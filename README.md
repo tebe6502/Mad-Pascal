@@ -2,4 +2,4 @@
 
 mp.exe filename.pas
 
-mads filename.a65 -x -i:base
+mads.exe filename.a65 -x -i:base
