@@ -1,4 +1,4 @@
-# Mad-Pascal
+# Mad-Pascal http://mads.atari8.info/
 
 mp.exe filename.pas
 
