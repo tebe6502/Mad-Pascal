@@ -1,0 +1,4904 @@
+<html>
+<head>
+
+<title>MAD-PASCAL INSTRUKCJA</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+
+<BODY BACKGROUND="6502proc.gif">
+
+<style type="text/css">
+
+.duzy {
+	font-family: Tahoma, Verdana, Arial;
+	font-size: 24px;
+	color: #000000;
+	background-position: left;
+	font-weight: bold;
+}
+
+.tekst {
+	font-family: Tahoma, Verdana, Arial;
+	font-size: 11px;
+	color: #000000;
+	background-position: left;
+}
+
+.tekst-wiekszy {
+	font-family: Tahoma, Verdana, Arial;
+	font-size: 14px;
+	color: #000000;
+	background-position: left;
+	font-weight: bold;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #666666;
+}
+
+.tekst-wiekszy2 {
+	font-family: Tahoma, Verdana, Arial;
+	font-size: 16px;
+	color: #0000a0;
+	background-position: left;
+	font-weight: bold;
+}
+
+.stopka {
+	font-family: Tahoma, Verdana, Arial;
+	font-size: 9px;
+	color: #666666;
+	text-decoration: none;
+	background-position: center;}
+ 
+</style>
+
+
+</head>
+
+<CENTER>
+<p class="duzy"><u>MAD-PASCAL 1.5.4</u></p>
+<p class="stopka">Tebe/Madteam (14.01.2018)
+
+<HR>
+
+<TABLE>
+<TR><TD VALIGN=top>
+<UL>
+
+<tt>
+<b><LI><A HREF="#wprow">WPROWADZENIE</A></b>
+<UL>
+
+<LI><A HREF="#mads">Wstęp</A>
+<LI><A HREF="#komp">Kompilacja</A>
+
+</UL>
+
+<br />
+
+<b><LI><A HREF="#sposob">SPOSÓB UŻYCIA</A></b>
+<UL>
+<LI><A HREF="#switches">Przełączniki kompilatora</A>
+<LI><A HREF="#err">Kody wyjścia</A>
+</UL>
+
+<br />
+
+<b><LI><A HREF="#ulib">BIBLIOTEKA PODSTAWOWA</A></b>
+<ul>
+<LI><A HREF="#crt">CRT</A>
+<LI><A HREF="#graph">GRAPH</A>
+<LI><A HREF="#system">SYSTEM</A>
+<LI><A HREF="#sysutils">SYSUTILS</A>
+<LI><A HREF="#utypes">TYPES</A>
+<LI><A HREF="#dos">DOS</A>
+<LI><A HREF="#math">MATH</A>
+
+<LI><A HREF="#cmc">CMC</A>, <A HREF="#mpt">MPT</A>, <A HREF="#rmt">RMT</A>
+<LI><A HREF="#misc">MISC</A>
+<LI><A HREF="#vbxe">VBXE</A>
+<LI><A HREF="#joy">JOYSTICK</A>
+
+</ul>
+
+<br  />
+
+<b><LI><A HREF="#syntax">SKŁADNIA</A></b>
+<UL>
+<LI><A HREF="#kom">Komentarze</A>
+<LI><A HREF="#resword">Zarezerwowane słowa</A>
+
+<LI><A HREF="#expres">Wyrażenia</A>
+<UL>
+<LI><A HREF="#numbers">Liczby</A>
+<LI><A HREF="#opers">Operatory</A>
+</UL>
+
+<LI><A HREF="#direc">Dyrektywy kompilatora</A>
+
+<ul>
+<LI><A HREF="#resource">RESOURCE {$R filename}</A>
+</ul>
+
+</ul>
+
+<br />
+
+<b><LI><A HREF="#change">HISTORIA</A></b>
+</UL>
+</tt>
+
+</TD>
+
+
+<TD VALIGN=top>
+<UL>
+<tt>
+
+<b><LI><A HREF="#const">CONSTANTS</A></b>
+<UL>
+<LI><A HREF="#c_ord">Ordinary constants</A>
+</ul>
+<br />
+
+<b><LI><A HREF="#types">TYPES</A></b>
+<UL>
+
+<LI><A HREF="#t_ord">Ordinal types</A>
+<LI><A HREF="#bool">Boolean types</A>
+<LI><A HREF="#enum">Enumeration types</A>
+<LI><A HREF="#real">Real types</A>
+<LI><A HREF="#char">Character types</A>
+<LI><A HREF="#pointers">Pointers</A>
+<LI><A HREF="#arrays">Arrays</A>
+<LI><A HREF="#records">Record types</A>
+<LI><A HREF="#objects">Object types</A>
+<LI><A HREF="#files">File types</A>
+
+</ul>
+<br />
+
+<LI><A HREF="#war">Instrukcje warunkowe</A>
+<LI><A HREF="#ite">Instrukcje iteracyjne</A>
+
+<br />
+<br />
+
+<LI><A HREF="#proc">Procedury i funkcje</A>
+<LI><A HREF="#mody">Modyfikatory procedur i funkcji</A>
+
+<ul>
+<li><a href="#asm">ASSEMBLER</a>
+<li><a href="#ovr">OVERLOAD</a>
+<li><a href="#for">FORWARD</a>
+<li><a href="#reg">REGISTER</a>
+<li><a href="#int">INTERRUPT</a>
+</ul>
+
+
+<br />
+<li><a href="#units">Units</a>
+
+</UL>
+</UL>
+</TD></TR>
+</TABLE>
+
+</CENTER>
+
+</tt>
+<HR>
+
+
+<tt>
+
+<div align="justify">
+
+
+<A NAME="wprow">
+<p class="duzy">
+WPROWADZENIE
+</p>
+
+
+<A NAME="mads">
+<u><tt><h2>Wstęp</h2></tt></u>
+<p>
+<tt>Mad-Pascal (MP)</tt> jest 32-bitowym kompilatorem Turbo Pascala dla Atari XE/XL. W założeniu jest kompatybilny z Free Pascal Compilatorem (FPC) (przełącznik -MDelphi powinien być aktywny), co oznacza możliwość otrzymanie kodu uruchomieniowego dla XE/XL, PC i każdej innej platformy dla której istnieje FPC. MP nie jest portem FPC, został napisany na podstawie kompilatorów SUB-Pascal (2009), XD-Pascal (2010), których autorem jest Vasiliy Tereshkov (vtereshkov@mail.ru).
+</p>
+
+<p>
+Program który zadziała na Atari może mieć problem na PC jeśli np. nie zaincjowaliśmy wskaźników adresem zmiennej, będziemy próbowali zapisywać coś pod adresem $0000 (błąd ochrony pamięci). Mocną stroną MP jest szybka i wygodna możliwość dołączania wstawek assemblerowych. Program z wstawkami ASM nie będzie działał na innej platformie niż XE/XL. MP wykorzystuje 64KB pamięci podstawowej, korzystanie z pamięci rozszerzonej udostępnia TMemoryStream.
+</p>
+Alokacja zmiennych jest statyczna, nie ma dynamicznego zarządzania pamięcią. Parametry przekazywane do funkcji i procedur są przez wartość, zmienną lub stałą.
+<p>
+Dostępne są:
+</p>
+<li>If, Case, For, While, Repeat statements.
+<li>Compound statements.
+<li>Label, Goto statements.
+<li>Arithmetic and boolean operators.
+<li>Procedures and functions with up to 8 parameters. Returned value of a function is assigned to a predefined Result variable.
+<li>Static local variables.
+<li>Primitive data types (all types except the ShortReal/Real type are compatible. Pointers are dereferenced as pointers to Word):
+<ul>
+<li>Cardinal, Word, Char, Byte, Boolean
+<li>Integer, SmallInt, ShortInt
+<li>Pointer, File
+<li>ShortReal, Real (fixed-point)
+<li>Single (IEEE-754)
+</ul>
+
+<li>One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters.
+<li>Predefined type string [N] which is equivalent to array [0..N] of Char.
+<li>Type aliases.
+<li>Records.
+<li>Objects.
+<li>Separate program modules.
+<li>Recursion.
+
+<p></p>
+
+
+<li><a href="http://www.freepascal.org/docs-html/ref/ref.html#refch14.html">Free Pascal Reference Guide</a>
+<li><a href="http://atariage.com/forums/topic/240919-mad-pascal/">MadPascal forum</a>
+<li><a href="http://atariage.com/forums/topic/243658-mad-pascal-examples/">MadPascal examples</a>
+
+
+
+<p></p>
+<br />
+
+
+
+<A NAME="komp">
+<u><tt><h2>Kompilacja</h2></tt></u>
+<p>
+Aby skompilować źródło <tt>Mad-Pascala</tt>, można użyć kompilatora z <tt>Delphi</tt>, jeśli ktoś ma akurat zainstalowane środowisko <tt>Delphi 7.0</tt> lub nowsze.
+</p>
+
+<p>
+Innym sposobem, bardziej multi platformowym jest użycie kompilatora z pakietu <tt><b>Free Pascal Compiler (FPC)</b></tt>, który można pobrać ze strony <a href="http://www.freepascal.org/">http://www.freepascal.org/</a> 
+</p>
+
+Uruchamiamy instalator, wybieramy katalog w którym zostanie zainstalowany <tt>FP</tt>. Ważne jest aby nie używać w nazwie katalogu znaku wykrzyknika <tt>'!'</tt> czy innych nie standardowych znaków. Jeśli nie uda nam się skompilować żadnego pliku, najpewniej winna jest nie standardowa nazwa ścieżki. Linia komend uruchamiająca kompilację może wyglądać następująco (wielkość liter w nazwach parametrów ma znaczenie):
+
+<pre>
+fpc -Mdelphi -v -O3 mp.dpr
+
+<li>-Mdelphi     pozwala kompilować plik w formacie <tt>Delphi</tt>
+<li>-v           wyświetla wszystkie komunikaty błędów i ostrzeżeń
+<li>-O3          dokonuje optymalizacji kodu
+</pre>
+
+<p></p>
+<br />
+
+
+
+<A NAME="sposob">
+<p class="duzy">
+SPOSÓB UŻYCIA
+</p>
+
+<A NAME="switches">
+<u><tt><h2>Przełączniki kompilatora</h2></tt></u>
+
+<span style="color: #0000FF">
+<pre>
+Syntax: mp source [switches]
+
+-d:address      tryb diagnostyczny
+-code:$address  adres uruchomienia programu
+-data:$address  adres pamięci dla zmiennych, tablic
+-stack:$address adres pamięci dla stosu programowego (64 bajty)
+-zpage:$address adres na stronie zerowej dla zmiennych (24 bajty)
+</pre>
+</span>
+
+
+<p>
+<div style="font-weight: bold"  style="font-size: 18px">-d</div>
+<div align="justify">
+Użycie przełącznika <b><tt>-d</tt></b> powoduje wygenerowanie dodatkowego pliku z informacją o wszystkich użytych zmiennych, procedurach, funkcjach.</p>
+
+
+<p>
+Domyślnym rozszerzeniem pliku wynikowego jest *.A65, plik taki assemblujemy z użyciem Mad-Assemblera (dodatkowo ustawiamy ścieżkę poszukiwań na -i:base), np.:
+</p>
+<span style="color: #0000FF">
+<pre>
+ mads source.a65 -x -i:base
+</pre>
+</span>
+
+Przełącznik -x (Exclude unreferenced procedures) pozwoli wygenerować najkrótszy kod wynikowy dla 6502.
+<p></p>
+<br />
+
+
+<A NAME="err">
+<u><tt><h2>Kody wyjścia</h2></tt></u>
+
+<span style="color: #0000FF">
+<pre>
+3 = bad parameters, compiling not started
+2 = error occured
+0 = no errors
+</pre>
+</span>
+
+Komunikaty ostrzeżenia nie powodują zmiany wartości kodu wyjścia.
+<p></p>
+<br />
+
+
+
+<A NAME="syntax">
+<p class="duzy">
+SKŁADNIA
+</p>
+
+
+<A NAME="kom">
+<u><tt><h2>Komentarze</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse2.html">Comments</a>
+
+<p>
+W MP do oznaczenia komentarza jednoliniowego służą znaki <tt>'//'</tt>, dla wieloliniowego klamry <tt>{ }</tt>, lub <tt>(* *)</tt>.
+</p>
+
+<span style="color: #0000FF">
+<pre>
+ // to jest komentarz
+ inc(a); // to jest komentarz
+ 
+ (* komentarz *)
+ 
+ (*
+
+  komentarz
+ 
+ *)
+
+ { to 
+   jest
+   komentarz
+ }
+</pre>
+</span>
+
+<p></p>
+<br />
+
+
+<A NAME="resword">
+<u><tt><h2>Zarezerwowane słowa</h2></tt></u>
+
+Zarezerwowane rozkazy:
+<span style="color: #0000FF">
+<pre>
+absolute
+and
+array
+asm
+begin
+case
+const
+div
+do
+downto
+else
+end
+file
+for
+function
+if
+implementation
+interface
+mod
+not
+of
+or
+procedure
+program
+record
+repeat
+shl
+shr
+stack
+string
+then
+to
+type
+unit
+until
+uses
+var
+while
+xor
+</pre>
+</span>
+
+
+Zarezerwowane stałe:
+<span style="color: #0000FF">
+<pre>
+pi
+true
+false
+</pre>
+</span>
+
+
+<p></p>
+<br />
+
+
+<A NAME="expres">
+<p class="duzy">
+WYRAŻENIA
+</p>
+
+<a href="http://www.freepascal.org/docs-html/ref/refch12.html">Expression</a>
+
+<A NAME="numbers">
+
+<u><tt><h2>Liczby</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse6.html">Numbers</a>
+
+<p></p>
+
+<li>zapis decymalny:
+<pre>
+ -100
+ -2437325
+ 1743
+</pre>
+
+<li>zapis hexadecymalny:
+<pre>
+ $100
+ $e430
+ $000001
+</pre>
+
+<li>zapis binarny:
+<pre>
+ %0001001010
+ %000000001
+ %001000
+</pre>
+
+<li>zapis kodami ATASCII:
+<pre>
+ 'a'
+ 'fds'
+ 'W'
+ #65#32#65
+ #$9b
+</pre>
+
+<p></p>
+<br />
+
+
+
+
+<A NAME="opers">
+<u><tt><h2>Operatory</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu41.html">Arithmetic operators</a>
+<pre>
++   Addition
+-   Subtraction
+*   Multiplication
+/   Division
+DIV Integer division
+MOD Remainder
+</pre>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu42.html">Logical operators</a>
+<pre>
+NOT Bitwise negation (unary)
+AND Bitwise and
+OR  Bitwise or
+XOR Bitwise xor
+SHL Bitwise shift to the left
+SHR Bitwise shift to the right
+</pre>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu43.html">Boolean operators</a>
+<pre>
+NOT logical negation (unary)
+AND logical and
+OR  logical or
+XOR logical xor
+</pre>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu46.html">Relational operators</a>
+<pre>
+=   Equal
+&lt&gt  Not equal
+&lt   Less than
+&gt   Greater than
+&lt=  Less than or equal
+&gt=  Greater than or equal
+</pre>
+
+<p></p>
+<br />
+
+
+<A NAME="direc">
+
+<p class="duzy">
+DYREKTYWY KOMPILATORA
+</p>
+
+<a href="http://www.freepascal.org/docs-html/prog/progch1.html#x5-40001">Compiler directives</a>
+
+<p>
+Zapis dyrektyw kompilatora ma postać:
+<ul>
+<li>{$dyrektywa parametry}</li>
+<li>{$lista_dyrektyw_przełącznikowych}</li>
+</ul>
+
+Dyrektywa stanowi komentarz, w którym pierwszy znak $ odróżnia zwykły komentarz, od dyrektywy kompilatora.
+
+<tt><h2>CONDITIONAL {$IFDEF label}, {$IFNDEF label}, {$ELSE}, {$ENDIF}, {$DEFINE label}, {$UNDEF label}</h2></tt>
+
+<a href="http://wiki.freepascal.org/Conditional_compilation">Conditional compilation</a>
+
+<pre>
+{$define test}
+
+const
+	{$ifdef test}
+	a=1;
+	{$else}
+	a=2;
+	{$endif}
+</pre>
+</span>
+
+<tt><h2>FASTMUL {$F page}</h2></tt>
+
+<a href="http://codebase64.org/doku.php?id=base:seriously_fast_multiplication">Seriously fast multiplication (8-bit and 16-bit)</a>
+
+<span style="color: #0000FF">
+<pre>
+{$f $70}  // fastmul at $7000
+</pre>
+</span>
+<p>
+
+<p>
+Alternatywne procedury szybkiego mnożenia dla typu BYTE, SHORTINT, WORD, SMALLINT, SHORTREAL. Procedury zajmują 2KB i są umieszczane od adresu PAGE*256.
+</p>
+<br />
+
+
+<tt><h2>IOCHECK {$I+} {$I-}</h2></tt>
+<a href="http://www.freepascal.org/docs-html/prog/progsu38.html#x45-440001.2.38">Input/Output checking</a>
+<span style="color: #0000FF">
+<pre>
+{i+}  IOCHECK ON  default
+{i-}  IOCHECK OFF
+</pre>
+</span>
+<p>
+Dla {$i+} w przypadku wystąpienia błędów transmisji I/O (RESET, REWRITE, BLOCKREAD, BLOCKWRITE, CLOSE) wykonywany program zostaje zatrzymany,
+generowany jest komunikat błędu 'ERROR xxx'. Wyłączenie IOCHECK {$i-} przydaje się gdy chcemy sprawdzić istnienie pliku na dysku, np.:
+</p>
+<span style="color: #0000FF">
+<pre>
+function FileExists(name: TString): Boolean;
+var f: file;
+begin
+
+  {$I-}     // io check off
+  Assign (f, name);
+  Reset (f);
+  Result:=(IoResult<128) and (length(name)>0);
+  Close (f);
+  {$I+}     // io check 
+
+end;
+</pre>
+</span>
+
+W blokach PROCEDURE, FUNCTION dyrektywa IOCHECK jest zasięgu lokalnego, po zakończeniu kompilacji takiego bloku przywracana jest wartość IOCHECK która została
+określona poza takim blokiem.
+
+<p></p>
+<br />
+
+
+<tt><h2>INCLUDE {$I filename}</h2></tt>
+<a href="http://www.freepascal.org/docs-html/prog/progsu40.html#x47-460001.2.40">Include file</a>
+<p>
+Dyrektywa dołączenia tekstu zawartego w pliku.
+</p>
+<br />
+
+
+<A NAME="resource">
+
+<tt><h2>RESOURCE {$R filename}</h2></tt>
+<a href="http://www.freepascal.org/docs-html/prog/progsu67.html#x74-730001.2.67">Include resource</a>
+<p>
+<h2>RCLABEL RCTYPE RCFILE [PAR0 PAR1 PAR2 PAR3 PAR4 PAR5 PAR6 PAR7]</h2>
+
+Dyrektywa dołączenia pliku z zasobami. Plik zasobów jest plikiem tekstowym, każdy jego kolejny wiersz powinien składać się z trzech pól rozdzielonych "białym znakiem": etykieta RCLABEL (jej deklaracja musi znaleźć się także w programie),
+typ zasobów RCTYPE, lokalizacja pliku RCFILE. Aktualnie w pliku BASE\RES6502.ASM znajdują się makra do obsługi 10 typów zasobów RCTYPE:
+<p></p>
+ 
+<table border="1">
+<tr>
+	<td><tt><b>RCDATA</b></tt></td>
+	<td><tt>dowolny typ danych</tt></td>
+</tr>
+<tr>
+	<td><tt><b>DOSFILE</b></tt></td>
+	<td><tt>plik z nagłówkiem Atari DOS, adres ładowania takiego pliku powiniem być identyczny jak <b>RCLABEL</b></tt></td>
+</tr>
+<tr>
+	<td><tt><b>RELOC</b></tt></td>
+	<td><tt>plik relokowalny w formacie MadAssemblera, plik zostanie poddany relokacji pod wskazany adres <b>RCLABEL</b></tt></td>
+</tr>
+<tr>
+	<td><tt><b>RMT</b></tt></td>
+	<td><tt>plik modułu Raster Music Tracker-a, plik zostanie poddany relokacji pod wskazany adres <b>RCLABEL</b></tt></td>
+</tr>
+<tr>
+	<td><tt><b>MPT</b></tt></td>
+	<td><tt>plik modułu Music ProTracker-a, plik zostanie poddany relokacji pod wskazany adres <b>RCLABEL</b></tt></td>
+</tr>
+<tr>
+	<td><tt><b>CMC</b></tt></td>
+	<td><tt>plik modułu Chaos Music Composer-a, plik zostanie poddany relokacji pod wskazany adres <b>RCLABEL</b></tt></td>
+</tr>
+<tr>
+	<td><tt><b>RMTPLAY</b></tt></td>
+	<td><tt>player dla modułu RMT, jako <b>RCFILE</b> podajemy plik *.FEAT oraz dodatkowo <b>PAR0</b> tryb playera 0..3</tt>
+
+<pre>	
+0 => compile RMTplayer for 4 tracks mono
+1 => compile RMTplayer for 8 tracks stereo
+2 => compile RMTplayer for 4 tracks stereo L1 R2 R3 L4
+3 => compile RMTplayer for 4 tracks stereo L1 L2 R3 R4	
+</pre>
+	
+	</td>
+</tr>
+<tr>
+	<td><tt><b>MPTPLAY</b></tt></td>
+	<td><tt>player dla modułu MPT</tt></td>
+</tr>
+<tr>
+	<td><tt><b>CMCPLAY</b></tt></td>
+	<td><tt>player dla modułu CMC</tt></td>
+</tr>
+<tr>
+	<td><tt><b>XBMP</b></tt></td>
+	<td><tt>plik Windows Bitmap (8 BitsPerPixel) ładowany do pamięci VBXE pod wskazany adres <b>RCLABEL</b> od indeksu koloru <b>PAR0</b> w palecie kolorów VBXE nr 1</tt></td>
+</tr>
+</table> 
+ 
+ 
+<pre>
+Przykład:
+
+bmp1  RCDATA   'pic.mic'
+
+msx   MPT      'porazka.mpt'
+
+play  RMTPLAY   'modul.feat' 1
+
+bmp   XBMP     'pic.bmp' 80
+</pre>
+
+<p></p>
+<br />
+
+
+
+<A NAME="const">
+<A NAME="c_ord">
+
+<p class="duzy">
+CONSTANTS
+</p>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse9.html">Ordinary constants</a>
+
+<p>
+Do deklaracji stałych CONST służy znak '='. Dopuszczalne jest użycie operatorów +, -, *, /, not, and, or, div, mod, ord, chr, sizeof, pi</p>
+
+<span style="color: #0000ff">
+<pre>
+Const  
+  e = 2.7182818;       { Real type constant }
+  f : single = 3.14;   { Single type constant }
+  a = 2;               { Ordinal BYTE type constant }
+  c = '4';             { Character type constant }
+  s = 'atari';         { String type constant } 
+  sc = chr(32);
+  ls = SizeOf(cardinal);  
+
+  x: word = 5;         { wymuszenie typu stałej }	
+</pre>
+</span>
+
+<p></p>
+<br />
+
+
+
+<A NAME="types">
+<p class="duzy">
+TYPES
+</p>
+
+
+<A NAME="t_ord">
+<u><tt><h2>Typy porządkowe</h2></tt></u>
+
+<a href="https://pl.wikibooks.org/wiki/Object_Pascal/Typy_zmiennych#Porz.C4.85dkowy">Typ porządkowy</a>
+
+<br />
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu4.html#x26-250003.1.1">Ordinal types</a>
+
+<p></p>
+
+<table border="0" class="tekst">
+<tr>
+	<td>Type</td>
+	<td>Range</td>
+	<td>Size in bytes</td>
+</tr>
+<tr>
+	<td><hr /></td>
+	<td><hr /></td>
+	<td><hr /></td>
+</tr>
+<tr>
+	<td>BYTE</td>
+	<td>0 .. 255</td>
+	<td ALIGN=CENTER>1</td>
+</tr>
+<tr>
+	<td>SHORTINT</td>
+	<td>-128 .. 127</td>
+	<td ALIGN=CENTER>1</td>
+</tr>
+<tr>
+	<td>WORD</td>
+	<td>0 .. 65535</td>
+	<td ALIGN=CENTER>2</td>
+</tr>
+<tr>
+	<td>SMALLINT</td>
+	<td>-32768 .. 32767</td>
+	<td ALIGN=CENTER>2</td>
+</tr>
+<tr>
+	<td>CARDINAL</td>
+	<td>0 .. 4294967295</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>LONGWORD</td>
+	<td>0 .. 4294967295</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>DWORD</td>
+	<td>0 .. 4294967295</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>UINT32</td>
+	<td>0 .. 4294967295</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>INTEGER</td>
+	<td>-2147483648 .. 2147483647</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>LONGINT</td>
+	<td>-2147483648 .. 2147483647</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+</table>
+
+
+<A NAME="bool">
+<u><tt><h2>Typy logiczne</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu4.html#x26-270003.1.1">Boolean types</a>
+
+<p></p>
+
+<table border="0" class="tekst">
+<tr>
+	<td>Name</td>
+	<td>Size</td>
+	<td>Ord(True)</td>
+</tr>
+
+<tr>
+	<td><hr /></td>
+	<td><hr /></td>
+	<td><hr /></td>
+</tr>
+
+<tr>
+	<td>BOOLEAN</td>
+	<td ALIGN=CENTER>1</td>
+	<td ALIGN=CENTER>1</td>
+</tr>
+</table>
+
+
+
+<A NAME="enum">
+<u><tt><h2>Typy wyliczeniowe</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu4.html#x26-280003.1.1">Enumeration types</a>
+
+<p>
+Typ wyliczeniowy w MP został zaimplementowany w podstawowej postaci, tzn.:
+</p>
+
+<span style="color: #0000FF">
+<pre>
+Type  
+  Days = (monday,tuesday,wednesday,thursday,friday,  
+          saturday,sunday);
+
+  Joy = (right_down = 5, right_up, right, left_down = 9, left_up, left, down = 13, up, none);
+</pre>
+</span>
+
+<p>
+Typ wyliczeniowy przechowywany jest tylko w pamięci kompilatora MP, do pliku wynikowego nie zostaną zapisane jakiekolwiek informacje dotyczące pól typu wyliczeniowego. Dopuszczalne jest użycie komendy
+ORD, SIZEOF oraz rzutowania dla typu wyliczeniowego. 
+</p>
+
+<span style="color: #0000FF">
+<pre>
+var
+   d: Days;
+	
+   d:=friday;
+   writeln(ord(d));
+   writeln(ord(sunday));
+   writeln(sizeof(days));
+   writeln(sizeof(monday));
+   
+   d:=days(20);
+   
+   case d of
+    sunday: writeln('sunday');
+   end;   
+</pre>
+</span>
+
+
+<p>
+Aktualnie kompilator MP nie sprawdzi poprawności typów wyliczeniowych dla operacji IF ELSE.
+</p>
+
+<p></p>
+<br />
+
+
+
+<A NAME="real">
+<u><tt><h2>Typy rzeczywiste</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu5.html#x27-300003.1.2">Real types</a>
+
+<p></p>
+
+<table border="0" class="tekst">
+<tr>
+	<td>Type</td>
+	<td>Range</td>
+	<td>Size in bytes</td>
+</tr>
+
+<tr>
+	<td><hr /></td>
+	<td><hr /></td>
+	<td><hr /></td>
+</tr>
+
+<tr>
+	<td>SHORTREAL (Q8.8)</td>
+	<td>-128..127</td>
+	<td ALIGN=CENTER>2</td>
+</tr>
+
+<tr>
+	<td>REAL (Q24.8)</td>
+	<td>-8388607..8388608</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>SINGLE (IEEE-754)</td>
+	<td>1.5E-45 .. 3.4E38</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+<tr>
+	<td>FLOAT (IEEE-754)</td>
+	<td>1.5E-45 .. 3.4E38</td>
+	<td ALIGN=CENTER>4</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+<A NAME="char">
+<u><tt><h2>Typy znakowe</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu6.html#x29-320003.2.1">Char</a>
+<br />
+<a href="http://www.freepascal.org/docs-html/ref/refsu9.html#x32-350003.2.4">Short strings</a>
+
+<p></p>
+
+<table border="0" class="tekst">
+<tr>
+	<td>Type</td>
+	<td>Range</td>
+	<td>Size in bytes</td>
+</tr>
+
+<tr>
+	<td><hr /></td>
+	<td><hr /></td>
+	<td><hr /></td>
+</tr>
+
+<tr>
+	<td>CHAR</td>
+	<td>ATASCII (0 .. 255)</td>
+	<td ALIGN=CENTER>1</td>
+</tr>
+
+<tr>
+	<td>STRING</td>
+	<td>1 .. 255</td>
+	<td ALIGN=CENTER>256</td>
+</tr>
+</table>
+
+<p>
+Ciąg znaków STRING reprezentowany jest jako tablica o możliwym maksymalnym rozmiarze [0..255]. Pierwszym bajtem takiej tablicy [0] jest długość ciągu z zakresu 0..255. Od bajtu [1..] zaczyna się właściwy ciąg znaków.
+</p>
+
+Dopuszczalne jest użycie dodatkowych znaków po końcowym apostrofie, takich jak '*', '~'. Znak '*' oznacza ciąg w inwersie, tylda '~' ciąg w kodach ANTIC-a.
+
+<span style="color: #0000FF">
+<pre>
+ a: string = 'Atari'*;         // ciąg znaków w inwersie
+ b: string = 'Spectrum'~;      // ciąg znaków w kodach ANTIC-a
+ c: char = 'X'~*;              // znak w inwersie, kodach ANTIC-a
+</pre>
+</span>
+
+
+<p></p>
+<br />
+
+
+
+<A NAME="pointers">
+<u><tt><h2>Wskaźniki</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse15.html">Pointers</a>
+
+<p></p>
+
+<table border="0" class="tekst">
+<tr>
+	<td>Type</td>
+	<td>Range</td>
+	<td>Size in bytes</td>
+</tr>
+
+<tr>
+	<td><hr /></td>
+	<td><hr /></td>
+	<td><hr /></td>
+</tr>
+
+<tr>
+	<td>POINTER</td>
+	<td>0 .. 65535</td>
+	<td ALIGN=CENTER>2</td>
+</tr>
+</table>
+
+<p>
+Wskaźniki w MP mogą być typowane i bez określonego typu, np.:
+</p>
+
+<span style="color: #0000FF">
+<pre>
+ a: ^word;         // wskaźnik typowany na słowo
+ b: pointer;       // wskaźnik bez typu
+</pre>
+</span>
+
+<p>
+Niezaincjowany wskaźnik najczęściej będzie miał adres $0000, należy zadbać aby przed jego wykorzystaniem zaincjować go adresem odpowiedniej zmiennej, np.:
+</p>
+
+<span style="color: #0000FF">
+<pre>
+ a := @tmp;         // wskaźnikowi A zostaje przypisany adres zmiennej TMP
+</pre>
+</span>
+
+<p>
+Jeśli tego nie zrobimy to w przypadku uruchomienia takiego programu na PC spowodujemy błąd ochrony pamięci 'Access Violation'.
+</p>
+Zwiększanie wskaźnika przez INC zwiększy go o rozmiar typu na jaki wskazuje. Zmniejszenie wskaźnika przez DEC zmniejszy go o rozmiar typu na jaki wskazuje.
+Jeśli typ jest nieokreślony, wówczas domyślną wartością zwiększania/zmniejszanie będzie 1.
+
+<p></p>
+<br />
+
+
+
+<A NAME="arrays">
+<u><tt><h2>Tablice</h2></tt></u>
+
+</p>
+<a href="http://www.freepascal.org/docs-html/ref/refsu14.html#x38-500003.3.1">Static Arrays</a>
+
+
+<p>
+Tablice w MP są tylko statyczne, jednowymiarowe lub dwuwymiarowe z początkowym indeksem =0, np.:
+</p>
+
+<span style="color: #0000FF">
+<pre>
+var tb: array [0..100] of word;
+var tb2: array [0..15, 0..31] of Boolean;
+</pre>
+</span>
+
+<p>
+W przypadku początkowego indeksu innego niż zero zostanie wygenerowany błąd <tt>'Error: Array lower bound is not zero'</tt>.
+</p>
+
+W pamięci tablica reprezentowana jest przez wskaźnik (POINTER), wskaźnik jest adresem tablicy w pamięci (WORD). Najszybszą metodą odwołania się do tablicy z poziomu assemblera jest zastosowanie przedrostka 'ADR.', np.:
+
+<span style="color: #885500">
+<pre>
+asm
+{ lda adr.tb,y   ; bezpośrednie odwołanie do tablicy TB
+  lda tb         ; odwołanie do wskaźnika tablicy TB
+};
+</pre>
+</span>
+
+<p>
+Kompilator generuje kod dla tablic zależnie od ich deklaracji:
+</p>
+
+<table border="1">
+<tr>
+	<td><tt><b>array [0..255] of byte<br />array [0..127] of word<br />array [0..63] of cardinal</b></tt></td>
+	<td><tt>Gdy liczba bajtów zajmowanych przez tablicę nie przekracza 256 bajtów generowany jest najszybszy kod odwołujący się bezpośrednio do adresu tablicy (przedrostek ADR.) z pominięciem wskaźnika. Dla takiej tablicy nie ma możliwości zmiany adresu.</tt>
+	
+<span style="color: #0000FF">
+<pre>
+ ldy #118
+ lda adr.tb,y
+</pre>
+</span>	
+
+</td>	
+	
+</tr>
+<tr>
+	<td><tt><b>array [0..0] of type</b></tt></td>
+	<td><tt>Gdy liczba elementów tablicy wynosi '1' jest ona traktowana specjalnie. Generowany kod odwołuje się do tablicy poprzez wzkaźnik. Istnieje możliwość ustalenia nowego adresu takiej tablicy.</tt>
+	
+<span style="color: #0000FF">
+<pre>
+ lda TB
+ add I
+ tay
+ lda TB+1
+ adc #$00
+ sta bp+1
+ lda (bp),y
+</pre>
+</span>	
+	
+	
+	</td>
+</tr>
+<tr>
+	<td><tt><b>array [0..255+1] of byte<br />array [0..127+1] of word<br />array [0..63+1] of cardinal</b></tt></td>
+	<td><tt>Gdy liczba bajtów zajmowanych przez tablicę przekracza 256 bajtów generowany kod odwołuje się do tablicy poprzez wskaźnik. Istnieje możliwość ustalenia nowego adresu takiej tablicy.</tt>
+	
+<span style="color: #0000FF">
+<pre>
+ lda TB
+ add I
+ tay
+ lda TB+1
+ adc #$00
+ sta bp+1
+ lda (bp),y
+</pre>
+</span>	
+
+	</td>
+</tr>
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="records">
+<u><tt><h2>Rekordy</h2></tt></u>
+
+</p>
+<a href="http://www.freepascal.org/docs-html/ref/refsu15.html#x39-550003.3.2">Record types</a>
+
+<p>
+W pamięci rekord reprezentowany jest przez wskaźnik (POINTER).
+
+<span style="color: #0000FF">
+<pre>
+type
+    TPoint = record x,y: byte end;
+
+var px: TPoint;
+</pre>
+</span>
+
+Dostęp do pól rekordu z poziomu asm:
+
+<span style="color: #0000FF">
+<pre>
+ mwa px bp2
+ ldy #px.x-DATAORIGIN
+ lda (bp2),y
+</pre>
+</span>	
+
+<p></p>
+<br />
+
+
+
+<A NAME="objects">
+<u><tt><h2>Obiekty</h2></tt></u>
+
+</p>
+<a href="https://www.freepascal.org/docs-html/ref/refse28.html#x60-780005.1">Objects types</a>
+
+<p>
+Obiekty to rekordy z dodatkowymi metodami. W pamięci obiekt reprezentowany jest przez wskaźnik (POINTER). 
+
+<span style="color: #0000FF">
+<pre>
+type
+	TRMT = Object
+
+	player: pointer;
+	modul: pointer;
+
+	procedure Init(a: byte); assembler;
+	procedure Play; assembler;
+	procedure Stop; assembler;
+
+	end;
+</pre>
+</span>
+
+
+<p></p>
+<br />
+
+
+
+<A NAME="files">
+<u><tt><h2>Pliki</h2></tt></u>
+
+</p>
+<a href="http://www.freepascal.org/docs-html/ref/refsu17.html#x41-590003.3.4">File types</a>
+
+<p>
+Typ FILE reprezentuje uchwyt do pliku oraz definiuje rozmiar rekordu.
+</p>
+
+<span style="color: #0000FF">
+<pre>
+type
+ ftype = array [0..63] of cardinal;
+
+var f: file;               // rekord domyślny =128 bajtów
+    f: file of byte;       // rekord 1 bajt
+    f: file of ftype;      // rekord 256 bajtów (ftype = 64 * 4)   
+</pre>
+</span>
+
+
+W pamięci XE/XL uchwyt FILE reprezentowany jest przez wskaźnik (POINTER) do tablicy o strukturze (rozmiar 12 bajtów):
+
+<span style="color: #885500">
+<pre>
+.struct	s@file
+pfname   .word		; pointer to string with filename
+record   .word		; record size
+chanel   .byte		; channel *$10
+eof      .byte		; EOF status
+buffer   .word		; load/write buffer
+nrecord  .word		; number of records for load/write
+numread  .word		; pointer to variable, length of loaded data
+.ends
+</pre>
+</span>
+
+<p>
+Do procedur, funkcji typ FILE może być przekazywany tylko jako zmienna (VAR).
+</p>
+
+<p></p>
+<br />
+
+
+
+<A NAME="war">
+<p class="duzy">
+INSTRUKCJE WARUNKOWE
+</p>
+
+<u><tt><h2>CASE OF ELSE</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu57.html">The Case statement</a>
+
+<p>Obecnie Mad Pascal akceptuje dla zmiennej CASE typy tylko o długości 1 bajta: SHORTINT, BYTE, CHAR, BOOLEAN</p>
+
+<span style="color: #885500">
+<pre>
+ case a of             // dla zmiennej A typu CHAR
+  'A'..'Z': begin end;
+  '0'..'9': begin end;
+   '+','*': begin end;
+ end;
+</pre>
+</span>
+
+<p></p>
+<br />
+
+
+<u><tt><h2>IF THEN ELSE</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refsu58.html">The If..then..else statement</a>
+
+<p>
+Instrukcje warunkowe IF mogą być zagnieżdżane. Wykorzystywane jest to przy budowie bardziej złożonych warunków. 
+</p>
+
+<p></p>
+<br />
+
+
+
+<A NAME="ite">
+<p class="duzy">
+INSTRUKCJE ITERACYJNE
+</p>
+
+<u><tt><h2>FOR TO DOWNTO DO</h2></tt></u>
+<a href="http://www.freepascal.org/docs-html/ref/refsu59.html">The For..to/downto..do statement</a>
+
+<pre>
+FOR zmienna := { wartość początkowa } TO { wartość końcowa } DO { instrukcje do wykonania }
+FOR zmienna := { wartość końcowa } DOWNTO { wartość początkowa } DO { instrukcje do wykonania }
+</pre>
+
+Instrukcja ta służy do organizacji obliczeń, które będą wykonywane z góry określoną liczbę razy. Zmienna sterująca musi być identyfikatorem typu porządkowego, a oba wyrażenia powinny być zgodne w sensie przypisania z typem zmiennej sterującej. W czasie realizacji pętli TO zmiennej sterującej przypisywana jest następna wartość w danym typie, w pętli DOWNTO poprzednia. Zabroniona jest "ręczna" zmiana wartości zmiennej sterującej. W przypadku takiej próby  MP nie zasygnalizuje błędu.
+<p>
+
+Kompilator dba o to aby nie wystąpiła pętla bez końca, dlatego można bez obaw stosować taką pętlę:
+
+<span style="color: #885500">
+<pre>
+ for i:=0 to 255 do writeln(i);    // dla zmiennej I typu BYTE
+</pre>
+</span>
+
+<p></p>
+<br />
+
+
+
+<u><tt><h2>WHILE DO</h2></tt></u>
+<a href="http://www.freepascal.org/docs-html/ref/refsu62.html">The While..do statement</a>
+
+<pre>
+while { warunek } do
+{ instrukcja do wykonania }
+</pre>
+
+Konstrukcja ta służy do organizacji obliczeń, które będą wykonywane tak długo jak wyrażenie znajdujące się po słowie WHILE jest prawdą. Tak skonstruowana pętla może nie zostać wykonana ani razu. 
+
+<span style="color: #885500">
+<pre>
+ while BlitterBusy do;   // oczekiwanie na zakończenie działania blittera VBXE
+</pre>
+</span>
+
+<p></p>
+Ograniczenia dla instrukcji WHILE:
+<span style="color: #885500">
+<pre>
+ while i<=255 do inc(i); // pętla bez końca gdy zmienna I typu BYTE
+</pre>
+</span>
+
+
+<p></p>
+<br />
+
+
+
+<u><tt><h2>REPEAT UNTIL</h2></tt></u>
+<a href="http://www.freepascal.org/docs-html/ref/refsu61.html">The Repeat..until statement</a>
+
+<pre>
+repeat
+  { instrukcje do wykonania }
+until { warunek zakończenia }
+</pre>
+
+Instrukcja ta wykonuje cyklicznie inne instrukcje zawarte pomiędzy słowami REPEAT i UNTIL do momentu gdy wyrażenie znajdujące się za słowem UNTIL nie przyjmie wartości PRAWDA (czyli TRUE). 
+
+<p>
+Efekt zastosowania pętli REPEAT jest bardzo podobny do działania pętli WHILE. Pętla ta także może być wykonywana ogromną liczbę razy. Jedyna różnica polega na tym, że w pętli REPEAT warunek zakończenia sprawdzany jest dopiero po wykonaniu instrukcji. Oznacza to, że pętla REPEAT zawsze będzie wykonana co najmniej raz. Dopiero po tej iteracji program sprawdzi, czy można zakończyć działanie pętli. W przypadku pętli WHILE warunek jest sprawdzany bezpośrednio przed jej wykonaniem, co w rezultacie może spowodować, że taka pętla nigdy niezostanie wykonana.
+</p>
+
+<span style="color: #885500">
+<pre>
+ i:=0;
+ repeat
+ inc(i);
+ until i=0;		 // pętla wykona się 256 razy
+</pre>
+</span>
+ 
+
+<p></p>
+<br />
+
+
+
+<A NAME="proc">
+<p class="duzy">
+PROCEDURY I FUNKCJE
+</p>
+
+<u><tt><h2>Procedure</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse87.html">Procedure declaration</a>
+
+<p>
+MP pozwala na przekazanie do procedury maksymalnie 8 parametrów. Są dostępne trzy sposoby przekazywania parametrów - przez wartość, stałą (CONST) i zmienną (VAR). Możliwe jest użycie modyfikatora OVERLOAD w celu przeciążenia procedur.
+</p>
+
+Dostępne <a href="#mody">modyfikatory</a> procedur: OVERLOAD, ASSEMBLER, FORWARD, REGISTER, INTERRUPT.
+<p>
+Możliwa jest rekurencja procedur, pod warunkiem że parametry procedury będą przekazywane przez wartość, będą typu <a href="#t_ord">prostego - porządkowego</a>. Typ rekordowy, wskaźnikowy nie będzie właściwie alokowany w pamięci.
+</p>
+<p></p>
+<br />
+
+
+<u><tt><h2>Function</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse88.html">Function declaration</a>
+
+<p>
+MP pozwala na przekazanie do funkcji maksymalnie 8 parametrów. Są dostępne trzy sposoby przekazywania parametrów - przez wartość, stałą (CONST) i zmienną (VAR). Domyślną nazwą zmiennej dla wyniku funkcji jest RESULT, np.:
+</p>
+
+<span style="color: #0000FF">
+<pre>
+function suma(a,b: word): cardinal;
+begin
+
+ Result := a+b;
+
+end;
+</pre>
+</span>
+
+Dostępne <a href="#mody">modyfikatory</a> funkcji: OVERLOAD, ASSEMBLER, FORWARD, REGISTER, INTERRUPT (nie zalecane dla funkcji).
+
+<p>
+Możliwa jest rekurencja funkcji, pod warunkiem że parametry funkcji będą przekazywane przez wartość, będą typu <a href="#t_ord">prostego - porządkowego</a>. Typ rekordowy, wskaźnikowy nie będzie właściwie alokowany w pamięci.
+</p>
+
+<p></p>
+<br />
+
+
+
+
+<A NAME="mody">
+<p class="duzy">
+MODYFIKATORY PROCEDUR I FUNKCJI
+</p>
+
+<A NAME="asm">
+<u><tt><h2>ASSEMBLER</h2></tt></u>
+
+Procedury/Funkcje oznaczona przez ASSEMBLER mogą składać się tylko z bloku ASM. Kompilator nie dokonuje analizy składni takich bloków, traktuje je jak komentarz,
+ewentualne błędy zostaną wychwycone dopiero podczas asemblacji.
+
+<span style="color: #0000FF">
+<pre>
+procedure color(a: byte); assembler;
+asm
+{	mva a 712
+};
+end;
+</pre>
+</span>
+
+
+<A NAME="ovr">
+<u><tt><h2>OVERLOAD</h2></tt></u>
+
+Procedury/Funkcje przeciążone rozpoznawane są na podstawie listy parametrów.
+
+<span style="color: #0000FF">
+<pre>
+procedure suma(var i: integer; a,b: integer); overload;
+begin
+ i := a+b;
+end;
+
+procedure suma(var i: integer; a,b,c: integer); overload;
+begin
+ i := a+b+c;
+end;
+
+function fsuma(a,b: word): cardinal; assembler; overload;
+asm
+{
+ adw a b result
+};
+end;
+
+function fsuma(a,b: real): real; overload;
+begin
+ Result := a+b;
+end;
+</pre>
+</span>
+
+
+<A NAME="for">
+<u><tt><h2>FORWARD</h2></tt></u>
+
+Jeżeli chcemy aby procedura/funkcja była zadeklarowana za miejscem jej pierwszego wywołania, należy użyć modyfikator FORWARD.
+
+<span style="color: #0000FF">
+<pre>
+procedure nazwa [(lista-parametrów-formalnych)]; forward;
+
+...
+...
+...
+
+procedure nazwa;
+begin
+end;
+</pre>
+</span>
+
+
+<A NAME="reg">
+<u><tt><h2>REGISTER</h2></tt></u>
+
+Użycie modyfikatora REGISTER spowoduje że trzy pierwsze parametry formalne procedury/funkcji będą umieszczone na stronie zerowej, w 32-bitowych rejestrach programowych, odpowiednio EDX, ECX, EAX.
+
+<span style="color: #0000FF">
+<pre>
+procedure nazwa (a,b,c: cardinal); register;
+
+// a = edx
+// b = ecx
+// c = eax
+</pre>
+</span>
+
+<A NAME="int">
+<u><tt><h2>INTERRUPT</h2></tt></u>
+
+Procedury/Funkcje oznaczone przez INTERRUPT kompilator będzie kończył 
+rozkazem RTI (standardowo RTS). Zaleca się używanie bloku ASM w przypadku takich procedur/funkcji, w innym przypadku stos programowy Mad Pascala zostanie zniszczony, co
+może doprowadzić do niestabilnego działania programu, łącznie z zawieszeniem się komputera. Na wejściu procedury/funkcji oznaczonej przez INTERRUPT programista musi
+zadbać o zachowanie rejestrów CPU (A, X, Y), na wyjściu o przywrócenie stanu takich rejestrów, kompilator ogranicza się tylko do wstawienia końcowego rozkazu RTI.
+
+<span style="color: #0000FF">
+<pre>
+procedure dli; interrupt;
+asm
+{	pha
+
+	lda #$c8
+	sta wsync
+	sta $d01a
+
+	pla 
+};
+end;             // rozkaz RTI zostanie wstawiony automatycznie
+</pre>
+</span>
+
+
+<p></p>
+<br />
+
+
+
+<A NAME="units">
+<p class="duzy">
+UNITS
+</p>
+
+<a href="http://www.freepascal.org/docs-html/ref/refse106.html#x216-23800016.2">Units</a>
+<br />
+<a href="https://pl.wikipedia.org/wiki/Modu%C5%82_(informatyka)">Moduły</a>
+
+<p></p>
+
+Moduły (UNIT) w MP składają się z sekcji INTERFACE (wymagany), IMPLEMENTATION (wymagany), INITIALIZATION (opcjonalny).
+
+
+<span style="color: #0000FF">
+<pre>
+unit test;
+
+interface
+
+type	TUInt24 =
+	record
+		byte0: byte;
+		byte1: byte;
+		byte2: byte;
+	end;
+
+const
+	LoRes = 1;
+	MedRes = 2;
+	HiRes = 3;
+
+	procedure Print(a: string);
+
+implementation
+
+uses test2;
+
+procedure Print(a: string);
+begin
+
+ writeln(a);
+
+end;
+
+end.
+</pre>
+</span>
+
+
+<br />
+<p></p>
+
+
+<A NAME="ulib">
+<p class="duzy">
+BIBLIOTEKA PODSTAWOWA
+</p>
+
+W katalogu 'LIB' Mad-Pascala znajdują się potrzebne do kompilacji podstawowe moduły (unit), takie jak SYSTEM, CRT, GRAPH, SYSUTILS, MATH, DOS. W programie wybierane są przez instrukcję USES, np.:
+
+<span style="color: #0000ff">
+<pre>
+uses crt, sysutils;
+</pre>
+</span>
+
+Moduł SYSTEM jest domyślnie dopisywany do listy USES i kompilowany jako pierwszy.
+
+<A NAME="system">
+<u><tt><h2>SYSTEM</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/rtl/system/index-5.html">Reference for unit 'System': Procedures and functions</a>
+
+
+<p class="tekst-wiekszy2">[ Constants ]</p>
+
+<pre>
+M_PI_2           = 6.283285;  // pi * 2
+D_PI_2           = 1.570796;  // pi / 2
+D_PI_180         = 0.017453;  // pi / 180
+
+mGTIA            = 0;
+mVBXE            = $80;
+WINDOW           = $10;
+NARROW           = $20;
+
+
+VBXE_XDLADR      = $0000;     // XDLIST
+VBXE_MAPADR      = $1000;     // COLOR MAP ADDRESS
+VBXE_BCBADR      = $0100;     // BLITTER LIST ADDRESS
+VBXE_OVRADR      = $5000;     // OVERLAY ADDRESS
+VBXE_WINDOW      = $B000;     // 4K WINDOW $B000..$BFFF
+
+iDLI             = 0;
+iVBL             = 1;
+
+CH_DELCHR        = $FE;
+CH_ENTER         = $9B;
+CH_ESC           = $1B;
+CH_CURS_UP       = 28;
+CH_CURS_DOWN     = 29;
+CH_CURS_LEFT     = 30;
+CH_CURS_RIGHT    = 31;
+
+CH_TAB           = $7F;
+CH_EOL           = $9B;
+CH_CLR           = $7D;
+CH_BEL           = $FD;
+CH_DEL           = $7E;
+CH_DELLINE       = $9C;
+CH_INSLINE       = $9D;
+
+COLOR_BLACK      = $00;
+COLOR_WHITE      = $0e;
+COLOR_RED        = $32;
+COLOR_CYAN       = $96;
+COLOR_VIOLET     = $68;
+COLOR_GREEN      = $c4;
+COLOR_BLUE       = $74;
+COLOR_YELLOW     = $ee;
+COLOR_ORANGE     = $4a;
+COLOR_BROWN      = $e4;
+COLOR_LIGHTRED   = $3c;
+COLOR_GRAY1      = $04;
+COLOR_GRAY2      = $06;
+COLOR_GRAY3      = $0a;
+COLOR_LIGHTGREEN = $cc;
+COLOR_LIGHTBLUE  = $7c;
+</pre>
+
+<p class="tekst-wiekszy2">[ Types ]</p>
+
+<table border="1">
+ 
+<tr>
+	<td><b><tt>TPoint</b></td>
+	<td><tt>
+  <b><tt>TPoint = record x,y: SmallInt end;;</b></tt>
+  <p>Definicja współrzędnych (x,y).</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>TRect</b></td>
+	<td><tt>
+  <b><tt>TRect = record left, top, right, bottom: smallint end;</b></tt>
+  <p>Definicja położenia i rozmiaru czworokąta o parametrach (left, top) - lewy górny narożnik, (right, bottom) - prawy dolny narożnik.</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>TString</b></td>
+	<td><tt>
+  <b><tt>TString = string[32];</b></tt>
+  <p>Definicja krótkiego ciągu znakowego wykorzystywanego do przekazywania nazw plików itp.</p>
+	</td>
+</tr>
+
+
+</table>
+
+
+<p class="tekst-wiekszy2">[ Variables ]</p>
+
+<table border="1">
+ 
+<tr>
+	<td><b><tt>IOResult</b></td>
+	<td><tt>
+  <b><tt>IOResult: byte;</b></tt>
+  <p>
+   Kod błędu (>127) dla ostatnio przeprowadzonej operacji I/O. 
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>ScreenWidth</b></td>
+	<td><tt>
+  <b><tt>ScreenWidth: word = 40;</b></tt>
+  <p>
+Zmienna przechowująca aktualną szerokość ekranu. Domyślnie jest to wartość 40 dla ekranu edytora.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>ScreenHeight</b></td>
+	<td><tt>
+  <b><tt>ScreenHeight: word = 24;</b></tt>
+  <p>
+Zmienna przechowująća aktualną wysokość ekranu. Domyślnie jest to wartość 24 dla ekranu edytora.
+	</p>
+	</td>
+</tr>
+
+</table>
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+ 
+<tr>
+	<td><b><tt>Abs</b></td>
+	<td><tt>
+  <b><tt>function Abs(x: real): real;<br />
+         function Abs(x: integer): integer;</b></tt>
+  <p>
+ Funkcja obliczająca wartość bezwzględną podanej liczby (ang. Absolute value). Wartość bezwzględna liczby nieujemnej to ta sama liczba, a liczby ujemnej - liczba do niej przeciwna. Funkcja w przypadku podania jej argumentu całkowitego zwraca wynik również typu całkowitego.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>ArcTan</b></td>
+	<td><tt>
+  <b><tt>function ArcTan(x: real): real;</b></tt>
+  <p>
+Funkcja ArcTan (arcus tangens) zwraca wartość kąta, którego tangens wynosi x.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Assign</b></td>
+	<td><tt>
+	<b><tt>procedure Assign(var F:File; FileName:string)</tt></b>
+<p>
+Procedura przypisuje zmiennej plikowej F
+plik o nazwie FileName. Aby móc odwoływać się do jakiegoś
+pliku, zawsze należy najpierw użyć procedury
+Assign. Przy dalszych operacjach pliki są
+identyfikowane przy pomocy zmiennej
+plikowej, a nie nazwy. 
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>BinStr</b></td>
+	<td><tt>
+  <b><tt>function BinStr(Value: cardinal; Digits: byte): TString;</b></tt>
+  <p>
+Funkcja BinStr zwraca ciąg znakowy z reprezentacją binarną wartości Value. Digits określa długość ciągu, który maksymalnie może liczyć 32 znaki.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Blockread<br />Blockwrite</td>
+	<td><tt>
+  <b><tt>procedure BlockRead(var f: file; var Buf; Count: word; var Result: word); </b></tt>
+  <br />
+  <b><tt>procedure BlockWrite(var f: file; var Buf; Count: word; var Result: word); </b></tt>
+  
+  <p>
+Procedura BlockRead wczytuje z pliku plik do zmiennej Buf nie więcej niż Count bajtów i umieszcza w zmiennej Result ilość rzeczywiście przeczytanych bajtów (która może być mniejsza od oczekiwanej np. ze względu na rzeczywistą długość pliku). Procedura BlockWrite działa tak samo, tylko zapisuje do pliku.
+  </p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Bounds</b></td>
+	<td><tt>
+  <b><tt>function Bounds(ALeft, ATop, AWidth, AHeight: smallint): TRect;</b></tt>
+  <p>
+Funkcja Bounds zwraca rekord typu TRect na podstawie podanych parametrów. Działanie funkcji jest praktycznie takie samo jak działanie funkcji Rect.
+  </p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Chr</b></td>
+<td><tt>
+<b><tt>function Chr(X: Byte): Char;</tt></b>
+<p>
+Funkcja zwraca znak (Char) o odpowiadającym kodzie ATASCII podanym w parametrze.
+</p>
+<span style="color: #0000ff">
+<pre>
+Chr(65); // Zwraca znak A
+Chr(90); // Zwraca znak Z
+Chr(32); // Zwraca znak spacji
+</pre>
+</span>
+
+Zamiennie z funkcją Chr, chcąc uzyskać odpowiedni znak możemy użyć jego kodu ATASCII poprzedzając go #
+<span style="color: #0000ff">
+<pre>
+Writeln(#65);       // Znak A
+Writeln(#65#32#65); // Napisze 'A Z'	
+</pre>
+</span>
+
+</td>
+</tr>
+
+<tr>
+	<td><b><tt>Cos</b></td>
+	<td><tt>
+  <b><tt>function Cos(x: real): real;</b></tt>
+  <p>
+Cosinus kąta (x w radianach).
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Close</b></td>
+	<td><tt>
+  <b><tt>procedure Close(var f: file);</b></tt>
+  <p>
+Procedura służąca do zamykania otwartego pliku dowolnego typu. Każdy plik otwarty przy pomocy Reset lub Rewrite powinno się zamknąć przy pomocy Close. 
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Dec</b></td>
+	<td><tt>
+<b><tt>procedure Dec(var X [, N: int]);</tt></b>
+
+<p>
+Procedura zmniejsza wartość parametru X o 1 lub wartość parametru N.
+</p>
+Wartość parametru X może być typu CHAR, BYTE, WORD, CARDINAL. Procedura DEC generuje optymalny kod,
+jest zalecana do używania w pętlach, zamiast operatora odejmowania (-).
+<span style="color: #0000ff">
+<pre>
+ dec(tmp);
+ dec(tmp[2]);
+</pre>
+</span>	
+	
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>DeleteFile</b></td>
+	<td><tt>
+  <b><tt>function DeleteFile(FileName: string): Boolean;</b></tt>
+  <p>
+Funkcja pozwala skasować plik z dysku o nazwie FileName, zwraca TRUE kiedy operacja powiodła się, FALSE w przypadku wystąpienia błędu (najczęściej z powodu zabezpieczenia przed zapisem lub błędnej nazwy pliku).
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>DPeek</b></td>
+	<td><tt>
+   <b><tt>function DPeek(a: word): word;</tt></b>
+	<p>
+	Funkcja zwraca słowo spod adresu A.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>DPoke</b></td>
+	<td><tt>
+	<b><tt>procedure DPoke(a: word; value: word);</tt></b>
+	<p>
+	Procedura zapisuje słowo Value pod adresem A.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Eof</b></td>
+	<td><tt>
+	<b><tt>function Eof(var f: file): Boolean;</tt></b>
+	<p>
+Funkcja zwraca wartość logiczną True jeśli osiągnięty został koniec pliku.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Exit</b></td>
+	<td><tt>
+Wywołanie procedury Exit powoduje natychmiastowe opuszczenie bloku programu, w którym to wywołanie nastąpiło. Można jej użyć do opuszczenia pętli, wyjścia z procedury/funkcji lub programu głównego. 
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Exp</b></td>
+	<td><tt>
+	<b><tt>function Exp(x: real): real;</tt></b>
+	<p>
+Funkcja podnosząca liczbę e (=2.71) do potęgi podanej przez argument.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>FilePos</b></td>
+	<td><tt>
+	<b><tt>function FilePos(var f: file): cardinal;</tt></b>
+	<p>
+Funkcja zwraca aktualną pozycję pliku. Plik nie może być tekstowy i musi być otwarty (np. poleceniem Reset). 
+Bity 0..15 zwróconej wartości to numer sektora dysku, bity 16..23 pozycja w sektorze [0..255]. Jest to odpowiednik instrukcji NOTE.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>FileSize</b></td>
+	<td><tt>
+	<b><tt>function FileSize(var f: file): cardinal;</tt></b>
+	<p>
+Funkcja zwraca długość pliku w bajtach (Sparta DOS X). Plik nie może być tekstowy i musi być otwarty (np. poleceniem Reset).
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>FillChar</tt></b></td>
+	<td><tt>
+<b><tt>procedure FillChar(a: pointer; count: word; value: char);</tt></b>
+<p>
+Procedura wypełnia bufor określony w parametrze X identycznymi znakami lub bajtami. Parametr Value musi określać dane, natomiast Count - ilość danych jakie zostaną przypisane do bufora.
+</p>
+<span style="color: #0000ff">
+<pre>
+var
+  Buffer : array[0..100] of Char;
+begin
+  FillChar(Buffer, SizeOf(Buffer), 'A');
+end.
+</pre>
+</span>
+</tt>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Frac</b></td>
+	<td><tt>
+	<b><tt>function Frac(x: real): real;</tt></b>
+<p>
+Zwraca część ułamkową liczby x w postaci rzeczywistej.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>GetIntVec</b></td>
+	<td><tt>
+   <b><tt>procedure GetIntVec(intno: Byte; var vector: pointer);</tt></b>
+<p>   
+ Procedura odczytuje adres wektora przerwań wg. kodu INTNO. Obecnie dopuszczalnymi kodami są:
+<span style="color: #0000ff">
+<pre>
+iDLI - przerwanie DLI
+iVBL - przerwanie VBL
+</pre>
+</span>
+</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Halt</b></td>
+	<td><tt>
+	<b><tt>procedure halt;</tt></b>
+<p>
+Wywołanie powoduje natychmiastowe wyjście z programu. Można (opcjonalnie) podać kod błędu, w przypadku MP jest on ignorowany.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Hi</b></td>
+	<td><tt>
+   <b><tt>function Hi(x): byte</tt></b>	
+   <p>
+	Funkcja zwracająca starszy bajt parametru X.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>HexStr</b></td>
+	<td><tt>
+  <b><tt>function HexStr(Value: cardinal; Digits: byte): TString;</b></tt>
+  <p>
+Funkcja HexStr zwraca ciąg znakowy z reprezentacją heksadecymalną wartości Value. Digits określa długość ciągu, który maksymalnie może liczyć 32 znaki.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Inc</b></td>
+	<td><tt>
+<b><tt>procedure Inc(var X [, N: int]);</tt></b>
+
+<p>
+Procedura zwiększa wartość parametru X o 1 lub wartość parametru N.
+</p>
+Wartość parametru X może być typu CHAR, BYTE, WORD, CARDINAL. Procedura INC generuje optymalny kod,
+jest zalecana do używania w pętlach, zamiast operatora dodawania (+).
+<span style="color: #0000ff">
+<pre>
+ inc(tmp);
+ inc(tmp[2]);
+</pre>
+</span>	
+	
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Int</b></td>
+	<td><tt>
+   <b><tt>function Int(x: real): real;</tt></b>
+   <p>
+ Funkcja zwraca część całkowitą argumentu będącego liczbą rzeczywistą.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>IOResult</b></td>
+	<td><tt>
+	<b><tt>var IOResult: byte;</tt></b>
+	<p>
+	Zmienna IOResult przechowuje ostatni błąd operacji I/O.
+<a href="http://atariki.krap.pl/index.php/Kody_statusowe_Atari_OS">Kody błędów I/O</a>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Ln</b></td>
+	<td><tt>
+   <b><tt>function Ln(x: real): real;</tt></b>
+   <p>
+ Funkcja licząca logarytm naturalny (o podstawie e) z podanej liczby. Argument funkcji musi być dodatni!
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Lo</b></td>
+	<td><tt>
+   <b><tt>function Lo(x): byte;</tt></b>
+   <p>
+	Funkcja zwracająca młodszy bajt parametru X.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>LowerCase</b></td>
+	<td><tt>
+   <b><tt>function LowerCase(a: char): char;</tt></b>
+   <p>
+ Funkcja zmieniająca znaki 'A'..'Z' na odpowiednie małe znaki 'a'..'z'
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Move</b></td>
+	<td><tt><b><tt>procedure Move(source, dest: pointer; count: word);</tt></b>
+<p>
+Procedura służy do kopiowania danych ze źródła (parametr Source) do bufora oznaczonego jako przeznaczenie (parametr Dest). Ilość kopiowanych danych określa parametr Count.
+</p>
+</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>OctStr</b></td>
+	<td><tt>
+  <b><tt>function OctStr(Value: cardinal; Digits: byte): TString;</b></tt>
+  <p>
+Funkcja OctStr zwraca ciąg znakowy z reprezentacją ósemkową wartości Value. Digits określa długość ciągu, który maksymalnie może liczyć 32 znaki.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Odd</b></td>
+	<td><tt>
+  <b><tt>function Odd(x: cardinal): Boolean;<br />function Odd(x: integer): Boolean;</b></tt>
+  <p>
+Funkcja Odd zwraca wartość True jeżeli liczba określona w parametrze X jest nieparzysta, False jeżeli jest parzysta.
+	</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><b><tt>Ord</b></td>
+	<td><tt>
+<b><tt>function Ord(X);</tt></b>
+<p>
+Funkcja ta działa odwrotnie do Chr. Z podanego znaku jako parametr zwraca nam jego kod w ATASCII.
+</p>
+<span style="color: #0000ff">
+<pre>
+Ord('A'); // Zwraca 65
+Ord('Z'); // Zwraca 90
+Ord(' '); // Zwraca 32	
+</pre>
+</span>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>ParamCount</b></td>
+	<td><tt>
+<b><tt>function ParamCount: byte;</tt></b>
+<p>
+Funkcja ParamCount zwraca ilość dostępnych argumentów (Sparta Dos X, BWDos), tzn. maksymalny indeks dla procedury ParamStr. ParamCount określa ilość parametrów przekazanych do programu z linii poleceń. 
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>ParamStr</b></td>
+	<td><tt>
+<b><tt>function ParamStr(Index: byte): TString;</tt></b>
+<p>
+Funkcja ParamStr zwraca parametry programu (Sparta Dos X, BWDos). Index to numer parametru, czyli ciągu znaków oddzielonego spacją. Jeżeli uruchomimy program TEST.EXE w taki sposób:
+<span style="color: #0000ff">
+<pre>
+TEST.EXE parametr1 parametr2 parametr3
+</pre>
+</span>
+To aby uzyskać parametr3 należy podać Index=3, zaś aby uzyskać parametr1 należy Index=1. Index=0 to specjalny argument, wtedy funkcja zwraca napęd z którego został uruchomiony programu, np. 'D1:'
+</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><b><tt>Pause</b></td>
+	<td><tt>
+	<b><tt>procedure Pause;<br />
+	procedure Pause(n: word);</tt></b>
+	<p>
+Zatrzymuje działanie programu na N * 1.50 sek
+   </p>
+   </td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Peek</b></td>
+	<td><tt>
+	<b><tt>function Peek(a: word): byte;</tt></b>
+	<p>
+Funkcja zwraca bajt spod adresu A.
+   </p>
+   </td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Point</b></td>
+	<td><tt>
+	<b><tt>function Point(AX, AY: smallint): TPoint;</tt></b>
+	<p>
+Na podstawie parametrów AX oraz AY tworzony jest rekord typu TPoint.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>PointsEqual</b></td>
+	<td><tt>
+	<b><tt>function PointsEqual(const P1, P2: TPoint): Boolean; </tt></b>
+	<p>
+Funkcja sprawdza czy wartości współrzędnych określone w parametrach P1 oraz P2 są sobie równe. W takim wypadku funkcja zwraca wartość True.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Poke</b></td>
+	<td><tt>
+	<b><tt>procedure Poke(a: word; value: byte);</tt></b>
+	<p>
+	Procedura zapisuje bajt Value pod adresem A.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Pi</b></td>
+	<td><tt>Zwraca wartość liczby pi.</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Pred</b></td>
+	<td><tt>
+	<b><tt>function Pred(X: TOrdinal): TOrdinal;</tt></b>
+	<p>
+	Poprzednik elementu X.	
+	</p>
+</tr>
+
+
+<tr>
+	<td><b><tt>Random</b></td>
+	<td><tt>
+	<b><tt>function Random: Real; assembler; overload;</tt></b>
+<p>
+Funkcja zwraca losową wartość z przedziału <0 .. 1>	
+</p>
+	<b><tt>function Random(range: byte): byte; assembler; overload;</tt></b>
+<p>
+Funkcja zwraca losową wartość z przedziału <0 .. range-1>, w przypadku Range=0 zwraca wartość losową z przedziału <0 .. 255 >
+</p>
+
+	<b><tt>function Random(range: smallint): smallint;</tt></b>
+<p>	
+Funkcja zwraca losową wartość z przedziału <0 .. range-1>	
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>ReadConfig</b></td>
+	<td><tt>
+	<b><tt>function ReadConfig(devnum: byte): cardinal;</tt></b>
+	<p></p>
+	Odczyt statusu stacji DEVNUM. Wynikiem są cztery bajty DVSTAT ($02EA..$02ED).
+<pre>
+Byte 0 ($02ea):
+Bit 0:Indicates the last command frame had an error. 
+Bit 1:Checksum, indicates that there was a checksum error in the last command or data frame
+Bit 2:Indicates that the last operation by the drive was in error. 
+Bit 3:Indicates a write protected diskette. 1=Write protect 
+Bit 4:Indicates the drive motor is on. 1=motor on 
+Bit 5:A one indicates MFM format (double density) 
+Bit 6:Not used 
+Bit 7:Indicates Density and a Half if 1 
+
+Byte 1 ($02eb):
+Bit 0:FDC Busy should always be a 1 
+Bit 1:FDC Data Request should always be 1 
+Bit 2:FDC Lost data should always be 1 
+Bit 3:FDC CRC error, a 0 indicates the last sector read had a CRC error 
+Bit 4:FDC Record not found, a 0 indicates last sector not found 
+Bit 5:FDC record type, a 0 indicates deleted data mark 
+Bit 6:FDC write protect, indicates write protected disk 
+Bit 7:FDC door is open, 0 indicates door is open 
+
+Byte 2 ($2ec):
+Timeout value for doing a format. 
+
+Byte 3 ($2ed):
+not used, should be zero
+</pre>	
+</tr>
+
+
+<tr>
+	<td><b><tt>ReadSector</b></td>
+	<td><tt>
+	<b><tt>procedure ReadSector(devnum: byte; sector: word; var buf);</tt></b>
+	<p>
+	Odczyt sektora SECTOR dyskietki w stacji dysków DEVNUM i zapisanie go w buforze BUF.
+	</p>
+</tr>
+
+
+<tr>
+	<td><b><tt>Rect</b></td>
+	<td><tt>
+	<b><tt>function Rect(ALeft, ATop, ARight, ABottom: smallint): TRect;</tt></b>
+	<p>
+Na podstawie parametrów tworzony jest rekord typu TRect. 	
+	</p>
+</tr>
+
+
+
+<tr>
+	<td><b><tt>RenameFile</b></td>
+	<td><tt>
+  <b><tt>function RenameFile(OldName, NewName: string): Boolean;</b></tt>
+  <p>
+Funkcja pozwala zmienić nazwę pliku OldName na nową nazwę NewName, zwraca TRUE kiedy operacja powiodła się, FALSE w przypadku wystąpienia błędu (najczęściej z powodu zabezpieczenia przed zapisem lub błędnej nazwy pliku).
+	</p>
+<span style="color: #0000ff">
+<pre>
+RenameFile('D:OLDNAME.TMP', 'NEWNAME.TMP');
+</pre>
+</span>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Reset</b></td>
+	<td><tt>
+  <b><tt>procedure Reset(var f: file; l: Word);</b></tt>
+  <p>
+	Otwiera istniejący plik z nazwą przekazaną do F poleceniem Assign. Opcjonalnie możemy podać rozmiar rekordu w bajtach L, domyślnie jest to wartość 128.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Rewrite</b></td>
+	<td><tt>
+  <b><tt>procedure Rewrite(var f: file; l: Word);</b></tt>
+  <p>
+	Tworzy i otwiera nowy plik. F jest nazwą przekazaną za pomocą polecenia Assign. Opcjonalnie możemy podać rozmiar rekordu w bajtach L, domyślnie jest to wartość 128.
+	</p>	
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Round</b></td>
+	<td><tt>
+	<b><tt>function Round(x: real): integer;</tt></b>
+	<p>
+Funkcja Round dokonuje zaokrąglenia podanej liczby rzeczywistej do najbliższej liczby całkowitej.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Seek</b></td>
+	<td><tt>
+	<b><tt>procedure Seek(var f: file; N: cardinal);</tt></b>
+	<p>
+Ustawia pozycję w pliku na N. N powinno być wartością zwróconą przez FilePos. Jest to odpowiednik instrukcji POINT.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>SetLength</b></td>
+	<td><tt>
+	<b><tt>procedure SetLength(var S: string; Len: byte);</tt></b>
+	<p>
+Ustawia długość ciągu S na LEN.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>SetIntVec</b></td>
+	<td><tt>
+   <b><tt>procedure SetIntVec(intno: Byte; vector: pointer);</tt></b><br />
+<p>   
+ Procedura ustawia adres wektora przerwań wg. kodu INTNO. Obecnie dopuszczalnymi kodami są:
+<span style="color: #0000ff">
+<pre>
+iDLI - przerwanie DLI
+iVBL - przerwanie VBL
+</pre>
+</span>
+</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Sin</b></td>
+	<td><tt>
+  <b><tt>function Sin(x: real): real;</b></tt>
+  <p>
+Sinus kąta (x w radianach).
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Succ</b></td>
+	<td><tt>
+	<b><tt>function Succ(X: TOrdinal): TOrdinal;</tt></b>
+	<p>
+	Następnik elementu X.	
+	</p>
+</tr>
+
+
+<tr>
+	<td><b><tt>Space</b></td>
+	<td><tt>
+<b><tt>function Space(Len: Byte): ^char;</tt></b>	
+<p>
+Funkcja generuje nowy ciąg znakowy o długości LEN wypełniony znakami spacji.
+</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><b><tt>SizeOf</tt></b></td>
+	<td><tt>
+<b><tt>function SizeOf(X: AnyType): byte;</tt></b>	
+<p>
+Funkcja zwraca rozmiar podanej zmiennej (lub typu) w bajtach.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><b><tt>Str</b></td>
+	<td><tt>
+	<b><tt>procedure Str(var X: TNumericType; var S: string);</tt></b>
+<p>
+Instrukcja zamienia liczbę X na łańcuch znaków S.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>StringOfChar</b></td>
+	<td><tt>
+	<b><tt>procedure StringOfChar(ch: Char; len: byte): ^char;</tt></b>
+<p>
+Funkcja generuje nowy ciąg znakowy o długości LEN wypełniony znakami CH.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Sqr</b></td>
+	<td><tt>
+   <b><tt>function Sqr(x: real): real;
+          function Sqr(x: integer): integer;</tt></b>
+   <p>
+  Funkcja obliczająca kwadrat podanej liczby (ang. Square).
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Sqrt</b></td>
+	<td><tt>
+   <b><tt>function Sqrt(x: real): real;
+          function Sqrt(x: integer): integer;</tt></b>
+   <p>
+   Funkcja obliczająca pierwiastek kwadratowy podanej liczby (ang. Square root).
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Trunc</b></td>
+	<td><tt>
+   <b><tt>function Trunc(x: real): integer;</tt></b>
+   <p>
+Funkcja zwraca część całkowitą liczby rzeczywistej w postaci liczby całkowitej.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>UpCase</b></td>
+	<td><tt>
+   <b><tt>function UpCase(a: char): char;</tt></b>
+   <p>
+ Funkcja zmieniająca znaki 'a'..'z' na odpowiednie duże znaki 'A'..'Z'
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>Val</b></td>
+	<td><tt>
+	<b><tt>procedure Val(const S: string; var V; var Code: Byte);</tt></b>
+<p>
+Procedura przekształca ciąg znaków S na liczbę V. Code przyjmie wartość 0 jeśli nie było błędnych znaków, w przeciwnym wypadku przyjmie numer znaku który spowodował błąd konwersji.
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><b><tt>WriteSector</b></td>
+	<td><tt>
+	<b><tt>procedure WriteSector(devnum: byte; sector: word; var buf);</tt></b>
+<p>
+Zapis sektora SECTOR dyskietki w stacji DEVNUM na podstawie bufora BUF.
+</p>
+	</td>
+</tr>
+
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="crt">
+<u><tt><h2>CRT</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/rtl/crt/index-5.html">Reference for unit 'Crt': Procedures and functions</a>
+
+<p class="tekst-wiekszy2">[ Constants ]</p>
+
+<pre>
+CN_START_SELECT_OPTION	= 0;
+CN_SELECT_OPTION	= 1;
+CN_START_OPTION		= 2;
+CN_OPTION		= 3;
+CN_START_SELECT		= 4;
+CN_SELECT		= 5;
+CN_START		= 6;
+CN_NONE			= 7;
+</pre>
+
+
+<p class="tekst-wiekszy2">[ Variables ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>Consol</b></td>
+	<td><tt>
+	<b><tt>Consol: byte absolute $d01f;</tt></b>
+	<p>
+	Zmienna 'Consol' zwraca kod naciśniętego klawisza/klawiszy konsoli.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>TextAttr</b></td>
+	<td><tt>
+	<b><tt>TextAttr: byte = 0;</tt></b>
+	<p>
+	Zmienna 'TextAttr' przechowuje wartość jaka jest dodawana do każdego wyświetlanego znaku, np. TextAttr = $80 spowoduje że znaki będą wyświetlane w inwersie.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>WhereX</b></td>
+	<td><tt>
+	<b><tt>WhereX: byte absolute $54;</tt></b>
+	<p>
+	Zmienna 'WhereX' przechowuje aktualną poziomą pozycję kursora.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>WhereY</b></td>
+	<td><tt>
+	<b><tt>WhereY: byte absolute $55;</tt></b>
+	<p>
+	Zmienna 'WhereY' przechowuje aktualną pionową pozycję kursora.
+	</p>
+	</td>
+</tr>
+
+</table>
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>ClrEol</b></td>
+	<td><tt>Procedura czyści wiersz od aktualnej pozycji kursora do prawej strony krawędzi ekranu. Pozycja kursora nie ulega zmianie.</tt></td>
+</tr>
+
+<tr>
+	<td><tt><b>ClrScr</b></td>
+	<td><tt>Procedura czyści ekran edytora, wykonuje kod znaku CH_CLR</tt></td>
+</tr>
+<tr>
+	<td><tt><b>CursorOff</b></td>
+	<td><tt>Procedura wyłącza kursor.</tt></td>
+</tr>
+<tr>
+	<td><tt><b>CursorOn</b></td>
+	<td><tt>Procedura włącza kursor.</tt></td>
+</tr>
+
+<tr>
+	<td><tt><b>Delay</b></td>
+	<td><tt>
+	<b><tt>procedure Delay(MS: Word);</tt></b>
+	<p>
+	Procedura czeka zadaną ilość milisekund MS. W przybliżeniu Delay(1000) generuje opóźnienie jednej sekundy.	
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>DelLine</b></td>
+	<td><tt>Procedura kasuje wiersz na aktualnej pozycji kursora, wykonuje kod znaku CH_DELLINE</tt></td>
+</tr>
+<tr>
+	<td><tt><b>GotoXY</b></td>
+	<td><tt>
+   <b><tt>procedure GotoXY(x, y: byte);</tt></b>
+   <p>
+ Procedura ustawia nową pozycję kursora.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>InsLine</b></td>
+	<td><tt>Procedura wstawia pusty wiersz na aktualnej pozycji kursora, wykonuje kod znaku CH_INSLINE</tt></td>
+</tr>
+
+<tr>
+	<td><tt><b>Keypressed</b></td>
+	<td><tt>
+	<b><tt>function Keypressed: Boolean;</tt></b>
+	<p>
+	Funkcja zwraca TRUE gdy został naciśnięty jakiś klawisz klawiatury, w przeciwnym razie zwraca FALSE.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>NoSound</b></td>
+	<td><tt>Procedura wycisza kanały obu POKEY-i ($D200, $D210)</tt></td>
+</tr>
+
+
+<tr>
+	<td><tt><b>ReadKey</b></td>
+	<td><tt>
+	<b><tt>function ReadKey: char;</tt></b>
+	<p>
+	Funkcja zwraca kod naciśniętego klawisza klawiatury.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Sound</b></td>
+	<td><tt>
+	<b><tt>procedure Sound(Chan,Freq,Dist,Vol: byte);</tt></b>
+	<p>
+	Procedura odtwarza dźwięk na kanale POKEY-a CHAN, o częstotliwości FREQ, filtrach DIST, głośności VOL.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>TextBackground</b></td>
+	<td><tt>
+	<b><tt>procedure TextBackground(a: byte);</tt></b>
+	<p>
+   Procedura ustawia nowy kolor tła znaków (działa najlepiej z włączonym VBXE).	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>TextColor</b></td>
+	<td><tt>
+	<b><tt>procedure TextColor(a: byte);</tt></b>
+	<p>
+	Procedura ustawia nowy kolor znaków (działa najlepiej z włączonym VBXE).	</p>
+	</td>
+</tr>
+
+</table>
+
+
+<p></p>
+<br />
+
+
+<A NAME="graph">
+<u><tt><h2>GRAPH</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/rtl/graph/index-5.html">Reference for unit 'Graph': Procedures and functions</a>
+
+
+<p class="tekst-wiekszy2">[ Constants ]</p>
+
+<pre>
+	{ graphic drivers }
+	D1bit	= 11;
+	D2bit	= 12;
+	D4bit	= 13;
+	D6bit	= 14;		// 64 colors Half-brite mode - Amiga
+	D8bit	= 15;
+	D12bit	= 16;		// 4096 color modes HAM mode - Amiga
+
+	m640x480 = 8 + 16;
+
+	{ error codes }
+	grOK		= 0;
+	grNoInitGraph	= -1;
+	grNotDetected	= -2;
+	grFileNotFound	= -3;
+	grInvalidDriver	= -4;
+	grNoLoadMem	= -5;
+	grNoScanMem	= -6;
+	grNoFloodMem	= -7;
+	grFontNotFound	= -8;
+	grNoFontMem	= -9;
+	grInvalidMode	= -10;
+	grError		= -11;
+	grIOerror	= -12;
+	grInvalidFont	= -13;
+	grInvalidFontNum= -14;
+	grInvalidVersion= -18;
+</pre>
+
+
+<p class="tekst-wiekszy2">[ Variables ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>GraphResult</td>
+	<td><tt>
+<b><tt>GraphResult : byte;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>Bar</b></td>
+	<td><tt>
+	<b><tt>procedure Bar(x1, y1, x2, y2: Smallint);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Bar3D</b></td>
+	<td><tt>
+	<b><tt>procedure Bar3D(x1, y1, x2, y2 : smallint;depth : word;top : boolean);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Circle</b></td>
+	<td><tt>
+	<b><tt>procedure Circle(x0,y0,radius: word);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>ClipLine</b></td>
+	<td><tt>
+	<b><tt>procedure ClipLine(x1, y1, x2, y2: smallint);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Ellipse</b></td>
+	<td><tt>
+	<b><tt>procedure Ellipse(x0, y0, a, b: word);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>FillEllipse</b></td>
+	<td><tt>
+	<b><tt>procedure FillEllipse(x0, y0, a, b: word);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>FillRect</b></td>
+	<td><tt>
+	<b><tt>procedure FillRect(Rect: TRect);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>FloodFill</b></td>
+	<td><tt>
+	<b><tt>procedure FloodFill(x, y: smallint; color: byte);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetColor</b></td>
+	<td><tt>
+	<b><tt>function GetColor: byte; assembler;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>GetX</b></td>
+	<td><tt>
+	<b><tt>function GetX: smallint;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetY</b></td>
+	<td><tt>
+	<b><tt>function GetY: smallint;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>GetMaxX</b></td>
+	<td><tt>
+	<b><tt>function GetMaxX: word;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetMaxY</b></td>
+	<td><tt>
+	<b><tt>function GetMaxY: word;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><tt><b>GetPixel</b></td>
+	<td><tt>
+	<b><tt>function GetPixel(x,y: smallint): byte;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>InitGraph</b></td>
+	<td><tt>
+	<b><tt>procedure InitGraph(mode: byte);<br />procedure InitGraph(driver, mode: byte; pth: TString);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Line</b></td>
+	<td><tt>
+	<b><tt>procedure Line(x0, y0, x1, y1: smallint);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>LineTo</b></td>
+	<td><tt>
+	<b><tt>procedure LineTo(x, y: smallint);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>MoveRel</b></td>
+	<td><tt>
+	<b><tt>procedure MoveRel(Dx, Dy: smallint);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>MoveTo</b></td>
+	<td><tt>
+	<b><tt>procedure MoveTo(x, y: smallint);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><tt><b>PutPixel</b></td>
+	<td><tt>
+	<b><tt>procedure PutPixel(x,y: smallint);<br />procedure PutPixel(x,y: smallint; color: byte);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Rectangle</b></td>
+	<td><tt>
+	<b><tt>procedure Rectangle(x1, y1, x2, y2: smallint); overload;<br />
+procedure Rectangle(Rect: TRect); overload;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>SetBkColor</b></td>
+	<td><tt>
+	<b><tt>procedure SetBkColor(color: byte);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>SetClipRect</b></td>
+	<td><tt>
+	<b><tt>procedure SetClipRect(x0,y0,x1,y1: smallint); overload;<br />
+procedure SetClipRect(Rect: TRect); overload;</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><tt><b>SetColor</b></td>
+	<td><tt>
+	<b><tt>procedure SetColor(color: byte);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>SetColorMapEntry</b></td>
+	<td><tt>
+	<b><tt>procedure SetColorMapEntry;<br />procedure  SetColorMapEntry(a,b,c: byte);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>SetColorMapDimensions</b></td>
+	<td><tt>
+	<b><tt>procedure SetColorMapDimensions(w,h: byte);</tt></b>
+	<p>
+	</p>
+	</td>
+</tr>
+
+
+</table>
+
+<p></p>
+<br />
+
+
+<A NAME="sysutils">
+<u><tt><h2>SYSUTILS</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/rtl/sysutils/index-5.html">Reference for unit 'Sysutils': Procedures and functions</a>
+
+
+<p class="tekst-wiekszy2">[ Constants ]</p>
+<pre>
+faReadOnly	= $01;
+faHidden	= $02;
+faSysFile	= $04;
+faVolumeID	= $08;
+faDirectory	= $10;
+faArchive	= $20;
+faAnyFile	= $3f;
+</pre>
+
+
+<p class="tekst-wiekszy2">[ Types ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>TSearchRec</td>
+	<td><tt>
+<b>
+<pre>
+TSearchRec = record
+		Attr: Byte;
+		Name: TString;
+		FindHandle: Pointer;
+	     end;
+</pre></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+</table>
+
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>AnsiUpperCase</td>
+	<td><tt>
+<b><tt>function AnsiUpperCase(const a: string): string;</tt></b>
+<p>
+Funkcja konwertuje znaki z łańcucha A na wielkie. 
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Beep</td>
+	<td><tt>
+<b><tt>procedure Beep;</tt></b>
+<p>
+Sygnał brzęczka (buzzer).
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>DeleteFile</td>
+	<td><tt>
+<b><tt>function DeleteFile(var FileName: TString): Boolean;</tt></b>
+<p>
+Funkcja kasuje plik określony w parametrze FileName, zwraca TRUE gdy operacja się powiodła.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>ExtractFileExt</td>
+	<td><tt>
+<b><tt>function ExtractFileExt(const FileName: string): TString;</tt></b>
+<p>
+Na podstawie nazwy pliku lub pełnej ścieżki do pliku (określonej w parametrze FileName), funkcja zwraca rozszerzenie (poprzedzone kropką - np. .txt).
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>FileExists</td>
+	<td><tt>
+<b><tt>function FileExists(const FileName: string): Boolean;</tt></b>
+<p>
+Funkcja sprawdza czy plik określony w parametrze FileName, istnieje (True) czy też nie (False). 
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>FindFirst</td>
+	<td><tt>
+<b><tt>function FindFirst(const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>FindNext</td>
+	<td><tt>
+<b><tt>function FindNext(var f: TSearchRec): byte;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>FindClose</td>
+	<td><tt>
+<b><tt>procedure FindClose(var f: TSearchRec);</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetTickCount</td>
+	<td><tt>
+<b><tt>function GetTickCount: cardinal;</tt></b>
+<p>
+GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256 + PEEK(RTCLOK)*65536). Jest to przydatne do pomiaru czasu.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>IntToHex</td>
+	<td><tt>
+<b><tt>function IntToHex(Value: cardinal; Digits: byte): TString;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>IntToStr</td>
+	<td><tt>
+<b><tt>function IntToStr(a: integer): ^char;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RenameFile</td>
+	<td><tt>
+<b><tt>function RenameFile(var OldName,NewName: TString): Boolean;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>StrToFloat</td>
+	<td><tt>
+<b><tt>function StrToFloat(var s: TString): real;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>StrToInt</td>
+	<td><tt>
+<b><tt>function StrToInt(const s: char): byte;<br />function StrToInt (const s: TString): integer; </tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+
+<A NAME="utypes">
+<u><tt><h2>TYPES</h2></tt></u>
+
+<a href="https://www.freepascal.org/docs-html/rtl/types/index-5.html">Reference for unit 'Types': Procedures and functions</a>
+
+
+</table>
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>Bounds</td>
+	<td><tt>
+<b><tt>function Bounds(ALeft, ATop, AWidth, AHeight: smallint): TRect;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>CenterPoint</td>
+	<td><tt>
+<b><tt>function CenterPoint(const Rect: TRect): TPoint;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>EqualRect</td>
+	<td><tt>
+<b><tt>function EqualRect(const r1,r2 : TRect) : Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>InflateRect</td>
+	<td><tt>
+<b><tt>function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>IntersectRect</td>
+	<td><tt>
+<b><tt>function IntersectRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>IsRectEmpty</td>
+	<td><tt>
+<b><tt>function IsRectEmpty(const Rect : TRect) : Boolean;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>NormalizeRect</td>
+	<td><tt>
+<b><tt>procedure NormalizeRect(var Rect: TRect); overload;<br />
+procedure NormalizeRect(var left,top, right,bottom : smallint); overload;
+</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>OffsetRect</td>
+	<td><tt>
+<b><tt>function OffsetRect(var Rect : TRect;DX : Integer;DY : Integer) : Boolean;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Point</td>
+	<td><tt>
+<b><tt>function Point(AX, AY: smallint): TPoint;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>PointsEqualt</td>
+	<td><tt>
+<b><tt>function PointsEqual(const P1, P2: TPoint): Boolean;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>PtInEllipse</td>
+	<td><tt>
+<b><tt>function PtInEllipse(const Rect: TRect; X, Y: integer): Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>PtInRect</td>
+	<td><tt>
+<b><tt>function PtInRect(const Rect : TRect;const p : TPoint) : Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Rect</td>
+	<td><tt>
+<b><tt>function Rect(ALeft, ATop, ARight, ABottom: smallint): TRect;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>RectWidth</td>
+	<td><tt>
+<b><tt>function RectWidth(const Rect: TRect): word;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>RectHeight</td>
+	<td><tt>
+<b><tt>function RectHeight(const Rect: TRect): word;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><tt><b>Size</td>
+	<td><tt>
+<b><tt>function Size(AWidth, AHeight: smallint): TSize; overload;<br />
+function Size(const ARect: TRect): TSize; overload;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>UnionRect</td>
+	<td><tt>
+<b><tt>function UnionRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;</tt></b>
+<p>
+
+</p>
+	</td>
+</tr>
+
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="misc">
+<u><tt><h2>MISC</h2></tt></u>
+
+
+<p class="tekst-wiekszy2">[ Variables ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>banks</td>
+	<td><tt>
+<b><tt>banks: array [0..63] of byte;</tt></b>
+<p>Tablica przechowująca 64 kody wykrytych banków dodatkowej pamięci.</p>
+	</td>
+</tr>
+
+</table>
+
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr><tt>
+	<td><tt><b>DetectCPU</b></tt></td>
+	<td><tt><b>function DetectCPU: byte; assembler;</b>
+	<p>Funckja zwraca wartość $00 gdy wykryje CPU 6502, $01 dla 65C02, $80 dla 65816.</p></td>
+</tr>
+
+<tr><tt>
+	<td><tt><b>DetectCPUSpeed</b></tt></td>
+	<td><tt><b>function DetectCPUSpeed: real;</b>
+	<p>Funckja zwraca szybkość zainstalowanego CPU wyrażoną w MHz.</p></td>
+</tr>
+
+<tr>
+	<td><tt><b>DetectMapRAM</b></tt></td>
+	<td><tt><b>function DetectMapRam: Boolean; assembler;</b>
+	<p>Funkcja zwraca TRUE gdy wykryta zostanie możliwość zapisu w 2KB obszarze który normalnie zajmują rejestry sprzętowe. Ten obszar to <a href="http://xxl.atari.pl/mapram/">MapRAM</a>.</p></td>
+</tr>
+
+<tr>
+	<td><tt><b>DetectMem</b></tt></td>
+	<td><tt><b>function DetectMEM: byte; assembler;</b>
+	<p>Funkcja zwraca liczbę wykrytych dodatkowych banków pamięci, w tablicy BANKS zapisane zostają ich kody.</p></td>
+</tr>
+
+<tr>
+	<td><tt><b>DetectStereo</b></tt></td>
+	<td><tt><b>function DetectStereo: Boolean; assembler;</b>
+	<p>Funkcja zwraca TRUE gdy wykryty zostanie drugi POKEY (STEREO).</p></td>
+</tr>
+
+<tr>
+	<td><tt><b>DetectVBXE</b></tt></td>
+	<td><tt><b>function DetectVBXE(var p: word): Boolean; assembler; register;</b>
+	<p>Funkcja zwraca TRUE w przypadku wykrycia VBXE, dodatkowo w zmiennej P typu WORD zostają zapisane informacje o wersji zainstalowanego rdzenia.
+<pre>
+bit 0..6  numer wersji rdzenia
+bit 7     =1 RAMBO
+bit 8..15 strona pamięci na której są rejestry VBXE
+</pre>	
+	
+	</p></td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="vbxe">
+<u><tt><h2>VBXE</h2></tt></u>
+
+<p>
+Mapa pamięci dla VBXE zdefiniowana jest w module SYSTEM
+</p>
+<pre>
+VBXE_XDLADR = $0000;	// XDLIST
+VBXE_MAPADR = $1000;	// COLOR MAP ADDRESS
+VBXE_BCBADR = $0100;	// BLITTER LIST ADDRESS
+VBXE_OVRADR = $5000;	// OVERLAY ADDRESS
+VBXE_WINDOW = $B000;	// 4K WINDOW $B000..$BFFF
+</pre>
+
+<p class="tekst-wiekszy2">[ Constants ]</p>
+
+<pre>
+LoRes = 1;
+MedRes = 2;
+HiRes = 3;
+</pre>
+
+
+<p class="tekst-wiekszy2">[ Types ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>TUInt24</b></td>
+	<td><tt>
+	<pre>
+record
+	byte0: byte;
+	byte1: byte;
+	byte2: byte;
+end;
+</pre></td>
+<td><tt>Typ 24-bitowy wykorzystywany do definicji adresów pamięci VBXE.
+</tt></td>
+</tr>
+
+<tr>
+	<td><tt><b>TXDL</b></td>
+	<td><tt>
+	<pre>
+record
+	xdlc_: word;
+	rptl_: byte;
+	xdlc: word;
+	rptl: byte;
+	ov_adr: TUInt24;
+	ov_step: word;
+	mp_adr: TUInt24;
+	mp_step: word;
+	mp_hscrol: byte;
+	mp_vscrol: byte;
+	mp_width: byte;
+	mp_height: byte;
+	ov_width: byte;
+	ov_prior: byte;
+end;
+</pre></td>
+<td><tt>Typ TXDL wykorzystywany przez procedury GetXDL i SetXDL. Pozwala na modyfikację programu dla VBXE wykorzystywanego przez MadPascal.</td>
+</tr>
+
+<tr>
+	<td><tt><b>TBCB</b></td>
+	<td><tt>
+	<pre>
+record
+	src_adr: TUInt24;
+	src_step_y: smallint;
+	src_step_x: shortint;
+	dst_adr: TUInt24;
+	dst_step_y: smallint;
+	dst_step_x: shortint;
+	blt_width: word;
+	blt_height: byte;
+	blt_and_mask: byte;
+	blt_xor_mask: byte;
+	blt_collision_mask: byte;
+	blt_zoom: byte;
+	pattern_feature: byte;
+	blt_control: byte;
+end;
+</pre></td>
+<td><tt>Typ TBCB (21 bajtów), Blitter Code Block. Definicja typu bloku programu dla Blittera VBXE.</td>
+</tr>
+
+</table>
+
+
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+<tr><tt>
+	<td><tt><b>BlitterBusy</b></tt></td>
+	<td><tt><b>function BlitterBusy: Boolean; assembler;</b>
+	<p>Funkcja zwraca TRUE jeśli blitter VBXE zajęty jest wykonywaniem programu blittera.</p></td>
+</tr>
+<tr>
+	<td><tt><b>ColorMapOff</b></tt></td>
+	<td><tt><b>procedure ColorMapOff; assembler;</b>
+	<p>Wyłączenie mapy kolorów w programie XDLIST dla VBXE.</p></td>
+</tr>
+<tr>
+	<td><tt><b>ColorMapOn</b></tt></td>
+	<td><tt><b>procedure ColorMapOn; assembler;</b>
+	<p>Włączenie mapy kolorów w programie XDLIST dla VBXE.</p></td>
+</tr>
+
+<tr>
+	<td><tt><b>DstBCB</b></td>
+	<td><tt>
+	<b><tt>procedure DstBCB(var a: TBCB; dst: cardinal);</b>
+	<p>Procedura zmieniająca adres docelowy (dst_adr) w programie blittera A.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetXDL</b></td>
+	<td><tt>
+	<b><tt>procedure GetXDL(var a: txdl); register; assembler;</b>
+	<p>Procedura przepisuje do zmiennej A program XDLIST spod adresu VBXE_XDLADR w pamięci VBXE.</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>IniBCB</b></td>
+	<td><tt>
+	<b><tt>procedure IniBCB(var a: TBCB; src,dst: cardinal; w0, w1: smallint; w: word; h: byte; ctrl: byte);</b>
+	<p>Procedura INIBCB pozwala zaincjować pamięć dla programu blittera pod adresem A. Dodatkowe parametry określają adres spod którego będą kopiowane dane
+   	SRC, adres docelowy kopiowanych danych DST, szerokość okna danych źródłowych W0, docelowych W1, rozmiar okna wynikowego, jego szerokość W, wysokość H, oraz 
+   	określić parametry końcowe bloku programu blittera CTRL (ustawiony bit 3 CTRL nakazuje blitterowi odczyt kolejnego programu i jego wykonanie).
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>OverlayOff</b></td>
+	<td><tt>
+	<b>procedure OverlayOff; assembler;</b>
+	<p>Wyłączenie trybu overlay w programie XDLIST.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RunBCB</b></td>
+	<td><tt>
+	<b><tt>procedure RunBCB(var a: TBCB); assembler;</b>
+	<p>Wystartowanie blittera VBXE na podstawie adresu programu A.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>SetHorizontalRes</b></td>
+	<td><tt>
+	<b><tt>procedure SetHorizontalRes(a: byte); assembler;</b><br />
+	<b><tt>procedure SetHRes(a: byte); assembler;</b>
+
+	<p>Ustanowienie trybu overlay w programie XDLIST (LoRes: 160x240x256c, MedRes: 320x240x256c, HiRes: 640x240x16c).
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>VBXEMemoryBank</b></td>
+	<td><tt>
+	<b><tt>procedure VBXEMemoryBank(b: byte); assembler;</b>
+	<p>Włączenie 4K banku VBXE w okno pamięci XE/XL $B000..$BCFF 
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>SetXDL</b></td>
+	<td><tt>
+	<b><tt>procedure SetXDL(var a: txdl); register; assembler;</b>
+	<p>Procedura przepisuje program A pod adres VBXE_XDLADR w pamięci VBXE.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>SrcBCB</b></td>
+	<td><tt>
+	<b><tt>procedure SrcBCB</tt></b>
+	<p>Procedura zmieniająca adres źródłowy (src_adr) w programie blittera A.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>VBXEOff</b></td>
+	<td><tt>
+	<b><tt>procedure VBXEOff</tt></b>
+	<p>Wyłączenie, reset VBXE.
+	</p>
+	</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="dos">
+<u><tt><h2>DOS</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/rtl/dos/index-5.html">Reference for unit 'Dos': Procedures and functions</a>
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="0">
+
+<tr>
+	<td><tt><b>CurrentMinuteOfDay</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>CurrentSec100OfDay</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>CurrentSecondOfDay</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>DosVersion</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>GetTime</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>MinuteOfDay</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>MinutesToTime</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>SecondOfDay</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>SecondsToTime</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td><tt><b>SetTime</td>
+	<td></td>
+</tr>
+
+</table>
+
+
+<p></p>
+<br />
+
+
+<A NAME="math">
+<u><tt><h2>MATH</h2></tt></u>
+
+<a href="http://www.freepascal.org/docs-html/rtl/math/index-5.html">Reference for unit 'Math': Procedures and functions</a>
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+
+<tr>
+	<td><tt><b>ArcCos</td>
+	<td><tt>
+<b><tt>function ArcCos(x: real): real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ArcSin</td>
+	<td><tt>
+<b><tt>function ArcSin(x: real): real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ArcTan2</td>
+	<td><tt>
+<b><tt>function ArcTan2(y, x: real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Ceil</td>
+	<td><tt>
+<b><tt>function Ceil(a: real): smallint;</tt></b>
+<p>
+Funkcja zwraca najmniejszą liczbę całkowitą większą lub równą od tej podanej w parametrze.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>CycleToRad</td>
+	<td><tt>
+<b><tt>function CycleToRad(cycle : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>DegNormalize</td>
+	<td><tt>
+<b><tt>function DegNormalize(deg : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>DegToGrad</td>
+	<td><tt>
+<b><tt>function DegToGrad(deg : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>DegToRad</td>
+	<td><tt>
+<b><tt>function DegToRad(deg : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>DivMod</td>
+	<td><tt>
+<b><tt>procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: Word);<br />procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: smallint);</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>EnsureRange</td>
+	<td><tt>
+<b><tt>function EnsureRange(const AValue, AMin, AMax: byte): Integer;<br />function EnsureRange(const AValue, AMin, AMax: Integer): Integer;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Floor</td>
+	<td><tt>
+<b><tt>function Floor(a: real): smallint;</tt></b>
+<p>
+Funkcja zwraca najbliższą liczbę całkowitą mniejszą lub równą od tej podanej w parametrze.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>FMod</td>
+	<td><tt>
+<b><tt>function FMod(a, b: real): real;</tt></b>
+<p>
+Funkcja zwraca resztę z dzielenia dwóch liczb rzeczywistych.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GradToDeg</td>
+	<td><tt>
+<b><tt>function GradToDeg(grad : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GradToRad</td>
+	<td><tt>
+<b><tt>function GradToRad(grad : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>InRange</td>
+	<td><tt>
+<b><tt>function InRange(const AValue, AMin, AMax: byte): Boolean;<br />function InRange(const AValue, AMin, AMax: Integer): Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>IsNan</td>
+	<td><tt>
+<b><tt>function IsNan(const d : Single): Boolean;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Log2</td>
+	<td><tt>
+<b><tt>function log2(x : single): single;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Log10</td>
+	<td><tt>
+<b><tt>function log10(x : single): single;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>LogN</td>
+	<td><tt>
+<b><tt>function logN(n,x : single): single;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><tt><b>Max</td>
+	<td><tt>
+<b><tt>function Max(a, b: real): real;<br />function Max(a, b: integer): integer;</tt></b>
+<p>
+Przeciążona funkcja porównuje wartości dwóch parametrów: A i B, oraz zwraca ten, który jest większy.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Min</td>
+	<td><tt>
+<b><tt>function Min(a, b: real): real;<br />function Min(a, b: integer): integer;</tt></b>
+<p>
+Przeciążona funkcja porównuje wartości dwóch parametrów A i B, oraz zwraca wartość tego który jest mniejszy.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Power</td>
+	<td><tt>
+<b><tt>function Power(base : real; const exponent : shortint) : real;<br />power(base : integer; const exponent : shortint) : integer;</tt></b>
+<p>
+Funkcja podnosi liczbę A do dowolnej potęgi N, potęga może być ułamkiem.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RadToCycle</td>
+	<td><tt>
+<b><tt>function RadToCycle(rad : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RadToDeg</td>
+	<td><tt>
+<b><tt>function RadToDeg(rad : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RadToGrad</td>
+	<td><tt>
+<b><tt>function RadToGrad(rad : real) : real;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RandG</td>
+	<td><tt>
+<b><tt>function RandG(mean, stddev : single) : single;</tt></b>
+<p>
+Zwraca liczbę losową rozkładu Gaussa.
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>RandomRange</td>
+	<td><tt>
+<b><tt>function RandomRange(const aFrom, aTo: smallint): smallint;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>RandomRangeF</td>
+	<td><tt>
+<b><tt>function RandomRangeF(const min, max: single): single;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Tan</td>
+	<td><tt>
+<b><tt>function Tan(x: Real): Real;</tt></b>
+<p>
+Funkcja zwraca wartość tangensa kąta podanego w parametrze X.
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="cmc">
+<u><tt><h2>CMC</h2></tt></u>
+
+<p class="tekst-wiekszy2">[ Types ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>TCMC</td>
+	<td><tt>
+<b><tt><pre>
+type
+    TCMC = Object
+	 
+      player: pointer;
+      modul: pointer;
+     
+      procedure Init; assembler;
+      procedure Play; assembler;
+      procedure Stop; assembler;
+
+   end;
+</pre></tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>Init</td>
+	<td><tt>
+<b><tt>procedure TCMC.Init; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Play</td>
+	<td><tt>
+<b><tt>procedure TCMC.Play; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Stop</td>
+	<td><tt>
+<b><tt>procedure TCMC.Stop; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="mpt">
+<u><tt><h2>MPT</h2></tt></u>
+
+<p class="tekst-wiekszy2">[ Types ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>TMPT</td>
+	<td><tt>
+<b><tt>
+<pre>
+type
+    TMPT = Object
+	 
+      player: pointer;
+      modul: pointer;
+     
+      procedure Init; assembler;
+      procedure Play; assembler;
+      procedure Stop; assembler;
+
+   end;
+</pre>	
+</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>Init</td>
+	<td><tt>
+<b><tt>procedure TMPT.Init; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Play</td>
+	<td><tt>
+<b><tt>procedure TMPT.Play; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Stop</td>
+	<td><tt>
+<b><tt>procedure TMPT.Stop; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+<A NAME="rmt">
+<u><tt><h2>RMT</h2></tt></u>
+
+<p class="tekst-wiekszy2">[ Types ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>TRMT</td>
+	<td><tt>
+<b><tt><pre>
+type
+    TRMT = Object
+	 
+      player: pointer;
+      modul: pointer;
+     
+      procedure Init(a: byte); assembler;
+      procedure Play; assembler;
+      procedure Stop; assembler;
+
+   end;
+</pre></tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>Init</td>
+	<td><tt>
+<b><tt>procedure TRMT.Init(a: byte); assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Play</td>
+	<td><tt>
+<b><tt>procedure TRMT.Play; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>Stop</td>
+	<td><tt>
+<b><tt>procedure TRMT.Stop; assembler;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+</table>
+
+<p></p>
+<br />
+
+
+
+
+<A NAME="joy">
+<u><tt><h2>JOYSTICK</h2></tt></u>
+
+<p class="tekst-wiekszy2">[ Constants ]</p>
+<pre>
+joy_none       = 15;
+joy_up         = 14;
+joy_down       = 13;
+joy_left       = 11;
+joy_left_up    = 10;
+joy_left_down  = 9;
+joy_right      = 7;
+joy_right_up   = 6;
+joy_right_down = 5;
+</pre>
+
+
+<p class="tekst-wiekszy2">[ Variables ]</p>
+
+<table border="1">
+
+<tr>
+	<td><tt><b>joy_1, stick0</td>
+	<td><tt>
+<b><tt>joy_1 : byte absolute $278;<br />stick0 : byte absolute $278;</tt></b>
+<p>
+Położenie joysticka 0.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>joy_2, stick1</td>
+	<td><tt>
+<b><tt>joy_2 : byte absolute $279;<br />stick1 : byte absolute $279;</tt></b>
+<p>
+Położenie joysticka 1.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>strig0</td>
+	<td><tt>
+<b><tt>strig0 : byte absolute $284;</tt></b>
+<p>
+Wskaźnik naciśnięcia przycisku na joysticku 0. Normalnie zawiera '1', naciśnięcie tzw. fire na joysticku powoduje wpisanie tutaj '0'.
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>strig1</td>
+	<td><tt>
+<b><tt>strig1 : byte absolute $285;</tt></b>
+<p>
+Wskaźnik naciśnięcia przycisku na joysticku 1. Normalnie zawiera '1', naciśnięcie tzw. fire na joysticku powoduje wpisanie tutaj '0'.
+</p>
+	</td>
+</tr>
+
+
+
+<tr>
+	<td><tt><b>paddl0</td>
+	<td><tt>
+<b><tt>paddl0 : byte absolute $270;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl1</td>
+	<td><tt>
+<b><tt>paddl1 : byte absolute $271;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl2</td>
+	<td><tt>
+<b><tt>paddl2 : byte absolute $272;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl3</td>
+	<td><tt>
+<b><tt>paddl3 : byte absolute $273;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl4</td>
+	<td><tt>
+<b><tt>paddl4 : byte absolute $274;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl5</td>
+	<td><tt>
+<b><tt>paddl5 : byte absolute $275;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl6</td>
+	<td><tt>
+<b><tt>paddl6 : byte absolute $276;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>paddl7</td>
+	<td><tt>
+<b><tt>paddl7 : byte absolute $277;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>ptrig0</td>
+	<td><tt>
+<b><tt>ptrig0 : byte absolute $27c;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig1</td>
+	<td><tt>
+<b><tt>ptrig1 : byte absolute $27d;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig2</td>
+	<td><tt>
+<b><tt>ptrig2 : byte absolute $27e;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig3</td>
+	<td><tt>
+<b><tt>ptrig3 : byte absolute $27f;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig4</td>
+	<td><tt>
+<b><tt>ptrig4 : byte absolute $280;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig5</td>
+	<td><tt>
+<b><tt>ptrig5 : byte absolute $281;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig6</td>
+	<td><tt>
+<b><tt>ptrig6 : byte absolute $282;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>ptrig7</td>
+	<td><tt>
+<b><tt>ptrig7 : byte absolute $283;</tt></b>
+<p>
+</p>
+	</td>
+</tr>
+
+
+</table>
+
+
+<p></p>
+<br />
+
+
+
+</div>
+</tt>
+
+
+<A NAME="change">
+</tt><h2>HISTORIA</h2></tt>
+
+<p class="tekst-wiekszy">
+1.5.3
+<p class="tekst">
+- dodana możliwość zaincjowania zmiennej ABSOLUTE poprzez adres innej zmiennej<br>
+- dodana możliwość inicjowania tablic adresami innych tablic i zmiennych<br>
+- dodana obsługa wskaźnika do tablicy w rekordzie<br>
+- dodana obsługa wskaźnika do rekordu<br>
+- typ STRING odróżniany jest od typu PChar (^char)<br>
+- SYSTEM unit: Swap<br>
+- poprawione WhereX, WhereY dla kompatybilności z FPC<br>
+
+
+<p class="tekst-wiekszy">
+1.5.2
+<p class="tekst">
+- nowy typ FLOAT jako odpowiednik typu SINGLE<br>
+- SYSTEM unti: FileSize (SDX)<br>
+- SYSTEM unit: EXP:Single, LN:Single, LN:Real, EXP:Real (wysoka precyzja obliczeń)<br>
+- SYSUTILS unit: AnsiUpperCase, ExtractFileExt<br>
+- TYPES unit: Bounds, CenterPoint, EqualRect, InflateRect, IntersectRect, IsRectEmpty, NormalizeRect, OffsetRect, Point, PointsEqual, PtInRect, PtInEllipse, Rect, RectWidth, RectHeight, Size, UnionRect<br>
+- IMAGE unit: LoadMIC, LoadPIC, LoadBMP, LoadPCX, LoadGIF<br>
+- VIMAGE unit: LoadVBMP, LoadVPCX, LoadVGIF<br>
+- GRAPH, FASTGRAPH unit: SetClipRect, ClipLine, FillRect(TRect), Rectangle(TRect)<br>
+
+
+<p class="tekst-wiekszy">
+1.5.1
+<p class="tekst">
+- dodane nowe przełączniki -CODE:$address, -DATA:$address -STACK:$address, -ZPAGE:$address<br>
+- SYSTEM unit: RandomF (Result as Single), VAL (Integer, Single)<br>
+- GRAPH, FASTGRAPH unit: Bar, Bar3D, GetX, GetY, MoveRel, FloodFill<br>
+- MATH unit: RandomRange, RandomRangeF, RandG (gaussian distributed random number)<br>
+- CRT unit: SOUND (działa identycznie jak SOUND w Atari BASIC)<br>
+- VBXE unit: TVBXEMemoryStream<br>
+- dodany komunikat ostrzeżenia 'Comparison might be always true/false due to range of constant and expression'<br>
+- zasoby RCASM, CMCPLAY, MPTPLAY można teraz ładować pod ROM<br>
+- dodana możliwość oznaczenia kodowania ciągu znakowego jako internal ANTIC-a poprzez znak tyldy '~', np.:
+<pre>
+ txt0: string = 'Atari'~;      // ciąg w kodach ANTIC-a
+ txt1: string = 'Spectrum'*~;  // ciąg w inwersie w kodach ANTIC-a
+</pre>
+
+<p class="tekst-wiekszy">
+1.5.0
+<p class="tekst">
+- poprawiona i uzupełniona inicjalizacja tablic typu POINTER<br>
+- poprawiona i uzupełniona inicjalizacja zmiennych typu wyliczeniowego<br>
+- wprowadzony typ LONGWORD, DWORD, UINT32 jako odpowiednik CARDINAL<br>
+- wprowadzony typ LONGINT jako odpowiednik INTEGER<br>
+- zreorganizowane typy rzeczywiste, typ ShortReal (fixed point Q8.8), Real (fixed point Q24.8), Single (32bit IEEE-754)<br>
+- unit SYSTEM (const SINGLE): NaN, Infinity, NegInfinity<br>
+- unit SYSTEM (type SINGLE): SIN, COS, ABS, SQRT, ISQRT, ROUND, TRUNC<br>
+- unit MATH (type SINGLE): LOG2, LOG10, LOGN, IsNaN<br>
+- dla WRITE/WRITELN akceptowane i ingorowane jest formatowanie wyniku, np.: writeln(f:8:8)<br>
+
+
+<p class="tekst-wiekszy">
+1.4.8/1.4.9
+<p class="tekst">
+- zmniejszenie wskaźnika stosu programowego w przypadku wywołania funkcji bez odebrania jej wartości<br>
+- lepsza ocena możliwości ustalenia adresu stałej/zmiennej, dodany komunikat "Can't take the address of constant expressions"<br>
+
+
+<p class="tekst-wiekszy">
+1.4.7
+<p class="tekst">
+- optymalizacja dla imulBYTE, imulWORD, imulCARD, mulSHORTINT, mulSMALLINT, mulINTEGER<br>
+- dodana obsługa wskaźnika rekordu, np.:
+<pre>
+type
+	TPoint = record x,y: smallint end;
+var
+	a,b: ^TPoint;
+begin
+	a^.y := b^.x;
+	a^ := b^;
+end.
+</pre>
+<p class="tekst">
+- dodana obsługa sekcji INITIALIZATION w modułach UNIT<br>
+- dodany nowy typ EXTMEM dla pliku resource $R, pozwalajacy ładować dane do pamięci dodatkowej<br>
+- dodany nowy typ OBJECT, czyli RECORD z dodatkowymi metodami
+<pre>
+type
+	TMemoryStream = Object
+
+	Position: cardinal;
+	Size: cardinal;
+	
+	procedure Create;
+	procedure ReadBuffer(var Buffer; Count: word);
+	procedure WriteBuffer(var Buffer; Count: word);
+
+	end;
+</pre>
+<p class="tekst">
+- poprawione biblioteki CMC, MPT, RMT<br>
+
+
+<p class="tekst-wiekszy">
+1.4.6
+<p class="tekst">
+- dodana obsługa dyrektyw warunkowych $IFDEF, $IFNDEF, $ELSE, $ENDIF, $DEFINE, $UNDEF przez DMSC
+<pre>
+{$define test}
+
+const
+	{$ifdef test}
+	a=1;
+	{$else}
+	a=2;
+	{$endif}
+</pre>
+<p class="tekst">
+- dodana możliwość przekazania wartości funkcji przez EXIT(expression)<br>
+- dodana podstawowa implementacja dla typu wyliczeniowego (w pliku wynikowym nie są zapisywane nazwy etykiet)<br>
+- dodana obsługa tablic dwuwymiarowych<br>
+
+
+<p class="tekst-wiekszy">
+1.4.4/1.4.5
+<p class="tekst">
+- poprawione porównanie typów tego samego rozmiaru ale o przeciwnych znakach<br>
+- dodana możliwość użycia klauzuli USES w blokach modułów UNIT<br>
+- dodany wymóg deklaracji funkcji/procedur w sekcji INTERFACE modułów UNIT<br>
+- poprawione zauważone błędy optymalizatora<br>
+
+
+<p class="tekst-wiekszy">
+1.4.3
+<p class="tekst">
+- dodana możliwość zwrócenia wartości funkcji przez RECORD, np:
+<pre>
+  var p: TPoint;
+
+  p:=Point(x,y);
+</pre>
+<p class="tekst">
+- {$f page} FAST_MUL, procedury szybkiego mnożenia dla BYTE, SHORTINT, WORD, SMALLINT, SINGLE<br>
+- SYSTEM: ReadConfig, ReadSector, WriteSector<br>
+- SYSTEM: Point, Rect, Bounds, PointsEqual<br>
+  (https://github.com/graemeg/freepascal/blob/577d99e594f4958bad4f343fb419b8dddda2ebe6/rtl/objpas/classes/classes.inc)<br>
+- DOS: CurrentMinuteOfDay, CurrentSec100OfDay, CurrentSecondOfDay, MinuteOfDay, MinutesToTime, SecondOfDay, SecondsToTime<br>
+  (https://github.com/graemeg/freepascal/blob/master/packages/fv/src/time.pas#L309)<br>
+- MATH: Power, ArcTan2, InRange, EnsureRange, CycleToRad, DegNormalize, DegToGrad, DegToRad, DivMod, GradToDeg, GradToRad, RadToCycle, RadToDeg, RadToGrad<br>
+  (https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp)<br>
+- nowy typ LABEL<br>
+- dodana obsługa GOTO label
+
+
+
+<p class="tekst-wiekszy">
+1.4.1/1.4.2
+<p class="tekst">
+- optymalizacja kodu wynikowego 6502 generowanego dla pętli FOR<br>
+- poprawiony odczyt plików include i resource<br>
+- MISC: DetectCPUSpeed<br>
+- dodatkowy typ danych rzeczywistych SINGLE <-128..127>
+
+
+<p class="tekst-wiekszy">
+1.4.0
+<p class="tekst">
+- w parametrach formalnych procedur i funkcji dodana możliwość podania typu UNTYPED (tylko przez VAR), np.
+<pre>
+ procedure move(var x,y; count: word);
+ begin
+ end;
+
+ move(tab[100], tab[200], 50);
+</pre>
+<p class="tekst">
+- SYSTEM: poprawki dla FILLCHAR, FILLBYTE, MOVE
+<pre>
+ fillchar(pointer($bc40+40*8), 100, ord('a')); 
+ fillchar(scr[40*8], 100, ord('a'));            // teraz takie wywołanie też jest możliwe
+</pre>
+<p class="tekst">
+- funkcja INTTOREAL usunięta, zastąpiona przez wbudowaną konwersję typu REAL, np.
+<pre>
+ var f: real;
+     i: word;
+
+ f:=real(i);
+</pre>
+<p class="tekst">
+- FASTGRAPH: SetClipRect, ClipLine (Cohen-Sutherland algorithm)<br>
+- poprawki dla {$i filename}, poprawne liczenie linii kompilowanego programu
+
+
+<p class="tekst-wiekszy">
+1.3.8
+<p class="tekst">
+- SYSTEM: RANDOM(RANGE: BYTE): BYTE; RANDOM(RANGE: INTEGER): SMALLINT;<br>
+- CRT: WHEREX, WHEREY<br>
+- SYSUTILS: BEEP<br>
+- dodatkowy znak * po apostrofie '' oznacza inwers znaków, np.:
+<pre>
+ writeln('inwers'*'bez inwersu');
+</pre>
+
+
+<p class="tekst-wiekszy">
+1.3.7
+<p class="tekst">
+- dodana możliwość ładowania bloku resource {$R} pod adres tablicy
+
+
+<p class="tekst-wiekszy">
+1.3.6
+<p class="tekst">
+- dodane rozkazy GetIntVec, SetIntVec w zastępstwie rozkazu Intr<br>
+- umożliwione zwracanie wartości RESULT dla funkcji poprzez tablice<br>
+- poprawki dla MOVE (downwards, upwards)<br>
+- optymalizacja ASM dla procedur/funkcji POKE, DPOKE, PEEK, DPEEK, FILLCHAR, MOVE, INTTOREAL<br>
+- SYSTEM: ParamCount, ParamStr (SDX, BWDOS)<br>
+
+
+<p class="tekst-wiekszy">
+1.3.5
+<p class="tekst">
+- dodana możliwość odczytu adresu stałej, np.:
+<pre>
+  const tb: array [0..0] of byte = ( lo(word(@tb)) );
+</pre>
+<p class="tekst">
+- dodany odczyt wektorów DLI, VBL przez rozkaz INTR
+<pre>
+  intr(rVBL, label);
+  intr(rDLI, label);
+</pre>
+
+	
+<p class="tekst-wiekszy">
+1.3.4
+<p class="tekst">
+- dodana dodatkowa informacja o zajmowanej pamięci przez kolejne kompilowane moduły<br>
+- dodany nowy moduł VBXE (tryb OVERLAY, BLITTER)<br>
+- dodana obsługa błędów dla operacji I/O {I+} {I-} IOCHECK ON/OFF<br>
+- dwie dodatkowe poprawki Greblusa dla $I, $R z myślą o działaniu w środowisku Linuxa<br>
+
+
+<p class="tekst-wiekszy">
+1.3.3
+<p class="tekst">
+- Greblus dodał poprawki umożliwiające działanie kompilatora z Linux-em<br>
+- dodana możliwość zaincjowania wskaźnika
+<pre>
+	tmp: byte;
+	p: pointer = @tmp;
+	a: ^byte = @tmp;
+</pre>
+<p class="tekst">
+- dodana możliwość przypisania rekordu
+<pre>
+type a = record x,y: byte end;
+var k,w: a;
+
+	k:=w;
+</pre>
+<p class="tekst">
+- GRAPH: SetVideoBank, SetColorMapDimensions, SetColorMapEntry<br>
+- VBXE: GetXDL, SetXDL, RunBlit, ClrVideoBank<br>
+
+
+<p class="tekst-wiekszy">
+1.3.2
+<p class="tekst">
+- DOS: GetTime, SetTime<br>
+- MATH: Ceil<br>
+- SYSUTILS: GetTickCount<br>
+- FindFirst ... obsługa Attributes<br>
+- wbudowanie funkcji w kompilator: INT, FRAC, TRUNC, ROUND, ODD<br>
+
+<p class="tekst-wiekszy">
+1.3.1
+<p class="tekst">
+- dodana obsługa rekordów RECORD<br>
+- {$i filename}<br>
+- {$r filename}, Resource Type: RCDATA, DOSFILE, RELOC, RMT, MPT, CMC<br>
+- dodany przełącznik -o Optimize code<br>
+- możliwość wymuszenia typu dla CONST<br>
+<pre>
+  const
+      a: word = 5;     // WORD
+      b = 5;           // BYTE
+</pre>
+<p class="tekst">
+- dodana obsługa modyfikatorów INTERRUPT, FORWARD, REGISTER dla procedur i funkcji<br>
+- dodana obsługa mapy kolorów (40x30x8x8) VBXE (moduł GRAPH, CRT), SetColorMap, SetColorCell, SetVideoBank<br>
+- SYSUTILS: TSearchRec, FindFirst, FindNext, FindClose<br>
+- GRAPH, FASTGRAPH: FillRect, FillEllipse<br>
+- SYSTEM: ODD, INT, LOW, HIGH, SIZEOF, INTR (INTERRUPT_NUMBER), BinStr, OctStr, HexStr, Pause, Sound, NoSound, Concat<br>
+- RMT: RMTINIT, RMTPLAY, RMTSTOP<br>
+- MPT: MPTINIT, MPTPLAY, MPTSTOP<br>
+- CMC: CMCINIT, CMCPLAY, CMCSTOP<br>
+
+
+
+</html>
