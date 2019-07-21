@@ -58,6 +58,7 @@ lmargin	=	$52
 rmargin	=	$53
 rowcrs	=	$54	; wiersz  kursora
 colcrs	=	$55	; (2) Kolumna kursora
+savmsc	=	$58	; (2) Adres pamiêci obrazu
 
 keydef	=	$79	; (2) tablica konwersji kod?w klawiatury na ATASCII
 

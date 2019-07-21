@@ -1,9 +1,24 @@
 	opt l-
 
-/* ----------------------------------------------------------------------- */
+/* -----------------------------------------------------------------------
 /*                          	 CPU 6502
-/*			        21.01.2018
-/* ----------------------------------------------------------------------- */
+/*			        19.04.2018
+/* -----------------------------------------------------------------------
+/* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
+/*
+/* -----------------------------------------------------------------------
+
+@AllocMem
+@ClrScr
+@CmdLine
+@COMMAND
+@GRAPHICS
+@GetLine
+@GetKey
+
+*/
+
+// IORESULT = 106	Invalid numeric format
 
 ; wiersz obrazu dla mapy kolorow VBXE = 256 bajtow (40*4 + ...)
 ; szerokosc linii obrazu dla OVERLAY = 320
@@ -134,50 +149,50 @@ numread	.word		; pointer to variable, length of loaded data
 	lda %%1
 	clc
 	adc %%2
-	sta STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	lda %%3
 	adc %%4
-	sta STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH,x
 
 	lda %%5
 	adc %%6
-	sta STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
 
 	lda %%7
 	adc %%8
-	sta STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH*3,x
 .endm
 
 .macro	m@subEAX_ECX
 	lda %%1
 	sec
 	sbc %%2
-	sta STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	lda %%3
 	sbc %%4
-	sta STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH,x
 
 	lda %%5
 	sbc %%6
-	sta STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
 
 	lda %%7
 	sbc %%8
-	sta STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH*3,x
 .endm
 
 .macro	m@index2 (Ofset)
-	asl STACKORIGIN-%%Ofset,x
-	rol STACKORIGIN-%%Ofset+STACKWIDTH,x
+	asl :STACKORIGIN-%%Ofset,x
+	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
 .endm
 
 .macro	m@index4 (Ofset)
-	asl STACKORIGIN-%%Ofset,x
-	rol STACKORIGIN-%%Ofset+STACKWIDTH,x
-	asl STACKORIGIN-%%Ofset,x
-	rol STACKORIGIN-%%Ofset+STACKWIDTH,x
+	asl :STACKORIGIN-%%Ofset,x
+	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
+	asl :STACKORIGIN-%%Ofset,x
+	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
 .endm
 
 ; store value in fx register (via accumulator)
@@ -215,120 +230,120 @@ fxla    .macro
 
 
 .proc	hiBYTE
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	:4 lsr @
-	sta STACKORIGIN,x
+	sta :STACKORIGIN,x
 	rts
 .endp
 
 .proc	hiWORD
-	lda STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN,x
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN,x
 	rts
 .endp
 
 .proc	hiCARD
-	lda STACKORIGIN+STACKWIDTH*3,x
-	sta STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH,x
 
-	lda STACKORIGIN+STACKWIDTH*2,x
-	sta STACKORIGIN,x
+	lda :STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN,x
 	rts
 .endp
 
 
 .proc	movaBX_EAX		; mov [BX], EAX
-	:MAXSIZE mva eax+# STACKORIGIN-1+#*STACKWIDTH,x
+	:MAXSIZE mva eax+# :STACKORIGIN-1+#*STACKWIDTH,x
 	rts
 .endp
 
 /*
 .proc	@pushBYTE
-	adc STACKORIGIN+STACKWIDTH,x
+	adc :STACKORIGIN+STACKWIDTH,x
 	sta bp+1
 
-	mva (bp),y STACKORIGIN,x
+	mva (bp),y :STACKORIGIN,x
 
 ;	lda #$00
-;	sta STACKORIGIN+STACKWIDTH,x
-;	sta STACKORIGIN+STACKWIDTH*2,x
-;	sta STACKORIGIN+STACKWIDTH*3,x
+;	sta :STACKORIGIN+STACKWIDTH,x
+;	sta :STACKORIGIN+STACKWIDTH*2,x
+;	sta :STACKORIGIN+STACKWIDTH*3,x
 
 	rts
 .endp
 
 
 .proc	@pullWORD (.word ya) .reg
-	add STACKORIGIN-1,x
+	add :STACKORIGIN-1,x
 	sta bp2
 	tya
-	adc STACKORIGIN-1+STACKWIDTH,x
+	adc :STACKORIGIN-1+STACKWIDTH,x
 	sta bp2+1
 
 	ldy #$00
 
-	mva STACKORIGIN,x (bp2),y
+	mva :STACKORIGIN,x (bp2),y
 	iny
-	mva STACKORIGIN+STACKWIDTH,x (bp2),y
+	mva :STACKORIGIN+STACKWIDTH,x (bp2),y
 
 	rts
 .endp
 
 
 .proc	@pullCARD (.word ya) .reg
-	add STACKORIGIN-1,x
+	add :STACKORIGIN-1,x
 	sta bp2
 	tya
-	adc STACKORIGIN-1+STACKWIDTH,x
+	adc :STACKORIGIN-1+STACKWIDTH,x
 	sta bp2+1
 
 	ldy #$00
 
-	mva STACKORIGIN,x (bp2),y
+	mva :STACKORIGIN,x (bp2),y
 	iny
-	mva STACKORIGIN+STACKWIDTH,x (bp2),y
+	mva :STACKORIGIN+STACKWIDTH,x (bp2),y
 	iny
-	mva STACKORIGIN+STACKWIDTH*2,x (bp2),y
+	mva :STACKORIGIN+STACKWIDTH*2,x (bp2),y
 	iny
-	mva STACKORIGIN+STACKWIDTH*3,x (bp2),y
+	mva :STACKORIGIN+STACKWIDTH*3,x (bp2),y
 
 	rts
 .endp
 
 
 .proc	@pushWORD (.word ya) .reg
-	add STACKORIGIN,x
+	add :STACKORIGIN,x
 	sta bp2
 	tya
-	adc STACKORIGIN+STACKWIDTH,x
+	adc :STACKORIGIN+STACKWIDTH,x
 	sta bp2+1
 
 	ldy #$00
 
-	mva (bp2),y STACKORIGIN,x
+	mva (bp2),y :STACKORIGIN,x
 	iny
-	mva (bp2),y STACKORIGIN+STACKWIDTH,x
+	mva (bp2),y :STACKORIGIN+STACKWIDTH,x
 
 	rts
 .endp
 
 
 .proc	@pushCARD (.word ya) .reg
-	add STACKORIGIN,x
+	add :STACKORIGIN,x
 	sta bp2
 	tya
-	adc STACKORIGIN+STACKWIDTH,x
+	adc :STACKORIGIN+STACKWIDTH,x
 	sta bp2+1
 
 	ldy #$00
 
-	mva (bp2),y STACKORIGIN,x
+	mva (bp2),y :STACKORIGIN,x
 	iny
-	mva (bp2),y STACKORIGIN+STACKWIDTH,x
+	mva (bp2),y :STACKORIGIN+STACKWIDTH,x
 	iny
-	mva (bp2),y STACKORIGIN+STACKWIDTH*2,x
+	mva (bp2),y :STACKORIGIN+STACKWIDTH*2,x
 	iny
-	mva (bp2),y STACKORIGIN+STACKWIDTH*3,x
+	mva (bp2),y :STACKORIGIN+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -343,19 +358,19 @@ fxla    .macro
 ;	jmp CARD
 
 BYTE	lda #0
-	sta STACKORIGIN-1+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
 WORD	lda #0
-	sta STACKORIGIN-1+STACKWIDTH*2,x
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 CARD	clc
-	ldy STACKORIGIN,x	; cl
+	ldy :STACKORIGIN,x	; cl
 	beq stop
-@	asl STACKORIGIN-1,x	; eax
-	rol STACKORIGIN-1+STACKWIDTH,x
-	rol STACKORIGIN-1+STACKWIDTH*2,x
-	rol STACKORIGIN-1+STACKWIDTH*3,x
+@	asl :STACKORIGIN-1,x	; eax
+	rol :STACKORIGIN-1+STACKWIDTH,x
+	rol :STACKORIGIN-1+STACKWIDTH*2,x
+	rol :STACKORIGIN-1+STACKWIDTH*3,x
 	dey
 	bne @-
 
@@ -368,16 +383,16 @@ stop	rts
 ;SHORT	jsr @expandToCARD1.SHORT
 ;	jmp shrEAX_CL
 
-BYTE	ldy STACKORIGIN,x	; cl
+BYTE	ldy :STACKORIGIN,x	; cl
 	beq stop
-@	lsr STACKORIGIN-1,x
+@	lsr :STACKORIGIN-1,x
 	dey
 	bne @-
 
 stop	lda #0
-	sta STACKORIGIN-1+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH*2,x
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -387,28 +402,28 @@ stop	lda #0
 ;SMALL	jsr @expandToCARD1.SMALL
 ;	jmp shrEAX_CL
 
-WORD	ldy STACKORIGIN,x	; cl
+WORD	ldy :STACKORIGIN,x	; cl
 	beq stop
-@	lsr STACKORIGIN-1+STACKWIDTH,x
-	ror STACKORIGIN-1,x
+@	lsr :STACKORIGIN-1+STACKWIDTH,x
+	ror :STACKORIGIN-1,x
 	dey
 	bne @-
 
 stop	lda #0
-	sta STACKORIGIN-1+STACKWIDTH*2,x
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
 
 .proc	shrEAX_CL
 
-	ldy STACKORIGIN,x	; cl
+	ldy :STACKORIGIN,x	; cl
 	beq stop
-@	lsr STACKORIGIN-1+STACKWIDTH*3,x
-	ror STACKORIGIN-1+STACKWIDTH*2,x
-	ror STACKORIGIN-1+STACKWIDTH,x
-	ror STACKORIGIN-1,x
+@	lsr :STACKORIGIN-1+STACKWIDTH*3,x
+	ror :STACKORIGIN-1+STACKWIDTH*2,x
+	ror :STACKORIGIN-1+STACKWIDTH,x
+	ror :STACKORIGIN-1,x
 	dey
 	bne @-
 
@@ -423,16 +438,16 @@ stop	rts
 
 	ldy #0
 
-	sty STACKORIGIN-1+STACKWIDTH*2,x
-	sty STACKORIGIN-1+STACKWIDTH*3,x
+	sty :STACKORIGIN-1+STACKWIDTH*2,x
+	sty :STACKORIGIN-1+STACKWIDTH*3,x
 
-	lda STACKORIGIN-1,x
-	add STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	add :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 	scc
 	iny
 
-	sty STACKORIGIN-1+STACKWIDTH,x
+	sty :STACKORIGIN-1+STACKWIDTH,x
 
 	rts
 .endp
@@ -441,19 +456,19 @@ stop	rts
 
 	ldy #0
 
-	sty STACKORIGIN-1+STACKWIDTH*3,x
+	sty :STACKORIGIN-1+STACKWIDTH*3,x
 
-	lda STACKORIGIN-1,x
-	add STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	add :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 
-	lda STACKORIGIN-1+STACKWIDTH,x
-	adc STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
+	adc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 	scc
 	iny
 
-	sty STACKORIGIN-1+STACKWIDTH*2,x
+	sty :STACKORIGIN-1+STACKWIDTH*2,x
 
 	rts
 .endp
@@ -468,21 +483,21 @@ SHORT	jsr @expandToCARD.SHORT
 SMALL	jsr @expandToCARD.SMALL
 	jsr @expandToCARD1.SMALL
 */
-CARD	lda STACKORIGIN-1,x
-	add STACKORIGIN,x
-	sta STACKORIGIN-1,x
+CARD	lda :STACKORIGIN-1,x
+	add :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 
-	lda STACKORIGIN-1+STACKWIDTH,x
-	adc STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
+	adc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
-	lda STACKORIGIN-1+STACKWIDTH*2,x
-	adc STACKORIGIN+STACKWIDTH*2,x
-	sta STACKORIGIN-1+STACKWIDTH*2,x
+	lda :STACKORIGIN-1+STACKWIDTH*2,x
+	adc :STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
 
-	lda STACKORIGIN-1+STACKWIDTH*3,x
-	adc STACKORIGIN+STACKWIDTH*3,x
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	lda :STACKORIGIN-1+STACKWIDTH*3,x
+	adc :STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -492,15 +507,15 @@ CARD	lda STACKORIGIN-1,x
 
 	ldy #0
 
-	lda STACKORIGIN-1,x
-	sub STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	sub :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 	scs
 	dey
 
-	sty STACKORIGIN-1+STACKWIDTH,x
-	sty STACKORIGIN-1+STACKWIDTH*2,x
-	sty STACKORIGIN-1+STACKWIDTH*3,x
+	sty :STACKORIGIN-1+STACKWIDTH,x
+	sty :STACKORIGIN-1+STACKWIDTH*2,x
+	sty :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -509,39 +524,39 @@ CARD	lda STACKORIGIN-1,x
 
 	ldy #0
 
-	lda STACKORIGIN-1,x		; ax
-	sub STACKORIGIN,x		; cx
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x		; ax
+	sub :STACKORIGIN,x		; cx
+	sta :STACKORIGIN-1,x
 
-	lda STACKORIGIN-1+STACKWIDTH,x
-	sbc STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
+	sbc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 	scs
 	dey
 
-	sty STACKORIGIN-1+STACKWIDTH*2,x
-	sty STACKORIGIN-1+STACKWIDTH*3,x
+	sty :STACKORIGIN-1+STACKWIDTH*2,x
+	sty :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
 
 .proc	subEAX_ECX
 
-	lda STACKORIGIN-1,x
-	sub STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	sub :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 
-	lda STACKORIGIN-1+STACKWIDTH,x
-	sbc STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
+	sbc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
-	lda STACKORIGIN-1+STACKWIDTH*2,x
-	sbc STACKORIGIN+STACKWIDTH*2,x
-	sta STACKORIGIN-1+STACKWIDTH*2,x
+	lda :STACKORIGIN-1+STACKWIDTH*2,x
+	sbc :STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
 
-	lda STACKORIGIN-1+STACKWIDTH*3,x
-	sbc STACKORIGIN+STACKWIDTH*3,x
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	lda :STACKORIGIN-1+STACKWIDTH*3,x
+	sbc :STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -549,20 +564,20 @@ CARD	lda STACKORIGIN-1,x
 
 .proc	@expandSHORT2SMALL
 	ldy #$00
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	spl
 	dey
-	sty STACKORIGIN+STACKWIDTH,x
+	sty :STACKORIGIN+STACKWIDTH,x
 
 	rts
 .endp
 
 .proc	@expandSHORT2SMALL1
 	ldy #$00
-	lda STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
 	spl
 	dey
-	sty STACKORIGIN-1+STACKWIDTH,x
+	sty :STACKORIGIN-1+STACKWIDTH,x
 
 	rts
 .endp
@@ -570,7 +585,7 @@ CARD	lda STACKORIGIN-1,x
 
 .proc	@expandToCARD
 
-SMALL	lda STACKORIGIN+STACKWIDTH,x
+SMALL	lda :STACKORIGIN+STACKWIDTH,x
 	bpl WORD
 
 	lda #$ff
@@ -579,7 +594,7 @@ SMALL	lda STACKORIGIN+STACKWIDTH,x
 WORD	lda #$00
 	beq _wo
 
-SHORT	lda STACKORIGIN,x
+SHORT	lda :STACKORIGIN,x
 	bpl BYTE
 
 	lda #$ff
@@ -587,16 +602,16 @@ SHORT	lda STACKORIGIN,x
 
 BYTE	lda #$00
 
-_by	sta STACKORIGIN+STACKWIDTH,x
-_wo	sta STACKORIGIN+STACKWIDTH*2,x
-_lo	sta STACKORIGIN+STACKWIDTH*3,x
+_by	sta :STACKORIGIN+STACKWIDTH,x
+_wo	sta :STACKORIGIN+STACKWIDTH*2,x
+_lo	sta :STACKORIGIN+STACKWIDTH*3,x
 	rts
 .endp
 
 
 .proc	@expandToCARD1
 
-SMALL	lda STACKORIGIN-1+STACKWIDTH,x
+SMALL	lda :STACKORIGIN-1+STACKWIDTH,x
 	bpl WORD
 
 	lda #$ff
@@ -605,7 +620,7 @@ SMALL	lda STACKORIGIN-1+STACKWIDTH,x
 WORD	lda #$00
 	beq _wo
 
-SHORT	lda STACKORIGIN-1,x
+SHORT	lda :STACKORIGIN-1,x
 	bpl BYTE
 
 	lda #$ff
@@ -613,9 +628,9 @@ SHORT	lda STACKORIGIN-1,x
 
 BYTE	lda #$00
 
-_by	sta STACKORIGIN-1+STACKWIDTH,x
-_wo	sta STACKORIGIN-1+STACKWIDTH*2,x
-_lo	sta STACKORIGIN-1+STACKWIDTH*3,x
+_by	sta :STACKORIGIN-1+STACKWIDTH,x
+_wo	sta :STACKORIGIN-1+STACKWIDTH*2,x
+_lo	sta :STACKORIGIN-1+STACKWIDTH*3,x
 	rts
 .endp
 
@@ -626,11 +641,11 @@ _lo	sta STACKORIGIN-1+STACKWIDTH*3,x
 
 	ldy #1
 	lda (ztmp),y
-	cmp STACKORIGIN+1+STACKWIDTH,x
+	cmp :STACKORIGIN+1+STACKWIDTH,x
 	bne stop
 	dey
 	lda (ztmp),y
-	cmp STACKORIGIN+1,x
+	cmp :STACKORIGIN+1,x
 stop	rts
 .endp
 
@@ -641,19 +656,19 @@ stop	rts
 
 	ldy #3
 	lda (ztmp),y
-	cmp STACKORIGIN+1+STACKWIDTH*3,x
+	cmp :STACKORIGIN+1+STACKWIDTH*3,x
 	bne stop
 	dey
 	lda (ztmp),y
-	cmp STACKORIGIN+1+STACKWIDTH*2,x
+	cmp :STACKORIGIN+1+STACKWIDTH*2,x
 	bne stop
 	dey
 	lda (ztmp),y
-	cmp STACKORIGIN+1+STACKWIDTH,x
+	cmp :STACKORIGIN+1+STACKWIDTH,x
 	bne stop
 	dey
 	lda (ztmp),y
-	cmp STACKORIGIN+1,x
+	cmp :STACKORIGIN+1,x
 
 stop	rts
 .endp
@@ -666,7 +681,7 @@ stop	rts
 	ldy	#0
 	lda	(ztmp),y
 	sec
-	sbc	STACKORIGIN+1,x
+	sbc	:STACKORIGIN+1,x
 	bne	@cmpFor_INT.L4
 
 	jmp	@cmpFor_INT.L1
@@ -680,12 +695,12 @@ stop	rts
 	ldy	#1
 	lda	(ztmp),y
 	sec
-	sbc	STACKORIGIN+1+STACKWIDTH,x
+	sbc	:STACKORIGIN+1+STACKWIDTH,x
 	bne	@cmpFor_INT.L4
 
 	dey
 	lda	(ztmp),y
-	cmp	STACKORIGIN+1,x
+	cmp	:STACKORIGIN+1,x
 
 	jmp	@cmpFor_INT.L1
 .endp
@@ -698,22 +713,22 @@ stop	rts
 	ldy	#3
 	lda	(ztmp),y
 	sec
-	sbc	STACKORIGIN+1+STACKWIDTH*3,x
+	sbc	:STACKORIGIN+1+STACKWIDTH*3,x
 	bne	L4
 
 	dey
 	lda	(ztmp),y
-	cmp	STACKORIGIN+1+STACKWIDTH*2,x
+	cmp	:STACKORIGIN+1+STACKWIDTH*2,x
 	bne	L1
 
 	dey
 	lda	(ztmp),y
-	cmp	STACKORIGIN+1+STACKWIDTH,x
+	cmp	:STACKORIGIN+1+STACKWIDTH,x
 	bne	L1
 
 	dey
 	lda	(ztmp),y
-	cmp	STACKORIGIN+1,x
+	cmp	:STACKORIGIN+1,x
 
 L1	beq	L2
 	bcs	L3
@@ -735,9 +750,9 @@ L5	rts
 ; originally by Ullrich von Bassewitz
 
 .proc	cmpSHORTINT
-	lda	STACKORIGIN-1,x
+	lda	:STACKORIGIN-1,x
 	clv:sec
-	sbc	STACKORIGIN,x
+	sbc	:STACKORIGIN,x
 	bne	cmpINT.L4
 
 	jmp	cmpINT.L1
@@ -745,34 +760,34 @@ L5	rts
 
 
 .proc	cmpSMALLINT
-	lda	STACKORIGIN-1+STACKWIDTH,x
+	lda	:STACKORIGIN-1+STACKWIDTH,x
 	clv:sec
-	sbc	STACKORIGIN+STACKWIDTH,x
+	sbc	:STACKORIGIN+STACKWIDTH,x
 	bne	cmpINT.L4
 
-	lda	STACKORIGIN-1,x
-	cmp	STACKORIGIN,x
+	lda	:STACKORIGIN-1,x
+	cmp	:STACKORIGIN,x
 
 	jmp	cmpINT.L1
 .endp
 
 
 .proc	cmpINT
-	lda	STACKORIGIN-1+STACKWIDTH*3,x
+	lda	:STACKORIGIN-1+STACKWIDTH*3,x
 	clv:sec
-	sbc	STACKORIGIN+STACKWIDTH*3,x
+	sbc	:STACKORIGIN+STACKWIDTH*3,x
 	bne	L4
 
-	lda	STACKORIGIN-1+STACKWIDTH*2,x
-	cmp	STACKORIGIN+STACKWIDTH*2,x
+	lda	:STACKORIGIN-1+STACKWIDTH*2,x
+	cmp	:STACKORIGIN+STACKWIDTH*2,x
 	bne	L1
 
-	lda	STACKORIGIN-1+STACKWIDTH,x
-	cmp	STACKORIGIN+STACKWIDTH,x
+	lda	:STACKORIGIN-1+STACKWIDTH,x
+	cmp	:STACKORIGIN+STACKWIDTH,x
 	bne	L1
 
-	lda	STACKORIGIN-1,x
-	cmp	STACKORIGIN,x
+	lda	:STACKORIGIN-1,x
+	cmp	:STACKORIGIN,x
 
 L1	beq	L2
 	bcs	L3
@@ -791,18 +806,18 @@ L5	rts
 
 
 .proc	cmpEAX_ECX
-	lda STACKORIGIN-1+STACKWIDTH*3,x
-	cmp STACKORIGIN+STACKWIDTH*3,x
+	lda :STACKORIGIN-1+STACKWIDTH*3,x
+	cmp :STACKORIGIN+STACKWIDTH*3,x
 	bne _done
-	lda STACKORIGIN-1+STACKWIDTH*2,x
-	cmp STACKORIGIN+STACKWIDTH*2,x
+	lda :STACKORIGIN-1+STACKWIDTH*2,x
+	cmp :STACKORIGIN+STACKWIDTH*2,x
 	bne _done
 AX_CX
-	lda STACKORIGIN-1+STACKWIDTH,x
-	cmp STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
+	cmp :STACKORIGIN+STACKWIDTH,x
 	bne _done
-	lda STACKORIGIN-1,x
-	cmp STACKORIGIN,x
+	lda :STACKORIGIN-1,x
+	cmp :STACKORIGIN,x
 
 _done	rts
 .endp
@@ -810,12 +825,12 @@ _done	rts
 
 .proc	cmpSTRING2CHAR
 
-	lda STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
 	sta ztmp8
-	lda STACKORIGIN-1+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
 	sta ztmp8+1
 
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	sta ztmp10
 
 	ldy #0
@@ -845,12 +860,12 @@ fail	lda #$ff
 
 .proc	cmpCHAR2STRING
 
-	lda STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
 	sta ztmp8
 
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	sta ztmp10
-	lda STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta ztmp10+1
 
 	ldy #0
@@ -879,14 +894,14 @@ fail	lda #$ff
 
 .proc	cmpSTRING
 
-	lda STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
 	sta ztmp8
-	lda STACKORIGIN-1+STACKWIDTH,x
+	lda :STACKORIGIN-1+STACKWIDTH,x
 	sta ztmp8+1
 
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	sta ztmp10
-	lda STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta ztmp10+1
 
 	ldy #0
@@ -930,9 +945,9 @@ fail	lda #$ff
 .proc	notaBX
 
 	.rept MAXSIZE
-	lda STACKORIGIN+#*STACKWIDTH,x
+	lda :STACKORIGIN+#*STACKWIDTH,x
 	eor #$ff
-	sta STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -940,14 +955,14 @@ fail	lda #$ff
 
 
 .proc	notBOOLEAN
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	bne _0
 
 	lda #true
 	sne
 
 _0	lda #false
-	sta STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	rts
 .endp
@@ -955,60 +970,60 @@ _0	lda #false
 
 .proc	negBYTE
 	lda #$00
-	sub STACKORIGIN,x
-	sta STACKORIGIN,x
+	sub :STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH*3,x
 
 	rts
 .endp
 
 .proc	negWORD
 	lda #$00
-	sub STACKORIGIN,x
-	sta STACKORIGIN,x
+	sub :STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	lda #$00
-	sbc STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN+STACKWIDTH,x
-
-	lda #$00
-	sbc #$00
-	sta STACKORIGIN+STACKWIDTH*2,x
+	sbc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
+
+	lda #$00
+	sbc #$00
+	sta :STACKORIGIN+STACKWIDTH*3,x
 
 	rts
 .endp
 
 .proc	negCARD
 	lda #$00
-	sub STACKORIGIN,x
-	sta STACKORIGIN,x
+	sub :STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	lda #$00
-	sbc STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN+STACKWIDTH,x
+	sbc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH,x
 
 	lda #$00
-	sbc STACKORIGIN+STACKWIDTH*2,x
-	sta STACKORIGIN+STACKWIDTH*2,x
+	sbc :STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
 
 	lda #$00
-	sbc STACKORIGIN+STACKWIDTH*3,x
-	sta STACKORIGIN+STACKWIDTH*3,x
+	sbc :STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -1016,60 +1031,60 @@ _0	lda #false
 
 .proc	negBYTE1
 	lda #$00
-	sub STACKORIGIN-1,x
-	sta STACKORIGIN-1,x
+	sub :STACKORIGIN-1,x
+	sta :STACKORIGIN-1,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN-1+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN-1+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
 
 .proc	negWORD1
 	lda #$00
-	sub STACKORIGIN-1,x
-	sta STACKORIGIN-1,x
+	sub :STACKORIGIN-1,x
+	sta :STACKORIGIN-1,x
 
 	lda #$00
-	sbc STACKORIGIN-1+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH,x
-
-	lda #$00
-	sbc #$00
-	sta STACKORIGIN-1+STACKWIDTH*2,x
+	sbc :STACKORIGIN-1+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
 	lda #$00
 	sbc #$00
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
+
+	lda #$00
+	sbc #$00
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
 
 .proc	negCARD1
 	lda #$00
-	sub STACKORIGIN-1,x
-	sta STACKORIGIN-1,x
+	sub :STACKORIGIN-1,x
+	sta :STACKORIGIN-1,x
 
 	lda #$00
-	sbc STACKORIGIN-1+STACKWIDTH,x
-	sta STACKORIGIN-1+STACKWIDTH,x
+	sbc :STACKORIGIN-1+STACKWIDTH,x
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
 	lda #$00
-	sbc STACKORIGIN-1+STACKWIDTH*2,x
-	sta STACKORIGIN-1+STACKWIDTH*2,x
+	sbc :STACKORIGIN-1+STACKWIDTH*2,x
+	sta :STACKORIGIN-1+STACKWIDTH*2,x
 
 	lda #$00
-	sbc STACKORIGIN-1+STACKWIDTH*3,x
-	sta STACKORIGIN-1+STACKWIDTH*3,x
+	sbc :STACKORIGIN-1+STACKWIDTH*3,x
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -1077,9 +1092,9 @@ _0	lda #false
 
 .proc	andAL_CL
 
-	lda STACKORIGIN-1,x
-	and STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	and :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 
 	rts
 .endp
@@ -1087,9 +1102,9 @@ _0	lda #false
 .proc	andAX_CX
 
 	.rept 2
-	lda STACKORIGIN-1+#*STACKWIDTH,x
-	and STACKORIGIN+#*STACKWIDTH,x
-	sta STACKORIGIN-1+#*STACKWIDTH,x
+	lda :STACKORIGIN-1+#*STACKWIDTH,x
+	and :STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN-1+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -1098,9 +1113,9 @@ _0	lda #false
 .proc	andEAX_ECX
 
 	.rept MAXSIZE
-	lda STACKORIGIN-1+#*STACKWIDTH,x
-	and STACKORIGIN+#*STACKWIDTH,x
-	sta STACKORIGIN-1+#*STACKWIDTH,x
+	lda :STACKORIGIN-1+#*STACKWIDTH,x
+	and :STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN-1+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -1109,9 +1124,9 @@ _0	lda #false
 
 .proc	orAL_CL
 
-	lda STACKORIGIN-1,x
-	ora STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	ora :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 
 	rts
 .endp
@@ -1119,9 +1134,9 @@ _0	lda #false
 .proc	orAX_CX
 
 	.rept 2
-	lda STACKORIGIN-1+#*STACKWIDTH,x
-	ora STACKORIGIN+#*STACKWIDTH,x
-	sta STACKORIGIN-1+#*STACKWIDTH,x
+	lda :STACKORIGIN-1+#*STACKWIDTH,x
+	ora :STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN-1+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -1130,9 +1145,9 @@ _0	lda #false
 .proc	orEAX_ECX
 
 	.rept MAXSIZE
-	lda STACKORIGIN-1+#*STACKWIDTH,x
-	ora STACKORIGIN+#*STACKWIDTH,x
-	sta STACKORIGIN-1+#*STACKWIDTH,x
+	lda :STACKORIGIN-1+#*STACKWIDTH,x
+	ora :STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN-1+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -1141,9 +1156,9 @@ _0	lda #false
 
 .proc	xorAL_CL
 
-	lda STACKORIGIN-1,x
-	eor STACKORIGIN,x
-	sta STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
+	eor :STACKORIGIN,x
+	sta :STACKORIGIN-1,x
 
 	rts
 .endp
@@ -1151,9 +1166,9 @@ _0	lda #false
 .proc	xorAX_CX
 
 	.rept 2
-	lda STACKORIGIN-1+#*STACKWIDTH,x
-	eor STACKORIGIN+#*STACKWIDTH,x
-	sta STACKORIGIN-1+#*STACKWIDTH,x
+	lda :STACKORIGIN-1+#*STACKWIDTH,x
+	eor :STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN-1+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -1162,9 +1177,9 @@ _0	lda #false
 .proc	xorEAX_ECX
 
 	.rept MAXSIZE
-	lda STACKORIGIN-1+#*STACKWIDTH,x
-	eor STACKORIGIN+#*STACKWIDTH,x
-	sta STACKORIGIN-1+#*STACKWIDTH,x
+	lda :STACKORIGIN-1+#*STACKWIDTH,x
+	eor :STACKORIGIN+#*STACKWIDTH,x
+	sta :STACKORIGIN-1+#*STACKWIDTH,x
 	.endr
 
 	rts
@@ -1174,8 +1189,8 @@ _0	lda #false
 /*
 .proc	iniEAX_ECX_BYTE
 
-	mva STACKORIGIN,x ecx
-	mva STACKORIGIN-1,x eax
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN-1,x eax
 
 	rts
 .endp
@@ -1184,11 +1199,11 @@ _0	lda #false
 
 .proc	iniEAX_ECX_WORD
 
-	mva STACKORIGIN,x ecx
-	mva STACKORIGIN+STACKWIDTH,x ecx+1
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN+STACKWIDTH,x ecx+1
 
-	mva STACKORIGIN-1,x eax
-	mva STACKORIGIN-1+STACKWIDTH,x eax+1
+	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
 
 	mva #$00 ecx+2
 	sta ecx+3
@@ -1201,24 +1216,24 @@ _0	lda #false
 
 
 .proc	iniEAX_ECX_CARD
-	mva STACKORIGIN,x ecx
-	mva STACKORIGIN+STACKWIDTH,x ecx+1
-	mva STACKORIGIN+STACKWIDTH*2,x ecx+2
-	mva STACKORIGIN+STACKWIDTH*3,x ecx+3
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN+STACKWIDTH,x ecx+1
+	mva :STACKORIGIN+STACKWIDTH*2,x ecx+2
+	mva :STACKORIGIN+STACKWIDTH*3,x ecx+3
 
-	mva STACKORIGIN-1,x eax
-	mva STACKORIGIN-1+STACKWIDTH,x eax+1
-	mva STACKORIGIN-1+STACKWIDTH*2,x eax+2
-	mva STACKORIGIN-1+STACKWIDTH*3,x eax+3
+	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+	mva :STACKORIGIN-1+STACKWIDTH*2,x eax+2
+	mva :STACKORIGIN-1+STACKWIDTH*3,x eax+3
 
 	rts
 .endp
 
 .proc	movZTMP_aBX
-	mva ZTMP8 STACKORIGIN-1,x
-	mva ZTMP9 STACKORIGIN-1+STACKWIDTH,x
-	mva ZTMP10 STACKORIGIN-1+STACKWIDTH*2,x
-	mva ZTMP11 STACKORIGIN-1+STACKWIDTH*3,x
+	mva ZTMP8 :STACKORIGIN-1,x
+	mva ZTMP9 :STACKORIGIN-1+STACKWIDTH,x
+	mva ZTMP10 :STACKORIGIN-1+STACKWIDTH*2,x
+	mva ZTMP11 :STACKORIGIN-1+STACKWIDTH*3,x
 
 	rts
 .endp
@@ -1233,7 +1248,7 @@ _0	lda #false
 
 	icl '6502\cpu6502_byte.asm'		; mul / div -> BYTE
 	icl '6502\cpu6502_word.asm'		; mul / div -> WORD
-	icl '6502\cpu6502_card.asm'		; mul / div -> CARDINAL
+	icl '6502\cpu6502_cardinal.asm'		; mul / div -> CARDINAL
 
 	icl '6502\cpu6502_shortreal.asm'	; mul / div -> SHORTREAL	Q8.8
 	icl '6502\cpu6502_real.asm'		; mul / div -> REAL		Q24.8
@@ -1241,7 +1256,7 @@ _0	lda #false
 
 
 .proc	@printCHAR
-	ldy STACKORIGIN,x
+	ldy :STACKORIGIN,x
 	jmp @print
 .endp
 
@@ -1264,8 +1279,12 @@ _0	lda #false
 
 
 .proc	@printPCHAR (.word ya) .reg
-	sta addr
-	sty addr+1
+
+	cpy #0
+	beq empty
+
+	sta ztmp
+	sty ztmp+1
 
 	stx @sp
 
@@ -1273,8 +1292,7 @@ _0	lda #false
 	sta loop+1
 
 loop	ldy #0
-	lda $ffff,y
-addr	equ *-2
+	lda (ztmp),y
 	beq stop
 
 	inc loop+1
@@ -1286,11 +1304,16 @@ addr	equ *-2
 
 stop	ldx #0
 @sp	equ *-1
-	rts
+
+empty	rts
 .endp
 
 
 .proc	@printSTRING (.word ya) .reg
+
+	cpy #0
+	beq empty
+
 	sta ztmp
 	sty ztmp+1
 
@@ -1319,12 +1342,13 @@ ln	equ *-1
 
 stop	ldx #0
 @sp	equ *-1
-	rts
+
+empty	rts
 .endp
 
 
 .proc	@printBOOLEAN
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	beq _0
 
 _1	lda <_true
@@ -1341,7 +1365,7 @@ _false	dta 5,c'FALSE'
 
 
 .proc	mov_BYTE_DX
-	mva STACKORIGIN,x dx
+	mva :STACKORIGIN,x dx
 	mva #$00 dx+1
 	sta dx+2
 	sta dx+3
@@ -1350,8 +1374,8 @@ _false	dta 5,c'FALSE'
 .endp
 
 .proc	mov_WORD_DX
-	mva STACKORIGIN,x dx
-	mva STACKORIGIN+STACKWIDTH,x dx+1
+	mva :STACKORIGIN,x dx
+	mva :STACKORIGIN+STACKWIDTH,x dx+1
 	mva #$00 dx+2
 	sta dx+3
 
@@ -1359,10 +1383,10 @@ _false	dta 5,c'FALSE'
 .endp
 
 .proc	mov_CARD_DX
-	mva STACKORIGIN,x dx
-	mva STACKORIGIN+STACKWIDTH,x dx+1
-	mva STACKORIGIN+STACKWIDTH*2,x dx+2
-	mva STACKORIGIN+STACKWIDTH*3,x dx+3
+	mva :STACKORIGIN,x dx
+	mva :STACKORIGIN+STACKWIDTH,x dx+1
+	mva :STACKORIGIN+STACKWIDTH*2,x dx+2
+	mva :STACKORIGIN+STACKWIDTH*3,x dx+3
 
 	rts
 .endp
@@ -1396,14 +1420,14 @@ bit	= @buf+64
 
 	stx @sp
 
-	mva STACKORIGIN,x I
-	sta STACKORIGIN+9
-	mva STACKORIGIN+STACKWIDTH,x I+1
-	sta STACKORIGIN+STACKWIDTH+9
-	mva STACKORIGIN+STACKWIDTH*2,x I+2
-	sta STACKORIGIN+STACKWIDTH*2+9
-	mva STACKORIGIN+STACKWIDTH*3,x I+3
-	sta STACKORIGIN+STACKWIDTH*3+9	; Sign
+	mva :STACKORIGIN,x I
+	sta :STACKORIGIN+9
+	mva :STACKORIGIN+STACKWIDTH,x I+1
+	sta :STACKORIGIN+STACKWIDTH+9
+	mva :STACKORIGIN+STACKWIDTH*2,x I+2
+	sta :STACKORIGIN+STACKWIDTH*2+9
+	mva :STACKORIGIN+STACKWIDTH*3,x I+3
+	sta :STACKORIGIN+STACKWIDTH*3+9	; Sign
 
 	bpl skp
 
@@ -1413,10 +1437,10 @@ bit	= @buf+64
 skp
 ; optimize OK (test_3.pas), line = 32
 
-	lda STACKORIGIN+STACKWIDTH*3+9
-	asl STACKORIGIN+9
-	rol STACKORIGIN+STACKWIDTH+9
-	rol STACKORIGIN+STACKWIDTH*2+9
+	lda :STACKORIGIN+STACKWIDTH*3+9
+	asl :STACKORIGIN+9
+	rol :STACKORIGIN+STACKWIDTH+9
+	rol :STACKORIGIN+STACKWIDTH*2+9
 	rol @
 	sta EXP				; Exponent
 
@@ -1678,7 +1702,7 @@ b_0508
 
 	stx @sp
 
-	lda STACKORIGIN+STACKWIDTH*3,x
+	lda :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr @printMINUS
 
@@ -1803,7 +1827,7 @@ ok	:4 mva fracpart+# dx+#
 
 .proc	@printSHORTINT
 
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	spl
 	jsr @printMINUS
 
@@ -1813,7 +1837,7 @@ ok	:4 mva fracpart+# dx+#
 
 .proc	@printSMALLINT
 
-	lda STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN+STACKWIDTH,x
 	spl
 	jsr @printMINUS
 
@@ -1823,7 +1847,7 @@ ok	:4 mva fracpart+# dx+#
 
 .proc	@printINT
 
-	lda STACKORIGIN+STACKWIDTH*3,x
+	lda :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr @printMINUS
 
@@ -2018,6 +2042,7 @@ adr	equ *-2
 	sty bp2+1
 
 	ldy #0
+	sty MAIN.SYSTEM.IOResult
 	sty edx
 	sty edx+1
 	sty edx+2
@@ -2042,6 +2067,9 @@ l1	lda (bp2),y
 	ADC #$FF-'9'	; make m = $FF
 	ADC #'9'-'0'+1	; carry set if in range n to m
 	bcs ok
+
+	lda #106	; Invalid numeric format
+	sta MAIN.SYSTEM.IOResult
 
 	rts		; reg Y contains the index of the character in S which prevented the conversion
 
@@ -2074,7 +2102,7 @@ stop	ldy #0		; reg Y = 0 conversion successful
 
 
 .proc	negEDX
-	lda #$00		; minus
+	lda #$00	; minus
 	sub edx
 	sta edx
 
@@ -2139,14 +2167,14 @@ add32bit
 
 .proc	@trunc
 
-	ldy STACKORIGIN+STACKWIDTH*3,x
+	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr negCARD
 
-	mva STACKORIGIN+STACKWIDTH,x STACKORIGIN,x
-	mva STACKORIGIN+STACKWIDTH*2,x STACKORIGIN+STACKWIDTH,x
-	mva STACKORIGIN+STACKWIDTH*3,x STACKORIGIN+STACKWIDTH*2,x
-	mva #$00 STACKORIGIN+STACKWIDTH*3,x
+	mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x
+	mva :STACKORIGIN+STACKWIDTH*2,x :STACKORIGIN+STACKWIDTH,x
+	mva :STACKORIGIN+STACKWIDTH*3,x :STACKORIGIN+STACKWIDTH*2,x
+	mva #$00 :STACKORIGIN+STACKWIDTH*3,x
 
 	tya
 	spl
@@ -2158,24 +2186,24 @@ add32bit
 
 .proc	@round
 
-	ldy STACKORIGIN+STACKWIDTH*3,x
+	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr negCARD
 
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 //	add #$80
 	cmp #$80
-	lda STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN+STACKWIDTH,x
 	adc #0
-	sta STACKORIGIN,x
-	lda STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN,x
+	lda :STACKORIGIN+STACKWIDTH*2,x
 	adc #0
-	sta STACKORIGIN+STACKWIDTH,x
-	lda STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH,x
+	lda :STACKORIGIN+STACKWIDTH*3,x
 	adc #0
-	sta STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
 
-	mva #$00 STACKORIGIN+STACKWIDTH*3,x
+	mva #$00 :STACKORIGIN+STACKWIDTH*3,x
 
 	tya
 	spl
@@ -2187,14 +2215,14 @@ add32bit
 
 .proc	@frac
 
-	ldy STACKORIGIN+STACKWIDTH*3,x
+	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr negCARD
 
 	lda #$00
-	sta STACKORIGIN+STACKWIDTH,x
-	sta STACKORIGIN+STACKWIDTH*2,x
-	sta STACKORIGIN+STACKWIDTH*3,x
+	sta :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*3,x
 
 	tya
 	spl
@@ -2206,12 +2234,12 @@ add32bit
 
 .proc	@int
 
-	ldy STACKORIGIN+STACKWIDTH*3,x
+	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr negCARD
 
 	lda #$00
-	sta STACKORIGIN,x
+	sta :STACKORIGIN,x
 
 	tya
 	spl
@@ -2308,6 +2336,20 @@ sname	dta c'S:',$9b
 	.endp
 
 
+.proc	@ata2int
+        asl
+        php
+        cmp #2*$60
+        bcs @+
+        sbc #2*$20-1
+        bcs @+
+        adc #2*$60
+@       plp
+        ror
+	rts
+.endp
+
+
 /*
   PUT CHAR
 
@@ -2351,11 +2393,13 @@ vbxe	bit *
 
 */
 
-.proc	@getline
+.proc	@GetLine
 
 	stx @sp
 
 	ldx #0
+
+	stx MAIN.SYSTEM.EoLn
 
 	mwa	#@buf+1	icbufa,x
 
@@ -2368,6 +2412,13 @@ vbxe	bit *
 	dew icbufl
 	mva icbufl @buf			; length
 
+	ldx @buf+1
+	cpx #EOL
+	bne skp
+
+	ldx #TRUE
+	stx MAIN.SYSTEM.EoLn
+skp
 	ldx #0
 @sp	equ *-1
 
@@ -2394,8 +2445,8 @@ getk	lda kbcodes	; odczytaj kbcodes
 	sta @move.dst
 	sty @move.dst+1
 
-	mva STACKORIGIN,x @move.src
-	mva STACKORIGIN+STACKWIDTH,x @move.src+1
+	mva :STACKORIGIN,x @move.src
+	mva :STACKORIGIN+STACKWIDTH,x @move.src+1
 
 	ldy #$00
 	lda (@move.src),y
@@ -2414,8 +2465,8 @@ getk	lda kbcodes	; odczytaj kbcodes
 	sta @move.dst
 	sty @move.dst+1
 
-	mva STACKORIGIN,x @move.src
-	mva STACKORIGIN+STACKWIDTH,x @move.src+1
+	mva :STACKORIGIN,x @move.src
+	mva :STACKORIGIN+STACKWIDTH,x @move.src+1
 
 	ldy #$00
 	lda (@move.src),y
@@ -2562,7 +2613,7 @@ ptr1 = edx
 ptr3 = ecx
 ptr2 = eax
 
-	stx @sp
+	txa:pha
 
 	ldx ptr2
 
@@ -2614,8 +2665,7 @@ L3:	dey
 	sta	(ptr2),y	; and high section
 	bne     L3		; flags still up to date from dey!
 
-leave	ldx #0
-@sp	equ *-1
+leave	pla:tax
 	rts			; return
 .endp
 
@@ -3072,7 +3122,7 @@ _no_command_line		; przeskok tutaj oznacza brak dostepnosci wiersza polecen
 */
 
 
-.proc	@cmdline (.byte a) .reg
+.proc	@CmdLine (.byte a) .reg
 
 	stx @sp
 
@@ -3246,7 +3296,7 @@ _eol	lda #0
 
 /* ----------------------------------------------------------------------- */
 
-
+/*
 .proc	@rstsnd
 	lda #0
 	sta $d208
@@ -3257,6 +3307,7 @@ _eol	lda #0
 	sty $d21f
 	rts
 .endp
+*/
 
 ;	ert (*>$3fff) .and (*<$8000)
 
@@ -3587,7 +3638,7 @@ stp	rts
 /* ----------------------------------------------------------------------- */
 
 
-.proc	@clrscr
+.proc	@ClrScr
 
 	ldx #$00
 	lda #$0c

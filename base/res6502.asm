@@ -275,7 +275,17 @@ maxlen	 = $ff
 .endp
 
 
-.proc	sys_off
+.proc	sys
+
+off	lda portb
+	tay
+	and #1
+	beq exit
+
+	sty pb
+
+	lda #{nop}
+	sta on
 
 	lda:rne vcount
 
@@ -284,14 +294,17 @@ maxlen	 = $ff
 	mva #$fe portb
 
 	rts
-.endp
+	
+exit	lda #{rts}
+	sta on
 
-
-.proc	sys_on
+on	nop
 
 	lda:rne vcount
 
-	mva #$ff portb
+	lda #$ff
+pb	equ *-1
+	sta portb
 	dec nmien
 	cli
 
@@ -317,11 +330,11 @@ mcpy	ift main.%%lab+len >= $bc20
 	sta dmactl
 	eif
 
-	jsr sys_off
+	jsr sys.off
 
 	memcpy #data #main.%%lab #len
 
-	jmp sys_on
+	jmp sys.on
 data
 
 .local	_%%2, main.%%lab
@@ -349,11 +362,11 @@ mcpy	ift main.%%lab+len >= $bc20
 	sta dmactl
 	eif
 
-	jsr sys_off
+	jsr sys.off
 
 	memcpy #data #main.%%lab #len
 
-	jmp sys_on
+	jmp sys.on
 data
 
 .local	_%%2, main.%%lab
@@ -383,7 +396,7 @@ PLAYER		= main.%%lab
 
 	ert *>=$c000
 
-	.echo 'RMTPLAYER: ',track_variables,'..',RMTPLAYEREND
+	.echo '$R RMTPLAY ',track_variables,'..',RMTPLAYEREND," %%nam"
 .endm
 
 
@@ -402,11 +415,11 @@ mcpy	ift main.%%lab+len >= $bc20
 	sta dmactl
 	eif
 
-	jsr sys_off
+	jsr sys.off
 
 	memcpy #data #main.%%lab #len
 
-	jmp sys_on
+	jmp sys.on
 data
 
 .local	_%%2, main.%%lab
@@ -414,6 +427,7 @@ data
 	icl %%1
 
 .endl
+	.print '$R RCASM   ',main.%%lab,'..',main.%%lab+len-1," %%1"
 
 	ini mcpy
 .endm
@@ -430,19 +444,23 @@ len = .filesize(%%1)
  ift main.%%lab+len >= $c000
 	org RESORIGIN
 
-mcpy	jsr sys_off
+mcpy	jsr sys.off
 
 	memcpy #data #main.%%lab #len
 
-	jmp sys_on
+	jmp sys.on
 
 data	ins %%1
+
+	.print '$R RCDATA  ',main.%%lab,'..',main.%%lab+len-1," %%1"
 
 	ini mcpy
  els
 	org main.%%lab
 
 	ins %%1
+	
+	.print '$R RCDATA   ',main.%%lab,'..',*-1," %%1"
  eif
 .endm
 
@@ -461,7 +479,7 @@ data	ins %%1
 
 _stop	jmp stop
 
-mcpy	jsr sys_off
+mcpy	jsr sys.off
 
 	mwa #data ztmp
 
@@ -514,7 +532,7 @@ loop	ldy #0
 skp	cpw ztmp #data_end
 	jne loop
 stop
-	jmp sys_on
+	jmp sys.on
 
 sadr	.word
 eadr	.word
@@ -523,11 +541,15 @@ len	.word
 data	ins %%1
 data_end
 
+	.print '$R DOSFILE ',.wget[2],'..$xxxx'," %%1"
+
 	ini mcpy
  els
-	opt h-
+ 	opt h-
 	ins %%1
 	opt h+
+
+	.print '$R DOSFILE ',.wget[2],'..',*-1," %%1"
  eif
 .endm
 
@@ -646,13 +668,15 @@ len = .filesize(%%1)
  ift main.%%lab+len-6 >= $c000
 	org RESORIGIN
 
-mcpy	jsr sys_off
+mcpy	jsr sys.off
 
 	memcpy #data #main.%%lab #len-6
 
-	jmp sys_on
+	jmp sys.on
 
 data	rmt_relocator %%1,main.%%lab
+
+	.print '$R RMT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
 
 	ini mcpy
  els
@@ -669,6 +693,8 @@ data	rmt_relocator %%1,main.%%lab
 
 	rmt_relocator %%1,main.%%lab
 _end
+	.print '$R RMT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
+
  eif
 .endm
 
@@ -776,11 +802,11 @@ len = .filesize(%%1)
  ift main.%%lab+len-6 >= $c000
 	org RESORIGIN
 
-mcpy	jsr sys_off
+mcpy	jsr sys.off
 
 	memcpy #data #main.%%lab #len-6
 
-	jmp sys_on
+	jmp sys.on
 
 data	mpt_relocator %%1,main.%%lab
 
@@ -859,11 +885,11 @@ len = .filesize(%%1)
  ift main.%%lab+len-6 >= $c000
 	org RESORIGIN
 
-mcpy	jsr sys_off
+mcpy	jsr sys.off
 
 	memcpy #data #main.%%lab #len-6
 
-	jmp sys_on
+	jmp sys.on
 
 data	cmc_relocator %%1,main.%%lab
 
@@ -990,6 +1016,8 @@ ln	= .filesize(%%1)-he-1024
 	fxsa FX_MEMS
 	rts
 	ini RESORIGIN
+
+	.print '$R XBMP    ',main.%%lab,'..',main.%%lab+ln-1," %%1"
 
 .endm
 
