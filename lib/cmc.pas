@@ -1,4 +1,14 @@
-unit cmc;
+unit CMC;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Chaos Music Player library
+ @version: 1.0
+
+ @description:
+ <http://atariki.krap.pl/index.php/Chaos_Music_Composer>
+*)
+
 
 {
 
@@ -10,15 +20,19 @@ TCMC.Stop
 
 interface
 
-type
-	TCMC = Object
+type	TCMC = Object
+(*
+@description:
+object for controling CMC player
+*)
+	player: pointer;		// memory address of player
+	modul: pointer;			// memory address of a module
 
-	player: pointer;
-	modul: pointer;
-
-	procedure Init; assembler;
-	procedure Play; assembler;
-	procedure Stop; assembler;
+	procedure Init; assembler;	// initializes
+	procedure Play; assembler;	// play
+	procedure Pause; assembler;	// pause
+	procedure Cont; assembler;	// continue
+	procedure Stop; assembler;	// stops music
 
 	end;
 
@@ -27,23 +41,29 @@ implementation
 
 
 procedure TCMC.Init; assembler;
+(*
+@description:
+Initialize CMC player
+*)
 asm
 {	txa:pha
 
+	mwa TCMC :bp2
+
 	ldy #0
-	lda (bp2),y
+	lda (:bp2),y
 	add #3		; jsr player+3
 	sta adr
 	iny
-	lda (bp2),y
+	lda (:bp2),y
 	adc #0
 	sta adr+1
 
 	iny
-	lda (bp2),y
+	lda (:bp2),y
 	tax		; low byte of RMT module to X reg
 	iny
-	lda (bp2),y
+	lda (:bp2),y
 	tay		; hi byte of RMT module to Y reg
 
 	lda #$70
@@ -64,15 +84,21 @@ end;
 
 
 procedure TCMC.Play; assembler;
+(*
+@description:
+Play music, call this procedure every VBL frame
+*)
 asm
 {	txa:pha
 
-	ldy #0
-	lda (bp2),y
-	sta adr
-	iny
-	lda (bp2),y
-	sta adr+1
+	mwa TCMC ptr
+
+	ldy #1
+cptr	lda $ffff,y
+ptr	equ *-2
+	sta adr,y
+	dey
+	bpl cptr
 
 	jsr $ffff
 adr	equ *-2
@@ -83,15 +109,21 @@ end;
 
 
 procedure TCMC.Stop; assembler;
+(*
+@description:
+Halt CMC player
+*)
 asm
 {	txa:pha
 
+	mwa TCMC :bp2
+
 	ldy #0
-	lda (bp2),y
+	lda (:bp2),y
 	add #3		; jsr player+3
 	sta adr
 	iny
-	lda (bp2),y
+	lda (:bp2),y
 	adc #0
 	sta adr+1
 
@@ -104,6 +136,63 @@ adr	equ *-2
 };
 end;
 
+
+procedure TCMC.Pause; assembler;
+(*
+@description:
+Interrupt CMC player
+*)
+asm
+{	txa:pha
+
+	mwa TCMC :bp2
+
+	ldy #0
+	lda (:bp2),y
+	add #3		; jsr player+3
+	sta adr
+	iny
+	lda (:bp2),y
+	adc #0
+	sta adr+1
+
+	lda #$50
+
+	jsr $ffff
+adr	equ *-2
+
+	pla:tax
+};
+end;
+
+
+procedure TCMC.Cont; assembler;
+(*
+@description:
+Continue CMC player
+*)
+asm
+{	txa:pha
+
+	mwa TCMC :bp2
+
+	ldy #0
+	lda (:bp2),y
+	add #3		; jsr player+3
+	sta adr
+	iny
+	lda (:bp2),y
+	adc #0
+	sta adr+1
+
+	lda #$60
+
+	jsr $ffff
+adr	equ *-2
+
+	pla:tax
+};
+end;
 
 end.
 

@@ -1,6 +1,6 @@
 
 {****************************************************************************
-** VIMAGE unit (14.01.2018)						   **
+** VIMAGE unit (14.01.2018) VBXE					   **
 **   by Steven Don, Tomasz Biela					   **
 *****************************************************************************
 ** A unit to load a variety of image formats to a buffer.		   **
@@ -26,6 +26,14 @@
 ****************************************************************************}
 
 unit vimage;
+(*
+@type: unit
+@name: A unit to load a variety of image formats
+@author: Steven Don, Tomasz Biela (Tebe)
+
+@description:
+VBXE
+*)
 
 {
 
@@ -68,6 +76,10 @@ var
 
 
 procedure UpdateXDL(Location: cardinal; Top: word; Height: word);
+(*
+@description:
+
+*)
 var xdl: TXDL;
 begin
 
@@ -93,6 +105,10 @@ end;
 
 
 procedure LoadPalette(cnt: byte; x, ln, a,b,c: byte);
+(*
+@description:
+
+*)
 var i: byte;
 begin
 
@@ -107,9 +123,10 @@ end;
 
 
 function LoadVPCX(Filename: TString; Location: cardinal): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a PCX File (8bit)
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a PCX File (8bit)
+*)
 var
   Header			: PCXHeader;
   DOffSet, OffSet, Width, Height: Word;
@@ -252,9 +269,10 @@ end;
 
 
 function LoadVBMP(Filename: TString; Location: cardinal): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a BMP File (4bit, 8bit)
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a BMP File (4bit, 8bit)
+*)
 var Header: TBmpHeader;
     x, w, h: word;
     b, v, i: byte;
@@ -300,7 +318,6 @@ begin
  UpdateXDL(Location, (240-h) shr 1, h);
 
  vram.position:=Location+h*336;
-
 
  {Set the palette}
 
@@ -368,9 +385,10 @@ end;
 
 
 function LoadVGIF(FileName: TString; Location: cardinal): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a GIF File (GIF87a)
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a GIF File (GIF87a)
+*)
 var
   {For loading from the GIF file}
   Header       : GIFHeader;
@@ -656,6 +674,5 @@ begin
 
   VBXEMemoryBank(0);
 end;
-
 
 end.

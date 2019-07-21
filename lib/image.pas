@@ -1,6 +1,6 @@
 
 {****************************************************************************
-** IMAGE unit,								   **
+** IMAGE unit, ANTIC/GTIA						   **
 **	by Steven Don, Tomasz Biela					   **
 *****************************************************************************
 ** A unit to load a variety of image formats.				   **
@@ -28,6 +28,15 @@
 ****************************************************************************}
 
 unit image;
+(*
+@type: unit
+@name: A unit to load a variety of image formats
+@author: Steven Don, Tomasz Biela (Tebe)
+
+@description:
+GTIA
+*)
+
 
 {
 
@@ -46,7 +55,7 @@ uses atari, sysutils, graph;
 {$i imageh.inc}
 
 var
-	IMGError: byte;
+	IMGError: byte;		(* @var =0 if operation successfull *)
 
 {Error codes}
 const
@@ -69,8 +78,12 @@ var
 	f: file;
 
 
-{This function reads the next byte from the PIC/PCX file}
 function NextByte : Byte;
+(*
+@description:
+This function reads the next byte from the PIC/PCX file
+
+*)
 begin
 
     {Check to see whether next block should be read}
@@ -93,9 +106,11 @@ end;
 
 
 function LoadPIC(const FileName: TString; Location: pointer): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a PIC File to the specified location.
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a PIC File to the specified location
+
+*)
 var Header		: TPicHeader;
     i, ile		: word;
     tmp, px, py, v	: byte;
@@ -168,7 +183,7 @@ begin
   Exit;
  end;
 
- colbak:=Header.colors[4];
+ colbaks:=Header.colors[4];
  color0:=Header.colors[0];
  color1:=Header.colors[1];
  color2:=Header.colors[2];
@@ -218,9 +233,11 @@ end;
 
 
 function LoadMIC(const FileName: TString; Location: pointer): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a MIC File to the specified location.
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a MIC File to the specified location
+
+*)
 begin
 
   {Check to see whether the file exists and can be opened}
@@ -251,9 +268,11 @@ end;
 
 
 function LoadBMP(const FileName: TString): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a BMP File (4bit, 8bit)
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a BMP File (4bit, 8bit)
+
+*)
 var
   BMPFile			: File;
   Header			: TBMPHeader;
@@ -336,9 +355,11 @@ end;
 
 
 function LoadPCX(const FileName: TString): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a PCX File (8bit)
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a PCX File (8bit)
+
+*)
 var
   Header                         : PCXHeader;
   PCXLen                         : LongInt;
@@ -456,9 +477,11 @@ end;
 
 
 function LoadGIF(const FileName: TString): Boolean;
-// ------------------------------------------------------------------------------
-// This loads a GIF File (GIF87a)
-// ------------------------------------------------------------------------------
+(*
+@description:
+This loads a GIF File (GIF87a)
+
+*)
 var
   {For loading from the GIF file}
   GIFFile      : File;

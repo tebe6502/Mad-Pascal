@@ -1,4 +1,29 @@
-unit pmg;
+unit PMG;
+(*
+  @type: unit
+  @name: Player/missile graphics library
+
+  @author: Bostjan Gorisek (Gury)
+
+	Tebe - Core, supporting routines, modifications
+
+  Initial release date: 6.10.2015
+  @version: 1.0 R1 Beta
+
+  Modifications:
+    v1.0 (7.10.2015) - Tebe
+	- Fixed usage of Unit (module) libraries (routine exchange)
+	- Core and supporting routines (DPoke, DPeek, Fillchar)
+	- Custom pointer variables for customizing P/M graphics in main program
+    v1.1 (8.10.2015) - Gury:
+	- Missile support
+	- DPoke -> Poke
+	- Code revisited
+	- Documentation (comments)
+    v1.2 (12.12.2015) - Tebe
+	- Power -> math.pas
+	- MoveM: Case statement
+*)
 
 {
 
@@ -15,33 +40,8 @@ SizeMx
 }
 
 
-
 interface
 
-
-{
-  Player/missile graphics library  
-  Unit: PMG.PAS
-    
-  Author: Bostjan Gorisek (Gury)
-          Tebe - Core, supporting routines, modifications
-  Initial release date: 6.10.2015
-  Version: 1.0 R1 Beta
-
-  Modifications:
-    v1.0 (7.10.2015) - Tebe
-	- Fixed usage of Unit (module) libraries (routine exchange)
-	- Core and supporting routines (DPoke, DPeek, Fillchar)
-	- Custom pointer variables for customizing P/M graphics in main program
-    v1.1 (8.10.2015) - Gury:
-	- Missile support
-	- DPoke -> Poke
-	- Code revisited
-	- Documentation (comments)
-    v1.2 (12.12.2015) - Tebe
-	- Power -> math.pas
-	- MoveM: Case statement
-}
 
 uses math;
 
@@ -60,16 +60,13 @@ const
   _PM_SINGLE_RES  = 2;  // PM single-line resolution
 
 var
-  // Player data graphics address
-  p_data : array [0..3] of pointer;
-  // Missile data graphics address
-  m_data : array [0..3] of pointer;
+  p_data : array [0..3] of pointer;	(* @var Player data graphics address *)
+  m_data : array [0..3] of pointer;	(* @var Missile data graphics address *)
 
-  // P/M graphics supporting variables  
-  pm_mem : word;
-  pm_offset : word = 512;
-  pm_top : byte = 8;  // 1.1
-  pm_size : word = 128;
+  pm_mem : word;			(* @var P/M graphics supporting variables *)
+  pm_offset : word = 512;		(* @var P/M graphics supporting variables *)
+  pm_top : byte = 8;			(* @var P/M graphics supporting variables *)
+  pm_size : word = 128;			(* @var P/M graphics supporting variables *)
 
 
 	procedure SetPM(res : byte);
@@ -83,18 +80,20 @@ var
 	procedure ShowPM(show : byte);
 	procedure InitPM(res : byte);
 
-	
+
 
 implementation
 
 
-//-----------------------------------------------------------------------------
-// Procedure  : SetPM
-// Description: Set P/M variables
-// Parameters : res (byte) - P/M graphics resolution type
-//                           (_PM_SINGLE_RES, _PM_DOUBLE_RES)
-//-----------------------------------------------------------------------------
-procedure SetPM(res : byte);
+procedure SetPM (res : byte);
+(*
+* @description:
+* Set P/M variables
+*
+* @param: res (byte) - P/M graphics resolution type
+* @param: _PM_SINGLE_RES
+* @param: _PM_DOUBLE_RES
+*)
 begin
   pm_offset := 512 * res;
   pm_size := 128 * res;
@@ -103,42 +102,47 @@ begin
   else
     pm_top := 8;
 end;
- 
-//-----------------------------------------------------------------------------
-// Procedure  : ClearPM
-// Description: Clear player/missile memory
-//-----------------------------------------------------------------------------
+
+
 procedure ClearPM;
+(*
+* @description:
+* Clear player/missile memory
+*)
 begin
   fillchar(pointer(pm_mem+pm_offset-pm_size), pm_size*5, 0);
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : MoveP
-// Description: Draw and move selected player
-// Parameters : p (byte) - selected player
-//              x (word) - player horizontal coordinate
-//              y (byte) - player vertical coordinate
-//-----------------------------------------------------------------------------
-procedure MoveP(p : byte; x : word; y : byte);
+
+procedure MoveP (p : byte; x : word; y : byte);
+(*
+* @description:
+* Draw and move selected player
+*
+* @param: p (byte) - selected player
+* @param: x (word) - player horizontal coordinate
+* @param: y (byte) - player vertical coordinate
+*)
 begin
   // Erase top and bottom line of player data
   Poke(pm_mem+pm_offset+pm_size*p+y-1, 0);
   Poke(pm_mem+pm_offset+pm_size*p+y+_P_MAX+1, 0);
-  // Vertical position of player   
+  // Vertical position of player
   move(p_data[p], pointer(pm_mem+pm_offset+pm_size*p+y), _P_MAX+1);  // 1.1
   // Horizontal position of player
   Poke(53248+p, x);
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : MoveM
-// Description: Draw and move selected missile
-// Parameters : m (byte) - selected missile
-//              x (word) - missile horizontal coordinate
-//              y (byte) - missile vertical coordinate
-//-----------------------------------------------------------------------------
-procedure MoveM(m : byte; x : word; y : byte);
+
+procedure MoveM (m : byte; x : word; y : byte);
+(*
+* @description:
+* Draw and move selected missile
+*
+* @param: m (byte) - selected missile
+* @param: x (word) - missile horizontal coordinate
+* @param: y (byte) - missile vertical coordinate
+*)
 begin
   // Erase top line of missile data
   Poke(pm_mem+pm_offset-pm_size+y-1, 0);
@@ -150,7 +154,7 @@ begin
 	Poke(pm_mem+pm_offset-pm_size+y+_M0_MAX+1, 0);
 	move(m_data[m], pointer(pm_mem+pm_offset-pm_size+y), _M0_MAX+1);
       end;
-      
+
    1: begin
 	Poke(pm_mem+pm_offset-pm_size+y+_M1_MAX+1, 0);
 	move(m_data[m], pointer(pm_mem+pm_offset-pm_size+y), _M1_MAX+1);
@@ -165,49 +169,56 @@ begin
 	Poke(pm_mem+pm_offset-pm_size+y+_M3_MAX+1, 0);
 	move(m_data[m], pointer(pm_mem+pm_offset-pm_size+y), _M3_MAX+1);
       end;
-      
+
    end;
 
   // Missile horizontal position
   Poke(53252+m, x);
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : ColorPM
-// Description: Player/missile color
-// Parameters : pm (byte) - selected player
-//              col (byte) - player color
-//-----------------------------------------------------------------------------
-procedure ColorPM(pm, col : byte);
+
+procedure ColorPM (pm, col : byte);
+(*
+* @description:
+* Player/missile color
+*
+* @param: pm (byte) - selected player
+* @param: col (byte) - player color
+*)
 begin
   Poke(704+pm, col);
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : SizeP
-// Description: Player size
-// Parameters : p (byte) - selected player
-//              value (byte) - player size:
-//                _PM_NORMAL_SIZE (0 = normal)
-//                _PM_DOUBLE_SIZE (1 = double)
-//                _PM_QUAD_SIZE   (3 = quadruple)
-//-----------------------------------------------------------------------------
-procedure SizeP(p, value : byte);
+
+procedure SizeP (p, value : byte);
+(*
+* @description:
+* Player size
+*
+* @param: p (byte) - selected player
+* @param: value (byte) - player size:
+* @param: _PM_NORMAL_SIZE (0 = normal)
+* @param: _PM_DOUBLE_SIZE (1 = double)
+* @param: _PM_QUAD_SIZE   (3 = quadruple)
+*)
 begin
   Poke(53256+p, value);
 end;
 
-//-----------------------------------------------------------------------------
-// Function      : SizeMx
-// Description   : Calculate bit numbers for selected missile size
-// Parameters    : m (shortint) - selected missile
-//                 value (byte) - missile size:
-//                   _PM_NORMAL_SIZE (0 = normal)
-//                   _PM_DOUBLE_SIZE (1 = double)
-//                   _PM_QUAD_SIZE   (3 = quadruple)
-// Returns (byte): Calculated bit number for selected missile size
-//-----------------------------------------------------------------------------
-function SizeMx(m: shortint; value : byte) : byte;
+
+function SizeMx (m: shortint; value : byte) : byte;
+(*
+* @description:
+* Calculate bit numbers for selected missile size
+*
+* @param: m (shortint) - selected missile
+* @param: value (byte) - missile size:
+* @param: _PM_NORMAL_SIZE (0 = normal)
+* @param: _PM_DOUBLE_SIZE (1 = double)
+* @param: _PM_QUAD_SIZE   (3 = quadruple)
+*
+* @returns: (byte) Calculated bit number for selected missile size
+*)
 var
   i : byte;
   mem : Byte = 0;
@@ -228,15 +239,17 @@ begin
   result := mem;
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : SizeM
-// Description: Set missile sizes
-// Parameters : m0 (byte) - size for missile 0
-//              m1 (byte) - size for missile 1
-//              m2 (byte) - size for missile 2
-//              m3 (byte) - size for missile 3
-//-----------------------------------------------------------------------------
-procedure SizeM(m0, m1, m2, m3 : byte);
+
+procedure SizeM (m0, m1, m2, m3 : byte);
+(*
+* @description:
+* Set missile sizes
+*
+* @param: m0 (byte) - size for missile 0
+* @param: m1 (byte) - size for missile 1
+* @param: m2 (byte) - size for missile 2
+* @param: m3 (byte) - size for missile 3
+*)
 var
   mem : byte = 0;
 begin
@@ -247,24 +260,30 @@ begin
   Poke(53260, mem);
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : ShowPM
-// Description: P/M graphics visibility
-// Parameters : show (byte) - flag for selecting P/M visibility
-//                            (_PM_SHOW_ON, _PM_SHOW_OFF)
-//-----------------------------------------------------------------------------
-procedure ShowPM(show : byte);
+
+procedure ShowPM (show : byte);
+(*
+* @description:
+* P/M graphics visibility
+*
+* @param: show (byte) - flag for selecting P/M visibility
+* @param: _PM_SHOW_ON
+* @param: _PM_SHOW_OFF
+*)
 begin
   Poke(53277, show);
 end;
 
-//-----------------------------------------------------------------------------
-// Procedure  : InitPM
-// Description: Initialize P/M graphics
-// Parameters : res (byte) - P/M graphics resolution type
-//                           (_PM_DOUBLE_RES, _PM_SINGLE_RES)
-//-----------------------------------------------------------------------------
-procedure InitPM(res : byte);
+
+procedure InitPM (res : byte);
+(*
+* @description:
+* Initialize P/M graphics
+*
+* @param: res (byte) - P/M graphics resolution type
+* @param: _PM_DOUBLE_RES
+* @param: _PM_SINGLE_RES
+*)
 begin
   Poke(53277, 0);
   pm_mem := Peek(106) - pm_top;
@@ -278,6 +297,4 @@ begin
   ClearPM;
 end;
 
-
 end.
-

@@ -1,8 +1,15 @@
 unit highmem;
+(*
+@type: unit
+@name:
+@author: Tomasz Biela (Tebe)
+
+@description:
+<http://www.freepascal.org/docs-html/rtl/objects/index-4.html>
+*)
+
 
 {
-
-http://www.freepascal.org/docs-html/rtl/objects/index-4.html
 
 + THighMemoryStream : Object
 
@@ -23,8 +30,11 @@ interface
 
 uses misc;
 
-type
-	THighMemoryStream = Object
+type	THighMemoryStream = Object
+	(*
+	@description:
+
+	*)
 
 	Position: cardinal;
 	Size: cardinal;
@@ -44,13 +54,16 @@ type
 	end;
 
 
-
 implementation
 
 var	bank: byte;
 
 
 procedure THighMemoryStream.Create;
+(*
+@description:
+
+*)
 begin
 
  Size := bank shl 16;	// * 65536
@@ -60,6 +73,11 @@ end;
 
 
 procedure ReadWriteHighMem; assembler;
+(*
+@description:
+
+*)
+
 // src = edx
 // dst = ecx
 // len = eax
@@ -96,6 +114,10 @@ end;
 
 
 procedure THighMemoryStream.ReadBuffer(var Buffer; Count: word);
+(*
+@description:
+
+*)
 begin
 
 if Count > 0 then begin
@@ -128,6 +150,10 @@ end;
 
 
 procedure THighMemoryStream.WriteBuffer(var Buffer; Count: word);
+(*
+@description:
+
+*)
 begin
 
 if Count > 0 then begin
@@ -159,6 +185,10 @@ end;
 
 
 function THighMemoryStream.ReadByte: Byte;
+(*
+@description:
+
+*)
 begin
 
 asm
@@ -184,6 +214,10 @@ end;
 
 
 function THighMemoryStream.ReadWord: Word;
+(*
+@description:
+
+*)
 begin
 
 asm
@@ -212,6 +246,10 @@ end;
 
 
 function THighMemoryStream.ReadDWord: Cardinal;
+(*
+@description:
+
+*)
 begin
 
 asm
@@ -246,6 +284,10 @@ end;
 
 
 procedure THighMemoryStream.WriteByte(b: Byte);
+(*
+@description:
+
+*)
 begin
 
 asm
@@ -271,6 +313,10 @@ end;
 
 
 procedure THighMemoryStream.WriteWord(w: Word);
+(*
+@description:
+
+*)
 begin
 
 asm
@@ -299,6 +345,10 @@ end;
 
 
 procedure THighMemoryStream.WriteDWord(d: Cardinal);
+(*
+@description:
+
+*)
 begin
 
 asm

@@ -1,18 +1,21 @@
 unit dos;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Mad Pascal DOS interface
+ @version: 1.0
+
+ @description:
+ The DOS unit gives access to some operating system calls related to files, the file system, date and time.
+
+ <https://www.freepascal.org/docs-html/rtl/dos/index.html>
+*)
+
 
 {
 
-http://www.freepascal.org/docs-html/rtl/dos/index-5.html
-
-CurrentMinuteOfDay
-CurrentSec100OfDay
-CurrentSecondOfDay
 DosVersion
 GetTime
-MinuteOfDay
-MinutesToTime
-SecondOfDay
-SecondsToTime
 SetTime
 
 }
@@ -20,16 +23,8 @@ SetTime
 interface
 
 	function DosVersion: word; assembler;
-	procedure GetTime(var hour, minute, second, sec100: word);
-	procedure SetTime(hour, minute, second, sec100: word);
-	function CurrentMinuteOfDay: Word;
-	function CurrentSecondOfDay: cardinal;
-	function CurrentSec100OfDay: Cardinal;
-	function MinuteOfDay (Hour24, Minute: Word): Word;
-	function SecondOfDay (Hour24, Minute, Second: Word): cardinal;
-	procedure MinutesToTime (Md: cardinal; Var Hour24, Minute: Word);
-	procedure SecondsToTime (Sd: cardinal; Var Hour24, Minute, Second: Word);
-
+	procedure GetTime(var hour, minute, second, msec: word);
+	procedure SetTime(hour, minute, second, msec: word);
 
 implementation
 
@@ -38,6 +33,10 @@ var
 
 
 function DosVersion: word; assembler;
+(*
+@description:
+Current DOS version
+*)
 asm
 {	txa:pha
 
@@ -45,11 +44,11 @@ asm
 ; (c) idea by KMK, code: mikey
 ;
 ; $Id: sparta_detect.asm,v 1.2 2006/09/27 22:59:27 mikey Exp $
-; 
+;
 
 p0	= bp2
 fsymbol	= $07EB
-                   
+
 sparta_detect
 
 ; if peek($700) = 'S' and bit($701) sets V then we're SDX
@@ -73,7 +72,7 @@ sparta_detect
 	ldy #$06
 	bne _fv
 
-; we're running SDX, find (DOSVEC)-$150 
+; we're running SDX, find (DOSVEC)-$150
 
 _oldsdx	lda $a
 	sec
@@ -83,8 +82,8 @@ _oldsdx	lda $a
 	sbc #>$150
 	sta p0+1
 
-; ok, hopefully we have established the address. 
-; now peek at it. return the value. 
+; ok, hopefully we have established the address.
+; now peek at it. return the value.
 
 	ldy #0
 _fv	lda (p0),y
@@ -103,12 +102,12 @@ _end	sta Result
 ; if A=$FF -> No SDX :(
 ; if A=$FE -> SDX is in OSROM mode
 ; if A=$00 -> SDX doesn't use any XMS banks
-; if A=anything else -> BANKED mode, and A is the bank number 
+; if A=anything else -> BANKED mode, and A is the bank number
 
 ; 0F31         0          SpartaDOS 2.3e
 ;              13            DOS 4.0
 ;              15         SpartaDOS 1.1
-;              19         Atari DOS 2.5 
+;              19         Atari DOS 2.5
 ;              76         Atari DOS 3.0
 ;              78         Atari DOS 3.0
 ;              89         SpartaDOS 3.2d
@@ -124,10 +123,16 @@ _end	sta Result
 end;
 
 
-procedure GetTime(var hour, minute, second, sec100: word);
-//----------------------------------------------------------------------------------------------
-// Set system time
-//----------------------------------------------------------------------------------------------
+procedure GetTime(var hour, minute, second, msec: word);
+(*
+@description:
+Return the current time
+
+@param: hour - word variable
+@param: minute - word variable
+@param: second - word variable
+@param: msec - word variable
+*)
 var	time: cardinal;
 	tmp: word;
 	fps: byte;
@@ -135,8 +140,8 @@ begin
 
 asm
 {	mva #$00 time+3
-	mva :rtclok time+2 
-	mva :rtclok+1 time+1 
+	mva :rtclok time+2
+	mva :rtclok+1 time+1
 	mva :rtclok+2 time
 };
 
@@ -144,28 +149,34 @@ asm
   fps := 50
  else
   fps := 60;
-  
+
  time := time div fps;
- 
+
  tmp := time div 3600;
  hour := tmp mod 24;
 
  dec(time, tmp*3600);
- 
+
  tmp := time div 60;
  minute := tmp;
 
  dec(time, tmp*60);
 
  second := time;
- 
+
 end;
 
 
-procedure SetTime(hour, minute, second, sec100: word);
-//----------------------------------------------------------------------------------------------
-// Set system time
-//----------------------------------------------------------------------------------------------
+procedure SetTime(hour, minute, second, msec: word);
+(*
+@description:
+Set system time
+
+@param: hour - word variable
+@param: minute - word variable
+@param: second - word variable
+@param: msec - word variable
+*)
 var	time: cardinal;
 	fps: byte;
 begin
@@ -176,7 +187,7 @@ begin
   fps := 50
  else
   fps := 60;
- 
+
  time := time * fps;
 
 asm
@@ -185,57 +196,5 @@ asm
 	mva time :rtclok+2
 };
 end;
-
-
-FUNCTION CurrentMinuteOfDay: Word;
-VAR Hour, Minute, Second, Sec100: Word;
-BEGIN
-   GetTime(Hour, Minute, Second, Sec100);		{ Get current time }
-   Result := (Hour * 60) + Minute;			{ Minute from midnight }
-END;
-
-
-FUNCTION CurrentSecondOfDay: cardinal;
-VAR Hour, Minute, Second, Sec100: Word;
-BEGIN
-   GetTime(Hour, Minute, Second, Sec100);		{ Get current time }
-   Result := (Hour * 3600) +  (Minute * 60) + Second;	{ Second from midnight }
-END;
-
-
-FUNCTION CurrentSec100OfDay: Cardinal;
-VAR Hour, Minute, Second, Sec100: Word;
-BEGIN
-   GetTime(Hour, Minute, Second, Sec100);		{ Get current time }
-   Result := (Hour * 360000) + (Minute * 6000) + (Second*100) + Sec100; { Sec100 from midnight }
-END;
-
-
-FUNCTION MinuteOfDay (Hour24, Minute: Word): Word;
-BEGIN
-   Result := (Hour24 * 60) + Minute;			{ Minute from midnight }
-END;
-
-
-FUNCTION SecondOfDay (Hour24, Minute, Second: Word): cardinal;
-BEGIN
-   Result := (Hour24 * 3600) + (Minute * 60) + Second;	{ Second from midnight }
-END;
-
-
-PROCEDURE MinutesToTime (Md: cardinal; Var Hour24, Minute: Word);
-BEGIN
-   Hour24 := Md DIV 60;					{ Hours of time }
-   Minute := Md MOD 60;					{ Minutes of time }
-END;
-
-
-PROCEDURE SecondsToTime (Sd: cardinal; Var Hour24, Minute, Second: Word);
-BEGIN
-   Hour24 := Sd DIV 3600;				{ Hours of time }
-   Minute := Sd MOD 3600 DIV 60;			{ Minutes of time }
-   Second := Sd MOD 60;					{ Seconds of time }
-END;
-
 
 end.

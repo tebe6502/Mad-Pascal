@@ -1,10 +1,13 @@
 
 {
 
+Arc
 Bar
 Bar3D
+calcRegCode
 Circle
 ClipLine
+GetMaxColor
 GetMaxX
 GetMaxY
 GetX
@@ -13,14 +16,21 @@ Ellipse
 FillEllipse
 FillRect
 FloodFill
+FloodFillH
 MoveRel
+PieSlice
 Rectangle
+SetArcCoords
 SetClipRect
 
 }
 
 
 function GetX: smallint;
+(*
+@description:
+GetX returns the X-coordinate of the current position of the graphical pointer
+*)
 begin
 
  Result := CurrentX;
@@ -29,6 +39,10 @@ end;
 
 
 function GetY: smallint;
+(*
+@description:
+GetY returns the Y-coordinate of the current position of the graphical pointer
+*)
 begin
 
  Result := CurrentY;
@@ -37,13 +51,33 @@ end;
 
 
 procedure MoveRel(Dx, Dy: smallint);
+(*
+@description:
+MoveRel moves the pointer to the point (DX,DY), relative to the current pointer position
+*)
 begin
      CurrentX := CurrentX + Dx;
      CurrentY := CurrentY + Dy;
 end;
 
 
+function GetMaxColor: word;
+(*
+@description:
+GetMaxColor returns the maximum color-number which can be set with SetColor.
+*)
+begin
+
+ Result:=4;
+
+end;
+
+
 function GetMaxX: word;
+(*
+@description:
+GetMaxX returns the maximum horizontal screen length.
+*)
 begin
 
  Result := ScreenWidth;
@@ -52,6 +86,10 @@ end;
 
 
 function GetMaxY: word;
+(*
+@description:
+GetMaxY returns the maximum number of screen lines.
+*)
 begin
 
  Result := ScreenHeight;
@@ -60,9 +98,10 @@ end;
 
 
 procedure Circle(x0,y0,radius: word);
-//----------------------------------------------------------------------------------------------
-// Bresenham Circle
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Bresenham Circle
+*)
 var	x,y, txp, typ, txm, tym: word;
 	d: smallint;
 
@@ -121,10 +160,74 @@ begin
 end;
 
 
+procedure SetArcCoords (x,y,xradius,yradius,StAngle,EndAngle : word);
+var a,s: single;
+begin
+  LastArcCoords.X:=X;
+  LastArccOords.y:=y;
+
+  a:=StAngle*D_PI_180;
+  s:=xradius*cos(a); Lastarccoords.xstart:=x+round(s);
+  s:=yradius*sin(a); Lastarccoords.ystart:=y-round(s);
+
+  a:=EndAngle*D_PI_180;
+  s:=xradius*cos(a); LastArccoords.xend:=x+round(s);
+  s:=yradius*sin(a); LastArccoords.yend:=y-round(s);
+end;
+
+
+procedure Arc(X, Y, StAngle, EndAngle, Radius: Word);
+(*
+@description:
+Arc draws part of a circle with center at (X,Y), radius Radius, starting from StAngle, stopping at EndAngle. These angles are measured counterclockwise.
+*)
+var i : word;
+    tmpAng : single;
+    curX, curY: smallint;
+begin
+
+ if StAngle > EndAngle then begin
+  i:=StAngle;
+  StAngle:=EndAngle;
+  EndAngle:=i;
+ end;
+
+ SetArcCoords (X,Y,radius,radius,StAngle,EndAngle);
+
+ tmpAng:=StAngle * D_PI_180;
+
+ For i:= StAngle To EndAngle Do
+  Begin
+   curX:= X + Round (Radius*Cos (tmpAng));
+   curY:= Y - Round (Radius*Sin (tmpAng));
+   PutPixel (curX, curY);
+
+   tmpAng:=tmpAng+D_PI_180;
+  End;
+end;
+
+
+procedure PieSlice(X, Y, StAngle, EndAngle, Radius: Word);
+(*
+@description:
+PieSlice draws a sector of a circle with center (X,Y) and radius Radius, starting at StAngle and ending at EndAngle.
+*)
+var i : word;
+    tmpAng : single;
+    curX, curY: smallint;
+begin
+ Arc(X, Y, StAngle, EndAngle, Radius);
+
+ Line(X,Y,LastArcCoords.xstart,LastArcCoords.ystart);
+ Line(X,Y,LastArcCoords.xend,LastArcCoords.yend);
+end;
+
+
 procedure Ellipse(x0, y0, a, b: word);
-//----------------------------------------------------------------------------------------------
-// Ellipse
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Bresenham Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
+*)
 var	a2, b2, error, stopx, stopy: integer;
 	x, y: word;
 
@@ -187,9 +290,10 @@ end;
 
 
 procedure FillEllipse(x0, y0, a, b: word);
-//----------------------------------------------------------------------------------------------
-// Fill Ellipse
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Bresenham filled Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
+*)
 var	a2, b2, error, stopx, stopy: integer;
 	x, y: word;
 
@@ -246,9 +350,10 @@ end;
 
 
 procedure Rectangle(x1, y1, x2, y2: Smallint); overload;
-//----------------------------------------------------------------------------------------------
-// Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color
+*)
 begin
 
  MoveTo(x1,y1);
@@ -261,9 +366,10 @@ end;
 
 
 procedure Rectangle(Rect: TRect); overload;
-//----------------------------------------------------------------------------------------------
-// Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color
+*)
 begin
 
  MoveTo(Rect.Left, Rect.Top);
@@ -275,6 +381,91 @@ begin
 end;
 
 
+procedure FloodFillH(x,y: smallint; color: byte);
+(*
+@description:
+Horizontal flood fill
+*)
+var xStack, yStack: array [0..4095] of smallint;
+    stackEntry: word;
+    sx: smallint;
+    spanAbove, spanBelow: Boolean;
+    oldColor, belowColor, aboveColor: byte;
+begin
+	oldColor := GetPixel(x,y);
+
+	if (oldColor = color) then exit;
+
+	SetColor(color);
+
+	stackEntry := 1;
+
+	repeat
+
+		while (x > 0) and (GetPixel(x-1,y) = oldColor) do dec(x);
+
+		spanAbove := false;
+		spanBelow := false;
+
+		sx := x;
+
+		while (x < ScreenWidth) and (GetPixel(x,y) = oldColor) do begin
+
+			if (y < smallint(ScreenHeight-1)) then begin
+
+				belowColor := GetPixel(x, y+1);
+
+				if (spanBelow=false) and (belowColor = oldColor) then begin
+
+					xStack[stackEntry]  := x;
+					yStack[stackEntry]  := y+1;
+					inc(stackEntry);
+
+					if stackEntry > sizeof(xStack) then exit;
+
+					spanBelow := true;
+				end
+				else if (spanBelow=true) and (belowColor <> oldColor) then
+					spanBelow := false;
+			end;
+
+			if (y > 0) then begin
+
+				aboveColor := GetPixel(x, y-1);
+
+				if (spanAbove=false) and (aboveColor = oldColor) then begin
+
+					xStack[stackEntry]  := x;
+					yStack[stackEntry]  := y-1;
+					inc(stackEntry);
+
+					if stackEntry > sizeof(xStack) then exit;
+
+					spanAbove := true;
+				end
+				else if (spanAbove=true) and (aboveColor <> oldColor) then
+					spanAbove := false;
+			end;
+
+			inc(x);
+		end;
+
+		dec(x);
+
+		Line(sx,y,x,y);
+
+		dec(stackEntry);
+		x := xStack[stackEntry];
+		y := yStack[stackEntry];
+
+	until stackentry=0;
+
+end;
+
+
+{
+separate xStack, yStack -> code too long
+
 procedure FloodFill(a,b: smallint; newcolor: byte);
 //----------------------------------------------------------------------------------------------
 // Fill an area with a given color, seed fill algorithm
@@ -282,7 +473,7 @@ procedure FloodFill(a,b: smallint; newcolor: byte);
 var ir, nf: word;
     c: cardinal;
     oldcolor: byte;
-    FloodFillStack: array [0..0] of cardinal;
+    xStack, yStack: array [0..0] of smallint;
 
 
 procedure FloodFillExec;
@@ -333,7 +524,8 @@ begin
 
     inc(nf);
 
-    FloodFillStack[nf]:= word(xr) shl 16 + word(yr);
+    xStack[nf] := xr;
+    yStack[nf] := yr;
    end;
 
  end;
@@ -343,7 +535,8 @@ end;
 
 begin
 
- FloodFillStack:=pointer(dpeek(560)-2048);
+ xStack:=pointer(dpeek(560)-2048);
+ yStack:=pointer(dpeek(560)-1024);
 
  SetColor(newcolor);
 
@@ -351,7 +544,8 @@ begin
 
  nf := 1;
  ir := 1;
- FloodFillStack[nf] := word(a) shl 16 + word(b);
+ xStack[nf] := a;
+ yStack[nf] := b;
 
  FloodFillExec;
 
@@ -359,10 +553,8 @@ begin
 
   inc(ir);
 
-  c:=FloodFillStack[ir];
-
-  a := hi(c);
-  b := lo(c);
+  a := xStack[ir];
+  b := yStack[ir];
 
   FloodFillExec;
 
@@ -372,7 +564,8 @@ begin
 
    if nf>500 then exit;
 
-   move(FloodFillStack[ir+1], FloodFillStack[1], nf shl 2);
+   move(xStack[ir+1], xStack[1], nf shl 1);
+   move(yStack[ir+1], yStack[1], nf shl 1);
 
 //   for i := 1 to nf do fill[i] := fill[ir+i];
 
@@ -383,12 +576,126 @@ begin
  end;
 
 end;
+}
+
+
+procedure FloodFill(a,b: smallint; newcolor: byte);
+(*
+@description:
+Fill an area with a given color, seed fill algorithm
+*)
+const
+    FILLSTACKSIZE = 512;
+
+var stackPointer, stackEntry: word;
+    c: cardinal;
+    oldcolor: byte;
+    FloodFillStack: array [0..FILLSTACKSIZE-1] of cardinal;
+
+
+procedure FloodFillExec;
+var i: byte;
+    xr,yr: smallint;
+    yes: Boolean;
+begin
+
+ for i:=0 to 3 do begin
+
+  case i of
+
+   0: begin
+	xr:=a+1;
+	yr:=b;
+
+	yes:=(xr < ScreenWidth);
+      end;
+
+   1: begin
+	xr:=a-1;
+//	yr:=b;
+
+	yes:=(xr >= 0);
+      end;
+
+   2: begin
+	xr:=a;
+	yr:=b+1;
+
+	yes:=(yr < ScreenHeight);
+      end;
+
+   3: begin
+//	xr:=a;
+	yr:=b-1;
+
+	yes:=(yr >= 0);
+      end;
+
+  end;
+
+
+  if yes then
+   if GetPixel(xr,yr) = oldcolor then begin
+
+    PutPixel(xr, yr);
+
+    inc(stackEntry);
+
+    FloodFillStack[stackEntry]:= word(xr) shl 16 + word(yr);
+
+   end;
+
+ end;
+
+end;
+
+
+begin
+
+ SetColor(newcolor);
+
+ oldcolor:=GetPixel(a,b);
+
+ stackEntry := 1;
+ stackPointer := 1;
+
+ FloodFillStack[stackEntry] := word(a) shl 16 + word(b);
+
+ FloodFillExec;
+
+ while stackEntry > stackPointer do begin
+
+  inc(stackPointer);
+
+  c:=FloodFillStack[stackPointer];
+
+  a := hi(c);
+  b := lo(c);
+
+  FloodFillExec;
+
+  if (stackEntry > FILLSTACKSIZE shr 1) then begin
+
+   stackEntry := stackEntry - stackPointer;
+
+   if stackEntry > FILLSTACKSIZE shr 1 then exit;
+
+   move(FloodFillStack[stackPointer+1], FloodFillStack[1], stackEntry * sizeof(cardinal) );
+
+   stackPointer := 0;
+
+  end;
+
+ end;
+
+end;
 
 
 procedure Bar(x1, y1, x2, y2: Smallint);
-//----------------------------------------------------------------------------------------------
-// Draw filled rectangle
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw filled rectangle
+*)
 var i: smallint;
 begin
 
@@ -398,9 +705,10 @@ end;
 
 
 procedure FillRect(Rect: TRect);
-//----------------------------------------------------------------------------------------------
-// Draw filled rectangle
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw filled rectangle
+*)
 var i: smallint;
 begin
 
@@ -412,9 +720,10 @@ end;
 
 
 procedure Bar3D(x1, y1, x2, y2 : smallint;depth : word;top : boolean);
-//----------------------------------------------------------------------------------------------
-// Draw filled 3-dimensional rectangle
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw filled 3-dimensional rectangle
+*)
 var
  origwritemode : smallint;
  OldX, OldY : smallint;
