@@ -1,4 +1,14 @@
 unit joystick;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Joystick memory registers (Atari XE/XL)
+
+ @version: 1.1
+
+ @description:
+ *)
+
 
 {
 
@@ -11,11 +21,17 @@ var
 	joy_1 : byte absolute $278;	// The value of joystick 0
 	joy_2 : byte absolute $279;	// The value of joystick 1
 
+	stick: array [0..1] of byte absolute $278;
+
 	stick0 : byte absolute $278;
 	stick1 : byte absolute $279;
 
+	strig: array [0..1] of byte absolute $284;
+
 	strig0 : byte absolute $284;	// Stick trigger 0
 	strig1 : byte absolute $285;	// Stick trigger 1
+
+	paddl: array [0..7] of byte absolute $270;
 
 	paddl0 : byte absolute $270;	// The value of paddle 0
 	paddl1 : byte absolute $271;	// The value of paddle 1
@@ -25,6 +41,8 @@ var
 	paddl5 : byte absolute $275;	// The value of paddle 5
 	paddl6 : byte absolute $276;	// The value of paddle 6
 	paddl7 : byte absolute $277;	// The value of paddle 7
+
+	ptrig: array [0..7] of byte absolute $27c;
 
 	ptrig0 : byte absolute $27c;	// Paddle trigger 0
 	ptrig1 : byte absolute $27d;	// Paddle trigger 1

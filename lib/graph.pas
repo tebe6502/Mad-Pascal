@@ -1,9 +1,15 @@
 unit graph;
+(*
+@type: unit
+@name:
+@author: Tomasz Biela (Tebe)
+
+@description:
+<http://www.freepascal.org/docs-html/rtl/graph/index-5.html>
+*)
+
 
 {
-
-http://www.freepascal.org/docs-html/rtl/graph/index-5.html
-
 
 GetColor
 GetPixel
@@ -50,9 +56,10 @@ end;
 *)
 
 procedure InitGraph(mode: byte); overload;
-//----------------------------------------------------------------------------------------------
-// init graphics mode
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Init graphics mode
+*)
 var window: byte;
 begin
 
@@ -69,7 +76,7 @@ begin
 	case mode of
 	0,3:	begin ScreenWidth := 40; ScreenHeight := 24 end;
 	5:	begin ScreenWidth := 80; ScreenHeight := 48 end;
-	7:	begin ScreenWidth := 160; ScreenHeight := 96 end;
+	6..7:	begin ScreenWidth := 160; ScreenHeight := 96 end;
 	8:	ScreenWidth := 320;
 	9..11:	ScreenWidth := 80;
 	15:	ScreenWidth := 160
@@ -98,9 +105,10 @@ end;
 
 
 procedure SetBkColor(color: byte); assembler;
-//----------------------------------------------------------------------------------------------
-// Sets the background color to Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sets the background color to Color
+*)
 asm
 {	mva color colbaks
 };
@@ -108,9 +116,10 @@ end;
 
 
 function GetColor: byte; assembler;
-//----------------------------------------------------------------------------------------------
-// Return current drawing color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Return current drawing color
+*)
 asm
 {	mva @COMMAND.colscr Result
 };
@@ -118,9 +127,10 @@ end;
 
 
 procedure SetColor(color: byte); assembler;
-//----------------------------------------------------------------------------------------------
-// Sets the foreground color to Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sets the foreground color to Color
+*)
 asm
 {	mva color @COMMAND.colscr
 };
@@ -128,9 +138,10 @@ end;
 
 
 procedure PutPixel(x,y: smallint); assembler; overload;
-//----------------------------------------------------------------------------------------------
-// Puts a point at (X,Y) using color Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Puts a point at (X,Y) using color Color
+*)
 asm
 {	txa:pha
 
@@ -164,9 +175,10 @@ stop	pla:tax
 end;
 
 procedure PutPixel(x,y: smallint; color: byte); overload;
-//----------------------------------------------------------------------------------------------
-// Puts a point at (X,Y) using color Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Puts a point at (X,Y) using color Color
+*)
 begin
 
 asm
@@ -177,9 +189,10 @@ end;
 
 
 function GetPixel(x,y: smallint): byte; assembler;
-//----------------------------------------------------------------------------------------------
-// Return color of pixel
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Return color of pixel
+*)
 asm
 {	txa:pha
 
@@ -222,9 +235,10 @@ end;
 
 
 procedure LineTo(x, y: smallint); assembler;
-//----------------------------------------------------------------------------------------------
-// Draw a line starting from current position to a given point
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw a line starting from current position to a given point
+*)
 asm
 {	lda y+1
 	bpl _0
@@ -281,9 +295,10 @@ end;
 
 
 procedure Line(x1, y1, x2, y2: smallint);
-//----------------------------------------------------------------------------------------------
-// Draw a line between 2 points
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw a line between 2 points
+*)
 var x, y: smallint;
 begin
 	x:=CurrentX;
@@ -298,9 +313,10 @@ end;
 
 
 procedure fLine(x0, y0, x1, y1: smallint);
-//----------------------------------------------------------------------------------------------
-// Draw a line between 2 points
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw a line between 2 points
+*)
 begin
  Line(x0,y0,x1,y1);
 end;

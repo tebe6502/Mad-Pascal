@@ -1,5 +1,22 @@
+unit clipping;
+(*
+ @type: unit
+ @author:
+ @name:
 
-unit Clipping;
+ @version: 1.0
+
+ @description:
+
+*)
+
+
+{
+
+CheckLineClipping
+CheckRectClipping
+
+}
 
 interface
 
@@ -14,6 +31,10 @@ implementation
 
 
 procedure CheckRectClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint); overload;
+(*
+@description:
+
+*)
   procedure ClearRect;
   begin
     x1 := -1;
@@ -40,12 +61,20 @@ end;
 
 
 procedure CheckRectClipping (ClipRect:TRect; var Rect:Trect); overload;
+(*
+@description:
+
+*)
 begin
     CheckRectClipping (ClipRect, ClipRect.left, ClipRect.top, ClipRect.right, ClipRect.bottom);
 end;
 
 
 procedure CheckLineClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint);
+(*
+@description:
+
+*)
 var a,b : real;
     Calculated : boolean;
     xdiff,n : smallint;

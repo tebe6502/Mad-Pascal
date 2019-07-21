@@ -1,4 +1,14 @@
 unit vbxe;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Video Board XE unit
+
+ @version: 1.0
+
+ @description:
+*)
+
 
 (*
 	$0000	XDLIST
@@ -44,15 +54,21 @@ interface
 
 uses crt;
 
-type	TUInt24 =
-	record
-		byte0: byte;
-		byte1: byte;
-		byte2: byte;
+type	TUInt24 = record
+	(*
+	@description:
+
+	*)
+	byte0: byte;
+	byte1: byte;
+	byte2: byte;
 	end;
 
-	TXDL =
-	record
+type	TXDL = record
+	(*
+	@description:
+
+	*)
 		xdlc_: word;		// blank
 		rptl_: byte;
 
@@ -70,8 +86,11 @@ type	TUInt24 =
 		ov_prior: byte;
 	end;
 
-	TBCB =
-	record
+type	TBCB = record
+	(*
+	@description:
+
+	*)
 		src_adr: TUInt24;
 		src_step_y: smallint;
 		src_step_x: shortint;
@@ -89,7 +108,11 @@ type	TUInt24 =
 	end;
 
 
-	TVBXEMemoryStream = Object
+type	TVBXEMemoryStream = Object
+	(*
+	@description:
+
+	*)
 
 	Position: cardinal;
 	Size: cardinal;			// 0..Size-1
@@ -144,6 +167,10 @@ implementation
 
 
 procedure VBXEMemoryBank(b: byte); assembler;
+(*
+@description:
+
+*)
 asm
 {	fxs FX_MEMS b
 };
@@ -151,6 +178,10 @@ end;
 
 
 function ReadVBXEMemoryByte(var Position: cardinal): byte;
+(*
+@description:
+
+*)
 var bnk: byte;
     adr: word;
 begin
@@ -166,6 +197,10 @@ end;
 
 
 procedure WriteVBXEMemoryByte(var Position: cardinal; a: byte);
+(*
+@description:
+
+*)
 var bnk: byte;
     adr: word;
 begin
@@ -181,6 +216,10 @@ end;
 
 
 procedure TVBXEMemoryStream.Create;
+(*
+@description:
+
+*)
 begin
 
  Position := 0;
@@ -190,6 +229,10 @@ end;
 
 
 procedure TVBXEMemoryStream.SetBank;
+(*
+@description:
+
+*)
 var bnk: byte;
     adr: word;
 begin
@@ -201,6 +244,10 @@ end;
 
 
 procedure TVBXEMemoryStream.ReadBuffer(var Buffer; Count: word);
+(*
+@description:
+
+*)
 var bnk: byte;
     adr, i: word;
     dst: ^byte;
@@ -234,6 +281,10 @@ end;
 
 
 procedure TVBXEMemoryStream.WriteBuffer(var Buffer; Count: word);
+(*
+@description:
+
+*)
 var bnk: byte;
     adr, i: word;
     src: ^byte;
@@ -267,6 +318,10 @@ end;
 
 
 function TVBXEMemoryStream.ReadByte: Byte;
+(*
+@description:
+
+*)
 begin
 	Result := ReadVBXEMemoryByte(Position);
 
@@ -275,6 +330,10 @@ end;
 
 
 function TVBXEMemoryStream.ReadWord: Word;
+(*
+@description:
+
+*)
 begin
 	Result := ReadVBXEMemoryByte(Position);
 	Result := Result + ReadVBXEMemoryByte(Position) shl 8;
@@ -284,6 +343,10 @@ end;
 
 
 function TVBXEMemoryStream.ReadDWord: Cardinal;
+(*
+@description:
+
+*)
 begin
 	Result := ReadVBXEMemoryByte(Position);
 	Result := Result + ReadVBXEMemoryByte(Position) shl 8;
@@ -295,6 +358,10 @@ end;
 
 
 procedure TVBXEMemoryStream.WriteByte(b: Byte);
+(*
+@description:
+
+*)
 begin
 	WriteVBXEMemoryByte(Position, b);
 
@@ -303,6 +370,10 @@ end;
 
 
 procedure TVBXEMemoryStream.WriteWord(w: Word);
+(*
+@description:
+
+*)
 begin
 	WriteVBXEMemoryByte(Position, w);
 	WriteVBXEMemoryByte(Position, w shr 8);
@@ -312,6 +383,10 @@ end;
 
 
 procedure TVBXEMemoryStream.WriteDWord(d: Cardinal);
+(*
+@description:
+
+*)
 begin
 	WriteVBXEMemoryByte(Position, d);
 	WriteVBXEMemoryByte(Position, d shr 8);
@@ -323,6 +398,10 @@ end;
 
 
 procedure TVBXEMemoryStream.Clear;
+(*
+@description:
+
+*)
 var adr, siz: cardinal;
 begin
 	adr:=Position;
@@ -384,6 +463,10 @@ end;
 
 
 procedure OverlayOff; assembler;
+(*
+@description:
+
+*)
 asm
 {	@setxdl #e@xdl.ovroff
 };
@@ -391,12 +474,20 @@ end;
 
 
 procedure ColorMapOn; assembler;
+(*
+@description:
+
+*)
 asm
 {	@setxdl #e@xdl.mapon
 };
 end;
 
 procedure ColorMapOff; assembler;
+(*
+@description:
+
+*)
 asm
 {	@setxdl #e@xdl.mapoff
 };
@@ -404,12 +495,21 @@ end;
 
 
 procedure SetHorizontalRes(a: byte); assembler;
+(*
+@description:
+
+*)
 asm
 {	@setxdl a
 };
 end;
 
+
 procedure SetHRes(a: byte); assembler;
+(*
+@description:
+
+*)
 asm
 {	@setxdl a
 };
@@ -417,6 +517,10 @@ end;
 
 
 procedure IniBCB(var a: TBCB; src,dst: cardinal; w0, w1: smallint; w: word; h: byte; ctrl: byte);
+(*
+@description:
+
+*)
 begin
  fillbyte(a, sizeof(a), 0);
 
@@ -444,6 +548,10 @@ end;
 
 
 procedure SrcBCB(var a: TBCB; src: cardinal);
+(*
+@description:
+
+*)
 begin
 
  a.src_adr.byte2 := src shr 16;
@@ -454,6 +562,10 @@ end;
 
 
 procedure DstBCB(var a: TBCB; dst: cardinal);
+(*
+@description:
+
+*)
 begin
 
  a.dst_adr.byte2 := dst shr 16;
@@ -464,6 +576,10 @@ end;
 
 
 function BlitterBusy: Boolean; assembler;
+(*
+@description:
+
+*)
 asm
 {	ldy #FX_BLITTER_BUSY
 	lda (fxptr),y
@@ -473,6 +589,10 @@ end;
 
 
 procedure RunBCB(var a: TBCB); assembler;
+(*
+@description:
+
+*)
 asm
 {	fxs	FX_BL_ADR0	a
 	lda	a+1
@@ -489,6 +609,10 @@ end;
 
 
 procedure GetXDL(var a: txdl); register; assembler;
+(*
+@description:
+
+*)
 asm
 {	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
 
@@ -505,6 +629,10 @@ end;
 
 
 procedure SetXDL(var a: txdl); register; assembler;
+(*
+@description:
+
+*)
 asm
 {	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
 
@@ -521,6 +649,10 @@ end;
 
 
 procedure VBXEControl(a: byte); assembler;
+(*
+@description:
+
+*)
 asm
 {
 	fxs FX_VIDEO_CONTROL a
@@ -529,6 +661,10 @@ end;
 
 
 procedure VBXEOff; assembler;
+(*
+@description:
+
+*)
 asm
 {	stx @sp
 

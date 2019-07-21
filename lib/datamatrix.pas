@@ -1,14 +1,20 @@
-//
-// Datamatrix library
-// based on https://github.com/pfusik/datamatrix6502
-// adapted into MadPascal by bocianu '2017
-//
-
 unit datamatrix;
+(*
+ @type: unit
+ @author: bocianu <bocianu@gmail.com>
+ @name: Datamatrix library
+
+ @description:
+ <https://github.com/pfusik/datamatrix6502>
+
+ adapted into MadPascal by bocianu '2017
+*)
+
+
 interface
 
 procedure CalculateMatrix:assembler;
-procedure SetMessage(msg:string;dmData:word);
+procedure SetMessage(msg:string; dmData:word);
 
 implementation
 
@@ -16,6 +22,10 @@ const
    DataMatrix_EOF = 255;
 
 procedure CalculateMatrix:assembler;
+(*
+@description:
+
+*)
 asm
 {
    txa:pha	; need to store register X in Mad pascal
@@ -396,6 +406,10 @@ end;
 
 
 procedure SetMessage(msg:string; dmData:word);
+(*
+@description:
+
+*)
 var len: byte;
 begin
     len := byte(msg[0]);

@@ -7,9 +7,10 @@ MoveTo
 
 
 procedure MoveTo(x, y: smallint); assembler;
-//----------------------------------------------------------------------------------------------
-// Move cursor to absolute position
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Move cursor to absolute position.
+*)
 asm
 {	lda y+1
 	bpl _0

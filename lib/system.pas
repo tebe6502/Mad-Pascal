@@ -1,8 +1,17 @@
 unit system;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Standard supported functions of Mad Pascal
+
+ @version: 1.1
+
+ @description:
+ <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
+*)
+
 
 {
-
-http://www.freepascal.org/docs-html/rtl/system/index-5.html
 
 Abs
 ArcTan
@@ -39,7 +48,7 @@ Space
 Str
 StringOfChar
 Sqr
-Sqrt
+Sqrt		; sqrt(x) = exp(0.5*ln(x))
 UpCase
 Val
 WriteSector
@@ -48,26 +57,52 @@ WriteSector
 
 interface
 
-type
-	TString = string[32];
-	TSize = record cx, cy: smallint end;
-	TRect = record	left, top, right, bottom: smallint end;
-	TPoint = record x,y: SmallInt end;
+type	TString = string[32];
+	(*
+	@description:
 
-var	ScreenWidth: word = 40;
-	ScreenHeight: word = 24;
+	*)
 
-	IOResult, ScreenMode: byte;
+type	TSize = record cx, cy: smallint end;
+	(*
+	@description:
+	TSize is a type to describe the size of a rectangular area, where cx is the width, cy is the height (in pixels) of the rectangle.
+	*)
+
+type	TRect = record	left, top, right, bottom: smallint end;
+	(*
+	@description:
+	TRect is a type to describe a rectangular area.
+	*)
+
+type	TPoint = record x,y: SmallInt end;
+	(*
+	@description:
+	This record describes a coordinate.
+	*)
+
+type	TDateTime = record yy,mm,dd,h,m,s: byte end;
+	(*
+	@description:
+	This record describes Date-Time.
+	*)
+
+type	TLastArcCoords = record x,y,xstart,ystart,xend,yend: smallint end;
+	(*
+	@description:
+
+	*)
+
 
 const
 	M_PI_2	= pi*2;
 	D_PI_2	= pi/2;
 	D_PI_180= pi/180;
 
-	mGTIA = 0;
-	mVBXE = $80;
-	WINDOW  = $10;			// text window
-	NARROW  = $20;			// narrow screen
+	mGTIA	= 0;
+	mVBXE	= $80;
+//	WINDOW	= $10;			// text window
+//	NARROW	= $20;			// narrow screen
 
 	VBXE_XDLADR = $0000;		// XDLIST
 	VBXE_BCBADR = $0100;		// BLITTER LIST ADDRESS
@@ -115,6 +150,26 @@ const
 	COLOR_LIGHTGREEN	= $cc;
 	COLOR_LIGHTBLUE         = $7c;
 
+(* file mode *)
+
+	fmOpenRead	= $04;
+	fmOpenWrite	= $08;
+	fmOpenAppend	= $09;
+	fmOpenReadWrite	= $0c;
+
+
+var	ScreenWidth: smallint = 40;	(* @var current screen width *)
+	ScreenHeight: smallint = 24;	(* @var current screen height *)
+
+	DateSeparator: Char = '-';
+
+	FileMode: byte = fmOpenReadWrite;
+
+	ScreenMode: byte;		(* @var current screen mode *)
+
+	IOResult: byte;			(* @var result of last file IO operation *)
+
+	EoLn: Boolean;			(* @var end of line status *)
 
 
 	function Abs(x: Real): Real; register; assembler; overload;
@@ -179,7 +234,7 @@ const
 	function Sqr(x: integer): integer; overload;
 	function Sqrt(x: Real): Real; overload;
 	function Sqrt(x: Single): Single; overload;
-	function Sqrt(x: Integer): Integer; overload;
+	function Sqrt(x: Integer): Single; overload;
 	function UpCase(a: char): char;
 	procedure Val(const s: TString; var v: integer; var code: byte); assembler; overload;
 	procedure Val(const s: TString; var v: single; var code: byte); overload;
@@ -195,6 +250,13 @@ var
 
 
 function ReadConfig(devnum: byte): cardinal; assembler;
+(*
+@description:
+Read disk drive configuration
+
+@param: devnum - device number
+*)
+
 {
 DVSTAT
 Byte 0 ($02ea):
@@ -263,6 +325,14 @@ end;
 
 
 procedure ReadSector(devnum: byte; sector: word; var buf); assembler;
+(*
+@description:
+Read disk sector to buffer
+
+@param: devnum - device number
+@param: sector - sector number
+@param: buf - pointer to buffer
+*)
 asm
 {	txa:pha
 
@@ -289,6 +359,14 @@ end;
 
 
 procedure WriteSector(devnum: byte; sector: word; var buf); assembler;
+(*
+@description:
+Write disk sector from buffer
+
+@param: devnum - device number
+@param: sector - sector number
+@param: buf - pointer to buffer
+*)
 asm
 {	txa:pha
 
@@ -315,13 +393,28 @@ end;
 
 
 procedure RunError(a: byte);
+(*
+@description:
+Print error message
+
+@param: a - error number
+*)
 begin
-	writeln('Runtime error ', a);
+	writeln(#69,#82,#82,#32, a);	// 'ERR ',a	; kody znakow oddzielone przecinkiem nie zostana potraktowane jako ciag znakowy ktory kompilator zapisuje do stalych
 	halt;
 end;
 
 
 function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
+(*
+@description:
+Convert cardinal value to string with hexadecimal representation.
+
+@param: Value
+@param: Digits
+
+@returns: string[32]
+*)
 asm
 {	txa:pha
 
@@ -335,6 +428,14 @@ end;
 
 
 function Peek(a: word): byte; register; assembler;
+(*
+@description:
+Reads BYTE from the desired memory address
+
+@param: a - memory address
+
+@returns: byte
+*)
 asm
 {	ldy #0
 	mva (edx),y Result
@@ -343,6 +444,14 @@ end;
 
 
 function DPeek(a: word): word; register; assembler;
+(*
+@description:
+Reads WORD from the desired memory address
+
+@param: a - memory address
+
+@returns: word
+*)
 asm
 {	ldy #0
 	mva (edx),y Result
@@ -353,6 +462,10 @@ end;
 
 
 procedure Randomize; assembler;
+(*
+@description:
+Initialize random number generator
+*)
 asm
 {	mva $d20a RndSeed
 	mva #$00  RndSeed+1
@@ -361,6 +474,12 @@ end;
 
 
 function Random: Real; overload;
+(*
+@description:
+Generate random number
+
+@returns: Real (Q24.8)
+*)
 begin
 
 asm
@@ -469,6 +588,12 @@ end;
 
 
 function RandomF: Float;
+(*
+@description:
+Generate random number
+
+@returns: Float (Single)
+*)
 begin
 
 asm
@@ -490,6 +615,14 @@ end;
 
 
 function Random(range: byte): byte; assembler; overload;
+(*
+@description:
+Generate random number
+
+@param: range (0..range-1)
+
+@returns: byte
+*)
 asm
 {
 ;BYTE FUNC Rand(BYTE range)
@@ -514,6 +647,14 @@ end;
 
 
 function Random(range: smallint): smallint; overload;
+(*
+@description:
+Generate random number
+
+@param: range (0..range-1), (-range..0)
+
+@returns: smallint
+*)
 begin
 
  if range = 0 then
@@ -549,26 +690,17 @@ ok
 end;
 
 
-(*
-function IntToReal(x: integer): Real; register; assembler;
-//----------------------------------------------------------------------------------------------
-// Convert an integer value to a real value
-//----------------------------------------------------------------------------------------------
-asm
-{	mva edx+2 result+3
-	mva edx+1 result+2
-	mva edx result+1
-	mva #0 result
-};
-end;
-*)
-
-
 function Abs(x: Real): Real; register; assembler; overload;
-//----------------------------------------------------------------------------------------------
-// Abs returns the absolute value of a variable.
-// The result of the function has the same type as its argument, which can be any numerical type.
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
 asm
 {	lda edx+3
 	spl
@@ -583,10 +715,16 @@ end;
 
 
 function Abs(x: Single): Single; register; assembler; overload;
-//----------------------------------------------------------------------------------------------
-// Abs returns the absolute value of a variable.
-// The result of the function has the same type as its argument, which can be any numerical type.
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - Single
+
+@returns: Single
+*)
 asm
 {	lda edx+3
 	and #$7f
@@ -600,10 +738,16 @@ end;
 
 
 function Abs(x: Integer): Integer; register; assembler; overload;
-//----------------------------------------------------------------------------------------------
-// Abs returns the absolute value of a variable.
-// The result of the function has the same type as its argument, which can be any numerical type.
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - Integer
+
+@returns: Integer
+*)
 asm
 {	lda edx+3
 	spl
@@ -618,9 +762,14 @@ end;
 
 
 function Sqr(x: Real): Real; overload;
-//----------------------------------------------------------------------------------------------
-// Sqr returns the square of its argument X
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sqr returns the square of its argument X
+
+@param: x - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
 begin
 
  Result := x*x;
@@ -629,9 +778,14 @@ end;
 
 
 function Sqr(x: Single): Single; overload;
-//----------------------------------------------------------------------------------------------
-// Sqr returns the square of its argument X
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sqr returns the square of its argument X
+
+@param: x - Single
+
+@returns: Single
+*)
 begin
 
  Result := x*x;
@@ -640,9 +794,14 @@ end;
 
 
 function Sqr(x: integer): integer; overload;
-//----------------------------------------------------------------------------------------------
-// Sqr returns the square of its argument X
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sqr returns the square of its argument X
+
+@param: x - integer
+
+@returns: integer
+*)
 begin
 
  Result := x*x;
@@ -651,96 +810,107 @@ end;
 
 
 function Sqrt(x: Real): Real; overload;
-//----------------------------------------------------------------------------------------------
-// Sqrt returns the square root of its argument X, which must be positive
-//----------------------------------------------------------------------------------------------
+(*
+@description
+Sqrt returns the square root of its argument X, which must be positive
+
+@param: x - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
 var Divisor: Real;
 begin
 { Hero's algorithm }
 
-if x < 0.0 then exit;
+Result:=0.0;
+
+if x <= 0.0 then exit;
 
 Result  := x;
 Divisor := 1.0;
 
 while Abs(Result - Divisor) > 0.01 do
   begin
-  Divisor := (Result + Divisor) * 0.5;
-  Result := x / Divisor;
+   Divisor := (Result + Divisor) * 0.5;
+   Result := x / Divisor;
   end;
+
 end;
 
 
 function Sqrt(x: Single): Single; overload;
-//----------------------------------------------------------------------------------------------
-// Sqrt returns the square root of its argument X, which must be positive
-//----------------------------------------------------------------------------------------------
+(*
+@description
+Sqrt returns the square root of its argument X, which must be positive
+
+@param: x - Single
+
+@returns: Single
+*)
 var sp: ^single;
     c: cardinal;
 begin
+	Result:=0;
+
+	if x <= 0 then exit;
 
 	sp:=@c;
 
-	c := cardinal(x) - $3f800000;
-	c := c shr 1;
-	c := c + $3f800000;
+	c:=cardinal(x);
+
+	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
 
 	Result := sp^;
 
 	Result:=(Result+x/Result) * 0.5;
 	Result:=(Result+x/Result) * 0.5;
+	Result:=(Result+x/Result) * 0.5;
 end;
 
+
+function Sqrt(x: Integer): Single; overload;
 (*
-function Sqrt(x: Single): Single; overload;
-//----------------------------------------------------------------------------------------------
-// Sqrt returns the square root of its argument X, which must be positive
-//----------------------------------------------------------------------------------------------
-var Divisor: Single;
-begin
-{ Hero's algorithm }
+@description
+Sqrt returns the square root of its argument X, which must be positive
 
-if x < single(0) then exit;
+@param: x - integer
 
-Result  := x;
-Divisor := 1;
-
-while Abs(Result - Divisor) > single(0.0001) do
-  begin
-  Divisor := (Result + Divisor) * 0.5;
-  Result := x / Divisor;
-  end;
-end;
+@returns: integer
 *)
-
-
-function Sqrt(x: Integer): Integer; overload;
-//----------------------------------------------------------------------------------------------
-// Sqrt returns the square root of its argument X, which must be positive.
-//----------------------------------------------------------------------------------------------
-var
-  Divisor: Integer;
+var sp: ^single;
+    c: cardinal;
 begin
-{ Hero's algorithm }
+	Result:=0;
 
-if x < 0 then exit;
+	if x <= 0 then exit;
 
-Result  := x;
-Divisor := 1;
+	sp:=@c;
 
-while Abs(Result - Divisor) > 1 do
-  begin
-  Divisor := (Result + Divisor) shr 1;
-  Result := x div Divisor;
-  end;
+	c:=cardinal(single(x));
+
+	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
+
+	Result := sp^;
+
+	Result:=(Result+x/Result) * 0.5;
+	Result:=(Result+x/Result) * 0.5;
+	Result:=(Result+x/Result) * 0.5;
 end;
 
 
 function iSqrt(number: Single): Single;
-//----------------------------------------------------------------------------------------------
-// https://en.wikipedia.org/wiki/Fast_inverse_square_root
-// https://pl.wikipedia.org/wiki/Szybka_odwrotno%C5%9B%C4%87_pierwiastka_kwadratowego
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Fast inverse square root
+
+<https://en.wikipedia.org/wiki/Fast_inverse_square_root>
+
+<https://pl.wikipedia.org/wiki/Szybka_odwrotno%C5%9B%C4%87_pierwiastka_kwadratowego>
+
+@param: number - Single
+
+@returns: Single
+*)
 var sp: ^single;
     c: cardinal;
     f0, f1: single;
@@ -760,10 +930,16 @@ end;
 
 
 function ArcTan(value: real): real;
-//----------------------------------------------------------------------------------------------
-// Arctan returns the Arctangent of X, which can be any Real type.
-// The resulting angle is in radial units.
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Arctan returns the Arctangent of Value, which can be any Real type.
+
+The resulting angle is in radial units.
+
+@param: value - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
 var x, y: real;
     sign: Boolean;
 begin
@@ -796,10 +972,16 @@ end;
 
 
 function Exp(x: Real): Real; overload;
-//----------------------------------------------------------------------------------------------
-// Exp returns the exponent of X, i.e. the number e to the power X.
-// https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Exp returns the exponent of X, i.e. the number e to the power X.
+
+<https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent>
+
+@param: x - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
 var P, Fraction, I, L: Real;
 begin
     Fraction := x;
@@ -818,10 +1000,16 @@ end;
 
 
 function Exp(x: Float): Float; overload;
-//----------------------------------------------------------------------------------------------
-// Exp returns the exponent of X, i.e. the number e to the power X.
-// https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Exp returns the exponent of X, i.e. the number e to the power X.
+
+<https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent>
+
+@param: x - Float (Single)
+
+@returns: Float (Single)
+*)
 var P, Fraction, I, L: Float;
 begin
     Fraction := x;
@@ -840,10 +1028,16 @@ end;
 
 
 function Ln(x: Real): Real; overload;
-//----------------------------------------------------------------------------------------------
-// Ln returns the natural logarithm of the Real parameter X. X must be positive.
-// https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Ln returns the natural logarithm of the Real parameter X. X must be positive.
+
+<https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent>
+
+@param: x - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
 var N, P, K, L, R, A, E: Real;
 begin
 		E := 2.71828182845905;
@@ -878,10 +1072,16 @@ end;
 
 
 function Ln(x: Float): Float; overload;
-//----------------------------------------------------------------------------------------------
-// Ln returns the natural logarithm of the Real parameter X. X must be positive.
-// https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Ln returns the natural logarithm of the Real parameter X. X must be positive.
+
+<https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent>
+
+@param: x - Float (Single)
+
+@returns: Float (Single)
+*)
 var N, P, K, L, R, A, E: Float;
 begin
 		E := 2.71828182845905;
@@ -916,13 +1116,21 @@ end;
 
 
 function FileSize(var f: file): cardinal; assembler;
+(*
+@description:
+Size of file (SDX only)
+
+@param: f - file handle
+
+@returns: cardinal
+*)
 asm
 {	txa:pha
 
-	mwa f bp2
+	mwa f :bp2
 
 	ldy #s@file.chanel
-	lda (bp2),y
+	lda (:bp2),y
 	tax
 	lda #39
 	sta iccmd,x
@@ -941,13 +1149,21 @@ end;
 
 
 function FilePos(var f: file): cardinal; assembler;
+(*
+@description:
+Get position in file (SDX only)
+
+@param: f - file handle
+
+@returns: cardinal
+*)
 asm
 {	txa:pha
 
-	mwa f bp2
+	mwa f :bp2
 
 	ldy #s@file.chanel
-	lda (bp2),y
+	lda (:bp2),y
 	tax
 	lda #38
 	sta iccmd,x
@@ -955,10 +1171,27 @@ asm
 
 	sty IOResult
 
-	mva icax3,x result
-	mva icax4,x result+1
-	mva icax5,x result+2
-	mva #$00 result+3
+	mva icax3,x eax
+	mva icax4,x eax+1
+	mva icax5,x eax+2
+
+	mva #$00 eax+3
+	sta ecx+2
+	sta ecx+3
+
+	ldy #s@file.record
+	lda (:bp2),y
+	sta ecx
+	iny
+	lda (:bp2),y
+	sta ecx+1
+
+	jsr idivEAX_ECX.main
+
+	mva eax Result
+	mva eax+1 Result+1
+	mva eax+2 Result+2
+	mva eax+3 Result+3
 
 	pla:tax
 };
@@ -966,20 +1199,44 @@ end;
 
 
 procedure Seek(var f: file; a: cardinal); assembler;
+(*
+@description:
+Set file position (SDX only)
+
+@param: f - file handle
+@param: a - new position
+*)
 asm
 {	txa:pha
 
-	mwa f bp2
+	mwa f :bp2
 
 	ldy #s@file.chanel
-	lda (bp2),y
+	lda (:bp2),y
 	tax
 	lda #37
 	sta iccmd,x
 
-	mva a icax3,x
-	mva a+1 icax4,x
-	mva a+2 icax5,x
+	ldy #s@file.record
+	lda (:bp2),y
+	sta eax
+	iny
+	lda (:bp2),y
+	sta eax+1
+	lda #$00
+	sta eax+2
+	sta eax+3
+
+	mva a ecx
+	mva a+1 ecx+1
+	mva a+2 ecx+2
+	mva a+3 ecx+3
+
+	jsr imulECX
+
+	mva eax icax3,x
+	mva eax+1 icax4,x
+	mva eax+2 icax5,x
 
 	jsr ciov
 
@@ -991,39 +1248,29 @@ end;
 
 
 function Eof(var f: file): Boolean;
+(*
+@description:
+Check for end of file
+
+@param: f - file handle
+
+@returns: TRUE if the file-pointer has reached the end of the file
+@return: FALSE in all other cases
+*)
 var i: cardinal;
-    tmp: byte;
+    bf: array [0..255] of byte;
 begin
 	i:=FilePos(f);
-asm
-{	mwa f bp2
 
-	ldy #s@file.record
-	lda (bp2),y
-	pha
-	lda #1
-	sta (bp2),y
-	iny
-	lda (bp2),y
-	pha
-	lda #0
-	sta (bp2),y
-
-};
-	blockread(f, tmp, 1);
+	blockread(f, bf, 1);
 
 	Seek(f, i);
+
 asm
-{	ldy #s@file.record
-	iny
-	pla
-	sta (bp2),y
-	dey
-	pla
-	sta (bp2),y
+{	mwa f :bp2
 
 	ldy #s@file.status
-	lda (bp2),y
+	lda (:bp2),y
 	and #e@file.eof
 	sta Result
 };
@@ -1031,9 +1278,14 @@ end;
 
 
 function LowerCase(a: char): char;
-//----------------------------------------------------------------------------------------------
-// Converts a character to lowercase
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Converts a character to lowercase
+
+@param: a - char
+
+@returns: char
+*)
 begin
 
  case a of
@@ -1046,9 +1298,14 @@ end;
 
 
 function UpCase(a: char): char;
-//----------------------------------------------------------------------------------------------
-// Converts a character to uppercase
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Converts a character to uppercase
+
+@param: a - char
+
+@returns: char
+*)
 begin
 
  case a of
@@ -1061,35 +1318,45 @@ end;
 
 
 procedure Val(const s: TString; var v: integer; var code: byte); assembler; overload;
-//----------------------------------------------------------------------------------------------
-// Calculate numerical value of a string
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Calculate numerical value of a string
+
+@param: s - string[32]
+@param: v - pointer to integer - result
+@param: code - pointer to integer - error code
+*)
 asm
 {	@StrToInt #adr.s
 
 	tya
 	pha
 
-	mwa code bp2
+	mwa code :bp2
 	ldy #0
 
 	pla
-	sta (bp2),y
+	sta (:bp2),y
 
-	mwa v bp2
+	mwa v :bp2
 
-	mva edx (bp2),y+
-	mva edx+1 (bp2),y+
-	mva edx+2 (bp2),y+
-	mva edx+3 (bp2),y
+	mva edx (:bp2),y+
+	mva edx+1 (:bp2),y+
+	mva edx+2 (:bp2),y+
+	mva edx+3 (:bp2),y
 };
 end;
 
 
 procedure Val(const s: TString; var v: single; var code: byte); overload;
-//----------------------------------------------------------------------------------------------
-// Calculate numerical value of a string
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Calculate numerical value of a string
+
+@param: s - string[32]
+@param: v - pointer to integer - result
+@param: code - pointer to integer - error code
+*)
 var n, dotpos, len: byte;
     f: single;
 begin
@@ -1137,9 +1404,14 @@ end;
 
 
 function FloatToStr(a: real): ^string; assembler;
-//----------------------------------------------------------------------------------------------
-// Convert a float value to a string
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Convert a float value to a string
+
+@param: a - Real (Q24.8)
+
+@returns: string[32]
+*)
 asm
 {	txa:pha
 
@@ -1155,9 +1427,13 @@ end;
 
 
 procedure Str(a: integer; var s: TString); assembler;
-//----------------------------------------------------------------------------------------------
-// Convert a numerical value to a string
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Convert a numerical value to a string
+
+@param: a - integer
+@param: s - string[32] - result
+*)
 asm
 {	txa:pha
 
@@ -1173,6 +1449,13 @@ end;
 
 
 procedure Poke(a: word; value: byte); register; assembler;
+(*
+@description:
+Store BYTE at the desired memory address
+
+@param: a - memory address
+@param: value (0..255)
+*)
 asm
 {	ldy #0
 	mva value (edx),y
@@ -1181,6 +1464,13 @@ end;
 
 
 procedure DPoke(a: word; value: word); register; assembler;
+(*
+@description:
+Store WORD at the desired memory address
+
+@param: a - memory address
+@param: value (0..65535)
+*)
 asm
 {	ldy #0
 	mva value (edx),y
@@ -1191,45 +1481,72 @@ end;
 
 
 procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload;
-//----------------------------------------------------------------------------------------------
-// Fills the memory starting at A with Count Characters with value equal to Value
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Fills the memory starting at A with Count Characters with value equal to Value
+
+@param: a - pointer
+@param: count
+@param: value - Char
+*)
 asm
 {	jsr @fill
 };
 end;
 
 procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload;
-//----------------------------------------------------------------------------------------------
-// Fills the memory starting at A with Count Bytes with value equal to Value
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Fills the memory starting at A with Count Characters with value equal to Value
+
+@param: a - pointer
+@param: count
+@param: value - Byte
+*)
 asm
 {	jsr @fill
 };
 end;
 
 procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload;
-//----------------------------------------------------------------------------------------------
-// Fills the memory starting at A with Count Boolean with value equal to Value
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Fills the memory starting at A with Count Characters with value equal to Value
+
+@param: a - pointer
+@param: count
+@param: value - Boolean
+*)
 asm
 {	jsr @fill
 };
 end;
 
 procedure FillChar(var x; count: word; value: char); assembler; register; overload;
+(*
+@description:
+
+*)
 asm
 {	jsr @fill
 };
 end;
 
 procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
+(*
+@description:
+
+*)
 asm
 {	jsr @fill
 };
 end;
 
 procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
+(*
+@description:
+
+*)
 asm
 {	jsr @fill
 };
@@ -1237,15 +1554,23 @@ end;
 
 
 procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload;
-//----------------------------------------------------------------------------------------------
-// Fills the memory starting at A with Count Bytes with value equal to Value
-//----------------------------------------------------------------------------------------------
-asm
+(*
+@description:
+Fills the memory starting at A with Count Characters with value equal to Value
+
+@param: a - pointer
+@param: count
+@param: value - Byte
+*)asm
 {	jsr @fill
 };
 end;
 
 procedure FillByte(var x; count: word; value: byte); assembler; register; overload;
+(*
+@description:
+
+*)
 asm
 {	jsr @fill
 };
@@ -1253,89 +1578,106 @@ end;
 
 
 procedure Move(source, dest: pointer; count: word); assembler; register; overload;
-//----------------------------------------------------------------------------------------------
-// Moves Count bytes from Source to Dest
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Moves Count bytes from Source to Dest
+
+@param: source - pointer
+@param: dest - pointer
+@param: count - word
+
+@returns: cardinal
+*)
 asm
 {	jsr @move
 };
 end;
 
 procedure Move(var source, dest; count: word); assembler; register; overload;
+(*
+@description:
+
+*)
 asm
 {	jsr @move
 };
 end;
 
 procedure Move(var source; dest: pointer; count: word); assembler; register; overload;
+(*
+@description:
+
+*)
 asm
 {	jsr @move
 };
 end;
 
 
-function Sin(x: Real): Real; overload;
-var
-  r, x2: Real;
-  a: byte;
+function rsincos(x: real; sc: boolean): real;
+//----------------------------------------------------------------------------------------------
+// http://atariage.com/forums/topic/240919-mad-pascal/page-10#entry3818764
+//----------------------------------------------------------------------------------------------
+var i: byte;
 begin
 
  while x > M_PI_2 do x := x - M_PI_2;
  while x < 0.0    do x := x + M_PI_2;
 
- Result := 0;
- r := x;
- x2 := x * x;
+    { Normalize argument, divide by (pi/2) }
+    x := x * 0.63661977236758134308;
 
- a:=2;
+    { Get's integer part, should be }
+    i := trunc(x);
 
- while a<19 do begin			// !!! 19 !!! aby COS byl precyzyjnie wyliczony
-  Result := Result + r;
-  r := (-r) * x2 / real((a + 1) * a);
+    { Fixes negative part, needed to calculate "fractional" part }
+    if x<0 then dec(i);
 
-  inc(a, 2);
- end;
+    { And finally get's fractional part }
+    x := x - shortint(i);
 
+    { If we need cosine, adds pi/2 }
+    if sc then inc(i);
+
+    { Test quadrant, odd values are reflected }
+    if (i and 1) = 0 then x := 1 - x;
+
+    { Calculate cosine(x) with optimal polynomial approximation }
+    x := x * x;
+    Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
+
+    { Test quadrant to return negative values }
+    if (i and 2) = 2 then Result := -Result;
+
+end;
+
+
+function Sin(x: Real): Real; overload;
+(*
+@description:
+Calculate sine of angle
+
+@param: X - angle in radians (Q24.8)
+
+@returns: Q24.8
+*)
+begin
+	Result := rsincos(x, false);
 end;
 
 
 function Cos(x: Real): Real; overload;
-begin
- Result := Sin(x + D_PI_2);
-end;
-
-
 (*
-function Sin(x: single): single; overload;
-var
-  r, x2: single;
-  a: byte;
-begin
+@description:
+Calculate cosine of angle
 
-while x > single(M_PI_2) do x := x - M_PI_2;
-while x < single(0) do x := x + M_PI_2;
+@param: X - angle in radians (Q24.8)
 
-Result := 0;
-r := x;
-x2 := x * x;
-
- a:=2;
-
- while a<27 do begin			// !!! 27 !!! aby COS byl precyzyjnie wyliczony
-  Result := Result + r;
-  r := (-r) * x2 / single((a + 1) * a);
-  inc(a, 2);
- end;
-
-end;
-
-
-function Cos(x: Single): Single; overload;
-begin
- x:=x + D_PI_2;
- Result := Sin(x);
-end;
+@returns: Q24.8
 *)
+begin
+	Result := rsincos(x, true);
+end;
 
 
 function fsincos(x: single; sc: boolean): single;
@@ -1346,7 +1688,7 @@ var i: byte;
 begin
 
     while x > single(M_PI_2) do x := x - M_PI_2;
-    while x < single(0) do x := x + M_PI_2;
+    while x < 0 do x := x + M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
     x := x * 0.63661977236758134308;
@@ -1359,7 +1701,7 @@ begin
         dec(i);
 
     { And finally get's fractional part }
-    x := x - single(shortint(i));
+    x := x - shortint(i);
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -1376,22 +1718,43 @@ begin
 end;
 
 
-function sin(x: single): single; overload;
+function Sin(x: single): single; overload;
+(*
+@description:
+Calculate sine of angle
+
+@param: X - angle in radians (Single)
+
+@returns: Single
+*)
 begin
     Result := fsincos(x, false);
 end;
 
 
-function cos(x: single): single; overload;
+function Cos(x: single): single; overload;
+(*
+@description:
+Calculate cosine of angle
+
+@param: X - angle in radians (Single)
+
+@returns: Single
+*)
 begin
     Result := fsincos(x, true);
 end;
 
 
 function Space(b: Byte): ^string; assembler;
-//----------------------------------------------------------------------------------------------
-// Return a string of spaces
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Return a string of spaces
+
+@param: b - number of spaces
+
+@returns: pointer to string
+*)
 asm
 {	ldy #0
 	lda #' '
@@ -1405,6 +1768,15 @@ end;
 
 
 function StringOfChar(c: Char; l: byte): ^string; assembler;
+(*
+@description:
+Return a string consisting of 1 character repeated N times.
+
+@param: c - character
+@param: l - counter (BYTE)
+
+@returns: pointer to string
+*)
 asm
 {	ldy #0
 	lda c
@@ -1418,6 +1790,13 @@ end;
 
 
 procedure SetLength(var S: string; Len: byte); register; assembler;
+(*
+@description:
+Set length of a string.
+
+@param: S - string
+@param: len - new length (BYTE)
+*)
 asm
 {	ldy #0
 	mva Len (edx),y
@@ -1426,6 +1805,15 @@ end;
 
 
 function BinStr(Value: cardinal; Digits: byte): TString; assembler;
+(*
+@description:
+Convert integer to string with binary representation.
+
+@param: Value - Cardinal
+@param: Digits - Byte
+
+@returns: string[32]
+*)
 asm
 {	txa:pha
 
@@ -1454,6 +1842,15 @@ end;
 
 
 function OctStr(Value: cardinal; Digits: byte): TString; assembler;
+(*
+@description:
+Convert integer to a string with octal representation.
+
+@param: Value - Cardinal
+@param: Digits - Byte
+
+@returns: string[32]
+*)
 asm
 {	txa:pha
 
@@ -1490,6 +1887,10 @@ end;
 
 
 procedure Pause; assembler; overload;
+(*
+@description:
+Delay program execution (1/50 second).
+*)
 asm
 {	lda:cmp:req :rtclok+2
 };
@@ -1497,22 +1898,35 @@ end;
 
 
 procedure Pause(n: word); assembler; overload;
+(*
+@description:
+Delay program execution (N * 1/50 second).
+
+@param: N - number of '1/50 second'
+*)
 asm
-{	lda n
+{
+loop	lda n
 	ora n+1
 	beq stop
 
-	mwa n timcnt3
+	lda:cmp:req :rtclok+2
 
-	lda #$FF
-	sta timflg3
-	lda:rne timflg3
+	dew n
+
+	jmp loop
 stop
 };
 end;
 
 
 function ParamCount: byte; assembler;
+(*
+@description:
+Return number of command-line parameters passed to the program.
+
+@returns: byte
+*)
 asm
 {	@cmdline #255
 	sta Result
@@ -1521,6 +1935,14 @@ end;
 
 
 function ParamStr(i: byte): TString; assembler;
+(*
+@description:
+Return value of a command-line argument.
+
+@param: i - of a command-line argument
+
+@returns: string[32]
+*)
 asm
 {	@cmdline i
 	@move #@buf Result #33
@@ -1529,6 +1951,15 @@ end;
 
 
 function Concat(a,b: string): string; assembler; overload;
+(*
+@description:
+Append one string to another.
+
+@param: a - first string
+@param: b - second string
+
+@returns: string (a+b)
+*)
 asm
 {	mva #0 @buf
 	@addString #adr.a
@@ -1539,6 +1970,10 @@ end;
 
 
 function Concat(a: string; b: char): string; assembler; overload;
+(*
+@description:
+
+*)
 asm
 {	mva #0 @buf
 	@addString #adr.a
@@ -1552,6 +1987,10 @@ end;
 
 
 function Concat(a: char; b: string): string; assembler; overload;
+(*
+@description:
+
+*)
 asm
 {	mva #1 @buf
 	lda a
@@ -1563,6 +2002,10 @@ end;
 
 
 function Concat(a,b: char): string; overload;
+(*
+@description:
+
+*)
 begin
  Result[0]:=chr(2);
  Result[1]:=a;
@@ -1571,6 +2014,14 @@ end;
 
 
 function Swap(a: word): word; overload;
+(*
+@description:
+Swap high and low bytes of a variable
+
+@param: a - word
+
+@returns: word
+*)
 begin
 
  Result := a shr 8 + a shl 8;
@@ -1579,11 +2030,18 @@ end;
 
 
 function Swap(a: cardinal): cardinal; overload;
+(*
+@description:
+Swap high and low words of a variable
+
+@param: a - cardinal
+
+@returns: cardinal
+*)
 begin
 
  Result := a shr 16 + a shl 16;
 
 end;
-
 
 end.

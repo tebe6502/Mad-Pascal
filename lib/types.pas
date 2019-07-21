@@ -1,8 +1,17 @@
 unit types;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Various types
+
+ @version: 1.0
+
+ @description:
+ <https://www.freepascal.org/docs-html/rtl/types/index-5.html>
+*)
+
 
 {
-
-https://www.freepascal.org/docs-html/rtl/types/index-5.html
 
 Bounds
 CenterPoint
@@ -27,12 +36,12 @@ interface
 	function Bounds(ALeft, ATop, AWidth, AHeight: smallint): TRect;
 	function CenterPoint(const Rect: TRect): TPoint;
 	function EqualRect(const r1,r2 : TRect) : Boolean;
-	function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+	function InflateRect(var Rect: TRect; dx, dy: smallint): Boolean;
 	function IntersectRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;
 	function IsRectEmpty(const Rect : TRect) : Boolean;
 	procedure NormalizeRect(var Rect: TRect); overload;
 	procedure NormalizeRect(var left,top, right,bottom : smallint); overload;
-	function OffsetRect(var Rect : TRect;DX : Integer;DY : Integer) : Boolean;
+	function OffsetRect(var Rect : TRect; DX, DY : smallint) : Boolean;
 	function Point(AX, AY: smallint): TPoint;
 	function PointsEqual(const P1, P2: TPoint): Boolean;
 	function PtInEllipse(const Rect: TRect; const p : TPoint): Boolean;
@@ -49,6 +58,15 @@ implementation
 
 
 function Point(AX, AY: smallint): TPoint;
+(*
+@description:
+Create a point
+
+@param: ax - position x
+@param: ay - position y
+
+@returns: TPoint record
+*)
 begin
   Result.X := AX;
   Result.Y := AY;
@@ -56,6 +74,15 @@ end;
 
 
 function Rect(ALeft, ATop, ARight, ABottom: smallint): TRect;
+(*
+@description:
+Create a rectangle record
+
+@param: ALeft, ATop - left corner
+@param: ARight, ABottom - right corner
+
+@returns: TRect record
+*)
 begin
   Result.Left := ALeft;
   Result.Top := ATop;
@@ -65,6 +92,15 @@ end;
 
 
 function Bounds(ALeft, ATop, AWidth, AHeight: smallint): TRect;
+(*
+@description:
+Create a rectangle, given a position and size
+
+@param: ALeft, ATop - position
+@param: AWidth, AHeigh - size
+
+@returns: TRect record
+*)
 begin
   Result.Left := ALeft;
   Result.Top := ATop;
@@ -74,12 +110,28 @@ end;
 
 
 function EqualRect(const r1,r2 : TRect) : Boolean;
+(*
+@description:
+Check if two rectangles are equal
+
+@param: R1, R2 - rectangles
+
+@returns: TRUE if the rectangles R1 and R2 are equal
+*)
 begin
   Result:=(r1.left=r2.left) and (r1.right=r2.right) and (r1.top=r2.top) and (r1.bottom=r2.bottom);
 end;
 
 
 function PointsEqual(const P1, P2: TPoint): Boolean;
+(*
+@description:
+Check if two points are equal
+
+@param: P1, P2 - points
+
+@returns: TRUE if the points P1 and P2 are equal
+*)
 begin
   { lazy, but should work }
   result:=cardinal(P1.x + P1.y shl 16) = cardinal(P2.x + P2.y shl 16);
@@ -87,18 +139,35 @@ end;
 
 
 function RectWidth(const Rect: TRect): word;
+(*
+@description:
+
+*)
 begin
  Result:=abs(Rect.right - Rect.left);
 end;
 
 
 function RectHeight(const Rect: TRect): word;
+(*
+@description:
+
+*)
 begin
  Result:=abs(Rect.bottom - Rect.top);
 end;
 
 
 function PtInEllipse(const Rect: TRect; const p : TPoint): Boolean;
+(*
+@description:
+Check whether a point is inside a ellipse
+
+@param: Rect - TRect record
+@param: p - TPoint record
+
+@returns: TRUE if p is located inside ellipse defined by Rect
+*)
 begin
 
   Result := false;
@@ -112,6 +181,15 @@ end;
 
 
 function PtInRect(const Rect : TRect;const p : TPoint) : Boolean;
+(*
+@description:
+Check whether a point is inside a rectangle
+
+@param: Rect - TRect record
+@param: p - TPoint record
+
+@returns: TRUE if p is located inside Rect
+*)
 begin
   Result:=(p.y>=Rect.Top) and
 	  (p.y<Rect.Bottom) and
@@ -121,6 +199,10 @@ end;
 
 
 function Avg(a, b: integer): integer;
+(*
+@description:
+
+*)
 begin
   if a < b then
     Result := a + ((b - a) shr 1)
@@ -130,6 +212,14 @@ end;
 
 
 function CenterPoint(const Rect: TRect): TPoint;
+(*
+@description:
+Return the center point of a rectangle
+
+@param: Rect - TRect record
+
+@returns: TPoint record
+*)
 begin
  Result.X := Avg(Rect.Left, Rect.Right);
  Result.Y := Avg(Rect.Top, Rect.Bottom);
@@ -137,12 +227,29 @@ end;
 
 
 function IsRectEmpty(const Rect : TRect) : Boolean;
+(*
+@description:
+Check whether a rectangle is empty
+
+@param: TRect record
+
+@returns: TRUE if the rectangle is empty
+*)
 begin
   Result:=(Rect.Right<=Rect.Left) or (Rect.Bottom<=Rect.Top);
 end;
 
 
 function IntersectRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;
+(*
+@description:
+Return the intersection of 2 rectangles
+
+@param: Rect - destination TRect record
+@param: R1, R2 - rectangles
+
+@returns: TRUE if the operation was successfull
+*)
 var
   lRect: TRect;
 begin
@@ -173,6 +280,15 @@ end;
 
 
 function UnionRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;
+(*
+@description:
+Return the union of 2 rectangles
+
+@param: Rect - destination TRect record
+@param: R1, R2 - rectangles
+
+@returns: TRUE if the operation was successfull
+*)
 var
   lRect: TRect;
 begin
@@ -199,7 +315,17 @@ begin
 end;
 
 
-function OffsetRect(var Rect : TRect;DX : Integer;DY : Integer) : Boolean;
+function OffsetRect(var Rect : TRect; DX, DY : Smallint) : Boolean;
+(*
+@description:
+Offset the rectangle
+
+@param: Rect - TRect record
+@param: offsets the rectangle Rect by a horizontal distance DX
+@param: offsets the rectangle Rect by a vertical distance DY
+
+@returns: TRUE if the operation was successfull
+*)
 begin
 
  if isRectEmpty(Rect) then
@@ -216,7 +342,17 @@ begin
 end;
 
 
-function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+function InflateRect(var Rect: TRect; dx, dy: smallint): Boolean;
+(*
+@description:
+Increase the rectangle in size, keeping it centered
+
+@param: Rect - TRect record
+@param: inflates the rectangle horizontally with DX pixels on each side
+@param: inflates the rectangle verticaly with DY pixels on each side
+
+@returns: TRUE if the operation was successfull
+*)
 begin
 
  if isRectEmpty(Rect) then
@@ -233,6 +369,10 @@ end;
 
 
 procedure NormalizeRect(var Rect: TRect); overload;
+(*
+@description:
+
+*)
 var x: smallint;
 begin
   if Rect.Top > Rect.Bottom then
@@ -251,6 +391,10 @@ end;
 
 
 procedure NormalizeRect(var left,top, right,bottom : smallint); overload;
+(*
+@description:
+
+*)
 var x: smallint;
 begin
   if Top > Bottom then
@@ -269,6 +413,14 @@ end;
 
 
 function Size(AWidth, AHeight: smallint): TSize; overload;
+(*
+@description:
+Return the size of the rectangle
+
+@param: AWidth, AHeight
+
+@returns: TSize record
+*)
 begin
   Result.cx := AWidth;
   Result.cy := AHeight;
@@ -276,6 +428,14 @@ end;
 
 
 function Size(const ARect: TRect): TSize; overload;
+(*
+@description:
+Return the size of the rectangle
+
+@param: ARect - TRect
+
+@returns: TSize record
+*)
 begin
   Result.cx := ARect.Right - ARect.Left;
   Result.cy := ARect.Bottom - ARect.Top;

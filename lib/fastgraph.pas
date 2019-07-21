@@ -1,9 +1,15 @@
 unit fastgraph;
+(*
+@type: unit
+@name:
+@author: Tomasz Biela (Tebe)
+
+@description:
+<http://www.freepascal.org/docs-html/rtl/graph/index-5.html>
+*)
+
 
 {
-
-http://www.freepascal.org/docs-html/rtl/graph/index-5.html
-
 
 fLine			fast Line
 FrameBuffer
@@ -58,9 +64,10 @@ end;
 
 
 procedure SetBkColor(color: byte); assembler;
-//----------------------------------------------------------------------------------------------
-// Sets the background color to Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sets the background color to Color
+*)
 asm
 {	mva color colbaks
 };
@@ -68,9 +75,10 @@ end;
 
 
 procedure SetColor(color: byte); assembler;
-//----------------------------------------------------------------------------------------------
-// Sets the foreground color to Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Sets the foreground color to Color
+*)
 asm
 {	jmp gr8
 mode	equ *-2
@@ -111,7 +119,7 @@ lp	tya
 c9	dta 0,0
 c9_	dta $0f, $f0
 
-colorHi		dta h(adr.color_bits, adr.color_bits+$100, adr.color_bits+$200, adr.color_bits+$300)
+colorHi	dta h(adr.color_bits, adr.color_bits+$100, adr.color_bits+$200, adr.color_bits+$300)
 
 gr8	lda color
 	and #1
@@ -151,9 +159,10 @@ end;
 
 
 procedure PutPixel(x,y: smallint); assembler; register;
-//----------------------------------------------------------------------------------------------
-// Puts a point at (X,Y) using color Color
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Puts a point at (X,Y) using color Color
+*)
 asm
 {	stx @sp
 
@@ -179,13 +188,13 @@ sk1
 	lda adr.lineLo,y
 	add #0
 lfb	equ *-1
-	sta bp2
+	sta :bp2
 
 	lda adr.lineHi,y
 ;	beq stop
 	adc #0
 hfb	equ *-1
-	sta bp2+1
+	sta :bp2+1
 
 	jmp gr8
 mode	equ *-2
@@ -220,9 +229,9 @@ gr8	lda x
 	lda adr.div4,y
 	tay
 
-plot	lda (bp2),y
-acol	ora adr.color_bits,x
-	sta (bp2),y
+plot	lda (:bp2),y
+acol	and adr.color_bits,x
+	sta (:bp2),y
 
 stop	ldx #0
 @sp	equ *-1
@@ -231,9 +240,10 @@ end;
 
 
 function GetPixel(x,y: smallint): byte; assembler;
-//----------------------------------------------------------------------------------------------
-// Return color of pixel
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Return color of pixel
+*)
 asm
 {	txa:pha
 
@@ -274,6 +284,10 @@ end;
 
 procedure Line(x1,y1,x2,y2: smallint);
 var dx, dy, fraction, stepx, stepy: smallint;
+(*
+@description:
+
+*)
 begin
     if x1<0 then x1:=0;
     if y1<0 then y1:=0;
@@ -326,8 +340,13 @@ end;
 
 
 procedure fLine(x0,y0,x1,y1: byte); assembler;
-// DRAWTO in Graphics 8, 9, 15
-// A quick hack by eru
+(*
+@description:
+
+DRAWTO in Graphics 8, 9, 15
+A quick hack by eru
+*)
+
 asm
 {
 dx	= ztmp
@@ -337,10 +356,10 @@ todo	= ztmp+3
 
 PIXEL	.MACRO
 	ldy adr.div4,x
-	lda (bp2),y
+	lda (:bp2),y
 	.def :1 = *
 	ora adr.color_bits,x
-	sta (bp2),y
+	sta (:bp2),y
 	.ENDM
 
 PREPARE	.MACRO
@@ -378,11 +397,11 @@ right
 	lda adr.lineLo,y
 	add #0
 lfb	equ *-1
-	sta bp2
+	sta :bp2
 	lda adr.lineHi,y
 	adc #0
 hfb	equ *-1
-	sta bp2+1
+	sta :bp2+1
 
 ; remember x0 in X
 	ldx x0
@@ -413,13 +432,13 @@ urr_loop
 	bcs urr_skip
 	adc dx
 	sta tmp
-	lda bp2			; go 1 line up
+	lda :bp2		; go 1 line up
 	sec
 	sbc #0
 w0	equ *-1
-	sta bp2
+	sta :bp2
 	bcs *+4
-	dec bp2+1
+	dec :bp2+1
 urr_skip
 	dec todo
 	bne urr_loop
@@ -431,13 +450,13 @@ up_up_right
 	PREPARE uur_color
 uur_loop
 	PIXEL uur_color
-	lda bp2	; go 1 line up
+	lda :bp2		; go 1 line up
 	sec
 	sbc #0
 w1	equ *-1
-	sta bp2
+	sta :bp2
 	bcs *+4
-	dec bp2+1
+	dec :bp2+1
 	lda tmp
 	sec
 	sbc dx
@@ -474,13 +493,13 @@ drr_loop
 	bcs drr_skip
 	adc dx
 	sta tmp
-	lda bp2			; go 1 line down
+	lda :bp2		; go 1 line down
 	clc
 	adc #0
 w2	equ *-1
-	sta bp2
+	sta :bp2
 	bcc *+4
-	inc bp2+1
+	inc :bp2+1
 drr_skip
 	dec todo
 	bne drr_loop
@@ -492,13 +511,13 @@ down_down_right
 	PREPARE ddr_color
 ddr_loop
 	PIXEL ddr_color
-	lda bp2			; go 1 line down
+	lda :bp2		; go 1 line down
 	clc
 	adc #0
 w3	equ *-1
-	sta bp2
+	sta :bp2
 	bcc *+4
-	inc bp2+1
+	inc :bp2+1
 	lda tmp
 	sec
 	sbc dx
@@ -519,11 +538,11 @@ end;
 
 
 procedure LineTo(x, y: smallint);
-//----------------------------------------------------------------------------------------------
-// Draw a line starting from current position to a given point
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draw a line starting from current position to a given point
+*)
 begin
-
 asm
 {	lda y+1
 	bpl _0
@@ -558,9 +577,10 @@ end;
 
 
 procedure fRectangle(x1, y1, x2, y2: Smallint);
-//----------------------------------------------------------------------------------------------
-// Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color and style
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color and style
+*)
 begin
 
  fLine(x1,y1,x2,y1);
@@ -572,6 +592,9 @@ end;
 
 
 procedure FrameBuffer(a: word); assembler;
+(*
+@description:
+*)
 asm
 {	.ifdef PutPixel
 	mva a	PutPixel.lfb
@@ -587,9 +610,10 @@ end;
 
 
 procedure InitGraph(mode: byte); overload;
-//----------------------------------------------------------------------------------------------
-// init graphics mode
-//----------------------------------------------------------------------------------------------
+(*
+@description:
+Init graphics mode
+*)
 var window, i, width: byte;
 begin
 
@@ -725,18 +749,18 @@ asm
 ; ---	init_tabs
 
 	ldy #0
-	sty bp2
-	sty bp2+1
+	sty :bp2
+	sty :bp2+1
 it1
-	lda bp2+1
+	lda :bp2+1
 	sta adr.lineHi,y
-	lda bp2
+	lda :bp2
 	sta adr.lineLo,y
 	clc
 	adc width
-	sta bp2
+	sta :bp2
 	scc
-	inc bp2+1
+	inc :bp2+1
 
 	iny
 	bne it1

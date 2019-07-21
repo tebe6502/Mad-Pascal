@@ -1,5 +1,13 @@
-
 unit misc;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Miscellaneous procedures for detect additional hardware
+ @version: 1.0
+
+ @description:
+*)
+
 
 {
 
@@ -17,7 +25,7 @@ DetectVBXE
 interface
 
 var
-	banks: array [0..63] of byte absolute $0101;
+	banks: array [0..63] of byte absolute $0101;	// array with code of banks PORTB
 
 	function DetectCPU: byte; assembler;
 	function DetectCPUSpeed: real;
@@ -33,7 +41,14 @@ implementation
 
 
 function DetectHighMem: word;
-// http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej
+(*
+@description:
+Detect 65816 linear memmory
+
+<http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej>
+
+@returns: amount of memory in KB
+*)
 begin
 
  Result:=0;
@@ -115,6 +130,17 @@ end;
 
 
 function DetectVBXE(var p: word): Boolean; assembler; register;
+(*
+@description:
+Detect VBXE card
+
+@param: word variable
+
+@returns: TRUE present, FALSE otherwise
+@returns: bit 0..6 variable: VBXE CORE
+@returns: bit 7 variable: =1 RAMBO
+@returns: bit 8..15 variable: VBXE PAGE
+*)
 asm
 {	txa:pha
 
@@ -135,6 +161,13 @@ end;
 
 
 function DetectEvie: Boolean; assembler;
+(*
+@description:
+Detect EVIE card
+
+@returns: TRUE present, FALSE otherwise
+*)
+
 asm
 {	ldy #3
 lp	lda $d2fa,y
@@ -160,11 +193,15 @@ end;
 
 function DetectStereo: Boolean; assembler;
 (*
- second POKEY detect routine answer in A register:
- $00 - absent
- $80 - present
- code & idea: Seban/SLIGHT
- (c) 1995,96 Slight!
+@description:
+Second POKEY detect routine
+
+author:
+Seban/SLIGHT
+
+(c) 1995,96
+
+@returns: TRUE present, FALSE otherwise
 *)
 asm
 {	txa:pha
@@ -207,20 +244,22 @@ end;
 
 function DetectCPU: byte; assembler;
 (*
+@description:
  How to detect on which CPU the assembler code is running
 
  (This information is from Draco, the author of SYSINFO 2.0)
 
  You can test on plain 6502-Code if there is a 65c816 CPU, the 16-Bit processor avaible
+
  in some XLs as a turbo-board, avaible. Draco told me how to do this:
 
  First we make sure, whether we are running on NMOS-CPU (6502) or CMOS (65c02,65c816).
+
  I will just show the "official" way which doesn`t uses "illegal opcodes":
 
- result in regA:
- $00 - 6502
- $01 - 65c02
- $80 - 65816
+@returns: $00 - 6502
+@returns: $01 - 65c02
+@returns: $80 - 65816
 *)
 asm
 {	txa:pha
@@ -262,7 +301,12 @@ end;
 
 function DetectCPUSpeed: real;
 (*
-	by Draco
+@description:
+Detect CPU speed in megahertz
+
+author: Draco
+
+@returns: speed (Q24.8)
 *)
 var clkm, fr0: word;
 begin
@@ -331,11 +375,18 @@ hvbl	equ *-1
 	ldx #0
 @sp	equ *-1
 };
-	Result := (real((fr0 shl 16) + clkm) / 487.0) * 1.7734;
+	Result := ((fr0 shl 16 + clkm) / 487) * 1.7734;
 end;
 
 
 function DetectMem: byte; assembler;
+(*
+@description:
+Detect amount additional memmory PORTB
+
+@returns: amount of banks (0..255)
+@returns: banks code PORTB = BANKS[0..63] at address $0101
+*)
 asm
 {	txa:pha
 
@@ -453,9 +504,16 @@ end;
 
 
 function DetectMapRam: Boolean; assembler;
+(*
+@description:
+Detect MapRAM
+
+<http://xxl.atari.pl/mapram/>
+
+@returns: TRUE present, FALSE otherwise
+*)
 asm
 {
-; http://xxl.atari.pl/mapram/
 
 bsav	= DX
 ext_b	= $5000		;cokolwiek z zakresu $5000-$57FF
