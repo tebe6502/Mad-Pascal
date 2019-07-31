@@ -66,7 +66,7 @@ uses
 
 const
 
-  title = '1.6.0';
+  title = '1.6.1';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -476,6 +476,7 @@ type
   TCaseLabel =
     record
      left, right: Int64;
+     equality: Boolean;
     end;
 
   TCaseLabelArray = array of TCaseLabel;
@@ -524,7 +525,7 @@ var
 
   asmLabels: array of integer;
 
-  OptimizeBuf: array of TOptimizeBuf;
+  OptimizeBuf, TemporaryBuf: array of TOptimizeBuf;
 
   resArray: array of TResource;
 
@@ -2612,6 +2613,25 @@ var i, l, k, m: integer;
 	Result:=false;
       end;
 
+
+    if (listing[i] = #9'bne *+5') and								// bne *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'beq *+5') and								// beq *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
+
+       Result:=false;
+     end;
 
 {
     if (pos('mva #$', listing[i]) > 0) and (pos('mva #$', listing[i+1]) > 0) and 		// mva #$xx	; 0
@@ -10999,6 +11019,14 @@ var i, l, k, m: integer;
      end;
 
 
+    if (pos('lda ', listing[i]) > 0) and (pos('ldy ', listing[i+1]) > 0) and			// lda			; 0
+       (pos('mva ', listing[i+2]) > 0) then							// ldy			; 1
+     begin											// mva			; 2
+      listing[i] := '';
+      Result:=false;
+     end;
+
+
     if (pos('lda ', listing[i]) > 0) and (pos('mva ', listing[i+1]) > 0) then 			// lda			; 0
      begin											// mva			; 1
       listing[i] := '';
@@ -12092,6 +12120,112 @@ var i, l, k, m: integer;
 
        Result:=false;
      end;
+
+
+    if (listing[i] = #9'bne *+5') and								// bne *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'beq *+5') and								// beq *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
+
+       Result:=false;
+     end;
+
+
+    if (pos('cmp ', listing[i]) > 0) and							// cmp			; 0
+       (listing[i+1] = #9'beq @+') and								// beq @+		; 1
+       (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
+       (listing[i+3] = '@') then								// @			; 3
+     begin
+       listing[i+1] := #9'jne ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'bne @+') and								// bne @+		; 0
+       (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
+       (listing[i+2] = '@') then								// @			; 2
+     begin
+       listing[i]   := #9'jeq ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
+       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       (listing[i+2] = #9'beq @+') and								// beq @+		; 2
+       (pos('jmp l_', listing[i+3]) > 0) and							// jmp l_		; 3
+       (listing[i+4] = '@') then								//@			; 4
+      begin
+       listing[i+2] := #9'jne ' + copy(listing[i+3], 6, 256);
+       listing[i+3] := '';
+
+       Result:=false;
+      end;
+
+
+    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
+       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
+       (listing[i+3] = '@') then								//@			; 3
+      begin
+       listing[i+1] := #9'jmi ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       Result:=false;
+      end;
+
+
+    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
+       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
+       (listing[i+3] = '@') then								//@			; 3
+      begin
+       listing[i+1] := #9'jpl ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       Result:=false;
+      end;
+
+
+    if (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       (listing[i+1] = #9'beq @+') and								// beq @+		; 1
+       (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
+       (listing[i+3] = '@') then								//@			; 3
+      begin
+       listing[i+1] := #9'jne ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := '';
+
+       Result:=false;
+      end;
+
+
+    if (listing[i] = #9'seq') and								// seq			; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+      begin
+       listing[i] := #9'jne ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := '';
+
+       Result:=false;
+      end;
 
 
     if (pos('lda :STACK', listing[i]) > 0) and (pos('sta :STACK', listing[i+1]) > 0) and	// lda :STACKORIGIN+10	; 0
@@ -15028,9 +15162,87 @@ begin
 end;
 
 
+procedure OptimizeTMP;
+var i: integer;
+begin
+
+ for i:=0 to High(TemporaryBuf)-1 do
+  if TemporaryBuf[i].line <> '' then begin
+
+   if (pos('jmp l_', TemporaryBuf[i].line) > 0) then					// jmp l_xxxx		; 0
+    if TemporaryBuf[i+1].line = copy(TemporaryBuf[i].line, 6, 256) then			//l_xxxx		; 1
+    begin
+     TemporaryBuf[i].line   := '';
+     TemporaryBuf[i+1].line := '';
+    end;
+
+
+   if (pos('@+', TemporaryBuf[i].line) = 0) and						// beq *+5		; 0
+      (pos('beq *+5', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 1
+      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) then
+    begin
+     TemporaryBuf[i+1].line := #9'jne ' + copy(TemporaryBuf[i+2].line, 6, 256);
+     TemporaryBuf[i+2].line := '';
+    end;
+
+
+   if (pos('@+', TemporaryBuf[i].line) = 0) and
+      (pos('beq @+', TemporaryBuf[i+1].line) > 0) and
+      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
+      (TemporaryBuf[i+3].line = '@') then
+    begin
+     TemporaryBuf[i+1].line := #9'jne ' + copy(TemporaryBuf[i+2].line, 6, 256);
+     TemporaryBuf[i+2].line := '';
+//     TemporaryBuf[i+3].line := '';
+    end;
+
+
+   if (pos('@+', TemporaryBuf[i].line) = 0) and
+      (pos('bcs @+', TemporaryBuf[i+1].line) > 0) and
+      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
+      (TemporaryBuf[i+3].line = '@') then
+    begin
+     TemporaryBuf[i+1].line := #9'jcc ' + copy(TemporaryBuf[i+2].line, 6, 256);
+     TemporaryBuf[i+2].line := '';
+//     TemporaryBuf[i+3].line := '';
+    end;
+
+
+   if (TemporaryBuf[i].line = #9'seq') and
+      (pos('jmp l_', TemporaryBuf[i+1].line) > 0) then
+    begin
+     TemporaryBuf[i].line   := #9'jne ' + copy(TemporaryBuf[i+1].line, 6, 256);
+     TemporaryBuf[i+1].line := '';
+    end;
+
+ end;
+
+
+ for i:=0 to High(TemporaryBuf)-1 do writeln(OutFile, TemporaryBuf[i].line );// +#9';--');
+
+ SetLength(TemporaryBuf, 1);
+
+end;
+
+
+
 procedure asm65(a: string; comment : string ='');
 var len, i: integer;
     optimize_code: Boolean;
+    str: string;
+
+
+ procedure WriteTemporary(s: string);
+ var i: integer;
+ begin
+     i:=High(TemporaryBuf);
+     TemporaryBuf[i].line := s;
+     TemporaryBuf[i].comment := '';
+
+     SetLength(TemporaryBuf, i+2);
+ end;
+
+
 begin
 
 {$IFDEF OPTIMIZECODE}
@@ -15053,11 +15265,14 @@ begin
 
   end else begin
 
-   if High(OptimizeBuf) > 0 then
-     OptimizeASM
-   else begin
+   if High(OptimizeBuf) > 0 then begin
 
-    write(OutFile, a);
+     if High(TemporaryBuf) > 0 then OptimizeTMP;
+
+     OptimizeASM;
+   end else begin
+
+    str:=a;
 
     if comment<>'' then begin
 
@@ -15069,12 +15284,13 @@ begin
       else
        if not(a[i] in [#13, #10]) then inc(len);
 
-     while len<56 do begin write(OutFile, #9); inc(len, 8) end;
+     while len<56 do begin str:=str+#9; inc(len, 8) end;
 
-     writeln(OutFile, comment);
+     str:=str + comment;
 
-    end else
-     writeln(OutFile);
+    end;
+
+    WriteTemporary(str);
 
    end;
 
@@ -16242,12 +16458,12 @@ begin
        __shrAX_CL: asm65(#9'jsr shrAX_CL.WORD');
       __shrEAX_CL: asm65(#9'jsr shrEAX_CL');
 
-	     __je: asm65(#9'beq *+5', '; je');				// =
-	    __jne: asm65(#9'bne *+5', '; jne');			       // <>
-	     __jg: begin asm65(#9'seq', '; jg'); asm65(#9'bcs *+5') end;      // >
-	    __jge: asm65(#9'bcs *+5', '; jge');			       // >=
-	     __jl: asm65(#9'bcc *+5', '; jl');				// <
-	    __jle: begin asm65(#9'bcc *+7', '; jle'); asm65(#9'beq *+5') end; // <=
+	     __je: asm65(#9'beq *+5', '; je');					// =
+	    __jne: asm65(#9'bne *+5', '; jne');					// <>
+	     __jg: begin asm65(#9'seq', '; jg'); asm65(#9'bcs *+5') end;	// >
+	    __jge: asm65(#9'bcs *+5', '; jge');					// >=
+	     __jl: asm65(#9'bcc *+5', '; jl');					// <
+	    __jle: begin asm65(#9'bcc *+7', '; jle'); asm65(#9'beq *+5') end;	// <=
 
 	  __addBX: asm65(#9'inx', '; add bx, 1');
 	  __subBX: asm65(#9'dex', '; sub bx, 1');
@@ -18175,13 +18391,26 @@ Gen; Gen;	//Gen($F9); GenDWord(Value1);			// cmp :ecx, Value1
 end;
 
 
-procedure GenerateCaseStatementProlog;
+procedure GenerateCaseStatementProlog(equality: Boolean);
 begin
-asm65(#13#10'; GenerateCaseStatementProlog');
+//asm65(#13#10'; GenerateCaseStatementProlog');
 
-Gen; Gen;							// and al, 40h    ; test zero flag
+//Gen; Gen;							// and al, 40h    ; test zero flag
 
 GenerateIfThenProlog;
+{
+Inc(CodePosStackTop);
+CodePosStack[CodePosStackTop] := CodeSize;
+
+Gen;								// nop   ; jump to the IF..THEN block end will be inserted here
+Gen;								// nop
+Gen;								// nop
+
+if equality then
+ asm65(#9'jne l_'+IntToHex(CodeSize, 4))
+else
+ asm65(#9'jcc l_'+IntToHex(CodeSize, 4));
+}
 end;
 
 
@@ -18268,7 +18497,7 @@ begin
 
   ResetOpty;
 
-  asm65(#13#10'; IfThenEpilog');
+//  asm65(#13#10'; IfThenEpilog');
 
   CodePos := CodePosStack[CodePosStackTop];
   Dec(CodePosStackTop);
@@ -18287,7 +18516,7 @@ procedure GenerateWhileDoEpilog;
 var
   CodePos, ReturnPos: Word;
 begin
-asm65(#13#10'; WhileDoEpilog');
+//asm65(#13#10'; WhileDoEpilog');
 
 CodePos := CodePosStack[CodePosStackTop];
 Dec(CodePosStackTop);
@@ -18449,7 +18678,9 @@ if Pass = CODEGENERATIONPASS then begin
 
  Gen;
 
+ asm65separator(false);
  asm65('; ' + CompilerTitle);
+ asm65separator(false);
  asm65('');
 
 // asm65(':STACKORIGIN'#9'= $98', '; zp free = $d8..$ff');
@@ -18471,6 +18702,7 @@ if Pass = CODEGENERATIONPASS then begin
 // asm65(#9'.define :STACK3 STA :STACKORIGIN+STACkWIDTH*3,x');
 // asm65(#9'.define @param .print %%1');
 
+ asm65separator;
  asm65('');
 
  if ZPAGE_Atari > 0 then
@@ -18506,11 +18738,11 @@ if Pass = CODEGENERATIONPASS then begin
 
 // asm65('zfre');
 
- asm65(#13#10#9'.print ''ZPFREE: $0000..'',fxptr-1,'' ; '',*,''..'',$ff');
+ asm65(#13#10'.print ''ZPFREE: $0000..'',fxptr-1,'' ; '',*,''..'',$ff');
 
- // asm65(#13#10'@sp'#9'.ds 1');
-
+ asm65separator;
  asm65('');
+
  asm65('ax'#9'= eax');
  asm65('al'#9'= eax');
  asm65('ah'#9'= eax+1');
@@ -18669,9 +18901,9 @@ Gen;								// nop   ; jump to the IF..THEN block end will be inserted here
 Gen;								// nop
 Gen;								// nop
 
-asm65(#9'ift l_'+IntToHex(CodeSize, 4)+'-*>3');
+//asm65(#9'ift l_'+IntToHex(CodeSize, 4)+'-*>3');     // !!!! infinite loop
 asm65(#9'jmp l_'+IntToHex(CodeSize, 4));
-asm65(#9'eif');
+//asm65(#9'eif');
 
 end;
 
@@ -19923,7 +20155,9 @@ case Tok[i].Kind of
 
 			ConstValType := DATAORIGINOFFSET;
 
-	if not Ident[IdentIndex].isAbsolute then Error(i + 1, 'Can''t take the address of variable');
+//        writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+
+	if not (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then Error(i + 1, 'Can''t take the address of variable');
 
 	if (Ident[IdentIndex].DataType in Pointers) and					// zadziala tylko dla ABSOLUTE
 	   (Ident[IdentIndex].NumAllocElements > 0) and
@@ -23457,6 +23691,9 @@ case Tok[i].Kind of
 	else begin
 	  GenerateCaseEqualityCheck(ConstVal, SelectorType);		    // Equality check
 
+// 	 if abs(ConstVal) > 255 then
+//	   warning(i, RangeCheckError_, IdentIndex, ArrayIndex, SelectorType);
+
 	  CaseLabel.left:=ConstVal;
 	  CaseLabel.right:=ConstVal;
 	end;
@@ -23475,7 +23712,7 @@ case Tok[i].Kind of
 
       CheckTok(i, COLONTOK);
 
-      GenerateCaseStatementProlog;
+      GenerateCaseStatementProlog(CaseLabel.equality);
 
       ResetOpty;
 
@@ -23745,7 +23982,7 @@ case Tok[i].Kind of
 
 	      CheckTok(j + 1, DOTOK);
 
-		asm65(#13#10'; ForToDoProlog');
+		//asm65(#13#10'; ForToDoProlog');
 
 		GenerateForToDoProlog;
 		j := CompileStatement(j + 2);
@@ -24788,6 +25025,9 @@ begin
 	  inc(i);
 	end;// while
 
+  if Ident[NumIdent].isInterrupt and (Ident[NumIdent].isAsm = false) then
+    Note(i, 'Use assembler block instead pascal');
+
  Result := i;
 end;
 
@@ -25614,9 +25854,9 @@ begin
   if (ConstValType = SINGLETOK) and (ActualParamType = REALTOK) then
    ActualParamType := SINGLETOK;
 
-  if (ConstValType = SINGLETOK) and (ActualParamType in IntegerTypes) then begin
+  if (ConstValType in RealTypes) and (ActualParamType in IntegerTypes) then begin
    Int2Float(ConstVal);
-   ActualParamType := SINGLETOK;
+   ActualParamType := ConstValType;
   end;
 
   if (ConstValType = SHORTREALTOK) and (ActualParamType = REALTOK) then
@@ -25636,7 +25876,7 @@ begin
 
    if ConstValType in IntegerTypes then begin
 
-    if GetCommonConstType(i, ConstValType, ActualParamType, false) then
+    if GetCommonConstType(i, ConstValType, ActualParamType, (ActualParamType in RealTypes)) then
      warning(i, RangeCheckError, 0, ConstVal, ConstValType);
 
    end else
@@ -26182,7 +26422,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
 asm65('');
 
 if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezdzonych procedur / funkcji
- GenerateDeclarationProlog;
+  GenerateDeclarationProlog;
 
 
 while Tok[i].Kind in
@@ -27165,27 +27405,36 @@ if DataSegmentUse then begin
   for j := VarDataSize - 1 downto 0 do
    if DataSegment[j] <> 0 then begin DataSegmentSize := j+1; Break end;
 
+  tmp:='';
+
   for j := 0 to DataSegmentSize-1 do begin
-   if (j mod 24 = 0) then write(OutFile, #13#10+'.by');
-   if (j mod 8 = 0) then write(OutFile,' ');
+
+   if (j mod 24 = 0) then begin
+    if tmp <> '' then asm65(tmp);
+    tmp:='.by';
+   end;
+
+   if (j mod 8 = 0) then tmp:=tmp+' ';
 
    if DataSegment[j] and $c000 = $8000 then
-    write(OutFile, ' <[DATAORIGIN+$' + IntToHex(byte(DataSegment[j]) or byte(DataSegment[j+1]) shl 8, 4)+']')
+    tmp:=tmp+' <[DATAORIGIN+$' + IntToHex(byte(DataSegment[j]) or byte(DataSegment[j+1]) shl 8, 4)+']'
    else
    if DataSegment[j] and $c000 = $4000 then
-    write(OutFile, ' >[DATAORIGIN+$' + IntToHex(byte(DataSegment[j-1]) or byte(DataSegment[j]) shl 8, 4)+']')
+    tmp:=tmp+' >[DATAORIGIN+$' + IntToHex(byte(DataSegment[j-1]) or byte(DataSegment[j]) shl 8, 4)+']'
    else
    if DataSegment[j] and $3000 = $2000 then
-    write(OutFile, ' <[CODEORIGIN+$' + IntToHex(byte(DataSegment[j]) or byte(DataSegment[j+1]) shl 8, 4)+']')
+    tmp:=tmp+' <[CODEORIGIN+$' + IntToHex(byte(DataSegment[j]) or byte(DataSegment[j+1]) shl 8, 4)+']'
    else
    if DataSegment[j] and $3000 = $1000 then
-    write(OutFile, ' >[CODEORIGIN+$' + IntToHex(byte(DataSegment[j-1]) or byte(DataSegment[j]) shl 8, 4)+']')
+    tmp:=tmp+' >[CODEORIGIN+$' + IntToHex(byte(DataSegment[j-1]) or byte(DataSegment[j]) shl 8, 4)+']'
    else
-    write(OutFile, ' $' + IntToHex(DataSegment[j],2) );
+    tmp:=tmp+' $' + IntToHex(DataSegment[j],2);
 
   end;
 
-  asm65('');
+  if tmp <> '' then asm65(tmp);
+
+ // asm65('');
 
 //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
 
@@ -27292,6 +27541,8 @@ asm65(#13#10'.macro'#9'STATICDATA');
 
 
 asm65(#13#10#9'end');
+
+OptimizeTMP;
 
 end;// CompileProgram
 
@@ -27604,6 +27855,7 @@ begin
 
  for i := 1 to MAXUNITS do UnitName[i].Units := 0;
 
+ SetLength(TemporaryBuf, 1);
  SetLength(OptimizeBuf, 1);
  SetLength(msgWarning, 1);
  SetLength(msgNote, 1);
