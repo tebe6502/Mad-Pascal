@@ -833,7 +833,7 @@ begin
 	AlwaysFalse: Result := 'Comparison might be always false due to range of constant and expression';
 
     RangeCheckError: begin
-		      Result := 'Range check error while evaluating constants ('+IntToStr(SrcType)+' must be between '+IntToStr(LowBound(ErrTokenIndex, DstType))+' and ';
+   		      Result := 'Range check error while evaluating constants ('+IntToStr(SrcType)+' must be between '+IntToStr(LowBound(ErrTokenIndex, DstType))+' and ';
 
 		      if IdentIndex > 0 then
 		       Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements-1)+')'
@@ -12179,6 +12179,19 @@ var i, l, k, m: integer;
        Result:=false;
       end;
 
+{ !@!@!@!
+    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
+       (listing[i+1] = #9'bmi *+7') and								// bmi *+7		; 1
+       (listing[i+2] = #9'beq *+5') and								// beq *+5		; 2
+       (pos('jmp l_', listing[i+3]) > 0) then							// jmp l_		; 3
+      begin
+       listing[i+1] := #9'smi';
+       listing[i+2] := #9'jne ' + copy(listing[i+3], 6, 256);
+       listing[i+3] := '';
+
+       Result:=false;
+      end;
+}
 
     if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
        (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
@@ -18336,7 +18349,7 @@ case DataSize[SelectorType] of
  1: begin
      asm65(#9'lda :STACKORIGIN+1,x');
 
-     if Value <> 0 then asm65(#9'cmp #'+IntToStr(Value));
+     if Value <> 0 then asm65(#9'cmp #'+IntToStr(byte(Value)));
     end;
 
 // 2: asm65(#9'cpw :STACKORIGIN,x #$'+IntToHex(Value, 4));
@@ -18366,7 +18379,7 @@ Gen; Gen;	//Gen($F9); GenDWord(Value1);			// cmp :ecx, Value1
   case DataSize[SelectorType] of
    1: begin
        asm65(#9'lda :STACKORIGIN+1,x');
-       asm65(#9'cmp #'+IntToStr(Value1));
+       asm65(#9'cmp #'+IntToStr(byte(Value1)));
       end;
 
   end;
@@ -18376,7 +18389,7 @@ Gen; Gen;	//Gen($F9); GenDWord(Value1);			// cmp :ecx, Value1
   case DataSize[SelectorType] of
    1: begin
 //       asm65(#9'lda :STACKORIGIN+1,x');
-       asm65(#9'cmp #'+IntToStr(Value2));
+       asm65(#9'cmp #'+IntToStr(byte(Value2)));
       end;
 
   end;
@@ -22326,7 +22339,7 @@ case Tok[i].Kind of
 
     j := CompileExpression(i + 2, ValType, Tok[i].Kind);
 
-    if (ValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind <> OBRACKETTOK) then begin
+    if (ValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) {and (Tok[i + 3].Kind <> OBRACKETTOK)} then begin
 
       IdentIndex := GetIdent(Tok[i + 2].Name^);
 
@@ -23044,8 +23057,7 @@ case Tok[i].Kind of
 
 	    VarType := Ident[IdentIndex].AllocElementType;
 // !@!@
-// 	    writeln(Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].Name,',',VarType) ;
-
+// 	    writeln(Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].Name,',',VarType,',',Ident[IdentIndex].DataType) ;
 
 	    if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 	       IndirectionLevel := ASPOINTERTOARRAYRECORD;
@@ -23667,6 +23679,9 @@ case Tok[i].Kind of
       repeat     // Loop over all constants for the current case
 	i := CompileConstExpression(i, ConstVal, ConstValType, SelectorType);
 
+//	 ConstVal:=ConstVal and $ff;
+	//warning(i, RangeCheckError, 0, ConstValType, SelectorType);
+
 	GetCommonType(i, ConstValType, SelectorType);
 
 	if (Tok[i].Kind = IDENTTOK) then
@@ -23677,6 +23692,9 @@ case Tok[i].Kind of
 	if Tok[i + 1].Kind = RANGETOK then				      // Range check
 	  begin
 	  i := CompileConstExpression(i + 2, ConstVal2, ConstValType, SelectorType);
+
+//	  ConstVal2:=ConstVal2 and $ff;
+	  //warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
 	  GetCommonType(i, ConstValType, SelectorType);
 
@@ -23690,9 +23708,6 @@ case Tok[i].Kind of
 	  end
 	else begin
 	  GenerateCaseEqualityCheck(ConstVal, SelectorType);		    // Equality check
-
-// 	 if abs(ConstVal) > 255 then
-//	   warning(i, RangeCheckError_, IdentIndex, ArrayIndex, SelectorType);
 
 	  CaseLabel.left:=ConstVal;
 	  CaseLabel.right:=ConstVal;
@@ -25848,8 +25863,32 @@ var ActualParamType: byte;
     ConstVal: Int64;
 
 
+procedure SaveDataSegment(DataType: Byte);
+begin
+
+   if StaticData then
+    SaveToStaticDataSegment(ConstDataSize, ConstVal, DataType)
+   else
+    SaveToDataSegment(ConstDataSize, ConstVal, DataType);
+
+   if DataType = DATAORIGINOFFSET then
+    inc(ConstDataSize, DataSize[POINTERTOK] )
+   else
+    inc(ConstDataSize, DataSize[DataType] );
+
+end;
+
+
 procedure SaveData;
 begin
+
+  if (ConstValType in StringTypes + [CHARTOK, STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
+    iError(i, IllegalExpression);
+
+
+  if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = CHARTOK) then
+   iError(i, IncompatibleTypes, 0, ActualParamType, ConstValType);
+
 
   if (ConstValType = SINGLETOK) and (ActualParamType = REALTOK) then
    ActualParamType := SINGLETOK;
@@ -25863,16 +25902,11 @@ begin
    ActualParamType := SHORTREALTOK;
 
 
-  if ActualParamType = DATAORIGINOFFSET then begin
+  if ActualParamType = DATAORIGINOFFSET then
 
-   if StaticData then
-    SaveToStaticDataSegment(ConstDataSize, ConstVal, DATAORIGINOFFSET)
-   else
-    SaveToDataSegment(ConstDataSize, ConstVal, DATAORIGINOFFSET);
+   SaveDataSegment(DATAORIGINOFFSET)
 
-   inc(ConstDataSize, DataSize[POINTERTOK] );
-
-  end else begin
+  else begin
 
    if ConstValType in IntegerTypes then begin
 
@@ -25882,13 +25916,7 @@ begin
    end else
     GetCommonConstType(i, ConstValType, ActualParamType);
 
-
-   if StaticData then
-    SaveToStaticDataSegment(ConstDataSize, ConstVal, ConstValType)
-   else
-    SaveToDataSegment(ConstDataSize, ConstVal, ConstValType);
-
-   inc(ConstDataSize, DataSize[ConstValType] );
+   SaveDataSegment(ConstValType);
 
   end;
 
@@ -25905,7 +25933,7 @@ begin
  NumAllocElements_ := NumAllocElements shr 16;
  NumAllocElements  := NumAllocElements and $ffff;
 
- repeat
+  repeat
 
   inc(NumActualParams);
   if NumActualParams > NumAllocElements then Break;
@@ -25933,6 +25961,8 @@ begin
    //inc(i);
   end else begin
    i := CompileConstExpression(i + 1, ConstVal, ActualParamType);
+
+//   writeln(ConstVal, ',',ActualParamType,' / ',ConstValType,' | ', StaticData);
 
    SaveData;
   end;
