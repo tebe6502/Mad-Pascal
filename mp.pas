@@ -541,7 +541,7 @@ var
 
 
   PROGRAMTOK_USE, INTERFACETOK_USE: Boolean;
-  OutputDisabled, isConst, isError, IOCheck: Boolean;
+  OutputDisabled, isConst, isError, IOCheck, TakeAddress: Boolean;
 
   DiagMode: Boolean = false;
   DataSegmentUse: Boolean = false;
@@ -3640,6 +3640,124 @@ var i, l, k, m: integer;
        begin
 	listing[i+2] := '';
 	listing[i+3] := '';
+
+	Result:=false;
+       end;
+
+
+    if (pos('lda ', listing[i]) > 0) and						// lda DX 			; 0
+       (pos('add ', listing[i+1]) > 0) and						// add DX			; 1
+       (pos('sta ', listing[i+2]) > 0) and						// sta DX			; 2
+       (pos('lda ', listing[i+3]) > 0) and						// lda DX+1			; 3
+       (pos('adc ', listing[i+4]) > 0) and						// adc DX+1			; 4
+       (pos('sta ', listing[i+5]) > 0) and						// sta DX+1			; 5
+       (pos('lda ', listing[i+6]) > 0) and						// lda DX+2			; 6
+       (pos('adc ', listing[i+7]) > 0) and						// adc DX+2			; 7
+       (pos('sta ', listing[i+8]) > 0) and						// sta DX+2			; 8
+       (pos('lda ', listing[i+9]) > 0) and						// lda DX+3			; 9
+       (pos('adc ', listing[i+10]) > 0) and						// adc DX+3			; 10
+       (pos('sta ', listing[i+11]) > 0) then						// sta DX+3			; 11
+      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
+	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) and
+	 (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) and
+	 (copy(listing[i+4], 6, 256) = copy(listing[i+5], 6, 256)) and
+	 (copy(listing[i+6], 6, 256) = copy(listing[i+7], 6, 256)) and
+	 (copy(listing[i+7], 6, 256) = copy(listing[i+8], 6, 256)) and
+	 (copy(listing[i+9], 6, 256) = copy(listing[i+10], 6, 256)) and
+	 (copy(listing[i+10], 6, 256) = copy(listing[i+11], 6, 256)) then
+       begin
+	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
+	listing[i+1] := #9'rol ' + copy(listing[i+3], 6, 256);
+	listing[i+2] := #9'rol ' + copy(listing[i+6], 6, 256);
+	listing[i+3] := #9'rol ' + copy(listing[i+9], 6, 256);
+
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+	Result:=false;
+       end;
+
+
+    if (pos('lda ', listing[i]) > 0) and						// lda DX 			; 0
+       (pos('add ', listing[i+1]) > 0) and						// add DX			; 1
+       (pos('sta ', listing[i+2]) > 0) and						// sta DX			; 2
+       (pos('lda ', listing[i+3]) > 0) and						// lda DX+1			; 3
+       (pos('adc ', listing[i+4]) > 0) and						// adc DX+1			; 4
+       (pos('sta ', listing[i+5]) > 0) then						// sta DX+1			; 5
+      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
+	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) and
+	 (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) and
+	 (copy(listing[i+4], 6, 256) = copy(listing[i+5], 6, 256)) then
+       begin
+	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
+	listing[i+1] := #9'rol ' + copy(listing[i+3], 6, 256);
+
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false;
+       end;
+
+
+    if (pos('lda ', listing[i]) > 0) and						// lda DX 			; 0
+       (pos('add ', listing[i+1]) > 0) and						// add DX			; 1
+       (pos('sta ', listing[i+2]) > 0) then						// sta DX			; 2
+      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
+	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	Result:=false;
+       end;
+
+
+    if (pos('lda ', listing[i]) > 0) and						// lda TT+1 			; 0
+       (pos('sta ', listing[i+1]) > 0) and						// lda :STACKORIGIN+STACKWIDTH+9; 1
+       (pos('lda ', listing[i+2]) > 0) and						// lda TT			; 2
+       (listing[i+3] = #9'asl @') and							// asl @			; 3
+       (pos('rol ', listing[i+4]) > 0) and						// rol :STACKORIGIN+STACKWIDTH+9; 4
+       (pos('sta ', listing[i+5]) > 0) and						// sta TT			; 5
+       (pos('lda ', listing[i+6]) > 0) and						// lda :STACKORIGIN+STACKWIDTH+9; 6
+       (pos('sta ', listing[i+7]) > 0) then						// lda TT+1			; 7
+      if (copy(listing[i], 6, 256) = copy(listing[i+7], 6, 256)) and
+	 (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) and
+	 (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+	 (copy(listing[i+4], 6, 256) = copy(listing[i+6], 6, 256)) then
+       begin
+	listing[i+6] := #9'asl ' + copy(listing[i+2], 6, 256);
+	listing[i+7] := #9'rol ' + copy(listing[i], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false;
+       end;
+
+
+    if (pos('lda ', listing[i]) > 0) and						// lda TT 			; 0
+       (listing[i+1] = #9'asl @') and							// asl @			; 1
+       (pos('sta ', listing[i+2]) > 0) then						// sta TT			; 2
+      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i] := #9'asl ' + copy(listing[i], 6, 256);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
 
 	Result:=false;
        end;
@@ -19802,9 +19920,13 @@ case Tok[i].Kind of
 
     CheckTok(i + 1, OPARTOK);
 
+    TakeAddress:=false;
+
     i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
     if isError then Exit;
+
+    if TakeAddress then Error(i + 1, 'Can''t take the address of variable');
 
     GetCommonConstType(i, INTEGERTOK, ConstValType);
 
@@ -19827,9 +19949,13 @@ case Tok[i].Kind of
 
     CheckTok(i + 1, OPARTOK);
 
+    TakeAddress:=false;
+
     i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
     if isError then Exit;
+
+    if TakeAddress then Error(i + 1, 'Can''t take the address of variable');
 
     GetCommonConstType(i, INTEGERTOK, ConstValType);
 
@@ -20170,7 +20296,7 @@ case Tok[i].Kind of
 
 //        writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
-	if not (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then Error(i + 1, 'Can''t take the address of variable');
+//	if not (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then Error(i + 1, 'Can''t take the address of variable');
 
 	if (Ident[IdentIndex].DataType in Pointers) and					// zadziala tylko dla ABSOLUTE
 	   (Ident[IdentIndex].NumAllocElements > 0) and
@@ -20244,6 +20370,8 @@ case Tok[i].Kind of
 
        end else
 	iError(i + 1, UnknownIdentifier);
+
+    TakeAddress:=true;
 
     Result := i + 1;
     end;
@@ -27521,16 +27649,16 @@ asm65(#13#10'.macro'#9'STATICDATA');
    if (i>0) and (i mod 8=0) then tmp:=tmp+' ';
 
   if StaticStringData[i] and $c000 = $8000 then
-   tmp:=tmp+' <[DATAORIGIN+'+IntToHex(byte(StaticStringData[i]) or byte(StaticStringData[i+1]) shl 8, 4)+']'
+   tmp:=tmp+' <[DATAORIGIN+$'+IntToHex(byte(StaticStringData[i]) or byte(StaticStringData[i+1]) shl 8, 4)+']'
   else
   if StaticStringData[i] and $c000 = $4000 then
-   tmp:=tmp+' >[DATAORIGIN+'+IntToHex(byte(StaticStringData[i-1]) or byte(StaticStringData[i]) shl 8, 4)+']'
+   tmp:=tmp+' >[DATAORIGIN+$'+IntToHex(byte(StaticStringData[i-1]) or byte(StaticStringData[i]) shl 8, 4)+']'
   else
   if StaticStringData[i] and $3000 = $2000 then
-   tmp:=tmp+' <[CODEORIGIN+'+IntToHex(byte(StaticStringData[i]) or byte(StaticStringData[i+1]) shl 8, 4)+']'
+   tmp:=tmp+' <[CODEORIGIN+$'+IntToHex(byte(StaticStringData[i]) or byte(StaticStringData[i+1]) shl 8, 4)+']'
   else
   if StaticStringData[i] and $3000 = $1000 then
-   tmp:=tmp+' >[CODEORIGIN+'+IntToHex(byte(StaticStringData[i-1]) or byte(StaticStringData[i]) shl 8, 4)+']'
+   tmp:=tmp+' >[CODEORIGIN+$'+IntToHex(byte(StaticStringData[i-1]) or byte(StaticStringData[i]) shl 8, 4)+']'
   else
    tmp:=tmp+' $'+IntToHex(StaticStringData[i], 2);
 
