@@ -501,6 +501,8 @@ var
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;	// For dead code elimination
 
+  OldConstValType: byte;
+
   NumTok: integer = 0;
 
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks,
@@ -541,7 +543,7 @@ var
 
 
   PROGRAMTOK_USE, INTERFACETOK_USE: Boolean;
-  OutputDisabled, isConst, isError, IOCheck, TakeAddress: Boolean;
+  OutputDisabled, isConst, isError, IOCheck: Boolean;
 
   DiagMode: Boolean = false;
   DataSegmentUse: Boolean = false;
@@ -19920,13 +19922,13 @@ case Tok[i].Kind of
 
     CheckTok(i + 1, OPARTOK);
 
-    TakeAddress:=false;
+    OldConstValType:=0;
 
     i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
     if isError then Exit;
 
-    if TakeAddress then Error(i + 1, 'Can''t take the address of variable');
+    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
 
     GetCommonConstType(i, INTEGERTOK, ConstValType);
 
@@ -19949,13 +19951,13 @@ case Tok[i].Kind of
 
     CheckTok(i + 1, OPARTOK);
 
-    TakeAddress:=false;
+    OldConstValType:=0;
 
     i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
     if isError then Exit;
 
-    if TakeAddress then Error(i + 1, 'Can''t take the address of variable');
+    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
 
     GetCommonConstType(i, INTEGERTOK, ConstValType);
 
@@ -20285,7 +20287,9 @@ case Tok[i].Kind of
 		      ConstVal := Ident[IdentIndex].Value - CODEORIGIN;
 
 	  VARIABLE: if Ident[IdentIndex].isAbsolute then 				// wyjatek gdy ABSOLUTE
+
 	   	      ConstVal := Ident[IdentIndex].Value
+
 		    else begin
 
 		     if isConst then begin isError:=true; exit end;			// !!! koniecznie zamiast Error !!!
@@ -20294,9 +20298,7 @@ case Tok[i].Kind of
 
 			ConstValType := DATAORIGINOFFSET;
 
-//        writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
-
-//	if not (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then Error(i + 1, 'Can''t take the address of variable');
+//        writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',ConstVal);
 
 	if (Ident[IdentIndex].DataType in Pointers) and					// zadziala tylko dla ABSOLUTE
 	   (Ident[IdentIndex].NumAllocElements > 0) and
@@ -20325,7 +20327,6 @@ case Tok[i].Kind of
 
 		CheckTok(i + 1, CBRACKETTOK);
 	   end;
-
 			Result := i + 1;
 
 			exit;
@@ -20363,15 +20364,12 @@ case Tok[i].Kind of
 		i := j;
 
 		CheckTok(i + 1, CBRACKETTOK);
-
 	   end;
 
 	ConstValType := POINTERTOK;
 
        end else
 	iError(i + 1, UnknownIdentifier);
-
-    TakeAddress:=true;
 
     Result := i + 1;
     end;
@@ -20526,6 +20524,8 @@ case Tok[i].Kind of
     if isError then exit;
 
     CheckTok(j + 1, CPARTOK);
+
+    if ConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then OldConstValType := ConstValType;
 
     ConstValType := Tok[i].Kind;
 
@@ -22467,7 +22467,7 @@ case Tok[i].Kind of
 
     j := CompileExpression(i + 2, ValType, Tok[i].Kind);
 
-    if (ValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) {and (Tok[i + 3].Kind <> OBRACKETTOK)} then begin
+    if (ValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind <> OBRACKETTOK) then begin
 
       IdentIndex := GetIdent(Tok[i + 2].Name^);
 
