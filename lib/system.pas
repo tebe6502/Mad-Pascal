@@ -162,6 +162,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
 	DateSeparator: Char = '-';
+	
+	TVSystem: byte absolute $D014;
 
 	FileMode: byte = fmOpenReadWrite;
 
