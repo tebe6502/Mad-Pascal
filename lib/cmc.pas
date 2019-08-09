@@ -39,6 +39,8 @@ object for controling CMC player
 
 implementation
 
+var	ntsc: byte;
+
 
 procedure TCMC.Init; assembler;
 (*
@@ -91,19 +93,25 @@ Play music, call this procedure every VBL frame
 asm
 {	txa:pha
 
+	asl ntsc		; =0 PAL, =4 NTSC
+	bcc skp
+
+	lda #%00000100
+	sta ntsc
+
+	bne quit
+skp
+	lda >quit-1		; JMP -> RTS -> QUIT
+	pha
+	lda <quit-1
+	pha
+	
 	mwa TCMC ptr
 
-	ldy #1
-cptr	lda $ffff,y
+	jmp (TCMC)
 ptr	equ *-2
-	sta adr,y
-	dey
-	bpl cptr
 
-	jsr $ffff
-adr	equ *-2
-
-	pla:tax
+quit	pla:tax	
 };
 end;
 
@@ -193,6 +201,20 @@ adr	equ *-2
 	pla:tax
 };
 end;
+
+
+initialization
+
+asm
+{
+	lda #0
+	ldx SYSTEM.TVSystem
+	cpx #15
+	sne
+	lda #4
+
+	sta ntsc
+};
 
 end.
 

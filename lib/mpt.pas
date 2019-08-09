@@ -36,6 +36,8 @@ object for controling MPT player
 
 implementation
 
+var	ntsc: byte;
+
 
 procedure TMPT.Init; assembler;
 (*
@@ -79,19 +81,25 @@ Play music, call this procedure every VBL frame
 asm
 {	txa:pha
 
+	asl ntsc		; =0 PAL, =4 NTSC
+	bcc skp
+
+	lda #%00000100
+	sta ntsc
+
+	bne quit
+skp
+	lda >quit-1		; JMP -> RTS -> QUIT
+	pha
+	lda <quit-1
+	pha
+	
 	mwa TMPT ptr
 
-	ldy #1
-cptr	lda $ffff,y
+	jmp (TMPT)
 ptr	equ *-2
-	sta adr,y
-	dey
-	bpl cptr
 
-	jsr $ffff
-adr	equ *-2
-
-	pla:tax
+quit	pla:tax	
 };
 end;
 
@@ -116,6 +124,19 @@ si1	sta $d200,y
 };
 end;
 
+
+initialization
+
+asm
+{
+	lda #0
+	ldx SYSTEM.TVSystem
+	cpx #15
+	sne
+	lda #4
+
+	sta ntsc
+};
 
 end.
 
