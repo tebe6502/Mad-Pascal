@@ -3,6 +3,7 @@
 	fmulu_8
 	imulCL
 	imulBYTE
+	idivBYTE
 	idiv_AL_CL
 */
 
@@ -92,8 +93,8 @@ MUL2	DEY
 
 .proc	imulBYTE
 
-	mva STACKORIGIN,x ecx
-	mva STACKORIGIN-1,x eax
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN-1,x eax
 
 	lda #$00
 
@@ -109,13 +110,24 @@ MUL2	DEY
 .endp
 
 
+.define	jsr_imodBYTE jsr idivBYTE
+
+.proc	idivBYTE
+
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN-1,x eax
+
+	jmp idivAL_CL
+.endp
+
+
 ; DIVIDE ROUTINE (8 BIT)
 ; AL/CL -> ACC, remainder in ZTMP
 
 .proc idivAL_CL
 
-	mva STACKORIGIN,x cl
-	mva STACKORIGIN-1,x al
+;	mva :STACKORIGIN,x cl
+;	mva :STACKORIGIN-1,x al
 
 	lda #$00
 
@@ -125,7 +137,7 @@ MUL2	DEY
 
 	STA ztmp+1
 	STA ztmp+2
-	STA ztmp+3	
+	STA ztmp+3
 
 	LDY #$08
 LOOP	ASL AL

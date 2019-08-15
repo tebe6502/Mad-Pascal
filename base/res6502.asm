@@ -460,7 +460,7 @@ data	ins %%1
 
 	ins %%1
 	
-	.print '$R RCDATA   ',main.%%lab,'..',*-1," %%1"
+	.print '$R RCDATA  ',main.%%lab,'..',*-1," %%1"
  eif
 .endm
 

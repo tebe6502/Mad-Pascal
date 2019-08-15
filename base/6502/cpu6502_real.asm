@@ -11,15 +11,15 @@
 
 ;	jsr iniEAX_ECX_CARD
 
-	mva STACKORIGIN,x ecx0
-	mva STACKORIGIN+STACKWIDTH,x ecx1
-	mva STACKORIGIN+STACKWIDTH*2,x ecx2
-	mva STACKORIGIN+STACKWIDTH*3,x ecx3
+	mva :STACKORIGIN,x ecx0
+	mva :STACKORIGIN+STACKWIDTH,x ecx1
+	mva :STACKORIGIN+STACKWIDTH*2,x ecx2
+	mva :STACKORIGIN+STACKWIDTH*3,x ecx3
 
-	mva STACKORIGIN-1,x eax
-	mva STACKORIGIN-1+STACKWIDTH,x eax+1
-	mva STACKORIGIN-1+STACKWIDTH*2,x eax+2
-	mva STACKORIGIN-1+STACKWIDTH*3,x eax+3
+	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+	mva :STACKORIGIN-1+STACKWIDTH*2,x eax+2
+	mva :STACKORIGIN-1+STACKWIDTH*3,x eax+3
 
 ;	jsr imul64				; imul ecx 64 bit
 
@@ -80,18 +80,18 @@ ROTATE_R  ror @		;Rotate partial product
 
 	ldy edx
 
-	lda STACKORIGIN-1+STACKWIDTH*3,x	; t1
+	lda :STACKORIGIN-1+STACKWIDTH*3,x	; t1
 	bpl @+
 	sec
 	tya
-	sbc STACKORIGIN,x
+	sbc :STACKORIGIN,x
 	tay
 @
-	lda STACKORIGIN+STACKWIDTH*3,x		; t2
+	lda :STACKORIGIN+STACKWIDTH*3,x		; t2
 	bpl @+
 	sec
 	tya
-	sbc STACKORIGIN-1,x
+	sbc :STACKORIGIN-1,x
 	tay
 @
 	sty eax+3
@@ -160,18 +160,18 @@ ROTATE_R  ror @		;Rotate partial product
 
 .proc	divREAL
 
-	mva STACKORIGIN,x ecx0
+	mva :STACKORIGIN,x ecx0
 	sta ecx0_
-	mva STACKORIGIN+STACKWIDTH,x ecx1
+	mva :STACKORIGIN+STACKWIDTH,x ecx1
 	sta ecx1_
-	mva STACKORIGIN+STACKWIDTH*2,x ecx2
+	mva :STACKORIGIN+STACKWIDTH*2,x ecx2
 	sta ecx2_
-	mva STACKORIGIN+STACKWIDTH*3,x ecx3
+	mva :STACKORIGIN+STACKWIDTH*3,x ecx3
 
-	mva STACKORIGIN-1+STACKWIDTH*3,x eax+4
-	mva STACKORIGIN-1+STACKWIDTH*2,x eax+3
-	mva STACKORIGIN-1+STACKWIDTH,x eax+2
-	mva STACKORIGIN-1,x eax+1
+	mva :STACKORIGIN-1+STACKWIDTH*3,x eax+4
+	mva :STACKORIGIN-1+STACKWIDTH*2,x eax+3
+	mva :STACKORIGIN-1+STACKWIDTH,x eax+2
+	mva :STACKORIGIN-1,x eax+1
 
 	lda #$00
 	sta eax
