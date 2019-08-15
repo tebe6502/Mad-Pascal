@@ -12275,6 +12275,19 @@ var i, l, k, m: integer;
      end;
 
 
+    if (pos('cmp ', listing[i]) > 0) and							// cmp			; 0
+       (listing[i+1] = #9'bcc @+') and								// bcc @+		; 1
+       (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
+       (listing[i+3] = '@') then								// @			; 3
+     begin
+       listing[i+1] := #9'jcs ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       Result:=false;
+     end;
+
+
     if (listing[i] = #9'bne @+') and								// bne @+		; 0
        (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
        (listing[i+2] = '@') then								// @			; 2
@@ -15297,6 +15310,24 @@ end;
 
 procedure OptimizeTMP;
 var i: integer;
+
+
+function TestBranch(i: integer): Boolean;
+var j: integer;
+begin
+
+ Result:=true;
+
+ for j:=i downto 0 do begin
+
+  if pos(' @+', TemporaryBuf[j].line) > 0 then begin Result:=false; Break end;
+  if pos('lda ', TemporaryBuf[j].line) > 0 then Break;
+
+ end;
+
+end;
+
+
 begin
 
  for i:=0 to High(TemporaryBuf)-1 do
@@ -15310,8 +15341,8 @@ begin
     end;
 
 
-   if (pos('@+', TemporaryBuf[i].line) = 0) and						// beq *+5		; 0
-      (pos('beq *+5', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 1
+   if TestBranch(i) and									// beq *+5		; 1
+      (pos('beq *+5', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
       (pos('jmp l_', TemporaryBuf[i+2].line) > 0) then
     begin
      TemporaryBuf[i+1].line := #9'jne ' + copy(TemporaryBuf[i+2].line, 6, 256);
@@ -15319,8 +15350,8 @@ begin
     end;
 
 
-   if (pos('@+', TemporaryBuf[i].line) = 0) and
-      (pos('beq @+', TemporaryBuf[i+1].line) > 0) and
+   if TestBranch(i) and									// beq @+		; 1
+      (pos('beq @+', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
       (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
       (TemporaryBuf[i+3].line = '@') then
     begin
@@ -15330,12 +15361,23 @@ begin
     end;
 
 
-   if (pos('@+', TemporaryBuf[i].line) = 0) and
-      (pos('bcs @+', TemporaryBuf[i+1].line) > 0) and
+   if TestBranch(i) and									// bcs @+		; 1
+      (pos('bcs @+', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
       (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
       (TemporaryBuf[i+3].line = '@') then
     begin
      TemporaryBuf[i+1].line := #9'jcc ' + copy(TemporaryBuf[i+2].line, 6, 256);
+     TemporaryBuf[i+2].line := '';
+//     TemporaryBuf[i+3].line := '';
+    end;
+
+
+   if TestBranch(i) and									// bcc @+		; 1
+      (pos('bcc @+', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
+      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
+      (TemporaryBuf[i+3].line = '@') then
+    begin
+     TemporaryBuf[i+1].line := #9'jcs ' + copy(TemporaryBuf[i+2].line, 6, 256);
      TemporaryBuf[i+2].line := '';
 //     TemporaryBuf[i+3].line := '';
     end;
