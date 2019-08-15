@@ -15,6 +15,7 @@ fLine			fast Line
 FrameBuffer
 fRectangle		fast Rectangle
 GetPixel
+HLine
 InitGraph		support mode: 3, 5, 7, 8, 9, 10, 11, 15
 Line
 MoveTo
@@ -34,7 +35,8 @@ uses	types;
 
 	procedure fLine(x0,y0,x1,y1: byte); assembler;
 	procedure FrameBuffer(a: word); assembler;
-	procedure fRectangle(x1, y1, x2, y2: Smallint);
+	procedure fRectangle(x1, y1, x2, y2: smallint);
+	procedure Hline(x0,x1,y: smallint); 
 	procedure LineTo(x, y: smallint);
 	procedure PutPixel(x,y: smallint); assembler; register;
 
@@ -80,7 +82,9 @@ procedure SetColor(color: byte); assembler;
 Sets the foreground color to Color
 *)
 asm
-{	jmp gr8
+{	sta GetColor
+
+	jmp gr8
 mode	equ *-2
 
 gr15	lda color
@@ -191,7 +195,6 @@ lfb	equ *-1
 	sta :bp2
 
 	lda adr.lineHi,y
-;	beq stop
 	adc #0
 hfb	equ *-1
 	sta :bp2+1
@@ -225,8 +228,7 @@ gr8	lda x
 	lsr x+1
 	ror @
 
-	tay
-	lda adr.div4,y
+	:2 lsr @
 	tay
 
 plot	lda (:bp2),y
@@ -247,35 +249,130 @@ Return color of pixel
 asm
 {	txa:pha
 
-	ldy #0
-
 	lda y+1
-	bmi stop
+	bmi error
 	cmp MAIN.SYSTEM.ScreenHeight+1
 	bne sk0
 	lda y
 	cmp MAIN.SYSTEM.ScreenHeight
 sk0
-	bcs stop
+	bcs error
 
 	lda x+1
-	bmi stop
+	bmi error
 	cmp MAIN.SYSTEM.ScreenWidth+1
 	bne sk1
 	lda x
 	cmp MAIN.SYSTEM.ScreenWidth
 sk1
-	bcs stop
+	bcs error
 
-	mwa x colcrs
-	mva y rowcrs
+	ldy y
+	lda adr.lineLo,y
+	add #0
+lfb	equ *-1
+	sta :bp2
 
-	lda #@IDget
+	lda adr.lineHi,y
+	adc #0
+hfb	equ *-1
+	sta :bp2+1
 
-	jsr @COMMAND
+	jmp gr15
+mode	equ *-2
+
+
+error	lda #0
+	jmp stop
+	
+	
+gr8	.local
+	lda x
+	tax
+
+	lsr x+1
+	ror @
+
+	:2 lsr @
 	tay
+	
+	txa
+	and #7
+	tax
+	
+	lda (:bp2),y
+	and msk,x
+	bne c1
+	
+	jmp stop
+	
+c1	lda #1
+	jmp stop
 
-stop	sty Result
+msk	dta $80,$40,$20,$10,$08,$04,$02,$01
+
+	.endl
+	
+	
+
+gr15	.local
+
+	ldx x
+	ldy adr.div4,x
+	
+	txa
+	and #3
+	beq _0
+
+	cmp #1
+	beq _1
+
+	cmp #2
+	beq _2
+	
+_3	lda (:bp2),y
+	and #$03
+	jmp stop
+	
+_0	lda (:bp2),y
+	and #$c0
+	:6 lsr @
+	jmp stop
+	
+_1	lda (:bp2),y
+	and #$30
+	:4 lsr @
+	jmp stop
+	
+_2	lda (:bp2),y
+	and #$0c
+	:2 lsr @
+	jmp stop
+
+	.endl
+
+	
+gr9	.local
+
+	lda x
+	lsr @
+	tay
+	
+	lda x
+	and #1
+	bne _1
+
+_0	lda (:bp2),y
+	:4 lsr @
+	jmp stop
+	
+_1	lda (:bp2),y
+	and #$0f
+	jmp stop
+	
+	.endl
+	
+stop	sta Result
 
 	pla:tax
 };
@@ -283,11 +380,11 @@ end;
 
 
 procedure Line(x1,y1,x2,y2: smallint);
-var dx, dy, fraction, stepx, stepy: smallint;
 (*
 @description:
-
+Bresenham line
 *)
+var dx, dy, fraction, stepx, stepy: smallint;
 begin
     if x1<0 then x1:=0;
     if y1<0 then y1:=0;
@@ -300,8 +397,8 @@ begin
 
     if (dy < 0) then begin dy := -dy; stepy := -1 end else stepy := 1;
     if (dx < 0) then begin dx := -dx; stepx := -1 end else stepx := 1;
-    dy := dy + dy;        // dy is now 2*dy
-    dx := dx + dx;        // dx is now 2*dx
+    dy := dy + dy;	// dy is now 2*dy
+    dx := dx + dx;	// dx is now 2*dx
 
     PutPixel(x1,y1);
 
@@ -336,6 +433,217 @@ begin
         end;
      end;
 
+end;
+
+
+procedure Hline(x0,x1,y: smallint);
+(*
+@description:
+Draw horizintal line, fast as possible
+*)
+var mode: byte;
+    tmp: smallint;    
+begin
+
+ if x0 > x1 then begin
+  tmp:=x1;
+  x1:=x0;
+  x0:=tmp; 
+ end;
+
+ mode:=ScreenMode and $0f;
+
+ if (mode<>5) and (mode<>7) and (mode<>15) then begin
+  Line(x0,y,x1,y);
+  exit;
+ end;
+ 
+asm
+{	txa:pha
+
+	jmp skp
+
+error	jmp exit
+
+skp
+	lda y+1
+	bmi error
+	cmp MAIN.SYSTEM.ScreenHeight+1
+	bne sk0
+	lda y
+	cmp MAIN.SYSTEM.ScreenHeight
+sk0
+	bcs error
+
+	lda x0+1
+	bmi error
+	cmp MAIN.SYSTEM.ScreenWidth+1
+	bne sk1
+	lda x0
+	cmp MAIN.SYSTEM.ScreenWidth
+sk1
+	bcc ok1
+	
+	mwa MAIN.SYSTEM.ScreenWidth x0
+
+ok1	lda x1+1
+	bmi error
+	cmp MAIN.SYSTEM.ScreenWidth+1
+	bne sk2
+	lda x1
+	cmp MAIN.SYSTEM.ScreenWidth
+sk2
+	bcc ok2
+
+	mwa MAIN.SYSTEM.ScreenWidth x1
+	
+ok2
+	ldy y
+	lda adr.lineLo,y
+	add #0
+lfb	equ *-1
+	sta :bp2
+
+	lda adr.lineHi,y
+	adc #0
+hfb	equ *-1
+	sta :bp2+1
+
+
+	lda GetColor
+	and #3
+	
+	:2 asl @
+	sta color
+	tay
+	lda left,y
+	sta fill
+
+	lda x0		; left edge
+	and #3
+	tax
+	lda lmask,x
+	sta lmsk
+	eor #$ff
+	sta _lmsk
+	txa
+	add #0
+color	equ *-1
+	tax
+	lda left,x
+	sta lcol
+
+	lda x0
+	:2 lsr @
+	tay
+	sty lf
+
+	lda x1		; right edge
+	and #3
+	tax
+	lda rmask,x
+	sta rmsk
+	eor #$ff
+	sta _rmsk
+	txa
+	add color
+	tax
+	lda right,x
+	sta rcol
+
+	lda x1
+	:2 lsr @
+	tay
+	sty rg
+
+	ldy #0
+lf	equ *-1
+	cpy rg
+	beq piksel
+
+	lda (:bp2),y
+	and #0
+lmsk	equ *-1
+	ora #0
+lcol	equ *-1
+	sta (:bp2),y
+	
+	lda #0
+rg	equ *-1
+	clc
+	sbc lf
+	beq stop
+	tax
+
+	lda #0
+fill	equ *-1
+
+loop	iny
+	sta (:bp2),y
+	dex
+	bne loop
+
+stop	iny
+	lda (:bp2),y
+	and #0
+rmsk	equ *-1
+	ora #0
+rcol	equ *-1
+	sta (:bp2),y
+
+	jmp exit
+
+lmask	dta %00000000
+	dta %11000000
+	dta %11110000
+	dta %11111100
+
+left	:4 brk
+
+	dta %01010101
+	dta %00010101
+	dta %00000101
+	dta %00000001
+
+	dta %10101010
+	dta %00101010
+	dta %00001010
+	dta %00000010
+
+	dta %11111111
+rmask
+	dta %00111111
+	dta %00001111
+	dta %00000011
+
+right	:4 brk
+
+	dta %01000000
+	dta %01010000
+	dta %01010100
+	dta %01010101
+
+	dta %10000000
+	dta %10100000
+	dta %10101000
+	dta %10101010
+
+	dta %11000000
+	dta %11110000
+	dta %11111100
+	dta %11111111
+
+piksel	lda fill
+	and #0
+_lmsk	equ *-1
+	and #0
+_rmsk	equ *-1
+	ora (:bp2),y
+	sta (:bp2),y
+
+exit
+	pla:tax
+};
 end;
 
 
@@ -596,14 +904,27 @@ procedure FrameBuffer(a: word); assembler;
 @description:
 *)
 asm
-{	.ifdef PutPixel
-	mva a	PutPixel.lfb
-	mva a+1	PutPixel.hfb
+{	lda a
+	ldy a+1
+
+	.ifdef PutPixel
+	sta PutPixel.lfb
+	sty PutPixel.hfb
+	eif
+
+	.ifdef GetPixel
+	sta GetPixel.lfb
+	sty GetPixel.hfb
+	eif
+
+	.ifdef HLine
+	sta HLine.lfb
+	sty HLine.hfb
 	eif
 
 	.ifdef fLine
-	mva a	fLine.lfb
-	mva a+1	fLine.hfb
+	sta fLine.lfb
+	sty fLine.hfb
 	eif
 };
 end;
@@ -630,6 +951,20 @@ begin
 
 	ScreenHeight := 192;
 
+asm
+{	.ifdef SetColor
+	mwa #SetColor.gr15 SetColor.mode
+	.endif
+
+	.ifdef PutPixel
+	mwa #PutPixel.gr15 PutPixel.mode
+	.endif
+	
+	.ifdef GetPixel
+	mwa #GetPixel.gr15 GetPixel.mode
+	.endif		
+};
+
 case mode of
 
 3:
@@ -638,14 +973,6 @@ asm
 	mwa #24 MAIN.SYSTEM.ScreenHeight
 
 	mva #10 width
-
-	.ifdef SetColor
-	mwa #SetColor.gr15 SetColor.mode
-	.endif
-
-	.ifdef PutPixel
-	mwa #PutPixel.gr15 PutPixel.mode
-	.endif
 };
 
 5:
@@ -654,28 +981,12 @@ asm
 	mwa #48 MAIN.SYSTEM.ScreenHeight
 
 	mva #20 width
-
-	.ifdef SetColor
-	mwa #SetColor.gr15 SetColor.mode
-	.endif
-
-	.ifdef PutPixel
-	mwa #PutPixel.gr15 PutPixel.mode
-	.endif
 };
 
 7:
 asm
 {	mwa #160 MAIN.SYSTEM.ScreenWidth
 	mwa #96 MAIN.SYSTEM.ScreenHeight
-
-	.ifdef SetColor
-	mwa #SetColor.gr15 SetColor.mode
-	.endif
-
-	.ifdef PutPixel
-	mwa #PutPixel.gr15 PutPixel.mode
-	.endif
 };
 
 8:
@@ -689,6 +1000,10 @@ asm
 
 	.ifdef PutPixel
 	mwa #PutPixel.gr8 PutPixel.mode
+	.endif
+	
+	.ifdef GetPixel
+	mwa #GetPixel.gr8 GetPixel.mode
 	.endif
 };
 
@@ -704,6 +1019,10 @@ asm
 	.ifdef PutPixel
 	mwa #PutPixel.gr9 PutPixel.mode
 	.endif
+	
+	.ifdef GetPixel
+	mwa #GetPixel.gr9 GetPixel.mode
+	.endif
 
 	.ifdef fLine
 	mva #$ea _nop
@@ -715,13 +1034,6 @@ asm
 {	mwa #160 MAIN.SYSTEM.ScreenWidth
 ;	mwa #192 MAIN.SYSTEM.ScreenHeight
 
-	.ifdef SetColor
-	mwa #SetColor.gr15 SetColor.mode
-	.endif
-
-	.ifdef PutPixel
-	mwa #PutPixel.gr15 PutPixel.mode
-	.endif
 };
 end;
 

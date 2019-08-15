@@ -299,8 +299,8 @@ var	a2, b2, error, stopx, stopy: integer;
 
 	procedure DrawEllipse;
 	begin
-		Line(x0 - x, y0 + y, x0 + x, y0 + y);
-		Line(x0 - x, y0 - y, x0 + x, y0 - y);
+		HLine(x0 - x, x0 + x, y0 + y);
+		HLine(x0 - x, x0 + x, y0 - y);
 	end;
 
 begin
@@ -386,9 +386,9 @@ procedure FloodFillH(x,y: smallint; color: byte);
 @description:
 Horizontal flood fill
 *)
-var xStack, yStack: array [0..4095] of smallint;
-    stackEntry: word;
-    sx: smallint;
+var xStack: array [0..255] of word absolute $400;
+    yStack: array [0..255] of byte absolute $600;
+    stackEntry, sx: word;
     spanAbove, spanBelow: Boolean;
     oldColor, belowColor, aboveColor: byte;
 begin
@@ -409,9 +409,9 @@ begin
 
 		sx := x;
 
-		while (x < ScreenWidth) and (GetPixel(x,y) = oldColor) do begin
+		while (word(x) < word(ScreenWidth)) and (GetPixel(x,y) = oldColor) do begin
 
-			if (y < smallint(ScreenHeight-1)) then begin
+			if (byte(y) < byte(ScreenHeight-1)) then begin
 
 				belowColor := GetPixel(x, y+1);
 
@@ -421,7 +421,7 @@ begin
 					yStack[stackEntry]  := y+1;
 					inc(stackEntry);
 
-					if stackEntry > sizeof(xStack) then exit;
+					if stackEntry > High(xStack) then exit;
 
 					spanBelow := true;
 				end
@@ -429,7 +429,7 @@ begin
 					spanBelow := false;
 			end;
 
-			if (y > 0) then begin
+			if (byte(y) > 0) then begin
 
 				aboveColor := GetPixel(x, y-1);
 
@@ -439,7 +439,7 @@ begin
 					yStack[stackEntry]  := y-1;
 					inc(stackEntry);
 
-					if stackEntry > sizeof(xStack) then exit;
+					if stackEntry > High(xStack) then exit;
 
 					spanAbove := true;
 				end
@@ -452,13 +452,13 @@ begin
 
 		dec(x);
 
-		Line(sx,y,x,y);
+		HLine(sx,x,y);
 
 		dec(stackEntry);
 		x := xStack[stackEntry];
 		y := yStack[stackEntry];
 
-	until stackentry=0;
+	until stackEntry=0;
 
 end;
 
@@ -699,7 +699,7 @@ Draw filled rectangle
 var i: smallint;
 begin
 
- for i:=y1 to y2 do Line(x1,i, x2, i);
+ for i:=y1 to y2 do HLine(x1,x2, i);
 
 end;
 
@@ -714,7 +714,7 @@ begin
 
  NormalizeRect(Rect);
 
- for i:=Rect.Top to Rect.Bottom do Line(Rect.Left, i, Rect.Right, i);
+ for i:=Rect.Top to Rect.Bottom do HLine(Rect.Left, Rect.Right, i);
 
 end;
 

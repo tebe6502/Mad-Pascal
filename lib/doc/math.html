@@ -1,0 +1,138 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit math - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit math</h1>
+<h3>Additional mathematical routines</h3>
+<p>author: Tomasz Biela (Tebe)</p>
+<br><p><a href='http://www.freepascal.org/docs-html/rtl/math/index-5.html'>http://www.freepascal.org/docs-html/rtl/math/index-5.html</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>a0</td><td class='tvalue'>D_PI_2</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>a1</td><td class='tvalue'>-0.212</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>a2</td><td class='tvalue'>0.074</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>a3</td><td class='tvalue'>-0.019</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>DegNormalize</td><td class='tdesc'><h4>function DegNormalize(deg : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>degtorad</td><td class='tdesc'><h4>function degtorad(deg : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>radtodeg</td><td class='tdesc'><h4>function radtodeg(rad : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>gradtorad</td><td class='tdesc'><h4>function gradtorad(grad : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>radtograd</td><td class='tdesc'><h4>function radtograd(rad : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>degtograd</td><td class='tdesc'><h4>function degtograd(deg : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>gradtodeg</td><td class='tdesc'><h4>function gradtodeg(grad : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>cycletorad</td><td class='tdesc'><h4>function cycletorad(cycle : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>radtocycle</td><td class='tdesc'><h4>function radtocycle(rad : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>DivMod</td><td class='tdesc'><h4>procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: Word); overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>DivMod</td><td class='tdesc'><h4>procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: smallint); overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>InRange</td><td class='tdesc'><h4>function InRange(const AValue, AMin, AMax: byte): Boolean; overload;</h4><br>
+	Check whether value is in range<br><ul></ul></td></tr>
+<tr><td class='tname fname'>InRange</td><td class='tdesc'><h4>function InRange(const AValue, AMin, AMax: Integer): Boolean; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>EnsureRange</td><td class='tdesc'><h4>function EnsureRange(const AValue, AMin, AMax: byte): Integer; overload;</h4><br>
+	Change value to it falls in specified range<br><ul></ul></td></tr>
+<tr><td class='tname fname'>EnsureRange</td><td class='tdesc'><h4>function EnsureRange(const AValue, AMin, AMax: Integer): Integer; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: real): real; overload;</h4><br>
+	Return smallest of two values<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: integer): integer; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: real): real; overload;</h4><br>
+	Return largest of two values<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: integer): integer; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>RandomRange</td><td class='tdesc'><h4>function RandomRange(const aFrom, aTo: smallint): smallint;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>RandomRangeF</td><td class='tdesc'><h4>function RandomRangeF(const min, max: single): single;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>RandG</td><td class='tdesc'><h4>function RandG(mean, stddev : single) : single;</h4><br>
+	Return gaussian distributed random number<br><ul></ul></td></tr>
+<tr><td class='tname fname'>power</td><td class='tdesc'><h4>function power(base : real; const exponent : shortint) : real; overload;</h4><br>
+	Return real power <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a><br><ul></ul></td></tr>
+<tr><td class='tname fname'>power</td><td class='tdesc'><h4>function power(base : single; const exponent : shortint) : single; overload;</h4><br>
+	Return real power <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a><br><ul></ul></td></tr>
+<tr><td class='tname fname'>power</td><td class='tdesc'><h4>function power(base : integer; const exponent : shortint) : integer; overload;</h4><br>
+	Return real power <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a><br><ul></ul></td></tr>
+<tr><td class='tname fname'>arctan2</td><td class='tdesc'><h4>function arctan2(y,x : real) : real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>ArcSin</td><td class='tdesc'><h4>function ArcSin(x: real): real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>ArcCos</td><td class='tdesc'><h4>function ArcCos(x: real): real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Tan</td><td class='tdesc'><h4>function Tan(x: Real): Real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Ceil</td><td class='tdesc'><h4>function Ceil(a: real): smallint;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Floor</td><td class='tdesc'><h4>function Floor(a: real): smallint;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>FMod</td><td class='tdesc'><h4>function FMod(a, b: real): real;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Log10</td><td class='tdesc'><h4>function Log10(x: single): single;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>log2</td><td class='tdesc'><h4>function log2(x : single) : single;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>logn</td><td class='tdesc'><h4>function logn(n,x : single) : single;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>IsNan</td><td class='tdesc'><h4>function IsNan(const d : Single): Boolean;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Sign</td><td class='tdesc'><h4>function Sign(const AValue: Integer): shortint; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Sign</td><td class='tdesc'><h4>function Sign(const AValue: Real): Real; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Sign</td><td class='tdesc'><h4>function Sign(const AValue: Single): Single; overload;</h4><br>
+	<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

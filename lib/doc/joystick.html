@@ -1,0 +1,89 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit joystick - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit joystick</h1>
+<h3>Joystick memory registers (Atari XE/XL)</h3>
+<p>author: Tomasz Biela (Tebe)</p>
+
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>joy_none</td><td class='tvalue'>15</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_up</td><td class='tvalue'>14</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_down</td><td class='tvalue'>13</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_left</td><td class='tvalue'>11</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_left_up</td><td class='tvalue'>10</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_left_down</td><td class='tvalue'>9</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_right</td><td class='tvalue'>7</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_right_up</td><td class='tvalue'>6</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>joy_right_down</td><td class='tvalue'>5</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>joy_1</td><td class='taddress'>$278</td><td class='ttype'>byte</td><td class='tdesc'>The value of joystick 0</td></tr>
+<tr><td class='tname'>joy_2</td><td class='taddress'>$279</td><td class='ttype'>byte</td><td class='tdesc'>The value of joystick 1</td></tr>
+<tr><td class='tname'>stick</td><td class='taddress'>$278</td><td class='ttype'>array [0..1] of byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>stick0</td><td class='taddress'>$278</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>stick1</td><td class='taddress'>$279</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>strig</td><td class='taddress'>$284</td><td class='ttype'>array [0..1] of byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>strig0</td><td class='taddress'>$284</td><td class='ttype'>byte</td><td class='tdesc'>Stick trigger 0</td></tr>
+<tr><td class='tname'>strig1</td><td class='taddress'>$285</td><td class='ttype'>byte</td><td class='tdesc'>Stick trigger 1</td></tr>
+<tr><td class='tname'>paddl0</td><td class='taddress'>$270</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 0</td></tr>
+<tr><td class='tname'>paddl1</td><td class='taddress'>$271</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 1</td></tr>
+<tr><td class='tname'>paddl2</td><td class='taddress'>$272</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 2</td></tr>
+<tr><td class='tname'>paddl3</td><td class='taddress'>$273</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 3</td></tr>
+<tr><td class='tname'>paddl4</td><td class='taddress'>$274</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 4</td></tr>
+<tr><td class='tname'>paddl5</td><td class='taddress'>$275</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 5</td></tr>
+<tr><td class='tname'>paddl6</td><td class='taddress'>$276</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 6</td></tr>
+<tr><td class='tname'>paddl7</td><td class='taddress'>$277</td><td class='ttype'>byte</td><td class='tdesc'>The value of paddle 7</td></tr>
+<tr><td class='tname'>ptrig0</td><td class='taddress'>$27c</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 0</td></tr>
+<tr><td class='tname'>ptrig1</td><td class='taddress'>$27d</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 1</td></tr>
+<tr><td class='tname'>ptrig2</td><td class='taddress'>$27e</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 2</td></tr>
+<tr><td class='tname'>ptrig3</td><td class='taddress'>$27f</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 3</td></tr>
+<tr><td class='tname'>ptrig4</td><td class='taddress'>$280</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 4</td></tr>
+<tr><td class='tname'>ptrig5</td><td class='taddress'>$281</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 5</td></tr>
+<tr><td class='tname'>ptrig6</td><td class='taddress'>$282</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 6</td></tr>
+<tr><td class='tname'>ptrig7</td><td class='taddress'>$283</td><td class='ttype'>byte</td><td class='tdesc'>Paddle trigger 7</td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+
+
+
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit image - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit image</h1>
+<h3>A unit to load a variety of image formats</h3>
+<p>author: Steven Don, Tomasz Biela (Tebe)</p>
+<br><p>GTIA</p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>FileNotFound</td><td class='tvalue'>$01</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>UnsupportedFormat</td><td class='tvalue'>$02</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>TooLarge</td><td class='tvalue'>$03</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>Buffer</td><td class='taddress'>$0400</td><td class='ttype'>array [0..0] of byte</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>IMGError</td><td class='ttype'>byte</td><td class='tdesc'>=0 if operation successfull</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>NextByte</td><td class='tdesc'><h4>function NextByte : Byte;</h4><br>
+	This function reads the next byte from the PIC/PCX file<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LoadPIC</td><td class='tdesc'><h4>function LoadPIC(const FileName: TString; Location: pointer): Boolean;</h4><br>
+	This loads a PIC File to the specified location<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LoadMIC</td><td class='tdesc'><h4>function LoadMIC(const FileName: TString; Location: pointer): Boolean;</h4><br>
+	This loads a MIC File to the specified location<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LoadBMP</td><td class='tdesc'><h4>function LoadBMP(const FileName: TString): Boolean;</h4><br>
+	This loads a BMP File (4bit, 8bit)<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LoadPCX</td><td class='tdesc'><h4>function LoadPCX(const FileName: TString): Boolean;</h4><br>
+	This loads a PCX File (8bit)<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LoadGIF</td><td class='tdesc'><h4>function LoadGIF(const FileName: TString): Boolean;</h4><br>
+	This loads a GIF File (GIF87a)<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

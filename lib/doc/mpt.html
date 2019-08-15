@@ -1,0 +1,63 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit MPT - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit MPT</h1>
+<h3>Music Pro Tracker library</h3>
+<p>author: Tomasz Biela (Tebe)</p>
+<br><p><a href='http://atariki.krap.pl/index.php/Music_Protracker'>http://atariki.krap.pl/index.php/Music_Protracker</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>TMPT</td><td class='ttype'>Object<ul class='record'><li>player: pointer; <span class='comment'>// memory address of player</span></li><li>modul: pointer; <span class='comment'>// memory address of a module</span></li><li><a href='#TMPT.INIT'>	procedure Init; assembler;	</a> <span class='comment'>// Initializes</span></li><li><a href='#TMPT.PLAY'>	procedure Play; assembler;</a></li><li><a href='#TMPT.STOP'>	procedure Stop; assembler;	</a> <span class='comment'>// Stops Music</span></li></ul><br clear='all'>end;</td><td class='tdesc'>object for controling MPT player</td></tr>
+
+</table>
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'><a name='TMPT.INIT'></a>TMPT.Init</td><td class='tdesc'><h4>procedure TMPT.Init; assembler;</h4><br>
+	Initialize MPT player<br><ul></ul></td></tr>
+<tr><td class='tname fname'><a name='TMPT.PLAY'></a>TMPT.Play</td><td class='tdesc'><h4>procedure TMPT.Play; assembler;</h4><br>
+	Play music, call this procedure every VBL frame<br><ul></ul></td></tr>
+<tr><td class='tname fname'><a name='TMPT.STOP'></a>TMPT.Stop</td><td class='tdesc'><h4>procedure TMPT.Stop; assembler;</h4><br>
+	Halt MPT player<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>
