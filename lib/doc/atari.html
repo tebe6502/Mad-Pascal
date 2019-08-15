@@ -1,0 +1,141 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit atari - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit atari</h1>
+<h3>Common used memory registers (Atari XE/XL)</h3>
+<p>author: Tomasz Biela (Tebe)</p>
+<br><p><a href='https://www.atariarchives.org/mapping/memorymap.php'>https://www.atariarchives.org/mapping/memorymap.php</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>Tdmactl</td><td class='ttype'>(<br>&nbsp;&nbsp;blank = %00,<br>&nbsp;&nbsp;narrow = %01,<br>&nbsp;&nbsp;normal = %10,<br>&nbsp;&nbsp;wide = %11,<br>&nbsp;&nbsp;missiles= %100,<br>&nbsp;&nbsp;players = %1000,<br>&nbsp;&nbsp;oneline = %10000,<br>&nbsp;&nbsp;enable = %100000<br>)</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>rtclok</td><td class='taddress'>$12</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>atract</td><td class='taddress'>$4D</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>lmargin</td><td class='taddress'>$52</td><td class='ttype'>byte</td><td class='tdesc'>lewy margines ekranu</td></tr>
+<tr><td class='tname'>rmargin</td><td class='taddress'>$53</td><td class='ttype'>byte</td><td class='tdesc'>prawy margines ekranu</td></tr>
+<tr><td class='tname'>rowcrs</td><td class='taddress'>$54</td><td class='ttype'>byte</td><td class='tdesc'>pionowa pozycja kursora</td></tr>
+<tr><td class='tname'>colcrs</td><td class='taddress'>$55</td><td class='ttype'>word</td><td class='tdesc'>(2) pozioma pozycja kursora</td></tr>
+<tr><td class='tname'>dindex</td><td class='taddress'>$57</td><td class='ttype'>byte</td><td class='tdesc'>numer trybu graficznego OS</td></tr>
+<tr><td class='tname'>savmsc</td><td class='taddress'>$58</td><td class='ttype'>word</td><td class='tdesc'>(2) adres pamieci obrazu</td></tr>
+<tr><td class='tname'>vdslst</td><td class='taddress'>$200</td><td class='ttype'>word</td><td class='tdesc'>(2) adres programu przerwania 'Display List'</td></tr>
+<tr><td class='tname'>sdlstl</td><td class='taddress'>$230</td><td class='ttype'>word</td><td class='tdesc'>(2) adres programu ANTIC-a 'Display List'</td></tr>
+<tr><td class='tname'>txtrow</td><td class='taddress'>$290</td><td class='ttype'>byte</td><td class='tdesc'>wiersz kursora w oknie tekstowym</td></tr>
+<tr><td class='tname'>txtcol</td><td class='taddress'>$291</td><td class='ttype'>word</td><td class='tdesc'>(2) kolumna kursora w oknie tekstowym</td></tr>
+<tr><td class='tname'>tindex</td><td class='taddress'>$293</td><td class='ttype'>byte</td><td class='tdesc'>tryb graficzny OS w oknie tekstowym</td></tr>
+<tr><td class='tname'>txtmsc</td><td class='taddress'>$294</td><td class='ttype'>word</td><td class='tdesc'>(2) adres pamieci okna tekstowego</td></tr>
+<tr><td class='tname'>sdmctl</td><td class='taddress'>$22F</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien DMACTL</td></tr>
+<tr><td class='tname'>gprior</td><td class='taddress'>$26F</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien GTIACTL</td></tr>
+<tr><td class='tname'>crsinh</td><td class='taddress'>$2F0</td><td class='ttype'>byte</td><td class='tdesc'>znacznik widocznosci kursora</td></tr>
+<tr><td class='tname'>chact</td><td class='taddress'>$2F3</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien CHRCTL</td></tr>
+<tr><td class='tname'>chbas</td><td class='taddress'>$2F4</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien CHBASE</td></tr>
+<tr><td class='tname'>ch</td><td class='taddress'>$2FC</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien KBCODE</td></tr>
+<tr><td class='tname'>pcolr0</td><td class='taddress'>$02C0</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>pcolr1</td><td class='taddress'>$02C1</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>pcolr2</td><td class='taddress'>$02C2</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>pcolr3</td><td class='taddress'>$02C3</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>color0</td><td class='taddress'>$02C4</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>color1</td><td class='taddress'>$02C5</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>color2</td><td class='taddress'>$02C6</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>color3</td><td class='taddress'>$02C7</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>color4</td><td class='taddress'>$02C8</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hposp0</td><td class='taddress'>$D000</td><td class='ttype'>byte</td><td class='tdesc'>rejestry dla poziomej pozycja duchow</td></tr>
+<tr><td class='tname'>hposp1</td><td class='taddress'>$D001</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hposp2</td><td class='taddress'>$D002</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hposp3</td><td class='taddress'>$D003</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hposm0</td><td class='taddress'>$D004</td><td class='ttype'>byte</td><td class='tdesc'>rejestry dla poziomej pozycja pociskow</td></tr>
+<tr><td class='tname'>hposm1</td><td class='taddress'>$D005</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hposm2</td><td class='taddress'>$D006</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hposm3</td><td class='taddress'>$D007</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>sizep0</td><td class='taddress'>$D008</td><td class='ttype'>byte</td><td class='tdesc'>poziomy rozmiar gracza 0 (Z)</td></tr>
+<tr><td class='tname'>sizep1</td><td class='taddress'>$D009</td><td class='ttype'>byte</td><td class='tdesc'>poziomy rozmiar gracza 1 (Z)</td></tr>
+<tr><td class='tname'>sizep2</td><td class='taddress'>$D00A</td><td class='ttype'>byte</td><td class='tdesc'>poziomy rozmiar gracza 2 (Z)</td></tr>
+<tr><td class='tname'>sizep3</td><td class='taddress'>$D00B</td><td class='ttype'>byte</td><td class='tdesc'>poziomy rozmiar gracza 3 (Z)</td></tr>
+<tr><td class='tname'>sizem</td><td class='taddress'>$D00C</td><td class='ttype'>byte</td><td class='tdesc'>poziomy rozmiar pociskow (Z)</td></tr>
+<tr><td class='tname'>grafp0</td><td class='taddress'>$D00D</td><td class='ttype'>byte</td><td class='tdesc'>rejestr grafiki gracza 0 (Z)</td></tr>
+<tr><td class='tname'>grafp1</td><td class='taddress'>$D00E</td><td class='ttype'>byte</td><td class='tdesc'>rejestr grafiki gracza 1 (Z)</td></tr>
+<tr><td class='tname'>grafp2</td><td class='taddress'>$D00F</td><td class='ttype'>byte</td><td class='tdesc'>rejestr grafiki gracza 2 (Z)</td></tr>
+<tr><td class='tname'>grafp3</td><td class='taddress'>$D010</td><td class='ttype'>byte</td><td class='tdesc'>rejestr grafiki gracza 3 (Z)</td></tr>
+<tr><td class='tname'>grafm</td><td class='taddress'>$D011</td><td class='ttype'>byte</td><td class='tdesc'>rejestr grafiki pociskow (Z)</td></tr>
+<tr><td class='tname'>P0PF</td><td class='taddress'>$D004</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>Pal</td><td class='taddress'>$D014</td><td class='ttype'>byte</td><td class='tdesc'>(R) znacznik systemu TV PAL = 1, NTSC = 15</td></tr>
+<tr><td class='tname'>colpm0</td><td class='taddress'>$D012</td><td class='ttype'>byte</td><td class='tdesc'>rejestry kolorow duchow i pociskow</td></tr>
+<tr><td class='tname'>colpm1</td><td class='taddress'>$D013</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colpm2</td><td class='taddress'>$D014</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colpm3</td><td class='taddress'>$D015</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colpf0</td><td class='taddress'>$D016</td><td class='ttype'>byte</td><td class='tdesc'>rejestry kolorow pola gry</td></tr>
+<tr><td class='tname'>colpf1</td><td class='taddress'>$D017</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colpf2</td><td class='taddress'>$D018</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colpf3</td><td class='taddress'>$D019</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colbk</td><td class='taddress'>$D01A</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>prior</td><td class='taddress'>$D01B</td><td class='ttype'>byte</td><td class='tdesc'>rejestr piorytetu GTIA</td></tr>
+<tr><td class='tname'>gractl</td><td class='taddress'>$D01D</td><td class='ttype'>byte</td><td class='tdesc'>rejestr kontroli PMG</td></tr>
+<tr><td class='tname'>hitclr</td><td class='taddress'>$D01E</td><td class='ttype'>byte</td><td class='tdesc'>rejestr zerujacy kolizje PMG</td></tr>
+<tr><td class='tname'>audf1</td><td class='taddress'>$D200</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audc1</td><td class='taddress'>$D201</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audf2</td><td class='taddress'>$D202</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audc2</td><td class='taddress'>$D203</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audf3</td><td class='taddress'>$D204</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audc3</td><td class='taddress'>$D205</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audf4</td><td class='taddress'>$D206</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audc4</td><td class='taddress'>$D207</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>audctl</td><td class='taddress'>$D208</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>skstat</td><td class='taddress'>$D20F</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>portb</td><td class='taddress'>$D301</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>dmactl</td><td class='taddress'>$D400</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>chactl</td><td class='taddress'>$D401</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>dlistl</td><td class='taddress'>$D402</td><td class='ttype'>word</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>hscrol</td><td class='taddress'>$D404</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>vscrol</td><td class='taddress'>$D405</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>pmbase</td><td class='taddress'>$D407</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>chbase</td><td class='taddress'>$D409</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>wsync</td><td class='taddress'>$D40A</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>vcount</td><td class='taddress'>$D40B</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>penh</td><td class='taddress'>$D40C</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>penv</td><td class='taddress'>$D40D</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>nmien</td><td class='taddress'>$D40E</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+
+
+
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

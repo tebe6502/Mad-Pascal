@@ -1,0 +1,63 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit dos - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit dos</h1>
+<h3>Mad Pascal DOS interface</h3>
+<p>author: Tomasz Biela (Tebe)</p>
+<br><p>The DOS unit gives access to some operating system calls related to files, the file system, date and time. <br> <a href='https://www.freepascal.org/docs-html/rtl/dos/index.html'>https://www.freepascal.org/docs-html/rtl/dos/index.html</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>palntsc</td><td class='taddress'>$d014</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>DosVersion</td><td class='tdesc'><h4>function DosVersion: word; assembler;</h4><br>
+	Current DOS version<br><ul></ul></td></tr>
+<tr><td class='tname fname'>GetTime</td><td class='tdesc'><h4>procedure GetTime(var hour, minute, second, sec100: word);</h4><br>
+	Return the current time<br><ul><h5>parameters:</h5><li>hour - word variable</li><li>minute - word variable</li><li>second - word variable</li><li>sec100 - word variable</li></ul></td></tr>
+<tr><td class='tname fname'>SetTime</td><td class='tdesc'><h4>procedure SetTime(hour, minute, second, sec100: word);</h4><br>
+	Set system time<br><ul><h5>parameters:</h5><li>hour - word variable</li><li>minute - word variable</li><li>second - word variable</li><li>sec100 - word variable</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

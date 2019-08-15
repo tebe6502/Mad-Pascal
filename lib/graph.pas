@@ -13,6 +13,7 @@ unit graph;
 
 GetColor
 GetPixel
+HLine
 InitGraph
 Line
 MoveTo
@@ -30,7 +31,7 @@ uses	types;
 
 	{$i graphh.inc}
 
-	function GetColor: byte; assembler;
+	procedure HLine(x1,x2, y: smallint); 
 	procedure LineTo(x, y: smallint); assembler;
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
@@ -115,17 +116,6 @@ asm
 end;
 
 
-function GetColor: byte; assembler;
-(*
-@description:
-Return current drawing color
-*)
-asm
-{	mva @COMMAND.colscr Result
-};
-end;
-
-
 procedure SetColor(color: byte); assembler;
 (*
 @description:
@@ -133,6 +123,7 @@ Sets the foreground color to Color
 *)
 asm
 {	mva color @COMMAND.colscr
+	sta GetColor
 };
 end;
 
@@ -309,6 +300,14 @@ begin
 
 	CurrentX:=x;
 	CurrentY:=y;
+end;
+
+
+procedure HLine(x1,x2,y: smallint);
+begin
+
+ Line(x1,y,x2,y);
+
 end;
 
 

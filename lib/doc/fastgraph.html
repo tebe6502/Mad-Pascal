@@ -1,0 +1,71 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit fastgraph - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit fastgraph</h1>
+
+<p>author: Tomasz Biela (Tebe)</p>
+<br><p><a href='http://www.freepascal.org/docs-html/rtl/graph/index-5.html'>http://www.freepascal.org/docs-html/rtl/graph/index-5.html</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>SetBkColor</td><td class='tdesc'><h4>procedure SetBkColor(color: byte); assembler;</h4><br>
+	Sets the background color to Color<br><ul></ul></td></tr>
+<tr><td class='tname fname'>SetColor</td><td class='tdesc'><h4>procedure SetColor(color: byte); assembler;</h4><br>
+	Sets the foreground color to Color<br><ul></ul></td></tr>
+<tr><td class='tname fname'>PutPixel</td><td class='tdesc'><h4>procedure PutPixel(x,y: smallint); assembler; register;</h4><br>
+	Puts a point at (X,Y) using color Color<br><ul></ul></td></tr>
+<tr><td class='tname fname'>GetPixel</td><td class='tdesc'><h4>function GetPixel(x,y: smallint): byte; assembler;</h4><br>
+	Return color of pixel<br><ul></ul></td></tr>
+<tr><td class='tname fname'>fLine</td><td class='tdesc'><h4>procedure fLine(x0,y0,x1,y1: byte); assembler;</h4><br>
+	DRAWTO in Graphics 8, 9, 15 A quick hack by eru<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LineTo</td><td class='tdesc'><h4>procedure LineTo(x, y: smallint);</h4><br>
+	Draw a line starting from current position to a given point<br><ul></ul></td></tr>
+<tr><td class='tname fname'>fRectangle</td><td class='tdesc'><h4>procedure fRectangle(x1, y1, x2, y2: Smallint);</h4><br>
+	Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color and style<br><ul></ul></td></tr>
+<tr><td class='tname fname'>FrameBuffer</td><td class='tdesc'><h4>procedure FrameBuffer(a: word); assembler;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>InitGraph</td><td class='tdesc'><h4>procedure InitGraph(mode: byte); overload;</h4><br>
+	Init graphics mode<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

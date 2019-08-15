@@ -104,6 +104,8 @@ var	WIN_LEFT: smallint = 0;
 	WIN_BOTTOM: smallint = 192-1;
 
 	GraphResult: byte;
+	
+	GetColor: byte;
 
 	LastArcCoords: TLastArcCoords;
 
