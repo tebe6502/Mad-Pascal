@@ -1,0 +1,79 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit b_system - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit b_system</h1>
+<h3>System Tools</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of useful constants, registers and methods to simplify common system related tasks in Atari 8-bit programming. <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>PORTB_SELFTEST_OFF</td><td class='tvalue'>%10000000</td><td class='tdesc'>portb bit value to turn Self-Test off</td></tr>
+<tr><td class='tname'>PORTB_BASIC_OFF</td><td class='tvalue'>%00000010</td><td class='tdesc'>portb bit value to turn Basic off</td></tr>
+<tr><td class='tname'>PORTB_SYSTEM_ON</td><td class='tvalue'>%00000001</td><td class='tdesc'>portb bit value to turn System on</td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>SystemOff</td><td class='tdesc'><h4>procedure SystemOff(port_b: byte); assembler; overload;</h4><br>
+	Turns off OS with custom PORTB($D301) value.<br><ul><h5>parameters:</h5><li>port_b - value of PORTB register</li></ul></td></tr>
+<tr><td class='tname fname'>SystemOff</td><td class='tdesc'><h4>procedure SystemOff; overload;</h4><br>
+	Turns off OS and BASIC. <br> Gives maximum available RAM.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>SystemReset</td><td class='tdesc'><h4>procedure SystemReset; overload;</h4><br>
+	Turns on OS back and resets machine.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>EnableVBLI</td><td class='tdesc'><h4>procedure EnableVBLI(vblptr: pointer); assembler;</h4><br>
+	Enable and set custom handler for Vertical Blank Interrupt.<br><ul><h5>parameters:</h5><li>vblptr - pointer to interrupt handler routine</li></ul></td></tr>
+<tr><td class='tname fname'>DisableVBLI</td><td class='tdesc'><h4>procedure DisableVBLI; assembler;</h4><br>
+	Disables custom routine of Vertical Blank Interrupt.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>EnableDLI</td><td class='tdesc'><h4>procedure EnableDLI(dliptr: pointer); assembler;</h4><br>
+	Enable and set custom handler for Display List Interrupt.<br><ul><h5>parameters:</h5><li>dliptr - pointer to interrupt handler routine</li></ul></td></tr>
+<tr><td class='tname fname'>DisableDLI</td><td class='tdesc'><h4>procedure DisableDLI; assembler;</h4><br>
+	Disables Display List Interrupts.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>WaitFrame</td><td class='tdesc'><h4>procedure WaitFrame; assembler;</h4><br>
+	Waits till drawing of current frame ends.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>WaitFrames</td><td class='tdesc'><h4>procedure WaitFrames(frames: byte);</h4><br>
+	Waits for a specified number of frames. <br> Each frame is 1/50 sec for PAL systems, or 1/60 sec for NTSC.<br><ul><h5>parameters:</h5><li>frames - number of frames to wait.</li></ul></td></tr>
+<tr><td class='tname fname'>SetCharset</td><td class='tdesc'><h4>procedure SetCharset(msb: byte);</h4><br>
+	Sets font charset located at specified page of memory.<br><ul><h5>parameters:</h5><li>msb - most significant byte of charset address (memory page number).</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

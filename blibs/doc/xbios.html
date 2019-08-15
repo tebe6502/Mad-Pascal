@@ -1,0 +1,195 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit xbios - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit xbios</h1>
+<h3>xBios handlers</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Handful of useful procedures to fiddle with Atari IO (disk) using xBios. For more informations about xBios - look here: <a href='https://xxl.atari.pl/'>https://xxl.atari.pl/</a>. <br> Known limitations of xBios: <br> - New files cannot be created. <br> - Existing files cannot be extended in length. <br> - New directories cannot be created programatically. <br> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>xBIOS_ADDRESS</td><td class='tvalue'>$800</td><td class='tdesc'>Change this value if you are using xbios at non-default location</td></tr>
+<tr><td class='tname'>xBIOS_VERSION</td><td class='tvalue'>xBIOS_ADDRESS + $02</td><td class='tdesc'>location of version number in memory</td></tr>
+<tr><td class='tname'>xBIOS_RENAME_ENTRY</td><td class='tvalue'>xBIOS_ADDRESS + $03</td><td class='tdesc'>original xBios procedures vectors</td></tr>
+<tr><td class='tname'>xBIOS_LOAD_FILE</td><td class='tvalue'>xBIOS_ADDRESS + $06</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_OPEN_FILE</td><td class='tvalue'>xBIOS_ADDRESS + $09</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_LOAD_DATA</td><td class='tvalue'>xBIOS_ADDRESS + $0c</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_WRITE_DATA</td><td class='tvalue'>xBIOS_ADDRESS + $0f</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_OPEN_CURRENT_DIR</td><td class='tvalue'>xBIOS_ADDRESS + $12</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_GET_BYTE</td><td class='tvalue'>xBIOS_ADDRESS + $15</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_PUT_BYTE</td><td class='tvalue'>xBIOS_ADDRESS + $18</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_FLUSH_BUFFER</td><td class='tvalue'>xBIOS_ADDRESS + $1b</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_LENGTH</td><td class='tvalue'>xBIOS_ADDRESS + $1e</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_INIAD</td><td class='tvalue'>xBIOS_ADDRESS + $21</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_FILE_OFFSET</td><td class='tvalue'>xBIOS_ADDRESS + $24</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_RUNAD</td><td class='tvalue'>xBIOS_ADDRESS + $27</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_DEFAULT_DEVICE</td><td class='tvalue'>xBIOS_ADDRESS + $2a</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_OPEN_DIR</td><td class='tvalue'>xBIOS_ADDRESS + $2d</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_LOAD_BINARY_FILE</td><td class='tvalue'>xBIOS_ADDRESS + $30</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_OPEN_DEFAULT_DIR</td><td class='tvalue'>xBIOS_ADDRESS + $33</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_DEVICE</td><td class='tvalue'>xBIOS_ADDRESS + $36</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_RELOCATE_BUFFER</td><td class='tvalue'>xBIOS_ADDRESS + $39</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_GET_ENTRY</td><td class='tvalue'>xBIOS_ADDRESS + $3c</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_OPEN_DEFAULT_FILE</td><td class='tvalue'>xBIOS_ADDRESS + $3f</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_READ_SECTOR</td><td class='tvalue'>xBIOS_ADDRESS + $42</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_FIND_ENTRY</td><td class='tvalue'>xBIOS_ADDRESS + $45</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>xBIOS_SET_BUFFER_SIZE</td><td class='tvalue'>xBIOS_ADDRESS + $48</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>TxBiosConfig</td><td class='ttype'>record<ul class='record'><li>version: byte; <span class='comment'>// upper nibble is major version number, lower is lower ;)</span></li><li>autorun: array [0..10] of char; <span class='comment'>// name of autorun file (default 'XAUTORUN')</span></li><li>xBiosAddress: byte; <span class='comment'>// MSB of xBios memory address (default $800)</span></li><li>bufferAddress: byte; <span class='comment'>// MSB of buffer memory address (default $700)</span></li><li>initAd: word; <span class='comment'>// INITAD vector address (default $02e2)</span></li><li>runAd: word; <span class='comment'>// RUNAD vector address (default $02e0)</span></li><li>aosv: word; <span class='comment'>// I/O module adress (at run AtariOS; default xSIOV)</span></li><li>aosv_reloc: word; <span class='comment'>// relocate AtariOS I/O module variables</span></li><li>portb: byte; <span class='comment'>// PORTB value at start (default $ff)</span></li><li>nmien: byte; <span class='comment'>// NMIEN value at start (default $40)</span></li><li>irqen: byte; <span class='comment'>// IRQEN value at start (default $c0)</span></li></ul><br clear='all'>end;</td><td class='tdesc'>Structured type used to store and represent xBios configuration file.</td></tr>
+
+</table>
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>xDIRSIZE</td><td class='taddress'>xBIOS_ADDRESS + $3e5</td><td class='ttype'>byte</td><td class='tdesc'>current directory size in sectors (1 byte)</td></tr>
+<tr><td class='tname'>xSPEED</td><td class='taddress'>xBIOS_ADDRESS + $3e6</td><td class='ttype'>byte</td><td class='tdesc'>STD SPEED</td></tr>
+<tr><td class='tname'>xHSPEED</td><td class='taddress'>xBIOS_ADDRESS + $3e7</td><td class='ttype'>byte</td><td class='tdesc'>ULTRA SPEED</td></tr>
+<tr><td class='tname'>xIRQEN</td><td class='taddress'>xBIOS_ADDRESS + $3e8</td><td class='ttype'>byte</td><td class='tdesc'>User IRQ (1 byte)</td></tr>
+<tr><td class='tname'>xAUDCTL</td><td class='taddress'>xBIOS_ADDRESS + $3e9</td><td class='ttype'>byte</td><td class='tdesc'>AUDCTL</td></tr>
+<tr><td class='tname'>xFILE</td><td class='taddress'>xBIOS_ADDRESS + $3ea</td><td class='ttype'>word</td><td class='tdesc'>File handle (2 bytes)</td></tr>
+<tr><td class='tname'>xDIR</td><td class='taddress'>xBIOS_ADDRESS + $3ec</td><td class='ttype'>word</td><td class='tdesc'>Root directory handle (2 bytes)</td></tr>
+<tr><td class='tname'>xIOV</td><td class='taddress'>xBIOS_ADDRESS + $3ee</td><td class='ttype'>word</td><td class='tdesc'>I/O module entry (2 bytes)</td></tr>
+<tr><td class='tname'>xBUFFERH</td><td class='taddress'>xBIOS_ADDRESS + $3f0</td><td class='ttype'>byte</td><td class='tdesc'>Buffer adr hi byte (1 byte)</td></tr>
+<tr><td class='tname'>xBUFSIZE</td><td class='taddress'>xBIOS_ADDRESS + $3f1</td><td class='ttype'>byte</td><td class='tdesc'>Buffer size lo byte $100-SIZE (1 byte)</td></tr>
+<tr><td class='tname'>xDAUX3</td><td class='taddress'>xBIOS_ADDRESS + $3f2</td><td class='ttype'>byte</td><td class='tdesc'>Buffer offset (1 byte)</td></tr>
+<tr><td class='tname'>xSEGMENT</td><td class='taddress'>xBIOS_ADDRESS + $3f3</td><td class='ttype'>word</td><td class='tdesc'>Bytes to go in binary file segment (2 bytes)</td></tr>
+<tr><td class='tname'>xNOTE</td><td class='taddress'>xBIOS_ADDRESS + $3f5</td><td class='ttype'>word</td><td class='tdesc'>File pointer (2 lower bytes)</td></tr>
+<tr><td class='tname'>xNOTEH</td><td class='taddress'>xBIOS_ADDRESS + $3f7</td><td class='ttype'>byte</td><td class='tdesc'>File pointer (highest byte)</td></tr>
+<tr><td class='tname'>xDEVICE</td><td class='taddress'>xBIOS_ADDRESS + $3fc</td><td class='ttype'>byte</td><td class='tdesc'>Device ID</td></tr>
+<tr><td class='tname'>xDCMD</td><td class='taddress'>xBIOS_ADDRESS + $3fd</td><td class='ttype'>byte</td><td class='tdesc'>CMD (1 byte)</td></tr>
+<tr><td class='tname'>xDAUX1</td><td class='taddress'>xBIOS_ADDRESS + $3fe</td><td class='ttype'>byte</td><td class='tdesc'>Sector lo byte (1 byte)</td></tr>
+<tr><td class='tname'>xDAUX2</td><td class='taddress'>xBIOS_ADDRESS + $3ff</td><td class='ttype'>byte</td><td class='tdesc'>Sector hi byte (1 byte)</td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>xBiosIOresult</td><td class='ttype'>byte = 0</td><td class='tdesc'>contains result of last IO operation ( 0 = OK, 1 = KO )</td></tr>
+<tr><td class='tname'>xBiosIOerror</td><td class='ttype'>byte = 0</td><td class='tdesc'>contains register X value after last error (for debuging purposes)</td></tr>
+<tr><td class='tname'>xBiosDirEntryIndex</td><td class='ttype'>byte = 0</td><td class='tdesc'>contains index of last directory entry, after using xBiosFindEntry or xBiosGetEntry</td></tr>
+<tr><td class='tname'>xBiosDirEntryStatus</td><td class='ttype'>byte = 0</td><td class='tdesc'>contains status of last directory entry, after using xBiosGetEntry</td></tr>
+<tr><td class='tname'>xBiosDirEntrySector</td><td class='ttype'>word = 0</td><td class='tdesc'>contains starting sector of found directory entry, after using xBiosFindEntry</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>xBiosCheck</td><td class='tdesc'><h4>function xBiosCheck:byte;</h4><br>
+	Checks for the presence of xBios in memory. Looks at address defined as xBiosAddress.<br><ul><h5>returns:</h5><li class='returns'>(byte) - returns 0 for no xBios loaded,if xBios is present - returns two nibbles of xBios version</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosRenameEntry</td><td class='tdesc'><h4>procedure xBiosRenameEntry(var filename:TString):assembler;</h4><br>
+	This function allows you to rename a file or directory. There is no limit to the characters used in the filename apart from that they must fit a case insensitive “8.3” format without the dot. If your filename is not 8 characters long, pad it out with spaces.<br><ul><h5>parameters:</h5><li>filename - string containing both names, source and destination, padded with spaces.Must be 22 characters long. <br> example: filename := 'INFILE  TXTOUTFILE TXT';</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosLoadFile</td><td class='tdesc'><h4>procedure xBiosLoadFile(var filename:TString):assembler;</h4><br>
+	Loads and runs the file, INIT and RUN headers are supported. In the case the file does not have a defined block RUN will be launched from the beginning of the first block.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'INFILE  TXT';</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosOpenFile</td><td class='tdesc'><h4>procedure xBiosOpenFile(var filename:TString):assembler;</h4><br>
+	Opens a file in order to carry out subsequent IO operations.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'INFILE  TXT';</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosLoadData</td><td class='tdesc'><h4>procedure xBiosLoadData(dest: pointer):assembler;</h4><br>
+	Loads data from file to a specified destination address. You can set the file offset (xBiosSetFileOffset) and the amount of data to be loaded (xBiosSetLength). If you do not define these values, data will be loaded from the current position of the file pointer to the end of the file.<br><ul><h5>parameters:</h5><li>dest - data destination pointer.</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosWriteData</td><td class='tdesc'><h4>procedure xBiosWriteData(src: pointer):assembler;</h4><br>
+	Saves data from memory to a file, starting from the current position in the file. You can set the file pointer offset current (xBiosSetFileOffset) and the amount of data to be saved (xBiosSetLength). If you do not define these values, data from the current file position to the end of the file is written to the file.<br><ul><h5>parameters:</h5><li>src - pointer to source of data.</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosOpenCurrentDir</td><td class='tdesc'><h4>procedure xBiosOpenCurrentDir:assembler;</h4><br>
+	Opens the current directory.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosGetByte</td><td class='tdesc'><h4>function xBiosGetByte:byte:assembler;</h4><br>
+	Reads one byte from opened file.<br><ul><h5>returns:</h5><li class='returns'>(byte) - byte readed from file</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosPutByte</td><td class='tdesc'><h4>procedure xBiosPutByte(b:byte):assembler;</h4><br>
+	Writes one byte into opened file.<br><ul><h5>parameters:</h5><li>b - byte to be written into file</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosFlushBuffer</td><td class='tdesc'><h4>procedure xBiosFlushBuffer:assembler;</h4><br>
+	All write operations are cached, use this to flush the buffer to the current file.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetLength</td><td class='tdesc'><h4>procedure xBiosSetLength(len: word):assembler;</h4><br>
+	Defines the amount of data to process while reading or writing.<br><ul><h5>parameters:</h5><li>len - amount of data</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetInitAd</td><td class='tdesc'><h4>procedure xBiosSetInitAd(adr: word):assembler;</h4><br>
+	Allows you to change the init address vector INITAD ($2E2) for loaded binary files.<br><ul><h5>parameters:</h5><li>adr - new address vector for INITAD</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetFileOffset</td><td class='tdesc'><h4>procedure xBiosSetFileOffset(pos: cardinal):assembler;</h4><br>
+	Sets the current read/write position in the current file with a value stored in parameter. This item is calculated relative to the beginning of the file. In DOS speak, the operation is called "POINT". You can only move this pointer forward.<br><ul><h5>parameters:</h5><li>pos - new position in the current file</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetRunAd</td><td class='tdesc'><h4>procedure xBiosSetRunAd(adr: word):assembler;</h4><br>
+	Allows you to change the run address vector RUNAD ($2E0) for loaded binary files.<br><ul><h5>parameters:</h5><li>adr - new address vector for RUNAD</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetDefaultDevice</td><td class='tdesc'><h4>procedure xBiosSetDefaultDevice:assembler;</h4><br>
+	Restores the standard IO device.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosOpenDir</td><td class='tdesc'><h4>procedure xBiosOpenDir(var filename:TString):assembler;</h4><br>
+	Allows you to change the current directory.<br><ul><h5>parameters:</h5><li>filename - string containing directory name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'SUBDIR     ';</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosLoadBinaryFile</td><td class='tdesc'><h4>procedure xBiosLoadBinaryFile:assembler;</h4><br>
+	Loads and runs the binary file from the current read/write position. INIT and RUN headers are supported.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosOpenDefaultDir</td><td class='tdesc'><h4>procedure xBiosOpenDefaultDir:assembler;</h4><br>
+	Opens the default directory.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetDevice</td><td class='tdesc'><h4>procedure xBiosSetDevice(dev: word):assembler;</h4><br>
+	Changes the IO device.<br><ul><h5>parameters:</h5><li>dev - device address</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosRelocateBuffer</td><td class='tdesc'><h4>procedure xBiosRelocateBuffer(adr: word;c:byte):assembler;</h4><br>
+	Changes address of IO buffer. If c = 1, the relocation can be carried out even during IO. The data will not be lost. If c = 0, buffer contents will not be copied to a new location.<br><ul><h5>parameters:</h5><li>adr - new buffer address</li><li>c - dynamic relocation flag</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosGetEntry</td><td class='tdesc'><h4>procedure xBiosGetEntry:assembler;</h4><br>
+	Gets another entry in the directory. The xBiosDirEntryIndex returns the index to the filename or folder (byte of buffer address is stored in the variable xBUFFERH). The xBiosDirEntryStatus is set with the status. The xBiosIOresult is set to 1 when the end of the directory is found.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosOpenDefaultFile</td><td class='tdesc'><h4>procedure xBiosOpenDefaultFile:assembler;</h4><br>
+	Opens the default file. The function does not search the directory, the file handle is derived from the variable 'xFILE'.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>xBiosReadSector</td><td class='tdesc'><h4>procedure xBiosReadSector(sector: word):assembler;</h4><br>
+	Loads an sector into a buffer.<br><ul><h5>parameters:</h5><li>sector - sector number</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosFindEntry</td><td class='tdesc'><h4>procedure xBiosFindEntry(var filename:TString):assembler;</h4><br>
+	This function allows you to find the specified directory entry. The xBiosDirEntryIndex returns the index to the filename or folder (byte of buffer address is stored in the variable xBUFFERH). The xBiosDirEntrySector returns starting sector number of found entry. If an entry is not found, the xBiosIOresult is set to 1.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'INFILE  TXT';</li></ul></td></tr>
+<tr><td class='tname fname'>xBiosSetBufferSize</td><td class='tdesc'><h4>procedure xBiosSetBufferSize(size: byte):assembler;</h4><br>
+	This feature allows you to set the buffer size for IO operations. Buffer Size is also stored in the variable xBUFSIZE in bytes format.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>DosGetEntryName</td><td class='tdesc'><h4>function DosGetEntryName:TString;</h4><br>
+	Reads and returns last directory entry name. Can be invoked only after xBiosGetEntry or xBiosFindEntry.<br><ul><h5>returns:</h5><li class='returns'>(string) - returns last directory entry name</li></ul></td></tr>
+<tr><td class='tname fname'>DosReadEntryName</td><td class='tdesc'><h4>procedure DosReadEntryName(ptr: pointer);overload;</h4><br>
+	Reads and stores last directory entry name at provided memory address. Can be invoked only after xBiosGetEntry or xBiosFindEntry.<br><ul><h5>parameters:</h5><li>ptr - pointer to memory location where entry name should be stored.</li></ul></td></tr>
+<tr><td class='tname fname'>DosReadEntryName</td><td class='tdesc'><h4>procedure DosReadEntryName(var s: TString);overload;</h4><br>
+	Reads and stores last directory entry name in string provided. Can be invoked only after xBiosGetEntry or xBiosFindEntry.<br><ul><h5>parameters:</h5><li>s - string where entry name should be stored.</li></ul></td></tr>
+<tr><td class='tname fname'>DosHasEntryExt</td><td class='tdesc'><h4>function DosHasEntryExt(ext: TString):boolean;</h4><br>
+	Checks if last entry extension matches extension provided as an parameter.<br><ul><h5>parameters:</h5><li>ext - string containing file extension (3 characters long).</li><h5>returns:</h5><li class='returns'>(boolean) - returns true if extension matches param.</li></ul></td></tr>
+<tr><td class='tname fname'>DosGetEntrySize</td><td class='tdesc'><h4>function DosGetEntrySize:word;</h4><br>
+	Reads and returns last directory entry size (in sectors). Can be invoked only after xBiosGetEntry or xBiosFindEntry.<br><ul><h5>returns:</h5><li class='returns'>(word) - returns number of sectors occupied by last directory entry,</li></ul></td></tr>
+<tr><td class='tname fname'>DosGetEntrySector</td><td class='tdesc'><h4>function DosGetEntrySector:word;</h4><br>
+	Returns first sector occupied by last directory entry. Can be invoked after xBiosGetEntry.<br><ul><h5>returns:</h5><li class='returns'>(word) - returns starting sector number of last directory entry,</li></ul></td></tr>
+<tr><td class='tname fname'>DosGetEntryStatus</td><td class='tdesc'><h4>function DosGetEntryStatus:byte;</h4><br>
+	Reads and returns last directory entry status byte. Can be invoked after xBiosFindEntry.<br><ul><h5>returns:</h5><li class='returns'>(byte) - returns status byte of found directory entry</li></ul></td></tr>
+<tr><td class='tname fname'>DosIsDir</td><td class='tdesc'><h4>function DosIsDir(status: byte):boolean;</h4><br>
+	Interprets directory entry status byte, returning true if entry is an directory.<br><ul><h5>returns:</h5><li class='returns'>(boolean) - returns true if status describes directory entry</li></ul></td></tr>
+<tr><td class='tname fname'>DosIsFile</td><td class='tdesc'><h4>function DosIsFile(status: byte):boolean;</h4><br>
+	Interprets directory entry status byte, returning true if entry is an file.<br><ul><h5>returns:</h5><li class='returns'>(boolean) - returns true if status describes file entry</li></ul></td></tr>
+<tr><td class='tname fname'>DosIsDeleted</td><td class='tdesc'><h4>function DosIsDeleted(status: byte):boolean;</h4><br>
+	Interprets directory entry status byte, returning true if entry has been deleted.<br><ul><h5>returns:</h5><li class='returns'>(boolean) - returns true if status describes deleted entry</li></ul></td></tr>
+<tr><td class='tname fname'>DosIsLocked</td><td class='tdesc'><h4>function DosIsLocked(status: byte):boolean;</h4><br>
+	Interprets directory entry status byte, returning true if entry has been locked.<br><ul><h5>returns:</h5><li class='returns'>(boolean) - returns true if status describes locked entry</li></ul></td></tr>
+<tr><td class='tname fname'>DosIsOpened</td><td class='tdesc'><h4>function DosIsOpened(status: byte):boolean;</h4><br>
+	Interprets directory entry status byte, returning true if entry has been opened for writing.<br><ul><h5>returns:</h5><li class='returns'>(boolean) - returns true if status describes opened entry</li></ul></td></tr>
+<tr><td class='tname fname'>DosFileExists</td><td class='tdesc'><h4>function DosFileExists(var filename:TString):boolean;</h4><br>
+	Checks if file exists in current directory.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long.</li><h5>returns:</h5><li class='returns'>(boolean) - returns true if file exists</li></ul></td></tr>
+<tr><td class='tname fname'>DosDirExists</td><td class='tdesc'><h4>function DosDirExists(var filename:TString):boolean;</h4><br>
+	Checks if subdirectory exists in current directory.<br><ul><h5>parameters:</h5><li>filename - string containing directory name (8.3 format without dot) padded with spaces.Must be 11 characters long.</li><h5>returns:</h5><li class='returns'>(boolean) - returns true if directory exists</li></ul></td></tr>
+<tr><td class='tname fname'>formatFilename</td><td class='tdesc'><h4>function formatFilename(s:TString; showExt:boolean):TString;</h4><br>
+	Formats xBIOS filenames into common dos, dot separated format.<br><ul><h5>parameters:</h5><li>s - string containing file name (8.3 format without dot) padded with spaces.</li><li>showExt - defines if you want to show file extension in output string</li><h5>returns:</h5><li class='returns'>(string) - returns formated file name with or without extension</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

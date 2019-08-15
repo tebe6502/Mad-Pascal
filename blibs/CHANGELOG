@@ -1,0 +1,194 @@
+06.08.2019
+    xbios   v. 0.1.1
+        - Added: 
+            procedure xBiosLoadLz4Data;
+        - Updated examples for xbios
+
+03.06.2019
+    b_system   v. 0.5.3
+        - Added: 
+            procedure EnableIRQ;
+            procedure DisableIRQ; 
+        - Updated documentation
+
+12.04.2019
+    b_system   v. 0.5.2
+        - Changed: 
+            procedure SystemOff; - removed waiting for next frame from system procedures, it was hanging on nmien=0;
+            procedure SystemReset; - removed waiting for next frame from system procedures, it was hanging on nmien=0;
+            
+17.02.2019
+    b_system   v. 0.5.1
+        - Changed: 
+            procedure SystemOff; overload; - IRQVEC updated to work with xBios (change by TeBe)
+
+16.02.2019
+    xbios   v. 0.1.0
+        - Added
+            function xBiosCheck:byte;
+            procedure xBiosRenameEntry(var filename:TString):assembler;
+            procedure xBiosLoadFile(var filename:TString):assembler;
+            procedure xBiosOpenFile(var filename:TString):assembler;
+            procedure xBiosLoadData(dest: pointer):assembler;
+            procedure xBiosWriteData(src: pointer):assembler;
+            procedure xBiosOpenCurrentDir:assembler;
+            function  xBiosGetByte:byte:assembler;
+            procedure xBiosPutByte(b:byte):assembler;
+            procedure xBiosFlushBuffer:assembler;
+            procedure xBiosSetLength(len: word):assembler;
+            procedure xBiosSetInitAd(adr: word):assembler;
+            procedure xBiosSetFileOffset(pos: cardinal):assembler;
+            procedure xBiosSetRunAd(adr: word):assembler;
+            procedure xBiosSetDefaultDevice:assembler;
+            procedure xBiosOpenDir(var filename:TString):assembler;
+            procedure xBiosLoadBinaryFile:assembler;
+            procedure xBiosOpenDefaultDir:assembler;
+            procedure xBiosSetDevice(dev: word):assembler;
+            procedure xBiosRelocateBuffer(adr: word;c:byte):assembler;
+            procedure xBiosGetEntry:assembler;
+            procedure xBiosOpenDefaultFile:assembler;
+            procedure xBiosReadSector(sector: word):assembler;
+            procedure xBiosFindEntry(var filename:TString):assembler;
+            procedure xBiosSetBufferSize(size: byte):assembler;
+            function DosGetEntryName:TString;
+            procedure DosReadEntryName(ptr: pointer);overload;
+            procedure DosReadEntryName(var s: TString);overload;
+            function DosHasEntryExt(ext: TString):boolean;
+            function DosGetEntrySize:word;
+            function DosGetEntrySector:word;
+            function DosGetEntryStatus:byte;
+            function DosIsDir(status: byte):boolean;
+            function DosIsFile(status: byte):boolean;
+            function DosIsDeleted(status: byte):boolean;
+            function DosIsLocked(status: byte):boolean;
+            function DosIsOpened(status: byte):boolean;
+            function DosFileExists(var filename:TString):boolean;
+            function DosDirExists(var filename:TString):boolean;
+            function formatFilename(s:TString; showExt:boolean):TString;
+
+    examples
+        - Added
+            xbios examples
+
+20.01.2019
+    b_crt   v. 0.5.1
+        - Added
+            procedure CRT_WriteRightAligned(s: string);
+            procedure CRT_WriteRightAligned(r: row; s: string);
+            procedure CRT_CarriageReturn;
+
+    b_utils v. 0.5.1
+        - Added
+            function FFTermToString(ptr: word): string;
+
+    examples
+        - Updated
+            crt_test1.pas
+
+30.06.2018
+    b_crt   v. 0.5.0
+        - Added
+            procedure CRT_ClearRow(row: byte); overload;
+            procedure CRT_ClearRow; overload;
+            procedure CRT_Write(num: integer); overload;
+            procedure CRT_Write(num: real); overload;
+            procedure CRT_WriteCentered(row: byte; s:string); overload;
+            procedure CRT_WriteCentered(s:string); overload;        
+            function CRT_ReadInt: integer;
+            function CRT_ReadFloat: real;
+            procedure CRT_NewLine; overload;
+            procedure CRT_NewLine(offset: byte); overload;
+            procedure CRT_NewLines(count: byte);
+            procedure CRT_Invert(x, y, width: byte);
+            procedure CRT_InvertRow(row: byte);
+            function CRT_StartPressed: boolean;
+            function CRT_SelectPressed: boolean;
+            function CRT_OptionPressed: boolean;
+            function CRT_HelpPressed:boolean;                
+
+    b_system   v. 0.5.0
+        - Added:
+            procedure SystemReset(port_b: byte); assembler; overload;
+            procedure SystemReset; overload;
+            procedure EnableVBLI(vblptr: pointer); assembler;
+            procedure DisableVBLI; assembler;
+            procedure EnableDLI(dliptr: pointer); assembler;
+            procedure DisableDLI; assembler;        
+        - Changed: 
+            procedure SystemOff(port_b: byte); assembler; overload;
+            procedure SystemOff; overload;
+
+    examples
+        - Added:
+            crt_test2.pas
+            system_interrupts.pas
+
+26.06.2018
+
+    b_crt
+        - Added:
+            procedure CRT_Init(vram_address: word; width, height: byte);overload;
+            procedure CRT_Init(vram_address: word);overload;
+            procedure CRT_Init;overload;
+            procedure CRT_Clear;overload;
+            procedure CRT_Clear(filler: byte);overload;
+            procedure CRT_GotoXY(x, y: byte);
+            procedure CRT_Write(s: string);overload;
+            procedure CRT_Write(num: byte);overload;
+            procedure CRT_Write(num: word);overload;
+            procedure CRT_Write(num: cardinal);overload;
+            procedure CRT_WriteXY(x,y: byte; s: string);
+            function CRT_WhereY: byte;
+            function CRT_WhereX: byte;
+            procedure CRT_Put(b: byte);overload;
+            procedure CRT_Put(x, y, b: byte);overload;
+            function CRT_GetXY(x, y: byte): byte;
+            function CRT_KeyPressed: boolean;
+            function CRT_ReadKey: byte;
+            function CRT_ReadChar: byte;
+            function CRT_ReadCharI: byte;
+            function CRT_ReadStringI(limit: byte): string; overload;
+            function CRT_ReadStringI: string; overload;
+            function CRT_ReadString(limit: byte): string; overload;
+            function CRT_ReadString: string; overload;
+            function Atascii2Antic(c: byte):byte;overload;
+            function Antic2Atascii(c: byte):byte;overload;
+            function Atascii2Antic(s: string):string;overload;
+            function Antic2Atascii(s: string):string;overload;
+
+    b_system - new library
+        - Added:
+            procedure WaitFrame;assembler;
+            procedure WaitFrames(frames:byte);
+            procedure SetCharset(msb: byte);
+        - Fixed:
+            SystemOff
+
+    b_utils
+        - Added:
+            function CountBits(b: byte):byte;assembler;
+            procedure WriteLnCentered(s: string);
+            procedure WriteRightAligned(w: byte; s: TString);
+            function NullTermToString(ptr: word): string;
+            procedure ExpandRLE(src: word; dest: word);
+
+    examples
+        - Added:
+            crt_test1.pas
+            utils_rle.pas
+            utils_textalign.pas
+
+13.06.2018
+    b_dl    v. 1.1.0
+        - Added DL_Seek, DL_Attach, DL_Find
+
+10.06.2018
+    b_crt   v. 0.1.0
+        - Initial version.
+    b_dl    v. 1.0.0
+        - Initial version.
+    b_pmg   v. 1.0.0
+        - Initial version.
+    b_utils v. 0.1.0
+        - Initial version.
+

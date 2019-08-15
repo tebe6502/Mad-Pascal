@@ -1,0 +1,171 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit b_crt - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit b_crt</h1>
+<h3>OS independent screen and keyboard routines.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of useful constants, registers and methods to cope with text input and output without ATARI OS. <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>CHAR_RETURN</td><td class='tvalue'>#$9b</td><td class='tdesc'>Chars returned for special keys in ASCII code</td></tr>
+<tr><td class='tname'>CHAR_ESCAPE</td><td class='tvalue'>#$1b</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>CHAR_BACKSPACE</td><td class='tvalue'>#$7e</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>CHAR_TAB</td><td class='tvalue'>#$7f</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>CHAR_INVERSE</td><td class='tvalue'>#$81</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>CHAR_CAPS</td><td class='tvalue'>#$82</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>ICHAR_RETURN</td><td class='tvalue'>#219</td><td class='tdesc'>Chars returned for special keys in Antic code</td></tr>
+<tr><td class='tname'>ICHAR_ESCAPE</td><td class='tvalue'>#91</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>ICHAR_BACKSPACE</td><td class='tvalue'>#126</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>ICHAR_TAB</td><td class='tvalue'>#127</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>ICHAR_INVERSE</td><td class='tvalue'>#193</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>ICHAR_CAPS</td><td class='tvalue'>#194</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>kbcode</td><td class='taddress'>$d209</td><td class='ttype'>byte</td><td class='tdesc'>code of last pressed key</td></tr>
+<tr><td class='tname'>consol</td><td class='taddress'>$d01f</td><td class='ttype'>byte</td><td class='tdesc'>console keys status</td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>CRT_vram</td><td class='ttype'>word</td><td class='tdesc'>contains address of video memory</td></tr>
+<tr><td class='tname'>CRT_size</td><td class='ttype'>word</td><td class='tdesc'>contains size of video memory</td></tr>
+<tr><td class='tname'>CRT_screenWidth</td><td class='ttype'>byte</td><td class='tdesc'>contains width of screen in bytes</td></tr>
+<tr><td class='tname'>CRT_screenHeight</td><td class='ttype'>byte</td><td class='tdesc'>contains height of screen in bytes</td></tr>
+<tr><td class='tname'>CRT_cursor</td><td class='ttype'>word</td><td class='tdesc'>contains cursor position in memory</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>CRT_Init</td><td class='tdesc'><h4>procedure CRT_Init(vram_address: word; width, height: byte); overload;</h4><br>
+	Initializes CRT library with video ram located at specified memory address, using custom values for screen width and height.<br><ul><h5>parameters:</h5><li>vram_address - memory address of video ram</li><li>width - width of the screen (chars)</li><li>height - height of the screen (rows)</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Init</td><td class='tdesc'><h4>procedure CRT_Init(vram_address: word); overload;</h4><br>
+	Initializes CRT library with video ram located at specified memory address, Screen size is defined as default values (40 x 24).<br><ul><h5>parameters:</h5><li>vram_address - memory address of video ram</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Init</td><td class='tdesc'><h4>procedure CRT_Init; overload;</h4><br>
+	Initializes CRT library with video ram pointed by savmsc register, Screen size is defined as default values (40 x 24).<br><ul><h5>parameters:</h5><li>vram_address - memory address of video ram</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Clear</td><td class='tdesc'><h4>procedure CRT_Clear; overload;</h4><br>
+	Clears screen.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>CRT_Clear</td><td class='tdesc'><h4>procedure CRT_Clear(filler: byte); overload;</h4><br>
+	Clears screen using specified byte as filling value.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>CRT_ClearRow</td><td class='tdesc'><h4>procedure CRT_ClearRow(row: byte); overload;</h4><br>
+	Clears specified row of a screen.<br><ul><h5>parameters:</h5><li>row - number of row to clear</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ClearRow</td><td class='tdesc'><h4>procedure CRT_ClearRow; overload;</h4><br>
+	Clears current row of a screen.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>CRT_GotoXY</td><td class='tdesc'><h4>procedure CRT_GotoXY(x, y: byte);</h4><br>
+	Moves cursor to specified position on screen. <br> x=0, y=0 is upper left corner.<br><ul><h5>parameters:</h5><li>x - cursor's horizontal position</li><li>y - cursor's vertical position</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WhereY</td><td class='tdesc'><h4>function CRT_WhereY: byte;</h4><br>
+	Returns current vertical position of cursor (row).<br><ul><h5>returns:</h5><li class='returns'>(byte) - current row</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WhereX</td><td class='tdesc'><h4>function CRT_WhereX: byte;</h4><br>
+	Returns current horizontal position of cursor (column).<br><ul><h5>returns:</h5><li class='returns'>(byte) - current column</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_GetXY</td><td class='tdesc'><h4>function CRT_GetXY(x, y: byte): byte;</h4><br>
+	Returns byte located at specified position on screen. <br> x=0, y=0 is upper left corner.<br><ul><h5>parameters:</h5><li>x - cursor's horizontal position</li><li>y - cursor's vertical position</li><h5>returns:</h5><li class='returns'>(byte) - value at specified position</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Write</td><td class='tdesc'><h4>procedure CRT_Write(s: string); overload;</h4><br>
+	Outputs string at current cursor position. <br> This function outputs text in Antic coding, not ATASCII. Add 'tilda' after finishing quote of your string to use Antic coding. <br> Example:  Write('Hello Atari'~); <br> <br> You may also use Atascii2Antic function, to convert strings.<br><ul><h5>parameters:</h5><li>s - string of text in Antic code</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Write</td><td class='tdesc'><h4>procedure CRT_Write(num: integer); overload;</h4><br>
+	Outputs integer value at current cursor position.<br><ul><h5>parameters:</h5><li>num - value to write.</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Write</td><td class='tdesc'><h4>procedure CRT_Write(num: real); overload;</h4><br>
+	Outputs real value at current cursor position.<br><ul><h5>parameters:</h5><li>num - value to write.</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WriteXY</td><td class='tdesc'><h4>procedure CRT_WriteXY(x,y: byte; s: string);</h4><br>
+	Outputs string at desired position of the screen. <br> x=0, y=0 is upper left corner.<br><ul><h5>parameters:</h5><li>x - cursor's horizontal position</li><li>y - cursor's vertical position</li><li>s - string to output (in Antic code)</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WriteCentered</td><td class='tdesc'><h4>procedure CRT_WriteCentered(row: byte; s:string); overload;</h4><br>
+	Outputs centered string at specified row of the screen.<br><ul><h5>parameters:</h5><li>row - row number</li><li>s - string to output (in Antic code)</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WriteCentered</td><td class='tdesc'><h4>procedure CRT_WriteCentered(s:string); overload;</h4><br>
+	Outputs centered string in current row of cursor.<br><ul><h5>parameters:</h5><li>s - string to output (in Antic code)</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WriteRightAligned</td><td class='tdesc'><h4>procedure CRT_WriteRightAligned(row: byte; s: string); overload;</h4><br>
+	Outputs string right aligned at specified row of the screen.<br><ul><h5>parameters:</h5><li>row - row number</li><li>s - string to output (in Antic code)</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_WriteRightAligned</td><td class='tdesc'><h4>procedure CRT_WriteRightAligned(s: string); overload;</h4><br>
+	Outputs string right aligned in current row of cursor.<br><ul><h5>parameters:</h5><li>s - string to output (in Antic code)</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Put</td><td class='tdesc'><h4>procedure CRT_Put(b: byte); overload;</h4><br>
+	Outputs single byte at current position of the cursor.<br><ul><h5>parameters:</h5><li>b - byte to be writen</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_Put</td><td class='tdesc'><h4>procedure CRT_Put(x, y, b: byte); overload;</h4><br>
+	Outputs single byte at desired position of the screen. <br> x=0, y=0 is upper left corner.<br><ul><h5>parameters:</h5><li>x - cursor's horizontal position</li><li>y - cursor's vertical position</li><li>b - byte to be writen</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_KeyPressed</td><td class='tdesc'><h4>function CRT_KeyPressed: boolean;</h4><br>
+	Returns true if any key on keyboard is pressed down.<br><ul><h5>returns:</h5><li class='returns'>(boolean) true if any key is down</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadKey</td><td class='tdesc'><h4>function CRT_ReadKey: byte;</h4><br>
+	Waits for key to be pressed and returns it's keyboard code.<br><ul><h5>returns:</h5><li class='returns'>keyboard code of pressed key.</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadChar</td><td class='tdesc'><h4>function CRT_ReadChar: byte;</h4><br>
+	Waits for key to be pressed and returns it's value in ATASCII code.<br><ul><h5>returns:</h5><li class='returns'>ATASCII code of pressed key.</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadCharI</td><td class='tdesc'><h4>function CRT_ReadCharI: byte;</h4><br>
+	Waits for key to be pressed and returns it's value in ANTIC code.<br><ul><h5>returns:</h5><li class='returns'>ANTIC code of pressed key.</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadStringI</td><td class='tdesc'><h4>function CRT_ReadStringI(limit: byte): string; overload;</h4><br>
+	Reads string from keyboard, finished with return key, and returns it's value in ANTIC code. <br> You can provide maximum number of chars to be entered.<br><ul><h5>returns:</h5><li class='returns'>entered string in ANTIC code</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadStringI</td><td class='tdesc'><h4>function CRT_ReadStringI: string; overload;</h4><br>
+	Reads string from keyboard, finished with return key, and returns it's value in ANTIC code. <br> Maximum length is 255 chars<br><ul><h5>returns:</h5><li class='returns'>entered string in ANTIC code</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadString</td><td class='tdesc'><h4>function CRT_ReadString(limit: byte): string; overload;</h4><br>
+	Reads string from keyboard, finished with return key, and returns it's value in ATASCII code. <br> You can provide maximum number of chars to be entered.<br><ul><h5>returns:</h5><li class='returns'>entered string in ATASCII code</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadString</td><td class='tdesc'><h4>function CRT_ReadString: string; overload;</h4><br>
+	Reads string from keyboard, finished with return key, and returns it's value in ATASCII code. <br> Maximum length is 255 chars<br><ul><h5>returns:</h5><li class='returns'>entered string in ATASCII code</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadInt</td><td class='tdesc'><h4>function CRT_ReadInt: integer;</h4><br>
+	Reads integer value from keyboard, finished with return key,<br><ul><h5>returns:</h5><li class='returns'>(integer) entered integer value</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_ReadFloat</td><td class='tdesc'><h4>function CRT_ReadFloat: real;</h4><br>
+	Reads floating point value from keyboard, finished with return key, <br> Dot symbol '.' is used to separate fractional part.<br><ul><h5>returns:</h5><li class='returns'>(real) entered floating point value</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_NewLine</td><td class='tdesc'><h4>procedure CRT_NewLine; overload;</h4><br>
+	Moves cursor to next line of screen.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>CRT_NewLine</td><td class='tdesc'><h4>procedure CRT_NewLine(offset: byte); overload;</h4><br>
+	Moves cursor to next line of screen and sets left margin (text offset).<br><ul><h5>parameters:</h5><li>offset - new value for left margin</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_NewLines</td><td class='tdesc'><h4>procedure CRT_NewLines(count: byte);</h4><br>
+	Moves cursor down by specifien number of lines.<br><ul><h5>parameters:</h5><li>number of lines</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_CarriageReturn</td><td class='tdesc'><h4>procedure CRT_CarriageReturn;</h4><br>
+	Moves cursor to the left margin of the screen,<br><ul></ul></td></tr>
+<tr><td class='tname fname'>CRT_Invert</td><td class='tdesc'><h4>procedure CRT_Invert(x, y, width: byte);</h4><br>
+	Inverts part of the screen. <br> x=0, y=0 is upper left corner.<br><ul><h5>parameters:</h5><li>x - starting cursor's horizontal position</li><li>y - starting cursor's vertical position</li><li>b - number of characters to be inverted</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_InvertRow</td><td class='tdesc'><h4>procedure CRT_InvertRow(row: byte);</h4><br>
+	Inverts selected row of the screen.<br><ul><h5>parameters:</h5><li>row - row number to invert</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_StartPressed</td><td class='tdesc'><h4>function CRT_StartPressed: boolean;</h4><br>
+	Returns true if START key is pressed down.<br><ul><h5>returns:</h5><li class='returns'>(boolean) true if START key is down</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_SelectPressed</td><td class='tdesc'><h4>function CRT_SelectPressed: boolean;</h4><br>
+	Returns true if SELECT key is pressed down.<br><ul><h5>returns:</h5><li class='returns'>(boolean) true if SELECT key is down</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_OptionPressed</td><td class='tdesc'><h4>function CRT_OptionPressed: boolean;</h4><br>
+	Returns true if OPTION key is pressed down.<br><ul><h5>returns:</h5><li class='returns'>(boolean) true if OPTION key is down</li></ul></td></tr>
+<tr><td class='tname fname'>CRT_HelpPressed</td><td class='tdesc'><h4>function CRT_HelpPressed:boolean;</h4><br>
+	Returns true if HELP key is pressed down.<br><ul><h5>returns:</h5><li class='returns'>(boolean) true if HELP key is down</li></ul></td></tr>
+<tr><td class='tname fname'>Atascii2Antic</td><td class='tdesc'><h4>function Atascii2Antic(c: byte): byte;overload;</h4><br>
+	Converts single byte from ATASCII to ANTIC coding.<br><ul><h5>parameters:</h5><li>c - byte to convert</li></ul></td></tr>
+<tr><td class='tname fname'>Antic2Atascii</td><td class='tdesc'><h4>function Antic2Atascii(c: byte): byte; overload;</h4><br>
+	Converts single byte from ANTIC to ATASCII coding.<br><ul><h5>parameters:</h5><li>c - byte to convert</li></ul></td></tr>
+<tr><td class='tname fname'>Atascii2Antic</td><td class='tdesc'><h4>function Atascii2Antic(s: string): string; overload;</h4><br>
+	Converts text string from ATASCII to ANTIC coding.<br><ul><h5>parameters:</h5><li>s - string to convert</li></ul></td></tr>
+<tr><td class='tname fname'>Antic2Atascii</td><td class='tdesc'><h4>function Antic2Atascii(s: string): string; overload;</h4><br>
+	Converts text string from ANTIC to ATASCII coding.<br><ul><h5>parameters:</h5><li>s - string to convert</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

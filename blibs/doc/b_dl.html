@@ -1,0 +1,112 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit b_dl - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit b_dl</h1>
+<h3>Display List manipulation library.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of useful constants and methods, to customize display lists for the Atari 8-bit. <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>DL_BLANK1</td><td class='tvalue'>0</td><td class='tdesc'>1 blank line</td></tr>
+<tr><td class='tname'>DL_BLANK2</td><td class='tvalue'>%00010000</td><td class='tdesc'>2 blank lines</td></tr>
+<tr><td class='tname'>DL_BLANK3</td><td class='tvalue'>%00100000</td><td class='tdesc'>3 blank lines</td></tr>
+<tr><td class='tname'>DL_BLANK4</td><td class='tvalue'>%00110000</td><td class='tdesc'>4 blank lines</td></tr>
+<tr><td class='tname'>DL_BLANK5</td><td class='tvalue'>%01000000</td><td class='tdesc'>5 blank lines</td></tr>
+<tr><td class='tname'>DL_BLANK6</td><td class='tvalue'>%01010000</td><td class='tdesc'>6 blank lines</td></tr>
+<tr><td class='tname'>DL_BLANK7</td><td class='tvalue'>%01100000</td><td class='tdesc'>7 blank lines</td></tr>
+<tr><td class='tname'>DL_BLANK8</td><td class='tvalue'>%01110000</td><td class='tdesc'>8 blank lines</td></tr>
+<tr><td class='tname'>DL_DLI</td><td class='tvalue'>%10000000</td><td class='tdesc'>Order to run DLI</td></tr>
+<tr><td class='tname'>DL_LMS</td><td class='tvalue'>%01000000</td><td class='tdesc'>Order to set new memory address</td></tr>
+<tr><td class='tname'>DL_VSCROLL</td><td class='tvalue'>%00100000</td><td class='tdesc'>Turn on vertical scroll on this line</td></tr>
+<tr><td class='tname'>DL_HSCROLL</td><td class='tvalue'>%00010000</td><td class='tdesc'>Turn on horizontal scroll on this line</td></tr>
+<tr><td class='tname'>DL_MODE_40x24T2</td><td class='tvalue'>2</td><td class='tdesc'>Antic Modes</td></tr>
+<tr><td class='tname'>DL_MODE_40x24T5</td><td class='tvalue'>4</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_40x12T5</td><td class='tvalue'>5</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_20x24T5</td><td class='tvalue'>6</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_20x12T5</td><td class='tvalue'>7</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_40x24G4</td><td class='tvalue'>8</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_80x48G2</td><td class='tvalue'>9</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_80x48G4</td><td class='tvalue'>$A</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_160x96G2</td><td class='tvalue'>$B</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_160x192G2</td><td class='tvalue'>$C</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_160x96G4</td><td class='tvalue'>$D</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_160x192G4</td><td class='tvalue'>$E</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_MODE_320x192G2</td><td class='tvalue'>$F</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>DL_JMP</td><td class='tvalue'>%00000001</td><td class='tdesc'>Order to jump</td></tr>
+<tr><td class='tname'>DL_JVB</td><td class='tvalue'>%01000001</td><td class='tdesc'>Jump to begining</td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>DL_address</td><td class='ttype'>word</td><td class='tdesc'>contains memory of Display List</td></tr>
+<tr><td class='tname'>DL_cursor</td><td class='ttype'>byte</td><td class='tdesc'>contains position of modification cursor</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>DL_Init</td><td class='tdesc'><h4>procedure DL_Init(address:word);</h4><br>
+	Initializes new empty Display List at desired address. Sets DL_cursor at 0.<br><ul><h5>parameters:</h5><li>address - Display List memory address</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Push</td><td class='tdesc'><h4>procedure DL_Push(value:byte);overload;</h4><br>
+	Pushes single byte value into Display List at DL_cursor position. Moves cursor one byte forward. <br> Use it to set with mode lines and blanks.<br><ul><h5>parameters:</h5><li>value - Display List element to push</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Push</td><td class='tdesc'><h4>procedure DL_Push(value, count:byte);overload;</h4><br>
+	Pushes multple bytes with single value into Display List at DL_cursor position. Moves cursor to position of first byte after added values. <br> Use it to set multiple mode lines and blanks.<br><ul><h5>parameters:</h5><li>value - value of byte to push</li><li>count - number of bytes to push</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Push</td><td class='tdesc'><h4>procedure DL_Push(address: word);overload;</h4><br>
+	Pushes address value into Display List at DL_cursor position. Moves cursor two bytes forward.<br><ul><h5>parameters:</h5><li>address - (word) address to push</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Push</td><td class='tdesc'><h4>procedure DL_Push(value: byte; address: word);overload;</h4><br>
+	Pushes byte value and address value into Display List at DL_cursor position. Moves cursor three bytes forward. <br> Use with DL_LMS and jump orders.<br><ul><h5>parameters:</h5><li>value - Display List order to push</li><li>address - address to push</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Start</td><td class='tdesc'><h4>procedure DL_Start;</h4><br>
+	Order ANTIC to use currently defined Display List.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>DL_Attach</td><td class='tdesc'><h4>function DL_Attach:word;</h4><br>
+	Attaches to current (system) Display List. Sets modification pointer at 0, so next DL_Push overwrites first byte of Display List.<br><ul><h5>returns:</h5><li class='returns'>(word) - memory address of current Display List</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Seek</td><td class='tdesc'><h4>function DL_Seek(offset:byte):byte;</h4><br>
+	Moves DL_cursor to desired position, and returns byte value stored at this offset.<br><ul><h5>parameters:</h5><li>offset - new DL_cursor position</li><h5>returns:</h5><li class='returns'>(byte) - byte at cursor</li></ul></td></tr>
+<tr><td class='tname fname'>DL_SeekW</td><td class='tdesc'><h4>function DL_SeekW(offset:byte):word;</h4><br>
+	Moves DL_cursor to desired position, and returns word value stored at this offset.<br><ul><h5>parameters:</h5><li>offset - new DL_cursor position</li><h5>returns:</h5><li class='returns'>(word) - word at cursor</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Find</td><td class='tdesc'><h4>function DL_Find(val: byte):byte;</h4><br>
+	Tries to find desired value in Display List starting from DL_cursor. It checks only first 255 bytes of DL. Returns offset of first found element, or $ff (255) if not found.<br><ul><h5>parameters:</h5><li>val - value to find</li><h5>returns:</h5><li class='returns'>(byte) - offset of found element (or 255 if not found)</li></ul></td></tr>
+<tr><td class='tname fname'>DL_Poke</td><td class='tdesc'><h4>procedure DL_Poke(offset: byte; val: byte);</h4><br>
+	Moves DL_cursor to desired position, and puts a byte value at this offset.<br><ul><h5>parameters:</h5><li>offset - new DL_cursor position</li><li>val - value to poke</li></ul></td></tr>
+<tr><td class='tname fname'>DL_PokeW</td><td class='tdesc'><h4>procedure DL_PokeW(offset: byte; val: word);</h4><br>
+	Moves DL_cursor to desired position, and puts a word value at this offset.<br><ul><h5>parameters:</h5><li>offset - new DL_cursor position</li><li>val - value to poke</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

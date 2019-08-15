@@ -1,0 +1,7038 @@
+mads 2.0.8 build 17 (25 Oct 18)
+Source: hscroll.a65
+     1 = 0010			STACKWIDTH	= 16
+     2 = 2000			CODEORIGIN	= $2000
+     3
+     4 = 0001			TRUE		= 1
+     5 = 0000			FALSE		= 0
+     6
+     7 					org $80
+     8
+     9 					.print 'ZPFREE: $0000..',*-1
+     9 				ZPFREE: $0000..$007F
+    10
+    11 = 0080			fxptr	.ds 2
+    12
+    13 = 0082			eax	.ds 4						;8 bytes (aex + edx) -> divREAL
+    14 = 0086			edx	.ds 4
+    15 = 008A			ecx	.ds 4
+    16 = 008E			bp	.ds 2
+    17 = 0090			bp2	.ds 2
+    18
+    19 				ztmp
+    20 = 0092			ztmp8	.ds 1
+    21 = 0093			ztmp9	.ds 1
+    22 = 0094			ztmp10	.ds 1
+    23 = 0095			ztmp11	.ds 1
+    24
+    25 = 0096			TMP	.ds 2
+    26
+    27 = 0098			STACKORIGIN	.ds STACKWIDTH*4
+    28
+    29 					.print 'ZPFREE: ',*,'..',$ff
+    29 				ZPFREE: $00D8..$00FF
+    30
+    31 = 0082			ax	= eax
+    32 = 0082			al	= eax
+    33 = 0083			ah	= eax+1
+    34
+    35 = 008A			cx	= ecx
+    36 = 008A			cl	= ecx
+    37 = 008B			ch	= ecx+1
+    38
+    39 = 0086			dx	= edx
+    40 = 0086			dl	= edx
+    41 = 0087			dh	= edx+1
+    42
+    43 					org eax
+    44
+    45 = 0082			FP1MAN0	.ds 1
+    46 = 0083			FP1MAN1	.ds 1
+    47 = 0084			FP1MAN2	.ds 1
+    48 = 0085			FP1MAN3	.ds 1
+    49
+    50 					org ztmp8
+    51
+    52 = 0092			FP1SGN	.ds 1
+    53 = 0093			FP1EXP	.ds 1
+    54
+    55 					org edx
+    56
+    57 = 0086			FP2MAN0	.ds 1
+    58 = 0087			FP2MAN1	.ds 1
+    59 = 0088			FP2MAN2	.ds 1
+    60 = 0089			FP2MAN3	.ds 1
+    61
+    62 					org ztmp10
+    63
+    64 = 0094			FP2SGN	.ds 1
+    65 = 0095			FP2EXP	.ds 1
+    66
+    67 					org ecx
+    68
+    69 = 008A			FPMAN0	.ds 1
+    70 = 008B			FPMAN1	.ds 1
+    71 = 008C			FPMAN2	.ds 1
+    72 = 008D			FPMAN3	.ds 1
+    73
+    74 					org bp2
+    75
+    76 = 0090			FPSGN	.ds 1
+    77 = 0091			FPEXP	.ds 1
+    78
+    79 				; -----------------------------------------------------------
+    80
+    81 					org CODEORIGIN
+    82
+    83 2000				STATICDATA
+Macro: STATICDATA [Source: hscroll.a65]
+     1 FFFF> 2000-25D5> 27 68 + .by  $27 $68 $65 $6C $6C $6F $01 $00  $69 $74 $00 $69 $73 $00 $61 $6E  $00 $6A $75 $6D $70 $69 $6E $67
+     2 2018 00 70 61 73 63 61 + .by  $00 $70 $61 $73 $63 $61 $6C $00  $73 $63 $72 $6F $6C $6C $01 $01  $00
+Source: hscroll.a65
+    84
+    85 2029			START
+    86 2029 BA				tsx
+    87 202A 8E C3 22			stx MAIN.@halt+1
+    88
+    89 					.ifdef fmulinit
+    90 					fmulinit
+    91 					eif
+    92
+    93 					ift DATAORIGIN+VARINITSIZE > $BFFF
+    94 					ert 'Invalid memory address range ',DATAORIGIN+VARINITSIZE
+    95 					els
+    96 					@fill #DATAORIGIN+VARINITSIZE #VARDATASIZE-VARINITSIZE #0
+    96 				 MWA #DATAORIGIN+VARINITSIZE @FILL.PTR1\ MWA #VARDATASIZE-VARINITSIZE @FILL.PTR3\ MVA #0 @FILL.PTR2\ JSR @FILL
+    96 202D A9 D6 85 86 A9 25 +  MWA #DATAORIGIN+VARINITSIZE @FILL.PTR1
+    96 2035 A9 00 85 8A A9 00 +  MWA #VARDATASIZE-VARINITSIZE @FILL.PTR3
+    96 203D A9 00 85 82		 MVA #0 @FILL.PTR2
+    96 2041 20 5E 24		 JSR @FILL
+    97 					eif
+    98
+    99 2044 A2 0F			ldx #$0f
+   100 2046 BD 40 03 9D C6 22 + 	mva:rpl $340,x MAIN.IOCB@COPY,x-
+   101
+   102 204F A2 00 86 8E			mvx #$00 bp					; lo BP = 0, X = 0 !!!
+   103
+   104 2053				UNITINITIALIZATION
+Macro: UNITINITIALIZATION [Source: hscroll.a65]
+Source: hscroll.a65
+   105
+   106 2053			.local	MAIN						; PROCEDURE
+   107
+   108 					ift l_0030-*>3
+   109 2053 4C D2 21			jmp l_0030
+   110 					eif
+   111
+   112 				; -----------------------------------------------------------
+   113
+   114 2056			.local	SYSTEM						; UNIT
+   115
+   116 2056			.local	POKE						; PROCEDURE | ASSEMBLER | REGISTER
+   117
+   118 				; -----------------------------------------------------------
+   119
+   120 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   121 				; as Pointer
+   122 2056 B5 98 85 8A			mva :STACKORIGIN,x VALUE
+   123 205A CA				dex						; sub bx, 1
+   124
+   125 				; -----------------------------------------------------------
+   126
+   127 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   128 				; as Pointer
+   129 205B B5 98 85 86			mva :STACKORIGIN,x A
+   130 205F B5 A8 85 87			mva :STACKORIGIN+STACKWIDTH,x A+1
+   131 2063 CA				dex						; sub bx, 1
+   132
+   133
+   134 				; ---------------------  ASM Block 021  ---------------------
+   135
+   136 2064 A0 00			ldy #0
+   137 2066 A5 8A 91 86			mva value (edx),y
+   138
+   139
+   140 				; -----------------------------------------------------------
+   141
+   142 = 0086			A	= edx
+   143 = 008A			VALUE	= ecx
+   144
+   145 206A			@exit
+   146 					.ifdef @new
+   147 					@FreeMem #@VarData #@VarDataSize
+   148 					eif
+   149 206A 60				rts						; ret
+   150 				.endl
+   151
+   152 206B			.local	DPOKE						; PROCEDURE | ASSEMBLER | REGISTER
+   153
+   154 				; -----------------------------------------------------------
+   155
+   156 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   157 				; as Pointer
+   158 206B B5 98 85 8A			mva :STACKORIGIN,x VALUE
+   159 206F B5 A8 85 8B			mva :STACKORIGIN+STACKWIDTH,x VALUE+1
+   160 2073 CA				dex						; sub bx, 1
+   161
+   162 				; -----------------------------------------------------------
+   163
+   164 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   165 				; as Pointer
+   166 2074 B5 98 85 86			mva :STACKORIGIN,x A
+   167 2078 B5 A8 85 87			mva :STACKORIGIN+STACKWIDTH,x A+1
+   168 207C CA				dex						; sub bx, 1
+   169
+   170
+   171 				; ---------------------  ASM Block 022  ---------------------
+   172
+   173 207D A0 00			ldy #0
+   174 207F A5 8A 91 86			mva value (edx),y
+   175 2083 C8				iny
+   176 2084 A5 8B 91 86			mva value+1 (edx),y
+   177
+   178
+   179 				; -----------------------------------------------------------
+   180
+   181 = 0086			A	= edx
+   182 = 008A			VALUE	= ecx
+   183
+   184 2088			@exit
+   185 					.ifdef @new
+   186 					@FreeMem #@VarData #@VarDataSize
+   187 					eif
+   188 2088 60				rts						; ret
+   189 				.endl
+   190
+   191 2089			.local	MOVE_0064					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER
+   192
+   193 				; -----------------------------------------------------------
+   194
+   195 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   196 				; as Pointer
+   197 2089 B5 98 85 82			mva :STACKORIGIN,x COUNT
+   198 208D B5 A8 85 83			mva :STACKORIGIN+STACKWIDTH,x COUNT+1
+   199 2091 CA				dex						; sub bx, 1
+   200
+   201 				; -----------------------------------------------------------
+   202
+   203 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   204 				; as Pointer
+   205 2092 B5 98 85 8A			mva :STACKORIGIN,x DEST
+   206 2096 B5 A8 85 8B			mva :STACKORIGIN+STACKWIDTH,x DEST+1
+   207 209A CA				dex						; sub bx, 1
+   208
+   209 				; -----------------------------------------------------------
+   210
+   211 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   212 				; as Pointer
+   213 209B B5 98 85 86			mva :STACKORIGIN,x SOURCE
+   214 209F B5 A8 85 87			mva :STACKORIGIN+STACKWIDTH,x SOURCE+1
+   215 20A3 CA				dex						; sub bx, 1
+   216
+   217
+   218 				; ---------------------  ASM Block 033  ---------------------
+   219
+   220 20A4 20 09 24			jsr @move
+   221
+   222
+   223 				; -----------------------------------------------------------
+   224
+   225 = 0086			SOURCE	= edx
+   226 = 008A			DEST	= ecx
+   227 = 0082			COUNT	= eax
+   228
+   229 20A7			@exit
+   230 					.ifdef @new
+   231 					@FreeMem #@VarData #@VarDataSize
+   232 					eif
+   233 20A7 60				rts						; ret
+   234 				.endl
+   235
+   236 20A8			.local	PAUSE_0080					; PROCEDURE | ASSEMBLER | OVERLOAD
+   237
+   238
+   239 				; ---------------------  ASM Block 039  ---------------------
+   240
+   241 20A8 A5 14 C5 14 F0 FC		lda:cmp:req :rtclok+2
+   242
+   243
+   244 20AE			@exit
+   245 					.ifdef @new
+   246 					@FreeMem #@VarData #@VarDataSize
+   247 					eif
+   248 20AE 60				rts						; ret
+   249 				.endl
+   250
+   251 				; -----------------------------------------------------------
+   252
+   253 = 0648			M_PI_2	= $0648
+   254 = 0192			D_PI_2	= $0192
+   255 = 0004			D_PI_180	= $0004
+   256 = 0000			MGTIA	= $0000
+   257 = 0080			MVBXE	= $0080
+   258 = 0010			WINDOW	= $0010
+   259 = 0020			NARROW	= $0020
+   260 = 0000			VBXE_XDLADR	= $0000
+   261 = 0100			VBXE_BCBADR	= $0100
+   262 = 1000			VBXE_MAPADR	= $1000
+   263 = 5000			VBXE_OVRADR	= $5000
+   264 = B000			VBXE_WINDOW	= $B000
+   265 = 0000			IDLI	= $0000
+   266 = 0001			IVBL	= $0001
+   267 = 00FE			CH_DELCHR	= $00FE
+   268 = 009B			CH_ENTER	= $009B
+   269 = 001B			CH_ESC	= $001B
+   270 = 001C			CH_CURS_UP	= $001C
+   271 = 001D			CH_CURS_DOWN	= $001D
+   272 = 001E			CH_CURS_LEFT	= $001E
+   273 = 001F			CH_CURS_RIGHT	= $001F
+   274 = 007F			CH_TAB	= $007F
+   275 = 009B			CH_EOL	= $009B
+   276 = 007D			CH_CLR	= $007D
+   277 = 00FD			CH_BELL	= $00FD
+   278 = 007E			CH_DEL	= $007E
+   279 = 009C			CH_DELLINE	= $009C
+   280 = 009D			CH_INSLINE	= $009D
+   281 = 0000			COLOR_BLACK	= $0000
+   282 = 000E			COLOR_WHITE	= $000E
+   283 = 0032			COLOR_RED	= $0032
+   284 = 0096			COLOR_CYAN	= $0096
+   285 = 0068			COLOR_VIOLET	= $0068
+   286 = 00C4			COLOR_GREEN	= $00C4
+   287 = 0074			COLOR_BLUE	= $0074
+   288 = 00EE			COLOR_YELLOW	= $00EE
+   289 = 004A			COLOR_ORANGE	= $004A
+   290 = 00E4			COLOR_BROWN	= $00E4
+   291 = 003C			COLOR_LIGHTRED	= $003C
+   292 = 0004			COLOR_GRAY1	= $0004
+   293 = 0006			COLOR_GRAY2	= $0006
+   294 = 000A			COLOR_GRAY3	= $000A
+   295 = 00CC			COLOR_LIGHTGREEN	= $00CC
+   296 = 007C			COLOR_LIGHTBLUE	= $007C
+   297 = 0004			FMOPENREAD	= $0004
+   298 = 0008			FMOPENWRITE	= $0008
+   299 = 0009			FMOPENAPPEND	= $0009
+   300 = 000C			FMOPENREADWRITE	= $000C
+   301 = 24A7			SCREENWIDTH	= DATAORIGIN+$0000
+   302 = 24A9			SCREENHEIGHT	= DATAORIGIN+$0002
+   303 = 24AB			FILEMODE	= DATAORIGIN+$0004
+   304 = 24AC			SCREENMODE	= DATAORIGIN+$0005
+   305 = 24AD			IORESULT	= DATAORIGIN+$0006
+   306 = 24AE			EOLN	= DATAORIGIN+$0007
+   307 = 24AF			RNDSEED	= DATAORIGIN+$0008
+   308
+   309 				.endl							; UNIT SYSTEM
+   310
+   311 				; -----------------------------------------------------------
+   312
+   313 20AF			.local	ATARI						; UNIT
+   314
+   315 				; -----------------------------------------------------------
+   316
+   317 = 0012			RTCLOK	= $0012
+   318 = 004D			ATRACT	= $004D
+   319 = 0052			LMARGIN	= $0052
+   320 = 0053			RMARGIN	= $0053
+   321 = 0054			ROWCRS	= $0054
+   322 = 0055			COLCRS	= $0055
+   323 = 0057			DINDEX	= $0057
+   324 = 0058			SAVMSC	= $0058
+   325 = 0200			VDSLST	= $0200
+   326 = 0230			SDLSTL	= $0230
+   327 = 0290			TXTROW	= $0290
+   328 = 0291			TXTCOL	= $0291
+   329 = 0293			TINDEX	= $0293
+   330 = 0294			TXTMSC	= $0294
+   331 = 022F			SDMCTL	= $022F
+   332 = 026F			GPRIOR	= $026F
+   333 = 02F0			CRSINH	= $02F0
+   334 = 02F3			CHACT	= $02F3
+   335 = 02F4			CHBAS	= $02F4
+   336 = 02FC			CH	= $02FC
+   337 = 02C0			PCOLR0	= $02C0
+   338 = 02C1			PCOLR1	= $02C1
+   339 = 02C2			PCOLR2	= $02C2
+   340 = 02C3			PCOLR3	= $02C3
+   341 = 02C4			COLOR0	= $02C4
+   342 = 02C5			COLOR1	= $02C5
+   343 = 02C6			COLOR2	= $02C6
+   344 = 02C7			COLOR3	= $02C7
+   345 = 02C8			COLOR4	= $02C8
+   346 = D000			HPOSP0	= $D000
+   347 = D001			HPOSP1	= $D001
+   348 = D002			HPOSP2	= $D002
+   349 = D003			HPOSP3	= $D003
+   350 = D004			HPOSM0	= $D004
+   351 = D005			HPOSM1	= $D005
+   352 = D006			HPOSM2	= $D006
+   353 = D007			HPOSM3	= $D007
+   354 = D008			SIZEP0	= $D008
+   355 = D009			SIZEP1	= $D009
+   356 = D00A			SIZEP2	= $D00A
+   357 = D00B			SIZEP3	= $D00B
+   358 = D00C			SIZEM	= $D00C
+   359 = D00D			GRAFP0	= $D00D
+   360 = D00E			GRAFP1	= $D00E
+   361 = D00F			GRAFP2	= $D00F
+   362 = D010			GRAFP3	= $D010
+   363 = D011			GRAFM	= $D011
+   364 = D004			P0PF	= $D004
+   365 = D014			PAL	= $D014
+   366 = D012			COLPM0	= $D012
+   367 = D013			COLPM1	= $D013
+   368 = D014			COLPM2	= $D014
+   369 = D015			COLPM3	= $D015
+   370 = D016			COLPF0	= $D016
+   371 = D017			COLPF1	= $D017
+   372 = D018			COLPF2	= $D018
+   373 = D019			COLPF3	= $D019
+   374 = D01A			COLBK	= $D01A
+   375 = D01B			PRIOR	= $D01B
+   376 = D01D			GRACTL	= $D01D
+   377 = D01E			HITCLR	= $D01E
+   378 = D200			AUDF1	= $D200
+   379 = D201			AUDC1	= $D201
+   380 = D202			AUDF2	= $D202
+   381 = D203			AUDC2	= $D203
+   382 = D204			AUDF3	= $D204
+   383 = D205			AUDC3	= $D205
+   384 = D206			AUDF4	= $D206
+   385 = D207			AUDC4	= $D207
+   386 = D208			AUDCTL	= $D208
+   387 = D20F			SKSTAT	= $D20F
+   388 = D301			PORTB	= $D301
+   389 = D400			DMACTL	= $D400
+   390 = D401			CHACTL	= $D401
+   391 = D402			DLISTL	= $D402
+   392 = D404			HSCROL	= $D404
+   393 = D405			VSCROL	= $D405
+   394 = D407			PMBASE	= $D407
+   395 = D409			CHBASE	= $D409
+   396 = D40A			WSYNC	= $D40A
+   397 = D40B			VCOUNT	= $D40B
+   398 = D40C			PENH	= $D40C
+   399 = D40D			PENV	= $D40D
+   400 = D40E			NMIEN	= $D40E
+   401
+   402 				.endl							; UNIT ATARI
+   403
+   404 				; -----------------------------------------------------------
+   405
+   406 20AF			.local	B_DL						; UNIT
+   407
+   408 20AF			.local	DL_INIT						; PROCEDURE
+   409
+   410 				; -----------------------------------------------------------
+   411
+   412 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   413 				; as Pointer
+   414 20AF B5 98 8D B4 24		mva :STACKORIGIN,x ADDRESS
+   415 20B4 B5 A8 8D B5 24		mva :STACKORIGIN+STACKWIDTH,x ADDRESS+1
+   416 20B9 CA				dex						; sub bx, 1
+   417
+   418 					ift l_008A-*>3
+   419 					jmp l_008A
+   420 					eif
+   421
+   422 				; IfThenEpilog
+   423 20BA			l_008A
+   424
+   425 				; optimize OK (B_DL), line = 160
+   426
+   427 20BA AD B4 24 8D B1 24		mva ADDRESS DL_ADDRESS
+   428 20C0 AD B5 24 8D B2 24		mva ADDRESS+1 DL_ADDRESS+1
+   429
+   430 				; optimize OK (B_DL), line = 161
+   431
+   432 20C6 A9 00 8D B3 24		mva #$00 DL_CURSOR
+   433
+   434 				; -----------------------------------------------------------
+   435
+   436 = 24B4			ADDRESS	= DATAORIGIN+$000D
+   437
+   438 = 24B4			@VarData	= ADDRESS
+   439 = 0002			@VarDataSize	= 2
+   440
+   441
+   442 20CB			@exit
+   443 					.ifdef @new
+   444 					@FreeMem #@VarData #@VarDataSize
+   445 					eif
+   446 20CB 60				rts						; ret
+   447 				.endl
+   448
+   449 20CC			.local	DL_PUSH_009A					; PROCEDURE | OVERLOAD
+   450
+   451 				; -----------------------------------------------------------
+   452
+   453 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   454 				; as Pointer
+   455 20CC B5 98 8D B6 24		mva :STACKORIGIN,x VALUE
+   456 20D1 CA				dex						; sub bx, 1
+   457
+   458 					ift l_00A3-*>3
+   459 					jmp l_00A3
+   460 					eif
+   461
+   462 				; IfThenEpilog
+   463 20D2			l_00A3
+   464
+   465 				; optimize OK (B_DL), line = 166
+   466
+   467 20D2 AD B1 24			lda DL_ADDRESS
+   468 20D5 18 6D B3 24			add DL_CURSOR
+   469 20D9 A8				tay
+   470 20DA AD B2 24			lda DL_ADDRESS+1
+   471 20DD 69 00			adc #$00
+   472 20DF 85 8F			sta :bp+1
+   473 20E1 AD B6 24			lda VALUE
+   474 20E4 91 8E			sta (:bp),y
+   475
+   476 				; optimize FAIL (0, B_DL), line = 167
+   477 20E6 EE B3 24			inc DL_CURSOR
+   478
+   479 				; -----------------------------------------------------------
+   480
+   481 = 24B6			VALUE	= DATAORIGIN+$000F
+   482
+   483 = 24B6			@VarData	= VALUE
+   484 = 0001			@VarDataSize	= 1
+   485
+   486
+   487 20E9			@exit
+   488 					.ifdef @new
+   489 					@FreeMem #@VarData #@VarDataSize
+   490 					eif
+   491 20E9 60				rts						; ret
+   492 				.endl
+   493
+   494 20EA			.local	DL_PUSH_00B4					; PROCEDURE | OVERLOAD
+   495
+   496 				; -----------------------------------------------------------
+   497
+   498 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   499 				; as Pointer
+   500 20EA B5 98 8D B8 24		mva :STACKORIGIN,x COUNT
+   501 20EF CA				dex						; sub bx, 1
+   502
+   503 				; -----------------------------------------------------------
+   504
+   505 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   506 				; as Pointer
+   507 20F0 B5 98 8D B7 24		mva :STACKORIGIN,x VALUE
+   508 20F5 CA				dex						; sub bx, 1
+   509
+   510 					ift l_00C3-*>3
+   511 					jmp l_00C3
+   512 					eif
+   513
+   514 				; IfThenEpilog
+   515 20F6			l_00C3
+   516
+   517 				; --- WhileProlog
+   518 20F6			l_00C4
+   519
+   520 				; optimize OK (B_DL), line = 172
+   521
+   522 20F6 AD B8 24			lda COUNT
+   523 20F9 C9 00			cmp #$00
+   524 20FB F0 02			seq
+   525 20FD B0 03			bcs @+
+   526 20FF 4C 11 21			jmp l_00D3
+   527 2102			@
+   528
+   529 				; optimize FAIL ('DL_PUSH_009A', B_DL), line = 173
+   530 2102 E8				inx
+   531 2103 AD B7 24 95 98		mva VALUE :STACKORIGIN,x
+   532 2108 20 CC 20			jsr DL_PUSH_009A
+   533
+   534 				; optimize FAIL (0, B_DL), line = 174
+   535 210B CE B8 24			dec COUNT
+   536
+   537 				; --- WhileDoEpilog
+   538 210E			c_00C4
+   539
+   540 				; WhileDoEpilog
+   541 210E 4C F6 20			jmp l_00C4
+   542 2111			l_00D3
+   543 2111			b_00C4
+   544
+   545 				; -----------------------------------------------------------
+   546
+   547 = 24B7			VALUE	= DATAORIGIN+$0010
+   548 = 24B8			COUNT	= DATAORIGIN+$0011
+   549
+   550 = 24B7			@VarData	= VALUE
+   551 = 0002			@VarDataSize	= 2
+   552
+   553
+   554 2111			@exit
+   555 					.ifdef @new
+   556 					@FreeMem #@VarData #@VarDataSize
+   557 					eif
+   558 2111 60				rts						; ret
+   559 				.endl
+   560
+   561 2112			.local	DL_PUSH_00DD					; PROCEDURE | OVERLOAD
+   562
+   563 				; -----------------------------------------------------------
+   564
+   565 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   566 				; as Pointer
+   567 2112 B5 98 8D B9 24		mva :STACKORIGIN,x ADDRESS
+   568 2117 B5 A8 8D BA 24		mva :STACKORIGIN+STACKWIDTH,x ADDRESS+1
+   569 211C CA				dex						; sub bx, 1
+   570
+   571 					ift l_00E6-*>3
+   572 					jmp l_00E6
+   573 					eif
+   574
+   575 				; IfThenEpilog
+   576 211D			l_00E6
+   577
+   578 				; optimize FAIL ('DL_PUSH_009A', B_DL), line = 180
+   579 211D E8				inx
+   580 211E AD B9 24 95 98		mva ADDRESS :STACKORIGIN,x
+   581 2123 AD BA 24 95 A8		mva ADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   582 2128 20 CC 20			jsr DL_PUSH_009A
+   583
+   584 				; optimize FAIL ('DL_PUSH_009A', B_DL), line = 181
+   585 212B E8				inx
+   586 212C AD B9 24 95 98		mva ADDRESS :STACKORIGIN,x
+   587 2131 AD BA 24 95 A8		mva ADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   588 2136 20 DA 22			jsr hiWORD
+   589 2139 20 CC 20			jsr DL_PUSH_009A
+   590
+   591 				; -----------------------------------------------------------
+   592
+   593 = 24B9			ADDRESS	= DATAORIGIN+$0012
+   594
+   595 = 24B9			@VarData	= ADDRESS
+   596 = 0002			@VarDataSize	= 2
+   597
+   598
+   599 213C			@exit
+   600 					.ifdef @new
+   601 					@FreeMem #@VarData #@VarDataSize
+   602 					eif
+   603 213C 60				rts						; ret
+   604 				.endl
+   605
+   606 213D			.local	DL_PUSH_00ED					; PROCEDURE | OVERLOAD
+   607
+   608 				; -----------------------------------------------------------
+   609
+   610 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   611 				; as Pointer
+   612 213D B5 98 8D BC 24		mva :STACKORIGIN,x ADDRESS
+   613 2142 B5 A8 8D BD 24		mva :STACKORIGIN+STACKWIDTH,x ADDRESS+1
+   614 2147 CA				dex						; sub bx, 1
+   615
+   616 				; -----------------------------------------------------------
+   617
+   618 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   619 				; as Pointer
+   620 2148 B5 98 8D BB 24		mva :STACKORIGIN,x VALUE
+   621 214D CA				dex						; sub bx, 1
+   622
+   623 					ift l_00FC-*>3
+   624 					jmp l_00FC
+   625 					eif
+   626
+   627 				; IfThenEpilog
+   628 214E			l_00FC
+   629
+   630 				; optimize FAIL ('DL_PUSH_009A', B_DL), line = 186
+   631 214E E8				inx
+   632 214F AD BB 24 95 98		mva VALUE :STACKORIGIN,x
+   633 2154 20 CC 20			jsr DL_PUSH_009A
+   634
+   635 				; optimize FAIL ('DL_PUSH_00DD', B_DL), line = 187
+   636 2157 E8				inx
+   637 2158 AD BC 24 95 98		mva ADDRESS :STACKORIGIN,x
+   638 215D AD BD 24 95 A8		mva ADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   639 2162 20 12 21			jsr DL_PUSH_00DD
+   640
+   641 				; -----------------------------------------------------------
+   642
+   643 = 24BB			VALUE	= DATAORIGIN+$0014
+   644 = 24BC			ADDRESS	= DATAORIGIN+$0015
+   645
+   646 = 24BB			@VarData	= VALUE
+   647 = 0003			@VarDataSize	= 3
+   648
+   649
+   650 2165			@exit
+   651 					.ifdef @new
+   652 					@FreeMem #@VarData #@VarDataSize
+   653 					eif
+   654 2165 60				rts						; ret
+   655 				.endl
+   656
+   657 2166			.local	DL_START					; PROCEDURE
+   658
+   659 					ift l_0107-*>3
+   660 					jmp l_0107
+   661 					eif
+   662
+   663 				; IfThenEpilog
+   664 2166			l_0107
+   665
+   666 				; optimize FAIL ('SYSTEM.PAUSE_0080', B_DL), line = 192
+   667 2166 20 A8 20			jsr SYSTEM.PAUSE_0080
+   668
+   669 				; optimize OK (B_DL), line = 193
+   670
+   671 2169 AD B1 24 8D 30 02		mva DL_ADDRESS ATARI.SDLSTL
+   672 216F AD B2 24 8D 31 02		mva DL_ADDRESS+1 ATARI.SDLSTL+1
+   673
+   674 2175			@exit
+   675 					.ifdef @new
+   676 					@FreeMem #@VarData #@VarDataSize
+   677 					eif
+   678 2175 60				rts						; ret
+   679 				.endl
+   680
+   681 2176			.local	DL_POKE						; PROCEDURE
+   682
+   683 				; -----------------------------------------------------------
+   684
+   685 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   686 				; as Pointer
+   687 2176 B5 98 8D BF 24		mva :STACKORIGIN,x VAL
+   688 217B CA				dex						; sub bx, 1
+   689
+   690 				; -----------------------------------------------------------
+   691
+   692 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   693 				; as Pointer
+   694 217C B5 98 8D BE 24		mva :STACKORIGIN,x OFFSET
+   695 2181 CA				dex						; sub bx, 1
+   696
+   697 					ift l_0122-*>3
+   698 					jmp l_0122
+   699 					eif
+   700
+   701 				; IfThenEpilog
+   702 2182			l_0122
+   703
+   704 				; optimize OK (B_DL), line = 225
+   705
+   706 2182 AD BE 24 8D B3 24		mva OFFSET DL_CURSOR
+   707
+   708 				; optimize OK (B_DL), line = 226
+   709
+   710 2188 AD B1 24			lda DL_ADDRESS
+   711 218B 18 6D B3 24			add DL_CURSOR
+   712 218F A8				tay
+   713 2190 AD B2 24			lda DL_ADDRESS+1
+   714 2193 69 00			adc #$00
+   715 2195 85 8F			sta :bp+1
+   716 2197 AD BF 24			lda VAL
+   717 219A 91 8E			sta (:bp),y
+   718
+   719 				; -----------------------------------------------------------
+   720
+   721 = 24BE			OFFSET	= DATAORIGIN+$0017
+   722 = 24BF			VAL	= DATAORIGIN+$0018
+   723
+   724 = 24BE			@VarData	= OFFSET
+   725 = 0002			@VarDataSize	= 2
+   726
+   727
+   728 219C			@exit
+   729 					.ifdef @new
+   730 					@FreeMem #@VarData #@VarDataSize
+   731 					eif
+   732 219C 60				rts						; ret
+   733 				.endl
+   734
+   735 219D			.local	DL_POKEW					; PROCEDURE
+   736
+   737 				; -----------------------------------------------------------
+   738
+   739 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   740 				; as Pointer
+   741 219D B5 98 8D C1 24		mva :STACKORIGIN,x VAL
+   742 21A2 B5 A8 8D C2 24		mva :STACKORIGIN+STACKWIDTH,x VAL+1
+   743 21A7 CA				dex						; sub bx, 1
+   744
+   745 				; -----------------------------------------------------------
+   746
+   747 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   748 				; as Pointer
+   749 21A8 B5 98 8D C0 24		mva :STACKORIGIN,x OFFSET
+   750 21AD CA				dex						; sub bx, 1
+   751
+   752 					ift l_0147-*>3
+   753 					jmp l_0147
+   754 					eif
+   755
+   756 				; IfThenEpilog
+   757 21AE			l_0147
+   758
+   759 				; optimize OK (B_DL), line = 231
+   760
+   761 21AE AD C0 24 8D B3 24		mva OFFSET DL_CURSOR
+   762
+   763 				; optimize OK (B_DL), line = 232
+   764
+   765 21B4 AD B1 24			lda DL_ADDRESS
+   766 21B7 18 6D B3 24			add DL_CURSOR
+   767 21BB 85 90			sta :bp2
+   768 21BD AD B2 24			lda DL_ADDRESS+1
+   769 21C0 69 00			adc #$00
+   770 21C2 85 91			sta :bp2+1
+   771 21C4 A0 00			ldy #$00
+   772 21C6 AD C1 24			lda VAL
+   773 21C9 91 90			sta (:bp2),y
+   774 21CB C8				iny
+   775 21CC AD C2 24			lda VAL+1
+   776 21CF 91 90			sta (:bp2),y
+   777
+   778 				; -----------------------------------------------------------
+   779
+   780 = 24C0			OFFSET	= DATAORIGIN+$0019
+   781 = 24C1			VAL	= DATAORIGIN+$001A
+   782
+   783 = 24C0			@VarData	= OFFSET
+   784 = 0003			@VarDataSize	= 3
+   785
+   786
+   787 21D1			@exit
+   788 					.ifdef @new
+   789 					@FreeMem #@VarData #@VarDataSize
+   790 					eif
+   791 21D1 60				rts						; ret
+   792 				.endl
+   793
+   794 				; -----------------------------------------------------------
+   795
+   796 = 0000			DL_BLANK1	= $0000
+   797 = 0010			DL_BLANK2	= $0010
+   798 = 0020			DL_BLANK3	= $0020
+   799 = 0030			DL_BLANK4	= $0030
+   800 = 0040			DL_BLANK5	= $0040
+   801 = 0050			DL_BLANK6	= $0050
+   802 = 0060			DL_BLANK7	= $0060
+   803 = 0070			DL_BLANK8	= $0070
+   804 = 0080			DL_DLI	= $0080
+   805 = 0040			DL_LMS	= $0040
+   806 = 0020			DL_VSCROLL	= $0020
+   807 = 0010			DL_HSCROLL	= $0010
+   808 = 0002			DL_MODE_40X24T2	= $0002
+   809 = 0004			DL_MODE_40X24T5	= $0004
+   810 = 0005			DL_MODE_40X12T5	= $0005
+   811 = 0006			DL_MODE_20X24T5	= $0006
+   812 = 0007			DL_MODE_20X12T5	= $0007
+   813 = 0008			DL_MODE_40X24G4	= $0008
+   814 = 0009			DL_MODE_80X48G2	= $0009
+   815 = 000A			DL_MODE_80X48G4	= $000A
+   816 = 000B			DL_MODE_160X96G2	= $000B
+   817 = 000C			DL_MODE_160X192G2	= $000C
+   818 = 000D			DL_MODE_160X96G4	= $000D
+   819 = 000E			DL_MODE_160X192G4	= $000E
+   820 = 000F			DL_MODE_320X192G2	= $000F
+   821 = 0001			DL_JMP	= $0001
+   822 = 0041			DL_JVB	= $0041
+   823 = 24B1			DL_ADDRESS	= DATAORIGIN+$000A
+   824 = 24B3			DL_CURSOR	= DATAORIGIN+$000C
+   825
+   826 				.endl							; UNIT B_DL
+   827
+   828 				; IfThenEpilog
+   829 21D2			l_0030
+   830
+   831 				; optimize FAIL ('B_DL.DL_INIT', hscroll.pas), line = 20
+   832 21D2 E8				inx
+   833 21D3 A9 00 95 98			mva #$00 :STACKORIGIN,x
+   834 21D7 A9 50 95 A8			mva #$50 :STACKORIGIN+STACKWIDTH,x
+   835 21DB 20 AF 20			jsr B_DL.DL_INIT
+   836
+   837 				; optimize FAIL ('B_DL.DL_PUSH_00B4', hscroll.pas), line = 21
+   838 21DE E8				inx
+   839 21DF A9 70 95 98			mva #$70 :STACKORIGIN,x
+   840 21E3 E8				inx
+   841 21E4 A9 0C 95 98			mva #$0C :STACKORIGIN,x
+   842 21E8 20 EA 20			jsr B_DL.DL_PUSH_00B4
+   843
+   844 				; optimize FAIL ('B_DL.DL_PUSH_00ED', hscroll.pas), line = 22
+   845 21EB E8				inx
+   846 21EC A9 52 95 98			mva #$52 :STACKORIGIN,x
+   847 21F0 E8				inx
+   848 21F1 A9 00 95 98			mva #$00 :STACKORIGIN,x
+   849 21F5 A9 51 95 A8			mva #$51 :STACKORIGIN+STACKWIDTH,x
+   850 21F9 20 3D 21			jsr B_DL.DL_PUSH_00ED
+   851
+   852 				; optimize FAIL ('B_DL.DL_PUSH_00ED', hscroll.pas), line = 23
+   853 21FC E8				inx
+   854 21FD A9 41 95 98			mva #$41 :STACKORIGIN,x
+   855 2201 E8				inx
+   856 2202 A9 00 95 98			mva #$00 :STACKORIGIN,x
+   857 2206 A9 50 95 A8			mva #$50 :STACKORIGIN+STACKWIDTH,x
+   858 220A 20 3D 21			jsr B_DL.DL_PUSH_00ED
+   859
+   860 				; optimize FAIL ('B_DL.DL_START', hscroll.pas), line = 24
+   861 220D 20 66 21			jsr B_DL.DL_START
+   862
+   863 				; optimize OK (hscroll.pas), line = 26
+   864
+   865 2210 AD D6 22			lda S
+   866 2213 18 69 01			add #$01
+   867 2216 85 86			sta :edx
+   868 2218 AD D7 22			lda S+1
+   869 221B 69 00			adc #$00
+   870 221D 85 87			sta :edx+1
+   871 221F A9 2A			lda #$2A
+   872 2221 85 8A			sta :ecx
+   873 2223 A9 51			lda #$51
+   874 2225 85 8B			sta :ecx+1
+   875 2227 A9 00			lda #$00
+   876 2229 85 82			sta :eax
+   877 222B A9 01			lda #$01
+   878 222D 85 83			sta :eax+1
+   879 222F 20 09 24			jsr @move
+   880
+   881 				; optimize OK (hscroll.pas), line = 27
+   882
+   883 2232 A9 00 8D C6 02		mva #$00 ATARI.COLOR2
+   884
+   885 				; --- RepeatUntilProlog
+   886 2237			l_0174
+   887
+   888 				; optimize FAIL ('SYSTEM.PAUSE_0080', hscroll.pas), line = 30
+   889 2237 20 A8 20			jsr SYSTEM.PAUSE_0080
+   890
+   891 				; optimize OK (hscroll.pas), line = 31
+   892
+   893 223A A0 01			ldy #1
+   894 223C AD C3 24			lda HSCROLL
+   895 223F C9 FF			cmp #$FF
+   896 2241 F0 01			beq @+
+   897 2243 88				dey
+   898 2244			@
+   899 					.ifdef IFTMP_22
+   900 					sty IFTMP_22
+   901 					eif
+   902 2244 98				tya
+   903 2245 D0 03			bne *+5
+   904 2247 4C 96 22			jmp l_0187
+   905
+   906 				; optimize OK (hscroll.pas), line = 32
+   907
+   908 224A A9 03 8D C3 24		mva #$03 HSCROLL
+   909
+   910 				; optimize FAIL ('imodCARD', hscroll.pas), line = 33
+   911 224F E8				inx
+   912 2250 AD C4 24 95 98		mva OFFSET :STACKORIGIN,x
+   913 2255 E8				inx
+   914 2256 A9 01 95 98			mva #$01 :STACKORIGIN,x
+   915 225A 20 41 23			jsr @expandToCARD1.BYTE
+   916 225D 20 24 23			jsr @expandToCARD.BYTE
+   917 2260 20 F6 22			jsr addEAX_ECX
+   918 2263 A9 50 95 98			mva #$50 :STACKORIGIN,x
+   919 2267 20 24 23			jsr @expandToCARD.BYTE
+   920 226A 20 7C 23			jsr idivCARD
+   921 226D 20 6B 23			jsr movZTMP_aBX
+   922 2270 CA				dex
+   923 2271 B5 98 8D C4 24		mva :STACKORIGIN,x OFFSET
+   924 2276 CA				dex
+   925
+   926 				; optimize FAIL ('B_DL.DL_POKEW', hscroll.pas), line = 34
+   927 2277 E8				inx
+   928 2278 A9 0D 95 98			mva #$0D :STACKORIGIN,x
+   929 227C E8				inx
+   930 227D A9 00 95 98			mva #$00 :STACKORIGIN,x
+   931 2281 A9 51 95 A8			mva #$51 :STACKORIGIN+STACKWIDTH,x
+   932 2285 E8				inx
+   933 2286 AD C4 24 95 98		mva OFFSET :STACKORIGIN,x
+   934 228B A9 00 95 A8			mva #$00 :STACKORIGIN+STACKWIDTH,x
+   935 228F 20 DF 22			jsr addAX_CX
+   936 2292 CA				dex
+   937 2293 20 9D 21			jsr B_DL.DL_POKEW
+   938
+   939 				; IfThenEpilog
+   940 2296			l_0187
+   941
+   942 				; optimize OK (hscroll.pas), line = 36
+   943
+   944 2296 AD C3 24 8D 04 D4		mva HSCROLL ATARI.HSCROL
+   945
+   946 				; optimize FAIL (0, hscroll.pas), line = 37
+   947 229C CE C3 24			dec HSCROLL
+   948
+   949 				; optimize OK (hscroll.pas), line = 38
+   950
+   951 229F AD C5 24			lda BLANKSIZE
+   952 22A2 18 69 01			add #$01
+   953 22A5 29 0F			and #$0F
+   954 22A7 8D C5 24			sta BLANKSIZE
+   955
+   956 				; optimize FAIL ('B_DL.DL_POKE', hscroll.pas), line = 39
+   957 22AA E8				inx
+   958 22AB A9 0A 95 98			mva #$0A :STACKORIGIN,x
+   959 22AF E8				inx
+   960 22B0 AC C5 24			ldy BLANKSIZE 
+   961 22B3 B9 C6 25 95 98		mva adr.BLANKS,y :STACKORIGIN,x
+   962 22B8 20 76 21			jsr B_DL.DL_POKE
+   963
+   964 				; optimize OK (hscroll.pas), line = 40
+   965
+   966 22BB A9 00			lda #$00
+   967 22BD D0 03			bne *+5
+   968 22BF			c_0174
+   969 22BF 4C 37 22			jmp l_0174
+   970 22C2			b_0174
+   971
+   972 				; -----------------------------------------------------------
+   973
+   974 = 5000			DLIST	= $5000
+   975 = 5100			VMEM	= $5100
+   976 = 24C3			HSCROLL	= DATAORIGIN+$001C
+   977 = 24C4			OFFSET	= DATAORIGIN+$001D
+   978 = 24C5			BLANKSIZE	= DATAORIGIN+$001E
+   979 = 24C6			adr.S	= DATAORIGIN+$001F
+   980 22C2			.var S	= adr.S .word
+   981 = 25C6			adr.BLANKS	= DATAORIGIN+$011F
+   982 22C2			.var BLANKS	= adr.BLANKS .word
+   983
+   984 22C2			@exit
+   985
+   986 22C2 A2 00		@halt	ldx #0
+   987 22C4 9A				txs
+   988
+   989 22C5 60				rts
+   990
+   991 22C6 00 00 00 00 00 00 + IOCB@COPY	:16 brk
+   992
+   993 22D6			.local	@DEFINES
+   994 22D6			ATARI
+   995 				.endl
+   996
+   997 = 22D6 C6 24		S
+   997 = 22D8 C6 25		BLANKS
+   997 				.endl
+   998
+   999 				; -----------------------------------------------------------
+  1000
+  1001 22DA				icl 'cpu6502.asm'
+Source: cpu6502.asm
+   290 					opt l+
+   224 					opt l+
+   225
+   226 				/* ----------------------------------------------------------------------- */
+   227
+   228
+   229 22DA			.proc	hiBYTE
+   230 					lda :STACKORIGIN,x
+   231 22DA				:4 lsr @
+   232 					sta :STACKORIGIN,x
+   233 					rts
+   234 				.endp
+   235
+   236 22DA			.proc	hiWORD
+   237 22DA B5 A8			lda :STACKORIGIN+STACKWIDTH,x
+   238 22DC 95 98			sta :STACKORIGIN,x
+   239 22DE 60				rts
+   240 				.endp
+   241
+   242 22DF			.proc	hiCARD
+   243 					lda :STACKORIGIN+STACKWIDTH*3,x
+   244 					sta :STACKORIGIN+STACKWIDTH,x
+   245
+   246 					lda :STACKORIGIN+STACKWIDTH*2,x
+   247 					sta :STACKORIGIN,x
+   248 					rts
+   249 				.endp
+   250
+   251
+   252 22DF			.proc	movaBX_EAX		; mov [BX], EAX
+   253 22DF				:MAXSIZE mva eax+# :STACKORIGIN-1+#*STACKWIDTH,x
+   254 					rts
+   255 				.endp
+   256
+   257 				/*
+   258 				.proc	@pushBYTE
+   259 					adc :STACKORIGIN+STACKWIDTH,x
+   260 					sta bp+1
+   261
+   262 					mva (bp),y :STACKORIGIN,x
+   263
+   264 				;	lda #$00
+   265 				;	sta :STACKORIGIN+STACKWIDTH,x
+   266 				;	sta :STACKORIGIN+STACKWIDTH*2,x
+   267 				;	sta :STACKORIGIN+STACKWIDTH*3,x
+   268
+   269 					rts
+   270 				.endp
+   271
+   272
+   273 				.proc	@pullWORD (.word ya) .reg
+   274 					add :STACKORIGIN-1,x
+   275 					sta bp2
+   276 					tya
+   277 					adc :STACKORIGIN-1+STACKWIDTH,x
+   278 					sta bp2+1
+   279
+   280 					ldy #$00
+   281
+   282 					mva :STACKORIGIN,x (bp2),y
+   283 					iny
+   284 					mva :STACKORIGIN+STACKWIDTH,x (bp2),y
+   285
+   286 					rts
+   287 				.endp
+   288
+   289
+   290 				.proc	@pullCARD (.word ya) .reg
+   291 					add :STACKORIGIN-1,x
+   292 					sta bp2
+   293 					tya
+   294 					adc :STACKORIGIN-1+STACKWIDTH,x
+   295 					sta bp2+1
+   296
+   297 					ldy #$00
+   298
+   299 					mva :STACKORIGIN,x (bp2),y
+   300 					iny
+   301 					mva :STACKORIGIN+STACKWIDTH,x (bp2),y
+   302 					iny
+   303 					mva :STACKORIGIN+STACKWIDTH*2,x (bp2),y
+   304 					iny
+   305 					mva :STACKORIGIN+STACKWIDTH*3,x (bp2),y
+   306
+   307 					rts
+   308 				.endp
+   309
+   310
+   311 				.proc	@pushWORD (.word ya) .reg
+   312 					add :STACKORIGIN,x
+   313 					sta bp2
+   314 					tya
+   315 					adc :STACKORIGIN+STACKWIDTH,x
+   316 					sta bp2+1
+   317
+   318 					ldy #$00
+   319
+   320 					mva (bp2),y :STACKORIGIN,x
+   321 					iny
+   322 					mva (bp2),y :STACKORIGIN+STACKWIDTH,x
+   323
+   324 					rts
+   325 				.endp
+   326
+   327
+   328 				.proc	@pushCARD (.word ya) .reg
+   329 					add :STACKORIGIN,x
+   330 					sta bp2
+   331 					tya
+   332 					adc :STACKORIGIN+STACKWIDTH,x
+   333 					sta bp2+1
+   334
+   335 					ldy #$00
+   336
+   337 					mva (bp2),y :STACKORIGIN,x
+   338 					iny
+   339 					mva (bp2),y :STACKORIGIN+STACKWIDTH,x
+   340 					iny
+   341 					mva (bp2),y :STACKORIGIN+STACKWIDTH*2,x
+   342 					iny
+   343 					mva (bp2),y :STACKORIGIN+STACKWIDTH*3,x
+   344
+   345 					rts
+   346 				.endp
+   347 				*/
+   347
+   348
+   349 22DF			.proc	shlEAX_CL
+   350
+   351 				;SHORT	jsr @expandToCARD1.SHORT
+   352 				;	jmp CARD
+   353
+   354 				;SMALL	jsr @expandToCARD1.SMALL
+   355 				;	jmp CARD
+   356
+   357 22DF			BYTE	lda #0
+   358 					sta :STACKORIGIN-1+STACKWIDTH,x
+   359
+   360 22DF			WORD	lda #0
+   361 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   362 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   363
+   364 22DF			CARD	clc
+   365 					ldy :STACKORIGIN,x	; cl
+   366 					beq stop
+   367 22DF			@	asl :STACKORIGIN-1,x	; eax
+   368 					rol :STACKORIGIN-1+STACKWIDTH,x
+   369 					rol :STACKORIGIN-1+STACKWIDTH*2,x
+   370 					rol :STACKORIGIN-1+STACKWIDTH*3,x
+   371 					dey
+   372 					bne @-
+   373
+   374 22DF			stop	rts
+   375 				.endp
+   376
+   377
+   378 22DF			.proc	shrAL_CL
+   379
+   380 				;SHORT	jsr @expandToCARD1.SHORT
+   381 				;	jmp shrEAX_CL
+   382
+   383 22DF			BYTE	ldy :STACKORIGIN,x	; cl
+   384 					beq stop
+   385 22DF			@	lsr :STACKORIGIN-1,x
+   386 					dey
+   387 					bne @-
+   388
+   389 22DF			stop	lda #0
+   390 					sta :STACKORIGIN-1+STACKWIDTH,x
+   391 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   392 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   393
+   394 					rts
+   395 				.endp
+   396
+   397 22DF			.proc	shrAX_CL
+   398
+   399 				;SMALL	jsr @expandToCARD1.SMALL
+   400 				;	jmp shrEAX_CL
+   401
+   402 22DF			WORD	ldy :STACKORIGIN,x	; cl
+   403 					beq stop
+   404 22DF			@	lsr :STACKORIGIN-1+STACKWIDTH,x
+   405 					ror :STACKORIGIN-1,x
+   406 					dey
+   407 					bne @-
+   408
+   409 22DF			stop	lda #0
+   410 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   411 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   412
+   413 					rts
+   414 				.endp
+   415
+   416 22DF			.proc	shrEAX_CL
+   417
+   418 					ldy :STACKORIGIN,x	; cl
+   419 					beq stop
+   420 22DF			@	lsr :STACKORIGIN-1+STACKWIDTH*3,x
+   421 					ror :STACKORIGIN-1+STACKWIDTH*2,x
+   422 					ror :STACKORIGIN-1+STACKWIDTH,x
+   423 					ror :STACKORIGIN-1,x
+   424 					dey
+   425 					bne @-
+   426
+   427 22DF			stop	rts
+   428 				.endp
+   429
+   430 				; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   431 				; wynik operacji ADD zostanie potraktowany jako INTEGER / CARDINAL
+   432 				; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   433
+   434 22DF			.proc	addAL_CL
+   435
+   436 					ldy #0
+   437
+   438 					sty :STACKORIGIN-1+STACKWIDTH*2,x
+   439 					sty :STACKORIGIN-1+STACKWIDTH*3,x
+   440
+   441 					lda :STACKORIGIN-1,x
+   442 					add :STACKORIGIN,x
+   443 					sta :STACKORIGIN-1,x
+   444 					scc
+   445 					iny
+   446
+   447 					sty :STACKORIGIN-1+STACKWIDTH,x
+   448
+   449 					rts
+   450 				.endp
+   451
+   452 22DF			.proc	addAX_CX
+   453
+   454 22DF A0 00			ldy #0
+   455
+   456 22E1 94 C7			sty :STACKORIGIN-1+STACKWIDTH*3,x
+   457
+   458 22E3 B5 97			lda :STACKORIGIN-1,x
+   459 22E5 18 75 98			add :STACKORIGIN,x
+   460 22E8 95 97			sta :STACKORIGIN-1,x
+   461
+   462 22EA B5 A7			lda :STACKORIGIN-1+STACKWIDTH,x
+   463 22EC 75 A8			adc :STACKORIGIN+STACKWIDTH,x
+   464 22EE 95 A7			sta :STACKORIGIN-1+STACKWIDTH,x
+   465 22F0 90 01			scc
+   466 22F2 C8				iny
+   467
+   468 22F3 94 B7			sty :STACKORIGIN-1+STACKWIDTH*2,x
+   469
+   470 22F5 60				rts
+   471 				.endp
+   472
+   473
+   474 22F6			.proc	addEAX_ECX
+   475 				/*
+   476 				SHORT	jsr @expandToCARD.SHORT
+   477 					jsr @expandToCARD1.SHORT
+   478 					jmp CARD
+   479
+   480 				SMALL	jsr @expandToCARD.SMALL
+   481 					jsr @expandToCARD1.SMALL
+   482 				*/
+   482
+   483 22F6 B5 97		CARD	lda :STACKORIGIN-1,x
+   484 22F8 18 75 98			add :STACKORIGIN,x
+   485 22FB 95 97			sta :STACKORIGIN-1,x
+   486
+   487 22FD B5 A7			lda :STACKORIGIN-1+STACKWIDTH,x
+   488 22FF 75 A8			adc :STACKORIGIN+STACKWIDTH,x
+   489 2301 95 A7			sta :STACKORIGIN-1+STACKWIDTH,x
+   490
+   491 2303 B5 B7			lda :STACKORIGIN-1+STACKWIDTH*2,x
+   492 2305 75 B8			adc :STACKORIGIN+STACKWIDTH*2,x
+   493 2307 95 B7			sta :STACKORIGIN-1+STACKWIDTH*2,x
+   494
+   495 2309 B5 C7			lda :STACKORIGIN-1+STACKWIDTH*3,x
+   496 230B 75 C8			adc :STACKORIGIN+STACKWIDTH*3,x
+   497 230D 95 C7			sta :STACKORIGIN-1+STACKWIDTH*3,x
+   498
+   499 230F 60				rts
+   500 				.endp
+   501
+   502
+   503 2310			.proc	subAL_CL
+   504
+   505 					ldy #0
+   506
+   507 					lda :STACKORIGIN-1,x
+   508 					sub :STACKORIGIN,x
+   509 					sta :STACKORIGIN-1,x
+   510 					scs
+   511 					dey
+   512
+   513 					sty :STACKORIGIN-1+STACKWIDTH,x
+   514 					sty :STACKORIGIN-1+STACKWIDTH*2,x
+   515 					sty :STACKORIGIN-1+STACKWIDTH*3,x
+   516
+   517 					rts
+   518 				.endp
+   519
+   520 2310			.proc	subAX_CX
+   521
+   522 					ldy #0
+   523
+   524 					lda :STACKORIGIN-1,x		; ax
+   525 					sub :STACKORIGIN,x		; cx
+   526 					sta :STACKORIGIN-1,x
+   527
+   528 					lda :STACKORIGIN-1+STACKWIDTH,x
+   529 					sbc :STACKORIGIN+STACKWIDTH,x
+   530 					sta :STACKORIGIN-1+STACKWIDTH,x
+   531 					scs
+   532 					dey
+   533
+   534 					sty :STACKORIGIN-1+STACKWIDTH*2,x
+   535 					sty :STACKORIGIN-1+STACKWIDTH*3,x
+   536
+   537 					rts
+   538 				.endp
+   539
+   540 2310			.proc	subEAX_ECX
+   541
+   542 					lda :STACKORIGIN-1,x
+   543 					sub :STACKORIGIN,x
+   544 					sta :STACKORIGIN-1,x
+   545
+   546 					lda :STACKORIGIN-1+STACKWIDTH,x
+   547 					sbc :STACKORIGIN+STACKWIDTH,x
+   548 					sta :STACKORIGIN-1+STACKWIDTH,x
+   549
+   550 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   551 					sbc :STACKORIGIN+STACKWIDTH*2,x
+   552 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   553
+   554 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   555 					sbc :STACKORIGIN+STACKWIDTH*3,x
+   556 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   557
+   558 					rts
+   559 				.endp
+   560
+   561
+   562 2310			.proc	@expandSHORT2SMALL
+   563 					ldy #$00
+   564 					lda :STACKORIGIN,x
+   565 					spl
+   566 					dey
+   567 					sty :STACKORIGIN+STACKWIDTH,x
+   568
+   569 					rts
+   570 				.endp
+   571
+   572 2310			.proc	@expandSHORT2SMALL1
+   573 					ldy #$00
+   574 					lda :STACKORIGIN-1,x
+   575 					spl
+   576 					dey
+   577 					sty :STACKORIGIN-1+STACKWIDTH,x
+   578
+   579 					rts
+   580 				.endp
+   581
+   582
+   583 2310			.proc	@expandToCARD
+   584
+   585 2310 B5 A8		SMALL	lda :STACKORIGIN+STACKWIDTH,x
+   586 2312 10 04			bpl WORD
+   587
+   588 2314 A9 FF			lda #$ff
+   589 2316 D0 10			bne _wo
+   590
+   591 2318 A9 00		WORD	lda #$00
+   592 231A F0 0C			beq _wo
+   593
+   594 231C B5 98		SHORT	lda :STACKORIGIN,x
+   595 231E 10 04			bpl BYTE
+   596
+   597 2320 A9 FF			lda #$ff
+   598 2322 D0 02			bne _by
+   599
+   600 2324 A9 00		BYTE	lda #$00
+   601
+   602 2326 95 A8		_by	sta :STACKORIGIN+STACKWIDTH,x
+   603 2328 95 B8		_wo	sta :STACKORIGIN+STACKWIDTH*2,x
+   604 232A 95 C8		_lo	sta :STACKORIGIN+STACKWIDTH*3,x
+   605 232C 60				rts
+   606 				.endp
+   607
+   608
+   609 232D			.proc	@expandToCARD1
+   610
+   611 232D B5 A7		SMALL	lda :STACKORIGIN-1+STACKWIDTH,x
+   612 232F 10 04			bpl WORD
+   613
+   614 2331 A9 FF			lda #$ff
+   615 2333 D0 10			bne _wo
+   616
+   617 2335 A9 00		WORD	lda #$00
+   618 2337 F0 0C			beq _wo
+   619
+   620 2339 B5 97		SHORT	lda :STACKORIGIN-1,x
+   621 233B 10 04			bpl BYTE
+   622
+   623 233D A9 FF			lda #$ff
+   624 233F D0 02			bne _by
+   625
+   626 2341 A9 00		BYTE	lda #$00
+   627
+   628 2343 95 A7		_by	sta :STACKORIGIN-1+STACKWIDTH,x
+   629 2345 95 B7		_wo	sta :STACKORIGIN-1+STACKWIDTH*2,x
+   630 2347 95 C7		_lo	sta :STACKORIGIN-1+STACKWIDTH*3,x
+   631 2349 60				rts
+   632 				.endp
+   633
+   634 				/*
+   635 				.proc	@cmpFor_WORD (.word ya) .reg
+   636 					sta ztmp
+   637 					sty ztmp+1
+   638
+   639 					ldy #1
+   640 					lda (ztmp),y
+   641 					cmp :STACKORIGIN+1+STACKWIDTH,x
+   642 					bne stop
+   643 					dey
+   644 					lda (ztmp),y
+   645 					cmp :STACKORIGIN+1,x
+   646 				stop	rts
+   647 				.endp
+   648
+   649
+   650 				.proc	@cmpFor_CARD (.word ya) .reg
+   651 					sta ztmp
+   652 					sty ztmp+1
+   653
+   654 					ldy #3
+   655 					lda (ztmp),y
+   656 					cmp :STACKORIGIN+1+STACKWIDTH*3,x
+   657 					bne stop
+   658 					dey
+   659 					lda (ztmp),y
+   660 					cmp :STACKORIGIN+1+STACKWIDTH*2,x
+   661 					bne stop
+   662 					dey
+   663 					lda (ztmp),y
+   664 					cmp :STACKORIGIN+1+STACKWIDTH,x
+   665 					bne stop
+   666 					dey
+   667 					lda (ztmp),y
+   668 					cmp :STACKORIGIN+1,x
+   669
+   670 				stop	rts
+   671 				.endp
+   672
+   673
+   674 				.proc	@cmpFor_SHORTINT(.word ya) .reg
+   675 					sta ztmp
+   676 					sty ztmp+1
+   677
+   678 					ldy	#0
+   679 					lda	(ztmp),y
+   680 					sec
+   681 					sbc	:STACKORIGIN+1,x
+   682 					bne	@cmpFor_INT.L4
+   683
+   684 					jmp	@cmpFor_INT.L1
+   685 				.endp
+   686
+   687
+   688 				.proc	@cmpFor_SMALLINT(.word ya) .reg
+   689 					sta ztmp
+   690 					sty ztmp+1
+   691
+   692 					ldy	#1
+   693 					lda	(ztmp),y
+   694 					sec
+   695 					sbc	:STACKORIGIN+1+STACKWIDTH,x
+   696 					bne	@cmpFor_INT.L4
+   697
+   698 					dey
+   699 					lda	(ztmp),y
+   700 					cmp	:STACKORIGIN+1,x
+   701
+   702 					jmp	@cmpFor_INT.L1
+   703 				.endp
+   704
+   705
+   706 				.proc	@cmpFor_INT(.word ya) .reg
+   707 					sta ztmp
+   708 					sty ztmp+1
+   709
+   710 					ldy	#3
+   711 					lda	(ztmp),y
+   712 					sec
+   713 					sbc	:STACKORIGIN+1+STACKWIDTH*3,x
+   714 					bne	L4
+   715
+   716 					dey
+   717 					lda	(ztmp),y
+   718 					cmp	:STACKORIGIN+1+STACKWIDTH*2,x
+   719 					bne	L1
+   720
+   721 					dey
+   722 					lda	(ztmp),y
+   723 					cmp	:STACKORIGIN+1+STACKWIDTH,x
+   724 					bne	L1
+   725
+   726 					dey
+   727 					lda	(ztmp),y
+   728 					cmp	:STACKORIGIN+1,x
+   729
+   730 				L1	beq	L2
+   731 					bcs	L3
+   732
+   733 					lda	#$FF	; Set the N flag
+   734 				L2	rts
+   735
+   736 				L3	lda	#$01	; Clear the N flag
+   737 					rts
+   738
+   739 				L4	bvc	L5
+   740 					eor	#$FF	; Fix the N flag if overflow
+   741 					ora	#$01	; Clear the Z flag
+   742 				L5	rts
+   743 				.endp
+   744 				*/
+   744
+   745
+   746 				; Piotr Fusik, 15.04.2002
+   747 				; originally by Ullrich von Bassewitz
+   748
+   749 234A			.proc	cmpSHORTINT
+   750 					lda	:STACKORIGIN-1,x
+   751 					clv:sec
+   752 					sbc	:STACKORIGIN,x
+   753 					bne	cmpINT.L4
+   754
+   755 					jmp	cmpINT.L1
+   756 				.endp
+   757
+   758
+   759 234A			.proc	cmpSMALLINT
+   760 					lda	:STACKORIGIN-1+STACKWIDTH,x
+   761 					clv:sec
+   762 					sbc	:STACKORIGIN+STACKWIDTH,x
+   763 					bne	cmpINT.L4
+   764
+   765 					lda	:STACKORIGIN-1,x
+   766 					cmp	:STACKORIGIN,x
+   767
+   768 					jmp	cmpINT.L1
+   769 				.endp
+   770
+   771
+   772 234A			.proc	cmpINT
+   773 					lda	:STACKORIGIN-1+STACKWIDTH*3,x
+   774 					clv:sec
+   775 					sbc	:STACKORIGIN+STACKWIDTH*3,x
+   776 					bne	L4
+   777
+   778 					lda	:STACKORIGIN-1+STACKWIDTH*2,x
+   779 					cmp	:STACKORIGIN+STACKWIDTH*2,x
+   780 					bne	L1
+   781
+   782 					lda	:STACKORIGIN-1+STACKWIDTH,x
+   783 					cmp	:STACKORIGIN+STACKWIDTH,x
+   784 					bne	L1
+   785
+   786 					lda	:STACKORIGIN-1,x
+   787 					cmp	:STACKORIGIN,x
+   788
+   789 234A			L1	beq	L2
+   790 					bcs	L3
+   791
+   792 					lda	#$FF	; Set the N flag
+   793 234A			L2	rts
+   794
+   795 234A			L3	lda	#$01	; Clear the N flag
+   796 					rts
+   797
+   798 234A			L4	bvc	L5
+   799 					eor	#$FF	; Fix the N flag if overflow
+   800 					ora	#$01	; Clear the Z flag
+   801 234A			L5	rts
+   802 				.endp
+   803
+   804
+   805 234A			.proc	cmpEAX_ECX
+   806 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   807 					cmp :STACKORIGIN+STACKWIDTH*3,x
+   808 					bne _done
+   809 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   810 					cmp :STACKORIGIN+STACKWIDTH*2,x
+   811 					bne _done
+   812 234A			AX_CX
+   813 					lda :STACKORIGIN-1+STACKWIDTH,x
+   814 					cmp :STACKORIGIN+STACKWIDTH,x
+   815 					bne _done
+   816 					lda :STACKORIGIN-1,x
+   817 					cmp :STACKORIGIN,x
+   818
+   819 234A			_done	rts
+   820 				.endp
+   821
+   822
+   823 234A			.proc	cmpSTRING2CHAR
+   824
+   825 					lda :STACKORIGIN-1,x
+   826 					sta ztmp8
+   827 					lda :STACKORIGIN-1+STACKWIDTH,x
+   828 					sta ztmp8+1
+   829
+   830 					lda :STACKORIGIN,x
+   831 					sta ztmp10
+   832
+   833 					ldy #0
+   834
+   835 					lda (ztmp8),y		; if length <> 1
+   836 					cmp #1
+   837 					bne fail
+   838
+   839 					iny
+   840
+   841 234A			loop	lda (ztmp8),y
+   842 					cmp ztmp10
+   843 					bne fail
+   844
+   845 					lda #0
+   846 					seq
+   847
+   848 234A			fail	lda #$ff
+   849
+   850 					ldy #1
+   851
+   852 					cmp #0
+   853 					rts
+   854 				.endp
+   855
+   856
+   857
+   858 234A			.proc	cmpCHAR2STRING
+   859
+   860 					lda :STACKORIGIN-1,x
+   861 					sta ztmp8
+   862
+   863 					lda :STACKORIGIN,x
+   864 					sta ztmp10
+   865 					lda :STACKORIGIN+STACKWIDTH,x
+   866 					sta ztmp10+1
+   867
+   868 					ldy #0
+   869
+   870 					lda (ztmp10),y		; if length <> 1
+   871 					cmp #1
+   872 					bne fail
+   873
+   874 					iny
+   875
+   876 234A			loop	lda (ztmp10),y
+   877 					cmp ztmp8
+   878 					bne fail
+   879
+   880 					lda #0
+   881 					seq
+   882
+   883 234A			fail	lda #$ff
+   884
+   885 					ldy #1
+   886
+   887 					cmp #0
+   888 					rts
+   889 				.endp
+   890
+   891
+   892 234A			.proc	cmpSTRING
+   893
+   894 					lda :STACKORIGIN-1,x
+   895 					sta ztmp8
+   896 					lda :STACKORIGIN-1+STACKWIDTH,x
+   897 					sta ztmp8+1
+   898
+   899 					lda :STACKORIGIN,x
+   900 					sta ztmp10
+   901 					lda :STACKORIGIN+STACKWIDTH,x
+   902 					sta ztmp10+1
+   903
+   904 					ldy #0
+   905
+   906 					lda (ztmp8),y		; if length1 = 0
+   907 					beq fail
+   908 					lda (ztmp10),y		; if length2 = 0
+   909 					beq fail
+   910
+   911 					lda (ztmp8),y		; if length1 <> length2
+   912 					cmp (ztmp10),y
+   913 					bne fail
+   914
+   915 					sta max
+   916
+   917 					inw ztmp8
+   918 					inw ztmp10
+   919
+   920 234A			loop	lda (ztmp8),y
+   921 					cmp (ztmp10),y
+   922 					bne fail
+   923
+   924 					iny
+   925
+   926 					cpy #0
+   927 234A			max	equ *-1
+   928 					bne loop
+   929
+   930 					lda #0
+   931 					seq
+   932
+   933 234A			fail	lda #$ff
+   934
+   935 					ldy #1
+   936
+   937 					cmp #0
+   938 					rts
+   939 				.endp
+   940
+   941
+   942 234A			.proc	notaBX
+   943
+   944 					.rept MAXSIZE
+   945 					LDA :STACKORIGIN+#*STACKWIDTH,X
+   946 					EOR #$FF
+   947 					STA :STACKORIGIN+#*STACKWIDTH,X
+   948 					.ENDR
+   948 					.endr
+Source: REPT
+   945 					LDA :STACKORIGIN+#*STACKWIDTH,X
+   945 					EOR #$FF
+   945 					STA :STACKORIGIN+#*STACKWIDTH,X
+   945 					LDA :STACKORIGIN+#*STACKWIDTH,X
+   945 					EOR #$FF
+   945 					STA :STACKORIGIN+#*STACKWIDTH,X
+   945 					LDA :STACKORIGIN+#*STACKWIDTH,X
+   945 					EOR #$FF
+   945 					STA :STACKORIGIN+#*STACKWIDTH,X
+   945 					LDA :STACKORIGIN+#*STACKWIDTH,X
+   945 					EOR #$FF
+   945 					STA :STACKORIGIN+#*STACKWIDTH,X
+Source: cpu6502.asm
+   949
+   950 					rts
+   951 				.endp
+   952
+   953
+   954 234A			.proc	notBOOLEAN
+   955 					lda :STACKORIGIN,x
+   956 					bne _0
+   957
+   958 					lda #true
+   959 					sne
+   960
+   961 234A			_0	lda #false
+   962 					sta :STACKORIGIN,x
+   963
+   964 					rts
+   965 				.endp
+   966
+   967
+   968 234A			.proc	negBYTE
+   969 					lda #$00
+   970 					sub :STACKORIGIN,x
+   971 					sta :STACKORIGIN,x
+   972
+   973 					lda #$00
+   974 					sbc #$00
+   975 					sta :STACKORIGIN+STACKWIDTH,x
+   976
+   977 					lda #$00
+   978 					sbc #$00
+   979 					sta :STACKORIGIN+STACKWIDTH*2,x
+   980
+   981 					lda #$00
+   982 					sbc #$00
+   983 					sta :STACKORIGIN+STACKWIDTH*3,x
+   984
+   985 					rts
+   986 				.endp
+   987
+   988 234A			.proc	negWORD
+   989 					lda #$00
+   990 					sub :STACKORIGIN,x
+   991 					sta :STACKORIGIN,x
+   992
+   993 					lda #$00
+   994 					sbc :STACKORIGIN+STACKWIDTH,x
+   995 					sta :STACKORIGIN+STACKWIDTH,x
+   996
+   997 					lda #$00
+   998 					sbc #$00
+   999 					sta :STACKORIGIN+STACKWIDTH*2,x
+  1000
+  1001 					lda #$00
+  1002 					sbc #$00
+  1003 					sta :STACKORIGIN+STACKWIDTH*3,x
+  1004
+  1005 					rts
+  1006 				.endp
+  1007
+  1008 234A			.proc	negCARD
+  1009 					lda #$00
+  1010 					sub :STACKORIGIN,x
+  1011 					sta :STACKORIGIN,x
+  1012
+  1013 					lda #$00
+  1014 					sbc :STACKORIGIN+STACKWIDTH,x
+  1015 					sta :STACKORIGIN+STACKWIDTH,x
+  1016
+  1017 					lda #$00
+  1018 					sbc :STACKORIGIN+STACKWIDTH*2,x
+  1019 					sta :STACKORIGIN+STACKWIDTH*2,x
+  1020
+  1021 					lda #$00
+  1022 					sbc :STACKORIGIN+STACKWIDTH*3,x
+  1023 					sta :STACKORIGIN+STACKWIDTH*3,x
+  1024
+  1025 					rts
+  1026 				.endp
+  1027
+  1028
+  1029 234A			.proc	negBYTE1
+  1030 					lda #$00
+  1031 					sub :STACKORIGIN-1,x
+  1032 					sta :STACKORIGIN-1,x
+  1033
+  1034 					lda #$00
+  1035 					sbc #$00
+  1036 					sta :STACKORIGIN-1+STACKWIDTH,x
+  1037
+  1038 					lda #$00
+  1039 					sbc #$00
+  1040 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+  1041
+  1042 					lda #$00
+  1043 					sbc #$00
+  1044 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+  1045
+  1046 					rts
+  1047 				.endp
+  1048
+  1049 234A			.proc	negWORD1
+  1050 					lda #$00
+  1051 					sub :STACKORIGIN-1,x
+  1052 					sta :STACKORIGIN-1,x
+  1053
+  1054 					lda #$00
+  1055 					sbc :STACKORIGIN-1+STACKWIDTH,x
+  1056 					sta :STACKORIGIN-1+STACKWIDTH,x
+  1057
+  1058 					lda #$00
+  1059 					sbc #$00
+  1060 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+  1061
+  1062 					lda #$00
+  1063 					sbc #$00
+  1064 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+  1065
+  1066 					rts
+  1067 				.endp
+  1068
+  1069 234A			.proc	negCARD1
+  1070 					lda #$00
+  1071 					sub :STACKORIGIN-1,x
+  1072 					sta :STACKORIGIN-1,x
+  1073
+  1074 					lda #$00
+  1075 					sbc :STACKORIGIN-1+STACKWIDTH,x
+  1076 					sta :STACKORIGIN-1+STACKWIDTH,x
+  1077
+  1078 					lda #$00
+  1079 					sbc :STACKORIGIN-1+STACKWIDTH*2,x
+  1080 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+  1081
+  1082 					lda #$00
+  1083 					sbc :STACKORIGIN-1+STACKWIDTH*3,x
+  1084 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+  1085
+  1086 					rts
+  1087 				.endp
+  1088
+  1089
+  1090 234A			.proc	andAL_CL
+  1091
+  1092 					lda :STACKORIGIN-1,x
+  1093 					and :STACKORIGIN,x
+  1094 					sta :STACKORIGIN-1,x
+  1095
+  1096 					rts
+  1097 				.endp
+  1098
+  1099 234A			.proc	andAX_CX
+  1100
+  1101 					.rept 2
+  1102 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1103 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1104 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1105 					.ENDR
+  1105 					.endr
+Source: REPT
+  1102 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1102 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1102 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1102 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1102 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1102 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+Source: cpu6502.asm
+  1106
+  1107 					rts
+  1108 				.endp
+  1109
+  1110 234A			.proc	andEAX_ECX
+  1111
+  1112 					.rept MAXSIZE
+  1113 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1114 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1115 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1116 					.ENDR
+  1116 					.endr
+Source: REPT
+  1113 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1113 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1113 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1113 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1113 					AND :STACKORIGIN+#*STACKWIDTH,X
+  1113 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+Source: cpu6502.asm
+  1117
+  1118 					rts
+  1119 				.endp
+  1120
+  1121
+  1122 234A			.proc	orAL_CL
+  1123
+  1124 					lda :STACKORIGIN-1,x
+  1125 					ora :STACKORIGIN,x
+  1126 					sta :STACKORIGIN-1,x
+  1127
+  1128 					rts
+  1129 				.endp
+  1130
+  1131 234A			.proc	orAX_CX
+  1132
+  1133 					.rept 2
+  1134 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1135 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1136 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1137 					.ENDR
+  1137 					.endr
+Source: REPT
+  1134 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1134 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1134 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1134 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1134 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1134 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+Source: cpu6502.asm
+  1138
+  1139 					rts
+  1140 				.endp
+  1141
+  1142 234A			.proc	orEAX_ECX
+  1143
+  1144 					.rept MAXSIZE
+  1145 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1146 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1147 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1148 					.ENDR
+  1148 					.endr
+Source: REPT
+  1145 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1145 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1145 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1145 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1145 					ORA :STACKORIGIN+#*STACKWIDTH,X
+  1145 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+Source: cpu6502.asm
+  1149
+  1150 					rts
+  1151 				.endp
+  1152
+  1153
+  1154 234A			.proc	xorAL_CL
+  1155
+  1156 					lda :STACKORIGIN-1,x
+  1157 					eor :STACKORIGIN,x
+  1158 					sta :STACKORIGIN-1,x
+  1159
+  1160 					rts
+  1161 				.endp
+  1162
+  1163 234A			.proc	xorAX_CX
+  1164
+  1165 					.rept 2
+  1166 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1167 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1168 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1169 					.ENDR
+  1169 					.endr
+Source: REPT
+  1166 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1166 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1166 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1166 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1166 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1166 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+Source: cpu6502.asm
+  1170
+  1171 					rts
+  1172 				.endp
+  1173
+  1174 234A			.proc	xorEAX_ECX
+  1175
+  1176 					.rept MAXSIZE
+  1177 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1178 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1179 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1180 					.ENDR
+  1180 					.endr
+Source: REPT
+  1177 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1177 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1177 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1177 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					LDA :STACKORIGIN-1+#*STACKWIDTH,X
+  1177 					EOR :STACKORIGIN+#*STACKWIDTH,X
+  1177 					STA :STACKORIGIN-1+#*STACKWIDTH,X
+Source: cpu6502.asm
+  1181
+  1182 					rts
+  1183 				.endp
+  1184
+  1185
+  1186 				/*
+  1187 				.proc	iniEAX_ECX_BYTE
+  1188
+  1189 					mva :STACKORIGIN,x ecx
+  1190 					mva :STACKORIGIN-1,x eax
+  1191
+  1192 					rts
+  1193 				.endp
+  1194 				*/
+  1194
+  1195
+  1196
+  1197 234A			.proc	iniEAX_ECX_WORD
+  1198
+  1199 					mva :STACKORIGIN,x ecx
+  1200 					mva :STACKORIGIN+STACKWIDTH,x ecx+1
+  1201
+  1202 					mva :STACKORIGIN-1,x eax
+  1203 					mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+  1204
+  1205 					mva #$00 ecx+2
+  1206 					sta ecx+3
+  1207
+  1208 					sta eax+2
+  1209 					sta eax+3
+  1210
+  1211 					rts
+  1212 				.endp
+  1213
+  1214
+  1215 234A			.proc	iniEAX_ECX_CARD
+  1216 234A B5 98 85 8A			mva :STACKORIGIN,x ecx
+  1217 234E B5 A8 85 8B			mva :STACKORIGIN+STACKWIDTH,x ecx+1
+  1218 2352 B5 B8 85 8C			mva :STACKORIGIN+STACKWIDTH*2,x ecx+2
+  1219 2356 B5 C8 85 8D			mva :STACKORIGIN+STACKWIDTH*3,x ecx+3
+  1220
+  1221 235A B5 97 85 82			mva :STACKORIGIN-1,x eax
+  1222 235E B5 A7 85 83			mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+  1223 2362 B5 B7 85 84			mva :STACKORIGIN-1+STACKWIDTH*2,x eax+2
+  1224 2366 B5 C7 85 85			mva :STACKORIGIN-1+STACKWIDTH*3,x eax+3
+  1225
+  1226 236A 60				rts
+  1227 				.endp
+  1228
+  1229 236B			.proc	movZTMP_aBX
+  1230 236B A5 92 95 97			mva ZTMP8 :STACKORIGIN-1,x
+  1231 236F A5 93 95 A7			mva ZTMP9 :STACKORIGIN-1+STACKWIDTH,x
+  1232 2373 A5 94 95 B7			mva ZTMP10 :STACKORIGIN-1+STACKWIDTH*2,x
+  1233 2377 A5 95 95 C7			mva ZTMP11 :STACKORIGIN-1+STACKWIDTH*3,x
+  1234
+  1235 237B 60				rts
+  1236 				.endp
+  1237
+  1238
+  1239 237C				icl '6502\cpu6502_sio.asm'
+Source: cpu6502_sio.asm
+     1
+     2 237C			.proc	@sio
+     3
+     4 					stx dbufa		;< adres bufora
+     5 					sty dbufa+1		;> adres bufora
+     6 					sta dcmnd		; 'R' read sector / 'P' write sector
+     7
+     8 					ldy dunit
+     9 					lda lsector-1,y
+    10 					sta dsctln		; < dlugosc sektora
+    11 				;	sta dbyt		;< dlugosc bufora
+    12
+    13 					lda hsector-1,y
+    14 					sta dsctln+1		; > dlugosc sektora 
+    15 				;	sta dbyt+1		;> dlugosc bufora
+    16
+    17 					lda #$c0		; $40 read / $80 write
+    18 					sta dstats
+    19
+    20 					lda #0
+    21 					sta casflg		; = 00 to indicate that it isn't a cassette operation
+    22
+    23 					jmp jdskint
+    24
+    25 				// A = [1..8]
+    26 237C			devnrm	tax
+    27
+    28 					CLC			; clear carry for add
+    29 					ADC #$FF-8		; make m = $FF
+    30 					ADC #8-1+1		; carry set if in range n to m
+    31 					bcs ok
+    32
+    33 					ldy #-123		; kod bledu "DEVICE OR FILE NOT OPEN"
+    34 					rts
+    35 					
+    36 237C			ok	txa
+    37 					sta dunit		; nr stacji
+    38 					ora #$30
+    39 					sta ddevic		; nr stacji + $30
+    40
+    41 					lda #7
+    42 					sta dtimlo		; timeout
+    43
+    44 					ldy #0
+    45 					rts
+    46
+    47 237C			devsec	tya			; zapisz rozmiar sektora
+    48 					ldy dunit
+    49 					sta hsector-1,y
+    50 					txa
+    51 					sta lsector-1,y
+    52 					rts
+    53
+    54 237C			lsector	:8 dta l(256)
+    55 237C			hsector	:8 dta h(256)
+    56
+    57 				.endp
+  1240 237C				icl '6502\cpu6502_cio.asm'
+Source: cpu6502_cio.asm
+     1
+     2 				/*
+     3 					Reset(f, record)
+     4 					Rewrite(f, record)
+     5
+     6 					C = 1	SEC	IOCHECK TRUE
+     7 					C = 0	CLC	IOCHECK FALSE
+     8 				*/
+     8
+     9
+    10 237C			.proc	@openfile (.word ya .byte x) .reg
+    11
+    12 					sta bp2
+    13 					sty bp2+1
+    14
+    15 					stx code
+    16
+    17 					lda #0
+    18 					rol @
+    19 					sta iocheck
+    20
+    21 					ldy #s@file.status
+    22 					lda (bp2),y
+    23 					and #e@file.eof^$ff
+    24 					sta (bp2),y
+    25
+    26 					ldy #s@file.pfname
+    27 					lda (bp2),y
+    28 					add #1
+    29 					sta lfname
+    30 					iny
+    31 					lda (bp2),y
+    32 					adc #0
+    33 					sta hfname
+    34
+    35 					jsr lookup
+    36 					bmi error
+    37
+    38 					ldy #s@file.chanel
+    39 					txa
+    40 					sta (bp2),y		;CHANNEL
+    41
+    42 				; -----------------------------------------
+    43
+    44 					lda #$03		;komenda: OPEN
+    45 					sta iccmd,x
+    46 					lda #$00		;adres nazwy pliku
+    47 237C			lfname	equ *-1
+    48 					sta icbufa,x
+    49 					lda #$00
+    50 237C			hfname	equ *-1
+    51 					sta icbufa+1,x
+    52 					lda #$00		;kod dostepu: $04 odczyt, $08 zapis, $09 dopisywanie, $0c odczyt/zapis, $0d odczyt/dopisywanie
+    53 237C			code	equ *-1
+    54 					sta icax1,x
+    55 					lda #$00		;dodatkowy parametr, $00 jest zawsze dobre
+    56 					sta icax2,x
+    57 					jsr ciov
+    58
+    59 237C			error	sty MAIN.SYSTEM.IOResult
+    60
+    61 					bpl ok
+    62
+    63 237C			msg	lda #true
+    64 237C			iocheck	equ *-1
+    65 					beq skp
+    66
+    67 					sty dx
+    68 				;	sty FX_CORE_RESET
+    69
+    70 					@clrscr
+    71
+    72 					lda <_error
+    73 					ldy >_error
+    74 					jsr @printSTRING
+    75
+    76 					lda #$00
+    77 					sta dx+1
+    78 					sta dx+2
+    79 					sta dx+3
+    80
+    81 					jsr @printVALUE
+    82
+    83 					jmp MAIN.@halt
+    84
+    85 237C			skp	ldy #s@file.status
+    86 					lda (bp2),y
+    87 					ora #e@file.eof
+    88 					sta (bp2),y
+    89
+    90 					ldy #s@file.record
+    91 					lda #$00
+    92 					sta (bp2),y
+    93 					iny
+    94 					sta (bp2),y
+    95
+    96 					rts
+    97
+    98 237C			ok	ldy #s@file.status
+    99 					lda (bp2),y
+   100 					ora #e@file.open
+   101 					sta (bp2),y
+   102
+   103 					rts
+   104
+   105 237C			_error	dta 6,c'ERROR '
+   106
+   107 				; -----------------------------------------
+   108
+   109 237C			lookup	ldx #$00
+   110 					ldy #$01
+   111 237C			loop	lda icchid,x
+   112 					cmp #$ff
+   113 					beq found
+   114 					txa
+   115 					clc
+   116 					adc #$10
+   117 					tax
+   118 					bpl loop
+   119 					ldy #-95       		; kod bledu "TOO MANY CHANNELS OPEN"
+   120 237C			found	rts
+   121 				.endp
+   122
+   123
+   124 				/*
+   125 					Close(f)
+   126
+   127 					C = 1	SEC	IOCHECK TRUE
+   128 					C = 0	CLC	IOCHECK FALSE
+   129 				*/
+   129
+   130
+   131 237C			.proc	@closefile (.word ya) .reg
+   132 					sta	bp2
+   133 					sty	bp2+1
+   134
+   135 					ldy	#s@file.status
+   136
+   137 					lda	#0
+   138 					rol	@
+   139 					sta	@openfile.iocheck
+   140 				;	beq	ok_open
+   141
+   142 					lda	(bp2),y
+   143 					and 	#e@file.open
+   144 					bne	ok_open
+   145
+   146 					ldy	#-123		; kod bledu "DEVICE OR FILE NOT OPEN"
+   147 					jmp	@openfile.error
+   148
+   149 237C			ok_open	lda	(bp2),y
+   150 					ora	#e@file.eof
+   151 					sta	(bp2),y
+   152
+   153 					ldy	#s@file.chanel
+   154 					lda	(bp2),y
+   155 					tax
+   156
+   157 					lda	#$0c		;komenda: CLOSE
+   158 					sta	iccmd,x
+   159 					jsr	ciov
+   160
+   161 				;	lda	#0		; iocheck off
+   162 				;	sta	@openfile.iocheck
+   163
+   164 					jmp	@openfile.error
+   165
+   166 				.endp
+   167
+   168
+   169 				/*
+   170 					BlockRead(f, buf, num_records, numread)
+   171 					BlockWrite(f, buf, num_records, numwrite)
+   172
+   173 					C = 1	SEC	IOCHECK TRUE
+   174 					C = 0	CLC	IOCHECK FALSE
+   175 				*/
+   175
+   176
+   177 237C			.proc	@readfile (.word ya .byte x) .reg
+   178
+   179 					sta	bp2
+   180 					sty	bp2+1
+   181
+   182 					stx	code
+   183
+   184 					lda	#$00
+   185 					sta	eax+2
+   186 					sta	eax+3
+   187 					sta	ecx+2
+   188 					sta	ecx+3
+   189
+   190 					sta	MAIN.SYSTEM.IOResult
+   191
+   192 					rol	@
+   193 					sta	@openfile.iocheck
+   194
+   195 					ldy	#s@file.status
+   196 					lda	(bp2),y
+   197 					and	#e@file.open
+   198 					bne	ok_open
+   199
+   200 					ldy	#-123			; kod bledu "DEVICE OR FILE NOT OPEN"
+   201 					jmp	@openfile.error
+   202
+   203 237C			ok_open	ldy	#s@file.record
+   204 					mwa	(bp2),y	ecx
+   205
+   206 					ldy	#s@file.nrecord
+   207 					mwa	(bp2),y	eax
+   208
+   209 				;	lda	#0
+   210 					jsr	imulCX			; record * nrecord = file length to load
+   211
+   212 					cpw	eax #0
+   213 					beq	nothing
+   214
+   215 					ldy	#s@file.chanel
+   216 					lda	(bp2),y
+   217 					tax
+   218
+   219 					mwa	eax	icbufl,x
+   220
+   221 					ldy	#s@file.buffer
+   222 					mwa	(bp2),y	icbufa,x
+   223
+   224 					lda	#$00
+   225 237C			code	equ *-1
+   226 					and	#$7f
+   227 					sta	iccmd,x
+   228
+   229 					jsr	ciov
+   230
+   231 					sty	MAIN.SYSTEM.IOResult
+   232
+   233 					bpl ok
+   234
+   235 					cpy #136
+   236 					beq done
+   237
+   238 					jsr eof
+   239
+   240 					lda #$00
+   241 					sta eax
+   242 					sta eax+1
+   243
+   244 					jmp	@openfile.msg
+   245
+   246 237C			done	jsr eof
+   247
+   248 237C			ok	mwa icbufl,x	eax
+   249 					ldy #s@file.record
+   250 					mwa (bp2),y	ecx
+   251
+   252 					lda #$00
+   253 					jsr idivAX_CX.main
+   254
+   255 237C			nothing	lda code
+   256 					bpl quit			; blockread(f, buf, len)   short version
+   257
+   258 					ldy #s@file.numread
+   259 					mwa (bp2),y ztmp
+   260
+   261 					ldy #0
+   262 					mwa eax (ztmp),y		; length of loaded data / record = number of records
+   263
+   264 237C			quit	rts
+   265
+   266 237C			eof	ldy #s@file.status
+   267 					lda (bp2),y
+   268 					ora #e@file.eof
+   269 					sta (bp2),y
+   270
+   271 					rts
+   272 				.endp
+   273
+   274
+   275 237C			.proc	@ReadDirFileName (.word ya) .reg
+   276
+   277 					ldx #5
+   278 					clc		; iocheck off
+   279 					jsr @readfile	; (ya, x)
+   280
+   281 					ldy eax
+   282
+   283 					lda MAIN.SYSTEM.IOResult
+   284 					smi
+   285 					lda #0		; ok
+   286
+   287 					rts
+   288 				.endp
+   289
+   290
+   291 237C			.proc	@DirFileName
+   292
+   293 					lda #0
+   294 					sta attr
+   295
+   296 					cpy #$12
+   297 					bne stop
+   298
+   299 					lda @buf
+   300 					cmp #'*'
+   301 					bne skp
+   302
+   303 					lda #MAIN.SYSUTILS.faReadOnly
+   304 					sta attr
+   305
+   306 237C			skp	ldy #1
+   307 					ldx #2
+   308 					lda #10
+   309 					jsr cpName
+   310
+   311 					ldx #10
+   312 					lda @buf,x
+   313 					pha
+   314 					bpl files
+   315
+   316 					lda attr
+   317 					ora #MAIN.SYSUTILS.faDirectory
+   318 					sta attr
+   319
+   320 					jmp skp2
+   321
+   322 237C			files	lda attr
+   323 					ora #MAIN.SYSUTILS.faArchive
+   324 					sta attr
+   325
+   326 237C			skp2	pla
+   327 					beq stp2
+   328
+   329 					lda #'.'
+   330 					sta (bp2),y
+   331 					iny
+   332
+   333 					lda #13
+   334 					jsr cpName
+   335 237C			stp2
+   336 					dey
+   337 					tya
+   338 237C			stop	ldy #0
+   339 					sta (bp2),y
+   340
+   341 					ldx #0
+   342 237C			attr	equ *-1
+   343 					rts
+   344
+   345 237C			cpName	sta ln
+   346 237C			cp	lda @buf,x
+   347 					cmp #' '
+   348 					beq stp
+   349 					sta (bp2),y
+   350 					iny
+   351 					inx
+   352 					cpx #0
+   353 237C			ln	equ *-1
+   354 					bne cp
+   355 237C			stp	rts
+   356 				.endp
+   357
+  1241
+  1242 237C				icl '6502\cpu6502_shortint.asm'		; mul / div -> SHORTINT
+Source: cpu6502_shortint.asm
+     1
+     2 				/*
+     3 					mulSHORTINT
+     4 					divmulSHORTINT
+     5 				*/
+     5
+     6
+     7
+     8 237C			.proc	mulSHORTINT
+     9
+    10 					jsr imulBYTE
+    11
+    12 					lda :STACKORIGIN-1,x
+    13 					bpl @+
+    14 						sec
+    15 						lda eax+1
+    16 						sbc :STACKORIGIN,x
+    17 						sta eax+1
+    18 237C			@
+    19 					lda :STACKORIGIN,x
+    20 					bpl @+
+    21 						sec
+    22 						lda eax+1
+    23 						sbc :STACKORIGIN-1,x
+    24 						sta eax+1
+    25 237C			@
+    26 					jmp movaBX_EAX
+    27 				.endp
+    28
+    29
+    30 237C			.proc	divmulSHORTINT
+    31
+    32 237C			MOD	mva #{jsr} _mod
+    33
+    34 					lda :STACKORIGIN,x		; divisor sign
+    35 					spl
+    36 					jsr negBYTE
+    37
+    38 237C			DIV	ldy <idivBYTE
+    39 					lda >idivBYTE
+    40
+    41 237C			skp	sty addr
+    42 					sta addr+1
+    43
+    44 					ldy #0
+    45
+    46 					lda :STACKORIGIN-1,x		; dividend sign
+    47 					bpl @+
+    48 					jsr negBYTE1
+    49 					iny
+    50
+    51 237C			@	lda :STACKORIGIN,x		; divisor sign
+    52 					bpl @+
+    53 					jsr negBYTE
+    54 					iny
+    55
+    56 237C			@	tya
+    57 					and #1
+    58 					pha
+    59
+    60 					jsr $ffff			; idiv ecx
+    61 237C			addr	equ *-2
+    62
+    63 					jsr movaBX_EAX
+    64
+    65 237C			_mod	bit movZTMP_aBX			; mod
+    66 					mva #{bit} _mod
+    67
+    68 					pla
+    69 					seq
+    70 					jmp negCARD1
+    71
+    72 					rts
+    73 				.endp
+  1243 237C				icl '6502\cpu6502_smallint.asm'		; mul / div -> SMALLINT
+Source: cpu6502_smallint.asm
+     1
+     2 				/*
+     3 					mulSMALLINT
+     4 					divmulSMALLINT
+     5 				*/
+     5
+     6
+     7
+     8 237C			.proc	mulSMALLINT
+     9
+    10 					jsr imulWORD
+    11
+    12 					lda :STACKORIGIN-1+STACKWIDTH,x	; t1
+    13 					bpl @+
+    14 						sec
+    15 						lda eax+2
+    16 						sbc :STACKORIGIN,x
+    17 						sta eax+2
+    18 						lda eax+3
+    19 						sbc :STACKORIGIN+STACKWIDTH,x
+    20 						sta eax+3
+    21 237C			@
+    22 					lda :STACKORIGIN+STACKWIDTH,x	; t2
+    23 					bpl @+
+    24 						sec
+    25 						lda eax+2
+    26 						sbc :STACKORIGIN-1,x
+    27 						sta eax+2
+    28 						lda eax+3
+    29 						sbc :STACKORIGIN-1+STACKWIDTH,x
+    30 						sta eax+3
+    31 237C			@
+    32 					jmp movaBX_EAX
+    33 				.endp
+    34
+    35
+    36 237C			.proc	divmulSMALLINT
+    37
+    38 237C			SHORTREAL
+    39 					ldy <divSHORTREAL
+    40 					lda >divSHORTREAL
+    41 					bne skp
+    42
+    43 237C			MOD	mva #{jsr} _mod
+    44
+    45 					lda :STACKORIGIN+STACKWIDTH,x	; divisor sign
+    46 					spl
+    47 					jsr negWORD
+    48
+    49 237C			DIV	ldy <idivWORD
+    50 					lda >idivWORD
+    51
+    52 237C			skp	sty addr
+    53 					sta addr+1
+    54
+    55 					ldy #0
+    56
+    57 					lda :STACKORIGIN-1+STACKWIDTH,x	; dividend sign
+    58 					bpl @+
+    59 					jsr negWORD1
+    60 					iny
+    61 237C			@
+    62 					lda :STACKORIGIN+STACKWIDTH,x	; divisor sign
+    63 					bpl @+
+    64 					jsr negWORD
+    65 					iny
+    66 237C			@
+    67 					tya
+    68 					and #1
+    69 					pha
+    70
+    71 					jsr $ffff			; idiv cx
+    72 237C			addr	equ *-2
+    73
+    74 					jsr movaBX_EAX
+    75
+    76 237C			_mod	bit movZTMP_aBX			; mod
+    77 					mva #{bit} _mod
+    78
+    79 					pla
+    80 					seq
+    81 					jmp negCARD1
+    82
+    83 					rts
+    84 				.endp
+  1244 237C				icl '6502\cpu6502_integer.asm'		; mul / div -> INTEGER
+Source: cpu6502_integer.asm
+     1
+     2 				/*
+     3 					mulINTEGER
+     4 					divmulINT
+     5 				*/
+     5
+     6
+     7 237C			.proc	mulINTEGER
+     8
+     9 					jsr imulCARD
+    10
+    11 					jmp movaBX_EAX
+    12 				.endp
+    13
+    14
+    15 237C			.proc	divmulINT
+    16
+    17 237C			REAL	ldy <divREAL
+    18 					lda >divREAL
+    19 					bne skp
+    20
+    21 237C			MOD	mva #{jsr} _mod
+    22
+    23 					lda :STACKORIGIN+STACKWIDTH*3,x		; divisor sign
+    24 					spl
+    25 					jsr negCARD
+    26
+    27 237C			DIV	ldy <idivCARD
+    28 					lda >idivCARD
+    29
+    30 237C			skp	sty addr
+    31 					sta addr+1
+    32
+    33 					ldy #0
+    34
+    35 					lda :STACKORIGIN-1+STACKWIDTH*3,x	; dividend sign
+    36 					bpl @+
+    37 					jsr negCARD1
+    38 					iny
+    39
+    40 237C			@	lda :STACKORIGIN+STACKWIDTH*3,x		; divisor sign
+    41 					bpl @+
+    42 					jsr negCARD
+    43 					iny
+    44
+    45 237C			@	tya
+    46 					and #1
+    47 					pha
+    48
+    49 					jsr $ffff				; idiv ecx
+    50 237C			addr	equ *-2
+    51 					jsr movaBX_EAX
+    52
+    53 237C			_mod	bit movZTMP_aBX				; mod
+    54 					mva #{bit} _mod
+    55
+    56 					pla
+    57 					seq
+    58 					jmp negCARD1
+    59
+    60 					rts
+    61 				.endp
+  1245
+  1246 237C				icl '6502\cpu6502_byte.asm'		; mul / div -> BYTE
+Source: cpu6502_byte.asm
+     1
+     2 				/*
+     3 					fmulu_8
+     4 					imulCL
+     5 					imulBYTE
+     6 					idivBYTE
+     7 					idiv_AL_CL
+     8 				*/
+     8
+     9
+    10 				; Description: Unsigned 8-bit multiplication with unsigned 16-bit result.
+    11 				;
+    12 				; Input: 8-bit unsigned value in T1
+    13 				;	 8-bit unsigned value in T2
+    14 				;	 Carry=0: Re-use T1 from previous multiplication (faster)
+    15 				;	 Carry=1: Set T1 (slower)
+    16 				;
+    17 				; Output: 16-bit unsigned value in PRODUCT
+    18 				;
+    19 				; Clobbered: PRODUCT, X, A, C
+    20 				;
+    21 				; Allocation setup: T1,T2 and PRODUCT preferably on Zero-page.
+    22 				;		    square1_lo, square1_hi, square2_lo, square2_hi must be
+    23 				;		    page aligned. Each table are 512 bytes. Total 2kb.
+    24 				;
+    25 				; Table generation: I:0..511
+    26 				;		    square1_lo = <((I*I)/4)
+    27 				;		    square1_hi = >((I*I)/4)
+    28 				;		    square2_lo = <(((I-255)*(I-255))/4)
+    29 				;		    square2_hi = >(((I-255)*(I-255))/4)
+    30 237C			.proc fmulu_8
+    31
+    32 = 0082			t1	= eax
+    33 = 008A			t2	= ecx
+    34
+    35 = 0082			product	= eax
+    36
+    37 					txa:tay
+    38 				;		bcc :+
+    39 						    lda T1
+    40 						    sta sm1+1
+    41 						    sta sm3+1
+    42 						    eor #$ff
+    43 						    sta sm2+1
+    44 						    sta sm4+1
+    45
+    46 						ldx T2
+    47 						sec
+    48 237C			sm1:		lda square1_lo,x
+    49 237C			sm2:		sbc square2_lo,x
+    50 						sta PRODUCT+0
+    51 237C			sm3:		lda square1_hi,x
+    52 237C			sm4:		sbc square2_hi,x
+    53
+    54 						sta PRODUCT+1
+    55
+    56 					tya:tax
+    57 						rts
+    58 				.endp
+    59
+    60
+    61 				/*
+    62
+    63 				 8 bit multiply and divide routines.
+    64 				 Three 8 bit locations
+    65 				 ACC, AUX and EXT must be set up,
+    66 				 preferably on zero page.
+    67
+    68 				 MULTIPLY ROUTINE
+    69
+    70 				 EAX*ECX -> EAX (low,hi) 16 bit result
+    71
+    72 				*/
+    72
+    73
+    74 237C			.proc	imulCL
+    75
+    76 					lda #$00
+    77
+    78 					LDY #$09
+    79 					CLC
+    80 237C			LOOP	ROR @
+    81 					ROR eax
+    82 					BCC MUL2
+    83 					CLC		;DEC AUX above to remove CLC
+    84 					ADC ecx
+    85 237C			MUL2	DEY
+    86 					BNE LOOP
+    87
+    88 					STA eax+1
+    89
+    90 					RTS
+    91 				.endp
+    92
+    93
+    94 237C			.proc	imulBYTE
+    95
+    96 					mva :STACKORIGIN,x ecx
+    97 					mva :STACKORIGIN-1,x eax
+    98
+    99 					lda #$00
+   100
+   101 					sta eax+2
+   102 					sta eax+3
+   103
+   104 					.ifdef fmulinit
+   105 					jmp fmulu_8
+   106 					els
+   107 					jmp imulCL
+   108 					eif
+   109
+   110 				.endp
+   111
+   112
+   113 				.define	jsr_imodBYTE jsr idivBYTE
+   114
+   115 237C			.proc	idivBYTE
+   116
+   117 					mva :STACKORIGIN,x ecx
+   118 					mva :STACKORIGIN-1,x eax
+   119
+   120 					jmp idivAL_CL
+   121 				.endp
+   122
+   123
+   124 				; DIVIDE ROUTINE (8 BIT)
+   125 				; AL/CL -> ACC, remainder in ZTMP
+   126
+   127 237C			.proc idivAL_CL
+   128
+   129 				;	mva :STACKORIGIN,x cl
+   130 				;	mva :STACKORIGIN-1,x al
+   131
+   132 					lda #$00
+   133
+   134 					sta eax+1
+   135 					sta eax+2
+   136 					sta eax+3
+   137
+   138 					STA ztmp+1
+   139 					STA ztmp+2
+   140 					STA ztmp+3
+   141
+   142 					LDY #$08
+   143 237C			LOOP	ASL AL
+   144 					ROL @
+   145 					CMP CL
+   146 					BCC DIV2
+   147 					SBC CL
+   148 					INC AL
+   149 237C			DIV2
+   150 					DEY
+   151 					BNE LOOP
+   152
+   153 					STA ZTMP
+   154
+   155 					rts
+   156 				.endp
+   157
+  1247 237C				icl '6502\cpu6502_word.asm'		; mul / div -> WORD
+Source: cpu6502_word.asm
+     1
+     2 				/*
+     3 					fmulu_16
+     4 					imulCX
+     5 					imulWORD
+     6 					idivWORD
+     7 					idivAX_CX
+     8 				*/
+     8
+     9
+    10 				; Description: Unsigned 16-bit multiplication with unsigned 32-bit result.
+    11 				;
+    12 				; Input: 16-bit unsigned value in T1
+    13 				;	 16-bit unsigned value in T2
+    14 				;	 Carry=0: Re-use T1 from previous multiplication (faster)
+    15 				;	 Carry=1: Set T1 (slower)
+    16 				;
+    17 				; Output: 32-bit unsigned value in PRODUCT
+    18 				;
+    19 				; Clobbered: PRODUCT, X, A, C
+    20 				;
+    21 				; Allocation setup: T1,T2 and PRODUCT preferably on Zero-page.
+    22 				;		    square1_lo, square1_hi, square2_lo, square2_hi must be
+    23 				;		    page aligned. Each table are 512 bytes. Total 2kb.
+    24 				;
+    25 				; Table generation: I:0..511
+    26 				;		    square1_lo = <((I*I)/4)
+    27 				;		    square1_hi = >((I*I)/4)
+    28 				;		    square2_lo = <(((I-255)*(I-255))/4)
+    29 				;		    square2_hi = >(((I-255)*(I-255))/4)
+    30 				//.proc multiply_16bit_unsigned
+    31 						; <T1 * <T2 = AAaa
+    32 						; <T1 * >T2 = BBbb
+    33 						; >T1 * <T2 = CCcc
+    34 						; >T1 * >T2 = DDdd
+    35 						;
+    36 						;	AAaa
+    37 						;     BBbb
+    38 						;     CCcc
+    39 						; + DDdd
+    40 						; ----------
+    41 						;   PRODUCT!
+    42
+    43 						; Setup T1 if changed
+    44 237C			.proc	fmulu_16
+    45
+    46 = 0082			t1	= eax
+    47 = 008A			t2	= ecx
+    48
+    49 = 0082			product	= eax
+    50
+    51 					txa:pha
+    52 				;		bcc @+
+    53 						    lda T1+0
+    54 						    sta sm1a+1
+    55 						    sta sm3a+1
+    56 						    sta sm5a+1
+    57 						    sta sm7a+1
+    58 						    eor #$ff
+    59 						    sta sm2a+1
+    60 						    sta sm4a+1
+    61 						    sta sm6a+1
+    62 						    sta sm8a+1
+    63 						    lda T1+1
+    64 						    sta sm1b+1
+    65 						    sta sm3b+1
+    66 						    sta sm5b+1
+    67 						    sta sm7b+1
+    68 						    eor #$ff
+    69 						    sta sm2b+1
+    70 						    sta sm4b+1
+    71 						    sta sm6b+1
+    72 						    sta sm8b+1
+    73 				;@
+    74 						; Perform <T1 * <T2 = AAaa
+    75 						ldx T2+0
+    76 						sec
+    77 237C			sm1a:		lda square1_lo,x
+    78 237C			sm2a:		sbc square2_lo,x
+    79 						sta PRODUCT+0
+    80 237C			sm3a:		lda square1_hi,x
+    81 237C			sm4a:		sbc square2_hi,x
+    82 						;sta _AA+1
+    83 						tay
+    84
+    85 						; Perform >T1_hi * <T2 = CCcc
+    86 						sec
+    87 237C			sm1b:		lda square1_lo,x
+    88 237C			sm2b:		sbc square2_lo,x
+    89 						sta _cc+1
+    90 237C			sm3b:		lda square1_hi,x
+    91 237C			sm4b:		sbc square2_hi,x
+    92 						sta _CC_+1
+    93
+    94 						; Perform <T1 * >T2 = BBbb
+    95 						ldx T2+1
+    96 						sec
+    97 237C			sm5a:		lda square1_lo,x
+    98 237C			sm6a:		sbc square2_lo,x
+    99 						sta _bb+1
+   100 237C			sm7a:		lda square1_hi,x
+   101 237C			sm8a:		sbc square2_hi,x
+   102 						sta _BB_+1
+   103
+   104 						; Perform >T1 * >T2 = DDdd
+   105 						sec
+   106 237C			sm5b:		lda square1_lo,x
+   107 237C			sm6b:		sbc square2_lo,x
+   108 						sta _dd+1
+   109 237C			sm7b:		lda square1_hi,x
+   110 237C			sm8b:		sbc square2_hi,x
+   111 				;		sta PRODUCT+3
+   112 						tax
+   113
+   114 						; Add the separate multiplications together
+   115 						clc
+   116 				;_AA:		lda #0
+   117 						tya
+   118 237C			_bb:		adc #0
+   119 				;		sta PRODUCT+1
+   120 						tay
+   121 237C			_BB_:		lda #0
+   122 237C			_CC_:		adc #0
+   123 						sta PRODUCT+2
+   124 						bcc @+
+   125 				;		    inc PRODUCT+3
+   126 						inx
+   127 						    clc
+   128 237C			@
+   129 						tya
+   130 237C			_cc:		adc #0
+   131 				;		adc PRODUCT+1
+   132 						sta PRODUCT+1
+   133 237C			_dd:		lda #0
+   134 						adc PRODUCT+2
+   135 						sta PRODUCT+2
+   136 						scc
+   137 				;		    inc PRODUCT+3
+   138 						inx
+   139
+   140 					stx PRODUCT+3
+   141
+   142 					pla:tax
+   143
+   144 					rts
+   145 				.endp
+   146
+   147
+   148 				/*
+   149
+   150 				 16 bit multiply and divide routines.
+   151 				 Three 16 bit (two-byte) locations
+   152 				 ACC, AUX and EXT must be set up,
+   153 				 preferably on zero page.
+   154
+   155 				 MULTIPLY ROUTINE
+   156
+   157 				 EAX*ECX -> EAX (low,hi) 32 bit result
+   158
+   159 				*/
+   159
+   160
+   161 237C			.proc	imulCX
+   162
+   163 					lda #$00
+   164 					sta eax+3
+   165
+   166 					LDY #$11			; A = 0 !
+   167 					CLC
+   168 237C			LOOP	ROR eax+3
+   169 					ROR @
+   170 					ROR eax+1
+   171 					ROR eax
+   172 					BCC MUL2
+   173 					CLC
+   174 					ADC ecx
+   175 					PHA
+   176 					LDA ecx+1
+   177 					ADC eax+3
+   178 					STA eax+3
+   179 					PLA
+   180 237C			MUL2	DEY
+   181 					BNE LOOP
+   182
+   183 					STA eax+2
+   184
+   185 					rts
+   186 				.endp
+   187
+   188
+   189 237C			.proc	imulWORD
+   190
+   191 					mva :STACKORIGIN,x ecx
+   192 					mva :STACKORIGIN+STACKWIDTH,x ecx+1
+   193
+   194 					mva :STACKORIGIN-1,x eax
+   195 					mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+   196
+   197 					.ifdef fmulinit
+   198 					jmp fmulu_16
+   199 					els
+   200 					jmp imulCX
+   201 					eif
+   202 				.endp
+   203
+   204
+   205 				.define	jsr_imodWORD jsr idivWORD
+   206
+   207 237C			.proc	idivWORD
+   208
+   209 					mva :STACKORIGIN,x ecx
+   210 					mva :STACKORIGIN+STACKWIDTH,x ecx+1
+   211
+   212 					mva :STACKORIGIN-1,x eax
+   213 					mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+   214
+   215 					jmp idivAX_CX
+   216 				.endp
+   217
+   218
+   219 				; DIVIDE ROUTINE (16 BIT)
+   220 				; AX/CX -> ACC, remainder in ZTMP
+   221
+   222 237C			.proc	idivAX_CX
+   223
+   224 				;	jsr iniEAX_ECX_WORD
+   225 237C			main
+   226 					LDA #0
+   227 					STA ztmp+1
+   228 					STA ztmp+2
+   229 					STA ztmp+3
+   230
+   231 					sta eax+2
+   232 					sta eax+3
+   233
+   234 					.ifdef fmulinit
+   235 					.rept 16
+   236 					ASL ax
+   237 					ROL ax+1
+   238 					ROL @
+   239 					ROL ztmp+1
+   240 					tay
+   241 					CMP cx
+   242 					LDA ztmp+1
+   243 					SBC cx+1
+   244 					BCC @+
+   245 					STA ztmp+1
+   246 					tya
+   247 					SBC cx
+   248 					tay
+   249 					INC ax
+   250 				@	tya
+   251 					.endr
+   252
+   253 					els
+   254 					LDY #$10
+   255
+   256 237C			LOOP	ASL ax
+   257 					ROL ax+1
+   258 					ROL @
+   259 					ROL ztmp+1
+   260 					sta edx
+   261 					CMP cx
+   262 					LDA ztmp+1
+   263 					SBC cx+1
+   264 					BCC DIV2
+   265 					STA ztmp+1
+   266 					lda edx
+   267 					SBC cx
+   268 					sta edx
+   269 					INC ax
+   270 237C			DIV2	lda edx
+   271 					DEY
+   272 					BNE LOOP
+   273 					eif
+   274
+   275 					STA ztmp
+   276
+   277 					rts
+   278 				.endp
+   279
+  1248 237C				icl '6502\cpu6502_cardinal.asm'		; mul / div -> CARDINAL
+Source: cpu6502_cardinal.asm
+     1
+     2 				/*
+     3 					imulECX
+     4 					imulCARD
+     5 					idivCARD
+     6 					idivEAX_ECX
+     7 				*/
+     7
+     8
+     9 				; *** MUL32: 32-bit multiply
+    10 				; EAX * ECX -> ZTMP8-ZTMP11
+    11 237C			.proc	imulECX
+    12
+    13 					lda #0
+    14 					sta ZTMP10
+    15 					sta ZTMP9
+    16 					sta ZTMP8
+    17
+    18 					ldy #32
+    19 237C			MUL320	lsr ZTMP10
+    20 					ror ZTMP9
+    21 					ror ZTMP8
+    22 					ror @
+    23 					ror eax+3
+    24 					ror eax+2
+    25 					ror eax+1
+    26 					ror eax
+    27 					bcc MUL321
+    28 					clc
+    29 					adc ecx
+    30 					pha
+    31 					lda ecx+1
+    32 					adc ZTMP8
+    33 					sta ZTMP8
+    34 					lda ecx+2
+    35 					adc ZTMP9
+    36 					sta ZTMP9
+    37 					lda ecx+3
+    38 					adc ZTMP10
+    39 					sta ZTMP10
+    40 					pla
+    41 237C			MUL321	dey
+    42 				       	bpl MUL320
+    43
+    44 					rts
+    45 				.endp
+    46
+    47
+    48 237C			.proc	imulCARD
+    49
+    50 					jsr iniEAX_ECX_CARD
+    51
+    52 					jmp imulECX
+    53 				.endp
+    54
+    55
+    56 				.define	jsr_imodCARD jsr idivCARD
+    57
+    58 237C			.proc	idivCARD
+    59
+    60 237C 20 4A 23			jsr iniEAX_ECX_CARD
+    61
+    62 237F 4C 92 23			jmp idivEAX_ECX.CARD
+    63 				.endp
+    64
+    65
+    66 				; *** UDIV32: 32-bit unsigned division
+    67 				; input: dividend at ZTMP0-ZTMP3
+    68 				;        divisor at ZTMP4-ZTMP7
+    69 				; output: result at ZTMP0-ZTMP3
+    70 				;         remainder at ZTMP8-ZTMP11
+    71 				; X,Y preserved
+    72
+    73 2382			.proc	idivEAX_ECX
+    74
+    75 2382 B5 B7 95 C7		REAL	mva :STACKORIGIN-1+STACKWIDTH*2,x :STACKORIGIN-1+STACKWIDTH*3,x
+    76 2386 B5 A7 95 B7			mva :STACKORIGIN-1+STACKWIDTH,x :STACKORIGIN-1+STACKWIDTH*2,x
+    77 238A B5 97 95 A7			mva :STACKORIGIN-1,x :STACKORIGIN-1+STACKWIDTH,x
+    78 238E A9 00 95 97			mva #$00 :STACKORIGIN-1,x
+    79
+    80 2392			CARD	;jsr iniEAX_ECX_CARD
+    81
+    82 2392 A9 00		MAIN	LDA #0
+    83 2394 85 92			STA ZTMP8
+    84 2396 85 93			STA ZTMP9
+    85 2398 85 94			STA ZTMP10
+    86 239A 85 95			STA ZTMP11
+    87
+    88 239C A0 20			LDY #32
+    89 239E 06 82		UDIV320	ASL eax
+    90 23A0 26 83			ROL eax+1
+    91 23A2 26 84			ROL eax+2
+    92 23A4 26 85			ROL eax+3
+    93 23A6 26 92			ROL ZTMP8
+    94 23A8 26 93			ROL ZTMP9
+    95 23AA 26 94			ROL ZTMP10
+    96 23AC 26 95			ROL ZTMP11
+    97 							;do a subtraction
+    98 23AE A5 92			LDA ZTMP8
+    99 23B0 C5 8A			CMP ecx
+   100 23B2 A5 93			LDA ZTMP9
+   101 23B4 E5 8B			SBC ecx+1
+   102 23B6 A5 94			LDA ZTMP10
+   103 23B8 E5 8C			SBC ecx+2
+   104 23BA A5 95			LDA ZTMP11
+   105 23BC E5 8D			SBC ecx+3
+   106 23BE 90 16			BCC UDIV321
+   107 				 			;overflow, do the subtraction again, this time store the result
+   108 23C0 85 8D			STA ecx+3	;we have the high byte already
+   109 23C2 A5 92			LDA ZTMP8
+   110 23C4 E5 8A			SBC ecx		;byte 0
+   111 23C6 85 92			STA ZTMP8
+   112 23C8 A5 93			LDA ZTMP9
+   113 23CA E5 8B			SBC ecx+1
+   114 23CC 85 93			STA ZTMP9	;byte 1
+   115 23CE A5 94			LDA ZTMP10
+   116 23D0 E5 8C			SBC ecx+2
+   117 23D2 85 94			STA ZTMP10	;byte 2
+   118 23D4 E6 82			INC eax		;set result bit
+   119
+   120 23D6 88			UDIV321	DEY
+   121 23D7 D0 C5			BNE UDIV320
+   122
+   123 23D9 60				rts
+   124 				.endp
+   125
+  1249
+  1250 23DA				icl '6502\cpu6502_shortreal.asm'	; mul / div -> SHORTREAL	Q8.8
+Source: cpu6502_shortreal.asm
+     1 				; SHORTREAL	fixed-point Q8.8, 16bit
+     2 				; https://en.wikipedia.org/wiki/Q_(number_format)
+     3
+     4 				/*
+     5 					mulSHORTREAL
+     6 					divSHORTREAL
+     7 				*/
+     7
+     8
+     9
+    10 23DA			.proc	mulSHORTREAL
+    11
+    12 					jsr imulWORD
+    13
+    14 					mva #0 eax+3
+    15 					mva eax+1 eax
+    16 					mva eax+2 eax+1
+    17
+    18 					ldy eax+3
+    19
+    20 					lda :STACKORIGIN-1+STACKWIDTH,x	; t1
+    21 					bpl @+
+    22 					sec
+    23 					lda eax+1
+    24 					sbc :STACKORIGIN,x
+    25 					sta eax+1
+    26 					tya
+    27 					sbc :STACKORIGIN+STACKWIDTH,x
+    28 					tay
+    29 23DA			@
+    30 					lda :STACKORIGIN+STACKWIDTH,x	; t2
+    31 					bpl @+
+    32 					sec
+    33 					lda eax+1
+    34 					sbc :STACKORIGIN-1,x
+    35 					sta eax+1
+    36 					tya
+    37 					sbc :STACKORIGIN-1+STACKWIDTH,x
+    38 					tay
+    39 23DA			@
+    40 					sty eax+2
+    41
+    42 					jmp movaBX_EAX
+    43 				.endp
+    44
+    45
+    46
+    47 23DA			.proc	divSHORTREAL
+    48 					jsr iniEAX_ECX_WORD
+    49
+    50 					mva eax+1 eax+2
+    51 					mva eax eax+1
+    52 					lda #0
+    53 					sta eax
+    54 					sta eax+3
+    55 					sta ecx+3
+    56
+    57 					jmp idivEAX_ECX.main
+    58 				.endp
+  1251 23DA				icl '6502\cpu6502_real.asm'		; mul / div -> REAL		Q24.8
+Source: cpu6502_real.asm
+     1 				; REAL	fixed-point Q24.8, 32bit
+     2 				; https://en.wikipedia.org/wiki/Q_(number_format)
+     3
+     4 				/*
+     5 					mulREAL
+     6 					divREAL
+     7 				*/
+     7
+     8
+     9
+    10 23DA			.proc	mulREAl
+    11
+    12 				;	jsr iniEAX_ECX_CARD
+    13
+    14 					mva :STACKORIGIN,x ecx0
+    15 					mva :STACKORIGIN+STACKWIDTH,x ecx1
+    16 					mva :STACKORIGIN+STACKWIDTH*2,x ecx2
+    17 					mva :STACKORIGIN+STACKWIDTH*3,x ecx3
+    18
+    19 					mva :STACKORIGIN-1,x eax
+    20 					mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+    21 					mva :STACKORIGIN-1+STACKWIDTH*2,x eax+2
+    22 					mva :STACKORIGIN-1+STACKWIDTH*3,x eax+3
+    23
+    24 				;	jsr imul64				; imul ecx 64 bit
+    25
+    26 					lda #$00
+    27 					sta edx		;Clear upper half of
+    28 					sta edx+1	;product
+    29 					sta edx+2
+    30 					sta edx+3
+    31
+    32 					sta ztmp8
+    33 					sta ztmp9
+    34 					sta ztmp10
+    35 					sta ztmp11
+    36
+    37 					ldy #$20	;Set binary count to 32
+    38 23DA			SHIFT_R	lsr eax+3	;Shift multiplyer right
+    39 					ror eax+2
+    40 					ror eax+1
+    41 					ror eax
+    42 					bcc ROTATE_R	;Go rotate right if c = 0
+    43 					lda edx		;Get upper half of product
+    44 					clc		;and add multiplicand to
+    45 					adc #0		;it
+    46 23DA			ecx0	equ *-1
+    47 					sta edx
+    48 					lda edx+1
+    49 					adc #0
+    50 23DA			ecx1	equ *-1
+    51 					sta edx+1
+    52 					lda edx+2
+    53 					adc #0
+    54 23DA			ecx2	equ *-1
+    55 					sta edx+2
+    56 					lda edx+3
+    57 					adc #0
+    58 23DA			ecx3	equ *-1
+    59 23DA			ROTATE_R  ror @		;Rotate partial product
+    60 				        sta edx+3	;right
+    61 				        ror edx+2
+    62 				        ror edx+1
+    63 				        ror edx
+    64 				        ror ztmp11
+    65 				        ror ztmp10
+    66 				        ror ztmp9
+    67 				        ror ztmp8
+    68 				        dey		;Decrement bit count and
+    69 				        bne SHIFT_R	;loop until 32 bits are
+    70
+    71 				;	mva ztmp8 eax
+    72 					mva ztmp9 eax
+    73 					mva ztmp10 eax+1
+    74 					mva ztmp11 eax+2
+    75
+    76
+    77 				;	mva eax+1 eax
+    78 				;	mva eax+2 eax+1
+    79 				;	mva eax+3 eax+2
+    80
+    81 					ldy edx
+    82
+    83 					lda :STACKORIGIN-1+STACKWIDTH*3,x	; t1
+    84 					bpl @+
+    85 					sec
+    86 					tya
+    87 					sbc :STACKORIGIN,x
+    88 					tay
+    89 23DA			@
+    90 					lda :STACKORIGIN+STACKWIDTH*3,x		; t2
+    91 					bpl @+
+    92 					sec
+    93 					tya
+    94 					sbc :STACKORIGIN-1,x
+    95 					tay
+    96 23DA			@
+    97 					sty eax+3
+    98
+    99 					jmp movaBX_EAX
+   100 				.endp
+   101
+   102
+   103 				/*
+   104 				;32 bit multiply with 64 bit product
+   105
+   106 				.proc	imul64
+   107
+   108 					lda #$00
+   109 					sta edx		;Clear upper half of
+   110 					sta edx+1	;product
+   111 					sta edx+2
+   112 					sta edx+3
+   113
+   114 					sta ztmp8
+   115 					sta ztmp9
+   116 					sta ztmp10
+   117 					sta ztmp11
+   118
+   119 					ldy #$20	;Set binary count to 32
+   120 				SHIFT_R	lsr eax+3	;Shift multiplyer right
+   121 					ror eax+2
+   122 					ror eax+1
+   123 					ror eax
+   124 					bcc ROTATE_R	;Go rotate right if c = 0
+   125 					lda edx		;Get upper half of product
+   126 					clc		;and add multiplicand to
+   127 					adc ecx		;it
+   128 					sta edx
+   129 					lda edx+1
+   130 					adc ecx+1
+   131 					sta edx+1
+   132 					lda edx+2
+   133 					adc ecx+2
+   134 					sta edx+2
+   135 					lda edx+3
+   136 					adc ecx+3
+   137 				ROTATE_R  ror @		;Rotate partial product
+   138 				        sta edx+3	;right
+   139 				        ror edx+2
+   140 				        ror edx+1
+   141 				        ror edx
+   142 				        ror ztmp11
+   143 				        ror ztmp10
+   144 				        ror ztmp9
+   145 				        ror ztmp8
+   146 				        dey		;Decrement bit count and
+   147 				        bne SHIFT_R	;loop until 32 bits are
+   148
+   149 					mva ztmp8 eax
+   150 					mva ztmp9 eax+1
+   151 					mva ztmp10 eax+2
+   152 					mva ztmp11 eax+3
+   153
+   154 					rts
+   155 				.endp
+   156 				*/
+   156
+   157
+   158 				; 64bit / 32bit = 32bit
+   159 				; eax = eax + edx
+   160
+   161 23DA			.proc	divREAL
+   162
+   163 					mva :STACKORIGIN,x ecx0
+   164 					sta ecx0_
+   165 					mva :STACKORIGIN+STACKWIDTH,x ecx1
+   166 					sta ecx1_
+   167 					mva :STACKORIGIN+STACKWIDTH*2,x ecx2
+   168 					sta ecx2_
+   169 					mva :STACKORIGIN+STACKWIDTH*3,x ecx3
+   170
+   171 					mva :STACKORIGIN-1+STACKWIDTH*3,x eax+4
+   172 					mva :STACKORIGIN-1+STACKWIDTH*2,x eax+3
+   173 					mva :STACKORIGIN-1+STACKWIDTH,x eax+2
+   174 					mva :STACKORIGIN-1,x eax+1
+   175
+   176 					lda #$00
+   177 					sta eax
+   178 					sta eax+5
+   179 					sta eax+6
+   180 					sta eax+7
+   181
+   182 					STA ZTMP8
+   183 					STA ZTMP9
+   184 					STA ZTMP10
+   185 					STA ZTMP11
+   186
+   187 					LDY #64
+   188 23DA			UDIV320	ASL eax
+   189 					ROL eax+1
+   190 					ROL eax+2
+   191 					ROL eax+3
+   192 					ROL eax+4
+   193 					ROL eax+5
+   194 					ROL eax+6
+   195 					ROL eax+7
+   196
+   197 					ROL ZTMP8
+   198 					ROL ZTMP9
+   199 					ROL ZTMP10
+   200 					ROL ZTMP11
+   201 							;do a subtraction
+   202 					LDA ZTMP8
+   203 					CMP #0
+   204 23DA			ecx0	equ *-1
+   205 					LDA ZTMP9
+   206 					SBC #0
+   207 23DA			ecx1	equ *-1
+   208 					LDA ZTMP10
+   209 					SBC #0
+   210 23DA			ecx2	equ *-1
+   211 					LDA ZTMP11
+   212 					SBC #0
+   213 23DA			ecx3	equ *-1
+   214 					BCC UDIV321
+   215 				 			;overflow, do the subtraction again, this time store the result
+   216 					STA ecx3	;we have the high byte already
+   217 					LDA ZTMP8
+   218 					SBC #0		;byte 0
+   219 23DA			ecx0_	equ *-1
+   220 					STA ZTMP8
+   221 					LDA ZTMP9
+   222 					SBC #0
+   223 23DA			ecx1_	equ *-1
+   224 					STA ZTMP9	;byte 1
+   225 					LDA ZTMP10
+   226 					SBC #0
+   227 23DA			ecx2_	equ *-1
+   228 					STA ZTMP10	;byte 2
+   229
+   230 					INC eax		;set result bit
+   231
+   232 23DA			UDIV321	DEY
+   233 					BNE UDIV320
+   234
+   235 					rts
+   236 				.endp
+   237
+   238
+   239 				/*
+   240 				.proc	divREAL
+   241
+   242 					jsr iniEAX_ECX_CARD
+   243
+   244 					mva eax+3 eax+4
+   245 					mva eax+2 eax+3
+   246 					mva eax+1 eax+2
+   247 					mva eax eax+1
+   248
+   249 					lda #$00
+   250 					sta eax
+   251 					sta eax+5
+   252 					sta eax+6
+   253 					sta eax+7
+   254
+   255 					STA ZTMP8
+   256 					STA ZTMP9
+   257 					STA ZTMP10
+   258 					STA ZTMP11
+   259
+   260 					LDY #64
+   261 				UDIV320	ASL eax
+   262 					ROL eax+1
+   263 					ROL eax+2
+   264 					ROL eax+3
+   265 					ROL eax+4
+   266 					ROL eax+5
+   267 					ROL eax+6
+   268 					ROL eax+7
+   269
+   270 					ROL ZTMP8
+   271 					ROL ZTMP9
+   272 					ROL ZTMP10
+   273 					ROL ZTMP11
+   274 							;do a subtraction
+   275 					LDA ZTMP8
+   276 					CMP ecx
+   277 					LDA ZTMP9
+   278 					SBC ecx+1
+   279 					LDA ZTMP10
+   280 					SBC ecx+2
+   281 					LDA ZTMP11
+   282 					SBC ecx+3
+   283 					BCC UDIV321
+   284 				 			;overflow, do the subtraction again, this time store the result
+   285 					STA ecx+3	;we have the high byte already
+   286 					LDA ZTMP8
+   287 					SBC ecx		;byte 0
+   288 					STA ZTMP8
+   289 					LDA ZTMP9
+   290 					SBC ecx+1
+   291 					STA ZTMP9	;byte 1
+   292 					LDA ZTMP10
+   293 					SBC ecx+2
+   294 					STA ZTMP10	;byte 2
+   295
+   296 					INC eax		;set result bit
+   297
+   298 				UDIV321	DEY
+   299 					BNE UDIV320
+   300
+   301 					rts
+   302 				.endp
+   303 				*/
+   303
+  1252 23DA				icl '6502\cpu6502_single.asm'		; mul / div -> SINGLE		IEEE-754
+Source: cpu6502_single.asm
+     1 				; JAVA IEEE-32 (IEEE-754)
+     2 				; David Schmenk
+     3 				; https://sourceforge.net/projects/vm02/
+     4 				; http://vm02.cvs.sourceforge.net/viewvc/vm02/vm02/src/
+     5
+     6 				/*
+     7 					org eax
+     8
+     9 				FP1MAN0	.ds 1
+    10 				FP1MAN1	.ds 1
+    11 				FP1MAN2	.ds 1
+    12 				FP1MAN3	.ds 1
+    13
+    14 					org ztmp8
+    15
+    16 				FP1SGN	.ds 1
+    17 				FP1EXP	.ds 1
+    18
+    19 					org edx
+    20
+    21 				FP2MAN0	.ds 1
+    22 				FP2MAN1	.ds 1
+    23 				FP2MAN2	.ds 1
+    24 				FP2MAN3	.ds 1
+    25
+    26 					org ztmp10
+    27
+    28 				FP2SGN	.ds 1
+    29 				FP2EXP	.ds 1
+    30
+    31 					org ecx
+    32
+    33 				FPMAN0	.ds 1
+    34 				FPMAN1	.ds 1
+    35 				FPMAN2	.ds 1
+    36 				FPMAN3	.ds 1
+    37
+    38 					org bp2
+    39
+    40 				FPSGN	.ds 1
+    41 				FPEXP	.ds 1
+    42
+    43 				*/
+    43
+    44
+    45 = 008F			@rx	= bp+1
+    46
+    47 = 000A			MIN_EXPONENT	= 10
+    48 = 00FF			MAX_EXPONENT	= 255
+    49
+    50
+    51 23DA			.proc	NEGINT
+    52
+    53 					LDA	#$00
+    54 					SEC
+    55
+    56 23DA			enter	SBC	FPMAN0
+    57 					STA	FPMAN0
+    58 					LDA	#$00
+    59 					SBC	FPMAN1
+    60 					STA	FPMAN1
+    61 					LDA	#$00
+    62 					SBC	FPMAN2
+    63 					STA	FPMAN2
+    64 					LDA	#$00
+    65 					SBC	FPMAN3
+    66 					STA	FPMAN3
+    67 					RTS
+    68 				.endp
+    69
+    70
+    71 23DA			.proc	FFRAC
+    72 					inx
+    73 					lda :STACKORIGIN-1,x
+    74 					sta :STACKORIGIN,x
+    75
+    76 					lda :STACKORIGIN-1+STACKWIDTH,x
+    77 					sta :STACKORIGIN+STACKWIDTH,x
+    78
+    79 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+    80 					sta :STACKORIGIN+STACKWIDTH*2,x
+    81
+    82 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+    83 					eor #$80
+    84 					sta :STACKORIGIN+STACKWIDTH*3,x
+    85
+    86 					dex
+    87
+    88 					jsr F2I
+    89 					jsr I2F
+    90
+    91 					lda :STACKORIGIN+STACKWIDTH*3,x
+    92 					eor #$80
+    93 					sta :STACKORIGIN+STACKWIDTH*3,x
+    94
+    95 					inx
+    96
+    97 					jsr FSUB
+    98
+    99 					dex
+   100
+   101 					rts
+   102 				.endp
+   103
+   104
+   105 23DA			.proc	FROUND
+   106 				;	LDA	#$00
+   107 				;	STA	FP2SGN
+   108
+   109 					lda :STACKORIGIN,x
+   110 					STA	FP2MAN0
+   111 					lda :STACKORIGIN+STACKWIDTH,x
+   112 					STA	FP2MAN1
+   113 					lda :STACKORIGIN+STACKWIDTH*2,x
+   114 					CMP	#$80		; SET CARRY FROM MSB
+   115 					ORA	#$80		; SET HIDDEN BIT
+   116 					STA	FP2MAN2
+   117 					lda :STACKORIGIN+STACKWIDTH*3,x
+   118 				;	EOR	FP2SGN		; TOGGLE SIGN FOR FSUB
+   119 					ROL
+   120 					STA	FP2EXP
+   121 					LDA	#$00
+   122 					STA	FPSGN
+   123 					BCC	@+
+   124 					SBC	FP2MAN0
+   125 					STA	FP2MAN0
+   126 					LDA	#$00
+   127 					SBC	FP2MAN1
+   128 					STA	FP2MAN1
+   129 					LDA	#$00
+   130 					SBC	FP2MAN2
+   131 					STA	FP2MAN2
+   132 					LDA	#$FF
+   133 23DA			@	STA	FP2MAN3
+   134 					lda #$00
+   135 					STA	FP1MAN0
+   136 					STA	FP1MAN1
+   137 					CMP	#$80		; SET CARRY FROM MSB
+   138 					ORA	#$80		; SET HIDDEN BIT
+   139 					STA	FP1MAN2
+   140
+   141 					lda :STACKORIGIN+STACKWIDTH*3,x
+   142 					and #$80
+   143 					ora #$3f		; 0.5 / -0.5
+   144
+   145 					inx
+   146
+   147 					jsr FSUB.enter
+   148
+   149 					dex
+   150
+   151 					rts
+   152 				.endp
+   153
+   154
+   155 23DA			.proc	FSUB
+   156 					LDA	#$80		; TOGGLE SIGN
+   157 					BNE	@+
+   158 23DA			FADD:	LDA	#$00
+   159 23DA			@	STA	FP2SGN
+   160 				;	stx @rx
+   161
+   162 					lda :STACKORIGIN,x
+   163 					STA	FP2MAN0
+   164 					lda :STACKORIGIN+STACKWIDTH,x
+   165 					STA	FP2MAN1
+   166 					lda :STACKORIGIN+STACKWIDTH*2,x
+   167 					CMP	#$80		; SET CARRY FROM MSB
+   168 					ORA	#$80		; SET HIDDEN BIT
+   169 					STA	FP2MAN2
+   170 					lda :STACKORIGIN+STACKWIDTH*3,x
+   171 					EOR	FP2SGN		; TOGGLE SIGN FOR FSUB
+   172 					ROL
+   173 					STA	FP2EXP
+   174 					LDA	#$00
+   175 					STA	FPSGN
+   176 					BCC	@+
+   177 					SBC	FP2MAN0
+   178 					STA	FP2MAN0
+   179 					LDA	#$00
+   180 					SBC	FP2MAN1
+   181 					STA	FP2MAN1
+   182 					LDA	#$00
+   183 					SBC	FP2MAN2
+   184 					STA	FP2MAN2
+   185 					LDA	#$FF
+   186 23DA			@	STA	FP2MAN3
+   187 					lda :STACKORIGIN-1,x
+   188 					STA	FP1MAN0
+   189 					lda :STACKORIGIN-1+STACKWIDTH,x
+   190 					STA	FP1MAN1
+   191 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   192 					CMP	#$80		; SET CARRY FROM MSB
+   193 					ORA	#$80		; SET HIDDEN BIT
+   194 					STA	FP1MAN2
+   195 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   196 23DA			enter	ROL
+   197 					STA	FP1EXP
+   198 					LDA	#$00
+   199 					BCC	@+
+   200 					SBC	FP1MAN0
+   201 					STA	FP1MAN0
+   202 					LDA	#$00
+   203 					SBC	FP1MAN1
+   204 					STA	FP1MAN1
+   205 					LDA	#$00
+   206 					SBC	FP1MAN2
+   207 					STA	FP1MAN2
+   208 					LDA	#$FF
+   209 23DA			@	STA	FP1MAN3
+   210 					LDA	FP1EXP		; CALCULATE WHICH MANTISSA TO SHIFT
+   211 					STA	FPEXP
+   212 					SEC
+   213 					SBC	FP2EXP
+   214 					BEQ	FADDMAN
+   215 					BCS	@+
+   216 					EOR	#$FF
+   217 					TAY
+   218 					INY
+   219 					LDA	FP2EXP
+   220 					STA	FPEXP
+   221 					LDA	FP1MAN3
+   222 					CPY	#24		; KEEP SHIFT RANGE VALID
+   223 					BCC	FP1SHFT
+   224 					LDA	#$00
+   225 					STA	FP1MAN3
+   226 					STA	FP1MAN2
+   227 					STA	FP1MAN1
+   228 					STA	FP1MAN0
+   229 					BEQ	FADDMAN
+   230 23DA			FP1SHFT:	CMP	#$80	; SHIFT FP1 DOWN
+   231 					ROR
+   232 					ROR	FP1MAN2
+   233 					ROR	FP1MAN1
+   234 					ROR	FP1MAN0
+   235 					DEY
+   236 					BNE	FP1SHFT
+   237 					STA	FP1MAN3
+   238 					JMP	FADDMAN
+   239
+   240 23DA			@	TAY
+   241 					LDA	FP2MAN3
+   242 					CPY	#24		; KEEP SHIFT RANGE VALID
+   243 					BCC	FP2SHFT
+   244 					LDA	#$00
+   245 					STA	FP2MAN3
+   246 					STA	FP2MAN2
+   247 					STA	FP2MAN1
+   248 					STA	FP2MAN0
+   249 					BEQ	FADDMAN
+   250 23DA			FP2SHFT:	CMP	#$80	; SHIFT FP2 DOWN
+   251 					ROR
+   252 					ROR	FP2MAN2
+   253 					ROR	FP2MAN1
+   254 					ROR	FP2MAN0
+   255 					DEY
+   256 					BNE	FP2SHFT
+   257 					STA	FP2MAN3
+   258 23DA			FADDMAN:	LDA	FP1MAN0
+   259 					CLC
+   260 					ADC	FP2MAN0
+   261 					STA	FPMAN0
+   262 					LDA	FP1MAN1
+   263 					ADC	FP2MAN1
+   264 					STA	FPMAN1
+   265 					LDA	FP1MAN2
+   266 					ADC	FP2MAN2
+   267 					STA	FPMAN2
+   268 					LDA	FP1MAN3
+   269 					ADC	FP2MAN3
+   270 					STA	FPMAN3
+   271 					BPL	FPNORM
+   272
+   273 					LDA	#$80
+   274 					STA	FPSGN
+   275
+   276 					JSR	NEGINT
+   277
+   278 					jmp FPNORM
+   279 				.endp
+   280
+   281
+   282 23DA			.proc	FPNORM
+   283 					BEQ	FPNORMLEFT	; NORMALIZE FP, A = FPMANT3
+   284 23DA			FPNORMRIGHT:	INC	FPEXP
+   285 					LSR
+   286 					STA	FPMAN3
+   287 					ROR	FPMAN2
+   288 					ROR	FPMAN1
+   289 					LDA	FPMAN0
+   290 					ROR
+   291 					ADC	#$00
+   292 					STA	FPMAN0
+   293 					LDA	FPMAN1
+   294 					ADC	#$00
+   295 					STA	FPMAN1
+   296 					LDA	FPMAN2
+   297 					ADC	#$00
+   298 					STA	FPMAN2
+   299 					LDA	FPMAN3
+   300 					ADC	#$00
+   301 					BNE	FPNORMRIGHT
+   302 					LDA	FPEXP
+   303 					ASL	FPMAN2
+   304 					LSR
+   305 					ORA	FPSGN
+   306
+   307 				;	ldx @rx
+   308 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   309 					LDA	FPMAN2
+   310 					ROR
+   311 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   312
+   313 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   314 					asl @
+   315 					tay
+   316 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   317 					spl
+   318 					iny
+   319 					cpy #MIN_EXPONENT	; to small 6.018531E-36
+   320 					bcc zero
+   321 					cpy #MAX_EXPONENT
+   322 					beq zero		; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
+   323
+   324 					LDA	FPMAN1
+   325 					sta :STACKORIGIN-1+STACKWIDTH,x
+   326 					LDA	FPMAN0
+   327 					sta :STACKORIGIN-1,x
+   328 					rts
+   329
+   330 23DA			FPNORMLEFT:	LDA	FPMAN2
+   331 					BNE	FPNORMLEFT1
+   332 					LDA	FPMAN1
+   333 					BNE	FPNORMLEFT8
+   334 					LDA	FPMAN0
+   335 					BNE	FPNORMLEFT16
+   336
+   337 				;	ldx @rx			; RESULT IS ZERO
+   338 23DA			zero	lda #0
+   339
+   340 					sta :STACKORIGIN-1,x
+   341 					sta :STACKORIGIN-1+STACKWIDTH,x
+   342 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   343 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   344 					rts
+   345
+   346 23DA			FPNORMLEFT16:	TAY
+   347 					LDA	FPEXP
+   348 					SEC
+   349 					SBC	#$10
+   350 					STA	FPEXP
+   351 					LDA	#$00
+   352 					STA	FPMAN1
+   353 					STA	FPMAN0
+   354 					TYA
+   355 					BNE	FPNORMLEFT1
+   356 23DA			FPNORMLEFT8:	TAY
+   357 					LDA	FPMAN0
+   358 					STA	FPMAN1
+   359 					LDA	FPEXP
+   360 					SEC
+   361 					SBC	#$08
+   362 					STA	FPEXP
+   363 					LDA	#$00
+   364 					STA	FPMAN0
+   365 					TYA
+   366 23DA			FPNORMLEFT1:	BMI	FPNORMDONE
+   367 23DA			@	DEC	FPEXP
+   368 					ASL	FPMAN0
+   369 					ROL	FPMAN1
+   370 					ROL
+   371 					BPL	@-
+   372 23DA			FPNORMDONE:	ASL
+   373 					TAY
+   374 					LDA	FPEXP
+   375 					LSR
+   376 					ORA	FPSGN
+   377
+   378 				;	ldx @rx
+   379 					sta :STACKORIGIN-1+STACKWIDTH*3,x
+   380 					TYA
+   381 					ROR
+   382 					sta :STACKORIGIN-1+STACKWIDTH*2,x
+   383
+   384 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   385 					asl @
+   386 					tay
+   387 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   388 					spl
+   389 					iny
+   390 					cpy #MIN_EXPONENT	; to small 6.018531E-36
+   391 					bcc zero
+   392 					cpy #MAX_EXPONENT
+   393 					beq zero		; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
+   394
+   395 					LDA	FPMAN1
+   396 					sta :STACKORIGIN-1+STACKWIDTH,x
+   397 					LDA	FPMAN0
+   398 					sta :STACKORIGIN-1,x
+   399
+   400 					rts
+   401 				.endp
+   402
+   403
+   404 23DA			.proc	FMUL
+   405
+   406 					stx @rx
+   407
+   408 					lda :STACKORIGIN,x
+   409 					STA	FP2MAN0
+   410 					lda :STACKORIGIN+STACKWIDTH,x
+   411 					STA	FP2MAN1
+   412 					lda :STACKORIGIN+STACKWIDTH*2,x
+   413 					CMP	#$80		; SET CARRY FROM MSB
+   414 					ORA	#$80		; SET HIDDEN BIT
+   415 					STA	FP2MAN2
+   416 				 	lda :STACKORIGIN+STACKWIDTH*3,x
+   417 					ROL
+   418 					STA	FP2EXP
+   419 					BNE	@+
+   420
+   421 				; MUL BY ZERO, RESULT ZERO
+   422 				;	LDA	#$00
+   423 23DA			ZERO:	STA :STACKORIGIN-1,x
+   424 					STA :STACKORIGIN-1+STACKWIDTH,x
+   425 					STA :STACKORIGIN-1+STACKWIDTH*2,x
+   426 					STA :STACKORIGIN-1+STACKWIDTH*3,x
+   427 					rts
+   428
+   429 23DA			@	LDA	#$00
+   430 					ROR
+   431 					STA	FPSGN
+   432 					lda :STACKORIGIN-1,x
+   433 					STA	FP1MAN0
+   434 					lda :STACKORIGIN-1+STACKWIDTH,x
+   435 					STA	FP1MAN1
+   436 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   437 					CMP	#$80		; SET CARRY FROM MSB
+   438 					ORA	#$80		; SET HIDDEN BIT
+   439 					STA	FP1MAN2
+   440 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   441 					ROL
+   442 					STA	FP1EXP
+   443 					BEQ	ZERO		; MUL BY ZERO, RESULT ZERO
+   444
+   445 					LDA	#$00
+   446 					ROR
+   447 					EOR	FPSGN
+   448 					STA	FPSGN
+   449 					LDA	FP1EXP
+   450 					CLC			; ADD EXPONENTS
+   451 					ADC	FP2EXP
+   452 					SEC			; SUBTRACT BIAS
+   453 					SBC	#$7F
+   454 					STA	FPEXP
+   455 					LDX	#$00
+   456 					STX	FPMAN0
+   457 					STX	FPMAN1
+   458 					STX	FPMAN2
+   459 					STX	FPMAN3
+   460 					STX	TMP
+   461 23DA			FMULNEXTBYTE:	LDA	FP1MAN0,X
+   462 					BNE	@+
+   463 					LDX	FPMAN1		; SHORT CIRCUIT BYTE OF ZERO BITS
+   464 					STX	FPMAN0
+   465 					LDX	FPMAN2
+   466 					STX	FPMAN1
+   467 					LDX	FPMAN3
+   468 					STX	FPMAN2
+   469 					STA	FPMAN3
+   470 					INC	TMP
+   471 					LDX	TMP
+   472 					CPX	#$03
+   473 					BNE	FMULNEXTBYTE
+   474
+   475 					ldx @rx
+   476 					LDA	FPMAN3
+   477 					JMP	FPNORM
+   478
+   479 23DA			@	EOR	#$FF
+   480 					LDX	#$08
+   481 23DA			FMULTSTBITS:	LSR	FPMAN3
+   482 					ROR	FPMAN2
+   483 					ROR	FPMAN1
+   484 					ROR	FPMAN0
+   485 					LSR
+   486 					BCS	FMULNEXTTST
+   487 					TAY
+   488 					LDA	FP2MAN0
+   489 					ADC	FPMAN0
+   490 					STA	FPMAN0
+   491 					LDA	FP2MAN1
+   492 					ADC	FPMAN1
+   493 					STA	FPMAN1
+   494 					LDA	FP2MAN2
+   495 					ADC	FPMAN2
+   496 					STA	FPMAN2
+   497 					LDA	#$00
+   498 					ADC	FPMAN3
+   499 					STA	FPMAN3
+   500 					TYA
+   501 23DA			FMULNEXTTST:	DEX
+   502 					BNE	FMULTSTBITS
+   503 					INC	TMP
+   504 					LDX	TMP
+   505 					CPX	#$03
+   506 					BNE	FMULNEXTBYTE
+   507
+   508 					ldx @rx
+   509 					LDA	FPMAN3
+   510 					JMP	FPNORM
+   511 				.endp
+   512
+   513
+   514 23DA			.proc	FDIV
+   515
+   516 					stx @rx
+   517
+   518 					lda :STACKORIGIN,x
+   519 					STA	FP2MAN0
+   520 					lda :STACKORIGIN+STACKWIDTH,x
+   521 					STA	FP2MAN1
+   522 					lda :STACKORIGIN+STACKWIDTH*2,x
+   523 					CMP	#$80		; SET CARRY FROM MSB
+   524 					ORA	#$80		; SET HIDDEN BIT
+   525 					STA	FP2MAN2
+   526 					lda :STACKORIGIN+STACKWIDTH*3,x
+   527 					ROL
+   528 					STA	FP2EXP
+   529 					BNE	@+
+   530
+   531 				;	LDA	#$00
+   532 23DA			ZERO:	STA :STACKORIGIN-1,x
+   533 					STA :STACKORIGIN-1+STACKWIDTH,x
+   534 					STA :STACKORIGIN-1+STACKWIDTH*2,x
+   535 					STA :STACKORIGIN-1+STACKWIDTH*3,x
+   536 					rts
+   537 				;	LDA	#23		; DIVIDE BY ZERO, ERROR
+   538 				;	JMP	SYSTHROW
+   539
+   540 23DA			@	LDA	#$00
+   541 					ROR
+   542 					STA	FPSGN
+   543 					lda :STACKORIGIN-1,x
+   544 					STA	FP1MAN0
+   545 					lda :STACKORIGIN-1+STACKWIDTH,x
+   546 					STA	FP1MAN1
+   547 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   548 					CMP	#$80		; SET CARRY FROM MSB
+   549 					ORA	#$80		; SET HIDDEN BIT
+   550 					STA	FP1MAN2
+   551 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   552 					ROL
+   553 					STA	FP1EXP
+   554 					BEQ	ZERO		; DIVIDE ZERO, RESULT ZERO
+   555
+   556 					LDA	#$00
+   557 					STA	FP1MAN3
+   558 					ROR
+   559 					EOR	FPSGN
+   560 					STA	FPSGN
+   561 					LDA	FP1EXP
+   562 					SEC			; SUBTRACT EXPONENTS
+   563 					SBC	FP2EXP
+   564 					CLC
+   565 					ADC	#$7F		; ADD BACK BIAS
+   566 					STA	FPEXP
+   567
+   568 					LDX	#24		; #BITS
+   569 23DA			FDIVLOOP:	LDA	FP1MAN0
+   570 					SEC
+   571 					SBC	FP2MAN0
+   572 					STA	TMP
+   573 					LDA	FP1MAN1
+   574 					SBC	FP2MAN1
+   575 					STA	TMP+1
+   576 					LDA	FP1MAN2
+   577 					SBC	FP2MAN2
+   578 					TAY
+   579 					LDA	FP1MAN3
+   580 					SBC	#$00
+   581 					BCC	FDIVNEXTBIT
+   582 					STA	FP1MAN3
+   583 					STY	FP1MAN2
+   584 					LDA	TMP+1
+   585 					STA	FP1MAN1
+   586 					LDA	TMP
+   587 					STA	FP1MAN0
+   588 23DA			FDIVNEXTBIT:	ROL	FPMAN0
+   589 					ROL	FPMAN1
+   590 					ROL	FPMAN2
+   591 					ASL	FP1MAN0
+   592 					ROL	FP1MAN1
+   593 					ROL	FP1MAN2
+   594 					ROL	FP1MAN3
+   595 					DEX
+   596 					BNE	FDIVLOOP
+   597
+   598 					ldx @rx
+   599 					LDA	#$00
+   600 					JMP	FPNORM
+   601 				.endp
+   602
+   603
+   604 23DA			.proc	FCMPL
+   605 23DA			FCMPG:
+   606 					CLV
+   607
+   608 					LDA	:STACKORIGIN+STACKWIDTH*3,X	; COMPARE SIGNS
+   609 					AND	#$80
+   610 					STA	FP2SGN
+   611 					LDA	:STACKORIGIN-1+STACKWIDTH*3,X
+   612 					AND	#$80
+   613 					CMP	FP2SGN
+   614 					BCC	FCMPGTSGN
+   615 					BEQ	@+
+   616 					BCS	FCMPLTSGN
+   617 23DA			@	LDA	:STACKORIGIN-1+STACKWIDTH*3,X	; COMPARE AS MAGNITUDE
+   618 					CMP	:STACKORIGIN+STACKWIDTH*3,X
+   619 					BCC	FCMPLT
+   620 					BEQ	@+
+   621 					BCS	FCMPGT
+   622 23DA			@	LDA	:STACKORIGIN-1+STACKWIDTH*2,X
+   623 					CMP	:STACKORIGIN+STACKWIDTH*2,X
+   624 					BCC	FCMPLT
+   625 					BEQ	@+
+   626 					BCS	FCMPGT
+   627 23DA			@	LDA	:STACKORIGIN-1+STACKWIDTH,X
+   628 					CMP	:STACKORIGIN+STACKWIDTH,X
+   629 					BCC	FCMPLT
+   630 					BEQ	@+
+   631 					BCS	FCMPGT
+   632 23DA			@	LDA	:STACKORIGIN-1,X
+   633 					CMP	:STACKORIGIN,X
+   634 					BCC	FCMPLT
+   635 					BEQ	FCMPEQ
+   636 					BCS	FCMPGT
+   637 23DA			FCMPEQ:	LDA #0			; EQUAL
+   638 					RTS
+   639
+   640 23DA			FCMPGT:	LDA	FP2SGN		; FLIP RESULT IF NEGATIVE #S
+   641 					BMI	FCMPLTSGN
+   642 23DA			FCMPGTSGN:	LDA	#$01	; GREATER THAN
+   643 					RTS
+   644
+   645 23DA			FCMPLT:	LDA	FP2SGN		; FLIP RESULT IF NEGATIVE #S
+   646 					BMI	FCMPGTSGN
+   647 23DA			FCMPLTSGN:	LDA	#$FF	; LESS THAN
+   648 					RTS
+   649 				.endp
+   650
+   651
+   652 23DA			.proc	F2I
+   653
+   654 					lda :STACKORIGIN,x
+   655 					STA	FPMAN0
+   656 					lda :STACKORIGIN+STACKWIDTH,x
+   657 					STA	FPMAN1
+   658 					lda :STACKORIGIN+STACKWIDTH*2,x
+   659 					CMP	#$80		; SET CARRY FROM MSB
+   660 					ORA	#$80		; SET HIDDEN BIT
+   661 					STA	FPMAN2
+   662 					lda :STACKORIGIN+STACKWIDTH*3,x
+   663 					ROL	@
+   664 					STA	FPEXP
+   665 					LDA	#$00
+   666 					ROR	@
+   667 					STA	FPSGN
+   668 					LDA	FPEXP		; CHECK FOR LESS THAN ONE
+   669 					SEC
+   670 					SBC	#$7F
+   671 					BCS	@+
+   672
+   673 23DA			ZERO:	LDA	#$00		; RETURN ZERO
+   674 					STA :STACKORIGIN,x
+   675 					STA :STACKORIGIN+STACKWIDTH,x
+   676 					STA :STACKORIGIN+STACKWIDTH*2,x
+   677 					STA :STACKORIGIN+STACKWIDTH*3,x
+   678 					rts
+   679
+   680 23DA			@	CMP	#23
+   681 					BCS	F2ISHL
+   682 					STA	FPEXP
+   683 					LDA	#23
+   684 					SEC
+   685 					SBC	FPEXP
+   686 					TAY			; SHIFT MANTISSA RIGHT
+   687 					LDA	FPMAN2
+   688 23DA			F2ISHR:	LSR	@
+   689 					ROR	FPMAN1
+   690 					ROR	FPMAN0
+   691 					DEY
+   692 					BNE	F2ISHR
+   693 					STA	FPMAN2
+   694 					STY	FPMAN3
+   695 23DA			F2ICHKNEG:	LDA	FPSGN
+   696 					BPL	@+		; CHECK FOR NEGATIVE
+   697 					ASL	@		; LDA #$00; SEC
+   698
+   699 					JSR	NEGINT.enter
+   700
+   701 23DA			@	LDA	FPMAN3
+   702 					STA :STACKORIGIN+STACKWIDTH*3,x
+   703 					LDA	FPMAN2
+   704 					STA :STACKORIGIN+STACKWIDTH*2,x
+   705 					LDA	FPMAN1
+   706 					STA :STACKORIGIN+STACKWIDTH,x
+   707 					LDA	FPMAN0
+   708 					STA :STACKORIGIN,x
+   709 					rts
+   710
+   711 23DA			F2ISHL:	CMP	#32
+   712 					BCC	@+
+   713 					LDA	#$FF		; OVERFLOW, STORE MAXINT
+   714 					STA	FPMAN0
+   715 					STA	FPMAN1
+   716 					STA	FPMAN2
+   717 					LSR	@
+   718 					STA	FPMAN3
+   719 					BNE	F2ICHKNEG
+   720 23DA			@	SEC
+   721 					SBC	#23
+   722 					BNE	@+
+   723 					STA	FPMAN3
+   724 					BEQ	F2ICHKNEG
+   725 23DA			@	TAY			; SHIFT MANTISSA LEFT
+   726 					LDA	#$00
+   727 23DA			@	ASL	FPMAN0
+   728 					ROL	FPMAN1
+   729 					ROL	FPMAN2
+   730 					ROL	@
+   731 					DEY
+   732 					BNE	@-
+   733 					STA	FPMAN3
+   734 					BEQ	F2ICHKNEG
+   735 				.endp
+   736
+   737
+   738 23DA			.proc	I2F
+   739
+   740 					lda :STACKORIGIN,x
+   741 					STA	FPMAN0
+   742 					lda :STACKORIGIN+STACKWIDTH,x
+   743 					STA	FPMAN1
+   744 					lda :STACKORIGIN+STACKWIDTH*2,x
+   745 					STA	FPMAN2
+   746 					lda :STACKORIGIN+STACKWIDTH*3,x
+   747 					STA	FPMAN3
+   748 					AND	#$80
+   749 					STA	FPSGN
+   750 					BPL	@+
+   751 				;	LDX	#FPMAN0
+   752 					JSR	NEGINT
+   753 23DA			@	LDA	#$7F+23
+   754 					STA	FPEXP
+   755
+   756 					inx			; ten zabieg zapisze pod :STACKORIGIN,x
+   757 								; zamiast :STACKORIGIN-1,x
+   758 					LDA	FPMAN3
+   759 					JSR	FPNORM
+   760
+   761 					dex
+   762 					rts
+   763 				.endp
+   764
+   765
+   766 23DA			.proc	I2F_m
+   767
+   768 					lda :STACKORIGIN-1,x
+   769 					STA	FPMAN0
+   770 					lda :STACKORIGIN-1+STACKWIDTH,x
+   771 					STA	FPMAN1
+   772 					lda :STACKORIGIN-1+STACKWIDTH*2,x
+   773 					STA	FPMAN2
+   774 					lda :STACKORIGIN-1+STACKWIDTH*3,x
+   775
+   776 					STA	FPMAN3
+   777 					AND	#$80
+   778 					STA	FPSGN
+   779 					BPL	@+
+   780 				;	LDX	#FPMAN0
+   781 					JSR	NEGINT
+   782 23DA			@	LDA	#$7F+23
+   783 					STA	FPEXP
+   784
+   785 					LDA	FPMAN3
+   786 					JMP	FPNORM
+   787 				.endp
+  1253
+  1254
+  1255 23DA			.proc	@printCHAR
+  1256 					ldy :STACKORIGIN,x
+  1257 					jmp @print
+  1258 				.endp
+  1259
+  1260
+  1261 23DA			.proc	@printEOL
+  1262 					ldy #eol
+  1263 					jmp @print
+  1264 				.endp
+  1265
+  1266
+  1267 23DA			.proc	@print (.byte y) .reg
+  1268 					txa:pha
+  1269
+  1270 					tya
+  1271 					jsr @putchar
+  1272
+  1273 					pla:tax
+  1274 					rts
+  1275 				.endp
+  1276
+  1277
+  1278 23DA			.proc	@printPCHAR (.word ya) .reg
+  1279 					sta addr
+  1280 					sty addr+1
+  1281
+  1282 					stx @sp
+  1283
+  1284 					lda #0
+  1285 					sta loop+1
+  1286
+  1287 23DA			loop	ldy #0
+  1288 					lda $ffff,y
+  1289 23DA			addr	equ *-2
+  1290 					beq stop
+  1291
+  1292 					inc loop+1
+  1293 					beq stop
+  1294
+  1295 					jsr @putchar
+  1296
+  1297 					jmp loop
+  1298
+  1299 23DA			stop	ldx #0
+  1300 23DA			@sp	equ *-1
+  1301 					rts
+  1302 				.endp
+  1303
+  1304
+  1305 23DA			.proc	@printSTRING (.word ya) .reg
+  1306 					sta ztmp
+  1307 					sty ztmp+1
+  1308
+  1309 					stx @sp
+  1310
+  1311 					ldy #0
+  1312 					sty loop+1
+  1313 					lda (ztmp),y
+  1314 					sta ln
+  1315
+  1316 					inw ztmp
+  1317
+  1318 23DA			loop	ldy #0
+  1319 					lda (ztmp),y
+  1320 				;	beq stop
+  1321
+  1322 					cpy #0
+  1323 23DA			ln	equ *-1
+  1324 					beq stop
+  1325
+  1326 					inc loop+1
+  1327
+  1328 					jsr @putchar
+  1329
+  1330 					jmp loop
+  1331
+  1332 23DA			stop	ldx #0
+  1333 23DA			@sp	equ *-1
+  1334 					rts
+  1335 				.endp
+  1336
+  1337
+  1338 23DA			.proc	@printBOOLEAN
+  1339 					lda :STACKORIGIN,x
+  1340 					beq _0
+  1341
+  1342 23DA			_1	lda <_true
+  1343 					ldy >_true
+  1344 					jmp @printSTRING
+  1345
+  1346 23DA			_0	lda <_false
+  1347 					ldy >_false
+  1348 					jmp @printSTRING
+  1349
+  1350 23DA			_true	dta 4,c'TRUE'
+  1351 23DA			_false	dta 5,c'FALSE'
+  1352 				.endp
+  1353
+  1354
+  1355 23DA			.proc	mov_BYTE_DX
+  1356 					mva :STACKORIGIN,x dx
+  1357 					mva #$00 dx+1
+  1358 					sta dx+2
+  1359 					sta dx+3
+  1360
+  1361 					rts
+  1362 				.endp
+  1363
+  1364 23DA			.proc	mov_WORD_DX
+  1365 					mva :STACKORIGIN,x dx
+  1366 					mva :STACKORIGIN+STACKWIDTH,x dx+1
+  1367 					mva #$00 dx+2
+  1368 					sta dx+3
+  1369
+  1370 					rts
+  1371 				.endp
+  1372
+  1373 23DA			.proc	mov_CARD_DX
+  1374 					mva :STACKORIGIN,x dx
+  1375 					mva :STACKORIGIN+STACKWIDTH,x dx+1
+  1376 					mva :STACKORIGIN+STACKWIDTH*2,x dx+2
+  1377 					mva :STACKORIGIN+STACKWIDTH*3,x dx+3
+  1378
+  1379 					rts
+  1380 				.endp
+  1381
+  1382
+  1383 23DA			.proc	@printMINUS
+  1384 					ldy #'-'
+  1385 					jsr @printVALUE.pout
+  1386
+  1387 					jmp negCARD
+  1388 				.endp
+  1389
+  1390
+  1391 23DA			.proc	@printSHORTREAL
+  1392 					jsr @expandToCARD.SMALL
+  1393 					jmp @printREAL
+  1394 				.endp
+  1395
+  1396
+  1397 23DA			.proc	@FTOA
+  1398
+  1399 = 0086			i	= edx
+  1400 = 008A			fra	= ecx
+  1401 = 0082			hlp	= eax
+  1402
+  1403 = 0092			exp	= ztmp
+  1404 = 0093			b	= ztmp+1
+  1405 = 0094			sht	= ztmp+2
+  1406
+  1407 = 0440			bit	= @buf+64
+  1408
+  1409 					stx @sp
+  1410
+  1411 					mva :STACKORIGIN,x I
+  1412 					sta :STACKORIGIN+9
+  1413 					mva :STACKORIGIN+STACKWIDTH,x I+1
+  1414 					sta :STACKORIGIN+STACKWIDTH+9
+  1415 					mva :STACKORIGIN+STACKWIDTH*2,x I+2
+  1416 					sta :STACKORIGIN+STACKWIDTH*2+9
+  1417 					mva :STACKORIGIN+STACKWIDTH*3,x I+3
+  1418 					sta :STACKORIGIN+STACKWIDTH*3+9	; Sign
+  1419
+  1420 					bpl skp
+  1421
+  1422 					ldy #'-'
+  1423 					jsr @printVALUE.pout
+  1424
+  1425 23DA			skp
+  1426 				; optimize OK (test_3.pas), line = 32
+  1427
+  1428 					lda :STACKORIGIN+STACKWIDTH*3+9
+  1429 					asl :STACKORIGIN+9
+  1430 					rol :STACKORIGIN+STACKWIDTH+9
+  1431 					rol :STACKORIGIN+STACKWIDTH*2+9
+  1432 					rol @
+  1433 					sta EXP				; Exponent
+  1434
+  1435 				; optimize OK (test_3.pas), line = 33
+  1436
+  1437 					lda I
+  1438 					sta FRA
+  1439 					lda I+1
+  1440 					sta FRA+1
+  1441 					lda I+2
+  1442 					sta FRA+2
+  1443 					lda I+3
+  1444 					sta FRA+3
+  1445 					asl FRA
+  1446 					rol FRA+1
+  1447 					rol FRA+2
+  1448 					rol FRA+3
+  1449
+  1450 				; optimize OK (test_3.pas), line = 35
+  1451
+  1452 					lda EXP
+  1453 					sub #$7F
+  1454 					sta SHT
+  1455
+  1456 				; optimize OK (test_3.pas), line = 37
+  1457
+  1458 					ldx #$3f
+  1459 					lda #0
+  1460 					sta:rpl bit,x-
+  1461
+  1462 				; For
+  1463
+  1464 				; optimize OK (test_3.pas), line = 39
+  1465
+  1466 				;	sta B
+  1467 					tax
+  1468
+  1469 				; optimize OK (test_3.pas), line = 39
+  1470
+  1471 23DA			l_01D4
+  1472 				;	lda B
+  1473 				;	cmp #$17
+  1474 					cpx #$17
+  1475 					bcc *+7
+  1476 					beq *+5
+  1477
+  1478 				; ForToDoProlog
+  1479 					jmp l_01EE
+  1480
+  1481 				; optimize OK (test_3.pas), line = 40
+  1482
+  1483 				;	lda #$20
+  1484 				;	add B
+  1485 				;	tax
+  1486
+  1487 					lda FRA+2
+  1488 					sta BIT+$20,x
+  1489
+  1490 				; optimize OK (test_3.pas), line = 41
+  1491
+  1492 					asl FRA
+  1493 					rol FRA+1
+  1494 					rol FRA+2
+  1495 					rol FRA+3
+  1496
+  1497 				; ForToDoEpilog
+  1498 23DA			c_01D4
+  1499 				;	inc B
+  1500 					inx
+  1501
+  1502 					seq
+  1503
+  1504 				; WhileDoEpilog
+  1505 					jmp l_01D4
+  1506 23DA			l_01EE
+  1507 23DA			b_01D4
+  1508
+  1509 				; optimize OK (test_3.pas), line = 44
+  1510
+  1511 					mva #$80 BIT+$1f
+  1512
+  1513 				; optimize OK (test_3.pas), line = 46
+  1514
+  1515 					mva #$00 I
+  1516 					sta I+1
+  1517 					sta I+2
+  1518 					sta I+3
+  1519
+  1520 				; optimize OK (test_3.pas), line = 47
+  1521
+  1522 					sta FRA+1
+  1523 					sta FRA+2
+  1524 					sta FRA+3
+  1525
+  1526 					mva #$01 FRA
+  1527
+  1528 				; For
+  1529
+  1530 				; optimize OK (test_3.pas), line = 49
+  1531
+  1532 					lda SHT
+  1533 					add #$1F
+  1534 					sta B
+  1535
+  1536 				; optimize OK (test_3.pas), line = 49
+  1537
+  1538 					tay
+  1539
+  1540 23DA			l_035B
+  1541 				;	lda B
+  1542 				;	cmp #$00
+  1543 				;	bcs *+5
+  1544
+  1545 				; ForToDoProlog
+  1546 				;	jmp l_0375
+  1547
+  1548 				; optimize OK (test_3.pas), line = 50
+  1549
+  1550 				;	ldy B
+  1551 					lda BIT,y
+  1552 					bpl l_03D7
+  1553
+  1554 				; optimize OK (test_3.pas), line = 50
+  1555
+  1556 					lda I				; Mantissa
+  1557 					add FRA
+  1558 					sta I
+  1559 					lda I+1
+  1560 					adc FRA+1
+  1561 					sta I+1
+  1562 					lda I+2
+  1563 					adc FRA+2
+  1564 					sta I+2
+  1565 					lda I+3
+  1566 					adc FRA+3
+  1567 					sta I+3
+  1568
+  1569 				; IfThenEpilog
+  1570 23DA			l_03D7
+  1571
+  1572 				; optimize OK (test_3.pas), line = 52
+  1573
+  1574 					asl FRA
+  1575 					rol FRA+1
+  1576 					rol FRA+2
+  1577 					rol FRA+3
+  1578
+  1579 				; ForToDoEpilog
+  1580 23DA			c_035B
+  1581 				;	dec B
+  1582 					dey
+  1583
+  1584 				;	lda B
+  1585 				;	cmp #$ff
+  1586 					cpy #$ff
+  1587 					seq
+  1588
+  1589 				; WhileDoEpilog
+  1590 					jmp l_035B
+  1591 23DA			l_0375
+  1592 23DA			b_035B
+  1593
+  1594 				; optimize OK (test_3.pas), line = 55
+  1595
+  1596 					mva #$00 FRA
+  1597 					sta FRA+1
+  1598 					sta FRA+2
+  1599 					sta FRA+3
+  1600
+  1601 				; optimize OK (test_3.pas), line = 56
+  1602
+  1603 					sta EXP
+  1604
+  1605 					sta hlp
+  1606 					sta hlp+1
+  1607
+  1608 					lda #$80
+  1609 					sta hlp+2
+  1610 				; For
+  1611
+  1612 				; optimize OK (test_3.pas), line = 58
+  1613
+  1614 					lda SHT
+  1615 					add #$20
+  1616 				;	sta B
+  1617
+  1618 					tay
+  1619
+  1620 				; optimize OK (test_3.pas), line = 58
+  1621
+  1622 					add #23
+  1623 					sta FORTMP_1273
+  1624 				; To
+  1625 23DA			l_0508
+  1626
+  1627 				; ForToDoCondition
+  1628
+  1629 				; optimize OK (test_3.pas), line = 58
+  1630
+  1631 				;	lda B
+  1632 				;	cmp #0
+  1633 					cpy #0
+  1634 23DA			FORTMP_1273	equ *-1
+  1635 					bcc *+7
+  1636 					beq *+5
+  1637
+  1638 				; ForToDoProlog
+  1639 					jmp l_0534
+  1640
+  1641 				; optimize OK (test_3.pas), line = 59
+  1642
+  1643 				;	ldy B
+  1644 					lda BIT,y
+  1645 					bpl l_0596
+  1646
+  1647 				; optimize OK (test_3.pas), line = 59
+  1648
+  1649 					lda FRA
+  1650 					add hlp
+  1651 					sta FRA
+  1652 					lda FRA+1
+  1653 					adc hlp+1
+  1654 					sta FRA+1
+  1655 					lda FRA+2
+  1656 					adc hlp+2
+  1657 					sta FRA+2
+  1658
+  1659 				; IfThenEpilog
+  1660 23DA			l_0596
+  1661
+  1662 					lsr hlp+2
+  1663 					ror hlp+1
+  1664 					ror hlp
+  1665
+  1666 				; ForToDoEpilog
+  1667 23DA			c_0508
+  1668 				;	inc B						; inc ptr byte [CounterAddress]
+  1669 					iny
+  1670
+  1671 					seq
+  1672
+  1673 				; WhileDoEpilog
+  1674 					jmp l_0508
+  1675 23DA			l_0534
+  1676 23DA			b_0508
+  1677 23DA				:3 mva fra+# fracpart+#
+  1678
+  1679 					mva #6 @float.afterpoint	; wymagana liczba miejsc po przecinku
+  1680 					@float #500000
+  1681
+  1682 					ldx #0
+  1683 23DA			@sp	equ *-1
+  1684
+  1685 					rts
+  1686 				.endp
+  1687
+  1688
+  1689 23DA			.proc	@printREAL
+  1690
+  1691 					stx @sp
+  1692
+  1693 					lda :STACKORIGIN+STACKWIDTH*3,x
+  1694 					spl
+  1695 					jsr @printMINUS
+  1696
+  1697 					jsr mov_CARD_DX
+  1698
+  1699 					mva dx+1 intpart		; intpart := uvalue shr 8
+  1700 					mva dx+2 intpart+1
+  1701 					mva dx+3 intpart+2
+  1702 					mva #$00 intpart+3
+  1703
+  1704 					sta dx+3			; fracpart := uvalue and $FF (dx)
+  1705 					sta dx+2
+  1706 					sta dx+1
+  1707
+  1708 					sta fracpart
+  1709 					sta fracpart+1
+  1710
+  1711 					lda dx
+  1712 					sta fracpart+2
+  1713
+  1714 23DA				:4 mva intpart+# dx+#		; integer part
+  1715
+  1716 					mva #4 @float.afterpoint		; wymagana liczba miejsc po przecinku
+  1717 					@float #5000
+  1718
+  1719 					ldx #0
+  1720 23DA			@sp	equ *-1
+  1721 					rts
+  1722
+  1723 23DA 00 00 00 00		intpart		.dword
+  1724
+  1725 				.endp
+  1726
+  1727
+  1728 23DE			.proc	@float (.long axy) .reg
+  1729
+  1730 					sty cx
+  1731 					stx cx+1
+  1732 					sta cx+2
+  1733
+  1734 					lda @printVALUE.pout		; print integer part
+  1735 					pha
+  1736 					jsr @printVALUE
+  1737 					pla
+  1738 					sta @printVALUE.pout
+  1739
+  1740 					lda #0
+  1741 					sta dx
+  1742 					sta dx+1
+  1743 					sta dx+2
+  1744 					sta dx+3
+  1745
+  1746 23DE			loop	lda fracpart+2
+  1747 					bpl skp
+  1748
+  1749 					clc
+  1750 				;	lda cx
+  1751 				;	spl
+  1752 				;	sec
+  1753
+  1754 					lda dx
+  1755 					adc cx
+  1756 					sta dx
+  1757 					lda dx+1
+  1758 					adc cx+1
+  1759 					sta dx+1
+  1760 					lda dx+2
+  1761 					adc cx+2
+  1762 					sta dx+2
+  1763 				;	lda dx+3
+  1764 				;	adc #0
+  1765 				;	sta dx+3
+  1766
+  1767 23DE			skp	lsr cx+2
+  1768 					ror cx+1
+  1769 					ror cx
+  1770
+  1771 					asl fracpart
+  1772 					rol fracpart+1
+  1773 					rol fracpart+2
+  1774
+  1775 					lda cx
+  1776 					ora cx+1
+  1777 					ora cx+2
+  1778
+  1779 					bne loop
+  1780
+  1781 					ldy #'.'
+  1782 					jsr @printVALUE.pout
+  1783
+  1784 23DE				:4 mva dx+# fracpart+#
+  1785
+  1786 					lda @printVALUE.pout
+  1787 					pha
+  1788
+  1789 					lda #{rts}
+  1790 					sta @printVALUE.pout
+  1791 					jsr @printVALUE			; floating part length
+  1792
+  1793 					sta cnt
+  1794
+  1795 					pla
+  1796 					sta @printVALUE.pout
+  1797
+  1798 23DE			lp	lda #0
+  1799 23DE			cnt	equ *-1
+  1800 					cmp #4				; N miejsc po przecinku
+  1801 23DE			afterpoint equ *-1
+  1802 					bcs ok
+  1803
+  1804 					ldy #'0'
+  1805 					jsr @printVALUE.pout
+  1806
+  1807 					inc cnt
+  1808 					bne lp
+  1809
+  1810 23DE			ok	:4 mva fracpart+# dx+#
+  1811 					jmp @printVALUE			; print floating part
+  1812
+  1813 				.endp
+  1814
+  1815
+  1816 23DE			.proc	@printSHORTINT
+  1817
+  1818 					lda :STACKORIGIN,x
+  1819 					spl
+  1820 					jsr @printMINUS
+  1821
+  1822 					jmp @printBYTE
+  1823 				.endp
+  1824
+  1825
+  1826 23DE			.proc	@printSMALLINT
+  1827
+  1828 					lda :STACKORIGIN+STACKWIDTH,x
+  1829 					spl
+  1830 					jsr @printMINUS
+  1831
+  1832 					jmp @printWORD
+  1833 				.endp
+  1834
+  1835
+  1836 23DE			.proc	@printINT
+  1837
+  1838 					lda :STACKORIGIN+STACKWIDTH*3,x
+  1839 					spl
+  1840 					jsr @printMINUS
+  1841
+  1842 					jmp @printCARD
+  1843 				.endp
+  1844
+  1845
+  1846 23DE			.proc	@printCARD
+  1847 					jsr mov_CARD_DX
+  1848 					jmp @printVALUE
+  1849 				.endp
+  1850
+  1851
+  1852 23DE			.proc	@printWORD
+  1853 					jsr mov_WORD_DX
+  1854 					jmp @printVALUE
+  1855 				.endp
+  1856
+  1857
+  1858 23DE			.proc	@printBYTE
+  1859 					jsr mov_BYTE_DX
+  1860 					jmp @printVALUE
+  1861 				.endp
+  1862
+  1863
+  1864 23DE			.proc	@printVALUE
+  1865
+  1866 					lda dx+3
+  1867 					bne _32bit
+  1868
+  1869 					lda dx+2
+  1870 					bne _24bit
+  1871
+  1872 					lda dx+1
+  1873 					bne _16bit
+  1874
+  1875 23DE			_8bit	lda #3
+  1876 					bne l3
+  1877
+  1878 23DE			_16bit	lda #5
+  1879 					bne l3
+  1880
+  1881 23DE			_24bit	lda #8
+  1882 					bne l3
+  1883
+  1884 					; prints a 32 bit value to the screen (Graham)
+  1885
+  1886 23DE			_32bit	lda #10
+  1887
+  1888 23DE			l3	sta limit
+  1889
+  1890 					stx @sp
+  1891
+  1892 					ldx #0
+  1893 					stx cnt
+  1894
+  1895 23DE			lp	jsr div10
+  1896
+  1897 					sta tmp,x
+  1898 					inx
+  1899 					cpx #10
+  1900 23DE			limit	equ *-1
+  1901 					bne lp
+  1902
+  1903 					;ldx #9
+  1904 					dex
+  1905
+  1906 23DE			l1	lda tmp,x
+  1907 					bne l2
+  1908 					dex		; skip leading zeros
+  1909 					bne l1
+  1910
+  1911 23DE			l2	lda tmp,x
+  1912 					ora #$30
+  1913 					tay
+  1914
+  1915 					jsr pout
+  1916 					inc cnt
+  1917
+  1918 					dex
+  1919 					bpl l2
+  1920
+  1921 					mva #{jmp*} pout
+  1922
+  1923 					lda #0
+  1924 23DE			cnt	equ *-1
+  1925
+  1926 					ldx #0
+  1927 23DE			@sp	equ *-1
+  1928 					rts
+  1929
+  1930 23DE			pout	jmp @print
+  1931
+  1932 					sty @buf+1
+  1933 23DE			pbuf	equ *-2
+  1934 					inc pbuf
+  1935
+  1936 					rts
+  1937
+  1938 23DE			tmp	.byte 0,0,0,0,0,0,0,0,0,0
+  1939
+  1940 				.endp
+  1941
+  1942
+  1943 				; divides a 32 bit value by 10
+  1944 				; remainder is returned in akku
+  1945
+  1946 23DE			.proc	div10
+  1947 				        ldy #32		; 32 bits
+  1948 				        lda #0
+  1949 				        clc
+  1950 23DE			l4      rol @
+  1951 				        cmp #10
+  1952 				        bcc skip
+  1953 				        sbc #10
+  1954 23DE			skip    rol dx
+  1955 				        rol dx+1
+  1956 				        rol dx+2
+  1957 				        rol dx+3
+  1958 				        dey
+  1959 				        bpl l4
+  1960
+  1961 					rts
+  1962 				.endp
+  1963
+  1964
+  1965 23DE			.proc	@hexStr
+  1966
+  1967 = 0086			Value	= edx
+  1968 = 008A			Digits	= ecx
+  1969
+  1970 					ldx Digits
+  1971 					cpx #32
+  1972 					scc
+  1973 					ldx #32
+  1974
+  1975 					stx Digits
+  1976
+  1977 					lda Value
+  1978 					jsr hex
+  1979 					lda Value+1
+  1980 					jsr hex
+  1981 					lda Value+2
+  1982 					jsr hex
+  1983 					lda Value+3
+  1984 					jsr hex
+  1985
+  1986 					lda Digits
+  1987 					sta @buf
+  1988 					rts
+  1989
+  1990 23DE			hex	pha
+  1991 					and #$f
+  1992 					jsr put
+  1993 					pla
+  1994 23DE				:4 lsr @
+  1995 23DE			put	tay
+  1996 					lda thex,y
+  1997 					sta @buf,x
+  1998 					dex
+  1999 					rts
+  2000
+  2001 23DE			thex	dta c'0123456789ABCDEF'
+  2002 				.endp
+  2003
+  2004
+  2005 23DE			.proc	@ValueToStr (.word ya) .reg
+  2006
+  2007 					sta adr
+  2008 					sty adr+1
+  2009
+  2010 					mva #{bit*} @printVALUE.pout
+  2011 					mva <@buf+1 @printVALUE.pbuf
+  2012
+  2013 					jsr $ffff
+  2014 23DE			adr	equ *-2
+  2015
+  2016 					ldy @printVALUE.pbuf
+  2017 					dey
+  2018 					sty @buf
+  2019
+  2020 					rts
+  2021 				.endp
+  2022
+  2023
+  2024 				;	ecx	isSign
+  2025 				;	edx	Result
+  2026
+  2027 23DE			.proc	@StrToInt (.word ya) .reg
+  2028
+  2029 					sta bp2
+  2030 					sty bp2+1
+  2031
+  2032 					ldy #0
+  2033 					sty MAIN.SYSTEM.IOResult
+  2034 					sty edx
+  2035 					sty edx+1
+  2036 					sty edx+2
+  2037 					sty edx+3
+  2038
+  2039 					lda (bp2),y
+  2040 					beq stop
+  2041 					sta len
+  2042
+  2043 					inw bp2
+  2044
+  2045 					lda (bp2),y
+  2046 					cmp #'-'
+  2047 					sne
+  2048 					iny
+  2049
+  2050 					sty ecx
+  2051
+  2052 23DE			l1	lda (bp2),y
+  2053
+  2054 					CLC
+  2055 					ADC #$FF-'9'	; make m = $FF
+  2056 					ADC #'9'-'0'+1	; carry set if in range n to m
+  2057 					bcs ok
+  2058
+  2059 					lda #106	; Invalid numeric format
+  2060 					sta MAIN.SYSTEM.IOResult
+  2061
+  2062 					rts		; reg Y contains the index of the character in S which prevented the conversion
+  2063
+  2064 23DE			ok	jsr fmul10
+  2065
+  2066 					lda (bp2),y
+  2067 					sub #$30
+  2068 					sta ztmp
+  2069
+  2070 					lda #$00
+  2071 					sta ztmp+1
+  2072 					sta ztmp+2
+  2073 					sta ztmp+3
+  2074
+  2075 					jsr fmul10.add32bit
+  2076
+  2077 					iny
+  2078 					cpy #0
+  2079 23DE			len	equ *-1
+  2080 					bne l1
+  2081
+  2082 					lda ecx
+  2083 					beq stop
+  2084
+  2085 					jsr negEDX
+  2086
+  2087 23DE			stop	ldy #0		; reg Y = 0 conversion successful
+  2088 					rts
+  2089 				.endp
+  2090
+  2091
+  2092 23DE			.proc	negEDX
+  2093 					lda #$00	; minus
+  2094 					sub edx
+  2095 					sta edx
+  2096
+  2097 					lda #$00
+  2098 					sbc edx+1
+  2099 					sta edx+1
+  2100
+  2101 					lda #$00
+  2102 					sbc edx+2
+  2103 					sta edx+2
+  2104
+  2105 					lda #$00
+  2106 					sbc edx+3
+  2107 					sta edx+3
+  2108
+  2109 					rts
+  2110 				.endp
+  2111
+  2112
+  2113 23DE			.proc	fmul10
+  2114 					asl edx		;multiply by 2
+  2115 					rol edx+1	;temp store in ZTMP
+  2116 					rol edx+2
+  2117 					rol edx+3
+  2118
+  2119 					lda edx
+  2120 					sta ztmp
+  2121 					lda edx+1
+  2122 					sta ztmp+1
+  2123 					lda edx+2
+  2124 					sta ztmp+2
+  2125 					lda edx+3
+  2126 					sta ztmp+3
+  2127
+  2128 					asl edx
+  2129 					rol edx+1
+  2130 					rol edx+2
+  2131 					rol edx+3
+  2132
+  2133 					asl edx
+  2134 					rol edx+1
+  2135 					rol edx+2
+  2136 					rol edx+3
+  2137
+  2138 23DE			add32bit
+  2139 					lda edx
+  2140 					add ztmp
+  2141 					sta edx
+  2142 					lda edx+1
+  2143 					adc ztmp+1
+  2144 					sta edx+1
+  2145 					lda edx+2
+  2146 					adc ztmp+2
+  2147 					sta edx+2
+  2148 					lda edx+3
+  2149 					adc ztmp+3
+  2150 					sta edx+3
+  2151
+  2152 					rts
+  2153 				.endp
+  2154
+  2155
+  2156 23DE			.proc	@trunc
+  2157
+  2158 					ldy :STACKORIGIN+STACKWIDTH*3,x
+  2159 					spl
+  2160 					jsr negCARD
+  2161
+  2162 					mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x
+  2163 					mva :STACKORIGIN+STACKWIDTH*2,x :STACKORIGIN+STACKWIDTH,x
+  2164 					mva :STACKORIGIN+STACKWIDTH*3,x :STACKORIGIN+STACKWIDTH*2,x
+  2165 					mva #$00 :STACKORIGIN+STACKWIDTH*3,x
+  2166
+  2167 					tya
+  2168 					spl
+  2169 					jsr negCARD
+  2170
+  2171 					rts
+  2172 				.endp
+  2173
+  2174
+  2175 23DE			.proc	@round
+  2176
+  2177 					ldy :STACKORIGIN+STACKWIDTH*3,x
+  2178 					spl
+  2179 					jsr negCARD
+  2180
+  2181 					lda :STACKORIGIN,x
+  2182 				//	add #$80
+  2183 					cmp #$80
+  2184 					lda :STACKORIGIN+STACKWIDTH,x
+  2185 					adc #0
+  2186 					sta :STACKORIGIN,x
+  2187 					lda :STACKORIGIN+STACKWIDTH*2,x
+  2188 					adc #0
+  2189 					sta :STACKORIGIN+STACKWIDTH,x
+  2190 					lda :STACKORIGIN+STACKWIDTH*3,x
+  2191 					adc #0
+  2192 					sta :STACKORIGIN+STACKWIDTH*2,x
+  2193
+  2194 					mva #$00 :STACKORIGIN+STACKWIDTH*3,x
+  2195
+  2196 					tya
+  2197 					spl
+  2198 					jsr negCARD
+  2199
+  2200 					rts
+  2201 				.endp
+  2202
+  2203
+  2204 23DE			.proc	@frac
+  2205
+  2206 					ldy :STACKORIGIN+STACKWIDTH*3,x
+  2207 					spl
+  2208 					jsr negCARD
+  2209
+  2210 					lda #$00
+  2211 					sta :STACKORIGIN+STACKWIDTH,x
+  2212 					sta :STACKORIGIN+STACKWIDTH*2,x
+  2213 					sta :STACKORIGIN+STACKWIDTH*3,x
+  2214
+  2215 					tya
+  2216 					spl
+  2217 					jsr negCARD
+  2218
+  2219 					rts
+  2220 				.endp
+  2221
+  2222
+  2223 23DE			.proc	@int
+  2224
+  2225 					ldy :STACKORIGIN+STACKWIDTH*3,x
+  2226 					spl
+  2227 					jsr negCARD
+  2228
+  2229 					lda #$00
+  2230 					sta :STACKORIGIN,x
+  2231
+  2232 					tya
+  2233 					spl
+  2234 					jsr negCARD
+  2235
+  2236 					rts
+  2237 				.endp
+  2238
+  2239
+  2240 				;----------------------------;
+  2241 				; Biblioteka procedur        ;
+  2242 				; graficznych                ;
+  2243 				;----------------------------;
+  2244 				; Autorzy:                   ;
+  2245 				;  Slawomir 'SERO' Ritter,   ;
+  2246 				;  Jakub Cebula,             ;
+  2247 				;  Winfried Hofacker         ;
+  2248 				;----------------------------;
+  2249 				; Wersja:1.1 DATA:09.01.2008 ;
+  2250 				;----------------------------;
+  2251
+  2252 = 0003			@open	= $03		; Otworz kanal
+  2253 = 000C			@close	= $0c		; Zamknij kanal
+  2254
+  2255 = 0007			@IDget	= $07		; Narysuj punkt
+  2256 = 0009			@IDput	= $09		; Narysuj punkt
+  2257 = 0011			@IDdraw	= $11		; Narysuj linie
+  2258 = 0012			@IDfill	= $12		; Wypelnij obszar
+  2259
+  2260
+  2261 				;------------------------;
+  2262 				;Wy:.Y-numer bledu (1-OK);
+  2263 				;   f(N)=1-wystapil blad ;
+  2264 				;------------------------;
+  2265 23DE			.proc	@COMMAND
+  2266
+  2267 					ldx	#$00
+  2268 23DE			scrchn	equ *-1
+  2269
+  2270 					sta	iocom,x
+  2271
+  2272 					lda	#$00
+  2273 23DE			colscr	equ *-1
+  2274 					sta	atachr
+  2275
+  2276 					jmp	ciov
+  2277 				.endp
+  2278
+  2279 				;------------------------;
+  2280 				; Ustaw tryb ekranu      ;
+  2281 				;------------------------;
+  2282 				;We:.X-numer kanalu      ;
+  2283 				;      (normalnie 0)     ;
+  2284 				;   .Y-numer trybu (O.S.);
+  2285 				;   .A-Ustawiony bit nr :;
+  2286 				;     5-Nie kasowanie    ;
+  2287 				;       pamieci ekranu   ;
+  2288 				;     4-Obecnosc okna    ;
+  2289 				;       tekstowego       ;
+  2290 				;     2-Odczyt z ekranu  ;
+  2291 				;------------------------;
+  2292 				;Wy:SCRCHN-numer kanalu  ;
+  2293 				;  .Y-numer bledu (1-OK) ;
+  2294 				;   f(N)=1 wystapil blad ;
+  2295 				;------------------------;
+  2296 23DE			@GRAPHICS .proc (.byte x,y,a) .reg
+  2297
+  2298 					sta	byte1
+  2299 					sty	byte2
+  2300
+  2301 					stx	@COMMAND.scrchn
+  2302
+  2303 					lda	#@close
+  2304 					jsr	xcio
+  2305
+  2306 					lda	#0		; =opcje
+  2307 23DE			byte1	equ	*-1
+  2308 					ora	#8		; +zapis na ekranie
+  2309 					sta	ioaux1,x
+  2310
+  2311 					lda	#0
+  2312 23DE			byte2	equ	*-1
+  2313 					sta	ioaux2,x	;=nr.trybu
+  2314
+  2315 					mwa	#sname	ioadr,x
+  2316
+  2317 					lda	#@open
+  2318
+  2319 23DE			xcio	sta iocom,x
+  2320 					jmp ciov
+  2321
+  2322 23DE			sname	dta c'S:',$9b
+  2323
+  2324 					.endp
+  2325
+  2326
+  2327 23DE			.proc	@ata2int
+  2328 				        asl
+  2329 				        php
+  2330 				        cmp #2*$60
+  2331 				        bcs @+
+  2332 				        sbc #2*$20-1
+  2333 				        bcs @+
+  2334 				        adc #2*$60
+  2335 23DE			@       plp
+  2336 				        ror
+  2337 					rts
+  2338 				.endp
+  2339
+  2340
+  2341 				/*
+  2342 				  PUT CHAR
+  2343
+  2344 				  Procedura wyprowadza znak na ekran na pozycji X/Y kursora okreslonej przez zmienne odpowiednio
+  2345 				  COLCRS ($55-$56) i ROWCRS ($54). Zaklada sie, ze obowiazuja przy tym domyslne ustawienia OS-u,
+  2346 				  to jest ekran jest w trybie Graphics 0, a kanal IOCB 0 jest otwarty dla edytora ekranowego.
+  2347
+  2348 				  Wyprowadzenie znaku polega na zaladowaniu jego kodu ATASCII do akumulatora i wykonaniu rozkazu
+  2349 				  JSR PUTCHR.
+  2350 				*/
+  2350
+  2351
+  2352 23DE			.proc	@putchar (.byte a) .reg
+  2353
+  2354 23DE			vbxe	bit *
+  2355
+  2356 					ldx #$00
+  2357 					.ifdef MAIN.CRT.TextAttr
+  2358 					ora MAIN.CRT.TextAttr
+  2359 					.endif
+  2360 					tay
+  2361 					lda icputb+1,x
+  2362 					pha
+  2363 					lda icputb,x
+  2364 					pha
+  2365 					tya
+  2366
+  2367 					rts
+  2368
+  2369 				.endp
+  2370
+  2371
+  2372 				/*
+  2373 				  GETLINE
+  2374
+  2375 				  Program czeka, az uzytkownik wpisze ciag znak�w z klawiatury i nacisnie klawisz RETURN.
+  2376 				  Znaki podczas wpisywania sa wyswietlane na ekranie, dzialaja tez normalne znaki kontrolne
+  2377 				  (odczyt jest robiony z edytora ekranowego).
+  2378
+  2379 				  Wywolanie funkcji polega na zaladowaniu adresu, pod jaki maja byc wpisane znaki,
+  2380 				  do rejestr�w A/Y (mlodszy/starszy) i wykonaniu rozkazu JSR GETLINE.
+  2381
+  2382 				*/
+  2382
+  2383
+  2384 23DE			.proc	@GetLine
+  2385
+  2386 					stx @sp
+  2387
+  2388 					ldx #0
+  2389
+  2390 					stx MAIN.SYSTEM.EoLn
+  2391
+  2392 					mwa	#@buf+1	icbufa,x
+  2393
+  2394 					mwa	#$ff	icbufl,x	; maks. wielkosc tekstu
+  2395
+  2396 					mva	#$05	iccmd,x
+  2397
+  2398 					jsr	ciov
+  2399
+  2400 					dew icbufl
+  2401 					mva icbufl @buf			; length
+  2402
+  2403 					ldx @buf+1
+  2404 					cpx #EOL
+  2405 					bne skp
+  2406
+  2407 					ldx #TRUE
+  2408 					stx MAIN.SYSTEM.EoLn
+  2409 23DE			skp
+  2410 					ldx #0
+  2411 23DE			@sp	equ *-1
+  2412
+  2413 					rts
+  2414 				.endp
+  2415
+  2416
+  2417 23DE			.proc	@GetKey
+  2418
+  2419 23DE			getk	lda kbcodes	; odczytaj kbcodes
+  2420 					cmp #255		; czy jest znak?
+  2421 					beq getk	; nie: czekaj
+  2422 					ldy #255		; daj zna�, �e klawisz
+  2423 					sty kbcodes	; zosta� odebrany
+  2424 					tay		; kod klawisza jako indeks
+  2425 					lda (keydef),y	; do tablicy w ROM-ie
+  2426
+  2427 					rts
+  2428 				.endp
+  2429
+  2430
+  2431 23DE			.proc	@moveSTRING (.word ya) .reg
+  2432
+  2433 					sta @move.dst
+  2434 					sty @move.dst+1
+  2435
+  2436 					mva :STACKORIGIN,x @move.src
+  2437 					mva :STACKORIGIN+STACKWIDTH,x @move.src+1
+  2438
+  2439 					ldy #$00
+  2440 					lda (@move.src),y
+  2441 					add #1
+  2442 					sta @move.cnt
+  2443 					scc
+  2444 					iny
+  2445 					sty @move.cnt+1
+  2446
+  2447 					jmp @move
+  2448 				.endp
+  2449
+  2450
+  2451 23DE			.proc	@moveSTRING_1 (.word ya) .reg
+  2452
+  2453 					sta @move.dst
+  2454 					sty @move.dst+1
+  2455
+  2456 					mva :STACKORIGIN,x @move.src
+  2457 					mva :STACKORIGIN+STACKWIDTH,x @move.src+1
+  2458
+  2459 					ldy #$00
+  2460 					lda (@move.src),y
+  2461 				;	add #1
+  2462 					sta @move.cnt
+  2463 					sty @move.cnt+1
+  2464
+  2465 					inw @move.src
+  2466
+  2467 					jmp @move
+  2468 				.endp
+  2469
+  2470
+  2471 				; Ullrich von Bassewitz, 2003-08-20
+  2472 				; Performance increase (about 20%) by
+  2473 				; Christian Krueger, 2009-09-13
+  2474
+  2475 23DE			.proc	@moveu		; assert Y = 0
+  2476
+  2477 = 0086			ptr1	= edx
+  2478 = 008A			ptr2	= ecx
+  2479 = 0082			ptr3	= eax
+  2480
+  2481 23DE 8E 07 24			stx @sp
+  2482
+  2483 23E1 A0 00			ldy	#0
+  2484
+  2485 23E3 A6 83			ldx     ptr3+1		; Get high byte of n
+  2486 23E5 F0 13			beq     L2		; Jump if zero
+  2487
+  2488 				L1:     .rept 2		; Unroll this a bit to make it faster...
+  2489 					LDA     (PTR1),Y	
+  2490 					STA     (PTR2),Y
+  2491 					INY
+  2492 					.ENDR
+  2492 					.endr
+Source: REPT
+  2489 23E7 B1 86			LDA     (PTR1),Y	
+  2489 23E9 91 8A			STA     (PTR2),Y
+  2489 23EB C8				INY
+  2489 23EC B1 86			LDA     (PTR1),Y	
+  2489 23EE 91 8A			STA     (PTR2),Y
+  2489 23F0 C8				INY
+Source: cpu6502.asm
+  2493
+  2494 23F1 D0 F4			bne     L1
+  2495 23F3 E6 87			inc     ptr1+1
+  2496 23F5 E6 8B			inc     ptr2+1
+  2497 23F7 CA				dex			; Next 256 byte block
+  2498 23F8 D0 ED			bne	L1		; Repeat if any
+  2499
+  2500 					; the following section could be 10% faster if we were able to copy
+  2501 					; back to front - unfortunately we are forced to copy strict from
+  2502 					; low to high since this function is also used for
+  2503 					; memmove and blocks could be overlapping!
+  2504 					; {
+  2505 23FA			L2:				; assert Y = 0
+  2506 23FA A6 82			ldx     ptr3		; Get the low byte of n
+  2507 23FC F0 08			beq     done		; something to copy
+  2508
+  2509 23FE B1 86		L3:     lda     (ptr1),Y	; copy a byte
+  2510 2400 91 8A			sta     (ptr2),Y
+  2511 2402 C8				iny
+  2512 2403 CA				dex
+  2513 2404 D0 F8			bne     L3
+  2514
+  2515 					; }
+  2516
+  2517 2406 A2 00		done	ldx #0
+  2518 = 2407			@sp	equ *-1
+  2519 2408 60				rts
+  2520 				.endp
+  2521
+  2522
+  2523 2409			@move	.proc (.word ptr1, ptr2, ptr3) .var
+  2524
+  2525 = 0086			ptr1	= edx
+  2526 = 008A			ptr2	= ecx
+  2527 = 0082			ptr3	= eax
+  2528
+  2529 = 0086			src	= ptr1
+  2530 = 008A			dst	= ptr2
+  2531 = 0082			cnt	= ptr3
+  2532
+  2533 2409 A5 8B C5 87 D0 04 + 	cpw ptr2 ptr1
+  2534 2413 B0 03			scs
+  2535 2415 4C DE 23			jmp @moveu
+  2536
+  2537 2418 8E 5C 24			stx @sp
+  2538
+  2539 				; Copy downwards. Adjust the pointers to the end of the memory regions.
+  2540
+  2541 241B A5 87			lda     ptr1+1
+  2542 241D 18 65 83			add     ptr3+1
+  2543 2420 85 87			sta     ptr1+1
+  2544
+  2545 2422 A5 8B			lda     ptr2+1
+  2546 2424 18 65 83			add     ptr3+1
+  2547 2427 85 8B			sta     ptr2+1
+  2548
+  2549 				; handle fractions of a page size first
+  2550
+  2551 2429 A4 82			ldy     ptr3		; count, low byte
+  2552 242B D0 06			bne     @entry		; something to copy?
+  2553 242D F0 0B			beq     PageSizeCopy	; here like bra...
+  2554
+  2555 242F			@copyByte:
+  2556 242F B1 86			lda     (ptr1),y
+  2557 2431 91 8A			sta     (ptr2),y
+  2558 2433			@entry:
+  2559 2433 88				dey
+  2560 2434 D0 F9			bne     @copyByte
+  2561 2436 B1 86			lda     (ptr1),y	; copy remaining byte
+  2562 2438 91 8A			sta     (ptr2),y
+  2563
+  2564 243A			PageSizeCopy:			; assert Y = 0
+  2565 243A A6 83			ldx     ptr3+1		; number of pages
+  2566 243C F0 1D			beq     done		; none? -> done
+  2567
+  2568 243E			@initBase:
+  2569 243E C6 87			dec     ptr1+1		; adjust base...
+  2570 2440 C6 8B			dec     ptr2+1
+  2571 2442 88				dey			; in entry case: 0 -> FF
+  2572 2443 B1 86			lda     (ptr1),y	; need to copy this 'intro byte'
+  2573 2445 91 8A			sta     (ptr2),y	; to 'land' later on Y=0! (as a result of the '.repeat'-block!)
+  2574 2447 88				dey			; FF ->FE
+  2575 2448			@copyBytes:
+  2576 					.rept 2		; Unroll this a bit to make it faster...
+  2577 					LDA     (PTR1),Y
+  2578 					STA     (PTR2),Y
+  2579 					DEY
+  2580 					.ENDR
+  2580 					.endr
+Source: REPT
+  2577 2448 B1 86			LDA     (PTR1),Y
+  2577 244A 91 8A			STA     (PTR2),Y
+  2577 244C 88				DEY
+  2577 244D B1 86			LDA     (PTR1),Y
+  2577 244F 91 8A			STA     (PTR2),Y
+  2577 2451 88				DEY
+Source: cpu6502.asm
+  2581 2452			@copyEntry:			; in entry case: 0 -> FF
+  2582 2452 D0 F4			bne     @copyBytes
+  2583 2454 B1 86			lda     (ptr1),y	; Y = 0, copy last byte
+  2584 2456 91 8A			sta     (ptr2),y
+  2585 2458 CA				dex			; one page to copy less
+  2586 2459 D0 E3			bne     @initBase	; still a page to copy?
+  2587
+  2588 245B A2 00		done	ldx #0
+  2589 = 245C			@sp	equ *-1
+  2590 245D 60				rts
+  2591 				.endp
+  2592
+  2593
+  2594 				; Ullrich von Bassewitz, 29.05.1998
+  2595 				; Performance increase (about 20%) by
+  2596 				; Christian Krueger, 12.09.2009, slightly improved 12.01.2011
+  2597
+  2598 245E			.proc	@fill (.word ptr1, ptr3 .byte ptr2) .var
+  2599
+  2600 = 0086			ptr1 = edx
+  2601 = 008A			ptr3 = ecx
+  2602 = 0082			ptr2 = eax
+  2603
+  2604 245E 8E A5 24			stx @sp
+  2605
+  2606 2461 A6 82			ldx ptr2
+  2607
+  2608 2463 A0 00			ldy #0
+  2609
+  2610 2465 46 8B		        lsr	ptr3+1          ; divide number of
+  2611 2467 66 8A		        ror	ptr3            ; bytes by two to increase
+  2612 2469 90 09		        bcc	evenCount       ; speed (ptr3 = ptr3/2)
+  2613 246B			oddCount:
+  2614 								; y is still 0 here
+  2615 246B 8A			        txa			; restore fill value
+  2616 246C 91 86		        sta	(ptr1),y	; save value and increase
+  2617 246E E6 86		        inc	ptr1		; dest. pointer
+  2618 2470 D0 02		        bne	evenCount
+  2619 2472 E6 87		        inc	ptr1+1
+  2620 2474			evenCount:
+  2621 2474 A5 86			lda	ptr1		; build second pointer section
+  2622 2476 18				clc
+  2623 2477 65 8A			adc	ptr3		; ptr2 = ptr1 + (length/2) <- ptr3
+  2624 2479 85 82			sta     ptr2
+  2625 247B A5 87			lda     ptr1+1
+  2626 247D 65 8B			adc     ptr3+1
+  2627 247F 85 83			sta     ptr2+1
+  2628
+  2629 2481 8A			        txa			; restore fill value
+  2630 2482 A6 8B		        ldx	ptr3+1		; Get high byte of n
+  2631 2484 F0 13		        beq	L2		; Jump if zero
+  2632
+  2633 				; Set 256/512 byte blocks
+  2634 								; y is still 0 here
+  2635 				L1:	.rept 2		; Unroll this a bit to make it faster
+  2636 					STA	(PTR1),Y	
+  2637 					STA	(PTR2),Y	
+  2638 					INY
+  2639 					.ENDR
+  2639 					.endr
+Source: REPT
+  2636 2486 91 86			STA	(PTR1),Y	
+  2636 2488 91 82			STA	(PTR2),Y	
+  2636 248A C8				INY
+  2636 248B 91 86			STA	(PTR1),Y	
+  2636 248D 91 82			STA	(PTR2),Y	
+  2636 248F C8				INY
+Source: cpu6502.asm
+  2640 2490 D0 F4		        bne	L1
+  2641 2492 E6 87		        inc	ptr1+1
+  2642 2494 E6 83		        inc	ptr2+1
+  2643 2496 CA			        dex                     ; Next 256 byte block
+  2644 2497 D0 ED		        bne	L1              ; Repeat if any
+  2645
+  2646 				; Set the remaining bytes if any
+  2647
+  2648 2499 A4 8A		L2:	ldy	ptr3            ; Get the low byte of n
+  2649 249B F0 07			beq	leave           ; something to set? No -> leave
+  2650
+  2651 249D 88			L3:	dey
+  2652 249E 91 86			sta	(ptr1),y	; set bytes in low
+  2653 24A0 91 82			sta	(ptr2),y	; and high section
+  2654 24A2 D0 F9			bne     L3		; flags still up to date from dey!
+  2655
+  2656 24A4 A2 00		leave	ldx #0
+  2657 = 24A5			@sp	equ *-1
+  2658 24A6 60				rts			; return
+  2659 				.endp
+  2660
+  2661
+  2662 				/*
+  2663 				 add strings
+  2664 				 result -> @buf
+  2665 				*/
+  2665
+  2666 24A7			.proc	@addString(.word ya) .reg
+  2667
+  2668 					sta ztmp
+  2669 					sty ztmp+1
+  2670
+  2671 					stx @sp
+  2672
+  2673 					ldx @buf
+  2674 					inx
+  2675 					beq stop
+  2676
+  2677 					ldy #0
+  2678 					lda (ztmp),y
+  2679 					sta ile
+  2680 					beq stop
+  2681
+  2682 					iny
+  2683
+  2684 24A7			load	lda (ztmp),y
+  2685 					sta @buf,x
+  2686
+  2687 					iny
+  2688 					inx
+  2689 					beq stop
+  2690 					dec ile
+  2691 					bne load
+  2692
+  2693 24A7			stop	dex
+  2694 					stx @buf
+  2695
+  2696 					ldx #0
+  2697 24A7			@sp	equ *-1
+  2698 					rts
+  2699
+  2700 24A7			ile	brk
+  2701 				.endp
+  2702
+  2703
+  2704 				/* ----------------------------------------------------------------------- */
+  2705
+  2706
+  2707 24A7			.proc	@AllocMem(.word ztmp .word ztmp+2) .var
+  2708
+  2709 					jsr swap
+  2710
+  2711 					adw spoint ztmp+2
+  2712
+  2713 					rts
+  2714
+  2715 24A7			swap	txa:pha
+  2716
+  2717 					mwa spoint bp2
+  2718
+  2719 					ldx #0
+  2720 					ldy #0
+  2721
+  2722 24A7			loop	cpy ztmp+2
+  2723 					bne @+
+  2724 					cpx ztmp+3
+  2725 					beq stop
+  2726
+  2727 24A7			@	lda (bp2),y
+  2728 					pha
+  2729
+  2730 					lda (ztmp),y
+  2731 					sta (bp2),y
+  2732
+  2733 					pla
+  2734 					sta (ztmp),y
+  2735
+  2736 					iny
+  2737 					bne loop
+  2738
+  2739 					inc ztmp+1
+  2740 					inc bp2+1
+  2741 					inx
+  2742
+  2743 					jmp loop
+  2744
+  2745 24A7			stop	pla:tax
+  2746
+  2747 					rts
+  2748
+  2749 24A7			spoint	dta a(PROGRAMSTACK)
+  2750 				.endp
+  2751
+  2752
+  2753 24A7			.proc	@FreeMem(.word ztmp .word ztmp+2) .var
+  2754
+  2755 					sbw @AllocMem.spoint ztmp+2
+  2756
+  2757 					jmp @AllocMem.swap
+  2758 				.endp
+  2759
+  2760
+  2761 				/* ----------------------------------------------------------------------- */
+  2762
+  2763
+  2764 24A7			.proc	@vbxe_detect
+  2765
+  2766 					ldy #.sizeof(detect)-1
+  2767 					mva:rpl copy,y detect,y-
+  2768
+  2769 					jmp detect
+  2770
+  2771 24A7			copy
+  2772 0400				.local	detect,@buf
+  2773 				;
+  2774 				; 2009 by KMK/DLT
+  2775 				;
+  2776 					lda #0
+  2777 					sta fxptr
+  2778
+  2779 				        lda #$d6
+  2780 				        sta fxptr+1
+  2781 				        ldy #FX_MEMB
+  2782 				        jsr ?clr
+  2783
+  2784 				        jsr ?try
+  2785 				        bcc ok
+  2786
+  2787 				        inc fxptr+1
+  2788
+  2789 					jsr ?try
+  2790 					bcc ok
+  2791
+  2792 					lda #0
+  2793 					sta fxptr+1
+  2794 					rts
+  2795
+  2796 0400			?try    ldx $4000
+  2797 				        jsr ?chk
+  2798 				        bcc ?ret
+  2799 				        inx
+  2800 				        stx $4000
+  2801 				        jsr ?chk
+  2802 				        dec $4000
+  2803 0400			?ret    rts
+  2804
+  2805 0400			ok	ldy	#VBXE_MINOR		; get core minor version
+  2806 					lda	(fxptr),y
+  2807 					rts
+  2808
+  2809 0400			?chk    lda #$80
+  2810 				        jsr _vbxe_write
+  2811 				        cpx $4000
+  2812 				        bne ?fnd
+  2813 				        sec
+  2814 0400			        .byte $24
+  2815 0400			?fnd    clc
+  2816 0400			?clr    lda #$00
+  2817 0400			_vbxe_write
+  2818 				        sta (fxptr),y
+  2819 				        rts
+  2820
+  2821 				/*
+  2822 					lda	#0
+  2823 					ldx	#0xd6
+  2824 					sta	0xd640			; make sure it isn't coincidence
+  2825 					lda	0xd640
+  2826 					cmp	#0x10			; do we have major version here?
+  2827 					beq	VBXE_Detected		; if so, then VBXE is detected
+  2828 					lda	#0
+  2829 					inx
+  2830 					sta	0xd740			; no such luck, try other location
+  2831 					lda	0xd740
+  2832 					cmp	#0x10
+  2833 					beq	VBXE_Detected
+  2834 					ldx 	#0  			; not here, so not present or FX core version too low
+  2835 					stx	fxptr+1
+  2836 					stx	fxptr
+  2837
+  2838 					sec
+  2839 					rts
+  2840
+  2841 				VBXE_Detected
+  2842 					stx	fxptr+1
+  2843 					lda	#0
+  2844 					sta	fxptr
+  2845
+  2846 					ldy	#VBXE_MINOR		; get core minor version
+  2847 					lda	(fxptr),y
+  2848
+  2849 					clc
+  2850 					rts	 			; x - page of vbxe
+  2851 				*/
+  2851
+  2852
+  2853 					.endl
+  2854
+  2855 				.endp
+  2856
+  2857
+  2858 24A7			.proc	@setxdl(.byte a) .reg
+  2859
+  2860 					asl @
+  2861 					sta idx
+  2862
+  2863 					fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+  2864
+  2865 					ldy #0
+  2866 24A7			idx	equ *-1
+  2867
+  2868 					lda MAIN.SYSTEM.VBXE_WINDOW+s@xdl.xdlc
+  2869 					and msk,y
+  2870 					ora val,y
+  2871 					sta MAIN.SYSTEM.VBXE_WINDOW+s@xdl.xdlc
+  2872
+  2873 					lda MAIN.SYSTEM.VBXE_WINDOW+s@xdl.xdlc+1
+  2874 					and msk+1,y
+  2875 					ora val+1,y
+  2876 					sta MAIN.SYSTEM.VBXE_WINDOW+s@xdl.xdlc+1
+  2877
+  2878 					fxs FX_MEMS #0
+  2879 					rts
+  2880
+  2881 24A7			msk	.array [6] .word
+  2882 					[e@xdl.mapon]  = [XDLC_MAPON|XDLC_MAPOFF]^$FFFF
+  2883 					[e@xdl.mapoff] = [XDLC_MAPON|XDLC_MAPOFF]^$FFFF
+  2884 					[e@xdl.ovron]  = [XDLC_GMON|XDLC_OVOFF|XDLC_LR|XDLC_HR]^$FFFF
+  2885 					[e@xdl.ovroff] = [XDLC_GMON|XDLC_OVOFF|XDLC_LR|XDLC_HR]^$FFFF
+  2886 					[e@xdl.hr]     = [XDLC_GMON|XDLC_OVOFF|XDLC_LR|XDLC_HR]^$FFFF
+  2887 					[e@xdl.lr]     = [XDLC_GMON|XDLC_OVOFF|XDLC_LR|XDLC_HR]^$FFFF
+  2888 					.enda
+  2889
+  2890 24A7			val	.array [6] .word
+  2891 					[e@xdl.mapon]  = XDLC_MAPON
+  2892 					[e@xdl.mapoff] = XDLC_MAPOFF
+  2893 					[e@xdl.ovron]  = XDLC_GMON
+  2894 					[e@xdl.ovroff] = XDLC_OVOFF
+  2895 					[e@xdl.hr]     = XDLC_GMON|XDLC_HR
+  2896 					[e@xdl.lr]     = XDLC_GMON|XDLC_LR
+  2897 					.enda
+  2898
+  2899 				.endp
+  2900
+  2901
+  2902 24A7			.proc	@vbxe_init
+  2903
+  2904 					fxs FX_MEMC #%1000+>MAIN.SYSTEM.VBXE_WINDOW	; $b000..$bfff (4K window), cpu on, antic off
+  2905 					fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000	; enable VBXE BANK #0
+  2906
+  2907 					ldx #.sizeof(s@xdl)-1
+  2908 					mva:rpl xdlist,x MAIN.SYSTEM.VBXE_XDLADR+MAIN.SYSTEM.VBXE_WINDOW,x-
+  2909
+  2910 					jsr cmapini		; init color map
+  2911
+  2912 					fxsa FX_P1		; A = 0
+  2913 					fxsa FX_P2
+  2914 					fxsa FX_P3
+  2915
+  2916 					fxsa FX_IRQ_CONTROL
+  2917 					fxsa FX_BLITTER_START
+  2918
+  2919 					fxsa FX_XDL_ADR0	; XDLIST PROGRAM ADDRES (VBXE_XDLADR = $0000) = bank #0
+  2920 					fxsa FX_XDL_ADR1
+  2921 					fxsa FX_XDL_ADR2
+  2922
+  2923 					sta colpf0s
+  2924
+  2925 					fxs FX_P0 #$ff
+  2926
+  2927 					mwa #@vbxe_cmap @putchar.vbxe+1
+  2928 					mva #{jsr*} @putchar.vbxe
+  2929
+  2930 					fxs FX_VIDEO_CONTROL #VC_XDL_ENABLED|VC_XCOLOR	;|VC_NO_TRANS
+  2931
+  2932 					rts
+  2933
+  2934 24A7			cmapini	lda colpf1s
+  2935 					and #$0f
+  2936 					sta colpf1s
+  2937
+  2938 					lda #$80+MAIN.SYSTEM.VBXE_MAPADR/$1000
+  2939 					sta ztmp
+  2940
+  2941 					mva #4 ztmp+1
+  2942
+  2943 24A7			loop	fxs FX_MEMS ztmp
+  2944
+  2945 					lda >MAIN.SYSTEM.VBXE_WINDOW
+  2946 					sta bp+1
+  2947
+  2948 					ldx #16
+  2949 					ldy #0
+  2950
+  2951 24A7			lop	mva #$00	(bp),y+
+  2952 					mva colpf1s	(bp),y+
+  2953 					mva colpf2s	(bp),y+
+  2954 					mva #%00010000	(bp),y+		; overlay palette #1
+  2955 					bne lop
+  2956
+  2957 					inc bp+1
+  2958 					dex
+  2959 					bne lop
+  2960
+  2961 					inc ztmp
+  2962
+  2963 					dec ztmp+1
+  2964 					bne loop
+  2965
+  2966 					fxs FX_MEMS #$00		; disable VBXE BANK
+  2967 					rts
+  2968
+  2969 				xdlist	dta s@xdl [0] (XDLC_RPTL, 24-1,\
+  2970 					XDLC_END|XDLC_RPTL|XDLC_MAPON|XDLC_MAPADR|XDLC_OVADR|XDLC_MAPPAR|XDLC_OVATT,\	;|XDLC_GMON,\
+  2971 					192-1, MAIN.SYSTEM.VBXE_OVRADR, 320,\
+  2972 					MAIN.SYSTEM.VBXE_MAPADR, $100,\
+  2973 					0, 0, 7, 7, %00010001, $ff)
+  2973 24A7			XDLIST	DTA S@XDL [0] (XDLC_RPTL, 24-1,	XDLC_END|XDLC_RPTL|XDLC_MAPON|XDLC_MAPADR|XDLC_OVADR|XDLC_MAPPAR|XDLC_OVATT,	192-1, MAIN.SYSTEM.VBXE_OVRADR, 320,	MAIN.SYSTEM.VBXE_MAPADR, $100,	0, 0, 7, 7, %00010001, $ff)
+  2974 				.endp
+  2975
+  2976
+  2977 24A7			.proc	@vbxe_cmap
+  2978
+  2979 					pha
+  2980
+  2981 					cmp #eol
+  2982 					beq stop
+  2983
+  2984 					cmp #$7d		; clrscr
+  2985 					bne skp
+  2986
+  2987 					jsr @vbxe_init.cmapini
+  2988 					jmp stop
+  2989
+  2990 24A7			skp	lda rowcrs
+  2991 					pha
+  2992 24A7				:4 lsr @
+  2993 					add #$80+MAIN.SYSTEM.VBXE_MAPADR/$1000
+  2994 					fxsa FX_MEMS
+  2995
+  2996 					pla
+  2997 					and #$0f
+  2998 					add >MAIN.SYSTEM.VBXE_WINDOW
+  2999 					sta bp+1
+  3000
+  3001 					lda colcrs
+  3002 					asl @
+  3003 					asl @
+  3004 					tay
+  3005 					mva colpf0s (bp),y
+  3006 					iny
+  3007 					mva colpf1s (bp),y
+  3008 					iny
+  3009 					mva colpf2s (bp),y
+  3010
+  3011 					fxs FX_MEMS #$00
+  3012
+  3013 24A7			stop	pla
+  3014
+  3015 					rts
+  3016 				.endp
+  3017
+  3018
+  3019 				/* ----------------------------------------------------------------------- */
+  3020
+  3021
+  3022 				/*
+  3023 				.proc	@cmdline (.byte a) .reg
+  3024
+  3025 					stx @sp
+  3026
+  3027 					sta idpar
+  3028
+  3029 					lda #0
+  3030 					sta parno
+  3031
+  3032 					lda boot?		; sprawdzamy, czy DOS w ogole jest w pamieci
+  3033 					lsr
+  3034 					bcc _no_command_line
+  3035
+  3036 					lda dosvec+1		; a jesli tak, czy DOSVEC nie wskazuje ROM-u
+  3037 					cmp #$c0
+  3038 					bcs _no_command_line
+  3039
+  3040 					ldy #$03
+  3041 					lda (dosvec),y
+  3042 					cmp #{jmp}
+  3043 					bne _no_command_line
+  3044
+  3045 					ldy #$0a		; COMTAB+$0A (BUFOFF)
+  3046 					lda (dosvec),y
+  3047 					sta lbuf
+  3048 					iny
+  3049 					lda (dosvec),y
+  3050 					sta hbuf
+  3051
+  3052 					adw dosvec #3 zcr
+  3053
+  3054 				loop	lda #0
+  3055 					sta @buf
+  3056
+  3057 					jsr $ffff
+  3058 				zcr	equ *-2
+  3059 					beq stop
+  3060
+  3061 					lda idpar
+  3062 					bne skp
+  3063
+  3064 					ldy #33			; ParamStr(0)
+  3065 				_par0	lda (dosvec),y
+  3066 					sta @buf-33+1,y
+  3067 					iny
+  3068 					cpy #36
+  3069 					bne _par0
+  3070
+  3071 					lda #3
+  3072 					sta @buf
+  3073 					bne stop
+  3074
+  3075 				skp	ldy #36
+  3076 				_cp	lda (dosvec),y
+  3077 					sta @buf-36+1,y
+  3078 					iny
+  3079 					cmp #$9b
+  3080 					bne _cp
+  3081
+  3082 					tya
+  3083 					sub #37
+  3084 					sta @buf
+  3085
+  3086 					inc parno
+  3087 					lda #0
+  3088 				parno	equ *-1
+  3089 					cmp #0
+  3090 				idpar	equ *-1
+  3091
+  3092 					bne loop
+  3093
+  3094 				stop	ldy #$0a		; przywracamy poprzednia wartosc BUFOFF
+  3095 					lda #0
+  3096 				lbuf	equ *-1
+  3097 					sta (dosvec),y
+  3098 					iny
+  3099 					lda #0
+  3100 				hbuf	equ *-1
+  3101 					sta (dosvec),y
+  3102
+  3103 				_no_command_line		; przeskok tutaj oznacza brak dostepnosci wiersza polecen
+  3104
+  3105 					lda parno
+  3106
+  3107 					ldx #0
+  3108 				@sp	equ *-1
+  3109 					rts
+  3110 				.endp
+  3111 				*/
+  3111
+  3112
+  3113
+  3114 24A7			.proc	@CmdLine (.byte a) .reg
+  3115
+  3116 					stx @sp
+  3117
+  3118 					sta idpar
+  3119
+  3120 					lda #0
+  3121 					sta parno
+  3122 					sta loop+1
+  3123
+  3124 					lda	#{jsr*}
+  3125 					sta	res
+  3126
+  3127 				; Get filename from SpartaDOS...
+  3128 24A7			get_param
+  3129 					lda boot?		; sprawdzamy, czy DOS w ogole jest w pamieci
+  3130 					lsr
+  3131 					bcc no_sparta
+  3132
+  3133 					lda dosvec+1		; a jesli tak, czy DOSVEC nie wskazuje ROM-u
+  3134 					cmp #$c0
+  3135 					bcs no_sparta
+  3136
+  3137 					ldy #$03
+  3138 					lda (dosvec),y
+  3139 					cmp #{jmp}
+  3140 					bne no_sparta
+  3141
+  3142 					ldy #$0a		; COMTAB+$0A (BUFOFF)
+  3143 					lda (dosvec),y
+  3144 					sta lbuf
+  3145 					iny
+  3146 					lda (dosvec),y
+  3147 					sta hbuf
+  3148
+  3149 					adw dosvec #33 tmp
+  3150
+  3151 					ldy #0
+  3152 24A7			fnm	lda (tmp),y
+  3153 					iny
+  3154 					cmp #$9b
+  3155 					bne fnm
+  3156
+  3157 					tya			; remove .COM
+  3158 					sub #5
+  3159 					tay
+  3160 					lda #0
+  3161 					sta (tmp),y
+  3162 					tay
+  3163
+  3164 					lda	#3
+  3165 					sta	loop+1
+  3166 					add	dosvec
+  3167 					sta	get_adr
+  3168 					lda	#0
+  3169 					adc	dosvec+1
+  3170 					sta	get_adr+1
+  3171
+  3172 					jmp	_ok
+  3173
+  3174 24A7			no_sparta
+  3175 					mwa #next get_adr
+  3176
+  3177 					lda	#{bit*}
+  3178 					sta	res
+  3179
+  3180 				; ... or channel #0
+  3181 					lda	MAIN.IOCB@COPY+2	; command
+  3182 					cmp	#5			; read line
+  3183 					bne	_no_command_line
+  3184 					lda	MAIN.IOCB@COPY+3	; status
+  3185 					bmi	_no_command_line
+  3186 				; don't assume the line is EOL-terminated
+  3187 				; DOS II+/D overwrites the EOL with ".COM"
+  3188 				; that's why we rely on the length
+  3189 					lda	MAIN.IOCB@COPY+9	; length hi
+  3190 					bne	_no_command_line
+  3191 					ldx	MAIN.IOCB@COPY+8	; length lo
+  3192 					beq	_no_command_line
+  3193 					inx:inx
+  3194 					stx	arg_len
+  3195 				; give access to three bytes before the input buffer
+  3196 				; in DOS II+/D the device prompt ("D1:") is there
+  3197 					lda	MAIN.IOCB@COPY+4
+  3198 					sub	#3
+  3199 					sta	tmp
+  3200 					lda	MAIN.IOCB@COPY+5
+  3201 					sbc	#0
+  3202 					sta	tmp+1
+  3203
+  3204 					lda	#0
+  3205 					ldy	#0
+  3206 24A7			arg_len	equ *-1
+  3207 					sta	(tmp),y
+  3208
+  3209
+  3210 24A7			loop	ldy	#0
+  3211
+  3212 24A7			_ok	ldx	#0
+  3213
+  3214 24A7			lprea	lda	(tmp),y
+  3215 					sta	@buf+1,x
+  3216
+  3217 					beq	stop
+  3218
+  3219 					cmp	#$9b
+  3220 					beq	stop
+  3221 					cmp	#' '
+  3222 					beq	stop
+  3223
+  3224 					iny
+  3225 					inx
+  3226 					cpx #32
+  3227 					bne lprea
+  3228
+  3229 24A7			stop	lda #0
+  3230 24A7			parno	equ *-1
+  3231 					cmp #0
+  3232 24A7			idpar	equ *-1
+  3233 					beq found
+  3234
+  3235 					jsr $ffff		; sty loop+1
+  3236 24A7			get_adr	equ *-2
+  3237 					beq found
+  3238
+  3239 					inc parno
+  3240 					bne loop
+  3241
+  3242 24A7			found	lda #0	;+$9b
+  3243 					sta @buf+1,x
+  3244 					stx @buf
+  3245
+  3246 24A7			res	jsr sdxres
+  3247
+  3248 24A7			_no_command_line		; przeskok tutaj oznacza brak dostepnosci wiersza polecen
+  3249
+  3250 					lda parno
+  3251
+  3252 					ldx #0
+  3253 24A7			@sp	equ *-1
+  3254 					rts
+  3255
+  3256
+  3257 24A7			sdxres	ldy #$0a		; przywracamy poprzednia wartosc BUFOFF
+  3258 					lda #0
+  3259 24A7			lbuf	equ *-1
+  3260 					sta (dosvec),y
+  3261 					iny
+  3262 					lda #0
+  3263 24A7			hbuf	equ *-1
+  3264 					sta (dosvec),y
+  3265 					rts
+  3266
+  3267
+  3268 24A7			_next	iny
+  3269 24A7			next	lda (tmp),y
+  3270 					beq _eol
+  3271 					cmp #' '
+  3272 					beq _next
+  3273
+  3274 					cmp #$9b
+  3275 					beq _eol
+  3276
+  3277 					sty loop+1
+  3278 					rts
+  3279
+  3280 24A7			_eol	lda #0
+  3281 					rts
+  3282
+  3283 				.endp
+  3284
+  3285
+  3286 				/* ----------------------------------------------------------------------- */
+  3287
+  3288 				/*
+  3289 				.proc	@rstsnd
+  3290 					lda #0
+  3291 					sta $d208
+  3292 					sta $d218
+  3293
+  3294 					ldy #3
+  3295 					sty $d20f
+  3296 					sty $d21f
+  3297 					rts
+  3298 				.endp
+  3299 				*/
+  3299
+  3300
+  3301 				;	ert (*>$3fff) .and (*<$8000)
+  3302
+  3303
+  3304 				/* ----------------------------------------------------------------------- */
+  3305
+  3306
+  3307 24A7			.proc	@xmsBank
+  3308
+  3309 = 0082			ptr3 = eax			; position	(4)
+  3310
+  3311 					mva ptr3+3 ztmp+1	; position shr 14
+  3312 					mva ptr3+2 ztmp
+  3313 					lda ptr3+1
+  3314
+  3315 					.rept 6
+  3316 					LSR ZTMP+1
+  3317 					ROR ZTMP
+  3318 					ROR @
+  3319 					.ENDR
+  3319 					.endr
+Source: REPT
+  3316 					LSR ZTMP+1
+  3316 					ROR ZTMP
+  3316 					ROR @
+  3316 					LSR ZTMP+1
+  3316 					ROR ZTMP
+  3316 					ROR @
+  3316 					LSR ZTMP+1
+  3316 					ROR ZTMP
+  3316 					ROR @
+  3316 					LSR ZTMP+1
+  3316 					ROR ZTMP
+  3316 					ROR @
+  3316 					LSR ZTMP+1
+  3316 					ROR ZTMP
+  3316 					ROR @
+  3316 					LSR ZTMP+1
+  3316 					ROR ZTMP
+  3316 					ROR @
+Source: cpu6502.asm
+  3320
+  3321 					tax			; index to bank
+  3322
+  3323 					lda portb
+  3324 					and #1
+  3325 					ora main.misc.adr.banks,x
+  3326 					sta portb
+  3327
+  3328 					lda ptr3 		; offset
+  3329 					sta ztmp
+  3330 					lda ptr3+1
+  3331 					and #$3f
+  3332 					ora #$40
+  3333 					sta ztmp+1
+  3334
+  3335 					rts
+  3336 				.endp
+  3337
+  3338
+  3339 24A7			.proc	@xmsReadBuf (.word ptr1, ptr2) .var
+  3340
+  3341 = 0086			ptr1 = dx	; buffer	(2)
+  3342
+  3343 = 008A			ptr2 = cx	; count		(2)
+  3344 = 008C			pos = cx+2	; position	(2) pointer
+  3345
+  3346 = 0082			ptr3 = eax	; position	(4)
+  3347
+  3348 					txa:pha
+  3349
+  3350 					ldy #0
+  3351 					lda (pos),y
+  3352 					sta ptr3
+  3353 					iny
+  3354 					lda (pos),y
+  3355 					sta ptr3+1
+  3356 					iny
+  3357 					lda (pos),y
+  3358 					sta ptr3+2
+  3359 					iny
+  3360 					lda (pos),y
+  3361 					sta ptr3+3
+  3362
+  3363 					lda ptr2+1
+  3364 					beq lp2
+  3365
+  3366 24A7			lp1	jsr @xmsBank
+  3367
+  3368 					lda ztmp+1
+  3369 					cmp #$7f
+  3370 					bne skp
+  3371 					lda ztmp
+  3372 					beq skp
+  3373
+  3374 					lda #0
+  3375 					jsr nextBank
+  3376 					jmp skp2
+  3377
+  3378 24A7			skp	ldy #0
+  3379 					mva:rne (ztmp),y @buf,y+
+  3380
+  3381 24A7			skp2	lda portb
+  3382 					and #1
+  3383 					ora #$fe
+  3384 					sta portb
+  3385
+  3386 					ldy #0
+  3387 					mva:rne @buf,y (dx),y+
+  3388
+  3389 					inc dx+1	// inc(dx, $100)
+  3390
+  3391 					inl ptr3+1	// inc(position, $100)
+  3392
+  3393 					dec ptr2+1
+  3394 					bne lp1
+  3395
+  3396 24A7			lp2	jsr @xmsBank
+  3397
+  3398 					lda ztmp+1		; zakonczenie kopiowania
+  3399 					cmp #$7f		; jesli przekraczamy granice banku $7FFF
+  3400 					bne skp_
+  3401
+  3402 					lda ztmp
+  3403 					add ptr2
+  3404 					bcc skp_
+  3405
+  3406 					lda ptr2		; to realizuj wyjatek NEXTBANK, kopiuj PTR2 bajtow
+  3407 					jsr nextBank
+  3408 					jmp skp3
+  3409
+  3410 24A7			skp_	ldy #0
+  3411 24A7			mv	lda (ztmp),y
+  3412 					sta @buf,y
+  3413 					iny
+  3414 					cpy ptr2
+  3415 					bne mv
+  3416
+  3417 24A7			skp3	lda portb
+  3418 					and #1
+  3419 					ora #$fe
+  3420 					sta portb
+  3421
+  3422 					ldy #0
+  3423 24A7			lp3	lda @buf,y
+  3424 					sta (dx),y
+  3425 					iny
+  3426 					cpy ptr2
+  3427 					bne lp3
+  3428
+  3429 					jmp @xmsUpdatePosition
+  3430
+  3431 24A7			.local	nextBank
+  3432
+  3433 					sta max
+  3434
+  3435 					mwa ztmp src
+  3436
+  3437 					ldy #0
+  3438 24A7			mv0	lda $ffff,y
+  3439 24A7			src	equ *-2
+  3440 					sta @buf,y
+  3441 					iny
+  3442 					inc ztmp
+  3443 					bne mv0
+  3444
+  3445 					lda portb
+  3446 					and #1
+  3447 					ora main.misc.adr.banks+1,x
+  3448 					sta portb
+  3449
+  3450 					ldx #0
+  3451 24A7			mv1	cpy #0
+  3452 24A7			max	equ *-1
+  3453 					beq stp
+  3454 					lda $4000,x
+  3455 					sta @buf,y
+  3456 					inx
+  3457 					iny
+  3458 					bne mv1
+  3459 24A7			stp	rts
+  3460 				.endl
+  3461
+  3462 				.endp
+  3463
+  3464
+  3465 24A7			.proc	@xmsWriteBuf (.word ptr1, ptr2) .var
+  3466
+  3467 = 0086			ptr1 = dx	; buffer	(2)
+  3468
+  3469 = 008A			ptr2 = cx	; count		(2)
+  3470 = 008C			pos = cx+2	; position	(2) pointer
+  3471
+  3472 = 0082			ptr3 = eax	; position	(4)
+  3473
+  3474 					txa:pha
+  3475
+  3476 					ldy #0			; przepisz POSITION spod wskaznika
+  3477 					lda (pos),y
+  3478 					sta ptr3
+  3479 					iny
+  3480 					lda (pos),y
+  3481 					sta ptr3+1
+  3482 					iny
+  3483 					lda (pos),y
+  3484 					sta ptr3+2
+  3485 					iny
+  3486 					lda (pos),y
+  3487 					sta ptr3+3
+  3488
+  3489 24A7			lp1	lda portb		; wylacz dodatkowe banki
+  3490 					and #1
+  3491 					ora #$fe
+  3492 					sta portb
+  3493
+  3494 					ldy #0			; przepisz 256b z BUFFER do @BUF
+  3495 					mva:rne (dx),y @buf,y+
+  3496
+  3497 					jsr @xmsBank		; wlacz dodatkowy bank
+  3498
+  3499 					lda ptr2+1
+  3500 					beq lp2
+  3501
+  3502 					lda ztmp+1		; jesli przekraczamy granice banku $7FFF
+  3503 					cmp #$7f
+  3504 					bne skp
+  3505 					lda ztmp
+  3506 					beq skp
+  3507
+  3508 					lda #0			; to realizuj wyjatek NEXTBANK, kopiuj 256b
+  3509 					jsr nextBank
+  3510 					jmp skp2
+  3511
+  3512 24A7			skp	mva:rne @buf,y (ztmp),y+
+  3513
+  3514 24A7			skp2	inc dx+1		// inc(dx, $100)
+  3515
+  3516 					inl ptr3+1		// inc(position, $100)
+  3517
+  3518 					dec ptr2+1
+  3519 					bne lp1
+  3520
+  3521 24A7			lp2	lda ztmp+1		; zakonczenie kopiowania
+  3522 					cmp #$7f		; jesli przekraczamy granice banku $7FFF
+  3523 					bne skp_
+  3524
+  3525 					lda ztmp
+  3526 					add ptr2
+  3527 					bcc skp_
+  3528
+  3529 					lda ptr2		; to realizuj wyjatek NEXTBANK, kopiuj PTR2 bajtow
+  3530 					jsr nextBank
+  3531 					jmp quit
+  3532
+  3533 24A7			skp_	ldy #0
+  3534 24A7			lp3	lda @buf,y
+  3535 					sta (ztmp),y
+  3536
+  3537 					iny
+  3538 					cpy ptr2
+  3539 					bne lp3
+  3540
+  3541 24A7			quit	lda portb
+  3542 					and #1
+  3543 					ora #$fe
+  3544 					sta portb
+  3545
+  3546 					jmp @xmsUpdatePosition
+  3547
+  3548 24A7			.local	nextBank
+  3549
+  3550 					sta max
+  3551
+  3552 					mwa ztmp dst
+  3553
+  3554 					ldy #0
+  3555 24A7			mv0	lda @buf,y
+  3556 					sta $ffff,y
+  3557 24A7			dst	equ *-2
+  3558 					iny
+  3559 					inc ztmp
+  3560 					bne mv0
+  3561
+  3562 					lda portb
+  3563 					and #1
+  3564 					ora main.misc.adr.banks+1,x
+  3565 					sta portb
+  3566
+  3567 					ldx #0
+  3568 24A7			mv1	cpy #0
+  3569 24A7			max	equ *-1
+  3570 					beq stp
+  3571 					lda @buf,y
+  3572 					sta $4000,x
+  3573 					inx
+  3574 					iny
+  3575 					bne mv1
+  3576 24A7			stp	rts
+  3577 				.endl
+  3578
+  3579 				.endp
+  3580
+  3581
+  3582 24A7			.proc	@xmsAddPosition
+  3583
+  3584 24A7				.use @xmsReadBuf
+  3585
+  3586 					add ptr3
+  3587 					sta ptr3
+  3588 					lda #$00
+  3589 					adc ptr3+1
+  3590 					sta ptr3+1
+  3591 					lda #$00
+  3592 					adc ptr3+2
+  3593 					sta ptr3+2
+  3594 					lda #$00
+  3595 					adc ptr3+3
+  3596 					sta ptr3+3
+  3597
+  3598 					rts
+  3599 				.endp
+  3600
+  3601
+  3602 24A7			.proc	@xmsUpdatePosition
+  3603
+  3604 24A7				.use @xmsReadBuf
+  3605
+  3606 					tya
+  3607 					jsr @xmsAddPosition
+  3608
+  3609 					ldy #0
+  3610 					lda ptr3
+  3611 					sta (pos),y
+  3612 					iny
+  3613 					lda ptr3+1
+  3614 					sta (pos),y
+  3615 					iny
+  3616 					lda ptr3+2
+  3617 					sta (pos),y
+  3618 					iny
+  3619 					lda ptr3+3
+  3620 					sta (pos),y
+  3621
+  3622 					pla:tax
+  3623 					rts
+  3624 				.endp
+  3625
+  3626
+  3627 				/* ----------------------------------------------------------------------- */
+  3628
+  3629
+  3630 24A7			.proc	@ClrScr
+  3631
+  3632 					ldx #$00
+  3633 					lda #$0c
+  3634 					jsr xcio
+  3635
+  3636 					mwa #ename ioadr,x
+  3637
+  3638 					mva #$0c ioaux1,x
+  3639 					mva #$00 ioaux2,x
+  3640
+  3641 					lda #$03
+  3642
+  3643 24A7			xcio	sta iocom,x
+  3644 					jmp ciov
+  3645
+  3646 24A7			ename	.byte 'E:',$9b
+  3647
+  3648 				.endp
+  3649
+  3650
+  3651 				/* ----------------------------------------------------------------------- */
+  3652
+  3653
+  3654 					opt l+
+  1002
+  1003 				; -----------------------------------------------------------
+  1004
+  1005 				.macro UNITINITIALIZATION
+  1006 				
+  1007 					.ifdef MAIN.SYSTEM.@UnitInit
+  1008 					jsr MAIN.SYSTEM.@UnitInit
+  1009 					eif
+  1010 				
+  1011 					.ifdef MAIN.ATARI.@UnitInit
+  1012 					jsr MAIN.ATARI.@UnitInit
+  1013 					eif
+  1014 				
+  1015 					.ifdef MAIN..@UnitInit
+  1016 					jsr MAIN..@UnitInit
+  1017 					eif
+  1018 				
+  1019 					.ifdef MAIN.B_DL.@UnitInit
+  1020 					jsr MAIN.B_DL.@UnitInit
+  1021 					eif
+  1022 				.endm
+  1023
+  1024 					ift .SIZEOF(MAIN.SYSTEM) > 0
+  1025 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+  1025 				SYSTEM: $2056..$20AE
+  1026 					eif
+  1027
+  1028 					ift .SIZEOF(MAIN.ATARI) > 0
+  1029 					.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
+  1030 					eif
+  1031
+  1032 					ift .SIZEOF(MAIN.B_DL) > 0
+  1033 					.print 'B_DL: ',MAIN.B_DL,'..',MAIN.B_DL+.SIZEOF(MAIN.B_DL)-1
+  1033 				B_DL: $20AF..$21D1
+  1034 					eif
+  1035
+  1036 					.print 'CODE: ',CODEORIGIN,'..',*-1
+  1036 				CODE: $2000..$24A6
+  1037
+  1038 24A7			DATAORIGIN
+  1039
+  1040 24A7 28 00 18 00 0C 00 + .by  $28 $00 $18 $00 $0C $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1041 24BF 00 00 00 00 03 00 + .by  $00 $00 $00 $00 $03 $00 $00 $27  $68 $65 $6C $6C $6F $01 $00 $69  $74 $00 $69 $73 $00 $61 $6E $00
+  1042 24D7 6A 75 6D 70 69 6E + .by  $6A $75 $6D $70 $69 $6E $67 $00  $70 $61 $73 $63 $61 $6C $00 $73  $63 $72 $6F $6C $6C $01 $01 $00
+  1043 24EF 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1044 2507 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1045 251F 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1046 2537 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1047 254F 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1048 2567 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1049 257F 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1050 2597 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+  1051 25AF 00 00 00 00 00 00 + .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $70
+  1052 25C7 60 50 40 30 20 10 + .by  $60 $50 $40 $30 $20 $10 $00 $00  $10 $20 $30 $40 $50 $60 $70
+  1053
+  1054 = 012F			VARINITSIZE	= *-DATAORIGIN
+  1055 = 012F			VARDATASIZE	= 303
+  1056
+  1057 = 25D6			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  1058
+  1059 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+  1059 				DATA: $24A7..$25D6
+  1060
+  1061 02E0-02E1> 29 20			run START
+  1062
+  1063 				; -----------------------------------------------------------
+  1064
+  1065 				.macro	STATICDATA
+  1066 				.by  $27 $68 $65 $6C $6C $6F $01 $00  $69 $74 $00 $69 $73 $00 $61 $6E  $00 $6A $75 $6D $70 $69 $6E $67
+  1067 				.by  $00 $70 $61 $73 $63 $61 $6C $00  $73 $63 $72 $6F $6C $6C $01 $01  $00
+  1068 				.endm
+  1069
+  1070 					end
