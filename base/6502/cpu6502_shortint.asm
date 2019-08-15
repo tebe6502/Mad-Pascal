@@ -9,18 +9,18 @@
 
 	jsr imulBYTE
 
-	lda STACKORIGIN-1,x
+	lda :STACKORIGIN-1,x
 	bpl @+
 		sec
 		lda eax+1
-		sbc STACKORIGIN,x
+		sbc :STACKORIGIN,x
 		sta eax+1
 @
-	lda STACKORIGIN,x
+	lda :STACKORIGIN,x
 	bpl @+
 		sec
 		lda eax+1
-		sbc STACKORIGIN-1,x
+		sbc :STACKORIGIN-1,x
 		sta eax+1
 @
 	jmp movaBX_EAX
@@ -31,24 +31,24 @@
 
 MOD	mva #{jsr} _mod
 
-	lda STACKORIGIN,x		; divisor sign
+	lda :STACKORIGIN,x		; divisor sign
 	spl
 	jsr negBYTE
 
-DIV	ldy <idivAL_CL
-	lda >idivAL_CL
+DIV	ldy <idivBYTE
+	lda >idivBYTE
 
 skp	sty addr
 	sta addr+1
 
 	ldy #0
 
-	lda STACKORIGIN-1,x		; dividend sign
+	lda :STACKORIGIN-1,x		; dividend sign
 	bpl @+
 	jsr negBYTE1
 	iny
 
-@	lda STACKORIGIN,x		; divisor sign
+@	lda :STACKORIGIN,x		; divisor sign
 	bpl @+
 	jsr negBYTE
 	iny

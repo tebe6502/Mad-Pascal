@@ -17,24 +17,24 @@
 
 	ldy eax+3
 
-	lda STACKORIGIN-1+STACKWIDTH,x	; t1
+	lda :STACKORIGIN-1+STACKWIDTH,x	; t1
 	bpl @+
 	sec
 	lda eax+1
-	sbc STACKORIGIN,x
+	sbc :STACKORIGIN,x
 	sta eax+1
 	tya
-	sbc STACKORIGIN+STACKWIDTH,x
+	sbc :STACKORIGIN+STACKWIDTH,x
 	tay
 @
-	lda STACKORIGIN+STACKWIDTH,x	; t2
+	lda :STACKORIGIN+STACKWIDTH,x	; t2
 	bpl @+
 	sec
 	lda eax+1
-	sbc STACKORIGIN-1,x
+	sbc :STACKORIGIN-1,x
 	sta eax+1
 	tya
-	sbc STACKORIGIN-1+STACKWIDTH,x
+	sbc :STACKORIGIN-1+STACKWIDTH,x
 	tay
 @
 	sty eax+2

@@ -3,6 +3,7 @@
 	fmulu_16
 	imulCX
 	imulWORD
+	idivWORD
 	idivAX_CX
 */
 
@@ -187,11 +188,11 @@ MUL2	DEY
 
 .proc	imulWORD
 
-	mva STACKORIGIN,x ecx
-	mva STACKORIGIN+STACKWIDTH,x ecx+1
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN+STACKWIDTH,x ecx+1
 
-	mva STACKORIGIN-1,x eax
-	mva STACKORIGIN-1+STACKWIDTH,x eax+1
+	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
 
 	.ifdef fmulinit
 	jmp fmulu_16
@@ -201,17 +202,34 @@ MUL2	DEY
 .endp
 
 
+.define	jsr_imodWORD jsr idivWORD
+
+.proc	idivWORD
+
+	mva :STACKORIGIN,x ecx
+	mva :STACKORIGIN+STACKWIDTH,x ecx+1
+
+	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+
+	jmp idivAX_CX
+.endp
+
+
 ; DIVIDE ROUTINE (16 BIT)
 ; AX/CX -> ACC, remainder in ZTMP
 
 .proc	idivAX_CX
 
-	jsr iniEAX_ECX_WORD
+;	jsr iniEAX_ECX_WORD
 main
-;	LDA #0
+	LDA #0
 	STA ztmp+1
 	STA ztmp+2
 	STA ztmp+3
+
+	sta eax+2
+	sta eax+3
 
 	.ifdef fmulinit
 	.rept 16

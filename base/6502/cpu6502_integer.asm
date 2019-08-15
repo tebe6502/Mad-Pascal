@@ -20,24 +20,24 @@ REAL	ldy <divREAL
 
 MOD	mva #{jsr} _mod
 
-	lda STACKORIGIN+STACKWIDTH*3,x		; divisor sign
+	lda :STACKORIGIN+STACKWIDTH*3,x		; divisor sign
 	spl
 	jsr negCARD
 
-DIV	ldy <idivEAX_ECX.CARD
-	lda >idivEAX_ECX.CARD
+DIV	ldy <idivCARD
+	lda >idivCARD
 
 skp	sty addr
 	sta addr+1
 
 	ldy #0
 
-	lda STACKORIGIN-1+STACKWIDTH*3,x	; dividend sign
+	lda :STACKORIGIN-1+STACKWIDTH*3,x	; dividend sign
 	bpl @+
 	jsr negCARD1
 	iny
 
-@	lda STACKORIGIN+STACKWIDTH*3,x		; divisor sign
+@	lda :STACKORIGIN+STACKWIDTH*3,x		; divisor sign
 	bpl @+
 	jsr negCARD
 	iny

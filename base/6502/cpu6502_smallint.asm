@@ -9,24 +9,24 @@
 
 	jsr imulWORD
 
-	lda STACKORIGIN-1+STACKWIDTH,x	; t1
+	lda :STACKORIGIN-1+STACKWIDTH,x	; t1
 	bpl @+
 		sec
 		lda eax+2
-		sbc STACKORIGIN,x
+		sbc :STACKORIGIN,x
 		sta eax+2
 		lda eax+3
-		sbc STACKORIGIN+STACKWIDTH,x
+		sbc :STACKORIGIN+STACKWIDTH,x
 		sta eax+3
 @
-	lda STACKORIGIN+STACKWIDTH,x	; t2
+	lda :STACKORIGIN+STACKWIDTH,x	; t2
 	bpl @+
 		sec
 		lda eax+2
-		sbc STACKORIGIN-1,x
+		sbc :STACKORIGIN-1,x
 		sta eax+2
 		lda eax+3
-		sbc STACKORIGIN-1+STACKWIDTH,x
+		sbc :STACKORIGIN-1+STACKWIDTH,x
 		sta eax+3
 @
 	jmp movaBX_EAX
@@ -42,24 +42,24 @@ SHORTREAL
 
 MOD	mva #{jsr} _mod
 
-	lda STACKORIGIN+STACKWIDTH,x	; divisor sign
+	lda :STACKORIGIN+STACKWIDTH,x	; divisor sign
 	spl
 	jsr negWORD
 
-DIV	ldy <idivAX_CX
-	lda >idivAX_CX
+DIV	ldy <idivWORD
+	lda >idivWORD
 
 skp	sty addr
 	sta addr+1
 
 	ldy #0
 
-	lda STACKORIGIN-1+STACKWIDTH,x	; dividend sign
+	lda :STACKORIGIN-1+STACKWIDTH,x	; dividend sign
 	bpl @+
 	jsr negWORD1
 	iny
 @
-	lda STACKORIGIN+STACKWIDTH,x	; divisor sign
+	lda :STACKORIGIN+STACKWIDTH,x	; divisor sign
 	bpl @+
 	jsr negWORD
 	iny
