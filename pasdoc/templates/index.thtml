@@ -1,0 +1,25 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>Documentation index</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<% print(`<h1>${lang.doclist}:</h1><br>`); %>
+
+<!--********************* DOCUMENT LIST **************************-->
+
+<% print(indexData.length>0 ? `<ul class='doclist'>` : ''); %>
+<% _.forEach(indexData, elem => {
+	print(`<li><a href='${elem.filename}' class='unitname'>${elem.head.split(' ')[1]}</a> 
+	- <a href='${elem.filename}' class='unittitle'>${elem.body.name}</a></li>\n`);
+}); %>
+<% print(indexData.length>0 ? '</ul>' : ''); %>
+
+
+<br>
+<div class='footer'><%= lang.footer %> <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "pasdoc",
+  "version": "1.2.0",
+  "description": "Pascal comment2doc parser",
+  "main": "pasdoc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "bocianu@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "command-line-args": "^5.0.2",
+    "command-line-usage": "^5.0.5",
+    "lodash": "^4.17.10",
+    "markdown": "^0.5.0"
+  }
+}
