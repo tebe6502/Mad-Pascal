@@ -1,0 +1,65 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit b_utils - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit b_utils</h1>
+<h3>Common Utils</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of useful procedures to simplify common tasks in Atari 8-bit programming. <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>CountBits</td><td class='tdesc'><h4>function CountBits(b: byte):byte;assembler;</h4><br>
+	Counts number of ones in bits of any byte value.<br><ul><h5>parameters:</h5><li>b - byte value to count bits in</li><h5>returns:</h5><li class='returns'>(byte) - number fo bits turned on</li></ul></td></tr>
+<tr><td class='tname fname'>WriteLnCentered</td><td class='tdesc'><h4>procedure WriteLnCentered(s: string);</h4><br>
+	Outputs string aligned to center of screen width. <br> Length of string should not exceed screen width (40).<br><ul><h5>parameters:</h5><li>s - string to write</li></ul></td></tr>
+<tr><td class='tname fname'>WriteRightAligned</td><td class='tdesc'><h4>procedure WriteRightAligned(w: byte; s: TString);</h4><br>
+	Outputs string aligned to right of provided width. <br> Length of string should not exceed provided width of field.<br><ul><h5>parameters:</h5><li>w - width of field to align</li><li>s - string to write</li></ul></td></tr>
+<tr><td class='tname fname'>NullTermToString</td><td class='tdesc'><h4>function NullTermToString(ptr: word): string;</h4><br>
+	Parses null terminated string into regular pascal string variable.<br><ul><h5>parameters:</h5><li>ptr (word) - address in memory of null terminated string</li><h5>returns:</h5><li class='returns'>(string) - regular pascal string type variable</li></ul></td></tr>
+<tr><td class='tname fname'>FFTermToString</td><td class='tdesc'><h4>function FFTermToString(ptr: word): string;</h4><br>
+	Parses string terminated with $FF into regular pascal string variable.<br><ul><h5>parameters:</h5><li>ptr (word) - address in memory of null terminated string</li><h5>returns:</h5><li class='returns'>(string) - regular pascal string type variable</li></ul></td></tr>
+<tr><td class='tname fname'>ExpandRLE</td><td class='tdesc'><h4>procedure ExpandRLE(src: word; dest: word);</h4><br>
+	Expands RLE compressed data from source memory location and writes expanded data at destination memory address.<br><ul><h5>parameters:</h5><li>src (word) - source address of compressed data</li><li>dest (word) - destination address where data is expanded</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>
