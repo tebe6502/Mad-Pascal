@@ -1,0 +1,120 @@
+* {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    line-height: 1.2em;
+}
+
+body {
+    margin: 0.2em 2em 1em 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    line-height: 1.5em;
+}
+
+h2 {
+    margin-top: 1em;
+}
+
+a {
+	color: #88d;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    padding: 0.3em 0.5em;
+    vertical-align: top;
+
+}
+
+table th {
+    background-color: #aaa;
+    color: #fff;
+    text-align: left;
+    padding: 0.5em 0.5em;
+}
+
+.tname {
+    vertical-align: top;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.1em;
+    background-color: #eee;
+}
+
+.fname {
+    vertical-align: top;
+    font-size: 1.4em;
+    padding: 0.3em 0.5em;
+    background-color: #eee;
+}
+
+.tvalue, .taddress {
+    font-family: monospace;
+    text-align: right;
+    font-size: 1.1em;
+}
+
+.ttype {
+    vertical-align: top;
+    font-family: monospace;
+}
+
+.tdesc {
+    padding: 0.2em 0.6em;
+    line-height: 1em;
+}
+
+.tdesc ul {
+    margin-top: 0.5em;
+}
+
+.tdesc li {
+    margin-left: 1.5em;
+}
+
+.returns {
+    margin-top: 0.2em;
+}
+
+.footer {
+    font-size: 0.8em;
+    padding-top: 0.3em;
+    margin-top: 1em;
+    border-top: 1px dotted #aaa;
+}
+
+.comment {
+    display: block;
+    float: right;
+    margin-left: 1em;
+    color: #888;
+    background-color: #eee;
+}
+
+ul.record li {
+    clear: both;
+    display: block;
+    float: left;
+    margin: 0.2em 0 0.2em 1.2em;
+    list-style-type: none;
+}
+
+ul.doclist li {
+    margin: 0.5em 0 0.5em 1.2em;
+}
+
+.unitname {
+	text-transform: uppercase;
+}
+
+.unittitle {
+	text-decoration: none;
+	color:#888;
+}
+
