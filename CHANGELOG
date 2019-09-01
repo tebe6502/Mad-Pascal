@@ -1,8 +1,24 @@
+01.09.2019
+- poprawiona procedura CompileAddress, dodane 'or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0))'
+- poprawiona procedura TestIdentProc, procedury s¹ testowane dodatkowo na podstawie Ident[IdentIndex].UnitIndex, Ident[IdentIndex].Block
+- poprawione procedura DefineIdent , dodane 'and (not Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK])'
+
+25.08.2019
+- poprawiona i rozbudowana procedura TestIdentProc, trafniej wybiera procedury/funkcje o tych samych nazwach preferuj¹c najpierw te znajduj¹ce siê w aktualnych unicie lub zagnie¿d¿one w procedurze/funkcji
+
+19.08.2019
+- unit GRAPH, FASTGRAPH, dodane parametry dla trybu 4 (80x96)
+- dla pêtli FOR wy³¹czona optymalizacja argumentu sta³ego gdy OPTIMIZECODE nie jest aktywne
+
+18.08.2019
+- optymalizacja dla IMULBYTE *$00,$01,$02,$04,$08,$10,$20,$40,$80,$100
+- optymalizacja dla IMULBYTE *$0A
+
 09.08.2019
 - unit SYSTEM: TVSystem: byte absolute $d014
-- unit CMC: TCMC.Play
-- unit MPT: TMPT.Play
-- unit RMT: TRMT.Play
+- unit CMC: TCMC.Play (PAL / NTSC)
+- unit MPT: TMPT.Play (PAL / NTSC)
+- unit RMT: TRMT.Play (PAL / NTSC)
 - blok Initialization dla CMC, MPT, RMT
 
 04.08.2019

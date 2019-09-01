@@ -935,66 +935,23 @@ procedure InitGraph(mode: byte); overload;
 @description:
 Init graphics mode
 *)
-var window, i, width: byte;
+var width: byte;
 begin
-
+{
 	if mode and $20<>0 then
 	 width := 32
 	else
 	 width := 40;
-
-	window := mode and $10;
-
+}
 	ScreenMode := mode;
-
-	mode := mode and $0f;
-
-	ScreenHeight := 192;
-
-asm
-{	.ifdef SetColor
-	mwa #SetColor.gr15 SetColor.mode
-	.endif
-
-	.ifdef PutPixel
-	mwa #PutPixel.gr15 PutPixel.mode
-	.endif
 	
-	.ifdef GetPixel
-	mwa #GetPixel.gr15 GetPixel.mode
-	.endif		
-};
+	width := mode and $0f;
 
-case mode of
-
-3:
-asm
-{	mwa #40 MAIN.SYSTEM.ScreenWidth
-	mwa #24 MAIN.SYSTEM.ScreenHeight
-
-	mva #10 width
-};
-
-5:
-asm
-{	mwa #80 MAIN.SYSTEM.ScreenWidth
-	mwa #48 MAIN.SYSTEM.ScreenHeight
-
-	mva #20 width
-};
-
-7:
-asm
-{	mwa #160 MAIN.SYSTEM.ScreenWidth
-	mwa #96 MAIN.SYSTEM.ScreenHeight
-};
+case width of
 
 8:
 asm
-{	mwa #320 MAIN.SYSTEM.ScreenWidth
-;	mwa #192 MAIN.SYSTEM.ScreenHeight
-
-	.ifdef SetColor
+{	.ifdef SetColor
 	mwa #SetColor.gr8 SetColor.mode
 	.endif
 
@@ -1009,10 +966,7 @@ asm
 
 9..11:
 asm
-{	mwa #80 MAIN.SYSTEM.ScreenWidth
-;	mwa #192 MAIN.SYSTEM.ScreenHeight
-
-	.ifdef SetColor
+{	.ifdef SetColor
 	mwa #SetColor.gr9 SetColor.mode
 	.endif
 
@@ -1029,34 +983,83 @@ asm
 	.endif
 };
 
-15:
-asm
-{	mwa #160 MAIN.SYSTEM.ScreenWidth
-;	mwa #192 MAIN.SYSTEM.ScreenHeight
+else
 
+asm
+{	.ifdef SetColor
+	mwa #SetColor.gr15 SetColor.mode
+	.endif
+
+	.ifdef PutPixel
+	mwa #PutPixel.gr15 PutPixel.mode
+	.endif
+	
+	.ifdef GetPixel
+	mwa #GetPixel.gr15 GetPixel.mode
+	.endif		
 };
+
 end;
 
 asm
 {	txa:pha
 
+	lda mode
+	and #$0f
+	tay
+
+	ldx #$60	; 6*16
+	lda mode	; %00010000 with text window
+	and #$10
+	eor #$10
+	ora #2		; read
+
+	.nowarn @graphics
+
+
+; Fox/TQA
+
+dindex	equ $57
+tmccn	equ $ee7d
+tmrcn	equ $ee8d
+
+	ldx dindex
+	lda tmccn,x
+	ldy tmrcn,x
+	ldx #0
+	cmp #<320
+	sne:inx
+
+; X:A = horizontal resolution
+; Y = vertical resolution
+
+	sta MAIN.SYSTEM.ScreenWidth
+	stx MAIN.SYSTEM.ScreenWidth+1
+
+	sty MAIN.SYSTEM.ScreenHeight
+	lda #0
+	sta MAIN.SYSTEM.ScreenHeight+1
+
+
+tlshc	equ $ee6d
+
+	ldx dindex
+	ldy tlshc,x
+	lda #5
+shift	asl @
+	dey
+	bne shift
+
+	sta width
+
 	.ifdef fLine
-	lda width
+;	lda width
 	sta fLine.w0
 	sta fLine.w1
 	sta fLine.w2
 	sta fLine.w3
 	.endif
 
-
-	ldy mode
-
-	ldx #$60	; 6*16
-	lda window	; %00010000 with text window
-	eor #$10
-	ora #2		; read
-
-	.nowarn @graphics
 
 ; ---	init_tabs
 
@@ -1089,6 +1092,7 @@ l0	sta __oras,x
 	bpl l0
 
 	lda mode
+	and #$0f
 	cmp #8
 	bne it2
 

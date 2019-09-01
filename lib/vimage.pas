@@ -429,6 +429,12 @@ var
 
   {Used while reading the codes}
   BitsIn       : Byte;
+  
+  
+const
+ 
+ BitShift: array [0..15] of word = (1,2,4,8,$10,$20,$40,$80,$100,$200,$400,$800,$1000,$2000,$4000,$8000);
+ 
 
   {Local function to read from the buffer}
   function LoadByte : Byte;
@@ -465,7 +471,7 @@ var
       end;
 
       {Add the current bit to the code}
-      if ((Temp and 1) > 0) then inc (Code, 1 shl Counter);
+      if ((Temp and 1) > 0) then inc (Code, BitShift[Counter]);
       Temp := Temp shr 1;
     end;
   end;
@@ -549,7 +555,7 @@ begin
 
   {Get amount of colours in image}
   BitsPerPixel := 1 + (Header.Depth and 7);
-  NumOfColours := (1 shl BitsPerPixel) - 1;
+  NumOfColours := (BitShift[BitsPerPixel]) - 1;
 
   {Load global colour map}
   LoadPalette(NumOfColours, 0, 3, 0,1,2);
@@ -594,7 +600,7 @@ begin
   BPointer := BlockSize;
 
   {Special codes used in the GIF spec}
-  ClearCode        := 1 shl CodeSize;    {Code to reset}
+  ClearCode        := BitShift[CodeSize];    {Code to reset}
   EOICode          := ClearCode + 1;     {End of file}
 
   {Initialize the string table}
@@ -604,7 +610,7 @@ begin
   {Initial size of the code and its maximum value}
   inc (CodeSize);
   InitCodeSize     := CodeSize;
-  MaxCode          := 1 shl CodeSize;
+  MaxCode          := BitShift[CodeSize];
 
   BitsIn := 8;
 
@@ -627,7 +633,7 @@ begin
 
       {Set the code size to initial values}
       CodeSize := InitCodeSize;
-      MaxCode  := 1 shl CodeSize;
+      MaxCode  := BitShift[CodeSize];
 
       {The next code may be read}
       ReadCode;
