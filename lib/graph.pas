@@ -61,47 +61,56 @@ procedure InitGraph(mode: byte); overload;
 @description:
 Init graphics mode
 *)
-var window: byte;
 begin
 
 	GraphResult := 0;
 
-	window := mode and $10;
-
 	ScreenMode := mode;
-
-	mode := mode and $0f;
-
-	ScreenHeight := 192;
-
-	case mode of
-	0,3:	begin ScreenWidth := 40; ScreenHeight := 24 end;
-	5:	begin ScreenWidth := 80; ScreenHeight := 48 end;
-	6..7:	begin ScreenWidth := 160; ScreenHeight := 96 end;
-	8:	ScreenWidth := 320;
-	9..11:	ScreenWidth := 80;
-	15:	ScreenWidth := 160
-
-	else
-		GraphResult := 128;
-	end;
-
-asm
-{	txa:pha
+	
+asm	
+{
+	txa:pha
 
 	mva #$2c @putchar.vbxe
 
-	ldy mode
+	lda mode
+	and #$0f
+	tay
 
 	ldx #$60	; 6*16
-	lda window	; %00010000 with text window
+	lda mode	; %00010000 with text window
+	and #$10
 	eor #$10
 	ora #2		; read
 
 	.nowarn @graphics
 
+; Fox/TQA
+
+dindex	equ $57
+tmccn	equ $ee7d
+tmrcn	equ $ee8d
+
+	ldx dindex
+	lda tmccn,x
+	ldy tmrcn,x
+	ldx #0
+	cmp #<320
+	sne:inx
+    
+; X:A = horizontal resolution
+; Y = vertical resolution
+
+	sta MAIN.SYSTEM.ScreenWidth
+	stx MAIN.SYSTEM.ScreenWidth+1
+	
+	sty MAIN.SYSTEM.ScreenHeight
+	lda #0
+	sta MAIN.SYSTEM.ScreenHeight+1
+
 	pla:tax
 };
+
 end;
 
 
@@ -135,7 +144,7 @@ Puts a point at (X,Y) using color Color
 *)
 asm
 {	txa:pha
-
+{
 	lda y+1
 	bmi stop
 	cmp MAIN.SYSTEM.ScreenHeight+1

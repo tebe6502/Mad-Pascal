@@ -1184,11 +1184,11 @@ end;
 
 
 function GetIdentProc(S: TString; Param: TParamList; NumParams: integer): integer;
-var IdentIndex, BlockStackIndex, i, k: Integer;
+var IdentIndex, BlockStackIndex, i, k, b: Integer;
     cnt: byte;
     hits, m: word;
     best: array of record
-		    IdentIndex : integer;
+		    IdentIndex, b: integer;
 		    hit: word;
 		   end;
 
@@ -1244,7 +1244,8 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
 	k:=High(best);
 
 	best[k].IdentIndex := IdentIndex;
-	best[k].hit	:= hits;
+	best[k].hit	   := hits;
+	best[k].b	   := Ident[IdentIndex].Block;
 
 	SetLength(best, k+2);
       end;
@@ -1252,12 +1253,13 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
   end;// for
 
  m:=0;
+ b:=0;
 
  if High(best) = 1 then
   Result := best[0].IdentIndex
  else
   for i := 0 to High(best) - 1 do
-   if best[i].hit > m then begin m := best[i].hit; Result := best[i].IdentIndex end;
+   if (best[i].hit > m) and (best[i].b >= b) then begin m := best[i].hit; b := best[i].b; Result := best[i].IdentIndex end;
 
  SetLength(best, 0);
 
@@ -1266,17 +1268,53 @@ end;
 
 procedure TestIdentProc(x: integer; S: TString);
 var IdentIndex, BlockStackIndex: Integer;
-    k, i,j, m: integer;
+    k, m: integer;
     ok: Boolean;
+
+    ov: array of record
+		  i,j,u,b: integer;
+	end;
+
     l: array of record
+		  u,b: integer;
 		  Param: TParamList;
 		  NumParams: word;
        end;
+
+
+procedure addOverlay(UnitIndex, Block: integer; ovr: Boolean);
+var i: integer;
+    yes: Boolean;
 begin
 
-i := 0;
-j := 0;
+ yes:=true;
 
+ for i:=High(ov)-1 downto 0 do
+  if (ov[i].u = UnitIndex) and (ov[i].b = Block) then begin
+   inc(ov[i].i, ord(ovr));
+   inc(ov[i].j);
+
+   yes:=false;
+   Break;
+  end;
+
+ if yes then begin
+  i:=High(ov);
+
+  ov[i].u := UnitIndex;
+  ov[i].b := Block;
+  ov[i].i := ord(ovr);
+  ov[i].j := 1;
+
+  SetLength(ov, i+2);
+ end;
+
+end;
+
+
+begin
+
+SetLength(ov, 1);
 SetLength(l, 1);
 
 for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
@@ -1286,10 +1324,8 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
     begin
 
-     inc(j);
-
      for k := 0 to High(l)-1 do
-      if Ident[IdentIndex].NumParams = l[k].NumParams then begin
+      if (Ident[IdentIndex].NumParams = l[k].NumParams) and (Ident[IdentIndex].UnitIndex = l[k].u) and (Ident[IdentIndex].Block = l[k].b)  then begin
 
        ok := true;
 
@@ -1301,21 +1337,27 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
 
       end;
 
-     l[High(l)].NumParams := Ident[IdentIndex].NumParams;
-     l[High(l)].Param := Ident[IdentIndex].Param;
+     k:=High(l);
 
-     SetLength(l, High(l)+2);
+     l[k].NumParams := Ident[IdentIndex].NumParams;
+     l[k].Param     := Ident[IdentIndex].Param;
+     l[k].u	    := Ident[IdentIndex].UnitIndex;
+     l[k].b	    := Ident[IdentIndex].Block;
 
-     if Ident[IdentIndex].isOverload then inc(i);
+     SetLength(l, k+2);
+
+     addOverlay(Ident[IdentIndex].UnitIndex, Ident[IdentIndex].Block, Ident[IdentIndex].isOverload);
     end;
 
   end;// for
 
-if j>1 then
- if i<>j then
-  Error(x, 'Not all declarations of '+Ident[NumIdent].Name+' are declared with OVERLOAD');
+ for i:=0 to High(ov)-1 do
+  if ov[i].j > 1 then
+   if ov[i].i <> ov[i].j then
+    Error(x, 'Not all declarations of '+Ident[NumIdent].Name+' are declared with OVERLOAD');
 
-SetLength(l, 0);
+ SetLength(l, 0);
+ SetLength(ov, 0);
 end;
 
 
@@ -1539,7 +1581,7 @@ var
 begin
 
 i := GetIdent(Name);
-if (i > 0) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
+if (i > 0) and (not Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK]) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
   Error(ErrTokenIndex, 'Identifier ' + Name + ' is already defined')
 else
   begin
@@ -1885,6 +1927,21 @@ var i, l, k, m: integer;
      Result := (pos('and ', listing[i]) > 0) or (pos('ora ', listing[i]) > 0) or (pos('eor ', listing[i]) > 0);
    end;
 
+   function SKIP(i: integer): Boolean;
+   begin
+
+     if i<0 then
+      Result:=False
+     else
+      Result :=	(listing[i] = #9'seq') or (listing[i] = #9'sne') or
+		(listing[i] = #9'spl') or (listing[i] = #9'smi') or
+		(listing[i] = #9'scc') or (listing[i] = #9'scs') or
+		(pos('bne ', listing[i]) > 0) or (pos('beq ', listing[i]) > 0) or
+		(pos('bcc ', listing[i]) > 0) or (pos('bcs ', listing[i]) > 0) or
+		(pos('bmi ', listing[i]) > 0) or (pos('bpl ', listing[i]) > 0);
+   end;
+
+
 // -----------------------------------------------------------------------------
 
    procedure Rebuild;
@@ -2210,6 +2267,33 @@ var i, l, k, m: integer;
 
 
     if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva ', listing[i+1]) > 0) and 							// mva aa :STACKORIGIN,x		; 1
+       (listing[i+2] = #9'ldy #1') and								// ldy #1				; 2
+       (listing[i+3] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 3
+       (listing[i+4] = #9'cmp :STACKORIGIN,x') then						// cmp :STACKORIGIN,x			; 4
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+       listing[i+4] := #9'cmp ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+1] := '';
+
+       Result:=false;
+     end;
+
+
+    if (pos('mva ', listing[i]) > 0) and 							// mva aa :STACKORIGIN,x		; 0
+       (listing[i+1] = #9'inx') and								// inx					; 1
+       (listing[i+2] = #9'ldy #1') and								// ldy #1				; 2
+       (listing[i+3] = #9'lda :STACKORIGIN-1,x') then						// lda :STACKORIGIN-1,x			; 3
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) then
+     begin
+       listing[i+3] := #9'lda ' + copy(listing[i], 6, pos(':STACK', listing[i])-6 );
+       listing[i]   := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
        (pos('mva ', listing[i+1]) > 0) and (pos('mva ', listing[i+2]) > 0) and			// mva aa :STACKORIGIN,x		; 1
        (pos('lda ', listing[i+3]) > 0) and (pos('add :STACK', listing[i+4]) > 0) and		// mva bb :STACKORIGIN+STACKWIDTH,x	; 2
        (listing[i+5] = #9'tay') and								// lda					; 3
@@ -2227,7 +2311,7 @@ var i, l, k, m: integer;
        listing[i+1] := '';
        listing[i+2] := '';
 
-       if (listing[i+7] = #9'adc #$00') then
+       if pos('adc #$00', listing[i+7]) > 0 then
 	if copy(listing[i+3], 6, 256)+'+1' = copy(listing[i+6], 6, 256) then begin
 	 listing[i+3] := #9'mwa ' + copy(listing[i+3], 6, 256) + ' :bp2';
 	 listing[i+4] := #9'ldy ' + copy(listing[i+4], 6, 256);
@@ -2549,6 +2633,30 @@ var i, l, k, m: integer;
 
 
     if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva #', listing[i+1]) > 0) and							// mva # :STACKORIGIN,x			; 1
+       (listing[i+2] = #9'inx') and								// inx					; 2
+       (pos('mva #', listing[i+3]) > 0) and							// mva # :STACKORIGIN,x			; 3
+       (listing[i+4] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 4
+       (listing[i+5] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 5
+       (listing[i+6] = #9'dex') then								// dex					; 6
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     begin
+
+       p := GetVAL(copy(listing[i+1], 6, 4)) * GetVAL(copy(listing[i+3], 6, 4));
+
+       listing[i]   := #9'inx';
+       listing[i+1] := #9'mva #$'+IntToHex(p and $ff, 2) + ' :STACKORIGIN,x';
+       listing[i+2] := #9'mva #$'+IntToHex(byte(p shr 8), 2) + ' :STACKORIGIN+STACKWIDTH,x';
+       listing[i+3] := '';//#9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x';
+       listing[i+4] := '';//#9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x';
+       listing[i+5] := #9'inx';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
        (pos('mva ', listing[i+1]) > 0) and							// mva  :STACKORIGIN,x			; 1
        (pos('mva ', listing[i+2]) > 0) and							// mva  :STACKORIGIN+STACKWIDTH,x	; 2
        (pos('mva ', listing[i+3]) > 0) and							// mva  :STACKORIGIN+STACKWIDTH*2,x	; 3
@@ -2635,52 +2743,34 @@ var i, l, k, m: integer;
        Result:=false;
      end;
 
+
+    if Result and
+       (pos('mva #$', listing[i]) > 0) and							// mva #$xx		; 0
+       (pos('mva #$', listing[i+1]) > 0) and							// mva #$xx		; 1
+       (pos('mva #$', listing[i+2]) = 0) then							// ~mva #$		; 2
+     if (copy(listing[i], 6, 4) = copy(listing[i+1], 6, 4)) then
+     begin
+
+       listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
+
+       Result:=false;
+     end;
+
+
+    if Result and
+       (pos('mva #$', listing[i]) > 0) and							// mva #$xx		; 0
+       (pos('mva #$', listing[i+1]) > 0) and							// mva #$xx		; 1
+       (pos('mva #$', listing[i+2]) > 0) then							// mva #$yy		; 2
+     if (copy(listing[i], 6, 4) = copy(listing[i+1], 6, 4)) and
+        (copy(listing[i+1], 6, 4) <> copy(listing[i+2], 6, 4)) then
+     begin
+
+       listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
+
+       Result:=false;
+     end;
+
 {
-    if (pos('mva #$', listing[i]) > 0) and (pos('mva #$', listing[i+1]) > 0) and 		// mva #$xx	; 0
-       (pos('mva #$', listing[i+2]) > 0) and (pos('mva #$', listing[i+3]) > 0) then		// mva #$xx	; 1
-     if (copy(listing[i], 6, 4) = copy(listing[i+1], 6, 4)) and 				// mva #$xx	; 2
-	(copy(listing[i+1], 6, 4) = copy(listing[i+2], 6, 4)) and 				// mva #$xx	; 3
-	(copy(listing[i+2], 6, 4) = copy(listing[i+3], 6, 4)) then begin
-
-       listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
-       listing[i+2] := #9'sta' + copy(listing[i+2], 10, 256);
-       listing[i+3] := #9'sta' + copy(listing[i+3], 10, 256);
-       Result:=false;
-     end;
-
-
-    if (pos('mva #$', listing[i]) > 0) and (pos('mva #$', listing[i+1]) > 0) and 		// mva #$xx	; 0
-       (pos('mva #$', listing[i+2]) > 0) then							// mva #$xx	; 1
-     if (copy(listing[i], 6, 4) = copy(listing[i+1], 6, 4)) and 				// mva #$xx	; 2
-	(copy(listing[i+1], 6, 4) = copy(listing[i+2], 6, 4)) then begin
-
-       listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
-       listing[i+2] := #9'sta' + copy(listing[i+2], 10, 256);
-       Result:=false;
-     end;
-
-
-    if (pos('mva #$', listing[i]) > 0) and (pos('mva #$', listing[i+1]) > 0) then		// mva #$xx	; 0
-     if copy(listing[i], 6, 4) = copy(listing[i+1], 6, 4) then begin				// mva #$xx	; 1
-
-       listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
-       Result:=false;
-     end;
-
-
-    if (pos('mva #$', listing[i]) > 0) and (pos('mva #$', listing[i+1]) > 0) and		// mva #$xx	; 0
-       (pos('mva #$', listing[i+2]) > 0) then							// mva #$yy	; 1
-     if (copy(listing[i], 6, 4) = copy(listing[i+2], 6, 4)) and					// mva #$xx	; 2
-	(copy(listing[i], 6, 4) <> copy(listing[i+1], 6, 4)) then begin
-
-       tmp := listing[i];
-
-       listing[i]   := listing[i+1];
-       listing[i+1] := tmp;
-       Result:=false;
-     end;
-
-
     if (pos('mva #$', listing[i]) > 0) and (pos(' :STACK', listing[i]) > 0) and			// mva #$xx STACKORIGN,x		; 0
        (pos('sta :STACK', listing[i+1]) > 0) and (listing[i+2] = #9'inx') and			// sta :STACKORIGIN+STACKWIDTH,x		; 1
        (pos('mva #$', listing[i+3]) > 0) and (pos(' :STACK', listing[i+3]) > 0) then		// inx					; 2
@@ -3434,7 +3524,7 @@ var i, l, k, m: integer;
        (listing[i+14] = #9'lda :eax') and						// lda :eax				; 14
        add_sub(i+15) and								// add|sub 				; 15
        ((listing[i+16] = #9'tay') or							// tay|sta :STACK			; 16
-       ((pos('sta :STACK', listing[i+16]) > 0) and (listing[i+17] <> #9'lda :eax+1') )) then
+       ((pos('sta :STACK', listing[i+16]) > 0) and (pos(' :eax+1', listing[i+17]) = 0) )) then
        begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3496,6 +3586,81 @@ var i, l, k, m: integer;
        (pos('lda ', listing[i+2]) > 0) and						// lda					; 2
        (listing[i+3] = #9'asl @') and							// asl @				; 3
        (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       (listing[i+5] = #9'asl @') and							// asl @				; 5
+       (listing[i+6] = #9'rol :eax+1') and						// rol :eax+1				; 6
+       (pos('add ', listing[i+7]) > 0) and						// add					; 7
+       (listing[i+8] = #9'sta :eax') and						// sta :eax				; 8
+       (listing[i+9] = #9'lda :eax+1') and						// lda :eax+1				; 9
+       (listing[i+10] = #9'adc #$00') and						// adc #$00				; 10
+       (listing[i+11] = #9'sta :eax+1') and						// sta :eax+1				; 11
+       (listing[i+12] = #9'asl :eax') and						// asl :eax				; 12
+       (listing[i+13] = #9'rol :eax+1') and						// rol :eax+1				; 13
+       (listing[i+14] = #9'lda :eax') and						// lda :eax				; 14
+       (pos('sta ', listing[i+15]) > 0) and						// sta 					; 15
+       (pos(' :eax+1', listing[i+16]) = 0) and						// ~ :eax+1				; 16
+       (pos(' :eax+1', listing[i+17]) = 0) then						// ~ :eax+1				; 17
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+4] := '';
+	listing[i+6] := '';
+
+	listing[i+8]  := '';
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+	listing[i+12] := #9'asl @';
+	listing[i+13] := #9'sta :eax';
+
+	Result:=false;
+       end;
+
+
+    if (listing[i] = #9'lda #$00') and							// lda #$00				; 0
+       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       (pos('lda ', listing[i+2]) > 0) and						// lda					; 2
+       (listing[i+3] = #9'asl @') and							// asl @				; 3
+       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       (listing[i+5] = #9'asl @') and							// asl @				; 5
+       (listing[i+6] = #9'rol :eax+1') and						// rol :eax+1				; 6
+       (pos('add ', listing[i+7]) > 0) and						// add					; 7
+       (listing[i+8] = #9'sta :eax') and						// sta :eax				; 8
+       (listing[i+9] = #9'lda :eax+1') and						// lda :eax+1				; 9
+       (listing[i+10] = #9'adc #$00') and						// adc #$00				; 10
+       (listing[i+11] = #9'sta :eax+1') and						// sta :eax+1				; 11
+       (listing[i+12] = #9'asl :eax') and						// asl :eax				; 12
+       (listing[i+13] = #9'rol :eax+1') and						// rol :eax+1				; 13
+       (listing[i+14] = #9'lda :eax') and						// lda :eax				; 14
+       add_sub(i+15) and								// add|sub 				; 15
+       (pos('sta ', listing[i+16]) > 0) and						// sta					; 16
+       (pos(' :eax+1', listing[i+17]) = 0) and						// ~ :eax+1				; 17
+       (pos(' :eax+1', listing[i+18]) = 0) then						// ~ :eax+1				; 18
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+4] := '';
+	listing[i+6] := '';
+
+	listing[i+8]  := '';
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+	listing[i+12] := #9'asl @';
+	listing[i+13] := #9'sta :eax';
+
+	Result:=false;
+       end;
+
+
+    if (listing[i] = #9'lda #$00') and							// lda #$00				; 0
+       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       (pos('lda ', listing[i+2]) > 0) and						// lda					; 2
+       (listing[i+3] = #9'asl @') and							// asl @				; 3
+       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
        (pos('add ', listing[i+5]) > 0) and						// add					; 5
        (listing[i+6] = #9'sta :eax') and						// sta :eax				; 6
        (listing[i+7] = #9'lda :eax+1') and						// lda :eax+1				; 7
@@ -3503,7 +3668,8 @@ var i, l, k, m: integer;
        (listing[i+9] = #9'sta :eax+1') and						// sta :eax+1				; 9
        (listing[i+10] = #9'lda :eax') and						// lda :eax				; 10
        (pos('sta ', listing[i+11]) > 0) and						// sta					; 11
-       (pos('lda :eax+1', listing[i+12]) = 0) then
+       (pos(' :eax+1', listing[i+12]) = 0) and						// ~ :eax+1				; 12
+       (pos(' :eax+1', listing[i+13]) = 0) then						// ~ :eax+1				; 13
        begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3516,6 +3682,36 @@ var i, l, k, m: integer;
 
 	Result:=false;
        end;
+
+
+    if (listing[i] = #9'lda #$00') and							// lda #$00				; 0
+       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       (pos('lda ', listing[i+2]) > 0) and						// lda					; 2
+       (listing[i+3] = #9'asl @') and							// asl @				; 3
+       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       (pos('add ', listing[i+5]) > 0) and						// add					; 5
+       (listing[i+6] = #9'sta :eax') and						// sta :eax				; 6
+       (listing[i+7] = #9'lda :eax+1') and						// lda :eax+1				; 7
+       (listing[i+8] = #9'adc #$00') and						// adc #$00				; 8
+       (listing[i+9] = #9'sta :eax+1') and						// sta :eax+1				; 9
+       (listing[i+10] = #9'lda :eax') and						// lda :eax				; 10
+       add_sub(i+11) and								// add|sub				; 11
+       (pos('sta ', listing[i+12]) > 0) and						// sta					; 12
+       (pos(' :eax+1', listing[i+13]) = 0) and						// ~ :eax+1				; 13
+       (pos(' :eax+1', listing[i+14]) = 0) then						// ~ :eax+1				; 14
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+4] := '';
+
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+
+	Result:=false;
+       end;
+
 
 // add !!!
     if (pos('lda :STACK', listing[i]) > 0) and						// lda :STACKORIGIN+10			; 0
@@ -3768,6 +3964,33 @@ var i, l, k, m: integer;
 // -----------------------------------------------------------------------------
 // ===				IMUL.					  === //
 // -----------------------------------------------------------------------------
+
+    if (pos('lda #$', listing[i]) > 0) and						// lda #$			; 0
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx			; 1
+       (pos('lda #$', listing[i+2]) > 0) and						// lda #$			; 2
+       (listing[i+3] = #9'sta :eax') and						// sta :eax			; 3
+       (listing[i+4] = #9'.ifdef fmulinit') and						// .ifdef fmulinit		; 4
+       (listing[i+5] = #9'fmulu_8') and							// fmulu_8			; 5
+       (listing[i+6] = #9'els') and							// els				; 6
+       (listing[i+7] = #9'imulCL') and 							// imulCL			; 7
+       (listing[i+8] = #9'eif') then		 					// eif				; 8
+       begin
+	p:=GetVal(copy(listing[i], 6, 256)) * GetVal(copy(listing[i+2], 6, 256));
+
+	listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
+	listing[i+1] := #9'sta :eax';
+	listing[i+2] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+	listing[i+3] := #9'sta :eax+1';
+	listing[i+4] := '';//#9'lda #$00';
+	listing[i+5] := '';//#9'sta :eax+2';
+	listing[i+6] := '';//#9'lda #$00';
+	listing[i+7] := '';//#9'sta :eax+3';
+
+	listing[i+8] := '';
+
+	Result:=false;
+       end;
+
 
     if (pos('lda #$', listing[i]) > 0) and						// lda #$			; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx			; 1
@@ -4317,6 +4540,38 @@ var i, l, k, m: integer;
 
       listing[i+6] := listing[i+4];
       listing[i+4] := #9'lda #$00';
+
+      listing[i+8] := '';
+      listing[i+9] := '';
+      listing[i+10] := '';
+      listing[i+11] := '';
+      listing[i+12] := '';
+
+      Result:=false;
+     end;
+
+
+    if (pos('lda ', listing[i]) > 0) and						// lda 					; 0
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       (pos('lda ', listing[i+2]) > 0) and						// lda 					; 2
+       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
+       (listing[i+4] = #9'lda #$00') and						// lda #$00				; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       (listing[i+6] = #9'lda #$01') and 						// lda #$01				; 6
+       (listing[i+7] = #9'sta :eax+1') and 						// sta :eax+1				; 7
+       (listing[i+8] = #9'.ifdef fmulinit') and 					// .ifdef fmulinit			; 8
+       (listing[i+9] = #9'fmulu_16') and						// fmulu_16				; 9
+       (listing[i+10] = #9'els') and 							// els					; 10
+       (listing[i+11] = #9'imulCX') and 						// imulCX				; 11
+       (listing[i+12] = #9'eif') then 							// eif					; 12
+     begin
+      listing[i+6] := listing[i];
+      listing[i+4] := #9'lda #$00';
+
+      listing[i]   := '';
+      listing[i+1] := '';
+      listing[i+2] := '';
+      listing[i+3] := '';
 
       listing[i+8] := '';
       listing[i+9] := '';
@@ -6088,6 +6343,48 @@ var i, l, k, m: integer;
      end;
 
 
+    if (pos('lsr :STACKORIGIN+STACKWIDTH*2', listing[i]) > 0) and				// lsr :STACKORIGIN+STACKWIDTH*2	; 0
+       (pos('ror :STACKORIGIN+STACKWIDTH', listing[i+1]) > 0 ) and				// ror :STACKORIGIN+STACKWIDTH		; 1
+       (listing[i+2] = #9'ror @') and								// ror @				; 2
+       (pos('ora ', listing[i+3]) > 0) and							// ora					; 3
+       (pos('sta ', listing[i+4]) > 0) and							// sta 					; 4
+       (pos('lda ', listing[i+5]) = 0) then							// ~lda 				; 5
+     begin
+        listing[i]   := '';
+	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
+
+	Result:=false;
+     end;
+
+
+    if (pos('lsr :STACKORIGIN+STACKWIDTH*2', listing[i]) > 0) and				// lsr :STACKORIGIN+STACKWIDTH*2	; 0
+       (pos('ror :STACKORIGIN+STACKWIDTH', listing[i+1]) > 0 ) and				// ror :STACKORIGIN+STACKWIDTH		; 1
+       (listing[i+2] = #9'ror @') and								// ror @				; 2
+       (pos('lsr :STACKORIGIN+STACKWIDTH', listing[i+3]) > 0 ) and				// lsr :STACKORIGIN+STACKWIDTH		; 3
+       (listing[i+4] = #9'ror @') then								// ror @				; 4
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
+     begin
+        listing[i]   := '';
+	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
+
+	Result:=false;
+     end;
+
+
+    if (pos('lda ', listing[i]) > 0) and							// lda TEMP				; 0
+       (listing[i+1] = #9'lsr @') and								// lsr @				; 1
+       (pos('sta ', listing[i+2]) > 0 ) then							// sta TEMP				; 2
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+     begin
+	listing[i] := #9'lsr ' + copy(listing[i], 6, 256);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	Result:=false;
+     end;
+
+
 // -----------------------------------------------------------------------------
 // ===				ASL.					  === //
 // -----------------------------------------------------------------------------
@@ -6336,6 +6633,22 @@ var i, l, k, m: integer;
 
 	Result:=false;
        end;
+
+
+// add !!!
+    if (listing[i] = #9'sta :eax+1') and							// sta :eax+1			; 0
+       (listing[i+1] = #9'asl :eax') and							// asl :eax			; 1
+       (listing[i+2] = #9'rol :eax+1') and							// rol :eax+1			; 2
+       (pos('lda ', listing[i+3]) > 0) and							// lda 				; 3
+       (listing[i+4] = #9'add :eax+1') and							// add :eax+1			; 4
+       (pos('sta :STACK', listing[i+5]) > 0) then						// sta :STACK			; 5
+      begin
+	listing[i+2] := #9'rol @';
+	listing[i+3] := #9'add ' + copy(listing[i+3], 6, 256);
+	listing[i+4] := '';
+
+	Result:=false;
+      end;
 
 
     if (pos('lda ', listing[i]) > 0) and							// lda I			; 0
@@ -7833,6 +8146,49 @@ var i, l, k, m: integer;
 
 	Result:=false;
        end;
+
+
+    if (listing[i] = #9'ldy #$00') and							// ldy #$00				; 0
+       (listing[i+1] = #9'lda (:bp2),y') and						// lda (:bp2),y				; 1
+       (pos('sta ', listing[i+2]) > 0) and						// sta :STACKORIGIN+10			; 2
+       (listing[i+3] = #9'iny') and							// iny					; 3
+       (listing[i+4] = #9'lda (:bp2),y') and						// lda (:bp2),y				; 4
+       (pos('sta ', listing[i+5]) > 0) and						// sta :STACKORIGIN+STACKWIDTH+10	; 5
+       (pos('lda ', listing[i+6]) > 0) and 						// lda OUTCODE				; 6
+       add_sub(i+7) and									// add|sub				; 7
+       (listing[i+8] = #9'tay') and							// tay					; 8
+       (pos('lda ', listing[i+9]) > 0) and 						// lda OUTCODE+1			; 9
+       adc_sbc(i+10) and								// adc|sbc				; 10
+       (listing[i+11] = #9'sta :bp+1') and						// sta :bp+1				; 11
+       (pos('lda ', listing[i+12]) > 0) then 						// lda :STACKORIGIN+10			; 12
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+12], 6, 256)) then
+       begin
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	Result:=false;
+       end;
+
+
+    if add_sub(i) and									// add|sub				; 0
+       (listing[i+1] = #9'sta :bp2') and						// sta :bp2				; 1
+       (pos('lda ', listing[i+2]) > 0) and 						// lda 					; 2
+       adc_sbc(i+3) and									// adc|sbc				; 3
+       (listing[i+4] = #9'sta :bp2+1') and						// sta :bp2+1				; 4
+       (listing[i+5] = #9'ldy #$00') and						// ldy #$00				; 5
+       (listing[i+6] = #9'lda (:bp2),y') and						// lda (:bp2),y				; 6
+       (pos('sta ', listing[i+7]) > 0) and 						// sta 					; 7
+       (listing[i+8] <> #9'iny') then							// ~iny					; 8
+      begin
+	listing[i+1]  := #9'tay';
+
+	listing[i+4]  := #9'sta :bp+1';
+	listing[i+5]  := '';
+	listing[i+6]  := #9'lda (:bp),y';
+
+	Result:=false;
+      end;
 
 
     if (listing[i] = #9'ldy #$00') and							// ldy #$00				; 0
@@ -10192,6 +10548,16 @@ var i, l, k, m: integer;
 // ===			optymalizacja SUB.				  === //
 // -----------------------------------------------------------------------------
 
+    if (pos('lda ', listing[i]) > 0) and							// lda			; 0
+       (pos('lda ', listing[i+1]) > 0) and							// lda			; 1
+       add_sub(i+2) then									// add|sub		; 2
+      begin
+	listing[i] := '';
+
+	Result := false;
+      end;
+
+
     if (l = 3) and (pos('lda ', listing[i]) > 0) and (pos(',y', listing[i]) = 0) and		// lda X 		; 0
        (listing[i+1] = #9'sub #$01') and							// sub #$01		; 1
        (pos('sta ', listing[i+2]) > 0) and (pos(',y', listing[i+2]) = 0) then			// sta Y		; 2
@@ -11362,6 +11728,15 @@ var i, l, k, m: integer;
      end;
 
 
+    if (listing[i] = #9'tya') and							// tya
+       (pos('lda ', listing[i+1]) > 0) and						// lda
+       (pos('sta ', listing[i+2]) > 0) then						// sta
+     begin
+	listing[i] := '';
+	Result:=false;
+     end;
+
+
     if (pos('sty :STACK', listing[i]) > 0) and (pos('sty ', listing[i+1]) > 0) and	// sty :STACKORIGIN+10	; 0
        (pos('lda :STACK', listing[i+2]) > 0) then					// sty			; 1
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then begin		// lda :STACKORIGIN+10	; 2
@@ -12242,26 +12617,6 @@ var i, l, k, m: integer;
      end;
 
 
-    if (listing[i] = #9'bne *+5') and								// bne *+5		; 0
-       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
-     begin
-       listing[i]   := '';
-       listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
-
-       Result:=false;
-     end;
-
-
-    if (listing[i] = #9'beq *+5') and								// beq *+5		; 0
-       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
-     begin
-       listing[i]   := '';
-       listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
-
-       Result:=false;
-     end;
-
-
     if (pos('cmp ', listing[i]) > 0) and							// cmp			; 0
        (listing[i+1] = #9'beq @+') and								// beq @+		; 1
        (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
@@ -12283,18 +12638,6 @@ var i, l, k, m: integer;
        listing[i+1] := #9'jcs ' + copy(listing[i+2], 6, 256);
        listing[i+2] := '';
        listing[i+3] := '';
-
-       Result:=false;
-     end;
-
-
-    if (listing[i] = #9'bne @+') and								// bne @+		; 0
-       (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
-       (listing[i+2] = '@') then								// @			; 2
-     begin
-       listing[i]   := #9'jeq ' + copy(listing[i+1], 6, 256);
-       listing[i+1] := '';
-       listing[i+2] := '';
 
        Result:=false;
      end;
@@ -12362,6 +12705,80 @@ var i, l, k, m: integer;
 
        Result:=false;
       end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'bne @+') and								// bne @+		; 0
+       (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
+       (listing[i+2] = '@') then								// @			; 2
+     begin
+       listing[i]   := #9'jeq ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false;
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'bcs @+') and								// bcs @+		; 0
+       (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
+       (listing[i+2] = '@') then								// @			; 2
+     begin
+       listing[i]   := #9'jcc ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false;
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
+       (listing[i+2] = '@') then								// @			; 2
+     begin
+       listing[i]   := #9'jcs ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false;
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'beq @+') and								// beq @+		; 0
+       (pos('jmp l_', listing[i+1]) > 0) and							// jmp l_		; 1
+       (listing[i+2] = '@') then								// @			; 2
+     begin
+       listing[i]   := #9'jne ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false;
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'bne *+5') and								// bne *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
+
+       Result:=false;
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'beq *+5') and								// beq *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
+
+       Result:=false;
+     end;
 
 
     if (listing[i] = #9'seq') and								// seq			; 0
@@ -13543,7 +13960,7 @@ begin
 
 	k := GetVAL(copy(listing[l], 6, 256));
 
-	if (arg0 = 'imulBYTE') and (k in [0,1,2,4,8,16,32]) and (pos('#$', listing[l+2]) = 0) then begin
+	if (l>0) and (arg0 = 'imulBYTE') and (k in [0,1,2,4,8,16,32]) and (pos('#$', listing[l+2]) = 0) then begin
 
 	s[x][0] := #9'lda ' + copy(listing[l+2], 6, 256);
 	s[x][1] := #9'lda #$00';
@@ -13621,6 +14038,168 @@ begin
 
 	inc(l, 22);
 	end;
+
+
+    if (l=9) and			// !!! tylko pierwsza poczatkowa czesc
+					// !!! dla 'lda :STACK' zle optymalizuje
+       (pos('lda ', listing[m]) > 0) and (pos('lda :STACK', listing[m]) = 0) and	// lda					; 0
+       ( ((listing[m+1] = #9'sta :ecx') and (listing[m+3] = #9'sta :eax')) or		// sta :ecx|:eax			; 1
+         ((listing[m+1] = #9'sta :eax') and (listing[m+3] = #9'sta :ecx')) ) and
+       ((listing[m+2] = #9'lda #$00') or (listing[m+2] = #9'lda #$01') or
+        (listing[m+2] = #9'lda #$02') or (listing[m+2] = #9'lda #$04') or
+        (listing[m+2] = #9'lda #$08') or (listing[m+2] = #9'lda #$10') or
+	(listing[m+2] = #9'lda #$20') or (listing[m+2] = #9'lda #$40') or
+	(listing[m+2] = #9'lda #$80')) and						// lda #$00;01;02;04;08;10;20;40;80	; 2
+       (listing[m+4] = #9'.ifdef fmulinit') and						// .ifdef fmulinit			; 4
+       (listing[m+5] = #9'fmulu_8') and							// fmulu_8				; 5
+       (listing[m+6] = #9'els') and 							// els					; 6
+       (listing[m+7] = #9'imulCL') and		 					// imulCL				; 7
+       (listing[m+8] = #9'eif') then 							// eif					; 8
+     begin
+      k:=GetVal(copy(listing[m+2], 6, 256));
+
+      if k in [0,1] then begin
+
+	if k=0 then listing[m] := #9'lda #$00';
+
+	listing[m+1] := #9'sta :eax';
+	listing[m+2] := #9'lda #$00';
+	listing[m+3] := #9'sta :eax+1';
+
+	l:=m+4;
+
+      end else begin
+
+	case k of
+	 $02: k:=1;
+	 $04: k:=2;
+	 $08: k:=3;
+	 $10: k:=4;
+	 $20: k:=5;
+	 $40: k:=6;
+	 $80: k:=7;
+	end;
+
+	listing[m+2] := listing[m];
+
+	listing[m]   := #9'lda #$00';
+	listing[m+1] := #9'sta :eax+1';
+
+	l:=m+3;
+
+	while k>0 do begin
+	 listing[l]   := #9'asl @';
+	 listing[l+1] := #9'rol :eax+1';
+
+	 inc(l, 2);
+	 dec(k);
+	end;
+
+	listing[l] := #9'sta :eax';
+
+	inc(l);
+     end;    // if k in [0,1]
+
+     end;
+
+
+    if (l=9) and
+       ((listing[m] = #9'lda #$00') or (listing[m] = #9'lda #$01') or
+        (listing[m] = #9'lda #$02') or (listing[m] = #9'lda #$04') or
+        (listing[m] = #9'lda #$08') or (listing[m] = #9'lda #$10') or
+	(listing[m] = #9'lda #$20') or (listing[m] = #9'lda #$40') or			// lda #$00;01;02;04;08;10;20;40;80	; 0
+	(listing[m] = #9'lda #$80')) and
+       ( ((listing[m+1] = #9'sta :ecx') and (listing[m+3] = #9'sta :eax')) or		// sta :ecx|:eax			; 1
+         ((listing[m+1] = #9'sta :eax') and (listing[m+3] = #9'sta :ecx')) ) and
+       (pos('lda ', listing[m+2]) > 0) and (pos('lda :STACK', listing[m+2]) = 0) and	// lda 					; 2
+       (listing[m+4] = #9'.ifdef fmulinit') and						// .ifdef fmulinit			; 4
+       (listing[m+5] = #9'fmulu_8') and							// fmulu_8				; 5
+       (listing[m+6] = #9'els') and 							// els					; 6
+       (listing[m+7] = #9'imulCL') and		 					// imulCL				; 7
+       (listing[m+8] = #9'eif') then 							// eif					; 8
+     begin
+      k:=GetVal(copy(listing[m], 6, 256));
+
+      if k in [0,1] then begin
+
+	if k=0 then
+	 listing[m] := #9'lda #$00'
+	else
+	 listing[m] := listing[m+2];
+
+	listing[m+1] := #9'sta :eax';
+	listing[m+2] := #9'lda #$00';
+	listing[m+3] := #9'sta :eax+1';
+
+	l:=m+4;
+
+      end else begin
+
+	case k of
+	 $02: k:=1;
+	 $04: k:=2;
+	 $08: k:=3;
+	 $10: k:=4;
+	 $20: k:=5;
+	 $40: k:=6;
+	 $80: k:=7;
+	end;
+
+	listing[m]   := #9'lda #$00';
+	listing[m+1] := #9'sta :eax+1';
+
+	l:=m+3;
+
+	while k>0 do begin
+	 listing[l]   := #9'asl @';
+	 listing[l+1] := #9'rol :eax+1';
+
+	 inc(l, 2);
+	 dec(k);
+	end;
+
+	listing[l] := #9'sta :eax';
+
+	inc(l);
+
+     end;    // if k in [0,1]
+
+     end;
+
+
+    if (l=9) and			// !!! tylko pierwsza poczatkowa czesc
+					// !!! dla 'lda :STACK' zle optymalizuje
+       (listing[m] = #9'lda #$0A') and							// lda #$0A				; 0
+       (listing[m+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       (pos('lda ', listing[m+2]) > 0) and (pos('lda :STACK', listing[m+2]) = 0) and	// lda					; 2
+       (listing[m+3] = #9'sta :eax') and 						// sta :eax				; 3
+       (listing[m+4] = #9'.ifdef fmulinit') and						// .ifdef fmulinit			; 4
+       (listing[m+5] = #9'fmulu_8') and							// fmulu_8				; 5
+       (listing[m+6] = #9'els') and 							// els					; 6
+       (listing[m+7] = #9'imulCL') and		 					// imulCL				; 7
+       (listing[m+8] = #9'eif') then 							// eif					; 8
+     begin
+
+	listing[m]   := #9'lda #$00';
+	listing[m+1] := #9'sta :eax+1';
+
+	listing[m+3] := #9'asl @';
+	listing[m+4] := #9'rol :eax+1';
+	listing[m+5] := #9'asl @';
+	listing[m+6] := #9'rol :eax+1';
+
+	listing[m+7]  := #9'add ' + copy(listing[m+2], 6, 256);
+	listing[m+8] := #9'sta :eax';
+	listing[m+9] := #9'lda :eax+1';
+	listing[m+10] := #9'adc #$00';
+	listing[m+11] := #9'sta :eax+1';
+
+	listing[m+12] := #9'asl :eax';
+	listing[m+13] := #9'rol :eax+1';
+
+	l:=m+14;
+     end;
+
 
     if (l=9) and			// !!! tylko pierwsza poczatkowa czesc
 					// !!! dla 'lda :STACK' zle optymalizuje
@@ -13785,6 +14364,7 @@ begin
 	inc(l, 28);
 	end;
 
+
     if (l=13) and			// !!! tylko pierwsza poczatkowa czesc
 					// !!! dla 'lda :STACK' zle optymalizuje
        (pos('lda ', listing[m]) > 0) and (pos('lda :STACK', listing[m]) = 0) and	// lda					; 0
@@ -13807,7 +14387,6 @@ begin
        listing[m]   := #9'lda #$0A';
        listing[m+2] := #9'lda #$00';
       end;				// zamieniamy miejscami aby zadzialala optymalizacja *10
-
 
 
     if (l=13) and			// !!! tylko pierwsza poczatkowa czesc
@@ -13847,7 +14426,7 @@ begin
 	listing[m+12] := #9'asl :eax';
 	listing[m+13] := #9'rol :eax+1';
 
-	l:=m+14;;
+	l:=m+14;
 
       end else begin
 
@@ -15312,20 +15891,35 @@ procedure OptimizeTMP;
 var i: integer;
 
 
-function TestBranch(i: integer): Boolean;
-var j: integer;
-begin
+  function SKIP(i: integer): Boolean;
+  begin
 
- Result:=true;
+     if i<0 then
+      Result:=False
+     else
+      Result :=	(TemporaryBuf[i].line = #9'seq') or (TemporaryBuf[i].line = #9'sne') or
+		(TemporaryBuf[i].line = #9'spl') or (TemporaryBuf[i].line = #9'smi') or
+		(TemporaryBuf[i].line = #9'scc') or (TemporaryBuf[i].line = #9'scs') or
+		(pos('bne ', TemporaryBuf[i].line) > 0) or (pos('beq ', TemporaryBuf[i].line) > 0) or
+		(pos('bcc ', TemporaryBuf[i].line) > 0) or (pos('bcs ', TemporaryBuf[i].line) > 0) or
+		(pos('bmi ', TemporaryBuf[i].line) > 0) or (pos('bpl ', TemporaryBuf[i].line) > 0);
+  end;
 
- for j:=i downto 0 do begin
 
-  if pos(' @+', TemporaryBuf[j].line) > 0 then begin Result:=false; Break end;
-  if pos('lda ', TemporaryBuf[j].line) > 0 then Break;
+  function TestBranch(i: integer): Boolean;
+  var j: integer;
+  begin
 
- end;
+   Result:=true;
 
-end;
+   for j:=i downto 0 do begin
+
+    if pos(' @+', TemporaryBuf[j].line) > 0 then begin Result:=false; Break end;
+    if pos('lda ', TemporaryBuf[j].line) > 0 then Break;
+
+   end;
+
+  end;
 
 
 begin
@@ -15341,7 +15935,7 @@ begin
     end;
 
 
-   if TestBranch(i) and									// beq *+5		; 1
+   if (SKIP(i) = false) and								// beq *+5		; 1
       (pos('beq *+5', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
       (pos('jmp l_', TemporaryBuf[i+2].line) > 0) then
     begin
@@ -17033,6 +17627,7 @@ begin
    NumAllocElements := Elements(IdentIndex); //Ident[IdentIndex].NumAllocElements;
 
   svar := GetLocalName(IdentIndex);
+
  end else begin
   Kind := CONSTANT;
   NumAllocElements := 0;
@@ -21116,7 +21711,7 @@ begin
 	     AllocElementType := Ident[IdentIndex].AllocElementType;
 
 	     end else
-	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK] + Pointers) then begin
+	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK]) or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0)) then begin
 
 // writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
@@ -21170,7 +21765,7 @@ begin
 	 iError(i, TooManyParameters, IdentIndex);
 
 
-       if Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING then begin
+       if (Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING) then begin
 
 	CompileExpression(i + 2, ActualParamType);
 
@@ -22022,14 +22617,14 @@ case Tok[i].Kind of
 
 	  Param := NumActualParameters(i, IdentIndex, j);
 
-	  if Ident[IdentIndex].isOverload then begin
+//	  if Ident[IdentIndex].isOverload then begin
 	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
 
 	    if IdentTemp = 0 then
 	     iError(i, CantDetermine, IdentIndex);
 
 	    IdentIndex := IdentTemp;
-	  end;
+//	  end;
 
 	CompileActualParameters(i, IdentIndex);
 
@@ -23710,14 +24305,14 @@ case Tok[i].Kind of
 	  end else
 	   Param := NumActualParameters(i, IdentIndex, j);
 
-	  if Ident[IdentIndex].isOverload then begin
+	  //if Ident[IdentIndex].isOverload then begin
 	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
 
 	    if IdentTemp = 0 then
 	     iError(i, CantDetermine, IdentIndex);
 
 	    IdentIndex := IdentTemp;
-	  end;
+	  //end;
 
 	  CompileActualParameters( i, IdentIndex);
 
@@ -24133,6 +24728,9 @@ case Tok[i].Kind of
 
 	      StartOptimization(j);
 
+
+	{$IFDEF OPTIMIZECODE}
+
 	      if SafeCompileConstExpression(j, ConstVal, ExpressionType, Ident[IdentIndex].DataType, true) then begin
 		Push(ConstVal, ASVALUE, DataSize[Ident[IdentIndex].DataType]);
 		DefineIdent(j, '@FORTMP_'+IntToStr(CodeSize), CONSTANT, Ident[IdentIndex].DataType, 0, 0, ConstVal, Tok[j].Kind);
@@ -24141,6 +24739,15 @@ case Tok[i].Kind of
 		ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
 		DefineIdent(j, '@FORTMP_'+IntToStr(CodeSize), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 0);
 	      end;
+
+	{$ELSE}
+
+		j := CompileExpression(j, ExpressionType);
+		ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
+		DefineIdent(j, '@FORTMP_'+IntToStr(CodeSize), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 0);
+
+	{$ENDIF}
+
 
 	      if not (ExpressionType in OrdinalTypes) then
 		iError(j, OrdinalExpectedFOR);
@@ -24159,6 +24766,7 @@ case Tok[i].Kind of
 	      asm65(#13#10'; ForToDoCondition');
 
 	      StartOptimization(j);
+
 	      Push(Ident[IdentTemp].Value, ASPOINTER, DataSize[Ident[IdentTemp].DataType], IdentTemp);
 
 	      GenerateForToDoCondition(DataSize[Ident[IdentIndex].DataType], Down, IdentIndex);  // Satisfied if counter does not reach the second expression value
