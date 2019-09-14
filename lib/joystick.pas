@@ -17,6 +17,17 @@ unit joystick;
 
 interface
 
+const
+	joy_none	= 15;
+	joy_up		= 14;
+	joy_down	= 13;
+	joy_left	= 11;
+	joy_left_up	= 10;
+	joy_left_down	= 9;
+	joy_right	= 7;
+	joy_right_up	= 6;
+	joy_right_down	= 5;
+
 var
 	joy_1 : byte absolute $278;	// The value of joystick 0
 	joy_2 : byte absolute $279;	// The value of joystick 1
@@ -52,17 +63,6 @@ var
 	ptrig5 : byte absolute $281;	// Paddle trigger 5
 	ptrig6 : byte absolute $282;	// Paddle trigger 6
 	ptrig7 : byte absolute $283;	// Paddle trigger 7
-
-const
-	joy_none	= 15;
-	joy_up		= 14;
-	joy_down	= 13;
-	joy_left	= 11;
-	joy_left_up	= 10;
-	joy_left_down	= 9;
-	joy_right	= 7;
-	joy_right_up	= 6;
-	joy_right_down	= 5;
 
 implementation
 
