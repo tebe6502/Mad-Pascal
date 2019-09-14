@@ -442,6 +442,11 @@ data
 len = .filesize(%%1)
 
  ift main.%%lab+len >= $c000
+
+ 	ift main.%%lab>=CODEORIGIN && main.%%lab<PROGRAMSTACK
+	ert 'Overlap memory'
+	eif
+
 	org RESORIGIN
 
 mcpy	jsr sys.off
@@ -456,10 +461,14 @@ data	ins %%1
 
 	ini mcpy
  els
+	ift main.%%lab>=CODEORIGIN && main.%%lab<PROGRAMSTACK
+	ert 'Overlap memory'
+	eif
+
 	org main.%%lab
 
 	ins %%1
-	
+
 	.print '$R RCDATA  ',main.%%lab,'..',*-1," %%1"
  eif
 .endm
