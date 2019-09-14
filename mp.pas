@@ -1212,6 +1212,11 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
       hits := 0;
       cnt:= 0;
 
+      if Ident[IdentIndex].Name = 'TTT' then
+       for i := 1 to NumParams do begin
+        writeln(Ident[IdentIndex].Param[i].Name,',',Ident[IdentIndex].Param[i].DataType,',',Ident[IdentIndex].Param[i].AllocElementType ,' / ', Param[i].Name,',', Param[i].DataType,',',Param[i].AllocElementType  );
+       end;
+
       for i := 1 to NumParams do
        if (
 	  ( ((Ident[IdentIndex].Param[i].DataType in UnsignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes) ) and
@@ -1220,12 +1225,12 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
 	  ( ((Ident[IdentIndex].Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in SignedOrdinalTypes) ) and
 	  (DataSize[Ident[IdentIndex].Param[i].DataType] >= DataSize[Param[i].DataType]) ) or
 
-	  ( ((Ident[IdentIndex].Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes) ) and		// smallint > byte
+	  ( ((Ident[IdentIndex].Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes) ) and	// smallint > byte
 	  (DataSize[Ident[IdentIndex].Param[i].DataType] >= DataSize[Param[i].DataType]) ) or
 
 	  (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) ) or
 
-	  ( (Param[i].DataType in Pointers) and (Ident[IdentIndex].Param[i].DataType = Param[i].AllocElementType) ) or			// dla parametru VAR
+	  ( (Param[i].DataType in Pointers) and (Ident[IdentIndex].Param[i].DataType = Param[i].AllocElementType) ) or		// dla parametru VAR
 
 	  ( (Ident[IdentIndex].Param[i].DataType = UNTYPETOK) and (Ident[IdentIndex].Param[i].PassMethod = VARPASSING) and (Param[i].DataType in IntegerTypes + [CHARTOK]) )
 
@@ -1234,7 +1239,7 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
 	   hits := hits or mask[cnt];		  // z grubsza spelnia warunek
 	   inc(cnt);
 
-	   if Ident[IdentIndex].Param[i].DataType = Param[i].DataType then begin   // dodatkowe punkty jesli idealnie spelnia warunek
+	   if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) then begin   // dodatkowe punkty jesli idealnie spelnia warunek
 	     hits := hits or mask[cnt];
 	     inc(cnt);
 	   end;
@@ -2266,15 +2271,14 @@ var i, l, k, m: integer;
      end;
 
 
-    if (listing[i] = #9'inx') and								// inx					; 0
-       (pos('mva ', listing[i+1]) > 0) and 							// mva aa :STACKORIGIN,x		; 1
-       (listing[i+2] = #9'ldy #1') and								// ldy #1				; 2
-       (listing[i+3] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 3
-       (listing[i+4] = #9'cmp :STACKORIGIN,x') then						// cmp :STACKORIGIN,x			; 4
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+    if (pos('mva ', listing[i]) > 0) and 							// mva aa :STACKORIGIN,x		; 0
+       (listing[i+1] = #9'ldy #1') and								// ldy #1				; 1
+       (listing[i+2] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 2
+       (listing[i+3] = #9'cmp :STACKORIGIN,x') then						// cmp :STACKORIGIN,x			; 3
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) then
      begin
-       listing[i+4] := #9'cmp ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
-       listing[i+1] := '';
+       listing[i+3] := #9'cmp ' + copy(listing[i], 6, pos(':STACK', listing[i])-7 );
+       listing[i]   := '';
 
        Result:=false;
      end;
@@ -2286,8 +2290,36 @@ var i, l, k, m: integer;
        (listing[i+3] = #9'lda :STACKORIGIN-1,x') then						// lda :STACKORIGIN-1,x			; 3
      if (pos(':STACKORIGIN,x', listing[i]) > 0) then
      begin
-       listing[i+3] := #9'lda ' + copy(listing[i], 6, pos(':STACK', listing[i])-6 );
+       listing[i+3] := #9'lda ' + copy(listing[i], 6, pos(':STACK', listing[i])-7 );
        listing[i]   := '';
+
+       Result:=false;
+     end;
+
+
+    if (pos('mva ', listing[i]) > 0) and 							// mva aa :STACKORIGIN,x		; 0
+       (listing[i+1] = #9'jsr andAL_CL') and							// jst andAL_CL				; 1
+       (listing[i+2] = #9'ldy #1') and								// ldy #1				; 2
+       (listing[i+3] = #9'lda :STACKORIGIN-1,x') then						// lda :STACKORIGIN-1,x			; 3
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) then
+     begin
+       listing[i+1] := listing[i+2];
+       listing[i+2] := listing[i+3];
+
+       listing[i+3] := #9'and ' + copy(listing[i], 6, pos(':STACK', listing[i])-7 );
+       listing[i]   := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'cmp #$00') and								// cmp #$00				; 0
+       (listing[i+1] = #9'bne @+') and								// bne @+				; 1
+       (listing[i+2] = #9'dey') and								// lda :STACKORIGIN-1,x			; 2
+       (listing[i+3] = '@') and									// @					; 3
+       (pos('sty :STACK', listing[i+4]) > 0) then						// sty :STACK				; 4
+     begin
+       listing[i] := '';
 
        Result:=false;
      end;
@@ -2711,13 +2743,13 @@ var i, l, k, m: integer;
 
     if (pos('mva ', listing[i]) > 0) and (pos('mva :STACK', listing[i]) = 0) and		// mva YY+3 :STACKORIGIN+STACKWIDTH*3,x	; 0
        (pos(' :STACK', listing[i]) > 0) and							// lda :STACKORIGIN+STACKWIDTH*3,x	; 1
-       (pos('lda :STACK', listing[i+1]) > 0) and						// and|ora|eor #$80			; 2
+       (pos('lda :STACK', listing[i+1]) > 0) and						// and|ora|eor				; 2
        and_ora_eor(i+2) and									// sta :STACKORIGIN+STACKWIDTH*3,x	; 3
        (pos('sta :STACK', listing[i+3]) > 0) then
      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
 	(pos(copy(listing[i+1], 6, 256), listing[i]) > 0 ) then
       begin
-	listing[i]   := #9'lda ' + copy(listing[i], 6, pos(' :STACK', listing[i])-6);
+	listing[i]   := #9'lda ' + copy(listing[i], 6, pos(' :STACK', listing[i])-7);
 	listing[i+1] := '';
 
 	Result:=false;
@@ -2924,7 +2956,7 @@ var i, l, k, m: integer;
       end;
 
 
-     if (pos('lda :STACK', listing[i]) > 0) and						// lda STACK
+     if (pos('lda :STACK', listing[i]) > 0) and						// lda :STACK
         ( (pos('adc ', listing[i+1]) > 0) or (pos('add ', listing[i+1]) > 0) ) then	// add|adc
       begin
 
@@ -2935,10 +2967,10 @@ var i, l, k, m: integer;
 
 	  if (pos('sta ', listing[p]) > 0) and (pos('lda ', listing[p-1]) > 0) and (pos('sta ', listing[p+1]) = 0) then begin
 
-	   listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+	   listing[i]   := #9'lda ' + copy(listing[p-1], 6, 256);
 
 	   listing[p-1] := '';
-	   listing[p] := '';
+	   listing[p]   := '';
 
 	   Result:=false;
 	   Break;
@@ -2954,9 +2986,9 @@ var i, l, k, m: integer;
       end;
 
 
-     if Result and									// lda STACK
-	(pos('lda :STACK', listing[i]) > 0) and (pos('sta ', listing[i+1]) > 0) and	// sta
-	(pos('sta ', listing[i+2]) = 0) and						// ~sta
+     if Result and									// lda :STACKORIGIN		; 0
+	(pos('lda :STACK', listing[i]) > 0) and (pos('sta ', listing[i+1]) > 0) and	// sta				; 1
+	(pos('sta ', listing[i+2]) = 0) and						// ~sta				; 2
 	( copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256) ) then
        begin
 
@@ -3075,24 +3107,18 @@ var i, l, k, m: integer;
        (listing[i+1] = #9'sta (:bp2),y') then						// sta (:bp2),y			; 1
        begin
 
- 	tmp:=copy(listing[i], 6, 256);
+ 	tmp:=#9'sta ' + copy(listing[i], 6, 256);
 
-	yes:=false;
 	for p:=i-1 downto 1 do
-	 if (pos(tmp, listing[p]) > 0) then begin
+	 if (listing[p] = tmp) and (pos('lda ', listing[p-1]) > 0) and (pos(',y', listing[p-1]) = 0) then begin
+	  listing[i]   := listing[p-1];
 
-	  if (pos('sta '+tmp, listing[p]) > 0) and (pos('lda ', listing[p-1]) > 0) and (pos(',y', listing[p-1]) = 0) then begin
-	   listing[i]   := listing[p-1];
-	   listing[p-1] := '';
-	   listing[p]   := '';
+//	  listing[p-1] := '';		!!! zachowac 'lda'
+//	  listing[p]   := '';
 
-	   Result:=false;
-	  end else
-	   Break;
-
+	  Result:=false;
+	  Break;
 	 end;
-//	  else
-//	  if (listing[p] = '@') or (pos(#9'jsr', listing[p]) > 0) then Break;
 
        end;
 
@@ -6070,6 +6096,7 @@ var i, l, k, m: integer;
 
 	listing[i+7+p*4] := listing[i+7];
 	dec(p);
+
 	while p>=0 do begin
 	 listing[i+7+p*4] := #9'lsr @';
 	 listing[i+8+p*4] := #9'ror ' + copy(listing[i+5], 6, 256) ;
@@ -6343,6 +6370,46 @@ var i, l, k, m: integer;
      end;
 
 
+    if (listing[i] = #9'lda #$00') and								// lda #$00				; 0
+       (pos('sta :STACKORIGIN+STACKWIDTH*2', listing[i+1]) > 0) and				// sta :STACKORIGIN+STACKWIDTH*2	; 1
+       (listing[i+2] = #9'lsr @') and								// lsr @				; 2
+       (pos('ror :STACKORIGIN+STACKWIDTH*2', listing[i+3]) > 0) and				// ror :STACKORIGIN+STACKWIDTH*2	; 3
+       (pos('ror :STACK', listing[i+4]) > 0) and						// ror :STACKORIGIN+STACKWIDTH		; 4
+       (pos('ror :STACK', listing[i+5]) > 0) and						// ror :STACKORIGIN			; 5
+       (pos('sta ', listing[i+6]) > 0) then							// sta					; 6
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
+     begin
+	listing[i]   := #9'lsr ' + copy(listing[i+4], 6, 256);
+	listing[i+1] := listing[i+5];
+	listing[i+2] := #9'lda #$00';
+	listing[i+3] := #9'sta ' + copy(listing[i+3], 6, 256);
+	listing[i+4] := #9'lda #$00';
+	listing[i+5] := listing[i+6];
+	listing[i+6] := '';
+
+	Result:=false;
+     end;
+
+
+    if (listing[i] = #9'lda #$00') and								// lda #$00				; 0
+       (pos('sta :STACKORIGIN+STACKWIDTH*2', listing[i+1]) > 0) and				// sta :STACKORIGIN+STACKWIDTH*2	; 1
+       (pos('lsr :STACKORIGIN+STACKWIDTH*2', listing[i+2]) > 0) and				// lsr :STACKORIGIN+STACKWIDTH*2	; 2
+       (pos('ror :STACK', listing[i+3]) > 0) and						// ror :STACKORIGIN+STACKWIDTH		; 3
+       (pos('ror :STACK', listing[i+4]) > 0) then						// ror :STACKORIGIN			; 4
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
+     begin
+	listing[i]   := #9'lsr ' + copy(listing[i+3], 6, 256);
+	listing[i+1] := listing[i+4];
+
+	listing[i+3] := #9'lda #$00';
+	listing[i+4] := #9'sta ' + copy(listing[i+2], 6, 256);
+
+	listing[i+2] := '';
+
+	Result:=false;
+     end;
+
+
     if (pos('lsr :STACKORIGIN+STACKWIDTH*2', listing[i]) > 0) and				// lsr :STACKORIGIN+STACKWIDTH*2	; 0
        (pos('ror :STACKORIGIN+STACKWIDTH', listing[i+1]) > 0 ) and				// ror :STACKORIGIN+STACKWIDTH		; 1
        (listing[i+2] = #9'ror @') and								// ror @				; 2
@@ -6380,6 +6447,20 @@ var i, l, k, m: integer;
 
 	listing[i+1] := '';
 	listing[i+2] := '';
+
+	Result:=false;
+     end;
+
+
+    if (pos('sta :STACK', listing[i]) > 0) and							// sta :STACKORIGIN+STACKWIDTH		; 0
+       (pos('lsr :STACK', listing[i+1]) > 0 ) and						// lsr :STACKORIGIN+STACKWIDTH		; 1
+       (listing[i+2] <> #9'ror @') and								// ~ror @				; 2
+       (listing[i+3] <> #9'ror @') and								// ~ror @				; 3
+       (listing[i+4] <> #9'ror @') then								// ~ror @				; 4
+     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+     begin
+        listing[i+1] := listing[i];
+	listing[i]   := #9'lsr @';
 
 	Result:=false;
      end;
@@ -11839,10 +11920,10 @@ var i, l, k, m: integer;
 
 
     if (pos('sta :STACK', listing[i]) > 0) and
-       (pos('lda :STACK', listing[i+1]) > 0) and (pos('sta ', listing[i+2]) > 0) and	// sta STACK+WIDTH+10	; 0
-       (pos('lda :STACK', listing[i+3]) > 0) and (pos('sta ', listing[i+4]) > 0) and	// lda STACK+10		; 1
+       (pos('lda :STACK', listing[i+1]) > 0) and (pos('sta ', listing[i+2]) > 0) and	// sta :STACK+WIDTH+10	; 0
+       (pos('lda :STACK', listing[i+3]) > 0) and (pos('sta ', listing[i+4]) > 0) and	// lda :STACK+10	; 1
        (pos('ldy ', listing[i+5]) > 0) and (pos('lda ', listing[i+6]) > 0) and		// sta :eax		; 2
-       (pos('sta ', listing[i+7]) > 0) and (pos('lda ', listing[i+8]) > 0) and		// lda STACK+WIDTH+10	; 3
+       (pos('sta ', listing[i+7]) > 0) and (pos('lda ', listing[i+8]) > 0) and		// lda :STACK+WIDTH+10	; 3
        (pos('sta ', listing[i+9]) > 0) then						// sta :eax+1		; 4
      if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) and 			// ldy :eax		; 5
 	(copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) then			// lda			; 6
@@ -12157,16 +12238,18 @@ var i, l, k, m: integer;
 
   repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA;
+  repeat until PeepholeOptimization_END;
 
   repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA;
+  repeat until PeepholeOptimization_END;
 
   repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA;
+  repeat until PeepholeOptimization_END;
 
   repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA;
-
   repeat until PeepholeOptimization_END;
 
  end;
@@ -13545,163 +13628,6 @@ begin
 
        inc(l, 6);
       end else
-{       if arg0 = '@round' then begin
-	t:='';
-
-	listing[l]   := #9'lda '+GetARG(0, x);
-	listing[l+1] := #9'sta '+GetARG(0, x);
-	listing[l+2] := #9'lda '+GetARG(1, x);
-	listing[l+3] := #9'sta '+GetARG(1, x);
-	listing[l+4] := #9'lda '+GetARG(2, x);
-	listing[l+5] := #9'sta '+GetARG(2, x);
-	listing[l+6] := #9'lda '+GetARG(3, x);
-	listing[l+7] := #9'sta '+GetARG(3, x);
-	listing[l+8] := #9'tay';
-	listing[l+9] := #9'bpl @+';
-
-	inc(l, 10);
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-
-	listing[l]    := '@';
-	listing[l+1]  := #9'lda '+GetARG(0, x);
-	listing[l+2]  := #9'cmp #$80';
-
-	inc(l, 3);
-
-	listing[l]    := #9'lda '+GetARG(1, x);
-	listing[l+1]  := #9'adc #$00';
-	listing[l+2]  := #9'sta '+GetARG(0, x);
-	listing[l+3]  := #9'lda '+GetARG(2, x);
-	listing[l+4]  := #9'adc #$00';
-	listing[l+5]  := #9'sta '+GetARG(1, x);
-	listing[l+6]  := #9'lda '+GetARG(3, x);
-	listing[l+7] := #9'adc #$00';
-	listing[l+8] := #9'sta '+GetARG(2, x);
-	listing[l+9] := #9'lda #$00';
-	listing[l+10] := #9'sta '+GetARG(3, x);
-	listing[l+11] := #9'tya';
-	listing[l+12] := #9'bpl @+';
-
-	inc(l, 13);
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-
-	listing[l]  := '@';
-	listing[l+1] := #9'lda '+GetARG(0, x);
-	listing[l+2] := #9'sta '+GetARG(0, x);
-	listing[l+3] := #9'lda '+GetARG(1, x);
-	listing[l+4] := #9'sta '+GetARG(1, x);
-	listing[l+5] := #9'lda '+GetARG(2, x);
-	listing[l+6] := #9'sta '+GetARG(2, x);
-	listing[l+7] := #9'lda '+GetARG(3, x);
-	listing[l+8] := #9'sta '+GetARG(3, x);
-
-	inc(l, 9);
-
-       end else
-       if arg0 = '@trunc' then begin
-	t:='';
-
-	listing[l]   := #9'lda '+GetARG(0, x);
-	listing[l+1] := #9'sta '+GetARG(0, x);
-	listing[l+2] := #9'lda '+GetARG(1, x);
-	listing[l+3] := #9'sta '+GetARG(1, x);
-	listing[l+4] := #9'lda '+GetARG(2, x);
-	listing[l+5] := #9'sta '+GetARG(2, x);
-	listing[l+6] := #9'lda '+GetARG(3, x);
-	listing[l+7] := #9'sta '+GetARG(3, x);
-
-	inc(l, 8);
-
-	listing[l]     := #9'tay';
-	listing[l+1]   := #9'bpl @+';
-
-	inc(l, 2);
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-
-	listing[l]    := '@';
-	listing[l+1]  := #9'lda '+GetARG(1, x);
-	listing[l+2]  := #9'sta '+GetARG(0, x);
-	listing[l+3]  := #9'lda '+GetARG(2, x);
-	listing[l+4]  := #9'sta '+GetARG(1, x);
-	listing[l+5]  := #9'lda '+GetARG(3, x);
-	listing[l+6]  := #9'sta '+GetARG(2, x);
-	listing[l+7]  := #9'lda #$00';
-	listing[l+8]  := #9'sta '+GetARG(3, x);
-	listing[l+9]  := #9'tya';
-	listing[l+10] := #9'bpl @+';
-
-	inc(l, 11);
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-
-	listing[l]  := '@';
-	listing[l+1] := #9'lda '+GetARG(0, x);
-	listing[l+2] := #9'sta '+GetARG(0, x);
-	listing[l+3] := #9'lda '+GetARG(1, x);
-	listing[l+4] := #9'sta '+GetARG(1, x);
-	listing[l+5] := #9'lda '+GetARG(2, x);
-	listing[l+6] := #9'sta '+GetARG(2, x);
-	listing[l+7] := #9'lda '+GetARG(3, x);
-	listing[l+8] := #9'sta '+GetARG(3, x);
-
-	inc(l, 9);
-
-      end else}
       if arg0 = 'negCARD' then begin
        t:='';
 
@@ -21643,7 +21569,7 @@ begin
 end;
 
 
-function CompileAddress(i: integer; out ValType, AllocElementType: Byte): integer;
+function CompileAddress(i: integer; out ValType, AllocElementType: Byte; VarPass: Boolean = false): integer;
 var IdentIndex: integer;
     Name, svar: string;
 begin
@@ -21711,9 +21637,11 @@ begin
 	     AllocElementType := Ident[IdentIndex].AllocElementType;
 
 	     end else
-	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK]) or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0)) then begin
+	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
+	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType > 0)) or
+		 (Ident[IdentIndex].PassMethod = VARPASSING) or VarPass then begin
 
-// writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+ //writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
 		 if (Ident[IdentIndex].DataType in Pointers) and (Tok[i + 2].Kind = DEREFERENCETOK) then begin
 		   AllocElementType :=  Ident[IdentIndex].AllocElementType;
@@ -21722,9 +21650,9 @@ begin
 		 end;
 
 		 if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentIndex].NumAllocElements > 0) and
-		    (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET) then
+		    (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET) then begin
 		   Push(Ident[IdentIndex].Value, ASPOINTERTORECORD, DataSize[POINTERTOK], IdentIndex)
-		 else
+		 end else
 		   Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 
 	      end else
@@ -21858,6 +21786,9 @@ begin
 
 //	   GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].AllocElementType, Ident[IdentTemp].AllocElementType)
 
+	   if (Ident[IdentIndex].Param[NumActualParams].NumAllocElements = 0) and (Ident[IdentTemp].NumAllocElements = 0) then
+// ok ?
+	   else
 	   if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> Ident[IdentTemp].AllocElementType then
 	     iError(i, IncompatibleTypes, 0, Ident[IdentTemp].AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
 
@@ -23637,7 +23568,8 @@ begin
 
 	end;
 
-	i := CompileAddress(i + 1, ActualParamType, AllocElementType);
+	i := CompileAddress(i + 1, ActualParamType, AllocElementType, NumActualParams < 3 );
+
        end else
 	i := CompileExpression(i + 2 , ActualParamType);  // Evaluate actual parameters and push them onto the stack
 
@@ -23646,8 +23578,8 @@ begin
        ExpandParam(fBlockRead_ParamType[NumActualParams], ActualParamType);
 
        case NumActualParams of
-	1: GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, Ident[IdentIndex].Name, 's@file.buffer');
-	2: GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, Ident[IdentIndex].Name, 's@file.nrecord');
+	1: GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, Ident[IdentIndex].Name, 's@file.buffer');	// VarPassing
+	2: GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, Ident[IdentIndex].Name, 's@file.nrecord');	// VarPassing
 	3: GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, Ident[IdentIndex].Name, 's@file.numread');
        end;
 
@@ -24233,9 +24165,25 @@ case Tok[i].Kind of
 		 if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentTemp].DataType in Pointers) then
 		  asm65(#9'@move '+Name+' '+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)))
 		 else
-		  if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType in Pointers) then
-		   asm65(#9'@move '+Name+' #adr.'+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)))
- 		  else
+		  if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType in Pointers) then begin
+
+		   if RecordSize(IdentIndex) <= 8 then begin
+
+		    asm65(#9'mwa '+Name+' :bp2');
+		    asm65(#9'ldy #0');
+		    asm65(#9'lda (:bp2),y');
+		    asm65(#9'sta adr.'+Ident[IdentIndex].Name);
+
+		    for k:=1 to RecordSize(IdentIndex)-1 do begin
+		     asm65(#9'iny');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9'sta adr.'+Ident[IdentIndex].Name+'+'+IntToStr(k));
+		    end;
+
+		   end else
+		    asm65(#9'@move '+Name+' #adr.'+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
+
+ 		  end else
 		   asm65(#9'@move #'+Name+' '+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
 
      	       end else	   // ExpressionType <> RECORDTOK+OBJECTTOK
@@ -24305,14 +24253,14 @@ case Tok[i].Kind of
 	  end else
 	   Param := NumActualParameters(i, IdentIndex, j);
 
-	  //if Ident[IdentIndex].isOverload then begin
+//	  if Ident[IdentIndex].isOverload then begin
 	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
 
 	    if IdentTemp = 0 then
 	     iError(i, CantDetermine, IdentIndex);
 
 	    IdentIndex := IdentTemp;
-	  //end;
+//	  end;
 
 	  CompileActualParameters( i, IdentIndex);
 
