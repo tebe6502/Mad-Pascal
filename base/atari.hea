@@ -45,23 +45,30 @@ scr32	= @dmactl(narrow|dma|players|missiles|oneline)		;screen 32b
 * ---	OS
 * ---------------------------------------------------------------------------------------------
 
-ramlo	=	$04	; (2) wektor RAM dla testu wielko?ci pami?ci
+ramlo	=	$04	; (2) wektor RAM dla testu wielkosci pamieci
 
-warmst	=	$08	; znacznik gor?cego startu
-boot?	=	$09	; znacznik odczytu wst?pnego
+warmst	=	$08	; znacznik goracego startu
+boot?	=	$09	; znacznik odczytu wstepnego
 dosvec	=	$0A	; (2) wektor startowy programu dyskowego
 dosini	=	$0C	; (2) wektor inicjacji po odczycie z dyskietki
 
+brkkey	=	$11
+
 rtclok	=	$12	; (3) zegar czasu rzeczywistego
 
-lmargin	=	$52
-rmargin	=	$53
+lmargn	=	$52
+rmargn	=	$53
 rowcrs	=	$54	; wiersz  kursora
 colcrs	=	$55	; (2) Kolumna kursora
-savmsc	=	$58	; (2) Adres pamiêci obrazu
+dindex	=	$57
+savmsc	=	$58	; (2) Adres pamieci obrazu
+oldrow	=	$5a
+oldcol	=	$5b
+oldchr	=	$5d
+oldadr	=	$5e
+logcol	=	$63
 
-keydef	=	$79	; (2) tablica konwersji kod?w klawiatury na ATASCII
-
+keydef	=	$79	; (2) tablica konwersji kodow klawiatury na ATASCII
 
 vdslst	=	$0200	; (2) wektor przerwa? NMI listy displejowej
 timcnt3	=	$021C	; trzeci licznik systemu
@@ -78,31 +85,32 @@ colpf2s	=	$02C6	; rejestr-cie? COLPF2
 colpf3s	=	$02C7	; rejestr-cie? COLPF3
 colbaks	=	$02C8	; rejestr-cie? COLBAK
 
+escflg	=	$02a2
 dsctln	=	$02D5	; (2) Disk sector size register; default of 128 ($80) bytes
+memlo	=	$02e7
 dvstat	=	$02EA	; (4) device status
-
 crsinh	=	$02F0	; znacznik widoczno?ci kursora
 chact	=	$02F3	; rejestr cien CHRCTL
+chart	=	$02F3	; cien rejestru kontroli wyswietlania znak?w (CHRCTL)
 chbas	=	$02F4	; rejestr cien CHBASE
+atachr	=	$02fb	; numer koloru dla PLOT, DRAW (kod ATASCII znaku)
+kbcodes	=	$02fc	; kod ostatnio nacisnietego klawisza, $ff jesli zaden nie zostal nacisniety (KBCODE)
+fildat	=	$02fd	; numer koloru dla FILL
+ssflag	=	$02ff
 
-atachr	=	$02Fb	; numer koloru dla PLOT, DRAW (kod ATASCII znaku)
-kbcodes	=	$02Fc	; kod ostatnio naci?ni?tego klawisza, $ff je?li ?aden nie zosta? naci?ni?ty (KBCODE)
-fildat	=	$02Fd	; numer koloru dla FILL
-chart	=	$02F3	; cie? rejestru kontroli wy?wietlania znak?w (CHRCTL)
-
-ddevic	=	$0300	; Device Control Block, identyfikator urz?dzenia
-dunit	=	$0301	; Numer urz?dzenia; w przypadku stacji dysk?w numer nap?du
+ddevic	=	$0300	; Device Control Block, identyfikator urzadzenia
+dunit	=	$0301	; Numer urz?dzenia; w przypadku stacji dyskow numer nap?du
 dcmnd	=	$0302	; Komenda dla urz?dzenia.
-dstats	=	$0303	; Przed wywo?aniem SIO nale?y ustawi? tu rodzaj operacji ($40 odczyt, $80 zapis, $C0 zapis i odczyt, $00 brak transferu danych). Po powrocie z systemu znajduje si? tu status operacji (kod b??du).
-dbufa	=	$0304	; (2) Adres bufora. Przy operacji zapisu i odczytu jednocze?nie (DSTATS = $C0) bufor na odczytywane dane znajduje si? w tym samym miejscu, co bufor danch przeznaczonych do zapisu.
+dstats	=	$0303	; Przed wywo?aniem SIO nalezy ustawic tu rodzaj operacji ($40 odczyt, $80 zapis, $C0 zapis i odczyt, $00 brak transferu danych). Po powrocie z systemu znajduje si? tu status operacji (kod b??du).
+dbufa	=	$0304	; (2) Adres bufora. Przy operacji zapisu i odczytu jednocze?nie (DSTATS = $C0) bufor na odczytywane dane znajduje sie w tym samym miejscu, co bufor danch przeznaczonych do zapisu.
 dtimlo	=	$0306	; Czas oczekiwania na pozytywn? odpowied? urz?dzenia, tzw. timeout, najczesciej = 7
-dunuse	=	$0307	; Bajt nieu?ywany, zarezerwowany do przysz?ych zastosowa?.
-dbyt	=	$0308	; (2) Wielko?? bufora; musi by? zgodna z wielko?ci? transmitowanego bloku danych. Zero oznacza 64 kilobajty.
+dunuse	=	$0307	; Bajt nieuzywany, zarezerwowany do przysz?ych zastosowa?.
+dbyt	=	$0308	; (2) Wielkosc bufora; musi byc zgodna z wielkoscia transmitowanego bloku danych. Zero oznacza 64 kilobajty.
 daux1	=	$030A	; Pierwszy bajt pomocniczy. W operacjach dyskowych m?odszy bajt numeru sektora.
 daux2	=	$030B	; Drugi bajt pomocniczy. W operacjach dyskowych starszy bajt numeru sektora.
 casflg	=	$030F	; When set to zero, the current operation is a standard SIO operation; when non-zero, it is a cassette operation.
 
-hatabs	=	$031A	; tabela wektor?w procedur obs?ugi
+hatabs	=	$031A	; tabela wektorow procedur obslugi
 
 iocb	=	$0340	; IOCB 0..7 ($340, $350, $360 ...)
 iocom	=	iocb+2	; Komenda dla IOCB
