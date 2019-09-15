@@ -320,7 +320,7 @@ const
 
   DataSize: array [BYTETOK..SINGLETOK] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4);
 
-  fBlockRead_ParamType : array [1..3] of byte = (POINTERTOK, SMALLINTTOK, POINTERTOK);
+  fBlockRead_ParamType : array [1..3] of byte = (POINTERTOK, WORDTOK, POINTERTOK);
 
 type
 
@@ -1096,7 +1096,7 @@ var TempIndex: integer;
 
 	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
 
-	  exit;
+	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') then exit;
 	end
 
   end;
@@ -1117,7 +1117,7 @@ var TempIndex: integer;
 
 	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
 
-	  exit;
+	  if (Ident[IdentIndex].UnitIndex = UnitIndex) then exit;
 	end
 
   end;
@@ -1586,7 +1586,8 @@ var
 begin
 
 i := GetIdent(Name);
-if (i > 0) and (not Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK]) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
+
+if (i > 0) and (not (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK])) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
   Error(ErrTokenIndex, 'Identifier ' + Name + ' is already defined')
 else
   begin
@@ -21639,7 +21640,8 @@ begin
 	     end else
 	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
 	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType > 0)) or
-		 (Ident[IdentIndex].PassMethod = VARPASSING) or VarPass then begin
+		 (Ident[IdentIndex].PassMethod = VARPASSING) or
+		 (VarPass and (Ident[IdentIndex].DataType in Pointers))  then begin
 
  //writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
@@ -22552,9 +22554,13 @@ case Tok[i].Kind of
 	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
 
 	    if IdentTemp = 0 then
-	     iError(i, CantDetermine, IdentIndex);
+	     if Ident[IdentIndex].isOverload then
+	      iError(i, CantDetermine, IdentIndex)
+	     else
+              iError(i, WrongNumParameters, IdentIndex);
 
 	    IdentIndex := IdentTemp;
+
 //	  end;
 
 	CompileActualParameters(i, IdentIndex);
@@ -23568,7 +23574,7 @@ begin
 
 	end;
 
-	i := CompileAddress(i + 1, ActualParamType, AllocElementType, NumActualParams < 3 );
+	i := CompileAddress(i + 1, ActualParamType, AllocElementType, fBlockRead_ParamType[NumActualParams] in Pointers);
 
        end else
 	i := CompileExpression(i + 2 , ActualParamType);  // Evaluate actual parameters and push them onto the stack
@@ -24257,9 +24263,13 @@ case Tok[i].Kind of
 	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
 
 	    if IdentTemp = 0 then
-	     iError(i, CantDetermine, IdentIndex);
+	     if Ident[IdentIndex].isOverload then
+	      iError(i, CantDetermine, IdentIndex)
+	     else
+              iError(i, WrongNumParameters, IdentIndex);
 
 	    IdentIndex := IdentTemp;
+
 //	  end;
 
 	  CompileActualParameters( i, IdentIndex);
