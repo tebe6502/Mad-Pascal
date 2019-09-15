@@ -2200,7 +2200,7 @@ var i, l, k, m: integer;
    end;
 
 
- function OptimizeStack: Boolean;
+ function PeepholeOptimization_STACK: Boolean;
  var i, p, q: integer;
      tmp: string;
  begin
@@ -2272,7 +2272,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('mva ', listing[i]) > 0) and 							// mva aa :STACKORIGIN,x		; 0
+    if (pos('mva ', listing[i]) > 0) and (pos(',y', listing[i]) = 0) and			// mva aa :STACKORIGIN,x		; 0
        (listing[i+1] = #9'ldy #1') and								// ldy #1				; 1
        (listing[i+2] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 2
        (listing[i+3] = #9'cmp :STACKORIGIN,x') then						// cmp :STACKORIGIN,x			; 3
@@ -2988,15 +2988,16 @@ var i, l, k, m: integer;
 
 
      if Result and									// lda :STACKORIGIN		; 0
-	(pos('lda :STACK', listing[i]) > 0) and (pos('sta ', listing[i+1]) > 0) and	// sta				; 1
-	(pos('sta ', listing[i+2]) = 0) and						// ~sta				; 2
+	(pos('lda :STACK', listing[i]) > 0) and						// sta				; 1
+	(pos('sta ', listing[i+1]) > 0) and (pos(',y', listing[i+1]) = 0) and		// ~sta				; 2
+	(pos('sta ', listing[i+2]) = 0) and
 	( copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256) ) then
        begin
 
 	tmp:=#9'sta ' + copy(listing[i], 6, 256);
-
+// !!! dupa
 	for p:=i-1 downto 0 do
-	 if listing[p] = tmp then begin
+	 if (listing[p] = tmp) and (pos('lda ', listing[p-1]) > 0) {and (pos(',y', listing[p-1]) = 0)} then begin
 	  listing[p]   := listing[i+1];
 	  listing[i]   := '';
 	  listing[i+1] := '';
@@ -11426,6 +11427,15 @@ var i, l, k, m: integer;
      end;
 
 
+    if (pos('lda adr.', listing[i]) > 0) and (pos(',y', listing[i]) = 0) and			// lda adr.		; 0
+       (listing[i+1] = #9'sta #$00') and							// sta #$00		; 1
+       ((pos('lda ', listing[i+2]) > 0) or (pos('mwa ', listing[i+2]) > 0)) then		// lda			; 2
+     begin
+	listing[i+1] := '';
+	Result:=false;
+     end;
+
+
     if (pos('sta ', listing[i]) > 0) and (listing[i+1] = #9'sta #$00') then			// sta
      begin											// sta #$00
 	listing[i+1] := '';
@@ -15772,7 +15782,7 @@ begin
 
 {$IFDEF OPTIMIZECODE}
 
-  repeat until OptimizeStack;	     // optymalizacja lda :STACK... \ sta :STACK...
+  repeat until PeepholeOptimization_STACK;	     // optymalizacja lda :STACK... \ sta :STACK...
 
 {$ENDIF}
 
