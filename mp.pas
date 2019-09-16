@@ -23,6 +23,7 @@ Contributors:
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
 	- fast SIN/COS (IEEE754-32 precision)
 	- DrawChar (unit GRAPHICS)
+	- unit EFAST
 
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
