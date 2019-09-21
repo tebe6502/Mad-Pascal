@@ -3,6 +3,8 @@
 
 Sub-Pascal 32-bit real mode compiler for 80386+ processors v. 2.0 by Vasiliy Tereshkov, 2009
 
+https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
+
 Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2019
 
 Contributors:
@@ -22,7 +24,7 @@ Contributors:
 + DMSC :
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
 	- fast SIN/COS (IEEE754-32 precision)
-	- DrawChar (unit GRAPHICS)
+	- TextOut (unit GRAPHICS)
 	- unit EFAST
 
 
@@ -1213,10 +1215,12 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
       hits := 0;
       cnt:= 0;
 
+{
       if Ident[IdentIndex].Name = 'TTT' then
        for i := 1 to NumParams do begin
         writeln(Ident[IdentIndex].Param[i].Name,',',Ident[IdentIndex].Param[i].DataType,',',Ident[IdentIndex].Param[i].AllocElementType ,' / ', Param[i].Name,',', Param[i].DataType,',',Param[i].AllocElementType  );
        end;
+}
 
       for i := 1 to NumParams do
        if (
@@ -2900,7 +2904,7 @@ var i, l, k, m: integer;
     while (pos('lda #', old) > 0) and (pos('sta ', listing[p+1]) > 0) and (pos('lda #', listing[p+2]) > 0) and (p<l-2) do begin	// lda #
 
      if (copy(old, 6, 256) = copy(listing[p+2], 6, 256)) then
-      listing[p+2] := ''					       // sta
+      listing[p+2] := ''						// sta
      else
       old:=listing[p+2];
 
@@ -3988,6 +3992,20 @@ var i, l, k, m: integer;
 
 	Result:=false;
        end;
+
+
+    if (pos('sta :STACK', listing[i]) > 0) and							// sta :STACKORIGIN+STACKWIDTH		; 0
+       (pos('lsr :STACK', listing[i+1]) > 0 ) and						// lsr :STACKORIGIN+STACKWIDTH		; 1
+       (listing[i+2] <> #9'ror @') and								// ~ror @				; 2
+       (listing[i+3] <> #9'ror @') and								// ~ror @				; 3
+       (listing[i+4] <> #9'ror @') then								// ~ror @				; 4
+     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+     begin
+        listing[i+1] := listing[i];
+	listing[i]   := #9'lsr @';
+
+	Result:=false;
+     end;
 
 
 // -----------------------------------------------------------------------------
@@ -6489,20 +6507,6 @@ var i, l, k, m: integer;
 
 	listing[i+1] := '';
 	listing[i+2] := '';
-
-	Result:=false;
-     end;
-
-
-    if (pos('sta :STACK', listing[i]) > 0) and							// sta :STACKORIGIN+STACKWIDTH		; 0
-       (pos('lsr :STACK', listing[i+1]) > 0 ) and						// lsr :STACKORIGIN+STACKWIDTH		; 1
-       (listing[i+2] <> #9'ror @') and								// ~ror @				; 2
-       (listing[i+3] <> #9'ror @') and								// ~ror @				; 3
-       (listing[i+4] <> #9'ror @') then								// ~ror @				; 4
-     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
-     begin
-        listing[i+1] := listing[i];
-	listing[i]   := #9'lsr @';
 
 	Result:=false;
      end;
@@ -11595,9 +11599,8 @@ var i, l, k, m: integer;
 
 
     if (pos('lda ', listing[i]) > 0) and							// lda
-       ((pos('lda ', listing[i+2]) > 0) or (pos('ldy ', listing[i+2]) > 0) or			// adc|sbc STACK
-       (pos('mwa ', listing[i+2]) > 0)) and							// lda | ldy | mwa
-       adc_sbc_stack(i+1) then
+       adc_sbc_stack(i+1) and									// adc|sbc STACK
+       ((pos('lda ', listing[i+2]) > 0) or (pos('mwa ', listing[i+2]) > 0)) then		// lda | mwa
      begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -11606,8 +11609,7 @@ var i, l, k, m: integer;
 
 
     if ((listing[i] = #9'sbc #$00') or (listing[i] = #9'adc #$00')) and				// sbc #$00 | adc #$00
-       ((pos('lda ', listing[i+1]) > 0) or (pos('ldy ', listing[i+1]) > 0) or			// lda | ldy | mwa
-       (pos('mwa ', listing[i+1]) > 0)) then
+       ((pos('lda ', listing[i+1]) > 0) or (pos('mwa ', listing[i+1]) > 0)) then		// lda | mwa
      begin
 	listing[i]   := '';
 	Result:=false;
@@ -15853,12 +15855,7 @@ begin
 
 {$ENDIF}
 
-  for i := 0 to l - 1 do
-    {if listing[i]<>'' then} Writeln(OutFile, listing[i]);
-
-
-//  for i := 0 to High(OptimizeBuf) - 1 do
-//    Writeln(OutFile, OptimizeBuf[i].line);
+  for i := 0 to l - 1 do Writeln(OutFile, listing[i]);
 
  end;
 
