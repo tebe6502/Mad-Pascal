@@ -509,7 +509,7 @@ var
   NumTok: integer = 0;
 
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass,
+  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, iOut,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, NumDefines, IfdefLevel: Integer;
 
   start_time: QWord;
@@ -530,12 +530,14 @@ var
 
   asmLabels: array of integer;
 
-  OptimizeBuf, TemporaryBuf: array of TOptimizeBuf;
+  TemporaryBuf: array [0..31] of string;
+
+  OptimizeBuf: array of TOptimizeBuf;
 
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2: string;
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3: string;
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp: string;
 
   msgWarning, msgNote, msgUser, UnitPath: TArrayString;
 
@@ -1065,7 +1067,7 @@ begin
 end;
 
 
-procedure asm65(a: string; comment : string =''); forward;
+procedure asm65(a: string = ''; comment : string =''); forward;
 
 
 function GetIdent(S: TString): Integer;
@@ -1889,6 +1891,150 @@ begin
 end;
 
 
+procedure OptimizeTemporaryBuf;
+var i: integer;
+
+
+  function SKIP(i: integer): Boolean;
+  begin
+
+     if i<0 then
+      Result:=False
+     else
+      Result :=	(TemporaryBuf[i] = #9'seq') or (TemporaryBuf[i] = #9'sne') or
+		(TemporaryBuf[i] = #9'spl') or (TemporaryBuf[i] = #9'smi') or
+		(TemporaryBuf[i] = #9'scc') or (TemporaryBuf[i] = #9'scs') or
+		(pos('bne ', TemporaryBuf[i]) > 0) or (pos('beq ', TemporaryBuf[i]) > 0) or
+		(pos('bcc ', TemporaryBuf[i]) > 0) or (pos('bcs ', TemporaryBuf[i]) > 0) or
+		(pos('bmi ', TemporaryBuf[i]) > 0) or (pos('bpl ', TemporaryBuf[i]) > 0);
+  end;
+
+
+  function TestBranch(i: integer): Boolean;
+  var j: integer;
+  begin
+
+   Result:=true;
+
+   for j:=i downto 0 do begin
+
+    if pos(' @+', TemporaryBuf[j]) > 0 then begin Result:=false; Break end;
+    if pos('lda ', TemporaryBuf[j]) > 0 then Break;
+
+   end;
+
+  end;
+
+
+begin
+
+ for i:=0 to High(TemporaryBuf)-1 do
+  if TemporaryBuf[i] <> '' then begin
+
+   if (pos('jmp l_', TemporaryBuf[i]) > 0) then						// jmp l_xxxx		; 0
+    if TemporaryBuf[i+1] = copy(TemporaryBuf[i], 6, 256) then				//l_xxxx		; 1
+    begin
+     TemporaryBuf[i]   := '';
+     TemporaryBuf[i+1] := '';
+    end;
+
+
+   if (SKIP(i) = false) and								// beq *+5		; 1
+      (pos('beq *+5', TemporaryBuf[i+1]) > 0) and					// jmp l_xxxx		; 2
+      (pos('jmp l_', TemporaryBuf[i+2]) > 0) then
+    begin
+     TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+2], 6, 256);
+     TemporaryBuf[i+2] := '';
+    end;
+
+
+    if (TemporaryBuf[i] = #9'bcc *+7') and						// bcc *+7		; 0
+       (TemporaryBuf[i+1] = #9'beq *+5') and						// beq *+5		; 1
+       (pos('jmp l_', TemporaryBuf[i+2]) > 0) then					// jmp l_		; 2
+      begin
+       TemporaryBuf[i]   := #9'scc';
+       TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+2], 6, 256);
+       TemporaryBuf[i+2] := '';
+      end;
+
+
+    if (TemporaryBuf[i] = #9'.ENDL') and						// .ENDL		; 0
+       (TemporaryBuf[i+1] = #9'bmi *+7') and						// bmi *+7		; 1
+       (TemporaryBuf[i+2] = #9'beq *+5') and						// beq *+5		; 2
+       (pos('jmp l_', TemporaryBuf[i+3]) > 0) then					// jmp l_		; 3
+      begin
+       TemporaryBuf[i+1] := #9'smi';
+       TemporaryBuf[i+2] := #9'jne ' + copy(TemporaryBuf[i+3], 6, 256);
+       TemporaryBuf[i+3] := '';
+      end;
+
+
+   if TestBranch(i) and	(SKIP(i) = false) and						// beq @+		; 1
+      (pos('beq @+', TemporaryBuf[i+1]) > 0) and					// jmp l_xxxx		; 2
+      (pos('jmp l_', TemporaryBuf[i+2]) > 0) and
+      (TemporaryBuf[i+3] = '@') then
+    begin
+     TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+2], 6, 256);
+     TemporaryBuf[i+2] := '';
+    end;
+
+
+   if TestBranch(i) and	(SKIP(i) = false) and						// bcs @+		; 1
+      (pos('bcs @+', TemporaryBuf[i+1]) > 0) and					// jmp l_xxxx		; 2
+      (pos('jmp l_', TemporaryBuf[i+2]) > 0) and
+      (TemporaryBuf[i+3] = '@') then
+    begin
+     TemporaryBuf[i+1] := #9'jcc ' + copy(TemporaryBuf[i+2], 6, 256);
+     TemporaryBuf[i+2] := '';
+    end;
+
+
+   if TestBranch(i) and (SKIP(i) = false) and						// bcc @+		; 1
+      (pos('bcc @+', TemporaryBuf[i+1]) > 0) and					// jmp l_xxxx		; 2
+      (pos('jmp l_', TemporaryBuf[i+2]) > 0) and
+      (TemporaryBuf[i+3] = '@') then
+    begin
+     TemporaryBuf[i+1] := #9'jcs ' + copy(TemporaryBuf[i+2], 6, 256);
+     TemporaryBuf[i+2] := '';
+    end;
+
+
+   if (TemporaryBuf[i] = #9'seq') and							// seq			; 0
+      (pos('jmp l_', TemporaryBuf[i+1]) > 0) then					// jmp l_		; 1
+    begin
+     TemporaryBuf[i]   := #9'jne ' + copy(TemporaryBuf[i+1], 6, 256);
+     TemporaryBuf[i+1] := '';
+    end;
+
+ end;
+
+end;
+
+
+procedure WriteOut(a: string);
+var i: integer;
+begin
+
+ if iOut < High(TemporaryBuf) then begin
+  TemporaryBuf[iOut] := a;
+  inc(iOut);
+ end else begin
+
+  OptimizeTemporaryBuf;
+
+  if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+
+  outTmp := TemporaryBuf[0];
+
+  for i:=1 to iOut do TemporaryBuf[i-1] := TemporaryBuf[i];
+
+  TemporaryBuf[iOut] := a;
+
+ end;
+
+end;
+
+
 procedure OptimizeASM;
 (* -------------------------------------------------------------------------- *)
 (* optymalizacja powiodla sie jesli na wyjsciu X=0
@@ -2343,8 +2489,8 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and				// lda (:bp),y				; 9
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) then
      begin
-       listing[i+4]  := #9'add ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
-       listing[i+7]  := #9'adc ' + copy(listing[i+2], 6, pos(':STACK', listing[i+2])-6 );
+       listing[i+4]  := #9'add ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+       listing[i+7]  := #9'adc ' + copy(listing[i+2], 6, pos(':STACK', listing[i+2])-7 );
 
        listing[i+1] := '';
        listing[i+2] := '';
@@ -2375,8 +2521,8 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and				// sta					; 8
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) then
      begin
-       listing[i+4]  := #9'add ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
-       listing[i+7]  := #9'adc ' + copy(listing[i+2], 6, pos(':STACK', listing[i+2])-6 );
+       listing[i+4]  := #9'add ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+       listing[i+7]  := #9'adc ' + copy(listing[i+2], 6, pos(':STACK', listing[i+2])-7 );
 
        listing[i+1] := '';
        listing[i+2] := '';
@@ -2427,7 +2573,7 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+5]) > 0) then
      begin
        listing[i+2] := '';
-       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
        listing[i+1] := '';
        Result:=false;
      end;
@@ -2444,7 +2590,7 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+5]) > 0) then
      begin
        listing[i+2] := '';
-       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
        listing[i+1] := '';
        Result:=false;
      end;
@@ -2458,7 +2604,7 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN,x', listing[i+2]) > 0) and
 	(pos(':STACKORIGIN,x', listing[i+3]) > 0) then
      begin
-       listing[i+2] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+2] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
        listing[i+1] := '';
        Result:=false;
      end;
@@ -2474,7 +2620,7 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
      begin
        listing[i+2] := '';
-       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
        listing[i+1] := '';
        Result:=false;
      end;
@@ -2490,7 +2636,7 @@ var i, l, k, m: integer;
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
      begin
        listing[i+2] := '';
-       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+3] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
        listing[i+1] := '';
        Result:=false;
      end;
@@ -2526,7 +2672,7 @@ var i, l, k, m: integer;
        listing[i+2] := '';
        listing[i+3] := '';
        listing[i+4] := '';
-       listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 );
+       listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
        listing[i+1] := '';
        Result:=false;
      end;
@@ -2671,6 +2817,157 @@ var i, l, k, m: integer;
 
 
     if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva ', listing[i+1]) > 0) and (pos('mva :STACK', listing[i+1]) = 0) and		// mva ... :STACKORIGIN,x		; 1
+       (pos('mva ', listing[i+2]) > 0) and (pos('mva :STACK', listing[i+2]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 2
+       (listing[i+3] = #9'inx') and								// inx					; 3
+       (pos('mva ', listing[i+4]) > 0) and (pos('mva :STACK', listing[i+4]) = 0) and		// mva ... :STACKORIGIN,x		; 4
+       (pos('mva ', listing[i+5]) > 0) and (pos('mva :STACK', listing[i+5]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 5
+       (listing[i+6] = #9'jsr addAX_CX') and							// jsr addAX_CX				; 6
+       (listing[i+7] = #9'dex') and								// dex					; 7
+       (listing[i+8] = #9'm@index2 0') and							// m@index2 0				; 8
+       (listing[i+9] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 9
+       (pos('mva ', listing[i+10]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+10]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 10
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+4]) > 0) then
+     begin
+       listing[i+1] := #9'lda ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+       listing[i+2] := #9'add ' + copy(listing[i+4], 6, pos(':STACK', listing[i+4])-7 );
+       listing[i+3] := #9'asl @';
+       listing[i+4] := #9'tay';
+
+       if listing[i+2] = #9'add #$00' then listing[i+2]:='';
+
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva ', listing[i+1]) > 0) and (pos('mva :STACK', listing[i+1]) = 0) and		// mva ... :STACKORIGIN,x		; 1
+       (pos('mva ', listing[i+2]) > 0) and (pos('mva :STACK', listing[i+2]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 2
+       (listing[i+3] = #9'inx') and								// inx					; 3
+       (pos('mva ', listing[i+4]) > 0) and (pos('mva :STACK', listing[i+4]) = 0) and		// mva ... :STACKORIGIN,x		; 4
+       (pos('mva ', listing[i+5]) > 0) and (pos('mva :STACK', listing[i+5]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 5
+       (listing[i+6] = #9'm@index4 0') and							// m@index4 0				; 6
+       (listing[i+7] = #9'jsr addAX_CX') and							// jsr addAX_CX				; 7
+       (listing[i+8] = #9'dex') and								// dex					; 8
+       (listing[i+9] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 9
+       (pos('mva ', listing[i+10]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+10]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 10
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+4]) > 0) then
+     begin
+       listing[i+5] := #9'add ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+
+       if listing[i+5] = #9'add #$00' then listing[i+5]:='';
+
+       listing[i+2] := #9'lda ' + copy(listing[i+4], 6, pos(':STACK', listing[i+4])-7 );
+       listing[i+3] := #9'asl @';
+       listing[i+4] := #9'asl @';
+
+       listing[i+6] := #9'tay';
+
+       listing[i+1] := '';
+
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva ', listing[i+1]) > 0) and (pos('mva :STACK', listing[i+1]) = 0) and		// mva ... :STACKORIGIN,x		; 1
+       (listing[i+2] = #9'inx') and								// inx					; 2
+       (pos('mva ', listing[i+3]) > 0) and (pos('mva :STACK', listing[i+3]) = 0) and		// mva ... :STACKORIGIN,x		; 3
+       (pos('mva ', listing[i+4]) > 0) and (pos('mva :STACK', listing[i+4]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 4
+       (pos('sta ', listing[i+5]) > 0) and							// sta :STACK				; 5
+       (listing[i+6] = #9'jsr addAX_CX') and							// jsr addAX_CX				; 6
+       (listing[i+7] = #9'dex') and								// dex					; 7
+       (listing[i+8] = #9'm@index2 0') and							// m@index2 0				; 8
+       (listing[i+9] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 9
+       (pos('mva ', listing[i+10]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+10]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 10
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     begin
+       listing[i+1] := #9'lda ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+       listing[i+2] := #9'add ' + copy(listing[i+3], 6, pos(':STACK', listing[i+3])-7 );
+       listing[i+3] := #9'asl @';
+       listing[i+4] := #9'tay';
+
+       if listing[i+2] = #9'add #$00' then listing[i+2]:='';
+
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mwa ', listing[i+1]) > 0) and (pos(':bp2', listing[i+1]) > 0) and			// mwa ... :bp2				; 1
+       (listing[i+2] = #9'ldy #$00') and							// ldy #$00				; 2
+       (pos('mva (:bp2),y', listing[i+3]) > 0) and						// mva (:bp2),y :STACKORIGIN,x		; 3
+       (pos('mva ', listing[i+4]) > 0) and 							// mva 					; 4
+       (listing[i+5] = #9'm@index2 0') and							// m@index2 0				; 5
+       (listing[i+6] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 6
+       (pos('mva ', listing[i+7]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+7]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 7
+     if (pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     begin
+       listing[i+3] := #9'lda (:bp2),y';
+       listing[i+4] := #9'asl @';
+       listing[i+5] := #9'tay';
+
+       listing[i+6] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva ', listing[i+1]) > 0) and (pos('mva :STACK', listing[i+1]) = 0) and		// mva ... :STACKORIGIN,x		; 1
+       (pos('mva ', listing[i+2]) > 0) and (pos('mva :STACK', listing[i+2]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 2
+       (listing[i+3] = #9'm@index2 0') and							// m@index2 0				; 3
+       (listing[i+4] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 4
+       (pos('mva ', listing[i+5]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+5]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 5
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+       listing[i+1] := #9'lda ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+       listing[i+2] := #9'asl @';
+       listing[i+3] := #9'tay';
+
+       listing[i+4] := '';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
+       (pos('mva ', listing[i+1]) > 0) and (pos('mva :STACK', listing[i+1]) = 0) and		// mva ... :STACKORIGIN,x		; 1
+       (pos('mva ', listing[i+2]) > 0) and (pos('mva :STACK', listing[i+2]) = 0) and		// mva ... :STACKORIGIN+STACKWIDTH,x	; 2
+       (listing[i+3] = #9'm@index4 0') and							// m@index4 0				; 3
+       (listing[i+4] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 4
+       (pos('mva ', listing[i+5]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+5]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 5
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+       listing[i+1] := #9'lda ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-7 );
+       listing[i+2] := #9'asl @';
+       listing[i+3] := #9'asl @';
+       listing[i+4] := #9'tay';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'inx') and								// inx					; 0
        (pos('mva #', listing[i+1]) > 0) and							// mva # :STACKORIGIN,x			; 1
        (listing[i+2] = #9'inx') and								// inx					; 2
        (pos('mva #', listing[i+3]) > 0) and							// mva # :STACKORIGIN,x			; 3
@@ -2689,6 +2986,49 @@ var i, l, k, m: integer;
        listing[i+3] := '';//#9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x';
        listing[i+4] := '';//#9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x';
        listing[i+5] := #9'inx';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 0
+       (listing[i+1] = #9'dex') and								// dex					; 1
+       (listing[i+2] = #9'm@index2 0') and							// m@index2 0				; 2
+       (listing[i+3] = #9'ldy :STACKORIGIN,x') and						// ldy :STACKORIGIN,x			; 3
+       (pos('mva ', listing[i+4]) > 0) and (pos(',y :STACKORIGIN,x', listing[i+4]) > 0) then	// mva adr. ,y :STACKORIGIN,X		; 4
+     begin
+       listing[i]   := #9'dex';
+       listing[i+1] := #9'lda :eax';
+       listing[i+2] := #9'asl @';
+       listing[i+3] := #9'tay';
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 0
+       (listing[i+1] = #9'dex') and								// dex					; 1
+       (pos('mva :STACKORIGIN,x', listing[i+2]) > 0) and					// mva :STACKORIGIN,x			; 2
+       (pos('mva :STACKORIGIN+STACKWIDTH,x', listing[i+3]) > 0) and				// mva :STACKORIGIN+STACKWIDTH,x	; 3
+       (listing[i+4] = #9'dex') then								// dex					; 4
+     begin
+       listing[i]   := '';
+
+       listing[i+2] := #9'mva :eax ' + copy(listing[i+2], pos(',x', listing[i+2])+3, length(listing[i+2]) ) ;
+       listing[i+3] := #9'mva :eax+1 ' + copy(listing[i+3], pos(',x', listing[i+3])+3, length(listing[i+3]) ) ;
+
+       Result:=false;
+     end;
+
+
+    if (listing[i] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 0
+       (listing[i+1] = #9'dex') and								// dex					; 1
+       (pos('mva :STACKORIGIN,x', listing[i+2]) > 0) and					// mva :STACKORIGIN,x			; 2
+       (listing[i+3] = #9'dex') then								// dex					; 3
+     begin
+       listing[i]   := '';
+
+       listing[i+2] := #9'mva :eax ' + copy(listing[i+2], pos(',x', listing[i+2])+3, length(listing[i+2]) ) ;
 
        Result:=false;
      end;
@@ -2807,69 +3147,6 @@ var i, l, k, m: integer;
 
        Result:=false;
      end;
-
-{
-    if (pos('mva #$', listing[i]) > 0) and (pos(' :STACK', listing[i]) > 0) and			// mva #$xx STACKORIGN,x		; 0
-       (pos('sta :STACK', listing[i+1]) > 0) and (listing[i+2] = #9'inx') and			// sta :STACKORIGIN+STACKWIDTH,x		; 1
-       (pos('mva #$', listing[i+3]) > 0) and (pos(' :STACK', listing[i+3]) > 0) then		// inx					; 2
-     if copy(listing[i], 6, 4) = copy(listing[i+3], 6, 4) then					// mva #$xx STACKORIGN,x		; 3
-     begin
-       listing[i+3] := #9'sta ' + copy(listing[i+3], pos(':STACK', listing[i+3]), 256 );
-       Result:=false;
-     end;
-
-
-    if (pos('mva #$', listing[i]) > 0) and (pos(' :STACK', listing[i]) > 0) and			// mva #$xx STACKORIGN,x		; 0
-       (listing[i+1] = #9'inx') and								// inx					; 1
-       (pos('mva #$', listing[i+2]) > 0) and (pos(' :STACK', listing[i+2]) > 0) then		// mva #$xx STACKORIGN,x		; 2
-     if copy(listing[i], 6, 4) = copy(listing[i+2], 6, 4) then
-     begin
-       listing[i+2] := #9'sta ' + copy(listing[i+2], pos(':STACK', listing[i+2]), 256 );
-       Result:=false;
-     end;
-
-
-    if (pos('mva #$', listing[i]) > 0) and (pos(' :STACK', listing[i]) > 0) and			// mva #$xx STACKORIGN			; 0
-       (pos('mva #$', listing[i+1]) > 0) and (pos(' :STACK', listing[i+1]) > 0) and		// mva #$yy STACKORIGN			; 1
-       (listing[i+2] = #9'inx') and								// inx					; 2
-       (pos('mva #$', listing[i+3]) > 0) and (pos(' :STACK', listing[i+3]) > 0) then		// mva #$xx STACKORIGN			; 3
-     if copy(listing[i], 6, 4) = copy(listing[i+3], 6, 4) then
-     begin
-       tmp:=listing[i];
-       listing[i]   := listing[i+1];
-       listing[i+1] := tmp;
-       Result:=false;
-     end;
-}
-
-{	!!! takie optymalizacje na stosie nie dzialaja prawidlowo !!!
-
-    if (listing[i] = #9'inx') and											// inx					; 0
-       (pos('mva ', listing[i+1]) > 0) and (pos('mva ', listing[i+2]) > 0) and						// mva aa STACKORIGN,x			; 1
-       (pos('mva ', listing[i+3]) > 0) and (pos('mva ', listing[i+4]) > 0) and						// mva bb STACKORIGN+STACKWIDTH,x	; 2
-       (listing[i+5] = #9'inx') and											// mva cc :STACKORIGIN+STACKWIDTH*2,x	; 3
-       (pos('mva ', listing[i+6]) > 0) and (pos('mva ', listing[i+7]) > 0) and						// mva dd :STACKORIGIN+STACKWIDTH*3,x	; 4
-       (pos('mva ', listing[i+8]) > 0) and (pos('mva ', listing[i+9]) > 0) and						// inx					; 5
-       (pos(':STACKORIGIN,', listing[i+1]) > 6) and (pos(':STACKORIGIN+STACKWIDTH,', listing[i+2]) > 6) and		// mva aa STACKORIGN,x			; 6
-       (pos(':STACKORIGIN+STACKWIDTH*2,', listing[i+3]) > 6) and (pos(':STACKORIGIN+STACKWIDTH*3,', listing[i+4]) > 6) and// mva bb STACKORIGN+STACKWIDTH,x	; 7
-       (pos(':STACKORIGIN', listing[i+6]) > 6) and (pos(':STACKORIGIN+STACKWIDTH,', listing[i+7]) > 6) and		// mva cc :STACKORIGIN+STACKWIDTH*2,x	; 8
-       (pos(':STACKORIGIN+STACKWIDTH*2,', listing[i+8]) > 6) and (pos(':STACKORIGIN+STACKWIDTH*3,', listing[i+9]) > 6) and// mva dd :STACKORIGIN+STACKWIDTH*3,x	; 9
-       (listing[i+10] = #9'jsr mulREAL') then										// jsr mulREAL				; 10
-     begin
-       listing[i+1] := #9'mva ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6 ) + ':eax';
-       listing[i+2] := #9'mva ' + copy(listing[i+2], 6, pos(':STACK', listing[i+2])-6 ) + ':eax+1';
-       listing[i+3] := #9'mva ' + copy(listing[i+3], 6, pos(':STACK', listing[i+3])-6 ) + ':eax+2';
-       listing[i+4] := #9'mva ' + copy(listing[i+4], 6, pos(':STACK', listing[i+4])-6 ) + ':eax+3';
-
-       listing[i+6] := #9'mva ' + copy(listing[i+6], 6, pos(':STACK', listing[i+6])-6 ) + 'mulREAL.ecx0';
-       listing[i+7] := #9'mva ' + copy(listing[i+7], 6, pos(':STACK', listing[i+7])-6 ) + 'mulREAL.ecx1';
-       listing[i+8] := #9'mva ' + copy(listing[i+8], 6, pos(':STACK', listing[i+8])-6 ) + 'mulREAL.ecx2';
-       listing[i+9] := #9'mva ' + copy(listing[i+9], 6, pos(':STACK', listing[i+9])-6 ) + 'mulREAL.ecx3';
-
-       listing[i+10] := #9'jsr mulREAL.main';
-       Result:=false;
-     end;
-}
 
   end;
 
@@ -11558,7 +11835,7 @@ var i, l, k, m: integer;
     if (pos('sta :STACK', listing[i]) > 0) and (pos('lda ', listing[i+1]) > 0) and		// sta :STACKORIGIN+10
        (pos('add :STACK', listing[i+2]) > 0) and						// lda
        ( (pos('sta ', listing[i+3]) > 0) or (listing[i+3] = #9'tay') ) then			// add :STACKORIGIN+10
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then begin			// sta | tay
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then begin			// sta|tay
 	listing[i]   := '';
 	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256) ;
 	listing[i+2] := '';
@@ -11598,22 +11875,22 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('lda ', listing[i]) > 0) and							// lda
-       adc_sbc_stack(i+1) and									// adc|sbc STACK
-       ((pos('lda ', listing[i+2]) > 0) or (pos('mwa ', listing[i+2]) > 0)) then		// lda | mwa
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	Result:=false;
-    end;
-
-
-    if ((listing[i] = #9'sbc #$00') or (listing[i] = #9'adc #$00')) and				// sbc #$00 | adc #$00
-       ((pos('lda ', listing[i+1]) > 0) or (pos('mwa ', listing[i+1]) > 0)) then		// lda | mwa
+    if adc_sbc(i) and										// adc|sbc STACK	; 0
+       ((pos('lda ', listing[i+1]) > 0) or (pos('mwa ', listing[i+1]) > 0)) then		// lda|mwa		; 1
      begin
 	listing[i]   := '';
 	Result:=false;
     end;
+
+
+    if ((pos('lda ', listing[i]) > 0) or adc_sbc(i)) and					// lda|adc|sbc		; 0
+       (pos('ldy ', listing[i+1]) > 0) and							// ldy			; 1
+       ((pos('lda ', listing[i+2]) > 0) or (pos('mva ', listing[i+2]) > 0) or			// lda|mva|mwa		; 2
+        (pos('mwa ', listing[i+2]) > 0)) then
+     begin
+      listing[i] := '';
+      Result:=false;
+     end;
 
 
     if (pos('ldy #$', listing[i]) > 0) and (pos('lda #$', listing[i+1]) > 0) and 		// ldy #$xx		; 0
@@ -11650,6 +11927,15 @@ var i, l, k, m: integer;
      end;
 
 
+    if (pos('lda ', listing[i]) > 0) and (pos(',y', listing[i]) = 0) and			// lda			; 0
+       ((pos('lda ', listing[i+1]) > 0) or (pos('mva ', listing[i+1]) > 0) or 			// lda|mva|mwa		; 1
+        (pos('mwa ', listing[i+1]) > 0)) then
+     begin
+      listing[i] := '';
+      Result:=false;
+     end;
+
+{
     if (pos('lda ', listing[i]) > 0) and (pos('lda ', listing[i+1]) > 0) and 			// lda			; 0
        (pos(',y', listing[i]) = 0) then								// lda			; 1
      begin
@@ -11665,20 +11951,12 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('lda ', listing[i]) > 0) and (pos('ldy ', listing[i+1]) > 0) and			// lda			; 0
-       (pos('mva ', listing[i+2]) > 0) then							// ldy			; 1
-     begin											// mva			; 2
-      listing[i] := '';
-      Result:=false;
-     end;
-
-
     if (pos('lda ', listing[i]) > 0) and (pos('mva ', listing[i+1]) > 0) then 			// lda			; 0
      begin											// mva			; 1
       listing[i] := '';
       Result:=false;
      end;
-
+}
 
     if (pos('lda ', listing[i]) > 0) and (pos('mwa ', listing[i+2]) > 0) then 			// lda			; 0
      if (pos(#9'tay', listing[i+1]) = 0) and (pos('sta ', listing[i+1]) = 0) then		// ~sta|tay		; 1
@@ -11754,7 +12032,7 @@ var i, l, k, m: integer;
 
 	p := GetVAL(copy(listing[i], 6, 256)) xor GetVAL(copy(listing[i+1], 6, 256));
 
-	listing[i]   := #9'lda #$'+IntToHex(p, 2);;
+	listing[i]   := #9'lda #$'+IntToHex(p, 2);
 	listing[i+1] := '';
 	Result:=false;
      end;
@@ -11951,9 +12229,9 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('lda ', listing[i]) > 0) and (pos('ldy ', listing[i+1]) > 0) and		// lda
-       ((pos('mwa ', listing[i+2]) > 0) or (pos('lda ', listing[i+2]) > 0)) then	// ldy
-     begin										// mwa | lda
+    if (pos('lda ', listing[i]) > 0) and (pos('ldy ', listing[i+1]) > 0) and		// lda		; 0
+       ((pos('mwa ', listing[i+2]) > 0) or (pos('lda ', listing[i+2]) > 0)) then	// ldy		; 1
+     begin										// mwa|lda	; 2
 	listing[i] := '';
 	Result:=false;
      end;
@@ -12818,19 +13096,6 @@ var i, l, k, m: integer;
        Result:=false;
       end;
 
-{ !@!@!@!
-    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
-       (listing[i+1] = #9'bmi *+7') and								// bmi *+7		; 1
-       (listing[i+2] = #9'beq *+5') and								// beq *+5		; 2
-       (pos('jmp l_', listing[i+3]) > 0) then							// jmp l_		; 3
-      begin
-       listing[i+1] := #9'smi';
-       listing[i+2] := #9'jne ' + copy(listing[i+3], 6, 256);
-       listing[i+3] := '';
-
-       Result:=false;
-      end;
-}
 
     if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
        (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
@@ -15675,7 +15940,9 @@ begin
 
   ifTmp := false;
 
-  writeln(OutFile, #13#10'; optimize OK ('+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line)+#13#10);
+  WriteOut('');
+  WriteOut('; optimize OK ('+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
+  WriteOut('');
 
 {$IFDEF OPTIMIZECODE}
 
@@ -15828,7 +16095,7 @@ begin
   Rebuild;
 
   for i := 0 to l - 1 do
-    if listing[i]<>'' then Writeln(OutFile, listing[i]);
+    if listing[i]<>'' then WriteOut(listing[i]);
 
 
 (* -------------------------------------------------------------------------- *)
@@ -15839,10 +16106,12 @@ begin
 
   resetOpty;
 
+  WriteOut('');
+
   if x = 51 then
-   writeln(OutFile, #13#10'; optimize FAIL ('+''''+arg0+''''+ ', '+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line))
+   WriteOut('; optimize FAIL ('+''''+arg0+''''+ ', '+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line))
   else
-   writeln(OutFile, #13#10'; optimize FAIL ('+IntToStr(x)+', '+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
+   WriteOut('; optimize FAIL ('+IntToStr(x)+', '+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
 
 
   l := High(OptimizeBuf);
@@ -15855,7 +16124,7 @@ begin
 
 {$ENDIF}
 
-  for i := 0 to l - 1 do Writeln(OutFile, listing[i]);
+  for i := 0 to l - 1 do WriteOut(listing[i]);
 
  end;
 
@@ -15882,137 +16151,15 @@ begin
 
 {$ENDIF}
 
-
  SetLength(OptimizeBuf, 1);
 
 end;
 
 
-procedure OptimizeTMP;
-var i: integer;
-
-
-  function SKIP(i: integer): Boolean;
-  begin
-
-     if i<0 then
-      Result:=False
-     else
-      Result :=	(TemporaryBuf[i].line = #9'seq') or (TemporaryBuf[i].line = #9'sne') or
-		(TemporaryBuf[i].line = #9'spl') or (TemporaryBuf[i].line = #9'smi') or
-		(TemporaryBuf[i].line = #9'scc') or (TemporaryBuf[i].line = #9'scs') or
-		(pos('bne ', TemporaryBuf[i].line) > 0) or (pos('beq ', TemporaryBuf[i].line) > 0) or
-		(pos('bcc ', TemporaryBuf[i].line) > 0) or (pos('bcs ', TemporaryBuf[i].line) > 0) or
-		(pos('bmi ', TemporaryBuf[i].line) > 0) or (pos('bpl ', TemporaryBuf[i].line) > 0);
-  end;
-
-
-  function TestBranch(i: integer): Boolean;
-  var j: integer;
-  begin
-
-   Result:=true;
-
-   for j:=i downto 0 do begin
-
-    if pos(' @+', TemporaryBuf[j].line) > 0 then begin Result:=false; Break end;
-    if pos('lda ', TemporaryBuf[j].line) > 0 then Break;
-
-   end;
-
-  end;
-
-
-begin
-
- for i:=0 to High(TemporaryBuf)-1 do
-  if TemporaryBuf[i].line <> '' then begin
-
-   if (pos('jmp l_', TemporaryBuf[i].line) > 0) then					// jmp l_xxxx		; 0
-    if TemporaryBuf[i+1].line = copy(TemporaryBuf[i].line, 6, 256) then			//l_xxxx		; 1
-    begin
-     TemporaryBuf[i].line   := '';
-     TemporaryBuf[i+1].line := '';
-    end;
-
-
-   if (SKIP(i) = false) and								// beq *+5		; 1
-      (pos('beq *+5', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
-      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) then
-    begin
-     TemporaryBuf[i+1].line := #9'jne ' + copy(TemporaryBuf[i+2].line, 6, 256);
-     TemporaryBuf[i+2].line := '';
-    end;
-
-
-   if TestBranch(i) and									// beq @+		; 1
-      (pos('beq @+', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
-      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
-      (TemporaryBuf[i+3].line = '@') then
-    begin
-     TemporaryBuf[i+1].line := #9'jne ' + copy(TemporaryBuf[i+2].line, 6, 256);
-     TemporaryBuf[i+2].line := '';
-//     TemporaryBuf[i+3].line := '';
-    end;
-
-
-   if TestBranch(i) and									// bcs @+		; 1
-      (pos('bcs @+', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
-      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
-      (TemporaryBuf[i+3].line = '@') then
-    begin
-     TemporaryBuf[i+1].line := #9'jcc ' + copy(TemporaryBuf[i+2].line, 6, 256);
-     TemporaryBuf[i+2].line := '';
-//     TemporaryBuf[i+3].line := '';
-    end;
-
-
-   if TestBranch(i) and									// bcc @+		; 1
-      (pos('bcc @+', TemporaryBuf[i+1].line) > 0) and					// jmp l_xxxx		; 2
-      (pos('jmp l_', TemporaryBuf[i+2].line) > 0) and
-      (TemporaryBuf[i+3].line = '@') then
-    begin
-     TemporaryBuf[i+1].line := #9'jcs ' + copy(TemporaryBuf[i+2].line, 6, 256);
-     TemporaryBuf[i+2].line := '';
-//     TemporaryBuf[i+3].line := '';
-    end;
-
-
-   if (TemporaryBuf[i].line = #9'seq') and
-      (pos('jmp l_', TemporaryBuf[i+1].line) > 0) then
-    begin
-     TemporaryBuf[i].line   := #9'jne ' + copy(TemporaryBuf[i+1].line, 6, 256);
-     TemporaryBuf[i+1].line := '';
-    end;
-
- end;
-
-
- for i:=0 to High(TemporaryBuf)-1 do writeln(OutFile, TemporaryBuf[i].line );// +#9';--');
-
- SetLength(TemporaryBuf, 1);
-
-end;
-
-
-
-procedure asm65(a: string; comment : string ='');
+procedure asm65(a: string = ''; comment : string ='');
 var len, i: integer;
     optimize_code: Boolean;
     str: string;
-
-
- procedure WriteTemporary(s: string);
- var i: integer;
- begin
-     i:=High(TemporaryBuf);
-     TemporaryBuf[i].line := s;
-     TemporaryBuf[i].comment := '';
-
-     SetLength(TemporaryBuf, i+2);
- end;
-
-
 begin
 
 {$IFDEF OPTIMIZECODE}
@@ -16035,12 +16182,11 @@ begin
 
   end else begin
 
-   if High(OptimizeBuf) > 0 then begin
+   if High(OptimizeBuf) > 0 then
 
-     if High(TemporaryBuf) > 0 then OptimizeTMP;
+     OptimizeASM
 
-     OptimizeASM;
-   end else begin
+   else begin
 
     str:=a;
 
@@ -16060,7 +16206,7 @@ begin
 
     end;
 
-    WriteTemporary(str);
+    WriteOut(str);
 
    end;
 
@@ -17189,7 +17335,7 @@ end;// TokenizeProgram
 
 procedure asm65separator(a: Boolean = true);
 begin
- if a then asm65('');
+ if a then asm65;
  asm65('; '+StringOfChar('-',59));
 end;
 
@@ -17567,7 +17713,7 @@ end;
 procedure GenerateIndexShift(ElementType: Byte; Ofset: Byte = 0);
 begin
 
-  asm65('');
+  asm65;
 
   case DataSize[ElementType] of
     2: asm65(#9'm@index2 '+IntToStr(Ofset));
@@ -17644,13 +17790,15 @@ begin
 
  asm65separator;
 
- asm65(#13#10'; Push'+InfoAboutSize(Size));
+ asm65;
+ asm65('; Push'+InfoAboutSize(Size));
 
 case IndirectionLevel of
 
   ASVALUE:
     begin
-    asm65('; as Value $'+IntToHex(Value, 8) + ' ('+IntToStr(Value)+')'+#13#10);
+    asm65('; as Value $'+IntToHex(Value, 8) + ' ('+IntToStr(Value)+')');
+    asm65;
 
     //Gen($83); Gen($C3); Gen($04);					// add bx, 4
     a65(__addBX);
@@ -17662,7 +17810,8 @@ case IndirectionLevel of
 
   ASPOINTER:
     begin
-    asm65('; as Pointer'+#13#10);
+    asm65('; as Pointer');
+    asm65;
 
     a65(__addBX);
 //    asm65(#9'ldx sp');
@@ -17705,7 +17854,8 @@ case IndirectionLevel of
 
   ASPOINTERTORECORD:
     begin
-    asm65('; as Pointer to Record'+#13#10);
+    asm65('; as Pointer to Record');
+    asm65;
 
     Gen; //Gen($2E); Gen(Lo(Value)); Gen(Hi(Value));			// mov bp, [Value]
 
@@ -17739,7 +17889,8 @@ case IndirectionLevel of
 
   ASPOINTERTOPOINTER:
     begin
-    asm65('; as Pointer to Pointer'+#13#10);	   // ???
+    asm65('; as Pointer to Pointer');	   	// ???
+    asm65;
 
     Gen; //Gen($2E); Gen(Lo(Value)); Gen(Hi(Value));			// mov bp, [Value]
 
@@ -17798,7 +17949,8 @@ case IndirectionLevel of
 
   ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
-    asm65('; as Pointer to Array Origin'+#13#10);
+    asm65('; as Pointer to Array Origin');
+    asm65;
 
     Gen; //Gen($2E); Gen(Lo(Value)); Gen(Hi(Value));			// mov bp, [Value]
 //    a65(__movBP_aAdr, Value);
@@ -17846,7 +17998,7 @@ case IndirectionLevel of
 	 if IndirectionLevel = ASPOINTERTOARRAYORIGIN  then
 	 GenerateIndexShift(WORDTOK);
 
-	 asm65('');
+	 asm65;
 
 	 if (NumAllocElements * 2>256) or (NumAllocElements=1) or (Ident[IdentIndex].PassMethod = VARPASSING) then begin
 
@@ -17883,7 +18035,7 @@ case IndirectionLevel of
 	 if IndirectionLevel = ASPOINTERTOARRAYORIGIN  then
 	 GenerateIndexShift(CARDINALTOK);
 
-	 asm65('');
+	 asm65;
 
 	 if (NumAllocElements * 4>256) or (NumAllocElements=1)  or (Ident[IdentIndex].PassMethod = VARPASSING) then begin
 
@@ -17929,7 +18081,8 @@ case IndirectionLevel of
 
 ASPOINTERTOARRAYRECORD:
     begin
-    asm65('; as Pointer to Array ^Record'+#13#10);
+    asm65('; as Pointer to Array ^Record');
+    asm65;
 
     Gen; //Gen($2E); Gen(Lo(Value)); Gen(Hi(Value));			// mov bp, [Value]
 
@@ -18011,7 +18164,7 @@ begin
   optimize.use := false;
   optimize.assign := assign;
 
-  if High(OptimizeBuf) > 0 then asm65('');
+  if High(OptimizeBuf) > 0 then asm65;
 
 end;
 
@@ -18031,7 +18184,8 @@ end;
 procedure SaveToSystemStack(cnt: integer);
 begin
 
- asm65(#13#10'; Save conditional expression');		//at expression stack top onto the system :STACK');
+ asm65;
+ asm65('; Save conditional expression');		//at expression stack top onto the system :STACK');
 
  Gen; Gen; Gen;						// push dword ptr [bx]
 
@@ -18046,7 +18200,8 @@ end;
 procedure RestoreFromSystemStack(cnt: integer);
 begin
 
- asm65(#13#10'; Restore conditional expression');
+ asm65;
+ asm65('; Restore conditional expression');
 
  Gen; Gen; Gen;						// add bx, 4
 // a65(__addBX);
@@ -18070,7 +18225,7 @@ begin
 
  ResetOpty;
 
- asm65('');
+ asm65;
  asm65(#9'txa:pha');
 
  if IOCheck then
@@ -18097,7 +18252,7 @@ begin
  end;
 
  asm65(#9'pla:tax');
- asm65('');
+ asm65;
 
 end;
 
@@ -18119,14 +18274,16 @@ begin
 
 
  if Down then begin
-  asm65(#13#10'; Dec(var X [ ; N: int ] ) -> '+InfoAboutToken(ExpressionType));
+  asm65;
+  asm65('; Dec(var X [ ; N: int ] ) -> '+InfoAboutToken(ExpressionType));
 
 //  a:='sbb';
   b:='sub';
   c:='sbc';
 
  end else begin
-  asm65(#13#10'; Inc(var X [ ; N: int ] ) -> '+InfoAboutToken(ExpressionType));
+  asm65;
+  asm65('; Inc(var X [ ; N: int ] ) -> '+InfoAboutToken(ExpressionType));
 
 //  a:='adb';
   b:='add';
@@ -18139,7 +18296,8 @@ begin
   ASPOINTER:
        begin
 
-       asm65('; as Pointer'#13#10);
+       asm65('; as Pointer');
+       asm65;
 
 	     case DataSize[ExpressionType] of
 	      1: begin
@@ -18184,7 +18342,8 @@ begin
   ASPOINTERTOPOINTER:
 	begin
 
-	   asm65('; as Pointer To Pointer'#13#10);
+	   asm65('; as Pointer To Pointer');
+	   asm65;
 
 	   if pos('.', svar) > 0 then
 	    asm65(#9'mwa '+copy(svar, 1, pos('.', svar)-1)+' :bp2')
@@ -18198,14 +18357,14 @@ begin
 
 	     case DataSize[ExpressionType] of
 	      1: begin
-		  asm65('');
+		  asm65;
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9+b+' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		 end;
 
 	      2: begin
-		  asm65('');
+		  asm65;
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9+b+' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
@@ -18216,7 +18375,7 @@ begin
 		 end;
 
 	      4: begin
-		  asm65('');
+		  asm65;
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9+b+' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
@@ -18241,7 +18400,8 @@ begin
   ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
 	  begin
 
-	  asm65('; as Pointer To Array Origin'#13#10);
+	  asm65('; as Pointer To Array Origin');
+	  asm65;
 
 	     case DataSize[ExpressionType] of
 	      1: begin
@@ -18256,7 +18416,7 @@ begin
 		   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 		   asm65(#9'sta :bp+1');
 
-		   asm65('');
+		   asm65;
 		   asm65(#9'lda (:bp),y');
 		   asm65(#9+b+' :STACKORIGIN,x');
 		   asm65(#9'sta (:bp),y');
@@ -18367,7 +18527,8 @@ begin
 
  asm65separator;
 
- asm65(#13#10'; Generate Assignment for'+InfoAboutSize(Size));
+ asm65;
+ asm65('; Generate Assignment for'+InfoAboutSize(Size));
 
  Gen; Gen; Gen;					// mov :eax, [bx]
 
@@ -18772,12 +18933,14 @@ begin
 
  Gen;									// call Entry
 
- asm65('');
+ asm65;
 
  if Ident[IdentIndex].isOverload then
-  asm65(#9'jsr '+Name+'_'+IntToHex(Ident[IdentIndex].Value, 4), '; call Entry'#13#10)
+  asm65(#9'jsr '+Name+'_'+IntToHex(Ident[IdentIndex].Value, 4), '; call Entry')
  else
-  asm65(#9'jsr '+Name, '; call Entry'#13#10);
+  asm65(#9'jsr '+Name, '; call Entry');
+
+ asm65;
 
  if Ident[IdentIndex].Kind <> FUNCTIONTOK then StopOptimization;
 
@@ -18790,7 +18953,7 @@ begin
 
  if not isInt then
   if not IsFunction then begin
-   asm65('');
+   asm65;
    asm65('@exit');
 
    asm65(#9'.ifdef @new');
@@ -18809,7 +18972,8 @@ end;
 
 procedure GenerateIfThenCondition;
 begin
-asm65(#13#10'; If Then Condition');
+asm65;
+asm65('; If Then Condition');
 
 Gen; Gen; Gen;								// mov :eax, [bx]
 
@@ -18823,7 +18987,8 @@ end;
 
 procedure GenerateElseCondition;
 begin
-asm65(#13#10'; else condition');
+asm65;
+asm65('; else condition');
 
 Gen; Gen; Gen;								// mov :eax, [bx]
 
@@ -19087,7 +19252,8 @@ end;
 
 procedure GenerateCaseProlog;
 begin
-asm65(#13#10'; GenerateCaseProlog');
+asm65;
+asm65('; GenerateCaseProlog');
 
 Gen; Gen;							// pop :ecx	   ; CASE switch value
 Gen; Gen;							// mov al, 00h       ; initial flag mask
@@ -19099,7 +19265,8 @@ end;
 
 procedure GenerateCaseEqualityCheck(Value: Int64; SelectorType: Byte);
 begin
-asm65(#13#10'; GenerateCaseEqualityCheck');
+asm65;
+asm65('; GenerateCaseEqualityCheck');
 
 Gen; Gen;	//Gen($F9); GenDWord(Value);			// cmp :ecx, Value
 
@@ -19125,7 +19292,7 @@ Gen; Gen;	//Gen($F9); GenDWord(Value1);			// cmp :ecx, Value1
 
  if (SelectorType in [BYTETOK, CHARTOK]) and (Value1 >= 0) and (Value2 >= 0) then begin
 
-   asm65('');
+   asm65;
    asm65(#9'lda :STACKORIGIN+1,x');
    asm65(#9'clc', '; clear carry for add');
    asm65(#9'adc #$FF-'+IntToStr(Value2), '; make m = $FF');
@@ -19189,7 +19356,8 @@ procedure GenerateIfElseEpilog;
 begin
 resetOpty;
 
-asm65(#13#10'; GenerateIfElseEpilog');
+asm65;
+asm65('; GenerateIfElseEpilog');
 
 Dec(CodePosStackTop);
 
@@ -19200,7 +19368,8 @@ end;
 procedure GenerateCaseStatementEpilog(cnt: integer);
 var StoredCodeSize: Integer;
 begin
-asm65(#13#10'; GenerateCaseStatementEpilog');
+asm65;
+asm65('; GenerateCaseStatementEpilog');
 
 asm65(#9'jmp a_'+IntToHex(cnt,4));
 
@@ -19224,7 +19393,8 @@ procedure GenerateCaseEpilog(NumCaseStatements: Integer; cnt: integer);
 var i: Integer;
 begin
 
-asm65(#13#10'; GenerateCaseEpilog');
+asm65;
+asm65('; GenerateCaseEpilog');
 
 for i := 1 to NumCaseStatements do GenerateIfElseEpilog;
 
@@ -19390,14 +19560,14 @@ if Epilog then begin
 
   case CounterSize of
    1: begin
-       asm65('');
+       asm65;
        asm65(#9'lda '+svar);
        asm65(#9'cmp #$ff');
        asm65(#9'seq');
       end;
 
    2: begin
-       asm65('');
+       asm65;
        asm65(#9'lda '+svar);
        asm65(#9'and '+svar+'+1');
        asm65(#9'cmp #$ff');
@@ -19405,7 +19575,7 @@ if Epilog then begin
       end;
 
    4: begin
-       asm65('');
+       asm65;
        asm65(#9'lda '+svar);
        asm65(#9'and '+svar+'+1');
        asm65(#9'and '+svar+'+2');
@@ -19417,7 +19587,7 @@ if Epilog then begin
 
  end else begin
 
-  asm65('');
+  asm65;
   asm65(#9'seq');
 
  end;
@@ -19452,21 +19622,21 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator(false);
  asm65('; ' + CompilerTitle);
  asm65separator(false);
- asm65('');
+ asm65;
 
 // asm65(':STACKORIGIN'#9'= $98', '; zp free = $d8..$ff');
  asm65('STACKWIDTH'#9'= 16');
 
  asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
 
- asm65('');
+ asm65;
 
 // asm65('FRACBITS'#9'= '+IntToStr(FRACBITS));
 // asm65('FRACMASK'#9'= '+IntToStr(TWOPOWERFRACBITS-1));
  asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
  asm65('FALSE'#9#9'= '+IntToStr(Ident[GetIdent('FALSE')].Value));
 
-// asm65('');
+// asm65;
 // asm65(#9'.define :STACK0 inx:STA :STACKORIGIN,x');
 // asm65(#9'.define :STACK1 STA :STACKORIGIN+STACkWIDTH,x');
 // asm65(#9'.define :STACK2 STA :STACKORIGIN+STACkWIDTH*2,x');
@@ -19474,16 +19644,16 @@ if Pass = CODEGENERATIONPASS then begin
 // asm65(#9'.define @param .print %%1');
 
  asm65separator;
- asm65('');
+ asm65;
 
  if ZPAGE_Atari > 0 then
   asm65(#9'org $'+IntToHex(ZPAGE_Atari, 2))
  else
   asm65(#9'org $80');
 
- asm65('');
+ asm65;
  asm65('fxptr'#9'.ds 2');
- asm65('');
+ asm65;
 
  asm65('eax'#9'.ds 4', ';8 bytes (aex + edx) -> divREAL');
  asm65('edx'#9'.ds 4');
@@ -19493,7 +19663,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('bp'#9'.ds 2');
  asm65('bp2'#9'.ds 2');
 
- asm65('');
+ asm65;
 
  asm65('ztmp');
  asm65('ztmp8'#9'.ds 1');
@@ -19501,18 +19671,22 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('ztmp10'#9'.ds 1');
  asm65('ztmp11'#9'.ds 1');
 
- asm65(#13#10'TMP'#9'.ds 2');
+ asm65;
+ asm65('TMP'#9'.ds 2');
 
- if STACK_Atari > 0 then asm65(#13#10#9'org $'+IntToHex(STACK_Atari, 4));
+ if STACK_Atari > 0 then begin
+  asm65;
+  asm65(#9'org $'+IntToHex(STACK_Atari, 4));
+ end;
 
- asm65(#13#10'STACKORIGIN'#9'.ds STACKWIDTH*4');
+ asm65;
+ asm65('STACKORIGIN'#9'.ds STACKWIDTH*4');
 
-// asm65('zfre');
-
- asm65(#13#10'.print ''ZPFREE: $0000..'',fxptr-1,'' ; '',*,''..'',$ff');
+ asm65;
+ asm65('.print ''ZPFREE: $0000..'',fxptr-1,'' ; '',*,''..'',$ff');
 
  asm65separator;
- asm65('');
+ asm65;
 
  asm65('ax'#9'= eax');
  asm65('al'#9'= eax');
@@ -19522,68 +19696,68 @@ if Pass = CODEGENERATIONPASS then begin
 // asm65('bl'#9'= ebx');
 // asm65('bh'#9'= ebx+1');
 
- asm65('');
+ asm65;
  asm65('cx'#9'= ecx');
  asm65('cl'#9'= ecx');
  asm65('ch'#9'= ecx+1');
 
- asm65('');
+ asm65;
  asm65('dx'#9'= edx');
  asm65('dl'#9'= edx');
  asm65('dh'#9'= edx+1');
 
 
- asm65('');
+ asm65;
  asm65(#9'org eax');
- asm65('');
+ asm65;
  asm65('FP1MAN0'#9'.ds 1');
  asm65('FP1MAN1'#9'.ds 1');
  asm65('FP1MAN2'#9'.ds 1');
  asm65('FP1MAN3'#9'.ds 1');
 
- asm65('');
+ asm65;
  asm65(#9'org ztmp8');
- asm65('');
+ asm65;
  asm65('FP1SGN'#9'.ds 1');
  asm65('FP1EXP'#9'.ds 1');
 
- asm65('');
+ asm65;
  asm65(#9'org edx');
- asm65('');
+ asm65;
  asm65('FP2MAN0'#9'.ds 1');
  asm65('FP2MAN1'#9'.ds 1');
  asm65('FP2MAN2'#9'.ds 1');
  asm65('FP2MAN3'#9'.ds 1');
 
- asm65('');
+ asm65;
  asm65(#9'org ztmp10');
- asm65('');
+ asm65;
  asm65('FP2SGN'#9'.ds 1');
  asm65('FP2EXP'#9'.ds 1');
 
- asm65('');
+ asm65;
  asm65(#9'org ecx');
- asm65('');
+ asm65;
  asm65('FPMAN0'#9'.ds 1');
  asm65('FPMAN1'#9'.ds 1');
  asm65('FPMAN2'#9'.ds 1');
  asm65('FPMAN3'#9'.ds 1');
 
- asm65('');
+ asm65;
  asm65(#9'org bp2');
- asm65('');
+ asm65;
  asm65('FPSGN'#9'.ds 1');
  asm65('FPEXP'#9'.ds 1');
 
 
  if High(resArray) > 0 then begin
 
-  asm65('');
+  asm65;
   asm65('.local'#9'RESOURCE');
 
   asm65(#9'icl ''res6502.asm''');
 
-  asm65('');
+  asm65;
 
   for i := 0 to High(resArray) - 1 do begin
    a:=#9+resArray[i].resType+' '''+resArray[i].resFile+''''+' ';
@@ -19600,7 +19774,8 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
- asm65(#13#10#9'org CODEORIGIN');
+ asm65;
+ asm65(#9'org CODEORIGIN');
 
 // asm65(#13#10#9'jmp start');
 
@@ -19608,10 +19783,11 @@ if Pass = CODEGENERATIONPASS then begin
 // Build static string data table
  for i := 0 to NumStaticStrChars - 1 do Gen;			// db StaticStringData[i]
 
- asm65(#13#10#9'STATICDATA');
- //asm65('');
+ asm65;
+ asm65(#9'STATICDATA');
 
- asm65(#13#10'START');
+ asm65;
+ asm65('START');
 
  Gen; Gen; Gen;							// mov bx, :STACKORIGIN
 // asm65(#9'mwa #:STACKORIGIN bx', '; mov bx, :STACKORIGIN');
@@ -19621,30 +19797,30 @@ if Pass = CODEGENERATIONPASS then begin
 // asm65(#9'mva #$ff portb');
 
 
- asm65('');
+ asm65;
  asm65(#9'.ifdef fmulinit');
  asm65(#9'fmulinit');
  asm65(#9'eif');
 
 
- asm65('');
+ asm65;
  asm65(#9'ift DATAORIGIN+VARINITSIZE > $BFFF');
  asm65(#9'ert ''Invalid memory address range '',DATAORIGIN+VARINITSIZE');
  asm65(#9'els');
  asm65(#9'@fill #DATAORIGIN+VARINITSIZE #VARDATASIZE-VARINITSIZE #0');
  asm65(#9'eif');
- asm65('');
+ asm65;
 
  asm65(#9'ldx #$0f');						// DOS II+/D ParamStr
  asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
- asm65('');
+ asm65;
 
  asm65(#9'inx'#9#9'; X = 0 !!!');
  asm65(#9'stx bp'#9#9'; lo BP = 0');
 
  if CPUMode = 65816 then asm65(#9'opt c+');
 
- asm65('');
+ asm65;
  asm65(#9'UNITINITIALIZATION');
 
  optimize.use := tmp;
@@ -19659,7 +19835,7 @@ Gen; Gen;							// mov ah, 4Ch
 
 asm65(#9'lda #$'+IntToHex(ExitCode, 2));
 asm65(#9'jmp @halt');
-asm65('');
+asm65;
 end;
 
 
@@ -19697,7 +19873,7 @@ end;// GenerateRead
 procedure GenerateWriteString(Address: Word; IndirectionLevel: byte; ValueType: byte = INTEGERTOK);
 begin
 
-asm65('');
+asm65;
 
 Gen; Gen;							// mov ah, 09h
 
@@ -19865,7 +20041,8 @@ end;
 procedure GenerateBinaryOperation(op: Byte; ResultType: Byte);
 begin
 
-asm65(#13#10'; Generate Binary Operation for '+InfoAboutToken(ResultType));
+asm65;
+asm65('; Generate Binary Operation for '+InfoAboutToken(ResultType));
 
 Gen; Gen; Gen;							// mov :ecx, [bx]      :STACKORIGIN,x
 
@@ -20097,7 +20274,8 @@ end;
 
 procedure GenerateRelationString(rel: Byte; LeftValType, RightValType: Byte);
 begin
- asm65(#13#10'; relation STRING');
+ asm65;
+ asm65('; relation STRING');
 
  Gen;
 
@@ -20130,7 +20308,8 @@ end;
 
 procedure GenerateRelation(rel: Byte; ValType: Byte);
 begin
- asm65(#13#10'; relation');
+ asm65;
+ asm65('; relation');
 
  Gen;
 
@@ -20233,10 +20412,12 @@ begin
   else
    t:='';
 
+  asm65;
+
   if Ident[IdentIndex].NumAllocElements_ > 0 then
-   asm65(#13#10';'+t+' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+', 0..'+IntToStr(Ident[IdentIndex].NumAllocElements_ - 1)+']')
+   asm65(';'+t+' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+', 0..'+IntToStr(Ident[IdentIndex].NumAllocElements_ - 1)+']')
   else
-   asm65(#13#10';'+t+' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+']');
+   asm65(';'+t+' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+']');
 
 end;
 
@@ -21670,7 +21851,8 @@ begin
 	   if not ( (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) ) then
 	     Error(i + 1, 'Can''t take the address of constant expressions');
 
-	  asm65(#13#10'; address');
+	  asm65;
+	  asm65('; address');
 
 	  if Ident[IdentIndex].Kind in [PROC, FUNC] then begin
 
@@ -21699,7 +21881,7 @@ begin
 
  svar := GetLocalName(IdentIndex);
 
- asm65('');
+ asm65;
  asm65(#9'lda '+svar);
  asm65(#9'add :STACKORIGIN,x');
  asm65(#9'sta :STACKORIGIN,x');
@@ -22171,7 +22353,8 @@ case Tok[i].Kind of
 
      CheckTok(i + 1, CPARTOK);
 
-     asm65(#13#10'; Lo(X)');
+     asm65;
+     asm65('; Lo(X)');
 
      case ActualParamType of
       SHORTINTTOK, BYTETOK:
@@ -22179,7 +22362,7 @@ case Tok[i].Kind of
 		    asm65(#9'lda :STACKORIGIN,x', '; lo BYTE');
 		    asm65(#9'and #$0f');
 		    asm65(#9'sta :STACKORIGIN,x');
-		    asm65('');
+		    asm65;
 		  end;
      end;
 
@@ -22204,7 +22387,8 @@ case Tok[i].Kind of
 
      CheckTok(i + 1, CPARTOK);
 
-     asm65(#13#10'; Hi(X)');
+     asm65;
+     asm65('; Hi(X)');
 
      case ActualParamType of
 	 SHORTINTTOK, BYTETOK: asm65(#9'jsr hiBYTE');
@@ -23997,7 +24181,7 @@ case Tok[i].Kind of
 
 		 Result := CompileExpression(i + 2, ExpressionType, VarType);      // Right-hand side expression
 
-		 asm65('');
+		 asm65;
 
  // Character assignment to pointer  var f:=c
 
@@ -24627,7 +24811,8 @@ case Tok[i].Kind of
     begin
     inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
 
-    asm65(#13#10'; --- WhileProlog');
+    asm65;
+    asm65('; --- WhileProlog');
 
     ResetOpty;
 
@@ -24643,17 +24828,20 @@ case Tok[i].Kind of
 
     CheckTok(j + 1, DOTOK);
 
-      asm65(#13#10'; --- WhileDoCondition');
+      asm65;
+      asm65('; --- WhileDoCondition');
       GenerateWhileDoCondition;			// Satisfied if expression is not zero
 
-      asm65(#13#10'; --- WhileDoProlog');
+      asm65;
+      asm65('; --- WhileDoProlog');
       GenerateWhileDoProlog;
 
       StopOptimization;
 
       j := CompileStatement(j + 2);
 
-      asm65(#13#10'; --- WhileDoEpilog');
+      asm65;
+      asm65('; --- WhileDoEpilog');
       asm65('c_'+IntToHex(BreakPosStack[BreakPosStackTop], 4));
 
       GenerateWhileDoEpilog;
@@ -24668,7 +24856,8 @@ case Tok[i].Kind of
     begin
     inc(CodeSize);			    // !!! aby dzialaly zagniezdzone REPEAT
 
-    asm65(#13#10'; --- RepeatUntilProlog');
+    asm65;
+    asm65('; --- RepeatUntilProlog');
 
     ResetOpty;
 
@@ -24691,10 +24880,12 @@ case Tok[i].Kind of
 
     GetCommonType(j, BOOLEANTOK, ExpressionType);
 
-    asm65(#13#10'; --- RepeatUntilCondition');
+    asm65;
+    asm65('; --- RepeatUntilCondition');
     GenerateRepeatUntilCondition;
 
-    asm65(#13#10'; --- RepeatUntilEpilog');
+    asm65;
+    asm65('; --- RepeatUntilEpilog');
     asm65('c_'+IntToHex(BreakPosStack[BreakPosStackTop], 4));
 
     GenerateRepeatUntilEpilog;
@@ -24795,7 +24986,8 @@ case Tok[i].Kind of
 
 	      SaveBreakAddress;
 
-	      asm65(#13#10'; ForToDoCondition');
+	      asm65;
+	      asm65('; ForToDoCondition');
 
 	      StartOptimization(j);
 
@@ -24812,7 +25004,8 @@ case Tok[i].Kind of
 		GenerateForToDoProlog;
 		j := CompileStatement(j + 2);
 
-		asm65(#13#10'; ForToDoEpilog');
+		asm65;
+		asm65('; ForToDoEpilog');
 		asm65('c_'+IntToHex(BreakPosStack[BreakPosStackTop], 4));
 
 		GenerateForToDoEpilog(DataSize[Ident[IdentIndex].DataType], Down, IdentIndex);
@@ -25243,7 +25436,9 @@ case Tok[i].Kind of
 
      StopOptimization;		       // takich blokow nie optymalizujemy
 
-     asm65(#13#10'; ---------------------  ASM Block '+format('%.3d',[AsmBlockIndex])+'  ---------------------'#13#10);
+     asm65;
+     asm65('; ---------------------  ASM Block '+format('%.3d',[AsmBlockIndex])+'  ---------------------');
+     asm65;
 
      asm65(AsmBlock[AsmBlockIndex]);
 
@@ -25447,10 +25642,14 @@ case Tok[i].Kind of
 
 	 if NumActualParams = 0 then begin
 
+	  asm65;
+
 	  if Down then
-	   asm65(#13#10'; Dec(var X) -> '+InfoAboutToken(ExpressionType)+#13#10)
+	   asm65('; Dec(var X) -> '+InfoAboutToken(ExpressionType))
 	  else
-	   asm65(#13#10'; Inc(var X) -> '+InfoAboutToken(ExpressionType)+#13#10);
+	   asm65('; Inc(var X) -> '+InfoAboutToken(ExpressionType));
+
+	  asm65;
 
 	  GenerateForToDoEpilog(DataSize[ExpressionType], Down, IdentIndex, false)    // +1, -1
 	 end else
@@ -25497,7 +25696,7 @@ case Tok[i].Kind of
 
      end;
 
-     asm65('');
+     asm65;
 
      asm65(#9'jmp @exit', '; exit');
 
@@ -25512,7 +25711,7 @@ case Tok[i].Kind of
      if BreakPosStackTop = 0 then
       Error(i, 'BREAK not allowed');
 
-     asm65('');
+     asm65;
      asm65(#9'jmp b_'+IntToHex(BreakPosStack[BreakPosStackTop], 4), '; break');
 
      ResetOpty;
@@ -25526,7 +25725,7 @@ case Tok[i].Kind of
      if BreakPosStackTop = 0 then
       Error(i, 'CONTINUE not allowed');
 
-     asm65('');
+     asm65;
      asm65(#9'jmp c_'+IntToHex(BreakPosStack[BreakPosStackTop], 4), '; continue');
 
      Result := i;
@@ -25580,7 +25779,7 @@ case Tok[i].Kind of
 
     case ConstVal of
      ord(iDLI): begin
-		 asm65('');
+		 asm65;
 		 asm65(#9'lda VDSLST');
 		 asm65(#9'sta '+svar);
 		 asm65(#9'lda VDSLST+1');
@@ -25588,7 +25787,7 @@ case Tok[i].Kind of
 		end;
 
      ord(iVBL): begin
-		 asm65('');
+		 asm65;
 		 asm65(#9'lda VVBLKD');
 		 asm65(#9'sta '+svar);
 		 asm65(#9'lda VVBLKD+1');
@@ -26536,7 +26735,7 @@ begin
 
     if emptyLine then begin
      asm65separator;
-     asm65('');
+     asm65;
 
      emptyLine:=false;
     end;
@@ -26605,8 +26804,10 @@ begin
    end;
 
   if (BlockStack[BlockStackTop] <> 1) and VarSize and (size > 0) then begin
-   asm65(#13#10'@VarData'#9'= '+varbegin);
-   asm65('@VarDataSize'#9'= '+IntToStr(size)+#13#10);
+   asm65;
+   asm65('@VarData'#9'= '+varbegin);
+   asm65('@VarDataSize'#9'= '+IntToStr(size));
+   asm65;
   end;
 
  end;
@@ -26808,10 +27009,12 @@ begin
  if Ident[BlockIdentIndex].isRegister then info := info + ' | REGISTER';
  if Ident[BlockIdentIndex].isInterrupt then info := info + ' | INTERRUPT';
 
+ asm65;
+
  if Ident[BlockIdentIndex].isOverload then
-   asm65(#13#10'.local'#9+Ident[BlockIdentIndex].Name+'_'+IntToHex(Ident[BlockIdentIndex].Value, 4), info)
+   asm65('.local'#9+Ident[BlockIdentIndex].Name+'_'+IntToHex(Ident[BlockIdentIndex].Value, 4), info)
  else
-   asm65(#13#10'.local'#9+Ident[BlockIdentIndex].Name, info);
+   asm65('.local'#9+Ident[BlockIdentIndex].Name, info);
 
 end;
 
@@ -27259,7 +27462,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
  end;
 
 
-asm65('');
+asm65;
 
 if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezdzonych procedur / funkcji
   GenerateDeclarationProlog;
@@ -27314,7 +27517,8 @@ while Tok[i].Kind in
 
    DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, 0, 0, 0, 0);
 
-   asm65(#13#10'.local'#9 + UnitName[Tok[i].UnitIndex].Name, '; UNIT');
+   asm65;
+   asm65('.local'#9 + UnitName[Tok[i].UnitIndex].Name, '; UNIT');
 
    UnitNameIndex := Tok[i].UnitIndex;
 
@@ -27344,7 +27548,8 @@ while Tok[i].Kind in
 
    GenerateProcFuncAsmLabels(BlockIdentIndex);
 
-   asm65(#13#10'.endl', '; UNIT ' + UnitName[Tok[i].UnitIndex].Name);
+   asm65;
+   asm65('.endl', '; UNIT ' + UnitName[Tok[i].UnitIndex].Name);
 
    j := NumIdent;
 
@@ -27391,7 +27596,7 @@ while Tok[i].Kind in
    j := CompileStatement(i + 1);
    while Tok[j + 1].Kind = SEMICOLONTOK do j := CompileStatement(j + 2);
 
-   asm65('');
+   asm65;
    asm65(#9'rts');
 
    i := j + 1;
@@ -28119,12 +28324,12 @@ if IsFunction then begin
 // if FunctionNumAllocElements > 0 then
 //  Push(Ident[GetIdent('RESULT')].Value, ASVALUE, DataSize[FunctionResultType], GetIdent('RESULT'))
 // else
-  asm65('');
+  asm65;
   asm65('@exit');
 
   Push(Ident[GetIdent('RESULT')].Value, ASPOINTER, DataSize[FunctionResultType], GetIdent('RESULT'));
 
-  asm65('');
+  asm65;
   asm65(#9'.ifdef @new');
   asm65(#9'@FreeMem #@VarData #@VarDataSize');
   asm65(#9'eif');
@@ -28178,19 +28383,19 @@ j := NumIdent;
 
 StopOptimization;
 
-asm65('');
+asm65;
 asm65('@exit');
-asm65('');
+asm65;
 asm65('@halt'#9'ldx #0');
 asm65(#9'txs');
 
-asm65('');
+asm65;
 asm65(#9'rts');
 
-asm65('');
+asm65;
 asm65('IOCB@COPY'#9':16 brk');
 
-asm65('');
+asm65;
 asm65('.local'#9'@DEFINES');
 
 for j:=1 to MAXDEFINES do
@@ -28198,23 +28403,24 @@ for j:=1 to MAXDEFINES do
 
 asm65('.endl');
 
-asm65('');
+asm65;
 asm65('.endl');
 //GenerateReturn(false, false);
 
 asm65separator;
 
-asm65(#13#10#9'icl ''cpu6502.asm''');
+asm65;
+asm65(#9'icl ''cpu6502.asm''');
 
 asm65separator;
 
-asm65('');
+asm65;
 asm65('.macro UNITINITIALIZATION');
 
 for j := NumUnits downto 2 do
  if UnitName[j].Name <> '' then begin
 
-  asm65('');
+  asm65;
   asm65(#9'.ifdef MAIN.'+UnitName[j].Name+'.@UnitInit');
   asm65(#9'jsr MAIN.'+UnitName[j].Name+'.@UnitInit');
   asm65(#9'eif');
@@ -28226,16 +28432,22 @@ asm65('.endm');
 
 for j := NumUnits downto 2 do
  if UnitName[j].Name <> '' then begin
-  asm65(#13#10#9'ift .SIZEOF(MAIN.'+UnitName[j].Name+') > 0');
+  asm65;
+  asm65(#9'ift .SIZEOF(MAIN.'+UnitName[j].Name+') > 0');
   asm65(#9'.print '''+UnitName[j].Name+': '+''',MAIN.'+UnitName[j].Name+','+'''..'''+','+'MAIN.'+UnitName[j].Name+'+.SIZEOF(MAIN.'+UnitName[j].Name+')-1');
   asm65(#9'eif');
  end;
 
-asm65(#13#10#9'.print ''CODE: '',CODEORIGIN,''..'',*-1');
+asm65;
+asm65(#9'.print ''CODE: '',CODEORIGIN,''..'',*-1');
 
-if DATA_Atari > 0 then asm65(#13#10#9'org $'+IntToHex(DATA_Atari, 4));
+if DATA_Atari > 0 then begin
+ asm65;
+ asm65(#9'org $'+IntToHex(DATA_Atari, 4));
+end;
 
-asm65(#13#10'DATAORIGIN');
+asm65;
+asm65('DATAORIGIN');
 
 if DataSegmentUse then begin
  if Pass = CODEGENERATIONPASS then begin
@@ -28274,7 +28486,7 @@ if DataSegmentUse then begin
 
   if tmp <> '' then asm65(tmp);
 
- // asm65('');
+ // asm65;
 
 //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
 
@@ -28284,28 +28496,34 @@ end;{ else
  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
 }
 
-asm65('');
+asm65;
 asm65('VARINITSIZE'#9'= *-DATAORIGIN');
 asm65('VARDATASIZE'#9'= '+IntToStr(VarDataSize));
 
-asm65(#13#10'PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
+asm65;
+asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
 
-asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
+asm65;
+asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
 
 
 if FastMul > 0  then begin
 
  asm65separator;
 
- asm65(#13#10#9'icl ''6502\cpu6502_fmul.asm''', '; fast multiplication');
+ asm65;
+ asm65(#9'icl ''6502\cpu6502_fmul.asm''', '; fast multiplication');
 
- asm65(#13#10#9'.print ''FMUL_INIT: '',fmulinit,''..'',*');
+ asm65;
+ asm65(#9'.print ''FMUL_INIT: '',fmulinit,''..'',*');
 
- asm65(#13#10#9'org $'+IntToHex(FastMul, 2)+'00');
+ asm65;
+ asm65(#9'org $'+IntToHex(FastMul, 2)+'00');
 
- asm65(#13#10#9'.print ''FMUL_DATA: '',*,''..'',*+$0800');
+ asm65;
+ asm65(#9'.print ''FMUL_DATA: '',*,''..'',*+$0800');
 
- asm65('');
+ asm65;
  asm65('square1_lo'#9'.ds $200');
  asm65('square1_hi'#9'.ds $200');
  asm65('square2_lo'#9'.ds $200');
@@ -28313,13 +28531,13 @@ if FastMul > 0  then begin
 
 end;
 
-asm65('');
+asm65;
 asm65(#9'run START');
 
 asm65separator;
 
-
-asm65(#13#10'.macro'#9'STATICDATA');
+asm65;
+asm65('.macro'#9'STATICDATA');
 
  tmp:='';
  for i := 0 to NumStaticStrChars - 1 do begin
@@ -28379,10 +28597,12 @@ asm65(#13#10'.macro'#9'STATICDATA');
 
 //asm65('.endm');
 
+asm65;
+asm65(#9'end');
 
-asm65(#13#10#9'end');
 
-OptimizeTMP;
+if iOut > 0 then
+ for i:=0 to High(TemporaryBuf) do writeln(OutFile, TemporaryBuf[i]);
 
 end;// CompileProgram
 
@@ -28695,7 +28915,8 @@ begin
 
  for i := 1 to MAXUNITS do UnitName[i].Units := 0;
 
- SetLength(TemporaryBuf, 1);
+ iOut:=0;
+ outTmp:='';
  SetLength(OptimizeBuf, 1);
  SetLength(msgWarning, 1);
  SetLength(msgNote, 1);
