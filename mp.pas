@@ -1,4 +1,3 @@
-
 (*
 
 Sub-Pascal 32-bit real mode compiler for 80386+ processors v. 2.0 by Vasiliy Tereshkov, 2009
@@ -12615,7 +12614,7 @@ var i, l, k, m: integer;
 
 
  function OptimizeRelation: Boolean;
- var i, j: integer;
+ var i, j, p: integer;
      a: string;
  begin
   // optymalizacja warunku
@@ -12968,6 +12967,57 @@ var i, l, k, m: integer;
      if copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256) then begin
 
        listing[i+6] := #9'lda ' + copy(listing[i], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       Result:=false;
+      end;
+
+
+    if (pos(',y', listing[i]) = 0) and								// lda ~,y		; 0
+       (pos('lda ', listing[i]) > 0) and (pos('sta :STACK', listing[i+1]) > 0) and		// sta :STACKORIGIN+N	; 1
+       (pos('ldy ', listing[i+2]) > 0) and							// ldy			; 2
+       (pos('lda ', listing[i+3]) > 0) and (pos(',y', listing[i+3]) > 0) and			// lda ,y		; 3
+       (listing[i+4] = #9'ldy #1') and								// ldy #1		; 4
+       (pos('cmp :STACK', listing[i+5]) > 0) then						// cmp :STACKORIGIN+N	; 5
+     if copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256) then begin
+
+       listing[i+5] := #9'cmp ' + copy(listing[i], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       Result:=false;
+      end;
+
+
+    if (pos(',y', listing[i]) = 0) and								// lda ~,y		; 0
+       (pos('lda ', listing[i]) > 0) and (pos('sta :STACK', listing[i+1]) > 0) and		// sta :STACKORIGIN+N	; 1
+       (pos('ldy ', listing[i+2]) > 0) and							// ldy			; 2
+       (listing[i+3] = #9'iny') and								// iny			; 3
+       (pos('lda ', listing[i+4]) > 0) and (pos(',y', listing[i+4]) > 0) and			// lda ,y		; 4
+       (listing[i+5] = #9'ldy #1') and								// ldy #1		; 5
+       (pos('cmp :STACK', listing[i+6]) > 0) then						// cmp :STACKORIGIN+N	; 6
+     if copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256) then begin
+
+       listing[i+6] := #9'cmp ' + copy(listing[i], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       Result:=false;
+      end;
+
+
+    if (pos(',y', listing[i]) = 0) and								// lda ~,y		; 0
+       (pos('lda ', listing[i]) > 0) and (pos('sta :STACK', listing[i+1]) > 0) and		// sta :STACKORIGIN+N	; 1
+       (pos('lda ', listing[i+2]) > 0) and							// lda			; 2
+       add_sub(i+3) and										// add			; 3
+       (listing[i+4] = #9'tay') and								// tay			; 4
+       (pos('lda ', listing[i+5]) > 0) and (pos(',y', listing[i+5]) > 0) and			// lda ,y		; 5
+       (listing[i+6] = #9'ldy #1') and								// ldy #1		; 6
+       (pos('cmp :STACK', listing[i+7]) > 0) then						// cmp :STACKORIGIN+N	; 7
+     if copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256) then begin
+
+       listing[i+7] := #9'cmp ' + copy(listing[i], 6, 256);
 
        listing[i]   := '';
        listing[i+1] := '';

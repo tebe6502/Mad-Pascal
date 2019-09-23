@@ -3,6 +3,9 @@
 - nowe wzory optymalizacji movaBX_EAX dla PeepholeOptimization_STACK
 - dodane wspolne wyjscie dla generowanego listingu 'WriteOut' z dodatkow¹ optymalizacj¹ kodu w TemporaryBuf
 
+17.09.2019
+- nowy unit EFAST dla przyspiesza wyœwietlania na urz¹dzeniu E:
+
 08.09.2019
 - poprawiony CompileAddress, dodany VarPass dla BlockRead
 - poprawione GetIdent, DefineIdent
