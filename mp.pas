@@ -8834,6 +8834,67 @@ var i, l, k, m: integer;
        end;
 
 
+    if (pos('lda ', listing[i]) > 0) and							// lda T			; 0
+       add_sub(i+1) and										// add|sub Q			; 1
+       (pos('sta :STACK', listing[i+2]) > 0) and						// sta :STACKORIGIN+9		; 2
+       (pos('lda ', listing[i+3]) > 0) and							// lda T+1			; 3
+       adc_sbc(i+4) and										// adc|sbc Q+1			; 4
+       (pos('sta :STACK', listing[i+5]) > 0) and						// sta :STACKORIGIN+STACKWIDTH+9; 5
+       (pos('lda ', listing[i+6]) > 0) and							// lda T			; 6
+       add_sub(i+7) and		 								// add|sub Q			; 7
+       (listing[i+8] = #9'tay') and								// tay				; 8
+       (pos('lda ', listing[i+9]) > 0) and							// lda T+1			; 9
+       adc_sbc(i+10) and									// adc|sbc Q+1			; 10
+       (listing[i+11] = #9'sta :bp+1') then							// sta :bp+1			; 11
+     if (listing[i] = listing[i+6]) and
+        (listing[i+1] = listing[i+7]) and
+        (listing[i+3] = listing[i+9]) and
+        (listing[i+4] = listing[i+10]) then
+       begin
+	listing[i+7]  := #9'tay';
+	listing[i+8]  := listing[i+3];
+	listing[i+9]  := listing[i+4];
+	listing[i+10] := listing[i+5];
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+
+	Result:=false;
+       end;
+
+
+    if (pos('lda ', listing[i]) > 0) and							// lda T			; 0
+       add_sub(i+1) and										// add|sub Q			; 1
+       (pos('sta :STACK', listing[i+2]) > 0) and						// sta :STACKORIGIN+9		; 2
+       (listing[i+3] = #9'tay') and								// tay				; 3
+       (pos('lda ', listing[i+4]) > 0) and							// lda T+1			; 4
+       adc_sbc(i+5) and										// adc|sbc Q+1			; 5
+       (pos('sta :STACK', listing[i+6]) > 0) and						// sta :STACKORIGIN+STACKWIDTH+9; 6
+       (listing[i+7] = #9'sta :bp+1') and							// sta :bp+1			; 7
+       (listing[i+8] = #9'lda (:bp),y') and							// lda (:bp),y			; 8
+       and_ora_eor(i+9) and									// ora|and|eor			; 9
+       (pos('sta :STACK', listing[i+10]) > 0) and						// sta :STACKORIGIN+10		; 10
+       (pos('lda :STACK', listing[i+11]) > 0) and						// lda :STACKORIGIN+STACKWIDTH+9; 11
+       (listing[i+12] = #9'sta :bp+1') and							// sta :bp+1			; 12
+       (pos('ldy :STACK', listing[i+13]) > 0) and						// ldy :STACKORIGIN+9		; 13
+       (pos('lda :STACK', listing[i+14]) > 0) then						// lda :STACKORIGI+10		; 14
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+13], 6, 256)) and
+	(copy(listing[i+6], 6, 256) = copy(listing[i+11], 6, 256)) and
+	(copy(listing[i+10], 6, 256) = copy(listing[i+14], 6, 256)) then
+       begin
+	listing[i+2] := '';
+	listing[i+6] := '';
+
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+
+	Result:=false;
+       end;
+
+
 // -----------------------------------------------------------------------------
 // ===			optymalizacja ORA.				  === //
 // -----------------------------------------------------------------------------
@@ -17385,8 +17446,11 @@ end;// TokenizeProgram
 
 procedure asm65separator(a: Boolean = true);
 begin
+
  if a then asm65;
+
  asm65('; '+StringOfChar('-',59));
+
 end;
 
 
@@ -25006,18 +25070,18 @@ case Tok[i].Kind of
 
 	      if SafeCompileConstExpression(j, ConstVal, ExpressionType, Ident[IdentIndex].DataType, true) then begin
 		Push(ConstVal, ASVALUE, DataSize[Ident[IdentIndex].DataType]);
-		DefineIdent(j, '@FORTMP_'+IntToStr(CodeSize), CONSTANT, Ident[IdentIndex].DataType, 0, 0, ConstVal, Tok[j].Kind);
+		DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), CONSTANT, Ident[IdentIndex].DataType, 0, 0, ConstVal, Tok[j].Kind);
 	      end else begin
 		j := CompileExpression(j, ExpressionType);
 		ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
-		DefineIdent(j, '@FORTMP_'+IntToStr(CodeSize), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 0);
+		DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 0);
 	      end;
 
 	{$ELSE}
 
 		j := CompileExpression(j, ExpressionType);
 		ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
-		DefineIdent(j, '@FORTMP_'+IntToStr(CodeSize), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 0);
+		DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 0);
 
 	{$ENDIF}
 
@@ -25026,7 +25090,7 @@ case Tok[i].Kind of
 		iError(j, OrdinalExpectedFOR);
 
 
-	      IdentTemp := GetIdent('@FORTMP_'+IntToStr(CodeSize));
+	      IdentTemp := GetIdent('@FORTMP_'+IntToHex(CodeSize, 4));
 	      GenerateAssignment(ASPOINTER, DataSize[Ident[IdentTemp].DataType], IdentTemp);
 
 

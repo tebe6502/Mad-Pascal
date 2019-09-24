@@ -1,3 +1,6 @@
+24.09.2019
+- poprawiony modu³ PLAY w unit CMC, MPT, RMT, u¿yty wczeœniej rozkaz jmp(abs) jest Ÿle wykonywany przez CPU6502, np. jmp ($91FF) skacze pod adres ($91FF, $9100)
+
 22.09.2019
 - nowe wzory optymalizacji adresowania tablic ADR. dla PeepholeOptimization_STACK
 - nowe wzory optymalizacji movaBX_EAX dla PeepholeOptimization_STACK
