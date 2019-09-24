@@ -101,14 +101,16 @@ asm
 
 	bne quit
 skp
-	lda >quit-1		; JMP -> RTS -> QUIT
-	pha
-	lda <quit-1
-	pha
+	mwa TCMC adr
 	
-	mwa TCMC ptr
-
-	jmp (TCMC)
+	ldy #1
+mov	lda $ff00,y
+adr	equ *-2
+	sta ptr,y
+	dey
+	bpl mov
+	
+	jsr $ff00		; jmp (TCMC)	6502 buggy indirect jump 
 ptr	equ *-2
 
 quit	pla:tax	
