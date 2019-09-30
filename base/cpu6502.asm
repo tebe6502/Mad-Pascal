@@ -2070,8 +2070,8 @@ l1	lda (bp2),y
 
 	lda #106	; Invalid numeric format
 	sta MAIN.SYSTEM.IOResult
-
-	rts		; reg Y contains the index of the character in S which prevented the conversion
+	
+	bne stop	; reg Y+1 contains the index of the character in S which prevented the conversion
 
 ok	jsr fmul10
 
@@ -2090,13 +2090,15 @@ ok	jsr fmul10
 	cpy #0
 len	equ *-1
 	bne l1
+	
+	ldy #$ff
 
 	lda ecx
 	beq stop
 
 	jsr negEDX
-
-stop	ldy #0		; reg Y = 0 conversion successful
+	
+stop	iny		; reg Y = 0 conversion successful
 	rts
 .endp
 
