@@ -1,3 +1,50 @@
+16.11.2019
+- poprawione operacje OR, AND na typie BOOLEAN
+
+08.11.2019
+- SYSTEM: function Copy(var S: String; Index: Byte; Count: Byte): String;
+- SYSTEM: Palette, HPalette: array [0..8] of 704 | $d012
+
+03.11.2019
+- optymalizacje dla FILLCHAR (@FILL)
+- optymalizacja dla RESOURCE (res6502.asm), detekcja pamiêci dodatkowej oraz VBXE odbywa siê tylko na raz
+- optymalizacja dla MULTOK (CompileTerm), nie rozszerza typu poza zadany typ
+- PeepholeOptimization_STACK, optymalizacje dla subAX_CX, addAX_CX
+
+02.11.2019
+- poprawka dla NumActualParameters, który nie uwzglednia³ procedur/funkcji overload o ró¿nej liczbie parametrów, bra³ pod uwagê ostatni¹ z nich
+
+31.10.2019
+- dodany typ PChar
+
+27.10.2019
+- optymalizacje dla Optymization_STACK
+- dodana mo¿liwoœæ zwracania wartoœci funkcji przez typ wyliczeniowy
+
+23.10.2019
+- zastapienie '.ifdef IFTMP_xxxx' przez IfTMPPosStack, krotsze bloki warunkowe
+
+20.10.2019
+- optymalizacja dla wystepowania etykiet b_xxxx (Break), c_xxxx (continue), BreakPosStack
+- CompileStatement, dodane StopOptimization na poaczatku bloku
+
+17.10.2019
+- PeepholeOptimization_STACK, optymalizacje dla subAL_CL, addAL_CL
+
+15.10.2019
+- krótszy blok inicjalizacji bloku danych DATAORIGIN jeœli nie przekracza 256 bajtów, w innym przypadku wywo³ywana jest procedura @fill
+
+14.10.2019
+- usuniêty b³¹d w definicji typu w³asnego, tablica dwuwymiarowa by³a traktowana jako jednowymiarowa
+- usuniêty b³¹d który nie pozwala³ adresowaæ tablicy dwuwymiarowej przez wskaŸnik do typu takiej tablicy
+
+12.10.2019
+- nowe prze³¹czniki -define:symbol ; -ipath:filepath
+
+30.09.2019
+- poprawiona procedura @StrToInt (base\cpu6502.asm), zabrak³o INY na wyjœciu gdy zwraca b³¹d IOResult = 106 (Invalid numeric format)
+- poprawiona procedura InitGraph w module FASTGRAPH, tryb 6 jest teraz inicjowany prawid³owo
+
 24.09.2019
 - poprawiony modu³ PLAY w unit CMC, MPT, RMT, u¿yty wczeœniej rozkaz jmp(abs) jest Ÿle wykonywany przez CPU6502, np. jmp ($91FF) skacze pod adres ($91FF, $9100)
 
