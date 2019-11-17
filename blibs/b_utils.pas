@@ -3,7 +3,7 @@ unit b_utils;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Common Utils
-* @version: 0.5.1
+* @version: 0.5.2
 * @description:
 * Set of useful procedures to simplify common tasks in Atari 8-bit programming.
 *
@@ -65,6 +65,17 @@ procedure ExpandRLE(src: word; dest: word);
 * @description:
 * Expands RLE compressed data from source memory location and 
 * writes expanded data at destination memory address.
+* 
+* @param: src (word) - source address of compressed data 
+* @param: dest (word) - destination address where data is expanded
+*)
+procedure ExpandLZ4(source: word; dest: word):assembler;
+(*
+* @description:
+* Expands LZ4 compressed data from source memory location and 
+* writes expanded data at destination memory address.
+* 
+* Based on xxl & fox routine from here: <https://xxl.atari.pl/lz4-decompressor/>
 * 
 * @param: src (word) - source address of compressed data 
 * @param: dest (word) - destination address where data is expanded
@@ -137,6 +148,79 @@ begin
         Inc(dest,count);
         value := peek(src);
     end;
+end; 
+
+procedure ExpandLZ4(source: word; dest: word):assembler;
+asm {
+                  mwa dest xdest
+                  mwa source xsource
+unlz4
+                  jsr    GET_BYTE                  ; length of literals
+                  sta    token
+               :4 lsr
+                  beq    read_offset                     ; there is no literal
+                  cmp    #$0f
+                  jsr    getlength
+literals          jsr    GET_BYTE
+                  jsr    store
+                  bne    literals
+read_offset       jsr    GET_BYTE
+                  tay
+                  sec
+                  eor    #$ff
+                  adc    xdest
+                  sta    src
+                  tya
+                  php
+                  jsr    GET_BYTE
+                  plp
+                  bne    not_done
+                  tay
+                  beq    unlz4_done
+not_done          eor    #$ff
+                  adc    xdest+1
+                  sta    src+1
+                  ; c=1
+                  lda    #$ff
+token             equ    *-1
+                  and    #$0f
+                  adc    #$03                            ; 3+1=4
+                  cmp    #$13
+                  jsr    getLength
+
+@                 lda    $ffff
+src               equ    *-2
+                  inw    src
+                  jsr    store
+                  bne    @-
+                  beq    unlz4                           ; zawsze
+store             sta    $ffff
+xdest              equ    *-2
+                  inw    xdest
+                  dec    lenL
+                  bne    unlz4_done
+                  dec    lenH
+unlz4_done        rts
+getLength_next    jsr    GET_BYTE
+                  tay
+                  clc
+                  adc    #$00
+lenL              equ    *-1
+                  bcc    @+
+                  inc    lenH
+@                 iny
+getLength         sta    lenL
+                  beq    getLength_next
+                  tay
+                  beq    @+
+                  inc    lenH
+@                 rts
+lenH              .byte    $00
+get_byte          lda    $ffff
+xsource           equ    *-2
+                  inw    xsource
+                  rts
+};
 end; 
 
 end.

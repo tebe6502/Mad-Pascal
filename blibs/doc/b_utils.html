@@ -54,6 +54,8 @@
 	Parses string terminated with $FF into regular pascal string variable.<br><ul><h5>parameters:</h5><li>ptr (word) - address in memory of null terminated string</li><h5>returns:</h5><li class='returns'>(string) - regular pascal string type variable</li></ul></td></tr>
 <tr><td class='tname fname'>ExpandRLE</td><td class='tdesc'><h4>procedure ExpandRLE(src: word; dest: word);</h4><br>
 	Expands RLE compressed data from source memory location and writes expanded data at destination memory address.<br><ul><h5>parameters:</h5><li>src (word) - source address of compressed data</li><li>dest (word) - destination address where data is expanded</li></ul></td></tr>
+<tr><td class='tname fname'>ExpandLZ4</td><td class='tdesc'><h4>procedure ExpandLZ4(source: word; dest: word):assembler;</h4><br>
+	Expands LZ4 compressed data from source memory location and writes expanded data at destination memory address. <br> Based on xxl & fox routine from here: <a href='https://xxl.atari.pl/lz4-decompressor/'>https://xxl.atari.pl/lz4-decompressor/</a><br><ul><h5>parameters:</h5><li>src (word) - source address of compressed data</li><li>dest (word) - destination address where data is expanded</li></ul></td></tr>
 
 </table>
 
