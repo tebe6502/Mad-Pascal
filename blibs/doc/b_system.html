@@ -55,13 +55,19 @@
 <tr><td class='tname fname'>SystemReset</td><td class='tdesc'><h4>procedure SystemReset; overload;</h4><br>
 	Turns on OS back and resets machine.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>EnableVBLI</td><td class='tdesc'><h4>procedure EnableVBLI(vblptr: pointer); assembler;</h4><br>
-	Enable and set custom handler for Vertical Blank Interrupt.<br><ul><h5>parameters:</h5><li>vblptr - pointer to interrupt handler routine</li></ul></td></tr>
+	Enable and set custom handler for Vertical Blank Interrupt. <br> <br> To set vertical blank interrupt vector from your inline assembly code, use label __vblvec to store new routine address. <br> <br> Example: <br> &nbsp; lda &lt;myVblRoutine <br> &nbsp; sta __vblvec <br> &nbsp; lda &gt;myVblRoutine <br> &nbsp; sta __vblvec+1<br><ul><h5>parameters:</h5><li>vblptr - pointer to interrupt handler routine</li></ul></td></tr>
 <tr><td class='tname fname'>DisableVBLI</td><td class='tdesc'><h4>procedure DisableVBLI; assembler;</h4><br>
 	Disables custom routine of Vertical Blank Interrupt.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>EnableDLI</td><td class='tdesc'><h4>procedure EnableDLI(dliptr: pointer); assembler;</h4><br>
-	Enable and set custom handler for Display List Interrupt.<br><ul><h5>parameters:</h5><li>dliptr - pointer to interrupt handler routine</li></ul></td></tr>
+	Enable and set custom handler for Display List Interrupt. <br> <br> To set display list interrupt vector from your inline assembly code, use label __dlivec to store new routine address. <br> <br> Example: <br> &nbsp; lda &lt;myDliRoutine <br> &nbsp; sta __dlivec <br> &nbsp; lda &gt;myDliRoutine <br> &nbsp; sta __dlivec+1<br><ul><h5>parameters:</h5><li>dliptr - pointer to interrupt handler routine</li></ul></td></tr>
 <tr><td class='tname fname'>DisableDLI</td><td class='tdesc'><h4>procedure DisableDLI; assembler;</h4><br>
 	Disables Display List Interrupts.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>EnableIRQ</td><td class='tdesc'><h4>procedure EnableIRQ; assembler;</h4><br>
+	Enables IRQ Interrupts.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>DisableIRQ</td><td class='tdesc'><h4>procedure DisableIRQ; assembler;</h4><br>
+	Disables IRQ Interrupts.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>SetIRQ</td><td class='tdesc'><h4>procedure SetIRQ(irqptr:pointer); assembler;</h4><br>
+	Set IRQ Interrupt Vector.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>WaitFrame</td><td class='tdesc'><h4>procedure WaitFrame; assembler;</h4><br>
 	Waits till drawing of current frame ends.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>WaitFrames</td><td class='tdesc'><h4>procedure WaitFrames(frames: byte);</h4><br>
