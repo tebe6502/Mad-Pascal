@@ -55,8 +55,8 @@
 </head>
 
 <CENTER>
-<p class="duzy"><u>MAD-PASCAL 1.5.4</u></p>
-<p class="stopka">Tebe/Madteam (14.01.2018)
+<p class="duzy"><u>MAD-PASCAL 1.6.0</u></p>
+<p class="stopka">Tebe/Madteam (2019-07-21)
 
 <HR>
 
@@ -83,20 +83,11 @@
 
 <br />
 
-<b><LI><A HREF="#ulib">BIBLIOTEKA PODSTAWOWA</A></b>
+<b><LI><A HREF="#ulib">BIBLIOTEKI</A></b>
 <ul>
-<LI><A HREF="#crt">CRT</A>
-<LI><A HREF="#graph">GRAPH</A>
-<LI><A HREF="#system">SYSTEM</A>
-<LI><A HREF="#sysutils">SYSUTILS</A>
-<LI><A HREF="#utypes">TYPES</A>
-<LI><A HREF="#dos">DOS</A>
-<LI><A HREF="#math">MATH</A>
 
-<LI><A HREF="#cmc">CMC</A>, <A HREF="#mpt">MPT</A>, <A HREF="#rmt">RMT</A>
-<LI><A HREF="#misc">MISC</A>
-<LI><A HREF="#vbxe">VBXE</A>
-<LI><A HREF="#joy">JOYSTICK</A>
+<LI><A HREF="..\lib\doc\index.html">LIB</A>
+<LI><A HREF="..\blibs\doc\index.html">BLIBS</A>
 
 </ul>
 
@@ -116,6 +107,7 @@
 <LI><A HREF="#direc">Dyrektywy kompilatora</A>
 
 <ul>
+<LI><A HREF="#conditional">$DEFINE label</A>
 <LI><A HREF="#resource">RESOURCE {$R filename}</A>
 </ul>
 
@@ -166,14 +158,6 @@
 <LI><A HREF="#proc">Procedury i funkcje</A>
 <LI><A HREF="#mody">Modyfikatory procedur i funkcji</A>
 
-<ul>
-<li><a href="#asm">ASSEMBLER</a>
-<li><a href="#ovr">OVERLOAD</a>
-<li><a href="#for">FORWARD</a>
-<li><a href="#reg">REGISTER</a>
-<li><a href="#int">INTERRUPT</a>
-</ul>
-
 
 <br />
 <li><a href="#units">Units</a>
@@ -217,7 +201,7 @@ Dostêpne s±:
 <li>Compound statements.
 <li>Label, Goto statements.
 <li>Arithmetic and boolean operators.
-<li>Procedures and functions with up to 8 parameters. Returned value of a function is assigned to a predefined Result variable.
+<li>Procedures and functions with up to 8 parameters. Returned value of a function is assigned to a predefined RESULT variable.
 <li>Static local variables.
 <li>Primitive data types (all types except the ShortReal/Real type are compatible. Pointers are dereferenced as pointers to Word):
 <ul>
@@ -240,10 +224,11 @@ Dostêpne s±:
 
 
 <li><a href="http://www.freepascal.org/docs-html/ref/ref.html#refch14.html">Free Pascal Reference Guide</a>
-<li><a href="http://atariage.com/forums/topic/240919-mad-pascal/">MadPascal forum</a>
+<li><a href="http://www.atari.org.pl/forum/viewtopic.php?id=13373">MadPascal AtariArea forum (PL)</a></li>
+<li><a href="http://atariage.com/forums/topic/240919-mad-pascal/">MadPascal AtariAge forum (ENG)</a>
 <li><a href="http://atariage.com/forums/topic/243658-mad-pascal-examples/">MadPascal examples</a>
 
-
+<li><a href="https://atariwiki.org/wiki/Wiki.jsp?page=Pascal">Atari XE/XL Pascal Compilers</a>
 
 <p></p>
 <br />
@@ -288,6 +273,8 @@ SPOSÓB U¯YCIA
 Syntax: mp source [switches]
 
 -d:address      tryb diagnostyczny
+-define:symbol  definiowanie symbolu
+-ipath:&ltx&gt      dodatkowa ¶cie¿ka poszukiwañ
 -code:$address  adres uruchomienia programu
 -data:$address  adres pamiêci dla zmiennych, tablic
 -stack:$address adres pamiêci dla stosu programowego (64 bajty)
@@ -396,6 +383,7 @@ function
 if
 implementation
 interface
+main
 mod
 not
 of
@@ -548,6 +536,8 @@ Zapis dyrektyw kompilatora ma postaæ:
 
 Dyrektywa stanowi komentarz, w którym pierwszy znak $ odró¿nia zwyk³y komentarz, od dyrektywy kompilatora.
 
+<A NAME="conditional">
+
 <tt><h2>CONDITIONAL {$IFDEF label}, {$IFNDEF label}, {$ELSE}, {$ENDIF}, {$DEFINE label}, {$UNDEF label}</h2></tt>
 
 <a href="http://wiki.freepascal.org/Conditional_compilation">Conditional compilation</a>
@@ -563,6 +553,8 @@ const
 	{$endif}
 </pre>
 </span>
+
+Z poziomu assemblera dostêp do zdefiniowanych etykiet $DEFINE mo¿liwy jest przez MAIN.@DEFINES.label
 
 <tt><h2>FASTMUL {$F page}</h2></tt>
 
@@ -616,18 +608,59 @@ okre¶lona poza takim blokiem.
 <p></p>
 <br />
 
+<tt><h2>{$INCLUDE %DATE%}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu41.html">Include DATE</a>
+<p>
+Dyrektywa do³±czenia tekstu z aktualn± dat± kompilacji.
+</p>
+<br />
 
-<tt><h2>INCLUDE {$I filename}</h2></tt>
-<a href="http://www.freepascal.org/docs-html/prog/progsu40.html#x47-460001.2.40">Include file</a>
+<tt><h2>{$INCLUDE %TIME%}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu41.html">Include TIME</a>
+<p>
+Dyrektywa do³±czenia tekstu z aktualnym czasem kompilacji.
+</p>
+<br />
+
+
+<tt><h2>INCLUDE {$I filename}, {$INCLUDE filename}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu40.html#x47-460001.2.40">Include file</a>
 <p>
 Dyrektywa do³±czenia tekstu zawartego w pliku.
 </p>
 <br />
 
 
+<tt><h2>LIBRARY PATH {$LIBRARYPATH path1;path2;...}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu99.html">Specify library path</a>
+<p>
+Dyrektywa pozwalaj±ca wskazaæ dodatkowe ¶cie¿ki poszukiwañ dla bibliotek (unit).
+</p>
+<br />
+
+
+<tt><h2>INFO {$INFO user_defined}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu35.html#x42-410001.2.35">Generate info message</a>
+<p>
+</p>
+<br />
+
+<tt><h2>WARNING {$WARNING user_defined}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu81.html#x88-870001.2.81">Generate warning message</a>
+<p>
+</p>
+<br />
+
+<tt><h2>ERROR {$ERROR user_defined}</h2></tt>
+<a href="https://www.freepascal.org/docs-html/prog/progsu17.html#x24-230001.2.17">Generate error message</a>
+<p>
+</p>
+<br />
+
+
 <A NAME="resource">
 
-<tt><h2>RESOURCE {$R filename}</h2></tt>
+<tt><h2>RESOURCE {$R filename}, {$RESOURCE filename}</h2></tt>
 <a href="http://www.freepascal.org/docs-html/prog/progsu67.html#x74-730001.2.67">Include resource</a>
 <p>
 <h2>RCLABEL RCTYPE RCFILE [PAR0 PAR1 PAR2 PAR3 PAR4 PAR5 PAR6 PAR7]</h2>
@@ -640,6 +673,10 @@ typ zasobów RCTYPE, lokalizacja pliku RCFILE. Aktualnie w pliku BASE\RES6502.ASM
 <tr>
 	<td><tt><b>RCDATA</b></tt></td>
 	<td><tt>dowolny typ danych</tt></td>
+</tr>
+<tr>
+	<td><tt><b>RCASM</b></tt></td>
+	<td><tt>plik w assemlerze, który zostanie do³±czony i zasemblowany</tt></td>
 </tr>
 <tr>
 	<td><tt><b>DOSFILE</b></tt></td>
@@ -1185,6 +1222,25 @@ var px: TPoint;
 </pre>
 </span>
 
+Domy¶lnie rekordy w MP s± typu <b>PACKED</b>. 
+
+<p>
+Je¶li zale¿y nam na zachowania kompatybilno¶ci z FPC nale¿y dodatkowo poprzedziæ s³owo 'record' s³owem 'packed'.
+<br />
+
+Bez tego rozmiar pamiêci jaki zajmuje rekord bêdzie móg³ siê ró¿niæ, bêzie mniej zajmowa³ pamiêci na Atari XE/XL, potencjalnie wiêcej o kilka bajtów na PC.
+</p>
+
+<span style="color: #0000FF">
+<pre>
+type
+    TPoint = packed record x,y: byte end;
+
+var px: TPoint;
+</pre>
+</span>
+
+
 Dostêp do pól rekordu z poziomu asm:
 
 <span style="color: #0000FF">
@@ -1431,15 +1487,23 @@ Mo¿liwa jest rekurencja procedur, pod warunkiem ¿e parametry procedury bêd± prze
 <a href="http://www.freepascal.org/docs-html/ref/refse88.html">Function declaration</a>
 
 <p>
-MP pozwala na przekazanie do funkcji maksymalnie 8 parametrów. S± dostêpne trzy sposoby przekazywania parametrów - przez warto¶æ, sta³± (CONST) i zmienn± (VAR). Domy¶ln± nazw± zmiennej dla wyniku funkcji jest RESULT, np.:
+MP pozwala na przekazanie do funkcji maksymalnie 8 parametrów. S± dostêpne trzy sposoby przekazywania parametrów - przez warto¶æ, sta³± (CONST) i zmienn± (VAR). Wynik funkcji zwracamy przypisuj±c go do nazwy funkcji lub korzystaj±c z automatycznie deklarowanej zmiennej RESULT, np.:
 </p>
 
 <span style="color: #0000FF">
 <pre>
-function suma(a,b: word): cardinal;
+function add(a,b: word): cardinal;
 begin
 
  Result := a+b;
+
+end;
+
+
+function mul(a,b: word): cardinal;
+begin
+
+ mul := a*b;
 
 end;
 </pre>
@@ -1550,7 +1614,9 @@ procedure nazwa (a,b,c: cardinal); register;
 <u><tt><h2>INTERRUPT</h2></tt></u>
 
 Procedury/Funkcje oznaczone przez INTERRUPT kompilator bêdzie koñczy³ 
-rozkazem RTI (standardowo RTS). Zaleca siê u¿ywanie bloku ASM w przypadku takich procedur/funkcji, w innym przypadku stos programowy Mad Pascala zostanie zniszczony, co
+rozkazem RTI (standardowo RTS). Niezale¿nie czy w programie wyst±pi wywo³anie takiej procedury/funkcji kompilator zawsze wygeneruje dla niej kod.
+
+Zaleca siê u¿ywanie bloku ASM w przypadku takich procedur/funkcji, w innym przypadku stos programowy Mad Pascala zostanie zniszczony, co
 mo¿e doprowadziæ do niestabilnego dzia³ania programu, ³±cznie z zawieszeniem siê komputera. Na wej¶ciu procedury/funkcji oznaczonej przez INTERRUPT programista musi
 zadbaæ o zachowanie rejestrów CPU (A, X, Y), na wyj¶ciu o przywrócenie stanu takich rejestrów, kompilator ogranicza siê tylko do wstawienia koñcowego rozkazu RTI.
 
@@ -1645,7 +1711,8 @@ uses crt, sysutils;
 
 Modu³ SYSTEM jest domy¶lnie dopisywany do listy USES i kompilowany jako pierwszy.
 
-<A NAME="system">
+
+<A NAME="u_system">
 <u><tt><h2>SYSTEM</h2></tt></u>
 
 <a href="http://www.freepascal.org/docs-html/rtl/system/index-5.html">Reference for unit 'System': Procedures and functions</a>
@@ -1830,31 +1897,28 @@ Funkcja BinStr zwraca ci±g znakowy z reprezentacj± binarn± warto¶ci Value. Digit
 	</td>
 </tr>
 
+<tr>
+	<td><b><tt>Concat</b></td>
+	<td><tt>
+  <b><tt>function Concat(a,b: string): string; assembler<br>function Concat(a: string; b: char): string; assembler;<br>
+function Concat(a: char; b: string): string; assembler;<br>	function Concat(a,b: char): string;</b></tt>
+  <p>
+Funkcja ³±czy dwa ci±gi tekstowe w nowy ci±g znakowy.
+	</p>
+	</td>
+</tr>
+
 
 <tr>
 	<td><b><tt>Blockread<br />Blockwrite</td>
 	<td><tt>
-  <b><tt>procedure BlockRead(var f: file; var Buf; Count: word; var Result: word); </b></tt>
-  <br />
-  <b><tt>procedure BlockWrite(var f: file; var Buf; Count: word; var Result: word); </b></tt>
-  
+  <b><tt>procedure BlockRead(var f: file; var Buf; Count: word; var Result: word);<br>
+procedure BlockWrite(var f: file; var Buf; Count: word; var Result: word);</b></tt>
   <p>
 Procedura BlockRead wczytuje z pliku plik do zmiennej Buf nie wiêcej ni¿ Count bajtów i umieszcza w zmiennej Result ilo¶æ rzeczywi¶cie przeczytanych bajtów (która mo¿e byæ mniejsza od oczekiwanej np. ze wzglêdu na rzeczywist± d³ugo¶æ pliku). Procedura BlockWrite dzia³a tak samo, tylko zapisuje do pliku.
   </p>
 	</td>
 </tr>
-
-
-<tr>
-	<td><b><tt>Bounds</b></td>
-	<td><tt>
-  <b><tt>function Bounds(ALeft, ATop, AWidth, AHeight: smallint): TRect;</b></tt>
-  <p>
-Funkcja Bounds zwraca rekord typu TRect na podstawie podanych parametrów. Dzia³anie funkcji jest praktycznie takie samo jak dzia³anie funkcji Rect.
-  </p>
-	</td>
-</tr>
-
 
 <tr>
 	<td><b><tt>Chr</b></td>
@@ -2316,11 +2380,11 @@ Funkcja sprawdza czy warto¶ci wspó³rzêdnych okre¶lone w parametrach P1 oraz P2 s
 <tr>
 	<td><b><tt>Random</b></td>
 	<td><tt>
-	<b><tt>function Random: Real; assembler; overload;</tt></b>
+	<b><tt>function Random: Real; assembler;</tt></b>
 <p>
 Funkcja zwraca losow± warto¶æ z przedzia³u <0 .. 1>	
 </p>
-	<b><tt>function Random(range: byte): byte; assembler; overload;</tt></b>
+	<b><tt>function Random(range: byte): byte; assembler;</tt></b>
 <p>
 Funkcja zwraca losow± warto¶æ z przedzia³u <0 .. range-1>, w przypadku Range=0 zwraca warto¶æ losow± z przedzia³u <0 .. 255 >
 </p>
@@ -2544,8 +2608,7 @@ Funkcja generuje nowy ci±g znakowy o d³ugo¶ci LEN wype³niony znakami CH.
 <tr>
 	<td><b><tt>Sqr</b></td>
 	<td><tt>
-   <b><tt>function Sqr(x: real): real;
-          function Sqr(x: integer): integer;</tt></b>
+   <b><tt>function Sqr(x: real): real;<br>function Sqr(x: integer): integer;</tt></b>
    <p>
   Funkcja obliczaj±ca kwadrat podanej liczby (ang. Square).
 	</p>
@@ -2556,8 +2619,7 @@ Funkcja generuje nowy ci±g znakowy o d³ugo¶ci LEN wype³niony znakami CH.
 <tr>
 	<td><b><tt>Sqrt</b></td>
 	<td><tt>
-   <b><tt>function Sqrt(x: real): real;
-          function Sqrt(x: integer): integer;</tt></b>
+   <b><tt>function Sqrt(x: real): real;<br>function Sqrt(x: single): single;<br>function Sqrt(x: integer): single;</tt></b>
    <p>
    Funkcja obliczaj±ca pierwiastek kwadratowy podanej liczby (ang. Square root).
 	</p>
@@ -2617,7 +2679,7 @@ Zapis sektora SECTOR dyskietki w stacji DEVNUM na podstawie bufora BUF.
 
 
 
-<A NAME="crt">
+<A NAME="u_crt">
 <u><tt><h2>CRT</h2></tt></u>
 
 <a href="http://www.freepascal.org/docs-html/rtl/crt/index-5.html">Reference for unit 'Crt': Procedures and functions</a>
@@ -2689,20 +2751,42 @@ CN_NONE			= 7;
 
 <tr>
 	<td><tt><b>ClrEol</b></td>
-	<td><tt>Procedura czy¶ci wiersz od aktualnej pozycji kursora do prawej strony krawêdzi ekranu. Pozycja kursora nie ulega zmianie.</tt></td>
+	<td><tt>
+	<b><tt>procedure ClrEol;</tt></b>
+	<p>
+	Procedura czy¶ci wiersz od aktualnej pozycji kursora do prawej strony krawêdzi ekranu. Pozycja kursora nie ulega zmianie.
+	</p>
+	</td>
 </tr>
 
 <tr>
 	<td><tt><b>ClrScr</b></td>
-	<td><tt>Procedura czy¶ci ekran edytora, wykonuje kod znaku CH_CLR</tt></td>
+	<td><tt>
+	<b><tt>procedure ClrScr;</tt></b>
+	<p>
+	Procedura czy¶ci ekran edytora, wykonuje kod znaku CH_CLR
+	</p>
+	</td>
 </tr>
+
 <tr>
 	<td><tt><b>CursorOff</b></td>
-	<td><tt>Procedura wy³±cza kursor.</tt></td>
+	<td><tt>
+	<b><tt>procedure CursorOff;</tt></b>
+	<p>
+	Procedura wy³±cza kursor.
+	</p>
+	</td>
 </tr>
+
 <tr>
 	<td><tt><b>CursorOn</b></td>
-	<td><tt>Procedura w³±cza kursor.</tt></td>
+	<td><tt>
+	<b><tt>procedure CursorOn;</tt></b>
+	<p>
+	Procedura w³±cza kursor.
+	</p>
+	</td>
 </tr>
 
 <tr>
@@ -2717,8 +2801,14 @@ CN_NONE			= 7;
 
 <tr>
 	<td><tt><b>DelLine</b></td>
-	<td><tt>Procedura kasuje wiersz na aktualnej pozycji kursora, wykonuje kod znaku CH_DELLINE</tt></td>
+	<td><tt>
+   <b><tt>procedure DelLine;</tt></b>
+   <p>
+ Procedura kasuje wiersz na aktualnej pozycji kursora, wykonuje kod znaku CH_DELLINE
+	</p>
+	</td>
 </tr>
+
 <tr>
 	<td><tt><b>GotoXY</b></td>
 	<td><tt>
@@ -2731,7 +2821,12 @@ CN_NONE			= 7;
 
 <tr>
 	<td><tt><b>InsLine</b></td>
-	<td><tt>Procedura wstawia pusty wiersz na aktualnej pozycji kursora, wykonuje kod znaku CH_INSLINE</tt></td>
+	<td><tt>
+   <b><tt>procedure InsLine;</tt></b>
+   <p>
+ Procedura wstawia pusty wiersz na aktualnej pozycji kursora, wykonuje kod znaku CH_INSLINE
+	</p>
+	</td>
 </tr>
 
 <tr>
@@ -2744,12 +2839,15 @@ CN_NONE			= 7;
 	</td>
 </tr>
 
-
 <tr>
 	<td><tt><b>NoSound</b></td>
-	<td><tt>Procedura wycisza kana³y obu POKEY-i ($D200, $D210)</tt></td>
+	<td><tt>
+	<b><tt>procedure NoSound;</tt></b>
+	<p>
+	Procedura wycisza kana³y obu POKEY-i ($D200, $D210)
+	</p>
+	</td>
 </tr>
-
 
 <tr>
 	<td><tt><b>ReadKey</b></td>
@@ -2766,11 +2864,10 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure Sound(Chan,Freq,Dist,Vol: byte);</tt></b>
 	<p>
-	Procedura odtwarza d¼wiêk na kanale POKEY-a CHAN, o czêstotliwo¶ci FREQ, filtrach DIST, g³o¶no¶ci VOL.
+	Procedura odtwarza d¼wiêk na kanale POKEY-a CHAN (0..3, 4..7), o czêstotliwo¶ci FREQ (0..255), filtrach DIST (0..7), g³o¶no¶ci VOL (0..15).
 	</p>
 	</td>
 </tr>
-
 
 <tr>
 	<td><tt><b>TextBackground</b></td>
@@ -2797,7 +2894,7 @@ CN_NONE			= 7;
 <br />
 
 
-<A NAME="graph">
+<A NAME="u_graph">
 <u><tt><h2>GRAPH</h2></tt></u>
 
 <a href="http://www.freepascal.org/docs-html/rtl/graph/index-5.html">Reference for unit 'Graph': Procedures and functions</a>
@@ -2861,6 +2958,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure Bar(x1, y1, x2, y2: Smallint);</tt></b>
 	<p>
+	Prostok±t, np. dla wykresów s³upkowych.
 	</p>
 	</td>
 </tr>
@@ -2868,8 +2966,9 @@ CN_NONE			= 7;
 <tr>
 	<td><tt><b>Bar3D</b></td>
 	<td><tt>
-	<b><tt>procedure Bar3D(x1, y1, x2, y2 : smallint;depth : word;top : boolean);</tt></b>
+	<b><tt>procedure Bar3D(x1, y1, x2, y2: smallint; depth: word; top: boolean);</tt></b>
 	<p>
+	S³upek „trójwymiarowy”.
 	</p>
 	</td>
 </tr>
@@ -2880,6 +2979,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure Circle(x0,y0,radius: word);</tt></b>
 	<p>
+	Okr±g.
 	</p>
 	</td>
 </tr>
@@ -2900,6 +3000,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure Ellipse(x0, y0, a, b: word);</tt></b>
 	<p>
+	Elipsa.
 	</p>
 	</td>
 </tr>
@@ -2909,6 +3010,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure FillEllipse(x0, y0, a, b: word);</tt></b>
 	<p>
+	Elipsa wype³niona wewn±trz.
 	</p>
 	</td>
 </tr>
@@ -2918,6 +3020,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure FillRect(Rect: TRect);</tt></b>
 	<p>
+	Prostok±t wype³niony wewn±trz.
 	</p>
 	</td>
 </tr>
@@ -2927,6 +3030,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure FloodFill(x, y: smallint; color: byte);</tt></b>
 	<p>
+	Wype³nienie zamkniêtego obszaru ekranu.
 	</p>
 	</td>
 </tr>
@@ -2936,35 +3040,17 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>function GetColor: byte; assembler;</tt></b>
 	<p>
+	Podaj bie¿±cy kolor rysowania.
 	</p>
 	</td>
 </tr>
-
-
-<tr>
-	<td><tt><b>GetX</b></td>
-	<td><tt>
-	<b><tt>function GetX: smallint;</tt></b>
-	<p>
-	</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>GetY</b></td>
-	<td><tt>
-	<b><tt>function GetY: smallint;</tt></b>
-	<p>
-	</p>
-	</td>
-</tr>
-
 
 <tr>
 	<td><tt><b>GetMaxX</b></td>
 	<td><tt>
 	<b><tt>function GetMaxX: word;</tt></b>
 	<p>
+	Podaj najwy¿sz± warto¶æ wspó³rzêdnej X na ekranie.
 	</p>
 	</td>
 </tr>
@@ -2974,17 +3060,37 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>function GetMaxY: word;</tt></b>
 	<p>
+	Podaj najwy¿sz± warto¶æ wspó³rzêdnej Y na ekranie.
 	</p>
 	</td>
 </tr>
-
-
 
 <tr>
 	<td><tt><b>GetPixel</b></td>
 	<td><tt>
 	<b><tt>function GetPixel(x,y: smallint): byte;</tt></b>
 	<p>
+	Podaj kolor danego punktu na ekranie.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetX</b></td>
+	<td><tt>
+	<b><tt>function GetX: smallint;</tt></b>
+	<p>
+	Podaj bie¿±c± wspó³rzêdn± X kursora graficznego.
+	</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>GetY</b></td>
+	<td><tt>
+	<b><tt>function GetY: smallint;</tt></b>
+	<p>
+	Podaj bie¿±c± wspó³rzêdn± Y kursora graficznego.
 	</p>
 	</td>
 </tr>
@@ -2994,6 +3100,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure InitGraph(mode: byte);<br />procedure InitGraph(driver, mode: byte; pth: TString);</tt></b>
 	<p>
+	Zainicjuj tryb graficzny.
 	</p>
 	</td>
 </tr>
@@ -3003,6 +3110,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure Line(x0, y0, x1, y1: smallint);</tt></b>
 	<p>
+  Linia prosta.	
 	</p>
 	</td>
 </tr>
@@ -3012,6 +3120,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure LineTo(x, y: smallint);</tt></b>
 	<p>
+	Linia od bie¿±cej pozycji kursora do wskazanego punktu.
 	</p>
 	</td>
 </tr>
@@ -3022,6 +3131,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure MoveRel(Dx, Dy: smallint);</tt></b>
 	<p>
+	Przesuñ kursor graficzny.
 	</p>
 	</td>
 </tr>
@@ -3031,6 +3141,7 @@ CN_NONE			= 7;
 	<td><tt>
 	<b><tt>procedure MoveTo(x, y: smallint);</tt></b>
 	<p>
+	Przesuñ kursor graficzny do wskazanego punktu.
 	</p>
 	</td>
 </tr>
@@ -3040,8 +3151,9 @@ CN_NONE			= 7;
 <tr>
 	<td><tt><b>PutPixel</b></td>
 	<td><tt>
-	<b><tt>procedure PutPixel(x,y: smallint);<br />procedure PutPixel(x,y: smallint; color: byte);</tt></b>
+	<b><tt>procedure PutPixel(x,y: smallint);<br>procedure PutPixel(x,y: smallint; color: byte);</tt></b>
 	<p>
+	Zapal punkt na ekranie.
 	</p>
 	</td>
 </tr>
@@ -3050,9 +3162,9 @@ CN_NONE			= 7;
 <tr>
 	<td><tt><b>Rectangle</b></td>
 	<td><tt>
-	<b><tt>procedure Rectangle(x1, y1, x2, y2: smallint); overload;<br />
-procedure Rectangle(Rect: TRect); overload;</tt></b>
+	<b><tt>procedure Rectangle(x1, y1, x2, y2: smallint);<br>procedure Rectangle(Rect: TRect);</tt></b>
 	<p>
+	Prostok±t.
 	</p>
 	</td>
 </tr>
@@ -3062,6 +3174,7 @@ procedure Rectangle(Rect: TRect); overload;</tt></b>
 	<td><tt>
 	<b><tt>procedure SetBkColor(color: byte);</tt></b>
 	<p>
+	Ustaw kolor t³a.
 	</p>
 	</td>
 </tr>
@@ -3070,8 +3183,7 @@ procedure Rectangle(Rect: TRect); overload;</tt></b>
 <tr>
 	<td><tt><b>SetClipRect</b></td>
 	<td><tt>
-	<b><tt>procedure SetClipRect(x0,y0,x1,y1: smallint); overload;<br />
-procedure SetClipRect(Rect: TRect); overload;</tt></b>
+	<b><tt>procedure SetClipRect(x0,y0,x1,y1: smallint);<br>procedure SetClipRect(Rect: TRect);</tt></b>
 	<p>
 	</p>
 	</td>
@@ -3084,6 +3196,7 @@ procedure SetClipRect(Rect: TRect); overload;</tt></b>
 	<td><tt>
 	<b><tt>procedure SetColor(color: byte);</tt></b>
 	<p>
+	Ustaw kolor pisaka.
 	</p>
 	</td>
 </tr>
@@ -3113,7 +3226,7 @@ procedure SetClipRect(Rect: TRect); overload;</tt></b>
 <br />
 
 
-<A NAME="sysutils">
+<A NAME="u_sysutils">
 <u><tt><h2>SYSUTILS</h2></tt></u>
 
 <a href="http://www.freepascal.org/docs-html/rtl/sysutils/index-5.html">Reference for unit 'Sysutils': Procedures and functions</a>
@@ -3151,9 +3264,7 @@ TSearchRec = record
 	</td>
 </tr>
 
-
 </table>
-
 
 
 <p class="tekst-wiekszy2">[ Procedures and functions ]</p>
@@ -3170,13 +3281,22 @@ Funkcja konwertuje znaki z ³añcucha A na wielkie.
 	</td>
 </tr>
 
-
 <tr>
 	<td><tt><b>Beep</td>
 	<td><tt>
 <b><tt>procedure Beep;</tt></b>
 <p>
 Sygna³ brzêczka (buzzer).
+</p>
+	</td>
+</tr>
+
+<tr>
+	<td><tt><b>Click</td>
+	<td><tt>
+<b><tt>procedure Click;</tt></b>
+<p>
+Sygna³ klawiatury.
 </p>
 	</td>
 </tr>
@@ -3218,7 +3338,7 @@ Funkcja sprawdza czy plik okre¶lony w parametrze FileName, istnieje (True) czy t
 	<td><tt>
 <b><tt>function FindFirst(const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;</tt></b>
 <p>
-
+Funkcja FindFirst wyszukuje pliki pasuj±ce do wzorca FileMask i posiadaj±ce atrybuty okre¶lone w Attributes. Je¶li zosta³y znalezione pliki pasuj±ce do szablonu to pierwszy z nich jest zwracany w zmiennej SerchResult.
 </p>
 	</td>
 </tr>
@@ -3229,7 +3349,7 @@ Funkcja sprawdza czy plik okre¶lony w parametrze FileName, istnieje (True) czy t
 	<td><tt>
 <b><tt>function FindNext(var f: TSearchRec): byte;</tt></b>
 <p>
-
+Funkcja przechodzi do nastêpnego rekordu znalezionego wcze¶niej przy pomocy FindFirst. W parametrze musi zostaæ przekazane wskazanie na rekord, który wcze¶niej zosta³ u¿yty w funkcji FindFirst.
 </p>
 	</td>
 </tr>
@@ -3240,7 +3360,7 @@ Funkcja sprawdza czy plik okre¶lony w parametrze FileName, istnieje (True) czy t
 	<td><tt>
 <b><tt>procedure FindClose(var f: TSearchRec);</tt></b>
 <p>
-
+Procedura zwalnia zasoby (pamiêæ) zaalokowan± przez funkcjê FindFirst. Procedura ta powinna byæ wywo³ywana za ka¿dym razem po zakoñczeniu procesu wyszukiwania.
 </p>
 	</td>
 </tr>
@@ -3260,7 +3380,7 @@ GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256
 	<td><tt>
 <b><tt>function IntToHex(Value: cardinal; Digits: byte): TString;</tt></b>
 <p>
-
+Funkcja konwertuje warto¶æ liczbow± na jej odpowiednik ³añcuchowy w systemie szesnastkowym.
 </p>
 	</td>
 </tr>
@@ -3270,7 +3390,7 @@ GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256
 	<td><tt>
 <b><tt>function IntToStr(a: integer): ^char;</tt></b>
 <p>
-
+Funkcja s³u¿y do konwersji liczby ca³kowitej podanej w parametrze do postaci ³añcuchowej.
 </p>
 	</td>
 </tr>
@@ -3280,7 +3400,7 @@ GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256
 	<td><tt>
 <b><tt>function RenameFile(var OldName,NewName: TString): Boolean;</tt></b>
 <p>
-
+RenameFile próbuje zmieniæ nazwê pliku (okre¶lonego w parametrze OldName) na NewName. Je¿eli operacja siê powiedzie, funkcja zwróci warto¶æ True; w przeciwnym wypadku - False. Mo¿e siê zdarzyæ, ¿e funkcja nie bêdzie mog³a zmieniæ nazwy (np. gdy aplikacja nie ma prawa do tego) - wówczas funkcja zwróci False. 
 </p>
 	</td>
 </tr>
@@ -3290,7 +3410,7 @@ GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256
 	<td><tt>
 <b><tt>function StrToFloat(var s: TString): real;</tt></b>
 <p>
-
+Funkcja konwertuje ³añcuch do postaci zmiennoprzenkowej typu Real.
 </p>
 	</td>
 </tr>
@@ -3298,9 +3418,9 @@ GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256
 <tr>
 	<td><tt><b>StrToInt</td>
 	<td><tt>
-<b><tt>function StrToInt(const s: char): byte;<br />function StrToInt (const s: TString): integer; </tt></b>
+<b><tt>function StrToInt(const S: char): byte;<br />function StrToInt (const S: TString): integer; </tt></b>
 <p>
-
+Funkcja s³u¿y do konwersji tekstu zapisanego w zmiennej S na liczbê ca³kowit± - o ile to mo¿liwe.
 </p>
 	</td>
 </tr>
@@ -3312,282 +3432,7 @@ GetTickCount zwraca 24-bitowy licznik czasu (PEEK(RTCLOK+2) + PEEK(RTCLOK+1)*256
 
 
 
-
-<A NAME="utypes">
-<u><tt><h2>TYPES</h2></tt></u>
-
-<a href="https://www.freepascal.org/docs-html/rtl/types/index-5.html">Reference for unit 'Types': Procedures and functions</a>
-
-
-</table>
-
-
-<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>Bounds</td>
-	<td><tt>
-<b><tt>function Bounds(ALeft, ATop, AWidth, AHeight: smallint): TRect;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>CenterPoint</td>
-	<td><tt>
-<b><tt>function CenterPoint(const Rect: TRect): TPoint;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>EqualRect</td>
-	<td><tt>
-<b><tt>function EqualRect(const r1,r2 : TRect) : Boolean;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>InflateRect</td>
-	<td><tt>
-<b><tt>function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>IntersectRect</td>
-	<td><tt>
-<b><tt>function IntersectRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>IsRectEmpty</td>
-	<td><tt>
-<b><tt>function IsRectEmpty(const Rect : TRect) : Boolean;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>NormalizeRect</td>
-	<td><tt>
-<b><tt>procedure NormalizeRect(var Rect: TRect); overload;<br />
-procedure NormalizeRect(var left,top, right,bottom : smallint); overload;
-</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>OffsetRect</td>
-	<td><tt>
-<b><tt>function OffsetRect(var Rect : TRect;DX : Integer;DY : Integer) : Boolean;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Point</td>
-	<td><tt>
-<b><tt>function Point(AX, AY: smallint): TPoint;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>PointsEqualt</td>
-	<td><tt>
-<b><tt>function PointsEqual(const P1, P2: TPoint): Boolean;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>PtInEllipse</td>
-	<td><tt>
-<b><tt>function PtInEllipse(const Rect: TRect; X, Y: integer): Boolean;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>PtInRect</td>
-	<td><tt>
-<b><tt>function PtInRect(const Rect : TRect;const p : TPoint) : Boolean;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>Rect</td>
-	<td><tt>
-<b><tt>function Rect(ALeft, ATop, ARight, ABottom: smallint): TRect;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>RectWidth</td>
-	<td><tt>
-<b><tt>function RectWidth(const Rect: TRect): word;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>RectHeight</td>
-	<td><tt>
-<b><tt>function RectHeight(const Rect: TRect): word;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-
-<tr>
-	<td><tt><b>Size</td>
-	<td><tt>
-<b><tt>function Size(AWidth, AHeight: smallint): TSize; overload;<br />
-function Size(const ARect: TRect): TSize; overload;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>UnionRect</td>
-	<td><tt>
-<b><tt>function UnionRect(var Rect : TRect;const R1,R2 : TRect) : Boolean;</tt></b>
-<p>
-
-</p>
-	</td>
-</tr>
-
-
-</table>
-
-<p></p>
-<br />
-
-
-
-<A NAME="misc">
-<u><tt><h2>MISC</h2></tt></u>
-
-
-<p class="tekst-wiekszy2">[ Variables ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>banks</td>
-	<td><tt>
-<b><tt>banks: array [0..63] of byte;</tt></b>
-<p>Tablica przechowuj±ca 64 kody wykrytych banków dodatkowej pamiêci.</p>
-	</td>
-</tr>
-
-</table>
-
-
-
-<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
-
-<table border="1">
-
-<tr><tt>
-	<td><tt><b>DetectCPU</b></tt></td>
-	<td><tt><b>function DetectCPU: byte; assembler;</b>
-	<p>Funckja zwraca warto¶æ $00 gdy wykryje CPU 6502, $01 dla 65C02, $80 dla 65816.</p></td>
-</tr>
-
-<tr><tt>
-	<td><tt><b>DetectCPUSpeed</b></tt></td>
-	<td><tt><b>function DetectCPUSpeed: real;</b>
-	<p>Funckja zwraca szybko¶æ zainstalowanego CPU wyra¿on± w MHz.</p></td>
-</tr>
-
-<tr>
-	<td><tt><b>DetectMapRAM</b></tt></td>
-	<td><tt><b>function DetectMapRam: Boolean; assembler;</b>
-	<p>Funkcja zwraca TRUE gdy wykryta zostanie mo¿liwo¶æ zapisu w 2KB obszarze który normalnie zajmuj± rejestry sprzêtowe. Ten obszar to <a href="http://xxl.atari.pl/mapram/">MapRAM</a>.</p></td>
-</tr>
-
-<tr>
-	<td><tt><b>DetectMem</b></tt></td>
-	<td><tt><b>function DetectMEM: byte; assembler;</b>
-	<p>Funkcja zwraca liczbê wykrytych dodatkowych banków pamiêci, w tablicy BANKS zapisane zostaj± ich kody.</p></td>
-</tr>
-
-<tr>
-	<td><tt><b>DetectStereo</b></tt></td>
-	<td><tt><b>function DetectStereo: Boolean; assembler;</b>
-	<p>Funkcja zwraca TRUE gdy wykryty zostanie drugi POKEY (STEREO).</p></td>
-</tr>
-
-<tr>
-	<td><tt><b>DetectVBXE</b></tt></td>
-	<td><tt><b>function DetectVBXE(var p: word): Boolean; assembler; register;</b>
-	<p>Funkcja zwraca TRUE w przypadku wykrycia VBXE, dodatkowo w zmiennej P typu WORD zostaj± zapisane informacje o wersji zainstalowanego rdzenia.
-<pre>
-bit 0..6  numer wersji rdzenia
-bit 7     =1 RAMBO
-bit 8..15 strona pamiêci na której s± rejestry VBXE
-</pre>	
-	
-	</p></td>
-</tr>
-
-</table>
-
-<p></p>
-<br />
-
-
-
-<A NAME="vbxe">
+<A NAME="u_vbxe">
 <u><tt><h2>VBXE</h2></tt></u>
 
 <p>
@@ -3604,9 +3449,9 @@ VBXE_WINDOW = $B000;	// 4K WINDOW $B000..$BFFF
 <p class="tekst-wiekszy2">[ Constants ]</p>
 
 <pre>
-LoRes = 1;
+LoRes  = 1;
 MedRes = 2;
-HiRes = 3;
+HiRes  = 3;
 </pre>
 
 
@@ -3675,6 +3520,38 @@ end;
 </pre></td>
 <td><tt>Typ TBCB (21 bajtów), Blitter Code Block. Definicja typu bloku programu dla Blittera VBXE.</td>
 </tr>
+
+
+
+
+<tr>
+	<td><tt><b>TVBXEMemoryStream</b></td>
+	<td><tt>
+	<pre>
+Object
+	Position: cardinal;
+	Size: cardinal;			// 0..Size-1
+
+	procedure Create;
+
+	procedure Clear;
+	procedure SetBank;
+
+	procedure ReadBuffer(var Buffer; Count: word);
+	procedure WriteBuffer(var Buffer; Count: word);
+
+	function ReadByte: Byte;
+	function ReadWord: Word;
+	function ReadDWord: Cardinal;
+
+	procedure WriteByte(b: Byte);
+	procedure WriteWord(w: Word);
+	procedure WriteDWord(d: Cardinal);
+end;
+</pre></td>
+<td><tt>Obiekt TVBXEMemoryStream pozwala na liniowy dostêp do pamiêci VBXE.</td>
+</tr>
+
 
 </table>
 
@@ -3745,6 +3622,7 @@ end;
 	</td>
 </tr>
 
+
 <tr>
 	<td><tt><b>SetHorizontalRes</b></td>
 	<td><tt>
@@ -3777,8 +3655,18 @@ end;
 <tr>
 	<td><tt><b>SrcBCB</b></td>
 	<td><tt>
-	<b><tt>procedure SrcBCB</tt></b>
+	<b><tt>procedure SrcBCB(var a: TBCB; src: cardinal);</tt></b>
 	<p>Procedura zmieniaj±ca adres ¼ród³owy (src_adr) w programie blittera A.
+	</p>
+	</td>
+</tr>
+
+
+<tr>
+	<td><tt><b>VBXEControl</b></td>
+	<td><tt>
+	<b><tt>procedure VBXEControl(a: byte); assembler;</tt></b>
+	<p>Procedura ustawia warto¶c FX_VIDEO_CONTROL.
 	</p>
 	</td>
 </tr>
@@ -3799,73 +3687,7 @@ end;
 
 
 
-<A NAME="dos">
-<u><tt><h2>DOS</h2></tt></u>
-
-<a href="http://www.freepascal.org/docs-html/rtl/dos/index-5.html">Reference for unit 'Dos': Procedures and functions</a>
-
-<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
-
-<table border="0">
-
-<tr>
-	<td><tt><b>CurrentMinuteOfDay</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>CurrentSec100OfDay</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>CurrentSecondOfDay</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>DosVersion</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>GetTime</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>MinuteOfDay</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>MinutesToTime</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>SecondOfDay</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>SecondsToTime</td>
-	<td></td>
-</tr>
-
-<tr>
-	<td><tt><b>SetTime</td>
-	<td></td>
-</tr>
-
-</table>
-
-
-<p></p>
-<br />
-
-
-<A NAME="math">
+<A NAME="u_math">
 <u><tt><h2>MATH</h2></tt></u>
 
 <a href="http://www.freepascal.org/docs-html/rtl/math/index-5.html">Reference for unit 'Math': Procedures and functions</a>
@@ -3880,6 +3702,7 @@ end;
 	<td><tt>
 <b><tt>function ArcCos(x: real): real;</tt></b>
 <p>
+Arcus cosinus jest funkcj± odwrotn± do funkcji Cos (cosinus). Warto¶æ parametru X musi nale¿eæ do przedzia³u obustronnie domkniêtego <-1; 1>. Warto¶ci± zwracan± przez funkcjê jest k±t z przedzia³u <0; ?> wyra¿ony w mierze ³ukowej (radianach).
 </p>
 	</td>
 </tr>
@@ -3889,6 +3712,7 @@ end;
 	<td><tt>
 <b><tt>function ArcSin(x: real): real;</tt></b>
 <p>
+Funkcja ArcSin s³u¿y do obliczenia funkcji matematycznej arcus sinus z liczby X. Jest to funkcja odwrotna do funkcji sinus, tzn. sin(arcsin(x)) = x.
 </p>
 	</td>
 </tr>
@@ -3898,6 +3722,7 @@ end;
 	<td><tt>
 <b><tt>function ArcTan2(y, x: real) : real;</tt></b>
 <p>
+Funkcja oblicza arcus tangens (odwrotno¶æ tangensa) z liczby Y/X i zwraca warto¶æ w radianach.
 </p>
 	</td>
 </tr>
@@ -3918,6 +3743,7 @@ Funkcja zwraca najmniejsz± liczbê ca³kowit± wiêksz± lub równ± od tej podanej w p
 	<td><tt>
 <b><tt>function CycleToRad(cycle : real) : real;</tt></b>
 <p>
+Funkcja CycleToRad przelicza warto¶æ k±ta wyra¿onego w cyklach (obrotach) na k±t wyra¿ony w radianach.
 </p>
 	</td>
 </tr>
@@ -3938,6 +3764,7 @@ Funkcja zwraca najmniejsz± liczbê ca³kowit± wiêksz± lub równ± od tej podanej w p
 	<td><tt>
 <b><tt>function DegToGrad(deg : real) : real;</tt></b>
 <p>
+Funkcja DegToGrad przelicza warto¶æ k±ta wyra¿onego w stopniach na k±t wyra¿ony w gradach.
 </p>
 	</td>
 </tr>
@@ -3948,6 +3775,7 @@ Funkcja zwraca najmniejsz± liczbê ca³kowit± wiêksz± lub równ± od tej podanej w p
 	<td><tt>
 <b><tt>function DegToRad(deg : real) : real;</tt></b>
 <p>
+Funkcja DegToRad przelicza warto¶æ k±ta wyra¿onego w stopniach na k±t wyra¿ony w mierze ³ukowej, czyli radianach.
 </p>
 	</td>
 </tr>
@@ -3987,7 +3815,7 @@ Funkcja zwraca najbli¿sz± liczbê ca³kowit± mniejsz± lub równ± od tej podanej w p
 	<td><tt>
 <b><tt>function FMod(a, b: real): real;</tt></b>
 <p>
-Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
+Funkcja FMod zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 </p>
 	</td>
 </tr>
@@ -3997,6 +3825,7 @@ Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 	<td><tt>
 <b><tt>function GradToDeg(grad : real) : real;</tt></b>
 <p>
+Funkcja GradToDeg przelicza warto¶æ k±ta wyra¿onego w gradach na k±t wyra¿ony w stopniach.
 </p>
 	</td>
 </tr>
@@ -4006,6 +3835,7 @@ Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 	<td><tt>
 <b><tt>function GradToRad(grad : real) : real;</tt></b>
 <p>
+Funkcja GradToRad przelicza warto¶æ k±ta wyra¿onego w gradach na k±t wyra¿ony w radianach.
 </p>
 	</td>
 </tr>
@@ -4025,6 +3855,7 @@ Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 	<td><tt>
 <b><tt>function IsNan(const d : Single): Boolean;</tt></b>
 <p>
+Funkcja sprawdza czy warto¶æ parametru D jest poprawn± liczb±.
 </p>
 	</td>
 </tr>
@@ -4035,6 +3866,7 @@ Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 	<td><tt>
 <b><tt>function log2(x : single): single;</tt></b>
 <p>
+Funkcja zwraca warto¶æ logarytmu przy podstawie 2 dla parametru rzeczywistego X>0.
 </p>
 	</td>
 </tr>
@@ -4045,6 +3877,7 @@ Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 	<td><tt>
 <b><tt>function log10(x : single): single;</tt></b>
 <p>
+Funkcja zwraca warto¶æ logarytmu dziesiêtnego (logarytmu przy podstawie 10) dla parametru rzeczywistego X>0.
 </p>
 	</td>
 </tr>
@@ -4055,6 +3888,7 @@ Funkcja zwraca resztê z dzielenia dwóch liczb rzeczywistych.
 	<td><tt>
 <b><tt>function logN(n,x : single): single;</tt></b>
 <p>
+Funkcja zwraca warto¶æ logarytmu przy podstawie N>0 dla parametru rzeczywistego X>0.
 </p>
 	</td>
 </tr>
@@ -4084,7 +3918,7 @@ Przeci±¿ona funkcja porównuje warto¶ci dwóch parametrów A i B, oraz zwraca warto
 <tr>
 	<td><tt><b>Power</td>
 	<td><tt>
-<b><tt>function Power(base : real; const exponent : shortint) : real;<br />power(base : integer; const exponent : shortint) : integer;</tt></b>
+<b><tt>function Power(base : real; const exponent : shortint): real;<br />power(base : integer; const exponent : shortint): integer;</tt></b>
 <p>
 Funkcja podnosi liczbê A do dowolnej potêgi N, potêga mo¿e byæ u³amkiem.
 </p>
@@ -4096,6 +3930,7 @@ Funkcja podnosi liczbê A do dowolnej potêgi N, potêga mo¿e byæ u³amkiem.
 	<td><tt>
 <b><tt>function RadToCycle(rad : real) : real;</tt></b>
 <p>
+Funkcja RadToCycle przelicza warto¶æ k±ta wyra¿onego w radianach na k±t wyra¿ony w cyklach (obrotach).
 </p>
 	</td>
 </tr>
@@ -4105,6 +3940,7 @@ Funkcja podnosi liczbê A do dowolnej potêgi N, potêga mo¿e byæ u³amkiem.
 	<td><tt>
 <b><tt>function RadToDeg(rad : real) : real;</tt></b>
 <p>
+Funkcja RadToDeg przelicza warto¶æ k±ta wyra¿onego w radianach na k±t wyra¿ony w stopniach (deg).
 </p>
 	</td>
 </tr>
@@ -4114,6 +3950,7 @@ Funkcja podnosi liczbê A do dowolnej potêgi N, potêga mo¿e byæ u³amkiem.
 	<td><tt>
 <b><tt>function RadToGrad(rad : real) : real;</tt></b>
 <p>
+Funkcja RadToGrad przelicza warto¶æ k±ta wyra¿onego w radianach na k±t wyra¿ony w gradach.
 </p>
 	</td>
 </tr>
@@ -4123,17 +3960,17 @@ Funkcja podnosi liczbê A do dowolnej potêgi N, potêga mo¿e byæ u³amkiem.
 	<td><tt>
 <b><tt>function RandG(mean, stddev : single) : single;</tt></b>
 <p>
-Zwraca liczbê losow± rozk³adu Gaussa.
+RandG reprezentuje generator liczb pseudolosowych o rozk³adzie Gaussa wokó³ ¶redniej Mean. Parametr StdDev jest odchyleniem standardowym generowanych liczb od warto¶ci ¶redniej (Mean).
 </p>
 	</td>
 </tr>
-
 
 <tr>
 	<td><tt><b>RandomRange</td>
 	<td><tt>
 <b><tt>function RandomRange(const aFrom, aTo: smallint): smallint;</tt></b>
 <p>
+Funkcja zwraca losow± liczbê z przedzia³u AFrom - ATo (³±cznie z warto¶ci± ATo).
 </p>
 	</td>
 </tr>
@@ -4146,7 +3983,6 @@ Zwraca liczbê losow± rozk³adu Gaussa.
 </p>
 	</td>
 </tr>
-
 
 <tr>
 	<td><tt><b>Tan</td>
@@ -4164,455 +4000,57 @@ Funkcja zwraca warto¶æ tangensa k±ta podanego w parametrze X.
 <br />
 
 
-
-<A NAME="cmc">
-<u><tt><h2>CMC</h2></tt></u>
-
-<p class="tekst-wiekszy2">[ Types ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>TCMC</td>
-	<td><tt>
-<b><tt><pre>
-type
-    TCMC = Object
-	 
-      player: pointer;
-      modul: pointer;
-     
-      procedure Init; assembler;
-      procedure Play; assembler;
-      procedure Stop; assembler;
-
-   end;
-</pre></tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-</table>
-
-<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>Init</td>
-	<td><tt>
-<b><tt>procedure TCMC.Init; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Play</td>
-	<td><tt>
-<b><tt>procedure TCMC.Play; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Stop</td>
-	<td><tt>
-<b><tt>procedure TCMC.Stop; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-</table>
-
-<p></p>
-<br />
-
-
-
-<A NAME="mpt">
-<u><tt><h2>MPT</h2></tt></u>
-
-<p class="tekst-wiekszy2">[ Types ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>TMPT</td>
-	<td><tt>
-<b><tt>
-<pre>
-type
-    TMPT = Object
-	 
-      player: pointer;
-      modul: pointer;
-     
-      procedure Init; assembler;
-      procedure Play; assembler;
-      procedure Stop; assembler;
-
-   end;
-</pre>	
-</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-</table>
-
-<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>Init</td>
-	<td><tt>
-<b><tt>procedure TMPT.Init; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Play</td>
-	<td><tt>
-<b><tt>procedure TMPT.Play; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Stop</td>
-	<td><tt>
-<b><tt>procedure TMPT.Stop; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-</table>
-
-<p></p>
-<br />
-
-
-
-<A NAME="rmt">
-<u><tt><h2>RMT</h2></tt></u>
-
-<p class="tekst-wiekszy2">[ Types ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>TRMT</td>
-	<td><tt>
-<b><tt><pre>
-type
-    TRMT = Object
-	 
-      player: pointer;
-      modul: pointer;
-     
-      procedure Init(a: byte); assembler;
-      procedure Play; assembler;
-      procedure Stop; assembler;
-
-   end;
-</pre></tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-</table>
-
-<p class="tekst-wiekszy2">[ Procedures and functions ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>Init</td>
-	<td><tt>
-<b><tt>procedure TRMT.Init(a: byte); assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Play</td>
-	<td><tt>
-<b><tt>procedure TRMT.Play; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>Stop</td>
-	<td><tt>
-<b><tt>procedure TRMT.Stop; assembler;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-</table>
-
-<p></p>
-<br />
-
-
-
-
-<A NAME="joy">
-<u><tt><h2>JOYSTICK</h2></tt></u>
-
-<p class="tekst-wiekszy2">[ Constants ]</p>
-<pre>
-joy_none       = 15;
-joy_up         = 14;
-joy_down       = 13;
-joy_left       = 11;
-joy_left_up    = 10;
-joy_left_down  = 9;
-joy_right      = 7;
-joy_right_up   = 6;
-joy_right_down = 5;
-</pre>
-
-
-<p class="tekst-wiekszy2">[ Variables ]</p>
-
-<table border="1">
-
-<tr>
-	<td><tt><b>joy_1, stick0</td>
-	<td><tt>
-<b><tt>joy_1 : byte absolute $278;<br />stick0 : byte absolute $278;</tt></b>
-<p>
-Po³o¿enie joysticka 0.
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>joy_2, stick1</td>
-	<td><tt>
-<b><tt>joy_2 : byte absolute $279;<br />stick1 : byte absolute $279;</tt></b>
-<p>
-Po³o¿enie joysticka 1.
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>strig0</td>
-	<td><tt>
-<b><tt>strig0 : byte absolute $284;</tt></b>
-<p>
-Wska¼nik naci¶niêcia przycisku na joysticku 0. Normalnie zawiera '1', naci¶niêcie tzw. fire na joysticku powoduje wpisanie tutaj '0'.
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>strig1</td>
-	<td><tt>
-<b><tt>strig1 : byte absolute $285;</tt></b>
-<p>
-Wska¼nik naci¶niêcia przycisku na joysticku 1. Normalnie zawiera '1', naci¶niêcie tzw. fire na joysticku powoduje wpisanie tutaj '0'.
-</p>
-	</td>
-</tr>
-
-
-
-<tr>
-	<td><tt><b>paddl0</td>
-	<td><tt>
-<b><tt>paddl0 : byte absolute $270;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl1</td>
-	<td><tt>
-<b><tt>paddl1 : byte absolute $271;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl2</td>
-	<td><tt>
-<b><tt>paddl2 : byte absolute $272;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl3</td>
-	<td><tt>
-<b><tt>paddl3 : byte absolute $273;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl4</td>
-	<td><tt>
-<b><tt>paddl4 : byte absolute $274;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl5</td>
-	<td><tt>
-<b><tt>paddl5 : byte absolute $275;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl6</td>
-	<td><tt>
-<b><tt>paddl6 : byte absolute $276;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>paddl7</td>
-	<td><tt>
-<b><tt>paddl7 : byte absolute $277;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-<tr>
-	<td><tt><b>ptrig0</td>
-	<td><tt>
-<b><tt>ptrig0 : byte absolute $27c;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig1</td>
-	<td><tt>
-<b><tt>ptrig1 : byte absolute $27d;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig2</td>
-	<td><tt>
-<b><tt>ptrig2 : byte absolute $27e;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig3</td>
-	<td><tt>
-<b><tt>ptrig3 : byte absolute $27f;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig4</td>
-	<td><tt>
-<b><tt>ptrig4 : byte absolute $280;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig5</td>
-	<td><tt>
-<b><tt>ptrig5 : byte absolute $281;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig6</td>
-	<td><tt>
-<b><tt>ptrig6 : byte absolute $282;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-<tr>
-	<td><tt><b>ptrig7</td>
-	<td><tt>
-<b><tt>ptrig7 : byte absolute $283;</tt></b>
-<p>
-</p>
-	</td>
-</tr>
-
-
-</table>
-
-
-<p></p>
-<br />
-
-
-
-</div>
-</tt>
-
-
 <A NAME="change">
 </tt><h2>HISTORIA</h2></tt>
 
 <p class="tekst-wiekszy">
-1.5.3
+1.5.9 - 1.6.0
 <p class="tekst">
-- dodana mo¿liwo¶æ zaincjowania zmiennej ABSOLUTE poprzez adres innej zmiennej<br>
-- dodana mo¿liwo¶æ inicjowania tablic adresami innych tablic i zmiennych<br>
-- dodana obs³uga wska¼nika do tablicy w rekordzie<br>
-- dodana obs³uga wska¼nika do rekordu<br>
-- typ STRING odró¿niany jest od typu PChar (^char)<br>
-- SYSTEM unit: Swap<br>
-- poprawione WhereX, WhereY dla kompatybilno¶ci z FPC<br>
+- SYSTEM: TDateTime<br>
+- GRAPH, FASTGRAPH: Arc, PieSlice, TLastArcCoords, LastArcCoords<br>
+- SYSUTILS: Now, Date, DateToStr, DecodeDate, DecodeDateTime, DecodeTime, EncodeDate, EncodeDateTime, EncodeTime, IsLeapYear, BoolToStr, StrToBool<br>
+- STRUTILS: AddChar, AddCharR, PadLeft, PadRight<br>
+- dodana obs³uga {$INCLUDE %DATE%}, {$INCLUDE %TIME%}, https://www.freepascal.org/docs-html/prog/progsu41.html<br>
+- prze³±czniki -CODE:, -DATA:, -STACK:, -ZPAGE: domy¶lnie wymagaj± podania warto¶ci HEX bez znaku pocz±tkowego '$'<br>
 
+<p class="tekst-wiekszy">
+1.5.8
+<p class="tekst">
+- GRAPHICS: Font, FontInitialize, FillRect, TextOut, TextWidth, MoveTo, LineTo<br>
+- SYSTEM: FileMode (RESET), [fmOpenRead, fmOpenWrite, fmOpenAppend, fmOpenReadWrite]<br>
+- dodana obs³uga dyrektyw {$info user_defined}, {$warning user_defined}, {$error user_defined}, {$include filename}, {$resource filename}<br>
+- akceptuje zapis PROGRAM (par1, par2 ...)<br>
+- poprawione FillFlood, dodane FillFloodH (wype³nianie poziomymi liniami)<br>
+- kompilator generuje krótszy kod gdy procedura/funkcja nie ma parametrów<br>
+- dostêp do definicji .DEFINE z poziomu ASM, MAIN.@DEFINES.nazwa<br>
+- procedury/funkcje INTERRUPT niezale¿nie czy zostan± u¿yte kompilator zawsze wygeneruje dla nich kod<br>
+- poprawiona optymalizacja bloków REPEAT UNTIL<br>
+- dodana informacja o czasie kompilacji<br>
+- dodana obs³uga inicjalizacji tablic dwuwymiarowych sta³ych i zmiennych<br>
+
+<p class="tekst-wiekszy">
+1.5.6 - 1.5.7
+<p class="tekst">
+- SYSUTILS: Click<br>
+- SYSTEM: Sqrt(Integer): Single<br>
+- MATH: Sign<br>
+- dodana mo¿liwo¶æ u¿ycia nazwy funkcji dla zwracanej warto¶ci, dotychczas tylko przez RESULT<br>
+- dodana obs³uga tablic typu STRING<br>
+- dodana obs³uga dyrektywy {$LIBRARYPATH path1;path2;...}<br>
+- nowa biblioteka BLIBS<br>
+- nowa dokumentacja dla LIB, BLIBS wygenerowana przez PASDOC (https://gitlab.com/bocianu/pasdoc)<br>
+
+
+<p class="tekst-wiekszy">
+1.5.3 - 1.5.5
+<p class="tekst">
+- CRT: TextMode<br>
+- SYSUTILS: ExtractFilePath<br>
+- SYSTEM: EoLn<br>
+- dodana obs³uga linii poleceñ z poziomu DOS II/D dla ParamCount, ParamStr<br>
+- OBJECT, mo¿na zdefiniowaæ je bez zmiennych, tylko same metody<br>
+- OBJECT, mo¿na wywo³aæ metodê z poziomu metody<br>
+- dodana automatyczna konwersja wyra¿eñ typu INTEGER na REAL<br>
 
 <p class="tekst-wiekszy">
 1.5.2
@@ -4659,7 +4097,7 @@ Wska¼nik naci¶niêcia przycisku na joysticku 1. Normalnie zawiera '1', naci¶niêci
 
 
 <p class="tekst-wiekszy">
-1.4.8/1.4.9
+1.4.8 / 1.4.9
 <p class="tekst">
 - zmniejszenie wska¼nika stosu programowego w przypadku wywo³ania funkcji bez odebrania jej warto¶ci<br>
 - lepsza ocena mo¿liwo¶ci ustalenia adresu sta³ej/zmiennej, dodany komunikat "Can't take the address of constant expressions"<br>
@@ -4752,9 +4190,8 @@ const
 - dodana obs³uga GOTO label
 
 
-
 <p class="tekst-wiekszy">
-1.4.1/1.4.2
+1.4.1 / 1.4.2
 <p class="tekst">
 - optymalizacja kodu wynikowego 6502 generowanego dla pêtli FOR<br>
 - poprawiony odczyt plików include i resource<br>
@@ -4898,7 +4335,5 @@ var k,w: a;
 - RMT: RMTINIT, RMTPLAY, RMTSTOP<br>
 - MPT: MPTINIT, MPTPLAY, MPTSTOP<br>
 - CMC: CMCINIT, CMCPLAY, CMCSTOP<br>
-
-
 
 </html>
