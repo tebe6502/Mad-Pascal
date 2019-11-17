@@ -17,6 +17,7 @@ Abs
 ArcTan
 BinStr
 Concat
+Copy
 Cos		; real, single
 DPeek		; optimization build in compiler
 DPoke		; optimization build in compiler
@@ -141,7 +142,7 @@ const
 	COLOR_GREEN		= $c4;
 	COLOR_BLUE		= $74;
 	COLOR_YELLOW		= $ee;
-	COLOR_ORANGE		= $4a;
+	COLOR_ORANGE		= $28;
 	COLOR_BROWN		= $e4;
 	COLOR_LIGHTRED		= $3c;
 	COLOR_GRAY1		= $04;
@@ -164,6 +165,9 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	DateSeparator: Char = '-';
 	
 	TVSystem: byte absolute $D014;
+	
+	Palette: array [0..8] of byte absolute 704;
+	HPalette: array [0..8] of byte absolute $d012;
 
 	FileMode: byte = fmOpenReadWrite;
 
@@ -183,6 +187,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Concat(a: string; b: char): string; assembler; overload;
 	function Concat(a: char; b: string): string; assembler; overload;
 	function Concat(a,b: char): string; overload;
+	function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 	function Cos(x: Real): Real; overload;
 	function Cos(x: Single): Single; overload;
 	function DPeek(a: word): word; register; assembler;
@@ -1341,7 +1346,7 @@ asm
 	sta (:bp2),y
 
 	mwa v :bp2
-
+	
 	mva edx (:bp2),y+
 	mva edx+1 (:bp2),y+
 	mva edx+2 (:bp2),y+
@@ -2012,6 +2017,61 @@ begin
  Result[0]:=chr(2);
  Result[1]:=a;
  Result[2]:=b;
+end;
+
+
+function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
+(*
+@description:
+
+*)
+asm
+{	txa:pha
+
+	mwa S :bp2
+	ldy #0
+
+	lda Index
+	sne
+	lda #1
+	cmp (:bp2),y
+	seq
+	bcs stop
+
+	sta Index
+	add Count
+	sta ln
+	lda #$00
+	adc #$00
+
+	cmp #$00
+	bne @+
+	lda #0
+ln	equ *-1
+	cmp (:bp2),y
+@	beq ok
+	bcc ok
+
+	lda (:bp2),y
+	sub Index
+	add #1
+	sta Count
+
+ok	lda Count
+	sta adr.Result
+	beq stop
+
+	ldx #0
+	ldy Index
+lp	lda (:bp2),y
+	sta adr.Result+1,x
+	iny
+	inx
+	cpx Count
+	bne lp
+	
+stop	pla:tax
+};
 end;
 
 

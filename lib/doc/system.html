@@ -23,8 +23,8 @@
 <tr><td class='tname'>D_PI_180</td><td class='tvalue'>pi/180</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>mGTIA</td><td class='tvalue'>0</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>mVBXE</td><td class='tvalue'>$80</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>WINDOW</td><td class='tvalue'>$10</td><td class='tdesc'>text window</td></tr>
-<tr><td class='tname'>NARROW</td><td class='tvalue'>$20</td><td class='tdesc'>narrow screen</td></tr>
+<tr><td class='tname'>//	WINDOW</td><td class='tvalue'>$10</td><td class='tdesc'>text window</td></tr>
+<tr><td class='tname'>//	NARROW</td><td class='tvalue'>$20</td><td class='tdesc'>narrow screen</td></tr>
 <tr><td class='tname'>VBXE_XDLADR</td><td class='tvalue'>$0000</td><td class='tdesc'>XDLIST</td></tr>
 <tr><td class='tname'>VBXE_BCBADR</td><td class='tvalue'>$0100</td><td class='tdesc'>BLITTER LIST ADDRESS</td></tr>
 <tr><td class='tname'>VBXE_MAPADR</td><td class='tvalue'>$1000</td><td class='tdesc'>COLOR MAP ADDRESS</td></tr>
@@ -54,7 +54,7 @@
 <tr><td class='tname'>COLOR_GREEN</td><td class='tvalue'>$c4</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>COLOR_BLUE</td><td class='tvalue'>$74</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>COLOR_YELLOW</td><td class='tvalue'>$ee</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>COLOR_ORANGE</td><td class='tvalue'>$4a</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>COLOR_ORANGE</td><td class='tvalue'>$28</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>COLOR_BROWN</td><td class='tvalue'>$e4</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>COLOR_LIGHTRED</td><td class='tvalue'>$3c</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>COLOR_GRAY1</td><td class='tvalue'>$04</td><td class='tdesc'></td></tr>
@@ -80,14 +80,22 @@
 <tr><td class='tname'>TSize</td><td class='ttype'>record cx, cy: smallint end</td><td class='tdesc'>TSize is a type to describe the size of a rectangular area, where cx is the width, cy is the height (in pixels) of the rectangle.</td></tr>
 <tr><td class='tname'>TRect</td><td class='ttype'>record	left, top, right, bottom: smallint end</td><td class='tdesc'>TRect is a type to describe a rectangular area.</td></tr>
 <tr><td class='tname'>TPoint</td><td class='ttype'>record x,y: SmallInt end</td><td class='tdesc'>This record describes a coordinate.</td></tr>
+<tr><td class='tname'>TDateTime</td><td class='ttype'>record yy,mm,dd,h,m,s: byte end</td><td class='tdesc'>This record describes Date-Time.</td></tr>
+<tr><td class='tname'>TLastArcCoords</td><td class='ttype'>record x,y,xstart,ystart,xend,yend: smallint end</td><td class='tdesc'></td></tr>
 
 </table>
 
 <!--********************* ABSOLUTE VARIABLES **************************-->
 
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
+<tr><td class='tname'>TVSystem</td><td class='taddress'>$D014</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>Palette</td><td class='taddress'>704</td><td class='ttype'>array [0..8] of byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>HPalette</td><td class='taddress'>$d012</td><td class='ttype'>array [0..8] of byte</td><td class='tdesc'></td></tr>
 
-
+</table>
 
 <!--********************* GLOBAL VARIABLES **************************-->
 
@@ -242,6 +250,8 @@
 <tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a: char; b: string): string; assembler; overload;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a,b: char): string; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Copy</td><td class='tdesc'><h4>function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Swap</td><td class='tdesc'><h4>function Swap(a: word): word; overload;</h4><br>
 	Swap high and low bytes of a variable<br><ul><h5>parameters:</h5><li>a - word</li><h5>returns:</h5><li class='returns'>word</li></ul></td></tr>

@@ -16,11 +16,17 @@ unit zxlib;
 	- Screen functions updated (GetPixel function used instead of removed Locate function)
 
  Version 1.2:
-	- ZXTitle function:
+	- ZXTitle procedure:
 	- detecting console keys Start, Select and Option
 	- Text "Press any key to start a game" moved upper in text mode 1
 	- Flashing of this text
 	- Added additional text parameter
+  
+  Version 1.3:
+	- [Added] Beep procedure, simulating ZX Spectrum beeper in middle C
+	- PrintAt procedure: check x boundaries for text mode 1 and 2
+	- ZXTitle procedure: minor updates
+	- [Bug fix] FlashAt procedure: removed annoying messed up alternating text
 *)
 
 interface
@@ -38,11 +44,18 @@ function Screen(var f : file; y, x : byte) : char; overload;
 function SetRAM(pages : byte) : word;
 procedure ZXTitle(title : string; y, x : byte; author, dev, text, misc : string);
 function Sgn(number : integer) : integer;
+procedure Beep (duration : real; pitch : integer);
 
 implementation
 
 uses Graph, Crt;
 
+const
+  // Middle C notes
+  baseNotes : array[0..19] of byte =
+    (114, 109, 104, 97, 90, 84, 80, 76, 71, 67, 63, 60, 49, 42, 36, 30, 23, 16, 9, 2);
+  baseNotesBelow : array[0..19] of byte =
+    (128, 133, 138, 145, 152, 158, 162, 166, 171, 175, 179, 186, 193, 200, 206, 236, 243, 250, 253, 255);
 
 procedure PrintAt (y, x : byte; c : char); overload;
 (*
@@ -85,8 +98,11 @@ procedure PrintAt (var f : file; y, x : byte; c : char); overload;
 * @param: c - character to be displayed
 *)
 begin
-  GotoXY(x+1, y+1);
-  blockwrite(f, c, 1);
+  if (x >= 0) and (x <= 19) then begin
+    //and (y >= 0) and (y <= 23) then begin
+    GotoXY(x+1, y+1);
+    blockwrite(f, c, 1);
+  end;
 end;
 
 
@@ -101,8 +117,11 @@ procedure PrintAt (var f : file; y, x : byte; text : string); overload;
 * @param: text - string to be displayed
 *)
 begin
-  GotoXY(x+1, y+1);
-  blockwrite(f, text[1], length(text));
+  if (x >= 0) and (x <= 19) then begin
+    //and (y >= 0) and (y <= 23) then begin
+    GotoXY(x+1, y+1);
+    blockwrite(f, text[1], length(text));
+  end;
 end;
 
 
@@ -170,8 +189,9 @@ var
 begin
   origStr := str;
 
-  for i := 1 to Length(str) do
+  for i := 1 to Length(str) do begin
     str[i] := Chr(Ord(str[i]) + $80);
+  end;
 
   PrintAt(f, y, x, str);
 
@@ -199,7 +219,7 @@ begin
   text02 := str;
 
   for i := 1 to Length(str) do begin
-    text02[i] := Chr(Ord(text02[i]) + 32);
+    text02[i] := Chr(Ord(text02[i]) + $80);
   end;
 
   for i := 1 to rep do begin
@@ -271,17 +291,19 @@ begin
   PrintAt(f, y, x, title);
   PrintAt(f, 3, 0, text);
 
-  Write('Original author: ', author,
+  if dev <> '' then
+    Write('Original author: ', author,
           eol, 'Ported to Atari: ', dev,
+          eol, eol, misc)
+  else begin
+    Write('Original author: ', author,
           eol, eol, misc);
+  end;
 
   PrintAt(f, 16, 1, 'press any key');
-
   repeat
     Flash(f, 17, 1, 'to start the game');
-  until KeyPressed
-        or (consol = CN_START) or (consol = CN_SELECT) or (consol = CN_OPTION);
-
+  until (consol = CN_START) or (consol = CN_SELECT) or (consol = CN_OPTION) or KeyPressed;
   if KeyPressed then ReadKey;
 end;
 
@@ -328,6 +350,35 @@ begin
     result := -1
   else
     result := 0;
+end;
+
+
+procedure Beep (duration : real; pitch : integer);
+(*
+* @description:
+* Emulate ZX Spectrum beeper 
+*
+* @param: duration - duration of the sound
+* @param: pitch    - pitch is given in semitones above middle C using negative
+                     numbers for notes below middle C
+*)
+var
+  base : byte = 121;
+begin
+  // Pitch above 0
+  if pitch >= 1 then begin
+    base := baseNotes[pitch - 1];
+  end
+  // Pitch below 0
+  else if pitch <= -1 then begin
+    base := baseNotesBelow[abs(pitch) - 1];
+  end;
+
+  // Middle C
+  Sound(0, base, 10, 8);
+  Delay(Round(duration * 1150));
+  // Shut off sound when finished
+  Sound(0, 0, 0, 0);
 end;
 
 end.

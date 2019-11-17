@@ -41,7 +41,7 @@ type	TBrushBitmap = array [0..7] of byte;
 	procedure Create;
 	function Font(const Charset: string): Boolean;
 	procedure FontInitialize; assembler;
-	procedure FillRect(var R: TRect);
+	procedure FillRect(R: TRect);
 	procedure TextOut(X,Y: smallint; const Text: string); overload;
 	procedure TextOut(X,Y: smallint; const ch: char); overload;
 	function TextWidth(const Text: string): word; assembler; overload;
@@ -95,7 +95,7 @@ begin
 end;
 
 
-procedure TCanvas.FillRect(var R: TRect);
+procedure TCanvas.FillRect(R: TRect);
 var lpos: word;
     i: smallint;
 

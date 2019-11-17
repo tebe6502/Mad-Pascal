@@ -1,0 +1,61 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit strutils - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit strutils</h1>
+<h3>Various string handling routines</h3>
+<p>author: Tomasz Biela (Tebe)</p>
+<br><p>https://www.freepascal.org/docs-html/rtl/strutils/index-5.html</p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>AddChar</td><td class='tdesc'><h4>function AddChar(C: Char; var S: string; N: Byte): ^string;</h4><br>
+	AddChar adds characters (C) to the left of S till the length N is reached, and returns the resulting string. If the length of S is already equal to or larger than N, then no characters are added. The resulting string can be thought of as a right-aligned version of S, with length N.<br><ul><h5>parameters:</h5><li>C - Char to be added</li><li>S - The string to be treated</li><li>N - The minimal length the string should have</li></ul></td></tr>
+<tr><td class='tname fname'>AddCharR</td><td class='tdesc'><h4>function AddCharR(C: Char; var S: string; N: Byte): ^string;</h4><br>
+	AddCharR adds characters (C) to the right of S till the length N is reached, and returns the resulting string. If the length of S is already equal to or larger than N, then no characters are added. The resulting string can be thought of as a left-aligned version of S, with length N .<br><ul><h5>parameters:</h5><li>C - Char to be added</li><li>S - The string to be treated</li><li>N - The minimal length the string should have</li></ul></td></tr>
+<tr><td class='tname fname'>PadLeft</td><td class='tdesc'><h4>function PadLeft(var S: string; N: Byte): ^string;</h4><br>
+	Add spaces to the left of a string till a certain length is reached.<br><ul><h5>parameters:</h5><li>S - String to pad</li><li>N - Minimal length of the resulting string.</li></ul></td></tr>
+<tr><td class='tname fname'>PadRight</td><td class='tdesc'><h4>function PadRight(var S: string; N: Byte): ^string;</h4><br>
+	Add spaces to the right of a string till a certain length is reached.<br><ul><h5>parameters:</h5><li>S - String to pad</li><li>N - Minimal length of the resulting string.</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

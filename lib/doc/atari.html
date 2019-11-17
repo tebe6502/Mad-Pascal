@@ -54,7 +54,7 @@
 <tr><td class='tname'>chact</td><td class='taddress'>$2F3</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien CHRCTL</td></tr>
 <tr><td class='tname'>chbas</td><td class='taddress'>$2F4</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien CHBASE</td></tr>
 <tr><td class='tname'>ch</td><td class='taddress'>$2FC</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien KBCODE</td></tr>
-<tr><td class='tname'>pcolr0</td><td class='taddress'>$02C0</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>pcolr0</td><td class='taddress'>$02C0</td><td class='ttype'>byte</td><td class='tdesc'>cienie rejestrow kolorow $D012 .. $D01A</td></tr>
 <tr><td class='tname'>pcolr1</td><td class='taddress'>$02C1</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>pcolr2</td><td class='taddress'>$02C2</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>pcolr3</td><td class='taddress'>$02C3</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
@@ -63,6 +63,7 @@
 <tr><td class='tname'>color2</td><td class='taddress'>$02C6</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>color3</td><td class='taddress'>$02C7</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>color4</td><td class='taddress'>$02C8</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colbaks</td><td class='taddress'>$02C8</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>hposp0</td><td class='taddress'>$D000</td><td class='ttype'>byte</td><td class='tdesc'>rejestry dla poziomej pozycja duchow</td></tr>
 <tr><td class='tname'>hposp1</td><td class='taddress'>$D001</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>hposp2</td><td class='taddress'>$D002</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
@@ -83,15 +84,15 @@
 <tr><td class='tname'>grafm</td><td class='taddress'>$D011</td><td class='ttype'>byte</td><td class='tdesc'>rejestr grafiki pociskow (Z)</td></tr>
 <tr><td class='tname'>P0PF</td><td class='taddress'>$D004</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>Pal</td><td class='taddress'>$D014</td><td class='ttype'>byte</td><td class='tdesc'>(R) znacznik systemu TV PAL = 1, NTSC = 15</td></tr>
-<tr><td class='tname'>colpm0</td><td class='taddress'>$D012</td><td class='ttype'>byte</td><td class='tdesc'>rejestry kolorow duchow i pociskow</td></tr>
+<tr><td class='tname'>colpm0</td><td class='taddress'>$D012</td><td class='ttype'>byte</td><td class='tdesc'>rejestry sprzetowe kolorow duchow i pociskow</td></tr>
 <tr><td class='tname'>colpm1</td><td class='taddress'>$D013</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>colpm2</td><td class='taddress'>$D014</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>colpm3</td><td class='taddress'>$D015</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>colpf0</td><td class='taddress'>$D016</td><td class='ttype'>byte</td><td class='tdesc'>rejestry kolorow pola gry</td></tr>
+<tr><td class='tname'>colpf0</td><td class='taddress'>$D016</td><td class='ttype'>byte</td><td class='tdesc'>rejestry sprzetowe kolorow pola gry</td></tr>
 <tr><td class='tname'>colpf1</td><td class='taddress'>$D017</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>colpf2</td><td class='taddress'>$D018</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>colpf3</td><td class='taddress'>$D019</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>colbk</td><td class='taddress'>$D01A</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>colbk</td><td class='taddress'>$D01A</td><td class='ttype'>byte</td><td class='tdesc'>rejestr sprzetowy koloru tla</td></tr>
 <tr><td class='tname'>prior</td><td class='taddress'>$D01B</td><td class='ttype'>byte</td><td class='tdesc'>rejestr piorytetu GTIA</td></tr>
 <tr><td class='tname'>gractl</td><td class='taddress'>$D01D</td><td class='ttype'>byte</td><td class='tdesc'>rejestr kontroli PMG</td></tr>
 <tr><td class='tname'>hitclr</td><td class='taddress'>$D01E</td><td class='ttype'>byte</td><td class='tdesc'>rejestr zerujacy kolizje PMG</td></tr>

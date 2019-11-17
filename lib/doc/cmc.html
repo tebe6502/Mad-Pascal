@@ -24,7 +24,7 @@
 <table class='types'>
 <tr><th>name:</th><th>type:</th><th>description:</th></tr>
 
-<tr><td class='tname'>TCMC</td><td class='ttype'>Object<ul class='record'><li>player: pointer; <span class='comment'>// memory address of player</span></li><li>modul: pointer; <span class='comment'>// memory address of a module</span></li><li><a href='#TCMC.INIT'>	procedure Init; assembler;	</a> <span class='comment'>// Initializes</span></li><li><a href='#TCMC.PLAY'>	procedure Play; assembler;</a></li><li><a href='#TCMC.STOP'>	procedure Stop; assembler;	</a> <span class='comment'>// Stops Music</span></li></ul><br clear='all'>end;</td><td class='tdesc'>object for controling CMC player</td></tr>
+<tr><td class='tname'>TCMC</td><td class='ttype'>Object<ul class='record'><li>player: pointer; <span class='comment'>// memory address of player</span></li><li>modul: pointer; <span class='comment'>// memory address of a module</span></li><li><a href='#TCMC.INIT'>	procedure Init; assembler;	</a> <span class='comment'>// initializes</span></li><li><a href='#TCMC.PLAY'>	procedure Play; assembler;	</a> <span class='comment'>// play</span></li><li><a href='#TCMC.PAUSE'>	procedure Pause; assembler;	</a> <span class='comment'>// pause</span></li><li><a href='#TCMC.CONT'>	procedure Cont; assembler;	</a> <span class='comment'>// continue</span></li><li><a href='#TCMC.STOP'>	procedure Stop; assembler;	</a> <span class='comment'>// stops music</span></li></ul><br clear='all'>end;</td><td class='tdesc'>object for controling CMC player</td></tr>
 
 </table>
 
@@ -52,6 +52,10 @@
 	Play music, call this procedure every VBL frame<br><ul></ul></td></tr>
 <tr><td class='tname fname'><a name='TCMC.STOP'></a>TCMC.Stop</td><td class='tdesc'><h4>procedure TCMC.Stop; assembler;</h4><br>
 	Halt CMC player<br><ul></ul></td></tr>
+<tr><td class='tname fname'><a name='TCMC.PAUSE'></a>TCMC.Pause</td><td class='tdesc'><h4>procedure TCMC.Pause; assembler;</h4><br>
+	Interrupt CMC player<br><ul></ul></td></tr>
+<tr><td class='tname fname'><a name='TCMC.CONT'></a>TCMC.Cont</td><td class='tdesc'><h4>procedure TCMC.Cont; assembler;</h4><br>
+	Continue CMC player<br><ul></ul></td></tr>
 
 </table>
 

@@ -228,8 +228,8 @@ procedure Ellipse(x0, y0, a, b: word);
 @description:
 Bresenham Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
 *)
-var	a2, b2, error, stopx, stopy: integer;
-	x, y: word;
+var	{a2, b2, }error, stopx, stopy: integer;
+        a2, b2, x, y: word;
 
 	procedure DrawEllipse;
 	var txp, typ, txm, tym: word;
@@ -294,8 +294,8 @@ procedure FillEllipse(x0, y0, a, b: word);
 @description:
 Bresenham filled Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
 *)
-var	a2, b2, error, stopx, stopy: integer;
-	x, y: word;
+var	{a2, b2,} error, stopx, stopy: integer;
+	a2, b2,	x, y: word;
 
 	procedure DrawEllipse;
 	begin
@@ -425,7 +425,7 @@ begin
 
 					spanBelow := true;
 				end
-				else if (spanBelow=true) and (belowColor <> oldColor) then
+				else if (spanBelow) and (belowColor <> oldColor) then
 					spanBelow := false;
 			end;
 
@@ -443,7 +443,7 @@ begin
 
 					spanAbove := true;
 				end
-				else if (spanAbove=true) and (aboveColor <> oldColor) then
+				else if (spanAbove) and (aboveColor <> oldColor) then
 					spanAbove := false;
 			end;
 

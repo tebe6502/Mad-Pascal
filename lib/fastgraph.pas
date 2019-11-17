@@ -937,19 +937,13 @@ Init graphics mode
 *)
 var width: byte;
 begin
-{
-	if mode and $20<>0 then
-	 width := 32
-	else
-	 width := 40;
-}
 	ScreenMode := mode;
 	
 	width := mode and $0f;
 
 case width of
 
-8:
+6,8:
 asm
 {	.ifdef SetColor
 	mwa #SetColor.gr8 SetColor.mode
@@ -1094,8 +1088,12 @@ l0	sta __oras,x
 	lda mode
 	and #$0f
 	cmp #8
-	bne it2
-
+	beq x8
+	cmp #6
+	beq x8
+	
+	jmp it2
+x8
 	mva #$ff _col+1
 
 	ldx #7

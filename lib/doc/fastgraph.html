@@ -50,6 +50,10 @@
 	Puts a point at (X,Y) using color Color<br><ul></ul></td></tr>
 <tr><td class='tname fname'>GetPixel</td><td class='tdesc'><h4>function GetPixel(x,y: smallint): byte; assembler;</h4><br>
 	Return color of pixel<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Line</td><td class='tdesc'><h4>procedure Line(x1,y1,x2,y2: smallint);</h4><br>
+	Bresenham line<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Hline</td><td class='tdesc'><h4>procedure Hline(x0,x1,y: smallint);</h4><br>
+	Draw horizintal line, fast as possible<br><ul></ul></td></tr>
 <tr><td class='tname fname'>fLine</td><td class='tdesc'><h4>procedure fLine(x0,y0,x1,y1: byte); assembler;</h4><br>
 	DRAWTO in Graphics 8, 9, 15 A quick hack by eru<br><ul></ul></td></tr>
 <tr><td class='tname fname'>LineTo</td><td class='tdesc'><h4>procedure LineTo(x, y: smallint);</h4><br>

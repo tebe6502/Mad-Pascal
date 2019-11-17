@@ -11,12 +11,14 @@ unit misc;
 
 {
 
+DetectBASIC
 DetectCPU
 DetectCPUSpeed
 DetectEvie
 DetectHighMem
 DetectMapRam
 DetectMem
+DetectOS
 DetectStereo
 DetectVBXE
 
@@ -26,7 +28,10 @@ interface
 
 var
 	banks: array [0..63] of byte absolute $0101;	// array with code of banks PORTB
+	
+	DetectOS: byte absolute $fff7;
 
+	function DetectBASIC: byte; assembler;
 	function DetectCPU: byte; assembler;
 	function DetectCPUSpeed: real;
 	function DetectEvie: Boolean; assembler;
@@ -411,8 +416,10 @@ copy
 	lda portb
 	pha
 
-	lda #$ff
-	sta portb
+	lda:rne vcount
+
+;	lda #$ff
+;	sta portb
 
 	lda ext_b
 	pha
@@ -592,6 +599,24 @@ stop	pla:tax
 
 };
 end;
+
+
+function DetectBASIC: byte; assembler;
+asm
+{
+BASROM	= $a8e2
+
+	lda #$fd
+	sta PORTB
+
+	lda BASROM
+	sta Result
+	
+	lda #$ff
+	sta PORTB
+};
+end;
+
 
 end.
 
