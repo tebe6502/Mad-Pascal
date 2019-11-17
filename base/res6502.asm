@@ -17,7 +17,6 @@ RMTPLAY
 XBMP
 
 */
-
 	org CODEORIGIN
 
 portb	= $d301
@@ -167,8 +166,10 @@ ext_b	= $4000		;cokolwiek z zakresu $4000-$7FFF
 	lda portb
 	pha
 
-	lda #$ff
-	sta portb
+	lda:rne vcount
+
+;	lda #$ff
+;	sta portb
 
 	lda ext_b
 	pha
@@ -233,6 +234,7 @@ _p3	jsr setpb
 	pla
 	sta portb
 
+	sty bank
 	rts
 
 ; podprogramy
@@ -247,6 +249,8 @@ setpb	txa		;zmiana kolejnoœci bitów: %0000dcba -> %cba000d0
 	rts
 
 bsav	:16 brk
+
+bank	brk
 
 .endp
 
@@ -936,7 +940,10 @@ he	= .sizeof(s@bmp)
 
 	org RESORIGIN
 
-lbmp	jsr vbxe_detect
+lbmp
+	ift ?VBXDETECT=0
+
+	jsr vbxe_detect
 	bcc ok
 
 	@print #notVBXE
@@ -946,6 +953,10 @@ lbmp	jsr vbxe_detect
 	rts
 
 notVBXE	dta c'VBXE not detected',$9b
+
+	eif
+	
+	.def ?VBXDETECT=1
 
 ok	fxs FX_MEMC #%1000+$b0
 
@@ -1039,15 +1050,14 @@ ln	= .filesize(%%1)-he-1024
 
 len = .filesize(%%1)
 
-bank = ax
-
-	org RESORIGIN
-	jsr DetectMem
-	sty bank
-	rts
-	ini RESORIGIN
+	ift ?EXTDETECT=0
+	ini DetectMem
+	eif
+	
+	.def ?EXTDETECT=1
 
 	?adr = main.%%lab
+
 	org RESORIGIN
 
 	mwa #[?adr&$3fff]+$4000 dst
@@ -1059,7 +1069,7 @@ quit	mva #$ff portb
 
 move	ldx #?adr/$4000
 
-	cpx bank
+	cpx DetectMem.bank
 	bcs nomem
 
 	lda @mem_banks,x
@@ -1079,7 +1089,7 @@ dst	equ *-2
 
 	inx
 
-	cpx bank
+	cpx DetectMem.bank
 	bcs nomem
 
 	lda @mem_banks,x
@@ -1107,7 +1117,6 @@ outMem	dta c'Out of memory',$9b
 
 	.align
 data
-
 	ini RESORIGIN
 
 	.rept len/256

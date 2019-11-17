@@ -1296,7 +1296,8 @@ loop	ldy #0
 	beq stop
 
 	inc loop+1
-	beq stop
+	sne
+	inc ztmp+1
 
 	jsr @putchar
 
