@@ -36,9 +36,10 @@ scr32	= @dmactl(narrow|dma|players|missiles|oneline)		;screen 32b
 
 
 .enum	@antic
+	dli = $80
 	lms = $40
-	hsc = $50
-	vsc = $60
+	hsc = $10
+	vsc = $20
 .ende
 
 * ---------------------------------------------------------------------------------------------
