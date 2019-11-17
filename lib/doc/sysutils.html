@@ -90,6 +90,32 @@
 	Extract the path from a filename<br><ul><h5>parameters:</h5><li>const a: string[255]</li><h5>returns:</h5><li class='returns'>string[255]</li></ul></td></tr>
 <tr><td class='tname fname'>AnsiUpperCase</td><td class='tdesc'><h4>function AnsiUpperCase(const a: string): string;</h4><br>
 	Return an uppercase version of a string<br><ul><h5>parameters:</h5><li>const a: string[255]</li><h5>returns:</h5><li class='returns'>string[255]</li></ul></td></tr>
+<tr><td class='tname fname'>Now</td><td class='tdesc'><h4>function Now: TDateTime;</h4><br>
+	Read actual Date-Time (Sparta DOS X, R-Time 8, SIO Real-Time Clock)<br><ul><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
+<tr><td class='tname fname'>Date</td><td class='tdesc'><h4>function Date: TDateTime;</h4><br>
+	Read actual Date<br><ul><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
+<tr><td class='tname fname'>DateToStr</td><td class='tdesc'><h4>function DateToStr(d: TDateTime): TString;</h4><br>
+	Converts a TDateTime value to a date string.<br><ul><h5>parameters:</h5><li>d: TDateTime</li><h5>returns:</h5><li class='returns'>TString</li></ul></td></tr>
+<tr><td class='tname fname'>TimeToStr</td><td class='tdesc'><h4>function TimeToStr(d: TDateTime): TString;</h4><br>
+	Converts a TDateTime value to a time string.<br><ul><h5>parameters:</h5><li>d: TDateTime</li><h5>returns:</h5><li class='returns'>TString</li></ul></td></tr>
+<tr><td class='tname fname'>DecodeDate</td><td class='tdesc'><h4>procedure DecodeDate(d: TDateTime; var yy,mm,dd: byte);</h4><br>
+	Decode a TDateTime to a year,month,day triplet<br><ul><h5>parameters:</h5><li>d: TDateTime</li><li>yy: byte - year</li><li>mm: byte - month</li><li>dd: byte - day</li></ul></td></tr>
+<tr><td class='tname fname'>DecodeTime</td><td class='tdesc'><h4>procedure DecodeTime(d: TDateTime; var h,m,s: byte);</h4><br>
+	Decode a TDateTime to a hour,minute,second triplet<br><ul><h5>parameters:</h5><li>d: TDateTime</li><li>h: byte - hour</li><li>m: byte - minute</li><li>s: byte - second</li></ul></td></tr>
+<tr><td class='tname fname'>DecodeDateTime</td><td class='tdesc'><h4>procedure DecodeDateTime(d: TDateTime; var yy,mm,dd,h,m,s: byte);</h4><br>
+	Decode a TDateTime to a year,month,day, hour,minute,second<br><ul><h5>parameters:</h5><li>d: TDateTime</li><li>yy: byte - year</li><li>mm: byte - month</li><li>dd: byte - day</li><li>h: byte - hour</li><li>m: byte - minute</li><li>s: byte - second</li></ul></td></tr>
+<tr><td class='tname fname'>BoolToStr</td><td class='tdesc'><h4>function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;</h4><br>
+	BoolToStr converts the boolean B to one of the strings 'TRUE' or 'FALSE'<br><ul><h5>parameters:</h5><li>B: Boolean</li><li>UseBoolStrs: Boolean</li><h5>returns:</h5><li class='returns'>TString</li></ul></td></tr>
+<tr><td class='tname fname'>StrToBool</td><td class='tdesc'><h4>function StrToBool(const S: TString): Boolean;</h4><br>
+	StrToBool will convert the string S to a boolean value. The string S can contain one of 'True', 'False' (case is ignored) or a numerical value. If it contains a numerical value, 0 is converted to False, all other values result in True.<br><ul><h5>parameters:</h5><li>S: TString</li><h5>returns:</h5><li class='returns'>Boolean</li></ul></td></tr>
+<tr><td class='tname fname'>IsLeapYear</td><td class='tdesc'><h4>function IsLeapYear(Year: Word): boolean;</h4><br>
+	IsLeapYear returns True if Year is a leap year, False otherwise.<br><ul><h5>parameters:</h5><li>Year: Word</li><h5>returns:</h5><li class='returns'>Boolean</li></ul></td></tr>
+<tr><td class='tname fname'>EncodeDate</td><td class='tdesc'><h4>function EncodeDate(Year, Month, Day: Byte): TDateTime;</h4><br>
+	EncodeDate encodes the Year, Month and Day variables to a date in TDateTime format. It does the opposite of the DecodeDate procedure.<br><ul><h5>parameters:</h5><li>Year: Byte</li><li>Month: Byte</li><li>Day: Byte</li><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
+<tr><td class='tname fname'>EncodeTime</td><td class='tdesc'><h4>function EncodeTime(Hour, Minute, Second: Byte): TDateTime;</h4><br>
+	EncodeTime encodes the Hour, Minute and Second variables to a date in TDateTime format. It does the opposite of the DecodeTime procedure.<br><ul><h5>parameters:</h5><li>Hour: Byte</li><li>Minute: Byte</li><li>Second: Byte</li><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
+<tr><td class='tname fname'>EncodeDateTime</td><td class='tdesc'><h4>function EncodeDateTime(Year, Month, Day, Hour, Minute, Second: Byte): TDateTime;</h4><br>
+	EncodeDateTime encodes the values Year, Month, Day, Hour, Minute and Second to a date/time valueand returns this value.<br><ul><h5>parameters:</h5><li>Year: Byte</li><li>Month: Byte</li><li>Day: Byte</li><li>Hour: Byte</li><li>Minute: Byte</li><li>Second: Byte</li><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
 
 </table>
 

@@ -14,9 +14,14 @@
 
 <!--********************* CONSTANTS **************************-->
 
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
+<tr><td class='tname'>baseNotes : array[0..19] of byte</td><td class='tvalue'></td><td class='tdesc'></td></tr>
+<tr><td class='tname'>baseNotesBelow : array[0..19] of byte</td><td class='tvalue'></td><td class='tdesc'></td></tr>
 
-
+</table>
 
 <!--********************* TYPES **************************-->
 
@@ -73,6 +78,8 @@
 	Set new top free RAM and character set address<br><ul><h5>parameters:</h5><li>pages - number of pages reserved at the top of free memory</li></ul></td></tr>
 <tr><td class='tname fname'>Sgn</td><td class='tdesc'><h4>function Sgn (number : integer) : integer;</h4><br>
 	Return signed or zero number depending on input number<br><ul><h5>parameters:</h5><li>number - Number to be checked</li><h5>returns:</h5><li class='returns'>number > 0: returned value 1</li><li class='returns'>number < 0: returned value -1</li><li class='returns'>number = 0: returned value 0</li></ul></td></tr>
+<tr><td class='tname fname'>Beep</td><td class='tdesc'><h4>procedure Beep (duration : real; pitch : integer);</h4><br>
+	Emulate ZX Spectrum beeper<br><ul><h5>parameters:</h5><li>duration - duration of the sound</li><li>pitch    - pitch is given in semitones above middle C using negativenumbers for notes below middle C</li></ul></td></tr>
 
 </table>
 

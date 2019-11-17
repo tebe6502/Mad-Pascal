@@ -49,7 +49,7 @@ var
 	chbas: byte absolute $2F4;		// rejestr cien CHBASE
 	ch: byte absolute $2FC;			// rejestr cien KBCODE
 
-	pcolr0: byte absolute $02C0;
+	pcolr0: byte absolute $02C0;		// cienie rejestrow kolorow $D012 .. $D01A
 	pcolr1: byte absolute $02C1;
 	pcolr2: byte absolute $02C2;
 	pcolr3: byte absolute $02C3;
@@ -85,15 +85,15 @@ var
 
 	Pal: byte absolute $D014;		// (R) znacznik systemu TV PAL = 1, NTSC = 15
 
-	colpm0: byte absolute $D012;		// rejestry kolorow duchow i pociskow
+	colpm0: byte absolute $D012;		// rejestry sprzetowe kolorow duchow i pociskow
 	colpm1: byte absolute $D013;
 	colpm2: byte absolute $D014;
 	colpm3: byte absolute $D015;
-	colpf0: byte absolute $D016;		// rejestry kolorow pola gry
+	colpf0: byte absolute $D016;		// rejestry sprzetowe kolorow pola gry
 	colpf1: byte absolute $D017;
 	colpf2: byte absolute $D018;
 	colpf3: byte absolute $D019;
-	colbk: byte absolute $D01A;
+	colbk: byte absolute $D01A;		// rejestr sprzetowy koloru tla
 
 	prior: byte absolute $D01B;		// rejestr piorytetu GTIA
 	gractl: byte absolute $D01D;		// rejestr kontroli PMG

@@ -1,4 +1,15 @@
 unit objects;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Standard base objects
+ @version: 1.0
+
+ @description:
+ This unit implements Memory stream objects.
+ 
+ *)
+
 
 {
 
