@@ -55,8 +55,8 @@
 </head>
 
 <CENTER>
-<p class="duzy"><u>MAD-PASCAL 1.6.0</u></p>
-<p class="stopka">Tebe/Madteam (2019-07-21)
+<p class="duzy"><u>MAD-PASCAL 1.6.2</u></p>
+<p class="stopka">Tebe/Madteam (2019-07-11)
 
 <HR>
 
@@ -205,11 +205,12 @@ Dostêpne s±:
 <li>Static local variables.
 <li>Primitive data types (all types except the ShortReal/Real type are compatible. Pointers are dereferenced as pointers to Word):
 <ul>
-<li>Cardinal, Word, Char, Byte, Boolean
+<li>Cardinal, Word, Byte, Boolean
+<li>Char, String, PChar
 <li>Integer, SmallInt, ShortInt
 <li>Pointer, File
 <li>ShortReal, Real (fixed-point)
-<li>Single (IEEE-754)
+<li>Single (IEEE-754) [Float]
 </ul>
 
 <li>One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters.
@@ -1027,13 +1028,30 @@ Aktualnie kompilator MP nie sprawdzi poprawno¶ci typów wyliczeniowych dla operac
 	<td>1 .. 255</td>
 	<td ALIGN=CENTER>256</td>
 </tr>
+
+<tr>
+	<td>PCHAR</td>
+	<td>0 .. 65535</td>
+	<td ALIGN=CENTER>2</td>
+</tr>
+
 </table>
 
 <p>
 Ci±g znaków STRING reprezentowany jest jako tablica o mo¿liwym maksymalnym rozmiarze [0..255]. Pierwszym bajtem takiej tablicy [0] jest d³ugo¶æ ci±gu z zakresu 0..255. Od bajtu [1..] zaczyna siê w³a¶ciwy ci±g znaków.
 </p>
 
+<p>
+Ci±g znaków PCHAR reprezentowany jest przez wska¼nik do typu CHAR. Znakiem koñca ci±gu PCHAR jest znak #0.
+</p>
+
+<p>
 Dopuszczalne jest u¿ycie dodatkowych znaków po koñcowym apostrofie, takich jak '*', '~'. Znak '*' oznacza ci±g w inwersie, tylda '~' ci±g w kodach ANTIC-a.
+</p>
+
+<p>
+Innym sposobem modyfikacji wyprowadzanych znaków jest u¿ycie systemowej zmiennej TextAttr, ka¿dy znak wyprowadzany na ekran jest zwiêkszany o warto¶æ TextAttr (domy¶lnie = 0).
+</p>
 
 <span style="color: #0000FF">
 <pre>
@@ -4002,6 +4020,20 @@ Funkcja zwraca warto¶æ tangensa k±ta podanego w parametrze X.
 
 <A NAME="change">
 </tt><h2>HISTORIA</h2></tt>
+
+<p class="tekst-wiekszy">
+1.6.0 - 1.6.2
+<p class="tekst">
+- nowy unit EFAST dla przyspieszenia wyprowadzania znaków na urz±dzenie E:<br>
+- SYSTEM: function Copy(var S: String; Index: Byte; Count: Byte): String;<br>
+- SYSTEM: Palette, HPalette<br>
+- dodana obs³uga tablic jednowymiarowych typu ^RECORD (wskaznik do rekordu)<br>
+- optymalizacja bloków warunkowych, generowany jest mo¿liwie najkrótszy, najszybszy kod wynikowy<br>
+- dodany typ PChar, https://www.freepascal.org/docs-html/rtl/system/pchar.html<br>
+- dodana mo¿liwo¶æ zwracania warto¶ci funkcji przez typ wyliczeniowy<br>
+- dodany nowy prze³±cznik -define:symbol<br>
+- dodany nowy prze³±cznik -ipath:includepath<br>
+
 
 <p class="tekst-wiekszy">
 1.5.9 - 1.6.0
