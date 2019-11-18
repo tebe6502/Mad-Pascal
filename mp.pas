@@ -82,7 +82,7 @@ uses
 
 const
 
-  title = '1.6.2';
+  title = '1.6.3';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -13481,7 +13481,8 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('ldy ', listing[i-1]) = 0) and (tay(i-1) = false) and				// sta :STACKORIGIN+9	; 0
+    if (i>0) and
+       (pos('ldy ', listing[i-1]) = 0) and (tay(i-1) = false) and				// sta :STACKORIGIN+9	; 0
        sta(i) and lda(i+2) and 									// clc|sec		; 1
        ((listing[i+1] = #9'clc') or (listing[i+1] = #9'sec')) then				// lda :STACKORIGIN+9	; 2
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then begin
@@ -13491,7 +13492,8 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('ldy ', listing[i-1]) = 0) and (tay(i-1) = false) and				// sta :STACKORIGIN+9	; 0
+    if (i>0) and
+       (pos('ldy ', listing[i-1]) = 0) and (tay(i-1) = false) and				// sta :STACKORIGIN+9	; 0
        sta(i) and lda(i+1) and 									// lda :STACKORIGIN+9	; 1
        ((pos('add ', listing[i+2]) = 0) or (pos('sub ', listing[i+2]) = 0)) then		// add|sub		; 2
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin
