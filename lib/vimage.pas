@@ -28,7 +28,7 @@
 unit vimage;
 (*
 @type: unit
-@name: A unit to load a variety of image formats
+@name: A unit to load a variety of image formats for VBXE
 @author: Steven Don, Tomasz Biela (Tebe)
 
 @description:

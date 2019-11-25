@@ -1,7 +1,7 @@
 unit graph;
 (*
 @type: unit
-@name:
+@name: Unit to handle screen graphics
 @author: Tomasz Biela (Tebe)
 
 @description:

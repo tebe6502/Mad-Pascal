@@ -94,6 +94,17 @@ type	TLastArcCoords = record x,y,xstart,ystart,xend,yend: smallint end;
 
 	*)
 
+type	PByte = ^byte;
+	(*
+	@description:
+
+	*)
+
+type	PWord = array [0..0] of word;
+	(*
+	@description:
+
+	*)
 
 const
 	M_PI_2	= pi*2;
