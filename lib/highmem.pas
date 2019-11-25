@@ -1,7 +1,7 @@
 unit highmem;
 (*
 @type: unit
-@name:
+@name: Additional base objects to manage CPU65816 linear high memory
 @author: Tomasz Biela (Tebe)
 
 @description:

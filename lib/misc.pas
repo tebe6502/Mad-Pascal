@@ -26,10 +26,23 @@ DetectVBXE
 
 interface
 
-var
-	banks: array [0..63] of byte absolute $0101;	// array with code of banks PORTB
+var	banks: array [0..63] of byte absolute $0101;	// array with code of banks PORTB
 	
-	DetectOS: byte absolute $fff7;
+var	DetectOS: byte absolute $fff7;
+(* 
+@description:	
+Detect OS
+
+@returns: 1   'XL/XE OS Rev.1'
+@returns: 2   'XL/XE OS Rev.2'
+@returns: 3   'XL/XE OS Rev.3'
+@returns: 4   'XL/XE/XEGS OS Rev.4'
+@returns: 10  'XL/XE OS Rev.10'
+@returns: 11  'XL/XE OS Rev.11'
+@returns: 59  'XL/XE OS Rev.3B' 
+@returns: 64  'QMEG+OS 4.04'
+@returns: 253 'QMEG+OS RC01'
+*)	
 
 	function DetectBASIC: byte; assembler;
 	function DetectCPU: byte; assembler;
@@ -311,7 +324,7 @@ Detect CPU speed in megahertz
 
 author: Draco
 
-@returns: speed (Q24.8)
+@returns: speed (REAL Q24.8)
 *)
 var clkm, fr0: word;
 begin
@@ -602,9 +615,20 @@ end;
 
 
 function DetectBASIC: byte; assembler;
+(*
+@description:
+Detect BASIC
+
+@returns: 162 = 'Atari Basic Rev.A'
+@returns: 96 = 'Atari Basic Rev.B' 
+@returns: 234 = 'Atari Basic Rev.C'
+*)
 asm
 {
 BASROM	= $a8e2
+
+	lda PORTB
+	sta old
 
 	lda #$fd
 	sta PORTB
@@ -613,10 +637,10 @@ BASROM	= $a8e2
 	sta Result
 	
 	lda #$ff
+old	equ *-1
 	sta PORTB
 };
 end;
-
 
 end.
 

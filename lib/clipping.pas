@@ -1,8 +1,8 @@
 unit clipping;
 (*
  @type: unit
- @author:
- @name:
+ @author: FPC
+ @name: Common procedures for line clipping in defined rectangle area
 
  @version: 1.0
 

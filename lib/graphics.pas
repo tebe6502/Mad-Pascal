@@ -1,4 +1,12 @@
 unit graphics;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Unit to handle HiRes bitmap graphics, proportional fonts
+ @version: 1.0
+
+ @description:
+*)
 
 {
 

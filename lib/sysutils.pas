@@ -94,6 +94,7 @@ const
 	function StrToInt(const s: char): byte; assembler; overload;
 	function StrToInt(const s: TString): integer; assembler; overload;
 	function TimeToStr(d: TDateTime): TString;
+	function Trim(var S: string): string;
 
 implementation
 
@@ -941,6 +942,28 @@ begin
  Result.m:=Minute;
  Result.s:=Second;
 
+end;
+
+
+function Trim(var S: string): string;
+(*
+@description:
+Trim whitespace from the ends of a string.
+
+@param: S: String
+
+@return: string
+*)
+var i : byte;
+begin
+ 
+ i:=length(s);
+ while (i>0) and (s[i]=' ') do dec(i);
+
+ Result:=s;
+ Result[0]:=chr(i);
+ 
+// Result:=Copy(s,1,i);
 end;
 
 

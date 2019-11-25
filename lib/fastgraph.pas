@@ -1,7 +1,7 @@
 unit fastgraph;
 (*
 @type: unit
-@name:
+@name: Unit to handle screen graphics, accelerated bitmap modes
 @author: Tomasz Biela (Tebe)
 
 @description:
