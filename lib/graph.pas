@@ -27,34 +27,41 @@ SetColor
 
 interface
 
-uses	types;
+uses	types, atari;
 
 	{$i graphh.inc}
 
+	procedure DisplayBuffer(var a: TFrameBuffer);
+	procedure fLine(x0, y0, x1, y1: smallint);
+	procedure FrameBuffer(var a: TFrameBuffer);
 	procedure HLine(x1,x2, y: smallint); 
 	procedure LineTo(x, y: smallint); assembler;
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
-
+	function Scanline(y: smallint): PByte;
+	function SetBuffer(var a: TFrameBuffer; mode, bound: byte): TFrameBuffer;
+	procedure SwitchBuffer(var a,b: TFrameBuffer);
 
 implementation
 
 var
-	CurrentX, CurrentY: word;
+	CurrentX, CurrentY, VideoRam: word;
+	
+	Scanline_Width: byte;
 
+
+procedure FrameBuffer(var a: TFrameBuffer);
 (*
-	TheFillSettings : FillSettingsType;
+@description:
 
-
-procedure SetFillStyle(pattern, color: byte);
-//----------------------------------------------------------------------------------------------
-// Set drawing fill style
-//----------------------------------------------------------------------------------------------
-begin
-	TheFillSettings.pattern := pattern;
-	TheFillSettings.color	:= color;
-end;
 *)
+begin
+
+ VideoRam := a.bp;
+ savmsc := VideoRam;
+
+end;
+
 
 procedure InitGraph(mode: byte); overload;
 (*
@@ -84,6 +91,19 @@ asm
 	ora #2		; read
 
 	.nowarn @graphics
+	
+	
+tlshc	equ $ee6d
+
+	ldx dindex
+	ldy tlshc,x
+	lda #5
+shift	asl @
+	dey
+	bne shift
+
+	sta SCANLINE_WIDTH
+	
 
 ; Fox/TQA
 
@@ -104,9 +124,24 @@ tmrcn	equ $ee8d
 	sta MAIN.SYSTEM.ScreenWidth
 	stx MAIN.SYSTEM.ScreenWidth+1
 	
+	sub #1
+	sta WIN_RIGHT
+	txa
+	sbc #0
+	sta WIN_RIGHT+1
+	
 	sty MAIN.SYSTEM.ScreenHeight
 	lda #0
 	sta MAIN.SYSTEM.ScreenHeight+1
+	
+	sta WIN_LEFT
+	sta WIN_LEFT+1
+	sta WIN_TOP
+	sta WIN_TOP+1
+
+	sta WIN_BOTTOM+1	
+	dey
+	sty WIN_BOTTOM
 
 	pla:tax
 };
@@ -351,6 +386,32 @@ asm
 };
 end;
 *)
+
+
+function Scanline(y: smallint): PByte;
+(*
+@description:
+
+*)
+var i: byte;
+    a: word;
+begin
+
+ i:=y;
+
+ if y < 0 then i:=0 else
+  if y >= ScreenHeight then i:=ScreenHeight-1;
+  
+ if Scanline_Width <> 40 then 
+  a:=i * Scanline_Width
+ else begin   
+  a:=i shl 3;
+  a:=a + a shl 2;
+ end; 
+
+ Result:=pointer(a + VideoRam);
+
+end;
 
 
 {$i vbxe.inc}

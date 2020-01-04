@@ -7,6 +7,8 @@ Bar3D
 calcRegCode
 Circle
 ClipLine
+DisplayBuffer
+FrameBuffer
 GetMaxColor
 GetMaxX
 GetMaxY
@@ -24,6 +26,61 @@ SetArcCoords
 SetClipRect
 
 }
+
+
+procedure DisplayBuffer(var a: TFrameBuffer);
+(*
+@description:
+
+*)
+begin
+	sdlstl := a.dl;
+	dlistl := sdlstl;
+end;
+
+
+function SetBuffer(var a: TFrameBuffer; mode, bound: byte): TFrameBuffer;
+(*
+@description:
+
+*)
+begin
+
+ ramtop := bound;
+ 
+ InitGraph(mode);
+ 
+ a.dl := sdlstl;	
+ a.bp := savmsc;
+
+end;
+
+
+procedure SwitchBuffer(var a,b: TFrameBuffer);
+var tmp: TFrameBuffer;
+    x, y: pointer;
+    l: word;
+begin
+
+ tmp:=b;
+ 
+ b:=a;
+ a:=tmp;
+ 
+ DisplayBuffer(a);
+ FrameBuffer(b);
+ 
+ x:=Scanline(WIN_TOP);
+
+ y:=Scanline(WIN_BOTTOM); 
+ l:=word(y);
+ y:=Scanline(WIN_TOP);
+ 
+ dec(l, word(y));
+
+ fillchar(x, l, 0);
+
+end;
 
 
 function GetX: smallint;

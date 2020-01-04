@@ -19,7 +19,7 @@ unit atari;
 
 interface
 
-type	Tdmactl = (blank = %00, narrow = %01, normal = %10, wide = %11, missiles= %100, players = %1000, oneline = %10000, enable = %100000);
+type	TDMACtl = (blank = %00, narrow = %01, normal = %10, wide = %11, missiles= %100, players = %1000, oneline = %10000, enable = %100000);
 	(*
 	@description:
 
@@ -34,6 +34,7 @@ var
 	colcrs: word absolute $55;		// (2) pozioma pozycja kursora
 	dindex: byte absolute $57;		// numer trybu graficznego OS
 	savmsc: word absolute $58;		// (2) adres pamieci obrazu
+	ramtop: byte absolute $6a;
 
 	vdslst: word absolute $200;		// (2) adres programu przerwania 'Display List'
 	sdlstl: word absolute $230;		// (2) adres programu ANTIC-a 'Display List'

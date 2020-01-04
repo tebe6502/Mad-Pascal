@@ -1,10 +1,9 @@
-(*
+
 type
-	FillSettingsType =
-	record
-		pattern, color : byte;
-	end;
-*)
+	TFrameBuffer = record 
+			dl: word;
+			bp: word;
+		       end;
 
 const
 	{ graphic drivers }
@@ -99,9 +98,9 @@ const
 *)
 
 var	WIN_LEFT: smallint = 0;
-	WIN_RIGHT: smallint = 160-1;
+	WIN_RIGHT: smallint = 39;
 	WIN_TOP: smallint = 0;
-	WIN_BOTTOM: smallint = 192-1;
+	WIN_BOTTOM: smallint = 23;
 
 	GraphResult: byte;
 	

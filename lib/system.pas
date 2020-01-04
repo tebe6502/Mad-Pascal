@@ -100,7 +100,19 @@ type	PByte = ^byte;
 
 	*)
 
-type	PWord = array [0..0] of word;
+type	PWord = ^word;
+	(*
+	@description:
+
+	*)
+
+type	PByteArray = ^byte;
+	(*
+	@description:
+
+	*)
+
+type	PWordArray = ^word;
 	(*
 	@description:
 
@@ -438,7 +450,9 @@ asm
 
 	jsr @hexStr
 
-	@move #@buf Result #33
+;	@move #@buf Result #33
+	ldy #256-33
+	mva:rne @buf+33-256,y adr.Result+33-256,y+	
 
 	pla:tax
 };
@@ -1852,7 +1866,9 @@ _tob1	lda #0
 	dey
 	bne _tob1
 
-	@move #@buf Result #33
+;	@move #@buf Result #33
+	ldy #256-33
+	mva:rne @buf+33-256,y adr.Result+33-256,y+	
 
 	pla:tax
 };
@@ -1897,7 +1913,9 @@ _toct2	lsr Value+3
 	dey
 	bne _toct1
 
-	@move #@buf Result #33
+;	@move #@buf Result #33
+	ldy #256-33
+	mva:rne @buf+33-256,y adr.Result+33-256,y+	
 
 	pla:tax
 };
@@ -1963,7 +1981,10 @@ Return value of a command-line argument.
 *)
 asm
 {	@cmdline i
-	@move #@buf Result #33
+
+;	@move #@buf Result #33
+	ldy #256-33
+	mva:rne @buf+33-256,y adr.Result+33-256,y+
 };
 end;
 
@@ -1982,7 +2003,9 @@ asm
 {	mva #0 @buf
 	@addString #adr.a
 	@addString #adr.b
-	@move #@buf #adr.Result #256
+;	@move #@buf #adr.Result #256
+	ldy #0
+	mva:rne @buf,y adr.Result,y+
 };
 end;
 
@@ -1999,7 +2022,9 @@ asm
 	ldy @buf
 	lda b
 	sta @buf,y
-	@move #@buf #adr.Result #256
+;	@move #@buf #adr.Result #256
+	ldy #0
+	mva:rne @buf,y adr.Result,y+
 };
 end;
 
@@ -2014,7 +2039,9 @@ asm
 	lda a
 	sta @buf+1
 	@addString #adr.b
-	@move #@buf #adr.Result #256
+;	@move #@buf #adr.Result #256
+	ldy #0
+	mva:rne @buf,y adr.Result,y+
 };
 end;
 
