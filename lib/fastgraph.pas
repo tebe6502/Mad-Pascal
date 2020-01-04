@@ -2,26 +2,31 @@ unit fastgraph;
 (*
 @type: unit
 @name: Unit to handle screen graphics, accelerated bitmap modes
-@author: Tomasz Biela (Tebe)
+@author: Tomasz Biela (Tebe/Madteam)
 
 @description:
 <http://www.freepascal.org/docs-html/rtl/graph/index-5.html>
+
+Marcin ¯ukowski (Eru/TQA): fLine
 *)
 
 
 {
 
+DisplayBuffer
 fLine			fast Line
 FrameBuffer
 fRectangle		fast Rectangle
 GetPixel
 HLine
-InitGraph		support mode: 3, 5, 7, 8, 9, 10, 11, 15
+InitGraph		mode: 3, 5, 7, 8, 9, 10, 11, 15
 Line
-MoveTo
 LineTo
+MoveTo
 PutPixel
+Scanline
 SetBkColor
+SetBuffer
 SetColor
 
 }
@@ -29,17 +34,21 @@ SetColor
 
 interface
 
-uses	types;
+uses	types, atari;
 
 	{$i graphh.inc}
-
+	
+	procedure DisplayBuffer(var a: TFrameBuffer);
 	procedure fLine(x0,y0,x1,y1: byte); assembler;
-	procedure FrameBuffer(a: word); assembler;
+	procedure FrameBuffer(a: word); assembler; overload;
+	procedure FrameBuffer(var a: TFrameBuffer); overload;
 	procedure fRectangle(x1, y1, x2, y2: smallint);
 	procedure Hline(x0,x1,y: smallint); 
 	procedure LineTo(x, y: smallint);
 	procedure PutPixel(x,y: smallint); assembler; register;
-
+	function Scanline(y: smallint): PByte;
+	function SetBuffer(var a: TFrameBuffer; mode, bound: byte): TFrameBuffer;
+	procedure SwitchBuffer(var a,b: TFrameBuffer);
 
 implementation
 
@@ -48,6 +57,8 @@ var
 	lineLo, lineHi, div4: array [0..255] of byte;
 
 	CurrentX, CurrentY: smallint;
+	
+	VideoRam: word;
 
 
 (*
@@ -899,13 +910,17 @@ begin
 end;
 
 
-procedure FrameBuffer(a: word); assembler;
+procedure FrameBuffer(a: word); assembler; overload;
 (*
 @description:
+
 *)
 asm
 {	lda a
 	ldy a+1
+	
+	sta VideoRam
+	sty VideoRam+1
 
 	.ifdef PutPixel
 	sta PutPixel.lfb
@@ -927,6 +942,18 @@ asm
 	sty fLine.hfb
 	eif
 };
+end;
+
+
+procedure FrameBuffer(var a: TFrameBuffer); overload;
+(*
+@description:
+
+*)
+begin
+
+ FrameBuffer(a.bp);
+
 end;
 
 
@@ -1029,10 +1056,25 @@ tmrcn	equ $ee8d
 
 	sta MAIN.SYSTEM.ScreenWidth
 	stx MAIN.SYSTEM.ScreenWidth+1
-
+	
+	sub #1
+	sta WIN_RIGHT
+	txa
+	sbc #0
+	sta WIN_RIGHT+1
+	
 	sty MAIN.SYSTEM.ScreenHeight
 	lda #0
 	sta MAIN.SYSTEM.ScreenHeight+1
+	
+	sta WIN_LEFT
+	sta WIN_LEFT+1
+	sta WIN_TOP
+	sta WIN_TOP+1
+
+	sta WIN_BOTTOM+1	
+	dey
+	sty WIN_BOTTOM
 
 
 tlshc	equ $ee6d
@@ -1133,8 +1175,27 @@ __oras	dta $c0,$30,$0c,$03
 
 stop	pla:tax
 };
-	FrameBuffer(DPeek(88));
+	FrameBuffer(savmsc);
 end;
+
+
+function Scanline(y: smallint): PByte;
+(*
+@description:
+
+*)
+var i: byte;
+begin
+
+ i:=y;
+
+ if y < 0 then i:=0 else
+  if y >= ScreenHeight then i:=ScreenHeight-1;
+
+ Result:=pointer(lineLo[i] + lineHi[i] shl 8 + VideoRam);
+
+end;
+
 
 
 {$i vbxe.inc}

@@ -483,7 +483,9 @@ asm
 
 	jsr @hexStr
 
-	@move #@buf Result #33
+;	@move #@buf Result #33
+	ldy #256-33
+	mva:rne @buf+33-256,y adr.Result+33-256,y+	
 
 	pla:tax
 };

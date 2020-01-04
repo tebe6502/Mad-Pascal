@@ -33,15 +33,15 @@ var	DetectOS: byte absolute $fff7;
 @description:	
 Detect OS
 
-@returns: 1   'XL/XE OS Rev.1'
-@returns: 2   'XL/XE OS Rev.2'
-@returns: 3   'XL/XE OS Rev.3'
-@returns: 4   'XL/XE/XEGS OS Rev.4'
-@returns: 10  'XL/XE OS Rev.10'
-@returns: 11  'XL/XE OS Rev.11'
-@returns: 59  'XL/XE OS Rev.3B' 
-@returns: 64  'QMEG+OS 4.04'
-@returns: 253 'QMEG+OS RC01'
+1   'XL/XE OS Rev.1'
+2   'XL/XE OS Rev.2'
+3   'XL/XE OS Rev.3'
+4   'XL/XE/XEGS OS Rev.4'
+10  'XL/XE OS Rev.10'
+11  'XL/XE OS Rev.11'
+59  'XL/XE OS Rev.3B' 
+64  'QMEG+OS 4.04'
+253 'QMEG+OS RC01'
 *)	
 
 	function DetectBASIC: byte; assembler;
