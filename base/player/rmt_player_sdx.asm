@@ -32,11 +32,11 @@
 ;*									;2 => compile RMTplayer for 4 tracks stereo L1 R2 R3 L4
 ;*									;3 => compile RMTplayer for 4 tracks stereo L1 L2 R3 R4
 ;*
-;	IFT STEREOMODE==1
-;TRACKS		equ 8
-;	ELS
-;TRACKS		equ 4
-;	EIF
+	IFT STEREOMODE==1
+TRACKS		equ 8
+	ELS
+TRACKS		equ 4
+	EIF
 ;*
 ;PLAYER		equ $3400
 ;*
@@ -45,26 +45,27 @@
 ;	icl "rmt_feat.a65"
 ;*
 ;* RMT ZeroPage addresses
-;	org 203
-;p_tis
-;p_instrstable	org *+2
-;p_trackslbstable	org *+2
-;p_trackshbstable	org *+2
-;p_song			org *+2
-;ns				org *+2
-;nr				org *+2
-;nt				org *+2
-;reg1			org *+1
-;reg2			org *+1
-;reg3			org *+1
-;tmp				org *+1
+	org $e0
+p_tis
+p_instrstable		org *+2
+p_trackslbstable	org *+2
+p_trackshbstable	org *+2
+p_song			org *+2
+ns			org *+2
+nr			org *+2
+nt			org *+2
+reg1			org *+1
+reg2			org *+1
+reg3			org *+1
+tmp			org *+1
+
 ;	IFT FEAT_COMMAND2
 ;frqaddcmd2		org *+1
 ;	EIF
 
 
 
-;	org PLAYER
+	org PLAYER
 ;*
 ;* Set of RMT main vectors:
 ;*

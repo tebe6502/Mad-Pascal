@@ -36,17 +36,18 @@ TRACKS		equ 4
 ;* RMT ZeroPage addresses
 	org $e0
 p_tis
-p_instrstable	org *+2
+p_instrstable		org *+2
 p_trackslbstable	org *+2
 p_trackshbstable	org *+2
 p_song			org *+2
-ns				org *+2
-nr				org *+2
-nt				org *+2
+ns			org *+2
+nr			org *+2
+nt			org *+2
 reg1			org *+1
 reg2			org *+1
 reg3			org *+1
-tmp				org *+1
+tmp			org *+1
+
 	IFT FEAT_COMMAND2
 frqaddcmd2		org *+1
 	EIF
