@@ -1,4 +1,3 @@
-	opt l-
 
 .enum	@dmactl
 	blank	= %00
@@ -296,4 +295,3 @@ irqvec	=	$FFFE	; wektor przerwania IRQ
 nmivec16 =	$FFEA	; wektor przerwania NMI (nativ 65816)
 irqvec16 =	$FFEE	; wektor przerwania IRQ
 
-	opt l+

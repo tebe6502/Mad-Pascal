@@ -222,9 +222,7 @@ fxla    .macro
 
 /* ----------------------------------------------------------------------- */
 
-	opt l-
 	icl 'atari.hea'
-	opt l+
 
 /* ----------------------------------------------------------------------- */
 
@@ -857,7 +855,6 @@ fail	lda #$ff
 .endp
 
 
-
 .proc	cmpCHAR2STRING
 
 	lda :STACKORIGIN-1,x
@@ -892,6 +889,57 @@ fail	lda #$ff
 .endp
 
 
+/*
+{   CompareText compares S1 and S2, the result is the based on
+    substraction of the ascii values of characters in S1 and S2
+    comparison is case-insensitive
+    case     result
+    S1 < S2  < 0
+    S1 > S2  > 0
+    S1 = S2  = 0     }
+
+function CompareText(const S1, S2: string): Integer; overload;
+
+var
+  i, count, count1, count2: sizeint;
+  Chr1, Chr2: byte;
+  P1, P2: PChar;
+begin
+  Count1 := Length(S1);
+  Count2 := Length(S2);
+  if (Count1>Count2) then
+    Count := Count2
+  else
+    Count := Count1;
+  i := 0;
+  if count>0 then
+    begin
+      P1 := @S1[1];
+      P2 := @S2[1];
+      while i < Count do
+        begin
+          Chr1 := byte(p1^);
+          Chr2 := byte(p2^);
+          if Chr1 <> Chr2 then
+            begin
+              if Chr1 in [97..122] then
+                dec(Chr1,32);
+              if Chr2 in [97..122] then
+                dec(Chr2,32);
+              if Chr1 <> Chr2 then
+                Break;
+            end;
+          Inc(P1); Inc(P2); Inc(I);
+        end;
+    end;
+  if i < Count then
+    result := Chr1-Chr2
+  else
+    // CAPSIZEINT is no-op if Sizeof(Sizeint)<=SizeOF(Integer)
+    result:=CAPSIZEINT(Count1-Count2);
+end;
+*/
+
 .proc	cmpSTRING
 
 	lda :STACKORIGIN-1,x
@@ -905,39 +953,49 @@ fail	lda #$ff
 	sta ztmp10+1
 
 	ldy #0
+	
+	lda (ztmp10),y
+	sta count2
+	
+	lda (ztmp8),y
+	sta count1
 
-	lda (ztmp8),y		; if length1 = 0
-	beq fail
-	lda (ztmp10),y		; if length2 = 0
-	beq fail
+	cmp count2
+	scc
+	lda count2
+	sta count	
 
-	lda (ztmp8),y		; if length1 <> length2
-	cmp (ztmp10),y
-	bne fail
-
-	sta max
+	cmp #0
+	beq stop
 
 	inw ztmp8
 	inw ztmp10
 
 loop	lda (ztmp8),y
-	cmp (ztmp10),y
+	sub (ztmp10),y
 	bne fail
 
 	iny
 
 	cpy #0
-max	equ *-1
+count	equ *-1
 	bne loop
+stop
+	ldy #1
 
 	lda #0
-	seq
+count1	equ *-1
+	sub #0
+count2	equ *-1
+	bcc fail
 
-fail	lda #$ff
+	rts
+
+fail	php
 
 	ldy #1
 
-	cmp #0
+	plp
 	rts
 .endp
 
@@ -2487,7 +2545,7 @@ getk	lda kbcodes	; odczytaj kbcodes
 ; Performance increase (about 20%) by
 ; Christian Krueger, 2009-09-13
 
-.proc	@moveu		; assert Y = 0
+.proc	@moveu			; assert Y = 0
 
 ptr1	= edx
 ptr2	= ecx
@@ -2500,7 +2558,7 @@ ptr3	= eax
 	ldx     ptr3+1		; Get high byte of n
 	beq     L2		; Jump if zero
 
-L1:     .rept 2		; Unroll this a bit to make it faster...
+L1:     .rept 2			; Unroll this a bit to make it faster...
 	lda     (ptr1),Y	; copy a byte
 	sta     (ptr2),Y
 	iny
@@ -2588,7 +2646,7 @@ PageSizeCopy:			; assert Y = 0
 	sta     (ptr2),y	; to 'land' later on Y=0! (as a result of the '.repeat'-block!)
 	dey			; FF ->FE
 @copyBytes:
-	.rept 2		; Unroll this a bit to make it faster...
+	.rept 2			; Unroll this a bit to make it faster...
 	lda     (ptr1),y
 	sta     (ptr2),y
 	dey
@@ -2647,7 +2705,7 @@ evenCount:
 
 ; Set 256/512 byte blocks
 				; y is still 0 here
-L1:	.rept 2		; Unroll this a bit to make it faster
+L1:	.rept 2			; Unroll this a bit to make it faster
 	sta	(ptr1),y	; Set byte in lower section
 	sta	(ptr2),y	; Set byte in upper section
 	iny
