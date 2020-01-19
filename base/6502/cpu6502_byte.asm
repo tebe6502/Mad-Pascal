@@ -60,6 +60,37 @@ sm4:		sbc square2_hi,x
 
 /*
 
+;
+; Ullrich von Bassewitz, 2009-08-17
+;
+; CC65 runtime: 8x8 => 16 unsigned multiplication
+;
+
+*/
+
+.proc	imulCL
+ptr1 = ecx
+ptr4 = eax
+	
+	ldy #8
+	lda #0
+
+        lsr     ptr4            ; Get first bit into carry
+@L0:    bcc     @L1
+        clc
+        adc     ptr1
+@L1:    ror	@
+        ror     ptr4
+        dey
+        bne     @L0
+        sta	ptr4+1
+
+	rts
+.endp
+
+
+/*
+
  8 bit multiply and divide routines.
  Three 8 bit locations
  ACC, AUX and EXT must be set up,
@@ -70,7 +101,7 @@ sm4:		sbc square2_hi,x
  EAX*ECX -> EAX (low,hi) 16 bit result
 
 */
-
+/*
 .proc	imulCL
 
 	lda #$00
@@ -89,7 +120,7 @@ MUL2	DEY
 
 	RTS
 .endp
-
+*/
 
 .proc	imulBYTE
 
