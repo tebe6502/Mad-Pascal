@@ -1,3 +1,15 @@
+16.01.2020
+- szybsza wersja procedury mnozenia mul8x8 na podstawie cc65 (base\6502\cpu6502_byte -> imulCL)
+- optymalizacje dla warunku '<='
+- optymalizacja skoku gdy inkrementujemy licznik typu WORD
+
+14.01.2020
+- SYSTEM: IntToStr(CARDINAL)
+- poprawki dla High(type), przedtem zwraca³o b³¹d 'type identifier not allowed here'
+
+09.01.2020
+- dodanie kodu resetujacego POKEY-a na poczatku uruchomienia programu
+
 02.01.2020
 - poprawiona optymalizacja 'opty REGY', zablokowana dla 'ldy :STACK'
 - przepisane rozwiniêcie kodu dla notBOOLEAN
