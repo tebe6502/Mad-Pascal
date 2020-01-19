@@ -32,14 +32,24 @@ Contributors:
 + Eru / TQA :
 	- unit FASTGRAPH: fLine
 
++ Guillermo Fuenzalida :
+	- unit MISC: DetectANTIC
+
++ Piotr Fusik :
+	- Integer compare
+
 + Seban / Slight :
 	- unit MISC: DetectStereo
 
 + Steven Don :
 	- unit IMAGE, VIMAGE
 
-+ Ullrich von Bassewitz, Christian Krueger :
++ Ullrich von Bassewitz, Christian Krueger (https://github.com/cc65/cc65/libsrc/common/) :
 	- unit SYSTEM: MOVE, FILLCHAR
+
++ Ullrich von Bassewitz (https://github.com/cc65/cc65/libsrc/runtime/) :
+	- 8x8 => 16 multiplication routine (base\cpu6502\cpu6502_byte.asm)
+	- 16x16 => 32 multiplication routine (base\cpu6502\cpu6502_word.asm)
 
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
@@ -85,7 +95,7 @@ uses
 
 const
 
-  title = '1.6.3';
+  title = '1.6.4';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -560,7 +570,7 @@ var
 
   asmLabels: array of integer;
 
-  TemporaryBuf: array [0..31] of string;
+  TemporaryBuf, TemporaryBuf_Tmp: array [0..31] of string;
 
   OptimizeBuf: array of TOptimizeBuf;
 
@@ -1906,7 +1916,7 @@ end;
 
 
 procedure OptimizeTemporaryBuf;
-var i: integer;
+var i, p: integer;
 
 
   function SKIP(i: integer): Boolean;
@@ -1940,11 +1950,16 @@ var i: integer;
   end;
 
 
+  function GetBYTE(i: integer): integer;
+  begin
+    Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
+  end;
+
+
 begin
 
  for i:=0 to High(TemporaryBuf)-1 do
   if TemporaryBuf[i] <> '' then begin
-
 
    if (pos('l_', TemporaryBuf[i]) > 0) and						//l_xxxxt		; 0
       (pos('lda IFTMP_', TemporaryBuf[i+1]) > 0) and					// lda IFTMP_xxxx	; 1
@@ -1955,14 +1970,14 @@ begin
 
      TemporaryBuf[i+2] := TemporaryBuf[i+1];
      TemporaryBuf[i+1] := TemporaryBuf[i];
-     TemporaryBuf[i]   := '';
+     TemporaryBuf[i]   := '~';
     end;
 
 
    if (pos('jmp @exit', TemporaryBuf[i]) > 0) and					// jmp @exit		; 0
       (TemporaryBuf[i+1] = '@exit') then						//@exit			; 1
     begin
-     TemporaryBuf[i] := '';
+     TemporaryBuf[i] := '~';
     end;
 
 
@@ -1971,17 +1986,17 @@ begin
       (pos('jmp l_', TemporaryBuf[i+2]) > 0) and					// jmp l_yyyy		; 2
       (pos(TemporaryBuf[i+3], TemporaryBuf[i+1]) > 0) then				//l_xxxx		; 3
     begin
-     TemporaryBuf[i]   := '';
-     TemporaryBuf[i+1] := '';
-     TemporaryBuf[i+3] := '';
+     TemporaryBuf[i]   := '~';
+     TemporaryBuf[i+1] := '~';
+     TemporaryBuf[i+3] := '~';
     end;
 
 
    if (pos('jmp l_', TemporaryBuf[i]) > 0) then						// jmp l_xxxx		; 0
     if TemporaryBuf[i+1] = copy(TemporaryBuf[i], 6, 256) then				//l_xxxx		; 1
     begin
-     TemporaryBuf[i]   := '';
-     TemporaryBuf[i+1] := '';
+     TemporaryBuf[i]   := '~';
+     TemporaryBuf[i+1] := '~';
     end;
 
 
@@ -1990,8 +2005,74 @@ begin
       (pos('jmp l_', TemporaryBuf[i+2]) > 0) then
     begin
      TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+2], 6, 256);
-     TemporaryBuf[i+2] := '';
+     TemporaryBuf[i+2] := '~';
     end;
+
+
+    if (pos('lda ', TemporaryBuf[i]) > 0) and						// lda W+1		; 0
+       (pos('cmp #', TemporaryBuf[i+1]) > 0) and					// cmp #$1F		; 1
+       (TemporaryBuf[i+2] = #9'bne @+') and						// bne @+		; 2
+       (pos('lda ', TemporaryBuf[i+3]) > 0) and						// lda W		; 3
+       (pos('cmp #', TemporaryBuf[i+4]) > 0) and					// cmp #$FF		; 4
+       (TemporaryBuf[i+5] = '@') and							//@			; 5
+       (TemporaryBuf[i+6] = #9'bcc *+7') and						// bcc *+7		; 6
+       (TemporaryBuf[i+7] = #9'beq *+5') and						// beq *+5		; 7
+       (pos('jmp l_', TemporaryBuf[i+8]) > 0) then					// jmp l_		; 8
+      begin
+      p := GetBYTE(i+1) shl 8 + GetBYTE(i+4) + 1;
+
+      if p <= $FFFF then begin
+
+        if byte(p shr 8) = 0 then
+	 TemporaryBuf[i+1] := '~'
+	else
+	 TemporaryBuf[i+1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);
+
+	if p and $ff = 0 then begin
+	 TemporaryBuf[i+2] := #9'sne';
+
+	 TemporaryBuf[i+4] := '~';
+	 TemporaryBuf[i+5] := '~';
+	end else
+	 TemporaryBuf[i+4] := #9'cmp #$'+IntToHex(p and $ff, 2);
+
+	TemporaryBuf[i+6] := '~';
+	TemporaryBuf[i+7] := '~';
+	TemporaryBuf[i+8] := #9'jcs ' + copy(TemporaryBuf[i+8], 6, 256);
+
+      end;
+
+     end;
+
+
+    if (pos('lda ', TemporaryBuf[i]) > 0) and						// lda W		; 0
+       (pos('cmp #', TemporaryBuf[i+1]) > 0) and					// cmp #$FF		; 1
+       (TemporaryBuf[i+2] = #9'bcc *+7') and						// bcc *+7		; 2
+       (TemporaryBuf[i+3] = #9'beq *+5') and						// beq *+5		; 3
+       (pos('jmp l_', TemporaryBuf[i+4]) > 0) then					// jmp l_		; 4
+     begin
+      p := GetBYTE(i+1) + 1;
+
+      if p <= $FF then begin
+	TemporaryBuf[i+1] := #9'cmp #$'+IntToHex(p and $ff, 2);
+
+	TemporaryBuf[i+2] := '~';
+	TemporaryBuf[i+3] := '~';
+	TemporaryBuf[i+4] := #9'jcs ' + copy(TemporaryBuf[i+4], 6, 256);
+      end;
+
+     end;
+
+
+    if (pos('inc ', TemporaryBuf[i]) > 0) and						// inc W		; 0
+       (TemporaryBuf[i+1] = #9'sne') and						// sne			; 1
+       (pos('inc ', TemporaryBuf[i+2]) > 0) and						// inc W+1		; 2
+       ((pos('jmp l_', TemporaryBuf[i+3]) > 0) or					// jmp l_		; 3
+        (pos('jne l_', TemporaryBuf[i+3]) > 0))  then					// jne l_		; 3
+     if (pos(TemporaryBuf[i], TemporaryBuf[i+2]) > 0) then
+      begin
+	TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+3], 6, 256);
+      end;
 
 
     if (TemporaryBuf[i] = #9'bcc *+7') and						// bcc *+7		; 0
@@ -2000,7 +2081,7 @@ begin
       begin
        TemporaryBuf[i]   := #9'scc';
        TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+2], 6, 256);
-       TemporaryBuf[i+2] := '';
+       TemporaryBuf[i+2] := '~';
       end;
 
 
@@ -2011,7 +2092,7 @@ begin
       begin
        TemporaryBuf[i+1] := #9'smi';
        TemporaryBuf[i+2] := #9'jne ' + copy(TemporaryBuf[i+3], 6, 256);
-       TemporaryBuf[i+3] := '';
+       TemporaryBuf[i+3] := '~';
       end;
 
 
@@ -2021,7 +2102,7 @@ begin
       (TemporaryBuf[i+3] = '@') then
     begin
      TemporaryBuf[i+1] := #9'jne ' + copy(TemporaryBuf[i+2], 6, 256);
-     TemporaryBuf[i+2] := '';
+     TemporaryBuf[i+2] := '~';
     end;
 
 
@@ -2031,7 +2112,7 @@ begin
       (TemporaryBuf[i+3] = '@') then
     begin
      TemporaryBuf[i+1] := #9'jcc ' + copy(TemporaryBuf[i+2], 6, 256);
-     TemporaryBuf[i+2] := '';
+     TemporaryBuf[i+2] := '~';
     end;
 
 
@@ -2041,7 +2122,7 @@ begin
       (TemporaryBuf[i+3] = '@') then
     begin
      TemporaryBuf[i+1] := #9'jcs ' + copy(TemporaryBuf[i+2], 6, 256);
-     TemporaryBuf[i+2] := '';
+     TemporaryBuf[i+2] := '~';
     end;
 
 
@@ -2049,8 +2130,19 @@ begin
       (pos('jmp l_', TemporaryBuf[i+1]) > 0) then					// jmp l_		; 1
     begin
      TemporaryBuf[i]   := #9'jne ' + copy(TemporaryBuf[i+1], 6, 256);
-     TemporaryBuf[i+1] := '';
+     TemporaryBuf[i+1] := '~';
     end;
+{
+  if (i>2) and (TemporaryBuf[i] = '; --- WhileProlog') then begin
+   writeln('+') ;
+   writeln(TemporaryBuf[i-2]);
+   writeln(TemporaryBuf[i-1]);
+   writeln(TemporaryBuf[i]);
+   writeln(TemporaryBuf[i+1]);
+   writeln(TemporaryBuf[i+2]);
+   writeln('-');
+  end;
+}
 
  end;
 
@@ -2068,9 +2160,11 @@ begin
 
   OptimizeTemporaryBuf;
 
-  if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+  if TemporaryBuf[0] <> '~' then begin
+   if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
 
-  outTmp := TemporaryBuf[0];
+   outTmp := TemporaryBuf[0];
+  end;
 
   for i:=1 to iOut do TemporaryBuf[i-1] := TemporaryBuf[i];
 
@@ -2246,6 +2340,11 @@ var i, l, k, m: integer;
    function IY(i: integer): Boolean;
    begin
     Result := pos(',y', listing[i]) > 0;
+   end;
+
+   function CMP_IM(i: integer): Boolean;
+   begin
+     Result := pos('cmp #', listing[i]) > 0;
    end;
 
    function LDY_IM(i: integer): Boolean;
@@ -2824,11 +2923,7 @@ var i, l, k, m: integer;
 
   for i := 0 to l - 1 do begin
 
-   if (pos('jsr ', listing[i])  > 0) or (pos('cmp ', listing[i]) > 0) or
-      (pos('bne ', listing[i]) > 0) or (pos('beq ', listing[i]) > 0) or
-      (pos('bcc ', listing[i]) > 0) or (pos('bcs ', listing[i]) > 0) or
-      (pos('bmi ', listing[i]) > 0) or (pos('bpl ', listing[i]) > 0) or
-      spl(i) or smi(i) or seq(i) or sne(i) then Break;
+   if (pos('jsr ', listing[i])  > 0) or cmp(i) or skip(i) then Break;
 
    if mwa_bp2(i) then
     if tmp = listing[i] then
@@ -4495,7 +4590,7 @@ var i, l, k, m: integer;
 	for p:=i-1 downto 1 do
 	 if (pos(tmp, listing[p]) > 0) then begin
 
-	  if (p>0) and lda(p-1) and sta(p) then begin
+	  if (p>1) and (skip(p-2) = false) and lda(p-1) and sta(p) then begin
 
 	   listing[i] := copy(listing[i], 1, 5) +  copy(listing[p-1], 6, 256);
 
@@ -7094,11 +7189,8 @@ var i, l, k, m: integer;
 	p:=i+1;
 	while p < l do begin
 
-	if (pos('cmp ', listing[p]) > 0) or (pos('bne ', listing[p]) > 0) or (pos('beq ', listing[p]) > 0) or	// wyjatki dla ktorych
-	   (pos('bcc ', listing[p]) > 0) or (pos('bcs ', listing[p]) > 0) or					// musimy zachowac ldy #$xx
-	   (pos('bpl ', listing[p]) > 0) or (pos('bmi ', listing[p]) > 0) or
-	   seq(p) or sne(p) or spl(p) or smi(p) or scc(p) or scs(p) or
-	   tya(p) or dey(p) or iny(p)
+	if cmp(p) or									// wyjatki dla ktorych
+	   skip(p) or tya(p) or dey(p) or iny(p)					// musimy zachowac ldy #$xx
 //	   (pos('jne ', listing[p]) > 0) or (pos('jeq ', listing[p]) > 0) or
 //	   (pos('jmi ', listing[p]) > 0) or (pos('jpl ', listing[p]) > 0) or
 //	   (pos('jcs ', listing[p]) > 0) or (pos('jcc ', listing[p]) > 0)
@@ -7139,11 +7231,8 @@ var i, l, k, m: integer;
 	p:=i+2;
 	while p < l do begin
 
-	if (pos('cmp ', listing[p]) > 0) or (pos('bne ', listing[p]) > 0) or (pos('beq ', listing[p]) > 0) or	// wyjatki dla ktorych
-	   (pos('bcc ', listing[p]) > 0) or (pos('bcs ', listing[p]) > 0) or					// musimy zachowac ldy #$xx
-	   (pos('bpl ', listing[p]) > 0) or (pos('bmi ', listing[p]) > 0) or
-	   seq(p) or sne(p) or spl(p) or smi(p) or scc(p) or scs(p) or
-	   tya(p) or dey(p) or iny(p)
+	if cmp(p) or									// wyjatki dla ktorych
+	   skip(p) or tya(p) or dey(p) or iny(p)					// musimy zachowac ldy #$xx
 //	   (pos('jne ', listing[p]) > 0) or (pos('jeq ', listing[p]) > 0) or
 //	   (pos('jmi ', listing[p]) > 0) or (pos('jpl ', listing[p]) > 0) or
 //	   (pos('jcs ', listing[p]) > 0) or (pos('jcc ', listing[p]) > 0)
@@ -7261,7 +7350,6 @@ var i, l, k, m: integer;
 
 
 // -----------------------------------------------------------------------------
-
 //	lda adr.L_BLOCK,y		; 0
 //	sta :STACKORIGIN+9		; 1
 //	lda adr.H_BLOCK,y		; 2
@@ -7273,14 +7361,16 @@ var i, l, k, m: integer;
 //	adc :STACKORIGIN+STACKWIDTH+10	; 8
 //	sta TB+1			; 9
 
-    if lda(i) and (iy(i) = false) and sta_stack(i+1) and
-       add_stack(i+5)  then
-       if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
+
+    if (skip(i-1) = false) and
+       lda(i) and (iy(i) = false) and
+       sta_stack(i+1) and
+       (add_sub_stack(i+4) or adc_sbc_stack(i+4)) then
+       if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+2]) = 0) and
-	  (pos(copy(listing[i+1], 6, 256), listing[i+3]) = 0) and
-	  (pos(copy(listing[i+1], 6, 256), listing[i+4]) = 0) then
+	  (pos(copy(listing[i+1], 6, 256), listing[i+3]) = 0) then
        begin
-	listing[i+5] := #9'add '+copy(listing[i], 6, 256);
+	listing[i+4] := copy(listing[i+4], 1, 5) + copy(listing[i], 6, 256);
 	listing[i]   := '';
 	listing[i+1] := '';
 
@@ -7288,15 +7378,34 @@ var i, l, k, m: integer;
        end;
 
 
-    if lda(i) and (iy(i) = false) and sta_stack(i+1) and
-       adc_stack(i+6)  then
+    if (skip(i-1) = false) and
+       lda(i) and (iy(i) = false) and
+       sta_stack(i+1) and
+       (add_sub_stack(i+5) or adc_sbc_stack(i+5)) then
+       if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
+	  (pos(copy(listing[i+1], 6, 256), listing[i+2]) = 0) and
+	  (pos(copy(listing[i+1], 6, 256), listing[i+3]) = 0) and
+	  (pos(copy(listing[i+1], 6, 256), listing[i+4]) = 0) then
+       begin
+	listing[i+5] := copy(listing[i+5], 1, 5) + copy(listing[i], 6, 256);
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	Result:=false;
+       end;
+
+
+    if (skip(i-1) = false) and
+       lda(i) and (iy(i) = false) and
+       sta_stack(i+1) and
+       (add_sub_stack(i+6) or adc_sbc_stack(i+6)) then
        if (copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+2]) = 0) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+3]) = 0) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+4]) = 0) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+5]) = 0) then
        begin
-	listing[i+6] := #9'adc '+copy(listing[i], 6, 256);
+	listing[i+6] := copy(listing[i+6], 1, 5) + copy(listing[i], 6, 256);
 	listing[i]   := '';
 	listing[i+1] := '';
 
@@ -8720,6 +8829,33 @@ var i, l, k, m: integer;
        end;
 
 
+    if asl_stack(i) and										// asl :STACKORIGIN+9			; 0
+       rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH+9	; 1
+       rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2+9	; 2
+       rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3+9	; 3
+       lda_stack(i+4) and									// lda :STACKORIGIN+9			; 4
+       sta(i+5) and										// sta					; 5
+       (lda_stack(i+6) = false)  then								// ~lda :STACKORIGIN+STACKWIDTH*2+9	; 8
+     if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) then begin
+
+	k:=i;
+	while (listing[i]=listing[k-4]) and (listing[i+1]=listing[k-4+1]) and (listing[i+2]=listing[k-4+2]) and (listing[i+3]=listing[k-4+3]) do begin
+
+	 listing[k-4+1] := '';
+	 listing[k-4+2] := '';
+	 listing[k-4+3] := '';
+
+	 dec(k, 4);
+	end;
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	Result:=false;
+       end;
+
+
     if lda(i) and										// lda					; 0
        add_sub(i+1) and										// sub adr.VEL,y			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
@@ -8842,7 +8978,7 @@ var i, l, k, m: integer;
 
 
     if lda(i) and 										// lda				; 0
-       ( lda(i+3) or mwa(i+3) ) and					// sta :STACKORIGIN		; 1
+       ( lda(i+3) or mwa(i+3) ) and								// sta :STACKORIGIN		; 1
        sta_stack(i+1) and									// asl :STACKORIGIN		; 2
        asl_stack(i+2) then									// lda|mwa			; 3
       if (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
@@ -12909,9 +13045,9 @@ var i, l, k, m: integer;
       end;
 
 
-    if (l = 3) and lda(i) and (iy(i) = false) and					// lda X 		; 0
+    if (l = 3) and lda(i) and (iy(i) = false) and						// lda X 		; 0
        (listing[i+1] = #9'sub #$01') and							// sub #$01		; 1
-       sta(i+2) and (iy(i+2) = false) then						// sta Y		; 2
+       sta(i+2) and (iy(i+2) = false) then							// sta Y		; 2
       if copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256) then
      begin
 
@@ -13814,7 +13950,7 @@ var i, l, k, m: integer;
 
 
     if adc_sbc(i) and										// adc|sbc STACK	; 0
-       (lda(i+1) or mwa(i+1)) then					// lda|mwa		; 1
+       (lda(i+1) or mwa(i+1)) then								// lda|mwa		; 1
      begin
 	listing[i]   := '';
 	Result:=false;
@@ -13865,7 +14001,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if lda(i) and (iy(i) = false) and						// lda			; 0
+    if lda(i) and (iy(i) = false) and								// lda			; 0
        (lda(i+1) or mva(i+1) or 								// lda|mva|mwa		; 1
         mwa(i+1)) then
      begin
@@ -13874,7 +14010,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if lda(i) and mwa(i+2) then 						// lda			; 0
+    if lda(i) and mwa(i+2) then 								// lda			; 0
      if (tay(i+1) = false) and (sta(i+1) = false) then						// ~sta|tay		; 1
      begin											// mwa			; 2
       listing[i]   := '';
@@ -13957,7 +14093,7 @@ var i, l, k, m: integer;
 {  !!! ta optymalizacja nie sprawdzila sie !!!
 
     if (lda(i) or sbc(i) or sub(i) or adc(i) or add(i)) and					// lda|sub|sbc|add|adc
-       (lda(i+1) or mwa(i+1) or mva(i+1) ) then begin   			// lda|mva|mwa
+       (lda(i+1) or mwa(i+1) or mva(i+1) ) then begin   					// lda|mva|mwa
 	listing[i] := '';
 	Result:=false;
        end;
@@ -14163,7 +14299,7 @@ var i, l, k, m: integer;
 
 
     if lda(i) and ldy(i+1) and								// lda		; 0
-       (mwa(i+2) or lda(i+2)) then				// ldy		; 1
+       (mwa(i+2) or lda(i+2)) then							// ldy		; 1
      begin										// mwa|lda	; 2
 	listing[i] := '';
 	Result:=false;
@@ -14571,6 +14707,7 @@ var i, l, k, m: integer;
    for i := 0 to l - 1 do
     if listing[i] <> '' then begin
 
+
     if lda(i) and ldy_1(i+1) and								// lda		; 0
        (listing[i+2] = #9'and #$00') and (listing[i+3] = #9'bne @+') and			// ldy #1	; 1
        lda(i+4) then										// and #$00	; 2
@@ -14582,7 +14719,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if (pos('and #$00', listing[i]) > 0) and (i>0) then						// lda #$00	; -1
+    if (i>0) and (pos('and #$00', listing[i]) > 0) then						// lda #$00	; -1
      if pos('lda #$00', listing[i-1]) > 0 then begin						// and #$00	; 0
 	listing[i] := '';
 	Result:=false;
@@ -14773,12 +14910,12 @@ var i, l, k, m: integer;
 
 
     if (cmp(i) or lda(i) or and_ora_eor(i)) and							// cmp|lda|and|ora|eor	; 0
-       ((listing[i+1] = #9'beq @+') or (listing[i+1] = #9'bne @+') or				// beq|bne @+		; 1
-        (listing[i+1] = #9'bcc @+')) and							// bcc|bcs @+		; 1
-       dey(i+2) and	 									// dey			; 2
-       (listing[i+3] = '@') and									//@			; 3
-       tya(i+4) and										// tya			; 4
-       (pos('jeq l_', listing[i+5]) > 0) then							// jeq			; 5
+       ((listing[i+1] = #9'beq @+') or (listing[i+1] = #9'bne @+') or				// beq|bne|bcc|bcs @+	; 1
+        (listing[i+1] = #9'bcc @+')) and							// dey			; 2
+       dey(i+2) and	 									//@			; 3
+       (listing[i+3] = '@') and									// tya			; 4
+       tya(i+4) and										// jeq			; 5
+       (pos('jeq l_', listing[i+5]) > 0) then
      begin
 
        if listing[i+1] = #9'bcc @+' then
@@ -15206,8 +15343,6 @@ var i, l, k, m: integer;
        Result:=false;
       end;
 
-
-//luci+
 
     if lda_stack(i) and sta_stack(i+1) and							// lda :STACKORIGIN+10	; 0
        lda_stack(i+2) then									// sta :STACKORIGIN+10	; 1
@@ -15677,6 +15812,120 @@ var i, l, k, m: integer;
       end;
 
 
+    if lda(i) and										// lda K+1				; 0
+       cmp_im(i+1) and										// cmp #$10				; 1
+       (listing[i+2] = #9'bne @+') and								// bne @+				; 2
+       lda(i+3) and										// lda K				; 3
+       cmp_im(i+4) and										// cmp #$FF				; 4
+       (listing[i+5] = '@') and									//@					; 5
+       (listing[i+6] = #9'bcc @+') and								// bcc @+				; 6
+       (pos('jne l_', listing[i+7]) > 0) and							// jne l_				; 7
+       (listing[i+8] = '@') then 								//@					; 8
+     begin
+      p := GetBYTE(i+1) shl 8 + GetBYTE(i+4) + 1;
+
+      if p <= $FFFF then begin
+
+        if byte(p shr 8) = 0 then
+	 listing[i+1] := ''
+	else
+	 listing[i+1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);
+
+	if p and $ff = 0 then begin
+	 listing[i+2] := #9'sne';
+
+	 listing[i+4] := '';
+	 listing[i+5] := '';
+	end else
+	 listing[i+4] := #9'cmp #$'+IntToHex(p and $ff, 2);
+
+	listing[i+6] := '';
+	listing[i+7] := #9'jcs ' + copy(listing[i+7], 6, 256);
+	listing[i+8] := '';
+
+	Result:=false;
+      end;
+
+     end;
+
+{
+    if lda(i) and										// lda K+1				; 0
+       cmp_im(i+1) and										// cmp #$10				; 1
+       (listing[i+2] = #9'bne @+') and								// bne @+				; 2
+       lda(i+3) and										// lda K				; 3
+       cmp_im(i+4) and										// cmp #$FF				; 4
+       (listing[i+5] = '@') and									//@					; 5
+       (listing[i+6] = #9'scc') and								// scc					; 6
+       (pos('jne l_', listing[i+7]) > 0) then							// jne l_				; 7
+     begin
+      p := GetBYTE(i+1) shl 8 + GetBYTE(i+4) + 1;
+
+      if p <= $FFFF then begin
+
+        if byte(p shr 8) = 0 then
+	 listing[i+1] := ''
+	else
+	 listing[i+1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);
+
+	if p and $ff = 0 then begin
+	 listing[i+2] := #9'sne';
+
+	 listing[i+4] := '';
+	 listing[i+5] := '';
+	end else
+	 listing[i+4] := #9'cmp #$'+IntToHex(p and $ff, 2);
+
+	listing[i+6] := '';
+	listing[i+7] := #9'jcs ' + copy(listing[i+7], 6, 256);
+
+	Result:=false;
+       end;
+
+     end;
+}
+
+
+    if lda(i) and										// lda K				; 0
+       cmp_im(i+1) and										// cmp #$10				; 1
+       (listing[i+2] = #9'bcc @+') and								// bcc @+				; 2
+       (pos('jne l_', listing[i+3]) > 0) and							// jne l_				; 3
+       (listing[i+4] = '@') then								//@					; 4
+     begin
+      p := GetBYTE(i+1) + 1;
+
+      if p <= $FF then begin
+	listing[i+1] := #9'cmp #$'+IntToHex(p and $ff, 2);
+
+	listing[i+2] := '';
+	listing[i+3] := #9'jcs ' + copy(listing[i+3], 6, 256);
+	listing[i+4] := '';
+
+	Result:=false;
+      end;
+
+     end;
+
+{
+    if lda(i) and										// lda K				; 0
+       cmp_im(i+1) and										// cmp #$10				; 1
+       (listing[i+2] = #9'scc') and								// scc					; 2
+       (pos('jne l_', listing[i+3]) > 0) then							// jne l_				; 3
+     begin
+      p := GetBYTE(i+1) + 1;
+
+      if p <= $FF then begin
+	listing[i+1] := #9'cmp #$'+IntToHex(p and $ff, 2);
+
+	listing[i+2] := '';
+	listing[i+3] := #9'jcs ' + copy(listing[i+3], 6, 256);
+
+	Result:=false;
+      end;
+
+     end;
+}
+
+
     if sty_stack(i) and										// sty :STACKORIGIN+9	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN+9	; 1
        (pos('jmp l_', listing[i+3]) > 0) then							// jmp l_		; 3
@@ -15702,7 +15951,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if lda(i) and (pos('lda #', listing[i]) = 0) and						// lda M				; 0
+    if lda(i) and (lda_im(i) = false) and							// lda M				; 0
        add(i+1) and										// add #$10				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
        lda_im_0(i+3) and									// lda #$00				; 3
@@ -22003,7 +22252,14 @@ end else begin
 
   case CounterSize of
    1: asm65(#9'inc '+svar, '; inc ptr byte [CounterAddress]');
-   2: asm65(#9'inw '+svar, '; inc ptr word [CounterAddress]');
+
+//   2: asm65(#9'inw '+svar, '; inc ptr word [CounterAddress]');
+   2: begin
+       asm65(#9'inc '+svar);				// dla optymalizacji z 'JMP L_xxxx'
+       asm65(#9'sne');
+       asm65(#9'inc '+svar+'+1');
+      end;
+
    4: asm65(#9'ind '+svar, '; inc ptr dword [CounterAddress]');
   end;
 
@@ -22045,7 +22301,7 @@ if Epilog then begin
 
  end else begin
 
-  asm65;
+//  asm65;
   asm65(#9'seq');
 
  end;
@@ -22292,12 +22548,18 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'eif');
  asm65;
 
- asm65(#9'ldx #$0f');						// DOS II+/D ParamStr
+ asm65(#9'ldx #$0f','; DOS II+/D ParamStr');			// DOS II+/D ParamStr
  asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
  asm65;
 
- asm65(#9'inx'#9#9'; X = 0 !!!');
- asm65(#9'stx bp'#9#9'; lo BP = 0');
+ asm65(#9'inx','; X = 0 !!!');
+ asm65(#9'stx bp','; lo BP = 0');
+
+ asm65;
+ asm65(#9'stx audctl','; reset POKEY');
+ asm65(#9'lda #3');
+ asm65(#9'sta skctl');
+ asm65;
 
  if CPUMode = 65816 then asm65(#9'opt c+');
 
@@ -23064,6 +23326,7 @@ var IdentIndex, j: Integer;
 begin
 
  Result := i;
+
  ConstVal:=0;
  ConstValType:=0;
 
@@ -23860,7 +24123,7 @@ Result:=i;
 
 j := CompileConstFactor(i, ConstVal, ConstValType);
 
-if isError then exit;
+if isError then Exit;
 
 ftmp[0]:=0;
 ftmp[1]:=0;
@@ -24686,6 +24949,15 @@ case Tok[i].Kind of
 
       CheckTok(i + 1, OPARTOK);
 
+
+      if Tok[i + 2].Kind in AllTypes then begin
+
+       ValType := Tok[i + 2].Kind;
+
+       j:=i + 2;
+
+      end else begin
+
       oldPass := Pass;
       oldCodeSize := CodeSize;
       Pass := CALLDETERMPASS;
@@ -24694,6 +24966,8 @@ case Tok[i].Kind of
 
       Pass := oldPass;
       CodeSize := oldCodeSize;
+
+      end;
 {
       if ValType = ENUMTYPE then begin
 
@@ -26014,6 +26288,7 @@ begin
 
  Pass := oldPass;
  CodeSize := oldCodeSize;
+
 
  if Tok[j + 1].Kind in [MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTOK] then
   j := CompileFactor(i, isZero, ValType, INTEGERTOK)
