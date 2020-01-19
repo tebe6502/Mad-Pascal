@@ -66,6 +66,7 @@ oldrow	=	$5a
 oldcol	=	$5b
 oldchr	=	$5d
 oldadr	=	$5e
+palnts	=	$62
 logcol	=	$63
 
 keydef	=	$79	; (2) tablica konwersji kodow klawiatury na ATASCII

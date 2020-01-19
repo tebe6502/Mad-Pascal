@@ -561,21 +561,21 @@ CARD	lda :STACKORIGIN-1,x
 
 
 .proc	@expandSHORT2SMALL
-	ldy #$00
 	lda :STACKORIGIN,x
-	spl
-	dey
-	sty :STACKORIGIN+STACKWIDTH,x
+	ora #$7f
+	smi
+	lda #$00
+	sta :STACKORIGIN+STACKWIDTH,x
 
 	rts
 .endp
 
 .proc	@expandSHORT2SMALL1
-	ldy #$00
 	lda :STACKORIGIN-1,x
-	spl
-	dey
-	sty :STACKORIGIN-1+STACKWIDTH,x
+	ora #$7f
+	smi
+	lda #$00
+	sta :STACKORIGIN-1+STACKWIDTH,x
 
 	rts
 .endp

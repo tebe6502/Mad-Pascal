@@ -157,7 +157,7 @@ _dd:		lda #0
  EAX*ECX -> EAX (low,hi) 32 bit result
 
 */
-
+/*
 .proc	imulCX
 
 	lda #$00
@@ -184,6 +184,52 @@ MUL2	DEY
 
 	rts
 .endp
+*/
+
+
+/*
+
+;
+; Ullrich von Bassewitz, 2010-11-03
+;
+; CC65 runtime: 16x16 => 32 unsigned multiplication
+;
+
+*/
+
+.proc	imulCX
+
+ptr1 = eax
+sreg = eax+2
+ptr3 = ecx
+
+        lda     #0
+        sta     sreg+1
+        ldy     #16             ; Number of bits
+
+        lsr     ptr1+1
+        ror     ptr1            ; Get first bit into carry
+@L0:    bcc     @L1
+
+        clc
+        adc     ptr3
+        pha
+        lda     ptr3+1
+        adc     sreg+1
+        sta     sreg+1
+        pla
+
+@L1:    ror     sreg+1
+        ror     @
+        ror     ptr1+1
+        ror     ptr1
+        dey
+        bne     @L0
+
+        sta     sreg            ; Save byte 3
+        rts                     ; Done
+
+ .endp
 
 
 .proc	imulWORD
