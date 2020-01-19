@@ -34,6 +34,7 @@ var
 	colcrs: word absolute $55;		// (2) pozioma pozycja kursora
 	dindex: byte absolute $57;		// numer trybu graficznego OS
 	savmsc: word absolute $58;		// (2) adres pamieci obrazu
+	palnts: byte absolute $62;
 	ramtop: byte absolute $6a;
 
 	vdslst: word absolute $200;		// (2) adres programu przerwania 'Display List'
