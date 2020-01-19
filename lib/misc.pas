@@ -44,6 +44,7 @@ Detect OS
 253 'QMEG+OS RC01'
 *)	
 
+	function DetectANTIC: Boolean; assembler;
 	function DetectBASIC: byte; assembler;
 	function DetectCPU: byte; assembler;
 	function DetectCPUSpeed: real;
@@ -56,6 +57,45 @@ Detect OS
 
 
 implementation
+
+
+function DetectANTIC: Boolean; assembler;
+asm
+{
+// ANTIC PAL Test for Atari 8-bits
+// (C) 2019 Guillermo Fuenzalida
+
+antic_loop1
+	lda vcount
+	cmp #100
+	bcc antic_loop1		// wait till scanline 200
+	sta scanline
+antic_loop2
+	lda vcount
+	cmp #10
+	bmi antic_loop2_fin
+	cmp scanline
+	bmi antic_loop2
+	sta scanline
+	bpl antic_loop2
+antic_loop2_fin	
+	ldx #$00
+	lda #0
+scanline equ *-1
+	cmp #135
+	bmi ntsc
+	inx
+ntsc
+	stx palnts	
+detect
+	ldy #1
+	lda palnts
+	seq
+	dey
+
+	sty Result
+};
+end;
 
 
 function DetectHighMem: word;

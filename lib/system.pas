@@ -94,6 +94,12 @@ type	TLastArcCoords = record x,y,xstart,ystart,xend,yend: smallint end;
 
 	*)
 
+type	PBoolean = ^Boolean;
+	(*
+	@description:
+
+	*)
+
 type	PByte = ^byte;
 	(*
 	@description:
