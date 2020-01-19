@@ -10081,10 +10081,10 @@ var i, l, k, m: integer;
 // ===			optymalizacja BP2.				  === //
 // -----------------------------------------------------------------------------
 
-    if lda(i) and (lda_stack(i) = false) and							// lda T			; 0
+    if lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda T			; 0
        add_sub(i+1) and										// add|sub			; 1
        tay(i+2) and										// tay				; 2
-       lda(i+3) and										// lda T+1			; 3
+       lda(i+3) and (lda_im(i+3) = false) and							// lda T+1			; 3
        (adc_im_0(i+4) or sbc_im_0(i+4)) and							// adc|sbc #$00			; 4
        sta_bp_1(i+5) and									// sta :bp+1			; 5
        LDA_BP_Y(i+6) then									// lda (:bp),y			; 6
@@ -10106,10 +10106,10 @@ var i, l, k, m: integer;
        end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda T			; 0
+    if lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda T			; 0
        add_sub(i+1) and										// add|sub			; 1
        tay(i+2) and										// tay				; 2
-       lda(i+3) and										// lda T+1			; 3
+       lda(i+3) and (lda_im(i+3) = false) and							// lda T+1			; 3
        (adc_im_0(i+4) or sbc_im_0(i+4)) and							// adc|sbc #$00			; 4
        sta_bp_1(i+5) and									// sta :bp+1			; 5
        lda_stack(i+6) and 									// lda 				; 6
