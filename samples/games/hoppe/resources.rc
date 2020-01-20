@@ -1,0 +1,3 @@
+CHARSET_TILE_ADDRESS rcdata 'hoppe_.fnt'
+DL_MEM rcasm 'dlist.asm'
+STRINGS rcasm 'strings.asm'
