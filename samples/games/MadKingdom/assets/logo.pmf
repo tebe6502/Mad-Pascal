@@ -1,0 +1,466 @@
+// Player-Missile Fade
+// v2.5 (26.07.2010 - 12.08.2013)
+
+	.ifndef pmg
+pmg	= $0000
+	eif
+
+mapBits	= pmg+$100
+
+	ert <mapBits<>0
+
+// -----------------------------------------------------------
+
+.local	fade_chars
+
+	color
+
+cont	ldx #0
+	ldy #0
+
+	ift FADECHR = 1
+	box #WIDTH #HEIGHT
+	eli FADECHR = 2
+	random
+	eli FADECHR = 3
+	left_right
+	eli FADECHR = 4
+	plasma
+	eif
+
+wait	lda:cmp:req cloc
+	rts
+
+.proc	color (.byte a) .reg
+	beq color0
+
+color1	mva #{lda $ffff,y} plot.src
+	rts
+
+color0	mva #{bit $ffff} plot.src
+	rts
+.endp
+
+// -----------------------------------------------------------
+
+	ift FADECHR = 4
+.proc	plasma
+
+loop	mwa #hmap src
+
+	ldx #HEIGHT-1
+lpy
+	ldy #WIDTH-1
+
+lpx	lda $ffff,y
+src	equ *-2
+	cmp #0
+hmax	equ *-1
+	sne
+
+	jsr plot
+
+	dey
+	bpl lpx
+
+	adw src #48
+
+	dex
+	bpl lpy
+
+	jsr wait
+
+incdec	inc hmax
+	lda hmax
+	bmi stop_p
+	cmp #$3f+1
+	bcs stop_m
+
+	jmp loop
+
+stop_p	lda #{inc*}
+	dta {bit*}
+stop_m	lda #{dec*}
+	sta incdec
+	rts
+
+hmap	.he 28 2E 33 39 3F 3B 35 2F 29 24 1F 1A 16 12 0F 0B 09 07 05 05 04 05 06 07 09 0C 0F 12 16 1B 1F 24
+	.he 29 2E 33 38 3C 3F 3B 38 35 34 33 33 34 36 38 3B 2D 33 39 3F 3A 34 2E 28 23 1E 18 14 0F 0B 08 05
+	.he 03 01 00 00 00 00 01 02 04 07 0A 0E 13 18 1C 21 26 2C 32 37 3B 3F 3B 37 34 33 32 32 33 35 37 39
+	.he 33 39 3F 3B 34 2E 28 23 1D 18 12 0E 0A 06 02 00 01 04 05 05 05 04 03 01 01 03 07 0B 0F 14 1A 1F
+	.he 25 2A 30 35 3B 3F 3A 37 33 32 30 31 32 33 35 38 38 3E 3B 35 2F 29 23 1D 18 12 0D 09 05 01 02 05
+	.he 07 09 0A 0A 0A 09 07 05 03 00 03 08 0C 11 16 1C 23 28 2E 34 3A 3F 3A 36 33 30 2F 2F 30 32 34 37
+	.he 3D 3D 37 30 2B 24 1F 19 13 0E 09 03 00 03 06 09 0B 0D 0E 0E 0E 0D 0B 09 06 02 00 05 09 0F 14 1A
+	.he 20 26 2D 33 3A 3E 3B 37 33 31 30 2F 30 32 34 37 3E 39 32 2C 26 21 1A 15 0F 09 05 00 04 07 0A 0C
+	.he 0F 10 11 11 11 10 0E 0C 09 05 01 02 07 0C 11 18 1E 24 2B 31 38 3E 3C 38 34 31 2F 30 30 32 34 37
+	.he 3B 35 2F 29 23 1D 17 12 0C 07 02 02 06 0A 0C 0F 11 13 14 14 13 12 11 0E 0B 08 04 00 05 0A 10 15
+	.he 1B 22 29 2F 35 3B 3D 39 35 32 31 30 31 34 36 38 38 32 2C 27 20 1A 15 0F 09 04 00 05 09 0C 0F 12
+	.he 13 15 16 16 15 14 13 10 0D 0A 06 02 02 08 0D 14 1A 20 26 2D 33 39 3E 3C 37 35 33 33 34 35 37 39
+	.he 35 2F 2A 24 1E 18 13 0D 08 03 02 06 09 0D 10 13 15 16 17 17 16 15 14 12 0F 0B 07 03 01 06 0C 11
+	.he 17 1D 24 2A 30 36 3C 3F 3C 38 37 37 36 38 39 3C 34 2E 28 23 1D 17 11 0C 07 02 02 07 0A 0D 11 13
+	.he 15 16 17 17 17 16 14 12 0F 0C 08 04 00 04 0A 10 15 1B 21 27 2D 33 38 3C 3F 3C 3B 3A 3A 3B 3D 3E
+	.he 32 2D 28 22 1C 16 11 0C 07 02 02 06 0A 0D 10 13 14 16 17 17 16 15 14 12 0F 0C 09 05 00 04 08 0E
+	.he 13 19 1F 24 2A 30 34 38 3C 3E 3F 3E 3E 3F 3F 3E 32 2D 28 22 1D 17 12 0D 08 03 01 04 09 0C 10 11
+	.he 13 15 15 15 15 15 13 11 0F 0C 09 04 01 03 07 0D 12 17 1C 22 26 2B 30 34 37 39 3C 3D 3D 3C 3C 3A
+	.he 33 2E 28 23 1E 19 13 0E 09 04 00 03 07 0A 0D 10 12 13 13 13 14 13 11 10 0D 0A 07 04 00 02 07 0C
+	.he 10 15 19 1F 23 28 2C 2F 33 35 37 38 38 38 38 37 33 2F 2A 24 20 1A 15 10 0B 07 03 01 05 08 0B 0D
+	.he 0E 0F 11 11 11 10 0F 0E 0B 09 07 03 00 03 07 0B 0F 14 18 1C 20 24 28 2B 2E 31 32 33 34 34 34 33
+	.he 35 30 2C 27 22 1C 18 13 0E 0A 06 02 01 04 07 09 0B 0C 0D 0E 0E 0D 0C 0A 09 07 04 01 00 04 07 0B
+	.he 0E 12 16 1A 1E 21 24 27 2A 2C 2E 2F 30 30 30 30 36 33 2E 2A 25 20 1B 17 13 0E 0A 06 02 00 03 04
+	.he 06 08 09 09 09 09 08 07 06 04 02 00 01 05 08 0B 0E 11 14 18 1B 1E 21 23 26 28 2A 2B 2C 2C 2C 2C
+	.he 39 35 32 2D 29 24 20 1B 17 12 0E 0A 07 04 02 00 02 03 04 05 05 04 04 03 02 00 00 02 04 07 09 0B
+	.he 0E 10 13 16 19 1B 1E 20 23 24 26 27 28 29 29 29 3C 39 35 31 2D 29 24 20 1C 17 13 10 0D 0A 07 05
+	.he 03 02 01 00 00 00 00 01 01 02 04 05 06 08 0A 0C 0E 11 13 15 17 1A 1B 1E 1F 21 23 24 24 25 26 26
+	.he 3F 3D 39 36 31 2E 29 25 21 1D 19 16 12 0F 0C 0A 09 08 06 05 05 05 06 06 07 07 08 09 0A 0B 0C 0E
+	.he 0F 11 12 14 16 18 19 1B 1D 1E 20 20 22 22 23 24 3C 3E 3E 3A 37 33 2F 2B 27 23 1F 1C 19 16 13 11
+	.he 0F 0E 0D 0C 0C 0B 0B 0C 0C 0C 0D 0D 0D 0E 0F 0F 10 11 12 14 15 16 18 19 1B 1C 1D 1E 1F 20 21 21
+	.he 37 3A 3C 3F 3C 38 34 30 2D 29 25 22 1F 1C 1A 18 15 15 13 12 12 12 12 12 12 12 12 12 11 12 11 11
+	.he 12 12 13 14 15 15 16 18 19 1A 1B 1C 1D 1E 1E 20 33 35 37 3A 3D 3E 3B 37 33 2F 2C 28 25 23 20 1E
+	.he 1D 1B 1A 19 19 19 18 18 18 17 17 16 16 15 15 14 13 13 14 14 14 15 15 16 18 18 19 1A 1B 1D 1D 1F
+	.he 2E 30 32 35 37 3B 3E 3D 39 35 32 2F 2C 29 27 25 23 22 21 21 20 1F 1F 1F 1E 1D 1D 1C 1A 19 17 17
+	.he 16 15 15 14 14 14 15 15 16 17 18 19 1A 1B 1C 1D 2A 2B 2D 2F 31 35 38 3C 3F 3C 38 35 32 2F 2D 2B
+	.he 2A 29 28 27 27 26 26 25 24 23 22 20 1E 1D 1B 19 18 16 16 15 15 15 15 15 15 16 17 18 19 1B 1B 1C
+	.he 26 27 28 29 2C 2F 32 36 3A 3D 3F 3B 38 36 33 31 31 2F 2E 2E 2D 2C 2D 2B 2B 2A 28 26 24 21 1E 1C
+	.he 1A 19 17 16 15 15 15 15 15 16 17 18 19 1A 1B 1D 22 22 23 25 26 29 2D 30 34 37 3B 3E 3E 3B 39 37
+	.he 36 35 34 34 34 33 32 31 30 2F 2C 2A 28 24 22 1F 1D 1A 18 17 17 16 15 15 15 16 17 18 19 1A 1C 1D
+	.he 1E 1E 1E 1F 21 24 28 2B 2F 32 36 39 3C 3E 3E 3D 3C 3B 3A 3A 39 39 38 36 36 34 31 2E 2B 28 25 22
+	.he 1F 1C 1A 19 17 17 16 16 16 17 17 18 1A 1B 1C 1E 1B 1B 1B 1B 1E 20 23 27 2A 2E 31 35 38 3A 3C 3E
+	.he 3F 3F 3F 3F 3D 3D 3C 3B 39 38 35 32 2E 2A 27 24 21 1E 1C 1A 19 18 18 17 18 18 19 19 1B 1C 1E 1F
+	.he 19 18 17 19 1A 1D 20 23 27 2A 2E 31 34 36 39 3A 3A 3C 3C 3D 3D 3E 3F 3E 3D 3A 37 33 31 2D 29 26
+	.he 22 20 1E 1C 1A 1A 19 18 19 19 1A 1B 1C 1D 1F 21 18 16 16 17 18 1B 1D 21 25 28 2B 2F 31 34 35 37
+	.he 38 39 39 3A 3B 3C 3E 3F 3E 3C 39 35 32 2E 2B 27 24 21 1F 1E 1C 1B 1A 1A 1A 1B 1C 1D 1E 1F 22 24
+
+.endp
+	eif
+
+// -----------------------------------------------------------
+
+	ift FADECHR = 3
+.proc	left_right
+
+	mva #WIDTH/2 cnt
+
+	mva #0 x0
+	mva #WIDTH-1 x1
+
+loop	ldy #0
+x0	equ *-1
+	jsr column
+
+	ldy #0
+x1	equ *-1
+	jsr column
+
+	:2 inc x0
+	:2 dec x1
+
+	dec cnt
+	bne loop
+	rts
+
+column	ldx #29
+draw	jsr plot
+	dex
+	bpl draw
+	jmp wait
+
+cnt	brk
+
+.endp
+	eif
+
+// -----------------------------------------------------------
+
+	ift FADECHR = 2
+.proc	random
+
+	mwa #0 cnt
+
+loop	lda $d20a	; y
+	and #$f
+	cmp #15
+	bcs loop
+	asl @
+	sta py
+
+	:2 asl @
+	sta bmap
+
+ret	lda $d20a	; x
+	lsr @
+	and #$1f
+	cmp #WIDTH/2
+	bcs ret
+	asl @
+	sta px
+
+	:3 lsr @
+	tax
+
+	lda px
+	and #7
+	tay
+
+	jsr mapByte
+	and mask,y
+	bne loop
+
+	jsr mapByte
+	ora mask,y
+
+	mvy #{sta $ffff,x} mapByte
+	jsr mapByte
+	mvy #{lda $ffff,x} mapByte
+
+	ldy #0
+px	equ *-1
+	ldx #0
+py	equ *-1
+
+	jsr plot
+	iny
+	jsr plot
+	inx
+	jsr plot
+	dey
+	jsr plot
+
+	inw cnt
+
+	cpw cnt #(WIDTH/2)*15
+	jne loop
+
+	ldx #$7f
+	lda #0
+	sta:rpl mapBits,x-
+	
+mapByte	lda mapBits,x
+bmap	equ *-2
+	rts
+
+mask	dta $80,$40,$20,$10,$08,$04,$02,$01
+
+cnt	dta a(0)
+.endp
+	eif
+
+// -----------------------------------------------------------
+
+	ift FADECHR = 1
+.proc	box (.byte width, height) .var
+
+loop	mva width w
+	dec w
+l0	jsr plot
+	iny
+	dec w
+	bne l0
+
+	mva height h
+	dec h
+l1	jsr plot
+	inx
+	dec h
+	bne l1
+
+	mva width w
+	dec w
+l2	jsr plot
+	dey
+	dec w
+	bne l2
+
+	mva height h
+	dec h
+l3	jsr plot
+	dex
+	dec h
+	bne l3
+
+	:2 dec width
+	:2 dec height
+
+	inx
+	iny
+
+	jsr wait
+
+	cpy #15
+	bne loop
+
+	rts
+
+w	brk
+h	brk
+
+width	brk
+height	brk
+
+.endp
+	eif
+
+// -----------------------------------------------------------
+
+.proc	movfil	(.word fadr, fhlp, fcnt .byte fill+1) .var
+
+	sta fill_+1
+
+	LDY #0
+	LDX fcnt+1
+	BEQ MD2
+MD1	LDA (fadr),y ; move the remaining bytes
+	STA (fhlp),y
+fill	lda #0
+	sta (fadr),y
+	INY
+	BNE MD1
+	INC fadr+1
+	INC fhlp+1
+	DEX
+	BNE MD1
+MD2	LDX fcnt
+	BEQ MD4
+MD3	LDA (fadr),y ; move the remaining bytes
+	STA (fhlp),y
+fill_	lda #0
+	sta (fadr),y
+	INY
+	DEX
+	BNE MD3
+MD4	RTS
+
+.endp
+
+init	movfil	#scr #scrn #WIDTH*HEIGHT #127
+
+	ldy #0
+	tya
+pmgClr	sta pmg+$300,y
+	sta pmg+$400,y
+	sta pmg+$500,y
+	sta pmg+$600,y
+	sta pmg+$700,y
+	iny
+	bne pmgClr
+	rts
+
+// -----------------------------------------------------------
+
+.proc	plot (.byte x,y) .reg
+
+	stx rx		; Y char position
+	sty ry		; X char position
+
+	mva lmul,x fadr
+	mva hmul,x fadr+1
+
+	lda fadr
+	add <scrn
+_sta0	sta src+1
+	lda fadr+1
+	adc >scrn
+_sta1	sta src+2
+
+	adw fadr #scr dst+1
+
+	lda #127
+
+src	lda $ffff,y
+dst	sta $ffff,y
+
+	jsr pmg_plot
+
+	ldx #0
+rx	equ *-1
+	ldy #0
+ry	equ *-1
+
+	rts
+	
+.local	pmg_plot
+
+	mva lcol,y fcnt
+	mva hcol,y fcnt+1
+
+	txa
+	asl @
+	tay
+
+	asl @
+	asl @
+	add #8
+	tax
+
+	lda (fcnt),y
+	sta fadr
+	iny
+	lda (fcnt),y
+	sta fadr+1
+
+	ldy #0
+
+loop	lda (fadr),y
+src	equ *-2
+	sta tmp
+
+	beq stop
+
+	jmi _mis
+p0	asl tmp
+	jmi _pl0
+p1	asl tmp
+	jmi _pl1
+p2	asl tmp
+	jmi _pl2
+p3	asl tmp
+	jmi _pl3
+
+stop	rts
+
+tmp	brk
+
+_mis	@plot $300
+	jmp p0
+	
+_pl0	@plot $400
+	jmp p1
+
+_pl1	@plot $500
+	jmp p2
+
+_pl2	@plot $600
+	jmp p3
+
+_pl3	@plot $700
+	rts
+
+.macro	@plot (player)
+	.rept 8
+	iny
+	lda pmg+%%player+#,x
+	eor (fadr),y
+	sta pmg+%%player+#,x
+	.endr
+.endm
+
+.endl
+
+lcol	:WIDTH dta l(col%%1)
+hcol	:WIDTH dta h(col%%1)
+
+	.rept WIDTH,#
+col%%1	dta a(c%%1r0),a(c%%1r1),a(c%%1r2),a(c%%1r3),a(c%%1r4)
+	dta a(c%%1r5),a(c%%1r6),a(c%%1r7),a(c%%1r8),a(c%%1r9)
+	dta a(c%%1r10),a(c%%1r11),a(c%%1r12),a(c%%1r13),a(c%%1r14)
+	dta a(c%%1r15),a(c%%1r16),a(c%%1r17),a(c%%1r18),a(c%%1r19)
+	dta a(c%%1r20),a(c%%1r21),a(c%%1r22),a(c%%1r23),a(c%%1r24)
+	dta a(c%%1r25),a(c%%1r26),a(c%%1r27),a(c%%1r28),a(c%%1r29)
+	.endr
+
+lmul	:HEIGHT dta l(#*WIDTH)
+hmul	:HEIGHT dta h(#*WIDTH)
+.endp
+
+.endl
+
+scrn	.ds WIDTH*HEIGHT
