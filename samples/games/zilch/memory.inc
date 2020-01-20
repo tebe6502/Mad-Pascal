@@ -1,0 +1,5 @@
+const
+    PMGBASE = $7800;
+    CHARSET_TILE_ADDRESS = $7c00;
+    RMT_MODULE = $8000;
+    RMT_PLAYER = $9000;
