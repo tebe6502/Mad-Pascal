@@ -4549,14 +4549,15 @@ var i, l, k, m: integer;
 
     old := listing[p];
 
-    while (pos('lda #', old) > 0) and sta(p+1) and lda_im(p+2) and (p<l-2) do begin	// lda #
-
-     if (copy(old, 6, 256) = copy(listing[p+2], 6, 256)) then
-      listing[p+2] := ''								// sta
-     else
+    while (pos('lda #', old) > 0) and sta(p+1) and lda_im(p+2) and (p < l-2) do begin	// lda #$28	; 0
+											// sta		; 1
+     if (copy(old, 6, 256) = copy(listing[p+2], 6, 256)) then begin			// lda #$28	; 2
+      listing[p+2] := '';
+      Result:=false;
+     end else
       old:=listing[p+2];
 
-     inc(p, 2);										// lda #
+     inc(p, 2);
     end;
 
    end;
@@ -6886,7 +6887,6 @@ var i, l, k, m: integer;
 
   if pos('@FORTMP_', listing[i]) = 0 then begin				// !!! @FORTMP_ bez optymalizacji !!!
 
-
     if mva_im(i) and mva_im(i+1) and 								// mva #$xx	; 0
        mva_im(i+2) and mva_im(i+3) and								// mva #$xx	; 1
        (sta(i+4) = false) then									// mva #$xx	; 2
@@ -7364,7 +7364,7 @@ var i, l, k, m: integer;
 
     if (skip(i-1) = false) and
        lda(i) and (iy(i) = false) and
-       sta_stack(i+1) and
+       sta_stack(i+1) and (sta_stack(i+2) = false) and
        (add_sub_stack(i+4) or adc_sbc_stack(i+4)) then
        if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+2]) = 0) and
@@ -7380,7 +7380,7 @@ var i, l, k, m: integer;
 
     if (skip(i-1) = false) and
        lda(i) and (iy(i) = false) and
-       sta_stack(i+1) and
+       sta_stack(i+1) and (sta_stack(i+2) = false) and
        (add_sub_stack(i+5) or adc_sbc_stack(i+5)) then
        if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+2]) = 0) and
@@ -7397,7 +7397,7 @@ var i, l, k, m: integer;
 
     if (skip(i-1) = false) and
        lda(i) and (iy(i) = false) and
-       sta_stack(i+1) and
+       sta_stack(i+1) and (sta_stack(i+2) = false) and
        (add_sub_stack(i+6) or adc_sbc_stack(i+6)) then
        if (copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) and
 	  (pos(copy(listing[i+1], 6, 256), listing[i+2]) = 0) and
@@ -11166,6 +11166,41 @@ var i, l, k, m: integer;
 // -----------------------------------------------------------------------------
 // ===			optymalizacja ADD.				  === //
 // -----------------------------------------------------------------------------
+
+
+    if lda(i) and (iy(i) = false) and							// lda					; 0
+       add(i+1) and (iy(i+1) = false) and						// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
+       lda(i+3) and									// lda					; 3
+       adc_im_0(i+4) and								// adc #$00				; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
+       lda(i+6) and									// lda 					; 6
+       add_stack(i+7) and								// add :STACKORIGIN+10			; 7
+       sta(i+8) and									// sta					; 8
+       lda(i+9) and									// lda 					; 9
+       adc_stack(i+10) and								// add :STACKORIGIN+STACKWIDTH+10	; 10
+       sta(i+11) then									// sta					; 11
+    if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and
+       (copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) then
+       begin
+
+	listing[i+2] := listing[i+1];
+	listing[i+1] := #9'ldy ' + copy(listing[i+3], 6, 256);
+
+	listing[i+3] := #9'scc';
+	listing[i+4] := #9'iny';
+	listing[i+5] := #9'add ' + copy(listing[i+6], 6, 256);
+	listing[i+6] := listing[i+8];
+	listing[i+7] := #9'tya';
+	listing[i+8] := #9'adc ' + copy(listing[i+9], 6, 256);
+	listing[i+9] := listing[i+11];
+
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+	Result:=false;
+       end;
+
 
     if lda(i) and									// lda			; 0
        add(i+1) and									// add			; 1
