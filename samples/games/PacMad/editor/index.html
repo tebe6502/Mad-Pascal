@@ -1,0 +1,40 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>PACMAD editor</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <div id='board'></div>
+  <div id='toolbox'>Draw:<br></div>
+  <div id='logo'><img src='PacMadEditor.png'></div>
+  <div id='filebox'>Level:<br>
+        <button id='test' class='tool'>PLAY</button>
+        <!--<button id='parse' class='tool'>PARSE</button>-->
+        <label>Ghost AI [1-9]:</label>
+        <input type='text' id='ai0' class='toolinput ai'>
+        <input type='text' id='ai1' class='toolinput ai'>
+        <input type='text' id='ai2' class='toolinput ai'>
+        <input type='text' id='ai3' class='toolinput ai'>
+        <label>Spawn delay [s]:</label>
+        <input type='text' id='delaytime' class='toolinput'>
+        <label>Pill time [s]:</label>
+        <input type='text' id='pilltime' class='toolinput'>
+        <label title='how much dots can remain to open exit'>Leftovers:</label>
+        <input title='how much dots can remain to open exit' type='text' id='remain' class='toolinput'>
+        <label>Colors:</label>
+        <input type='text'  id='color0' class='toolinput colortool'>
+        <input type='text'  id='color1' class='toolinput colortool'>
+        <input type='text'  id='color2' class='toolinput colortool'>
+        <br>
+        <hr class="tool_hr">
+        <button id='reset' class='tool'>RESET</button>
+  </div>
+  <div id='output'>
+    <textarea id='outbox'></textarea><br>
+  </div>
+  <a id='link'></a>
+  <script src="editor.js"></script>
+</body>
+</html>
