@@ -2132,17 +2132,6 @@ begin
      TemporaryBuf[i]   := #9'jne ' + copy(TemporaryBuf[i+1], 6, 256);
      TemporaryBuf[i+1] := '~';
     end;
-{
-  if (i>2) and (TemporaryBuf[i] = '; --- WhileProlog') then begin
-   writeln('+') ;
-   writeln(TemporaryBuf[i-2]);
-   writeln(TemporaryBuf[i-1]);
-   writeln(TemporaryBuf[i]);
-   writeln(TemporaryBuf[i+1]);
-   writeln(TemporaryBuf[i+2]);
-   writeln('-');
-  end;
-}
 
  end;
 
@@ -2185,7 +2174,7 @@ type
 
 var i, l, k, m: integer;
     x: integer;
-    a, t, arg, arg0, arg1: string;
+    a, t, arg, arg0, arg1, arg2: string;
     inxUse, ifTmp: Boolean;
     t0, t1, t2, t3: string;
     listing, listing_tmp: TListing;
@@ -4706,7 +4695,6 @@ var i, l, k, m: integer;
 	 end else
 	  if (listing[p] = '@') or (pos(#9'.if', listing[p]) > 0) or
 	     (pos(#9'jsr', listing[p]) > 0) or (listing[p] = #9'eif') then Break;
-
       end;
 
 
@@ -10081,6 +10069,22 @@ var i, l, k, m: integer;
 // ===			optymalizacja BP2.				  === //
 // -----------------------------------------------------------------------------
 
+    if lda(i) and (iy(i) = false) and								// lda T			; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+9		; 1
+       lda(i+2) and										// lda				; 2
+       sta_bp_1(i+3) and									// sta :bp+1			; 3
+       ldy_stack(i+4) then									// ldy :STACKORIGIN+9		; 4
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then
+       begin
+	listing[i+4] := #9'ldy ' + copy(listing[i], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	Result:=false;
+       end;
+
+
     if lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda T			; 0
        add_sub(i+1) and										// add|sub			; 1
        tay(i+2) and										// tay				; 2
@@ -11166,7 +11170,7 @@ var i, l, k, m: integer;
 // -----------------------------------------------------------------------------
 // ===			optymalizacja ADD.				  === //
 // -----------------------------------------------------------------------------
-
+// luci
 
     if lda(i) and (iy(i) = false) and							// lda					; 0
        add(i+1) and (iy(i+1) = false) and						// add					; 1
@@ -13890,6 +13894,15 @@ var i, l, k, m: integer;
      end;
 
 
+    if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
+       (listing[i+1] = #9'.LOCAL') and								// .LOCAL		; 1
+       lda(i+2) then										// lda			; 2
+     begin
+	listing[i] := '';
+	Result:=false;
+     end;
+
+
     if sta(i) and (listing[i+1] = #9'sta #$00') then						// sta
      begin											// sta #$00
 	listing[i+1] := '';
@@ -15663,7 +15676,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
+    if //(listing[i] = #9'.ENDL') and								// .ENDL		; 0
        (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
        (listing[i+2] = #9'beq @+') and								// beq @+		; 2
        (pos('jmp l_', listing[i+3]) > 0) and							// jmp l_		; 3
@@ -15729,7 +15742,7 @@ var i, l, k, m: integer;
       end;
 
 
-    if (listing[i] = #9'.ENDL') and								// .ENDL		; 0
+    if ((listing[i] = #9'.ENDL') or (i=0)) and							// .ENDL		; 0
        (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
        (pos('jmp l_', listing[i+2]) > 0) and							// jmp l_		; 2
        (listing[i+3] = '@') then								//@			; 3
@@ -15883,7 +15896,7 @@ var i, l, k, m: integer;
 
      end;
 
-{
+{ luci
     if lda(i) and										// lda K+1				; 0
        cmp_im(i+1) and										// cmp #$10				; 1
        (listing[i+2] = #9'bne @+') and								// bne @+				; 2
@@ -15961,6 +15974,35 @@ var i, l, k, m: integer;
 }
 
 
+    if lda(i) and										// lda 				; 0
+       add_sub(i+1) and										// add|sub			; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN+9		; 2
+       lda(i+3) and										// lda 				; 3
+       (adc_im_0(i+4) or sbc_im_0(i+4)) and							// adc|sbc #$00			; 4
+       cmp(i+5) and										// cmp 				; 5
+       (listing[i+6] = #9'bne @+') and								// bne @+			; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN+9		; 7
+       cmp(i+8) then										// cmp				; 8
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) then begin
+
+	for p:=0 to l-1 do writeln(listing[p]);
+
+       //Result:=false;
+     end;
+
+
+{
+	lda PAD2Y
+	add #$0E
+	sta :STACKORIGIN+9
+	lda #$00
+	adc #$00
+	cmp #$00
+	bne @+
+	lda :STACKORIGIN+9
+	cmp BALLY
+@
+}
     if sty_stack(i) and										// sty :STACKORIGIN+9	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN+9	; 1
        (pos('jmp l_', listing[i+3]) > 0) then							// jmp l_		; 3
@@ -16532,6 +16574,41 @@ begin
       if arg0 = 'cmpSMALLINT' then begin
        t:='';
 
+
+       listing[l]   := #9'.LOCAL';
+       listing[l+1] := #9'lda '+GetARG(1, x-1);		// lda label     -> zastepujemy sub #$00 przez SEC !!!
+							// sub #$00
+       arg1 := GetARG(1, x);
+
+       if arg1 <> '#$00' then
+	listing[l+2] := #9'sub '+arg1
+       else
+	listing[l+2] := #9'clv:sec';
+
+       listing[l+3] := #9'bne L4';
+       listing[l+4] := #9'lda '+GetARG(0, x-1);
+
+       arg1 := GetARG(0, x);
+
+       if arg1 <> '#$00' then
+	listing[l+5] := #9'cmp '+arg1
+       else
+	listing[l+5] := '';
+
+       listing[l+6] := #9'beq L5';
+       listing[l+7] := #9'lda #$00';
+       listing[l+8] := #9'adc #$FF';
+       listing[l+9] := #9'ora #$01';
+       listing[l+10]:= #9'bne L5';
+       listing[l+11]:= 'L4'#9'bvc L5';
+       listing[l+12]:= #9'eor #$FF';
+       listing[l+13]:= #9'ora #$01';
+       listing[l+14]:= 'L5';
+       listing[l+15]:= #9'.ENDL';
+
+       inc(l, 16);
+
+{
        listing[l]   := #9'.LOCAL';
        listing[l+1] := #9'lda '+GetARG(1, x-1);		// lda label     -> zastepujemy sub #$00 przez SEC !!!
 							// sub #$00
@@ -16565,36 +16642,32 @@ begin
        listing[l+16]:= #9'.ENDL';
 
        inc(l, 17);
-
+}
       end else
       if arg0 = 'cmpSHORTINT' then begin
        t:='';
 
-       listing[l]   := #9'.LOCAL';
-       listing[l+1] := #9'lda '+GetARG(0, x-1);
-
        arg1 := GetARG(0, x);
 
-       if arg1 <> '#$00' then
-	listing[l+2] := #9'sub '+arg1
-       else
-	listing[l+2] := #9'clv:sec';
+       if arg1 = '#$00' then begin
+       listing[l] := #9'lda '+GetARG(0, x-1);
 
+       inc(l, 1);
+       end else begin
+
+       listing[l]   := #9'.LOCAL';
+       listing[l+1] := #9'lda '+GetARG(0, x-1);
+       listing[l+2] := #9'sub '+arg1;
        listing[l+3] := #9'bne L4';
+       listing[l+4] := #9'beq L5';
+       listing[l+5] := 'L4'#9'bvc L5';
+       listing[l+6] := #9'eor #$FF';
+       listing[l+7] := #9'ora #$01';
+       listing[l+8] := 'L5';
+       listing[l+9] := #9'.ENDL';
 
-       listing[l+4] := 'L1'#9'beq L2';
-       listing[l+5] := #9'bcs L3';
-       listing[l+6] := #9'lda #$FF';
-       listing[l+7] := 'L2'#9'jmp L5';
-       listing[l+8] := 'L3'#9'lda #$01';
-       listing[l+9] := #9'jmp L5';
-       listing[l+10]:= 'L4'#9'bvc L5';
-       listing[l+11]:= #9'eor #$FF';
-       listing[l+12]:= #9'ora #$01';
-       listing[l+13]:= 'L5';
-       listing[l+14]:= #9'.ENDL';
-
-       inc(l, 15);
+       inc(l, 10);
+       end;
 
       end else
       if arg0 = 'negBYTE' then begin
