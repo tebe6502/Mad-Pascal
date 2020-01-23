@@ -1,3 +1,6 @@
+21.01.2020
+- optymalizacja CMP_SHORTINT, CMP_SMALLINT
+
 16.01.2020
 - szybsza wersja procedury mnozenia mul8x8 na podstawie cc65 (base\6502\cpu6502_byte -> imulCL)
 - optymalizacje dla warunku '<='
