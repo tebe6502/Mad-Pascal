@@ -263,7 +263,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sin(x: Real): Real; overload;
 	function Sin(x: Single): Single; overload;
 	function Space(b: Byte): ^string; assembler;
-	procedure Str(a: integer; var s: TString); assembler;
+	procedure Str(a: integer; var s: TString); overload; assembler;
+	procedure Str(a: cardinal; var s: TString); overload; assembler;
 	function StringOfChar(c: Char; l: byte): ^string; assembler;
 	function Sqr(x: Real): Real; overload;
 	function Sqr(x: Single): Single; overload;
@@ -1464,7 +1465,7 @@ asm
 end;
 
 
-procedure Str(a: integer; var s: TString); assembler;
+procedure Str(a: integer; var s: TString); overload; assembler;
 (*
 @description:
 Convert a numerical value to a string
@@ -1478,6 +1479,28 @@ asm
 	inx
 
 	@ValueToStr #@printINT
+
+	@move #@buf s #16	; !!! koniecznie przez wskaznik
+
+	pla:tax
+};
+end;
+
+
+procedure Str(a: cardinal; var s: TString); overload; assembler;
+(*
+@description:
+Convert a numerical value to a string
+
+@param: a - integer
+@param: s - string[32] - result
+*)
+asm
+{	txa:pha
+
+	inx
+
+	@ValueToStr #@printCARD
 
 	@move #@buf s #16	; !!! koniecznie przez wskaznik
 
