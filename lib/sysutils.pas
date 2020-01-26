@@ -13,6 +13,7 @@ unit sysutils;
 AnsiUpperCase
 Beep
 BoolToStr
+ByteToStr
 Click
 Date
 DateToStr
@@ -67,6 +68,7 @@ const
 	function AnsiUpperCase(const a: string): string;
 	procedure Beep;
 	function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;
+	function ByteToStr(a: byte): ^string; assembler;
 	procedure Click; assembler;
 	function Date: TDateTime;
 	function DateToStr(d: TDateTime): TString;
@@ -407,6 +409,45 @@ begin
   {$I+}
 
   FileMode:=fm;
+end;
+
+
+function ByteToStr(a: byte): ^string; assembler;
+(*
+@description: Converts input byte to a string
+
+@param: a: byte
+
+@returns: pointer to string
+.Y = hundreds, .X = tens, .A = ones
+*)
+
+asm
+{	txa:pha
+
+	lda a
+	ldy #$2f
+	ldx #$3a
+	sec
+@	iny
+	sbc #100
+	bcs @-
+@	dex
+	adc #10
+	bmi @-
+	adc #$2f
+	
+	sta @buf+3
+	stx @buf+2
+	sty @buf+1
+	
+	lda #3
+	sta @buf
+	
+	mwa #@buf Result
+	
+	pla:tax
+};
 end;
 
 
