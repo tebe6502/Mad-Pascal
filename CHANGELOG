@@ -1,3 +1,11 @@
+29.01.2020
+- poprawki dla opt_099; opt_100
+
+24.01.2020
+- optymalizacja warunku GT
+- SYSTEM: Str(CARDINAL, STRING);
+- SYSUTILS: ByteToStr(BYTE): STRING
+
 21.01.2020
 - optymalizacja CMP_SHORTINT, CMP_SMALLINT
 
