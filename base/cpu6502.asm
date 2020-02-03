@@ -638,8 +638,7 @@ _lo	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 .proc	cmpSHORTINT
 	lda	:STACKORIGIN-1,x
-	clv:sec
-	sbc	:STACKORIGIN,x
+	sub	:STACKORIGIN,x
 	bne     @L4
 @L3	rts
 
@@ -652,8 +651,7 @@ _lo	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 .proc	cmpSMALLINT
 	lda	:STACKORIGIN-1+STACKWIDTH,x
-	clv:sec
-	sbc	:STACKORIGIN+STACKWIDTH,x
+	sub	:STACKORIGIN+STACKWIDTH,x
 	bne     @L4
 
 	lda	:STACKORIGIN-1,x
@@ -674,8 +672,7 @@ _lo	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 .proc	cmpINT
 	lda	:STACKORIGIN-1+STACKWIDTH*3,x
-	clv:sec
-	sbc	:STACKORIGIN+STACKWIDTH*3,x
+	sub	:STACKORIGIN+STACKWIDTH*3,x
 	bne	L4
 
 	lda	:STACKORIGIN-1+STACKWIDTH*2,x
@@ -691,7 +688,6 @@ _lo	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 L1	beq	L2
 	bcs	L3
-
 	lda	#$FF	; Set the N flag
 L2	rts
 
