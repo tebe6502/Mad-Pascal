@@ -5,7 +5,8 @@
 /*			        19.04.2018
 /* -----------------------------------------------------------------------
 /* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
-/*
+/* 29.02.2020	optymalizacja @printREAL, pozbycie sie 
+		'jsr mov_BYTE_DX', 'jsr mov_WORD_DX', 'jsr mov_CARD_DX'
 /* -----------------------------------------------------------------------
 
 @AllocMem
@@ -1321,34 +1322,6 @@ _false	dta 5,c'FALSE'
 .endp
 
 
-.proc	mov_BYTE_DX
-	mva :STACKORIGIN,x dx
-	mva #$00 dx+1
-	sta dx+2
-	sta dx+3
-
-	rts
-.endp
-
-.proc	mov_WORD_DX
-	mva :STACKORIGIN,x dx
-	mva :STACKORIGIN+STACKWIDTH,x dx+1
-	mva #$00 dx+2
-	sta dx+3
-
-	rts
-.endp
-
-.proc	mov_CARD_DX
-	mva :STACKORIGIN,x dx
-	mva :STACKORIGIN+STACKWIDTH,x dx+1
-	mva :STACKORIGIN+STACKWIDTH*2,x dx+2
-	mva :STACKORIGIN+STACKWIDTH*3,x dx+3
-
-	rts
-.endp
-
-
 .proc	@printMINUS
 	ldy #'-'
 	jsr @printVALUE.pout
@@ -1662,35 +1635,24 @@ b_0508
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	spl
 	jsr @printMINUS
-
-	jsr mov_CARD_DX
-
-	mva dx+1 intpart		; intpart := uvalue shr 8
-	mva dx+2 intpart+1
-	mva dx+3 intpart+2
-	mva #$00 intpart+3
-
-	sta dx+3			; fracpart := uvalue and $FF (dx)
+	
 	sta dx+2
-	sta dx+1
+
+	mva :STACKORIGIN,x fracpart+2	; intpart := uvalue shr 8
+	mva :STACKORIGIN+STACKWIDTH,x dx; fracpart := uvalue and $FF (dx)
+	mva :STACKORIGIN+STACKWIDTH*2,x dx+1
+;	mva :STACKORIGIN+STACKWIDTH*3,x dx+2
+	mva #$00 dx+3
 
 	sta fracpart
 	sta fracpart+1
 
-	lda dx
-	sta fracpart+2
-
-	:4 mva intpart+# dx+#		; integer part
-
-	mva #4 @float.afterpoint		; wymagana liczba miejsc po przecinku
+	mva #4 @float.afterpoint	; wymagana liczba miejsc po przecinku
 	@float #5000
 
 	ldx #0
 @sp	equ *-1
 	rts
-
-intpart		.dword
-
 .endp
 
 
@@ -1813,20 +1775,34 @@ ok	:4 mva fracpart+# dx+#
 
 
 .proc	@printCARD
-	jsr mov_CARD_DX
+	mva :STACKORIGIN,x dx
+	mva :STACKORIGIN+STACKWIDTH,x dx+1
+	mva :STACKORIGIN+STACKWIDTH*2,x dx+2
+	mva :STACKORIGIN+STACKWIDTH*3,x dx+3
+
 	jmp @printVALUE
 .endp
 
 
 .proc	@printWORD
-	jsr mov_WORD_DX
-	jmp @printVALUE
+	mva :STACKORIGIN,x dx
+	mva :STACKORIGIN+STACKWIDTH,x dx+1
+	lda #$00
+	sta dx+2
+	sta dx+3
+
+	jmp @printVALUE._16bit
 .endp
 
 
 .proc	@printBYTE
-	jsr mov_BYTE_DX
-	jmp @printVALUE
+	mva :STACKORIGIN,x dx
+	lda #$00 
+	sta dx+1
+	sta dx+2
+	sta dx+3
+
+	jmp @printVALUE._8bit
 .endp
 
 
@@ -2674,55 +2650,43 @@ ile	brk
 /* ----------------------------------------------------------------------- */
 
 
-.proc	@AllocMem(.word ztmp .word ztmp+2) .var
+.proc	@AllocMem(.word ztmp .byte ztmp+2) .var
 
 	jsr swap
 
-	adw spoint ztmp+2
+	lda psptr
+	add ztmp+2
+	sta psptr
+	scc
+	inc psptr+1
 
 	rts
 
-swap	txa:pha
+swap	ldy ztmp+2
 
-	mwa spoint bp2
-
-	ldx #0
-	ldy #0
-
-loop	cpy ztmp+2
-	bne @+
-	cpx ztmp+3
-	beq stop
-
-@	lda (bp2),y
-	pha
+loop	lda (psptr),y
+	sta ztmp+3
 
 	lda (ztmp),y
-	sta (bp2),y
+	sta (psptr),y
 
-	pla
+	lda ztmp+3
 	sta (ztmp),y
 
-	iny
+	dey
 	bne loop
 
-	inc ztmp+1
-	inc bp2+1
-	inx
-
-	jmp loop
-
-stop	pla:tax
-
 	rts
-
-spoint	dta a(PROGRAMSTACK)
 .endp
 
 
-.proc	@FreeMem(.word ztmp .word ztmp+2) .var
+.proc	@FreeMem(.word ztmp .byte ztmp+2) .var
 
-	sbw @AllocMem.spoint ztmp+2
+	lda psptr
+	sub ztmp+2
+	sta psptr
+	scs
+	dec psptr+1
 
 	jmp @AllocMem.swap
 .endp
@@ -3617,6 +3581,42 @@ ename	.byte 'E:',$9b
 
 .endp
 
+
+/* ----------------------------------------------------------------------- */
+
+.proc   @mul40			; = 33 bytes, 48/53 cycles
+
+        sta     eax+1		; remember value for later addition...
+        ldy     #0              ; clear high-byte
+        asl     @		; * 2
+        bcc     mul4            ; high-byte affected?
+        ldy     #2              ; this will be the 1st high-bit soon...
+
+mul4:   asl     @               ; * 4
+        bcc     mul5            ; high-byte affected?
+        iny                     ; => yes, apply to 0 high-bit
+        clc                     ; prepare addition
+
+mul5:   adc     eax+1		; * 5
+        bcc     mul10		; high-byte affected?
+        iny			; yes, correct...
+
+mul10:  sty     eax+1		; continue with classic shifting...
+        
+        asl     @		; * 10
+        rol     eax+1
+
+        asl     @		; * 20
+        rol     eax+1
+
+        asl     @		; * 40
+        rol     eax+1
+	
+	sta eax
+
+        rts
+
+.endp	
 
 /* ----------------------------------------------------------------------- */
 
