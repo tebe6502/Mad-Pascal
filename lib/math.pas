@@ -66,10 +66,12 @@ interface
 	function Min(x, y: real): real; overload;
 	function Min(x, y: shortreal): shortreal; overload;
 	function Min(x, y: single): single; overload;	
+	function Min(x, y: smallint): smallint; overload;
 	function Min(x, y: integer): integer; overload;
 	function Max(x, y: real): real; overload;
 	function Max(x, y: shortreal): shortreal; overload;
 	function Max(x, y: single): single; overload;	
+	function Max(x, y: smallint): smallint; overload;
 	function Max(x, y: integer): integer; overload;
 	function power(base : real; const exponent : shortint) : real; overload;
 	function power(base : single; const exponent : shortint) : single; overload;
@@ -314,6 +316,16 @@ if x < y then Result := x else Result := y;
 end;
 
 
+function Min(x, y: smallint): smallint; overload;
+(*
+@description:
+
+*)
+begin
+if x < y then Result := x else Result := y;
+end;
+
+
 function Min(x, y: integer): integer; overload;
 (*
 @description:
@@ -350,6 +362,16 @@ function Max(x, y: single): single; overload;
 (*
 @description:
 Return largest of two values
+
+*)
+begin
+if x > y then Result := x else Result := y;
+end;
+
+
+function Max(x, y: smallint): smallint; overload;
+(*
+@description:
 
 *)
 begin
