@@ -1,5 +1,22 @@
+01.03.2020
+- optymalizacje dla CARDINAL, WORD, BYTE, <>, =, <=, >=, <, >
+
+26.02.2020
+- CompileSimpleExpression, dodane 'SafeCompileConstExpression' dla znaku MINUS
+
+18.02.2020
+- pointer jako licznik pêtli dla FOR
+
+10.02.2020
+- @AllocMem ograniczony do 128 bajtowych bloków
+- dodany PSPTR na stronie zerowej dla przyspieszenia @AllocMem
+
 29.01.2020
-- poprawki dla opt_099; opt_100
+- poprawione opt_099; opt_100
+- optymalizacja opt_098 dla CARDINAL <> 0 ; CARDINAL = 0
+- optymalizacja opt_097 dla WORD <> 0 ; WORD = 0
+- optymalizacja opt_095 dla WORD <> 0 ; WORD = 0
+- optymalizacja opt_094 dla BYTE > 0
 
 24.01.2020
 - optymalizacja warunku GT
