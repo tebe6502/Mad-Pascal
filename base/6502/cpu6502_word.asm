@@ -48,7 +48,7 @@ t2	= ecx
 
 product	= eax
 
-	txa:pha
+	stx @sp
 ;		bcc @+
 		    lda T1+0
 		    sta sm1a+1
@@ -139,7 +139,8 @@ _dd:		lda #0
 
 	stx PRODUCT+3
 
-	pla:tax
+	ldx #0
+@sp	equ *-1
 
 	rts
 .endp

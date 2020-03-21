@@ -82,6 +82,11 @@
 <tr><td class='tname'>TPoint</td><td class='ttype'>record x,y: SmallInt end</td><td class='tdesc'>This record describes a coordinate.</td></tr>
 <tr><td class='tname'>TDateTime</td><td class='ttype'>record yy,mm,dd,h,m,s: byte end</td><td class='tdesc'>This record describes Date-Time.</td></tr>
 <tr><td class='tname'>TLastArcCoords</td><td class='ttype'>record x,y,xstart,ystart,xend,yend: smallint end</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PBoolean</td><td class='ttype'>^Boolean</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PByte</td><td class='ttype'>^byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PWord</td><td class='ttype'>^word</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PByteArray</td><td class='ttype'>^byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PWordArray</td><td class='ttype'>^word</td><td class='tdesc'></td></tr>
 
 </table>
 
@@ -189,7 +194,9 @@
 	Calculate numerical value of a string<br><ul><h5>parameters:</h5><li>s - string[32]</li><li>v - pointer to integer - result</li><li>code - pointer to integer - error code</li></ul></td></tr>
 <tr><td class='tname fname'>FloatToStr</td><td class='tdesc'><h4>function FloatToStr(a: real): ^string; assembler;</h4><br>
 	Convert a float value to a string<br><ul><h5>parameters:</h5><li>a - Real (Q24.8)</li><h5>returns:</h5><li class='returns'>string[32]</li></ul></td></tr>
-<tr><td class='tname fname'>Str</td><td class='tdesc'><h4>procedure Str(a: integer; var s: TString); assembler;</h4><br>
+<tr><td class='tname fname'>Str</td><td class='tdesc'><h4>procedure Str(a: integer; var s: TString); overload; assembler;</h4><br>
+	Convert a numerical value to a string<br><ul><h5>parameters:</h5><li>a - integer</li><li>s - string[32] - result</li></ul></td></tr>
+<tr><td class='tname fname'>Str</td><td class='tdesc'><h4>procedure Str(a: cardinal; var s: TString); overload; assembler;</h4><br>
 	Convert a numerical value to a string<br><ul><h5>parameters:</h5><li>a - integer</li><li>s - string[32] - result</li></ul></td></tr>
 <tr><td class='tname fname'>Poke</td><td class='tdesc'><h4>procedure Poke(a: word; value: byte); register; assembler;</h4><br>
 	Store BYTE at the desired memory address<br><ul><h5>parameters:</h5><li>a - memory address</li><li>value (0..255)</li></ul></td></tr>

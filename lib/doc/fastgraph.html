@@ -9,8 +9,8 @@
 
 <h1>unit fastgraph</h1>
 <h3>Unit to handle screen graphics, accelerated bitmap modes</h3>
-<p>author: Tomasz Biela (Tebe)</p>
-<br><p><a href='http://www.freepascal.org/docs-html/rtl/graph/index-5.html'>http://www.freepascal.org/docs-html/rtl/graph/index-5.html</a></p>
+<p>author: Tomasz Biela (Tebe/Madteam)</p>
+<br><p><a href='http://www.freepascal.org/docs-html/rtl/graph/index-5.html'>http://www.freepascal.org/docs-html/rtl/graph/index-5.html</a> <br> Marcin �ukowski (Eru/TQA): fLine</p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -60,10 +60,14 @@
 	Draw a line starting from current position to a given point<br><ul></ul></td></tr>
 <tr><td class='tname fname'>fRectangle</td><td class='tdesc'><h4>procedure fRectangle(x1, y1, x2, y2: Smallint);</h4><br>
 	Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color and style<br><ul></ul></td></tr>
-<tr><td class='tname fname'>FrameBuffer</td><td class='tdesc'><h4>procedure FrameBuffer(a: word); assembler;</h4><br>
+<tr><td class='tname fname'>FrameBuffer</td><td class='tdesc'><h4>procedure FrameBuffer(a: word); assembler; overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>FrameBuffer</td><td class='tdesc'><h4>procedure FrameBuffer(var a: TFrameBuffer); overload;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>InitGraph</td><td class='tdesc'><h4>procedure InitGraph(mode: byte); overload;</h4><br>
 	Init graphics mode<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Scanline</td><td class='tdesc'><h4>function Scanline(y: smallint): PByte;</h4><br>
+	<br><ul></ul></td></tr>
 
 </table>
 
