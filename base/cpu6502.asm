@@ -1785,8 +1785,12 @@ ok	:4 mva fracpart+# dx+#
 
 
 .proc	@printWORD
-	mva :STACKORIGIN,x dx
-	mva :STACKORIGIN+STACKWIDTH,x dx+1
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x 
+_ay
+	sta dx
+	sty dx+1
+
 	lda #$00
 	sta dx+2
 	sta dx+3
@@ -1796,7 +1800,10 @@ ok	:4 mva fracpart+# dx+#
 
 
 .proc	@printBYTE
-	mva :STACKORIGIN,x dx
+	lda :STACKORIGIN,x
+_a
+	sta dx
+
 	lda #$00 
 	sta dx+1
 	sta dx+2

@@ -34,7 +34,7 @@ t2	= ecx
 
 product	= eax
 
-	txa:tay
+	stx @sp
 ;		bcc :+
 		    lda T1
 		    sta sm1+1
@@ -53,7 +53,8 @@ sm4:		sbc square2_hi,x
 
 		sta PRODUCT+1
 
-	tya:tax
+	ldx #0
+@sp	equ *-1
 		rts
 .endp
 

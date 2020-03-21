@@ -74,8 +74,12 @@
 	Delete a file from the filesystem<br><ul><h5>parameters:</h5><li>var FileName: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - the file was successfully removed</li><li class='returns'>FALSE - I/O error</li></ul></td></tr>
 <tr><td class='tname fname'>FileExists</td><td class='tdesc'><h4>function FileExists(name: TString): Boolean;</h4><br>
 	Check whether a particular file exists in the filesystem<br><ul><h5>parameters:</h5><li>name: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - file exists</li><li class='returns'>FALSE - file not exists</li></ul></td></tr>
-<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): ^string; assembler;</h4><br>
-	Convert an integer value to a decimal string<br><ul><h5>parameters:</h5><li>a: integer</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
+<tr><td class='tname fname'>ByteToStr</td><td class='tdesc'><h4>function ByteToStr(a: byte): ^string; assembler;</h4><br>
+	Converts input byte to a string<br><ul><h5>parameters:</h5><li>a: byte</li><h5>returns:</h5><li class='returns'>pointer to string.Y = hundreds, .X = tens, .A = ones</li></ul></td></tr>
+<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): ^string; assembler; overload;</h4><br>
+	Convert an INTEGER value to a decimal string<br><ul><h5>parameters:</h5><li>a: integer</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
+<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: cardinal): ^string; assembler; overload;</h4><br>
+	Convert an CARDINAL value to a decimal string<br><ul><h5>parameters:</h5><li>a: cardinal</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
 <tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(const s: char): byte; assembler; overload;</h4><br>
 	Convert a char to an byte value<br><ul><h5>parameters:</h5><li>s: char</li><h5>returns:</h5><li class='returns'>byte</li></ul></td></tr>
 <tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(const s: TString): integer; assembler; overload;</h4><br>
@@ -116,6 +120,8 @@
 	EncodeTime encodes the Hour, Minute and Second variables to a date in TDateTime format. It does the opposite of the DecodeTime procedure.<br><ul><h5>parameters:</h5><li>Hour: Byte</li><li>Minute: Byte</li><li>Second: Byte</li><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
 <tr><td class='tname fname'>EncodeDateTime</td><td class='tdesc'><h4>function EncodeDateTime(Year, Month, Day, Hour, Minute, Second: Byte): TDateTime;</h4><br>
 	EncodeDateTime encodes the values Year, Month, Day, Hour, Minute and Second to a date/time valueand returns this value.<br><ul><h5>parameters:</h5><li>Year: Byte</li><li>Month: Byte</li><li>Day: Byte</li><li>Hour: Byte</li><li>Minute: Byte</li><li>Second: Byte</li><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
+<tr><td class='tname fname'>Trim</td><td class='tdesc'><h4>function Trim(var S: string): string;</h4><br>
+	Trim whitespace from the ends of a string.<br><ul><h5>parameters:</h5><li>S: String</li></ul></td></tr>
 
 </table>
 

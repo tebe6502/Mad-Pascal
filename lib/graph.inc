@@ -285,8 +285,8 @@ procedure Ellipse(x0, y0, a, b: word);
 @description:
 Bresenham Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
 *)
-var	{a2, b2, }error, stopx, stopy: integer;
-        a2, b2, x, y: word;
+var	error, stopx, stopy: integer;
+        a2, b2, x, y, _a, _b: word;
 
 	procedure DrawEllipse;
 	var txp, typ, txm, tym: word;
@@ -302,10 +302,13 @@ var	{a2, b2, }error, stopx, stopy: integer;
 
 begin
 			if (a = 0) or (b = 0) then exit;
+			
+			_a := a * a;
+			_b := b * b;
 
-			a2 := (a * a) shl 1;
-			b2 := (b * b) shl 1;
-			error := a*a*b;
+			a2 := _a shl 1;
+			b2 := _b shl 1;
+			error := _a * b;
 			x := 0;
 			y := b;
 			stopy := 0;
@@ -325,7 +328,7 @@ begin
 				end;
 			end;
 
-			error := b*b*a;
+			error := _b * a;
 			x := a;
 			y := 0;
 			stopy := word(b2) * a;

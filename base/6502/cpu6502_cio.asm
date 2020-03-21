@@ -14,7 +14,7 @@
 
 	stx code
 
-	lda #0
+	lda #0			;C
 	rol @
 	sta iocheck
 
@@ -62,7 +62,7 @@ error	sty MAIN.SYSTEM.IOResult
 
 msg	lda #true
 iocheck	equ *-1
-	beq skp
+	beq ok	;skp
 
 	sty dx
 ;	sty FX_CORE_RESET
@@ -81,7 +81,7 @@ iocheck	equ *-1
 	jsr @printVALUE
 
 	jmp MAIN.@halt
-
+/*
 skp	ldy #s@file.status
 	lda (bp2),y
 	ora #e@file.eof
@@ -94,7 +94,7 @@ skp	ldy #s@file.status
 	sta (bp2),y
 
 	rts
-
+*/
 ok	ldy #s@file.status
 	lda (bp2),y
 	ora #e@file.open
