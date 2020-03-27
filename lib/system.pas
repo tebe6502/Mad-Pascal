@@ -209,6 +209,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	function Abs(x: Real): Real; register; assembler; overload;
 	function Abs(x: Single): Single; register; assembler; overload;
+	function Abs(x: shortint): shortint; register; assembler; overload;
+	function Abs(x: smallint): smallint; register; assembler; overload;
 	function Abs(x: Integer): Integer; register; assembler; overload;
 	function ArcTan(value: real): real;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
@@ -776,6 +778,58 @@ asm
 end;
 
 
+function Abs(x: shortint): shortint; register; assembler; overload;
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - shortint
+
+@returns: shortint
+*)
+asm
+{	lda edx
+	bpl @+
+
+	eor #$ff
+	add #1
+@
+	sta Result
+};
+end;
+
+
+function Abs(x: smallint): smallint; register; assembler; overload;
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - smallint
+
+@returns: smallint
+*)
+asm
+{	lda edx+1
+	bpl @+
+
+	lda #$00
+	sub edx
+	sta edx
+	lda #$00
+	sbc edx+1
+	sta edx+1
+@
+	sta Result+1
+
+	mva edx Result
+};
+end;
+
+
 function Abs(x: Integer): Integer; register; assembler; overload;
 (*
 @description:
@@ -792,10 +846,11 @@ asm
 	spl
 	jsr negEDX
 
+	sta Result+3
+
 	mva edx Result
 	mva edx+1 Result+1
 	mva edx+2 Result+2
-	mva edx+3 Result+3
 };
 end;
 
