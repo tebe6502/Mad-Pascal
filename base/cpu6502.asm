@@ -146,6 +146,32 @@ numread	.word		; pointer to variable, length of loaded data
 
 /* ----------------------------------------------------------------------- */
 
+.macro	m@add
+	lda %%1
+	clc
+	adc %%2
+	sta %%3
+.endm
+
+.macro	m@adc
+	lda %%1
+	adc %%2
+	sta %%3
+.endm
+
+.macro	m@sub
+	lda %%1
+	sec
+	sbc %%2
+	sta %%3
+.endm
+
+.macro	m@sbc
+	lda %%1
+	sbc %%2
+	sta %%3
+.endm
+
 .macro	m@addEAX_ECX
 	lda %%1
 	clc
