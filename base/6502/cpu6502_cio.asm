@@ -293,8 +293,13 @@ eof	ldy #s@file.status
 	lda #0
 	sta attr
 
-	cpy #$12
-	bne stop
+	lda @buf
+
+	clc						; clear carry for add
+	adc #$FF-'9'					; make m = $FF
+	adc #'9'-'0'+1					; carry set if in range n to m
+	bcs stop	
+	
 
 	lda @buf
 	cmp #'*'
