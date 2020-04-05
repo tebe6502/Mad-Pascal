@@ -1,3 +1,16 @@
+05.04.2020
+- poprawione FindFirst (SYSUTILS), @DirFileName (base\cpu6502_cio.asm)
+
+02.04.2020
+- optymalizacje warunku dla typów ze znakiem (SignedOrdinalTypes)
+
+27.03.2020
+- poprawiona optymalizacja dla PEEK, POKE
+- dodatkowe optymalizacje dla (IF AND AND), (IF OR OR), (WHILE AND AND), (WHILE OR OR)
+
+22.03.2020
+- poprawione CheckArrayIndex, CheckArrayIndex_, nie zg³asza ostrze¿en dla PByte
+
 12.03.2020
 - poprawka dla base\6502\cpu6502_cio.asm, w przypadku b³êdu IO przy otwieraniu kana³u ustawiany jest status OPEN zamiast EOF (@openfile)
 
