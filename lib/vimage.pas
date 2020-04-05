@@ -32,7 +32,7 @@ unit vimage;
 @author: Steven Don, Tomasz Biela (Tebe)
 
 @description:
-VBXE
+VBXE Image
 *)
 
 {
@@ -181,8 +181,8 @@ begin
     Exit;
   end;
 
-  if (Header.xMax > 336-1) or (Header.xMin < 0)
-  or (Header.yMax > 256-1) or (Header.yMin < 0) then begin
+  if (word(Header.xMax) > 336-1) or (Header.xMin < 0)
+  or (word(Header.yMax) > 256-1) or (Header.yMin < 0) then begin
     Close (f);
     IMGError := TooLarge;
     Result := false;
@@ -225,7 +225,7 @@ begin
   nY:=0;
 
   {Decode and display graphics}
-  While (Y < Header.yMax) do begin
+  While (Y < word(Header.yMax)) do begin
     {Read next byte}
     DataByte := NextByte;
 
@@ -247,7 +247,7 @@ begin
       inc (X);
 
       {If End of Line reached, next line}
-      if X = Header.xMax then begin
+      if X = word(Header.xMax) then begin
         X := Header.xMin;
 	inc(Y);
 	inc(nY);

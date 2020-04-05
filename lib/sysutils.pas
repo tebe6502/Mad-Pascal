@@ -142,7 +142,7 @@ asm
 end;
 
 
-function FindFirst (const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;
+function FindFirst(const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;
 (*
 @description: Start a file search and return a findhandle
 
@@ -158,9 +158,9 @@ begin
 asm
 {	txa:pha
 
-loop	clc			; iocheck off
+	clc			; iocheck off
 	@openfile f #6
-
+loop
 	mwa SearchResult :bp2
 
 	ldy #SearchResult.Attr-DATAORIGIN
