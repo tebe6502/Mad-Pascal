@@ -295,17 +295,25 @@ eof	ldy #s@file.status
 
 	lda @buf
 
-	clc						; clear carry for add
-	adc #$FF-'9'					; make m = $FF
-	adc #'9'-'0'+1					; carry set if in range n to m
-	bcs stop	
-	
+	clc					; clear carry for add
+	adc #$FF-'9'				; make m = $FF
+	adc #'9'-'0'+1				; carry set if in range n to m
+	bcs stop
 
-	lda @buf
+	lda @buf+1
+	cmp #$3a
+	bne @+
+
+	lda attr
+	ora #MAIN.SYSUTILS.faDirectory
+	sta attr
+
+@	lda @buf
 	cmp #'*'
 	bne skp
 
-	lda #MAIN.SYSUTILS.faReadOnly
+	lda attr
+	ora #MAIN.SYSUTILS.faReadOnly
 	sta attr
 
 skp	ldy #1
@@ -313,7 +321,7 @@ skp	ldy #1
 	lda #10
 	jsr cpName
 
-	ldx #10
+	ldx #10					; ?
 	lda @buf,x
 	pha
 	bpl files
