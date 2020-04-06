@@ -4,8 +4,6 @@ mp.exe filename.pas
 
 mads.exe filename.a65 -x -i:base
 
-# BLIBS http://bocianu.atari.pl/blog/blibs
-
 <tt>Mad-Pascal (MP)</tt> is a 32-bit Turbo Pascal compiler for Atari XE/XL. By design, it is compatible with the Free Pascal Compiler (FPC) (the -MDelphi switch should be active), which means the possibility of obtaining executable code for XE/XL, PC and every other platform for which FPC exists. MP is not a port of FPC; it has been written based on of SUB-Pascal (2009), XD-Pascal (2010), the author of which is Vasiliy Tereshkov (vtereshkov@mail.ru).
 </p>
 
@@ -41,3 +39,10 @@ The available features are:
 <li>Separate program modules.
 <li>Recursion.
 </ul>
+
+# BLIBS http://bocianu.atari.pl/blog/blibs
+<p>
+Set of custom libraries for MadPascal.
+<br>
+Lastest documentation always at: https://bocianu.gitlab.io/blibs/
+</p>
