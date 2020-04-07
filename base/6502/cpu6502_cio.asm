@@ -300,20 +300,29 @@ eof	ldy #s@file.status
 	adc #'9'-'0'+1				; carry set if in range n to m
 	bcs stop
 
-	lda @buf+1
-	cmp #$3a
+
+	lda @buf
+	cmp #'*'
+	bne @+
+
+	lda attr
+	ora #MAIN.SYSUTILS.faReadOnly
+	sta attr
+
+@	lda @buf+1
+	cmp #':'
 	bne @+
 
 	lda attr
 	ora #MAIN.SYSUTILS.faDirectory
 	sta attr
-
-@	lda @buf
-	cmp #'*'
+	
+@	lda @buf+1
+	cmp #' '
 	bne skp
 
 	lda attr
-	ora #MAIN.SYSUTILS.faReadOnly
+	ora #MAIN.SYSUTILS.faArchive
 	sta attr
 
 skp	ldy #1
@@ -321,22 +330,8 @@ skp	ldy #1
 	lda #10
 	jsr cpName
 
-	ldx #10					; ?
+	ldx #10				
 	lda @buf,x
-	pha
-	bpl files
-
-	lda attr
-	ora #MAIN.SYSUTILS.faDirectory
-	sta attr
-
-	jmp skp2
-
-files	lda attr
-	ora #MAIN.SYSUTILS.faArchive
-	sta attr
-
-skp2	pla
 	beq stp2
 
 	lda #'.'
