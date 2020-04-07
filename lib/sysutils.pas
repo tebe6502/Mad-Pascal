@@ -51,6 +51,7 @@ type	TSearchRec = record
 
 *)
 		Attr: Byte;
+		ExcludeAttr: Byte;
 		Name: TString;
 		FindHandle: Pointer;
 	     end;
@@ -163,7 +164,7 @@ asm
 loop
 	mwa SearchResult :bp2
 
-	ldy #SearchResult.Attr-DATAORIGIN
+	ldy #SearchResult.ExcludeAttr-DATAORIGIN
 	lda Attributes
 	sta (:bp2),y
 
@@ -199,7 +200,12 @@ loop
 
 	jsr @DirFileName
 
+	mwa SearchResult :bp2
+
+	ldy #SearchResult.Attr-DATAORIGIN
 	txa
+	sta (:bp2),y
+	
 	and Attributes
 	ora Result
 	beq loop
@@ -234,8 +240,12 @@ loop	mwa f :bp2
 	jsr @DirFileName
 
 	mwa f :bp2
+	
 	ldy #f.Attr-DATAORIGIN
 	txa
+	sta (:bp2),y
+	
+	ldy #f.ExcludeAttr-DATAORIGIN
 	and (:bp2),y
 	ora Result
 	beq loop
