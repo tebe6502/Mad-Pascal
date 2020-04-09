@@ -43,6 +43,7 @@ The available features are:
 <li>Objects.
 <li>Separate program modules.
 <li>Recursion.
+<li>Separate <a href=http://mads.atari8.info/lib/doc/index.html>units</a>
 </ul>
 
 # BLIBS http://bocianu.atari.pl/blog/blibs
