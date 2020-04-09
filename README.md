@@ -47,6 +47,13 @@ The available features are:
 <li>Separate <a href=http://mads.atari8.info/lib/doc/index.html>units</a>
 </ul>
 
+# MadStrap http://bocianu.atari.pl/blog/madstrap
+<p>
+Simple Atari Mad-Pascal common project bootstrap.
+<br>
+Source code at: https://gitlab.com/bocianu/madstrap
+</p>
+  
 # BLIBS http://bocianu.atari.pl/blog/blibs
 <p>
 Set of custom libraries for MadPascal.
@@ -54,7 +61,7 @@ Set of custom libraries for MadPascal.
 Lastest documentation always at: https://bocianu.gitlab.io/blibs/
 </p>
 
-# PASDOC https://bocianu.atari.pl/blog/pasdoc
+# pasdoc https://bocianu.atari.pl/blog/pasdoc
 <p>
 Custom tool for generating documentation from pascal comments in units.
 <br>
