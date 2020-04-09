@@ -16,6 +16,7 @@ Mad-Pascal (MP) is a 32-bit Turbo Pascal compiler for Atari XE/XL. By design, it
 A program that works on Atari might have problems on PC if, for example, the pointers have not been initialized with the address of a variable and the program attempts to write to the address $0000 (memory protection fault). The strengths of MP include fast and convenient possibility of inclusion of inline assembly. A program using inline ASM does not work on platforms other than XE/XL. MP uses 64KB of primary memory; TMemoryStream provides usage of extended memory.
 </p>
 Variable allocation is static; there is no dynamic memory management. Parameters are passed to functions by value, variable or constant.
+<p></p>
 <p>
 The available features are:
 </p>
