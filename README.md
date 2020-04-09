@@ -33,7 +33,7 @@ The available features are:
 <li>Char, String, PChar
 <li>Integer, SmallInt, ShortInt
 <li>Pointer, File
-<li>ShortReal, Real (fixed-point)
+<li>ShortReal Q8.8, Real Q24.8 (fixed-point)
 <li>Single 32-bit (IEEE-754) [Float]
 </ul>
 
@@ -44,7 +44,7 @@ The available features are:
 <li>Objects.
 <li>Separate program modules.
 <li>Recursion.
-<li>Separate <a href=http://mads.atari8.info/lib/doc/index.html>units</a>
+<li>Separate <a href=http://mads.atari8.info/library/doc/index.html>units</a>
 </ul>
 
 # MadStrap http://bocianu.atari.pl/blog/madstrap
