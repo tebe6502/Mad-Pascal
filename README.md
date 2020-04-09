@@ -33,7 +33,7 @@ The available features are:
 <li>Integer, SmallInt, ShortInt
 <li>Pointer, File
 <li>ShortReal, Real (fixed-point)
-<li>Single (IEEE-754) [Float]
+<li>Single 32-bit (IEEE-754) [Float]
 </ul>
 
 <li>One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters.
