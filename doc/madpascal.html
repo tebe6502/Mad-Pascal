@@ -55,8 +55,8 @@
 </head>
 
 <CENTER>
-<p class="duzy"><u>MAD-PASCAL 1.6.2</u></p>
-<p class="stopka">Tebe/Madteam (2019-07-11)
+<p class="duzy"><u>MAD-PASCAL 1.6.3</u></p>
+<p class="stopka">Tebe/Madteam (2020-01-04)
 
 <HR>
 
@@ -86,7 +86,7 @@
 <b><LI><A HREF="#ulib">BIBLIOTEKI</A></b>
 <ul>
 
-<LI><A HREF="..\lib\doc\index.html">LIB</A>
+<LI><A HREF="..\library\doc\index.html">LIB</A>
 <LI><A HREF="..\blibs\doc\index.html">BLIBS</A>
 
 </ul>
@@ -990,6 +990,13 @@ Aktualnie kompilator MP nie sprawdzi poprawno¶ci typów wyliczeniowych dla operac
 </tr>
 
 </table>
+
+<p></p>
+
+Konwersja typu FLOAT / SINGLE do liczby ca³kowitej dostêpna jest tylko w zakresie INTEGER. Typ INTEGER nie pozwoli zaprezentowaæ maksymalnej warto¶ci 3.4E38 typu FLOAT / SINGLE.
+
+<p></p>
+
 
 <p></p>
 <br />
@@ -4020,6 +4027,17 @@ Funkcja zwraca warto¶æ tangensa k±ta podanego w parametrze X.
 
 <A NAME="change">
 </tt><h2>HISTORIA</h2></tt>
+
+
+<p class="tekst-wiekszy">
+1.6.3
+<p class="tekst">
+- poprawki, optymalizacje
+- SYSUTILS: Trim<br>
+- SYSTEM: PByte, PByteArray, PWord<br>
+- GRAPH, FASTGRAPH: TFrameBuffer, DisplayBuffer, FrameBuffer, SwitchBuffer, Scanline<br>
+- BLIBS: unit GR10PP<br>
+- LIB: unit GR4PP<br>
 
 <p class="tekst-wiekszy">
 1.6.0 - 1.6.2
