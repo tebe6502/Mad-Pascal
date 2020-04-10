@@ -1,4 +1,9 @@
-# Mad-Pascal http://mads.atari8.info/
+# Mad-Pascal
+<p>
+http://mads.atari8.info/
+<br>
+https://atariage.com/forums/topic/240919-mad-pascal/
+</p>
 <p>
 <tt>Usage:</tt>
 <br>
@@ -42,9 +47,8 @@ The available features are:
 <li>Type aliases.
 <li>Records.
 <li>Objects.
-<li>Separate program modules.
+<li>Separate program <a href=http://mads.atari8.info/library/doc/index.html>modules</a>.
 <li>Recursion.
-<li>Separate <a href=http://mads.atari8.info/library/doc/index.html>units</a>
 </ul>
 
 # MadStrap http://bocianu.atari.pl/blog/madstrap
