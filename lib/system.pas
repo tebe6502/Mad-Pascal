@@ -1813,8 +1813,7 @@ begin
     i := trunc(x);
 
     { Fixes negative part, needed to calculate "fractional" part }
-    if cardinal(x) >= $80000000 then { this is shorter than "x < 0" }
-        dec(i);
+    if integer(x) < 0 then dec(i); { this is shorter than "x < 0" }
 
     { And finally get's fractional part }
     x := x - shortint(i);
