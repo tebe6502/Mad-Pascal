@@ -6,7 +6,8 @@
 /* -----------------------------------------------------------------------
 /* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
 /* 29.02.2020	optymalizacja @printREAL, pozbycie sie 
-		'jsr mov_BYTE_DX', 'jsr mov_WORD_DX', 'jsr mov_CARD_DX'
+/*		'jsr mov_BYTE_DX', 'jsr mov_WORD_DX', 'jsr mov_CARD_DX'
+/* 07.04.2020	negSHORT, @TRUNC_SHORT, @ROUND_SHORT, @FRAC_SHORT, @INT_SHORT
 /* -----------------------------------------------------------------------
 
 @AllocMem
@@ -2133,7 +2134,94 @@ add32bit
 .endp
 
 
-.proc	@trunc
+.proc	negSHORT
+	lda #$00
+	sub :STACKORIGIN,x
+	sta :STACKORIGIN,x
+
+	lda #$00
+	sbc :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH,x
+
+	rts
+.endp
+
+
+.proc	@TRUNC_SHORT
+
+	ldy :STACKORIGIN+STACKWIDTH,x
+	spl
+	jsr negSHORT
+
+	sta :STACKORIGIN,x
+	mva #$00 :STACKORIGIN+STACKWIDTH,x
+
+	tya
+	spl
+	jsr negSHORT
+
+	rts
+.endp
+
+
+.proc	@ROUND_SHORT
+
+	ldy :STACKORIGIN+STACKWIDTH,x
+	spl
+	jsr negSHORT
+
+	lda :STACKORIGIN,x
+//	add #$80
+	cmp #$80
+	lda :STACKORIGIN+STACKWIDTH,x
+	adc #0
+	sta :STACKORIGIN,x
+
+	mva #$00 :STACKORIGIN+STACKWIDTH,x
+
+	tya
+	spl
+	jsr negSHORT
+
+	rts
+.endp
+
+
+.proc	@FRAC_SHORT
+
+	ldy :STACKORIGIN+STACKWIDTH,x
+	spl
+	jsr negSHORT
+
+	lda #$00
+	sta :STACKORIGIN+STACKWIDTH,x
+
+	tya
+	spl
+	jsr negSHORT
+
+	rts
+.endp
+
+
+.proc	@INT_SHORT
+
+	ldy :STACKORIGIN+STACKWIDTH,x
+	spl
+	jsr negSHORT
+
+	lda #$00
+	sta :STACKORIGIN,x
+
+	tya
+	spl
+	jsr negSHORT
+
+	rts
+.endp
+
+
+.proc	@TRUNC
 
 	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
@@ -2152,7 +2240,7 @@ add32bit
 .endp
 
 
-.proc	@round
+.proc	@ROUND
 
 	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
@@ -2181,7 +2269,7 @@ add32bit
 .endp
 
 
-.proc	@frac
+.proc	@FRAC
 
 	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
@@ -2200,7 +2288,7 @@ add32bit
 .endp
 
 
-.proc	@int
+.proc	@INT
 
 	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
