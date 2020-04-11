@@ -1,5 +1,19 @@
 unit pokey;
+(*
+ @type: unit
+ @author:
+ @name: POKEY unit
+ @version: 1.0
+
+ changes: 17.08.2017
+
+ @description:
+ POKEY memory registers
+*)
+
+
 interface
+
 var
     pot0    : byte absolute $d200;
     pot1    : byte absolute $d201;
@@ -32,4 +46,5 @@ var
     skstat  : byte absolute $d20f;
 
 implementation
+
 end.
