@@ -1,3 +1,6 @@
+07.04.2020
+- base\cpu6502.asm, nowe procedury dla typu SHORTREAL (Round, Trunc, Frac, Int)
+
 05.04.2020
 - poprawione FindFirst (SYSUTILS), @DirFileName (base\cpu6502_cio.asm)
 
