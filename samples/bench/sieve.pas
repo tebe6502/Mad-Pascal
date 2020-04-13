@@ -1,8 +1,9 @@
 // Eratosthenes Sieve benchmark
-// 1 iter  = 1899 / 74 ticks
-// 1 iter  = 1899 / 65 ticks	FAST
-// 10 iter = 1899 / 737 ticks
-// 10 iter = 1899 / 642 ticks	FAST
+// 1899
+//  1 iter 68 ticks
+//  1 iter 60 ticks	FAST
+// 10 iter 688 ticks	
+// 10 iter 607 ticks	FAST
 
 uses crt, sysutils;
 
@@ -65,9 +66,9 @@ begin
 
  ticks:=word(GetTickCount)-ticks;
  
+ writeln(ticks, ' ticks'); 
  writeln(count, ' primes');
- writeln(ticks, ' ticks');
-
+ 
  repeat until keypressed;
 
 end.
