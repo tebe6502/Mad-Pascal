@@ -55,6 +55,32 @@
 
 	Result:=false; Break;
        end;
+       
+       
+    if LDA_BP_Y(i+6) and									// lda (:bp),y			; 6
+       tay(i+7) and										// tay				; 7
+       lda(i+8) and										// lda 				; 8
+       sta(i+9) then										// sta 				; 9
+    if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
+       begin
+        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
+	else
+	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+
+	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+6] := #9'lda (:bp2),y';
+
+	if lda_bp_y(i+8) then listing[i+8] := #9'lda (:bp2),y';
+	if sta_bp_y(i+9) then listing[i+9] := #9'sta (:bp2),y';
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	Result:=false; Break;
+       end;
 
 
     if lda(i+6) and (lda_bp_y(i+6) = false) and	(lda_stack(i+6) = false) and			// lda				; 6
