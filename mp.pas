@@ -2575,6 +2575,21 @@ var i, l, k, m: integer;
      Result := listing[i] = #9'dex';
    end;
 
+   function AND_BP_Y(i: integer): Boolean; inline;
+   begin
+     Result := listing[i] = #9'and (:bp),y';
+   end;
+
+   function ORA_BP_Y(i: integer): Boolean; inline;
+   begin
+     Result := listing[i] = #9'ora (:bp),y';
+   end;
+
+   function EOR_BP_Y(i: integer): Boolean; inline;
+   begin
+     Result := listing[i] = #9'eor (:bp),y';
+   end;
+
    function LDA_BP_Y(i: integer): Boolean; inline;
    begin
      Result := listing[i] = #9'lda (:bp),y';
@@ -13586,78 +13601,6 @@ var i, l, k, m: integer;
 
 
 {$i poke.inc}
-
-
-// -----------------------------------------------------------------------------
-// ===				ABSOLUTE BP.				  === //
-// -----------------------------------------------------------------------------
-
-    if listing[i][1] in ['+','-'] then begin
-
-     tmp:=copy(listing[i], 2, 256);
-
-     yes:=false;
-
-     for p:=i+1 to l-1 do
-      if mwa_bp2(p) and (listing[p] = #9'mwa '+tmp+' :bp2') then listing[p] := '' else
-       if mwy_bp2(p) and (listing[p] = #9'mwy '+tmp+' :bp2') then listing[p] := '' else
-        if pos('(:bp2),y', listing[p]) > 0 then begin listing[p] := copy(listing[p], 1, 5) + '('+tmp+'),y'; yes:=true end else
-         if listing[p][1] in ['+','-'] then Break;
-
-     if yes then begin
-      listing[i] := '';
-
-      Result:=false; Break;
-     end;
-
-    end;
-
-{
-
-    if listing[i][1] = '-' then begin
-
-     tmp:=copy(listing[i], 2, 256);
-
-     yes:=false;
-
-     for p:=i+1 to l-1 do
-      if mwa_bp2(p) and (listing[p] = #9'mwa '+tmp+' :bp2') then begin listing[p] := ''; yes:=true end else
-       if mwy_bp2(p) and (listing[p] = #9'mwy '+tmp+' :bp2') then begin listing[p] := ''; yes:=true end else
-        if sta_bp2_y(p) then begin listing[p] := #9'sta ('+tmp+'),y'; yes:=true end else
-         if listing[p][1] in ['+','-'] then Break;
-
-     if yes then begin
-      listing[i] := '';
-
-      Result:=false; Break;
-     end;
-
-    end;
-}
-
-
-    if (listing[i][1] in ['+','-']) and								//+-label				; 0
-       ldy(i+1) and										// ldy P				; 1
-       lda(i+2) and										// lda P+1				; 2
-       sta_bp_1(i+3) and									// sta :bp+1				; 3
-       lda(i+4) and										// lda 					; 4
-       (add_bp_y(i+5) or sub_bp_y(i+5)) and							// add|sub (:bp),y			; 5
-       sta(i+6) then										// sta					; 6
-     if (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) then
-       begin
-	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
-	listing[i+2] := #9'ldy #$00';
-	listing[i+3] := '';
-
-	if lda_bp_y(i+4) then listing[i+4] := #9'lda (:bp2),y';
-
-	if add_bp_y(i+5) then listing[i+5] := #9'add (:bp2),y';
-	if sub_bp_y(i+5) then listing[i+5] := #9'sub (:bp2),y';
-
-	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
-
-	Result:=false; Break;
-       end;
 
 
 // -----------------------------------------------------------------------------
