@@ -173,43 +173,6 @@ numread	.word		; pointer to variable, length of loaded data
 	sta %%3
 .endm
 
-.macro	m@addEAX_ECX
-	lda %%1
-	clc
-	adc %%2
-	sta :STACKORIGIN,x
-
-	lda %%3
-	adc %%4
-	sta :STACKORIGIN+STACKWIDTH,x
-
-	lda %%5
-	adc %%6
-	sta :STACKORIGIN+STACKWIDTH*2,x
-
-	lda %%7
-	adc %%8
-	sta :STACKORIGIN+STACKWIDTH*3,x
-.endm
-
-.macro	m@subEAX_ECX
-	lda %%1
-	sec
-	sbc %%2
-	sta :STACKORIGIN,x
-
-	lda %%3
-	sbc %%4
-	sta :STACKORIGIN+STACKWIDTH,x
-
-	lda %%5
-	sbc %%6
-	sta :STACKORIGIN+STACKWIDTH*2,x
-
-	lda %%7
-	sbc %%8
-	sta :STACKORIGIN+STACKWIDTH*3,x
-.endm
 
 .macro	m@index2 (Ofset)
 	asl :STACKORIGIN-%%Ofset,x
@@ -2771,9 +2734,21 @@ ile	brk
 /* ----------------------------------------------------------------------- */
 
 
-.proc	@AllocMem(.word ztmp .byte ztmp+2) .var
+.proc	@AllocMem	;(.word ztmp .byte ztmp+2) .var
 
-	jsr swap
+	sty ztmp+2
+
+loop	lda (psptr),y
+	sta ztmp+3
+
+	lda (ztmp),y
+	sta (psptr),y
+
+	lda ztmp+3
+	sta (ztmp),y
+
+	dey
+	bne loop
 
 	lda psptr
 	add ztmp+2
@@ -2782,8 +2757,18 @@ ile	brk
 	inc psptr+1
 
 	rts
+.endp
 
-swap	ldy ztmp+2
+
+.proc	@FreeMem	;(.word ztmp .byte ztmp+2) .var
+
+	sty ztmp+2
+
+	lda psptr
+	sub ztmp+2
+	sta psptr
+	scs
+	dec psptr+1
 
 loop	lda (psptr),y
 	sta ztmp+3
@@ -2798,18 +2783,6 @@ loop	lda (psptr),y
 	bne loop
 
 	rts
-.endp
-
-
-.proc	@FreeMem(.word ztmp .byte ztmp+2) .var
-
-	lda psptr
-	sub ztmp+2
-	sta psptr
-	scs
-	dec psptr+1
-
-	jmp @AllocMem.swap
 .endp
 
 
