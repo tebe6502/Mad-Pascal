@@ -1,3 +1,6 @@
+12.04.2020
+- optymalizacja dla wskaŸników na stronie zerowej, absolute (PByte Absolute ZPage)
+
 07.04.2020
 - base\cpu6502.asm, nowe procedury dla typu SHORTREAL (Round, Trunc, Frac, Int)
 
