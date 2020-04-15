@@ -200,7 +200,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	FileMode: byte = fmOpenReadWrite;
 
-	ScreenMode: byte;		(* @var current screen mode *)
+	GraphMode: byte;		(* @var current screen mode *)
 
 	IOResult: byte;			(* @var result of last file IO operation *)
 

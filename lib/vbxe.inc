@@ -10,21 +10,22 @@ SetPaletteEntry
 
 }
 
-procedure InitGraph(driver, mode: byte; pth: TString); overload;
+
+procedure InitGraph(driver, mode: byte; dev: PByte); overload;
 begin
 
- InitGraph(mode);
+InitGraph(mode);
 
 asm
-{	txa:pha
-
-	lda driver
+{	lda driver
 	bpl stop
+
+	txa:pha
 
 	jsr @vbxe_detect
 	bcc ok
 
-	ldx #$80
+	ldx #grNoInitGraph
 	jmp err
 
 ok	jsr @vbxe_init
@@ -32,7 +33,8 @@ ok	jsr @vbxe_init
 	ldx #grOK
 err	stx GraphResult
 
-stop	pla:tax
+	pla:tax
+stop
 };
 end;
 

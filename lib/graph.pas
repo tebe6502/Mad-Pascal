@@ -69,11 +69,6 @@ procedure InitGraph(mode: byte); overload;
 Init graphics mode
 *)
 begin
-
-	GraphResult := 0;
-
-	ScreenMode := mode;
-	
 asm	
 {
 	txa:pha
@@ -81,6 +76,7 @@ asm
 	mva #$2c @putchar.vbxe
 
 	lda mode
+	sta MAIN.SYSTEM.GraphMode
 	and #$0f
 	tay
 
@@ -91,7 +87,9 @@ asm
 	ora #2		; read
 
 	.nowarn @graphics
-	
+
+	sty GraphResult
+
 	
 tlshc	equ $ee6d
 
@@ -121,6 +119,7 @@ tmrcn	equ $ee8d
 ; X:A = horizontal resolution
 ; Y = vertical resolution
 
+
 	sta MAIN.SYSTEM.ScreenWidth
 	stx MAIN.SYSTEM.ScreenWidth+1
 	
@@ -145,7 +144,6 @@ tmrcn	equ $ee8d
 
 	pla:tax
 };
-
 end;
 
 

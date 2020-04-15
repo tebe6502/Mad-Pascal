@@ -125,7 +125,7 @@ var	WIN_LEFT: smallint = 0;
 	function GetPixel(x,y: smallint): byte; assembler;
 	function GetMaxColor: word;
 	procedure InitGraph(mode: byte); overload;
-	procedure InitGraph(driver, mode: byte; pth: TString); overload;
+	procedure InitGraph(driver, mode: byte; dev: PByte); overload;
 	procedure Line(x1,y1,x2,y2: smallint);
 	procedure MoveRel(Dx, Dy: smallint);
 	procedure MoveTo(x, y: smallint); assembler;
