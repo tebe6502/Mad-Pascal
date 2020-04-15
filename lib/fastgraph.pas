@@ -462,7 +462,7 @@ begin
   x0:=tmp; 
  end;
 
- mode:=ScreenMode and $0f;
+ mode:=GraphMode and $0f;
 
  if (mode<>5) and (mode<>7) and (mode<>15) then begin
   Line(x0,y,x1,y);
@@ -964,7 +964,7 @@ Init graphics mode
 *)
 var width: byte;
 begin
-	ScreenMode := mode;
+	GraphMode := mode;
 	
 	width := mode and $0f;
 
