@@ -71,7 +71,7 @@ logcol	=	$63
 
 keydef	=	$79	; (2) tablica konwersji kodow klawiatury na ATASCII
 
-vdslst	=	$0200	; (2) wektor przerwa? NMI listy displejowej
+vdslst	=	$0200	; (2) wektor przerwan NMI listy displejowej
 timcnt3	=	$021C	; trzeci licznik systemu
 vvblki	=	$0222	; (2) wektor NMI natychmiastowego VBI
 vvblkd	=	$0224	; (2) wektor NMI op??nionego VBI
@@ -80,11 +80,11 @@ sdmctl	=	$022f	; cieñ DMACTL
 sdlstl	=	$0230	; cieñ DLISTL
 sdlsth	=	$0231	; cieñ DLISTH
 
-colpf0s	=	$02C4	; rejestr-cie? COLPF0
-colpf1s	=	$02C5	; rejestr-cie? COLPF1
-colpf2s	=	$02C6	; rejestr-cie? COLPF2
-colpf3s	=	$02C7	; rejestr-cie? COLPF3
-colbaks	=	$02C8	; rejestr-cie? COLBAK
+colpf0s	=	$02C4	; rejestr-cien COLPF0
+colpf1s	=	$02C5	; rejestr-cien COLPF1
+colpf2s	=	$02C6	; rejestr-cien COLPF2
+colpf3s	=	$02C7	; rejestr-cien COLPF3
+colbaks	=	$02C8	; rejestr-cien COLBAK
 
 escflg	=	$02a2
 dsctln	=	$02D5	; (2) Disk sector size register; default of 128 ($80) bytes
@@ -101,7 +101,7 @@ ssflag	=	$02ff
 
 ddevic	=	$0300	; Device Control Block, identyfikator urzadzenia
 dunit	=	$0301	; Numer urz?dzenia; w przypadku stacji dyskow numer nap?du
-dcmnd	=	$0302	; Komenda dla urz?dzenia.
+dcmnd	=	$0302	; Komenda dla urzadzenia.
 dstats	=	$0303	; Przed wywo?aniem SIO nalezy ustawic tu rodzaj operacji ($40 odczyt, $80 zapis, $C0 zapis i odczyt, $00 brak transferu danych). Po powrocie z systemu znajduje si? tu status operacji (kod b??du).
 dbufa	=	$0304	; (2) Adres bufora. Przy operacji zapisu i odczytu jednocze?nie (DSTATS = $C0) bufor na odczytywane dane znajduje sie w tym samym miejscu, co bufor danch przeznaczonych do zapisu.
 dtimlo	=	$0306	; Czas oczekiwania na pozytywn? odpowied? urz?dzenia, tzw. timeout, najczesciej = 7
@@ -114,18 +114,15 @@ casflg	=	$030F	; When set to zero, the current operation is a standard SIO opera
 hatabs	=	$031A	; tabela wektorow procedur obslugi
 
 iocb	=	$0340	; IOCB 0..7 ($340, $350, $360 ...)
-iocom	=	iocb+2	; Komenda dla IOCB
-ioadr	=	iocb+4	; (2) Adres bufora dla IOCB
-ioaux1	=	iocb+10	; Bajt pomocniczy 1 IOCB
-ioaux2	=	iocb+11	; Bajt pomocniczy 2 IOCB
 
 icchid	=	$0340
 icdno	=	$0341
 iccmd	=	$0342	; kod rozkazu operacji I/O
 icstat	=	$0343	; status operacji I/O
 icbufa	=	$0344	; (2) adres bufora danych dla operacji I/O
-icputb	=	$0346	; (2) adres procedury przesy?ania danych
-icbufl	=	$0348	; (2) d?ugo?? bufora danych dla operacji I/O
+icputb	=	$0346	; (2) adres procedury przesylania danych
+icbufl	=	$0348	; (2) dlugosc bufora danych dla operacji I/O
+icbufh	=	$0349
 icax1	=	$034A	; rejestr pomocniczy dla operacji I/O
 icax2	=	$034B	; rejestr pomocniczy dla operacji I/O
 icax3	=	$034C	; rejestr pomocniczy dla operacji I/O
