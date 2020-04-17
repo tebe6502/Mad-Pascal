@@ -24600,13 +24600,13 @@ begin
 
 {$IFDEF OPTIMIZECODE}
 
-//  repeat until OptimizeRelation;
+  repeat until OptimizeRelation;
 
   OptimizeAssignment;
   OptimizeAssignment;
   OptimizeAssignment;
 
-//  repeat until OptimizeRelation;
+  repeat until OptimizeRelation;
 
 {$ENDIF}
 
@@ -32705,7 +32705,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
     ConstValRight := ConstVal;
     RightValType  := ConstValType;
 
-   end;		// if ConstValType in
+   end;		// if ConstValType in IntegerTypes
 
   end;
 
