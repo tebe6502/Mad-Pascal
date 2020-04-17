@@ -2262,7 +2262,7 @@ byte2	equ	*-1
 xcio	sta iccmd,x
 	jmp ciov
 
-sname	dta c'S:',$9b,$9b
+sname	dta c'S:',$9b
 
 	.endp
 
@@ -3594,6 +3594,10 @@ ename	.byte 'E:',$9b
 
         sta     eax+1		; remember value for later addition...
         ldy     #0              ; clear high-byte
+
+	sty	eax+2
+	sty	eax+3
+
         asl     @		; * 2
         bcc     mul4            ; high-byte affected?
         ldy     #2              ; this will be the 1st high-bit soon...
