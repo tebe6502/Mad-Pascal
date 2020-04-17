@@ -27886,18 +27886,19 @@ end;
 
 procedure GenerateReturn(IsFunction, isInt: Boolean);
 begin
- Gen;									// ret
+ Gen;						// ret
 
  if not isInt then
   if not IsFunction then begin
 //   asm65;
    asm65('@exit');
 
-   asm65(#9'.ifdef @new');
-//   asm65(#9'@FreeMem #@VarData-1 #@VarDataSize');
-   asm65(#9'mwa #@VarData-1 :ztmp');
+   asm65(#9'.ifdef @new');			// @FreeMem #@VarData-1 #@VarDataSize
+   asm65(#9'lda <@VarData-1');
+   asm65(#9'sta :ztmp');
+   asm65(#9'lda >@VarData-1');
    asm65(#9'ldy #@VarDataSize');
-   asm65(#9'jsr @FreeMem');
+   asm65(#9'jmp @FreeMem');
    asm65(#9'eif');
   end;
 
@@ -36529,8 +36530,10 @@ Ident[BlockIdentIndex].ProcAsBlock := NumBlocks;
 GenerateLocal(BlockIdentIndex, IsFunction);
 
 if (BlockStack[BlockStackTop] <> 1) and (NumParams > 0) and Ident[BlockIdentIndex].isRecursion then begin
-// asm65('@new'#9'@AllocMem #@VarData-1 #@VarDataSize');
- asm65('@new'#9'mwa #@VarData-1 :ztmp');
+
+ asm65('@new'#9'lda <@VarData-1');			// @AllocMem #@VarData-1 #@VarDataSize
+ asm65(#9'sta :ztmp');
+ asm65(#9'lda >@VarData-1');
  asm65(#9'ldy #@VarDataSize');
  asm65(#9'jsr @AllocMem');
 end;
@@ -37657,11 +37660,12 @@ if IsFunction then begin
   Push(Ident[GetIdent('RESULT')].Value, ASPOINTER, DataSize[FunctionResultType], GetIdent('RESULT'));
 
   asm65;
-  asm65(#9'.ifdef @new');
-//  asm65(#9'@FreeMem #@VarData-1 #@VarDataSize');
-  asm65(#9'mwa #@VarData-1 :ztmp');
+  asm65(#9'.ifdef @new');			// @FreeMem #@VarData-1 #@VarDataSize
+  asm65(#9'lda <@VarData-1');
+  asm65(#9'sta :ztmp');
+  asm65(#9'lda >@VarData-1');
   asm65(#9'ldy #@VarDataSize');
-  asm65(#9'jsr @FreeMem');
+  asm65(#9'jmp @FreeMem');
   asm65(#9'eif');
 
 end;
