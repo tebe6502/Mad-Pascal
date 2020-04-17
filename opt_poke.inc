@@ -341,14 +341,14 @@
 }
 
 
-    if (listing[i][1] in ['+','-']) and								//+-label				; 0
-       ldy(i+1) and										// ldy P				; 1
-       lda(i+2) and										// lda P+1				; 2
-       sta_bp_1(i+3) then begin									// sta :bp+1				; 3
+  if (listing[i][1] in ['+','-']) and								//+-label				; 0
+     ldy(i+1) and										// ldy P				; 1
+     lda(i+2) and										// lda P+1				; 2
+     sta_bp_1(i+3) then begin									// sta :bp+1				; 3
 
 
     if lda(i+4) and										// lda 					; 4
-       (add_bp_y(i+5) or sub_bp_y(i+5)) and							// add|sub (:bp),y			; 5
+       add_sub(i+5) and										// add|sub				; 5
        sta(i+6) then										// sta					; 6
      if (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) then
        begin
@@ -404,4 +404,4 @@
        end;
 
 
-    end;
+  end;
