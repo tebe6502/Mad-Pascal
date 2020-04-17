@@ -257,6 +257,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
 	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
 	function FloatToStr(a: real): TString; assembler;
+	procedure FreeMem(var p; size: word); assembler; register;
+	procedure GetMem(var p; size: word); assembler; register;
 	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
 	function IsLetter(A: char): Boolean;
 	function IsDigit(A: char): Boolean;
@@ -2158,8 +2160,12 @@ function Concat(a: PString; b: char): string; assembler; overload;
 
 *)
 asm
-{	mva #0 @buf
+{	cpw a #@buf
+	beq skp
+
+	mva #0 @buf
 	@addString a
+skp
 	inc @buf
 	ldy @buf
 	lda b
@@ -2285,5 +2291,50 @@ begin
  Result := a shr 16 + a shl 16;
 
 end;
+
+
+procedure GetMem(var p; size: word); assembler; register;
+(*
+@description:
+Getmem reserves Size bytes memory, and returns a pointer to this memory in p.
+
+@param: p - pointer
+@param: size
+*)
+asm
+{
+	ldy #$00
+	lda :psptr
+	sta (P),y
+	iny
+	lda :psptr+1
+	sta (P),y
+
+	adw :psptr size
+};
+end;
+
+
+procedure FreeMem(var p; size: word); assembler; register;
+(*
+@description:
+Freemem releases the memory occupied by the pointer P
+
+@param: p - pointer
+@param: size
+*)
+asm
+{
+	ldy #$00
+	tya
+	sta (P),y
+	iny
+	sta (P),y
+
+	sbw :psptr size	
+};
+end;
+
+
 
 end.
