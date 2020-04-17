@@ -2648,6 +2648,7 @@ ile	brk
 
 .proc	@AllocMem	;(.word ztmp .byte ztmp+2) .var
 
+	sta ztmp+1
 	sty ztmp+2
 
 loop	lda (psptr),y
@@ -2674,10 +2675,12 @@ loop	lda (psptr),y
 
 .proc	@FreeMem	;(.word ztmp .byte ztmp+2) .var
 
-	sty ztmp+2
+	sta ztmp+1
 
-	lda psptr
-	sub ztmp+2
+	tya
+	eor #$ff
+	sec
+	adc psptr
 	sta psptr
 	scs
 	dec psptr+1
