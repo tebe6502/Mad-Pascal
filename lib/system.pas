@@ -2325,6 +2325,10 @@ Freemem releases the memory occupied by the pointer P
 *)
 asm
 {
+	cpw psptr #:PROGRAMSTACK
+	beq skp
+	bcc skp
+	
 	ldy #$00
 	tya
 	sta (P),y
@@ -2332,6 +2336,7 @@ asm
 	sta (P),y
 
 	sbw :psptr size	
+skp
 };
 end;
 

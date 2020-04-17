@@ -80,7 +80,7 @@ const
 	function EncodeDate(Year, Month, Day: Byte): TDateTime;
 	function EncodeDateTime(Year, Month, Day, Hour, Minute, Second: Byte): TDateTime;
 	function EncodeTime(Hour, Minute, Second: Byte): TDateTime;
-	function ExtractFileExt(a: PString): TString; register;
+	function ExtractFileExt(a: PString): TString;
 	function ExtractFilePath(a: PString): string;
 	function FileExists(name: PString): Boolean;
 	procedure FindClose(var f: TSearchRec); assembler;
@@ -617,7 +617,7 @@ begin
 end;
 
 
-function ExtractFileExt(a: PString): TString; register;
+function ExtractFileExt(a: PString): TString;
 (*
 @description: Return the extension from a filename
 
