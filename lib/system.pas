@@ -234,7 +234,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Abs(x: Integer): Integer; register; assembler; overload;
 	function ArcTan(value: real): real;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
-	function Concat(a,b: PString): string; assembler; overload;
+	function Concat(a,b: String): string; assembler; overload;
 	function Concat(a: PString; b: char): string; assembler; overload;
 	function Concat(a: char; b: PString): string; assembler; overload;
 	function Concat(a,b: char): string; overload;
@@ -256,7 +256,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure FillChar(var x; count: word; value: char); assembler; register; overload;
 	procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
 	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
-	function FloatToStr(a: real): ^string; assembler;
+	function FloatToStr(a: real): TString; assembler;
 	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
 	function IsLetter(A: char): Boolean;
 	function IsDigit(A: char): Boolean;
@@ -1551,7 +1551,7 @@ begin
 end;
 
 
-function FloatToStr(a: real): ^string; assembler;
+function FloatToStr(a: real): TString; assembler;
 (*
 @description:
 Convert a float value to a string
@@ -1567,7 +1567,8 @@ asm
 
 	@ValueToStr #@printREAL
 
-	mwa #@buf Result
+	ldx #$20
+	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
 };
@@ -2137,8 +2138,12 @@ Append one string to another.
 @returns: string (a+b)
 *)
 asm
-{	mva #0 @buf
+{	cpw a #@buf
+	beq skp
+
+	mva #0 @buf
 	@addString a
+skp
 	@addString b
 
 	ldy #0

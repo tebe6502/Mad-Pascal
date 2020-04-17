@@ -69,7 +69,7 @@ const
 	function AnsiUpperCase(a: PString): string; register;
 	procedure Beep;
 	function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;
-	function ByteToStr(a: byte): ^string; assembler;
+	function ByteToStr(a: byte): TString; assembler;
 	procedure Click; assembler;
 	function Date: TDateTime;
 	function DateToStr(d: TDateTime): TString;
@@ -88,8 +88,8 @@ const
 	function FindNext(var f: TSearchRec): byte; assembler;
 	function GetTickCount: cardinal; assembler;
 	function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;
-	function IntToStr(a: integer): ^string; assembler; overload;
-	function IntToStr(a: cardinal): ^string; assembler; overload;
+	function IntToStr(a: integer): TString; assembler; overload;
+	function IntToStr(a: cardinal): TString; assembler; overload;
 	function IsLeapYear(Year: Word): boolean;
 	function Now: TDateTime;
 	function RenameFile(var OldName,NewName: TString): Boolean; assembler;
@@ -422,7 +422,7 @@ begin
 end;
 
 
-function ByteToStr(a: byte): ^string; assembler;
+function ByteToStr(a: byte): TString; assembler;
 (*
 @description: Converts input byte to a string
 
@@ -447,21 +447,19 @@ asm
 	bmi @-
 	adc #$2f
 	
-	sta @buf+3
-	stx @buf+2
-	sty @buf+1
+	sta adr.Result+3
+	stx adr.Result+2
+	sty adr.Result+1
 	
 	lda #3
-	sta @buf
-	
-	mwa #@buf Result
-	
+	sta adr.Result
+
 	pla:tax
 };
 end;
 
 
-function IntToStr(a: integer): ^string; assembler; overload;
+function IntToStr(a: integer): TString; assembler; overload;
 (*
 @description: Convert an INTEGER value to a decimal string
 
@@ -476,14 +474,15 @@ asm
 
 	@ValueToStr #@printINT
 
-	mwa #@buf Result
+	ldx #$20
+	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
 };
 end;
 
 
-function IntToStr(a: cardinal): ^string; assembler; overload;
+function IntToStr(a: cardinal): TString; assembler; overload;
 (*
 @description: Convert an CARDINAL value to a decimal string
 
@@ -498,7 +497,8 @@ asm
 
 	@ValueToStr #@printCARD
 
-	mwa #@buf Result
+	ldx #$20
+	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
 };
