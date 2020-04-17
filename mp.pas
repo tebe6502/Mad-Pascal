@@ -32553,7 +32553,14 @@ if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
 
  end;
 
+
+ if ValType = SINGLETOK then begin
+  move(ConstVal, ftmp, sizeof(ftmp));
+  ConstVal := ftmp[1];
+ end;
+
  Push(ConstVal, ASVALUE, DataSize[ValType]);
+
 
 end else begin
  j := CompileTerm(j, ValType, VarType);
@@ -32675,10 +32682,9 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   j := CompileSimpleExpression(i + 2, RightValType, VarType);
 
+
   k := i + 2;
-  if SafeCompileConstExpression(k, ConstVal, ConstValType, VarType, False) then begin
-
-
+  if SafeCompileConstExpression(k, ConstVal, ConstValType, VarType, False) then
    if ConstValType in IntegerTypes then begin
 
     if ConstVal = 0 then begin
@@ -32706,8 +32712,6 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
     RightValType  := ConstValType;
 
    end;		// if ConstValType in IntegerTypes
-
-  end;
 
 
 
@@ -35933,7 +35937,7 @@ var IdentIndex, size: integer;
    function Value(dorig: Boolean = false): string;
    const reg: array [1..3] of string = ('edx', 'ecx', 'eax');
    var ftmp: TFloat;
-       v: integer;
+       v: Int64;
    begin
 
     move(Ident[IdentIndex].Value, ftmp, sizeof(ftmp));
