@@ -27,6 +27,8 @@ FilePos
 FileSize
 FillByte	; optimization build in compiler
 FillChar	; optimization build in compiler
+IsLetter
+IsDigit
 iSqrt		; fast inverse square root
 HexStr
 Ln
@@ -107,6 +109,24 @@ type	PByte = ^byte;
 	*)
 
 type	PWord = ^word;
+	(*
+	@description:
+
+	*)
+
+type	PCardinal = ^cardinal;
+	(*
+	@description:
+
+	*)
+
+type	PInteger = ^integer;
+	(*
+	@description:
+
+	*)
+
+type	PString = ^string;
 	(*
 	@description:
 
@@ -214,9 +234,9 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Abs(x: Integer): Integer; register; assembler; overload;
 	function ArcTan(value: real): real;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
-	function Concat(a,b: string): string; assembler; overload;
-	function Concat(a: string; b: char): string; assembler; overload;
-	function Concat(a: char; b: string): string; assembler; overload;
+	function Concat(a,b: PString): string; assembler; overload;
+	function Concat(a: PString; b: char): string; assembler; overload;
+	function Concat(a: char; b: PString): string; assembler; overload;
 	function Concat(a,b: char): string; overload;
 	function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 	function Cos(x: Real): Real; overload;
@@ -238,6 +258,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
 	function FloatToStr(a: real): ^string; assembler;
 	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
+	function IsLetter(A: char): Boolean;
+	function IsDigit(A: char): Boolean;
 	function iSqrt(number: Single): Single;
 	function Ln(x: Real): Real; overload;
 	function Ln(x: Float): Float; overload;
@@ -275,8 +297,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sqrt(x: Single): Single; overload;
 	function Sqrt(x: Integer): Single; overload;
 	function UpCase(a: char): char;
-	procedure Val(const s: TString; var v: integer; var code: byte); assembler; overload;
-	procedure Val(const s: TString; var v: single; var code: byte); overload;
+	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
+	procedure Val(s: PString; var v: single; var code: byte); overload; register;
 	procedure WriteSector(devnum: byte; sector: word; var buf); assembler;
 	function Swap(a: word): word; overload;
 	function Swap(a: cardinal): cardinal; overload;
@@ -1371,6 +1393,38 @@ asm
 end;
 
 
+function IsLetter(A: char): Boolean;
+(*
+@description:
+Check if A is a letter.
+
+@param: A - char
+
+@returns: Boolean
+*)
+begin
+
+ Result := (a>='A') and (a<='Z');
+
+end;
+
+
+function IsDigit(A: char): Boolean;
+(*
+@description:
+Check if A is a digit.
+
+@param: A - char
+
+@returns: Boolean
+*)
+begin
+
+ Result := (a>='0') and (a<='9');
+
+end;
+
+
 function LowerCase(a: char): char;
 (*
 @description:
@@ -1411,17 +1465,17 @@ begin
 end;
 
 
-procedure Val(const s: TString; var v: integer; var code: byte); assembler; overload;
+procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
 (*
 @description:
 Calculate numerical value of a string
 
-@param: s - string[32]
+@param: s - string
 @param: v - pointer to integer - result
 @param: code - pointer to integer - error code
 *)
 asm
-{	@StrToInt #adr.s
+{	@StrToInt s
 
 	tya
 	pha
@@ -1442,12 +1496,12 @@ asm
 end;
 
 
-procedure Val(const s: TString; var v: single; var code: byte); overload;
+procedure Val(s: PString; var v: single; var code: byte); overload; register;
 (*
 @description:
 Calculate numerical value of a string
 
-@param: s - string[32]
+@param: s - string
 @param: v - pointer to integer - result
 @param: code - pointer to integer - error code
 *)
@@ -2072,7 +2126,7 @@ asm
 end;
 
 
-function Concat(a,b: string): string; assembler; overload;
+function Concat(a,b: PString): string; assembler; overload;
 (*
 @description:
 Append one string to another.
@@ -2084,35 +2138,35 @@ Append one string to another.
 *)
 asm
 {	mva #0 @buf
-	@addString #adr.a
-	@addString #adr.b
-;	@move #@buf #adr.Result #256
+	@addString a
+	@addString b
+
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
 };
 end;
 
 
-function Concat(a: string; b: char): string; assembler; overload;
+function Concat(a: PString; b: char): string; assembler; overload;
 (*
 @description:
 
 *)
 asm
 {	mva #0 @buf
-	@addString #adr.a
+	@addString a
 	inc @buf
 	ldy @buf
 	lda b
 	sta @buf,y
-;	@move #@buf #adr.Result #256
+
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
 };
 end;
 
 
-function Concat(a: char; b: string): string; assembler; overload;
+function Concat(a: char; b: PString): string; assembler; overload;
 (*
 @description:
 
@@ -2121,8 +2175,8 @@ asm
 {	mva #1 @buf
 	lda a
 	sta @buf+1
-	@addString #adr.b
-;	@move #@buf #adr.Result #256
+	@addString b
+
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
 };

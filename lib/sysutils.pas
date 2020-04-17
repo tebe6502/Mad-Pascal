@@ -66,7 +66,7 @@ const
 	faAnyFile	= $3f;
 
 
-	function AnsiUpperCase(const a: string): string;
+	function AnsiUpperCase(a: PString): string; register;
 	procedure Beep;
 	function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;
 	function ByteToStr(a: byte): ^string; assembler;
@@ -80,9 +80,9 @@ const
 	function EncodeDate(Year, Month, Day: Byte): TDateTime;
 	function EncodeDateTime(Year, Month, Day, Hour, Minute, Second: Byte): TDateTime;
 	function EncodeTime(Hour, Minute, Second: Byte): TDateTime;
-	function ExtractFileExt(const a: string): TString;
-	function ExtractFilePath(const a: string): string;
-	function FileExists(name: TString): Boolean;
+	function ExtractFileExt(a: PString): TString; register;
+	function ExtractFilePath(a: PString): string;
+	function FileExists(name: PString): Boolean;
 	procedure FindClose(var f: TSearchRec); assembler;
 	function FindFirst (const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;
 	function FindNext(var f: TSearchRec): byte; assembler;
@@ -93,10 +93,10 @@ const
 	function IsLeapYear(Year: Word): boolean;
 	function Now: TDateTime;
 	function RenameFile(var OldName,NewName: TString): Boolean; assembler;
-	function StrToBool(const S: TString): Boolean;
-	function StrToFloat(var s: TString): real;
+	function StrToBool(S: PString): Boolean;
+	function StrToFloat(var s: String): real;
 	function StrToInt(const s: char): byte; assembler; overload;
-	function StrToInt(const s: TString): integer; assembler; overload;
+	function StrToInt(s: PString): integer; assembler; overload;
 	function TimeToStr(d: TDateTime): TString;
 	function Trim(var S: string): string;
 
@@ -374,7 +374,7 @@ ok	lda #true
 end;
 
 
-function FileExists(name: TString): Boolean;
+function FileExists(name: PString): Boolean;
 (*
 @description: Check whether a particular file exists in the filesystem
 
@@ -524,7 +524,7 @@ asm
 end;
 
 
-function StrToInt(const s: TString): integer; assembler; overload;
+function StrToInt(s: PString): integer; assembler; overload;
 (*
 @description: Convert a string to an integer value
 
@@ -533,7 +533,7 @@ function StrToInt(const s: TString): integer; assembler; overload;
 @returns: integer (32bit)
 *)
 asm
-{	@StrToInt #adr.s
+{	@StrToInt s
 
 	mva edx Result
 	mva edx+1 Result+1
@@ -566,7 +566,7 @@ asm
 end;
 
 
-function StrToFloat(var s: TString): real;
+function StrToFloat(var s: String): real;
 (*
 @description: Convert a string to a floating-point value
 
@@ -617,7 +617,7 @@ begin
 end;
 
 
-function ExtractFileExt(const a: string): TString;
+function ExtractFileExt(a: PString): TString; register;
 (*
 @description: Return the extension from a filename
 
@@ -647,7 +647,7 @@ begin
 end;
 
 
-function ExtractFilePath(const a: string): string;
+function ExtractFilePath(a: PString): string;
 (*
 @description: Extract the path from a filename
 
@@ -675,23 +675,20 @@ begin
 end;
 
 
-function AnsiUpperCase(const a: string): string;
+function AnsiUpperCase(a: PString): string; register;
 (*
 @description: Return an uppercase version of a string
 
-@param: const a: string[255]
+@param: a: PString
 
 @returns: string[255]
 *)
-var i, j: byte;
+var j: byte;
 begin
 
  Result:=a;
 
- i:=byte(a[0]);
-
- if i<>0 then
-  for j:=1 to i do Result[j]:=UpCase(Result[j]);
+ for j:=1 to length(a) do Result[j] := UpCase(Result[j]);
 
 end;
 
@@ -919,7 +916,7 @@ begin
 end;
 
 
-function StrToBool(const S: TString): Boolean;
+function StrToBool(S: PString): Boolean;
 (*
 @description:
 StrToBool will convert the string S to a boolean value.
@@ -930,9 +927,22 @@ If it contains a numerical value, 0 is converted to False, all other values resu
 
 @returns: Boolean
 *)
+var i: integer;
+    e: byte;
 begin
 
- if (AnsiUpperCase(S) = 'TRUE') or (S = '1') then
+ val(S, i, e);
+
+ if e = 0 then begin
+ 
+  if i = 0 then
+   Result := false
+  else 
+   Result := true; 
+ 
+ end else
+ 
+ if (AnsiUpperCase(S) = 'TRUE') then
   Result := true
  else
   Result := false;
