@@ -1,3 +1,12 @@
+17.04.2020
+- SYSTEM: GetMem, FreeMem
+
+16.04.2020
+- poprawiki SYSTEM (Concat), SYSUTILS (IntToStr, FloatToStr) w celu zmniejszenia u¿ycia pamiêci na STRING-i
+
+15.04.2020
+- nowe modu³y CIO, S2 (VBXE)
+
 12.04.2020
 - optymalizacja dla wskaŸników na stronie zerowej, absolute (PByte Absolute ZPage)
 
