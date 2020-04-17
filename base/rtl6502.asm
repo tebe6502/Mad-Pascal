@@ -1506,7 +1506,7 @@ l_0596
 
 ; ForToDoEpilog
 c_0508
-;	inc B						; inc ptr byte [CounterAddress]
+;	inc B					; inc ptr byte [CounterAddress]
 	iny
 
 	seq
@@ -1517,7 +1517,7 @@ l_0534
 b_0508
 	:3 mva fra+# fracpart+#
 
-	mva #6 @float.afterpoint	; wymagana liczba miejsc po przecinku
+	mva #6 @float.afterpoint		; wymagana liczba miejsc po przecinku
 	@float #500000
 
 	ldx #0
@@ -2661,10 +2661,11 @@ loop	lda (psptr),y
 	sta (ztmp),y
 
 	dey
-	bne loop
+	bpl loop
 
 	lda psptr
-	add ztmp+2
+	sec
+	adc ztmp+2
 	sta psptr
 	scc
 	inc psptr+1
@@ -2679,7 +2680,7 @@ loop	lda (psptr),y
 
 	tya
 	eor #$ff
-	sec
+	clc
 	adc psptr
 	sta psptr
 	scs
@@ -2695,7 +2696,7 @@ loop	lda (psptr),y
 	sta (ztmp),y
 
 	dey
-	bne loop
+	bpl loop
 
 	rts
 .endp
