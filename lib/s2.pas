@@ -22,6 +22,8 @@ interface
 	procedure SetGraphMode(mode: byte);
 	procedure ClearDevice;
 	procedure CloseGraph;
+	procedure Print(a: char); overload;
+	procedure Print(a: PString); overload;
 
 implementation
 
@@ -83,6 +85,23 @@ asm
 	
 	pla:tax
 };
+end;
+
+
+procedure Print(a: char); overload;
+begin
+
+ put(6, ord(a));
+
+end;
+
+
+procedure Print(a: PString); overload;
+var i: byte;
+begin
+
+ for i:=1 to a[0] do put(6, ord(a[i]));
+
 end;
 
 
