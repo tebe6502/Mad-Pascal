@@ -3,7 +3,12 @@
 Sub-Pascal 32-bit real mode compiler for 80386+ processors v. 2.0 by Vasiliy Tereshkov, 2009
 
 https://atariage.com/forums/topic/240919-mad-pascal/
+
 https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
+
+IDE WUDSN
+https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
+
 
 Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2019
 
@@ -3744,14 +3749,16 @@ var i, l, k, m: integer;
      end;
 
 
-    if ldy_1(i) and										// ldy #1				; 0
-       lda(i+1) and										// lda					; 1
-       cmp(i+2)  and										// cmp					; 2
-       SKIP(i+3) and										// SKIP					; 3
-       dey(i+4) and										// dey					; 4
-       (listing[i+5] = '@') and									//@					; 5
-       tya(i+6) and										// tya					; 6
-       jeq(i+7) then										// jeq					; 7
+  if ldy_1(i) and										// ldy #1				; 0
+     lda(i+1) and										// lda					; 1
+     cmp(i+2)  and										// cmp					; 2
+     SKIP(i+3) and										// SKIP					; 3
+     dey(i+4) and										// dey					; 4
+     (listing[i+5] = '@') and									//@					; 5
+     tya(i+6) then begin									// tya					; 6
+
+
+    if jeq(i+7) then										// jeq					; 7
      begin
        listing[i+4] := #9'jmp ' + copy(listing[i+7], 6, 256);
 
@@ -3763,14 +3770,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if ldy_1(i) and										// ldy #1				; 0
-       lda(i+1) and										// lda					; 1
-       cmp(i+2) and										// cmp					; 2
-       SKIP(i+3) and										// SKIP					; 3
-       dey(i+4) and										// dey					; 4
-       (listing[i+5] = '@') and									//@					; 5
-       tya(i+6) and										// tya					; 6
-       and_stack(i+7) and									// and :STACKORIGIN,x			; 7
+    if and_stack(i+7) and									// and :STACKORIGIN,x			; 7
        jeq(i+8) then										// jeq					; 8
      begin
        listing[i+4] := #9'jmp ' + copy(listing[i+8], 6, 256);
@@ -3783,14 +3783,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if ldy_1(i) and										// ldy #1				; 0
-       lda(i+1) and										// lda					; 1
-       cmp(i+2) and										// cmp					; 2
-       SKIP(i+3) and										// SKIP					; 3
-       dey(i+4) and										// dey					; 4
-       (listing[i+5] = '@') and									//@					; 5
-       tya(i+6) and										// tya					; 6
-       and_stack(i+7) and									// and :STACKORIGIN+1,x			; 7
+    if and_stack(i+7) and									// and :STACKORIGIN,x			; 7
        jne(i+8) then										// jne					; 8
      begin
        listing[i+4] := #9'jmp ' + copy(listing[i+8], 6, 256) + 'w';
@@ -3802,6 +3795,9 @@ var i, l, k, m: integer;
        listing[i] := '';
        Result:=false; Break;
      end;
+
+  end;
+
 
 
     if (listing[i] = #9'jsr andAL_CL') and							// jsr andAL_CL				; 0
@@ -8376,12 +8372,7 @@ var i, l, k, m: integer;
 
 
 {$i opt_imulCX.inc}
-{$i opt_imulCX_x10.inc}
-
-{$i opt_imulCL_x3.inc}
-{$i opt_imulCL_x5.inc}
-{$i opt_imulCL_x8.inc}
-{$i opt_imulCL_x10.inc}
+{$i opt_imulCL.inc}
 
 
     if lda(i) and									// lda 					; 0
@@ -14359,6 +14350,25 @@ var i, l, k, m: integer;
 // ===			optymalizacja ADD.				  === //
 // -----------------------------------------------------------------------------
 
+    if (pos('lda <adr.', listing[i]) >0) and						// lda <adr.		; 0
+       add_im(i+1) and									// add #		; 1
+       sta(i+2) and									// sta			; 2
+       (pos('lda >adr.', listing[i+3]) >0) and						// lda >adr.		; 3
+       adc_im(i+4) and									// adc #		; 4
+       sta(i+5) then									// sta			; 5
+     begin
+	p:=GetWORD(i+1, i+4);
+
+	if p <> 0 then listing[i] := listing[i] + '+$' + IntToHex(p, 2);
+	listing[i+1] := '';
+
+	if p <> 0 then listing[i+3] := listing[i+3] + '+$' + IntToHex(p, 2);
+	listing[i+4] := '';
+
+	Result:=false; Break;
+     end;
+
+
     if lda(i) and									// lda			; 0
        add(i+1) and									// add			; 1
        sta(i+2) and									// sta			; 2
@@ -16364,6 +16374,25 @@ var i, l, k, m: integer;
 // ===			optymalizacja SUB.				  === //
 // -----------------------------------------------------------------------------
 
+    if (pos('lda <adr.', listing[i]) >0) and						// lda <adr.		; 0
+       sub_im(i+1) and									// sub #		; 1
+       sta(i+2) and									// sta			; 2
+       (pos('lda >adr.', listing[i+3]) >0) and						// lda >adr.		; 3
+       sbc_im(i+4) and									// sbc #		; 4
+       sta(i+5) then									// sta			; 5
+     begin
+	p:=GetWORD(i+1, i+4);
+
+	if p <> 0 then listing[i] := listing[i] + '-$' + IntToHex(p, 2);
+	listing[i+1] := '';
+
+	if p <> 0 then listing[i+3] := listing[i+3] + '-$' + IntToHex(p, 2);
+	listing[i+4] := '';
+
+	Result:=false; Break;
+     end;
+
+
     if lda(i) and									// lda			; 0
        lda(i+1) and									// lda			; 1
        add_sub(i+2) then								// add|sub		; 2
@@ -17232,6 +17261,28 @@ var i, l, k, m: integer;
 
 	if yes then begin
 	 listing[i+1] := '';
+
+	 Result:=false; Break;
+	end;
+
+      end;
+
+
+    if (asl_a(i) or lsr_a(i)) and 							// asl|lsr @		; 0
+       ((pos('rol ', listing[i+1]) > 0) or (pos('ror ', listing[i+1]) > 0)) and		// rol|ror		; 1
+       (pos('sta :eax', listing[i+2]) > 0) then						// sta :eax		; 2
+      begin
+
+	tmp := copy(listing[i+2], 6, 256);
+
+        yes:=true;
+        for p:=i+3 to l do
+	 if (pos(tmp, listing[p]) > 0) or (pos(#9'jsr', listing[p]) > 0) or (pos(#9'.if', listing[p]) > 0) then begin
+	  yes:=false; Break
+	 end;
+
+	if yes then begin
+	 listing[i+2] := '';
 
 	 Result:=false; Break;
 	end;
@@ -22951,7 +23002,7 @@ begin
        ( ((listing[m+1] = #9'sta :ecx') and (listing[m+3] = #9'sta :eax')) or		// sta :ecx|:eax			; 1
          ((listing[m+1] = #9'sta :eax') and (listing[m+3] = #9'sta :ecx')) ) and
        lda_im(m+2) and
-       (GetBYTE(m+2) in [$00,$01,$02,04,$08,$10,$20,$40,$80]) and			// lda #$00;01;02;04;08;10;20;40;80	; 2
+       (GetBYTE(m+2) in [$00,$01,$02,04,$08,$10,$20,$40{,$80}]) and			// lda #$00;01;02;04;08;10;20;40;80	; 2
 {
        ((listing[m+2] = #9'lda #$00') or (listing[m+2] = #9'lda #$01') or		// .ifdef fmulinit			; 4
         (listing[m+2] = #9'lda #$02') or (listing[m+2] = #9'lda #$04') or		// fmulu_8				; 5
@@ -23025,7 +23076,7 @@ begin
 
     if (l=9) and
        lda_im(m) and
-       (GetBYTE(m) in [$00,$01,$02,$04,$08,$10,$20,$40,$80]) and			// lda #$00;01;02;04;08;10;20;40;80	; 0
+       (GetBYTE(m) in [$00,$01,$02,$04,$08,$10,$20,$40{,$80}]) and			// lda #$00;01;02;04;08;10;20;40;80	; 0
 {
 	((listing[m] = #9'lda #$00') or (listing[m] = #9'lda #$01') or
         (listing[m] = #9'lda #$02') or (listing[m] = #9'lda #$04') or			// sta :ecx|:eax			; 1
@@ -24854,7 +24905,7 @@ begin
 
 {$IFDEF OPTIMIZECODE}
 
-  repeat until PeepholeOptimization_STACK;	     // optymalizacja lda :STACK... \ sta :STACK...
+  repeat until PeepholeOptimization_STACK;		// optymalizacja lda :STACK...,x \ sta :STACK...,x
 
 {$ENDIF}
 
@@ -30717,6 +30768,7 @@ end;
 function CompileAddress(i: integer; out ValType, AllocElementType: Byte; VarPass: Boolean = false): integer;
 var IdentIndex: integer;
     Name, svar: string;
+    NumAllocElements: cardinal;
 begin
 
     Result:=i;
@@ -30764,23 +30816,47 @@ begin
 	  begin						// array index
 	      inc(i);
 
- // asm65(#9'atari');	  // a := @tab[x,y]
+ // atari	  // a := @tab[x,y]
 
 	      i := CompileArrayIndex(i, IdentIndex);
 
- svar := GetLocalName(IdentIndex);
 
- asm65;
- asm65(#9'lda '+svar);
- asm65(#9'add :STACKORIGIN,x');
- asm65(#9'sta :STACKORIGIN,x');
- asm65(#9'lda '+svar+'+1');
- asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
- asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	if Ident[IdentIndex].DataType = ENUMTYPE then begin
+//   Size := DataSize[Ident[IdentIndex].AllocElementType];
+	 NumAllocElements := 0;
+	end else
+	 NumAllocElements := Elements(IdentIndex); //Ident[IdentIndex].NumAllocElements;
+
+
+	svar := GetLocalName(IdentIndex);
+
+	AllocElementType := Ident[IdentIndex].AllocElementType;
+
+// writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements );
+
+
+	if (NumAllocElements * DataSize[AllocElementType] > 256) or (NumAllocElements in [0,1]) then begin
+
+	 asm65(#9'lda '+svar);
+	 asm65(#9'add :STACKORIGIN,x');
+	 asm65(#9'sta :STACKORIGIN,x');
+	 asm65(#9'lda '+svar+'+1');
+	 asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+	 asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+	end else begin
+
+	 asm65(#9'lda <adr.'+svar);
+	 asm65(#9'add :STACKORIGIN,x');
+	 asm65(#9'sta :STACKORIGIN,x');
+	 asm65(#9'lda >adr.'+svar);
+	 asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+	 asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+	end;
+
 
 	     CheckTok(i + 1, CBRACKETTOK);
-
-	     AllocElementType := Ident[IdentIndex].AllocElementType;
 
 	     end else
 	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
@@ -31276,17 +31352,23 @@ case Tok[i].Kind of
 
 	   if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) or (Ident[IdentIndex].AllocElementType = CHARTOK) then begin
 
+
 	    a65(__addBX);
-//	    asm65(#9'mwa '+Ident[IdentIndex].Name+' :bp2');
-//	    asm65(#9'ldy #0');
-//	    asm65(#9'lda (:bp2),y');
-//	    asm65(#9'sta :STACKORIGIN,x');
+
+	 if (Ident[IdentIndex].PassMethod = VARPASSING) or (Ident[IdentIndex].NumAllocElements = 0) then begin
 
 	    asm65(#9'lda '+Ident[IdentIndex].Name+'+1');
 	    asm65(#9'sta :bp+1');
 	    asm65(#9'ldy '+Ident[IdentIndex].Name);
 	    asm65(#9'lda (:bp),y');
 	    asm65(#9'sta :STACKORIGIN,x');
+
+	end else begin
+
+	    asm65(#9'lda adr.'+Ident[IdentIndex].Name);
+	    asm65(#9'sta :STACKORIGIN,x');
+
+	end;
 
 	    ValType:=BYTETOK;
 
