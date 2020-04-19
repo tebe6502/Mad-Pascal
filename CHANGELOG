@@ -1,5 +1,14 @@
+19.04.2020
+- zreorganizowana biblioteka procedur base\, nowe podkatalogi \atari, \common, \runtime
+- runtime library base\rtl6502.asm
+
+18.04.2020
+- optymalizacje kodu 6502 dla obliczania adresu tablic (przez wskaünik albo bezpoúrednio przez adr.label)
+- optymaliacja kodu 6502 dla obliczania d≥ugoúci stringa (przez wskaünik albo bezpoúrednio przez adr.label)
+
 17.04.2020
 - SYSTEM: GetMem, FreeMem
+- naprawione wywo≥anie Push w CompileSimpleExpression dla typu Single
 
 16.04.2020
 - poprawiki SYSTEM (Concat), SYSUTILS (IntToStr, FloatToStr) w celu zmniejszenia uøycia pamiÍci na STRING-i
