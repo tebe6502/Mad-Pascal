@@ -31,7 +31,9 @@ Contributors:
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
-+ Draco :
++ Drac030 :
+	- base\atari\cmdline.asm
+	- base\atari\vbxedetect.asm
 	- unit MISC: DetectCPU, DetectCPUSpeed, DetectMem, DetectHighMem
 
 + Eru / TQA :
@@ -41,7 +43,8 @@ Contributors:
 	- unit MISC: DetectANTIC
 
 + Piotr Fusik :
-	- Integer compare
+	- base\runtime\icmp.asm
+	- unit GRAPH: detect X:Y graphics resolution (OS mode)
 
 + Seban / Slight :
 	- unit MISC: DetectStereo
@@ -50,11 +53,12 @@ Contributors:
 	- unit IMAGE, VIMAGE: BMP, GIF, PCX
 
 + Ullrich von Bassewitz, Christian Krueger (https://github.com/cc65/cc65/libsrc/common/) :
-	- unit SYSTEM: MOVE, FILLCHAR
+	- base\common\memmove.asm
+	- base\common\memset.asm
 
 + Ullrich von Bassewitz (https://github.com/cc65/cc65/libsrc/runtime/) :
-	- 8x8 => 16 multiplication routine (base\cpu6502\cpu6502_byte.asm)
-	- 16x16 => 32 multiplication routine (base\cpu6502\cpu6502_word.asm)
+	- 8x8 => 16 multiplication routine (base\common\byte.asm)
+	- 16x16 => 32 multiplication routine (base\common\word.asm)
 
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
@@ -21607,6 +21611,26 @@ var i, l, k, m: integer;
       end;
 
 
+    if lda_im_0(i) and										// lda #$00		; 0
+       jeq(i+1) then										// jeq			; 1
+      begin
+       listing[i] := '';
+       listing[i+1] := #9'jmp ' + copy(listing[i+1], 6, 256);
+
+       Result:=false; Break;
+      end;
+
+
+    if (lda_im(i) and (lda_im_0(i) = false)) and						// lda #		; 0
+       jne(i+1) then										// jne			; 1
+      begin
+       listing[i] := '';
+       listing[i+1] := #9'jmp ' + copy(listing[i+1], 6, 256);
+
+       Result:=false; Break;
+      end;
+
+
 { luci
     if //((i > 0) and (ldy_1(i-1) = false)) and							// lda 				; 0
        lda(i) and (iy(i) = false) and								// add|sub			; 1
@@ -28660,7 +28684,7 @@ if Pass = CODEGENERATIONPASS then begin
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  asm65(#9'icl ''res6502.asm''');
+  asm65(#9'icl ''atari\resource.asm''');
 
   asm65(#9'?EXTDETECT = 0');
   asm65(#9'?VBXDETECT = 0');
@@ -37894,7 +37918,7 @@ if FastMul > 0  then begin
  asm65separator;
 
  asm65;
- asm65(#9'icl ''6502\cpu6502_fmul.asm''', '; fast multiplication');
+ asm65(#9'icl ''common\fmul.asm''', '; fast multiplication');
 
  asm65;
  asm65(#9'.print ''FMUL_INIT: '',fmulinit,''..'',*');
