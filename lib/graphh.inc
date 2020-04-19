@@ -32,7 +32,7 @@ const
 	m640x480 = 8 + 16;
 
 	{ error codes }
-	grOK		= 0;
+	grOK		= 1;
 	grNoInitGraph	= -1;
 	grNotDetected	= -2;
 	grFileNotFound	= -3;
