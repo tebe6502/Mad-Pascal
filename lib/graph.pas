@@ -73,18 +73,18 @@ asm
 {
 	txa:pha
 
-	mva #$2c @putchar.vbxe
+	mva #$2c @putchar.vbxe	; bit*
 
 	lda mode
 	sta MAIN.SYSTEM.GraphMode
 	and #$0f
 	tay
 
-	ldx #$60	; 6*16
-	lda mode	; %00010000 with text window
+	ldx #$60		; 6*16
+	lda mode		; %00010000 with text window
 	and #$10
 	eor #$10
-	ora #2		; read
+	ora #2			; read
 
 	.nowarn @graphics
 

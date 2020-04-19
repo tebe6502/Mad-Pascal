@@ -26,7 +26,7 @@ interface
 	procedure Cls(chn: byte); assembler;
 	function Get(chn: byte): byte; assembler;
 	procedure Put(chn, a: byte): assembler;
-	procedure XIO(chn, cmd, ax1, ax2: byte); assembler;
+	procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
 	
 implementation
 
@@ -134,7 +134,7 @@ asm
 end;
 
 
-procedure XIO(chn, cmd, ax1, ax2: byte); assembler;
+procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
 asm
 {	txa:pha
 
@@ -150,6 +150,13 @@ asm
 
 	lda ax2
 	sta icax2,x
+	
+	inw device		;skip [0]
+
+	lda device		;device name
+	sta icbufa,x
+	lda device+1
+	sta icbufa+1,x	
 
 	jsr ciov
 
