@@ -73,8 +73,6 @@ asm
 {
 	txa:pha
 
-	mva #$2c @putchar.vbxe	; bit*
-
 	lda mode
 	sta MAIN.SYSTEM.GraphMode
 	and #$0f
@@ -86,10 +84,9 @@ asm
 	eor #$10
 	ora #2			; read
 
-	.nowarn @graphics
+	.nowarn @GRAPHICS
 
 	sty GraphResult
-
 	
 tlshc	equ $ee6d
 
@@ -101,7 +98,6 @@ shift	asl @
 	bne shift
 
 	sta SCANLINE_WIDTH
-	
 
 ; Fox/TQA
 
@@ -119,28 +115,7 @@ tmrcn	equ $ee8d
 ; X:A = horizontal resolution
 ; Y = vertical resolution
 
-
-	sta MAIN.SYSTEM.ScreenWidth
-	stx MAIN.SYSTEM.ScreenWidth+1
-	
-	sub #1
-	sta WIN_RIGHT
-	txa
-	sbc #0
-	sta WIN_RIGHT+1
-	
-	sty MAIN.SYSTEM.ScreenHeight
-	lda #0
-	sta MAIN.SYSTEM.ScreenHeight+1
-	
-	sta WIN_LEFT
-	sta WIN_LEFT+1
-	sta WIN_TOP
-	sta WIN_TOP+1
-
-	sta WIN_BOTTOM+1	
-	dey
-	sty WIN_BOTTOM
+	@SCREENSIZE
 
 	pla:tax
 };

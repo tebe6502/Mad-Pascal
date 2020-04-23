@@ -89,7 +89,8 @@ const
 	procedure CursorOn;
 	procedure Delay(count: word); assembler;
 	procedure DelLine;
-	procedure GotoXY(x,y: byte); assembler;
+	procedure GotoXY(x: word; y: byte); assembler; overload;
+	procedure GotoXY(x: byte; y: byte); assembler; overload;
 	procedure InsLine;
 	function Keypressed: Boolean; assembler;
 	procedure NoSound; assembler;
@@ -253,7 +254,39 @@ skp	sty Result
 end;
 
 
-procedure GotoXY(x,y: byte); assembler;
+procedure GotoXY(x: word; y: byte); assembler; overload;
+(*
+@description:
+Set cursor position on screen.
+
+
+GotoXY positions the cursor at (X,Y), X in horizontal, Y in vertical direction relative to
+
+the origin of the current window. The origin is located at (1,1), the upper-left corner of the window.
+
+@param: x - horizontal positions (1..40)
+@param: y - vertical positions (1..24)
+*)
+asm
+{	lda x
+	ora x+1
+	beq @+
+	
+	dew x
+
+@	mwa x colcrs
+
+	ldy y
+	beq @+
+
+	dey
+
+@	sty rowcrs
+};
+end;
+
+
+procedure GotoXY(x: byte; y: byte); assembler; overload;
 (*
 @description:
 Set cursor position on screen.
@@ -269,14 +302,18 @@ the origin of the current window. The origin is located at (1,1), the upper-left
 asm
 {	ldy x
 	beq @+
+	
 	dey
-	sty colcrs
 
-@	ldy y
+@	sty colcrs
+	mvy #$00 colcrs+1
+
+	ldy y
 	beq @+
+
 	dey
-	sty rowcrs
-@
+
+@	sty rowcrs
 };
 end;
 

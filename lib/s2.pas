@@ -13,23 +13,65 @@ unit S2;
 {
 
 ClearDevice
+CloseGraph
 InitGraph
+SetGraphMode
+TextOut
 
 }
 
 interface
 
+const
+	fsNormal = 0;
+	fsUnderline = 64;
+	fsInverse = 128;
+	fsProportional = 8;
+	fsCondensed = 32;
+	
+
+var	Font: Object
+			Style: byte;
+			Color: byte;
+
+			procedure LoadFromFile(name: TString);
+			procedure LoadFromMem(p: pointer);
+	end;
+
+
 	procedure SetGraphMode(mode: byte);
 	procedure ClearDevice;
 	procedure CloseGraph;
-{	procedure Print(a: cardinal); overload;
-	procedure Print(a: integer); overload;
-	procedure Print(a: char); overload;
-	procedure Print(a: PString); overload;
-}
+	
+//	procedure TextOut(x,y: char; s: PByte);
+//	procedure TextOut(x: word; y: byte; s: PByte); overload;
+// !!! powinien zglosic niezgodnosc typow parametrow !!!
+
+
+	procedure TextOut(x: word; y: byte; s: PByte); overload;
+	procedure TextOut(a: char); overload;
+
+
 implementation
 
 uses cio, graph, crt, sysutils;
+
+
+
+procedure Font.LoadFromFile(name: PByte);
+begin
+
+
+
+end;
+
+
+procedure Font.LoadFromMem(p: pointer);
+begin
+
+
+
+end;
 
 
 procedure ClearDevice;
@@ -83,94 +125,84 @@ procedure SetGraphMode(mode: byte);
 @description:
 Init S2:
 *)
-var p: pointer;
 begin
-
- InitGraph(0);
 
  cls(6);
  opn(6,12,mode,'S2:');
  
+// xio(111,6,0,0,'S2:');
+
+ GraphResult := byte(grNotDetected);
+ 
 asm
 {
+	ldy icax5+$60	; vertical resolution Y
+	beq toEnd
+
 	txa:pha
 
-	ldy icax5+$60	; vertical resolution Y
-	bne ok
-
-	lda #MAIN.GRAPH.grNotDetected
-	bne toEnd
-
-ok	lda icax3+$60	; horizontal resolution X:A
+	lda icax3+$60	; horizontal resolution X:A
 	ldx icax4+$60
 
-	sta MAIN.SYSTEM.ScreenWidth
-	stx MAIN.SYSTEM.ScreenWidth+1
+; X:A = horizontal resolution
+; Y = vertical resolution
 
-	sub #1
-	sta MAIN.GRAPH.WIN_RIGHT
-	txa
-	sbc #0
-	sta MAIN.GRAPH.WIN_RIGHT+1
-
-	sty MAIN.SYSTEM.ScreenHeight
-	lda #0
-	sta MAIN.SYSTEM.ScreenHeight+1
-
-	sta MAIN.GRAPH.WIN_LEFT
-	sta MAIN.GRAPH.WIN_LEFT+1
-	sta MAIN.GRAPH.WIN_TOP
-	sta MAIN.GRAPH.WIN_TOP+1
-
-	sta MAIN.GRAPH.WIN_BOTTOM+1	
-	dey
-	sty MAIN.GRAPH.WIN_BOTTOM
+	@SCREENSIZE
 
 	lda mode
 	sta MAIN.SYSTEM.GraphMode
 
   	mva #$2c @putchar.vbxe	; bit*
-	mva #$60 @putchar.chn	; #6
+
+	lda #$60		; #6 * $10
+	sta @putchar.chn
+	sta @COMMAND.scrchn
+
 	mva #0 766		; execution execution control character
-	
+
+	sta colcrs
+	sta colcrs+1
+	sta rowcrs
+
 	lda #MAIN.GRAPH.grOK
-toEnd
 	sta MAIN.GRAPH.GraphResult
 
 	pla:tax
+	
+toEnd
+	
 };
 end;
 
 
-{
-procedure Print(a: char); overload;
-begin
 
- put(6, ord(a));
-
-end;
-
-
-procedure Print(a: PString); overload;
+procedure TextOut(x: word; y: byte; s: PByte); overload;
 var i: byte;
 begin
 
- for i:=1 to a[0] do put(6, ord(a[i]));
+ GotoXY(x,y);
 
+asm
+{
+	mva FONT.COLOR fildat
+};
+  
+ for i:=1 to s[0] do xio(105,6,Font.Style,byte(s[i]),'S2:');
+ 
 end;
 
 
-procedure Print(a: cardinal); overload;
+procedure TextOut(a: char); overload;
 begin
- Print( IntToStr(a) );
-end;
 
-
-procedure Print(a: integer); overload;
-begin
- Print( IntToStr(a) );
+asm
+{
+	mva FONT.COLOR fildat
+};
+  
+ xio(105,6,Font.Style,byte(a),'S2:');
+ 
 end;
-}
 
 
 procedure CloseGraph;
