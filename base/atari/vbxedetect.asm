@@ -1,5 +1,5 @@
 
-; VBXE detect
+; VBXE.INC
 
 .proc	@vbxe_detect
 

@@ -1,4 +1,8 @@
 
+; unit GRAPH: InitGraph
+; unit S2: SetGraphMode
+
+
 /*
   PUT CHAR
 

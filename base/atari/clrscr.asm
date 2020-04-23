@@ -1,10 +1,12 @@
 
+; unit CRT: TextMode
+; unit VBXE: VBXEOff
+
 .proc	@ClrScr
 
-	mva #$2c @putchar.vbxe	; bit*
+	mva #$2c @putchar.vbxe	; bit*	disable VBXE put char
 
-	ldx @putchar.chn
-
+	ldx #0
 	lda #$0c
 	jsr xcio
 
