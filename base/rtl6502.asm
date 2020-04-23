@@ -12,25 +12,7 @@
 /* -----------------------------------------------------------------------
 
 @AllocMem
-@ClrScr
-@CmdLine
-@COMMAND
-@GRAPHICS
-@GetLine
-@GetKey
 @FreeMem
-@putchar
-
-fmul10		EDX * 10
-div10		EDX div 10 -> remainder A
-
-@mul40		AX * 10 -> EAX
-
-@vbxe_detect
-@vbxe_init
-@vbxe_cmap
-@setxdl
-@vbxe_put
 
 */
 
@@ -226,6 +208,13 @@ fxla    .macro
         .endm
 
 
+m@call	.macro (os_proc)
+
+	jsr %%os_proc
+
+	.endm
+
+
 ; -----------------------------------------------------------------------
 
 	icl 'atari\atari.hea'
@@ -240,7 +229,7 @@ fxla    .macro
 	icl 'atari\getkey.asm'		; @GetKey
 	icl 'atari\getline.asm'		; @GetLine
 	icl 'atari\putchar.asm'		; @putchar
-	icl 'atari\graphics.asm'	; @GRAPHICS, @COMMAND
+	icl 'atari\graphics.asm'	; @GRAPHICS, @COMMAND, @SCREENSIZE
 
 	icl 'atari\vbxedetect.asm'	; @vbxe_detect
 	icl 'atari\vbxeinit.asm'	; @vbxe_init	
