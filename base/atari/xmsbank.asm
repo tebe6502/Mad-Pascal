@@ -20,7 +20,7 @@ ptr3 = eax			; position	(4)
 
 	lda portb
 	and #1
-	ora MAIN.MISC.ADR.BANKS,x
+	ora MAIN.SYSTEM.__PORTB_BANKS,x
 	sta portb
 
 	lda ptr3 		; offset

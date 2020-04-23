@@ -18,8 +18,8 @@
 
 	org CODEORIGIN
 
-portb	= $d301
-@mem_banks = $0600
+portb		= $d301
+@mem_banks	= $0600
 
 .struct	s@bmp
 .word	bftype

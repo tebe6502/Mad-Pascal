@@ -110,7 +110,7 @@ src	equ *-2
 
 	lda portb
 	and #1
-	ora MAIN.MISC.ADR.BANKS+1,x
+	ora MAIN.SYSTEM.__PORTB_BANKS+1,x
 	sta portb
 
 	ldx #0
