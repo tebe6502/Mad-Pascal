@@ -4,12 +4,12 @@
 // -----------------------------------------------------------------------------
 
   if ((pos(listing[i], listing[i+3]) > 0) or ((pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0))) and
-     lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda T			; 0
-     add(i+1) and										// add				; 1
-     tay(i+2) and										// tay				; 2
-     lda(i+3) and										// lda T+1			; 3
-     adc_im_0(i+4) and										// adc #$00			; 4
-     sta_bp_1(i+5) then										// sta :bp+1			; 5
+     lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and					// lda T			; 0
+     add(i+1) and											// add				; 1
+     tay(i+2) and											// tay				; 2
+     lda(i+3) and											// lda T+1			; 3
+     adc_im_0(i+4) and											// adc #$00			; 4
+     sta_bp_1(i+5) then											// sta :bp+1			; 5
    begin
 
     if LDA_BP_Y(i+6) and									// lda (:bp),y			; 6
@@ -226,13 +226,13 @@
 
 
   if ((pos(listing[i], listing[i+4]) > 0) or ((pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+4]) > 0))) and
-     lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda T			; 0
-     add(i+1) and										// add				; 1
-     sta_stack(i+2) and										// sta :STACKORIGIN		; 2
-     tay(i+3) and										// tay				; 3
-     lda(i+4) and										// lda T+1			; 4
-     adc_im_0(i+5) and										// adc #$00			; 5
-     sta_bp_1(i+6) then										// sta :bp+1			; 6
+     lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and					// lda T			; 0
+     add(i+1) and											// add				; 1
+     sta_stack(i+2) and											// sta :STACKORIGIN		; 2
+     tay(i+3) and											// tay				; 3
+     lda(i+4) and											// lda T+1			; 4
+     adc_im_0(i+5) and											// adc #$00			; 5
+     sta_bp_1(i+6) then											// sta :bp+1			; 6
    begin
 
     if lda_bp_y(i+7) and									// lda (:bp),y			; 7
@@ -297,7 +297,7 @@
 // ===				ABSOLUTE BP.				  === //
 // -----------------------------------------------------------------------------
 
-    if listing[i][1] in ['+','-'] then begin
+    if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) then begin
 
      tmp:=copy(listing[i], 2, 256);
 
@@ -307,7 +307,12 @@
       if mwa_bp2(p) and (listing[p] = #9'mwa '+tmp+' :bp2') then listing[p] := '' else
        if mwy_bp2(p) and (listing[p] = #9'mwy '+tmp+' :bp2') then listing[p] := '' else
         if pos('(:bp2),y', listing[p]) > 0 then begin listing[p] := copy(listing[p], 1, 5) + '('+tmp+'),y'; yes:=true end else
-         if listing[p][1] in ['+','-'] then Break;
+         if (pos('+', listing[p]) = 1) or (pos('-', listing[p]) = 1) then begin
+	 
+	  if length(listing[p]) = 1 then listing[p] := '';
+	  
+	  Break;	  
+	 end; 
 
      if yes then begin
       listing[i] := '';
@@ -341,10 +346,10 @@
 }
 
 
-  if (listing[i][1] in ['+','-']) and								//+-label				; 0
-     ldy(i+1) and										// ldy P				; 1
-     lda(i+2) and										// lda P+1				; 2
-     sta_bp_1(i+3) then begin									// sta :bp+1				; 3
+  if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
+     ldy(i+1) and											// ldy P				; 1
+     lda(i+2) and											// lda P+1				; 2
+     sta_bp_1(i+3) then begin										// sta :bp+1				; 3
 
 
     if lda(i+4) and										// lda 					; 4
