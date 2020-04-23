@@ -26,7 +26,7 @@ DetectVBXE
 
 interface
 
-var	banks: array [0..63] of byte absolute $0101;	// array with code of banks PORTB
+var	banks: array [0..63] of byte absolute __PORTB_BANKS;	// array with code of banks PORTB
 	
 var	DetectOS: byte absolute $fff7;
 (* 
@@ -101,7 +101,7 @@ end;
 function DetectHighMem: word;
 (*
 @description:
-Detect 65816 linear memmory
+Detect 65816 linear memory
 
 <http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej>
 
@@ -440,7 +440,7 @@ end;
 function DetectMem: byte; assembler;
 (*
 @description:
-Detect amount additional memmory PORTB
+Detect amount additional memory PORTB
 
 @returns: amount of banks (0..255)
 @returns: banks code PORTB = BANKS[0..63] at address $0101

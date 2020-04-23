@@ -145,6 +145,8 @@ type	PWordArray = ^word;
 	*)
 
 const
+	__PORTB_BANKS = $0101;		// memory banks array
+
 	M_PI_2	= pi*2;
 	D_PI_2	= pi/2;
 	D_PI_180= pi/180;
@@ -281,8 +283,6 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Random(range: smallint): smallint; overload;
 	function RandomF: Float;
 	procedure Randomize; assembler;
-	function ReadConfig (devnum: byte): cardinal; assembler;
-	procedure ReadSector (devnum: byte; sector: word; var buf); assembler;
 	procedure RunError(a: byte);
 	procedure Seek(var f: file; a: cardinal); assembler;
 	procedure SetLength(var S: string; Len: byte); register; assembler;
@@ -300,8 +300,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sqrt(x: Integer): Single; overload;
 	function UpCase(a: char): char;
 	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
-	procedure Val(s: PString; var v: single; var code: byte); overload; register;
-	procedure WriteSector(devnum: byte; sector: word; var buf); assembler;
+	procedure Val(s: PString; var v: real; var code: byte); overload; //register;
+	procedure Val(s: PString; var v: single; var code: byte); overload; //register;
 	function Swap(a: word): word; overload;
 	function Swap(a: cardinal): cardinal; overload;
 
@@ -310,149 +310,6 @@ implementation
 
 var
 	RndSeed: smallint;
-
-
-function ReadConfig(devnum: byte): cardinal; assembler;
-(*
-@description:
-Read disk drive configuration
-
-@param: devnum - device number
-*)
-
-{
-DVSTAT
-Byte 0 ($02ea):
-Bit 0:Indicates the last command frame had an error.
-Bit 1:Checksum, indicates that there was a checksum error in the last command or data frame
-Bit 2:Indicates that the last operation by the drive was in error.
-Bit 3:Indicates a write protected diskette. 1=Write protect
-Bit 4:Indicates the drive motor is on. 1=motor on
-Bit 5:A one indicates MFM format (double density)
-Bit 6:Not used
-Bit 7:Indicates Density and a Half if 1
-
-Byte 1 ($02eb):
-Bit 0:FDC Busy should always be a 1
-Bit 1:FDC Data Request should always be 1
-Bit 2:FDC Lost data should always be 1
-Bit 3:FDC CRC error, a 0 indicates the last sector read had a CRC error
-Bit 4:FDC Record not found, a 0 indicates last sector not found
-Bit 5:FDC record type, a 0 indicates deleted data mark
-Bit 6:FDC write protect, indicates write protected disk
-Bit 7:FDC door is open, 0 indicates door is open
-
-Byte 2 ($2ec):
-Timeout value for doing a format.
-
-Byte 3 ($2ed):
-not used, should be zero
-}
-asm
-{	txa:pha
-
-	lda devnum
-	jsr @sio.devnrm
-	bmi _err
-
-	lda #'S'	; odczyt statusu stacji
-	sta dcmnd
-
-	jsr jdskint	; $e453
-	bmi _err
-
-	ldx <256	; 256 bajtow
-	ldy >256	; w sektorze
-
-	lda dvstat
-	and #%00100000
-	bne _skp
-
-	ldx <128	;128 bajtow
-	ldy >128	;w sektorze
-
-_skp	jsr @sio.devsec
-
-	mva dvstat result
-	mva dvstat+1 result+1
-	mva dvstat+2 result+2
-	mva dvstat+3 result+3
-
-	ldy #0
-
-_err	sty MAIN.SYSTEM.IOResult
-
-	pla:tax
-};
-end;
-
-
-procedure ReadSector(devnum: byte; sector: word; var buf); assembler;
-(*
-@description:
-Read disk sector to buffer
-
-@param: devnum - device number
-@param: sector - sector number
-@param: buf - pointer to buffer
-*)
-asm
-{	txa:pha
-
-	lda devnum
-	jsr @sio.devnrm
-	bmi _err
-
-	lda sector
-	sta daux1
-	lda sector+1
-	sta daux2
-
-	ldx buf
-	ldy buf+1
-	lda #'R'
-
-	jsr @sio
-
-_err	sty MAIN.SYSTEM.IOResult
-
-	pla:tax
-};
-end;
-
-
-procedure WriteSector(devnum: byte; sector: word; var buf); assembler;
-(*
-@description:
-Write disk sector from buffer
-
-@param: devnum - device number
-@param: sector - sector number
-@param: buf - pointer to buffer
-*)
-asm
-{	txa:pha
-
-	lda devnum
-	jsr @sio.devnrm
-	bmi _err
-
-	lda sector
-	sta daux1
-	lda sector+1
-	sta daux2
-
-	ldx buf
-	ldy buf+1
-	lda #'P'
-
-	jsr @sio
-
-_err	sty MAIN.SYSTEM.IOResult
-
-	pla:tax
-};
-end;
 
 
 procedure RunError(a: byte);
@@ -1498,7 +1355,71 @@ asm
 end;
 
 
-procedure Val(s: PString; var v: single; var code: byte); overload; register;
+procedure Val(s: PString; var v: real; var code: byte); overload; //register;
+(*
+@description:
+Calculate numerical value of a string
+
+@param: s - string
+@param: v - pointer to real - result
+@param: code - pointer to integer - error code
+*)
+var n, dotpos, len: byte;
+    r: real;
+begin
+
+ r:=0.0;
+ 
+ code:=1;
+
+ len:=1 + byte(s[0]);
+
+ if len > 1 then begin
+
+	dotpos:=0;
+
+	if (s[1] = '-') or (s[1] = '+') then	//Added line to check sign.If the number is signed,
+		n:=2				//set n to position 2.
+	else					//(number is not signed)
+		n:=1;				//set n to position 1.
+
+// If the number was signed,then we set n to 2,
+// so that we start with s[2],and at the end
+// if the number was negative we will multiply by -1.
+
+	while n<len do begin			//n is already set to the position of the fisrt number.
+
+	if (s[n] = '.') then
+		dotpos := len - n - 1
+        else
+		if isDigit(s[n]) then
+			r := r * 10.0 +  real(ord(s[n])-ord('0'))
+		else begin
+			v := 0.0;
+			code := n;
+			exit;
+		end;
+
+	inc(n);
+	end;
+
+	while dotpos <> 0 do begin
+		r := r / 10;
+		dec(dotpos);
+	end;
+
+	if (s[1]='-') then			//If s[] is "negative"
+		r :=  -r;
+
+	code := 0;
+ end;
+ 
+ v := r;
+
+end;
+
+
+procedure Val(s: PString; var v: single; var code: byte); overload; //register;
 (*
 @description:
 Calculate numerical value of a string
@@ -1512,6 +1433,8 @@ var n, dotpos, len: byte;
 begin
 
  f:=0;
+ 
+ code:=1;
 
  len:=length(s) + 1;
 
@@ -1533,7 +1456,13 @@ begin
 	if (s[n] = '.') then
 		dotpos := len - n - 1
         else
-		f := f * 10 +  single(ord(s[n])-ord('0'));
+		if isDigit(s[n]) then
+			f := f * 10 +  single(ord(s[n])-ord('0'))		
+		else begin
+			v := 0;
+			code := n;
+			exit;
+		end;
 
 	inc(n);
 	end;
@@ -1546,6 +1475,7 @@ begin
 	if (s[1]='-') then			// If s[] is "negative"
 		f :=  -f;
 
+	code := 0;
  end;
 
  v := f;
