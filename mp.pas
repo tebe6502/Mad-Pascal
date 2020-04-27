@@ -42,6 +42,10 @@ Contributors:
 + Guillermo Fuenzalida :
 	- unit MISC: DetectANTIC
 
++ Krzysztof Dudek :
+	- XBIOS
+	- unit LZ4: unLZ4
+
 + Piotr Fusik :
 	- base\runtime\icmp.asm
 	- unit GRAPH: detect X:Y graphics resolution (OS mode)
@@ -234,12 +238,14 @@ const
   FORWARDTOK		= 96;
   REGISTERTOK		= 97;
   INTERRUPTTOK		= 98;
+  PASCALTOK		= 99;
+//  STDCALLTOK		= 100;
 
-  SUCCTOK		= 100;
-  PREDTOK		= 101;
-  PACKEDTOK		= 102;
-  GOTOTOK		= 104;
-  INTOK			= 105;
+  SUCCTOK		= 105;
+  PREDTOK		= 106;
+  PACKEDTOK		= 107;
+  GOTOTOK		= 108;
+  INTOK			= 109;
 
   SETTOK		= 127;	// Size = 32 SET OF
 
@@ -371,7 +377,7 @@ const
 
 type
 
-  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08);
+  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04{, mStdcall = $02});
 
   irCode = (iDLI, iVBL);
 
@@ -485,6 +491,8 @@ type
 	 isRegister: Boolean;
 	 isInterrupt: Boolean;
 	 isRecursion: Boolean;
+//	 isStdcall: Boolean;
+	 isPascal: Boolean;
 	 isAsm: Boolean;
 	 IsNotDead: Boolean;);
 
@@ -755,6 +763,11 @@ DEREFERENCETOK: Result := '^';
 	SETTOK: Result := 'SET';
        FILETOK: Result := 'FILE';
       PCHARTOK: Result := 'PCHAR';
+
+   REGISTERTOK: Result := 'REGISTER';
+     PASCALTOK: Result := 'PASCAL';
+        ASMTOK: Result := 'ASM';
+  INTERRUPTTOK: Result := 'INTERRUPT';
  else
   Result := 'UNTYPED'
  end;
@@ -3621,7 +3634,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if mva(i) and 										// mva aa :STACKORIGIN,x		; 0
+    if mva(i) and (iy(i) = false) and								// mva aa :STACKORIGIN,x		; 0
        inx(i+1) and										// inx					; 1
        ldy_1(i+2) and										// ldy #1				; 2
        (listing[i+3] = #9'lda :STACKORIGIN-1,x') then						// lda :STACKORIGIN-1,x			; 3
@@ -3634,7 +3647,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if mva(i) and 										// mva aa :STACKORIGIN,x		; 0
+    if mva(i) and (iy(i) = false) and								// mva aa :STACKORIGIN,x		; 0
        (listing[i+1] = #9'jsr andAL_CL') and							// jst andAL_CL				; 1
        ldy_1(i+2) and										// ldy #1				; 2
        (listing[i+3] = #9'lda :STACKORIGIN-1,x') then						// lda :STACKORIGIN-1,x			; 3
@@ -6498,7 +6511,7 @@ var i, l, k, m: integer;
 
 
      if lda_stack(i) and								// lda :STACK
-        (add(i+1) or adc(i+1)) then							// add|adc
+        {(add(i+1) or adc(i+1))} (add_sub(i+1) or adc_sbc(i+1)) then			// add|adc|sub|sbc
       begin
 
 	tmp:=copy(listing[i], 6, 256);
@@ -12885,6 +12898,7 @@ var i, l, k, m: integer;
 	Result:=false; Break;
      end;
 
+{ fuck ???
 
     if lda_im(i) and										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
@@ -12905,7 +12919,7 @@ var i, l, k, m: integer;
 
 	Result:=false; Break;
        end;
-
+}
 
     if spl(i) and										// spl					; 0
        dey(i+1) and										// dey					; 1
@@ -12992,7 +13006,38 @@ var i, l, k, m: integer;
        end;
 
 
-// luci2
+    if ldy_im_0(i) and										// ldy #$00				; 0
+       lda(i+1) and										// lda					; 1
+       spl(i+2) and										// spl					; 2
+       dey(i+3) and										// dey					; 3
+       sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN			; 5
+       lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
+       asl_stack(i+7) and									// asl :STACKORIGIN			; 7
+       rol_a(i+8) and										// rol @				; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH		; 9
+       ldy_stack(i+10) then									// ldy :STACKORIGIN			; 10
+     if (copy(listing[i+4], 6, 256) = copy(listing[i+6], 6, 256)) and
+        (copy(listing[i+6], 6, 256) = copy(listing[i+9], 6, 256)) and
+        (copy(listing[i+5], 6, 256) = copy(listing[i+7], 6, 256)) and
+        (copy(listing[i+7], 6, 256) = copy(listing[i+10], 6, 256)) then
+       begin
+	listing[i]   := listing[i+1];
+	listing[i+1] := #9'asl @';
+	listing[i+2] := #9'tay';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+
+	Result:=false; Break;
+       end;
+
+
     if ldy_im_0(i) and										// ldy #$00				; 0
        lda(i+1) and										// lda					; 1
        spl(i+2) and										// spl					; 2
@@ -13293,7 +13338,7 @@ var i, l, k, m: integer;
 
 
     if (l=4) and
-       mwa_bp2(i) and (pos('mwa #', listing[i]) = 0) and					// mwa P0 :bp2			; 0
+       ((mwa_bp2(i) and (pos('mwa #', listing[i]) = 0)) {or mwy_bp2(i)}) and			// mwa|mwy P0 :bp2		; 0
        ldy_im_0(i+1) and 									// ldy #$00			; 1
        lda(i+2) and										// lda				; 2
        STA_BP2_Y(i+3) then 									// sta (:bp2),y			; 3
@@ -16635,6 +16680,48 @@ fuck
 
     if lda(i) and (iy(i) = false) and							// lda					; 0
        add(i+1) and (iy(i+1) = false) and						// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+STACKWIDTH		; 2
+       lda(i+3) and									// lda					; 3
+       add(i+4) and									// add 					; 4
+       sta(i+5) and									// sta					; 5
+       lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH		; 6
+       adc_im_0(i+7) then								// adc #$00				; 7
+    if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
+       begin
+	listing[i+6] := listing[i];
+	listing[i+7] := #9'adc ' + copy(listing[i+1], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if lda(i) and (iy(i) = false) and							// lda					; 0
+       add(i+1) and (iy(i+1) = false) and						// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+STACKWIDTH		; 2
+       lda(i+3) and									// lda					; 3
+       add(i+4) and									// add 					; 4
+       tay(i+5) and									// tay					; 5
+       lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH		; 6
+       adc_im_0(i+7) then								// adc #$00				; 7
+    if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
+       begin
+	listing[i+6] := listing[i];
+	listing[i+7] := #9'adc ' + copy(listing[i+1], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if lda(i) and (iy(i) = false) and							// lda					; 0
+       add(i+1) and (iy(i+1) = false) and						// add					; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        lda(i+3) and									// lda					; 3
        adc_im_0(i+4) and								// adc #$00				; 4
@@ -16682,49 +16769,7 @@ fuck
 
 
     if lda(i) and (iy(i) = false) and							// lda					; 0
-       add(i+1) and (iy(i+1) = false) and						// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+STACKWIDTH		; 2
-       lda(i+3) and									// lda					; 3
-       add(i+4) and									// add 					; 4
-       sta(i+5) and									// sta					; 5
-       lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH		; 6
-       adc_im_0(i+7) then								// adc #$00				; 7
-    if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
-       begin
-	listing[i+6] := listing[i];
-	listing[i+7] := #9'adc ' + copy(listing[i+1], 6, 256);
-
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-
-	Result:=false; Break;
-       end;
-
-
-    if lda(i) and (iy(i) = false) and							// lda					; 0
-       add(i+1) and (iy(i+1) = false) and						// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+STACKWIDTH		; 2
-       lda(i+3) and									// lda					; 3
-       add(i+4) and									// add 					; 4
-       tay(i+5) and									// tay					; 5
-       lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH		; 6
-       adc_im_0(i+7) then								// adc #$00				; 7
-    if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
-       begin
-	listing[i+6] := listing[i];
-	listing[i+7] := #9'adc ' + copy(listing[i+1], 6, 256);
-
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-
-	Result:=false; Break;
-       end;
-
-
-    if lda(i) and (iy(i) = false) and							// lda					; 0
-       add_sub(i+1) and (iy(i+1) = false) and						// add|sub				; 1
+       add_sub(i+1) and	{(iy(i+1) = false) and}						// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda(i+3) and									// lda					; 3
        adc_sbc(i+4) and									// adc|sbc				; 4
@@ -16738,10 +16783,15 @@ fuck
     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
        (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
        begin
-	listing[i+2] := #9'tay';
 
-	listing[i+5] := #9'sta :bp+1';
-	listing[i+6] := #9'tya';
+	if iy(i+1) then
+	 listing[i+5] := #9'sta :bp+1'
+	else begin
+	 listing[i+2] := #9'tay';
+
+	 listing[i+5] := #9'sta :bp+1';
+	 listing[i+6] := #9'tya';
+	end;
 
 	listing[i+9]  := #9'scc';
 	listing[i+10] := #9'inc :bp+1';
@@ -17886,6 +17936,7 @@ fuck
   if not optimize.assign then
    for i := 0 to l - 1 do
     if listing[i] <> '' then begin
+
 
     if lda(i) and										// lda		; 0
        ldy_1(i+1) and										// ldy #1	; 1
@@ -21695,7 +21746,6 @@ fuck
        Result:=false; Break;
      end;
 
-// luci
 
     if seq(i) and										// seq			; 0
        (listing[i+1] = #9'bcs @+') and								// bcs @+		; 1
@@ -26523,6 +26573,8 @@ Spelling[ASSEMBLERTOK	] := 'ASSEMBLER';
 Spelling[FORWARDTOK	] := 'FORWARD';
 Spelling[REGISTERTOK	] := 'REGISTER';
 Spelling[INTERRUPTTOK	] := 'INTERRUPT';
+Spelling[PASCALTOK	] := 'PASCAL';
+//Spelling[STDCALLTOK	] := 'STDCALL';
 
 Spelling[ASSIGNFILETOK	] := 'ASSIGN';
 Spelling[RESETTOK	] := 'RESET';
@@ -28983,12 +29035,11 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('ztmp');
  asm65('ztmp8'#9'.ds 1');
  asm65('ztmp9'#9'.ds 1');
- asm65('TMP');
  asm65('ztmp10'#9'.ds 1');
  asm65('ztmp11'#9'.ds 1');
 
-// asm65;
-// asm65('TMP'#9'.ds 2');
+ asm65;
+ asm65('TMP'#9'.ds 2');
 
  if STACK_Atari > 0 then begin
   asm65;
@@ -31756,33 +31807,90 @@ case Tok[i].Kind of
 
 	  if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0)) then begin
 
-	   if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) or (Ident[IdentIndex].AllocElementType = CHARTOK) then begin
+	   if ((Ident[IdentIndex].DataType = STRINGPOINTERTOK) or (Ident[IdentIndex].AllocElementType = CHARTOK)) or
+	      ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK)) then begin
 
-// fuck  length(tab[5])
-	    a65(__addBX);
+		if Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK then begin	// length(array[x])
 
-	 if (Ident[IdentIndex].PassMethod = VARPASSING) or (Ident[IdentIndex].NumAllocElements = 0) then begin
+		i:=CompileArrayIndex(i + 2, IdentIndex);
 
-	    asm65(#9'ldy '+Ident[IdentIndex].Name+'+1');
-	    asm65(#9'sty :bp+1');
-	    asm65(#9'ldy '+Ident[IdentIndex].Name);
-	    asm65(#9'lda (:bp),y');
-	    asm65(#9'sta :STACKORIGIN,x');
+		a65(__addBX);
 
-	end else begin
+		if (Ident[IdentIndex].NumAllocElements * 2 > 256) or (Ident[IdentIndex].NumAllocElements in [0,1]) or (Ident[IdentIndex].PassMethod = VARPASSING) then begin
 
-	    asm65(#9'lda adr.'+Ident[IdentIndex].Name);
-	    asm65(#9'sta :STACKORIGIN,x');
+    		asm65(#9'lda '+Ident[IdentIndex].Name);
+     		asm65(#9'add :STACKORIGIN-1,x');
+     		asm65(#9'sta :bp2');
+     		asm65(#9'lda '+Ident[IdentIndex].Name+'+1');
+     		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+     		asm65(#9'sta :bp2+1');
 
-	end;
+		asm65(#9'ldy #$01');
+		asm65(#9'lda (:bp2),y');
+		asm65(#9'sta :bp+1');
+		asm65(#9'dey');
+		asm65(#9'lda (:bp2),y');
+		asm65(#9'tay');
 
-	    ValType:=BYTETOK;
+		end else begin
+
+		asm65(#9'ldy :STACKORIGIN-1,x');
+     		asm65(#9'lda adr.'+Ident[IdentIndex].Name+'+1,y');
+     		asm65(#9'sta :bp+1');
+    		asm65(#9'lda adr.'+Ident[IdentIndex].Name+',y');
+     		asm65(#9'tay');
+
+		end;
+
+		a65(__subBX);
+
+		asm65(#9'lda (:bp),y');
+		asm65(#9'sta :STACKORIGIN,x');
+
+		CheckTok(i + 1, CBRACKETTOK);
+
+		CheckTok(i + 2, CPARTOK);
+
+		ValType := BYTETOK;
+
+		Result:=i + 2;
+		exit;
+
+		end else
+		if (Ident[IdentIndex].PassMethod = VARPASSING) or (Ident[IdentIndex].NumAllocElements = 0) then begin
+		 a65(__addBX);
+
+		 asm65(#9'ldy '+Ident[IdentIndex].Name+'+1');
+		 asm65(#9'sty :bp+1');
+		 asm65(#9'ldy '+Ident[IdentIndex].Name);
+		 asm65(#9'lda (:bp),y');
+	 	 asm65(#9'sta :STACKORIGIN,x');
+
+		end else begin
+		 a65(__addBX);
+
+		 asm65(#9'lda adr.'+Ident[IdentIndex].Name);
+		 asm65(#9'sta :STACKORIGIN,x');
+
+		end;
+
+		ValType:=BYTETOK;
 
 	   end else begin
-	    Value:=Ident[IdentIndex].NumAllocElements;
 
-	    ValType := GetValueType(Value);
-	    Push(Value, ASVALUE, DataSize[ValType]);
+	    if Tok[i + 3].Kind = OBRACKETTOK then
+
+	     iError(i+2, TypeMismatch)
+
+	    else begin
+
+	     Value:=Ident[IdentIndex].NumAllocElements;
+
+	     ValType := GetValueType(Value);
+	     Push(Value, ASVALUE, DataSize[ValType]);
+
+	    end;
+
 	   end;
 
 	  end else
@@ -35725,7 +35833,7 @@ begin
     isForward := false;
     isInt := false;
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK{, STDCALLTOK}] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -35768,10 +35876,27 @@ begin
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
+
+{	     STDCALLTOK: begin
+			   Ident[NumIdent].isStdCall := true;
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+}
+	      PASCALTOK: begin
+			   Ident[NumIdent].isRecursion := true;
+			   Ident[NumIdent].isPascal := true;
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
 	  end;
 
 	  inc(i);
 	end;// while
+
+
+  if Ident[NumIdent].isRegister and Ident[NumIdent].isPascal then
+   Error(i, 'Calling convention directive "REGISTER" not applicable with "PASCAL"');
 
   if Ident[NumIdent].isInterrupt and (Ident[NumIdent].isAsm = false) then
     Note(i, 'Use assembler block instead pascal');
@@ -36614,9 +36739,9 @@ end;
 
 
 function ReadDataArray(i: integer; ConstDataSize: integer; const ConstValType: Byte; NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
-var ActualParamType: byte;
+var ActualParamType, ch: byte;
     NumActualParams, NumActualParams_, NumAllocElements_: cardinal;
-    ConstVal, TempVal: Int64;
+    ConstVal: Int64;
 
 
 procedure SaveDataSegment(DataType: Byte);
@@ -36689,6 +36814,7 @@ begin
  NumAllocElements_ := NumAllocElements shr 16;
  NumAllocElements  := NumAllocElements and $ffff;
 
+
   repeat
 
   inc(NumActualParams);
@@ -36719,15 +36845,18 @@ begin
    i := CompileConstExpression(i + 1, ConstVal, ActualParamType);
 
    if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
-     TempVal := Tok[i].Value;
-     DefineStaticString(i, chr(Tok[i].Value));
+
+     if StaticData then
+      Error(i, 'Memory overlap due conversion CHAR to STRING, use VAR instead CONST');
+
+     ch := Tok[i].Value;
+     DefineStaticString(i, chr(ch));
 
      ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_Atari;
-     Tok[i].Value := TempVal;
-     ActualParamType:=STRINGPOINTERTOK;
-   end;
+     Tok[i].Value := ch;
 
-//   writeln(ConstVal, ' ; ',ActualParamType,' / ',ConstValType,',',NumAllocElements,     ' | ', StaticData);
+     ActualParamType := STRINGPOINTERTOK;
+   end;
 
    SaveData;
   end;
@@ -36735,6 +36864,7 @@ begin
   inc(i);
 
  until Tok[i].Kind <> COMMATOK;
+
 
  CheckTok(i, CPARTOK);
 
@@ -36762,6 +36892,7 @@ begin
  if Ident[BlockIdentIndex].isOverload then info := info + ' | OVERLOAD';
  if Ident[BlockIdentIndex].isRegister then info := info + ' | REGISTER';
  if Ident[BlockIdentIndex].isInterrupt then info := info + ' | INTERRUPT';
+ if Ident[BlockIdentIndex].isPascal then info := info + ' | PASCAL';
 
  asm65;
 
@@ -36898,7 +37029,7 @@ begin
 	end;// if IsNestedFunction
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK{, STDCALLTOK}] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -36931,6 +37062,19 @@ begin
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
+
+{	     STDCALLTOK: begin
+			   Status := Status or ord(mStdcall);
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+}
+	      PASCALTOK: begin
+			   Status := Status or ord(mPascal);
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+
 	  end;
 
 	  inc(i);
@@ -36979,7 +37123,10 @@ Ident[BlockIdentIndex].ProcAsBlock := NumBlocks;
 
 GenerateLocal(BlockIdentIndex, IsFunction);
 
-if (BlockStack[BlockStackTop] <> 1) and (NumParams > 0) and Ident[BlockIdentIndex].isRecursion then begin
+if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIndex].isRecursion then begin
+
+ if Ident[BlockIdentIndex].isRegister then
+   Error(i, 'Calling convention directive "REGISTER" not applicable with recursion');
 
  asm65('@new'#9'lda <@VarData');			// @AllocMem
  asm65(#9'sta :ztmp');
@@ -37997,11 +38144,8 @@ while Tok[i].Kind in
 
 //	   function header ”arg1” doesn’t match forward : var name changes arg2 = arg3
 
-
-// fuck XXX  s2: textout
-
 	 for ParamIndex := 1 to Ident[ForwardIdentIndex].NumParams do
-	  if (Ident[ForwardIdentIndex].Param[ParamIndex].Name <> Param[ParamIndex].Name) then
+	  if ((Ident[ForwardIdentIndex].Param[ParamIndex].Name <> Param[ParamIndex].Name) or (Ident[ForwardIdentIndex].Param[ParamIndex].DataType <> Param[ParamIndex].DataType)) then
 	    Error(i, 'Function header '''+Ident[ForwardIdentIndex].Name+''' doesn''t match forward : '+  Ident[ForwardIdentIndex].Param[ParamIndex].Name +' <> ' + Param[ParamIndex].Name);
 
 	 for ParamIndex := 1 to Ident[ForwardIdentIndex].NumParams do
@@ -38016,6 +38160,8 @@ while Tok[i].Kind in
 	 if Ident[ForwardIdentIndex].isAsm then Tmp := Tmp or ord(mAssembler);
 	 if Ident[ForwardIdentIndex].isRegister then Tmp := Tmp or ord(mRegister);
 	 if Ident[ForwardIdentIndex].isInterrupt then Tmp := Tmp or ord(mInterrupt);
+	 if Ident[ForwardIdentIndex].isPascal then Tmp := Tmp or ord(mPascal);
+//	 if Ident[ForwardIdentIndex].isStdcall then Tmp := Tmp or ord(mStdcall);
 
 	 if Tmp <> TmpResult then
 	   Error(i, 'Function header doesn''t match the previous declaration ''' + Ident[ForwardIdentIndex].Name + '''');
