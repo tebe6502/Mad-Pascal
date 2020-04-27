@@ -1,4 +1,4 @@
-unit cio;
+unit sio;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)
@@ -33,6 +33,8 @@ function ReadConfig(devnum: byte): cardinal; assembler;
 Read disk drive configuration
 
 @param: devnum - device number
+
+@result: cardinal
 *)
 
 {

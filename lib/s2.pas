@@ -34,7 +34,7 @@ var	Font: Object
 			Style: byte;
 			Color: byte;
 
-			procedure LoadFromFile(name: TString);
+			procedure LoadFromFile(name: PByte);
 			procedure LoadFromMem(p: pointer);
 	end;
 
@@ -42,12 +42,6 @@ var	Font: Object
 	procedure SetGraphMode(mode: byte);
 	procedure ClearDevice;
 	procedure CloseGraph;
-	
-//	procedure TextOut(x,y: char; s: PByte);
-//	procedure TextOut(x: word; y: byte; s: PByte); overload;
-// !!! powinien zglosic niezgodnosc typow parametrow !!!
-
-
 	procedure TextOut(x: word; y: byte; s: PByte); overload;
 	procedure TextOut(a: char); overload;
 
@@ -81,43 +75,6 @@ begin
  opn(6,12,GraphMode,'S2:');
 
 end;
-
-
-(*
-procedure s2_put;
-begin
-
-asm
-{
-	pha
-	tya
-	pha
-
-	stx @sp
-
-	cmp #eol
-	beq skp
-
-	cmp #$7d		; clrscr
-	bne skp
-
-	ldx @sp			; restore X !
-};
-
-	ClearDevice;
-asm
-{
-skp
-	pla
-	tay
-	pla
-
-	ldx #0
-@sp	equ *-1
-};
-
-end;
-*)
 
 
 procedure SetGraphMode(mode: byte);
@@ -158,11 +115,7 @@ asm
 	sta @putchar.chn
 	sta @COMMAND.scrchn
 
-	mva #0 766		; execution execution control character
-
-	sta colcrs
-	sta colcrs+1
-	sta rowcrs
+	mva #0 766		; execution control character
 
 	lda #MAIN.GRAPH.grOK
 	sta MAIN.GRAPH.GraphResult
