@@ -63,24 +63,21 @@ colscr	equ *-1
 	stx	@COMMAND.scrchn
 
 
-	mva #$2c	@putchar.vbxe	; bit*
-	mva #0		@putchar.chn	; #0 -> E: window
+	mva #{bit*}	@putchar.vbxe	; bit*
+	mva #$00	@putchar.chn	; #0 -> E: window
 
-	sta	colcrs
-	sta	colcrs+1
-	sta	rowcrs
 
 	lda	#@close
 	jsr	xcio
 
-	lda	#0		; =opcje
+	lda	#0		; option
 byte1	equ	*-1
-	ora	#8		; +zapis na ekranie
+	ora	#8		; 8: save to screen
 	sta	icax1,x
 
 	lda	#0
 byte2	equ	*-1
-	sta	icax2,x		;=nr.trybu
+	sta	icax2,x		; mode
 
 	mwa	#sname	icbufa,x
 
