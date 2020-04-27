@@ -1,3 +1,13 @@
+26.04.2020
+- poprawione testowanie parametrow dla procedur/funkcji FORWARD
+- nowy modyfikator procedur/funkcji PASCAL umo¿liwia rekurencjê tych¿e
+- komunikat b³êdu dla tablic STRING deklarowanych jako CONST z elementami CHAR, brak mo¿liwoœæ konwersji CHAR na STRING (tylko przez VAR jest to mo¿liwe)
+- poprawiony LENGTH, zwraca d³ugoœæ elementu tablicy STRING
+
+21.04.2020
+- GRAPH.INC: procedure Ellipse(X, Y, StAngle, EndAngle, xRadius,yRadius: Word);
+- SYSTEM: poprawki dla VAL (REAL, SINGLE)
+
 19.04.2020
 - zreorganizowana biblioteka procedur base\, nowe podkatalogi \atari, \common, \runtime
 - runtime library base\rtl6502.asm
