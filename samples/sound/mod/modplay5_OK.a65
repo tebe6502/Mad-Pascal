@@ -1,0 +1,4339 @@
+STACKWIDTH	= 16
+CODEORIGIN	= $2000
+
+TRUE		= 1
+FALSE		= 0
+
+	org $80
+
+	.print 'ZPFREE: $0000..',*-1
+
+fxptr	.ds 2
+
+eax	.ds 4						;8 bytes (aex + edx) -> divREAL
+edx	.ds 4
+ecx	.ds 4
+bp	.ds 2
+bp2	.ds 2
+
+ztmp
+ztmp8	.ds 1
+ztmp9	.ds 1
+ztmp10	.ds 1
+ztmp11	.ds 1
+
+TMP	.ds 2
+
+STACKORIGIN	.ds STACKWIDTH*4
+
+	.print 'ZPFREE: ',*,'..',$ff
+
+ax	= eax
+al	= eax
+ah	= eax+1
+
+cx	= ecx
+cl	= ecx
+ch	= ecx+1
+
+dx	= edx
+dl	= edx
+dh	= edx+1
+
+	org eax
+
+FP1MAN0	.ds 1
+FP1MAN1	.ds 1
+FP1MAN2	.ds 1
+FP1MAN3	.ds 1
+
+	org ztmp8
+
+FP1SGN	.ds 1
+FP1EXP	.ds 1
+
+	org edx
+
+FP2MAN0	.ds 1
+FP2MAN1	.ds 1
+FP2MAN2	.ds 1
+FP2MAN3	.ds 1
+
+	org ztmp10
+
+FP2SGN	.ds 1
+FP2EXP	.ds 1
+
+	org ecx
+
+FPMAN0	.ds 1
+FPMAN1	.ds 1
+FPMAN2	.ds 1
+FPMAN3	.ds 1
+
+	org bp2
+
+FPSGN	.ds 1
+FPEXP	.ds 1
+
+.local	RESOURCE
+	icl 'res6502.asm'
+
+	RCASM 'arrays5.asm' EFFECT 0 0 0 0 0 0 0 0
+	RCDATA 'volume.tab' VOLUME 0 0 0 0 0 0 0 0
+	RCDATA 'draco_6bit.dat' VOL6BIT 0 0 0 0 0 0 0 0
+.endl
+
+; -----------------------------------------------------------
+
+	org CODEORIGIN
+
+	STATICDATA
+
+START
+	tsx
+	stx MAIN.@halt+1
+
+	.ifdef fmulinit
+	fmulinit
+	eif
+
+	ift DATAORIGIN+VARINITSIZE > $BFFF
+	ert 'Invalid memory address range ',DATAORIGIN+VARINITSIZE
+	els
+	@fill #DATAORIGIN+VARINITSIZE #VARDATASIZE-VARINITSIZE #0
+	eif
+
+	ldx #$0f
+	mva:rpl $340,x MAIN.IOCB@COPY,x-
+
+	mvx #$00 bp					; lo BP = 0, X = 0 !!!
+
+	UNITINITIALIZATION
+
+.local	MAIN						; PROCEDURE
+
+	ift l_00E5-*>3
+	jmp l_00E5
+	eif
+
+; -----------------------------------------------------------
+
+.local	SYSTEM						; UNIT
+
+.local	HEXSTR						; FUNCTION | ASSEMBLER | REGISTER
+
+; -----------------------------------------------------------
+
+; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+	mva :STACKORIGIN,x DIGITS
+	dex						; sub bx, 1
+
+; -----------------------------------------------------------
+
+; Generate Assignment for CARDINAL / INTEGER / REAL / SINGLE
+; as Pointer
+	mva :STACKORIGIN,x VALUE
+	mva :STACKORIGIN+STACKWIDTH,x VALUE+1
+	mva :STACKORIGIN+STACKWIDTH*2,x VALUE+2
+	mva :STACKORIGIN+STACKWIDTH*3,x VALUE+3
+	dex						; sub bx, 1
+
+
+; ---------------------  ASM Block 003  ---------------------
+
+	txa:pha
+
+	jsr @hexStr
+
+	@move #@buf Result #33
+
+	pla:tax
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+VALUE	= edx
+DIGITS	= ecx
+adr.RESULT	= DATAORIGIN+$000A
+.var RESULT	= adr.RESULT .word
+
+@VarData	= RESULT
+@VarDataSize	= 33
+
+	rts						; ret
+.endl
+
+.local	PARAMCOUNT					; FUNCTION | ASSEMBLER
+
+
+; ---------------------  ASM Block 041  ---------------------
+
+	@cmdline #255
+	sta Result
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+RESULT	= DATAORIGIN+$002B
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
+	rts						; ret
+.endl
+
+.local	PARAMSTR					; FUNCTION | ASSEMBLER
+
+; -----------------------------------------------------------
+
+; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+	mva :STACKORIGIN,x I
+	dex						; sub bx, 1
+
+
+; ---------------------  ASM Block 042  ---------------------
+
+	@cmdline i
+	@move #@buf Result #33
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+I	= DATAORIGIN+$002C
+adr.RESULT	= DATAORIGIN+$002D
+.var RESULT	= adr.RESULT .word
+
+@VarData	= I
+@VarDataSize	= 34
+
+	rts						; ret
+.endl
+
+.local	SWAP_0124					; FUNCTION | OVERLOAD
+
+; -----------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	mva :STACKORIGIN,x A
+	mva :STACKORIGIN+STACKWIDTH,x A+1
+	dex						; sub bx, 1
+
+	ift l_012D-*>3
+	jmp l_012D
+	eif
+
+; IfThenEpilog
+l_012D
+
+; optimize OK (SYSTEM), line = 2026
+
+	lda A+1
+	sta :STACKORIGIN+9
+	lda A
+	sta RESULT+1
+	lda :STACKORIGIN+9
+	sta RESULT
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+A	= DATAORIGIN+$004E
+RESULT	= DATAORIGIN+$0050
+
+@VarData	= A
+@VarDataSize	= 4
+
+	rts						; ret
+.endl
+
+; -----------------------------------------------------------
+
+M_PI_2	= $0648
+D_PI_2	= $0192
+D_PI_180	= $0004
+MGTIA	= $0000
+MVBXE	= $0080
+WINDOW	= $0010
+NARROW	= $0020
+VBXE_XDLADR	= $0000
+VBXE_BCBADR	= $0100
+VBXE_MAPADR	= $1000
+VBXE_OVRADR	= $5000
+VBXE_WINDOW	= $B000
+IDLI	= $0000
+IVBL	= $0001
+CH_DELCHR	= $00FE
+CH_ENTER	= $009B
+CH_ESC	= $001B
+CH_CURS_UP	= $001C
+CH_CURS_DOWN	= $001D
+CH_CURS_LEFT	= $001E
+CH_CURS_RIGHT	= $001F
+CH_TAB	= $007F
+CH_EOL	= $009B
+CH_CLR	= $007D
+CH_BELL	= $00FD
+CH_DEL	= $007E
+CH_DELLINE	= $009C
+CH_INSLINE	= $009D
+COLOR_BLACK	= $0000
+COLOR_WHITE	= $000E
+COLOR_RED	= $0032
+COLOR_CYAN	= $0096
+COLOR_VIOLET	= $0068
+COLOR_GREEN	= $00C4
+COLOR_BLUE	= $0074
+COLOR_YELLOW	= $00EE
+COLOR_ORANGE	= $004A
+COLOR_BROWN	= $00E4
+COLOR_LIGHTRED	= $003C
+COLOR_GRAY1	= $0004
+COLOR_GRAY2	= $0006
+COLOR_GRAY3	= $000A
+COLOR_LIGHTGREEN	= $00CC
+COLOR_LIGHTBLUE	= $007C
+FMOPENREAD	= $0004
+FMOPENWRITE	= $0008
+FMOPENAPPEND	= $0009
+FMOPENREADWRITE	= $000C
+SCREENWIDTH	= DATAORIGIN+$0000
+SCREENHEIGHT	= DATAORIGIN+$0002
+FILEMODE	= DATAORIGIN+$0004
+SCREENMODE	= DATAORIGIN+$0005
+IORESULT	= DATAORIGIN+$0006
+EOLN	= DATAORIGIN+$0007
+RNDSEED	= DATAORIGIN+$0008
+
+.endl							; UNIT SYSTEM
+
+; -----------------------------------------------------------
+
+.local	ATARI						; UNIT
+
+; -----------------------------------------------------------
+
+RTCLOK	= $0012
+ATRACT	= $004D
+LMARGIN	= $0052
+RMARGIN	= $0053
+ROWCRS	= $0054
+COLCRS	= $0055
+DINDEX	= $0057
+SAVMSC	= $0058
+VDSLST	= $0200
+SDLSTL	= $0230
+TXTROW	= $0290
+TXTCOL	= $0291
+TINDEX	= $0293
+TXTMSC	= $0294
+SDMCTL	= $022F
+GPRIOR	= $026F
+CRSINH	= $02F0
+CHACT	= $02F3
+CHBAS	= $02F4
+CH	= $02FC
+PCOLR0	= $02C0
+PCOLR1	= $02C1
+PCOLR2	= $02C2
+PCOLR3	= $02C3
+COLOR0	= $02C4
+COLOR1	= $02C5
+COLOR2	= $02C6
+COLOR3	= $02C7
+COLOR4	= $02C8
+HPOSP0	= $D000
+HPOSP1	= $D001
+HPOSP2	= $D002
+HPOSP3	= $D003
+HPOSM0	= $D004
+HPOSM1	= $D005
+HPOSM2	= $D006
+HPOSM3	= $D007
+SIZEP0	= $D008
+SIZEP1	= $D009
+SIZEP2	= $D00A
+SIZEP3	= $D00B
+SIZEM	= $D00C
+P0PF	= $D004
+PAL	= $D014
+COLPM0	= $D012
+COLPM1	= $D013
+COLPM2	= $D014
+COLPM3	= $D015
+COLPF0	= $D016
+COLPF1	= $D017
+COLPF2	= $D018
+COLPF3	= $D019
+COLBK	= $D01A
+PRIOR	= $D01B
+GRACTL	= $D01D
+HITCLR	= $D01E
+AUDF1	= $D200
+AUDC1	= $D201
+AUDF2	= $D202
+AUDC2	= $D203
+AUDF3	= $D204
+AUDC3	= $D205
+AUDF4	= $D206
+AUDC4	= $D207
+AUDCTL	= $D208
+SKSTAT	= $D20F
+PORTB	= $D301
+DMACTL	= $D400
+CHACTL	= $D401
+DLISTL	= $D402
+HSCROL	= $D404
+VSCROL	= $D405
+PMBASE	= $D407
+CHBASE	= $D409
+WSYNC	= $D40A
+VCOUNT	= $D40B
+PENH	= $D40C
+PENV	= $D40D
+NMIEN	= $D40E
+
+.endl							; UNIT ATARI
+
+; -----------------------------------------------------------
+
+.local	CRT						; UNIT
+
+.local	GOTOXY						; PROCEDURE | ASSEMBLER
+
+; -----------------------------------------------------------
+
+; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+	mva :STACKORIGIN,x Y
+	dex						; sub bx, 1
+
+; -----------------------------------------------------------
+
+; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+	mva :STACKORIGIN,x X
+	dex						; sub bx, 1
+
+
+; ---------------------  ASM Block 051  ---------------------
+
+	ldy x
+	beq @+
+	dey
+	sty colcrs
+
+@	ldy y
+	beq @+
+	dey
+	sty rowcrs
+@
+
+
+; -----------------------------------------------------------
+
+X	= DATAORIGIN+$0053
+Y	= DATAORIGIN+$0054
+
+@VarData	= X
+@VarDataSize	= 2
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+.local	WHEREX						; FUNCTION | ASSEMBLER
+
+
+; ---------------------  ASM Block 052  ---------------------
+
+
+	ldy colcrs
+	iny
+	sty Result
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0055
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
+	rts						; ret
+.endl
+
+.local	WHEREY						; FUNCTION | ASSEMBLER
+
+
+; ---------------------  ASM Block 053  ---------------------
+
+
+	ldy rowcrs
+	iny
+	sty Result
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0056
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
+	rts						; ret
+.endl
+
+.local	TEXTMODE					; PROCEDURE | ASSEMBLER
+
+; -----------------------------------------------------------
+
+; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+	mva :STACKORIGIN,x MODE
+	dex						; sub bx, 1
+
+
+; ---------------------  ASM Block 056  ---------------------
+
+
+	@clrscr
+
+
+; -----------------------------------------------------------
+
+MODE	= DATAORIGIN+$0057
+
+@VarData	= MODE
+@VarDataSize	= 1
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+; -----------------------------------------------------------
+
+TEXTATTR	= DATAORIGIN+$0052
+CONSOL	= $D01F
+CN_START_SELECT_OPTION	= $0000
+CN_SELECT_OPTION	= $0001
+CN_START_OPTION	= $0002
+CN_OPTION	= $0003
+CN_START_SELECT	= $0004
+CN_SELECT	= $0005
+CN_START	= $0006
+CN_NONE	= $0007
+BW40	= $0000
+CO40	= $0001
+BW80	= $0002
+CO80	= $0003
+MONO	= $0007
+C40	= $0001
+C80	= $0003
+BLACK	= $0000
+BLUE	= $0001
+GREEN	= $0002
+CYAN	= $0003
+RED	= $0004
+MAGENTA	= $0005
+BROWN	= $0006
+LIGHTGRAY	= $0007
+DARKGRAY	= $0008
+LIGHTBLUE	= $0009
+LIGHTGREEN	= $000A
+LIGHTCYAN	= $000B
+LIGHTRED	= $000C
+LIGHTMAGENTA	= $000D
+YELLOW	= $000E
+WHITE	= $000F
+BLINK	= $0080
+
+.endl							; UNIT CRT
+
+; -----------------------------------------------------------
+
+.local	MISC						; UNIT
+
+.local	DETECTHIGHMEM					; FUNCTION
+
+	ift l_0164-*>3
+	jmp l_0164
+	eif
+
+; IfThenEpilog
+l_0164
+
+; optimize OK (MISC), line = 54
+
+	mva #$00 RESULT
+	sta RESULT+1
+
+; optimize FAIL ('DETECTCPU', MISC), line = 56
+	jsr DETECTCPU
+	inx
+	mva #$7F :STACKORIGIN,x
+	ldy #1
+	lda :STACKORIGIN-1,x
+	cmp :STACKORIGIN,x
+	seq
+	bcs @+
+	dey
+@
+	sty :STACKORIGIN-1,x
+	dex
+	.ifdef IFTMP_21
+	lda :STACKORIGIN,x
+	sta IFTMP_21
+	eif
+	dex
+	lda :STACKORIGIN+1,x
+	bne *+5
+	jmp l_017B
+
+; ---------------------  ASM Block 057  ---------------------
+
+
+adr	= eax
+bcnt	= Result
+bfirst	= Result+1
+
+	opt c+
+
+	stx @sp
+
+	sei
+	inc nmien
+
+ramsize	stz adr
+	stz adr+1
+	lda #$01
+	sta adr+2
+
+	stz bfirst
+	stz bcnt
+
+?lp0	stz.w $0000
+
+	lda [adr]
+	eor #$ff
+	sta [adr]
+	cmp [adr]
+	bne ?nx
+	ldx.w $0000
+	bne ?nx
+	eor #$ff
+	sta [adr]
+	bra ?fnd
+
+?nx	inc adr+2
+	bne ?lp0
+
+	bra ?abt
+
+?fnd	lda adr+2
+	sta bfirst
+
+	inc adr+2
+	inc bcnt
+
+?lp1	stz.w $0000
+
+	lda [adr]
+	eor #$ff
+	sta [adr]
+	cmp [adr]
+	bne ?abt
+	ldx.w $0000
+	bne ?abt
+	eor #$ff
+	sta [adr]
+	inc bcnt
+	inc adr+2
+	bne ?lp1
+
+        dec bcnt
+
+?abt
+	dec nmien
+	cli
+
+	ldx #0
+@sp	equ *-1
+
+	opt c-
+
+
+; IfThenEpilog
+l_017B
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0058
+
+@VarData	= RESULT
+@VarDataSize	= 2
+
+	rts						; ret
+.endl
+
+.local	DETECTCPU					; FUNCTION | ASSEMBLER
+
+
+; ---------------------  ASM Block 061  ---------------------
+
+	txa:pha
+
+	opt c+
+
+;detekcja zainstalowanego procesora
+	lda #$99
+	clc
+	sed
+	adc #$01
+	cld
+	beq DetectCPU_CMOS
+
+DetectCPU_02
+	lda #0
+	jmp stop
+
+DetectCPU_CMOS
+	lda #0
+	rep #%00000010		;wyzerowanie bitu Z
+	bne DetectCPU_C816
+
+DetectCPU_C02
+	lda #1
+	jmp stop
+
+DetectCPU_C816
+	lda #$80
+
+stop	sta Result
+
+	opt c-
+
+	pla:tax
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+RESULT	= DATAORIGIN+$005A
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
+	rts						; ret
+.endl
+
+; -----------------------------------------------------------
+
+adr.BANKS	= $0101
+.var BANKS	= adr.BANKS .word
+
+.endl							; UNIT MISC
+
+; -----------------------------------------------------------
+
+.local	HIGHMEM						; UNIT
+
+.local	THIGHMEMORYSTREAM.CREATE			; PROCEDURE
+	sta THIGHMEMORYSTREAM
+	sty THIGHMEMORYSTREAM+1
+	sta POSITION
+	sty POSITION+1
+	add #4
+	scc
+	iny
+	sta SIZE
+	sty SIZE+1
+
+	ift l_0188-*>3
+	jmp l_0188
+	eif
+
+; IfThenEpilog
+l_0188
+
+; optimize OK (HIGHMEM), line = 69
+
+	lda #$00
+	mwy SIZE :bp2
+	ldy #$00
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+	iny
+	lda BANK
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+; optimize OK (HIGHMEM), line = 70
+
+	mwa POSITION :bp2
+	ldy #$00
+	lda #$00
+	sta (:bp2),y
+	iny
+	sta (:bp2),y
+	iny
+	sta (:bp2),y
+	iny
+	sta (:bp2),y
+
+; -----------------------------------------------------------
+
+THIGHMEMORYSTREAM	= DATAORIGIN+$005C
+POSITION	= DATAORIGIN+$005E
+SIZE	= DATAORIGIN+$0060
+
+@VarData	= THIGHMEMORYSTREAM
+@VarDataSize	= 6
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+.local	READWRITEHIGHMEM				; PROCEDURE | ASSEMBLER
+
+
+; ---------------------  ASM Block 065  ---------------------
+
+	stx @sp
+
+	opt c+
+
+	ldx #0
+	ldy #0
+
+loop	lda [edx],y
+	sta [ecx],y
+
+	iny
+	bne skp
+
+	inw edx+1
+	inw ecx+1
+
+	inx
+
+skp	cpx eax+1
+	bne loop
+	cpy eax
+	bne loop
+
+	opt c-
+
+	ldx #0
+@sp	equ *-1
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+.local	THIGHMEMORYSTREAM.WRITEBUFFER			; PROCEDURE
+	sta THIGHMEMORYSTREAM
+	sty THIGHMEMORYSTREAM+1
+	sta POSITION
+	sty POSITION+1
+	add #4
+	scc
+	iny
+	sta SIZE
+	sty SIZE+1
+
+; -----------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	mva :STACKORIGIN,x COUNT
+	mva :STACKORIGIN+STACKWIDTH,x COUNT+1
+	dex						; sub bx, 1
+
+; -----------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	mva :STACKORIGIN,x BUFFER
+	mva :STACKORIGIN+STACKWIDTH,x BUFFER+1
+	dex						; sub bx, 1
+
+	ift l_01AE-*>3
+	jmp l_01AE
+	eif
+
+; IfThenEpilog
+l_01AE
+
+; optimize OK (HIGHMEM), line = 159
+
+	ldy #1
+	lda COUNT+1
+	cmp #$00
+	bne @+
+	lda COUNT
+@
+	seq
+	bcs @+
+	dey
+@
+	.ifdef IFTMP_23
+	sty IFTMP_23
+	eif
+	tya
+	bne *+5
+	jmp l_01BF
+
+; ---------------------  ASM Block 067  ---------------------
+
+	mwa Buffer edx	; src
+	mva #0 edx+2
+
+	mwa Position eax
+
+	ldy #0		; dst
+	lda (eax),y
+	sta ecx
+	iny
+	lda (eax),y
+	sta ecx+1
+	iny
+	lda (eax),y
+	sta ecx+2
+
+	mwa Count eax
+
+
+; optimize FAIL ('READWRITEHIGHMEM', HIGHMEM), line = 179
+	jsr READWRITEHIGHMEM
+
+; optimize OK (HIGHMEM), line = 181
+
+	mwa POSITION :bp2
+	ldy #$00
+	lda (:bp2),y
+	add COUNT
+	sta (:bp2),y
+	iny
+	lda (:bp2),y
+	adc COUNT+1
+	sta (:bp2),y
+	iny
+	lda (:bp2),y
+	adc #$00
+	sta (:bp2),y
+	iny
+	lda (:bp2),y
+	adc #$00
+	sta (:bp2),y
+
+; IfThenEpilog
+l_01BF
+
+; -----------------------------------------------------------
+
+THIGHMEMORYSTREAM	= DATAORIGIN+$0066
+BUFFER	= DATAORIGIN+$0068
+COUNT	= DATAORIGIN+$006A
+POSITION	= DATAORIGIN+$006C
+SIZE	= DATAORIGIN+$006E
+
+@VarData	= THIGHMEMORYSTREAM
+@VarDataSize	= 10
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+; -----------------------------------------------------------
+; -----------------------------------------------------------
+@UnitInit
+
+; optimize FAIL ('MISC.DETECTCPU', HIGHMEM), line = 387
+	jsr MISC.DETECTCPU
+	inx
+	mva #$80 :STACKORIGIN,x
+	ldy #1
+	lda :STACKORIGIN-1,x
+	cmp :STACKORIGIN,x
+	beq @+
+	dey
+@
+	sty :STACKORIGIN-1,x
+	dex
+	.ifdef IFTMP_24
+	lda :STACKORIGIN,x
+	sta IFTMP_24
+	eif
+	dex
+	lda :STACKORIGIN+1,x
+	bne *+5
+	jmp l_01D6
+
+; optimize FAIL ('MISC.DETECTHIGHMEM', HIGHMEM), line = 388
+	jsr MISC.DETECTHIGHMEM
+	mva :STACKORIGIN,x BANK
+	dex
+
+; IfThenEpilog
+l_01D6
+
+; Restore conditional expression
+	lda IFTMP_24
+
+; else condition
+	beq *+5						; je
+	jmp l_01E7
+
+; optimize OK (HIGHMEM), line = 390
+
+	mva #$00 BANK
+
+; IfThenEpilog
+l_01E7
+
+	rts
+
+; -----------------------------------------------------------
+
+BANK	= DATAORIGIN+$005B
+IFTMP_24	= DATAORIGIN+$0088
+
+.endl							; UNIT HIGHMEM
+
+.local	PLAY						; PROCEDURE | ASSEMBLER
+
+
+; ---------------------  ASM Block 074  ---------------------
+
+
+/****************************************************************************
+  MOVE - copy memory block >...
+  X = source
+  Y = destination
+  A = length-1
+*****************************************************************************/
+.macro move
+
+ ldx.w #[:1]&$00FFFF
+ ldy.w #[:2]&$00FFFF
+ lda.w #[:3]
+
+ mvn ^[:1],^[:2]
+
+.endm
+
+	opt c+
+
+.zpvar = $d8
+
+.zpvar nr0, nr1, nr2, nr3, patno, patend, cnts, pause, track_pos .byte
+.zpvar pat0, pat1, pat2 .long
+
+	stx _rx
+
+	jsr wait
+
+	sei
+
+	stz nmien
+	stz irqen
+
+	mva #$fe portb
+
+	ldx #8
+lp	stz AUDF1,x
+	stz AUDF1+$10,x
+	dex
+	bpl lp
+
+	ldx #0
+	mva:rne 0,x ZPAGE,x+
+
+;	ldx #0
+mv1	lda .adr(mainloop),x
+	sta mainloop,x
+	lda .adr(mainloop)+$100,x
+	sta mainloop+$100,x
+	inx
+	bne mv1
+
+;	ldx #0
+mv0	lda .adr(playloop),x
+	sta playloop,x
+	inx
+	cpx #.sizeof(playloop)
+	bne mv0
+
+	lda SONG_LENGTH
+	sta mainloop.patmax+1
+
+;	lda SONG_RESTART
+;	sta mainloop.patres+1
+
+	lda >volume		; silence
+	sta playloop.ivol0+2
+	sta playloop.ivol1+2
+	sta playloop.ivol2+2
+	sta playloop.ivol3+2
+/*
+	lda POKEY
+	bne skip
+
+	lda >COVOX		; covox
+	sta playloop.ch0+2
+	sta playloop.ch1+2
+	sta playloop.ch2+2
+	sta playloop.ch3+2
+
+	ldy #0
+	sty playloop.ch0+1
+	iny
+	sty playloop.ch1+1
+	iny
+	sty playloop.ch2+1
+	iny
+	sty playloop.ch3+1
+
+	jmp start
+*/
+
+skip	lda >VOLUME		; pokey
+	sta mvol+2
+
+	ldy #32			; POKEY volume table
+	ldx #0
+mvol	lsr VOLUME,x
+	inx
+	bne mvol
+
+	inc mvol+2
+	dey
+	bpl mvol
+
+start
+	stz dmactl
+
+	stz patno
+	stz track_pos
+
+	stz pat0
+	stz pat1
+	stz pat2
+
+	lda #6
+	sta pause
+	sta cnts
+
+	lda ^pattern_start
+	sta pat0+2
+	sta pat1+2
+	sta pat2+2
+
+	ldy adr.ORDER
+	sty pat0+1
+	iny
+	sty pat1+1
+	iny
+	sty pat2+1
+
+
+	clc:xce
+
+	.ia 16
+
+	phb
+	move $0000 player $1000-1
+	move $c000 player+$c000 $1000-1
+	move $d800 player+$d800 $2700-1
+	plb
+
+	.ia 8
+
+
+	mwa	#nmi nmivec16		; custom NMI handler
+	mwa	#irq irqvec16		; custom IRQ handler
+
+;	mva	#$01	AUDCTL		; 0=POKEY 64KHz, 1=15KHz
+
+	mva #%01000000	AUDCTL
+
+	mva #32	AUDF1			; 48 kHz
+
+	mva #$01	IRQEN
+
+	;set IRQ position in scanline for consistency and disable keyboard scan
+	mva	#0 skctl
+	sta	wsync
+
+	ldx	#16			; raster shift (right border)
+	dex:rne
+	sta	skctl
+	sta	stimer
+	lda	#1
+	sta	skctl
+
+	mva	#$40	nmien
+
+	mwa sdlstl dlistl
+;	mva sdmctl dmactl
+
+	lda ^player
+	pha
+	plb
+
+	cli
+
+	jmp player+mainloop.stop
+
+
+IRQ	jmp player+playloop
+
+NMI	jmp player+mainloop
+
+
+.local	playloop,play_smp
+
+;	phb
+
+	.ia16
+
+	sta regA
+	stx regX
+
+	.ia8
+
+	lda #0
+	sta.l IRQEN
+	lda #1
+	sta.l IRQEN
+
+
+	ldx #0
+voice	equ *-1
+
+	lda vol6bit,x
+	sta.l audc1
+
+	lda vol6bit+$100,x
+	sta.l audc2
+
+	lda vol6bit+$200,x
+	sta.l audc3
+
+
+	ldx #0
+voice_	equ *-1
+
+	lda vol6bit,x
+	sta.l audc1+$10
+
+	lda vol6bit+$100,x
+	sta.l audc2+$10
+
+	lda vol6bit+$200,x
+	sta.l audc3+$10
+
+
+	.ifdef MAIN.@DEFINES.STATUS
+	lda #$0f
+	sta.l colbak
+	.endif
+
+; ---
+; ---	AUDC 1
+; ---
+
+	clc
+
+ist_0	lda #0
+iad0_m	adc #0
+	sta ist_0+1
+	lda p_0c+1
+iad0_s	adc #0
+	bcc ext_0
+
+	inc p_0c+2
+	bne ext_0
+
+ire0_s	lda #0
+	sta p_0c+2
+ire0_m	lda #0
+
+ext_0	sta p_0c+1
+
+
+; ---
+; ---	AUDC 2
+; ---
+
+	clc
+
+ist_1	lda #0
+iad1_m	adc #0
+	sta ist_1+1
+	lda p_1c+1
+iad1_s	adc #0
+	bcc ext_1
+
+	inc p_1c+2
+	bne ext_1
+
+ire1_s	lda #0
+	sta p_1c+2
+ire1_m	lda #0
+
+ext_1	sta p_1c+1
+
+
+; ---
+; ---	AUDC 3
+; ---
+
+	clc
+
+ist_2	lda #0
+iad2_m	adc #0
+	sta ist_2+1
+	lda p_2c+1
+iad2_s	adc #0
+	bcc ext_2
+
+	inc p_2c+2
+	bne ext_2
+
+ire2_s	lda #0
+	sta p_2c+2
+ire2_m	lda #0
+
+ext_2	sta p_2c+1
+
+
+; ---
+; ---	AUDC 4
+; ---
+
+	clc
+
+ist_3	lda #0
+iad3_m	adc #0
+	sta ist_3+1
+	lda p_3c+1
+iad3_s	adc #0
+	bcc ext_3
+
+	inc p_3c+2
+	bne ext_3
+
+ire3_s	lda #0
+	sta p_3c+2
+ire3_m	lda #0
+
+ext_3	sta p_3c+1
+
+
+p_0c	lda.l sample_start+$FFFF	; ch #1
+	sta ivol0+1
+p_1c	lda.l sample_start+$FFFF	; ch #2
+	sta ivol1+1
+p_2c	lda.l sample_start+$FFFF	; ch #3
+	sta ivol2+1
+p_3c	lda.l sample_start+$FFFF	; ch #4
+	sta ivol3+1
+
+	clc
+ivol0	lda volume
+ivol3	adc volume
+	sta voice
+
+
+	clc
+ivol1	lda volume
+ivol2	adc volume
+	sta voice_
+
+
+	.ifdef MAIN.@DEFINES.STATUS
+	lda #$00
+	sta.l colbak
+	.endif
+
+
+	.ia16
+
+	lda.w #0
+regA	equ *-2
+
+	ldx.w #0
+regX	equ *-2
+
+
+;	plb
+	rti
+
+	.print 'PLAY_SMP: ',*
+
+.endl
+
+
+
+.local	mainloop,main_lop
+
+;	phb
+
+	.ai16
+
+	sta regA
+	stx regX
+	sty regY
+
+	.ai8
+
+	dec cnts
+	seq
+	jmp nmiExit
+
+	stz patend
+
+	ldy track_pos
+
+*---------------------------
+* track  0
+
+i_0	;ldy #1
+	lda [pat1],y
+	sta i_0c+1
+	and #$1f
+	beq i_0c
+	tax
+	sta nr0
+	lda adr.tivol-1,x
+	sta playloop.ivol0+2
+
+i_0c	ldx EFFECT
+	beq i_0f
+	cpx #$40
+	bne @+
+	;ldy #2
+	lda [pat2],y
+	sta playloop.ivol0+2
+@	cpx #$c0
+	bne @+
+	;ldy #2
+	lda [pat2],y
+	sta pause
+@	cpx #$80
+	bne i_0f
+	stx patend
+
+i_0f	;ldy #0
+	lda [pat0],y
+	beq i_1
+	tax
+	lda tadcl-1,x
+	sta playloop.iad0_m+1
+	lda tadch-1,x
+	sta playloop.iad0_s+1
+
+	stz playloop.ist_0+1
+
+	ldx nr0
+	txa
+	add ^sample_start-1
+	sta playloop.p_0c+3
+
+	lda adr.tstrl-1,x
+	sta playloop.p_0c+1
+	lda adr.tstrh-1,x
+	sta playloop.p_0c+2
+
+	lda adr.trepl-1,x
+	sta playloop.ire0_m+1
+	lda adr.treph-1,x
+	sta playloop.ire0_s+1
+
+* track 1
+
+i_1	iny
+
+	;ldy #4
+	lda [pat1],y
+	sta i_1c+1
+	and #$1f
+	beq i_1c
+	tax
+	sta nr1
+	lda adr.tivol-1,x
+	sta playloop.ivol1+2
+
+i_1c	ldx EFFECT
+	beq i_1f
+	cpx #$40
+	bne @+
+	;ldy #5
+	lda [pat2],y
+	sta playloop.ivol1+2
+@	cpx #$c0
+	bne @+
+	;ldy #5
+	lda [pat2],y
+	sta pause
+@	cpx #$80
+	bne i_1f
+	stx patend
+
+i_1f	;ldy #3
+	lda [pat0],y
+	beq i_2
+	tax
+	lda tadcl-1,x
+	sta playloop.iad1_m+1
+	lda tadch-1,x
+	sta playloop.iad1_s+1
+
+	stz playloop.ist_1+1
+
+	ldx nr1
+	txa
+	add ^sample_start-1
+	sta playloop.p_1c+3
+
+	lda adr.tstrl-1,x
+	sta playloop.p_1c+1
+	lda adr.tstrh-1,x
+	sta playloop.p_1c+2
+
+	lda adr.trepl-1,x
+	sta playloop.ire1_m+1
+	lda adr.treph-1,x
+	sta playloop.ire1_s+1
+
+* track 2
+
+i_2	iny
+
+	;ldy #7
+	lda [pat1],y
+	sta i_2c+1
+	and #$1f
+	beq i_2c
+	tax
+	sta nr2
+	lda adr.tivol-1,x
+	sta playloop.ivol2+2
+
+i_2c	ldx EFFECT
+	beq i_2f
+	cpx #$40
+	bne @+
+	;ldy #8
+	lda [pat2],y
+	sta playloop.ivol2+2
+@	cpx #$c0
+	bne @+
+	;ldy #8
+	lda [pat2],y
+	sta pause
+@	cpx #$80
+	bne i_2f
+	stx patend
+
+i_2f	;ldy #6
+	lda [pat0],y
+	beq i_3
+	tax
+	lda tadcl-1,x
+	sta playloop.iad2_m+1
+	lda tadch-1,x
+	sta playloop.iad2_s+1
+
+	stz playloop.ist_2+1
+
+	ldx nr2
+	txa
+	add ^sample_start-1
+	sta playloop.p_2c+3
+
+	lda adr.tstrl-1,x
+	sta playloop.p_2c+1
+	lda adr.tstrh-1,x
+	sta playloop.p_2c+2
+
+	lda adr.trepl-1,x
+	sta playloop.ire2_m+1
+	lda adr.treph-1,x
+	sta playloop.ire2_s+1
+
+* track 3
+
+i_3	iny
+
+	;ldy #10
+	lda [pat1],y
+	sta i_3c+1
+	and #$1f
+	beq i_3c
+	tax
+	sta nr3
+	lda adr.tivol-1,x
+	sta playloop.ivol3+2
+
+i_3c	ldx EFFECT
+	beq i_3f
+	cpx #$40
+	bne @+
+	;ldy #11
+	lda [pat2],y
+	sta playloop.ivol3+2
+@	cpx #$c0
+	bne @+
+	;ldy #11
+	lda [pat2],y
+	sta pause
+@	cpx #$80
+	bne i_3f
+	stx patend
+
+i_3f	;ldy #9
+	lda [pat0],y
+	beq i_e
+	tax
+	lda tadcl-1,x
+	sta playloop.iad3_m+1
+	lda tadch-1,x
+	sta playloop.iad3_s+1
+
+	stz playloop.ist_3+1
+
+	ldx nr3
+	txa
+	add ^sample_start-1
+	sta playloop.p_3c+3
+
+	lda adr.tstrl-1,x
+	sta playloop.p_3c+1
+	lda adr.tstrh-1,x
+	sta playloop.p_3c+2
+
+	lda adr.trepl-1,x
+	sta playloop.ire3_m+1
+	lda adr.treph-1,x
+	sta playloop.ire3_s+1
+
+i_e
+	lda patend
+	bne i_en
+
+	iny
+	sty track_pos
+	bne i_end
+
+i_en	inc patno
+	ldx patno
+patmax	cpx #0
+	bcc i_ens
+
+	lda #6
+	sta pause
+patres	ldx #0
+	stx patno
+
+i_ens	ldy adr.ORDER,x
+	sty pat0+1
+	iny
+	sty pat1+1
+	iny
+	sty pat2+1
+
+	stz track_pos
+
+i_end
+	lda pause
+	sta cnts
+
+nmiExit
+	lda.l consol
+	cmp #$06
+	bne skp
+
+	lda #$2c	; bit *
+	sta stop
+
+skp
+
+	.ia16
+
+	lda.w #0
+regA	equ *-2
+
+	ldx.w #0
+regX	equ *-2
+
+	ldy.w #0
+regY	equ *-2
+
+;	plb
+	rti
+
+
+stop	jmp *			; do nothing
+
+	lda.l:rne vcount
+
+	sei
+	lda #0
+	sta.l NMIEN
+	sta.l IRQEN
+
+	pha
+	plb
+
+	jml stop2
+
+.endl
+
+
+wait	lda skstat	; wait on keypress
+	and #4
+	beq wait
+
+	lda:rne vcount
+	rts
+
+stop2
+	stz AUDCTL
+	stz AUDCTL+$10
+
+	ldx #0
+	mva:rne ZPAGE,x 0,x+
+
+	jsr wait
+
+	sec:xce
+
+	lda #$ff
+	sta portb
+
+	mva sdmctl dmactl
+
+	lda irqens
+	sta IRQEN
+
+	lda	#3
+	sta	skctl
+
+	mva #$40 nmien
+	cli
+
+	ldx #0
+_rx	equ *-1
+
+	opt c-
+
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+.local	CNVPATTERN					; FUNCTION | ASSEMBLER
+
+
+; ---------------------  ASM Block 075  ---------------------
+
+
+	lda #0
+	sta Result
+	sta Result+1
+	sta Result+2
+	sta Result+3
+
+	lda adr.BUF
+	and #$f
+	ora adr.BUF+1
+	beq _sil
+
+	ldy #0
+_tst	lda adr.KOD,y
+	cmp adr.BUF+1
+	bne pls
+	lda adr.BUF		;kod dzwieku
+	and #$f
+	cmp adr.KOD+1,y
+	bne pls
+	iny
+	iny
+	tya
+	lsr @
+; ldy #0
+	sta Result		;czestotliwosc
+
+	lda adr.BUF+2		;oblicz nr instr
+	lsr @
+	lsr @
+	lsr @
+	lsr @
+	sta or_+1
+	lda adr.BUF
+	and #$f0
+or_	ora #0
+	and #$1f
+; ldy #1
+_con	sta Result+1		;numer instrumentu
+
+; ldy #2
+	lda #0
+	sta Result+2
+; dey
+	lda adr.BUF+2
+	and #$f
+	cmp #$c
+	beq _vol		; Effect Cxy (Set Volume)
+	cmp #$f
+	beq _tmp		; Effect Fxy (Set Speed)
+	cmp #$d
+	beq _break		; Effect Dxy (Pattern Break)
+	jmp stop
+
+_sil	sta Result
+	beq _con
+
+_break	lda #$80
+	ora Result+1
+	sta Result+1
+	bne stop
+
+_vol	lda #$40
+	ora Result+1
+	sta Result+1
+
+	lda adr.BUF+3		;parametr komendy
+
+	lsr @
+	clc
+	adc >VOLUME
+	sta Result+2
+	bne stop
+
+_tmp	lda adr.BUF+3
+	cmp #$20
+	bcs _tq
+	lda #$c0
+	ora Result+1
+	sta Result+1
+; ldy #2
+	lda adr.BUF+3		;parametr komendy
+	and #$1f
+	sta Result+2
+_tq
+	jmp stop
+
+pls	iny
+	iny
+	cpy #96
+
+	jne _tst
+
+stop
+
+
+@exit
+
+; -----------------------------------------------------------
+
+; Push CARDINAL / INTEGER / REAL / SINGLE
+; as Pointer
+
+	inx						; add bx, 1
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+	mva RESULT+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva RESULT+3 :STACKORIGIN+STACKWIDTH*3,x
+
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+
+; -----------------------------------------------------------
+
+RESULT	= DATAORIGIN+$048C
+
+@VarData	= RESULT
+@VarDataSize	= 4
+
+	rts						; ret
+.endl
+
+.local	LOADMOD						; PROCEDURE
+
+; -----------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	mva :STACKORIGIN,x FNAM
+	mva :STACKORIGIN+STACKWIDTH,x FNAM+1
+	dex						; sub bx, 1
+	@move FNAM #adr.FNAM #33
+	mwa #adr.FNAM FNAM
+
+	ift l_01FA-*>3
+	jmp l_01FA
+	eif
+
+.local	NORMALIZEBUF					; PROCEDURE
+
+	ift l_01FD-*>3
+	jmp l_01FD
+	eif
+
+; IfThenEpilog
+l_01FD
+; For
+
+; optimize OK (), line = 16
+
+	mva #$00 J
+
+; optimize OK (), line = 16
+
+; To
+l_0210
+
+; ForToDoCondition
+
+; optimize OK (), line = 16
+
+	lda J
+	cmp #$DF
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_021E
+
+; optimize OK (), line = 17
+
+	ldy J
+	lda adr.BUF,y
+	add #$80
+	sta adr.BUF,y
+
+; ForToDoEpilog
+c_0210
+	inc J						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_0210
+l_021E
+b_0210
+
+; -----------------------------------------------------------
+
+@FORTMP_522	= DATAORIGIN+$0509
+
+@VarData	= @FORTMP_522
+@VarDataSize	= 1
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+; IfThenEpilog
+l_01FA
+	@move #CODEORIGIN+$0010 #adr.NAME #3
+
+; optimize OK (), line = 25
+
+	mwa FNAM :bp2
+	ldy #0
+	lda (:bp2),y
+	add #$02
+	sta adr.NAME+$00
+; For
+
+; optimize OK (), line = 27
+
+	mva #$01 I
+
+; optimize OK (), line = 27
+
+	mwa FNAM :bp2
+	ldy #0
+	lda (:bp2),y
+	sta @FORTMP_580
+; To
+l_024A
+
+; ForToDoCondition
+
+; optimize OK (), line = 27
+
+	lda I
+	cmp @FORTMP_580
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_0258
+
+; optimize OK (), line = 28
+
+	lda I
+	add #$02
+	sta :STACKORIGIN+9
+	ldy I
+	lda adr.FNAM,y
+	ldy :STACKORIGIN+9
+	sta adr.NAME,y
+
+; ForToDoEpilog
+c_024A
+	inc I						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_024A
+l_0258
+b_024A
+; AssignFile
+
+; optimize OK (), line = 30
+
+	mwa F :bp2
+	ldy #s@file.pfname
+	lda NAME
+	sta (:bp2),y
+	iny
+	lda NAME+1
+	sta (:bp2),y
+
+; optimize OK (), line = 30
+
+	ldy #s@file.status
+	lda #$00
+	sta (:bp2),y
+; Reset
+
+; optimize OK (), line = 30
+
+	ldy #s@file.record
+	lda #$01
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@openfile F, MAIN.SYSTEM.FileMode
+	pla:tax
+
+; BlockRead
+
+; optimize OK (), line = 32
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda MODNAME
+	sta (:bp2),y
+	iny
+	lda MODNAME+1
+	sta (:bp2),y
+
+; optimize OK (), line = 32
+
+	ldy #s@file.nrecord
+	lda #$14
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize OK (), line = 34
+
+	mva #$00 NUMBER_OF_SAMPLES
+; For
+
+; optimize OK (), line = 36
+
+	mva #$00 I
+
+; optimize OK (), line = 36
+
+; To
+l_02A8
+
+; ForToDoCondition
+
+; optimize OK (), line = 36
+
+	lda I
+	cmp #$1E
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_02B6
+
+; optimize OK (), line = 38
+
+	lda I
+	asl @
+	tay
+	lda adr.SAMPLE,y
+	sta SMP
+	lda adr.SAMPLE+1,y
+	sta SMP+1
+; BlockRead
+
+; optimize OK (), line = 40
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda #SMP.NAME-DATAORIGIN
+	add SMP
+	sta (:bp2),y
+	iny
+	lda #$00
+	adc SMP+1
+	sta (:bp2),y
+
+; optimize OK (), line = 40
+
+	ldy #s@file.nrecord
+	lda #$1E
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize FAIL ('SYSTEM.SWAP_0124', ), line = 42
+	inx
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	iny
+	mva (:bp2),y :STACKORIGIN+STACKWIDTH,x
+	jsr SYSTEM.SWAP_0124
+	inx
+	mva #$01 :STACKORIGIN,x
+	jsr shlEAX_CL.WORD
+	dex
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	lda :STACKORIGIN,x
+	sta (:bp2),y
+	iny
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta (:bp2),y
+	dex
+
+; optimize FAIL ('SYSTEM.SWAP_0124', ), line = 43
+	inx
+	mwa SMP :bp2
+	ldy #SMP.LOOP_START-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	iny
+	mva (:bp2),y :STACKORIGIN+STACKWIDTH,x
+	jsr SYSTEM.SWAP_0124
+	inx
+	mva #$01 :STACKORIGIN,x
+	jsr shlEAX_CL.WORD
+	dex
+	mwa SMP :bp2
+	ldy #SMP.LOOP_START-DATAORIGIN
+	lda :STACKORIGIN,x
+	sta (:bp2),y
+	iny
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta (:bp2),y
+	dex
+
+; optimize FAIL ('SYSTEM.SWAP_0124', ), line = 44
+	inx
+	mwa SMP :bp2
+	ldy #SMP.LOOP_LEN-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	iny
+	mva (:bp2),y :STACKORIGIN+STACKWIDTH,x
+	jsr SYSTEM.SWAP_0124
+	inx
+	mva #$01 :STACKORIGIN,x
+	jsr shlEAX_CL.WORD
+	dex
+	mwa SMP :bp2
+	ldy #SMP.LOOP_LEN-DATAORIGIN
+	lda :STACKORIGIN,x
+	sta (:bp2),y
+	iny
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta (:bp2),y
+	dex
+
+; optimize OK (), line = 46
+
+	mwa SMP :bp2
+	ldy #SMP.FINE_TUNE-DATAORIGIN
+	lda (:bp2),y
+	sta :STACKORIGIN+9
+	ldy #1
+	.LOCAL
+	lda :STACKORIGIN+9
+	sub #$07
+	bne L4
+L1	beq L2
+	bcs L3
+	lda #$FF
+L2	jmp L5
+L3	lda #$01
+	jmp L5
+L4	bvc L5
+	eor #$FF
+	ora #$01
+L5
+	.ENDL
+	seq
+	bpl @+
+	dey
+@
+	.ifdef IFTMP_25
+	sty IFTMP_25
+	eif
+	tya
+	bne *+5
+	jmp l_0308
+
+; optimize OK (), line = 46
+
+	ldy #SMP.FINE_TUNE-DATAORIGIN
+	lda (:bp2),y
+	sub #$10
+	sta (:bp2),y
+
+; IfThenEpilog
+l_0308
+
+; optimize OK (), line = 48
+
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	lda (:bp2),y
+	sta :STACKORIGIN+9
+	iny
+	lda (:bp2),y
+	ldy #1
+	cmp #$00
+	bne @+
+	lda :STACKORIGIN+9
+@
+	bne @+
+	dey
+@
+	.ifdef IFTMP_26
+	sty IFTMP_26
+	eif
+	tya
+	bne *+5
+	jmp l_031D
+
+; optimize FAIL (0, ), line = 49
+	inc NUMBER_OF_SAMPLES
+
+; optimize OK (), line = 50
+
+	ldy I
+	iny
+	sty NUMBER_OF_BANKS
+
+; IfThenEpilog
+l_031D
+
+; optimize OK (), line = 53
+
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	lda (:bp2),y
+	sta :STACKORIGIN+9
+	iny
+	lda (:bp2),y
+	sta :STACKORIGIN+STACKWIDTH+9
+	ldy #1
+	lda #$00
+	cmp #$01
+	bne @+
+	lda :STACKORIGIN+STACKWIDTH+9
+	cmp #$00
+	bne @+
+	lda :STACKORIGIN+9
+@
+	seq
+	bcs @+
+	dey
+@
+	.ifdef IFTMP_27
+	sty IFTMP_27
+	eif
+	tya
+	bne *+5
+	jmp l_0342
+
+	@printSTRING #CODEORIGIN+$0014
+
+; -----------------------------------------------------------
+
+; Push CARDINAL / INTEGER / REAL / SINGLE
+; as Value $00010000 (65536)
+
+	inx						; add bx, 1
+	mva #$00 :STACKORIGIN,x
+	mva #$00 :STACKORIGIN+STACKWIDTH,x
+	mva #$01 :STACKORIGIN+STACKWIDTH*2,x
+	mva #$00 :STACKORIGIN+STACKWIDTH*3,x
+
+	jsr @printCARD
+	dex						; sub bx, 1
+
+	@printSTRING #CODEORIGIN+$001B
+	@printEOL
+	lda #$00
+	jmp @halt
+
+
+; IfThenEpilog
+l_0342
+
+; ForToDoEpilog
+c_02A8
+	inc I						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_02A8
+l_02B6
+b_02A8
+; BlockRead
+
+; optimize OK (), line = 61
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda <SONG_LENGTH
+	sta (:bp2),y
+	iny
+	lda >SONG_LENGTH
+	sta (:bp2),y
+
+; optimize OK (), line = 61
+
+	ldy #s@file.nrecord
+	lda #$01
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+; BlockRead
+
+; optimize OK (), line = 62
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda <SONG_RESTART
+	sta (:bp2),y
+	iny
+	lda >SONG_RESTART
+	sta (:bp2),y
+
+; optimize OK (), line = 62
+
+	ldy #s@file.nrecord
+	lda #$01
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize OK (), line = 65
+
+	mva #$00 NUMBER_OF_PATTERNS
+; For
+
+; optimize OK (), line = 67
+
+	mva #$00 I
+
+; optimize OK (), line = 67
+
+; To
+l_038A
+
+; ForToDoCondition
+
+; optimize OK (), line = 67
+
+	lda I
+	cmp #$7F
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_0398
+; BlockRead
+
+; optimize OK (), line = 68
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda <A
+	sta (:bp2),y
+	iny
+	lda >A
+	sta (:bp2),y
+
+; optimize OK (), line = 68
+
+	ldy #s@file.nrecord
+	lda #$01
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize OK (), line = 70
+
+	lda A
+	asl @
+	add #$00
+	add A
+	ldy I
+	sta adr.ORDER,y
+
+; optimize OK (), line = 72
+
+	ldy #1
+	lda A
+	cmp NUMBER_OF_PATTERNS
+	seq
+	bcs @+
+	dey
+@
+	.ifdef IFTMP_28
+	sty IFTMP_28
+	eif
+	tya
+	bne *+5
+	jmp l_03D1
+
+; optimize OK (), line = 72
+
+	mva A NUMBER_OF_PATTERNS
+
+; IfThenEpilog
+l_03D1
+
+; ForToDoEpilog
+c_038A
+	inc I						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_038A
+l_0398
+b_038A
+
+; optimize FAIL (0, ), line = 75
+	inc NUMBER_OF_PATTERNS
+; BlockRead
+
+; optimize OK (), line = 78
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda HEADER
+	add #$01
+	sta (:bp2),y
+	iny
+	lda HEADER+1
+	adc #$00
+	sta (:bp2),y
+
+; optimize OK (), line = 78
+
+	ldy #s@file.nrecord
+	lda #$04
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize OK (), line = 79
+
+	mva #$04 adr.HEADER+$00
+
+; optimize FAIL ('cmpSTRING', ), line = 81
+	inx
+	mva HEADER :STACKORIGIN,x
+	mva HEADER+1 :STACKORIGIN+STACKWIDTH,x
+	inx
+	mva #$31 :STACKORIGIN,x
+	mva #$20 :STACKORIGIN+STACKWIDTH,x
+	ldy #1
+	jsr cmpSTRING
+	bne @+
+	dey
+@
+	sty :STACKORIGIN-1,x
+	dex
+	.ifdef IFTMP_29
+	lda :STACKORIGIN,x
+	sta IFTMP_29
+	eif
+	dex
+	lda :STACKORIGIN+1,x
+	bne *+5
+	jmp l_040A
+
+	@printSTRING #CODEORIGIN+$0037
+	@printEOL
+	lda #$00
+	jmp @halt
+
+
+; IfThenEpilog
+l_040A
+
+	@printSTRING #CODEORIGIN+$004C
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx						; add bx, 1
+	mva MODNAME :STACKORIGIN,x
+	mva MODNAME+1 :STACKORIGIN+STACKWIDTH,x
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printPCHAR
+	dex						; sub bx, 1
+	@printEOL
+; For
+
+; optimize OK (), line = 90
+
+	mva #$00 I
+
+; optimize OK (), line = 90
+
+; To
+l_042A
+
+; ForToDoCondition
+
+; optimize OK (), line = 90
+
+	lda I
+	cmp #$1E
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_0438
+
+; optimize OK (), line = 92
+
+	lda I
+	asl @
+	tay
+	lda adr.SAMPLE,y
+	sta SMP
+	lda adr.SAMPLE+1,y
+	sta SMP+1
+
+; optimize OK (), line = 94
+
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	lda (:bp2),y
+	sta :STACKORIGIN+9
+	iny
+	lda (:bp2),y
+	ldy #1
+	cmp #$00
+	bne @+
+	lda :STACKORIGIN+9
+@
+	bne @+
+	dey
+@
+	.ifdef IFTMP_30
+	sty IFTMP_30
+	eif
+	tya
+	bne *+5
+	jmp l_0454
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva I :STACKORIGIN,x
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000001 (1)
+
+	inx						; add bx, 1
+	mva #$01 :STACKORIGIN,x
+	jsr @expandToCARD1.BYTE
+	jsr @expandToCARD.BYTE
+
+; Generate Binary Operation for CARDINAL
+	jsr addEAX_ECX					; add :eax, :ecx
+	dex						; sub bx, 1
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000002 (2)
+
+	inx						; add bx, 1
+	mva #$02 :STACKORIGIN,x
+
+	jsr SYSTEM.HEXSTR				; call Entry
+
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printSTRING
+	dex						; sub bx, 1
+	@print #$20
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer to Record
+
+	inx						; add bx, 1
+	lda #SMP.NAME-DATAORIGIN
+	add SMP
+	sta :STACKORIGIN,x
+	lda #$00
+	adc SMP+1
+	sta :STACKORIGIN+STACKWIDTH,x
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printPCHAR
+	dex						; sub bx, 1
+
+; optimize FAIL ('CRT.WHEREY', ), line = 96
+	inx
+	mva #$1A :STACKORIGIN,x
+	jsr CRT.WHEREY
+	jsr CRT.GOTOXY
+	@print #$20
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer to Pointer
+
+	inx						; add bx, 1
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	iny
+	mva (:bp2),y :STACKORIGIN+STACKWIDTH,x
+	jsr @expandToCARD.WORD
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000004 (4)
+
+	inx						; add bx, 1
+	mva #$04 :STACKORIGIN,x
+
+	jsr SYSTEM.HEXSTR				; call Entry
+
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printSTRING
+	dex						; sub bx, 1
+	@print #$20
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer to Pointer
+
+	inx						; add bx, 1
+	mwa SMP :bp2
+	ldy #SMP.FINE_TUNE-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+
+	jsr @printSHORTINT
+	dex						; sub bx, 1
+
+; optimize FAIL ('CRT.WHEREY', ), line = 98
+	inx
+	mva #$23 :STACKORIGIN,x
+	jsr CRT.WHEREY
+	jsr CRT.GOTOXY
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer to Pointer
+
+	inx						; add bx, 1
+	mwa SMP :bp2
+	ldy #SMP.VOLUME-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	jsr @expandToCARD.BYTE
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000002 (2)
+
+	inx						; add bx, 1
+	mva #$02 :STACKORIGIN,x
+
+	jsr SYSTEM.HEXSTR				; call Entry
+
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printSTRING
+	dex						; sub bx, 1
+	@print #$20
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer to Pointer
+
+	inx						; add bx, 1
+	mwa SMP :bp2
+	ldy #SMP.LOOP_START-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	iny
+	mva (:bp2),y :STACKORIGIN+STACKWIDTH,x
+	jsr @expandToCARD.WORD
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000004 (4)
+
+	inx						; add bx, 1
+	mva #$04 :STACKORIGIN,x
+
+	jsr SYSTEM.HEXSTR				; call Entry
+
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printSTRING
+	dex						; sub bx, 1
+	@print #$20
+
+; -----------------------------------------------------------
+
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer to Pointer
+
+	inx						; add bx, 1
+	mwa SMP :bp2
+	ldy #SMP.LOOP_LEN-DATAORIGIN
+	mva (:bp2),y :STACKORIGIN,x
+	iny
+	mva (:bp2),y :STACKORIGIN+STACKWIDTH,x
+	jsr @expandToCARD.WORD
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000004 (4)
+
+	inx						; add bx, 1
+	mva #$04 :STACKORIGIN,x
+
+	jsr SYSTEM.HEXSTR				; call Entry
+
+
+	lda :STACKORIGIN,x
+	ldy :STACKORIGIN+STACKWIDTH,x
+	jsr @printSTRING
+	dex						; sub bx, 1
+	@printEOL
+
+; IfThenEpilog
+l_0454
+
+; ForToDoEpilog
+c_042A
+	inc I						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_042A
+l_0438
+b_042A
+
+; optimize OK (), line = 105
+
+	ldy #1
+	lda NUMBER_OF_PATTERNS
+	cmp #$55
+	seq
+	bcs @+
+	dey
+@
+	.ifdef IFTMP_31
+	sty IFTMP_31
+	eif
+	tya
+	bne *+5
+	jmp l_04AF
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $0000009B (155)
+
+	inx						; add bx, 1
+	mva #$9B :STACKORIGIN,x
+
+	@printCHAR
+	dex						; sub bx, 1
+
+	@printSTRING #CODEORIGIN+$0054
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva NUMBER_OF_PATTERNS :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+	@printEOL
+
+	@printSTRING #CODEORIGIN+$005F
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $00000055 (85)
+
+	inx						; add bx, 1
+	mva #$55 :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+
+	@printSTRING #CODEORIGIN+$0066
+	@printEOL
+	lda #$00
+	jmp @halt
+
+
+; IfThenEpilog
+l_04AF
+
+; optimize FAIL ('HIGHMEM.THIGHMEMORYSTREAM.CREATE', ), line = 112
+	lda XMS
+	ldy XMS+1
+	jsr HIGHMEM.THIGHMEMORYSTREAM.CREATE
+
+; optimize OK (), line = 114
+
+	lda #$00
+	sta :ecx
+	sta :ecx+1
+	lda #$01
+	sta :ecx+2
+	lda #$00
+	sta :ecx+3
+	lda NUMBER_OF_BANKS
+	sta :eax
+	lda #$00
+	sta :eax+1
+	sta :eax+2
+	sta :eax+3
+	jsr imulECX
+	ldy #1
+	lda XMS.SIZE+3
+	cmp :eax+3
+	bne @+
+	lda XMS.SIZE+2
+	cmp :eax+2
+	bne @+
+	lda XMS.SIZE+1
+	cmp :eax+1
+	bne @+
+	lda XMS.SIZE
+	cmp :eax
+@
+	bcc @+
+	dey
+@
+	.ifdef IFTMP_32
+	sty IFTMP_32
+	eif
+	tya
+	bne *+5
+	jmp l_04E8
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $0000009B (155)
+
+	inx						; add bx, 1
+	mva #$9B :STACKORIGIN,x
+
+	@printCHAR
+	dex						; sub bx, 1
+
+	@printSTRING #CODEORIGIN+$0078
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva NUMBER_OF_BANKS :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+
+	@printSTRING #CODEORIGIN+$0087
+	@printEOL
+	lda #$00
+	jmp @halt
+
+
+; IfThenEpilog
+l_04E8
+
+; optimize OK (), line = 120
+
+	mva #$50 TEMP+1
+	mva #$00 TEMP
+	sta TEMP+2
+	sta TEMP+3
+
+; optimize OK (), line = 122
+
+	mva #$00 XMS.POSITION
+	sta XMS.POSITION+1
+	mva #$0F XMS.POSITION+2
+	mva #$00 XMS.POSITION+3
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Value $0000009B (155)
+
+	inx						; add bx, 1
+	mva #$9B :STACKORIGIN,x
+
+	@printCHAR
+	dex						; sub bx, 1
+
+	@printSTRING #CODEORIGIN+$009F
+
+; optimize FAIL ('CRT.WHEREX', ), line = 125
+	jsr CRT.WHEREX
+	mva :STACKORIGIN,x X
+	dex
+
+; optimize FAIL ('CRT.WHEREY', ), line = 126
+	jsr CRT.WHEREY
+	mva :STACKORIGIN,x Y
+	dex
+; For
+
+; optimize OK (), line = 128
+
+	mva #$01 I
+
+; optimize OK (), line = 128
+
+	mva NUMBER_OF_PATTERNS @FORTMP_1329
+; To
+l_0537
+
+; ForToDoCondition
+
+; optimize OK (), line = 128
+
+	lda I
+	cmp @FORTMP_1329
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_0545
+
+; optimize OK (), line = 130
+
+	mva TEMP P0
+	mva TEMP+1 P0+1
+
+; optimize OK (), line = 131
+
+	lda TEMP
+	sta P1
+	lda TEMP+1
+	add #$01
+	sta P1+1
+
+; optimize OK (), line = 132
+
+	lda TEMP
+	sta P2
+	lda TEMP+1
+	add #$02
+	sta P2+1
+
+; optimize FAIL ('CRT.GOTOXY', ), line = 134
+	inx
+	mva X :STACKORIGIN,x
+	inx
+	mva Y :STACKORIGIN,x
+	jsr CRT.GOTOXY
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva I :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+	@print #$2F
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva NUMBER_OF_PATTERNS :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+; For
+
+; optimize OK (), line = 137
+
+	mva #$00 J
+
+; optimize OK (), line = 137
+
+; To
+l_0588
+
+; ForToDoCondition
+
+; optimize OK (), line = 137
+
+	lda J
+	cmp #$FF
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_0596
+; BlockRead
+
+; optimize OK (), line = 138
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda BUF
+	sta (:bp2),y
+	iny
+	lda BUF+1
+	sta (:bp2),y
+
+; optimize OK (), line = 138
+
+	ldy #s@file.nrecord
+	lda #$04
+	sta (:bp2),y
+	iny
+	lda #$00
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize FAIL ('CNVPATTERN', ), line = 140
+	jsr CNVPATTERN
+	mva :STACKORIGIN,x TMP
+	mva :STACKORIGIN+STACKWIDTH,x TMP+1
+	mva :STACKORIGIN+STACKWIDTH*2,x TMP+2
+	mva :STACKORIGIN+STACKWIDTH*3,x TMP+3
+	dex
+
+; optimize OK (), line = 142
+
+	mva P0+1 :bp+1
+	ldy P0
+	lda TMP
+	sta (:bp),y
+
+; optimize FAIL (0, ), line = 142
+	inw P0
+
+; optimize OK (), line = 143
+
+	mva P1+1 :bp+1
+	ldy P1
+	lda TMP+1
+	sta (:bp),y
+
+; optimize FAIL (0, ), line = 143
+	inw P1
+
+; optimize OK (), line = 144
+
+	mva P2+1 :bp+1
+	ldy P2
+	lda TMP+2
+	sta (:bp),y
+
+; optimize FAIL (0, ), line = 144
+	inw P2
+
+; ForToDoEpilog
+c_0588
+	inc J						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_0588
+l_0596
+b_0588
+
+; optimize OK (), line = 147
+
+	dec P0+1
+
+; optimize FAIL ('HIGHMEM.THIGHMEMORYSTREAM.WRITEBUFFER', ), line = 149
+	inx
+	mva P0 :STACKORIGIN,x
+	mva P0+1 :STACKORIGIN+STACKWIDTH,x
+	inx
+	mva #$00 :STACKORIGIN,x
+	mva #$03 :STACKORIGIN+STACKWIDTH,x
+	lda XMS
+	ldy XMS+1
+	jsr HIGHMEM.THIGHMEMORYSTREAM.WRITEBUFFER
+
+; ForToDoEpilog
+c_0537
+	inc I						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_0537
+l_0545
+b_0537
+	@printEOL
+
+	@printSTRING #CODEORIGIN+$00AF
+
+; optimize FAIL ('CRT.WHEREX', ), line = 156
+	jsr CRT.WHEREX
+	mva :STACKORIGIN,x X
+	dex
+
+; optimize FAIL ('CRT.WHEREY', ), line = 157
+	jsr CRT.WHEREY
+	mva :STACKORIGIN,x Y
+	dex
+
+; optimize OK (), line = 159
+
+	mva #$00 OFFSET
+	sta OFFSET+1
+	mva #$10 OFFSET+2
+	mva #$00 OFFSET+3
+
+; optimize OK (), line = 160
+
+	mva #$01 NUM
+; For
+
+; optimize OK (), line = 162
+
+	mva #$00 I
+
+; optimize OK (), line = 162
+
+; To
+l_0612
+
+; ForToDoCondition
+
+; optimize OK (), line = 162
+
+	lda I
+	cmp #$1E
+	bcc *+7
+	beq *+5
+
+; ForToDoProlog
+	jmp l_0620
+
+; optimize OK (), line = 164
+
+	ldy I
+	mva #$00 adr.TSTRL,y
+
+; optimize OK (), line = 165
+
+	mva #$DE adr.TSTRH,y
+
+; optimize OK (), line = 166
+
+	mva #$00 adr.TREPL,y
+
+; optimize OK (), line = 167
+
+	mva #$DE adr.TREPH,y
+
+; optimize OK (), line = 169
+
+	sta adr.TIVOL,y
+
+; optimize OK (), line = 171
+
+	lda I
+	asl @
+	tay
+	lda adr.SAMPLE,y
+	sta SMP
+	lda adr.SAMPLE+1,y
+	sta SMP+1
+
+; optimize OK (), line = 173
+
+	mwa SMP :bp2
+	ldy #SMP.LEN-DATAORIGIN
+	lda (:bp2),y
+	sta LEN
+	iny
+	lda (:bp2),y
+	sta LEN+1
+
+; optimize OK (), line = 175
+
+	ldy #1
+	lda LEN+1
+	bne @+
+	lda LEN
+@
+	bne @+
+	dey
+@
+	.ifdef IFTMP_33
+	sty IFTMP_33
+	eif
+	tya
+	bne *+5
+	jmp l_0667
+
+; optimize FAIL ('CRT.GOTOXY', ), line = 177
+	inx
+	mva X :STACKORIGIN,x
+	inx
+	mva Y :STACKORIGIN,x
+	jsr CRT.GOTOXY
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva NUM :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+	@print #$2F
+
+; -----------------------------------------------------------
+
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx						; add bx, 1
+	mva NUMBER_OF_SAMPLES :STACKORIGIN,x
+
+	jsr @printBYTE
+	dex						; sub bx, 1
+
+; optimize OK (), line = 180
+
+	lda #$00
+	sub LEN
+	sta :STACKORIGIN+9
+	lda #$00
+	sbc LEN+1
+	sta :STACKORIGIN+STACKWIDTH+9
+	lda #$01
+	sbc #$00
+	sta :STACKORIGIN+STACKWIDTH*2+9
+	lda #$00
+	sbc #$00
+	sta :STACKORIGIN+STACKWIDTH*3+9
+	lda :STACKORIGIN+9
+	add OFFSET
+	sta TEMP
+	lda :STACKORIGIN+STACKWIDTH+9
+	adc OFFSET+1
+	sta TEMP+1
+	lda :STACKORIGIN+STACKWIDTH*2+9
+	adc OFFSET+2
+	sta TEMP+2
+	lda :STACKORIGIN+STACKWIDTH*3+9
+	adc OFFSET+3
+	sta TEMP+3
+
+; optimize OK (), line = 182
+
+	mva TEMP XMS.POSITION
+	mva TEMP+1 XMS.POSITION+1
+	mva TEMP+2 XMS.POSITION+2
+	mva TEMP+3 XMS.POSITION+3
+
+; optimize OK (), line = 184
+
+	ldy I
+	mva TEMP adr.TSTRL,y
+
+; optimize OK (), line = 185
+
+	lda TEMP+1
+	sta adr.TSTRH,y
+
+; optimize OK (), line = 187
+
+	mwa SMP :bp2
+	ldy #SMP.LOOP_LEN-DATAORIGIN
+	lda (:bp2),y
+	sta :STACKORIGIN+9
+	iny
+	lda (:bp2),y
+	ldy #1
+	cmp #$00
+	bne @+
+	lda :STACKORIGIN+9
+	cmp #$08
+@
+	bcc @+
+	dey
+@
+	.ifdef IFTMP_34
+	sty IFTMP_34
+	eif
+	tya
+	bne *+5
+	jmp l_06B5
+
+; optimize OK (), line = 188
+
+	mva #$FF TEMP
+	sta TEMP+1
+	mva #$00 TEMP+2
+	sta TEMP+3
+
+; IfThenEpilog
+l_06B5
+
+; Restore conditional expression
+	lda IFTMP_34
+
+; else condition
+	beq *+5						; je
+	jmp l_06C6
+
+; optimize OK (), line = 190
+
+	mwa SMP :bp2
+	ldy #SMP.LOOP_START-DATAORIGIN
+	lda TEMP
+	add (:bp2),y
+	iny
+	sta TEMP
+	lda TEMP+1
+	adc (:bp2),y
+	sta TEMP+1
+	lda TEMP+2
+	adc #$00
+	sta TEMP+2
+	lda TEMP+3
+	adc #$00
+	sta TEMP+3
+
+; IfThenEpilog
+l_06C6
+
+; optimize OK (), line = 192
+
+	ldy I
+	mva TEMP adr.TREPL,y
+
+; optimize OK (), line = 193
+
+	lda TEMP+1
+	sta adr.TREPH,y
+
+; optimize OK (), line = 195
+
+	lda #$DE
+	sta :STACKORIGIN+10
+	mwa SMP :bp2
+	ldy #SMP.VOLUME-DATAORIGIN
+	lda (:bp2),y
+	lsr @
+	add :STACKORIGIN+10
+	ldy I
+	sta adr.TIVOL,y
+
+; --- WhileProlog
+l_06E8
+
+; optimize OK (), line = 197
+
+	lda LEN+1
+	cmp #$00
+	bne @+
+	lda LEN
+@
+	seq
+	bcs @+
+	jmp l_06F6
+@
+
+; optimize OK (), line = 199
+
+	ldy #1
+	lda LEN+1
+	cmp #$00
+	bne @+
+	lda LEN
+	cmp #$E0
+@
+	bcs @+
+	dey
+@
+	.ifdef IFTMP_35
+	sty IFTMP_35
+	eif
+	tya
+	bne *+5
+	jmp l_0707
+
+; optimize OK (), line = 200
+
+	mva #$E0 TEMP
+	mva #$00 TEMP+1
+	sta TEMP+2
+	sta TEMP+3
+
+; IfThenEpilog
+l_0707
+
+; Restore conditional expression
+	lda IFTMP_35
+
+; else condition
+	beq *+5						; je
+	jmp l_0718
+
+; optimize OK (), line = 202
+
+	mva LEN TEMP
+	mva LEN+1 TEMP+1
+	mva #$00 TEMP+2
+	sta TEMP+3
+
+; IfThenEpilog
+l_0718
+; BlockRead
+
+; optimize OK (), line = 204
+
+	mwa F :bp2
+	ldy #s@file.buffer
+	lda BUF
+	sta (:bp2),y
+	iny
+	lda BUF+1
+	sta (:bp2),y
+
+; optimize OK (), line = 204
+
+	ldy #s@file.nrecord
+	lda TEMP
+	sta (:bp2),y
+	iny
+	lda TEMP+1
+	sta (:bp2),y
+
+	txa:pha
+	sec
+	@readfile F, #7
+	pla:tax
+
+
+; optimize FAIL ('NORMALIZEBUF', ), line = 205
+	jsr NORMALIZEBUF
+
+; optimize FAIL ('HIGHMEM.THIGHMEMORYSTREAM.WRITEBUFFER', ), line = 206
+	inx
+	mva BUF :STACKORIGIN,x
+	mva BUF+1 :STACKORIGIN+STACKWIDTH,x
+	inx
+	mva TEMP :STACKORIGIN,x
+	mva TEMP+1 :STACKORIGIN+STACKWIDTH,x
+	mva TEMP+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva TEMP+3 :STACKORIGIN+STACKWIDTH*3,x
+	lda XMS
+	ldy XMS+1
+	jsr HIGHMEM.THIGHMEMORYSTREAM.WRITEBUFFER
+
+; optimize OK (), line = 208
+
+	lda LEN
+	sub TEMP
+	sta LEN
+	lda LEN+1
+	sbc TEMP+1
+	sta LEN+1
+
+; --- WhileDoEpilog
+c_06E8
+
+; WhileDoEpilog
+	jmp l_06E8
+l_06F6
+b_06E8
+
+; optimize FAIL (0, ), line = 212
+	inc NUM
+
+; IfThenEpilog
+l_0667
+
+; optimize OK (), line = 216
+
+	inw OFFSET+2
+
+; ForToDoEpilog
+c_0612
+	inc I						; inc ptr byte [CounterAddress]
+
+	seq
+
+; WhileDoEpilog
+	jmp l_0612
+l_0620
+b_0612
+	@printEOL
+; CloseFile
+
+	txa:pha
+	sec
+	@closefile F
+	pla:tax
+
+
+; -----------------------------------------------------------
+
+adr.FNAM	= DATAORIGIN+$0490
+.var FNAM	= adr.FNAM .word
+.var F	= DATAORIGIN+$04B1 .word
+adr.NAME	= DATAORIGIN+$04BD
+.var NAME	= adr.NAME .word
+I	= DATAORIGIN+$04DE
+J	= DATAORIGIN+$04DF
+A	= DATAORIGIN+$04E0
+X	= DATAORIGIN+$04E1
+Y	= DATAORIGIN+$04E2
+NUM	= DATAORIGIN+$04E3
+OFFSET	= DATAORIGIN+$04E4
+TMP	= DATAORIGIN+$04E8
+TEMP	= DATAORIGIN+$04EC
+LEN	= DATAORIGIN+$04F0
+adr.SMP	= DATAORIGIN+$04F2
+.var SMP	= adr.SMP .word
+SMP.NAME	= DATAORIGIN+$0000
+SMP.LEN	= DATAORIGIN+$0016
+SMP.FINE_TUNE	= DATAORIGIN+$0018
+SMP.VOLUME	= DATAORIGIN+$0019
+SMP.LOOP_START	= DATAORIGIN+$001A
+SMP.LOOP_LEN	= DATAORIGIN+$001C
+P0	= DATAORIGIN+$04FE
+P1	= DATAORIGIN+$0500
+P2	= DATAORIGIN+$0502
+adr.HEADER	= DATAORIGIN+$0504
+.var HEADER	= adr.HEADER .word
+@FORTMP_580	= DATAORIGIN+$050A
+@FORTMP_674	= $001E
+@FORTMP_900	= $007F
+@FORTMP_1060	= $001E
+@FORTMP_1329	= DATAORIGIN+$050B
+@FORTMP_1410	= $00FF
+@FORTMP_1548	= $001E
+IFTMP_34	= DATAORIGIN+$050C
+IFTMP_35	= DATAORIGIN+$050D
+
+@VarData	= FNAM
+@VarDataSize	= 113
+
+
+@exit
+	.ifdef @new
+	@FreeMem #@VarData #@VarDataSize
+	eif
+	rts						; ret
+.endl
+
+; IfThenEpilog
+l_00E5
+
+; optimize FAIL ('CRT.TEXTMODE', modplay5.pas), line = 781
+	inx
+	mva #$00 :STACKORIGIN,x
+	jsr CRT.TEXTMODE
+
+	@printSTRING #CODEORIGIN+$00BE
+	@printEOL
+	@printEOL
+
+; optimize FAIL ('SYSTEM.PARAMCOUNT', modplay5.pas), line = 787
+	jsr SYSTEM.PARAMCOUNT
+	inx
+	mva #$00 :STACKORIGIN,x
+	ldy #1
+	lda :STACKORIGIN-1,x
+	cmp :STACKORIGIN,x
+	seq
+	bcs @+
+	dey
+@
+	sty :STACKORIGIN-1,x
+	dex
+	.ifdef IFTMP_36
+	lda :STACKORIGIN,x
+	sta IFTMP_36
+	eif
+	dex
+	lda :STACKORIGIN+1,x
+	bne *+5
+	jmp l_0758
+
+; optimize FAIL ('SYSTEM.PARAMSTR', modplay5.pas), line = 789
+	inx
+	mva #$01 :STACKORIGIN,x
+	jsr SYSTEM.PARAMSTR
+	jsr LOADMOD
+
+; optimize FAIL ('PLAY', modplay5.pas), line = 798
+	jsr PLAY
+
+; IfThenEpilog
+l_0758
+
+; -----------------------------------------------------------
+
+COVOX	= $D700
+PATTERN_TEMP	= $5000
+PATTERN_LIMIT	= $0055
+ZPAGE	= $D900
+EFFECT	= $DC00
+TADCL	= $DD00
+TADCH	= $DD30
+VOLUME	= $DE00
+SAMPLE_LEN	= $10000
+adr.KOD	= CODEORIGIN+$00DE
+.var KOD	= adr.KOD .word
+adr.BUF	= $0500
+.var BUF	= adr.BUF .word
+adr.TIVOL	= $05E0
+.var TIVOL	= adr.TIVOL .word
+adr.ORDER	= $0600
+.var ORDER	= adr.ORDER .word
+adr.TSTRL	= $0680
+.var TSTRL	= adr.TSTRL .word
+adr.TSTRH	= $06A0
+.var TSTRH	= adr.TSTRH .word
+adr.TREPL	= $06C0
+.var TREPL	= adr.TREPL .word
+adr.TREPH	= $06E0
+.var TREPH	= adr.TREPH .word
+adr.MODNAME	= DATAORIGIN+$0089
+.var MODNAME	= adr.MODNAME .word
+adr.SAMPL_0	= DATAORIGIN+$009E
+.var SAMPL_0	= adr.SAMPL_0 .word
+adr.SAMPL_0.NAME	= DATAORIGIN+$009E
+.var SAMPL_0.NAME	= adr.SAMPL_0.NAME .word
+SAMPL_0.LEN	= DATAORIGIN+$00B4
+SAMPL_0.FINE_TUNE	= DATAORIGIN+$00B6
+SAMPL_0.VOLUME	= DATAORIGIN+$00B7
+SAMPL_0.LOOP_START	= DATAORIGIN+$00B8
+SAMPL_0.LOOP_LEN	= DATAORIGIN+$00BA
+adr.SAMPL_1	= DATAORIGIN+$00BC
+.var SAMPL_1	= adr.SAMPL_1 .word
+adr.SAMPL_1.NAME	= DATAORIGIN+$00BC
+.var SAMPL_1.NAME	= adr.SAMPL_1.NAME .word
+SAMPL_1.LEN	= DATAORIGIN+$00D2
+SAMPL_1.FINE_TUNE	= DATAORIGIN+$00D4
+SAMPL_1.VOLUME	= DATAORIGIN+$00D5
+SAMPL_1.LOOP_START	= DATAORIGIN+$00D6
+SAMPL_1.LOOP_LEN	= DATAORIGIN+$00D8
+adr.SAMPL_2	= DATAORIGIN+$00DA
+.var SAMPL_2	= adr.SAMPL_2 .word
+adr.SAMPL_2.NAME	= DATAORIGIN+$00DA
+.var SAMPL_2.NAME	= adr.SAMPL_2.NAME .word
+SAMPL_2.LEN	= DATAORIGIN+$00F0
+SAMPL_2.FINE_TUNE	= DATAORIGIN+$00F2
+SAMPL_2.VOLUME	= DATAORIGIN+$00F3
+SAMPL_2.LOOP_START	= DATAORIGIN+$00F4
+SAMPL_2.LOOP_LEN	= DATAORIGIN+$00F6
+adr.SAMPL_3	= DATAORIGIN+$00F8
+.var SAMPL_3	= adr.SAMPL_3 .word
+adr.SAMPL_3.NAME	= DATAORIGIN+$00F8
+.var SAMPL_3.NAME	= adr.SAMPL_3.NAME .word
+SAMPL_3.LEN	= DATAORIGIN+$010E
+SAMPL_3.FINE_TUNE	= DATAORIGIN+$0110
+SAMPL_3.VOLUME	= DATAORIGIN+$0111
+SAMPL_3.LOOP_START	= DATAORIGIN+$0112
+SAMPL_3.LOOP_LEN	= DATAORIGIN+$0114
+adr.SAMPL_4	= DATAORIGIN+$0116
+.var SAMPL_4	= adr.SAMPL_4 .word
+adr.SAMPL_4.NAME	= DATAORIGIN+$0116
+.var SAMPL_4.NAME	= adr.SAMPL_4.NAME .word
+SAMPL_4.LEN	= DATAORIGIN+$012C
+SAMPL_4.FINE_TUNE	= DATAORIGIN+$012E
+SAMPL_4.VOLUME	= DATAORIGIN+$012F
+SAMPL_4.LOOP_START	= DATAORIGIN+$0130
+SAMPL_4.LOOP_LEN	= DATAORIGIN+$0132
+adr.SAMPL_5	= DATAORIGIN+$0134
+.var SAMPL_5	= adr.SAMPL_5 .word
+adr.SAMPL_5.NAME	= DATAORIGIN+$0134
+.var SAMPL_5.NAME	= adr.SAMPL_5.NAME .word
+SAMPL_5.LEN	= DATAORIGIN+$014A
+SAMPL_5.FINE_TUNE	= DATAORIGIN+$014C
+SAMPL_5.VOLUME	= DATAORIGIN+$014D
+SAMPL_5.LOOP_START	= DATAORIGIN+$014E
+SAMPL_5.LOOP_LEN	= DATAORIGIN+$0150
+adr.SAMPL_6	= DATAORIGIN+$0152
+.var SAMPL_6	= adr.SAMPL_6 .word
+adr.SAMPL_6.NAME	= DATAORIGIN+$0152
+.var SAMPL_6.NAME	= adr.SAMPL_6.NAME .word
+SAMPL_6.LEN	= DATAORIGIN+$0168
+SAMPL_6.FINE_TUNE	= DATAORIGIN+$016A
+SAMPL_6.VOLUME	= DATAORIGIN+$016B
+SAMPL_6.LOOP_START	= DATAORIGIN+$016C
+SAMPL_6.LOOP_LEN	= DATAORIGIN+$016E
+adr.SAMPL_7	= DATAORIGIN+$0170
+.var SAMPL_7	= adr.SAMPL_7 .word
+adr.SAMPL_7.NAME	= DATAORIGIN+$0170
+.var SAMPL_7.NAME	= adr.SAMPL_7.NAME .word
+SAMPL_7.LEN	= DATAORIGIN+$0186
+SAMPL_7.FINE_TUNE	= DATAORIGIN+$0188
+SAMPL_7.VOLUME	= DATAORIGIN+$0189
+SAMPL_7.LOOP_START	= DATAORIGIN+$018A
+SAMPL_7.LOOP_LEN	= DATAORIGIN+$018C
+adr.SAMPL_8	= DATAORIGIN+$018E
+.var SAMPL_8	= adr.SAMPL_8 .word
+adr.SAMPL_8.NAME	= DATAORIGIN+$018E
+.var SAMPL_8.NAME	= adr.SAMPL_8.NAME .word
+SAMPL_8.LEN	= DATAORIGIN+$01A4
+SAMPL_8.FINE_TUNE	= DATAORIGIN+$01A6
+SAMPL_8.VOLUME	= DATAORIGIN+$01A7
+SAMPL_8.LOOP_START	= DATAORIGIN+$01A8
+SAMPL_8.LOOP_LEN	= DATAORIGIN+$01AA
+adr.SAMPL_9	= DATAORIGIN+$01AC
+.var SAMPL_9	= adr.SAMPL_9 .word
+adr.SAMPL_9.NAME	= DATAORIGIN+$01AC
+.var SAMPL_9.NAME	= adr.SAMPL_9.NAME .word
+SAMPL_9.LEN	= DATAORIGIN+$01C2
+SAMPL_9.FINE_TUNE	= DATAORIGIN+$01C4
+SAMPL_9.VOLUME	= DATAORIGIN+$01C5
+SAMPL_9.LOOP_START	= DATAORIGIN+$01C6
+SAMPL_9.LOOP_LEN	= DATAORIGIN+$01C8
+adr.SAMPL_10	= DATAORIGIN+$01CA
+.var SAMPL_10	= adr.SAMPL_10 .word
+adr.SAMPL_10.NAME	= DATAORIGIN+$01CA
+.var SAMPL_10.NAME	= adr.SAMPL_10.NAME .word
+SAMPL_10.LEN	= DATAORIGIN+$01E0
+SAMPL_10.FINE_TUNE	= DATAORIGIN+$01E2
+SAMPL_10.VOLUME	= DATAORIGIN+$01E3
+SAMPL_10.LOOP_START	= DATAORIGIN+$01E4
+SAMPL_10.LOOP_LEN	= DATAORIGIN+$01E6
+adr.SAMPL_11	= DATAORIGIN+$01E8
+.var SAMPL_11	= adr.SAMPL_11 .word
+adr.SAMPL_11.NAME	= DATAORIGIN+$01E8
+.var SAMPL_11.NAME	= adr.SAMPL_11.NAME .word
+SAMPL_11.LEN	= DATAORIGIN+$01FE
+SAMPL_11.FINE_TUNE	= DATAORIGIN+$0200
+SAMPL_11.VOLUME	= DATAORIGIN+$0201
+SAMPL_11.LOOP_START	= DATAORIGIN+$0202
+SAMPL_11.LOOP_LEN	= DATAORIGIN+$0204
+adr.SAMPL_12	= DATAORIGIN+$0206
+.var SAMPL_12	= adr.SAMPL_12 .word
+adr.SAMPL_12.NAME	= DATAORIGIN+$0206
+.var SAMPL_12.NAME	= adr.SAMPL_12.NAME .word
+SAMPL_12.LEN	= DATAORIGIN+$021C
+SAMPL_12.FINE_TUNE	= DATAORIGIN+$021E
+SAMPL_12.VOLUME	= DATAORIGIN+$021F
+SAMPL_12.LOOP_START	= DATAORIGIN+$0220
+SAMPL_12.LOOP_LEN	= DATAORIGIN+$0222
+adr.SAMPL_13	= DATAORIGIN+$0224
+.var SAMPL_13	= adr.SAMPL_13 .word
+adr.SAMPL_13.NAME	= DATAORIGIN+$0224
+.var SAMPL_13.NAME	= adr.SAMPL_13.NAME .word
+SAMPL_13.LEN	= DATAORIGIN+$023A
+SAMPL_13.FINE_TUNE	= DATAORIGIN+$023C
+SAMPL_13.VOLUME	= DATAORIGIN+$023D
+SAMPL_13.LOOP_START	= DATAORIGIN+$023E
+SAMPL_13.LOOP_LEN	= DATAORIGIN+$0240
+adr.SAMPL_14	= DATAORIGIN+$0242
+.var SAMPL_14	= adr.SAMPL_14 .word
+adr.SAMPL_14.NAME	= DATAORIGIN+$0242
+.var SAMPL_14.NAME	= adr.SAMPL_14.NAME .word
+SAMPL_14.LEN	= DATAORIGIN+$0258
+SAMPL_14.FINE_TUNE	= DATAORIGIN+$025A
+SAMPL_14.VOLUME	= DATAORIGIN+$025B
+SAMPL_14.LOOP_START	= DATAORIGIN+$025C
+SAMPL_14.LOOP_LEN	= DATAORIGIN+$025E
+adr.SAMPL_15	= DATAORIGIN+$0260
+.var SAMPL_15	= adr.SAMPL_15 .word
+adr.SAMPL_15.NAME	= DATAORIGIN+$0260
+.var SAMPL_15.NAME	= adr.SAMPL_15.NAME .word
+SAMPL_15.LEN	= DATAORIGIN+$0276
+SAMPL_15.FINE_TUNE	= DATAORIGIN+$0278
+SAMPL_15.VOLUME	= DATAORIGIN+$0279
+SAMPL_15.LOOP_START	= DATAORIGIN+$027A
+SAMPL_15.LOOP_LEN	= DATAORIGIN+$027C
+adr.SAMPL_16	= DATAORIGIN+$027E
+.var SAMPL_16	= adr.SAMPL_16 .word
+adr.SAMPL_16.NAME	= DATAORIGIN+$027E
+.var SAMPL_16.NAME	= adr.SAMPL_16.NAME .word
+SAMPL_16.LEN	= DATAORIGIN+$0294
+SAMPL_16.FINE_TUNE	= DATAORIGIN+$0296
+SAMPL_16.VOLUME	= DATAORIGIN+$0297
+SAMPL_16.LOOP_START	= DATAORIGIN+$0298
+SAMPL_16.LOOP_LEN	= DATAORIGIN+$029A
+adr.SAMPL_17	= DATAORIGIN+$029C
+.var SAMPL_17	= adr.SAMPL_17 .word
+adr.SAMPL_17.NAME	= DATAORIGIN+$029C
+.var SAMPL_17.NAME	= adr.SAMPL_17.NAME .word
+SAMPL_17.LEN	= DATAORIGIN+$02B2
+SAMPL_17.FINE_TUNE	= DATAORIGIN+$02B4
+SAMPL_17.VOLUME	= DATAORIGIN+$02B5
+SAMPL_17.LOOP_START	= DATAORIGIN+$02B6
+SAMPL_17.LOOP_LEN	= DATAORIGIN+$02B8
+adr.SAMPL_18	= DATAORIGIN+$02BA
+.var SAMPL_18	= adr.SAMPL_18 .word
+adr.SAMPL_18.NAME	= DATAORIGIN+$02BA
+.var SAMPL_18.NAME	= adr.SAMPL_18.NAME .word
+SAMPL_18.LEN	= DATAORIGIN+$02D0
+SAMPL_18.FINE_TUNE	= DATAORIGIN+$02D2
+SAMPL_18.VOLUME	= DATAORIGIN+$02D3
+SAMPL_18.LOOP_START	= DATAORIGIN+$02D4
+SAMPL_18.LOOP_LEN	= DATAORIGIN+$02D6
+adr.SAMPL_19	= DATAORIGIN+$02D8
+.var SAMPL_19	= adr.SAMPL_19 .word
+adr.SAMPL_19.NAME	= DATAORIGIN+$02D8
+.var SAMPL_19.NAME	= adr.SAMPL_19.NAME .word
+SAMPL_19.LEN	= DATAORIGIN+$02EE
+SAMPL_19.FINE_TUNE	= DATAORIGIN+$02F0
+SAMPL_19.VOLUME	= DATAORIGIN+$02F1
+SAMPL_19.LOOP_START	= DATAORIGIN+$02F2
+SAMPL_19.LOOP_LEN	= DATAORIGIN+$02F4
+adr.SAMPL_20	= DATAORIGIN+$02F6
+.var SAMPL_20	= adr.SAMPL_20 .word
+adr.SAMPL_20.NAME	= DATAORIGIN+$02F6
+.var SAMPL_20.NAME	= adr.SAMPL_20.NAME .word
+SAMPL_20.LEN	= DATAORIGIN+$030C
+SAMPL_20.FINE_TUNE	= DATAORIGIN+$030E
+SAMPL_20.VOLUME	= DATAORIGIN+$030F
+SAMPL_20.LOOP_START	= DATAORIGIN+$0310
+SAMPL_20.LOOP_LEN	= DATAORIGIN+$0312
+adr.SAMPL_21	= DATAORIGIN+$0314
+.var SAMPL_21	= adr.SAMPL_21 .word
+adr.SAMPL_21.NAME	= DATAORIGIN+$0314
+.var SAMPL_21.NAME	= adr.SAMPL_21.NAME .word
+SAMPL_21.LEN	= DATAORIGIN+$032A
+SAMPL_21.FINE_TUNE	= DATAORIGIN+$032C
+SAMPL_21.VOLUME	= DATAORIGIN+$032D
+SAMPL_21.LOOP_START	= DATAORIGIN+$032E
+SAMPL_21.LOOP_LEN	= DATAORIGIN+$0330
+adr.SAMPL_22	= DATAORIGIN+$0332
+.var SAMPL_22	= adr.SAMPL_22 .word
+adr.SAMPL_22.NAME	= DATAORIGIN+$0332
+.var SAMPL_22.NAME	= adr.SAMPL_22.NAME .word
+SAMPL_22.LEN	= DATAORIGIN+$0348
+SAMPL_22.FINE_TUNE	= DATAORIGIN+$034A
+SAMPL_22.VOLUME	= DATAORIGIN+$034B
+SAMPL_22.LOOP_START	= DATAORIGIN+$034C
+SAMPL_22.LOOP_LEN	= DATAORIGIN+$034E
+adr.SAMPL_23	= DATAORIGIN+$0350
+.var SAMPL_23	= adr.SAMPL_23 .word
+adr.SAMPL_23.NAME	= DATAORIGIN+$0350
+.var SAMPL_23.NAME	= adr.SAMPL_23.NAME .word
+SAMPL_23.LEN	= DATAORIGIN+$0366
+SAMPL_23.FINE_TUNE	= DATAORIGIN+$0368
+SAMPL_23.VOLUME	= DATAORIGIN+$0369
+SAMPL_23.LOOP_START	= DATAORIGIN+$036A
+SAMPL_23.LOOP_LEN	= DATAORIGIN+$036C
+adr.SAMPL_24	= DATAORIGIN+$036E
+.var SAMPL_24	= adr.SAMPL_24 .word
+adr.SAMPL_24.NAME	= DATAORIGIN+$036E
+.var SAMPL_24.NAME	= adr.SAMPL_24.NAME .word
+SAMPL_24.LEN	= DATAORIGIN+$0384
+SAMPL_24.FINE_TUNE	= DATAORIGIN+$0386
+SAMPL_24.VOLUME	= DATAORIGIN+$0387
+SAMPL_24.LOOP_START	= DATAORIGIN+$0388
+SAMPL_24.LOOP_LEN	= DATAORIGIN+$038A
+adr.SAMPL_25	= DATAORIGIN+$038C
+.var SAMPL_25	= adr.SAMPL_25 .word
+adr.SAMPL_25.NAME	= DATAORIGIN+$038C
+.var SAMPL_25.NAME	= adr.SAMPL_25.NAME .word
+SAMPL_25.LEN	= DATAORIGIN+$03A2
+SAMPL_25.FINE_TUNE	= DATAORIGIN+$03A4
+SAMPL_25.VOLUME	= DATAORIGIN+$03A5
+SAMPL_25.LOOP_START	= DATAORIGIN+$03A6
+SAMPL_25.LOOP_LEN	= DATAORIGIN+$03A8
+adr.SAMPL_26	= DATAORIGIN+$03AA
+.var SAMPL_26	= adr.SAMPL_26 .word
+adr.SAMPL_26.NAME	= DATAORIGIN+$03AA
+.var SAMPL_26.NAME	= adr.SAMPL_26.NAME .word
+SAMPL_26.LEN	= DATAORIGIN+$03C0
+SAMPL_26.FINE_TUNE	= DATAORIGIN+$03C2
+SAMPL_26.VOLUME	= DATAORIGIN+$03C3
+SAMPL_26.LOOP_START	= DATAORIGIN+$03C4
+SAMPL_26.LOOP_LEN	= DATAORIGIN+$03C6
+adr.SAMPL_27	= DATAORIGIN+$03C8
+.var SAMPL_27	= adr.SAMPL_27 .word
+adr.SAMPL_27.NAME	= DATAORIGIN+$03C8
+.var SAMPL_27.NAME	= adr.SAMPL_27.NAME .word
+SAMPL_27.LEN	= DATAORIGIN+$03DE
+SAMPL_27.FINE_TUNE	= DATAORIGIN+$03E0
+SAMPL_27.VOLUME	= DATAORIGIN+$03E1
+SAMPL_27.LOOP_START	= DATAORIGIN+$03E2
+SAMPL_27.LOOP_LEN	= DATAORIGIN+$03E4
+adr.SAMPL_28	= DATAORIGIN+$03E6
+.var SAMPL_28	= adr.SAMPL_28 .word
+adr.SAMPL_28.NAME	= DATAORIGIN+$03E6
+.var SAMPL_28.NAME	= adr.SAMPL_28.NAME .word
+SAMPL_28.LEN	= DATAORIGIN+$03FC
+SAMPL_28.FINE_TUNE	= DATAORIGIN+$03FE
+SAMPL_28.VOLUME	= DATAORIGIN+$03FF
+SAMPL_28.LOOP_START	= DATAORIGIN+$0400
+SAMPL_28.LOOP_LEN	= DATAORIGIN+$0402
+adr.SAMPL_29	= DATAORIGIN+$0404
+.var SAMPL_29	= adr.SAMPL_29 .word
+adr.SAMPL_29.NAME	= DATAORIGIN+$0404
+.var SAMPL_29.NAME	= adr.SAMPL_29.NAME .word
+SAMPL_29.LEN	= DATAORIGIN+$041A
+SAMPL_29.FINE_TUNE	= DATAORIGIN+$041C
+SAMPL_29.VOLUME	= DATAORIGIN+$041D
+SAMPL_29.LOOP_START	= DATAORIGIN+$041E
+SAMPL_29.LOOP_LEN	= DATAORIGIN+$0420
+adr.SAMPL_30	= DATAORIGIN+$0422
+.var SAMPL_30	= adr.SAMPL_30 .word
+adr.SAMPL_30.NAME	= DATAORIGIN+$0422
+.var SAMPL_30.NAME	= adr.SAMPL_30.NAME .word
+SAMPL_30.LEN	= DATAORIGIN+$0438
+SAMPL_30.FINE_TUNE	= DATAORIGIN+$043A
+SAMPL_30.VOLUME	= DATAORIGIN+$043B
+SAMPL_30.LOOP_START	= DATAORIGIN+$043C
+SAMPL_30.LOOP_LEN	= DATAORIGIN+$043E
+adr.SAMPLE	= DATAORIGIN+$0440
+.var SAMPLE	= adr.SAMPLE .word
+GCHAR	= DATAORIGIN+$047E
+SONG_LENGTH	= DATAORIGIN+$047F
+SONG_RESTART	= DATAORIGIN+$0480
+NUMBER_OF_PATTERNS	= DATAORIGIN+$0481
+NUMBER_OF_BANKS	= DATAORIGIN+$0482
+NUMBER_OF_SAMPLES	= DATAORIGIN+$0483
+adr.XMS	= DATAORIGIN+$0484
+.var XMS	= adr.XMS .word
+XMS.POSITION	= DATAORIGIN+$0484
+XMS.SIZE	= DATAORIGIN+$0488
+VOL6BIT	= $C000
+PLAY_SMP	= $D800
+MAIN_LOP	= $03E0
+PLAYER	= $E0000
+PATTERN_START	= $F0000
+SAMPLE_START	= $100000
+
+@exit
+
+@halt	ldx #0
+	txs
+
+	rts
+
+IOCB@COPY	:16 brk
+
+.local	@DEFINES
+ATARI
+.endl
+
+.endl
+
+; -----------------------------------------------------------
+
+	icl 'cpu6502.asm'
+
+; -----------------------------------------------------------
+
+.macro UNITINITIALIZATION
+
+	.ifdef MAIN.SYSTEM.@UnitInit
+	jsr MAIN.SYSTEM.@UnitInit
+	eif
+
+	.ifdef MAIN.ATARI.@UnitInit
+	jsr MAIN.ATARI.@UnitInit
+	eif
+
+	.ifdef MAIN.CRT.@UnitInit
+	jsr MAIN.CRT.@UnitInit
+	eif
+
+	.ifdef MAIN..@UnitInit
+	jsr MAIN..@UnitInit
+	eif
+
+	.ifdef MAIN.MISC.@UnitInit
+	jsr MAIN.MISC.@UnitInit
+	eif
+
+	.ifdef MAIN.HIGHMEM.@UnitInit
+	jsr MAIN.HIGHMEM.@UnitInit
+	eif
+.endm
+
+	ift .SIZEOF(MAIN.SYSTEM) > 0
+	.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+	eif
+
+	ift .SIZEOF(MAIN.ATARI) > 0
+	.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
+	eif
+
+	ift .SIZEOF(MAIN.CRT) > 0
+	.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
+	eif
+
+	ift .SIZEOF(MAIN.MISC) > 0
+	.print 'MISC: ',MAIN.MISC,'..',MAIN.MISC+.SIZEOF(MAIN.MISC)-1
+	eif
+
+	ift .SIZEOF(MAIN.HIGHMEM) > 0
+	.print 'HIGHMEM: ',MAIN.HIGHMEM,'..',MAIN.HIGHMEM+.SIZEOF(MAIN.HIGHMEM)-1
+	eif
+
+	.print 'CODE: ',CODEORIGIN,'..',*-1
+
+DATAORIGIN
+
+.by  $28 $00 $18 $00 $0C $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  <[DATAORIGIN+$009E] >[DATAORIGIN+$009E] <[DATAORIGIN+$00BC] >[DATAORIGIN+$00BC] <[DATAORIGIN+$00DA] >[DATAORIGIN+$00DA] <[DATAORIGIN+$00F8] >[DATAORIGIN+$00F8]  <[DATAORIGIN+$0116] >[DATAORIGIN+$0116] <[DATAORIGIN+$0134] >[DATAORIGIN+$0134] <[DATAORIGIN+$0152] >[DATAORIGIN+$0152] <[DATAORIGIN+$0170] >[DATAORIGIN+$0170]
+.by  <[DATAORIGIN+$018E] >[DATAORIGIN+$018E] <[DATAORIGIN+$01AC] >[DATAORIGIN+$01AC] <[DATAORIGIN+$01CA] >[DATAORIGIN+$01CA] <[DATAORIGIN+$01E8] >[DATAORIGIN+$01E8]  <[DATAORIGIN+$0206] >[DATAORIGIN+$0206] <[DATAORIGIN+$0224] >[DATAORIGIN+$0224] <[DATAORIGIN+$0242] >[DATAORIGIN+$0242] <[DATAORIGIN+$0260] >[DATAORIGIN+$0260]  <[DATAORIGIN+$027E] >[DATAORIGIN+$027E] <[DATAORIGIN+$029C] >[DATAORIGIN+$029C] <[DATAORIGIN+$02BA] >[DATAORIGIN+$02BA] <[DATAORIGIN+$02D8] >[DATAORIGIN+$02D8]
+.by  <[DATAORIGIN+$02F6] >[DATAORIGIN+$02F6] <[DATAORIGIN+$0314] >[DATAORIGIN+$0314] <[DATAORIGIN+$0332] >[DATAORIGIN+$0332] <[DATAORIGIN+$0350] >[DATAORIGIN+$0350]  <[DATAORIGIN+$036E] >[DATAORIGIN+$036E] <[DATAORIGIN+$038C] >[DATAORIGIN+$038C] <[DATAORIGIN+$03AA] >[DATAORIGIN+$03AA] <[DATAORIGIN+$03C8] >[DATAORIGIN+$03C8]  <[DATAORIGIN+$03E6] >[DATAORIGIN+$03E6] <[DATAORIGIN+$0404] >[DATAORIGIN+$0404] <[DATAORIGIN+$0422] >[DATAORIGIN+$0422]
+
+VARINITSIZE	= *-DATAORIGIN
+VARDATASIZE	= 1294
+
+PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+
+	.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+
+	run START
+
+; -----------------------------------------------------------
+
+.macro	STATICDATA
+
+.by  $0E $52 $75 $6E $74 $69 $6D $65  $20 $65 $72 $72 $6F $72 $20 $00  $02 $44 $3A $00 $05 $4F $6E $6C
+.by  $79 $20 $00 $14 $20 $62 $79 $74  $65 $73 $20 $6C $65 $6E $67 $74  $68 $20 $73 $61 $6D $70 $6C $65
+.by  $00 $04 $4D $2E $4B $2E $00 $13  $55 $6E $73 $75 $70 $6F $72 $74  $65 $64 $20 $4D $4F $44 $20 $66
+.by  $69 $6C $65 $00 $06 $4E $61 $6D  $65 $3A $20 $00 $09 $53 $61 $6D  $70 $6C $65 $73 $3A $20 $00 $05
+.by  $4F $6E $6C $79 $20 $00 $10 $20  $73 $61 $6D $70 $6C $65 $73 $20  $61 $6C $6C $6F $77 $65 $64 $00
+.by  $0D $4E $65 $65 $64 $20 $6D $69  $6E $69 $6D $75 $6D $20 $00 $16  $20 $62 $61 $6E $6B $73 $20 $65
+.by  $78 $70 $61 $6E $64 $65 $64 $20  $6D $65 $6D $6F $72 $79 $00 $0E  $4C $6F $61 $64 $20 $50 $61 $74
+.by  $74 $65 $72 $6E $3A $20 $00 $0D  $4C $6F $61 $64 $20 $53 $61 $6D  $70 $6C $65 $3A $20 $00 $1E $4D
+.by  $4F $44 $20 $50 $6C $61 $79 $65  $72 $20 $52 $61 $70 $69 $64 $75  $73 $20 $31 $2E $36 $20 $28 $36
+.by  $35 $38 $31 $36 $29 $00 $B0 $06  $50 $06 $F4 $05 $A0 $05 $4C $05  $00 $05 $B8 $04 $74 $04 $34 $04
+.by  $F8 $03 $C0 $03 $80 $03 $58 $03  $28 $03 $FA $02 $D0 $02 $A6 $02  $80 $02 $5C $02 $3A $02 $1A $02
+.by  $FC $01 $E0 $01 $C5 $01 $AC $01  $94 $01 $7D $01 $68 $01 $53 $01  $40 $01 $2E $01 $1D $01 $0D $01
+.by  $FE $00 $F0 $00 $E2 $00 $D6 $00  $CA $00 $BE $00 $B4 $00 $AA $00  $A0 $00 $97 $00 $8F $00 $87 $00
+.by  $7F $00 $78 $00 $71 $00
+.endm
+
+	end
