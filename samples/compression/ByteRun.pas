@@ -70,7 +70,7 @@ if ((i < word(len-2)) and (buf[i] = buf[i+1]) and (buf[i] = buf[i+2])) then begi
 //zmierz dlugosc sekwencji
 j := 0;
 
-while ((i+j < word(len-2)) and (buf[i+j] = buf[i+j+1]) and (buf[i+j] = buf[i+j+2]) and (j < 126)) do inc(j);
+while ((word(i+j) < word(len-2)) and (buf[i+j] = buf[i+j+1]) and (buf[i+j] = buf[i+j+2]) and (j < 126)) do inc(j);
 
 //wypisz spakowana sekwencje
 sav[k] := byte(j+1) shl 1;
@@ -88,12 +88,12 @@ end else begin
 //zmierz dlugosc sekwencji
 j:=0;
 
-while ((i+j < word(len-2)) and ((buf[i+j] <> buf[j+i+1]) or (buf[i+j] <> buf[j+i+2])) and (j < 128)) do inc(j);
+while ((word(i+j) < word(len-2)) and ((buf[i+j] <> buf[j+i+1]) or (buf[i+j] <> buf[j+i+2])) and (j < 128)) do inc(j);
 
 //dodaj jeszcze koncowke
-if ((i+j = word(len-2)) and (j < 128)) then inc(j);
+if ((word(i+j) = word(len-2)) and (j < 128)) then inc(j);
 
-if ((i+j = word(len-1)) and (j < 128)) then inc(j);
+if ((word(i+j) = word(len-1)) and (j < 128)) then inc(j);
 
 //wypisz spakowana sekwencje
 sav[k] := byte(j-1) shl 1 or 1;
