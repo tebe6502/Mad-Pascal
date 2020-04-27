@@ -32,6 +32,15 @@ implementation
 
 
 procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
+(*
+@description:
+Open channel
+
+@param: chn - channel 0..7
+@param: ax1 - parameter
+@param: ax2 - parameter
+@param: device - name of device, example "D:"
+*)
 asm
 {	txa:pha
 
@@ -65,6 +74,12 @@ end;
 
 
 procedure Cls(chn: byte); assembler;
+(*
+@description:
+Close channel
+
+@param: chn - channel 0..7
+*)
 asm
 {	txa:pha
 
@@ -85,6 +100,13 @@ end;
 
 
 function Get(chn: byte): byte; assembler;
+(*
+@description:
+Get one byte
+
+@param: chn - channel 0..7
+@result: byte
+*)
 asm
 {	txa:pha
  
@@ -110,6 +132,13 @@ end;
 
 
 procedure Put(chn, a: byte): assembler;
+(*
+@description:
+Write one byte
+
+@param: chn - channel 0..7
+@param: a - byte
+*)
 asm
 {	txa:pha
  
@@ -135,6 +164,16 @@ end;
 
 
 procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
+(*
+@description:
+Special command
+
+@param: cmd - command
+@param: chn - channel 0..7
+@param: ax1 - parameter
+@param: ax2 - parameter
+@param: device - name of device, example "S2:"
+*)
 asm
 {	txa:pha
 
@@ -165,6 +204,5 @@ asm
 	pla:tax
 };
 end;
-
 
 end.

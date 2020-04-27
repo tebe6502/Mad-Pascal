@@ -234,7 +234,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Abs(x: shortint): shortint; register; assembler; overload;
 	function Abs(x: smallint): smallint; register; assembler; overload;
 	function Abs(x: Integer): Integer; register; assembler; overload;
-	function ArcTan(value: real): real;
+	function ArcTan(value: real): real; overload;
+	function ArcTan(value: single): single; overload;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
 	function Concat(a,b: String): string; assembler; overload;
 	function Concat(a: PString; b: char): string; assembler; overload;
@@ -904,7 +905,7 @@ begin
 end;
 
 
-function ArcTan(value: real): real;
+function ArcTan(value: real): real; overload;
 (*
 @description:
 Arctan returns the Arctangent of Value, which can be any Real type.
@@ -932,6 +933,48 @@ begin
    end;
 
   x:=(x-1.0)/(x+1.0);
+  y:=x*x;
+  x := ((((((((.0028662257*y - .0161657367)*y + .0429096138)*y -
+             .0752896400)*y + .1065626393)*y - .1420889944)*y +
+             .1999355085)*y - .3333314528)*y + 1.0)*x;
+  x:= .785398163397 + x;
+
+  if sign then
+   Result := -x
+  else
+   Result := x;
+
+end;
+
+
+function ArcTan(value: single): single; overload;
+(*
+@description:
+Arctan returns the Arctangent of Value, which can be any Real type.
+
+The resulting angle is in radial units.
+
+@param: value - Real (Q24.8)
+
+@returns: Real (Q24.8)
+*)
+var x, y: single;
+    sign: Boolean;
+begin
+  sign:=false;
+  x:=value;
+  y:=0;
+
+  if (value=0) then begin
+    Result:=0;
+    exit;
+  end else
+   if (x < 0) then begin
+    sign:=true;
+    x:=-x;
+   end;
+
+  x:=(x-1)/(x+1);
   y:=x*x;
   x := ((((((((.0028662257*y - .0161657367)*y + .0429096138)*y -
              .0752896400)*y + .1065626393)*y - .1420889944)*y +
