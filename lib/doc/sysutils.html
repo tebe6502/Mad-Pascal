@@ -34,7 +34,7 @@
 <table class='types'>
 <tr><th>name:</th><th>type:</th><th>description:</th></tr>
 
-<tr><td class='tname'>TSearchRec</td><td class='ttype'>record<ul class='record'><li>Attr: Byte;</li><li>Name: TString;</li><li>FindHandle: Pointer;</li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>TSearchRec</td><td class='ttype'>record<ul class='record'><li>Attr: Byte;</li><li>ExcludeAttr: Byte;</li><li>Name: TString;</li><li>FindHandle: Pointer;</li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
 
 </table>
 
@@ -62,7 +62,7 @@
 	Sound the system click<br><ul></ul></td></tr>
 <tr><td class='tname fname'>GetTickCount</td><td class='tdesc'><h4>function GetTickCount: cardinal; assembler;</h4><br>
 	Get tick count<br><ul><h5>returns:</h5><li class='returns'>32bit tick count</li></ul></td></tr>
-<tr><td class='tname fname'>FindFirst</td><td class='tdesc'><h4>function FindFirst (const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;</h4><br>
+<tr><td class='tname fname'>FindFirst</td><td class='tdesc'><h4>function FindFirst(const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;</h4><br>
 	Start a file search and return a findhandle<br><ul><h5>parameters:</h5><li>FileMask: string[32]</li><li>Attributes: Byte</li><li>SearchResult: TSearchRec</li><h5>returns:</h5><li class='returns'>=0 file matching the specified criteria is found</li></ul></td></tr>
 <tr><td class='tname fname'>FindNext</td><td class='tdesc'><h4>function FindNext(var f: TSearchRec): byte; assembler;</h4><br>
 	Find the next entry in a findhandle<br><ul><h5>parameters:</h5><li>var f: TSearchRec</li><h5>returns:</h5><li class='returns'>=0 record matching the criteria, successful</li></ul></td></tr>
@@ -72,28 +72,28 @@
 	Renames a file from OldName to NewName<br><ul><h5>parameters:</h5><li>var OldName: string[32]</li><li>var NewName: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - successful</li><li class='returns'>FALSE - I/O error</li></ul></td></tr>
 <tr><td class='tname fname'>DeleteFile</td><td class='tdesc'><h4>function DeleteFile(var FileName: TString): Boolean; assembler;</h4><br>
 	Delete a file from the filesystem<br><ul><h5>parameters:</h5><li>var FileName: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - the file was successfully removed</li><li class='returns'>FALSE - I/O error</li></ul></td></tr>
-<tr><td class='tname fname'>FileExists</td><td class='tdesc'><h4>function FileExists(name: TString): Boolean;</h4><br>
+<tr><td class='tname fname'>FileExists</td><td class='tdesc'><h4>function FileExists(name: PString): Boolean;</h4><br>
 	Check whether a particular file exists in the filesystem<br><ul><h5>parameters:</h5><li>name: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - file exists</li><li class='returns'>FALSE - file not exists</li></ul></td></tr>
-<tr><td class='tname fname'>ByteToStr</td><td class='tdesc'><h4>function ByteToStr(a: byte): ^string; assembler;</h4><br>
+<tr><td class='tname fname'>ByteToStr</td><td class='tdesc'><h4>function ByteToStr(a: byte): TString; assembler;</h4><br>
 	Converts input byte to a string<br><ul><h5>parameters:</h5><li>a: byte</li><h5>returns:</h5><li class='returns'>pointer to string.Y = hundreds, .X = tens, .A = ones</li></ul></td></tr>
-<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): ^string; assembler; overload;</h4><br>
+<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): TString; assembler; overload;</h4><br>
 	Convert an INTEGER value to a decimal string<br><ul><h5>parameters:</h5><li>a: integer</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
-<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: cardinal): ^string; assembler; overload;</h4><br>
+<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: cardinal): TString; assembler; overload;</h4><br>
 	Convert an CARDINAL value to a decimal string<br><ul><h5>parameters:</h5><li>a: cardinal</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
 <tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(const s: char): byte; assembler; overload;</h4><br>
 	Convert a char to an byte value<br><ul><h5>parameters:</h5><li>s: char</li><h5>returns:</h5><li class='returns'>byte</li></ul></td></tr>
-<tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(const s: TString): integer; assembler; overload;</h4><br>
+<tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(s: PString): integer; assembler; overload;</h4><br>
 	Convert a string to an integer value<br><ul><h5>parameters:</h5><li>s: string[32]</li><h5>returns:</h5><li class='returns'>integer (32bit)</li></ul></td></tr>
 <tr><td class='tname fname'>IntToHex</td><td class='tdesc'><h4>function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;</h4><br>
 	Convert an integer value to a hexadecimal string<br><ul><h5>parameters:</h5><li>Value: cardinal (32bit)</li><li>Digits - number of characters</li><h5>returns:</h5><li class='returns'>string[32]</li></ul></td></tr>
-<tr><td class='tname fname'>StrToFloat</td><td class='tdesc'><h4>function StrToFloat(var s: TString): real;</h4><br>
+<tr><td class='tname fname'>StrToFloat</td><td class='tdesc'><h4>function StrToFloat(var s: String): real;</h4><br>
 	Convert a string to a floating-point value<br><ul><h5>parameters:</h5><li>var s: string[32]</li><h5>returns:</h5><li class='returns'>real (Q24.8)</li></ul></td></tr>
-<tr><td class='tname fname'>ExtractFileExt</td><td class='tdesc'><h4>function ExtractFileExt(const a: string): TString;</h4><br>
+<tr><td class='tname fname'>ExtractFileExt</td><td class='tdesc'><h4>function ExtractFileExt(a: PString): TString;</h4><br>
 	Return the extension from a filename<br><ul><h5>parameters:</h5><li>const a: string[255]</li><h5>returns:</h5><li class='returns'>string[32]</li></ul></td></tr>
-<tr><td class='tname fname'>ExtractFilePath</td><td class='tdesc'><h4>function ExtractFilePath(const a: string): string;</h4><br>
+<tr><td class='tname fname'>ExtractFilePath</td><td class='tdesc'><h4>function ExtractFilePath(a: PString): string;</h4><br>
 	Extract the path from a filename<br><ul><h5>parameters:</h5><li>const a: string[255]</li><h5>returns:</h5><li class='returns'>string[255]</li></ul></td></tr>
-<tr><td class='tname fname'>AnsiUpperCase</td><td class='tdesc'><h4>function AnsiUpperCase(const a: string): string;</h4><br>
-	Return an uppercase version of a string<br><ul><h5>parameters:</h5><li>const a: string[255]</li><h5>returns:</h5><li class='returns'>string[255]</li></ul></td></tr>
+<tr><td class='tname fname'>AnsiUpperCase</td><td class='tdesc'><h4>function AnsiUpperCase(a: PString): string; register;</h4><br>
+	Return an uppercase version of a string<br><ul><h5>parameters:</h5><li>a: PString</li><h5>returns:</h5><li class='returns'>string[255]</li></ul></td></tr>
 <tr><td class='tname fname'>Now</td><td class='tdesc'><h4>function Now: TDateTime;</h4><br>
 	Read actual Date-Time (Sparta DOS X, R-Time 8, SIO Real-Time Clock)<br><ul><h5>returns:</h5><li class='returns'>TDateTime</li></ul></td></tr>
 <tr><td class='tname fname'>Date</td><td class='tdesc'><h4>function Date: TDateTime;</h4><br>
@@ -110,7 +110,7 @@
 	Decode a TDateTime to a year,month,day, hour,minute,second<br><ul><h5>parameters:</h5><li>d: TDateTime</li><li>yy: byte - year</li><li>mm: byte - month</li><li>dd: byte - day</li><li>h: byte - hour</li><li>m: byte - minute</li><li>s: byte - second</li></ul></td></tr>
 <tr><td class='tname fname'>BoolToStr</td><td class='tdesc'><h4>function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;</h4><br>
 	BoolToStr converts the boolean B to one of the strings 'TRUE' or 'FALSE'<br><ul><h5>parameters:</h5><li>B: Boolean</li><li>UseBoolStrs: Boolean</li><h5>returns:</h5><li class='returns'>TString</li></ul></td></tr>
-<tr><td class='tname fname'>StrToBool</td><td class='tdesc'><h4>function StrToBool(const S: TString): Boolean;</h4><br>
+<tr><td class='tname fname'>StrToBool</td><td class='tdesc'><h4>function StrToBool(S: PString): Boolean;</h4><br>
 	StrToBool will convert the string S to a boolean value. The string S can contain one of 'True', 'False' (case is ignored) or a numerical value. If it contains a numerical value, 0 is converted to False, all other values result in True.<br><ul><h5>parameters:</h5><li>S: TString</li><h5>returns:</h5><li class='returns'>Boolean</li></ul></td></tr>
 <tr><td class='tname fname'>IsLeapYear</td><td class='tdesc'><h4>function IsLeapYear(Year: Word): boolean;</h4><br>
 	IsLeapYear returns True if Year is a leap year, False otherwise.<br><ul><h5>parameters:</h5><li>Year: Word</li><h5>returns:</h5><li class='returns'>Boolean</li></ul></td></tr>

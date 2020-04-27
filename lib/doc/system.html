@@ -18,6 +18,7 @@
 <table class='consts'>
 <tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
+<tr><td class='tname'>__PORTB_BANKS</td><td class='tvalue'>$0101</td><td class='tdesc'>memory banks array</td></tr>
 <tr><td class='tname'>M_PI_2</td><td class='tvalue'>pi*2</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>D_PI_2</td><td class='tvalue'>pi/2</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>D_PI_180</td><td class='tvalue'>pi/180</td><td class='tdesc'></td></tr>
@@ -85,6 +86,9 @@
 <tr><td class='tname'>PBoolean</td><td class='ttype'>^Boolean</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>PByte</td><td class='ttype'>^byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>PWord</td><td class='ttype'>^word</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PCardinal</td><td class='ttype'>^cardinal</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PInteger</td><td class='ttype'>^integer</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>PString</td><td class='ttype'>^string</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>PByteArray</td><td class='ttype'>^byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>PWordArray</td><td class='ttype'>^word</td><td class='tdesc'></td></tr>
 
@@ -110,7 +114,7 @@
 
 <tr><td class='tname'>ScreenWidth</td><td class='ttype'>smallint = 40</td><td class='tdesc'>current screen width</td></tr>
 <tr><td class='tname'>ScreenHeight</td><td class='ttype'>smallint = 24</td><td class='tdesc'>current screen height</td></tr>
-<tr><td class='tname'>ScreenMode</td><td class='ttype'>byte</td><td class='tdesc'>current screen mode</td></tr>
+<tr><td class='tname'>GraphMode</td><td class='ttype'>byte</td><td class='tdesc'>current screen mode</td></tr>
 <tr><td class='tname'>IOResult</td><td class='ttype'>byte</td><td class='tdesc'>result of last file IO operation</td></tr>
 <tr><td class='tname'>EoLn</td><td class='ttype'>Boolean</td><td class='tdesc'>end of line status</td></tr>
 
@@ -122,12 +126,6 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>ReadConfig</td><td class='tdesc'><h4>function ReadConfig(devnum: byte): cardinal; assembler;</h4><br>
-	Read disk drive configuration<br><ul><h5>parameters:</h5><li>devnum - device number</li></ul></td></tr>
-<tr><td class='tname fname'>ReadSector</td><td class='tdesc'><h4>procedure ReadSector(devnum: byte; sector: word; var buf); assembler;</h4><br>
-	Read disk sector to buffer<br><ul><h5>parameters:</h5><li>devnum - device number</li><li>sector - sector number</li><li>buf - pointer to buffer</li></ul></td></tr>
-<tr><td class='tname fname'>WriteSector</td><td class='tdesc'><h4>procedure WriteSector(devnum: byte; sector: word; var buf); assembler;</h4><br>
-	Write disk sector from buffer<br><ul><h5>parameters:</h5><li>devnum - device number</li><li>sector - sector number</li><li>buf - pointer to buffer</li></ul></td></tr>
 <tr><td class='tname fname'>RunError</td><td class='tdesc'><h4>procedure RunError(a: byte);</h4><br>
 	Print error message<br><ul><h5>parameters:</h5><li>a - error number</li></ul></td></tr>
 <tr><td class='tname fname'>HexStr</td><td class='tdesc'><h4>function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;</h4><br>
@@ -150,6 +148,10 @@
 	Abs returns the absolute value of a variable. <br> The result of the function has the same type as its argument, which can be any numerical type.<br><ul><h5>parameters:</h5><li>x - Real (Q24.8)</li><h5>returns:</h5><li class='returns'>Real (Q24.8)</li></ul></td></tr>
 <tr><td class='tname fname'>Abs</td><td class='tdesc'><h4>function Abs(x: Single): Single; register; assembler; overload;</h4><br>
 	Abs returns the absolute value of a variable. <br> The result of the function has the same type as its argument, which can be any numerical type.<br><ul><h5>parameters:</h5><li>x - Single</li><h5>returns:</h5><li class='returns'>Single</li></ul></td></tr>
+<tr><td class='tname fname'>Abs</td><td class='tdesc'><h4>function Abs(x: shortint): shortint; register; assembler; overload;</h4><br>
+	Abs returns the absolute value of a variable. <br> The result of the function has the same type as its argument, which can be any numerical type.<br><ul><h5>parameters:</h5><li>x - shortint</li><h5>returns:</h5><li class='returns'>shortint</li></ul></td></tr>
+<tr><td class='tname fname'>Abs</td><td class='tdesc'><h4>function Abs(x: smallint): smallint; register; assembler; overload;</h4><br>
+	Abs returns the absolute value of a variable. <br> The result of the function has the same type as its argument, which can be any numerical type.<br><ul><h5>parameters:</h5><li>x - smallint</li><h5>returns:</h5><li class='returns'>smallint</li></ul></td></tr>
 <tr><td class='tname fname'>Abs</td><td class='tdesc'><h4>function Abs(x: Integer): Integer; register; assembler; overload;</h4><br>
 	Abs returns the absolute value of a variable. <br> The result of the function has the same type as its argument, which can be any numerical type.<br><ul><h5>parameters:</h5><li>x - Integer</li><h5>returns:</h5><li class='returns'>Integer</li></ul></td></tr>
 <tr><td class='tname fname'>Sqr</td><td class='tdesc'><h4>function Sqr(x: Real): Real; overload;</h4><br>
@@ -166,7 +168,9 @@
 	Sqrt returns the square root of its argument X, which must be positive<br><ul><h5>parameters:</h5><li>x - integer</li><h5>returns:</h5><li class='returns'>integer</li></ul></td></tr>
 <tr><td class='tname fname'>iSqrt</td><td class='tdesc'><h4>function iSqrt(number: Single): Single;</h4><br>
 	Fast inverse square root <br> <a href='https://en.wikipedia.org/wiki/Fast_inverse_square_root'>https://en.wikipedia.org/wiki/Fast_inverse_square_root</a> <br> <a href='https://pl.wikipedia.org/wiki/Szybka_odwrotno%C5%9B%C4%87_pierwiastka_kwadratowego'>https://pl.wikipedia.org/wiki/Szybka_odwrotno%C5%9B%C4%87_pierwiastka_kwadratowego</a><br><ul><h5>parameters:</h5><li>number - Single</li><h5>returns:</h5><li class='returns'>Single</li></ul></td></tr>
-<tr><td class='tname fname'>ArcTan</td><td class='tdesc'><h4>function ArcTan(value: real): real;</h4><br>
+<tr><td class='tname fname'>ArcTan</td><td class='tdesc'><h4>function ArcTan(value: real): real; overload;</h4><br>
+	Arctan returns the Arctangent of Value, which can be any Real type. <br> The resulting angle is in radial units.<br><ul><h5>parameters:</h5><li>value - Real (Q24.8)</li><h5>returns:</h5><li class='returns'>Real (Q24.8)</li></ul></td></tr>
+<tr><td class='tname fname'>ArcTan</td><td class='tdesc'><h4>function ArcTan(value: single): single; overload;</h4><br>
 	Arctan returns the Arctangent of Value, which can be any Real type. <br> The resulting angle is in radial units.<br><ul><h5>parameters:</h5><li>value - Real (Q24.8)</li><h5>returns:</h5><li class='returns'>Real (Q24.8)</li></ul></td></tr>
 <tr><td class='tname fname'>Exp</td><td class='tdesc'><h4>function Exp(x: Real): Real; overload;</h4><br>
 	Exp returns the exponent of X, i.e. the number e to the power X. <br> <a href='https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent'>https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent</a><br><ul><h5>parameters:</h5><li>x - Real (Q24.8)</li><h5>returns:</h5><li class='returns'>Real (Q24.8)</li></ul></td></tr>
@@ -184,15 +188,21 @@
 	Set file position (SDX only)<br><ul><h5>parameters:</h5><li>f - file handle</li><li>a - new position</li></ul></td></tr>
 <tr><td class='tname fname'>Eof</td><td class='tdesc'><h4>function Eof(var f: file): Boolean;</h4><br>
 	Check for end of file<br><ul><h5>parameters:</h5><li>f - file handle</li><h5>returns:</h5><li class='returns'>TRUE if the file-pointer has reached the end of the file</li></ul></td></tr>
+<tr><td class='tname fname'>IsLetter</td><td class='tdesc'><h4>function IsLetter(A: char): Boolean;</h4><br>
+	Check if A is a letter.<br><ul><h5>parameters:</h5><li>A - char</li><h5>returns:</h5><li class='returns'>Boolean</li></ul></td></tr>
+<tr><td class='tname fname'>IsDigit</td><td class='tdesc'><h4>function IsDigit(A: char): Boolean;</h4><br>
+	Check if A is a digit.<br><ul><h5>parameters:</h5><li>A - char</li><h5>returns:</h5><li class='returns'>Boolean</li></ul></td></tr>
 <tr><td class='tname fname'>LowerCase</td><td class='tdesc'><h4>function LowerCase(a: char): char;</h4><br>
 	Converts a character to lowercase<br><ul><h5>parameters:</h5><li>a - char</li><h5>returns:</h5><li class='returns'>char</li></ul></td></tr>
 <tr><td class='tname fname'>UpCase</td><td class='tdesc'><h4>function UpCase(a: char): char;</h4><br>
 	Converts a character to uppercase<br><ul><h5>parameters:</h5><li>a - char</li><h5>returns:</h5><li class='returns'>char</li></ul></td></tr>
-<tr><td class='tname fname'>Val</td><td class='tdesc'><h4>procedure Val(const s: TString; var v: integer; var code: byte); assembler; overload;</h4><br>
-	Calculate numerical value of a string<br><ul><h5>parameters:</h5><li>s - string[32]</li><li>v - pointer to integer - result</li><li>code - pointer to integer - error code</li></ul></td></tr>
-<tr><td class='tname fname'>Val</td><td class='tdesc'><h4>procedure Val(const s: TString; var v: single; var code: byte); overload;</h4><br>
-	Calculate numerical value of a string<br><ul><h5>parameters:</h5><li>s - string[32]</li><li>v - pointer to integer - result</li><li>code - pointer to integer - error code</li></ul></td></tr>
-<tr><td class='tname fname'>FloatToStr</td><td class='tdesc'><h4>function FloatToStr(a: real): ^string; assembler;</h4><br>
+<tr><td class='tname fname'>Val</td><td class='tdesc'><h4>procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;</h4><br>
+	Calculate numerical value of a string<br><ul><h5>parameters:</h5><li>s - string</li><li>v - pointer to integer - result</li><li>code - pointer to integer - error code</li></ul></td></tr>
+<tr><td class='tname fname'>Val</td><td class='tdesc'><h4>procedure Val(s: PString; var v: real; var code: byte); overload; //register;</h4><br>
+	Calculate numerical value of a string<br><ul><h5>parameters:</h5><li>s - string</li><li>v - pointer to real - result</li><li>code - pointer to integer - error code</li></ul></td></tr>
+<tr><td class='tname fname'>Val</td><td class='tdesc'><h4>procedure Val(s: PString; var v: single; var code: byte); overload; //register;</h4><br>
+	Calculate numerical value of a string<br><ul><h5>parameters:</h5><li>s - string</li><li>v - pointer to integer - result</li><li>code - pointer to integer - error code</li></ul></td></tr>
+<tr><td class='tname fname'>FloatToStr</td><td class='tdesc'><h4>function FloatToStr(a: real): TString; assembler;</h4><br>
 	Convert a float value to a string<br><ul><h5>parameters:</h5><li>a - Real (Q24.8)</li><h5>returns:</h5><li class='returns'>string[32]</li></ul></td></tr>
 <tr><td class='tname fname'>Str</td><td class='tdesc'><h4>procedure Str(a: integer; var s: TString); overload; assembler;</h4><br>
 	Convert a numerical value to a string<br><ul><h5>parameters:</h5><li>a - integer</li><li>s - string[32] - result</li></ul></td></tr>
@@ -250,11 +260,11 @@
 	Return number of command-line parameters passed to the program.<br><ul><h5>returns:</h5><li class='returns'>byte</li></ul></td></tr>
 <tr><td class='tname fname'>ParamStr</td><td class='tdesc'><h4>function ParamStr(i: byte): TString; assembler;</h4><br>
 	Return value of a command-line argument.<br><ul><h5>parameters:</h5><li>i - of a command-line argument</li><h5>returns:</h5><li class='returns'>string[32]</li></ul></td></tr>
-<tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a,b: string): string; assembler; overload;</h4><br>
+<tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a,b: PString): string; assembler; overload;</h4><br>
 	Append one string to another.<br><ul><h5>parameters:</h5><li>a - first string</li><li>b - second string</li><h5>returns:</h5><li class='returns'>string (a+b)</li></ul></td></tr>
-<tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a: string; b: char): string; assembler; overload;</h4><br>
+<tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a: PString; b: char): string; assembler; overload;</h4><br>
 	<br><ul></ul></td></tr>
-<tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a: char; b: string): string; assembler; overload;</h4><br>
+<tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a: char; b: PString): string; assembler; overload;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Concat</td><td class='tdesc'><h4>function Concat(a,b: char): string; overload;</h4><br>
 	<br><ul></ul></td></tr>
@@ -264,6 +274,10 @@
 	Swap high and low bytes of a variable<br><ul><h5>parameters:</h5><li>a - word</li><h5>returns:</h5><li class='returns'>word</li></ul></td></tr>
 <tr><td class='tname fname'>Swap</td><td class='tdesc'><h4>function Swap(a: cardinal): cardinal; overload;</h4><br>
 	Swap high and low words of a variable<br><ul><h5>parameters:</h5><li>a - cardinal</li><h5>returns:</h5><li class='returns'>cardinal</li></ul></td></tr>
+<tr><td class='tname fname'>GetMem</td><td class='tdesc'><h4>procedure GetMem(var p; size: word); assembler; register;</h4><br>
+	Getmem reserves Size bytes memory, and returns a pointer to this memory in p.<br><ul><h5>parameters:</h5><li>p - pointer</li><li>size</li></ul></td></tr>
+<tr><td class='tname fname'>FreeMem</td><td class='tdesc'><h4>procedure FreeMem(var p; size: word); assembler; register;</h4><br>
+	Freemem releases the memory occupied by the pointer P<br><ul><h5>parameters:</h5><li>p - pointer</li><li>size</li></ul></td></tr>
 
 </table>
 
