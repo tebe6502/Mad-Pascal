@@ -30,7 +30,7 @@
 <table class='registers'>
 <tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
-<tr><td class='tname'>banks</td><td class='taddress'>$0101</td><td class='ttype'>array [0..63] of byte</td><td class='tdesc'>array with code of banks PORTB</td></tr>
+<tr><td class='tname'>banks</td><td class='taddress'>__PORTB_BANKS</td><td class='ttype'>array [0..63] of byte</td><td class='tdesc'>array with code of banks PORTB</td></tr>
 <tr><td class='tname'>DetectOS</td><td class='taddress'>$fff7</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 
 </table>
@@ -48,7 +48,7 @@
 <tr><th>name:</th><th>description:</th></tr>
 
 <tr><td class='tname fname'>DetectHighMem</td><td class='tdesc'><h4>function DetectHighMem: word;</h4><br>
-	Detect 65816 linear memmory <br> <a href='http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej'>http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej</a><br><ul><h5>returns:</h5><li class='returns'>amount of memory in KB</li></ul></td></tr>
+	Detect 65816 linear memory <br> <a href='http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej'>http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej</a><br><ul><h5>returns:</h5><li class='returns'>amount of memory in KB</li></ul></td></tr>
 <tr><td class='tname fname'>DetectVBXE</td><td class='tdesc'><h4>function DetectVBXE(var p: word): Boolean; assembler; register;</h4><br>
 	Detect VBXE card<br><ul><h5>parameters:</h5><li>word variable</li><h5>returns:</h5><li class='returns'>TRUE present, FALSE otherwise</li><li class='returns'>bit 0..6 variable: VBXE CORE</li><li class='returns'>bit 7 variable: =1 RAMBO</li><li class='returns'>bit 8..15 variable: VBXE PAGE</li></ul></td></tr>
 <tr><td class='tname fname'>DetectEvie</td><td class='tdesc'><h4>function DetectEvie: Boolean; assembler;</h4><br>
@@ -60,7 +60,7 @@
 <tr><td class='tname fname'>DetectCPUSpeed</td><td class='tdesc'><h4>function DetectCPUSpeed: real;</h4><br>
 	Detect CPU speed in megahertz <br> author: Draco<br><ul><h5>returns:</h5><li class='returns'>speed (REAL Q24.8)</li></ul></td></tr>
 <tr><td class='tname fname'>DetectMem</td><td class='tdesc'><h4>function DetectMem: byte; assembler;</h4><br>
-	Detect amount additional memmory PORTB<br><ul><h5>returns:</h5><li class='returns'>amount of banks (0..255)</li><li class='returns'>banks code PORTB = BANKS[0..63] at address $0101</li></ul></td></tr>
+	Detect amount additional memory PORTB<br><ul><h5>returns:</h5><li class='returns'>amount of banks (0..255)</li><li class='returns'>banks code PORTB = BANKS[0..63] at address $0101</li></ul></td></tr>
 <tr><td class='tname fname'>DetectMapRam</td><td class='tdesc'><h4>function DetectMapRam: Boolean; assembler;</h4><br>
 	Detect MapRAM <br> <a href='http://xxl.atari.pl/mapram/'>http://xxl.atari.pl/mapram/</a><br><ul><h5>returns:</h5><li class='returns'>TRUE present, FALSE otherwise</li></ul></td></tr>
 <tr><td class='tname fname'>DetectBASIC</td><td class='tdesc'><h4>function DetectBASIC: byte; assembler;</h4><br>
