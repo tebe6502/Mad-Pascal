@@ -11,6 +11,7 @@ unit sysutils;
 {
 
 AnsiUpperCase
+AnsiLowerCase
 Beep
 BoolToStr
 ByteToStr
@@ -67,6 +68,7 @@ const
 
 
 	function AnsiUpperCase(a: PString): string; register;
+	function AnsiLowerCase(a: PString): string; register;
 	procedure Beep;
 	function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;
 	function ByteToStr(a: byte): TString; assembler;
@@ -689,6 +691,24 @@ begin
  Result:=a;
 
  for j:=1 to length(a) do Result[j] := UpCase(Result[j]);
+
+end;
+
+
+function AnsiLowerCase(a: PString): string; register;
+(*
+@description: AnsiLowerCase converts the string S to lowercase characters and returns the resulting string.
+
+@param: a: PString
+
+@returns: string[255]
+*)
+var j: byte;
+begin
+
+ Result:=a;
+
+ for j:=1 to length(a) do Result[j] := LowerCase(Result[j]);
 
 end;
 

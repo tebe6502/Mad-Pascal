@@ -34,8 +34,11 @@ interface
 
 uses misc;
 
-type
-	TMemoryStream = Object
+type	TMemoryStream = Object
+	(*
+	@description:
+
+	*)
 
 	Position: cardinal;
 	Size: cardinal;
@@ -61,6 +64,9 @@ var bank: byte;
 
 
 procedure TMemoryStream.Create;
+(*
+@description:
+*)
 begin
 
  Size := bank shl 14;	// * 16384
@@ -70,6 +76,9 @@ end;
 
 
 procedure TMemoryStream.ReadBuffer(var Buffer; Count: word); register; assembler;
+(*
+@description:
+*)
 asm
 {	lda Count
 	ora Count+1
@@ -83,6 +92,9 @@ end;
 
 
 procedure TMemoryStream.WriteBuffer(var Buffer; Count: word); register; assembler;
+(*
+@description:
+*)
 asm
 {	lda Count
 	ora Count+1
@@ -96,6 +108,9 @@ end;
 
 
 function TMemoryStream.ReadByte: Byte; assembler;
+(*
+@description:
+*)
 asm
 {	mwa position cx+2
 	@xmsReadBuf #Result #1
@@ -104,6 +119,9 @@ end;
 
 
 function TMemoryStream.ReadWord: Word; assembler;
+(*
+@description:
+*)
 asm
 {	mwa position cx+2
 	@xmsReadBuf #Result #2
@@ -112,6 +130,9 @@ end;
 
 
 function TMemoryStream.ReadDWord: Cardinal; assembler;
+(*
+@description:
+*)
 asm
 {	mwa position cx+2
 	@xmsReadBuf #Result #4
@@ -120,6 +141,9 @@ end;
 
 
 procedure TMemoryStream.WriteByte(b: Byte); assembler;
+(*
+@description:
+*)
 asm
 {	mwa position cx+2
 	@xmsWriteBuf #b #1
@@ -128,6 +152,9 @@ end;
 
 
 procedure TMemoryStream.WriteWord(w: Word); assembler;
+(*
+@description:
+*)
 asm
 {	mwa position cx+2
 	@xmsWriteBuf #w #2
@@ -136,6 +163,9 @@ end;
 
 
 procedure TMemoryStream.WriteDWord(d: Cardinal); assembler;
+(*
+@description:
+*)
 asm
 {	mwa position cx+2
 	@xmsWriteBuf #d #4

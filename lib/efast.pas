@@ -8,7 +8,7 @@ unit efast;
  @description:
  E: accelerator for Atari 8-bit OS
  
- https://github.com/dmsc/e-accelerator
+ <https://github.com/dmsc/e-accelerator>
 *)
 
 
