@@ -1,16 +1,16 @@
 <html>
 <head>
 	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
-	<title>unit efast - reference</title>
+	<title>unit CRC - reference</title>
 </head>
 <body>
 
 <!--********************* HEADER **************************-->
 
-<h1>unit efast</h1>
-<h3>E: accelerator</h3>
-<p>author: DMSC, Tomasz Biela (Tebe)</p>
-<br><p>E: accelerator for Atari 8-bit OS <br> <a href='https://github.com/dmsc/e-accelerator'>https://github.com/dmsc/e-accelerator</a></p>
+<h1>unit CRC</h1>
+<h3>CRC</h3>
+<p>author: Piotr Fusik, Tomasz Biela</p>
+<br><p>compute the CRC-32 of a data stream <br> <a href='https://github.com/graemeg/freepascal/blob/master/packages/hash/src/crc.pas'>https://github.com/graemeg/freepascal/blob/master/packages/hash/src/crc.pas</a></p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -38,9 +38,16 @@
 
 <!--********************* INTERFACE **************************-->
 
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
 
+<tr><td class='tname fname'>make_table</td><td class='tdesc'><h4>procedure make_table; assembler;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>crc32</td><td class='tdesc'><h4>function crc32(crc: cardinal; buf: Pbyte; len: word): cardinal; register;</h4><br>
+	<br><ul></ul></td></tr>
 
-
+</table>
 
 <!--********************* FOOTER **************************-->
 

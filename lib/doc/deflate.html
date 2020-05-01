@@ -1,16 +1,16 @@
 <html>
 <head>
 	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
-	<title>unit efast - reference</title>
+	<title>unit deflate - reference</title>
 </head>
 <body>
 
 <!--********************* HEADER **************************-->
 
-<h1>unit efast</h1>
-<h3>E: accelerator</h3>
-<p>author: DMSC, Tomasz Biela (Tebe)</p>
-<br><p>E: accelerator for Atari 8-bit OS <br> <a href='https://github.com/dmsc/e-accelerator'>https://github.com/dmsc/e-accelerator</a></p>
+<h1>unit deflate</h1>
+<h3>Deflate</h3>
+<p>author: Piotr Fusik</p>
+<br><p>Deflate decompressor <br> <a href='https://github.com/pfusik/zlib6502'>https://github.com/pfusik/zlib6502</a></p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -38,9 +38,14 @@
 
 <!--********************* INTERFACE **************************-->
 
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
 
+<tr><td class='tname fname'>unDEF</td><td class='tdesc'><h4>procedure unDEF(input, output: pointer); assembler; register;</h4><br>
+	Deflate decompressor<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
 
-
+</table>
 
 <!--********************* FOOTER **************************-->
 
