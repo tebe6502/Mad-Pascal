@@ -174,9 +174,12 @@ sk1
 	mwa x colcrs
 	mva y rowcrs
 
-	lda #@IDput
+;	lda #@IDput		; slower
+;	jsr @COMMAND
 
-	jsr @COMMAND
+	ldx @COMMAND.scrchn	; faster
+	lda @COMMAND.colscr
+	jsr @putchar.main
 
 stop	pla:tax
 };
@@ -277,9 +280,12 @@ _3
 	mwa CurrentX colcrs
 	mva CurrentY rowcrs
 
-	lda #@IDput
+;	lda #@IDput		; slower
+;	jsr @COMMAND
 
-	jsr @COMMAND
+	ldx @COMMAND.scrchn	; faster
+	lda @COMMAND.colscr
+	jsr @putchar.main
 
 	lda x
 	sta colcrs

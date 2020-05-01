@@ -7,6 +7,19 @@ unit S2;
  @version: 1.0
 
  @description:
+ 1: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color.
+
+ 2: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors.
+
+ 3: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
+
+ 4: pixel mode 640x192/16 colors (hires)
+
+ 5: text mode 80x25.
+
+ 6: text mode 80x30.
+
+ 7: text mode 80x32. 
 *)
 
 
@@ -22,8 +35,7 @@ TextOut
 
 interface
 
-const
-	fsNormal = 0;
+const	fsNormal = 0;
 	fsUnderline = 64;
 	fsInverse = 128;
 	fsProportional = 8;
@@ -51,8 +63,10 @@ implementation
 uses cio, graph, crt, sysutils;
 
 
-
 procedure Font.LoadFromFile(name: PByte);
+(*
+@description:
+*)
 begin
 
 
@@ -61,6 +75,9 @@ end;
 
 
 procedure Font.LoadFromMem(p: pointer);
+(*
+@description:
+*)
 begin
 
 
@@ -69,10 +86,14 @@ end;
 
 
 procedure ClearDevice;
+(*
+@description:
+Clear whole screen
+*)
 begin
 
  cls(6);
- opn(6,12,GraphMode,'S2:');
+ opn(6, 12 + GraphMode and $f0, GraphMode and $0f, 'S2:');
 
 end;
 
@@ -85,7 +106,7 @@ Init S2:
 begin
 
  cls(6);
- opn(6,12,mode,'S2:');
+ opn(6, 12 + mode and $f0, mode and $0f, 'S2:');
  
 // xio(111,6,0,0,'S2:');
 
@@ -130,6 +151,9 @@ end;
 
 
 procedure TextOut(x: word; y: byte; s: PByte); overload;
+(*
+@description:
+*)
 var i: byte;
 begin
 
@@ -146,6 +170,9 @@ end;
 
 
 procedure TextOut(a: char); overload;
+(*
+@description:
+*)
 begin
 
 asm
@@ -159,6 +186,9 @@ end;
 
 
 procedure CloseGraph;
+(*
+@description:
+*)
 begin
 
  cls(6);
@@ -176,7 +206,7 @@ SetGraphMode(0);
 
 if GraphResult <> grOK then begin
 
- xio(40,1,0,0,'D:SDXLD.COM');
+ xio(40,1,0,0,'D:SDXLD.COM /X');
  
  if IoResult >= 128 then begin
   TextMode(0);
