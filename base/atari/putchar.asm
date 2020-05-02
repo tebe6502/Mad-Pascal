@@ -1,5 +1,5 @@
 
-; unit GRAPH: InitGraph
+; unit GRAPH: InitGraph, PutPixel, LineTo
 ; unit S2: SetGraphMode
 
 
@@ -24,7 +24,7 @@ chn	equ *-1
 	.ifdef MAIN.CRT.TextAttr
 	ora MAIN.CRT.TextAttr
 	.endif
-
+main
 	tay
 	lda icputb+1,x
 	pha
