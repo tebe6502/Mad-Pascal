@@ -28,6 +28,7 @@ unit S2;
 ClearDevice
 CloseGraph
 InitGraph
+Position
 SetGraphMode
 TextOut
 
@@ -54,13 +55,14 @@ var	Font: Object
 	procedure SetGraphMode(mode: byte);
 	procedure ClearDevice;
 	procedure CloseGraph;
+	procedure Position(x: word; y: byte); assembler;
 	procedure TextOut(x: word; y: byte; s: PByte); overload;
 	procedure TextOut(a: char); overload;
 
 
 implementation
 
-uses cio, graph, crt, sysutils;
+uses cio, crt, graph, sysutils;
 
 
 procedure Font.LoadFromFile(name: PByte);
@@ -149,6 +151,24 @@ toEnd
 end;
 
 
+procedure Position(x: word; y: byte); assembler;
+(*
+@description:
+Set cursor position on screen.
+
+GotoXY positions the cursor at (X,Y), X in horizontal, Y in vertical direction.
+
+@param: x - horizontal positions
+@param: y - vertical positions
+*)
+asm
+{
+	mwa x colcrs
+
+	mva y rowcrs
+};
+end;
+
 
 procedure TextOut(x: word; y: byte; s: PByte); overload;
 (*
@@ -157,10 +177,12 @@ procedure TextOut(x: word; y: byte; s: PByte); overload;
 var i: byte;
 begin
 
- GotoXY(x,y);
-
 asm
 {
+	mwa x colcrs
+
+	mva y rowcrs
+
 	mva FONT.COLOR fildat
 };
   

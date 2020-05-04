@@ -206,7 +206,7 @@ begin
 end;
 
 
-function SizeMx (m: shortint; value : byte) : byte;
+function SizeMx(m, value : byte) : byte;
 (*
 * @description:
 * Calculate bit numbers for selected missile size
