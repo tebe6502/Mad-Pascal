@@ -13,12 +13,7 @@
 
 .proc	notBOOLEAN
 	lda :STACKORIGIN,x
-	bne _0
-
-	lda #true
-	sne
-
-_0	lda #false
+	eor #true
 	sta :STACKORIGIN,x
 
 	rts
