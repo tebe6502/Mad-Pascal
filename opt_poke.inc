@@ -55,8 +55,8 @@
 
 	Result:=false; Break;
        end;
-       
-       
+
+
     if LDA_BP_Y(i+6) and									// lda (:bp),y			; 6
        tay(i+7) and										// tay				; 7
        lda(i+8) and										// lda 				; 8
@@ -105,7 +105,7 @@
 
 	Result:=false; Break;
        end;
-       
+
 
     if lda(i+6) and (lda_bp_y(i+6) = false) and	(lda_stack(i+6) = false) and			// lda				; 6
        (and_ora_eor(i+7) or add_sub(i+7)) and ((pos(' (:bp),y', listing[i+7]) > 0)) and		// and|ora|eor|add|sub (:bp),y	; 7
@@ -173,12 +173,12 @@
 
 	Result:=false; Break;
       end;
-      
+
 
     if lda_bp_y(i+6) and									// lda (:bp),y			; 6
        and_ora_eor(i+7) and									// and|ora|eor			; 7
        sta_stack(i+8) and									// sta :STACKORIGIN		; 8
-       (mwy_bp2(i+9) or mwa_bp2(i+9) or ldy(i+9)) then						// mwy|mwa ... :bp2		; 9
+       (mwy_bp2(i+9) or ldy(i+9)) then								// mwy ... :bp2			; 9
       begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
@@ -303,15 +303,15 @@
      yes:=false;
 
      for p:=i+1 to l-1 do
-      if mwa_bp2(p) and (listing[p] = #9'mwa '+tmp+' :bp2') then listing[p] := '' else
-       if mwy_bp2(p) and (listing[p] = #9'mwy '+tmp+' :bp2') then listing[p] := '' else
-        if pos('(:bp2),y', listing[p]) > 0 then begin listing[p] := copy(listing[p], 1, 5) + '('+tmp+'),y'; yes:=true end else
-         if (pos('+', listing[p]) = 1) or (pos('-', listing[p]) = 1) then begin
-	 
+      if mwy_bp2(p) and (listing[p] = #9'mwy '+tmp+' :bp2') then listing[p] := '' else
+       if pos('(:bp2),y', listing[p]) > 0 then begin listing[p] := copy(listing[p], 1, 5) + '('+tmp+'),y'; yes:=true end else
+        if (pos('+', listing[p]) = 1) or (pos('-', listing[p]) = 1) then begin
+
 	  if length(listing[p]) = 1 then listing[p] := '';
-	  
-	  Break;	  
-	 end; 
+
+	  Break;
+
+	end;
 
      if yes then begin
       listing[i] := '';
@@ -330,7 +330,6 @@
      yes:=false;
 
      for p:=i+1 to l-1 do
-      if mwa_bp2(p) and (listing[p] = #9'mwa '+tmp+' :bp2') then begin listing[p] := ''; yes:=true end else
        if mwy_bp2(p) and (listing[p] = #9'mwy '+tmp+' :bp2') then begin listing[p] := ''; yes:=true end else
         if sta_bp2_y(p) then begin listing[p] := #9'sta ('+tmp+'),y'; yes:=true end else
          if listing[p][1] in ['+','-'] then Break;
