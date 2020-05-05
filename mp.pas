@@ -9137,6 +9137,15 @@ var i, l, k, m: integer;
      end;
 
 
+    if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
+       jeq(i+1) then										// jeq			; 1
+     begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	Result:=false; Break;
+     end;
+
+
     if scc(i) and										// scc			; 0
        (listing[i+1] = #9'inc #$00') then							// inc #$00		; 1
      begin
@@ -22247,8 +22256,8 @@ var i, l, k, m: integer;
        end;
 
        listing[i+1] := '';
-       listing[i+2] := '';
-       listing[i+3] := '';
+       listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
+//       listing[i+3] := '';
 
        Result:=false; Break;
       end;
@@ -29304,6 +29313,11 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'eli VLEN>0');
  asm65(#9'@fill #VADR #VLEN #0');
  asm65(#9'eif');
+ asm65;
+
+ asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
+ asm65(#9'icl ''atari\romoff.asm''');
+ asm65(#9'.endif');
  asm65;
 
  asm65(#9'mwa #PROGRAMSTACK psptr');
@@ -38429,6 +38443,10 @@ asm65;
 asm65('@halt'#9'ldx #0');
 asm65(#9'txs');
 
+asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
+asm65(#9'inc portb');
+asm65(#9'.endif');
+
 asm65;
 asm65(#9'rts');
 
@@ -38747,7 +38765,6 @@ begin
   WriteLn('-d'#9#9'Diagnostics mode');
   Writeln('-define:symbol'#9'Defines the symbol');
   Writeln('-ipath:<x>'#9'Add <x> to include path');
-//  Writeln('-norom'#9#9'Disable ROM');
   WriteLn('-code:address'#9'Code origin hex address');
   WriteLn('-data:address'#9'Data origin hex address');
   WriteLn('-stack:address'#9'Software stack hex address (size = 64 bytes)');

@@ -1,3 +1,6 @@
+05.05.2020
+- dodana mo¿iwoœæ wy³aczenia ROM-u, przez {$define ROMOFF}
+
 26.04.2020
 - poprawione testowanie parametrow dla procedur/funkcji FORWARD
 - nowy modyfikator procedur/funkcji PASCAL umo¿liwia rekurencjê tych¿e
