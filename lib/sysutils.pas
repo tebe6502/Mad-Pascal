@@ -315,7 +315,8 @@ asm
 	lda #$00
 	sta icax1,x
 	sta icax2,x
-	jsr ciov
+
+	m@call	ciov
 
 stop	sty MAIN.SYSTEM.IOResult
 
@@ -359,7 +360,8 @@ asm
 	lda #$00
 	sta icax1,x
 	sta icax2,x
-	jsr ciov
+	
+	m@call	ciov
 
 stop	sty MAIN.SYSTEM.IOResult
 
@@ -733,7 +735,7 @@ asm
 	ldx #11
 	mva:rpl readrtc,x ddevic,x-
 
-	jsr jsioint
+	m@call	jsioint
 
 	sty MAIN.SYSTEM.IOResult
 

@@ -374,12 +374,18 @@ asm
 
 	tsx
 	stx	stk
-
+	
 	lda	vvblki
 	sta	lvbl
 
 	lda	vvblki+1
 	sta	hvbl
+
+	lda	portb
+	sta	oldp
+
+	lda	#$ff
+	sta	portb
 
 	sei
 
@@ -429,7 +435,12 @@ lvbl	equ *-1
 hvbl	equ *-1
 	sta vvblki+1
 
+	lda	#0
+oldp	equ *-1
+	sta	portb
+
 	cli
+
 	ldx #0
 @sp	equ *-1
 };
@@ -669,12 +680,15 @@ BASROM	= $a8e2
 
 	lda PORTB
 	sta old
+	
+	and #1
+	beq stop
 
 	lda #$fd
 	sta PORTB
 
 	lda BASROM
-	sta Result
+stop	sta Result
 	
 	lda #$ff
 old	equ *-1

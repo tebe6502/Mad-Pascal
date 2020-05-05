@@ -1035,8 +1035,14 @@ asm
 	eor #$10
 	ora #2		; read
 
-	.nowarn @graphics
+	.nowarn @GRAPHICS
 
+	sty GraphResult
+
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+	inc portb
+	.endif
 
 ; Fox/TQA
 
@@ -1087,6 +1093,7 @@ shift	asl @
 	bne shift
 
 	sta width
+;	sta SCANLINE_WIDTH
 
 	.ifdef fLine
 ;	lda width
@@ -1094,6 +1101,10 @@ shift	asl @
 	sta fLine.w1
 	sta fLine.w2
 	sta fLine.w3
+	.endif
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+	dec portb
 	.endif
 
 
