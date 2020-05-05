@@ -25,7 +25,7 @@
 
 	mva	#$05	iccmd,x
 
-	jsr	ciov
+	m@call	ciov
 
 	dew icbufl
 	mva icbufl @buf			; length

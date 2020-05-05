@@ -22,7 +22,8 @@
 	txa:pha
 
 	tya
-	jsr @putchar
+
+	m@call	@putchar
 
 	pla:tax
 	rts
@@ -50,7 +51,7 @@ loop	ldy #0
 	sne
 	inc ztmp+1
 
-	jsr @putchar
+	m@call	@putchar
 
 	jmp loop
 
