@@ -87,6 +87,11 @@ asm
 	.nowarn @GRAPHICS
 
 	sty GraphResult
+
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+	inc portb
+	.endif
 	
 tlshc	equ $ee6d
 
@@ -116,6 +121,10 @@ tmrcn	equ $ee8d
 ; Y = vertical resolution
 
 	@SCREENSIZE
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+	dec portb
+	.endif
 
 	pla:tax
 };
@@ -179,7 +188,8 @@ sk1
 
 	ldx @COMMAND.scrchn	; faster
 	lda @COMMAND.colscr
-	jsr @putchar.main
+
+	m@call	@putchar.main
 
 stop	pla:tax
 };
@@ -285,7 +295,8 @@ _3
 
 	ldx @COMMAND.scrchn	; faster
 	lda @COMMAND.colscr
-	jsr @putchar.main
+
+	m@call	@putchar.main
 
 	lda x
 	sta colcrs

@@ -1152,7 +1152,8 @@ asm
 	tax
 	lda #39
 	sta iccmd,x
-	jsr ciov
+
+	m@call	ciov
 
 	sty IOResult
 
@@ -1185,7 +1186,8 @@ asm
 	tax
 	lda #38
 	sta iccmd,x
-	jsr ciov
+
+	m@call	ciov
 
 	sty IOResult
 
@@ -1256,7 +1258,7 @@ asm
 	mva eax+1 icax4,x
 	mva eax+2 icax5,x
 
-	jsr ciov
+	m@call	ciov
 
 	sty IOResult
 

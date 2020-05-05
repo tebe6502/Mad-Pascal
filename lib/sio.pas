@@ -69,13 +69,15 @@ asm
 {	txa:pha
 
 	lda devnum
-	jsr @sio.devnrm
+	m@call	@sio.devnrm
+	tya
 	bmi _err
 
 	lda #'S'	; odczyt statusu stacji
 	sta dcmnd
 
-	jsr jdskint	; $e453
+	m@call	jdskint	; $e453
+	tya
 	bmi _err
 
 	ldx <256	; 256 bajtow
@@ -88,7 +90,7 @@ asm
 	ldx <128	;128 bajtow
 	ldy >128	;w sektorze
 
-_skp	jsr @sio.devsec
+_skp	m@call	@sio.devsec
 
 	mva dvstat result
 	mva dvstat+1 result+1
@@ -117,7 +119,8 @@ asm
 {	txa:pha
 
 	lda devnum
-	jsr @sio.devnrm
+	m@call	@sio.devnrm
+	tya
 	bmi _err
 
 	lda sector
@@ -129,7 +132,7 @@ asm
 	ldy buf+1
 	lda #'R'
 
-	jsr @sio
+	m@call	@sio
 
 _err	sty MAIN.SYSTEM.IOResult
 
@@ -151,7 +154,8 @@ asm
 {	txa:pha
 
 	lda devnum
-	jsr @sio.devnrm
+	m@call	@sio.devnrm
+	tya
 	bmi _err
 
 	lda sector
@@ -163,7 +167,7 @@ asm
 	ldy buf+1
 	lda #'P'
 
-	jsr @sio
+	m@call	@sio
 
 _err	sty MAIN.SYSTEM.IOResult
 
