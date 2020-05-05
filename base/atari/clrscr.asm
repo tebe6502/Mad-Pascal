@@ -18,7 +18,10 @@
 	lda #$03
 
 xcio	sta iccmd,x
-	jmp ciov
+
+	m@call	ciov
+
+	rts
 
 ename	.byte 'E:',$9b
 

@@ -61,9 +61,11 @@ code	equ *-1
 	sta icax1,x
 	lda #$00		;dodatkowy parametr, $00 jest zawsze dobre
 	sta icax2,x
-	jsr ciov
 
-error	sty MAIN.SYSTEM.IOResult
+	m@call	ciov
+
+error	tya
+	sta MAIN.SYSTEM.IOResult
 
 	bpl ok
 
@@ -161,7 +163,8 @@ ok_open	lda	(bp2),y
 
 	lda	#$0c		;komenda: CLOSE
 	sta	iccmd,x
-	jsr	ciov
+
+	m@call	ciov
 
 ;	lda	#0		; iocheck off
 ;	sta	@openfile.iocheck
@@ -230,9 +233,10 @@ code	equ *-1
 	and	#$7f
 	sta	iccmd,x
 
-	jsr	ciov
+	m@call	ciov
 
-	sty	MAIN.SYSTEM.IOResult
+	tya
+	sta	MAIN.SYSTEM.IOResult
 
 	bpl ok
 

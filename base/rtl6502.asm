@@ -1,11 +1,11 @@
-	opt l-
+;	opt l-
 
 /* -----------------------------------------------------------------------
 /*                        CPU 6502 Run Time Library
 /*			        19.04.2018
 /* -----------------------------------------------------------------------
 /* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
-/* 29.02.2020	optymalizacja @printREAL, pozbycie sie 
+/* 29.02.2020	optymalizacja @printREAL, pozbycie sie
 /*		'jsr mov_BYTE_DX', 'jsr mov_WORD_DX', 'jsr mov_CARD_DX'
 /* 07.04.2020	negSHORT, @TRUNC_SHORT, @ROUND_SHORT, @FRAC_SHORT, @INT_SHORT
 /* 19.04.2020	nowe podkatalogi base\atari, base\common, base\runtime
@@ -210,7 +210,19 @@ fxla    .macro
 
 m@call	.macro (os_proc)
 
-	jsr %%os_proc
+	.ifdef MAIN.@DEFINES.ROMOFF
+
+		inc portb
+
+		jsr %%os_proc
+
+		dec portb
+
+	.else
+
+		jsr %%os_proc
+
+	.endif
 
 	.endm
 
@@ -232,7 +244,7 @@ m@call	.macro (os_proc)
 	icl 'atari\graphics.asm'	; @GRAPHICS, @COMMAND, @SCREENSIZE
 
 	icl 'atari\vbxedetect.asm'	; @vbxe_detect
-	icl 'atari\vbxeinit.asm'	; @vbxe_init	
+	icl 'atari\vbxeinit.asm'	; @vbxe_init
 	icl 'atari\vbxexdl.asm'		; @set_xdl
 	icl 'atari\vbxeput.asm'		; @vbxe_put
 
@@ -267,7 +279,7 @@ m@call	.macro (os_proc)
 
 	icl 'runtime\expand.asm'	; @xpandSHORT2SMALL, @expandSHORT2SMALL1
 					; @expandToCARD.SHORT, @expandToCARD.SMALL, @expandToCARD.BYTE, @expandToCARD.WORD
-					; @expandToCARD1.SHORT, @expandToCARD1.SMALL, @expandToCARD1.BYTE, @expandToCARD1.WORD	
+					; @expandToCARD1.SHORT, @expandToCARD1.SMALL, @expandToCARD1.BYTE, @expandToCARD1.WORD
 
 	icl 'runtime\ini.asm'		; iniEAX_ECX_WORD, iniEAX_ECX_CARD
 	icl 'runtime\mov.asm'		; movBX_EAX, movZTMP_aBX
@@ -296,10 +308,10 @@ m@call	.macro (os_proc)
 	icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754
 
 	icl 'common\mul40.asm'		; @mul40
-	
+
 	icl 'common\int2hex.asm'	; @hexStr
 	icl 'common\int2str.asm'	; @ValueToStr
-	icl 'common\str2int.asm'	; @StrToInt, fmul10	
+	icl 'common\str2int.asm'	; @StrToInt, fmul10
 
 	icl 'common\printchr.asm'	; @printCHAR, @printEOL, @print, @printPCHAR
 	icl 'common\printstr.asm'	; @printSTRING

@@ -30,7 +30,7 @@ ln	equ *-1
 
 	inc loop+1
 
-	jsr @putchar
+	m@call	@putchar
 
 	jmp loop
 
