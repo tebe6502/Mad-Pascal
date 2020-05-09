@@ -43,8 +43,7 @@ procedure SetColorMapEntry; overload; assembler;
 asm
 {	txa:pha
 
-	lda #0
-	jsr @vbxe_cmap
+	@vbxe_put #0
 
 	pla:tax
 };
@@ -59,8 +58,7 @@ asm
 	mva b colpf1s
 	mva c colpf2s
 
-	lda #0
-	jsr @vbxe_cmap
+	@vbxe_put #0
 
 	pla:tax
 };
