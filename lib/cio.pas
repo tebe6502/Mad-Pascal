@@ -27,7 +27,7 @@ interface
 	function Get(chn: byte): byte; assembler;
 	procedure Put(chn, a: byte): assembler;
 	procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
-	
+
 implementation
 
 
@@ -64,7 +64,7 @@ asm
 	lda ax2			;dodatkowy parametr, $00 jest zawsze dobre
 	sta icax2,x
 
-	jsr ciov
+	m@call	ciov
 
 	sty MAIN.SYSTEM.IOResult
 
@@ -90,7 +90,7 @@ asm
 	lda #$0c		;komenda: CLOSE
 	sta iccmd,x
 
-	jsr ciov
+	m@call	ciov
 
 	sty MAIN.SYSTEM.IOResult
 
@@ -109,21 +109,22 @@ Get one byte
 *)
 asm
 {	txa:pha
- 
+
 	lda chn
 	:4 asl @
 	tax
- 
+
 	lda #7		;get char command
 	sta iccmd,x
 
 	lda #$00	;zero out the unused
 	sta icbufl,x	;store in accumulator
 	sta icbufh,x	;...after CIOV jump
-	jsr ciov
+
+	m@call	ciov
 
 	sty MAIN.SYSTEM.IOResult
-	
+
 	sta Result
 
 	pla:tax
@@ -141,20 +142,21 @@ Write one byte
 *)
 asm
 {	txa:pha
- 
+
 	lda chn
 	:4 asl @
 	tax
- 
+
 	lda #11		;put char command
 	sta iccmd,x
 
 	lda #$00	;zero out the unused
 	sta icbufl,x	;store in accumulator
 	sta icbufh,x	;...after CIOV jump
-	
+
 	lda a
-	jsr ciov
+
+	m@call	ciov
 
 	sty MAIN.SYSTEM.IOResult
 
@@ -189,15 +191,15 @@ asm
 
 	lda ax2
 	sta icax2,x
-	
+
 	inw device		;skip [0]
 
 	lda device		;device name
 	sta icbufa,x
 	lda device+1
-	sta icbufa+1,x	
+	sta icbufa+1,x
 
-	jsr ciov
+	m@call	ciov
 
 	sty MAIN.SYSTEM.IOResult
 

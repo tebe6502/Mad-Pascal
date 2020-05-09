@@ -1,7 +1,7 @@
 unit misc;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe)
+ @author: Konrad Kokoszkiewicz, Tomasz Biela
  @name: Miscellaneous procedures for detect additional hardware
  @version: 1.0
 
@@ -305,7 +305,7 @@ function DetectCPU: byte; assembler;
 @description:
  How to detect on which CPU the assembler code is running
 
- (This information is from Draco, the author of SYSINFO 2.0)
+ (This information is from Konrad Kokoszkiewicz (drac030), the author of SYSINFO 2.0)
 
  You can test on plain 6502-Code if there is a 65c816 CPU, the 16-Bit processor avaible
 
@@ -362,7 +362,7 @@ function DetectCPUSpeed: real;
 @description:
 Detect CPU speed in megahertz
 
-author: Draco
+author: Konrad Kokoszkiewicz
 
 @returns: speed (REAL Q24.8)
 *)

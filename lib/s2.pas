@@ -1,7 +1,7 @@
 unit S2;
 (*
  @type: unit
- @author: Drac030, Tomasz Biela (Tebe)
+ @author: Konrad Kokoszkiewicz, Tomasz Biela
  @name: S2: VBXE handler
 
  @version: 1.0
@@ -19,7 +19,7 @@ unit S2;
 
  6: text mode 80x30.
 
- 7: text mode 80x32. 
+ 7: text mode 80x32.
 *)
 
 
@@ -41,14 +41,13 @@ const	fsNormal = 0;
 	fsInverse = 128;
 	fsProportional = 8;
 	fsCondensed = 32;
-	
+
 
 var	Font: Object
 			Style: byte;
 			Color: byte;
 
-			procedure LoadFromFile(name: PByte);
-			procedure LoadFromMem(p: pointer);
+//			procedure LoadFromFile(fname: PByte);
 	end;
 
 
@@ -56,6 +55,9 @@ var	Font: Object
 	procedure ClearDevice;
 	procedure CloseGraph;
 	procedure Position(x: word; y: byte); assembler;
+	procedure ScrollUp(line, cnt: byte);
+	procedure ScrollDown(line, cnt: byte);
+	procedure ClearLine(line, cnt: byte);
 	procedure TextOut(x: word; y: byte; s: PByte); overload;
 	procedure TextOut(a: char); overload;
 
@@ -64,28 +66,7 @@ implementation
 
 uses cio, crt, graph, sysutils;
 
-
-procedure Font.LoadFromFile(name: PByte);
-(*
-@description:
-*)
-begin
-
-
-
-end;
-
-
-procedure Font.LoadFromMem(p: pointer);
-(*
-@description:
-*)
-begin
-
-
-
-end;
-
+{$i imageh.inc}
 
 procedure ClearDevice;
 (*
@@ -109,11 +90,9 @@ begin
 
  cls(6);
  opn(6, 12 + mode and $f0, mode and $0f, 'S2:');
- 
-// xio(111,6,0,0,'S2:');
 
  GraphResult := byte(grNotDetected);
- 
+
 asm
 {
 	ldy icax5+$60	; vertical resolution Y
@@ -138,17 +117,37 @@ asm
 	sta @putchar.chn
 	sta @COMMAND.scrchn
 
-	mva #0 766		; execution control character
+;	mva #0 766		; execution control character
 
 	lda #MAIN.GRAPH.grOK
 	sta MAIN.GRAPH.GraphResult
 
 	pla:tax
-	
+
 toEnd
-	
+
 };
 end;
+
+
+{
+procedure Font.LoadFromFile(fname: PByte);
+var buf: PByte;
+    f: file;
+begin
+
+ if FileExists(fname) then begin
+
+  assign(f, fname); reset(f, 1);
+  blockread(f, buf, 2048);
+  close(f);
+
+ end;
+
+ xio(103,6,$00,$81,'S2:');
+
+end;
+}
 
 
 procedure Position(x: word; y: byte); assembler;
@@ -185,9 +184,9 @@ asm
 
 	mva FONT.COLOR fildat
 };
-  
+
  for i:=1 to s[0] do xio(105,6,Font.Style,byte(s[i]),'S2:');
- 
+
 end;
 
 
@@ -201,10 +200,54 @@ asm
 {
 	mva FONT.COLOR fildat
 };
-  
+
  xio(105,6,Font.Style,byte(a),'S2:');
- 
+
 end;
+
+
+procedure ScrollUp(line, cnt: byte);
+(*
+@description:
+*)
+begin
+
+ while cnt > 0 do begin
+  XIO(97,6,12,line,'S2:');
+  dec(cnt);
+ end;
+
+end;
+
+
+procedure ScrollDown(line, cnt: byte);
+(*
+@description:
+*)
+begin
+
+ while cnt > 0 do begin
+  XIO(98,6,12,line,'S2:');
+  dec(cnt);
+ end;
+
+end;
+
+
+procedure ClearLine(line, cnt: byte);
+(*
+@description:
+*)
+begin
+
+ while cnt > 0 do begin
+  XIO(99,6,12,line,'S2:');
+  inc(line);
+  dec(cnt);
+ end;
+
+end;
+
 
 
 procedure CloseGraph;
@@ -216,7 +259,7 @@ begin
  cls(6);
 
  TextMode(0);
- 
+
 end;
 
 
@@ -229,7 +272,7 @@ SetGraphMode(0);
 if GraphResult <> grOK then begin
 
  xio(40,1,0,0,'D:SDXLD.COM /X');
- 
+
  if IoResult >= 128 then begin
   TextMode(0);
   writeln('S_VBXE.SYS not installed');
@@ -239,15 +282,15 @@ if GraphResult <> grOK then begin
  end;
 
  SetGraphMode(0);
- 
+
  if GraphResult <> grOK then begin
   TextMode(0);
   writeln('VBXE not present');
- 
+
   repeat until keypressed;
   halt;
  end;
-   
+
 end;
 
 

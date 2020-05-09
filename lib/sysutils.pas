@@ -96,7 +96,7 @@ const
 	function Now: TDateTime;
 	function RenameFile(var OldName,NewName: TString): Boolean; assembler;
 	function StrToBool(S: PString): Boolean;
-	function StrToFloat(var s: String): real;
+	function StrToFloat(var s: string): real; 
 	function StrToInt(const s: char): byte; assembler; overload;
 	function StrToInt(s: PString): integer; assembler; overload;
 	function TimeToStr(d: TDateTime): TString;
@@ -570,7 +570,7 @@ asm
 end;
 
 
-function StrToFloat(var s: String): real;
+function StrToFloat(var s: string): real; 
 (*
 @description: Convert a string to a floating-point value
 
@@ -603,7 +603,12 @@ begin
 	if (s[n] = '.') then
 		dotpos := len - n - 1
         else
-		result := result * 10.0 +  real(ord(s[n])-ord('0'));
+		if isDigit(s[n]) then
+			Result := Result * 10.0 +  real(ord(s[n])-ord('0'))
+		else begin
+			Result := 0.0;
+			exit;
+		end;
 
 	inc(n);
 	end;
