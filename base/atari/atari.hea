@@ -62,10 +62,10 @@ rowcrs	=	$54	; wiersz  kursora
 colcrs	=	$55	; (2) Kolumna kursora
 dindex	=	$57
 savmsc	=	$58	; (2) Adres pamieci obrazu
-oldrow	=	$5a
-oldcol	=	$5b
-oldchr	=	$5d
-oldadr	=	$5e
+oldrow	=	$5A
+oldcol	=	$5B
+oldchr	=	$5D
+oldadr	=	$5E
 palnts	=	$62
 logcol	=	$63
 
@@ -75,10 +75,13 @@ vdslst	=	$0200	; (2) wektor przerwan NMI listy displejowej
 timcnt3	=	$021C	; trzeci licznik systemu
 vvblki	=	$0222	; (2) wektor NMI natychmiastowego VBI
 vvblkd	=	$0224	; (2) wektor NMI op??nionego VBI
-timflg3	=	$022a	; znacznik wyzerowania licznika TIMCNT3
-sdmctl	=	$022f	; cieñ DMACTL
+timflg3	=	$022A	; znacznik wyzerowania licznika TIMCNT3
+sdmctl	=	$022F	; cieñ DMACTL
 sdlstl	=	$0230	; cieñ DLISTL
 sdlsth	=	$0231	; cieñ DLISTH
+
+escflg	=	$02A2
+botscr	=	$02BF	; liczba linii ekranu (24)
 
 colpf0s	=	$02C4	; rejestr-cien COLPF0
 colpf1s	=	$02C5	; rejestr-cien COLPF1
@@ -86,18 +89,17 @@ colpf2s	=	$02C6	; rejestr-cien COLPF2
 colpf3s	=	$02C7	; rejestr-cien COLPF3
 colbaks	=	$02C8	; rejestr-cien COLBAK
 
-escflg	=	$02a2
 dsctln	=	$02D5	; (2) Disk sector size register; default of 128 ($80) bytes
-memlo	=	$02e7
+memlo	=	$02E7
 dvstat	=	$02EA	; (4) device status
 crsinh	=	$02F0	; znacznik widoczno?ci kursora
 chact	=	$02F3	; rejestr cien CHRCTL
 chart	=	$02F3	; cien rejestru kontroli wyswietlania znak?w (CHRCTL)
 chbas	=	$02F4	; rejestr cien CHBASE
-atachr	=	$02fb	; numer koloru dla PLOT, DRAW (kod ATASCII znaku)
-kbcodes	=	$02fc	; kod ostatnio nacisnietego klawisza, $ff jesli zaden nie zostal nacisniety (KBCODE)
-fildat	=	$02fd	; numer koloru dla FILL
-ssflag	=	$02ff
+atachr	=	$02FB	; numer koloru dla PLOT, DRAW (kod ATASCII znaku)
+kbcodes	=	$02FC	; kod ostatnio nacisnietego klawisza, $ff jesli zaden nie zostal nacisniety (KBCODE)
+fildat	=	$02FD	; numer koloru dla FILL
+ssflag	=	$02FF
 
 ddevic	=	$0300	; Device Control Block, identyfikator urzadzenia
 dunit	=	$0301	; Numer urz?dzenia; w przypadku stacji dyskow numer nap?du
