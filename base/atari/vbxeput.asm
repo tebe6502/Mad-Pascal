@@ -1,7 +1,9 @@
 
 ; VBXE put char
+; input:
+;	A - char
 
-.proc	@vbxe_put
+.proc	@vbxe_put (.byte a) .reg
 
 	pha
 
