@@ -13,6 +13,7 @@ unit cio;
 {
 
 Cls
+BGet
 Get
 Opn
 Put
@@ -22,9 +23,11 @@ XIO
 
 interface
 
-	procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
+	procedure BGet(chn: byte; buf: PByte; cnt: word); register;
+	procedure BPut(chn: byte; buf: PByte; cnt: word); register;
 	procedure Cls(chn: byte); assembler;
 	function Get(chn: byte): byte; assembler;
+	procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
 	procedure Put(chn, a: byte): assembler;
 	procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
 
@@ -132,6 +135,26 @@ asm
 end;
 
 
+procedure BGet(chn: byte; buf: PByte; cnt: word); register;
+(*
+@description:
+Get CNT bytes to BUF
+
+@param: chn - channel 0..7
+@param: buf - buffer
+@param: cnt - bytes counter
+*)
+begin
+
+ while cnt > 0 do begin
+  buf^ := Get(chn);
+  inc(buf);
+  dec(cnt);
+ end;
+
+end;
+
+
 procedure Put(chn, a: byte): assembler;
 (*
 @description:
@@ -162,6 +185,26 @@ asm
 
 	pla:tax
 };
+end;
+
+
+procedure BPut(chn: byte; buf: PByte; cnt: word); register;
+(*
+@description:
+Put CNT bytes from BUF
+
+@param: chn - channel 0..7
+@param: buf - buffer
+@param: cnt - bytes counter
+*)
+begin
+
+ while cnt > 0 do begin
+  Put(chn, buf^);
+  inc(buf);
+  dec(cnt);
+ end;
+
 end;
 
 

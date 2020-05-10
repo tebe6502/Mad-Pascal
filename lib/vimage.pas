@@ -37,9 +37,9 @@ VBXE Image
 
 {
 
-LoadBMP
-LoadGIF
-LoadPCX
+LoadVBMP
+LoadVGIF
+LoadVPCX
 
 }
 
@@ -60,9 +60,9 @@ const
   TooLarge          = $03;
 
 
-	function LoadVBMP(Filename: TString; Location: cardinal): Boolean;
-	function LoadVPCX(Filename: TString; Location: cardinal): Boolean;
-	function LoadVGIF(FileName: TString; Location: cardinal): Boolean;
+	function LoadVBMP(Filename: PString; Location: cardinal): Boolean;
+	function LoadVPCX(Filename: PString; Location: cardinal): Boolean;
+	function LoadVGIF(FileName: PString; Location: cardinal): Boolean;
 
 
 implementation
@@ -109,7 +109,7 @@ procedure LoadPalette(cnt: byte; x, ln, a,b,c: byte);
 @description:
 
 *)
-var i: byte;
+var i: word;
 begin
 
  SetRGBPalette(x);
@@ -122,7 +122,7 @@ begin
 end;
 
 
-function LoadVPCX(Filename: TString; Location: cardinal): Boolean;
+function LoadVPCX(Filename: PString; Location: cardinal): Boolean;
 (*
 @description:
 This loads a PCX File (8bit)
@@ -268,7 +268,7 @@ begin
 end;
 
 
-function LoadVBMP(Filename: TString; Location: cardinal): Boolean;
+function LoadVBMP(Filename: PString; Location: cardinal): Boolean;
 (*
 @description:
 This loads a BMP File (4bit, 8bit)
@@ -384,7 +384,7 @@ begin
 end;
 
 
-function LoadVGIF(FileName: TString; Location: cardinal): Boolean;
+function LoadVGIF(FileName: PString; Location: cardinal): Boolean;
 (*
 @description:
 This loads a GIF File (GIF87a)
