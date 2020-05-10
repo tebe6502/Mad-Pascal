@@ -1,0 +1,236 @@
+VBXE "S:" display driver
+(c) 2014 by KMK/DLT
+
+TOPICS
+
+I.    What's this
+II.   Requirements
+III.  Usage
+IV.   New display modes
+V.    Text mode font
+VI.   256-character fonts and ASCII fonts
+VII.  Changing text colors
+VIII  Color mapping in text modes
+IX.   Color mapping in pixel modes
+X.    ClearScreen problem
+XI.   Relation to ANTIC display
+XII.  Other notes
+
+What's this
+-----------
+
+This is a graphics driver for the VideoBoard XE (aka VBXE). It installs itself into the OS' "S:", so that all functions of the underlying system driver work as before, but additionally new display modes are available and you can play with them easily using BASIC, or any other programming language.
+
+Requirements
+------------
+
+1) Atari XL or XE
+2) VideoBoard XE by Electron
+3) VBXE core FX 1.21 or later
+
+Users of AtariDOS and old SpartaDOS will have to use the SDXLD.COM file to load and initialize the driver. See SDXLD.TXT file for details. SpartaDOS X users may load the driver directly as described below.
+
+The driver occupies only about 512 bytes of the Atari's RAM - the bulk of the code is loaded to the VBXE VRAM, occupying the highest available 16k bank. On core A it is the topmost 16k bank of the VRAM. On core R it is the topmost 16k bank of the VRAM part which is not shared with Atari as its extended RAM.
+
+Usage
+-----
+
+You can load the file either from your CONFIG.SYS:
+
+DEVICE S_VBXE [f,b] [/MX]
+
+or from command line:
+
+S_VBXE.SYS [f,b] [/MX]
+
+"f" and "b" are numeric values for foreground and background color, respectively. Values given should be compatible with ones suitable for GTIA color registers; defaults are $CA and $94, i.e. 202 and 148.
+
+The /M switch, when given, will cause the program to convert the default, 256-color Atari palette into 16-shade grayscale palette. It is useful, when you use a monochrome monitor attached through the R-out and CSYNC (you have to use a 1-1.2 kOhm resistor to connect these two signals together).
+
+Note: you should NOT use this switch when you have a colour monitor with all the RGB signals connected.
+
+The /X switch enables the VBXE XCOLOR mode for the GTIA display: you have 256 color palette in all old modes, and in hires the pixel color is independent from the background color.
+
+New display modes
+-----------------
+
+The graphic device you refer to normally (even in implied manner, as in "GRAPHICS 8") is "S:". To avoid conflicts and compatibility issues with older software, the device you refer to while dealing with VBXE display modes is "S2:".
+
+There are seven new modes:
+
+1: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color.
+
+2: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors.
+
+3: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
+
+4: pixel mode 640x192/16 colors (hires)
+
+5: text mode 80x25.
+
+6: text mode 80x30.
+
+7: text mode 80x32.
+
+The mode 0 is reserved for text console. Enabling it will produce identical results as enabling the mode 1, unless you have installed the CON.SYS console driver: the mode 0 will then refer to the 80x24 screen editor, whereas mode 1 will be 80x24 raw character mode.
+
+Modes 6 and 7 are "condensed", character cell is 8x7 pixels instead of 8x8. As a result, some custom 8x8 fonts may look incorrectly. Otherwise modes 5-7 work like mode 1.
+
+All modes are full-screen, there are no text windows or such.
+
+To enable one of the new modes, use the following command:
+
+OPEN #n,a,m,"S2:"
+
+where:
+
+- "n" is the channel number (preferably 6 under BASIC)
+
+- "a" is the ICAX1 or I/O access code (preferably 12 for read/write operations)
+
+- "m" is the ICAX2 or mode number: 1, 2, 3, 4, 5, 6 or 7.
+
+Adding 16 to the "a" parameter does nothing, but please keep this bit cleared for upward compatibility.
+
+Adding 32 to the "a" parameter prevents the driver from clearing the screen.
+
+Adding 64 causes the driver to load grayscale palette.
+
+The OPEN call, when it succeeds, should return the following values in ICAX3-6 of the appropriate IOCB:
+
+ICAX3/4 - the X resolution
+
+ICAX5 - the Y resolution
+
+ICAX6 - color flag
+
+The 'color flag' is 0, when the colors are like in GR.0, i.e. there are no independent colors for each pixel or character cell. When the flag is nonzero, this means that the pixels (or characters) have independent colors and these can be manipulated via 709-711 as described below.
+
+This currently only applies to the text mode as the graphic modes select colors with the pixel values.
+
+To exit the mode just enable any other display mode, it is enough to do GRAPHICS 0 to return to the standard display.
+
+Please refer to XIO.TXT for a detailed list of additional special calls (XIO).
+
+Text mode font
+--------------
+
+At the OPEN call, the standard OS font is copied to the VBXE memory. If you want to change it, load the high byte of its address into CHBAS ($02F4 or 756). So, if you want the international charset instead of the standard one, do:
+
+POKE 756,204
+
+after turning the VBXE mode 1 on. The font will change at the nearest character output.
+
+This way you can load any (ANTIC-compatible) font you want, just remember, that it must be located at a 1 KB boundary in Atari's memory.
+
+256-character fonts and ASCII fonts
+-----------------------------------
+
+Normally the font defines only 128 characters, the other 128 represent the same characters, as in the first half, just in inverse video.
+
+It is, however, possible to load a font, which explicitly defines all 256 characters. To do that, store it in the Atari's memory at a 1 KB boundary, make the OPEN call to enable the VBXE text mode, and load the higher byte of the font address to the CHBAS register ($02F4 or 756), just like you do for standard fonts. To tell the software, that it has to load a 2 KB, add 1 to the CHBAS value (i.e. set its bit 0 to 1).
+
+In similar manner you can load ASCII fonts (standard Atari fonts contain characters ordered by ANTIC internal code, not ASCII). Normally, when you request the BIOS to load a font as described above, it translates it from ANTIC order to ASCII order (VBXE has no reason to respect ANTIC internal code, so it does not do). To load an ASCII font you need to suppress the translation. It can be accomplished by setting bit 1 of CHBAS (i.e. adding 2 to an initial value).
+
+This way you can load, for example, an ISO-compatible localized font and use it in your program. There is a price, though: you loose a half of the available colors (there will be 64 instead of 128, see below), and the method of printing inverse-video characters gets more complicated. But at the other hand you can now mix e.g. English with Greek, if you only have found the appropriate font.
+
+Changing text colors
+--------------------
+
+The text colors are controlled with three bytes in Atari memory:
+
+COLPF1S ($02C5 or 709) defines the global foreground color, as in GR.0, i.e. the top 7 bits of the byte define the color, and bit 0 has some special function which will be described later on:
+
+76543210
+--------
+CCCCCCCt
+
+The default palette is identical as in standard Atari modes (just remember that the foreground and background colors are independent: color $CA which looks like blueish white in GR.0, is in fact yellowish green and will appear on the VBXE display as such). The color of all the text on the screen will change at the nearest character output.
+
+COLPF2S ($02C6 or 710) in identical manner defines the global background color.
+
+COLPF3S ($02C7 or 711) is the "local" version of the COLPF1S - it defines new color for subsequently printed characters, but the text printed so far retains its colors. Also CLS will restore the "global" color here.
+
+All three bytes contain their default values after the OPEN call that enabled the VBXE display mode.
+
+The 't' bit (bit 0 of a color value) controls background transparency. It has no effect on normal characters, but setting it for an inverse video character will make it invisible (transparent). This feature may be used to make "holes" in the overlay display by which an underlying ANTIC display is visible. The Eddy disk editor uses this feature to display ANTIC-generated background bitmap together with 80-column VBXE text mode dialog boxes.
+
+For grayscale palette, the background color is chosen from the (theoretically) 256-shade grayscale palette. So to set the background color to the equivalent of the standard $94, you have to set the 711 register to $94*16, i.e. $40 or 64.
+
+Note that color indices for grayscale mode are incompatible with the indices for the color mode.
+
+Color mapping in text modes
+---------------------------
+
+In text modes the color selection depends on the font size:
+
+1) for standard, 128-character fonts, there are 128 colors available: even values from $00 to $FF. Adding 128 to the ASCII value of the character prints the character in inverse video (just like in standard GRAPHICS 0).
+
+The default palette of 128 colors contains standard Atari colors in eight intensities each (e.g. color 0 is black, 8 is gray, 15 is white and so on).
+
+The grayscale palette contains simply 128 intensities, from 0 (black) to 127 (white).
+
+You can select any palette index to be displayed as the color of the text, independently for each character cell.
+
+Now, the value of this color index also selects the background color of the character from the other half of the palette (colors 128-255). By default that part of the palette is zeroed, so the text background will always be black, unless you print them in inverse video. You can change this color storing the index of the 256-color Atari palette (or, if the grayscale palette has been selected, from the 128-shade grayscale palette) into COLPF2S. The background color will change when next character gets printed.
+
+2) for 256-character fonts there are 64 colors available. These are standard Atari colors in four intensities each. The color mapping is similar to the described above, except that only 6 top bits select color:
+
+76543210
+--------
+CCCCCCIt
+
+Setting bit 1 switches the text to inverse video. Bit 0 is the transparency bit as above.
+
+Making a XIO 113,#n,0,0,"S2:" call directly after opening the text mode you can suppress switching to 64 colors: there will be 128 colors as usual, but no inverse video in 256-character font mode. XIO 113,#n,1,0,"S2:" (or switching video modes) restores the default.
+
+The grayscale palette is defined so that the color 0 has the minimum intensity (black) and color 63 the maximum one (white). Setting the color to a value from 64 to 127 displays the character in inverse video: the foreground will be black, and the background will be displayed in one of 64 intensities, from black (64) to white (127).
+
+The background color definition works identically as described above.
+
+Color mapping in pixel modes
+----------------------------
+
+In pixel modes (2-4) the pixel value simply selects the relevant colour from the default palette. Modes 2 (lowres) and 3 (stdres) feature standard Atari palette. Mode 4 (hires) has 14 Atari colors, each one in different intensity, plus black (0) and white (15).
+
+The standard Atari palette, however, provides only 16 shades for each color. Adding 64 to the "a" parameter of the OPEN call (explained above) you can cause the driver to load grayscale palette instead. This one has 128 shades of grey instead of 256 colors (an entry of the palette is 7-bit wide).
+
+Grayscale palette is available for all modes. In mode 4 (hires) the shades are identical to the first 16 colors of the Atari palette.
+
+ClearScreen problem
+-------------------
+
+All modes, even the mode 1 (text), are "graphic" ones, which means, that they do not execute control characters, do scrolls automatically etc.
+
+The only control character available is ClearScreen (ASCII 125). Its execution, however, is blocked by default in all new modes.
+
+To unblock it, you have to do this:
+
+POKE 766,0
+
+Next to this, any ? #n;CHR$(125) or PUT #n,125 will clear the screen. To be back to the default mode, do:
+
+POKE 766,1
+
+Turbo BASIC XL "CLS #6" command appears to do that automatically.
+
+Relation to ANTIC display
+-------------------------
+
+By default, the VBXE is configured so that the VBXE display is completely covered by the ANTIC display (playfields 0-3 and P/MG), when any of the new modes is on. Because of that, the ANTIC DMA is switched off by default, and if you enable it back, it will be displayed in front of the new mode.
+
+You can change the default display priority by appropriate system call, see XIO.TXT for details.
+
+Other notes
+-----------
+
+1) As you may notice, in 320x192/256, eventhough the display memory is eight times larger than in GR.8, any PLOT and DRAWTO (and such) are averagely about 2.5 times faster than in GR.8. Especially CLS is much faster, because the code uses the VBXE Blitter to zero out the memory.
+
+2) All PUT/GET functions increase the coordinates of the graphic cursor, and the screen will never scroll up. So, when you plot or print something at the bottom right corner of the screen, and forget to reset the coordinates, expect position range error on the next display call.
+
+3) In Turbo BASIC XL the PAINT and TEXT keywords will not work. These two access the screen directly, bypassing the screen drivers, so they cannot be used with anything else than the standard ANTIC/GTIA graphics. CIRCLE will work, though.
+
+Have fun
+draco@krap.pl
+
+22.III.2009.
