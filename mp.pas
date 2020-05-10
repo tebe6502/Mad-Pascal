@@ -31,12 +31,16 @@ Contributors:
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
-+ Drac030 :
++ Jerzy Kut :
+	- {$DEFINE ROMOFF}
+
++ Konrad Kokoszkiewicz :
 	- base\atari\cmdline.asm
 	- base\atari\vbxedetect.asm
 	- unit MISC: DetectCPU, DetectCPUSpeed, DetectMem, DetectHighMem
+	- unit S2 (VBXE handler)
 
-+ Eru / TQA :
++ Marcin ¯ukowski :
 	- unit FASTGRAPH: fLine
 
 + Guillermo Fuenzalida :
@@ -51,7 +55,7 @@ Contributors:
 	- unit GRAPH: detect X:Y graphics resolution (OS mode)
 	- unit CRC
 
-+ Seban / Slight :
++ Sebastian Igielski :
 	- unit MISC: DetectStereo
 
 + Steven Don :
