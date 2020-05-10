@@ -9,7 +9,7 @@
 
 <h1>unit misc</h1>
 <h3>Miscellaneous procedures for detect additional hardware</h3>
-<p>author: Tomasz Biela (Tebe)</p>
+<p>author: Konrad Kokoszkiewicz, Tomasz Biela</p>
 
 
 <!--********************* CONSTANTS **************************-->
@@ -56,9 +56,9 @@
 <tr><td class='tname fname'>DetectStereo</td><td class='tdesc'><h4>function DetectStereo: Boolean; assembler;</h4><br>
 	Second POKEY detect routine <br> author: Seban/SLIGHT <br> (c) 1995,96<br><ul><h5>returns:</h5><li class='returns'>TRUE present, FALSE otherwise</li></ul></td></tr>
 <tr><td class='tname fname'>DetectCPU</td><td class='tdesc'><h4>function DetectCPU: byte; assembler;</h4><br>
-	How to detect on which CPU the assembler code is running <br> (This information is from Draco, the author of SYSINFO 2.0) <br> You can test on plain 6502-Code if there is a 65c816 CPU, the 16-Bit processor avaible <br> in some XLs as a turbo-board, avaible. Draco told me how to do this: <br> First we make sure, whether we are running on NMOS-CPU (6502) or CMOS (65c02,65c816). <br> I will just show the "official" way which doesn`t uses "illegal opcodes":<br><ul><h5>returns:</h5><li class='returns'>$00 - 6502</li><li class='returns'>$01 - 65c02</li><li class='returns'>$80 - 65816</li></ul></td></tr>
+	How to detect on which CPU the assembler code is running <br> (This information is from Konrad Kokoszkiewicz (drac030), the author of SYSINFO 2.0) <br> You can test on plain 6502-Code if there is a 65c816 CPU, the 16-Bit processor avaible <br> in some XLs as a turbo-board, avaible. Draco told me how to do this: <br> First we make sure, whether we are running on NMOS-CPU (6502) or CMOS (65c02,65c816). <br> I will just show the "official" way which doesn`t uses "illegal opcodes":<br><ul><h5>returns:</h5><li class='returns'>$00 - 6502</li><li class='returns'>$01 - 65c02</li><li class='returns'>$80 - 65816</li></ul></td></tr>
 <tr><td class='tname fname'>DetectCPUSpeed</td><td class='tdesc'><h4>function DetectCPUSpeed: real;</h4><br>
-	Detect CPU speed in megahertz <br> author: Draco<br><ul><h5>returns:</h5><li class='returns'>speed (REAL Q24.8)</li></ul></td></tr>
+	Detect CPU speed in megahertz <br> author: Konrad Kokoszkiewicz<br><ul><h5>returns:</h5><li class='returns'>speed (REAL Q24.8)</li></ul></td></tr>
 <tr><td class='tname fname'>DetectMem</td><td class='tdesc'><h4>function DetectMem: byte; assembler;</h4><br>
 	Detect amount additional memory PORTB<br><ul><h5>returns:</h5><li class='returns'>amount of banks (0..255)</li><li class='returns'>banks code PORTB = BANKS[0..63] at address $0101</li></ul></td></tr>
 <tr><td class='tname fname'>DetectMapRam</td><td class='tdesc'><h4>function DetectMapRam: Boolean; assembler;</h4><br>

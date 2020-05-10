@@ -9,7 +9,7 @@
 
 <h1>unit S2</h1>
 <h3>S2: VBXE handler</h3>
-<p>author: Drac030, Tomasz Biela (Tebe)</p>
+<p>author: Konrad Kokoszkiewicz, Tomasz Biela</p>
 <br><p>1: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color. <br> 2: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors. <br> 3: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors. <br> 4: pixel mode 640x192/16 colors (hires) <br> 5: text mode 80x25. <br> 6: text mode 80x30. <br> 7: text mode 80x32.</p>
 
 <!--********************* CONSTANTS **************************-->
@@ -34,9 +34,13 @@
 
 <!--********************* ABSOLUTE VARIABLES **************************-->
 
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
+<tr><td class='tname'>buffer</td><td class='taddress'>$0400</td><td class='ttype'>array [0..0] of byte</td><td class='tdesc'></td></tr>
 
-
+</table>
 
 <!--********************* GLOBAL VARIABLES **************************-->
 
@@ -50,20 +54,26 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>Font.LoadFromFile</td><td class='tdesc'><h4>procedure Font.LoadFromFile(name: PByte);</h4><br>
-	<br><ul></ul></td></tr>
-<tr><td class='tname fname'>Font.LoadFromMem</td><td class='tdesc'><h4>procedure Font.LoadFromMem(p: pointer);</h4><br>
-	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>ClearDevice</td><td class='tdesc'><h4>procedure ClearDevice;</h4><br>
 	Clear whole screen<br><ul></ul></td></tr>
 <tr><td class='tname fname'>SetGraphMode</td><td class='tdesc'><h4>procedure SetGraphMode(mode: byte);</h4><br>
 	Init S2:<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Position</td><td class='tdesc'><h4>procedure Position(x: word; y: byte); assembler;</h4><br>
+	Set cursor position on screen. <br> Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.<br><ul><h5>parameters:</h5><li>x - horizontal positions</li><li>y - vertical positions</li></ul></td></tr>
 <tr><td class='tname fname'>TextOut</td><td class='tdesc'><h4>procedure TextOut(x: word; y: byte; s: PByte); overload;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>TextOut</td><td class='tdesc'><h4>procedure TextOut(a: char); overload;</h4><br>
 	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>ScrollUp</td><td class='tdesc'><h4>procedure ScrollUp(line, cnt: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>ScrollDown</td><td class='tdesc'><h4>procedure ScrollDown(line, cnt: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>ClearLine</td><td class='tdesc'><h4>procedure ClearLine(line, cnt: byte);</h4><br>
+	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>CloseGraph</td><td class='tdesc'><h4>procedure CloseGraph;</h4><br>
 	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>LoadBitmap</td><td class='tdesc'><h4>function LoadBitmap(fnam: PString): Boolean;</h4><br>
+	This loads a BMP File (4bit, 8bit)<br><ul></ul></td></tr>
 
 </table>
 

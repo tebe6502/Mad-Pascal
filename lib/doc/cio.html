@@ -48,8 +48,12 @@
 	Close channel<br><ul><h5>parameters:</h5><li>chn - channel 0..7</li></ul></td></tr>
 <tr><td class='tname fname'>Get</td><td class='tdesc'><h4>function Get(chn: byte): byte; assembler;</h4><br>
 	Get one byte<br><ul><h5>parameters:</h5><li>chn - channel 0..7</li></ul></td></tr>
+<tr><td class='tname fname'>BGet</td><td class='tdesc'><h4>procedure BGet(chn: byte; buf: PByte; cnt: word); register;</h4><br>
+	Get CNT bytes to BUF<br><ul><h5>parameters:</h5><li>chn - channel 0..7</li><li>buf - buffer</li><li>cnt - bytes counter</li></ul></td></tr>
 <tr><td class='tname fname'>Put</td><td class='tdesc'><h4>procedure Put(chn, a: byte): assembler;</h4><br>
 	Write one byte<br><ul><h5>parameters:</h5><li>chn - channel 0..7</li><li>a - byte</li></ul></td></tr>
+<tr><td class='tname fname'>BPut</td><td class='tdesc'><h4>procedure BPut(chn: byte; buf: PByte; cnt: word); register;</h4><br>
+	Put CNT bytes from BUF<br><ul><h5>parameters:</h5><li>chn - channel 0..7</li><li>buf - buffer</li><li>cnt - bytes counter</li></ul></td></tr>
 <tr><td class='tname fname'>XIO</td><td class='tdesc'><h4>procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;</h4><br>
 	Special command<br><ul><h5>parameters:</h5><li>cmd - command</li><li>chn - channel 0..7</li><li>ax1 - parameter</li><li>ax2 - parameter</li><li>device - name of device, example "S2:"</li></ul></td></tr>
 
