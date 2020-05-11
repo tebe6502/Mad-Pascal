@@ -79,9 +79,11 @@ uses cio, crt, graph, sysutils;
 
 var
 	buffer: array [0..0] of byte absolute $0400;
+
 	tmp: array [0..3] of byte;
 
 	Header: TBmpHeader;
+
 	f: file;
 
 
@@ -412,7 +414,7 @@ begin
 
  Position(0,h);
 
- while not eof(f) do begin
+ while (h <> $FFFF) {not eof(f)} do begin
 
 	blockread(f, Buffer, 256);
 
