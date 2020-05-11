@@ -23,8 +23,8 @@ XIO
 
 interface
 
-	procedure BGet(chn: byte; buf: PByte; cnt: word); register;
-	procedure BPut(chn: byte; buf: PByte; cnt: word); register;
+	procedure BGet(chn: byte; buf: PByte; cnt: word); assembler; register;
+	procedure BPut(chn: byte; buf: PByte; cnt: word); assembler; register;
 	procedure Cls(chn: byte); assembler;
 	function Get(chn: byte): byte; assembler;
 	procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
@@ -135,7 +135,7 @@ asm
 end;
 
 
-procedure BGet(chn: byte; buf: PByte; cnt: word); register;
+procedure BGet(chn: byte; buf: PByte; cnt: word); assembler; register;
 (*
 @description:
 Get CNT bytes to BUF
@@ -144,14 +144,32 @@ Get CNT bytes to BUF
 @param: buf - buffer
 @param: cnt - bytes counter
 *)
-begin
+asm
+{	txa:pha
 
- while cnt > 0 do begin
-  buf^ := Get(chn);
-  inc(buf);
-  dec(cnt);
- end;
+	lda chn
+	:4 asl @
+	tax
 
+	lda #7		;get char/s command
+	sta iccmd,x
+
+	lda buf
+	sta icbufa,x
+	lda buf+1
+	sta icbufa+1,x
+
+	lda cnt	
+	sta icbufl,x
+	lda cnt+1
+	sta icbufh,x
+
+	m@call	ciov
+
+	sty MAIN.SYSTEM.IOResult
+
+	pla:tax
+};
 end;
 
 
@@ -188,7 +206,7 @@ asm
 end;
 
 
-procedure BPut(chn: byte; buf: PByte; cnt: word); register;
+procedure BPut(chn: byte; buf: PByte; cnt: word); assembler; register;
 (*
 @description:
 Put CNT bytes from BUF
@@ -197,14 +215,32 @@ Put CNT bytes from BUF
 @param: buf - buffer
 @param: cnt - bytes counter
 *)
-begin
+asm
+{	txa:pha
 
- while cnt > 0 do begin
-  Put(chn, buf^);
-  inc(buf);
-  dec(cnt);
- end;
+	lda chn
+	:4 asl @
+	tax
 
+	lda #11		;put char/s command
+	sta iccmd,x
+
+	lda buf
+	sta icbufa,x
+	lda buf+1
+	sta icbufa+1,x
+
+	lda cnt
+	sta icbufl,x
+	lda cnt+1
+	sta icbufh,x
+
+	m@call	ciov
+
+	sty MAIN.SYSTEM.IOResult
+
+	pla:tax
+};
 end;
 
 
