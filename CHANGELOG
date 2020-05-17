@@ -1,3 +1,6 @@
+09.05.2020
+- przepisane adresowanie z u¿yciem 'MWA LABEL :BP2' na 'MWY LABEL :BP2'
+
 05.05.2020
 - dodana mo¿iwoœæ wy³aczenia ROM-u, przez {$define ROMOFF}
 
