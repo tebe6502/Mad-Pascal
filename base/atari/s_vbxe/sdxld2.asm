@@ -97,14 +97,7 @@ main
 
 	rts
 
-E_8035	sei
-	inc $d40e
-
-	ldx #0
-	mva:rne 0,x zpbuf,x+
-
-start
-	lda #$00
+E_8035	lda #$00
 	ldx #$3F
 E_8039	sta E_870F,x
 	dex
@@ -537,15 +530,7 @@ E_83A4	lda E_8731,x
 	dex
 	bpl E_83A4
 
-E_83AD
-
-	ldx #0
-	mva:rne zpbuf,x 0,x+
-
-	dec $d40e
-	cli
-
-	rts		; end
+E_83AD	rts		; end
 
 E_83AE	jsr printF
 
@@ -926,8 +911,6 @@ E_868C	sec
 	rts
 
 Break	brk
-
-zpbuf	.ds 256
 
 buffer	.ds 128
 
