@@ -43,6 +43,8 @@ TextOut
 
 interface
 
+{$define S_VBXE}
+
 const	fsNormal = 0;
 	fsUnderline = 64;
 	fsInverse = 128;
@@ -79,8 +81,6 @@ uses cio, crt, graph, sysutils;
 
 var
 	buffer: array [0..0] of byte absolute $0400;
-
-	tmp: array [0..3] of byte;
 
 	Header: TBmpHeader;
 
@@ -301,6 +301,7 @@ end;
 
 procedure SaveBitmap(fnam: PString);
 var i: byte;
+    a: cardinal;
 begin
 
  Header.bfType := ord('M')*256 + ord('B');
@@ -326,17 +327,16 @@ begin
  GetPaletteEntries(Buffer);
 
  for i:=0 to 255 do begin
-  tmp[0]:=Buffer[$200+i];
-  tmp[1]:=Buffer[$100+i];
-  tmp[2]:=Buffer[i];
-  tmp[3]:=0;
+  a:=Buffer[$200+i];
+  a:=a or Buffer[$100+i] shl 8;
+  a:=a or Buffer[i] shl 16;
 
-  blockwrite(f, tmp, 4);
+  blockwrite(f, a, 4);
  end;
 
 
  for i:=191 downto 0 do begin
- 
+
   Position(0,i);
 
   BGet(6, Buffer, 320);
@@ -385,7 +385,7 @@ begin
    Exit;
  end;
 
- if (w>320) or (h>192) then begin
+ if (w > word(ScreenWidth)) or (h>192) then begin
 //  IMGError := TooLarge;
   Result := false;
   Exit;
@@ -395,50 +395,28 @@ begin
 
  dec(h);
 
- blockread(f, Buffer, Header.bfOffBits-1024-sizeof(TBMPHeader));	// offset do tablicy pikseli obrazka
+ blockread(f, Buffer, Header.bfOffBits-1024-sizeof(TBMPHeader));		// offset do tablicy pikseli obrazka
 
  {Set the palette}
 
  for i:=0 to 255 do begin
-  blockread(f, tmp, 4);
+  blockread(f, a, 4);
 
-  Buffer[i+$200]:= tmp[0];
-  Buffer[i+$100]:= tmp[1];
-  Buffer[i]	:= tmp[2];
- end;  
-  
+  Buffer[i+$200]:= a;
+  Buffer[i+$100]:= a shr 8;
+  Buffer[i]	:= a shr 16;
+ end;
+
  SetPaletteEntries(Buffer);
-
-
- x:=0;
-
- Position(0,h);
 
  while (h <> $FFFF) {not eof(f)} do begin
 
-	blockread(f, Buffer, 256);
+	blockread(f, Buffer, w);
 
-	if word(x+256) < w then begin
-	
-	 BPut(6, Buffer, 256);
-	 inc(x, 256);
+	Position(0,h);
+	BPut(6, Buffer, w);
 
-	end else
-
-	for i:=0 to 255 do begin
-
-	 Put(6, Buffer[i]);
-
-	 inc(x);
-
-	 if x = w then begin
-		x:=0;
-		dec(h);
-		Position(0,h);
-	 end;
-
-	end;
-
+	dec(h);
  end;
 
  {Close the file}
@@ -446,37 +424,6 @@ begin
 
  {Successful}
  Result := true;
-
-end;
-
-
-
-initialization
-
-
-SetGraphMode(0);
-
-if GraphResult <> grOK then begin
-
- xio(40,1,0,0,'D:SDXLD.COM /X');
-
- if IoResult >= 128 then begin
-  TextMode(0);
-  writeln('S_VBXE.SYS not installed');
-
-  repeat until keypressed;
-  halt;
- end;
-
- SetGraphMode(0);
-
- if GraphResult <> grOK then begin
-  TextMode(0);
-  writeln('VBXE not present');
-
-  repeat until keypressed;
-  halt;
- end;
 
 end;
 
