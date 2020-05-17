@@ -3,6 +3,7 @@
 Sub-Pascal 32-bit real mode compiler for 80386+ processors v. 2.0 by Vasiliy Tereshkov, 2009
 
 https://atariage.com/forums/topic/240919-mad-pascal/
+http://atarionline.pl/forum/comments.php?DiscussionID=4825&page=1
 
 https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
 
@@ -10,14 +11,9 @@ IDE WUDSN
 https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
 
 
-Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2019
+Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2020
 
 Contributors:
-
-+ Bocianu Boczansky :
-	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
-	- MADSTRAP
-	- PASDOC
 
 + Bostjan Gorisek :
 	- unit PMG, ZXLIB
@@ -31,6 +27,9 @@ Contributors:
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
++ Guillermo Fuenzalida :
+	- unit MISC: DetectANTIC
+
 + Jerzy Kut :
 	- {$DEFINE ROMOFF}
 
@@ -40,15 +39,12 @@ Contributors:
 	- unit MISC: DetectCPU, DetectCPUSpeed, DetectMem, DetectHighMem
 	- unit S2 (VBXE handler)
 
-+ Marcin ¯ukowski :
-	- unit FASTGRAPH: fLine
-
-+ Guillermo Fuenzalida :
-	- unit MISC: DetectANTIC
-
 + Krzysztof Dudek :
 	- XBIOS
 	- unit LZ4: unLZ4
+
++ Marcin ¯ukowski :
+	- unit FASTGRAPH: fLine
 
 + Piotr Fusik :
 	- base\runtime\icmp.asm
@@ -68,6 +64,11 @@ Contributors:
 + Ullrich von Bassewitz (https://github.com/cc65/cc65/libsrc/runtime/) :
 	- 8x8 => 16 multiplication routine (base\common\byte.asm)
 	- 16x16 => 32 multiplication routine (base\common\word.asm)
+
++ Wojciech Bociañski :
+	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
+	- MADSTRAP
+	- PASDOC
 
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
@@ -1946,7 +1947,7 @@ end;
 
 
 procedure OptimizeTemporaryBuf;
-var i, p: integer;
+var p: integer;
     tmp: string;
 
 
@@ -2573,7 +2574,7 @@ type
 
 var i, l, k, m: integer;
     x: integer;
-    a, t, arg, arg0, arg1, arg2: string;
+    a, t, arg, arg0, arg1: string;
     inxUse: Boolean;
     t0, t1, t2, t3: string;
     listing, listing_tmp: TListing;
@@ -6484,7 +6485,6 @@ var i, l, k, m: integer;
 
  var i, j, k: integer;
      v, emptyStart, emptyEnd: integer;
-     a, b: string;
 
 
    function PeepholeOptimization_END: Boolean;
@@ -8854,7 +8854,7 @@ var i, l, k, m: integer;
 
   function PeepholeOptimization: Boolean;
   var i, p, q, err: integer;
-      old, tmp: string;
+      tmp: string;
       btmp: array [0..15] of string;
       yes: Boolean;
   begin
@@ -14086,21 +14086,21 @@ var i, l, k, m: integer;
        end;
 
 
-    if lda(i) and									// lda T			; 0
-       add_sub(i+1) and									// add|sub Q			; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+9		; 2
-       tay(i+3) and									// tay				; 3
-       lda(i+4) and									// lda T+1			; 4
-       adc_sbc(i+5) and									// adc|sbc Q+1			; 5
-       sta_stack(i+6) and								// sta :STACKORIGIN+STACKWIDTH+9; 6
-       sta_bp_1(i+7) and								// sta :bp+1			; 7
-       lda_bp_y(i+8) and								// lda (:bp),y			; 8
-       and_ora_eor(i+9) and								// ora|and|eor			; 9
-       sta_stack(i+10) and								// sta :STACKORIGIN+10		; 10
-       lda_stack(i+11) and								// lda :STACKORIGIN+STACKWIDTH+9; 11
-       sta_bp_1(i+12) and								// sta :bp+1			; 12
-       ldy_stack(i+13) and								// ldy :STACKORIGIN+9		; 13
-       lda_stack(i+14) then								// lda :STACKORIGI+10		; 14
+    if lda(i) and										// lda T			; 0
+       add_sub(i+1) and										// add|sub Q			; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN+9		; 2
+       tay(i+3) and										// tay				; 3
+       lda(i+4) and										// lda T+1			; 4
+       adc_sbc(i+5) and										// adc|sbc Q+1			; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH+9; 6
+       sta_bp_1(i+7) and									// sta :bp+1			; 7
+       lda_bp_y(i+8) and									// lda (:bp),y			; 8
+       and_ora_eor(i+9) and									// ora|and|eor			; 9
+       sta_stack(i+10) and									// sta :STACKORIGIN+10		; 10
+       lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH+9; 11
+       sta_bp_1(i+12) and									// sta :bp+1			; 12
+       ldy_stack(i+13) and									// ldy :STACKORIGIN+9		; 13
+       lda_stack(i+14) then									// lda :STACKORIGI+10		; 14
      if (copy(listing[i+2], 6, 256) = copy(listing[i+13], 6, 256)) and
 	(copy(listing[i+6], 6, 256) = copy(listing[i+11], 6, 256)) and
 	(copy(listing[i+10], 6, 256) = copy(listing[i+14], 6, 256)) then
@@ -14116,15 +14116,15 @@ var i, l, k, m: integer;
        end;
 
 
-    if lda(i) and									// lda T+1			; 0
-       sta_bp_1(i+1) and								// sta :bp+1			; 1
-       ldy(i+2) and									// ldy T			; 2
-       lda(i+3) and									// lda				; 3
-       and_ora_eor(i+4) and								// and|ora|eor			; 4
-       and_ora_eor(i+5) and								// and|ora|eor			; 5
-       sta_stack(i+6) and								// sta :STACKORIGIN		; 6
-       lda(i+7) and									// lda T+1			; 7
-       sta_bp_1(i+8) then								// sta :bp+1			; 8
+    if lda(i) and										// lda T+1			; 0
+       sta_bp_1(i+1) and									// sta :bp+1			; 1
+       ldy(i+2) and										// ldy T			; 2
+       lda(i+3) and										// lda				; 3
+       and_ora_eor(i+4) and									// and|ora|eor			; 4
+       and_ora_eor(i+5) and									// and|ora|eor			; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN		; 6
+       lda(i+7) and										// lda T+1			; 7
+       sta_bp_1(i+8) then									// sta :bp+1			; 8
      if (listing[i] = listing[i+7]) and
         (listing[i+1] = listing[i+8]) then
        begin
@@ -14135,14 +14135,14 @@ var i, l, k, m: integer;
        end;
 
 
-    if lda(i) and									// lda T+1			; 0
-       sta_bp_1(i+1) and								// sta :bp+1			; 1
-       ldy(i+2) and									// ldy T			; 2
-       lda(i+3) and									// lda				; 3
-       and_ora_eor(i+4) and								// and|ora|eor			; 4
-       sta_stack(i+5) and								// sta :STACKORIGIN		; 5
-       lda(i+6) and									// lda T+1			; 6
-       sta_bp_1(i+7) then								// sta :bp+1			; 7
+    if lda(i) and										// lda T+1			; 0
+       sta_bp_1(i+1) and									// sta :bp+1			; 1
+       ldy(i+2) and										// ldy T			; 2
+       lda(i+3) and										// lda				; 3
+       and_ora_eor(i+4) and									// and|ora|eor			; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN		; 5
+       lda(i+6) and										// lda T+1			; 6
+       sta_bp_1(i+7) then									// sta :bp+1			; 7
      if (listing[i] = listing[i+6]) and
         (listing[i+1] = listing[i+7]) then
        begin
@@ -14301,6 +14301,38 @@ var i, l, k, m: integer;
 	listing[i+3] := '';
 	listing[i+4] := '';
 	listing[i+5] := '';
+
+	Result := false; Break;
+      end;
+
+
+    if lda(i) and										// lda 					; 0
+       sta_stack(i+1) and 									// sta :STACKORIGIN+STACKWIDTH		; 1
+       lda(i+2) and										// lda TB+1				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN			; 3
+       lda(i+4) and										// lda BUFFER				; 4
+       add_sub(i+5) and										// add|sub				; 5
+       tay(i+6) and										// tay					; 6
+       lda(i+7) and										// lda BUFFER+1				; 7
+       adc_sbc_stack(i+8) and									// adc|sbc :STACKORIGIN+STACKWIDTH	; 8
+       sta_bp_1(i+9) and									// sta :bp+1				; 9
+       lda_stack(i+10) and									// lda :STACKORIGIN			; 10
+       sta_bp_y(i+11) then									// sta (:bp),y				; 11
+    if (copy(listing[i+1], 6, 256) = copy(listing[i+8], 6, 256)) and
+       (copy(listing[i+3], 6, 256) = copy(listing[i+10], 6, 256)) then
+      begin
+	listing[i+10] := #9'lda ' + copy(listing[i+2], 6, 256);
+
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	if adc_stack(i+8) then
+	 listing[i+8] := #9'adc ' + copy(listing[i], 6, 256)
+	else
+	 listing[i+8] := #9'sbc ' + copy(listing[i], 6, 256);
+
+	listing[i] := '';
+	listing[i+1] := '';
 
 	Result := false; Break;
       end;
@@ -27116,7 +27148,7 @@ begin
 
     FieldType := Types[i].Field[j].DataType;
     NumAllocElements := Types[i].Field[j].NumAllocElements;
-    AllocElementType :=  Types[i].Field[j].AllocElementType;
+    AllocElementType := Types[i].Field[j].AllocElementType;
 
     if FieldType <> RECORDTOK then
      inc(Result, DataSize[FieldType]);
@@ -29231,6 +29263,12 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FPSGN'#9'.ds 1');
  asm65('FPEXP'#9'.ds 1');
 
+ asm65;
+ asm65(#9'.ifdef MAIN.@DEFINES.S_VBXE');
+ asm65(#9'opt h-');
+ asm65(#9'ins ''atari\s_vbxe\sdxld2.obx''');
+ asm65(#9'opt h+');
+ asm65(#9'.endif');
 
  if High(resArray) > 0 then begin
 
