@@ -297,7 +297,7 @@ off	lda portb
 	mva #$fe portb
 
 	rts
-	
+
 exit	lda #{rts}
 	sta on
 
@@ -342,7 +342,7 @@ data
 
 .local	_%%2, main.%%lab
 
-	.link 'player\cmc_player_reloc.obx'
+	.link 'atari\players\cmc_player_reloc.obx'
 
 .endl
 
@@ -374,7 +374,7 @@ data
 
 .local	_%%2, main.%%lab
 
-	.link 'player\mpt_player_reloc.obx'
+	.link 'atari\players\mpt_player_reloc.obx'
 
 .endl
 
@@ -393,7 +393,7 @@ PLAYER		= main.%%lab
 
 	ert <PLAYER <> 0,'RMT player routine MUST be compiled from the begin of the memory page'
 
-	icl 'player\rmt_player.asm'
+	icl 'atari\players\rmt_player.asm'
 
 	icl %%1
 
@@ -954,7 +954,7 @@ lbmp
 notVBXE	dta c'VBXE not detected',$9b
 
 	eif
-	
+
 	.def ?VBXDETECT=1
 
 ok	fxs FX_MEMC #%1000+$b0
@@ -1052,7 +1052,7 @@ len = .filesize(%%1)
 	ift ?EXTDETECT=0
 	ini DetectMem
 	eif
-	
+
 	.def ?EXTDETECT=1
 
 	?adr = main.%%lab

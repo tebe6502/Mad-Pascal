@@ -90,6 +90,8 @@ colpf3s	=	$02C7	; rejestr-cien COLPF3
 colbaks	=	$02C8	; rejestr-cien COLBAK
 
 dsctln	=	$02D5	; (2) Disk sector size register; default of 128 ($80) bytes
+runad	=	$02E0	; Used by DOS for the run address read from the disk sector one or from a binary file.
+initad	= 	$02E2	; Initialization address read from the disk. An autoboot file must load an address value into either RUNAD above or INITAD.
 memlo	=	$02E7
 dvstat	=	$02EA	; (4) device status
 crsinh	=	$02F0	; znacznik widoczno?ci kursora
