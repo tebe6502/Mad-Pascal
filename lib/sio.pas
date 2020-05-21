@@ -14,6 +14,7 @@ unit sio;
 
 ReadConfig
 ReadSector
+WriteBoot
 WriteSector
 
 }
@@ -22,6 +23,7 @@ interface
 
 	function ReadConfig (devnum: byte): cardinal; assembler;
 	procedure ReadSector (devnum: byte; sector: word; var buf); assembler;
+	procedure WriteBoot(devnum: byte; var buf); assembler;
 	procedure WriteSector(devnum: byte; sector: word; var buf); assembler;
 
 implementation
@@ -130,7 +132,7 @@ asm
 
 	ldx buf
 	ldy buf+1
-	lda #'R'
+	lda #'R'	; $52 - Get Sector
 
 	m@call	@sio
 
@@ -147,7 +149,7 @@ procedure WriteSector(devnum: byte; sector: word; var buf); assembler;
 Write disk sector from buffer
 
 @param: devnum - device number
-@param: sector - sector number
+@param: sector - sector number 1..
 @param: buf - pointer to buffer
 *)
 asm
@@ -165,7 +167,7 @@ asm
 
 	ldx buf
 	ldy buf+1
-	lda #'P'
+	lda #'P'	; $50 - Put Sector, without verify
 
 	m@call	@sio
 
@@ -174,5 +176,49 @@ _err	sty MAIN.SYSTEM.IOResult
 	pla:tax
 };
 end;
+
+
+procedure WriteBoot(devnum: byte; var buf); assembler;
+(*
+@description:
+Write disk sector 1-3 from buffer
+
+@param: devnum - device number
+@param: buf - pointer to buffer
+*)
+asm
+{	txa:pha
+
+	lda devnum
+	m@call	@sio.devnrm
+	tya
+	bmi _err
+
+	lda <1
+	sta daux1
+	lda >1
+	sta daux2
+
+lp	ldx buf
+	ldy buf+1
+	lda #'P'	; $50 - Put Sector, without verify
+
+	m@call	@sio.boot
+	tya
+	bmi _err
+
+	adw buf #128
+
+	inc daux1
+	lda daux1
+	cmp #4
+	bne lp
+
+_err	sty MAIN.SYSTEM.IOResult
+
+	pla:tax
+};
+end;
+
 
 end.
