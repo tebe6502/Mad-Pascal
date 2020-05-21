@@ -8,11 +8,9 @@
 	ldy dunit
 	lda lsector-1,y
 	sta dsctln		; < dlugosc sektora
-;	sta dbyt		;< dlugosc bufora
 
 	lda hsector-1,y
-	sta dsctln+1		; > dlugosc sektora 
-;	sta dbyt+1		;> dlugosc bufora
+	sta dsctln+1		; > dlugosc sektora
 
 	lda #$c0		; $40 read / $80 write
 	sta dstats
@@ -21,6 +19,21 @@
 	sta casflg		; = 00 to indicate that it isn't a cassette operation
 
 	jmp jdskint
+
+boot	stx dbufa		;< adres bufora
+	sty dbufa+1		;> adres bufora
+	sta dcmnd		; 'R' read sector / 'P' write sector
+
+	lda #$80		; $40 read / $80 write
+	sta dstats
+	sta dsctln		; < dlugosc sektora
+
+	lda #0
+	sta casflg		; = 00 to indicate that it isn't a cassette operation
+	sta dsctln+1		; > dlugosc sektora
+
+	jmp jdskint
+
 
 // A = [1..8]
 devnrm	tax
@@ -32,16 +45,16 @@ devnrm	tax
 
 	ldy #-123		; kod bledu "DEVICE OR FILE NOT OPEN"
 	rts
-	
+
 ok	txa
 	sta dunit		; nr stacji
 	ora #$30
 	sta ddevic		; nr stacji + $30
 
-	lda #7
-	sta dtimlo		; timeout
+;	lda #7
+;	sta dtimlo		; timeout
 
-	ldy #0
+	ldy #1
 	rts
 
 devsec	tya			; zapisz rozmiar sektora
