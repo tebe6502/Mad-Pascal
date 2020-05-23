@@ -37,18 +37,18 @@ interface
 uses	types, atari;
 
 	{$i graphh.inc}
-	
-	procedure DisplayBuffer(var a: TFrameBuffer);
+
+	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure fLine(x0,y0,x1,y1: byte); assembler;
-	procedure FrameBuffer(a: word); assembler; overload;
-	procedure FrameBuffer(var a: TFrameBuffer); overload;
+	procedure SetActiveBuffer(a: word); assembler; overload;
+	procedure SetActiveBuffer(var a: TDisplayBuffer); overload;
 	procedure fRectangle(x1, y1, x2, y2: smallint);
-	procedure Hline(x0,x1,y: smallint); 
+	procedure Hline(x0,x1,y: smallint);
 	procedure LineTo(x, y: smallint);
 	procedure PutPixel(x,y: smallint); assembler; register;
 	function Scanline(y: smallint): PByte;
-	function SetBuffer(var a: TFrameBuffer; mode, bound: byte): TFrameBuffer;
-	procedure SwitchBuffer(var a,b: TFrameBuffer);
+	function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
+	procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
 
 implementation
 
@@ -57,7 +57,7 @@ var
 	lineLo, lineHi, div4: array [0..255] of byte;
 
 	CurrentX, CurrentY: smallint;
-	
+
 	VideoRam: word;
 
 
@@ -295,8 +295,8 @@ mode	equ *-2
 
 error	lda #0
 	jmp stop
-	
-	
+
+
 gr8	.local
 	lda x
 	tax
@@ -306,31 +306,31 @@ gr8	.local
 
 	:2 lsr @
 	tay
-	
+
 	txa
 	and #7
 	tax
-	
+
 	lda (:bp2),y
 	and msk,x
 	bne c1
-	
+
 	jmp stop
-	
+
 c1	lda #1
 	jmp stop
 
 msk	dta $80,$40,$20,$10,$08,$04,$02,$01
 
 	.endl
-	
-	
+
+
 
 gr15	.local
 
 	ldx x
 	ldy adr.div4,x
-	
+
 	txa
 	and #3
 	beq _0
@@ -340,21 +340,21 @@ gr15	.local
 
 	cmp #2
 	beq _2
-	
+
 _3	lda (:bp2),y
 	and #$03
 	jmp stop
-	
+
 _0	lda (:bp2),y
 	and #$c0
 	:6 lsr @
 	jmp stop
-	
+
 _1	lda (:bp2),y
 	and #$30
 	:4 lsr @
 	jmp stop
-	
+
 _2	lda (:bp2),y
 	and #$0c
 	:2 lsr @
@@ -362,13 +362,13 @@ _2	lda (:bp2),y
 
 	.endl
 
-	
+
 gr9	.local
 
 	lda x
 	lsr @
 	tay
-	
+
 	lda x
 	and #1
 	bne _1
@@ -376,13 +376,13 @@ gr9	.local
 _0	lda (:bp2),y
 	:4 lsr @
 	jmp stop
-	
+
 _1	lda (:bp2),y
 	and #$0f
 	jmp stop
-	
+
 	.endl
-	
+
 stop	sta Result
 
 	pla:tax
@@ -453,13 +453,13 @@ procedure Hline(x0,x1,y: smallint);
 Draw horizintal line, fast as possible
 *)
 var mode: byte;
-    tmp: smallint;    
+    tmp: smallint;
 begin
 
  if x0 > x1 then begin
   tmp:=x1;
   x1:=x0;
-  x0:=tmp; 
+  x0:=tmp;
  end;
 
  mode:=GraphMode and $0f;
@@ -468,7 +468,7 @@ begin
   Line(x0,y,x1,y);
   exit;
  end;
- 
+
 asm
 {	txa:pha
 
@@ -494,7 +494,7 @@ sk0
 	cmp MAIN.SYSTEM.ScreenWidth
 sk1
 	bcc ok1
-	
+
 	mwa MAIN.SYSTEM.ScreenWidth x0
 
 ok1	lda x1+1
@@ -507,7 +507,7 @@ sk2
 	bcc ok2
 
 	mwa MAIN.SYSTEM.ScreenWidth x1
-	
+
 ok2
 	ldy y
 	lda adr.lineLo,y
@@ -523,7 +523,7 @@ hfb	equ *-1
 
 	lda GetColor
 	and #3
-	
+
 	:2 asl @
 	sta color
 	tay
@@ -578,7 +578,7 @@ lmsk	equ *-1
 	ora #0
 lcol	equ *-1
 	sta (:bp2),y
-	
+
 	lda #0
 rg	equ *-1
 	clc
@@ -910,7 +910,7 @@ begin
 end;
 
 
-procedure FrameBuffer(a: word); assembler; overload;
+procedure SetActiveBuffer(a: word); assembler; overload;
 (*
 @description:
 
@@ -918,7 +918,7 @@ procedure FrameBuffer(a: word); assembler; overload;
 asm
 {	lda a
 	ldy a+1
-	
+
 	sta VideoRam
 	sty VideoRam+1
 
@@ -945,14 +945,14 @@ asm
 end;
 
 
-procedure FrameBuffer(var a: TFrameBuffer); overload;
+procedure SetActiveBuffer(var a: TDisplayBuffer); overload;
 (*
 @description:
 
 *)
 begin
 
- FrameBuffer(a.bp);
+ SetActiveBuffer(a.bp);
 
 end;
 
@@ -965,7 +965,7 @@ Init graphics mode
 var width: byte;
 begin
 	GraphMode := mode;
-	
+
 	width := mode and $0f;
 
 case width of
@@ -979,7 +979,7 @@ asm
 	.ifdef PutPixel
 	mwa #PutPixel.gr8 PutPixel.mode
 	.endif
-	
+
 	.ifdef GetPixel
 	mwa #GetPixel.gr8 GetPixel.mode
 	.endif
@@ -994,7 +994,7 @@ asm
 	.ifdef PutPixel
 	mwa #PutPixel.gr9 PutPixel.mode
 	.endif
-	
+
 	.ifdef GetPixel
 	mwa #GetPixel.gr9 GetPixel.mode
 	.endif
@@ -1014,10 +1014,10 @@ asm
 	.ifdef PutPixel
 	mwa #PutPixel.gr15 PutPixel.mode
 	.endif
-	
+
 	.ifdef GetPixel
 	mwa #GetPixel.gr15 GetPixel.mode
-	.endif		
+	.endif
 };
 
 end;
@@ -1062,23 +1062,23 @@ tmrcn	equ $ee8d
 
 	sta MAIN.SYSTEM.ScreenWidth
 	stx MAIN.SYSTEM.ScreenWidth+1
-	
+
 	sub #1
 	sta WIN_RIGHT
 	txa
 	sbc #0
 	sta WIN_RIGHT+1
-	
+
 	sty MAIN.SYSTEM.ScreenHeight
 	lda #0
 	sta MAIN.SYSTEM.ScreenHeight+1
-	
+
 	sta WIN_LEFT
 	sta WIN_LEFT+1
 	sta WIN_TOP
 	sta WIN_TOP+1
 
-	sta WIN_BOTTOM+1	
+	sta WIN_BOTTOM+1
 	dey
 	sty WIN_BOTTOM
 
@@ -1144,7 +1144,7 @@ l0	sta __oras,x
 	beq x8
 	cmp #6
 	beq x8
-	
+
 	jmp it2
 x8
 	mva #$ff _col+1
@@ -1186,7 +1186,7 @@ __oras	dta $c0,$30,$0c,$03
 
 stop	pla:tax
 };
-	FrameBuffer(savmsc);
+	SetActiveBuffer(savmsc);
 end;
 
 

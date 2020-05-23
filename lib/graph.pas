@@ -31,26 +31,26 @@ uses	types, atari;
 
 	{$i graphh.inc}
 
-	procedure DisplayBuffer(var a: TFrameBuffer);
+	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure fLine(x0, y0, x1, y1: smallint);
-	procedure FrameBuffer(var a: TFrameBuffer);
-	procedure HLine(x1,x2, y: smallint); 
+	procedure SetActiveBuffer(var a: TDisplayBuffer);
+	procedure HLine(x1,x2, y: smallint);
 	procedure LineTo(x, y: smallint); assembler;
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
 	function Scanline(y: smallint): PByte;
-	function SetBuffer(var a: TFrameBuffer; mode, bound: byte): TFrameBuffer;
-	procedure SwitchBuffer(var a,b: TFrameBuffer);
+	function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
+	procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
 
 implementation
 
 var
 	CurrentX, CurrentY, VideoRam: word;
-	
+
 	Scanline_Width: byte;
 
 
-procedure FrameBuffer(var a: TFrameBuffer);
+procedure SetActiveBuffer(var a: TDisplayBuffer);
 (*
 @description:
 
@@ -69,7 +69,7 @@ procedure InitGraph(mode: byte); overload;
 Init graphics mode
 *)
 begin
-asm	
+asm
 {
 	txa:pha
 
@@ -92,7 +92,7 @@ asm
 	.ifdef MAIN.@DEFINES.ROMOFF
 	inc portb
 	.endif
-	
+
 tlshc	equ $ee6d
 
 	ldx dindex
@@ -116,7 +116,7 @@ tmrcn	equ $ee8d
 	ldx #0
 	cmp #<320
 	sne:inx
-    
+
 ; X:A = horizontal resolution
 ; Y = vertical resolution
 
@@ -128,6 +128,9 @@ tmrcn	equ $ee8d
 
 	pla:tax
 };
+
+ VideoRam:=savmsc;
+
 end;
 
 
@@ -338,6 +341,10 @@ end;
 
 
 procedure HLine(x1,x2,y: smallint);
+(*
+@description:
+Draw horizontal line between 2 points
+*)
 begin
 
  Line(x1,y,x2,y);
@@ -381,7 +388,7 @@ end;
 function Scanline(y: smallint): PByte;
 (*
 @description:
-
+ScanLine give access to memory starting point for each row raw data.
 *)
 var i: byte;
     a: word;
@@ -391,13 +398,13 @@ begin
 
  if y < 0 then i:=0 else
   if y >= ScreenHeight then i:=ScreenHeight-1;
-  
- if Scanline_Width <> 40 then 
+
+ if Scanline_Width <> 40 then
   a:=i * Scanline_Width
- else begin   
+ else begin
   a:=i shl 3;
   a:=a + a shl 2;
- end; 
+ end;
 
  Result:=pointer(a + VideoRam);
 

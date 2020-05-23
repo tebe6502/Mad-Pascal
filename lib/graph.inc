@@ -20,18 +20,20 @@ FillRect
 FloodFill
 FloodFillH
 MoveRel
+NewBuffer
 PieSlice
 Rectangle
 SetArcCoords
 SetClipRect
+SwitchBuffer
 
 }
 
 
-procedure DisplayBuffer(var a: TFrameBuffer);
+procedure SetDisplayBuffer(var a: TDisplayBuffer);
 (*
 @description:
-
+Set video buffer which is displayed
 *)
 begin
 	sdlstl := a.dl;
@@ -39,43 +41,47 @@ begin
 end;
 
 
-function SetBuffer(var a: TFrameBuffer; mode, bound: byte): TFrameBuffer;
+function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
 (*
 @description:
-
+Initialize new graphical buffer
 *)
 begin
 
  ramtop := bound;
- 
+
  InitGraph(mode);
- 
- a.dl := sdlstl;	
+
+ a.dl := sdlstl;
  a.bp := savmsc;
 
 end;
 
 
-procedure SwitchBuffer(var a,b: TFrameBuffer);
-var tmp: TFrameBuffer;
+procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
+(*
+@description:
+Switch graphical buffer between A <> B
+*)
+var tmp: TDisplayBuffer;
     x, y: pointer;
     l: word;
 begin
 
  tmp:=b;
- 
+
  b:=a;
  a:=tmp;
- 
- DisplayBuffer(a);
- FrameBuffer(b);
- 
+
+ SetDisplayBuffer(a);
+ SetActiveBuffer(b);
+
  x:=Scanline(WIN_TOP);
 
- y:=Scanline(WIN_BOTTOM); 
+ y:=Scanline(WIN_BOTTOM);
  l:=word(y);
  y:=Scanline(WIN_TOP);
- 
+
  dec(l, word(y));
 
  fillchar(x, l, 0);
@@ -179,10 +185,10 @@ begin
 	dy := y shl 2;
 
 	d := 3 - (radius shl 1);			// Decision criterion
-	
+
 	while (x <= y) do begin
 
-		if d >= 0 then begin			
+		if d >= 0 then begin
 
 			d := 4 + d - dy ;
 
@@ -202,7 +208,7 @@ begin
 		DrawCircle;
 
 		d := 6 + d + dx;
-		
+
 		inc(dx, 4);
 
 		inc(x);
@@ -212,6 +218,10 @@ end;
 
 
 procedure SetArcCoords (x,y,xradius,yradius,StAngle,EndAngle : word);
+(*
+@description:
+
+*)
 var a,s: single;
 begin
   LastArcCoords.X:=X;
@@ -276,7 +286,7 @@ begin
  end;
 
  SetArcCoords (X,Y,xRadius,yRadius,StAngle,EndAngle);
- 
+
  MoveTo(LastArcCoords.xstart, LastArcCoords.ystart);
 
  tmpAng:=StAngle * D_PI_180;
@@ -332,10 +342,10 @@ var	error, stopx, stopy: integer;
 
 begin
 			if (a = 0) or (b = 0) then exit;
-			
+
 			_a := a * a;
 			a2 := _a shl 1;
-			
+
 			_b := b * b;
 			b2 := _b shl 1;
 
@@ -367,7 +377,7 @@ begin
 
 			error := _b * a;
 			stopy := error shl 1;
-			
+
 			while (stopy >= stopx) do begin
 
 				DrawEllipse;
@@ -402,10 +412,10 @@ var	error, stopx, stopy: integer;
 
 begin
 			if (a = 0) or (b = 0) then exit;
-			
+
 			_a := a * a;
 			a2 := _a shl 1;
-			
+
 			_b := b * b;
 			b2 := _b shl 1;
 
@@ -437,7 +447,7 @@ begin
 
 			error := _b * a;
 			stopy := error shl 1;
-			
+
 			while (stopy >= stopx) do begin
 
 				DrawEllipse;
@@ -905,7 +915,10 @@ end;
 
 
 procedure ClipLine(x1, y1, x2, y2: smallint);
-// Cohen_Sutherland
+(*
+@description:
+Line clipping (Cohen-Sutherland algorithm)
+*)
 var
    rcode1, rcode2, rcode: byte;
    x, y: smallint;
