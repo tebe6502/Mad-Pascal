@@ -3697,7 +3697,23 @@ var i, l, k, m: integer;
      end;
 
 
-    if mwy_bp2(i) and										// mwa LEVEL :bp2			; 0
+    if lda(i) and										// lda                                  ; 0
+       sta_bp2(i+1) and										// sta :bp2				; 1
+       lda(i+2) and										// lda					; 2
+       sta_bp2_1(i+3) and									// sta :bp2+1                  		; 3
+       ldy(i+4) then										// ldy					; 4
+     if pos(listing[i], listing[i+2]) > 0 then
+      begin
+       listing[i]   := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       Result:=false; Break;
+      end;
+
+
+    if mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
        ldy(i+1) and (ldy_stack(i+1) = false) and						// ldy					; 1
        (listing[i+2] = #9'mva (:bp2),y :STACKORIGIN,x') and					// mva (:bp2),y :STACKORIGIN,x		; 2
        dex(i+3) then										// dex                  		; 3
@@ -3712,7 +3728,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if mwy_bp2(i) and										// mwa LEVEL :bp2			; 0
+    if mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
        ldy(i+1) and (ldy_stack(i+1) = false) and						// ldy					; 1
        (listing[i+2] = #9'mva (:bp2),y :STACKORIGIN+1,x') and					// mva (:bp2),y :STACKORIGIN+1,x	; 2
        dex(i+3) then										// dex                  		; 3
@@ -4424,6 +4440,35 @@ var i, l, k, m: integer;
        listing[i+4]  := #9'ldy ' + GetString(i+2);
 
        listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if //inx(i) and										// inx					; 0
+       lda(i+1) and 										// lda IMAGES				; 1
+       add_im_0(i+2) and									// add #$00				; 2
+       sta(i+3) and										// sta					; 3
+       lda(i+4) and										// lda IMAGES+1				; 4
+       adc(i+5) and										// adc 					; 5
+       sta(i+6) then										// sta					; 6
+     begin
+       listing[i+2] := '';
+
+       listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+
+        Result:=false; Break;
+     end;
+
+
+    if //inx(i) and										// inx					; 0
+       lda(i+1) and 										// lda IMAGES				; 1
+       add_im_0(i+2) and									// add #$00				; 2
+       sta(i+3) and										// sta					; 3
+//       lda(i+4) and										// lda IMAGES+1				; 4
+       (adc(i+5) = false) then									// adc 					; 5
+     begin
        listing[i+2] := '';
 
        Result:=false; Break;
