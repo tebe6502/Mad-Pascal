@@ -9,8 +9,8 @@
 
 <h1>unit apLib</h1>
 <h3>APL</h3>
-<p>author: John Brandwood</p>
-<br><p>apLib decompressor <br> <a href='http://ibsensoftware.com/products_aPLib.html'>http://ibsensoftware.com/products_aPLib.html</a> <br> <a href='https://github.com/emmanuel-marty/apultra'>https://github.com/emmanuel-marty/apultra</a></p>
+<p>author: John Brandwood, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela</p>
+<br><p>apLib decompressor (compress with APULTRA) <br> <a href='http://ibsensoftware.com/products_aPLib.html'>http://ibsensoftware.com/products_aPLib.html</a> <br> <a href='https://github.com/emmanuel-marty/apultra'>https://github.com/emmanuel-marty/apultra</a></p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -26,9 +26,13 @@
 
 <!--********************* ABSOLUTE VARIABLES **************************-->
 
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
+<tr><td class='tname'>buf</td><td class='taddress'>$0400</td><td class='ttype'>array [0..255] of byte</td><td class='tdesc'></td></tr>
 
-
+</table>
 
 <!--********************* GLOBAL VARIABLES **************************-->
 
@@ -42,8 +46,10 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>unAPL</td><td class='tdesc'><h4>procedure unAPL(inputPointer, outputPointer: pointer); assembler; register;</h4><br>
-	apLib decompressor<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
+<tr><td class='tname fname'>unAPL</td><td class='tdesc'><h4>procedure unAPL(fnam: PString; outputPointer: pointer); overload;</h4><br>
+	aPLib I/O stream decompressor (John Brandwood, Krzysztof 'XXL' Dudek)<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
+<tr><td class='tname fname'>unAPL</td><td class='tdesc'><h4>procedure unAPL(inputPointer, outputPointer: pointer); assembler; overload;</h4><br>
+	apLib decompressor (John Brandwood, Krzysztof 'XXL' Dudek)<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
 
 </table>
 
