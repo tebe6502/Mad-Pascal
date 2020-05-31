@@ -8,9 +8,9 @@ const
 begin
 
  InitGraph(15+16);
- 
- unlz4(pointer(lz4pic+11), pointer(dpeek(88)) );
- 
+
+ unlz4(pointer(lz4pic), pointer(dpeek(88)) );
+
  repeat until keypressed;
 
 
