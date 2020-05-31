@@ -1,7 +1,7 @@
 uses crt, fastgraph;
 
-const xsize		   = 80;
-const ysize		   = 48;	
+const xsize	   = 80;
+const ysize	   = 48;	
 const maxLines     = 5;
 const xspeed	   = 1;
 
