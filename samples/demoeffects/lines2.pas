@@ -6,7 +6,7 @@ var	buf1: array [0..0] of byte absolute $5000;
 	buf2: array [0..0] of byte absolute $7000;
 
 	dl: word;
-	
+
 procedure UpdateRaster();
 var
 	xp: array[0..2] of byte = (40, 70, 50);
@@ -18,7 +18,7 @@ var
 
 	i: byte;
 begin
-	
+
 	fLine(xp[0],yp[0],xp[1],yp[1]);
 	fLine(xp[1],yp[1],xp[2],yp[2]);
 	fLine(xp[2],yp[2],xp[0],yp[0]);
@@ -31,14 +31,14 @@ begin
 	fLine(xp[0]+i,yp[0]+i,xp[0],yp[0]);
 	fLine(xp[1]+i,yp[1]+i,xp[1],yp[1]);
 	fLine(xp[2]+i,yp[2]+i,xp[2],yp[2]);
-	
+
 
 	for i:=0 to High(xp) do begin
 		xp2[i] := xp[i];
 		yp2[i] := yp[i];
 		xp[i] := xp[i]+dxp[i];
 		yp[i] := yp[i]+dyp[i];
-		
+
 		if xp[i]>byte(ScreenWidth-10) then dxp[i]:=255;		// 255 = -1
 		if xp[i]<10 then dxp[i]:=1;
 		if yp[i]>byte(ScreenHeight-10) then dyp[i]:=255;
@@ -50,18 +50,18 @@ end;
 
 begin
  InitGraph(7+16);
- 
+
  dl:=dpeek($230);
- 
+
  SetColor(1);
- 
+
  repeat
 //	FRAME #1
 
 	pause;
 
   	dpoke(dl+4, word(@buf2));
-	FrameBuffer(word(@buf1));
+	SetActiveBuffer(word(@buf1));
 
 	fillchar(buf1, 40*96, 0);	// clear buf1
 
@@ -72,11 +72,11 @@ begin
 	pause;
 
 	dpoke(dl+4, word(@buf1));
-	FrameBuffer(word(@buf2));
-	
+	SetActiveBuffer(word(@buf2));
+
 	fillchar(buf2, 40*96, 0);	// clear buf2
-	
-	UpdateRaster;	
+
+	UpdateRaster;
 
  until keypressed;
 

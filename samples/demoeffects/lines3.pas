@@ -3,7 +3,7 @@
 uses crt, fastgraph;
 
 
-var	buf1, buf2: TFrameBuffer;
+var	buf1, buf2: TDisplayBuffer;
 
 
 procedure UpdateRaster();
@@ -16,7 +16,7 @@ var
 	i: byte;
 begin
 
-	SwitchBuffer(buf1, buf2);
+	SwitchDisplayBuffer(buf1, buf2);
 
 	fLine(xp[0],yp[0],xp[1],yp[1]);
 	fLine(xp[1],yp[1],xp[2],yp[2]);
@@ -33,12 +33,12 @@ begin
 
 	for i:=0 to High(xp) do begin
 
-		xp[i] := xp[i]+dxp[i];		
+		xp[i] := xp[i]+dxp[i];
 		yp[i] := yp[i]+dyp[i];
 
 		if xp[i] >= byte(ScreenWidth-18) then dxp[i]:=-1;
 		if xp[i] < 18 then dxp[i]:=1;
-		
+
 		if yp[i] >= byte(ScreenHeight-18) then dyp[i]:=-2;
 		if yp[i] < 18 then dyp[i]:=2;
 	end;
@@ -47,12 +47,12 @@ end;
 
 
 begin
-  
+
 // SetBuffer(buffer, mode, ramtop)
 
- SetBuffer(buf1, 7 + 16, $c0);		// ramtop = $c0
+ NewDisplayBuffer(buf1, 7 + 16, $c0);		// ramtop = $c0
 
- SetBuffer(buf2, 7 + 16, $a0);		// ramtop = $a0
+ NewDisplayBuffer(buf2, 7 + 16, $a0);		// ramtop = $a0
 
 // SetClipRect(0, 0, ScreenWidth, ScreenHeight);
 
