@@ -1830,7 +1830,7 @@ end;
 
 function fsincos(x: single; sc: boolean): single;
 //----------------------------------------------------------------------------------------------
-// http://atariage.com/forums/topic/240919-mad-pascal/page-10#entry3818764
+// https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
 var i: byte;
 begin

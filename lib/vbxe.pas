@@ -666,9 +666,9 @@ procedure VBXEOff; assembler;
 
 *)
 asm
-{	stx @sp
+{	txa:pha
 
-	stx FX_CORE_RESET
+	sta FX_CORE_RESET
 
 	fxs FX_MEMC #0
 	fxsa FX_MEMS
@@ -676,9 +676,7 @@ asm
 
 	@clrscr
 
-stop	ldx #0
-@sp	equ *-1
-
+	pla:tax
 };
 
 end;

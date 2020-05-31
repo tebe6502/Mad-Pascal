@@ -71,6 +71,7 @@ var	Font: Object
 	procedure SaveBitmap(fnam: PString);
 	procedure TextOut(x: word; y: byte; s: PByte); overload;
 	procedure TextOut(a: char); overload;
+	procedure TextOut(s: PByte); overload;
 
 
 implementation
@@ -222,6 +223,23 @@ asm
 };
 
  xio(105,6,Font.Style,byte(a),'S2:');
+
+end;
+
+
+procedure TextOut(s: PByte); overload;
+(*
+@description:
+*)
+var i: byte;
+begin
+
+asm
+{
+	mva FONT.COLOR fildat
+};
+
+ for i:=1 to s[0] do xio(105,6,Font.Style,byte(s[i]),'S2:');
 
 end;
 

@@ -159,7 +159,7 @@ asm
 	lda buf+1
 	sta icbufa+1,x
 
-	lda cnt	
+	lda cnt
 	sta icbufl,x
 	lda cnt+1
 	sta icbufh,x
@@ -256,7 +256,7 @@ Special command
 @param: device - name of device, example "S2:"
 *)
 asm
-{	txa:pha
+{	stx @sp
 
 	lda chn
 	:4 asl @
@@ -282,7 +282,8 @@ asm
 
 	sty MAIN.SYSTEM.IOResult
 
-	pla:tax
+	ldx #0
+@sp	equ *-1
 };
 end;
 
