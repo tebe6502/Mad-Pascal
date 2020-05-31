@@ -4,7 +4,7 @@
 
 .proc	@ClrScr
 
-	mva #$2c @putchar.vbxe	; bit*	disable VBXE put char
+	mva #{bit*} @putchar.vbxe	; disable VBXE put char
 
 	ldx #0
 	lda #$0c

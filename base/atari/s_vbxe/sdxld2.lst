@@ -1,0 +1,942 @@
+mads 2.1.0 build 8 (23 Dec 19)
+Source: D:\!Delphi\PAS6502\base\atari\s_vbxe\sdxld2.asm
+     1 				// sdxld.com + s_vbxe.sys
+     2
+     3 				;ciov	= $e456
+     4
+     5 = 0086			errn	= $86
+     6 = 0087			fnam	= $87
+     7
+     8 				;--------------------------
+     9 					org $8000
+    10 				;--------------------------
+    11
+    12 				s_vbxe
+    13 FFFF> 8000-A78E> FA FF + 	ins 's_vbxe.sys'
+    14
+    15
+    16 A117			ciov	.local
+    17 A117 E0 10			cpx #$10
+    18 A119 F0 03			beq ok
+    19
+    20 A11B 4C 56 E4			jmp $e456
+    21
+    22 A11E BD 42 03		ok	lda $342,x
+    23 A121 C9 03			cmp #3
+    24 A123 F0 70			beq open
+    25 A125 C9 07			cmp #7
+    26 A127 F0 03			beq read
+    27
+    28 A129 A0 01			ldy #1
+    29 A12B 60				rts
+    30
+    31 A12C BD 44 03		read	lda $344,x
+    32 A12F 8D 56 A1			sta dst+1
+    33 A132 BD 45 03			lda $345,x
+    34 A135 8D 57 A1			sta dst+2
+    35
+    36 A138 BD 48 03			lda $348,x
+    37 A13B 8D 93 A1			sta cnt
+    38 A13E BD 49 03			lda $349,x
+    39 A141 8D 94 A1			sta cnt+1
+    40
+    41 A144 AD 93 A1		move	lda cnt
+    42 A147 0D 94 A1			ora cnt+1
+    43 A14A D0 06			bne loa
+    44
+    45 A14C 20 87 A1			jsr src
+    46
+    47 A14F A0 01			ldy #1
+    48 A151 60				rts
+    49
+    50 A152 20 87 A1		loa	jsr src
+    51 A155 8D FF FF		dst	sta $ffff
+    52
+    53 A158 EE 56 A1 D0 03 EE + 	inw dst+1
+    54
+    55 A160 AD 93 A1 D0 03 CE + 	dew cnt
+    56
+    57 A16B AD 93 A1			lda cnt
+    58 A16E 0D 94 A1			ora cnt+1
+    59 A171 D0 DF			bne loa
+    60
+    61 A173 AD 89 A1 C9 A1 D0 + 	cpw src+1 #ciov
+    62 A17F D0 03			bne skp
+    63
+    64 A181 A0 88			ldy #136
+    65 A183 60				rts
+    66
+    67 A184 A0 01		skp	ldy #1
+    68 A186 60				rts
+    69
+    70 A187 AD 00 80		src	lda s_vbxe
+    71
+    72 A18A EE 88 A1 D0 03 EE + 	inw src+1
+    73 A192 60				rts
+    74
+    75 A193 00 00		cnt	dta a(0)
+    76
+    77 A195 A9 00 8D 88 A1 A9 + open	mwa #s_vbxe src+1
+    78 A19F A0 01			ldy #1
+    79 A1A1 60				rts
+    80
+    81 					.endl
+    82
+    83
+    84 				;	.align
+    85 A1A2			main
+    86 A1A2 AD 00 07			lda $0700
+    87 A1A5 C9 53			cmp #$53
+    88 A1A7 D0 2E			bne E_8035
+    89 A1A9 AD 01 07			lda $0701
+    90 A1AC C9 40			cmp #$40
+    91 A1AE 90 27			bcc E_8035
+    92
+    93 A1B0 20 EE A5			jsr printF
+    94
+    95 A1B3 9B				dta $9B
+    96 A1B4 54 68 69 73 20 44 + 	dta c'This DOS does not need SDXLD.COM',$9b,$00
+    97
+    98 A1D6 60				rts
+    99
+   100 A1D7 A9 00		E_8035	lda #$00
+   101 A1D9 A2 3F			ldx #$3F
+   102 A1DB 9D 0F A8		E_8039	sta E_870F,x
+   103 A1DE CA				dex
+   104 A1DF 10 FA			bpl E_8039
+   105 A1E1 A2 01			ldx #$01
+   106 A1E3 BD E7 02		E_8041	lda $02E7,x
+   107 A1E6 9D 31 A8			sta E_8731,x
+   108 A1E9 CA				dex
+   109 A1EA 10 F7			bpl E_8041
+   110 				/*
+   111 					lda <vbxecmd
+   112 					sta fnam
+   113 					lda >vbxecmd
+   114 					sta fnam+1
+   115 					jsr OpenFile
+   116 					bmi E_809B
+   117
+   118 					lda <buffer
+   119 					sta $0344,x
+   120 					lda >buffer
+   121 					sta $0345,x
+   122 					lda #$80
+   123 					sta $0348,x
+   124 					lda #$00
+   125 					sta $0349,x
+   126 					lda #$07
+   127 					jsr IoCmd
+   128
+   129 					lda $0344,x
+   130 					clc
+   131 					adc $0348,x
+   132 					sta $0089
+   133 					lda $0345,x
+   134 					adc $0349,x
+   135 					sta $008A
+   136 					ldy #$00
+   137 					lda #$9B
+   138 					sta ($0089),y
+   139 					jsr CloseFile
+   140
+   141 					ldx #$FF
+   142 				E_808C	inx
+   143 					lda buffer,x
+   144 					cmp #$9B
+   145 					beq E_8098
+   146 					cmp #$20
+   147 					beq E_808C
+   148
+   149 				E_8098	stx E_8734
+   150 				E_809B	ldx #$00
+   151 					lda $0342,x
+   152 					cmp #$05
+   153 					bne E_80E0
+   154 					lda $0344,x
+   155 					sta $0089
+   156 					lda $0345,x
+   157 					sta $008A
+   158 					ldy #$00
+   159 				E_80B0	lda ($0089),y
+   160 					cmp #$20
+   161 					beq E_80C1
+   162 					cmp #$2C
+   163 					beq E_80C1
+   164 					cmp #$9B
+   165 					beq E_80E0
+   166 					iny
+   167 					bne E_80B0
+   168 				E_80C1	iny
+   169 					lda ($0089),y
+   170 					cmp #$20
+   171 					beq E_80C1
+   172 					cmp #$9B
+   173 					beq E_80E0
+   174 					ldx #$00
+   175 				E_80CE	lda ($0089),y
+   176 					sta buffer,x
+   177 					inx
+   178 					cmp #$9B
+   179 					beq E_80DB
+   180 					iny
+   181 					bpl E_80CE
+   182 				E_80DB	lda #$00
+   183 					sta buffer,x
+   184 				*/
+   184
+   185 A1EC A9 00		E_80E0	lda <vbxesys
+   186 A1EE 85 87			sta fnam
+   187 A1F0 A9 A4			lda >vbxesys
+   188 A1F2 85 88			sta fnam+1
+   189 A1F4 20 0E A4			jsr OpenFile
+   190 A1F7 30 28			bmi E_8115
+   191
+   192 A1F9 A2 10		E_80ED	ldx #$10
+   193 A1FB A9 00			lda #$00
+   194 A1FD A0 02			ldy #$02
+   195 A1FF 20 35 A4			jsr E_8337
+   196
+   197 A202 30 1D			bmi E_8115
+   198 A204 A0 98			ldy #$98
+   199 A206 A2 10			ldx #$10
+   200 A208 AD 40 A8			lda header+1
+   201 A20B C9 FF			cmp >$FFFA
+   202 A20D D0 12			bne E_8115
+   203 A20F AD 3F A8			lda header
+   204 A212 E9 FA			sbc <$FFFA
+   205 A214 30 0B			bmi E_8115
+   206 A216 0A				asl @
+   207 A217 A8				tay
+   208 A218 B9 E3 A5			lda E_84E2+1,y
+   209 A21B 48				pha
+   210 A21C B9 E2 A5			lda E_84E2,y
+   211 A21F 48				pha
+   212 A220 60				rts
+   213
+   214 A221 4C 51 A4		E_8115	jmp E_8353
+   215
+   216 A224 20 D3 A3		Read	jsr E_82C7
+   217
+   218 A227 30 6F			bmi E_818C
+   219 A229 A9 02			lda #$02
+   220 A22B A0 0A			ldy #$0A
+   221 A22D 20 35 A4			jsr E_8337
+   222
+   223 A230 30 66			bmi E_818C
+   224 A232 4C F9 A1			jmp E_80ED
+   225
+   226 A235 A9 35		Close	lda <E_8735
+   227 A237 9D 44 03			sta $0344,x
+   228 A23A A9 A8			lda >E_8735
+   229 A23C 9D 45 03			sta $0345,x
+   230 A23F A9 08			lda #$08
+   231 A241 9D 48 03			sta $0348,x
+   232 A244 A9 00			lda #$00
+   233 A246 9D 49 03			sta $0349,x
+   234 A249 A9 07			lda #$07
+   235 A24B 20 2F A4			jsr IOCmd
+   236
+   237 A24E 30 48			bmi E_818C
+   238
+   239 A250 A9 CB			lda <symbols
+   240 A252 85 80			sta $0080
+   241 A254 A9 A4			lda >symbols
+   242 A256 85 81			sta $0081
+   243
+   244 A258 A0 00		E_814C	ldy #$00
+   245 A25A B1 80		E_814E	lda ($0080),y
+   246 A25C F0 17			beq E_8169
+   247 A25E D9 35 A8			cmp E_8735,y
+   248 A261 D0 38			bne E_818F
+   249 A263 C8				iny
+   250 A264 C0 08			cpy #$08
+   251 A266 90 F2			bcc E_814E
+   252 A268 B1 80			lda ($0080),y
+   253 A26A 8D 0F A8			sta E_870F
+   254 A26D C8				iny
+   255 A26E B1 80			lda ($0080),y
+   256 A270 8D 10 A8			sta E_8710
+   257 A273 B0 38			bcs E_81A1
+   258 A275 A9 00		E_8169	lda #$00
+   259 A277 8D 3D A8			sta E_873D
+   260
+   261 A27A 20 EE A5			jsr printF
+   262
+   263 A27D 53 79 6D 62 6F 6C + 	dta c'Symbol %s not defined',$9B,$00
+   264 A294 35 A8			dta a(E_8735)
+   265
+   266 A296 A0 9A			ldy #$9A
+   267 A298 4C 51 A4		E_818C	jmp E_8353
+   268
+   269 A29B A5 80		E_818F	lda $0080
+   270 A29D 18				clc
+   271 A29E 69 0A			adc #$0A
+   272 A2A0 85 80			sta $0080
+   273 A2A2 90 B4			bcc E_814C
+   274 A2A4 E6 81			inc $0081
+   275 A2A6 D0 B0			bne E_814C
+   276
+   277 A2A8 20 D3 A3		Write	jsr E_82C7
+   278
+   279 A2AB 30 EB			bmi E_818C
+   280 A2AD A9 02		E_81A1	lda #$02
+   281 A2AF A0 02			ldy #$02
+   282 A2B1 20 35 A4			jsr E_8337
+   283
+   284 A2B4 30 E2			bmi E_818C
+   285 A2B6 20 EF A3		E_81AA	jsr E_82E3
+   286
+   287 A2B9 30 DD			bmi E_818C
+   288 A2BB C9 FE			cmp #$FE
+   289 A2BD F0 2A			beq E_81DD
+   290 A2BF B0 1A			bcs E_81CF
+   291 A2C1 C9 FC			cmp #$FC
+   292 A2C3 F0 4B			beq E_8204
+   293 A2C5 B0 35			bcs E_81F0
+   294 A2C7 A8				tay
+   295 A2C8 B1 82		E_81BC	lda ($0082),y
+   296 A2CA 18				clc
+   297 A2CB 6D 0F A8			adc E_870F
+   298 A2CE 91 82			sta ($0082),y
+   299 A2D0 C8				iny
+   300 A2D1 B1 82			lda ($0082),y
+   301 A2D3 6D 10 A8			adc E_8710
+   302 A2D6 91 82			sta ($0082),y
+   303 A2D8 88				dey
+   304 A2D9 98				tya
+   305 A2DA 2C				dta $2C
+   306 A2DB A9 FA		E_81CF	lda #$FA
+   307 A2DD 18				clc
+   308 A2DE 65 82			adc $0082
+   309 A2E0 85 82			sta $0082
+   310 A2E2 90 D2			bcc E_81AA
+   311 A2E4 E6 83			inc $0083
+   312 A2E6 4C B6 A2			jmp E_81AA
+   313
+   314 A2E9 20 EF A3		E_81DD	jsr E_82E3
+   315
+   316 A2EC 30 AA			bmi E_818C
+   317 A2EE AA				tax
+   318 A2EF BD 11 A8			lda E_8711,x
+   319 A2F2 85 82			sta $0082
+   320 A2F4 BD 19 A8			lda E_8719,x
+   321 A2F7 85 83			sta $0083
+   322 A2F9 4C B6 A2			jmp E_81AA
+   323
+   324 A2FC 20 EF A3		E_81F0	jsr E_82E3
+   325
+   326 A2FF 30 7C			bmi E_8271
+   327 A301 85 82			sta $0082
+   328 A303 20 EF A3			jsr E_82E3
+   329
+   330 A306 30 75			bmi E_8271
+   331 A308 85 83			sta $0083
+   332 A30A A0 00			ldy #$00
+   333 A30C 98				tya
+   334 A30D 4C C8 A2			jmp E_81BC
+   335
+   336 A310 4C F9 A1		E_8204	jmp E_80ED
+   337
+   338 A313 20 EF A3		Status	jsr E_82E3
+   339
+   340 A316 30 65			bmi E_8271
+   341 A318 85 84			sta $0084
+   342 A31A 20 EF A3			jsr E_82E3
+   343
+   344 A31D 30 5E			bmi E_8271
+   345 A31F 85 85			sta $0085
+   346 A321 20 EF A3			jsr E_82E3
+   347
+   348 A324 30 57			bmi E_8271
+   349 A326 A4 84			ldy $0084
+   350 A328 99 21 A8			sta E_8721,y
+   351 A32B 20 EF A3			jsr E_82E3
+   352
+   353 A32E 30 4D			bmi E_8271
+   354 A330 A4 84			ldy $0084
+   355 A332 99 29 A8			sta E_8729,y
+   356 A335 A9 02			lda #$02
+   357 A337 A0 02			ldy #$02
+   358 A339 20 35 A4			jsr E_8337
+   359
+   360 A33C 30 3F			bmi E_8271
+   361 A33E A5 85			lda $0085
+   362 A340 30 21			bmi E_8257
+   363 A342 A2 10			ldx #$10
+   364 A344 AD 41 A8			lda loaadr
+   365 A347 9D 48 03			sta $0348,x
+   366 A34A AD 42 A8			lda loaadr+1
+   367 A34D 9D 49 03			sta $0349,x
+   368 A350 AD 31 A8			lda E_8731
+   369 A353 9D 44 03			sta $0344,x
+   370 A356 AD 32 A8			lda E_8732
+   371 A359 9D 45 03			sta $0345,x
+   372 A35C A9 07			lda #$07
+   373 A35E 20 2F A4			jsr IOCmd
+   374
+   375 A361 30 1A			bmi E_8271
+   376 A363 A4 84		E_8257	ldy $0084
+   377 A365 AD 31 A8			lda E_8731
+   378 A368 99 11 A8			sta E_8711,y
+   379 A36B AD 32 A8			lda E_8732
+   380 A36E 99 19 A8			sta E_8719,y
+   381 A371 AD 41 A8			lda loaadr
+   382 A374 AE 42 A8			ldx loaadr+1
+   383 A377 20 CC A5			jsr E_84CC
+   384
+   385 A37A 4C F9 A1			jmp E_80ED
+   386
+   387 A37D 4C 51 A4		E_8271	jmp E_8353
+   388
+   389 A380 A9 02		Open	lda #$02
+   390 A382 A0 04			ldy #$04
+   391 A384 20 35 A4			jsr E_8337
+   392
+   393 A387 30 F4			bmi E_8271
+   394 A389 AD 9A A4			lda E_839A+2
+   395 A38C C9 A4			cmp >E_83AD
+   396 A38E D0 12			bne E_8296
+   397 A390 AD 99 A4			lda E_839A+1
+   398 A393 C9 AB			cmp <E_83AD
+   399 A395 D0 0B			bne E_8296
+   400 A397 A0 01			ldy #$01
+   401 A399 B9 41 A8		E_828D	lda loaadr,y
+   402 A39C 99 99 A4			sta E_839A+1,y
+   403 A39F 88				dey
+   404 A3A0 10 F7			bpl E_828D
+   405 A3A2 AD 43 A8		E_8296	lda endadr
+   406 A3A5 38				sec
+   407 A3A6 ED 41 A8			sbc loaadr
+   408 A3A9 9D 48 03			sta $0348,x
+   409 A3AC AD 44 A8			lda endadr+1
+   410 A3AF ED 42 A8			sbc loaadr+1
+   411 A3B2 9D 49 03			sta $0349,x
+   412 A3B5 FE 48 03			inc $0348,x
+   413 A3B8 D0 03			bne E_82B1
+   414 A3BA FE 49 03			inc $0349,x
+   415 A3BD AD 41 A8		E_82B1	lda loaadr
+   416 A3C0 9D 44 03			sta $0344,x
+   417 A3C3 AD 42 A8			lda loaadr+1
+   418 A3C6 9D 45 03			sta $0345,x
+   419 A3C9 A9 07			lda #$07
+   420 A3CB 20 2F A4			jsr IOCmd
+   421
+   422 A3CE 30 AD			bmi E_8271
+   423 A3D0 4C F9 A1			jmp E_80ED
+   424
+   425 A3D3 20 EF A3		E_82C7	jsr E_82E3
+   426
+   427 A3D6 30 14			bmi E_82E0
+   428 A3D8 AA				tax
+   429 A3D9 38				sec
+   430 A3DA BD 11 A8			lda E_8711,x
+   431 A3DD FD 21 A8			sbc E_8721,x
+   432 A3E0 8D 0F A8			sta E_870F
+   433 A3E3 BD 19 A8			lda E_8719,x
+   434 A3E6 FD 29 A8			sbc E_8729,x
+   435 A3E9 8D 10 A8			sta E_8710
+   436 A3EC C0 00		E_82E0	cpy #$00
+   437 A3EE 60				rts
+   438
+   439 A3EF 8A			E_82E3	txa
+   440 A3F0 48				pha
+   441 A3F1 A9 02			lda #$02
+   442 A3F3 A0 01			ldy #$01
+   443 A3F5 20 35 A4			jsr E_8337
+   444
+   445 A3F8 68				pla
+   446 A3F9 AA				tax
+   447 A3FA AD 41 A8			lda loaadr
+   448 A3FD C0 00			cpy #$00
+   449 A3FF 60				rts
+   450
+   451 A400 44 3A 53 5F 56 42 + vbxesys	dta c'D:S_VBXE.SYS',$9B,$00
+   452
+   453 				//vbxecmd	dta c'D:S_VBXE.CMD',$9B,$00
+   454
+   455 A40E			OpenFile
+   456 A40E A2 10			ldx #$10
+   457 A410 20 2B A4			jsr CloseFile
+   458
+   459 A413 A5 87			lda fnam
+   460 A415 9D 44 03			sta $0344,x
+   461 A418 A5 88			lda fnam+1
+   462 A41A 9D 45 03			sta $0345,x
+   463 A41D A9 04			lda #$04
+   464 A41F 9D 4A 03			sta $034A,x
+   465 A422 A9 00			lda #$00
+   466 A424 9D 4B 03			sta $034B,x
+   467 A427 A9 03			lda #$03
+   468 A429 D0 04			bne IOCmd
+   469
+   470 A42B			CloseFile
+   471 A42B A2 10			ldx #$10
+   472 A42D A9 0C			lda #$0C
+   473 A42F 9D 42 03		IOCmd	sta $0342,x
+   474 A432 4C 17 A1			jmp ciov
+   475
+   476 A435 A2 10		E_8337	ldx #$10
+   477 A437 18				clc
+   478 A438 69 3F			adc <header
+   479 A43A 9D 44 03			sta $0344,x
+   480 A43D A9 00			lda #$00
+   481 A43F 69 A8			adc >header
+   482 A441 9D 45 03			sta $0345,x
+   483 A444 98				tya
+   484 A445 9D 48 03			sta $0348,x
+   485 A448 A9 00			lda #$00
+   486 A44A 9D 49 03			sta $0349,x
+   487 A44D A9 07			lda #$07
+   488 A44F D0 DE			bne IOCmd
+   489
+   490 A451 84 86		E_8353	sty errn
+   491 A453 20 2B A4			jsr CloseFile
+   492
+   493 A456 A4 86			ldy errn
+   494 A458 C0 88			cpy #$88
+   495 A45A D0 50			bne E_83AE
+   496 A45C A2 1D			ldx #$1D
+   497 A45E A9 00			lda #$00
+   498 A460 9D 3F A8		E_8362	sta header,x
+   499 A463 CA				dex
+   500 A464 10 FA			bpl E_8362
+   501 A466 A9 10			lda #$10
+   502 A468 8D 5C A8			sta temp+23
+   503 A46B A9 83			lda #$83
+   504 A46D 8D 4A A8			sta temp+5
+   505 A470 A2 00			ldx #$00
+   506 A472 BD 00 04		E_8374	lda $0400,x
+   507 A475 C9 20			cmp #$20
+   508 A477 F0 04			beq E_837F
+   509 A479 C9 4C			cmp #$4C
+   510 A47B D0 18			bne E_8397
+   511 A47D BD 01 04		E_837F	lda $0401,x
+   512 A480 C9 EB			cmp #$EB
+   513 A482 D0 11			bne E_8397
+   514 A484 BD 02 04			lda $0402,x
+   515 A487 C9 07			cmp #$07
+   516 A489 D0 0A			bne E_8397
+   517 A48B A9 30			lda <E_8430
+   518 A48D 9D 01 04			sta $0401,x
+   519 A490 A9 A5			lda >E_8430
+   520 A492 9D 02 04			sta $0402,x
+   521 A495 E8			E_8397	inx
+   522 A496 D0 DA			bne E_8374
+   523 A498 20 AB A4		E_839A	jsr E_83AD
+   524
+   525 A49B 2C 33 A8			bit E_8733
+   526 A49E 10 0B			bpl E_83AD
+   527 A4A0 A2 01			ldx #$01
+   528 A4A2 BD 31 A8		E_83A4	lda E_8731,x
+   529 A4A5 9D E7 02			sta $02E7,x
+   530 A4A8 CA				dex
+   531 A4A9 10 F7			bpl E_83A4
+   532
+   533 A4AB 60			E_83AD	rts		; end
+   534
+   535 A4AC 20 EE A5		E_83AE	jsr printF
+   536
+   537 A4AF 45 72 72 6F 72 20 + 	dta c'Error %b loading %p',$9B,$00
+   538 A4C4 86 00			dta a(errn)
+   539 A4C6 87 00			dta a(fnam)
+   540
+   541 A4C8 4C AB A4			jmp E_83AD
+   542 				;	rts
+   543
+   544 A4CB 53 5F 41 44 44 20 + symbols	dta c'S_ADD   ',a(_rts)
+   545 A4D5 45 58 54 45 4E 44 + 	dta c'EXTENDED',a(Break)
+   546 A4DF 53 59 4D 42 4F 4C + 	dta c'SYMBOL  ',a(E_8735)
+   547 A4E9 43 4F 4D 54 41 42 + 	dta c'COMTAB  ',a(header)
+   548 A4F3 50 52 49 4E 54 46 + 	dta c'PRINTF  ',a(printF)
+   549 A4FD 53 5F 41 44 44 49 + 	dta c'S_ADDIZ ',a(s_addiz)
+   550 A507 55 5F 47 45 54 4E + 	dta c'U_GETNUM',a(U_GETNUM)
+   551 A511 55 5F 53 4C 41 53 + 	dta c'U_SLASH ',a(U_SLASH)
+   552 A51B 49 4E 53 54 41 4C + 	dta c'INSTALL ',a(E_8733)
+   553 A525 54 5F 20 20 20 20 + 	dta c'T_      ',a(header)
+   554 A52F 00				dta $00
+   555
+   556 A530 A9 00		E_8430	lda #$00
+   557 A532 60				rts
+   558
+   559 A533			U_GETNUM
+   560 A533 A9 8F			lda <buffer
+   561 A535 18				clc
+   562 A536 6D 34 A8			adc E_8734
+   563 A539 48				pha
+   564 A53A A9 A7			lda >buffer
+   565 A53C 69 00			adc #$00
+   566 A53E AA				tax
+   567 A53F 68				pla
+   568 A540 20 FD A6			jsr E_85FD
+   569
+   570 A543 08				php
+   571 A544 48				pha
+   572 A545 98				tya
+   573 A546 48				pha
+   574 A547 AC 34 A8			ldy E_8734
+   575 A54A B9 8F A7		E_844A	lda buffer,y
+   576 A54D C9 9B			cmp #$9B
+   577 A54F F0 13			beq E_8464
+   578 A551 C9 2F			cmp #$2F
+   579 A553 F0 0F			beq E_8464
+   580 A555 C8				iny
+   581 A556 30 0C			bmi E_8464
+   582 A558 C9 20			cmp #$20
+   583 A55A D0 EE			bne E_844A
+   584 A55C C8			E_845C	iny
+   585 A55D B9 8F A7			lda buffer,y
+   586 A560 C9 20			cmp #$20
+   587 A562 F0 F8			beq E_845C
+   588 A564 8C 34 A8		E_8464	sty E_8734
+   589 A567 68				pla
+   590 A568 A8				tay
+   591 A569 68				pla
+   592 A56A 28				plp
+   593
+   594 A56B 85 80		U_SLASH	sta $0080
+   595 A56D 86 81			stx $0081
+   596 A56F 84 89			sty $0089
+   597 A571 88			E_8471	dey
+   598 A572 88				dey
+   599 A573 30 06			bmi E_847B
+   600 A575 A9 00			lda #$00
+   601 A577 91 80			sta ($0080),y
+   602 A579 F0 F6			beq E_8471
+   603 A57B A0 01		E_847B	ldy #$01
+   604 A57D AE 34 A8			ldx E_8734
+   605 A580 BD 8F A7			lda buffer,x
+   606 A583 C9 2F			cmp #$2F
+   607 A585 D0 17			bne E_849E
+   608 A587 A0 01		E_8487	ldy #$01
+   609 A589 E8				inx
+   610 A58A BD 8F A7		E_848A	lda buffer,x
+   611 A58D D1 80			cmp ($0080),y
+   612 A58F D0 07			bne E_8498
+   613 A591 88				dey
+   614 A592 A9 FF			lda #$FF
+   615 A594 91 80			sta ($0080),y
+   616 A596 D0 EF			bne E_8487
+   617 A598 C8			E_8498	iny
+   618 A599 C8				iny
+   619 A59A C4 89			cpy $0089
+   620 A59C 90 EC			bcc E_848A
+   621 A59E 8E 34 A8		E_849E	stx E_8734
+   622 A5A1 60				rts
+   623
+   624 A5A2 8D DD A5		s_addiz	sta E_84DC+1
+   625 A5A5 8C DE A5			sty E_84DC+2
+   626 A5A8 A5 0C			lda $000C
+   627 A5AA 8D E0 A5			sta E_84DF+1
+   628 A5AD A5 0D			lda $000D
+   629 A5AF 8D E1 A5			sta E_84DF+2
+   630 A5B2 A2 01			ldx #$01
+   631 A5B4 BD 31 A8		E_84B4	lda E_8731,x
+   632 A5B7 95 0C			sta $000C,x
+   633 A5B9 95 80			sta $0080,x
+   634 A5BB CA				dex
+   635 A5BC 10 F6			bpl E_84B4
+   636 A5BE A0 05			ldy #$05
+   637 A5C0 B9 DC A5		E_84C0	lda E_84DC,y
+   638 A5C3 91 80			sta ($0080),y
+   639 A5C5 88				dey
+   640 A5C6 10 F8			bpl E_84C0
+   641 A5C8 A9 06			lda #$06
+   642 A5CA A2 00			ldx #$00
+   643 A5CC 18			E_84CC	clc
+   644 A5CD 6D 31 A8			adc E_8731
+   645 A5D0 8D 31 A8			sta E_8731
+   646 A5D3 8A				txa
+   647 A5D4 6D 32 A8			adc E_8732
+   648 A5D7 8D 32 A8			sta E_8732
+   649 A5DA 18				clc
+   650 A5DB 60			_rts	rts
+   651
+   652 A5DC 20 00 00		E_84DC	jsr $0000
+   653
+   654 A5DF 4C 00 00		E_84DF	jmp $0000
+   655
+   656 				; http://tajemnice.atari8.info/8_91/8_91_dosy.html
+   657 				; Tablica sterownika (ang. handler) zawiera szereg wektorów o okreœlonym znaczeniu.
+   658 				; Ich kolejnoœæ jest nastêpuj¹ca:
+   659 				;	OPEN (wektor otwarcia pliku)
+   660 				;	CLOSE (wektor zamkniêcia pliku)
+   661 				;	GET BYTE (wektor pobrania bajtu z urz¹dzenia Ÿród³owego)
+   662 				;	PUT BYTE (wektor wys³ania bajtu do peryferia)
+   663 				;	GET STATUS (wektor pobrania statusu)
+   664 				;	SPECIAL (wektor specjalny).
+   665
+   666 A5E2 7F A3 34 A2 23 A2 + E_84E2	dta a(Open-1, Close-1, Read-1, Write-1, Status-1, Open-1)
+   667
+   668 A5EE 68			printF	pla
+   669 A5EF 85 32			sta $0032
+   670 A5F1 68				pla
+   671 A5F2 85 33			sta $0033
+   672 A5F4 A0 00			ldy #$00
+   673 A5F6 C8			E_84F6	iny
+   674 A5F7 B1 32			lda ($0032),y
+   675 A5F9 D0 FB			bne E_84F6
+   676 A5FB 38				sec
+   677 A5FC 98				tya
+   678 A5FD 65 32			adc $0032
+   679 A5FF 85 34			sta $0034
+   680 A601 A9 00			lda #$00
+   681 A603 65 33			adc $0033
+   682 A605 85 35			sta $0035
+   683 A607 A0 01			ldy #$01
+   684 A609 B1 32		E_8509	lda ($0032),y
+   685 A60B F0 16			beq E_8523
+   686 A60D C8				iny
+   687 A60E 84 15			sty $0015
+   688 A610 A2 00			ldx #$00
+   689 A612 86 3A			stx $003A
+   690 A614 0A				asl @
+   691 A615 66 3A			ror $003A
+   692 A617 4A				lsr @
+   693 A618 C9 25			cmp #$25
+   694 A61A F0 0B			beq E_8527
+   695 A61C 20 EE A6		E_851C	jsr E_85EE
+   696
+   697 A61F A4 15		E_851F	ldy $0015
+   698 A621 D0 E6			bne E_8509
+   699 A623 B8			E_8523	clv
+   700 A624 6C 34 00			jmp ($0034)
+   701
+   702 A627 B1 32		E_8527	lda ($0032),y
+   703 A629 C9 25			cmp #$25
+   704 A62B F0 21			beq E_854E
+   705 A62D 29 5F			and #$5F
+   706 A62F C9 58			cmp #$58
+   707 A631 F0 21			beq E_8554
+   708 A633 C9 42			cmp #$42
+   709 A635 F0 3C			beq E_8573
+   710 A637 C9 44			cmp #$44
+   711 A639 F0 33			beq E_856E
+   712 A63B C9 43			cmp #$43
+   713 A63D F0 53			beq E_8592
+   714 A63F C9 53			cmp #$53
+   715 A641 F0 58			beq E_859B
+   716 A643 C9 50			cmp #$50
+   717 A645 F0 69			beq E_85B0
+   718 A647 C9 46			cmp #$46
+   719 A649 F0 16			beq E_8561
+   720 A64B A9 25			lda #$25
+   721 A64D 2C				dta $2C
+   722 A64E E6 15		E_854E	inc $0015
+   723 A650 D0 CA			bne E_851C
+   724 A652 F0 CB		E_8552	beq E_851F
+   725 A654 20 BC A6		E_8554	jsr E_85BC
+   726
+   727 A657 20 DD A6			jsr E_85DD
+   728
+   729 A65A A5 D4			lda $00D4
+   730 A65C 20 DD A6			jsr E_85DD
+   731
+   732 A65F D0 BE			bne E_851F
+   733 A661 20 C5 A6		E_8561	jsr E_85C5
+   734
+   735 A664 A6 36			ldx $0036
+   736 A666 A4 37			ldy $0037
+   737 A668 20 89 DD			jsr $DD89
+   738
+   739 A66B B8				clv
+   740 A66C 50 0D			bvc E_857B
+   741 A66E 20 BC A6		E_856E	jsr E_85BC
+   742
+   743 A671 B0 05			bcs E_8578
+   744 A673 20 C5 A6		E_8573	jsr E_85C5
+   745
+   746 A676 84 D5			sty $00D5
+   747 A678 20 AA D9		E_8578	jsr $D9AA
+   748
+   749 A67B 20 E6 D8		E_857B	jsr $D8E6
+   750
+   751 A67E A0 00			ldy #$00
+   752 A680 B1 F3		E_8580	lda ($00F3),y
+   753 A682 08				php
+   754 A683 29 7F			and #$7F
+   755 A685 84 39			sty $0039
+   756 A687 20 EE A6			jsr E_85EE
+   757
+   758 A68A A4 39			ldy $0039
+   759 A68C C8				iny
+   760 A68D 28				plp
+   761 A68E 10 F0			bpl E_8580
+   762 A690 30 8D			bmi E_851F
+   763 A692 20 C5 A6		E_8592	jsr E_85C5
+   764
+   765 A695 20 EE A6			jsr E_85EE
+   766
+   767 A698 4C 1F A6			jmp E_851F
+   768
+   769 A69B 20 C5 A6		E_859B	jsr E_85C5
+   770
+   771 A69E B1 36		E_859E	lda ($0036),y
+   772 A6A0 F0 B0			beq E_8552
+   773 A6A2 C9 9B			cmp #$9B
+   774 A6A4 F0 AC			beq E_8552
+   775 A6A6 84 38			sty $0038
+   776 A6A8 20 EE A6			jsr E_85EE
+   777
+   778 A6AB A4 38			ldy $0038
+   779 A6AD C8				iny
+   780 A6AE D0 EE			bne E_859E
+   781 A6B0 20 BC A6		E_85B0	jsr E_85BC
+   782
+   783 A6B3 85 37			sta $0037
+   784 A6B5 A5 D4			lda $00D4
+   785 A6B7 85 36			sta $0036
+   786 A6B9 88				dey
+   787 A6BA F0 E2			beq E_859E
+   788 A6BC 20 C5 A6		E_85BC	jsr E_85C5
+   789
+   790 A6BF C8				iny
+   791 A6C0 B1 36			lda ($0036),y
+   792 A6C2 85 D5			sta $00D5
+   793 A6C4 60				rts
+   794
+   795 A6C5 E6 15		E_85C5	inc $0015
+   796 A6C7 A2 FE			ldx #$FE
+   797 A6C9 A0 00			ldy #$00
+   798 A6CB B1 34		E_85CB	lda ($0034),y
+   799 A6CD 95 38			sta $0038,x
+   800 A6CF E6 34			inc $0034
+   801 A6D1 D0 02			bne E_85D5
+   802 A6D3 E6 35			inc $0035
+   803 A6D5 E8			E_85D5	inx
+   804 A6D6 30 F3			bmi E_85CB
+   805 A6D8 B1 36			lda ($0036),y
+   806 A6DA 85 D4			sta $00D4
+   807 A6DC 60				rts
+   808
+   809 A6DD 48			E_85DD	pha
+   810 A6DE 4A 4A 4A 4A			:4	lsr @
+   811 A6E2 20 E8 A6			jsr E_85E8
+   812
+   813 A6E5 68				pla
+   814 A6E6 29 0F			and #$0F
+   815 A6E8 C9 0A		E_85E8	cmp #$0A
+   816 A6EA F8				sed
+   817 A6EB 69 30			adc #$30
+   818 A6ED D8				cld
+   819 A6EE 05 3A		E_85EE	ora $003A
+   820 A6F0 A8				tay
+   821 A6F1 AD 47 03			lda $0347
+   822 A6F4 48				pha
+   823 A6F5 AD 46 03			lda $0346
+   824 A6F8 48				pha
+   825 A6F9 98				tya
+   826 A6FA A2 00			ldx #$00
+   827 A6FC 60				rts
+   828
+   829 A6FD 85 15		E_85FD	sta $0015
+   830 A6FF 86 16			stx $0016
+   831 A701 A0 00			ldy #$00
+   832 A703 84 32			sty $0032
+   833 A705 84 33			sty $0033
+   834 A707 84 34			sty $0034
+   835 A709 B1 15			lda ($0015),y
+   836 A70B C9 24			cmp #$24
+   837 A70D D0 2C			bne E_863B
+   838 A70F C8			E_860F	iny
+   839 A710 B1 15			lda ($0015),y
+   840 A712 C9 30			cmp #$30
+   841 A714 90 64			bcc E_867A
+   842 A716 C9 3A			cmp #$3A
+   843 A718 90 0D			bcc E_8627
+   844 A71A 29 DF			and #$DF
+   845 A71C C9 41			cmp #$41
+   846 A71E 90 5A			bcc E_867A
+   847 A720 C9 47			cmp #$47
+   848 A722 B0 56			bcs E_867A
+   849 A724 38				sec
+   850 A725 E9 37			sbc #$37
+   851 A727 29 0F		E_8627	and #$0F
+   852 A729 A2 04			ldx #$04
+   853 A72B 06 32		E_862B	asl $0032
+   854 A72D 26 33			rol $0033
+   855 A72F 26 34			rol $0034
+   856 A731 CA				dex
+   857 A732 D0 F7			bne E_862B
+   858 A734 05 32			ora $0032
+   859 A736 85 32			sta $0032
+   860 A738 4C 0F A7			jmp E_860F
+   861
+   862 A73B B1 15		E_863B	lda ($0015),y
+   863 A73D 20 85 A7			jsr E_8685
+   864
+   865 A740 B0 39			bcs E_867B
+   866 A742 29 0F			and #$0F
+   867 A744 48				pha
+   868 A745 06 32			asl $0032
+   869 A747 26 33			rol $0033
+   870 A749 26 34			rol $0034
+   871 A74B A5 33			lda $0033
+   872 A74D 85 35			sta $0035
+   873 A74F A5 34			lda $0034
+   874 A751 85 36			sta $0036
+   875 A753 A5 32			lda $0032
+   876 A755 0A				asl @
+   877 A756 26 35			rol $0035
+   878 A758 26 36			rol $0036
+   879 A75A 0A				asl @
+   880 A75B 26 35			rol $0035
+   881 A75D 26 36			rol $0036
+   882 A75F A2 FD			ldx #$FD
+   883 A761 75 35		E_8661	adc $0035,x
+   884 A763 95 35			sta $0035,x
+   885 A765 B5 38			lda $0038,x
+   886 A767 E8				inx
+   887 A768 D0 F7			bne E_8661
+   888 A76A 68				pla
+   889 A76B 65 32			adc $0032
+   890 A76D 85 32			sta $0032
+   891 A76F 90 06			bcc E_8677
+   892 A771 E6 33			inc $0033
+   893 A773 D0 02			bne E_8677
+   894 A775 E6 34			inc $0034
+   895 A777 C8			E_8677	iny
+   896 A778 D0 C1			bne E_863B
+   897 A77A 88			E_867A	dey
+   898 A77B 98			E_867B	tya
+   899 A77C 08				php
+   900 A77D A5 32			lda $0032
+   901 A77F A6 33			ldx $0033
+   902 A781 A4 34			ldy $0034
+   903 A783 28				plp
+   904 A784 60				rts
+   905
+   906 A785 C9 30		E_8685	cmp #$30
+   907 A787 90 03			bcc E_868C
+   908 A789 C9 3A			cmp #$3A
+   909 A78B 24				dta $24
+   910 A78C 38			E_868C	sec
+   911 A78D 60				rts
+   912
+   913 A78E 00			Break	brk
+   914
+   915 = A78F			buffer	.ds 128
+   916
+   917 = A80F			E_870F	.ds 1
+   918 = A810			E_8710	.ds 1
+   919 = A811			E_8711	.ds 8
+   920 = A819			E_8719	.ds 8
+   921 = A821			E_8721	.ds 8
+   922 = A829			E_8729	.ds 8
+   923 = A831			E_8731	.ds 1
+   924 = A832			E_8732	.ds 1
+   925 = A833			E_8733	.ds 1
+   926 = A834			E_8734	.ds 1
+   927 = A835			E_8735	.ds 8
+   928 = A83D			E_873D	.ds 2
+   929
+   930 = A83F			header	.ds 2
+   931 = A841			loaadr	.ds 2
+   932 = A843			endadr	.ds 2
+   933
+   934 = A845			temp	.ds 23
+   935
+   936 				.print *
+   936 				$A85C
+   937
+   938 02E2-02E3> A2 A1			ini main
