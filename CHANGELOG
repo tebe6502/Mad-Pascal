@@ -1,3 +1,7 @@
+31.05.2020
+- poprawione rozpoznawanie parametrów procedur: proc(pointer) <> proc(PByte)
+- LZ4, aPLib
+
 23.05.2020
 - GRAPH, FASTGRAPH: SetActiveBuffer, SetDisplayBuffer, NewDisplayBuffer, SwitchDisplayBuffer
 

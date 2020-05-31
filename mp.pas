@@ -23,7 +23,7 @@ Contributors:
 
 + DMSC :
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
-	- fast SIN/COS (IEEE754-32 precision)
+	- unit SYSTEM: fsincos, fast SIN/COS (IEEE754-32 precision)
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
@@ -40,8 +40,9 @@ Contributors:
 	- unit S2 (VBXE handler)
 
 + Krzysztof Dudek :
-	- XBIOS
+	- unit XBIOS: BLIBS library
 	- unit LZ4: unLZ4
+	- unit aPLib: unAPL
 
 + Marcin ¯ukowski :
 	- unit FASTGRAPH: fLine
@@ -50,6 +51,7 @@ Contributors:
 	- base\runtime\icmp.asm
 	- unit GRAPH: detect X:Y graphics resolution (OS mode)
 	- unit CRC
+	- unit DEFLATE: unDEF
 
 + Sebastian Igielski :
 	- unit MISC: DetectStereo
@@ -80,16 +82,16 @@ Contributors:
 
 # wystepuja tylko skoki w przod @+ (@- nie istnieje)
 
-# edx+2, edx+3 nie wystepuje
+# :edx+2, :edx+3 nie wystepuje
 
-# register przyporzzadkowuje kolejnym parametrom 1: edx, 2: ecx, 3: eax
+# 'register' alokuje parametry na stronie zerowej 1-EDX, 2-ECX, 3-EAX
 
 # jeq, jne, jcc, jcs, jmi, jpl l_xxxx
 
 # wartosc dla typu POINTER zwiekszana jest o CODEORIGIN
 
-# BP  tylko przy adresowaniu bajtu
-# BP2 przy adresowaniu wiecej niz 1 bajtu (WORD, CARDINAL itd.)
+# BP  tylko przy adresowaniu 1-go bajtu
+# BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
 # indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
 # indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * DataSize[AllocElementType]) + b * DataSize[AllocElementType]
@@ -1292,29 +1294,32 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 	  ( ((Ident[IdentIndex].Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes) ) and	// smallint > byte
 	  (DataSize[Ident[IdentIndex].Param[i].DataType] >= DataSize[Param[i].DataType]) ) or
 
-	  (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) ) or
+	  ( (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) {and (Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType)} ) ) or
 
 	  ( (Param[i].DataType in Pointers) and (Ident[IdentIndex].Param[i].DataType = Param[i].AllocElementType) ) or		// dla parametru VAR
 
-	  ( (Ident[IdentIndex].Param[i].DataType = UNTYPETOK) and (Ident[IdentIndex].Param[i].PassMethod = VARPASSING) and (Param[i].DataType in IntegerTypes + [CHARTOK]) )
+	  ( (Ident[IdentIndex].Param[i].DataType = UNTYPETOK) and (Ident[IdentIndex].Param[i].PassMethod = VARPASSING) and (Param[i].DataType in OrdinalTypes {IntegerTypes + [CHARTOK]}) )
 
 	 then begin
 
 	   hits := hits or mask[cnt];		// z grubsza spelnia warunek
 	   inc(cnt);
 
-	   if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) then begin	// dodatkowe punkty jesli idealnie spelnia warunek
+	   if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) and
+	      (Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType) then begin
+ 	    //  (Ident[IdentIndex].Param[i].PassMethod = Param[i].PassMethod)  then begin	// dodatkowe punkty jesli idealnie spelnia warunek
+
 	     hits := hits or mask[cnt];
 	     inc(cnt);
 	   end;
 
 	 end;
-{
+
       if Ident[IdentIndex].Name = 'TEST' then
        for i := 1 to NumParams do begin
         writeln(High(best),':',Ident[IdentIndex].Param[i].Name,',',Ident[IdentIndex].Param[i].DataType,',',Ident[IdentIndex].Param[i].AllocElementType ,' / ', Param[i].Name,',', Param[i].DataType,',',Param[i].AllocElementType ,' | ', hits);
        end;
-}
+
 	k:=High(best);
 
 	best[k].IdentIndex := IdentIndex;
@@ -1403,7 +1408,7 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
        ok := true;
 
        for m := 1 to l[k].NumParams do
-	if (Ident[IdentIndex].Param[m].DataType <> l[k].Param[m].DataType) then begin ok := false; Break end;
+	if (Ident[IdentIndex].Param[m].DataType <> l[k].Param[m].DataType) or (Ident[IdentIndex].Param[m].AllocElementType <> l[k].Param[m].AllocElementType) then begin ok := false; Break end;
 
        if ok then
 	Error(x, 'Overloaded functions ''' + Ident[IdentIndex].Name + ''' have the same parameter list');
@@ -2490,6 +2495,35 @@ begin
 
 	TemporaryBuf[6] := '~';
 	TemporaryBuf[7] := '~';
+       end;
+
+
+    if (pos('mva :STACKORIGIN,x ', TemporaryBuf[0]) > 0) and				// mva :STACKORIGIN,x F			; 0
+       (pos('mva :STACKORIGIN+STACKWIDTH,x ', TemporaryBuf[1]) > 0) and			// mva :STACKORIGIN+STACKWIDTH,x F+1	; 1
+       (TemporaryBuf[2] = #9'dex') and							// dex					; 2
+       (TemporaryBuf[3] = ':move') then							//:move					; 3
+       begin
+
+	TemporaryBuf[0] := #9'mva :STACKORIGIN,x :bp2';
+	TemporaryBuf[1] := #9'mva :STACKORIGIN+STACKWIDTH,x :bp2+1';
+
+	tmp:=TemporaryBuf[4];
+	p:=StrToInt(TemporaryBuf[5]);
+
+	if p = 256 then begin
+     	 TemporaryBuf[2] := #9'ldy #$00';
+     	 TemporaryBuf[3] := #9'mva:rne (:bp2),y adr.'+tmp+',y+';
+    	end else
+    	if p <= 128 then begin
+     	 TemporaryBuf[2] := #9'ldy #$'+IntToHex(p-1, 2);
+     	 TemporaryBuf[3] := #9'mva:rpl (:bp2),y adr.'+tmp+',y-';
+    	end else begin
+     	 TemporaryBuf[2] := #9'@move '+tmp+' #adr.'+tmp+' #$'+IntToHex(p,2);
+     	 TemporaryBuf[3] := '~';
+	end;
+
+     	TemporaryBuf[4] := #9'mwa #adr.'+tmp+' '+tmp;
+     	TemporaryBuf[5] := #9'dex';
        end;
 
 
@@ -26959,8 +26993,8 @@ begin
 	     __jl: asm65(#9'bcc *+5', '; jl');					// <
 	    __jle: begin asm65(#9'bcc *+7', '; jle'); asm65(#9'beq *+5') end;	// <=
 
-	  __addBX: asm65(#9'inx', '; add bx, 1');
-	  __subBX: asm65(#9'dex', '; sub bx, 1');
+	  __addBX: asm65(#9'inx');//, '; add bx, 1');
+	  __subBX: asm65(#9'dex');//, '; sub bx, 1');
 
        __addAL_CL: asm65(#9'jsr addAL_CL', '; add al, cl');
        __addAX_CX: asm65(#9'jsr addAX_CX', '; add ax, cx');
@@ -37525,12 +37559,20 @@ end;
 
     idx := RecordSize(GetIdent(Param[ParamIndex].Name));
 
-    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(idx));
-    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
+    asm65(':move');
+    asm65(Param[ParamIndex].Name);
+    asm65(IntToStr(idx));
+
+//    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(idx));
+//    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
    end else begin
 
-    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(integer(Param[ParamIndex].NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
-    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
+    asm65(':move');
+    asm65(Param[ParamIndex].Name);
+    asm65(IntToStr(integer(Param[ParamIndex].NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
+
+//    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(integer(Param[ParamIndex].NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
+//    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
    end;
 
  end;
@@ -38920,13 +38962,16 @@ begin
 
   end else
 
-   if not FileExists(ParamStr(i)) then begin
-    writeln('Error: Can''t open file '''+ParamStr(i)+'''');
-    FreeTokens;
-    Halt(3);
-   end else begin
-    UnitName[1].Name := ParamStr(i);
-    UnitName[1].Path := ParamStr(i);
+   begin
+    UnitName[1].Name := ChangeFileExt(ParamStr(i), '.pas');
+    UnitName[1].Path := UnitName[1].Name;
+
+    if not FileExists(UnitName[1].Name) then begin
+     writeln('Error: Can''t open file '''+UnitName[1].Name+'''');
+     FreeTokens;
+     Halt(3);
+    end;
+
    end;
 
  end;
