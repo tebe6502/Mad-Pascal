@@ -23,8 +23,8 @@ interface
 	procedure unDEF(input, output: pointer); assembler; register;
 
 implementation
-	
-	
+
+
 procedure unDEF(input, output: pointer); assembler; register;
 (*
 @description:
@@ -98,7 +98,7 @@ CONTROL_SYMBOLS                 equ	LENGTH_SYMBOLS+DISTANCE_SYMBOLS
 
 	mwa input inputPointer
 	mwa output outputPointer
-	
+
 	stx @sp
 
 	mvy	#0	getBit_buffer
@@ -132,10 +132,11 @@ inflateStored_firstByte
 inflate_nextBlock
 	plp
 	bcc	inflate_blockLoop
-	
+
 	ldx #0
 @sp	equ *-1
 
+;	jmp @exit
 	rts
 
 inflateCompressed
@@ -505,7 +506,7 @@ nBitCode_controlOffset		equ nBitCode_literalOffset+2*TREE_SIZE
 allLiteralsCodeLength		equ nBitCode_controlOffset+2*TREE_SIZE
 codeToLiteralSymbol		equ allLiteralsCodeLength+1
 codeToControlSymbol		equ codeToLiteralSymbol+256
-	
+
 };
 end;
 
