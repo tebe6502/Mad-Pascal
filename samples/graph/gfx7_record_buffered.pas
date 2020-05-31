@@ -109,7 +109,7 @@ repeat
 	pause;
 
 	dpoke(dl+4, buf2);
-	FrameBuffer(buf1);
+	SetActiveBuffer(buf1);
 
 	Draw(b1_l0, l0, 1);
 	Draw(b1_l1, l1, 2);
@@ -118,7 +118,7 @@ repeat
 	pause;
 
 	dpoke(dl+4, buf1);
-	FrameBuffer(buf2);
+	SetActiveBuffer(buf2);
 
 	Draw(b2_l0, l0, 1);
 	Draw(b2_l1, l1, 2);
