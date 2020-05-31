@@ -3,13 +3,13 @@
 uses crt, fastgraph;
 
 
-var	buf1, buf2: TFrameBuffer;
+var	buf1, buf2: TDisplayBuffer;
 
 	ts: array [0..1] of PByte;	// scanline begin address
 	tc: array [0..1] of word;	// counter
-	
+
 	frm: byte;
-	
+
 procedure UpdateRaster();
 var
 	xp: array[0..2] of byte = (40, 70, 50);
@@ -22,11 +22,11 @@ var
 begin
 
 	if frm = 0 then begin
-		DisplayBuffer(buf2);
-		FrameBuffer(buf1);
+		SetDisplayBuffer(buf2);
+		SetActiveBuffer(buf1);
 	end else begin
-		DisplayBuffer(buf1);
-		FrameBuffer(buf2);
+		SetDisplayBuffer(buf1);
+		SetActiveBuffer(buf2);
 	end;
 
 //	ts[frm]		start address
@@ -46,13 +46,13 @@ begin
 	fLine(xp[0]+i,yp[0]+i,xp[0],yp[0]);
 	fLine(xp[1]+i,yp[1]+i,xp[1],yp[1]);
 	fLine(xp[2]+i,yp[2]+i,xp[2],yp[2]);
-	
+
 	max_y:=0;	// maximum Y
 	min_y:=255;	// minimum Y
 
 	for i:=0 to High(xp) do begin
 
-		xp[i] := xp[i]+dxp[i];		
+		xp[i] := xp[i]+dxp[i];
 		yp[i] := yp[i]+dyp[i];
 
 		y := yp[i];
@@ -62,39 +62,39 @@ begin
 
 		if xp[i]>=byte(ScreenWidth-18) then dxp[i]:=-1;
 		if xp[i]<18 then dxp[i]:=1;
-		
+
 		if y >= byte(ScreenHeight-18) then dyp[i]:=-2;
 		if y < 18 then dyp[i]:=2;
 	end;
-	
+
 	ts[frm]:=Scanline(min_y - 2);
-	
+
 	a:=(max_y-min_y) + 22;
-	
+
 	a:=a shl 3;
 	a:=a + a shl 2;
-	
+
 	tc[frm]:=a;		// *40 = *8 + *32
 end;
 
 
 begin
- 
-// SetBuffer(buffer, mode, ramtop)
 
- SetBuffer(buf1, 7 + 16, $c0);		// ramtop = $c0
+// NewDisplayBuffer(buffer, mode, ramtop)
+
+ NewDisplayBuffer(buf1, 7 + 16, $c0);		// ramtop = $c0
  ts[0]:=Scanline(0);
-  
- SetBuffer(buf2, 7 + 16, $a0);		// ramtop = $a0
+
+ NewDisplayBuffer(buf2, 7 + 16, $a0);		// ramtop = $a0
  ts[1]:=Scanline(0);
-   
+
  SetColor(1);
- 
+
  repeat
 	pause;
-	
+
 	UpdateRaster;
-	
+
 	frm:=frm xor 1;
 
  until keypressed;
