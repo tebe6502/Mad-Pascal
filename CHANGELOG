@@ -1,6 +1,11 @@
+02.06.2020
+- poprawki dla GetIdent, GetIdentProc, mo¿liwe wywo³anie procedur/funkcji przez kwalifikator, np. CRT.GOTOXY(x,y)
+- zmienne, procedury, funkcje s¹ przes³aniane zale¿nie od kolejnoœci zdefiniowania
+
 31.05.2020
 - poprawione rozpoznawanie parametrów procedur: proc(pointer) <> proc(PByte)
 - LZ4, aPLib
+- zintegrowany instalator S2 (S_VBXE.SYS) {$define S_VBXE}
 
 23.05.2020
 - GRAPH, FASTGRAPH: SetActiveBuffer, SetDisplayBuffer, NewDisplayBuffer, SwitchDisplayBuffer
