@@ -1274,7 +1274,7 @@ SetLength(best, 1);
 
 for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
   begin
-  for IdentIndex := 1 to NumIdent do
+  for IdentIndex := NumIdent downto 1 do
     if (Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK]) and
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) and
        (Ident[IdentIndex].NumParams = NumParams) then
@@ -1314,12 +1314,12 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 	   end;
 
 	 end;
-
+{
       if Ident[IdentIndex].Name = 'TEST' then
        for i := 1 to NumParams do begin
         writeln(High(best),':',Ident[IdentIndex].Param[i].Name,',',Ident[IdentIndex].Param[i].DataType,',',Ident[IdentIndex].Param[i].AllocElementType ,' / ', Param[i].Name,',', Param[i].DataType,',',Param[i].AllocElementType ,' | ', hits);
        end;
-
+}
 	k:=High(best);
 
 	best[k].IdentIndex := IdentIndex;
@@ -1397,7 +1397,7 @@ SetLength(l, 1);
 
 for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
   begin
-  for IdentIndex := 1 to NumIdent do
+  for IdentIndex := NumIdent downto 1 do
     if (Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK]) and
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
     begin
