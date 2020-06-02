@@ -1232,6 +1232,8 @@ begin
        if ( (Ident[TempIndex].DataType in Pointers) and (Ident[TempIndex].AllocElementType = RECORDTOK) ) then
 	Result := TempIndex;}
 
+//    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIndex,'/',Result,' | ',Ident[TempIndex].Kind,',',UnitName[Ident[TempIndex].UnitIndex].Name);
+
   end;
 
 end;
@@ -1254,7 +1256,7 @@ end;
 }
 
 
-function GetIdentProc(S: TString; Param: TParamList; NumParams: integer): integer;
+function GetIdentProc(S: TString; ProcIdentIndex: integer; Param: TParamList; NumParams: integer): integer;
 var IdentIndex, BlockStackIndex, i, k, b: Integer;
     cnt: byte;
     hits, m: word;
@@ -1276,6 +1278,7 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
   begin
   for IdentIndex := NumIdent downto 1 do
     if (Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK]) and
+       (Ident[IdentIndex].UnitIndex = Ident[ProcIdentIndex].UnitIndex) and
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) and
        (Ident[IdentIndex].NumParams = NumParams) then
       begin
@@ -1399,7 +1402,8 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
   begin
   for IdentIndex := NumIdent downto 1 do
     if (Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK]) and
-       (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
+       (S = Ident[IdentIndex].Name) and
+       (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
     begin
 
      for k := 0 to High(l)-1 do
@@ -32635,7 +32639,7 @@ case Tok[i].Kind of
 	  Param := NumActualParameters(i, IdentIndex, j);
 
 //	  if Ident[IdentIndex].isOverload then begin
-	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
+	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, IdentIndex, Param, j);
 
 	    if IdentTemp = 0 then
 	     if Ident[IdentIndex].isOverload then
@@ -33847,9 +33851,9 @@ case Tok[i].Kind of
     IdentIndex := GetIdent(Tok[i].Name^);
 
     if (IdentIndex > 0) and (Ident[IdentIndex].Kind = FUNC)  and (BlockStackTop > 1) then
-     for j:=1 to NumIdent do
+     for j:=NumIdent downto 1 do
       if (Ident[j].ProcAsBlock = NumBlocks) and (Ident[j].Kind = FUNC) then begin
-	if Ident[j].Name = Ident[IdentIndex].Name then IdentIndex := GetIdentResult(NumBlocks);
+	if (Ident[j].Name = Ident[IdentIndex].Name) and (Ident[j].UnitIndex = Ident[IdentIndex].UnitIndex) then IdentIndex := GetIdentResult(NumBlocks);
 	Break;
       end;
 
@@ -34496,7 +34500,7 @@ case Tok[i].Kind of
 	   Param := NumActualParameters(i, IdentIndex, j);
 
 //	  if Ident[IdentIndex].isOverload then begin
-	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, Param, j);
+	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, IdentIndex, Param, j);
 
 	    if IdentTemp = 0 then
 	     if Ident[IdentIndex].isOverload then
@@ -37675,6 +37679,9 @@ while Tok[i].Kind in
    asm65separator;
 
    DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, 0, 0, 0, 0);
+   Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
+
+//   writeln(UnitName[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
    asm65;
    asm65('.local'#9 + UnitName[Tok[i].UnitIndex].Name, '; UNIT');
@@ -38307,7 +38314,7 @@ while Tok[i].Kind in
        j:=i;
        FormalParameterList(j, ParamIndex, Param, TmpResult, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-       ForwardIdentIndex := GetIdentProc( Ident[ForwardIdentIndex].Name, Param, ParamIndex) ;
+       ForwardIdentIndex := GetIdentProc( Ident[ForwardIdentIndex].Name, ForwardIdentIndex, Param, ParamIndex) ;
 
       end;
 
