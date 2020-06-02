@@ -28925,12 +28925,31 @@ Gen; Gen;							// cmp :ecx, Value1
 
  if (SelectorType in [BYTETOK, CHARTOK, ENUMTYPE]) and (Value1 >= 0) and (Value2 >= 0) then begin
 
-   asm65;
-   asm65(#9'lda :STACKORIGIN+1,x');
-   asm65(#9'clc', '; clear carry for add');
-   asm65(#9'adc #$FF-'+IntToStr(Value2), '; make m = $FF');
-   asm65(#9'adc #'+IntToStr(Value2)+'-'+IntToStr(Value1)+'+1', '; carry set if in range n to m');
-   asm65(#9'bcs @+');
+   if Value1 = 0 then begin
+    asm65;
+    asm65(#9'lda :STACKORIGIN+1,x');
+    asm65(#9'cmp #$' + IntToHex(Value2,2)+'+1');
+    asm65(#9'bcc @+');
+   end else
+   if Value2 = 255 then begin
+    asm65;
+    asm65(#9'lda :STACKORIGIN+1,x');
+    asm65(#9'cmp #$' + IntToHex(Value1,2));
+    asm65(#9'bcs @+');
+   end else
+   if Value1 = Value2 then begin
+    asm65;
+    asm65(#9'lda :STACKORIGIN+1,x');
+    asm65(#9'cmp #$' + IntToHex(Value1,2));
+    asm65(#9'beq @+');
+   end else begin
+    asm65;
+    asm65(#9'lda :STACKORIGIN+1,x');
+    asm65(#9'clc', '; clear carry for add');
+    asm65(#9'adc #$FF-$'+IntToHex(Value2,2), '; make m = $FF');
+    asm65(#9'adc #$'+IntToHex(Value2,2)+'-$'+IntToHex(Value1,2)+'+1', '; carry set if in range n to m');
+    asm65(#9'bcs @+');
+   end;
 
  end else begin
 

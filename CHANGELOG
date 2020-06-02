@@ -1,6 +1,7 @@
 02.06.2020
 - poprawki dla GetIdent, GetIdentProc, mo¿liwe wywo³anie procedur/funkcji przez kwalifikator, np. CRT.GOTOXY(x,y)
 - zmienne, procedury, funkcje s¹ przes³aniane zale¿nie od kolejnoœci zdefiniowania
+- poprawione generowanie warunków dla CASE, N..N, 0..N, N..255
 
 31.05.2020
 - poprawione rozpoznawanie parametrów procedur: proc(pointer) <> proc(PByte)
