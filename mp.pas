@@ -28925,17 +28925,33 @@ Gen; Gen;							// cmp :ecx, Value1
 
  if (SelectorType in [BYTETOK, CHARTOK, ENUMTYPE]) and (Value1 >= 0) and (Value2 >= 0) then begin
 
+   if (Value1 = 0) and (Value2 = 255) then begin
+    asm65;
+    asm65(#9'jmp @+');
+   end else
    if Value1 = 0 then begin
     asm65;
     asm65(#9'lda :STACKORIGIN+1,x');
-    asm65(#9'cmp #$' + IntToHex(Value2,2)+'+1');
-    asm65(#9'bcc @+');
+
+    if Value2 = 127 then
+     asm65(#9'bpl @+')
+    else begin
+     asm65(#9'cmp #$' + IntToHex(Value2 + 1,2));
+     asm65(#9'bcc @+');
+    end;
+
    end else
    if Value2 = 255 then begin
     asm65;
     asm65(#9'lda :STACKORIGIN+1,x');
-    asm65(#9'cmp #$' + IntToHex(Value1,2));
-    asm65(#9'bcs @+');
+
+    if Value1 = 128 then
+     asm65(#9'bmi @+')
+    else begin
+     asm65(#9'cmp #$' + IntToHex(Value1,2));
+     asm65(#9'bcs @+');
+    end;
+
    end else
    if Value1 = Value2 then begin
     asm65;
