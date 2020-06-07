@@ -346,15 +346,14 @@
 
   if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
      ldy(i+1) and											// ldy P				; 1
-     lda(i+2) and											// lda P+1				; 2
+     lda(i+2) and (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) and				// lda P+1				; 2
      sta_bp_1(i+3) then begin										// sta :bp+1				; 3
 
 
     if lda(i+4) and										// lda 					; 4
        add_sub(i+5) and										// add|sub				; 5
        sta(i+6) then										// sta					; 6
-     if (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) then
-       begin
+      begin
 	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
 	listing[i+2] := #9'ldy #$00';
 	listing[i+3] := '';
@@ -367,14 +366,13 @@
 	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
 
 	Result:=false; Break;
-       end;
+      end;
 
 
     if lda(i+4) and										// lda 					; 4
        and_ora_eor(i+5) and									// and|ora|eor				; 5
        sta(i+6) then										// sta					; 6
-     if (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) then
-       begin
+      begin
 	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
 	listing[i+2] := #9'ldy #$00';
 	listing[i+3] := '';
@@ -388,14 +386,13 @@
 	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
 
 	Result:=false; Break;
-       end;
+      end;
 
 
     if lda(i+4) and										// lda 					; 4
        ldy(i+5) and										// ldy					; 5
        sta(i+6) then										// sta					; 6
-     if (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) then
-       begin
+      begin
 	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
 	listing[i+2] := #9'ldy #$00';
 	listing[i+3] := '';
@@ -404,7 +401,6 @@
 	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
 
 	Result:=false; Break;
-       end;
-
+      end;
 
   end;

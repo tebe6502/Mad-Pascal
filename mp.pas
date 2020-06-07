@@ -249,7 +249,6 @@ const
   REGISTERTOK		= 97;
   INTERRUPTTOK		= 98;
   PASCALTOK		= 99;
-//  STDCALLTOK		= 100;
 
   SUCCTOK		= 105;
   PREDTOK		= 106;
@@ -2019,12 +2018,110 @@ var p: integer;
 
 begin
 
+
+   if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      SKIP(2) and									// SKIP			; 2
+											//			; 3
+      (pos('; optimize OK', TemporaryBuf[4]) > 0) and					//; optimize OK		; 4
+											//			; 5
+      (TemporaryBuf[6] = TemporaryBuf[0]) and						// lda I		; 6
+      (SKIP(7) = false) then
+    begin
+     TemporaryBuf[6] := '~';
+
+     p:=7;
+
+     while (pos('cmp ', TemporaryBuf[p]) > 0) and					// cmp			; 7
+        SKIP(p+1) and									// SKIP			; 8
+        (TemporaryBuf[p+2] = TemporaryBuf[0]) and					// lda I		; 9
+        (SKIP(p+3) = false) do
+       begin
+	TemporaryBuf[p+2] := '~';
+
+	inc(p, 3);
+       end;
+
+    end;
+
+
+   if (pos('sta ', TemporaryBuf[0]) > 0) and						// sta I		; 0
+											//			; 1
+      (pos('; optimize OK', TemporaryBuf[2]) > 0) and					//; optimize OK		; 2
+											//			; 3
+      (pos('cmp ', TemporaryBuf[4]) > 0) and						// cmp			; 4
+      SKIP(5) and									// SKIP			; 5
+      (pos('lda ', TemporaryBuf[6]) > 0) and
+      (copy(TemporaryBuf[6], 6, 256) = copy(TemporaryBuf[0], 6, 256)) and		// lda I		; 6
+      (SKIP(7) = false) then
+    begin
+     TemporaryBuf[6] := '~';
+
+     if (pos('cmp ', TemporaryBuf[7]) > 0) and						// cmp			; 7
+        SKIP(8) and									// SKIP			; 8
+	(pos('lda ', TemporaryBuf[9]) > 0) and
+        (copy(TemporaryBuf[9], 6, 256) = copy(TemporaryBuf[0], 6, 256)) and		// lda I		; 9
+        (SKIP(10) = false) then
+       begin
+	TemporaryBuf[9] := '~';
+       end;
+
+    end;
+
+
+   if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      SKIP(2) and									// SKIP			; 2
+      (TemporaryBuf[3] = TemporaryBuf[0]) and						// lda I		; 3
+      (SKIP(4) = false) then
+    begin
+     TemporaryBuf[3] := '~';
+
+     p:=4;
+
+     while (pos('cmp ', TemporaryBuf[p]) > 0) and					// cmp			; 4
+        SKIP(p+1) and									// SKIP			; 5
+        (TemporaryBuf[p+2] = TemporaryBuf[0]) and					// lda I		; 6
+        (SKIP(p+3) = false) do
+      begin
+	TemporaryBuf[p+2] := '~';
+
+	inc(p,3)
+      end;
+
+    end;
+
+{
+   if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      SKIP(2) and									// SKIP			; 2
+      (TemporaryBuf[3] = TemporaryBuf[0]) and						// lda I		; 3
+      ((pos('cmp ', TemporaryBuf[4]) > 0) or 						// cmp|and|ora|eor	; 4
+       (pos('and ', TemporaryBuf[4]) > 0) or
+       (pos('ora ', TemporaryBuf[4]) > 0) or
+       (pos('eor ', TemporaryBuf[4]) > 0)) then
+    begin
+     TemporaryBuf[3] := '~';
+    end;
+}
+
+   if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      SKIP(2) and									// SKIP			; 2
+      (TemporaryBuf[3] = TemporaryBuf[0]) and						// lda I		; 3
+      ((pos('jeq ', TemporaryBuf[4]) > 0) or 						// jeq|jne		; 4
+       (pos('jne ', TemporaryBuf[4]) > 0)) then
+    begin
+     TemporaryBuf[3] := #9'cmp #$00';
+    end;
+
+
    if (TemporaryBuf[0] = #9'lda #$01') and						// lda #$01		; 0
       (pos('jeq ', TemporaryBuf[1]) > 0) and						// jeq l_xxxx		; 1
       (pos('jmp l_', TemporaryBuf[2]) > 0) and						// jmp l_yyyy		; 2
       (pos(TemporaryBuf[3], TemporaryBuf[1]) > 0) then					//l_xxxx		; 3
     begin
-     TemporaryBuf[0]   := '~';
+     TemporaryBuf[0] := '~';
      TemporaryBuf[1] := '~';
      TemporaryBuf[3] := '~';
     end;
@@ -2035,11 +2132,11 @@ begin
       (pos('jne l_', TemporaryBuf[2]) > 0) then						// jne l_xxxx		; 2
     begin
      TemporaryBuf[1] := TemporaryBuf[0];
-     TemporaryBuf[0]   := #9'jmp ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[0] := #9'jmp ' + copy(TemporaryBuf[2], 6, 256);
 
      TemporaryBuf[2] := TemporaryBuf[1];
      TemporaryBuf[1] := TemporaryBuf[0];
-     TemporaryBuf[0]   := '~';
+     TemporaryBuf[0] := '~';
     end;
 
 
@@ -2049,7 +2146,7 @@ begin
       (pos('jmp l_', TemporaryBuf[4]) > 0) then						// jmp l_xxxx		; 4
     begin
      TemporaryBuf[2] := TemporaryBuf[1];
-     TemporaryBuf[1]   := #9'jmp ' + copy(TemporaryBuf[4], 6, 256);
+     TemporaryBuf[1] := #9'jmp ' + copy(TemporaryBuf[4], 6, 256);
 
      TemporaryBuf[3] := TemporaryBuf[2];
      TemporaryBuf[2] := TemporaryBuf[1];
@@ -2125,8 +2222,23 @@ begin
      end;
 
 
+    if (SKIP(0) = false) and
+       (pos('lda ', TemporaryBuf[1]) > 0) and						// lda			; 1
+       (TemporaryBuf[2] = #9'cmp #$FF') and						// cmp #$FF		; 2
+       (TemporaryBuf[3] = #9'bcc *+7') and						// bcc *+7		; 3
+       (TemporaryBuf[4] = #9'beq *+5') and						// beq *+5		; 4
+       (pos('jmp l_', TemporaryBuf[5]) > 0) then					// jmp l_		; 5
+      begin
+       TemporaryBuf[1] := '~';
+       TemporaryBuf[2] := '~';
+       TemporaryBuf[3] := '~';
+       TemporaryBuf[4] := '~';
+       TemporaryBuf[5] := '~';
+      end;
+
+
     if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
-       (pos('cmp #', TemporaryBuf[1]) > 0) and						// cmp #$FF		; 1
+       (pos('cmp #', TemporaryBuf[1]) > 0) and						// cmp #		; 1
        (TemporaryBuf[2] = #9'bcc *+7') and						// bcc *+7		; 2
        (TemporaryBuf[3] = #9'beq *+5') and						// beq *+5		; 3
        (pos('jmp l_', TemporaryBuf[4]) > 0) then					// jmp l_		; 4
@@ -2140,6 +2252,15 @@ begin
 	TemporaryBuf[3] := '~';
 	TemporaryBuf[4] := #9'jcs ' + copy(TemporaryBuf[4], 6, 256);
       end;
+
+      if 										//			; 5
+         (pos('; optimize OK', TemporaryBuf[6]) > 0) and				//; optimize OK		; 6
+											//			; 7
+         (TemporaryBuf[8] = TemporaryBuf[0]) and					// lda I		; 8
+         (SKIP(9) = false) then
+	begin
+	 TemporaryBuf[8] := '~';
+	end;
 
      end;
 
@@ -2216,7 +2337,7 @@ begin
        (TemporaryBuf[1] = #9'beq *+5') and						// beq *+5		; 1
        (pos('jmp l_', TemporaryBuf[2]) > 0) then					// jmp l_		; 2
       begin
-       TemporaryBuf[0]   := #9'scc';
+       TemporaryBuf[0] := #9'scc';
        TemporaryBuf[1] := #9'jne ' + copy(TemporaryBuf[2], 6, 256);
        TemporaryBuf[2] := '~';
       end;
@@ -2280,6 +2401,18 @@ begin
     end;
 
 
+   if (SKIP(0) = false) and
+      (pos('lda ', TemporaryBuf[1]) > 0) and						// lda			; 1
+      (TemporaryBuf[2] = #9'cmp #$00') and						// cmp #$00		; 2
+      (pos('jcc l_', TemporaryBuf[3]) > 0) and						// jcc l_xxxx		; 3
+      (SKIP(4) = false) then
+    begin
+     TemporaryBuf[1] := '~';
+     TemporaryBuf[2] := '~';
+     TemporaryBuf[3] := '~';
+   end;
+
+
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda N		; 0
       SKIP(1) and									// SKIP			; 1
 											//			; 2
@@ -2297,6 +2430,17 @@ begin
      TemporaryBuf[6] := #9'add #$01';
 
      if TemporaryBuf[12] = TemporaryBuf[0] then TemporaryBuf[12] := '~';
+    end;
+
+
+   if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda N		; 0
+      SKIP(1) and									// SKIP			; 1
+											//			; 2
+      (pos('; optimize OK', TemporaryBuf[3]) > 0) and					//; optimize OK		; 3
+											//			; 4
+      (TemporaryBuf[5] = TemporaryBuf[0]) then						// lda N		; 5
+    begin
+     TemporaryBuf[5] := '~';
     end;
 
 
@@ -8147,7 +8291,6 @@ var i, l, k, m: integer;
        end;
 
 
-
     if lda(i) and									// lda				; 0
        add_sub(i+1) and									// add|sub			; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9		; 2
@@ -9141,8 +9284,8 @@ var i, l, k, m: integer;
      end;
 
 
-    if lsr_a(i) and										// lsr @
-       (listing[i+1] = #9'sta #$00') then							// sta #$00
+    if lsr_a(i) and										// lsr @		; 0
+       (listing[i+1] = #9'sta #$00') then							// sta #$00		; 1
      begin
 	listing[i+1] := '';
 	Result:=false; Break;
@@ -9542,11 +9685,11 @@ var i, l, k, m: integer;
      end;
 
 
-    if mwy_bp2(i) and										// mwa LEVEL :bp2	; 0
+    if mwy_bp2(i) and										// mwy LEVEL :bp2	; 0
        ldy(i+1) and										// ldy			; 1
        lda(i+2) and										// lda (:bp2),y		; 2
        SKIP(i+3) and										// SKIP			; 3
-       mwa(i+4) and										// mwa LEVEL :bp2	; 4
+       mwy(i+4) and										// mwy LEVEL :bp2	; 4
        ldy(i+5) and										// ldy			; 5
        lda(i+6) then										// lda (:bp2),y		; 6
     if listing[i] = listing[i+4] then
@@ -10106,6 +10249,19 @@ var i, l, k, m: integer;
 	tmp := listing[i];
 	listing[i] := listing[i+1];
 	listing[i+1] := tmp;
+	Result:=false; Break;
+      end;
+
+
+    if lda(i) and (iy(i) = false) and								// lda			; 0
+       (listing[i+1] = #9'add #$01') and							// add #$01		; 1
+       tay(i+2) and										// tay			; 2
+       lda(i+3) and										// lda			; 3
+       add(i+4) then										// add			; 4
+      begin
+	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i+1] := #9'iny';
+	listing[i+2] := '';
 	Result:=false; Break;
       end;
 
@@ -11100,9 +11256,9 @@ var i, l, k, m: integer;
 	tmp:='sta ' + copy(listing[i], 6, 256);
 	yes:=false;
 	for p:=i-1 downto 0 do begin
-	 if (listing[p] = #9'eif') or (pos(#9'jsr', listing[p]) > 0) or (listing[p] = '@') then Break;
-
 	 if pos(tmp, listing[p]) > 0 then begin yes:=true; listing[p] := #9'sta :ecx'; Break end;
+
+	 if (pos(copy(listing[i], 6, 256), listing[p]) > 0) or (listing[p] = #9'eif') or (pos(#9'jsr', listing[p]) > 0) or (listing[p] = '@') then Break;
 	end;
 
 	if yes then begin
@@ -11114,9 +11270,9 @@ var i, l, k, m: integer;
 	tmp:='sta ' + copy(listing[i+2], 6, 256);
 	yes:=false;
 	for p:=i-1 downto 0 do begin
-	 if (listing[p] = #9'eif') or (pos(#9'jsr', listing[p]) > 0) or (listing[p] = '@') then Break;
-
 	 if pos(tmp, listing[p]) > 0 then begin yes:=true; listing[p] := #9'sta :ecx+1'; Break end;
+
+	 if (pos(copy(listing[i], 6, 256), listing[p]) > 0) or (listing[p] = #9'eif') or (pos(#9'jsr', listing[p]) > 0) or (listing[p] = '@') then Break;
 	end;
 
 	if yes then begin
@@ -13255,15 +13411,15 @@ var i, l, k, m: integer;
 // ===			optymalizacja BP.				  === //
 // -----------------------------------------------------------------------------
 
-    if LDA_BP2_Y(i) and										// lda (:bp2),y				; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
-       iny(i+2) and										// iny					; 2
-       LDA_BP2_Y(i+3) and									// lda (:bp2),y				; 3
-       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH+9	; 4
-       lda_stack(i+5) and									// lda :STACKORIGIN+9			; 5
-       sta(i+6) and										// sta					; 6
-       lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH+9	; 7
-       sta(i+8) then										// sta					; 8
+    if LDA_BP2_Y(i) and										// lda (:bp2),y			; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+9		; 1
+       iny(i+2) and										// iny				; 2
+       LDA_BP2_Y(i+3) and									// lda (:bp2),y			; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH	; 4
+       lda_stack(i+5) and									// lda :STACKORIGIN+9		; 5
+       sta(i+6) and										// sta				; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH	; 7
+       sta(i+8) then										// sta				; 8
      if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
 	(copy(listing[i+4], 6, 256) = copy(listing[i+7], 6, 256)) then
        begin
@@ -19782,7 +19938,7 @@ var i, l, k, m: integer;
 
     if (SKIP(i-1) = false) and
        lda(i) and										// lda			; 0	opt_082	| BYTE < 0 ; >= 0
-       cmp_im_0(i+1) and									// cmp #		; 1
+       cmp_im_0(i+1) and									// cmp #$00		; 1
        (jcs(i+2) or jcc(i+2)) and								// jcc:jcs l_		; 2
        (SKIP(i+3) = false) then
       begin
@@ -21591,6 +21747,7 @@ var i, l, k, m: integer;
        (beq(i+5) or bne(i+5) or jeq(i+5) or jne(i+5)) then					// beq|bne|jeq|jne	; 5
      begin
 	listing[i+1] := '';
+
 	Result:=false; Break;
      end;
 
@@ -21606,7 +21763,7 @@ var i, l, k, m: integer;
      end;
 
 
-    if and_ora_eor(i) and 									// and|ora|eor #	; 0
+    if and_ora_eor(i) and 									// and|ora|eor		; 0
        (iy(i) = false) and									// ldy #1		; 1
        ldy_1(i+1) and										// cmp #$00		; 2
        cmp_im_0(i+2) and									// beq|bne		; 3
@@ -21618,6 +21775,53 @@ var i, l, k, m: integer;
 	listing[i+2] := '';
 	Result:=false; Break;
      end;
+
+
+    if lda(i) and										// lda			; 0
+       and_ora_eor(i+1) and									// and|ora|eor		; 1
+       bne(i+2) and										// bne			; 2
+       lda_im_0(i+3) and									// lda #$00		; 3
+       (listing[i+4] = '@') and									// @			; 4
+       (beq(i+5) or jeq(i+5)) then								// beq|jeq		; 5
+     begin
+	listing[i+3] := '';
+
+	if SKIP(i-1) = false then begin
+	 listing[i+2] := '';
+	 listing[i+4] := '';
+	end;
+
+	Result:=false; Break;
+     end;
+
+
+    if (listing[i] = #9'and #$80') and								// and #$80		; 0
+       (jeq(i+1) or jne(i+1)) then								// jeq|jne		; 1
+     begin
+	listing[i] := '';
+
+	if jeq(i+1) then
+	 listing[i+1] := #9'jpl ' + copy(listing[i+1], 6, 256)
+	else
+	 listing[i+1] := #9'jmi ' + copy(listing[i+1], 6, 256);
+
+	Result:=false; Break;
+     end;
+
+
+    if (listing[i] = #9'cmp #$80') and								// cmp #$80		; 0
+       (jcc(i+1) or jcs(i+1)) then								// jcc|jcs		; 1
+     begin
+	listing[i] := '';
+
+	if jcc(i+1) then
+	 listing[i+1] := #9'jpl ' + copy(listing[i+1], 6, 256)
+	else
+	 listing[i+1] := #9'jmi ' + copy(listing[i+1], 6, 256);
+
+	Result:=false; Break;
+     end;
+
 
 
 // -------------------------------------------------------------------------------------------
@@ -22133,6 +22337,17 @@ var i, l, k, m: integer;
      begin
        listing[i]   := '';
        listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
+
+       Result:=false; Break;
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0
+       (pos('jmp l_', listing[i+1]) > 0) then							// jmp l_		; 1
+     begin
+       listing[i]   := '';
+       listing[i+1] := #9'jcc ' + copy(listing[i+1], 6, 256);
 
        Result:=false; Break;
      end;
@@ -25439,7 +25654,7 @@ begin
       optyA := arg0;
 
      end else
-     if lda(i) or mva(i) or mwa(i) or (listing[i] = '@') or (pos('l_', listing[i]) = 1) or
+     if lda(i) or mva(i) or mwa(i) or (listing[i] = '@') or (pos('l_', listing[i]) = 1) or SKIP(i) or
 	(pos(#9'jsr', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
 
 
@@ -26811,7 +27026,6 @@ Spelling[FORWARDTOK	] := 'FORWARD';
 Spelling[REGISTERTOK	] := 'REGISTER';
 Spelling[INTERRUPTTOK	] := 'INTERRUPT';
 Spelling[PASCALTOK	] := 'PASCAL';
-//Spelling[STDCALLTOK	] := 'STDCALL';
 
 Spelling[ASSIGNFILETOK	] := 'ASSIGN';
 Spelling[RESETTOK	] := 'RESET';
@@ -34425,24 +34639,27 @@ case Tok[i].Kind of
 		 else
 		  if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType = POINTERTOK) then begin
 
-		   if RecordSize(IdentIndex) <= 8 then begin
+		   if RecordSize(IdentIndex) <= 128 then begin
 
 		    asm65(#9'mwy '+Name+' :bp2');
-		    asm65(#9'ldy #0');
-		    asm65(#9'lda (:bp2),y');
-		    asm65(#9'sta adr.'+Ident[IdentIndex].Name);
-
-		    for k:=1 to RecordSize(IdentIndex)-1 do begin
-		     asm65(#9'iny');
-		     asm65(#9'lda (:bp2),y');
-		     asm65(#9'sta adr.'+Ident[IdentIndex].Name+'+'+IntToStr(k));
-		    end;
+		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+		    asm65(#9'mva:rpl (:bp2),y adr.'+Ident[IdentIndex].Name+',y-');
 
 		   end else
 		    asm65(#9'@move '+Name+' #adr.'+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
 
- 		  end else
-		   asm65(#9'@move #'+Name+' '+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
+ 		  end else begin
+
+		   if (pos('adr.', Name) > 0) and (RecordSize(IdentIndex) <= 128) then begin
+
+		    asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
+		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+		    asm65(#9'mva:rpl '+Name+',y (:bp2),y-');
+
+		   end else
+		    asm65(#9'@move #'+Name+' '+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
+
+		  end;
 
      	       end else	   // ExpressionType <> RECORDTOK+OBJECTTOK
 		 GetCommonType(i + 1, ExpressionType, RECORDTOK);
@@ -36114,7 +36331,7 @@ begin
     isForward := false;
     isInt := false;
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK{, STDCALLTOK}] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -36158,12 +36375,6 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
-{	     STDCALLTOK: begin
-			   Ident[NumIdent].isStdCall := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-}
 	      PASCALTOK: begin
 			   Ident[NumIdent].isRecursion := true;
 			   Ident[NumIdent].isPascal := true;
@@ -37310,7 +37521,7 @@ begin
 	end;// if IsNestedFunction
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK{, STDCALLTOK}] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -37344,12 +37555,6 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
-{	     STDCALLTOK: begin
-			   Status := Status or ord(mStdcall);
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-}
 	      PASCALTOK: begin
 			   Status := Status or ord(mPascal);
 			   inc(i);
@@ -38005,6 +38210,7 @@ while Tok[i].Kind in
 
 
 	   if (VarType = SINGLETOK) and (ConstValType in [SHORTREALTOK, REALTOK]) then ConstValType := SINGLETOK;
+	   if (VarType = SHORTREALTOK) and (ConstValType = REALTOK) then ConstValType := SHORTREALTOK;
 
 
 	   if (VarType in RealTypes) and (ConstValType in IntegerTypes) then begin
@@ -38013,7 +38219,6 @@ while Tok[i].Kind in
 	   end;
 
 	   GetCommonType(i + 1, VarType, ConstValType);
-
 
 	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, VarType, 0, 0, ConstVal, Tok[j].Kind);
 	  end;
@@ -38083,10 +38288,22 @@ while Tok[i].Kind in
 
       i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-
       isAbsolute := false;
 
+{
+      if Tok[i + 1].Kind = REGISTERTOK then begin
 
+	if NumVarOfSameType > 1 then
+	 Error(i + 1, 'REGISTER can only be associated to one variable');
+
+	isAbsolute := true;
+
+	ConstVal := $ffffff0000+1;
+
+	inc(i);
+
+      end else
+}
       if Tok[i + 1].Kind = ABSOLUTETOK then begin
 
 	isAbsolute := true;
