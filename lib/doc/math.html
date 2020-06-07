@@ -10,7 +10,7 @@
 <h1>unit math</h1>
 <h3>Additional mathematical routines</h3>
 <p>author: Tomasz Biela (Tebe)</p>
-<br><p><a href='http://www.freepascal.org/docs-html/rtl/math/index-5.html'>http://www.freepascal.org/docs-html/rtl/math/index-5.html</a></p>
+<br><p><a href='http://www.freepascal.org/docs-html/rtl/math/index-5.html'>http://www.freepascal.org/docs-html/rtl/math/index-5.html</a> <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a> <br> hypot function from AMath library (C) Copyright 2009-2013 Wolfgang Ehrhardt</p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -68,77 +68,79 @@
 <tr><td class='tname fname'>radtocycle</td><td class='tdesc'><h4>function radtocycle(rad : real) : real;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>DivMod</td><td class='tdesc'><h4>procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: Word); overload;</h4><br>
-	<br><ul></ul></td></tr>
+	DivMod returns Dividend DIV Divisor in Result, and Dividend MOD Divisor in Remainder<br><ul></ul></td></tr>
 <tr><td class='tname fname'>DivMod</td><td class='tdesc'><h4>procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: smallint); overload;</h4><br>
-	<br><ul></ul></td></tr>
+	DivMod returns Dividend DIV Divisor in Result, and Dividend MOD Divisor in Remainder<br><ul></ul></td></tr>
 <tr><td class='tname fname'>InRange</td><td class='tdesc'><h4>function InRange(const AValue, AMin, AMax: byte): Boolean; overload;</h4><br>
-	Check whether value is in range<br><ul></ul></td></tr>
+	InRange returns True if AValue is in the range AMin..AMax. It returns False if Value lies outside the specified range.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>InRange</td><td class='tdesc'><h4>function InRange(const AValue, AMin, AMax: Integer): Boolean; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	InRange returns True if AValue is in the range AMin..AMax. It returns False if Value lies outside the specified range.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>EnsureRange</td><td class='tdesc'><h4>function EnsureRange(const AValue, AMin, AMax: byte): Integer; overload;</h4><br>
-	Change value to it falls in specified range<br><ul></ul></td></tr>
+	EnsureRange returns Value if AValue is in the range AMin..AMax. It returns AMin if the value is less than AMin, or AMax if the value is larger than AMax.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>EnsureRange</td><td class='tdesc'><h4>function EnsureRange(const AValue, AMin, AMax: Integer): Integer; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	EnsureRange returns Value if AValue is in the range AMin..AMax. It returns AMin if the value is less than AMin, or AMax if the value is larger than AMax.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: real): real; overload;</h4><br>
-	Return smallest of two values<br><ul></ul></td></tr>
+	Min returns the smallest value of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: shortreal): shortreal; overload;</h4><br>
-	Return smallest of two values<br><ul></ul></td></tr>
+	Min returns the smallest value of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: single): single; overload;</h4><br>
-	Return smallest of two values<br><ul></ul></td></tr>
+	Min returns the smallest value of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: smallint): smallint; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Min returns the smallest value of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Min</td><td class='tdesc'><h4>function Min(x, y: integer): integer; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Min returns the smallest value of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: real): real; overload;</h4><br>
-	Return largest of two values<br><ul></ul></td></tr>
+	Max returns the maximum of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: shortreal): shortreal; overload;</h4><br>
-	Return largest of two values<br><ul></ul></td></tr>
+	Max returns the maximum of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: single): single; overload;</h4><br>
-	Return largest of two values<br><ul></ul></td></tr>
+	Max returns the maximum of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: smallint): smallint; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Max returns the maximum of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Max</td><td class='tdesc'><h4>function Max(x, y: integer): integer; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Max returns the maximum of X and Y.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>RandomRange</td><td class='tdesc'><h4>function RandomRange(const aFrom, aTo: smallint): smallint;</h4><br>
-	<br><ul></ul></td></tr>
+	RandomRange returns a random value in the range AFrom to ATo. AFrom and ATo do not need to be in increasing order. The upper border is not included in the generated value, but the lower border is.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>RandomRangeF</td><td class='tdesc'><h4>function RandomRangeF(const min, max: single): single;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>RandG</td><td class='tdesc'><h4>function RandG(mean, stddev : single) : single;</h4><br>
-	Return gaussian distributed random number<br><ul></ul></td></tr>
+	Return gaussian distributed random number.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>power</td><td class='tdesc'><h4>function power(base : real; const exponent : shortint) : real; overload;</h4><br>
-	Return real power <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a><br><ul></ul></td></tr>
+	Return real power.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>power</td><td class='tdesc'><h4>function power(base : single; const exponent : shortint) : single; overload;</h4><br>
-	Return real power <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a><br><ul></ul></td></tr>
+	Return real power.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>power</td><td class='tdesc'><h4>function power(base : integer; const exponent : shortint) : integer; overload;</h4><br>
-	Return real power <br> <a href='https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp'>https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp</a><br><ul></ul></td></tr>
+	Return real power.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>arctan2</td><td class='tdesc'><h4>function arctan2(y,x : real) : real;</h4><br>
-	<br><ul></ul></td></tr>
+	arctan2 calculates arctan(y/x), and returns an angle in the correct quadrant. The returned angle will be in the range $-\pi$ to $\pi$ radians.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>ArcSin</td><td class='tdesc'><h4>function ArcSin(x: real): real;</h4><br>
-	<br><ul></ul></td></tr>
+	Arcsin returns the inverse sine of its argument x. The argument x should lie between -1 and 1.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>ArcCos</td><td class='tdesc'><h4>function ArcCos(x: real): real;</h4><br>
-	<br><ul></ul></td></tr>
+	Arccos returns the inverse cosine of its argument x. The argument x should lie between -1 and 1 (borders included).<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Tan</td><td class='tdesc'><h4>function Tan(x: Real): Real;</h4><br>
-	<br><ul></ul></td></tr>
+	Tan returns the tangent of x. The argument x must be in radians.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Ceil</td><td class='tdesc'><h4>function Ceil(a: real): smallint;</h4><br>
-	<br><ul></ul></td></tr>
+	Ceil returns the lowest integer number greater than or equal to x. The absolute value of x should be less than maxint.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Floor</td><td class='tdesc'><h4>function Floor(a: real): smallint;</h4><br>
-	<br><ul></ul></td></tr>
+	Floor returns the largest integer smaller than or equal to x. The absolute value of x should be less than maxint.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>FMod</td><td class='tdesc'><h4>function FMod(a, b: real): real;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Log10</td><td class='tdesc'><h4>function Log10(x: single): single;</h4><br>
-	<br><ul></ul></td></tr>
+	Log10 returns the 10-base logarithm of X.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>log2</td><td class='tdesc'><h4>function log2(x : single) : single;</h4><br>
-	<br><ul></ul></td></tr>
+	Log2 returns the 2-base logarithm of X.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>logn</td><td class='tdesc'><h4>function logn(n,x : single) : single;</h4><br>
-	<br><ul></ul></td></tr>
+	Logn returns the n-base logarithm of X.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>IsNan</td><td class='tdesc'><h4>function IsNan(const d : Single): Boolean;</h4><br>
-	<br><ul></ul></td></tr>
+	IsNan returns True if the single d contains Not A Number (a value which cannot be represented correctly in single format).<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Sign</td><td class='tdesc'><h4>function Sign(const AValue: Integer): shortint; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Return sign of argument<br><ul><h5>parameters:</h5><li>AValue - Integer</li></ul></td></tr>
 <tr><td class='tname fname'>Sign</td><td class='tdesc'><h4>function Sign(const AValue: Real): Real; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Return sign of argument<br><ul><h5>parameters:</h5><li>AValue - Real</li></ul></td></tr>
 <tr><td class='tname fname'>Sign</td><td class='tdesc'><h4>function Sign(const AValue: Single): Single; overload;</h4><br>
-	<br><ul></ul></td></tr>
+	Return sign of argument<br><ul><h5>parameters:</h5><li>AValue - Single (float)</li></ul></td></tr>
+<tr><td class='tname fname'>hypot</td><td class='tdesc'><h4>function hypot(x,y : float) : float;</h4><br>
+	Hypot returns the hypotenuse of the triangle where the sides adjacent to the square angle have lengths x and y. The function uses Pythagoras' rule for this.<br><ul></ul></td></tr>
 
 </table>
 
