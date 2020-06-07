@@ -8,6 +8,10 @@ unit math;
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/math/index-5.html>
+
+ <https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp>
+
+ hypot function from AMath library (C) Copyright 2009-2013 Wolfgang Ehrhardt
 *)
 
 
@@ -38,7 +42,7 @@ Power
 RadToCycle
 RadToDeg
 RadToGrad
-RandG		Return gaussian distributed random number
+RandG			Return gaussian distributed random number
 RandomRange
 RandomRangeF
 Sign
@@ -63,14 +67,15 @@ interface
 	function InRange(const AValue, AMin, AMax: Integer): Boolean; overload;
 	function EnsureRange(const AValue, AMin, AMax: byte): Integer; overload;
 	function EnsureRange(const AValue, AMin, AMax: Integer): Integer; overload;
+	function hypot(x,y : float) : float;
 	function Min(x, y: real): real; overload;
 	function Min(x, y: shortreal): shortreal; overload;
-	function Min(x, y: single): single; overload;	
+	function Min(x, y: single): single; overload;
 	function Min(x, y: smallint): smallint; overload;
 	function Min(x, y: integer): integer; overload;
 	function Max(x, y: real): real; overload;
 	function Max(x, y: shortreal): shortreal; overload;
-	function Max(x, y: single): single; overload;	
+	function Max(x, y: single): single; overload;
 	function Max(x, y: smallint): smallint; overload;
 	function Max(x, y: integer): integer; overload;
 	function power(base : real; const exponent : shortint) : real; overload;
@@ -185,7 +190,7 @@ function radtocycle(rad : real) : real;
 
 procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: Word); overload;
 (*
-@description:
+@description: DivMod returns Dividend DIV Divisor in Result, and Dividend MOD Divisor in Remainder
 
 *)
 begin
@@ -210,7 +215,7 @@ end;
 
 procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: smallint); overload;
 (*
-@description:
+@description: DivMod returns Dividend DIV Divisor in Result, and Dividend MOD Divisor in Remainder
 
 *)
 begin
@@ -235,8 +240,7 @@ end;
 
 function InRange(const AValue, AMin, AMax: byte): Boolean; overload;
 (*
-@description:
-Check whether value is in range
+@description: InRange returns True if AValue is in the range AMin..AMax. It returns False if Value lies outside the specified range.
 
 *)
 begin
@@ -246,7 +250,7 @@ end;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean; overload;
 (*
-@description:
+@description: InRange returns True if AValue is in the range AMin..AMax. It returns False if Value lies outside the specified range.
 
 *)
 begin
@@ -256,8 +260,7 @@ end;
 
 function EnsureRange(const AValue, AMin, AMax: byte): Integer; overload;
 (*
-@description:
-Change value to it falls in specified range
+@description: EnsureRange returns Value if AValue is in the range AMin..AMax. It returns AMin if the value is less than AMin, or AMax if the value is larger than AMax.
 
 *)
 begin
@@ -271,7 +274,7 @@ end;
 
 function EnsureRange(const AValue, AMin, AMax: Integer): Integer; overload;
 (*
-@description:
+@description: EnsureRange returns Value if AValue is in the range AMin..AMax. It returns AMin if the value is less than AMin, or AMax if the value is larger than AMax.
 
 *)
 begin
@@ -285,8 +288,7 @@ end;
 
 function Min(x, y: real): real; overload;
 (*
-@description:
-Return smallest of two values
+@description: Min returns the smallest value of X and Y.
 
 *)
 begin
@@ -296,9 +298,7 @@ end;
 
 function Min(x, y: shortreal): shortreal; overload;
 (*
-@description:
-Return smallest of two values
-
+@description: Min returns the smallest value of X and Y.
 *)
 begin
 if x < y then Result := x else Result := y;
@@ -307,8 +307,7 @@ end;
 
 function Min(x, y: single): single; overload;
 (*
-@description:
-Return smallest of two values
+@description: Min returns the smallest value of X and Y.
 
 *)
 begin
@@ -318,7 +317,7 @@ end;
 
 function Min(x, y: smallint): smallint; overload;
 (*
-@description:
+@description: Min returns the smallest value of X and Y.
 
 *)
 begin
@@ -328,7 +327,7 @@ end;
 
 function Min(x, y: integer): integer; overload;
 (*
-@description:
+@description: Min returns the smallest value of X and Y.
 
 *)
 begin
@@ -338,8 +337,7 @@ end;
 
 function Max(x, y: real): real; overload;
 (*
-@description:
-Return largest of two values
+@description: Max returns the maximum of X and Y.
 
 *)
 begin
@@ -349,8 +347,7 @@ end;
 
 function Max(x, y: shortreal): shortreal; overload;
 (*
-@description:
-Return largest of two values
+@description: Max returns the maximum of X and Y.
 
 *)
 begin
@@ -360,8 +357,7 @@ end;
 
 function Max(x, y: single): single; overload;
 (*
-@description:
-Return largest of two values
+@description: Max returns the maximum of X and Y.
 
 *)
 begin
@@ -371,7 +367,7 @@ end;
 
 function Max(x, y: smallint): smallint; overload;
 (*
-@description:
+@description: Max returns the maximum of X and Y.
 
 *)
 begin
@@ -381,7 +377,7 @@ end;
 
 function Max(x, y: integer): integer; overload;
 (*
-@description:
+@description: Max returns the maximum of X and Y.
 
 *)
 begin
@@ -391,7 +387,7 @@ end;
 
 function RandomRange(const aFrom, aTo: smallint): smallint;
 (*
-@description:
+@description: RandomRange returns a random value in the range AFrom to ATo. AFrom and ATo do not need to be in increasing order. The upper border is not included in the generated value, but the lower border is.
 
 *)
 var a: smallint;
@@ -421,8 +417,7 @@ end;
 
 function RandG(mean, stddev : single) : single;
 (*
-@description:
-Return gaussian distributed random number
+@description: Return gaussian distributed random number.
 
 *)
   Var U1,S2 : single;
@@ -438,10 +433,7 @@ Return gaussian distributed random number
 
 function power(base : real; const exponent : shortint) : real; overload;
 (*
-@description:
-Return real power
-
-<https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp>
+@description: Return real power.
 
 *)
   var
@@ -471,10 +463,7 @@ Return real power
 
 function power(base : single; const exponent : shortint) : single; overload;
 (*
-@description:
-Return real power
-
-<https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp>
+@description: Return real power.
 
 *)
   var
@@ -504,10 +493,7 @@ Return real power
 
 function power(base : integer; const exponent : shortint) : integer; overload;
 (*
-@description:
-Return real power
-
-<https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp>
+@description: Return real power.
 
 *)
   var
@@ -539,6 +525,7 @@ function arctan2(y,x : real) : real;
 (*
 @description:
 
+arctan2 calculates arctan(y/x), and returns an angle in the correct quadrant. The returned angle will be in the range $-\pi$ to $\pi$ radians.
 *)
   begin
     if (x=0.0) then
@@ -561,7 +548,7 @@ function arctan2(y,x : real) : real;
 
 function ArcSin(x: real): real;
 (*
-@description:
+@description: Arcsin returns the inverse sine of its argument x. The argument x should lie between -1 and 1.
 
 *)
 const
@@ -580,7 +567,7 @@ end;
 
 function ArcCos(x: real): real;
 (*
-@description:
+@description: Arccos returns the inverse cosine of its argument x. The argument x should lie between -1 and 1 (borders included).
 
 *)
 begin
@@ -593,7 +580,7 @@ end;
 
 function Tan(x: Real): Real;
 (*
-@description:
+@description: Tan returns the tangent of x. The argument x must be in radians.
 
 *)
 begin
@@ -605,7 +592,7 @@ end;
 
 function Ceil(a: real): smallint;
 (*
-@description:
+@description: Ceil returns the lowest integer number greater than or equal to x. The absolute value of x should be less than maxint.
 
 *)
 begin
@@ -617,7 +604,7 @@ end;
 
 function Floor(a: real): smallint;
 (*
-@description:
+@description: Floor returns the largest integer smaller than or equal to x. The absolute value of x should be less than maxint.
 
 *)
 begin
@@ -641,7 +628,7 @@ end;
 
 function Log10(x: single): single;
 (*
-@description:
+@description: Log10 returns the 10-base logarithm of X.
 
 *)
 begin
@@ -651,8 +638,7 @@ end;
 
 function log2(x : single) : single;
 (*
-@description:
-
+@description: Log2 returns the 2-base logarithm of X.
 *)
 begin
  Result := ln(x)*1.4426950408889634079;    { 1/ln(2) }
@@ -661,8 +647,7 @@ end;
 
 function logn(n,x : single) : single;
 (*
-@description:
-
+@description: Logn returns the n-base logarithm of X.
 *)
 begin
  Result := ln(x) / ln(n);
@@ -672,7 +657,7 @@ end;
 function IsNan(const d : Single): Boolean;
 (*
 @description:
-
+IsNan returns True if the single d contains Not A Number (a value which cannot be represented correctly in single format).
 *)
 begin
  Result := (cardinal(d) and $7fffffff) > $7f800000;
@@ -681,8 +666,10 @@ end;
 
 function Sign(const AValue: Integer): shortint; overload;
 (*
-@description:
+@description: Return sign of argument
 
+@param: AValue - Integer
+@result: Shortint
 *)
 begin
 
@@ -696,8 +683,10 @@ end;
 
 function Sign(const AValue: Real): Real; overload;
 (*
-@description:
+@description: Return sign of argument
 
+@param: AValue - Real
+@result: Real
 *)
 begin
 
@@ -711,8 +700,10 @@ end;
 
 function Sign(const AValue: Single): Single; overload;
 (*
-@description:
+@description: Return sign of argument
 
+@param: AValue - Single (float)
+@result: Single
 *)
 begin
 
@@ -722,6 +713,25 @@ begin
   Result := 1;
 
 end;
+
+
+function hypot(x,y : float) : float;
+(*
+@description:
+Hypot returns the hypotenuse of the triangle where the sides adjacent to the square angle have lengths x and y. The function uses Pythagoras' rule for this.
+*)
+
+  begin
+    x:=abs(x);
+    y:=abs(y);
+    if (x>y) then
+      hypot:=x*sqrt(1+sqr(y/x))
+    else if (x>0) then
+      hypot:=y*sqrt(1+sqr(x/y))
+    else
+      hypot:=y;
+  end;
+
 
 end.
 
