@@ -1,0 +1,1166 @@
+mads 2.1.0 build 8 (23 Dec 19)
+Source: foxmode.a65
+     1 				; ------------------------------------------------------------
+     2 				; Mad Pascal Compiler version 1.6.4 [2020/06/06] for 6502
+     3 				; ------------------------------------------------------------
+     4
+     5 = 0010			STACKWIDTH	= 16
+     6 = 2000			CODEORIGIN	= $2000
+     7
+     8 = 0001			TRUE		= 1
+     9 = 0000			FALSE		= 0
+    10
+    11 				; ------------------------------------------------------------
+    12
+    13 					org $80
+    14
+    15 = 0080			fxptr	.ds 2						; VBXE pointer
+    16 = 0082			psptr	.ds 2						; PROGRAMSTACK Pointer
+    17
+    18 = 0084			eax	.ds 4						;8 bytes (aex + edx) -> divREAL
+    19 = 0088			edx	.ds 4
+    20 = 008C			ecx	.ds 4
+    21 = 0090			bp	.ds 2
+    22 = 0092			bp2	.ds 2
+    23
+    24 				ztmp
+    25 = 0094			ztmp8	.ds 1
+    26 = 0095			ztmp9	.ds 1
+    27 = 0096			ztmp10	.ds 1
+    28 = 0097			ztmp11	.ds 1
+    29
+    30 = 0098			TMP	.ds 2
+    31
+    32 = 009A			STACKORIGIN	.ds STACKWIDTH*4
+    33 				zpend
+    34
+    35 				; ------------------------------------------------------------
+    36
+    37 = 0084			ax	= eax
+    38 = 0084			al	= eax
+    39 = 0085			ah	= eax+1
+    40
+    41 = 008C			cx	= ecx
+    42 = 008C			cl	= ecx
+    43 = 008D			ch	= ecx+1
+    44
+    45 = 0088			dx	= edx
+    46 = 0088			dl	= edx
+    47 = 0089			dh	= edx+1
+    48
+    49 					org eax
+    50
+    51 = 0084			FP1MAN0	.ds 1
+    52 = 0085			FP1MAN1	.ds 1
+    53 = 0086			FP1MAN2	.ds 1
+    54 = 0087			FP1MAN3	.ds 1
+    55
+    56 					org ztmp8
+    57
+    58 = 0094			FP1SGN	.ds 1
+    59 = 0095			FP1EXP	.ds 1
+    60
+    61 					org edx
+    62
+    63 = 0088			FP2MAN0	.ds 1
+    64
+    65 = 0089			FP2MAN1	.ds 1
+    66 = 008A			FP2MAN2	.ds 1
+    67 = 008B			FP2MAN3	.ds 1
+    68
+    69 					org ztmp10
+    70
+    71 = 0096			FP2SGN	.ds 1
+    72 = 0097			FP2EXP	.ds 1
+    73
+    74 					org ecx
+    75
+    76 = 008C			FPMAN0	.ds 1
+    77 = 008D			FPMAN1	.ds 1
+    78 = 008E			FPMAN2	.ds 1
+    79 = 008F			FPMAN3	.ds 1
+    80
+    81 					org bp2
+    82
+    83 = 0092			FPSGN	.ds 1
+    84 = 0093			FPEXP	.ds 1
+    85
+    86 					.ifdef MAIN.@DEFINES.S_VBXE
+    87 					opt h-
+    88 					ins 'atari\s_vbxe\sdxld2.obx'
+    89 					opt h+
+    90 					.endif
+    91
+    92 				.local	RESOURCE
+    93 					icl 'atari\resource.asm'
+Source: resource.asm
+     1
+  1148 					opt l+
+    94 = 0000				?EXTDETECT = 0
+    95 = 0000				?VBXDETECT = 0
+    96
+    97 2075				RCDATA 'fntdith.fnt' CHARSET_RAM_ADDRESS 0 0 0 0 0 0 0 0
+Macro: RESOURCE.RCDATA [Source: resource.asm]
+     2 = 0400			len = .filesize('fntdith.fnt')
+    10 2075				org RESORIGIN
+    12 2075 20 41 20		mcpy	jsr sys.off
+    14 2078 A9 96 85 88 A9 20 +  MWA #DATA EDX
+    14 2080 A9 00 85 8C A9 C0 +  MWA #MAIN.CHARSET_RAM_ADDRESS ECX
+    14 2088 A9 00 85 84 A9 04 +  MWA #LEN EAX
+    14 2090 20 00 20		 JSR RESOURCE.MEMCPY
+    16 2093 4C 65 20			jmp sys.on
+    18 2096 11 00 00 00 11 00 + data	ins 'fntdith.fnt'
+    20 					.print '$R RCDATA  ',main.CHARSET_RAM_ADDRESS,'..',main.CHARSET_RAM_ADDRESS+len-1," 'fntdith.fnt'"
+    20 				$R RCDATA  $C000..$C3FF 'fntdith.fnt'
+    22 02E2-02E3> 75 20			ini mcpy
+Source: foxmode.a65
+    98 2496				RCDATA 'fntdith.scr' VIDEO_RAM_ADDRESS 0 0 0 0 0 0 0 0
+Macro: RESOURCE.RCDATA [Source: resource.asm]
+     2 = 0960			len = .filesize('fntdith.scr')
+    10 2496				org RESORIGIN
+    12 2075-29F5> 20 41 20	mcpy	jsr sys.off
+    14 2078 A9 96 85 88 A9 20 +  MWA #DATA EDX
+    14 2080 A9 00 85 8C A9 C4 +  MWA #MAIN.VIDEO_RAM_ADDRESS ECX
+    14 2088 A9 60 85 84 A9 09 +  MWA #LEN EAX
+    14 2090 20 00 20		 JSR RESOURCE.MEMCPY
+    16 2093 4C 65 20			jmp sys.on
+    18 2096 17 0C 1A 4B 6B 46 + data	ins 'fntdith.scr'
+    20 					.print '$R RCDATA  ',main.VIDEO_RAM_ADDRESS,'..',main.VIDEO_RAM_ADDRESS+len-1," 'fntdith.scr'"
+    20 				$R RCDATA  $C400..$CD5F 'fntdith.scr'
+    22 02E2-02E3> 75 20			ini mcpy
+Source: foxmode.a65
+    99 				.endl
+   100
+   101 				; ------------------------------------------------------------
+   102
+   103 29F6				org CODEORIGIN
+   104
+   105 2000				STATICDATA
+Macro: STATICDATA [Source: foxmode.a65]
+Source: foxmode.a65
+   106
+   107 				; ------------------------------------------------------------
+   108
+   109 2000			RTLIB
+   110 2000				icl 'rtl6502.asm'
+Source: rtl6502.asm
+   388 					opt l+
+   111
+   112 				.print 'ZPAGE: ',fxptr,'..',zpend
+   112 				ZPAGE: $0080..$00DA
+   113
+   114 				.print 'RTLIB: ',RTLIB,'..',*
+   114 				RTLIB: $2000..$2000
+   115
+   116 				; ------------------------------------------------------------
+   117
+   118 2000			START
+   119 2000 BA				tsx
+   120 2001 8E D5 22			stx MAIN.@halt+1
+   121
+   122 					.ifdef fmulinit
+   123 					fmulinit
+   124 					eif
+   125
+   126 = 001C			VLEN	= VARDATASIZE-VARINITSIZE
+   127 = 22F1			VADR	= DATAORIGIN+VARINITSIZE
+   128
+   129 					ift VADR > $BFFF
+   130 					ert 'Invalid memory address range ',VADR
+   131 					eli (VLEN>0) && (VLEN<=256)
+   132 2004 A2 E4			ldx #256-VLEN
+   133 2006 A9 00			lda #0
+   134 2008 9D 0D 22 E8 D0 FA		sta:rne VADR+VLEN-256,x+
+   135 					eli VLEN>0
+   136 					@fill #VADR #VLEN #0
+   137 					eif
+   138
+   139 					.ifdef MAIN.@DEFINES.ROMOFF
+   140 200E				icl 'atari\romoff.asm'
+Source: romoff.asm
+     1
+     2 				// http://atariki.krap.pl/index.php/Programowanie:_U%C5%BCycie_OS-a_przy_wy%C5%82%C4%85czonym_ROM-ie
+     3
+     4 200E			.local	rominit
+     5
+     6 200E 78			        sei
+     7 200F A9 00		        lda #%00000000
+     8 2011 8D 0E D4		        sta NMIEN       ;$D40E
+     9 2014 A9 FE		        lda #%11111110
+    10 2016 8D 01 D3		        sta PORTB       ;$D301
+    11
+    12 2019 A2 03			ldx #3
+    13 201B A0 00			ldy #0
+    14 201D EE 01 D3		mv	inc portb
+    15 2020 B9 00 E0		afnt0	lda $e000,y
+    16 2023 CE 01 D3			dec portb
+    17 2026 99 00 E0		afnt1	sta $e000,y
+    18 2029 C8				iny
+    19 202A D0 F1			bne mv
+    20 202C EE 22 20			inc afnt0+2
+    21 202F EE 28 20			inc afnt1+2
+    22 2032 CA				dex
+    23 2033 10 E8			bpl mv
+    24
+    25 2035 A2 52		        ldx #<nmiint
+    26 2037 A0 20		        ldy #>nmiint
+    27 2039 8E FA FF		        stx NMIVEC      ;$FFFA
+    28 203C 8C FB FF		        sty NMIVEC+1
+    29
+    30 203F A2 5C		        ldx #<irqint
+    31 2041 A0 20		        ldy #>irqint
+    32 2043 8E FE FF		        stx IRQVEC      ;$FFFE
+    33 2046 8C FF FF		        sty IRQVEC+1
+    34
+    35 2049 A9 40		        lda #%01000000
+    36 204B 8D 0E D4		        sta NMIEN       ;$D40E
+    37 204E 58			        cli
+    38
+    39 204F 4C 7D 20			jmp skp
+    40
+    41
+    42
+    43 2052 2C 0F D4		nmiint  bit NMIST        ;$D40F
+    44 2055 10 03		        spl
+    45 2057 6C 00 02		        jmp (VDSLST)     ;$0200
+    46
+    47 205A 38			        sec
+    48 205B 24			        .byte $24        ;BIT $18
+    49
+    50 205C 18			irqint  clc
+    51
+    52 				        ;wlaczenie OS ROM
+    53
+    54 205D EE 01 D3		        inc PORTB       ;$D301
+    55
+    56 2060 48			        pha
+    57 2061 8A			        txa
+    58 2062 48			        pha
+    59 2063 BA			        tsx
+    60
+    61 				        ;odlozenie na stos danych dla powrotu z przerwania (RTI)
+    62
+    63 2064 A9 20		        lda #>iret      ;adres procedury iret
+    64 2066 48			        pha
+    65 2067 A9 76		        lda #<iret
+    66 2069 48			        pha
+    67 206A BD 03 01		        lda $103,x      ;skopiowanie wartosci rejestru stanu procesora
+    68 206D 48			        pha
+    69
+    70 				        ;skok przez odpowiedni wektor przerwania
+    71
+    72 206E 90 03		        scc
+    73 2070 6C FA FF		        jmp (NMIVEC)    ;$FFFA
+    74 2073 6C FE FF		        jmp (IRQVEC)    ;$FFFE
+    75
+    76 2076 68			iret    pla
+    77 2077 AA			        tax
+    78 2078 68			        pla
+    79
+    80 				        ;wylaczenie OS ROM
+    81
+    82 2079 CE 01 D3		        dec PORTB       ;$D301
+    83 207C 40			        rti
+    84
+    85 207D			skp
+    86
+    87 				.endl
+    88
+   141 					.endif
+   142
+   143 207D A9 0D 85 82 A9 23 + 	mwa #PROGRAMSTACK psptr
+   144
+   145 2085 A2 0F			ldx #$0f					; DOS II+/D ParamStr
+   146 2087 BD 40 03 9D DB 22 + 	mva:rpl $340,x MAIN.IOCB@COPY,x-
+   147
+   148 2090 E8				inx						; X = 0
+   149 2091 86 90			stx bp						; BP = 0
+   150
+   151 2093 8E 08 D2			stx audctl					; reset POKEY
+   152 2096 A9 03			lda #3
+   153 2098 8D 0F D2			sta skctl
+   154
+   155 209B CA				dex						; X = 255
+   156
+   157 209C				UNITINITIALIZATION
+Macro: UNITINITIALIZATION [Source: foxmode.a65]
+   158
+   159 209C			.local	MAIN						; PROCEDURE
+   160
+   161 209C 4C 82 22			jmp l_0007
+   162
+   163 				; ------------------------------------------------------------
+   164
+   165 209F			.local	SYSTEM						; UNIT
+   166
+   167 209F			.local	PAUSE_0056					; PROCEDURE | ASSEMBLER | OVERLOAD
+   168
+   169 				; ---------------------  ASM Block 039  ---------------------
+   170
+   171 209F A5 14 C5 14 F0 FC		lda:cmp:req :rtclok+2
+   172
+   173 20A5			@exit
+   174 					.ifdef @new
+   175 					lda <@VarData
+   176 					sta :ztmp
+   177 					lda >@VarData
+   178 					ldy #@VarDataSize-1
+   179 					jmp @FreeMem
+   180 					eif
+   181 20A5 60				rts						; ret
+   182 				.endl
+   183
+   184 				; ------------------------------------------------------------
+   185
+   186 = 0101			__PORTB_BANKS	= $0101
+   187 = 0648			M_PI_2	= $0648
+   188 = 0192			D_PI_2	= $0192
+   189 = 0004			D_PI_180	= $04
+   190 = 0000			MGTIA	= $00
+   191 = 0080			MVBXE	= $80
+   192 = 0000			VBXE_XDLADR	= $00
+   193 = 0100			VBXE_BCBADR	= $0100
+   194 = 1000			VBXE_MAPADR	= $1000
+   195 = 5000			VBXE_OVRADR	= $5000
+   196 = B000			VBXE_WINDOW	= $B000
+   197 = 0000			IDLI	= $00
+   198 = 0001			IVBL	= $01
+   199 = 00FE			CH_DELCHR	= $FE
+   200 = 009B			CH_ENTER	= $9B
+   201 = 001B			CH_ESC	= $1B
+   202 = 001C			CH_CURS_UP	= $1C
+   203 = 001D			CH_CURS_DOWN	= $1D
+   204 = 001E			CH_CURS_LEFT	= $1E
+   205 = 001F			CH_CURS_RIGHT	= $1F
+   206 = 007F			CH_TAB	= $7F
+   207 = 009B			CH_EOL	= $9B
+   208 = 007D			CH_CLR	= $7D
+   209 = 00FD			CH_BELL	= $FD
+   210 = 007E			CH_DEL	= $7E
+   211 = 009C			CH_DELLINE	= $9C
+   212 = 009D			CH_INSLINE	= $9D
+   213 = 0000			COLOR_BLACK	= $00
+   214 = 000E			COLOR_WHITE	= $0E
+   215 = 0032			COLOR_RED	= $32
+   216 = 0096			COLOR_CYAN	= $96
+   217 = 0068			COLOR_VIOLET	= $68
+   218 = 00C4			COLOR_GREEN	= $C4
+   219 = 0074			COLOR_BLUE	= $74
+   220 = 00EE			COLOR_YELLOW	= $EE
+   221 = 0028			COLOR_ORANGE	= $28
+   222 = 00E4			COLOR_BROWN	= $E4
+   223 = 003C			COLOR_LIGHTRED	= $3C
+   224 = 0004			COLOR_GRAY1	= $04
+   225 = 0006			COLOR_GRAY2	= $06
+   226 = 000A			COLOR_GRAY3	= $0A
+   227 = 00CC			COLOR_LIGHTGREEN	= $CC
+   228 = 007C			COLOR_LIGHTBLUE	= $7C
+   229 = 0004			FMOPENREAD	= $04
+   230 = 0008			FMOPENWRITE	= $08
+   231 = 0009			FMOPENAPPEND	= $09
+   232 = 000C			FMOPENREADWRITE	= $0C
+   233 = 22EB			SCREENWIDTH	= DATAORIGIN+$0000
+   234 = 22ED			SCREENHEIGHT	= DATAORIGIN+$0002
+   235 = 22EF			DATESEPARATOR	= DATAORIGIN+$0004
+   236 = D014			TVSYSTEM	= $D014
+   237 = 02C0			adr.PALETTE	= $02C0
+   238 20A6			.var PALETTE	= adr.PALETTE .word
+   239 = D012			adr.HPALETTE	= $D012
+   240 20A6			.var HPALETTE	= adr.HPALETTE .word
+   241 = 22F0			FILEMODE	= DATAORIGIN+$0005
+   242 = 22F1			GRAPHMODE	= DATAORIGIN+$0006
+   243 = 22F2			IORESULT	= DATAORIGIN+$0007
+   244 = 22F3			EOLN	= DATAORIGIN+$0008
+   245 = 22F4			RNDSEED	= DATAORIGIN+$0009
+   246
+   247 = 20A6 C0 02		PALETTE
+   247 = 20A8 12 D0		HPALETTE
+   247 				.endl							; UNIT SYSTEM
+   248
+   249 				; ------------------------------------------------------------
+   250
+   251 20AA			.local	ATARI						; UNIT
+   252
+   253 				; ------------------------------------------------------------
+   254
+   255 = 0012			RTCLOK	= $12
+   256 = 004D			ATRACT	= $4D
+   257 = 0052			LMARGIN	= $52
+   258 = 0053			RMARGIN	= $53
+   259 = 0054			ROWCRS	= $54
+   260 = 0055			COLCRS	= $55
+   261 = 0057			DINDEX	= $57
+   262 = 0058			SAVMSC	= $58
+   263 = 0062			PALNTS	= $62
+   264 = 006A			RAMTOP	= $6A
+   265 = 0200			VDSLST	= $0200
+   266 = 0230			SDLSTL	= $0230
+   267 = 0290			TXTROW	= $0290
+   268 = 0291			TXTCOL	= $0291
+   269 = 0293			TINDEX	= $0293
+   270 = 0294			TXTMSC	= $0294
+   271 = 022F			SDMCTL	= $022F
+   272 = 026F			GPRIOR	= $026F
+   273 = 02F0			CRSINH	= $02F0
+   274 = 02F3			CHACT	= $02F3
+   275 = 02F4			CHBAS	= $02F4
+   276 = 02FC			CH	= $02FC
+   277 = 02C0			PCOLR0	= $02C0
+   278 = 02C1			PCOLR1	= $02C1
+   279 = 02C2			PCOLR2	= $02C2
+   280 = 02C3			PCOLR3	= $02C3
+   281 = 02C4			COLOR0	= $02C4
+   282 = 02C5			COLOR1	= $02C5
+   283 = 02C6			COLOR2	= $02C6
+   284 = 02C7			COLOR3	= $02C7
+   285 = 02C8			COLOR4	= $02C8
+   286 = 02C8			COLBAKS	= $02C8
+   287 = D000			HPOSP0	= $D000
+   288 = D001			HPOSP1	= $D001
+   289 = D002			HPOSP2	= $D002
+   290 = D003			HPOSP3	= $D003
+   291 = D004			HPOSM0	= $D004
+   292 = D005			HPOSM1	= $D005
+   293 = D006			HPOSM2	= $D006
+   294 = D007			HPOSM3	= $D007
+   295 = D008			SIZEP0	= $D008
+   296 = D009			SIZEP1	= $D009
+   297 = D00A			SIZEP2	= $D00A
+   298 = D00B			SIZEP3	= $D00B
+   299 = D00C			SIZEM	= $D00C
+   300 = D00D			GRAFP0	= $D00D
+   301 = D00E			GRAFP1	= $D00E
+   302 = D00F			GRAFP2	= $D00F
+   303 = D010			GRAFP3	= $D010
+   304 = D011			GRAFM	= $D011
+   305 = D004			P0PF	= $D004
+   306 = D014			PAL	= $D014
+   307 = D012			COLPM0	= $D012
+   308 = D013			COLPM1	= $D013
+   309 = D014			COLPM2	= $D014
+   310 = D015			COLPM3	= $D015
+   311 = D016			COLPF0	= $D016
+   312 = D017			COLPF1	= $D017
+   313 = D018			COLPF2	= $D018
+   314 = D019			COLPF3	= $D019
+   315 = D01A			COLBK	= $D01A
+   316 = D01B			PRIOR	= $D01B
+   317 = D01D			GRACTL	= $D01D
+   318 = D01E			HITCLR	= $D01E
+   319 = D200			AUDF1	= $D200
+   320 = D201			AUDC1	= $D201
+   321 = D202			AUDF2	= $D202
+   322 = D203			AUDC2	= $D203
+   323 = D204			AUDF3	= $D204
+   324 = D205			AUDC3	= $D205
+   325 = D206			AUDF4	= $D206
+   326 = D207			AUDC4	= $D207
+   327 = D208			AUDCTL	= $D208
+   328 = D20F			SKSTAT	= $D20F
+   329 = D301			PORTB	= $D301
+   330 = D400			DMACTL	= $D400
+   331 = D401			CHACTL	= $D401
+   332 = D402			DLISTL	= $D402
+   333 = D404			HSCROL	= $D404
+   334 = D405			VSCROL	= $D405
+   335 = D407			PMBASE	= $D407
+   336 = D409			CHBASE	= $D409
+   337 = D40A			WSYNC	= $D40A
+   338 = D40B			VCOUNT	= $D40B
+   339 = D40C			PENH	= $D40C
+   340 = D40D			PENV	= $D40D
+   341 = D40E			NMIEN	= $D40E
+   342
+   343 				.endl							; UNIT ATARI
+   344
+   345 				; ------------------------------------------------------------
+   346
+   347 20AA			.local	CRT						; UNIT
+   348
+   349 20AA			.local	KEYPRESSED					; FUNCTION | ASSEMBLER
+   350
+   351 				; ---------------------  ASM Block 053  ---------------------
+   352
+   353 20AA A0 00			ldy #$00	; false
+   354 20AC AD FC 02			lda kbcodes
+   355 20AF C9 FF			cmp #$ff
+   356 20B1 F0 01			beq skp
+   357 20B3 C8				iny		; true
+   358
+   359 				;	sty kbcodes
+   360
+   361 20B4 8C F7 22		skp	sty Result
+   362
+   363 20B7			@exit
+   364
+   365 				; ------------------------------------------------------------
+   366
+   367 				; Push BYTE / CHAR / SHORTINT / BOOLEAN
+   368 				; as Pointer
+   369
+   370 20B7 E8				inx
+   371 20B8 AD F7 22 95 9A		mva RESULT :STACKORIGIN,x
+   372
+   373 					.ifdef @new
+   374 					lda <@VarData
+   375 					sta :ztmp
+   376 					lda >@VarData
+   377 					ldy #@VarDataSize-1
+   378 					jmp @FreeMem
+   379 					eif
+   380
+   381 				; ------------------------------------------------------------
+   382
+   383 = 22F7			RESULT	= DATAORIGIN+$000C
+   384
+   385 = 22F7			@VarData	= RESULT
+   386 = 0001			@VarDataSize	= 1
+   387
+   388 20BD 60				rts						; ret
+   389 				.endl
+   390
+   391 				; ------------------------------------------------------------
+   392
+   393 = 22F6			TEXTATTR	= DATAORIGIN+$000B
+   394 = D01F			CONSOL	= $D01F
+   395 = 0000			CN_START_SELECT_OPTION	= $00
+   396 = 0001			CN_SELECT_OPTION	= $01
+   397 = 0002			CN_START_OPTION	= $02
+   398 = 0003			CN_OPTION	= $03
+   399 = 0004			CN_START_SELECT	= $04
+   400 = 0005			CN_SELECT	= $05
+   401 = 0006			CN_START	= $06
+   402 = 0007			CN_NONE	= $07
+   403 = 0000			BW40	= $00
+   404 = 0001			CO40	= $01
+   405 = 0002			BW80	= $02
+   406 = 0003			CO80	= $03
+   407 = 0007			MONO	= $07
+   408 = 0001			C40	= $01
+   409 = 0003			C80	= $03
+   410 = 0000			BLACK	= $00
+   411 = 0001			BLUE	= $01
+   412 = 0002			GREEN	= $02
+   413 = 0003			CYAN	= $03
+   414 = 0004			RED	= $04
+   415 = 0005			MAGENTA	= $05
+   416 = 0006			BROWN	= $06
+   417 = 0007			LIGHTGRAY	= $07
+   418 = 0008			DARKGRAY	= $08
+   419 = 0009			LIGHTBLUE	= $09
+   420 = 000A			LIGHTGREEN	= $0A
+   421 = 000B			LIGHTCYAN	= $0B
+   422 = 000C			LIGHTRED	= $0C
+   423 = 000D			LIGHTMAGENTA	= $0D
+   424 = 000E			YELLOW	= $0E
+   425 = 000F			WHITE	= $0F
+   426 = 0080			BLINK	= $80
+   427
+   428 				.endl							; UNIT CRT
+   429
+   430 				; ------------------------------------------------------------
+   431
+   432 20BE			.local	GR4PP						; UNIT
+   433
+   434 20BE			.local	G4DLI						; PROCEDURE | ASSEMBLER | INTERRUPT
+   435
+   436 				; ---------------------  ASM Block 060  ---------------------
+   437
+   438
+   439 20BE			dli 
+   440 20BE 48			    pha 
+   441 20BF 8D 0A D4		    sta WSYNC
+   442 20C2 A9 04		    lda #4
+   443 = 20C3			.def :VS_Upper = *-1
+   444 20C4 8D 05 D4		    sta VSCROL
+   445 20C7 A9 03		    lda #3
+   446 = 20C8			.def :VS_Lower = *-1
+   447 20C9 8D 05 D4		    sta VSCROL
+   448 20CC 68			    pla 
+   449
+   450 20CD 40				rti						; ret
+   451 				.endl
+   452
+   453 20CE			.local	SETVS						; PROCEDURE | ASSEMBLER
+   454
+   455 				; ------------------------------------------------------------
+   456
+   457 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   458 				; as Pointer
+   459 20CE B5 9A 8D FB 22		mva :STACKORIGIN,x LOWER
+   460 20D3 CA				dex
+   461
+   462 				; ------------------------------------------------------------
+   463
+   464 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   465 				; as Pointer
+   466 20D4 B5 9A 8D FA 22		mva :STACKORIGIN,x UPPER
+   467 20D9 CA				dex
+   468
+   469 				; ---------------------  ASM Block 061  ---------------------
+   470
+   471
+   472 20DA AD FA 22		    lda upper
+   473 20DD 8D C3 20		    sta VS_Upper
+   474 20E0 AD FB 22		    lda lower
+   475 20E3 8D C8 20		    sta VS_Lower
+   476
+   477
+   478 				; ------------------------------------------------------------
+   479
+   480 = 22FA			UPPER	= DATAORIGIN+$000F
+   481 = 22FB			LOWER	= DATAORIGIN+$0010
+   482
+   483 = 22FA			@VarData	= UPPER
+   484 = 0002			@VarDataSize	= 2
+   485
+   486 20E6			@exit
+   487 					.ifdef @new
+   488 					lda <@VarData
+   489 					sta :ztmp
+   490 					lda >@VarData
+   491 					ldy #@VarDataSize-1
+   492 					jmp @FreeMem
+   493 					eif
+   494 20E6 60				rts						; ret
+   495 				.endl
+   496
+   497 20E7			.local	SETPIXELHEIGHT					; PROCEDURE
+   498
+   499 				; ------------------------------------------------------------
+   500
+   501 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   502 				; as Pointer
+   503 20E7 B5 9A 8D FC 22		mva :STACKORIGIN,x LINES
+   504 20EC CA				dex
+   505
+   506 				; optimize OK (GR4PP), line = 79
+   507
+   508 20ED AD FC 22			lda LINES
+   509 20F0 C9 02			cmp #$02
+   510 20F2 90 1A			jcc l_0087
+   511 20F4 C9 07			cmp #$07
+   512 20F6 B0 16			jcs l_0087
+   513
+   514 				; optimize FAIL ('SYSTEM.PAUSE_0056', GR4PP), line = 80
+   515 20F8 20 9F 20			jsr SYSTEM.PAUSE_0056
+   516
+   517 				; optimize FAIL ('SETVS', GR4PP), line = 81
+   518 20FB E8				inx
+   519 20FC A9 08			lda #$08
+   520 20FE 38 ED FC 22			sub LINES
+   521 2102 95 9A			sta :STACKORIGIN,x
+   522 2104 E8				inx
+   523 2105 AC FC 22			ldy LINES
+   524 2108 88				dey
+   525 2109 94 9A			sty :STACKORIGIN,x
+   526 210B 20 CE 20			jsr SETVS
+   527 210E			l_0087
+   528
+   529 				; ------------------------------------------------------------
+   530
+   531 = 22FC			LINES	= DATAORIGIN+$0011
+   532
+   533 = 22FC			@VarData	= LINES
+   534 = 0001			@VarDataSize	= 1
+   535
+   536 210E			@exit
+   537 					.ifdef @new
+   538 					lda <@VarData
+   539 					sta :ztmp
+   540 					lda >@VarData
+   541 					ldy #@VarDataSize-1
+   542 					jmp @FreeMem
+   543 					eif
+   544 210E 60				rts						; ret
+   545 				.endl
+   546
+   547 210F			.local	DLPOKE						; PROCEDURE
+   548
+   549 				; ------------------------------------------------------------
+   550
+   551 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   552 				; as Pointer
+   553 210F B5 9A 8D FD 22		mva :STACKORIGIN,x B
+   554 2114 CA				dex
+   555
+   556 				; optimize OK (GR4PP), line = 87
+   557
+   558 2115 AC F8 22 84 92 AC + 	mwy DLIST :bp2
+   559 211F A0 00			ldy #$00
+   560 2121 AD FD 22			lda B
+   561 2124 91 92			sta (:bp2),y
+   562
+   563 				; optimize FAIL (0, GR4PP), line = 88
+   564 2126 EE F8 22			inc DLIST
+   565 2129 D0 03			sne
+   566 212B EE F9 22			inc DLIST+1
+   567
+   568 				; ------------------------------------------------------------
+   569
+   570 = 22FD			B	= DATAORIGIN+$0012
+   571
+   572 = 22FD			@VarData	= B
+   573 = 0001			@VarDataSize	= 1
+   574
+   575 212E			@exit
+   576 					.ifdef @new
+   577 					lda <@VarData
+   578 					sta :ztmp
+   579 					lda >@VarData
+   580 					ldy #@VarDataSize-1
+   581 					jmp @FreeMem
+   582 					eif
+   583 212E 60				rts						; ret
+   584 				.endl
+   585
+   586 212F			.local	DLPOKEW						; PROCEDURE
+   587
+   588 				; ------------------------------------------------------------
+   589
+   590 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   591 				; as Pointer
+   592 212F B5 9A 8D FE 22		mva :STACKORIGIN,x W
+   593 2134 B5 AA 8D FF 22		mva :STACKORIGIN+STACKWIDTH,x W+1
+   594 2139 CA				dex
+   595
+   596 				; optimize OK (GR4PP), line = 93
+   597
+   598 213A AC F8 22 84 92 AC + 	mwy DLIST :bp2
+   599 2144 A0 00			ldy #$00
+   600 2146 AD FE 22			lda W
+   601 2149 91 92			sta (:bp2),y
+   602
+   603 				; optimize OK (GR4PP), line = 94
+   604
+   605 214B AD FF 22			lda W+1
+   606 214E C8				iny
+   607 214F 91 92			sta (:bp2),y
+   608
+   609 				; optimize OK (GR4PP), line = 95
+   610
+   611 2151 AD F8 22			lda DLIST
+   612 2154 18 69 02			add #$02
+   613 2157 8D F8 22			sta DLIST
+   614 215A 90 03			scc
+   615 215C EE F9 22			inc DLIST+1
+   616
+   617 				; ------------------------------------------------------------
+   618
+   619 = 22FE			W	= DATAORIGIN+$0013
+   620
+   621 = 22FE			@VarData	= W
+   622 = 0002			@VarDataSize	= 2
+   623
+   624 215F			@exit
+   625 					.ifdef @new
+   626 					lda <@VarData
+   627 					sta :ztmp
+   628 					lda >@VarData
+   629 					ldy #@VarDataSize-1
+   630 					jmp @FreeMem
+   631 					eif
+   632 215F 60				rts						; ret
+   633 				.endl
+   634
+   635 2160			.local	BUILDDISPLAYLIST				; PROCEDURE
+   636
+   637 				; ------------------------------------------------------------
+   638
+   639 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   640 				; as Pointer
+   641 2160 B5 9A 8D 05 23		mva :STACKORIGIN,x BLANKS
+   642 2165 CA				dex
+   643
+   644 				; ------------------------------------------------------------
+   645
+   646 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   647 				; as Pointer
+   648 2166 B5 9A 8D 04 23		mva :STACKORIGIN,x LINES
+   649 216B CA				dex
+   650
+   651 				; ------------------------------------------------------------
+   652
+   653 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   654 				; as Pointer
+   655 216C B5 9A 8D 02 23		mva :STACKORIGIN,x VRAMADDRESS
+   656 2171 B5 AA 8D 03 23		mva :STACKORIGIN+STACKWIDTH,x VRAMADDRESS+1
+   657 2176 CA				dex
+   658
+   659 				; ------------------------------------------------------------
+   660
+   661 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   662 				; as Pointer
+   663 2177 B5 9A 8D 00 23		mva :STACKORIGIN,x DLISTADDRESS
+   664 217C B5 AA 8D 01 23		mva :STACKORIGIN+STACKWIDTH,x DLISTADDRESS+1
+   665 2181 CA				dex
+   666
+   667 				; optimize OK (GR4PP), line = 100
+   668
+   669 2182 AD 00 23 8D F8 22		mva DLISTADDRESS DLIST
+   670 2188 AD 01 23 8D F9 22		mva DLISTADDRESS+1 DLIST+1
+   671
+   672 				; --- WhileProlog
+   673 218E 4C 9C 21			jmp l_00D7
+   674 2191			l_00D8
+   675
+   676 				; optimize FAIL ('DLPOKE', GR4PP), line = 102
+   677 2191 E8				inx
+   678 2192 A9 70 95 9A			mva #$70 :STACKORIGIN,x
+   679 2196 20 0F 21			jsr DLPOKE
+   680
+   681 				; optimize FAIL (0, GR4PP), line = 103
+   682 2199 CE 05 23			dec BLANKS
+   683 219C			l_00D7
+   684
+   685 				; optimize OK (GR4PP), line = 101
+   686
+   687 219C AD 05 23			lda BLANKS
+   688 219F D0 F0			jne l_00D8
+   689
+   690 				; optimize FAIL ('DLPOKE', GR4PP), line = 105
+   691 21A1 E8				inx
+   692 21A2 A9 E4 95 9A			mva #$E4 :STACKORIGIN,x
+   693 21A6 20 0F 21			jsr DLPOKE
+   694
+   695 				; optimize FAIL ('DLPOKEW', GR4PP), line = 106
+   696 21A9 E8				inx
+   697 21AA AD 02 23 95 9A		mva VRAMADDRESS :STACKORIGIN,x
+   698 21AF AD 03 23 95 AA		mva VRAMADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   699 21B4 20 2F 21			jsr DLPOKEW
+   700
+   701 				; optimize OK (GR4PP), line = 108
+   702
+   703 21B7 AD 04 23			lda LINES
+   704 21BA 4A				lsr @
+   705 21BB 38 E9 01			sub #$01
+   706 21BE 8D 04 23			sta LINES
+   707
+   708 				; --- WhileProlog
+   709 21C1 4C D3 21			jmp l_00FF
+   710 21C4			l_0100
+   711
+   712 				; optimize FAIL ('DLPOKEW', GR4PP), line = 110
+   713 21C4 E8				inx
+   714 21C5 A9 84 95 9A			mva #$84 :STACKORIGIN,x
+   715 21C9 A9 24 95 AA			mva #$24 :STACKORIGIN+STACKWIDTH,x
+   716 21CD 20 2F 21			jsr DLPOKEW
+   717
+   718 				; optimize FAIL (0, GR4PP), line = 111
+   719 21D0 CE 04 23			dec LINES
+   720 21D3			l_00FF
+   721
+   722 				; optimize OK (GR4PP), line = 109
+   723
+   724 21D3 AD 04 23			lda LINES
+   725 21D6 D0 EC			jne l_0100
+   726
+   727 				; optimize FAIL ('DLPOKE', GR4PP), line = 113
+   728 21D8 E8				inx
+   729 21D9 A9 04 95 9A			mva #$04 :STACKORIGIN,x
+   730 21DD 20 0F 21			jsr DLPOKE
+   731
+   732 				; optimize FAIL ('DLPOKE', GR4PP), line = 114
+   733 21E0 E8				inx
+   734 21E1 A9 41 95 9A			mva #$41 :STACKORIGIN,x
+   735 21E5 20 0F 21			jsr DLPOKE
+   736
+   737 				; optimize FAIL ('DLPOKEW', GR4PP), line = 115
+   738 21E8 E8				inx
+   739 21E9 AD 00 23 95 9A		mva DLISTADDRESS :STACKORIGIN,x
+   740 21EE AD 01 23 95 AA		mva DLISTADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   741 21F3 20 2F 21			jsr DLPOKEW
+   742
+   743 				; ------------------------------------------------------------
+   744
+   745 = 2300			DLISTADDRESS	= DATAORIGIN+$0015
+   746 = 2302			VRAMADDRESS	= DATAORIGIN+$0017
+   747 = 2304			LINES	= DATAORIGIN+$0019
+   748 = 2305			BLANKS	= DATAORIGIN+$001A
+   749
+   750 = 2300			@VarData	= DLISTADDRESS
+   751 = 0006			@VarDataSize	= 6
+   752
+   753 21F6			@exit
+   754 					.ifdef @new
+   755 					lda <@VarData
+   756 					sta :ztmp
+   757 					lda >@VarData
+   758 					ldy #@VarDataSize-1
+   759 					jmp @FreeMem
+   760 					eif
+   761 21F6 60				rts						; ret
+   762 				.endl
+   763
+   764 21F7			.local	GR4INIT						; PROCEDURE
+   765
+   766 				; ------------------------------------------------------------
+   767
+   768 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   769 				; as Pointer
+   770 21F7 B5 9A 8D 0C 23		mva :STACKORIGIN,x BLANKS
+   771 21FC CA				dex
+   772
+   773 				; ------------------------------------------------------------
+   774
+   775 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   776 				; as Pointer
+   777 21FD B5 9A 8D 0B 23		mva :STACKORIGIN,x PIXELHEIGHT
+   778 2202 CA				dex
+   779
+   780 				; ------------------------------------------------------------
+   781
+   782 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   783 				; as Pointer
+   784 2203 B5 9A 8D 0A 23		mva :STACKORIGIN,x LINES
+   785 2208 CA				dex
+   786
+   787 				; ------------------------------------------------------------
+   788
+   789 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   790 				; as Pointer
+   791 2209 B5 9A 8D 08 23		mva :STACKORIGIN,x VRAMADDRESS
+   792 220E B5 AA 8D 09 23		mva :STACKORIGIN+STACKWIDTH,x VRAMADDRESS+1
+   793 2213 CA				dex
+   794
+   795 				; ------------------------------------------------------------
+   796
+   797 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   798 				; as Pointer
+   799 2214 B5 9A 8D 06 23		mva :STACKORIGIN,x DLISTADDRESS
+   800 2219 B5 AA 8D 07 23		mva :STACKORIGIN+STACKWIDTH,x DLISTADDRESS+1
+   801 221E CA				dex
+   802
+   803 				; optimize FAIL ('BUILDDISPLAYLIST', GR4PP), line = 120
+   804 221F E8				inx
+   805 2220 AD 06 23 95 9A		mva DLISTADDRESS :STACKORIGIN,x
+   806 2225 AD 07 23 95 AA		mva DLISTADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   807 222A E8				inx
+   808 222B AD 08 23 95 9A		mva VRAMADDRESS :STACKORIGIN,x
+   809 2230 AD 09 23 95 AA		mva VRAMADDRESS+1 :STACKORIGIN+STACKWIDTH,x
+   810 2235 E8				inx
+   811 2236 AD 0A 23 95 9A		mva LINES :STACKORIGIN,x
+   812 223B E8				inx
+   813 223C AD 0C 23 95 9A		mva BLANKS :STACKORIGIN,x
+   814 2241 20 60 21			jsr BUILDDISPLAYLIST
+   815
+   816 				; optimize FAIL ('SETPIXELHEIGHT', GR4PP), line = 121
+   817 2244 E8				inx
+   818 2245 AD 0B 23 95 9A		mva PIXELHEIGHT :STACKORIGIN,x
+   819 224A 20 E7 20			jsr SETPIXELHEIGHT
+   820
+   821 				; optimize OK (GR4PP), line = 122
+   822
+   823 224D AD 06 23 8D 30 02		mva DLISTADDRESS ATARI.SDLSTL
+   824 2253 AD 07 23 8D 31 02		mva DLISTADDRESS+1 ATARI.SDLSTL+1
+   825
+   826 				; optimize OK (GR4PP), line = 123
+   827
+   828 2259 AD 08 23 85 58		mva VRAMADDRESS ATARI.SAVMSC
+   829 225E AD 09 23 85 59		mva VRAMADDRESS+1 ATARI.SAVMSC+1
+   830
+   831 				; optimize OK (GR4PP), line = 124
+   832
+   833 2263 A9 BE 8D 00 02		mva <G4DLI VDSLST
+   834 2268 A9 20 8D 01 02		mva >G4DLI VDSLST+1
+   835
+   836 				; optimize OK (GR4PP), line = 125
+   837
+   838 226D A9 C0 8D 0E D4		mva #$C0 ATARI.NMIEN
+   839
+   840 				; ------------------------------------------------------------
+   841
+   842 = 2306			DLISTADDRESS	= DATAORIGIN+$001B
+   843 = 2308			VRAMADDRESS	= DATAORIGIN+$001D
+   844 = 230A			LINES	= DATAORIGIN+$001F
+   845 = 230B			PIXELHEIGHT	= DATAORIGIN+$0020
+   846 = 230C			BLANKS	= DATAORIGIN+$0021
+   847
+   848 = 2306			@VarData	= DLISTADDRESS
+   849 = 0007			@VarDataSize	= 7
+   850
+   851 2272			@exit
+   852 					.ifdef @new
+   853 					lda <@VarData
+   854 					sta :ztmp
+   855 					lda >@VarData
+   856 					ldy #@VarDataSize-1
+   857 					jmp @FreeMem
+   858 					eif
+   859 2272 60				rts						; ret
+   860 				.endl
+   861
+   862 				; ------------------------------------------------------------
+   863
+   864 = 0070			DL_BLANK8	= $70
+   865 = 0080			DL_DLI	= $80
+   866 = 0040			DL_LMS	= $40
+   867 = 0020			DL_VSCROLL	= $20
+   868 = 000F			DL_MODE_320X192G2	= $0F
+   869 = 0041			DL_JVB	= $41
+   870 = 22F8			DLIST	= DATAORIGIN+$000D
+   871
+   872 				.endl							; UNIT GR4PP
+   873
+   874 2273			.local	VBL						; PROCEDURE | ASSEMBLER | INTERRUPT
+   875
+   876 				; ---------------------  ASM Block 062  ---------------------
+   877
+   878
+   879 2273 AD C3 20			lda VS_Upper
+   880 2276 8D 05 D4			sta vscrol
+   881
+   882 2279 A9 C0 8D 09 D4		mva >CHARSET_RAM_ADDRESS	chbase
+   883
+   884 227E 4C 62 E4			jmp xitvbv
+   885
+   886 2281 40				rti						; ret
+   887 				.endl
+   888 2282			l_0007
+   889
+   890 				; optimize FAIL ('GR4PP.GR4INIT', foxmode.pas), line = 30
+   891 2282 E8				inx
+   892 2283 A9 00 95 9A			mva #$00 :STACKORIGIN,x
+   893 2287 A9 D8 95 AA			mva #$D8 :STACKORIGIN+STACKWIDTH,x
+   894 228B E8				inx
+   895 228C A9 00 95 9A			mva #$00 :STACKORIGIN,x
+   896 2290 A9 C4 95 AA			mva #$C4 :STACKORIGIN+STACKWIDTH,x
+   897 2294 E8				inx
+   898 2295 A9 3C 95 9A			mva #$3C :STACKORIGIN,x
+   899 2299 E8				inx
+   900 229A A9 04 95 9A			mva #$04 :STACKORIGIN,x
+   901 229E E8				inx
+   902 229F A9 00 95 9A			mva #$00 :STACKORIGIN,x
+   903 22A3 20 F7 21			jsr GR4PP.GR4INIT
+   904
+   905 				; optimize OK (foxmode.pas), line = 32
+   906
+   907 22A6 A9 73			lda <VBL
+   908 22A8 A0 05			ldy #5
+   909 22AA 8D 0A D4			sta wsync
+   910 22AD 88				dey
+   911 22AE D0 FD			rne
+   912 22B0 8D 24 02			sta VVBLKD
+   913 22B3 A9 22			lda >VBL
+   914 22B5 8D 25 02			sta VVBLKD+1
+   915
+   916 				; optimize OK (foxmode.pas), line = 34
+   917
+   918 22B8 A9 00 8D 1A D0		mva #$00 ATARI.COLBK
+   919
+   920 				; optimize OK (foxmode.pas), line = 36
+   921
+   922 22BD A9 22 8D C4 02		mva #$22 ATARI.COLOR0
+   923
+   924 				; optimize OK (foxmode.pas), line = 37
+   925
+   926 22C2 A9 36 8D C5 02		mva #$36 ATARI.COLOR1
+   927
+   928 				; optimize OK (foxmode.pas), line = 38
+   929
+   930 22C7 A9 96 8D C6 02		mva #$96 ATARI.COLOR2
+   931
+   932 				; --- RepeatUntilProlog
+   933 22CC			l_0162
+   934
+   935 				; optimize FAIL ('CRT.KEYPRESSED', foxmode.pas), line = 40
+   936 22CC 20 AA 20			jsr CRT.KEYPRESSED
+   937 22CF CA				dex
+   938 22D0 B5 9B			lda :STACKORIGIN+1,x
+   939 22D2 F0 F8			jeq l_0162
+   940
+   941 				; ------------------------------------------------------------
+   942
+   943 = D800			DISPLAY_LIST_ADDRESS	= $D800
+   944 = C000			CHARSET_RAM_ADDRESS	= $C000
+   945 = C400			VIDEO_RAM_ADDRESS	= $C400
+   946 22D4			@exit
+   947
+   948 22D4 A2 00		@halt	ldx #0
+   949 22D6 9A				txs
+   950 					.ifdef MAIN.@DEFINES.ROMOFF
+   951 22D7 EE 01 D3			inc portb
+   952 					.endif
+   953
+   954 22DA 60				rts
+   955
+   956 				; ------------------------------------------------------------
+   957
+   958 22DB 00 00 00 00 00 00 + IOCB@COPY	:16 brk
+   959
+   960 				; ------------------------------------------------------------
+   961
+   962 22EB			.local	@DEFINES
+   963 22EB			ATARI
+   964 22EB			ROMOFF
+   965 				.endl
+   966
+   967 				.endl							; MAIN
+   968
+   969 				; ------------------------------------------------------------
+   970 				; ------------------------------------------------------------
+   971
+   972 				.macro	UNITINITIALIZATION
+   973 				
+   974 					.ifdef MAIN.SYSTEM.@UnitInit
+   975 					jsr MAIN.SYSTEM.@UnitInit
+   976 					eif
+   977 				
+   978 					.ifdef MAIN.ATARI.@UnitInit
+   979 					jsr MAIN.ATARI.@UnitInit
+   980 					eif
+   981 				
+   982 					.ifdef MAIN.CRT.@UnitInit
+   983 					jsr MAIN.CRT.@UnitInit
+   984 					eif
+   985 				
+   986 					.ifdef MAIN.GR4PP.@UnitInit
+   987 					jsr MAIN.GR4PP.@UnitInit
+   988 					eif
+   989 				.endm
+   990
+   991 				; ------------------------------------------------------------
+   992
+   993 					ift .SIZEOF(MAIN.SYSTEM) > 0
+   994 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+   994 				SYSTEM: $209F..$20A9
+   995 					eif
+   996
+   997 					ift .SIZEOF(MAIN.ATARI) > 0
+   998 					.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
+   999 					eif
+  1000
+  1001 					ift .SIZEOF(MAIN.CRT) > 0
+  1002 					.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
+  1002 				CRT: $20AA..$20BD
+  1003 					eif
+  1004
+  1005 					ift .SIZEOF(MAIN.GR4PP) > 0
+  1006 					.print 'GR4PP: ',MAIN.GR4PP,'..',MAIN.GR4PP+.SIZEOF(MAIN.GR4PP)-1
+  1006 				GR4PP: $20BE..$2272
+  1007 					eif
+  1008
+  1009 					.print 'CODE: ',CODEORIGIN,'..',*-1
+  1009 				CODE: $2000..$22EA
+  1010
+  1011 				; ------------------------------------------------------------
+  1012
+  1013 22EB			DATAORIGIN
+  1014 22EB 28 00 18 00 2D 0C	.by  $28 $00 $18 $00 $2D $0C
+  1015
+  1016 = 0006			VARINITSIZE	= *-DATAORIGIN
+  1017 = 0022			VARDATASIZE	= 34
+  1018
+  1019 = 230D			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  1020
+  1021 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+  1021 				DATA: $22EB..$230D
+  1022
+  1023 02E0-02E1> 00 20			run START
+  1024
+  1025 				; ------------------------------------------------------------
+  1026
+  1027 				.macro	STATICDATA
+  1028 				.endm
+  1029
+  1030 					end
