@@ -1,3 +1,6 @@
+11.06.2020
+- optymalizacje dla FOR TO DO, gdy licznikiem jest typ SHORTINT, SMALLINT
+
 07.06.2020
 - optymalizacje dla warunków z 'and #$80'
 - optymalizacje dla FOR byte DOWNTO 0, 'for i:=255 downto 0'
