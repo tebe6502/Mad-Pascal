@@ -2044,30 +2044,6 @@ begin
 
     end;
 
-{
-   if (pos('sta ', TemporaryBuf[0]) > 0) and						// sta I		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
-      (pos('; optimize OK', TemporaryBuf[2]) > 0) and					//; optimize OK		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
-      (pos('cmp ', TemporaryBuf[4]) > 0) and						// cmp			; 4
-      SKIP(5) and									// SKIP			; 5
-      (pos('lda ', TemporaryBuf[6]) > 0) and
-      (copy(TemporaryBuf[6], 6, 256) = copy(TemporaryBuf[0], 6, 256)) and		// lda I		; 6
-      (SKIP(7) = false) then
-    begin
-     TemporaryBuf[6] := '~';
-
-     if (pos('cmp ', TemporaryBuf[7]) > 0) and						// cmp			; 7
-        SKIP(8) and									// SKIP			; 8
-	(pos('lda ', TemporaryBuf[9]) > 0) and
-        (copy(TemporaryBuf[9], 6, 256) = copy(TemporaryBuf[0], 6, 256)) and		// lda I		; 9
-        (SKIP(10) = false) then
-       begin
-	TemporaryBuf[9] := '~';
-       end;
-
-    end;
-}
 
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
@@ -2172,79 +2148,6 @@ begin
 	TemporaryBuf[2] := '~';
       end;
 
-{
-    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W+1		; 0
-       (pos('cmp #', TemporaryBuf[1]) > 0) and						// cmp #		; 1
-       (TemporaryBuf[2] = #9'bne @+') and						// bne @+		; 2
-       (pos('lda ', TemporaryBuf[3]) > 0) and						// lda W		; 3
-       (pos('cmp #', TemporaryBuf[4]) > 0) and						// cmp #		; 4
-       (TemporaryBuf[5] = '@') and							//@			; 5
-       (TemporaryBuf[6] = #9'bcc *+7') and						// bcc *+7		; 6
-       (TemporaryBuf[7] = #9'beq *+5') and						// beq *+5		; 7
-       (pos('jmp l_', TemporaryBuf[8]) > 0) then					// jmp l_		; 8
-      begin
-      p := GetBYTE(1) shl 8 + GetBYTE(4) + 1;
-
-      if p <= $FFFF then begin
-
-        if byte(p shr 8) = 0 then
-	 TemporaryBuf[1] := '~'
-	else
-	 TemporaryBuf[1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);
-
-	if p and $ff = 0 then begin
-	 TemporaryBuf[2] := #9'sne';
-
-	 TemporaryBuf[4] := '~';
-	 TemporaryBuf[5] := '~';
-	end else
-	 TemporaryBuf[4] := #9'cmp #$'+IntToHex(p and $ff, 2);
-
-	TemporaryBuf[6] := '~';
-	TemporaryBuf[7] := '~';
-	TemporaryBuf[8] := #9'jcs ' + copy(TemporaryBuf[8], 6, 256);
-
-      end;
-
-     end;
-
-
-    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
-       (pos('cmp #', TemporaryBuf[1]) > 0) and						// cmp #		; 1
-       (TemporaryBuf[2] = #9'bcc *+7') and						// bcc *+7		; 2
-       (TemporaryBuf[3] = #9'beq *+5') and						// beq *+5		; 3
-       (pos('jmp l_', TemporaryBuf[4]) > 0) then					// jmp l_		; 4
-     begin
-      p := GetBYTE(1) + 1;
-
-      if p <= $FF then begin
-
-        if p = $80 then begin
-	 TemporaryBuf[1] := '~';
-	 TemporaryBuf[2] := '~';
-	 TemporaryBuf[3] := '~';
-	 TemporaryBuf[4] := #9'jmi ' + copy(TemporaryBuf[4], 6, 256);
-	end else begin
-	 TemporaryBuf[1] := #9'cmp #$'+IntToHex(p and $ff, 2);
-
-	 TemporaryBuf[2] := '~';
-	 TemporaryBuf[3] := '~';
-	 TemporaryBuf[4] := #9'jcs ' + copy(TemporaryBuf[4], 6, 256);
-	end;
-
-      end;
-
-      if 										//			; 5
-         (pos('; optimize OK', TemporaryBuf[6]) > 0) and				//; optimize OK		; 6
-	 (TemporaryBuf[7] = '') and							//			; 7
-         (TemporaryBuf[8] = TemporaryBuf[0]) and					// lda I		; 8
-         (SKIP(9) = false) then
-	begin
-	 TemporaryBuf[8] := '~';
-	end;
-
-     end;
-}
 
     if (pos('inc ', TemporaryBuf[0]) > 0) and						// inc W		; 0
        (TemporaryBuf[1] = #9'sne') and							// sne			; 1
@@ -13878,7 +13781,7 @@ var i, l, k, m, x: integer;
        begin
 
         if pos(listing[i+6], listing[i+8]) > 0 then begin
-	 listing[i]   := #9'mwa ' + copy(listing[i+6], 6, 256) + ' :TMP';
+	 listing[i]   := #9'mwy ' + copy(listing[i+6], 6, 256) + ' :TMP';
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 	 listing[i+3] := '';
@@ -13923,7 +13826,7 @@ var i, l, k, m, x: integer;
 	(copy(listing[i+6], 6, 256) = copy(listing[i+12], 6, 256)) then 			// sta (:bp2),y				; 13
       begin
 
-	listing[i+1] := #9'mwa ' + GetString(i+7) + ' :TMP';
+	listing[i+1] := #9'mwy ' + GetString(i+7) + ' :TMP';
 	listing[i+2] := listing[i+8];
 	listing[i+3] := #9'lda (:bp2),y';
 	listing[i+4] := #9'sta (:TMP),y';
@@ -13958,7 +13861,7 @@ var i, l, k, m, x: integer;
      if (copy(listing[i+2], 6, 256) = copy(listing[i+8], 6, 256)) then
        begin
 
-	listing[i]   := #9'mwa ' + GetString(i+6) + ' :TMP';
+	listing[i]   := #9'mwy ' + GetString(i+6) + ' :TMP';
 	listing[i+1] := listing[i+7];
 	listing[i+2] := #9'lda (:bp2),y';
 	listing[i+3] := #9'sta (:TMP),y';
@@ -19900,41 +19803,40 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if (listing[i+9] = #9'.ENDL') and								// .ENDL		; 9
-       (jpl(i+10) or jmi(i+10)) and								// jpl|jmi		; 10
-       (SKIP(i+11) = false) and
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       (jpl(i+9) or jmi(i+9)) and								// jpl|jmi		; 9
+       (SKIP(i+10) = false) and
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint < #$xx		JPL
        lda(i+1) and										// lda E		; 1	shortint >= #$xx	JMI
        sub_im(i+2) and										// sub #		; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
-       (listing[i+4] = #9'beq L5') and								// beq L5		; 4
-       (listing[i+5] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 5
-       (listing[i+6] = #9'eor #$FF') and							// eor #$FF		; 6
-       (listing[i+7] = #9'ora #$01') and							// ora #$01		; 7
-       (listing[i+8] = 'L5') then								//L5			; 8
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
 
       begin
         p := shortint(GetBYTE(i+2));
 
-	if jmi(i+10) then begin
+	if jmi(i+9) then begin
 	 listing[i] := listing[i+1];
 	 listing[i+1] := listing[i+2];
 	 listing[i+2] := #9'svs';
 	 listing[i+3] := #9'eor #$80';
-	 listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
+	 listing[i+4] := #9'jpl ' + copy(listing[i+9], 6, 256);
 	end else
 	if p <> Low(shortint) then begin
 	 listing[i] := listing[i+1];
 	 listing[i+1] := listing[i+2];
 	 listing[i+2] := #9'svc';
 	 listing[i+3] := #9'eor #$80';
-	 listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
+	 listing[i+4] := #9'jpl ' + copy(listing[i+9], 6, 256);
 	end else begin
 	 listing[i] := '';
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 	 listing[i+3] := '';
-	 listing[i+4] := #9'jmp ' + copy(listing[i+10], 6, 256);
+	 listing[i+4] := #9'jmp ' + copy(listing[i+9], 6, 256);
 	end;
 
 	listing[i+5] := '';
@@ -19942,42 +19844,39 @@ var i, l, k, m, x: integer;
 	listing[i+7] := '';
 	listing[i+8] := '';
 	listing[i+9] := '';
-	listing[i+10] := '';
 
 	Result:=false; Break;
       end;
 
 
-    if (listing[i+9] = #9'.ENDL') and								// .ENDL		; 9
-       (jpl(i+10) or jmi(i+10)) and								// jpl|jmi		; 10
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       (jpl(i+9) or jmi(i+9)) and								// jpl|jmi		; 9
        (SKIP(i+11) = false) and
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint < shortint	JPL
        lda(i+1) and										// lda E		; 1	shortint >= shortint	JMI
        sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
-       (listing[i+4] = #9'beq L5') and								// beq L5		; 4
-       (listing[i+5] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 5
-       (listing[i+6] = #9'eor #$FF') and							// eor #$FF		; 6
-       (listing[i+7] = #9'ora #$01') and							// ora #$01		; 7
-       (listing[i+8] = 'L5') then								//L5			; 8
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
 
       begin
 	listing[i] := listing[i+1];
 	listing[i+1] := listing[i+2];
 
-	if jpl(i+10) then
+	if jpl(i+9) then
 	 listing[i+2] := #9'svc'
 	else
 	 listing[i+2] := #9'svs';
 
 	listing[i+3] := #9'eor #$80';
-	listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
+	listing[i+4] := #9'jpl ' + copy(listing[i+9], 6, 256);
 	listing[i+5] := '';
 	listing[i+6] := '';
 	listing[i+7] := '';
 	listing[i+8] := '';
 	listing[i+9] := '';
-	listing[i+10] := '';
 
 	Result:=false; Break;
       end;
@@ -20492,19 +20391,18 @@ var i, l, k, m, x: integer;
      end;
 
 
-    if (listing[i+9] = #9'.ENDL') and								// .ENDL		; 9
-       bmi(i+10) and										// bmi			; 10
-       jne(i+11) and										// jne			; 11
-       (listing[i+12] = '@') and								//@			; 12
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       bmi(i+9) and										// bmi			; 9
+       jne(i+10) and										// jne			; 10
+       (listing[i+11] = '@') and								//@			; 11
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint <= xx
        lda(i+1) and										// lda E		; 1
        sub_im(i+2) and										// sub #		; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
-       (listing[i+4] = #9'beq L5') and								// beq L5		; 4
-       (listing[i+5] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 5
-       (listing[i+6] = #9'eor #$FF') and							// eor #$FF		; 6
-       (listing[i+7] = #9'ora #$01') and							// ora #$01		; 7
-       (listing[i+8] = 'L5') then								//L5			; 8
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
       begin
         p := GetBYTE(i+2);
 
@@ -20514,7 +20412,7 @@ var i, l, k, m, x: integer;
 	listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
 	listing[i+2] := #9'svc';
 	listing[i+3] := #9'eor #$80';
-	listing[i+4] := #9'jpl ' + copy(listing[i+11], 6, 256);
+	listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
 	listing[i+5] := '';
 	listing[i+6] := '';
 	listing[i+7] := '';
@@ -20522,7 +20420,6 @@ var i, l, k, m, x: integer;
 	listing[i+9] := '';
 	listing[i+10] := '';
 	listing[i+11] := '';
-	listing[i+12] := '';
 
 	Result:=false; Break;
       end;
@@ -20923,18 +20820,17 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if (listing[i+9] = #9'.ENDL') and								// .ENDL		; 9
-       jmi(i+10) and										// jmi			; 10
-       jeq(i+11) and										// jeq			; 11
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       jmi(i+9) and										// jmi			; 9
+       jeq(i+10) and										// jeq			; 10
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint > $xx
        lda(i+1) and										// lda E		; 1
        sub_im(i+2) and										// sub #		; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
-       (listing[i+4] = #9'beq L5') and								// beq L5		; 4
-       (listing[i+5] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 5
-       (listing[i+6] = #9'eor #$FF') and							// eor #$FF		; 6
-       (listing[i+7] = #9'ora #$01') and							// ora #$01		; 7
-       (listing[i+8] = 'L5') then								//L5			; 8
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
       begin
         p := shortint(GetBYTE(i+2));
 
@@ -20945,13 +20841,13 @@ var i, l, k, m, x: integer;
 	 listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
 	 listing[i+2] := #9'svs';
 	 listing[i+3] := #9'eor #$80';
-	 listing[i+4] := #9'jpl ' + copy(listing[i+11], 6, 256);
+	 listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
 	end else begin
 	 listing[i] := '';
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 	 listing[i+3] := '';
-	 listing[i+4] := #9'jmp ' + copy(listing[i+11], 6, 256);
+	 listing[i+4] := #9'jmp ' + copy(listing[i+10], 6, 256);
 	end;
 
 	listing[i+5] := '';
@@ -20960,7 +20856,6 @@ var i, l, k, m, x: integer;
 	listing[i+8] := '';
 	listing[i+9] := '';
 	listing[i+10] := '';
-	listing[i+11] := '';
 
 	Result:=false; Break;
       end;
@@ -21387,22 +21282,21 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if (listing[i+9] = #9'.ENDL') and								// .ENDL		; 9
-       (jeq(i+10) or jne(i+10)) and								// jeq|jne		; 10
-       (SKIP(i+11) = false) and
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       (jeq(i+9) or jne(i+9)) and								// jeq|jne		; 9
+       (SKIP(i+10) = false) and
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint <> shortint
        lda(i+1) and										// lda E		; 1	shortint = shortint
        sub(i+2) and										// sub			; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
-       (listing[i+4] = #9'beq L5') and								// beq L5		; 4
-       (listing[i+5] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 5
-       (listing[i+6] = #9'eor #$FF') and							// eor #$FF		; 6
-       (listing[i+7] = #9'ora #$01') and							// ora #$01		; 7
-       (listing[i+8] = 'L5') then								//L5			; 8
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
       begin
 	listing[i] := listing[i+1];
 	listing[i+1] := #9'cmp ' + copy(listing[i+2], 6, 256);
-	listing[i+2] := listing[i+10];
+	listing[i+2] := listing[i+9];
 	listing[i+3] := '';
 	listing[i+4] := '';
 	listing[i+5] := '';
@@ -21410,7 +21304,6 @@ var i, l, k, m, x: integer;
 	listing[i+7] := '';
 	listing[i+8] := '';
 	listing[i+9] := '';
-	listing[i+10] := '';
 
 	Result:=false; Break;
       end;
@@ -23334,15 +23227,14 @@ begin
        listing[l]   := #9'.LOCAL';
        listing[l+1] := #9'lda ' + GetARG(0, x-1);
        listing[l+2] := #9'sub ' + arg1;
-       listing[l+3] := #9'bne L4';
-       listing[l+4] := #9'beq L5';
-       listing[l+5] := 'L4'#9'bvc L5';
-       listing[l+6] := #9'eor #$FF';
-       listing[l+7] := #9'ora #$01';
-       listing[l+8] := 'L5';
-       listing[l+9] := #9'.ENDL';
+       listing[l+3] := #9'beq L5';
+       listing[l+4] := #9'bvc L5';
+       listing[l+5] := #9'eor #$FF';
+       listing[l+6] := #9'ora #$01';
+       listing[l+7] := 'L5';
+       listing[l+8] := #9'.ENDL';
 
-       inc(l, 10);
+       inc(l, 9);
        end;
 
       end else
@@ -25614,6 +25506,9 @@ begin
       writeln(listing[13]);
       writeln(listing[14]);
       writeln(listing[15]);
+      writeln(listing[16]);
+      writeln(listing[17]);
+      writeln(listing[18]);
 
       writeln('---');
 }
@@ -25680,29 +25575,41 @@ begin
 	 listing[6] := '';
 	end;
 
-{
-       if (l = 9) and
-          lda(0) and
-          (listing[1] = #9'cmp #$FF') and
-	  (listing[2] = #9'bne @+') and
-          lda(3) and
-          (listing[4] = #9'cmp #$FF') and
-          (listing[5] = '@') and
-	  (listing[6] = #9'bcc *+7') and
-	  (listing[7] = #9'beq *+5') and
-	  (pos('jmp l_', listing[8]) > 0 ) then
+
+       if (l = 7) and					// SHORTINT - UP
+          lda(0) and (lda_im(0) = false) and
+          sub_im(1) and
+	  (listing[2] = #9'svc') and
+          (listing[3] = #9'eor #$80') and
+          (listing[4] = #9'bmi *+7') and
+          (listing[5] = #9'beq *+5') and
+	  (pos('jmp l_', listing[6]) > 0 ) then
 	begin
-	 listing[0] := '';
-	 listing[1] := '';
-	 listing[2] := '';
-	 listing[3] := '';
-	 listing[4] := '';
-	 listing[5] := '';
-	 listing[6] := '';
-	 listing[7] := '';
-	 listing[8] := '';
+        k := GetBYTE(1) + 1;
+
+	 if k <> $80 then begin
+	  listing[1] := #9'sub #$' + IntToHex(k and $ff, 2);
+
+	  listing[4] := #9'asl @';
+	  listing[5] := #9'jcc ' + copy(listing[6], 6, 256);
+	  listing[6] := '';
+	 end;
+
 	end;
-}
+
+
+       if (l = 6) and					// SHORTINT - DOWN
+          lda(0) and (lda_im(0) = false) and
+          sub_im(1) and
+	  (listing[2] = #9'svc') and
+          (listing[3] = #9'eor #$80') and
+          (listing[4] = #9'bpl *+5') and
+	  (pos('jmp l_', listing[5]) > 0 ) then
+	begin
+	 listing[4] := #9'jmi ' + copy(listing[5], 6, 256);
+	 listing[5] := '';
+	end;
+
 
        if (l = 9) and
           lda(0) and
@@ -25733,7 +25640,7 @@ begin
           if byte(k shr 8) = 0 then
 	   listing[1] := ''
 	  else
-	   listing[1] := #9'cmp #$'+IntToHex(byte(k shr 8), 2);
+	   listing[1] := #9'cmp #$' + IntToHex(byte(k shr 8), 2);
 
 	  if k and $ff = 0 then begin
 	   listing[2] := #9'sne';
@@ -25741,7 +25648,7 @@ begin
 	   listing[4] := '';
 	   listing[5] := '';
 	  end else
-	   listing[4] := #9'cmp #$'+IntToHex(k and $ff, 2);
+	   listing[4] := #9'cmp #$' + IntToHex(k and $ff, 2);
 
 	  listing[6] := '';
  	  listing[7] := '';
@@ -25827,6 +25734,104 @@ begin
 	 listing[12] := '';
 	 listing[13] := '';
 	 listing[14] := '';
+	end;
+
+
+       if (l = 20) and				// SMALLINT - UP
+          (listing[0] = #9'.LOCAL') and
+	  lda(1) and (lda_im(1) = false) and
+	  sub_im(2) and
+          (listing[3] = #9'bne L4') and
+	  lda(4) and (lda_im(4) = false) and
+	  cmp_im(5) and
+          (listing[6] = 'L1'#9'beq L5') and
+          (listing[7] = #9'bcs L3') and
+          (listing[8] = #9'lda #$FF') and
+          (listing[9] = #9'bne L5') and
+          (listing[10] = 'L3'#9'lda #$01') and
+          (listing[11] = #9'bne L5') and
+          (listing[12] = 'L4'#9'bvc L5') and
+          (listing[13] = #9'eor #$FF') and
+          (listing[14] = #9'ora #$01') and
+          (listing[15] = 'L5') and
+          (listing[16] = #9'.ENDL') and
+          (listing[17] = #9'bmi *+7') and
+          (listing[18] = #9'beq *+5') and
+	  (pos('jmp l_', listing[19]) > 0 ) then
+	begin
+        k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
+
+         if k <> $8000 then begin
+	  listing[5] := #9'cmp #$' + IntToHex(k and $ff, 2);
+	  listing[6] := listing[1];
+	  listing[7] := #9'sbc #$' + IntToHex(byte(k shr 8), 2);
+	  listing[8] := #9'svc';
+	  listing[9] := #9'eor #$80';
+	  listing[10] := #9'asl @';
+	  listing[11] := #9'jcc ' + copy(listing[19], 6, 256);
+	  listing[12] := '';
+	  listing[13] := '';
+	  listing[14] := '';
+	  listing[15] := '';
+	  listing[16] := '';
+	  listing[17] := '';
+	  listing[18] := '';
+	  listing[19] := '';
+
+	  listing[0] := '';
+	  listing[1] := '';
+	  listing[2] := '';
+	  listing[3] := '';
+	 end;
+
+	end;
+
+
+       if (l = 19) and				// SMALLINT - DOWN
+          (listing[0] = #9'.LOCAL') and
+	  lda(1) and (lda_im(1) = false) and
+	  sub_im(2) and
+          (listing[3] = #9'bne L4') and
+	  lda(4) and (lda_im(4) = false) and
+	  cmp_im(5) and
+          (listing[6] = 'L1'#9'beq L5') and
+          (listing[7] = #9'bcs L3') and
+          (listing[8] = #9'lda #$FF') and
+          (listing[9] = #9'bne L5') and
+          (listing[10] = 'L3'#9'lda #$01') and
+          (listing[11] = #9'bne L5') and
+          (listing[12] = 'L4'#9'bvc L5') and
+          (listing[13] = #9'eor #$FF') and
+          (listing[14] = #9'ora #$01') and
+          (listing[15] = 'L5') and
+          (listing[16] = #9'.ENDL') and
+          (listing[17] = #9'bpl *+5') and
+	  (pos('jmp l_', listing[18]) > 0 ) then
+	begin
+        k := GetBYTE(2) shl 8 + GetBYTE(5);
+
+         if k <> $8000 then begin
+	  listing[5] := #9'cmp #$' + IntToHex(k and $ff, 2);
+	  listing[6] := listing[1];
+	  listing[7] := #9'sbc #$' + IntToHex(byte(k shr 8), 2);
+	  listing[8] := #9'svc';
+	  listing[9] := #9'eor #$80';
+	  listing[10] := #9'jmi ' + copy(listing[18], 6, 256);
+	  listing[11] := '';
+	  listing[12] := '';
+	  listing[13] := '';
+	  listing[14] := '';
+	  listing[15] := '';
+	  listing[16] := '';
+	  listing[17] := '';
+	  listing[18] := '';
+
+	  listing[0] := '';
+	  listing[1] := '';
+	  listing[2] := '';
+	  listing[3] := '';
+	 end;
+
 	end;
 
       end;
@@ -29160,47 +29165,6 @@ begin
 end;
 
 
-procedure SignedTest(ValType: Byte; var svar: string);
-begin
-       asm65(#9'bne L4');
-
-       case ValType of
-
-	SMALLINTTOK:
-	   begin
-	    asm65(#9'lda '+svar);
-	    asm65(#9'cmp :STACKORIGIN+1,x');
-	   end;
-
-	INTEGERTOK:
-	   begin
-	    asm65(#9'lda '+svar+'+2');
-	    asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH*2,x');
-	    asm65(#9'bne L1');
-
-	    asm65(#9'lda '+svar+'+1');
-	    asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH,x');
-	    asm65(#9'bne L1');
-
-	    asm65(#9'lda '+svar);
-	    asm65(#9'cmp :STACKORIGIN+1,x');
-	   end;
-       end;
-
-       asm65('L1'#9'beq L5');
-       asm65(#9'bcs L3');
-       asm65(#9'lda #$FF');
-       asm65(#9'jmp L5');
-       asm65('L3'#9'lda #$01');
-       asm65(#9'jmp L5');
-       asm65('L4'#9'bvc L5');
-       asm65(#9'eor #$FF');
-       asm65(#9'ora #$01');
-       asm65('L5');
-       asm65(#9'.ENDL');
-end;
-
-
 procedure GenerateForToDoCondition(CounterSize: Byte; Down: Boolean; IdentIndex: integer);
 var svar: string;
     ValType: Byte;
@@ -29211,7 +29175,7 @@ ValType := Ident[IdentIndex].DataType;
 
 asm65(';'+InfoAboutSize(CounterSize));
 
-Gen; Gen; Gen;							// mov :ecx, [bx]
+Gen; Gen; Gen;						// mov :ecx, [bx]
 
 a65(__subBX);
 
@@ -29220,16 +29184,18 @@ case CounterSize of
   1: begin
      ExpandByte;
 
-     if ValType = SHORTINTTOK then begin
-								// @cmpFor_SHORTINT
-       asm65(#9'.LOCAL', '; @cmpFor_SHORTINT');
+     if ValType = SHORTINTTOK then begin		// @cmpFor_SHORTINT
+
        asm65(#9'lda '+svar);
        asm65(#9'sub :STACKORIGIN+1,x');
+       asm65(#9'svc');
+       asm65(#9'eor #$80');
 
-       SignedTest(ValType, svar);
      end else begin
-      asm65(#9'lda '+svar);
-      asm65(#9'cmp :STACKORIGIN+1,x');
+
+       asm65(#9'lda '+svar);
+       asm65(#9'cmp :STACKORIGIN+1,x');
+
      end;
 
      end;
@@ -29237,48 +29203,82 @@ case CounterSize of
   2: begin
      ExpandWord;
 
-     if ValType = SMALLINTTOK then begin
-								// @cmpFor_SMALLINT
-       asm65(#9'.LOCAL', '; @cmpFor_SMALLINT');
+     if ValType = SMALLINTTOK then begin		// @cmpFor_SMALLINT
+
+       asm65(#9'.LOCAL');
        asm65(#9'lda '+svar+'+1');
        asm65(#9'sub :STACKORIGIN+1+STACKWIDTH,x');
+       asm65(#9'bne L4');
+       asm65(#9'lda '+svar);
+       asm65(#9'cmp :STACKORIGIN+1,x');
+       asm65('L1'#9'beq L5');
+       asm65(#9'bcs L3');
+       asm65(#9'lda #$FF');
+       asm65(#9'bne L5');
+       asm65('L3'#9'lda #$01');
+       asm65(#9'bne L5');
+       asm65('L4'#9'bvc L5');
+       asm65(#9'eor #$FF');
+       asm65(#9'ora #$01');
+       asm65('L5');
+       asm65(#9'.ENDL');
 
-       SignedTest(ValType, svar);
      end else begin
-//      asm65(#9'@cmpFor_WORD #'+svar);
-      asm65(#9'lda '+svar+'+1');
-      asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH,x');
-      asm65(#9'bne @+');
-      asm65(#9'lda '+svar);
-      asm65(#9'cmp :STACKORIGIN+1,x');
-      asm65('@');
+
+       asm65(#9'lda '+svar+'+1');
+       asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH,x');
+       asm65(#9'bne @+');
+       asm65(#9'lda '+svar);
+       asm65(#9'cmp :STACKORIGIN+1,x');
+       asm65('@');
+
      end;
 
      end;
 
   4: begin
 
-     if ValType = INTEGERTOK then begin
-								// @cmpFor_INT
-       asm65(#9'.LOCAL', '; @cmpFor_INT');
+     if ValType = INTEGERTOK then begin			// @cmpFor_INT
+
+       asm65(#9'.LOCAL');
        asm65(#9'lda '+svar+'+3');
        asm65(#9'sub :STACKORIGIN+1+STACKWIDTH*3,x');
+       asm65(#9'bne L4');
+       asm65(#9'lda '+svar+'+2');
+       asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH*2,x');
+       asm65(#9'bne L1');
+       asm65(#9'lda '+svar+'+1');
+       asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH,x');
+       asm65(#9'bne L1');
+       asm65(#9'lda '+svar);
+       asm65(#9'cmp :STACKORIGIN+1,x');
+       asm65('L1'#9'beq L5');
+       asm65(#9'bcs L3');
+       asm65(#9'lda #$FF');
+       asm65(#9'bne L5');
+       asm65('L3'#9'lda #$01');
+       asm65(#9'bne L5');
+       asm65('L4'#9'bvc L5');
+       asm65(#9'eor #$FF');
+       asm65(#9'ora #$01');
+       asm65('L5');
+       asm65(#9'.ENDL');
 
-       SignedTest(ValType, svar);
      end else begin
-//      asm65(#9'@cmpFor_CARD #'+svar);
-      asm65(#9'lda '+svar+'+3');
-      asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH*3,x');
-      asm65(#9'bne @+');
-      asm65(#9'lda '+svar+'+2');
-      asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH*2,x');
-      asm65(#9'bne @+');
-      asm65(#9'lda '+svar+'+1');
-      asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH,x');
-      asm65(#9'bne @+');
-      asm65(#9'lda '+svar);
-      asm65(#9'cmp :STACKORIGIN+1,x');
-      asm65('@');
+
+       asm65(#9'lda '+svar+'+3');
+       asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH*3,x');
+       asm65(#9'bne @+');
+       asm65(#9'lda '+svar+'+2');
+       asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH*2,x');
+       asm65(#9'bne @+');
+       asm65(#9'lda '+svar+'+1');
+       asm65(#9'cmp :STACKORIGIN+1+STACKWIDTH,x');
+       asm65(#9'bne @+');
+       asm65(#9'lda '+svar);
+       asm65(#9'cmp :STACKORIGIN+1,x');
+       asm65('@');
+
      end;
 
     end;
@@ -29647,7 +29647,35 @@ Gen; Gen;						// ... [CounterAddress]
 
 if Epilog then begin
 
- if not (ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK]) then
+ if ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK] then begin
+
+  case CounterSize of
+   1: begin
+
+       if Down then begin
+        asm65;
+        asm65(#9'lda '+svar);
+        asm65(#9'cmp #$7f');
+        asm65(#9'seq');
+       end else begin
+        asm65;
+        asm65(#9'lda '+svar);
+        asm65(#9'cmp #$80');
+        asm65(#9'seq');
+       end;
+
+      end;
+{
+   2: begin
+      end;
+
+   4: begin
+      end;
+}
+
+  end;
+
+ end else
  if Down then begin					// for label = exp to max(type)
 
   case CounterSize of
@@ -29660,7 +29688,6 @@ if Epilog then begin
 
    2: begin
        asm65;
-//       asm65(#9'lda '+svar);
        asm65(#9'lda '+svar+'+1');
        asm65(#9'cmp #$ff');
        asm65(#9'seq');
@@ -29668,9 +29695,6 @@ if Epilog then begin
 
    4: begin
        asm65;
-//       asm65(#9'lda '+svar);
-//       asm65(#9'and '+svar+'+1');
-//       asm65(#9'and '+svar+'+2');
        asm65(#9'lda '+svar+'+3');
        asm65(#9'cmp #$ff');
        asm65(#9'seq');
@@ -29679,7 +29703,6 @@ if Epilog then begin
 
  end else begin
 
-//  asm65;
   asm65(#9'seq');
 
  end;
@@ -29747,14 +29770,16 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65;
 
+ asm65('TMP');
+
  asm65('ztmp');
  asm65('ztmp8'#9'.ds 1');
  asm65('ztmp9'#9'.ds 1');
  asm65('ztmp10'#9'.ds 1');
  asm65('ztmp11'#9'.ds 1');
 
- asm65;
- asm65('TMP'#9'.ds 2');
+ //asm65;
+ //asm65('TMP'#9'.ds 2');
 
  if STACK_Atari > 0 then begin
   asm65;
@@ -29880,10 +29905,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'icl ''rtl6502.asm''');
 
  asm65;
- asm65('.print ''ZPAGE: '',fxptr,''..'',zpend');
+ asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1');
 
  asm65;
- asm65('.print ''RTLIB: '',RTLIB,''..'',*');
+ asm65('.print ''RTLIB: '',RTLIB,''..'',*-1');
 
  asm65separator;
 
@@ -35551,6 +35576,8 @@ WHILETOK:
 
 		GenerateForToDoProlog;
 		j := CompileStatement(j + 2);
+
+//	        StartOptimization(j);		!!! zaremowac aby dzialaly optymalizacje w TemporaryBuf
 
 		asm65;
 		asm65('; --- ForToDoEpilog');
