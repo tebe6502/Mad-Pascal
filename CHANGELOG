@@ -1,3 +1,6 @@
+12.06.2020
+- poprawiona optymalizacja dla if (<=) or ()
+
 11.06.2020
 - optymalizacje dla FOR TO DO, gdy licznikiem jest typ SHORTINT, SMALLINT
 
