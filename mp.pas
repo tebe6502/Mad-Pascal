@@ -22892,7 +22892,24 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if (beq(i) or bne(i)) and									// beq|bne @+			; 0
+    if bcc(i) and										// bcc @+			; 0
+       beq(i+1) and										// beq @+			; 1
+       (listing[i+2] = #9'jmp *+6') and								// jmp *+6			; 2
+       (pos('@'#9'jmp l_', listing[i+3]) > 0) and						//@ jmp l_			; 3
+       (pos('jmp l_', listing[i+4]) = 0) then							//~jmp l_			; 4
+      begin
+	listing[i]   := #9'jcc ' + copy(listing[i+3], 7, 256);
+	listing[i+1] := #9'jeq ' + copy(listing[i+3], 7, 256);
+
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (SKIP(i-1) = false) and
+       (beq(i) or bne(i)) and									// beq|bne @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (pos('jmp l_', listing[i+3]) = 0) then							//~jmp l_			; 3
@@ -22909,7 +22926,8 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if ((listing[i] = #9'bcs @+') or (listing[i] = #9'bcc @+')) and				// bcs|bcc @+			; 0
+    if (SKIP(i-1) = false) and
+       ((listing[i] = #9'bcs @+') or (listing[i] = #9'bcc @+')) and				// bcs|bcc @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (pos('jmp l_', listing[i+3]) = 0) then							//~jmp l_			; 3
@@ -22926,7 +22944,8 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if ((listing[i] = #9'bpl @+') or (listing[i] = #9'bmi @+')) and				// bpl|bmi @+			; 0
+    if (SKIP(i-1) = false) and
+       ((listing[i] = #9'bpl @+') or (listing[i] = #9'bmi @+')) and				// bpl|bmi @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (pos('jmp l_', listing[i+3]) = 0) then							//~jmp l_			; 3
