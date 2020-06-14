@@ -7,7 +7,7 @@ unit efast;
 
  @description:
  E: accelerator for Atari 8-bit OS
- 
+
  <https://github.com/dmsc/e-accelerator>
 *)
 
@@ -44,6 +44,10 @@ ATCLR	= $7d
 ATESC	= $1b
 
 	txa:pha
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+		inc portb
+	.endif
 
 	; Search E: handler in HATABS
 	ldy	#<HATABS+1-3
@@ -245,9 +249,13 @@ no_cursor:
 ; End of resident handler
 handler_end:
 
+	.ifdef MAIN.@DEFINES.ROMOFF
+		dec portb
+	.endif
+
 	pla:tax
 };
- 
+
  TextMode(0);
 
 end.
