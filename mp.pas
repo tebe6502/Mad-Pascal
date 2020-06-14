@@ -21,7 +21,7 @@ Contributors:
 + David Schmenk :
 	- IEEE-754 (32bit) single
 
-+ DMSC :
++ Daniel Serpell :
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
 	- unit SYSTEM: fsincos, fast SIN/COS (IEEE754-32 precision)
 	- unit GRAPHICS: TextOut
