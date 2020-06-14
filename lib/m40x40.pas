@@ -1,4 +1,4 @@
-unit gr0pp;
+unit m40x40;
 
 (*
 * @type: unit
@@ -7,7 +7,7 @@ unit gr0pp;
 * @version: 1.0
 * @description:
 * Set of procedures to initialize, run, and use special graphics mode 0++.
-* Resolution 40x60 chars, 2 colors
+* Resolution 160x240 / 80x60, 2 colors
 *
 *)
 interface
