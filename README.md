@@ -54,25 +54,29 @@ The available features are:
 <li>Recursion.
 </ul>
 
-# MadStrap http://bocianu.atari.pl/blog/madstrap
+# MadStrap
+http://bocianu.atari.pl/blog/madstrap
 <p>
 Simple Atari Mad-Pascal common project bootstrap.
 <br>
 Source code at: https://gitlab.com/bocianu/madstrap
 </p>
   
-# BLIBS http://bocianu.atari.pl/blog/blibs
+# BLIBS
+http://bocianu.atari.pl/blog/blibs
 <p>
 Set of custom libraries for MadPascal.
 <br>
 Lastest documentation always at: https://bocianu.gitlab.io/blibs/
 </p>
 
-# pasdoc https://bocianu.atari.pl/blog/pasdoc
+# pasdoc
+https://bocianu.atari.pl/blog/pasdoc
 <p>
 Custom tool for generating documentation from pascal comments in units.
 <br>
 Source code at: https://gitlab.com/bocianu/pasdoc
 </p>
 
-# https://github.com/ilmenit/CC65-Advanced-Optimizations
+# Some advice
+https://github.com/ilmenit/CC65-Advanced-Optimizations
