@@ -80,3 +80,31 @@ Source code at: https://gitlab.com/bocianu/pasdoc
 
 # Some advice
 https://github.com/ilmenit/CC65-Advanced-Optimizations
+
+# Benchmark
+<table style="width:100%">
+  <tr>
+    <th></th>
+    <th>cc65</th>
+    <th>Mad Pascal</th>
+    <th>Millfork</th>
+  </tr>
+  <tr>
+    <td>Sieve</td>
+    <td>602</td>
+    <td>607</td>
+    <td>701</td>
+  </tr>
+  <tr>
+    <td>YoshPlus</td>
+    <td>41933</td>
+    <td>41933</td>
+    <td>41867</td>
+  </tr>
+  <tr>
+    <td>Chessboard</td>
+    <td>76</td>
+    <td>79</td>
+    <td>75</td>
+  </tr>  
+</table>
