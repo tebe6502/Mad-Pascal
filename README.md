@@ -90,19 +90,19 @@ https://github.com/ilmenit/CC65-Advanced-Optimizations
     <th>Millfork</th>
   </tr>
   <tr>
-    <td>Sieve</td>
+    <td>Sieve (less is better)</td>
     <td>602</td>
     <td>607</td>
     <td>701</td>
   </tr>
   <tr>
-    <td>YoshPlus</td>
+    <td>YoshPlus (higher is better)</td>
     <td>41933</td>
     <td>41933</td>
     <td>41867</td>
   </tr>
   <tr>
-    <td>Chessboard</td>
+    <td>Chessboard (higher is better)</td>
     <td>76</td>
     <td>79</td>
     <td>75</td>
