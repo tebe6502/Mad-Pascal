@@ -404,3 +404,32 @@
       end;
 
   end;
+
+
+
+  if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
+     lda(i+1) and											// lda P				; 1
+     add(i+2) and											// add					; 2
+     tay(i+3) and											// tay					; 3
+     lda(i+4) and (listing[i+1]+'+1' = listing[i+4]) and						// lda P+1				; 4
+     adc_im_0(i+5) and											// adc #$00				; 5
+     sta_bp_1(i+6) then begin										// sta :bp+1				; 6
+
+    if lda(i+7) and										// lda 					; 7
+       sta(i+8) then										// sta					; 8
+      begin
+	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
+	listing[i+2] := #9'ldy ' + copy(listing[i+2], 6, 256);
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+
+	if lda_bp_y(i+7) then listing[i+7] := #9'lda (:bp2),y';
+
+	if sta_bp_y(i+8) then listing[i+8] := #9'sta (:bp2),y';
+
+	Result:=false; Break;
+      end;
+
+   end;

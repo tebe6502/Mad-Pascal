@@ -5755,6 +5755,37 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if (listing[i+4] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 4
+       (listing[i+5] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 5
+       dex(i+6) and										// dex					; 6
+       inx(i) and										// inx					; 0
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       inx(i+2) and										// inx					; 2
+       mva_im(i+3) and (GetBYTE(i+3) in [2,4,8,16,32]) then					// mva # :STACKORIGIN,x			; 3
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     begin
+       p := GetBYTE(i+3);
+
+       listing[i+1] := #9'lda ' + GetString(i+1);
+
+       case p of
+         2: listing[i+2] := #9'asl @';
+         4: listing[i+2] := #9':2 asl @';
+         8: listing[i+2] := #9':3 asl @';
+        16: listing[i+2] := #9':4 asl @';
+        32: listing[i+2] := #9':5 asl @';
+       end;
+
+       listing[i+3] := #9'sta :STACKORIGIN,x';
+       listing[i+4] := '';
+       listing[i+5] := '';
+       listing[i+6] := '';
+
+       Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 0
        dex(i+1) and										// dex					; 1
        (listing[i+2] = #9'm@index2 0') and							// m@index2 0				; 2
