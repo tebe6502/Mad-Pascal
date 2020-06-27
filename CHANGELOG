@@ -1,5 +1,6 @@
 27.06.2020
 - poprawione generowanie kodu dla INC/DEC
+- w listingu *.a65 dodana informacja o deklarowanych tablicach '.array [size]'
 
 20.06.2020
 - unit FASTMATH
