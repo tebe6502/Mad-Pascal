@@ -9283,9 +9283,10 @@ var i, l, k, m, x: integer;
 
 
     if (listing[i] = listing[i+3]) and								// lda I	; 0
-       (listing[i+1] = listing[i+4]) and							// asl @	; 1
-       sta(i+2) and										// sta		; 2
-       sta(i+5) then										// sta		; 5
+       (and_ora_eor(i+1) or lsr_a(i+1) or asl_a(i+1)) and					// asl @	; 1
+       (listing[i+1] = listing[i+4]) and							// sta		; 2
+       sta(i+2) and										// sta		; 5
+       sta(i+5) then
      begin
      	listing[i+3] := '';
 	listing[i+4] := '';
@@ -37391,8 +37392,8 @@ var IdentIndex, size: integer;
     varbegin: TString;
 
 
-   function Value(dorig: Boolean = false): string;
-   const reg: array [1..3] of string = ('edx', 'ecx', 'eax');		// !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
+   function Value(dorig: Boolean = false; brackets: Boolean = false): string;
+   const reg: array [1..3] of string = ('edx', 'ecx', 'eax');			// !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
    var ftmp: TFloat;
        v: Int64;
    begin
@@ -37406,9 +37407,15 @@ var IdentIndex, size: integer;
       v := Ident[IdentIndex].Value;
     end;
 
-    if dorig then
-     Result := #9'= DATAORIGIN+$'+IntToHex(Ident[IdentIndex].Value - DATAORIGIN, 4)
-    else
+
+    if dorig then begin
+
+     if brackets then
+      Result := #9'= [DATAORIGIN+$'+IntToHex(Ident[IdentIndex].Value - DATAORIGIN, 4)+']'
+     else
+      Result := #9'= DATAORIGIN+$'+IntToHex(Ident[IdentIndex].Value - DATAORIGIN, 4);
+
+    end else
      if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..3]) then begin
       Result := #9'= '+reg[(Ident[IdentIndex].Value shr 24) and $7f];
       size := 0;
@@ -37486,7 +37493,16 @@ begin
 
 		  else begin
 
-		   asm65('adr.'+Ident[IdentIndex].Name + Value(true));
+		   if Elements(IdentIndex) > 0 then begin
+
+		    if Ident[IdentIndex].NumAllocElements_ > 0 then
+		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements) + ']')
+		    else
+		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']');
+
+		   end else
+		    asm65('adr.'+Ident[IdentIndex].Name + Value(true));
+
 		   asm65('.var '+Ident[IdentIndex].Name+#9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  end;
