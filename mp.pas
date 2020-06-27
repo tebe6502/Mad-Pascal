@@ -107,11 +107,9 @@ Contributors:
 
 program MADPASCAL;
 
-//{$DEFINE USEOPTFILE}
-
 //{$DEFINE WHILEDO}
 
-//{$DEFINE DEBUG}
+//{$DEFINE USEOPTFILE}
 
 {$DEFINE OPTIMIZECODE}
 
@@ -277,7 +275,8 @@ const
   PCHARTOK		= 144;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 145;	// Size = 1 BYTE
 
-  FLOATTOK		= 146;	// zamieniamy na SINGLETOK
+  SHORTSTRINGTOK	= 146;	// zamieniamy na STRINGTOK
+  FLOATTOK		= 147;	// zamieniamy na SINGLETOK
 
   DATAORIGINOFFSET	= 150;
   CODEORIGINOFFSET	= 151;
@@ -3258,27 +3257,6 @@ var i, l, k, m, x: integer;
 
 // -----------------------------------------------------------------------------
 
- {$IFDEF DEBUG}
- procedure onDebug;
- var i: integer;
- begin
-
- if Debug > 0 then begin
-  for i:=0 to l-1 do writeln(listing[i]);
-  writeln('-------');
-
-  writeln(Debug);
-
-  inc(Debug);
-
-  if Debug > 20 then halt;
- end;
-
- end;
-{$ENDIF}
-
-// -----------------------------------------------------------------------------
-
    procedure Clear;
    var i, k: integer;
    begin
@@ -4471,6 +4449,30 @@ var i, l, k, m, x: integer;
 
        listing[i+1] := '';
        listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if //inx(i) and										// inx					; 0
+       lda(i+1) and (iy(i+1) = false) and							// lda IMAGES				; 1
+       (listing[i+2] = #9'add #$01') and							// add #$01				; 2
+       tay(i+3) then										// tay					; 3
+     begin
+       listing[i+1] := #9'ldy ' + copy(listing[i+1], 6, 256);
+       listing[i+2] := #9'iny';
+       listing[i+3] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy(i) and										// ldy I				; 0
+       mva(i+1) and										// mva ...				; 1
+       inx(i+2) and										// inx					; 2
+       ldy(i+3) and (listing[i] = listing[i+3]) then						// ldy I				; 3
+     begin
+       listing[i+3] := '';
 
        Result:=false; Break;
      end;
@@ -6639,10 +6641,6 @@ var i, l, k, m, x: integer;
    Result:=true;
 
    Rebuild;
-
-   {$IFDEF DEBUG}
-    onDebug;
-   {$ENDIF}
 
    for i := 0 to l - 1 do
     if (listing[i] <> '') then begin
@@ -8968,11 +8966,6 @@ var i, l, k, m, x: integer;
 
   Rebuild;
 
-  {$IFDEF DEBUG}
-   onDebug;
-   num:=0;
-  {$ENDIF}
-
   for i := 0 to l - 1 do
    if listing[i] <> '' then begin
 
@@ -9287,6 +9280,17 @@ var i, l, k, m, x: integer;
 // -----------------------------------------------------------------------------
 // ===		     optymalizacja LDA.			  	  	  === //
 // -----------------------------------------------------------------------------
+
+
+    if (listing[i] = listing[i+3]) and								// lda I	; 0
+       (listing[i+1] = listing[i+4]) and							// asl @	; 1
+       sta(i+2) and										// sta		; 2
+       sta(i+5) then										// sta		; 5
+     begin
+     	listing[i+3] := '';
+	listing[i+4] := '';
+	Result:=false; Break;
+     end;
 
 
     if lda_im_0(i) and										// lda #$00	; 0
@@ -9963,6 +9967,7 @@ var i, l, k, m, x: integer;
 // ===				optymalizacja LDY.			  === //
 // -----------------------------------------------------------------------------
 
+
     if Result and									// "samotna" instrukcja na koncu bloku
        (ldy(i) or lda(i)) and
        (listing[i+1] = '') then begin
@@ -10119,6 +10124,18 @@ var i, l, k, m, x: integer;
       begin
 	listing[i] := '';
 	listing[i+1] := #9'sta ' + copy(listing[i+1], 6, 256);
+	Result:=false; Break;
+      end;
+
+
+    if sta(i) and										// sta			; 0
+       sta(i+1) and										// sta			; 1
+       ldy(i+2) then										// ldy			; 2
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+      begin
+        listing[i]   := '';
+
+	listing[i+2] := #9'tay';
 	Result:=false; Break;
       end;
 
@@ -15545,12 +15562,44 @@ var i, l, k, m, x: integer;
        lda(i+3) and									// lda P+1				; 3
        adc_im_0(i+4) and								// adc #$00				; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+11	; 5
-       lda(i+6) and add_stack(i+7) and							// lda LEVELDATA			; 6
-       tay(i+8) and									// add :STACKORIGIN+11			; 7
-       lda(i+9) and adc_stack(i+10) and							// tay					; 8
-       sta_bp_1(i+11) then								// lda LEVELDATA+1			; 9
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and			// adc :STACKORIGIN+STACKWIDTH+11	; 10
-	(copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) then			// sta :bp+1				; 11
+       lda(i+6) and									// lda LEVELDATA			; 6
+       add_stack(i+7) and								// add :STACKORIGIN+11			; 7
+       tay(i+8) and									// tay					; 8
+       lda(i+9) and									// lda LEVELDATA+1			; 9
+       adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH+11	; 10
+       sta_bp_1(i+11) then								// sta :bp+1				; 11
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and
+	(copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) then
+       begin
+	listing[i+7]  := #9'sec:adc ' + copy(listing[i], 6, 256);
+	listing[i+10] := #9'adc ' + copy(listing[i+3], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if lda(i) and									// lda P				; 0
+       (listing[i+1] = #9'add #$01') and						// add #$01				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+11			; 2
+       lda(i+3) and									// lda P+1				; 3
+       adc_im_0(i+4) and								// adc #$00				; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+11	; 5
+       lda(i+6) and									// lda LEVELDATA			; 6
+       add_stack(i+7) and								// add :STACKORIGIN+11			; 7
+       sta(i+8) and (sta_stack(i+8) = false) and					// sta					; 8
+       lda(i+9) and									// lda LEVELDATA+1			; 9
+       adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH+11	; 10
+       sta(i+11) and (sta_stack(i+11) = false) and					// sta 					; 11
+       (adc(i+13) = false) then
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and
+	(copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) then
        begin
 	listing[i+7]  := #9'sec:adc ' + copy(listing[i], 6, 256);
 	listing[i+10] := #9'adc ' + copy(listing[i+3], 6, 256);
@@ -17892,10 +17941,6 @@ var i, l, k, m, x: integer;
      end;
 
   end;
-
-{$IFDEF DEBUG}
-  writeln(Result,',',num);
-{$ENDIF}
 
   end;			// Peepholeoptimization
 
@@ -26988,6 +27033,7 @@ var
 
 	 CurToken := GetStandardToken(Text);
 	 if CurToken = FLOATTOK then CurToken := SINGLETOK;
+	 if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
 	 AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
 
@@ -27425,6 +27471,7 @@ Spelling[REALTOK	] := 'REAL';
 Spelling[SINGLETOK	] := 'SINGLE';
 Spelling[PCHARTOK	] := 'PCHAR';
 
+Spelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
 Spelling[FLOATTOK	] := 'FLOAT';
 
  AsmFound  := false;
@@ -28425,10 +28472,9 @@ begin
  case IndirectionLevel of
 
   ASPOINTER:
-       begin
-
-       asm65('; as Pointer');
-       asm65;
+	begin
+             asm65('; as Pointer');
+             asm65;
 
 	     case DataSize[ExpressionType] of
 	      1: begin
@@ -28467,7 +28513,7 @@ begin
 
 	     end;
 
-       end;
+	end;
 
 
   ASPOINTERTOPOINTER:
@@ -28488,14 +28534,12 @@ begin
 
 	     case DataSize[ExpressionType] of
 	      1: begin
-		  asm65;
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9+b+' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		 end;
 
 	      2: begin
-		  asm65;
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9+b+' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
@@ -28506,7 +28550,6 @@ begin
 		 end;
 
 	      4: begin
-		  asm65;
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9+b+' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
@@ -28525,14 +28568,15 @@ begin
 	      end;
 
 	     end;
+
 	end;
 
 
   ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
-	  begin
+	begin
 
-	  asm65('; as Pointer To Array Origin');
-	  asm65;
+	     asm65('; as Pointer To Array Origin');
+	     asm65;
 
 	     case DataSize[ExpressionType] of
 	      1: begin
@@ -28621,7 +28665,7 @@ begin
 
 	   a65(__subBX);
 
-	  end;
+	end;
 
  end;
 
@@ -36252,7 +36296,7 @@ WHILETOK:
 	       inc(NumActualParams);
 	     end else
 	     if not(Ident[IdentIndex].AllocElementType in [BYTETOK, SHORTINTTOK]) then begin
-	       Push(DataSize[Ident[IdentIndex].AllocElementType], ASVALUE, 1);   // +/- DATASIZE
+	       Push(DataSize[Ident[IdentIndex].AllocElementType], ASVALUE, 1);			// +/- DATASIZE
 
 	       ExpandParam(ExpressionType, BYTETOK);
 
@@ -36260,7 +36304,7 @@ WHILETOK:
 	     end;
 
 
-	 if Ident[IdentIndex].PassMethod = VARPASSING then IndirectionLevel := ASPOINTERTOPOINTER;
+	 if (Ident[IdentIndex].PassMethod = VARPASSING) and (IndirectionLevel <> ASPOINTERTOARRAYORIGIN) then IndirectionLevel := ASPOINTERTOPOINTER;
 
 
 //       NumActualParams:=1;
@@ -36271,15 +36315,15 @@ WHILETOK:
 	  asm65;
 
 	  if Down then
-	   asm65('; Dec(var X) -> '+InfoAboutToken(ExpressionType))
+	   asm65('; Dec(var X) -> ' + InfoAboutToken(ExpressionType))
 	  else
-	   asm65('; Inc(var X) -> '+InfoAboutToken(ExpressionType));
+	   asm65('; Inc(var X) -> ' + InfoAboutToken(ExpressionType));
 
 	  asm65;
 
-	  GenerateForToDoEpilog(DataSize[ExpressionType], Down, IdentIndex, false)    // +1, -1
+	  GenerateForToDoEpilog(DataSize[ExpressionType], Down, IdentIndex, false)		// +1, -1
 	 end else
-	  GenerateIncOperation(IndirectionLevel, ExpressionType, Down, IdentIndex);   // +N, -N
+	  GenerateIncOperation(IndirectionLevel, ExpressionType, Down, IdentIndex);		// +N, -N
 
 	 StopOptimization;
 
