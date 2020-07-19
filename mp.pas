@@ -2391,6 +2391,18 @@ begin
     end;
 
 
+   if (pos('dec ', TemporaryBuf[0]) > 0) and						// dec I		; 0
+											//			; 1
+      (pos('; optimize OK', TemporaryBuf[2]) > 0) and					//; optimize OK		; 2
+											//			; 3
+      (pos('lda ', TemporaryBuf[4]) > 0) and						// lda I		; 4
+      (pos('jne ', TemporaryBuf[5]) > 0) then						// jne			; 5
+    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
