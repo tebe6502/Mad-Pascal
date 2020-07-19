@@ -1,3 +1,6 @@
+19.07.2020
+- optymalizacja dla FOR BYTE DOWNTO
+
 27.06.2020
 - poprawione generowanie kodu dla INC/DEC
 - w listingu *.a65 dodana informacja o deklarowanych tablicach '.array [size]'

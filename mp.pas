@@ -2176,6 +2176,24 @@ begin
       end;
 
 
+    if //(TemporaryBuf[0] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 0
+       (pos('dec ', TemporaryBuf[1]) > 0) and 						// dec W		; 1
+       (pos('lda ', TemporaryBuf[2]) > 0) and 						// lda W		; 2
+       (TemporaryBuf[3] = #9'cmp #$FF') and						// cmp #$FF		; 3
+       (TemporaryBuf[4] = #9'seq') and							// seq			; 4
+       (pos('jmp l_', TemporaryBuf[5]) > 0) and						// jmp l_xxxx		; 5
+       (pos('l_', TemporaryBuf[6]) = 1) then						//l_yyyy		; 6
+     if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
+      begin
+	TemporaryBuf[3] := TemporaryBuf[1];
+
+	TemporaryBuf[1] := TemporaryBuf[2];
+	TemporaryBuf[2] := #9'beq ' + TemporaryBuf[6];
+
+	TemporaryBuf[4] := '~';
+      end;
+
+
     if (pos('ldy ', TemporaryBuf[0]) > 0) and 						// ldy #$00		; 0
        (pos('lda ', TemporaryBuf[1]) > 0) and						// lda #$00		; 1
        (pos('sta ', TemporaryBuf[2]) > 0) then						// sta			; 2
@@ -3604,6 +3622,24 @@ var i, l, k, m, x: integer;
        listing[i] := #9'sta ' + copy(listing[i], pos(':STACK', listing[i]), 256);
        if inx(i+1) and (listing[i-2] = listing[i+2]) then
 	listing[i+2] := #9'sta ' + copy(listing[i+2], pos(':STACK', listing[i+2]), 256);
+
+       Result:=false; Break;
+     end;
+
+
+    if lda(i) and (iy(i) = false) and								// lda :STACKORIGIN,x			; 0
+       ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01')) and			// add|sub #$01				; 1
+       sta(i+2) and (iy(i+2) = false) and							// sta :STACKORIGIN,x			; 2
+       (inx(i+3) or dex(i+3)) then								// inx|dex				; 3
+     begin
+       listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+
+       if listing[i+1] = #9'add #$01' then
+        listing[i+1] := #9'iny'
+       else
+        listing[i+1] := #9'dey';
+
+       listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
 
        Result:=false; Break;
      end;
@@ -5050,20 +5086,40 @@ var i, l, k, m, x: integer;
      begin
 
        if listing[i+5] = #9'jsr addAX_CX' then begin
+
         listing[i]   := #9'adb ' + GetString(i) + ' ' + GetString(i+3) + ' :STACKORIGIN,x';
 	listing[i+1] := #9'lda ' + GetString(i+1);
 	listing[i+2] := #9'adc ' + GetString(i+4);
         listing[i+3] := #9'sta :STACKORIGIN+STACKWIDTH,x';
         listing[i+4] := #9'inx';
-       end else begin
-        listing[i]   := #9'sbb ' + GetString(i) + ' ' + GetString(i+3) + ' :STACKORIGIN,x';
-	listing[i+1] := #9'lda ' + GetString(i+1);
-	listing[i+2] := #9'sbc ' + GetString(i+4);
-        listing[i+3] := #9'sta :STACKORIGIN+STACKWIDTH,x';
-        listing[i+4] := #9'inx';
-       end;
+        listing[i+5] :='';
 
-       listing[i+5] :='';
+       end else begin
+
+        if dex(i+6) and (GetWORD(i+3, i+4) = 1) then begin
+
+	 tmp:=listing[i];
+
+         listing[i]   := #9'lda ' + GetString(i+1);
+	 listing[i+1] := #9'ldy:sne ' + GetString(tmp);
+	 listing[i+2] := #9'sub #$01';
+	 listing[i+3] := #9'dey';
+	 listing[i+4] := #9'sty :STACKORIGIN,x';
+         listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+	 listing[i+6] := '';
+
+	end else begin
+
+         listing[i]   := #9'sbb ' + GetString(i) + ' ' + GetString(i+3) + ' :STACKORIGIN,x';
+	 listing[i+1] := #9'lda ' + GetString(i+1);
+	 listing[i+2] := #9'sbc ' + GetString(i+4);
+         listing[i+3] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+         listing[i+4] := #9'inx';
+         listing[i+5] :='';
+
+	end;
+
+       end;
 
        Result:=false; Break;
      end;
@@ -5992,6 +6048,53 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if inx(i) and										// inx					; 0
+       mva(i+1) and										// mva	:STACKORIGIN,x			; 1
+       inx(i+2) and										// inx					; 2
+       (listing[i+3] = #9'mva #$00 :STACKORIGIN,x') and						// mva #$00 :STACKORIGIN,x		; 3
+       (listing[i+4] = #9'mva #$01 :STACKORIGIN+STACKWIDTH,x') and				// mva #$01 :STACKORIGIN+STACKWIDTH,x	; 4
+       (listing[i+5] = #9'mva #$00 :STACKORIGIN-1+STACKWIDTH,x') and				// mva #$00 :STACKORIGIN-1+STACKWIDTH,x	; 5
+       (listing[i+6] = #9'jsr imulWORD') and							// jsr imulWORD				; 6
+       (listing[i+7] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 7
+       dex(i+8) then										// dex					; 8
+     begin
+       listing[i+2] := #9'mva ' + GetString(i+1) + ' :STACKORIGIN+STACKWIDTH,x';
+
+       listing[i+1] := listing[i+3];
+
+       listing[i+3] := #9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x';
+       listing[i+4] := #9'sta :STACKORIGIN+STACKWIDTH*3,x';
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       (listing[i+1] = #9'mva #$00 :STACKORIGIN,x') and						// mva #$00 :STACKORIGIN,x		; 1
+       (listing[i+2] = #9'mva #$01 :STACKORIGIN+STACKWIDTH,x') and				// mva #$01 :STACKORIGIN+STACKWIDTH,x	; 2
+       inx(i+3) and										// inx					; 3
+       mva(i+4) and										// mva	:STACKORIGIN,x			; 4
+       (listing[i+5] = #9'mva #$00 :STACKORIGIN+STACKWIDTH,x') and				// mva #$00 :STACKORIGIN+STACKWIDTH,x	; 5
+       (listing[i+6] = #9'jsr imulWORD') and							// jsr imulWORD				; 6
+       (listing[i+7] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 7
+       dex(i+8) then										// dex					; 8
+     begin
+       listing[i+2] := #9'mva ' + GetString(i+4) + ' :STACKORIGIN+STACKWIDTH,x';
+       listing[i+3] := #9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x';
+       listing[i+4] := #9'sta :STACKORIGIN+STACKWIDTH*3,x';
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+
+       Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 0
        dex(i+1) and										// dex					; 1
        (pos('mva :STACKORIGIN,x', listing[i+2]) > 0) and					// mva :STACKORIGIN,x			; 2
@@ -6035,7 +6138,7 @@ var i, l, k, m, x: integer;
 	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+3]) > 0) then
      begin
 
-       if (listing[i+10] = #9'jsr addEAX_ECX') then begin
+       if (listing[i+7] = #9'jsr addEAX_ECX') then begin
 	listing[i] := #9'm@add "' + GetString(i) + '" "' + GetString(i+5) + '" ":STACKORIGIN,x"';
 	listing[i+1] := #9'm@adc "' + GetString(i+1) +'" #$00 ":STACKORIGIN+STACKWIDTH,x"';
 	listing[i+2] := #9'm@adc "' + GetString(i+2) +'" #$00 ":STACKORIGIN+STACKWIDTH*2,x"';
@@ -6045,6 +6148,40 @@ var i, l, k, m, x: integer;
 	listing[i+1] := #9'm@sbc "' + GetString(i+1) +'" #$00 ":STACKORIGIN+STACKWIDTH,x"';
 	listing[i+2] := #9'm@sbc "' + GetString(i+2) +'" #$00 ":STACKORIGIN+STACKWIDTH*2,x"';
 	listing[i+3] := #9'm@sbc "' + GetString(i+3) +'" #$00 ":STACKORIGIN+STACKWIDTH*3,x"';
+       end;
+
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if mva(i) and										// mva  :STACKORIGIN,x			; 0
+       mva(i+1) and										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
+       mva(i+2) and										// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
+       (listing[i+3] = #9'sta :STACKORIGIN+STACKWIDTH*3,x') and					// sta :STACKORIGIN+STACKWIDTH*3,x	; 3
+       inx(i+4) and										// inx					; 4
+       mva(i+5) and										// mva  :STACKORIGIN,x			; 5
+       (listing[i+6] = #9'jsr @expandToCARD.BYTE') and						// jsr @expandToCARD.BYTE		; 6
+       ADD_SUB_EAX_ECX(i+7) then								// jsr addEAX_ECX|subEAX_ECX		; 7
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+5]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+2]) > 0) then
+     begin
+
+       if (listing[i+7] = #9'jsr addEAX_ECX') then begin
+	listing[i] := #9'm@add "' + GetString(i) + '" "' + GetString(i+5) + '" ":STACKORIGIN,x"';
+	listing[i+1] := #9'm@adc "' + GetString(i+1) +'" #$00 ":STACKORIGIN+STACKWIDTH,x"';
+	listing[i+3] := #9'm@adc "' + GetString(i+2) +'" #$00 ":STACKORIGIN+STACKWIDTH*3,x"';
+	listing[i+2] := #9'm@adc "' + GetString(i+2) +'" #$00 ":STACKORIGIN+STACKWIDTH*2,x"';
+       end else begin
+	listing[i] := #9'm@sub "' + GetString(i) + '" "' + GetString(i+5) + '" ":STACKORIGIN,x"';
+	listing[i+1] := #9'm@sbc "' + GetString(i+1) +'" #$00 ":STACKORIGIN+STACKWIDTH,x"';
+	listing[i+3] := #9'm@sbc "' + GetString(i+2) +'" #$00 ":STACKORIGIN+STACKWIDTH*3,x"';
+	listing[i+2] := #9'm@sbc "' + GetString(i+2) +'" #$00 ":STACKORIGIN+STACKWIDTH*2,x"';
        end;
 
        listing[i+5] := '';
@@ -6261,10 +6398,6 @@ var i, l, k, m, x: integer;
         listing[i] := #9'adb :STACKORIGIN-1,x :STACKORIGIN,x'
        else
         listing[i] := #9'sbb :STACKORIGIN-1,x :STACKORIGIN,x';
-
-       listing[i+1] := '.nowarn'#9'@putchar';
-       listing[i+2] := #9'dex';
-       listing[i+3] := #9'dex';
 
        Result:=false; Break;
      end;
@@ -14644,6 +14777,26 @@ var i, l, k, m, x: integer;
       end;
 
 
+    if sta_stack(i) and										// sta :STACKORIGIN		; 0
+       tay(i+1) and 										// tay				; 1
+       lda(i+2) and										// lda				; 2
+       sta_bp2(i+3) and										// sta :bp2			; 3
+       lda(i+4) and										// lda				; 4
+       sta_bp2_1(i+5) and									// sta :bp2+1			; 5
+       ldy(i+6) and										// ldy				; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN		; 7
+       sta_bp2_y(i+8) then									// sta (:bp2),y			; 8
+    if (copy(listing[i], 6, 256) = copy(listing[i+7], 6, 256)) then
+      begin
+	listing[i] := '';
+
+	listing[i+7] := listing[i+6];
+	listing[i+6] := #9'tya';
+
+	Result := false; Break;
+      end;
+
+
 // -----------------------------------------------------------------------------
 // ===			optymalizacja ORA.				  === //
 // -----------------------------------------------------------------------------
@@ -17009,6 +17162,21 @@ var i, l, k, m, x: integer;
 
 	 Result := false; Break;
        end;
+
+
+    if tya(i) and 									// tya			; 0
+       (listing[i+1] = #9'sub #$01') and						// sub #$01		; 1
+       tay(i+2) and 									// tay			; 2
+       scs(i+3) and									// scs			; 3
+       (pos('dec ', listing[i+4]) > 0) then						// dec			; 4
+     begin
+      listing[i+1] := #9'sne';
+      listing[i+2] := listing[i+4];
+      listing[i+3] := #9'dey';
+      listing[i+4] := '';
+
+      Result:=false; Break;
+     end;
 
 
     if sta(i) and									// sta A		; 0
@@ -21114,16 +21282,16 @@ var i, l, k, m, x: integer;
        jeq(i+24) and										// jeq			; 24
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	integer > high(integer)
        lda(i+1) and										// lda E+3		; 1
-       (listing[i+2] = #9'sub #$7F') and							// sub #$7f		; 2
+       (listing[i+2] = #9'sub #$7F') and							// sub #$7F		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda(i+4) and										// lda E+2		; 4
-       (listing[i+5] = #9'cmp #$FF') and							// cmp #$ff		; 5
+       (listing[i+5] = #9'cmp #$FF') and							// cmp #$FF		; 5
        (listing[i+6] = #9'bne L1') and								// bne L1		; 6
        lda(i+7) and										// lda E+1		; 7
-       (listing[i+8] = #9'cmp #$FF') and							// cmp #$ff		; 8
+       (listing[i+8] = #9'cmp #$FF') and							// cmp #$FF		; 8
        (listing[i+9] = #9'bne L1') and								// bne L1		; 9
        lda(i+10) and										// lda E		; 10
-       (listing[i+11] = #9'cmp #$FF') and							// cmp #$ff		; 11
+       (listing[i+11] = #9'cmp #$FF') and							// cmp #$FF		; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
        (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
@@ -29715,16 +29883,16 @@ if Down then begin
   Gen;							 // dec ...
 
   case CounterSize of
-   1: asm65(#9'dec '+svar, '; dec ptr byte [CounterAddress]');
-   2: asm65(#9'dew '+svar, '; dec ptr word [CounterAddress]');
-   4: asm65(#9'ded '+svar, '; dec ptr dword [CounterAddress]');
+   1: asm65(#9'dec '+svar);//, '; dec ptr byte [CounterAddress]');
+   2: asm65(#9'dew '+svar);//, '; dec ptr word [CounterAddress]');
+   4: asm65(#9'ded '+svar);//, '; dec ptr dword [CounterAddress]');
   end;
 
 end else begin
   Gen;							// inc ...
 
   case CounterSize of
-   1: asm65(#9'inc '+svar, '; inc ptr byte [CounterAddress]');
+   1: asm65(#9'inc '+svar);//, '; inc ptr byte [CounterAddress]');
 
 //   2: asm65(#9'inw '+svar, '; inc ptr word [CounterAddress]');
    2: begin
@@ -29733,7 +29901,7 @@ end else begin
        asm65(#9'inc '+svar+'+1');
       end;
 
-   4: asm65(#9'ind '+svar, '; inc ptr dword [CounterAddress]');
+   4: asm65(#9'ind '+svar);//, '; inc ptr dword [CounterAddress]');
   end;
 
 end;
@@ -29748,12 +29916,12 @@ if Epilog then begin
    1: begin
 
        if Down then begin
-        asm65;
+//        asm65;
         asm65(#9'lda '+svar);
         asm65(#9'cmp #$7f');
         asm65(#9'seq');
        end else begin
-        asm65;
+//        asm65;
         asm65(#9'lda '+svar);
         asm65(#9'cmp #$80');
         asm65(#9'seq');
@@ -29775,23 +29943,23 @@ if Epilog then begin
 
   case CounterSize of
    1: begin
-       asm65;
+//       asm65;
        asm65(#9'lda '+svar);
-       asm65(#9'cmp #$ff');
+       asm65(#9'cmp #$FF');
        asm65(#9'seq');
       end;
 
    2: begin
-       asm65;
+//       asm65;
        asm65(#9'lda '+svar+'+1');
-       asm65(#9'cmp #$ff');
+       asm65(#9'cmp #$FF');
        asm65(#9'seq');
       end;
 
    4: begin
-       asm65;
+//       asm65;
        asm65(#9'lda '+svar+'+3');
-       asm65(#9'cmp #$ff');
+       asm65(#9'cmp #$FF');
        asm65(#9'seq');
       end;
   end;
