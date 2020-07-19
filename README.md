@@ -104,7 +104,7 @@ https://github.com/ilmenit/CC65-Advanced-Optimizations
   <tr>
     <td>Chessboard (higher is better)</td>
     <td>76</td>
+    <td>81</td>
     <td>79</td>
-    <td>75</td>
   </tr>  
 </table>
