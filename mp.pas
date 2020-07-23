@@ -8263,7 +8263,7 @@ var i, l, k, m, x: integer;
        end;
 
 
-    if lda(i) and									// lda				; 0
+    if //lda(i) and									// lda				; 0
        add_sub(i+1) and									// add|sub			; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9		; 2
        lda(i+3) and									// lda				; 3
@@ -8453,8 +8453,6 @@ var i, l, k, m, x: integer;
 
 	Result:=false; Break;
       end;
-
-
 
 {	sieve
 
@@ -8652,6 +8650,17 @@ var i, l, k, m, x: integer;
 	listing[i+10]:= '';
 	listing[i+11]:= '';
 	listing[i+12]:= '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (listing[i] = #9'jsr @mul40') and						// jsr @mul40		; 0
+       lda(i+1) and									// lda			; 1
+       (listing[i+2] = #9'add :eax') then						// add :eax		; 2
+      begin
+        listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+2] := '';
 
 	Result:=false; Break;
       end;
@@ -20661,15 +20670,22 @@ var i, l, k, m, x: integer;
        (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
        (listing[i+7] = 'L5') then								//L5			; 7
       begin
-        p := GetBYTE(i+2);
+        p := GetBYTE(i+2) + 1;
 
-	inc(p);
+	if p = $80 then begin
+	 listing[i]   := '';
+	 listing[i+1] := '';
+	 listing[i+2] := '';
+	 listing[i+3] := '';
+	 listing[i+4] := '';
+	end else begin
+	 listing[i] := listing[i+1];
+	 listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
+	 listing[i+2] := #9'svc';
+	 listing[i+3] := #9'eor #$80';
+	 listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
+	end;
 
-	listing[i] := listing[i+1];
-	listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
-	listing[i+2] := #9'svc';
-	listing[i+3] := #9'eor #$80';
-	listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
 	listing[i+5] := '';
 	listing[i+6] := '';
 	listing[i+7] := '';
@@ -20713,8 +20729,17 @@ var i, l, k, m, x: integer;
 	listing[i+15] := '';
 	listing[i+16] := '';
        end else begin
-         inc(p);
+        inc(p);
 
+	if p = $8000 then begin
+	 listing[i+10] := '';
+	 listing[i+11] := '';
+	 listing[i+12] := '';
+	 listing[i+13] := '';
+	 listing[i+14] := '';
+	 listing[i+15] := '';
+	 listing[i+16] := '';
+	end else begin
 	 listing[i+10] := listing[i+4];
 	 listing[i+11] := #9'cmp #$' + IntToHex(p and $ff, 2);
 	 listing[i+12] := listing[i+1];
@@ -20722,6 +20747,8 @@ var i, l, k, m, x: integer;
 	 listing[i+14] := #9'svc';
 	 listing[i+15] := #9'eor #$80';
 	 listing[i+16] := #9'jpl ' + copy(listing[i+17], 6, 256);
+	end;
+
        end;
 
 	listing[i] := '';
@@ -20735,7 +20762,7 @@ var i, l, k, m, x: integer;
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	listing[i+17] := '';
+ 	listing[i+17] := '';
 	listing[i+18] := '';
 
 	Result:=false; Break;
@@ -20799,6 +20826,65 @@ var i, l, k, m, x: integer;
 
 	Result:=false; Break;
       end;
+
+
+    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+       bmi(i+23) and										// bmi @+		; 23
+       jne(i+24) and										// jne l_		; 24
+       (listing[i+25] = '@') and								//@			; 25
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	integer <= high(integer)
+       lda(i+1) and										// lda E+3		; 1
+       (listing[i+2] = #9'sub #$7F') and							// sub #$7F		; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda(i+4) and										// lda E+2		; 4
+       (listing[i+5] = #9'cmp #$FF') and							// cmp #$FF		; 5
+       (listing[i+6] = #9'bne L1') and								// bne L1		; 6
+       lda(i+7) and										// lda E+1		; 7
+       (listing[i+8] = #9'cmp #$FF') and							// cmp #$FF		; 8
+       (listing[i+9] = #9'bne L1') and								// bne L1		; 9
+       lda(i+10) and										// lda E		; 10
+       (listing[i+11] = #9'cmp #$FF') and							// cmp #$FF		; 11
+       (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
+       (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
+       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       (listing[i+15] = #9'bne L5') and								// bne L5		; 15
+       (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
+       (listing[i+17] = #9'bne L5') and								// bne L5		; 17
+       (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
+       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
+       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       (listing[i+21] = 'L5') then								//L5			; 21
+      begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+	listing[i+23] := '';
+	listing[i+24] := '';
+	listing[i+25] := '';
+
+	Result:=false; Break;
+      end;
+
 
 // -------------------------------------------------------------------------------------------
 //					GT.
@@ -25717,7 +25803,7 @@ begin
 
 
 (* -------------------------------------------------------------------------- *)
-//				opty FOR
+//				opty FOR.
 (* -------------------------------------------------------------------------- *)
 
 //  Rebuild;
@@ -25788,6 +25874,8 @@ begin
 
       writeln('---');
 }
+
+
        if (l = 3) and
           lda(0) and
           (listing[1] = #9'cmp #$00') and
@@ -25808,7 +25896,7 @@ begin
         begin
         k := GetBYTE(1) + 1;
 
-        if k < $FF then begin
+        if k < $100 then begin
 
          if k = $80 then begin
  	  listing[1] := '';
@@ -25900,7 +25988,7 @@ begin
         begin
         k := GetBYTE(1) shl 8 + GetBYTE(4) + 1;
 
-        if k < $FFFF then begin
+        if k < $10000 then begin
 
 	 if k = $8000 then begin
 	  listing[1] := '';
@@ -26035,7 +26123,7 @@ begin
           (listing[18] = #9'beq *+5') and
 	  (pos('jmp l_', listing[19]) > 0 ) then
 	begin
-        k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
+         k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
 
          if k <> $8000 then begin
 	  listing[5] := #9'cmp #$' + IntToHex(k and $ff, 2);
@@ -26084,7 +26172,7 @@ begin
           (listing[17] = #9'bpl *+5') and
 	  (pos('jmp l_', listing[18]) > 0 ) then
 	begin
-        k := GetBYTE(2) shl 8 + GetBYTE(5);
+         k := GetBYTE(2) shl 8 + GetBYTE(5);
 
          if k <> $8000 then begin
 	  listing[5] := #9'cmp #$' + IntToHex(k and $ff, 2);
@@ -29616,7 +29704,7 @@ a65(__subBX);
 end;
 
 
-procedure GenerateCaseEqualityCheck(Value: Int64; SelectorType: Byte);
+procedure GenerateCaseEqualityCheck(Value: Int64; SelectorType: Byte; Join: Boolean);
 begin
 asm65;
 asm65('; GenerateCaseEqualityCheck');
@@ -29624,11 +29712,12 @@ asm65('; GenerateCaseEqualityCheck');
 Gen; Gen;							// cmp :ecx, Value
 
 case DataSize[SelectorType] of
- 1: begin
-     asm65(#9'lda :STACKORIGIN+1,x');
 
-     if Value <> 0 then asm65(#9'cmp #'+IntToStr(byte(Value)));
-    end;
+ 1: if join=false then begin
+      asm65(#9'lda :STACKORIGIN+1,x');
+      if Value <> 0 then asm65(#9'cmp #$'+IntToHex(byte(Value),2));
+    end else
+      asm65(#9'cmp #$'+IntToHex(byte(Value),2));
 
 // 2: asm65(#9'cpw :STACKORIGIN,x #$'+IntToHex(Value, 4));
 // 4: asm65(#9'cpd :STACKORIGIN,x #$'+IntToHex(Value, 4));
@@ -29639,7 +29728,7 @@ asm65(#9'beq @+');
 end;
 
 
-procedure GenerateCaseRangeCheck(Value1, Value2: Int64; SelectorType: Byte);
+procedure GenerateCaseRangeCheck(Value1, Value2: Int64; SelectorType: Byte; Join: Boolean);
 begin
 Gen; Gen;							// cmp :ecx, Value1
 
@@ -29651,7 +29740,7 @@ Gen; Gen;							// cmp :ecx, Value1
    end else
    if Value1 = 0 then begin
     asm65;
-    asm65(#9'lda :STACKORIGIN+1,x');
+    if join=false then asm65(#9'lda :STACKORIGIN+1,x');
 
     if Value2 = 127 then
      asm65(#9'bpl @+')
@@ -29663,7 +29752,7 @@ Gen; Gen;							// cmp :ecx, Value1
    end else
    if Value2 = 255 then begin
     asm65;
-    asm65(#9'lda :STACKORIGIN+1,x');
+    if join=false then asm65(#9'lda :STACKORIGIN+1,x');
 
     if Value1 = 128 then
      asm65(#9'bmi @+')
@@ -29675,12 +29764,12 @@ Gen; Gen;							// cmp :ecx, Value1
    end else
    if Value1 = Value2 then begin
     asm65;
-    asm65(#9'lda :STACKORIGIN+1,x');
+    if join=false then asm65(#9'lda :STACKORIGIN+1,x');
     asm65(#9'cmp #$' + IntToHex(Value1,2));
     asm65(#9'beq @+');
    end else begin
     asm65;
-    asm65(#9'lda :STACKORIGIN+1,x');
+    if join=false then asm65(#9'lda :STACKORIGIN+1,x');
     asm65(#9'clc', '; clear carry for add');
     asm65(#9'adc #$FF-$'+IntToHex(Value2,2), '; make m = $FF');
     asm65(#9'adc #$'+IntToHex(Value2,2)+'-$'+IntToHex(Value1,2)+'+1', '; carry set if in range n to m');
@@ -29691,7 +29780,7 @@ Gen; Gen;							// cmp :ecx, Value1
 
   case DataSize[SelectorType] of
    1: begin
-       asm65(#9'lda :STACKORIGIN+1,x');
+       if join=false then asm65(#9'lda :STACKORIGIN+1,x');
        asm65(#9'cmp #'+IntToStr(byte(Value1)));
       end;
 
@@ -35422,6 +35511,8 @@ case Tok[i].Kind of
 
     repeat	// Loop over all cases
 
+      yes:=false;
+
       repeat	// Loop over all constants for the current case
 	i := CompileConstExpression(i, ConstVal, ConstValType, SelectorType);
 
@@ -35447,13 +35538,17 @@ case Tok[i].Kind of
 	  if ConstVal > ConstVal2 then
 	   Error(i, 'Upper bound of case range is less than lower bound');
 
-	  GenerateCaseRangeCheck(ConstVal, ConstVal2, SelectorType);
+	  GenerateCaseRangeCheck(ConstVal, ConstVal2, SelectorType, yes);
+
+	  yes:=false;
 
 	  CaseLabel.left:=ConstVal;
 	  CaseLabel.right:=ConstVal2;
 	  end
 	else begin
-	  GenerateCaseEqualityCheck(ConstVal, SelectorType);			// Equality check
+	  GenerateCaseEqualityCheck(ConstVal, SelectorType, yes);			// Equality check
+
+	  yes:=true;
 
 	  CaseLabel.left:=ConstVal;
 	  CaseLabel.right:=ConstVal;
@@ -35468,6 +35563,7 @@ case Tok[i].Kind of
 	  inc(i)
 	else
 	  ExitLoop := TRUE;
+
       until ExitLoop;
 
 
@@ -35832,7 +35928,7 @@ WHILETOK:
 
 //		asm65('; --- To');
 
-	        GenerateRepeatUntilProlog;      // Save return address used by GenerateForToDoEpilog
+	        GenerateRepeatUntilProlog;	// Save return address used by GenerateForToDoEpilog
 
 	        SaveBreakAddress;
 
@@ -35843,7 +35939,7 @@ WHILETOK:
 
 	        Push(Ident[IdentTemp].Value, ASPOINTER, DataSize[Ident[IdentTemp].DataType], IdentTemp);
 
-	        GenerateForToDoCondition(DataSize[Ident[IdentIndex].DataType], Down, IdentIndex);  // Satisfied if counter does not reach the second expression value
+	        GenerateForToDoCondition(DataSize[Ident[IdentIndex].DataType], Down, IdentIndex);	// Satisfied if counter does not reach the second expression value
 
 	        CheckTok(j + 1, DOTOK);
 
