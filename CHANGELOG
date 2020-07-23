@@ -1,5 +1,7 @@
 19.07.2020
 - optymalizacja dla FOR BYTE DOWNTO
+- poprawione testowanie krañcowych zakresów dla FOR BYTE/WORD
+- optymalizacja CASE, pozbycie siê nadmiarowego 'lda :STACKORIGIN+1,x'
 
 27.06.2020
 - poprawione generowanie kodu dla INC/DEC
