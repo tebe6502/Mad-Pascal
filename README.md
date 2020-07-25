@@ -6,6 +6,7 @@ https://atariage.com/forums/topic/240919-mad-pascal/
 <br>
 http://www.atari.org.pl/forum/viewtopic.php?id=13373
 <br>
+<br>
 https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/?do=findComment&comment=4340150
 </p>
 <p>
