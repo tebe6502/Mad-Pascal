@@ -82,6 +82,9 @@ Source code at: https://gitlab.com/bocianu/pasdoc
 https://github.com/ilmenit/CC65-Advanced-Optimizations
 
 # Benchmarks
+
+https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
+
 <table style="width:100%">
   <tr>
     <th></th>
@@ -106,7 +109,9 @@ https://github.com/ilmenit/CC65-Advanced-Optimizations
     <td>76</td>
     <td>81</td>
     <td>79</td>
-  </tr>  
+  </tr>
 </table>
 
 https://github.com/zbyti/a8-mad-pascal-bench-suite
+
+https://github.com/zbyti/a8-mad-pascal-bench-suite/blob/master/suite.gif
