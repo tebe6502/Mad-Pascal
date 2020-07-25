@@ -108,3 +108,5 @@ https://github.com/ilmenit/CC65-Advanced-Optimizations
     <td>79</td>
   </tr>  
 </table>
+
+https://github.com/zbyti/a8-mad-pascal-bench-suite
