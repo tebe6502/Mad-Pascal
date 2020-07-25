@@ -114,4 +114,4 @@ https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
 
 https://github.com/zbyti/a8-mad-pascal-bench-suite
 
-https://github.com/zbyti/a8-mad-pascal-bench-suite/blob/master/suite.gif
+<img src="https://github.com/zbyti/a8-mad-pascal-bench-suite/raw/master/suite.gif">
