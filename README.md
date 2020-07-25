@@ -81,7 +81,7 @@ Source code at: https://gitlab.com/bocianu/pasdoc
 # Some advice
 https://github.com/ilmenit/CC65-Advanced-Optimizations
 
-# Benchmark
+# Benchmarks
 <table style="width:100%">
   <tr>
     <th></th>
