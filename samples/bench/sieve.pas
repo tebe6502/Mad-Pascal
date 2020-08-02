@@ -1,20 +1,21 @@
 // Eratosthenes Sieve benchmark
 // 1899
-//  1 iter 68 ticks
-//  1 iter 60 ticks	FAST
-// 10 iter 688 ticks	
-// 10 iter 607 ticks	FAST
+//  1 iter 66 ticks
+//  1 iter 58 ticks	FAST
+// 10 iter 661 ticks
+// 10 iter 580 ticks	FAST
 
 uses crt, sysutils;
 
 {$define FAST}
 
 const
- size = 8191;
+ size = 8190;
+ sizepl = 8192;
  iter_max = 10;
 
 var
-  flags: array [0..size] of boolean;
+  flags: array [0..sizepl] of boolean;
 
   iter: byte;
   ticks: word;
@@ -31,21 +32,18 @@ var
 begin
 
 	writeln(iter_max,' iterations');
-		
+
 	pause;
 
 	ticks := GetTickCount;
 
-	iter := 1;
-	while iter <= iter_max do begin
+	for iter:=1 to iter_max do begin
 
 		fillchar(flags, sizeof(flags), true);
 
-		i:=0;
 		count := 0;
 
-		while i <= size do begin
-
+		for i:=0 to size do
 			if flags[i] then begin
 
 				prime := i*2 + 3;
@@ -57,18 +55,13 @@ begin
 				end;
 				inc(count);
 			end;
-
-		inc(i);
-		end;
-
-	inc(iter);
 	end;
 
  ticks:=word(GetTickCount)-ticks;
- 
- writeln(ticks, ' ticks'); 
+
+ writeln(ticks, ' ticks');
  writeln(count, ' primes');
- 
+
  repeat until keypressed;
 
 end.
