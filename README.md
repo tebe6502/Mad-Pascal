@@ -98,7 +98,7 @@ https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
   <tr>
     <td>Sieve (less is better)</td>
     <td>602</td>
-    <td>607</td>
+    <td>580</td>
     <td>701</td>
   </tr>
   <tr>
