@@ -97,7 +97,7 @@
      begin
       p := GetWORD(i+4, i+1);
 
-      if p < $FFFF then begin
+      if (p > 0) and (p < $FFFF) then begin
        inc(p);
 
        listing[i+1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);

@@ -6853,7 +6853,7 @@ var i, l, k, m, x: integer;
     if (listing[i] <> '') then begin
 
 
-     if ADD_SUB_STACK(i) or ADC_SBC_STACK(i) then					// add|sub|adc|sbc STACK
+     if ADD_SUB_STACK(i) or ADC_SBC_STACK(i) or AND_ORA_EOR_STACK(i) then			// add|sub|adc|sbc STACK
       begin
 
 	tmp:=copy(listing[i], 6, 256);
@@ -6867,8 +6867,12 @@ var i, l, k, m, x: integer;
 
 	   listing[i] := copy(listing[i], 1, 5) +  copy(listing[p-1], 6, 256);
 
-	   listing[p-1] := '';
-	   listing[p] := '';
+	   if sta(p+1) then
+	    listing[p] := ''
+	   else begin
+	    listing[p-1] := '';
+	    listing[p]   := '';
+	   end;
 
 	   Result:=false; Break;
 	  end;
@@ -6895,8 +6899,12 @@ var i, l, k, m, x: integer;
 
 	   listing[i]   := #9'lda ' + copy(listing[p-1], 6, 256);
 
-	   listing[p-1] := '';
-	   listing[p]   := '';
+	   if sta(p+1) then
+	    listing[p] := ''
+	   else begin
+	    listing[p-1] := '';
+	    listing[p]   := '';
+	   end;
 
 	   Result:=false; Break;
 	  end;
