@@ -105,7 +105,7 @@ https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
     <td>YoshPlus (higher is better)</td>
     <td>41933</td>
     <td>41933</td>
-    <td>41867</td>
+    <td>41933</td>
   </tr>
   <tr>
     <td>Chessboard (higher is better)</td>
