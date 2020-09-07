@@ -182,31 +182,6 @@ numread	.word		; pointer to variable, length of loaded data
 	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
 .endm
 
-; store value in fx register (via accumulator)
-fxs     .macro
-
-        lda     :2
-        ldy     #:1
-        sta     (fxptr),y
-
-        .endm
-
-; store accumulator in fx register
-fxsa    .macro
-
-        ldy     #:1
-        sta     (fxptr),y
-
-        .endm
-
-; load fx register value to accumulator
-fxla    .macro
-
-        ldy     #:1
-        lda     (fxptr),y
-
-        .endm
-
 
 m@call	.macro (os_proc)
 
@@ -226,6 +201,9 @@ m@call	.macro (os_proc)
 
 	.endm
 
+; -----------------------------------------------------------------------
+
+	icl 'atari\vbxe.mac'
 
 ; -----------------------------------------------------------------------
 

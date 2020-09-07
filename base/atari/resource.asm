@@ -42,22 +42,7 @@ portb		= $d301
 .ends
 
 
-; store value in fx register (via accumulator)
-fxs     .macro
-
-        lda     :2
-        ldy     #:1
-        sta     (fxptr),y
-
-        .endm
-
-; store accumulator in fx register
-fxsa    .macro
-
-        ldy     #:1
-        sta     (fxptr),y
-
-        .endm
+	icl 'vbxe.mac'
 
 
 .proc	vbxe_detect
