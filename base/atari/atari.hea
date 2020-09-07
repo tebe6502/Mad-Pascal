@@ -56,6 +56,7 @@ brkkey	=	$11
 
 rtclok	=	$12	; (3) zegar czasu rzeczywistego
 
+atract	=	$4D
 lmargn	=	$52
 rmargn	=	$53
 rowcrs	=	$54	; wiersz  kursora
