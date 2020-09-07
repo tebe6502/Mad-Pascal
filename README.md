@@ -110,7 +110,7 @@ https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
   <tr>
     <td>Chessboard (higher is better)</td>
     <td>76</td>
-    <td>81</td>
+    <td>88</td>
     <td>82</td>
   </tr>
 </table>
