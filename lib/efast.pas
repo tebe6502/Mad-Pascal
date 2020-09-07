@@ -1,7 +1,7 @@
 unit efast;
 (*
  @type: unit
- @author: DMSC, Tomasz Biela (Tebe)
+ @author: Daniel Serpell (DMSC), Tomasz Biela (Tebe)
  @name: E: accelerator
  @version: 1.0
 

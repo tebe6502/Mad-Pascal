@@ -2,7 +2,7 @@ unit m0pp;
 
 (*
 * @type: unit
-* @author: bocianu <bocianu@gmail.com>, Karolj Nadj, DMSC, tebe <tebe6502@gmail.com>
+* @author: bocianu <bocianu@gmail.com>, Karolj Nadj, Daniel Serpell, tebe <tebe6502@gmail.com>
 * @name: Graphics 0++ library, 40x40 mode
 * @version: 1.0
 * @description:

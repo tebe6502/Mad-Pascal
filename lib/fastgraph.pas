@@ -15,7 +15,6 @@ Marcin ¯ukowski (Eru/TQA): fLine
 
 DisplayBuffer
 fLine			fast Line
-FrameBuffer
 fRectangle		fast Rectangle
 GetPixel
 HLine
