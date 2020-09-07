@@ -1,4 +1,17 @@
 
+{
+
+*3
+*5
+*8
+*10
+*16
+*40
+*255
+
+}
+
+
 // -----------------------------------------------------------------------------
 // ===				imulCL 3				  === //
 // -----------------------------------------------------------------------------
@@ -188,6 +201,45 @@
       listing[i+2] := #9'asl @';
       listing[i+3] := #9'add ' + copy(listing[i], 6, 256);
       listing[i+4] := #9'sta :eax';
+
+      listing[i+5] := '';
+      listing[i+6] := '';
+      listing[i+7] := '';
+      listing[i+8] := '';
+
+      Result:=false; Break;
+     end;
+
+
+    if lda(i) and									// lda 					; 0
+       (listing[i+1] = #9'sta :ecx') and						// sta :eax				; 1
+       (listing[i+2] = #9'lda #$05') and						// lda #$05				; 2
+       (listing[i+3] = #9'sta :eax') and						// sta :ecx				; 3
+       IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
+       											// fmulu_8				; 5
+       											// els					; 6
+       											// imulCL				; 7
+       											// eif					; 8
+       (listing[i+9] = #9'lda :eax') and						// lda :eax				; 9
+       add_sub(i+10) and								// add|sub				; 10
+       and_ora_eor(i+11) and								// and_ora_eor				; 11
+       sta(i+12) then									// sta					; 12
+     begin
+
+      listing[i+1] := #9'asl @';
+      listing[i+2] := #9'asl @';
+
+      if listing[i+10] = #9'add #$01' then begin
+
+       listing[i+3] := #9'sec';
+       listing[i+4] := #9'adc ' + copy(listing[i], 6, 256);
+
+       listing[i+9] := '';
+       listing[i+10]:= '';
+      end else begin
+       listing[i+3] := #9'add ' + copy(listing[i], 6, 256);
+       listing[i+4] := #9'sta :eax';
+      end;
 
       listing[i+5] := '';
       listing[i+6] := '';
