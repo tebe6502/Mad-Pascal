@@ -52,15 +52,19 @@ Tan
 
 interface
 
-	function DegNormalize(deg : real) : real;
-	function degtorad(deg : real) : real;
-	function radtodeg(rad : real) : real;
-	function gradtorad(grad : real) : real;
-	function radtograd(rad : real) : real;
-	function degtograd(deg : real) : real;
-	function gradtodeg(grad : real) : real;
-	function cycletorad(cycle : real) : real;
-	function radtocycle(rad : real) : real;
+	function ArcCos(x: real): real; overload;
+	function ArcCos(x: single): single; overload;
+	function ArcSin(x: real): real; overload;
+	function ArcSin(x: single): single; overload;
+	function DegNormalize(deg : single) : single;
+	function degtorad(deg : single) : single;
+	function radtodeg(rad : single) : single;
+	function gradtorad(grad : single) : single;
+	function radtograd(rad : single) : single;
+	function degtograd(deg : single) : single;
+	function gradtodeg(grad : single) : single;
+	function cycletorad(cycle : single) : single;
+	function radtocycle(rad : single) : single;
 	procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: Word); overload;
 	procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: smallint); overload;
 	function InRange(const AValue, AMin, AMax: byte): Boolean; overload;
@@ -71,19 +75,19 @@ interface
 	function Min(x, y: real): real; overload;
 	function Min(x, y: shortreal): shortreal; overload;
 	function Min(x, y: single): single; overload;
+	function Min(x, y: shortint): shortint; overload;
 	function Min(x, y: smallint): smallint; overload;
 	function Min(x, y: integer): integer; overload;
 	function Max(x, y: real): real; overload;
 	function Max(x, y: shortreal): shortreal; overload;
 	function Max(x, y: single): single; overload;
+	function Max(x, y: shortint): shortint; overload;
 	function Max(x, y: smallint): smallint; overload;
 	function Max(x, y: integer): integer; overload;
 	function power(base : real; const exponent : shortint) : real; overload;
 	function power(base : single; const exponent : shortint) : single; overload;
 	function power(base : integer; const exponent : shortint) : integer; overload;
 	function arctan2(y,x : real) : real;
-	function ArcSin(x: real): real;
-	function ArcCos(x: real): real;
 	function Tan(x: Real): Real;
 	function Ceil(a: real): smallint;
 	function Floor(a: real): smallint;
@@ -103,88 +107,88 @@ interface
 implementation
 
 
-function DegNormalize(deg : real) : real;
+function DegNormalize(deg : single) : single;
 (*
 @description:
 
 *)
 begin
-  Result:=Deg-real(Trunc(Deg/360.0))*360.0;
-  If Result<0.0 then Result:=Result+360.0;
+  Result:=Deg-single(Trunc(Deg/360))*360;
+  If Result<0 then Result:=Result+360;
 end;
 
 
-function degtorad(deg : real) : real;
+function degtorad(deg : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=deg*(pi/180.0);
+     Result:=deg*(pi/180);
   end;
 
-function radtodeg(rad : real) : real;
+function radtodeg(rad : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=rad*(180.0/pi);
+     Result:=rad*(180/pi);
   end;
 
-function gradtorad(grad : real) : real;
+function gradtorad(grad : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=grad*(pi/200.0);
+     Result:=grad*(pi/200);
   end;
 
-function radtograd(rad : real) : real;
+function radtograd(rad : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=rad*(200.0/pi);
+     Result:=rad*(200/pi);
   end;
 
-function degtograd(deg : real) : real;
+function degtograd(deg : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=deg*(200.0/180.0);
+     Result:=deg*(200/180);
   end;
 
-function gradtodeg(grad : real) : real;
+function gradtodeg(grad : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=grad*(180.0/200.0);
+     Result:=grad*(180/200);
   end;
 
-function cycletorad(cycle : real) : real;
+function cycletorad(cycle : single) : single;
 (*
 @description:
 
 *)
   begin
-     Result:=M_PI_2*cycle;
+     Result:=cycle * M_PI_2;
   end;
 
-function radtocycle(rad : real) : real;
+function radtocycle(rad : single) : single;
 (*
 @description:
 
 *)
   begin
      { avoid division }
-     Result:=rad*(1.0/M_PI_2);
+     Result:=rad*(1 / M_PI_2);
   end;
 
 
@@ -315,6 +319,16 @@ if x < y then Result := x else Result := y;
 end;
 
 
+function Min(x, y: shortint): shortint; overload;
+(*
+@description: Min returns the smallest value of X and Y.
+
+*)
+begin
+if x < y then Result := x else Result := y;
+end;
+
+
 function Min(x, y: smallint): smallint; overload;
 (*
 @description: Min returns the smallest value of X and Y.
@@ -356,6 +370,16 @@ end;
 
 
 function Max(x, y: single): single; overload;
+(*
+@description: Max returns the maximum of X and Y.
+
+*)
+begin
+if x > y then Result := x else Result := y;
+end;
+
+
+function Max(x, y: shortint): shortint; overload;
 (*
 @description: Max returns the maximum of X and Y.
 
@@ -420,15 +444,15 @@ function RandG(mean, stddev : single) : single;
 @description: Return gaussian distributed random number.
 
 *)
-  Var U1,S2 : single;
-  begin
+Var U1,S2 : single;
+begin
      repeat
        u1:= 2*RandomF-1;
        S2:=Sqr(U1)+sqr(single(2)*RandomF-single(1));
      until s2 < single(1);
 
      Result:=Sqrt(single(-2)*ln(S2)/S2)*u1*stddev+Mean;
-  end;
+end;
 
 
 function power(base : real; const exponent : shortint) : real; overload;
@@ -436,9 +460,9 @@ function power(base : real; const exponent : shortint) : real; overload;
 @description: Return real power.
 
 *)
-  var
+var
      i : integer;
-  begin
+begin
      if (base = 0.0) and (exponent = 0) then
        result:=1.0
      else
@@ -458,7 +482,7 @@ function power(base : real; const exponent : shortint) : real; overload;
          if exponent<0 then
            Result:=1.0/Result;
        end;
-  end;
+end;
 
 
 function power(base : single; const exponent : shortint) : single; overload;
@@ -466,9 +490,9 @@ function power(base : single; const exponent : shortint) : single; overload;
 @description: Return real power.
 
 *)
-  var
+var
      i : integer;
-  begin
+begin
      if (base = single(0)) and (exponent = 0) then
        result:=1.0
      else
@@ -488,7 +512,7 @@ function power(base : single; const exponent : shortint) : single; overload;
          if exponent<0 then
            Result:=1.0/Result;
        end;
-  end;
+end;
 
 
 function power(base : integer; const exponent : shortint) : integer; overload;
@@ -496,9 +520,9 @@ function power(base : integer; const exponent : shortint) : integer; overload;
 @description: Return real power.
 
 *)
-  var
+var
      i : integer;
-  begin
+begin
      if (base = 0) and (exponent = 0) then
        result:=1
      else
@@ -518,7 +542,7 @@ function power(base : integer; const exponent : shortint) : integer; overload;
          if exponent<0 then
            Result:=0;
        end;
-  end;
+end;
 
 
 function arctan2(y,x : real) : real;
@@ -527,7 +551,7 @@ function arctan2(y,x : real) : real;
 
 arctan2 calculates arctan(y/x), and returns an angle in the correct quadrant. The returned angle will be in the range $-\pi$ to $\pi$ radians.
 *)
-  begin
+begin
     if (x=0.0) then
       begin
         if y=0.0 then
@@ -543,10 +567,42 @@ arctan2 calculates arctan(y/x), and returns an angle in the correct quadrant. Th
       Result:=Result+pi;
     if Result>pi then
       Result:=Result-M_PI_2;
-  end;
+end;
 
 
-function ArcSin(x: real): real;
+function ArcSin(x: single): single; overload;
+(*
+@description: Arcsin returns the inverse sine of its argument x. The argument x should lie between -1 and 1.
+
+*)
+const
+ a0 : single = D_PI_2;
+ a1 : single = -0.212;
+ a2 : single =  0.074;
+ a3 : single = -0.019;
+
+begin
+
+ if (x>=-1) and (x<=1) then
+  Result:= a0 - sqrt(1 - x)*(a0 + a1*x + a2*x*x + a3*x*x*x);
+
+end;
+
+
+function ArcCos(x: single): single; overload;
+(*
+@description: Arccos returns the inverse cosine of its argument x. The argument x should lie between -1 and 1 (borders included).
+
+*)
+begin
+
+ if (x>=-1) and (x<=1) then
+  Result:= D_PI_2 - ArcSin(x);
+
+end;
+
+
+function ArcSin(x: real): real; overload;
 (*
 @description: Arcsin returns the inverse sine of its argument x. The argument x should lie between -1 and 1.
 
@@ -565,7 +621,7 @@ begin
 end;
 
 
-function ArcCos(x: real): real;
+function ArcCos(x: real): real; overload;
 (*
 @description: Arccos returns the inverse cosine of its argument x. The argument x should lie between -1 and 1 (borders included).
 
