@@ -86,20 +86,19 @@ https://github.com/ilmenit/CC65-Advanced-Optimizations
 
 # Projects
 
-https://gitlab.com/bocianu/MadKingdom
-https://gitlab.com/bocianu/zilch
-https://gitlab.com/bocianu/justpong
-https://gitlab.com/bocianu/hoppe
-https://gitlab.com/bocianu/PacMad
-https://gitlab.com/bocianu/k12trailer
-https://gitlab.com/bocianu/gr10
-https://gitlab.com/bocianu/oldmansion
-https://gitlab.com/bocianu/artur
-https://gitlab.com/bocianu/jcq
-https://gitlab.com/bocianu/fujinet-udp-shoutbox
-https://gitlab.com/bocianu/speedway
-https://gitlab.com/bocianu/chessnet
-
+https://gitlab.com/bocianu/MadKingdom <br>
+https://gitlab.com/bocianu/zilch <br>
+https://gitlab.com/bocianu/justpong <br>
+https://gitlab.com/bocianu/hoppe <br>
+https://gitlab.com/bocianu/PacMad <br>
+https://gitlab.com/bocianu/k12trailer <br>
+https://gitlab.com/bocianu/gr10 <br>
+https://gitlab.com/bocianu/oldmansion <br>
+https://gitlab.com/bocianu/artur <br>
+https://gitlab.com/bocianu/jcq <br>
+https://gitlab.com/bocianu/fujinet-udp-shoutbox <br>
+https://gitlab.com/bocianu/speedway <br>
+https://gitlab.com/bocianu/chessnet <br>
 
 # Benchmarks
 
