@@ -84,6 +84,23 @@ Source code at: https://gitlab.com/bocianu/pasdoc
 # Some advice
 https://github.com/ilmenit/CC65-Advanced-Optimizations
 
+# Projects
+
+https://gitlab.com/bocianu/MadKingdom
+https://gitlab.com/bocianu/zilch
+https://gitlab.com/bocianu/justpong
+https://gitlab.com/bocianu/hoppe
+https://gitlab.com/bocianu/PacMad
+https://gitlab.com/bocianu/k12trailer
+https://gitlab.com/bocianu/gr10
+https://gitlab.com/bocianu/oldmansion
+https://gitlab.com/bocianu/artur
+https://gitlab.com/bocianu/jcq
+https://gitlab.com/bocianu/fujinet-udp-shoutbox
+https://gitlab.com/bocianu/speedway
+https://gitlab.com/bocianu/chessnet
+
+
 # Benchmarks
 
 https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
