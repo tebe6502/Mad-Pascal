@@ -95,7 +95,7 @@ compiled to binary code with Mad Assembler.
 <table style="width:100%">
   <tr>
     <th>https://github.com/MADRAFi/StarVagrant</th>
-    <th>[!(https://www.youtube.com/watch?v=gZGu8Ocfd0U&ab_channel=AtariOnlinePL)]</th>
+    <th>[!(https://yt-embed.herokuapp.com/embed?v=gZGu8Ocfd0U)]</th>
   </tr>
 </table>
 
