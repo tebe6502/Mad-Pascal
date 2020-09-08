@@ -93,7 +93,7 @@ compiled to binary code with Mad Assembler.
 
 # Projects in Mad-Pascal
 
-https://github.com/MADRAFi/StarVagrant
+https://github.com/MADRAFi/StarVagrant <br>
 https://gitlab.com/bocianu/MadKingdom <br>
 https://gitlab.com/bocianu/zilch <br>
 https://gitlab.com/bocianu/justpong <br>
