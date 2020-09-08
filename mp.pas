@@ -21516,6 +21516,14 @@ var i, l, k, m, x: integer;
        listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
 //       listing[i+3] := '';
 
+       for p:=i downto 0 do
+        if pos(tmp, listing[p]) > 0 then begin
+	 if (listing[p] = #9'sta ' + tmp) then listing[p] := listing[i+3];
+	 Break;
+	end;
+
+	listing[i+3] := '';
+
        Result:=false; Break;
       end;
 
@@ -21586,7 +21594,15 @@ var i, l, k, m, x: integer;
 
        listing[i+1] := #9'jmp ' + copy(listing[i+3], 6, 256);
        listing[i+2] := copy(listing[i+3], 6, 256) + 'w';
-       listing[i+3] := '';
+//       listing[i+3] := '';
+
+       for p:=i downto 0 do
+        if pos(tmp, listing[p]) > 0 then begin
+	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jeq ' + copy(listing[i+3], 6, 256) + 'w';
+	 Break;
+	end;
+
+	listing[i+3] := '';
 
        Result:=false; Break;
       end;
@@ -21661,7 +21677,15 @@ var i, l, k, m, x: integer;
 
        listing[i+1] := '';
        listing[i+2] := '';
-       listing[i+3] := '';
+//       listing[i+3] := '';
+
+       for p:=i downto 0 do
+        if pos(tmp, listing[p]) > 0 then begin
+	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jne ' + copy(listing[i+3], 6, 256);
+	 Break;
+	end;
+
+	listing[i+3] := '';
 
        Result:=false; Break;
       end;
@@ -21871,7 +21895,15 @@ var i, l, k, m, x: integer;
 
        listing[i+1] := #9'jmp ' + copy(listing[i+3], 6, 256);
        listing[i+2] := copy(listing[i+3], 6, 256) + 'x';
-       listing[i+3] := '';
+//       listing[i+3] := '';
+
+       for p:=i downto 0 do
+        if pos(tmp, listing[p]) > 0 then begin
+	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jne ' + copy(listing[i+3], 6, 256) + 'x';
+	 Break;
+	end;
+
+	listing[i+3] := '';
 
        Result:=false; Break;
       end;
