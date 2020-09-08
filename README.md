@@ -84,7 +84,7 @@ Source code at: https://gitlab.com/bocianu/pasdoc
 # Some advice
 https://github.com/ilmenit/CC65-Advanced-Optimizations
 
-# Projects
+# Projects in Mad-Pascal
 
 https://gitlab.com/bocianu/MadKingdom <br>
 https://gitlab.com/bocianu/zilch <br>
