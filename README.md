@@ -93,8 +93,8 @@ compiled to binary code with Mad Assembler.
 
 # Projects in Mad-Pascal
 
-https://github.com/MADRAFi/StarVagrant <br>
-[![Star Vagrant](https://img.youtube.com/vi/gZGu8Ocfd0U/0.jpg)](https://www.youtube.com/watch?v=gZGu8Ocfd)
+https://github.com/MADRAFi/StarVagrant <br><br>
+[![Star Vagrant](https://img.youtube.com/vi/gZGu8Ocfd0U/0.jpg)](https://www.youtube.com/watch?v=gZGu8Ocfd0U)
 
 https://gitlab.com/bocianu/MadKingdom <br>
 https://gitlab.com/bocianu/zilch <br>
