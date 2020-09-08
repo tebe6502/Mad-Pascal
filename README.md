@@ -92,8 +92,16 @@ compiled to binary code with Mad Assembler.
 </p>
 
 # Projects in Mad-Pascal
+<table style="width:100%">
+  <tr>
+    <th>https://github.com/MADRAFi/StarVagrant</th>
+    <th><a href="https://www.youtube.com/watch?v=gZGu8Ocfd0U&ab_channel=AtariOnlinePL"><img src="https://img.youtube.com/vi/gZGu8Ocfd0U/0.jpg"></a></th>
+  </tr>
+</table>
 
 https://github.com/MADRAFi/StarVagrant <br>
+https://www.youtube.com/watch?v=gZGu8Ocfd0U&ab_channel=AtariOnlinePL
+
 https://gitlab.com/bocianu/MadKingdom <br>
 https://gitlab.com/bocianu/zilch <br>
 https://gitlab.com/bocianu/justpong <br>
