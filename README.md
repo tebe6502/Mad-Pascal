@@ -99,6 +99,7 @@ https://gitlab.com/bocianu/jcq <br>
 https://gitlab.com/bocianu/fujinet-udp-shoutbox <br>
 https://gitlab.com/bocianu/speedway <br>
 https://gitlab.com/bocianu/chessnet <br>
+https://gitlab.com/amarok8bit/gr9Lab
 
 # Benchmarks
 
