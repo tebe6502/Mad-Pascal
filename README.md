@@ -64,7 +64,7 @@ Simple Atari Mad-Pascal common project bootstrap.
 <br>
 Source code at: https://gitlab.com/bocianu/madstrap
 </p>
-  
+
 # BLIBS
 http://bocianu.atari.pl/blog/blibs
 <p>
@@ -92,15 +92,9 @@ compiled to binary code with Mad Assembler.
 </p>
 
 # Projects in Mad-Pascal
-<table style="width:100%">
-  <tr>
-    <th>https://github.com/MADRAFi/StarVagrant</th>
-    <th>https://yt-embed.herokuapp.com/embed?v=gZGu8Ocfd0U</th>
-  </tr>
-</table>
 
 https://github.com/MADRAFi/StarVagrant <br>
-https://www.youtube.com/watch?v=gZGu8Ocfd0U&ab_channel=AtariOnlinePL
+[![Star Vagrant](https://img.youtube.com/vi/gZGu8Ocfd0U/0.jpg)](https://www.youtube.com/watch?v=gZGu8Ocfd)
 
 https://gitlab.com/bocianu/MadKingdom <br>
 https://gitlab.com/bocianu/zilch <br>
