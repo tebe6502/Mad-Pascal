@@ -122,8 +122,8 @@ https://github.com/tebe6502/Mad-Pascal/blob/master/benchmark.7z
   <tr>
     <td>Sieve (less is better)</td>
     <td>602</td>
-    <td>580</td>
-    <td>586</td>
+    <td>577</td>
+    <td>579</td>
   </tr>
   <tr>
     <td>YoshPlus (higher is better)</td>
