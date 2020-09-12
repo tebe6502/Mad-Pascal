@@ -214,9 +214,9 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
 	DateSeparator: Char = '-';
-	
+
 	TVSystem: byte absolute $D014;
-	
+
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
 
@@ -343,7 +343,7 @@ asm
 
 ;	@move #@buf Result #33
 	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+	
+	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
 };
@@ -1391,7 +1391,7 @@ asm
 	sta (:bp2),y
 
 	mwa v :bp2
-	
+
 	mva edx (:bp2),y+
 	mva edx+1 (:bp2),y+
 	mva edx+2 (:bp2),y+
@@ -1414,7 +1414,7 @@ var n, dotpos, len: byte;
 begin
 
  r:=0.0;
- 
+
  code:=1;
 
  len:=1 + byte(s[0]);
@@ -1458,7 +1458,7 @@ begin
 
 	code := 0;
  end;
- 
+
  v := r;
 
 end;
@@ -1478,7 +1478,7 @@ var n, dotpos, len: byte;
 begin
 
  f:=0;
- 
+
  code:=1;
 
  len:=length(s) + 1;
@@ -1502,7 +1502,7 @@ begin
 		dotpos := len - n - 1
         else
 		if isDigit(s[n]) then
-			f := f * 10 +  single(ord(s[n])-ord('0'))		
+			f := f * 10 +  single(ord(s[n])-ord('0'))
 		else begin
 			v := 0;
 			code := n;
@@ -1983,7 +1983,7 @@ _tob1	lda #0
 
 ;	@move #@buf Result #33
 	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+	
+	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
 };
@@ -2030,7 +2030,7 @@ _toct2	lsr Value+3
 
 ;	@move #@buf Result #33
 	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+	
+	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
 };
@@ -2042,9 +2042,22 @@ procedure Pause; assembler; overload;
 @description:
 Delay program execution (1/50 second).
 *)
+
+{$ifdef c64}
+asm
+{
+w1	bit vic_cr1
+	bpl w1
+
+w2	bit vic_cr1
+	bmi w2
+};
+{$else}
 asm
 {	lda:cmp:req :rtclok+2
 };
+{$endif}
+
 end;
 
 
@@ -2230,7 +2243,7 @@ lp	lda (:bp2),y
 	inx
 	cpx Count
 	bne lp
-	
+
 stop	pla:tax
 };
 end;
@@ -2303,14 +2316,14 @@ asm
 	cpw psptr #:PROGRAMSTACK
 	beq skp
 	bcc skp
-	
+
 	ldy #$00
 	tya
 	sta (P),y
 	iny
 	sta (P),y
 
-	sbw :psptr size	
+	sbw :psptr size
 skp
 };
 end;

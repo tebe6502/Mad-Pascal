@@ -112,6 +112,7 @@ var
 	audctl: byte absolute $D208;
 	skstat: byte absolute $D20F;
 
+	porta: byte absolute $D300;
 	portb: byte absolute $D301;
 
 	dmactl: byte absolute $D400;
