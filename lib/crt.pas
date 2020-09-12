@@ -34,11 +34,14 @@ WhereY
 
 interface
 
+{$IFDEF ATARI}
 var
 	TextAttr: byte = 0;			(* @var Text Attribute *)
 	Consol: byte absolute $d01f;		// CONSOL register
+{$ENDIF}
 
 const
+{$IFDEF ATARI}
 	CN_START_SELECT_OPTION	= 0;		// Consol values
 	CN_SELECT_OPTION	= 1;
 	CN_START_OPTION		= 2;
@@ -47,6 +50,7 @@ const
 	CN_SELECT		= 5;
 	CN_START		= 6;
 	CN_NONE			= 7;
+{$ENDIF}
 
 { CRT modes }
 	BW40	= 0;		{ 40x25 B/W on Color Adapter }
@@ -138,7 +142,15 @@ procedure ClrScr;
 @description: Clear screen
 *)
 begin
+
+{$IFDEF ATARI}
  write( CH_CLR );
+{$ELSE}
+asm
+{	jsr $e544
+};
+{$ENDIF}
+
 end;
 
 

@@ -96,7 +96,7 @@ const
 	function Now: TDateTime;
 	function RenameFile(var OldName,NewName: TString): Boolean; assembler;
 	function StrToBool(S: PString): Boolean;
-	function StrToFloat(var s: string): real; 
+	function StrToFloat(var s: string): real;
 	function StrToInt(const s: char): byte; assembler; overload;
 	function StrToInt(s: PString): integer; assembler; overload;
 	function TimeToStr(d: TDateTime): TString;
@@ -207,7 +207,7 @@ loop
 	ldy #SearchResult.Attr-DATAORIGIN
 	txa
 	sta (:bp2),y
-	
+
 	and Attributes
 	ora Result
 	beq loop
@@ -242,11 +242,11 @@ loop	mwa f :bp2
 	jsr @DirFileName
 
 	mwa f :bp2
-	
+
 	ldy #f.Attr-DATAORIGIN
 	txa
 	sta (:bp2),y
-	
+
 	ldy #f.ExcludeAttr-DATAORIGIN
 	and (:bp2),y
 	ora Result
@@ -360,7 +360,7 @@ asm
 	lda #$00
 	sta icax1,x
 	sta icax2,x
-	
+
 	m@call	ciov
 
 stop	sty MAIN.SYSTEM.IOResult
@@ -450,11 +450,11 @@ asm
 	adc #10
 	bmi @-
 	adc #$2f
-	
+
 	sta adr.Result+3
 	stx adr.Result+2
 	sty adr.Result+1
-	
+
 	lda #3
 	sta adr.Result
 
@@ -563,14 +563,14 @@ asm
 
 ;	@move #@buf Result #33
 	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+	
+	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
 };
 end;
 
 
-function StrToFloat(var s: string): real; 
+function StrToFloat(var s: string): real;
 (*
 @description: Convert a string to a floating-point value
 
@@ -697,7 +697,7 @@ begin
 
  Result:=a;
 
- for j:=1 to length(a) do Result[j] := UpCase(Result[j]);
+ for j:=length(a) downto 1 do Result[j] := UpCase(Result[j]);
 
 end;
 
@@ -715,7 +715,7 @@ begin
 
  Result:=a;
 
- for j:=1 to length(a) do Result[j] := LowerCase(Result[j]);
+ for j:=length(a) downto 1 do Result[j] := LowerCase(Result[j]);
 
 end;
 
@@ -961,14 +961,14 @@ begin
  val(S, i, e);
 
  if e = 0 then begin
- 
+
   if i = 0 then
    Result := false
-  else 
-   Result := true; 
- 
+  else
+   Result := true;
+
  end else
- 
+
  if (AnsiUpperCase(S) = 'TRUE') then
   Result := true
  else
@@ -1069,13 +1069,13 @@ Trim whitespace from the ends of a string.
 *)
 var i : byte;
 begin
- 
+
  i:=length(s);
  while (i>0) and (s[i]=' ') do dec(i);
 
  Result:=s;
  Result[0]:=chr(i);
- 
+
 // Result:=Copy(s,1,i);
 end;
 
