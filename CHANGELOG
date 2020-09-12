@@ -1,3 +1,9 @@
+12.09.2020
+- dodany prze³acznik -target (-t), mozliwoœæ wygenerowania kodu dla C64
+
+09.09.2020
+- poprawiona optymalizacja dla IF () OR, IF () AND, WHILE () OR
+
 08.09.2020
 - optymalizacja dla FOR BYTE<128 DOWNTO
 - umo¿liwione adresowanie rekordu przez wskaŸnik (przyk³ad MD5)
