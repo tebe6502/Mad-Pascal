@@ -80,7 +80,7 @@ Contributors:
 
 # uzywaj asm65('') zamiast #13#10, POS bedzie wlasciwie zwracalo indeks
 
-# wystepuja tylko skoki w przod @+ (@- nie istnieje)
+# wystepuja tylko skoki w przod @+ (@- nie wystepuja)
 
 # :edx+2, :edx+3 nie wystepuje
 
@@ -385,6 +385,8 @@ const
 
 type
 
+  TTarget = (t_a8, t_c64);
+
   ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04{, mStdcall = $02});
 
   irCode = (iDLI, iVBL);
@@ -580,6 +582,8 @@ var
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, Debug: Integer;
 
   iOut: integer = -1;
+
+  target: TTarget;
 
   start_time: QWord;
 
@@ -1959,6 +1963,7 @@ end;
 procedure OptimizeTemporaryBuf;
 var p: integer;
     tmp: string;
+    yes: Boolean;
 
 
   function SKIP(i: integer): Boolean;
@@ -2570,6 +2575,51 @@ begin
 
 	Break;
        end;
+
+    end;
+
+
+   if (pos('#for:dec', TemporaryBuf[6]) > 0) and					// #for:dec I			; 6
+      (TemporaryBuf[7] = '') and							//				; 7
+      (TemporaryBuf[0] = TemporaryBuf[5]) and						//				; 0
+      (pos('l_', TemporaryBuf[1]) = 1) and						//l_00FB			; 1
+      (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition	; 2
+											//				; 3
+      (pos('; optimize OK', TemporaryBuf[4]) > 0) then					//; optimize OK			; 4
+											//				; 5
+    begin
+
+     yes:=true;
+
+     for p:=5 to High(TemporaryBuf) do
+      if pos(TemporaryBuf[1], TemporaryBuf[p]) > 0 then begin
+
+        if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[1]) and			//; --- ForToDoEpilog
+	   (TemporaryBuf[p-5] = '; --- ForToDoEpilog') and			// dec I
+	   (pos('dec ', TemporaryBuf[p-4]) > 0) and				// lda I
+	   (TemporaryBuf[p-1] = #9'seq') and					// cmp #$FF
+	   (TemporaryBuf[p-2] = #9'cmp #$FF') then				// seq
+	   begin								// jmp l_00FB
+ 	    TemporaryBuf[6] := TemporaryBuf[p-4];
+
+	    TemporaryBuf[p-4] := '~';
+
+	    TemporaryBuf[p-2] := '~';
+	    TemporaryBuf[p-1] := '~';
+
+     	    TemporaryBuf[p] := #9'jne ' + TemporaryBuf[1];
+
+	    TemporaryBuf[0] := #9'jmp ' + TemporaryBuf[1] + 'f';
+
+	    TemporaryBuf[7] := TemporaryBuf[1] + 'f';
+
+	    yes:=false;
+	   end;
+
+	Break;
+       end;
+
+     if yes then TemporaryBuf[6] := '~';
 
     end;
 
@@ -28413,7 +28463,7 @@ begin
 end;
 
 
-procedure GenerateForToDoEpilog (CounterSize: Byte; Down: Boolean; IdentIndex: integer = 0; Epilog: Boolean = true; forBPL: Boolean = false);
+procedure GenerateForToDoEpilog (CounterSize: Byte; Down: Boolean; IdentIndex: integer = 0; Epilog: Boolean = true; forBPL: byte = 0);
 var svar: string;
     ValType: Byte;
 begin
@@ -28495,9 +28545,12 @@ if Epilog then begin
 
   case CounterSize of
 
-   1: if forBPL then begin
-	asm65(#9'bmi *+5');
-      end else begin
+   1: if forBPL and 1 <> 0 then		// [BYTE < 128] DOWNTO 0
+	asm65(#9'bmi *+5')
+      else
+      if forBPL and 2 <> 0 then		// BYTE DOWNTO [exp > 0]
+	asm65(#9'seq')
+      else begin
         asm65(#9'lda '+svar);
         asm65(#9'cmp #$FF');
         asm65(#9'seq');
@@ -28555,7 +28608,9 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
 
  asm65('STACKWIDTH'#9'= 16');
- asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
+
+ if target = t_a8 then
+  asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
 
  asm65;
 
@@ -28666,22 +28721,27 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FPSGN'#9'.ds 1');
  asm65('FPEXP'#9'.ds 1');
 
- asm65;
- asm65(#9'.ifdef MAIN.@DEFINES.S_VBXE');
- asm65(#9'opt h-');
- asm65(#9'ins ''atari\s_vbxe\sdxld2.obx''');
- asm65(#9'opt h+');
- asm65(#9'.endif');
+ if target = t_a8 then begin
+  asm65;
+  asm65(#9'.ifdef MAIN.@DEFINES.S_VBXE');
+  asm65(#9'opt h-');
+  asm65(#9'ins ''atari\s_vbxe\sdxld2.obx''');
+  asm65(#9'opt h+');
+  asm65(#9'.endif');
+ end;
 
  if High(resArray) > 0 then begin
 
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  asm65(#9'icl ''atari\resource.asm''');
+  if target = t_a8 then begin
+   asm65(#9'icl ''atari\resource.asm''');
 
-  asm65(#9'?EXTDETECT = 0');
-  asm65(#9'?VBXDETECT = 0');
+   asm65(#9'?EXTDETECT = 0');
+   asm65(#9'?VBXDETECT = 0');
+  end else
+   asm65(#9'icl ''c64\resource.asm''');
 
   asm65;
 
@@ -28700,8 +28760,21 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
- asm65;
- asm65(#9'org CODEORIGIN');
+ if target = t_c64 then begin
+
+  asm65(#9'opt h-f+');
+  asm65(#9'org $801');
+  asm65(#9'org [a($801)],$801','; BASIC start address');
+  asm65;
+  asm65(#9'basic_start(START)');
+
+  asm65('CODEORIGIN');
+ end else begin
+
+  asm65;
+  asm65(#9'org CODEORIGIN');
+
+ end;
 
 // asm65(#13#10#9'jmp start');
 
@@ -28717,7 +28790,11 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65;
  asm65('RTLIB');
- asm65(#9'icl ''rtl6502.asm''');
+
+ if target = t_c64 then
+  asm65(#9'icl ''rtl6502_c64.asm''')
+ else
+  asm65(#9'icl ''rtl6502_a8.asm''');
 
  asm65;
  asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1');
@@ -28760,28 +28837,40 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'eif');
  asm65;
 
- asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
- asm65(#9'icl ''atari\romoff.asm''');
- asm65(#9'.endif');
- asm65;
-
  asm65(#9'mwa #PROGRAMSTACK psptr');
  asm65;
 
- asm65(#9'ldx #$0F','; DOS II+/D ParamStr');			// DOS II+/D ParamStr
- asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
- asm65;
+ if target = t_a8 then begin
 
- asm65(#9'inx','; X = 0');
- asm65(#9'stx bp','; BP = 0');
+  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
+  asm65(#9'icl ''atari\romoff.asm''');
+  asm65(#9'.endif');
+  asm65;
 
- asm65;
- asm65(#9'stx audctl','; reset POKEY');
- asm65(#9'lda #3');
- asm65(#9'sta skctl');
- asm65;
- asm65(#9'dex','; X = 255');
- asm65;
+  asm65(#9'ldx #$0F','; DOS II+/D ParamStr');			// DOS II+/D ParamStr
+  asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
+  asm65;
+
+  asm65(#9'inx','; X = 0');
+  asm65(#9'stx bp','; BP = 0');
+
+  asm65;
+  asm65(#9'stx audctl','; reset POKEY');
+  asm65(#9'lda #3');
+  asm65(#9'sta skctl');
+  asm65;
+  asm65(#9'dex','; X = 255');
+  asm65;
+
+ end else begin
+
+  asm65(#9'ldx #$00');
+  asm65(#9'stx bp','; BP = 0');
+  asm65;
+  asm65(#9'dex','; X = 255');
+  asm65;
+
+ end;
 
  if CPUMode = 65816 then asm65(#9'opt c+');
 
@@ -33171,10 +33260,11 @@ var
   Param: TParamList;
   ExpressionType, IndirectionLevel, ActualParamType, ConstValType, VarType, SelectorType: Byte;
   Value, ConstVal, ConstVal2: Int64;
-  Down, ExitLoop, yes, forBPL: Boolean;			  // To distinguish TO / DOWNTO loops
+  Down, ExitLoop, yes: Boolean;			  // To distinguish TO / DOWNTO loops
   CaseLabelArray: TCaseLabelArray;
   CaseLabel: TCaseLabel;
   Name, EnumName, svar, par1, par2: string;
+  forBPL: byte;
 begin
 
 Result:=i;
@@ -34341,18 +34431,19 @@ WHILETOK:
 
 	    Ident[IdentIndex].LoopVariable := true;
 
+	    asm65;
 	    asm65('; --- For');
 
 	    j := i + 3;
 
 	    StartOptimization(j);
 
-	    forBPL := false;
+	    forBPL := 0;
 
 	    if SafeCompileConstExpression(j, ConstVal, ExpressionType, Ident[IdentIndex].DataType, true) then begin
 	      Push(ConstVal, ASVALUE, DataSize[Ident[IdentIndex].DataType]);
 
-	      forBPL := (ConstVal < 128);
+	      forBPL := ord(ConstVal < 128);
 	    end else begin
 	      j := CompileExpression(j, ExpressionType);
 	      ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
@@ -34383,6 +34474,8 @@ WHILETOK:
 	      if SafeCompileConstExpression(j, ConstVal, ExpressionType, Ident[IdentIndex].DataType, true) then begin
 		Push(ConstVal, ASVALUE, DataSize[Ident[IdentIndex].DataType]);
 		DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), CONSTANT, Ident[IdentIndex].DataType, 0, 0, ConstVal, Tok[j].Kind);
+
+		if ConstVal > 0 then forBPL:=forBPL or 2;
 	      end else begin
 		j := CompileExpression(j, ExpressionType);
 		ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
@@ -35081,7 +35174,7 @@ WHILETOK:
 
 	  asm65;
 
-	  GenerateForToDoEpilog(DataSize[ExpressionType], Down, IdentIndex, false, false);	// +1, -1
+	  GenerateForToDoEpilog(DataSize[ExpressionType], Down, IdentIndex, false, 0);		// +1, -1
 	 end else
 	  GenerateIncOperation(IndirectionLevel, ExpressionType, Down, IdentIndex);		// +N, -N
 
@@ -38125,8 +38218,10 @@ if FastMul > 0  then begin
 
 end;
 
-asm65;
-asm65(#9'run START');
+if target = t_a8 then begin
+ asm65;
+ asm65(#9'run START');
+end;
 
 asm65separator;
 
@@ -38292,9 +38387,10 @@ procedure Syntax(ExitCode: byte);
 begin
 
   WriteLn('Syntax: mp <inputfile> [options]');
-  WriteLn('-d'#9#9'Diagnostics mode');
+  WriteLn('-diag'#9#9'Diagnostics mode');
   Writeln('-define:symbol'#9'Defines the symbol');
   Writeln('-ipath:<x>'#9'Add <x> to include path');
+  Writeln('-target:<x>'#9'Target system: a8 (default), c64');
   WriteLn('-code:address'#9'Code origin hex address');
   WriteLn('-data:address'#9'Data origin hex address');
   WriteLn('-stack:address'#9'Software stack hex address (size = 64 bytes)');
@@ -38307,37 +38403,66 @@ end;
 
 procedure ParseParam;
 var i, err: integer;
-    s: string;
+    s, t: string;
 begin
 
- for i := 1 to ParamCount do begin
+ t:='A8';
+
+ i:=1;
+ while i <= ParamCount do begin
 
   if ParamStr(i)[1] = '-' then begin
 
    if AnsiUpperCase(ParamStr(i)) = '-O' then
 //    OptimizeCode := TRUE
    else
-   if AnsiUpperCase(ParamStr(i)) = '-D' then
+   if AnsiUpperCase(ParamStr(i)) = '-DIAG' then
     DiagMode := TRUE
    else
 
+   if (AnsiUpperCase(ParamStr(i)) = '-IPATH') or (AnsiUpperCase(ParamStr(i)) = '-I') then begin
+
+     AddPath(ParamStr(i+1));
+     inc(i);
+
+   end else
    if pos('-IPATH:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      s:=copy(ParamStr(i), 8, 255);
      AddPath(s);
 
    end else
+   if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
+
+     AddDefine(AnsiUpperCase(ParamStr(i+1)));
+     inc(i);
+     AddDefines := NumDefines;
+
+   end else
    if pos('-DEFINE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      s:=copy(ParamStr(i), 9, 255);
      AddDefine(AnsiUpperCase(s));
-
      AddDefines := NumDefines;
+
+   end else
+   if (AnsiUpperCase(ParamStr(i)) = '-CODE') or (AnsiUpperCase(ParamStr(i)) = '-C') then begin
+
+     val('$'+ParamStr(i+1), CODEORIGIN_Atari, err);
+     inc(i);
+     if err<>0 then Syntax(3);
 
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_Atari, err);
+     if err<>0 then Syntax(3);
+
+   end else
+   if (AnsiUpperCase(ParamStr(i)) = '-DATA') then begin
+
+     val('$'+ParamStr(i+1), DATA_Atari, err);
+     inc(i);
      if err<>0 then Syntax(3);
 
    end else
@@ -38347,9 +38472,23 @@ begin
      if err<>0 then Syntax(3);
 
    end else
+   if (AnsiUpperCase(ParamStr(i)) = '-STACK') or (AnsiUpperCase(ParamStr(i)) = '-S') then begin
+
+     val('$'+ParamStr(i+1), STACK_Atari, err);
+     inc(i);
+     if err<>0 then Syntax(3);
+
+   end else
    if pos('-STACK:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      val('$'+copy(ParamStr(i), 8, 255), STACK_Atari, err);
+     if err<>0 then Syntax(3);
+
+   end else
+   if (AnsiUpperCase(ParamStr(i)) = '-ZPAGE') or (AnsiUpperCase(ParamStr(i)) = '-Z') then begin
+
+     val('$'+ParamStr(i+1), ZPAGE_Atari, err);
+     inc(i);
      if err<>0 then Syntax(3);
 
    end else
@@ -38357,6 +38496,17 @@ begin
 
      val('$'+copy(ParamStr(i), 8, 255), ZPAGE_Atari, err);
      if err<>0 then Syntax(3);
+
+   end else
+   if (AnsiUpperCase(ParamStr(i)) = '-TARGET') or (AnsiUpperCase(ParamStr(i)) = '-T') then begin
+
+     t:=AnsiUpperCase(ParamStr(i+1));
+     inc(i);
+
+   end else
+   if pos('-TARGET:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+
+     t:=AnsiUpperCase(copy(ParamStr(i), 9, 255));
 
    end else
      Syntax(3);
@@ -38375,7 +38525,12 @@ begin
 
    end;
 
+  inc(i);
  end;
+
+ if t = 'A8' then target := t_a8 else
+  if t = 'C64' then target := t_c64 else
+   Syntax(3);
 
 end;
 
@@ -38404,9 +38559,13 @@ begin
 
  NumUnits:=1;			     // !!! 1 !!!
 
- Defines[1] := 'ATARI';
-
  ParseParam;
+
+ if target = t_a8 then
+  Defines[1] := 'ATARI'
+ else
+  Defines[1] := 'C64';
+
 
  if (UnitName[1].Name='') then Syntax(3);
 
@@ -38486,7 +38645,12 @@ begin
  DefineIdent(1, 'BLOCKWRITE',     FUNC, INTEGERTOK, 0, 0, $00000000);
 
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
- DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000009B);
+
+ if target = t_c64 then
+  DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000000D)
+ else
+  DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000009B);
+
  DefineIdent(1, 'TRUE',     CONSTANT, BOOLEANTOK, 0, 0, $00000001);
  DefineIdent(1, 'FALSE',    CONSTANT, BOOLEANTOK, 0, 0, $00000000);
  DefineIdent(1, 'FRACBITS', CONSTANT, INTEGERTOK, 0, 0, FRACBITS);
