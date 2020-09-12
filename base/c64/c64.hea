@@ -1,0 +1,92 @@
+
+.macro	basic_start(addr)
+
+	.word upstartEnd	// link address
+	.word 10		// line num
+	.byte $9e		// sys
+
+	?a=0
+	?b=0
+	?c=0
+	?d=0
+	?e=0
+
+	?v = %%addr
+
+	ift ?v>=10000
+	?a=?v/10000
+	?v=?v-(?a*10000)
+	eif
+
+	ift ?v>=1000
+	?b=?v/1000
+	?v=?v-(?b*1000)
+	eif
+
+	ift ?v>=100
+	?c=?v/100
+	?v=?v-(?c*100)
+	eif
+
+	ift ?v>=10
+	?d=?v/10
+	?v=?v-(?d*10)
+	eif
+
+	?e=?v%10
+
+	dta ?a+$30,?b+$30,?c+$30,?d+$30,?e+$30
+
+	.byte 0
+upstartEnd
+	.word 0			// empty link signals the end of the program
+
+.endm
+
+vic_spr0_x		= $D000
+vic_spr0_y		= $D001
+vic_spr1_x		= $D002
+vic_spr1_y		= $D003
+vic_spr2_x		= $D004
+vic_spr2_y		= $D005
+vic_spr3_x		= $D006
+vic_spr3_y		= $D007
+vic_spr4_x		= $D008
+vic_spr4_y		= $D009
+vic_spr5_x		= $D00A
+vic_spr5_y		= $D00B
+vic_spr6_x		= $D00C
+vic_spr6_y		= $D00D
+vic_spr7_x		= $D00E
+vic_spr7_y		= $D00F
+vic_spr_hi_x		= $D010
+vic_cr1			= $D011
+vic_raster		= $D012
+vic_lp_x		= $D013
+vic_lp_y		= $D014
+vic_spr_ena		= $D015
+vic_cr2			= $D016
+vic_spr_exp_y		= $D017
+vic_mem			= $D018
+vic_irq			= $D019
+vic_irq_ena		= $D01A
+vic_spr_dp		= $D01B
+vic_spr_mcolor		= $D01C
+vic_spr_exp_x		= $D01D
+vic_spr_ss_col		= $D01E
+vic_spr_sd_col		= $D01F
+vic_border		= $D020
+vic_bg_color0		= $D021
+vic_bg_color1		= $D022
+vic_bg_color2		= $D023
+vic_bg_color3		= $D024
+vic_spr_color1		= $D025
+vic_spr_color2		= $D026
+vic_spr0_color		= $D027
+vic_spr1_color		= $D028
+vic_spr2_color		= $D029
+vic_spr3_color		= $D02A
+vic_spr4_color		= $D02B
+vic_spr5_color		= $D02C
+vic_spr6_color		= $D02D
+vic_spr7_color		= $D02E
