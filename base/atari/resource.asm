@@ -42,7 +42,7 @@ portb		= $d301
 .ends
 
 
-	icl 'vbxe.mac'
+	icl 'vbxe.hea'
 
 
 .proc	vbxe_detect
