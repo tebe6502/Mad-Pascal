@@ -53,7 +53,7 @@
 	  (pos('jcc l_', listing[2]) > 0 ) then
 	begin
 	 listing[0] := #9'#for:dec ' + copy(listing[0], 6, 256);
-	 listing[1] := '';
+	 listing[1] := #9'#for';
 	 listing[2] := '';
 	end;
 
