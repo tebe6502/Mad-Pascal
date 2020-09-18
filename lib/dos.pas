@@ -137,13 +137,28 @@ var	time: cardinal;
 	tmp: word;
 	fps: byte;
 begin
-
+{$IFDEF ATARI}
 asm
 {	mva #$00 time+3
 	mva :rtclok time+2
 	mva :rtclok+1 time+1
 	mva :rtclok+2 time
 };
+{$ELSE}
+asm
+{	txa:pha
+
+	jsr $FFDE
+	sta time
+	stx time+1
+	sty time+2
+
+	lda #$00
+	sta time+3
+
+	pla:tax
+};
+{$ENDIF}
 
  if palntsc = 1 then
   fps := 50
