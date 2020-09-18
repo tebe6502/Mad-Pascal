@@ -136,12 +136,28 @@ function GetTickCount: cardinal; assembler;
 
 @returns: 32bit tick count
 *)
+{$IFDEF ATARI}
 asm
 {	mva :rtclok+2 Result
 	mva :rtclok+1 Result+1
 	mva :rtclok Result+2
 	mva #$00 Result+3
 };
+{$ELSE}
+asm
+{	txa:pha
+
+	jsr $FFDE
+	sta Result
+	stx Result+1
+	sty Result+2
+
+	lda #$00
+	sta Result+3
+
+	pla:tax
+};
+{$ENDIF}
 end;
 
 

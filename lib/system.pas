@@ -546,6 +546,29 @@ Generate random number
 
 @returns: byte
 *)
+{$IFDEF C64}
+asm
+{
+	lda $DC04	//CIA#1 Timer A Lo byte
+	eor $DC05	//CIA#1 Timer A Hi byte
+	eor $DD04	//CIA#2 Timer A Lo byte
+	adc $DD05	//CIA#2 Timer A Hi byte
+	eor $DD06	//CIA#2 Timer B Lo byte
+	eor $DD07	//CIA#2 Timer B Hi byte
+	tay
+
+	lda	range
+	beq	stop
+
+	sta	ecx
+	sty	eax
+
+	jsr	imulCL
+	tay
+
+stop	sty	Result
+};
+{$ELSE}
 asm
 {
 ;BYTE FUNC Rand(BYTE range)
@@ -566,6 +589,7 @@ asm
 
 stop	sty	Result
 };
+{$ENDIF}
 end;
 
 

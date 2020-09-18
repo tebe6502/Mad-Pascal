@@ -93,7 +93,7 @@ const
 	procedure CursorOn;
 	procedure Delay(count: word); assembler;
 	procedure DelLine;
-	procedure GotoXY(x: byte; y: byte); assembler;
+	procedure GotoXY(x,y: byte); assembler;
 	procedure InsLine;
 	function Keypressed: Boolean; assembler;
 	procedure NoSound; assembler;
@@ -108,7 +108,11 @@ const
 
 implementation
 
+//{$IFDEF ATARI}
+
 uses atari;
+
+//{$ENDIF}
 
 
 procedure CursorOff;
@@ -142,7 +146,6 @@ procedure ClrScr;
 @description: Clear screen
 *)
 begin
-
 {$IFDEF ATARI}
  write( CH_CLR );
 {$ELSE}
@@ -150,7 +153,6 @@ asm
 {	jsr $e544
 };
 {$ENDIF}
-
 end;
 
 
@@ -178,6 +180,7 @@ function ReadKey: char; assembler;
 
 @returns: char
 *)
+{$IFDEF ATARI}
 asm
 {	txa:pha
 
@@ -187,6 +190,14 @@ asm
 
 	pla:tax
 };
+{$ELSE}
+asm
+{	txa:pha
+	jsr $ffe4	; GETIN
+	sta Result
+	pla:tax
+};
+{$ENDIF}
 end;
 
 
@@ -251,6 +262,7 @@ function Keypressed: Boolean; assembler;
 @returns: TRUE key has been pressed
 @returns: FALSE otherwise
 *)
+{$IFDEF ATARI}
 asm
 {	ldy #$00	; false
 	lda kbcodes
@@ -262,10 +274,23 @@ asm
 
 skp	sty Result
 };
+{$ELSE}
+asm
+{	ldy #$00	; false
+	lda $cb
+	cmp #$40
+	beq skp
+	iny		; true
+
+;	sty kbcodes
+
+skp	sty Result
+};
+{$ENDIF}
 end;
 
 
-procedure GotoXY(x: byte; y: byte); assembler;
+procedure GotoXY(x,y: byte); assembler;
 (*
 @description:
 Set cursor position on screen.
@@ -278,6 +303,8 @@ the origin of the current window. The origin is located at (1,1), the upper-left
 @param: x - horizontal positions (1..40)
 @param: y - vertical positions (1..24)
 *)
+
+{$IFDEF ATARI}
 asm
 {	ldy x
 	beq @+
@@ -294,6 +321,24 @@ asm
 
 @	sty rowcrs
 };
+{$ELSE}
+asm
+{	txa:pha
+	clc
+
+	ldx y
+	seq
+	dex
+
+	ldy x
+	seq
+	dey
+
+	jsr $FFF0	; PLOT
+
+	pla:tax
+};
+{$ENDIF}
 end;
 
 
@@ -303,12 +348,25 @@ function WhereX: byte; assembler;
 
 @returns: byte (1..40)
 *)
+{$IFDEF ATARI}
 asm
 {
 	ldy colcrs
 	iny
 	sty Result
 };
+{$ELSE}
+asm
+{	txa:pha
+	sec
+
+	jsr $FFF0	; PLOT
+	iny
+	sty Result
+
+	pla:tax
+};
+{$ENDIF}
 end;
 
 
@@ -318,12 +376,25 @@ function WhereY: byte; assembler;
 
 @returns: byte (1..24)
 *)
+{$IFDEF ATARI}
 asm
 {
 	ldy rowcrs
 	iny
 	sty Result
 };
+{$ELSE}
+asm
+{	txa:pha
+	sec
+
+	jsr $FFF0	; PLOT
+	inx
+	stx Result
+
+	pla:tax
+};
+{$ENDIF}
 end;
 
 
