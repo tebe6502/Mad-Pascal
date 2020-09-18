@@ -616,7 +616,7 @@ var
 
   optimize : record
 	      use, assign: Boolean;
-	      unitIndex, line: integer;
+	      unitIndex, line, old: integer;
 	     end;
 
 
@@ -2022,6 +2022,27 @@ var p: integer;
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
   end;
 
+
+
+   function GetString(j: integer): string;
+   var i: integer;
+       a: string;
+   begin
+
+    Result := '';
+    i:=6;
+
+    a:=TemporaryBuf[j];
+
+    if a<>'' then
+     while not(a[i] in [' ',#9]) and (i <= length(a)) do begin
+      Result := Result + a[i];
+      inc(i);
+     end;
+
+   end;
+
+
 begin
 
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
@@ -2213,7 +2234,9 @@ begin
        (pos('lda ', TemporaryBuf[1]) > 0) then						// lda A		; 1
      if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[1], 6, 256)) then
       begin
-	TemporaryBuf[0] := '~';
+
+	if (pos('sta ', TemporaryBuf[2]) = 0) then TemporaryBuf[0] := '~';
+
 	TemporaryBuf[1] := '~';
       end;
 
@@ -2418,6 +2441,117 @@ begin
     end;
 
 
+   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
+      (TemporaryBuf[1] = '') and							//			; 1
+      (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
+      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy C		; 4
+      (pos('lda ', TemporaryBuf[5]) > 0) and						// lda Result		; 5
+      ((pos('add ', TemporaryBuf[6]) > 0) or (pos('sub ', TemporaryBuf[6]) > 0)) and	// add|sub		; 6
+      (pos('sta ', TemporaryBuf[7]) > 0) and						// sta Result		; 7
+      ((TemporaryBuf[8] = #9'scc') or (TemporaryBuf[8] = #9'scs')) and			// scc|scs		; 8
+      ((pos('inc ', TemporaryBuf[9]) > 0) or (pos('dec ', TemporaryBuf[9]) > 0)) and	// inc|dec Result+1	; 9
+											//			; 10
+      (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
+      (pos('inc ', TemporaryBuf[12]) > 0) and						// inc C 		; 12
+      (TemporaryBuf[13] = #9'seq') and							// seq 			; 13
+      (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
+      (pos('l_', TemporaryBuf[15]) = 1) then						//l_			; 15
+    if (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[12], 6, 256)) then
+     begin
+
+       if copy(TemporaryBuf[5], 6, 256) = copy(TemporaryBuf[7], 6, 256) then begin
+	TemporaryBuf[1] := TemporaryBuf[5];
+
+	TemporaryBuf[5] := '~';
+       end;
+
+	TemporaryBuf[0] := #9'ldy ' + GetString(0);
+
+	TemporaryBuf[12] := #9'iny';
+	TemporaryBuf[13] := #9'jne ' + copy(TemporaryBuf[14], 6, 256);
+	TemporaryBuf[14] := TemporaryBuf[15];
+	TemporaryBuf[15] := #9'sty ' + copy(TemporaryBuf[4], 6, 256);
+
+	TemporaryBuf[4] := '~';
+     end;
+
+
+   if (TemporaryBuf[0] = '') and							//			; 0
+      (pos('l_', TemporaryBuf[1]) = 1) and						//l_2092		; 1
+      (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 2
+      (TemporaryBuf[3] = #9'ldy #$00') and						// ldy #$00		; 3
+      (pos('lda ', TemporaryBuf[4]) > 0) and						// lda Result		; 4
+      ((pos('add (', TemporaryBuf[5]) > 0) or (pos('sub (', TemporaryBuf[5]) > 0)) and	// add|sub (P),y	; 5
+      (pos('sta ', TemporaryBuf[6]) > 0) and						// sta Result		; 6
+      ((TemporaryBuf[7] = #9'scc') or (TemporaryBuf[7] = #9'scs')) and			// scc|scs		; 7
+      ((pos('inc ', TemporaryBuf[8]) > 0) or (pos('dec ', TemporaryBuf[8]) > 0)) and	// inc|dec Result+1	; 8
+											//			; 9
+      (TemporaryBuf[10] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 10
+      (pos('inc ', TemporaryBuf[11]) > 0) and						// inc P 		; 11
+      (TemporaryBuf[12] = #9'sne') and							// sne 			; 12
+      (pos('inc ', TemporaryBuf[13]) > 0) and						// inc P+1 		; 13
+      (TemporaryBuf[14] = #9'seq') and							// seq 			; 14
+      (TemporaryBuf[15] = #9'jmp ' + TemporaryBuf[1]) and				// jmp l_2092		; 15
+      (pos('l_', TemporaryBuf[16]) = 1) then						//l_			; 16
+    if (copy(TemporaryBuf[5], 6, 256) = '('+copy(TemporaryBuf[11], 6, 256)+'),y') then
+     begin
+
+       if copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[6], 6, 256) then begin
+	TemporaryBuf[0] := TemporaryBuf[4];
+
+	TemporaryBuf[4] := '~';
+       end;
+
+	TemporaryBuf[3] := TemporaryBuf[2];
+	TemporaryBuf[2] := TemporaryBuf[1];
+	TemporaryBuf[1] := #9'ldy #$00';
+
+	TemporaryBuf[12] := #9'jne ' + copy(TemporaryBuf[15], 6, 256);
+
+	TemporaryBuf[14] := #9'jne ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[15] := TemporaryBuf[16];
+	TemporaryBuf[16] := #9'sty ' + copy(TemporaryBuf[11], 6, 256);
+
+	TemporaryBuf[11] := #9'iny';
+     end;
+
+
+   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
+      (TemporaryBuf[1] = '') and							//			; 1
+      (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
+      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      (pos('lda ', TemporaryBuf[4]) > 0) and						// lda C		; 4
+      (pos('cmp ', TemporaryBuf[5]) > 0) and						// cmp 			; 5
+      SKIP(6) and									// SKIP			; 6
+      (pos('ldy ', TemporaryBuf[7]) > 0) and						// ldy C		; 7
+      (pos('lda ', TemporaryBuf[8]) > 0) and						// lda 			; 8
+      (TemporaryBuf[9] = #9'iny') and							// iny 			; 9
+      (pos('sta ', TemporaryBuf[10]) > 0) and						// sta 			; 10
+											//			; 11
+      (TemporaryBuf[12] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 12
+      (pos('inc ', TemporaryBuf[13]) > 0) and						// inc C 		; 13
+      (TemporaryBuf[14] = #9'seq') and							// seq 			; 14
+      (TemporaryBuf[15] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 15
+      (pos('l_', TemporaryBuf[16]) = 1) then						//l_			; 16
+    if (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[7], 6, 256)) and
+       (copy(TemporaryBuf[7], 6, 256) = copy(TemporaryBuf[13], 6, 256)) then
+     begin
+	TemporaryBuf[0] := #9'ldy ' + GetString(0);
+
+	TemporaryBuf[4] := '~';
+	TemporaryBuf[5] := #9'cpy ' + copy(TemporaryBuf[5], 6, 256);
+
+	TemporaryBuf[13] := #9'jne ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[14] := TemporaryBuf[16];
+	TemporaryBuf[15] := #9'sty ' + copy(TemporaryBuf[7], 6, 256);
+
+	TemporaryBuf[7] := '~';
+
+	TemporaryBuf[16] := '~';
+     end;
+
+
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
@@ -2436,6 +2570,25 @@ begin
       TemporaryBuf[6] := '~';
      end else
       TemporaryBuf[6] := #9'tay';
+
+    end;
+
+
+   if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      SKIP(2) and									// SKIP			; 2
+      (pos('ldy ', TemporaryBuf[3]) > 0) and						// ldy W		; 3
+      (pos('lda ', TemporaryBuf[4]) > 0) then						// lda 			; 4
+    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[3], 6, 256)) then
+    begin
+
+     if (pos(',y', TemporaryBuf[0]) = 0) and (pos(',y', TemporaryBuf[1]) = 0) then begin
+      TemporaryBuf[0] := #9'ldy ' + copy(TemporaryBuf[0], 6, 256);
+      TemporaryBuf[1] := #9'cpy ' + copy(TemporaryBuf[1], 6, 256);
+
+      TemporaryBuf[3] := '~';
+     end else
+      TemporaryBuf[3] := #9'tay';
 
     end;
 
@@ -2579,14 +2732,12 @@ begin
     end;
 
 
-   if (pos('#for:dec', TemporaryBuf[6]) > 0) and					// #for:dec I			; 6
-      (TemporaryBuf[7] = '') and							//				; 7
-      (TemporaryBuf[0] = TemporaryBuf[5]) and						//				; 0
+   if (TemporaryBuf[4] = #9'#for') and							// #for				; 4
+      (pos('#for:dec', TemporaryBuf[3]) > 0) and					// #for:dec I			; 3
+
+      (TemporaryBuf[0] = '') and							//				; 0
       (pos('l_', TemporaryBuf[1]) = 1) and						//l_00FB			; 1
-      (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition	; 2
-											//				; 3
-      (pos('; optimize OK', TemporaryBuf[4]) > 0) then					//; optimize OK			; 4
-											//				; 5
+      (TemporaryBuf[2] = '; --- ForToDoCondition') then					//; --- ForToDoCondition	; 2
     begin
 
      yes:=true;
@@ -2594,13 +2745,13 @@ begin
      for p:=5 to High(TemporaryBuf) do
       if pos(TemporaryBuf[1], TemporaryBuf[p]) > 0 then begin
 
-        if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[1]) and			//; --- ForToDoEpilog
-	   (TemporaryBuf[p-5] = '; --- ForToDoEpilog') and			// dec I
-	   (pos('dec ', TemporaryBuf[p-4]) > 0) and				// lda I
-	   (TemporaryBuf[p-1] = #9'seq') and					// cmp #$FF
-	   (TemporaryBuf[p-2] = #9'cmp #$FF') then				// seq
-	   begin								// jmp l_00FB
- 	    TemporaryBuf[6] := TemporaryBuf[p-4];
+        if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[1]) and			//; --- ForToDoEpilog	// -5
+	   (TemporaryBuf[p-5] = '; --- ForToDoEpilog') and			// dec I		// -4
+	   (pos('dec ', TemporaryBuf[p-4]) > 0) and				// lda I		// -3
+	   (TemporaryBuf[p-1] = #9'seq') and					// cmp #$FF		// -2
+	   (TemporaryBuf[p-2] = #9'cmp #$FF') then				// seq			// -1
+	   begin								// jmp l_00FB		// 0
+ 	    TemporaryBuf[3] := TemporaryBuf[p-4];
 
 	    TemporaryBuf[p-4] := '~';
 
@@ -2611,7 +2762,7 @@ begin
 
 	    TemporaryBuf[0] := #9'jmp ' + TemporaryBuf[1] + 'f';
 
-	    TemporaryBuf[7] := TemporaryBuf[1] + 'f';
+	    TemporaryBuf[4] := TemporaryBuf[1] + 'f';
 
 	    yes:=false;
 	   end;
@@ -2619,7 +2770,10 @@ begin
 	Break;
        end;
 
-     if yes then TemporaryBuf[6] := '~';
+     if yes then begin
+      TemporaryBuf[3] := '~';
+      TemporaryBuf[4] := '~';
+     end;
 
     end;
 
@@ -2698,25 +2852,6 @@ begin
      TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
 
     end;
-
-
-{
-   if (pos('l_', TemporaryBuf[i]) = 1) and						//l_xxxx		; 0
-      (TemporaryBuf[i+1] = '') and							//			; 1
-      (pos('; optimize', TemporaryBuf[i+2]) = 1) and					//; optimize		; 2
-      (TemporaryBuf[i+3] = '') and							//			; 3
-      (pos(#9'mwy ', TemporaryBuf[i+4]) > 0) and					// mwy P :bp2		; 4
-      (pos(' :bp2', TemporaryBuf[i+4]) > 0) then
-    begin
-     TemporaryBuf[i+1] := TemporaryBuf[i];
-     TemporaryBuf[i]   := TemporaryBuf[i+4];
-
-     TemporaryBuf[i+4] := '~';
-    end;
-
- end;
-}
-
 
 end;
 
@@ -18245,6 +18380,23 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if lda(i) and sta(i+2) and								// lda W			; 0
+       lda(i+3) and									// sub 				; 1
+       sta(i+5) and									// sta W 			; 2
+       sub(i+1) and (sub_im(i+1) = false) and						// lda W+1			; 3
+       sbc_im_0(i+4) and								// sbc #$00			; 4
+       (lda(i+6) = false) then								// sta W+1			; 5
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and			//~lda				; 6
+	(copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
+     begin
+	listing[i+3] := #9'scs';
+	listing[i+4] := #9'dec '+copy(listing[i+5], 6, 256);
+	listing[i+5] := '';
+
+	Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'sec') and							// sec			; 0
        lda_im(i+1) and sta(i+3) and							// lda #$		; 1
        lda_im(i+4) and sta(i+6) and							// sbc #$		; 2
@@ -24571,9 +24723,13 @@ begin
 
  if ((x = 0) and inxUse) then begin   // succesfull
 
-  WriteOut('');
-  WriteOut('; optimize OK ('+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
-  WriteOut('');
+  if optimize.line <> optimize.old then begin
+   WriteOut('');
+   WriteOut('; optimize OK ('+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
+   WriteOut('');
+
+   optimize.old := optimize.line;
+  end;
 
 {$IFDEF OPTIMIZECODE}
 
@@ -28767,6 +28923,10 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'org [a($801)],$801','; BASIC start address');
   asm65;
   asm65(#9'basic_start(START)');
+
+  asm65;
+  asm65(#9'org $900');
+  asm65;
 
   asm65('CODEORIGIN');
  end else begin
@@ -34498,8 +34658,7 @@ WHILETOK:
 	        IdentTemp := GetIdent('@FORTMP_'+IntToHex(CodeSize, 4));
 	        GenerateAssignment(ASPOINTER, DataSize[Ident[IdentTemp].DataType], IdentTemp);
 
-
-//		asm65('; --- To');
+		asm65;		// ; --- To
 
 	        GenerateRepeatUntilProlog;	// Save return address used by GenerateForToDoEpilog
 
