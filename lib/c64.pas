@@ -3,6 +3,32 @@ unit c64;
 interface
 
 const
+
+  colorRAM              = $d800;
+
+// colors
+  BLACK                 = $0;
+  WHITE                 = $1;
+  RED                   = $2;
+  CYAN                  = $3;
+  PURPLE                = $4;
+  GREEN                 = $5;
+  BLUE                  = $6;
+  YELLOW                = $7;
+  ORANGE                = $8;
+  BROWN                 = $9;
+  LIGHT_RED             = $A;
+  DARK_GREY             = $B;
+  GREY                  = $C;
+  LIGHT_GREEN           = $D;
+  LIGHT_BLUE            = $E;
+  LIGHT_GREY            = $F;
+
+
+var
+
+(*
+
 // Standard Kernal ROM routines
   CHKIN      = $ffc6; // CHKIN. Define file as default input. (Must call OPEN beforehand.)
   CHKOUT     = $ffc9; // CHKOUT. Define file as default output. (Must call OPEN beforehand.)
@@ -56,75 +82,58 @@ const
 
 // keyboard
   CURRKEY    = $cb;   // currently pressed keycode is stored to $00cb; $40  = no key pressed
+*)
 
 // VIC-II registers
-  Sprite0X              =  $d000;  //  X coordinate sprite 0
-  Sprite0Y              =  $d001;  //  Y coordinate sprite 0
-  Sprite1X              =  $d002;  //  X coordinate sprite 1
-  Sprite1Y              =  $d003;  //  Y coordinate sprite 1
-  Sprite2X              =  $d004;  //  X coordinate sprite 2
-  Sprite2Y              =  $d005;  //  Y coordinate sprite 2
-  Sprite3X              =  $d006;  //  X coordinate sprite 3
-  Sprite3Y              =  $d007;  //  Y coordinate sprite 3
-  Sprite4X              =  $d008;  //  X coordinate sprite 4
-  Sprite4Y              =  $d009;  //  Y coordinate sprite 4
-  Sprite5X              =  $d00a;  //  X coordinate sprite 5
-  Sprite5Y              =  $d00b;  //  Y coordinate sprite 5
-  Sprite6X              =  $d00c;  //  X coordinate sprite 6
-  Sprite6Y              =  $d00d;  //  Y coordinate sprite 6
-  Sprite7X              =  $d00e;  //  X coordinate sprite 7
-  Sprite7Y              =  $d00f;  //  Y coordinate sprite 7
-  SpritesXmsb           =  $d010;  //  MSBs of X coordinates
-  ControlRegister1      =  $d011;  //  Control register 1
-  RasterCounter         =  $d012;  //  Raster counter
-  LightpenX             =  $d013;  //  Light pen X
-  LightpenY             =  $d014;  //  Light pen Y
-  EnableSprites         =  $d015;  //  Sprite enabled
-  ControlRegister2      =  $d016;  //  Control register 2
-  SpriteYExpansion      =  $d017;  //  Sprite Y expansion
-  Memorypointers        =  $d018;  //  Memory pointers
-  Interruptregister     =  $d019;  //  Interrupt register
-  Interruptenabled      =  $d01a;  //  Interrupt enabled
-  Spritedatapriority    =  $d01b;  //  Sprite data priority
-  Spritemulticolor      =  $d01c;  //  Sprite multicolor
-  SpriteXExpansion      =  $d01d;  //  Sprite X expansion
-  SpriteSpriteCollision =  $d01e;  //  Sprite-sprite collision
-  SpritedataCollision   =  $d01f;  //  Sprite-data collision
-  Bordercolor           =  $d020;  //  Border color
-  Backgroundcolor0      =  $d021;  //  Background color 0
-  Backgroundcolor1      =  $d022;  //  Background color 1
-  Backgroundcolor2      =  $d023;  //  Background color 2
-  Backgroundcolor3      =  $d024;  //  Background color 3
-  SpriteMulticolor0     =  $d025;  //  Sprite multicolor 0
-  SpriteMulticolor1     =  $d026;  //  Sprite multicolor 1
-  Sprite0Color          =  $d027;  //  Color sprite 0
-  Sprite1Color          =  $d028;  //  Color sprite 1
-  Sprite2Color          =  $d029;  //  Color sprite 2
-  Sprite3Color          =  $d02a;  //  Color sprite 3
-  Sprite4Color          =  $d02b;  //  Color sprite 4
-  Sprite5Color          =  $d02c;  //  Color sprite 5
-  Sprite6Color          =  $d02d;  //  Color sprite 6
-  Sprite7Color          =  $d02e;  //  Color sprite 7
+  Sprite0X: byte absolute $d000;  //  X coordinate sprite 0
+  Sprite0Y: byte absolute $d001;  //  Y coordinate sprite 0
+  Sprite1X: byte absolute $d002;  //  X coordinate sprite 1
+  Sprite1Y: byte absolute $d003;  //  Y coordinate sprite 1
+  Sprite2X: byte absolute $d004;  //  X coordinate sprite 2
+  Sprite2Y: byte absolute $d005;  //  Y coordinate sprite 2
+  Sprite3X: byte absolute $d006;  //  X coordinate sprite 3
+  Sprite3Y: byte absolute $d007;  //  Y coordinate sprite 3
+  Sprite4X: byte absolute $d008;  //  X coordinate sprite 4
+  Sprite4Y: byte absolute $d009;  //  Y coordinate sprite 4
+  Sprite5X: byte absolute $d00a;  //  X coordinate sprite 5
+  Sprite5Y: byte absolute $d00b;  //  Y coordinate sprite 5
+  Sprite6X: byte absolute $d00c;  //  X coordinate sprite 6
+  Sprite6Y: byte absolute $d00d;  //  Y coordinate sprite 6
+  Sprite7X: byte absolute $d00e;  //  X coordinate sprite 7
+  Sprite7Y: byte absolute $d00f;  //  Y coordinate sprite 7
 
-// colors
-  BLACK                 = $0;
-  WHITE                 = $1;
-  RED                   = $2;
-  CYAN                  = $3;
-  PURPLE                = $4;
-  GREEN                 = $5;
-  BLUE                  = $6;
-  YELLOW                = $7;
-  ORANGE                = $8;
-  BROWN                 = $9;
-  LIGHT_RED             = $A;
-  DARK_GREY             = $B;
-  GREY                  = $C;
-  LIGHT_GREEN           = $D;
-  LIGHT_BLUE            = $E;
-  LIGHT_GREY            = $F;
+  SpritesXmsb: byte absolute $d010;		//  MSBs of X coordinates
+  ControlRegister1: byte absolute $d011;	//  Control register 1
+  RasterCounter: byte absolute $d012;		//  Raster counter
+  LightpenX: byte absolute $d013;		//  Light pen X
+  LightpenY: byte absolute $d014;		//  Light pen Y
+  EnableSprites: byte absolute $d015;		//  Sprite enabled
+  ControlRegister2: byte absolute $d016;	//  Control register 2
+  SpriteYExpansion: byte absolute $d017;	//  Sprite Y expansion
+  Memorypointers: byte absolute $d018;		//  Memory pointers
+  Interruptregister: byte absolute $d019;	//  Interrupt register
+  Interruptenabled: byte absolute $d01a;	//  Interrupt enabled
+  Spritedatapriority: byte absolute $d01b;	//  Sprite data priority
+  Spritemulticolor: byte absolute $d01c;	//  Sprite multicolor
+  SpriteXExpansion: byte absolute $d01d;	//  Sprite X expansion
+  SpriteSpriteCollision: byte absolute $d01e;	//  Sprite-sprite collision
+  SpritedataCollision: byte absolute $d01f;	//  Sprite-data collision
+  Bordercolor: byte absolute $d020;		//  Border color
+  Backgroundcolor0: byte absolute $d021;	//  Background color 0
+  Backgroundcolor1: byte absolute $d022;	//  Background color 1
+  Backgroundcolor2: byte absolute $d023;	//  Background color 2
+  Backgroundcolor3: byte absolute $d024;	//  Background color 3
+  SpriteMulticolor0: byte absolute $d025;	//  Sprite multicolor 0
+  SpriteMulticolor1: byte absolute $d026;	//  Sprite multicolor 1
+  Sprite0Color: byte absolute $d027;		//  Color sprite 0
+  Sprite1Color: byte absolute $d028;		//  Color sprite 1
+  Sprite2Color: byte absolute $d029;		//  Color sprite 2
+  Sprite3Color: byte absolute $d02a;		//  Color sprite 3
+  Sprite4Color: byte absolute $d02b;		//  Color sprite 4
+  Sprite5Color: byte absolute $d02c;		//  Color sprite 5
+  Sprite6Color: byte absolute $d02d;		//  Color sprite 6
+  Sprite7Color: byte absolute $d02e;		//  Color sprite 7
 
-  colorRAM              = $d800;
 
 implementation
 
