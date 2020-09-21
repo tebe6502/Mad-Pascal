@@ -1,21 +1,20 @@
 // Eratosthenes Sieve benchmark
 // 1899
-//  1 iter 66 ticks
-//  1 iter 58 ticks	FAST
-// 10 iter 661 ticks
-// 10 iter 580 ticks	FAST
+//  1 iter 65 ticks
+//  1 iter 57 ticks	FAST
+// 10 iter 658 ticks
+// 10 iter 577 ticks	FAST
 
 uses crt, sysutils;
 
 {$define FAST}
 
 const
- size = 8190;
- sizepl = 8192;
+ size = 8192;
  iter_max = 10;
 
 var
-  flags: array [0..sizepl] of boolean;
+  flags: array [0..size] of boolean;
 
   iter: byte;
   ticks: word;
@@ -37,7 +36,7 @@ begin
 
 	ticks := GetTickCount;
 
-	for iter:=1 to iter_max do begin
+	for iter:=iter_max-1 downto 0 do begin
 
 		fillchar(flags, sizeof(flags), true);
 
