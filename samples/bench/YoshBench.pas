@@ -1,13 +1,13 @@
-// 23730
+// 25515
 // 139372
-// 79039
+// 112864
 
 program YoshBench;
 
 uses crt, sysutils;
 
 var i: cardinal;
-var rt1: PByte;
+var rt1: PByte absolute $e0;
 
 begin
 	pause;
@@ -22,7 +22,7 @@ begin
 	pause;
 	poke(20, 0);
 	while peek(20) <= 100 do Inc(i);
-	WriteLn('Peek: ', i);  
+	WriteLn('Peek: ', i);
 
 	i := 0;
 	pause;

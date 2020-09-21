@@ -1,6 +1,4 @@
-// 499
-
-//{$f $70}
+// 498
 
 program MonteCarloPi;
 
