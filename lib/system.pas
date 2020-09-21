@@ -2066,7 +2066,6 @@ procedure Pause; assembler; overload;
 @description:
 Delay program execution (1/50 second).
 *)
-
 {$ifdef c64}
 asm
 {
@@ -2092,6 +2091,25 @@ Delay program execution (N * 1/50 second).
 
 @param: N - number of '1/50 second'
 *)
+{$ifdef c64}
+asm
+{
+loop	lda n
+	ora n+1
+	beq stop
+
+w1	bit vic_cr1
+	bpl w1
+
+w2	bit vic_cr1
+	bmi w2
+
+	dew n
+
+	jmp loop
+stop
+};
+{$else}
 asm
 {
 loop	lda n
@@ -2105,6 +2123,7 @@ loop	lda n
 	jmp loop
 stop
 };
+{$endif}
 end;
 
 
