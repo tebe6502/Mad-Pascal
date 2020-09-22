@@ -1,19 +1,20 @@
-// 186
+// 181
+// 175	FAST
 
 program MonteCarloPi;
 
 uses crt;
 
-//{$define FAST}
+{$define FAST}
 
 var
 	rtClock1	: byte absolute 19;
 	rtClock2	: byte absolute 20;
 	rndNumber	: byte absolute $D20A;
+	stop		: word;
 
 {$ifdef FAST}
-	stop			: word absolute $e0;
-	i			: word absolute $e0;
+ 	i			: word absolute $e0;
 	r			: word absolute $e2;
 	x			: word absolute $e4;
 	y			: word absolute $e6;
@@ -22,7 +23,7 @@ var
 	foundPi			: word absolute $ec;
 	n			: byte absolute $ee;
 {$else}
-	stop, i, r, x, y,
+	i, r, x, y,
 	bingo, probe, foundPi	: word;
 	n			: byte;
 {$endif}
@@ -32,15 +33,13 @@ begin
 	r := 127 * 127;
 	probe := 10000;
 
-	Pause;
+	Pause(1);
 	rtClock1 := 0; rtClock2 := 0;
 
 	for i := 0 to probe do begin
-		n := rndNumber;
-		if (n > 127) then n:= n xor %10000000;
+		n := rndNumber and 127;
 		x := n * n;
-		n := rndNumber;
-		if (n > 127) then n:= n xor %10000000;
+		n := rndNumber and 127;
 		y := n * n;
 		if (x + y) <= r then Inc(bingo);
 	end;
@@ -51,6 +50,7 @@ begin
 	{$ifdef FAST}
 	WriteLn('Variables on zero page');
 	{$endif}
+
 	WriteLn('Probe size ', probe);
 	WriteLn('Points in circle ', bingo);
 	WriteLn('Found pi approximation ', foundPi / probe);
