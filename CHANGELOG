@@ -1,3 +1,7 @@
+22.09.2020
+- krótsze nazwy prze³acznikow -zpage (-z), -stack (-s), -data (-d), -code (-c), -define (-def), -ipath (-i), -diag
+- naprawione dzia³anie tablic dwuwymiarowych typu const
+
 12.09.2020
 - dodany prze³acznik -target (-t), mozliwoœæ wygenerowania kodu dla C64
 
