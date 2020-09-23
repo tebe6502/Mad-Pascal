@@ -6832,20 +6832,18 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if mva(i) and (iy(i) = false) and (pos(' :STACKORIGIN,x', listing[i]) > 0) and		// mva I :STACKORIGIN,x			; 0
+    if mva(i) and (iy(i) = false) and								// mva I :STACKORIGIN,x			; 0
        (listing[i+1] = #9'jsr @printBYTE') then							// jsr @printBYTE			; 1
+     if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
       begin
 
         listing[i]   := #9'lda ' + GetString(i);
 	listing[i+1] := #9'jsr @printBYTE._a';
 
-	if dex(i+2) then begin
-	 listing[i+2] := '';
-
+	if dex(i+2) then
 	 for p:=i-1 downto 0 do
-	  if inx(p) then begin listing[p] := ''; Break end;
-
-	end;
+	  if pos('jsr ', listing[p]) > 0 then Break else
+	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
 	Result:=false; Break;
       end;
@@ -6862,13 +6860,10 @@ var i, l, k, m, x: integer;
         listing[i+1] := #9'ldy ' + GetString(i+1);
 	listing[i+2] := #9'jsr @printWORD._ay';
 
-	if dex(i+3) then begin
-	 listing[i+3] := '';
-
+	if dex(i+3) then
 	 for p:=i-1 downto 0 do
-	  if inx(p) then begin listing[p] := ''; Break end;
-
-	end;
+	  if pos('jsr ', listing[p]) > 0 then Break else
+	   if inx(p) then begin listing[i+3] := ''; listing[p] := ''; Break end;
 
 	Result:=false; Break;
       end;
@@ -6878,7 +6873,7 @@ var i, l, k, m, x: integer;
        mva(i+1) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) and										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
-       (listing[i+4] = #9'jsr @printCARD') then							// jsr @printWORD			; 4
+       (listing[i+4] = #9'jsr @printCARD') then							// jsr @printCARD			; 4
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) and
         (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0 ) and
         (pos(' :STACKORIGIN+STACKWIDTH*2,x', listing[i+2]) > 0 ) and
@@ -6891,13 +6886,10 @@ var i, l, k, m, x: integer;
         listing[i+3] := #9'mva ' + GetString(i+3) + ' :dx+3';
 	listing[i+4] := #9'@printVALUE';
 
-	if dex(i+5) then begin
-	 listing[i+5] := '';
-
+	if dex(i+5) then
 	 for p:=i-1 downto 0 do
-	  if inx(p) then begin listing[p] := ''; Break end;
-
-	end;
+	  if pos('jsr ', listing[p]) > 0 then Break else
+	   if inx(p) then begin listing[i+5] := ''; listing[p] := ''; Break end;
 
 	Result:=false; Break;
       end;
@@ -38669,7 +38661,7 @@ begin
      AddPath(s);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
+   if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then begin
 
      AddDefine(AnsiUpperCase(ParamStr(i+1)));
      inc(i);
@@ -38696,7 +38688,7 @@ begin
      if err<>0 then Syntax(3);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-DATA') then begin
+   if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
 
      val('$'+ParamStr(i+1), DATA_Atari, err);
      inc(i);
