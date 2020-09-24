@@ -2393,6 +2393,31 @@ begin
     end;
 
 
+    if (TemporaryBuf[8] = #9'.ifdef fmulinit') and	 					// .ifdef fmulinit	; 8
+       (TemporaryBuf[9] = #9'fmulu_16') and							// fmulu_16		; 9
+      												// els			; 10
+       (TemporaryBuf[11] = #9'imulCX') and							// imulCX		; 11
+												// eif			; 12
+
+       (pos('mva ', TemporaryBuf[0]) > 0) and (pos('mva :STACK', TemporaryBuf[0]) = 0) and	// mva .. X		; 0
+       (TemporaryBuf[1] = #9'mva #$00 ' + copy(TemporaryBuf[5], 6, 256)) and 			// mva #$00 X+1		; 1
+       (pos('lda ', TemporaryBuf[2]) > 0) and							// lda X		; 2
+       (TemporaryBuf[3] = #9'sta :ecx') and							// sta :ecx		; 3
+       (TemporaryBuf[4] = #9'sta :eax') and							// sta :eax		; 4
+       (pos('lda ', TemporaryBuf[5]) > 0) and							// lda X		; 5
+       (TemporaryBuf[6] = #9'sta :ecx+1') and							// sta :ecx+1		; 6
+       (TemporaryBuf[7] = #9'sta :eax+1') then							// sta :eax+1		; 7
+      begin
+	TemporaryBuf[i+5] := '~';
+	TemporaryBuf[i+6] := '~';
+	TemporaryBuf[i+7] := '~';
+
+	TemporaryBuf[i+9] := #9'fmulu_8';
+
+	TemporaryBuf[i+11]:= #9'imulCL';
+       end;
+
+
    if (pos('sta ', TemporaryBuf[0]) > 0) and						// sta PRIME		; 0
       (TemporaryBuf[1] = #9'scc') and							// scc			; 1
       (pos('inc ', TemporaryBuf[2]) > 0) and						// inc PRIME+1		; 2
@@ -18447,7 +18472,7 @@ var i, l, k, m, x: integer;
 
 
     if lda(i) and sta(i+2) and								// lda W			; 0
-       lda(i+3) and									// sub 				; 1
+       lda(i+3) and (lda_stack(i+3) = false) and					// sub 				; 1
        sta(i+5) and									// sta W 			; 2
        sub(i+1) and (sub_im(i+1) = false) and						// lda W+1			; 3
        sbc_im_0(i+4) and								// sbc #$00			; 4
