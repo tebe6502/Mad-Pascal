@@ -790,4 +790,3 @@ Hypot returns the hypotenuse of the triangle where the sides adjacent to the squ
 
 
 end.
-
