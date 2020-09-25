@@ -5280,7 +5280,7 @@ var i, l, k, m, x: integer;
     if inx(i) and (iy(i+1) = false) and								// inx					; 0
        mva(i+1) and 										// mva  :STACKORIGIN,x			; 1
        inx(i+2) and 										// inx					; 2
-       mwy_bp2(i+3) and										// mwa ... :bp2				; 3
+       mwy_bp2(i+3) and										// mwy ... :bp2				; 3
        ldy_im(i+4) and										// ldy #				; 4
        (pos('mva (:bp2),y', listing[i+5]) > 0) and 						// mva (:bp2),y :STACKORIGIN,x		; 5
        add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
@@ -6076,6 +6076,30 @@ var i, l, k, m, x: integer;
        listing[i+8] := #9'lda :STACKORIGIN,x';
        listing[i+9] := #9'adc ' + GetString(tmp);
        listing[i+10]:= #9'sta :bp2+1';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy(i) and										// ldy					; 0
+       (listing[i+1] = #9'mva (:bp2),y :STACKORIGIN,x') and					// mva (:bp2),y :STACKORIGIN,x		; 1
+       iny(i+2) and 										// iny					; 2
+       (listing[i+3] = #9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x') and				// mva (:bp2),y :STACKORIGIN+STACKWIDTH ; 3
+       lda(i+4) and										// lda A				; 4
+       (listing[i+5] = #9'add :STACKORIGIN,x') and						// add :STACKORIGIN,x			; 5
+       sta(i+6) and										// sta 					; 6
+       lda(i+7) and										// lda A+1				; 7
+       (listing[i+8] = #9'adc :STACKORIGIN+STACKWIDTH,x') and					// adc :STACKORIGIN+STACKWIDTH,x	; 8
+       sta(i+9) then										// sta					; 9
+     begin
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := listing[i+4];
+       listing[i+4] := #9'add (:bp2),y';
+       listing[i+5] := listing[i+6];
+       listing[i+6] := #9'iny';
+
+       listing[i+8] := #9'adc (:bp2),y';
 
        Result:=false; Break;
      end;
@@ -31223,7 +31247,7 @@ begin
 
 	end else
 
-	if (NumAllocElements * DataSize[AllocElementType] > 256) or (NumAllocElements in [0,1]) then begin
+	if (Ident[IdentIndex].PassMethod = VARPASSING) or (NumAllocElements * DataSize[AllocElementType] > 256) or (NumAllocElements in [0,1]) then begin
 
 	 asm65(#9'lda '+svar);
 	 asm65(#9'add :STACKORIGIN,x');
@@ -31247,7 +31271,7 @@ begin
 
 	     end else
 	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
-	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType > 0)) or
+	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType > 0) and (Ident[IdentIndex].NumAllocElements > 0)) or
 		 (Ident[IdentIndex].PassMethod = VARPASSING) or
 		 (VarPass and (Ident[IdentIndex].DataType in Pointers))  then begin
 
@@ -31265,8 +31289,18 @@ begin
 		 end else
 		   Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 
-	      end else
-		 Push(Ident[IdentIndex].Value, ASVALUE, DataSize[POINTERTOK], IdentIndex);
+	      end else begin
+
+		 if (Ident[IdentIndex].DataType in Pointers) and (Tok[i + 2].Kind = DEREFERENCETOK) then begin
+		   AllocElementType :=  Ident[IdentIndex].AllocElementType;
+
+		   inc(i);
+
+		   Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
+		 end else
+ 		  Push(Ident[IdentIndex].Value, ASVALUE, DataSize[POINTERTOK], IdentIndex);
+
+	 end;
 
 	  ValType :=  POINTERTOK;
 
