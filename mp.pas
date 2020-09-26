@@ -336,7 +336,7 @@ const
   MAXVARS		= 256;		// maksymalna liczba parametrów dla VAR
   MAXUNITS		= 128;
   MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
-  MAXALLOWEDUNITS	= 16;
+  MAXALLOWEDUNITS	= 64;
 
   CODEORIGIN		= $100;
   DATAORIGIN		= $8000;
