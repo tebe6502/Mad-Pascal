@@ -6724,6 +6724,39 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if ADD_SUB_EAX_ECX(i) and									// jsr addEAX_ECX|subEAX_ECX		; 0
+       dex(i+1) and										// dex					; 1
+       mva_stack(i+2) and									// mva :STACKORIGIN,x B			; 2
+       mva_stack(i+3) and									// mva :STACKORIGIN+STACKWIDTH,x B+1	; 3
+       mva_stack(i+4) and									// mva :STACKORIGIN+STACKWIDTH*2,x B+2	; 4
+       mva_stack(i+5) and									// mva :STACKORIGIN+STACKWIDTH*3,x B+3	; 5
+       dex(i+6) then										// dex					; 6
+     if (pos(':STACKORIGIN,x', listing[i+2]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+3]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+4]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+5]) > 0) then
+     begin
+
+	if (listing[i] = #9'jsr addEAX_ECX') then begin
+	 listing[i] := #9'm@add ":STACKORIGIN-1,x" ":STACKORIGIN,x" "'+copy(listing[i+2],21,256)+'"';
+	 listing[i+1] := #9'm@adc ":STACKORIGIN-1+STACKWIDTH,x" ":STACKORIGIN+STACKWIDTH,x" "'+copy(listing[i+3],32,256)+'"';
+	 listing[i+2] := #9'm@adc ":STACKORIGIN-1+STACKWIDTH*2,x" ":STACKORIGIN+STACKWIDTH*2,x" "'+copy(listing[i+4],34,256)+'"';
+	 listing[i+3] := #9'm@adc ":STACKORIGIN-1+STACKWIDTH*3,x" ":STACKORIGIN+STACKWIDTH*3,x" "'+copy(listing[i+5],34,256)+'"';
+	end else begin
+	 listing[i] := #9'm@sub ":STACKORIGIN-1,x" ":STACKORIGIN,x" "'+copy(listing[i+2],21,256)+'"';
+	 listing[i+1] := #9'm@sbc ":STACKORIGIN-1+STACKWIDTH,x" ":STACKORIGIN+STACKWIDTH,x" "'+copy(listing[i+3],32,256)+'"';
+	 listing[i+2] := #9'm@sbc ":STACKORIGIN-1+STACKWIDTH*2,x" ":STACKORIGIN+STACKWIDTH*2,x" "'+copy(listing[i+4],34,256)+'"';
+	 listing[i+3] := #9'm@sbc ":STACKORIGIN-1+STACKWIDTH*3,x" ":STACKORIGIN+STACKWIDTH*3,x" "'+copy(listing[i+5],34,256)+'"';
+	end;
+
+       listing[i+4] := #9'dex';
+       listing[i+5] := #9'dex';
+       listing[i+6] := '';
+
+       Result:=false; Break;
+     end;
+
+
     if mva(i) and (mva_stack(i) = false) and (pos(' :STACK', listing[i]) > 0) and		// mva YY+3 :STACKORIGIN+STACKWIDTH*3,x	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 1
        and_ora_eor(i+2) and									// and|ora|eor				; 2
@@ -31030,6 +31063,9 @@ var ConstVal: Int64;
     j: integer;
     yes: Boolean;
 begin
+
+	if optimize.use = false then StartOptimization(i);
+
 	InfoAboutArray(IdentIndex);
 
 	NumAllocElements := Ident[IdentIndex].NumAllocElements;
@@ -35893,7 +35929,7 @@ var
   NumFieldsInList, FieldInListIndex, RecType, k: integer;
   NestedDataType, ExpressionType, NestedAllocElementType: Byte;
   FieldInListName: array [1..MAXFIELDS] of TField;
-  ExitLoop: Boolean;
+  ExitLoop, pack: Boolean;
 
   Name: TString;
 
@@ -36272,15 +36308,12 @@ end else
   Result := i;
 end else// if OBJECTTOK
 
-  if Tok[i].Kind in [PACKEDTOK, RECORDTOK] then				// Record
+  if (Tok[i].Kind = RECORDTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i+1].Kind = RECORDTOK)) then		// Record
   begin
 
   Name := Tok[i-2].Name^;
 
-  if Tok[i].Kind = PACKEDTOK then begin
-   CheckTok(i + 1, RECORDTOK);
-   inc(i);
-  end;
+  if Tok[i].Kind = PACKEDTOK then inc(i);
 
   inc(NumTypes);
   RecType := NumTypes;
@@ -36401,9 +36434,11 @@ else if Tok[i].Kind = STRINGTOK then					// String
    iError(i, SubrangeBounds);
 
   end	// if STRINGTOK
-else if Tok[i].Kind = ARRAYTOK then					// Array
+else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].Kind = ARRAYTOK))  then		// Array
   begin
   DataType := POINTERTOK;
+
+  if Tok[i].Kind = PACKEDTOK then inc(i);
 
   CheckTok(i + 1, OBRACKETTOK);
 
@@ -36998,11 +37033,11 @@ begin
 	      begin
 //	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
 
-	      Param[NumParams].DataType	 := VarType;
-	      Param[NumParams].Name	     := VarOfSameType[VarOfSameTypeIndex].Name;
+	      Param[NumParams].DataType		:= VarType;
+	      Param[NumParams].Name		:= VarOfSameType[VarOfSameTypeIndex].Name;
 	      Param[NumParams].NumAllocElements := NumAllocElements;
-	      Param[NumParams].AllocElementType := AllocElementType;
-	      Param[NumParams].PassMethod       := ListPassMethod;
+	      Param[NumParams].AllocElementType	:= AllocElementType;
+	      Param[NumParams].PassMethod	:= ListPassMethod;
 
 	      end;
 	    end;
@@ -37099,7 +37134,7 @@ var
   NumAllocTypes: word;
   ConstVal: Int64;
   IsNestedFunction, isAsm, isReg, isInt, isAbsolute, isForward, ImplementationUse: Boolean;
-  iocheck_old, yes: Boolean;
+  iocheck_old, yes, pack: Boolean;
   VarType, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
   NestedFunctionAllocElementType, IdType, Tmp: Byte;
   TmpResult: byte;
@@ -37116,6 +37151,7 @@ j:=0;
 ConstVal:=0;
 
 ImplementationUse:=false;
+pack:=false;
 
 Param := Ident[BlockIdentIndex].Param;
 isAsm := Ident[BlockIdentIndex].isAsm;
@@ -37804,6 +37840,18 @@ while Tok[i].Kind in
       until Tok[i].Kind <> COMMATOK;
 
       CheckTok(i, COLONTOK);
+
+      pack:=false;
+
+      if Tok[i + 1].Kind = PACKEDTOK then begin
+
+       if (Tok[i + 2].Kind in [ARRAYTOK, RECORDTOK]) then begin
+        inc(i);
+        pack := true;
+       end else
+        CheckTok(i + 2, RECORDTOK);
+
+      end;
 
       IdType := Tok[i + 1].Kind;
 
