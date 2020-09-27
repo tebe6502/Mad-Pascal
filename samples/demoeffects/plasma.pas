@@ -57,13 +57,13 @@ procedure makechar;
 var i, ii, b, s, c: byte;
 begin
 
-    for c := 0 to 127 do begin
+    for c := 127 downto 0 do begin
 
 	s := sinustable[c];
 
-        for i := 0 to 7 do begin
+        for i := 7 downto 0 do begin
             b := 0;
-            for ii := 0 to 7 do
+            for ii := 7 downto 0 do
                 if peek($d20a) > s then b := b or bittab[ii];
 
 	    CHARSET[(c shl 3) + i] := b;
@@ -83,7 +83,7 @@ begin
     _c1a := c1A;
     _c1b := c1B;
 
-    for ii := 0 to 23 do begin
+    for ii := 23 downto 0 do begin
         ybuf[ii] := sinustable[_c1a] + sinustable[_c1b];
         inc(_c1a, 4);
         inc(_c1b, 9);
@@ -94,7 +94,7 @@ begin
     _c2a := c2A;
     _c2b := c2B;
 
-    for i := 0 to 39 do begin
+    for i := 39 downto 0 do begin
         xbuf[i] := sinustable[_c2a] + sinustable[_c2b];
         inc(_c2a, 3);
         inc(_c2b, 7);
@@ -102,12 +102,12 @@ begin
     inc(c2A, 2);
     dec(c2B, 3);
 
-    for ii := 0 to 23 do begin
+    for ii := 23 downto 0 do begin
 
 	tmp := ybuf[ii];
 
-	for i := 0 to 39 do scrn[i] := byte(xbuf[i] + tmp);
-	
+	for i := 39 downto 0 do scrn[i] := byte(xbuf[i] + tmp);
+
 	inc(scrn, 40);
     end;
 
