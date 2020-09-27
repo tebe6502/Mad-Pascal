@@ -59,7 +59,7 @@ begin
   l_block[i] := lo(word(p));
   h_block[i] := hi(word(p));
 
-  m.ReadBuffer(p, 40);
+  m.ReadBuffer(p^, 40);
  end;
 
  dlist^.cmd := $70 ;
@@ -108,7 +108,7 @@ begin
 
   end;
 
-  m.ReadBuffer(p, 40);
+  m.ReadBuffer(p^, 40);
 
   dlist := pointer(dls + 3);
 
