@@ -2,8 +2,10 @@
 
 uses crt, fastgraph;
 
-var	buf1: array [0..0] of byte absolute $5000;
-	buf2: array [0..0] of byte absolute $7000;
+{$define romoff}
+
+var	buf1: array [0..0] of byte absolute $c000;
+	buf2: array [0..0] of byte absolute $e000;
 
 	dl: word;
 

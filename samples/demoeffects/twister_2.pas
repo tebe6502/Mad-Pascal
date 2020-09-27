@@ -1,6 +1,6 @@
 // Twister
 
-uses crt, fastgraph;
+uses crt, fastgraph, fastmath;
 
 
 var sine: array [0..255] of byte absolute $0600;
@@ -10,52 +10,6 @@ var sine: array [0..255] of byte absolute $0600;
 const
     height = 96 div 2;
     cx = 48;
-
-
-procedure FillSin; assembler;
-asm
-{
-	txa:pha
-
-	ldy #$3f
-	ldx #$00
-
-; Accumulate the delta (normal 16-bit addition)
-loop
-	lda #0
-lvalue	equ *-1
-	clc
-	adc #0
-ldelta	equ *-1
-	sta lvalue
-	lda #0
-hvalue	equ *-1
-	adc #0
-hdelta	equ *-1
-	sta hvalue
-
-; Reflect the value around for a sine wave
-	sta adr.sine+$c0,x
-	sta adr.sine+$80,y
-	eor #$7f
-	sta adr.sine+$40,x
-	sta adr.sine+$00,y
-
-; Increase the delta, which creates the "acceleration" for a parabola
-	lda ldelta
-	adc #8   ; this value adds up to the proper amplitude
-	sta ldelta
-	scc
-	inc hdelta
-
-; Loop
-	inx
-	dey
-	bpl loop
-
-	pla:tax
-};
-end;
 
 
 procedure Twister(adY: byte);
@@ -120,7 +74,7 @@ begin
  Poke(709, $76);
  Poke(710, $f6);
 
- FillSin;		// initialize SINUS table
+ FillSinLow(sine);		// initialize SINUS table
 
  mv:=0;
  mv2:=65;
@@ -134,7 +88,7 @@ begin
 
    inc(mv, 2);
    dec(mv2, 3);
-   
+
    Twister(1);
 
    inc(mv, 3);

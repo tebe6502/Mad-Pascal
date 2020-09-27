@@ -76,7 +76,7 @@ begin
  p2:=@temp2[ad+sw];
  s :=@temp2[ad+sw*2];
 
- for i := 0 to 3 do begin
+ for i := 3 downto 0 do begin
 
    a:=Random(0);
 
@@ -118,81 +118,81 @@ begin
     p:=@temp[ad];
     p2:=@temp2[ad2];
 
-    p[0] := p2[0]; 
-    p[1] := p2[1]; 
-    p[2] := p2[2]; 
-    p[3] := p2[3]; 
-    p[4] := p2[4]; 
-    p[5] := p2[5]; 
-    p[6] := p2[6]; 
-    p[7] := p2[7]; 
+    p[0] := p2[0];
+    p[1] := p2[1];
+    p[2] := p2[2];
+    p[3] := p2[3];
+    p[4] := p2[4];
+    p[5] := p2[5];
+    p[6] := p2[6];
+    p[7] := p2[7];
 
-    p[sw] := p2[sw]; 
-    p[sw+1] := p2[sw+1]; 
-    p[sw+2] := p2[sw+2]; 
-    p[sw+3] := p2[sw+3]; 
-    p[sw+4] := p2[sw+4]; 
-    p[sw+5] := p2[sw+5]; 
-    p[sw+6] := p2[sw+6]; 
-    p[sw+7] := p2[sw+7];     
+    p[sw] := p2[sw];
+    p[sw+1] := p2[sw+1];
+    p[sw+2] := p2[sw+2];
+    p[sw+3] := p2[sw+3];
+    p[sw+4] := p2[sw+4];
+    p[sw+5] := p2[sw+5];
+    p[sw+6] := p2[sw+6];
+    p[sw+7] := p2[sw+7];
     inc(p, sw*2); inc(p2, sw*2);
-        
-    p[sw] := p2[sw]; 
-    p[sw+1] := p2[sw+1]; 
-    p[sw+2] := p2[sw+2]; 
-    p[sw+3] := p2[sw+3]; 
-    p[sw+4] := p2[sw+4]; 
-    p[sw+5] := p2[sw+5]; 
-    p[sw+6] := p2[sw+6]; 
-    p[sw+7] := p2[sw+7]; 
 
-    p[0] := p2[0]; 
-    p[1] := p2[1]; 
-    p[2] := p2[2]; 
-    p[3] := p2[3]; 
-    p[4] := p2[4]; 
-    p[5] := p2[5]; 
-    p[6] := p2[6]; 
-    p[7] := p2[7]; 
+    p[sw] := p2[sw];
+    p[sw+1] := p2[sw+1];
+    p[sw+2] := p2[sw+2];
+    p[sw+3] := p2[sw+3];
+    p[sw+4] := p2[sw+4];
+    p[sw+5] := p2[sw+5];
+    p[sw+6] := p2[sw+6];
+    p[sw+7] := p2[sw+7];
+
+    p[0] := p2[0];
+    p[1] := p2[1];
+    p[2] := p2[2];
+    p[3] := p2[3];
+    p[4] := p2[4];
+    p[5] := p2[5];
+    p[6] := p2[6];
+    p[7] := p2[7];
     inc(p, sw*2); inc(p2, sw*2);
 
     p[0] := p2[0];
-    p[1] := p2[1]; 
-    p[2] := p2[2]; 
-    p[3] := p2[3]; 
-    p[4] := p2[4]; 
-    p[5] := p2[5]; 
-    p[6] := p2[6]; 
-    p[7] := p2[7]; 
+    p[1] := p2[1];
+    p[2] := p2[2];
+    p[3] := p2[3];
+    p[4] := p2[4];
+    p[5] := p2[5];
+    p[6] := p2[6];
+    p[7] := p2[7];
 
-    p[sw] := p2[sw]; 
-    p[sw+1] := p2[sw+1]; 
-    p[sw+2] := p2[sw+2]; 
-    p[sw+3] := p2[sw+3]; 
-    p[sw+4] := p2[sw+4]; 
-    p[sw+5] := p2[sw+5]; 
-    p[sw+6] := p2[sw+6]; 
-    p[sw+7] := p2[sw+7];     
+    p[sw] := p2[sw];
+    p[sw+1] := p2[sw+1];
+    p[sw+2] := p2[sw+2];
+    p[sw+3] := p2[sw+3];
+    p[sw+4] := p2[sw+4];
+    p[sw+5] := p2[sw+5];
+    p[sw+6] := p2[sw+6];
+    p[sw+7] := p2[sw+7];
     inc(p, sw*2); inc(p2, sw*2);
 
-    p[sw] := p2[sw]; 
-    p[sw+1] := p2[sw+1]; 
-    p[sw+2] := p2[sw+2]; 
-    p[sw+3] := p2[sw+3]; 
-    p[sw+4] := p2[sw+4]; 
-    p[sw+5] := p2[sw+5]; 
-    p[sw+6] := p2[sw+6]; 
-    p[sw+7] := p2[sw+7];     
+    p[sw] := p2[sw];
+    p[sw+1] := p2[sw+1];
+    p[sw+2] := p2[sw+2];
+    p[sw+3] := p2[sw+3];
+    p[sw+4] := p2[sw+4];
+    p[sw+5] := p2[sw+5];
+    p[sw+6] := p2[sw+6];
+    p[sw+7] := p2[sw+7];
 
     p[0] := p2[0];
-    p[1] := p2[1]; 
-    p[2] := p2[2]; 
-    p[3] := p2[3]; 
-    p[4] := p2[4]; 
-    p[5] := p2[5]; 
-    p[6] := p2[6]; 
-    p[7] := p2[7]; 
-    
+    p[1] := p2[1];
+    p[2] := p2[2];
+    p[3] := p2[3];
+    p[4] := p2[4];
+    p[5] := p2[5];
+    p[6] := p2[6];
+    p[7] := p2[7];
+
 
    inc(tx, bSize);
 
@@ -207,7 +207,7 @@ begin
 
   scr:=pointer(dpeek(88));
 
-  for y:=0 to sh-1 do begin
+  for y:=sh-1 downto 0 do begin
 
    if y>=16 then
     ad2:=byte(y-16)*40
@@ -215,23 +215,23 @@ begin
     ad2:=0;
 
    s:=@scr[ad2];
-   
+
    i:=0;
 
-   for x:=0 to sw shr 2-1 do begin
+   for x:=sw shr 2-1 downto 0 do begin
 
     a:=p[i]; p2[i]:=a; inc(i);
     b:=p[i]; p2[i]:=b; inc(i);
-    c:=p[i]; p2[i]:=c; inc(i); 
-    d:=p[i]; p2[i]:=d; inc(i); 
+    c:=p[i]; p2[i]:=c; inc(i);
+    d:=p[i]; p2[i]:=d; inc(i);
 
-    s[x]:=byte(a and $c0) or byte(b and $30) or byte(c and $0c) or (d and $03);
+    s[x]:=byte(a and $03) or byte(b and $0c) or byte(c and $30) or (d and $c0);
 
    end;
-   
+
    inc(p, sw);
    inc(p2, sw);
-   
+
   end;
 
 end;
