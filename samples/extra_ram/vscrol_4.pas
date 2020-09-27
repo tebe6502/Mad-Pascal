@@ -55,7 +55,7 @@ begin
  dlist^.cmd := $70 ;
  dlist^.adr := $7070;
  inc(dlist);
-	
+
  for i:=0 to height-2 do begin
   p:=pointer(scr+i*stp);
 
@@ -63,12 +63,12 @@ begin
   dlist^.adr := word(p);
   inc(dlist);
 
-  m.ReadBuffer(p, 40);
+  m.ReadBuffer(p^, 40);
  end;
 
  dlist^.cmd := $41;
  dlist^.adr := dls;
- 
+
  sdlstl := dls;					// dpoke 560,dls
 
  add := 1;
@@ -99,7 +99,7 @@ begin
 
   end;
 
-  m.ReadBuffer(p, 40);
+  m.ReadBuffer(p^, 40);
 
   inc(lines, add);
 
