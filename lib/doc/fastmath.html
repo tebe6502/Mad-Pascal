@@ -14,9 +14,15 @@
 
 <!--********************* CONSTANTS **************************-->
 
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
+<tr><td class='tname'>atan_tab: array [0..255] of byte</td><td class='tvalue'>(</td><td class='tdesc'>atan(2^(x/32))*128/pi</td></tr>
+<tr><td class='tname'>log2_tab : array [0..255] of byte</td><td class='tvalue'>(</td><td class='tdesc'>log2(x)*32</td></tr>
+<tr><td class='tname'>octant_adjust : array [0..7] of byte</td><td class='tvalue'>(</td><td class='tdesc'></td></tr>
 
-
+</table>
 
 <!--********************* TYPES **************************-->
 
@@ -42,6 +48,10 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
+<tr><td class='tname fname'>atan2</td><td class='tdesc'><h4>function atan2(x1,x2,y1,y2: byte): byte; assembler;</h4><br>
+	Calculate the angle, in a 256-degree circle, between two points. The trick is to use logarithmic division to get the y/x ratio and integrate the power function into the atan table. Some branching is avoided by using a table to adjust for the octants. In otherwords nothing new or particularily clever but nevertheless quite useful. <br> by Johan Forsl�f (doynax) https://codebase64.org/doku.php?id=base:8bit_atan2_8-bit_angle<br><ul><h5>parameters:</h5><li>x1 - byte</li><li>x2 - byte</li><li>y1 - byte</li><li>y2 - byte</li></ul></td></tr>
+<tr><td class='tname fname'>sqrt16</td><td class='tdesc'><h4>function sqrt16(a: word): byte; assembler;</h4><br>
+	Returns the 8-bit square root of the 16-bit number. https://codebase64.org/doku.php?id=base:16bit_and_24bit_sqrt<br><ul><h5>parameters:</h5><li>A - Word</li></ul></td></tr>
 <tr><td class='tname fname'>FillSin</td><td class='tdesc'><h4>procedure FillSin(p: pointer; eor,add: byte); assembler;</h4><br>
 	https://codebase64.org/doku.php?id=base:generating_approximate_sines_in_assembly<br><ul></ul></td></tr>
 <tr><td class='tname fname'>FillSinLow</td><td class='tdesc'><h4>procedure FillSinLow(p: pointer);</h4><br>

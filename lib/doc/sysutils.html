@@ -75,7 +75,7 @@
 <tr><td class='tname fname'>FileExists</td><td class='tdesc'><h4>function FileExists(name: PString): Boolean;</h4><br>
 	Check whether a particular file exists in the filesystem<br><ul><h5>parameters:</h5><li>name: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - file exists</li><li class='returns'>FALSE - file not exists</li></ul></td></tr>
 <tr><td class='tname fname'>ByteToStr</td><td class='tdesc'><h4>function ByteToStr(a: byte): TString; assembler;</h4><br>
-	Converts input byte to a string<br><ul><h5>parameters:</h5><li>a: byte</li><h5>returns:</h5><li class='returns'>pointer to string.Y = hundreds, .X = tens, .A = ones</li></ul></td></tr>
+	Converts input byte to a string<br> https://codebase64.org/doku.php?id=base:tiny_.a_to_ascii_routine<br><ul><h5>parameters:</h5><li>a: byte</li><h5>returns:</h5><li class='returns'>pointer to string.Y = hundreds, .X = tens, .A = ones</li></ul></td></tr>
 <tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): TString; assembler; overload;</h4><br>
 	Convert an INTEGER value to a decimal string<br><ul><h5>parameters:</h5><li>a: integer</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
 <tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: cardinal): TString; assembler; overload;</h4><br>

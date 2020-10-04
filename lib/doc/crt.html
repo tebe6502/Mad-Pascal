@@ -105,7 +105,7 @@
 	Waits a specified number of milliseconds<br><ul><h5>parameters:</h5><li>count - number of milliseconds</li></ul></td></tr>
 <tr><td class='tname fname'>Keypressed</td><td class='tdesc'><h4>function Keypressed: Boolean; assembler;</h4><br>
 	Check if there is a keypress in the keybuffer<br><ul><h5>returns:</h5><li class='returns'>TRUE key has been pressed</li><li class='returns'>FALSE otherwise</li></ul></td></tr>
-<tr><td class='tname fname'>GotoXY</td><td class='tdesc'><h4>procedure GotoXY(x: byte; y: byte); assembler;</h4><br>
+<tr><td class='tname fname'>GotoXY</td><td class='tdesc'><h4>procedure GotoXY(x,y: byte); assembler;</h4><br>
 	Set cursor position on screen. <br> <br> GotoXY positions the cursor at (X,Y), X in horizontal, Y in vertical direction relative to <br> the origin of the current window. The origin is located at (1,1), the upper-left corner of the window.<br><ul><h5>parameters:</h5><li>x - horizontal positions (1..40)</li><li>y - vertical positions (1..24)</li></ul></td></tr>
 <tr><td class='tname fname'>WhereX</td><td class='tdesc'><h4>function WhereX: byte; assembler;</h4><br>
 	Return X (horizontal) cursor position<br><ul><h5>returns:</h5><li class='returns'>byte (1..40)</li></ul></td></tr>
