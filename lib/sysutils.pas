@@ -446,6 +446,8 @@ function ByteToStr(a: byte): TString; assembler;
 (*
 @description: Converts input byte to a string
 
+https://codebase64.org/doku.php?id=base:tiny_.a_to_ascii_routine
+
 @param: a: byte
 
 @returns: pointer to string
@@ -471,8 +473,22 @@ asm
 	stx adr.Result+2
 	sty adr.Result+1
 
-	lda #3
-	sta adr.Result
+	ldy #3
+lp	cpy #1
+	beq skp
+	lda adr.Result+1
+	cmp #$30
+	bne skp
+
+	lda adr.Result+2
+	sta adr.Result+1
+	lda adr.Result+3
+	sta adr.Result+2
+
+	dey
+	bne lp
+
+skp	sty adr.Result
 
 	pla:tax
 };
