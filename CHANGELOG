@@ -1,3 +1,6 @@
+12.10.2020
+- poprawione ReadDataArray, akceptuje pojedyñcze znaki jako string dla tablic jedno i dwuwymiarowych
+
 22.09.2020
 - krótsze nazwy prze³acznikow -zpage (-z), -stack (-s), -data (-d), -code (-c), -define (-def), -ipath (-i), -diag
 - naprawione dzia³anie tablic dwuwymiarowych typu const

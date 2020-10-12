@@ -122,7 +122,7 @@ uses
 
 const
 
-  title = '1.6.4';
+  title = '1.6.5';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -36894,6 +36894,24 @@ end;
 procedure SaveData;
 begin
 
+  i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
+
+  if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
+
+    if StaticData then
+      Error(i, 'Memory overlap due conversion CHAR to STRING, use VAR instead CONST');
+
+    ch := Tok[i].Value;
+    DefineStaticString(i, chr(ch));
+
+    ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_Atari;
+    Tok[i].Value := ch;
+
+    ActualParamType := STRINGPOINTERTOK;
+
+  end;
+
+
   if (ConstValType in StringTypes + [CHARTOK, STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
     iError(i, IllegalExpression);
 
@@ -36962,8 +36980,6 @@ begin
     inc(NumActualParams_);
     if NumActualParams_ > NumAllocElements_ then Break;
 
-    i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
-
     SaveData;
 
     inc(i);
@@ -36972,25 +36988,8 @@ begin
    CheckTok(i, CPARTOK);
 
    //inc(i);
-  end else begin
-   i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
-
-   if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
-
-     if StaticData then
-      Error(i, 'Memory overlap due conversion CHAR to STRING, use VAR instead CONST');
-
-     ch := Tok[i].Value;
-     DefineStaticString(i, chr(ch));
-
-     ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_Atari;
-     Tok[i].Value := ch;
-
-     ActualParamType := STRINGPOINTERTOK;
-   end;
-
+  end else
    SaveData;
-  end;
 
   inc(i);
 
