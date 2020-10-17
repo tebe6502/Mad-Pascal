@@ -1,5 +1,6 @@
 17.10.2020
 - dodany rozkaz 'ldy #$01' na zakoñczenie programu (@halt)
+- mo¿liwoœæ do³¹czenia bloku realizuj¹cego wy³¹czenie BASIC-a {$define basicoff}
 
 12.10.2020
 - poprawione ReadDataArray, akceptuje pojedyñcze znaki jako string dla tablic jedno i dwuwymiarowych

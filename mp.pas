@@ -25758,7 +25758,7 @@ var
 	dec(NumTok);
        end else
 *)
-       if cmd = 'F' then begin					// {$f address}
+       if (cmd = 'F') or (cmd = 'FASTMUL') then begin		// {$f address}
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
 	s := get_digit(i, d);
@@ -29136,6 +29136,13 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FPEXP'#9'.ds 1');
 
  if target = t_a8 then begin
+  asm65;
+  asm65(#9'.ifdef MAIN.@DEFINES.BASICOFF');
+  asm65(#9'org CODEORIGIN');
+  asm65(#9'icl ''atari\basicoff.asm''');
+  asm65(#9'ini CODEORIGIN');
+  asm65(#9'.endif');
+
   asm65;
   asm65(#9'.ifdef MAIN.@DEFINES.S_VBXE');
   asm65(#9'opt h-');
