@@ -225,28 +225,29 @@ const
   BLOCKREADTOK		= 77;
   BLOCKWRITETOK		= 78;
   CLOSEFILETOK		= 79;
+  GETRESOURCEHANDLETOK	= 80;
 
-  WRITELNTOK		= 80;
-  SIZEOFTOK		= 81;
-  LENGTHTOK		= 82;
-  HIGHTOK		= 83;
-  LOWTOK		= 84;
-  INTTOK		= 85;
-  FRACTOK		= 86;
-  TRUNCTOK		= 87;
-  ROUNDTOK		= 88;
-  ODDTOK		= 89;
+  WRITELNTOK		= 81;
+  SIZEOFTOK		= 82;
+  LENGTHTOK		= 83;
+  HIGHTOK		= 84;
+  LOWTOK		= 85;
+  INTTOK		= 86;
+  FRACTOK		= 87;
+  TRUNCTOK		= 88;
+  ROUNDTOK		= 89;
+  ODDTOK		= 90;
 
-  PROGRAMTOK		= 90;
-  INTERFACETOK		= 91;
-  IMPLEMENTATIONTOK     = 92;
-  INITIALIZATIONTOK     = 93;
-  OVERLOADTOK		= 94;
-  ASSEMBLERTOK		= 95;
-  FORWARDTOK		= 96;
-  REGISTERTOK		= 97;
-  INTERRUPTTOK		= 98;
-  PASCALTOK		= 99;
+  PROGRAMTOK		= 91;
+  INTERFACETOK		= 92;
+  IMPLEMENTATIONTOK     = 93;
+  INITIALIZATIONTOK     = 94;
+  OVERLOADTOK		= 95;
+  ASSEMBLERTOK		= 96;
+  FORWARDTOK		= 97;
+  REGISTERTOK		= 98;
+  INTERRUPTTOK		= 99;
+  PASCALTOK		= 100;
 
   SUCCTOK		= 105;
   PREDTOK		= 106;
@@ -529,6 +530,7 @@ type
 
   TResource =
     record
+     resStream: Boolean;
      resName, resType, resFile: TString;
      resFullName: string;
      resPar: array [1..MAXPARAMS] of TString;
@@ -1576,7 +1578,30 @@ begin
 
      res.resName := get_label(i, s);
      res.resType := get_label(i, s);
-     res.resFile := get_string(i, s, false);  // nie zmieniaj wielkosci liter
+     res.resFile := get_string(i, s, false);	// nie zmieniaj wielkosci liter
+
+    if (AnsiUpperCase(res.resType) = 'RCDATA') or
+       (AnsiUpperCase(res.resType) = 'RCASM') or
+       (AnsiUpperCase(res.resType) = 'DOSFILE') or
+       (AnsiUpperCase(res.resType) = 'RELOC') or
+       (AnsiUpperCase(res.resType) = 'RELOC') or
+       (AnsiUpperCase(res.resType) = 'RMT') or
+       (AnsiUpperCase(res.resType) = 'MPT') or
+       (AnsiUpperCase(res.resType) = 'CMC') or
+       (AnsiUpperCase(res.resType) = 'RMTPLAY') or
+       (AnsiUpperCase(res.resType) = 'MPTPLAY') or
+       (AnsiUpperCase(res.resType) = 'CMCPLAY') or
+       (AnsiUpperCase(res.resType) = 'EXTMEM') or
+       (AnsiUpperCase(res.resType) = 'XBMP')
+      then
+
+      else
+        Error(NumTok, 'Undefined resource type: Type = UNKNOWN, Name = '''+res.resName+'''');
+
+
+    if (res.resFile = '') or not(FileExists(res.resFile)) then
+       Error(NumTok, 'Resource file not found: Type = '+res.resType+', Name = '''+res.resName+'''');
+
 
      for j := 1 to MAXPARAMS do begin
 
@@ -1594,7 +1619,7 @@ begin
 
      for j := High(resArray)-1 downto 0 do
       if resArray[j].resName = res.resName then
-       Error(NumTok, 'Duplicate resource: Type = '+res.resType+', Name = '+res.resName);
+       Error(NumTok, 'Duplicate resource: Type = '+res.resType+', Name = '''+res.resName+'''');
 
      j:=High(resArray);
      resArray[j] := res;
@@ -26414,6 +26439,8 @@ Spelling[BLOCKREADTOK	] := 'BLOCKREAD';
 Spelling[BLOCKWRITETOK	] := 'BLOCKWRITE';
 Spelling[CLOSEFILETOK	] := 'CLOSE';
 
+Spelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
+
 Spelling[FILETOK	] := 'FILE';
 Spelling[SETTOK		] := 'SET';
 Spelling[PACKEDTOK	] := 'PACKED';
@@ -29132,15 +29159,16 @@ if Pass = CODEGENERATIONPASS then begin
 
   asm65;
 
-  for i := 0 to High(resArray) - 1 do begin
-   a:=#9+resArray[i].resType+' '''+resArray[i].resFile+''''+' ';
+  for i := 0 to High(resArray) - 1 do
+   if resArray[i].resStream = false then begin
+    a:=#9+resArray[i].resType+' '''+resArray[i].resFile+''''+' ';
 
-   a:=a+resArray[i].resFullName;
+    a:=a+resArray[i].resFullName;
 
-   for j := 1 to MAXPARAMS do a:=a+' '+resArray[i].resPar[j];
+    for j := 1 to MAXPARAMS do a:=a+' '+resArray[i].resPar[j];
 
-   asm65(a);
-  end;
+    asm65(a);
+   end;
 
   asm65('.endl');
  end;
@@ -29220,10 +29248,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'ert ''Invalid memory address range '',VADR');
  asm65(#9'eli (VLEN>0) && (VLEN<=256)');
  asm65(#9'ldx #256-VLEN');
- asm65(#9'lda #0');
+ asm65(#9'lda #$00');
  asm65(#9'sta:rne VADR+VLEN-256,x+');
  asm65(#9'eli VLEN>0');
- asm65(#9'@fill #VADR #VLEN #0');
+ asm65(#9'@fill #VADR #VLEN #$00');
  asm65(#9'eif');
  asm65;
 
@@ -35081,6 +35109,41 @@ WHILETOK:
 	end;
 
 
+  GETRESOURCEHANDLETOK:
+    if Tok[i + 1].Kind <> OPARTOK then
+      iError(i + 1, OParExpected)
+    else
+      if Tok[i + 2].Kind <> IDENTTOK then
+	iError(i + 2, IdentifierExpected)
+      else
+	begin
+	IdentIndex := GetIdent(Tok[i + 2].Name^);
+
+	if Ident[IdentIndex].DataType <> POINTERTOK then
+	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
+
+	CheckTok(i + 3, COMMATOK);
+
+        CheckTok(i + 4, STRINGLITERALTOK);
+
+	svar:='';
+
+	for k:=1 to Tok[i+4].StrLength do
+	 svar:=svar + chr(StaticStringData[Tok[i+4].StrAddress - CODEORIGIN+k]);
+
+	CheckTok(i + 5, CPARTOK);
+
+	asm65;
+	asm65('; GetResourceHandle');
+
+	asm65(#9'mwa #MAIN.@RESOURCE.'+svar+' '+Tok[i + 2].Name^);
+
+	inc(i, 5);
+
+	Result := i;
+      end;
+
+
   BLOCKREADTOK:
     if Tok[i + 1].Kind <> OPARTOK then
       iError(i + 1, OParExpected)
@@ -36692,7 +36755,7 @@ var IdentIndex, size: integer;
       size := 0;
      end else
      if Ident[IdentIndex].isAbsolute then begin
-
+// dupa
       if Ident[IdentIndex].Value < 0 then
        Result := #9'= DATAORIGIN+$'+IntToHex(abs(Ident[IdentIndex].Value), 4)
       else
@@ -38480,13 +38543,15 @@ StopOptimization;
 //asm65;
 asm65('@exit');
 asm65;
-asm65('@halt'#9'ldx #0');
+asm65('@halt'#9'ldx #$00');
 asm65(#9'txs');
 
 if target = t_a8 then begin
  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
  asm65(#9'inc portb');
  asm65(#9'.endif');
+ asm65;
+ asm65(#9'ldy #$01');
 end;
 
 asm65;
@@ -38508,6 +38573,43 @@ for j:=1 to MAXDEFINES do
  if Defines[j]<>'' then asm65(Defines[j]);
 
 asm65('.endl');
+
+
+asm65(#13#10'.local'#9'@RESOURCE');
+
+ for i := 0 to High(resArray) - 1 do begin
+
+  resArray[i].resStream := false;
+
+  yes:=false;
+  for IdentIndex := 1 to NumIdent do
+    if (resArray[i].resName = Ident[IdentIndex].Name) and (Ident[IdentIndex].Block = 1) then begin
+
+     if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then
+      tmp := GetLocalName(IdentIndex, 'adr.')
+     else
+      tmp := GetLocalName(IdentIndex);
+
+     yes:=true; Break;
+    end;
+
+  if not yes then
+   if AnsiUpperCase(resArray[i].resType) = 'RCDATA' then begin
+    asm65(resArray[i].resName+#9'ins '''+resArray[i].resFile+'''');
+    asm65(resArray[i].resName+'.end');
+    resArray[i].resStream := true;
+   end else
+    Error(NumTok, 'Resource identifier not found: Type = '+resArray[i].resType+', Name = '+resArray[i].resName);
+
+//  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);
+
+  resArray[i].resFullName := tmp;
+
+  Ident[IdentIndex].Pass := Pass;
+ end;
+
+asm65('.endl');
+
 
 asm65;
 asm65('.endl','; MAIN');
@@ -38542,7 +38644,11 @@ for j := NumUnits downto 2 do
  end;
 
 asm65;
-asm65(#9'.print ''CODE: '',CODEORIGIN,''..'',*-1');
+asm65(#9'.print ''CODE: '',CODEORIGIN,''..'',MAIN.@RESOURCE-1');
+
+for i:=0 to High(resArray)-1 do
+ if resArray[i].resStream then
+   asm65(#9'.print ''$R '+resArray[i].resName+''','+''' '''+','+'"'''+resArray[i].resFile+'''"'+','+''' '''+',MAIN.@RESOURCE.'+resArray[i].resName+','+'''..'''+',MAIN.@RESOURCE.'+resArray[i].resName+'.end-1');
 
 asm65separator;
 
@@ -38676,8 +38782,8 @@ asm65('.macro'#9'STATICDATA');
 
  asm65('.endm');
 
-
-//asm65(#13#10'.macro'#9'RESOURCE');
+{
+//asm65(#13#10'.local'#9'@RESOURCE');
 
  for i := 0 to High(resArray) - 1 do begin
 
@@ -38703,7 +38809,8 @@ asm65('.macro'#9'STATICDATA');
   Ident[IdentIndex].Pass := Pass;
  end;
 
-//asm65('.endm');
+//asm65('.endl');
+}
 
 asm65;
 asm65(#9'end');
@@ -39062,6 +39169,8 @@ begin
 // Predefined constants
  DefineIdent(1, 'BLOCKREAD',      FUNC, INTEGERTOK, 0, 0, $00000000);
  DefineIdent(1, 'BLOCKWRITE',     FUNC, INTEGERTOK, 0, 0, $00000000);
+
+ DefineIdent(1, 'GETRESOURCEHANDLE', FUNC, INTEGERTOK, 0, 0, $00000000);
 
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
