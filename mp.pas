@@ -36755,7 +36755,7 @@ var IdentIndex, size: integer;
       size := 0;
      end else
      if Ident[IdentIndex].isAbsolute then begin
-// dupa
+
       if Ident[IdentIndex].Value < 0 then
        Result := #9'= DATAORIGIN+$'+IntToHex(abs(Ident[IdentIndex].Value), 4)
       else
