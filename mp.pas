@@ -2491,13 +2491,96 @@ begin
     end;
 
 
+(* ????????????????????
+
+
    if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
       (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
       (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy C		; 4
       (pos('lda ', TemporaryBuf[5]) > 0) and						// lda			; 5
-      (pos('sta (', TemporaryBuf[6]) > 0) and						// sta ( ),y		; 6
+      ((pos('and ', TemporaryBuf[6]) > 0) or  						// and|ora|eor		; 6
+       (pos('ora ', TemporaryBuf[6]) > 0) or
+       (pos('eor ', TemporaryBuf[6]) > 0)) and
+      (pos('sta ', TemporaryBuf[7]) > 0) {and						// sta 			; 7
+											//			; 8
+      (TemporaryBuf[9] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 9
+      (pos('inc ', TemporaryBuf[10]) > 0) and						// inc C 		; 10
+      (TemporaryBuf[10] = #9'seq') and							// seq 			; 11
+      (TemporaryBuf[11] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 12
+      (pos('l_', TemporaryBuf[12]) = 1)} then						//l_			; 13
+    //if (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[9], 6, 256)) then
+     begin
+
+
+    writeln(TemporaryBuf[0]);
+    writeln(TemporaryBuf[1]);
+    writeln(TemporaryBuf[2]);
+    writeln(TemporaryBuf[3]);
+    writeln(TemporaryBuf[4]);
+    writeln(TemporaryBuf[5]);
+    writeln(TemporaryBuf[6]);
+    writeln(TemporaryBuf[7]);
+    writeln(TemporaryBuf[8]);
+    writeln(TemporaryBuf[9]);
+    writeln(TemporaryBuf[10]);
+    writeln(TemporaryBuf[11]);
+    writeln(TemporaryBuf[12]);
+    writeln(TemporaryBuf[13]);
+    writeln(TemporaryBuf[14]);
+    writeln(TemporaryBuf[15]);
+    writeln(TemporaryBuf[16]);
+    writeln(TemporaryBuf[17]);
+    writeln(TemporaryBuf[18]);
+    writeln('----');
+
+
+     {
+	TemporaryBuf[0] := #9'ldy ' + GetString(0);
+	TemporaryBuf[1] := TemporaryBuf[5];
+
+	if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[1], 6, 256)) then TemporaryBuf[1] := #9'tya';
+
+	TemporaryBuf[9] := #9'iny';
+	TemporaryBuf[10] := #9'jne ' + copy(TemporaryBuf[11], 6, 256);
+	TemporaryBuf[11] := TemporaryBuf[12];
+	TemporaryBuf[12] := #9'sty ' + copy(TemporaryBuf[4], 6, 256);
+
+	TemporaryBuf[5] := TemporaryBuf[3];
+	TemporaryBuf[4] := TemporaryBuf[2];
+	TemporaryBuf[3] := '~';
+	TemporaryBuf[2] := '~';
+	}
+     end;
+
+{
+	mva #$05 I
+
+l_1359
+; --- ForToDoCondition
+	ldy I
+	lda (PTR),y
+	eor #$80
+	sta (PTR),y
+
+; --- ForToDoEpilog
+	dec I
+	jpl l_1359
+l_1367
+
+}
+
+*)
+
+
+   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
+      (TemporaryBuf[1] = '') and							//			; 1
+      (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
+      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy C		; 4
+      (pos('lda ', TemporaryBuf[5]) > 0) and						// lda			; 5
+      (pos('sta ', TemporaryBuf[6]) > 0) and						// sta ( ),y		; 6
 											//			; 7
       (TemporaryBuf[8] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 8
       (pos('inc ', TemporaryBuf[9]) > 0) and						// inc C 		; 9
@@ -7288,8 +7371,6 @@ var i, l, k, m, x: integer;
      end;
 
     end;
-
-
 
 
   end;
@@ -24763,6 +24844,10 @@ begin
 
        if (pos(',y', s[x-1][0]) >0 ) or (pos(',y', s[x][0]) >0 ) then begin x:=30; Break end;
 
+       s[x-1][1] := #9'mva #$00';
+       s[x-1][2] := #9'mva #$00';
+       s[x-1][3] := #9'mva #$00';
+
        listing[l]   := #9'lda '+GetARG(0, x-1);
        listing[l+1] := #9'add '+GetARG(0, x);
        listing[l+2] := #9'sta '+GetARG(0, x-1);
@@ -24781,7 +24866,12 @@ begin
 
        inc(l, 12);
       end;
+
       if arg0 = 'addAX_CX' then begin
+
+       s[x-1][2] := #9'mva #$00';
+       s[x-1][3] := #9'mva #$00';
+
        listing[l]   := #9'lda '+GetARG(0, x-1);
        listing[l+1] := #9'add '+GetARG(0, x);
        listing[l+2] := #9'sta '+GetARG(0, x-1);
@@ -24800,6 +24890,7 @@ begin
 
        inc(l, 12);
       end;
+
       if (arg0 = 'addEAX_ECX') then begin
 
        listing[l]   := #9'lda '+GetARG(0, x-1);
@@ -31197,10 +31288,12 @@ begin
 	// Size := RecordSize(IdentIndex);
 	end;
 
-	      if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) = 1) or (NumAllocElements_ > 0) then
+	      if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) = 1) or (NumAllocElements_ > 0) or ((Ident[IdentIndex].AllocElementType <> 0) and (Ident[IdentIndex].NumAllocElements = 0)) then
 	       ActualParamType := WORDTOK
 	      else
 	       ActualParamType := GetValueType(Elements(IdentIndex));
+
+	       ActualParamType := WORDTOK;
 
 	      j := i + 2;
 
@@ -33265,6 +33358,8 @@ if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
 
   if ValType in IntegerTypes then
     ValType := GetValueType(ConstVal);
+
+  writeln(inttohex(constval,4));
 
  end;
 
