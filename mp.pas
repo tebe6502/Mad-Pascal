@@ -1558,6 +1558,85 @@ begin
 end;
 
 
+procedure NormalizePath(var Name: string);
+begin
+
+  {$IFDEF UNIX}
+   if Pos('\', Name) > 0 then
+    Name := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+    Name := LowerCase(Name);
+  {$ENDIF}
+end;
+
+
+function FindFile(Name: string; ftyp: TString): string; overload;
+var i: integer;
+begin
+
+  NormalizePath(Name);
+
+  i:=0;
+
+  repeat
+
+   Result :=  Name;
+
+   if not FileExists( Result ) then begin
+    Result := UnitPath[i] + Name;
+
+     if not FileExists( Result ) and (i > 0) then begin
+      Result := FilePath + UnitPath[i] + Name;
+     end;
+
+   end;
+
+   inc(i);
+
+  until (i > High(UnitPath)) or FileExists( Result );
+
+  if not FileExists( Result ) then
+   if ftyp = 'unit' then
+    Error(NumTok, 'Can''t find unit '+ChangeFileExt(Name,'')+' used by '+PROGRAM_NAME)
+   else
+    Error(NumTok, 'Can''t open '+ftyp+' file '''+Result+'''');
+
+end;
+
+
+function FindFile(Name: string): Boolean; overload;
+var i: integer;
+    fnm: string;
+begin
+
+  NormalizePath(Name);
+
+  i:=0;
+
+  repeat
+
+   fnm :=  Name;
+
+   if not FileExists( fnm ) then begin
+    fnm := UnitPath[i] + Name;
+
+     if not FileExists( fnm ) and (i > 0) then begin
+      fnm := FilePath + UnitPath[i] + Name;
+     end;
+
+   end;
+
+   inc(i);
+
+  until (i > High(UnitPath)) or FileExists( fnm );
+
+  Result := FileExists( fnm );
+
+end;
+
+
 procedure AddResource(fnam: string);
 var i, j: integer;
     t: textfile;
@@ -1599,7 +1678,7 @@ begin
         Error(NumTok, 'Undefined resource type: Type = UNKNOWN, Name = '''+res.resName+'''');
 
 
-    if (res.resFile = '') or not(FileExists(res.resFile)) then
+    if (res.resFile = '') or not(FindFile(res.resFile)) then
        Error(NumTok, 'Resource file not found: Type = '+res.resType+', Name = '''+res.resName+'''');
 
 
@@ -2489,89 +2568,6 @@ begin
     begin
      TemporaryBuf[4] := '~';
     end;
-
-
-(* ????????????????????
-
-
-   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
-      (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
-      (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy C		; 4
-      (pos('lda ', TemporaryBuf[5]) > 0) and						// lda			; 5
-      ((pos('and ', TemporaryBuf[6]) > 0) or  						// and|ora|eor		; 6
-       (pos('ora ', TemporaryBuf[6]) > 0) or
-       (pos('eor ', TemporaryBuf[6]) > 0)) and
-      (pos('sta ', TemporaryBuf[7]) > 0) {and						// sta 			; 7
-											//			; 8
-      (TemporaryBuf[9] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 9
-      (pos('inc ', TemporaryBuf[10]) > 0) and						// inc C 		; 10
-      (TemporaryBuf[10] = #9'seq') and							// seq 			; 11
-      (TemporaryBuf[11] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 12
-      (pos('l_', TemporaryBuf[12]) = 1)} then						//l_			; 13
-    //if (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[9], 6, 256)) then
-     begin
-
-
-    writeln(TemporaryBuf[0]);
-    writeln(TemporaryBuf[1]);
-    writeln(TemporaryBuf[2]);
-    writeln(TemporaryBuf[3]);
-    writeln(TemporaryBuf[4]);
-    writeln(TemporaryBuf[5]);
-    writeln(TemporaryBuf[6]);
-    writeln(TemporaryBuf[7]);
-    writeln(TemporaryBuf[8]);
-    writeln(TemporaryBuf[9]);
-    writeln(TemporaryBuf[10]);
-    writeln(TemporaryBuf[11]);
-    writeln(TemporaryBuf[12]);
-    writeln(TemporaryBuf[13]);
-    writeln(TemporaryBuf[14]);
-    writeln(TemporaryBuf[15]);
-    writeln(TemporaryBuf[16]);
-    writeln(TemporaryBuf[17]);
-    writeln(TemporaryBuf[18]);
-    writeln('----');
-
-
-     {
-	TemporaryBuf[0] := #9'ldy ' + GetString(0);
-	TemporaryBuf[1] := TemporaryBuf[5];
-
-	if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[1], 6, 256)) then TemporaryBuf[1] := #9'tya';
-
-	TemporaryBuf[9] := #9'iny';
-	TemporaryBuf[10] := #9'jne ' + copy(TemporaryBuf[11], 6, 256);
-	TemporaryBuf[11] := TemporaryBuf[12];
-	TemporaryBuf[12] := #9'sty ' + copy(TemporaryBuf[4], 6, 256);
-
-	TemporaryBuf[5] := TemporaryBuf[3];
-	TemporaryBuf[4] := TemporaryBuf[2];
-	TemporaryBuf[3] := '~';
-	TemporaryBuf[2] := '~';
-	}
-     end;
-
-{
-	mva #$05 I
-
-l_1359
-; --- ForToDoCondition
-	ldy I
-	lda (PTR),y
-	eor #$80
-	sta (PTR),y
-
-; --- ForToDoEpilog
-	dec I
-	jpl l_1359
-l_1367
-
-}
-
-*)
 
 
    if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
@@ -25269,8 +25265,6 @@ begin
 
        optyY := arg0;
 
-//writeln(copy(arg0, 6, 256));
-
       end else begin
        arg0 := ''; optyY := '';
       end;
@@ -25450,54 +25444,6 @@ begin
       else
        Result := CARDINALTOK
     end;
-
-end;
-
-
-procedure NormalizePath(var Name: string);
-begin
-
-  {$IFDEF UNIX}
-   if Pos('\', Name) > 0 then
-    Name := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-    Name := LowerCase(Name);
-  {$ENDIF}
-end;
-
-
-function FindFile(Name: string; ftyp: TString): string;
-var i: integer;
-begin
-
-  NormalizePath(Name);
-
-  i:=0;
-
-  repeat
-
-   Result :=  Name;
-
-   if not FileExists( Result ) then begin
-    Result := UnitPath[i] + Name;
-
-     if not FileExists( Result ) and (i > 0) then begin
-      Result := FilePath + UnitPath[i] + Name;
-     end;
-
-   end;
-
-   inc(i);
-
-  until (i > High(UnitPath)) or FileExists(Result);
-
-  if not FileExists( Result ) then
-   if ftyp = 'unit' then
-    Error(NumTok, 'Can''t find unit '+ChangeFileExt(Name,'')+' used by '+PROGRAM_NAME)
-   else
-    Error(NumTok, 'Can''t open '+ftyp+' file '''+Result+'''');
 
 end;
 
@@ -33359,8 +33305,6 @@ if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
   if ValType in IntegerTypes then
     ValType := GetValueType(ConstVal);
 
-  writeln(inttohex(constval,4));
-
  end;
 
 
@@ -36230,11 +36174,10 @@ var
    Types[RecType].Field[x].AllocElementType := AllocElementType;
    Types[RecType].Field[x].NumAllocElements := NumAllocElements;
 
-
    if not (FieldType in [RECORDTOK, OBJECTTOK]) then begin
 
     if FieldType in Pointers then
-     inc(Types[RecType].Size, NumAllocElements * DataSize[AllocElementType])
+     inc(Types[RecType].Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) * DataSize[AllocElementType])
     else
      inc(Types[RecType].Size, DataSize[FieldType]);
 
@@ -36243,9 +36186,6 @@ var
 
 
    Types[RecType].Field[x].Kind := 0;
-
-//   writeln(name,',',AllocElementType,',',NumAllocElements,',', Data);
-
   end;
 
 
