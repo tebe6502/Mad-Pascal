@@ -217,6 +217,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	TVSystem: byte absolute $D014;
 
+	Rnd: byte absolute $d20a;
+
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
 
