@@ -278,6 +278,35 @@
      end;
 
 
+    if (listing[i] = #9'lda #$05') and							// lda #$05				; 0
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       lda(i+2) and									// lda 					; 2
+       (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
+       IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
+       											// fmulu_8				; 5
+       											// els					; 6
+       											// imulCL				; 7
+       											// eif					; 8
+       (listing[i+9] = #9'lda :eax') and						// lda :eax				; 9
+       add_sub(i+10) and								// add					; 10
+       tay(i+11) and									// tay					; 11
+       (listing[i+12] <> #9'lda :eax+1') then						// ~lda :eax+1				; 12
+     begin
+      listing[i]   := '';
+      listing[i+1] := '';
+
+      listing[i+3] := #9'asl @';
+      listing[i+4] := #9'asl @';
+      listing[i+5] := #9'add ' + copy(listing[i+2], 6, 256);
+      listing[i+6] := '';
+      listing[i+7] := '';
+      listing[i+8] := '';
+      listing[i+9] := '';
+
+      Result:=false; Break;
+     end;
+
+
     if lda(i) and									// lda 					; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        (listing[i+2] = #9'lda #$05') and						// lda #$05				; 2
@@ -502,6 +531,49 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 	listing[i+8] := '';
+
+	Result:=false;
+       end;
+
+
+    if (listing[i] = #9'sta :ecx') and							// sta :ecx				; 0
+       (listing[i+1] = #9'lda #$28') and						// lda #$28				; 1
+       (listing[i+2] = #9'sta :eax') and						// sta :eax				; 2
+       IFDEF_MUL8(i+3) then								// .ifdef fmulinit			; 3
+     											// fmulu_8				; 4
+      											// els					; 5
+      											// imulCL				; 6
+       		 									// eif					; 7
+       begin
+	listing[i] := #9'jsr @mul40';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+	Result:=false;
+       end;
+
+
+    if (listing[i]  = #9'sta :eax') and							// sta :eax				; 0
+       (listing[i+1] = #9'lda #$28') and						// lda #$28				; 1
+       (listing[i+2] = #9'sta :ecx') and						// sta :ecx				; 2
+       IFDEF_MUL8(i+3) then								// .ifdef fmulinit			; 3
+     											// fmulu_8				; 4
+      											// els					; 5
+      											// imulCL				; 6
+       		 									// eif					; 7
+       begin
+	listing[i+1] := #9'jsr @mul40';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
 
 	Result:=false;
        end;
