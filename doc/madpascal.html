@@ -55,8 +55,8 @@
 </head>
 
 <CENTER>
-<p class="duzy"><u>MAD-PASCAL 1.6.3</u></p>
-<p class="stopka">Tebe/Madteam (2020-01-04)
+<p class="duzy"><u>MAD-PASCAL 1.6.4</u></p>
+<p class="stopka">Tebe/Madteam (2020-10-22)
 
 <HR>
 
@@ -108,6 +108,7 @@
 
 <ul>
 <LI><A HREF="#conditional">$DEFINE label</A>
+<LI><A HREF="#romoff">$DEFINE ROMOFF</A>
 <LI><A HREF="#resource">RESOURCE {$R filename}</A>
 </ul>
 
@@ -273,21 +274,22 @@ SPOSÓB U¯YCIA
 <pre>
 Syntax: mp source [switches]
 
--d:address      tryb diagnostyczny
+-diag           tryb diagnostyczny
 -define:symbol  definiowanie symbolu
 -ipath:&ltx&gt      dodatkowa ¶cie¿ka poszukiwañ
--code:$address  adres uruchomienia programu
--data:$address  adres pamiêci dla zmiennych, tablic
--stack:$address adres pamiêci dla stosu programowego (64 bajty)
--zpage:$address adres na stronie zerowej dla zmiennych (24 bajty)
+-target:&ltx&gt     docelowy system: a8 (domy¶lnie), c64
+-code:address   adres uruchomienia programu
+-data:address   adres pamiêci dla zmiennych, tablic
+-stack:address  adres pamiêci dla stosu programowego (64 bajty)
+-zpage:address  adres na stronie zerowej dla zmiennych (24 bajty)
 </pre>
 </span>
 
 
 <p>
-<div style="font-weight: bold"  style="font-size: 18px">-d</div>
+<div style="font-weight: bold"  style="font-size: 18px">-diag</div>
 <div align="justify">
-U¿ycie prze³±cznika <b><tt>-d</tt></b> powoduje wygenerowanie dodatkowego pliku z informacj± o wszystkich u¿ytych zmiennych, procedurach, funkcjach.</p>
+U¿ycie prze³±cznika <b><tt>-diag</tt></b> powoduje wygenerowanie dodatkowego pliku z informacj± o wszystkich u¿ytych zmiennych, procedurach, funkcjach.</p>
 
 
 <p>
@@ -557,6 +559,7 @@ const
 
 Z poziomu assemblera dostêp do zdefiniowanych etykiet $DEFINE mo¿liwy jest przez MAIN.@DEFINES.label
 
+
 <tt><h2>FASTMUL {$F page}</h2></tt>
 
 <a href="http://codebase64.org/doku.php?id=base:seriously_fast_multiplication">Seriously fast multiplication (8-bit and 16-bit)</a>
@@ -609,14 +612,14 @@ okre¶lona poza takim blokiem.
 <p></p>
 <br />
 
-<tt><h2>{$INCLUDE %DATE%}</h2></tt>
+<tt><h2>{$INCLUDE %DATE%}, {$I %DATE%}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu41.html">Include DATE</a>
 <p>
 Dyrektywa do³±czenia tekstu z aktualn± dat± kompilacji.
 </p>
 <br />
 
-<tt><h2>{$INCLUDE %TIME%}</h2></tt>
+<tt><h2>{$INCLUDE %TIME%}, {$I %TIME%}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu41.html">Include TIME</a>
 <p>
 Dyrektywa do³±czenia tekstu z aktualnym czasem kompilacji.
@@ -624,7 +627,7 @@ Dyrektywa do³±czenia tekstu z aktualnym czasem kompilacji.
 <br />
 
 
-<tt><h2>INCLUDE {$I filename}, {$INCLUDE filename}</h2></tt>
+<tt><h2>{$INCLUDE filename}, {$I filename}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu40.html#x47-460001.2.40">Include file</a>
 <p>
 Dyrektywa do³±czenia tekstu zawartego w pliku.
@@ -632,7 +635,7 @@ Dyrektywa do³±czenia tekstu zawartego w pliku.
 <br />
 
 
-<tt><h2>LIBRARY PATH {$LIBRARYPATH path1;path2;...}</h2></tt>
+<tt><h2>{$LIBRARYPATH path1;path2;...}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu99.html">Specify library path</a>
 <p>
 Dyrektywa pozwalaj±ca wskazaæ dodatkowe ¶cie¿ki poszukiwañ dla bibliotek (unit).
@@ -640,28 +643,49 @@ Dyrektywa pozwalaj±ca wskazaæ dodatkowe ¶cie¿ki poszukiwañ dla bibliotek (unit).
 <br />
 
 
-<tt><h2>INFO {$INFO user_defined}</h2></tt>
+<tt><h2>{$INFO user_defined}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu35.html#x42-410001.2.35">Generate info message</a>
 <p>
 </p>
 <br />
 
-<tt><h2>WARNING {$WARNING user_defined}</h2></tt>
+<tt><h2>{$WARNING user_defined}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu81.html#x88-870001.2.81">Generate warning message</a>
 <p>
 </p>
 <br />
 
-<tt><h2>ERROR {$ERROR user_defined}</h2></tt>
+<tt><h2>{$ERROR user_defined}</h2></tt>
 <a href="https://www.freepascal.org/docs-html/prog/progsu17.html#x24-230001.2.17">Generate error message</a>
 <p>
 </p>
 <br />
 
 
+<A NAME="romoff">
+<tt><h2>{$DEFINE BASICOFF}</h2></tt>
+
+<p>
+Dodatkowy blok programu realizuj±cy wy³±czenie BASIC-a.
+</p>
+<br />
+
+
+<A NAME="romoff">
+<tt><h2>{$DEFINE ROMOFF}</h2></tt>
+
+<p>
+Zyskujemy dostêp do pamiêci pod ROM-em, $C000..$CFFF, $D800..$FFFF
+</p>
+<p>
+Zestaw znaków z ROM ($E000..$E3FF) zostaje przepisany pod ten sam adres w RAM, zostaje zainstalowany handler przerwañ NMI, IRQ. System operacyjny dzia³a normalnie, mo¿na z poziomu ASM wywo³ywaæ procedury w nim zawarte poprzez makro 'm@call'.
+</p>
+<br />
+
+
 <A NAME="resource">
 
-<tt><h2>RESOURCE {$R filename}, {$RESOURCE filename}</h2></tt>
+<tt><h2>{$RESOURCE filename}, {$R filename}</h2></tt>
 <a href="http://www.freepascal.org/docs-html/prog/progsu67.html#x74-730001.2.67">Include resource</a>
 <p>
 <h2>RCLABEL RCTYPE RCFILE [PAR0 PAR1 PAR2 PAR3 PAR4 PAR5 PAR6 PAR7]</h2>
@@ -686,6 +710,10 @@ typ zasobów RCTYPE, lokalizacja pliku RCFILE. Aktualnie w pliku BASE\RES6502.ASM
 <tr>
 	<td><tt><b>RELOC</b></tt></td>
 	<td><tt>plik relokowalny w formacie MadAssemblera, plik zostanie poddany relokacji pod wskazany adres <b>RCLABEL</b></tt></td>
+</tr>
+<tr>
+	<td><tt><b>EXTMEM</b></tt></td>
+	<td><tt>plik zostanie za³adowany do pamiêci dodatkowej (PORTB) pod wskazany adres <b>RCLABEL</b></tt></td>
 </tr>
 <tr>
 	<td><tt><b>RMT</b></tt></td>
@@ -722,7 +750,7 @@ typ zasobów RCTYPE, lokalizacja pliku RCFILE. Aktualnie w pliku BASE\RES6502.ASM
 </tr>
 <tr>
 	<td><tt><b>XBMP</b></tt></td>
-	<td><tt>plik Windows Bitmap (8 BitsPerPixel) ³adowany do pamiêci VBXE pod wskazany adres <b>RCLABEL</b> od indeksu koloru <b>PAR0</b> w palecie kolorów VBXE nr 1</tt></td>
+	<td><tt>plik Windows Bitmap (8 BitsPerPixel) ³adowany do pamiêci VBXE pod wskazany adres <b>RCLABEL</b> od indeksu koloru <b>PAR0</b> w palecie kolorów VBXE nr <b>1</b></tt></td>
 </tr>
 </table> 
  
@@ -734,9 +762,11 @@ bmp1  RCDATA   'pic.mic'
 
 msx   MPT      'porazka.mpt'
 
-play  RMTPLAY   'modul.feat' 1
+play  RMTPLAY  'modul.feat' 1
 
 bmp   XBMP     'pic.bmp' 80
+
+bmp2  EXTMEM   'file.mic'
 </pre>
 
 <p></p>
@@ -4028,11 +4058,38 @@ Funkcja zwraca warto¶æ tangensa k±ta podanego w parametrze X.
 <A NAME="change">
 </tt><h2>HISTORIA</h2></tt>
 
+<p class="tekst-wiekszy">
+1.6.4
+<p class="tekst">
+- procedury mno¿enie u8x8, u16x16 zast±pione kodem z CC65<br>
+- dodanie kodu resetujacego POKEY-a na pocz±tku uruchomienia programu<br>
+- optymalizacje wyra¿eñ warunkowych IF () and () and ... ; IF () or () or ...<br>
+- optymalizacja CMP_SHORTINT, CMP_SMALLINT<br>
+- GRAPH, FASTGRAPH: SetActiveBuffer, SetDisplayBuffer, NewDisplayBuffer, SwitchDisplayBuffer, przyk³ad demoeffects\lines2.pas, line3.pas, line4.pas<br>
+- GRAPH: procedure Ellipse(X, Y, StAngle, EndAngle, xRadius,yRadius: Word);<br>
+- MATH: Hypot<br>
+- SYSTEM: Length(string_array[element])<br>
+- SYSTEM: GetMem, FreeMem<br>
+- SYSTEM: IntToStr(CARDINAL), Str(CARDINAL, STRING)<br>
+- SYSUTILS: ByteToStr(BYTE): STRING<br>
+- SYSUTILS: poprawione FindFirst, StrToFloat<br>
+- SYSTEM: poprawione Val(string, real, code) ; Val(string, single, code)<br>
+- nowy unit CIO: Opn, Cls, Get, Put, BGet, BPut, XIO<br>
+- nowy unit SIODISK, wydzielony z SYSTEM<br>
+- nowy unit S2, zintegrowany z instalatorem handlera VBXE S2: (S_VBXE.SYS)<br>
+- nowy unit DEFLATE, realizuj±cy dekompresjê DEFLATE (procedure unDEF), przyk³ad compression\undef.pas<br>
+- nowy unit LZ4, realizuj±cy dekompresjê LZ4 z pamiêci lub dysku (procedure unLZ4), przyk³ad compression\unlz4.pas, unlz4_stream.pas<br>
+- nowy unit APLIB, realizuj±cy dekompresjê apLib z pamiêci RAM lub dysku (procedure unApl), przyk³ad compression\unapl.pas, unapl_stream.pas<br>
+- nowy unit CRC: function crc32(crc: cardinal; buf: Pbyte; len: word)<br>
+- nowy modyfikator procedur/funkcji PASCAL, powoduj±cy przydzielenie/zwolnienie nowego bloku pamiêci dla zmiennych przy ka¿dym wywo³aniu procedury/funkcji, przyk³ad 'math\evaluate.pas'<br>
+- dodana mo¿liwo¶æ wy³±czenia pamiêci ROM z zachowaniem dzia³ania systemu, {$DEFINE ROMOFF}<br>
+- krótsze nazwy prze³acznikow -zpage (-z), -stack (-s), -data (-d), -code (-c), -define (-d), -ipath (-i)<br>
+- dodana mo¿liwo¶æ generowania kodu dla C64 (-t c64)<br>
 
 <p class="tekst-wiekszy">
 1.6.3
 <p class="tekst">
-- poprawki, optymalizacje
+- poprawki, optymalizacje<br>
 - SYSUTILS: Trim<br>
 - SYSTEM: PByte, PByteArray, PWord<br>
 - GRAPH, FASTGRAPH: TFrameBuffer, DisplayBuffer, FrameBuffer, SwitchBuffer, Scanline<br>
