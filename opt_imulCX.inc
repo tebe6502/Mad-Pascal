@@ -7,6 +7,7 @@
 *10
 *16
 *256
+*320
 
 }
 
@@ -67,6 +68,9 @@
      end;
 
 
+// -----------------------------------------------------------------------------
+// ===				imulCX 2				  === //
+// -----------------------------------------------------------------------------
 
     if (listing[i] = #9'lda #$02') and							// lda #$02				; 0	* 2
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
@@ -138,6 +142,9 @@
      end;
 
 
+// -----------------------------------------------------------------------------
+// ===				imulCX 4				  === //
+// -----------------------------------------------------------------------------
 
     if (listing[i] = #9'lda #$04') and							// lda #$04				; 0	* 4
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
@@ -206,6 +213,9 @@
      end;
 
 
+// -----------------------------------------------------------------------------
+// ===				imulCX 8				  === //
+// -----------------------------------------------------------------------------
 
     if (listing[i] = #9'lda #$08') and							// lda #$08				; 0	* 8
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
@@ -248,6 +258,10 @@
      end;
 
 
+// -----------------------------------------------------------------------------
+// ===				imulCX 16				  === //
+// -----------------------------------------------------------------------------
+
     if (listing[i] = #9'lda #$10') and							// lda #$10				; 0	* 16
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        lda_im_0(i+2) and								// lda #$00				; 2
@@ -288,6 +302,10 @@
 
      end;
 
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 256				  === //
+// -----------------------------------------------------------------------------
 
     if lda_im_0(i) and									// lda #$00				; 0	* 256
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
@@ -386,6 +404,41 @@
      end;
 
 
+// -----------------------------------------------------------------------------
+// ===				imulCX 320				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'lda #$40') and							// lda #$40				; 0	* 320
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       (listing[i+2] = #9'lda #$01') and						// lda #$01				; 2
+       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
+       lda(i+4) and									// lda 					; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       lda(i+6) and 									// lda 					; 6
+       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
+     begin
+      listing[i]   := listing[i+4];
+      listing[i+1] := listing[i+5];
+      listing[i+2] := listing[i+6];
+      listing[i+3] := listing[i+7];
+      listing[i+4] := #9'jsr @mul320';
+      listing[i+5] := '';
+      listing[i+6] := '';
+      listing[i+7] := '';
+      listing[i+8] := '';
+      listing[i+9] := '';
+      listing[i+10] := '';
+      listing[i+11] := '';
+      listing[i+12] := '';
+
+      Result:=false; Break;
+     end;
+
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 10				  === //
+// -----------------------------------------------------------------------------
+
     if (listing[i] = #9'lda #$0A') and 							// lda #$0A				; 0	* 10	BYTE
        (listing[i+1] = #9'sta :ecx') and 						// sta :ecx				; 1
        lda_im_0(i+2) and 								// lda #$00				; 2
@@ -446,51 +499,12 @@
 	 Result:=false; Break;
        end;
 
-
      end;
-
-
-{
-    if (listing[i] = #9'lda #$04') and							// lda #$04				; 0
-       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda_im_0(i+2) and								// lda #$00				; 2
-       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
-       lda(i+4) and									// lda					; 4
-       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
-       lda(i+6) and 									// lda					; 6
-       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
-     begin
-      listing[i+5] := listing[i+4];
-
-      listing[i] := #9'lda #$00';
-      listing[i+1] := #9'sta :eax+2';
-      listing[i+2] := #9'sta :eax+3';
-      listing[i+3] := listing[i+6];
-      listing[i+4] := listing[i+7];
-
-      listing[i+6] := #9'asl @';
-      listing[i+7] := #9'rol :eax+1';
-      listing[i+8] := #9'rol :eax+2';
-      listing[i+9] := #9'asl @';
-      listing[i+10] := #9'rol :eax+1';
-      listing[i+11] := #9'rol :eax+2';
-      listing[i+12] := #9'sta :eax';
-
-      Result:=false; Break;
-     end;
-}
-
 
   end;
 
 
-
-
-// -----------------------------------------------------------------------------
-// ===				imulCX 10				  === //
-// -----------------------------------------------------------------------------
-
- if (listing[i] = #9'lda #$0A') and 							// lda #$0A				; 0
+ if (listing[i] = #9'lda #$0A') and 							// lda #$0A				; 0	* 10
     (listing[i+1] = #9'sta :ecx') and 							// sta :ecx				; 1
     lda_im_0(i+2) and 									// lda #$00				; 2
     (listing[i+3] = #9'sta :ecx+1') and 						// sta :ecx+1				; 3
@@ -555,9 +569,7 @@
 
   end;
 
-
 // -----------------------------------------------------------------------------
-
 
   if ldy_im_0(i) and 									// ldy #$00				; 0
      lda(i+1) and 									// lda 					; 1
@@ -643,7 +655,4 @@
       Result:=false; Break;
      end;
 
-
    end;
-
-

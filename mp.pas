@@ -2149,6 +2149,7 @@ var p: integer;
 
 begin
 
+
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
@@ -2761,10 +2762,6 @@ begin
 	TemporaryBuf[7] := '~';
      end;
 
-(*
-
-  lda C
-  asl @
 
    if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
@@ -2772,12 +2769,14 @@ begin
       (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
       (pos('lda ', TemporaryBuf[4]) > 0) and						// lda C		; 4
       (pos('cmp ', TemporaryBuf[5]) > 0) and						// cmp 			; 5
-      SKIP(6) then									// SKIP			; 6
+      SKIP(6) and									// SKIP			; 6
+      (TemporaryBuf[7] = '') and							//			; 7
+      											//; optimize OK		; 8
+      (TemporaryBuf[9] = '') and							//			; 9
+      (pos('lda ', TemporaryBuf[10]) > 0) then						// lda			; 10
      begin
 
-//     yes:=false;
-
-      for p:=7 to High(TemporaryBuf) do
+      for p:=11 to High(TemporaryBuf) do
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if (TemporaryBuf[p-6] = #9'ldy ' + copy(TemporaryBuf[4], 6, 256)) and	// ldy C
@@ -2795,19 +2794,64 @@ begin
 
 	   TemporaryBuf[p-2] := #9'iny';
 	   TemporaryBuf[p-1] := #9'jne ' + copy(TemporaryBuf[p], 6, 256);
-	   TemporaryBuf[p]   := '';
+	   TemporaryBuf[p]   := '~';
 	  end;
 
 	 Break;
        end;
-        {else
+     end;
+
+// pussy
+   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva ... C		; 0
+      (TemporaryBuf[1] = '') and							//			; 1
+      (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
+      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      (pos('lda ', TemporaryBuf[4]) > 0) and						// lda C		; 4
+      (pos('cmp ', TemporaryBuf[5]) > 0) and						// cmp 			; 5
+      SKIP(6) and									// SKIP			; 6
+      (TemporaryBuf[7] = '') and							//			; 7
+      											//; optimize OK		; 8
+      (TemporaryBuf[9] = '') and							//			; 9
+      (TemporaryBuf[10] = #9'ldy ' + copy(TemporaryBuf[4], 6, 256)) then		// ldy C		; 10
+     begin
+
+      yes:=true;
+
+      for p:=11 to High(TemporaryBuf) do
+       if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
+
+         if yes and
+	    (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			//; --- ForToDoEpilog
+            (TemporaryBuf[p-2] = #9'inc ' + copy(TemporaryBuf[4], 6, 256)) and	// inc C
+            (TemporaryBuf[p-1] = #9'seq') and					// seq
+            (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_2092
+            (TemporaryBuf[p+1] = copy(TemporaryBuf[6], 6, 256)) then		//l_
+	  begin
+	   TemporaryBuf[0] := #9'ldy ' + GetString(0);
+
+	   TemporaryBuf[4] := '~';
+	   TemporaryBuf[5] := #9'cpy ' + copy(TemporaryBuf[5], 6, 256);
+
+	   TemporaryBuf[p-2] := #9'iny';
+	   TemporaryBuf[p-1] := #9'jne ' + copy(TemporaryBuf[p], 6, 256);
+	   TemporaryBuf[p]   := TemporaryBuf[p+1] ;
+	   TemporaryBuf[p+1] := #9'sty ' + copy(TemporaryBuf[10], 6, 256);
+
+	   TemporaryBuf[10]  := '~';
+	  end;
+
+	 Break;
+       end else
         if (pos('ldy ', TemporaryBuf[p]) > 0) or
+           (pos('mwy ', TemporaryBuf[p]) > 0) or
+           (pos('mvy ', TemporaryBuf[p]) > 0) or
+           (pos('jsr ', TemporaryBuf[p]) > 0) or
+           (pos('ift ', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
-           (TemporaryBuf[p] = #9'tay') then yes:=true;
-}
+           (TemporaryBuf[p] = #9'tay') then yes:=false;
+
      end;
-*)
 
 
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
@@ -27267,8 +27311,8 @@ begin
 
 	if Ident[GetIdent(lab)].AllocElementType = RECORDTOK then begin
 
-	 asm65(#9'mwy '+lab+' :bp2');
-
+	 asm65(#9'mwy '+lab+' :bp2');			// !!! koniecznie w ten sposób
+							// !!! kolejne optymalizacje podstawi¹ pod :BP2 -> LAB
 	 asm65(#9'lda :bp2');
 	 asm65(#9'add #' + svar + '-DATAORIGIN');
 	 asm65(#9'sta :bp2');
