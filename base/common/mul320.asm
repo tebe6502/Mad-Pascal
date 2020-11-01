@@ -1,43 +1,34 @@
 
-// y*256+y*64
+// AX (16bit) * 320 = EAX
+// (a shl 8) shr 2 + (a shl 8)
 
-.proc   @mul320			; = 33 bytes, 48/53 cycles
+.proc   @mul320
 
-	sta :STACKORIGIN+10
-	lda K+1
-	sta :STACKORIGIN+STACKWIDTH+10
-	lda #$00
-	asl :STACKORIGIN+10
-	rol :STACKORIGIN+STACKWIDTH+10
-	rol @
-	asl :STACKORIGIN+10
-	rol :STACKORIGIN+STACKWIDTH+10
-	rol @
-	asl :STACKORIGIN+10
-	rol :STACKORIGIN+STACKWIDTH+10
-	rol @
-	asl :STACKORIGIN+10
-	rol :STACKORIGIN+STACKWIDTH+10
-	rol @
-	asl :STACKORIGIN+10
-	rol :STACKORIGIN+STACKWIDTH+10
-	rol @
-	asl :STACKORIGIN+10
-	rol :STACKORIGIN+STACKWIDTH+10
-	rol @
-	sta :STACKORIGIN+STACKWIDTH*2+10
-	lda :STACKORIGIN+10
-	sta CR
-	lda K
-	add :STACKORIGIN+STACKWIDTH+10
-	sta CR+1
-	lda K+1
-	adc :STACKORIGIN+STACKWIDTH*2+10
-	sta CR+2
+	lda :eax
+	sta :ecx+1
+
+	ldy :eax+1
+	sty :ecx+2
+	sty :eax+2
+
+	ldy #$00
+	sty :eax
+
+	lsr :eax+2
+	ror @
+	ror :eax
+	lsr :eax+2
+	ror @
+	ror :eax
+
+	add :ecx+1
+	sta :eax+1
+	lda :eax+2
+	adc :ecx+2
+	sta :eax+2
 	lda #$00
 	adc #$00
-	sta CR+3
+	sta :eax+3
 
         rts
-
 .endp
