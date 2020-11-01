@@ -7,6 +7,8 @@
 *10
 *16
 *40
+*64
+*128
 *255
 
 }
@@ -613,6 +615,34 @@
 
 
 // -----------------------------------------------------------------------------
+// ===				imulCL 64				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'lda #$40') and							// lda #$40				; 0
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       lda(i+2) and									// lda					; 2
+       (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
+       IFDEF_MUL8(i+4) then								// .ifdef fmulinit			; 4
+       											// fmulu_8				; 5
+       											// els					; 6
+       											// imulCL				; 7
+       											// eif					; 8
+     begin
+      listing[i] := listing[i+2];
+      listing[i+1] := #9'sta :eax+1';
+      listing[i+2] := #9'lda #$00';
+      listing[i+3] := #9'lsr :eax+1';
+      listing[i+4] := #9'ror @';
+      listing[i+5] := #9'lsr :eax+1';
+      listing[i+6] := #9'ror @';
+      listing[i+7] := #9'sta :eax';
+      listing[i+8] := '';
+
+      Result:=false; Break;
+     end;
+
+
+// -----------------------------------------------------------------------------
 // ===				imulCL 128				  === //
 // -----------------------------------------------------------------------------
 
@@ -626,12 +656,12 @@
        											// imulCL				; 7
        											// eif					; 8
      begin
-      listing[i] := #9'lda #$00';
-      listing[i+1] := #9'sta :eax';
-
-      listing[i+3] := #9'lsr @';
-      listing[i+4] := #9'ror :eax';
-      listing[i+5] := #9'sta :eax+1';
+      listing[i] := listing[i+2];
+      listing[i+1] := #9'sta :eax+1';
+      listing[i+2] := #9'lda #$00';
+      listing[i+3] := #9'lsr :eax+1';
+      listing[i+4] := #9'ror @';
+      listing[i+5] := #9'sta :eax';
       listing[i+6] := '';
       listing[i+7] := '';
       listing[i+8] := '';
