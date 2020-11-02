@@ -2149,7 +2149,6 @@ var p: integer;
 
 begin
 
-
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
@@ -2417,6 +2416,17 @@ begin
 	if (pos('sta ', TemporaryBuf[2]) = 0) then TemporaryBuf[0] := '~';
 
 	TemporaryBuf[1] := '~';
+      end;
+
+
+    if (pos('sta :STACK', TemporaryBuf[0]) > 0) and 					// sta :STACKORIGIN	; 0
+       ((TemporaryBuf[1] = #9'iny') or (TemporaryBuf[1] = #9'dey')) and			// iny|dey		; 1
+       (pos('lda :STACK', TemporaryBuf[2]) > 0) and					// lda :STACKORIGIN	; 2
+       (SKIP(3) = false) then
+     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
+      begin
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[2] := '~';
       end;
 
 
@@ -10033,38 +10043,6 @@ var i, l, k, m, x: integer;
      end;
 
 
-{ fuck
-    if asl_stack(i) and									// asl :STACKORIGIN+10	; 0
-       rol_a(i+1) and									// rol @		; 1
-       (listing[i+2] = #9'sta :eax+1') and						// sta :eax+1		; 2
-       lda_stack(i+3) and								// lda :STACKORIGIN+10	; 3
-       (listing[i+4] = #9'sta :eax') and						// sta :eax		; 4
-       lda_im_0(i+5) and								// lda #$00		; 5
-       (listing[i+6] = #9'sta :eax+2') and						// sta :eax+2		; 6
-       lda_im_0(i+7) and								// lda #$00		; 7
-       (listing[i+8] = #9'sta :eax+3') then 						// sta :eax+3		; 8
-     if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) then
-     begin
-
-	tmp:=#9'sta ' + copy(listing[i+3], 6, 256);
-	insert('STACKWIDTH+', tmp, pos(':STACKORIGIN+', listing[i+3])+13);
-
-	yes:=false;
-	for p:=i+3 to l-1 do
-	 if pos(':eax+1', listing[p]) > 0 then begin yes:=true; Break end;
-
-	if not yes then listing[i+2] := tmp;
-
-	listing[i+5]:= '';
-	listing[i+6]:= '';
-	listing[i+7]:= '';
-	listing[i+8]:= '';
-
-	Result:=false; Break;
-     end;
-}
-
-
     if lda(i) and									// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
@@ -11065,8 +11043,9 @@ var i, l, k, m, x: integer;
 
 
     if sta_stack(i) and									// sta :STACKORIGIN+10		; 0
-       (sty(i+1) or iny(i+1) or ldy(i+1)) and						// sty|iny|ldy			; 1
-       lda_stack(i+2) then								// lda :STACKORIGIN+10		; 2
+       (sty(i+1) or iny(i+1) or dey(i+1) or ldy(i+1)) and				// sty|iny|dey|ldy		; 1
+       lda_stack(i+2) and								// lda :STACKORIGIN+10		; 2
+       (SKIP(i+3) = false) then
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then begin
 	listing[i]   := '';
 	listing[i+2] := '';
@@ -11270,7 +11249,6 @@ var i, l, k, m, x: integer;
 // -----------------------------------------------------------------------------
 // ===				optymalizacja LDY.			  === //
 // -----------------------------------------------------------------------------
-
 
     if Result and									// "samotna" instrukcja na koncu bloku
        (ldy(i) or lda(i)) and
@@ -14378,28 +14356,6 @@ var i, l, k, m, x: integer;
 	Result:=false; Break;
      end;
 
-{ fuck ???
-
-    if lda_im(i) and										// lda #				; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
-       lda_im(i+2) and										// lda #				; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+9	; 3
-       ldy_im_0(i+4) and									// ldy #$00				; 4
-       lda_stack(i+5) and									// lda :STACKORIGIN+9			; 5
-       spl(i+6) and dey(i+7) and								// spl					; 6
-       sty_stack(i+8) then									// dey					; 7
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and				// sty :STACKORIGIN+STACKWIDTH+9	; 8
-	(copy(listing[i+3], 6, 256) = copy(listing[i+8], 6, 256)) then
-       begin
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-	listing[i+6]  := '';
-	listing[i+7]  := '';
-	listing[i+8]  := '';
-
-	Result:=false; Break;
-       end;
-}
 
     if spl(i) and										// spl					; 0
        dey(i+1) and										// dey					; 1
@@ -19142,27 +19098,6 @@ var i, l, k, m, x: integer;
      end;
 
 
-{ kopia w/w
-
-    if lda(i) and sta_stack(i+1) and							// lda				; 0
-       lda(i+2) and sta_stack(i+3) and							// sta :STACKORIGIN+9		; 1
-       lda(i+4) and sub_stack(i+5) and							// lda				; 2
-       sta(i+6) and lda(i+7) and							// sta :STACKORIGIN+STACKWIDTH+9; 3
-       sbc_stack(i+8) and sta(i+9) then							// lda				; 4
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and			// sub :STACKORIGIN+9		; 5
-	(copy(listing[i+3], 6, 256) = copy(listing[i+8], 6, 256)) then begin		// sta				; 6
-	listing[i+5] := #9'sub ' + copy(listing[i], 6, 256);				// lda				; 7
-	listing[i+8] := #9'sbc ' + copy(listing[i+2], 6, 256);				// sbc :STACKORIGIN+STACKWIDTH+9; 8
-	listing[i]   := '';								// sta				; 9
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-
-	Result:=false; Break;
-     end;
-}
-
-
     if lda(i) and 									// lda				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN		; 1
        lda(i+2) and (lda_stack(i+2) = false) and					// lda				; 2
@@ -19900,7 +19835,7 @@ var i, l, k, m, x: integer;
 
   if Result = false then RebuildLF;
 
-  repeat until PeepholeOptimization;	 while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+  repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
@@ -25898,13 +25833,31 @@ begin
        if arg0 = optyY then begin
         listing[i-2] := '';
         listing[i-1] := '';
-        listing[i] := '';
+        listing[i]   := '';
        end else
 	if (optyY <> '') and (arg0[1] = '+') and (optyY[1] = '+') then begin
 	  k:=StrToInt(copy(arg0, 3, 3)) - StrToInt(copy(optyY, 3, 3));
 
-	  if k = 1 then begin listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'iny' end else
-	   if k = -1 then begin listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'dey' end;
+	  if k = 1 then begin
+	   listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'iny';
+
+	   if lda(i+1) and adc_im_0(i+2) and sta(i+3) then begin
+	    listing[i+1] := '';
+	    listing[i+2] := '';
+	    listing[i+3] := '';
+	   end;
+
+	  end else
+	  if k = -1 then begin
+	   listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'dey';
+
+	   if lda(i+1) and adc_im_0(i+2) and sta(i+3) then begin
+	    listing[i+1] := '';
+	    listing[i+2] := '';
+	    listing[i+3] := '';
+	   end;
+
+	  end;
 
 //	writeln(optyY,' | ',StrToInt(copy(optyY, 3, 3)),' : ',arg0,' | ', StrToInt(copy(arg0, 3, 3)),' = ',k);
 
@@ -25912,8 +25865,26 @@ begin
 	if (optyY <> '') and (arg0[1] = '-') and (optyY[1] = '-') then begin
 	  k:=StrToInt(copy(arg0, 3, 3)) - StrToInt(copy(optyY, 3, 3));
 
-	  if k = 1 then begin listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'dey' end else
-	   if k = -1 then begin listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'iny' end;
+	  if k = 1 then begin
+	   listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'dey';
+
+	   if lda(i+1) and adc_im_0(i+2) and sta(i+3) then begin
+	    listing[i+1] := '';
+	    listing[i+2] := '';
+	    listing[i+3] := '';
+	   end;
+
+	  end else
+	  if k = -1 then begin
+	   listing[i-2] := ''; listing[i-1] := ''; listing[i] := #9'iny';
+
+	   if lda(i+1) and adc_im_0(i+2) and sta(i+3) then begin
+	    listing[i+1] := '';
+	    listing[i+2] := '';
+	    listing[i+3] := '';
+	   end;
+
+	  end;
 
 //	writeln(optyY,' | ',StrToInt(copy(optyY, 3, 3)),' : ',arg0,' | ', StrToInt(copy(arg0, 3, 3)),' = ',k);
 
