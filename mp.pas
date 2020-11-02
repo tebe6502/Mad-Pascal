@@ -335,9 +335,9 @@ const
   MAXBLOCKS		= 16384;	// maksymalna liczba blokow
   MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
   MAXVARS		= 256;		// maksymalna liczba parametrów dla VAR
-  MAXUNITS		= 128;
+  MAXUNITS		= 512;
   MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
-  MAXALLOWEDUNITS	= 64;
+  MAXALLOWEDUNITS	= 256;
 
   CODEORIGIN		= $100;
   DATAORIGIN		= $8000;
@@ -11065,7 +11065,7 @@ var i, l, k, m, x: integer;
 
 
     if sta_stack(i) and									// sta :STACKORIGIN+10		; 0
-       (sty(i+1) or iny(i+1)) and							// sty|iny			; 1
+       (sty(i+1) or iny(i+1) or ldy(i+1)) and						// sty|iny|ldy			; 1
        lda_stack(i+2) then								// lda :STACKORIGIN+10		; 2
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then begin
 	listing[i]   := '';
