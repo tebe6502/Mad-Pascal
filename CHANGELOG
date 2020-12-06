@@ -1,3 +1,22 @@
+06.12.2020
+- poprawki dla FOR gdy przerywany przez BREAK
+
+02.12.2020
+- poprawione generowanie kodu dla 'CASE expression OF', pozbycie siê stosu, optymalizacja kodu
+- poprawione dzia³anie negacji dla 'type signed := - type unsigned'
+
+01.12.2020
+- poprawki dla @MOVE nie przekraczaj¹cych 256 bajtów, jeœli obszary nie nachodz¹ na siebie i adresy s¹ sta³ymi
+
+29.11.2020
+- przepisana od nowa optymalizacja dla tablic nie przekraczaj¹cych rozmiaru 256 bajtów
+- poprawki dla CASE, brak mo¿liwoœci u¿ycia bezpoœrednio elementu tablicy jako selektora
+- zmiany w RESOURCE, brak podania identyfikatora powoduje do³¹czenia zasobu na koniec programu, adres mo¿na odczytaæ przez GetResourceHandle(pointer, name)
+
+5.11.2020
+- nowe optymalizacje dla tablic nie przekraczaj¹cych rozmiaru 256 bajtów
+- optymalizacja pêtli FOR, jeœli parametry s¹ znane mo¿liwe zmniejszenie rozmiaru typu licznika pêtli
+
 17.10.2020
 - dodany rozkaz 'ldy #$01' na zakoñczenie programu (@halt)
 - mo¿liwoœæ do³¹czenia bloku realizuj¹cego wy³¹czenie BASIC-a {$define basicoff}
