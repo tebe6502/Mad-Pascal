@@ -1,4 +1,5 @@
-
+; https://github.com/cc65/cc65/blob/153bb295010e2dc75ffd544d7091870ff563338d/libsrc/common/memset.s
+;
 ; Ullrich von Bassewitz, 29.05.1998
 ; Performance increase (about 20%) by
 ; Christian Krueger, 12.09.2009, slightly improved 12.01.2011
