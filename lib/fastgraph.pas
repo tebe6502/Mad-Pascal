@@ -961,7 +961,14 @@ procedure InitGraph(mode: byte); overload;
 @description:
 Init graphics mode
 *)
+
+const
+	tlshc: array [0..15] of byte = ($03,$02,$02,$01,$01,$02,$02,$03,$03,$03,$03,$03,$03,$03,$02,$03);	// $EE6D: Table Left SHift Columns
+	tmccn: array [0..15] of byte = ($28,$14,$14,$28,$50,$50,$A0,$A0,$40,$50,$50,$50,$28,$28,$A0,$A0);	// $EE7D: Table Mode Column CouNts
+	tmrcn: array [0..15] of byte = ($18,$18,$0C,$18,$30,$30,$60,$60,$C0,$C0,$C0,$C0,$18,$0C,$C0,$C0);	// $EE8D: Table Mode Row CouNts
+
 var width: byte;
+
 begin
 	GraphMode := mode;
 
@@ -1046,12 +1053,10 @@ asm
 ; Fox/TQA
 
 dindex	equ $57
-tmccn	equ $ee7d
-tmrcn	equ $ee8d
 
 	ldx dindex
-	lda tmccn,x
-	ldy tmrcn,x
+	lda adr.tmccn,x
+	ldy adr.tmrcn,x
 	ldx #0
 	cmp #<320
 	sne:inx
@@ -1082,10 +1087,8 @@ tmrcn	equ $ee8d
 	sty WIN_BOTTOM
 
 
-tlshc	equ $ee6d
-
 	ldx dindex
-	ldy tlshc,x
+	ldy adr.tlshc,x
 	lda #5
 shift	asl @
 	dey
