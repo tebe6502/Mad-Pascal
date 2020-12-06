@@ -259,183 +259,6 @@
 
 
 // -----------------------------------------------------------------------------
-// ===				imulCX 16				  === //
-// -----------------------------------------------------------------------------
-
-    if (listing[i] = #9'lda #$10') and							// lda #$10				; 0	* 16
-       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda_im_0(i+2) and								// lda #$00				; 2
-       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
-       lda(i+4) and									// lda					; 4
-       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
-       lda(i+6) and 									// lda					; 6
-       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
-     begin
-
-
-       if ldy(i+13) and									// ldy			; 13
-          (listing[i+14] = #9'lda :eax') and						// lda :eax		; 14
-	  sta(i+15) and									// sta			; 15
-          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
-	  sta(i+17) and									// sta			; 17
-          (listing[i+18] <> #9'lda :eax+2') then					//~lda :eax+2		; 18
-	begin
-	 listing[i]   := listing[i+6];
-	 listing[i+1] := listing[i+7];
-	 listing[i+2] := listing[i+4];
-
-	 listing[i+3] := #9'asl @';
-	 listing[i+4] := #9'rol :eax+1';
-	 listing[i+5] := #9'asl @';
-	 listing[i+6] := #9'rol :eax+1';
-	 listing[i+7] := #9'asl @';
-	 listing[i+8] := #9'rol :eax+1';
-	 listing[i+9] := #9'asl @';
-	 listing[i+10] := #9'rol :eax+1';
-	 listing[i+11] := #9'sta :eax';
-
-	 listing[i+12] := '';
-
-	 Result:=false; Break;
-	end;
-
-
-     end;
-
-
-// -----------------------------------------------------------------------------
-// ===				imulCX 256				  === //
-// -----------------------------------------------------------------------------
-
-    if lda_im_0(i) and									// lda #$00				; 0	* 256
-       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       (listing[i+2] = #9'lda #$01') and						// lda #$01				; 2
-       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
-       lda(i+4) and									// lda					; 4
-       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
-       lda(i+6) and 									// lda 					; 6
-       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
-     begin
-
-
-      if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
-         sta(i+14) and									// sta			; 14
-         (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
-         sta(i+16) and									// sta			; 16
-         (listing[i+17] <> #9'lda :eax+2') then						//~lda :eax+2		; 17
-       begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-
-	listing[i+6] := listing[i+4];
-	listing[i+4] := #9'lda #$00';
-
-	listing[i+8] := '';
-	listing[i+9] := '';
-	listing[i+10] := '';
-	listing[i+11] := '';
-	listing[i+12] := '';
-
-	Result:=false; Break;
-       end;
-
-
-      if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
-	 add_sub(i+14) and								// add|sub		; 14
-         sta(i+15) and									// sta			; 15
-         (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
-	 adc_sbc(i+17) and								// adc|sbc		; 17
-         sta(i+18) and									// sta			; 18
-         (listing[i+19] <> #9'lda :eax+2') then						//~lda :eax+2		; 19
-       begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-
-	listing[i+6] := listing[i+4];
-	listing[i+4] := #9'lda #$00';
-
-	listing[i+8] := '';
-	listing[i+9] := '';
-	listing[i+10] := '';
-	listing[i+11] := '';
-	listing[i+12] := '';
-
-	Result:=false; Break;
-       end;
-
-
-     end;
-
-
-    if lda(i) and									// lda 					; 0	* 256
-       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and									// lda 					; 2
-       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
-       lda_im_0(i+4) and								// lda #$00				; 4
-       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
-       (listing[i+6] = #9'lda #$01') and 						// lda #$01				; 6
-       (listing[i+7] = #9'sta :eax+1') and 						// sta :eax+1				; 7
-
-       (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
-       sta(i+14) and									// sta			; 14
-       (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
-       sta(i+16) and									// sta			; 16
-       (listing[i+17] <> #9'lda :eax+2') then						//~lda :eax+2		; 17
-     begin
-      listing[i+6] := listing[i];
-      listing[i+4] := #9'lda #$00';
-
-      listing[i]   := '';
-      listing[i+1] := '';
-      listing[i+2] := '';
-      listing[i+3] := '';
-
-      listing[i+8] := '';
-      listing[i+9] := '';
-      listing[i+10] := '';
-      listing[i+11] := '';
-      listing[i+12] := '';
-
-      Result:=false; Break;
-     end;
-
-
-// -----------------------------------------------------------------------------
-// ===				imulCX 320				  === //
-// -----------------------------------------------------------------------------
-
-    if (listing[i] = #9'lda #$40') and							// lda #$40				; 0	* 320
-       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       (listing[i+2] = #9'lda #$01') and						// lda #$01				; 2
-       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
-       lda(i+4) and									// lda 					; 4
-       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
-       lda(i+6) and 									// lda 					; 6
-       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
-     begin
-      listing[i]   := listing[i+4];
-      listing[i+1] := listing[i+5];
-      listing[i+2] := listing[i+6];
-      listing[i+3] := listing[i+7];
-      listing[i+4] := #9'jsr @mul320';
-      listing[i+5] := '';
-      listing[i+6] := '';
-      listing[i+7] := '';
-      listing[i+8] := '';
-      listing[i+9] := '';
-      listing[i+10] := '';
-      listing[i+11] := '';
-      listing[i+12] := '';
-
-      Result:=false; Break;
-     end;
-
-
-// -----------------------------------------------------------------------------
 // ===				imulCX 10				  === //
 // -----------------------------------------------------------------------------
 
@@ -656,3 +479,180 @@
      end;
 
    end;
+
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 16				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'lda #$10') and							// lda #$10				; 0	* 16
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       lda_im_0(i+2) and								// lda #$00				; 2
+       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
+       lda(i+4) and									// lda					; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       lda(i+6) and 									// lda					; 6
+       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
+     begin
+
+
+       if ldy(i+13) and									// ldy			; 13
+          (listing[i+14] = #9'lda :eax') and						// lda :eax		; 14
+	  sta(i+15) and									// sta			; 15
+          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+	  sta(i+17) and									// sta			; 17
+          (listing[i+18] <> #9'lda :eax+2') then					//~lda :eax+2		; 18
+	begin
+	 listing[i]   := listing[i+6];
+	 listing[i+1] := listing[i+7];
+	 listing[i+2] := listing[i+4];
+
+	 listing[i+3] := #9'asl @';
+	 listing[i+4] := #9'rol :eax+1';
+	 listing[i+5] := #9'asl @';
+	 listing[i+6] := #9'rol :eax+1';
+	 listing[i+7] := #9'asl @';
+	 listing[i+8] := #9'rol :eax+1';
+	 listing[i+9] := #9'asl @';
+	 listing[i+10] := #9'rol :eax+1';
+	 listing[i+11] := #9'sta :eax';
+
+	 listing[i+12] := '';
+
+	 Result:=false; Break;
+	end;
+
+
+     end;
+
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 256				  === //
+// -----------------------------------------------------------------------------
+
+    if lda_im_0(i) and									// lda #$00				; 0	* 256
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       (listing[i+2] = #9'lda #$01') and						// lda #$01				; 2
+       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
+       lda(i+4) and									// lda					; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       lda(i+6) and 									// lda 					; 6
+       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
+     begin
+
+
+      if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+         sta(i+14) and									// sta			; 14
+         (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+         sta(i+16) and									// sta			; 16
+         (listing[i+17] <> #9'lda :eax+2') then						//~lda :eax+2		; 17
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	listing[i+6] := listing[i+4];
+	listing[i+4] := #9'lda #$00';
+
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+
+	Result:=false; Break;
+       end;
+
+
+      if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+	 add_sub(i+14) and								// add|sub		; 14
+         sta(i+15) and									// sta			; 15
+         (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+	 adc_sbc(i+17) and								// adc|sbc		; 17
+         sta(i+18) and									// sta			; 18
+         (listing[i+19] <> #9'lda :eax+2') then						//~lda :eax+2		; 19
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	listing[i+6] := listing[i+4];
+	listing[i+4] := #9'lda #$00';
+
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+
+	Result:=false; Break;
+       end;
+
+
+     end;
+
+
+    if lda(i) and									// lda 					; 0	* 256
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       lda(i+2) and									// lda 					; 2
+       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
+       lda_im_0(i+4) and								// lda #$00				; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       (listing[i+6] = #9'lda #$01') and 						// lda #$01				; 6
+       (listing[i+7] = #9'sta :eax+1') and 						// sta :eax+1				; 7
+
+       (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       sta(i+14) and									// sta			; 14
+       (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+       sta(i+16) and									// sta			; 16
+       (listing[i+17] <> #9'lda :eax+2') then						//~lda :eax+2		; 17
+     begin
+      listing[i+6] := listing[i];
+      listing[i+4] := #9'lda #$00';
+
+      listing[i]   := '';
+      listing[i+1] := '';
+      listing[i+2] := '';
+      listing[i+3] := '';
+
+      listing[i+8] := '';
+      listing[i+9] := '';
+      listing[i+10] := '';
+      listing[i+11] := '';
+      listing[i+12] := '';
+
+      Result:=false; Break;
+     end;
+
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 320				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'lda #$40') and							// lda #$40				; 0	* 320
+       (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       (listing[i+2] = #9'lda #$01') and						// lda #$01				; 2
+       (listing[i+3] = #9'sta :ecx+1') and						// sta :ecx+1				; 3
+       lda(i+4) and									// lda 					; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       lda(i+6) and 									// lda 					; 6
+       (listing[i+7] = #9'sta :eax+1') then 						// sta :eax+1				; 7
+     begin
+      listing[i]   := listing[i+4];
+      listing[i+1] := listing[i+5];
+      listing[i+2] := listing[i+6];
+      listing[i+3] := listing[i+7];
+      listing[i+4] := #9'jsr @mul320';
+      listing[i+5] := '';
+      listing[i+6] := '';
+      listing[i+7] := '';
+      listing[i+8] := '';
+      listing[i+9] := '';
+      listing[i+10] := '';
+      listing[i+11] := '';
+      listing[i+12] := '';
+
+      Result:=false; Break;
+     end;

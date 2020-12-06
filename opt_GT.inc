@@ -182,7 +182,7 @@
 	c:=GetByte(i+1);
 
 	if c < $FF then begin
-	 listing[i+1] := #9'cmp #$' + IntToHex(c+1, 2);
+	 listing[i+1] := #9'cmp #$' + IntToHex(c + 1, 2);
 
 	 listing[i+3] := '';
 
