@@ -605,7 +605,7 @@ begin
 
  base:=dpeek(88);
 
- move(pointer($e000), fdata, 1024);
+ move(pointer(peek(756) shl 8), fdata, 1024);
 
  brush.bitmap:=@br;
 
