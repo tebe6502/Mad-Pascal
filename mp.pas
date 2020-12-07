@@ -12105,6 +12105,7 @@ if pos('adr.QB', listing[i+1]) > 0 then begin
 end;
 }
 
+{$i opt_BP_ADR.inc}
 {$i opt_ADR.inc}
 
 
@@ -13604,7 +13605,7 @@ end;
      end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGN+STACKWIDTH		; 0
+    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
        sty_stack(i+1) and									// sty :STACKORIGIN+STACKWIDTH*2	; 1
        lsr_stack(i+2) and									// lsr :STACKORIGIN+STACKWIDTH*2	; 2
        ror_stack(i+3) and									// ror :STACKORIGIN+STACKWIDTH		; 3
@@ -13625,7 +13626,7 @@ end;
      end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGN+STACKWIDTH		; 0
+    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
        sty_stack(i+1) and									// sty :STACKORIGIN+STACKWIDTH*2	; 1
        sty_stack(i+2) and									// sty :STACKORIGIN+STACKWIDTH*3	; 2
        lsr_stack(i+3) and									// lsr :STACKORIGIN+STACKWIDTH*3	; 3
