@@ -49,7 +49,7 @@ Set of custom libraries for MadPascal.
 
 Lastest documentation always at [GitLab]( https://bocianu.gitlab.io/blibs/)
 
-### [pasdoc] https://bocianu.atari.pl/blog/pasdoc
+### [pasdoc](https://bocianu.atari.pl/blog/pasdoc)
 
 Custom tool for generating documentation from pascal comments in units.
 
