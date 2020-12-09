@@ -1334,7 +1334,12 @@ Check if A is a letter.
 *)
 begin
 
- Result := (a>='A') and (a<='Z');
+ case a of
+  'a'..'z' : Result := true;
+  'A'..'Z' : Result := true;
+ else
+  Result := false
+ end;
 
 end;
 
