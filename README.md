@@ -37,7 +37,7 @@ The available features are:
 
 ## Tools
 
-### (MadStrap)[http://bocianu.atari.pl/blog/madstrap]
+### [MadStrap]([http://bocianu.atari.pl/blog/madstrap)
 
 Simple Atari Mad-Pascal common project bootstrap.
 
