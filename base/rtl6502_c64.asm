@@ -43,6 +43,24 @@ numread	.word		; pointer to variable, length of loaded data
 
 	icl 'runtime\macros.asm'
 
+m@call	.macro (os_proc)
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+
+		inc portb
+
+		jsr %%os_proc
+
+		dec portb
+
+	.else
+
+		jsr %%os_proc
+
+	.endif
+
+	.endm
+
 ; -----------------------------------------------------------------------
 
 	icl 'c64\c64.hea'
