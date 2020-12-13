@@ -1,7 +1,7 @@
 	opt l-
 
 /* -----------------------------------------------------------------------
-/*                        CPU 6502 Run Time Library
+/*                        CPU 6502 Run Time Library - C64
 /*			        19.04.2018
 /* -----------------------------------------------------------------------
 /* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
@@ -42,24 +42,6 @@ numread	.word		; pointer to variable, length of loaded data
 ; -----------------------------------------------------------------------
 
 	icl 'runtime\macros.asm'
-
-m@call	.macro (os_proc)
-
-	.ifdef MAIN.@DEFINES.ROMOFF
-
-		inc portb
-
-		jsr %%os_proc
-
-		dec portb
-
-	.else
-
-		jsr %%os_proc
-
-	.endif
-
-	.endm
 
 ; -----------------------------------------------------------------------
 
