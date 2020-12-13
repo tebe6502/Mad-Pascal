@@ -8947,7 +8947,6 @@ var i, l, k, m, x: integer;
 	if Result = false then Break;
        end;
 
-// piss
 
     if sty_stack(i) and									// sty :STACKORIGIN+STACKWIDTH*2	; 0
        sty_stack(i+1) and								// sty :STACKORIGIN+STACKWIDTH*3	; 1
@@ -12047,7 +12046,6 @@ var i, l, k, m, x: integer;
 	Result:=false; Break;
      end;
 
-// piss
 
     if (lda(i) or adc_sbc(i)) and (iy(i) = false) and					// lda|adc|sbc			; 0
        ldy(i+1) and									// ldy				; 1
@@ -12112,8 +12110,6 @@ var i, l, k, m, x: integer;
 	listing[i+3] := #9'sty '+copy(listing[i+3], 6, 256);
 	Result:=false; Break;
      end;
-
-
 
 
     if sta_stack(i) and	(iy(i+1) = false) and (iy(i+3) = false) and			// sta STACK+9			; 0
@@ -14989,21 +14985,14 @@ end;
      end;
 
 
-
     if ldy_im_0(i) and										// ldy #$00		; 0
        lda_stack(i+1) and									// lda :STACKORIGIN+9	; 1
        spl(i+2) and										// spl			; 2
        dey(i+3) and										// dey			; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STA	; 4
        (sta_stack(i+5) or lda_stack(i+5)) then							// lda|sta :STACKORN+9	; 5
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) then begin
-
-
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
-
-
-
+    if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) then
+     begin
 	listing[i+5] := '';
 	Result:=false; Break;
      end;
@@ -18029,7 +18018,7 @@ end;
        sta(i+5) and									// sta					; 5
        lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH+9	; 6
        adc_sbc(i+7) then 								// adc|sbc 				; 7
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and			
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
 	(copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
        begin
 	listing[i+3] := listing[i];
