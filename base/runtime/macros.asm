@@ -43,3 +43,22 @@
 	asl :STACKORIGIN-%%Ofset,x
 	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
 .endm
+
+
+m@call	.macro (os_proc)
+
+	.ifdef MAIN.@DEFINES.ROMOFF
+
+		inc portb
+
+		jsr %%os_proc
+
+		dec portb
+
+	.else
+
+		jsr %%os_proc
+
+	.endif
+
+	.endm
