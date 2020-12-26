@@ -1,3 +1,9 @@
+26.12.2020
+- dodany test na obecnoœæ niedozwolonych instrukcji w bloku INTERRUPT (:BP, :STACKORIGIN)
+
+21.12.2020
+- opt_ADR.inc zosta³ przepisany
+
 06.12.2020
 - poprawki dla FOR gdy przerywany przez BREAK
 
