@@ -30,6 +30,25 @@
    begin
 
 
+    if (listing[i+9] = #9'lda :eax') and						// lda :eax				; 9
+       sta(i+10) and									// sta					; 10
+       (lda(i+11) = false) then
+     begin
+      listing[i]   := '';
+      listing[i+1] := '';
+
+      listing[i+3] := #9'asl @';
+      listing[i+4] := #9'add ' + copy(listing[i+2], 6, 256);
+      listing[i+5] := '';
+      listing[i+6] := '';
+      listing[i+7] := '';
+      listing[i+8] := '';
+      listing[i+9] := '';
+
+      Result:=false; Break;
+     end;
+
+
     if (listing[i+9] = #9'ldy :eax') then						// ldy :eax				; 9
      begin
       listing[i]   := '';
