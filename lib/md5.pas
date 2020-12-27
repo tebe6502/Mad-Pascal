@@ -41,7 +41,7 @@ type
  TMD5 = record
     Align,
     BufCnt,
-    Len     : cardinal;
+    Len     : word;
     State   : array [0..3] of cardinal;
     Buffer  : array [0..63] of byte;
   end;
@@ -66,7 +66,7 @@ type
 
 const
 
-s: array[0..63] of cardinal = (
+s: array[0..63] of byte = (
 	7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
 	5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
 	4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
@@ -90,14 +90,14 @@ K: array[0..63] of cardinal = (
 	$6fa87e4f, $fe2ce6e0, $a3014314, $4e0811a1,
 	$f7537e82, $bd3af235, $2ad7d2bb, $eb86d391 );
 
-
-function leftrotate(x: cardinal; c: byte): Cardinal;
+{
+function leftrotate(x: cardinal; c: byte): cardinal; register;
 begin
  leftrotate := (x shl c) or (x shr byte(32-c));
 end;
+}
 
-
-function reverse32(v: cardinal): cardinal;
+function reverse32(v: cardinal): cardinal; register;
 begin
  reverse32 := byte(v shr 24) + byte(v shr 16) shl 8 + byte(v shr 8) shl 16 + byte(v) shl 24;
 end;
@@ -122,43 +122,50 @@ type
   TBlock = array[0..15] of Cardinal;
   PBlock = ^TBlock;
 var
-  a, b, c, d, f, g, tmp: Cardinal;
+  a, b, c, d, f, x, y: Cardinal;
   Block: PBlock;// absolute Buffer;
-  i: byte;
+  i, g: byte;
 
 begin
 
-  Block:=Buffer;
+//  Block:=Buffer;
 
   a := Context.State[0];
   b := Context.State[1];
   c := Context.State[2];
   d := Context.State[3];
 
-//Main loop:
+//main loop:
     for i := 0 to 63 do begin
 
 	if i < 16 then begin
-	  F := (B and C) or ((not B) and D);
-	  g := i;
+	  g := i shl 2;
+	  f := (b and c) or ((not b) and d);
 	end else
 	if i < 32 then begin
-	  F := (D and B) or ((not D) and C);
-	  g := (5*i + 1) and $0f;
+	  g := ((5*i + 1) and $0f) shl 2;
+	  f := (d and b) or ((not d) and c);
 	end else
 	if i < 48 then begin
-	  F := B xor C xor D;
-	  g := (3*i + 5) and $0f;
+	  g := ((3*i + 5) and $0f) shl 2;
+	  f := b xor c xor d;
 	end else begin
-	  F := C xor (B or (not D));
-	  g := (7*i) mod 16;
+	  g := ((7*i) and $0f) shl 2;
+	  f := c xor (b or (not d));
 	end;
 
-        tmp := D;
-        D := C;
-        C := B;
-        B := B + leftrotate((A + F + K[i] + Block[g]), s[i]);
-        A := tmp;
+	Block:=pointer(word(Buffer) + g);
+
+	f:=f+a;
+
+	a := d;
+        d := c;
+        c := b;
+
+	x := f + K[i] + Block^;
+        y := (x shl s[i]) or (x shr byte(32-s[i]));
+
+        b := b + y;	// leftrotate(f + K[i] + Block^, s[i]);
     end;
 
   inc(Context.State[0], a);
@@ -173,7 +180,7 @@ end;
 
 procedure MDUpdate(var Context: TMD5; var Buf; const BufLen: Word);
 var
-  Align, Num: cardinal;
+  Align, Num: word;
   Src: PByte;
 begin
 
@@ -231,7 +238,7 @@ const
   PADDING_MD45: array[0..15] of Cardinal = ($80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 var
   Len: cardinal;
-  Pads: cardinal;
+  Pads: word;
 begin
 
   // 1. Compute length of the whole stream in bits
