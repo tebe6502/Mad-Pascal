@@ -271,7 +271,7 @@
        (listing[i+9] = #9'lda :eax') and						// lda :eax				; 9
        add_sub(i+10) and								// add|sub				; 10
        and_ora_eor(i+11) and								// and_ora_eor				; 11
-       sta(i+12) then									// sta					; 12
+       (sta(i+12) or asl_a(i+12) or lsr_a(i+12)) then					// sta|asl @|lsr @			; 12
      begin
 
       listing[i+1] := #9'asl @';
@@ -398,7 +398,7 @@
        											// eif					; 8
        (listing[i+9] = #9'lda :eax') and						// lda :eax				; 9
        and_ora_eor(i+10) and								// and|ora|eor				; 10
-       sta(i+11) and									// sta					; 11
+       (sta(i+11) or asl_a(i+11) or lsr_a(i+11)) and					// sta|asl @|lsr @			; 11
        (listing[i+12] <> #9'lda :eax+1') then						// ~lda :eax+1				; 12
      begin
       listing[i+1] := #9'asl @';
@@ -426,7 +426,7 @@
        											// eif					; 8
        (listing[i+9] = #9'lda :eax') and						// lda :eax				; 9
        and_ora_eor(i+10) and								// and|ora|eor				; 10
-       sta(i+11) and									// sta					; 11
+       (sta(i+11) or asl_a(i+11) or lsr_a(i+11)) and					// sta|asl @|lsr @			; 11
        (listing[i+12] <> #9'lda :eax+1') then						// ~lda :eax+1				; 12
      begin
       listing[i] := listing[i+2];
