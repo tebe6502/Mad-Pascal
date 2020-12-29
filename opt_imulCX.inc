@@ -591,6 +591,31 @@
        end;
 
 
+      if lda(i+13) and									// lda			; 13
+	 ((listing[i+14] = #9'add :eax') or (listing[i+14] = #9'sub :eax')) and		// add|sub :eax		; 14
+         tay(i+15) and									// tay			; 15
+	 lda(i+16) and									// lda			; 16
+	 ((listing[i+17] = #9'adc :eax+1') or (listing[i+17] = #9'sbc :eax+1')) and	// adc|sbc :eax+1	; 17
+         sta_bp_1(i+18) then								// sta :bp+1		; 18
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	listing[i+6] := listing[i+4];
+	listing[i+4] := #9'lda #$00';
+
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+
+	Result:=false; Break;
+       end;
+
+
      end;
 
 
