@@ -516,14 +516,14 @@ begin
     CRT_cursor := y * CRT_screenWidth + x + CRT_vram;
 end;
 
-function CRT_WhereY:byte;
+function CRT_WhereY: byte;
 begin
-    result := (CRT_cursor - CRT_vram) div CRT_screenWidth;
+    result := word(CRT_cursor - CRT_vram) div CRT_screenWidth;
 end;
 
-function CRT_WhereX:byte;
+function CRT_WhereX: byte;
 begin
-    result := (CRT_cursor - CRT_vram) mod CRT_screenWidth;
+    result := word(CRT_cursor - CRT_vram) mod CRT_screenWidth;
 end;
 
 procedure CRT_Write(s: string);overload;
