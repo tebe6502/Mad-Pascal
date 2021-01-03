@@ -316,6 +316,33 @@
       end;
 
 
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       seq(i+9) and										// seq			; 9
+       (listing[i+10] = #9'bpl @+') and								// bpl @+		; 10
+       dey(i+11) and										// dey			; 11
+       (listing[i+12] = '@') and								//@			; 12
+       (sty(i+13) or tya(i+13)) and								// sty|tya		; 13
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint_0 > shorint_1 => shortint_1 < shortint_0
+       lda(i+1) and										// lda K		; 1
+       sub(i+2) and (sub_im(i+2) = false) and							// sub U		; 2
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
+      begin
+        tmp := listing[i+1];
+
+	listing[i+1] := #9'lda ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'sub ' + copy(tmp, 6, 256);
+
+	listing[i+9]  := '';
+	listing[i+10] := #9'bmi @+';
+
+	Result:=false; Break;
+      end;
+
+
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        seq(i+16) and										// seq			; 16
        (listing[i+17] = #9'bpl @+') and								// bpl @+		; 17
@@ -425,6 +452,44 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 	listing[i+10] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+       seq(i+16) and										// seq			; 16
+       (listing[i+17] = #9'bpl @+') and								// bpl @+		; 17
+       dey(i+18)  and										// dey			; 18
+       (listing[i+19] = '@') and								//@			; 19
+       (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
+
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	smallint_0 > smallint_1 => smallint_1 < smallint_0
+       lda(i+1) and										// lda K+1		; 1
+       sub(i+2) and (sub_im(i+2) = false) and							// sub U+1		; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda(i+4) and										// lda K		; 4
+       cmp(i+5) and (cmp_im(i+5) = false) and							// cmp U		; 5
+       (listing[i+6] = #9'beq L5') and								// beq L5		; 6
+       lda_im_0(i+7) and									// lda #$00		; 7
+       (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
+       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       (listing[i+10] = #9'bne L5') and								// bne L5		; 10
+       (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
+       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
+       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       (listing[i+14] = 'L5') then								//L5			; 14
+      begin
+	tmp := listing[i+1];
+	listing[i+1] := #9'lda ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'sub ' + copy(tmp, 6, 256);
+
+	tmp := listing[i+4];
+	listing[i+4] := #9'lda ' + copy(listing[i+5], 6, 256);
+	listing[i+5] := #9'cmp ' + copy(tmp, 6, 256);
+
+	listing[i+16] := '';
+	listing[i+17] := #9'bmi @+';
 
 	Result:=false; Break;
       end;
