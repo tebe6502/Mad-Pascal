@@ -429,12 +429,12 @@ var
 
   {Used while reading the codes}
   BitsIn       : Byte;
-  
-  
+
+
 const
- 
+
  BitShift: array [0..15] of word = (1,2,4,8,$10,$20,$40,$80,$100,$200,$400,$800,$1000,$2000,$4000,$8000);
- 
+
 
   {Local function to read from the buffer}
   function LoadByte : Byte;

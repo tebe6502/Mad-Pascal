@@ -90,8 +90,8 @@ const
 	function FindNext(var f: TSearchRec): byte; assembler;
 	function GetTickCount: cardinal; assembler;
 	function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;
-	function IntToStr(a: integer): TString; assembler; overload;
-	function IntToStr(a: cardinal): TString; assembler; overload;
+	function IntToStr(a: integer): TString; assembler; inline; overload;
+	function IntToStr(a: cardinal): TString; assembler; inline; overload;
 	function IsLeapYear(Year: Word): boolean;
 	function Now: TDateTime;
 	function RenameFile(var OldName,NewName: TString): Boolean; assembler;
@@ -495,7 +495,7 @@ skp	sty adr.Result
 end;
 
 
-function IntToStr(a: integer): TString; assembler; overload;
+function IntToStr(a: integer): TString; assembler; inline; overload;
 (*
 @description: Convert an INTEGER value to a decimal string
 
@@ -518,7 +518,7 @@ asm
 end;
 
 
-function IntToStr(a: cardinal): TString; assembler; overload;
+function IntToStr(a: cardinal): TString; assembler; inline; overload;
 (*
 @description: Convert an CARDINAL value to a decimal string
 
