@@ -246,8 +246,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 	function Cos(x: Real): Real; overload;
 	function Cos(x: Single): Single; overload;
-	function DPeek(a: word): word; register; assembler;
-	procedure DPoke(a: word; value: word); register; assembler;
+	function DPeek(a: word): word; register; inline; assembler;
+	procedure DPoke(a: word; value: word); register; inline; assembler;
 	function Eof(var f: file): Boolean;
 	function Exp(x: Real): Real; overload;
 	function Exp(x: Float): Float; overload;
@@ -261,7 +261,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure FillChar(var x; count: word; value: char); assembler; register; overload;
 	procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
 	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
-	function FloatToStr(a: real): TString; assembler;
+	function FloatToStr(a: real): TString; inline; assembler;
 	procedure FreeMem(var p; size: word); assembler; register;
 	procedure GetMem(var p; size: word); assembler; register;
 	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
@@ -279,8 +279,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function ParamStr(i: byte): TString; assembler;
 	procedure Pause; assembler; overload;
 	procedure Pause(n: word); assembler; overload;
-	function Peek(a: word): byte; register; assembler;
-	procedure Poke(a: word; value: byte); register; assembler;
+	function Peek(a: word): byte; register; inline; assembler;
+	procedure Poke(a: word; value: byte); register; inline; assembler;
 	function Random: Real; overload;
 	function Random(range: byte): byte; assembler; overload;
 	function Random(range: smallint): smallint; overload;
@@ -292,8 +292,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sin(x: Real): Real; overload;
 	function Sin(x: Single): Single; overload;
 	function Space(b: Byte): ^string; assembler;
-	procedure Str(a: integer; var s: TString); overload; assembler;
-	procedure Str(a: cardinal; var s: TString); overload; assembler;
+	procedure Str(a: integer; var s: TString); overload; inline; assembler;
+	procedure Str(a: cardinal; var s: TString); overload; inline; assembler;
 	function StringOfChar(c: Char; l: byte): ^string; assembler;
 	function Sqr(x: Real): Real; overload;
 	function Sqr(x: Single): Single; overload;
@@ -352,7 +352,7 @@ asm
 end;
 
 
-function Peek(a: word): byte; register; assembler;
+function Peek(a: word): byte; register; inline; assembler;
 (*
 @description:
 Reads BYTE from the desired memory address
@@ -368,7 +368,7 @@ asm
 end;
 
 
-function DPeek(a: word): word; register; assembler;
+function DPeek(a: word): word; register; inline; assembler;
 (*
 @description:
 Reads WORD from the desired memory address
@@ -1559,7 +1559,7 @@ begin
 end;
 
 
-function FloatToStr(a: real): TString; assembler;
+function FloatToStr(a: real): TString; inline; assembler;
 (*
 @description:
 Convert a float value to a string
@@ -1583,7 +1583,7 @@ asm
 end;
 
 
-procedure Str(a: integer; var s: TString); overload; assembler;
+procedure Str(a: integer; var s: TString); overload; inline; assembler;
 (*
 @description:
 Convert a numerical value to a string
@@ -1605,7 +1605,7 @@ asm
 end;
 
 
-procedure Str(a: cardinal; var s: TString); overload; assembler;
+procedure Str(a: cardinal; var s: TString); overload; inline; assembler;
 (*
 @description:
 Convert a numerical value to a string
@@ -1627,7 +1627,7 @@ asm
 end;
 
 
-procedure Poke(a: word; value: byte); register; assembler;
+procedure Poke(a: word; value: byte); register; inline; assembler;
 (*
 @description:
 Store BYTE at the desired memory address
@@ -1642,7 +1642,7 @@ asm
 end;
 
 
-procedure DPoke(a: word; value: word); register; assembler;
+procedure DPoke(a: word; value: word); register; inline; assembler;
 (*
 @description:
 Store WORD at the desired memory address

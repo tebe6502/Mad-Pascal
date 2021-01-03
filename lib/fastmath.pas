@@ -8,6 +8,7 @@ unit fastmath;
  @description:
 
  https://codebase64.org/doku.php?id=base:6502_6510_maths
+ https://dwheeler.com/6502/oneelkruns/asm1step.html
 *)
 
 

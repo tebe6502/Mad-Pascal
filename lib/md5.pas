@@ -242,7 +242,7 @@ var
 begin
 
   // 1. Compute length of the whole stream in bits
-  Len := (Context.Len + Context.BufCnt) shl 3;
+  Len := word(Context.Len + Context.BufCnt) shl 3;
 
   // 2. Append padding bits
   if Context.BufCnt >= 56 then
