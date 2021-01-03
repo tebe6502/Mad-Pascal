@@ -326,6 +326,27 @@
      end;
 
 
+ {
+*5
+	 listing[i]   := #9'lda #$00';
+	 listing[i+1] := #9'sta :eax+1';
+
+	 listing[i+3] := #9'asl @';
+	 listing[i+4] := #9'rol :eax+1';
+	 listing[i+5] := #9'asl @';
+	 listing[i+6] := #9'rol :eax+1';
+	 listing[i+7] := #9'add ' + copy(listing[i+2], 6, 256);
+	 listing[i+8] := #9'sta :eax';
+	 listing[i+9] := #9'scc';
+	 listing[i+10] := #9'inc :eax+1';
+
+	lda :eax
+	sta O
+	lda :eax+1
+	sta O+1
+}
+
+
     if (listing[i] = #9'lda #$05') and							// lda #$05				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2

@@ -1,3 +1,10 @@
+03.01.2021
+- przekazywanie parametrów typu prostego do procedur/funkcji odbywa siê teraz bez udzia³u stosu programowego
+
+01.01.2021
+- optymalizacja, zamiany shortint_0 > shortint_1 => shortint_1 < shortint_0
+- optymalizacja, zamiany smallint_0 > smallint_1 => smallint_1 < smallint_0
+
 26.12.2020
 - dodany test na obecnoœæ niedozwolonych instrukcji w bloku INTERRUPT (:BP, :STACKORIGIN)
 
