@@ -580,7 +580,7 @@ var
   AddDefines: integer = 1;
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
-  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks,
+  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func,
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, Debug: Integer;
 
@@ -3964,6 +3964,11 @@ var i, l, k, m, x: integer;
    end;
 
 
+   function IX(i: integer): Boolean;
+   begin
+    Result := pos(',x', listing[i]) > 0;
+   end;
+
    function IY(i: integer): Boolean;
    begin
     Result := pos(',y', listing[i]) > 0;
@@ -4813,6 +4818,14 @@ var i, l, k, m, x: integer;
   for i := 0 to l - 1 do
    if listing[i] <> '' then begin
 
+{
+   if pos('imulBYTE', listing[i]) > 0 then begin
+
+      for p:=0 to l-1 do writeln(listing[p]);
+      writeln('-------');
+
+   end;
+}
 
     if dex(i) and inx(i+1) then									// dex
      begin											// inx
@@ -4830,8 +4843,19 @@ var i, l, k, m, x: integer;
      end;
 
 
-    if lda_stack(i) and										// lda :STACKORIGIN+9
-       sta_stack(i+1) then									// sta :STACKORIGIN+9
+    if inx(i) and										// inx				; 0
+       lda(i+1) and (ix(i+1) = false) and							// lda				; 1
+       (listing[i+2] = #9'sta @PARAM?') and							// sta @PARAM?			; 2
+       dex(i+3) then										// dex				; 3
+     begin
+       listing[i]   := '';
+       listing[i+3] := '';
+       Result:=false; Break;
+     end;
+
+
+    if lda_stack(i) and										// lda :STACKORIGIN+9		; 0
+       sta_stack(i+1) then									// sta :STACKORIGIN+9		; 1
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -5873,6 +5897,23 @@ var i, l, k, m, x: integer;
        listing[i+3] := #9'tya';
        listing[i+4] := #9'ora :STACKORIGIN+1,x';
        listing[i+5] := #9'';
+
+       Result:=false; Break;
+     end;
+
+
+
+    if (listing[i] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 0
+       dex(i+1) and										// dex					; 1
+       (listing[i+2] = #9'jsr orAL_CL') and							// jsr orAL_CL				; 2
+       dex(i+3) and										// dex					; 3
+       (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
+       sta(i+5) and (ix(i+5) = false) and							// sta					; 5
+       dex(i+6) then										// dex					; 6
+     begin
+       listing[i+6] := listing[i+5];
+       listing[i+5] := #9'lda :STACKORIGIN+1,x';
+       listing[i+4] := #9'dex';
 
        Result:=false; Break;
      end;
@@ -7487,6 +7528,40 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if (pos(#9'jsr ', listing[i]) > 0) and							// jsr					; 0
+       (listing[i+1] = #9'mva #$00 :STACKORIGIN-1+STACKWIDTH,x') and				// mva #$00 :STACKORIGIN-1+STACKWIDTH,x	; 1
+       (listing[i+2] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x	; 2
+       add_sub_AX_CX(i+3) and									// jsr addAX_CX|subAX_CX		; 3
+       dex(i+4) and										// dex					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       sta(i+6) and										// sta					; 6
+       (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
+       sta(i+8) then										// sta					; 8
+     begin
+
+       if listing[i+3] = #9'jsr addAX_CX' then begin
+	listing[i+1] := #9'lda :STACKORIGIN-1,x';
+	listing[i+2] := #9'add :STACKORIGIN,x';
+	listing[i+3] := #9'sta ' + copy(listing[i+6], 6, 256);
+	listing[i+4] := #9'lda #$00';
+	listing[i+5] := #9'adc #$00';
+	listing[i+6] := #9'sta ' + copy(listing[i+8], 6, 256);
+       end else begin
+	listing[i+1] := #9'lda :STACKORIGIN-1,x';
+	listing[i+2] := #9'sub :STACKORIGIN,x';
+	listing[i+3] := #9'sta ' + copy(listing[i+6], 6, 256);
+	listing[i+4] := #9'lda #$00';
+	listing[i+5] := #9'sbc #$00';
+	listing[i+6] := #9'sta ' + copy(listing[i+8], 6, 256);
+       end;
+
+       listing[i+7] := #9'dex';
+       listing[i+8] := '';
+
+       Result:=false; Break;
+     end;
+
+
     if mva(i) and (mva_stack(i) = false) and							// mva ... :STACKORIGIN,x		; 0
        mva(i+1) and (mva_stack(i+1) = false) and						// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and 										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
@@ -7733,6 +7808,20 @@ var i, l, k, m, x: integer;
        listing[i]   := '';
 
        listing[i+2] := #9'mva :eax ' + copy(listing[i+2], pos(',x', listing[i+2])+3, length(listing[i+2]) ) ;
+
+       Result:=false; Break;
+     end;
+
+
+    if (listing[i] = #9'jsr movaBX_EAX') and							// jsr movaBX_EAX			; 0
+       dex(i+1) and										// dex					; 1
+       (listing[i+2] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 2
+       sta(i+3) and										// sta					; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i] := '';
+
+       listing[i+2] := #9'lda :eax';
 
        Result:=false; Break;
      end;
@@ -12225,8 +12314,9 @@ var i, l, k, m, x: integer;
 	Result:=false; Break;
       end;
 
+
 {
-if (pos('@PARAM', listing[i+3]) > 0) then begin
+if (pos('sub PLAYER', listing[i+3]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22541,6 +22631,26 @@ end;
      end;
 
 
+    if lda(i) and										// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+10			; 1
+       ldy_1(i+2) and										// ldy #1				; 2
+       (listing[i+3] = #9'.LOCAL') and								// .LOCAL				; 3
+       lda(i+4) and										// lda					; 4
+       sub(i+5) and										// sub 					; 5
+       (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN+10			; 7
+       cmp(i+8) then										// cmp 					; 8
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256)) then
+     begin
+       listing[i+7]  := #9'lda ' + copy(listing[i], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+
+       Result:=false; Break;
+     end;
+
+
     if ldy(i) and										// ldy 					; 0
        lda(i+1) and										// lda 					; 1
        sty_stack(i+2) and									// sty :STACKORIGIN+STACKWIDTH+10	; 2
@@ -24640,7 +24750,7 @@ begin
    if pos(#9'dex', a) > 0 then begin dec(x); t:='' end;
 
 
-   if (pos('@print', a) > 0) then begin x:=100; Break end;		// zakoncz optymalizacje niepowodzeniem
+   if (pos('@print', a) > 0) then begin x:=51; arg0:='@print'; Break end;		// zakoncz optymalizacje niepowodzeniem
 
 
      if (pos(#9'jsr ', a) > 0) or (pos('m@', a) > 0) then begin
@@ -25447,6 +25557,29 @@ begin
 	inc(l);
      end;    // if k in [0,1]
 
+     end;
+
+{
+writeln(l);
+writeln(listing[m]);
+writeln(listing[m+1]);
+writeln(listing[m+2]);
+writeln(listing[m+3]);
+writeln(listing[m+4]);
+writeln(listing[m+5]);
+writeln('------------');
+}
+
+    if (l=9) and
+       (lda_stack(m) = false) and (lda_im(m) = false) and				// lda 					; 0
+       (listing[m+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       (listing[m+2] = #9'lda #$28') and						// lda #$28				; 2
+       (listing[m+3] = #9'sta :eax') and						// sta :eax				; 3
+       IFDEF_MUL8(m+4) then
+     begin
+      listing[m+1] := #9'jsr @mul40';
+
+      l:=2;
      end;
 
 
@@ -27180,7 +27313,7 @@ begin
       optyA := arg0;
 
      end else
-     if lda(i) or mva(i) or mwa(i) or tya(i) or (listing[i] = '@') or (pos('l_', listing[i]) = 1) or  //SKIP(i) or
+     if lda(i) or mva(i) or mwa(i) or tya(i) or (listing[i] = '@') or (pos('l_', listing[i]) = 1) or //SKIP(i) or
 	(pos(#9'jsr ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
 
 
@@ -29157,13 +29290,16 @@ end;// GenerateInterrupt
 *)
 
 
-procedure StopOptimization;//(assign: Boolean = false);
+procedure StopOptimization;
 begin
 
+ if run_func = 0 then begin
+
   optimize.use := false;
-//  optimize.assign := assign;
 
   if High(OptimizeBuf) > 0 then asm65;
+
+ end;
 
 end;
 
@@ -29173,10 +29309,10 @@ begin
 
   StopOptimization;
 
-//  optimize.assign := false;
   optimize.use := true;
   optimize.unitIndex := Tok[i].UnitIndex;
   optimize.line:= Tok[i].Line;
+
 end;
 
 
@@ -30511,7 +30647,7 @@ case IndirectionLevel of
 
 end;// case
 
-StopOptimization;//(true);
+StopOptimization;
 
 end;
 
@@ -33748,15 +33884,13 @@ end;
 
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer);
-var NumActualParams, IdentTemp, ParamIndex, idx, j: integer;
+var NumActualParams, IdentTemp, ParamIndex, idx, j, old_func: integer;
     ActualParamType, AllocElementType: byte;
     svar: string;
     yes: Boolean;
 begin
 
    j := i;
-
-//   if Ident[IdentIndex].Kind = PROCEDURETOK then StartOptimization(i);
 
    if Ident[IdentIndex].ProcAsBlock = BlockStack[BlockStackTop] then Ident[IdentIndex].isRecursion := true;
 
@@ -33768,8 +33902,6 @@ begin
 
 
 //   yes:=true;
-
-   StartOptimization(i);
 
 
    NumActualParams := 0;
@@ -33959,12 +34091,18 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
    Error(i, 'Unassigned: ' + IntToStr(Ident[IdentIndex].Param[ParamIndex].DataType) );
   end;
 
-  StopOptimization;
+  old_func:=run_func;
+  run_func:=0;
+
+  if (Ident[IdentIndex].isInline = false) then
+						if Ident[IdentIndex].Kind = FUNC then
+	  						StartOptimization(i)
+						else
+	  						StopOptimization;
+
+  run_func:=old_func;
 
  end;
-
-
- if (Ident[IdentIndex].Kind = FUNCTIONTOK) and (Ident[IdentIndex].isInline = false) then StartOptimization(i);
 
  Gen;
 
@@ -33973,7 +34111,6 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
  ResetOpty;
 
 end;
-
 
 
 function CompileFactor(i: Integer; out isZero: Boolean; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer;
@@ -34779,9 +34916,15 @@ case Tok[i].Kind of
 
 //	  end;
 
+	StartOptimization(i);
+
+	inc(run_func);
+
 	CompileActualParameters(i, IdentIndex);
 
 	ValType := Ident[IdentIndex].DataType;
+
+	dec(run_func);
 
 	Result := i;
 	end // FUNC
@@ -36646,9 +36789,15 @@ case Tok[i].Kind of
 
 //	  end;
 
-	  CompileActualParameters( i, IdentIndex);
+	  StartOptimization(i);
+
+	  inc(run_func);
+
+	  CompileActualParameters(i, IdentIndex);
 
 	  if Ident[IdentIndex].Kind = FUNC then a65(__subBX);	// zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
+
+	  dec(run_func);
 
 	  Result := i;
 	  end;// PROC
@@ -40830,7 +40979,6 @@ var i, j, DataSegmentSize, IdentIndex: Integer;
 begin
 
 optimize.use := false;
-//optimize.assign := false;
 
 IOCheck := true;
 
@@ -41473,7 +41621,7 @@ begin
  BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0;
  VarDataSize := 0; NumStaticStrChars := 0;
  NumBlocks := 0; NumTypes := 0;
- CaseCnt :=0; IfCnt := 0;
+ CaseCnt :=0; IfCnt := 0; run_func := 0;
  NumTok := 0; NumIdent := 0;
  NumDefines := AddDefines; IfdefLevel := 0;
  //Defines[1] := 'ATARI';
@@ -41532,7 +41680,7 @@ begin
 
  NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0;
  VarDataSize := 0; NumStaticStrChars := NumStaticStrCharsTmp;
- CaseCnt :=0; IfCnt := 0; NumTypes := 0;
+ CaseCnt :=0; IfCnt := 0; NumTypes := 0; run_func := 0;
  ResetOpty;
  optyFOR0 := '';
  optyFOR1 := '';
