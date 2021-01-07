@@ -181,9 +181,9 @@
 	if jmi(i+9) then begin
 	 listing[i] := listing[i+1];
 	 listing[i+1] := listing[i+2];
-	 listing[i+2] := #9'svs';
+	 listing[i+2] := #9'svc';
 	 listing[i+3] := #9'eor #$80';
-	 listing[i+4] := #9'jpl ' + copy(listing[i+9], 6, 256);
+	 listing[i+4] := #9'jmi ' + copy(listing[i+9], 6, 256);
 	end else
 	if p <> Low(shortint) then begin
 	 listing[i] := listing[i+1];
@@ -225,13 +225,16 @@
 	listing[i] := listing[i+1];
 	listing[i+1] := listing[i+2];
 
-	if jpl(i+9) then
-	 listing[i+2] := #9'svc'
-	else
-	 listing[i+2] := #9'svs';
+	if jpl(i+9) then begin
+	 listing[i+2] := #9'svc';
+	 listing[i+3] := #9'eor #$80';
+	 listing[i+4] := #9'jpl ' + copy(listing[i+9], 6, 256);
+	end else begin
+	 listing[i+2] := #9'svc';
+	 listing[i+3] := #9'eor #$80';
+	 listing[i+4] := #9'jmi ' + copy(listing[i+9], 6, 256);
+	end;
 
-	listing[i+3] := #9'eor #$80';
-	listing[i+4] := #9'jpl ' + copy(listing[i+9], 6, 256);
 	listing[i+5] := '';
 	listing[i+6] := '';
 	listing[i+7] := '';
@@ -240,6 +243,62 @@
 
 	Result:=false; Break;
       end;
+
+
+// piss
+
+
+    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+       ((listing[i+9] = #9'bpl @+') or (listing[i+9] = #9'bmi @+')) and				// bpl @+|bmi @+	; 9
+       dey(i+10) and										// dey			; 10
+       (listing[i+11] = '@') and								//@			; 11
+       (sty(i+12) or tya(i+12)) and								// tya			; 12
+
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL shortint >= shortint	BPL
+       lda(i+1) and										// lda E		; 1	BOOL shortint < shortint	BMI
+       sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
+       (listing[i+3] = #9'beq L5') and								// beq L5		; 3
+       (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
+       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
+       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       (listing[i+7] = 'L5') then								//L5			; 7
+
+      begin
+	listing[i] := listing[i+1];
+	listing[i+1] := listing[i+2];
+	listing[i+2] := #9'svc';
+	listing[i+3] := #9'eor #$80';
+	listing[i+4] := listing[i+9];
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (SKIP(i) = false) and									//
+       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       dey(i+2) and										// dey			; 2
+       (listing[i+3] = '@') and									//@			; 3
+       tya(i+4) and										// tya			; 4
+       jne(i+5) then										// sta			; 5
+      begin
+       listing[i+1] := #9'jpl ' + copy(listing[i+5], 6, 256);
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+
+       for p:=i-1 downto 0 do
+	 if ldy_1(p) then begin listing[p]:=''; Break end;
+
+       Result:=false; Break;
+      end;
+
+
 
 
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
@@ -265,14 +324,8 @@
 	listing[i+11] := listing[i+5];
 	listing[i+12] := listing[i+1];
 	listing[i+13] := #9'sbc ' + copy(listing[i+2], 6, 256);
-
-	if jpl(i+16) then
-	 listing[i+14] := #9'svc'
-	else
-	 listing[i+14] := #9'svs';
-
+	listing[i+14] := #9'svc';
 	listing[i+15] := #9'eor #$80';
-	listing[i+16] := #9'jpl ' + copy(listing[i+16], 6, 256);
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -428,9 +481,9 @@
 	 listing[i+11] := listing[i+5];
 	 listing[i+12] := listing[i+1];
 	 listing[i+13] := #9'sbc ' + copy(listing[i+2], 6, 256);
-	 listing[i+14] := #9'svs';
+	 listing[i+14] := #9'svc';
 	 listing[i+15] := #9'eor #$80';
-	 listing[i+16] := #9'jpl ' + copy(listing[i+16], 6, 256);
+	 listing[i+16] := #9'jmi ' + copy(listing[i+16], 6, 256);
 	end;
 
 	listing[i] := '';

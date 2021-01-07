@@ -3238,7 +3238,7 @@ begin
       (TemporaryBuf[5] = '') and							//			; 5
       (pos('; optimize OK', TemporaryBuf[6]) > 0) and					//; optimize OK		; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      (pos('ldy ', TemporaryBuf[8]) > 0) then						// ldy			; 8
+      (pos('ldy #', TemporaryBuf[8]) > 0) then						// ldy #		; 8
     begin
       yes:=true;
 
@@ -3269,6 +3269,7 @@ begin
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
+           (TemporaryBuf[p] = #9'tya') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
 
      end;
@@ -12316,13 +12317,14 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('sub PLAYER', listing[i+3]) > 0) then begin
+if (pos('adr.QB', listing[i+3]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
 {$i opt_BP_ADR.inc}
 {$i opt_ADR.inc}
@@ -15707,6 +15709,23 @@ end;
      end;
 
 
+    if ldy_im_0(i) and										// ldy #$00		; 0
+       lda(i+1) and										// lda			; 1
+       spl(i+2) and										// spl			; 2
+       dey(i+3) and										// dey			; 3
+       (listing[i+4] = #9'sty #$00') and							// sty #$00		; 4
+       lda(i+5) then										// lda			; 5
+     begin
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
 {$i opt_POKE.inc}
 
 
@@ -17839,13 +17858,28 @@ end;
 
 
     if sta_stack(i) and									// sta :STACKORIGIN+9	; 0
-       lda_stack(i+1) and								// lda :STACKORIGIN+10	; 1
+       lda_stack(i+1) and 								// lda :STACKORIGIN+10	; 1
        add_stack(i+2) then								// add :STACKORIGIN+9	; 2
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
      begin
 	listing[i]   := #9'add ' + copy(listing[i+1], 6, 256);
 	listing[i+1] := '';
 	listing[i+2] := '';
+
+	Result:=false; Break;
+     end;
+
+
+    if sta_stack(i) and									// sta :STACKORIGIN+9	; 0
+       ldy(i+1) and									// ldy			; 1
+       lda(i+2) and iy(i+2) and 							// lda ,y		; 2
+       add_stack(i+3) then								// add :STACKORIGIN+9	; 3
+     if copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256) then
+     begin
+	listing[i+2]  := #9'add ' + copy(listing[i+2], 6, 256);
+
+	listing[i]   := '';
+	listing[i+3] := '';
 
 	Result:=false; Break;
      end;
@@ -21377,6 +21411,14 @@ end;
    for i := 0 to l - 1 do
     if listing[i] <> '' then begin
 
+{
+if (pos('.LOCAL', listing[i]) > 0) then begin
+
+      for p:=0 to l-1 do writeln(listing[p]);
+      writeln('-------');
+
+end;
+}
 
     if lda(i) and										// lda		; 0
        ldy_1(i+1) and										// ldy #1	; 1
@@ -23238,6 +23280,7 @@ end;
 
 // -------------------------------------------------------------------------------------------
 
+
     if lda(i) and (listing[i+1] = #9'cmp #$80') and						// lda			; 0	>= 128
        (listing[i+2] = #9'bcs @+') and dey(i+3) then						// cmp #$80		; 1
      begin											// bcs @+		; 2
@@ -23452,6 +23495,27 @@ end;
       begin
        listing[i  ] := #9'jmi ' + copy(listing[i+5], 6, 256);
        listing[i+1] := #9'jeq ' + copy(listing[i+5], 6, 256);
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+
+	for p:=i-1 downto 0 do
+	 if ldy_1(p) then begin listing[p]:=''; Break end;
+
+       Result:=false; Break;
+      end;
+
+// piss
+
+    if (SKIP(i) = false) and									//
+       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       dey(i+2) and										// dey			; 2
+       (listing[i+3] = '@') and									//@			; 3
+       tya(i+4) and										// tya			; 4
+       jeq(i+5) then										// jeq			; 5
+      begin
+       listing[i+1] := #9'jmi ' + copy(listing[i+5], 6, 256);
        listing[i+2] := '';
        listing[i+3] := '';
        listing[i+4] := '';
@@ -27270,7 +27334,8 @@ writeln('------------');
 
      arg0:=GetString(i);
 
-     if SKIP(i+1) or ((i>0) and (listing[i-1] = #9'.LOCAL')) then
+     if SKIP(i+1) or
+        ((i>0) and ((listing[i-1] = #9'.LOCAL') or (SKIP(i-1) and lda_im(i)))) then
 
      else
      if (arg0 = optyA) then
@@ -27314,7 +27379,7 @@ writeln('------------');
 
      end else
      if lda(i) or mva(i) or mwa(i) or tya(i) or (listing[i] = '@') or (pos('l_', listing[i]) = 1) or //SKIP(i) or
-	(pos(#9'jsr ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
+        (pos(#9'jsr ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
 
 
 // -------------------------------------------------------------------------- //
@@ -38134,7 +38199,6 @@ WHILETOK:
      end;
 
      asm65;
-
      asm65(#9'jmp @exit', '; exit');
 
      ResetOpty;
@@ -38148,7 +38212,7 @@ WHILETOK:
      if BreakPosStackTop = 0 then
       Error(i, 'BREAK not allowed');
 
-     asm65;
+//     asm65;
      asm65(#9'jmp b_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4), '; break');
 
      BreakPosStack[BreakPosStackTop].brk := true;
@@ -38164,7 +38228,7 @@ WHILETOK:
      if BreakPosStackTop = 0 then
       Error(i, 'CONTINUE not allowed');
 
-     asm65;
+//     asm65;
      asm65(#9'jmp c_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4), '; continue');
 
      BreakPosStack[BreakPosStackTop].cnt := true;
@@ -39944,8 +40008,6 @@ if IsFunction then   begin //DefineIdent(i, 'RESULT', VARIABLE, FunctionResultTy
 
 end;
 
-
-// piss
 
 yes := (Ident[BlockIdentIndex].ObjectIndex > 0) or Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isInline;
 

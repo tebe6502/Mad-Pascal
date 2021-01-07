@@ -152,21 +152,20 @@
 // -----------------------------------------------------------------------------
 
     if (p > 1) and
-       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
-       ((lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) or 			// lda  |lda #				; p-2		#-BYTE
-        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #|sub				; p-1
+       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and			// lda  				; p-2		#-BYTE
+       lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1) and 				// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
        sbc(p+2) and									// sbc 					; p+2
        sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
       begin
-
+{
 	if lda_im(p-2) then begin
 	 q:=GetWORD(p-2, p+1);
 
 	 listing[i+4] := #9'ldy ' + copy(listing[p-1], 6, 256);
 	 listing[i+5] := '';
-	end else begin
+	end else begin}
 	 q:=GetWORD(p-1, p+2);
 
 	 if iy(p-2) = false then begin
@@ -177,7 +176,7 @@
 	  listing[i+5] := #9'tay';
 	 end;
 
-	end;
+//	end;
 
 	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '-$' + IntToHex(q, 2) + ',y';
 	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '-$' + IntToHex(q, 2) + ',y';
@@ -196,6 +195,27 @@
 
 	Result:=false; Break;
       end;
+
+
+    if (p > 1) and
+       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and			// lda #				; p-2		#-BYTE
+       (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false)) and				// sub					; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       sbc(p+2) and									// sbc 					; p+2
+       sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
+      begin
+//	listing[i+3]  := '';
+//	listing[i+4]  := '';
+//	listing[i+5]  := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+
+	Result:=false; Break;
+      end;
+
 
 // -----------------------------------------------------------------------------
 

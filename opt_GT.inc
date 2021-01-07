@@ -294,9 +294,9 @@
 
 	 listing[i] := listing[i+1];
 	 listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
-	 listing[i+2] := #9'svs';
+	 listing[i+2] := #9'svc';
 	 listing[i+3] := #9'eor #$80';
-	 listing[i+4] := #9'jpl ' + copy(listing[i+10], 6, 256);
+	 listing[i+4] := #9'jmi ' + copy(listing[i+10], 6, 256);
 	end else begin
 	 listing[i] := '';
 	 listing[i+1] := '';
@@ -428,9 +428,9 @@
 	 listing[i+12] := #9'cmp #$' + IntToHex(p and $ff, 2);
 	 listing[i+13] := listing[i+1];
 	 listing[i+14] := #9'sbc #$' + IntToHex(byte(p shr 8), 2);
-	 listing[i+15] := #9'svs';
+	 listing[i+15] := #9'svc';
 	 listing[i+16] := #9'eor #$80';
-	 listing[i+17] := #9'jpl ' + copy(listing[i+17], 6, 256);
+	 listing[i+17] := #9'jmi ' + copy(listing[i+17], 6, 256);
 	end else begin
 	 listing[i+11] := '';
 	 listing[i+12] := '';
