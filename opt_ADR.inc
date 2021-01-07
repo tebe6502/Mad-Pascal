@@ -498,8 +498,8 @@
 
     if (p > 1) and
        (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
-       ((lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) or 			// lda  |lda #				; p-2		#-WORD
-        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #|sub				; p-1
+       lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1) and 				// lda  				; p-2		#-WORD
+//        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
        sbc(p+2) and									// sbc 					; p+2
@@ -508,13 +508,13 @@
        sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
       begin
 
-	if lda_im(p-2) then begin
-	 q:=GetWORD(p-2, p+1);
-	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
-	end else begin
+//	if lda_im(p-2) then begin
+//	 q:=GetWORD(p-2, p+1);
+//	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+//	end else begin
 	 q:=GetWORD(p-1, p+2);
 	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
-	end;
+//	end;
 
 	q:=q * 2;
 
@@ -738,8 +738,8 @@
 
     if (p > 1) and
        (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
-       ((lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) or 			// lda  |lda #				; p-2		#-CARDINAL
-        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #|sub				; p-1
+       lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1) and 				// lda  				; p-2		#-CARDINAL
+//        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
        sbc(p+2) and									// sbc 					; p+2
@@ -750,13 +750,13 @@
        sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
       begin
 
-	if lda_im(p-2) then begin
-	 q:=GetWORD(p-2, p+1);
-	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
-	end else begin
+//	if lda_im(p-2) then begin
+//	 q:=GetWORD(p-2, p+1);
+//	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+//	end else begin
 	 q:=GetWORD(p-1, p+2);
 	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
-	end;
+//	end;
 
 	q:=q * 4;
 
