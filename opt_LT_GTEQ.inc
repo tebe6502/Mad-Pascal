@@ -530,7 +530,7 @@
       begin
         p := smallint(GetWORD(i+5, i+2));
 
-	if p = 0 then begin									//				smallint >= #0
+	if p = 0 then begin									//				smallint >= 0
 	 listing[i+10] := listing[i+1];
 	 listing[i+11] := listing[i+16];
 	 listing[i+12] := '';
@@ -566,7 +566,7 @@
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jpl(i+23) and										// jpl			; 23
        (SKIP(i+24) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER < #0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER < 0
        lda(i+1) and										// lda E+3		; 1
        (sub_im_0(i+2) or (listing[i+2] = #9'sub #$80')) and					// sub #$00|$80		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -628,7 +628,7 @@
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jmi(i+23) and										// jmi			; 23
        (SKIP(i+24) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER >= #0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER >= 0
        lda(i+1) and										// lda E+3		; 1
        sub_im_0(i+2) and									// sub #$00		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -687,8 +687,8 @@
        (listing[i+25] = '@') and								//@			; 25
        (sty(i+26) or tya(i+26)) and								// tya|sty		; 26
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := INTEGER < #0
-       lda(i+1) and										// lda E+3		; 1	BOOL := INTEGER >= #0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := INTEGER < 0
+       lda(i+1) and										// lda E+3		; 1	BOOL := INTEGER >= 0
        sub_im_0(i+2) and									// sub #$00		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda(i+4) and										// lda E+2		; 4
