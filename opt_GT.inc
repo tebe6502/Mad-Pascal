@@ -278,7 +278,7 @@
     if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
        jmi(i+9) and										// jmi			; 9
        jeq(i+10) and										// jeq			; 10
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint > $xx
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT > $XX
        lda(i+1) and										// lda E		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -322,7 +322,7 @@
        dey(i+11) and										// dey			; 11
        (listing[i+12] = '@') and								//@			; 12
        (sty(i+13) or tya(i+13)) and								// sty|tya		; 13
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	shortint_0 > shorint_1 => shortint_1 < shortint_0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT_0 > SHORINT_1 => SHORTINT_1 < SHORTINT_0
        lda(i+1) and										// lda K		; 1
        sub(i+2) and (sub_im(i+2) = false) and							// sub U		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -349,7 +349,7 @@
        dey(i+18)  and										// dey			; 18
        (listing[i+19] = '@') and								//@			; 19
        (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := smallint > 0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SMALLINT > 0
        lda(i+1) and										// lda E+1		; 1
        sub_im_0(i+2) and									// sub #$00		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -393,7 +393,7 @@
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        jmi(i+16) and										// jmi			; 16
        jeq(i+17) and										// jeq			; 17
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	smallint > $xxyy
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT > $XXYY
        lda(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -412,7 +412,7 @@
 
         p := smallint(GetWORD(i+5, i+2));
 
-	if p = 0 then begin									//				smallint > 0
+	if p = 0 then begin									//				SMALLINT > 0
 	 listing[i+11] := listing[i+1];
 	 listing[i+12] := listing[i+16];
 	 listing[i+13] := #9'ora ' + copy(listing[i+4], 6, 256);
@@ -464,8 +464,8 @@
        (listing[i+19] = '@') and								//@			; 19
        (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	smallint_0 > smallint_1 => smallint_1 < smallint_0
-       lda(i+1) and										// lda K+1		; 1
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT_0 > SMALLINT_1 => SMALLINT_1 < SMALLINT_0
+       lda(i+1) and 										// lda K+1		; 1
        sub(i+2) and (sub_im(i+2) = false) and							// sub U+1		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda(i+4) and										// lda K		; 4
@@ -498,7 +498,7 @@
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jmi(i+23) and										// jmi			; 23
        jeq(i+24) and										// jeq			; 24
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	integer > 0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER > 0
        lda(i+1) and										// lda E+3		; 1
        sub_im_0(i+2) and									// sub #$00		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -555,7 +555,7 @@
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jmi(i+23) and										// jmi			; 23
        jeq(i+24) and										// jeq			; 24
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	integer > high(integer)
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER > HIGH(INTEGER)
        lda(i+1) and										// lda E+3		; 1
        (listing[i+2] = #9'sub #$7F') and							// sub #$7F		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
