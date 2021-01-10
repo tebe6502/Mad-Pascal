@@ -248,7 +248,7 @@ const
   REGISTERTOK		= 98;
   INTERRUPTTOK		= 99;
   PASCALTOK		= 100;
-  INLINETOK		= 101;
+  STDCALLTOK		= 101;
 
   SUCCTOK		= 105;
   PREDTOK		= 106;
@@ -387,9 +387,9 @@ const
 
 type
 
-  TTarget = (t_a8, t_c64);
+  TTarget = (t_a8, t_c64, t_c4p);
 
-  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mInline = $02);
+  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02);
 
   irCode = (iDLI, iVBL);
 
@@ -504,7 +504,7 @@ type
 	 isRegister: Boolean;
 	 isInterrupt: Boolean;
 	 isRecursion: Boolean;
-	 isInline: Boolean;
+	 isStdCall: Boolean;
 	 isPascal: Boolean;
 	 isAsm: Boolean;
 	 IsNotDead: Boolean;);
@@ -784,7 +784,7 @@ DEREFERENCETOK: Result := '^';
 
    REGISTERTOK: Result := 'REGISTER';
      PASCALTOK: Result := 'PASCAL';
-     INLINETOK: Result := 'INLINE';
+     STDCALLTOK: Result := 'STDCALL';
         ASMTOK: Result := 'ASM';
   INTERRUPTTOK: Result := 'INTERRUPT';
  else
@@ -21400,7 +21400,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('.LOCAL', listing[i]) > 0) then begin
+if (pos('ldy #1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22733,6 +22733,32 @@ end;
 
 
     if lda(i) and (iy(i) = false) and								// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+10	; 1
+       lda(i+2) and (iy(i+2) = false) and							// lda 					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+10			; 3
+       ldy_1(i+4) and										// ldy #1				; 4
+       (listing[i+5] = #9'.LOCAL') and								// .LOCAL				; 5
+       lda(i+6) and										// lda					; 6
+       sub_stack(i+7) and									// sub :STACKORIGIN+STACKWIDTH+10	; 7
+       (listing[i+8] = #9'bne L4') and								// bne L4				; 8
+       lda(i+9) and										// lda					; 9
+       cmp_stack(i+10) then									// cmp :STACKORIGIN+10			; 10
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+10], 6, 256)) then
+     begin
+       listing[i+7]  := #9'sub ' + copy(listing[i], 6, 256);
+       listing[i+10] := #9'cmp ' + copy(listing[i+2], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if lda(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+10			; 1
        ldy_1(i+2) and										// ldy #1				; 2
        (listing[i+3] = #9'.LOCAL') and								// .LOCAL				; 3
@@ -22898,13 +22924,51 @@ end;
 
 
     if lda(i) and										// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 1
+       lda(i+2) and										// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+9	; 3
+       lda(i+4) and										// lda					; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+9			; 5
+       ldy_1(i+6) and										// ldy #1				; 6
+       (listing[i+7] = #9'.LOCAL') and								// .LOCAL				; 7
+       lda(i+8) and										// lda 					; 8
+       sub_stack(i+9) and									// sub :STACKORIGIN+STACKWIDTH*3+9	; 9
+       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
+       lda(i+11) and										// lda					; 11
+       cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH*2+9	; 12
+       (listing[i+13] = #9'bne L1') and								// bne L1				; 13
+       lda(i+14) and										// lda					; 14
+       cmp_stack(i+15) and									// cmp :STACKORIGIN+STACKWIDTH+9	; 15
+       (listing[i+16] = #9'bne L1') and								// bne L1				; 16
+       lda(i+17) and										// lda					; 17
+       cmp_stack(i+18) then									// cmp :STACKORIGIN+9			; 18
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+12], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+15], 6, 256)) and
+	(copy(listing[i+5], 6, 256) = copy(listing[i+18], 6, 256)) then
+     begin
+       listing[i+12] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+15] := #9'cmp ' + copy(listing[i+2], 6, 256);
+       listing[i+18] := #9'cmp ' + copy(listing[i+4], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if lda(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH+9	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 3
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 4
        (listing[i+5] = #9'.LOCAL') and								// .LOCAL				; 5
        lda(i+6) and										// lda 					; 6
-       sub(i+7) and										// sub :STACKORIGIN+STACKWIDTH*3+9	; 7
+       sub_stack(i+7) and									// sub :STACKORIGIN+STACKWIDTH*3+9	; 7
        (listing[i+8] = #9'bne L4') and								// bne L4				; 8
        lda(i+9) and										// lda					; 9
        cmp_stack(i+10) and									// cmp :STACKORIGIN+STACKWIDTH*2+9	; 10
@@ -24910,6 +24974,26 @@ begin
 	end;
 
       end else
+{
+      if arg0 = '@expandToREAL' then begin
+	t:='';
+
+	s[x][3] := s[x][2];
+	s[x][2] := s[x][1];
+	s[x][1] := s[x][0];
+	s[x][0] := #9'mva #$00';
+
+      end else
+      if arg0 = '@expandToREAL1' then begin
+	t:='';
+
+	s[x-1][3] := s[x-1][2];
+	s[x-1][2] := s[x-1][1];
+	s[x-1][1] := s[x-1][0];
+	s[x-1][0] := #9'mva #$00';
+
+      end else
+}
       if arg0 = 'm@index4 1' then begin
        t:='';
        index(2, x-1);
@@ -24935,30 +25019,13 @@ begin
        listing[l+2] := #9'sub ' + GetARG(3, x);		// SBC ustawi znacznik V, gdy brak SUB #$00 => clv:sec
        listing[l+3] := #9'bne L4';
        listing[l+4] := #9'lda '+GetARG(2, x-1);
-
-//       arg1 := GetARG(2, x);
-//       if arg1 <> '#$00' then
-	listing[l+5] := #9'cmp '+GetARG(2, x);
-//       else
-//	listing[l+5] := '';
-
+       listing[l+5] := #9'cmp '+GetARG(2, x);
        listing[l+6] := #9'bne L1';
        listing[l+7] := #9'lda '+GetARG(1, x-1);
-
-//       arg1 := GetARG(1, x);
-//       if arg1 <> '#$00' then
-	listing[l+8] := #9'cmp '+GetARG(1, x);
-//       else
-//	listing[l+8] := '';
-
+       listing[l+8] := #9'cmp '+GetARG(1, x);
        listing[l+9] := #9'bne L1';
        listing[l+10]:= #9'lda '+GetARG(0, x-1);
-
-//       arg1 := GetARG(0, x);
-//       if arg1 <> '#$00' then
-	listing[l+11]:= #9'cmp '+GetARG(0, x);
-//       else
-//	listing[l+11]:= '';
+       listing[l+11]:= #9'cmp '+GetARG(0, x);
 
        listing[l+12]:= 'L1'#9'beq L5';
        listing[l+13]:= #9'bcs L3';
@@ -27165,7 +27232,7 @@ writeln('------------');
       end;
 
      end;
-
+//piss
 
    if (pos(':STACKORIGIN,', t) > 7) and (pos('(:bp),', t) = 0) then begin	// kiedy odczytujemy tablice
     s[x][0]:=copy(a, 1, pos(' :STACK', a));
@@ -27268,7 +27335,6 @@ writeln('------------');
    if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(1, x+1);
    if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(2, x+1);
    if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(3, x+1);
-
 
    if t <> '' then begin
     listing[l] := t;
@@ -28769,7 +28835,7 @@ Spelling[FORWARDTOK	] := 'FORWARD';
 Spelling[REGISTERTOK	] := 'REGISTER';
 Spelling[INTERRUPTTOK	] := 'INTERRUPT';
 Spelling[PASCALTOK	] := 'PASCAL';
-Spelling[INLINETOK	] := 'INLINE';
+Spelling[STDCALLTOK	] := 'STDCALL';
 
 Spelling[ASSIGNFILETOK	] := 'ASSIGN';
 Spelling[RESETTOK	] := 'RESET';
@@ -31564,13 +31630,17 @@ if Pass = CODEGENERATIONPASS then begin
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  if target = t_a8 then begin
-   asm65(#9'icl ''atari\resource.asm''');
+  case target of
+   t_c64: asm65(#9'icl ''c64\resource.asm''');
+   t_c4p: asm65(#9'icl ''c4p\resource.asm''');
 
-   asm65(#9'?EXTDETECT = 0');
-   asm65(#9'?VBXDETECT = 0');
-  end else
-   asm65(#9'icl ''c64\resource.asm''');
+    t_a8: begin
+  	   asm65(#9'icl ''atari\resource.asm''');
+
+    	   asm65(#9'?EXTDETECT = 0');
+    	   asm65(#9'?VBXDETECT = 0');
+   	  end;
+  end;
 
   asm65;
 
@@ -31590,23 +31660,37 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
- if target = t_c64 then begin
+ case target of
+  t_c64: begin
+	  asm65(#9'opt h-f+');
+  	  asm65(#9'org $801');
+  	  asm65(#9'org [a($801)],$801','; BASIC start address');
+  	  asm65;
+  	  asm65(#9'basic_start(START)');
 
-  asm65(#9'opt h-f+');
-  asm65(#9'org $801');
-  asm65(#9'org [a($801)],$801','; BASIC start address');
-  asm65;
-  asm65(#9'basic_start(START)');
+  	  asm65(#9'org $900');
+  	  asm65;
 
-  asm65(#9'org $900');
-  asm65;
+  	  asm65('CODEORIGIN');
+         end;
 
-  asm65('CODEORIGIN');
- end else begin
+  t_c4p: begin
+	  asm65(#9'opt h-f+');
+  	  asm65(#9'org $801');
+  	  asm65(#9'org [a($801)],$801','; BASIC start address');
+  	  asm65;
+  	  asm65(#9'basic_start(START)');
 
-  asm65;
-  asm65(#9'org CODEORIGIN');
+  	  asm65(#9'org $900');
+  	  asm65;
 
+  	  asm65('CODEORIGIN');
+         end;
+
+   t_a8: begin
+	  asm65;
+  	  asm65(#9'org CODEORIGIN');
+	 end;
  end;
 
 // asm65(#13#10#9'jmp start');
@@ -31624,10 +31708,11 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
  asm65('RTLIB');
 
- if target = t_c64 then
-  asm65(#9'icl ''rtl6502_c64.asm''')
- else
-  asm65(#9'icl ''rtl6502_a8.asm''');
+ case target of
+  t_c64: asm65(#9'icl ''rtl6502_c64.asm''');
+  t_c4p: asm65(#9'icl ''rtl6502_c4p.asm''');
+   t_a8: asm65(#9'icl ''rtl6502_a8.asm''');
+ end;
 
  asm65;
  asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1');
@@ -33947,7 +34032,7 @@ begin
    if Ident[IdentIndex].ProcAsBlock = BlockStack[BlockStackTop] then Ident[IdentIndex].isRecursion := true;
 
 
-   yes := (Ident[IdentIndex].ObjectIndex > 0) or Ident[IdentIndex].isRecursion or Ident[IdentIndex].isInline;
+   yes := (Ident[IdentIndex].ObjectIndex > 0) or Ident[IdentIndex].isRecursion or Ident[IdentIndex].isStdCall;
 
    for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
     if not (Ident[IdentIndex].Param[ParamIndex].DataType in OrdinalTypes + RealTypes) then begin yes:=true; Break end;
@@ -34146,7 +34231,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
   old_func:=run_func;
   run_func:=0;
 
-  if (Ident[IdentIndex].isInline = false) then
+  if (Ident[IdentIndex].isStdCall = false) then
 						if Ident[IdentIndex].Kind = FUNC then
 	  						StartOptimization(i)
 						else
@@ -35569,6 +35654,8 @@ begin
 
    ExpandParam(INTEGERTOK, RightValType);
 
+   asm65(#9'jsr @expandToREAL');
+{
    asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
    asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
    asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
@@ -35577,7 +35664,7 @@ begin
    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
    asm65(#9'lda #$00');
    asm65(#9'sta :STACKORIGIN,x');
-
+}
    if not(ValType in [REALTOK, SHORTREALTOK]) and (Kind in [REALTOK, SHORTREALTOK]) then
     RightValType := Kind
    else
@@ -35590,6 +35677,8 @@ begin
 
    ExpandParam_m1(INTEGERTOK, ValType);
 
+   asm65(#9'jsr @expandToREAL1');
+{
    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
@@ -35598,6 +35687,7 @@ begin
    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
    asm65(#9'lda #$00');
    asm65(#9'sta :STACKORIGIN-1,x');
+}
 
    if not(RightValType in [REALTOK, SHORTREALTOK]) and (Kind in [REALTOK, SHORTREALTOK]) then
     ValType := Kind
@@ -35846,7 +35936,6 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   j := CompileSimpleExpression(i + 2, RightValType, VarType);
 
-
   k := i + 2;
   if SafeCompileConstExpression(k, ConstVal, ConstValType, VarType, False) then
    if ConstValType in IntegerTypes then begin
@@ -35875,8 +35964,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
     ConstValRight := ConstVal;
     RightValType  := ConstValType;
 
-   end;		// if ConstValType in IntegerTypes
-
+   end;			// if ConstValType in IntegerTypes
 
 
   if (Tok[i + 2].Kind = STRINGLITERALTOK) or (RightValType = STRINGPOINTERTOK) then sRight:=true else
@@ -35960,6 +36048,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
    if (ValType = VarType) and (RightValType in RealTypes) then RightValType := VarType;
    if (ValType in RealTypes) and (RightValType = VarType) then ValType := VarType;
   end;
+
 
 // !!! wyjatek !!! porownanie typow tego samego rozmiaru, ale z roznymi znakami
 
@@ -38496,7 +38585,7 @@ begin
     isForward := false;
     isInt := false;
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, INLINETOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -38531,8 +38620,8 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
-	      INLINETOK: begin
-			   Ident[NumIdent].isInline := true;
+	     STDCALLTOK: begin
+			   Ident[NumIdent].isStdCall := true;
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -39717,7 +39806,7 @@ begin
 	end;// if IsNestedFunction
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, INLINETOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -39745,8 +39834,8 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
-	      INLINETOK: begin
-			   Status := Status or ord(mInline);
+	      STDCALLTOK: begin
+			   Status := Status or ord(mStdCall);
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -39996,7 +40085,7 @@ if IsFunction then   begin //DefineIdent(i, 'RESULT', VARIABLE, FunctionResultTy
 end;
 
 
-yes := (Ident[BlockIdentIndex].ObjectIndex > 0) or Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isInline;
+yes := (Ident[BlockIdentIndex].ObjectIndex > 0) or Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isStdCall;
 
 for ParamIndex := NumParams downto 1 do
  if not (Param[ParamIndex].DataType in OrdinalTypes + RealTypes) then begin yes:=true; Break end;
@@ -40903,7 +40992,7 @@ while Tok[i].Kind in
 	 if Ident[ForwardIdentIndex].isRegister then Tmp := Tmp or ord(mRegister);
 	 if Ident[ForwardIdentIndex].isInterrupt then Tmp := Tmp or ord(mInterrupt);
 	 if Ident[ForwardIdentIndex].isPascal then Tmp := Tmp or ord(mPascal);
-	 if Ident[ForwardIdentIndex].isInline then Tmp := Tmp or ord(mInline);
+	 if Ident[ForwardIdentIndex].isStdCall then Tmp := Tmp or ord(mStdCall);
 
 	 if Tmp <> TmpResult then
 	   Error(i, 'Function header doesn''t match the previous declaration ''' + Ident[ForwardIdentIndex].Name + '''');
@@ -41439,7 +41528,7 @@ begin
   WriteLn('-diag'#9#9'Diagnostics mode');
   Writeln('-define:symbol'#9'Defines the symbol');
   Writeln('-ipath:<x>'#9'Add <x> to include path');
-  Writeln('-target:<x>'#9'Target system: a8 (default), c64');
+  Writeln('-target:<x>'#9'Target system: a8 (default), c64, c4p');
   WriteLn('-code:address'#9'Code origin hex address');
   WriteLn('-data:address'#9'Data origin hex address');
   WriteLn('-stack:address'#9'Software stack hex address (size = 64 bytes)');
@@ -41579,7 +41668,8 @@ begin
 
  if t = 'A8' then target := t_a8 else
   if t = 'C64' then target := t_c64 else
-   Syntax(3);
+   if t = 'C4P' then target := t_c4p else
+    Syntax(3);
 
 end;
 
@@ -41697,7 +41787,7 @@ begin
 
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
- if target = t_c64 then
+ if target in [t_c64, t_c4p] then
   DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000000D)
  else
   DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000009B);
