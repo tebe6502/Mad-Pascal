@@ -11904,19 +11904,6 @@ var i, l, k, m, x: integer;
 	Result:=false; Break;
      end;
 
-{
-// piss / sbc !!!
-
-
-    if Result and				// mamy pewnosc ze jest to pierwszy test sposrod wszystkich
-       (add(i+1) = false) and (adc(i+1) = false) and					// clc		; 0
-       (add(i+2) = false) and (adc(i+2) = false) then 					// <> add|adc	; 1
-    if (listing[i] = #9'clc') then							// <> add|adc	; 2
-    begin
-	listing[i] := '';
-	Result:=false; Break;
-    end;
-}
 
     if (pos('sta :STACKORIGIN+STACKWIDTH', listing[i]) > 0) and				// sta :STACKORIGIN+STACKWIDTH	; 0
        (pos('lda :STACKORIGIN+STACKWIDTH*2', listing[i+1]) > 0) and			// lda :STACKORIGIN+STACKWIDTH*2; 1
@@ -12317,7 +12304,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('adr.QB', listing[i+3]) > 0) then begin
+if (pos('spl', listing[i+3]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -15355,12 +15342,13 @@ end;
        sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 9
        ldy_im_0(i+10) and									// ldy #$00				; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+9			; 11
-       (listing[i+12] = #9'spl') and dey(i+13) and						// spl					; 12
-       sta_stack(i+14) and									// dey					; 13
-       sty_stack(i+15) and									// sta :STACKORIGIN+9			; 14
-       sty_stack(i+16) and									// sty :STACKORIGIN+STACKWIDTH+9	; 15
-       sty_stack(i+17) then									// sty :STACKORIGIN+STACKWIDTH*2+9	; 16
-     if (copy(listing[i], 6, 256) = copy(listing[i+11], 6, 256)) and				// sty :STACKORIGIN+STACKWIDTH*3+9	; 17
+       spl(i+12) and										// spl					; 12
+       dey(i+13) and										// dey					; 13
+       sta_stack(i+14) and									// sta :STACKORIGIN+9			; 14
+       sty_stack(i+15) and									// sty :STACKORIGIN+STACKWIDTH+9	; 15
+       sty_stack(i+16) and									// sty :STACKORIGIN+STACKWIDTH*2+9	; 16
+       sty_stack(i+17) then									// sty :STACKORIGIN+STACKWIDTH*3+9	; 17
+     if (copy(listing[i], 6, 256) = copy(listing[i+11], 6, 256)) and
 	(copy(listing[i+11], 6, 256) = copy(listing[i+14], 6, 256)) and
 	(copy(listing[i+3], 6, 256) = copy(listing[i+15], 6, 256)) and
 	(copy(listing[i+6], 6, 256) = copy(listing[i+16], 6, 256)) and
@@ -23506,7 +23494,6 @@ end;
        Result:=false; Break;
       end;
 
-// piss
 
     if (SKIP(i) = false) and									//
        (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1

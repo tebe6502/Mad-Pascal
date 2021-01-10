@@ -245,17 +245,14 @@
       end;
 
 
-// piss
-
-
     if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
        ((listing[i+9] = #9'bpl @+') or (listing[i+9] = #9'bmi @+')) and				// bpl @+|bmi @+	; 9
        dey(i+10) and										// dey			; 10
        (listing[i+11] = '@') and								//@			; 11
        (sty(i+12) or tya(i+12)) and								// tya			; 12
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL shortint >= shortint	BPL
-       lda(i+1) and										// lda E		; 1	BOOL shortint < shortint	BMI
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SHORTINT >= SHORTINT	BPL
+       lda(i+1) and										// lda E		; 1	BOOL := SHORTINT < SHORTINT	BMI
        sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
        (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
@@ -304,8 +301,8 @@
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        (jpl(i+16) or jmi(i+16)) and								// jpl|jmi		; 16
        (SKIP(i+17) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	smallint < smallint	JPL
-       lda(i+1) and										// lda E+1		; 1	smallint >= smallint	JMI
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT < SMALLINT	JPL
+       lda(i+1) and										// lda E+1		; 1	SMALLINT >= SMALLINT	JMI
        sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda(i+4) and										// lda E		; 4
@@ -347,8 +344,8 @@
        dey(i+17) and										// dey			; 17
        (listing[i+18] = '@') and								//@			; 18
        (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := smallint < 0	BMI
-       lda(i+1) and										// lda E+1		; 1	BOOL := smallint >= 0	BPL
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SMALLINT < 0	BMI
+       lda(i+1) and										// lda E+1		; 1	BOOL := SMALLINT >= 0	BPL
        sub_im_0(i+2) and									// sub #$00		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda(i+4) and										// lda E		; 4
@@ -386,9 +383,74 @@
 
 
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+       (bpl(i+16) or bmi(i+16)) and								// bpl|bmi		; 16
+       dey(i+17) and										// dey			; 17
+       (listing[i+18] = '@') and								//@			; 18
+       (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SMALLINT < SMALLINT	BMI
+       lda(i+1) and										// lda E+1		; 1	BOOL := SMALLINT >= SMALLINT	BPL
+       sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda(i+4) and										// lda E		; 4
+       cmp(i+5) and (cmp_im(i+5) = false) and							// cmp			; 5
+       (listing[i+6] = #9'beq L5') and								// beq L5		; 6
+       lda_im_0(i+7) and									// lda #$00		; 7
+       (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
+       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       (listing[i+10] = #9'bne L5') and								// bne L5		; 10
+       (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
+       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
+       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       (listing[i+14] = 'L5') then								//L5			; 14
+      begin
+	listing[i+10] := listing[i+4];
+	listing[i+11] := listing[i+5];
+	listing[i+12] := listing[i+1];
+	listing[i+13] := #9'sbc ' + copy(listing[i+2], 6, 256);
+	listing[i+14] := #9'svc';
+	listing[i+15] := #9'eor #$80';
+
+	listing[i] := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if lda(i) and										// lda E		; 0	BOOL := SMALLINT < 0	BMI
+       cmp_im_0(i+1) and									// cmp #$00		; 1	BOOL := SMALLINT >= 0	BPL
+       lda(i+2) and										// lda E+1		; 2
+       sbc_im_0(i+3) and									// sbc #$00		; 3
+       (listing[i+4] = #9'svc') and								// svc			; 4
+       (listing[i+5] = #9'eor #$80') and							// eor #$80		; 5
+       (bpl(i+6) or bmi(i+6)) and								// bpl|bmi		; 6
+       dey(i+7) and										// dey			; 7
+       (listing[i+8] = '@') and									//L4 bvc L5		; 8
+       (sty(i+9) or tya(i+9)) then								// sty|tya		; 9
+      begin
+	listing[i] := '';
+	listing[i+1] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        jpl(i+16) and										// jpl			; 16
        (SKIP(i+17) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	smallint < #$xxyy
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT < #$XXYY
        lda(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -406,7 +468,7 @@
       begin
         p := smallint(GetWORD(i+5, i+2));
 
-	if p = 0 then begin									//				smallint < 0
+	if p = 0 then begin									//				SMALLINT < 0
 	 listing[i+10] := '';
 	 listing[i+11] := '';
 	 listing[i+12] := '';
@@ -504,7 +566,7 @@
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jpl(i+23) and										// jpl			; 23
        (SKIP(i+24) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	integer < #0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER < #0
        lda(i+1) and										// lda E+3		; 1
        (sub_im_0(i+2) or (listing[i+2] = #9'sub #$80')) and					// sub #$00|$80		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -528,7 +590,7 @@
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
 
-	if listing[i+2] = #9'sub #$80' then begin			// < low(integer)
+	if listing[i+2] = #9'sub #$80' then begin			// < LOW(INTEGER)
 	 listing[i] := #9'jmp ' + copy(listing[i+23], 6, 256);
 	 listing[i+1] := '';
 	end else begin							// < 0
@@ -566,7 +628,7 @@
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jmi(i+23) and										// jmi			; 23
        (SKIP(i+24) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	integer >= #0
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER >= #0
        lda(i+1) and										// lda E+3		; 1
        sub_im_0(i+2) and									// sub #$00		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -614,6 +676,64 @@
 	listing[i+21] := '';
 	listing[i+22] := '';
 	listing[i+23] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+       (bpl(i+23) or bmi(i+23)) and								// bmi @+|bpl @+	; 23
+       dey(i+24) and										// dey			; 24
+       (listing[i+25] = '@') and								//@			; 25
+       (sty(i+26) or tya(i+26)) and								// tya|sty		; 26
+
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := INTEGER < #0
+       lda(i+1) and										// lda E+3		; 1	BOOL := INTEGER >= #0
+       sub_im_0(i+2) and									// sub #$00		; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda(i+4) and										// lda E+2		; 4
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+       (listing[i+6] = #9'bne L1') and								// bne L1		; 6
+       lda(i+7) and										// lda E+1		; 7
+       cmp_im_0(i+8) and									// cmp #$00		; 8
+       (listing[i+9] = #9'bne L1') and								// bne L1		; 9
+       lda(i+10) and										// lda E		; 10
+       cmp_im_0(i+11) and									// cmp #$00		; 11
+       (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
+       (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
+       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       (listing[i+15] = #9'bne L5') and								// bne L5		; 15
+       (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
+       (listing[i+17] = #9'bne L5') and								// bne L5		; 17
+       (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
+       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
+       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       (listing[i+21] = 'L5') then								//L5			; 21
+      begin
+
+	listing[i]   := '';
+
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
 
 	Result:=false; Break;
       end;
