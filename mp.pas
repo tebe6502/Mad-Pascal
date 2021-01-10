@@ -31676,12 +31676,12 @@ if Pass = CODEGENERATIONPASS then begin
 
   t_c4p: begin
 	  asm65(#9'opt h-f+');
-  	  asm65(#9'org $801');
-  	  asm65(#9'org [a($801)],$801','; BASIC start address');
+  	  asm65(#9'org $1001');
+  	  asm65(#9'org [a($1001)],$1001','; BASIC start address');
   	  asm65;
   	  asm65(#9'basic_start(START)');
 
-  	  asm65(#9'org $900');
+  	  asm65(#9'org $100E');
   	  asm65;
 
   	  asm65('CODEORIGIN');
@@ -41700,11 +41700,11 @@ begin
 
  ParseParam;
 
- if target = t_a8 then
-  Defines[1] := 'ATARI'
- else
-  Defines[1] := 'C64';
-
+ case target of
+   t_a8: Defines[1] := 'ATARI';
+  t_c64: Defines[1] := 'C64';
+  t_c4p: Defines[1] := 'C4P';
+ end;
 
  if (UnitName[1].Name='') then Syntax(3);
 
