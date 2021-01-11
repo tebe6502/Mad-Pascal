@@ -1,3 +1,6 @@
+10.01.2021
+- generowanie kodu dla Commodore C4 Plus (-c4p)
+
 03.01.2021
 - przekazywanie parametrów typu prostego do procedur/funkcji odbywa siê teraz bez udzia³u stosu programowego
 

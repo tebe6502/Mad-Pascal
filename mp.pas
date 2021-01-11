@@ -22962,6 +22962,41 @@ end;
 
 
     if lda(i) and										// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 1
+       lda(i+2) and										// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 3
+       lda(i+4) and										// lda					; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+9	; 5
+       ldy_1(i+6) and										// ldy #1				; 6
+       (listing[i+7] = #9'.LOCAL') and								// .LOCAL				; 7
+       lda(i+8) and										// lda 					; 8
+       sub_stack(i+9) and									// sub :STACKORIGIN+STACKWIDTH*3+9	; 9
+       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
+       lda(i+11) and										// lda					; 11
+       cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH*2+9	; 12
+       (listing[i+13] = #9'bne L1') and								// bne L1				; 13
+       lda(i+14) and										// lda					; 14
+       cmp_stack(i+15) then									// cmp :STACKORIGIN+STACKWIDTH+9	; 15
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+9], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+12], 6, 256)) and
+	(copy(listing[i+5], 6, 256) = copy(listing[i+15], 6, 256)) then
+     begin
+       listing[i+9] := #9'sub ' + copy(listing[i], 6, 256);
+       listing[i+12] := #9'cmp ' + copy(listing[i+2], 6, 256);
+       listing[i+15] := #9'cmp ' + copy(listing[i+4], 6, 256);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if lda(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH+9	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 3
@@ -24974,26 +25009,46 @@ begin
 	end;
 
       end else
-{
+
       if arg0 = '@expandToREAL' then begin
 	t:='';
 
-	s[x][3] := s[x][2];
-	s[x][2] := s[x][1];
-	s[x][1] := s[x][0];
-	s[x][0] := #9'mva #$00';
+	s[x][3] := '';					// -> :STACKORIGIN+STACKWIDTH*3
+
+	listing[l]   := #9'lda ' + GetARG(2, x);
+	listing[l+1] := #9'sta ' + GetARG(3, x);
+	listing[l+2] := #9'lda ' + GetARG(1, x);
+	listing[l+3] := #9'sta ' + GetARG(2, x);
+	listing[l+4] := #9'lda ' + GetARG(0, x);
+	listing[l+5] := #9'sta ' + GetARG(1, x);
+	listing[l+6] := #9'lda #$00';
+
+	s[x][0] := '';					// -> :STACKORIGIN
+	listing[l+7] := #9'sta ' + GetARG(0, x);
+
+	inc(l,8);
 
       end else
       if arg0 = '@expandToREAL1' then begin
 	t:='';
 
-	s[x-1][3] := s[x-1][2];
-	s[x-1][2] := s[x-1][1];
-	s[x-1][1] := s[x-1][0];
-	s[x-1][0] := #9'mva #$00';
+	s[x-1][3] := '';				// -> :STACKORIGIN-1+STACKWIDTH*3
+
+	listing[l]   := #9'lda ' + GetARG(2, x-1);
+	listing[l+1] := #9'sta ' + GetARG(3, x-1);
+	listing[l+2] := #9'lda ' + GetARG(1, x-1);
+	listing[l+3] := #9'sta ' + GetARG(2, x-1);
+	listing[l+4] := #9'lda ' + GetARG(0, x-1);
+	listing[l+5] := #9'sta ' + GetARG(1, x-1);
+	listing[l+6] := #9'lda #$00';
+
+	s[x-1][0] := '';				// -> :STACKORIGIN-1
+	listing[l+7] := #9'sta ' + GetARG(0, x-1);
+
+	inc(l,8);
 
       end else
-}
+
       if arg0 = 'm@index4 1' then begin
        t:='';
        index(2, x-1);
@@ -27232,7 +27287,7 @@ writeln('------------');
       end;
 
      end;
-//piss
+
 
    if (pos(':STACKORIGIN,', t) > 7) and (pos('(:bp),', t) = 0) then begin	// kiedy odczytujemy tablice
     s[x][0]:=copy(a, 1, pos(' :STACK', a));
