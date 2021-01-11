@@ -301,7 +301,6 @@
 	Result:=false; Break;
       end;
 
-// piss
 
     if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
        bmi(i+9) and										// bmi			; 9
