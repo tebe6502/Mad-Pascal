@@ -16,4 +16,6 @@ begin
     row := 40 * b0i;
     for b1i := 0 to 15 do COLORRAM[row+b1i] := (b0i shl 4) + b1i;
   end;
+
+  repeat until false;
 end.
