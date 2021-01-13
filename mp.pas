@@ -5668,7 +5668,6 @@ var i, l, k, m, x: integer;
      end;
 
 
-
     if (listing[i] = '@') and									// @					; 0
        (listing[i+1] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 1
        dex(i+2) and										// dex					; 2
@@ -6006,6 +6005,27 @@ var i, l, k, m, x: integer;
        listing[i+4] := listing[i+3];
        listing[i+3] := listing[i+2];
        listing[i+2] := #9'lda :STACKORIGIN,x';
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda T				; 1
+       SKIP(i+2) and										// SKIP					; 2
+       dey(i+3) and										// dey					; 3
+       (listing[i+4] = '@') and									//@					; 4
+       (listing[i+5] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 5
+       dex(i+6) then										// dex					; 6
+     begin
+       listing[i+6] := #9'sty :STACKORIGIN,x';
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
        listing[i+1] := listing[i];
 
        listing[i] := #9'dex';
@@ -17238,31 +17258,43 @@ end;
       end;
 
 
-    if (listing[i+7] = listing[i+4] + '+1') and							// lda A+1			; 7
-
-       sta_stack(i) and										// sta :STACKORIGIN		; 0
-       lda(i+1) and (lda_stack(i+1) = false) and (iy(i+1) = false) and				// lda B			; 1
-       adc_im_0(i+2) and									// adc #$00			; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH	; 3
-       lda(i+4) and (lda_stack(i+4) = false) and (iy(i+4) = false) and				// lda A			; 4
-       add_stack(i+5) and									// add :STACKORIGIN		; 5
-       tay(i+6) and										// tay				; 6
-
-       adc_stack(i+8) and									// adc :STACKORIGIN+STACKWIDTH	; 8
-       sta_bp_1(i+9) then									// sta :bp+1			; 9
-    if (copy(listing[i], 6, 256) = copy(listing[i+5], 6, 256)) and
-       (copy(listing[i+3], 6, 256) = copy(listing[i+8], 6, 256)) then
+    if lda(i) and (lda_stack(i) = false) and 							// lda O			; 0
+       add(i+1) and (add_stack(i+1) = false) and						// add C			; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN		; 2
+       lda(i+3) and (lda_stack(i+3) = false) and						// lda O+1			; 3
+       adc_im_0(i+4) and									// adc #$00			; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH	; 5
+       lda(i+6) and (lda_stack(i+6) = false) and						// lda BS			; 6
+       add_stack(i+7) and									// add :STACKORIGIN		; 7
+       tay(i+8) and										// tay				; 8
+       lda(i+9) and (lda_stack(i+9) = false) and						// lda BS+1			; 9
+       adc_stack(i+10) and									// adc :STACKORIGIN+STACKWIDTH	; 10
+       sta_bp_1(i+11) and									// sta :bp+1			; 11
+       (lda_bp_y(i+12) or sta_bp_y(i+13)) then							// lda        |lda (:bp),y	; 12
+    if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and				// sta (:bp),y|sta		; 13
+       (copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) then
       begin
-	listing[i]   := #9'scc';
-	listing[i+1] := #9'inc ' + copy(listing[i+1], 6, 256);
-	listing[i+2] := #9'add ' + copy(listing[i+4], 6, 256);
-	listing[i+3] := #9'tay';
-	listing[i+4] := listing[i+7];
-	listing[i+5] := #9'adc ' + copy(listing[i+1], 6, 256);
-	listing[i+6] := #9'sta :bp+1';
-	listing[i+7] := '';
-	listing[i+8] := '';
-	listing[i+9] := '';
+	listing[i+7] := #9'add ' + copy(listing[i], 6, 256);
+
+	listing[i+10] := #9'adc ' + copy(listing[i+3], 6, 256);
+
+	listing[i+5] := listing[i+6];
+	listing[i+6] := listing[i+7];
+	listing[i+7] := #9'sta :bp2';
+	listing[i+8] := listing[i+9];
+	listing[i+9] := listing[i+10];
+	listing[i+10] := #9'sta :bp2+1';
+
+	listing[i+11] := #9'ldy ' + copy(listing[i+1], 6, 256);
+
+	if lda_bp_y(i+12) then listing[i+12] := #9'lda (:bp2),y';
+	if sta_bp_y(i+13) then listing[i+13] := #9'sta (:bp2),y';
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
 
 	Result := false; Break;
       end;
