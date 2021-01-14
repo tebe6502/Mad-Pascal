@@ -31597,8 +31597,11 @@ if Pass = CODEGENERATIONPASS then begin
 
  if ZPAGE_Atari > 0 then
   asm65(#9'org $'+IntToHex(ZPAGE_Atari, 2))
- else
-  asm65(#9'org $80');
+ else begin
+  if target = t_a8 then asm65(#9'org $80');
+  if target = t_c64 then asm65(#9'org $10');
+  if target = t_c4p then asm65(#9'org $10');
+ end;
 
  asm65;
  asm65('fxptr'#9'.ds 2','; VBXE pointer');
