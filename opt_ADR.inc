@@ -357,6 +357,31 @@
       end;
 
 
+    if (p > 2) and
+       lda(p-3) and (lda_stack(p-3) = false) and					// lda					; p-3		+-WORD	[byte]
+       add_sub(p-2) and (add_sub_stack(p-2) = false) and 				// add|sub				; p-2
+       and_ora_eor(p-1) and								// and|ora|eor				; p-1
+											// sta :STACKORIGIN			; p
+       lda_im_0(p+1) and								// lda #$00				; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'tay';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (p > 0) and
        lda(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD	[byte]
 											// sta :STACKORIGIN			; p
