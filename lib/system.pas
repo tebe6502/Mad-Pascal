@@ -277,15 +277,15 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function OctStr(Value: cardinal; Digits: byte): TString; assembler;
 	function ParamCount: byte; assembler;
 	function ParamStr(i: byte): TString; assembler;
-	procedure Pause; assembler; overload;
-	procedure Pause(n: word); assembler; overload;
+	procedure Pause; assembler; overload;                                                      //platform dependent
+	procedure Pause(n: word); assembler; overload;                                             //platform dependent
 	function Peek(a: word): byte; register; stdcall; assembler;
 	procedure Poke(a: word; value: byte); register; stdcall; assembler;
-	function Random: Real; overload;
-	function Random(range: byte): byte; assembler; overload;
-	function Random(range: smallint): smallint; overload;
-	function RandomF: Float;
-	procedure Randomize; assembler;
+	function Random: Real; overload;                                                           //platform dependent
+	function Random(range: byte): byte; assembler; overload;                                   //platform dependent
+	function Random(range: smallint): smallint; overload;                                      //platform dependent
+	function RandomF: Float;                                                                   //platform dependent
+	procedure Randomize; assembler;                                                            //platform dependent
 	procedure RunError(a: byte);
 	procedure Seek(var f: file; a: cardinal); assembler;
 	procedure SetLength(var S: string; Len: byte); register; assembler;

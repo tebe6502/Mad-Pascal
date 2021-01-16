@@ -43,3 +43,7 @@ upstartEnd
 
 .endm
 
+c4p_time = $00A3
+ted_timer_1 = $FF00
+ted_timer_2 = $FF02
+ted_timer_3 = $FF04

@@ -1,18 +1,10 @@
-// caly INC do przepisania pod Plus/4
-// zaslepka na potrzeby kompilatora
-
 procedure Pause; assembler; overload;
 (*
 @description:
 Delay program execution (1/50 second).
 *)
 asm
-{
-w1  bit vic_cr1
-  bpl w1
-
-w2  bit vic_cr1
-  bmi w2
+{ lda:cmp:req :c4p_time+2
 };
 end;
 
@@ -30,11 +22,7 @@ loop  lda n
   ora n+1
   beq stop
 
-w1  bit vic_cr1
-  bpl w1
-
-w2  bit vic_cr1
-  bmi w2
+  lda:cmp:req :c4p_time+2
 
   dew n
 
@@ -49,7 +37,7 @@ procedure Randomize; assembler;
 Initialize random number generator
 *)
 asm
-{ mva $d20a RndSeed
+{ mva ted_timer_1 RndSeed
   mva #$00  RndSeed+1
 };
 end;
@@ -66,7 +54,7 @@ begin
 
 asm
 {
- lda $d20a
+ lda ted_timer_1
  sta Result
 
  lda #$00
@@ -180,10 +168,10 @@ begin
 
 asm
 {
- lda $d20a
+ lda ted_timer_1
  and #$7f
  sta Result+2
- mva $d20a Result+1
+ mva ted_timer_1 Result+1
 
  lda #$00
  sta Result
@@ -207,12 +195,12 @@ Generate random number
 *)
 asm
 {
-  lda $DC04 //CIA#1 Timer A Lo byte
-  eor $DC05 //CIA#1 Timer A Hi byte
-  eor $DD04 //CIA#2 Timer A Lo byte
-  adc $DD05 //CIA#2 Timer A Hi byte
-  eor $DD06 //CIA#2 Timer B Lo byte
-  eor $DD07 //CIA#2 Timer B Hi byte
+  lda ted_timer_1   //Timer A Lo byte
+  eor ted_timer_1+1 //Timer A Hi byte
+  eor ted_timer_2   //Timer B Lo byte
+  adc ted_timer_2+1 //Timer B Hi byte
+  eor ted_timer_3   //Timer C Lo byte
+  eor ted_timer_3+1 //Timer C Hi byte
   tay
 
   lda range
