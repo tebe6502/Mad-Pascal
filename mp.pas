@@ -27479,7 +27479,8 @@ writeln('------------');
       optyA := arg0;
 
      end else
-     if lda(i) or mva(i) or mwa(i) or tya(i) or (listing[i] = '@') or (pos('l_', listing[i]) = 1) or //SKIP(i) or
+     if lda(i) or mva(i) or mwa(i) or tya(i) or (listing[i] = '@') or
+        (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or //SKIP(i) or
         (pos(#9'jsr ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
 
 
@@ -27522,7 +27523,7 @@ writeln('------------');
       if pos(copy(listing[i], 5, 256), optyBP2) > 0 then optyBP2 := '';
 
      end else
-     if (pos(#9'jsr ', listing[i]) > 0) or (pos('l_', listing[i]) = 1) then optyBP2:='';
+     if (pos(#9'jsr ', listing[i]) > 0) or (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) then optyBP2:='';
 
 
 // -------------------------------------------------------------------------- //
@@ -27680,7 +27681,8 @@ writeln('------------');
      end else
      if iny(i) or dey(i) or tay(i) or ldy_stack(i) or (pos('mvy ', listing[i]) > 0) or mwy(i) or
         (pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) or ((optyA = optyY) and (optyA <> '')) or
-	(pos(#9'jsr ', listing[i]) > 0) or (pos('l_', listing[i]) = 1) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyY := '' end;
+        (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or
+	(pos(#9'jsr ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyY := '' end;
 
 
 (* -------------------------------------------------------------------------- *)
