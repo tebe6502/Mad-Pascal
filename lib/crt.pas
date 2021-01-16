@@ -88,22 +88,22 @@ const
 
 
 	procedure ClrEol;
-	procedure ClrScr;
+	procedure ClrScr;                                                                          //platform dependent
 	procedure CursorOff;
 	procedure CursorOn;
 	procedure Delay(count: word); assembler;
 	procedure DelLine;
-	procedure GotoXY(x,y: byte); assembler;
+	procedure GotoXY(x,y: byte); assembler;                                                    //platform dependent
 	procedure InsLine;
-	function Keypressed: Boolean; assembler;
+	function Keypressed: Boolean; assembler;                                                   //platform dependent
 	procedure NoSound; assembler;
-	function ReadKey: char; assembler;
+	function ReadKey: char; assembler;                                                         //platform dependent
 	procedure Sound(Chan,Freq,Dist,Vol: byte); assembler;
 	procedure TextBackground(a: byte); assembler;
 	procedure TextColor(a: byte); assembler;
 	procedure TextMode(Mode: byte); assembler;
-	function WhereX: byte; assembler;
-	function WhereY: byte; assembler;
+	function WhereX: byte; assembler;                                                          //platform dependent
+	function WhereY: byte; assembler;                                                          //platform dependent
 
 
 implementation
