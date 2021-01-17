@@ -1,9 +1,13 @@
 
 uses crt, graph, types, graphics;
 
+{$r txtout.rc}
+
 var   canvas: TCanvas;
 
       s: TString;
+
+      p: pointer;
 
       i,j: byte;
 
@@ -40,6 +44,11 @@ canvas.fillrect(Rect(12,14,88,28));
 canvas.pen.color:=1;
 
 canvas.textout((320-canvas.textwidth(s)) shr 1, 80, s);
+
+
+GetResourceHandle(p, 'weirdo');
+
+canvas.Font(p);
 
 s:='POWER with PRICE';
 
