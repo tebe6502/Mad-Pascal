@@ -1,6 +1,6 @@
-const 
+const
 diceTile1: array [0..24] of byte = (
-  $51, $52, $52, $52, $45,            
+  $51, $52, $52, $52, $45,
   $3e, $00, $00, $00, $44,                //
   $3e, $00, $00, $00, $44,		          //
   $3e, $00, $00, $00, $44,                //
@@ -10,7 +10,7 @@ diceTile1: array [0..24] of byte = (
 diceTile2: array [0..24] of byte = (
   $51, $52, $52, $52, $45,
   $3e, $00, $00, $00, $44,                //
-  $3e, $00, $00, $00, $59,		
+  $3e, $00, $00, $00, $59,
   $3e, $00, $00, $00, $44,                //
   $5a, $58, $58, $58, $43       // // //
 );
@@ -18,7 +18,7 @@ diceTile2: array [0..24] of byte = (
 diceTile3: array [0..24] of byte = (
   $51, $52, $52, $52, $45,
   $3e, $00, $00, $00, $44,                //
-  $3e, $00, $00, $00, $44,                // 
+  $3e, $00, $00, $00, $44,                //
   $3e, $00, $00, $00, $44,                //
   $5a, $58, $55, $58, $43        //   //
 );
@@ -26,7 +26,7 @@ diceTile3: array [0..24] of byte = (
 diceTile4: array [0..24] of byte = (
   $51, $52, $52, $52, $45,                //
   $3e, $00, $00, $00, $44,
-  $3e, $00, $00, $00, $59,                
+  $3e, $00, $00, $00, $59,
   $3e, $00, $00, $00, $44,                //
   $5a, $58, $55, $58, $43         //   //
 );
@@ -35,16 +35,16 @@ diceTile5: array [0..24] of byte = (
   $51, $52, $52, $52, $45,
   $3e, $00, $00, $00, $59,
   $3e, $00, $00, $00, $44,                //
-  $3e, $00, $00, $00, $59,                
-  $5a, $58, $55, $58, $43       //    //  
+  $3e, $00, $00, $00, $59,
+  $5a, $58, $55, $58, $43       //    //
 );
 
 diceTile6: array [0..24] of byte = (
   $51, $52, $52, $52, $45,
   $3e, $00, $00, $00, $59,
   $3e, $00, $00, $00, $44,                //
-  $3e, $00, $00, $00, $59,                
-  $5a, $58, $58, $58, $43       // // //  
+  $3e, $00, $00, $00, $59,
+  $5a, $58, $58, $58, $43       // // //
 );
 
 diceTile7: array [0..24] of byte = (
@@ -140,16 +140,18 @@ numberTiles: array [0..5] of pointer = (@dice1, @dice2, @dice3, @dice4, @dice5, 
 diceTiles: array [0..7] of pointer = (@diceTile1, @diceTile2, @diceTile3, @diceTile4, @diceTile5, @diceTile6, @diceTile7, @diceTile8);
 
 var
-num1: TString = 'one    ';
-num2: TString = 'two    ';
-num3: TString = 'three  ';
-num4: TString = 'four   ';
-num5: TString = 'five   ';
-num6: TString = 'six    ';
-numStrings: array [0..5] of pointer = (@num1, @num2, @num3, @num4, @num5, @num6);
+numStrings: array [0..5] of TString = (
+'one    ',
+'two    ',
+'three  ',
+'four   ',
+'five   ',
+'six    '
+);
 
-place1: TString = 'WINNER !';
-place2: TString = '2ndPLACE';
-place3: TString = '3rdPLACE';
-place4: TString = '4thPLACE';
-placeStrings: array [0..3] of pointer = (@place1, @place2, @place3, @place4);
+placeStrings: array [0..3] of TString = (
+'WINNER !',
+'2ndPLACE',
+'3rdPLACE',
+'4thPLACE'
+);
