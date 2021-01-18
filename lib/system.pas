@@ -18,28 +18,28 @@ ArcTan
 BinStr
 Concat
 Copy
-Cos   ; real, single
-DPeek   ; optimization build in compiler
-DPoke   ; optimization build in compiler
+Cos                ; real, single
+DPeek              ; optimization build in compiler
+DPoke              ; optimization build in compiler
 Eof
 Exp
 FilePos
 FileSize
-FillByte  ; optimization build in compiler
-FillChar  ; optimization build in compiler
+FillByte           ; optimization build in compiler
+FillChar           ; optimization build in compiler
 IsLetter
 IsDigit
-iSqrt   ; fast inverse square root
+iSqrt              ; fast inverse square root
 HexStr
 Ln
 LowerCase
-Move    ; optimization build in compiler
+Move               ; optimization build in compiler
 OctStr
 ParamCount
 ParamStr
 Pause
-Peek    ; optimization build in compiler
-Poke    ; optimization build in compiler
+Peek               ; optimization build in compiler
+Poke               ; optimization build in compiler
 Random
 ReadConfig
 ReadSector
@@ -51,7 +51,7 @@ Space
 Str
 StringOfChar
 Sqr
-Sqrt    ; sqrt(x) = exp(0.5*ln(x))
+Sqrt               ; sqrt(x) = exp(0.5*ln(x))
 UpCase
 Val
 WriteSector
@@ -157,81 +157,79 @@ const
 //  WINDOW  = $10;      // text window
 //  NARROW  = $20;      // narrow screen
 
-  VBXE_XDLADR = $0000;    // XDLIST
-  VBXE_BCBADR = $0100;    // BLITTER LIST ADDRESS
-  VBXE_MAPADR = $1000;    // COLOR MAP ADDRESS
-  VBXE_OVRADR = $5000;    // OVERLAY ADDRESS
-  VBXE_WINDOW = $B000;    // 4K WINDOW $B000..$BFFF
+  VBXE_XDLADR = $0000;      // XDLIST
+  VBXE_BCBADR = $0100;      // BLITTER LIST ADDRESS
+  VBXE_MAPADR = $1000;      // COLOR MAP ADDRESS
+  VBXE_OVRADR = $5000;      // OVERLAY ADDRESS
+  VBXE_WINDOW = $B000;      // 4K WINDOW $B000..$BFFF
 
-  iDLI = 0;     // set new DLI vector
-  iVBL = 1;     // set new VBL vector
+  iDLI = 0;                 // set new DLI vector
+  iVBL = 1;                 // set new VBL vector
 
 (* Character codes *)
 
-  CH_DELCHR = chr($FE); // delete char under the cursor
-  CH_ENTER  = chr($9B);
-  CH_ESC    = chr($1B);
-  CH_CURS_UP  = chr(28);
+  CH_DELCHR     = chr($FE); // delete char under the cursor
+  CH_ENTER      = chr($9B);
+  CH_ESC        = chr($1B);
+  CH_CURS_UP    = chr(28);
   CH_CURS_DOWN  = chr(29);
   CH_CURS_LEFT  = chr(30);
   CH_CURS_RIGHT = chr(31);
 
-  CH_TAB    = chr($7F); // tabulator
-  CH_EOL    = chr($9B); // end-of-line marker
-  CH_CLR    = chr($7D); // clear screen
-  CH_BELL   = chr($FD); // bell
-  CH_DEL    = chr($7E); // back space (delete char to the left)
-  CH_DELLINE  = chr($9C); // delete line
-  CH_INSLINE  = chr($9D); // insert line
+  CH_TAB        = chr($7F); // tabulator
+  CH_EOL        = chr($9B); // end-of-line marker
+  CH_CLR        = chr($7D); // clear screen
+  CH_BELL       = chr($FD); // bell
+  CH_DEL        = chr($7E); // back space (delete char to the left)
+  CH_DELLINE    = chr($9C); // delete line
+  CH_INSLINE    = chr($9D); // insert line
 
 (* color defines *)
 
-  COLOR_BLACK   = $00;
-  COLOR_WHITE   = $0e;
-  COLOR_RED   = $32;
-  COLOR_CYAN    = $96;
-  COLOR_VIOLET    = $68;
-  COLOR_GREEN   = $c4;
-  COLOR_BLUE    = $74;
-  COLOR_YELLOW    = $ee;
-  COLOR_ORANGE    = $28;
-  COLOR_BROWN   = $e4;
+  COLOR_BLACK       = $00;
+  COLOR_WHITE       = $0e;
+  COLOR_RED         = $32;
+  COLOR_CYAN        = $96;
+  COLOR_VIOLET      = $68;
+  COLOR_GREEN       = $c4;
+  COLOR_BLUE        = $74;
+  COLOR_YELLOW      = $ee;
+  COLOR_ORANGE      = $28;
+  COLOR_BROWN       = $e4;
   COLOR_LIGHTRED    = $3c;
-  COLOR_GRAY1   = $04;
-  COLOR_GRAY2   = $06;
-  COLOR_GRAY3   = $0a;
+  COLOR_GRAY1       = $04;
+  COLOR_GRAY2       = $06;
+  COLOR_GRAY3       = $0a;
   COLOR_LIGHTGREEN  = $cc;
-  COLOR_LIGHTBLUE         = $7c;
+  COLOR_LIGHTBLUE   = $7c;
 
 (* file mode *)
 
-  fmOpenRead  = $04;
-  fmOpenWrite = $08;
-  fmOpenAppend  = $09;
+  fmOpenRead      = $04;
+  fmOpenWrite     = $08;
+  fmOpenAppend    = $09;
   fmOpenReadWrite = $0c;
 {$endif}
 
 {$ifdef atari}
 var
-  ScreenWidth: smallint = 40; (* @var current screen width *)
-  ScreenHeight: smallint = 24;  (* @var current screen height *)
+  ScreenWidth   : smallint = 40; (* @var current screen width *)
+  ScreenHeight  : smallint = 24; (* @var current screen height *)
 
-  DateSeparator: Char = '-';
+  DateSeparator : Char = '-';
 
-  TVSystem: byte absolute $D014;
+  TVSystem      : byte absolute $D014;
 
-  Rnd: byte absolute $d20a;
+  Rnd           : byte absolute $d20a;
 
-  Palette: array [0..8] of byte absolute 704;
-  HPalette: array [0..8] of byte absolute $d012;
+  Palette       : array [0..8] of byte absolute 704;
+  HPalette      : array [0..8] of byte absolute $d012;
 
-  FileMode: byte = fmOpenReadWrite;
+  FileMode      : byte = fmOpenReadWrite;
 
-  GraphMode: byte;    (* @var current screen mode *)
-
-  IOResult: byte;     (* @var result of last file IO operation *)
-
-  EoLn: Boolean;      (* @var end of line status *)
+  GraphMode     : byte;    (* @var current screen mode *)
+  IOResult      : byte;    (* @var result of last file IO operation *)
+  EoLn          : Boolean; (* @var end of line status *)
 {$endif}
 
   function Abs(x: Real): Real; register; assembler; overload;
