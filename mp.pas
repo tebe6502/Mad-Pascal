@@ -72,10 +72,6 @@ Contributors:
 	- MADSTRAP
 	- PASDOC
 
-+ Bartosz Zbytniewski :
-	- Bug Hunter
-	- Commodore C16/264 minimal unit SYSTEM setup
-
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
@@ -31571,7 +31567,10 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
- asm65('fxptr'#9'.ds 2','; VBXE pointer');
+
+ if target = t_a8 then
+  asm65('fxptr'#9'.ds 2','; VBXE pointer');
+
  asm65('psptr'#9'.ds 2','; PROGRAMSTACK Pointer');
  asm65;
 
@@ -31772,7 +31771,10 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
- asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1');
+ if target = t_a8 then
+  asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1')
+ else
+  asm65('.print ''ZPAGE: '',psptr,''..'',zpend-1');
 
  asm65;
  asm65('.print ''RTLIB: '',RTLIB,''..'',*-1');
@@ -41386,7 +41388,6 @@ asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
 
 asm65;
 asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
-
 
 if FastMul > 0  then begin
 
