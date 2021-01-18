@@ -71,6 +71,9 @@ Contributors:
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
 	- MADSTRAP
 	- PASDOC
++ Bartosz Zbytniewski :
+	- Bug Hunter
+	- Commodore C16/264 minimal unit SYSTEM setup
 
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
