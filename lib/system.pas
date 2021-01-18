@@ -18,40 +18,40 @@ ArcTan
 BinStr
 Concat
 Copy
-Cos		; real, single
-DPeek		; optimization build in compiler
-DPoke		; optimization build in compiler
+Cos   ; real, single
+DPeek   ; optimization build in compiler
+DPoke   ; optimization build in compiler
 Eof
 Exp
 FilePos
 FileSize
-FillByte	; optimization build in compiler
-FillChar	; optimization build in compiler
+FillByte  ; optimization build in compiler
+FillChar  ; optimization build in compiler
 IsLetter
 IsDigit
-iSqrt		; fast inverse square root
+iSqrt   ; fast inverse square root
 HexStr
 Ln
 LowerCase
-Move		; optimization build in compiler
+Move    ; optimization build in compiler
 OctStr
 ParamCount
 ParamStr
 Pause
-Peek		; optimization build in compiler
-Poke		; optimization build in compiler
+Peek    ; optimization build in compiler
+Poke    ; optimization build in compiler
 Random
 ReadConfig
 ReadSector
 RunError
 Seek
 SetLength
-Sin		; real, single
+Sin   ; real, single
 Space
 Str
 StringOfChar
 Sqr
-Sqrt		; sqrt(x) = exp(0.5*ln(x))
+Sqrt    ; sqrt(x) = exp(0.5*ln(x))
 UpCase
 Val
 WriteSector
@@ -60,259 +60,262 @@ WriteSector
 
 interface
 
-type	TString = string[32];
-	(*
-	@description:
+type  TString = string[32];
+  (*
+  @description:
 
-	*)
+  *)
 
-type	TSize = record cx, cy: smallint end;
-	(*
-	@description:
-	TSize is a type to describe the size of a rectangular area, where cx is the width, cy is the height (in pixels) of the rectangle.
-	*)
+type  TSize = record cx, cy: smallint end;
+  (*
+  @description:
+  TSize is a type to describe the size of a rectangular area, where cx is the width, cy is the height (in pixels) of the rectangle.
+  *)
 
-type	TRect = record	left, top, right, bottom: smallint end;
-	(*
-	@description:
-	TRect is a type to describe a rectangular area.
-	*)
+type  TRect = record  left, top, right, bottom: smallint end;
+  (*
+  @description:
+  TRect is a type to describe a rectangular area.
+  *)
 
-type	TPoint = record x,y: SmallInt end;
-	(*
-	@description:
-	This record describes a coordinate.
-	*)
+type  TPoint = record x,y: SmallInt end;
+  (*
+  @description:
+  This record describes a coordinate.
+  *)
 
-type	TDateTime = record yy,mm,dd,h,m,s: byte end;
-	(*
-	@description:
-	This record describes Date-Time.
-	*)
+type  TDateTime = record yy,mm,dd,h,m,s: byte end;
+  (*
+  @description:
+  This record describes Date-Time.
+  *)
 
-type	TLastArcCoords = record x,y,xstart,ystart,xend,yend: smallint end;
-	(*
-	@description:
+type  TLastArcCoords = record x,y,xstart,ystart,xend,yend: smallint end;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PBoolean = ^Boolean;
-	(*
-	@description:
+type  PBoolean = ^Boolean;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PByte = ^byte;
-	(*
-	@description:
+type  PByte = ^byte;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PWord = ^word;
-	(*
-	@description:
+type  PWord = ^word;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PCardinal = ^cardinal;
-	(*
-	@description:
+type  PCardinal = ^cardinal;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PInteger = ^integer;
-	(*
-	@description:
+type  PInteger = ^integer;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PString = ^string;
-	(*
-	@description:
+type  PString = ^string;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PByteArray = ^byte;
-	(*
-	@description:
+type  PByteArray = ^byte;
+  (*
+  @description:
 
-	*)
+  *)
 
-type	PWordArray = ^word;
-	(*
-	@description:
+type  PWordArray = ^word;
+  (*
+  @description:
 
-	*)
+  *)
 
 const
-	__PORTB_BANKS = $0101;		// memory banks array
+  M_PI_2  = pi*2;
+  D_PI_2  = pi/2;
+  D_PI_180= pi/180;
 
-	M_PI_2	= pi*2;
-	D_PI_2	= pi/2;
-	D_PI_180= pi/180;
+{$ifdef atari}
+  __PORTB_BANKS = $0101;    // memory banks array
 
-	mGTIA	= 0;
-	mVBXE	= $80;
-//	WINDOW	= $10;			// text window
-//	NARROW	= $20;			// narrow screen
+  mGTIA = 0;
+  mVBXE = $80;
+//  WINDOW  = $10;      // text window
+//  NARROW  = $20;      // narrow screen
 
-	VBXE_XDLADR = $0000;		// XDLIST
-	VBXE_BCBADR = $0100;		// BLITTER LIST ADDRESS
-	VBXE_MAPADR = $1000;		// COLOR MAP ADDRESS
-	VBXE_OVRADR = $5000;		// OVERLAY ADDRESS
-	VBXE_WINDOW = $B000;		// 4K WINDOW $B000..$BFFF
+  VBXE_XDLADR = $0000;    // XDLIST
+  VBXE_BCBADR = $0100;    // BLITTER LIST ADDRESS
+  VBXE_MAPADR = $1000;    // COLOR MAP ADDRESS
+  VBXE_OVRADR = $5000;    // OVERLAY ADDRESS
+  VBXE_WINDOW = $B000;    // 4K WINDOW $B000..$BFFF
 
-	iDLI = 0;			// set new DLI vector
-	iVBL = 1;			// set new VBL vector
+  iDLI = 0;     // set new DLI vector
+  iVBL = 1;     // set new VBL vector
 
 (* Character codes *)
 
-	CH_DELCHR	= chr($FE);	// delete char under the cursor
-	CH_ENTER	= chr($9B);
-	CH_ESC		= chr($1B);
-	CH_CURS_UP	= chr(28);
-	CH_CURS_DOWN	= chr(29);
-	CH_CURS_LEFT	= chr(30);
-	CH_CURS_RIGHT	= chr(31);
+  CH_DELCHR = chr($FE); // delete char under the cursor
+  CH_ENTER  = chr($9B);
+  CH_ESC    = chr($1B);
+  CH_CURS_UP  = chr(28);
+  CH_CURS_DOWN  = chr(29);
+  CH_CURS_LEFT  = chr(30);
+  CH_CURS_RIGHT = chr(31);
 
-	CH_TAB		= chr($7F);	// tabulator
-	CH_EOL		= chr($9B);	// end-of-line marker
-	CH_CLR		= chr($7D);	// clear screen
-	CH_BELL		= chr($FD);	// bell
-	CH_DEL		= chr($7E);	// back space (delete char to the left)
-	CH_DELLINE	= chr($9C);	// delete line
-	CH_INSLINE	= chr($9D);	// insert line
+  CH_TAB    = chr($7F); // tabulator
+  CH_EOL    = chr($9B); // end-of-line marker
+  CH_CLR    = chr($7D); // clear screen
+  CH_BELL   = chr($FD); // bell
+  CH_DEL    = chr($7E); // back space (delete char to the left)
+  CH_DELLINE  = chr($9C); // delete line
+  CH_INSLINE  = chr($9D); // insert line
 
 (* color defines *)
 
-	COLOR_BLACK		= $00;
-	COLOR_WHITE		= $0e;
-	COLOR_RED		= $32;
-	COLOR_CYAN		= $96;
-	COLOR_VIOLET		= $68;
-	COLOR_GREEN		= $c4;
-	COLOR_BLUE		= $74;
-	COLOR_YELLOW		= $ee;
-	COLOR_ORANGE		= $28;
-	COLOR_BROWN		= $e4;
-	COLOR_LIGHTRED		= $3c;
-	COLOR_GRAY1		= $04;
-	COLOR_GRAY2		= $06;
-	COLOR_GRAY3		= $0a;
-	COLOR_LIGHTGREEN	= $cc;
-	COLOR_LIGHTBLUE         = $7c;
+  COLOR_BLACK   = $00;
+  COLOR_WHITE   = $0e;
+  COLOR_RED   = $32;
+  COLOR_CYAN    = $96;
+  COLOR_VIOLET    = $68;
+  COLOR_GREEN   = $c4;
+  COLOR_BLUE    = $74;
+  COLOR_YELLOW    = $ee;
+  COLOR_ORANGE    = $28;
+  COLOR_BROWN   = $e4;
+  COLOR_LIGHTRED    = $3c;
+  COLOR_GRAY1   = $04;
+  COLOR_GRAY2   = $06;
+  COLOR_GRAY3   = $0a;
+  COLOR_LIGHTGREEN  = $cc;
+  COLOR_LIGHTBLUE         = $7c;
 
 (* file mode *)
 
-	fmOpenRead	= $04;
-	fmOpenWrite	= $08;
-	fmOpenAppend	= $09;
-	fmOpenReadWrite	= $0c;
+  fmOpenRead  = $04;
+  fmOpenWrite = $08;
+  fmOpenAppend  = $09;
+  fmOpenReadWrite = $0c;
+{$endif}
 
+{$ifdef atari}
+var
+  ScreenWidth: smallint = 40; (* @var current screen width *)
+  ScreenHeight: smallint = 24;  (* @var current screen height *)
 
-var	ScreenWidth: smallint = 40;	(* @var current screen width *)
-	ScreenHeight: smallint = 24;	(* @var current screen height *)
+  DateSeparator: Char = '-';
 
-	DateSeparator: Char = '-';
+  TVSystem: byte absolute $D014;
 
-	TVSystem: byte absolute $D014;
+  Rnd: byte absolute $d20a;
 
-	Rnd: byte absolute $d20a;
+  Palette: array [0..8] of byte absolute 704;
+  HPalette: array [0..8] of byte absolute $d012;
 
-	Palette: array [0..8] of byte absolute 704;
-	HPalette: array [0..8] of byte absolute $d012;
+  FileMode: byte = fmOpenReadWrite;
 
-	FileMode: byte = fmOpenReadWrite;
+  GraphMode: byte;    (* @var current screen mode *)
 
-	GraphMode: byte;		(* @var current screen mode *)
+  IOResult: byte;     (* @var result of last file IO operation *)
 
-	IOResult: byte;			(* @var result of last file IO operation *)
+  EoLn: Boolean;      (* @var end of line status *)
+{$endif}
 
-	EoLn: Boolean;			(* @var end of line status *)
-
-
-	function Abs(x: Real): Real; register; assembler; overload;
-	function Abs(x: Single): Single; register; assembler; overload;
-	function Abs(x: shortint): shortint; register; assembler; overload;
-	function Abs(x: smallint): smallint; register; assembler; overload;
-	function Abs(x: Integer): Integer; register; assembler; overload;
-	function ArcTan(value: real): real; overload;
-	function ArcTan(value: single): single; overload;
-	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
-	function Concat(a,b: String): string; assembler; overload;
-	function Concat(a: PString; b: char): string; assembler; overload;
-	function Concat(a: char; b: PString): string; assembler; overload;
-	function Concat(a,b: char): string; overload;
-	function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
-	function Cos(x: Real): Real; overload;
-	function Cos(x: Single): Single; overload;
-	function DPeek(a: word): word; register; stdcall; assembler;
-	procedure DPoke(a: word; value: word); register; stdcall; assembler;
-	function Eof(var f: file): Boolean;
-	function Exp(x: Real): Real; overload;
-	function Exp(x: Float): Float; overload;
-	function FilePos(var f: file): cardinal; assembler;
-	function FileSize(var f: file): cardinal; assembler;
-	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload;
-	procedure FillByte(var x; count: word; value: byte); assembler; register; overload;
-	procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload;
-	procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload;
-	procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload;
-	procedure FillChar(var x; count: word; value: char); assembler; register; overload;
-	procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
-	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
-	function FloatToStr(a: real): TString; stdcall; assembler;
-	procedure FreeMem(var p; size: word); assembler; register;
-	procedure GetMem(var p; size: word); assembler; register;
-	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
-	function IsLetter(A: char): Boolean;
-	function IsDigit(A: char): Boolean;
-	function iSqrt(number: Single): Single;
-	function Ln(x: Real): Real; overload;
-	function Ln(x: Float): Float; overload;
- 	function LowerCase(a: char): char;
-	procedure Move(source, dest: pointer; count: word); assembler; register; overload;
-	procedure Move(var source, dest; count: word); assembler; register; overload;
-	procedure Move(var source; dest: pointer; count: word); assembler; register; overload;
-	function OctStr(Value: cardinal; Digits: byte): TString; assembler;
-	function ParamCount: byte; assembler;
-	function ParamStr(i: byte): TString; assembler;
-	procedure Pause; assembler; overload;                                                      //platform dependent
-	procedure Pause(n: word); assembler; overload;                                             //platform dependent
-	function Peek(a: word): byte; register; stdcall; assembler;
-	procedure Poke(a: word; value: byte); register; stdcall; assembler;
-	function Random: Real; overload;                                                           //platform dependent
-	function Random(range: byte): byte; assembler; overload;                                   //platform dependent
-	function Random(range: smallint): smallint; overload;                                      //platform dependent
-	function RandomF: Float;                                                                   //platform dependent
-	procedure Randomize; assembler;                                                            //platform dependent
-	procedure RunError(a: byte);
-	procedure Seek(var f: file; a: cardinal); assembler;
-	procedure SetLength(var S: string; Len: byte); register; assembler;
-	function Sin(x: Real): Real; overload;
-	function Sin(x: Single): Single; overload;
-	function Space(b: Byte): ^string; assembler;
-	procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
-	procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
-	function StringOfChar(c: Char; l: byte): ^string; assembler;
-	function Sqr(x: Real): Real; overload;
-	function Sqr(x: Single): Single; overload;
-	function Sqr(x: integer): integer; overload;
-	function Sqrt(x: Real): Real; overload;
-	function Sqrt(x: Single): Single; overload;
-	function Sqrt(x: Integer): Single; overload;
-	function UpCase(a: char): char;
-	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
-	procedure Val(s: PString; var v: real; var code: byte); overload; //register;
-	procedure Val(s: PString; var v: single; var code: byte); overload; //register;
-	function Swap(a: word): word; overload;
-	function Swap(a: cardinal): cardinal; overload;
+  function Abs(x: Real): Real; register; assembler; overload;
+  function Abs(x: Single): Single; register; assembler; overload;
+  function Abs(x: shortint): shortint; register; assembler; overload;
+  function Abs(x: smallint): smallint; register; assembler; overload;
+  function Abs(x: Integer): Integer; register; assembler; overload;
+  function ArcTan(value: real): real; overload;
+  function ArcTan(value: single): single; overload;
+  function BinStr(Value: cardinal; Digits: byte): TString; assembler;
+  function Concat(a,b: String): string; assembler; overload;
+  function Concat(a: PString; b: char): string; assembler; overload;
+  function Concat(a: char; b: PString): string; assembler; overload;
+  function Concat(a,b: char): string; overload;
+  function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
+  function Cos(x: Real): Real; overload;
+  function Cos(x: Single): Single; overload;
+  function DPeek(a: word): word; register; stdcall; assembler;
+  procedure DPoke(a: word; value: word); register; stdcall; assembler;
+  function Eof(var f: file): Boolean;
+  function Exp(x: Real): Real; overload;
+  function Exp(x: Float): Float; overload;
+  function FilePos(var f: file): cardinal; assembler;
+  function FileSize(var f: file): cardinal; assembler;
+  procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload;
+  procedure FillByte(var x; count: word; value: byte); assembler; register; overload;
+  procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload;
+  procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload;
+  procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload;
+  procedure FillChar(var x; count: word; value: char); assembler; register; overload;
+  procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
+  procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
+  function FloatToStr(a: real): TString; stdcall; assembler;
+  procedure FreeMem(var p; size: word); assembler; register;
+  procedure GetMem(var p; size: word); assembler; register;
+  function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
+  function IsLetter(A: char): Boolean;
+  function IsDigit(A: char): Boolean;
+  function iSqrt(number: Single): Single;
+  function Ln(x: Real): Real; overload;
+  function Ln(x: Float): Float; overload;
+  function LowerCase(a: char): char;
+  procedure Move(source, dest: pointer; count: word); assembler; register; overload;
+  procedure Move(var source, dest; count: word); assembler; register; overload;
+  procedure Move(var source; dest: pointer; count: word); assembler; register; overload;
+  function OctStr(Value: cardinal; Digits: byte): TString; assembler;
+  function ParamCount: byte; assembler;
+  function ParamStr(i: byte): TString; assembler;
+  procedure Pause; assembler; overload;                                                      //platform dependent
+  procedure Pause(n: word); assembler; overload;                                             //platform dependent
+  function Peek(a: word): byte; register; stdcall; assembler;
+  procedure Poke(a: word; value: byte); register; stdcall; assembler;
+  function Random: Real; overload;                                                           //platform dependent
+  function Random(range: byte): byte; assembler; overload;                                   //platform dependent
+  function Random(range: smallint): smallint; overload;                                      //platform dependent
+  function RandomF: Float;                                                                   //platform dependent
+  procedure Randomize; assembler;                                                            //platform dependent
+  procedure RunError(a: byte);
+  procedure Seek(var f: file; a: cardinal); assembler;
+  procedure SetLength(var S: string; Len: byte); register; assembler;
+  function Sin(x: Real): Real; overload;
+  function Sin(x: Single): Single; overload;
+  function Space(b: Byte): ^string; assembler;
+  procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
+  procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
+  function StringOfChar(c: Char; l: byte): ^string; assembler;
+  function Sqr(x: Real): Real; overload;
+  function Sqr(x: Single): Single; overload;
+  function Sqr(x: integer): integer; overload;
+  function Sqrt(x: Real): Real; overload;
+  function Sqrt(x: Single): Single; overload;
+  function Sqrt(x: Integer): Single; overload;
+  function UpCase(a: char): char;
+  procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
+  procedure Val(s: PString; var v: real; var code: byte); overload; //register;
+  procedure Val(s: PString; var v: single; var code: byte); overload; //register;
+  function Swap(a: word): word; overload;
+  function Swap(a: cardinal): cardinal; overload;
 
 
 implementation
 
 var
-	RndSeed: smallint;
+  RndSeed: smallint;
 
 
 procedure RunError(a: byte);
@@ -323,8 +326,8 @@ Print error message
 @param: a - error number
 *)
 begin
-	writeln(#69,#82,#82,#32, a);	// 'ERR ',a	; kody znakow oddzielone przecinkiem nie zostana potraktowane jako ciag znakowy ktory kompilator zapisuje do stalych
-	halt;
+  writeln(#69,#82,#82,#32, a);  // 'ERR ',a ; kody znakow oddzielone przecinkiem nie zostana potraktowane jako ciag znakowy ktory kompilator zapisuje do stalych
+  halt;
 end;
 
 
@@ -339,15 +342,15 @@ Convert cardinal value to string with hexadecimal representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	jsr @hexStr
+  jsr @hexStr
 
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
+; @move #@buf Result #33
+  ldy #256-33
+  mva:rne @buf+33-256,y adr.Result+33-256,y+
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -362,8 +365,8 @@ Reads BYTE from the desired memory address
 @returns: byte
 *)
 asm
-{	ldy #0
-	mva (edx),y Result
+{ ldy #0
+  mva (edx),y Result
 };
 end;
 
@@ -378,10 +381,10 @@ Reads WORD from the desired memory address
 @returns: word
 *)
 asm
-{	ldy #0
-	mva (edx),y Result
-	iny
-	mva (edx),y Result+1
+{ ldy #0
+  mva (edx),y Result
+  iny
+  mva (edx),y Result+1
 };
 end;
 
@@ -398,14 +401,14 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Real (Q24.8)
 *)
 asm
-{	lda edx+3
-	spl
-	jsr negEDX
+{ lda edx+3
+  spl
+  jsr negEDX
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
-	mva edx+3 Result+3
+  mva edx Result
+  mva edx+1 Result+1
+  mva edx+2 Result+2
+  mva edx+3 Result+3
 };
 end;
 
@@ -422,13 +425,13 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Single
 *)
 asm
-{	lda edx+3
-	and #$7f
-	sta Result+3
+{ lda edx+3
+  and #$7f
+  sta Result+3
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
+  mva edx Result
+  mva edx+1 Result+1
+  mva edx+2 Result+2
 };
 end;
 
@@ -445,13 +448,13 @@ The result of the function has the same type as its argument, which can be any n
 @returns: shortint
 *)
 asm
-{	lda edx
-	bpl @+
+{ lda edx
+  bpl @+
 
-	eor #$ff
-	add #1
+  eor #$ff
+  add #1
 @
-	sta Result
+  sta Result
 };
 end;
 
@@ -468,19 +471,19 @@ The result of the function has the same type as its argument, which can be any n
 @returns: smallint
 *)
 asm
-{	lda edx+1
-	bpl @+
+{ lda edx+1
+  bpl @+
 
-	lda #$00
-	sub edx
-	sta edx
-	lda #$00
-	sbc edx+1
-	sta edx+1
+  lda #$00
+  sub edx
+  sta edx
+  lda #$00
+  sbc edx+1
+  sta edx+1
 @
-	sta Result+1
+  sta Result+1
 
-	mva edx Result
+  mva edx Result
 };
 end;
 
@@ -497,15 +500,15 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Integer
 *)
 asm
-{	lda edx+3
-	spl
-	jsr negEDX
+{ lda edx+3
+  spl
+  jsr negEDX
 
-	sta Result+3
+  sta Result+3
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
+  mva edx Result
+  mva edx+1 Result+1
+  mva edx+2 Result+2
 };
 end;
 
@@ -599,21 +602,21 @@ Sqrt returns the square root of its argument X, which must be positive
 var sp: ^single;
     c: cardinal;
 begin
-	Result:=0;
+  Result:=0;
 
-	if x <= 0 then exit;
+  if x <= 0 then exit;
 
-	sp:=@c;
+  sp:=@c;
 
-	c:=cardinal(x);
+  c:=cardinal(x);
 
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
+  if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
 
-	Result := sp^;
+  Result := sp^;
 
-	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
+  Result:=(Result+x/Result) * 0.5;
+  Result:=(Result+x/Result) * 0.5;
+  Result:=(Result+x/Result) * 0.5;
 end;
 
 
@@ -629,21 +632,21 @@ Sqrt returns the square root of its argument X, which must be positive
 var sp: ^single;
     c: cardinal;
 begin
-	Result:=0;
+  Result:=0;
 
-	if x <= 0 then exit;
+  if x <= 0 then exit;
 
-	sp:=@c;
+  sp:=@c;
 
-	c:=cardinal(single(x));
+  c:=cardinal(single(x));
 
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
+  if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
 
-	Result := sp^;
+  Result := sp^;
 
-	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
+  Result:=(Result+x/Result) * 0.5;
+  Result:=(Result+x/Result) * 0.5;
+  Result:=(Result+x/Result) * 0.5;
 end;
 
 
@@ -667,13 +670,13 @@ const
     threehalfs: single = 1.5;
 begin
 
-	sp:=@c;
+  sp:=@c;
 
-	f0 := number * 0.5;
-	c  := cardinal(number);		// evil floating point bit level hacking
-	c  := $5f3759df - (c shr 1);	// what the fuck?
+  f0 := number * 0.5;
+  c  := cardinal(number);   // evil floating point bit level hacking
+  c  := $5f3759df - (c shr 1);  // what the fuck?
         f1 := f0 * sp^ * sp^;
-	Result := sp^ * ( 1.5 - f1 );	// 1st iteration
+  Result := sp^ * ( 1.5 - f1 ); // 1st iteration
 
 end;
 
@@ -831,34 +834,34 @@ Ln returns the natural logarithm of the Real parameter X. X must be positive.
 *)
 var N, P, K, L, R, A, E: Real;
 begin
-		E := 2.71828182845905;
-		P := x;
-		N := 0;
+    E := 2.71828182845905;
+    P := x;
+    N := 0;
 
-	if X>0.0 then begin
+  if X>0.0 then begin
 
                 // This speeds up the convergence by calculating the integral
-		while(P >= E) do begin
-			P := P / E;
-			N := N + 1;
-		end;
+    while(P >= E) do begin
+      P := P / E;
+      N := N + 1;
+    end;
 
                 N := N + (P / E);
-		P := x;
+    P := x;
 
-		while true do begin
-			A := N;
-			K := N - 1;
-			L := P / Exp(K);
-			R := K * E;
-			N := (L + R) / E;
+    while true do begin
+      A := N;
+      K := N - 1;
+      L := P / Exp(K);
+      R := K * E;
+      N := (L + R) / E;
 
-			if A-N < 0.01 then Break;
-		end;
+      if A-N < 0.01 then Break;
+    end;
 
-	end;
+  end;
 
-		Result := N;
+    Result := N;
 end;
 
 
@@ -875,34 +878,34 @@ Ln returns the natural logarithm of the Real parameter X. X must be positive.
 *)
 var N, P, K, L, R, A, E: Float;
 begin
-		E := 2.71828182845905;
-		P := x;
-		N := 0;
+    E := 2.71828182845905;
+    P := x;
+    N := 0;
 
-	if x>Float(0) then begin
+  if x>Float(0) then begin
 
                 // This speeds up the convergence by calculating the integral
-		while(P >= E) do begin
-			P := P / E;
-			N := N + 1;
-		end;
+    while(P >= E) do begin
+      P := P / E;
+      N := N + 1;
+    end;
 
                 N := N + (P / E);
-		P := x;
+    P := x;
 
-		while true do begin
-			A := N;
-			K := N - 1;
-			L := P / Exp(K);
-			R := K * E;
-			N := (L + R) / E;
+    while true do begin
+      A := N;
+      K := N - 1;
+      L := P / Exp(K);
+      R := K * E;
+      N := (L + R) / E;
 
-			if A-N < Float(0.01) then Break;
-		end;
+      if A-N < Float(0.01) then Break;
+    end;
 
-	end;
+  end;
 
-		Result := N;
+    Result := N;
 end;
 
 
@@ -916,26 +919,26 @@ Size of file (SDX only)
 @returns: cardinal
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	mwa f :bp2
+  mwa f :bp2
 
-	ldy #s@file.chanel
-	lda (:bp2),y
-	tax
-	lda #39
-	sta iccmd,x
+  ldy #s@file.chanel
+  lda (:bp2),y
+  tax
+  lda #39
+  sta iccmd,x
 
-	m@call	ciov
+  m@call  ciov
 
-	sty IOResult
+  sty IOResult
 
-	mva icax3,x result
-	mva icax4,x result+1
-	mva icax5,x result+2
-	mva #$00 result+3
+  mva icax3,x result
+  mva icax4,x result+1
+  mva icax5,x result+2
+  mva #$00 result+3
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -950,43 +953,43 @@ Get position in file (SDX only)
 @returns: cardinal
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	mwa f :bp2
+  mwa f :bp2
 
-	ldy #s@file.chanel
-	lda (:bp2),y
-	tax
-	lda #38
-	sta iccmd,x
+  ldy #s@file.chanel
+  lda (:bp2),y
+  tax
+  lda #38
+  sta iccmd,x
 
-	m@call	ciov
+  m@call  ciov
 
-	sty IOResult
+  sty IOResult
 
-	mva icax3,x eax
-	mva icax4,x eax+1
-	mva icax5,x eax+2
+  mva icax3,x eax
+  mva icax4,x eax+1
+  mva icax5,x eax+2
 
-	mva #$00 eax+3
-	sta ecx+2
-	sta ecx+3
+  mva #$00 eax+3
+  sta ecx+2
+  sta ecx+3
 
-	ldy #s@file.record
-	lda (:bp2),y
-	sta ecx
-	iny
-	lda (:bp2),y
-	sta ecx+1
+  ldy #s@file.record
+  lda (:bp2),y
+  sta ecx
+  iny
+  lda (:bp2),y
+  sta ecx+1
 
-	jsr idivEAX_ECX.main
+  jsr idivEAX_ECX.main
 
-	mva eax Result
-	mva eax+1 Result+1
-	mva eax+2 Result+2
-	mva eax+3 Result+3
+  mva eax Result
+  mva eax+1 Result+1
+  mva eax+2 Result+2
+  mva eax+3 Result+3
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -1000,42 +1003,42 @@ Set file position (SDX only)
 @param: a - new position
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	mwa f :bp2
+  mwa f :bp2
 
-	ldy #s@file.chanel
-	lda (:bp2),y
-	tax
-	lda #37
-	sta iccmd,x
+  ldy #s@file.chanel
+  lda (:bp2),y
+  tax
+  lda #37
+  sta iccmd,x
 
-	ldy #s@file.record
-	lda (:bp2),y
-	sta eax
-	iny
-	lda (:bp2),y
-	sta eax+1
-	lda #$00
-	sta eax+2
-	sta eax+3
+  ldy #s@file.record
+  lda (:bp2),y
+  sta eax
+  iny
+  lda (:bp2),y
+  sta eax+1
+  lda #$00
+  sta eax+2
+  sta eax+3
 
-	mva a ecx
-	mva a+1 ecx+1
-	mva a+2 ecx+2
-	mva a+3 ecx+3
+  mva a ecx
+  mva a+1 ecx+1
+  mva a+2 ecx+2
+  mva a+3 ecx+3
 
-	jsr imulECX
+  jsr imulECX
 
-	mva eax icax3,x
-	mva eax+1 icax4,x
-	mva eax+2 icax5,x
+  mva eax icax3,x
+  mva eax+1 icax4,x
+  mva eax+2 icax5,x
 
-	m@call	ciov
+  m@call  ciov
 
-	sty IOResult
+  sty IOResult
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -1053,19 +1056,19 @@ Check for end of file
 var i: cardinal;
     bf: array [0..255] of byte;
 begin
-	i:=FilePos(f);
+  i:=FilePos(f);
 
-	blockread(f, bf, 1);
+  blockread(f, bf, 1);
 
-	Seek(f, i);
+  Seek(f, i);
 
 asm
-{	mwa f :bp2
+{ mwa f :bp2
 
-	ldy #s@file.status
-	lda (:bp2),y
-	and #e@file.eof
-	sta Result
+  ldy #s@file.status
+  lda (:bp2),y
+  and #e@file.eof
+  sta Result
 };
 end;
 
@@ -1157,23 +1160,23 @@ Calculate numerical value of a string
 @param: code - pointer to integer - error code
 *)
 asm
-{	@StrToInt s
+{ @StrToInt s
 
-	tya
-	pha
+  tya
+  pha
 
-	mwa code :bp2
-	ldy #0
+  mwa code :bp2
+  ldy #0
 
-	pla
-	sta (:bp2),y
+  pla
+  sta (:bp2),y
 
-	mwa v :bp2
+  mwa v :bp2
 
-	mva edx (:bp2),y+
-	mva edx+1 (:bp2),y+
-	mva edx+2 (:bp2),y+
-	mva edx+3 (:bp2),y
+  mva edx (:bp2),y+
+  mva edx+1 (:bp2),y+
+  mva edx+2 (:bp2),y+
+  mva edx+3 (:bp2),y
 };
 end;
 
@@ -1199,42 +1202,42 @@ begin
 
  if len > 1 then begin
 
-	dotpos:=0;
+  dotpos:=0;
 
-	if (s[1] = '-') or (s[1] = '+') then	//Added line to check sign.If the number is signed,
-		n:=2				//set n to position 2.
-	else					//(number is not signed)
-		n:=1;				//set n to position 1.
+  if (s[1] = '-') or (s[1] = '+') then  //Added line to check sign.If the number is signed,
+    n:=2        //set n to position 2.
+  else          //(number is not signed)
+    n:=1;       //set n to position 1.
 
 // If the number was signed,then we set n to 2,
 // so that we start with s[2],and at the end
 // if the number was negative we will multiply by -1.
 
-	while n<len do begin			//n is already set to the position of the fisrt number.
+  while n<len do begin      //n is already set to the position of the fisrt number.
 
-	if (s[n] = '.') then
-		dotpos := len - n - 1
+  if (s[n] = '.') then
+    dotpos := len - n - 1
         else
-		if isDigit(s[n]) then
-			r := r * 10.0 +  real(ord(s[n])-ord('0'))
-		else begin
-			v := 0.0;
-			code := n;
-			exit;
-		end;
+    if isDigit(s[n]) then
+      r := r * 10.0 +  real(ord(s[n])-ord('0'))
+    else begin
+      v := 0.0;
+      code := n;
+      exit;
+    end;
 
-	inc(n);
-	end;
+  inc(n);
+  end;
 
-	while dotpos <> 0 do begin
-		r := r / 10;
-		dec(dotpos);
-	end;
+  while dotpos <> 0 do begin
+    r := r / 10;
+    dec(dotpos);
+  end;
 
-	if (s[1]='-') then			//If s[] is "negative"
-		r :=  -r;
+  if (s[1]='-') then      //If s[] is "negative"
+    r :=  -r;
 
-	code := 0;
+  code := 0;
  end;
 
  v := r;
@@ -1263,42 +1266,42 @@ begin
 
  if len > 1 then begin
 
-	dotpos:=0;
+  dotpos:=0;
 
-	if (s[1] = '-') or (s[1] = '+') then	//Added line to check sign.If the number is signed,
-		n:=2				//set n to position 2.
-	else					//(number is not signed)
-		n:=1;				//set n to position 1.
+  if (s[1] = '-') or (s[1] = '+') then  //Added line to check sign.If the number is signed,
+    n:=2        //set n to position 2.
+  else          //(number is not signed)
+    n:=1;       //set n to position 1.
 
 // If the number was signed,then we set n to 2,
 // so that we start with s[2],and at the end
 // if the number was negative we will multiply by -1.
 
-	while n<len do begin			//n is already set to the position of the fisrt number.
+  while n<len do begin      //n is already set to the position of the fisrt number.
 
-	if (s[n] = '.') then
-		dotpos := len - n - 1
+  if (s[n] = '.') then
+    dotpos := len - n - 1
         else
-		if isDigit(s[n]) then
-			f := f * 10 +  single(ord(s[n])-ord('0'))
-		else begin
-			v := 0;
-			code := n;
-			exit;
-		end;
+    if isDigit(s[n]) then
+      f := f * 10 +  single(ord(s[n])-ord('0'))
+    else begin
+      v := 0;
+      code := n;
+      exit;
+    end;
 
-	inc(n);
-	end;
+  inc(n);
+  end;
 
-	while dotpos <> 0 do begin
-		f := f * 0.1;			// '* 0.1' is faster than '/ 10'
-		dec(dotpos);
-	end;
+  while dotpos <> 0 do begin
+    f := f * 0.1;     // '* 0.1' is faster than '/ 10'
+    dec(dotpos);
+  end;
 
-	if (s[1]='-') then			// If s[] is "negative"
-		f :=  -f;
+  if (s[1]='-') then      // If s[] is "negative"
+    f :=  -f;
 
-	code := 0;
+  code := 0;
  end;
 
  v := f;
@@ -1316,16 +1319,16 @@ Convert a float value to a string
 @returns: string[32]
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	inx
+  inx
 
-	@ValueToStr #@printREAL
+  @ValueToStr #@printREAL
 
-	ldx #$20
-	mva:rpl @buf,x adr.Result,x-
+  ldx #$20
+  mva:rpl @buf,x adr.Result,x-
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -1339,15 +1342,15 @@ Convert a numerical value to a string
 @param: s - string[32] - result
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	inx
+  inx
 
-	@ValueToStr #@printINT
+  @ValueToStr #@printINT
 
-	@move #@buf s #16	; !!! koniecznie przez wskaznik
+  @move #@buf s #16 ; !!! koniecznie przez wskaznik
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -1361,15 +1364,15 @@ Convert a numerical value to a string
 @param: s - string[32] - result
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	inx
+  inx
 
-	@ValueToStr #@printCARD
+  @ValueToStr #@printCARD
 
-	@move #@buf s #16	; !!! koniecznie przez wskaznik
+  @move #@buf s #16 ; !!! koniecznie przez wskaznik
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -1383,8 +1386,8 @@ Store BYTE at the desired memory address
 @param: value (0..255)
 *)
 asm
-{	ldy #0
-	mva value (edx),y
+{ ldy #0
+  mva value (edx),y
 };
 end;
 
@@ -1398,10 +1401,10 @@ Store WORD at the desired memory address
 @param: value (0..65535)
 *)
 asm
-{	ldy #0
-	mva value (edx),y
-	iny
-	mva value+1 (edx),y
+{ ldy #0
+  mva value (edx),y
+  iny
+  mva value+1 (edx),y
 };
 end;
 
@@ -1416,7 +1419,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: value - Char
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1430,7 +1433,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: value - Byte
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1444,7 +1447,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: value - Boolean
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1454,7 +1457,7 @@ procedure FillChar(var x; count: word; value: char); assembler; register; overlo
 
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1464,7 +1467,7 @@ procedure FillChar(var x; count: word; value: byte); assembler; register; overlo
 
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1474,7 +1477,7 @@ procedure FillChar(var x; count: word; value: Boolean); assembler; register; ove
 
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1488,7 +1491,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: count
 @param: value - Byte
 *)asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1498,7 +1501,7 @@ procedure FillByte(var x; count: word; value: byte); assembler; register; overlo
 
 *)
 asm
-{	jsr @fill
+{ jsr @fill
 };
 end;
 
@@ -1515,7 +1518,7 @@ Moves Count bytes from Source to Dest
 @returns: cardinal
 *)
 asm
-{	jsr @move
+{ jsr @move
 };
 end;
 
@@ -1525,7 +1528,7 @@ procedure Move(var source, dest; count: word); assembler; register; overload;
 
 *)
 asm
-{	jsr @move
+{ jsr @move
 };
 end;
 
@@ -1535,7 +1538,7 @@ procedure Move(var source; dest: pointer; count: word); assembler; register; ove
 
 *)
 asm
-{	jsr @move
+{ jsr @move
 };
 end;
 
@@ -1588,7 +1591,7 @@ Calculate sine of angle
 @returns: Q24.8
 *)
 begin
-	Result := rsincos(x, false);
+  Result := rsincos(x, false);
 end;
 
 
@@ -1602,7 +1605,7 @@ Calculate cosine of angle
 @returns: Q24.8
 *)
 begin
-	Result := rsincos(x, true);
+  Result := rsincos(x, true);
 end;
 
 
@@ -1681,13 +1684,13 @@ Return a string of spaces
 @returns: pointer to string
 *)
 asm
-{	ldy #0
-	lda #' '
-	sta:rne @buf,y+
+{ ldy #0
+  lda #' '
+  sta:rne @buf,y+
 
-	mva b @buf
+  mva b @buf
 
-	mwa #@buf Result
+  mwa #@buf Result
 };
 end;
 
@@ -1703,13 +1706,13 @@ Return a string consisting of 1 character repeated N times.
 @returns: pointer to string
 *)
 asm
-{	ldy #0
-	lda c
-	sta:rne @buf,y+
+{ ldy #0
+  lda c
+  sta:rne @buf,y+
 
-	mva l @buf
+  mva l @buf
 
-	mwa #@buf Result
+  mwa #@buf Result
 };
 end;
 
@@ -1723,8 +1726,8 @@ Set length of a string.
 @param: len - new length (BYTE)
 *)
 asm
-{	ldy #0
-	mva Len (edx),y
+{ ldy #0
+  mva Len (edx),y
 };
 end;
 
@@ -1740,30 +1743,30 @@ Convert integer to string with binary representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	ldy Digits
-	cpy #32
-	scc
-	ldy #32
+  ldy Digits
+  cpy #32
+  scc
+  ldy #32
 
-	sty @buf
+  sty @buf
 
-_tob1	lda #0
-	lsr Value+3
-	ror Value+2
-	ror Value+1
-	ror Value
-	adc #'0'
-	sta @buf,y
-	dey
-	bne _tob1
+_tob1 lda #0
+  lsr Value+3
+  ror Value+2
+  ror Value+1
+  ror Value
+  adc #'0'
+  sta @buf,y
+  dey
+  bne _tob1
 
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
+; @move #@buf Result #33
+  ldy #256-33
+  mva:rne @buf+33-256,y adr.Result+33-256,y+
 
-	pla:tax
+  pla:tax
 };
 end;
 
@@ -1779,49 +1782,49 @@ Convert integer to a string with octal representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	ldy Digits
-	cpy #32
-	scc
-	ldy #32
+  ldy Digits
+  cpy #32
+  scc
+  ldy #32
 
-	sty @buf
+  sty @buf
 
-_toct1	ldx #3
-	lda #0
-_toct2	lsr Value+3
-	ror Value+2
-	ror Value+1
-	ror Value
-	ror @
-	dex
-	bne _toct2
+_toct1  ldx #3
+  lda #0
+_toct2  lsr Value+3
+  ror Value+2
+  ror Value+1
+  ror Value
+  ror @
+  dex
+  bne _toct2
 
-	:5 lsr @
+  :5 lsr @
 
-	ora #'0'
-	sta @buf,y
+  ora #'0'
+  sta @buf,y
 
-	dey
-	bne _toct1
+  dey
+  bne _toct1
 
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
+; @move #@buf Result #33
+  ldy #256-33
+  mva:rne @buf+33-256,y adr.Result+33-256,y+
 
-	pla:tax
+  pla:tax
 };
 end;
 
 {$ifdef atari}
-	{$i system_atari.inc}
+  {$i system_atari.inc}
 {$endif}
 {$ifdef c64}
-	{$i system_c64.inc}
+  {$i system_c64.inc}
 {$endif}
 {$ifdef c4p}
-	{$i system_c4p.inc}
+  {$i system_c4p.inc}
 {$endif}
 
 function ParamCount: byte; assembler;
@@ -1832,8 +1835,8 @@ Return number of command-line parameters passed to the program.
 @returns: byte
 *)
 asm
-{	@cmdline #255
-	sta Result
+{ @cmdline #255
+  sta Result
 };
 end;
 
@@ -1848,11 +1851,11 @@ Return value of a command-line argument.
 @returns: string[32]
 *)
 asm
-{	@cmdline i
+{ @cmdline i
 
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
+; @move #@buf Result #33
+  ldy #256-33
+  mva:rne @buf+33-256,y adr.Result+33-256,y+
 };
 end;
 
@@ -1868,16 +1871,16 @@ Append one string to another.
 @returns: string (a+b)
 *)
 asm
-{	cpw a #@buf
-	beq skp
+{ cpw a #@buf
+  beq skp
 
-	mva #0 @buf
-	@addString a
+  mva #0 @buf
+  @addString a
 skp
-	@addString b
+  @addString b
 
-	ldy #0
-	mva:rne @buf,y adr.Result,y+
+  ldy #0
+  mva:rne @buf,y adr.Result,y+
 };
 end;
 
@@ -1888,19 +1891,19 @@ function Concat(a: PString; b: char): string; assembler; overload;
 
 *)
 asm
-{	cpw a #@buf
-	beq skp
+{ cpw a #@buf
+  beq skp
 
-	mva #0 @buf
-	@addString a
+  mva #0 @buf
+  @addString a
 skp
-	inc @buf
-	ldy @buf
-	lda b
-	sta @buf,y
+  inc @buf
+  ldy @buf
+  lda b
+  sta @buf,y
 
-	ldy #0
-	mva:rne @buf,y adr.Result,y+
+  ldy #0
+  mva:rne @buf,y adr.Result,y+
 };
 end;
 
@@ -1911,13 +1914,13 @@ function Concat(a: char; b: PString): string; assembler; overload;
 
 *)
 asm
-{	mva #1 @buf
-	lda a
-	sta @buf+1
-	@addString b
+{ mva #1 @buf
+  lda a
+  sta @buf+1
+  @addString b
 
-	ldy #0
-	mva:rne @buf,y adr.Result,y+
+  ldy #0
+  mva:rne @buf,y adr.Result,y+
 };
 end;
 
@@ -1940,51 +1943,51 @@ function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 
 *)
 asm
-{	txa:pha
+{ txa:pha
 
-	mwa S :bp2
-	ldy #0
+  mwa S :bp2
+  ldy #0
 
-	lda Index
-	sne
-	lda #1
-	cmp (:bp2),y
-	seq
-	bcs stop
+  lda Index
+  sne
+  lda #1
+  cmp (:bp2),y
+  seq
+  bcs stop
 
-	sta Index
-	add Count
-	sta ln
-	lda #$00
-	adc #$00
+  sta Index
+  add Count
+  sta ln
+  lda #$00
+  adc #$00
 
-	cmp #$00
-	bne @+
-	lda #0
-ln	equ *-1
-	cmp (:bp2),y
-@	beq ok
-	bcc ok
+  cmp #$00
+  bne @+
+  lda #0
+ln  equ *-1
+  cmp (:bp2),y
+@ beq ok
+  bcc ok
 
-	lda (:bp2),y
-	sub Index
-	add #1
-	sta Count
+  lda (:bp2),y
+  sub Index
+  add #1
+  sta Count
 
-ok	lda Count
-	sta adr.Result
-	beq stop
+ok  lda Count
+  sta adr.Result
+  beq stop
 
-	ldx #0
-	ldy Index
-lp	lda (:bp2),y
-	sta adr.Result+1,x
-	iny
-	inx
-	cpx Count
-	bne lp
+  ldx #0
+  ldy Index
+lp  lda (:bp2),y
+  sta adr.Result+1,x
+  iny
+  inx
+  cpx Count
+  bne lp
 
-stop	pla:tax
+stop  pla:tax
 };
 end;
 
@@ -2031,14 +2034,14 @@ Getmem reserves Size bytes memory, and returns a pointer to this memory in p.
 *)
 asm
 {
-	ldy #$00
-	lda :psptr
-	sta (P),y
-	iny
-	lda :psptr+1
-	sta (P),y
+  ldy #$00
+  lda :psptr
+  sta (P),y
+  iny
+  lda :psptr+1
+  sta (P),y
 
-	adw :psptr size
+  adw :psptr size
 };
 end;
 
@@ -2053,17 +2056,17 @@ Freemem releases the memory occupied by the pointer P
 *)
 asm
 {
-	cpw psptr #:PROGRAMSTACK
-	beq skp
-	bcc skp
+  cpw psptr #:PROGRAMSTACK
+  beq skp
+  bcc skp
 
-	ldy #$00
-	tya
-	sta (P),y
-	iny
-	sta (P),y
+  ldy #$00
+  tya
+  sta (P),y
+  iny
+  sta (P),y
 
-	sbw :psptr size
+  sbw :psptr size
 skp
 };
 end;
