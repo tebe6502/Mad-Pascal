@@ -41484,7 +41484,7 @@ asm65('.macro'#9'STATICDATA');
 asm65;
 asm65(#9'end');
 
-for i:=0 to iOut do WriteOut('');
+for i:=0 to High(TemporaryBuf) do WriteOut('');
 
 end;// CompileProgram
 
