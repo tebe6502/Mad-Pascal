@@ -31546,10 +31546,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator(false);
  asm65;
 
- if (STACK_SIZE >= 1) and (STACK_SIZE <= 16) then
+ if (STACK_SIZE >= 2) and (STACK_SIZE <= 8) then
   asm65('STACKWIDTH'#9'= '+IntToStr(STACK_SIZE))
  else
-  asm65('STACKWIDTH'#9'= 16');
+  asm65('STACKWIDTH'#9'= 8');
 
  if target = t_a8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
@@ -31605,7 +31605,7 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
- asm65('STACKORIGIN'#9'.ds STACKWIDTH*4');
+ asm65('STACKORIGIN'#9'.ds STACKWIDTH*8');
 
  asm65('zpend');
 
