@@ -592,9 +592,10 @@ var
 
   CODEORIGIN_Atari: integer = $2000;
 
-   DATA_Atari: integer = -1;
-  ZPAGE_Atari: integer = -1;
-  STACK_Atari: integer = -1;
+  DATA_Atari  : integer = -1;
+  ZPAGE_Atari : integer = -1;
+  STACK_Atari : integer = -1;
+  STACK_SIZE  : integer = -1;
 
   UnitNameIndex: Integer = 1;
 
@@ -31545,7 +31546,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator(false);
  asm65;
 
- asm65('STACKWIDTH'#9'= 16');
+ if (STACK_SIZE >= 1) and (STACK_SIZE <= 16) then
+  asm65('STACKWIDTH'#9'= '+IntToStr(STACK_SIZE))
+ else
+  asm65('STACKWIDTH'#9'= 16');
 
  if target = t_a8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
@@ -31567,7 +31571,10 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
- asm65('fxptr'#9'.ds 2','; VBXE pointer');
+
+ if target = t_a8 then
+  asm65('fxptr'#9'.ds 2','; VBXE pointer');
+
  asm65('psptr'#9'.ds 2','; PROGRAMSTACK Pointer');
  asm65;
 
@@ -31768,7 +31775,10 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
- asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1');
+ if target = t_a8 then
+  asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1')
+ else
+  asm65('.print ''ZPAGE: '',psptr,''..'',zpend-1');
 
  asm65;
  asm65('.print ''RTLIB: '',RTLIB,''..'',*-1');
@@ -41383,7 +41393,6 @@ asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
 asm65;
 asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
 
-
 if FastMul > 0  then begin
 
  asm65separator;
@@ -41480,7 +41489,7 @@ asm65('.macro'#9'STATICDATA');
 asm65;
 asm65(#9'end');
 
-for i:=0 to iOut do WriteOut('');
+for i:=0 to High(TemporaryBuf) do WriteOut('');
 
 end;// CompileProgram
 
@@ -41686,6 +41695,19 @@ begin
    if pos('-ZPAGE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      val('$'+copy(ParamStr(i), 8, 255), ZPAGE_Atari, err);
+     if err<>0 then Syntax(3);
+
+   end else
+   if (AnsiUpperCase(ParamStr(i)) = '-SSIZE') or (AnsiUpperCase(ParamStr(i)) = '-SS') then begin
+
+     val('$'+ParamStr(i+1), STACK_SIZE, err);
+     inc(i);
+     if err<>0 then Syntax(3);
+
+   end else
+   if pos('-SSIZE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+
+     val('$'+copy(ParamStr(i), 8, 255), STACK_SIZE, err);
      if err<>0 then Syntax(3);
 
    end else
