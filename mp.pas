@@ -31546,8 +31546,6 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator(false);
  asm65;
 
-
- writeln(STACK_SIZE);
  if (STACK_SIZE >= 1) and (STACK_SIZE <= 16) then
   asm65('STACKWIDTH'#9'= '+IntToStr(STACK_SIZE))
  else
