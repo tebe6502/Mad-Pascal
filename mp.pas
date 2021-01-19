@@ -72,6 +72,9 @@ Contributors:
 	- MADSTRAP
 	- PASDOC
 
++ Bartosz Zbytniewski :
+	- Bug Hunter
+	- Commodore C16/264 minimal unit SYSTEM setup
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
