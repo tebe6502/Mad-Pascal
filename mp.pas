@@ -595,7 +595,6 @@ var
   DATA_Atari  : integer = -1;
   ZPAGE_Atari : integer = -1;
   STACK_Atari : integer = -1;
-  STACK_SIZE  : integer = -1;
 
   UnitNameIndex: Integer = 1;
 
@@ -31546,10 +31545,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator(false);
  asm65;
 
- if (STACK_SIZE >= 1) and (STACK_SIZE <= 16) then
-  asm65('STACKWIDTH'#9'= '+IntToStr(STACK_SIZE))
- else
-  asm65('STACKWIDTH'#9'= 16');
+ asm65('STACKWIDTH'#9'= 16');
 
  if target = t_a8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
@@ -41695,19 +41691,6 @@ begin
    if pos('-ZPAGE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      val('$'+copy(ParamStr(i), 8, 255), ZPAGE_Atari, err);
-     if err<>0 then Syntax(3);
-
-   end else
-   if (AnsiUpperCase(ParamStr(i)) = '-SSIZE') or (AnsiUpperCase(ParamStr(i)) = '-SS') then begin
-
-     val('$'+ParamStr(i+1), STACK_SIZE, err);
-     inc(i);
-     if err<>0 then Syntax(3);
-
-   end else
-   if pos('-SSIZE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
-
-     val('$'+copy(ParamStr(i), 8, 255), STACK_SIZE, err);
      if err<>0 then Syntax(3);
 
    end else
