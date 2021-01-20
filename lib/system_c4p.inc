@@ -200,7 +200,7 @@ asm
   eor ted_timer_2   //Timer B Lo byte
   adc ted_timer_2+1 //Timer B Hi byte
   eor ted_timer_3   //Timer C Lo byte
-  eor ted_hcount    //Timer C Hi byte
+  eor ted_hcount    //horizontal counter
   tay
 
   lda range
