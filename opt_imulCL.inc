@@ -8,6 +8,7 @@
 *16
 *40
 *64
+*96
 *128
 *255
 
@@ -20,7 +21,7 @@
 
   if (listing[i] = #9'lda #$03') and							// lda #$03				; 0
      (pos('sta :e', listing[i+1]) > 0) and						// sta :e..				; 1
-     lda(i+2) and (lda_stack(i+2) = false) and						// lda 					; 2
+     (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda 					; 2
      (pos('sta :e', listing[i+3]) > 0) and				 		// sta :e..				; 3
      IFDEF_MUL8(i+4) then								// .ifdef fmulinit			; 4
       											// fmulu_8				; 5
@@ -152,7 +153,7 @@
 
 
 
-    if	lda(i) and (lda_stack(i) = false) and						// lda					; 0
+    if	(lda(i) or lda_adr(i)) and (lda_stack(i) = false) and				// lda					; 0
 	(pos('sta :e', listing[i+1]) > 0) and						// sta :e..				; 1
 	(listing[i+2] = #9'lda #$03') and 						// lda #$03				; 2
        	(pos('sta :e', listing[i+3]) > 0) and				 		// sta :e..				; 3
@@ -202,7 +203,7 @@
 // ===				imulCL 5				  === //
 // -----------------------------------------------------------------------------
 
-    if lda(i) and (lda_stack(i) = false) and						// lda 					; 0
+    if (lda(i) or lda_adr(i)) and (lda_stack(i) = false) and				// lda 					; 0
        (listing[i+1] = #9'sta :eax') and						// sta :eax				; 1
        (listing[i+2] = #9'lda #$05') and						// lda #$05				; 2
        (listing[i+3] = #9'sta :ecx') and						// sta :ecx				; 3
@@ -259,7 +260,7 @@
      end;
 
 
-    if lda(i) and (lda_stack(i) = false) and						// lda 					; 0
+    if (lda(i) or lda_adr(i)) and (lda_stack(i) = false) and				// lda 					; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        (listing[i+2] = #9'lda #$05') and						// lda #$05				; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
@@ -300,7 +301,7 @@
 
     if (listing[i] = #9'lda #$05') and							// lda #$05				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda 					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -349,7 +350,7 @@
 
     if (listing[i] = #9'lda #$05') and							// lda #$05				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda 					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -376,7 +377,7 @@
      end;
 
 
-    if lda(i) and (lda_stack(i) = false) and						// lda 					; 0
+    if (lda(i) or lda_adr(i)) and (lda_stack(i) = false) and				// lda 					; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        (listing[i+2] = #9'lda #$05') and						// lda #$05				; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
@@ -408,7 +409,7 @@
 // ===				imulCL 7				  === //
 // -----------------------------------------------------------------------------
 
-    if lda(i) and (lda_stack(i) = false) and						// lda 					; 0
+    if (lda(i) or lda_adr(i)) and (lda_stack(i) = false) and				// lda 					; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        (listing[i+2] = #9'lda #$07') and						// lda #$07				; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
@@ -438,7 +439,7 @@
 
     if (listing[i] = #9'lda #$07') and							// lda #$07				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda 					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -471,7 +472,7 @@
 
     if (listing[i] = #9'lda #$08') and							// lda #$08				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda 					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -500,7 +501,7 @@
 
     if (listing[i] = #9'lda #$08') and							// lda #$08				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda 					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) and 								// .ifdef fmulinit			; 4
       											// fmulu_8				; 5
@@ -535,7 +536,7 @@
 
  if (listing[i] = #9'lda #$0A') and 							// lda #$0A				; 0
     (listing[i+1] = #9'sta :ecx') and 							// sta :ecx				; 1
-    lda(i+2) and (lda_stack(i+2) = false) and						// lda 					; 2
+    (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and				// lda 					; 2
     (listing[i+3] = #9'sta :eax') and 							// sta :eax				; 3
     IFDEF_MUL8(i+4) then 								// .ifdef fmulinit			; 4
      											// fmulu_8				; 5
@@ -611,7 +612,7 @@
 
     if (listing[i] = #9'lda #$10') and							// lda #$10				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) and								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -644,7 +645,7 @@
 
     if (listing[i]  = #9'lda #$28') and							// lda #$28				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) then								// .ifdef fmulinit			; 4
      											// fmulu_8				; 5
@@ -716,7 +717,7 @@
 
     if (listing[i] = #9'lda #$40') and							// lda #$40				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) then								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -739,12 +740,38 @@
 
 
 // -----------------------------------------------------------------------------
+// ===				imulCL 96				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'sta :ecx') and							// sta :ecx				; 0
+       (listing[i+1] = #9'lda #$60') and						// lda #$60				; 1
+       (listing[i+2] = #9'sta :eax') and						// sta :eax				; 2
+       IFDEF_MUL8(i+3) then								// .ifdef fmulinit			; 3
+       											// fmulu_8				; 4
+       											// els					; 5
+       											// imulCL				; 6
+       											// eif					; 7
+     begin
+	listing[i]   := #9'jsr @mul96';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+	Result:=false;
+     end;
+
+
+// -----------------------------------------------------------------------------
 // ===				imulCL 128				  === //
 // -----------------------------------------------------------------------------
 
     if (listing[i] = #9'lda #$80') and							// lda #$80				; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and					// lda					; 2
+       (lda(i+2) or lda_adr(i+2)) and (lda_stack(i+2) = false) and			// lda					; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
        IFDEF_MUL8(i+4) then								// .ifdef fmulinit			; 4
        											// fmulu_8				; 5
@@ -795,7 +822,7 @@
        end;
 
 
-    if lda(i) and									// lda					; 0
+    if (lda(i) or lda_adr(i)) and							// lda					; 0
        (listing[i+1] = #9'sta :ecx') and						// sta :ecx				; 1
        (listing[i+2] = #9'lda #$FF') and						// lda #$FF				; 2
        (listing[i+3] = #9'sta :eax') and						// sta :eax				; 3
