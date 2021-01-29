@@ -103,6 +103,8 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754
 
 	icl 'common\mul40.asm'		; @mul40
+	icl 'common\mul64.asm'		; @mul64
+	icl 'common\mul96.asm'		; @mul96
 	icl 'common\mul320.asm'		; @mul320
 
 	icl 'common\int2hex.asm'	; @hexStr
