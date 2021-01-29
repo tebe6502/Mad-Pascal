@@ -18,13 +18,13 @@
 // -----------------------------------------------------------------------------
 
     if (p > 2) and
-       lda(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and		// lda					; p-3		#-+BYTE
-       sub_im(p-2) and					 				// sub #				; p-2
-       add(p-1) and (add_stack(p-1) = false) and					// add					; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
-       adc(p+2) and									// adc 					; p+2
-       sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
+       lda_a(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and			// lda					; p-3		#-+BYTE
+       sub_im(p-2) and					 					// sub #				; p-2
+       add(p-1) and (add_stack(p-1) = false) and						// add					; p-1
+												// sta :STACKORIGIN			; p
+       lda(p+1) and (lda_stack(p+1) = false) and						// lda 					; p+1
+       adc(p+2) and										// adc 					; p+2
+       sta_stack(p+3) then									// sta :STACKORIGIN+STACKWIDTH		; p+3
       begin
 	q:=GetBYTE(p-2);
 
@@ -43,13 +43,13 @@
 
 
     if (p > 2) and
-       lda(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and		// lda					; p-3		#-+BYTE
-       add_im(p-2) and 									// add #				; p-2
-       add(p-1) and (add_stack(p-1) = false) and					// add 					; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
-       adc(p+2) and									// adc 					; p+2
-       sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
+       lda_a(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and			// lda					; p-3		#-+BYTE
+       add_im(p-2) and 										// add #				; p-2
+       add(p-1) and (add_stack(p-1) = false) and						// add 					; p-1
+												// sta :STACKORIGIN			; p
+       lda(p+1) and (lda_stack(p+1) = false) and						// lda 					; p+1
+       adc(p+2) and										// adc 					; p+2
+       sta_stack(p+3) then									// sta :STACKORIGIN+STACKWIDTH		; p+3
       begin
 	q:=GetBYTE(p-2);
 
@@ -68,14 +68,14 @@
 
 
     if (p > 2) and
-       lda(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and		// lda					; p-3		+-BYTE
-       add_sub(p-2) and (add_sub_stack(p-2) = false) and 				// add|sub				; p-2
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and 				// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
-       adc_sbc(p+2) and									// adc|sbc				; p+2
-       sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
-       (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
+       lda_a(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and			// lda					; p-3		+-BYTE
+       add_sub(p-2) and (add_sub_stack(p-2) = false) and 					// add|sub				; p-2
+       add_sub(p-1) and (add_sub_stack(p-1) = false) and 					// add|sub				; p-1
+												// sta :STACKORIGIN			; p
+       lda(p+1) and (lda_stack(p+1) = false) and						// lda 					; p+1
+       adc_sbc(p+2) and										// adc|sbc				; p+2
+       sta_stack(p+3) and									// sta :STACKORIGIN+STACKWIDTH		; p+3
+       (adc_sbc(p+5) = false) then								//~adc|sbc				; p+5
       begin
 	listing[p+1] := '';
 	listing[p+2] := '';
@@ -91,14 +91,14 @@
 
 
     if (p > 2) and
-       lda(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and		// lda					; p-3		+-BYTE
-       and_ora_eor(p-2) and (and_ora_eor_stack(p-2) = false) and 			// and|ora|eor				; p-2
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and 				// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
-       adc_sbc(p+2) and									// adc|sbc				; p+2
-       sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
-       (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
+       lda_a(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and			// lda					; p-3		+-BYTE
+       and_ora_eor(p-2) and (and_ora_eor_stack(p-2) = false) and 				// and|ora|eor				; p-2
+       add_sub(p-1) and (add_sub_stack(p-1) = false) and 					// add|sub				; p-1
+												// sta :STACKORIGIN			; p
+       lda(p+1) and (lda_stack(p+1) = false) and						// lda 					; p+1
+       adc_sbc(p+2) and										// adc|sbc				; p+2
+       sta_stack(p+3) and									// sta :STACKORIGIN+STACKWIDTH		; p+3
+       (adc_sbc(p+5) = false) then								//~adc|sbc				; p+5
       begin
 	listing[p+1] := '';
 	listing[p+2] := '';
@@ -113,7 +113,7 @@
 
 
     if (p > 1) and
-       lda(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-BYTE
+       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-BYTE
        add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
@@ -134,7 +134,7 @@
 
 
     if (p > 1) and
-       lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-BYTE
+       lda_a(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-BYTE
        add_sub(p-1) and (add_sub_stack(p-1) = false) and				// add|sub				; p-1
 											// sta :STACKORIGIN			; p
 //       lda(p+1) and									//~lda 					; p+1
@@ -150,7 +150,7 @@
 
 
     if (p > 0) and
-       lda(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		BYTE
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		BYTE
 											// sta :STACKORIGIN			; p
        lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
        add_sub(p+2) and									// add|sub				; p+2
@@ -167,6 +167,36 @@
 
 	Result:=false; Break;
       end;
+
+
+    if (p > 4) and
+       ldy_im_0(p-5) and								// ldy #$00				; p-5		+-SHORTINT
+       lda(p-4) and									// lda					; p-4
+       spl(p-3) and									// spl					; p-3
+       dey(p-2) and									// dey					; p-2
+       add_sub(p-1) and									// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       tya(p+1) and									// tya 					; p+1
+       adc_sbc(p+2) and									// adc|sbc				; p+2
+       sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+       (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
+      begin
+	listing[p-5] := '';
+
+	listing[p-3] := '';
+	listing[p-2] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+      end;
+
 
 // -----------------------------------------------------------------------------
 
@@ -383,7 +413,7 @@
 
 
     if (p > 0) and
-       lda(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD	[byte]
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD	[byte]
 											// sta :STACKORIGIN			; p
        lda_im_0(p+1) and								// lda #$00				; p+1
        asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
@@ -406,7 +436,7 @@
 
 
     if (p > 1) and
-       lda(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-WORD
+       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-WORD
        add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and 									// lda					; p+1
@@ -432,7 +462,7 @@
 
 
     if (p > 0) and
-       lda(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD
 											// sta :STACKORIGIN			; p
        lda(p+1) and 									// lda					; p+1
        adc(p+2) and									// adc					; p+2
@@ -523,7 +553,7 @@
 
     if (p > 1) and
        (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
-       lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1) and 				// lda  				; p-2		#-WORD
+       (lda(p-2) or lda_adr(p-2)) and (lda_im(p-2) = false) and sub_im(p-1) and 	// lda  				; p-2		#-WORD
 //        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
@@ -586,7 +616,7 @@
 // -----------------------------------------------------------------------------
 
     if (p > 0) and
-       lda(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		CARDINAL	[byte]
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		CARDINAL	[byte]
 											// sta :STACKORIGIN			; p
        lda_im_0(p+1) and								// lda #$00				; p+1
        asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
@@ -642,7 +672,7 @@
 // -----------------------------------------------------------------------------
 
     if (p > 1) and
-       lda(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-CARDINAL
+       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-CARDINAL
        add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
