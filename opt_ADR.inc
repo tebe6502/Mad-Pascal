@@ -79,6 +79,7 @@
        lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
        adc_sbc(p+2) and									// adc|sbc				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											// 					; p+4
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
       begin
 	listing[p+1] := '';
@@ -102,6 +103,7 @@
        lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
        adc_sbc(p+2) and									// adc|sbc				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											//					; p+4
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
       begin
 	listing[p+1] := '';
@@ -124,6 +126,7 @@
        lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
        adc_sbc(p+2) and									// adc|sbc				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											//					; p+4
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
       begin
 	listing[p+1] := '';
@@ -160,11 +163,29 @@
        lda(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
        add_sub(p+2) and									// add|sub				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											//					; p+4
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
       begin
 	listing[p+1] := '';
 	listing[p+2] := '';
 	listing[p+3] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 0) and
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		BYTE
+											// sta :STACKORIGIN			; p
+       lda(p+1) and (lda_stack(p+1) = false) and (lda_im(p+1) = false) and		// lda 					; p+1
+       asl_stack(p+2) and (copy(listing[p], 6, 256) = copy(listing[p+2], 6, 256)) and	// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
+      begin
 
 	listing[i+3] := '';
 	listing[i+4] := '';
@@ -184,6 +205,7 @@
        tya(p+1) and									// tya 					; p+1
        adc_sbc(p+2) and									// adc|sbc				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											//					; p+4
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
       begin
 	listing[p-5] := '';
@@ -219,6 +241,7 @@
        lda(p+1) and									// lda 					; p+1
        adc_stack(p+2) and								// adc :STACKORIGIN+STACKWIDTH+10	; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH+9	; p+3
+											//					; p+4
        (adc(p+5) = false) then								//~adc					; p+5
     if (copy(listing[p-6], 6, 256) = copy(listing[p-1], 6, 256)) and
        (copy(listing[p-3], 6, 256) = copy(listing[p+2], 6, 256)) then
