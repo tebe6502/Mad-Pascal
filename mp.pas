@@ -358,6 +358,8 @@ const
   ASPOINTERTOARRAYORIGIN2= 4;
   ASPOINTERTORECORD	 = 5;
   ASPOINTERTOARRAYRECORD = 6;
+  ASSTRINGPOINTERTOARRAYORIGIN = 7;
+
   //ASPOINTERTOARRAYRECORDORIGIN = 7;
 
   ASCHAR		= 6;	// GenerateWriteString
@@ -485,6 +487,10 @@ type
     IdType: Byte;
     PassMethod: Byte;
     Pass: Byte;
+
+    NestedNumAllocElements: cardinal;
+    NestedAllocElementType: Byte;
+    NestedDataType: Byte;
 
     NestedFunctionNumAllocElements: cardinal;
     NestedFunctionAllocElementType: Byte;
@@ -3651,6 +3657,22 @@ begin
       end;
 
 
+    if (TemporaryBuf[0] = #9'dex') and							// dex			; 0
+       (TemporaryBuf[1] = #9'inx') then							// inx			; 1
+      begin
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+      end;
+
+
+    if (TemporaryBuf[0] = #9'inx') and							// inx			; 0
+       (TemporaryBuf[1] = #9'dex') then							// dex			; 1
+      begin
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+      end;
+
+
     if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
        (pos('sta ', TemporaryBuf[1]) > 0) and						// sta F				; 1
        (TemporaryBuf[2] = #9'lda :STACKORIGIN+STACKWIDTH,x') and			// lda :STACKORIGIN+STACKWIDTH,x	; 2
@@ -3753,6 +3775,56 @@ begin
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
 
+	 end;
+
+       end;
+
+
+    if (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.A+1', TemporaryBuf[9]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[7]) = 1) and (pos('.A', TemporaryBuf[7]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[5]) = 1) and (pos('.COUNT+1', TemporaryBuf[5]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[3]) = 1) and (pos('.COUNT', TemporaryBuf[3]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[1]) = 1) and (pos('.VALUE', TemporaryBuf[1]) > 0) and
+       (pos(#9'lda ', TemporaryBuf[0]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[2]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
+       (pos(#9'lda ', TemporaryBuf[6]) = 1) and (pos(#9'lda #', TemporaryBuf[6]) = 0) and
+       (pos(#9'lda ', TemporaryBuf[8]) = 1) then
+       begin
+{
+	lda #$00				; 0
+	sta SYSTEM.FILLBYTE_051A.VALUE		; 1
+	lda #$15				; 2
+	sta SYSTEM.FILLBYTE_051A.COUNT		; 3
+	lda #$00				; 4
+	sta SYSTEM.FILLBYTE_051A.COUNT+1	; 5
+	lda A					; 6
+	sta SYSTEM.FILLBYTE_051A.A		; 7
+	lda A+1					; 8
+	sta SYSTEM.FILLBYTE_051A.A+1		; 9
+}
+	k:=GetWORD(2, 4);		// len
+
+	if k <= 128 then begin
+	  TemporaryBuf[7] := #9'sta :bp2';
+
+	  TemporaryBuf[9] := #9'sta :bp2+1';
+
+	  TemporaryBuf[1] := TemporaryBuf[6];
+	  TemporaryBuf[2] := TemporaryBuf[7];
+	  TemporaryBuf[3] := TemporaryBuf[8];
+	  TemporaryBuf[4] := TemporaryBuf[9];
+
+	  TemporaryBuf[5] := TemporaryBuf[0];
+
+	  TemporaryBuf[6] := #9'ldy #$'+IntToHex(k-1, 2);
+	  TemporaryBuf[7] := #9'sta:rpl (:bp2),y-';
+
+	  TemporaryBuf[0] := '~';
+
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
 	 end;
 
        end;
@@ -5120,7 +5192,54 @@ var i, l, k, m, x: integer;
        Result:=false; Break;
      end;
 
+{ piss
+    if mva(i) and										// mva   :STACKORIGIN,x			; 0
+       inx(i+1) and										// inx					; 1
+       lda(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       add_sub(i+3) and (add_sub_stack(i+3) = false) and					// add|sub				; 3
+       sta(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       dex(i+5) and										// dex					; 5
+       (listing[i+6] = #9'lda :STACKORIGIN,x') then						// lda :STACKORIGIN,x			; 6
+    if pos(' :STACKORIGIN,x', listing[i]) > 0 then
+     begin
+       listing[i+6] := #9'lda ' + GetString(i);
 
+       listing[i]   := '';
+       listing[i+1] := '';
+
+       listing[i+5] := '';
+
+       Result:=false; Break;
+     end;
+}
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       add_sub(i+2) and (add_sub_stack(i+2) = false) and					// add|sub				; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i]   := '';
+       listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       ldy(i+1) and (ldy_stack(i+1) = false) and						// ldy					; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       dex(i+3) then										// dex					; 3
+     begin
+       listing[i]   := '';
+       listing[i+3] := '';
+
+       Result:=false; Break;
+     end;
+
+
+{
     if lda(i) and (iy(i) = false) and								// lda :STACKORIGIN,x			; 0
        ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01')) and			// add|sub #$01				; 1
        sta(i+2) and (iy(i+2) = false) and							// sta :STACKORIGIN,x			; 2
@@ -5137,7 +5256,7 @@ var i, l, k, m, x: integer;
 
        Result:=false; Break;
      end;
-
+}
 
     if (listing[i] = #9'jsr movZTMP_aBX') and							// jsr movZTMP_aBX			; 0
        dex(i+1) and										// dex					; 1
@@ -5289,6 +5408,20 @@ var i, l, k, m, x: integer;
        listing[i+2] := #9'cmp (:bp2),y';
 
        listing[i] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if (pos(#9'jsr ', listing[i]) > 0) and							// jsr					; 0
+       (listing[i+1] = #9'mva #$00 :STACKORIGIN+STACKWIDTH,x') and				// mva #$00 :STACKORIGIN+STACKWIDTH,x	; 1
+       (listing[i+2] = #9'm@index2 0') and							// m@index2 0				; 2
+       (listing[i+3] = #9'ldy :STACKORIGIN,x') then						// ldy :STACKORIGIN,x			; 3
+     begin
+
+       listing[i+1] := #9'lda :STACKORIGIN,x';
+       listing[i+2] := #9'asl @';
+       listing[i+3] := #9'tay';
 
        Result:=false; Break;
      end;
@@ -6724,11 +6857,28 @@ var i, l, k, m, x: integer;
 
 
     if //inx(i) and										// inx					; 0
+       lda_im_0(i+1) and 									// lda #$00				; 1
+       add(i+2) and										// add					; 2
+       sta(i+3) and										// sta					; 3
+       lda(i+4) and										// lda IMAGES+1				; 4
+       adc(i+5) and										// adc 					; 5
+       sta(i+6) then										// sta					; 6
+     begin
+       listing[i+1] := '';
+       listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
+
+       listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+
+        Result:=false; Break;
+     end;
+
+
+    if //inx(i) and										// inx					; 0
        lda(i+1) and 										// lda IMAGES				; 1
        add_im_0(i+2) and									// add #$00				; 2
        sta(i+3) and										// sta					; 3
 //       lda(i+4) and										// lda IMAGES+1				; 4
-       (adc(i+5) = false) then									// adc 					; 5
+       (adc(i+5) = false) then									//~adc 					; 5
      begin
        listing[i+2] := '';
 
@@ -6933,7 +7083,7 @@ var i, l, k, m, x: integer;
      begin
 
        tmp:=GetString(i+2);
-
+{
        if (tmp = '#$01') and (iy(i) = false) then begin
 
 	 listing[i] := #9'ldy ' + GetString(i);
@@ -6946,7 +7096,7 @@ var i, l, k, m, x: integer;
 	 listing[i+2] := #9'sty :STACKORIGIN,x';
 
        end else begin
-
+}
         listing[i] := #9'lda ' + GetString(i);
 
         if listing[i+3] = #9'jsr addAL_CL' then
@@ -6956,7 +7106,7 @@ var i, l, k, m, x: integer;
 
         listing[i+2] := #9'sta :STACKORIGIN,x';
 
-       end;
+//       end;
 
        listing[i+3] := #9'inx';
 
@@ -8568,7 +8718,7 @@ var i, l, k, m, x: integer;
       end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda 					; 0
+    if lda_a(i) and (lda_stack(i) = false) and							// lda 					; 0
        ldy(i+1) and										// ldy					; 1
        (listing[i+2] = #9'jsr @printSTRING') then						// jsr @printSTRING			; 2
       begin
@@ -8583,6 +8733,33 @@ var i, l, k, m, x: integer;
   	  Result:=false; Break;
 	end;
 
+      end;
+
+
+    if lda_a(i) and										// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and (iy(i+2) = false) and							// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_stack(i+4) and									// lda :STACKORIGIN			; 4
+       ldy_stack(i+5) and									// ldy :STACKORIGIN+STACKWIDTH		; 5
+       (listing[i+6] = #9'jsr @printSTRING') then						// jsr @printSTRING			; 6
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+        (copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
+      begin
+	listing[i+4] := listing[i];
+	listing[i+5] := #9'ldy ' + copy(listing[i+2], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	if dex(i+7) then
+	 for p:=i-1 downto 0 do
+	  if pos('jsr ', listing[p]) > 0 then Break else
+	   if inx(p) then begin listing[i+7] := ''; listing[p] := ''; Break end;
+
+  	Result:=false; Break;
       end;
 
 
@@ -10650,6 +10827,7 @@ var i, l, k, m, x: integer;
 	Result:=false; Break;
       end;
 
+{ piss
 
     if lda(i) and									// lda 				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN		; 1
@@ -10669,6 +10847,22 @@ var i, l, k, m, x: integer;
 	listing[i+1] := '';
 	listing[i+2] := '';
 	listing[i+3] := '';
+
+	Result:=false; Break;
+      end;
+}
+
+    if ldy_im(i) and									// ldy #			; 0
+       sty_bp_1(i+1) and								// sty :bp+1			; 1
+       ldy(i+2) and (ldy_im(i+2) = false) and						// ldy				; 2
+       sta_bp_y(i+3) then 								// sta (:bp),y			; 3
+      begin
+        p:=GetBYTE(i);
+
+	listing[i+3] := #9'sta $' + IntToHex(p, 2) + '00,y';
+
+	listing[i] := '';
+	listing[i+1] := '';
 
 	Result:=false; Break;
       end;
@@ -11548,7 +11742,7 @@ var i, l, k, m, x: integer;
    if listing[i] <> '' then begin
 
 {
-if (pos('adr.QW', listing[i]) > 0) then begin
+if (pos('adr.TAB', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -12725,6 +12919,20 @@ end;
 
       	Result:=false; Break;
      end;
+
+
+    if sta_stack(i) and									// sta :STACKORIGIN+9		; 0
+       ldy(i+1) and									// ldy				; 1
+       sty(i+2) and									// sty				; 2
+       ldy(i+3) and									// ldy				; 3
+       lda_stack(i+4) then								// lda :STACKORIGIN+9		; 4
+     if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) then
+       begin
+	listing[i]   := '';
+	listing[i+4] := '';
+
+	Result:=false; Break;
+       end;
 
 
     if lda(i) and									// lda				; 0
@@ -15090,7 +15298,7 @@ end;
        sty_stack(i+7) and									// sty :STACKORIGIN+STACKWIDTH*3	; 7
        lda_stack(i+8) and									// lda :STACKORIGIN			; 8
        add_sub(i+9) and										// add|sub 				; 9
-       sta(i+10) and										// sta 					; 10
+       sta(i+10) and (sta_stack(i+10) = false) and						// sta 					; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH		; 11
        adc_sbc(i+12) and									// adc|sbc				; 12
        sta(i+13) then										// sta					; 13
@@ -15118,7 +15326,7 @@ end;
        dey(i+5) and										// dey 					; 5
        sty_stack(i+6) and									// sty :STACKORIGIN+STACKWIDTH		; 6
        add_sub(i+7) and										// add|sub 				; 7
-       sta(i+8) and										// sta					; 8
+       sta(i+8) and (sta_stack(i+8) = false) and						// sta					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
        adc_sbc(i+10) then									// adc|sbc 				; 10
      if (copy(listing[i+2], 6, 256) = copy(listing[i+3], 6, 256)) and
@@ -15141,7 +15349,7 @@ end;
        dey(i+3) and										// dey 					; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
        add_sub(i+5) and										// add|sub 				; 5
-       sta(i+6) and										// sta					; 6
+       sta(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
        lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH		; 7
        adc_sbc(i+8) then									// adc|sbc 				; 8
      if (copy(listing[i+4], 6, 256) = copy(listing[i+7], 6, 256)) then
@@ -15210,7 +15418,7 @@ end;
 	Result:=false; Break;
        end;
 
-
+{ piss
     if lda(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda K				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+10			; 1
        ldy_im_0(i+2) and									// ldy #$00				; 2
@@ -15246,7 +15454,7 @@ end;
 
 	Result:=false; Break;
        end;
-
+}
 
     if lda(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda K				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
@@ -20451,10 +20659,9 @@ end;
 
     if sty_stack(i) and									// sty :STACKORIGIN+10		; 0
        sub(i+1) and									// sub				; 1
-       sta(i+2) and									// sta				; 2
+       sta(i+2) and (sta_stack(i+2) = false) and					// sta				; 2
        lda_stack(i+3) and								// lda :STACKORIGIN+10		; 3
-       sbc(i+4) and									// sbc				; 4
-       sta(i+5) then									// sta				; 5
+       sbc(i+4) then									// sbc				; 4
      if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) then
        begin
 
@@ -26298,6 +26505,7 @@ begin
 	  listing[l+1] := #9'sta '+GetARG(0, x);
 
 	  inc(l, 2);
+
 	end;
 
       end else
@@ -30840,6 +31048,106 @@ case IndirectionLevel of
     end;
 
 
+
+  ASSTRINGPOINTERTOARRAYORIGIN:
+    begin
+    asm65('; as StringPointer to Array Origin');
+
+    case Size of
+
+      2: begin
+
+	 if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
+
+	 asm65(#9'lda '+svar);
+	 asm65(#9'add :STACKORIGIN-1,x');
+	 asm65(#9'sta :bp2');
+	 asm65(#9'lda '+svar+'+1');
+	 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	 asm65(#9'sta :bp2+1');
+
+	 asm65(#9'ldy #$00');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta @move.dst');
+	 asm65(#9'iny');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta @move.dst+1');
+
+	 end else begin
+
+	 if Ident[IdentIndex].PassMethod = VARPASSING then begin
+
+	  LoadBP2(IdentIndex, svar);
+
+	  asm65(#9'ldy :STACKORIGIN-1,x');
+	  asm65(#9'lda (:bp2),y');
+	  asm65(#9'sta @move.dst');
+	  asm65(#9'iny');
+	  asm65(#9'lda (:bp2),y');
+	  asm65(#9'sta @move.dst+1');
+
+	 end else begin
+
+	  asm65(#9'lda :STACKORIGIN-1,x');
+	  asm65(#9'add #$00');
+	  asm65(#9'tay');
+	  asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	  asm65(#9'adc #$00');
+	  asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+	  asm65(#9'lda '+svara+',y');
+	  asm65(#9'sta @move.dst');
+	  asm65(#9'lda '+svara+'+1,y');
+	  asm65(#9'sta @move.dst+1');
+
+	 end;
+
+	 end;
+
+	  asm65(#9'lda :STACKORIGIN,x');
+	  asm65(#9'sta @move.src');
+	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	  asm65(#9'sta @move.src+1');
+
+	  if Ident[IdentIndex].NestedNumAllocElements > 0 then begin
+
+	   asm65(#9'lda <' + IntToStr(Ident[IdentIndex].NestedNumAllocElements));
+	   asm65(#9'sta @move.cnt');
+	   asm65(#9'lda >' + IntToStr(Ident[IdentIndex].NestedNumAllocElements));
+	   asm65(#9'sta @move.cnt+1');
+
+	   asm65(#9'@move');
+
+	   if Ident[IdentIndex].NestedNumAllocElements < 256 then begin
+	    asm65(#9'ldy #$00');
+	    asm65(#9'lda #' + IntToStr(Ident[IdentIndex].NestedNumAllocElements-1));
+	    asm65(#9'cmp (@move.src),y');
+	    asm65(#9'scs');
+	    asm65(#9'sta (@move.dst),y');
+	   end;
+
+	  end else begin
+
+	   asm65(#9'ldy #$00');
+	   asm65(#9'lda (@move.src),y');
+	   asm65(#9'add #1');
+	   asm65(#9'sta @move.cnt');
+	   asm65(#9'scc');
+	   asm65(#9'iny');
+	   asm65(#9'sty @move.cnt+1');
+
+	   asm65(#9'@move');
+
+	  end;
+
+	 a65(__subBX);
+	 a65(__subBX);
+
+	 end;
+      end;
+    end;
+
+
   ASPOINTERTOPOINTER:
     begin
     asm65('; as Pointer to Pointer');
@@ -33847,7 +34155,6 @@ var ConstVal: Int64;
     j: integer;
     yes: Boolean;
 begin
-
 	if optimize.use = false then StartOptimization(i);
 
 	InfoAboutArray(IdentIndex);
@@ -34411,6 +34718,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
    Error(i, 'Unassigned: ' + IntToStr(Ident[IdentIndex].Param[ParamIndex].DataType) );
   end;
 
+
   old_func:=run_func;
   run_func:=0;
 
@@ -34419,16 +34727,14 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 	  						StartOptimization(i)
 						else
 	  						StopOptimization;
-
   run_func:=old_func;
+
 
  end;
 
  Gen;
 
  asm65(#9'jsr '+svar);				// GenerateCall
-
- //ResetOpty;					// BP2 niszczy po PEEK, POKE !!!
 
 end;
 
@@ -35236,7 +35542,12 @@ case Tok[i].Kind of
 
 //	  end;
 
-	StartOptimization(i);
+
+        if (Ident[IdentIndex].isStdCall = false) then
+	 StartOptimization(i)
+	else
+        if optimize.use = false then StartOptimization(i);
+
 
 	inc(run_func);
 
@@ -36776,21 +37087,43 @@ case Tok[i].Kind of
 
 		  Ident[IdentIndex].isInit := true;
 
-		  StopOptimization;
+		 // StopOptimization;
 
-		  ResetOpty;
+		 // ResetOpty;
+
+		  svar := GetLocalName(IdentIndex);
 
 		  case IndirectionLevel of
 
 		    ASPOINTER, ASPOINTERTOPOINTER:
 		      begin
 
-		       if Ident[IdentIndex].DataType = POINTERTOK then
-			asm65(#9'@moveSTRING_1 ' + Ident[IdentIndex].Name)
-		       else
-			asm65(#9'@moveSTRING ' + Ident[IdentIndex].Name);
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @move.src');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @move.src+1');
 
-		       a65(__subBX);
+			if Ident[IdentIndex].DataType = POINTERTOK then
+			 asm65(#9'@moveSTRING_1 ' + Ident[IdentIndex].Name)
+			else begin
+
+		         if Ident[IdentIndex].NumAllocElements = 256 then begin
+
+			  asm65(#9'mwy '+svar+' :bp2');
+
+			  asm65(#9'ldy #$00');
+			  asm65(#9'mva:rne (@move.src),y (:bp2),y+');
+
+			 end else
+			  asm65(#9'@moveSTRING ' + Ident[IdentIndex].Name + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements));
+
+			end;
+
+			a65(__subBX);
+
+			StopOptimization;
+			ResetOpty;
+
 		      end;
 
 		  else
@@ -37020,18 +37353,19 @@ case Tok[i].Kind of
 
 		 if Tok[k].Kind = ADDRESSTOK then
 		    iError(i, IncompatibleTypes,  0, POINTERTOK, STRINGPOINTERTOK);
-(*
-		 if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then begin
 
-		   StopOptimization;
-  		   ResetOpty;
 
-		   asm65(#9'@moveString? #'+ Ident[IdentIndex].Name + '.' + Tok[i].Name^);
+//	        if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and
+//	           (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) and (ExpressionType = STRINGPOINTERTOK) then begin
 
-		   a65(__subBX);
+		 if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then begin
+
+		  GenerateAssignment(ASSTRINGPOINTERTOARRAYORIGIN, DataSize[VarType], IdentIndex);
+
+		  StopOptimization;
+		  ResetOpty;
 
 		 end else
-*)
 		  GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex, par1, par2);
 
 	        end else
@@ -37113,7 +37447,12 @@ case Tok[i].Kind of
 
 //	  end;
 
-	  StartOptimization(i);
+
+          if (Ident[IdentIndex].isStdCall = false) then
+	    StartOptimization(i)
+	  else
+          if optimize.use = false then StartOptimization(i);
+
 
 	  inc(run_func);
 
@@ -38844,7 +39183,7 @@ function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardi
 var
   NestedNumAllocElements: cardinal;
   LowerBound, UpperBound, ConstVal, IdentIndex: Int64;
-  NumFieldsInList, FieldInListIndex, RecType, k: integer;
+  NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
   NestedDataType, ExpressionType, NestedAllocElementType: Byte;
   FieldInListName: array [1..MAXFIELDS] of TField;
   ExitLoop, pack: Boolean;
@@ -39152,7 +39491,11 @@ end else
 
     CheckTok(i, COLONTOK);
 
+    j := i + 1;
+
     i := CompileType(i + 1, DataType, NumAllocElements, AllocElementType);
+
+    if Tok[j].Kind = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
 
     for FieldInListIndex := 1 to NumFieldsInList do
@@ -39262,7 +39605,12 @@ end else// if OBJECTTOK
 
     CheckTok(i, COLONTOK);
 
+    j := i + 1;
+
     i := CompileType(i + 1, DataType, NumAllocElements, AllocElementType);
+
+    if Tok[j].Kind = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
 
     //NumAllocElements:=0;		// ??? arrays not allowed, only pointers ???
 
@@ -39405,10 +39753,17 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
   CheckTok(i + 1, CBRACKETTOK);
   CheckTok(i + 2, OFTOK);
 
-  i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+  if Tok[i + 3].Kind = ARRAYTOK then begin
+    i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+    Result := i;
+  end else begin
+    Result := i;
+    i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+  end;
+
 
 // sick3
-// writeln('>',NestedDataType,',',NestedAllocElementType,',',Tok[i].kind,',',NestedDataType);
+// writeln('>',NestedDataType,',',NestedAllocElementType,',',Tok[i].kind,',',NestedNumAllocElements);
 
 
   if NestedNumAllocElements > 0 then
@@ -39431,7 +39786,7 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
     NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
 
    end else
-   if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].kind <> PCHARTOK) then begin
+   if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].Kind <> PCHARTOK) then begin
 
      if (NestedAllocElementType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements shr 16 > 0) then
        Error(i, 'Multidimensional arrays are not supported');
@@ -39442,7 +39797,7 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
 
   AllocElementType := NestedDataType;
 
-  Result := i;
+//  Result := i;
   end // if ARRAYTOK
 else if (Tok[i].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i].Name^)].Kind = USERTYPE) then
   begin
@@ -39543,6 +39898,20 @@ var IdentIndex, size: integer;
    end;
 
 
+  function mads_data_size: string;
+  begin
+
+   Result := '';
+
+   case DataSize[Ident[IdentIndex].AllocElementType] of
+//    1: Result := ' .byte';
+    2: Result := ' .word';
+    4: Result := ' .dword';
+   end;
+
+  end;
+
+
 begin
 
  if Pass = CODEGENERATIONPASS then begin
@@ -39597,9 +39966,9 @@ begin
 		   if Elements(IdentIndex) > 0 then begin
 
 		    if Ident[IdentIndex].NumAllocElements_ > 0 then
-		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements) + ']')
+		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements) + ']' + mads_data_size)
 		    else
-		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']');
+		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);
 
 		   end else
 		    asm65('adr.'+Ident[IdentIndex].Name + Value(true));
@@ -40049,13 +40418,13 @@ var
   Param: TParamList;
   j, ParamIndex, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize,  tmpVarDataSize_: Integer;
   ForwardIdentIndex, IdentIndex: integer;
-  NumAllocElements, NestedFunctionNumAllocElements: cardinal;
+  NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   NumAllocTypes: word;
   ConstVal: Int64;
   IsNestedFunction, isAsm, isReg, isInt, isAbsolute, isForward, ImplementationUse: Boolean;
   iocheck_old, isInterrupt_old, yes, pack: Boolean;
   VarType, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
-  NestedFunctionAllocElementType, IdType, Tmp: Byte;
+  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp: Byte;
   TmpResult: byte;
 
   UnitList: array of TString;
@@ -40672,6 +41041,8 @@ while Tok[i].Kind in
 
 	  j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
+	  if Tok[i +3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
 	  if (VarType in Pointers) and (NumAllocElements = 0) then
 	   if AllocElementType <> CHARTOK then iError(j, IllegalExpression);
 
@@ -40743,6 +41114,8 @@ while Tok[i].Kind in
 
 	  j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
+	  if Tok[i +3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
 	  DefineIdent(i + 1, Tok[i + 1].Name^, USERTYPE, VarType, NumAllocElements, AllocElementType, 0, Tok[i + 3].Kind);
 	  Ident[NumIdent].Pass := CALLDETERMPASS;
 
@@ -40796,6 +41169,8 @@ while Tok[i].Kind in
 
       isAbsolute := false;
 
+      if IdType = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
 {
       if Tok[i + 1].Kind = REGISTERTOK then begin
 
@@ -40810,6 +41185,7 @@ while Tok[i].Kind in
 
       end else
 }
+
       if Tok[i + 1].Kind = ABSOLUTETOK then begin
 
 	isAbsolute := true;
@@ -40854,7 +41230,7 @@ while Tok[i].Kind in
       for VarOfSameTypeIndex := 1 to NumVarOfSameType do begin
 
 // sick2
-//	writeln('> ', VarType,',',AllocElementType,',',NumAllocElements);
+// writeln(VarType,',',NumAllocElements and $FFFF,',',NumAllocElements shr 16,',',AllocElementType, ',',idType);
 
 	if VarType = ENUMTYPE then begin
 
@@ -40864,14 +41240,52 @@ while Tok[i].Kind in
 	  Ident[NumIdent].AllocElementType := AllocElementType;
 	  Ident[NumIdent].NumAllocElements := NumAllocElements;
 
-	end else
+	end else begin
 	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, VarType, NumAllocElements, AllocElementType, ord(isAbsolute) * ConstVal, IdType);
+
+	  Ident[NumIdent].NestedDataType := NestedDataType;
+	  Ident[NumIdent].NestedAllocElementType := NestedAllocElementType;
+	  Ident[NumIdent].NestedNumAllocElements := NestedNumAllocElements;
+
+//	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements);
+
+	  if (VarType = POINTERTOK) and (AllocElementType = STRINGPOINTERTOK) and (NestedNumAllocElements > 0) then begin		// array [ ][ ] of string;
+
+	   idx := Ident[NumIdent].Value - DATAORIGIN;
+
+	   if NumAllocElements shr 16 > 0 then begin
+
+		for j:=0 to (NumAllocElements and $FFFF) * (NumAllocElements shr 16) - 1 do begin
+      		  SaveToDataSegment(idx, VarDataSize, DATAORIGINOFFSET);
+
+		  inc(idx, 2);
+ 		  inc(VarDataSize, NestedNumAllocElements);
+		end;
+
+	   end else begin
+
+		for j:=0 to NumAllocElements - 1 do begin
+      		  SaveToDataSegment(idx, VarDataSize, DATAORIGINOFFSET);
+
+		  inc(idx, 2);
+ 		  inc(VarDataSize, NestedNumAllocElements);
+		end;
+
+	   end;
+
+	  end;
+
+
+	end;
+
 
 //	writeln(VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
 
 	if ( (VarType in Pointers) and (AllocElementType = RECORDTOK) ) then begin
 
-	tmpVarDataSize_ := VarDataSize;
+//	 writeln('> ',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements);
+
+	 tmpVarDataSize_ := VarDataSize;
 
 	 if (NumAllocElements shr 16) > 0 then begin											// array [0..x] of record
 

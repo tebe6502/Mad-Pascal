@@ -516,6 +516,46 @@
 // -----------------------------------------------------------------------------
 
     if (p > 1) and
+       (lda_a(p-2) = false) and								//~lda					; p-2		#+-WORD
+       add_sub_im(p-1) and					 			// add #|sub #				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       adc_sbc_im(p+2) and								// adc #|sbc #				; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
+      begin
+
+	q:=GetWORD(p-1, p+2);
+
+	listing[i] := #9'lda ' + copy(listing[p], 6, 256);
+
+	q:=q * 2;
+
+	listing[i+1]  := #9'asl @';
+	listing[i+2]  := #9'tay';
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	if add_im(p-1) then
+	 LDA_STA_ADR(i,q,'+')
+	else
+	 LDA_STA_ADR(i,q,'-');
+
+	listing[p-1] := '';
+//	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 1) and
        (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
        ((lda(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+WORD
         (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
