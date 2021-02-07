@@ -6,23 +6,19 @@
 	@moveSTRING_1
 */
 
-.proc	@moveSTRING (.word ya) .reg
+.proc	@moveSTRING (.word @move.dst .word @move.cnt) .var
 
-	sta @move.dst
-	sty @move.dst+1
+	@move
 
-	mva :STACKORIGIN,x @move.src
-	mva :STACKORIGIN+STACKWIDTH,x @move.src+1
+	dec @move.cnt
 
 	ldy #$00
-	lda (@move.src),y
-	add #1
-	sta @move.cnt
-	scc
-	iny
-	sty @move.cnt+1
+	lda @move.cnt
+	cmp (@move.src),y
+	scs
+	sta (@move.dst),y
 
-	jmp @move
+	rts
 .endp
 
 
@@ -30,9 +26,6 @@
 
 	sta @move.dst
 	sty @move.dst+1
-
-	mva :STACKORIGIN,x @move.src
-	mva :STACKORIGIN+STACKWIDTH,x @move.src+1
 
 	ldy #$00
 	lda (@move.src),y
