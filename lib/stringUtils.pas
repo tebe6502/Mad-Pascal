@@ -3,7 +3,7 @@ unit stringUtils;
 * @type: unit
 * @author: dely <daniel.kozminski@gmail.com>
 * @name: String manipulation library.
-* @version: 0.1
+* @version: 0.3
 
 * @description:
 * String manipulation procedures and functions for use with MadPascal. 
@@ -11,6 +11,26 @@ unit stringUtils;
 * <https://gitlab.com/delysio/mad-pascal>
 *)
 interface 
+
+procedure strInsert(var s: string; var s2: string; index: byte);
+(*
+* @description:
+* Insert one string in another.
+*
+* @param: (string) s - The input string.
+* @param: (string) s2 - String to insert.
+* @param: (byte) index - Position to insert.
+*) 
+
+procedure strDelete(var s: string; index: byte; count: byte);
+(*
+* @description:
+* Removes Count characters from string S, starting at position Index.
+*
+* @param: (string) s - The input string.
+* @param: (byte) index - Position.
+* @param: (byte) count - Number of chars to remove.
+*) 
 
 function strCat(s1: string; s2: string): string; overload;
 (*
@@ -86,7 +106,18 @@ function strMid(s: string; startChar: byte; countChars: byte): string;
 * @returns: (string) - the returned string will start at the startChar position in string, counting from one and will consist of countChars chars.
 *) 
 
-function strPos(s1: string; s2: string): byte;
+function strPos(c: char; s: string): byte; overload;
+(*
+* @description:
+* Returns the first index of char in string
+*
+* @param: (string) c - char / needle.
+* @param: (string) s - String / haystack.
+*
+* @returns: (byte) - returns first index or 0 if substring was not found
+*) 
+
+function strPos(s1: string; s2: string): byte; overload;
 (*
 * @description:
 * Returns the first index of substring in string
@@ -117,6 +148,71 @@ function strIsPrefix(s: string; p: string): boolean;
 * @param: (string) s2 - Prefix.
 *
 * @returns: (byte) - returns true or false
+*) 
+
+function strReplace(s: string; c: char; rpl: char): string; overload;
+(*
+* @description:
+* Replace first occurrence of the search char (c) with the replacement char (rpl)
+* This function is case-sensitive. Use strIReplace for case-insensitive replace.
+*
+* @param: (string) s - String / haystack.
+* @param: (char) c - Char to find / needle.
+* @param: (char) rpl - Replacement.
+*
+* @returns: (string) - replaced string
+*) 
+
+function strReplace(s1: string; s2: string; c: char): string; overload;
+(*
+* @description:
+* Replace first occurrence of the search string (s2) with the replacement char (c)
+* This function is case-sensitive. Use strIReplace for case-insensitive replace.
+*
+* @param: (string) s1 - String / haystack.
+* @param: (string) s2 - String to find / needle.
+* @param: (char) c - Replacement.
+*
+* @returns: (string) - replaced string
+*) 
+
+function strReplace(s1: string; s2: string; s3: string): string; overload;
+(*
+* @description:
+* Replace first occurrence of the search string (s2) with the replacement string (s3)
+* This function is case-sensitive. Use strIReplace for case-insensitive replace.
+*
+* @param: (string) s1 - String / haystack.
+* @param: (string) s2 - String to find / needle.
+* @param: (string) s3 - Replacement.
+*
+* @returns: (string) - replaced string
+*) 
+
+function strIReplace(s: string; c: char; rpl: char): string;
+(*
+* @description:
+* Replace first occurrence of the search char (c) with the replacement char (rpl)
+* This function is Case-insensitive. Use strReplace for case-sensitive replace.
+*
+* @param: (string) s - String / haystack.
+* @param: (char) c - char to find / needle.
+* @param: (char) rpl - replacement.
+*
+* @returns: (string) - replaced string
+*) 
+
+function strReplaceAll(s: string; c: char; rpl: char): string; overload;
+(*
+* @description:
+* Replace all occurrences of the search char (c) with the replacement char (rpl)
+* This function is case-sensitive. Use strIReplace for case-insensitive replace.
+*
+* @param: (string) s - String / haystack.
+* @param: (char) c - Char to find / needle.
+* @param: (char) rpl - Replacement.
+*
+* @returns: (string) - replaced string
 *) 
 
 implementation
@@ -203,7 +299,25 @@ begin
     result := r;
 end;
 
-function strPos(s1: string; s2: string): byte;
+function strPos(c: char; s: string): byte; overload;
+var
+    slen: byte;
+    i    : byte;
+begin
+    slen := Length(s);
+    result := 0;
+
+    for i := 1 to slen - 1 do
+    begin
+        if s[i] = c then
+        begin
+            result := i;
+            break;
+        end;
+    end
+end;
+
+function strPos(s1: string; s2: string): byte; overload;
 var
     s1len: byte;
     s2len: byte;
@@ -212,23 +326,23 @@ var
 begin
     s1len := Length(s1);
     s2len := Length(s2);
+
     result := 0;
 
-    for i := 1 to s2len - s1len do
+    for i := 1 to s2len - s1len do // 1 to 14
     begin
-        j := 0;
 
-        for j := 1 to s1len do
+        for j := 0 to s1len - 1 do // 0 to 17
         begin
-            if s2[i+j] <> s1[j] then 
+            if s2[i+j] <> s1[j+1] then // 1 <> 1
             begin
                 break;
             end;
         end;
 
-        if j -1 = s1len then 
+        if j = s1len then 
         begin
-            result := i+1;
+            result := i;
             break;
         end;
 
@@ -275,6 +389,145 @@ begin
             break;
         end;
     end;
+end;
+
+procedure strInsert(var s: string; var s2: string; index: byte);
+var
+    r: string;
+    i: byte;
+    j: byte;
+    k: byte;
+begin
+    SetLength(r, 0);
+    if index > Length(s) then 
+    begin
+        strAdd(s, s2);
+        exit;
+    end;
+    
+    j := 1;
+    if index > 1 then
+    begin
+        for i := 1 to index do
+        begin
+            r[i] := s[i];
+            Inc(j);
+        end;
+    end;
+    for i := 1 to Length(s2) do
+    begin
+        r[j] := s2[i];
+        Inc(j);
+    end;
+    if index > 1 then k := index + 1 else k := index;
+    for i := k to Length(s) do
+    begin
+        r[j] := s[i];
+        Inc(j);
+    end;
+    SetLength(r, j-1);
+    s := r;
+end;
+
+procedure strDelete(var s: string; index: byte; count: byte);
+var
+    i: byte;
+begin
+    for i := index + count to Length(s) do
+        s[i - count] := s[i];
+    SetLength(s, Length(s)-count);
+end;
+
+function strReplace(s: string; c: char; rpl: char): string; overload;
+var
+    r : string;
+    i : byte;
+begin
+    SetLength(r, Length(s));
+    r := s;
+    i := strPos(c, s);
+
+    if i > 0 then r[i] := rpl;
+    result := r;
+end;
+
+function strReplace(s1: string; s2: string; c: char): string; overload;
+var
+    r: string;
+    i: byte;
+    j: byte;
+begin
+    SetLength(r, 0);
+    i := strPos(s2, s1);
+    j := Length(s1) - Length(s2);
+    if i > 0 then
+    begin
+        Dec(i);
+        if i > 1 then r := strLeft(s1, i);
+        strAdd(r, c);
+        if j - 1 > 0 then strAdd(r, strRight(s1, j - i));
+        result := r;
+    end;
+end;
+
+function strReplace(s1: string; s2: string; s3: string): string; overload;
+var
+    r: string;
+    i: byte;
+    j: byte;
+begin
+    SetLength(r, 0);
+    i := strPos(s2, s1);
+    if i > 0 then begin
+        strDelete(s1, i, Length(s2));
+        strInsert(s1, s3, i); 
+    end;
+    result := s1;
+end;
+
+function strIReplace(s: string; c: char; rpl: char): string;
+var
+    r : string;
+    i : byte;
+begin
+    SetLength(r, Length(s));
+
+    if not isLetter(c) then
+    begin
+        result := strReplace(s, c, rpl);
+    end else
+    begin
+        for i := 1 to Length(s) do
+        begin
+            if (s[i] = LowerCase(c)) or (s[i] = UpCase(c)) then
+            begin
+                r[i] := rpl;
+            end else
+            begin
+                r[i] := s[i];
+            end;
+        end;
+        result := r;
+    end;
+end;
+
+function strReplaceAll(s: string; c: char; rpl: char): string; overload;
+var
+    r : string;
+    i : byte;
+begin
+    SetLength(r, Length(s));
+    for i := 1 to Length(s) do
+    begin
+        if s[i] = c then
+        begin
+            r[i] := rpl;
+        end else
+        begin
+            r[i] := s[i];
+        end;
+    end;
+    result := r;
 end;
 
 end.
