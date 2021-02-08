@@ -27,6 +27,9 @@ Contributors:
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
++ Daniel KoŸmiñski :
+	- unit STRINGUTILS
+
 + Guillermo Fuenzalida :
 	- unit MISC: DetectANTIC
 
