@@ -162,6 +162,7 @@ const
 	procedure VBXEControl(a: byte); assembler;
 	procedure VBXEOff; assembler;
 
+	procedure PutPixel(x: word; y: byte);
 	procedure SetColor(a: byte);
 	procedure HLine(x1, x2: word; y1: byte);
 	procedure Line(x1: word; y1: byte; x2: word; y2: byte);
