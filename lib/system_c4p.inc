@@ -198,9 +198,9 @@ asm
   lda ted_timer_1   //Timer A Lo byte
   eor ted_timer_1+1 //Timer A Hi byte
   eor ted_timer_2   //Timer B Lo byte
-  adc ted_timer_2+1 //Timer B Hi byte
+  adc ted_hcount    //Horizontal counter
   eor ted_timer_3   //Timer C Lo byte
-  eor ted_timer_3+1 //Timer C Hi byte
+  eor ted_hcount    //Horizontal counter
   tay
 
   lda range
