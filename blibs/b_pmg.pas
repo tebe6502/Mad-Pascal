@@ -3,7 +3,7 @@ unit b_pmg;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Player and missile graphics library.
-* @version: 1.0.0
+* @version: 1.0.1
 
 * @description:
 * Set of useful constants, registers and methods to fiddle with hardware Atari 8-bit sprites (and missiles).
@@ -70,26 +70,31 @@ var
     PMG_pcolr1: byte absolute $D013;
     PMG_pcolr2: byte absolute $D014;
     PMG_pcolr3: byte absolute $D015;
+    PMG_pcolr: array [0..3] of byte absolute $D012;
 
     PMG_pcolr0_S: byte absolute $2C0; // Player colors - shadow registers.
     PMG_pcolr1_S: byte absolute $2C1;
     PMG_pcolr2_S: byte absolute $2C2;
     PMG_pcolr3_S: byte absolute $2C3;
+    PMG_pcolr_S: array [0..3] of byte absolute $2C0;
 
     PMG_hpos0: byte absolute $D000; // Horizontal positions of players.
     PMG_hpos1: byte absolute $D001;
     PMG_hpos2: byte absolute $D002;
     PMG_hpos3: byte absolute $D003;
+    PMG_hpos: array [0..3] of byte absolute $D000;
 
     PMG_hposm0: byte absolute $D004; // Horizontal positions of missiles.
     PMG_hposm1: byte absolute $D005;
     PMG_hposm2: byte absolute $D006;
     PMG_hposm3: byte absolute $D007;
+    PMG_hposm: array [0..3] of byte absolute $D004;
 
     PMG_sizep0: byte absolute $D008; // Size of players.
     PMG_sizep1: byte absolute $D009;
     PMG_sizep2: byte absolute $D00A;
     PMG_sizep3: byte absolute $D00B;
+    PMG_sizep: array [0..3] of byte absolute $D008;
 
     PMG_sizem: byte absolute $D00C; // Size of missiles
 
@@ -97,12 +102,15 @@ var
     PMG_grafp1: byte absolute $D00E;
     PMG_grafp2: byte absolute $D00F;
     PMG_grafp3: byte absolute $D010;
-    PMG_grafm: byte absolute $D011; // Missile graphics shapes (non DMA).
+    PMG_grafp: array [0..3] of byte absolute $D00D;
 
+    PMG_grafm: byte absolute $D011; // Missile graphics shapes (non DMA).
+    
     PMG_p0pl: byte absolute $D00C; // Player to player collison statuses.
     PMG_p1pl: byte absolute $D00D;
     PMG_p2pl: byte absolute $D00E;
     PMG_p3pl: byte absolute $D00F;
+    PMG_ppl: array [0..3] of byte absolute $D00C;
 
     PMG_vdelay: byte absolute $D01C; // Vertical delay register.
     PMG_gractl: byte absolute $D01D; // Graphics Control register. Controls receipt of Player/Missile DMA data

@@ -1,3 +1,76 @@
+07.01.2021
+    b_maxflash8mb   v. 0.1.0
+        - Added: 
+            procedure SetBank(bank: byte);
+            procedure SetSector(sec: byte);
+            procedure EraseChip;
+            procedure EraseSector(sec: byte);
+            procedure BurnByte(bank:byte;addr:word;val:byte);
+            procedure BurnBlock(bank: byte; src, dest, size: word);
+            procedure BurnPages(sec, src, dest, pages:byte);
+
+21.11.2020
+    b_utils   v. 0.5.4
+        - Added: 
+            procedure UnixToDate(ux: cardinal; var date: TDateTime);
+            function Hour24to12(hour: byte):byte;
+            function HexChar2Dec(c:char):byte;
+
+1.11.2020
+    fn_cookies v.0.1.0
+        - Added:
+            procedure InitCookie(creator: word; app, key: byte);
+            function SetCookie(val: pointer; vlength: word):byte;
+            function GetCookie(val: pointer):byte;
+            testcookie.pas example added
+    fn_sio   v. 0.9.3
+        - Changed
+            FN_timeout value can be changed now
+
+10.10.2020
+    fn_tcp   v. 0.7.0
+        - Added:
+            function TCP_WaitForData(timeout:word):byte;
+            procedure TCP_ClearBuffer;
+    fn_sio   v. 0.9.2
+        - Added:
+            procedure FN_Command(cmd, dstats, dbyt, aux1, aux2:byte; dbufa: word);
+
+3.09.2020
+    b_pmg   v. 1.0.1
+        - Added register arrays
+
+14.06.2020
+    sio      v. 1.0.0
+        - Added:
+            DCB structure
+            procedure ExecSIO;assembler;
+    fn_sio   v. 0.9.0
+        - Added:
+            FN_StatusStruct
+            FN_Open	
+            FN_WriteBuffer	
+            FN_ReadBuffer	
+            FN_ReadStatus	
+            FN_Close
+    fn_tcp   v. 0.6.0
+        - Added:
+            procedure TCP_InitIRQ;
+            procedure TCP_StopIRQ;
+            function TCP_Connect(var tcp_uri:PChar):byte;
+            procedure TCP_GetStatus;
+            function TCP_SIORead:word;
+            function TCP_ReadByte: byte;
+            function TCP_ReadBuffer(buf: pointer; len: word): word;
+            function TCP_CheckAndPoll:word;
+            procedure TCP_SendString(var s:string);
+            procedure TCP_SendBuffer(buf: pointer;len: word);
+            procedure TCP_Close;
+    examples
+        - Added:
+            shoutbox.pas
+            tcp_time.pas
+
 28.08.2019
     b_utils   v. 0.5.2
         - Added: 

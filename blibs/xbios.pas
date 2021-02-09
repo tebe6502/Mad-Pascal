@@ -103,7 +103,7 @@ function xBiosCheck:byte;
 * @returns: (byte) - returns 0 for no xBios loaded,  
 *                    if xBios is present - returns two nibbles of xBios version 
 *)
-procedure xBiosRenameEntry(var filename:TString):assembler;
+procedure xBiosRenameEntry(var filename:TString); assembler;
 (*
 * @description:
 * This function allows you to rename a file or directory. 
@@ -116,7 +116,7 @@ procedure xBiosRenameEntry(var filename:TString):assembler;
 * 
 * example: filename := 'INFILE  TXTOUTFILE TXT';
 *)
-procedure xBiosLoadFile(var filename:TString):assembler;
+procedure xBiosLoadFile(var filename:TString); assembler;
 (*
 * @description:
 * Loads and runs the file, INIT and RUN headers are supported. 
@@ -127,7 +127,7 @@ procedure xBiosLoadFile(var filename:TString):assembler;
 * 
 * example: filename := 'INFILE  TXT';
 *)
-procedure xBiosOpenFile(var filename:TString):assembler;
+procedure xBiosOpenFile(var filename:TString); assembler;
 (*
 * @description:
 * Opens a file in order to carry out subsequent IO operations.
@@ -137,7 +137,7 @@ procedure xBiosOpenFile(var filename:TString):assembler;
 * 
 * example: filename := 'INFILE  TXT';
 *)
-procedure xBiosLoadData(dest: pointer):assembler;
+procedure xBiosLoadData(dest: pointer); assembler;
 (*
 * @description:
 * Loads data from file to a specified destination address. You can set the file offset (xBiosSetFileOffset) 
@@ -146,7 +146,7 @@ procedure xBiosLoadData(dest: pointer):assembler;
 * 
 * @param: dest - data destination pointer. 
 *)
-procedure xBiosLoadLz4Data(dest: pointer):assembler;
+procedure xBiosLoadLz4Data(dest: pointer); assembler;
 (*
 * @description:
 * Loads and decompres data from compressed lz4 file to a specified destination address. 
@@ -154,7 +154,7 @@ procedure xBiosLoadLz4Data(dest: pointer):assembler;
 * 
 * @param: dest - data destination pointer. 
 *)
-procedure xBiosWriteData(src: pointer):assembler;
+procedure xBiosWriteData(src: pointer); assembler;
 (*
 * @description:
 * Saves data from memory to a file, starting from the current position in the file. You can set the file 
@@ -163,46 +163,46 @@ procedure xBiosWriteData(src: pointer):assembler;
 * 
 * @param: src - pointer to source of data.  
 *)
-procedure xBiosOpenCurrentDir:assembler;
+procedure xBiosOpenCurrentDir; assembler;
 (*
 * @description:
 * Opens the current directory.  
 * 
 *)
-function  xBiosGetByte:byte:assembler;
+function  xBiosGetByte:byte; assembler;
 (*
 * @description:
 * Reads one byte from opened file.
 * 
 * @returns: (byte) - byte readed from file   
 *)
-procedure xBiosPutByte(b:byte):assembler;
+procedure xBiosPutByte(b:byte); assembler;
 (*
 * @description:
 * Writes one byte into opened file.
 * 
 * @param: b - byte to be written into file   
 *)
-procedure xBiosFlushBuffer:assembler;
+procedure xBiosFlushBuffer; assembler;
 (*
 * @description:
 * All write operations are cached, use this to flush the buffer to the current file.
 *)
-procedure xBiosSetLength(len: word):assembler;
+procedure xBiosSetLength(len: word); assembler;
 (*
 * @description:
 * Defines the amount of data to process while reading or writing.
 * 
 * @param: len - amount of data
 *)
-procedure xBiosSetInitAd(adr: word):assembler;
+procedure xBiosSetInitAd(adr: word); assembler;
 (*
 * @description:
 * Allows you to change the init address vector INITAD ($2E2) for loaded binary files.
 * 
 * @param: adr - new address vector for INITAD
 *)
-procedure xBiosSetFileOffset(pos: cardinal):assembler;
+procedure xBiosSetFileOffset(pos: cardinal); assembler;
 (*
 * @description:
 * Sets the current read/write position in the current file with a value stored in parameter. 
@@ -211,19 +211,19 @@ procedure xBiosSetFileOffset(pos: cardinal):assembler;
 * 
 * @param: pos - new position in the current file
 *)
-procedure xBiosSetRunAd(adr: word):assembler;
+procedure xBiosSetRunAd(adr: word); assembler;
 (*
 * @description:
 * Allows you to change the run address vector RUNAD ($2E0) for loaded binary files.
 * 
 * @param: adr - new address vector for RUNAD
 *)
-procedure xBiosSetDefaultDevice:assembler;
+procedure xBiosSetDefaultDevice; assembler;
 (*
 * @description:
 * Restores the standard IO device.
 *)
-procedure xBiosOpenDir(var filename:TString):assembler;
+procedure xBiosOpenDir(var filename:TString); assembler;
 (*
 * @description:
 * Allows you to change the current directory.
@@ -233,24 +233,24 @@ procedure xBiosOpenDir(var filename:TString):assembler;
 * 
 * example: filename := 'SUBDIR     ';
 *)
-procedure xBiosLoadBinaryFile:assembler;
+procedure xBiosLoadBinaryFile; assembler;
 (*
 * @description:
 * Loads and runs the binary file from the current read/write position. INIT and RUN headers are supported.
 *)
-procedure xBiosOpenDefaultDir:assembler;
+procedure xBiosOpenDefaultDir; assembler;
 (*
 * @description:
 * Opens the default directory.
 *)
-procedure xBiosSetDevice(dev: word):assembler;
+procedure xBiosSetDevice(dev: word); assembler;
 (*
 * @description:
 * Changes the IO device.
 * 
 * @param: dev - device address
 *)
-procedure xBiosRelocateBuffer(adr: word;c:byte):assembler;
+procedure xBiosRelocateBuffer(adr: word;c:byte); assembler;
 (*
 * @description:
 * Changes address of IO buffer. If c = 1, the relocation can be carried out 
@@ -259,26 +259,26 @@ procedure xBiosRelocateBuffer(adr: word;c:byte):assembler;
 * @param: adr - new buffer address
 * @param: c - dynamic relocation flag
 *)
-procedure xBiosGetEntry:assembler;
+procedure xBiosGetEntry; assembler;
 (*
 * @description:
 * Gets another entry in the directory. The xBiosDirEntryIndex returns the index to the filename or folder 
 * (byte of buffer address is stored in the variable xBUFFERH). The xBiosDirEntryStatus is set with the status. 
 * The xBiosIOresult is set to 1 when the end of the directory is found.
 *)
-procedure xBiosOpenDefaultFile:assembler;
+procedure xBiosOpenDefaultFile; assembler;
 (*
 * @description:
 * Opens the default file. The function does not search the directory, the file handle is derived from the variable 'xFILE'.
 *)
-procedure xBiosReadSector(sector: word):assembler;
+procedure xBiosReadSector(sector: word); assembler;
 (*
 * @description:
 * Loads an sector into a buffer.
 * 
 * @param: sector - sector number 
 *)
-procedure xBiosFindEntry(var filename:TString):assembler;
+procedure xBiosFindEntry(var filename:TString); assembler;
 (*
 * @description:
 * This function allows you to find the specified directory entry. The xBiosDirEntryIndex returns the index to the filename or folder 
@@ -290,7 +290,7 @@ procedure xBiosFindEntry(var filename:TString):assembler;
 * 
 * example: filename := 'INFILE  TXT';
 *)
-procedure xBiosSetBufferSize(size: byte):assembler;
+procedure xBiosSetBufferSize(size: byte); assembler;
 (*
 * @description:
 * This feature allows you to set the buffer size for IO operations. 
@@ -424,7 +424,7 @@ begin
     else result := 0;
 end;
 
-procedure xBiosRenameEntry(var filename:TString):assembler;
+procedure xBiosRenameEntry(var filename:TString); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -442,7 +442,7 @@ asm {
 };
 end;
 
-procedure xBiosLoadFile(var filename:TString):assembler;
+procedure xBiosLoadFile(var filename:TString); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -460,7 +460,7 @@ asm {
 };
 end;
 
-procedure xBiosOpenFile(var filename:TString):assembler;
+procedure xBiosOpenFile(var filename:TString); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -478,7 +478,7 @@ asm {
 };
 end;
 
-procedure xBiosLoadData(dest: pointer):assembler;
+procedure xBiosLoadData(dest: pointer); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -493,8 +493,10 @@ asm {
 };
 end;
 
-procedure xBiosLoadLz4Data(dest: pointer):assembler;
+procedure xBiosLoadLz4Data(dest: pointer); assembler;
 asm {
+.LOCAL
+
                   mwa dest xdest
 unlz4
                   jsr    xBIOS_GET_BYTE                  ; length of literals
@@ -558,10 +560,11 @@ getLength         sta    lenL
                   inc    lenH
 @                 rts
 lenH              .byte    $00
+.ENDL
 };
 end;
 
-procedure xBiosWriteData(src: pointer):assembler;
+procedure xBiosWriteData(src: pointer); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -576,7 +579,7 @@ asm {
 };
 end;
 
-procedure xBiosOpenCurrentDir:assembler;
+procedure xBiosOpenCurrentDir; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -589,7 +592,7 @@ asm {
 };
 end;
 
-function xBiosGetByte:byte:assembler;
+function xBiosGetByte:byte; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -603,7 +606,7 @@ asm {
 };
 end;
 
-procedure xBiosPutByte(b:byte):assembler;
+procedure xBiosPutByte(b:byte); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -617,7 +620,7 @@ asm {
 };
 end;
 
-procedure xBiosFlushBuffer:assembler;
+procedure xBiosFlushBuffer; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -630,7 +633,7 @@ asm {
 };
 end;
 
-procedure xBiosSetLength(len: word):assembler;
+procedure xBiosSetLength(len: word); assembler;
 asm {
     txa:pha
     ldy len
@@ -640,7 +643,7 @@ asm {
 };
 end;
 
-procedure xBiosSetInitAd(adr: word):assembler;
+procedure xBiosSetInitAd(adr: word); assembler;
 asm {
     txa:pha
     ldy adr
@@ -650,7 +653,7 @@ asm {
 };
 end;
 
-procedure xBiosSetFileOffset(pos: cardinal):assembler;
+procedure xBiosSetFileOffset(pos: cardinal); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -666,7 +669,7 @@ asm {
 };
 end;
 
-procedure xBiosSetRunAd(adr: word):assembler;
+procedure xBiosSetRunAd(adr: word); assembler;
 asm {
     txa:pha
     ldy adr
@@ -676,7 +679,7 @@ asm {
 };
 end;
 
-procedure xBiosSetDefaultDevice:assembler;
+procedure xBiosSetDefaultDevice; assembler;
 asm {
     txa:pha
     jsr xBIOS_SET_DEFAULT_DEVICE   
@@ -684,7 +687,7 @@ asm {
 };
 end;
 
-procedure xBiosOpenDir(var filename:TString):assembler;
+procedure xBiosOpenDir(var filename:TString); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -702,7 +705,7 @@ asm {
 };
 end;
 
-procedure xBiosLoadBinaryFile:assembler;
+procedure xBiosLoadBinaryFile; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -715,7 +718,7 @@ asm {
 };
 end;
 
-procedure xBiosOpenDefaultDir:assembler;
+procedure xBiosOpenDefaultDir; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -728,7 +731,7 @@ asm {
 };
 end;
 
-procedure xBiosSetDevice(dev: word):assembler;
+procedure xBiosSetDevice(dev: word); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -743,7 +746,7 @@ asm {
 };
 end;
 
-procedure xBiosRelocateBuffer(adr: word;c:byte):assembler;
+procedure xBiosRelocateBuffer(adr: word;c:byte); assembler;
 asm {
     txa:pha
     ldx adr+1
@@ -756,7 +759,7 @@ asm {
 };
 end;
 
-procedure xBiosGetEntry:assembler;
+procedure xBiosGetEntry; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -770,7 +773,7 @@ asm {
 };
 end;
 
-procedure xBiosOpenDefaultFile:assembler;
+procedure xBiosOpenDefaultFile; assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -783,7 +786,7 @@ asm {
 };
 end;
 
-procedure xBiosReadSector(sector: word):assembler;
+procedure xBiosReadSector(sector: word); assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
