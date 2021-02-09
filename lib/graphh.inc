@@ -144,7 +144,9 @@ var	WIN_LEFT: smallint = 0;
 //	procedure SetFillStyle(pattern, color: byte);
 	procedure SetPaletteEntry(nr: word; r,g,b: byte); register; overload;
 	procedure SetPaletteEntry(r,g,b: byte); register; overload;
-	procedure SetRGBPalette(nr: word); assembler; register; overload;
-	procedure SetRGBPalette(nr: word; r,g,b: byte); assembler; overload;
+	procedure SetRGBPalette(pal: byte); assembler; register; overload;
+	procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
+	procedure SetRGBPalette(cnt: byte; r,g,b: byte); assembler; overload;
 	procedure SetRGBPalette(r,g,b: byte); assembler; register; overload;
-
+	procedure SetPlayfieldPalette(a: byte); register; assembler;
+	procedure SetOverlayPalette(a: byte); register; assembler;

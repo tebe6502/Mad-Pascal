@@ -1,10 +1,10 @@
 unit vbxe;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe)
+ @author: Tomasz Biela (Tebe), Daniel KoŸmiñski
  @name: Video Board XE unit
 
- @version: 1.0
+ @version: 1.1
 
  @description:
 *)
@@ -162,8 +162,17 @@ const
 	procedure VBXEControl(a: byte); assembler;
 	procedure VBXEOff; assembler;
 
+	procedure SetColor(a: byte);
+	procedure HLine(x1, x2: word; y1: byte);
+	procedure Line(x1: word; y1: byte; x2: word; y2: byte);
+	procedure VLine(x1: word; y1, y2: byte);
 
 implementation
+
+var	fildat: byte absolute $2fd;
+	hres: byte;
+
+	vram: TVBXEMemoryStream;
 
 
 procedure VBXEMemoryBank(b: byte); assembler;
@@ -462,6 +471,146 @@ stop	pla:tax
 end;
 
 
+procedure SetColor(a: byte);
+begin
+	fildat := a;
+end;
+
+
+procedure PutPixel(x: word; y: byte);
+var a: cardinal;
+begin
+
+    case hres of
+     1: a := y*160;
+     2: a := y*320;
+     3: a := y*640;
+    else
+     a:=0
+    end;
+
+    vram.position := VBXE_OVRADR + x + a;
+    vram.WriteByte(fildat);
+end;
+
+
+procedure HLine(x1, x2: word; y1: byte);
+var x: word;
+begin
+
+      if x2 >= x1 then
+       for x := x1 to x2 do PutPixel(x, y1)
+      else
+       for x := x2 to x1 do PutPixel(x, y1);
+
+end;
+
+
+procedure VLine(x1: word; y1, y2: byte);
+var y: word;
+begin
+
+      if y2 >= y1 then
+       for y := y1 to y2 do PutPixel(x1, y)
+      else
+       for y := y2 to y1 do PutPixel(x1, y);
+
+end;
+
+
+procedure Line(x1: word; y1: byte; x2: word; y2: byte);
+var
+     d, ai, bi: smallint;
+     dx, dy: smallint;
+     xi, yi: smallint;
+     x, y: word;
+begin
+
+     if y1 = y2 then begin
+      HLine(x1,x2, y1);
+
+      exit;
+     end;
+
+
+     if x1 = x2 then begin
+      VLine(x1, y1,y2);
+
+      exit;
+     end;
+
+
+     x := x1;
+     y := y1;
+
+     if x1 < x2 then begin
+         xi := 1;
+         dx := x2 - x1;
+     end else begin
+         xi := -1;
+         dx := x1 - x2;
+     end;
+
+     if y1 < y2 then begin
+         yi := 1;
+         dy := y2 - y1;
+     end else begin
+         yi := -1;
+         dy := y1 - y2;
+     end;
+
+     PutPixel(x, y);
+
+     if dx > dy then begin
+
+          ai := (dy - dx) * 2;
+          bi := dy * 2;
+          d := bi - dx;
+
+          while x <> x2 do begin
+
+               if d >= 0 then begin
+
+                   x := x + xi;
+                   y := y + yi;
+                   d := d + ai;
+
+               end else begin
+                   d := d + bi;
+                   x := x + xi;
+               end;
+
+               PutPixel(x, y);
+
+          end;
+
+     end else begin
+
+         ai := ( dx - dy ) * 2;
+         bi := dx * 2;
+         d := bi - dy;
+
+          while (y <> y2) do begin
+
+               if d >= 0 then begin
+                    x := x + xi;
+                    y := y + yi;
+                    d := d + ai;
+               end else begin
+                    d := d + bi;
+                    y := y + yi;
+               end;
+
+               PutPixel(x, y);
+
+          end;
+     end;
+
+end;
+
+
+
+
 procedure OverlayOff; assembler;
 (*
 @description:
@@ -500,7 +649,9 @@ procedure SetHorizontalRes(a: byte); assembler;
 
 *)
 asm
-{	@setxdl a
+{	lda a
+	sta hres
+	@setxdl @
 };
 end;
 
@@ -511,7 +662,9 @@ procedure SetHRes(a: byte); assembler;
 
 *)
 asm
-{	@setxdl a
+{	lda a
+	sta hres
+	@setxdl @
 };
 end;
 
@@ -683,4 +836,3 @@ end;
 
 
 end.
-

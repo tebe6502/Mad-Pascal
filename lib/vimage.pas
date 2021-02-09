@@ -112,7 +112,7 @@ procedure LoadPalette(cnt: byte; x, ln, a,b,c: byte);
 var i: word;
 begin
 
- SetRGBPalette(x);
+ SetRGBPalette(1, x);
 
  for i:=0 to cnt do begin
   blockread(f, Buffer, ln);
