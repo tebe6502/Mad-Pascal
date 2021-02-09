@@ -135,8 +135,8 @@ end;
 procedure SetRGBPalette(pal: byte); assembler; register; overload;
 asm
 {
-	fxs FX_PSEL, pal
-	fxs FX_CSEL, #0
+	fxs FX_PSEL, pal	; select Palette
+	fxs FX_CSEL, #0		; select Color
 };
 end;
 
@@ -144,8 +144,8 @@ end;
 procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
 asm
 {
-	fxs FX_PSEL, pal
-	fxs FX_CSEL, cnt
+	fxs FX_PSEL, pal	; select Palette
+	fxs FX_CSEL, cnt	; select Color
 };
 end;
 
