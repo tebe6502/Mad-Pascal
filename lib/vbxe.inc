@@ -7,6 +7,8 @@ SetColorMapDimensions
 SetRGBPalette
 SetCurrentPaletteEntry
 SetPaletteEntry
+SetPlayfieldPalette
+SetOverlayPalette
 
 }
 
@@ -65,6 +67,48 @@ asm
 end;
 
 
+procedure SetPlayfieldPalette(a: byte); register; assembler;
+asm
+{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	ldy #s@xdl.ovwidth
+
+	lda a
+	and #3
+	:6 asl @
+	sta a
+
+	lda MAIN.SYSTEM.VBXE_WINDOW,y
+	and #%00111111
+	ora a
+	sta MAIN.SYSTEM.VBXE_WINDOW,y
+
+	fxs FX_MEMS #$00
+};
+end;
+
+
+procedure SetOverlayPalette(a: byte); register; assembler;
+asm
+{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	ldy #s@xdl.ovwidth
+
+	lda a
+	and #3
+	:4 asl @
+	sta a
+
+	lda MAIN.SYSTEM.VBXE_WINDOW,y
+	and #%11001111
+	ora a
+	sta MAIN.SYSTEM.VBXE_WINDOW,y
+
+	fxs FX_MEMS #$00
+};
+end;
+
+
 procedure SetColorMapDimensions(w,h: byte); register; assembler;
 asm
 {	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
@@ -88,22 +132,28 @@ asm
 end;
 
 
-procedure SetRGBPalette(nr: word); assembler; register; overload;
+procedure SetRGBPalette(pal: byte); assembler; register; overload;
 asm
-{	inc nr+1
-
-	fxs FX_PSEL, nr+1
-	fxs FX_CSEL, nr
+{
+	fxs FX_PSEL, pal
+	fxs FX_CSEL, #0
 };
 end;
 
 
-procedure SetRGBPalette(nr: word; r,g,b: byte); assembler; overload;
+procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
 asm
-{	inc nr+1
+{
+	fxs FX_PSEL, pal
+	fxs FX_CSEL, cnt
+};
+end;
 
-	fxs FX_PSEL, nr+1
-	fxs FX_CSEL, nr
+
+procedure SetRGBPalette(cnt: byte; r,g,b: byte); assembler; overload;
+asm
+{
+	fxs FX_CSEL, cnt
 
 	lda r
 	fxsa FX_CR

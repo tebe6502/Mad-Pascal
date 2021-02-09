@@ -225,11 +225,18 @@ https://codebase64.org/doku.php?id=base:generating_approximate_sines_in_assembly
 asm
 {	txa:pha
 
+	lda p
+	sta a3+1
+	add <$40
+	sta a2+1
 	lda p+1
-	sta a0+2
-	sta a1+2
-	sta a2+2
 	sta a3+2
+	adc >$40
+	sta a2+2
+
+	adw p #$80 a1+1
+	adw p #$c0 a0+1
+
 
 	ldy #$3f
 	ldx #$00
