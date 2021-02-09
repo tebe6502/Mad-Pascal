@@ -3,7 +3,7 @@ unit b_utils;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Common Utils
-* @version: 0.5.2
+* @version: 0.5.4
 * @description:
 * Set of useful procedures to simplify common tasks in Atari 8-bit programming.
 *
@@ -13,6 +13,20 @@ unit b_utils;
 *)
 interface
 uses atari;
+
+type TdateTime = record 
+(*
+* @description: 
+* Record type used to store date and time.
+*)
+    year:word; 
+    month:byte;
+    day:byte;     // day of month
+    hour:byte;
+    minute:byte;
+    second:byte;
+    dow:byte;    // day of week
+end;
 
 function CountBits(b: byte):byte;assembler;
 (*
@@ -80,6 +94,34 @@ procedure ExpandLZ4(source: word; dest: word):assembler;
 * @param: src (word) - source address of compressed data 
 * @param: dest (word) - destination address where data is expanded
 *)
+procedure UnixToDate(ux: cardinal; var date: TDateTime);
+(*
+* @description:
+* Converts unix timestamp to proper date, represented as an record of TDateTime type.
+* 
+* @param: ux (cardinal) - unix timestamp 
+* @param: date (TDateTime) - record where the result of conversion is stored
+*)
+function Hour24to12(hour: byte):byte;
+(*
+* @description:
+* Converts 24 hour clock indication into to 12 hour
+* 
+* @param: hour (byte) - hour (0-23)
+* 
+* @returns: (byte) - hour(0-12)
+*)
+function HexChar2Dec(c:char):byte;
+(*
+* @description:
+* Converts hex char into proper value in decimal.
+* 
+* @param: c (char) - hex char (0-9,a-f)
+* 
+* @returns: (byte) - decimal value (0-15), on error (invalid char) returns 255
+*)
+
+
 
 
 implementation
@@ -222,5 +264,79 @@ xsource           equ    *-2
                   rts
 };
 end; 
+
+procedure UnixToDate(ux: cardinal; var date:TDateTime);
+var second, minute, hour, day, month, year, dow, dim: cardinal;
+    leap: boolean;
+    daysInYear: word;
+    daysInMonth: array [0..11] of byte = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+    fin:boolean;
+begin
+    fin := false;
+    second := ux;
+    minute := ux div 60;
+    second := second - minute * 60;
+    hour   := minute div 60;
+    minute := minute - hour * 60;
+    day    := hour div 24;
+    hour   := hour - day * 24;
+    
+    year   := 1970;
+    dow    := 4;
+    
+    repeat;
+        leap := (year mod 4 = 0) and ((year mod 100 <> 0) or (year mod 400 = 0));
+        daysInYear := 365;
+        if leap then inc(daysInYear);
+        if day >= daysInYear then begin
+            inc(dow);
+            if leap then inc(dow);
+            day := day - daysInYear;
+            if dow >= 7 then dow := dow -7;
+            inc(year);
+        end else begin
+            date.day := day;
+            dow := dow + day;
+            dow := dow mod 7;
+            month := 0;
+            repeat
+                dim := daysInMonth[month];
+                if (month = 1) and leap then inc(dim);
+                if day >= dim then day := day - dim else fin := true;;
+                inc(month);
+            until fin or (month = 12);
+            fin := true;
+        end;
+    until fin;
+    date.second := second;
+    date.minute := minute;
+    date.hour := hour;
+    date.day := day + 1;
+    date.month := month; 
+    date.year := year;
+    date.dow := dow;
+end;
+
+function Hour24to12(hour: byte):byte;
+begin
+    result := hour;
+    if hour > 12 then result := hour - 12;
+end;
+
+function HexChar2Dec(c:char):byte;
+begin
+    result:=$ff;
+    case c of
+        '0'..'9': begin 
+            exit(byte(byte(c)-48));
+        end;
+        'a'..'f': begin 
+            exit(byte(byte(c)-87));
+        end;
+        'A'..'F': begin 
+            exit(byte(byte(c)-55));
+        end;
+    end;
+end;
 
 end.
