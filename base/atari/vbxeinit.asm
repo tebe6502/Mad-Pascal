@@ -71,7 +71,8 @@ lop	mva #$00	(bp),y+
 
 xdlist	dta s@xdl [0] (XDLC_RPTL, 24-1,\
 	XDLC_END|XDLC_RPTL|XDLC_MAPON|XDLC_MAPADR|XDLC_OVADR|XDLC_MAPPAR|XDLC_OVATT,\	;|XDLC_GMON,\
-	192-1, MAIN.SYSTEM.VBXE_OVRADR, 320,\
+	192-1, MAIN.SYSTEM.VBXE_OVRADR,\
+	320,\			; OVSTEP
 	MAIN.SYSTEM.VBXE_MAPADR, $100,\
 	0, 0, 7, 7,\		; XDLC_MAPPAR: hscroll, vscroll, width, height
 	%00010001,\		; bit 7..6 PF Pal = 0 ; bit 5..4 OV Pal = 1 ; bit 0..1 NORMAL = 320px
