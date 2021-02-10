@@ -7,6 +7,22 @@ unit vbxe;
  @version: 1.1
 
  @description:
+
+1: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color.
+
+2: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors.
+
+3: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
+
+4: pixel mode 640x192/16 colors (hires)
+
+5: text mode 80x25.
+
+6: text mode 80x30.
+
+7: text mode 80x32.
+
+The mode 0 is reserved for text console.
 *)
 
 
@@ -145,7 +161,10 @@ const
 	VC_NO_TRANS	= 4;
 	VC_TRANS15	= 8;
 
+var
+	vram: TVBXEMemoryStream;
 
+//	procedure VBXEMode(mode: byte);
 	function BlitterBusy: Boolean; assembler;
 	procedure ColorMapOn; assembler;
 	procedure ColorMapOff; assembler;
@@ -155,8 +174,10 @@ const
 	procedure OverlayOff; assembler;
 	procedure RunBCB(var a: TBCB); assembler;
 	procedure VBXEMemoryBank(b: byte); assembler;
-	procedure SetHorizontalRes(a: byte); assembler;
-	procedure SetHRes(a: byte); assembler;
+	procedure SetHorizontalRes(a: byte); overload;
+	procedure SetHorizontalRes(a: byte; s: word); overload;
+	procedure SetHRes(a: byte); overload;
+	procedure SetHRes(a: byte; s: word); overload;
 	procedure SrcBCB(var a: TBCB; src: cardinal);
 	procedure SetXDL(var a: txdl); register; assembler;
 	procedure VBXEControl(a: byte); assembler;
@@ -173,7 +194,7 @@ implementation
 var	fildat: byte absolute $2fd;
 	hres: byte;
 
-	vram: TVBXEMemoryStream;
+//	vram: TVBXEMemoryStream;
 
 
 procedure VBXEMemoryBank(b: byte); assembler;
@@ -472,30 +493,102 @@ stop	pla:tax
 end;
 
 
-procedure SetColor(a: byte);
+(*
+
+procedure VBXEMode(mode: byte);
+
 begin
-	fildat := a;
+
+ InitGraph(mVBXE, 0, '');
+
+asm
+{
+	txa:pha
+
+	lda <320
+	ldx >320
+	ldy #200
+
+; X:A = horizontal resolution
+; Y = vertical resolution
+
+	@SCREENSIZE
+
+	lda mode
+	sta MAIN.SYSTEM.GraphMode
+
+  	mva #$2c @putchar.vbxe	; bit*
+
+	lda #$60		; #6 * $10
+	sta @putchar.chn
+	sta @COMMAND.scrchn
+
+	lda #MAIN.GRAPH.grOK
+	sta MAIN.GRAPH.GraphResult
+
+	pla:tax
+
+};
+end;
+*)
+
+procedure SetColor(a: byte);
+(*
+@description:
+
+*)
+begin
+	if hres = 3 then
+	 fildat := (a and $0f) or (a shl 4)
+	else
+	 fildat := a;
 end;
 
 
 procedure PutPixel(x: word; y: byte);
+(*
+@description:
+
+*)
 var a: cardinal;
+    v: byte;
 begin
 
     case hres of
-     1: a := y*160;
-     2: a := y*320;
-     3: a := y*640;
-    else
-     a:=0
+     1: begin
+	 vram.position := VBXE_OVRADR + y*160 + x;
+	 vram.WriteByte(fildat);
+	end;
+
+     2: begin
+	 vram.position := VBXE_OVRADR + y*320 + x;
+	 vram.WriteByte(fildat);
+	end;
+
+     3: begin
+	 vram.position := VBXE_OVRADR + y*320 + x shr 1;
+
+	 v := vram.ReadByte;
+
+	 dec(vram.position);
+
+	 if x and 1 = 0 then
+	  v:=v or (fildat and $f0)
+	 else
+	  v:=v or (fildat and $0f);
+
+	 vram.WriteByte(v);
+	end;
     end;
 
-    vram.position := VBXE_OVRADR + x + a;
-    vram.WriteByte(fildat);
 end;
 
 
 procedure HLine(x1, x2: word; y1: byte);
+(*
+@description:
+
+*)
 var x: word;
 begin
 
@@ -508,6 +601,10 @@ end;
 
 
 procedure VLine(x1: word; y1, y2: byte);
+(*
+@description:
+
+*)
 var y: word;
 begin
 
@@ -520,6 +617,10 @@ end;
 
 
 procedure Line(x1: word; y1: byte; x2: word; y2: byte);
+(*
+@description:
+
+*)
 var
      d, ai, bi: smallint;
      dx, dy: smallint;
@@ -644,29 +745,81 @@ asm
 end;
 
 
-procedure SetHorizontalRes(a: byte); assembler;
+procedure SetHorizontalRes(a: byte; s: word); overload;
 (*
 @description:
 
 *)
+begin
+	a:=a and 3;
+
+	case a of
+	 1: ScreenWidth := 160;
+	 2: ScreenWidth := 320;
+	 3: ScreenWidth := 640;
+	end;
+
 asm
 {	lda a
 	sta hres
 	@setxdl @
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	ldy #s@xdl.ovstep
+
+	lda s
+	sta MAIN.SYSTEM.VBXE_WINDOW,y
+
+	lda s+1
+	sta MAIN.SYSTEM.VBXE_WINDOW+1,y
+
+	fxs FX_MEMS #$00
 };
 end;
 
 
-procedure SetHRes(a: byte); assembler;
+procedure SetHorizontalRes(a: byte); overload;
 (*
 @description:
 
 *)
-asm
-{	lda a
-	sta hres
-	@setxdl @
-};
+begin
+
+ a:=a and 3;
+
+ if a = 1 then
+  SetHorizontalRes(a, 160)
+ else
+  SetHorizontalRes(a, 320);
+
+end;
+
+
+procedure SetHRes(a: byte); overload;
+(*
+@description:
+
+*)
+begin
+
+ a:=a and 3;
+
+ if a = 1 then
+  SetHorizontalRes(a, 160)
+ else
+  SetHorizontalRes(a, 320);
+
+end;
+
+
+procedure SetHRes(a: byte; s: word); overload;
+(*
+@description:
+
+*)
+begin
+	SetHorizontalRes(a, s);
 end;
 
 
