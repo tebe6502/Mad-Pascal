@@ -139,6 +139,31 @@
 	end;
 
 
+       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+	  sta(i+14) and									// sta			; 14
+          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+	  sta(i+16) and									// sta			; 16
+          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+	begin
+	 listing[i]   := listing[i+6];
+	 listing[i+1] := listing[i+7];
+	 listing[i+2] := listing[i+4];
+
+	 listing[i+3] := #9'asl @';
+	 listing[i+4] := #9'rol :eax+1';
+	 listing[i+5] := #9'sta :eax';
+
+	 listing[i+6]  := '';
+	 listing[i+7]  := '';
+	 listing[i+8]  := '';
+	 listing[i+9]  := '';
+	 listing[i+10] := '';
+	 listing[i+11] := '';
+	 listing[i+12] := '';
+
+	 Result:=false; Break;
+	end;
+
      end;
 
 
