@@ -51,6 +51,7 @@ var
 var
   gameOver            : boolean;
   availDir, alive     : byte;
+  ply                 : ^Player;
 
 //-----------------------------------------------------------------------------
 
@@ -116,11 +117,8 @@ end;
 //-----------------------------------------------------------------------------
 
 // brain = 0
-procedure human(p: pointer);
-var
-  ply : ^Player;
+procedure human;
 begin
-  ply := p;
   newDir := ply.dir;
   JOY := JOY_SELECT_1; KEY_PIO := $ff; t0b := JOY xor $ff;
 
@@ -147,11 +145,8 @@ begin
 end;
 
 // brain = 2
-procedure ai_Straightforward(p: pointer);
-var
-  ply : ^Player;
+procedure ai_Straightforward;
 begin
-  ply := p;
   if (availDir and ply.dir) <> 0 then newDir := ply.dir
   else begin
     t0n := false;
@@ -163,11 +158,8 @@ begin
 end;
 
 // brain = 3
-procedure ai_Swinger(p: pointer);
-var
-  ply : ^Player;
+procedure ai_Swinger;
 begin
-  ply := p;
   if ((availDir and ply.dir) <> 0) and (Random(3) = 0) then newDir := ply.dir
   else begin
     t0n := false;
@@ -181,8 +173,6 @@ end;
 //-----------------------------------------------------------------------------
 
 procedure playerMove(p: pointer);
-var
-  ply : ^Player;
 begin
   ply := p;
 
@@ -196,10 +186,10 @@ begin
     end else begin
 
       case ply.brain of
-        0 : human(p);
+        0 : human;
         1 : ai_SimpleRandom;
-        2 : ai_Straightforward(p);
-        3 : ai_Swinger(p);
+        2 : ai_Straightforward;
+        3 : ai_Swinger;
       end;
 
       if ply.dir = newDir then begin
@@ -241,7 +231,7 @@ begin
     player1.brain := 3; // ai_Swinger
     player2.brain := 1; // ai_SimpleRandom
     player3.brain := 2; // ai_Straightforward
-    player4.brain := 0; // human
+    player4.brain := 1; // human
 
     repeat
       pause(1); playerMove(@player1);
