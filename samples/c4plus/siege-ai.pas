@@ -244,14 +244,10 @@ begin
     player4.brain := 0; // human
 
     repeat
-      pause(1);
-      playerMove(@player1);
-      pause(1);
-      playerMove(@player2);
-      pause(1);
-      playerMove(@player3);
-      pause(1);
-      playerMove(@player4);
+      pause(1); playerMove(@player1);
+      pause(1); playerMove(@player2);
+      pause(1); playerMove(@player3);
+      pause(1); playerMove(@player4);
     until alive = 0;
 
     pause(100);
