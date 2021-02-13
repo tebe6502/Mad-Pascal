@@ -62,8 +62,6 @@ var
 
 procedure initPlayfield;
 begin
-  alive := 3;
-
   BORDERCOLOR := $1f; BGCOLOR := 0;
   FillChar(pointer(SCREEN_ADDR), 24 * 40, EMPTY);
 
@@ -225,6 +223,7 @@ begin
   gameOver := false;
 
   repeat
+    alive := 3;
     initPlayers;
     initPlayfield;
 
