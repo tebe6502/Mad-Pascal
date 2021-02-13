@@ -231,7 +231,7 @@ begin
     player1.brain := 3; // ai_Swinger
     player2.brain := 1; // ai_SimpleRandom
     player3.brain := 2; // ai_Straightforward
-    player4.brain := 1; // human
+    player4.brain := 0; // human
 
     repeat
       pause(1); playerMove(@player1);
