@@ -237,7 +237,7 @@ begin
       pause(1); playerMove(@player2);
       pause(1); playerMove(@player3);
       pause(1); playerMove(@player4);
-    until alive = 0;
+    until (alive = 0) or (alive = $ff);
 
     pause(100);
   until gameOver;
