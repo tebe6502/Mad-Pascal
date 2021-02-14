@@ -16,12 +16,6 @@ unit vbxe;
 
 4: pixel mode 640x192/16 colors (hires)
 
-5: text mode 80x25.
-
-6: text mode 80x30.
-
-7: text mode 80x32.
-
 The mode 0 is reserved for text console.
 *)
 
@@ -31,6 +25,7 @@ The mode 0 is reserved for text console.
 	$00E0	CLR_BLIST
 	$0100	BLITTER_CODE_BLOCK
 	$1000	COLOR_MAP
+	$1000	CHARSET BASE
 	$5000	VBXE_OVRADR
 *)
 
@@ -92,6 +87,7 @@ type	TXDL = record
 		rptl: byte;
 		ov_adr: TUInt24;
 		ov_step: word;
+		ov_chbase: byte;
 		mp_adr: TUInt24;
 		mp_step: word;
 		mp_hscrol: byte;
@@ -164,10 +160,11 @@ const
 var
 	vram: TVBXEMemoryStream;
 
-//	procedure VBXEMode(mode: byte);
 	function BlitterBusy: Boolean; assembler;
 	procedure ColorMapOn; assembler;
 	procedure ColorMapOff; assembler;
+	procedure ColorMap(a: Boolean); overload;
+	procedure ColorMap(w, h: byte); overload;
 	procedure DstBCB(var a: TBCB; dst: cardinal);
 	procedure GetXDL(var a: txdl); register; assembler;
 	procedure IniBCB(var a: TBCB; src,dst: cardinal; w0, w1: smallint; w: word; h: byte; ctrl: byte);
@@ -182,6 +179,26 @@ var
 	procedure SetXDL(var a: txdl); register; assembler;
 	procedure VBXEControl(a: byte); assembler;
 	procedure VBXEOff; assembler;
+	procedure VBXEMode(mode, pal: byte);
+
+	procedure ClearDevice;
+	procedure TextOut(a: char; c: byte); overload;
+	procedure TextOut(s: PByte; c: byte); overload;
+	procedure Position(x,y: byte);
+
+	procedure SetColorMapEntry; overload; assembler;
+	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
+	procedure SetColorMapDimensions(w,h: byte); register; assembler;
+	procedure SetCurrentPaletteEntry(nr: word); register;
+	procedure SetPaletteEntry(nr: word; r,g,b: byte); register; overload;
+	procedure SetPaletteEntry(r,g,b: byte); register; overload;
+	procedure SetRGBPalette(pal: byte); assembler; register; overload;
+	procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
+	procedure SetRGBPalette(cnt: byte; r,g,b: byte); assembler; overload;
+	procedure SetRGBPalette(r,g,b: byte); assembler; register; overload;
+	procedure SetPlayfieldPalette(a: byte); register; assembler;
+	procedure SetOverlayPalette(a: byte); register; assembler;
+
 
 	procedure PutPixel(x: word; y: byte);
 	procedure SetColor(a: byte);
@@ -194,7 +211,8 @@ implementation
 var	fildat: byte absolute $2fd;
 	hres: byte;
 
-//	vram: TVBXEMemoryStream;
+
+{$i vbxe.inc}
 
 
 procedure VBXEMemoryBank(b: byte); assembler;
@@ -288,7 +306,7 @@ begin
 
 	VBXEMemoryBank(bnk);
 
-	dst:=@Buffer;
+	dst:=Buffer;
 
 	for i:=0 to Count-1 do begin
 
@@ -325,7 +343,7 @@ begin
 
 	VBXEMemoryBank(bnk);
 
-	src:=@Buffer;
+	src:=Buffer;
 
 	for i:=0 to Count-1 do begin
 
@@ -493,44 +511,6 @@ stop	pla:tax
 end;
 
 
-(*
-
-procedure VBXEMode(mode: byte);
-
-begin
-
- InitGraph(mVBXE, 0, '');
-
-asm
-{
-	txa:pha
-
-	lda <320
-	ldx >320
-	ldy #200
-
-; X:A = horizontal resolution
-; Y = vertical resolution
-
-	@SCREENSIZE
-
-	lda mode
-	sta MAIN.SYSTEM.GraphMode
-
-  	mva #$2c @putchar.vbxe	; bit*
-
-	lda #$60		; #6 * $10
-	sta @putchar.chn
-	sta @COMMAND.scrchn
-
-	lda #MAIN.GRAPH.grOK
-	sta MAIN.GRAPH.GraphResult
-
-	pla:tax
-
-};
-end;
-*)
 
 procedure SetColor(a: byte);
 (*
@@ -554,32 +534,29 @@ var a: cardinal;
     v: byte;
 begin
 
-    case hres of
-     1: begin
-	 vram.position := VBXE_OVRADR + y*160 + x;
-	 vram.WriteByte(fildat);
-	end;
+    vram.position := VBXE_OVRADR + y*320;
 
-     2: begin
-	 vram.position := VBXE_OVRADR + y*320 + x;
-	 vram.WriteByte(fildat);
-	end;
+    if hres = 3 then begin
 
-     3: begin
-	 vram.position := VBXE_OVRADR + y*320 + x shr 1;
+	inc(vram.position, x shr 1);
 
-	 v := vram.ReadByte;
+	v := vram.ReadByte;
 
-	 dec(vram.position);
+	dec(vram.position);
 
-	 if x and 1 = 0 then
+	if x and 1 = 0 then
 	  v:=v or (fildat and $f0)
 	 else
-	  v:=v or (fildat and $0f);
+	 v:=v or (fildat and $0f);
 
-	 vram.WriteByte(v);
-	end;
-    end;
+	vram.WriteByte(v);
+
+     end else begin
+
+	inc(vram.position, x);
+	vram.WriteByte(fildat);
+
+     end;
 
 end;
 
@@ -711,6 +688,62 @@ begin
 end;
 
 
+procedure Position(x,y: byte);
+(*
+@description:
+Set cursor position on screen.
+
+Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.
+
+@param: x - horizontal positions
+@param: y - vertical positions
+*)
+begin
+
+ vram.position:=VBXE_OVRADR + y*160 + x shl 1;
+
+end;
+
+
+procedure TextOut(a: char; c: byte); overload;
+(*
+@description:
+
+*)
+begin
+
+ fildat := c;
+
+ vram.WriteWord(ord(a) + c shl 8);
+
+end;
+
+
+function ata2int(a: byte): byte;
+begin
+
+asm
+{
+    @ata2int
+    sta Result;
+};
+
+end;
+
+
+procedure TextOut(s: PByte; c: byte); overload;
+(*
+@description:
+
+*)
+var i: byte;
+begin
+
+ fildat:=c;
+
+ for i:=1 to s[0] do vram.WriteWord(ata2int(s[i]) + c shl 8);
+
+end;
 
 
 procedure OverlayOff; assembler;
@@ -745,23 +778,62 @@ asm
 end;
 
 
+procedure ColorMap(a: Boolean); overload;
+begin
+
+ if a then
+  ColorMapOn
+ else
+  ColorMapOff;
+
+end;
+
+
+procedure ColorMap(w, h: byte); overload;
+begin
+
+ ColorMapOn;
+ SetColorMapDimensions(w,h);
+
+end;
+
+
 procedure SetHorizontalRes(a: byte; s: word); overload;
 (*
 @description:
 
 *)
 begin
-	a:=a and 3;
+	ScreenHeight := 192;
 
 	case a of
 	 1: ScreenWidth := 160;
 	 2: ScreenWidth := 320;
 	 3: ScreenWidth := 640;
+	else
+
+	 begin
+	   ScreenWidth := 80;
+	   ScreenHeight := 24;
+	   a:=2;
+	  end;
+
 	end;
 
 asm
-{	lda a
+{	txa:pha
+
+	lda MAIN.SYSTEM.ScreenWidth
+	ldx MAIN.SYSTEM.ScreenWidth+1
+
+	ldy MAIN.SYSTEM.ScreenHeight
+
+	@SCREENSIZE
+
+	lda a
+	and #3
 	sta hres
+
 	@setxdl @
 
 	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
@@ -775,6 +847,8 @@ asm
 	sta MAIN.SYSTEM.VBXE_WINDOW+1,y
 
 	fxs FX_MEMS #$00
+
+	pla:tax
 };
 end;
 
@@ -786,11 +860,6 @@ procedure SetHorizontalRes(a: byte); overload;
 *)
 begin
 
- a:=a and 3;
-
- if a = 1 then
-  SetHorizontalRes(a, 160)
- else
   SetHorizontalRes(a, 320);
 
 end;
@@ -803,11 +872,6 @@ procedure SetHRes(a: byte); overload;
 *)
 begin
 
- a:=a and 3;
-
- if a = 1 then
-  SetHorizontalRes(a, 160)
- else
   SetHorizontalRes(a, 320);
 
 end;
@@ -819,7 +883,7 @@ procedure SetHRes(a: byte; s: word); overload;
 
 *)
 begin
-	SetHorizontalRes(a, s);
+  SetHorizontalRes(a, s);
 end;
 
 
@@ -985,6 +1049,60 @@ asm
 
 	pla:tax
 };
+
+end;
+
+
+procedure ClearDevice;
+begin
+
+ vram.position:=VBXE_OVRADR;
+ vram.size:=VBXE_OVRADR+320*256;
+ vram.Clear;
+
+end;
+
+
+procedure VBXEMode(mode, pal: byte);
+var p: pointer;
+begin
+
+ mode:=mode and $0f;
+
+ if mode > 0 then begin
+
+	case mode of
+	  1: begin
+
+		SetHorizontalRes($80,160);
+
+		p:=pointer(peek(756)*256);
+
+		vram.position:=VBXE_CHBASE;
+
+		vram.WriteBuffer(p, 2048);
+
+		asm
+		{
+		@setxdl #e@xdl.tmon
+		};
+
+	     end;
+
+	  2: SetHorizontalRes(loRes);
+	  3: SetHorizontalRes(medRes);
+	  4: SetHorizontalRes(hiRes);
+
+	end;
+
+	ColorMapOff;
+
+	VBXEControl(vc_xdl+vc_xcolor+vc_no_trans);
+
+	SetOverlayPalette(pal);
+
+	ClearDevice;
+ end;
 
 end;
 

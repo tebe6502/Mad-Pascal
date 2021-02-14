@@ -1,5 +1,6 @@
 07.02.2021
 - dodane alokowanie pamieci dla tablic typu STRING
+- nowy unit: STRINGUTILS
 
 28.01.2021
 - parametry typu POINTER s¹ przekazywane do procedur/funkcji bez udzia³u stosu programowego

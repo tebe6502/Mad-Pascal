@@ -1,7 +1,6 @@
 
 {
 
-InitGraph
 SetColorMapEntry
 SetColorMapDimensions
 SetRGBPalette
@@ -11,34 +10,6 @@ SetPlayfieldPalette
 SetOverlayPalette
 
 }
-
-
-procedure InitGraph(driver, mode: byte; dev: PByte); overload;
-begin
-
-InitGraph(mode);
-
-asm
-{	lda driver
-	bpl stop
-
-	txa:pha
-
-	jsr @vbxe_detect
-	bcc ok
-
-	ldx #grNoInitGraph
-	jmp err
-
-ok	jsr @vbxe_init
-
-	ldx #grOK
-err	stx GraphResult
-
-	pla:tax
-stop
-};
-end;
 
 
 procedure SetColorMapEntry; overload; assembler;
