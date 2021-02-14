@@ -3890,6 +3890,10 @@ begin
 
    if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
+    if (pos('lda ', TemporaryBuf[0]) > 0) then begin
+     writeln(OutFile, '.def :' + fortmp(GetSTRING(0)) + ' = *+1');
+     TemporaryBuf[0] := #9'lda #$00';
+    end else
     if (pos('cmp ', TemporaryBuf[0]) > 0) then begin
      writeln(OutFile, '.def :' + fortmp(GetSTRING(0)) + ' = *+1');
      TemporaryBuf[0] := #9'cmp #$00';
@@ -11745,7 +11749,7 @@ var i, l, k, m, x: integer;
    if listing[i] <> '' then begin
 
 {
-if (pos('adr.TAB', listing[i]) > 0) then begin
+if (pos('FORTMP_', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -11762,7 +11766,7 @@ end;
     begin
      listing[i+1] := #9'mva ' + copy(listing[i], 6, 4) + ' ' +  copy(listing[i+1], 6, 256);
      listing[i] := '';
-     Result:=false;  Break;
+     Result:=false; Break;
     end;
 
 
@@ -21549,6 +21553,30 @@ end;
 
 // -------------------
 
+{
+piss
+
+    if lda_a(i) and									// sta :eax		; 0
+       (listing[i+1] = #9'sta :eax+1') and						// lda :eax		; 1
+
+       mva(i+1) and									// mva :eax v		; 1
+       (pos(copy(listing[i], 6, 256), listing[i+1]) = 6) then
+     begin
+	tmp := copy(listing[i], 6, 256);
+	delete( listing[i+1], pos(tmp, listing[i+1]), length(tmp) + 1 );
+	listing[i]   := #9'sta ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := '';
+
+	Result:=false; Break;
+     end;
+
+	lda $02F4
+	sta :eax+1
+	lda #$00
+	sta P
+	lda :eax+1
+	sta P+1
+}
 
     if sta_a(i) and									// sta :eax		; 0
        mva(i+1) and									// mva :eax v		; 1
@@ -21648,7 +21676,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('ldy #1', listing[i]) > 0) then begin
+if (pos('jne l_', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -23647,10 +23675,12 @@ end;
      end;
 
 
-    if lda(i) and (listing[i+1] = #9'cmp #$7F') and						// lda			; 0	<= 127	FOR
-       (listing[i+2] = #9'bcc *+7') and (listing[i+3] = #9'beq *+5') then			// cmp #$7F		; 1
-     begin											// bcc *+7		; 2
-	listing[i+1] := #9'bpl *+5';								// beq *+5		; 3
+    if lda(i) and										// lda			; 0	<= 127	FOR
+       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+       (listing[i+2] = #9'bcc *+7') and								// bcc *+7		; 2
+       (listing[i+3] = #9'beq *+5') then							// beq *+5		; 3
+     begin
+	listing[i+1] := #9'bpl *+5';
 	listing[i+2] := '';
 	listing[i+3] := '';
 	Result:=false; Break;
@@ -37959,6 +37989,7 @@ WHILETOK:
 
 	    StartOptimization(j);
 
+
 	    forBPL := 0;
 
 	    if SafeCompileConstExpression(j, ConstVal, ExpressionType, Ident[IdentIndex].DataType, true) then begin
@@ -37988,8 +38019,6 @@ WHILETOK:
 	      inc(j, 2);
 
 	    StartOptimization(j);
-
-	    ResetOpty;
 
 
 	{$IFDEF OPTIMIZECODE}
@@ -38040,6 +38069,7 @@ WHILETOK:
 	        asm65('; --- ForToDoCondition');
 
 	        StartOptimization(j);
+		ResetOpty;			// !!!
 
 	        Push(Ident[IdentTemp].Value, ASPOINTER, DataSize[Ident[IdentTemp].DataType], IdentTemp);
 
