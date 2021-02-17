@@ -1692,7 +1692,7 @@ begin
         Error(NumTok, 'Undefined resource type: Type = UNKNOWN, Name = '''+res.resName+'''');
 
 
-    if (res.resFile = '') or not(FindFile(res.resFile)) then
+     if (res.resFile <> '') and not(FindFile(res.resFile)) then
        Error(NumTok, 'Resource file not found: Type = '+res.resType+', Name = '''+res.resName+'''');
 
 
