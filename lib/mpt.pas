@@ -36,6 +36,8 @@ object for controling MPT player
 
 implementation
 
+uses misc;
+
 var	ntsc: byte;
 
 
@@ -90,18 +92,18 @@ asm
 	bne quit
 skp
 	mwa TMPT adr
-	
+
 	ldy #1
 mov	lda $ff00,y
 adr	equ *-2
 	sta ptr,y
 	dey
 	bpl mov
-	
-	jsr $ff00		; jmp (TMPT)	6502 buggy indirect jump 
+
+	jsr $ff00		; jmp (TMPT)	6502 buggy indirect jump
 ptr	equ *-2
 
-quit	pla:tax	
+quit	pla:tax
 };
 end;
 
@@ -129,16 +131,9 @@ end;
 
 initialization
 
-asm
-{
-	lda #0
-	ldx SYSTEM.TVSystem
-	cpx #15
-	sne
-	lda #4
-
-	sta ntsc
-};
+if DetectAntic then
+ ntsc:=0
+else
+ ntsc:=4;
 
 end.
-

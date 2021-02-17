@@ -159,6 +159,7 @@ const
 	VBXE_XDLADR = $0000;		// XDLIST
 	VBXE_BCBADR = $0100;		// BLITTER LIST ADDRESS
 	VBXE_MAPADR = $1000;		// COLOR MAP ADDRESS
+	VBXE_CHBASE = $1000;		// CHARSET BASE ADDRESS
 	VBXE_OVRADR = $5000;		// OVERLAY ADDRESS
 	VBXE_WINDOW = $B000;		// 4K WINDOW $B000..$BFFF
 
@@ -214,8 +215,6 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
 	DateSeparator: Char = '-';
-
-	TVSystem: byte absolute $D014;
 
 	Rnd: byte absolute $d20a;
 

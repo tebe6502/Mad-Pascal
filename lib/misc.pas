@@ -1,7 +1,7 @@
 unit misc;
 (*
  @type: unit
- @author: Konrad Kokoszkiewicz, Tomasz Biela
+ @author: Tomasz Biela, Konrad Kokoszkiewicz, Guillermo Fuenzalida, Sebastian Igielski
  @name: Miscellaneous procedures for detect additional hardware
  @version: 1.0
 
@@ -11,6 +11,7 @@ unit misc;
 
 {
 
+DetectAntic
 DetectBASIC
 DetectCPU
 DetectCPUSpeed
@@ -27,10 +28,10 @@ DetectVBXE
 interface
 
 var	banks: array [0..63] of byte absolute __PORTB_BANKS;	// array with code of banks PORTB
-	
+
 var	DetectOS: byte absolute $fff7;
-(* 
-@description:	
+(*
+@description:
 Detect OS
 
 1   'XL/XE OS Rev.1'
@@ -39,10 +40,10 @@ Detect OS
 4   'XL/XE/XEGS OS Rev.4'
 10  'XL/XE OS Rev.10'
 11  'XL/XE OS Rev.11'
-59  'XL/XE OS Rev.3B' 
+59  'XL/XE OS Rev.3B'
 64  'QMEG+OS 4.04'
 253 'QMEG+OS RC01'
-*)	
+*)
 
 	function DetectANTIC: Boolean; assembler;
 	function DetectBASIC: byte; assembler;
@@ -60,6 +61,13 @@ implementation
 
 
 function DetectANTIC: Boolean; assembler;
+(*
+@description:
+Detect ANTIC PAL/NTSC
+
+@returns: TRUE = PAL
+@returns: FALSE = NTSC
+*)
 asm
 {
 // ANTIC PAL Test for Atari 8-bits
@@ -78,21 +86,15 @@ antic_loop2
 	bmi antic_loop2
 	sta scanline
 	bpl antic_loop2
-antic_loop2_fin	
-	ldx #$00
+
+antic_loop2_fin
+	ldy #$00
 	lda #0
 scanline equ *-1
 	cmp #135
 	bmi ntsc
-	inx
+	iny
 ntsc
-	stx palnts	
-detect
-	ldy #1
-	lda palnts
-	seq
-	dey
-
 	sty Result
 };
 end;
@@ -374,7 +376,7 @@ asm
 
 	tsx
 	stx	stk
-	
+
 	lda	vvblki
 	sta	lvbl
 
@@ -671,7 +673,7 @@ function DetectBASIC: byte; assembler;
 Detect BASIC
 
 @returns: 162 = 'Atari Basic Rev.A'
-@returns: 96 = 'Atari Basic Rev.B' 
+@returns: 96 = 'Atari Basic Rev.B'
 @returns: 234 = 'Atari Basic Rev.C'
 *)
 asm
@@ -680,7 +682,7 @@ BASROM	= $a8e2
 
 	lda PORTB
 	sta old
-	
+
 	and #1
 	beq stop
 
@@ -689,7 +691,7 @@ BASROM	= $a8e2
 
 	lda BASROM
 stop	sta Result
-	
+
 	lda #$ff
 old	equ *-1
 	sta PORTB
