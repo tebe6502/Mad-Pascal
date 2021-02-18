@@ -22,9 +22,9 @@ begin
    i:=sine[a + mv2] + sine[mv];
 
    x1 := cx + sine[i] shr 1;
-   x2 := cx + sine[i + 64] shr 1;
-   x3 := cx + sine[i + 128] shr 1;
-   x4 := cx + sine[i + 192] shr 1;
+   x2 := cx + sine[byte(i + 64)] shr 1;
+   x3 := cx + sine[byte(i + 128)] shr 1;
+   x4 := cx + sine[byte(i + 192)] shr 1;
 
    minx:=x1;
 

@@ -41,8 +41,10 @@ begin
     while color <> $ff do begin
       cursor_y := color_height[color];
 
-      if rnd < $80 then inc(color_height[color])
-      if rnd < $80 then dec(color_height[color]);
+      if rnd < $80 then
+        inc(color_height[color])
+      else
+        if rnd < $80 then dec(color_height[color]);
 
       drawto; dec(color);
     end;
