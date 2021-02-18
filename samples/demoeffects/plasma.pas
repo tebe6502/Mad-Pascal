@@ -1,6 +1,6 @@
 // plasma by groepaz/hitmen
 
-uses crt;
+uses crt, graph;
 
 type
 	TScreen = PByte;
@@ -119,6 +119,8 @@ begin
  randomize;
 
  makechar;
+
+// InitGraph(12+16);
 
  poke(756, hi(word(@charset)));
 
