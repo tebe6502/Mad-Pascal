@@ -7,10 +7,21 @@ end;
 
 //-----------------------------------------------------------------------------
 
+procedure printXY(s: string; x, y, c: byte);
+begin
+  t0w := SCREEN_ADDR + mul40[y] + x;
+
+  Move(s[1], pointer(t0w), length(s));
+  FillChar(pointer(t0w - OFFSET), length(s), c);
+end;
+
+
+//-----------------------------------------------------------------------------
+
 procedure putChar(x, y, v, c: byte); overload;
 begin
   t0w := ATTRIBUTE_ADDR + mul40[y] + x;
-  Poke(t0w, c); Poke(t0w + (SCREEN_ADDR - ATTRIBUTE_ADDR), v);
+  Poke(t0w, c); Poke(t0w + OFFSET, v);
 end;
 
 //-----------------------------------------------------------------------------
@@ -161,8 +172,7 @@ procedure startScreen;
 var
   info: string = #6#9#18#5#33;
 begin
-  Move(info[1], pointer(SCREEN_ADDR + 2), length(info));
-  FillChar(pointer(ATTRIBUTE_ADDR + 2), length(info), $71 + $80);
+  printXY(info, 2, 0, $71 + $80);
   putChar(player1.x, player1.y, player1.head, byte(player1.colour + $80));
 
   repeat checkJoyStatus until joyStatus = JOY_FIRE;
@@ -178,13 +188,9 @@ procedure endScreen;
 var
   winner: string = #23#9#14#14#5#18#33;
   loser : string = #12#15#19#5#18#33;
-  tmp   : string;
 begin
-  if player1.score = ZERO + VICTORIES then tmp := winner
-  else tmp := loser;
-
-  Move(tmp[1], pointer(SCREEN_ADDR + 2), length(tmp));
-  FillChar(pointer(ATTRIBUTE_ADDR + 2), length(tmp), $71 + $80);
+  if player1.score = ZERO + VICTORIES then printXY(winner, 2, 0, $71 + $80)
+  else printXY(loser, 2, 0, $71 + $80);
 end;
 
 //-----------------------------------------------------------------------------
