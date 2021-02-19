@@ -1,30 +1,34 @@
-//---------------------- GLOBALS ----------------------------------------------
-// t0b                 : byte absolute $58;
-// newDir              : byte absolute $59;
-// t0n                 : boolean absolute $5a;
-// t0w                 : word absolute $5b;
-// availDir            : byte;
-// ply                 : ^Player;
-// player1, player2, player3, player4 : Player;
-//----------------------- CONST -----------------------------------------------
-// JOY_UP = 1; JOY_DOWN = 2; JOY_LEFT = 4; JOY_RIGHT = 8; JOY_FIRE = 64;
-// direction: array [0..3] of byte = (
-//   JOY_UP, JOY_DOWN, JOY_LEFT, JOY_RIGHT
-// );
+//-----------------------------------------------------------------------------
+
+procedure human; // brain = 0
+begin
+  checkJoyStatus; newDir := ply.dir;
+  case joyStatus of
+    JOY_UP    : if ply.dir <> JOY_DOWN  then newDir := JOY_UP;
+    JOY_DOWN  : if ply.dir <> JOY_UP    then newDir := JOY_DOWN;
+    JOY_LEFT  : if ply.dir <> JOY_RIGHT then newDir := JOY_LEFT;
+    JOY_RIGHT : if ply.dir <> JOY_LEFT  then newDir := JOY_RIGHT;
+  end;
+
+  if (newDir and availDir) = 0 then begin
+    ply.isAlive := false; Dec(alive);
+  end;
+end;
+
 //-----------------------------------------------------------------------------
 
 procedure aiStraight; // brain = 1
 begin
   if (availDir and ply.dir) <> 0 then newDir := ply.dir
   else begin
-    if availDir = (JOY_UP or JOY_DOWN) then newDir := direction[Random(0) and 1]
+    if availDir = (JOY_UP or JOY_DOWN) then newDir := direction[Random(2)]
     else begin
       case availDir of
         JOY_UP    : newDir := JOY_UP;
         JOY_DOWN  : newDir := JOY_DOWN;
       end;
     end;
-    if availDir = (JOY_LEFT or JOY_RIGHT) then newDir := direction[(Random(0) and 1) + 2]
+    if availDir = (JOY_LEFT or JOY_RIGHT) then newDir := direction[byte(Random(2) + 2)]
     else begin
       case availDir of
         JOY_LEFT   : newDir := JOY_LEFT;
@@ -36,14 +40,55 @@ end;
 
 //-----------------------------------------------------------------------------
 
-procedure aiMirror; // brain = 2
+
+procedure aiSapper; // brain = 2
+var
+  l, r, u, d: byte;
 begin
-  case player1.dir of
-    JOY_UP    : t0b := JOY_DOWN;
-    JOY_DOWN  : t0b := JOY_UP;
-    JOY_LEFT  : t0b := JOY_RIGHT;
-    JOY_RIGHT : t0b := JOY_LEFT;
+  l := 0; r := 0; u := 0; d := 0;
+  t0w := SCREEN_ADDR + mul40[ply.y] + ply.x;
+
+  if (availDir and JOY_UP) <> 0 then begin
+    for i0b := LOOK_AHEAD downto 1 do begin
+      if Peek(t0w - mul40[i0b]) = EMPTY then Inc(u);
+      if Peek(t0w - mul40[i0b] + 1) = EMPTY then Inc(u);
+      if Peek(t0w - mul40[i0b] - 1) = EMPTY then Inc(u);
+    end;
   end;
+
+  if (availDir and JOY_DOWN) <> 0 then begin
+      for i0b := LOOK_AHEAD downto 1 do begin
+      if Peek(t0w + mul40[i0b]) = EMPTY then Inc(d);
+      if Peek(t0w + mul40[i0b] + 1) = EMPTY then Inc(d);
+      if Peek(t0w + mul40[i0b] - 1) = EMPTY then Inc(d);
+    end;
+  end;
+
+  if (availDir and JOY_LEFT) <> 0 then begin
+    for i0b := LOOK_AHEAD downto 1 do begin
+      if Peek(t0w - i0b) = EMPTY then Inc(l);
+      if Peek(t0w - i0b + 40) = EMPTY then Inc(l);
+      if Peek(t0w - i0b - 40) = EMPTY then Inc(l);
+    end;
+  end;
+
+  if (availDir and JOY_RIGHT) <> 0 then begin
+    for i0b := LOOK_AHEAD downto 1 do begin
+      if Peek(t0w + i0b) = EMPTY then Inc(r);
+      if Peek(t0w + i0b + 40) = EMPTY then Inc(r);
+      if Peek(t0w + i0b - 40) = EMPTY then Inc(r);
+    end;
+  end;
+
+  t0b := d;
+  if t0b < u then t0b := u;
+  if t0b < l then t0b := l;
+  if t0b < r then t0b := r;
+
+  if t0b = d then t0b := JOY_DOWN;
+  if t0b = u then t0b := JOY_UP;
+  if t0b = l then t0b := JOY_LEFT;
+  if t0b = r then t0b := JOY_RIGHT;
 
   if (availDir and t0b) <> 0 then newDir := t0b
   else aiStraight;
@@ -51,13 +96,42 @@ end;
 
 //-----------------------------------------------------------------------------
 
-procedure aiRandom; // brain = 3
+procedure aiBully; // brain = 3
 begin
   t0b := ply.dir;
-  if (Random(0) and 3) = 0 then t0b := direction[Random(4)];
+
+  if player1.isAlive or player2.isAlive then begin
+
+    if player1.isAlive then tmpPly := @player1 else tmpPly := @player2;
+
+    if ply.y > tmpPly.y then t0b := JOY_UP else t0b := JOY_DOWN;
+    if (ply.y = tmpPly.y) or ((availDir and t0b) = 0) then
+      if ply.x > tmpPly.x then t0b := JOY_LEFT else t0b := JOY_RIGHT;
+
+  end;
 
   if (availDir and t0b) <> 0 then newDir := t0b
-  else aiStraight;
+  else aiSapper;
+
+end;
+
+//-----------------------------------------------------------------------------
+
+procedure aiMirror; // brain = 4
+begin
+  t0b := ply.dir;
+
+  if player1.isAlive then begin
+    case player1.dir of
+      JOY_UP    : t0b := JOY_DOWN;
+      JOY_DOWN  : t0b := JOY_UP;
+      JOY_LEFT  : t0b := JOY_RIGHT;
+      JOY_RIGHT : t0b := JOY_LEFT;
+    end;
+  end;
+
+  if (availDir and t0b) <> 0 then newDir := t0b
+  else aiSapper;
 end;
 
 //-----------------------------------------------------------------------------
