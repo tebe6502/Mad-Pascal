@@ -1,16 +1,30 @@
 //-----------------------------------------------------------------------------
 
+function calcScreenAddr(x, y: byte): word;
+begin
+  Result := SCREEN_ADDR + x + mul40[y];
+end;
+
+//-----------------------------------------------------------------------------
+
 procedure putChar(x, y, v: byte); overload;
 begin
-  t0w := SCREEN_ADDR + mul40[y] + x; Poke(t0w, v);
+  Poke(calcScreenAddr(x, y), v);
+end;
+
+//-----------------------------------------------------------------------------
+
+procedure putChar(x, y, v, c: byte); overload;
+begin
+  t0w := calcScreenAddr(x, y);
+  Poke(t0w, v); Poke(t0w - OFFSET, c);
 end;
 
 //-----------------------------------------------------------------------------
 
 procedure printXY(s: string; x, y, c: byte);
 begin
-  t0w := SCREEN_ADDR + mul40[y] + x;
-
+  t0w := calcScreenAddr(x, y);
   Move(s[1], pointer(t0w), length(s));
   FillChar(pointer(t0w - OFFSET), length(s), c);
 end;
@@ -18,18 +32,9 @@ end;
 
 //-----------------------------------------------------------------------------
 
-procedure putChar(x, y, v, c: byte); overload;
-begin
-  t0w := ATTRIBUTE_ADDR + mul40[y] + x;
-  Poke(t0w, c); Poke(t0w + OFFSET, v);
-end;
-
-//-----------------------------------------------------------------------------
-
 function getChar(x, y: byte): byte;
 begin
-  t0w := SCREEN_ADDR + mul40[y] + x;
-  Result := Peek(t0w);
+  Result := Peek(calcScreenAddr(x, y));
 end;
 
 //-----------------------------------------------------------------------------
@@ -57,7 +62,7 @@ end;
 procedure checkAvailDir;
 begin
   availDir := 0;
-  t0w := SCREEN_ADDR + mul40[ply.y] + ply.x;
+  t0w := calcScreenAddr(ply.x, ply.y);
 
   if Peek(t0w - 40) = EMPTY then availDir := availDir or JOY_UP;
   if Peek(t0w + 40) = EMPTY then availDir := availDir or JOY_DOWN;
@@ -78,19 +83,12 @@ end;
 
 //-----------------------------------------------------------------------------
 
-function calcObstacleAddr(x, y: byte): word;
-begin
-  Result := SCREEN_ADDR + x + mul40[y];
-end;
-
-//-----------------------------------------------------------------------------
-
 procedure saveObstacles;
 begin
   for i0b := OBST_QUANTITY downto 0 do begin
     if obstacles[i0b] <> TRASH then begin
       Poke(obstacles[i0b], OBSTACLE_1);
-      Poke(obstacles[i0b] - (SCREEN_ADDR - ATTRIBUTE_ADDR), OBST_COLOUR);
+      Poke(obstacles[i0b] - OFFSET, OBST_COLOUR);
     end;
   end;
 end;
