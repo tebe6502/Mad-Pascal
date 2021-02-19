@@ -55,7 +55,7 @@ end;
 //-----------------------------------------------------------------------------
 
 begin
-  setFonts;
+  initFonts;
 
   repeat
     initScore; gameOver := false; level := 1;
