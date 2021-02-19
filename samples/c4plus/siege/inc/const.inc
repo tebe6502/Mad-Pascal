@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 
 const
-  ATTRIBUTE_ADDR = $0800; SCREEN_ADDR = $0c00;
+  ATTRIBUTE_ADDR = $0800; SCREEN_ADDR = $0c00; OFFSET = SCREEN_ADDR - ATTRIBUTE_ADDR;
   BACKGROUND_COLOUR = $1f; BOREDER_COLOUR = 0;
 
   OBST_QUANTITY = 7; // means 8 (fixed value)
