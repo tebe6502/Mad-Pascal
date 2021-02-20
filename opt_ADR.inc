@@ -228,7 +228,7 @@
 // -----------------------------------------------------------------------------
 
     if (p > 7) and
-       lda(p-8) and (lda_stack(p-8) = false) and					// lda					; p-8		#-+BYTE
+       lda_a(p-8) and (lda_stack(p-8) = false) and					// lda					; p-8		#-+BYTE
        add_sub_im(p-7) and								// add|sub #				; p-7
        sta_stack(p-6) and								// sta :STACKORIGIN+10			; p-6
        lda(p-5) and									// lda					; p-5
@@ -270,7 +270,7 @@
 
     if (p > 1) and
        (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
-       ((lda(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+BYTE
+       ((lda_a(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+BYTE
         (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
@@ -325,7 +325,7 @@
 
     if (p > 1) and
        (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and			// lda					; p-2		#-BYTE
-       (lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) and				// sub #				; p-1
+       (lda_a(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) and			// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
        sbc(p+2) and									// sbc 					; p+2
@@ -959,24 +959,6 @@
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-
-    if (lda_im(i) = false) and (lda_stack(i) = false) and				//~lda					; 0		BYTE
-       add_im_0(i+1) and								// add #$00				; 1
-       tay(i+2) and									// tay					; 2
-       lda(i+3) and									// lda					; 3
-       adc_im_0(i+4) and								// adc #$00				; 4
-       sta_stack(i+5) and		 						// sta :STACKORIGIN+STACKWIDTH		; 5
-       (lda_adr(i+6) or sta_adr(i+7)) then						// lda     |lda adr.			; 6
-											// sta adr.|sta				; 7
-       begin
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	Result:=false; Break;
-       end;
-
-
     if lda_im(i) and									// lda #				; 0		BYTE
        add_im_0(i+1) and								// add #$00				; 1
        tay(i+2) and									// tay					; 2
@@ -1046,3 +1028,19 @@
 	Result:=false; Break;
        end;
 
+
+    if (lda_im(i) = false) and (lda_stack(i) = false) and				//~lda #|:STACKORIGIN			; 0		BYTE
+       add_im_0(i+1) and								// add #$00				; 1
+       tay(i+2) and									// tay					; 2
+       lda(i+3) and									// lda					; 3
+       adc_im_0(i+4) and								// adc #$00				; 4
+       sta_stack(i+5) and		 						// sta :STACKORIGIN+STACKWIDTH		; 5
+       (lda_adr(i+6) or sta_adr(i+7)) then						// lda     |lda adr.			; 6
+											// sta adr.|sta				; 7
+       begin
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+       end;
