@@ -5058,7 +5058,7 @@ var i, l, k, m, x: integer;
    if listing[i] <> '' then begin
 
 {
-   if pos('TEST', listing[i]) > 0 then begin
+   if pos('adr.TABLICA', listing[i]) > 0 then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -5156,13 +5156,20 @@ var i, l, k, m, x: integer;
      end;
 
 
-    if (lda_adr(i) or lda(i)) and (lda_stack(i) = false) and					// lda				; 0
+    if lda_a(i) and (lda_stack(i) = false) and							// lda				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN,x		; 1
        ldy_stack(i+2) then									// ldy :STACKORIGIN,x		; 2
      if copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256) then
      begin
-       listing[i+1] := #9'tay';
+
+       if iy(i) = false then begin
+        listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i+1] := '';
+       end else
+        listing[i+1] := #9'tay';
+
        listing[i+2] := '';
+
        Result:=false; Break;
      end;
 
@@ -12170,10 +12177,10 @@ end;
      end;
 
 
-    if (lda_im(i) = false) and (lda_im(i+2) = false) and					// lda TEMP	; 0
-       lda_a(i) and										// sta		; 1
+    if (lda_im(i) = false) and (lda_im(i+2) = false) and					// lda TEMP	; 0	(lda adr.) = false
+       lda(i) and										// sta		; 1
        sta_a(i+1) and										// lda TEMP	; 2
-       lda_a(i+2) then
+       lda(i+2) then
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
 	(copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then begin
 	listing[i+2] := '';
@@ -12222,14 +12229,14 @@ end;
       end;
 
 
-    if lda_a(i) and								// lda A	; 0
-       sta_a(i+1) and								// sta :ecx	; 1
-       lda_a(i+2) and								// lda A+1	; 2
-       sta_a(i+3) and								// sta :ecx+1	; 3
-       lda_a(i+4) and								// lda A	; 4
-       sta_a(i+5) and								// sta :eax	; 5
-       lda_a(i+6) and								// lda A+1	; 6
-       sta_a(i+7) then								// sta :eax+1	; 7
+    if lda_a(i) and										// lda A	; 0
+       sta_a(i+1) and										// sta :ecx	; 1
+       lda_a(i+2) and										// lda A+1	; 2
+       sta_a(i+3) and										// sta :ecx+1	; 3
+       lda_a(i+4) and										// lda A	; 4
+       sta_a(i+5) and										// sta :eax	; 5
+       lda_a(i+6) and										// lda A+1	; 6
+       sta_a(i+7) then										// sta :eax+1	; 7
      if (listing[i] = listing[i+4]) and
 	(listing[i+2] = listing[i+6]) and
 	(copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) and
@@ -12276,6 +12283,24 @@ end;
 	listing[i+1] := '';
 	listing[i+2] := '';
 	listing[i+3] := '';
+
+      	Result:=false; Break;
+     end;
+
+
+    if lda_a(i) and										// lda 		; 0
+       sta_a(i+1) and										// sta A	; 1
+       lda_a(i+2) and 										// lda 		; 2
+       sta_a(i+3) and										// sta 		; 3
+       lda_a(i+4) and 										// lda A	; 4
+       sta_a(i+5) then										// sta		; 5
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+	(copy(listing[i+2], 6, 256) <> copy(listing[i+5], 6, 256)) then
+     begin
+	listing[i+4] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
 
       	Result:=false; Break;
      end;
@@ -12972,9 +12997,9 @@ end;
      end;
 
 
-    if (lda(i) or lda_adr(i)) and							// lda				; 0
+    if lda_a(i) and									// lda				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN+STACKWIDTH	; 1
-       (lda(i+2) or lda_adr(i+2)) and							// lda				; 2
+       lda_a(i+2) and									// lda				; 2
        sta_stack(i+3) then								// sta :STACKORIGIN+STACKWIDTH	; 3
      if (copy(listing[i+1], 6, 256) <> copy(listing[i+2], 6, 256)) and
         (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
@@ -41282,7 +41307,7 @@ while Tok[i].Kind in
 
 //	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements);
 
-	  if (VarType = POINTERTOK) and (AllocElementType = STRINGPOINTERTOK) and (NestedNumAllocElements > 0) then begin		// array [ ][ ] of string;
+	  if (VarType = POINTERTOK) and (AllocElementType = STRINGPOINTERTOK) and (NestedNumAllocElements > 0) and (NumAllocElements > 1) then begin	// array [ ][ ] of string;
 
 	   idx := Ident[NumIdent].Value - DATAORIGIN;
 
