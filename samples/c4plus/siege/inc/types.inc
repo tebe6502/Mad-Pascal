@@ -3,7 +3,7 @@
 type
   Player = record
     x, y, head, colour, dir, brain, score : byte;
-    isDead                                : boolean;
+    isAlive                               : boolean;
   end;
 
 //-----------------------------------------------------------------------------
