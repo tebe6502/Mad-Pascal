@@ -1583,6 +1583,7 @@ begin
   {$IFDEF LINUX}
     Name := LowerCase(Name);
   {$ENDIF}
+
 end;
 
 
@@ -1590,7 +1591,10 @@ function FindFile(Name: string; ftyp: TString): string; overload;
 var i: integer;
 begin
 
-  NormalizePath(Name);
+  {$IFDEF UNIX}
+   if Pos('\', Name) > 0 then
+    Name := StringReplace(Name, '\', '/', [rfReplaceAll]);
+  {$ENDIF}
 
   i:=0;
 
@@ -1625,7 +1629,10 @@ var i: integer;
     fnm: string;
 begin
 
-  NormalizePath(Name);
+  {$IFDEF UNIX}
+   if Pos('\', Name) > 0 then
+    Name := StringReplace(Name, '\', '/', [rfReplaceAll]);
+  {$ENDIF}
 
   i:=0;
 
