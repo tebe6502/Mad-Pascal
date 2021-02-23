@@ -168,7 +168,7 @@ end;
 
 procedure startScreen;
 var
-  info: string = #6#9#18#5#33;
+  info: string = 'fire!'~;
 begin
   printXY(info, 2, 0, $71 + $80);
   putChar(player1.x, player1.y, player1.head, byte(player1.colour + $80));
@@ -184,8 +184,8 @@ end;
 
 procedure endScreen;
 var
-  winner: string = #23#9#14#14#5#18#33;
-  loser : string = #12#15#19#5#18#33;
+  winner: string = 'winner!'~;
+  loser : string = 'looser!'~;
 begin
   if player1.score = ZERO + VICTORIES then printXY(winner, 2, 0, $71 + $80)
   else printXY(loser, 2, 0, $71 + $80);
