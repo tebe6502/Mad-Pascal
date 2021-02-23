@@ -145,6 +145,59 @@ end;
        (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[1]) = 1) and (pos('.COUNT', TemporaryBuf[1]) > 0) and
        (pos(#9'lda #', TemporaryBuf[0]) = 1) and
        (pos(#9'lda #', TemporaryBuf[2]) = 1) and
+       (pos(#9'lda ', TemporaryBuf[4]) = 1) and (pos(#9'lda #', TemporaryBuf[4]) = 0) and
+       (pos(#9'lda ', TemporaryBuf[6]) = 1)  and (pos(#9'lda #', TemporaryBuf[6]) = 0) and
+       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       begin
+{
+	lda #$10			; 0
+	sta SYSTEM.MOVE_007C.COUNT	; 1
+	lda #$00			; 2
+	sta SYSTEM.MOVE_007C.COUNT+1	; 3
+	lda DST				; 4
+	sta SYSTEM.MOVE_007C.DEST	; 5
+	lda DST+1			; 6
+	sta SYSTEM.MOVE_007C.DEST+1	; 7
+	lda #$59			; 8
+	sta SYSTEM.MOVE_007C.SOURCE	; 9
+	lda #$20			; 10
+	sta SYSTEM.MOVE_007C.SOURCE+1	; 11
+	jsr SYSTEM.MOVE_007C		; 12
+}
+	p:=GetWORD(8, 10);		// src
+	k:=GetWORD(0, 2);		// len
+
+	if k <= 128 then begin
+
+	  TemporaryBuf[0] := '~';
+	  TemporaryBuf[1] := '~';
+	  TemporaryBuf[2] := '~';
+	  TemporaryBuf[3] := '~';
+
+	  TemporaryBuf[5] := #9'sta :bp2';
+
+	  TemporaryBuf[7] := #9'sta :bp2+1';
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  TemporaryBuf[11] := #9'ldy #$'+IntToHex(k-1, 2);
+	  TemporaryBuf[12] := #9'mva:rpl $' + IntToHex(p, 4) + ',y (:bp2),y-';
+
+	end;
+
+       end;
+
+
+    if (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[11]) = 1) and (pos('.SOURCE+1', TemporaryBuf[11]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[9]) = 1) and (pos('.SOURCE', TemporaryBuf[9]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[7]) = 1) and (pos('.DEST+1', TemporaryBuf[7]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[5]) = 1) and (pos('.DEST', TemporaryBuf[5]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[3]) = 1) and (pos('.COUNT+1', TemporaryBuf[3]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[1]) = 1) and (pos('.COUNT', TemporaryBuf[1]) > 0) and
+       (pos(#9'lda #', TemporaryBuf[0]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[2]) = 1) and
        (pos(#9'lda #', TemporaryBuf[4]) = 1) and
        (pos(#9'lda #', TemporaryBuf[6]) = 1) and
        (pos(#9'lda ', TemporaryBuf[8]) = 1) and (pos(#9'lda #', TemporaryBuf[8]) = 0) and
