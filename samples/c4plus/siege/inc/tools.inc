@@ -126,7 +126,7 @@ end;
 procedure playerBusted;
 begin
   ply.isAlive := false; Dec(alive);
-  putChar(ply.x, ply.y, ply.head, byte(ply.colour + $80));
+  putChar(ply.x, ply.y, ply.head, ply.colour + $80);
 end;
 
 //-----------------------------------------------------------------------------
