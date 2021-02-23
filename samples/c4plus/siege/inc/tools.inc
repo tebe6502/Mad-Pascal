@@ -185,7 +185,7 @@ end;
 procedure endScreen;
 var
   winner: string = 'winner!'~;
-  loser : string = 'looser!'~;
+  loser : string = 'loser!'~;
 begin
   if player1.score = ZERO + VICTORIES then printXY(winner, 2, 0, $71 + $80)
   else printXY(loser, 2, 0, $71 + $80);
