@@ -1,6 +1,5 @@
 23.02.2021
 - dodana konwersja znaków PETSCII dla ci¹gów znaków zakoñczonych ''~
-- poprawione FindFile, nie zmieniamy wielkoœci liter dla UNIX, LINUX
 
 18.02.2021
 - unit MISC DetectAntic

@@ -1591,10 +1591,7 @@ function FindFile(Name: string; ftyp: TString): string; overload;
 var i: integer;
 begin
 
-  {$IFDEF UNIX}
-   if Pos('\', Name) > 0 then
-    Name := StringReplace(Name, '\', '/', [rfReplaceAll]);
-  {$ENDIF}
+  NormalizePath(Name);
 
   i:=0;
 
@@ -1629,10 +1626,7 @@ var i: integer;
     fnm: string;
 begin
 
-  {$IFDEF UNIX}
-   if Pos('\', Name) > 0 then
-    Name := StringReplace(Name, '\', '/', [rfReplaceAll]);
-  {$ENDIF}
+  NormalizePath(Name);
 
   i:=0;
 
