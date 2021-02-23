@@ -46,7 +46,7 @@ var
   l, r, u, d: byte;
 begin
   l := 0; r := 0; u := 0; d := 0;
-  t0w := calcScreenAddr(ply.x, ply.y);
+  t0w := calcScrAddr(ply.x, ply.y);
 
   if (availDir and JOY_UP) <> 0 then begin
     for i0b := LOOK_AHEAD downto 1 do begin
