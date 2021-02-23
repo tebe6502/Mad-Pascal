@@ -1583,7 +1583,6 @@ begin
   {$IFDEF LINUX}
     Name := LowerCase(Name);
   {$ENDIF}
-
 end;
 
 
@@ -32279,6 +32278,8 @@ if Pass = CODEGENERATIONPASS then begin
   	  asm65;
 
   	  asm65('CODEORIGIN');
+
+	  CODEORIGIN_Atari := $0900;
          end;
 
   t_c4p: begin
@@ -32292,6 +32293,8 @@ if Pass = CODEGENERATIONPASS then begin
   	  asm65;
 
   	  asm65('CODEORIGIN');
+
+	  CODEORIGIN_Atari := $100E;
          end;
 
    t_a8: begin
