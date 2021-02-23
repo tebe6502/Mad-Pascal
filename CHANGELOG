@@ -1,3 +1,7 @@
+18.02.2021
+- unit MISC DetectAntic
+- unit RMT, CMC, MPT (DetectAntic)
+
 07.02.2021
 - dodane alokowanie pamieci dla tablic typu STRING
 - nowy unit: STRINGUTILS
@@ -6,6 +10,7 @@
 - parametry typu POINTER s¹ przekazywane do procedur/funkcji bez udzia³u stosu programowego
 
 10.01.2021
+- unit SYSTEM uwzglêdnia ró¿ne platformy ATARI, C64, C4Plus
 - generowanie kodu dla Commodore C4 Plus (-c4p)
 
 03.01.2021
