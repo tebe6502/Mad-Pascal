@@ -602,7 +602,7 @@ var
 
   start_time: QWord;
 
-  CODEORIGIN_Atari: integer = $2000;
+  CODEORIGIN_BASE: integer = $2000;
 
    DATA_Atari: integer = -1;
   ZPAGE_Atari: integer = -1;
@@ -32098,7 +32098,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('STACKWIDTH'#9'= 16');
 
  if target = t_a8 then
-  asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_Atari, 4));
+  asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
  asm65;
 
@@ -32279,7 +32279,7 @@ if Pass = CODEGENERATIONPASS then begin
 
   	  asm65('CODEORIGIN');
 
-	  CODEORIGIN_Atari := $0900;
+	  CODEORIGIN_BASE := $0900;
          end;
 
   t_c4p: begin
@@ -32294,7 +32294,7 @@ if Pass = CODEGENERATIONPASS then begin
 
   	  asm65('CODEORIGIN');
 
-	  CODEORIGIN_Atari := $100E;
+	  CODEORIGIN_BASE := $100E;
          end;
 
    t_a8: begin
@@ -33157,7 +33157,7 @@ var IdentIndex, j: Integer;
     function GetStaticValue(x: byte): Int64;
     begin
 
-      Result := StaticStringData[Ident[IdentIndex].Value - CODEORIGIN - CODEORIGIN_Atari + ArrayIndex * DataSize[ConstValType] + x];
+      Result := StaticStringData[Ident[IdentIndex].Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex * DataSize[ConstValType] + x];
 
     end;
 
@@ -33800,7 +33800,7 @@ case Tok[i].Kind of
 
   STRINGLITERALTOK:
     begin
-    ConstVal := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_Atari;
+    ConstVal := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
 
 {    if Tok[i].StrLength > 255 then begin
      ConstValType := POINTERTOK;
@@ -36004,7 +36004,7 @@ case Tok[i].Kind of
 
   STRINGLITERALTOK:
     begin
-    Push(Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_Atari, ASVALUE, DataSize[STRINGPOINTERTOK]);
+    Push(Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE, ASVALUE, DataSize[STRINGPOINTERTOK]);
     ValType := STRINGPOINTERTOK;
 
     Result := i;
@@ -39491,7 +39491,7 @@ if Tok[i].Kind = OPARTOK then begin					// enumerated
     for FieldInListIndex := 1 to NumFieldsInList do begin
       DefineIdent(i, FieldInListName[FieldInListIndex].Name, ENUMTYPE, DataType, 0, 0, FieldInListName[FieldInListIndex].Value);
 {
-      DefineIdent(i, FieldInListName[FieldInListIndex].Name, CONSTANT, POINTERTOK, length(FieldInListName[FieldInListIndex].Name)+1, CHARTOK, NumStaticStrChars + CODEORIGIN + CODEORIGIN_Atari , IDENTTOK);
+      DefineIdent(i, FieldInListName[FieldInListIndex].Name, CONSTANT, POINTERTOK, length(FieldInListName[FieldInListIndex].Name)+1, CHARTOK, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE , IDENTTOK);
 
       StaticStringData[NumStaticStrChars] := length(FieldInListName[FieldInListIndex].Name);
 
@@ -40015,7 +40015,7 @@ var IdentIndex, size: integer;
 
      end else
       if Ident[IdentIndex].NumAllocElements > 0 then
-	Result := #9'= CODEORIGIN+$'+IntToHex(Ident[IdentIndex].Value - CODEORIGIN_Atari - CODEORIGIN, 4)
+	Result := #9'= CODEORIGIN+$'+IntToHex(Ident[IdentIndex].Value - CODEORIGIN_BASE - CODEORIGIN, 4)
       else
        if abs(v) < 256 then
 	Result := #9'= $'+IntToHex(byte(v), 2)
@@ -40230,7 +40230,7 @@ begin
     ch := Tok[i].Value;
     DefineStaticString(i, chr(ch));
 
-    ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_Atari;
+    ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
     Tok[i].Value := ch;
 
     ActualParamType := STRINGPOINTERTOK;
@@ -41188,7 +41188,7 @@ while Tok[i].Kind in
 	  end else
 
 	  if NumAllocElements > 0 then begin
-	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, POINTERTOK, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_Atari, IDENTTOK);
+	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, POINTERTOK, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, IDENTTOK);
 
 	   j := ReadDataArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
 
@@ -41533,7 +41533,7 @@ while Tok[i].Kind in
 		if not ( (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) ) then
 		  iError(i + 1, CantAdrConstantExp)
 		else
-		 SaveToDataSegment(idx, Ident[IdentIndex].Value - CODEORIGIN - CODEORIGIN_Atari, CODEORIGINOFFSET);
+		 SaveToDataSegment(idx, Ident[IdentIndex].Value - CODEORIGIN - CODEORIGIN_BASE, CODEORIGINOFFSET);
 
 	       end else
 		 SaveToDataSegment(idx, Ident[IdentIndex].Value - DATAORIGIN, DATAORIGINOFFSET);
@@ -42313,14 +42313,14 @@ begin
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-CODE') or (AnsiUpperCase(ParamStr(i)) = '-C') then begin
 
-     val('$'+ParamStr(i+1), CODEORIGIN_Atari, err);
+     val('$'+ParamStr(i+1), CODEORIGIN_BASE, err);
      inc(i);
      if err<>0 then Syntax(3);
 
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
-     val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_Atari, err);
+     val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
      if err<>0 then Syntax(3);
 
    end else
