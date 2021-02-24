@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 
-function calcScreenAddr(x, y: byte): word;
+function calcScrAddr(x, y: byte): word;
 begin
   Result := SCREEN_ADDR + x + mul40[y];
 end;
@@ -9,14 +9,14 @@ end;
 
 procedure putChar(x, y, v: byte); overload;
 begin
-  Poke(calcScreenAddr(x, y), v);
+  Poke(calcScrAddr(x, y), v);
 end;
 
 //-----------------------------------------------------------------------------
 
 procedure putChar(x, y, v, c: byte); overload;
 begin
-  t0w := calcScreenAddr(x, y);
+  t0w := calcScrAddr(x, y);
   Poke(t0w, v); Poke(t0w - OFFSET, c);
 end;
 
@@ -24,7 +24,7 @@ end;
 
 procedure printXY(s: string; x, y, c: byte);
 begin
-  t0w := calcScreenAddr(x, y);
+  t0w := calcScrAddr(x, y);
   Move(s[1], pointer(t0w), length(s));
   FillChar(pointer(t0w - OFFSET), length(s), c);
 end;
@@ -34,7 +34,7 @@ end;
 
 function getChar(x, y: byte): byte;
 begin
-  Result := Peek(calcScreenAddr(x, y));
+  Result := Peek(calcScrAddr(x, y));
 end;
 
 //-----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ end;
 procedure checkAvailDir;
 begin
   availDir := 0;
-  t0w := calcScreenAddr(ply.x, ply.y);
+  t0w := calcScrAddr(ply.x, ply.y);
 
   if Peek(t0w - 40) = EMPTY then availDir := availDir or JOY_UP;
   if Peek(t0w + 40) = EMPTY then availDir := availDir or JOY_DOWN;
@@ -171,7 +171,7 @@ var
   info: string = 'fire!'~;
 begin
   printXY(info, 2, 0, $71 + $80);
-  putChar(player1.x, player1.y, player1.head, byte(player1.colour + $80));
+  putChar(player1.x, player1.y, player1.head, player1.colour + $80);
 
   repeat checkJoyStatus until joyStatus = JOY_FIRE;
 
