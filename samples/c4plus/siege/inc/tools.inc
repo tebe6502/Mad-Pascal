@@ -119,7 +119,7 @@ end;
 
 //-----------------------------------------------------------------------------
 
-procedure animateBackGround;
+procedure animateBackground;
 begin
   Poke(CHARSET + $2B3, Peek(CHARSET + $2B3) shl 1);
   Poke(CHARSET + $2B7, Peek(CHARSET + $2B7) shl 2);
