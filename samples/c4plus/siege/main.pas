@@ -58,8 +58,8 @@ procedure welcome;
 begin
   initPlayfield;
 
-  setPlayer(@player1,  3, direction[Random(18)] + 3, direction[Random(4)], AI_SAPPER, PLY1_COLOUR, true);
-  setPlayer(@player2, 36, direction[Random(18)] + 3, direction[Random(4)], AI_SAPPER, PLY2_COLOUR, true);
+  setPlayer(@player1,  3, 3, direction[Random(4)], AI_SAPPER, PLY1_COLOUR, true);
+  setPlayer(@player2, 36, 3, direction[Random(4)], AI_SAPPER, PLY2_COLOUR, true);
 
   printXY('ai calibration, computing,'~, 2, 0, $71);
   printXY(' * wait * '~, 28, 0, $71 + $80);
