@@ -2,8 +2,12 @@
 
 procedure initPlayfield;
 begin
+  //restore 7 custom char
+  Poke(CHARSET + $2B3, 16); Poke(CHARSET + $2B7, 1);
+
   BACKGROUND := BACKGROUND_COLOUR; BOREDER := BOREDER_COLOUR;
   FillChar(pointer(SCREEN_ADDR), 24 * 40, EMPTY);
+  FillChar(pointer(ATTRIBUTE_ADDR), 24 * 40, PLAYFIELD_COLOUR);
 
   for t0b := 39 downto 0 do begin
     Poke(SCREEN_ADDR + t0b, WALL);
@@ -16,8 +20,6 @@ begin
     DPoke((SCREEN_ADDR - 1) + mul40[t0b], WALL * 256 + WALL);
     DPoke((ATTRIBUTE_ADDR - 1) + mul40[t0b], WALL_COLOUR * 256 + WALL_COLOUR);
   end;
-
-  for i0b := OBST_QUANTITY downto 0 do obstacles[i0b] := TRASH;
 end;
 
 //-----------------------------------------------------------------------------
@@ -44,7 +46,6 @@ begin
   initPlayfield; initPlayers;
 
   case level of
-    0 : setLevel00; // test
     1 : setLevel01; // easy
     2 : setLevel02; // easy
     3 : setLevel03; // easy
@@ -55,21 +56,21 @@ begin
     8 : setLevel08; // very hard
   end;
 
-  saveObstacles; animateObstacles; showScore;
+  animateObstacles; showScore;
 end;
 
 //-----------------------------------------------------------------------------
 
 procedure initFonts;
 begin
-  Move(pointer($d000), pointer($6000), $400);
-  Move(fonts, pointer($6000 + (8 * $50)), 8 * 6);
+  Move(pointer($d000), pointer(CHARSET), $400);
+  Move(fonts, pointer(CHARSET + (8 * $50)), SizeOf(fonts));
 
   // set bit 2
   RAMROMSEL := RAMROMSEL and %11111011;
 
-  // 24 = $6000 / $400 on 2-7 bits
-  CHBAS := (CHBAS and %11) or 24 shl 2;
+  // 12 = $3000 / $400 on 2-7 bits
+  CHBAS := (CHBAS and %11) or 12 shl 2;
 end;
 
 //-----------------------------------------------------------------------------
