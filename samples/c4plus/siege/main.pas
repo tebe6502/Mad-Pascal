@@ -41,7 +41,7 @@ begin
   repeat
     pause; ply := @player1; playerMove;
 
-    animateObstacles;
+    animateObstacles; animateBackGround;
 
     pause(2); // 1 fast; 2 normal; 3 slow
     ply := @player2; playerMove;
@@ -54,15 +54,42 @@ end;
 
 //-----------------------------------------------------------------------------
 
+procedure welcome;
+begin
+  initPlayfield;
+
+  setPlayer(@player1,  3, direction[Random(18)] + 3, direction[Random(4)], AI_SAPPER, PLY1_COLOUR, true);
+  setPlayer(@player2, 36, direction[Random(18)] + 3, direction[Random(4)], AI_SAPPER, PLY2_COLOUR, true);
+
+  printXY('ai calibration, computing,'~, 2, 0, $71);
+  printXY(' * wait * '~, 28, 0, $71 + $80);
+
+  printBigXY(3, 3, $51, 'tron'~);
+  printBigXY(11, 13, $51, '+4'~);
+
+  repeat
+    pause(4);
+
+    ply := @player1; playerMove;
+    ply := @player2; playerMove;
+
+    animateBackGround;;
+  until (not player1.isAlive) or (not player2.isAlive);
+end;
+
+//-----------------------------------------------------------------------------
+
 begin
   initFonts;
 
   repeat
+    welcome;
+
     initScore; gameOver := false; level := 1;
 
     repeat mainLoop until isGameOver;
 
-    showScore; endScreen; pause(200);
+    showScore; endScreen;
   until false;
 
 end.
