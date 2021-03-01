@@ -3,7 +3,7 @@ var
   SETIRQSRC                          : byte absolute $ff0a;  //set IRQ source
   RC                                 : byte absolute $ff0b;  //raser counter bits 0-7
   BACKGROUND                         : byte absolute $ff15;
-  BOREDER                            : byte absolute $ff19;
+  BORDER                            : byte absolute $ff19;
   VCOUNT                             : byte absolute $ff1d;  //vertical line bits 0-7
   IRQVEC                             : word absolute $fffe;
 
@@ -15,9 +15,9 @@ procedure myRasterIrq; interrupt;
 begin
   asm { phr };
 
-  Inc(BOREDER);
+  Inc(BORDER);
   tmp:= VCOUNT + 32; repeat until tmp = VCOUNT;
-  Dec(BOREDER);
+  Dec(BORDER);
 
   DETIRQSRC := DETIRQSRC and %01111111;
   asm { plr };

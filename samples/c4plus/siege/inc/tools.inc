@@ -29,6 +29,34 @@ begin
   FillChar(pointer(t0w - OFFSET), length(s), c);
 end;
 
+//-----------------------------------------------------------------------------
+
+procedure printBigCharXY(x, y, ch, c: byte);
+begin
+  t0w := calcScrAddr(x, y);
+  t1w := CHARSET + (8 * ch);
+
+  for i0b := 0 to 7 do begin
+    t0b := Peek(t1w + i0b);
+    for i1b := 7 downto 0 do begin
+      if (t0b and 1) = 1 then begin
+        poke(t0w + i1b, $a0);
+        poke(t0w - OFFSET + i1b, c);
+      end;
+      t0b := t0b shr 1;
+    end;
+    Inc(t0w, 40);
+  end;
+end;
+
+//-----------------------------------------------------------------------------
+
+procedure printBigXY(x, y, c: byte; s: string);
+var
+  i0b : byte;
+begin
+  for i0b := 1 to length(s) do printBigCharXY(x + (8 * (i0b - 1)), y, ord(s[i0b]), c);
+end;
 
 //-----------------------------------------------------------------------------
 
@@ -41,20 +69,24 @@ end;
 
 procedure showScore;
 begin
-  if player1.isAlive then putChar(30, 0, player1.score, player1.colour);
-  if player2.isAlive then putChar(32, 0, player2.score, player2.colour);
-  if player3.isAlive then putChar(34, 0, player3.score, player3.colour);
-  if player4.isAlive then putChar(36, 0, player4.score, player4.colour);
+  if player1.isAlive then putChar(30, 0, player1.score, PLY1_COLOUR);
+  if player2.isAlive then putChar(32, 0, player2.score, PLY2_COLOUR);
+  if player3.isAlive then putChar(34, 0, player3.score, PLY3_COLOUR);
+  if player4.isAlive then putChar(36, 0, player4.score, PLY4_COLOUR);
 end;
 
 //-----------------------------------------------------------------------------
 
 procedure updateScore;
 begin
-  if player1.isAlive then Inc(player1.score);
-  if player2.isAlive then Inc(player2.score);
-  if player3.isAlive then Inc(player3.score);
-  if player4.isAlive then Inc(player4.score);
+  t0b := 0;
+
+  if player1.isAlive then begin Inc(player1.score); t0b := player1.colour end;
+  if player2.isAlive then begin Inc(player2.score); t0b := player2.colour end;
+  if player3.isAlive then begin Inc(player3.score); t0b := player3.colour end;
+  if player4.isAlive then begin Inc(player4.score); t0b := player4.colour end;
+
+  if t0b <> 0 then printBigCharXY(16,  8, PLY_HEAD_UP, t0b);
 end;
 
 //-----------------------------------------------------------------------------
@@ -74,23 +106,25 @@ end;
 
 procedure animateObstacles;
 var
-  counter, obst: byte;
+  counter: byte;
 begin
   Inc(counter);
-  if (counter and 1) <> 0 then obst := OBSTACLE_1 else obst := OBSTACLE_2;
-  for i0b := OBST_QUANTITY downto 0 do Poke(obstacles[i0b], obst);
+  if (counter and 1) <> 0 then
+    t0w := CHARSET + (8 * OBSTACLE_1)
+  else
+    t0w := CHARSET + (8 * OBSTACLE_2);
+
+  Move(pointer(t0w), pointer(CHARSET + (8 * OBSTACLE)), 8);
 end;
 
 //-----------------------------------------------------------------------------
 
-procedure saveObstacles;
+procedure animateBackground;
 begin
-  for i0b := OBST_QUANTITY downto 0 do begin
-    if obstacles[i0b] <> TRASH then begin
-      Poke(obstacles[i0b], OBSTACLE_1);
-      Poke(obstacles[i0b] - OFFSET, OBST_COLOUR);
-    end;
-  end;
+  Poke(CHARSET + $2B3, Peek(CHARSET + $2B3) shl 1);
+  Poke(CHARSET + $2B7, Peek(CHARSET + $2B7) shl 2);
+  if Peek(CHARSET + $2B3) = 0 then Poke(CHARSET + $2B3, 1);
+  if Peek(CHARSET + $2B7) = 0 then Poke(CHARSET + $2B7, 1);
 end;
 
 //-----------------------------------------------------------------------------
@@ -116,7 +150,7 @@ begin
     JOY_RIGHT : begin Inc(ply.x); t0b := PLY_HEAD_RIGHT end;
   end;
 
-  ply.head := t0b;
+  if ply.isAlive then ply.head := t0b else ply.head := t0b + 8;
 
   putChar(ply.x, ply.y, ply.head, ply.colour);
 end;
@@ -187,8 +221,17 @@ var
   winner: string = 'winner!'~;
   loser : string = 'loser!'~;
 begin
-  if player1.score = ZERO + VICTORIES then printXY(winner, 2, 0, $71 + $80)
-  else printXY(loser, 2, 0, $71 + $80);
+  if player1.score = ZERO + VICTORIES then
+    printXY(winner, 2, 0, $71 + $80)
+  else begin
+    printXY(loser, 2, 0, $71 + $80);
+    printBigCharXY(12,  5, ROGER + 0, $71);
+    printBigCharXY(20,  5, ROGER + 1, $71);
+    printBigCharXY(12, 13, ROGER + 2, $71);
+    printBigCharXY(20, 13, ROGER + 3, $71);
+  end;
+
+  pause(250);
 end;
 
 //-----------------------------------------------------------------------------

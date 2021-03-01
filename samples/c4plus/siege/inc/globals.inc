@@ -11,18 +11,17 @@ var
 //-----------------------------------------------------------------------------
 
   t0b                                : byte absolute $58;
-  i0b                                : byte absolute $59;
-  alive                              : byte absolute $5a;
-  newDir                             : byte absolute $5b;
-  availDir                           : byte absolute $5c;
-  joyStatus                          : byte absolute $5d;
-  t0w                                : word absolute $5e;
-  ply                                : ^Player absolute $70;
-  tmpPly                             : ^Player absolute $72;
-
-//-----------------------------------------------------------------------------
-
-  obstacles                          : array [0..7] of word absolute $60;
+  t1b                                : byte absolute $59;
+  i0b                                : byte absolute $5a;
+  i1b                                : byte absolute $5b;
+  alive                              : byte absolute $5c;
+  newDir                             : byte absolute $5d;
+  availDir                           : byte absolute $5e;
+  joyStatus                          : byte absolute $5f;
+  t0w                                : word absolute $60;
+  t1w                                : word absolute $62;
+  ply                                : ^Player absolute $64;
+  tmpPly                             : ^Player absolute $66;
 
 //-----------------------------------------------------------------------------
 
