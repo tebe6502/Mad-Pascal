@@ -8,7 +8,7 @@ unit gr10pp;
 * Set of procedures to initialize, run, and use special graphics mode 10++.
 * Resolution 80x48, 9 colors, square pixel (for lineHeight = 4)
 *
-* This library is a part of 'blibs' - set of custom Mad-Pascal libraries.
+* This library is nota a part of 'blibs' - set of custom Mad-Pascal libraries.
 *
 * <https://gitlab.com/bocianu/blibs>
 *)
@@ -42,6 +42,7 @@ procedure SetPixelHeight(lines: byte);
 
 
 const
+    DL_BLANK1 = 0; // 1 blank line
     DL_BLANK8 = %01110000; // 8 blank lines
     DL_DLI = %10000000; // Order to run DLI
     DL_LMS = %01000000; // Order to set new memory address
@@ -101,24 +102,31 @@ begin
 end;
 
 procedure BuildDisplayList(DListAddress: word; VRamAddress: word; lines: byte; blanks: byte);
+var limit4k : word;
+    setLMS : boolean;
 begin
+    lines := lines and %11111110; // trim to be even
     dList := pointer(DListAddress);
     dlPtr := 0;
     while blanks > 0 do begin
-        if blanks = 1 then DLPoke(DL_BLANK8 + DL_DLI)
-        else DLPoke(DL_BLANK8);
+        DLPoke(DL_BLANK8);
         dec(blanks);
     end;
-    DLPoke(DL_MODE_320x192G2 + DL_LMS + DL_VSCROLL);
-    DLPokeW(VRamAddress);
-    DLPoke(DL_MODE_320x192G2 + DL_DLI);
-    dec(lines);
+    DLPoke(DL_BLANK1 + DL_DLI); // dli forced before first line
+    setLMS := true;
     while (lines > 0) do begin
-        DLPoke(DL_MODE_320x192G2 + DL_VSCROLL);
+        if setLMS then begin
+            DLPoke(DL_MODE_320x192G2 + DL_LMS + DL_VSCROLL);
+            DLPokeW(VRamAddress);
+            limit4k := (VRamAddress and $F000) + $1000;
+            setLMS := false;
+        end else
+            DLPoke(DL_MODE_320x192G2 + DL_VSCROLL);
         DLPoke(DL_MODE_320x192G2 + DL_DLI);
-        dec(lines);
+        dec(lines,2);
+        VRamAddress := VRamAddress + 80;
+        if VRamAddress >= limit4k then setLMS := true;
     end;
-    DLPoke(DL_BLANK8);
     DLPoke(DL_JVB);
     DLPokeW(DListAddress);
 end;
