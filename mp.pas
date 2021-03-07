@@ -38647,7 +38647,7 @@ WHILETOK:
 
      ResetOpty;
 
-     StopOptimization;		       // takich blokow nie optymalizujemy
+     StopOptimization;			// takich blokow nie optymalizujemy
 
      asm65;
      asm65('; ---------------------  ASM Block '+format('%.3d',[AsmBlockIndex])+'  ---------------------');
