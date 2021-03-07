@@ -152,6 +152,36 @@ asm
 end;
 
 
+procedure SetRGBPalette(c: cardinal); assembler; register; overload;
+asm
+{	lda c
+	fxsa FX_CR
+
+	lda c+1
+	fxsa FX_CG
+
+	lda c+2
+	fxsa FX_CB
+};
+end;
+
+
+procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
+asm
+{	fxs FX_CSEL, cnt
+
+	lda c
+	fxsa FX_CR
+
+	lda c+1
+	fxsa FX_CG
+
+	lda c+2
+	fxsa FX_CB
+};
+end;
+
+
 procedure SetCurrentPaletteEntry(nr: word); register;
 begin
 	SetRGBPalette(nr);

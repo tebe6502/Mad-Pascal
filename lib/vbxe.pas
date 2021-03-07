@@ -196,6 +196,8 @@ var
 	procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
 	procedure SetRGBPalette(cnt: byte; r,g,b: byte); assembler; overload;
 	procedure SetRGBPalette(r,g,b: byte); assembler; register; overload;
+	procedure SetRGBPalette(c: cardinal); assembler; register; overload;
+	procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
 	procedure SetPlayfieldPalette(a: byte); register; assembler;
 	procedure SetOverlayPalette(a: byte); register; assembler;
 
@@ -209,7 +211,12 @@ var
 implementation
 
 var	fildat: byte absolute $2fd;
+	rowcrs: byte absolute $54;		// pionowa pozycja kursora
+	colcrs: byte absolute $55;		// (2) pozioma pozycja kursora
+
 	hres: byte;
+
+	mem_vbxe: ^byte;
 
 
 {$i vbxe.inc}
@@ -688,6 +695,23 @@ begin
 end;
 
 
+procedure WrapCursor;
+begin
+
+ inc(colcrs);
+
+ if colcrs >= 80 then begin
+  inc(rowcrs);
+
+  inc(mem_vbxe, 2);
+  colcrs:=0;
+ end;
+
+ if rowcrs > 24 then ;
+
+end;
+
+
 procedure Position(x,y: byte);
 (*
 @description:
@@ -698,10 +722,36 @@ Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.
 @param: x - horizontal positions
 @param: y - vertical positions
 *)
+var tmp: word;
 begin
 
- vram.position:=VBXE_OVRADR + y*160 + x shl 1;
+ colcrs := x;
+ rowcrs := y;
 
+ tmp := y*160 + x shl 1;
+
+ vram.position:=VBXE_OVRADR + tmp;
+
+ mem_vbxe:=pointer(VBXE_WINDOW + tmp);
+
+end;
+
+
+function ata2int(a: byte): byte; assembler;
+asm
+{
+        asl
+        php
+        cmp #2*$60
+        bcs @+
+        sbc #2*$20-1
+        bcs @+
+        adc #2*$60
+@       plp
+        ror
+
+	sta Result;
+};
 end;
 
 
@@ -714,18 +764,23 @@ begin
 
  fildat := c;
 
- vram.WriteWord(ord(a) + c shl 8);
+asm
+{
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
 
-end;
+};
 
+ mem_vbxe^ := ata2int(ord(a));
+ inc(mem_vbxe);
 
-function ata2int(a: byte): byte;
-begin
+ mem_vbxe^ := c;
+ inc(mem_vbxe);
+
+ WrapCursor;
 
 asm
 {
-    @ata2int
-    sta Result;
+ 	fxs FX_MEMS #$00		; disable VBXE BANK
 };
 
 end;
@@ -739,9 +794,29 @@ procedure TextOut(s: PByte; c: byte); overload;
 var i: byte;
 begin
 
- fildat:=c;
+ fildat := c;
 
- for i:=1 to s[0] do vram.WriteWord(ata2int(s[i]) + c shl 8);
+asm
+{
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+};
+
+ for i:=1 to s[0] do begin
+
+  mem_vbxe^ := ata2int(s[i]);
+  inc(mem_vbxe);
+
+  mem_vbxe^ := c;
+  inc(mem_vbxe);
+
+  WrapCursor;
+ end;
+
+asm
+{
+ 	fxs FX_MEMS #$00		; disable VBXE BANK
+};
 
 end;
 
@@ -1073,7 +1148,6 @@ begin
 
 	case mode of
 	  1: begin
-
 		SetHorizontalRes($80,160);
 
 		p:=pointer(peek(756)*256);
@@ -1081,6 +1155,8 @@ begin
 		vram.position:=VBXE_CHBASE;
 
 		vram.WriteBuffer(p, 2048);
+
+		Position(0,0);
 
 		asm
 		{
