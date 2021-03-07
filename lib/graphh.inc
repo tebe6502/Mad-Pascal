@@ -148,5 +148,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
 	procedure SetRGBPalette(cnt: byte; r,g,b: byte); assembler; overload;
 	procedure SetRGBPalette(r,g,b: byte); assembler; register; overload;
+	procedure SetRGBPalette(c: cardinal); assembler; register; overload;
+	procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
 	procedure SetPlayfieldPalette(a: byte); register; assembler;
 	procedure SetOverlayPalette(a: byte); register; assembler;
