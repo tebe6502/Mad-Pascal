@@ -41,8 +41,6 @@ begin
   repeat
     pause; ply := @player1; playerMove;
 
-    animateObstacles; animateBackground;
-
     pause(2); // 1 fast; 2 normal; 3 slow
     ply := @player2; playerMove;
     ply := @player3; playerMove;
@@ -73,20 +71,46 @@ begin
     ply := @player1; playerMove;
     ply := @player2; playerMove;
 
-    animateBackground;
   until (not player1.isAlive) or (not player2.isAlive);
 end;
 
 //-----------------------------------------------------------------------------
 
+procedure vbi; interrupt;
 begin
+  asm {
+        phr
+        inc c4p_time+2
+        bne off
+        inc c4p_time+1
+        bne off
+        inc c4p_time
+  off:
+  };
+
+  checkJoyStatus;
+  if (c4p_time_2 and 1) = 0 then animateStuff;
+
+  asm {
+        mva #2 DETIRQSRC
+        plr
+  };
+end;
+
+//-----------------------------------------------------------------------------
+
+begin
+
   initFonts;
 
+  asm { sei \ sta $ff3f};
+  RC := 204; SETIRQSRC := 2; DETIRQSRC := 2; IRQVEC := word(@vbi);
+  asm { cli };
+
   repeat
-    welcome;
+    pause; welcome; initScore; gameOver := false; level := 1;
 
-    initScore; gameOver := false; level := 1;
-
+    pause;
     repeat mainLoop until isGameOver;
 
     showScore; endScreen;

@@ -2,7 +2,7 @@
 
 procedure human; // brain = 0
 begin
-  checkJoyStatus; newDir := ply.dir;
+  newDir := ply.dir;
   case joyStatus of
     JOY_UP    : if ply.dir <> JOY_DOWN  then newDir := JOY_UP;
     JOY_DOWN  : if ply.dir <> JOY_UP    then newDir := JOY_DOWN;
@@ -42,6 +42,8 @@ end;
 
 
 procedure aiSapper; // brain = 2
+const
+  LOOK_AHEAD = 5;
 var
   l, r, u, d: byte;
 begin

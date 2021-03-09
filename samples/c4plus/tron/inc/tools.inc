@@ -104,23 +104,20 @@ end;
 
 //-----------------------------------------------------------------------------
 
-procedure animateObstacles;
+procedure animateStuff;
 var
   counter: byte;
+  frame  : word;
 begin
+  //obstacles
   Inc(counter);
   if (counter and 1) <> 0 then
-    t0w := CHARSET + (8 * OBSTACLE_1)
+    frame := CHARSET + (8 * OBSTACLE_1)
   else
-    t0w := CHARSET + (8 * OBSTACLE_2);
+    frame := CHARSET + (8 * OBSTACLE_2);
+  Move(pointer(frame), pointer(CHARSET + (8 * OBSTACLE)), 8);
 
-  Move(pointer(t0w), pointer(CHARSET + (8 * OBSTACLE)), 8);
-end;
-
-//-----------------------------------------------------------------------------
-
-procedure animateBackground;
-begin
+  //background
   Poke(CHARSET + $2B3, Peek(CHARSET + $2B3) shl 1);
   Poke(CHARSET + $2B7, Peek(CHARSET + $2B7) shl 2);
   if Peek(CHARSET + $2B3) = 0 then Poke(CHARSET + $2B3, 1);
