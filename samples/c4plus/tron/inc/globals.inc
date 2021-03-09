@@ -3,10 +3,15 @@
 var
   KEYSCAN                            : byte absolute $fd30;
   JOY                                : byte absolute $ff08;
+  DETIRQSRC                          : byte absolute $ff09;
+  SETIRQSRC                          : byte absolute $ff0a;
+  RC                                 : byte absolute $ff0b;
   RAMROMSEL                          : byte absolute $ff12;
   CHBAS                              : byte absolute $ff13;
   BACKGROUND                         : byte absolute $ff15;
   BOREDER                            : byte absolute $ff19;
+  VCOUNT                             : byte absolute $ff1d;
+  IRQVEC                             : word absolute $fffe;
 
 //-----------------------------------------------------------------------------
 
@@ -22,6 +27,9 @@ var
   t1w                                : word absolute $62;
   ply                                : ^Player absolute $64;
   tmpPly                             : ^Player absolute $66;
+  c4p_time                           : byte absolute $a3;
+  c4p_time_1                         : byte absolute $a4;
+  c4p_time_2                         : byte absolute $a5;
 
 //-----------------------------------------------------------------------------
 
