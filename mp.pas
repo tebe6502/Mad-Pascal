@@ -32231,22 +32231,15 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'.endif');
  end;
 
- if High(resArray) > 0 then begin
+ if (High(resArray) > 0) and (target = t_a8) then begin
 
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  case target of
-   t_c64: asm65(#9'icl ''c64\resource.asm''');
-   t_c4p: asm65(#9'icl ''c4p\resource.asm''');
+  asm65(#9'icl ''atari\resource.asm''');
 
-    t_a8: begin
-  	   asm65(#9'icl ''atari\resource.asm''');
-
-    	   asm65(#9'?EXTDETECT = 0');
-    	   asm65(#9'?VBXDETECT = 0');
-   	  end;
-  end;
+  asm65(#9'?EXTDETECT = 0');
+  asm65(#9'?VBXDETECT = 0');
 
   asm65;
 
@@ -41839,7 +41832,7 @@ end;// CompileBlock
 
 procedure CompileProgram;
 var i, j, DataSegmentSize, IdentIndex: Integer;
-    tmp: string;
+    tmp, a: string;
     yes: Boolean;
 begin
 
@@ -42121,35 +42114,35 @@ asm65('.macro'#9'STATICDATA');
 
  asm65('.endm');
 
-{
-//asm65(#13#10'.local'#9'@RESOURCE');
 
- for i := 0 to High(resArray) - 1 do begin
 
-  yes:=false;
-  for IdentIndex := 1 to NumIdent do
-    if (resArray[i].resName = Ident[IdentIndex].Name) and (Ident[IdentIndex].Block = 1) then begin
+ if (High(resArray) > 0) and (target <> t_a8) then begin
 
-     if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then
-      tmp := GetLocalName(IdentIndex, 'adr.')
-     else
-      tmp := GetLocalName(IdentIndex);
+  asm65;
+  asm65('.local'#9'RESOURCE');
 
-     yes:=true; Break;
-    end;
+  case target of
+   t_c64: asm65(#9'icl ''c64\resource.asm''');
+   t_c4p: asm65(#9'icl ''c4p\resource.asm''');
+  end;
 
-  if not yes then
-    Error(NumTok, 'Resource identifier not found: Type = '+resArray[i].resType+', Name = '+resArray[i].resName);
+  asm65;
 
-//  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);
+  for i := 0 to High(resArray) - 1 do
+   if resArray[i].resStream = false then begin
+    a:=#9+resArray[i].resType+' '''+resArray[i].resFile+''''+' ';
 
-  resArray[i].resFullName := tmp;
+    a:=a+resArray[i].resFullName;
 
-  Ident[IdentIndex].Pass := Pass;
+    for j := 1 to MAXPARAMS do a:=a+' '+resArray[i].resPar[j];
+
+    asm65(a);
+   end;
+
+  asm65('.endl');
  end;
 
-//asm65('.endl');
-}
+
 
 asm65;
 asm65(#9'end');

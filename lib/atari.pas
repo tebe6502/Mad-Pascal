@@ -100,6 +100,7 @@ var
 	prior: byte absolute $D01B;		// rejestr piorytetu GTIA
 	gractl: byte absolute $D01D;		// rejestr kontroli PMG
 	hitclr: byte absolute $D01E;		// rejestr zerujacy kolizje PMG
+	consol: byte absolute $D01F;		// console keys status
 
 	audf1: byte absolute $D200;
 	audc1: byte absolute $D201;
@@ -110,6 +111,8 @@ var
 	audf4: byte absolute $D206;
 	audc4: byte absolute $D207;
 	audctl: byte absolute $D208;
+	kbcode: byte absolute $D209;		// code of last pressed key
+
 	skstat: byte absolute $D20F;
 
 	porta: byte absolute $D300;
