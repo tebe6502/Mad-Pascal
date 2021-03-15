@@ -32,9 +32,7 @@ len = * - len_
 /* RCDATA
 /* ----------------------------------------------------------------------- */
 
-.macro	RCDATA (nam, lab)
-
-len = .filesize(%%1)
+.macro	RCDATA (nam, lab, ofs)
 
 	ift main.%%lab>=CODEORIGIN && main.%%lab<PROGRAMSTACK
 	ert 'Overlap memory'
@@ -42,7 +40,7 @@ len = .filesize(%%1)
 
 	org main.%%lab
 
-	ins %%1
+	ins %%1,%%ofs
 
 	.print '$R RCDATA  ',main.%%lab,'..',*-1," %%1"
 .endm

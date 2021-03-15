@@ -425,9 +425,9 @@ data
 /* RCDATA
 /* ----------------------------------------------------------------------- */
 
-.macro	RCDATA (nam, lab)
+.macro	RCDATA (nam, lab, ofs)
 
-len = .filesize(%%1)
+len = .filesize(%%1)-%%ofs
 
  ift main.%%lab+len >= $c000
 
@@ -443,7 +443,7 @@ mcpy	jsr sys.off
 
 	jmp sys.on
 
-data	ins %%1
+data	ins %%1,%%ofs
 
 	.print '$R RCDATA  ',main.%%lab,'..',main.%%lab+len-1," %%1"
 
@@ -455,7 +455,7 @@ data	ins %%1
 
 	org main.%%lab
 
-	ins %%1
+	ins %%1,%%ofs
 
 	.print '$R RCDATA  ',main.%%lab,'..',*-1," %%1"
  eif
