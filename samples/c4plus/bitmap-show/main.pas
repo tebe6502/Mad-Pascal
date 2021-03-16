@@ -1,5 +1,7 @@
 {$r gfx.rc}
 
+// sample gfx made by Carrion
+
 const
   TRON_TITLE_SCREEN = $5800;
 
