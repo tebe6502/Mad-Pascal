@@ -23,7 +23,7 @@ asm {
   lda DETIRQSRC \ sta DETIRQSRC
 
   inc BORDER;
-  jsr $4003;
+  jsr MUSIC+3;
   dec BORDER;
 
   plr
@@ -36,7 +36,7 @@ begin
   asm {
     sei
     sta $ff3f
-    phr \ lda #0 \ jsr $4000 \ plr
+    phr \ lda #0 \ jsr MUSIC \ plr
   };
 
   RC := 4; SETIRQSRC := 2;
