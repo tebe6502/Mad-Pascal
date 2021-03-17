@@ -11,10 +11,10 @@ var
 begin
   pause;
 
-  asm { phr \ jsr $4000 \ plr };
+  asm { phr \ jsr MUSIC \ plr };
 
   repeat
     repeat until VCOUNT = $d8;
-    asm { phr \ lda #0 \ jsr $4000 \ plr };
+    asm { phr \ lda #0 \ jsr MUSIC+3 \ plr };
   until false;
 end.
