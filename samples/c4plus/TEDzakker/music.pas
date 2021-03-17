@@ -15,6 +15,6 @@ begin
 
   repeat
     repeat until VCOUNT = $d8;
-    asm { phr \ jsr $4003 \ plr };
+    asm { phr \ lda #0 \ jsr $4000 \ plr };
   until false;
 end.

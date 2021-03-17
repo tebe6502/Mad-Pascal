@@ -36,7 +36,7 @@ begin
   asm {
     sei
     sta $ff3f
-    phr \ jsr $4000 \ plr
+    phr \ lda #0 \ jsr $4000 \ plr
   };
 
   RC := 4; SETIRQSRC := 2;
