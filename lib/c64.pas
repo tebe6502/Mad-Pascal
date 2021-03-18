@@ -85,55 +85,182 @@ var
 *)
 
 // VIC-II registers
-  Sprite0X: byte absolute $d000;  //  X coordinate sprite 0
-  Sprite0Y: byte absolute $d001;  //  Y coordinate sprite 0
-  Sprite1X: byte absolute $d002;  //  X coordinate sprite 1
-  Sprite1Y: byte absolute $d003;  //  Y coordinate sprite 1
-  Sprite2X: byte absolute $d004;  //  X coordinate sprite 2
-  Sprite2Y: byte absolute $d005;  //  Y coordinate sprite 2
-  Sprite3X: byte absolute $d006;  //  X coordinate sprite 3
-  Sprite3Y: byte absolute $d007;  //  Y coordinate sprite 3
-  Sprite4X: byte absolute $d008;  //  X coordinate sprite 4
-  Sprite4Y: byte absolute $d009;  //  Y coordinate sprite 4
-  Sprite5X: byte absolute $d00a;  //  X coordinate sprite 5
-  Sprite5Y: byte absolute $d00b;  //  Y coordinate sprite 5
-  Sprite6X: byte absolute $d00c;  //  X coordinate sprite 6
-  Sprite6Y: byte absolute $d00d;  //  Y coordinate sprite 6
-  Sprite7X: byte absolute $d00e;  //  X coordinate sprite 7
-  Sprite7Y: byte absolute $d00f;  //  Y coordinate sprite 7
+  Sprite0X             : byte absolute $d000; //  X coordinate sprite 0
+  Sprite0Y             : byte absolute $d001; //  Y coordinate sprite 0
+  Sprite1X             : byte absolute $d002; //  X coordinate sprite 1
+  Sprite1Y             : byte absolute $d003; //  Y coordinate sprite 1
+  Sprite2X             : byte absolute $d004; //  X coordinate sprite 2
+  Sprite2Y             : byte absolute $d005; //  Y coordinate sprite 2
+  Sprite3X             : byte absolute $d006; //  X coordinate sprite 3
+  Sprite3Y             : byte absolute $d007; //  Y coordinate sprite 3
+  Sprite4X             : byte absolute $d008; //  X coordinate sprite 4
+  Sprite4Y             : byte absolute $d009; //  Y coordinate sprite 4
+  Sprite5X             : byte absolute $d00a; //  X coordinate sprite 5
+  Sprite5Y             : byte absolute $d00b; //  Y coordinate sprite 5
+  Sprite6X             : byte absolute $d00c; //  X coordinate sprite 6
+  Sprite6Y             : byte absolute $d00d; //  Y coordinate sprite 6
+  Sprite7X             : byte absolute $d00e; //  X coordinate sprite 7
+  Sprite7Y             : byte absolute $d00f; //  Y coordinate sprite 7
 
-  SpritesXmsb: byte absolute $d010;		//  MSBs of X coordinates
-  ControlRegister1: byte absolute $d011;	//  Control register 1
-  RasterCounter: byte absolute $d012;		//  Raster counter
-  LightpenX: byte absolute $d013;		//  Light pen X
-  LightpenY: byte absolute $d014;		//  Light pen Y
-  EnableSprites: byte absolute $d015;		//  Sprite enabled
-  ControlRegister2: byte absolute $d016;	//  Control register 2
-  SpriteYExpansion: byte absolute $d017;	//  Sprite Y expansion
-  Memorypointers: byte absolute $d018;		//  Memory pointers
-  Interruptregister: byte absolute $d019;	//  Interrupt register
-  Interruptenabled: byte absolute $d01a;	//  Interrupt enabled
-  Spritedatapriority: byte absolute $d01b;	//  Sprite data priority
-  Spritemulticolor: byte absolute $d01c;	//  Sprite multicolor
-  SpriteXExpansion: byte absolute $d01d;	//  Sprite X expansion
-  SpriteSpriteCollision: byte absolute $d01e;	//  Sprite-sprite collision
-  SpritedataCollision: byte absolute $d01f;	//  Sprite-data collision
-  Bordercolor: byte absolute $d020;		//  Border color
-  Backgroundcolor0: byte absolute $d021;	//  Background color 0
-  Backgroundcolor1: byte absolute $d022;	//  Background color 1
-  Backgroundcolor2: byte absolute $d023;	//  Background color 2
-  Backgroundcolor3: byte absolute $d024;	//  Background color 3
-  SpriteMulticolor0: byte absolute $d025;	//  Sprite multicolor 0
-  SpriteMulticolor1: byte absolute $d026;	//  Sprite multicolor 1
-  Sprite0Color: byte absolute $d027;		//  Color sprite 0
-  Sprite1Color: byte absolute $d028;		//  Color sprite 1
-  Sprite2Color: byte absolute $d029;		//  Color sprite 2
-  Sprite3Color: byte absolute $d02a;		//  Color sprite 3
-  Sprite4Color: byte absolute $d02b;		//  Color sprite 4
-  Sprite5Color: byte absolute $d02c;		//  Color sprite 5
-  Sprite6Color: byte absolute $d02d;		//  Color sprite 6
-  Sprite7Color: byte absolute $d02e;		//  Color sprite 7
+  SpritesXmsb          : byte absolute $d010; //  MSBs of X coordinates
+  ControlRegister1     : byte absolute $d011; //  Control register 1
+  RasterCounter        : byte absolute $d012; //  Raster counter
+  LightpenX            : byte absolute $d013; //  Light pen X
+  LightpenY            : byte absolute $d014; //  Light pen Y
+  EnableSprites        : byte absolute $d015; //  Sprite enabled
+  ControlRegister2     : byte absolute $d016; //  Control register 2
+  SpriteYExpansion     : byte absolute $d017; //  Sprite Y expansion
+  Memorypointers       : byte absolute $d018; //  Memory pointers
+  Interruptregister    : byte absolute $d019; //  Interrupt register
+  Interruptenabled     : byte absolute $d01a; //  Interrupt enabled
+  Spritedatapriority   : byte absolute $d01b; //  Sprite data priority
+  Spritemulticolor     : byte absolute $d01c; //  Sprite multicolor
+  SpriteXExpansion     : byte absolute $d01d; //  Sprite X expansion
+  SpriteSpriteCollision: byte absolute $d01e; //  Sprite-sprite collision
+  SpritedataCollision  : byte absolute $d01f; //  Sprite-data collision
+  Bordercolor          : byte absolute $d020; //  Border color
+  Backgroundcolor0     : byte absolute $d021; //  Background color 0
+  Backgroundcolor1     : byte absolute $d022; //  Background color 1
+  Backgroundcolor2     : byte absolute $d023; //  Background color 2
+  Backgroundcolor3     : byte absolute $d024; //  Background color 3
+  SpriteMulticolor0    : byte absolute $d025; //  Sprite multicolor 0
+  SpriteMulticolor1    : byte absolute $d026; //  Sprite multicolor 1
+  Sprite0Color         : byte absolute $d027; //  Color sprite 0
+  Sprite1Color         : byte absolute $d028; //  Color sprite 1
+  Sprite2Color         : byte absolute $d029; //  Color sprite 2
+  Sprite3Color         : byte absolute $d02a; //  Color sprite 3
+  Sprite4Color         : byte absolute $d02b; //  Color sprite 4
+  Sprite5Color         : byte absolute $d02c; //  Color sprite 5
+  Sprite6Color         : byte absolute $d02d; //  Color sprite 6
+  Sprite7Color         : byte absolute $d02e; //  Color sprite 7
 
+
+// MEMORY MAP
+
+  D6510               : byte absolute $0000;
+  R6510               : byte absolute $0001;
+
+  PRA2                : byte absolute $DD00;
+
+  SP0X                : byte absolute $D000;
+  SP0Y                : byte absolute $D001;
+  SP1X                : byte absolute $D002;
+  SP1Y                : byte absolute $D003;
+  SP2X                : byte absolute $D004;
+  SP2Y                : byte absolute $D005;
+  SP3X                : byte absolute $D006;
+  SP3Y                : byte absolute $D007;
+  SP4X                : byte absolute $D008;
+  SP4Y                : byte absolute $D009;
+  SP5X                : byte absolute $D00A;
+  SP5Y                : byte absolute $D00B;
+  SP6X                : byte absolute $D00C;
+  SP6Y                : byte absolute $D00D;
+  SP7X                : byte absolute $D00E;
+  SP7Y                : byte absolute $D00F;
+  MSIGX               : byte absolute $D010;
+  SCROLY              : byte absolute $D011;
+  VICCR1              : byte absolute $D011; // alias
+  RASTER              : byte absolute $D012;
+  LPENX               : byte absolute $D013;
+  LPENY               : byte absolute $D014;
+  SPENA               : byte absolute $D015;
+  SCROLX              : byte absolute $D016;
+  VICCR2              : byte absolute $D016; // alias
+  YXPAND              : byte absolute $D017; // Sprite double height register
+  VMCSB               : byte absolute $D018; // ssss ccc-  s: Screen pointer (A13-A10),  c: Bitmap/charset pointer (A13-A11)
+  VICIRQ              : byte absolute $D019;
+  IRQMASK             : byte absolute $D01A;
+  SPBGPR              : byte absolute $D01B;
+  SPMC                : byte absolute $D01C; // Sprite multicolor mode register
+  XXPAND              : byte absolute $D01D; // Sprite double width register
+  SPSPCL              : byte absolute $D01E;
+  SPBGCL              : byte absolute $D01F;
+  EXTCOL              : byte absolute $D020;
+  BGCOL0              : byte absolute $D021;
+  BGCOL1              : byte absolute $D022;
+  BGCOL2              : byte absolute $D023;
+  BGCOL3              : byte absolute $D024;
+  SPMC0               : byte absolute $D025; // Sprite extra color #1
+  SPMC1               : byte absolute $D026; // Sprite extra color #2
+  SP0COL              : byte absolute $D027;
+  SP1COL              : byte absolute $D028;
+  SP2COL              : byte absolute $D029;
+  SP3COL              : byte absolute $D02A;
+  SP4COL              : byte absolute $D02B;
+  SP5COL              : byte absolute $D02C;
+  SP6COL              : byte absolute $D02D;
+  SP7COL              : byte absolute $D02E;
+  FRELO1              : byte absolute $D400;
+  FREHI1              : byte absolute $D401;
+  PWLO1               : byte absolute $D402;
+  PWHI1               : byte absolute $D403;
+  VCREG1              : byte absolute $D404;
+  ATDCY1              : byte absolute $D405;
+  SUREL1              : byte absolute $D406;
+  FRELO2              : byte absolute $D407;
+  FREHI2              : byte absolute $D408;
+  PWLO2               : byte absolute $D409;
+  PWHI2               : byte absolute $D40A;
+  VCREG2              : byte absolute $D40B;
+  ATDCY2              : byte absolute $D40C;
+  SUREL2              : byte absolute $D40D;
+  FRELO3              : byte absolute $D40E;
+  FREHI3              : byte absolute $D40F;
+  PWLO3               : byte absolute $D410;
+  PWHI3               : byte absolute $D411;
+  VCREG3              : byte absolute $D412;
+  ATDCY3              : byte absolute $D413;
+  SUREL3              : byte absolute $D414;
+  CUTLO               : byte absolute $D415;
+  CUTHI               : byte absolute $D416;
+  RESON               : byte absolute $D417;
+  SIGVOL              : byte absolute $D418;
+  POTX                : byte absolute $D419;
+  POTY                : byte absolute $D41A;
+  RANDOM              : byte absolute $D41B;
+  ENV3                : byte absolute $D41C;
+  COLORRAM            : byte absolute $D800;
+  CIAPRA              : byte absolute $DC00;
+  CIAPRB              : byte absolute $DC01;
+  CIDDRA              : byte absolute $DC02;
+  CIDDRB              : byte absolute $DC03;
+  TIMALO              : byte absolute $DC04;
+  TIMAHI              : byte absolute $DC05;
+  TIMBLO              : byte absolute $DC06;
+  TIMBHI              : byte absolute $DC07;
+  TODTEN              : byte absolute $DC08;
+  TODSEC              : byte absolute $DC09;
+  TODMIN              : byte absolute $DC0A;
+  TODHRS              : byte absolute $DC0B;
+  CIASDR              : byte absolute $DC0C;
+  CIAICR              : byte absolute $DC0D;
+  CIACRA              : byte absolute $DC0E;
+  CIACRB              : byte absolute $DC0F;
+  CI2PRA              : byte absolute $DD00;
+  CI2PRB              : byte absolute $DD01;
+  C2DDRA              : byte absolute $DD02;
+  C2DDRB              : byte absolute $DD03;
+  TI2ALO              : byte absolute $DD04;
+  TI2AHI              : byte absolute $DD05;
+  TI2BLO              : byte absolute $DD06;
+  TI2BHI              : byte absolute $DD07;
+  TO2TEN              : byte absolute $DD08;
+  TO2SEC              : byte absolute $DD09;
+  TO2MIN              : byte absolute $DD0A;
+  TO2HRS              : byte absolute $DD0B;
+  CI2SDR              : byte absolute $DD0C;
+  CI2ICR              : byte absolute $DD0D;
+  CI2CRA              : byte absolute $DD0E;
+  CI2CRB              : byte absolute $DD0F;
+
+
+  NMIADL              : byte absolute $FFFA;
+  NMIADH              : byte absolute $FFFB;
+  RSTADL              : byte absolute $FFFC;
+  RSTADH              : byte absolute $FFFD;
+  IRQADL              : byte absolute $FFFE;
+  IRQADH              : byte absolute $FFFF;
 
 implementation
 
