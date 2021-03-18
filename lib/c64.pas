@@ -4,8 +4,6 @@ interface
 
 const
 
-  colorRAM              = $d800;
-
 // colors
   BLACK                 = $0;
   WHITE                 = $1;
