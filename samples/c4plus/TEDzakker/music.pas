@@ -6,10 +6,10 @@ const
   MUSIC = $4000;
 
 begin
-  asm { phr \ lda #0 \ jsr MUSIC \ plr };
+  asm { txa:pha \ lda #0 \ jsr MUSIC \ pla:tax };
 
   repeat
     pause;
-    asm { phr \ jsr MUSIC+3 \ plr };
+    asm { txa:pha \ jsr MUSIC+3 \ pla:tax };
   until false;
 end.
