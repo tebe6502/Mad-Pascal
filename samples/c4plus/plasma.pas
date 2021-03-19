@@ -84,7 +84,7 @@ begin
 
     tmp := sinusTable[_c1a] + sinusTable[_c1b];
 
-    inc(_c1a, 4); inc(_c1b, 9);
+    Inc(_c1a, 4); Inc(_c1b, 9);
 
     for i := (SCR_W - 1) downto 0 do
       scrn[i] := lookupDiv16[xbuf[i] + tmp];
@@ -92,7 +92,7 @@ begin
     Inc(scrn, 40);
   end;
 
-  inc(c1A, 3); dec(c1B, 5);
+  Inc(c1A, 3); Dec(c1B, 5);
 end;
 
 //-----------------------------------------------------------------------------
