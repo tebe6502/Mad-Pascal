@@ -36,7 +36,7 @@ begin
   asm {
     sei
     sta $ff3f
-    phr \ lda #0 \ jsr MUSIC \ plr
+    txa:pha \ lda #0 \ jsr MUSIC \ pla:tax
   };
 
   RC := 4; SETIRQSRC := 2;
