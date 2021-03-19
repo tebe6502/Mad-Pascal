@@ -36,7 +36,6 @@ var
   c1A               : byte = 1;
   c1B               : byte = 5;
 
-  p                 : pointer;
   scrn              : PByte absolute $60;
 
   charset           : array [0..0]   of byte absolute $3000;
