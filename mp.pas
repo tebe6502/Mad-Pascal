@@ -32112,8 +32112,8 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'org $'+IntToHex(ZPAGE_Atari, 2))
  else begin
   if target = t_a8 then asm65(#9'org $80');
-  if target = t_c64 then asm65(#9'org $10');
-  if target = t_c4p then asm65(#9'org $10');
+  if target = t_c64 then asm65(#9'org $2');
+  if target = t_c4p then asm65(#9'org $2');
  end;
 
  asm65;
