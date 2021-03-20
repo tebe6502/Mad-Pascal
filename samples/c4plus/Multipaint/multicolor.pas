@@ -1,3 +1,4 @@
+// sample gfx made by Carrion
 {$r mgfx.rc}
 
 const
