@@ -249,7 +249,7 @@
        ((listing[i+9] = #9'bpl @+') or (listing[i+9] = #9'bmi @+')) and				// bpl @+|bmi @+	; 9
        dey(i+10) and										// dey			; 10
        (listing[i+11] = '@') and								//@			; 11
-       (sty(i+12) or tya(i+12)) and								// tya			; 12
+       ((sty(i+12) and (lda(i+13) = false)) or (tya(i+12) and (SKIP(i+13) = false))) and	// sty|tya		; 12
 
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SHORTINT >= SHORTINT	BPL
        lda(i+1) and										// lda E		; 1	BOOL := SHORTINT < SHORTINT	BMI
@@ -343,7 +343,8 @@
        (bpl(i+16) or bmi(i+16)) and								// bpl|bmi		; 16
        dey(i+17) and										// dey			; 17
        (listing[i+18] = '@') and								//@			; 18
-       (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
+       ((sty(i+19) and (lda(i+20) = false)) or (tya(i+19) and (SKIP(i+20) = false))) and	// sty|tya		; 19
+
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SMALLINT < 0	BMI
        lda(i+1) and										// lda E+1		; 1	BOOL := SMALLINT >= 0	BPL
        sub_im_0(i+2) and									// sub #$00		; 2
@@ -386,7 +387,8 @@
        (bpl(i+16) or bmi(i+16)) and								// bpl|bmi		; 16
        dey(i+17) and										// dey			; 17
        (listing[i+18] = '@') and								//@			; 18
-       (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
+       ((sty(i+19) and (lda(i+20) = false)) or (tya(i+19) and (SKIP(i+20) = false))) and	// sty|tya		; 19
+
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SMALLINT < SMALLINT	BMI
        lda(i+1) and										// lda E+1		; 1	BOOL := SMALLINT >= SMALLINT	BPL
        sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
@@ -685,7 +687,7 @@
        (bpl(i+23) or bmi(i+23)) and								// bmi @+|bpl @+	; 23
        dey(i+24) and										// dey			; 24
        (listing[i+25] = '@') and								//@			; 25
-       (sty(i+26) or tya(i+26)) and								// tya|sty		; 26
+       ((sty(i+26) and (lda(i+27) = false)) or (tya(i+26) and (SKIP(i+27) = false))) and	// sty|tya		; 26
 
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := INTEGER < 0
        lda(i+1) and										// lda E+3		; 1	BOOL := INTEGER >= 0
