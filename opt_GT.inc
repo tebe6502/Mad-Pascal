@@ -166,6 +166,34 @@
       end;
 
 
+
+    if (SKIP(i-1) = false) and
+       lda(i) and										// lda W+1		; 0	WORD_1 > WORD_2 => WORD_2 < WORD_1
+       cmp(i+1) and (cmp_im(i+1) = false) and 							// cmp 			; 1
+       bne(i+2) and										// bne @+		; 2
+       lda(i+3) and										// lda W		; 3
+       cmp(i+4) and (cmp_im(i+4) = false) and							// cmp			; 4
+       (listing[i+5] = '@') and									//@			; 5
+       seq(i+6) and										// seq			; 6
+       bcs(i+7) and										// bcs @+		; 7
+       dey(i+8) then										// dey			; 8
+      begin
+	tmp := listing[i];
+	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'cmp ' + copy(tmp, 6, 256);
+
+	tmp := listing[i+3];
+	listing[i+3]   := #9'lda ' + copy(listing[i+4], 6, 256);
+	listing[i+4] := #9'cmp ' + copy(tmp, 6, 256);
+
+	listing[i+6] := '';
+	listing[i+7] := #9'bcc @+';
+
+	Result:=false; Break;
+      end;
+
+
+
     if (SKIP(i-1) = false) and
        lda(i) and										// lda			; 0	opt_094	| BYTE > 0
        cmp_im(i+1) and										// cmp #		; 1
@@ -348,7 +376,8 @@
        (listing[i+17] = #9'bpl @+') and								// bpl @+		; 17
        dey(i+18)  and										// dey			; 18
        (listing[i+19] = '@') and								//@			; 19
-       (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
+       ((sty(i+20) and (lda(i+21) = false)) or (tya(i+20) and (SKIP(i+21) = false))) and	// sty|tya		; 20
+
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := SMALLINT > 0
        lda(i+1) and										// lda E+1		; 1
        sub_im_0(i+2) and									// sub #$00		; 2
@@ -500,7 +529,7 @@
        bpl(i+24) and										// bpl @+		; 24
        dey(i+25) and										// dey			; 25
        (listing[i+26] = '@') and								//@			; 26
-       (sty(i+27) or tya(i+27)) and								// sty|tya		; 27
+       ((sty(i+27) and (lda(i+28) = false)) or (tya(i+27) and (SKIP(i+28) = false))) and	// sty|tya		; 27
 
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL := INTEGER > 0
        lda(i+1) and										// lda E+3		; 1
@@ -554,6 +583,7 @@
 
 	Result:=false; Break;
       end;
+
 
 {
 	lda R+1
