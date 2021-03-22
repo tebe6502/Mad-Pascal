@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Commodore Plus/4, C16 or 264 TED sound frequency tables PAL
+// Commodore Plus/4, C16 or 264 TED sound frequency table PAL
 // https://www.dtech.lv/techarticles_plus4_freq.html
 //-----------------------------------------------------------------------------
 const
@@ -75,7 +75,7 @@ begin
   TED_FF11 := $9f;
 
   for i := 0 to SizeOf(music_duration)-1 do begin
-    duration := music_duration[i];
+    duration := music_duration[i] shl TEMPO;
     note := music_notes[i];
 
     TED_FF0E := Lo(note);
@@ -84,7 +84,7 @@ begin
     //Turn on sound
     TED_FF11 := TED_FF11 and $7f;
 
-    for ii := (duration shl TEMPO) downto 1 do pause;
+    for ii := duration downto 1 do pause;
 
     //Turn off sound
     TED_FF11 := TED_FF11 or $80;
