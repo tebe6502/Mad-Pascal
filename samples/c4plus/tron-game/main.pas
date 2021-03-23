@@ -69,6 +69,7 @@ begin
   setPlayer(@player1,  3, Random(18) + 3, direction[Random(4)], AI_SAPPER, PLY1_COLOUR, true);
   setPlayer(@player2, 36, Random(18) + 3, direction[Random(4)], AI_SAPPER, PLY2_COLOUR, true);
 
+  pause;
   printXY('ai calibration, computing,'~, 2, 0, $71);
   printXY(' * wait * '~, 28, 0, $71 + $80);
 
