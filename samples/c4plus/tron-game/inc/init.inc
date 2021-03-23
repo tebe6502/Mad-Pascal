@@ -78,7 +78,10 @@ begin
   BORDER := 0; BACKGROUND := 0;
   initFonts;
 
-  asm { sei \ sta $ff3f };
+  asm {
+    sei \ sta $ff3f
+    lda SETBITMAP \ pha \ mva #0 SETBITMAP
+  };
 
   unapl(pointer(MUSIC_APL), pointer(MUSIC));
   unapl(pointer(TITLE_SCR_APL), pointer(GFX));
@@ -87,6 +90,7 @@ begin
 
   asm {
     phr \ jsr MUSIC \ plr
+    pla \ sta SETBITMAP
     cli
   };
 end;
