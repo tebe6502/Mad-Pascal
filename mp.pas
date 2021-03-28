@@ -21946,9 +21946,8 @@ piss
    for i := 0 to l - 1 do
     if listing[i] <> '' then begin
 
-
 {
-if (pos('lda X+1', listing[i]) > 0) then begin
+if (pos('ldy #1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22381,7 +22380,31 @@ end;
         listing[i+2] := #9'eor ' + copy(listing[i+1], 6, 256);
         listing[i+3] := '';
         listing[i+4] := '';
-        listing[i+5] := #9'sta ' + copy(listing[i+5], 6, 256);
+
+	listing[i+5] := #9'sta ' + copy(listing[i+5], 6, 256);
+
+        Result:=false; Break;
+       end;
+
+      end;
+
+
+    if sty(i+5) and (sty_stack(i+5) = false) and						// sty			; 5
+       ldy_1(i) and										// ldy #1		; 0
+       and_im(i+1) and										// and #		; 1
+       bne(i+2) and										// bne @+		; 2
+       dey(i+3) and										// dey			; 3
+       (listing[i+4] = '@') then								//@			; 4
+     begin
+
+       if GetBYTE(i+1) in [1,2,4,8,16,32,64,128] then begin
+        listing[i]   := '';
+
+        listing[i+2] := '';
+        listing[i+3] := '';
+        listing[i+4] := '';
+
+	listing[i+5] := #9'sta ' + copy(listing[i+5], 6, 256);
 
         Result:=false; Break;
        end;
@@ -22402,6 +22425,29 @@ end;
         listing[i]   := '';
 
         listing[i+2] := #9'eor ' + copy(listing[i+1], 6, 256);
+        listing[i+3] := '';
+        listing[i+4] := '';
+        listing[i+5] := '';
+
+        Result:=false; Break;
+       end;
+
+      end;
+
+
+    if tya(i+5) and										// tya			; 5
+       sta(i+6) and (sta_stack(i+6) = false) and						// sta			; 6
+       ldy_1(i) and										// ldy #1		; 0
+       and_im(i+1) and										// and #		; 1
+       bne(i+2) and										// bne @+		; 2
+       dey(i+3) and										// dey			; 3
+       (listing[i+4] = '@') then								//@			; 4
+     begin
+
+       if GetBYTE(i+1) in [1,2,4,8,16,32,64,128] then begin
+        listing[i]   := '';
+
+        listing[i+2] := '';
         listing[i+3] := '';
         listing[i+4] := '';
         listing[i+5] := '';
@@ -29251,6 +29297,37 @@ var
 
 	  Tok[NumTok].Kind := CurToken;
 
+	  tmp:=FilePos(InFile);
+
+	  repeat
+	   Read(InFile, ch);
+	  until not(ch in [' ',TAB,LF,CR]);
+
+	  if ch <> '{' then begin
+
+	   Seek(InFile, tmp);
+
+	   AsmBlock[AsmBlockIndex] := '';
+
+	   Text:='';
+
+	   while true do begin
+	    Read(InFile, ch);
+
+	    SaveAsmBlock(ch);
+
+	    {if not(ch in [' ',TAB,LF,CR]) then} Text:=Text + UpperCase(ch);
+
+	    if ch in [LF,CR] then Text:='';
+
+	    if pos('END;', Text) > 0 then begin SetLength(AsmBlock[AsmBlockIndex], length(AsmBlock[AsmBlockIndex])-4); Break end;
+
+	   end;
+
+	  end else begin
+
+	  Seek(InFile, FilePos(InFile) - 1);
+
 	  AsmFound:=true;
 
 	  repeat
@@ -29261,6 +29338,8 @@ var
 	  until not (ch in [' ',TAB,LF,CR,'{','}']);    // Skip space, tab, line feed, carriage return, comment braces
 
 	  AsmFound:=false;
+
+	  end;
 
 	  inc(AsmBlockIndex);
 
