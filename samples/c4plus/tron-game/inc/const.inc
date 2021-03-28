@@ -1,10 +1,21 @@
 //-----------------------------------------------------------------------------
 
 const
-  ATTRIBUTE_ADDR = $0800; SCREEN_ADDR = $0c00; OFFSET = SCREEN_ADDR - ATTRIBUTE_ADDR;
-  CHARSET = $3000; CHBASE = $50;
+  TITLE_SCR_APL = $4000;
+  MP_LOGO_APL   = $4a00;
+  MUSIC_APL     = $5800;
+  GFX           = $5800;
+  MUSIC         = $8000;
 
-  BACKGROUND_COLOUR = $21; BOREDER_COLOUR = 0; PLAYFIELD_COLOUR = $51;
+  VBI_TRIGGER   = $e0;
+
+//-----------------------------------------------------------------------------
+
+const
+  ATTRIBUTE_ADDR = $0800; SCREEN_ADDR = $0c00; OFFSET = SCREEN_ADDR - ATTRIBUTE_ADDR;
+  CHARSET = $3c00; CHBASE = $50;
+
+  BACKGROUND_COLOUR = $21; BORDER_COLOUR = 0; PLAYFIELD_COLOUR = $51;
   PLY1_COLOUR = $62; PLY2_COLOUR = $5d; PLY3_COLOUR = $71; PLY4_COLOUR = $55;
   WALL_COLOUR = $41; OBST_COLOUR = $65;
 
