@@ -204,7 +204,7 @@ begin
   printXY(info, 2, 0, $71 + $80);
   putChar(player1.x, player1.y, player1.head, player1.colour + $80);
 
-  repeat checkJoyStatus until joyStatus = JOY_FIRE;
+  repeat until joyStatus = JOY_FIRE;
 
   FillChar(pointer(SCREEN_ADDR + 2), length(info), WALL);
   FillChar(pointer(ATTRIBUTE_ADDR + 2), length(info), WALL_COLOUR);
@@ -218,6 +218,7 @@ var
   winner: string = 'winner!'~;
   loser : string = 'loser!'~;
 begin
+  pause;
   if player1.score = ZERO + VICTORIES then
     printXY(winner, 2, 0, $71 + $80)
   else begin

@@ -1,9 +1,18 @@
-// set Z flag to 2
+//-----------------------------------------------------------------------------
+
+{$r media/media.rc}
+
+//-----------------------------------------------------------------------------
+
+uses aplib;
+
+//-----------------------------------------------------------------------------
 
 {$i 'inc/const.inc'}
 {$i 'inc/types.inc'}
 {$i 'inc/globals.inc'}
 {$i 'inc/tools.inc'}
+{$i 'inc/interrupts.inc'}
 {$i 'inc/ai.inc'}
 {$i 'inc/levels.inc'}
 {$i 'inc/init.inc'}
@@ -54,14 +63,17 @@ end;
 
 procedure welcome;
 begin
+  pause;
   initPlayfield;
 
   setPlayer(@player1,  3, Random(18) + 3, direction[Random(4)], AI_SAPPER, PLY1_COLOUR, true);
   setPlayer(@player2, 36, Random(18) + 3, direction[Random(4)], AI_SAPPER, PLY2_COLOUR, true);
 
+  pause;
   printXY('ai calibration, computing,'~, 2, 0, $71);
   printXY(' * wait * '~, 28, 0, $71 + $80);
 
+  pause;
   printBigXY(3, 3, $51, 'tron'~);
   printBigXY(11, 13, $51, '+4'~);
 
@@ -76,39 +88,40 @@ end;
 
 //-----------------------------------------------------------------------------
 
-procedure vbi; interrupt;
+procedure showGFX;
 begin
-  asm {
-        phr
-        inc c4p_time+2
-        bne off
-        inc c4p_time+1
-        bne off
-        inc c4p_time
-  off:
-  };
+  t0b := SETBITMAP; t1b := VIDEOMATRIX; i0b := SETMCOLOR; i1b := TED_FF12;
 
-  checkJoyStatus;
-  if (c4p_time_2 and 1) = 0 then animateStuff;
+  SETBITMAP := 0;
+  SETMCOLOR := (SETMCOLOR and $40) or $18;
+  VIDEOMATRIX := %01011000;
+  TED_FF12 := %00011000 or (TED_FF12 and %00000011);
+  BORDER := 0;
+  BACKGROUND := 0;
+  COLOUR1 := 1;
+  SETBITMAP := t0b or $20;
 
-  asm {
-        mva #2 DETIRQSRC
-        plr
-  };
+  pause(400);
+
+  SETBITMAP := 0;
+  unapl(pointer(MP_LOGO_APL), pointer(GFX));
+  SETMCOLOR := (SETMCOLOR and $40) or $8;
+  BORDER := $3d;
+  SETBITMAP := t0b or $20;
+
+  pause(200);
+
+  SETBITMAP := t0b; VIDEOMATRIX := t1b; SETMCOLOR := i0b; TED_FF12 := i1b;
 end;
 
 //-----------------------------------------------------------------------------
 
 begin
 
-  initFonts;
-
-  asm { sei \ sta $ff3f};
-  RC := 204; SETIRQSRC := 2; DETIRQSRC := 2; IRQVEC := word(@vbi);
-  asm { cli };
+  initSystem; showGFX;
 
   repeat
-    pause; welcome; initScore; gameOver := false; level := 1;
+    welcome; initScore; gameOver := false; level := 1;
 
     pause;
     repeat mainLoop until isGameOver;

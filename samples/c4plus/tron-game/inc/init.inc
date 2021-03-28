@@ -2,7 +2,7 @@
 
 procedure initPlayfield;
 begin
-  BACKGROUND := BACKGROUND_COLOUR; BOREDER := BOREDER_COLOUR;
+  BACKGROUND := BACKGROUND_COLOUR; BORDER := BORDER_COLOUR;
   FillChar(pointer(SCREEN_ADDR), 24 * 40, EMPTY);
   FillChar(pointer(ATTRIBUTE_ADDR), 24 * 40, PLAYFIELD_COLOUR);
 
@@ -64,11 +64,35 @@ begin
   Move(fonts, pointer(CHARSET + (8 * CHBASE)), SizeOf(fonts));
 
   // set bit 2
-  RAMROMSEL := RAMROMSEL and %11111011;
+  TED_FF12 := TED_FF12 and %11111011;
 
-  // 12 = $3000 / $400 on 2-7 bits
-  CHBAS := (CHBAS and %11) or 12 shl 2;
+  // 15 = $3C00 / $400 on 2-7 bits
+  CHBAS := (CHBAS and %11) or 15 shl 2;
 end;
 
 //-----------------------------------------------------------------------------
 
+procedure initSystem;
+begin
+  pause;
+  BORDER := 0; BACKGROUND := 0;
+  initFonts;
+
+  asm {
+    sei \ sta $ff3f
+    lda SETBITMAP \ pha \ mva #0 SETBITMAP
+  };
+
+  unapl(pointer(MUSIC_APL), pointer(MUSIC));
+  unapl(pointer(TITLE_SCR_APL), pointer(GFX));
+
+  RC := VBI_TRIGGER; SETIRQSRC := 2; DETIRQSRC := 2; IRQVEC := word(@vbi);
+
+  asm {
+    phr \ jsr MUSIC \ plr
+    pla \ sta SETBITMAP
+    cli
+  };
+end;
+
+//-----------------------------------------------------------------------------

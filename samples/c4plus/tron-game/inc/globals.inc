@@ -2,14 +2,18 @@
 
 var
   KEYSCAN                            : byte absolute $fd30;
+  SETBITMAP                          : byte absolute $ff06;
+  SETMCOLOR                          : byte absolute $ff07;
   JOY                                : byte absolute $ff08;
   DETIRQSRC                          : byte absolute $ff09;
   SETIRQSRC                          : byte absolute $ff0a;
   RC                                 : byte absolute $ff0b;
-  RAMROMSEL                          : byte absolute $ff12;
+  TED_FF12                           : byte absolute $ff12;
   CHBAS                              : byte absolute $ff13;
+  VIDEOMATRIX                        : byte absolute $ff14;
   BACKGROUND                         : byte absolute $ff15;
-  BOREDER                            : byte absolute $ff19;
+  COLOUR1                            : byte absolute $ff16;
+  BORDER                             : byte absolute $ff19;
   VCOUNT                             : byte absolute $ff1d;
   IRQVEC                             : word absolute $fffe;
 
