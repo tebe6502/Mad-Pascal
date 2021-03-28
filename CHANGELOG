@@ -1,5 +1,9 @@
+28.03.2021
+- ob³suga standardowej sk³adni dla bloku ASM, nie s¹ wymagane klamry { }
+
 14.03.2021
 - dodana obs³uga $resource dla C64, C4Plus (RCASM, RCDATA)
+- dla $resource RCDATA dodana mo¿liwoœæ podania przesuniêcia od którego ma zostaæ odczytany plik
 
 23.02.2021
 - dodana konwersja znaków PETSCII dla ci¹gów znaków zakoñczonych ''~
