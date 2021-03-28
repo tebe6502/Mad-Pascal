@@ -23,13 +23,13 @@ unZX0
 interface
 
 	procedure unZX0(inputPointer, outputPointer: pointer); assembler; register; overload;
-//	procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;
+	procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;
 
 implementation
 
 
 
-procedure ___unZX0(fnam: PString; outputPointer: pointer); register; overload;
+procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;
 (*
 @description:
 ZX0 I/O stream decompressor (Einar Saukas, Krzysztof 'XXL' Dudek)
@@ -41,12 +41,34 @@ var f: file;
     buf: array [0..255] of byte absolute $0400;
 
 
-procedure read_buf;
+procedure READ_BUF;
 begin
 
  {$I-}
 
+ asm
+	lda :ecx
+	pha
+	lda :ecx+1
+	pha
+	lda :eax
+	pha
+	lda :eax+1
+	pha
+ end;
+
  blockread(f, buf, 256);
+
+ asm
+	pla
+	sta :eax+1
+	pla
+	sta :eax
+	pla
+	sta :ecx+1
+	pla
+	sta :ecx
+ end;
 
  {$I+}
 
