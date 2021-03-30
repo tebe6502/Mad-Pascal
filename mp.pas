@@ -108,6 +108,9 @@ Contributors:
 
 # optymalizator usuwa odwolania do :STACKORIGIN+STACKWIDTH*2+9 gdy operacja ADC, SBC konczy sie na takim odwolaniu
 
+# (Tok[ ].Kind=ASMTOK + Tok[ ].Value=0) wersja z { }
+# (Tok[ ].Kind=ASMTOK + Tok[ ].Value=1) wersja bez { }
+
 *)
 
 
@@ -29296,6 +29299,7 @@ var
 	 if CurToken = ASMTOK then begin
 
 	  Tok[NumTok].Kind := CurToken;
+	  Tok[NumTok].Value:= 0;
 
 	  tmp:=FilePos(InFile);
 
@@ -29304,6 +29308,8 @@ var
 	  until not(ch in [' ',TAB,LF,CR]);
 
 	  if ch <> '{' then begin
+
+	   Tok[NumTok].Value:=1;
 
 	   Seek(InFile, tmp);
 
@@ -38971,8 +38977,7 @@ WHILETOK:
 
      inc(AsmBlockIndex);
 
-
-     if isAsm then begin
+     if isAsm and (Tok[i].Value = 0) then begin
 
       CheckTok(i + 1, SEMICOLONTOK);
       inc(i);
