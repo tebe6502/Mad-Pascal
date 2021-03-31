@@ -299,6 +299,8 @@ const
   STRINGLITERALTOK	= 184;
 //  UNKNOWNIDENTTOK	= 185;
 
+  PROCALIGNTOK		= 190;
+  LOOPALIGNTOK		= 191;
   INFOTOK		= 192;
   WARNINGTOK		= 193;
   ERRORTOK		= 194;
@@ -514,14 +516,14 @@ type
 	 Param: TParamList;
 	 ProcAsBlock: Integer;
 	 ObjectIndex: Integer;
-	 IsUnresolvedForward: Boolean;
-	 isOverload: Boolean;
-	 isRegister: Boolean;
-	 isInterrupt: Boolean;
-	 isRecursion: Boolean;
-	 isStdCall: Boolean;
-	 isPascal: Boolean;
-	 isAsm: Boolean;
+	 IsUnresolvedForward,
+	 isOverload,
+	 isRegister,
+	 isInterrupt,
+	 isRecursion,
+	 isStdCall,
+	 isPascal,
+	 isAsm,
 	 IsNotDead: Boolean;);
 
       VARIABLE, USERTYPE:
@@ -636,6 +638,10 @@ var
 	      use, assign: Boolean;
 	      unitIndex, line, old: integer;
 	     end;
+
+  codealign : record
+		proc, loop : integer;
+	      end;
 
 
   PROGRAMTOK_USE, INTERFACETOK_USE: Boolean;
@@ -799,7 +805,7 @@ DEREFERENCETOK: Result := '^';
 
    REGISTERTOK: Result := 'REGISTER';
      PASCALTOK: Result := 'PASCAL';
-     STDCALLTOK: Result := 'STDCALL';
+    STDCALLTOK: Result := 'STDCALL';
         ASMTOK: Result := 'ASM';
   INTERRUPTTOK: Result := 'INTERRUPT';
  else
@@ -28785,7 +28791,7 @@ var
   end;
 
   procedure ReadDirective(d: string);
-  var i: integer;
+  var i, v: integer;
       cmd, s, nam: string;
       found: Boolean;
 
@@ -28826,7 +28832,7 @@ var
 
       if s='ON' then macros:=true else
        if s='OFF' then macros:=false else
-        Error(NumTok,'Wrong switch toggle, use ON/OFF or +/-');
+        Error(NumTok, 'Wrong switch toggle, use ON/OFF or +/-');
 
      end else
 
@@ -28877,6 +28883,35 @@ var
 	end;
 
      end else
+
+      if (cmd = 'CODEALIGN') then begin
+
+       s := get_string(i, d);
+
+       if AnsiUpperCase(s) = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
+        if AnsiUpperCase(s) = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
+	 Error(NumTok, 'Illegal alignment directive');
+
+       omin_spacje(i, d);
+
+       if d[i] <> '=' then Error(NumTok, 'Illegal alignment directive');
+       inc(i);
+       omin_spacje(i, d);
+
+	s := get_digit(i, d);
+
+	val(s, v, Err);
+
+	if Err > 0 then
+	 iError(NumTok, OrdinalExpExpected);
+
+	GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
+
+	Tok[NumTok].Value := v;
+
+	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
+
+      end else
 
       if (cmd = 'LIBRARYPATH') then begin			// {$librarypath path1;path2;...}
        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
@@ -29077,7 +29112,7 @@ var
   begin
     SafeReadChar(ch);
 
-    while ch in [' ',TAB,CR,LF] do SafeReadChar(ch);
+    while ch in AllowWhiteSpaces do SafeReadChar(ch);
 
     if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
   end;
@@ -29305,17 +29340,30 @@ var
 
 	  repeat
 	   Read(InFile, ch);
-	  until not(ch in [' ',TAB,LF,CR]);
+	   if ch = LF then inc(line);
+	  until not(ch in AllowWhiteSpaces);
 
 	  if ch <> '{' then begin
 
 	   Tok[NumTok].Value:=1;
 
-	   Seek(InFile, tmp);
+	   Seek(InFile, tmp-1);
 
-	   AsmBlock[AsmBlockIndex] := '';
+	   Read(InFile, ch);
 
-	   Text:='';
+	   if ch in [CR,LF] then begin			// skip EOL after 'ASM'
+
+	    if ch = LF then inc(line);
+
+	    if ch = CR then Read(InFile, ch);		// CR LF
+
+	    AsmBlock[AsmBlockIndex] := '';
+	    Text:='';
+
+	   end else begin
+	    AsmBlock[AsmBlockIndex] := ch;
+	    Text:=ch;
+	   end;
 
 	   while true do begin
 	    Read(InFile, ch);
@@ -29324,11 +29372,15 @@ var
 
 	    {if not(ch in [' ',TAB,LF,CR]) then} Text:=Text + UpperCase(ch);
 
-	    if ch in [LF,CR] then Text:='';
+	    if ch in [LF,CR] then begin
+	     if ch = LF then inc(line);
+	     Text:='';
+	    end;
 
 	    if pos('END;', Text) > 0 then begin SetLength(AsmBlock[AsmBlockIndex], length(AsmBlock[AsmBlockIndex])-4); Break end;
 
 	   end;
+
 
 	  end else begin
 
@@ -37953,6 +38005,22 @@ case Tok[i].Kind of
     end;
 
 
+  PROCALIGNTOK:
+    begin
+     codealign.proc := Tok[i].Value;
+
+     Result := i;
+    end;
+
+
+  LOOPALIGNTOK:
+    begin
+     codealign.loop := Tok[i].Value;
+
+     Result := i;
+    end;
+
+
   GOTOTOK:
     begin
      CheckTok(i + 1, IDENTTOK);
@@ -38386,6 +38454,14 @@ WHILETOK:
 	    CheckTok(i + 2, ASSIGNTOK);
 
 	    Ident[IdentIndex].LoopVariable := true;
+
+	    if codealign.loop > 0 then begin
+	     asm65;
+	     asm65(#9'jmp @+');
+	     asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+	     asm65('@');
+	     asm65;
+	    end;
 
 //	    asm65;
 //	    asm65('; --- For');
@@ -40662,6 +40738,11 @@ begin
 
  asm65;
 
+ if codealign.proc > 0 then begin
+  asm65(#9'.align $' + IntToHex(codealign.proc,4));
+  asm65;
+ end;
+
  if Ident[BlockIdentIndex].isOverload then
    asm65('.local'#9+Ident[BlockIdentIndex].Name+'_'+IntToHex(Ident[BlockIdentIndex].Value, 4), info)
  else
@@ -41175,44 +41256,49 @@ if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezd
 while Tok[i].Kind in
  [CONSTTOK, TYPETOK, VARTOK, LABELTOK, PROCEDURETOK, FUNCTIONTOK, PROGRAMTOK, USESTOK,
   UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF,
-  INFOTOK, WARNINGTOK, ERRORTOK] do
+  PROCALIGNTOK, LOOPALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
   begin
 
+
+  if Tok[i].Kind = PROCALIGNTOK then begin
+   if Pass = CODEGENERATIONPASS then codealign.proc := Tok[i].Value;
+   inc(i, 2);
+  end;
+
+
+  if Tok[i].Kind = LOOPALIGNTOK then begin
+   if Pass = CODEGENERATIONPASS then codealign.loop := Tok[i].Value;
+   inc(i, 2);
+  end;
+
+
   if Tok[i].Kind = INFOTOK then begin
-
-      if Pass = CODEGENERATIONPASS then writeln('User defined: ' + msgUser[Tok[i].Value]);
-
-      inc(i, 2);
+   if Pass = CODEGENERATIONPASS then writeln('User defined: ' + msgUser[Tok[i].Value]);
+   inc(i, 2);
   end;
 
 
   if Tok[i].Kind = WARNINGTOK then begin
-
-      Warning(i, UserDefined);
-
-      inc(i, 2);
+   Warning(i, UserDefined);
+   inc(i, 2);
   end;
 
 
   if Tok[i].Kind = ERRORTOK then begin
-
-      if Pass = CODEGENERATIONPASS then iError(i, UserDefined);
-
-      inc(i, 2);
+   if Pass = CODEGENERATIONPASS then iError(i, UserDefined);
+   inc(i, 2);
   end;
 
 
   if Tok[i].Kind = IOCHECKON then begin
-      IOCheck := true;
-
-      inc(i, 2);
+   IOCheck := true;
+   inc(i, 2);
   end;
 
 
   if Tok[i].Kind = IOCHECKOFF then begin
-      IOCheck := false;
-
-      inc(i, 2);
+   IOCheck := false;
+   inc(i, 2);
   end;
 
 
@@ -41536,7 +41622,6 @@ while Tok[i].Kind in
 
     inc(i);
     end;// if CONSTTOK
-
 
 
   if Tok[i].Kind = TYPETOK then
@@ -41902,7 +41987,6 @@ while Tok[i].Kind in
     end;// if VARTOK
 
 
-
   if Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK] then
     if Tok[i + 1].Kind <> IDENTTOK then
       Error(i + 1, 'Procedure name expected but ' + GetSpelling(i + 1) + ' found')
@@ -42079,7 +42163,9 @@ OutputDisabled := (Pass = CODEGENERATIONPASS) and (BlockStack[BlockStackTop] <> 
 if not isAsm then begin
  GenerateDeclarationEpilog;  // Make jump to block entry point
 
- CheckTok(i, BEGINTOK);
+ if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK]) then
+  CheckTok(i, BEGINTOK);
+
 end;
 
 
@@ -42166,6 +42252,7 @@ SetLength(AsmLabels, 1);
 DefineIdent(1, 'MAIN', PROC, 0, 0, 0, 0);
 
 GenerateProgramProlog;
+
 
 j := CompileBlock(1, NumIdent, 0, FALSE, 0);
 
@@ -42305,7 +42392,7 @@ asm65;
 if DATA_Atari > 0 then
  asm65(#9'org $'+IntToHex(DATA_Atari, 4))
 else
- asm65(#9'.align $04');
+ asm65(#9'.align $0004');
 
 asm65;
 asm65('DATAORIGIN');
