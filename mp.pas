@@ -38313,6 +38313,16 @@ WHILETOK:
 
     inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
 
+
+    if codealign.loop > 0 then begin
+	     asm65;
+	     asm65(#9'jmp @+');
+	     asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+	     asm65('@');
+	     asm65;
+    end;
+
+
     asm65;
     asm65('; --- WhileProlog');
 
@@ -38393,6 +38403,14 @@ WHILETOK:
     begin
     inc(CodeSize);			    // !!! aby dzialaly zagniezdzone REPEAT
 
+    if codealign.loop > 0 then begin
+	     asm65;
+	     asm65(#9'jmp @+');
+	     asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+	     asm65('@');
+	     asm65;
+    end;
+
     asm65;
     asm65('; --- RepeatUntilProlog');
 
@@ -38455,13 +38473,15 @@ WHILETOK:
 
 	    Ident[IdentIndex].LoopVariable := true;
 
+
 	    if codealign.loop > 0 then begin
-	     asm65;
-	     asm65(#9'jmp @+');
-	     asm65(#9'.align $' + IntToHex(codealign.loop, 4));
-	     asm65('@');
-	     asm65;
+	      asm65;
+	      asm65(#9'jmp @+');
+	      asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+	      asm65('@');
+	      asm65;
 	    end;
+
 
 //	    asm65;
 //	    asm65('; --- For');
