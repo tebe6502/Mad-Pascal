@@ -1,5 +1,10 @@
+31.03.2021
+- nowa dyrektywa $CODEALIGN, pozwalaj¹ca wprowadziæ wyrównanie kodu dla procedur, funkcji oraz pêtli
+  $CODEALIGN PROC = value
+  $CODEALIGN LOOP = value
+
 28.03.2021
-- ob³suga standardowej sk³adni dla bloku ASM, nie s¹ wymagane klamry { }
+- obs³uga standardowej sk³adni dla bloku ASM, nie s¹ wymagane klamry { }
 
 14.03.2021
 - dodana obs³uga $resource dla C64, C4Plus (RCASM, RCDATA)
