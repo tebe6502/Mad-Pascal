@@ -88,6 +88,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [speedway](https://gitlab.com/bocianu/speedway)
 * [chessnet](https://gitlab.com/bocianu/chessnet)
 * [gr9Lab](https://gitlab.com/amarok8bit/gr9Lab)
+* [SortViz](https://gitlab.com/amarok8bit/sortviz)
 * [weather](https://gitlab.com/bocianu/weather)
 * [cart builder](https://gitlab.com/bocianu/cart_builder)
 
