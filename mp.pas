@@ -33,6 +33,9 @@ Contributors:
 + Guillermo Fuenzalida :
 	- unit MISC: DetectANTIC
 
++ Michael Jaskula :
+	- BASIC Off
+
 + Jerzy Kut :
 	- {$DEFINE ROMOFF}
 
@@ -6613,6 +6616,48 @@ var i, l, k, m, x: integer;
        dex(i+6) then										// dex					; 6
      begin
        listing[i+6] := #9'sty :STACKORIGIN,x';
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda T				; 1
+       SKIP(i+2) and										// SKIP					; 2
+       dey(i+3) and										// dey					; 3
+       (listing[i+4] = '@') and									//@					; 4
+       (listing[i+5] = #9'sty :STACKORIGIN,x') and						// sty :STACKORIGIN,x			; 5
+       dex(i+6) then										// dex					; 6
+     begin
+       listing[i+6] := #9'sty :STACKORIGIN+1,x';
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda T				; 1
+       SKIP(i+2) and										// SKIP					; 2
+       dey(i+3) and										// dey					; 3
+       (listing[i+4] = '@') and									//@					; 4
+       (listing[i+5] = #9'sty :STACKORIGIN+1,x') and						// sty :STACKORIGIN+1,x			; 5
+       dex(i+6) then										// dex					; 6
+     begin
+       listing[i+6] := #9'sty :STACKORIGIN+2,x';
        listing[i+5] := listing[i+4];
        listing[i+4] := listing[i+3];
        listing[i+3] := listing[i+2];
@@ -22375,6 +22420,8 @@ end;
       end;
 
 
+{ sick
+
     if sty(i+5) and (sty_stack(i+5) = false) and						// sty			; 5
        ldy_1(i) and										// ldy #1		; 0
        and_im(i+1) and										// and #		; 1
@@ -22465,7 +22512,7 @@ end;
        end;
 
       end;
-
+}
 
     if (iy(i) = false) and (iy(i+2) = false) and						// lda					; 0
        (iy(i+4) = false) and (iy(i+6) = false) and						// sta :STACKORIGIN+10			; 1
@@ -32727,8 +32774,9 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'ldx #256-VLEN');
  asm65(#9'lda #$00');
  asm65(#9'sta:rne VADR+VLEN-256,x+');
- asm65(#9'eli VLEN>0');
+ asm65(#9'eli VLEN>256');
  asm65(#9'@fill #VADR #VLEN #$00');
+// asm65(#9'm@fill');
  asm65(#9'eif');
  asm65;
 
