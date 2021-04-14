@@ -73,9 +73,9 @@ irqint  clc
         jmp (NMIVEC)    ;$FFFA
         jmp (IRQVEC)    ;$FFFE
 
-iret    pla
-        tax
-        pla
+iret	pla
+	tax
+	pla
 
         ;wylaczenie OS ROM
 

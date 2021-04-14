@@ -81,7 +81,7 @@ XDLC_END	equ     0x8000
 
 
 .enum	e@xdl
-	ovroff, lr, ovron, hr, mapon, mapoff
+	ovroff, lr, ovron, hr, mapon, mapoff, tmon
 .ende
 
 .struct	s@xdl
@@ -91,6 +91,7 @@ XDLC_END	equ     0x8000
 .byte	RPTL
 .long	OVADR
 .word	OVSTEP
+.byte	CHBASE
 .long	MAPADR
 .word	MAPSTEP
 .byte	HSCROL
