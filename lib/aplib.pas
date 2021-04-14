@@ -41,7 +41,7 @@ var f: file;
     buf: array [0..255] of byte absolute $0400;
 
 
-procedure read_buf;
+procedure READ_BUF;
 begin
 
  {$I-}

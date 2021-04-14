@@ -1,22 +1,22 @@
-unit ZX0;
+unit shrinkler;
 (*
 * @type: unit
-* @author: Einar Saukas, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
-* @name: ZX0
+* @author: , Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
+* @name: shrinkler
 *
 * @version: 1.0
 *
 * @description:
 * ZX0 decompressor
 *
-* <https://github.com/einar-saukas/ZX0>
+* <https://github.com/askeksa/Shrinkler>
 *
 * <https://xxl.atari.pl/zx0-decompressor/>
 *)
 
 {
 
-unZX0
+unShrink
 
 }
 
@@ -396,6 +396,8 @@ GET_BYTE	lda $ffff
 
 to_exit		ldx #0
 @sp		equ *-1
+end;
+
 end;
 
 end.
