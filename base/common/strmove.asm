@@ -8,7 +8,7 @@
 
 .proc	@moveSTRING (.word @move.dst .word @move.cnt) .var
 
-	@move
+.nowarn	@move
 
 	dec @move.cnt
 
