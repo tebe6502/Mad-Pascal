@@ -81,6 +81,8 @@ sdmctl	=	$022F	; cieñ DMACTL
 sdlstl	=	$0230	; cieñ DLISTL
 sdlsth	=	$0231	; cieñ DLISTH
 
+gtictls = 	$026F
+
 escflg	=	$02A2
 botscr	=	$02BF	; liczba linii ekranu (24)
 
@@ -226,6 +228,7 @@ gtiactl	=	gtictl
 
 vdelay	=	$D01C	; licznik op??nienia pionowego P/MG
 pmcntl	=	$D01D	; rejestr kontroli graczy i pocisk?w
+gractl	=	PMCNTL
 hitclr	=	$D01E	; rejestr kasowania rejestr?w kolizji
 consol	=	$D01F	; rejestr stanu klawiszy konsoli
 
