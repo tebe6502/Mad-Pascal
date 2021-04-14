@@ -26,6 +26,8 @@ type	TDMACtl = (blank = %00, narrow = %01, normal = %10, wide = %11, missiles= %
 	*)
 
 var
+	irqens: byte absolute $10;		// rejestr cien IRQEN
+
 	rtclok: byte absolute $12;
 	atract: byte absolute $4D;
 	lmargin: byte absolute $52;		// lewy margines ekranu
@@ -113,6 +115,7 @@ var
 	audctl: byte absolute $D208;
 	kbcode: byte absolute $D209;		// code of last pressed key
 
+	irqen: byte absolute $D20E;		// zezwolenie przerwan IRQ (Z)
 	skstat: byte absolute $D20F;
 
 	porta: byte absolute $D300;

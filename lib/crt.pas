@@ -182,13 +182,8 @@ function ReadKey: char; assembler;
 *)
 {$IFDEF ATARI}
 asm
-{	txa:pha
-
-	@GetKey
-
+{	m@call @GetKey
 	sta Result
-
-	pla:tax
 };
 {$ELSE}
 asm
