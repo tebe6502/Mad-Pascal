@@ -1,0 +1,5 @@
+pic1	rcdata 'assets\output1.zx0'
+pic2	rcdata 'assets\output2.zx0'
+pic3	rcdata 'assets\output3.zx0'
+pic4	rcdata 'assets\output4.zx0'
+pic5	rcdata 'assets\output5.zx0'
