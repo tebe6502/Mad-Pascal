@@ -115,3 +115,5 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [Atari Area Forum](http://www.atari.org.pl/forum/viewtopic.php?id=13373)
 * [Mad Pascal Announcement for WUDSN](https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/?do=findComment&comment=4340150)
 * [Some advice](https://github.com/ilmenit/CC65-Advanced-Optimizations)
+* [Programowanie w Mad Pascal dla C+4](https://c64portal.pl/2021/02/22/programowanie-w-mad-pascal-dla-c4/)
+* [Commodore Plus/4, Mad Pascal i bitmapy](https://c64portal.pl/2021/04/10/commodore-plus-4-mad-pascal-i-bitmapy/)
