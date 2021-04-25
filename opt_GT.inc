@@ -420,6 +420,49 @@
 
 
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+       smi(i+16) and										// smi			; 16
+       jne(i+17) and										// jne			; 17
+
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL SMALLINT > 0
+       lda(i+1) and										// lda E+1		; 1
+       sub_im_0(i+2) and									// sub #$00		; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda(i+4) and										// lda E		; 4
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+       (listing[i+6] = #9'beq L5') and								// beq L5		; 6
+       lda_im_0(i+7) and									// lda #$00		; 7
+       (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
+       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       (listing[i+10] = #9'bne L5') and								// bne L5		; 10
+       (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
+       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
+       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       (listing[i+14] = 'L5') then								//L5			; 14
+      begin
+	listing[i]   := listing[i+1];
+	listing[i+1] := #9'bmi @+';
+	listing[i+2] := #9'ora ' + copy(listing[i+4], 6, 256);
+	listing[i+3] := listing[i+17];
+	listing[i+4] := '@';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        jmi(i+16) and										// jmi			; 16
        jeq(i+17) and										// jeq			; 17
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT > $XXYY
@@ -555,11 +598,69 @@
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
 	listing[i]   := listing[i+1];
-	listing[i+1] := #9'bmi @+' + copy(listing[i+23], 6, 256);
+	listing[i+1] := #9'bmi @+';
 	listing[i+2] := #9'ora ' + copy(listing[i+4], 6, 256);
 	listing[i+3] := #9'ora ' + copy(listing[i+7], 6, 256);
 	listing[i+4] := #9'ora ' + copy(listing[i+10], 6, 256);
-	listing[i+5] := #9'sne ' + copy(listing[i+23], 6, 256);
+	listing[i+5] := #9'sne';
+	listing[i+6] := '@';
+
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+	listing[i+23] := '';
+	listing[i+24] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+       smi(i+23) and										// smi			; 23
+       jne(i+24) and										// jne			; 24
+
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	BOOL INTEGER > 0
+       lda(i+1) and										// lda E+3		; 1
+       sub_im_0(i+2) and									// sub #$00		; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda(i+4) and										// lda E+2		; 4
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+       (listing[i+6] = #9'bne L1') and								// bne L1		; 6
+       lda(i+7) and										// lda E+1		; 7
+       cmp_im_0(i+8) and									// cmp #$00		; 8
+       (listing[i+9] = #9'bne L1') and								// bne L1		; 9
+       lda(i+10) and										// lda E		; 10
+       cmp_im_0(i+11) and									// cmp #$00		; 11
+       (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
+       (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
+       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       (listing[i+15] = #9'bne L5') and								// bne L5		; 15
+       (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
+       (listing[i+17] = #9'bne L5') and								// bne L5		; 17
+       (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
+       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
+       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       (listing[i+21] = 'L5') then								//L5			; 21
+      begin
+	listing[i]   := listing[i+1];
+	listing[i+1] := #9'bmi @+';
+	listing[i+2] := #9'ora ' + copy(listing[i+4], 6, 256);
+	listing[i+3] := #9'ora ' + copy(listing[i+7], 6, 256);
+	listing[i+4] := #9'ora ' + copy(listing[i+10], 6, 256);
+	listing[i+5] := listing[i+24];
 	listing[i+6] := '@';
 
 	listing[i+7] := '';

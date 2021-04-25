@@ -1,3 +1,6 @@
+25.04.2021
+- poprawki optymalizacji generowanego kodu dla SHR, SHL
+
 31.03.2021
 - nowa dyrektywa $CODEALIGN, pozwalaj¹ca wprowadziæ wyrównanie kodu dla procedur, funkcji oraz pêtli
   $CODEALIGN PROC = value
