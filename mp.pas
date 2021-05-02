@@ -553,6 +553,7 @@ type
     record
      resStream: Boolean;
      resName, resType, resFile: TString;
+     resValue: integer;
      resFullName: string;
      resPar: array [1..MAXPARAMS] of TString;
     end;
@@ -42299,6 +42300,7 @@ procedure CompileProgram;
 var i, j, DataSegmentSize, IdentIndex: Integer;
     tmp, a: string;
     yes: Boolean;
+    res: TResource;
 begin
 
 optimize.use := false;
@@ -42581,7 +42583,6 @@ asm65('.macro'#9'STATICDATA');
  asm65('.endm');
 
 
-
  if (High(resArray) > 0) and (target <> t_a8) then begin
 
   asm65;
@@ -42594,8 +42595,32 @@ asm65('.macro'#9'STATICDATA');
 
   asm65;
 
+
   for i := 0 to High(resArray) - 1 do
    if resArray[i].resStream = false then begin
+
+    j := NumIdent;
+
+    while (j > 0) and (Ident[j].UnitIndex = 1) do begin
+     if Ident[j].Name = resArray[i].resName then begin resArray[i].resValue := Ident[j].Value; Break end;
+     Dec(j);
+    end;
+
+  end;
+
+
+  for i:=0 to High(resArray)-1 do
+   for j:=0 to High(resArray)-1 do
+    if resArray[i].resValue < resArray[j].resValue then begin
+     res := resArray[j];
+     resArray[j] := resArray[i];
+     resArray[i] := res;
+    end;
+
+
+  for i := 0 to High(resArray) - 1 do
+   if resArray[i].resStream = false then begin
+
     a:=#9+resArray[i].resType+' '''+resArray[i].resFile+''''+' ';
 
     a:=a+resArray[i].resFullName;
@@ -42644,7 +42669,7 @@ var i, CharIndex, ChildIndex: Integer;
     DiagFile: textfile;
 begin
 
-  AssignFile(DiagFile, ChangeFileExt( UnitName[1].Name, '.dat') );
+  AssignFile(DiagFile, ChangeFileExt( UnitName[1].Name, '.txt') );
   Rewrite(DiagFile);
 
   WriteLn(DiagFile);
