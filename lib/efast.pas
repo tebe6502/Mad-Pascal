@@ -29,8 +29,6 @@ initialization
 
 
 asm
-{
-
 ;
 ; Fast E: accelerator
 ; -------------------
@@ -246,15 +244,18 @@ no_cursor:
 	iny
 	rts
 
-; End of resident handler
+// End of resident handler
 handler_end:
+
+	lda #$ff
+	sta OLDROW
 
 	.ifdef MAIN.@DEFINES.ROMOFF
 		dec portb
 	.endif
 
 	pla:tax
-};
+end;
 
  TextMode(0);
 

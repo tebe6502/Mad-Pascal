@@ -32,18 +32,37 @@ The mode 0 is reserved for text console.
 {
 
 BlitterBusy
+ClearDevice;
 ColorMapOff
 ColorMapOn
+ColorMap
 DstBCB
 GetXDL
+HLine
 IniBCB
+Line
 OverlayOff
+Position
+PutPixel
+SetColor
+TextOut
 RunBCB
+SetColorMapDimensions
+SetColorMapEntry
+SetCurrentPaletteEntry
+SetPaletteEntry
+SetHRes
 SetHorizontalRes
+SetOverlayPalette
+SetPlayfieldPalette
+SetRGBPalette
 SetXDL
 SrcBCB
+VBXEControl
 VBXEMemoryBank
+VBXEMode
 VBXEOff
+VLine
 
 + TVBXEMemoryStream : Object
 
