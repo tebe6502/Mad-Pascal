@@ -382,17 +382,10 @@ stgraf1_:1
 	cpx #lines
 	jne lineloop
 
-	mva <adr.cval b0+1
-	mva <adr.cpmg cpm+1
-	mva <adr.creg+1 b1+1
-
-	lda adr.creg
-	sta creg_+1
-
 	lda adr.HCMPalette+1
 	sta 704
 	sta 706
-	
+
 	lda adr.HCMPalette+2
 	sta 705
 	sta 707
@@ -403,9 +396,17 @@ stgraf1_:1
 	sta 709
 	lda adr.HCMPalette+5
 	sta 710
-	
+
 	lda adr.HCMPalette+0
 	sta 712
+
+	mva <adr.cval b0+1
+;	sta attract
+	mva <adr.cpmg cpm+1
+	mva <adr.creg+1 b1+1
+
+	lda adr.creg
+	sta creg_+1
 
 stack	ldx #0
 	txs
