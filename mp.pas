@@ -2164,6 +2164,14 @@ var p, k , q: integer;
 
 begin
 
+{
+if (pos('ldy OFS', TemporaryBuf[0]) > 0) then begin
+
+      for p:=0 to 7 do writeln(TemporaryBuf[p]);
+      writeln('-------');
+
+end;
+}
 
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
@@ -2200,6 +2208,29 @@ begin
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[5], 6, 256)) then
     begin
 	TemporaryBuf[5] := #9'tya';
+    end;
+
+
+   if (pos('ldy ', TemporaryBuf[0]) > 0) and						// ldy I		; 0
+      (pos('lda ', TemporaryBuf[1]) > 0) and						// lda			; 1
+      (pos('sta ', TemporaryBuf[2]) > 0) and						// sta			; 2
+      (TemporaryBuf[3] = '') and							//			; 3
+      (pos('; optimize OK', TemporaryBuf[4]) > 0) and					//; optimize OK		; 4
+      (TemporaryBuf[5] = '') and							//			; 5
+      (pos('lda ', TemporaryBuf[6]) > 0) then						// lda I		; 6
+    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then
+    begin
+	TemporaryBuf[6] := #9'tya';
+    end;
+
+
+   if (pos('ldy ', TemporaryBuf[0]) > 0) and						// ldy I		; 0
+      (pos('lda ', TemporaryBuf[1]) > 0) and						// lda			; 1
+      (pos('sta ', TemporaryBuf[2]) > 0) and						// sta			; 2
+      (pos('lda ', TemporaryBuf[3]) > 0) then						// lda I		; 3
+    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[3], 6, 256)) then
+    begin
+	TemporaryBuf[3] := #9'tya';
     end;
 
 
@@ -12099,7 +12130,7 @@ end;
 
 
 {
-if (pos('adc #$00', listing[i]) > 0) then begin
+if (pos('ldy OFS', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
