@@ -188,7 +188,7 @@ begin
 	pause;
 
   	dpoke(dl+4, buf2);
-	FrameBuffer(buf1);
+	SetActiveBuffer(buf1);
 
 	Projection_3D_2D;
 
@@ -205,7 +205,7 @@ begin
 
 	pause;
 	dpoke(dl+4, buf1);
-	FrameBuffer(buf2);
+	SetActiveBuffer(buf2);
 
 	Projection_3D_2D;
 
