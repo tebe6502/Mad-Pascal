@@ -4,7 +4,7 @@ uses graph, crt;
 
 const
 	m = 6;
-      
+
 procedure D(x: word; y,s: byte);
 begin
 
@@ -31,7 +31,7 @@ end;
 begin
 
   InitGraph(8 + 16);
-  
+
   D(ScreenWidth shr 1, ScreenHeight shr 1, ScreenHeight shr 1);
 
   repeat until keypressed;
