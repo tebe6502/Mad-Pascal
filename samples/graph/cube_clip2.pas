@@ -5,7 +5,7 @@ uses crt, fastgraph;
 
 
 const
-	Ecken        =8;
+	Ecken        = 8;
 	distanz      = 4.0;
 
 	Laenge : real = 1.0;
@@ -48,7 +48,7 @@ var i, x : byte;
     x1,y1,x2,y2: smallint;
 begin
 
-    SetColor(0);
+    SetColor(2);
 
     for i := 0 to tmp[0]-1 do
       begin
@@ -308,7 +308,7 @@ begin
 	pause;
 
   	dpoke(dl+4, buf2);
-	FrameBuffer(buf1);
+	SetActiveBuffer(buf1);
 
 	Projection_3D_2D;
 
@@ -325,7 +325,7 @@ begin
 
 	pause;
 	dpoke(dl+4, buf1);
-	FrameBuffer(buf2);
+	SetActiveBuffer(buf2);
 
 	Projection_3D_2D;
 
