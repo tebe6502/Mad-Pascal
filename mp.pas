@@ -42674,10 +42674,7 @@ begin
 
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
- if target in [t_c64, t_c4p] then
-  DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000000D)
- else
-  DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, $0000009B);
+ {$i targets/eol.inc}
 
  DefineIdent(1, 'TRUE',     CONSTANT, BOOLEANTOK, 0, 0, $00000001);
  DefineIdent(1, 'FALSE',    CONSTANT, BOOLEANTOK, 0, 0, $00000000);
