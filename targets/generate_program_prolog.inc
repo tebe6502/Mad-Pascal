@@ -186,6 +186,7 @@ if Pass = CODEGENERATIONPASS then begin
    if (header = 'END') then break else
     if header <> '' then asm65(#9''+header) else asm65;
   asm65('CODEORIGIN');
+  CODEORIGIN_BASE := target.codeorigin;
  end;
 
 
