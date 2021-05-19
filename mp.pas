@@ -573,6 +573,8 @@ type
 
   TArrayString = array of string;
 
+{$i targets/var.inc}
+
 var
 
   PROGRAM_NAME: string = 'Program';
@@ -605,8 +607,6 @@ var
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, Debug: Integer;
 
   iOut: integer = -1;
-
-  target: TTarget;
 
   start_time: QWord;
 
@@ -29235,7 +29235,7 @@ var
 
   begin
 
-   if target = t_a8 then begin
+   if target.id = 'a8' then begin
 
      for i := p to length(Text) do
       Text[i] := chr(ata2int(ord(Text[i])));
@@ -42046,7 +42046,7 @@ asm65;
 asm65('@halt'#9'ldx #$00');
 asm65(#9'txs');
 
-if target = t_a8 then begin
+if target.id = 'a8' then begin
  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
  asm65(#9'inc portb');
  asm65(#9'.endif');
@@ -42059,7 +42059,7 @@ asm65(#9'rts');
 
 asm65separator;
 
-if target = t_a8 then begin
+if target.id = 'a8' then begin
  asm65;
  asm65('IOCB@COPY'#9':16 brk');
 end;
@@ -42244,7 +42244,7 @@ if FastMul > 0  then begin
 
 end;
 
-if target = t_a8 then begin
+if target.id = 'a8' then begin
  asm65;
  asm65(#9'run START');
 end;
@@ -42284,12 +42284,13 @@ asm65('.macro'#9'STATICDATA');
  asm65('.endm');
 
 
- if (High(resArray) > 0) and (target <> t_a8) then begin
+ if (High(resArray) > 0) and (target.id <> 'a8') then begin
 
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  {$i targets/resource.inc}
+  if target.id <> 'a8' then
+    asm65(#9'icl '''+target.id+'\resource.asm''');
 
   asm65;
 
@@ -42570,6 +42571,8 @@ end;
 begin
 //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
 
+ {$i targets/init.inc}
+
  WriteLn(CompilerTitle);
 
  SetLength(Tok, 1);
@@ -42591,7 +42594,7 @@ begin
 
  ParseParam;
 
- {$i targets/defines.inc}
+ Defines[1] := target.name;
 
  if (UnitName[1].Name='') then Syntax(3);
 
@@ -42674,7 +42677,7 @@ begin
 
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
- {$i targets/eol.inc}
+ DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, target.eol);
 
  DefineIdent(1, 'TRUE',     CONSTANT, BOOLEANTOK, 0, 0, $00000001);
  DefineIdent(1, 'FALSE',    CONSTANT, BOOLEANTOK, 0, 0, $00000000);
