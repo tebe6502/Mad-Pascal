@@ -18,7 +18,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65('STACKWIDTH'#9'= 16');
 
- if target = t_a8 then
+ if target.id = 'a8' then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
  asm65;
@@ -32,14 +32,12 @@ if Pass = CODEGENERATIONPASS then begin
  if ZPAGE_Atari > 0 then
   asm65(#9'org $'+IntToHex(ZPAGE_Atari, 2))
  else begin
-  if target = t_a8 then asm65(#9'org $80');
-  if target = t_c64 then asm65(#9'org $02');
-  if target = t_c4p then asm65(#9'org $02');
+  asm65(#9''+target.zpage);
  end;
 
  asm65;
 
- if target = t_a8 then
+ if target.id = 'a8' then
   asm65('fxptr'#9'.ds 2','; VBXE pointer');
 
  asm65('psptr'#9'.ds 2','; PROGRAMSTACK Pointer');
@@ -136,7 +134,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FPSGN'#9'.ds 1');
  asm65('FPEXP'#9'.ds 1');
 
- if target = t_a8 then begin
+ if target.id = 'a8' then begin
   asm65;
   asm65(#9'.ifdef MAIN.@DEFINES.BASICOFF');
   asm65(#9'org CODEORIGIN');
@@ -152,7 +150,7 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'.endif');
  end;
 
- if (High(resArray) > 0) and (target = t_a8) then begin
+ if (High(resArray) > 0) and (target.id = 'a8') then begin
 
   asm65;
   asm65('.local'#9'RESOURCE');
@@ -180,42 +178,16 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
- case target of
-  t_c64: begin
-    asm65(#9'opt h-f+');
-      asm65(#9'org $801');
-      asm65(#9'org [a($801)],$801','; BASIC start address');
-      asm65;
-      asm65(#9'basic_start(START)');
-
-      asm65(#9'org $900');
-      asm65;
-
-      asm65('CODEORIGIN');
-
-    CODEORIGIN_BASE := $0900;
-         end;
-
-  t_c4p: begin
-    asm65(#9'opt h-f+');
-      asm65(#9'org $1001');
-      asm65(#9'org [a($1001)],$1001','; BASIC start address');
-      asm65;
-      asm65(#9'basic_start(START)');
-
-      asm65(#9'org $100E');
-      asm65;
-
-      asm65('CODEORIGIN');
-
-    CODEORIGIN_BASE := $100E;
-         end;
-
-   t_a8: begin
-    asm65;
-      asm65(#9'org CODEORIGIN');
-   end;
+ if target.id = 'a8' then begin
+  asm65;
+  asm65(#9'org CODEORIGIN');
+ end else begin
+  for header in target.header do
+   if (header = 'END') then break else
+    if header <> '' then asm65(#9''+header) else asm65;
+  asm65('CODEORIGIN');
  end;
+
 
 // asm65(#13#10#9'jmp start');
 
@@ -232,15 +204,11 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
  asm65('RTLIB');
 
- case target of
-  t_c64: asm65(#9'icl ''rtl6502_c64.asm''');
-  t_c4p: asm65(#9'icl ''rtl6502_c4p.asm''');
-   t_a8: asm65(#9'icl ''rtl6502_a8.asm''');
- end;
+ asm65(#9'icl ''rtl6502_'+target.id+'.asm''');
 
  asm65;
 
- if target = t_a8 then
+ if target.id = 'a8' then
   asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1')
  else
   asm65('.print ''ZPAGE: '',psptr,''..'',zpend-1');
@@ -287,7 +255,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'mwa #PROGRAMSTACK psptr');
  asm65;
 
- if target = t_a8 then begin
+ if target.id = 'a8' then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
   asm65(#9'icl ''atari\romoff.asm''');
