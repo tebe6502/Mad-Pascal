@@ -9,7 +9,7 @@ c64.header[1]  := 'org $801';
 c64.header[2]  := 'org [a($801)],$801';
 c64.header[3]  := 'basic_start(START)';
 c64.header[4]  := ''; // asm65;
-c64.header[5]  := 'org $100E';
+c64.header[5]  := 'org $900';
 c64.header[6]  := ''; // asm65;
 c64.header[7]  := 'END';
 
