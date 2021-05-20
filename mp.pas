@@ -2164,7 +2164,7 @@ var p, k , q: integer;
 begin
 
 {
-if (pos('ldy OFS', TemporaryBuf[0]) > 0) then begin
+if (pos('@halt', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 7 do writeln(TemporaryBuf[p]);
       writeln('-------');
@@ -2371,6 +2371,13 @@ end;
        TemporaryBuf[2] := #9'jeq ' + copy(TemporaryBuf[2], 6, 256)
       else
        TemporaryBuf[2] := #9'jne ' + copy(TemporaryBuf[2], 6, 256);
+
+     if (pos(#9'jmp ', TemporaryBuf[0]) = 1) and					// jmp			; 0
+        (TemporaryBuf[1] = '~') and							//~			; 1
+        (pos(#9'jmp ', TemporaryBuf[2]) = 1) then					// jmp			; 2
+      begin
+       TemporaryBuf[2] := '~';
+      end;
 
     end;
 
@@ -12166,7 +12173,7 @@ end;
 
 
 {
-if (pos('ldy OFS', listing[i]) > 0) then begin
+if (pos('@halt', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -32565,7 +32572,7 @@ Gen; Gen;							// mov ah, 4Ch
 
 asm65(#9'lda #$'+IntToHex(ExitCode, 2));
 asm65(#9'jmp @halt');
-asm65;
+
 end;
 
 
@@ -39158,7 +39165,7 @@ WHILETOK:
 
       CheckTok(i + 1, CPARTOK);
 
-      inc(i, 2);
+      inc(i, 1);
 
       GenerateProgramEpilog(Value);
 
