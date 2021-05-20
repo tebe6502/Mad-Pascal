@@ -134,7 +134,7 @@ uses
 
 const
 
-  title = '1.6.5';
+  title = '1.6.6';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -6356,7 +6356,7 @@ var i, l, k, m, x: integer;
      begin
        listing[i]   := #9'dex';
        listing[i+1] := #9'tya';
-       listing[i+2] := #9'ora :STACKORIGIN+1,x';
+       listing[i+2] := #9'ora :STACKORIGIN,x';
        listing[i+3] := '';
 
        Result:=false; Break;
@@ -11546,6 +11546,43 @@ end;
 	 listing[i+4] := '';
 	 listing[i+5] := '';
 	 listing[i+6] := '';
+
+	 Result:=false; Break;
+	end;
+
+      end;
+
+
+    if (listing[i] = #9'sta :ax') and							// sta :ax			; 0
+       lda(i+1) and									// lda 				; 1
+       (adc_im_0(i+2) or sbc_im_0(i+2)) and						// adc|sbc #$00			; 2
+       (listing[i+3] = #9'sta :ax+1') and						// sta :ax+1			; 3
+       lda_im(i+4) and									// lda #			; 4
+       (listing[i+5] = #9'sta :cx') and							// sta :cx			; 5
+       (listing[i+6] = #9'jsr idivAX_CL.MOD') and					// jsr idivAX_CL.MOD		; 6
+       (listing[i+7] = #9'lda :ztmp8') then						// lda :ztmp8			; 7
+      begin
+	p:=GetBYTE(i+4);
+
+	if p in [2,4,8,16,32,64,128] then begin
+
+	 case p of
+	    2: listing[i] := #9'and #$01';
+	    4: listing[i] := #9'and #$03';
+	    8: listing[i] := #9'and #$07';
+	   16: listing[i] := #9'and #$0F';
+	   32: listing[i] := #9'and #$1F';
+	   64: listing[i] := #9'and #$3F';
+	  128: listing[i] := #9'and #$7F';
+	 end;
+
+	 listing[i+1] := '';
+	 listing[i+2] := '';
+	 listing[i+3] := '';
+	 listing[i+4] := '';
+	 listing[i+5] := '';
+	 listing[i+6] := '';
+	 listing[i+7] := '';
 
 	 Result:=false; Break;
 	end;
@@ -42289,8 +42326,7 @@ asm65('.macro'#9'STATICDATA');
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  if target.id <> 'a8' then
-    asm65(#9'icl '''+target.id+'\resource.asm''');
+  asm65(#9'icl '''+target.id+'\resource.asm''');
 
   asm65;
 
