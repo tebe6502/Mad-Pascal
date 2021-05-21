@@ -1817,7 +1817,7 @@ _toct2	lsr Value+3
 };
 end;
 
-{$i targets/system.inc}
+{$i '../targets/system.inc'}
 
 function ParamCount: byte; assembler;
 (*
