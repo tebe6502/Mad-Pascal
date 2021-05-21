@@ -151,6 +151,7 @@ const
 	D_PI_2	= pi/2;
 	D_PI_180= pi/180;
 
+{$ifdef atari}
 	mGTIA	= 0;
 	mVBXE	= $80;
 //	WINDOW	= $10;			// text window
@@ -165,6 +166,7 @@ const
 
 	iDLI = 0;			// set new DLI vector
 	iVBL = 1;			// set new VBL vector
+{$endif}
 
 (* Character codes *)
 
@@ -186,22 +188,24 @@ const
 
 (* color defines *)
 
-	COLOR_BLACK		= $00;
-	COLOR_WHITE		= $0e;
-	COLOR_RED		= $32;
-	COLOR_CYAN		= $96;
-	COLOR_VIOLET		= $68;
-	COLOR_GREEN		= $c4;
-	COLOR_BLUE		= $74;
-	COLOR_YELLOW		= $ee;
-	COLOR_ORANGE		= $28;
-	COLOR_BROWN		= $e4;
-	COLOR_LIGHTRED		= $3c;
-	COLOR_GRAY1		= $04;
-	COLOR_GRAY2		= $06;
-	COLOR_GRAY3		= $0a;
-	COLOR_LIGHTGREEN	= $cc;
-	COLOR_LIGHTBLUE         = $7c;
+{$ifdef atari}
+  COLOR_BLACK   = $00;
+  COLOR_WHITE   = $0e;
+  COLOR_RED   = $32;
+  COLOR_CYAN    = $96;
+  COLOR_VIOLET    = $68;
+  COLOR_GREEN   = $c4;
+  COLOR_BLUE    = $74;
+  COLOR_YELLOW    = $ee;
+  COLOR_ORANGE    = $28;
+  COLOR_BROWN   = $e4;
+  COLOR_LIGHTRED    = $3c;
+  COLOR_GRAY1   = $04;
+  COLOR_GRAY2   = $06;
+  COLOR_GRAY3   = $0a;
+  COLOR_LIGHTGREEN  = $cc;
+  COLOR_LIGHTBLUE         = $7c;
+{$endif}
 
 (* file mode *)
 
@@ -1813,15 +1817,7 @@ _toct2	lsr Value+3
 };
 end;
 
-{$ifdef atari}
-	{$i system_atari.inc}
-{$endif}
-{$ifdef c64}
-	{$i system_c64.inc}
-{$endif}
-{$ifdef c4p}
-	{$i system_c4p.inc}
-{$endif}
+{$i targets/system.inc}
 
 function ParamCount: byte; assembler;
 (*
