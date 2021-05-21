@@ -33,3 +33,15 @@ a8.id         := 'a8';
 a8.name       := 'ATARI';
 a8.zpage      := 'org $80';
 a8.eol        := $0000009B;
+
+// RAW binary target
+raw.id         := 'raw';
+raw.name       := 'RAW';
+raw.zpage      := 'org $00';
+raw.eol        := $0000000D;
+raw.codeorigin := $1000;
+raw.header[0]  := 'opt h-f+';;
+raw.header[1]  := ''; // asm65;
+raw.header[2]  := 'org $1000';
+raw.header[3]  := ''; // asm65;
+raw.header[4]  := 'END';
