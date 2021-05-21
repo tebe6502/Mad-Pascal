@@ -1,0 +1,18 @@
+#!/bin/bash
+
+mp="$HOME/Programs/MadPascal/mp"
+mads="$HOME/Programs/mads/mads"
+base="$HOME/Programs/MadPascal/base"
+name="raw"
+
+$mp $name.pas -t raw -o
+
+if [ -f $name.a65 ]; then
+  [ ! -d "output" ] && mkdir output
+  mv $name.a65 output/
+  $mads output/$name.a65 -x -i:$base -o:output/$name.bin
+  cat appender.bin output/$name.bin > test.bin
+  py65mon -l test.bin -g 1000
+else
+  exit 1
+fi
