@@ -1,7 +1,7 @@
   opt l-
 
 /* -----------------------------------------------------------------------
-/*                        CPU 6502 Run Time Library - C4Plus
+/*                        CPU 6502 Run Time Library - RAW
 /*              19.04.2018
 /* -----------------------------------------------------------------------
 /* 16.03.2019 poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
@@ -95,9 +95,6 @@ numread .word               ; pointer to variable, length of loaded data
   icl 'common\mul64.asm'    ; @mul64
   icl 'common\mul96.asm'    ; @mul96
   icl 'common\mul320.asm'   ; @mul320
-
-
-
 
 ; -----------------------------------------------------------------------
 
