@@ -288,9 +288,10 @@ const
   SINGLETOK		= 143;	// Size = 4 SINGLE/FLOAT		IEEE-754
   PCHARTOK		= 144;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 145;	// Size = 1 BYTE
+  FORWARDTYPE		= 146;
 
-  SHORTSTRINGTOK	= 146;	// zamieniamy na STRINGTOK
-  FLOATTOK		= 147;	// zamieniamy na SINGLETOK
+  SHORTSTRINGTOK	= 147;	// zamieniamy na STRINGTOK
+  FLOATTOK		= 148;	// zamieniamy na SINGLETOK
 
   DATAORIGINOFFSET	= 150;
   CODEORIGINOFFSET	= 151;
@@ -397,7 +398,7 @@ const
 
   // Data sizes
 
-  DataSize: array [BYTETOK..ENUMTOK] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,1);
+  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,1,2);
 
   fBlockRead_ParamType : array [1..3] of byte = (POINTERTOK, WORDTOK, POINTERTOK);
 
@@ -6386,6 +6387,21 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if (sty(i) = false) and									//~sty					; 0
+       (listing[i+1] = #9'jsr orAL_CL') and							// jsr orAL_CL				; 1
+       dex(i+2) and										// dex					; 2
+       dex(i+3) and										// dex					; 3
+       (listing[i+4] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 4
+     begin
+       listing[i+1] := #9'dex';
+       listing[i+2] := #9'dex';
+       listing[i+3] := #9'lda :STACKORIGIN+1,x';
+       listing[i+4] := #9'ora :STACKORIGIN+2,x';
+
+       Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 0
        dex(i+1) and										// dex					; 1
        (listing[i+2] = #9'jsr orAL_CL') and							// jsr orAL_CL				; 2
@@ -6725,6 +6741,22 @@ var i, l, k, m, x: integer;
        listing[i+1] := listing[i];
 
        listing[i] := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda A				; 1
+       cmp(i+2) and (cmp_stack(i+2) = false) and						// cmp B				; 2
+       SKIP(i+3) and										// SKIP					; 3
+       dey(i+4) and										// dey					; 4
+       (listing[i+5] = '@') and									//@					; 5
+       (listing[i+6] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 6
+       dex(i+7) then										// dex					; 7
+     begin
+       listing[i+6] := #9'dex';
+       listing[i+7] := #9'sty :STACKORIGIN,x';
 
        Result:=false; Break;
      end;
@@ -12173,7 +12205,7 @@ end;
 
 
 {
-if (pos('@halt', listing[i]) > 0) then begin
+if (pos('sta #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22143,7 +22175,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('ldy #1', listing[i]) > 0) then begin
+if (pos('sta #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22261,6 +22293,20 @@ end;
 	listing[i+1] := '';
 	Result:=false; Break;
       end;
+
+
+    if adc_sbc(i+1) and										// adc|sbc		; 1
+       (listing[i+2] = #9'sta #$00') and							// sta #$00		; 2
+       lda_a(i+3) and										// lda			; 3
+       cmp(i+4) then										// cmp			; 4
+     begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	if lda_a(i) then listing[i] := '';
+
+	Result:=false; Break;
+     end;
 
 
     if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
@@ -39097,13 +39143,14 @@ WHILETOK:
       yes := false;
 
       for j:=1 to NumIdent do
-       if (Ident[j].ProcAsBlock = NumBlocks) and (Ident[j].Kind = FUNC) then begin
+       if (Ident[j].ProcAsBlock = BlockStack[BlockStackTop]) and (Ident[j].Kind = FUNC) then begin
 
-	IdentIndex := GetIdentResult(NumBlocks);
+	IdentIndex := GetIdentResult(BlockStack[BlockStackTop]);
 
 	yes := true;
 	Break;
        end;
+
 
       if not yes then
 	Error(i, 'Procedures cannot return a value');
@@ -39113,11 +39160,10 @@ WHILETOK:
       else
        GetCommonConstType(i, Ident[IdentIndex].DataType, ActualParamType);
 
-      GenerateAssignment(ASPOINTER, DataSize[ActualParamType], 0, 'RESULT');
+      GenerateAssignment(ASPOINTER, DataSize[Ident[IdentIndex].DataType], 0, 'RESULT');
 
      end;
 
-     asm65;
      asm65(#9'jmp @exit', '; exit');
 
      ResetOpty;
@@ -39588,6 +39634,13 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
  if Tok[i + 1].Kind = IDENTTOK then begin
 
   IdentIndex := GetIdent(Tok[i + 1].Name^);
+
+  if IdentIndex = 0 then begin
+
+   NumAllocElements  := i + 1;
+   AllocElementType  := FORWARDTYPE;
+
+  end else
 
   if (IdentIndex > 0) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) then begin
     NumAllocElements := Ident[IdentIndex].NumAllocElements;
@@ -40738,6 +40791,42 @@ begin
 end;
 
 
+procedure CheckForwardResolutions;
+var TypeIndex, IdentIndex: Integer;
+    Name: string;
+    yes: Boolean;
+begin
+
+// Search for unresolved forward references
+for TypeIndex := 1 to NumIdent do
+  if (Ident[TypeIndex].AllocElementType = FORWARDTYPE) and
+     (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then begin
+
+     Name := Ident[GetIdent(Tok[Ident[TypeIndex].NumAllocElements].Name^)].Name;
+
+     for IdentIndex := 1 to NumIdent do
+       if (Ident[IdentIndex].Name = Name) and
+          (Ident[IdentIndex].Block = BlockStack[BlockStackTop]) then begin
+
+	   Ident[TypeIndex].NumAllocElements  := Ident[IdentIndex].NumAllocElements;
+	   Ident[TypeIndex].NumAllocElements_ := 0;
+	   Ident[TypeIndex].AllocElementType  := Ident[IdentIndex].DataType;
+
+	   Break;
+	  end;
+
+    end;
+
+
+// Search for unresolved forward references
+for TypeIndex := 1 to NumIdent do
+  if (Ident[TypeIndex].AllocElementType = FORWARDTYPE) and
+     (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then
+    Error(TypeIndex, 'Unresolved forward reference to type ' + Ident[TypeIndex].Name);
+
+end;	// CheckForwardResolutions
+
+
 function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean; FunctionResultType: Byte; FunctionNumAllocElements: cardinal = 0; FunctionAllocElementType: byte = 0): Integer;
 var
   VarOfSameType: TVariableList;
@@ -41440,14 +41529,14 @@ while Tok[i].Kind in
       else
 	  begin
 
-	  CheckTok(i + 2, EQTOK);
+	   CheckTok(i + 2, EQTOK);
 
-	  j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
+	   j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
-	  if Tok[i +3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+	   if Tok[i +3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
-	  DefineIdent(i + 1, Tok[i + 1].Name^, USERTYPE, VarType, NumAllocElements, AllocElementType, 0, Tok[i + 3].Kind);
-	  Ident[NumIdent].Pass := CALLDETERMPASS;
+	   DefineIdent(i + 1, Tok[i + 1].Name^, USERTYPE, VarType, NumAllocElements, AllocElementType, 0, Tok[i + 3].Kind);
+	   Ident[NumIdent].Pass := CALLDETERMPASS;
 
 	  end;
 
@@ -41455,6 +41544,8 @@ while Tok[i].Kind in
 
       i := j + 1;
     until Tok[i + 1].Kind <> IDENTTOK;
+
+    CheckForwardResolutions;
 
     i := i + 1;
     end;// if TYPETOK
