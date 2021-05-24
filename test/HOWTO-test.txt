@@ -1,0 +1,4 @@
+1. create config.ini based on config_example.ini, update with your paths
+2. enter to py65emu dir and install (python setup.py install)
+3. install pytest (pip install -U pytest)
+4. run all tests from this directory (pytest)
