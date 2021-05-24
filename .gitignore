@@ -2,5 +2,6 @@ mp.o
 test/config.ini
 test/tmp*
 test/.pytest_cache
-*/__pycache__/*
+__pycache__
+*.bat
 
