@@ -1,1 +1,6 @@
 mp.o
+test/config.ini
+test/tmp*
+test/.pytest_cache
+*/__pycache__/*
+
