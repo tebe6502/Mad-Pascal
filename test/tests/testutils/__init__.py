@@ -15,6 +15,12 @@ class testUtils:
             raise FileNotFoundError('config.ini file not found')
         self.config = configparser.ConfigParser()
         self.config.read(cfile)
+        if not os.path.exists(self.config.get('paths','mp')):
+            raise FileNotFoundError('MadPascal compiler not found here: {}'.format(self.config.get('paths','mp')))
+        if not os.path.exists(self.config.get('paths','mads')):
+            raise FileNotFoundError('MadAssembler not found here: {}'.format(self.config.get('paths','mads')))
+        if not os.path.exists(self.config.get('paths','base')):
+            raise FileNotFoundError('base directory not found here: {}'.format(self.config.get('paths','base')))
 
 
     def validateLabel(self, label):
