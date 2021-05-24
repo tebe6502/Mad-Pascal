@@ -172,3 +172,10 @@ class testUtils:
                 
             resultArray.append(elem)
         return resultArray
+
+    def isVarTrue(self, varlabel):
+        labelname = self.validateLabel(varlabel)
+        return self.m.read(self.labels[labelname]) == self.labels['TRUE']
+
+    def isTrue(self, address):
+        return self.m.read(address) == self.labels['TRUE']
