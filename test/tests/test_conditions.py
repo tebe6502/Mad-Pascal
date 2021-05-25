@@ -1,5 +1,5 @@
 from testutils import testUtils
-test = testUtils();
+test = testUtils()
 
 class Test_conditions:
 
@@ -21,11 +21,11 @@ class Test_conditions:
             if gettru and (a = 75) and (c = 'B') then r2 := true;
             if (c = 'B') and gettru and (a = 75) then r3 := true;
         end.
-        """);
+        """)
     
-        assert test.isVarTrue('r1');
-        assert test.isVarTrue('r2');
-        assert test.isVarTrue('r3');
+        assert test.isVarTrue('r1')
+        assert test.isVarTrue('r2')
+        assert test.isVarTrue('r3')
 
 
     def test_if_complex_order2(self):
@@ -46,9 +46,9 @@ class Test_conditions:
             if getfalse and (a = 12) and (c = 'A') then r2 := false;
             if (c = 'A') and getfalse and (a = 12) then r3 := false;
         end.
-        """);
+        """)
     
-        assert test.isVarTrue('r1');
-        assert test.isVarTrue('r2');
-        assert test.isVarTrue('r3');
+        assert test.isVarTrue('r1')
+        assert test.isVarTrue('r2')
+        assert test.isVarTrue('r3')
 
