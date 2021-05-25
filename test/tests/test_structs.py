@@ -1,5 +1,5 @@
 from testutils import testUtils
-test = testUtils();
+test = testUtils()
 
 import pytest
 
@@ -34,12 +34,12 @@ class Test_Structs:
             end;
         end.
 
-        """);
+        """)
         
         monsteradr = mem.readWord(labels['MAIN.MONSTER'])
         for i in range(0,4):
             monster = mem.readWord(monsteradr) + i * 2
-            assert mem.read(monster) == i;
+            assert mem.read(monster) == i
             #assert mem.read(monster+6) == i * 2;
 
 
@@ -67,12 +67,12 @@ class Test_Structs:
             end;
 
         end.
-        """);
+        """)
         
         monsterArrayAddress = test.varWord('monster')
-        monstersArray = test.getArray(monsterArrayAddress, 4, element_size = 2);
+        monstersArray = test.getArray(monsterArrayAddress, 4, element_size = 2)
         for i in range(0,4):
-            assert test.getByte(monstersArray[i]) == i;
-            assert test.getByte(monstersArray[i] + 1) == i * 2;
+            assert test.getByte(monstersArray[i]) == i
+            assert test.getByte(monstersArray[i] + 1) == i * 2
 
 
