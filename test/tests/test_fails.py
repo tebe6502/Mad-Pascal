@@ -1,7 +1,7 @@
 from testutils import testUtils
 test = testUtils();
 
-class Test_Basic_Arithmetics:
+class Test_Failures:
 
     def test_complex_fail_1(self):
 
