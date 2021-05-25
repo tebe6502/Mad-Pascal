@@ -134,11 +134,6 @@ class testUtils:
         return True
         
         
-    def resume(self):
-        self.runEmu()
-        return [self.c,self.m,self.labels]
-        
-        
     def runBinary(self, pasfile, breakpointlabels):    
         binfile = self.buildBinary(pasfile)
         self.breakpointadressess = []
@@ -158,12 +153,14 @@ class testUtils:
         self.cmdCount = 0
         self.runEmu()
         return [self.c,self.m,self.labels]
-            
+
+#############################        
+# TEST RUNNER API           #      
+#############################
             
     def runFile(self, pasfile, breakpoints = []):
         self.clearDir(self.config.get('paths','tempdir'))
         return self.runBinary(pasfile, breakpoints)
-        
         
     def runCode(self, pascode, breakpoints = []):
         self.clearDir(self.config.get('paths','tempdir'))
@@ -171,6 +168,10 @@ class testUtils:
         with open(pasfile, 'w') as f:
             f.write(pascode)
         return self.runBinary(pasfile, breakpoints)
+
+    def resume(self):
+        self.runEmu()
+        return [self.c,self.m,self.labels]
 
     def setRandomizingByte(self, address):
         self.randoms.append(address)
