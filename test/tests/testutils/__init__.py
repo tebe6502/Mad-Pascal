@@ -1,13 +1,27 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+__author__ = 'Wojciech Bocianski'
+__email__ = 'bocianu@gmail.com'
+__version__ = '0.0.1'
+
 from subprocess import run
 import os
 import shutil
 from time import sleep
+from typing import Counter
 from py65emu.cpu import CPU
 from py65emu.mmu import MMU
 import configparser
+import random
 
 class testUtils:
     validatedAttribs = ['START', 'MAIN.@EXIT']
+
+    def clearRandoms(self):
+        self.randoms = []
+    
+    def clearCounters(self):
+        self.counters = []
 
     def __init__(self):
         cfile = "config.ini"
@@ -21,7 +35,8 @@ class testUtils:
             raise FileNotFoundError('MadAssembler not found here: {}'.format(self.config.get('paths','mads')))
         if not os.path.exists(self.config.get('paths','base')):
             raise FileNotFoundError('base directory not found here: {}'.format(self.config.get('paths','base')))
-
+        self.clearRandoms()
+        self.clearCounters()
 
     def validateLabel(self, label):
         labelname = "MAIN.{}".format(label.upper())
@@ -68,7 +83,7 @@ class testUtils:
         if srcasmfile != asmfile: 
             rc = shutil.move(srcasmfile, asmfile)
             while not os.path.exists(asmfile):
-                sleep(0.1);
+                sleep(0.1)
         
         # assemby file and validate
         rc = run("{} {} -x -i:{} -t:{} -o:{}".format(self.config.get('paths','mads'), asmfile, self.config.get('paths','base'), tabfile, binfile), shell = True)
@@ -85,17 +100,38 @@ class testUtils:
 
         return binfile
         
-        
+  
     def runEmu(self):
+    # this method executes code until reaches end of program, or hits breapoint
+    # it returns False on breakpoints and True on the end of code reached  
+        timeout = int(self.config.get('params','cpuTimeout'), 16)
         while self.c.r.pc != self.labels['MAIN.@EXIT']:
             self.c.step()
             self.cmdCount += 1
-            if self.cmdCount > int(self.config.get('params','cpuTimeout'),16):
+            
+            # check for timeout
+            if self.cmdCount > timeout:
                 raise TimeoutError("CPU timeouted after {} commands".format(self.cmdCount))
+            
+            # check for breakpoints
             if len(self.breakpointadressess) > 0:
                 if self.c.r.pc in self.breakpointadressess:
-                    return False;
-        return True;
+                    return False
+
+            # check if there is something to randomize
+            if len(self.randoms) > 0:
+                for address in self.randoms:
+                    self.m.write(address, random.randint(255))
+            
+            # check if there are counters to increment
+            if len(self.counters) > 0:
+                for address in self.counters:
+                    curval = self.m.read(address)
+                    curval = (curval + 1) % 256
+                    print(curval)
+                    self.m.write(address, curval)
+
+        return True
         
         
     def resume(self):
@@ -105,7 +141,7 @@ class testUtils:
         
     def runBinary(self, pasfile, breakpointlabels):    
         binfile = self.buildBinary(pasfile)
-        self.breakpointadressess = [];
+        self.breakpointadressess = []
         if len(breakpointlabels) > 0:
             for blabel in breakpointlabels:
                 labelname = self.validateLabel(blabel.upper())
@@ -135,6 +171,12 @@ class testUtils:
         with open(pasfile, 'w') as f:
             f.write(pascode)
         return self.runBinary(pasfile, breakpoints)
+
+    def setRandomizingByte(self, address):
+        self.randoms.append(address)
+    
+    def setIncrementingByte(self, address):
+        self.counters.append(address)
 
 #############################        
 # VARIABLE AND DATA GETTERS #      
