@@ -10,7 +10,7 @@ class Test_Failures:
           itout  : word;
           itin   : word;
           index  : word;
-          primes : array[0..2] of word absolute $2000;
+          primes : array[0..3] of word absolute $2000;
         begin
           index := 0;
           primes[0] := 2; primes[1] := 3; inc(index, 2);
