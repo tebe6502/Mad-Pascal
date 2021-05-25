@@ -1,5 +1,5 @@
 from testutils import testUtils
-test = testUtils();
+test = testUtils()
 
 class Test_Basic_Arithmetics:
 
@@ -14,9 +14,9 @@ class Test_Basic_Arithmetics:
             b := 64;
             c := a + b;
         end.
-        """);
+        """)
     
-        assert test.varWord('c') == 34;
+        assert test.varWord('c') == 34
 
     def test_addition2(self):
 
@@ -30,7 +30,7 @@ class Test_Basic_Arithmetics:
             b := 60000;
             c := b + b + a + 10;
         end.
-        """);
+        """)
     
-        assert test.varCardinal('c') == 120210;
+        assert test.varCardinal('c') == 120210
 

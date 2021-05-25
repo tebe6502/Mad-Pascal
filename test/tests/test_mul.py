@@ -1,5 +1,5 @@
 from testutils import testUtils
-test = testUtils();
+test = testUtils()
 
 class Test_Multiplications:
         
@@ -27,22 +27,22 @@ class Test_Multiplications:
             
             a:=b*9;
         end.        
-        ''', ['breaktest']);
+        ''', ['breaktest'])
         
         assert test.varByte('b') == 27;   
-        assert test.varWord('a') == 27 * 3;
+        assert test.varWord('a') == 27 * 3
         
-        test.resume();
-        assert test.varWord('a') == 27 * 5;
+        test.resume()
+        assert test.varWord('a') == 27 * 5
 
-        test.resume();
-        assert test.varWord('a') == 27 * 6;
+        test.resume()
+        assert test.varWord('a') == 27 * 6
 
-        test.resume();
-        assert test.varWord('a') == 27 * 7;
+        test.resume()
+        assert test.varWord('a') == 27 * 7
 
-        test.resume();
-        assert test.varWord('a') == 27 * 9;
+        test.resume()
+        assert test.varWord('a') == 27 * 9
     
     def test_another_multiplication_inline(self):
 
@@ -55,7 +55,7 @@ class Test_Multiplications:
             a := 45 * b;
             w := a * 10;
         end.
-        """);
+        """)
     
-        assert test.varWord('w') == 23 * 45 * 10;
+        assert test.varWord('w') == 23 * 45 * 10
 
