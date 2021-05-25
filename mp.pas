@@ -34141,6 +34141,7 @@ case Tok[i].Kind of
 
 else
   iError(i, IdNumExpExpected);
+
 end;// case
 
 
@@ -34789,7 +34790,7 @@ begin
 //   AllocElementType := 0;
    ActualParamType := 0;
 
-   if Tok[i + 1].Kind = OPARTOK then		    // Actual parameter list found
+   if (Tok[i + 1].Kind = OPARTOK) and (Tok[i + 2].Kind <> CPARTOK) then		    // Actual parameter list found
      begin
      repeat
 
@@ -34824,7 +34825,7 @@ begin
      CheckTok(i + 1, CPARTOK);
 
 //     inc(i);
-     end;// if Tok[i + 1].Kind = OPARTOR
+     end;	// if (Tok[i + 1].Kind = OPARTOR) and (Tok[i + 2].Kind <> CPARTOK)
 
      Pass := oldPass;
      CodeSize := oldCodeSize;
@@ -34858,8 +34859,12 @@ begin
    NumActualParams := 0;
    IdentTemp := 0;
 
-   if Tok[i + 1].Kind = OPARTOK then		    // Actual parameter list found
+   if (Tok[i + 1].Kind = OPARTOK) then		    // Actual parameter list found
      begin
+
+     if (Tok[i + 2].Kind = CPARTOK) then
+      inc(i)
+     else
      repeat
 
        Inc(NumActualParams);
