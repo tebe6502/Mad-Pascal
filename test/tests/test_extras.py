@@ -16,16 +16,3 @@ class Test_Extras:
             timeout = True
             
         assert timeout
-
-    def test_counter(self):
-        test.setIncrementingByte(500)
-        test.runCode("""
-        var a, b:byte;
-        begin
-            a := peek(500);
-            asm { nop };
-            b := peek(500);
-        end.
-        """)
-            
-        assert test.varByte('a') != test.varByte('b')
