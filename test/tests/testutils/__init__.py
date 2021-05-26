@@ -17,12 +17,6 @@ import random
 class testUtils:
     validatedAttribs = ['START', 'MAIN.@EXIT']
 
-    def clearRandoms(self):
-        self.randoms = []
-    
-    def clearCounters(self):
-        self.counters = []
-
     def __init__(self):
         cfile = "config.ini"
         if not os.path.exists(cfile):
@@ -102,7 +96,7 @@ class testUtils:
         
   
     def runEmu(self):
-    # this method executes code until reaches end of program, or hits breapoint
+    # this method executes code until reaches end of program, or hits breakpoint
     # it returns False on breakpoints and True on the end of code reached  
         timeout = int(self.config.get('params','cpuTimeout'), 16)
         while self.c.r.pc != self.labels['MAIN.@EXIT']:
@@ -128,56 +122,101 @@ class testUtils:
                 for address in self.counters:
                     curval = self.m.read(address)
                     curval = (curval + 1) % 256
-                    print(curval)
                     self.m.write(address, curval)
 
         return True
         
         
-    def runBinary(self, pasfile, breakpointlabels):    
+    def runBinary(self, pasfile, breakpointlabels, randoms, counters):    
+    # breakpointlabels is a list of labels to stop emulation on program counter hit
+
+        # prepare binary file
         binfile = self.buildBinary(pasfile)
+        binstart = int(self.config.get('params','binaryLocation'),16)
+        memsize = int(self.config.get('params','memorySize'),16)
+        
+        # load into emulator memory
+        with open(binfile, "rb") as filedata:
+            self.m = MMU([
+                (0, binstart), 
+                (binstart, binstart + memsize, False, filedata) 
+            ])
+
+        # initialize cpu
+        self.c = CPU(self.m, self.labels['START'])
+        self.cmdCount = 0
+
+        # add user defined random registers
+        if len(randoms) > 0:
+            for item in randoms:
+                self.randoms.append(item)
+
+        # add user defined counters
+        if len(counters) > 0:
+            for item in counters:
+                self.counters.append(item)
+
+        # update randoms converting labels to direct addresses
+        for value in self.randoms:
+            if not isinstance(value, int):
+                labelname = self.validateLabel(value.upper())
+                self.randoms.remove(value)
+                self.randoms.append(self.labels[labelname])
+        
+        # update counters converting labels to direct addresses
+        for value in self.counters:
+            if not isinstance(value, int):
+                labelname = self.validateLabel(value.upper())
+                self.counters.remove(value)
+                self.counters.append(self.labels[labelname])
+
+        # convert breakpoint labels into addresses
         self.breakpointadressess = []
         if len(breakpointlabels) > 0:
             for blabel in breakpointlabels:
                 labelname = self.validateLabel(blabel.upper())
                 self.breakpointadressess.append(self.labels[labelname])
                 
-        with open(binfile, "rb") as f:
-            bstart = int(self.config.get('params','binaryLocation'),16)
-            bsize = int(self.config.get('params','memorySize'),16)
-            self.m = MMU([
-                (0, bstart), 
-                (bstart, bstart + bsize, False, f) 
-            ])
-        self.c = CPU(self.m, self.labels['START'])
-        self.cmdCount = 0
+        # make sure all elements are unique
+        self.randoms = list(set(self.randoms))                
+        self.counters = list(set(self.counters))                
+        self.breakpointadressess = list(set(self.breakpointadressess))                
+
         self.runEmu()
         return [self.c,self.m,self.labels]
+
+    def setRandomByte(self, address):
+        self.randoms.append(address)
+    
+    def setCounterByte(self, address):
+        self.counters.append(address)
+
+    def clearRandoms(self):
+        self.randoms = []
+    
+    def clearCounters(self):
+        self.counters = []        
 
 #############################        
 # TEST RUNNER API           #      
 #############################
             
-    def runFile(self, pasfile, breakpoints = []):
+    def runFile(self, pasfile, breakpoints = [], randoms = [], counters = []):
+    # breakpointlabels is a list of labels to stop emulation on program counter hit
         self.clearDir(self.config.get('paths','tempdir'))
-        return self.runBinary(pasfile, breakpoints)
+        return self.runBinary(pasfile, breakpoints, randoms, counters)
         
-    def runCode(self, pascode, breakpoints = []):
+    def runCode(self, pascode, breakpoints = [], randoms = [], counters = []):
+    # breakpointlabels is a list of labels to stop emulation on program counter hit
         self.clearDir(self.config.get('paths','tempdir'))
         pasfile = "{}/temp.pas".format(self.config.get('paths','tempdir'))
         with open(pasfile, 'w') as f:
             f.write(pascode)
-        return self.runBinary(pasfile, breakpoints)
+        return self.runBinary(pasfile, breakpoints, randoms, counters)
 
     def resume(self):
         self.runEmu()
         return [self.c,self.m,self.labels]
-
-    def setRandomizingByte(self, address):
-        self.randoms.append(address)
-    
-    def setIncrementingByte(self, address):
-        self.counters.append(address)
 
 #############################        
 # VARIABLE AND DATA GETTERS #      
