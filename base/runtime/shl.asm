@@ -20,15 +20,19 @@ WORD	lda #0
 	sta :STACKORIGIN-1+STACKWIDTH*2,x
 	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
-CARD	clc
-	ldy :STACKORIGIN,x	; cl
+CARD	ldy :STACKORIGIN,x	; cl
 	beq stop
+
+	lda :STACKORIGIN-1+STACKWIDTH*3,x
+
 @	asl :STACKORIGIN-1,x	; eax
 	rol :STACKORIGIN-1+STACKWIDTH,x
 	rol :STACKORIGIN-1+STACKWIDTH*2,x
-	rol :STACKORIGIN-1+STACKWIDTH*3,x
+	rol @
 	dey
 	bne @-
+
+	sta :STACKORIGIN-1+STACKWIDTH*3,x
 
 stop	rts
 .endp
