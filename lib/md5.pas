@@ -90,12 +90,6 @@ K: array[0..63] of cardinal = (
 	$6fa87e4f, $fe2ce6e0, $a3014314, $4e0811a1,
 	$f7537e82, $bd3af235, $2ad7d2bb, $eb86d391 );
 
-{
-function leftrotate(x: cardinal; c: byte): cardinal; register;
-begin
- leftrotate := (x shl c) or (x shr byte(32-c));
-end;
-}
 
 function reverse32(v: cardinal): cardinal; register;
 begin
@@ -162,10 +156,13 @@ begin
         d := c;
         c := b;
 
-	x := f + K[i] + Block^;
-        y := (x shl s[i]) or (x shr byte(32-s[i]));
+	x := (f + K[i] + Block^);
 
-        b := b + y;	// leftrotate(f + K[i] + Block^, s[i]);
+	g:=32-s[i];
+
+        y := (x shl s[i]) or (x shr g);
+
+        b := b + y;
     end;
 
   inc(Context.State[0], a);

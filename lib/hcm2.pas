@@ -25,14 +25,15 @@ const
     HiRes = $0f;
     LoRes = $0e;
 
-    HCMBase = $d800;
+    HCMBASE = $d800;
+    HCMVRAM = HCMBASE+$0800;
 
 var
-    cval: array [0..24] of byte absolute HCMBase+$20;
-    creg: array [0..24] of byte absolute HCMBase+$40;
-    cpmg: array [0..24] of byte absolute HCMBase+$60;
+    cval: array [0..24] of byte absolute HCMBASE+$20;
+    creg: array [0..24] of byte absolute HCMBASE+$40;
+    cpmg: array [0..24] of byte absolute HCMBASE+$60;
 
-    HCMPalette : array [0..4] of byte absolute HCMBase;
+    HCMPalette : array [0..4] of byte absolute HCMBASE;
 
 implementation
 
@@ -51,8 +52,8 @@ const
     lines = 200;
     yofset = 28;
 
-    PMGAddress = HCMBase;
-    VRamAddress = PMGAddress + $0800;
+    PMGAddress = HCMBASE;
+    VRamAddress = HCMVRAM;
     DListAddress = VRamAddress + lines * 32;
 
 
