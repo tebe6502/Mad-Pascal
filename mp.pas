@@ -261,6 +261,7 @@ const
   INTERRUPTTOK		= 99;
   PASCALTOK		= 100;
   STDCALLTOK		= 101;
+  INLINETOK		= 102;
 
   SUCCTOK		= 105;
   PREDTOK		= 106;
@@ -405,7 +406,7 @@ const
 {$i targets/type.inc}
 
 type
-  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02);
+  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
   irCode = (iDLI, iVBL);
 
@@ -526,6 +527,7 @@ type
 	 isRecursion,
 	 isStdCall,
 	 isPascal,
+	 isInline,
 	 isAsm,
 	 IsNotDead: Boolean;);
 
@@ -810,6 +812,7 @@ DEREFERENCETOK: Result := '^';
    REGISTERTOK: Result := 'REGISTER';
      PASCALTOK: Result := 'PASCAL';
     STDCALLTOK: Result := 'STDCALL';
+     INLINETOK: Result := 'INLINE';
         ASMTOK: Result := 'ASM';
   INTERRUPTTOK: Result := 'INTERRUPT';
  else
@@ -6014,7 +6017,7 @@ var i, l, k, m, x: integer;
 	begin
        	 listing[i+7] := #9'ldy ' + copy(listing[i+2], 6, 256) + '+$' + IntToHex(GetBYTE(p+1), 2);
 
-       	 listing[p+1]   := '';
+       	 listing[p+1] := '';
 	 listing[p+2] := '';
 
 	 listing[i+1] := '';
@@ -6026,6 +6029,18 @@ var i, l, k, m, x: integer;
 
 	 Result:=false; Break;
 	end;
+
+       if Result then begin
+	listing[i+1] := #9'ldy ' + GetString(i) + '+1';
+
+	listing[i] := #9'lda ' + GetString(i);
+
+	listing[i+4] := #9'scc';
+	listing[i+5] := #9'iny';
+	listing[i+6] := #9'sty :bp2+1';
+
+	Result := false; Break;
+       end;
 
      end;
 
@@ -12710,7 +12725,7 @@ end;
       end;
 
 
-    if lda_a(i) and										// lda 		; 0
+    if lda_a(i) and (lda_bp_y(i) = false) and (lda_bp2_y(i) = false) and 			// lda 		; 0
        sta_a(i+1) and										// sta A	; 1
        lda_a(i+2) and 										// lda 		; 2 --
        sta_a(i+3) and										// sta A+1	; 3  |
@@ -12734,7 +12749,7 @@ end;
      end;
 
 
-    if lda_a(i) and										// lda 		; 0
+    if lda_a(i) and (lda_bp_y(i) = false) and (lda_bp2_y(i) = false) and			// lda 		; 0
        sta_a(i+1) and										// sta A	; 1
        lda_a(i+2) and 										// lda 		; 2
        sta_a(i+3) and										// sta 		; 3
@@ -29868,6 +29883,7 @@ Spelling[REGISTERTOK	] := 'REGISTER';
 Spelling[INTERRUPTTOK	] := 'INTERRUPT';
 Spelling[PASCALTOK	] := 'PASCAL';
 Spelling[STDCALLTOK	] := 'STDCALL';
+Spelling[INLINETOK      ] := 'INLINE';
 
 Spelling[ASSIGNFILETOK	] := 'ASSIGN';
 Spelling[RESETTOK	] := 'RESET';
@@ -31902,7 +31918,7 @@ StopOptimization;
 end;
 
 
-procedure GenerateReturn(IsFunction, isInt: Boolean);
+procedure GenerateReturn(IsFunction, isInt, isInl: Boolean);
 var yes: Boolean;
 begin
  Gen;						// ret
@@ -31913,6 +31929,7 @@ begin
   if not IsFunction then begin
    asm65('@exit');
 
+   if not isInl then begin
    asm65(#9'.ifdef @new');			// @FreeMem
    asm65(#9'lda <@VarData');
    asm65(#9'sta :ztmp');
@@ -31922,11 +31939,12 @@ begin
    asm65(#9'els');
    asm65(#9'rts', '; ret');
    asm65(#9'eif');
+   end;
 
    yes:=false;
   end;
 
- if yes then
+ if yes and (isInl = false) then
   if isInt then
    asm65(#9'rti', '; ret')
   else
@@ -35063,7 +35081,28 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
  Gen;
 
- asm65(#9'jsr '+svar);				// GenerateCall
+ if Ident[IdentIndex].isInline then begin
+
+
+ if pass = CODEGENERATIONPASS then
+
+  writeln(svar,',', Ident[IdentIndex].ProcAsBlock,',', BlockStack[BlockStackTop], ',' ,Ident[IdentIndex].Block ,',', Ident[IdentIndex].UnitIndex );
+
+ asm65(#9'.local ' + svar);
+ {
+  if (BlockStack[BlockStackTop] <> 1) and (Ident[IdentIndex].Block = BlockStack[BlockStackTop]) then	// w aktualnym bloku procedury/funkcji
+   asm65(#9'.local ' + svar)
+  else
+  if Ident[IdentIndex].UnitIndex > 1 then
+   asm65(#9'.local :MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)			// w innym module
+  else
+   asm65(#9'.local :MAIN.' + svar);									// w tym samym module poza aktualnym blokiem procedury/funkcji
+}
+
+  asm65(#9+svar+'.INLINE');
+  asm65(#9'.endl');
+ end else
+  asm65(#9'jsr '+svar);				// GenerateCall
 
 end;
 
@@ -39329,7 +39368,7 @@ end;// case
 end;// CompileStatement
 
 
-function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
+function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex: Integer;
      ListPassMethod, VarType, AllocElementType: Byte;
@@ -39478,8 +39517,9 @@ begin
 
     isForward := false;
     isInt := false;
+    isInl := false;
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -39520,6 +39560,13 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
+	     INLINETOK: begin
+	                   isInl := true;
+			   Ident[NumIdent].isInline := true;
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+
 	   INTERRUPTTOK: begin
 			   isInt := true;
 			   Ident[NumIdent].isInterrupt := true;
@@ -39541,8 +39588,11 @@ begin
 	end;// while
 
 
-  if Ident[NumIdent].isRegister and Ident[NumIdent].isPascal then
-   Error(i, 'Calling convention directive "REGISTER" not applicable with "PASCAL"');
+  if Ident[NumIdent].isRegister and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion) then
+   Error(i, 'Calling convention directive ''REGISTER'' not applicable with ''PASCAL''');
+
+  if Ident[NumIdent].isInline and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion)  then
+   Error(i, 'Calling convention directive ''INLINE'' not applicable with ''PASCAL''');
 
 //  if Ident[NumIdent].isInterrupt and (Ident[NumIdent].isAsm = false) then
 //    Note(i, 'Use assembler block instead pascal');
@@ -39563,7 +39613,7 @@ var
   Name: TString;
 
   NestedFunctionNumAllocElements: cardinal;
-  isForward, isInt, IsNestedFunction: Boolean;
+  isForward, isInt, isInl, IsNestedFunction: Boolean;
   NestedFunctionResultType, NestedFunctionAllocElementType: Byte;
 
 
@@ -39825,7 +39875,7 @@ end else
 
 	  k := i;
 
-	  i := DefineFunction(i, 0, isForward, isInt, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
+	  i := DefineFunction(i, 0, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
 	  Inc(NumBlocks);
 	  Ident[NumIdent].ProcAsBlock := NumBlocks;
@@ -39912,7 +39962,7 @@ end else
 
 	  k := i;
 
-	  i := DefineFunction(i, 0, isForward, isInt, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
+	  i := DefineFunction(i, 0, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
 	  Inc(NumBlocks);
 	  Ident[NumIdent].ProcAsBlock := NumBlocks;
@@ -40601,6 +40651,8 @@ begin
  if Ident[BlockIdentIndex].isRegister then info := info + ' | REGISTER';
  if Ident[BlockIdentIndex].isInterrupt then info := info + ' | INTERRUPT';
  if Ident[BlockIdentIndex].isPascal then info := info + ' | PASCAL';
+// if Ident[BlockIdentIndex].isStdCall then info := info + ' | STDCALL';
+ if Ident[BlockIdentIndex].isInline then info := info + ' | INLINE';
 
  asm65;
 
@@ -40610,9 +40662,11 @@ begin
  end;
 
  if Ident[BlockIdentIndex].isOverload then
-   asm65('.local'#9+Ident[BlockIdentIndex].Name+'_'+IntToHex(Ident[BlockIdentIndex].Value, 4), info)
+   asm65('.local'#9 + Ident[BlockIdentIndex].Name+'_'+IntToHex(Ident[BlockIdentIndex].Value, 4), info)
  else
-   asm65('.local'#9+Ident[BlockIdentIndex].Name, info);
+   asm65('.local'#9 + Ident[BlockIdentIndex].Name, info);
+
+ if Ident[BlockIdentIndex].isInline then asm65(#13#10#9'.MACRO INLINE');
 
 end;
 
@@ -40742,7 +40796,7 @@ begin
 	end;// if IsNestedFunction
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -40772,6 +40826,12 @@ begin
 
 	      STDCALLTOK: begin
 			   Status := Status or ord(mStdCall);
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+
+	      INLINETOK: begin
+			   Status := Status or ord(mInline);
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -40841,7 +40901,7 @@ var
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   NumAllocTypes: word;
   ConstVal: Int64;
-  IsNestedFunction, isAsm, isReg, isInt, isAbsolute, isForward, ImplementationUse: Boolean;
+  IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isForward, ImplementationUse: Boolean;
   iocheck_old, isInterrupt_old, yes, pack: Boolean;
   VarType, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp: Byte;
@@ -40865,6 +40925,7 @@ Param := Ident[BlockIdentIndex].Param;
 isAsm := Ident[BlockIdentIndex].isAsm;
 isReg := Ident[BlockIdentIndex].isRegister;
 isInt := Ident[BlockIdentIndex].isInterrupt;
+isInl := Ident[BlockIdentIndex].isInline;
 
 isInterrupt:=isInt;
 
@@ -40880,11 +40941,14 @@ if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIn
  if Ident[BlockIdentIndex].isRegister then
    Error(i, 'Calling convention directive "REGISTER" not applicable with recursion');
 
- asm65('@new'#9'lda <@VarData');			// @AllocMem
- asm65(#9'sta :ztmp');
- asm65(#9'lda >@VarData');
- asm65(#9'ldy #@VarDataSize-1');
- asm65(#9'jsr @AllocMem');
+ if not isInl then begin
+  asm65('@new'#9'lda <@VarData');			// @AllocMem
+  asm65(#9'sta :ztmp');
+  asm65(#9'lda >@VarData');
+  asm65(#9'ldy #@VarDataSize-1');
+  asm65(#9'jsr @AllocMem');
+ end;
+
 end;
 
 
@@ -41932,7 +41996,7 @@ while Tok[i].Kind in
 
 //    writeln(ForwardIdentIndex,',',tok[i].line,',',Ident[ForwardIdentIndex].isOverload,',',Ident[ForwardIdentIndex].IsUnresolvedForward,' / ',Tok[i].Kind = PROCEDURETOK,',',  ((Tok[i].Kind = PROCEDURETOK) and (Ident[ForwardIdentIndex].Kind <> PROC)));
 
-    i := DefineFunction(i, ForwardIdentIndex, isForward, isInt, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
+    i := DefineFunction(i, ForwardIdentIndex, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
 
     // Check for a FORWARD directive (it is not a reserved word)
@@ -41972,7 +42036,7 @@ while Tok[i].Kind in
 
 	i := j + 1;
 
-	GenerateReturn(IsNestedFunction, isInt);
+	GenerateReturn(IsNestedFunction, isInt, isInl);
 
 	if OutputDisabled then OutputDisabled := FALSE;
 
@@ -42018,6 +42082,7 @@ while Tok[i].Kind in
 	 if Ident[ForwardIdentIndex].isInterrupt then Tmp := Tmp or ord(mInterrupt);
 	 if Ident[ForwardIdentIndex].isPascal then Tmp := Tmp or ord(mPascal);
 	 if Ident[ForwardIdentIndex].isStdCall then Tmp := Tmp or ord(mStdCall);
+	 if Ident[ForwardIdentIndex].isInline then Tmp := Tmp or ord(mInline);
 
 	 if Tmp <> TmpResult then
 	   Error(i, 'Function header doesn''t match the previous declaration ''' + Ident[ForwardIdentIndex].Name + '''');
@@ -42042,7 +42107,7 @@ while Tok[i].Kind in
 
 	i := j + 1;
 
-	GenerateReturn(IsNestedFunction, isInt);
+	GenerateReturn(IsNestedFunction, isInt, isInl);
 
 	if OutputDisabled then OutputDisabled := FALSE;
 
@@ -42119,6 +42184,8 @@ if IsFunction then begin
   Push(Ident[GetIdent('RESULT')].Value, ASPOINTER, DataSize[FunctionResultType], GetIdent('RESULT'));
 
   asm65;
+
+  if not isInl then begin
   asm65(#9'.ifdef @new');			// @FreeMem
   asm65(#9'lda <@VarData');
   asm65(#9'sta :ztmp');
@@ -42126,10 +42193,18 @@ if IsFunction then begin
   asm65(#9'ldy #@VarDataSize-1');
   asm65(#9'jmp @FreeMem');
   asm65(#9'eif');
+  end;// else
+   //asm65(#9'.ENDM');
 
 end;
 
-if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK] then GenerateProcFuncAsmLabels(BlockIdentIndex, true);
+if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK] then begin
+
+ if Ident[BlockIdentIndex].isInline then asm65(#9'.ENDM');
+
+ GenerateProcFuncAsmLabels(BlockIdentIndex, true);
+
+end;
 
 Dec(BlockStackTop);
 
