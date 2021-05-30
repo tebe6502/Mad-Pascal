@@ -26,10 +26,15 @@ stop	lda #0
 
 WORD	ldy :STACKORIGIN,x	; cl
 	beq stop
+
+	lda :STACKORIGIN-1,x
+
 @	lsr :STACKORIGIN-1+STACKWIDTH,x
-	ror :STACKORIGIN-1,x
+	ror @
 	dey
 	bne @-
+
+	sta :STACKORIGIN-1,x
 
 stop	lda #0
 	sta :STACKORIGIN-1+STACKWIDTH*2,x
@@ -43,12 +48,17 @@ stop	lda #0
 
 	ldy :STACKORIGIN,x	; cl
 	beq stop
+
+	lda :STACKORIGIN-1,x
+
 @	lsr :STACKORIGIN-1+STACKWIDTH*3,x
 	ror :STACKORIGIN-1+STACKWIDTH*2,x
 	ror :STACKORIGIN-1+STACKWIDTH,x
-	ror :STACKORIGIN-1,x
+	ror @
 	dey
 	bne @-
+
+	sta :STACKORIGIN-1,x
 
 stop	rts
 .endp
