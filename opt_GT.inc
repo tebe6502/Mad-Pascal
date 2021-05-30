@@ -78,6 +78,29 @@
 
 
     if (SKIP(i-1) = false) and
+       lda_bp2_y(i) and										// lda (:bp2),y		; 0	:BP2 > 0
+       bne(i+1) and										// bne @+		; 1
+       dey(i+2) and										// dey			; 2
+       lda_bp2_y(i+3) and									// lda (:bp2),y		; 3
+       cmp_im_0(i+4) and									// cmp #$00		; 4
+       (listing[i+5] = '@') and									//@			; 5
+       jcc(i+6) and										// jcc l_		; 6
+       jeq(i+7) then										// jeq l_		; 7
+     if (pos(listing[i+3], listing[i]) > 0) then
+      begin
+	listing[i+1] := '';
+
+        listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+
+       // listing[i+4] := '';
+        listing[i+5] := '';
+        listing[i+6] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (SKIP(i-1) = false) and
        lda(i) and										// lda W+1		; 0	opt_093 | WORD > 0
        cmp_im(i+1) and										// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
