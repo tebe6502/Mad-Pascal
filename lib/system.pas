@@ -145,12 +145,15 @@ type	PWordArray = ^word;
 	*)
 
 const
+{$ifndef raw}
 	__PORTB_BANKS = $0101;		// memory banks array
+{$endif}
 
 	M_PI_2	= pi*2;
 	D_PI_2	= pi/2;
 	D_PI_180= pi/180;
 
+{$ifdef atari}
 	mGTIA	= 0;
 	mVBXE	= $80;
 //	WINDOW	= $10;			// text window
@@ -165,9 +168,10 @@ const
 
 	iDLI = 0;			// set new DLI vector
 	iVBL = 1;			// set new VBL vector
+{$endif}
 
 (* Character codes *)
-
+{$ifndef raw}
 	CH_DELCHR	= chr($FE);	// delete char under the cursor
 	CH_ENTER	= chr($9B);
 	CH_ESC		= chr($1B);
@@ -183,34 +187,37 @@ const
 	CH_DEL		= chr($7E);	// back space (delete char to the left)
 	CH_DELLINE	= chr($9C);	// delete line
 	CH_INSLINE	= chr($9D);	// insert line
+{$endif}
 
 (* color defines *)
-
-	COLOR_BLACK		= $00;
-	COLOR_WHITE		= $0e;
-	COLOR_RED		= $32;
-	COLOR_CYAN		= $96;
+{$ifdef atari}
+	COLOR_BLACK			= $00;
+	COLOR_WHITE			= $0e;
+	COLOR_RED			= $32;
+	COLOR_CYAN			= $96;
 	COLOR_VIOLET		= $68;
-	COLOR_GREEN		= $c4;
-	COLOR_BLUE		= $74;
+	COLOR_GREEN			= $c4;
+	COLOR_BLUE			= $74;
 	COLOR_YELLOW		= $ee;
 	COLOR_ORANGE		= $28;
-	COLOR_BROWN		= $e4;
+	COLOR_BROWN			= $e4;
 	COLOR_LIGHTRED		= $3c;
-	COLOR_GRAY1		= $04;
-	COLOR_GRAY2		= $06;
-	COLOR_GRAY3		= $0a;
+	COLOR_GRAY1			= $04;
+	COLOR_GRAY2			= $06;
+	COLOR_GRAY3			= $0a;
 	COLOR_LIGHTGREEN	= $cc;
-	COLOR_LIGHTBLUE         = $7c;
+	COLOR_LIGHTBLUE 	= $7c;
+{$endif}
 
 (* file mode *)
-
+{$ifndef raw}
 	fmOpenRead	= $04;
 	fmOpenWrite	= $08;
 	fmOpenAppend	= $09;
 	fmOpenReadWrite	= $0c;
+{$endif}
 
-
+{$ifndef raw}
 var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
@@ -228,7 +235,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	IOResult: byte;			(* @var result of last file IO operation *)
 
 	EoLn: Boolean;			(* @var end of line status *)
-
+{$endif}
 
 	function Abs(x: Real): Real; register; assembler; overload;
 	function Abs(x: Single): Single; register; assembler; overload;
@@ -1813,15 +1820,7 @@ _toct2	lsr Value+3
 };
 end;
 
-{$ifdef atari}
-	{$i system_atari.inc}
-{$endif}
-{$ifdef c64}
-	{$i system_c64.inc}
-{$endif}
-{$ifdef c4p}
-	{$i system_c4p.inc}
-{$endif}
+{$i '../targets/system.inc'}
 
 function ParamCount: byte; assembler;
 (*
