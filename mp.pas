@@ -4293,6 +4293,16 @@ var i, l, k, m, x: integer;
      Result := listing[i] = #9'ldy #1';
    end;
 
+   function ROL_EAX_1(i: integer): Boolean; inline;
+   begin
+     Result := listing[i] = #9'rol :eax+1';
+   end;
+
+   function STA_EAX_1(i: integer): Boolean; inline;
+   begin
+     Result := listing[i] = #9'sta :eax+1';
+   end;
+
 
    function IX(i: integer): Boolean;
    begin
@@ -10559,7 +10569,7 @@ end;
 
     if lda(i) and									// lda 				; 0
        adc_sbc(i+1) and									// adc|sbc			; 1
-       (listing[i+2] = #9'sta :eax+1') and						// sta :eax+1			; 2
+       sta_eax_1(i+2) and								// sta :eax+1			; 2
        lda(i+3) and									// lda 				; 3
        add_sub(i+4) and	(pos(' :eax', listing[i+4]) > 0) and 				// add|sub :eax			; 4
        sta(i+5) and									// sta				; 5
@@ -10575,7 +10585,7 @@ end;
 
     if lda(i) and									// lda 				; 0
        adc_sbc(i+1) and									// adc|sbc			; 1
-       (listing[i+2] = #9'sta :eax+1') and						// sta :eax+1			; 2
+       sta_eax_1(i+2) and								// sta :eax+1			; 2
        (listing[i+3] = #9'lda :eax') and						// lda :eax			; 3
        sta(i+4) and									// sta				; 4
        (lda(i+5) = false) then								// ~lda				; 5
@@ -11508,7 +11518,7 @@ end;
     if (listing[i] = #9'sta :eax') and							// sta :eax			; 0
        lda(i+1) and									// lda				; 1
        (adc(i+2) or sbc(i+2)) and							// adc|sbc			; 2
-       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1			; 3
+       sta_eax_1(i+3) and								// sta :eax+1			; 3
        lda_im_0(i+4) and								// lda #$00			; 4
        (adc_im_0(i+5) or sbc_im_0(i+5)) and						// adc|sbc #$00			; 5
        (listing[i+6] = #9'sta :eax+2') and						// sta :eax+2			; 6
@@ -11717,7 +11727,7 @@ end;
        lda_im_0(i+5) and								// lda #$00		; 5
        (listing[i+6] = #9'sta :ecx+2') and						// sta :ecx+2		; 6
        (listing[i+7] = #9'sta :ecx+3') and						// sta :ecx+3		; 7
-       (listing[i+8] = #9'sta :eax+1') and						// sta :eax+1		; 8
+       sta_eax_1(i+8) and								// sta :eax+1		; 8
        (listing[i+9] = #9'sta :eax+2') and						// sta :eax+2		; 9
        (listing[i+10] = #9'sta :eax+3') and						// sta :eax+3		; 10
        (listing[i+11] = #9'jsr imulECX') then						// jsr imulECX		; 11
@@ -11743,7 +11753,7 @@ end;
     if (listing[i] = #9'sta :eax') and							// sta :eax		; 0
        lda_im_0(i+1) and								// lda #$00		; 1
        (adc_im_0(i+2) or sbc_im_0(i+2)) and						// adc|sbc #$00		; 2
-       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1		; 3
+       sta_eax_1(i+3) and								// sta :eax+1		; 3
        lda_im_0(i+4) and								// lda #$00		; 4
        (adc_im_0(i+5) or sbc_im_0(i+5)) and						// adc|sbc #$00		; 5
        (listing[i+6] = #9'sta :eax+2') and						// sta :eax+2		; 6
@@ -11883,7 +11893,7 @@ end;
        (listing[i+1] = #9'bpl @+') and							// bpl @+		; 1
        lda(i+2) and									// lda  		; 2
        sub(i+3) and									// sub 			; 3
-       (listing[i+4] = #9'sta :eax+1') and						// sta :eax+1		; 4
+       sta_eax_1(i+4) and								// sta :eax+1		; 4
        (listing[i+5] = '@') and								//@			; 5
        lda_stack(i+6) and 								// lda :STACK		; 6
        ((listing[i+7] = #9'add :eax') or (pos('sub :eax', listing[i+7]) > 0)) and	// add|sub :eax		; 7
@@ -11914,7 +11924,7 @@ end;
        (listing[i+3] = #9'sta :ztmp10') and						// sta :ztmp10		; 3
        lda(i+4) and									// lda			; 4
        adc_sbc(i+5) and									// adc|sbc		; 5
-       (listing[i+6] = #9'sta :eax+1') and						// sta :eax+1		; 6
+       sta_eax_1(i+6) and								// sta :eax+1		; 6
        (listing[i+7] = #9'sta :ztmp11') and						// sta :ztmp11		; 7
        lda(i+8) and									// lda			; 8
        add_sub(i+9) and									// add|sub		; 9
@@ -12003,7 +12013,7 @@ end;
        (listing[i+1] = #9'bpl @+') and							// bpl @+		; 1
        (listing[i+2] = #9'lda :eax+1') and						// lda :eax+1 		; 2
        sub(i+3) and									// sub 			; 3
-       (listing[i+4] = #9'sta :eax+1') and						// sta :eax+1		; 4
+       sta_eax_1(i+4) and								// sta :eax+1		; 4
        (listing[i+5] = '@') and								//@			; 5
        (listing[i+6] = #9'lda :eax') and 						// lda :eax		; 6
        (pos(' :eax+1', listing[i+7]) = 0) and
@@ -12047,7 +12057,7 @@ end;
        (listing[i+15] = #9'sta :eax') and 						// sta :eax				; 15
        sta(i+16) and 									// sta					; 16
        lda_stack(i+17) and 								// lda :STACKORIGIN+STACKWIDTH+9	; 17
-       (listing[i+18] = #9'sta :eax+1') and 						// sta :eax+1				; 18
+       sta_eax_1(i+18) and 								// sta :eax+1				; 18
        sta(i+19) then 									// sta					; 19
      if (copy(listing[i+2], 6, 256) = copy(listing[i+14], 6, 256)) and
 	(copy(listing[i+5], 6, 256) = copy(listing[i+17], 6, 256)) then
@@ -12091,13 +12101,13 @@ end;
        ((listing[i+1] = #9'sta :eax') or (listing[i+1] = #9'sta :ecx')) and		// sta :eax|:ecx			; 1
        (pos('sta :ztmp', listing[i+2]) > 0) and						// sta :ztmp...				; 2
        lda(i+3) and									// lda					; 3
-       ((listing[i+4] = #9'sta :eax+1') or (listing[i+4] = #9'sta :ecx+1')) and		// sta :eax+1|:ecx+1			; 4
+       (sta_eax_1(i+4) or (listing[i+4] = #9'sta :ecx+1')) and				// sta :eax+1|:ecx+1			; 4
        (pos('sta :ztmp', listing[i+5]) > 0) and 					// sta :ztmp...				; 5
        lda(i+6) and 									// lda :STACKORIGIN+10			; 6
        ((listing[i+7] = #9'sta :ecx') or (listing[i+7] = #9'sta :eax')) and 		// sta :ecx|:eax			; 7
        (pos('sta :ztmp', listing[i+8]) > 0) and						// sta :ztmp...				; 8
        lda(i+9) and 									// lda					; 9
-       ((listing[i+10] = #9'sta :ecx+1') or (listing[i+10] = #9'sta :eax+1')) and	// sta :ecx+1|:eax+1			; 10
+       ((listing[i+10] = #9'sta :ecx+1') or sta_eax_1(i+10)) and			// sta :ecx+1|:eax+1			; 10
        (pos('sta :ztmp', listing[i+11]) > 0) and 					// sta :ztmp...				; 11
        IFDEF_MUL16(i+12) and								// .ifdef fmulinit			; 12
       											// fmulu_16				; 13
@@ -12124,7 +12134,7 @@ end;
        ((listing[i+6] = #9'sta :ecx') or (listing[i+6] = #9'sta :eax')) and 		// sta :ecx|:eax			; 6
        (pos('sta :ztmp', listing[i+7]) > 0) and						// sta :ztmp...				; 7
        lda(i+8) and 									// lda					; 8
-       ((listing[i+9] = #9'sta :ecx+1') or (listing[i+9] = #9'sta :eax+1')) and		// sta :ecx+1|:eax+1			; 9
+       ((listing[i+9] = #9'sta :ecx+1') or sta_eax_1(i+9)) and				// sta :ecx+1|:eax+1			; 9
        (pos('sta :ztmp', listing[i+10]) > 0) and 					// sta :ztmp...				; 10
        IFDEF_MUL16(i+11) and								// .ifdef fmulinit			; 11
        											// fmulu_16				; 12
@@ -12173,7 +12183,7 @@ end;
        (listing[i+8] = #9'sta :eax') and 						// sta :eax				; 8
        sta(i+9) and									// sta :ztmp10				; 9
        lda_stack(i+10) and 								// lda :STACKORIGIN+STACKWIDTH+10	; 10
-       (listing[i+11] = #9'sta :eax+1') and 						// sta :eax+1				; 11
+       sta_eax_1(i+11) and 								// sta :eax+1				; 11
        sta(i+12) then 									// sta :ztmp11				; 12
      if copy(listing[i], 6, 256) = copy(listing[i+10], 6, 256) then
      begin
@@ -14788,9 +14798,9 @@ end;
 
 // add !!!
 
-    if (listing[i] = #9'sta :eax+1') and							// sta :eax+1				; 0
+    if sta_eax_1(i) and										// sta :eax+1				; 0
        (listing[i+1] = #9'asl :eax') and							// asl :eax				; 1
-       (listing[i+2] = #9'rol :eax+1') and							// rol :eax+1				; 2
+       rol_eax_1(i+2) and									// rol :eax+1				; 2
        lda(i+3) and										// lda 					; 3
        (listing[i+4] = #9'add :eax+1') and							// add :eax+1				; 4
        sta(i+5) then										// sta 					; 5
@@ -15362,16 +15372,16 @@ end;
 	Result:=false; Break;
       end;
 
-
+{
     if lda_im_0(i) and										// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and							// sta :eax+1				; 1
+       sta_eax_1(i+1) and									// sta :eax+1				; 1
        lda(i+2) and										// lda					; 2
        asl_a(i+3) and										// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and							// rol :eax+1				; 4
+       rol_eax_1(i+4) and									// rol :eax+1				; 4
        asl_a(i+5) and										// asl @				; 5
-       (listing[i+6] = #9'rol :eax+1') and							// rol :eax+1				; 6
+       rol_eax_1(i+6) and									// rol :eax+1				; 6
        asl_a(i+7) and										// asl @				; 7
-       (listing[i+8] = #9'rol :eax+1') and							// rol :eax+1				; 8
+       rol_eax_1(i+8) and									// rol :eax+1				; 8
        tay(i+9) then										// tay					; 9
       begin
 	listing[i]   := '';
@@ -15386,14 +15396,14 @@ end;
 
 
     if lda_im_0(i) and										// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and							// sta :eax+1				; 1
+       sta_eax_1(i+1) and									// sta :eax+1				; 1
        lda(i+2) and										// lda					; 2
        asl_a(i+3) and										// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and							// rol :eax+1				; 4
+       rol_eax_1(i+4) and									// rol :eax+1				; 4
        asl_a(i+5) and										// asl @				; 5
-       (listing[i+6] = #9'rol :eax+1') and							// rol :eax+1				; 6
+       rol_eax_1(i+6) and									// rol :eax+1				; 6
        asl_a(i+7) and										// asl @				; 7
-       (listing[i+8] = #9'rol :eax+1') and							// rol :eax+1				; 8
+       rol_eax_1(i+8) and									// rol :eax+1				; 8
        add_sub(i+9) and										// add|sub				; 9
        tay(i+10) then										// tay					; 10
       begin
@@ -15406,13 +15416,13 @@ end;
 
 	Result:=false; Break;
       end;
-
+}
 
     if lda_im_0(i) and										// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and							// sta :eax+1				; 1
+       sta_eax_1(i+1) and									// sta :eax+1				; 1
        lda(i+2) and										// lda					; 2
        asl_a(i+3) and										// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and							// rol :eax+1				; 4
+       rol_eax_1(i+4) and									// rol :eax+1				; 4
        add_sub(i+5) and										// add|sub				; 5
        add_sub(i+6) and										// add|sub				; 6
        and_ora_eor(i+7) and									// and|ora|eor				; 7
@@ -15422,6 +15432,23 @@ end;
 	listing[i+1] := '';
 
 	listing[i+4] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if asl_a(i) and										// asl @				; 0
+       rol_eax_1(i+1) and									// rol :eax+1				; 1
+       (tay(i+2) or 										// tay					; 2
+       (sta(i+2) and (listing[i+3] = '')) or							// sta ; ''				; 2
+       (add_sub(i+2) and tay(i+3))) then							// add|sub ; tay			; 2
+      begin
+
+	p:=i;
+	while asl_a(p) and rol_eax_1(p+1) do begin
+	 listing[p+1] := '';
+	 dec(p, 2);
+	end;
 
 	Result:=false; Break;
       end;
@@ -19936,7 +19963,7 @@ end;
     if lda_stack(i) and									// lda :STACKORIGIN+9			; 0
        (listing[i+1] = #9'sta :eax') and						// sta :eax				; 1
        lda_stack(i+2) and								// lda :STACKORIGIN+STACKWIDTH+9	; 2
-       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1				; 3
+       sta_eax_1(i+3) and								// sta :eax+1				; 3
        lda(i+4) and									// lda					; 4
        (listing[i+5] = #9'add :eax') and						// add :eax				; 5
        sta(i+6) and									// sta					; 6
@@ -21765,7 +21792,7 @@ end;
     if lda(i) and									// lda			; 0
        (listing[i+1] = #9'sta :eax') and						// sta :eax		; 1
        lda(i+2) and									// lda			; 2
-       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1		; 3
+       sta_eax_1(i+3) and								// sta :eax+1		; 3
        (listing[i+4] = #9'lda :eax') and						// lda :eax		; 4
        add_sub(i+5) and									// add|sub		; 5
        sta(i+6) and									// sta			; 6
@@ -21787,7 +21814,7 @@ end;
     if lda(i) and									// lda			; 0
        (listing[i+1] = #9'sta :eax') and						// sta :eax		; 1
        lda(i+2) and									// lda			; 2
-       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1		; 3
+       sta_eax_1(i+3) and								// sta :eax+1		; 3
        lda(i+4) and									// lda			; 4
        ((listing[i+5] = #9'add :eax') or (listing[i+5] = #9'sub :eax')) and		// add|sub :eax		; 5
        tay(i+6) and									// tay			; 6
@@ -21832,19 +21859,19 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        asl_a(i+5) and									// asl @				; 5
-       (listing[i+6] = #9'rol :eax+1') and						// rol :eax+1				; 6
+       rol_eax_1(i+6) and								// rol :eax+1				; 6
        add(i+7) and									// add					; 7
        (listing[i+8] = #9'sta :eax') and						// sta :eax				; 8
        (listing[i+9] = #9'lda :eax+1') and						// lda :eax+1				; 9
        adc_im_0(i+10) and								// adc #$00				; 10
-       (listing[i+11] = #9'sta :eax+1') and						// sta :eax+1				; 11
+       sta_eax_1(i+11) and								// sta :eax+1				; 11
        (listing[i+12] = #9'asl :eax') and						// asl :eax				; 12
-       (listing[i+13] = #9'rol :eax+1') and						// rol :eax+1				; 13
+       rol_eax_1(i+13) and								// rol :eax+1				; 13
        (listing[i+14] = #9'lda :eax') and						// lda :eax				; 14
        add_sub(i+15) and								// add|sub 				; 15
        (tay(i+16) or									// tay|sta :STACK			; 16
@@ -21870,19 +21897,19 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        asl_a(i+5) and									// asl @				; 5
-       (listing[i+6] = #9'rol :eax+1') and						// rol :eax+1				; 6
+       rol_eax_1(i+6) and								// rol :eax+1				; 6
        add(i+7) and									// add					; 7
        (listing[i+8] = #9'sta :eax') and						// sta :eax				; 8
        (listing[i+9] = #9'lda :eax+1') and						// lda :eax+1				; 9
        adc_im_0(i+10) and								// adc #$00				; 10
-       (listing[i+11] = #9'sta :eax+1') and						// sta :eax+1				; 11
+       sta_eax_1(i+11) and								// sta :eax+1				; 11
        (listing[i+12] = #9'asl :eax') and						// asl :eax				; 12
-       (listing[i+13] = #9'rol :eax+1') and						// rol :eax+1				; 13
+       rol_eax_1(i+13) and								// rol :eax+1				; 13
        lda(i+14) and 									// lda 					; 14
        add_sub(i+15) and								// add|sub 				; 15
        ((listing[i+16] = #9'add :eax') or (listing[i+16] = #9'sub :eax')) and		// add|sub :eax				; 16
@@ -21906,19 +21933,19 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        asl_a(i+5) and									// asl @				; 5
-       (listing[i+6] = #9'rol :eax+1') and						// rol :eax+1				; 6
+       rol_eax_1(i+6) and								// rol :eax+1				; 6
        add(i+7) and									// add					; 7
        (listing[i+8] = #9'sta :eax') and						// sta :eax				; 8
        (listing[i+9] = #9'lda :eax+1') and						// lda :eax+1				; 9
        adc_im_0(i+10) and								// adc #$00				; 10
-       (listing[i+11] = #9'sta :eax+1') and						// sta :eax+1				; 11
+       sta_eax_1(i+11) and								// sta :eax+1				; 11
        (listing[i+12] = #9'asl :eax') and						// asl :eax				; 12
-       (listing[i+13] = #9'rol :eax+1') and						// rol :eax+1				; 13
+       rol_eax_1(i+13) and								// rol :eax+1				; 13
        (listing[i+14] = #9'lda :eax') and						// lda :eax				; 14
        sta(i+15) and									// sta 					; 15
        (pos(' :eax+1', listing[i+16]) = 0) and						// ~ :eax+1				; 16
@@ -21943,19 +21970,19 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        asl_a(i+5) and									// asl @				; 5
-       (listing[i+6] = #9'rol :eax+1') and						// rol :eax+1				; 6
+       rol_eax_1(i+6) and								// rol :eax+1				; 6
        add(i+7) and									// add					; 7
        (listing[i+8] = #9'sta :eax') and						// sta :eax				; 8
        (listing[i+9] = #9'lda :eax+1') and						// lda :eax+1				; 9
        adc_im_0(i+10) and								// adc #$00				; 10
-       (listing[i+11] = #9'sta :eax+1') and						// sta :eax+1				; 11
+       sta_eax_1(i+11) and								// sta :eax+1				; 11
        (listing[i+12] = #9'asl :eax') and						// asl :eax				; 12
-       (listing[i+13] = #9'rol :eax+1') and						// rol :eax+1				; 13
+       rol_eax_1(i+13) and								// rol :eax+1				; 13
        (listing[i+14] = #9'lda :eax') and						// lda :eax				; 14
        add_sub(i+15) and								// add|sub 				; 15
        sta(i+16) and									// sta					; 16
@@ -21981,15 +22008,15 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        add(i+5) and									// add					; 5
        (listing[i+6] = #9'sta :eax') and						// sta :eax				; 6
        (listing[i+7] = #9'lda :eax+1') and						// lda :eax+1				; 7
        adc_im_0(i+8) and								// adc #$00				; 8
-       (listing[i+9] = #9'sta :eax+1') and						// sta :eax+1				; 9
+       sta_eax_1(i+9) and								// sta :eax+1				; 9
        (listing[i+10] = #9'lda :eax') and						// lda :eax				; 10
        sta(i+11) and									// sta					; 11
        (pos(' :eax+1', listing[i+12]) = 0) and						// ~ :eax+1				; 12
@@ -22009,15 +22036,15 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        add(i+5) and									// add					; 5
        (listing[i+6] = #9'sta :eax') and						// sta :eax				; 6
        (listing[i+7] = #9'lda :eax+1') and						// lda :eax+1				; 7
        adc_im_0(i+8) and								// adc #$00				; 8
-       (listing[i+9] = #9'sta :eax+1') and						// sta :eax+1				; 9
+       sta_eax_1(i+9) and								// sta :eax+1				; 9
        (listing[i+10] = #9'lda :eax') and						// lda :eax				; 10
        add_sub(i+11) and								// add|sub				; 11
        sta(i+12) and									// sta					; 12
@@ -22038,10 +22065,10 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        add(i+5) and									// add					; 5
        ((listing[i+6] = #9'sta :eax') or sta_stack(i+6)) and				// sta :eax				; 6
        (pos(' :eax+1', listing[i+7]) = 0) and						// ~ :eax+1				; 7
@@ -22058,10 +22085,10 @@ end;
 
 
     if lda_im_0(i) and									// lda #$00				; 0
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1				; 1
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
-       (listing[i+4] = #9'rol :eax+1') and						// rol :eax+1				; 4
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        add(i+5) and									// add					; 5
        sta(i+6) and									// sta 					; 6
        (listing[i+7] = #9'lda :eax+1') and						// lda :eax+1				; 7
@@ -22117,7 +22144,7 @@ end;
 
 
     if lda_stack(i) and									// lda :STACKORIGIN	; 0	byte = byte * ?
-       (listing[i+1] = #9'sta :eax+1') and						// sta :eax+1		; 1
+       sta_eax_1(i+1) and								// sta :eax+1		; 1
        (pos('mva :eax ', listing[i+2]) > 0) and						// mva :eax v		; 2
        (pos('mva :eax+1 ', listing[i+3]) = 0) then					//~mva :eax		; 3
      begin
@@ -22131,7 +22158,7 @@ end;
     if lda_stack(i) and									// lda :STACKORIGIN		; 0	word = byte * ?
        (listing[i+1] = #9'sta :eax') and						// sta :eax			; 1
        lda_stack(i+2) and 								// lda :STACKORIGIN+STACKWIDTH	; 2
-       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1			; 3
+       sta_eax_1(i+3) and								// sta :eax+1			; 3
        (pos('mva :eax ', listing[i+4]) > 0) and 					// mva :eax V			; 4
        (pos('mva :eax+1 ', listing[i+5]) > 0) then					// mva :eax+1 V+1		; 5
      begin
@@ -22725,10 +22752,10 @@ end;
 
 
     if lda_im_0(i) and										// lda #$00		; 0
-       (listing[i+1] = #9'sta :eax+1') and							// sta :eax+1		; 1
+       sta_eax_1(i+1) and									// sta :eax+1		; 1
        lda(i+2) and										// lda			; 2
        asl_a(i+3) and										// asl @		; 3
-       (listing[i+4] = #9'rol :eax+1') and							// rol :eax+1		; 4
+       rol_eax_1(i+4) and									// rol :eax+1		; 4
        add(i+5) and										// add			; 5
        (listing[i+6] = #9'sta :eax') and							// sta :eax		; 6
        (pos(' :eax+1', listing[i+7]) = 0) and							// ~ :eax+1		; 7
@@ -35083,24 +35110,23 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
  if Ident[IdentIndex].isInline then begin
 
+// if pass = CODEGENERATIONPASS then
+//  writeln(svar,',', Ident[IdentIndex].ProcAsBlock,',', BlockStack[BlockStackTop], ',' ,Ident[IdentIndex].Block ,',', Ident[IdentIndex].UnitIndex );
 
- if pass = CODEGENERATIONPASS then
+//  asm65(#9'.local ' + svar);
 
-  writeln(svar,',', Ident[IdentIndex].ProcAsBlock,',', BlockStack[BlockStackTop], ',' ,Ident[IdentIndex].Block ,',', Ident[IdentIndex].UnitIndex );
-
- asm65(#9'.local ' + svar);
- {
   if (BlockStack[BlockStackTop] <> 1) and (Ident[IdentIndex].Block = BlockStack[BlockStackTop]) then	// w aktualnym bloku procedury/funkcji
    asm65(#9'.local ' + svar)
   else
   if Ident[IdentIndex].UnitIndex > 1 then
-   asm65(#9'.local :MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)			// w innym module
+   asm65(#9'.local +MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)			// w innym module
   else
-   asm65(#9'.local :MAIN.' + svar);									// w tym samym module poza aktualnym blokiem procedury/funkcji
-}
+   asm65(#9'.local +MAIN.' + svar);									// w tym samym module poza aktualnym blokiem procedury/funkcji
 
-  asm65(#9+svar+'.INLINE');
+
+  asm65(#9+'m@INLINE');
   asm65(#9'.endl');
+
  end else
   asm65(#9'jsr '+svar);				// GenerateCall
 
@@ -40666,7 +40692,7 @@ begin
  else
    asm65('.local'#9 + Ident[BlockIdentIndex].Name, info);
 
- if Ident[BlockIdentIndex].isInline then asm65(#13#10#9'.MACRO INLINE');
+ if Ident[BlockIdentIndex].isInline then asm65(#13#10#9'.MACRO m@INLINE');
 
 end;
 
