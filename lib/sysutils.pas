@@ -589,15 +589,11 @@ function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;
 @returns: string[32]
 *)
 asm
-{	txa:pha
-
-	jsr @hexStr
+{	jsr @hexStr
 
 ;	@move #@buf Result #33
 	ldy #256-33
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
-
-	pla:tax
 };
 end;
 

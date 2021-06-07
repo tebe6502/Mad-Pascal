@@ -259,14 +259,14 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Exp(x: Float): Float; overload;
 	function FilePos(var f: file): cardinal; assembler;
 	function FileSize(var f: file): cardinal; assembler;
-	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload;
-	procedure FillByte(var x; count: word; value: byte); assembler; register; overload;
-	procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload;
-	procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload;
-	procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload;
-	procedure FillChar(var x; count: word; value: char); assembler; register; overload;
-	procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
-	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
+	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
+	procedure FillByte(var x; count: word; value: byte); assembler; register; overload; inline;
+	procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload; inline;
+	procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
+	procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
+	procedure FillChar(var x; count: word; value: char); assembler; register; overload; inline;
+	procedure FillChar(var x; count: word; value: byte); assembler; register; overload; inline;
+	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload; inline;
 	function FloatToStr(a: real): TString; stdcall; assembler;
 	procedure FreeMem(var p; size: word); assembler; register;
 	procedure GetMem(var p; size: word); assembler; register;
@@ -277,21 +277,21 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Ln(x: Real): Real; overload;
 	function Ln(x: Float): Float; overload;
  	function LowerCase(a: char): char;
-	procedure Move(source, dest: pointer; count: word); assembler; register; overload;
-	procedure Move(var source, dest; count: word); assembler; register; overload;
-	procedure Move(var source; dest: pointer; count: word); assembler; register; overload;
+	procedure Move(source, dest: pointer; count: word); assembler; register; overload; inline;
+	procedure Move(var source, dest; count: word); assembler; register; overload; inline;
+	procedure Move(var source; dest: pointer; count: word); assembler; register; overload; inline;
 	function OctStr(Value: cardinal; Digits: byte): TString; assembler;
 	function ParamCount: byte; assembler;
 	function ParamStr(i: byte): TString; assembler;
-	procedure Pause; assembler; overload;                                                      //platform dependent
-	procedure Pause(n: word); assembler; overload;                                             //platform dependent
+	procedure Pause; assembler; overload;							//platform dependent
+	procedure Pause(n: word); assembler; overload;						//platform dependent
 	function Peek(a: word): byte; register; stdcall; assembler;
 	procedure Poke(a: word; value: byte); register; stdcall; assembler;
-	function Random: Real; overload;                                                           //platform dependent
-	function Random(range: byte): byte; assembler; overload;                                   //platform dependent
-	function Random(range: smallint): smallint; overload;                                      //platform dependent
-	function RandomF: Float;                                                                   //platform dependent
-	procedure Randomize; assembler;                                                            //platform dependent
+	function Random: Real; overload;							//platform dependent
+	function Random(range: byte): byte; assembler; overload;				//platform dependent
+	function Random(range: smallint): smallint; overload;					//platform dependent
+	function RandomF: Float;								//platform dependent
+	procedure Randomize; assembler;								//platform dependent
 	procedure RunError(a: byte);
 	procedure Seek(var f: file; a: cardinal); assembler;
 	procedure SetLength(var S: string; Len: byte); register; assembler;
@@ -345,15 +345,11 @@ Convert cardinal value to string with hexadecimal representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
-
-	jsr @hexStr
+{	jsr @hexStr
 
 ;	@move #@buf Result #33
 	ldy #256-33
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
-
-	pla:tax
 };
 end;
 
@@ -1412,7 +1408,7 @@ asm
 end;
 
 
-procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload;
+procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
@@ -1426,7 +1422,7 @@ asm
 };
 end;
 
-procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload;
+procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
@@ -1440,7 +1436,7 @@ asm
 };
 end;
 
-procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload;
+procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
@@ -1454,7 +1450,7 @@ asm
 };
 end;
 
-procedure FillChar(var x; count: word; value: char); assembler; register; overload;
+procedure FillChar(var x; count: word; value: char); assembler; register; overload; inline;
 (*
 @description:
 
@@ -1464,7 +1460,7 @@ asm
 };
 end;
 
-procedure FillChar(var x; count: word; value: byte); assembler; register; overload;
+procedure FillChar(var x; count: word; value: byte); assembler; register; overload; inline;
 (*
 @description:
 
@@ -1474,7 +1470,7 @@ asm
 };
 end;
 
-procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload;
+procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload; inline;
 (*
 @description:
 
@@ -1485,7 +1481,7 @@ asm
 end;
 
 
-procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload;
+procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
@@ -1498,7 +1494,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 };
 end;
 
-procedure FillByte(var x; count: word; value: byte); assembler; register; overload;
+procedure FillByte(var x; count: word; value: byte); assembler; register; overload; inline;
 (*
 @description:
 
@@ -1509,7 +1505,7 @@ asm
 end;
 
 
-procedure Move(source, dest: pointer; count: word); assembler; register; overload;
+procedure Move(source, dest: pointer; count: word); assembler; register; overload; inline;
 (*
 @description:
 Moves Count bytes from Source to Dest
@@ -1525,7 +1521,7 @@ asm
 };
 end;
 
-procedure Move(var source, dest; count: word); assembler; register; overload;
+procedure Move(var source, dest; count: word); assembler; register; overload; inline;
 (*
 @description:
 
@@ -1535,7 +1531,7 @@ asm
 };
 end;
 
-procedure Move(var source; dest: pointer; count: word); assembler; register; overload;
+procedure Move(var source; dest: pointer; count: word); assembler; register; overload; inline;
 (*
 @description:
 
