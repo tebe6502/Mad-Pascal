@@ -7,6 +7,7 @@ var	i, bnk: shortint;
 	p: word;
 	cpu: byte;
 
+{$define romoff}
 
 begin
 
@@ -80,12 +81,13 @@ begin
 
 
 (* ------------------------------- *) 
-(* ---	     VIDEO BASIC	-- *) 
+(* ---	        BASIC		-- *) 
 (* ------------------------------- *) 
 
  write('  Basic: ');
 
  case DetectBASIC of
+    0: writeln('ROM OFF');
   162: writeln('Atari Basic Rev.A');
    96: writeln('Atari Basic Rev.B');
   234: writeln('Atari Basic Rev.C');
@@ -111,7 +113,10 @@ begin
    64: writeln('QMEG+OS 4.04');
   253: writeln('QMEG+OS RC01');
  else
-  writeln('UNKNOWN')
+  if portb and 1 = 0 then 
+   writeln('ROM OFF')
+  else  
+   writeln('UNKNOWN');
  end; 
 
 
