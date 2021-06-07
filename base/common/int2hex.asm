@@ -6,6 +6,8 @@
 Value	= edx
 Digits	= ecx
 
+	txa:pha
+
 	ldx Digits
 	cpx #32
 	scc
@@ -24,6 +26,8 @@ Digits	= ecx
 
 	lda Digits
 	sta @buf
+
+	pla:tax
 	rts
 
 hex	pha
