@@ -1,5 +1,15 @@
 
-if (pos(#9'jsr SYSTEM.MOVE_', TemporaryBuf[10]) = 1) then begin
+// -----------------------------------------------------------------------------
+// ===		     optymalizacja 	MOVE.		  	  	  === //
+// -----------------------------------------------------------------------------
+
+
+if (pos(#9'jsr SYSTEM.MOVE_', TemporaryBuf[10]) = 1) or
+
+   ((pos(#9'.local +MAIN.SYSTEM.MOVE_', TemporaryBuf[10]) = 1) and
+    (TemporaryBuf[11] = #9'm@INLINE') and
+    (TemporaryBuf[12] = #9'.endl')) then begin
+
 
     if (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[9]) = 1) and (pos('.SOURCE+1', TemporaryBuf[9]) > 0) and
        (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[8]) = 1) and (pos('.SOURCE', TemporaryBuf[8]) > 0) and
@@ -58,6 +68,11 @@ if (pos(#9'jsr SYSTEM.MOVE_', TemporaryBuf[10]) = 1) then begin
 	  TemporaryBuf[7] := '~';
 	  TemporaryBuf[8] := '~';
 
+          if (TemporaryBuf[11] = #9'm@INLINE') then begin
+	   TemporaryBuf[11] := '~';
+	   TemporaryBuf[12] := '~';
+	  end;
+
 	 end;
 
        end;
@@ -66,7 +81,11 @@ end;
 
 
 
- if (pos(#9'jsr SYSTEM.MOVE_', TemporaryBuf[12]) = 1) then begin
+ if (pos(#9'jsr SYSTEM.MOVE_', TemporaryBuf[12]) = 1) or
+
+   ((pos(#9'.local +MAIN.SYSTEM.MOVE_', TemporaryBuf[12]) = 1) and
+    (TemporaryBuf[13] = #9'm@INLINE') and
+    (TemporaryBuf[14] = #9'.endl')) then begin
 
     if (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[11]) = 1) and (pos('.SOURCE+1', TemporaryBuf[11]) > 0) and
        (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[9]) = 1) and (pos('.SOURCE', TemporaryBuf[9]) > 0) and
@@ -132,6 +151,11 @@ end;
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
 
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
+
 	 end;
 
        end;
@@ -184,6 +208,11 @@ end;
 
 	  TemporaryBuf[11] := #9'ldy #$'+IntToHex(k-1, 2);
 	  TemporaryBuf[12] := #9'mva:rpl $' + IntToHex(p, 4) + ',y (:bp2),y-';
+
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
 
 	end;
 
@@ -242,6 +271,11 @@ end;
 	  TemporaryBuf[5] := '~';
 	  TemporaryBuf[6] := '~';
 
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
+
 	end;
 
        end;
@@ -294,6 +328,11 @@ end;
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
 
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
+
 	end;
 
        end;
@@ -342,6 +381,11 @@ end;
 	TemporaryBuf[8] := '~';
 	TemporaryBuf[9] := '~';
 	TemporaryBuf[10] := '~';
+
+        if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	 TemporaryBuf[13] := '~';
+	 TemporaryBuf[14] := '~';
+	end;
 
        end;
 
@@ -392,6 +436,11 @@ end;
 	  TemporaryBuf[8] := '~';
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
+
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
 
 	end;
 
@@ -445,6 +494,64 @@ end;
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
 
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
+
+	end;
+
+       end;
+
+
+    if (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[11]) = 1) and (pos('.SOURCE+1', TemporaryBuf[11]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[9]) = 1) and (pos('.SOURCE', TemporaryBuf[9]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[8]) = 1) and (pos('.COUNT+1', TemporaryBuf[8]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[6]) = 1) and (pos('.COUNT', TemporaryBuf[6]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[4]) = 1) and (pos('.DEST+1', TemporaryBuf[4]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[1]) = 1) and (pos('.DEST', TemporaryBuf[1]) > 0) and
+       (pos(#9'lda #', TemporaryBuf[5]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[7]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       begin
+{
+	add|sub				; 0
+	sta SYSTEM.MOVE_00A1.DEST	; 1
+	lda DLTOP+1			; 2
+	adc|sbc				; 3
+	sta SYSTEM.MOVE_00A1.DEST+1	; 4
+	lda #$0E			; 5
+	sta SYSTEM.MOVE_00A1.COUNT	; 6
+	lda #$00			; 7
+	sta SYSTEM.MOVE_00A1.COUNT+1	; 8
+	sta SYSTEM.MOVE_00A1.SOURCE	; 9
+	lda #$20			; 10
+	sta SYSTEM.MOVE_00A1.SOURCE+1	; 11
+}
+	p:=GetWORD(7, 10);		// src
+	k:=GetWORD(5, 7);		// len
+
+	if k <= 128 then begin
+
+	  TemporaryBuf[1] := #9'sta :bp2';
+
+	  TemporaryBuf[4] := #9'sta :bp2+1';
+
+	  TemporaryBuf[11] := #9'ldy #$'+IntToHex(k-1, 2);
+	  TemporaryBuf[12] := #9'mva:rpl $' + IntToHex(p, 4) + ',y (:bp2),y-';
+
+	  TemporaryBuf[5] := '~';
+	  TemporaryBuf[6] := '~';
+	  TemporaryBuf[7] := '~';
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
+
 	end;
 
        end;
@@ -492,6 +599,11 @@ end;
 	  TemporaryBuf[8] := '~';
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
+
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
 
 	end;
 
