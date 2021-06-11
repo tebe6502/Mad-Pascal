@@ -92,6 +92,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [weather](https://gitlab.com/bocianu/weather)
 * [cart builder](https://gitlab.com/bocianu/cart_builder)
 * [Mole](https://github.com/GSoftwareDevelopment/Mole)
+* [SFX-Tracker](https://github.com/GSoftwareDevelopment/SFX-Tracker)
 
 ## Benchmarks
 
