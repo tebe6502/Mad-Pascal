@@ -29,6 +29,7 @@ Contributors:
 
 + Daniel KoŸmiñski :
 	- unit STRINGUTILS
+	- unit CIO
 
 + Guillermo Fuenzalida :
 	- unit MISC: DetectANTIC
