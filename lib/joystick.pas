@@ -64,6 +64,10 @@ var
 	ptrig6 : byte absolute $282;	// Paddle trigger 6
 	ptrig7 : byte absolute $283;	// Paddle trigger 7
 
+	trig0 : byte absolute $d010;	// (R)
+	trig1 : byte absolute $d011;	// (R)
+
+
 implementation
 
 
