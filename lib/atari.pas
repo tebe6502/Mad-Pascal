@@ -134,6 +134,10 @@ var
 	penv: byte absolute $D40D;
 	nmien: byte absolute $D40E;
 
+	nmivec	: word absolute $FFFA;		// wektor przerwania NMI (6502)
+	resetvec: word absolute $FFFC;		// wektor przerwania RESET
+	irqvec	: word absolute $FFFE;		// wektor przerwania IRQ
+
 implementation
 
 

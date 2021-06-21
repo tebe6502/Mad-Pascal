@@ -70,9 +70,22 @@ irq1	tya
 	inc sample+1			; next hi byte of sample
 	dec size			; check if at end of sample
 	bne irq2			; branch if not
+
+	lda #0
+IRQ_l	equ *-1
+	sta irqvec
+
+	lda #0
+IRQ_h	equ *-1
+	sta irqvec+1
+
+	lda #0
+IRQ_s	equ *-1
+	sta IRQEN
+
 	lda #0
 size	equ *-1				; = 0
-	sta IRQEN			; end of sample - reset interrupt
+//	sta IRQEN			; end of sample - restore OLD IRQ interrupt
 	beq irq3			; always branch
 
 irq2	ora #$f0			; no polycounters + volume only bit
@@ -87,13 +100,13 @@ end;
 procedure TSMP.Play; assembler;
 (*
 @description:
-Play music, call this procedure every VBL frame
+
 *)
 asm
 	sei
 	mvy #0 IRQEN
 
-	mwa	#MAIN.SMP.PlaySample	$fffe		; setup custom IRQ handler
+	mwa #MAIN.SMP.PlaySample irqvec	; setup custom IRQ handler
 
 	lda :bp2
 	pha
@@ -139,8 +152,21 @@ wait3	cpy VCOUNT
 	lda #3
 	sta SKCTL			; test - reset pokey and polycounters
 	sta STIMER			; start timers
+
 	cli
 end;
 
+
+initialization
+
+asm
+	lda irqens
+	sta MAIN.SMP.PlaySample.IRQ_s
+
+	lda irqvec
+	sta MAIN.SMP.PlaySample.IRQ_l
+	lda irqvec+1
+	sta MAIN.SMP.PlaySample.IRQ_h
+end;
 
 end.
