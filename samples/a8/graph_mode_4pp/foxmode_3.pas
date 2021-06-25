@@ -1,3 +1,4 @@
+// inline
 
 {$r foxmode.rc}
 
@@ -58,6 +59,39 @@ var _c1a, _c1b: byte;
     a,b, k: byte;
     scrn: PByte absolute $e0;
     tmp: byte absolute $e2;
+
+
+procedure row; inline;
+begin
+	scrn[23] := lookupMul[xbuf1[23] + tmp] + lookupDiv[xbuf0[23] + tmp];
+	scrn[22] := lookupMul[xbuf1[22] + tmp] + lookupDiv[xbuf0[22] + tmp];
+	scrn[21] := lookupMul[xbuf1[21] + tmp] + lookupDiv[xbuf0[21] + tmp];
+	scrn[20] := lookupMul[xbuf1[20] + tmp] + lookupDiv[xbuf0[20] + tmp];
+	scrn[19] := lookupMul[xbuf1[19] + tmp] + lookupDiv[xbuf0[19] + tmp];
+	scrn[18] := lookupMul[xbuf1[18] + tmp] + lookupDiv[xbuf0[18] + tmp];
+	scrn[17] := lookupMul[xbuf1[17] + tmp] + lookupDiv[xbuf0[17] + tmp];
+	scrn[16] := lookupMul[xbuf1[16] + tmp] + lookupDiv[xbuf0[16] + tmp];
+	scrn[15] := lookupMul[xbuf1[15] + tmp] + lookupDiv[xbuf0[15] + tmp];
+	scrn[14] := lookupMul[xbuf1[14] + tmp] + lookupDiv[xbuf0[14] + tmp];
+	scrn[13] := lookupMul[xbuf1[13] + tmp] + lookupDiv[xbuf0[13] + tmp];
+	scrn[12] := lookupMul[xbuf1[12] + tmp] + lookupDiv[xbuf0[12] + tmp];
+	scrn[11] := lookupMul[xbuf1[11] + tmp] + lookupDiv[xbuf0[11] + tmp];
+	scrn[10] := lookupMul[xbuf1[10] + tmp] + lookupDiv[xbuf0[10] + tmp];
+	scrn[9] := lookupMul[xbuf1[9] + tmp] + lookupDiv[xbuf0[9] + tmp];
+	scrn[8] := lookupMul[xbuf1[8] + tmp] + lookupDiv[xbuf0[8] + tmp];
+	scrn[7] := lookupMul[xbuf1[7] + tmp] + lookupDiv[xbuf0[7] + tmp];
+	scrn[6] := lookupMul[xbuf1[6] + tmp] + lookupDiv[xbuf0[6] + tmp];
+	scrn[5] := lookupMul[xbuf1[5] + tmp] + lookupDiv[xbuf0[5] + tmp];
+	scrn[4] := lookupMul[xbuf1[4] + tmp] + lookupDiv[xbuf0[4] + tmp];
+	scrn[3] := lookupMul[xbuf1[3] + tmp] + lookupDiv[xbuf0[3] + tmp];
+	scrn[2] := lookupMul[xbuf1[2] + tmp] + lookupDiv[xbuf0[2] + tmp];
+	scrn[1] := lookupMul[xbuf1[1] + tmp] + lookupDiv[xbuf0[1] + tmp];
+	scrn[0] := lookupMul[xbuf1[0] + tmp] + lookupDiv[xbuf0[0] + tmp];
+
+	inc(scrn, 40);
+end;
+
+
 begin
     scrn := pointer(VIDEO_RAM_ADDRESS + 8 + 10*40);	// X=8 ; Y=10
 
@@ -79,18 +113,11 @@ begin
 
         tmp := xbuf0[ii];
 
- 	for i := 23 downto 0 do
-	    scrn[i] := lookupMul[xbuf1[i] + tmp] + lookupDiv[xbuf0[i] + tmp];
-
-	inc(scrn, 40);
-
+	row;
 
         tmp := xbuf1[ii];
 
- 	for i := 23 downto 0 do
-	    scrn[i] := lookupMul[xbuf1[i] + tmp] + lookupDiv[xbuf0[i] + tmp];
-
-	inc(scrn, 40);
+	row;
 
     end;
 
