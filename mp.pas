@@ -11999,14 +11999,14 @@ end;
    if listing[i] <> '' then begin
 
 
-{
-if (pos('sta #$00', listing[i]) > 0) then begin
+(*
+if (pos(' :TMP', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
-}
+*)
 
 
 // -----------------------------------------------------------------------------
@@ -13331,7 +13331,7 @@ end;
        end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda I			; 0
+    if lda(i) and (lda_im(i) = false) and (lda_stack(i) = false) and				// lda I			; 0
        add_sub(i+1) and										// add_sub			; 1
        sta(i+2) and (sta_stack(i+2) = false) and						// sta				; 2
        ldy(i+3) then										// ldy I			; 3
@@ -28071,7 +28071,7 @@ begin
 
    for i := 0 to l - 1 do
     if mva_im(i) or
-       (mva(i) and (pos('mva adr.', listing[i]) = 0) and (pos(':STACK', listing[i]) = 0)) or
+       (mva(i) and (pos('mva adr.', listing[i]) = 0) and (pos(':STACK', listing[i]) = 0) and (iy(i) = false)) or
        (lda_a(i) and (lda_stack(i) = false) and (iy(i) = false) {and (SKIP(i+1) = false)}) then
     begin
 
