@@ -56,7 +56,6 @@ end;
 procedure doPlasma;
 var _c1a, _c1b: byte;
     i, ii: byte;
-    a,b, k: byte;
     scrn: PByte absolute $e0;
     tmp: byte absolute $e2;
 
