@@ -1,5 +1,7 @@
 25.06.2021
 - poprawa b³êdu optymalizacji rejestru A (opty REG A)
+- nowa biblioteka SMP (Sample player)
+- INLINE, nowy modyfikator dla procedur, funkcji który zamienia je w makra
 
 23.05.2021
 - poprawione dzia³ania EXIT w przypadku kiedy wystêpuj¹ zagnie¿d¿one procedury/funkcje
