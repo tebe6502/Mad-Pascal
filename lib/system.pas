@@ -191,20 +191,20 @@ const
 
 (* color defines *)
 {$ifdef atari}
-	COLOR_BLACK			= $00;
-	COLOR_WHITE			= $0e;
-	COLOR_RED			= $32;
-	COLOR_CYAN			= $96;
+	COLOR_BLACK		= $00;
+	COLOR_WHITE		= $0e;
+	COLOR_RED		= $32;
+	COLOR_CYAN		= $96;
 	COLOR_VIOLET		= $68;
-	COLOR_GREEN			= $c4;
-	COLOR_BLUE			= $74;
+	COLOR_GREEN		= $c4;
+	COLOR_BLUE		= $74;
 	COLOR_YELLOW		= $ee;
 	COLOR_ORANGE		= $28;
-	COLOR_BROWN			= $e4;
+	COLOR_BROWN		= $e4;
 	COLOR_LIGHTRED		= $3c;
-	COLOR_GRAY1			= $04;
-	COLOR_GRAY2			= $06;
-	COLOR_GRAY3			= $0a;
+	COLOR_GRAY1		= $04;
+	COLOR_GRAY2		= $06;
+	COLOR_GRAY3		= $0a;
 	COLOR_LIGHTGREEN	= $cc;
 	COLOR_LIGHTBLUE 	= $7c;
 {$endif}

@@ -7,7 +7,7 @@ unit objects;
 
  @description:
  This unit implements Memory stream objects.
- 
+
  *)
 
 
@@ -178,4 +178,3 @@ initialization
 bank := DetectMem;
 
 end.
-
