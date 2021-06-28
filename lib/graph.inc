@@ -324,7 +324,8 @@ procedure Ellipse(x0, y0, a, b: word); overload;
 @description:
 Bresenham Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
 *)
-var	error, stopx, stopy: integer;
+var	error: integer register;
+	stopx, stopy: integer;
 	x, y: word;
 	a2, b2, _a, _b: cardinal;
 
@@ -505,8 +506,11 @@ Horizontal flood fill
 var xStack: array [0..255] of word absolute $400;
     yStack: array [0..255] of byte absolute $600;
     stackEntry, sx: word;
-    spanAbove, spanBelow: Boolean;
-    oldColor, belowColor, aboveColor: byte;
+    oldColor: byte;
+    spanAbove: Boolean register;
+    spanBelow: Boolean register;
+    belowColor: byte register;
+    aboveColor: byte register;
 begin
 	oldColor := GetPixel(x,y);
 
@@ -703,7 +707,8 @@ Fill an area with a given color, seed fill algorithm
 const
     FILLSTACKSIZE = 512;
 
-var stackPointer, stackEntry: word;
+var stackPointer: word register;
+    stackEntry: word register;
     c: cardinal;
     oldcolor: byte;
     FloodFillStack: array [0..FILLSTACKSIZE-1] of cardinal;

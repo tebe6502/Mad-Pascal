@@ -32,7 +32,7 @@ The mode 0 is reserved for text console.
 {
 
 BlitterBusy
-ClearDevice;
+ClearDevice
 ColorMapOff
 ColorMapOn
 ColorMap
@@ -332,7 +332,7 @@ begin
 
 	VBXEMemoryBank(bnk);
 
-	dst:=Buffer;
+	dst:=@Buffer;
 
 	for i:=0 to Count-1 do begin
 
@@ -369,7 +369,7 @@ begin
 
 	VBXEMemoryBank(bnk);
 
-	src:=Buffer;
+	src:=@Buffer;
 
 	for i:=0 to Count-1 do begin
 
@@ -378,7 +378,7 @@ begin
 	 inc(adr);
 	 inc(src);
 
-	 if adr>=VBXE_WINDOW+$1000 then begin
+	 if adr >= VBXE_WINDOW+$1000 then begin
 	  inc(bnk);
 	  VBXEMemoryBank(bnk);
 	  adr:=VBXE_WINDOW;

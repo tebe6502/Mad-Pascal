@@ -116,7 +116,12 @@ type
   TBlock = array[0..15] of Cardinal;
   PBlock = ^TBlock;
 var
-  a, b, c, d, f, x, y: Cardinal;
+  a: cardinal register;
+  b: cardinal register;
+  c: cardinal register;
+  d: cardinal register;
+
+  f, x, y: Cardinal;
   Block: PBlock;// absolute Buffer;
   i, g: byte;
 
@@ -319,12 +324,11 @@ function MD5Print(var MD5: TMD5): TString;
 
  procedure MoveBuf; assembler;
  asm
- {	ldy #31
+ 	ldy #31
  mv:	lda @buf+1,y
 	sta @buf+9,y
 	dey
 	bpl mv
- };
  end;
 
 begin
@@ -335,9 +339,9 @@ begin
  hexStr(md5.State[0],8);
 
  asm
- {	mva #32 @buf
+ 	mva #32 @buf
 	mwa #@buf Result
- };
+ end;
 
 end;
 
