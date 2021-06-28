@@ -109,6 +109,7 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'common\memmove.asm'	; @move, @moveu
 	icl 'common\memset.asm'		; @fill
 	icl 'common\strmove.asm'	; @moveSTRING, @moveSTRING_1
+	icl 'common\recmove.asm'	; @moveRECORD
 	icl 'common\strcat.asm'		; @addString
 
 	icl 'common\shortint.asm'	; mul / div -> SHORTINT
