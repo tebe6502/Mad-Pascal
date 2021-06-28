@@ -18,6 +18,9 @@ Contributors:
 + Bostjan Gorisek :
 	- unit PMG, ZXLIB
 
++ Chriss Hutt :
+	- unit SMP
+
 + David Schmenk :
 	- IEEE-754 (32bit) single
 
@@ -290,13 +293,14 @@ const
   SINGLETOK		= 143;	// Size = 4 SINGLE/FLOAT		IEEE-754
   PCHARTOK		= 144;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 145;	// Size = 1 BYTE
-  FORWARDTYPE		= 146;
+  TEXTFILETOK		= 146;	// Size = 2/12 FILE
+  FORWARDTYPE		= 147;	// Size = 2
 
-  SHORTSTRINGTOK	= 147;	// zamieniamy na STRINGTOK
-  FLOATTOK		= 148;	// zamieniamy na SINGLETOK
+  SHORTSTRINGTOK	= 148;	// zamieniamy na STRINGTOK
+  FLOATTOK		= 149;	// zamieniamy na SINGLETOK
 
-  DATAORIGINOFFSET	= 150;
-  CODEORIGINOFFSET	= 151;
+  DATAORIGINOFFSET	= 160;
+  CODEORIGINOFFSET	= 161;
 
   IDENTTOK		= 180;
   INTNUMBERTOK		= 181;
@@ -400,7 +404,7 @@ const
 
   // Data sizes
 
-  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,1,2);
+  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,1,2,2);
 
   fBlockRead_ParamType : array [1..3] of byte = (POINTERTOK, WORDTOK, POINTERTOK);
 
@@ -411,7 +415,7 @@ type
 
   irCode = (iDLI, iVBL);
 
-  ioCode = (ioOpenRead = 4, ioRead = 7, ioOpenWrite = 8, ioOpenAppend = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
+  ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
 
   ErrorCode =
   (
@@ -808,6 +812,7 @@ DEREFERENCETOK: Result := '^';
      SINGLETOK: Result := 'SINGLE';
 	SETTOK: Result := 'SET';
        FILETOK: Result := 'FILE';
+   TEXTFILETOK: Result := 'TEXTFILE';
       PCHARTOK: Result := 'PCHAR';
 
    REGISTERTOK: Result := 'REGISTER';
@@ -1873,7 +1878,7 @@ else
        if (DataType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements > 0) then
 	VarDataSize := VarDataSize + 0
        else
-       if (DataType = FILETOK) and (NumAllocElements > 0) then
+       if (DataType in [FILETOK, TEXTFILETOK]) and (NumAllocElements > 0) then
 	VarDataSize := VarDataSize + 12
        else
 	VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
@@ -9559,9 +9564,8 @@ end;
      end;
 
 
-     if //Result and
-	ldy_stack(i) and								// ldy :STACKORIGIN		; 0
-	(lda_a(i+1) or sta_a(i+1)) then							// lda|sta adr.			; 1
+     if ldy_stack(i) and								// ldy :STACKORIGIN		; 0
+	(lda_adr(i+1) or sta_adr(i+1)) then						// lda|sta adr.			; 1
       begin
 
 	tmp:=#9'sta ' + copy(listing[i], 6, 256);
@@ -11999,14 +12003,14 @@ end;
    if listing[i] <> '' then begin
 
 
-(*
-if (pos(' :TMP', listing[i]) > 0) then begin
+{
+if (pos('sta ADR', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
-*)
+}
 
 
 // -----------------------------------------------------------------------------
@@ -13292,6 +13296,21 @@ end;
 	listing[i+6] := #9'lda (:bp),y';
 
 	Result:=false; Break;
+      end;
+
+
+    if iny(i) and										// iny				; 0
+       lda_a(i+1) and										// lda				; 1
+       iny(i+2) and										// iny				; 2
+       lda_a(i+3) and										// lda				; 3
+       lda_a(i+4) then										// lda				; 4
+      begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	Result := false; Break;
       end;
 
 
@@ -29693,6 +29712,7 @@ Spelling[CLOSEFILETOK	] := 'CLOSE';
 Spelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
 
 Spelling[FILETOK	] := 'FILE';
+Spelling[TEXTFILETOK	] := 'TEXTFILE';
 Spelling[SETTOK		] := 'SET';
 Spelling[PACKEDTOK	] := 'PACKED';
 Spelling[LABELTOK	] := 'LABEL';
@@ -30828,15 +30848,15 @@ begin
 
    ioFileMode: asm65(#9'@openfile '+Ident[IdentIndex].Name+', MAIN.SYSTEM.FileMode');
 
-       ioRead,
-       ioWrite: if NumParams = 3 then
+       ioRead, ioWrite, ioReadRecord, ioWriteRecord:
+
+	        if NumParams = 3 then
 		  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code) or $80))
 		else
 		  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
 
        ioClose: asm65(#9'@closefile '+Ident[IdentIndex].Name);
 
-//   ioOpenAppend: ;
  end;
 
  asm65(#9'pla:tax');
@@ -34541,7 +34561,7 @@ begin
 	     CheckTok(i + 1, CBRACKETTOK);
 
 	     end else
-	      if (Ident[IdentIndex].DataType in [FILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
+	      if (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
 	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType > 0) and (Ident[IdentIndex].NumAllocElements > 0)) or
 		 (Ident[IdentIndex].PassMethod = VARPASSING) or
 		 (VarPass and (Ident[IdentIndex].DataType in Pointers))  then begin
@@ -34702,7 +34722,7 @@ begin
 //      writeln(Ident[IdentTemp].DataType,',',Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	if Ident[IdentTemp].DataType in Pointers then
-	  if Ident[IdentIndex].Param[NumActualParams].DataType <> FILETOK then begin
+	  if not(Ident[IdentIndex].Param[NumActualParams].DataType in [FILETOK, TEXTFILETOK]) then begin
 
 // writeln(Ident[IdentIndex].Param[NumActualParams].DataType,',', Ident[IdentTemp].DataType);
 // writeln(Ident[IdentIndex].Param[NumActualParams].NumAllocElements,',', Ident[IdentTemp].NumAllocElements);
@@ -38308,7 +38328,7 @@ WHILETOK:
 
 	asm65('; AssignFile');
 
-	if not((Ident[IdentIndex].DataType = FILETOK) or (Ident[IdentIndex].AllocElementType = FILETOK)) then
+	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK]) ) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
 
 	CheckTok(i + 3, COMMATOK);
@@ -38329,6 +38349,24 @@ WHILETOK:
 
 	GenerateAssignment(ASPOINTERTOPOINTER, 1, 0, Ident[IdentIndex].Name, 's@file.status');
 
+	if (Ident[IdentIndex].DataType = TEXTFILETOK) or (Ident[IdentIndex].AllocElementType = TEXTFILETOK) then begin
+
+		  asm65(#9'ldy #s@file.buffer');
+		  asm65(#9'lda <@buf');
+		  asm65(#9'sta (:bp2),y');
+	 	  asm65(#9'iny');
+		  asm65(#9'lda >@buf');
+		  asm65(#9'sta (:bp2),y');
+
+		  asm65(#9'ldy #s@file.numread');
+		  asm65(#9'lda #$00');
+		  asm65(#9'sta (:bp2),y');
+	 	  asm65(#9'iny');
+		  asm65(#9'lda #$01');
+		  asm65(#9'sta (:bp2),y');
+
+	end;
+
 	Result := i + 1;
 	end;
 
@@ -38348,7 +38386,7 @@ WHILETOK:
 
 	asm65('; Reset');
 
-	if not((Ident[IdentIndex].DataType = FILETOK) or (Ident[IdentIndex].AllocElementType = FILETOK)) then
+	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK]) ) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
 
 	StartOptimization(i + 3);
@@ -38394,12 +38432,13 @@ WHILETOK:
 
 	asm65('; Rewrite');
 
-	if not((Ident[IdentIndex].DataType = FILETOK) or (Ident[IdentIndex].AllocElementType = FILETOK)) then
+	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK]) ) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
 
 	StartOptimization(i + 3);
 
 	if Tok[i + 3].Kind <> COMMATOK then begin
+
 	 if Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] = 0 then
 	  Push(128, ASVALUE, 2)
 	 else
@@ -38407,6 +38446,10 @@ WHILETOK:
 
 	 inc(i, 3);
 	end else begin
+
+	 if (Ident[IdentIndex].DataType = TEXTFILETOK) or (Ident[IdentIndex].AllocElementType = TEXTFILETOK) then
+	  Error(i, 'Call by var for arg no. 1 has to match exactly: Got "Text" expected "File"');
+
 	 i := CompileExpression(i + 4, ActualParamType);	     // custom record size
 	 GetCommonType(i, WORDTOK, ActualParamType);
 
@@ -38534,7 +38577,7 @@ WHILETOK:
 
 	asm65('; CloseFile');
 
-	if not((Ident[IdentIndex].DataType = FILETOK) or (Ident[IdentIndex].AllocElementType = FILETOK)) then
+	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK])) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
 
 	CheckTok(i + 3, CPARTOK);
@@ -38561,6 +38604,29 @@ WHILETOK:
       else
 	begin
 	IdentIndex := GetIdent(Tok[i + 2].Name^);
+
+	if (IdentIndex > 0) and (Ident[identIndex].DataType = TEXTFILETOK) then begin
+
+	  GenerateFileOpen(IdentIndex, ioReadRecord, 0);
+
+	  inc(i, 3);
+
+	  CheckTok(i, COMMATOK);
+	  CheckTok(i + 1, IDENTTOK);
+
+	  if Ident[GetIdent(Tok[i + 1].Name^)].DataType <> STRINGPOINTERTOK then
+	   iError(i + 1, VariableExpected);
+
+	  IdentIndex := GetIdent(Tok[i + 1].Name^);
+
+	  asm65(#9'@moveRECORD ' +  GetLocalName(IdentIndex) );
+
+	  CheckTok(i + 2, CPARTOK);
+
+	  Result := i + 2;
+
+	end else
+
 	if IdentIndex > 0 then
 	  if (Ident[IdentIndex].Kind <> VARIABLE) {or (Ident[IdentIndex].DataType <> CHARTOK)} then
 	    iError(i + 2, IncompatibleTypeOf, IdentIndex)
@@ -38620,6 +38686,7 @@ WHILETOK:
 
     yes := (Tok[i].Kind = WRITELNTOK);
 
+
     if Tok[i + 1].Kind = SEMICOLONTOK then begin
 
     end else begin
@@ -38627,6 +38694,56 @@ WHILETOK:
      CheckTok(i + 1, OPARTOK);
 
      inc(i);
+
+     if (Tok[i + 1].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i + 1].Name^)].DataType = TEXTFILETOK) then begin
+
+      IdentIndex := GetIdent(Tok[i + 1].Name^);
+
+      inc(i);
+      CheckTok(i + 1, COMMATOK);
+      inc(i);
+
+      case Tok[i + 1].Kind of
+
+        IDENTTOK:
+		begin
+
+		  if Ident[GetIdent(Tok[i + 1].Name^)].DataType <> STRINGPOINTERTOK then
+		   iError(i + 1, VariableExpected);
+
+		  asm65(#9'mwy ' + GetLocalName(GetIdent(Tok[i + 1].Name^)) +' :bp2');
+		  asm65(#9'ldy #$01');
+		  asm65(#9'mva:rne (:bp2),y @buf-1,y+');
+		  asm65(#9'ldy #$00');
+		  asm65(#9'lda (:bp2),y');
+		  asm65(#9'tay');
+		  asm65(#9'lda #eol');
+		  asm65(#9'sta @buf,y');
+
+	          GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+
+		  inc(i, 2);
+
+		end;
+
+	STRINGLITERALTOK:			      // 'text'
+		begin
+	          asm65(#9'ldy #$00');
+		  asm65(#9'mva:rne CODEORIGIN+$'+IntToHex(Tok[i + 1].StrAddress - CODEORIGIN + 1,4)+',y @buf,y+');
+		  asm65(#9'lda #eol');
+		  asm65(#9'ldy CODEORIGIN+$'+IntToHex(Tok[i + 1].StrAddress - CODEORIGIN,4));
+		  asm65(#9'sta @buf,y');
+
+		  GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+
+		  inc(i, 2);
+		end;
+
+      end;
+
+      yes:=false;
+
+     end else
 
       repeat
 
@@ -39632,6 +39749,16 @@ if Tok[i].Kind = OPARTOK then begin					// enumerated
 
 end else
 
+if Tok[i].Kind = TEXTFILETOK then begin					// TextFile
+
+ AllocElementType := BYTETOK;
+ NumAllocElements := 1;
+
+ DataType := TEXTFILETOK;
+ Result := i;
+
+end else
+
 if Tok[i].Kind = FILETOK then begin					// File
 
  if Tok[i + 1].Kind = OFTOK then
@@ -40112,8 +40239,15 @@ var IdentIndex, size: integer;
       Result := #9'= DATAORIGIN+$'+IntToHex(Ident[IdentIndex].Value - DATAORIGIN, 4);
 
     end else
-     if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..3]) then begin
-      Result := #9'= '+reg[(Ident[IdentIndex].Value shr 24) and $7f];
+     if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) then begin
+
+      case byte((Ident[IdentIndex].Value shr 24) and $7f) of
+       1..3 : Result := #9'= '+reg[(Ident[IdentIndex].Value shr 24) and $7f];
+       4..19: Result := #9'= :STACKORIGIN-'+IntToStr(byte((Ident[IdentIndex].Value shr 24) and $7f)-3);
+      else
+       Result := #9'= ''out of resource'''
+      end;
+
       size := 0;
      end else
      if Ident[IdentIndex].isAbsolute then begin
@@ -40714,7 +40848,7 @@ var
   ConstVal: Int64;
   IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isForward, ImplementationUse: Boolean;
   iocheck_old, isInterrupt_old, yes, pack: Boolean;
-  VarType, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
+  VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp: Byte;
   TmpResult: byte;
 
@@ -40726,8 +40860,9 @@ ResetOpty;
 
 FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
 
-j:=0;
-ConstVal:=0;
+j := 0;
+ConstVal := 0;
+VarRegister := 0;
 
 ImplementationUse:=false;
 pack:=false;
@@ -41472,7 +41607,7 @@ while Tok[i].Kind in
 
       if IdType = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
-{
+
       if Tok[i + 1].Kind = REGISTERTOK then begin
 
 	if NumVarOfSameType > 1 then
@@ -41480,12 +41615,14 @@ while Tok[i].Kind in
 
 	isAbsolute := true;
 
-	ConstVal := $ffffff0000+1;
+	inc(VarRegister, DataSize[VarType]);
+
+	ConstVal := (VarRegister+3) shl 24 + 1 ;
 
 	inc(i);
 
       end else
-}
+
 
       if Tok[i + 1].Kind = ABSOLUTETOK then begin
 

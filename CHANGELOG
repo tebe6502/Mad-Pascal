@@ -1,3 +1,8 @@
+27.06.2021
+- dodana obs³uga typu TEXTFILE
+- poprawiony unit VBXE (ReadBuffer, WriteBuffer)
+- dodana mo¿liwoœæ deklaracji zmiennej na stronie zerowej przez u¿ycie modyfikatora REGISTER
+
 25.06.2021
 - poprawa b³êdu optymalizacji rejestru A (opty REG A)
 - nowa biblioteka SMP (Sample player)
