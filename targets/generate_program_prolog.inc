@@ -43,14 +43,13 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('psptr'#9'.ds 2','; PROGRAMSTACK Pointer');
  asm65;
 
- asm65('eax'#9'.ds 4', ';8 bytes (aex + edx) -> divREAL');
- asm65('edx'#9'.ds 4');
-
- asm65('ecx'#9'.ds 4');
-
  asm65('bp'#9'.ds 2');
  asm65('bp2'#9'.ds 2');
+ asm65;
 
+ asm65('eax'#9'.ds 4', ';8 bytes (aex + edx) -> divREAL');
+ asm65('edx'#9'.ds 4');
+ asm65('ecx'#9'.ds 4');
  asm65;
 
  asm65('TMP');
@@ -60,9 +59,6 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('ztmp9'#9'.ds 1');
  asm65('ztmp10'#9'.ds 1');
  asm65('ztmp11'#9'.ds 1');
-
- //asm65;
- //asm65('TMP'#9'.ds 2');
 
  if STACK_Atari > 0 then begin
   asm65;
