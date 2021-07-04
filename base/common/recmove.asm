@@ -3,7 +3,6 @@
 
 /*
 	@moveRECORD
-	@moveSTRING_1
 */
 
 .proc	@moveRECORD (.word ya) .reg
