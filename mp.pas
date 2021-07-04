@@ -298,6 +298,7 @@ const
 
   SHORTSTRINGTOK	= 148;	// zamieniamy na STRINGTOK
   FLOATTOK		= 149;	// zamieniamy na SINGLETOK
+  TEXTTOK		= 150;	// zamieniamy na TEXTFILETOK
 
   DATAORIGINOFFSET	= 160;
   CODEORIGINOFFSET	= 161;
@@ -12004,7 +12005,7 @@ end;
 
 
 {
-if (pos('sta ADR', listing[i]) > 0) then begin
+if (pos('lda I', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -29319,6 +29320,7 @@ var
 	  begin
 
 	 CurToken := GetStandardToken(Text);
+	 if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
 	 if CurToken = FLOATTOK then CurToken := SINGLETOK;
 	 if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
@@ -29818,6 +29820,7 @@ Spelling[PCHARTOK	] := 'PCHAR';
 
 Spelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
 Spelling[FLOATTOK	] := 'FLOAT';
+Spelling[TEXTTOK	] := 'TEXT';
 
  AsmFound  := false;
  UsesFound := false;
@@ -37372,7 +37375,7 @@ case Tok[i].Kind of
 
 {
 	if (Tok[k].Kind = IDENTTOK) then
-	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,' / ',IndirectionLevel)
+	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
 	else
 	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
 }
@@ -37793,8 +37796,6 @@ case Tok[i].Kind of
     DefineIdent(i, '@CASETMP_'+IntToHex(CaseLocalCnt, 4), VARIABLE, SelectorType, 0, 0, 0);
 
     GetIdent('@CASETMP_'+IntToHex(CaseLocalCnt, 4));
-
-//    GenerateCaseProlog;
 
 
     yes:=true;
@@ -38358,13 +38359,6 @@ WHILETOK:
 		  asm65(#9'lda >@buf');
 		  asm65(#9'sta (:bp2),y');
 
-		  asm65(#9'ldy #s@file.numread');
-		  asm65(#9'lda #$00');
-		  asm65(#9'sta (:bp2),y');
-	 	  asm65(#9'iny');
-		  asm65(#9'lda #$01');
-		  asm65(#9'sta (:bp2),y');
-
 	end;
 
 	Result := i + 1;
@@ -38399,6 +38393,10 @@ WHILETOK:
 
 	 inc(i, 3);
 	end else begin
+
+	 if (Ident[IdentIndex].DataType = TEXTFILETOK) or (Ident[IdentIndex].AllocElementType = TEXTFILETOK) then
+	  Error(i, 'Call by var for arg no. 1 has to match exactly: Got "Text" expected "File"');
+
 	 i := CompileExpression(i + 4, ActualParamType);	     // custom record size
 	 GetCommonType(i, WORDTOK, ActualParamType);
 
@@ -38607,6 +38605,8 @@ WHILETOK:
 
 	if (IdentIndex > 0) and (Ident[identIndex].DataType = TEXTFILETOK) then begin
 
+	  asm65(#9'lda #eol');
+	  asm65(#9'sta @buf');
 	  GenerateFileOpen(IdentIndex, ioReadRecord, 0);
 
 	  inc(i, 3);
@@ -38705,22 +38705,47 @@ WHILETOK:
 
       case Tok[i + 1].Kind of
 
-        IDENTTOK:
+        IDENTTOK:					// variable (pointer to string)
 		begin
 
 		  if Ident[GetIdent(Tok[i + 1].Name^)].DataType <> STRINGPOINTERTOK then
 		   iError(i + 1, VariableExpected);
 
-		  asm65(#9'mwy ' + GetLocalName(GetIdent(Tok[i + 1].Name^)) +' :bp2');
-		  asm65(#9'ldy #$01');
-		  asm65(#9'mva:rne (:bp2),y @buf-1,y+');
-		  asm65(#9'ldy #$00');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9'tay');
-		  asm65(#9'lda #eol');
-		  asm65(#9'sta @buf,y');
+	   	   asm65(#9'mwy ' + GetLocalName(GetIdent(Tok[i + 1].Name^)) +' :bp2');
+		   asm65(#9'ldy #$01');
+		   asm65(#9'mva:rne (:bp2),y @buf-1,y+');
+		   asm65(#9'lda (:bp2),y');
 
-	          GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+		   if yes then begin 								// WRITELN
+
+			asm65(#9'tay');
+			asm65(#9'lda #eol');
+			asm65(#9'sta @buf,y');
+
+			asm65(#9'mwy ' + GetLocalName(IdentIndex) +' :bp2');
+
+			asm65(#9'ldy #s@file.nrecord');
+			asm65(#9'lda #$00');
+			asm65(#9'sta (:bp2),y');
+	 		asm65(#9'iny');
+			asm65(#9'lda #$01');
+			asm65(#9'sta (:bp2),y');
+
+	        	GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+
+		   end else begin								// WRITE
+
+			asm65(#9'mwy ' + GetLocalName(IdentIndex) +' :bp2');
+
+			asm65(#9'ldy #s@file.nrecord');
+			asm65(#9'sta (:bp2),y');
+	 		asm65(#9'iny');
+			asm65(#9'lda #$00');
+			asm65(#9'sta (:bp2),y');
+
+	        	GenerateFileOpen(IdentIndex, ioWrite, 0);
+
+		   end;
 
 		  inc(i, 2);
 
@@ -38730,14 +38755,86 @@ WHILETOK:
 		begin
 	          asm65(#9'ldy #$00');
 		  asm65(#9'mva:rne CODEORIGIN+$'+IntToHex(Tok[i + 1].StrAddress - CODEORIGIN + 1,4)+',y @buf,y+');
-		  asm65(#9'lda #eol');
-		  asm65(#9'ldy CODEORIGIN+$'+IntToHex(Tok[i + 1].StrAddress - CODEORIGIN,4));
-		  asm65(#9'sta @buf,y');
 
-		  GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+		   if yes then begin 								// WRITELN
+
+		 	asm65(#9'lda #eol');
+			asm65(#9'ldy CODEORIGIN+$'+IntToHex(Tok[i + 1].StrAddress - CODEORIGIN,4));
+			asm65(#9'sta @buf,y');
+
+			asm65(#9'mwy ' + GetLocalName(IdentIndex) +' :bp2');
+
+			asm65(#9'ldy #s@file.nrecord');
+			asm65(#9'lda #$00');
+			asm65(#9'sta (:bp2),y');
+	 		asm65(#9'iny');
+			asm65(#9'lda #$01');
+			asm65(#9'sta (:bp2),y');
+
+	        	GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+
+		   end else begin								// WRITE
+
+			asm65(#9'lda CODEORIGIN+$'+IntToHex(Tok[i + 1].StrAddress - CODEORIGIN,4));
+
+			asm65(#9'mwy ' + GetLocalName(IdentIndex) +' :bp2');
+
+			asm65(#9'ldy #s@file.nrecord');
+			asm65(#9'sta (:bp2),y');
+	 		asm65(#9'iny');
+			asm65(#9'lda #$00');
+			asm65(#9'sta (:bp2),y');
+
+	        	GenerateFileOpen(IdentIndex, ioWrite, 0);
+
+		   end;
 
 		  inc(i, 2);
 		end;
+
+
+	INTNUMBERTOK:			      // 0..9
+		begin
+		  asm65(#9'txa:pha');
+
+		  Push(Tok[i + 1].Value, ASVALUE, DataSize[CARDINALTOK]);
+
+		  asm65(#9'@ValueToRec #@printINT');
+
+		  asm65(#9'pla:tax');
+
+		   if yes then begin 								// WRITELN
+
+			asm65(#9'mwy ' + GetLocalName(IdentIndex) +' :bp2');
+
+			asm65(#9'ldy #s@file.nrecord');
+			asm65(#9'lda #$00');
+			asm65(#9'sta (:bp2),y');
+	 		asm65(#9'iny');
+			asm65(#9'lda #$01');
+			asm65(#9'sta (:bp2),y');
+
+	        	GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+
+		   end else begin								// WRITE
+
+			asm65(#9'tya');
+
+			asm65(#9'mwy ' + GetLocalName(IdentIndex) +' :bp2');
+
+			asm65(#9'ldy #s@file.nrecord');
+			asm65(#9'sta (:bp2),y');
+	 		asm65(#9'iny');
+			asm65(#9'lda #$00');
+			asm65(#9'sta (:bp2),y');
+
+	        	GenerateFileOpen(IdentIndex, ioWrite, 0);
+
+		   end;
+
+		  inc(i, 2);
+		end;
+
 
       end;
 
