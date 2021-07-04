@@ -18,3 +18,22 @@ adr	equ *-2
 
 	rts
 .endp
+
+
+; Value To Record
+
+.proc	@ValueToRec (.word ya) .reg
+
+	sta adr
+	sty adr+1
+
+	mva #{bit*} @printVALUE.pout
+	mva <@buf @printVALUE.pbuf
+
+	jsr $ffff
+adr	equ *-2
+
+	ldy @printVALUE.pbuf
+
+	rts
+.endp
