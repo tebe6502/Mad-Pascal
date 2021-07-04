@@ -47,8 +47,8 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'atari\vbxe.hea'
 	icl 'atari\atari.hea'
 
-	icl 'atari\sio.asm'		; I/O SIO
-	icl 'atari\cio.asm'		; I/O CIO
+	icl 'atari\sio.asm'		; I/O SIO: @sio
+	icl 'atari\cio.asm'		; I/O CIO: @openfile, @closefile, @readfile, @ReadDirFileName, @DirFileName
 
 	icl 'atari\cmdline.asm'		; @CmdLine
 
@@ -130,7 +130,7 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'common\mul320.asm'		; @mul320
 
 	icl 'common\int2hex.asm'	; @hexStr
-	icl 'common\int2str.asm'	; @ValueToStr
+	icl 'common\int2str.asm'	; @ValueToStr, @ValueToRec
 	icl 'common\str2int.asm'	; @StrToInt, fmul10
 
 	icl 'common\printchr.asm'	; @printCHAR, @printEOL, @print, @printPCHAR
