@@ -416,7 +416,7 @@ type
 
   irCode = (iDLI, iVBL);
 
-  ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
+  ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
 
   ErrorCode =
   (
@@ -30846,19 +30846,52 @@ begin
 
  case Code of
 
+   ioAppend,
    ioOpenRead,
-   ioOpenWrite: asm65(#9'@openfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
+   ioOpenWrite:
 
-   ioFileMode: asm65(#9'@openfile '+Ident[IdentIndex].Name+', MAIN.SYSTEM.FileMode');
+	asm65(#9'@openfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
 
-       ioRead, ioWrite, ioReadRecord, ioWriteRecord:
+   ioFileMode:
 
-	        if NumParams = 3 then
-		  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code) or $80))
-		else
-		  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
+	asm65(#9'@openfile '+Ident[IdentIndex].Name+', MAIN.SYSTEM.FileMode');
 
-       ioClose: asm65(#9'@closefile '+Ident[IdentIndex].Name);
+   ioClose:
+
+   	asm65(#9'@closefile '+Ident[IdentIndex].Name);
+
+ end;
+
+ asm65(#9'pla:tax');
+ asm65;
+
+end;
+
+
+procedure GenerateFileRead(IdentIndex: Integer; Code: ioCode; NumParams: integer = 0);
+begin
+
+ ResetOpty;
+
+ asm65;
+ asm65(#9'txa:pha');
+
+ if IOCheck then
+  asm65(#9'sec')
+ else
+  asm65(#9'clc');
+
+ case Code of
+
+   ioRead,
+   ioWrite,
+   ioReadRecord,
+   ioWriteRecord:
+
+	if NumParams = 3 then
+	  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code) or $80))
+	else
+	  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
 
  end;
 
@@ -38395,7 +38428,7 @@ WHILETOK:
 	end else begin
 
 	 if (Ident[IdentIndex].DataType = TEXTFILETOK) or (Ident[IdentIndex].AllocElementType = TEXTFILETOK) then
-	  Error(i, 'Call by var for arg no. 1 has to match exactly: Got "Text" expected "File"');
+	  Error(i, 'Call by var for arg no. 1 has to match exactly: Got "' + InfoAboutToken(Ident[IdentIndex].DataType) + '" expected "File"');
 
 	 i := CompileExpression(i + 4, ActualParamType);	     // custom record size
 	 GetCommonType(i, WORDTOK, ActualParamType);
@@ -38446,7 +38479,7 @@ WHILETOK:
 	end else begin
 
 	 if (Ident[IdentIndex].DataType = TEXTFILETOK) or (Ident[IdentIndex].AllocElementType = TEXTFILETOK) then
-	  Error(i, 'Call by var for arg no. 1 has to match exactly: Got "Text" expected "File"');
+	  Error(i, 'Call by var for arg no. 1 has to match exactly: Got "' + InfoAboutToken(Ident[IdentIndex].DataType) + '" expected "File"');
 
 	 i := CompileExpression(i + 4, ActualParamType);	     // custom record size
 	 GetCommonType(i, WORDTOK, ActualParamType);
@@ -38464,6 +38497,42 @@ WHILETOK:
 
 	Result := i;
 	end;
+
+
+  APPENDTOK:
+    if Tok[i + 1].Kind <> OPARTOK then
+      iError(i + 1, OParExpected)
+    else
+      if Tok[i + 2].Kind <> IDENTTOK then
+	iError(i + 2, IdentifierExpected)
+      else
+       begin
+
+	IdentIndex := GetIdent(Tok[i + 2].Name^);
+
+	if IdentIndex = 0 then
+	 iError(i + 2, UnknownIdentifier);
+
+	asm65('; Append');
+
+	if not( (Ident[IdentIndex].DataType in [TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [TEXTFILETOK]) ) then
+	 Error(i, 'Call by var for arg no. 1 has to match exactly: Got "' + InfoAboutToken(Ident[IdentIndex].DataType) + '" expected "Text"');
+
+	if Tok[i + 3].Kind = COMMATOK then
+	 Error(i, 'Wrong number of parameters specified for call to Append');
+
+	StartOptimization(i + 3);
+
+	CheckTok(i + 3, CPARTOK);
+
+	Push(1, ASVALUE, 2);
+
+	GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, Ident[IdentIndex].Name, 's@file.record');
+
+	GenerateFileOpen(IdentIndex, ioAppend);
+
+	Result := i + 3;
+       end;
 
 
   GETRESOURCEHANDLETOK:
@@ -38525,7 +38594,7 @@ WHILETOK:
 
 	NumActualParams := CompileBlockRead(i, IdentIndex, GetIdent('BLOCKREAD'));
 
-	GenerateFileOpen(IdentIndex, ioRead, NumActualParams);
+	GenerateFileRead(IdentIndex, ioRead, NumActualParams);
 
 	Result := i;
 	end;
@@ -38554,7 +38623,7 @@ WHILETOK:
 	inc(i, 2);
 	NumActualParams := CompileBlockRead(i, IdentIndex, GetIdent('BLOCKWRITE'));
 
-	GenerateFileOpen(IdentIndex, ioWrite, NumActualParams);
+	GenerateFileRead(IdentIndex, ioWrite, NumActualParams);
 
 	Result := i;
 	end;
@@ -38607,7 +38676,7 @@ WHILETOK:
 
 	  asm65(#9'lda #eol');
 	  asm65(#9'sta @buf');
-	  GenerateFileOpen(IdentIndex, ioReadRecord, 0);
+	  GenerateFileRead(IdentIndex, ioReadRecord, 0);
 
 	  inc(i, 3);
 
@@ -38731,7 +38800,7 @@ WHILETOK:
 			asm65(#9'lda #$01');
 			asm65(#9'sta (:bp2),y');
 
-	        	GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+	        	GenerateFileRead(IdentIndex, ioWriteRecord, 0);
 
 		   end else begin								// WRITE
 
@@ -38743,7 +38812,7 @@ WHILETOK:
 			asm65(#9'lda #$00');
 			asm65(#9'sta (:bp2),y');
 
-	        	GenerateFileOpen(IdentIndex, ioWrite, 0);
+	        	GenerateFileRead(IdentIndex, ioWrite, 0);
 
 		   end;
 
@@ -38771,7 +38840,7 @@ WHILETOK:
 			asm65(#9'lda #$01');
 			asm65(#9'sta (:bp2),y');
 
-	        	GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+	        	GenerateFileRead(IdentIndex, ioWriteRecord, 0);
 
 		   end else begin								// WRITE
 
@@ -38785,7 +38854,7 @@ WHILETOK:
 			asm65(#9'lda #$00');
 			asm65(#9'sta (:bp2),y');
 
-	        	GenerateFileOpen(IdentIndex, ioWrite, 0);
+	        	GenerateFileRead(IdentIndex, ioWrite, 0);
 
 		   end;
 
@@ -38814,7 +38883,7 @@ WHILETOK:
 			asm65(#9'lda #$01');
 			asm65(#9'sta (:bp2),y');
 
-	        	GenerateFileOpen(IdentIndex, ioWriteRecord, 0);
+	        	GenerateFileRead(IdentIndex, ioWriteRecord, 0);
 
 		   end else begin								// WRITE
 
@@ -38828,7 +38897,7 @@ WHILETOK:
 			asm65(#9'lda #$00');
 			asm65(#9'sta (:bp2),y');
 
-	        	GenerateFileOpen(IdentIndex, ioWrite, 0);
+	        	GenerateFileRead(IdentIndex, ioWrite, 0);
 
 		   end;
 
