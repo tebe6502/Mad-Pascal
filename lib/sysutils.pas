@@ -16,6 +16,7 @@ Beep
 BoolToStr
 ByteToStr
 Click
+CompareMem
 Date
 DateToStr
 DeleteFile
@@ -73,6 +74,7 @@ const
 	function BoolToStr(B: Boolean; UseBoolStrs: Boolean): TString;
 	function ByteToStr(a: byte): TString; assembler;
 	procedure Click; assembler;
+	function CompareMem(P1,P2: PByte; Len: word): Boolean; register;
 	function Date: TDateTime;
 	function DateToStr(d: TDateTime): TString;
 	procedure DecodeDate(d: TDateTime; var yy,mm,dd: byte);
@@ -1105,6 +1107,29 @@ begin
  Result[0]:=chr(i);
 
 // Result:=Copy(s,1,i);
+end;
+
+
+function CompareMem(P1,P2: PByte; Len: word): Boolean; register;
+begin
+
+ Result := true;
+
+ if P1 <> P2 then begin
+
+  inc(Len, word(P1));
+
+  while P1 < pointer(Len) do begin
+
+   if P1[0] <> P2[0] then begin Result:=false; Break end;
+
+   inc(P1);
+   inc(P2);
+
+  end;
+
+ end;
+
 end;
 
 
