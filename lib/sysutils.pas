@@ -1106,7 +1106,6 @@ begin
  Result:=s;
  Result[0]:=chr(i);
 
-// Result:=Copy(s,1,i);
 end;
 
 
