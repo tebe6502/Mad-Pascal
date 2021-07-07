@@ -16,6 +16,7 @@ unit system;
 Abs
 ArcTan
 BinStr
+CompareByte
 Concat
 Copy
 Cos		; real, single
@@ -245,6 +246,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function ArcTan(value: real): real; overload;
 	function ArcTan(value: single): single; overload;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
+	function CompareByte(P1,P2: PByte; Len: word): smallint; register; overload;
+	function CompareByte(P1,P2: PByte; Len: byte): smallint; register; overload;
 	function Concat(a,b: String): string; assembler; overload;
 	function Concat(a: PString; b: char): string; assembler; overload;
 	function Concat(a: char; b: PString): string; assembler; overload;
@@ -2060,6 +2063,69 @@ asm
 	sbw :psptr size
 skp
 };
+end;
+
+
+function CompareByte(P1,P2: PByte; Len: word): smallint; register; overload;
+(*
+@description:
+Compare 2 memory buffers byte per byte
+
+@param: P1, P2 - pointer
+@param: Len - length
+*)
+begin
+
+ Result:=0;
+
+ if P1 <> P2 then begin
+
+  inc(Len, word(P1));
+
+  while P1 < pointer(Len) do begin
+
+   Result:=(P1[0] - P2[0]);
+
+   if Result <> 0 then Break;
+
+   inc(P1);
+   inc(P2);
+
+ end;
+
+ end;
+
+end;
+
+
+function CompareByte(P1,P2: PByte; Len: byte): smallint; register; overload;
+(*
+@description:
+Compare 2 memory buffers byte per byte
+
+@param: P1, P2 - pointer
+@param: Len - length
+*)
+begin
+
+ Result:=0;
+
+ if P1 <> P2 then begin
+
+  dec(Len);
+
+  while Len <> $ff do begin
+
+   Result:=(P1[Len] - P2[Len]);
+
+   if Result <> 0 then Break;
+
+   dec(Len);
+
+ end;
+
+ end;
+
 end;
 
 
