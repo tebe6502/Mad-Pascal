@@ -40430,7 +40430,7 @@ var IdentIndex, size: integer;
       Result := #9'= DATAORIGIN+$'+IntToHex(Ident[IdentIndex].Value - DATAORIGIN, 4);
 
     end else
-     if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) then begin
+     if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) then begin
 
       case byte((Ident[IdentIndex].Value shr 24) and $7f) of
        1..3 : Result := #9'= '+reg[(Ident[IdentIndex].Value shr 24) and $7f];
