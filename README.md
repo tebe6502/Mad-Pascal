@@ -1,8 +1,8 @@
 # Mad-Pascal
 
-[Doc PL](https://github.com/tebe6502/mad-pascal-mkdocs)
+[Doc PL](http://mads.atari8.info/doc/pl/index.html)
 
-[Doc ENG](https://github.com/tebe6502/mad-pascal-en-mkdocs)
+[Doc ENG](http://mads.atari8.info/doc/en/index.html)
 
 ## Introduction
 
