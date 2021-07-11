@@ -4965,7 +4965,7 @@ var i, l, k, m, x: integer;
    if listing[i] <> '' then begin
 
 {
-   if pos('adr.TABLICA', listing[i]) > 0 then begin
+   if pos('jsr cmpEAX_ECX.AX_CX	', listing[i]) > 0 then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -6869,6 +6869,31 @@ var i, l, k, m, x: integer;
        listing[i+1] := #9'ldy #1';
 
        listing[i+4] := #9'bne @+';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       (listing[i+1] = #9'mva #$00 :STACKORIGIN,x') and 					// mva #$00 :STACKORIGIN,x		; 1
+       (listing[i+2] = #9'sta :STACKORIGIN+STACKWIDTH,x') and 					// sta :STACKORIGIN+STACKWIDTH,x	; 2
+       ldy_1(i+3) and										// ldy #1				; 3
+       (listing[i+4] = #9'jsr cmpEAX_ECX.AX_CX') and						// jsr cmpEAX_ECX.AX_CX			; 4
+       (beq(i+5) or bne(i+5)) and 								// beq|bne @+				; 5
+       dey(i+6) and										// dey					; 6
+       (listing[i+7] = '@') and				 					//@					; 7
+       dex(i+8) and										// dex					; 8
+       dex(i+9) and										// dex					; 9
+       tya(i+10) and										// tya					; 10
+       jeq(i+11) then										// jeq l_				; 11
+     begin
+       listing[i]   := #9'ldy #1';
+       listing[i+1] := #9'lda :STACKORIGIN+STACKWIDTH,x';
+       listing[i+2] := #9'ora :STACKORIGIN,x';
+       listing[i+3] := '';
+       listing[i+4] := '';
+
+       listing[i+8] := '';
 
        Result:=false; Break;
      end;
@@ -12005,7 +12030,7 @@ end;
 
 
 {
-if (pos('lda I', listing[i]) > 0) then begin
+if (pos('jsr cmpEAX_ECX.AX_CX', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22007,7 +22032,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('sta #$00', listing[i]) > 0) then begin
+if (pos('jsr cmpEAX_ECX.AX_CX', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
