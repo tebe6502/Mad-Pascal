@@ -47,7 +47,7 @@ type
   end;
 
 	procedure MD5Buffer(var Buffer; BufLen: word; var MD5: TMD5);
-	procedure MD5String(var text: String; var MD5: TMD5);
+	procedure MD5String(var txt: String; var MD5: TMD5);
 	procedure MD5File(const Filename: TString; var MD5: TMD5);
 	function MD5Print(var MD5: TMD5): TString;
 
@@ -279,11 +279,11 @@ begin
 end;
 
 
-procedure MD5String(var text: String; var MD5: TMD5);
+procedure MD5String(var txt: String; var MD5: TMD5);
 begin
 
   MDInit(md5);
-  MDUpdate(md5, text[1], length(text));
+  MDUpdate(md5, txt[1], length(txt));
   MDFinal(md5);
 
 end;
