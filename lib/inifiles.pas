@@ -30,15 +30,17 @@ type	TINIFile = Object
 
 	FileName: TString;
 
-
 	procedure Create(fn: TString);
 	procedure Free;
 
 	function ReadString(const Section, Ident, Default: TString): TString;
 	function ReadInteger(const Section, Ident: TString; Default: integer): integer;
+	function ReadBool(const Section, Ident: TString; Default: Boolean): Boolean;
+
+
+	function Search(Section, Ident: TString): TString;
 
 {
-	function ReadBool(const Section, Ident: TString; Default: Boolean): Boolean;
 	function ReadFloat(const Section, Ident: TString; Default: Single): Single;
 }
 	end;
@@ -49,6 +51,9 @@ implementation
 uses sysutils;
 
 
+var tmp: string;
+
+
 procedure TINIFile.Free;
 (*
 @description:
@@ -56,6 +61,54 @@ procedure TINIFile.Free;
 
 begin
 
+
+end;
+
+
+function TINIFile.Search(Section, Ident: TString): TString;
+var t: text;
+    yes: Boolean;
+    s: string;
+begin
+
+ Result:='';
+
+ assign(t, FileName); reset(t);
+
+ yes:=true;
+
+ while IOResult = 1 do begin
+
+  readln(t, s);
+
+  tmp:=s;
+
+  Section:=AnsiUpperCase(Section);
+  Ident:=AnsiUpperCase(Ident);
+  s:=AnsiUpperCase(s);
+
+  if (length(s) > 0) and (s[1] <> ';') then
+
+  if yes then begin					// search for SECTION
+
+   if (s[1] = '[') and (s[length(Section) + 2] = ']') then
+    if CompareByte(@Section[1], @s[2], length(Section)) = 0 then yes := false;
+
+  end else begin					// search for KEY = VALUE
+
+   if s[length(Ident) + 1] = '=' then
+    if CompareByte(@Ident[1], @s[1], length(Ident)) = 0 then begin
+
+     Result := copy(tmp, length(Ident) + 2, 255);
+     Break;
+
+    end;
+
+  end;
+
+ end;
+
+ close(t);
 
 end;
 
@@ -82,47 +135,15 @@ function TINIFile.ReadString(const Section, Ident, Default: TString): TString;
 (*
 @description:
 *)
-var t: text;
-    s: TString;
-    yes: Boolean;
 begin
 
- Result:=Default;
+ Result:=TINIFile.Search(Section, Ident);
 
- assign(t, FileName); reset(t);
-
- yes:=true;
-
- while IOResult = 1 do begin
-
-  readln(t, s);
-
-  if (length(s) > 0) and (s[1] <> ';') then
-
-  if yes then begin		// search for SECTION
-
-   if (s[1] = '[') and (s[length(Section) + 2] = ']') then
-    if CompareByte(@Section[1], @s[2], length(Section)) = 0 then yes := false;
-
-  end else begin		// search for KEY = VALUE
-
-   if s[length(Ident) + 1] = '=' then
-    if CompareByte(@Ident[1], @s[1], length(Ident)) = 0 then begin
-
-     Result := copy(s, length(Ident) + 2, 255);
-
-     if (Result[1] = '"') and (Result[length(Result)] = '"') then	// remove " "
-      Result := copy(Result, 2, length(Result) - 2);
-
-     Break;
-
-    end;
-
-  end;
-
- end;
-
- close(t);
+ if length(Result) = 0 then
+  Result := Default
+ else
+  if (Result[1] = '"') and (Result[length(Result)] = '"') then		// remove " "
+   Result := copy(Result, 2, length(Result) - 2);
 
 end;
 
@@ -131,49 +152,33 @@ function TINIFile.ReadInteger(const Section, Ident: TString; Default: integer): 
 (*
 @description:
 *)
-var t: text;
-    s: TString;
-    yes: Boolean;
-    i: byte;
+var i: byte;
 begin
 
- Result:=Default;
+ tmp:=TINIFile.Search(Section, Ident);
 
- assign(t, FileName); reset(t);
+ val(tmp, Result, i);
 
- yes:=true;
-
- while IOResult = 1 do begin
-
-  readln(t, s);
-
-  if (length(s) > 0) and (s[1] <> ';') then
-
-  if yes then begin		// search for SECTION
-
-   if (s[1] = '[') and (s[length(Section) + 2] = ']') then
-    if CompareByte(@Section[1], @s[2], length(Section)) = 0 then yes := false;
-
-  end else begin		// search for KEY = VALUE
-
-   if s[length(Ident) + 1] = '=' then
-    if CompareByte(@Ident[1], @s[1], length(Ident)) = 0 then begin
-
-     s := copy(s, length(Ident) + 2, 255);
-
-     val(s, Result, i);
-
-     Break;
-
-    end;
-
-  end;
-
- end;
-
- close(t);
+ if (length(tmp) = 0) or (i <> 0) then Result := Default;
 
 end;
+
+
+function TINIFile.ReadBool(const Section, Ident: TString; Default: Boolean): Boolean;
+(*
+@description:
+*)
+begin
+
+ tmp:=TINIFile.Search(Section, Ident);
+
+ if length(tmp) = 1 then
+  Result := (tmp[1] = '1')
+ else
+  Result := Default;
+
+end;
+
 
 
 initialization
