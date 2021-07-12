@@ -111,7 +111,7 @@ begin
 end;
 
 
-procedure MDHash(var Context: TMD5; Buffer: Pointer);
+procedure MDHash(var Context: TMD5; var Buffer);
 type
   TBlock = array[0..15] of Cardinal;
   PBlock = ^TBlock;
@@ -122,12 +122,10 @@ var
   d: cardinal register;
 
   f, x, y: Cardinal;
-  Block: PBlock;// absolute Buffer;
+  Block: PBlock absolute Buffer;
   i, g: byte;
 
 begin
-
-//  Block:=Buffer;
 
   a := Context.State[0];
   b := Context.State[1];
@@ -138,22 +136,20 @@ begin
     for i := 0 to 63 do begin
 
 	if i < 16 then begin
-	  g := i shl 2;
+	  g := i;
 	  f := (b and c) or ((not b) and d);
 	end else
 	if i < 32 then begin
-	  g := ((5*i + 1) and $0f) shl 2;
+	  g := ((5*i + 1) and $0f);
 	  f := (d and b) or ((not d) and c);
 	end else
 	if i < 48 then begin
-	  g := ((3*i + 5) and $0f) shl 2;
+	  g := ((3*i + 5) and $0f);
 	  f := b xor c xor d;
 	end else begin
-	  g := ((7*i) and $0f) shl 2;
+	  g := ((7*i) and $0f);
 	  f := c xor (b or (not d));
 	end;
-
-	Block:=pointer(word(Buffer) + g);
 
 	f:=f+a;
 
@@ -161,7 +157,7 @@ begin
         d := c;
         c := b;
 
-	x := (f + K[i] + Block^);
+	x := (f + K[i] + Block[g]);
 
 	g:=32-s[i];
 
@@ -209,7 +205,7 @@ begin
     // 1.2 If buffer contains "Align" bytes, transform it
     if Context.BufCnt = Align then
     begin
-      MDHash(Context, @Context.Buffer);
+      MDHash(Context, Context.Buffer);
       Context.BufCnt := 0;
     end;
   end;

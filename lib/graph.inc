@@ -401,7 +401,8 @@ procedure FillEllipse(x0, y0, a, b: word);
 @description:
 Bresenham filled Ellipse with center (X0,Y0) and horizontal radius A, vertical radius B.
 *)
-var	error, stopx, stopy: integer;
+var	error: integer register;
+	stopx, stopy: integer;
 	x, y: word;
 	a2, b2, _a, _b: cardinal;
 

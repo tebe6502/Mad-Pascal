@@ -22,7 +22,6 @@ interface
 type	TSMP = Object
 (*
 @description:
-object for controling RMT player
 *)
 	adr: pointer;		// memory address of sample
 	len: byte;		// pages, sample size

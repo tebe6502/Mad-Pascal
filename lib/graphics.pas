@@ -51,9 +51,9 @@ type	TBrushBitmap = array [0..7] of byte;
 	function Font(const Charset: TString): Boolean; overload;
 	procedure FontInitialize; assembler;
 	procedure FillRect(R: TRect);
-	procedure TextOut(X,Y: smallint; const Text: string); overload;
+	procedure TextOut(X,Y: smallint; const Txt: string); overload;
 	procedure TextOut(X,Y: smallint; const ch: char); overload;
-	function TextWidth(const Text: string): word; assembler; overload;
+	function TextWidth(const Txt: string): word; assembler; overload;
 	function TextWidth(const ch: char): byte; assembler; overload;
 	procedure MoveTo(x, y: smallint);
 	procedure LineTo(x,y: smallint);
@@ -263,7 +263,7 @@ end;
 
 
 
-procedure TCanvas.TextOut(X,Y: smallint; const Text: string); overload;
+procedure TCanvas.TextOut(X,Y: smallint; const Txt: string); overload;
 var lpos: word;
     i, xpos, pix: byte;
 
@@ -404,7 +404,7 @@ begin
    xpos:=word(x) shr 3;
    pix:=tpix[x and 7];
 
-   for i:=1 to length(Text) do DrawChar(byte(Text[i]));
+   for i:=1 to length(Txt) do DrawChar(byte(Txt[i]));
 
   end;
 
@@ -421,7 +421,7 @@ begin
 end;
 
 
-function TCanvas.TextWidth(const Text: string): word; assembler; overload;
+function TCanvas.TextWidth(const Txt: string): word; assembler; overload;
 asm
 {	txa:pha
 
@@ -433,13 +433,13 @@ asm
 
 	iny
 
-lp	cpy adr.Text
+lp	cpy adr.Txt
 	beq stop
 
 	inw Result
 
 	iny
-	lda adr.Text,y
+	lda adr.Txt,y
 
 	jsr @ata2int
 
