@@ -1170,17 +1170,14 @@ begin
 		SetHorizontalRes($80,160);
 
 		p:=pointer(peek(756)*256);
-
 		vram.position:=VBXE_CHBASE;
-
-		vram.WriteBuffer(p, 2048);
+		vram.WriteBuffer(p^, 2048);
 
 		Position(0,0);
 
 		asm
-		{
 		@setxdl #e@xdl.tmon
-		};
+		end;
 
 	     end;
 
