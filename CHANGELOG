@@ -1,8 +1,21 @@
+11.07.2021
+- poprawki dla modu³u MD5 (procedure MDHash)
+- dodany zapis w³aœciwoœci PassMethod dla 'ABSOLUTE var_label'
+- poprawiony modu³ GRAPHICS (TEXT zast¹pione przez TXT)
+- poprawiony modu³ VBXE (procedure VBXEMode)
+
+07.07.2021
+- unit INIFILES
+
+06.07.2021
+- unit SYSUTILS: CompareMem
+- unit SYSTEM: CompareByte
+
 05.07.2021
 - dodana obs³uga procedury Append(var Text)
 
 27.06.2021
-- dodana obs³uga typu TEXTFILE
+- dodana obs³uga typu TEXTFILE (TEXT), s³owo TEXT staje siê teraz s³owem zarezerwowanym dla Pascala
 - poprawiony unit VBXE (ReadBuffer, WriteBuffer)
 - dodana mo¿liwoœæ deklaracji zmiennej na stronie zerowej przez u¿ycie modyfikatora REGISTER
 

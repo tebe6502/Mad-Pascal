@@ -12196,6 +12196,14 @@ end;
      end;
 
 
+    if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
+       (listing[i+1] <> #9'sta #$00') and sta_a(i+1) then					// sta			; 1
+     begin
+       listing[i] := '';
+       Result:=false; Break;
+     end;
+
+
     if (lda_a(i) or tya(i)) and									// lda|tya		; 0
        adc_sbc(i+1) and										// adc|sbc		; 1
        (listing[i+2] = #9'sta #$00') and							// sta #$00		; 2
@@ -30505,7 +30513,7 @@ case IndirectionLevel of
 
     a65(__addBX);
 
-  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
+  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
     if pos('.', svar) > 0 then
      asm65(#9'mwy '+copy(svar,1, pos('.', svar)-1)+' :bp2')
@@ -30547,7 +30555,7 @@ case IndirectionLevel of
 	 end;
       end;
 
-  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('+');		// +lda
+  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');	// +lda
 
     end;
 
@@ -30564,7 +30572,7 @@ case IndirectionLevel of
 
 	 if (NumAllocElements > 256) or (NumAllocElements in [0,1]) then begin
 
-	  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
+	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
 	  asm65(#9'lda '+svar);					// pushBYTE
 	  asm65(#9'add'+GetStackVariable(0));
@@ -30575,7 +30583,7 @@ case IndirectionLevel of
 	  asm65(#9'lda (:bp),y');
 	  asm65(#9'sta'+GetStackVariable(0));
 
-	  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('+');		// +lda
+	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');	// +lda
 
 	 end else begin
 
@@ -31421,7 +31429,7 @@ case IndirectionLevel of
 
 	 if (NumAllocElements > 256) or (NumAllocElements in [0,1]) then begin
 
-	  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
+	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
 
 	  asm65(#9'lda '+svar);
 	  asm65(#9'add :STACKORIGIN-1,x');
@@ -31432,7 +31440,7 @@ case IndirectionLevel of
 	  asm65(#9'lda :STACKORIGIN,x');
 	  asm65(#9'sta (:bp),y');
 
-	  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('-');		// -sta
+	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');	// -sta
 
 	 end else begin
 
@@ -31701,7 +31709,7 @@ case IndirectionLevel of
     begin
     asm65('; as Pointer to Pointer');
 
-  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
+  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
 
 
     if pos('.', svar) > 0 then
@@ -31747,7 +31755,7 @@ case IndirectionLevel of
 
       end;
 
-  if (Ident[IdentIndex].isAbsolute) and (NumAllocElements = 0) then asm65('-');		// -sta
+  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');	// -sta
 
      a65(__subBX);
 
@@ -41040,7 +41048,7 @@ var
   IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isForward, ImplementationUse: Boolean;
   iocheck_old, isInterrupt_old, yes, pack: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
-  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp: Byte;
+  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp, varPassMethod: Byte;
   TmpResult: byte;
 
   UnitList: array of TString;
@@ -41054,6 +41062,8 @@ FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
 j := 0;
 ConstVal := 0;
 VarRegister := 0;
+
+varPassMethod := 255;
 
 ImplementationUse:=false;
 pack:=false;
@@ -41828,8 +41838,12 @@ while Tok[i].Kind in
 
 	inc(i);
 
+	varPassMethod := 255;
+
 	if (Tok[i+1].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i+1].Name^)].Kind = VARTOK) then begin
 	 ConstVal := Ident[GetIdent(Tok[i+1].Name^)].Value - DATAORIGIN;
+
+	 varPassMethod := Ident[GetIdent(Tok[i+1].Name^)].PassMethod;
 
  	 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
 	  Error(i, 'Range check error while evaluating constants ('+IntToStr(ConstVal)+' must be between 0 and '+IntToStr($FFFFFF)+')');
@@ -41875,6 +41889,10 @@ while Tok[i].Kind in
 	  Ident[NumIdent].NestedDataType := NestedDataType;
 	  Ident[NumIdent].NestedAllocElementType := NestedAllocElementType;
 	  Ident[NumIdent].NestedNumAllocElements := NestedNumAllocElements;
+
+	  if varPassMethod <> 255 then Ident[NumIdent].PassMethod := varPassMethod;
+
+	  varPassMethod := 255;
 
 //	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements);
 
