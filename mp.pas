@@ -103,8 +103,8 @@ Contributors:
 
 # wartosc dla typu POINTER zwiekszana jest o CODEORIGIN
 
-# BP  tylko przy adresowaniu 1-go bajtu
-# BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
+# :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia siê tylko :BP+1
+# :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
 # indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
 # indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * DataSize[AllocElementType]) + b * DataSize[AllocElementType]
