@@ -15,6 +15,7 @@ unit system;
 
 Abs
 ArcTan
+Ata2Int
 BinStr
 CompareByte
 Concat
@@ -245,6 +246,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Abs(x: Integer): Integer; register; assembler; overload;
 	function ArcTan(value: real): real; overload;
 	function ArcTan(value: single): single; overload;
+	function ata2int(a: char): char; assembler;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
 	function CompareByte(P1,P2: PByte; Len: word): smallint; register; overload;
 	function CompareByte(P1,P2: PByte; Len: byte): smallint; register; overload;
@@ -334,6 +336,24 @@ Print error message
 begin
 	writeln(#69,#82,#82,#32, a);	// 'ERR ',a	; kody znakow oddzielone przecinkiem nie zostana potraktowane jako ciag znakowy ktory kompilator zapisuje do stalych
 	halt;
+end;
+
+
+function ata2int(a: char): char; assembler;
+asm
+{
+        asl
+        php
+        cmp #2*$60
+        bcs @+
+        sbc #2*$20-1
+        bcs @+
+        adc #2*$60
+@       plp
+        ror
+
+	sta Result;
+};
 end;
 
 

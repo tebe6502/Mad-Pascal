@@ -67,7 +67,7 @@ begin
  READ_BUF;
 
 asm
-{		mwa outputPointer dest
+		mwa outputPointer dest
 
 		mva #0 GET_BYTE+1
 
@@ -148,8 +148,11 @@ GET_BYTE	lda adr.buf
 
 		pla
 		rts
-to_exit
-};
+
+to_exit		lda #0
+		tya
+		sta:rne @buf,y+
+end;
 
  close(f);
 

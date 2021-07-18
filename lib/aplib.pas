@@ -67,7 +67,7 @@ begin
  READ_BUF;
 
 asm
-{		stx @sp
+		stx @sp
 
 		mwa outputPointer dest_ap
 
@@ -225,9 +225,13 @@ GET_BYTE	lda adr.buf
 
 @		rts
 
-to_exit		ldx #0
+to_exit		lda #0
+		tya
+		sta:rne @buf,y+
+
+		ldx #0
 @sp		equ *-1
-};
+end;
 
  close(f);
 
