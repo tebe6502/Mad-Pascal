@@ -56,6 +56,9 @@ SetHorizontalRes
 SetOverlayPalette
 SetPlayfieldPalette
 SetRGBPalette
+SetTopBorder
+SetXDLHeight
+SetMapStep
 SetXDL
 SrcBCB
 VBXEControl
@@ -219,7 +222,9 @@ var
 	procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
 	procedure SetPlayfieldPalette(a: byte); register; assembler;
 	procedure SetOverlayPalette(a: byte); register; assembler;
-
+	procedure SetTopBorder(a: byte); register; assembler;
+	procedure SetXDLHeight(a: byte); register; assembler;
+	procedure SetMapStep(a: word); register; assembler;
 
 	procedure PutPixel(x: word; y: byte);
 	procedure SetColor(a: byte);

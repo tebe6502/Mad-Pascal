@@ -7,6 +7,7 @@ SetRGBPalette
 SetCurrentPaletteEntry
 SetPaletteEntry
 SetPlayfieldPalette
+SetTopBorder
 SetOverlayPalette
 
 }
@@ -34,6 +35,51 @@ asm
 	@vbxe_put #0
 
 	pla:tax
+};
+end;
+
+
+procedure SetTopBorder(a: byte); register; assembler;
+asm
+{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	lda a
+	sub #1
+
+	ldy #s@xdl.RPTL_
+	sta MAIN.SYSTEM.VBXE_WINDOW,y
+
+	fxs FX_MEMS #$00
+};
+end;
+
+
+procedure SetXDLHeight(a: byte); register; assembler;
+asm
+{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	lda a
+	sub #1
+
+	ldy #s@xdl.RPTL
+	sta MAIN.SYSTEM.VBXE_WINDOW,y
+
+	fxs FX_MEMS #$00
+};
+end;
+
+
+procedure SetMapStep(a: word); register; assembler;
+asm
+{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	ldy #s@xdl.MAPSTEP
+	lda a
+	sta MAIN.SYSTEM.VBXE_WINDOW,y
+	lda a+1
+	sta MAIN.SYSTEM.VBXE_WINDOW+1,y
+
+	fxs FX_MEMS #$00
 };
 end;
 
