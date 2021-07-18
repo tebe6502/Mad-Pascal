@@ -346,6 +346,83 @@
 // ===				imulCX 10				  === //
 // -----------------------------------------------------------------------------
 
+
+    if lda_a(i) and									// lda					; 0	* 10 = WORD
+       (listing[i+1] = #9'sta :eax') and 						// sta :eax				; 1
+       lda_a(i+2) and									// lda					; 2
+       (listing[i+3] = #9'sta :eax+1') and 						// sta :eax+1				; 3
+       (listing[i+4] = #9'lda #$0A') and 						// lda #$0A				; 4
+       (listing[i+5] = #9'sta :ecx') and 						// sta :ecx				; 5
+       lda_im_0(i+6) and 								// lda #$00				; 6
+       (listing[i+7] = #9'sta :ecx+1') and 						// sta :ecx+1				; 7
+
+       (listing[i+13] = #9'lda :eax') and
+       sta(i+14) and
+       (listing[i+15] = #9'lda :eax+1') and
+       sta(i+16) and
+       (listing[i+17] <> #9'lda :eax+2') then
+     begin
+	listing[i+1] := listing[i+14];
+
+	listing[i+3] := listing[i+16];
+	listing[i+4] := #9'tay';
+	listing[i+5] := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+6] := #9'asl @';
+	listing[i+7] := #9'rol ' + copy(listing[i+3], 6, 256);
+	listing[i+8] := #9'asl @';
+	listing[i+9] := #9'rol ' + copy(listing[i+3], 6, 256);
+
+	listing[i+10] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+11] := #9'sta ' + copy(listing[i+1], 6, 256);
+
+	listing[i+12] := #9'tya';
+	listing[i+13] := #9'adc ' + copy(listing[i+3], 6, 256);
+	listing[i+14] := #9'asl ' + copy(listing[i+1], 6, 256);
+	listing[i+15] := #9'rol @';
+	listing[i+16] := #9'sta ' + copy(listing[i+3], 6, 256);
+
+	Result:=false; Break;
+     end;
+
+
+    if lda_a(i) and									// lda					; 0	* 10 = WORD
+       (listing[i+1] = #9'sta :ecx') and 						// sta :ecx				; 1
+       lda_a(i+2) and									// lda					; 2
+       (listing[i+3] = #9'sta :ecx+1') and 						// sta :ecx+1				; 3
+       (listing[i+4] = #9'lda #$0A') and 						// lda #$0A				; 4
+       (listing[i+5] = #9'sta :eax') and 						// sta :eax				; 5
+       lda_im_0(i+6) and 								// lda #$00				; 6
+       (listing[i+7] = #9'sta :eax+1') and 						// sta :eax+1				; 7
+
+       (listing[i+13] = #9'lda :eax') and
+       sta(i+14) and
+       (listing[i+15] = #9'lda :eax+1') and
+       sta(i+16) and
+       (listing[i+17] <> #9'lda :eax+2') then
+     begin
+	listing[i+1] := listing[i+14];
+
+	listing[i+3] := listing[i+16];
+	listing[i+4] := #9'tay';
+	listing[i+5] := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+6] := #9'asl @';
+	listing[i+7] := #9'rol ' + copy(listing[i+3], 6, 256);
+	listing[i+8] := #9'asl @';
+	listing[i+9] := #9'rol ' + copy(listing[i+3], 6, 256);
+
+	listing[i+10] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+11] := #9'sta ' + copy(listing[i+1], 6, 256);
+
+	listing[i+12] := #9'tya';
+	listing[i+13] := #9'adc ' + copy(listing[i+3], 6, 256);
+	listing[i+14] := #9'asl ' + copy(listing[i+1], 6, 256);
+	listing[i+15] := #9'rol @';
+	listing[i+16] := #9'sta ' + copy(listing[i+3], 6, 256);
+
+	Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'lda #$0A') and 							// lda #$0A				; 0	* 10	BYTE
        (listing[i+1] = #9'sta :ecx') and 						// sta :ecx				; 1
        lda_im_0(i+2) and 								// lda #$00				; 2
