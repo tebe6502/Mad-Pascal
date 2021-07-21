@@ -1441,8 +1441,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: value - Char
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
@@ -1455,8 +1454,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: value - Byte
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
@@ -1469,8 +1467,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: value - Boolean
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 procedure FillChar(var x; count: word; value: char); assembler; register; overload; inline;
@@ -1479,8 +1476,7 @@ procedure FillChar(var x; count: word; value: char); assembler; register; overlo
 
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 procedure FillChar(var x; count: word; value: byte); assembler; register; overload; inline;
@@ -1489,8 +1485,7 @@ procedure FillChar(var x; count: word; value: byte); assembler; register; overlo
 
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload; inline;
@@ -1499,8 +1494,7 @@ procedure FillChar(var x; count: word; value: Boolean); assembler; register; ove
 
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 
@@ -1512,9 +1506,9 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: a - pointer
 @param: count
 @param: value - Byte
-*)asm
-{	jsr @fill
-};
+*)
+asm
+	jsr @fill
 end;
 
 procedure FillByte(var x; count: word; value: byte); assembler; register; overload; inline;
@@ -1523,8 +1517,7 @@ procedure FillByte(var x; count: word; value: byte); assembler; register; overlo
 
 *)
 asm
-{	jsr @fill
-};
+	jsr @fill
 end;
 
 
