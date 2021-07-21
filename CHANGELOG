@@ -1,3 +1,8 @@
+19.07.2021
+- dodatkowe optymalizacje BYTE div 5,6,7
+- poprawiona optymalizacja dla FOR
+- poprawiona optymalizacja word:=word*256
+
 11.07.2021
 - poprawki dla modu³u MD5 (procedure MDHash)
 - dodany zapis w³aœciwoœci PassMethod dla 'ABSOLUTE var_label'

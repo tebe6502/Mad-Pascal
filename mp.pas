@@ -2817,13 +2817,6 @@ end;
       (pos('l_', TemporaryBuf[15]) = 1) then						//l_			; 15
     if (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[12], 6, 256)) then
      begin
-
-       if copy(TemporaryBuf[5], 6, 256) = copy(TemporaryBuf[7], 6, 256) then begin
-	TemporaryBuf[1] := TemporaryBuf[5];
-
-	TemporaryBuf[5] := '~';
-       end;
-
 	TemporaryBuf[0] := #9'tay';
 
 	TemporaryBuf[12] := #9'iny';
@@ -2836,7 +2829,29 @@ end;
 	end else
 	 TemporaryBuf[15] := #9'sty ' + copy(TemporaryBuf[4], 6, 256);
 
+	TemporaryBuf[4] := TemporaryBuf[5];
+	TemporaryBuf[5] := TemporaryBuf[6];
+	TemporaryBuf[6] := TemporaryBuf[7];
+	TemporaryBuf[7] := TemporaryBuf[8];
+	TemporaryBuf[8] := TemporaryBuf[9];
+	TemporaryBuf[9] := TemporaryBuf[10];
+	TemporaryBuf[10] := TemporaryBuf[11];
+	TemporaryBuf[11] := TemporaryBuf[12];
+	TemporaryBuf[12] := TemporaryBuf[13];
+	TemporaryBuf[13] := TemporaryBuf[14];
+	TemporaryBuf[14] := TemporaryBuf[15];
+	TemporaryBuf[15] := TemporaryBuf[16];
+
+        if copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[6], 6, 256) then begin
+	TemporaryBuf[1] := TemporaryBuf[4];
+
+	TemporaryBuf[15] := TemporaryBuf[6];
+
 	TemporaryBuf[4] := '~';
+
+	TemporaryBuf[6] := '~';
+        end;
+
      end;
 
 
@@ -2893,13 +2908,6 @@ end;
       (pos('l_', TemporaryBuf[16]) = 1) then						//l_			; 16
     if (copy(TemporaryBuf[5], 6, 256) = '('+copy(TemporaryBuf[11], 6, 256)+'),y') then
      begin
-
-       if copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[6], 6, 256) then begin
-	TemporaryBuf[0] := TemporaryBuf[4];
-
-	TemporaryBuf[4] := '~';
-       end;
-
 	TemporaryBuf[3] := TemporaryBuf[2];
 	TemporaryBuf[2] := TemporaryBuf[1];
 	TemporaryBuf[1] := #9'ldy #$00';
@@ -2916,6 +2924,26 @@ end;
 	 TemporaryBuf[16] := #9'sty ' + copy(TemporaryBuf[11], 6, 256);
 
 	TemporaryBuf[11] := #9'iny';
+
+        if copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[6], 6, 256) then begin
+	 TemporaryBuf[0] := TemporaryBuf[4];
+
+	 TemporaryBuf[4] := TemporaryBuf[5];
+	 TemporaryBuf[5] := TemporaryBuf[6];
+	 TemporaryBuf[6] := TemporaryBuf[7];
+	 TemporaryBuf[7] := TemporaryBuf[8];
+	 TemporaryBuf[8] := TemporaryBuf[9];
+	 TemporaryBuf[9] := TemporaryBuf[10];
+	 TemporaryBuf[10] := TemporaryBuf[11];
+	 TemporaryBuf[11] := TemporaryBuf[12];
+	 TemporaryBuf[12] := TemporaryBuf[13];
+	 TemporaryBuf[13] := TemporaryBuf[14];
+	 TemporaryBuf[14] := TemporaryBuf[15];
+	 TemporaryBuf[15] := TemporaryBuf[16];
+	 TemporaryBuf[16] := TemporaryBuf[17];
+	 TemporaryBuf[17] := TemporaryBuf[18];
+        end;
+
      end;
 
 
@@ -3057,20 +3085,17 @@ end;
       (TemporaryBuf[1] = '') and							//			; 1
       (pos('l_', TemporaryBuf[2]) = 1) and						//l_2092		; 2
       (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
-      (TemporaryBuf[4] = '') and							//			; 4
-      											//; optimize OK		; 5
-      (TemporaryBuf[6] = '') and							//			; 6
-      (TemporaryBuf[7] = #9'ldy ' + copy(TemporaryBuf[0], 6, 256)) then			// ldy C		; 7
+      (TemporaryBuf[4] = #9'ldy ' + copy(TemporaryBuf[0], 6, 256)) then			// ldy C		; 4
      begin
 
       yes:=true;
 
-      for p:=8 to High(TemporaryBuf) do
+      for p:=5 to High(TemporaryBuf) do
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if yes and
 	    (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			//; --- ForToDoEpilog
-            (TemporaryBuf[p-2] = #9'inc ' + copy(TemporaryBuf[7], 6, 256)) and	// inc C
+            (TemporaryBuf[p-2] = #9'inc ' + copy(TemporaryBuf[4], 6, 256)) and	// inc C
             (TemporaryBuf[p-1] = #9'seq') and					// seq
             (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_2092
             (pos('l_', TemporaryBuf[p+1]) = 1) then				//l_
@@ -3083,11 +3108,11 @@ end;
 
   	   if (pos('b_', TemporaryBuf[p+2]) = 1) then begin
 	    TemporaryBuf[p+1] := TemporaryBuf[p+2];
-	    TemporaryBuf[p+2] := #9'sty ' + copy(TemporaryBuf[7], 6, 256);
+	    TemporaryBuf[p+2] := #9'sty ' + copy(TemporaryBuf[4], 6, 256);
 	   end else
-	    TemporaryBuf[p+1] := #9'sty ' + copy(TemporaryBuf[7], 6, 256);
+	    TemporaryBuf[p+1] := #9'sty ' + copy(TemporaryBuf[4], 6, 256);
 
-	   TemporaryBuf[7]  := '~';
+	   TemporaryBuf[4]  := '~';
 	  end;
 
 	 Break;
@@ -3828,6 +3853,9 @@ begin
  end else begin
 
   OptimizeTemporaryBuf;
+
+  if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+   if (a = '') or (pos('; optimize OK', a) > 0) then exit;
 
   if TemporaryBuf[0] <> '~' then begin
    if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
@@ -6051,6 +6079,31 @@ var i, l, k, m, x: integer;
      end;
 
   end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       (listing[i+1] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 1
+       (listing[i+2] = #9'ora :STACKORIGIN,x') and						// ora :STACKORIGIN,x			; 2
+       (bne(i+3) or beq(i+3)) and								// bne|beq @+				; 3
+       dey(i+4) and										// dey					; 4
+       (listing[i+5] = '@') and									//@					; 5
+       dex(i+6) and										// dey					; 6
+       tya(i+7) and										// tya					; 7
+       jeq(i+8) then 										// jeq l_				; 8
+     begin
+       if beq(i+3) then listing[i+8] := #9'jne ' + copy(listing[i+8], 6, 256);
+
+       listing[i]   := #9'dex';
+       listing[i+1] := #9'lda :STACKORIGIN+1+STACKWIDTH,x';
+       listing[i+2] := #9'ora :STACKORIGIN+1,x';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+
+       Result:=false; Break;
+     end;
 
 
     if inx(i) and										// inx					; 0
@@ -12030,7 +12083,7 @@ end;
 
 
 {
-if (pos('jsr cmpEAX_ECX.AX_CX', listing[i]) > 0) then begin
+if (pos('sta :eax', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -12567,15 +12620,44 @@ end;
      end;
 
 
-    if lda_a(i) and (lda_bp_y(i) = false) and (lda_bp2_y(i) = false) and			// lda 		; 0
-       sta_a(i+1) and										// sta A	; 1
-       lda_a(i+2) and 										// lda 		; 2
-       sta_a(i+3) and										// sta 		; 3
+    if lda_a(i) and (lda_bp_y(i) = false) and (lda_bp2_y(i) = false) and			// lda 		; 0 --
+       sta_a(i+1) and										// sta A	; 1  |
+       lda_a(i+2) and 										// lda 		; 2  | <> !!!
+       sta_a(i+3) and										// sta 		; 3 --
        lda_a(i+4) and 										// lda A	; 4
        sta_a(i+5) then										// sta		; 5
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+     if	(copy(listing[i], 6, 256) <> copy(listing[i+3], 6, 256)) and
+        (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
 	(copy(listing[i+2], 6, 256) <> copy(listing[i+5], 6, 256)) then
      begin
+	listing[i+4] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+      	Result:=false; Break;
+     end;
+
+
+    if lda_a(i) and (lda_bp_y(i) = false) and (lda_bp2_y(i) = false) and			// lda 		; 0
+       sta_a(i+1) and										// sta A	; 1
+       lda_a(i+2) and 										// lda Q	; 2
+       sta_a(i+3) and										// sta A+1	; 3
+       lda_a(i+4) and 										// lda A	; 4
+       sta_a(i+5) and										// sta Q	; 5
+       lda_a(i+6) and 										// lda A+1	; 6
+       sta_a(i+7) and										// sta Q+1	; 7
+       (sta_a(i+8) = false) and (tya(i+8) = false) then
+     if	(copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+        (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+6], 6, 256)) and
+	(copy(listing[i], 6, 256) <> copy(listing[i+7], 6, 256)) then
+     begin
+	listing[i+3] := listing[i+7];
+
+	listing[i+6] := '';
+	listing[i+7] := '';
+
 	listing[i+4] := listing[i];
 
 	listing[i]   := '';
@@ -26005,12 +26087,83 @@ begin
 
 	  inc(l, 3);
 	 end else
+	 if t0 = '#$03' then begin		// div 3
+	  listing[l+1] := #9'sta :eax';
+	  listing[l+2] := #9'lsr @';
+	  listing[l+3] := #9'adc #$15';
+	  listing[l+4] := #9'lsr @';
+	  listing[l+5] := #9'adc :eax';
+	  listing[l+6] := #9'ror @';
+	  listing[l+7] := #9'lsr @';
+	  listing[l+8] := #9'adc :eax';
+	  listing[l+9] := #9'ror @';
+	  listing[l+10] := #9'lsr @';
+	  listing[l+11] := #9'adc :eax';
+	  listing[l+12] := #9'ror @';
+	  listing[l+13] := #9'lsr @';
+	  listing[l+14] := #9'sta :eax';
+
+	  inc(l, 15);
+	 end else
 	 if t0 = '#$04' then begin		// div 4
 	  listing[l+1] := #9'lsr @';
 	  listing[l+2] := #9'lsr @';
 	  listing[l+3] := #9'sta :eax';
 
 	  inc(l, 4);
+	 end else
+	 if t0 = '#$05' then begin		// div 5
+	  listing[l+1] := #9'sta :eax';
+	  listing[l+2] := #9'lsr @';
+	  listing[l+3] := #9'adc #$0d';
+	  listing[l+4] := #9'adc :eax';
+	  listing[l+5] := #9'ror @';
+	  listing[l+6] := #9'lsr @';
+	  listing[l+7] := #9'lsr @';
+	  listing[l+8] := #9'adc :eax';
+	  listing[l+9] := #9'ror @';
+	  listing[l+10] := #9'adc :eax';
+	  listing[l+11] := #9'ror @';
+	  listing[l+12] := #9'lsr @';
+	  listing[l+13] := #9'lsr @';
+	  listing[l+14] := #9'sta :eax';
+
+	  inc(l, 15);
+	 end else
+	 if t0 = '#$06' then begin		// div 6
+	  listing[l+1] := #9'lsr @';
+	  listing[l+2] := #9'sta :eax';
+	  listing[l+3] := #9'lsr @';
+	  listing[l+4] := #9'lsr @';
+	  listing[l+5] := #9'adc :eax';
+	  listing[l+6] := #9'ror @';
+	  listing[l+7] := #9'lsr @';
+	  listing[l+8] := #9'adc :eax';
+	  listing[l+9] := #9'ror @';
+	  listing[l+10] := #9'lsr @';
+	  listing[l+11] := #9'adc :eax';
+	  listing[l+12] := #9'ror @';
+	  listing[l+13] := #9'lsr @ ';
+	  listing[l+14] := #9'sta :eax';
+
+	  inc(l, 15);
+	 end else
+	 if t0 = '#$07' then begin		// div 7
+	  listing[l+1] := #9'sta :eax';
+	  listing[l+2] := #9'lsr @';
+	  listing[l+3] := #9'lsr @';
+	  listing[l+4] := #9'lsr @';
+	  listing[l+5] := #9'adc :eax';
+	  listing[l+6] := #9'ror @';
+	  listing[l+7] := #9'lsr @';
+	  listing[l+8] := #9'lsr @';
+	  listing[l+9] := #9'adc :eax';
+	  listing[l+10] := #9'ror @';
+	  listing[l+11] := #9'lsr @';
+	  listing[l+12] := #9'lsr @';
+	  listing[l+13] := #9'sta :eax';
+
+	  inc(l, 14);
 	 end else
 	 if t0 = '#$08' then begin		// div 8
 	  listing[l+1] := #9'lsr @';
