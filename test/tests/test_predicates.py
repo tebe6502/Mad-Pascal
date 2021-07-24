@@ -5,7 +5,7 @@ class Test_Predicates:
 
     def test_lteq(self):
         test.runFile('tests/sources/predicates_lteq.pas')
-        assert test.varByte('i') == 10
+        assert test.varCardinal('i') == 64824
 
     def test_ne(self):
         test.runFile('tests/sources/predicates_ne.pas')
@@ -17,11 +17,11 @@ class Test_Predicates:
 
     def test_gteq(self):
         test.runFile('tests/sources/predicates_gteq.pas')
-        assert test.varByte('i') == 12
+        assert test.varCardinal('i') == 4095
 
     def test_lt(self):
         test.runFile('tests/sources/predicates_lt.pas')
-        assert test.varByte('i') == 7
+        assert test.varCardinal('i') == 64768
 
     def test_eq(self):
         test.runFile('tests/sources/predicates_eq.pas')
