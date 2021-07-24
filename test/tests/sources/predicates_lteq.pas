@@ -1,5 +1,5 @@
 var
-    i: byte;
+    i: cardinal;
 
     a: byte;
     b: word;
@@ -20,31 +20,30 @@ begin
     f:=-1000;
 
     if a <= 0 then inc(i);
-    if b <= 0 then inc(i);
-    if c <= 0 then inc(i);
+    if b <= 0 then inc(i,2);
+    if c <= 0 then inc(i,4);
 
-    if d <= 0 then inc(i); // true
-    if e <= 0 then inc(i); // true
-    if f <= 0 then inc(i); // true
+    if d <= 0 then inc(i,8);	// true
+    if e <= 0 then inc(i,16);	// true
+    if f <= 0 then inc(i,32);	// true
 
-    if a <= 7 then inc(i);
+    if a <= 7 then inc(i,64);
 
-    if b <=$12 then inc(i);
+    if b <=$12 then inc(i,128);
 
-    if b <= $1234 then inc(i); // true
+    if b <= $1234 then inc(i,256);	// true
 
-    if c <= $11 then inc(i);
-    if c <= $1122 then inc(i); // true
-    if c <= $112233 then inc(i); // true
-    if c <= $11223344 then inc(i); // true
+    if c <= $11 then inc(i,512);
+    if c <= $1122 then inc(i,1024);		// true
+    if c <= $112233 then inc(i,2048);		// true
+    if c <= $11223344 then inc(i,4096);		// true
 
-    if d <= 117 then inc(i);  // true
-    if e <= 1117 then inc(i); // true
-    if f <= 11117 then inc(i); // true
+    if d <= 117 then inc(i,8192);  // true
+    if e <= 1117 then inc(i,16384); // true
+    if f <= 11117 then inc(i,32768); // true
 
-    if d <= low(shortint) then inc(i); 
-    if e <= low(smallint) then inc(i);
-    if f <= low(integer) then inc(i);
-
+    if d <= low(shortint) then inc(i,65536);
+    if e <= low(smallint) then inc(i,131072);
+    if f <= low(integer) then inc(i,262144);
 
 end.
