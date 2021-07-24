@@ -272,6 +272,7 @@ const
   PACKEDTOK		= 107;
   GOTOTOK		= 108;
   INTOK			= 109;
+  VOLATILETOK		= 110;
 
   SETTOK		= 127;	// Size = 32 SET OF
 
@@ -535,6 +536,7 @@ type
 	 isPascal,
 	 isInline,
 	 isAsm,
+	 isVolatile,
 	 IsNotDead: Boolean;);
 
       VARIABLE, USERTYPE:
@@ -29759,8 +29761,8 @@ var
       if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then begin
 	AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
 
-	  if UsesFound and (ch = ';') then
-	    if UsesOn then ReadUses;
+	if UsesFound and (ch = ';') then
+	  if UsesOn then ReadUses;
       end;
 
 
@@ -29903,6 +29905,7 @@ Spelling[FILETOK	] := 'FILE';
 Spelling[TEXTFILETOK	] := 'TEXTFILE';
 Spelling[SETTOK		] := 'SET';
 Spelling[PACKEDTOK	] := 'PACKED';
+Spelling[VOLATILETOK	] := 'VOLATILE';
 Spelling[LABELTOK	] := 'LABEL';
 Spelling[GOTOTOK	] := 'GOTO';
 Spelling[INTOK		] := 'IN';
@@ -36088,6 +36091,12 @@ case Tok[i].Kind of
 	  isError := false;
 	  isConst := true;
 
+	  if Ident[IdentIndex].isVolatile then begin
+	   asm65('?volatile:');
+	   resetOPTY;
+	  end;
+
+
 	  i := CompileConstTerm(i, ConstVal, ValType);
 
 	  if isError then begin
@@ -36137,7 +36146,7 @@ case Tok[i].Kind of
 	   Push(ConstVal, Ord(Ident[IdentIndex].Kind = VARIABLE), DataSize[ValType], IdentIndex);
 
 
-	  if (BLOCKSTACKTOP=1) then
+	  if (BLOCKSTACKTOP = 1) then
 	    if not (Ident[IdentIndex].isInit or Ident[IdentIndex].isInitialized or Ident[IdentIndex].LoopVariable) then
 	      warning(i, VariableNotInit, IdentIndex);
 
@@ -41199,7 +41208,7 @@ var
   NumAllocTypes: word;
   ConstVal: Int64;
   IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isForward, ImplementationUse: Boolean;
-  iocheck_old, isInterrupt_old, yes, pack: Boolean;
+  iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp, varPassMethod: Byte;
   TmpResult: byte;
@@ -41922,6 +41931,17 @@ while Tok[i].Kind in
 
   if Tok[i].Kind = VARTOK then
     begin
+
+    isVolatile := false;
+
+    if (Tok[i + 1].Kind = OBRACKETTOK) and (Tok[i + 2].Kind = VOLATILETOK) then begin
+       CheckTok(i + 3, CBRACKETTOK);
+
+       isVolatile := true;
+
+       inc(i, 3);
+    end;
+
     repeat
       NumVarOfSameType := 0;
       repeat
@@ -41942,6 +41962,7 @@ while Tok[i].Kind in
       CheckTok(i, COLONTOK);
 
       pack:=false;
+
 
       if Tok[i + 1].Kind = PACKEDTOK then begin
 
@@ -42042,6 +42063,7 @@ while Tok[i].Kind in
 	  Ident[NumIdent].NestedDataType := NestedDataType;
 	  Ident[NumIdent].NestedAllocElementType := NestedAllocElementType;
 	  Ident[NumIdent].NestedNumAllocElements := NestedNumAllocElements;
+	  Ident[NumIdent].isVolatile := isVolatile;
 
 	  if varPassMethod <> 255 then Ident[NumIdent].PassMethod := varPassMethod;
 
@@ -42257,6 +42279,14 @@ while Tok[i].Kind in
        end;
 
       CheckTok(i + 1, SEMICOLONTOK);
+
+      if (Tok[i + 2].Kind = OBRACKETTOK) and (Tok[i + 3].Kind = VOLATILETOK) then begin
+       CheckTok(i + 4, CBRACKETTOK);
+
+       isVolatile := true;
+
+       inc(i, 3);
+      end;
 
     i := i + 1;
     until Tok[i + 1].Kind <> IDENTTOK;
