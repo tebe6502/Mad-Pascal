@@ -1,3 +1,7 @@
+24.07.2021
+- wprowadzona mo¿liwoœæ wy³¹czenia optymalizacja dla odczytu zmiennej
+  [volatile] vcount: byte absolute $d40b;
+
 19.07.2021
 - dodatkowe optymalizacje BYTE div 5,6,7
 - poprawiona optymalizacja dla FOR
