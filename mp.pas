@@ -34903,8 +34903,9 @@ begin
 
    if Ident[IdentIndex].ProcAsBlock = BlockStack[BlockStackTop] then Ident[IdentIndex].isRecursion := true;
 
+// sicku
 
-   yes := (Ident[IdentIndex].ObjectIndex > 0) or Ident[IdentIndex].isRecursion or Ident[IdentIndex].isStdCall;
+   yes := {(Ident[IdentIndex].ObjectIndex > 0) or} Ident[IdentIndex].isRecursion or Ident[IdentIndex].isStdCall;
 
    for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
     if not ( (Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING) or
@@ -35035,6 +35036,7 @@ begin
    if Pass = CALLDETERMPASS then
      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
 
+{
 
    if Ident[IdentIndex].ObjectIndex > 0 then begin
      IdentTemp := GetIdent(copy(Tok[j].Name^, 1, pos('.', Tok[j].Name^)-1 ));
@@ -35045,7 +35047,10 @@ begin
      asm65(#9'ldy '+svar+'+1');
    end;
 
+}
 
+
+(*------------------------------------------------------------------------------------------------------------*)
 
  if Ident[IdentIndex].isOverload then
   svar := GetLocalName(IdentIndex) + '_' + IntToHex(Ident[IdentIndex].Value, 4)
@@ -35054,7 +35059,6 @@ begin
 
 
 if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
-
 
  for ParamIndex := NumActualParams downto 1 do
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
@@ -35067,9 +35071,17 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
   end else
   if (NumActualParams = 1) and (DataSize[Ident[IdentIndex].Param[ParamIndex].DataType] = 1) then begin			// only ONE parameter SIZE=1
 
+			if Ident[IdentIndex].ObjectIndex > 0 then begin
+
+					asm65(#9'lda :STACKORIGIN,x');
+					asm65(#9'sta ' + svar+'.'+Ident[IdentIndex].Param[ParamIndex].Name);
+					a65(__subBX);
+			end else begin
+
 					asm65(#9'lda :STACKORIGIN,x');
 					asm65(#9'sta @PARAM?');
 					a65(__subBX);
+			end;
 
   end else
   case Ident[IdentIndex].Param[ParamIndex].DataType of
@@ -35122,6 +35134,17 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
  end;
 
  Gen;
+
+(*------------------------------------------------------------------------------------------------------------*)
+
+   if Ident[IdentIndex].ObjectIndex > 0 then begin
+     IdentTemp := GetIdent(copy(Tok[j].Name^, 1, pos('.', Tok[j].Name^)-1 ));
+
+     asm65(#9'lda ' + GetLocalName(IdentTemp));
+     asm65(#9'ldy ' + GetLocalName(IdentTemp)+'+1');
+   end;
+
+(*------------------------------------------------------------------------------------------------------------*)
 
  if Ident[IdentIndex].isInline then begin
 
@@ -41430,7 +41453,9 @@ if IsFunction then   begin //DefineIdent(i, 'RESULT', VARIABLE, FunctionResultTy
 end;
 
 
-yes := (Ident[BlockIdentIndex].ObjectIndex > 0) or Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isStdCall;
+// sicku
+
+yes := {(Ident[BlockIdentIndex].ObjectIndex > 0) or} Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isStdCall;
 
 for ParamIndex := NumParams downto 1 do
  if not ( (Param[ParamIndex].PassMethod = VARPASSING) or
@@ -41443,7 +41468,8 @@ for ParamIndex := NumParams downto 1 do
 
 
 // Load ONE parameters from the stack
-if (yes = false) and (NumParams = 1) and (DataSize[Param[1].DataType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name);
+if (Ident[BlockIdentIndex].ObjectIndex = 0) then
+ if (yes = false) and (NumParams = 1) and (DataSize[Param[1].DataType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name);
 
 
 // Load parameters from the stack
