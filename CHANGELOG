@@ -1,3 +1,6 @@
+25.07.2021
+- poprawione przekazywanie parametrów do obiektów (OBJECT) bez u¿ycia stosu programowego :STACKORIGIN (w wiêkszoœci przypadków)
+
 24.07.2021
 - wprowadzona mo¿liwoœæ wy³¹czenia optymalizacja dla odczytu zmiennej
   [volatile] vcount: byte absolute $d40b;
