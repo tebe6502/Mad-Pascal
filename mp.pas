@@ -42280,6 +42280,8 @@ while Tok[i].Kind in
 
       CheckTok(i + 1, SEMICOLONTOK);
 
+      isVolatile := false;
+
       if (Tok[i + 2].Kind = OBRACKETTOK) and (Tok[i + 3].Kind = VOLATILETOK) then begin
        CheckTok(i + 4, CBRACKETTOK);
 
