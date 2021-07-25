@@ -29,12 +29,12 @@ class Test_Failures:
         assert test.getWord(0x2000 + 2*2) == 5
         assert test.getWord(0x2000 + 3*2) == 7
 
-      
+
     def test_consecutive_reading_of_changing_register_fails (self):
-      
+
         test.runCode("""
         var a, b, c: byte;
-            timer: byte = 0; // initialized to suppress warning
+            [volatile] timer: byte = 0; // initialized to suppress warning
         begin
             a := timer;
             asm { nop }; // nop fixes that
@@ -44,7 +44,7 @@ class Test_Failures:
         end.
         """,
         counters = ['timer'] )
-            
+
         assert test.varByte('a') != test.varByte('b')
         assert test.varByte('b') != test.varByte('c')
 
