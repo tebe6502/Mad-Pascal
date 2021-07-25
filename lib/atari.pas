@@ -129,7 +129,7 @@ var
 	pmbase: byte absolute $D407;
 	chbase: byte absolute $D409;
 	wsync: byte absolute $D40A;
-	vcount: byte absolute $D40B;
+	[volatile] vcount: byte absolute $D40B;
 	penh: byte absolute $D40C;
 	penv: byte absolute $D40D;
 	nmien: byte absolute $D40E;
