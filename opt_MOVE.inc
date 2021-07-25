@@ -245,6 +245,7 @@ end;
 	sta SYSTEM.MOVE_00A1.SOURCE	; 9
 	lda DL_GAME+1			; 10
 	sta SYSTEM.MOVE_00A1.SOURCE+1	; 11
+	jsr SYSTEM.MOVE_007C		; 12
 }
 	q:=GetWORD(4, 6);		// dst
 	k:=GetWORD(0, 2);		// len
@@ -264,6 +265,66 @@ end;
 	  TemporaryBuf[12] := #9'mva:rpl (:bp2),y $' + IntToHex(q, 4) + ',y-';
 
 	  TemporaryBuf[0] := '~';
+	  TemporaryBuf[1] := '~';
+	  TemporaryBuf[2] := '~';
+	  TemporaryBuf[3] := '~';
+	  TemporaryBuf[4] := '~';
+	  TemporaryBuf[5] := '~';
+	  TemporaryBuf[6] := '~';
+
+          if (TemporaryBuf[13] = #9'm@INLINE') then begin
+	   TemporaryBuf[13] := '~';
+	   TemporaryBuf[14] := '~';
+	  end;
+
+	end;
+
+       end;
+
+
+    if (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[11]) = 1) and (pos('.SOURCE+1', TemporaryBuf[11]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[9]) = 1) and (pos('.SOURCE', TemporaryBuf[9]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[7]) = 1) and (pos('.DEST+1', TemporaryBuf[7]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[5]) = 1) and (pos('.DEST', TemporaryBuf[5]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[4]) = 1) and (pos('.COUNT+1', TemporaryBuf[4]) > 0) and
+       (pos(#9'sta SYSTEM.MOVE_', TemporaryBuf[2]) = 1) and (pos('.COUNT', TemporaryBuf[2]) > 0) and
+       (pos(#9'lda #', TemporaryBuf[1]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[3]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
+       (pos(#9'lda ', TemporaryBuf[8]) = 1) and (pos(#9'lda #', TemporaryBuf[8]) = 0) and
+       (pos(#9'lda ', TemporaryBuf[10]) = 1) and (pos(#9'lda #', TemporaryBuf[10]) = 0) then
+       begin
+{
+	lda #$40			; 1
+	sta SYSTEM.MOVE_00A1.COUNT	; 2
+	lda #$00			; 3
+	sta SYSTEM.MOVE_00A1.COUNT+1	; 4
+	sta SYSTEM.MOVE_00A1.DEST	; 5
+	lda #$AE			; 6
+	sta SYSTEM.MOVE_00A1.DEST+1	; 7
+	lda DL_TITLE			; 8
+	sta SYSTEM.MOVE_00A1.SOURCE	; 9
+	lda DL_TITLE+1			; 10
+	sta SYSTEM.MOVE_00A1.SOURCE+1	; 11
+	jsr SYSTEM.MOVE_007C		; 12
+}
+	q:=GetWORD(3, 6);		// dst
+	k:=GetWORD(1, 3);		// len
+
+	if k <= 128 then begin
+
+	  TemporaryBuf[9] := #9'sta :bp2';
+
+	  TemporaryBuf[11] := #9'sta :bp2+1';
+
+	  TemporaryBuf[7] := TemporaryBuf[8];
+	  TemporaryBuf[8] := TemporaryBuf[9];
+	  TemporaryBuf[9] := TemporaryBuf[10];
+	  TemporaryBuf[10] := TemporaryBuf[11];
+
+	  TemporaryBuf[11] := #9'ldy #$'+IntToHex(k-1, 2);
+	  TemporaryBuf[12] := #9'mva:rpl (:bp2),y $' + IntToHex(q, 4) + ',y-';
+
 	  TemporaryBuf[1] := '~';
 	  TemporaryBuf[2] := '~';
 	  TemporaryBuf[3] := '~';
