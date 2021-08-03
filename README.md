@@ -114,8 +114,8 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 
 | iteration x 256             |Atari OS|FastChip|MP Single|MP Real|
 |:----------------------------|:-------|:------:|:-------:|:-----:|
-|add, sub, mul, div           | 231    | 4120   | 53      | 98    |
-|add, sub, mul, div, sin, cos | 113    | 1680   | 712     | 949   |
+|add, sub, mul, div           | 231    | 113    | 53      | 98    |
+|add, sub, mul, div, sin, cos | 4210   | 1680   | 712     | 949   |
 
 * MP Single: IEEE754-32bit
 * MP Real: Q24.8 Fixed Point
