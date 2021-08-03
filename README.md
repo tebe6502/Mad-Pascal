@@ -108,7 +108,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 |YoshPlus (higher is better)  |41933|41933     |41933   |
 |Chessboard (higher is better)|76   |88        |82      |
 
-[sources](https://github.com/tebe6502/Mad-Pascal/blob/master/samples/benchmark.7z)
+[https://github.com/tebe6502/Mad-Pascal/blob/master/samples/benchmark.7z](https://github.com/tebe6502/Mad-Pascal/blob/master/samples/benchmark.7z)
 
 ### Floating Point
 
@@ -120,7 +120,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * MP Single: IEEE754-32bit
 * MP Real: Q24.8 Fixed Point
 
-[sources](https://github.com/tebe6502/Mad-Pascal/blob/master/samples/fp_benchmark.7z)
+[https://github.com/tebe6502/Mad-Pascal/blob/master/samples/fp_benchmark.7z](https://github.com/tebe6502/Mad-Pascal/blob/master/samples/fp_benchmark.7z)
 
 ### Suite
 
