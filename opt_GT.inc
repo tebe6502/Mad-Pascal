@@ -151,10 +151,10 @@
 
     if (SKIP(i-1) = false) and
        lda(i) and										// lda W+1		; 0	opt_091 | WORD > 0
-       cmp_im(i+1) and										// cmp #$00		; 1
+       cmp_im(i+1) and										// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
        lda(i+3) and										// lda W		; 3
-       cmp_im(i+4) and										// cmp #$00		; 4
+       cmp_im(i+4) and										// cmp #		; 4
        (listing[i+5] = '@') and									//@			; 5
        beq(i+6) and										// beq @+		; 6
        jcs(i+7) and										// jcs l_		; 7
@@ -188,6 +188,45 @@
 
       end;
 
+
+    if (SKIP(i-1) = false) and
+       lda(i) and										// lda W+1		; 0	BOOL := WORD > WORD
+       cmp_im(i+1) and										// cmp #		; 1
+       bne(i+2) and										// bne @+		; 2
+       lda(i+3) and										// lda W		; 3
+       cmp_im(i+4) and										// cmp #		; 4
+       (listing[i+5] = '@') and									//@			; 5
+       seq(i+6) and										// seq			; 6
+       bcs(i+7) and										// bcs @+		; 7
+       dey(i+8) and										// dey			; 8
+       (listing[i+9] = '@') then								//@			; 9
+     if (pos(listing[i+3], listing[i]) > 0) then
+      begin
+
+	c:=GetWord(i+4, i+1);
+
+	if c = 0 then begin
+	 listing[i+1] := '';
+         listing[i+2] := '';
+	 listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+         listing[i+4] := '';
+         listing[i+5] := '';
+         listing[i+6] := '';
+         listing[i+7] := #9'bne @+';
+
+	 Result:=false; Break;
+        end else
+	if c < $FFFF then begin
+	 listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
+
+	 listing[i+4] := #9'cmp #$' + IntToHex(byte(c+1),2);
+
+	 listing[i+6] := '';
+
+	 Result:=false; Break;
+	end;
+
+      end;
 
 
     if (SKIP(i-1) = false) and

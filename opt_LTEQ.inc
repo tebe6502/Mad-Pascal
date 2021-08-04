@@ -182,7 +182,7 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda K+1		; 0	WORD <=  ->  WORD >=
+       lda(i) and										// lda K+1		; 0	BOOL := WORD <=  ->  WORD >=
        cmp(i+1) and (cmp_im(i+1) = false) and							// cmp W+1		; 1
        bne(i+2) and										// bne @+		; 2
        lda(i+3) and										// lda K		; 3
@@ -193,18 +193,79 @@
        dey(i+8) and										// dey			; 8
        (listing[i+9] = '@') then 								//@			; 9
       begin
-	tmp := listing[i];
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
-	listing[i+1] := #9'cmp ' + copy(tmp, 6, 256);
 
-	tmp := listing[i+3];
-	listing[i+3] := #9'lda ' + copy(listing[i+4], 6, 256);
-	listing[i+4] := #9'cmp ' + copy(tmp, 6, 256);
+{ !!!
+	if cmp_im(i+1) and cmp_im(i+4) then begin
+         c := GetWORD(i+4, i+1);
 
-	listing[i+6] := #9'bcs @+';
-	listing[i+7] := '';
+	 if c < $FFFF then begin
+	  listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
 
-	Result:=false; Break;
+	  listing[i+4] := #9'cmp #$' + IntToHex(byte(c+1),2);
+
+	  listing[i+7] := '';
+
+     	  Result:=false; Break;
+	 end;
+
+	end else begin
+}
+ 	 tmp := listing[i];
+	 listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	 listing[i+1] := #9'cmp ' + copy(tmp, 6, 256);
+
+	 tmp := listing[i+3];
+	 listing[i+3] := #9'lda ' + copy(listing[i+4], 6, 256);
+	 listing[i+4] := #9'cmp ' + copy(tmp, 6, 256);
+
+	 listing[i+6] := #9'bcs @+';
+	 listing[i+7] := '';
+
+	 Result:=false; Break;
+
+//	end;
+
+      end;
+
+
+    if (SKIP(i-1) = false) and
+       lda(i) and										// lda K+1		; 0	BOOL := WORD <=  ->  WORD >=
+       cmp_im(i+1) and										// cmp #		; 1
+       bne(i+2) and										// bne @+		; 2
+       lda(i+3) and										// lda K		; 3
+       cmp_im(i+4) and										// cmp #		; 4
+       (listing[i+5] = '@') and									//@			; 5
+       (listing[i+6] = #9'bcc @+') and								// bcc @+		; 6
+       (listing[i+7] = #9'beq @+') and								// beq @+		; 7
+       dey(i+8) and										// dey			; 8
+       (listing[i+9] = '@') and 								//@			; 9
+       tya(i+10) and										// tya			; 10
+       sta(i+11) then										// sta			; 11
+      begin
+
+        c := GetWORD(i+4, i+1);
+
+	if c = 0 then begin
+	  listing[i+1] := '';
+	  listing[i+2] := '';
+	  listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+	  listing[i+4] := '';
+
+	  listing[i+6] := '';
+
+     	  Result:=false; Break;
+	end else
+
+	if c < $FFFF then begin
+	  listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
+
+	  listing[i+4] := #9'cmp #$' + IntToHex(byte(c+1),2);
+
+	  listing[i+7] := '';
+
+     	  Result:=false; Break;
+	end;
+
       end;
 
 
@@ -256,6 +317,25 @@
        listing[i]   := '';
 
        listing[i+3] := #9'jcs ' + copy(listing[i+3], 6, 256);
+
+       Result:=false; Break;
+      end;
+
+
+    if (SKIP(i-1) = false) and									//				BOOL := BYTE <=  ->  BYTE >=
+       lda(i) and										// lda			; 0
+       cmp(i+1) and 										// cmp			; 1
+       bcc(i+2) and										// bcc @+		; 2
+       beq(i+3) and										// beq @+		; 3
+       dey(i+4) and										// dey			; 4
+       (listing[i+5] = '@') and									//@			; 5
+       tya(i+6) then										// tya			; 6
+      begin
+       listing[i+2] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+       listing[i]   := '';
+
+       listing[i+3] := #9'bcs @+';
 
        Result:=false; Break;
       end;
