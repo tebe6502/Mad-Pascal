@@ -255,24 +255,28 @@ const
   ODDTOK		= 90;
 
   PROGRAMTOK		= 91;
-  INTERFACETOK		= 92;
-  IMPLEMENTATIONTOK     = 93;
-  INITIALIZATIONTOK     = 94;
-  OVERLOADTOK		= 95;
-  ASSEMBLERTOK		= 96;
-  FORWARDTOK		= 97;
-  REGISTERTOK		= 98;
-  INTERRUPTTOK		= 99;
-  PASCALTOK		= 100;
-  STDCALLTOK		= 101;
-  INLINETOK		= 102;
+  LIBRARYTOK		= 92;
+  EXPORTSTOK		= 93;
+  EXTERNALTOK		= 94;
+  INTERFACETOK		= 95;
+  IMPLEMENTATIONTOK     = 96;
+  INITIALIZATIONTOK     = 97;
+  OVERLOADTOK		= 98;
+  ASSEMBLERTOK		= 99;
+  FORWARDTOK		= 100;
+  REGISTERTOK		= 101;
+  INTERRUPTTOK		= 102;
+  PASCALTOK		= 103;
+  STDCALLTOK		= 104;
+  INLINETOK		= 105;
 
-  SUCCTOK		= 105;
-  PREDTOK		= 106;
-  PACKEDTOK		= 107;
-  GOTOTOK		= 108;
-  INTOK			= 109;
-  VOLATILETOK		= 110;
+  SUCCTOK		= 106;
+  PREDTOK		= 107;
+  PACKEDTOK		= 108;
+  GOTOTOK		= 109;
+  INTOK			= 110;
+  VOLATILETOK		= 111;
+
 
   SETTOK		= 127;	// Size = 32 SET OF
 
@@ -2177,9 +2181,9 @@ var p, k , q: integer;
 begin
 
 {
-if (pos('@halt', TemporaryBuf[0]) > 0) then begin
+if (pos('jmp @+', TemporaryBuf[0]) > 0) then begin
 
-      for p:=0 to 7 do writeln(TemporaryBuf[p]);
+      for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
@@ -2424,6 +2428,16 @@ end;
        (TemporaryBuf[2] = copy(TemporaryBuf[0], 6, 256)) then				//a_xxxx		; 2
       begin
 	TemporaryBuf[0] := '~';
+      end;
+
+
+    if (TemporaryBuf[0] = #9'jmp @+') and						// jmp @+		; 0
+       (pos(#9'jmp l_', TemporaryBuf[1]) = 1) and					// jmp l_		; 1
+       (TemporaryBuf[2] = '@') then							//@			; 2
+      begin
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
       end;
 
 
@@ -12085,7 +12099,7 @@ end;
 
 
 {
-if (pos('sta :eax', listing[i]) > 0) then begin
+if (pos('cmp #$20', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -13417,11 +13431,11 @@ end;
       end;
 
 
-    if iny(i) and										// iny				; 0
-       lda_a(i+1) and										// lda				; 1
-       iny(i+2) and										// iny				; 2
-       lda_a(i+3) and										// lda				; 3
-       lda_a(i+4) then										// lda				; 4
+    if iny(i) and									// iny				; 0
+       lda_a(i+1) and									// lda				; 1
+       iny(i+2) and									// iny				; 2
+       lda_a(i+3) and									// lda				; 3
+       lda_a(i+4) then									// lda				; 4
       begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -22124,7 +22138,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('jsr cmpEAX_ECX.AX_CX', listing[i]) > 0) then begin
+if (pos('cmp #$20', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -22206,6 +22220,19 @@ end;
        begin
 	listing[i]   := #9'tya';
 	listing[i+1] := copy(listing[i+2], 1, 5) + copy(listing[i+1], 6, 256);
+	listing[i+2] := '';
+	Result:=false; Break;
+       end;
+
+
+    if sty_stack(i) and										// sty :STACKORIGIN+10		; 0
+       lda(i+1) and										// lda 				; 1
+       add_stack(i+2) and									// add :STACKORIGIN+10		; 2
+       sta(i+3) then										// sta				; 3
+       if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i]   := #9'tya';
+	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
 	listing[i+2] := '';
 	Result:=false; Break;
        end;
@@ -29876,8 +29903,10 @@ Spelling[VARTOK		] := 'VAR';
 Spelling[PROCEDURETOK	] := 'PROCEDURE';
 Spelling[FUNCTIONTOK	] := 'FUNCTION';
 Spelling[OBJECTTOK	] := 'OBJECT';
-
 Spelling[PROGRAMTOK	] := 'PROGRAM';
+Spelling[LIBRARYTOK	] := 'LIBRARY';
+Spelling[EXPORTSTOK	] := 'EXPORTS';
+Spelling[EXTERNALTOK	] := 'EXTERNAL';
 Spelling[UNITTOK	] := 'UNIT';
 Spelling[INTERFACETOK	] := 'INTERFACE';
 Spelling[IMPLEMENTATIONTOK] := 'IMPLEMENTATION';
@@ -34903,7 +34932,6 @@ begin
 
    if Ident[IdentIndex].ProcAsBlock = BlockStack[BlockStackTop] then Ident[IdentIndex].isRecursion := true;
 
-// sicku
 
    yes := {(Ident[IdentIndex].ObjectIndex > 0) or} Ident[IdentIndex].isRecursion or Ident[IdentIndex].isStdCall;
 
@@ -36011,7 +36039,7 @@ case Tok[i].Kind of
 	  else
 	    begin
 
-	    ValType := Ident[IdentIndex].AllocElementType;
+	    ValType :=  Ident[IdentIndex].AllocElementType;
 
 	    if (ValType in [RECORDTOK, OBJECTTOK]) then begin			// record^.
 
@@ -36485,7 +36513,7 @@ case Tok[i].Kind of
 
       IdentIndex := GetIdent(Tok[i + 2].Name^);
 
-      if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then
+      if (Ident[IdentIndex].DataType in Pointers) and ( (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) ) then
 	iError(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
 
     end;
@@ -37249,6 +37277,7 @@ case Tok[i].Kind of
 
 	   if Tok[i + 1].Kind = DEREFERENCETOK then				// With dereferencing '^'
 	    begin
+
 	    if not (Ident[IdentIndex].DataType in Pointers) then
 	      iError(i + 1, IncompatibleTypeOf, IdentIndex);
 
@@ -37672,7 +37701,24 @@ case Tok[i].Kind of
 		    end;
 
 		 end else
-		   GetCommonType(i + 1, VarType, ExpressionType);
+		    if (ExpressionType in [RECORDTOK, OBJECTTOK]) then begin
+
+			IdentTemp := GetIdent(Tok[k].Name^);
+
+			case IndirectionLevel of
+			           ASPOINTER:
+				   if (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] ) then
+				    Error(k, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+
+			  ASPOINTERTOPOINTER:
+				   if (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK] ) then
+				    Error(k, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+			else
+			  GetCommonType(i + 1, VarType, ExpressionType)
+			end;
+
+		    end else
+		   	  GetCommonType(i + 1, VarType, ExpressionType);
 
 	       end else
 			     if (VarType = ENUMTYPE) {and (Tok[k].Kind = IDENTTOK)} then begin
@@ -37727,9 +37773,22 @@ case Tok[i].Kind of
 
 	      if (VarType in [RECORDTOK, OBJECTTOK]) then begin
 
-	       IdentTemp := GetIdent(Tok[k].Name^);
+		IdentTemp := GetIdent(Tok[k].Name^);
 
-// BLEE		writeln(Ident[IdentTemp].AllocElementTYpe,',',Ident[IdentTemp].PassMethod);
+
+		if Ident[IdentIndex].PassMethod = Ident[IdentTemp].PassMethod then
+
+		case IndirectionLevel of
+		           ASPOINTER:
+			   if (Tok[k + 1].Kind <> DEREFERENCETOK) and (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK] ) then
+			    Error(k, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+
+		  ASPOINTERTOPOINTER: ;
+//			   if {(Tok[i + 1].Kind <> DEREFERENCETOK) and }(Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] ) then
+//			    Error(k, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+		else
+		  GetCommonType(i + 1, VarType, ExpressionType)
+		end;
 
 
 	       if (ExpressionType in [RECORDTOK, OBJECTTOK]) or ( (ExpressionType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]){and (Ident[IdentTemp].PassMethod = VARPASSING)} ) then begin
@@ -37750,7 +37809,7 @@ case Tok[i].Kind of
 		  svar := svar + '.result';
 		end;
 // sick
-//writeln( Ident[IdentIndex].Name,',', Ident[IdentIndex].NumAllocElements ,' / ', Ident[IdentTemp].Name,',', Ident[IdentTemp].NumAllocElements );
+//writeln( Ident[IdentIndex].Name,',', Ident[IdentIndex].NumAllocElements, ',', Ident[IdentIndex].AllocElementType  ,' / ', Ident[IdentTemp].Name,',', Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].AllocElementType );
 //writeln( '>', Ident[IdentTemp].Name,',', Ident[IdentTemp].DataType, ',', Ident[IdentTemp].AllocElementTYpe );
 //writeln(Types[5].Field[0].Name);
 
@@ -40524,6 +40583,8 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
     if NumAllocElements shr 16 > 0 then
       Error(i, 'Multidimensional ' + InfoAboutToken(NestedDataType) + ' arrays are not supported');
 
+//    if NestedDataType = RECORDTOK then
+//    else
     if NestedDataType in [RECORDTOK, OBJECTTOK] then
      Error(i, 'Only Array [0..'+IntToStr(NumAllocElements-1)+'] of ^'+InfoAboutToken(NestedDataType)+' supported')
     else
@@ -41453,8 +41514,6 @@ if IsFunction then   begin //DefineIdent(i, 'RESULT', VARIABLE, FunctionResultTy
 end;
 
 
-// sicku
-
 yes := {(Ident[BlockIdentIndex].ObjectIndex > 0) or} Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isStdCall;
 
 for ParamIndex := NumParams downto 1 do
@@ -41555,7 +41614,7 @@ if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezd
 
 
 while Tok[i].Kind in
- [CONSTTOK, TYPETOK, VARTOK, LABELTOK, PROCEDURETOK, FUNCTIONTOK, PROGRAMTOK, USESTOK,
+ [CONSTTOK, TYPETOK, VARTOK, LABELTOK, PROCEDURETOK, FUNCTIONTOK, PROGRAMTOK, USESTOK, LIBRARYTOK, EXPORTSTOK,
   UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF,
   PROCALIGNTOK, LOOPALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
   begin

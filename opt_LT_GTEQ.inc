@@ -15,7 +15,7 @@
        lda(i+9) and										// lda W		; 9
        cmp(i+10) and										// cmp			; 10
        (listing[i+11] = '@') and								//@			; 11
-       (jcs(i+12) or jcc(i+12)) and								// jcc:jcs l_		; 12
+       (jcs(i+12) or jcc(i+12)) and								// jcc|jcs l_		; 12
        (SKIP(i+13) = false) then
      if (pos(listing[i+9], listing[i]) > 0) and
         (pos(listing[i+9], listing[i+3]) > 0) and
@@ -71,7 +71,7 @@
        cmp_im(i+1) and										// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
        lda(i+3) and										// lda W		; 3
-       cmp_im(i+4) and										// cmp #		; 4
+       cmp_im_0(i+4) and									// cmp #$00		; 4
        (listing[i+5] = '@') and									//@			; 5
        jcc(i+6) and										// jcc l_		; 6
        (SKIP(i+7) = false) then
@@ -91,13 +91,10 @@
 	 listing[i+5] := listing[i+6];
 	 listing[i+6] := '@';
 
-	 if cmp_im_0(i+4) then begin
-	  listing[i+4] := listing[i+3];
+	 listing[i+4] := listing[i+3];
 
-	  listing[i+2] := listing[i+5];
-	  listing[i+3] := #9'bne @+';
-	 end else
-	  listing[i+2] := listing[i+5] + '\ bne @+';
+	 listing[i+2] := listing[i+5];
+	 listing[i+3] := #9'bne @+';
 
 	end;
 
@@ -112,7 +109,7 @@
        lda(i+3) and										// lda W		; 3
        cmp(i+4) and										// cmp 			; 4
        (listing[i+5] = '@') and									//@			; 5
-       (jcs(i+6) or jcc(i+6)) and								// jcc:jcs l_		; 6
+       (jcs(i+6) or jcc(i+6)) and								// jcc|jcs l_		; 6
        (SKIP(i+7) = false) then
      if (pos(listing[i+3], listing[i]) > 0) then
       begin
@@ -146,9 +143,38 @@
 
 
     if (SKIP(i-1) = false) and
+       lda(i) and										// lda W+1		; 0	BOOL := WORD >= 0
+       cmp_im_0(i+1) and									// cmp #$00		; 1
+       bne(i+2) and										// bne @+		; 2
+       lda(i+3) and										// lda W		; 3
+       cmp_im_0(i+4) and									// cmp 			; 4
+       (listing[i+5] = '@') and									//@			; 5
+       bcs(i+6) and										// bcs @+		; 6
+       dey(i+7) and										// dey			; 7
+       (listing[i+8] = '@') and									//@			; 8
+       tya(i+9) and										// tya			; 9
+       sta(i+10) then										// sta			; 10
+     if (pos(listing[i+3], listing[i]) > 0) then
+      begin
+
+	listing[i]    := '';
+	listing[i+1]  := '';
+	listing[i+2]  := '';
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+	listing[i+6]  := '';
+	listing[i+7]  := '';
+	listing[i+8]  := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (SKIP(i-1) = false) and
        lda(i) and										// lda			; 0	opt_082	| BYTE < 0 ; >= 0
        cmp_im_0(i+1) and									// cmp #$00		; 1
-       (jcs(i+2) or jcc(i+2)) and								// jcc:jcs l_		; 2
+       (jcs(i+2) or jcc(i+2)) and								// jcc|jcs l_		; 2
        (SKIP(i+3) = false) then
       begin
 	listing[i]   := '';
@@ -514,7 +540,7 @@
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        jmi(i+16) and										// jmi			; 16
        (SKIP(i+17) = false) and
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	smallint >= #$xxyy
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT >= #$XXYY
        lda(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -532,7 +558,7 @@
       begin
         p := smallint(GetWORD(i+5, i+2));
 
-	if p = 0 then begin									//				smallint >= 0
+	if p = 0 then begin									//				SMALLINT >= 0
 	 listing[i+10] := listing[i+1];
 	 listing[i+11] := listing[i+16];
 	 listing[i+12] := '';
