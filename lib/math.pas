@@ -57,7 +57,8 @@ interface
 	function ArcSin(x: real): real; overload;
 	function ArcSin(x: single): single; overload;
 	function DegNormalize(deg : single) : single;
-	function degtorad(deg : single) : single;
+	function degtorad(deg : single) : single; overload;
+	function degtorad(deg : real) : real; overload;
 	function radtodeg(rad : single) : single;
 	function gradtorad(grad : single) : single;
 	function radtograd(rad : single) : single;
@@ -118,78 +119,88 @@ begin
 end;
 
 
-function degtorad(deg : single) : single;
+function degtorad(deg : single) : single; overload;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=deg*(pi/180);
-  end;
+end;
+
+function degtorad(deg : real) : real; overload;
+(*
+@description:
+
+*)
+begin
+     Result:=deg*(pi/180);
+end;
+
 
 function radtodeg(rad : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=rad*(180/pi);
-  end;
+end;
 
 function gradtorad(grad : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=grad*(pi/200);
-  end;
+end;
 
 function radtograd(rad : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=rad*(200/pi);
-  end;
+end;
 
 function degtograd(deg : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=deg*(200/180);
-  end;
+end;
 
 function gradtodeg(grad : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=grad*(180/200);
-  end;
+end;
 
 function cycletorad(cycle : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      Result:=cycle * M_PI_2;
-  end;
+end;
 
 function radtocycle(rad : single) : single;
 (*
 @description:
 
 *)
-  begin
+begin
      { avoid division }
      Result:=rad*(1 / M_PI_2);
-  end;
+end;
 
 
 procedure DivMod(Dividend: integer; Divisor: Word; var r, Remainder: Word); overload;
