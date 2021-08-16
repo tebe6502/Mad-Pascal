@@ -29,43 +29,43 @@ const
 	joy_right_down	= 5;
 
 var
-	joy_1 : byte absolute $278;	// The value of joystick 0
-	joy_2 : byte absolute $279;	// The value of joystick 1
+	[volatile] joy_1 : byte absolute $278;	// The value of joystick 0
+	[volatile] joy_2 : byte absolute $279;	// The value of joystick 1
 
-	stick: array [0..1] of byte absolute $278;
+	[volatile] stick: array [0..1] of byte absolute $278;
 
-	stick0 : byte absolute $278;
-	stick1 : byte absolute $279;
+	[volatile] stick0 : byte absolute $278;
+	[volatile] stick1 : byte absolute $279;
 
-	strig: array [0..1] of byte absolute $284;
+	[volatile] strig: array [0..1] of byte absolute $284;
 
-	strig0 : byte absolute $284;	// Stick trigger 0
-	strig1 : byte absolute $285;	// Stick trigger 1
+	[volatile] strig0 : byte absolute $284;	// Stick trigger 0
+	[volatile] strig1 : byte absolute $285;	// Stick trigger 1
 
-	paddl: array [0..7] of byte absolute $270;
+	[volatile] paddl: array [0..7] of byte absolute $270;
 
-	paddl0 : byte absolute $270;	// The value of paddle 0
-	paddl1 : byte absolute $271;	// The value of paddle 1
-	paddl2 : byte absolute $272;	// The value of paddle 2
-	paddl3 : byte absolute $273;	// The value of paddle 3
-	paddl4 : byte absolute $274;	// The value of paddle 4
-	paddl5 : byte absolute $275;	// The value of paddle 5
-	paddl6 : byte absolute $276;	// The value of paddle 6
-	paddl7 : byte absolute $277;	// The value of paddle 7
+	[volatile] paddl0 : byte absolute $270;	// The value of paddle 0
+	[volatile] paddl1 : byte absolute $271;	// The value of paddle 1
+	[volatile] paddl2 : byte absolute $272;	// The value of paddle 2
+	[volatile] paddl3 : byte absolute $273;	// The value of paddle 3
+	[volatile] paddl4 : byte absolute $274;	// The value of paddle 4
+	[volatile] paddl5 : byte absolute $275;	// The value of paddle 5
+	[volatile] paddl6 : byte absolute $276;	// The value of paddle 6
+	[volatile] paddl7 : byte absolute $277;	// The value of paddle 7
 
-	ptrig: array [0..7] of byte absolute $27c;
+	[volatile] ptrig: array [0..7] of byte absolute $27c;
 
-	ptrig0 : byte absolute $27c;	// Paddle trigger 0
-	ptrig1 : byte absolute $27d;	// Paddle trigger 1
-	ptrig2 : byte absolute $27e;	// Paddle trigger 2
-	ptrig3 : byte absolute $27f;	// Paddle trigger 3
-	ptrig4 : byte absolute $280;	// Paddle trigger 4
-	ptrig5 : byte absolute $281;	// Paddle trigger 5
-	ptrig6 : byte absolute $282;	// Paddle trigger 6
-	ptrig7 : byte absolute $283;	// Paddle trigger 7
+	[volatile] ptrig0 : byte absolute $27c;	// Paddle trigger 0
+	[volatile] ptrig1 : byte absolute $27d;	// Paddle trigger 1
+	[volatile] ptrig2 : byte absolute $27e;	// Paddle trigger 2
+	[volatile] ptrig3 : byte absolute $27f;	// Paddle trigger 3
+	[volatile] ptrig4 : byte absolute $280;	// Paddle trigger 4
+	[volatile] ptrig5 : byte absolute $281;	// Paddle trigger 5
+	[volatile] ptrig6 : byte absolute $282;	// Paddle trigger 6
+	[volatile] ptrig7 : byte absolute $283;	// Paddle trigger 7
 
-	trig0 : byte absolute $d010;	// (R)
-	trig1 : byte absolute $d011;	// (R)
+	[volatile] trig0 : byte absolute $d010;	// (R)
+	[volatile] trig1 : byte absolute $d011;	// (R)
 
 
 implementation
