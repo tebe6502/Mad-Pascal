@@ -1,3 +1,12 @@
+05.09.2021
+- dla OBJECT dodana obs³uga metod CONSTRUCTOR, DESTRUCTOR
+
+04.09.2021
+- optymalizacje dla 'WORD:=WORD SHR 15', 'WORD:=WORD SHL 15', 'CARDINAL:=CARDINAL SHR 31', 'CARDINAL:=CARDINAL SHL 31'
+
+25.08.2021
+- wydajniejsza pêtla optymalizuj¹ca dla 'OptimizeRelation'
+
 25.07.2021
 - poprawione przekazywanie parametrów do obiektów (OBJECT) bez u¿ycia stosu programowego :STACKORIGIN (w wiêkszoœci przypadków)
 
