@@ -73,6 +73,9 @@ logcol	=	$63
 keydef	=	$79	; (2) tablica konwersji kodow klawiatury na ATASCII
 
 vdslst	=	$0200	; (2) wektor przerwan NMI listy displejowej
+vtimr1	=	$0210	; (2) wektor przerwania IRQ TIMER1
+vtimr2	=	$0212	; (2) wektor przerwania IRQ TIMER2
+vtimr4	=	$0214	; (2) wektor przerwania IRQ TIMER4
 timcnt3	=	$021C	; trzeci licznik systemu
 vvblki	=	$0222	; (2) wektor NMI natychmiastowego VBI
 vvblkd	=	$0224	; (2) wektor NMI op??nionego VBI

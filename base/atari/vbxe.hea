@@ -84,6 +84,7 @@ XDLC_END	equ     0x8000
 	ovroff, lr, ovron, hr, mapon, mapoff, tmon
 .ende
 
+
 .struct	s@xdl
 .word	XDLC_		; puste linie
 .byte	RPTL_

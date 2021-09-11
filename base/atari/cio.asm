@@ -127,6 +127,7 @@ loop	lda icchid,x
 	bpl loop
 	ldy #-95       		; kod bledu "TOO MANY CHANNELS OPEN"
 found	rts
+
 .endp
 
 
@@ -280,6 +281,10 @@ eof	ldy #s@file.status
 .endp
 
 
+;	ReadDirFileName(f)
+;
+;	C = 0	CLC	IOCHECK FALSE
+
 .proc	@ReadDirFileName (.word ya) .reg
 
 	ldx #5
@@ -295,6 +300,8 @@ eof	ldy #s@file.status
 	rts
 .endp
 
+
+;	DirFileName
 
 .proc	@DirFileName
 
@@ -324,7 +331,7 @@ eof	ldy #s@file.status
 	lda attr
 	ora #MAIN.SYSUTILS.faDirectory
 	sta attr
-	
+
 @	lda @buf+1
 	cmp #' '
 	bne skp
@@ -338,7 +345,7 @@ skp	ldy #1
 	lda #10
 	jsr cpName
 
-	ldx #10				
+	ldx #10
 	lda @buf,x
 	beq stp2
 
