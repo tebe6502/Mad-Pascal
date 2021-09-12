@@ -1,3 +1,6 @@
+12.09.2021
+- dodana obs³uga przerwañ IRQ - TIMER1, TIMER2, TIMER4 (GetIntVec, SetIntVec)
+
 05.09.2021
 - dla OBJECT dodana obs³uga metod CONSTRUCTOR, DESTRUCTOR
 
