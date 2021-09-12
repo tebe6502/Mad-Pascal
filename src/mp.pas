@@ -40328,21 +40328,141 @@ WHILETOK:
 		end;
 
      ord(iTIM1): begin
+	         asm65(#9'sei');
 		 asm65(#9'mva :STACKORIGIN,x VTIMR1');
 		 asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR1+1');
 		 a65(__subBX);
+
+		 if Tok[i + 1].Kind = COMMATOK then begin
+
+		   i := CompileExpression(i + 2, ActualParamType);
+    		   GetCommonType(i, BYTETOK, ActualParamType);
+
+		   asm65(#9'lda #$00');
+		   asm65(#9'ldy #$03');
+		   asm65(#9'sta AUDCTL');
+		   asm65(#9'sta AUDC1');
+		   asm65(#9'sty SKCTL');
+
+		   asm65(#9'mva :STACKORIGIN,x AUDCTL');
+	 	   a65(__subBX);
+
+		   CheckTok(i + 1, COMMATOK);
+
+		   i := CompileExpression(i + 2, ActualParamType);
+    		   GetCommonType(i, BYTETOK, ActualParamType);
+
+		   asm65(#9'mva :STACKORIGIN,x AUDF1');
+	 	   a65(__subBX);
+
+		   asm65(#9'lda irqens');
+		   asm65(#9'ora #$01');
+		   asm65(#9'sta irqens');
+		   asm65(#9'sta irqen');
+		   asm65(#9'sta stimer');
+
+		 end else begin
+
+		  asm65(#9'lda irqens');
+		  asm65(#9'and #$fe');
+		  asm65(#9'sta irqens');
+		  asm65(#9'sta irqen');
+
+		 end;
+
+	         asm65(#9'cli');
 		end;
 
      ord(iTIM2): begin
+	         asm65(#9'sei');
 		 asm65(#9'mva :STACKORIGIN,x VTIMR2');
 		 asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR2+1');
 		 a65(__subBX);
+
+		 if Tok[i + 1].Kind = COMMATOK then begin
+
+		   i := CompileExpression(i + 2, ActualParamType);
+    		   GetCommonType(i, BYTETOK, ActualParamType);
+
+		   asm65(#9'lda #$00');
+		   asm65(#9'ldy #$03');
+		   asm65(#9'sta AUDCTL');
+		   asm65(#9'sta AUDC2');
+		   asm65(#9'sty SKCTL');
+
+		   asm65(#9'mva :STACKORIGIN,x AUDCTL');
+	 	   a65(__subBX);
+
+		   CheckTok(i + 1, COMMATOK);
+
+		   i := CompileExpression(i + 2, ActualParamType);
+    		   GetCommonType(i, BYTETOK, ActualParamType);
+
+		   asm65(#9'mva :STACKORIGIN,x AUDF2');
+	 	   a65(__subBX);
+
+		   asm65(#9'lda irqens');
+		   asm65(#9'ora #$02');
+		   asm65(#9'sta irqens');
+		   asm65(#9'sta irqen');
+		   asm65(#9'sta stimer');
+
+		 end else begin
+
+		  asm65(#9'lda irqens');
+		  asm65(#9'and #$fd');
+		  asm65(#9'sta irqens');
+		  asm65(#9'sta irqen');
+
+		 end;
+
+	         asm65(#9'cli');
 		end;
 
      ord(iTIM4): begin
+	         asm65(#9'sei');
 		 asm65(#9'mva :STACKORIGIN,x VTIMR4');
 		 asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR4+1');
 		 a65(__subBX);
+
+		 if Tok[i + 1].Kind = COMMATOK then begin
+
+		   i := CompileExpression(i + 2, ActualParamType);
+    		   GetCommonType(i, BYTETOK, ActualParamType);
+
+		   asm65(#9'lda #$00');
+		   asm65(#9'ldy #$03');
+		   asm65(#9'sta AUDCTL');
+		   asm65(#9'sta AUDC4');
+		   asm65(#9'sty SKCTL');
+
+		   asm65(#9'mva :STACKORIGIN,x AUDCTL');
+	 	   a65(__subBX);
+
+		   CheckTok(i + 1, COMMATOK);
+
+		   i := CompileExpression(i + 2, ActualParamType);
+    		   GetCommonType(i, BYTETOK, ActualParamType);
+
+		   asm65(#9'mva :STACKORIGIN,x AUDF4');
+	 	   a65(__subBX);
+
+		   asm65(#9'lda irqens');
+		   asm65(#9'ora #$04');
+		   asm65(#9'sta irqens');
+		   asm65(#9'sta irqen');
+		   asm65(#9'sta stimer');
+
+		 end else begin
+
+		  asm65(#9'lda irqens');
+		  asm65(#9'and #$fb');
+		  asm65(#9'sta irqens');
+		  asm65(#9'sta irqen');
+
+		 end;
+
+	         asm65(#9'cli');
 		end;
     end;
 
