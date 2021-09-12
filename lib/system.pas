@@ -170,6 +170,10 @@ const
 
 	iDLI = 0;			// set new DLI vector
 	iVBL = 1;			// set new VBL vector
+	iTIM1 = 2;			// set new IRQ TIMER1 vector
+	iTIM2 = 3;			// set new IRQ TIMER2 vector
+	iTIM4 = 4;			// set new IRQ TIMER4 vector
+
 {$endif}
 
 (* Character codes *)
@@ -225,7 +229,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	DateSeparator: Char = '-';
 
-	Rnd: byte absolute $d20a;
+	[volatile] Rnd: byte absolute $d20a;
 
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
