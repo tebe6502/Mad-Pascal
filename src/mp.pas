@@ -315,8 +315,8 @@ const
   FRACNUMBERTOK		= 182;
   CHARLITERALTOK	= 183;
   STRINGLITERALTOK	= 184;
-//  UNKNOWNIDENTTOK	= 185;
 
+  MACRORELEASE		= 189;
   PROCALIGNTOK		= 190;
   LOOPALIGNTOK		= 191;
   INFOTOK		= 192;
@@ -458,13 +458,19 @@ type
   TString = string [MAXSTRLENGTH];
   TName   = string [MAXNAMELENGTH];
 
+  TDefines = record
+    Name: TName;
+    Macro: string;
+    Line: integer;
+  end;
+
   TParam = record
     Name: TString;
     DataType: Byte;
     NumAllocElements: Cardinal;
     AllocElementType: Byte;
     PassMethod: Byte;
-    end;
+   end;
 
   TFloat = array [0..1] of integer;
 
@@ -605,7 +611,7 @@ var
   Ident: array [1..MAXIDENTS] of TIdentifier;
   Spelling: array [1..MAXTOKENNAMES] of TString;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;
-  Defines: array [1..MAXDEFINES] of TName;
+  Defines: array [1..MAXDEFINES] of TDefines;
   IFTmpPosStack: array of integer;
   BreakPosStack: array [0..1023] of TPosStack;
   CodePosStack: array [0..1023] of Word;
@@ -29354,21 +29360,26 @@ function SearchDefine(X: string): integer;
 var i: integer;
 begin
    for i:=1 to NumDefines do
-    if X = Defines[i] then begin
+    if X = Defines[i].Name then begin
      Exit(i);
     end;
    Result := 0;
 end;
 
 
-procedure AddDefine(X: string);
+procedure AddDefine(X: string; Line: integer = 0; M: string = '');
 var S: TName;
 begin
    S := X;
    if SearchDefine(S) = 0 then
    begin
     Inc(NumDefines);
-    Defines[NumDefines] := S;
+    Defines[NumDefines].Name := S;
+
+    if M <> '' then SetLength(M, length(M)-1);
+
+    Defines[NumDefines].Macro := M;
+    Defines[NumDefines].Line := Line;
    end;
 end;
 
@@ -29392,11 +29403,474 @@ begin
 end;
 
 
+
+procedure TokenizeMacro(a: string; Line, Spaces: integer);
+var
+  Text: string;
+  Num, Frac: TString;
+  OldNumTok, UnitIndex, Err, cnt, Line2, TextPos, im: Integer;
+  Tmp: Int64;
+  yes: Boolean;
+  ch, ch2: Char;
+  CurToken: Byte;
+
+
+  procedure SkipWhiteSpace;				// 'string' + #xx + 'string'
+  begin
+    ch:=a[i]; inc(i);
+
+    while ch in AllowWhiteSpaces do begin ch:=a[i]; inc(i) end;
+
+    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
+  end;
+
+
+  procedure TextInvers(p: integer);
+  var i: integer;
+  begin
+
+   for i := p to length(Text) do
+    if ord(Text[i]) < 128 then
+     Text[i] := chr(ord(Text[i])+$80);
+
+  end;
+
+
+  procedure TextInternal(p: integer);
+  var i: integer;
+
+  function ata2int(const a: byte): byte;
+  (*----------------------------------------------------------------------------*)
+  (*  zamiana znakow ATASCII na INTERNAL					*)
+  (*----------------------------------------------------------------------------*)
+  begin
+   Result:=a;
+
+   case (a and $7f) of
+      0..31: inc(Result,64);
+     32..95: dec(Result,32);
+   end;
+
+  end;
+
+
+  function cbm(const a: char): byte;
+  begin
+   Result:=ord(a);
+
+      case a of
+       'a'..'z': dec(Result, 96);
+       '['..'_': dec(Result, 64);
+            '`': Result:=64;
+	    '@': Result:=0;
+      end;
+
+   end;
+
+
+  begin
+
+   if target.id = 'a8' then begin
+
+     for i := p to length(Text) do
+      Text[i] := chr(ata2int(ord(Text[i])));
+
+   end else begin
+
+     for i := p to length(Text) do
+      Text[i] := chr(cbm(Text[i]));
+
+   end;
+
+  end;
+
+
+  procedure ReadNumber;
+  var x, k, ln: integer;
+  begin
+
+    Num:='';
+
+    if ch='%' then begin		  // binary
+
+      ch:=a[i]; inc(i);
+
+      while ch in ['0', '1'] do
+       begin
+       Num := Num + ch;
+       ch:=a[i]; inc(i);
+       end;
+
+       if length(Num)=0 then
+	 iError(NumTok, OrdinalExpExpected);
+
+       //remove leading zeros
+       x:=1;
+       while Num[x]='0' do inc(x);
+
+       tmp:=0;
+
+       ln:=length(Num);
+
+       //do the conversion
+       for k:=ln downto x do
+	if Num[k]='1' then
+	 tmp:=tmp+(1 shl (ln-k));
+
+       Num:=IntToStr(tmp);
+
+    end else
+
+    if ch='$' then begin		  // hexadecimal
+
+      ch:=a[i]; inc(i);
+
+      while ch in AllowDigitChars do
+       begin
+       Num := Num + ch;
+       ch:=a[i]; inc(i);
+       end;
+
+       if length(Num)=0 then
+	 iError(NumTok, OrdinalExpExpected);
+
+       val('$'+Num, tmp, err);
+
+       Num:=IntToStr(tmp);
+    end else
+
+      while ch in ['0'..'9'] do		// Number suspected
+	begin
+	Num := Num + ch;
+	ch:=a[i]; inc(i);
+	end;
+
+  end;
+
+
+begin
+
+ i:=1;
+
+ while i <= length(a) do begin
+
+  while a[i] in AllowWhiteSpaces do begin
+
+   if a[i] = LF then begin
+    inc(Line); Spaces:=0;
+   end else
+    inc(Spaces);
+
+   inc(i);
+  end;
+
+  ch := UpCase(a[i]); inc(i);
+
+
+      Num:='';
+      if ch in ['0'..'9', '$', '%'] then ReadNumber;
+
+      if Length(Num) > 0 then			// Number found
+	begin
+	AddToken(INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
+
+	if ch = '.' then			// Fractional part suspected
+	  begin
+
+	  ch:=a[i]; inc(i);
+
+	  if ch = '.' then
+	    dec(i)				// Range ('..') token
+	  else
+	    begin				// Fractional part found
+	    Frac := '.';
+
+	    while ch in ['0'..'9'] do
+	      begin
+	      Frac := Frac + ch;
+
+	      ch:=a[i]; inc(i);
+	      end;
+
+	    Tok[NumTok].Kind := FRACNUMBERTOK;
+	    Tok[NumTok].FracValue := StrToFloat(Num + Frac);
+	    Tok[NumTok].Column := Tok[NumTok-1].Column + length(Num) + length(Frac) + Spaces; Spaces:=0;
+	    end;
+	  end;
+
+	Num := '';
+	Frac := '';
+	end;
+
+
+      if ch in ['A'..'Z', '_'] then		// Keyword or identifier suspected
+	begin
+
+	Text := '';
+
+	err:=0;
+
+	TextPos := i;
+
+	while ch in ['A'..'Z', '_', '0'..'9','.'] do begin
+	  Text := Text + ch;
+	  inc(err);
+
+	  ch:=UpCase(a[i]); inc(i);
+	end;
+
+	if err > 255 then
+	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
+
+	if Length(Text) > 0 then
+	  begin
+
+	 CurToken := GetStandardToken(Text);
+
+	 im := SearchDefine(Text);
+
+	 if (im > 0) and (Defines[im].Macro <> '') then begin
+
+	  i := TextPos;
+
+	  delete(a, i, length(Text));
+	  insert(Defines[im].Macro, a, i);
+
+	  CurToken := MACRORELEASE;
+	 end else begin
+
+	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
+	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
+	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
+
+	  AddToken(0, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
+
+	 end;
+
+	 if CurToken <> MACRORELEASE then
+
+	 if CurToken <> 0 then begin		// Keyword found
+
+	     Tok[NumTok].Kind := CurToken;
+
+	 end
+	 else begin				// Identifier found
+	     Tok[NumTok].Kind := IDENTTOK;
+	     New(Tok[NumTok].Name);
+	     Tok[NumTok].Name^ := Text;
+	   end;
+
+	 end;
+
+	 Text := '';
+	end;
+
+
+	if ch in ['''', '#'] then begin
+
+	 Text := '';
+	 yes:=true;
+
+	 repeat
+
+	 case ch of
+
+	  '''': begin
+
+		 if yes then begin
+		  TextPos := Length(Text)+1;
+		  yes:=false;
+		 end;
+
+		 inc(Spaces);
+
+		 repeat
+		  ch:=a[i]; inc(i);
+
+		  if ch = LF then	//Inc(Line);
+		   Error(NumTok, 'String exceeds line');
+
+		  if not(ch in ['''',CR,LF]) then
+		   Text := Text + ch
+		  else begin
+
+		   ch2:=a[i]; inc(i);
+
+		   if ch2='''' then begin
+		    Text := Text + '''';
+		    ch:=#0;
+		   end else
+		    dec(i);
+
+		  end;
+
+		 until ch = '''';
+
+		 inc(Spaces);
+
+		 ch:=a[i]; inc(i);
+
+		 if ch in [' ',TAB] then begin
+			ch2:=ch;
+			Err:=i;
+			while ch2 in [' ',TAB] do begin ch2:=a[i]; inc(i) end;
+
+			if ch2 in ['*','~','+'] then
+			 ch:=ch2
+			else
+			 i:=Err;
+		 end;
+
+
+		 if ch='*' then begin
+		  inc(Spaces);
+		  TextInvers(TextPos);
+		  ch:=a[i]; inc(i);
+		 end;
+
+		 if ch='~' then begin
+		  inc(Spaces);
+		  TextInternal(TextPos);
+		  ch:=a[i]; inc(i);
+
+		  if ch='*' then begin
+		   inc(Spaces);
+		   TextInvers(TextPos);
+		   ch:=a[i]; inc(i);
+		  end;
+
+		 end;
+
+		 if ch in [' ',TAB] then begin
+			ch2:=ch;
+			Err:=i;
+			while ch2 in [' ',TAB] do begin ch2:=a[i]; inc(i) end;
+
+			if ch2 in ['''','+'] then
+			 ch:=ch2
+			else
+			 i:=Err;
+		 end;
+
+
+		 if ch='+' then begin
+		  yes:=true;
+		  inc(Spaces);
+		  SkipWhiteSpace;
+		 end;
+
+		end;
+
+	   '#': begin
+		 ch:=a[i]; inc(i);
+
+		 Num:='';
+		 ReadNumber;
+
+		 if Length(Num)>0 then
+		  Text := Text + chr(StrToInt(Num))
+		 else
+		  Error(NumTok, 'Constant expression expected');
+
+		 if ch in [' ',TAB] then begin
+			ch2:=ch;
+			Err:=i;
+			while ch2 in [' ',TAB] do begin ch2:=a[i]; inc(i) end;
+
+			if ch2 in ['''','+'] then
+			 ch:=ch2
+			else
+			 i:=Err;
+		 end;
+
+		 if ch='+' then begin
+		  inc(Spaces);
+		  SkipWhiteSpace;
+		 end;
+
+		end;
+	 end;
+
+	 until not (ch in ['#', '''']);
+
+	 case ch of
+	  '*': begin TextInvers(TextPos); ch:=a[i]; inc(i) end;			// Invers
+	  '~': begin TextInternal(TextPos); ch:=a[i]; inc(i) end;		// Antic
+ 	 end;
+
+	// if Length(Text) > 0 then
+	  if Length(Text) = 1 then begin
+	    AddToken(CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
+	  end else begin
+	    AddToken(STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
+	    DefineStaticString(NumTok, Text);
+	  end;
+
+	 Text := '';
+
+	end;
+
+
+      if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then begin
+	AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0); Spaces:=0;
+      end;
+
+
+      if ch in [':', '>', '<', '.'] then					// Double-character token suspected
+	begin
+
+	Line2:=Line;
+
+	ch2:=a[i]; inc(i);
+
+	if (ch2 = '=') or
+	   ((ch = '<') and (ch2 = '>')) or
+	   ((ch = '.') and (ch2 = '.')) then begin				// Double-character token found
+	  AddToken(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0); Spaces:=0;
+	end else
+	 if (ch='.') and (ch2 in ['0'..'9']) then begin
+
+	   AddToken(INTNUMBERTOK, 1, Line, 0, 0);
+
+	   Frac := '0.';		  // Fractional part found
+
+	   while ch2 in ['0'..'9'] do begin
+	    Frac := Frac + ch2;
+
+	    ch2:=a[i]; inc(i);
+	   end;
+
+	   Tok[NumTok].Kind := FRACNUMBERTOK;
+	   Tok[NumTok].FracValue := StrToFloat(Frac);
+	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
+
+	   Frac := '';
+
+	   dec(i);
+
+	 end else
+	  begin
+	  dec(i);
+	  Line:=Line2;
+
+	  if ch in [':','>', '<', '.'] then begin				// Single-character token found
+	    AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0); Spaces:=0;
+	  end;
+
+	  end;
+
+	end;
+
+end;
+
+end;
+
+
 procedure TokenizeProgram(UsesOn: Boolean = true);
 var
   Text: string;
   Num, Frac: TString;
-  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos: Integer;
+  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im: Integer;
   Tmp: Int64;
   AsmFound, UsesFound, yes: Boolean;
   ch, ch2: Char;
@@ -29470,6 +29944,7 @@ var
    end;
   end;
 
+
   function SkipCodeUntilDirective: string;
   var c: char;
       i: Byte;
@@ -29516,6 +29991,7 @@ var
 
   end;
 
+
   function SkipCodeUntilElseEndif: boolean;
   var dir: string;
       lvl: integer;
@@ -29537,7 +30013,8 @@ var
    until false;
   end;
 
-  procedure ReadDirective(d: string);
+
+  procedure ReadDirective(d: string; DefineLine: integer);
   var i, v: integer;
       cmd, s, nam: string;
       found: Boolean;
@@ -29743,13 +30220,23 @@ var
        if cmd = 'DEFINE' then begin
 	nam := get_label(i, d);
 
+ 	while d[i] in AllowWhiteSpaces do begin
+   	 if d[i] = LF then inc(DefineLine);
+	 inc(i);
+  	end;
 
-	writeln(copy(d, i, 256));
+	if (d[i] = ':') and (d[i+1] = '=') then begin
+	 inc(i, 2);
 
-//fuckxxx
+ 	 while d[i] in AllowWhiteSpaces do begin
+   	  if d[i] = LF then inc(DefineLine);
+	  inc(i);
+  	 end;
 
-//	writeln(nam);
-	AddDefine(nam);
+	 AddDefine(nam, DefineLine, copy(d, i, length(d)))		// define macro
+	end else
+	 AddDefine(nam);
+
        end else
        if cmd = 'UNDEF' then begin
 	nam := get_label(i, d);
@@ -29775,6 +30262,7 @@ var
   var c2: Char;
       dir: Boolean;
       directive: string;
+      _line: integer;
   begin
 
   Read(InFile, c);
@@ -29782,7 +30270,7 @@ var
    if c = '(' then begin
     Read(InFile, c2);
 
-    if c2='*' then begin			// Skip comments (*   *)
+    if c2='*' then begin				// Skip comments (*   *)
 
      repeat
       c2:=c;
@@ -29804,6 +30292,8 @@ var
     dir:=false;
     directive:='';
 
+    _line := Line;
+
     Read(InFile, c2);
 
     if c2='$' then
@@ -29811,7 +30301,7 @@ var
     else
      Seek(InFile, FilePos(InFile) - 1);
 
-    repeat					// Skip comments
+    repeat						// Skip comments
       Read(InFile, c);
 
       if dir then directive := directive + c;
@@ -29822,7 +30312,7 @@ var
       if c = LF then Inc(Line);
     until c = '}';
 
-    if dir then ReadDirective(directive);
+    if dir then ReadDirective(directive, _line);
 
     Read(InFile, c);
 
@@ -29837,7 +30327,7 @@ var
 
     end;
 
-  if c = LF then Inc(Line);			// Increment current line number
+  if c = LF then Inc(Line);				// Increment current line number
   end;
 
 
@@ -29858,7 +30348,7 @@ var
   end;
 
 
-  procedure SkipWhiteSpace;			// 'string' + #xx + 'string'
+  procedure SkipWhiteSpace;				// 'string' + #xx + 'string'
   begin
     SafeReadChar(ch);
 
@@ -30076,11 +30566,23 @@ var
 	  begin
 
 	 CurToken := GetStandardToken(Text);
-	 if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
-	 if CurToken = FLOATTOK then CurToken := SINGLETOK;
-	 if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
-	 AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
+	 im := SearchDefine(Text);
+
+	 if (im > 0) and (Defines[im].Macro <> '') then begin
+
+	  TokenizeMacro(Defines[im].Macro, Defines[im].Line, 0);
+
+	  CurToken := MACRORELEASE;
+	 end else begin
+
+	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
+	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
+	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
+
+	  AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
+
+	 end;
 
 	 if CurToken = ASMTOK then begin
 
@@ -30159,6 +30661,8 @@ var
 	  end;
 
 	 end else begin
+
+	  if CurToken <> MACRORELEASE then
 
 	   if CurToken <> 0 then begin		// Keyword found
 	     Tok[NumTok].Kind := CurToken;
@@ -43464,7 +43968,7 @@ asm65;
 asm65('.local'#9'@DEFINES');
 
 for j:=1 to MAXDEFINES do
- if Defines[j]<>'' then asm65(Defines[j]);
+ if (Defines[j].Name <> '') and (Defines[j].Macro = '') then asm65( Defines[j].Name );
 
 asm65('.endl');
 
@@ -43987,7 +44491,7 @@ begin
 
  ParseParam;
 
- Defines[1] := target.name;
+ Defines[1].Name := target.name;
 
  if (UnitName[1].Name='') then Syntax(3);
 
