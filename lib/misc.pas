@@ -69,7 +69,7 @@ Detect ANTIC PAL/NTSC
 @returns: FALSE = NTSC
 *)
 asm
-{
+
 // ANTIC PAL Test for Atari 8-bits
 // (C) 2019 Guillermo Fuenzalida
 
@@ -96,7 +96,7 @@ scanline equ *-1
 	iny
 ntsc
 	sty Result
-};
+
 end;
 
 
@@ -116,7 +116,7 @@ begin
  if DetectCPU > $7f then
 
 asm
-{
+
 adr	= eax
 bcnt	= Result
 bfirst	= Result+1
@@ -185,7 +185,8 @@ ramsize	stz adr
 @sp	equ *-1
 
 	opt c-
-};
+end;
+
 end;
 
 
@@ -202,7 +203,7 @@ Detect VBXE card
 @returns: bit 8..15 variable: VBXE PAGE
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	jsr @vbxe_detect
 
@@ -216,7 +217,7 @@ asm
 	sta (p),y
 
 	pla:tax
-};
+
 end;
 
 
@@ -229,7 +230,7 @@ Detect EVIE card
 *)
 
 asm
-{	ldy #3
+	ldy #3
 lp	lda $d2fa,y
 	cmp _evie,y
 	bne _no
@@ -247,14 +248,17 @@ _no	lda #false
 _evie	dta c'Evie'
 
 stop
-};
+
 end;
 
 
+{
 function DetectStereo: Boolean; assembler;
 (*
 @description:
 Second POKEY detect routine
+
+<http://atariki.krap.pl/index.php/Programowanie:_Detekcja_stereo>
 
 author:
 Seban/SLIGHT
@@ -262,9 +266,10 @@ Seban/SLIGHT
 (c) 1995,96
 
 @returns: TRUE present, FALSE otherwise
+
 *)
 asm
-{	txa:pha
+	txa:pha
 
 pokey1	= $d200
 pokey2	= $d210
@@ -298,7 +303,50 @@ stop	lda $10
 	stx Result
 
 	pla:tax
-};
+end;
+}
+
+
+function DetectStereo: Boolean; assembler;
+(*
+@description:
+Second POKEY detect routine
+
+<http://atariki.krap.pl/index.php/Programowanie:_Detekcja_stereo>
+
+author: KMK
+
+@returns: X = 0 mono
+@returns: X = 1 stereo
+
+*)
+asm
+	txa:pha
+
+	ldx #$00
+	stx $d20f	;halt pokey 0
+	stx $d21f	;halt pokey 1
+	ldy #$03
+	sty $d21f	;release pokey 1
+
+	sta $d40a	;delay necessary for
+	sta $d40a	;accelerator boards
+
+	lda #$ff
+loop	and $d20a	;see if pokey 0 is halted ($d20a = $ff)
+	inx
+	bne loop
+
+	sty $d20f
+
+	cmp #$ff
+	bne mono
+
+	inx
+mono
+	stx Result
+
+	pla:tax
 end;
 
 
@@ -322,7 +370,7 @@ function DetectCPU: byte; assembler;
 @returns: $80 - 65816
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	opt c+
 
@@ -355,7 +403,7 @@ stop	sta Result
 	opt c-
 
 	pla:tax
-};
+
 end;
 
 
@@ -372,7 +420,7 @@ var clkm, fr0: word;
 begin
 
 asm
-{	stx @sp
+	stx @sp
 
 	tsx
 	stx	stk
@@ -445,7 +493,9 @@ oldp	equ *-1
 
 	ldx #0
 @sp	equ *-1
-};
+
+end;
+
 	Result := ((fr0 shl 16 + clkm) / 487) * 1.7734;
 end;
 
@@ -459,7 +509,7 @@ Detect amount additional memory PORTB
 @returns: banks code PORTB = BANKS[0..63] at address $0101
 *)
 asm
-{	txa:pha
+	txa:pha
 
 bsav	= @buf
 
@@ -572,7 +622,6 @@ setpb	txa		;zmiana kolejnoœci bitów: %0000dcba -> %cba000d0
 
 stop	pla:tax
 
-};
 end;
 
 
@@ -586,7 +635,6 @@ Detect MapRAM
 @returns: TRUE present, FALSE otherwise
 *)
 asm
-{
 
 bsav	= DX
 ext_b	= $5000		;cokolwiek z zakresu $5000-$57FF
@@ -663,7 +711,6 @@ setb	lda portb
 
 stop	pla:tax
 
-};
 end;
 
 
@@ -677,7 +724,7 @@ Detect BASIC
 @returns: 234 = 'Atari Basic Rev.C'
 *)
 asm
-{
+
 BASROM	= $a8e2
 
 	lda PORTB
@@ -695,8 +742,7 @@ stop	sta Result
 	lda #$ff
 old	equ *-1
 	sta PORTB
-};
+
 end;
 
 end.
-
