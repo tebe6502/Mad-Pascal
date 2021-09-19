@@ -1,3 +1,6 @@
+15.09.2021
+- dodana obs³uga makr {$define label := ......}
+
 12.09.2021
 - dodana obs³uga przerwañ IRQ - TIMER1, TIMER2, TIMER4 (GetIntVec, SetIntVec)
 
