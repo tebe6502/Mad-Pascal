@@ -134,7 +134,7 @@ program MADPASCAL;
 {$I+}
 
 uses
-  SysUtils;
+  SysUtils, StrUtils;
 
 const
 
@@ -458,10 +458,14 @@ type
   TString = string [MAXSTRLENGTH];
   TName   = string [MAXNAMELENGTH];
 
+
+  TDefinesParam = array [1..MAXPARAMS] of TString;
+
   TDefines = record
     Name: TName;
     Macro: string;
     Line: integer;
+    Param: TDefinesParam;
   end;
 
   TParam = record
@@ -29367,7 +29371,7 @@ begin
 end;
 
 
-procedure AddDefine(X: string; Line: integer = 0; M: string = '');
+procedure AddDefine(X: string);
 var S: TName;
 begin
    S := X;
@@ -29375,11 +29379,6 @@ begin
    begin
     Inc(NumDefines);
     Defines[NumDefines].Name := S;
-
-    if M <> '' then SetLength(M, length(M)-1);
-
-    Defines[NumDefines].Macro := M;
-    Defines[NumDefines].Line := Line;
    end;
 end;
 
@@ -29610,7 +29609,7 @@ begin
 
 	err:=0;
 
-	TextPos := i;
+	TextPos := i - 1;
 
 	while ch in ['A'..'Z', '_', '0'..'9','.'] do begin
 	  Text := Text + ch;
@@ -29618,6 +29617,7 @@ begin
 
 	  ch:=UpCase(a[i]); inc(i);
 	end;
+
 
 	if err > 255 then
 	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
@@ -29631,7 +29631,9 @@ begin
 
 	 if (im > 0) and (Defines[im].Macro <> '') then begin
 
-	  i := TextPos;
+ 	  ch:=#0;
+
+	  i:=TextPos;
 
 	  delete(a, i, length(Text));
 	  insert(Defines[im].Macro, a, i);
@@ -29870,11 +29872,12 @@ procedure TokenizeProgram(UsesOn: Boolean = true);
 var
   Text: string;
   Num, Frac: TString;
-  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im: Integer;
+  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   Tmp: Int64;
   AsmFound, UsesFound, yes: Boolean;
   ch, ch2: Char;
   CurToken: Byte;
+  StrParams: array of String;
 
 
   procedure TokenizeUnit(a: integer); forward;
@@ -30018,6 +30021,19 @@ var
   var i, v: integer;
       cmd, s, nam: string;
       found: Boolean;
+      Param: TDefinesParam;
+
+
+	procedure skip_spaces;
+	begin
+
+ 	 while d[i] in AllowWhiteSpaces do begin
+   	  if d[i] = LF then inc(DefineLine);
+ 	  inc(i);
+  	 end;
+
+	end;
+
 
 	procedure newMsgUser(Kind: Byte);
 	var k: integer;
@@ -30220,20 +30236,58 @@ var
        if cmd = 'DEFINE' then begin
 	nam := get_label(i, d);
 
- 	while d[i] in AllowWhiteSpaces do begin
-   	 if d[i] = LF then inc(DefineLine);
+	Err := 0;
+
+	skip_spaces;
+
+	if d[i] = '(' then begin
+
+	 Param[1] := '';
+	 Param[2] := '';
+ 	 Param[3] := '';
+	 Param[4] := '';
+	 Param[5] := '';
+	 Param[6] := '';
+	 Param[7] := '';
+	 Param[8] := '';
+
 	 inc(i);
-  	end;
+	 skip_spaces;
+
+	 repeat
+
+	  inc(Err);
+	  Param[Err] :=  get_label(i, d);
+
+	  skip_spaces;
+
+	  if d[i] = ',' then inc(i);
+
+	  skip_spaces;
+
+	 until d[i] = ')';
+
+	 inc(i);
+	 skip_spaces;
+
+	end;
+
 
 	if (d[i] = ':') and (d[i+1] = '=') then begin
 	 inc(i, 2);
 
- 	 while d[i] in AllowWhiteSpaces do begin
-   	  if d[i] = LF then inc(DefineLine);
-	  inc(i);
-  	 end;
+	 skip_spaces;
 
-	 AddDefine(nam, DefineLine, copy(d, i, length(d)))		// define macro
+	 AddDefine(nam);		// define macro
+
+	 s:=copy(d, i, length(d));
+	 SetLength(s, length(s)-1);
+
+	 Defines[NumDefines].Macro := s;
+	 Defines[NumDefines].Line := DefineLine;
+
+	 if Err > 0 then Defines[NumDefines].Param := Param;
+
 	end else
 	 AddDefine(nam);
 
@@ -30328,6 +30382,32 @@ var
     end;
 
   if c = LF then Inc(Line);				// Increment current line number
+  end;
+
+
+  function ReadParameters: String;
+  var opn: integer;
+  begin
+
+   Result := '(';
+   opn:=1;
+
+   while true do begin
+    ReadChar(ch);
+
+    if ch = LF then inc(Line);
+
+    if ch = '(' then inc(opn);
+    if ch = ')' then dec(opn);
+
+    if not(ch in [CR, LF]) then Result:=Result + ch;
+
+    if (length(Result) > 255) or (opn = 0) then Break;
+
+   end;
+
+   if ch = ')' then ReadChar(ch);
+
   end;
 
 
@@ -30571,7 +30651,48 @@ var
 
 	 if (im > 0) and (Defines[im].Macro <> '') then begin
 
+	  tmp:=FilePos(InFile);
+	  ch2:=ch;
+	  Num:='';			// read parameters, max 255 chars
+
+	  if Defines[im].Param[1] <> '' then begin
+	    while ch in AllowWhiteSpaces do ReadChar(ch);
+	    if ch = '(' then Num := ReadParameters;
+	  end;
+
+	  SetLength(StrParams, 1);
+	  StrParams[0] := '';
+
+	  if Num = '' then begin
+	   Seek(InFile, tmp);
+	   ch:=ch2;
+	  end else
+	   StrParams := SplitString(copy(Num, 2, length(Num)-2), ',');
+
+	  if (StrParams[0] <> '') and (Defines[im].Param[1] = '') then
+	   Error(NumTok, 'Wrong number of parameters');
+
+
+	  OldNumDefines := NumDefines;
+
+	  Err:=1;
+
+	  while Defines[im].Param[Err] <> '' do begin
+
+	   if StrParams[Err - 1] = '' then
+	     Error(NumTok, 'Missing parameter');
+
+	   AddDefine(Defines[im].Param[Err]);
+	   Defines[NumDefines].Macro := StrParams[Err - 1];
+	   Defines[NumDefines].Line := Line;
+
+	   inc(Err);
+	  end;
+
+
 	  TokenizeMacro(Defines[im].Macro, Defines[im].Line, 0);
+
+	  NumDefines := OldNumDefines;
 
 	  CurToken := MACRORELEASE;
 	 end else begin
