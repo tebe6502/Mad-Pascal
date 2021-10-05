@@ -1,3 +1,9 @@
+06.10.2021
+- 'FOR element IN array' dla tablic nie przekraczaj¹cych 256 bajtów
+
+25.09.2021
+- poprawione procedura GetIdentProc, oddzielny test dopasowania dla procedur/funkcji bez parametrów i z parametrami
+
 15.09.2021
 - dodana obs³uga makr {$define label := ......}
 

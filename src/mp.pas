@@ -1382,12 +1382,8 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 	   end;
 
 	 end;
-{
-      if Ident[IdentIndex].Name = 'TEST' then
-       for i := 1 to NumParams do begin
-        writeln(High(best),':',Ident[IdentIndex].Param[i].Name,',',Ident[IdentIndex].Param[i].DataType,',',Ident[IdentIndex].Param[i].AllocElementType ,' / ', Param[i].Name,',', Param[i].DataType,',',Param[i].AllocElementType ,' | ', hits);
-       end;
-}
+
+
 	k:=High(best);
 
 	best[k].IdentIndex := IdentIndex;
@@ -1404,9 +1400,19 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 
  if High(best) = 1 then
   Result := best[0].IdentIndex
- else
-  for i := 0 to High(best) - 1 do
-   if (best[i].hit > m) and (best[i].b >= b) then begin m := best[i].hit; b := best[i].b; Result := best[i].IdentIndex end;
+ else begin
+
+  if NumParams = 0 then begin
+
+   for i := 0 to High(best) - 1 do
+    if {(best[i].hit > m) and} (best[i].b >= b) then begin b := best[i].b; Result := best[i].IdentIndex end;
+
+  end else
+
+   for i := 0 to High(best) - 1 do
+    if (best[i].hit > m) and (best[i].b >= b) then begin m := best[i].hit; b := best[i].b; Result := best[i].IdentIndex end;
+
+ end;
 
  SetLength(best, 0);
 end;
@@ -9587,7 +9593,7 @@ var i, l, k, m, x: integer;
     if (listing[i] <> '') then begin
 
 {
-if (pos('asl :STACK', listing[i]) > 0) then begin
+if (pos('BD', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -10180,6 +10186,25 @@ end;
      adc_sbc(i+9) and									// adc|sbc				; 9
      sta(i+10) then 									// sta :STACKORIGIN+STACKWIDTH*3+9	; 10
    begin
+
+
+    if (i+22 = l-1) and
+       lda(i+17) and								// lda					; 17
+       adc_sbc(i+18) and							// adc|sbc				; 18
+       sta_stack(i+19) and							// sta :STACKORIGIN+STACKWIDTH*2	; 19
+       lda(i+20) and								// lda					; 20
+       adc_sbc(i+21) and							// adc|sbc				; 21
+       sta_stack(i+22) then							// sta :STACKORIGIN+STACKWIDTH*3	; 22
+      begin									//~
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+
+	Result:=false; Break;
+      end;
 
 
     if lda_stack(i+11) and							// lda :STACKORIGIN+9			; 11
@@ -11230,6 +11255,23 @@ end;
 
     if ldy_im(i) and									// ldy #			; 0
        sty_bp_1(i+1) and								// sty :bp+1			; 1
+       ldy_im(i+2) and 									// ldy #			; 2
+       sta_bp_y(i+3) then 								// sta (:bp),y			; 3
+      begin
+	p := GetWORD(i+2, i);
+
+	listing[i+3] := #9'sta $' + IntToHex(p, 4);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if ldy_im(i) and									// ldy #			; 0
+       sty_bp_1(i+1) and								// sty :bp+1			; 1
        ldy(i+2) and (ldy_im(i+2) = false) and						// ldy 				; 2
        lda_a(i+3) and									// lda				; 3
        sta_bp_y(i+4) then 								// sta (:bp),y			; 4
@@ -12178,7 +12220,7 @@ end;
 
 
 {
-if (pos('?volatile', listing[i]) > 0) then begin
+if (pos('BD', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -29379,6 +29421,9 @@ begin
    begin
     Inc(NumDefines);
     Defines[NumDefines].Name := S;
+
+    Defines[NumDefines].Macro := '';
+    Defines[NumDefines].Line := 0;
    end;
 end;
 
@@ -34399,8 +34444,11 @@ function CompileExpression(i: Integer; out ValType: Byte; VarType: Byte = INTEGE
 
 function LowBound(i: integer; DataType: Byte): Int64;
 begin
-Result := 0;
-case DataType of
+
+ Result := 0;
+
+ case DataType of
+
     UNTYPETOK: iError(i, CantReadWrite);
    INTEGERTOK: Result := Low(Integer);
   SMALLINTTOK: Result := Low(SmallInt);
@@ -34410,16 +34458,22 @@ case DataType of
       BYTETOK: Result := Low(Byte);
       WORDTOK: Result := Low(Word);
   CARDINALTOK: Result := Low(Cardinal);
-else
+    STRINGTOK: Result := 1;
+
+ else
   iError(i, TypeMismatch);
-end;// case
+ end;// case
+
 end;
 
 
 function HighBound(i: integer; DataType: Byte): Int64;
 begin
-Result := 0;
-case DataType of
+
+ Result := 0;
+
+ case DataType of
+
     UNTYPETOK: iError(i, CantReadWrite);
    INTEGERTOK: Result := High(Integer);
   SMALLINTTOK: Result := High(SmallInt);
@@ -34429,9 +34483,12 @@ case DataType of
       BYTETOK: Result := High(Byte);
       WORDTOK: Result := High(Word);
   CARDINALTOK: Result := High(Cardinal);
-else
+    STRINGTOK: Result := 255;
+
+ else
   iError(i, TypeMismatch);
-end;// case
+ end;// case
+
 end;
 
 
@@ -34635,7 +34692,7 @@ case Tok[i].Kind of
     begin
      CheckTok(i + 1, OPARTOK);
 
-     if Tok[i + 2].Kind in AllTypes then begin
+     if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
 
       ConstValType := Tok[i + 2].Kind;
 
@@ -34650,11 +34707,12 @@ case Tok[i].Kind of
      end;
 
 
-     if ConstValType in Pointers then begin
-       ConstVal := 0;
-       ConstValType := GetValueType(ConstVal);
-     end else
+     if ConstValType in Pointers then
+      ConstVal := 0
+     else
       ConstVal := LowBound(i, ConstValType);
+
+     ConstValType := GetValueType(ConstVal);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -34666,7 +34724,7 @@ case Tok[i].Kind of
     begin
      CheckTok(i + 1, OPARTOK);
 
-     if Tok[i + 2].Kind in AllTypes then begin
+     if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
 
       ConstValType := Tok[i + 2].Kind;
 
@@ -34688,9 +34746,10 @@ case Tok[i].Kind of
       else
        ConstVal := 0;
 
-      ConstValType := GetValueType(ConstVal);
      end else
       ConstVal := HighBound(i, ConstValType);
+
+     ConstValType := GetValueType(ConstVal);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -36448,8 +36507,7 @@ case Tok[i].Kind of
 
       CheckTok(i + 1, OPARTOK);
 
-
-      if Tok[i + 2].Kind in AllTypes then begin
+      if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
 
        ValType := Tok[i + 2].Kind;
 
@@ -36500,7 +36558,14 @@ case Tok[i].Kind of
 
       ValType:=GetValueType(Value);
 
-      Push(Value, ASVALUE, DataSize[ValType]);
+      if Ident[IdentIndex].DataType = STRINGPOINTERTOK then begin
+        a65(__addBX);
+        asm65(#9'lda adr.' + GetLocalName(IdentIndex));
+        asm65(#9'sta :STACKORIGIN,x');
+
+	ValType := BYTETOK;
+      end else
+       Push(Value, ASVALUE, DataSize[ValType]);
 
 //     end;
 
@@ -36547,8 +36612,12 @@ case Tok[i].Kind of
 
       end else begin
 }
+
        if ValType in Pointers then begin
 	Value := 0;
+
+	if ValType = STRINGPOINTERTOK then Value := 1;
+
        end else
 	Value := LowBound(i, ValType);
 
@@ -39151,7 +39220,7 @@ case Tok[i].Kind of
 	   Param := NumActualParameters(i, IdentIndex, j);
 
 //	  if Ident[IdentIndex].isOverload then begin
-	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, IdentIndex, Param, j);
+	    IdentTemp := GetIdentProc(Ident[IdentIndex].Name, IdentIndex, Param, j);
 
 	    if IdentTemp = 0 then
 	     if Ident[IdentIndex].isOverload then
@@ -39693,8 +39762,6 @@ WHILETOK:
 	 else
 	    begin
 
-	    CheckTok(i + 2, ASSIGNTOK);
-
 	    Ident[IdentIndex].LoopVariable := true;
 
 
@@ -39706,6 +39773,136 @@ WHILETOK:
 	      asm65;
 	    end;
 
+
+	   if Tok[i + 2].Kind = INTOK then begin		// IN
+
+	    j := i + 3;
+
+  	    if Tok[j].Kind <> IDENTTOK then
+	      iError(j, IdentifierExpected);
+
+	    IdentTemp := GetIdent(Tok[j].Name^);
+
+	    ActualParamType := Ident[IdentTemp].DataType;
+	    VarType := Ident[IdentTemp].AllocElementType;
+
+	    k := Elements(IdentTemp);
+
+	    if k * DataSize[VarType] > 256 then
+	     Error(j, 'only arrays with a maximum of 256 bytes');
+
+	    Down := false;	// only increment
+
+ //writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
+
+	    if not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK]) then
+	      Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
+
+	    if (VarType in [RECORDTOK]) and (Ident[IdentIndex].DataType = POINTERTOK) then
+		// ok
+	    else
+	     GetCommonType(i, Ident[IdentIndex].DataType, VarType);
+
+	    StartOptimization(j);
+
+	    if ActualParamType = STRINGPOINTERTOK then
+             asm65(#9'lda #$00')
+	    else
+             asm65(#9'lda #-' + IntToStr(k));
+
+
+	    asm65(#9'sta l_' + IntToHex(CodeSize, 4) + '+1' );
+
+
+	     GenerateRepeatUntilProlog;		// Save return address used by GenerateForToDoEpilog
+
+	     SaveBreakAddress;
+
+	     asm65('; --- ForToDoCondition');
+
+	     StartOptimization(j);
+	     ResetOpty;				// !!!
+
+
+	     if ActualParamType = STRINGPOINTERTOK then begin
+
+	      asm65(#9'ldy #$00');
+
+ 	      asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+1,y' );
+	      asm65(#9'jeq l_' + IntToHex(CodePosStack[CodePosStackTop], 4));
+	      asm65(#9'sta ' + GetLocalName(IdentIndex));
+
+	     end else begin
+
+	      case DataSize[VarType] of
+
+	       1: begin
+	           asm65(#9'ldy #$00');
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex));
+		  end;
+
+	       2: begin
+	           asm65(#9'lda #$00');
+		   asm65(#9'asl @');
+		   asm65(#9'tay');
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 2) + '-256,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex));
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 2) + '-256+1,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
+		  end;
+
+	       4: begin
+	           asm65(#9'lda #$00');
+		   asm65(#9'asl @');
+		   asm65(#9'asl @');
+		   asm65(#9'tay');
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex));
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+1,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+2,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+2');
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+3,y' );
+	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+3');
+		  end;
+
+	       end;
+
+	     end;
+
+
+	       CheckTok(j + 1, DOTOK);
+
+
+		Inc(CodePosStackTop);
+		CodePosStack[CodePosStackTop] := CodeSize;
+
+		j := CompileStatement(j + 2);
+
+		asm65;
+		asm65('; --- ForToDoEpilog');
+
+		if BreakPosStack[BreakPosStackTop].cnt then asm65('c_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
+
+	        asm65(#9'inc l_' + IntToHex(CodePosStack[CodePosStackTop-1], 4) + '+1' );
+		asm65(#9'seq');
+		GenerateWhileDoEpilog;
+
+		RestoreBreakAddress;
+
+		Result := j;
+
+	   end else begin		// IN
+
+	    CheckTok(i + 2, ASSIGNTOK);
 
 //	    asm65;
 //	    asm65('; --- For');
@@ -39821,6 +40018,8 @@ WHILETOK:
 		Result := j;
 
 	      end;
+
+	     end;	// if Tok[i + 2].Kind = INTTOK
 
 	    Ident[IdentIndex].LoopVariable := false;
 
