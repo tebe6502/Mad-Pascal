@@ -829,6 +829,8 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
 
  STRINGPOINTERTOK: Result := 'STRING';
 
+ STRINGLITERALTOK: Result := 'literal';
+
   SHORTREALTOK: Result := 'SHORTREAL';
        REALTOK: Result := 'REAL';
      SINGLETOK: Result := 'SINGLE';
@@ -843,6 +845,7 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
      INLINETOK: Result := 'INLINE';
         ASMTOK: Result := 'ASM';
   INTERRUPTTOK: Result := 'INTERRUPT';
+
  else
   Result := 'UNTYPED'
  end;
@@ -2541,9 +2544,15 @@ end;
      if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[1], 6, 256)) then
       begin
 
-	if (pos('sta ', TemporaryBuf[2]) = 0) then TemporaryBuf[0] := '~';
+        if (pos('sta :STACK', TemporaryBuf[0]) > 0) then begin
+	  TemporaryBuf[0] := '~';
+	  TemporaryBuf[1] := '~';
+	end else
+	  TemporaryBuf[1] := '~';
 
-	TemporaryBuf[1] := '~';
+//	if (pos('sta ', TemporaryBuf[2]) = 0) then TemporaryBuf[0] := '~';
+
+//	TemporaryBuf[1] := '~';
       end;
 
 
@@ -39773,134 +39782,21 @@ WHILETOK:
 	      asm65;
 	    end;
 
-
 	   if Tok[i + 2].Kind = INTOK then begin		// IN
 
 	    j := i + 3;
 
-  	    if Tok[j].Kind <> IDENTTOK then
-	      iError(j, IdentifierExpected);
+	    	if Tok[j].Kind = STRINGLITERALTOK then begin
 
-	    IdentTemp := GetIdent(Tok[j].Name^);
+		{$i for_in_stringliteral.inc}
 
-	    ActualParamType := Ident[IdentTemp].DataType;
-	    VarType := Ident[IdentTemp].AllocElementType;
+	    	end else begin
 
-	    k := Elements(IdentTemp);
+		{$i for_in_ident.inc}
 
-	    if k * DataSize[VarType] > 256 then
-	     Error(j, 'only arrays with a maximum of 256 bytes');
+	    	end;
 
-	    Down := false;	// only increment
-
- //writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
-
-	    if not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK]) then
-	      Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
-
-	    if (VarType in [RECORDTOK]) and (Ident[IdentIndex].DataType = POINTERTOK) then
-		// ok
-	    else
-	     GetCommonType(i, Ident[IdentIndex].DataType, VarType);
-
-	    StartOptimization(j);
-
-	    if ActualParamType = STRINGPOINTERTOK then
-             asm65(#9'lda #$00')
-	    else
-             asm65(#9'lda #-' + IntToStr(k));
-
-
-	    asm65(#9'sta l_' + IntToHex(CodeSize, 4) + '+1' );
-
-
-	     GenerateRepeatUntilProlog;		// Save return address used by GenerateForToDoEpilog
-
-	     SaveBreakAddress;
-
-	     asm65('; --- ForToDoCondition');
-
-	     StartOptimization(j);
-	     ResetOpty;				// !!!
-
-
-	     if ActualParamType = STRINGPOINTERTOK then begin
-
-	      asm65(#9'ldy #$00');
-
- 	      asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+1,y' );
-	      asm65(#9'jeq l_' + IntToHex(CodePosStack[CodePosStackTop], 4));
-	      asm65(#9'sta ' + GetLocalName(IdentIndex));
-
-	     end else begin
-
-	      case DataSize[VarType] of
-
-	       1: begin
-	           asm65(#9'ldy #$00');
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex));
-		  end;
-
-	       2: begin
-	           asm65(#9'lda #$00');
-		   asm65(#9'asl @');
-		   asm65(#9'tay');
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 2) + '-256,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex));
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 2) + '-256+1,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
-		  end;
-
-	       4: begin
-	           asm65(#9'lda #$00');
-		   asm65(#9'asl @');
-		   asm65(#9'asl @');
-		   asm65(#9'tay');
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex));
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+1,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+2,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+2');
-
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+3,y' );
-	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+3');
-		  end;
-
-	       end;
-
-	     end;
-
-
-	       CheckTok(j + 1, DOTOK);
-
-
-		Inc(CodePosStackTop);
-		CodePosStack[CodePosStackTop] := CodeSize;
-
-		j := CompileStatement(j + 2);
-
-		asm65;
-		asm65('; --- ForToDoEpilog');
-
-		if BreakPosStack[BreakPosStackTop].cnt then asm65('c_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
-
-	        asm65(#9'inc l_' + IntToHex(CodePosStack[CodePosStackTop-1], 4) + '+1' );
-		asm65(#9'seq');
-		GenerateWhileDoEpilog;
-
-		RestoreBreakAddress;
-
-		Result := j;
-
-	   end else begin		// IN
+	   end else begin					// = INTOK
 
 	    CheckTok(i + 2, ASSIGNTOK);
 
