@@ -14,7 +14,7 @@
 
 // writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
 
-	    if not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK]) then
+	    if not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK, STRINGLITERALTOK]) then
 	      Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
 
 	    if (VarType in [RECORDTOK]) and (Ident[IdentIndex].DataType = POINTERTOK) then
