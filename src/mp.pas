@@ -39763,7 +39763,7 @@ WHILETOK:
       inc(CodeSize);		      // !!! aby dzialaly zagniezdzone FOR
 
       if IdentIndex > 0 then
-	if not ( (Ident[IdentIndex].Kind = VARIABLE) and (Ident[IdentIndex].DataType in OrdinalTypes + [POINTERTOK]) ) then
+	if not ( (Ident[IdentIndex].Kind = VARIABLE) and (Ident[IdentIndex].DataType in OrdinalTypes + Pointers) ) then
 	  Error(i + 1, 'Ordinal variable expected as ''FOR'' loop counter')
 	 else
 	 if (Ident[IdentIndex].isInitialized) or (Ident[IdentIndex].PassMethod <> VALPASSING) then
@@ -39781,6 +39781,7 @@ WHILETOK:
 	      asm65('@');
 	      asm65;
 	    end;
+
 
 	   if Tok[i + 2].Kind = INTOK then begin		// IN
 

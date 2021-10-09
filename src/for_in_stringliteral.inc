@@ -1,4 +1,6 @@
 
+	      StartOptimization(j);
+
               asm65(#9'lda #$00');
    	      asm65(#9'sta l_' + IntToHex(CodeSize, 4) + '+1' );
 
