@@ -41092,7 +41092,9 @@ WHILETOK:
 
 	      inc(j, 2);
 
-	    StartOptimization(j);
+	      StartOptimization(j);
+
+	      IdentTemp := -1;
 
 
 	{$IFDEF OPTIMIZECODE}
@@ -41103,9 +41105,21 @@ WHILETOK:
 
 		if ConstVal > 0 then forBPL:=forBPL or 2;
 	      end else begin
-		j := CompileExpression(j, ExpressionType, Ident[IdentIndex].DataType);
-		ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
-		DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 1);
+
+	        if ((Tok[j].Kind = IDENTTOK) and (Tok[j + 1].Kind = DOTOK)) or
+		   ((Tok[j].Kind = OPARTOK) and (Tok[j + 1].Kind = IDENTTOK) and (Tok[j + 2].Kind = CPARTOK) and (Tok[j + 3].Kind = DOTOK)) then begin
+
+		 IdentTemp := GetIdent(Tok[j].Name^);
+
+		 j := CompileExpression(j, ExpressionType, Ident[IdentIndex].DataType);
+		 ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
+
+		end else begin
+		 j := CompileExpression(j, ExpressionType, Ident[IdentIndex].DataType);
+		 ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
+		 DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), VARIABLE, Ident[IdentIndex].DataType, 0, 0, 1);
+		end;
+
 	      end;
 
 	{$ELSE}
@@ -41131,7 +41145,8 @@ WHILETOK:
 		 ActualParamType := Ident[IdentIndex].DataType;
 
 
-	        IdentTemp := GetIdent('@FORTMP_'+IntToHex(CodeSize, 4));
+	        if IdentTemp < 0 then IdentTemp := GetIdent('@FORTMP_'+IntToHex(CodeSize, 4));
+
 	        GenerateAssignment(ASPOINTER, DataSize[Ident[IdentTemp].DataType], IdentTemp);
 
 		asm65;		// ; --- To

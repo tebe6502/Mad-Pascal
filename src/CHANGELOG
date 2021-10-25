@@ -1,4 +1,6 @@
 25.10.2021
+- poprawiona optymalizacja pêtli FOR, https://github.com/tebe6502/Mad-Pascal/issues/61
+- alokacja pamiêci na stronie zerowej dla dwóch wskaŸników FXPTR, PSPTR uzale¿niona od wykorzystania VBXE (FXPTR), rekurencji (PSPTR), wymaga poprawionej wersji MadAssemblera
 - nowa procedura SplitString (nie wymaga modu³u StrUtils)
 
 20.10.2021
