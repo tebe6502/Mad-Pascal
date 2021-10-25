@@ -216,7 +216,7 @@ var
   SIGVOL              : byte absolute $D418;
   POTX                : byte absolute $D419;
   POTY                : byte absolute $D41A;
-  RANDOM              : byte absolute $D41B;
+  [volatile]	RANDOM              : byte absolute $D41B;
   ENV3                : byte absolute $D41C;
   COLORRAM            : byte absolute $D800;
   CIAPRA              : byte absolute $DC00;

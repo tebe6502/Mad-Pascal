@@ -108,11 +108,11 @@ const
 
 implementation
 
-//{$IFDEF ATARI}
+{$IFDEF ATARI}
 
 uses atari;
 
-//{$ENDIF}
+{$ENDIF}
 
 
 procedure CursorOff;
@@ -120,11 +120,14 @@ procedure CursorOff;
 @description: Hide cursor
 *)
 begin
-
+{$IFDEF ATARI}
  crsinh:=1;		// znacznik widocznosci kursora
 
  write( CH_CURS_RIGHT, CH_CURS_LEFT );
+{$ELSE}
 
+
+{$ENDIF}
 end;
 
 
@@ -133,11 +136,14 @@ procedure CursorOn;
 @description: Display cursor
 *)
 begin
-
+{$IFDEF ATARI}
  crsinh:=0;		// znacznik widocznosci kursora
 
  write( CH_CURS_RIGHT, CH_CURS_LEFT );
+{$ELSE}
 
+
+{$ENDIF}
 end;
 
 
@@ -161,7 +167,11 @@ procedure DelLine;
 @description: Delete line at cursor position
 *)
 begin
+{$IFDEF ATARI}
  write( CH_DELLINE );
+{$ELSE}
+
+{$ENDIF}
 end;
 
 
@@ -170,7 +180,11 @@ procedure InsLine;
 @description: Insert an empty line at cursor position
 *)
 begin
+{$IFDEF ATARI}
  write( CH_INSLINE );
+{$ELSE}
+
+{$ENDIF}
 end;
 
 

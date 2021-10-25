@@ -116,6 +116,12 @@ type	PWord = ^word;
 
 	*)
 
+type	PLongWord = ^cardinal;
+	(*
+	@description:
+
+	*)
+
 type	PCardinal = ^cardinal;
 	(*
 	@description:
@@ -123,6 +129,12 @@ type	PCardinal = ^cardinal;
 	*)
 
 type	PInteger = ^integer;
+	(*
+	@description:
+
+	*)
+
+type	PSingle = ^single;
 	(*
 	@description:
 
@@ -147,7 +159,8 @@ type	PWordArray = ^word;
 	*)
 
 const
-{$ifndef raw}
+
+{$ifdef atari}
 	__PORTB_BANKS = $0101;		// memory banks array
 {$endif}
 
@@ -177,7 +190,7 @@ const
 {$endif}
 
 (* Character codes *)
-{$ifndef raw}
+{$ifdef atari}
 	CH_DELCHR	= chr($FE);	// delete char under the cursor
 	CH_ENTER	= chr($9B);
 	CH_ESC		= chr($1B);
@@ -229,10 +242,12 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	DateSeparator: Char = '-';
 
+{$ifdef atari}
 	[volatile] Rnd: byte absolute $d20a;
 
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
+{$endif}
 
 	FileMode: byte = fmOpenReadWrite;
 
@@ -345,7 +360,6 @@ end;
 
 function ata2int(a: char): char; assembler;
 asm
-{
         asl
         php
         cmp #2*$60
@@ -357,7 +371,6 @@ asm
         ror
 
 	sta Result;
-};
 end;
 
 
@@ -372,12 +385,11 @@ Convert cardinal value to string with hexadecimal representation.
 @returns: string[32]
 *)
 asm
-{	jsr @hexStr
+	jsr @hexStr
 
 ;	@move #@buf Result #33
 	ldy #256-33
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
-};
 end;
 
 
@@ -391,9 +403,8 @@ Reads BYTE from the desired memory address
 @returns: byte
 *)
 asm
-{	ldy #0
+	ldy #0
 	mva (edx),y Result
-};
 end;
 
 
@@ -407,11 +418,10 @@ Reads WORD from the desired memory address
 @returns: word
 *)
 asm
-{	ldy #0
+	ldy #0
 	mva (edx),y Result
 	iny
 	mva (edx),y Result+1
-};
 end;
 
 
