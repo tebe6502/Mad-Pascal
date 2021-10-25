@@ -7,6 +7,10 @@ Value	= edx
 Digits	= ecx
 
 	txa:pha
+	
+	ldx Digits
+	lda #'0'
+	sta:rne @buf,x-
 
 	ldx Digits
 	cpx #32
