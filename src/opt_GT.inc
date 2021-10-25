@@ -786,12 +786,26 @@
        (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
+
+       if listing[i+1] = #9'lda #$00' then begin
+
+	listing[i]   := #9'lda ' + copy(listing[i+4], 6, 256);
+	listing[i+1] := #9'ora ' + copy(listing[i+7], 6, 256);
+	listing[i+2] := #9'ora ' + copy(listing[i+10], 6, 256);
+	listing[i+3] := #9'jeq ' + copy(listing[i+23], 6, 256);
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+       end else begin
+
 	listing[i]   := listing[i+1];
 	listing[i+1] := #9'jmi ' + copy(listing[i+23], 6, 256);
 	listing[i+2] := #9'ora ' + copy(listing[i+4], 6, 256);
 	listing[i+3] := #9'ora ' + copy(listing[i+7], 6, 256);
 	listing[i+4] := #9'ora ' + copy(listing[i+10], 6, 256);
 	listing[i+5] := #9'jeq ' + copy(listing[i+23], 6, 256);
+
+       end;
 
 	listing[i+6] := '';
 	listing[i+7] := '';
