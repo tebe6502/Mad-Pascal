@@ -45,6 +45,15 @@
 .endm
 
 
+m@move	.macro (src, dst, pages)
+	ldy #$00
+move	:+%%pages mva %%src+#*$100,y %%dst+#*$100,y
+	:+%%pages mva %%src+$80+#*$100,y %%dst+$80+#*$100,y
+	iny
+	bpl move
+	.endm
+
+
 m@fill	.macro
 	lda #0
 	tay
