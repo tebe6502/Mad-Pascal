@@ -1,0 +1,38 @@
+mads 2.1.3 build 47 (22 Oct 21)
+Source: D:\!Delphi\PAS6502\src\targets\generate_program_prolog.inc
+     1 				procedure GenerateProgramProlog;
+     2 				var i, j: Integer;
+     3 				    tmp: Boolean;
+     4 				    a: string;
+     5 				begin
+     6
+     7 = 0000			if Pass = CODEGENERATIONPASS then begin
+     8
+     9 				 tmp := optimize.use;
+    10 				 optimize.use := false;
+    11
+    12 				 Gen;
+    13
+    14 				 asm65separator(false);
+    15 				 asm65('; ' + CompilerTitle);
+    16 				 asm65separator(false);
+    17 				 asm65;
+    18
+    19 				 asm65('STACKWIDTH'#9'= 16');
+    20
+    21 				 if target.id = 'a8' then
+    22 				  asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
+    23
+    24 				 asm65;
+    25
+    26 				 asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
+    27 				 asm65('FALSE'#9#9'= '+IntToStr(Ident[GetIdent('FALSE')].Value));
+    28
+    29 				 asm65separator;
+    30 				 asm65;
+    31
+    32 				 if ZPAGE_Atari > 0 then
+    33 				  asm65(#9'org $'+IntToHex(ZPAGE_Atari, 2))
+    34 				 else begin
+    35 				  asm65(#9''+target.zpage);
+    36 				 end;

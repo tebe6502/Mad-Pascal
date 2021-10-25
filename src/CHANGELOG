@@ -1,3 +1,14 @@
+25.10.2021
+- nowa procedura SplitString (nie wymaga modu³u StrUtils)
+
+20.10.2021
+- optymalizaje dla 'WORD SHL ?', 'CARDINAL SHL ?', 'WORD SHR ?', 'CARDINAL SHR ?'
+
+17.10.2021
+- nowy tryb adresowania ASPOINTERTODEREFERENCE
+- optymalizacje dla 'WORD SHL 10', 'CARDINAL SHL 13', 'CARDINAL SHL 23', 'CARDINAL SHR 23'
+- poprawiona procedura @hexStr (base\common\int2hex.asm), dodane inicjowanie zerami '0'
+
 06.10.2021
 - 'FOR element IN array' dla tablic nie przekraczaj¹cych 256 bajtów
 

@@ -36,11 +36,21 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
+ asm65('zpage');
+ asm65;
 
- if target.id = 'a8' then
+ if target.id = 'a8' then begin
+
+  asm65('.ifdef @vbxe_detect');
   asm65('fxptr'#9'.ds 2','; VBXE pointer');
+  asm65('.endif');
+  asm65;
 
+ end;
+
+ asm65('.ifdef @AllocMem');
  asm65('psptr'#9'.ds 2','; PROGRAMSTACK Pointer');
+ asm65('.endif');
  asm65;
 
  asm65('bp'#9'.ds 2');
@@ -205,10 +215,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65;
 
- if target.id = 'a8' then
-  asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1')
- else
-  asm65('.print ''ZPAGE: '',psptr,''..'',zpend-1');
+ asm65('.print ''ZPAGE: '',zpage,''..'',zpend-1');
 
  asm65;
  asm65('.print ''RTLIB: '',RTLIB,''..'',*-1');
@@ -249,7 +256,9 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'eif');
  asm65;
 
+ asm65('.ifdef @AllocMem');
  asm65(#9'mwa #PROGRAMSTACK psptr');
+ asm65('.endif');
  asm65;
 
  if target.id = 'a8' then begin
