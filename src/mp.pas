@@ -41109,7 +41109,10 @@ WHILETOK:
 	        if ((Tok[j].Kind = IDENTTOK) and (Tok[j + 1].Kind = DOTOK)) or
 		   ((Tok[j].Kind = OPARTOK) and (Tok[j + 1].Kind = IDENTTOK) and (Tok[j + 2].Kind = CPARTOK) and (Tok[j + 3].Kind = DOTOK)) then begin
 
-		 IdentTemp := GetIdent(Tok[j].Name^);
+		 if Tok[j].Kind = IDENTTOK then
+		  IdentTemp := GetIdent(Tok[j].Name^)
+		 else
+		  IdentTemp := GetIdent(Tok[j + 1].Name^);
 
 		 j := CompileExpression(j, ExpressionType, Ident[IdentIndex].DataType);
 		 ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
