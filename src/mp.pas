@@ -3135,11 +3135,16 @@ end;
 
 	 Break;
        end else
-        if (pos('ldy ', TemporaryBuf[p]) > 0) or
+        if ((pos('ldy ', TemporaryBuf[p]) > 0) and (TemporaryBuf[p] <> #9'ldy ' + copy(TemporaryBuf[4], 6, 256))) or
            (pos('mwy ', TemporaryBuf[p]) > 0) or
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (TemporaryBuf[p] = #9'lda ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'add ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'sub ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'adc ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'sbc ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
@@ -3183,11 +3188,16 @@ end;
 
 	 Break;
        end else
-        if (pos('ldy ', TemporaryBuf[p]) > 0) or
+        if ((pos('ldy ', TemporaryBuf[p]) > 0) and (TemporaryBuf[p] <> #9'ldy ' + copy(TemporaryBuf[4], 6, 256))) or
            (pos('mwy ', TemporaryBuf[p]) > 0) or
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (TemporaryBuf[p] = #9'lda ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'add ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'sub ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'adc ' + copy(TemporaryBuf[4], 6, 256)) or
+           (TemporaryBuf[p] = #9'sbc ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
@@ -10376,6 +10386,27 @@ end;
        end;
 
 
+    if (l = i + 11) and
+       ldy_stack(i) and									// ldy :STACKORIGIN			; 0
+       beq(i+1) and									// beq l_				; 1
+       (pos('l_', listing[i+2]) = 1) and						//l_					; 2
+       asl_a(i+3) and									// asl @				; 3
+       rol_stack(i+4) and								// rol :STACKORIGIN+STACKWIDTH		; 4
+       rol_stack(i+5) and								// rol :STACKORIGIN+STACKWIDTH*2	; 5
+       rol_stack(i+6) and								// rol :STACKORIGIN+STACKWIDTH*3	; 6
+       dey(i+7) and									// dey					; 7
+       bne(i+8) and									// bne l_				; 8
+       (pos('l_', listing[i+9]) = 1) and						//l_					; 9
+       sta(i+10) then									// sta 					; 10
+       begin
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+
+	Result:=false; Break;
+       end;
+
+
     if lda_stack(i) and									// lda :STACKORIGIN+STACKWIDTH*2	; 0
        sta_stack(i+1) and								// sta :STACKORIGIN+STACKWIDTH*3	; 1
        lda_a(i+2) and									// lda					; 2
@@ -14776,6 +14807,37 @@ end;
 	listing[i+21] := '';
 	listing[i+22] := '';
 	listing[i+23] := '';
+
+	Result:=false; Break;
+     end;
+
+
+    if sta_stack(i) and										// sta :STACKORIGIN			; 0
+       lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH		; 1
+       (adc_im_0(i+2) or sbc_im_0(i+2)) and							// adc|sbc #$00				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH*2	; 4
+       (adc_im_0(i+5) or sbc_im_0(i+5)) and							// adc|sbc #$00				; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH*2	; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH*3	; 7
+       (adc_im_0(i+8) or sbc_im_0(i+8)) and							// adc|sbc #$00				; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*3	; 9
+       lda(i+10) and										// lda					; 10
+       ldy_stack(i+11) and									// ldy :STACKORIGIN			; 11
+       beq(i+12) and										// beq					; 12
+       (pos('l_', listing[i+13]) = 1) then							//l_					; 13
+     if (copy(listing[i], 6, 256) = copy(listing[i+11], 6, 256)) then
+     begin
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
 
 	Result:=false; Break;
      end;
@@ -22895,6 +22957,26 @@ end;
        lda(i+2) and									// lda					; 2
        asl_a(i+3) and									// asl @				; 3
        rol_eax_1(i+4) and								// rol :eax+1				; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN			; 5
+       lda_im(i+6) and									// lda #				; 6
+       (pos(' :eax+1', listing[i+7]) = 0) and						// ~ :eax+1				; 7
+       (pos(' :eax+1', listing[i+8]) = 0) and						// ~ :eax+1				; 8
+       (pos(' :eax+1', listing[i+9]) = 0) then						// ~ :eax+1				; 9
+      begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+4] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if lda_im_0(i) and									// lda #$00				; 0
+       sta_eax_1(i+1) and								// sta :eax+1				; 1
+       lda(i+2) and									// lda					; 2
+       asl_a(i+3) and									// asl @				; 3
+       rol_eax_1(i+4) and								// rol :eax+1				; 4
        add(i+5) and									// add					; 5
        sta(i+6) and									// sta 					; 6
        (listing[i+7] = #9'lda :eax+1') and						// lda :eax+1				; 7
@@ -28852,13 +28934,56 @@ begin
       if arg0 = 'shlEAX_CL.BYTE' then begin		// SHL BYTE
 	t:='';
 
-	k := GetVAL(GetARG(0, x));
+	k := GetVAL(GetARG(0, x, false));
 
 	s[x-1][1] := '';				// !!! bez tego nie zadziala gdy 'lda adr.' !!!
 	s[x-1][2] := '';
 	s[x-1][3] := '';
 
 	inc(l, 2);
+
+
+	if k > 31 then begin
+
+	s[x-1][0] := '';
+
+	listing[l]   := #9'lda #$00';			// shl 32..
+	listing[l+1] := #9'sta ' + GetARG(0, x-1);
+	listing[l+2] := #9'lda #$00';
+	listing[l+3] := #9'sta ' + GetARG(1, x-1);
+	listing[l+4] := #9'lda #$00';
+	listing[l+5] := #9'sta ' + GetARG(2, x-1);
+	listing[l+6] := #9'lda #$00';
+	listing[l+7] := #9'sta ' + GetARG(3, x-1);
+
+	inc(l, 8);
+
+	end else
+
+	if k = 31 then begin				// shl 31
+
+	 listing[l]   := #9'lda ' + GetARG(0, x-1);
+	 listing[l+1] := #9'lsr @';
+	 s[x-1][3] := '';
+	 listing[l+2] := #9'lda #$00';
+	 listing[l+3] := #9'ror @';
+	 listing[l+4] := #9'sta ' + GetARG(3, x-1);
+
+	 inc(l, 5);
+
+	 s[x-1, 0] := #9'mva #$00';
+	 s[x-1, 1] := #9'mva #$00';
+	 s[x-1, 2] := #9'mva #$00';
+
+	 listing[l]   := #9'lda '+GetARG(0, x-1);
+	 listing[l+1] := #9'sta '+GetARG(0, x-1);
+	 listing[l+2] := #9'lda '+GetARG(1, x-1);
+	 listing[l+3] := #9'sta '+GetARG(1, x-1);
+	 listing[l+4] := #9'lda '+GetARG(2, x-1);
+	 listing[l+5] := #9'sta '+GetARG(2, x-1);
+
+	 inc(l,6);
+	end else
 
 	if k in [12..15] then begin			// shl 14 -> (shl 16) shr 2
 
@@ -28921,7 +29046,60 @@ begin
 
 	end else begin
 
-	if (k > 7) or (k < 0) then begin x:=50; Break end;
+	if (k > 7) or (k < 0) then begin //x:=50; Break end;
+
+	 listing[l]   := #9'lda #$00';
+	 s[x-1][3]    := '';
+	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
+	 listing[l+2] := #9'lda #$00';
+	 s[x-1][2]    := '';
+	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
+	 listing[l+4] := #9'lda #$00';
+	 s[x-1][1]    := '';
+	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
+
+	 inc(l, 6);
+
+	 listing[l] := #9'lda ' + GetARG(1, x-1);
+	 s[x-1][1]    := '';
+	 listing[l+1] := #9'sta ' + GetARG(1, x-1);
+	 listing[l+2] := #9'lda ' + GetARG(0, x-1);
+	 s[x-1][0]    := '';
+
+	 inc(l, 3);
+
+	 listing[l] := #9'ldy ' + GetARG(0, x);
+	 s[x][0]      := '';
+	 listing[l+1] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
+
+	 listing[l+2] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
+	 listing[l+3] := #9'asl @';
+	 listing[l+4] := #9'rol ' + GetARG(1, x-1);
+	 listing[l+5] := #9'rol ' + GetARG(2, x-1);
+	 listing[l+6] := #9'rol ' + GetARG(3, x-1);
+
+	 listing[l+7] := #9'dey';
+	 listing[l+8] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
+	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
+
+	 listing[l+10] := #9'sta ' + GetARG(0, x-1);
+
+	 inc(l, 11);
+
+	 listing[l] := #9'lda '+GetARG(1, x-1);
+	 listing[l+1] := #9'sta '+GetARG(1, x-1);
+	 listing[l+2] := #9'lda '+GetARG(2, x-1);
+	 s[x-1][2] := '';
+	 listing[l+3] := #9'sta '+GetARG(2, x-1);
+	 listing[l+4] := #9'lda '+GetARG(3, x-1);
+	 s[x-1][3] := '';
+	 listing[l+5] := #9'sta '+GetARG(3, x-1);
+
+	 inc(l, 6);
+
+	 inc(ShrShlCnt);
+
+       end else begin
 
 	listing[l]   := #9'lda ' + GetARG(0, x-1);
 	listing[l+1] := #9'sta ' + GetARG(0, x-1);
@@ -28929,29 +29107,31 @@ begin
 
 	inc(l, 3);
 
-       for m := 0 to k - 1 do begin
+        for m := 0 to k - 1 do begin
 
-	listing[l]   := #9'asl ' + GetARG(0, x-1);
-	listing[l+1] := #9'rol @';
+	 listing[l]   := #9'asl ' + GetARG(0, x-1);
+	 listing[l+1] := #9'rol @';
 
-	inc(l, 2);
+	 inc(l, 2);
+        end;
+
+        listing[l]   := #9'sta ' + GetARG(1, x-1);
+        listing[l+1] := #9'lda ' + GetARG(0, x-1);
+        listing[l+2] := #9'sta ' + GetARG(0, x-1);
+
+        s[x-1][2] := #9'mva #$00';
+        s[x-1][3] := #9'mva #$00';
+
+        listing[l+3] := #9'lda ' + GetARG(2, x-1);
+        listing[l+4] := #9'sta ' + GetARG(2, x-1);
+        listing[l+5] := #9'lda ' + GetARG(3, x-1);
+        listing[l+6] := #9'sta ' + GetARG(3, x-1);
+
+        inc(l, 7);
+
        end;
 
-       listing[l]   := #9'sta ' + GetARG(1, x-1);
-       listing[l+1] := #9'lda ' + GetARG(0, x-1);
-       listing[l+2] := #9'sta ' + GetARG(0, x-1);
-
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-
-       listing[l+3] := #9'lda ' + GetARG(2, x-1);
-       listing[l+4] := #9'sta ' + GetARG(2, x-1);
-       listing[l+5] := #9'lda ' + GetARG(3, x-1);
-       listing[l+6] := #9'sta ' + GetARG(3, x-1);
-
-       inc(l, 7);
-
-       end;
+      end;
 
       end else
       if arg0 = 'shlEAX_CL.WORD' then begin	    // SHL WORD
@@ -28964,35 +29144,42 @@ begin
 
         if k < 0 then begin
 
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
+	 listing[l]   := #9'lda #$00';
 	 s[x-1][3]    := '';
 	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
+	 listing[l+2] := #9'lda #$00';
 	 s[x-1][2]    := '';
 	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
+
+	 inc(l, 4);
+
+	 listing[l] := #9'lda ' + GetARG(1, x-1);
 	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
+	 listing[l+1] := #9'sta ' + GetARG(1, x-1);
+	 listing[l+2] := #9'lda ' + GetARG(0, x-1);
 	 s[x-1][0]    := '';
 
-	 listing[l+7] := #9'ldy ' + GetARG(0, x);
+	 inc(l, 3);
+
+	 listing[l] := #9'ldy ' + GetARG(0, x);
 	 s[x][0]      := '';
-	 listing[l+8] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
+	 listing[l+1] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
 
-	 listing[l+9]  := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+10] := #9'asl @';
-	 listing[l+11] := #9'rol ' + GetARG(1, x-1);
+	 listing[l+2] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
+	 listing[l+3] := #9'asl @';
+	 listing[l+4] := #9'rol ' + GetARG(1, x-1);
+	 listing[l+5] := #9'rol ' + GetARG(2, x-1);
+	 listing[l+6] := #9'rol ' + GetARG(3, x-1);
 
-	 listing[l+12] := #9'dey';
-	 listing[l+13] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+14] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
+	 listing[l+7] := #9'dey';
+	 listing[l+8] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
+	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
 
-	 listing[l+15] := #9'sta ' + GetARG(0, x-1);
+	 listing[l+10] := #9'sta ' + GetARG(0, x-1);
 
-	 inc(l, 16);
+	 inc(l, 11);
 
-	 listing[l]   := #9'lda '+GetARG(1, x-1);
+	 listing[l] := #9'lda '+GetARG(1, x-1);
 	 listing[l+1] := #9'sta '+GetARG(1, x-1);
 	 listing[l+2] := #9'lda '+GetARG(2, x-1);
 	 listing[l+3] := #9'sta '+GetARG(2, x-1);
@@ -29004,7 +29191,7 @@ begin
 	 inc(ShrShlCnt);
 
         end else
-	if k > 15 then begin
+{	if k > 15 then begin
 
 	listing[l]   := #9'lda ' + GetARG(0, x-1);
 	listing[l+1] := #9'sta ' + GetARG(2, x-1);
@@ -29018,7 +29205,7 @@ begin
 	inc(l, 8);
 
 	end else
-
+}
 	if k = 15 then begin
 
 	listing[l]   := #9'lda ' + GetARG(0, x-1);
@@ -29997,6 +30184,9 @@ begin
      if SKIP(i+1) or
         ((i>0) and ((listing[i-1] = #9'.LOCAL') or (SKIP(i-1) and lda_im(i)))) then
 
+     else
+     if (arg0 = optyY) and sta_a(i+1) then
+      listing[i] := #9'tya'
      else
      if (arg0 = optyA) then
 //      if mva_im(i) then
