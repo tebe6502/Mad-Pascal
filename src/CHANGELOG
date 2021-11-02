@@ -1,3 +1,7 @@
+02.11.2021
+- naprawione parsowanie liczb hexadecymalnych w makrach
+- poprawiona kontrola nad parametrami przekazywanymi do makr, komunikaty b³êdów
+
 31.10.2021
 - fix issue #63, https://github.com/tebe6502/Mad-Pascal/issues/63
 

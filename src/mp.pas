@@ -4697,7 +4697,7 @@ var i, l, k, m, x: integer;
    begin
 
      if i<0 then
-      Result:=False
+      Result := False
      else
       Result :=	seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or
 		jeq(i) or jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or
@@ -10356,7 +10356,7 @@ end;
     if (l = i + 4) and
        (lda_stack(i) or sta_stack(i) or lda_im(i) or rol_a(i) or ror_a(i)) and		// lda|sta :STACKORIGIN+STACKWIDTH*3	; 0
        lda(i+1) and									// lda :STACKORIGIN			; 1
-       add_sub(i+2) and									// add|sub				; 2
+       (add_sub(i+2) or and_ora_eor(i+2)) and						// add|sub|and|ora|eor			; 2
        sta(i+3) and (sta_stack(i+3) = false) then					// sta					; 3
      if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) and
 	(copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256)) then
@@ -15452,11 +15452,10 @@ end;
 
 // wspolna procka dla Nx ASL
 
-    if (add_sub(i) or										// add|sub|			; 0
-	lda_a(i) or rol_a(i) or									// lda|and|ora|eor|rol		; 0
-	AND_ORA_EOR(i)) and 									// sta :STACKORIGIN+9		; 1
-       sta_stack(i+1) and									// asl :STACKORIGIN+9		; 2
-       asl_stack(i+2) then
+    if (add_sub(i) or lda_a(i) or rol_a(i) or AND_ORA_EOR(i)) and				// add|sub|lda|rol|and|ora|eor	; 0
+	sta_stack(i+1) and									// sta :STACKORIGIN+9		; 1
+       	asl_stack(i+2) and									// asl :STACKORIGIN+9		; 2
+	(rol_stack(i+3) = false) then								//~rol :STACKORIGIN		; 3
      if (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
        begin
 
@@ -25450,6 +25449,30 @@ end;
      end;
 
 
+    if (SKIP(i-1) = false) and
+       lda(i) and 										// lda			; 0
+       (listing[i+1] = #9'and #$80') and							// and #$80		; 1
+       (listing[i+2] = #9'cmp #$80') and							// cmp #$80		; 2
+       bne(i+3) and										// bne			; 3
+       lda_im_0(i+4) and									// lda #$00		; 4
+       (listing[i+5] = '@') and									//@			; 5
+       (jeq(i+6) or jne(i+6)) then								// jeq|jne		; 6
+     begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	if jeq(i+6) then
+	 listing[i+6] := #9'jmi ' + copy(listing[i+6], 6, 256)
+	else
+	 listing[i+6] := #9'jpl ' + copy(listing[i+6], 6, 256);
+
+	Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'cmp #$80') and								// cmp #$80		; 0
        (jcc(i+1) or jcs(i+1)) then								// jcc|jcs		; 1
      begin
@@ -31107,7 +31130,7 @@ var
 
       ch:=a[i]; inc(i);
 
-      while ch in AllowDigitChars do
+      while UpCase(ch) in AllowDigitChars do
        begin
        Num := Num + ch;
        ch:=a[i]; inc(i);
@@ -31119,6 +31142,7 @@ var
        val('$'+Num, tmp, err);
 
        Num:=IntToStr(tmp);
+
     end else
 
       while ch in ['0'..'9'] do		// Number suspected
@@ -31218,10 +31242,14 @@ begin
 
 	  i:=TextPos;
 
+          if Defines[im].Macro = copy(a,i,length(text)) then
+	   Error(NumTok, 'Recursion in macros is not allowed');
+
 	  delete(a, i, length(Text));
 	  insert(Defines[im].Macro, a, i);
 
 	  CurToken := MACRORELEASE;
+
 	 end else begin
 
 	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
@@ -31768,7 +31796,7 @@ var
 
 
   procedure ReadDirective(d: string; DefineLine: integer);
-  var i, v: integer;
+  var i, v, x: integer;
       cmd, s, nam: string;
       found: Boolean;
       Param: TDefinesParam;
@@ -31990,7 +32018,7 @@ var
 
 	skip_spaces;
 
-	if d[i] = '(' then begin
+	if d[i] = '(' then begin	// macro parameters
 
 	 Param[1] := '';
 	 Param[2] := '';
@@ -32004,16 +32032,33 @@ var
 	 inc(i);
 	 skip_spaces;
 
+	 Tok[NumTok].Line := line;
+
+	 if not(UpCase(d[i]) in AllowLabelFirstChars) then
+	  Error(NumTok, 'Syntax error, ''identifier'' expected');
+
 	 repeat
 
 	  inc(Err);
-	  Param[Err] :=  get_label(i, d);
+
+          if Err > MAXPARAMS then
+	   Error(NumTok, 'Too many formal parameters in ' + nam);
+
+	  Param[Err] := get_label(i, d);
+
+	  for x := 1 to Err - 1 do
+	   if Param[x] = Param[Err] then
+	    Error(NumTok, 'Duplicate identifier ''' + Param[Err] + '''');
 
 	  skip_spaces;
 
-	  if d[i] = ',' then inc(i);
+	  if d[i] = ',' then begin
+	   inc(i);
+	   skip_spaces;
 
-	  skip_spaces;
+	   if not(UpCase(d[i]) in AllowLabelFirstChars) then
+	    Error(NumTok, 'Syntax error, ''identifier'' expected');
+	  end;
 
 	 until d[i] = ')';
 
@@ -42947,7 +42992,7 @@ end;// CompileStatement
 
 function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
-     NumVarOfSameType, VarOfSameTypeIndex: Integer;
+     NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
      ListPassMethod, VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
 begin
@@ -42995,8 +43040,13 @@ begin
 	      Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
 	    else
 	      begin
-	      Inc(NumVarOfSameType);
-	      VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name^;
+
+		for x := 1 to NumVarOfSameType do
+		 if VarOfSameType[x].Name = Tok[i + 1].Name^ then
+		   Error(i + 1, 'Identifier ' + Tok[i + 1].Name^ + ' is already defined');
+
+	        Inc(NumVarOfSameType);
+	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name^;
 	      end;
 	    i := i + 2;
 	    until Tok[i].Kind <> COMMATOK;
