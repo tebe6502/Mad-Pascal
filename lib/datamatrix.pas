@@ -13,7 +13,7 @@ unit datamatrix;
 
 interface
 
-procedure CalculateMatrix:assembler;
+procedure CalculateMatrix; assembler;
 procedure SetMessage(msg:string; dmData:word);
 
 implementation
@@ -21,7 +21,7 @@ implementation
 const
    DataMatrix_EOF = 255;
 
-procedure CalculateMatrix:assembler;
+procedure CalculateMatrix; assembler;
 (*
 @description:
 
