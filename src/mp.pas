@@ -41003,7 +41003,7 @@ case Tok[i].Kind of
 	  dec(run_func);
 
 	  Result := i;
-	  end;// PROC
+	  end;	// PROC
 
       else
 	Error(i, 'Assignment or procedure call expected but ' + Ident[IdentIndex].Name + ' found');
@@ -42467,24 +42467,6 @@ WHILETOK:
 	   iError(i, OrdinalExpExpected);
 
 
-          if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements = 0) and (Ident[IdentIndex].AllocElementType <> 0) then begin
-
-	      if Tok[i + 1].Kind = OBRACKETTOK then begin			// typed pointer: PByte, Pword ...
-
-		ExpressionType := Ident[IdentIndex].AllocElementType;
-
-		IndirectionLevel := ASPOINTERTOARRAYORIGIN;
-
-		i := CompileArrayIndex(i, IdentIndex);
-
-		CheckTok(i + 1, CBRACKETTOK);
-
-		inc(i);
-
-	      end;
-
-	  end else
-
 	  if not(Ident[IdentIndex].idType in [PCHARTOK]) and (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) and ( not(Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) ) then begin
 
 	      if Tok[i + 1].Kind = OBRACKETTOK then begin			// array index
@@ -42504,6 +42486,22 @@ WHILETOK:
 		Error(i + 1, 'Illegal qualifier')
 	       else
 		iError(i + 1, IncompatibleTypes, IdentIndex, Ident[IdentIndex].DataType, ExpressionType);
+
+	  end else
+
+//          if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements = 0) and (Ident[IdentIndex].AllocElementType <> 0) then begin
+
+	  if Tok[i + 1].Kind = OBRACKETTOK then begin				// typed pointer: PByte[], Pword[] ...
+
+	    ExpressionType := Ident[IdentIndex].AllocElementType;
+
+	    IndirectionLevel := ASPOINTERTOARRAYORIGIN;
+
+	    i := CompileArrayIndex(i, IdentIndex);
+
+	    CheckTok(i + 1, CBRACKETTOK);
+
+	    inc(i);
 
 	  end else
 
@@ -43048,6 +43046,7 @@ begin
 	        Inc(NumVarOfSameType);
 	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name^;
 	      end;
+
 	    i := i + 2;
 	    until Tok[i].Kind <> COMMATOK;
 
@@ -43138,6 +43137,7 @@ begin
 	i := i + 1;
 	end;// if IsNestedFunction
 
+    CheckTok(i, SEMICOLONTOK);
 
     end; //if ForwardIdentIndex = 0
 
@@ -44442,7 +44442,9 @@ begin
 	NestedFunctionAllocElementType := AllocElementType;
 
 	i := i + 1;
-	end;// if IsNestedFunction
+	end;	// if IsNestedFunction
+
+	CheckTok(i, SEMICOLONTOK);
 
 
 	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK] do begin
