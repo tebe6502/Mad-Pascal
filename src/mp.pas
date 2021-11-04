@@ -32458,11 +32458,18 @@ var
 	  SetLength(StrParams, 1);
 	  StrParams[0] := '';
 
+	  Tok[NumTok].Line := Line;
+
 	  if Num = '' then begin
 	   Seek(InFile, tmp);
 	   ch:=ch2;
-	  end else
+	  end else begin
 	   StrParams := SplitString(copy(Num, 2, length(Num)-2), ',');
+
+	  if High(StrParams) > MAXPARAMS then
+	   Error(NumTok, 'Too many formal parameters in ' + Text);
+
+	  end;
 
 	  if (StrParams[0] <> '') and (Defines[im].Param[1] = '') then
 	   Error(NumTok, 'Wrong number of parameters');
@@ -32472,7 +32479,7 @@ var
 
 	  Err:=1;
 
-	  while Defines[im].Param[Err] <> '' do begin
+	  while (Defines[im].Param[Err] <> '') and (Err <= MAXPARAMS) do begin
 
 	   if StrParams[Err - 1] = '' then
 	     Error(NumTok, 'Missing parameter');

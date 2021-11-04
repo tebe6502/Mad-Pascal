@@ -1,3 +1,6 @@
+04.11.2021
+- poprawiona kontrola liczby parametrów przekazywanych do makra
+
 02.11.2021
 - naprawione parsowanie liczb hexadecymalnych w makrach
 - poprawiona kontrola nad parametrami przekazywanymi do makr, komunikaty b³êdów
