@@ -14577,10 +14577,12 @@ end;
 	(copy(listing[i+5], 6, 256) = copy(listing[i+16], 6, 256)) and
 	(copy(listing[i+11], 6, 256) = copy(listing[i+18], 6, 256)) then
      begin
-	listing[i]   := #9'lsr ' + copy(listing[i], 6, 256);
-	listing[i+1] := #9'ror ' + copy(listing[i+2], 6, 256);
-	listing[i+2] := #9'ror ' + copy(listing[i+4], 6, 256);
-	listing[i+3] := #9'ror ' + copy(listing[i+6], 6, 256);
+	listing[i+3] := #9'ror ' + copy(listing[i], 6, 256);
+
+	listing[i]   := #9'lsr ' + copy(listing[i+6], 6, 256);
+	listing[i+1] := #9'ror ' + copy(listing[i+4], 6, 256);
+	listing[i+2] := #9'ror ' + copy(listing[i+2], 6, 256);
+
 	listing[i+4] := '';
 	listing[i+5] := '';
 	listing[i+6] := '';
