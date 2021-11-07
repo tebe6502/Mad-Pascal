@@ -9613,7 +9613,7 @@ var i, l, k, m, x: integer;
     if (listing[i] <> '') then begin
 
 {
-if (pos('BD', listing[i]) > 0) then begin
+if (pos('add B', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -11161,11 +11161,11 @@ end;
        add(i+1) and (add_im_0(i+1) = false) and (iy(i+1) = false) and			// add D			; 1
        sta_stack(i+2) and								// sta :STACKORIGIN		; 2
        lda_im_0(i+3) and								// lda #$00			; 3
-       adc(i+4) and 									// adc D+1			; 4
+       adc(i+4) and (adc_im_0(i+4) = false) and						// adc D+1			; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH	; 5
        lda_stack(i+6) and								// lda :STACKORIGIN		; 6
        add_sub(i+7) and									// add|sub			; 7
-       sta(i+8) and (sta_stack(i+8) = false) and (iy(i+8) = false) and			// sta D			; 8
+       (sta_stack(i+8) = false) and sta(i+8) and (iy(i+8) = false) and			// sta D			; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH	; 9
        adc_sbc(i+10) and								// adc|sbc			; 10
        sta(i+11) then									// sta D+1			; 11
@@ -11204,12 +11204,12 @@ end;
        add_sub(i+1) and (iy(i+1) = false) and
        (add_im_0(i+1) = false) and (sub_im_0(i+1) = false) and				// add|sub			; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9		; 2
-       lda(i+3) and (iy(i+3) = false) and (lda_im(i+3) = false) and			// lda				; 3
+       (lda_im(i+3) = false) and lda(i+3) and (iy(i+3) = false) and			// lda				; 3
        (adc_im_0(i+4) or sbc_im_0(i+4)) and						// adc|sbc #$00			; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH	; 5
        lda_stack(i+6) and								// lda :STACKORIGIN+9		; 6
        add_sub(i+7) and									// add				; 7
-       sta(i+8) and (sta_stack(i+8) = false) and (iy(i+8) = false) and			// sta T			; 8
+       (sta_stack(i+8) = false) and sta(i+8) and (iy(i+8) = false) and			// sta T			; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH	; 9
        (adc_im_0(i+10) or sbc_im_0(i+10)) and						// adc|sbc #$00			; 10
        sta(i+11) then									// sta T+1			; 11
