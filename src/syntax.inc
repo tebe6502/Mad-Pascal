@@ -2,6 +2,7 @@ procedure Syntax(ExitCode: byte);
 begin
 
   WriteLn('Syntax: mp <inputfile> [options]');
+  Writeln('-o:filename'#9'Output file');
   WriteLn('-diag'#9#9'Diagnostics mode');
   Writeln('-define:symbol'#9'Defines the symbol');
   Writeln('-ipath:<x>'#9'Add <x> to include path');
