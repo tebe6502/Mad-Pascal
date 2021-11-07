@@ -1,3 +1,28 @@
+5.11.2021
+    b_utils   v. 0.6.0
+        - Added: 
+			procedure Base64Init;
+			procedure Base64Encode(var src, dest: string);
+			procedure Base64Decode(var src, dest: string);
+    fn_sio   v. 0.9.4
+        - Changed:
+            FN_Open now can take aux params
+			FN_Command dbyt is word now
+    fn_tcp   v. 0.7.2
+        - Changed:
+            TCP_Connect now can take aux params
+	hsc_util v.0.9.0
+        - Added: 
+			procedure HSC_MakeToken(id:word;score:cardinal;var hscToken:AOC);
+			function HSC_Send(var hscToken:AOC;var hsc_buffer:AOC):byte;overload;
+			function HSC_Send(id:word;score:cardinal;var hsc_buffer:AOC):byte;overload;
+			function HSC_Get_Formated(id:byte;buff:pointer):byte;overload;
+			function HSC_Get(id:byte;buff:pointer):byte;overload;
+	examples
+        - Added:
+            hsc_example_send.pas
+            hsc_example_show.pas
+            
 07.01.2021
     b_maxflash8mb   v. 0.1.0
         - Added: 
