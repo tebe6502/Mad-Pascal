@@ -106,55 +106,55 @@
 
 <tr><td class='tname fname'>xBiosCheck</td><td class='tdesc'><h4>function xBiosCheck:byte;</h4><br>
 	Checks for the presence of xBios in memory. Looks at address defined as xBiosAddress.<br><ul><h5>returns:</h5><li class='returns'>(byte) - returns 0 for no xBios loaded,if xBios is present - returns two nibbles of xBios version</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosRenameEntry</td><td class='tdesc'><h4>procedure xBiosRenameEntry(var filename:TString):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosRenameEntry</td><td class='tdesc'><h4>procedure xBiosRenameEntry(var filename:TString); assembler;</h4><br>
 	This function allows you to rename a file or directory. There is no limit to the characters used in the filename apart from that they must fit a case insensitive “8.3” format without the dot. If your filename is not 8 characters long, pad it out with spaces.<br><ul><h5>parameters:</h5><li>filename - string containing both names, source and destination, padded with spaces.Must be 22 characters long. <br> example: filename := 'INFILE  TXTOUTFILE TXT';</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosLoadFile</td><td class='tdesc'><h4>procedure xBiosLoadFile(var filename:TString):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosLoadFile</td><td class='tdesc'><h4>procedure xBiosLoadFile(var filename:TString); assembler;</h4><br>
 	Loads and runs the file, INIT and RUN headers are supported. In the case the file does not have a defined block RUN will be launched from the beginning of the first block.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'INFILE  TXT';</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosOpenFile</td><td class='tdesc'><h4>procedure xBiosOpenFile(var filename:TString):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosOpenFile</td><td class='tdesc'><h4>procedure xBiosOpenFile(var filename:TString); assembler;</h4><br>
 	Opens a file in order to carry out subsequent IO operations.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'INFILE  TXT';</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosLoadData</td><td class='tdesc'><h4>procedure xBiosLoadData(dest: pointer):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosLoadData</td><td class='tdesc'><h4>procedure xBiosLoadData(dest: pointer); assembler;</h4><br>
 	Loads data from file to a specified destination address. You can set the file offset (xBiosSetFileOffset) and the amount of data to be loaded (xBiosSetLength). If you do not define these values, data will be loaded from the current position of the file pointer to the end of the file.<br><ul><h5>parameters:</h5><li>dest - data destination pointer.</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosLoadLz4Data</td><td class='tdesc'><h4>procedure xBiosLoadLz4Data(dest: pointer):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosLoadLz4Data</td><td class='tdesc'><h4>procedure xBiosLoadLz4Data(dest: pointer); assembler;</h4><br>
 	Loads and decompres data from compressed lz4 file to a specified destination address. Based on xxl & fox routine from here: <a href='https://xxl.atari.pl/lz4-decompressor/'>https://xxl.atari.pl/lz4-decompressor/</a><br><ul><h5>parameters:</h5><li>dest - data destination pointer.</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosWriteData</td><td class='tdesc'><h4>procedure xBiosWriteData(src: pointer):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosWriteData</td><td class='tdesc'><h4>procedure xBiosWriteData(src: pointer); assembler;</h4><br>
 	Saves data from memory to a file, starting from the current position in the file. You can set the file pointer offset current (xBiosSetFileOffset) and the amount of data to be saved (xBiosSetLength). If you do not define these values, data from the current file position to the end of the file is written to the file.<br><ul><h5>parameters:</h5><li>src - pointer to source of data.</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosOpenCurrentDir</td><td class='tdesc'><h4>procedure xBiosOpenCurrentDir:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosOpenCurrentDir</td><td class='tdesc'><h4>procedure xBiosOpenCurrentDir; assembler;</h4><br>
 	Opens the current directory.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosGetByte</td><td class='tdesc'><h4>function xBiosGetByte:byte:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosGetByte</td><td class='tdesc'><h4>function xBiosGetByte:byte; assembler;</h4><br>
 	Reads one byte from opened file.<br><ul><h5>returns:</h5><li class='returns'>(byte) - byte readed from file</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosPutByte</td><td class='tdesc'><h4>procedure xBiosPutByte(b:byte):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosPutByte</td><td class='tdesc'><h4>procedure xBiosPutByte(b:byte); assembler;</h4><br>
 	Writes one byte into opened file.<br><ul><h5>parameters:</h5><li>b - byte to be written into file</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosFlushBuffer</td><td class='tdesc'><h4>procedure xBiosFlushBuffer:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosFlushBuffer</td><td class='tdesc'><h4>procedure xBiosFlushBuffer; assembler;</h4><br>
 	All write operations are cached, use this to flush the buffer to the current file.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetLength</td><td class='tdesc'><h4>procedure xBiosSetLength(len: word):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetLength</td><td class='tdesc'><h4>procedure xBiosSetLength(len: word); assembler;</h4><br>
 	Defines the amount of data to process while reading or writing.<br><ul><h5>parameters:</h5><li>len - amount of data</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetInitAd</td><td class='tdesc'><h4>procedure xBiosSetInitAd(adr: word):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetInitAd</td><td class='tdesc'><h4>procedure xBiosSetInitAd(adr: word); assembler;</h4><br>
 	Allows you to change the init address vector INITAD ($2E2) for loaded binary files.<br><ul><h5>parameters:</h5><li>adr - new address vector for INITAD</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetFileOffset</td><td class='tdesc'><h4>procedure xBiosSetFileOffset(pos: cardinal):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetFileOffset</td><td class='tdesc'><h4>procedure xBiosSetFileOffset(pos: cardinal); assembler;</h4><br>
 	Sets the current read/write position in the current file with a value stored in parameter. This item is calculated relative to the beginning of the file. In DOS speak, the operation is called "POINT". You can only move this pointer forward.<br><ul><h5>parameters:</h5><li>pos - new position in the current file</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetRunAd</td><td class='tdesc'><h4>procedure xBiosSetRunAd(adr: word):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetRunAd</td><td class='tdesc'><h4>procedure xBiosSetRunAd(adr: word); assembler;</h4><br>
 	Allows you to change the run address vector RUNAD ($2E0) for loaded binary files.<br><ul><h5>parameters:</h5><li>adr - new address vector for RUNAD</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetDefaultDevice</td><td class='tdesc'><h4>procedure xBiosSetDefaultDevice:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetDefaultDevice</td><td class='tdesc'><h4>procedure xBiosSetDefaultDevice; assembler;</h4><br>
 	Restores the standard IO device.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosOpenDir</td><td class='tdesc'><h4>procedure xBiosOpenDir(var filename:TString):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosOpenDir</td><td class='tdesc'><h4>procedure xBiosOpenDir(var filename:TString); assembler;</h4><br>
 	Allows you to change the current directory.<br><ul><h5>parameters:</h5><li>filename - string containing directory name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'SUBDIR     ';</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosLoadBinaryFile</td><td class='tdesc'><h4>procedure xBiosLoadBinaryFile:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosLoadBinaryFile</td><td class='tdesc'><h4>procedure xBiosLoadBinaryFile; assembler;</h4><br>
 	Loads and runs the binary file from the current read/write position. INIT and RUN headers are supported.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosOpenDefaultDir</td><td class='tdesc'><h4>procedure xBiosOpenDefaultDir:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosOpenDefaultDir</td><td class='tdesc'><h4>procedure xBiosOpenDefaultDir; assembler;</h4><br>
 	Opens the default directory.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetDevice</td><td class='tdesc'><h4>procedure xBiosSetDevice(dev: word):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetDevice</td><td class='tdesc'><h4>procedure xBiosSetDevice(dev: word); assembler;</h4><br>
 	Changes the IO device.<br><ul><h5>parameters:</h5><li>dev - device address</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosRelocateBuffer</td><td class='tdesc'><h4>procedure xBiosRelocateBuffer(adr: word;c:byte):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosRelocateBuffer</td><td class='tdesc'><h4>procedure xBiosRelocateBuffer(adr: word;c:byte); assembler;</h4><br>
 	Changes address of IO buffer. If c = 1, the relocation can be carried out even during IO. The data will not be lost. If c = 0, buffer contents will not be copied to a new location.<br><ul><h5>parameters:</h5><li>adr - new buffer address</li><li>c - dynamic relocation flag</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosGetEntry</td><td class='tdesc'><h4>procedure xBiosGetEntry:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosGetEntry</td><td class='tdesc'><h4>procedure xBiosGetEntry; assembler;</h4><br>
 	Gets another entry in the directory. The xBiosDirEntryIndex returns the index to the filename or folder (byte of buffer address is stored in the variable xBUFFERH). The xBiosDirEntryStatus is set with the status. The xBiosIOresult is set to 1 when the end of the directory is found.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosOpenDefaultFile</td><td class='tdesc'><h4>procedure xBiosOpenDefaultFile:assembler;</h4><br>
+<tr><td class='tname fname'>xBiosOpenDefaultFile</td><td class='tdesc'><h4>procedure xBiosOpenDefaultFile; assembler;</h4><br>
 	Opens the default file. The function does not search the directory, the file handle is derived from the variable 'xFILE'.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>xBiosReadSector</td><td class='tdesc'><h4>procedure xBiosReadSector(sector: word):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosReadSector</td><td class='tdesc'><h4>procedure xBiosReadSector(sector: word); assembler;</h4><br>
 	Loads an sector into a buffer.<br><ul><h5>parameters:</h5><li>sector - sector number</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosFindEntry</td><td class='tdesc'><h4>procedure xBiosFindEntry(var filename:TString):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosFindEntry</td><td class='tdesc'><h4>procedure xBiosFindEntry(var filename:TString); assembler;</h4><br>
 	This function allows you to find the specified directory entry. The xBiosDirEntryIndex returns the index to the filename or folder (byte of buffer address is stored in the variable xBUFFERH). The xBiosDirEntrySector returns starting sector number of found entry. If an entry is not found, the xBiosIOresult is set to 1.<br><ul><h5>parameters:</h5><li>filename - string containing file name (8.3 format without dot) padded with spaces.Must be 11 characters long. <br> example: filename := 'INFILE  TXT';</li></ul></td></tr>
-<tr><td class='tname fname'>xBiosSetBufferSize</td><td class='tdesc'><h4>procedure xBiosSetBufferSize(size: byte):assembler;</h4><br>
+<tr><td class='tname fname'>xBiosSetBufferSize</td><td class='tdesc'><h4>procedure xBiosSetBufferSize(size: byte); assembler;</h4><br>
 	This feature allows you to set the buffer size for IO operations. Buffer Size is also stored in the variable xBUFSIZE in bytes format.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>DosGetEntryName</td><td class='tdesc'><h4>function DosGetEntryName:TString;</h4><br>
 	Reads and returns last directory entry name. Can be invoked only after xBiosGetEntry or xBiosFindEntry.<br><ul><h5>returns:</h5><li class='returns'>(string) - returns last directory entry name</li></ul></td></tr>

@@ -1,0 +1,82 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit fn_tcp - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit fn_tcp</h1>
+<h3>#FujiNet interface TCP communication library.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>This library provides an easy interface to estabilish TCP connection, and transfer data both directions. <br> It allows you to use SIO interrupts, to read data from SIO only on demand. <br> It uses 256 bytes circular buffer dynamicly allocated in your MadPascal DATA block. <br> <a href='https://fujinet.online/'>https://fujinet.online/</a> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>TCP_status</td><td class='ttype'>FN_StatusStruct</td><td class='tdesc'>Status operation result data. Structure defined in fn_sio module.</td></tr>
+<tr><td class='tname'>TCP_bytesWaiting</td><td class='ttype'>word</td><td class='tdesc'>Number of bytes waiting in network device</td></tr>
+<tr><td class='tname'>TCP_bufferLength</td><td class='ttype'>word</td><td class='tdesc'>Number of bytes in receive buffer</td></tr>
+<tr><td class='tname'>TCP_dataFlag</td><td class='ttype'>byte</td><td class='tdesc'>This byte is updated by SIO interrupt. 1 is set here if there is incoming data.</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>TCP_InitIRQ</td><td class='tdesc'><h4>procedure TCP_InitIRQ;</h4><br>
+	Attaches interrupt handler, to update TCP_dataFlag byte on incoming data connection. <br> This interrupt sets 1 into TCP_dataFlag variable. If you want to be informed on next packet, you need to reset it to zero manualy (probably after data fetch).<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TCP_StopIRQ</td><td class='tdesc'><h4>procedure TCP_StopIRQ;</h4><br>
+	Removes custom SIO interrupt handler. Do not call this procedure without TCP_InitIRQ before.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TCP_Connect</td><td class='tdesc'><h4>function TCP_Connect(var tcp_uri:PChar):byte;</h4><br>
+	Opens #FujiNet connection to remote host, at selected port using declared protocol.<br><ul><h5>parameters:</h5><li>tcp_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/<br> <br> The N: Device spec can be found here: <br> <a href='https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec'>https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec</a></li></ul></td></tr>
+<tr><td class='tname fname'>TCP_GetStatus</td><td class='tdesc'><h4>procedure TCP_GetStatus;</h4><br>
+	Reads network device status and stores information in TCP_status variable.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TCP_SIORead</td><td class='tdesc'><h4>function TCP_SIORead:word;</h4><br>
+	Performs data fetch from SIO device (N:) to free space in local TCP buffer. <br> If amount of SIO data is bigger than available space in buffer, only part of the data is received. To fetch rest of it you need to release some buffer space, by calling TCP_ReadByte or TCP_ReadBuffer procedure. And then call TCP_SIORead again... and again...<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TCP_ReadByte</td><td class='tdesc'><h4>function TCP_ReadByte: byte;</h4><br>
+	Reads one byte from TCP receive buffer (if available). It also frees one byte in buffer for future SIOReads. <br> Always check if there is at least one byte available in buffer (TCP_bufferLength > 0). If you will call this function on empty buffer, returned value is unpredictable.<br><ul><h5>returns:</h5><li class='returns'>(byte) - value from buffer</li></ul></td></tr>
+<tr><td class='tname fname'>TCP_ReadBuffer</td><td class='tdesc'><h4>function TCP_ReadBuffer(buf: pointer; len: word): word;</h4><br>
+	Reads block of bytes from TCP receive buffer. It also frees space in buffer for future SIOReads. <br> If amount of data available in buffer is smaller then desired (len), only available part is received. Function will return exact number of received/freed bytes.<br><ul><h5>parameters:</h5><li>buf - pointer of buffer to store the incoming data</li><li>len - data length (in bytes)</li><h5>returns:</h5><li class='returns'>(word) - number of bytes received.</li></ul></td></tr>
+<tr><td class='tname fname'>TCP_CheckAndPoll</td><td class='tdesc'><h4>function TCP_CheckAndPoll:word;</h4><br>
+	This function performs check if there is any incoming data available. If there is and we have free space in receive buffer, it reads biggest possible chunk of data from SIO to our TCP buffer. After operation it returns amount of data added to buffer, and updates value of TCP_bufferLength. <br> Also TCP_dataFlag is set to 0 after every succesful poll. <br> <br> This function should be called periodicaly to retrieve incoming data, and process it when it shows up in buffer.<br><ul><h5>returns:</h5><li class='returns'>(word) - number of bytes received.</li></ul></td></tr>
+<tr><td class='tname fname'>TCP_SendString</td><td class='tdesc'><h4>procedure TCP_SendString(var s:string);</h4><br>
+	Sends string using existing connection.<br><ul><h5>parameters:</h5><li>s - the string to be sent</li></ul></td></tr>
+<tr><td class='tname fname'>TCP_SendBuffer</td><td class='tdesc'><h4>procedure TCP_SendBuffer(buf: pointer;len: word);</h4><br>
+	Sends data buffer using already opened connection.<br><ul><h5>parameters:</h5><li>buf - pointer to starting address of data</li><li>len - data length (in bytes)</li></ul></td></tr>
+<tr><td class='tname fname'>TCP_Close</td><td class='tdesc'><h4>procedure TCP_Close;</h4><br>
+	Closes #FujiNet network connection.<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit fn_sio - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit fn_sio</h1>
+<h3>SIO library for #FujiNet interface.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of procedures to communicate with #FujiNet interface on SIO level. <a href='https://fujinet.online/'>https://fujinet.online/</a> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>FN_StatusStruct</td><td class='ttype'>record<ul class='record'><li>dataSize: word;</li><li>connected: byte;</li><li>errorCode: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'>Structure used to store Status Command result</td></tr>
+
+</table>
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>FN_Open</td><td class='tdesc'><h4>procedure FN_Open(var fn_uri:PChar);</h4><br>
+	Opens connection to remote host at selected port using declared protocol.<br><ul><h5>parameters:</h5><li>fn_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/<br> <br> The N: Device spec can be found here: <br> <a href='https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec'>https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec</a></li></ul></td></tr>
+<tr><td class='tname fname'>FN_WriteBuffer</td><td class='tdesc'><h4>procedure FN_WriteBuffer(buf: pointer; len: word);</h4><br>
+	Writes (sends) data from memory to network device.<br><ul><h5>parameters:</h5><li>buf - pointer to starting address of data</li><li>len - data length (in bytes)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_ReadBuffer</td><td class='tdesc'><h4>procedure FN_ReadBuffer(buf: pointer;len: word);</h4><br>
+	Reads (receives) data from network device.<br><ul><h5>parameters:</h5><li>buf - pointer of buffer to store the incoming data</li><li>len - data length (in bytes)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_ReadStatus</td><td class='tdesc'><h4>procedure FN_ReadStatus(status: pointer);</h4><br>
+	Reads network device status and stores information in provided memory location.<br><ul><h5>parameters:</h5><li>buf - pointer of buffer to store returned status information</li></ul></td></tr>
+<tr><td class='tname fname'>FN_Close</td><td class='tdesc'><h4>procedure FN_Close;</h4><br>
+	Closes network connection.<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>
