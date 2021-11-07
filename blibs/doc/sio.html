@@ -1,0 +1,80 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit sio - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit sio</h1>
+<h3>Serial Input/Ouput interface library.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of useful constants, and structures to work with ATARI OS SIO procedures. <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>_R</td><td class='tvalue'>$40</td><td class='tdesc'>Read - predefined values for data transfer direction (to be set in DSTATS)</td></tr>
+<tr><td class='tname'>_W</td><td class='tvalue'>$80</td><td class='tdesc'>Write</td></tr>
+<tr><td class='tname'>_RW</td><td class='tvalue'>$C0</td><td class='tdesc'>Read and Write</td></tr>
+<tr><td class='tname'>_NO</td><td class='tvalue'>$00</td><td class='tdesc'>No data transfer</td></tr>
+<tr><td class='tname'>JSIOINT</td><td class='tvalue'>$E459</td><td class='tdesc'>SIO OS procedure vector</td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>DCB_struct</td><td class='ttype'>record<ul class='record'><li>DDEVIC  : byte; <span class='comment'>// Device Id</span></li><li>DUNIT   : byte; <span class='comment'>// Unit number</span></li><li>DCMND   : byte; <span class='comment'>// Command</span></li><li>DSTATS  : byte; <span class='comment'>// Transfer direction on Input. Status on Output</span></li><li>DBUFA   : word; <span class='comment'>// Buffer address</span></li><li>DTIMLO  : byte; <span class='comment'>// Timeout in seconds</span></li><li>DUNUSE  : byte; <span class='comment'>// Unused</span></li><li>DBYT    : word; <span class='comment'>// Data length</span></li><li>DAUX1   : byte; <span class='comment'>// Auxiliary bytes</span></li><li>DAUX2   : byte;</li></ul><br clear='all'>end;</td><td class='tdesc'>Device Control Block structure definition</td></tr>
+
+</table>
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>DCB</td><td class='taddress'>$300</td><td class='ttype'>DCB_struct</td><td class='tdesc'>Device Control Block variable</td></tr>
+<tr><td class='tname'>PACTL</td><td class='taddress'>$D302</td><td class='ttype'>byte</td><td class='tdesc'>Port A Control Register</td></tr>
+<tr><td class='tname'>PBCTL</td><td class='taddress'>$D303</td><td class='ttype'>byte</td><td class='tdesc'>Port A Control Register</td></tr>
+<tr><td class='tname'>VPRCED</td><td class='taddress'>$0202</td><td class='ttype'>word</td><td class='tdesc'>Peripheral Proceed IRQ vector</td></tr>
+<tr><td class='tname'>VINTER</td><td class='taddress'>$0204</td><td class='ttype'>word</td><td class='tdesc'>Peripheral interrupt IRQ vector</td></tr>
+<tr><td class='tname'>sioStatus</td><td class='taddress'>$303</td><td class='ttype'>byte</td><td class='tdesc'>contains last SIO operation result, returned in DSTATS register. 1 is returned if operation was sucessfull, otherwise contains error code</td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>sioResult</td><td class='ttype'>byte</td><td class='tdesc'>contains last SIO operation result, returned in Y register. 1 is returned if operation was sucessfull, otherwise contains error code</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>ExecSIO</td><td class='tdesc'><h4>procedure ExecSIO; assembler;</h4><br>
+	Executes SIO operation defined by DCB block. On exit it returns status of operation in sioResult and/or sioStatus. 1 is returned if operation was sucessfull, otherwise variable contains error code.<br><ul></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>
