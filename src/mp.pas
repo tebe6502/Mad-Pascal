@@ -660,7 +660,7 @@ var
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2: string;
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp: string;
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: string;
 
   msgWarning, msgNote, msgUser, UnitPath: TArrayString;
 
@@ -46366,9 +46366,20 @@ begin
 
   if ParamStr(i)[1] = '-' then begin
 
-   if AnsiUpperCase(ParamStr(i)) = '-O' then
-//    OptimizeCode := TRUE
-   else
+   if AnsiUpperCase(ParamStr(i)) = '-O' then begin
+
+     outputFile := ParamStr(i+1);
+     inc(i);
+     if outputFile = '' then Syntax(3);
+
+   end else
+   if pos('-O:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+
+     outputFile := copy(ParamStr(i), 4, 255);
+
+     if outputFile = '' then Syntax(3);
+
+   end else
    if AnsiUpperCase(ParamStr(i)) = '-DIAG' then
     DiagMode := TRUE
    else
@@ -46535,7 +46546,12 @@ begin
  {$ENDIF}
 
 
- AssignFile(OutFile, ChangeFileExt(UnitName[1].Name, '.a65') ); rewrite(OutFile);
+ if outputFile <> '' then
+  AssignFile(OutFile, outputFile)
+ else
+  AssignFile(OutFile, ChangeFileExt(UnitName[1].Name, '.a65') );
+
+ rewrite(OutFile);
 
  Writeln('Compiling ', UnitName[1].Name);
 
