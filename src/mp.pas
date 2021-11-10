@@ -39867,15 +39867,11 @@ end;
 while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   begin
 
-//sick
 
   if ValType in RealTypes then VarType := ValType;
 
-//writeln('> ',ValType,',',VarType);
 
   k := CompileTerm(j + 2, RightValType, VarType);
-
- //writeln('>> ',ValType,',',VarType,',',RightValType);
 
   if ((ValType = SINGLETOK) and (RightValType in [SHORTREALTOK, REALTOK])) or
      ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType = SINGLETOK)) then
