@@ -39651,6 +39651,22 @@ begin
   end;
 
 
+{
+  If ((ValType = SINGLETOK) and (RightValType in [REALTOK, SHORTREALTOK])) then begin
+   ExpandParam(INTEGERTOK, RightValType);
+
+   RightValType := ValType;
+  end;
+
+
+  if ((ValType in [REALTOK, SHORTREALTOK]) and (RightValType = SINGLETOK)) then begin
+   ExpandParam(INTEGERTOK, ValType);
+
+   ValType := RightValType;
+  end;
+}
+
+
   If ((ValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) and (RightValType in IntegerTypes) then begin
 
    ExpandParam(INTEGERTOK, RightValType);
@@ -39719,11 +39735,20 @@ begin
 
  if Tok[j + 1].Kind in [MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTOK] then
   j := CompileFactor(i, isZero, ValType, INTEGERTOK)
- else
+ else begin
+
+  if ValType in RealTypes then VarType := ValType;
+
   j := CompileFactor(i, isZero, ValType, VarType);
+
+ end;
 
 while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTOK] do
   begin
+
+
+  if ValType in RealTypes then VarType := ValType;
+
 
   if Tok[j + 1].Kind in [MULTOK, DIVTOK] then
    k := CompileFactor(j + 2, isZero, RightValType, VarType)
@@ -39737,6 +39762,7 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
   if ((ValType = SINGLETOK) and (RightValType in [SHORTREALTOK, REALTOK])) or
    ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType = SINGLETOK)) then
     Error(j + 2, 'Illegal type conversion: "'+InfoAboutToken(ValType)+'" to "'+InfoAboutToken(RightValType)+'"');
+
 
   if VarType in RealTypes then begin
    if (ValType = VarType) and (RightValType in RealTypes) then RightValType := VarType;
@@ -39787,6 +39813,8 @@ begin
 if Tok[i].Kind in [PLUSTOK, MINUSTOK] then j := i + 1 else j := i;
 
 if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
+
+ if VarType in RealTypes then ValType := VarType;
 
  if Tok[i].Kind = MINUSTOK then
  if ValType in RealTypes then begin		// Unary minus (RealTypes)
@@ -39839,7 +39867,15 @@ end;
 while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   begin
 
+//sick
+
+  if ValType in RealTypes then VarType := ValType;
+
+//writeln('> ',ValType,',',VarType);
+
   k := CompileTerm(j + 2, RightValType, VarType);
+
+ //writeln('>> ',ValType,',',VarType,',',RightValType);
 
   if ((ValType = SINGLETOK) and (RightValType in [SHORTREALTOK, REALTOK])) or
      ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType = SINGLETOK)) then
@@ -39922,7 +39958,10 @@ ConstValRight := 0;
 sLeft:=false;
 sRight:=false;
 
+
+
 i := CompileSimpleExpression(i, ValType, VarType);
+
 
 if (Tok[i].Kind = STRINGLITERALTOK) or (ValType = STRINGPOINTERTOK) then sLeft:=true else
  if (ValType in Pointers) and (Tok[i].Kind = IDENTTOK) then
@@ -39935,7 +39974,12 @@ if Tok[i + 1].Kind = INTOK then writeln('IN');
 if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   begin
 
+
+  if ValType in RealTypes then VarType := ValType;
+
+
   j := CompileSimpleExpression(i + 2, RightValType, VarType);
+
 
   k := i + 2;
   if SafeCompileConstExpression(k, ConstVal, ConstValType, VarType, False) then
@@ -39983,7 +40027,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   RealTypeConversion(ValType, RightValType);
 
-//  writeln(ValType,'/',RightValType,',',isZero,',',Tok[i + 1].Kind );
+//  writeln(VarType,  ' | ', ValType,'/',RightValType,',',isZero,',',Tok[i + 1].Kind ,' : ', ConstVal);
 
 
   if (Tok[i + 1].Kind in [LTTOK, GTTOK]) and (ValType in IntegerTypes) then begin
