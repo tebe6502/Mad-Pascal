@@ -46518,7 +46518,7 @@ begin
   end else
 
    begin
-    UnitName[1].Name := ChangeFileExt(ParamStr(i), '.pas');
+    UnitName[1].Name := ParamStr(i);	//ChangeFileExt(ParamStr(i), '.pas');
     UnitName[1].Path := UnitName[1].Name;
 
     if not FileExists(UnitName[1].Name) then begin
