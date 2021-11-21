@@ -122,7 +122,11 @@ numread	.word		; pointer to variable, length of loaded data
 
 	icl 'common\shortreal.asm'	; mul / div -> SHORTREAL	Q8.8
 	icl 'common\real.asm'		; mul / div -> REAL		Q24.8
-	icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754
+	icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754 32bit
+	icl 'common\float16.asm'	; add / sub -> HALFSINGLE	IEEE-754 16bit
+	icl 'common\float16_mul.asm'	; mul -> HALFSINGLE		IEEE-754 16bit
+	icl 'common\float16_div.asm'	; div -> HALFSINGLE		IEEE-754 16bit
+	icl 'common\float16_int.asm'	; int -> HALFSINGLE		IEEE-754 16bit
 
 	icl 'common\mul40.asm'		; @mul40
 	icl 'common\mul64.asm'		; @mul64
