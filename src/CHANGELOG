@@ -1,3 +1,6 @@
+21.11.2021
+- dodany nowy typ FLOAT16 (half-single)
+
 11.11.2021
 - kompilator nie zmienia rozszerzenia kompilowanego pliku na *.pas
 
