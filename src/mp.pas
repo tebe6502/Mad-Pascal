@@ -11,12 +11,19 @@ IDE WUDSN
 https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
 
 
-Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2020
+Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2021
 
 Contributors:
 
++ Artyom Beilis, Marek Mauder :
+	- Float16 (half-single)
+
 + Bostjan Gorisek :
 	- unit PMG, ZXLIB
+
++ Bartosz Zbytniewski :
+	- Bug Hunter
+	- Commodore C16/264 minimal unit SYSTEM setup
 
 + Chriss Hutt :
 	- unit SMP
@@ -37,16 +44,13 @@ Contributors:
 + Guillermo Fuenzalida :
 	- unit MISC: DetectANTIC
 
-+ Michael Jaskula :
-	- BASIC Off
-
 + Jerzy Kut :
 	- {$DEFINE ROMOFF}
 
 + Konrad Kokoszkiewicz :
 	- base\atari\cmdline.asm
 	- base\atari\vbxedetect.asm
-	- unit MISC: DetectCPU, DetectCPUSpeed, DetectMem, DetectHighMem
+	- unit MISC: DetectCPU, DetectCPUSpeed, DetectMem, DetectHighMem, DetectStereo
 	- unit S2 (VBXE handler)
 
 + Krzysztof Dudek :
@@ -56,6 +60,9 @@ Contributors:
 
 + Marcin ¯ukowski :
 	- unit FASTGRAPH: fLine
+
++ Michael Jaskula :
+	- BASIC Off
 
 + Piotr Fusik :
 	- base\runtime\icmp.asm
@@ -82,9 +89,6 @@ Contributors:
 	- MADSTRAP
 	- PASDOC
 
-+ Bartosz Zbytniewski :
-	- Bug Hunter
-	- Commodore C16/264 minimal unit SYSTEM setup
 
 # rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
@@ -297,15 +301,17 @@ const
   OBJECTTOK		= 140;	// Size = 2/???
   SHORTREALTOK		= 141;	// Size = 2 SHORTREAL			Fixed-Point Q8.8
   REALTOK		= 142;	// Size = 4 REAL			Fixed-Point Q24.8
-  SINGLETOK		= 143;	// Size = 4 SINGLE/FLOAT		IEEE-754
-  PCHARTOK		= 144;	// Size = 2 POINTER TO ARRAY OF CHAR
-  ENUMTOK		= 145;	// Size = 1 BYTE
-  TEXTFILETOK		= 146;	// Size = 2/12 FILE
-  FORWARDTYPE		= 147;	// Size = 2
+  SINGLETOK		= 143;	// Size = 4 SINGLE / FLOAT		IEEE-754 32bit
+  HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16bit
+  PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
+  ENUMTOK		= 146;	// Size = 1 BYTE
+  TEXTFILETOK		= 147;	// Size = 2/12 FILE
+  FORWARDTYPE		= 148;	// Size = 2
 
-  SHORTSTRINGTOK	= 148;	// zamieniamy na STRINGTOK
-  FLOATTOK		= 149;	// zamieniamy na SINGLETOK
-  TEXTTOK		= 150;	// zamieniamy na TEXTFILETOK
+  SHORTSTRINGTOK	= 149;	// zamieniamy na STRINGTOK
+  FLOATTOK		= 150;	// zamieniamy na SINGLETOK
+  FLOAT16TOK		= 151;	// zamieniamy na HALFSINGLETOK
+  TEXTTOK		= 152;	// zamieniamy na TEXTFILETOK
 
   DATAORIGINOFFSET	= 160;
   CODEORIGINOFFSET	= 161;
@@ -330,7 +336,7 @@ const
 
   UnsignedOrdinalTypes	= [BYTETOK, WORDTOK, CARDINALTOK];
   SignedOrdinalTypes	= [SHORTINTTOK, SMALLINTTOK, INTEGERTOK];
-  RealTypes		= [SHORTREALTOK, REALTOK, SINGLETOK];
+  RealTypes		= [SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK];
 
   IntegerTypes		= UnsignedOrdinalTypes + SignedOrdinalTypes;
   OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK];
@@ -392,8 +398,9 @@ const
   ASBOOLEAN		= 7;
   ASREAL		= 8;
   ASSHORTREAL		= 9;
-  ASSINGLE		= 10;
-  ASPCHAR		= 11;
+  ASHALFSINGLE		= 10;
+  ASSINGLE		= 11;
+  ASPCHAR		= 12;
 
   OBJECTVARIABLE	= 1;
   RECORDVARIABLE	= 2;
@@ -412,7 +419,7 @@ const
 
   // Data sizes
 
-  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,1,2,2);
+  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,2,1,2,2);
 
   fBlockRead_ParamType : array [1..3] of byte = (POINTERTOK, WORDTOK, POINTERTOK);
 
@@ -834,6 +841,7 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
   SHORTREALTOK: Result := 'SHORTREAL';
        REALTOK: Result := 'REAL';
      SINGLETOK: Result := 'SINGLE';
+ HALFSINGLETOK: Result := 'FLOAT16';
 	SETTOK: Result := 'SET';
        FILETOK: Result := 'FILE';
    TEXTFILETOK: Result := 'TEXTFILE';
@@ -2044,6 +2052,9 @@ begin
      ( (DstType = SINGLETOK) and (SrcType <> SINGLETOK) ) or
      ( (DstType <> SINGLETOK) and (SrcType = SINGLETOK) ) or
 
+     ( (DstType = HALFSINGLETOK) and (SrcType <> HALFSINGLETOK) ) or
+     ( (DstType <> HALFSINGLETOK) and (SrcType = HALFSINGLETOK) ) or
+
      ( (DstType = SHORTREALTOK) and (SrcType <> SHORTREALTOK) ) or
      ( (DstType <> SHORTREALTOK) and (SrcType = SHORTREALTOK) ) or
 
@@ -3140,6 +3151,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'lda ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'add ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'sub ' + copy(TemporaryBuf[4], 6, 256)) or
@@ -3193,6 +3205,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'lda ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'add ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'sub ' + copy(TemporaryBuf[4], 6, 256)) or
@@ -3446,6 +3459,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tya') or
@@ -3491,6 +3505,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tya') or
@@ -3584,6 +3599,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
@@ -3626,6 +3642,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
@@ -3675,6 +3692,7 @@ end;
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
+           (pos(#9'@print', TemporaryBuf[p]) > 0) or
            (TemporaryBuf[p] = #9'iny') or
            (TemporaryBuf[p] = #9'dey') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
@@ -5114,7 +5132,7 @@ var i, l, k, m, x: integer;
    if listing[i] <> '' then begin
 
 {
-   if pos('@PARAM', listing[i]) > 0 then begin
+   if (pos('add #CONTEXT.STATE-DATAORIGIN', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -5262,6 +5280,576 @@ var i, l, k, m, x: integer;
        Result:=false; Break;
      end;
 
+{
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       (listing[i+2] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 2
+       (listing[i+3] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 3
+       (and_ora_eor(i+4) or add_sub(i+4)) and (pos(' :STACKORIGIN,x', listing[i+4]) > 0) then	// add|sub|and|ora|eor :STACKORIGIN,x	; 4
+     begin
+       listing[i+4] := copy(listing[i+4], 1, 5) + copy(listing[i+1], 6, 256);
+
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+}
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       and_ora_eor(i+2) and (and_ora_eor_stack(i+2) = false) and				// and|ora|eor				; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i]   := '';
+
+       listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       sta_a(i+2) and (sta_stack(i+2) = false) and						// sta					; 2
+       dex(i+3) then										// dex					; 3
+     begin
+       listing[i]   := '';
+
+       listing[i+3] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       sta_a(i+2) and (sta_stack(i+2) = false) and						// sta					; 2
+       lda_a(i+3) and (lda_stack(i+3) = false) and						// lda					; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       dex(i+5) then										// dex					; 5
+     begin
+       listing[i]   := '';
+
+       listing[i+5] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       sta_a(i+2) and (sta_stack(i+2) = false) and						// sta					; 2
+       lda_a(i+3) and (lda_stack(i+3) = false) and						// lda					; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       lda_a(i+5) and (lda_stack(i+5) = false) and						// lda					; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       lda_a(i+7) and (lda_stack(i+7) = false) and						// lda					; 7
+       sta_a(i+8) and (sta_stack(i+8) = false) and						// sta					; 8
+       dex(i+9) then										// dex					; 9
+     begin
+       listing[i]   := '';
+
+       listing[i+9] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       (listing[i+1] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 1
+       add_sub(i+2) and (add_sub_stack(i+2) = false) and					// add|sub				; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       (listing[i+4] = #9'lda :STACKORIGIN-1+STACKWIDTH,x') and					// lda :STACKORIGIN-1+STACKWIDTH,x	; 4
+       adc_sbc(i+5) and (adc_sbc_stack(i+5) = false) and					// adc|sbc				; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       dex(i+7) then										// dex					; 7
+     begin
+       listing[i+1] := #9'lda :STACKORIGIN,x';
+
+       listing[i+4] := #9'lda :STACKORIGIN+STACKWIDTH,x';
+
+       listing[i]   := '';
+
+       listing[i+7] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       (listing[i+1] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 1
+       add_sub(i+2) and (add_sub_stack(i+2) = false) and					// add|sub				; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
+       adc_sbc(i+5) and (adc_sbc_stack(i+5) = false) and					// adc|sbc				; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       dex(i+7) then										// dex					; 7
+     begin
+       listing[i+1] := #9'lda :STACKORIGIN,x';
+
+       listing[i]   := '';
+
+       listing[i+7] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       lda(i+1) and (lda_stack(i+1) = false)  and						// lda					; 1
+       add_sub_im(i+2) and 									// add|sub #				; 2
+       (listing[i+3] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 3
+       lda(i+4) and (lda_stack(i+4) = false)  and						// lda					; 4
+       adc_sbc_im(i+5) and 									// adc|sbc				; 5
+       (listing[i+6] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x	; 6
+       (listing[i+7] = #9'ldy :STACKORIGIN,x') then						// ldy :STACKORIGIN,x			; 7
+     begin
+       listing[i+3] := #9'tay';
+       listing[i+4] := '';
+       listing[i+5] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       ldy(i+1) and (ldy_stack(i+1) = false) and						// ldy					; 1
+       iny(i+2) and										// iny					; 2
+       lda_a(i+3) and (lda_stack(i+3) = false) and						// lda					; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       dex(i+5) then										// dex					; 5
+     begin
+       listing[i]   := '';
+
+       listing[i+5] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       (listing[i+1] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+1] := #9'ldy :STACKORIGIN,x';
+
+       listing[i]   := '';
+
+       listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       (listing[i+1] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
+       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
+       dex(i+6) then										// dex					; 6
+     begin
+       listing[i+1] := #9'ldy :STACKORIGIN,x';
+
+       listing[i]   := '';
+
+       listing[i+6] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       add_sub(i+2) and (add_sub_stack(i+2) = false) and					// add|sub				; 2
+       (listing[i+3] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       dex(i+5) then										// dex					; 5
+     begin
+       listing[i+3] := #9'ldy :STACKORIGIN,x';
+
+       listing[i]   := '';
+
+       listing[i+5] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mwy_bp2(i+2) and										// mwy G :bp2				; 2
+       ldy(i+3) and (ldy_stack(i+3) = false) and						// ldy					; 3
+       (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
+       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
+       dex(i+6) then										// dex					; 6
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+	listing[i+4] := #9'lda ' + GetString(i+1);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+6] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       (listing[i+3] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 3
+       (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
+       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
+       (listing[i+6] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 6
+       sta_a(i+7) and (sta_stack(i+7) = false) then						// sta					; 7
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
+     begin
+	listing[i+4] := #9'lda ' + GetString(i+1);
+
+	listing[i+6] := #9'lda ' + GetString(i+2);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       (listing[i+2] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 2
+       (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) then						// sta					; 4
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+	listing[i+3] := #9'lda ' + GetString(i+1);
+
+	listing[i+1] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       dex(i+2) and										// dex					; 2
+       mwy_bp2(i+3) and										// mwy 					; 3
+       ldy(i+4) and (ldy_stack(i+4) = false) and						// ldy					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 5
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+	listing[i+5] := #9'lda ' + GetString(i+1);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       dex(i+5) then										// dex					; 5
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
+     begin
+	listing[i+2] := '';
+	listing[i+3] := #9'lda ' + GetString(i+1);
+
+	listing[i+1] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) then						// sta					; 6
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
+     begin
+	listing[i+3] := #9'lda ' + GetString(i+1);
+
+	listing[i+5] := #9'lda ' + GetString(i+2);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       dex(i+7) then										// dex					; 7
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+	listing[i+5] := #9'lda ' + GetString(i+1);
+
+	listing[i+1] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
+       sta_a(i+8) and (sta_stack(i+8) = false) and						// sta					; 8
+       dex(i+9) then										// dex					; 9
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+	listing[i+5] := #9'lda ' + GetString(i+1);
+
+	listing[i+7] := #9'lda ' + GetString(i+2);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
+       sta_a(i+8) and (sta_stack(i+8) = false) and						// sta					; 8
+       (listing[i+9] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and					// lda :STACKORIGIN+STACKWIDTH*2,x	; 9
+       sta_a(i+10) and (sta_stack(i+10) = false) and						// sta					; 10
+       (listing[i+11] = #9'lda :STACKORIGIN+STACKWIDTH*3,x') and				// lda :STACKORIGIN+STACKWIDTH*3,x	; 11
+       sta_a(i+12) and (sta_stack(i+12) = false) then						// sta					; 12
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+5] := #9'lda ' + GetString(i+1);
+
+	listing[i+7] := #9'lda ' + GetString(i+2);
+
+	listing[i+9] := #9'lda ' + GetString(i+3);
+
+	listing[i+11] := #9'lda ' + GetString(i+4);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       (listing[i+5] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 5
+       (listing[i+6] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 6
+       sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
+       (listing[i+8] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 8
+       sta_a(i+9) and (sta_stack(i+9) = false) and						// sta					; 9
+       (listing[i+10] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and				// lda :STACKORIGIN+STACKWIDTH*2,x	; 10
+       sta_a(i+11) and (sta_stack(i+11) = false) and						// sta					; 11
+       (listing[i+12] = #9'lda :STACKORIGIN+STACKWIDTH*3,x') and				// lda :STACKORIGIN+STACKWIDTH*3,x	; 12
+       sta_a(i+13) and (sta_stack(i+13) = false) then						// sta					; 13
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+6] := #9'lda ' + GetString(i+1);
+
+	listing[i+8] := #9'lda ' + GetString(i+2);
+
+	listing[i+10] := #9'lda ' + GetString(i+3);
+
+	listing[i+12] := #9'lda ' + GetString(i+4);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       add_sub(i+6) and (add_sub_stack(i+6) = false) and					// add|sub				; 6
+       sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
+       (listing[i+8] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 8
+       adc_sbc(i+9) and (adc_sbc_stack(i+9) = false) and					// adc|sbc				; 9
+       sta_a(i+10) and (sta_stack(i+10) = false) and						// sta					; 10
+       dex(i+11) then										// dex					; 11
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+5] := #9'lda ' + GetString(i+1);
+
+	listing[i+8] := #9'lda ' + GetString(i+2);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       lda(i+5) and (lda_stack(i+5) = false) and						// lda					; 5
+       ldy(i+6) and (ldy_stack(i+6) = false) and						// ldy					; 6
+       add_im(i+7) and										// add #				; 7
+       sta_bp2(i+8) and										// sta :bp2				; 8
+       scc(i+9) and										// scc					; 9
+       iny(i+10) and										// iny					; 10
+       (listing[i+11] = #9'sty :bp2+1') and							// sty :bp2+1				; 11
+       (listing[i+12] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 12
+       (listing[i+13] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 13
+       sta_bp2_y(i+14) and									// sta (:bp2),y				; 14
+       iny(i+15) and										// iny					; 15
+       (listing[i+16] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 16
+       sta_bp2_y(i+17) and									// sta (:bp2),y				; 17
+       iny(i+18) and										// iny					; 18
+       (listing[i+19] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and				// lda :STACKORIGIN+STACKWIDTH*2,x	; 19
+       sta_bp2_y(i+20) and									// sta (:bp2),y				; 20
+       iny(i+21) and										// iny					; 21
+       (listing[i+22] = #9'lda :STACKORIGIN+STACKWIDTH*3,x') and				// lda :STACKORIGIN+STACKWIDTH*3,x	; 22
+       sta_bp2_y(i+23) and									// sta (:bp2),y				; 23
+       dex(i+24) then										// dex					; 24
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+12] := #9'ldy :STACKORIGIN,x';
+	listing[i+13] := #9'lda ' + GetString(i+1);
+
+	listing[i+16] := #9'lda ' + GetString(i+2);
+
+	listing[i+19] := #9'lda ' + GetString(i+3);
+
+	listing[i+22] := #9'lda ' + GetString(i+4);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+	listing[i+24] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       (listing[i+2] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 2
+       dex(i+3) and										// dex					; 3
+       (listing[i+4] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 4
+     begin
+	listing[i]   := '';
+
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       (add_sub_stack(i+3) or and_ora_eor_stack(i+3)) and					// add|sub|and|ora|eor :STACKORIGIN,x	; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) then						// sta					; 4
+     if (pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     begin
+	listing[i+3] := copy(listing[i+3], 1, 5) + GetString(i+1);
+
+	listing[i+1] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if inx(i) and										// inx					; 0
+       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       dex(i+2) and										// dex					; 2
+       (listing[i+3] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 3
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     begin
+	listing[i]   := '';
+	listing[i+1] := #9'lda ' + GetString(i+1);
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+       Result:=false; Break;
+     end;
+
+
+// sickx
 
     if inx(i) and										// inx					; 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
@@ -6411,6 +6999,20 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if (listing[i] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 0
+       and_ora_eor(i+1) and (and_ora_eor_stack(i+1) = false) and				// and|ora|eor				; 1
+       (listing[i+2] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 2
+       dex(i+3) then										// dex					; 3
+     begin
+       listing[i+3] := #9'sta :STACKORIGIN+1,x';
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'lda :STACKORIGIN+1,x';
+       listing[i]   := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+
     if (listing[i] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 0
        dex(i+1) and										// dex					; 1
        dex(i+2) and										// dex					; 1
@@ -6604,6 +7206,53 @@ var i, l, k, m, x: integer;
        listing[i+4] := listing[i+3];
        listing[i+3] := listing[i+2];
        listing[i+2] := #9'lda :STACKORIGIN,x';
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+// sickx
+
+    if ldy_1(i) and										// ldy #1				; 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       cmp(i+2) and (cmp_stack(i+2) = false) and						// cmp					; 2
+       SKIP(i+3) and										// SKIP					; 3
+       dey(i+4) and										// dey					; 4
+       (listing[i+5] = '@') and									//@					; 5
+       (listing[i+6] = #9'sty :STACKORIGIN,x') and						// sty :STACKORIGIN,x			; 6
+       dex(i+7) then										// dex					; 7
+     begin
+       listing[i+7] := #9'sty :STACKORIGIN+1,x';
+       listing[i+6] := listing[i+5];
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       cmp(i+2) and (cmp_stack(i+2) = false) and						// cmp					; 2
+       SKIP(i+3) and										// SKIP					; 3
+       dey(i+4) and										// dey					; 4
+       (listing[i+5] = '@') and									//@					; 5
+       (listing[i+6] = #9'sty :STACKORIGIN+1,x') and						// sty :STACKORIGIN+1,x			; 6
+       dex(i+7) then										// dex					; 7
+     begin
+       listing[i+7] := #9'sty :STACKORIGIN+2,x';
+       listing[i+6] := listing[i+5];
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
        listing[i+1] := listing[i];
 
        listing[i] := #9'dex';
@@ -7697,7 +8346,7 @@ var i, l, k, m, x: integer;
        Result:=false; Break;
      end;
 
-
+{
     if mva(i) and (mva_im(i) = false) and 							// mva  :STACKORIGIN,x			; 0
        mva(i+1) and (mva_im(i+1) = false) and							// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        inx(i+2) and 										// inx					; 2
@@ -7748,7 +8397,7 @@ var i, l, k, m, x: integer;
 
        Result:=false; Break;
      end;
-
+}
 
     if ((mva_im(i) = false) or (mva_im(i+1) = false) or (mva_im(i+3) = false) or (mva_im(i+4) = false)) and
        mva(i) and  										// mva  :STACKORIGIN,x			; 0
@@ -7781,6 +8430,29 @@ var i, l, k, m, x: integer;
 
        listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
        listing[i+6] :='';
+
+       Result:=false; Break;
+     end;
+
+
+    if lda_a(i) and										// lda					; 0
+       add_sub(i+1) and 									// add|sub				; 1
+       (listing[i+2] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN			; 2
+       lda_a(i+3) and 										// lda					; 3
+       adc_sbc(i+4) and 									// adc|sbc				; 4
+       (listing[i+5] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH		; 5
+       (listing[i+6] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN			; 6
+       sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
+       (listing[i+8] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH		; 8
+       sta_a(i+9) and (sta_stack(i+9) = false) then						// sta					; 9
+     begin
+       listing[i+2] := listing[i+7];
+
+       listing[i+5] := listing[i+9];
+       listing[i+6] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
 
        Result:=false; Break;
      end;
@@ -8336,6 +9008,48 @@ var i, l, k, m, x: integer;
 
        listing[i+7] := #9'dex';
        listing[i+8] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if (pos(#9'jsr ', listing[i]) > 0) and							// jsr					; 0
+       inx(i+1) and										// inx					; 1
+       mva(i+2) and (mva_stack(i+2) = false) and						// mva ... :STACKORIGIN,x		; 2
+       (listing[i+3] = #9'mva #$00 :STACKORIGIN+STACKWIDTH,x') and				// mva #$00 :STACKORIGIN+STACKWIDTH,x	; 3
+       (listing[i+4] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 4
+       add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
+       dex(i+6) and										// dex					; 6
+       (listing[i+7] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 7
+       sta(i+8) and										// sta					; 8
+       (listing[i+9] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 9
+       sta(i+10) then										// sta					; 10
+     if (pos(':STACKORIGIN,x', listing[i+2]) > 0) then
+     begin
+
+       if listing[i+5] = #9'jsr addAX_CX' then begin
+	listing[i+3] := #9'add ' + GetString(i+2);
+
+	listing[i+2] := #9'lda :STACKORIGIN-1,x';
+
+	listing[i+4] := #9'sta ' + copy(listing[i+8], 6, 256);
+	listing[i+5] := #9'lda #$00';
+	listing[i+6] := #9'adc #$00';
+	listing[i+7] := #9'sta ' + copy(listing[i+10], 6, 256);
+       end else begin
+	listing[i+3] := #9'sub ' + GetString(i+2);
+
+	listing[i+2] := #9'lda :STACKORIGIN-1,x';
+
+	listing[i+4] := #9'sta ' + copy(listing[i+8], 6, 256);
+	listing[i+5] := #9'lda #$00';
+	listing[i+6] := #9'sbc #$00';
+	listing[i+7] := #9'sta ' + copy(listing[i+10], 6, 256);
+       end;
+
+       listing[i+8]  := #9'dex';
+       listing[i+9]  := '';
+       listing[i+10] := '';
 
        Result:=false; Break;
      end;
@@ -12383,7 +13097,7 @@ end;
    if listing[i] <> '' then begin
 
 {
-if (pos('lda X+1', listing[i]) > 0) then begin
+if (pos('add #CONTEXT.STATE-DATAORIGIN', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -13581,6 +14295,21 @@ end;
      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then begin
 	listing[i+1] := '';
 	listing[i+3] := #9'sty '+copy(listing[i+3], 6, 256);
+	Result:=false; Break;
+     end;
+
+
+    if ldy_im(i) and									// ldy #			; 0
+       lda_im(i+1) and									// lda #			; 1
+       sty_stack(i+2) and								// sty :STACKORIGIN		; 2
+       sta(i+3) and (sta_stack(i+3) = false) and					// sta				; 3
+       lda_stack(i+4) and								// lda :STACKORIGIN		; 4
+       sta(i+5) and (sta_stack(i+5) = false) then					// sta				; 5
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+4], 6, 256)) then begin
+	listing[i+4] := #9'lda ' + copy(listing[i], 6, 256);
+
+	listing[i]   := '';
+	listing[i+2] := '';
 	Result:=false; Break;
      end;
 
@@ -23133,7 +23862,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('and ', listing[i]) > 0) then begin
+if (pos('lda ', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -28224,6 +28953,131 @@ begin
 	end;
 
       end else
+
+      if pos('@F16_INT', arg0) > 0 then begin
+
+	t:='';
+
+	listing[l] := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta @F16_INT.A';
+	listing[l+2] := #9'lda '+GetARG(1, x);
+	listing[l+3] := #9'sta @F16_INT.A+1';
+
+	listing[l+4] := #9'jsr @F16_INT';
+
+	listing[l+5] := #9'lda @F16_INT.RESULT';
+	listing[l+6] := #9'sta '+GetARG(0, x);
+	listing[l+7] := #9'lda @F16_INT.RESULT+1';
+	listing[l+8] := #9'sta '+GetARG(1, x);
+	listing[l+9] := #9'lda @F16_INT.RESULT+2';
+	listing[l+10] := #9'sta '+GetARG(2, x);
+	listing[l+11] := #9'lda @F16_INT.RESULT+3';
+	listing[l+12] := #9'sta '+GetARG(3, x);
+
+	inc(l, 13);
+
+      end else
+
+      if pos('@F16_MUL', arg0) > 0 then begin
+
+	t:='';
+
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta @F16_MUL.B';
+	listing[l+2] := #9'lda '+GetARG(1, x);
+	listing[l+3] := #9'sta @F16_MUL.B+1';
+
+	listing[l+4] := #9'lda '+GetARG(0, x-1);
+	listing[l+5] := #9'sta @F16_MUL.A';
+	listing[l+6] := #9'lda '+GetARG(1, x-1);
+	listing[l+7] := #9'sta @F16_MUL.A+1';
+
+	listing[l+8] := #9'jsr @F16_MUL';
+
+	listing[l+9] := #9'lda @F16_MUL.RESULT';
+	listing[l+10] := #9'sta '+GetARG(0, x-1);
+	listing[l+11] := #9'lda @F16_MUL.RESULT+1';
+	listing[l+12] := #9'sta '+GetARG(1, x-1);
+
+	inc(l, 13);
+
+      end else
+
+      if pos('@F16_DIV', arg0) > 0 then begin
+
+	t:='';
+
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta @F16_DIV.B';
+	listing[l+2] := #9'lda '+GetARG(1, x);
+	listing[l+3] := #9'sta @F16_DIV.B+1';
+
+	listing[l+4] := #9'lda '+GetARG(0, x-1);
+	listing[l+5] := #9'sta @F16_DIV.A';
+	listing[l+6] := #9'lda '+GetARG(1, x-1);
+	listing[l+7] := #9'sta @F16_DIV.A+1';
+
+	listing[l+8] := #9'jsr @F16_DIV';
+
+	listing[l+9] := #9'lda @F16_DIV.RESULT';
+	listing[l+10] := #9'sta '+GetARG(0, x-1);
+	listing[l+11] := #9'lda @F16_DIV.RESULT+1';
+	listing[l+12] := #9'sta '+GetARG(1, x-1);
+
+	inc(l, 13);
+
+      end else
+
+      if pos('@F16_ADD', arg0) > 0 then begin
+
+	t:='';
+
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta @F16_ADD.B';
+	listing[l+2] := #9'lda '+GetARG(1, x);
+	listing[l+3] := #9'sta @F16_ADD.B+1';
+
+	listing[l+4] := #9'lda '+GetARG(0, x-1);
+	listing[l+5] := #9'sta @F16_ADD.A';
+	listing[l+6] := #9'lda '+GetARG(1, x-1);
+	listing[l+7] := #9'sta @F16_ADD.A+1';
+
+	listing[l+8] := #9'jsr @F16_ADD';
+
+	listing[l+9] := #9'lda @F16_ADD.RESULT';
+	listing[l+10] := #9'sta '+GetARG(0, x-1);
+	listing[l+11] := #9'lda @F16_ADD.RESULT+1';
+	listing[l+12] := #9'sta '+GetARG(1, x-1);
+
+	inc(l, 13);
+
+      end else
+
+      if pos('@F16_SUB', arg0) > 0 then begin
+
+	t:='';
+
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta @F16_SUB.B';
+	listing[l+2] := #9'lda '+GetARG(1, x);
+	listing[l+3] := #9'sta @F16_SUB.B+1';
+
+	listing[l+4] := #9'lda '+GetARG(0, x-1);
+	listing[l+5] := #9'sta @F16_SUB.A';
+	listing[l+6] := #9'lda '+GetARG(1, x-1);
+	listing[l+7] := #9'sta @F16_SUB.A+1';
+
+	listing[l+8] := #9'jsr @F16_SUB';
+
+	listing[l+9] := #9'lda @F16_SUB.RESULT';
+	listing[l+10] := #9'sta '+GetARG(0, x-1);
+	listing[l+11] := #9'lda @F16_SUB.RESULT+1';
+	listing[l+12] := #9'sta '+GetARG(1, x-1);
+
+	inc(l, 13);
+
+      end else
+
 (*
       if pos('SYSTEM.MOVE', arg0) > 0 then begin
 	t:='';
@@ -31258,6 +32112,7 @@ begin
 
 	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
 	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
+	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
 	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
 	  AddToken(0, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
@@ -32505,6 +33360,7 @@ var
 
 	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
 	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
+	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
 	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
 	  AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
@@ -33008,6 +33864,7 @@ Spelling[POINTERTOK	] := 'POINTER';
 Spelling[SHORTREALTOK	] := 'SHORTREAL';
 Spelling[REALTOK	] := 'REAL';
 Spelling[SINGLETOK	] := 'SINGLE';
+Spelling[HALFSINGLETOK	] := 'FLOAT16';
 Spelling[PCHARTOK	] := 'PCHAR';
 
 Spelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
@@ -35757,6 +36614,15 @@ case IndirectionLevel of
      a65(__subBX);
     end;
 
+  ASHALFSINGLE:
+    begin
+     asm65(#9'jsr @f16toa');
+
+     Gen; Gen; Gen;						// sub bx, 4
+     a65(__subBX);
+    end;
+
+
   ASVALUE:
     begin
 
@@ -35889,6 +36755,9 @@ case op of
   PLUSTOK:
     begin
 
+     if ResultType = HALFSINGLETOK then
+	asm65(#9'jsr @F16_ADD')
+     else
      if ResultType = SINGLETOK then
        asm65(#9'jsr FSUB.FADD')
      else
@@ -35904,6 +36773,9 @@ case op of
   MINUSTOK:
     begin
 
+    if ResultType = HALFSINGLETOK then
+      asm65(#9'jsr @F16_SUB')
+    else
     if ResultType = SINGLETOK then
       asm65(#9'jsr FSUB')
     else
@@ -35924,7 +36796,8 @@ case op of
       case ResultType of
        SHORTREALTOK: asm65(#9'jsr mulSHORTREAL');	// Q8.8 fixed-point
 	    REALTOK: asm65(#9'jsr mulREAL'); 		// Q24.8 fixed-point
-	  SINGLETOK: asm65(#9'jsr FMUL');		// IEEE754
+	  SINGLETOK: asm65(#9'jsr FMUL');		// IEEE754 32bit
+      HALFSINGLETOK: asm65(#9'jsr @F16_MUL');		// IEEE754 16bit
       end;
 
     end else begin					// Integer multiplication
@@ -35962,7 +36835,8 @@ case op of
       case ResultType of
        SHORTREALTOK: asm65(#9'jsr divmulSMALLINT.SHORTREAL');	// Q8.8 fixed-point
 	    REALTOK: asm65(#9'jsr divmulINT.REAL');		// Q24.8 fixed-point
-	  SINGLETOK: asm65(#9'jsr FDIV');			// IEEE754
+	  SINGLETOK: asm65(#9'jsr FDIV');			// IEEE754 32bit
+      HALFSINGLETOK: asm65(#9'jsr @F16_DIV');			// IEEE754 16bit
       end;
 
     end
@@ -36290,6 +37164,88 @@ end;
 function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer; forward;
 
 
+function CardToHalf(Src: LongWord): word;
+var
+  Sign, Exp, Mantissa: LongInt;
+begin
+  // Extract sign, exponent, and mantissa from Single number
+  Sign := Src shr 31;
+  Exp := LongInt((Src and $7F800000) shr 23) - 127 + 15;
+  Mantissa := Src and $007FFFFF;
+
+  if (Exp > 0) and (Exp < 30) then
+  begin
+    // Simple case - round the significand and combine it with the sign and exponent
+    Result := (Sign shl 15) or (Exp shl 10) or ((Mantissa + $00001000) shr 13);
+  end
+  else if Src = 0 then
+  begin
+    // Input float is zero - return zero
+    Result := 0;
+  end
+  else
+  begin
+    // Difficult case - lengthy conversion
+    if Exp <= 0 then
+    begin
+      if Exp < -10 then
+      begin
+        // Input float's value is less than HalfMin, return zero
+         Result := 0;
+      end
+      else
+      begin
+        // Float is a normalized Single whose magnitude is less than HalfNormMin.
+        // We convert it to denormalized half.
+        Mantissa := (Mantissa or $00800000) shr (1 - Exp);
+        // Round to nearest
+        if (Mantissa and $00001000) > 0 then
+          Mantissa := Mantissa + $00002000;
+        // Assemble Sign and Mantissa (Exp is zero to get denormalized number)
+        Result := (Sign shl 15) or (Mantissa shr 13);
+      end;
+    end
+    else if Exp = 255 - 127 + 15 then
+    begin
+      if Mantissa = 0 then
+      begin
+        // Input float is infinity, create infinity half with original sign
+        Result := (Sign shl 15) or $7C00;
+      end
+      else
+      begin
+        // Input float is NaN, create half NaN with original sign and mantissa
+        Result := (Sign shl 15) or $7C00 or (Mantissa shr 13);
+      end;
+    end
+    else
+    begin
+      // Exp is > 0 so input float is normalized Single
+
+      // Round to nearest
+      if (Mantissa and $00001000) > 0 then
+      begin
+        Mantissa := Mantissa + $00002000;
+        if (Mantissa and $00800000) > 0 then
+        begin
+          Mantissa := 0;
+          Exp := Exp + 1;
+        end;
+      end;
+
+      if Exp > 30 then
+      begin
+        // Exponent overflow - return infinity half
+        Result := (Sign shl 15) or $7C00;
+      end
+      else
+        // Assemble normalized half
+        Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
+    end;
+  end;
+end;
+
+
 procedure Int2Float(var ConstVal: Int64);
 var ftmp: TFloat;
     fl: single;
@@ -36353,6 +37309,15 @@ ftmp[1]:=0;
 			DataSegment[ConstDataSize+2] := byte(ConstVal shr 16);
 			DataSegment[ConstDataSize+3] := byte(ConstVal shr 24);
 		       end;
+
+	HALFSINGLETOK: begin
+			move(ConstVal, ftmp, sizeof(ftmp));
+			ConstVal := CardToHalf( ftmp[1] );
+
+			DataSegment[ConstDataSize]   := byte(ConstVal);
+			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
+		       end;
+
 	 end;
 
  DataSegmentUse := true;
@@ -36659,7 +37624,7 @@ case Tok[i].Kind of
 
       CheckTok(i + 1, CPARTOK);
 
-      if ConstValType = SINGLETOK then begin
+      if ConstValType in [HALFSINGLETOK, SINGLETOK] then begin
 
     	move(ConstVal, ftmp, sizeof(ftmp));
 	move(ftmp[1], fl, sizeof(fl));
@@ -36904,7 +37869,7 @@ case Tok[i].Kind of
 	     4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl 16 + GetStaticValue(3) shl 24;
 	    end;
 
-	    if ConstValType = SINGLETOK then ConstVal := ConstVal shl 32;
+	    if ConstValType in [HALFSINGLETOK, SINGLETOK] then ConstVal := ConstVal shl 32;
 
 	    i := j + 1;
 	    end else
@@ -37171,7 +38136,7 @@ case Tok[i].Kind of
     end;
 }
 
-  SHORTREALTOK, REALTOK, SINGLETOK:					// SINGLE	IEEE-754	Q32
+  SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK:			// Q8.8 ; Q16.16 ; SINGLE 32bit ; FLOAT16
     begin
 
     CheckTok(i + 1, OPARTOK);
@@ -37271,6 +38236,12 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
    Int2Float(RightConstVal);
    RightConstValType := REALTOK;
   end;
+
+  if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (RightConstValType in [SHORTREALTOK, REALTOK]) then
+   RightConstValType := ConstValType;
+
+  if (RightConstValType in [SINGLETOK, HALFSINGLETOK]) and (ConstValType in [SHORTREALTOK, REALTOK]) then
+   ConstValType := RightConstValType;
 
 
   case Tok[j + 1].Kind of
@@ -37401,6 +38372,12 @@ end;
    ConstValType := RightConstValType;
   end;
 
+  if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (RightConstValType in [SHORTREALTOK, REALTOK]) then
+   RightConstValType := ConstValType;
+
+  if (RightConstValType in [SINGLETOK, HALFSINGLETOK]) and (ConstValType in [SHORTREALTOK, REALTOK]) then
+   ConstValType := RightConstValType;
+
 
   case Tok[j + 1].Kind of
     PLUSTOK:  if ConstValType in RealTypes then begin
@@ -37461,6 +38438,7 @@ var
   RightConstVal: Int64;
   RightConstValType: Byte;
   Yes: Boolean;
+  ftmp: TFloat;
 begin
 
 Result:=i;
@@ -37493,6 +38471,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   i := j;
   end;
+
 
  Result := i;
 
@@ -38142,7 +39121,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 					a65(__subBX);
 				     end;
 
-   WORDTOK, SMALLINTTOK, SHORTREALTOK, POINTERTOK, STRINGPOINTERTOK:
+   WORDTOK, SMALLINTTOK, SHORTREALTOK, HALFSINGLETOK, POINTERTOK, STRINGPOINTERTOK:
       				     begin
 					asm65(#9'lda :STACKORIGIN,x');
 					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name);
@@ -38228,6 +39207,33 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
  end else
   asm65(#9'jsr '+svar);				// GenerateCall
+
+
+	if (Ident[IdentIndex].Kind = FUNC) and (Ident[IdentIndex].isStdCall = false) and (Ident[IdentIndex].isRecursion = false) then begin
+
+		  asm65(#9'inx');
+
+		  case DataSize[Ident[IdentIndex].DataType] of
+
+		    1: begin
+			asm65(#9'mva ' + svar + '.RESULT :STACKORIGIN,x');
+		       end;
+
+		    2: begin
+			asm65(#9'mva ' + svar + '.RESULT :STACKORIGIN,x');
+			asm65(#9'mva ' + svar + '.RESULT+1 :STACKORIGIN+STACKWIDTH,x');
+		       end;
+
+		    4: begin
+			asm65(#9'mva ' + svar + '.RESULT :STACKORIGIN,x');
+			asm65(#9'mva ' + svar + '.RESULT+1 :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'mva ' + svar + '.RESULT+2 :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'mva ' + svar + '.RESULT+3 :STACKORIGIN+STACKWIDTH*3,x');
+		       end;
+
+		  end;
+
+	end;
 
 end;
 
@@ -38739,6 +39745,10 @@ case Tok[i].Kind of
 		      asm65(#9'jsr F2I');
                      end;
 
+      HALFSINGLETOK: begin
+		      asm65(#9'jsr @F16_INT');
+                     end;
+
        SHORTREALTOK: begin
 		      asm65(#9'jsr @ROUND_SHORT');
 		      ValType := SHORTINTTOK;
@@ -39202,17 +40212,21 @@ case Tok[i].Kind of
 	   ConstVal := Ident[IdentIndex].Value - CODEORIGIN
 	  else
 	   ConstVal := Ident[IdentIndex].Value;
+// sickx
+	  if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin
 
-	  if (ValType = SINGLETOK) or (VarType = SINGLETOK) then begin
-
-	   if (ValType in IntegerTypes) and (Ident[IdentIndex].Kind = CONSTANT) then begin
-	    Int2Float(ConstVal);
-	    ValType := SINGLETOK;
-	   end;
+	   if (ValType in IntegerTypes) and (Ident[IdentIndex].Kind = CONSTANT) then Int2Float(ConstVal);
 
 	   move(ConstVal, ftmp, sizeof(ftmp));
-	   ConstVal:=ftmp[1];
-	   //ValType := SINGLETOK;       !!!
+
+	   if (VarType = HALFSINGLETOK) or (ValType = HALFSINGLETOK) then begin
+	     ConstVal := CardToHalf( ftmp[1] );
+	     ValType := HALFSINGLETOK;
+	   end else begin
+	     ConstVal := ftmp[1];
+	     ValType := SINGLETOK;
+	   end;
+
 	  end;
 
 
@@ -39232,14 +40246,21 @@ case Tok[i].Kind of
 	      warning(i, VariableNotInit, IdentIndex);
 
 	  end else begin	// isError
-
-	   if (ValType = SINGLETOK) or (VarType = SINGLETOK) then begin
+// sickx
+	   if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin
 
 	    if ValType in IntegerTypes then Int2Float(ConstVal);
 
 	    move(ConstVal, ftmp, sizeof(ftmp));
-	    ConstVal:=ftmp[1];
-	    ValType := SINGLETOK;
+
+	    if (VarType = HALFSINGLETOK) or (ValType = HALFSINGLETOK) then begin
+	      ConstVal := CardToHalf( ftmp[1] );
+	      ValType := HALFSINGLETOK;
+	    end else begin
+	      ConstVal := ftmp[1];
+	      ValType := SINGLETOK;
+	    end;
+
 	   end;
 
 	   Push(ConstVal, ASVALUE, DataSize[ValType]);
@@ -39264,47 +40285,21 @@ case Tok[i].Kind of
 
   INTNUMBERTOK:
     begin
-{
-    j:=i;
 
-    isError := false;
-    isConst := true;
-
-    i := CompileConstTerm(i, ConstVal, ValType);	// !!! nie zazdziala gdy wystapi laczenie wartosciowania VAR + CONST
-							// day:=day mod 153 div 5   -> day mod 30 = 22 zamiast = 10 !!!
-    if isError then begin
-     i:=j;
-
-     ConstVal := Tok[i].Value;
-     ValType := GetValueType(ConstVal);
-    end;
-
-    if VarType in RealTypes then begin
-     Int2Float(ConstVal);
-
-     if VarType = SINGLETOK then begin
-      move(ConstVal, ftmp, sizeof(ftmp));
-      ConstVal := ftmp[1];
-     end;
-
-     ValType := VarType;
-    end;
-
-    Push(ConstVal, ASVALUE, DataSize[ValType]);
-
-    isConst := false;
-    isError := false;
-}
     ConstVal := Tok[i].Value;
     ValType := GetValueType(ConstVal);
 
     if VarType in RealTypes then begin
      Int2Float(ConstVal);
 
-     if VarType = SINGLETOK then begin
-      move(ConstVal, ftmp, sizeof(ftmp));
+// sickx
+     move(ConstVal, ftmp, sizeof(ftmp));
+
+     if VarType = HALFSINGLETOK then
+      ConstVal := CardToHalf( ftmp[1] )
+     else
+     if VarType = SINGLETOK then
       ConstVal := ftmp[1];
-     end;
 
      ValType := VarType;
     end;
@@ -39319,42 +40314,6 @@ case Tok[i].Kind of
 
   FRACNUMBERTOK:
     begin
-{
-    j:=i;
-
-    isError := false;
-    isConst := true;
-
-    i := CompileConstTerm(i, ConstVal, ValType);
-
-    if isError then begin
-     i:=j;
-
-     fl := Tok[i].FracValue;
-
-     ftmp[0] := round(fl * TWOPOWERFRACBITS);
-     ftmp[1] := integer(fl);
-
-     move(ftmp, ConstVal, sizeof(ftmp));
-    end;
-
-    move(ConstVal, ftmp, sizeof(ftmp));
-
-    if VarType in RealTypes then begin
-
-     if VarType = SINGLETOK then
-      ConstVal := ftmp[1]
-     else
-      ConstVal := ftmp[0];
-
-     ValType := VarType;
-    end;
-
-    Push(ConstVal, ASVALUE, DataSize[ValType]);
-
-    isConst := false;
-    isError := false;
-}
 
     fl := Tok[i].FracValue;
 
@@ -39367,10 +40326,12 @@ case Tok[i].Kind of
 
     if VarType in RealTypes then begin
 
-     if VarType = SINGLETOK then
-      ConstVal := ftmp[1]
+     case VarType of
+   	    SINGLETOK: ConstVal := ftmp[1];
+	HALFSINGLETOK: ConstVal := CardToHalf( ftmp[1] );
      else
-      ConstVal := ftmp[0];
+       ConstVal := ftmp[0]
+     end;
 
      ValType := VarType;
     end;
@@ -39482,6 +40443,20 @@ case Tok[i].Kind of
 
     Result := j + 1;
     end;
+
+
+
+ HALFSINGLETOK:
+   begin
+
+
+     writeln('under construction');
+     halt;
+
+
+   end;
+
+
 
 
   SINGLETOK:					// SINGLE	IEEE-754	Q32
@@ -39637,6 +40612,19 @@ begin
     RightValType := ValType;
   end;
 
+{
+  If ((ValType = SINGLETOK) or (Kind = SINGLETOK)) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(INTEGERTOK, RightValType);
+
+   asm65(#9'jsr I2F');
+
+   if (ValType <> SINGLETOK) and (Kind = SINGLETOK) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+  end;
+}
 
   If (ValType in IntegerTypes) and ((RightValType = SINGLETOK) or (Kind = SINGLETOK)) then begin
 
@@ -39843,6 +40831,12 @@ if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
   ConstVal := ftmp[1];
  end;
 
+ if ValType = HALFSINGLETOK then begin
+  move(ConstVal, ftmp, sizeof(ftmp));
+  ConstVal := CardToHalf( ftmp[1] );
+ end;
+
+
  Push(ConstVal, ASVALUE, DataSize[ValType]);
 
 
@@ -39931,6 +40925,14 @@ begin
    if (VarType in RealTypes) and (ValType in IntegerTypes) then begin
     Int2Float(ConstVal);
     ValType := VarType;
+   end;
+
+// sickx
+   if (ValType = HALFSINGLETOK) or ((VarType = HALFSINGLETOK) and (ValType in RealTypes)) then begin
+     move(ConstVal, ftmp, sizeof(ftmp));
+     ConstVal := CardToHalf( ftmp[1] );
+     ValType := HALFSINGLETOK;
+     VarType := HALFSINGLETOK;
    end;
 
    if (ValType = SINGLETOK) or ((VarType = SINGLETOK) and (ValType in RealTypes)) then begin
@@ -42349,6 +43351,8 @@ WHILETOK:
 		GenerateWriteString(Tok[i].Value, ASREAL)			// Real argument
 	  else if ExpressionType = SHORTREALTOK then
 		GenerateWriteString(Tok[i].Value, ASSHORTREAL)			// ShortReal argument
+	  else if ExpressionType = HALFSINGLETOK then
+		GenerateWriteString(Tok[i].Value, ASHALFSINGLE)			// Half Single argument
 	  else if ExpressionType = SINGLETOK then
 		GenerateWriteString(Tok[i].Value, ASSINGLE)			// Single argument
 	  else if ExpressionType in Pointers then begin
@@ -43980,7 +44984,8 @@ var IdentIndex, size: integer;
 
     case Ident[IdentIndex].DataType of
      SHORTREALTOK, REALTOK: v := ftmp[0];
-		 SINGLETOK: v := ftmp[1];
+                 SINGLETOK: v := ftmp[1];
+             HALFSINGLETOK: v := CardToHalf( ftmp[1] );
     else
       v := Ident[IdentIndex].Value;
     end;
@@ -44193,6 +45198,14 @@ ftmp[1]:=0;
 			StaticStringData[ConstDataSize+3] := byte(ConstVal shr 24);
 		       end;
 
+	HALFSINGLETOK: begin
+			move(ConstVal, ftmp, sizeof(ftmp));
+			ConstVal := CardToHalf( ftmp[1] );
+
+			StaticStringData[ConstDataSize]   := byte(ConstVal);
+			StaticStringData[ConstDataSize+1] := byte(ConstVal shr 8);
+		       end;
+
 	 end;
 end;
 
@@ -44248,8 +45261,8 @@ begin
    iError(i, IncompatibleTypes, 0, ActualParamType, ConstValType);
 
 
-  if (ConstValType = SINGLETOK) and (ActualParamType = REALTOK) then
-   ActualParamType := SINGLETOK;
+  if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (ActualParamType = REALTOK) then
+   ActualParamType := ConstValType;
 
   if (ConstValType in RealTypes) and (ActualParamType in IntegerTypes) then begin
    Int2Float(ConstVal);
@@ -45270,7 +46283,7 @@ while Tok[i].Kind in
 	   j := CompileConstExpression(j + 2, ConstVal, ConstValType, VarType, false);
 
 
-	   if (VarType = SINGLETOK) and (ConstValType in [SHORTREALTOK, REALTOK]) then ConstValType := SINGLETOK;
+	   if (VarType in [SINGLETOK, HALFSINGLETOK]) and (ConstValType in [SHORTREALTOK, REALTOK]) then ConstValType := VarType;
 	   if (VarType = SHORTREALTOK) and (ConstValType = REALTOK) then ConstValType := SHORTREALTOK;
 
 
@@ -45927,20 +46940,23 @@ if IsFunction then begin
 //  asm65;
   asm65('@exit');
 
-  Push(Ident[GetIdent('RESULT')].Value, ASPOINTER, DataSize[FunctionResultType], GetIdent('RESULT'));
+  if Ident[BlockIdentIndex].isStdCall or Ident[BlockIdentIndex].isRecursion then begin
 
-  asm65;
+    Push(Ident[GetIdent('RESULT')].Value, ASPOINTER, DataSize[FunctionResultType], GetIdent('RESULT'));
 
-  if not isInl then begin
-  asm65(#9'.ifdef @new');			// @FreeMem
-  asm65(#9'lda <@VarData');
-  asm65(#9'sta :ztmp');
-  asm65(#9'lda >@VarData');
-  asm65(#9'ldy #@VarDataSize-1');
-  asm65(#9'jmp @FreeMem');
-  asm65(#9'eif');
-  end;// else
-   //asm65(#9'.ENDM');
+    asm65;
+
+    if not isInl then begin
+      asm65(#9'.ifdef @new');			// @FreeMem
+      asm65(#9'lda <@VarData');
+      asm65(#9'sta :ztmp');
+      asm65(#9'lda >@VarData');
+      asm65(#9'ldy #@VarDataSize-1');
+      asm65(#9'jmp @FreeMem');
+      asm65(#9'eif');
+    end;
+
+   end;
 
 end;
 
