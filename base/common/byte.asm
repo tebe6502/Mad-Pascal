@@ -29,10 +29,10 @@
 ;		    square2_hi = >(((I-255)*(I-255))/4)
 .proc fmulu_8
 
-t1	= eax
-t2	= ecx
+t1	= :eax
+t2	= :ecx
 
-product	= eax
+product	= :eax
 
 	stx @sp
 ;		bcc :+
@@ -70,11 +70,15 @@ sm4:		sbc square2_hi,x
 */
 
 .proc	imulCL
-ptr1 = ecx
-ptr4 = eax
+
+ptr1 = :ECX
+ptr4 = :EAX
 	
 	ldy #8
 	lda #0
+	
+	sta ptr4+2
+	sta ptr4+3
 
         lsr     ptr4            ; Get first bit into carry
 @L0:    bcc     @L1
@@ -125,13 +129,13 @@ MUL2	DEY
 
 .proc	imulBYTE
 
-	mva :STACKORIGIN,x ecx
-	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN,x :ecx
+	mva :STACKORIGIN-1,x :eax
 
 	lda #$00
 
-	sta eax+2
-	sta eax+3
+	sta :eax+2
+	sta :eax+3
 
 	.ifdef fmulinit
 	jmp fmulu_8
@@ -145,8 +149,8 @@ MUL2	DEY
 .proc	idivBYTE
 
 MOD
-	mva :STACKORIGIN,x ecx
-	mva :STACKORIGIN-1,x eax
+	mva :STACKORIGIN,x :ecx
+	mva :STACKORIGIN-1,x :eax
 
 	jmp idivAL_CL
 .endp
@@ -164,13 +168,13 @@ MOD
 
 	lda #$00
 
-	sta eax+1
-	sta eax+2
-	sta eax+3
+	sta :eax+1
+	sta :eax+2
+	sta :eax+3
 
-	STA ztmp+1
-	STA ztmp+2
-	STA ztmp+3
+	STA :ZTMP+1
+	STA :ZTMP+2
+	STA :ZTMP+3
 
 	LDY #$08
 LOOP	ASL AL
@@ -183,7 +187,7 @@ DIV2
 	DEY
 	BNE LOOP
 
-	STA ZTMP
+	STA :ZTMP
 
 	rts
 .endp
