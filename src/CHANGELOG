@@ -1,6 +1,9 @@
 21.11.2021
 - dodany nowy typ FLOAT16 (half-single)
 
+17.11.2021
+- wartoœci funkcji zwracane s¹ przez zmienne zamiast stos programowy
+
 11.11.2021
 - kompilator nie zmienia rozszerzenia kompilowanego pliku na *.pas
 
