@@ -119,6 +119,8 @@ Contributors:
 
 # optymalizator usuwa odwolania do :STACKORIGIN+STACKWIDTH*2+9 gdy operacja ADC, SBC konczy sie na takim odwolaniu
 
+# 'OptimizeRelation' zostaje wykonane tylko gdy w listingu wystapi  'ldy #1' lub 'cmp'
+
 # (Tok[ ].Kind=ASMTOK + Tok[ ].Value=0) wersja z { }
 # (Tok[ ].Kind=ASMTOK + Tok[ ].Value=1) wersja bez { }
 
@@ -5143,7 +5145,7 @@ var i, l, k, m, x: integer;
 
 
 {
-   if (pos('sub SYSTEM', listing[i]) > 0) then begin
+   if (pos('mva LINE', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -5771,8 +5773,6 @@ var i, l, k, m, x: integer;
        Result:=false; Break;
      end;
 
-
-// sickx
 
     if inx(i) and										// inx					; 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
@@ -7149,7 +7149,6 @@ var i, l, k, m, x: integer;
        Result:=false; Break;
      end;
 
-// sickx
 
     if ldy_1(i) and										// ldy #1				; 0
        lda(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
@@ -9372,8 +9371,8 @@ var i, l, k, m, x: integer;
        mva(i+7) and 										// mva  :STACKORIGIN+STACKWIDTH		; 7
        (listing[i+8] = #9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x') and				// mva #$00 :STACKORIGIN+STACKWIDTH*2	; 8
        (listing[i+9] = #9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x') and				// mva #$00 :STACKORIGIN+STACKWIDTH*3	; 9
-       ADD_SUB_EAX_ECX(i+10) and								// jsr addEAX_ECX|subEAX_ECX		; 10
-       (dex(i+11) = false) then									// ~dex					; 11
+       ADD_SUB_EAX_ECX(i+10) then								// jsr addEAX_ECX|subEAX_ECX		; 10
+       //(dex(i+11) = false) then								// ~dex					; 11
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
      	(pos(':STACKORIGIN,x', listing[i+6]) > 0) and
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
@@ -12833,8 +12832,9 @@ end;
   for i := 0 to l - 1 do
    if listing[i] <> '' then begin
 
+
 {
-if (pos('add #CONTEXT.STATE-DATAORIGIN', listing[i]) > 0) then begin
+if (pos('ldy #1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -23644,7 +23644,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('lda ', listing[i]) > 0) then begin
+if (pos('ldy #1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -24120,7 +24120,7 @@ end;
       end;
 
 
-    if (lda_adr(i) = false) and									//~lda adr.		; 0
+    if lda_a(i) and{ (lda_adr(i) = false) and}							//~lda adr.		; 0
        sta_stack(i+1) and									// sta :STACKORIGIN	; 1
        ldy_1(i+2) and										// ldy #1		; 2
        lda_stack(i+3) and									// lda :STACKORIGIN	; 3
@@ -24284,6 +24284,35 @@ end;
 
        Result:=false; Break;
       end;
+
+
+    if lda(i) and (iy(i) = false) and								// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH*2	; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*3	; 3
+       ldy_1(i+4) and										// ldy #1				; 4
+       lda_stack(i+5) and									// lda :STACKORIGIN+STACKWIDTH*3	; 5
+       cmp(i+6) and										// cmp					; 6
+												// bne|beq				; 7
+       lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH*2	; 8
+       cmp(i+9) and										// cmp					; 9
+												// bne|beq				; 10
+       lda_stack(i+11) then									// lda :STACKORIGIN+STACKWIDTH		; 11
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+11], 6, 256)) and
+	(copy(listing[i+2], 6, 256) = copy(listing[i+8], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
+     begin
+	listing[i+5]  := listing[i];
+	listing[i+8]  := listing[i];
+	listing[i+11] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	Result:=false; Break;
+     end;
 
 
     if (iy(i) = false) and (iy(i+2) = false) and						// lda					; 0
