@@ -7,9 +7,9 @@ var
 	monster: array [0..3] of ^monsters;
 
 	i: byte;
-	
+
 	a,b,c,d: monsters;
-	
+
 	tmp: ^monsters;
 begin
 
