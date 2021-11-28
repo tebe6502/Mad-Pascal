@@ -21,9 +21,9 @@ The available features are:
 * Static local variables
 * Primitive data types, all types except the `ShortReal/Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
     * `Cardinal` `Word` `Byte` `Boolean`
-    * `Char` `String` `PChar`
     * `Integer` `SmallInt` `ShortInt`
-    * `Pointer` `File`
+    * `Char` `String` `PChar`
+    * `Pointer` `File` `Text`
     * `ShortReal` `Real` (fixed-point)
     * `Float16` https://en.wikipedia.org/wiki/Half-precision_floating-point_format
     * `Single` `Float` https://en.wikipedia.org/wiki/Single-precision_floating-point_format
