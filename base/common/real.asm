@@ -2,101 +2,95 @@
 ; https://en.wikipedia.org/wiki/Q_(number_format)
 
 /*
-	mulREAL
+	@REAL_MUL
 	divREAL
 */
 
 
-.proc	mulREAl
+.proc	@REAL_MUL
 
-;	jsr iniEAX_ECX_CARD
+RESULT	= :EAX
 
-	mva :STACKORIGIN,x ecx0
-	mva :STACKORIGIN+STACKWIDTH,x ecx1
-	mva :STACKORIGIN+STACKWIDTH*2,x ecx2
-	mva :STACKORIGIN+STACKWIDTH*3,x ecx3
+A	= :EAX
+B	= :ECX
 
-	mva :STACKORIGIN-1,x eax
-	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
-	mva :STACKORIGIN-1+STACKWIDTH*2,x eax+2
-	mva :STACKORIGIN-1+STACKWIDTH*3,x eax+3
+	lda A+3
+	sta t1+1
 
-;	jsr imul64				; imul ecx 64 bit
+	lda B
+	sta t1_+1
 
+	lda B+3
+	sta t2+1
+
+	lda A
+	sta t2_+1
+	
 	lda #$00
-	sta edx		;Clear upper half of
-	sta edx+1	;product
-	sta edx+2
-	sta edx+3
+	sta :EDX	;Clear upper half of
+	sta :EDX+1	;product
+	sta :EDX+2
+	sta :EDX+3
 
-	sta ztmp8
-	sta ztmp9
-	sta ztmp10
-	sta ztmp11
+	sta :ZTMP8
+	sta :ZTMP9
+	sta :ZTMP10
+	sta :ZTMP11
 
 	ldy #$20	;Set binary count to 32
-SHIFT_R	lsr eax+3	;Shift multiplyer right
-	ror eax+2
-	ror eax+1
-	ror eax
+SHIFT_R	lsr A+3		;Shift multiplyer right
+	ror A+2
+	ror A+1
+	ror A
 	bcc ROTATE_R	;Go rotate right if c = 0
-	lda edx		;Get upper half of product
+	lda :EDX	;Get upper half of product
 	clc		;and add multiplicand to
-	adc #0		;it
-ecx0	equ *-1
-	sta edx
-	lda edx+1
-	adc #0
-ecx1	equ *-1
-	sta edx+1
-	lda edx+2
-	adc #0
-ecx2	equ *-1
-	sta edx+2
-	lda edx+3
-	adc #0
-ecx3	equ *-1
+	adc B
+	sta :EDX
+	lda :EDX+1
+	adc B+1
+	sta :EDX+1
+	lda :EDX+2
+	adc B+2
+	sta :EDX+2
+	lda :EDX+3
+	adc B+3
 ROTATE_R  ror @		;Rotate partial product
-        sta edx+3	;right
-        ror edx+2
-        ror edx+1
-        ror edx
-        ror ztmp11
-        ror ztmp10
-        ror ztmp9
-        ror ztmp8
+        sta :EDX+3	;right
+        ror :EDX+2
+        ror :EDX+1
+        ror :EDX
+        ror :ZTMP11
+        ror :ZTMP10
+        ror :ZTMP9
+        ror :ZTMP8
         dey		;Decrement bit count and
         bne SHIFT_R	;loop until 32 bits are
 
-;	mva ztmp8 eax
-	mva ztmp9 eax
-	mva ztmp10 eax+1
-	mva ztmp11 eax+2
+;	mva :ZTMP8 A
+	mva :ZTMP9 A
+	mva :ZTMP10 A+1
+	mva :ZTMP11 A+2
 
+	ldy :EDX
 
-;	mva eax+1 eax
-;	mva eax+2 eax+1
-;	mva eax+3 eax+2
-
-	ldy edx
-
-	lda :STACKORIGIN-1+STACKWIDTH*3,x	; t1
+t1	lda #$00	;:STACKORIGIN-1+STACKWIDTH*3,x	; t1
 	bpl @+
 	sec
 	tya
-	sbc :STACKORIGIN,x
+t1_	sbc #$00	;:STACKORIGIN,x
 	tay
 @
-	lda :STACKORIGIN+STACKWIDTH*3,x		; t2
+t2	lda #$00	;:STACKORIGIN+STACKWIDTH*3,x	; t2
 	bpl @+
 	sec
 	tya
-	sbc :STACKORIGIN-1,x
+t2_	sbc #$00	;:STACKORIGIN-1,x
 	tay
 @
-	sty eax+3
+	sty A+3
 
-	jmp movaBX_EAX
+	rts
 .endp
 
 

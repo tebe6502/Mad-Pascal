@@ -341,5 +341,4 @@ _exit	ora SIGN
 	sta RESULT+1
 
 	RTS
-
 .endp
