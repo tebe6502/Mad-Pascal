@@ -1,24 +1,25 @@
 // changes 2019-01-15
-// 7303
 
 program cube;
 
 uses crt, fastgraph;
-
-{$fastmul $70}	// fastmul at page $70 ($7000)
 
 type
 	sineType = ShortReal;
 
 const
 	Ecken        = 8;
+	distanz      : sineType = 4;
 
 	Laenge = 1;
 
 	face: array [0..23] of byte =
 	(0,1,2,3, 5,4,7,6, 4,5,1,0, 1,5,6,2, 6,7,3,2, 4,0,3,7);
 
-	{$i sin128.pas}
+const
+	{$i sin256.pas}
+
+	{$f $70}	// fastmul at page $70 ($7000)
 
 var   x, y, z,
       x2d, y2d     : array [0..Ecken] of shortint;
@@ -31,9 +32,6 @@ var   x, y, z,
       angle2       : byte;
 
       dl           : word;
-
-      distanz      : sineType = 3.8;
-      ds	   : sineType = 0.2;
 
 
 procedure Draw_Cube;
@@ -55,7 +53,7 @@ begin
 
  visible:=0;
 
- for i:=5 downto 0 do begin
+ for i:=0 to 5 do begin
 
   x:=i shl 2;
 
@@ -78,9 +76,9 @@ begin
   x4:=x2d[d] + Add_X;
   y4:=y2d[d] + Add_Y;
 
-  tst:=smallint(x4-x1)*smallint(y2-y1) - smallint(x2-x1)*smallint(y4-y1);
+  tst:=smallint(x4-x1)*smallint(y2-y1)-smallint(x2-x1)*smallint(y4-y1);
 
-  if tst >= 0 then begin
+  if tst>=0 then begin
 
    s0:=false;
    s1:=false;
@@ -134,16 +132,7 @@ begin
 
  end;
 
-	angle1:=(angle1 + 1) and $7f;
-	angle2:=(angle2 + 1) and $7f;
-
-	distanz:=distanz + ds;
-
-	if distanz < sineType(3.5) then ds:=-ds;
-	if distanz > sineType(10.0) then ds:=-ds;
-
 end;
-
 
 procedure Projection_3D_2D;
 var i: byte;
@@ -164,17 +153,17 @@ begin
 }
 
  sina := tsin[angle1];
- cosa := tsin[(angle1+32) and $7f];
+ cosa := tsin[byte(angle1+64)];
 
  sinb := tsin[angle2];
- cosb := tsin[(angle2+32) and $7f];
+ cosb := tsin[byte(angle2+64)];
 
- for i := Ecken-1 downto 0 do begin
+ for i := 0 to Ecken-1 do begin
 
   rx := x[i];
   ry := y[i];
   rz := z[i];
-
+  
   rxCosa:=rx*Cosa;
   rySina:=ry*Sina;
 
@@ -243,7 +232,7 @@ begin
 	pause;
 
   	dpoke(dl+4, word(@buf2));
-	SetActiveBuffer(word(@buf1));
+	FrameBuffer(word(@buf1));
 
 	Projection_3D_2D;
 
@@ -251,18 +240,24 @@ begin
 
 	Draw_Cube;
 
+	inc(angle1);
+	inc(angle2);
+
 //	FRAME #2
 
 	pause;
 
 	dpoke(dl+4, word(@buf1));
-	SetActiveBuffer(word(@buf2));
+	FrameBuffer(word(@buf2));
 
 	Projection_3D_2D;
 
 	fillchar(buf2, 40*96, 0);	// clear buf2
 
 	Draw_Cube;
+
+	inc(angle1);
+	inc(angle2);
 
   until keypressed;
 
