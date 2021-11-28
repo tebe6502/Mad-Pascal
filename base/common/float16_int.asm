@@ -2,11 +2,9 @@
 .proc	@F16_INT						; FUNCTION
 
 RESULT	= :EAX
-A	= :EAX
+VALUE	= :EAX
 
-VALUE	= :ECX
-SHIFT	= :ECX+2
-
+A	= :EAX+2
 
 	lda A+1
 	and #$7C
@@ -32,13 +30,12 @@ l_0A92
 	lsr @
 	lsr @
 	sub #$19
-	sta SHIFT
+	tay
 
 	jmi l_0AC1
 	jeq l_0AC1
 
 	lda VALUE
-	ldy SHIFT
 l_0004_b
 	asl @
 	rol VALUE+1
@@ -49,11 +46,11 @@ l_0004_b
 	jmp l_0AD5
 l_0AC1
 
-	lda SHIFT
+	tya
 	jpl l_0AE6
-
-	lda #$00
-	sub SHIFT
+	
+	eor #$ff
+	add #$01
 	tay
 	lda VALUE
 l_0005_b
@@ -83,10 +80,10 @@ l_0AD5
 	RTS					; exit
 l_0B0B
 
-	lda VALUE
-	sta RESULT
-	lda VALUE+1
-	sta RESULT+1
+;	lda VALUE
+;	sta RESULT
+;	lda VALUE+1
+;	sta RESULT+1
 	lda #$00
 	sta RESULT+2
 	sta RESULT+3
