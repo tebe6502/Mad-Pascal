@@ -27,7 +27,7 @@ begin
 
     PutPixel(x,y, 15);
 
-  until false;
+  until keypressed;
 
 end;
 
@@ -40,7 +40,5 @@ begin
  InitGraph(gd,gm,'');
 
  sierp_pentagon;
-
- repeat until keypressed;
 
 end.
