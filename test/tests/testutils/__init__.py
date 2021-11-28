@@ -67,7 +67,7 @@ class testUtils:
         tabfile = "{}.tab".format(rawpath)
         
         # compile and validate
-        rc = run("{} {} -t raw -o".format(self.config.get('paths','mp'), pasfile), shell = True)
+        rc = run("{} {} -t raw".format(self.config.get('paths','mp'), pasfile), shell = True)
         if rc.returncode != 0 :
             raise NotImplementedError("Mad-Pascal exit code = {}. Probably compilation error occured".format(rc.returncode))
         if not os.path.exists(srcasmfile):
