@@ -512,7 +512,7 @@ begin
          Result:=1.0;
          while i>0 do
            begin
-              while (i and 1)=0 do
+              while (i and 1) = 0 do
                 begin
                    i:=i shr 1;
                    base:=sqr(base);
@@ -542,7 +542,7 @@ begin
          Result:=1;
          while i>0 do
            begin
-              while (i and 1)=0 do
+              while (i and 1) = 0 do
                 begin
                    i:=i shr 1;
                    base:=sqr(base);
