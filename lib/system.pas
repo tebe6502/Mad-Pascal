@@ -315,6 +315,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Random(range: byte): byte; assembler; overload;				//platform dependent
 	function Random(range: smallint): smallint; overload;					//platform dependent
 	function RandomF: Float;								//platform dependent
+	function RandomF16: Float16;								//platform dependent
 	procedure Randomize; assembler;								//platform dependent
 	procedure RunError(a: byte);
 	procedure Seek(var f: file; a: cardinal); assembler;

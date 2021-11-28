@@ -43,7 +43,7 @@ interface
 	function f16_mul(a, b: word): word;
 	function f16_div(a,b: word): word;
 
-	function f16_from_int(sv: integer): word;
+	function f16_from_int(sv: integer): float16;
 	function f16_int(a: word): integer;
 
 	function f32Tof16(f: single): word;
@@ -61,6 +61,9 @@ interface
 
 
 implementation
+
+type
+	PFloat16 = ^float16;
 
 
 function f16_sub(a, b: word): word;
@@ -594,7 +597,7 @@ begin
 end;
 
 
-function f16_from_int(sv: integer): word;
+function f16_from_int(sv: integer): float16;
 var v: cardinal;
     sig: word;
     e: integer;
@@ -625,12 +628,16 @@ begin
 // #define SIGNED_INF_VALUE(x)  ((x & SIGN_MASK) | 0x7C00)
 
  if e >= 31 then begin
-  Result := (sig and $8000) or $7C00;
+  sig := (sig and $8000) or $7C00;
+
+  Result:=PFloat16(@sig)^;
 
   exit;
  end;
 
- Result := sig or (e shl 10) or (v and 1023);
+ sig := sig or (e shl 10) or (v and 1023);
+
+ Result:=PFloat16(@sig)^;
 
 end;
 

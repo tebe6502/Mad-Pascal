@@ -185,6 +185,45 @@ asm
 end;
 
 
+function RandomF16: Float16;
+(*
+@description:
+Generate random number
+
+@returns: Float16 (Half-Single)
+*)
+begin
+
+asm
+{
+r0 lda #0
+ eor $d20a
+ sta Result
+ 
+ sta r0+1
+lp
+r1 adc #0
+ adc $d20a
+ 
+ sta r1+1
+
+ 
+ and #$7f
+ ora #$3c
+ 
+ and #$7c
+ cmp #$7c
+ beq lp
+
+ sta Result+1
+ 
+};
+
+ Result:= Result - 1;
+
+end;
+
+
 function Random(range: byte): byte; assembler; overload;
 (*
 @description:
