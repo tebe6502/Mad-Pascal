@@ -13923,7 +13923,7 @@ end;
 
 
     if sta_stack(i) and									// sta :STACKORIGIN+10		; 0
-       (sty(i+1) or iny(i+1) or dey(i+1) or ldy(i+1)) and				// sty|iny|dey|ldy		; 1
+       (sty(i+1) or iny(i+1) or dey(i+1) or ldy(i+1)) and (ldy_1(i+1) = false) and	// sty|iny|dey|ldy		; 1
        lda_stack(i+2) and								// lda :STACKORIGIN+10		; 2
        (SKIP(i+3) = false) and (add_sub(i+3) = false) then
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then begin
@@ -23644,7 +23644,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('ldy #1', listing[i]) > 0) then begin
+if (pos('lda adr.', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -24120,7 +24120,7 @@ end;
       end;
 
 
-    if lda_a(i) and{ (lda_adr(i) = false) and}							//~lda adr.		; 0
+    if {(lda_adr(i) = false) and} lda_a(i) and							//~lda adr.		; 0
        sta_stack(i+1) and									// sta :STACKORIGIN	; 1
        ldy_1(i+2) and										// ldy #1		; 2
        lda_stack(i+3) and									// lda :STACKORIGIN	; 3
@@ -24357,11 +24357,11 @@ end;
      end;
 
 
-    if (iy(i) = false) and (iy(i+2) = false) and						// lda :eax				; 0
+    if (iy(i) = false) and (iy(i+2) = false) and						// lda					; 0
        (iy(i+4) = false) and									// sta :STACKORIGIN+10			; 1
-       lda(i) and										// lda :eax+1				; 2
+       lda(i) and										// lda					; 2
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+10	; 3
-       lda(i+2) and										// lda :eax+2				; 4
+       lda(i+2) and										// lda					; 4
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2+10	; 5
        lda(i+4) and										// sta :STACKORIGIN+STACKWIDTH*3+10	; 6
        sta_stack(i+5) and									// ldy #1				; 7
@@ -24537,15 +24537,98 @@ end;
       end;
 
 
-    if lda(i) and										// lda					; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+11			; 1
-       lda(i+2) and										// lda					; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+11	; 3
-       lda(i+4) and										// lda 					; 4
-       cmp_stack(i+5) and									// cmp :STACKORIGIN+STACKWIDTH+11	; 5
+    if lda_a(i) and										// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_a(i+4) and										// lda					; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH*2	; 5
+       lda_a(i+6) and										// lda					; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
+       lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH*3 	; 8
+       cmp(i+9) and										// cmp 					; 9
+												//					; 10
+       lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH*2	; 11
+       cmp(i+12) and										// cmp 					; 12
+												//					; 13
+       lda_stack(i+14) and									// lda :STACKORIGIN+STACKWIDTH		; 14
+       cmp(i+15) and										// cmp 					; 15
+												//					; 16
+       lda_stack(i+17) then									// lda :STACKORIGIN			; 17
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+17], 6, 256)) and
+        (copy(listing[i+3], 6, 256) = copy(listing[i+14], 6, 256)) and
+        (copy(listing[i+5], 6, 256) = copy(listing[i+11], 6, 256)) and
+        (copy(listing[i+7], 6, 256) = copy(listing[i+8], 6, 256)) then
+      begin
+	listing[i+8] := listing[i+6];
+	listing[i+11] := listing[i+4];
+	listing[i+14] := listing[i+2];
+	listing[i+17] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if lda_a(i) and										// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_a(i+4) and										// lda					; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH*2	; 5
+       lda_a(i+6) and										// lda					; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
+       lda_a(i+8) and										// lda 					; 8
+       cmp_stack(i+9) and									// cmp :STACKORIGIN+STACKWIDTH*3 	; 9
+												//					; 10
+       lda_a(i+11) and										// lda 					; 11
+       cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 12
+												//					; 13
+       lda_a(i+14) and										// lda 					; 14
+       cmp_stack(i+15) and									// cmp :STACKORIGIN+STACKWIDTH		; 15
+												//					; 16
+       lda_a(i+17) and										// lda					; 17
+       cmp_stack(i+18) then									// cmp :STACKORIGIN			; 18
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+18], 6, 256)) and
+        (copy(listing[i+3], 6, 256) = copy(listing[i+15], 6, 256)) and
+        (copy(listing[i+5], 6, 256) = copy(listing[i+12], 6, 256)) and
+        (copy(listing[i+7], 6, 256) = copy(listing[i+9], 6, 256)) then
+      begin
+	listing[i+9] := #9'cmp ' + copy(listing[i+6], 6, 256);
+	listing[i+12] := #9'cmp ' + copy(listing[i+4], 6, 256);
+	listing[i+15] := #9'cmp ' + copy(listing[i+2], 6, 256);
+	listing[i+18] := #9'cmp ' + copy(listing[i], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if lda_a(i) and										// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_a(i+4) and										// lda 					; 4
+       cmp_stack(i+5) and									// cmp :STACKORIGIN+STACKWIDTH		; 5
        (beq(i+6) or bne(i+6)) and								// beq|bne @+				; 6
-       lda(i+7) and										// lda 					; 7
-       cmp_stack(i+8) then									// cmp :STACKORIGIN+11			; 8
+       lda_a(i+7) and										// lda 					; 7
+       cmp_stack(i+8) then									// cmp :STACKORIGIN			; 8
      if (copy(listing[i+1], 6, 256) = copy(listing[i+8], 6, 256)) and
         (copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
       begin
@@ -24561,12 +24644,12 @@ end;
       end;
 
 
-    if (lda(i) or lda_adr(i)) and								// lda					; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+11			; 1
-       (lda(i+2) or lda_adr(i+2)) and								// lda					; 2
+    if lda_a(i) and										// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
        cmp(i+3) and										// cmp					; 3
        (beq(i+4) or bne(i+4)) and								// beq|bne @+				; 4
-       lda_stack(i+5) then									// lda :STACKORIGIN+11			; 5
+       lda_stack(i+5) then									// lda :STACKORIGIN			; 5
      if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) then
       begin
 	listing[i+5] := listing[i];
@@ -24578,10 +24661,10 @@ end;
       end;
 
 
-    if (lda(i) or lda_adr(i)) and								// lda					; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+11			; 1
-       (lda(i+2) or lda_adr(i+2)) and								// lda					; 2
-       cmp_stack(i+3) then									// cmp :STACKORIGIN+11			; 3
+    if lda_a(i)	and										// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
+       cmp_stack(i+3) then									// cmp :STACKORIGIN			; 3
      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
       begin
 	listing[i+3] := #9'cmp ' + copy(listing[i], 6, 256);
@@ -28783,6 +28866,14 @@ begin
       else
       if pos('@F16_INT', arg0) > 0 then		// @F16_INT	accepted
       else
+      if pos('@F16_I2F', arg0) > 0 then		// @F16_I2F	accepted
+      else
+      if pos('@F16_EQ', arg0) > 0 then		// @F16_EQ	accepted
+      else
+      if pos('@F16_GT', arg0) > 0 then		// @F16_GT	accepted
+      else
+      if pos('@F16_GTE', arg0) > 0 then		// @F16_GTE	accepted
+      else
 
       if arg0 = 'SYSTEM.PEEK' then begin
 	t:='';
@@ -31003,9 +31094,9 @@ begin
      if SKIP(i+1) or
         ((i>0) and ((listing[i-1] = #9'.LOCAL') or (SKIP(i-1) and lda_im(i)))) then
 
-     else
-     if (arg0 = optyY) and sta_a(i+1) then
-      listing[i] := #9'tya'
+//     else					// !!! nie zadziala poprawnie gdy jednoczesnie A i Y wystapia w tym samym bloku kodu
+//     if (arg0 = optyY) and sta_a(i+1) then
+//      listing[i] := #9'tya'
      else
      if (arg0 = optyA) then
 //      if mva_im(i) then
@@ -35585,7 +35676,9 @@ end;
 
 procedure GenerateWhileDoCondition;
 begin
-GenerateIfThenCondition;
+
+ GenerateIfThenCondition;
+
 end;
 
 {$ENDIF}
@@ -35593,7 +35686,9 @@ end;
 
 procedure GenerateRepeatUntilCondition;
 begin
-GenerateIfThenCondition;
+
+ GenerateIfThenCondition;
+
 end;
 
 
@@ -36400,6 +36495,15 @@ case op of
     begin
     Gen; Gen; Gen;						// neg dword ptr [bx]
 
+    if ValType = HALFSINGLETOK then begin
+
+     asm65(#9'lda :STACKORIGIN,x');
+     asm65(#9'sta :STACKORIGIN,x');
+     asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+     asm65(#9'eor #$80');
+     asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+    end else
     if ValType = SINGLETOK then begin
 
      asm65(#9'lda :STACKORIGIN,x');
@@ -36568,10 +36672,8 @@ case op of
 
 	  SINGLETOK: asm65(#9'jsr FMUL');		// IEEE754 32bit
 
-      HALFSINGLETOK: //asm65(#9'jsr @F16_MUL');		// IEEE754 16bit
+      HALFSINGLETOK:					// IEEE754 16bit
 		begin
-
-//        asm65(#9'jsr @F16_MUL');
 
 		asm65(#9'lda :STACKORIGIN,x');
 		asm65(#9'sta @F16_MUL.B');
@@ -36631,7 +36733,7 @@ case op of
 	    REALTOK: asm65(#9'jsr divmulINT.REAL');		// Q24.8 fixed-point
 	  SINGLETOK: asm65(#9'jsr FDIV');			// IEEE754 32bit
 
-      HALFSINGLETOK: //asm65(#9'jsr @F16_DIV');			// IEEE754 16bit
+      HALFSINGLETOK:						// IEEE754 16bit
 		begin
 
 		asm65(#9'lda :STACKORIGIN,x');
@@ -36835,6 +36937,118 @@ begin
 
  Gen;
 
+ if ValType = HALFSINGLETOK then begin
+
+ case rel of
+  EQTOK:	// =
+    begin
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @F16_EQ.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @F16_EQ.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @F16_EQ.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @F16_EQ.A+1');
+
+	asm65(#9'jsr @F16_EQ');
+
+	asm65(#9'dex');
+    end;
+
+  NETOK, 0:	// <>
+    begin
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @F16_EQ.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @F16_EQ.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @F16_EQ.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @F16_EQ.A+1');
+
+	asm65(#9'jsr @F16_EQ');
+
+	asm65(#9'dex');
+	asm65(#9'eor #$01');
+    end;
+
+  GTTOK:	// >
+    begin
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @F16_GT.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @F16_GT.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @F16_GT.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @F16_GT.A+1');
+
+	asm65(#9'jsr @F16_GT');
+
+	asm65(#9'dex');
+    end;
+
+  GETOK:	// >=
+    begin
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @F16_GTE.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @F16_GTE.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @F16_GTE.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @F16_GTE.A+1');
+
+	asm65(#9'jsr @F16_GTE');
+
+	asm65(#9'dex');
+    end;
+
+  LTTOK:
+    begin	// <
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @F16_GT.A');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @F16_GT.A+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @F16_GT.B');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @F16_GT.B+1');
+
+	asm65(#9'jsr @F16_GT');
+
+	asm65(#9'dex');
+    end;
+
+  LETOK:	// <=
+    begin
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @F16_GTE.A');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @F16_GTE.A+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @F16_GTE.B');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @F16_GTE.B+1');
+
+	asm65(#9'jsr @F16_GTE');
+
+	asm65(#9'dex');
+    end;
+
+  end;
+
+  asm65(#9'sta :STACKORIGIN,x');
+
+ end else begin
+
  asm65(#9'ldy #1', '; true');
 
  Gen;
@@ -36874,6 +37088,8 @@ begin
  asm65(#9'sty :STACKORIGIN-1,x');
 
  a65(__subBX);
+
+ end; // if ValType = HALFSINGLETOK
 
 end;
 
@@ -38051,6 +38267,7 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
    Int2Float(RightConstVal);
    RightConstValType := REALTOK;
   end;
+
 
   if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (RightConstValType in [SHORTREALTOK, REALTOK]) then
    RightConstValType := ConstValType;
@@ -39464,6 +39681,21 @@ case Tok[i].Kind of
      case ActualParamType of
             REALTOK: asm65(#9'jsr @INT');
 
+      HALFSINGLETOK: begin
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_INT.A');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_INT.A+1');
+
+			asm65(#9'jsr @F16_INT');
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda @F16_I2F.RESULT');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda @F16_I2F.RESULT+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+		     end;
+
           SINGLETOK: begin
       			asm65(#9'jsr F2I');
       			asm65(#9'jsr I2F');
@@ -39492,6 +39724,37 @@ case Tok[i].Kind of
      case ActualParamType of
             REALTOK: asm65(#9'jsr @FRAC');
           SINGLETOK: asm65(#9'jsr FFRAC');
+
+      HALFSINGLETOK: begin
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_INT.A');
+			asm65(#9'pha');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_INT.A+1');
+			asm65(#9'pha');
+
+			asm65(#9'jsr @F16_INT');
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda @F16_I2F.RESULT');
+			asm65(#9'sta @F16_SUB.B');
+			asm65(#9'lda @F16_I2F.RESULT+1');
+			asm65(#9'sta @F16_SUB.B+1');
+
+			asm65(#9'pla');
+			asm65(#9'sta @F16_SUB.A+1');
+			asm65(#9'pla');
+			asm65(#9'sta @F16_SUB.A');
+
+			asm65(#9'jsr @F16_SUB');
+
+			asm65(#9'lda @F16_SUB.RESULT');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda @F16_SUB.RESULT+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+		     end;
+
+
        SHORTREALTOK: asm65(#9'jsr @FRAC_SHORT');
      end;
 
@@ -39542,6 +39805,27 @@ case Tok[i].Kind of
 		asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
 		end;
+
+      HALFSINGLETOK: begin
+		     // asm65(#9'jsr @F16_INT');
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_INT.A');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_INT.A+1');
+
+			asm65(#9'jsr @F16_INT');
+
+			asm65(#9'lda @F16_INT.RESULT');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda @F16_INT.RESULT+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'lda @F16_INT.RESULT+2');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'lda @F16_INT.RESULT+3');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+                     end;
 
           SINGLETOK: asm65(#9'jsr F2I');
 
@@ -39844,6 +40128,7 @@ case Tok[i].Kind of
     begin
     IdentIndex := GetIdent(Tok[i].Name^);
 
+
     if IdentIndex > 0 then
 
 	  if (Ident[IdentIndex].Kind = USERTYPE) and (Tok[i + 1].Kind = OPARTOK) then begin
@@ -39888,6 +40173,16 @@ case Tok[i].Kind of
 
 		  ValType := REALTOK;
 		end;
+
+
+		if (ValType in IntegerTypes) and (Ident[GetIdent(Tok[i].Name^)].DataType = HALFSINGLETOK) then begin
+
+		  ExpandParam(INTEGERTOK, ValType);
+
+		  asm65(#9'jsr @F16_I2F');
+
+		  ValType := HALFSINGLETOK;
+		end else
 
 
 		if (ValType in IntegerTypes) and (Ident[GetIdent(Tok[i].Name^)].DataType = SINGLETOK) then begin
@@ -40068,6 +40363,7 @@ case Tok[i].Kind of
 
 	  i := CompileConstTerm(i, ConstVal, ValType);
 
+
 	  if isError then begin
 	   i:=j;
 
@@ -40090,22 +40386,45 @@ case Tok[i].Kind of
 	   ConstVal := Ident[IdentIndex].Value - CODEORIGIN
 	  else
 	   ConstVal := Ident[IdentIndex].Value;
+
 // sickx
+
+	    if (ValType in IntegerTypes) and (VarType in [SINGLETOK, HALFSINGLETOK]) then Int2Float(ConstVal);
+
+	    move(ConstVal, ftmp, sizeof(ftmp));
+
+	    if (VarType = HALFSINGLETOK) {or (ValType = HALFSINGLETOK)} then begin
+	      ConstVal := CardToHalf( ftmp[1] );
+	      //ValType := HALFSINGLETOK;
+	    end;
+
+	    if (VarType = SINGLETOK) then begin
+	      ConstVal := ftmp[1];
+	      //ValType := SINGLETOK;
+	    end;
+
+
+{
 	  if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin
 
-	   if (ValType in IntegerTypes) and (Ident[IdentIndex].Kind = CONSTANT) then Int2Float(ConstVal);
 
-	   move(ConstVal, ftmp, sizeof(ftmp));
+	   if (ValType in IntegerTypes) and (Ident[IdentIndex].Kind = CONSTANT) then begin
+	     Int2Float(ConstVal);
 
-	   if (VarType = HALFSINGLETOK) or (ValType = HALFSINGLETOK) then begin
-	     ConstVal := CardToHalf( ftmp[1] );
-	     ValType := HALFSINGLETOK;
-	   end else begin
-	     ConstVal := ftmp[1];
-	     ValType := SINGLETOK;
+  	     move(ConstVal, ftmp, sizeof(ftmp));
+
+	     if (VarType = HALFSINGLETOK) or (ValType = HALFSINGLETOK) then begin
+	       ConstVal := CardToHalf( ftmp[1] );
+	       ValType := HALFSINGLETOK;
+	     end else begin
+	       ConstVal := ftmp[1];
+	       ValType := SINGLETOK;
+	     end;
+
 	   end;
 
 	  end;
+}
 
 
 	  if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentIndex].NumAllocElements > 0) and
@@ -40124,8 +40443,9 @@ case Tok[i].Kind of
 	      warning(i, VariableNotInit, IdentIndex);
 
 	  end else begin	// isError
-// sickx
-	   if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin
+
+
+	   if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin	// constants
 
 	    if ValType in IntegerTypes then Int2Float(ConstVal);
 
@@ -40140,6 +40460,7 @@ case Tok[i].Kind of
 	    end;
 
 	   end;
+
 
 	   Push(ConstVal, ASVALUE, DataSize[ValType]);
 
@@ -40170,7 +40491,7 @@ case Tok[i].Kind of
     if VarType in RealTypes then begin
      Int2Float(ConstVal);
 
-// sickx
+
      move(ConstVal, ftmp, sizeof(ftmp));
 
      if VarType = HALFSINGLETOK then
@@ -40327,13 +40648,39 @@ case Tok[i].Kind of
  HALFSINGLETOK:
    begin
 
+   if Tok[i + 1].Kind <> OPARTOK then
+    Error(i, 'type identifier not allowed here');
 
-     writeln('under construction');
-     halt;
+    j := CompileExpression(i + 2, ValType);
 
+    if not(ValType in RealTypes) then begin
+
+     ExpandParam(INTEGERTOK, ValType);
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda @F16_I2F.RESULT');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda @F16_I2F.RESULT+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+    end;
+
+    CheckTok(j + 1, CPARTOK);
+
+    ValType := HALFSINGLETOK;
+
+    Result := j + 1;
 
    end;
-
 
 
 
@@ -40478,6 +40825,7 @@ end;
 procedure RealTypeConversion(var ValType, RightValType: Byte; Kind: Byte = 0);
 begin
 
+
   If ((ValType = SINGLETOK) or (Kind = SINGLETOK)) and (RightValType in IntegerTypes) then begin
 
    ExpandParam(INTEGERTOK, RightValType);
@@ -40490,19 +40838,6 @@ begin
     RightValType := ValType;
   end;
 
-{
-  If ((ValType = SINGLETOK) or (Kind = SINGLETOK)) and (RightValType in IntegerTypes) then begin
-
-   ExpandParam(INTEGERTOK, RightValType);
-
-   asm65(#9'jsr I2F');
-
-   if (ValType <> SINGLETOK) and (Kind = SINGLETOK) then
-    RightValType := Kind
-   else
-    RightValType := ValType;
-  end;
-}
 
   If (ValType in IntegerTypes) and ((RightValType = SINGLETOK) or (Kind = SINGLETOK)) then begin
 
@@ -40517,20 +40852,65 @@ begin
   end;
 
 
-{
-  If ((ValType = SINGLETOK) and (RightValType in [REALTOK, SHORTREALTOK])) then begin
+  If ((ValType = HALFSINGLETOK) or (Kind = HALFSINGLETOK)) and (RightValType in IntegerTypes) then begin
+
    ExpandParam(INTEGERTOK, RightValType);
 
-   RightValType := ValType;
+//   asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda @F16_I2F.RESULT');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda @F16_I2F.RESULT+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+
+   if (ValType <> HALFSINGLETOK) and (Kind = HALFSINGLETOK) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
   end;
 
 
-  if ((ValType in [REALTOK, SHORTREALTOK]) and (RightValType = SINGLETOK)) then begin
-   ExpandParam(INTEGERTOK, ValType);
+  If (ValType in IntegerTypes) and ((RightValType = HALFSINGLETOK) or (Kind = HALFSINGLETOK)) then begin
 
-   ValType := RightValType;
+   ExpandParam_m1(INTEGERTOK, ValType);
+
+//   asm65(#9'jsr @F16_I2F');//_m');
+
+			asm65(#9'lda :STACKORIGIN-1,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda @F16_I2F.RESULT');
+			asm65(#9'sta :STACKORIGIN-1,x');
+			asm65(#9'lda @F16_I2F.RESULT+1');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+
+   if (RightValType <> HALFSINGLETOK) and (Kind = HALFSINGLETOK) then
+    ValType := Kind
+   else
+    ValType := RightValType;
   end;
-}
+
 
 
   If ((ValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) and (RightValType in IntegerTypes) then begin
@@ -40625,8 +41005,8 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
    Error(j + 1, 'Division by zero');
 
 
-  if ((ValType = SINGLETOK) and (RightValType in [SHORTREALTOK, REALTOK])) or
-   ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType = SINGLETOK)) then
+  if ((ValType in [HALFSINGLETOK, SINGLETOK]) and (RightValType in [SHORTREALTOK, REALTOK])) or
+   ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType in [HALFSINGLETOK, SINGLETOK])) then
     Error(j + 2, 'Illegal type conversion: "'+InfoAboutToken(ValType)+'" to "'+InfoAboutToken(RightValType)+'"');
 
 
@@ -40640,7 +41020,9 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
   else
    CastRealType := REALTOK;
 
+
   RealTypeConversion(ValType, RightValType, ord(Tok[j + 1].Kind = DIVTOK) * CastRealType);
+
 
   ValType := GetCommonType(j + 1, ValType, RightValType);
 
@@ -40719,6 +41101,7 @@ if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
 
 
 end else begin
+
  j := CompileTerm(j, ValType, VarType);
 
  if Tok[i].Kind = MINUSTOK then begin
@@ -40739,25 +41122,23 @@ end;
 while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   begin
 
-
   if ValType in RealTypes then VarType := ValType;
 
 
   k := CompileTerm(j + 2, RightValType, VarType);
 
-  if ((ValType = SINGLETOK) and (RightValType in [SHORTREALTOK, REALTOK])) or
-     ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType = SINGLETOK)) then
+  if ((ValType in [HALFSINGLETOK, SINGLETOK]) and (RightValType in [SHORTREALTOK, REALTOK])) or
+     ((ValType in [SHORTREALTOK, REALTOK]) and (RightValType in [HALFSINGLETOK, SINGLETOK])) then
       Error(j + 2, 'Illegal type conversion: "'+InfoAboutToken(ValType)+'" to "'+InfoAboutToken(RightValType)+'"');
 
-//  if (ValType = SINGLETOK) and (RightValType = REALTOK) then RightValType := SINGLETOK;
-//  if (ValType = REALTOK) and (RightValType = SINGLETOK) then ValType := SINGLETOK;
 
   if VarType in RealTypes then begin
    if (ValType = VarType) and (RightValType in RealTypes) then RightValType := VarType;
    if (ValType in RealTypes) and (RightValType = VarType) then ValType := VarType;
   end;
 
-  RealTypeConversion(ValType, RightValType);
+  RealTypeConversion(ValType, RightValType);//, VarType);
+
 
   ValType := GetCommonType(j + 1, ValType, RightValType);
 
@@ -40805,7 +41186,6 @@ begin
     ValType := VarType;
    end;
 
-// sickx
    if (ValType = HALFSINGLETOK) or ((VarType = HALFSINGLETOK) and (ValType in RealTypes)) then begin
      move(ConstVal, ftmp, sizeof(ftmp));
      ConstVal := CardToHalf( ftmp[1] );
@@ -40901,7 +41281,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
    if (ValType in RealTypes) and (RightValType = VarType) then ValType := VarType;
   end;
 
-  RealTypeConversion(ValType, RightValType);
+  RealTypeConversion(ValType, RightValType);//, VarType);
 
 //  writeln(VarType,  ' | ', ValType,'/',RightValType,',',isZero,',',Tok[i + 1].Kind ,' : ', ConstVal);
 
@@ -46904,7 +47284,7 @@ asm65(#9'txs');
 if target.id = 'a8' then begin
  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
  asm65(#9'inc portb');
- asm65(#9'.endif');
+ asm65(#9'.fi');
  asm65;
  asm65(#9'ldy #$01');
 end;
@@ -46982,7 +47362,7 @@ for j := NumUnits downto 2 do
   asm65;
   asm65(#9'.ifdef MAIN.'+UnitName[j].Name+'.@UnitInit');
   asm65(#9'jsr MAIN.'+UnitName[j].Name+'.@UnitInit');
-  asm65(#9'eif');
+  asm65(#9'.fi');
 
  end;
 
