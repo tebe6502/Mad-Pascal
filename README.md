@@ -13,7 +13,7 @@ Variable allocation is static; there is no dynamic memory management. Parameters
 
 The available features are:
 
-* `If` `Case` `For` `While` `Repeat` statements
+* `If` `Case` `For To` `For In` `While` `Repeat` statements
 * Compound statements
 * `Label` `Goto` statements
 * Arithmetic and boolean operators
