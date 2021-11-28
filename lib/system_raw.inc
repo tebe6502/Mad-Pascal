@@ -56,6 +56,18 @@ begin
 end;
 
 
+function RandomF16: Float16;
+(*
+@description:
+Generate random number
+
+@returns: Float (Single)
+*)
+begin
+
+end;
+
+
 function Random(range: byte): byte; assembler; overload;
 (*
 @description:

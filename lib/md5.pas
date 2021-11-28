@@ -190,7 +190,7 @@ begin
   Num := 0;
 
   // 1. Transform existing data in buffer
-  if Context.BufCnt > 0 then
+  if Context.BufCnt <> 0 then
   begin
     // 1.1 Try to fill buffer to "Align" bytes
     Num := Align - Context.BufCnt;
