@@ -29049,12 +29049,17 @@ begin
 
       end else
 
+      if pos('@FTOA', arg0) > 0 then		// @FTOA	accepted
+      else
 
       if pos('@REAL_MUL', arg0) > 0 then	// @REAL_MUL	accepted
       else
       if pos('@REAL_ROUND', arg0) > 0 then	// @REAL_ROUND	accepted
       else
       if pos('@REAL_TRUNC', arg0) > 0 then	// @REAL_TRUNC	accepted
+      else
+
+      if pos('@F16_F2A', arg0) > 0 then		// @F16_F2A	accepted
       else
 
       if pos('@F16_ADD', arg0) > 0 then		// @F16_ADD	accepted
@@ -36606,18 +36611,34 @@ case IndirectionLevel of
 
   ASSINGLE:
     begin
-     asm65(#9'jsr @ftoa');
+      asm65(#9'lda :STACKORIGIN,x');
+      asm65(#9'sta @FTOA.I');
+      asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+      asm65(#9'sta @FTOA.I+1');
+      asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+      asm65(#9'sta @FTOA.I+2');
+      asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+      asm65(#9'sta @FTOA.I+3');
 
-     Gen; Gen; Gen;						// sub bx, 4
-     a65(__subBX);
+      Gen; Gen; Gen;						// sub bx, 4
+      a65(__subBX);
+
+      asm65(#9'jsr @FTOA');
     end;
 
   ASHALFSINGLE:
     begin
-     asm65(#9'jsr @f16toa');
+//     asm65(#9'jsr @f16toa');
 
-     Gen; Gen; Gen;						// sub bx, 4
-     a65(__subBX);
+      asm65(#9'lda :STACKORIGIN,x');
+      asm65(#9'sta @F16_F2A.I');
+      asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+      asm65(#9'sta @F16_F2A.I+1');
+
+      Gen; Gen; Gen;						// sub bx, 4
+      a65(__subBX);
+
+      asm65(#9'jsr @F16_F2A');
     end;
 
 
