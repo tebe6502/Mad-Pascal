@@ -41,8 +41,6 @@ numread .word               ; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
-  icl 'runtime\trunc.asm'   ; @TRUNC, @TRUNC_SHORT
-  icl 'runtime\round.asm'   ; @ROUND, @ROUND_SHORT
   icl 'runtime\frac.asm'    ; @FRAC, @FRAC_SHORT
   icl 'runtime\int.asm'     ; @INT, @INT_SHORT
 
@@ -87,9 +85,18 @@ numread .word               ; pointer to variable, length of loaded data
   icl 'common\word.asm'     ; mul / div -> WORD
   icl 'common\cardinal.asm' ; mul / div -> CARDINAL
 
-  icl 'common\shortreal.asm'; mul / div -> SHORTREAL  Q8.8
-  icl 'common\real.asm'     ; mul / div -> REAL   Q24.8
-  icl 'common\single.asm'   ; mul / div -> SINGLE   IEEE-754
+  icl 'common\shortreal.asm'	; mul / div -> SHORTREAL	Q8.8
+  icl 'common\real.asm'		; mul / div -> REAL		Q24.8
+  icl 'common\real_trunc.asm'	; @REAL_TRUNC, @TRUNC_SHORT
+  icl 'common\real_round.asm'	; @REAL_ROUND, @ROUND_SHORT
+	
+  icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754 32bit
+  icl 'common\float16_add_sub.asm'; add / sub -> HALFSINGLE	IEEE-754 16bit
+  icl 'common\float16_mul.asm'	; mul -> HALFSINGLE		IEEE-754 16bit
+  icl 'common\float16_div.asm'	; div -> HALFSINGLE		IEEE-754 16bit
+  icl 'common\float16_int.asm'	; int -> HALFSINGLE		IEEE-754 16bit
+  icl 'common\float16_cmp.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
+  icl 'common\float16_i2f.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
 
   icl 'common\mul40.asm'    ; @mul40
   icl 'common\mul64.asm'    ; @mul64
