@@ -4,17 +4,18 @@
 
 .proc	@FTOA
 
-i	= edx
-fra	= eax
-hlp	= ecx
+I	= :EDX
 
-b	= ztmp
-sht	= ztmp+1
+FRA	= :EAX
 
-bit	= @buf+64
+HLP	= :ECX
+
+BIT	= @buf+64
+
 
 	stx @sp
 
+/*
 	mva :STACKORIGIN,x I
 	mva :STACKORIGIN+STACKWIDTH,x I+1
 
@@ -24,32 +25,31 @@ bit	= @buf+64
 	mva :STACKORIGIN+STACKWIDTH*3,x I+3
 
 	bpl skp
+*/
+
+	lda I+2
+	sta HLP
+	
+	lda I+3
+	bpl skp
 
 	ldy #'-'
 	jsr @printVALUE.pout
 
 skp
 
-; optimize OK (test_3.pas), line = 32
-
 	lda I+3
 	asl hlp
 	rol @
 ;	sta EXP				; Exponent
 
-; optimize OK (test_3.pas), line = 35
-
 ;	lda EXP
 	sub #$7F
-	sta SHT
-
-; optimize OK (test_3.pas), line = 37
+	tay
 
 	ldx #$3f
 	lda #0
 	sta:rpl bit,x-
-
-; optimize OK (test_3.pas), line = 33
 
 	lda I
 	sta FRA
@@ -67,17 +67,11 @@ skp
 
 ; For
 
-; optimize OK (test_3.pas), line = 39
-
 ;	lda FRA+2		; X = $FF
 
 	jmp c_01D4
 
-; optimize OK (test_3.pas), line = 39
-
 l_01D4
-
-; optimize OK (test_3.pas), line = 40
 
 ;	lda #$20
 ;	add B
@@ -85,8 +79,6 @@ l_01D4
 
 ;	lda FRA+2
 	sta BIT+$20,x
-
-; optimize OK (test_3.pas), line = 41
 
 	asl FRA
 	rol FRA+1
@@ -97,28 +89,22 @@ l_01D4
 c_01D4
 	inx
 
-	cpx #$17
+	cpx #$17+1
 	bcc l_01D4
-	beq l_01D4
+;	beq l_01D4
 
 ; WhileDoEpilog
 ;	jmp l_01D4
 l_01EE
 b_01D4
 
-; optimize OK (test_3.pas), line = 44
-
 	mva #$80 BIT+$1f
-
-; optimize OK (test_3.pas), line = 46
 
 	ldx #$00 
 	stx I
 	stx I+1
 	stx I+2
 	stx I+3
-
-; optimize OK (test_3.pas), line = 47
 
 	stx FRA+1
 	stx FRA+2
@@ -129,15 +115,11 @@ b_01D4
 
 ; For
 
-; optimize OK (test_3.pas), line = 49
-
-	lda SHT
+	tya
 	add #$1F
 ;	sta B
 
-; optimize OK (test_3.pas), line = 49
-
-	tay
+	tax
 
 l_035B
 ;	lda B
@@ -147,13 +129,9 @@ l_035B
 ; ForToDoProlog
 ;	jmp l_0375
 
-; optimize OK (test_3.pas), line = 50
-
 ;	ldy B
-	lda BIT,y
+	lda BIT,x
 	bpl l_03D7
-
-; optimize OK (test_3.pas), line = 50
 
 	lda I				; Mantissa
 	add FRA
@@ -171,8 +149,6 @@ l_035B
 ; IfThenEpilog
 l_03D7
 
-; optimize OK (test_3.pas), line = 52
-
 	asl FRA
 	rol FRA+1
 	rol FRA+2
@@ -181,8 +157,8 @@ l_03D7
 ; ForToDoEpilog
 c_035B
 ;	dec B
-	dey
-	
+
+	dex
 	bpl l_035B
 
 ;	lda B
@@ -195,14 +171,11 @@ c_035B
 l_0375
 b_035B
 
-; optimize OK (test_3.pas), line = 55
-
-	mva #$00 FRA
+	lda #$00
+	sta FRA
 	sta FRA+1
 	sta FRA+2
 	sta FRA+3
-
-; optimize OK (test_3.pas), line = 56
 
 ;	sta EXP
 
@@ -213,17 +186,13 @@ b_035B
 	sta hlp+2
 ; For
 
-; optimize OK (test_3.pas), line = 58
-
-	lda SHT
+	tya
 	add #$20
 ;	sta B
 
-	tay
+	tax
 
-; optimize OK (test_3.pas), line = 58
-
-	add #23
+	add #23+1
 	sta FORTMP_1273
 
 	jmp c_0508
@@ -232,13 +201,9 @@ l_0508
 
 ; ForToDoCondition
 
-; optimize OK (test_3.pas), line = 59
-
 ;	ldy B
-	lda BIT,y
+	lda BIT,x
 	bpl l_0596
-
-; optimize OK (test_3.pas), line = 59
 
 	lda FRA
 	add hlp
@@ -257,16 +222,16 @@ l_0596
 	ror hlp+1
 	ror hlp
 
-	iny
+	inx
 
 ; ForToDoEpilog
 c_0508
 ;	inc B					; inc ptr byte [CounterAddress]
 
-	cpy #0
+	cpx #0
 FORTMP_1273	equ *-1
 	bcc l_0508
-	beq l_0508
+;	beq l_0508
 
 l_0534
 b_0508

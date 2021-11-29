@@ -150,7 +150,8 @@ numread	.word		; pointer to variable, length of loaded data
 
 	icl 'common\printsingle.asm'	; @FTOA
 	icl 'common\printfloat.asm'	; @printSHORTREAL, @printREAL, @float
-
+	icl 'common\printfloat16.asm'	; @F16_F2A
+	
 	icl 'common\allocmem.asm'	; @AllocMem, @FreeMem
 
 ; -----------------------------------------------------------------------
