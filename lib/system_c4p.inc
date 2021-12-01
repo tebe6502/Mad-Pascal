@@ -52,8 +52,8 @@ Generate random number
 *)
 begin
 
-asm
-{
+ asm
+
  lda ted_timer_1
  sta Result
 
@@ -61,98 +61,10 @@ asm
  sta Result+1
  sta Result+2
  sta Result+3
-};
+
+ end;
 
  Result:= 1 - Result;
-
-(*
-asm
-{ txa:pha
-
-_t  = edx
-
-  LDA #$0
-
-  sta result+1
-  sta result+2
-  sta result+3
-
-  STA _T
-RAN1  INC _T
-  JSR POLY
-  CMP #$0
-  BEQ RAN1
-  ORA #$10
-  ldy #0
-;
-
-RAN2  INY
-  JSR POLY
-  ROL @
-  ROL @
-  ROL @
-  ROL @
-  AND #$F0
-  STA _T+1
-  JSR POLY
-  ORA _T+1
-  STA result-1,y
-; CPY #4
-; BCC RAN2
-; LDA _T
-; INY
-; STA result,y
-
-  pla:tax
-
-  jmp stop
-
-POLY  TYA
-  PHA
-  LDY #$0
-POLY1 INY
-  CLC
-  ROL POLYN
-  ROL POLYN+1
-  ROL POLYN+2
-  ROL POLYN+3
-  ROL POLYN+4
-  ROL POLYN+5
-  ROL POLYN+6
-  ROL POLYN+7
-  BCC POLY3
-;
-  LDX #$0
-POLY2 LDA POLYN,X
-  EOR GEN,X
-  STA POLYN,X
-  INX
-  CPX #8
-  BCC POLY2
-  SEC
-;
-POLY3 ROL _T+2
-  CPY #4
-  BCC POLY1
-;
-  PLA
-  TAY
-  LDA _T+2
-  AND #$0F
-  CMP #$0A
-  BCS POLY
-  RTS
-;
-;
-GEN dta a($A1)
-  dta $A2,$1A,$A2,$91,$C3,$93,$C0
-;
-POLYN dta a($63)
-  dta $42,$A1,$23,$55,$09,$03,$87
-
-stop
-};
-*)
 
 end;
 
@@ -166,8 +78,8 @@ Generate random number
 *)
 begin
 
-asm
-{
+ asm
+
  lda ted_timer_1
  and #$7f
  sta Result+2
@@ -177,9 +89,34 @@ asm
  sta Result
  lda #$3f
  sta Result+3
-};
+
+ end;
 
  Result:= 1 - Result;
+
+end;
+
+
+function RandomF16: Float16;
+(*
+@description:
+Generate random number
+
+@returns: Float16 (Half-Single)
+*)
+var a: word;
+begin
+
+ asm
+	lda ted_timer_1
+	and #$7f
+	sta a+1
+
+	lda ted_timer_1
+	sta a
+ end;
+
+ Result:= a * (1/32767);
 
 end;
 
@@ -194,7 +131,7 @@ Generate random number
 @returns: byte
 *)
 asm
-{
+
   lda ted_timer_1   //Timer A Lo byte
   eor ted_timer_1+1 //Timer A Hi byte
   eor ted_timer_2   //Timer B Lo byte
@@ -213,7 +150,7 @@ asm
   tay
 
 stop  sty Result
-};
+
 end;
 
 
