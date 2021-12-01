@@ -1,3 +1,7 @@
+30.11.2021
+- poprawiona prezycja konwersji Float32 to Float16 (Single -> Float16) 'CardToHalf'
+- nowa funkcja RandomF16
+
 23.11.2021
 - poprawiona, przepisana du¿a czêœæ optymalizacji dla stosu
 

@@ -2219,14 +2219,14 @@ var p, k , q: integer;
 begin
 
 
-{
-if (pos('.MACRO m@INLINE', TemporaryBuf[0]) > 0) then begin
+
+if (pos('dec I+1', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
-}
+
 
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
@@ -2543,6 +2543,25 @@ end;
  	TemporaryBuf[4] := '~';
       end;
 
+{ sickx
+
+    if (pos('dec ', TemporaryBuf[1]) > 0) and 						// dec W+1		; 1
+       (TemporaryBuf[2] = '@') and 							//@			; 2
+       (pos('dec ', TemporaryBuf[3]) > 0) and 						// dec W		; 3
+       (pos('lda ', TemporaryBuf[4]) > 0) and 						// lda W+1		; 4
+       (TemporaryBuf[5] = #9'cmp #$FF') and						// cmp #$FF		; 5
+       (TemporaryBuf[6] = #9'seq') and							// seq			; 6
+       (pos('jmp l_', TemporaryBuf[7]) > 0) and						// jmp l_xxxx		; 7
+       (pos('l_', TemporaryBuf[8]) = 1) then						//l_yyyy		; 8
+     if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
+      begin
+	TemporaryBuf[2] := #9'bne ' + TemporaryBuf[8];
+	TemporaryBuf[3] := '@' + TemporaryBuf[3];
+	TemporaryBuf[4] := '~';
+	TemporaryBuf[5] := '~';
+	TemporaryBuf[6] := '~';
+      end;
+}
 
     if (pos('ldy ', TemporaryBuf[0]) > 0) and 						// ldy #$00		; 0
        (pos('lda ', TemporaryBuf[1]) > 0) and						// lda #$00		; 1
@@ -5152,7 +5171,7 @@ var i, l, k, m, x: integer;
 
 
 {
-   if (pos('mva F', listing[i]) > 0) then begin
+   if (pos('lda @F16_INT.RESULT+3', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -6739,7 +6758,7 @@ var i, l, k, m, x: integer;
        (bne(i+3) or beq(i+3)) and								// bne|beq @+				; 3
        dey(i+4) and										// dey					; 4
        (listing[i+5] = '@') and									//@					; 5
-       dex(i+6) and										// dey					; 6
+       dex(i+6) and										// dex					; 6
        tya(i+7) and										// tya					; 7
        jeq(i+8) then 										// jeq l_				; 8
      begin
@@ -9368,6 +9387,60 @@ var i, l, k, m, x: integer;
      end;
 
 
+    if lda_a(i) and (lda_stack(i) = false) and							// lda A				; 0
+       (listing[i+1] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 1
+       lda_a(i+2) and										// lda A+1				; 2
+       (listing[i+3] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
+       dex(i+4) and										// dex					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       sta(i+6) and										// sta B				; 6
+       (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
+       sta(i+8) then										// sta B+1				; 8
+     begin
+
+	listing[i+5] := listing[i];
+
+	listing[i+7] := listing[i+2];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if lda_a(i) and (lda_stack(i) = false) and							// lda A				; 0
+       (listing[i+1] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda A+1				; 2
+       (listing[i+3] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x	; 3
+       lda_a(i+4) and (lda_stack(i+4) = false) and						// lda A+2				; 4
+       (listing[i+5] = #9'sta :STACKORIGIN+STACKWIDTH*2,x') and					// sta :STACKORIGIN+STACKWIDTH*2,x	; 5
+       lda_a(i+6) and (lda_stack(i+6) = false) and						// lda A+3				; 6
+       (listing[i+7] = #9'sta :STACKORIGIN+STACKWIDTH*3,x') and					// sta :STACKORIGIN+STACKWIDTH*3,x	; 7
+       (listing[i+8] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 8
+       sta(i+9) and (sta_stack(i+9) = false) and						// sta B				; 9
+       (listing[i+10] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 10
+       sta(i+11) and (sta_stack(i+11) = false) and						// sta B+1				; 11
+       dex(i+12) then										// dex					; 12
+     begin
+	listing[i+1] := listing[i+9];
+
+	listing[i+3] := listing[i+11];
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+       Result:=false; Break;
+     end;
+
+
     if inx(i) and										// inx					; 0
        mva(i+1) and (mva_stack(i+1) = false) and						// mva  :STACKORIGIN			; 1
        mva(i+2) and										// mva  :STACKORIGIN+STACKWIDTH		; 2
@@ -10062,8 +10135,9 @@ var i, l, k, m, x: integer;
    for i := 0 to l - 1 do
     if (listing[i] <> '') then begin
 
+
 {
-if (pos('add B', listing[i]) > 0) then begin
+if (pos('dec I+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -10554,6 +10628,26 @@ end;
 
 	if Result = false then Break;
        end;
+
+
+    if sty_stack(i) and									// sty :STACKORIGIN+STACKWIDTH*2	; 0
+       sty_stack(i+1) and								// sty :STACKORIGIN+STACKWIDTH*3	; 1
+       lda_stack(i+2) and								// lda :STACKORIGIN+STACKWIDTH*2	; 2
+       sta(i+3) and (sta_stack(i+3) = false) and					// sta A				; 3
+       lda(i+4) and									// lda :STACKORIGIN+STACKWIDTH*3	; 4
+       sta(i+5) and (sta_stack(i+5) = false) then	 				// sta A+1				; 5
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
+        (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then
+     begin
+	listing[i]   := #9'sty ' + copy(listing[i+3], 6, 256);
+	listing[i+1] := #9'sty ' + copy(listing[i+5], 6, 256);
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+      	Result:=false; Break;
+     end;
 
 
     if sty_stack(i) and									// sty :STACKORIGIN+STACKWIDTH*2	; 0
@@ -12873,7 +12967,7 @@ end;
 
 
 {
-if (pos('ldy :STACK', listing[i]) > 0) then begin
+if (pos('dec I+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -23698,7 +23792,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('.LOCAL', listing[i]) > 0) then begin
+if (pos('dec I+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -36609,7 +36703,17 @@ if Down then begin
 
   case CounterSize of
    1: asm65(#9'dec '+svar);//, '; dec ptr byte [CounterAddress]');
+
    2: asm65(#9'dew '+svar);//, '; dec ptr word [CounterAddress]');
+{
+      begin
+	asm65(#9'lda ' + svar);
+	asm65(#9'bne @+');
+	asm65(#9'dec ' + svar + '+1');
+	asm65('@');
+	asm65(#9'dec ' + svar);
+      end;
+}
    4: asm65(#9'ded '+svar);//, '; dec ptr dword [CounterAddress]');
   end;
 
@@ -37601,10 +37705,39 @@ end;
 function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer; forward;
 
 
-function CardToHalf(Src: LongWord): word;
+
+function CardToHalf(Src: uint32): word;
 var
-  Sign, Exp, Mantissa: LongInt;
+  Sign, Exp, Mantissa: cardinal;
+  s: single;
+
+
+function f32Tof16(fltInt32: uint32): word;
+//https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
+var
+//	fltInt32: uint32;
+	fltInt16, tmp: uint16;
+
 begin
+//	fltInt32 := PLongWord(@Float)^;
+	fltInt16 := (fltInt32 shr 31) shl 5;
+	tmp := (fltInt32 shr 23) and $ff;
+	tmp := (tmp - $70) and (LongWord(SarLongint(($70 - tmp), 4)) shr 27);
+	fltInt16 := (fltInt16 or tmp) shl 10;
+	result := fltInt16 or ((fltInt32 shr 13) and $3ff) + 1;
+end;
+
+
+begin
+
+  s := PSingle(@Src)^;
+
+  if s > 1 then
+
+   Result := f32Tof16(Src)
+
+  else begin
+
   // Extract sign, exponent, and mantissa from Single number
   Sign := Src shr 31;
   Exp := LongInt((Src and $7F800000) shr 23) - 127 + 15;
@@ -37680,6 +37813,9 @@ begin
         Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
     end;
   end;
+
+  end;
+
 end;
 
 
