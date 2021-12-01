@@ -261,6 +261,16 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('.fi');
  asm65;
 
+
+ if (target.id = 'c64') or (target.id = 'c4p') then begin
+
+  asm65(#9'lda #$0e');
+  asm65(#9'jsr $ffd2','; shifted charset');
+
+ end;
+
+
+
  if target.id = 'a8' then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');

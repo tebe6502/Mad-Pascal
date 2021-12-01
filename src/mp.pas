@@ -2219,14 +2219,14 @@ var p, k , q: integer;
 begin
 
 
-
+{
 if (pos('dec I+1', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
-
+}
 
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
@@ -2543,25 +2543,6 @@ end;
  	TemporaryBuf[4] := '~';
       end;
 
-{ sickx
-
-    if (pos('dec ', TemporaryBuf[1]) > 0) and 						// dec W+1		; 1
-       (TemporaryBuf[2] = '@') and 							//@			; 2
-       (pos('dec ', TemporaryBuf[3]) > 0) and 						// dec W		; 3
-       (pos('lda ', TemporaryBuf[4]) > 0) and 						// lda W+1		; 4
-       (TemporaryBuf[5] = #9'cmp #$FF') and						// cmp #$FF		; 5
-       (TemporaryBuf[6] = #9'seq') and							// seq			; 6
-       (pos('jmp l_', TemporaryBuf[7]) > 0) and						// jmp l_xxxx		; 7
-       (pos('l_', TemporaryBuf[8]) = 1) then						//l_yyyy		; 8
-     if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
-      begin
-	TemporaryBuf[2] := #9'bne ' + TemporaryBuf[8];
-	TemporaryBuf[3] := '@' + TemporaryBuf[3];
-	TemporaryBuf[4] := '~';
-	TemporaryBuf[5] := '~';
-	TemporaryBuf[6] := '~';
-      end;
-}
 
     if (pos('ldy ', TemporaryBuf[0]) > 0) and 						// ldy #$00		; 0
        (pos('lda ', TemporaryBuf[1]) > 0) and						// lda #$00		; 1
@@ -36782,9 +36763,13 @@ if Epilog then begin
       end;
 
    2: begin
+       asm65(#9'bit '+svar+'+1');
+       asm65(#9'svs');
+{
        asm65(#9'lda '+svar+'+1');
        asm65(#9'cmp #$FF');
        asm65(#9'seq');
+ }
       end;
 
    4: begin
