@@ -118,7 +118,7 @@ begin
 	sta a
  end;
 
- Result:= 0.000023725 * a;
+ Result:= a * (1/32767);
 
 end;
 

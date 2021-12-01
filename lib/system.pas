@@ -260,6 +260,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	function Abs(x: Real): Real; register; assembler; overload;
 	function Abs(x: Single): Single; register; assembler; overload;
+	function Abs(x: float16): float16; register; assembler; overload;
 	function Abs(x: shortint): shortint; register; assembler; overload;
 	function Abs(x: smallint): smallint; register; assembler; overload;
 	function Abs(x: Integer): Integer; register; assembler; overload;
@@ -276,6 +277,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 	function Cos(x: Real): Real; overload;
 	function Cos(x: Single): Single; overload;
+	function Cos(x: float16): float16; overload;
 	function DPeek(a: word): word; register; stdcall; assembler;
 	procedure DPoke(a: word; value: word); register; stdcall; assembler;
 	function Eof(var f: file): Boolean;
@@ -322,6 +324,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure SetLength(var S: string; Len: byte); register; assembler;
 	function Sin(x: Real): Real; overload;
 	function Sin(x: Single): Single; overload;
+	function Sin(x: float16): float16; overload;
 	function Space(b: Byte): ^string; assembler;
 	procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
 	procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
@@ -331,6 +334,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sqr(x: integer): integer; overload;
 	function Sqrt(x: Real): Real; overload;
 	function Sqrt(x: Single): Single; overload;
+	function Sqrt(x: float16): float16; overload;
 	function Sqrt(x: Integer): Single; overload;
 	function UpCase(a: char): char;
 	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
@@ -438,7 +442,7 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Real (Q24.8)
 *)
 asm
-{	lda edx+3
+	lda edx+3
 	spl
 	jsr negEDX
 
@@ -446,7 +450,6 @@ asm
 	mva edx+1 Result+1
 	mva edx+2 Result+2
 	mva edx+3 Result+3
-};
 end;
 
 
@@ -462,14 +465,33 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Single
 *)
 asm
-{	lda edx+3
+	lda edx+3
 	and #$7f
 	sta Result+3
 
 	mva edx Result
 	mva edx+1 Result+1
 	mva edx+2 Result+2
-};
+end;
+
+
+function Abs(x: float16): float16; register; assembler; overload;
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - Single
+
+@returns: Single
+*)
+asm
+	lda edx+1
+	and #$7f
+	sta Result+1
+
+	mva edx Result
 end;
 
 
@@ -485,14 +507,13 @@ The result of the function has the same type as its argument, which can be any n
 @returns: shortint
 *)
 asm
-{	lda edx
+	lda edx
 	bpl @+
 
 	eor #$ff
 	add #1
 @
 	sta Result
-};
 end;
 
 
@@ -508,7 +529,7 @@ The result of the function has the same type as its argument, which can be any n
 @returns: smallint
 *)
 asm
-{	lda edx+1
+	lda edx+1
 	bpl @+
 
 	lda #$00
@@ -521,7 +542,6 @@ asm
 	sta Result+1
 
 	mva edx Result
-};
 end;
 
 
@@ -537,7 +557,7 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Integer
 *)
 asm
-{	lda edx+3
+	lda edx+3
 	spl
 	jsr negEDX
 
@@ -546,7 +566,6 @@ asm
 	mva edx Result
 	mva edx+1 Result+1
 	mva edx+2 Result+2
-};
 end;
 
 
@@ -647,13 +666,43 @@ begin
 
 	c:=cardinal(x);
 
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
+	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;	// 1 = f32($3f800000)
 
 	Result := sp^;
 
 	Result:=(Result+x/Result) * 0.5;
 	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
+end;
+
+
+function Sqrt(x: float16): float16; overload;
+(*
+@description
+Sqrt returns the square root of its argument X, which must be positive
+
+@param: x - Single
+
+@returns: Single
+*)
+var sp: ^float16;
+    c: word;
+begin
+	Result:=0;
+
+	if x <= 0 then exit;
+
+	sp:=@c;
+
+	c:=word(x);
+
+	if c > $3c00 then c := (c - $3c00) shr 1 + $3c00;
+
+	Result := sp^;
+
 	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
 end;
 
 
@@ -683,7 +732,7 @@ begin
 
 	Result:=(Result+x/Result) * 0.5;
 	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
 end;
 
 
@@ -1701,6 +1750,71 @@ Calculate cosine of angle
 *)
 begin
     Result := fsincos(x, true);
+end;
+
+
+function fsincos16(x: float16; sc: boolean): float16;
+//----------------------------------------------------------------------------------------------
+// https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
+//----------------------------------------------------------------------------------------------
+var i: byte;
+begin
+
+    while x > M_PI_2 do x := x - M_PI_2;
+    while x < 0.0 do x := x + M_PI_2;
+
+    { Normalize argument, divide by (pi/2) }
+    x := x * 0.63661977236758134308;
+
+    { Get's integer part, should be }
+    i := trunc(x);
+
+    { Fixes negative part, needed to calculate "fractional" part }
+    if smallint(x) < 0 then dec(i); { this is shorter than "x < 0" }
+
+    { And finally get's fractional part }
+    x := x - i ;
+
+    { If we need cosine, adds pi/2 }
+    if sc then inc(i);
+
+    { Test quadrant, odd values are reflected }
+    if (i and 1) = 0 then x := 1 - x;
+
+    { Calculate cosine(x) with optimal polynomial approximation }
+    x := x * x;
+    Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
+
+    { Test quadrant to return negative values }
+    if (i and 2) = 2 then Result := -Result;
+end;
+
+
+function Sin(x: float16): float16; overload;
+(*
+@description:
+Calculate sine of angle
+
+@param: X - angle in radians (Single)
+
+@returns: Single
+*)
+begin
+    Result := fsincos16(x, false);
+end;
+
+
+function Cos(x: float16): float16; overload;
+(*
+@description:
+Calculate cosine of angle
+
+@param: X - angle in radians (Single)
+
+@returns: Single
+*)
+begin
+    Result := fsincos16(x, true);
 end;
 
 
