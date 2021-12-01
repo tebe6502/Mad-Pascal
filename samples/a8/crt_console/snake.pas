@@ -13,7 +13,14 @@ Program Snake;
 Uses CRT;
 
 const
+
+
+ {$IFDEF ATARI}
  SnakeBody = chr(ord('O') + $80);
+ {$ELSE}
+ SnakeBody = chr(ord('O'));
+ {$ENDIF}
+
  SnakeFood = 'X';
 
 Var
