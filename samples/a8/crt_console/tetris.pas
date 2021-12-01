@@ -17,7 +17,11 @@ var
   ss,nn,a,b,c,d,lin,rlin,x,y,pus: byte;
   st:array[0..12, 0..22] of byte;
 
+{$IFDEF ATARI}
   scr: array [0..23, 0..39] of char absolute $bc40;
+{$ELSE}
+  scr: array [0..23, 0..39] of char absolute $0400;
+{$ENDIF}
 
 
 procedure k(x,y:byte);
@@ -112,7 +116,8 @@ begin
   delay(d);
   key:=' ';
   if keypressed then key:=readkey;
-  if key='a' then
+
+  if (key='a') then
    begin
    fig(x-1,y,nn,3);
    if pus=0 then begin fig(x,y,nn,0); x:=x-1; fig(x,y,nn,1); end;
