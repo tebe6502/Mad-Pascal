@@ -21,6 +21,9 @@ if Pass = CODEGENERATIONPASS then begin
  if target.id = 'a8' then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
+ if target.id = 'raw' then
+  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
+
  asm65;
 
  asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
@@ -184,14 +187,17 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
- if target.id = 'a8' then begin
+
+ if (target.id = 'a8') then begin
   asm65;
   asm65(#9'org CODEORIGIN');
  end else begin
   for header in target.header do
    if (header = 'END') then break else
     if header <> '' then asm65(#9''+header) else asm65;
-  asm65('CODEORIGIN');
+
+  if target.id <> 'raw' then asm65('CODEORIGIN');
+
   CODEORIGIN_BASE := target.codeorigin;
  end;
 
@@ -303,7 +309,9 @@ if Pass = CODEGENERATIONPASS then begin
 
  end;
 
- if CPUMode = 65816 then asm65(#9'opt c+');
+
+// if CPUMode = 65816 then asm65(#9'opt c+');
+
 
  asm65;
  asm65(#9'UNITINITIALIZATION');

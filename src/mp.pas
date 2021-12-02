@@ -48261,11 +48261,15 @@ begin
      inc(i);
      if err<>0 then Syntax(3);
 
+     raw.codeorigin := CODEORIGIN_BASE;
+
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
      if err<>0 then Syntax(3);
+
+     raw.codeorigin := CODEORIGIN_BASE;
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
