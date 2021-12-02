@@ -1,16 +1,4 @@
 
-procedure ClrEol;
-(*
-@description:
-ClrEol clears the current line, starting from the cursor position, to the end of the window.
-
-The cursor doesn't move.
-*)
-begin
-
-end;
-
-
 procedure CursorOff;
 (*
 @description: Hide cursor
@@ -206,6 +194,20 @@ asm
 	stx Result
 
 	pla:tax
+end;
+
+
+procedure ClrEol;
+(*
+@description:
+ClrEol clears the current line, starting from the cursor position, to the end of the window.
+
+The cursor doesn't move.
+*)
+begin
+
+// FillChar( pointer($400+WhereX+WhereY*40-41), byte(41-byte(WhereX)), 32);
+
 end;
 
 
