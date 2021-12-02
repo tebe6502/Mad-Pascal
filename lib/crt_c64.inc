@@ -5,6 +5,8 @@ procedure CursorOff;
 *)
 begin
 
+ poke(204, 1);
+
 end;
 
 
@@ -13,6 +15,8 @@ procedure CursorOn;
 @description: Display cursor
 *)
 begin
+
+ poke(204, 0);
 
 end;
 
@@ -211,4 +215,52 @@ asm
 	stx Result
 
 	pla:tax
+end;
+
+
+procedure ClrEol;
+(*
+@description:
+ClrEol clears the current line, starting from the cursor position, to the end of the window.
+
+The cursor doesn't move.
+*)
+begin
+
+ FillChar( pointer($400+WhereX+WhereY*40-41), byte(41-byte(WhereX)), 32);
+
+end;
+
+
+procedure TextMode(Mode: byte); assembler;
+(*
+@description: Reset E: device
+
+@param: Mode - unused value
+*)
+asm
+
+end;
+
+
+procedure NoSound; assembler;
+(*
+@description: Reset POKEY
+*)
+asm
+
+end;
+
+
+procedure Sound(Chan,Freq,Dist,Vol: byte); assembler;
+(*
+@description: Plays sound
+
+@param: Chan - channel (0..3) primary POKEY, (4..7) secondary POKEY
+@param: Freq - frequency (0..255)
+@param: Dist - distortion (0,2,4,6,8,10,12,14)
+@param: Vol - volume (0..15)
+*)
+asm
+
 end;
