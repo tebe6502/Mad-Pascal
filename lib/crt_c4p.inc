@@ -24,7 +24,7 @@ procedure ClrScr;
 begin
 
  asm
-	jsr $e544
+	jsr $ff81
  end;
 
 end;
@@ -206,7 +206,7 @@ The cursor doesn't move.
 *)
 begin
 
-// FillChar( pointer($400+WhereX+WhereY*40-41), byte(41-byte(WhereX)), 32);
+ FillChar( pointer($c00+WhereX+WhereY*40-41), byte(41-byte(WhereX)), 32);
 
 end;
 
