@@ -29,7 +29,7 @@ Contributors:
 	- unit SMP
 
 + David Schmenk :
-	- IEEE-754 (32bit) single
+	- IEEE-754 (32bit) Single
 
 + Daniel Serpell :
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
@@ -119,7 +119,7 @@ Contributors:
 
 # optymalizator usuwa odwolania do :STACKORIGIN+STACKWIDTH*2+9 gdy operacja ADC, SBC konczy sie na takim odwolaniu
 
-# 'OptimizeRelation' zostaje wykonane tylko gdy w listingu wystapi  'ldy #1' lub 'cmp'
+# 'OptimizeRelation' zostaje wykonane tylko gdy w listingu wystapi 'ldy #1' lub 'cmp'
 
 # (Tok[ ].Kind=ASMTOK + Tok[ ].Value=0) wersja z { }
 # (Tok[ ].Kind=ASMTOK + Tok[ ].Value=1) wersja bez { }
@@ -37693,7 +37693,7 @@ function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardi
 
 function CardToHalf(Src: uint32): word;
 var
-  Sign, Exp, Mantissa: cardinal;
+  Sign, Exp, Mantissa: LongInt;
   s: single;
 
 
@@ -45082,7 +45082,7 @@ var
   NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
   NestedDataType, ExpressionType, NestedAllocElementType: Byte;
   FieldInListName: array [1..MAXFIELDS] of TField;
-  ExitLoop, pack: Boolean;
+  ExitLoop: Boolean;
 
   Name: TString;
 
@@ -46363,7 +46363,6 @@ end;
 procedure CheckForwardResolutions;
 var TypeIndex, IdentIndex: Integer;
     Name: string;
-    yes: Boolean;
 begin
 
 // Search for unresolved forward references
@@ -46403,7 +46402,6 @@ var
   j, ParamIndex, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize,  tmpVarDataSize_: Integer;
   ForwardIdentIndex, IdentIndex: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
-  NumAllocTypes: word;
   ConstVal: Int64;
   IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isForward, ImplementationUse: Boolean;
   iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;

@@ -21,8 +21,8 @@ if Pass = CODEGENERATIONPASS then begin
  if target.id = 'a8' then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
- if target.id = 'raw' then
-  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
+// if target.id = 'raw' then
+//  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
 
  asm65;
 
@@ -188,7 +188,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator;
 
 
- if (target.id = 'a8') then begin
+ if target.id = 'a8' then begin
   asm65;
   asm65(#9'org CODEORIGIN');
  end else begin
@@ -196,9 +196,22 @@ if Pass = CODEGENERATIONPASS then begin
    if (header = 'END') then break else
     if header <> '' then asm65(#9''+header) else asm65;
 
-  if target.id <> 'raw' then asm65('CODEORIGIN');
+  if target.id = 'raw' then begin
 
-  CODEORIGIN_BASE := target.codeorigin;
+   asm65;
+   asm65(#9'opt h-f+');
+   asm65;
+   asm65(#9'org $' + IntToHex(raw.codeorigin, 4));
+   asm65(#9'jmp START');
+   asm65;
+
+   CODEORIGIN_BASE := target.codeorigin + 3;
+
+  end else
+   CODEORIGIN_BASE := target.codeorigin;
+
+  asm65('CODEORIGIN');
+
  end;
 
 
