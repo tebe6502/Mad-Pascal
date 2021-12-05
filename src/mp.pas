@@ -36566,17 +36566,7 @@ if Down then begin
 
   case CounterSize of
    1: asm65(#9'dec '+svar);//, '; dec ptr byte [CounterAddress]');
-
    2: asm65(#9'dew '+svar);//, '; dec ptr word [CounterAddress]');
-{
-      begin
-	asm65(#9'lda ' + svar);
-	asm65(#9'bne @+');
-	asm65(#9'dec ' + svar + '+1');
-	asm65('@');
-	asm65(#9'dec ' + svar);
-      end;
-}
    4: asm65(#9'ded '+svar);//, '; dec ptr dword [CounterAddress]');
   end;
 
@@ -36645,13 +36635,9 @@ if Epilog then begin
       end;
 
    2: begin
-       asm65(#9'bit '+svar+'+1');
-       asm65(#9'svs');
-{
        asm65(#9'lda '+svar+'+1');
        asm65(#9'cmp #$FF');
        asm65(#9'seq');
- }
       end;
 
    4: begin
