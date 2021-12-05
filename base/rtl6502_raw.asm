@@ -2,7 +2,7 @@
 
 /* -----------------------------------------------------------------------
 /*                        CPU 6502 Run Time Library - RAW
-/*              19.04.2018
+/*              19.04.2018 ; 04.12.2021
 /* -----------------------------------------------------------------------
 /* 16.03.2019 poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
 /* 29.02.2020 optymalizacja @printREAL, pozbycie sie
@@ -41,6 +41,14 @@ numread .word               ; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
+  icl 'runtime\macros.asm'
+
+; -----------------------------------------------------------------------
+
+  icl 'c64\putchar.asm'	    ; @putchar
+
+; -----------------------------------------------------------------------
+
   icl 'runtime\frac.asm'    ; @FRAC, @FRAC_SHORT
   icl 'runtime\int.asm'     ; @INT, @INT_SHORT
 
@@ -72,25 +80,25 @@ numread .word               ; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
-  icl 'common\cmpstr.asm'   ; cmpSTRING2CHAR, cmpCHAR2STRING, cmpSTRING
+  icl 'common\cmpstr.asm'	; cmpSTRING2CHAR, cmpCHAR2STRING, cmpSTRING
 
-  icl 'common\memmove.asm'  ; @move, @moveu
-  icl 'common\memset.asm'   ; @fill
+  icl 'common\memmove.asm'	; @move, @moveu
+  icl 'common\memset.asm'	; @fill
 
-  icl 'common\shortint.asm' ; mul / div -> SHORTINT
-  icl 'common\smallint.asm' ; mul / div -> SMALLINT
-  icl 'common\integer.asm'  ; mul / div -> INTEGER
+  icl 'common\shortint.asm'	; mul / div -> SHORTINT
+  icl 'common\smallint.asm'	; mul / div -> SMALLINT
+  icl 'common\integer.asm'	; mul / div -> INTEGER
 
-  icl 'common\byte.asm'     ; mul / div -> BYTE
-  icl 'common\word.asm'     ; mul / div -> WORD
-  icl 'common\cardinal.asm' ; mul / div -> CARDINAL
+  icl 'common\byte.asm'		; mul / div -> BYTE
+  icl 'common\word.asm'		; mul / div -> WORD
+  icl 'common\cardinal.asm'	; mul / div -> CARDINAL
 
   icl 'common\shortreal.asm'	; mul / div -> SHORTREAL	Q8.8
   icl 'common\real.asm'		; mul / div -> REAL		Q24.8
   icl 'common\real_trunc.asm'	; @REAL_TRUNC, @TRUNC_SHORT
   icl 'common\real_round.asm'	; @REAL_ROUND, @ROUND_SHORT
 	
-  icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754 32bit
+  icl 'common\single.asm'	; mul / div -> SINGLE		IEEE-754 32bit
   icl 'common\float16_add_sub.asm'; add / sub -> HALFSINGLE	IEEE-754 16bit
   icl 'common\float16_mul.asm'	; mul -> HALFSINGLE		IEEE-754 16bit
   icl 'common\float16_div.asm'	; div -> HALFSINGLE		IEEE-754 16bit
@@ -98,11 +106,29 @@ numread .word               ; pointer to variable, length of loaded data
   icl 'common\float16_cmp.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
   icl 'common\float16_i2f.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
 
-  icl 'common\mul40.asm'    ; @mul40
-  icl 'common\mul64.asm'    ; @mul64
-  icl 'common\mul96.asm'    ; @mul96
-  icl 'common\mul320.asm'   ; @mul320
+  icl 'common\mul40.asm'	; @mul40
+  icl 'common\mul64.asm'	; @mul64
+  icl 'common\mul96.asm'	; @mul96
+  icl 'common\mul320.asm'	; @mul320
 
+  icl 'common\int2hex.asm'	; @hexStr
+  icl 'common\int2str.asm'	; @ValueToStr, @ValueToRec
+  icl 'common\str2int.asm'	; @StrToInt, fmul10
+
+  icl 'common\printchr.asm'	; @printCHAR, @printEOL, @print, @printPCHAR
+  icl 'common\printstr.asm'	; @printSTRING
+  icl 'common\printbool.asm'	; @printBOOLEAN
+
+  icl 'common\printint.asm'	; @printMINUS, @printVALUE
+					; @printBYTE, @printWORD, @printCARD
+					; @printSHORTINT, @printSMALLINT, @printINT
+
+  icl 'common\printsingle.asm'	; @FTOA
+  icl 'common\printfloat.asm'	; @printSHORTREAL, @printREAL, @float
+  icl 'common\printfloat16.asm'	; @F16_F2A
+	
+  icl 'common\allocmem.asm'	; @AllocMem, @FreeMem
+	
 ; -----------------------------------------------------------------------
 
   opt l+
