@@ -14047,7 +14047,6 @@ end;
 	Result:=false; Break;
      end;
 
-// sickx
 
     if sta_stack(i) and									// sta :STACKORIGIN+STACKWIDTH	; 0
        lda_stack(i+1) and								// lda :STACKORIGIN		; 1
@@ -25685,109 +25684,6 @@ end;
      end;
 
 
-{ sickx
-    if lda(i) and										// lda 					; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 1
-       lda(i+2) and										// lda					; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+9	; 3
-       lda(i+4) and										// lda					; 4
-       sta_stack(i+5) and									// sta :STACKORIGIN+9			; 5
-       ldy_1(i+6) and										// ldy #1				; 6
-       (listing[i+7] = #9'.LOCAL') and								// .LOCAL				; 7
-       lda(i+8) and										// lda 					; 8
-       sub_stack(i+9) and									// sub :STACKORIGIN+STACKWIDTH*3+9	; 9
-       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
-       lda(i+11) and										// lda					; 11
-       cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH*2+9	; 12
-       (listing[i+13] = #9'bne L1') and								// bne L1				; 13
-       lda(i+14) and										// lda					; 14
-       cmp_stack(i+15) and									// cmp :STACKORIGIN+STACKWIDTH+9	; 15
-       (listing[i+16] = #9'bne L1') and								// bne L1				; 16
-       lda(i+17) and										// lda					; 17
-       cmp_stack(i+18) then									// cmp :STACKORIGIN+9			; 18
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+12], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+15], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+18], 6, 256)) then
-     begin
-       listing[i+12] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+15] := #9'cmp ' + copy(listing[i+2], 6, 256);
-       listing[i+18] := #9'cmp ' + copy(listing[i+4], 6, 256);
-
-       listing[i]   := '';
-       listing[i+1] := '';
-       listing[i+2] := '';
-       listing[i+3] := '';
-       listing[i+4] := '';
-       listing[i+5] := '';
-
-       Result:=false; Break;
-     end;
-
-
-    if lda(i) and										// lda 					; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 1
-       lda(i+2) and										// lda					; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 3
-       lda(i+4) and										// lda					; 4
-       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+9	; 5
-       ldy_1(i+6) and										// ldy #1				; 6
-       (listing[i+7] = #9'.LOCAL') and								// .LOCAL				; 7
-       lda(i+8) and										// lda 					; 8
-       sub_stack(i+9) and									// sub :STACKORIGIN+STACKWIDTH*3+9	; 9
-       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
-       lda(i+11) and										// lda					; 11
-       cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH*2+9	; 12
-       (listing[i+13] = #9'bne L1') and								// bne L1				; 13
-       lda(i+14) and										// lda					; 14
-       cmp_stack(i+15) then									// cmp :STACKORIGIN+STACKWIDTH+9	; 15
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+9], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+12], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+15], 6, 256)) then
-     begin
-       listing[i+9] := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+12] := #9'cmp ' + copy(listing[i+2], 6, 256);
-       listing[i+15] := #9'cmp ' + copy(listing[i+4], 6, 256);
-
-       listing[i]   := '';
-       listing[i+1] := '';
-       listing[i+2] := '';
-       listing[i+3] := '';
-       listing[i+4] := '';
-       listing[i+5] := '';
-
-       Result:=false; Break;
-     end;
-
-
-    if lda(i) and (iy(i) = false) and								// lda 					; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+10			; 1
-       lda(i+2) and (iy(i+2) = false) and							// lda 					; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+10	; 3
-       ldy_1(i+4) and										// ldy #1				; 4
-       (listing[i+5] = #9'.LOCAL') and								// .LOCAL				; 5
-       lda(i+6) and										// lda					; 6
-       sub_stack(i+7) and									// sub :STACKORIGIN+STACKWIDTH+10	; 7
-       (listing[i+8] = #9'bne L4') and								// bne L4				; 8
-       lda(i+9) and										// lda					; 9
-       cmp_stack(i+10) then									// cmp :STACKORIGIN+10			; 10
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+10], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+7], 6, 256)) then
-     begin
-       listing[i+7]  := #9'sub ' + copy(listing[i+2], 6, 256);
-       listing[i+10] := #9'cmp ' + copy(listing[i], 6, 256);
-
-       listing[i]   := '';
-       listing[i+1] := '';
-       listing[i+2] := '';
-       listing[i+3] := '';
-
-       Result:=false; Break;
-     end;
-
-
-
-}
-
     if lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        ldy_1(i+2) and										// ldy #1				; 2
@@ -26432,20 +26328,6 @@ end;
 	listing[i+3] := '';
 	Result:=false; Break;
      end;
-
-// sickx
-
-
-{
-    if lda(i) and 										// lda			; 0	!!! tylko dla <>0 lub =0 !!!  beq|bne !!!
-       cmp_im_0(i+1) and									// cmp #$00		; 1	!!! to oznacza krotki test !!!
-       dey(i+3) and										// beq|bne|seq|sne	; 2
-       (beq(i+2) or bne(i+2) or	seq(i+2) or sne(i+2)) then					// dey			; 3
-     begin
-	listing[i+1] := '';
-	Result:=false; Break;
-     end;
-}
 
 
     if (jeq(i+5) or jne(i+5) or beq(i+5) or bne(i+5)) and					// jeq|jne|beq|bne	; 5
@@ -40931,29 +40813,6 @@ case Tok[i].Kind of
 	    end;
 
 
-{
-	  if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin
-
-
-	   if (ValType in IntegerTypes) and (Ident[IdentIndex].Kind = CONSTANT) then begin
-	     Int2Float(ConstVal);
-
-  	     move(ConstVal, ftmp, sizeof(ftmp));
-
-	     if (VarType = HALFSINGLETOK) or (ValType = HALFSINGLETOK) then begin
-	       ConstVal := CardToHalf( ftmp[1] );
-	       ValType := HALFSINGLETOK;
-	     end else begin
-	       ConstVal := ftmp[1];
-	       ValType := SINGLETOK;
-	     end;
-
-	   end;
-
-	  end;
-}
-
-
 	  if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentIndex].NumAllocElements > 0) and
 	     (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET) then
 
@@ -41766,7 +41625,6 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   j := CompileSimpleExpression(i + 2, RightValType, VarType);
 
 
-// sickx
   k := i + 2;
   if SafeCompileConstExpression(k, ConstVal, ConstValType, VarType, False) then
    if (ConstValType in IntegerTypes) and (VarType in IntegerTypes) then begin
