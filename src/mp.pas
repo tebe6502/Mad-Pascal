@@ -31993,7 +31993,7 @@ procedure TokenizeMacro(a: string; Line, Spaces: integer);
 var
   Text: string;
   Num, Frac: TString;
-  OldNumTok, UnitIndex, Err, cnt, Line2, TextPos, im: Integer;
+  Err, Line2, TextPos, im: Integer;
   Tmp: Int64;
   yes: Boolean;
   ch, ch2: Char;
@@ -32475,8 +32475,6 @@ procedure omin_spacje (var i:integer; var a:string);
 (*----------------------------------------------------------------------------*)
 (*  omijamy tzw. "biale spacje" czyli spacje, tabulatory		      *)
 (*----------------------------------------------------------------------------*)
-var txt: string;
-
 begin
 
  if a <> '' then
@@ -36271,6 +36269,7 @@ asm65(#9'jmp l_'+IntToHex(CodeSize, 4));
 end;
 
 
+{
 procedure GenerateCaseProlog;
 begin
 asm65;
@@ -36282,6 +36281,7 @@ Gen; Gen;							// mov al, 00h	; initial flag mask
 a65(__subBX);
 
 end;
+}
 
 
 procedure GenerateCaseEqualityCheck(Value: Int64; SelectorType: Byte; Join: Boolean; CaseLocalCnt: integer);
@@ -38865,7 +38865,6 @@ var
   RightConstVal: Int64;
   RightConstValType: Byte;
   Yes: Boolean;
-  ftmp: TFloat;
 begin
 
 Result:=i;
@@ -39349,7 +39348,7 @@ end;
 
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer);
-var NumActualParams, IdentTemp, ParamIndex, idx, j, old_func: integer;
+var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
     ActualParamType, AllocElementType: byte;
     svar: string;
     yes: Boolean;
