@@ -47,6 +47,7 @@ numread	.word		; pointer to variable, length of loaded data
 
 	icl 'c64\c64.hea'
 	icl 'c64\putchar.asm'		; @putchar
+	icl 'c64\clrscr.asm'		; @clrscr
 
 ; -----------------------------------------------------------------------
 
