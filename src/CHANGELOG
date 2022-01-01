@@ -1,3 +1,12 @@
+26.12.2021
+- optymalizacje dla @SMALLINT_MOD, @SMALLINT_DIV, @SHORTREAL_DIV
+
+16.12.2021
+- array [byte] of type, dla pozosta³ych typów innych ni¿ BYTE wyst¹pi b³¹d 'Error in type definition'
+
+14.12.2021
+- nowe testy dla SHR, tests\test-shr
+
 02.12.2021
 - dodana mozliwosc ustawienia adresu -CODE dla -TARGET RAW
 
