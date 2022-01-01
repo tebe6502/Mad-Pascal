@@ -1,4 +1,11 @@
 
+/*
+	andAL_CL
+	andAX_CX
+	andEAX_ECX
+*/
+
+
 .proc	andAL_CL
 
 	lda :STACKORIGIN-1,x
