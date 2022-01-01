@@ -205,8 +205,13 @@ ptr1 = :eax
 sreg = :eax+2
 ptr3 = :ecx
 
+	lda	ptr1+1
+	ora	ptr3+1
+	jeq	imulCL
+
         lda     #0
         sta     sreg+1
+
         ldy     #16             ; Number of bits
 
         lsr     ptr1+1
