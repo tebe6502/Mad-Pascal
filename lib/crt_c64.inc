@@ -28,7 +28,7 @@ procedure ClrScr;
 begin
 
  asm
-	jsr $e544
+	jsr @ClrScr
  end;
 
 end;
@@ -239,7 +239,7 @@ procedure TextMode(Mode: byte); assembler;
 @param: Mode - unused value
 *)
 asm
-
+	jsr @ClrScr
 end;
 
 
