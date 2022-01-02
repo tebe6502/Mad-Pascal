@@ -40038,7 +40038,7 @@ begin
 
    for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
     if not ( (Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING) or
-	     ((Ident[IdentIndex].Param[ParamIndex].DataType in Pointers) and (Ident[IdentIndex].Param[ParamIndex].NumAllocElements = 0) ) or
+	     ((Ident[IdentIndex].Param[ParamIndex].DataType in Pointers) and (Ident[IdentIndex].Param[ParamIndex].NumAllocElements and $FFFF = 0) ) or
              (Ident[IdentIndex].Param[ParamIndex].DataType in OrdinalTypes + RealTypes)
 	   ) then begin yes:=true; Break end;
 
@@ -47389,7 +47389,7 @@ yes := {(Ident[BlockIdentIndex].ObjectIndex > 0) or} Ident[BlockIdentIndex].isRe
 
 for ParamIndex := NumParams downto 1 do
  if not ( (Param[ParamIndex].PassMethod = VARPASSING) or
-          ((Param[ParamIndex].DataType in Pointers) and (Param[ParamIndex].NumAllocElements = 0)) or
+          ((Param[ParamIndex].DataType in Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF  = 0)) or
 	  (Param[ParamIndex].DataType in OrdinalTypes + RealTypes)
 	) then begin yes:=true; Break end;
 
@@ -47411,7 +47411,7 @@ if yes then
   else
      GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
 
-  if (Param[ParamIndex].PassMethod <> VARPASSING) and (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Param[ParamIndex].NumAllocElements > 0) then // copy arrays
+  if (Param[ParamIndex].PassMethod <> VARPASSING) and (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF > 0) then // copy arrays
    if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then begin
 
     idx := RecordSize(GetIdent(Param[ParamIndex].Name));
