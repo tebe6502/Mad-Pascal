@@ -409,7 +409,7 @@ Reads BYTE from the desired memory address
 *)
 asm
 	ldy #0
-	mva (edx),y Result
+	mva (:edx),y Result
 end;
 
 
@@ -424,9 +424,9 @@ Reads WORD from the desired memory address
 *)
 asm
 	ldy #0
-	mva (edx),y Result
+	mva (:edx),y Result
 	iny
-	mva (edx),y Result+1
+	mva (:edx),y Result+1
 end;
 
 
@@ -442,14 +442,14 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Real (Q24.8)
 *)
 asm
-	lda edx+3
+	lda :edx+3
 	spl
 	jsr negEDX
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
-	mva edx+3 Result+3
+	mva :edx Result
+	mva :edx+1 Result+1
+	mva :edx+2 Result+2
+	mva :edx+3 Result+3
 end;
 
 
@@ -465,13 +465,13 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Single
 *)
 asm
-	lda edx+3
+	lda :edx+3
 	and #$7f
 	sta Result+3
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
+	mva :edx Result
+	mva :edx+1 Result+1
+	mva :edx+2 Result+2
 end;
 
 
@@ -487,11 +487,11 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Single
 *)
 asm
-	lda edx+1
+	lda :edx+1
 	and #$7f
 	sta Result+1
 
-	mva edx Result
+	mva :edx Result
 end;
 
 
@@ -507,7 +507,7 @@ The result of the function has the same type as its argument, which can be any n
 @returns: shortint
 *)
 asm
-	lda edx
+	lda :edx
 	bpl @+
 
 	eor #$ff
@@ -529,19 +529,19 @@ The result of the function has the same type as its argument, which can be any n
 @returns: smallint
 *)
 asm
-	lda edx+1
+	lda :edx+1
 	bpl @+
 
 	lda #$00
-	sub edx
-	sta edx
+	sub :edx
+	sta :edx
 	lda #$00
-	sbc edx+1
-	sta edx+1
+	sbc :edx+1
+	sta :edx+1
 @
 	sta Result+1
 
-	mva edx Result
+	mva :edx Result
 end;
 
 
@@ -557,15 +557,15 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Integer
 *)
 asm
-	lda edx+3
+	lda :edx+3
 	spl
 	jsr negEDX
 
 	sta Result+3
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
+	mva :edx Result
+	mva :edx+1 Result+1
+	mva :edx+2 Result+2
 end;
 
 
@@ -1053,27 +1053,27 @@ asm
 
 	sty IOResult
 
-	mva icax3,x eax
-	mva icax4,x eax+1
-	mva icax5,x eax+2
+	mva icax3,x :eax
+	mva icax4,x :eax+1
+	mva icax5,x :eax+2
 
-	mva #$00 eax+3
-	sta ecx+2
-	sta ecx+3
+	mva #$00 :eax+3
+	sta :ecx+2
+	sta :ecx+3
 
 	ldy #s@file.record
 	lda (:bp2),y
-	sta ecx
+	sta :ecx
 	iny
 	lda (:bp2),y
-	sta ecx+1
+	sta :ecx+1
 
 	jsr idivEAX_ECX.main
 
-	mva eax Result
-	mva eax+1 Result+1
-	mva eax+2 Result+2
-	mva eax+3 Result+3
+	mva :eax Result
+	mva :eax+1 Result+1
+	mva :eax+2 Result+2
+	mva :eax+3 Result+3
 
 	pla:tax
 };
@@ -1101,24 +1101,24 @@ asm
 
 	ldy #s@file.record
 	lda (:bp2),y
-	sta eax
+	sta :eax
 	iny
 	lda (:bp2),y
-	sta eax+1
+	sta :eax+1
 	lda #$00
-	sta eax+2
-	sta eax+3
+	sta :eax+2
+	sta :eax+3
 
-	mva a ecx
-	mva a+1 ecx+1
-	mva a+2 ecx+2
-	mva a+3 ecx+3
+	mva a :ecx
+	mva a+1 :ecx+1
+	mva a+2 :ecx+2
+	mva a+3 :ecx+3
 
 	jsr imulECX
 
-	mva eax icax3,x
-	mva eax+1 icax4,x
-	mva eax+2 icax5,x
+	mva :eax icax3,x
+	mva :eax+1 icax4,x
+	mva :eax+2 icax5,x
 
 	m@call	ciov
 
@@ -1259,10 +1259,10 @@ asm
 
 	mwa v :bp2
 
-	mva edx (:bp2),y+
-	mva edx+1 (:bp2),y+
-	mva edx+2 (:bp2),y+
-	mva edx+3 (:bp2),y
+	mva :edx (:bp2),y+
+	mva :edx+1 (:bp2),y+
+	mva :edx+2 (:bp2),y+
+	mva :edx+3 (:bp2),y
 };
 end;
 
@@ -1473,7 +1473,7 @@ Store BYTE at the desired memory address
 *)
 asm
 {	ldy #0
-	mva value (edx),y
+	mva value (:edx),y
 };
 end;
 
@@ -1488,9 +1488,9 @@ Store WORD at the desired memory address
 *)
 asm
 {	ldy #0
-	mva value (edx),y
+	mva value (:edx),y
 	iny
-	mva value+1 (edx),y
+	mva value+1 (:edx),y
 };
 end;
 
@@ -1871,7 +1871,7 @@ Set length of a string.
 *)
 asm
 {	ldy #0
-	mva Len (edx),y
+	mva Len (:edx),y
 };
 end;
 
