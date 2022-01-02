@@ -1,4 +1,4 @@
-// $FE
+// FE
 
 uses crt;
 
@@ -102,6 +102,7 @@ begin
 	inc(v, a);
 
 	writeln(hexStr(v,2));
+	writeln(hexStr(b,2));
 
 repeat until keypressed;
 

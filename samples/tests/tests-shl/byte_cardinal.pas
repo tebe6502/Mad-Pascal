@@ -1,14 +1,13 @@
-// FFFFFFFE
+// 512
 
 uses crt;
 
 var
-	a, v: cardinal;
-
-	b: byte;
+	a: byte;
+	v, b: cardinal;
 
 begin
-	b:=1;
+	b:=$51fca3f7;
 
 	a := b shl 1;
 	inc(v, a);
@@ -104,7 +103,7 @@ begin
 	inc(v, a);
 
 	writeln(hexStr(v,8));
-	writeln(hexStr(b,2));
+	writeln(hexStr(b,8));
 
 repeat until keypressed;
 

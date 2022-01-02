@@ -1,4 +1,4 @@
-// $FFFE
+// FFFE
 
 uses crt;
 
@@ -104,6 +104,7 @@ begin
 	inc(v, a);
 
 	writeln(hexStr(v,4));
+	writeln(hexStr(b,2));
 
 repeat until keypressed;
 
