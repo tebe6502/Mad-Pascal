@@ -1,110 +1,108 @@
-// FFFFFFFE
+// $F7813F92
 
 uses crt;
 
 var
-	a, v: cardinal;
-
-	b: byte;
+	a, b, v: cardinal;
 
 begin
-	b:=1;
+	b:=$f7813Fa5;
 
-	a := b shl 1;
+	a := b shr 1;
 	inc(v, a);
 
-	a := b shl 2;
+	a := b shr 2;
 	inc(v, a);
 
-	a := b shl 3;
+	a := b shr 3;
 	inc(v, a);
 
-	a := b shl 4;
+	a := b shr 4;
 	inc(v, a);
 
-	a := b shl 5;
+	a := b shr 5;
  	inc(v, a);
 
-	a := b shl 6;
+	a := b shr 6;
  	inc(v, a);
 
-	a := b shl 7;
+	a := b shr 7;
  	inc(v, a);
 
-	a := b shl 8;
+	a := b shr 8;
  	inc(v, a);
 
-	a := b shl 9;
+	a := b shr 9;
  	inc(v, a);
 
-	a := b shl 10;
+	a := b shr 10;
  	inc(v, a);
 
-	a := b shl 11;
+	a := b shr 11;
  	inc(v, a);
 
-	a := b shl 12;
+	a := b shr 12;
  	inc(v, a);
 
-	a := b shl 13;
+	a := b shr 13;
  	inc(v, a);
 
-	a := b shl 14;
+	a := b shr 14;
  	inc(v, a);
 
-	a := b shl 15;
+	a := b shr 15;
  	inc(v, a);
 
-	a := b shl 16;
+	a := b shr 16;
  	inc(v, a);
 
-	a := b shl 17;
+	a := b shr 17;
  	inc(v, a);
 
-	a := b shl 18;
+	a := b shr 18;
  	inc(v, a);
 
-	a := b shl 19;
+	a := b shr 19;
  	inc(v, a);
 
-	a := b shl 20;
+	a := b shr 20;
  	inc(v, a);
 
-	a := b shl 21;
+	a := b shr 21;
  	inc(v, a);
 
-	a := b shl 22;
+	a := b shr 22;
  	inc(v, a);
 
-	a := b shl 23;
+	a := b shr 23;
  	inc(v, a);
 
-	a := b shl 24;
+	a := b shr 24;
  	inc(v, a);
 
-	a := b shl 25;
+	a := b shr 25;
  	inc(v, a);
 
-	a := b shl 26;
+	a := b shr 26;
  	inc(v, a);
 
-	a := b shl 27;
+	a := b shr 27;
  	inc(v, a);
 
-	a := b shl 28;
+	a := b shr 28;
  	inc(v, a);
 
-	a := b shl 29;
+	a := b shr 29;
  	inc(v, a);
 
-	a := b shl 30;
+	a := b shr 30;
 	inc(v, a);
 
-	a := b shl 31;
+	a := b shr 31;
 	inc(v, a);
 
 	writeln(hexStr(v,8));
-	writeln(hexStr(b,2));
+	writeln(hexStr(b,8));
 
 repeat until keypressed;
 
