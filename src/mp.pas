@@ -101,7 +101,7 @@ Contributors:
 
 # :edx+2, :edx+3 nie wystepuje
 
-# 'register' alokuje parametry na stronie zerowej 1-EDX, 2-ECX, 3-EAX
+# 'register' dla procedury/funkcji alokuje parametry na stronie zerowej 1-EDX, 2-ECX, 3-EAX
 
 # jeq, jne, jcc, jcs, jmi, jpl l_xxxx
 
@@ -307,7 +307,7 @@ const
   HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16bit
   PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 146;	// Size = 1 BYTE
-  PROCEDURETYPE		= 147;	// Size = 2 POINTER
+  PROCVARTOK		= 147;	// Size = 2
   TEXTFILETOK		= 148;	// Size = 2/12 FILE
   FORWARDTYPE		= 149;	// Size = 2
 
@@ -344,7 +344,7 @@ const
   IntegerTypes		= UnsignedOrdinalTypes + SignedOrdinalTypes;
   OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK];
 
-  Pointers		= [POINTERTOK, STRINGPOINTERTOK];
+  Pointers		= [POINTERTOK, PROCVARTOK, STRINGPOINTERTOK];
 
   AllTypes		= OrdinalTypes + RealTypes + Pointers;
 
@@ -639,7 +639,7 @@ var
   AddDefines: integer = 1;
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
-  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func,
+  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, Debug: Integer;
 
@@ -836,6 +836,8 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
     POINTERTOK,
     DATAORIGINOFFSET,
     CODEORIGINOFFSET: Result := 'POINTER';
+
+    PROCVARTOK: Result := '"<Procedure Variable>"';
 
  STRINGPOINTERTOK: Result := 'STRING';
 
@@ -1828,17 +1830,20 @@ begin
 end;
 
 
+
+// sickx
+
 function Elements(IdentIndex: integer): cardinal;
 begin
 
- if Ident[IdentIndex].DataType = ENUMTYPE then
+ if (Ident[IdentIndex].DataType = ENUMTYPE) then
   Result := 0
  else
 
- if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType in [RECORDTOK,OBJECTTOK]) then
-  Result := Ident[IdentIndex].NumAllocElements
- else
-  Result := Ident[IdentIndex].NumAllocElements * Ident[IdentIndex].NumAllocElements_;
+   if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType = PROCVARTOK) then
+    Result := Ident[IdentIndex].NumAllocElements
+   else
+    Result := Ident[IdentIndex].NumAllocElements * Ident[IdentIndex].NumAllocElements_;
 
 end;
 
@@ -1881,8 +1886,8 @@ else
    Ident[NumIdent].isInit := true;
   end;
 
-  NumAllocElements_ := NumAllocElements shr 16;		// , yy]
-  NumAllocElements  := NumAllocElements and $FFFF;	// [xx,
+   NumAllocElements_ := NumAllocElements shr 16;		// , yy]
+   NumAllocElements  := NumAllocElements and $FFFF;		// [xx,
 
   if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = CODEGENERATIONPASS) then
     if not ( (Ident[NumIdent].Pass in [CALLDETERMPASS , CODEGENERATIONPASS]) or (Ident[NumIdent].IsNotDead) ) then
@@ -40017,7 +40022,7 @@ begin
 end;
 
 
-procedure CompileActualParameters(var i: integer; IdentIndex: integer);
+procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
 var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
     ActualParamType, AllocElementType: byte;
     svar: string;
@@ -40055,7 +40060,10 @@ begin
        Inc(NumActualParams);
 
        if NumActualParams > Ident[IdentIndex].NumParams then
-	iError(i, WrongNumParameters, IdentIndex);
+        if ProcVarIndex > 0 then
+	 iError(i, WrongNumParameters, ProcVarIndex)
+	else
+	 iError(i, WrongNumParameters, IdentIndex);
 
        if Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING then begin
 
@@ -40155,26 +40163,17 @@ begin
 
 
    if NumActualParams <> Ident[IdentIndex].NumParams then
+    if ProcVarIndex > 0 then
+     iError(i, WrongNumParameters, ProcVarIndex)
+    else
      iError(i, WrongNumParameters, IdentIndex);
 
    if Pass = CALLDETERMPASS then
      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
 
-{
-
-   if Ident[IdentIndex].ObjectIndex > 0 then begin
-     IdentTemp := GetIdent(copy(Tok[j].Name^, 1, pos('.', Tok[j].Name^)-1 ));
-
-     svar := GetLocalName(IdentTemp);
-
-     asm65(#9'lda '+svar);
-     asm65(#9'ldy '+svar+'+1');
-   end;
-
-}
-
 
 (*------------------------------------------------------------------------------------------------------------*)
+
 
  if Ident[IdentIndex].isOverload then
   svar := GetLocalName(IdentIndex) + '_' + IntToHex(Ident[IdentIndex].Value, 4)
@@ -40188,9 +40187,9 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
 
 					asm65(#9'lda :STACKORIGIN,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name);
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name);
 					asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name + '+1');
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name + '+1');
 					a65(__subBX);
   end else
   if (NumActualParams = 1) and (DataSize[Ident[IdentIndex].Param[ParamIndex].DataType] = 1) then begin			// only ONE parameter SIZE=1
@@ -40198,7 +40197,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 			if Ident[IdentIndex].ObjectIndex > 0 then begin
 
 					asm65(#9'lda :STACKORIGIN,x');
-					asm65(#9'sta ' + svar+'.'+Ident[IdentIndex].Param[ParamIndex].Name);
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name);
 					a65(__subBX);
 			end else begin
 
@@ -40213,29 +40212,29 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
    BYTETOK, CHARTOK, BOOLEANTOK, SHORTINTTOK:
    				     begin
 					asm65(#9'lda :STACKORIGIN,x');
-					asm65(#9'sta ' + svar+'.'+Ident[IdentIndex].Param[ParamIndex].Name);
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name);
 					a65(__subBX);
 				     end;
 
    WORDTOK, SMALLINTTOK, SHORTREALTOK, HALFSINGLETOK, POINTERTOK, STRINGPOINTERTOK:
       				     begin
 					asm65(#9'lda :STACKORIGIN,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name);
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name);
 					asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name + '+1');
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name + '+1');
 					a65(__subBX);
 				     end;
 
    CARDINALTOK, INTEGERTOK, REALTOK, SINGLETOK:
       				     begin
 					asm65(#9'lda :STACKORIGIN,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name);
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name);
 					asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name + '+1');
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name + '+1');
 					asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name + '+2');
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name + '+2');
 					asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-					asm65(#9'sta ' + svar+'.' + Ident[IdentIndex].Param[ParamIndex].Name + '+3');
+					asm65(#9'sta ' + svar + '.' + Ident[IdentIndex].Param[ParamIndex].Name + '+3');
 					a65(__subBX);
 				     end;
 
@@ -40261,11 +40260,21 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
 (*------------------------------------------------------------------------------------------------------------*)
 
+   if ProcVarIndex > 0 then begin
+     asm65(#9'lda #$4C');
+     asm65(#9'sta :TMP');
+     asm65(#9'lda ' + GetLocalName(ProcVarIndex));
+     asm65(#9'sta :TMP+1');
+     asm65(#9'lda ' + GetLocalName(ProcVarIndex) + '+1');
+     asm65(#9'sta :TMP+2');
+   end;
+
+
    if Ident[IdentIndex].ObjectIndex > 0 then begin
      IdentTemp := GetIdent(copy(Tok[j].Name^, 1, pos('.', Tok[j].Name^)-1 ));
 
      asm65(#9'lda ' + GetLocalName(IdentTemp));
-     asm65(#9'ldy ' + GetLocalName(IdentTemp)+'+1');
+     asm65(#9'ldy ' + GetLocalName(IdentTemp) + '+1');
    end;
 
 (*------------------------------------------------------------------------------------------------------------*)
@@ -40301,8 +40310,16 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
   resetOpty;
 
- end else
-  asm65(#9'jsr '+svar);				// GenerateCall
+ end else begin
+
+ // sickx
+
+  if ProcVarIndex > 0 then
+   asm65(#9'jsr :TMP')
+  else
+   asm65(#9'jsr ' + svar);				// GenerateCall
+
+ end;
 
 
 	if (Ident[IdentIndex].Kind = FUNC) and (Ident[IdentIndex].isStdCall = false) and (Ident[IdentIndex].isRecursion = false) then begin
@@ -41270,6 +41287,22 @@ case Tok[i].Kind of
 		Result := j + 1;
 
 	  end else
+
+// sickx
+      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
+
+	IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
+
+	if Ident[IdentTemp].IsNestedFunction = FALSE then
+	 Error(i, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found');
+
+	CompileActualParameters(i, IdentTemp, IdentIndex);
+
+	ValType := Ident[Ident[IdentIndex].NumAllocElements_].DataType;
+
+	Result := i;
+
+      end else
 
       if Ident[IdentIndex].Kind = PROCEDURETOK then
 	Error(i, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found')
@@ -42726,7 +42759,7 @@ case Tok[i].Kind of
 	       inc(i, 2);
 
 	    end else
-	     if VarType in [RECORDTOK, OBJECTTOK] then VarType := POINTERTOK;
+	     if VarType in [RECORDTOK, OBJECTTOK, PROCVARTOK] then VarType := POINTERTOK;
 
 	    //CheckTok(i + 1, CBRACKETTOK);
 
@@ -42751,8 +42784,22 @@ case Tok[i].Kind of
 
 	    end;
 
+// sickx
+	   if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) and (Tok[i + 1].Kind <> ASSIGNTOK) then begin
 
+	        IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
+
+		CompileActualParameters(i, IdentTemp, IdentIndex);
+
+		Result := i;
+		exit;
+
+	   end else
 	    CheckTok(i + 1, ASSIGNTOK);
+
+
+//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',IndirectionLevel);
+
 
 	    if (Ident[IdentIndex].DataType in Pointers) and
 	       (Ident[IdentIndex].AllocElementType = CHARTOK) and
@@ -43048,7 +43095,7 @@ case Tok[i].Kind of
 
 	      CheckAssignment(i + 1, IdentIndex);
 
-	      if IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2] then begin
+	      if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) {and not (Ident[IdentIndex].AllocElementType in [PROCEDURETOK, FUNC])} then begin
 
 //writeln(Ident[IdentIndex].idtype,',', Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Name);
 //writeln(Ident[GetIdent(Ident[IdentIndex].Name)].AllocElementType);
@@ -45345,6 +45392,171 @@ end;// case
 end;// CompileStatement
 
 
+function DeclareFunction(i: integer; out ProcVarIndex: cardinal): integer;
+var  VarOfSameType: TVariableList;
+     NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
+     ListPassMethod, VarType, AllocElementType, NestedFunctionResultType, NestedFunctionAllocElementType: Byte;
+     NumAllocElements, NestedFunctionNumAllocElements: cardinal;
+     IsNestedFunction: Boolean;
+
+begin
+      inc(NumProc);
+
+      if Tok[i].Kind in [PROCEDURETOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+	begin
+	DefineIdent(i, '@FN' + IntToHex(NumProc, 4), Tok[i].Kind, 0, 0, 0, 0);
+	IsNestedFunction := FALSE;
+	end
+      else
+	begin
+	DefineIdent(i, '@FN' + IntToHex(NumProc, 4), FUNC, 0, 0, 0, 0);
+	IsNestedFunction := TRUE;
+	end;
+
+// sickx
+
+      ProcVarIndex := NumProc;			// -> NumAllocElements_
+
+      dec(i);
+
+      if (Tok[i + 2].Kind = OPARTOK) and (Tok[i + 3].Kind = CPARTOK) then inc(i, 2);
+
+      if Tok[i + 2].Kind = OPARTOK then						// Formal parameter list found
+	begin
+	i := i + 2;
+	repeat
+	  NumVarOfSameType := 0;
+
+	  ListPassMethod := VALPASSING;
+
+	  if Tok[i + 1].Kind = CONSTTOK then
+	    begin
+	    ListPassMethod := CONSTPASSING;
+	    inc(i);
+	    end
+	  else if Tok[i + 1].Kind = VARTOK then
+	    begin
+	    ListPassMethod := VARPASSING;
+	    inc(i);
+	    end;
+
+	    repeat
+
+	    if Tok[i + 1].Kind <> IDENTTOK then
+	      Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
+	    else
+	      begin
+
+		for x := 1 to NumVarOfSameType do
+		 if VarOfSameType[x].Name = Tok[i + 1].Name^ then
+		   Error(i + 1, 'Identifier ' + Tok[i + 1].Name^ + ' is already defined');
+
+	        Inc(NumVarOfSameType);
+	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name^;
+	      end;
+
+	    i := i + 2;
+	    until Tok[i].Kind <> COMMATOK;
+
+
+	  VarType := 0;								// UNTYPED
+	  NumAllocElements := 0;
+	  AllocElementType := 0;
+
+	  if (ListPassMethod = VARPASSING)  and (Tok[i].Kind <> COLONTOK) then begin
+
+	   dec(i);
+
+	  end else begin
+
+	   CheckTok(i, COLONTOK);
+
+	   if Tok[i + 1].Kind = DEREFERENCETOK then				// ^type
+	     Error(i + 1, 'Type identifier expected');
+
+	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
+
+	   if (VarType = FILETOK) and (ListPassMethod <> VARPASSING) then
+	     Error(i, 'File types must be var parameters');
+
+	  end;
+
+
+	  for VarOfSameTypeIndex := 1 to NumVarOfSameType do
+	    begin
+
+//	    if NumAllocElements > 0 then
+//	      Error(i, 'Structured parameters cannot be passed by value');
+
+	    Inc(Ident[NumIdent].NumParams);
+	    if Ident[NumIdent].NumParams > MAXPARAMS then
+	      iError(i, TooManyParameters, NumIdent)
+	    else
+	      begin
+	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
+
+	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].DataType		:= VarType;
+	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].Name		:= VarOfSameType[VarOfSameTypeIndex].Name;
+	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].NumAllocElements := NumAllocElements;
+	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].AllocElementType := AllocElementType;
+	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].PassMethod       := ListPassMethod;
+
+	      end;
+	    end;
+
+	  i := i + 1;
+	until Tok[i].Kind <> SEMICOLONTOK;
+
+	CheckTok(i, CPARTOK);
+
+	i := i + 1;
+	end// if Tok[i + 2].Kind = OPARTOR
+      else
+	i := i + 2;
+
+      NestedFunctionResultType := 0;
+      NestedFunctionNumAllocElements := 0;
+      NestedFunctionAllocElementType := 0;
+
+      if IsNestedFunction then
+	begin
+
+	CheckTok(i, COLONTOK);
+
+	if Tok[i + 1].Kind = ARRAYTOK then
+	 Error(i + 1, 'Type identifier expected');
+
+	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
+
+	NestedFunctionResultType := VarType;
+
+//	if Tok[i].Kind = PCHARTOK then NestedFunctionResultType := PCHARTOK;
+
+	Ident[NumIdent].DataType := NestedFunctionResultType;			// Result
+
+	NestedFunctionNumAllocElements := NumAllocElements;
+	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;
+
+	NestedFunctionAllocElementType := AllocElementType;
+	Ident[NumIdent].NestedFunctionAllocElementType := AllocElementType;
+
+//	Ident[NumIdent].isNestedFunction := true;
+
+	i := i + 1;
+	end;// if IsNestedFunction
+
+
+    Ident[NumIdent].isStdCall := true;
+    Ident[NumIdent].IsNestedFunction := IsNestedFunction;
+
+
+    CheckTok(i, SEMICOLONTOK);
+
+    Result := i;
+
+end;
+
+
 function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
@@ -45590,18 +45802,13 @@ end;
 
 function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer;
 var
-  NestedNumAllocElements: cardinal;
+  NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   LowerBound, UpperBound, ConstVal, IdentIndex: Int64;
-  NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
-  NestedDataType, ExpressionType, NestedAllocElementType: Byte;
+  ForwardIdentIndex, NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
+  NestedDataType, ExpressionType, NestedAllocElementType, NestedFunctionAllocElementType, NestedFunctionResultType: Byte;
   FieldInListName: array [1..MAXFIELDS] of TField;
-  ExitLoop: Boolean;
-
+  ExitLoop, isForward, isInt, isInl, IsNestedFunction: Boolean;
   Name: TString;
-
-  NestedFunctionNumAllocElements: cardinal;
-  isForward, isInt, isInl, IsNestedFunction: Boolean;
-  NestedFunctionResultType, NestedFunctionAllocElementType: Byte;
 
 
   function BoundaryType: Byte;
@@ -45664,11 +45871,18 @@ var
 
 begin
 
+// sickx
+
 if Tok[i].Kind in [PROCEDURETOK, FUNC] then begin			// PROCEDURE, FUNCTION
 
+  DataType := POINTERTOK;
+  AllocElementType := PROCVARTOK;
 
- writeln('under construction'); halt;
+  i := DeclareFunction(i, NestedNumAllocElements);
 
+  NumAllocElements := NestedNumAllocElements shl 16;
+
+  Result := i - 1;
 
 end else
 
@@ -46213,7 +46427,10 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
 
 
 // sick3
-// writeln('>',NestedDataType,',',NestedAllocElementType,',',Tok[i].kind,',',NestedNumAllocElements);
+// writeln('>',NestedDataType,',',NestedAllocElementType,',',Tok[i].kind,',',hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
+
+  if NestedAllocElementType = PROCVARTOK then
+      Error(i, InfoAboutToken(NestedAllocElementType)+' arrays are not supported');
 
 
   if NestedNumAllocElements > 0 then
@@ -46240,14 +46457,14 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
    end else
    if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].Kind <> PCHARTOK) then begin
 
-     if (NestedAllocElementType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements shr 16 > 0) then
+     if (NestedAllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
        Error(i, 'Multidimensional arrays are not supported');
 
      NestedDataType := NestedAllocElementType;
      NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
    end;
 
-  AllocElementType := NestedDataType;
+  AllocElementType :=  NestedDataType;
 
 //  Result := i;
   end // if ARRAYTOK
@@ -46363,11 +46580,16 @@ var IdentIndex, size: integer;
 
    Result := '';
 
-   case DataSize[Ident[IdentIndex].AllocElementType] of
-//    1: Result := ' .byte';
-    2: Result := ' .word';
-    4: Result := ' .dword';
-   end;
+   if Ident[IdentIndex].AllocElementType in [BYTETOK..FORWARDTYPE] then begin
+
+      case DataSize[Ident[IdentIndex].AllocElementType] of
+    	//1: Result := ' .byte';
+    	2: Result := ' .word';
+    	4: Result := ' .dword';
+      end;
+
+   end else
+    Result := ' ; type unknown';
 
   end;
 
@@ -48052,7 +48274,7 @@ while Tok[i].Kind in
        j:=i;
        FormalParameterList(j, ParamIndex, Param, TmpResult, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-       ForwardIdentIndex := GetIdentProc( Ident[ForwardIdentIndex].Name, ForwardIdentIndex, Param, ParamIndex) ;
+       ForwardIdentIndex := GetIdentProc(Ident[ForwardIdentIndex].Name, ForwardIdentIndex, Param, ParamIndex);
 
       end;
 
@@ -48971,7 +49193,7 @@ begin
  VarDataSize := 0; NumStaticStrChars := 0;
  NumBlocks := 0; NumTypes := 0;
  CaseCnt :=0; IfCnt := 0; ShrShlCnt:=0; run_func := 0;
- NumTok := 0; NumIdent := 0;
+ NumTok := 0; NumIdent := 0; NumProc:=0;
  NumDefines := AddDefines; IfdefLevel := 0;
  //Defines[1] := 'ATARI';
  AsmBlockIndex := 0;
@@ -49026,7 +49248,7 @@ begin
 
  NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0;
  VarDataSize := 0; NumStaticStrChars := NumStaticStrCharsTmp;
- CaseCnt :=0; IfCnt := 0; ShrShlCnt:=0; NumTypes := 0; run_func := 0;
+ CaseCnt :=0; IfCnt := 0; ShrShlCnt:=0; NumTypes := 0; run_func := 0; NumProc:=0;
  ResetOpty;
  optyFOR0 := '';
  optyFOR1 := '';
