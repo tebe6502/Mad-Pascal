@@ -144,8 +144,8 @@ asm
   lda range
   beq stop
 
-  sta ecx
-  sty eax
+  sta :ecx
+  sty :eax
 
   jsr imulCL
   tay
