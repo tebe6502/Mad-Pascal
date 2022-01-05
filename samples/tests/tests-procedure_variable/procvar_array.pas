@@ -14,6 +14,9 @@ uses crt;
 type
 	TPrc = function (a,b: byte): word;
 
+var
+	tab: array [0..3] of TPrc;
+
 
 function _add(a,b: byte): word; StdCall;
 begin
@@ -47,25 +50,22 @@ begin
 end;
 
 
-procedure print(p: TPrc);
-var x,y: byte;
+procedure print(x, y: byte);
+var p: TPrc;
 begin
 
- x:=176;
- y:=43;
-
- writeln( p(x,y) );
+ for p in tab do writeln( p(x,y) );
 
 end;
 
 
 begin
+ tab[0] := @_add;
+ tab[1] := @_sub;
+ tab[2] := @_mul;
+ tab[3] := @_div;
 
- print(@_add);
- print(@_sub);
- print(@_mul);
- print(@_div);
-
+ print(176,43);
 
  repeat until keypressed;
 
