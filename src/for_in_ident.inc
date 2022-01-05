@@ -67,10 +67,12 @@
 		   asm65(#9'asl @');
 		   asm65(#9'tay');
 
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 2) + '-256,y' );
+		   k := k * 2;
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256,y' );
 	           asm65(#9'sta ' + GetLocalName(IdentIndex));
 
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 2) + '-256+1,y' );
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256+1,y' );
 	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
 		  end;
 
@@ -80,16 +82,18 @@
 		   asm65(#9'asl @');
 		   asm65(#9'tay');
 
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256,y' );
+		   k := k * 4;
+
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256,y' );
 	           asm65(#9'sta ' + GetLocalName(IdentIndex));
 
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+1,y' );
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256+1,y' );
 	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
 
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+2,y' );
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256+2,y' );
 	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+2');
 
- 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k * 4) + '-256+3,y' );
+ 	           asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+' + IntToStr(k) + '-256+3,y' );
 	           asm65(#9'sta ' + GetLocalName(IdentIndex)+'+3');
 		  end;
 
