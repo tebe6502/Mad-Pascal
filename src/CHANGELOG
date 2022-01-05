@@ -1,3 +1,10 @@
+05.01.2022
+- zmiana sposobu przekazywania paramatrów do procedur/funkcji (od prawej do lewej strony), tak jak FPC, Delphi
+- dodana obs³uga typu proceduralnego w tablicach
+
+02.01.2022
+- dodana obs³uga typu proceduralnego, bez tablic
+
 26.12.2021
 - optymalizacje dla @SMALLINT_MOD, @SMALLINT_DIV, @SHORTREAL_DIV
 

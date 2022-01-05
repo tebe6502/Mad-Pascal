@@ -90,7 +90,7 @@ Contributors:
 	- PASDOC
 
 
-# rejestr X uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
+# rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
 
 # typ REAL Fixed-Point Q16.16 przekracza 32 bity dla MUL i DIV, czêsty OVERFLOW
@@ -101,7 +101,7 @@ Contributors:
 
 # :edx+2, :edx+3 nie wystepuje
 
-# 'register' dla procedury/funkcji alokuje parametry na stronie zerowej 1-EDX, 2-ECX, 3-EAX
+# 'register' dla procedury/funkcji alokuje parametry na stronie zerowej 1: EDX, 2: ECX, 3: EAX
 
 # jeq, jne, jcc, jcs, jmi, jpl l_xxxx
 
@@ -484,6 +484,7 @@ type
     NumAllocElements: Cardinal;
     AllocElementType: Byte;
     PassMethod: Byte;
+    i, i_: integer;
    end;
 
   TFloat = array [0..1] of integer;
@@ -4002,9 +4003,9 @@ end;
        end;
 
 
-{$i opt_MOVE.inc}
+//{$i opt_MOVE.inc}
 
-{$i opt_FILL.inc}
+//{$i opt_FILL.inc}
 
 
 //@PARAM??
@@ -24203,7 +24204,7 @@ end;
     if listing[i] <> '' then begin
 
 {
-if (pos('ldy #', listing[i]) > 0) then begin
+if (pos('#A.X0-DATAORIGIN', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -29741,21 +29742,21 @@ begin
 
 	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(0, x-1, false)) < 0) or (GetVAL(GetARG(1, x-1, false)) < 0) then begin
 
-	  listing[l]   := #9'ldy '+GetARG(1, x-1);
+	  listing[l]   := #9'ldy '+GetARG(1, x);
 	  listing[l+1] := #9'sty :bp+1';
-	  listing[l+2] := #9'ldy '+GetARG(0, x-1);
-	  listing[l+3] := #9'lda '+GetARG(0, x);
+	  listing[l+2] := #9'ldy '+GetARG(0, x);
+	  listing[l+3] := #9'lda '+GetARG(0, x-1);
 	  listing[l+4] := #9'sta (:bp),y';
 
 	  inc(l,5);
 	end else begin
 
-	  k := GetVAL(GetARG(0, x));
+	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
 
 	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
 
-	  k := GetVAL(GetARG(0, x-1)) + GetVAL(GetARG(1, x-1)) shl 8;
+	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
 
 	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
@@ -29802,29 +29803,29 @@ begin
 
 	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) or (GetVAL(GetARG(0, x-1, false)) < 0) or (GetVAL(GetARG(1, x-1, false)) < 0) then begin
 
-	  listing[l]   := #9'lda '+GetARG(0, x-1);
+	  listing[l]   := #9'lda '+GetARG(0, x);
 	  listing[l+1] := #9'sta :bp2';
-	  listing[l+2] := #9'lda '+GetARG(1, x-1);
+	  listing[l+2] := #9'lda '+GetARG(1, x);
 	  listing[l+3] := #9'sta :bp2+1';
 	  listing[l+4] := #9'ldy #$00';
-	  listing[l+5] := #9'lda '+GetARG(0, x);
+	  listing[l+5] := #9'lda '+GetARG(0, x-1);
 	  listing[l+6] := #9'sta (:bp2),y';
 	  listing[l+7] := #9'iny';
-	  listing[l+8] := #9'lda '+GetARG(1, x);
+	  listing[l+8] := #9'lda '+GetARG(1, x-1);
 	  listing[l+9] := #9'sta (:bp2),y';
 
 	  inc(l,10);
 	end else begin
 
-	  k := GetVAL(GetARG(0, x));
+	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
 	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
 
-	  k := GetVAL(GetARG(1, x));
+	  k := GetVAL(GetARG(1, x-1));
 	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
 	  listing[l+2] := #9'lda #$'+IntToHex(k, 2);
 
-	  k := GetVAL(GetARG(0, x-1)) + GetVAL(GetARG(1, x-1)) shl 8;
+	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
 
 	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
@@ -39640,7 +39641,7 @@ begin
 
 	Size:=DataSize[Ident[IdentIndex].AllocElementType];
 
-	if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then begin
+	if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK] then begin
 	 NumAllocElements_ := 0;
 	// Size := RecordSize(IdentIndex);
 	end;
@@ -39977,8 +39978,9 @@ begin
    Pass := CALLDETERMPASS;
 
    NumActualParams := 0;
-//   AllocElementType := 0;
    ActualParamType := 0;
+
+   Result[1].i_ := i + 1;
 
    if (Tok[i + 1].Kind = OPARTOK) and (Tok[i + 2].Kind <> CPARTOK) then		    // Actual parameter list found
      begin
@@ -39988,6 +39990,8 @@ begin
 
        if NumActualParams > MAXPARAMS then
 	 iError(i, TooManyParameters, IdentIndex);
+
+       Result[NumActualParams].i := i;
 
 {
        if (Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING) then begin		// !!! to nie uwzglednia innych procedur/funkcji o innej liczbie parametrow
@@ -40014,8 +40018,11 @@ begin
 
      CheckTok(i + 1, CPARTOK);
 
+     Result[1].i_ := i;
+
 //     inc(i);
      end;	// if (Tok[i + 1].Kind = OPARTOR) and (Tok[i + 2].Kind <> CPARTOK)
+
 
      Pass := oldPass;
      CodeSize := oldCodeSize;
@@ -40027,6 +40034,7 @@ var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
     ActualParamType, AllocElementType: byte;
     svar: string;
     yes: Boolean;
+    Param: TParamList;
 begin
 
    j := i;
@@ -40038,15 +40046,85 @@ begin
 
    for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
     if not ( (Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING) or
-	     ((Ident[IdentIndex].Param[ParamIndex].DataType in Pointers) and (Ident[IdentIndex].Param[ParamIndex].NumAllocElements and $FFFF = 0) ) or
+	     ((Ident[IdentIndex].Param[ParamIndex].DataType in Pointers) and (Ident[IdentIndex].Param[ParamIndex].NumAllocElements and $FFFF in [0,1])) or
              (Ident[IdentIndex].Param[ParamIndex].DataType in OrdinalTypes + RealTypes)
 	   ) then begin yes:=true; Break end;
 
 
 //   yes:=true;
 
+(*------------------------------------------------------------------------------------------------------------*)
 
-   NumActualParams := 0;
+   if  ProcVarIndex > 0 then begin
+
+     svar := GetLocalName(ProcVarIndex);
+
+     if (Tok[i + 1].Kind = OBRACKETTOK) then begin
+       i := CompileArrayIndex(i, ProcVarIndex);
+
+       CheckTok(i + 1, CBRACKETTOK);
+
+       inc(i);
+
+       if (Ident[ProcVarIndex].NumAllocElements * 2 > 256) or (Ident[ProcVarIndex].NumAllocElements in [0,1]) then begin
+
+	asm65(#9'lda ' + svar);
+        asm65(#9'add :STACKORIGIN,x');
+        asm65(#9'sta :bp2');
+        asm65(#9'lda ' + svar + '+1');
+        asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+        asm65(#9'sta :bp2+1');
+        asm65(#9'ldy #$00');
+        asm65(#9'lda (:bp2),y');
+        asm65(#9'sta :TMP+1');
+        asm65(#9'iny');
+        asm65(#9'lda (:bp2),y');
+        asm65(#9'sta :TMP+2');
+
+       end else begin
+
+	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'add #$00');
+	asm65(#9'tay');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'adc #$00');
+	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'lda adr.' + svar + ',y');
+        asm65(#9'sta :TMP+1');
+        asm65(#9'lda adr.' + svar + '+1,y');
+        asm65(#9'sta :TMP+2');
+
+       end;
+
+     end else begin
+
+       asm65(#9'lda ' + svar);
+       asm65(#9'sta :TMP+1');
+       asm65(#9'lda ' + svar + '+1');
+       asm65(#9'sta :TMP+2');
+
+     end;
+
+     asm65(#9'lda #$4C');
+     asm65(#9'sta :TMP');
+
+   end;
+
+(*------------------------------------------------------------------------------------------------------------*)
+
+   Param := NumActualParameters(i, IdentIndex, NumActualParams);
+
+
+   if NumActualParams <> Ident[IdentIndex].NumParams then
+     if ProcVarIndex > 0 then
+	iError(i, WrongNumParameters, ProcVarIndex)
+     else
+	iError(i, WrongNumParameters, IdentIndex);
+
+
+   ParamIndex := NumActualParams;
+
+//   NumActualParams := 0;
    IdentTemp := 0;
 
    if (Tok[i + 1].Kind = OPARTOK) then		    // Actual parameter list found
@@ -40055,15 +40133,19 @@ begin
      if (Tok[i + 2].Kind = CPARTOK) then
       inc(i)
      else
-     repeat
+     //repeat
 
-       Inc(NumActualParams);
+     while NumActualParams > 0 do begin
 
-       if NumActualParams > Ident[IdentIndex].NumParams then
-        if ProcVarIndex > 0 then
-	 iError(i, WrongNumParameters, ProcVarIndex)
-	else
-	 iError(i, WrongNumParameters, IdentIndex);
+//       Inc(NumActualParams);
+
+//       if NumActualParams > Ident[IdentIndex].NumParams then
+//        if ProcVarIndex > 0 then
+//	 iError(i, WrongNumParameters, ProcVarIndex)
+//	else
+//	 iError(i, WrongNumParameters, IdentIndex);
+
+       i := Param[NumActualParams].i;
 
        if Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING then begin
 
@@ -40154,7 +40236,12 @@ begin
        end;
 
 
-     until Tok[i + 1].Kind <> COMMATOK;
+       dec(NumActualParams);
+     end;
+
+     //until Tok[i + 1].Kind <> COMMATOK;
+
+     i := Param[1].i_;
 
      CheckTok(i + 1, CPARTOK);
 
@@ -40162,11 +40249,15 @@ begin
      end;// if Tok[i + 1].Kind = OPARTOR
 
 
+   NumActualParams := ParamIndex;
+
+{
    if NumActualParams <> Ident[IdentIndex].NumParams then
-    if ProcVarIndex > 0 then
-     iError(i, WrongNumParameters, ProcVarIndex)
-    else
+    if ProcVarIndex > 0 then begin
+     iError(i, WrongNumParameters, ProcVarIndex);
+    end else
      iError(i, WrongNumParameters, IdentIndex);
+}
 
    if Pass = CALLDETERMPASS then
      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
@@ -40183,7 +40274,7 @@ begin
 
 if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
- for ParamIndex := NumActualParams downto 1 do
+ for ParamIndex := 1 to NumActualParams do
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
 
 					asm65(#9'lda :STACKORIGIN,x');
@@ -40259,16 +40350,6 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
  Gen;
 
 (*------------------------------------------------------------------------------------------------------------*)
-
-   if ProcVarIndex > 0 then begin
-     asm65(#9'lda #$4C');
-     asm65(#9'sta :TMP');
-     asm65(#9'lda ' + GetLocalName(ProcVarIndex));
-     asm65(#9'sta :TMP+1');
-     asm65(#9'lda ' + GetLocalName(ProcVarIndex) + '+1');
-     asm65(#9'sta :TMP+2');
-   end;
-
 
    if Ident[IdentIndex].ObjectIndex > 0 then begin
      IdentTemp := GetIdent(copy(Tok[j].Name^, 1, pos('.', Tok[j].Name^)-1 ));
@@ -41290,6 +41371,8 @@ case Tok[i].Kind of
 
 // sickx
       if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
+
+//        writeln('!! ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
 
 	IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
 
@@ -42786,6 +42869,8 @@ case Tok[i].Kind of
 
 // sickx
 	   if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) and (Tok[i + 1].Kind <> ASSIGNTOK) then begin
+
+//     	 	writeln('?? ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
 
 	        IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
 
@@ -45395,8 +45480,8 @@ end;// CompileStatement
 function DeclareFunction(i: integer; out ProcVarIndex: cardinal): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType, NestedFunctionResultType, NestedFunctionAllocElementType: Byte;
-     NumAllocElements, NestedFunctionNumAllocElements: cardinal;
+     ListPassMethod, VarType, AllocElementType: Byte;
+     NumAllocElements: cardinal;
      IsNestedFunction: Boolean;
 
 begin
@@ -45514,10 +45599,6 @@ begin
       else
 	i := i + 2;
 
-      NestedFunctionResultType := 0;
-      NestedFunctionNumAllocElements := 0;
-      NestedFunctionAllocElementType := 0;
-
       if IsNestedFunction then
 	begin
 
@@ -45528,19 +45609,9 @@ begin
 
 	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-	NestedFunctionResultType := VarType;
-
-//	if Tok[i].Kind = PCHARTOK then NestedFunctionResultType := PCHARTOK;
-
-	Ident[NumIdent].DataType := NestedFunctionResultType;			// Result
-
-	NestedFunctionNumAllocElements := NumAllocElements;
+	Ident[NumIdent].DataType := VarType;					// Result
 	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;
-
-	NestedFunctionAllocElementType := AllocElementType;
 	Ident[NumIdent].NestedFunctionAllocElementType := AllocElementType;
-
-//	Ident[NumIdent].isNestedFunction := true;
 
 	i := i + 1;
 	end;// if IsNestedFunction
@@ -45880,7 +45951,7 @@ if Tok[i].Kind in [PROCEDURETOK, FUNC] then begin			// PROCEDURE, FUNCTION
 
   i := DeclareFunction(i, NestedNumAllocElements);
 
-  NumAllocElements := NestedNumAllocElements shl 16;
+  NumAllocElements := NestedNumAllocElements shl 16;	// NumAllocElements = NumProc shl 16
 
   Result := i - 1;
 
@@ -46330,8 +46401,9 @@ else if Tok[i].Kind = STRINGTOK then					// String
  //   Error(i + 1, '[ expected but ' + GetSpelling(i + 1) + ' found');
 
   i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
-  if not(ExpressionType in IntegerTypes) then
-    Error(i, 'String length must be integer');
+
+  if not(ExpressionType in UnsignedOrdinalTypes) or (UpperBound = 0) then
+    Error(i, 'string length must be a value from 1 to 255');
 
   CheckTok(i + 1, CBRACKETTOK);
 
@@ -46429,8 +46501,8 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
 // sick3
 // writeln('>',NestedDataType,',',NestedAllocElementType,',',Tok[i].kind,',',hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
 
-  if NestedAllocElementType = PROCVARTOK then
-      Error(i, InfoAboutToken(NestedAllocElementType)+' arrays are not supported');
+//  if NestedAllocElementType = PROCVARTOK then
+//      Error(i, InfoAboutToken(NestedAllocElementType)+' arrays are not supported');
 
 
   if NestedNumAllocElements > 0 then
@@ -46458,13 +46530,20 @@ else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].K
    if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].Kind <> PCHARTOK) then begin
 
      if (NestedAllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
-       Error(i, 'Multidimensional arrays are not supported');
+       Error(i, 'Multidimensional arrays type ' +  InfoAboutToken(NestedAllocElementType) + ' are not supported');
 
      NestedDataType := NestedAllocElementType;
-     NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
+
+     if NestedAllocElementType = PROCVARTOK then
+      NumAllocElements := NumAllocElements or NestedNumAllocElements
+     else
+      NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
+
    end;
 
   AllocElementType :=  NestedDataType;
+
+//  writeln('** ',hexstr(NumAllocElements,8));
 
 //  Result := i;
   end // if ARRAYTOK
@@ -46518,7 +46597,7 @@ var IdentIndex, size: integer;
 
 
    function Value(dorig: Boolean = false; brackets: Boolean = false): string;
-   const reg: array [1..3] of string = ('edx', 'ecx', 'eax');			// !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
+   const reg: array [1..3] of string = (':EDX', ':ECX', ':EAX');			// !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
    var ftmp: TFloat;
        v: Int64;
    begin
@@ -46648,7 +46727,7 @@ begin
 		   if Elements(IdentIndex) > 0 then begin
 
 		    if Ident[IdentIndex].NumAllocElements_ > 0 then
-		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements) + ']' + mads_data_size)
+		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements_) + ']' + mads_data_size)
 		    else
 		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);
 
@@ -47389,7 +47468,7 @@ yes := {(Ident[BlockIdentIndex].ObjectIndex > 0) or} Ident[BlockIdentIndex].isRe
 
 for ParamIndex := NumParams downto 1 do
  if not ( (Param[ParamIndex].PassMethod = VARPASSING) or
-          ((Param[ParamIndex].DataType in Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF  = 0)) or
+          ((Param[ParamIndex].DataType in Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF in [0,1])) or
 	  (Param[ParamIndex].DataType in OrdinalTypes + RealTypes)
 	) then begin yes:=true; Break end;
 
@@ -47403,15 +47482,20 @@ if (Ident[BlockIdentIndex].ObjectIndex = 0) then
 
 
 // Load parameters from the stack
-if yes then
- for ParamIndex := NumParams downto 1 do begin
+if yes then begin
+ for ParamIndex := 1 to NumParams do begin
+
+//  if ParamIndex = 1 then begin
+//   asm65(#9'txa');
+//   asm65(#9'jmi @main');
+//  end;
 
   if Param[ParamIndex].PassMethod = VARPASSING then
      GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
   else
      GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
 
-  if (Param[ParamIndex].PassMethod <> VARPASSING) and (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF > 0) then // copy arrays
+  if (Param[ParamIndex].PassMethod <> VARPASSING) and (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF > 1) then // copy arrays
    if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then begin
 
     idx := RecordSize(GetIdent(Param[ParamIndex].Name));
@@ -47424,15 +47508,25 @@ if yes then
 //    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
    end else begin
 
+    if Param[ParamIndex].NumAllocElements shr 16 <> 0 then
+     NumAllocElements := (Param[ParamIndex].NumAllocElements and $FFFF) * (Param[ParamIndex].NumAllocElements shr 16)
+    else
+     NumAllocElements := Param[ParamIndex].NumAllocElements;
+
     asm65(':move');
     asm65(Param[ParamIndex].Name);
-    asm65(IntToStr(integer(Param[ParamIndex].NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
+    asm65(IntToStr(integer(NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
 
 //    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(integer(Param[ParamIndex].NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
 //    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
    end;
 
+   if (Paramindex <> NumParams) then asm65(#9'jmi @main');
+
  end;
+
+asm65('@main');
+end;
 
 
 // Object variable definitions
@@ -48026,7 +48120,7 @@ while Tok[i].Kind in
 
 	  varPassMethod := 255;
 
-//	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements);
+//	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
 
 	  if (VarType = POINTERTOK) and (AllocElementType = STRINGPOINTERTOK) and (NestedNumAllocElements > 0) and (NumAllocElements > 1) then begin	// array [ ][ ] of string;
 
