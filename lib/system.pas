@@ -140,6 +140,12 @@ type	PSingle = ^single;
 
 	*)
 
+type	PFloat16 = ^float16;
+	(*
+	@description:
+
+	*)
+
 type	PString = ^string;
 	(*
 	@description:
