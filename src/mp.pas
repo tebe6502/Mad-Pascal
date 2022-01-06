@@ -394,7 +394,6 @@ const
   ASPOINTERTORECORD	 = 5;
   ASPOINTERTOARRAYRECORD = 6;
   ASSTRINGPOINTERTOARRAYORIGIN = 7;
-  ASPOINTERTODEREFERENCE = 8;
 
 
   ASCHAR		= 6;	// GenerateWriteString
@@ -2041,7 +2040,7 @@ begin
    ((DataType = BOOLEANTOK) and
        not (op in [ANDTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK])) or
    ((DataType in Pointers) and
-       not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK]))
+       not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK]))
 then
   Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' + InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"');
 
@@ -36078,7 +36077,7 @@ case IndirectionLevel of
 
     end;
 
-
+{
  ASPOINTERTODEREFERENCE:
     begin
     asm65('; as Pointer to Dereference');
@@ -36132,7 +36131,7 @@ case IndirectionLevel of
     a65(__subBX);
 
     end;
-
+}
 
   ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
@@ -39258,7 +39257,7 @@ case Tok[i].Kind of
     end;
 
 
-  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:   // type conversion operations
+  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:	// type conversion operations
     begin
 
     CheckTok(i + 1, OPARTOK);
@@ -39463,6 +39462,9 @@ end;
   k := CompileConstTerm(j + 2, RightConstVal, RightConstValType);
 
   if isError then Break;
+
+
+//  if (ConstValType = POINTERTOK) and (RightConstValType in IntegerTypes) then RightConstValType := ConstValType;
 
 
   if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then begin
@@ -41299,11 +41301,12 @@ case Tok[i].Kind of
 
 		j := CompileExpression(i + 2, ValType);
 
+
 		if not(ValType in AllTypes) then
 		  iError(i, TypeMismatch);
 
 
-		if (ValType in IntegerTypes) and (Ident[GetIdent(Tok[i].Name^)].DataType = SHORTREALTOK) then begin
+		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = SHORTREALTOK) then begin
 
 		  ExpandParam(SMALLINTTOK, ValType);
 
@@ -41320,7 +41323,7 @@ case Tok[i].Kind of
 		end;
 
 
-		if (ValType in IntegerTypes) and (Ident[GetIdent(Tok[i].Name^)].DataType = REALTOK) then begin
+		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = REALTOK) then begin
 
 		  ExpandParam(INTEGERTOK, ValType);
 
@@ -41337,7 +41340,7 @@ case Tok[i].Kind of
 		end;
 
 
-		if (ValType in IntegerTypes) and (Ident[GetIdent(Tok[i].Name^)].DataType = HALFSINGLETOK) then begin
+		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = HALFSINGLETOK) then begin
 
 		  ExpandParam(INTEGERTOK, ValType);
 
@@ -41347,7 +41350,7 @@ case Tok[i].Kind of
 		end else
 
 
-		if (ValType in IntegerTypes) and (Ident[GetIdent(Tok[i].Name^)].DataType = SINGLETOK) then begin
+		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = SINGLETOK) then begin
 
 		  ExpandParam(INTEGERTOK, ValType);
 
@@ -41356,14 +41359,67 @@ case Tok[i].Kind of
 		  ValType := SINGLETOK;
 		end;
 
-//		if Ident[GetIdent(Tok[i].Name^)].DataType in Pointers then
-//		  Error(j, 'Illegal type conversion: "'+InfoAboutToken(ValType)+'" to "'+Tok[i].Name^+'"');
-
-		ValType := Ident[GetIdent(Tok[i].Name^)].DataType;
-
-		ExpandParam(Ident[GetIdent(Tok[i].Name^)].DataType, ValType);
 
 		CheckTok(j + 1, CPARTOK);
+
+
+		if (ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in OrdinalTypes + RealTypes) then begin
+
+
+// ASPOINTERTODEREFERENCE
+
+		   if Tok[j + 2].Kind = DEREFERENCETOK then
+		     if ValType = POINTERTOK then begin
+
+			asm65(#9'lda :STACKORIGIN,x');
+		    	asm65(#9'sta :bp2');
+		    	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+		    	asm65(#9'sta :bp2+1');
+		    	asm65(#9'ldy #$00');
+
+			case DataSize[Ident[IdentIndex].AllocElementType] of
+
+			 1: begin
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN,x');
+			    end;
+
+			 2: begin
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN,x');
+				asm65(#9'iny');
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+			    end;
+
+			 4: begin
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN,x');
+				asm65(#9'iny');
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+				asm65(#9'iny');
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+				asm65(#9'iny');
+			    	asm65(#9'lda (:bp2),y');
+			    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+			    end;
+
+			end;
+
+		    	inc(j);
+
+		     end else
+		      Error(j + 2, 'Illegal qualifier');
+
+
+		  ValType := Ident[IdentIndex].AllocElementType;
+
+		end;
+
+
+		ExpandParam(Ident[IdentIndex].DataType, ValType);
 
 		Result := j + 1;
 
@@ -41543,7 +41599,6 @@ case Tok[i].Kind of
 
 	  i := CompileConstTerm(i, ConstVal, ValType);
 
-
 	  if isError then begin
 	   i:=j;
 
@@ -41629,6 +41684,7 @@ case Tok[i].Kind of
 
 	  Result := i;
 	  end;
+
 	end
     else
       iError(i, UnknownIdentifier);
@@ -41745,7 +41801,32 @@ case Tok[i].Kind of
 
     j := CompileExpression(i + 2, ValType);//, SHORTREALTOK);
 
-    if not(ValType in RealTypes) then begin
+// ASPOINTERTODEREFERENCE
+
+   if Tok[j + 1].Kind = DEREFERENCETOK then begin
+
+     if ValType = POINTERTOK then begin
+
+	asm65(#9'lda :STACKORIGIN,x');
+    	asm65(#9'sta :bp2');
+    	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+    	asm65(#9'sta :bp2+1');
+    	asm65(#9'ldy #$00');
+
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+    	inc(j);
+
+     end else
+      Error(j + 1, 'Illegal qualifier');
+
+    end else begin
+
+    if ValType in IntegerTypes + RealTypes then begin
 
      ExpandParam(SMALLINTTOK, ValType);
 
@@ -41757,6 +41838,9 @@ case Tok[i].Kind of
      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
      asm65(#9'lda #$00');
      asm65(#9'sta :STACKORIGIN,x');
+
+    end else
+      Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "' + InfoAboutToken(SHORTREALTOK) + '"');
 
     end;
 
@@ -41778,7 +41862,39 @@ case Tok[i].Kind of
 
     j := CompileExpression(i + 2, ValType);//, REALTOK);
 
-    if not(ValType in RealTypes) then begin
+
+// ASPOINTERTODEREFERENCE
+
+   if Tok[j + 1].Kind = DEREFERENCETOK then begin
+
+     if ValType = POINTERTOK then begin
+
+	asm65(#9'lda :STACKORIGIN,x');
+    	asm65(#9'sta :bp2');
+    	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+    	asm65(#9'sta :bp2+1');
+    	asm65(#9'ldy #$00');
+
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+    	inc(j);
+
+     end else
+      Error(j + 1, 'Illegal qualifier');
+
+   end else begin
+
+    if ValType in IntegerTypes + RealTypes then begin
 
      ExpandParam(INTEGERTOK, ValType);
 
@@ -41790,6 +41906,9 @@ case Tok[i].Kind of
      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
      asm65(#9'lda #$00');
      asm65(#9'sta :STACKORIGIN,x');
+
+    end else
+      Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "' + InfoAboutToken(REALTOK) + '"');
 
     end;
 
@@ -41810,7 +41929,36 @@ case Tok[i].Kind of
 
     j := CompileExpression(i + 2, ValType);
 
-    if not(ValType in RealTypes) then begin
+// ASPOINTERTODEREFERENCE
+
+    if Tok[j + 1].Kind = DEREFERENCETOK then begin
+
+     if ValType = POINTERTOK then begin
+
+	asm65(#9'lda :STACKORIGIN,x');
+    	asm65(#9'sta :bp2');
+    	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+    	asm65(#9'sta :bp2+1');
+    	asm65(#9'ldy #$00');
+
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+    	inc(j);
+
+     end else
+      Error(j + 1, 'Illegal qualifier');
+
+    end else begin
+
+    if ValType in [SHORTREALTOK, REALTOK] then
+     Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "' + InfoAboutToken(HALFSINGLETOK) + '"');
+
+
+    if ValType in IntegerTypes + RealTypes then begin
 
      ExpandParam(INTEGERTOK, ValType);
 
@@ -41829,6 +41977,9 @@ case Tok[i].Kind of
 			asm65(#9'sta :STACKORIGIN,x');
 			asm65(#9'lda @F16_I2F.RESULT+1');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+    end else
+      Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "' + InfoAboutToken(HALFSINGLETOK) + '"');
+
     end;
 
     CheckTok(j + 1, CPARTOK);
@@ -41865,16 +42016,52 @@ case Tok[i].Kind of
 	end else begin
 	  j := CompileExpression(i + 2, ValType);
 
-	  if ValType in [SHORTREALTOK, REALTOK] then
-	   Error(i + 2, 'Illegal type conversion: "'+InfoAboutToken(ValType)+'" to "'+InfoAboutToken(SINGLETOK)+'"');
+// ASPOINTERTODEREFERENCE
 
-	  if not(ValType in RealTypes) then begin
+   if Tok[j + 1].Kind = DEREFERENCETOK then begin
+
+     if ValType = POINTERTOK then begin
+
+	asm65(#9'lda :STACKORIGIN,x');
+    	asm65(#9'sta :bp2');
+    	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+    	asm65(#9'sta :bp2+1');
+    	asm65(#9'ldy #$00');
+
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+	asm65(#9'iny');
+    	asm65(#9'lda (:bp2),y');
+    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+    	inc(j);
+
+     end else
+      Error(j + 1, 'Illegal qualifier');
+
+
+   end else begin
+
+	  if ValType in [SHORTREALTOK, REALTOK] then
+	   Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "' + InfoAboutToken(SINGLETOK) + '"');
+
+
+	  if ValType in IntegerTypes + RealTypes then begin
 
 	    ExpandParam(INTEGERTOK, ValType);
 
 	    asm65(#9'jsr I2F');
 
-	  end;
+	  end else
+	   Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "'+InfoAboutToken(SINGLETOK) + '"');
+
+   end;
 
 	end;
 
@@ -41887,7 +42074,7 @@ case Tok[i].Kind of
     end;
 
 
-  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:   // type conversion operations
+  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:	// type conversion operations
     begin
 
    if Tok[i + 1].Kind <> OPARTOK then
@@ -41903,6 +42090,54 @@ case Tok[i].Kind of
 	iError(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
 
     end;
+
+// ASPOINTERTODEREFERENCE
+
+   if Tok[j + 1].Kind = DEREFERENCETOK then
+     if ValType = POINTERTOK then begin
+
+	asm65(#9'lda :STACKORIGIN,x');
+    	asm65(#9'sta :bp2');
+    	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+    	asm65(#9'sta :bp2+1');
+    	asm65(#9'ldy #$00');
+
+	case DataSize[Tok[i].Kind] of
+
+	 1: begin
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN,x');
+	    end;
+
+	 2: begin
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN,x');
+		asm65(#9'iny');
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	    end;
+
+	 4: begin
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN,x');
+		asm65(#9'iny');
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+		asm65(#9'iny');
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+		asm65(#9'iny');
+	    	asm65(#9'lda (:bp2),y');
+	    	asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+	    end;
+
+	end;
+
+    	inc(j);
+
+     end else
+      Error(j + 1, 'Illegal qualifier');
+
 
     if not(ValType in AllTypes) then
       iError(i, TypeMismatch);
@@ -42299,6 +42534,12 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   end;
 
   RealTypeConversion(ValType, RightValType);//, VarType);
+
+
+//  if VarType = POINTERTOK then begin
+   if (ValType = POINTERTOK) and (RightValType in IntegerTypes) then RightValType := POINTERTOK;
+//   if (ValType in IntegerTypes) and (RightValType = VarType) then ValType := VarType;
+//  end;
 
 
   ValType := GetCommonType(j + 1, ValType, RightValType);
@@ -43134,18 +43375,6 @@ case Tok[i].Kind of
 	      Result := CompileExpression(i + 2, ExpressionType, VarType);	// Right-hand side expression
 
 	      k := i + 2;
-
-
-	      if (ExpressionType = POINTERTOK) and (Tok[k].Kind = IDENTTOK) and (Tok[Result].Kind = CPARTOK) and (Tok[Result + 1].Kind = DEREFERENCETOK) then begin
-
-	       inc(Result);
-
-	       ExpressionType := Ident[GetIdent(Tok[k].Name^)].AllocElementType;
-
-	       GetCommonType(i + 1, VarType, ExpressionType);
-
-	       IndirectionLevel := ASPOINTERTODEREFERENCE;
-	      end;
 
 
 	      RealTypeConversion(VarType, ExpressionType);

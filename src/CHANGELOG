@@ -1,3 +1,6 @@
+06.01.2022
+- fix issue #75 (tests-pointer\arithmetic.pas)
+
 05.01.2022
 - zmiana sposobu przekazywania paramatrów do procedur/funkcji (od prawej do lewej strony), tak jak FPC, Delphi
 - dodana obs³uga typu proceduralnego w tablicach
@@ -21,7 +24,7 @@
 - poprawiony modu³ CRT pod systemy C64, C4P
 
 30.11.2021
-- poprawiona prezycja konwersji Float32 to Float16 (Single -> Float16) 'CardToHalf'
+- poprawiona precyzja konwersji Float32 to Float16 (Single -> Float16) 'CardToHalf'
 - nowa funkcja RandomF16
 
 23.11.2021
