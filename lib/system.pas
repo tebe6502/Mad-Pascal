@@ -1411,9 +1411,9 @@ Convert a float value to a string
 @returns: string[32]
 *)
 asm
-{	txa:pha
+	txa:pha
 
-	inx
+	inx		; parameter A
 
 	@ValueToStr #@printREAL
 
@@ -1421,7 +1421,6 @@ asm
 	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
-};
 end;
 
 
@@ -1434,16 +1433,16 @@ Convert a numerical value to a string
 @param: s - string[32] - result
 *)
 asm
-{	txa:pha
+	txa:pha
 
-	inx
+	inx		; parameter A
+	inx		; parameter S
 
 	@ValueToStr #@printINT
 
 	@move #@buf s #16	; !!! koniecznie przez wskaznik
 
 	pla:tax
-};
 end;
 
 
@@ -1456,16 +1455,16 @@ Convert a numerical value to a string
 @param: s - string[32] - result
 *)
 asm
-{	txa:pha
+	txa:pha
 
-	inx
+	inx		; parameter A
+	inx		; parameter S
 
 	@ValueToStr #@printCARD
 
 	@move #@buf s #16	; !!! koniecznie przez wskaznik
 
 	pla:tax
-};
 end;
 
 
@@ -1478,9 +1477,8 @@ Store BYTE at the desired memory address
 @param: value (0..255)
 *)
 asm
-{	ldy #0
+	ldy #0
 	mva value (:edx),y
-};
 end;
 
 
@@ -1493,11 +1491,10 @@ Store WORD at the desired memory address
 @param: value (0..65535)
 *)
 asm
-{	ldy #0
+	ldy #0
 	mva value (:edx),y
 	iny
 	mva value+1 (:edx),y
-};
 end;
 
 
