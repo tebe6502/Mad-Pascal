@@ -4002,9 +4002,9 @@ end;
        end;
 
 
-//{$i opt_MOVE.inc}
+{$i opt_MOVE.inc}
 
-//{$i opt_FILL.inc}
+{$i opt_FILL.inc}
 
 
 //@PARAM??
@@ -5263,6 +5263,28 @@ var i, l, k, m, x: integer;
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin
        listing[i]   := '';
        listing[i+1] := '';
+       Result:=false; Break;
+     end;
+
+
+     if (listing[i] = #9'sta :STACKORIGIN+STACKWIDTH,x') and
+        (listing[i+1] = #9'mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x') then
+      begin
+       listing[i]   := #9'sta :STACKORIGIN,x';
+       listing[i+1] := '';
+
+       Result:=false; Break;
+      end;
+
+
+    if lda_a(i) and (lda_stack(i) = false) and							// lda 				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN		; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda 				; 2
+       sta_stack(i+3) then									// sta :STACKORIGIN		; 3
+     if copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256) then begin
+       listing[i]   := '';
+       listing[i+1] := '';
+
        Result:=false; Break;
      end;
 
@@ -13326,7 +13348,7 @@ end;
 
 
 {
-if (pos('sub ', listing[i]) > 0) then begin
+if (pos('adr.FOO1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -13937,8 +13959,9 @@ end;
        sta_a(i+3) and										// sta 		; 3 --
        lda_a(i+4) and 										// lda A	; 4
        sta_a(i+5) then										// sta		; 5
-     if	(copy(listing[i], 6, 256) <> copy(listing[i+3], 6, 256)) and
-        (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+     if	(copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
+        (copy(listing[i], 6, 256) <> copy(listing[i+3], 6, 256)) and
+      	(copy(listing[i+1], 6, 256) <> copy(listing[i+3], 6, 256)) and
 	(copy(listing[i+2], 6, 256) <> copy(listing[i+5], 6, 256)) then
      begin
 	listing[i+4] := listing[i];
@@ -14862,6 +14885,7 @@ end;
 
 
 {$i opt_BP_ADR.inc}
+
 {$i opt_ADR.inc}
 
 
@@ -28626,6 +28650,7 @@ begin
 
        inc(l, 3);
       end else
+
       if arg0 = 'hiWORD' then begin
        t:='';
 
@@ -31973,7 +31998,6 @@ begin
     OptimizeAssignment;
 
   until OptimizeRelation;
-
 
 {$ENDIF}
 
