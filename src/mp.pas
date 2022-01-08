@@ -13348,7 +13348,7 @@ end;
 
 
 {
-if (pos('adr.FOO1', listing[i]) > 0) then begin
+if (pos('ldy ', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -14596,6 +14596,19 @@ end;
      begin
 	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
 	listing[i+1] := '';
+	Result:=false; Break;
+     end;
+
+
+    if ldy(i) and									// ldy				; 0
+       lda_a(i+1) and									// lda				; 1
+       sty(i+2) and									// sty				; 2
+       sta_a(i+3) then									// sta				; 3
+     begin
+        tmp := listing[i+1];
+
+	listing[i+1] := listing[i+2];
+	listing[i+2] := tmp;
 	Result:=false; Break;
      end;
 
@@ -42625,7 +42638,6 @@ begin
      ValType := SINGLETOK;
      VarType := SINGLETOK;
    end;
-
 
    Push(ConstVal, ASVALUE, DataSize[ValType]);
 
