@@ -1,10 +1,21 @@
+{ Test: The array MONSTER is filled with pointers to record.
+
+        Expected result:
+
+	0,0
+	1,2
+	2,4
+	3,6
+
+}
+
 uses crt;
 
 type
 	monsters = packed record
    	x: byte ;
 	y: byte;
-	
+
 	end;
 
 var
@@ -25,7 +36,7 @@ for i:=0 to High(monster) do begin
 end;
 
 
-for i:=0 to High(monster) do 
+for i:=0 to High(monster) do
  writeln(monster[i].x,',', monster[i].y);
 
 
