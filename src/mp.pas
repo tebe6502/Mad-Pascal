@@ -1840,7 +1840,7 @@ begin
   Result := 0
  else
 
-   if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType = PROCVARTOK) then
+   if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType in [PROCVARTOK, RECORDTOK, OBJECTTOK]) then
     Result := Ident[IdentIndex].NumAllocElements
    else
     Result := Ident[IdentIndex].NumAllocElements * Ident[IdentIndex].NumAllocElements_;
@@ -46991,7 +46991,7 @@ begin
 
 		   if Elements(IdentIndex) > 0 then begin
 
-		    if Ident[IdentIndex].NumAllocElements_ > 0 then
+		    if (Ident[IdentIndex].NumAllocElements_ > 0) and not (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK])  then
 		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements_) + ']' + mads_data_size)
 		    else
 		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);
