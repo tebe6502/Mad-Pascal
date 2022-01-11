@@ -171,7 +171,7 @@ const
   FUNCTIONTOK		= 5;     // !!!
   LABELTOK		= 6;	 // !!!
   UNITTOK		= 7;	 // !!!
-  //ENUMTOK		= 8;	 // !!!
+
 
   GETINTVECTOK		= 10;
   SETINTVECTOK		= 11;
@@ -325,6 +325,7 @@ const
   CHARLITERALTOK	= 183;
   STRINGLITERALTOK	= 184;
 
+  LINKTOK		= 188;
   MACRORELEASE		= 189;
   PROCALIGNTOK		= 190;
   LOOPALIGNTOK		= 191;
@@ -665,14 +666,12 @@ var
 
   TemporaryBuf: array [0..255] of string;
 
-  OptimizeBuf: TArrayString;
-
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2: string;
   optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: string;
 
-  msgWarning, msgNote, msgUser, UnitPath: TArrayString;
+  msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
 
   optimize : record
 	      use, assign: Boolean;
@@ -33523,11 +33522,13 @@ var
        dec(NumTok);
       end else
 
-      if (cmd = 'R') and not (d[i] in ['+','-']) then begin	// {$r filename}
+      if (cmd = 'R') and not (d[i] in ['+','-']) then begin	// {$R filename}
        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        s := LowerCase( get_string(i, d) );
        AddResource( FindFile(s, 'resource') );
+
+
 
        dec(NumTok);
       end else
@@ -33547,12 +33548,28 @@ var
 	dec(NumTok);
        end else
 *)
-       if (cmd = 'F') or (cmd = 'FASTMUL') then begin		// {$f address}
+
+      if (cmd = 'L') then begin					// {$L filename}
+       AddToken(LINKTOK, UnitIndex, Line, 1, 0);
+
+       s := LowerCase( get_string(i, d) );
+
+       v := High(linkObj);
+       linkObj[v] := s;
+
+       Tok[NumTok].Value := v;
+
+       SetLength(linkObj, v+2);
+
+       //dec(NumTok);
+      end else
+
+       if (cmd = 'F') or (cmd = 'FASTMUL') then begin		// {$F address}
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
 	s := get_digit(i, d);
 
-	val(s,FastMul, Err);
+	val(s, FastMul, Err);
 
 	if Err > 0 then
 	 iError(NumTok, OrdinalExpExpected);
@@ -39814,6 +39831,10 @@ begin
 
     AllocElementType := 0;
 
+
+    if Tok[i + 1].Kind = ADDRESSTOK then inc(i);
+
+
     if Tok[i + 1].Kind <> IDENTTOK then
       iError(i + 1, IdentifierExpected)
     else
@@ -39919,11 +39940,11 @@ begin
 
 	     end else
 	      if (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK, RECORDTOK, OBJECTTOK] {+ Pointers}) or
-	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType > 0) and (Ident[IdentIndex].NumAllocElements > 0)) or
+	         ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0) and (Ident[IdentIndex].NumAllocElements > 0)) or
 		 (Ident[IdentIndex].PassMethod = VARPASSING) or
 		 (VarPass and (Ident[IdentIndex].DataType in Pointers))  then begin
 
-// writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+// writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Tok[i + 2].Kind);
 
 		 DEREFERENCE := false;
 
@@ -39936,7 +39957,7 @@ begin
 
 
 		 if (Ident[IdentIndex].DataType in Pointers) and (Tok[i + 2].Kind = DEREFERENCETOK) then
-		  if Ident[IdentIndex].AllocElementType = RECORDTOK then begin				// var record^.field
+		  if (Ident[IdentIndex].AllocElementType = RECORDTOK) and (Tok[i +3].Kind = DOTTOK) then begin				// var record^.field
 
 		   // writeln(Tok[i + 2].Kind,',',Tok[i + 3].Kind,',',Tok[i + 4].Kind);
 
@@ -39972,6 +39993,7 @@ begin
 		 end else
 		  if DEREFERENCE then begin
 
+
 		  end else
 		    Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 
@@ -39984,9 +40006,9 @@ begin
 
 		   Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 		 end else
-		  if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0) and (Ident[IdentIndex].NumAllocElements = 0) then
+{		  if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0) and (Ident[IdentIndex].NumAllocElements = 0) then
 		   Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex)
-		  else
+		  else}
   		   Push(Ident[IdentIndex].Value, ASVALUE, DataSize[POINTERTOK], IdentIndex);
 
 	 end;
@@ -40188,7 +40210,7 @@ begin
 
        if Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING then begin
 
-	i := CompileAddress(i + 1, ActualParamType, AllocElementType);
+	i := CompileAddress(i + 1, ActualParamType, AllocElementType, true);
 
 	if Tok[i].Kind = IDENTTOK then
 	 IdentTemp := GetIdent(Tok[i].Name^)
@@ -47845,10 +47867,18 @@ if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezd
 
 while Tok[i].Kind in
  [CONSTTOK, TYPETOK, VARTOK, LABELTOK, PROCEDURETOK, FUNCTIONTOK, PROGRAMTOK, USESTOK, LIBRARYTOK, EXPORTSTOK,
-  CONSTRUCTORTOK, DESTRUCTORTOK,
+  CONSTRUCTORTOK, DESTRUCTORTOK, LINKTOK,
   UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF,
   PROCALIGNTOK, LOOPALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
   begin
+
+
+  if Tok[i].Kind = LINKTOK then begin
+   asm65(#9'.link ''' + linkObj[ Tok[i].Value ] + '''');
+
+   inc(i,1);
+
+  end;
 
 
   if Tok[i].Kind = PROCALIGNTOK then begin
@@ -49545,6 +49575,7 @@ begin
  PublicSection := true;
  UnitNameIndex := 1;
 
+ SetLength(linkObj, 1);
  SetLength(resArray, 1);
  SetLength(msgUser, 1);
 
@@ -49622,6 +49653,7 @@ begin
 
  iOut:=0;
  outTmp:='';
+
  SetLength(OptimizeBuf, 1);
  SetLength(msgWarning, 1);
  SetLength(msgNote, 1);

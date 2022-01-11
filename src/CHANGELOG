@@ -1,5 +1,11 @@
+11.01.2022
+- fix issue #77 (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference.pas)
+
+10.01.2022
+- dodana obs³uga dyrektywy LINK {$L filename} https://www.freepascal.org/docs-html/prog/progsu43.html
+
 06.01.2022
-- fix issue #75 (tests-pointer\arithmetic.pas)
+- fix issue #75 (https://github.com/tebe6502/Mad-Pascal/blob/master/samples/tests/tests-pointer/arithmetic.pas)
 
 05.01.2022
 - zmiana sposobu przekazywania paramatrów do procedur/funkcji (od prawej do lewej strony), tak jak FPC, Delphi
