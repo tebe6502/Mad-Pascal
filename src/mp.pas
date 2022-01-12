@@ -40229,8 +40229,13 @@ begin
 // writeln(Ident[IdentIndex].Param[NumActualParams].NumAllocElements,',', Ident[IdentTemp].NumAllocElements);
 // writeln(Ident[IdentIndex].Param[NumActualParams].PassMethod,',', Ident[IdentTemp].PassMethod);
 
-	     if Ident[IdentTemp].PassMethod <> VARPASSING then
-	       GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
+// sickxxx
+	    if Ident[IdentTemp].PassMethod <> VARPASSING then
+
+	      if Ident[IdentIndex].Param[NumActualParams].DataType in [RECORDTOK, OBJECTTOK] then
+	        Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name + '"')
+	      else
+	        GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
 
 	  end;
 
@@ -47793,7 +47798,8 @@ if yes then begin
 
 //    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(idx));
 //    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
-   end else begin
+   end else
+   if not (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
 
     if Param[ParamIndex].NumAllocElements shr 16 <> 0 then
      NumAllocElements := (Param[ParamIndex].NumAllocElements and $FFFF) * (Param[ParamIndex].NumAllocElements shr 16)

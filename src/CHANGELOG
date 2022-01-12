@@ -1,5 +1,8 @@
+12.01.2022
+- fix issue #78 (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_val.pas)
+
 11.01.2022
-- fix issue #77 (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference.pas)
+- fix issue #77 (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_var.pas)
 
 10.01.2022
 - dodana obs³uga dyrektywy LINK {$L filename} https://www.freepascal.org/docs-html/prog/progsu43.html
