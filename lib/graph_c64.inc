@@ -9,6 +9,9 @@ begin
  asm
     txa:pha
 
+    lda mode
+    sta MAIN.SYSTEM.GraphMode
+
     vic_bank=1
     vic_base=$4000*vic_bank		// A VIC-II bank indicates a 16K region
     screen_memory=$1000 + vic_base
@@ -18,6 +21,15 @@ begin
     SetHiresBitmapMode()
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
+
+
+;$FFED
+;SCREEN. Fetch number of screen rows and columns.
+;Input: –
+;Output: X = Number of columns (40); Y = Number of rows (25).
+;Used registers: X, Y.
+;Real address: $E505.
+
 
     lda <320
     ldx >320
@@ -65,6 +77,25 @@ procedure SetColor(color: byte); assembler;
 Sets the foreground color to Color
 *)
 asm
+	lda MAIN.SYSTEM.GraphMode
+	cmp #VGAHi
+	beq HiRes
+
+	jmp @exit
+
+HiRes	mva #$07 @putpixel.c_and
+
+	lda color
+	and #1
+	bne c1_h
+c0_h
+	sta @putpixel.c_idx
+	mva #{and#} @putpixel.msk
+
+	jmp @exit
+
+c1_h	mva #$08 @putpixel.c_idx
+	mva #{ora#} @putpixel.msk
 
 end;
 
@@ -74,45 +105,59 @@ procedure PutPixel(x,y: smallint); assembler; overload;
 @description:
 Puts a point at (X,Y) using color Color
 *)
-const
-     tand : array [0..7] of byte = ($80,$40,$20,$10,$08,$04,$02,$01);
-
 asm
+
+	lda y+1
+	bmi stop
+	cmp MAIN.SYSTEM.ScreenHeight+1
+	bne sk0
+	lda y
+	cmp MAIN.SYSTEM.ScreenHeight
+sk0
+	bcs stop
+
+	lda x+1
+	bmi stop
+	cmp MAIN.SYSTEM.ScreenWidth+1
+	bne sk1
+	lda x
+	cmp MAIN.SYSTEM.ScreenWidth
+sk1
+	bcs stop
+
 	lda X
-	and #$07
+	and @putpixel.c_and
+	ora @putpixel.c_idx
 	tay
-	lda adr.TAND,y
-	sta _ora+1
+	lda @putpixel.c0,y
+	sta @putpixel.msk+1
 
 	lda Y
 	lsr @
 	lsr @
 	lsr @
-	sta :eax
-	lda #$00
-	sta :eax+1
-	jsr @mul320
+	tay
 
 	lda X
 	and #%11111000
-	add :eax
-	sta :eax
+	add ladr,y
+	sta :bp2
 	lda X+1
-	adc :eax+1
-	sta :eax+1
+	adc hadr,y
+	adc VideoRam+1
+	sta :bp2+1
 
 	lda Y
 	and #$07
-	add :eax
 	tay
 
-	lda VideoRam+1
-	adc :eax+1
-	sta :bp+1
+	jmp @putpixel
 
-	lda (:bp),y
-_ora	ora #$00
-	sta (:bp),y
+stop	rts
+
+ladr	:25 dta l(#*320)
+hadr	:25 dta h(#*320)
+
 end;
 
 
@@ -122,6 +167,8 @@ procedure PutPixel(x,y: smallint; color: byte); overload;
 Puts a point at (X,Y) using color Color
 *)
 begin
+
+ SetColor(color);
 
  PutPixel(x,y);
 
