@@ -271,7 +271,6 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'sta:rne VADR+VLEN-256,x+');
  asm65(#9'eli VLEN>256');
  asm65(#9'@fill #VADR #VLEN #$00');
-// asm65(#9'm@fill');
  asm65(#9'eif');
  asm65;
 
