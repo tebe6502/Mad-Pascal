@@ -6728,6 +6728,8 @@ var i, l, k, m, x: integer;
        Result:=false; Break;
      end;
 
+{
+// sickx
 
     if (listing[i] = #9'jsr orEAX_ECX') and							// jsr orEAX_ECX			; 0
        dex(i+1) and										// dex					; 1
@@ -6753,7 +6755,7 @@ var i, l, k, m, x: integer;
 
        Result:=false; Break;
      end;
-
+}
 
     if ldy_1(i) and										// ldy #1				; 0	byte_0 > byte_1 -> byte_1 < byte_0
        lda(i+1) and 										// lda 					; 1
@@ -40229,7 +40231,6 @@ begin
 // writeln(Ident[IdentIndex].Param[NumActualParams].NumAllocElements,',', Ident[IdentTemp].NumAllocElements);
 // writeln(Ident[IdentIndex].Param[NumActualParams].PassMethod,',', Ident[IdentTemp].PassMethod);
 
-// sickxxx
 	    if Ident[IdentTemp].PassMethod <> VARPASSING then
 
 	      if Ident[IdentIndex].Param[NumActualParams].DataType in [RECORDTOK, OBJECTTOK] then
