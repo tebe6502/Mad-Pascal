@@ -1,4 +1,20 @@
 
+procedure SetActiveBuffer(var a: TDisplayBuffer);
+(*
+@description:
+
+*)
+begin
+
+ VideoRam := pointer(a.bp);
+ savmsc := word(VideoRam);
+
+end;
+
+
+{$i graph3.inc}
+
+
 procedure InitGraph(mode: byte); overload;
 (*
 @description:
@@ -66,7 +82,7 @@ dindex	equ $57
 	pla:tax
  end;
 
- VideoRam:=savmsc;
+ VideoRam:=pointer(savmsc);
 
 end;
 
@@ -110,7 +126,7 @@ procedure SetBkColor(color: byte); assembler;
 Sets the background color to Color
 *)
 asm
-	mva color colbaks
+	sta colbaks
 end;
 
 
@@ -120,7 +136,7 @@ procedure SetColor(color: byte); assembler;
 Sets the foreground color to Color
 *)
 asm
-	mva color @COMMAND.colscr
+	sta @COMMAND.colscr
 	sta GetColor
 end;
 

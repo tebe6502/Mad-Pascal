@@ -35,7 +35,7 @@ interface
 
 uses	types, atari;
 
-	{$i graphh.inc}
+{$i graphh.inc}
 
 	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure fLine(x0,y0,x1,y1: byte); assembler;
@@ -57,8 +57,8 @@ var
 
 	CurrentX, CurrentY: smallint;
 
-	VideoRam: word;
 
+{$i graph3.inc}
 
 (*
 	TheFillSettings : FillSettingsType;
@@ -1205,7 +1205,7 @@ begin
  if y < 0 then i:=0 else
   if y >= ScreenHeight then i:=ScreenHeight-1;
 
- Result:=pointer(lineLo[i] + lineHi[i] shl 8 + VideoRam);
+ Result:=pointer(VideoRam + lineLo[i] + lineHi[i] shl 8);
 
 end;
 

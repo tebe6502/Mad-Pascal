@@ -73,11 +73,11 @@ asm
 end;
 
 
-procedure LineTo(x, y: smallint); assembler;
+procedure LineTo(x, y: smallint);
 (*
 @description:
 Draw a line starting from current position to a given point
 *)
-asm
+begin
 
 end;
