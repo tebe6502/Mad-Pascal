@@ -6,7 +6,7 @@ var i: byte;
 
 begin
 
- GraphDriver := VGA;			// InitGraph(24);
+ GraphDriver := VGA;
  GraphMode := VGAMed;
  InitGraph(GraphDriver,GraphMode,'');
 
@@ -15,10 +15,10 @@ begin
 
 // %01 for the upper nibble of the screen matrix
 // %10 for lower nibble of the screen matrix
- fillchar(ScreenRAM, 25*40, $58);//GREEN*16 + WHITE);
+ fillchar(ScreenRAM, 25*40, RED*16 + BLUE);
 
 // %11 for the lower nibble of Screen RAM.
- fillchar(ColorRAM, 1024, YELLOW);
+ fillchar(ColorRAM, 25*40, YELLOW);
 
 
  SetColor(1);
