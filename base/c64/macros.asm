@@ -74,6 +74,27 @@
 
 
 //
+// Enter hires bitmap mode (a.k.a. standard bitmap mode)
+//
+.macro SetMulticolorBitmapMode
+    //
+    // Clear extended color mode (bit 6) and set bitmap mode (bit 5)
+    //
+    lda $d011
+    and #%10111111
+    ora #%00100000
+    sta $d011
+
+    //
+    // Clear multi color mode (bit 4)
+    //
+    lda $d016
+    ora #%00010000
+    sta $d016
+.endm
+
+
+//
 // Switch location of screen memory.
 //
 // Args:
