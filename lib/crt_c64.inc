@@ -239,7 +239,12 @@ procedure TextMode(Mode: byte); assembler;
 @param: Mode - unused value
 *)
 asm
-	jsr @ClrScr
+	txa:pha
+
+	jsr $FF81	; SCINIT. Initialize VIC
+	jsr $FF84	; IOINIT. Initialize CIA's, SID volume
+
+	pla:tax
 end;
 
 
@@ -248,7 +253,11 @@ procedure NoSound; assembler;
 @description: Reset POKEY
 *)
 asm
+	txa:pha
 
+	jsr $FF84	; IOINIT. Initialize CIA's, SID volume
+
+	pla:tax
 end;
 
 

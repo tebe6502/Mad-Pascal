@@ -63,6 +63,7 @@ const
 	C40	= CO40;
 	C80	= CO80;
 
+{$IFDEF ATARI}
 { Foreground and background color constants }
 	Black		= 0;
 	Blue		= 1;
@@ -82,6 +83,7 @@ const
 	LightMagenta	= 13;
 	Yellow		= 14;
 	White		= 15;
+{$ENDIF}
 
 { Add-in for blinking }
 	Blink		= 128;
