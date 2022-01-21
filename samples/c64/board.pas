@@ -24,8 +24,8 @@ var gd, gm: smallint;
 begin
   dst:=sqrt(1-sqr(ONESEC));
 
-  gd := D8bit;
-  gm := m640x400;
+  gd := VGA;
+  gm := VGAHi;
 
   InitGraph(gd,gm,'');
 
@@ -69,4 +69,6 @@ begin
   frame;
 
   repeat until keypressed;
+
+  TextColor(0);
 end.

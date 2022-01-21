@@ -25,6 +25,8 @@ begin
 
  for i:=0 to 9 do Circle(160,96,i shl 1+78);
 
+ TextMode(0);
+
  ticks:=word(GetTickCount)-ticks;
  writeln(ticks, ' ticks');
 
