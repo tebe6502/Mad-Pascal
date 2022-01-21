@@ -1,3 +1,6 @@
+// C64	HIRES	175
+// C64	MEDRES	179
+
 // Koch Snowflake
 // https://en.wikipedia.org/wiki/Koch_snowflake
 
@@ -17,7 +20,7 @@ type
 	END;
 
 var
-	gd, gm: smallint;
+	GraphDriver, GraphMode: smallint;
 
 	ticks: cardinal;
 
@@ -139,10 +142,9 @@ end;
 
 BEGIN
 
- gd := D8bit;
- gm := m640x480;
-
- InitGraph(gd,gm,'');
+ GraphDriver := VGA;
+ GraphMode := VGAHi;
+ InitGraph(GraphDriver,GraphMode,'');
 
  ticks:=GetTickCount;
 
@@ -151,6 +153,8 @@ BEGIN
  ticks:=GetTickCount - ticks;
 
  repeat until keypressed;
+
+ TextMode(0);
 
  writeln('ticks: ',ticks);
 
