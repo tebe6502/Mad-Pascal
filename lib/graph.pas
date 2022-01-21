@@ -27,7 +27,13 @@ SetColor
 
 interface
 
-uses	types, atari;
+{$ifdef atari}
+uses types, atari;
+{$endif}
+
+{$ifdef c64}
+uses types, c64;
+{$endif}
 
 	{$i graphh.inc}
 
@@ -45,22 +51,9 @@ uses	types, atari;
 implementation
 
 var
-	CurrentX, CurrentY, VideoRam: word;
-
 	Scanline_Width: byte;
 
-
-procedure SetActiveBuffer(var a: TDisplayBuffer);
-(*
-@description:
-
-*)
-begin
-
- VideoRam := a.bp;
- savmsc := VideoRam;
-
-end;
+	CurrentX, CurrentY: word;
 
 
 {$i graph2.inc}
@@ -153,7 +146,7 @@ begin
   a:=a + a shl 2;
  end;
 
- Result:=pointer(a + VideoRam);
+ Result:=pointer(VideoRam + a);
 
 end;
 

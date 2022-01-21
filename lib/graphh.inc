@@ -106,6 +106,12 @@ var	WIN_LEFT: smallint = 0;
 
 	GetColor: byte;
 
+	VideoRAM: pointer;
+
+{$ifdef c64}
+	ScreenRAM : pointer;
+{$endif}
+
 	LastArcCoords: TLastArcCoords;
 
 	procedure Arc(X, Y, StAngle, EndAngle, Radius: Word);
