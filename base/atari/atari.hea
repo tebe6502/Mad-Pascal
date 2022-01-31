@@ -149,6 +149,9 @@ ciov	=	$E456	; Wektor do CIOMAIN
 jsioint	=	$E459	; Wektor do SIO
 jdskint	=	$E453	; Wektor do sterownika dyskowego
 
+warmsv	=	$E474	; Punkt wejœcia do ciep³ego startu (RESET SYSTEMU)
+coldsv	=	$E477	; Punkt wejœcia do zimnego startu (w³¹czanie zasilania)
+		
 * ---------------------------------------------------------------------------------------------
 * ---	KEY ($d209)
 * ---------------------------------------------------------------------------------------------
