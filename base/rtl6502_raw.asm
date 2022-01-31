@@ -45,8 +45,7 @@ numread .word               ; pointer to variable, length of loaded data
   
 ; -----------------------------------------------------------------------
 
-  icl 'raw\macros.asm' 
-
+  icl 'raw\raw.hea'
   icl 'raw\putchar.asm'	    ; @putchar
 
 ; -----------------------------------------------------------------------

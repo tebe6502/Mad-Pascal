@@ -44,8 +44,6 @@ numread	.word		; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
-	icl 'atari\macros.asm'
-
 	icl 'atari\vbxe.hea'
 	icl 'atari\atari.hea'
 

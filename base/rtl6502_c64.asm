@@ -45,8 +45,6 @@ numread	.word		; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
-	icl 'c64\macros.asm'
-
 	icl 'c64\c64.hea'
 	icl 'c64\putpixel.asm'		; @putpixel
 	icl 'c64\putchar.asm'		; @putchar
