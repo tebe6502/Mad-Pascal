@@ -1,3 +1,11 @@
+30.01.2022
+- OptimizeEAX
+- poprawki dla @FORTMP_, wymagana nowa wersja Mad Assemblera
+
+
+23.01.2022
+- uproszczona inicjalizacja VBXE, poprawki dla modu³ów VBXE, GRAPH, CRT
+
 17.01.2022
 - wydzielone oddzielne moduly GRAPH dla ATARI, C64, C4P, RAW
 - wstêpna obs³uga InitGraph dla C64, tryb bitmapy HiRes
