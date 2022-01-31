@@ -6,7 +6,6 @@ type
 		       end;
 
 const
-	{ graphic drivers }
 
 	{ graphic drivers }
 	CurrentDriver	= -128;
@@ -144,6 +143,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure SetClipRect(Rect: TRect); overload;
 	procedure SetColor(color: byte); assembler;
 //	procedure SetFillStyle(pattern, color: byte);
+	procedure CloseGraph; assembler;
 
 {$ifdef atari}
 	procedure SetColorMapEntry; overload; assembler;

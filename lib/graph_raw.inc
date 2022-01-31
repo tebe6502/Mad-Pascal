@@ -81,3 +81,14 @@ Draw a line starting from current position to a given point
 begin
 
 end;
+
+
+procedure CloseGraph; assembler;
+(*
+@description:
+
+*)
+asm
+
+end;
+
