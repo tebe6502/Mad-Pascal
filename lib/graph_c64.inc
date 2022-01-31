@@ -412,3 +412,14 @@ begin
  CurrentY := y;
 
 end;
+
+
+procedure CloseGraph; assembler;
+(*
+@description:
+
+*)
+asm
+
+end;
+

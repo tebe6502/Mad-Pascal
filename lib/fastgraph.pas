@@ -81,8 +81,7 @@ procedure SetBkColor(color: byte); assembler;
 Sets the background color to Color
 *)
 asm
-{	mva color colbaks
-};
+	sta colbaks
 end;
 
 
@@ -92,7 +91,7 @@ procedure SetColor(color: byte); assembler;
 Sets the foreground color to Color
 *)
 asm
-{	sta GetColor
+	sta GetColor
 
 	jmp gr8
 mode	equ *-2
@@ -168,7 +167,6 @@ toend
 
 	sta PutPixel.acol
 	.endif
-};
 end;
 
 
@@ -178,35 +176,33 @@ procedure PutPixel(x,y: smallint); assembler; register;
 Puts a point at (X,Y) using color Color
 *)
 asm
-{	stx @sp
+	stx @sp
 
 	lda y+1
 	bmi stop
-	cmp MAIN.SYSTEM.ScreenHeight+1
+	cmp hsh:#0	;MAIN.SYSTEM.ScreenHeight+1
 	bne sk0
 	lda y
-	cmp MAIN.SYSTEM.ScreenHeight
+	cmp lsh:#0	;MAIN.SYSTEM.ScreenHeight
 sk0
 	bcs stop
 
 	lda x+1
 	bmi stop
-	cmp MAIN.SYSTEM.ScreenWidth+1
+	cmp hsw:#0	;MAIN.SYSTEM.ScreenWidth+1
 	bne sk1
 	lda x
-	cmp MAIN.SYSTEM.ScreenWidth
+	cmp lsw:#0	;MAIN.SYSTEM.ScreenWidth
 sk1
 	bcs stop
 
 	ldy y
 	lda adr.lineLo,y
-	add #0
-lfb	equ *-1
+	add lfb:#0
 	sta :bp2
 
 	lda adr.lineHi,y
-	adc #0
-hfb	equ *-1
+	adc hfb:#0
 	sta :bp2+1
 
 	jmp gr8
@@ -247,7 +243,7 @@ acol	and adr.color_bits,x
 
 stop	ldx #0
 @sp	equ *-1
-};
+
 end;
 
 
@@ -279,13 +275,11 @@ sk1
 
 	ldy y
 	lda adr.lineLo,y
-	add #0
-lfb	equ *-1
+	add lfb:#0
 	sta :bp2
 
 	lda adr.lineHi,y
-	adc #0
-hfb	equ *-1
+	adc hfb:#0
 	sta :bp2+1
 
 	jmp gr15
@@ -510,13 +504,11 @@ sk2
 ok2
 	ldy y
 	lda adr.lineLo,y
-	add #0
-lfb	equ *-1
+	add lfb:#0
 	sta :bp2
 
 	lda adr.lineHi,y
-	adc #0
-hfb	equ *-1
+	adc hfb:#0
 	sta :bp2+1
 
 
@@ -713,12 +705,10 @@ right
 ; set initial line address
 	ldy y0
 	lda adr.lineLo,y
-	add #0
-lfb	equ *-1
+	add lfb:#0
 	sta :bp2
 	lda adr.lineHi,y
-	adc #0
-hfb	equ *-1
+	adc hfb:#0
 	sta :bp2+1
 
 ; remember x0 in X
@@ -861,8 +851,9 @@ procedure LineTo(x, y: smallint);
 Draw a line starting from current position to a given point
 *)
 begin
+
 asm
-{	lda y+1
+	lda y+1
 	bpl _0
 
 	lda #0
@@ -886,7 +877,8 @@ _2
 
 	sbw main.system.ScreenWidth #1 x
 _3
-};
+end;
+
 	Line(CurrentX, CurrentY, x,y);
 
 	CurrentX := x;
@@ -915,32 +907,44 @@ procedure SetActiveBuffer(a: word); assembler; overload;
 
 *)
 asm
-{	lda a
+	lda a
 	ldy a+1
 
 	sta VideoRam
 	sty VideoRam+1
 
 	.ifdef PutPixel
-	sta PutPixel.lfb
-	sty PutPixel.hfb
+	 sta PutPixel.lfb
+	 sty PutPixel.hfb
 	eif
 
 	.ifdef GetPixel
-	sta GetPixel.lfb
-	sty GetPixel.hfb
+	 sta GetPixel.lfb
+	 sty GetPixel.hfb
 	eif
 
 	.ifdef HLine
-	sta HLine.lfb
-	sty HLine.hfb
+	 sta HLine.lfb
+	 sty HLine.hfb
 	eif
 
 	.ifdef fLine
-	sta fLine.lfb
-	sty fLine.hfb
+	 sta fLine.lfb
+	 sty fLine.hfb
 	eif
-};
+
+	.ifdef PutPixel
+	 lda WIN_RIGHT
+	 sta PutPixel.lsw
+	 lda WIN_RIGHT+1
+	 sta PutPixel.hsw
+
+	 lda WIN_BOTTOM
+	 sta PutPixel.lsh
+	 lda WIN_BOTTOM+1
+	 sta PutPixel.hsh
+	eif
+
 end;
 
 
@@ -977,8 +981,8 @@ begin
 case width of
 
 6,8:
-asm
-{	.ifdef SetColor
+ asm
+	.ifdef SetColor
 	mwa #SetColor.gr8 SetColor.mode
 	.endif
 
@@ -989,11 +993,11 @@ asm
 	.ifdef GetPixel
 	mwa #GetPixel.gr8 GetPixel.mode
 	.endif
-};
+ end;
 
 9..11:
-asm
-{	.ifdef SetColor
+ asm
+	.ifdef SetColor
 	mwa #SetColor.gr9 SetColor.mode
 	.endif
 
@@ -1008,12 +1012,12 @@ asm
 	.ifdef fLine
 	mva #$ea _nop
 	.endif
-};
+ end;
 
 else
 
-asm
-{	.ifdef SetColor
+ asm
+	.ifdef SetColor
 	mwa #SetColor.gr15 SetColor.mode
 	.endif
 
@@ -1024,12 +1028,13 @@ asm
 	.ifdef GetPixel
 	mwa #GetPixel.gr15 GetPixel.mode
 	.endif
-};
+ end;
 
 end;
 
+
 asm
-{	txa:pha
+	txa:pha
 
 	lda mode
 	and #$0f
@@ -1187,7 +1192,8 @@ __oras	dta $c0,$30,$0c,$03
 	dta 0,0,0,0
 
 stop	pla:tax
-};
+end;
+
 	SetActiveBuffer(savmsc);
 end;
 
@@ -1216,7 +1222,7 @@ begin
 InitGraph(mode);
 
 asm
-{	lda driver
+	lda driver
 	bpl stop
 
 	txa:pha
@@ -1225,16 +1231,18 @@ asm
 	bcc ok
 
 	ldx #grNoInitGraph
-	jmp err
+	bne status
 
 ok	jsr @vbxe_init
 
 	ldx #grOK
-err	stx GraphResult
+status	stx GraphResult
 
 	pla:tax
 stop
-};
+
+end;
+
 end;
 
 

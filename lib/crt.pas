@@ -63,27 +63,74 @@ const
 	C40	= CO40;
 	C80	= CO80;
 
-{$IFDEF ATARI}
-{ Foreground and background color constants }
-	Black		= 0;
-	Blue		= 1;
-	Green		= 2;
-	Cyan		= 3;
-	Red		= 4;
-	Magenta		= 5;
-	Brown		= 6;
-	LightGray	= 7;
 
-{ Foreground color constants }
-	DarkGray	= 8;
-	LightBlue	= 9;
-	LightGreen	= 10;
-	LightCyan	= 11;
-	LightRed	= 12;
-	LightMagenta	= 13;
-	Yellow		= 14;
-	White		= 15;
+{ Foreground and background color constants }
+
+{$IFDEF C64}
+
+  BLACK                 = $0;
+  WHITE                 = $1;
+  RED                   = $2;
+  CYAN                  = $3;
+  PURPLE                = $4;
+  GREEN                 = $5;
+  BLUE                  = $6;
+  YELLOW                = $7;
+  ORANGE                = $8;
+  BROWN                 = $9;
+  LIGHT_RED             = $A;
+  DARK_GREY             = $B;
+  GREY                  = $C;
+  LIGHT_GREEN           = $D;
+  LIGHT_BLUE            = $E;
+  LIGHT_GREY            = $F;
+
 {$ENDIF}
+
+
+{$IFDEF C4P}
+
+  BLACK                 = $0;
+  WHITE                 = $1;
+  RED                   = $2;
+  CYAN                  = $3;
+  PURPLE                = $4;
+  GREEN                 = $5;
+  BLUE                  = $6;
+  YELLOW                = $7;
+  ORANGE                = $8;
+  BROWN                 = $9;
+  YELLOW_GREEN          = $A;
+  PINK                  = $B;
+  BLUE_GREEN            = $C;
+  LIGHT_BLUE            = $D;
+  DARK_BLUE             = $E;
+  LIGHT_GREEN           = $F;
+
+{$ENDIF}
+
+
+{$IFDEF ATARI}
+
+  BLACK                 = $00;
+  WHITE                 = $0F;
+  RED                   = $26;
+  CYAN                  = $AC;
+  PURPLE                = $48;
+  GREEN                 = $B6;
+  BLUE                  = $86;
+  YELLOW                = $DC;
+  ORANGE                = $18;
+  BROWN                 = $F4;
+  LIGHT_RED             = $2A;
+  DARK_GREY             = $04;
+  GREY                  = $08;
+  LIGHT_GREEN           = $BC;
+  LIGHT_BLUE            = $9A;
+  LIGHT_GREY            = $0C;
+
+{$ENDIF}
+
 
 { Add-in for blinking }
 	Blink		= 128;

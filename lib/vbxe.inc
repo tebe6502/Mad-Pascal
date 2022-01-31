@@ -245,3 +245,14 @@ begin
 	SetRGBPalette(r,g,b);
 end;
 
+
+procedure CloseGraph; assembler;
+(*
+@description:
+
+*)
+asm
+//	m@call warmsv
+
+end;
+

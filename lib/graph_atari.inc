@@ -106,12 +106,12 @@ asm
 	bcc ok
 
 	ldx #grNoInitGraph
-	jmp err
+	bne status
 
 ok	jsr @vbxe_init
 
 	ldx #grOK
-err	stx GraphResult
+status	stx GraphResult
 
 	pla:tax
 stop
@@ -308,3 +308,5 @@ _3
 end;
 
 end;
+
+
