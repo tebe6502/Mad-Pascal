@@ -348,7 +348,7 @@ const
   RealTypes		= [SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK];
 
   IntegerTypes		= UnsignedOrdinalTypes + SignedOrdinalTypes;
-  OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK];
+  OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK, ENUMTOK];
 
   Pointers		= [POINTERTOK, PROCVARTOK, STRINGPOINTERTOK];
 
@@ -1361,6 +1361,7 @@ function GetIdentProc(S: TString; ProcIdentIndex: integer; Param: TParamList; Nu
 var IdentIndex, BlockStackIndex, i, k, b: Integer;
     cnt: byte;
     hits, m: word;
+    yes: Boolean;
     best: array of record
 		    IdentIndex, b: integer;
 		    hit: word;
@@ -1375,6 +1376,7 @@ Result := 0;
 
 SetLength(best, 1);
 
+
 for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
   begin
   for IdentIndex := NumIdent downto 1 do
@@ -1383,6 +1385,8 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) and
        (Ident[IdentIndex].NumParams = NumParams) then
       begin
+
+
 
       hits := 0;
       cnt:= 0;
@@ -1400,21 +1404,84 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 
 	  ( (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) {and (Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType)} ) ) or
 
+	  //( (Ident[IdentIndex].Param[i].AllocElementType = PROCVARTOK) and (Ident[IdentIndex].Param[i].NumAllocElements shr 16 = Param[i].NumAllocElements shr 16) ) or
+
 	  ( (Param[i].DataType in Pointers) and (Ident[IdentIndex].Param[i].DataType = Param[i].AllocElementType) ) or		// dla parametru VAR
 
 	  ( (Ident[IdentIndex].Param[i].DataType = UNTYPETOK) and (Ident[IdentIndex].Param[i].PassMethod = VARPASSING) and (Param[i].DataType in OrdinalTypes {IntegerTypes + [CHARTOK]}) )
 
 	 then begin
 
-	   hits := hits or mask[cnt];		// z grubsza spelnia warunek
-	   inc(cnt);
+
+	     if (Ident[IdentIndex].Param[i].AllocElementType = PROCVARTOK) then begin
+
+//writeln(Ident[IdentIndex].Name,',', Ident[GetIdent('@FN' + IntToHex(Ident[IdentIndex].Param[i].NumAllocElements shr 16, 4))].NumParams,',',Param[i].AllocElementType,' | ', Ident[IdentIndex].Param[i].DataType,',', Param[i].AllocElementType,',',Ident[GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))].NumParams);
+
+	      case Param[i].AllocElementType of
+
+		PROCEDURETOK, FUNCTIONTOK :
+		yes := Ident[GetIdent('@FN' + IntToHex(Ident[IdentIndex].Param[i].NumAllocElements shr 16, 4))].NumParams = Ident[GetIdent(Param[i].Name)].NumParams;
+
+		PROCVARTOK :
+		yes := (Ident[GetIdent('@FN' + IntToHex(Ident[IdentIndex].Param[i].NumAllocElements shr 16, 4))].NumParams) = (Ident[GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))].NumParams);
+
+	      else
+
+	       yes := false
+
+	      end;
+
+
+	      if yes then begin
+
+	       hits := hits or mask[cnt];
+	       inc(cnt);
+
+	      end;
+
+	     end else begin
+
+	       hits := hits or mask[cnt];
+	       inc(cnt);
+
+	     end;
+
+
+//	   hits := hits or mask[cnt];		// z grubsza spelnia warunek
+//	   inc(cnt);
+
+{
+       if Ident[IdentIndex].Param[i].AllocElementType = PROCVARTOK then begin
+         writeln(Ident[IdentIndex].Name,',', Ident[IdentIndex].Param[i].AllocElementType,',',Ident[IdentIndex].Param[i].NumAllocElements shr 16,',',Ident[Ident[IdentIndex].Param[i].NumAllocElements shr 16].NumParams);   // pointertok
+
+	   writeln (Ident[IdentIndex].Param[i].DataType,',', Param[i].DataType);
+	   writeln (Ident[IdentIndex].Param[i].AllocElementType ,',', Param[i].AllocElementType);
+
+	   writeln (Ident[Ident[IdentIndex].Param[i].NumAllocElements shr 16].NumParams ,',', Ident[Param[i].NumAllocElements shr 16].NumParams);
+
+       end;
+}
 
 	   if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) and
 	      (Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType) then begin
  	    //  (Ident[IdentIndex].Param[i].PassMethod = Param[i].PassMethod)  then begin	// dodatkowe punkty jesli idealnie spelnia warunek
+{
+	     if (Ident[IdentIndex].Param[i].AllocElementType = PROCVARTOK) then begin
 
-	     hits := hits or mask[cnt];
-	     inc(cnt);
+	      if (Param[i].AllocElementType = PROCVARTOK) and ((Ident[GetIdent('@FN' + IntToHex(Ident[IdentIndex].Param[i].NumAllocElements shr 16, 4))].NumParams) = (Ident[GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))].NumParams)) then begin
+
+	       hits := hits or mask[cnt];
+	       inc(cnt);
+
+	      end;
+
+	     end else begin
+}
+	       hits := hits or mask[cnt];
+	       inc(cnt);
+
+//	     end;
+
 	   end;
 
 	 end;
@@ -1518,8 +1585,23 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
 
        ok := true;
 
-       for m := 1 to l[k].NumParams do
+       for m := 1 to l[k].NumParams do begin
 	if (Ident[IdentIndex].Param[m].DataType <> l[k].Param[m].DataType) or (Ident[IdentIndex].Param[m].AllocElementType <> l[k].Param[m].AllocElementType) then begin ok := false; Break end;
+
+
+        if (Ident[IdentIndex].Param[m].DataType = l[k].Param[m].DataType) and (Ident[IdentIndex].Param[m].AllocElementType = PROCVARTOK) and
+	(l[k].Param[m].AllocElementType = PROCVARTOK) and
+	(Ident[IdentIndex].Param[m].NumAllocElements shr 16 <> l[k].Param[m].NumAllocElements shr 16) then begin
+
+	//writeln('>',Ident[IdentIndex].NumParams);//,',', l[k].Param[m].NumParams );
+
+	 ok := false; Break
+
+	end;
+
+
+
+       end;
 
        if ok then
 	Error(x, 'Overloaded functions ''' + Ident[IdentIndex].Name + ''' have the same parameter list');
@@ -3228,7 +3310,7 @@ end;
 
 	 Break;
        end else
-        if ((pos('ldy ', TemporaryBuf[p]) > 0) and (TemporaryBuf[p] <> #9'ldy ' + copy(TemporaryBuf[4], 6, 256))) or
+        if (pos('ldy ', TemporaryBuf[p]) > 0) or
            (pos('mwy ', TemporaryBuf[p]) > 0) or
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
@@ -3284,7 +3366,7 @@ end;
 
 	 Break;
        end else
-        if ((pos('ldy ', TemporaryBuf[p]) > 0) and (TemporaryBuf[p] <> #9'ldy ' + copy(TemporaryBuf[4], 6, 256))) or
+        if (pos('ldy ', TemporaryBuf[p]) > 0) or
            (pos('mwy ', TemporaryBuf[p]) > 0) or
            (pos('mvy ', TemporaryBuf[p]) > 0) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
@@ -3387,7 +3469,8 @@ end;
 	(copy(TemporaryBuf[5], 6, 256) = copy(TemporaryBuf[10], 6, 256)) then
       begin
        TemporaryBuf[10] := '~';
-       TemporaryBuf[9] := #9'add ' + copy(TemporaryBuf[9], 6, 256);
+       Te
+       mporaryBuf[9] := #9'add ' + copy(TemporaryBuf[9], 6, 256);
       end;
 
     end;
@@ -39791,16 +39874,46 @@ begin
 	i := CompileAddress(i + 1, ActualParamType, AllocElementType);
 
        end else}
+
 	 i := CompileExpression(i + 2, ActualParamType{, Ident[IdentIndex].Param[NumActualParams].DataType});	// Evaluate actual parameters and push them onto the stack
 
 
-	if (ActualParamType = POINTERTOK) and (Tok[i].Kind = IDENTTOK) then
-	  AllocElementType := Ident[GetIdent(Tok[i].Name^)].AllocElementType
-	else
+	if (ActualParamType = POINTERTOK) and (Tok[i].Kind = IDENTTOK) then begin
+	  AllocElementType := Ident[GetIdent(Tok[i].Name^)].AllocElementType;
+
+	  if Ident[GetIdent(Tok[i].Name^)].Kind in [PROCEDURETOK, FUNCTIONTOK] then begin
+{
+      inc(NumProc);
+
+      if Ident[GetIdent(Tok[i].Name^)].Kind in [PROCEDURETOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+	DefineIdent(i, '@FN' + IntToHex(NumProc, 4), Ident[GetIdent(Tok[i].Name^)].Kind, 0, 0, 0, 0)
+      else
+	DefineIdent(i, '@FN' + IntToHex(NumProc, 4), FUNC, 0, 0, 0, 0);
+
+      Ident[NumIdent].NumAllocElements := NumProc shl 16;
+
+//      Ident[NumIdent].Name := Ident[GetIdent(Tok[i].Name^)].Name;
+      Ident[NumIdent].Param := Ident[GetIdent(Tok[i].Name^)].Param;
+      Ident[NumIdent].NumParams := Ident[GetIdent(Tok[i].Name^)].NumParams;
+
+	   AllocElementType := PROCVARTOK;
+}
+           Result[NumActualParams].Name := Ident[GetIdent(Tok[i].Name^)].Name;
+
+	   AllocElementType := Ident[GetIdent(Tok[i].Name^)].Kind;
+
+	  end;
+
+//writeln(Ident[GetIdent(Tok[i].Name^)].Name,',', Ident[GetIdent(Tok[i].Name^)].Kind,',',AllocElementType);
+
+	end else
 	  AllocElementType := 0;
 
        Result[NumActualParams].DataType := ActualParamType;
        Result[NumActualParams].AllocElementType := AllocElementType;
+
+
+//       writeln(Result[NumActualParams].DataType,',',Result[NumActualParams].AllocElementType);
 
      until Tok[i + 1].Kind <> COMMATOK;
 
@@ -41096,58 +41209,72 @@ case Tok[i].Kind of
 		  iError(i, TypeMismatch);
 
 
-		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = SHORTREALTOK) then begin
+		if ValType in IntegerTypes then
 
-		  ExpandParam(SMALLINTTOK, ValType);
+		 case Ident[IdentIndex].DataType of
 
-		  asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		  asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-		  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-		  asm65(#9'lda :STACKORIGIN,x');
-		  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'lda #$00');
-		  asm65(#9'sta :STACKORIGIN,x');
-
-		  ValType := SHORTREALTOK;
-		end;
+			ENUMTOK:
+		   	begin
 
 
-		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = REALTOK) then begin
-
-		  ExpandParam(INTEGERTOK, ValType);
-
-		  asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		  asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-		  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-		  asm65(#9'lda :STACKORIGIN,x');
-		  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'lda #$00');
-		  asm65(#9'sta :STACKORIGIN,x');
-
-		  ValType := REALTOK;
-		end;
+				ValType := ENUMTOK;
+			end;
 
 
-		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = HALFSINGLETOK) then begin
+			SHORTREALTOK:
+		 	begin
+				ExpandParam(SMALLINTTOK, ValType);
 
-		  ExpandParam(INTEGERTOK, ValType);
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+				asm65(#9'lda :STACKORIGIN,x');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+				asm65(#9'lda #$00');
+				asm65(#9'sta :STACKORIGIN,x');
 
-		  asm65(#9'jsr @F16_I2F');
-
-		  ValType := HALFSINGLETOK;
-		end else
+				ValType := SHORTREALTOK;
+			end;
 
 
-		if (ValType in IntegerTypes) and (Ident[IdentIndex].DataType = SINGLETOK) then begin
+			REALTOK:
+			begin
+				ExpandParam(INTEGERTOK, ValType);
 
-		  ExpandParam(INTEGERTOK, ValType);
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+				asm65(#9'lda :STACKORIGIN,x');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+				asm65(#9'lda #$00');
+				asm65(#9'sta :STACKORIGIN,x');
 
-		  asm65(#9'jsr I2F');
+				ValType := REALTOK;
+			end;
 
-		  ValType := SINGLETOK;
-		end;
+
+			HALFSINGLETOK:
+			begin
+				ExpandParam(INTEGERTOK, ValType);
+
+				asm65(#9'jsr @F16_I2F');
+
+				ValType := HALFSINGLETOK;
+			end;
+
+
+			SINGLETOK:
+			begin
+				ExpandParam(INTEGERTOK, ValType);
+
+				asm65(#9'jsr I2F');
+
+				ValType := SINGLETOK;
+			end;
+
+		 end;
 
 
 		CheckTok(j + 1, CPARTOK);
@@ -41227,7 +41354,7 @@ case Tok[i].Kind of
 
 	CompileActualParameters(i, IdentTemp, IdentIndex);
 
-	ValType := Ident[Ident[IdentIndex].NumAllocElements_].DataType;
+	ValType := Ident[IdentTemp].DataType;
 
 	Result := i;
 
@@ -45637,7 +45764,6 @@ begin
 
     Ident[NumIdent].isStdCall := true;
     Ident[NumIdent].IsNestedFunction := IsNestedFunction;
-
 
     CheckTok(i, SEMICOLONTOK);
 
