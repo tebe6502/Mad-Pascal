@@ -19,7 +19,7 @@ The available features are:
 * Arithmetic and boolean operators
 * Procedures and functions with up to 8 parameters. Returned value of a function is assigned to a predefined `RESULT` variable
 * Static local variables
-* Primitive data types, all types except the `ShortReal/Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
+* Primitive data types, all types except the `ShortReal`/`Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
     * `Cardinal` `Word` `Byte` `Boolean`
     * `Integer` `SmallInt` `ShortInt`
     * `Char` `String` `PChar`
