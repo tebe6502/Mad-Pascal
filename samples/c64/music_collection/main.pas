@@ -30,7 +30,7 @@ const
   RESET_VECTOR        = $fffc;
   SID_REG_HEAD        = $d400;
 
-  RASTER_START        = $80;
+  RASTER_START        = $e0;
 
 //-----------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ zaks: array [0..M_COUNTER] of word = (
 //-----------------------------------------------------------------------------
 
 var
-  musix_index : byte = 0;
+  music_index : byte = 0;
 
 //-----------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ end;
 procedure prepare_new_music; inline;
 begin
   fillbyte(pointer(MUSIC), M_SPACE, 0);
-  unapl(pointer(zaks[musix_index]), pointer(MUSIC));
+  unapl(pointer(zaks[music_index]), pointer(MUSIC));
 
   music_init;
 end;
@@ -101,9 +101,9 @@ end;
 procedure main_loop;
 begin
   repeat
-    write(#$13, 'No.', musix_index + 1, ' ', names[musix_index]);
-
     prepare_new_music;
+
+    write(#$13, 'No.', music_index + 1, ' ', names[music_index]);
 
     repeat
       repeat until RasterCounter = RASTER_START;
@@ -116,8 +116,8 @@ begin
 
     sid_off;
 
-    inc(musix_index);
-  until musix_index > M_COUNTER;
+    inc(music_index);
+  until music_index > M_COUNTER;
 end;
 
 //-----------------------------------------------------------------------------

@@ -2,6 +2,6 @@
 
 for FILE in *.sid; do ./converter -f $FILE -r c000; done
 
-for FILE in *.rip; do apultra $FILE apl/${FILE::-4}.apl; done
+for FILE in *.rip; do apultra $FILE ../music/${FILE::-4}.apl; done
 
 rm *.rip
