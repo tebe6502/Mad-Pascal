@@ -126,7 +126,7 @@ foreach ($arrReloc as $value) {
   $binary[$value] = chr(ord($binary[$value]) - $oldHiByte + $newHiByte);
 }
 
-for ($i = 0; $i <= SEQUENCES_TABLE_MAX_LENGHT; $i++) {
+for ($i = 0; $i < SEQUENCES_TABLE_MAX_LENGHT; $i++) {
   $value = ord($binary[$sequencesTab + $i]);
   if ($value == 0) break;
 
