@@ -1,6 +1,6 @@
 #!/usr/bin/php
 
-#Ripper PSID format) & relocator for C64 Music Assembler
+#Ripper (PSID format) & relocator for C64 Music Assembler
 #relocation possible only by changing the memory page
 
 <?php
@@ -16,7 +16,7 @@ define("DATA_OFFSET"               , 0x07);
 define("DATA_ORIGINAL"             , 0x09);
 define("INIT_ADDRESS"              , 0x0A);
 define("PLAY_ADDRESS"              , 0x0C);
-define("SEQUENCES_TABLE_MAX_LENGHT", 0x3E);
+define("SEQUENCES_TABLE_MAX_LENGHT", 0xFD);
 define("SEQUENCES_POINTER"         , 0xA7);
 define("FREQUENCY_TABLE_LENGHT"    , 0x60);
 define("FREQUENCY_TABLE_MSB"       , 0x1C5);
@@ -59,7 +59,7 @@ $arrReloc = array(
 );
 
 //---------------------------------------------------------------------------------------------------------------
-//check existence of parameters
+//check existence of the parameters
 //---------------------------------------------------------------------------------------------------------------
 $options = getopt("f:r:");
 
