@@ -3469,8 +3469,7 @@ end;
 	(copy(TemporaryBuf[5], 6, 256) = copy(TemporaryBuf[10], 6, 256)) then
       begin
        TemporaryBuf[10] := '~';
-       Te
-       mporaryBuf[9] := #9'add ' + copy(TemporaryBuf[9], 6, 256);
+       TemporaryBuf[9] := #9'add ' + copy(TemporaryBuf[9], 6, 256);
       end;
 
     end;
@@ -4109,13 +4108,25 @@ end;
 {$i opt_FILL.inc}
 
 
-//@PARAM??
+// #asm
+
+   if TemporaryBuf[0] = '#asm' then begin
+
+    writeln(OutFile, AsmBlock[StrToInt(TemporaryBuf[1])]);
+
+    TemporaryBuf[0] := '~';
+    TemporaryBuf[1] := '~';
+
+   end;
+
+
+// @PARAM??
    if TemporaryBuf[0] = #9'sta @PARAM?' then TemporaryBuf[0] := '~';
 
    if TemporaryBuf[0] = #9'sty @PARAM?' then TemporaryBuf[0] := #9'tya';
 
 
-//@FORTMP?
+// @FORTMP?
 
    if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
@@ -4155,7 +4166,7 @@ var i: integer;
     tmp: string;
 begin
 
- if pos(#9'jsr ', a) = 1 then ResetOpty;
+ if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
 
     if pos(' :STACKORIGIN_EAX', a) = 5 then begin
@@ -13572,7 +13583,7 @@ end;
 
 
 {
-if (pos(' fmulinit', listing[i]) > 0) then begin
+if (pos('ldy #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -18219,6 +18230,27 @@ end;
        add_sub(i+5) and										// add|sub		; 5
        sta(i+6) and										// sta			; 6
        (adc_sbc(i+8) = false) then								//~adc|sbc		; 8
+     begin
+       listing[i]   := '';
+
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if ldy_im_0(i) and										// ldy #$00		; 0
+       lda(i+1) and										// lda			; 1
+       spl(i+2) and										// spl			; 2
+       dey(i+3) and										// dey			; 3
+       (listing[i+4] = #9'sty #$00') and							// sty #$00		; 4
+       add_sub(i+5) and										// add|sub		; 5
+       sta(i+6) and										// sta			; 6
+       lda(i+7) and										// lda			; 7
+       adc_sbc(i+8) and										// adc|sbc		; 8
+       sta(i+9) then										// sta			; 9
      begin
        listing[i]   := '';
 
@@ -41200,7 +41232,7 @@ case Tok[i].Kind of
 
 	  if (Ident[IdentIndex].Kind = USERTYPE) and (Tok[i + 1].Kind = OPARTOK) then begin
 
-		CheckTok(i + 1, OPARTOK);
+//		CheckTok(i + 1, OPARTOK);
 
 		j := CompileExpression(i + 2, ValType);
 
@@ -41279,7 +41311,22 @@ case Tok[i].Kind of
 
 		CheckTok(j + 1, CPARTOK);
 
+		if (ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
 
+			IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
+
+			if Ident[IdentTemp].IsNestedFunction = FALSE then
+	 		Error(i, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found');
+
+			CompileActualParameters(i, IdentTemp, IdentIndex);
+
+			ValType := Ident[IdentTemp].DataType;
+
+
+//		  ValType := Ident[IdentIndex].AllocElementType;
+
+
+		end else
 		if (ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in OrdinalTypes + RealTypes) then begin
 
 
@@ -42876,6 +42923,7 @@ par2:='';
 StopOptimization;
 
 case Tok[i].Kind of
+
   IDENTTOK:
     begin
     IdentIndex := GetIdent(Tok[i].Name^);
@@ -42895,7 +42943,24 @@ case Tok[i].Kind of
 	CONSTTOK, TYPETOK, ENUMTOK:
 	  begin
 
-	    iError(i, VariableExpected);
+	     if (Ident[IdentIndex].Kind = USERTYPE) and (Tok[i + 1].Kind = OPARTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind = CPARTOK) then begin
+
+	       IdentTemp:=GetIdent(Tok[i + 2].Name^);
+
+	       svar:=GetLocalName(IdentTemp);
+
+	       asm65(#9'lda ' + svar);
+	       asm65(#9'sta :TMP+1');
+	       asm65(#9'lda ' + svar + '+1');
+	       asm65(#9'sta :TMP+2');
+	       asm65(#9'lda #$4C');
+	       asm65(#9'sta :TMP');
+	       asm65(#9'jsr :TMP');
+
+	       Result := i + 3;
+
+	     end else
+		 iError(i, VariableExpected);
 
 	  end;
 
@@ -45004,7 +45069,7 @@ WHILETOK:
      StopOptimization;			// takich blokow nie optymalizujemy
 
      asm65;
-     asm65('; ---------------------  ASM Block '+format('%.3d',[AsmBlockIndex])+'  ---------------------');
+     asm65('; -------------------  ASM Block '+format('%.8d',[AsmBlockIndex])+'  -------------------');
      asm65;
 
 
@@ -45015,8 +45080,19 @@ WHILETOK:
 
      end;
 
+//   writeln(OutputDisabled,',',Pass);
+//   writeln('----------------------');
 
-     asm65(AsmBlock[AsmBlockIndex]);
+//     writeln(AsmBlock[AsmBlockIndex]);
+
+
+//     asm65(AsmBlock[AsmBlockIndex]);
+
+     asm65('#asm');
+     asm65(IntToStr(AsmBlockIndex));
+
+
+//     if (OutputDisabled=false) and (Pass = CODEGENERATIONPASS) then WriteOut(AsmBlock[AsmBlockIndex]);
 
      inc(AsmBlockIndex);
 
