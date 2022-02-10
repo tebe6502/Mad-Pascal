@@ -1,0 +1,18 @@
+#!/bin/bash
+
+mp="$HOME/Programs/MadPascal/mp"
+mads="$HOME/Programs/mads/mads"
+base="$HOME/Programs/MadPascal/base"
+name="main"
+
+$mp $name.pas
+
+if [ -f $name.a65 ]; then
+  [ ! -d "output" ] && mkdir output
+  mv $name.a65 output/
+  $mads output/$name.a65 -x -i:$base -o:output/$name.xex
+  a8-soundbox -slightsid mono output/main.xex
+else
+  exit 1
+fi
+
