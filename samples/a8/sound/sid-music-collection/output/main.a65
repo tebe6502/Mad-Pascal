@@ -643,16 +643,15 @@ OUTPUTPOINTER	= DATAORIGIN+$000F
 
 ; ---------------------  ASM Block 058  ---------------------
 
+	ldy #$00	; false
+	lda kbcodes
+	cmp #$ff
+	beq skp
+	iny		; true
 
-	ldy #$00	; false
-	lda #$ff
-	cmp kbcodes
-	beq skp
-	lda #$ff
-	iny		; true
-	sta kbcodes
-
-skp	sty Result
+;	sty kbcodes
+
+skp	sty Result
 
 @exit
 
@@ -735,11 +734,23 @@ BLINK	= $80
 @exit
 .endl
 
-.local	RESET_SYSTEM					; PROCEDURE | ASSEMBLER | INLINE
+.local	RESET_KEYBOARD					; PROCEDURE | ASSEMBLER | INLINE
 
 	.MACRO m@INLINE
 
 ; ---------------------  ASM Block 067  ---------------------
+
+  lda #$ff \ sta kbcodes
+
+	.ENDM
+@exit
+.endl
+
+.local	RESET_SYSTEM					; PROCEDURE | ASSEMBLER | INLINE
+
+	.MACRO m@INLINE
+
+; ---------------------  ASM Block 068  ---------------------
 
   jmp (RESET_VECTOR)
 
@@ -751,7 +762,7 @@ BLINK	= $80
 
 	.MACRO m@INLINE
 
-; optimize OK (main.pas), line = 85
+; optimize OK (main.pas), line = 91
 
 	lda #$00
 	sta SYSTEM.FILLBYTE_0145.A
@@ -767,7 +778,7 @@ BLINK	= $80
 	m@INLINE
 	.endl
 
-; optimize OK (main.pas), line = 86
+; optimize OK (main.pas), line = 92
 
 	lda MUSIC_INDEX
 	asl @
@@ -782,7 +793,7 @@ BLINK	= $80
 	sta APLIB.UNAPL_0172.OUTPUTPOINTER+1
 	jsr APLIB.UNAPL_0172
 
-; optimize FAIL ('m@INLINE', main.pas), line = 88
+; optimize FAIL ('m@INLINE', main.pas), line = 94
 
 	.local +MAIN.MUSIC_INIT
 	m@INLINE
@@ -795,7 +806,7 @@ BLINK	= $80
 
 	.MACRO m@INLINE
 
-; optimize OK (main.pas), line = 93
+; optimize OK (main.pas), line = 99
 
 	lda #$00
 	ldy #$18
@@ -807,15 +818,21 @@ BLINK	= $80
 .local	MAIN_LOOP					; PROCEDURE
 
 ; --- RepeatUntilProlog
-l_019D
+l_019E
 
-; optimize FAIL ('m@INLINE', main.pas), line = 101
+; optimize FAIL ('m@INLINE', main.pas), line = 107
+
+	.local +MAIN.RESET_KEYBOARD
+	m@INLINE
+	.endl
+
+; optimize FAIL ('m@INLINE', main.pas), line = 109
 
 	.local +MAIN.PREPARE_NEW_MUSIC
 	m@INLINE
 	.endl
 
-; optimize FAIL ('@print', main.pas), line = 103
+; optimize FAIL ('@print', main.pas), line = 111
 
 	@printSTRING #CODEORIGIN+$0099
 	inx
@@ -848,58 +865,58 @@ l_019D
 	@printEOL
 
 ; --- RepeatUntilProlog
-l_01B7
+l_01B9
 
-; optimize FAIL ('SYSTEM.PAUSE_0164', main.pas), line = 106
+; optimize FAIL ('SYSTEM.PAUSE_0164', main.pas), line = 114
 
 	jsr SYSTEM.PAUSE_0164
 
 ; --- RepeatUntilProlog
-l_01B9
+l_01BB
 
-; optimize OK (main.pas), line = 107
+; optimize OK (main.pas), line = 115
 
 	lda +ATARI.VCOUNT
 	cmp #$10
-	jne l_01B9
+	jne l_01BB
 
-; optimize OK (main.pas), line = 108
+; optimize OK (main.pas), line = 116
 
 	lda #$0E
 	sta ATARI.COLBK
 
-; optimize FAIL ('m@INLINE', main.pas), line = 110
+; optimize FAIL ('m@INLINE', main.pas), line = 118
 
 	.local +MAIN.MUSIC_PLAY
 	m@INLINE
 	.endl
 
-; optimize OK (main.pas), line = 112
+; optimize OK (main.pas), line = 120
 
 	lda #$00
 	sta ATARI.COLBK
 
-; optimize FAIL ('CRT.KEYPRESSED', main.pas), line = 113
+; optimize FAIL ('CRT.KEYPRESSED', main.pas), line = 121
 
 	jsr CRT.KEYPRESSED
 	lda CRT.KEYPRESSED.RESULT
-	jeq l_01B7
+	jeq l_01B9
 
-; optimize FAIL ('m@INLINE', main.pas), line = 115
+; optimize FAIL ('m@INLINE', main.pas), line = 123
 
 	.local +MAIN.SID_OFF
 	m@INLINE
 	.endl
 
-; optimize FAIL (0, main.pas), line = 117
+; optimize FAIL (0, main.pas), line = 125
 
 	inc MUSIC_INDEX
 
-; optimize OK (main.pas), line = 118
+; optimize OK (main.pas), line = 126
 
 	lda MUSIC_INDEX
 	cmp #$09
-	jcc l_019D
+	jcc l_019E
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -913,47 +930,47 @@ l_01B9
 .endl
 l_0109
 
-; optimize FAIL ('CRT.CLRSCR', main.pas), line = 124
+; optimize FAIL ('CRT.CLRSCR', main.pas), line = 132
 
 	jsr CRT.CLRSCR
 
-; optimize FAIL ('@print', main.pas), line = 125
+; optimize FAIL ('@print', main.pas), line = 134
 
 	@printSTRING #CODEORIGIN+$009E
 	@printEOL
 
-; optimize FAIL ('@print', main.pas), line = 126
+; optimize FAIL ('@print', main.pas), line = 135
 
 	@printEOL
 
-; optimize FAIL ('@print', main.pas), line = 127
+; optimize FAIL ('@print', main.pas), line = 136
 
 	@printSTRING #CODEORIGIN+$00B6
 	@printEOL
 
-; optimize FAIL ('@print', main.pas), line = 128
+; optimize FAIL ('@print', main.pas), line = 137
 
 	@printSTRING #CODEORIGIN+$00D0
 	@printEOL
 
-; optimize FAIL ('@print', main.pas), line = 129
+; optimize FAIL ('@print', main.pas), line = 138
 
 	@printEOL
 
-; optimize FAIL ('@print', main.pas), line = 130
+; optimize FAIL ('@print', main.pas), line = 139
 
 	@printSTRING #CODEORIGIN+$00EC
 	@printEOL
 
-; optimize FAIL ('@print', main.pas), line = 131
+; optimize FAIL ('@print', main.pas), line = 140
 
 	@printEOL
 
-; optimize FAIL ('MAIN_LOOP', main.pas), line = 133
+; optimize FAIL ('MAIN_LOOP', main.pas), line = 142
 
 	jsr MAIN_LOOP
 
-; optimize FAIL ('CRT.CLRSCR', main.pas), line = 135
+; optimize FAIL ('CRT.CLRSCR', main.pas), line = 144
 
 	jsr CRT.CLRSCR
 	@printSTRING #CODEORIGIN+$00FC
@@ -963,7 +980,7 @@ l_0109
 	sta SYSTEM.PAUSE_0165.N+1
 	jsr SYSTEM.PAUSE_0165
 
-; optimize FAIL ('m@INLINE', main.pas), line = 137
+; optimize FAIL ('m@INLINE', main.pas), line = 146
 
 	.local +MAIN.RESET_SYSTEM
 	m@INLINE

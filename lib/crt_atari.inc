@@ -130,11 +130,12 @@ function Keypressed: Boolean; assembler;
 *)
 asm
 	ldy #$00	; false
-	lda #$ff
-	cmp kbcodes
+	lda kbcodes
+	cmp #$ff
 	beq skp
 	iny		; true
-	sta kbcodes
+
+;	sty kbcodes
 
 skp	sty Result
 end;

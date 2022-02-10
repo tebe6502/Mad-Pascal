@@ -72,6 +72,11 @@ asm
   pla \ tax
 end;
 
+procedure reset_keyboard; assembler; inline;
+asm
+  lda #$ff \ sta kbcodes
+end;
+
 procedure reset_system; assembler; inline;
 asm
   jmp (RESET_VECTOR)
@@ -95,6 +100,8 @@ end;
 procedure main_loop;
 begin
   repeat
+    reset_keyboard;
+
     prepare_new_music;
 
     writeln('No.', music_index + 1, ' ', names[music_index]);

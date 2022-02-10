@@ -628,185 +628,197 @@ Macro: UNITINITIALIZATION [Source: main.a65]
    643
    644 				; ---------------------  ASM Block 058  ---------------------
    645
-   646
-   647 23D5 A0 00			ldy #$00	; false
-   648
-   649 23D7 A9 FF			lda #$ff
-   650
-   651 23D9 CD FC 02			cmp kbcodes
-   652
-   653 23DC F0 06			beq skp
-   654
-   655 23DE A9 FF			lda #$ff
-   656
-   657 23E0 C8				iny		; true
-   658
-   659 23E1 8D FC 02			sta kbcodes
-   660
+   646 23D5 A0 00			ldy #$00	; false
+   647 23D7 AD FC 02			lda kbcodes
+   648 23DA C9 FF			cmp #$ff
+   649 23DC F0 01			beq skp
+   650 23DE C8				iny		; true
+   651
+   652 				;	sty kbcodes
+   653
+   654 23DF 8C 22 25		skp	sty Result
+   655
+   656 23E2			@exit
+   657
+   658 				; ------------------------------------------------------------
+   659
+   660 = 2522			RESULT	= DATAORIGIN+$0012
    661
-   662
-   663 23E4 8C 22 25		skp	sty Result
+   662 = 2522			@VarData	= RESULT
+   663 = 0001			@VarDataSize	= 1
    664
-   665
-   666 23E7			@exit
+   665 23E2 60				rts						; ret
+   666 				.endl
    667
    668 				; ------------------------------------------------------------
    669
-   670 = 2522			RESULT	= DATAORIGIN+$0012
-   671
-   672 = 2522			@VarData	= RESULT
-   673 = 0001			@VarDataSize	= 1
-   674
-   675 23E7 60				rts						; ret
-   676 				.endl
-   677
-   678 				; ------------------------------------------------------------
-   679
-   680 = 2521			TEXTATTR	= DATAORIGIN+$0011
-   681 = D01F			CONSOL	= $D01F
-   682 = 0000			CN_START_SELECT_OPTION	= $00
-   683 = 0001			CN_SELECT_OPTION	= $01
-   684 = 0002			CN_START_OPTION	= $02
-   685 = 0003			CN_OPTION	= $03
-   686 = 0004			CN_START_SELECT	= $04
-   687 = 0005			CN_SELECT	= $05
-   688 = 0006			CN_START	= $06
-   689 = 0007			CN_NONE	= $07
-   690 = 0000			BW40	= $00
-   691 = 0001			CO40	= $01
-   692 = 0002			BW80	= $02
-   693 = 0003			CO80	= $03
-   694 = 0007			MONO	= $07
-   695 = 0001			C40	= $01
-   696 = 0003			C80	= $03
-   697 = 0000			BLACK	= $00
-   698 = 000F			WHITE	= $0F
-   699 = 0026			RED	= $26
-   700 = 00AC			CYAN	= $AC
-   701 = 0048			PURPLE	= $48
-   702 = 00B6			GREEN	= $B6
-   703 = 0086			BLUE	= $86
-   704 = 00DC			YELLOW	= $DC
-   705 = 0018			ORANGE	= $18
-   706 = 00F4			BROWN	= $F4
-   707 = 002A			LIGHT_RED	= $2A
-   708 = 0004			DARK_GREY	= $04
-   709 = 0008			GREY	= $08
-   710 = 00BC			LIGHT_GREEN	= $BC
-   711 = 009A			LIGHT_BLUE	= $9A
-   712 = 000C			LIGHT_GREY	= $0C
-   713 = 0080			BLINK	= $80
-   714
-   715 				.endl							; UNIT CRT
-   716
-   717 23E8			.local	MUSIC_PLAY					; PROCEDURE | ASSEMBLER | INLINE
-   718
-   719 					.MACRO m@INLINE
-   720 				
-   721 				; ---------------------  ASM Block 065  ---------------------
-   722 				
-   723 				  sei
-   724 				  txa \ pha
-   725 				  jsr M_PLAY
-   726 				  pla \ tax  
-   727 				  cli
+   670 = 2521			TEXTATTR	= DATAORIGIN+$0011
+   671 = D01F			CONSOL	= $D01F
+   672 = 0000			CN_START_SELECT_OPTION	= $00
+   673 = 0001			CN_SELECT_OPTION	= $01
+   674 = 0002			CN_START_OPTION	= $02
+   675 = 0003			CN_OPTION	= $03
+   676 = 0004			CN_START_SELECT	= $04
+   677 = 0005			CN_SELECT	= $05
+   678 = 0006			CN_START	= $06
+   679 = 0007			CN_NONE	= $07
+   680 = 0000			BW40	= $00
+   681 = 0001			CO40	= $01
+   682 = 0002			BW80	= $02
+   683 = 0003			CO80	= $03
+   684 = 0007			MONO	= $07
+   685 = 0001			C40	= $01
+   686 = 0003			C80	= $03
+   687 = 0000			BLACK	= $00
+   688 = 000F			WHITE	= $0F
+   689 = 0026			RED	= $26
+   690 = 00AC			CYAN	= $AC
+   691 = 0048			PURPLE	= $48
+   692 = 00B6			GREEN	= $B6
+   693 = 0086			BLUE	= $86
+   694 = 00DC			YELLOW	= $DC
+   695 = 0018			ORANGE	= $18
+   696 = 00F4			BROWN	= $F4
+   697 = 002A			LIGHT_RED	= $2A
+   698 = 0004			DARK_GREY	= $04
+   699 = 0008			GREY	= $08
+   700 = 00BC			LIGHT_GREEN	= $BC
+   701 = 009A			LIGHT_BLUE	= $9A
+   702 = 000C			LIGHT_GREY	= $0C
+   703 = 0080			BLINK	= $80
+   704
+   705 				.endl							; UNIT CRT
+   706
+   707 23E3			.local	MUSIC_PLAY					; PROCEDURE | ASSEMBLER | INLINE
+   708
+   709 					.MACRO m@INLINE
+   710 				
+   711 				; ---------------------  ASM Block 065  ---------------------
+   712 				
+   713 				  sei
+   714 				  txa \ pha
+   715 				  jsr M_PLAY
+   716 				  pla \ tax  
+   717 				  cli
+   718 				
+   719 					.ENDM
+   720 23E3			@exit
+   721 				.endl
+   722
+   723 23E3			.local	MUSIC_INIT					; PROCEDURE | ASSEMBLER | INLINE
+   724
+   725 					.MACRO m@INLINE
+   726 				
+   727 				; ---------------------  ASM Block 066  ---------------------
    728 				
-   729 					.ENDM
-   730 23E8			@exit
-   731 				.endl
-   732
-   733 23E8			.local	MUSIC_INIT					; PROCEDURE | ASSEMBLER | INLINE
-   734
-   735 					.MACRO m@INLINE
-   736 				
-   737 				; ---------------------  ASM Block 066  ---------------------
-   738 				
-   739 				  txa \ pha
-   740 				  jsr M_INIT
-   741 				  pla \ tax
+   729 				  txa \ pha
+   730 				  jsr M_INIT
+   731 				  pla \ tax
+   732 				
+   733 					.ENDM
+   734 23E3			@exit
+   735 				.endl
+   736
+   737 23E3			.local	RESET_KEYBOARD					; PROCEDURE | ASSEMBLER | INLINE
+   738
+   739 					.MACRO m@INLINE
+   740 				
+   741 				; ---------------------  ASM Block 067  ---------------------
    742 				
-   743 					.ENDM
-   744 23E8			@exit
-   745 				.endl
-   746
-   747 23E8			.local	RESET_SYSTEM					; PROCEDURE | ASSEMBLER | INLINE
+   743 				  lda #$ff \ sta kbcodes
+   744 				
+   745 					.ENDM
+   746 23E3			@exit
+   747 				.endl
    748
-   749 					.MACRO m@INLINE
-   750 				
-   751 				; ---------------------  ASM Block 067  ---------------------
+   749 23E3			.local	RESET_SYSTEM					; PROCEDURE | ASSEMBLER | INLINE
+   750
+   751 					.MACRO m@INLINE
    752 				
-   753 				  jmp (RESET_VECTOR)
+   753 				; ---------------------  ASM Block 068  ---------------------
    754 				
-   755 					.ENDM
-   756 23E8			@exit
-   757 				.endl
-   758
-   759 23E8			.local	PREPARE_NEW_MUSIC				; PROCEDURE | INLINE
+   755 				  jmp (RESET_VECTOR)
+   756 				
+   757 					.ENDM
+   758 23E3			@exit
+   759 				.endl
    760
-   761 					.MACRO m@INLINE
-   762 				
-   763 				; optimize OK (main.pas), line = 85
+   761 23E3			.local	PREPARE_NEW_MUSIC				; PROCEDURE | INLINE
+   762
+   763 					.MACRO m@INLINE
    764 				
-   765 					lda #$00
-   766 					sta SYSTEM.FILLBYTE_0145.A
-   767 					lda #$90
-   768 					sta SYSTEM.FILLBYTE_0145.A+1
-   769 					lda #$00
-   770 					sta SYSTEM.FILLBYTE_0145.COUNT
-   771 					lda #$10
-   772 					sta SYSTEM.FILLBYTE_0145.COUNT+1
-   773 					lda #$00
-   774 					sta SYSTEM.FILLBYTE_0145.VALUE
-   775 					.local +MAIN.SYSTEM.FILLBYTE_0145
-   776 					m@INLINE
-   777 					.endl
-   778 				
-   779 				; optimize OK (main.pas), line = 86
+   765 				; optimize OK (main.pas), line = 91
+   766 				
+   767 					lda #$00
+   768 					sta SYSTEM.FILLBYTE_0145.A
+   769 					lda #$90
+   770 					sta SYSTEM.FILLBYTE_0145.A+1
+   771 					lda #$00
+   772 					sta SYSTEM.FILLBYTE_0145.COUNT
+   773 					lda #$10
+   774 					sta SYSTEM.FILLBYTE_0145.COUNT+1
+   775 					lda #$00
+   776 					sta SYSTEM.FILLBYTE_0145.VALUE
+   777 					.local +MAIN.SYSTEM.FILLBYTE_0145
+   778 					m@INLINE
+   779 					.endl
    780 				
-   781 					lda MUSIC_INDEX
-   782 					asl @
-   783 					tay
-   784 					lda adr.ZAKS,y
-   785 					sta APLIB.UNAPL_0172.INPUTPOINTER
-   786 					lda adr.ZAKS+1,y
-   787 					sta APLIB.UNAPL_0172.INPUTPOINTER+1
-   788 					lda #$00
-   789 					sta APLIB.UNAPL_0172.OUTPUTPOINTER
-   790 					lda #$90
-   791 					sta APLIB.UNAPL_0172.OUTPUTPOINTER+1
-   792 					jsr APLIB.UNAPL_0172
-   793 				
-   794 				; optimize FAIL ('m@INLINE', main.pas), line = 88
+   781 				; optimize OK (main.pas), line = 92
+   782 				
+   783 					lda MUSIC_INDEX
+   784 					asl @
+   785 					tay
+   786 					lda adr.ZAKS,y
+   787 					sta APLIB.UNAPL_0172.INPUTPOINTER
+   788 					lda adr.ZAKS+1,y
+   789 					sta APLIB.UNAPL_0172.INPUTPOINTER+1
+   790 					lda #$00
+   791 					sta APLIB.UNAPL_0172.OUTPUTPOINTER
+   792 					lda #$90
+   793 					sta APLIB.UNAPL_0172.OUTPUTPOINTER+1
+   794 					jsr APLIB.UNAPL_0172
    795 				
-   796 					.local +MAIN.MUSIC_INIT
-   797 					m@INLINE
-   798 					.endl
-   799 					.ENDM
-   800 23E8			@exit
-   801 				.endl
-   802
-   803 23E8			.local	SID_OFF						; PROCEDURE | INLINE
+   796 				; optimize FAIL ('m@INLINE', main.pas), line = 94
+   797 				
+   798 					.local +MAIN.MUSIC_INIT
+   799 					m@INLINE
+   800 					.endl
+   801 					.ENDM
+   802 23E3			@exit
+   803 				.endl
    804
-   805 					.MACRO m@INLINE
-   806 				
-   807 				; optimize OK (main.pas), line = 93
+   805 23E3			.local	SID_OFF						; PROCEDURE | INLINE
+   806
+   807 					.MACRO m@INLINE
    808 				
-   809 					lda #$00
-   810 					ldy #$18
-   811 					sta:rpl $D500,y-
-   812 					.ENDM
-   813 23E8			@exit
-   814 				.endl
-   815
-   816 23E8			.local	MAIN_LOOP					; PROCEDURE
+   809 				; optimize OK (main.pas), line = 99
+   810 				
+   811 					lda #$00
+   812 					ldy #$18
+   813 					sta:rpl $D500,y-
+   814 					.ENDM
+   815 23E3			@exit
+   816 				.endl
    817
-   818 				; --- RepeatUntilProlog
-   819 23E8			l_019D
-   820
-   821 				; optimize FAIL ('m@INLINE', main.pas), line = 101
+   818 23E3			.local	MAIN_LOOP					; PROCEDURE
+   819
+   820 				; --- RepeatUntilProlog
+   821 23E3			l_019E
    822
-   823 23E8				.local +MAIN.PREPARE_NEW_MUSIC
-   824 23E8				m@INLINE
+   823 				; optimize FAIL ('m@INLINE', main.pas), line = 107
+   824
+   825 23E3				.local +MAIN.RESET_KEYBOARD
+   826 23E3				m@INLINE
+Macro: MAIN.RESET_KEYBOARD.M@INLINE [Source: main.a65]
+     4 23E3 A9 FF		  LDA #$FF 
+     4 23E5 8D FC 02		 STA KBCODES
+Source: main.a65
+   827 					.endl
+   828
+   829 				; optimize FAIL ('m@INLINE', main.pas), line = 109
+   830
+   831 23E8				.local +MAIN.PREPARE_NEW_MUSIC
+   832 23E8				m@INLINE
 Macro: MAIN.PREPARE_NEW_MUSIC.M@INLINE [Source: main.a65]
      4 23E8 A9 00			lda #$00
      5 23EA 85 88			sta SYSTEM.FILLBYTE_0145.A
@@ -840,72 +852,72 @@ Source: main.a65
      6 2423 AA			 TAX
 Source: main.a65
 Source: main.a65
-   825 					.endl
-   826
-   827 				; optimize FAIL ('@print', main.pas), line = 103
-   828
-   829 					@printSTRING #CODEORIGIN+$0099
-   829 				 LDY> CODEORIGIN+$0099\ LDA< CODEORIGIN+$0099\ JSR @PRINTSTRING
-   829 2424 A0 20		 LDY> CODEORIGIN+$0099
-   829 2426 A9 99		 LDA< CODEORIGIN+$0099
-   829 2428 20 8F 21		 JSR @PRINTSTRING
-   830 242B E8				inx
-   831 242C A0 00			ldy #$00
-   832 242E 94 C4			sty :STACKORIGIN+STACKWIDTH*3,x
-   833 2430 AD 23 25			lda MUSIC_INDEX
-   834 2433 18 69 01			add #$01
-   835 2436 95 94			sta :STACKORIGIN,x
-   836 2438 A9 00			lda #$00
-   837 243A 69 00			adc #$00
-   838 243C 95 A4			sta :STACKORIGIN+STACKWIDTH,x
-   839 243E 90 01			scc
-   840 2440 C8				iny
-   841 2441 94 B4			sty :STACKORIGIN+STACKWIDTH*2,x
-   842 2443 20 BE 21			jsr @printCARD
-   843 2446 CA				dex
-   844 					@print #$20
-   844 				 LDY# $20\ JSR @PRINT
-   844 2447 A0 20		 LDY# $20
-   844 2449 20 86 21		 JSR @PRINT
-   845 244C E8				inx
-   846 244D AD 23 25			lda MUSIC_INDEX
-   847 2450 0A				asl @
-   848 2451 A8				tay
-   849 2452 B9 02 21			lda adr.NAMES,y
-   850 2455 95 94			sta :STACKORIGIN,x
-   851 2457 B9 03 21			lda adr.NAMES+1,y
-   852 245A 95 A4			sta :STACKORIGIN+STACKWIDTH,x
-   853 245C B5 94			lda :STACKORIGIN,x
-   854 245E B4 A4			ldy :STACKORIGIN+STACKWIDTH,x
-   855 2460 20 8F 21			jsr @printSTRING
-   856 2463 CA				dex
-   857 2464 20 81 21			@printEOL
-   858
-   859 				; --- RepeatUntilProlog
-   860 2467			l_01B7
-   861
-   862 				; optimize FAIL ('SYSTEM.PAUSE_0164', main.pas), line = 106
-   863
-   864 2467 20 77 22			jsr SYSTEM.PAUSE_0164
-   865
-   866 				; --- RepeatUntilProlog
-   867 246A			l_01B9
-   868
-   869 				; optimize OK (main.pas), line = 107
-   870
-   871 246A AD 0B D4			lda +ATARI.VCOUNT
-   872 246D C9 10			cmp #$10
-   873 246F D0 F9			jne l_01B9
-   874
-   875 				; optimize OK (main.pas), line = 108
+   833 					.endl
+   834
+   835 				; optimize FAIL ('@print', main.pas), line = 111
+   836
+   837 					@printSTRING #CODEORIGIN+$0099
+   837 				 LDY> CODEORIGIN+$0099\ LDA< CODEORIGIN+$0099\ JSR @PRINTSTRING
+   837 2424 A0 20		 LDY> CODEORIGIN+$0099
+   837 2426 A9 99		 LDA< CODEORIGIN+$0099
+   837 2428 20 8F 21		 JSR @PRINTSTRING
+   838 242B E8				inx
+   839 242C A0 00			ldy #$00
+   840 242E 94 C4			sty :STACKORIGIN+STACKWIDTH*3,x
+   841 2430 AD 23 25			lda MUSIC_INDEX
+   842 2433 18 69 01			add #$01
+   843 2436 95 94			sta :STACKORIGIN,x
+   844 2438 A9 00			lda #$00
+   845 243A 69 00			adc #$00
+   846 243C 95 A4			sta :STACKORIGIN+STACKWIDTH,x
+   847 243E 90 01			scc
+   848 2440 C8				iny
+   849 2441 94 B4			sty :STACKORIGIN+STACKWIDTH*2,x
+   850 2443 20 BE 21			jsr @printCARD
+   851 2446 CA				dex
+   852 					@print #$20
+   852 				 LDY# $20\ JSR @PRINT
+   852 2447 A0 20		 LDY# $20
+   852 2449 20 86 21		 JSR @PRINT
+   853 244C E8				inx
+   854 244D AD 23 25			lda MUSIC_INDEX
+   855 2450 0A				asl @
+   856 2451 A8				tay
+   857 2452 B9 02 21			lda adr.NAMES,y
+   858 2455 95 94			sta :STACKORIGIN,x
+   859 2457 B9 03 21			lda adr.NAMES+1,y
+   860 245A 95 A4			sta :STACKORIGIN+STACKWIDTH,x
+   861 245C B5 94			lda :STACKORIGIN,x
+   862 245E B4 A4			ldy :STACKORIGIN+STACKWIDTH,x
+   863 2460 20 8F 21			jsr @printSTRING
+   864 2463 CA				dex
+   865 2464 20 81 21			@printEOL
+   866
+   867 				; --- RepeatUntilProlog
+   868 2467			l_01B9
+   869
+   870 				; optimize FAIL ('SYSTEM.PAUSE_0164', main.pas), line = 114
+   871
+   872 2467 20 77 22			jsr SYSTEM.PAUSE_0164
+   873
+   874 				; --- RepeatUntilProlog
+   875 246A			l_01BB
    876
-   877 2471 A9 0E			lda #$0E
-   878 2473 8D 1A D0			sta ATARI.COLBK
-   879
-   880 				; optimize FAIL ('m@INLINE', main.pas), line = 110
-   881
-   882 2476				.local +MAIN.MUSIC_PLAY
-   883 2476				m@INLINE
+   877 				; optimize OK (main.pas), line = 115
+   878
+   879 246A AD 0B D4			lda +ATARI.VCOUNT
+   880 246D C9 10			cmp #$10
+   881 246F D0 F9			jne l_01BB
+   882
+   883 				; optimize OK (main.pas), line = 116
+   884
+   885 2471 A9 0E			lda #$0E
+   886 2473 8D 1A D0			sta ATARI.COLBK
+   887
+   888 				; optimize FAIL ('m@INLINE', main.pas), line = 118
+   889
+   890 2476				.local +MAIN.MUSIC_PLAY
+   891 2476				m@INLINE
 Macro: MAIN.MUSIC_PLAY.M@INLINE [Source: main.a65]
      4 2476 78			  sei
      5 				  txa \ pha
@@ -917,263 +929,263 @@ Macro: MAIN.MUSIC_PLAY.M@INLINE [Source: main.a65]
      7 247D AA			 TAX  
      8 247E 58			  cli
 Source: main.a65
-   884 					.endl
-   885
-   886 				; optimize OK (main.pas), line = 112
-   887
-   888 247F A9 00			lda #$00
-   889 2481 8D 1A D0			sta ATARI.COLBK
-   890
-   891 				; optimize FAIL ('CRT.KEYPRESSED', main.pas), line = 113
-   892
-   893 2484 20 D5 23			jsr CRT.KEYPRESSED
-   894 2487 AD 22 25			lda CRT.KEYPRESSED.RESULT
-   895 248A F0 DB			jeq l_01B7
-   896
-   897 				; optimize FAIL ('m@INLINE', main.pas), line = 115
+   892 					.endl
+   893
+   894 				; optimize OK (main.pas), line = 120
+   895
+   896 247F A9 00			lda #$00
+   897 2481 8D 1A D0			sta ATARI.COLBK
    898
-   899 248C				.local +MAIN.SID_OFF
-   900 248C				m@INLINE
+   899 				; optimize FAIL ('CRT.KEYPRESSED', main.pas), line = 121
+   900
+   901 2484 20 D5 23			jsr CRT.KEYPRESSED
+   902 2487 AD 22 25			lda CRT.KEYPRESSED.RESULT
+   903 248A F0 DB			jeq l_01B9
+   904
+   905 				; optimize FAIL ('m@INLINE', main.pas), line = 123
+   906
+   907 248C				.local +MAIN.SID_OFF
+   908 248C				m@INLINE
 Macro: MAIN.SID_OFF.M@INLINE [Source: main.a65]
      4 248C A9 00			lda #$00
      5 248E A0 18			ldy #$18
      6 2490 99 00 D5 88 10 FA		sta:rpl $D500,y-
 Source: main.a65
-   901 					.endl
-   902
-   903 				; optimize FAIL (0, main.pas), line = 117
-   904
-   905 2496 EE 23 25			inc MUSIC_INDEX
-   906
-   907 				; optimize OK (main.pas), line = 118
-   908
-   909 2499 AD 23 25			lda MUSIC_INDEX
-   910 249C C9 09			cmp #$09
-   911 249E B0 03 4C E8 23		jcc l_019D
-   912 24A3			@exit
-   913 					.ifdef @new
-   914 					lda <@VarData
-   915 					sta :ztmp
-   916 					lda >@VarData
-   917 					ldy #@VarDataSize-1
-   918 					jmp @FreeMem
-   919 					els
-   920 24A3 60				rts						; ret
-   921 					eif
-   922 				.endl
-   923 24A4			l_0109
-   924
-   925 				; optimize FAIL ('CRT.CLRSCR', main.pas), line = 124
-   926
-   927 24A4 20 CF 23			jsr CRT.CLRSCR
-   928
-   929 				; optimize FAIL ('@print', main.pas), line = 125
-   930
-   931 					@printSTRING #CODEORIGIN+$009E
-   931 				 LDY> CODEORIGIN+$009E\ LDA< CODEORIGIN+$009E\ JSR @PRINTSTRING
-   931 24A7 A0 20		 LDY> CODEORIGIN+$009E
-   931 24A9 A9 9E		 LDA< CODEORIGIN+$009E
-   931 24AB 20 8F 21		 JSR @PRINTSTRING
-   932 24AE 20 81 21			@printEOL
-   933
-   934 				; optimize FAIL ('@print', main.pas), line = 126
-   935
-   936 24B1 20 81 21			@printEOL
-   937
-   938 				; optimize FAIL ('@print', main.pas), line = 127
-   939
-   940 					@printSTRING #CODEORIGIN+$00B6
-   940 				 LDY> CODEORIGIN+$00B6\ LDA< CODEORIGIN+$00B6\ JSR @PRINTSTRING
-   940 24B4 A0 20		 LDY> CODEORIGIN+$00B6
-   940 24B6 A9 B6		 LDA< CODEORIGIN+$00B6
-   940 24B8 20 8F 21		 JSR @PRINTSTRING
-   941 24BB 20 81 21			@printEOL
-   942
-   943 				; optimize FAIL ('@print', main.pas), line = 128
-   944
-   945 					@printSTRING #CODEORIGIN+$00D0
-   945 				 LDY> CODEORIGIN+$00D0\ LDA< CODEORIGIN+$00D0\ JSR @PRINTSTRING
-   945 24BE A0 20		 LDY> CODEORIGIN+$00D0
-   945 24C0 A9 D0		 LDA< CODEORIGIN+$00D0
-   945 24C2 20 8F 21		 JSR @PRINTSTRING
-   946 24C5 20 81 21			@printEOL
+   909 					.endl
+   910
+   911 				; optimize FAIL (0, main.pas), line = 125
+   912
+   913 2496 EE 23 25			inc MUSIC_INDEX
+   914
+   915 				; optimize OK (main.pas), line = 126
+   916
+   917 2499 AD 23 25			lda MUSIC_INDEX
+   918 249C C9 09			cmp #$09
+   919 249E B0 03 4C E3 23		jcc l_019E
+   920 24A3			@exit
+   921 					.ifdef @new
+   922 					lda <@VarData
+   923 					sta :ztmp
+   924 					lda >@VarData
+   925 					ldy #@VarDataSize-1
+   926 					jmp @FreeMem
+   927 					els
+   928 24A3 60				rts						; ret
+   929 					eif
+   930 				.endl
+   931 24A4			l_0109
+   932
+   933 				; optimize FAIL ('CRT.CLRSCR', main.pas), line = 132
+   934
+   935 24A4 20 CF 23			jsr CRT.CLRSCR
+   936
+   937 				; optimize FAIL ('@print', main.pas), line = 134
+   938
+   939 					@printSTRING #CODEORIGIN+$009E
+   939 				 LDY> CODEORIGIN+$009E\ LDA< CODEORIGIN+$009E\ JSR @PRINTSTRING
+   939 24A7 A0 20		 LDY> CODEORIGIN+$009E
+   939 24A9 A9 9E		 LDA< CODEORIGIN+$009E
+   939 24AB 20 8F 21		 JSR @PRINTSTRING
+   940 24AE 20 81 21			@printEOL
+   941
+   942 				; optimize FAIL ('@print', main.pas), line = 135
+   943
+   944 24B1 20 81 21			@printEOL
+   945
+   946 				; optimize FAIL ('@print', main.pas), line = 136
    947
-   948 				; optimize FAIL ('@print', main.pas), line = 129
-   949
-   950 24C8 20 81 21			@printEOL
-   951
-   952 				; optimize FAIL ('@print', main.pas), line = 130
-   953
-   954 					@printSTRING #CODEORIGIN+$00EC
-   954 				 LDY> CODEORIGIN+$00EC\ LDA< CODEORIGIN+$00EC\ JSR @PRINTSTRING
-   954 24CB A0 20		 LDY> CODEORIGIN+$00EC
-   954 24CD A9 EC		 LDA< CODEORIGIN+$00EC
-   954 24CF 20 8F 21		 JSR @PRINTSTRING
-   955 24D2 20 81 21			@printEOL
-   956
-   957 				; optimize FAIL ('@print', main.pas), line = 131
-   958
-   959 24D5 20 81 21			@printEOL
-   960
-   961 				; optimize FAIL ('MAIN_LOOP', main.pas), line = 133
-   962
-   963 24D8 20 E8 23			jsr MAIN_LOOP
+   948 					@printSTRING #CODEORIGIN+$00B6
+   948 				 LDY> CODEORIGIN+$00B6\ LDA< CODEORIGIN+$00B6\ JSR @PRINTSTRING
+   948 24B4 A0 20		 LDY> CODEORIGIN+$00B6
+   948 24B6 A9 B6		 LDA< CODEORIGIN+$00B6
+   948 24B8 20 8F 21		 JSR @PRINTSTRING
+   949 24BB 20 81 21			@printEOL
+   950
+   951 				; optimize FAIL ('@print', main.pas), line = 137
+   952
+   953 					@printSTRING #CODEORIGIN+$00D0
+   953 				 LDY> CODEORIGIN+$00D0\ LDA< CODEORIGIN+$00D0\ JSR @PRINTSTRING
+   953 24BE A0 20		 LDY> CODEORIGIN+$00D0
+   953 24C0 A9 D0		 LDA< CODEORIGIN+$00D0
+   953 24C2 20 8F 21		 JSR @PRINTSTRING
+   954 24C5 20 81 21			@printEOL
+   955
+   956 				; optimize FAIL ('@print', main.pas), line = 138
+   957
+   958 24C8 20 81 21			@printEOL
+   959
+   960 				; optimize FAIL ('@print', main.pas), line = 139
+   961
+   962 					@printSTRING #CODEORIGIN+$00EC
+   962 				 LDY> CODEORIGIN+$00EC\ LDA< CODEORIGIN+$00EC\ JSR @PRINTSTRING
+   962 24CB A0 20		 LDY> CODEORIGIN+$00EC
+   962 24CD A9 EC		 LDA< CODEORIGIN+$00EC
+   962 24CF 20 8F 21		 JSR @PRINTSTRING
+   963 24D2 20 81 21			@printEOL
    964
-   965 				; optimize FAIL ('CRT.CLRSCR', main.pas), line = 135
+   965 				; optimize FAIL ('@print', main.pas), line = 140
    966
-   967 24DB 20 CF 23			jsr CRT.CLRSCR
-   968 					@printSTRING #CODEORIGIN+$00FC
-   968 				 LDY> CODEORIGIN+$00FC\ LDA< CODEORIGIN+$00FC\ JSR @PRINTSTRING
-   968 24DE A0 20		 LDY> CODEORIGIN+$00FC
-   968 24E0 A9 FC		 LDA< CODEORIGIN+$00FC
-   968 24E2 20 8F 21		 JSR @PRINTSTRING
-   969 24E5 A9 32			lda #$32
-   970 24E7 8D 1B 25			sta SYSTEM.PAUSE_0165.N
-   971 24EA A9 00			lda #$00
-   972 24EC 8D 1C 25			sta SYSTEM.PAUSE_0165.N+1
-   973 24EF 20 7E 22			jsr SYSTEM.PAUSE_0165
+   967 24D5 20 81 21			@printEOL
+   968
+   969 				; optimize FAIL ('MAIN_LOOP', main.pas), line = 142
+   970
+   971 24D8 20 E3 23			jsr MAIN_LOOP
+   972
+   973 				; optimize FAIL ('CRT.CLRSCR', main.pas), line = 144
    974
-   975 				; optimize FAIL ('m@INLINE', main.pas), line = 137
-   976
-   977 24F2				.local +MAIN.RESET_SYSTEM
-   978 24F2				m@INLINE
+   975 24DB 20 CF 23			jsr CRT.CLRSCR
+   976 					@printSTRING #CODEORIGIN+$00FC
+   976 				 LDY> CODEORIGIN+$00FC\ LDA< CODEORIGIN+$00FC\ JSR @PRINTSTRING
+   976 24DE A0 20		 LDY> CODEORIGIN+$00FC
+   976 24E0 A9 FC		 LDA< CODEORIGIN+$00FC
+   976 24E2 20 8F 21		 JSR @PRINTSTRING
+   977 24E5 A9 32			lda #$32
+   978 24E7 8D 1B 25			sta SYSTEM.PAUSE_0165.N
+   979 24EA A9 00			lda #$00
+   980 24EC 8D 1C 25			sta SYSTEM.PAUSE_0165.N+1
+   981 24EF 20 7E 22			jsr SYSTEM.PAUSE_0165
+   982
+   983 				; optimize FAIL ('m@INLINE', main.pas), line = 146
+   984
+   985 24F2				.local +MAIN.RESET_SYSTEM
+   986 24F2				m@INLINE
 Macro: MAIN.RESET_SYSTEM.M@INLINE [Source: main.a65]
      4 24F2 6C FC FF		  jmp (RESET_VECTOR)
 Source: main.a65
-   979 					.endl
-   980
-   981 				; ------------------------------------------------------------
-   982
-   983 = 4300			MUSIC_APL_LONDON	= $4300
-   984 = 4900			MUSIC_APL_ART	= $4900
-   985 = 5100			MUSIC_APL_BATMANIA	= $5100
-   986 = 5800			MUSIC_APL_CONTAXIA	= $5800
-   987 = 6000			MUSIC_APL_DOMINATION	= $6000
-   988 = 6900			MUSIC_APL_FUNCIE	= $6900
-   989 = 7200			MUSIC_APL_CHANCE	= $7200
-   990 = 7A00			MUSIC_APL_LOVE	= $7A00
-   991 = 8200			MUSIC_APL_PIZZA	= $8200
-   992 = 9000			MUSIC	= $9000
-   993 = 9048			M_INIT	= $9048
-   994 = 9021			M_PLAY	= $9021
-   995 = 1000			M_SPACE	= $1000
-   996 = 0008			M_COUNTER	= $08
-   997 = FFFC			RESET_VECTOR	= $FFFC
-   998 = D500			SID_REG_HEAD	= $D500
-   999 = 0010			RASTER_START	= $10
-  1000 = 2102			adr.NAMES	= CODEORIGIN+$0102
-  1001 24F5			.var NAMES	= adr.NAMES .word
-  1002 = 2114			adr.ZAKS	= CODEORIGIN+$0114
-  1003 24F5			.var ZAKS	= adr.ZAKS .word
-  1004 = 2523			MUSIC_INDEX	= DATAORIGIN+$0013
-  1005 24F5			@exit
-  1006
-  1007 24F5 A2 00		@halt	ldx #$00
-  1008 24F7 9A				txs
-  1009 					.ifdef MAIN.@DEFINES.ROMOFF
-  1010 					inc portb
-  1011 					.fi
-  1012
-  1013 24F8 A0 01			ldy #$01
+   987 					.endl
+   988
+   989 				; ------------------------------------------------------------
+   990
+   991 = 4300			MUSIC_APL_LONDON	= $4300
+   992 = 4900			MUSIC_APL_ART	= $4900
+   993 = 5100			MUSIC_APL_BATMANIA	= $5100
+   994 = 5800			MUSIC_APL_CONTAXIA	= $5800
+   995 = 6000			MUSIC_APL_DOMINATION	= $6000
+   996 = 6900			MUSIC_APL_FUNCIE	= $6900
+   997 = 7200			MUSIC_APL_CHANCE	= $7200
+   998 = 7A00			MUSIC_APL_LOVE	= $7A00
+   999 = 8200			MUSIC_APL_PIZZA	= $8200
+  1000 = 9000			MUSIC	= $9000
+  1001 = 9048			M_INIT	= $9048
+  1002 = 9021			M_PLAY	= $9021
+  1003 = 1000			M_SPACE	= $1000
+  1004 = 0008			M_COUNTER	= $08
+  1005 = FFFC			RESET_VECTOR	= $FFFC
+  1006 = D500			SID_REG_HEAD	= $D500
+  1007 = 0010			RASTER_START	= $10
+  1008 = 2102			adr.NAMES	= CODEORIGIN+$0102
+  1009 24F5			.var NAMES	= adr.NAMES .word
+  1010 = 2114			adr.ZAKS	= CODEORIGIN+$0114
+  1011 24F5			.var ZAKS	= adr.ZAKS .word
+  1012 = 2523			MUSIC_INDEX	= DATAORIGIN+$0013
+  1013 24F5			@exit
   1014
-  1015 24FA 60				rts
-  1016
-  1017 				; ------------------------------------------------------------
-  1018
-  1019 24FB 00 00 00 00 00 00 + IOCB@COPY	:16 brk
+  1015 24F5 A2 00		@halt	ldx #$00
+  1016 24F7 9A				txs
+  1017 					.ifdef MAIN.@DEFINES.ROMOFF
+  1018 					inc portb
+  1019 					.fi
   1020
-  1021 				; ------------------------------------------------------------
+  1021 24F8 A0 01			ldy #$01
   1022
-  1023 250B			.local	@DEFINES
-  1024 250B			ATARI
-  1025 				.endl
+  1023 24FA 60				rts
+  1024
+  1025 				; ------------------------------------------------------------
   1026
-  1027 250B			.local	@RESOURCE
-  1028 				.endl
-  1029
-  1030 = 250B 02 21		NAMES
-  1030 = 250D 14 21		ZAKS
-  1030 				.endl							; MAIN
-  1031
-  1032 				; ------------------------------------------------------------
-  1033 				; ------------------------------------------------------------
+  1027 24FB 00 00 00 00 00 00 + IOCB@COPY	:16 brk
+  1028
+  1029 				; ------------------------------------------------------------
+  1030
+  1031 250B			.local	@DEFINES
+  1032 250B			ATARI
+  1033 				.endl
   1034
-  1035 				.macro	UNITINITIALIZATION
-  1036 				
-  1037 					.ifdef MAIN.SYSTEM.@UnitInit
-  1038 					jsr MAIN.SYSTEM.@UnitInit
-  1039 					.fi
-  1040 				
-  1041 					.ifdef MAIN.ATARI.@UnitInit
-  1042 					jsr MAIN.ATARI.@UnitInit
-  1043 					.fi
+  1035 250B			.local	@RESOURCE
+  1036 				.endl
+  1037
+  1038 = 250B 02 21		NAMES
+  1038 = 250D 14 21		ZAKS
+  1038 				.endl							; MAIN
+  1039
+  1040 				; ------------------------------------------------------------
+  1041 				; ------------------------------------------------------------
+  1042
+  1043 				.macro	UNITINITIALIZATION
   1044 				
-  1045 					.ifdef MAIN.APLIB.@UnitInit
-  1046 					jsr MAIN.APLIB.@UnitInit
+  1045 					.ifdef MAIN.SYSTEM.@UnitInit
+  1046 					jsr MAIN.SYSTEM.@UnitInit
   1047 					.fi
   1048 				
-  1049 					.ifdef MAIN.CRT.@UnitInit
-  1050 					jsr MAIN.CRT.@UnitInit
+  1049 					.ifdef MAIN.ATARI.@UnitInit
+  1050 					jsr MAIN.ATARI.@UnitInit
   1051 					.fi
-  1052 				.endm
-  1053
-  1054 				; ------------------------------------------------------------
-  1055
-  1056 					ift .SIZEOF(MAIN.SYSTEM) > 0
-  1057 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
-  1057 				SYSTEM: $2277..$229E
-  1058 					eif
-  1059
-  1060 					ift .SIZEOF(MAIN.ATARI) > 0
-  1061 					.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
-  1062 					eif
+  1052 				
+  1053 					.ifdef MAIN.APLIB.@UnitInit
+  1054 					jsr MAIN.APLIB.@UnitInit
+  1055 					.fi
+  1056 				
+  1057 					.ifdef MAIN.CRT.@UnitInit
+  1058 					jsr MAIN.CRT.@UnitInit
+  1059 					.fi
+  1060 				.endm
+  1061
+  1062 				; ------------------------------------------------------------
   1063
-  1064 					ift .SIZEOF(MAIN.APLIB) > 0
-  1065 					.print 'APLIB: ',MAIN.APLIB,'..',MAIN.APLIB+.SIZEOF(MAIN.APLIB)-1
-  1065 				APLIB: $229F..$23CE
+  1064 					ift .SIZEOF(MAIN.SYSTEM) > 0
+  1065 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+  1065 				SYSTEM: $2277..$229E
   1066 					eif
   1067
-  1068 					ift .SIZEOF(MAIN.CRT) > 0
-  1069 					.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
-  1069 				CRT: $23CF..$23E7
+  1068 					ift .SIZEOF(MAIN.ATARI) > 0
+  1069 					.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
   1070 					eif
   1071
-  1072 					.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
-  1072 				CODE: $2000..$250A
-  1073
-  1074 				; ------------------------------------------------------------
+  1072 					ift .SIZEOF(MAIN.APLIB) > 0
+  1073 					.print 'APLIB: ',MAIN.APLIB,'..',MAIN.APLIB+.SIZEOF(MAIN.APLIB)-1
+  1073 				APLIB: $229F..$23CE
+  1074 					eif
   1075
-  1076 250F				.align $0004
-  1077
-  1078 2510			DATAORIGIN
-  1079 2510-2515> 28 00 18 00 + .by  $28 $00 $18 $00 $2D $0C
-  1080
-  1081 = 0006			VARINITSIZE	= *-DATAORIGIN
-  1082 = 0014			VARDATASIZE	= 20
+  1076 					ift .SIZEOF(MAIN.CRT) > 0
+  1077 					.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
+  1077 				CRT: $23CF..$23E2
+  1078 					eif
+  1079
+  1080 					.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+  1080 				CODE: $2000..$250A
+  1081
+  1082 				; ------------------------------------------------------------
   1083
-  1084 = 2524			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  1084 250F				.align $0004
   1085
-  1086 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
-  1086 				DATA: $2510..$2524
-  1087
-  1088 02E0-02E1> 4F 22			run START
-  1089
-  1090 				; ------------------------------------------------------------
+  1086 2510			DATAORIGIN
+  1087 2510-2515> 28 00 18 00 + .by  $28 $00 $18 $00 $2D $0C
+  1088
+  1089 = 0006			VARINITSIZE	= *-DATAORIGIN
+  1090 = 0014			VARDATASIZE	= 20
   1091
-  1092 				.macro	STATICDATA
-  1093 				.by  $0F $4C $6F $6E $64 $6F $6E $20  $44 $65 $6D $6F $20 $20 $20 $20  $00 $0F $42 $61 $74 $6D $61 $6E
-  1094 				.by  $69 $61 $20 $49 $49 $20 $35 $20  $20 $00 $0F $41 $75 $64 $69 $6F  $20 $41 $72 $74 $20 $20 $20 $20
-  1095 				.by  $20 $20 $00 $0F $43 $6F $6E $74  $61 $78 $69 $61 $20 $20 $20 $20  $20 $20 $20 $00 $0F $44 $6F $6D
-  1096 				.by  $69 $6E $61 $74 $69 $6F $6E $20  $20 $20 $20 $20 $00 $0F $46 $75  $6E $63 $69 $65 $20 $20 $20 $20
-  1097 				.by  $20 $20 $20 $20 $20 $00 $0F $49  $6E $20 $43 $68 $61 $6E $63 $65  $20 $20 $20 $20 $20 $20 $00 $0F
-  1098 				.by  $4C $65 $73 $73 $6F $6E $73 $20  $69 $6E $20 $4C $6F $76 $65 $00  $0F $50 $65 $70 $70 $65 $72 $65
-  1099 				.by  $64 $20 $50 $69 $7A $7A $61 $20  $00 $03 $4E $6F $2E $00 $16 $45  $78 $70 $65 $63 $74 $69 $6E $67
-  1100 				.by  $20 $53 $49 $44 $20 $6F $6E $20  $24 $64 $35 $30 $30 $00 $18 $43  $6F $6D $70 $6F $73 $65 $72 $20
-  1101 				.by  $3A $20 $52 $65 $79 $6E $20 $4F  $75 $77 $65 $68 $61 $6E $64 $00  $1A $50 $6C $61 $79 $65 $72 $20
-  1102 				.by  $20 $20 $3A $20 $4D $75 $73 $69  $63 $20 $41 $73 $73 $65 $6D $62  $6C $65 $72 $00 $0E $70 $72 $65
-  1103 				.by  $73 $73 $20 $73 $70 $61 $63 $65  $2E $2E $2E $00 $04 $42 $59 $45  $21 $00 $00 $20 $11 $20 $22 $20
-  1104 				.by  $33 $20 $44 $20 $55 $20 $66 $20  $77 $20 $88 $20 $00 $43 $00 $51  $00 $49 $00 $58 $00 $60 $00 $69
-  1105 				.by  $00 $72 $00 $7A $00 $82
-  1106 				.endm
-  1107
-  1108 					end
+  1092 = 2524			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  1093
+  1094 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+  1094 				DATA: $2510..$2524
+  1095
+  1096 02E0-02E1> 4F 22			run START
+  1097
+  1098 				; ------------------------------------------------------------
+  1099
+  1100 				.macro	STATICDATA
+  1101 				.by  $0F $4C $6F $6E $64 $6F $6E $20  $44 $65 $6D $6F $20 $20 $20 $20  $00 $0F $42 $61 $74 $6D $61 $6E
+  1102 				.by  $69 $61 $20 $49 $49 $20 $35 $20  $20 $00 $0F $41 $75 $64 $69 $6F  $20 $41 $72 $74 $20 $20 $20 $20
+  1103 				.by  $20 $20 $00 $0F $43 $6F $6E $74  $61 $78 $69 $61 $20 $20 $20 $20  $20 $20 $20 $00 $0F $44 $6F $6D
+  1104 				.by  $69 $6E $61 $74 $69 $6F $6E $20  $20 $20 $20 $20 $00 $0F $46 $75  $6E $63 $69 $65 $20 $20 $20 $20
+  1105 				.by  $20 $20 $20 $20 $20 $00 $0F $49  $6E $20 $43 $68 $61 $6E $63 $65  $20 $20 $20 $20 $20 $20 $00 $0F
+  1106 				.by  $4C $65 $73 $73 $6F $6E $73 $20  $69 $6E $20 $4C $6F $76 $65 $00  $0F $50 $65 $70 $70 $65 $72 $65
+  1107 				.by  $64 $20 $50 $69 $7A $7A $61 $20  $00 $03 $4E $6F $2E $00 $16 $45  $78 $70 $65 $63 $74 $69 $6E $67
+  1108 				.by  $20 $53 $49 $44 $20 $6F $6E $20  $24 $64 $35 $30 $30 $00 $18 $43  $6F $6D $70 $6F $73 $65 $72 $20
+  1109 				.by  $3A $20 $52 $65 $79 $6E $20 $4F  $75 $77 $65 $68 $61 $6E $64 $00  $1A $50 $6C $61 $79 $65 $72 $20
+  1110 				.by  $20 $20 $3A $20 $4D $75 $73 $69  $63 $20 $41 $73 $73 $65 $6D $62  $6C $65 $72 $00 $0E $70 $72 $65
+  1111 				.by  $73 $73 $20 $73 $70 $61 $63 $65  $2E $2E $2E $00 $04 $42 $59 $45  $21 $00 $00 $20 $11 $20 $22 $20
+  1112 				.by  $33 $20 $44 $20 $55 $20 $66 $20  $77 $20 $88 $20 $00 $43 $00 $51  $00 $49 $00 $58 $00 $60 $00 $69
+  1113 				.by  $00 $72 $00 $7A $00 $82
+  1114 				.endm
+  1115
+  1116 					end
