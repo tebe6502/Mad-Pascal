@@ -61,7 +61,7 @@ function ReadKey: char; assembler;
 asm
 	txa:pha
 
-	jsr $ffe4	; GETIN
+	lda $cb
 
 	cmp #64
 	scc
@@ -70,7 +70,6 @@ asm
 	sta Result
 
 	pla:tax
-
 end;
 
 
@@ -136,15 +135,31 @@ function Keypressed: Boolean; assembler;
 @returns: FALSE otherwise
 *)
 asm
-	ldy #$00	; false
-	lda $cb
-	cmp #$40
-	beq skp
-	iny		; true
+	txa:pha
 
-;	sty kbcodes
+	lda $0289
+	pha
+	lda $028a
+	pha
 
-skp	sty Result
+	lda #1
+	sta $0289	// disable keyboard buffer
+	lda #127
+	sta $028a	// disable key repeat
+
+	jsr $F142
+	sta $cb
+
+	seq
+	lda #1
+	sta Result
+
+	pla
+	sta $028a
+	pla
+	sta $0289
+
+	pla:tax
 end;
 
 
