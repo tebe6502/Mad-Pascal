@@ -109,7 +109,7 @@ begin
       colbk := 0;
     until keypressed;
 
-    readkey; // reset keypressed
+    readkey; //reset keypressed
 
     sid_off;
 
