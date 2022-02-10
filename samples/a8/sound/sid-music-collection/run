@@ -11,7 +11,7 @@ if [ -f $name.a65 ]; then
   [ ! -d "output" ] && mkdir output
   mv $name.a65 output/
   $mads output/$name.a65 -x -i:$base -o:output/$name.xex
-  a8-soundbox -slightsid mono output/main.xex
+  a8-soundbox -slightsid mono output/$name.xex
 else
   exit 1
 fi
