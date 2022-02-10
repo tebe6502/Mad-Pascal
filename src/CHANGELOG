@@ -1,7 +1,9 @@
+11.02.2022
+- poprawiony zapis bloków ASM do pliku wynikowego
+
 30.01.2022
 - OptimizeEAX
 - poprawki dla @FORTMP_, wymagana nowa wersja Mad Assemblera
-
 
 23.01.2022
 - uproszczona inicjalizacja VBXE, poprawki dla modu³ów VBXE, GRAPH, CRT
