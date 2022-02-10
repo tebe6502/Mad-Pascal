@@ -119,6 +119,7 @@ end;
 
 begin
   clrscr;
+
   writeln('Expecting SID on $d500');
   writeln;
   writeln('Composer : Reyn Ouwehand');
