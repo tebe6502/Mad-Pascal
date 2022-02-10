@@ -132,12 +132,9 @@ asm
 	ldy #$00	; false
 	lda kbcodes
 	cmp #$ff
-	beq skp
+	seq
 	iny		; true
-
-;	sty kbcodes
-
-skp	sty Result
+	sty Result
 end;
 
 
