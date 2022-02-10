@@ -133,7 +133,6 @@ asm
 	lda #$ff
 	cmp kbcodes
 	beq skp
-	lda #$ff
 	iny		; true
 	sta kbcodes
 
