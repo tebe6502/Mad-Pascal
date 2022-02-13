@@ -59,17 +59,14 @@ function ReadKey: char; assembler;
 @returns: char
 *)
 asm
-	txa:pha
+getkey	lda $cb
+	cmp #$40
+	beq getkey
 
-	lda $cb
-
-	cmp #64
 	scc
 	eor #%00100000
 
 	sta Result
-
-	pla:tax
 end;
 
 
@@ -112,7 +109,7 @@ loop	cpy count
 	cpx count+1
 	beq stop
 
-@	lda #$70
+@	lda #$40
 
 cnt	adc #1
 	bne cnt
@@ -137,27 +134,12 @@ function Keypressed: Boolean; assembler;
 asm
 	txa:pha
 
-	lda $0289
-	pha
-	lda $028a
-	pha
-
-	lda #1
-	sta $0289	// disable keyboard buffer
-	lda #127
-	sta $028a	// disable key repeat
-
 	jsr $F142
 	sta $cb
 
 	seq
 	lda #1
 	sta Result
-
-	pla
-	sta $028a
-	pla
-	sta $0289
 
 	pla:tax
 end;

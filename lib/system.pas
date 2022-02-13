@@ -1831,14 +1831,13 @@ Return a string of spaces
 @returns: pointer to string
 *)
 asm
-{	ldy #0
+	ldy #0
 	lda #' '
 	sta:rne @buf,y+
 
 	mva b @buf
 
 	mwa #@buf Result
-};
 end;
 
 
@@ -1853,14 +1852,13 @@ Return a string consisting of 1 character repeated N times.
 @returns: pointer to string
 *)
 asm
-{	ldy #0
+	ldy #0
 	lda c
 	sta:rne @buf,y+
 
 	mva l @buf
 
 	mwa #@buf Result
-};
 end;
 
 
@@ -1873,9 +1871,8 @@ Set length of a string.
 @param: len - new length (BYTE)
 *)
 asm
-{	ldy #0
+	ldy #0
 	mva Len (:edx),y
-};
 end;
 
 
@@ -1890,7 +1887,7 @@ Convert integer to string with binary representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	ldy Digits
 	cpy #32
@@ -1914,7 +1911,6 @@ _tob1	lda #0
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
-};
 end;
 
 
@@ -1929,7 +1925,7 @@ Convert integer to a string with octal representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	ldy Digits
 	cpy #32
@@ -1961,10 +1957,11 @@ _toct2	lsr Value+3
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
-};
 end;
 
+
 {$i '../src/targets/system.inc'}
+
 
 function ParamCount: byte; assembler;
 (*
@@ -1974,9 +1971,8 @@ Return number of command-line parameters passed to the program.
 @returns: byte
 *)
 asm
-{	@cmdline #255
+	@cmdline #255
 	sta Result
-};
 end;
 
 
@@ -1990,12 +1986,11 @@ Return value of a command-line argument.
 @returns: string[32]
 *)
 asm
-{	@cmdline i
+	@cmdline i
 
 ;	@move #@buf Result #33
 	ldy #256-33
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
-};
 end;
 
 
@@ -2010,7 +2005,7 @@ Append one string to another.
 @returns: string (a+b)
 *)
 asm
-{	cpw a #@buf
+	cpw a #@buf
 	beq skp
 
 	mva #0 @buf
@@ -2020,7 +2015,6 @@ skp
 
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
-};
 end;
 
 
@@ -2030,7 +2024,7 @@ function Concat(a: PString; b: char): string; assembler; overload;
 
 *)
 asm
-{	cpw a #@buf
+	cpw a #@buf
 	beq skp
 
 	mva #0 @buf
@@ -2043,7 +2037,6 @@ skp
 
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
-};
 end;
 
 
@@ -2053,14 +2046,13 @@ function Concat(a: char; b: PString): string; assembler; overload;
 
 *)
 asm
-{	mva #1 @buf
+	mva #1 @buf
 	lda a
 	sta @buf+1
 	@addString b
 
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
-};
 end;
 
 
@@ -2082,7 +2074,7 @@ function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa S :bp2
 	ldy #0
@@ -2127,7 +2119,6 @@ lp	lda (:bp2),y
 	bne lp
 
 stop	pla:tax
-};
 end;
 
 
@@ -2172,7 +2163,6 @@ Getmem reserves Size bytes memory, and returns a pointer to this memory in p.
 @param: size
 *)
 asm
-{
 	ldy #$00
 	lda :psptr
 	sta (P),y
@@ -2181,7 +2171,6 @@ asm
 	sta (P),y
 
 	adw :psptr size
-};
 end;
 
 
@@ -2194,7 +2183,6 @@ Freemem releases the memory occupied by the pointer P
 @param: size
 *)
 asm
-{
 	cpw psptr #:PROGRAMSTACK
 	beq skp
 	bcc skp
@@ -2207,7 +2195,6 @@ asm
 
 	sbw :psptr size
 skp
-};
 end;
 
 
