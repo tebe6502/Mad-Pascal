@@ -288,7 +288,6 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
 
-
  if target.id = 'a8' then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');

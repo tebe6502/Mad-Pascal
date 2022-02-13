@@ -704,6 +704,36 @@ var
 {$ENDIF}
 
 
+function Tab2Space(a: string; spc: byte = 8): string;
+var column, nextTabStop: integer;
+    ch: char;
+begin
+
+ Result := '';
+ column:=0;
+
+ for ch in a do
+  case ch of
+
+   #9:
+	begin
+		nextTabStop := (column + spc) div spc * spc;
+		while column <> nextTabStop do begin Result := Result + ' '; inc(column) end;
+	end;
+
+   CR, LF:
+	begin
+		Result := Result + ch;
+		column:=0;
+        end;
+
+  else
+		Result := Result + ch;
+		inc(column);
+  end;
+
+end;
+
 
 function StrToInt(const a: string): Int64;
 (*----------------------------------------------------------------------------*)
@@ -13583,7 +13613,7 @@ end;
 
 
 {
-if (pos('ldy #$00', listing[i]) > 0) then begin
+if (pos('sta :STACKORIGIN+9', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -13765,7 +13795,7 @@ end;
 
 
     if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
-       (listing[i+1] <> #9'sta #$00') and sta_a(i+1) then					// sta			; 1
+       sta_a(i+1) then										// sta			; 1
      begin
        listing[i] := '';
        Result:=false; Break;
@@ -13861,6 +13891,20 @@ end;
     if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
        ldy(i+1) and										// ldy 			; 1
        (lda_a(i+2) or mva(i+2) or mwa(i+2) or tya(i+2)) then					// lda|mva|mwa|tya	; 2
+     begin
+	listing[i] := '';
+
+	if (i>0) and lda(i-1) then listing[i-1] := '';
+
+	Result:=false; Break;
+     end;
+
+
+    if (listing[i] = #9'sta #$00') and								// sta #$00		; 0
+       ldy(i+1) and										// ldy			; 1
+       sty_bp_1(i+2) and									// sty :bp+1		; 2
+       ldy(i+3) and										// ldy			; 3
+       lda(i+4) then										// lda			; 4
      begin
 	listing[i] := '';
 
@@ -40373,6 +40417,7 @@ function CompileFactor(i: Integer; out isZero: Boolean; out ValType: Byte; VarTy
 var IdentTemp, IdentIndex, j, oldCodeSize: Integer;
     ActualParamType, AllocElementType,  Kind, oldPass: Byte;
     Value, ConstVal: Int64;
+    svar: string;
     Param: TParamList;
     ftmp: TFloat;
     fl: single;
@@ -41315,16 +41360,22 @@ case Tok[i].Kind of
 
 			IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
 
-			if Ident[IdentTemp].IsNestedFunction = FALSE then
-	 		Error(i, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found');
+		       	if Ident[IdentTemp].IsNestedFunction = FALSE then
+			 Error(j, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found');
 
-			CompileActualParameters(i, IdentTemp, IdentIndex);
+			if Tok[j].Kind <> IDENTTOK then iError(j, VariableExpected);
+
+			svar := GetLocalName(GetIdent(Tok[j].Name^));
+
+			asm65(#9'lda ' + svar);
+	       		asm65(#9'sta :TMP+1');
+			asm65(#9'lda ' + svar + '+1');
+			asm65(#9'sta :TMP+2');
+	       		asm65(#9'lda #$4C');
+	       		asm65(#9'sta :TMP');
+	       		asm65(#9'jsr :TMP');
 
 			ValType := Ident[IdentTemp].DataType;
-
-
-//		  ValType := Ident[IdentIndex].AllocElementType;
-
 
 		end else
 		if (ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in OrdinalTypes + RealTypes) then begin
@@ -47505,11 +47556,13 @@ if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIn
    Error(i, 'Calling convention directive "REGISTER" not applicable with recursion');
 
  if not isInl then begin
+  asm65(#9'.ifdef @VarData');
   asm65('@new'#9'lda <@VarData');			// @AllocMem
   asm65(#9'sta :ztmp');
   asm65(#9'lda >@VarData');
   asm65(#9'ldy #@VarDataSize-1');
   asm65(#9'jsr @AllocMem');
+  asm65(#9'eif');
  end;
 
 end;
@@ -49482,7 +49535,7 @@ begin
  {$ENDIF}
 
 
- if outputFile <> '' then
+ if ExtractFileName(outputFile) <> '' then
   AssignFile(OutFile, outputFile)
  else
   AssignFile(OutFile, ChangeFileExt(UnitName[1].Name, '.a65') );
