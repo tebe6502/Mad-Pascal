@@ -7,7 +7,7 @@ unit fastgraph;
 @description:
 <http://www.freepascal.org/docs-html/rtl/graph/index-5.html>
 
-Marcin ¯ukowski (Eru/TQA): fLine
+Marcin Å»ukowski (Eru/TQA): fLine
 *)
 
 

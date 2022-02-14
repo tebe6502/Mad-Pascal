@@ -37,7 +37,7 @@ Contributors:
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
-+ Daniel KoümiÒski :
++ Daniel Ko≈∫mi≈Ñski :
 	- unit STRINGUTILS
 	- unit CIO
 
@@ -58,7 +58,7 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
-+ Marcin Øukowski :
++ Marcin ≈ªukowski :
 	- unit FASTGRAPH: fLine
 
 + Michael Jaskula :
@@ -84,7 +84,7 @@ Contributors:
 	- 8x8 => 16 multiplication routine (base\common\byte.asm)
 	- 16x16 => 32 multiplication routine (base\common\word.asm)
 
-+ Wojciech BociaÒski :
++ Wojciech Bocia≈Ñski :
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
 	- MADSTRAP
 	- PASDOC
@@ -93,7 +93,7 @@ Contributors:
 # rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
 
-# typ REAL Fixed-Point Q16.16 przekracza 32 bity dla MUL i DIV, czÍsty OVERFLOW
+# typ REAL Fixed-Point Q16.16 przekracza 32 bity dla MUL i DIV, czƒôsty OVERFLOW
 
 # uzywaj asm65('') zamiast #13#10, POS bedzie wlasciwie zwracalo indeks
 
@@ -107,7 +107,7 @@ Contributors:
 
 # wartosc dla typu POINTER zwiekszana jest o CODEORIGIN
 
-# :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia siÍ tylko :BP+1
+# :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia siƒô tylko :BP+1
 # :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
 # indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
@@ -379,7 +379,7 @@ const
   MAXIDENTS		= 16384;
   MAXBLOCKS		= 16384;	// maksymalna liczba blokow
   MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
-  MAXVARS		= 256;		// maksymalna liczba parametrÛw dla VAR
+  MAXVARS		= 256;		// maksymalna liczba parametr√≥w dla VAR
   MAXUNITS		= 512;
   MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
   MAXALLOWEDUNITS	= 256;
@@ -34936,28 +34936,28 @@ end;
 (*
 procedure GenerateInterrupt(InterruptNumber: Byte);
 
- DLI     5  ($200)   Wektor przerwaÒ NMI listy displejowej
+ DLI     5  ($200)   Wektor przerwa≈Ñ NMI listy displejowej
  VBI     6  ($222)   Wektor NMI natychmiastowego VBI
- VBL     7  ($224)   Wektor NMI opÛünionego VBI
+ VBL     7  ($224)   Wektor NMI op√≥≈∫nionego VBI
  RESET
  IRQ
  BRK
 
-VDSLST $0200 $E7B3 Wektor przerwaÒ NMI listy displejowej
+VDSLST $0200 $E7B3 Wektor przerwa≈Ñ NMI listy displejowej
 VPRCED $0202 $E7B3 Wektor IRQ procedury pryferyjnej
-VINTER $0204 $E7B3 Wektor IRQ urzπdzeÒ peryferyjnych
+VINTER $0204 $E7B3 Wektor IRQ urzƒÖdze≈Ñ peryferyjnych
 VBREAK $0206 $E7B3 Wektor IRQ programowej instrukcji BRK
 VKEYBD $0208 $EFBE Wektor IRQ klawiatury
-VSERIN $020A $EB11 Wektor IRQ gotowoúci wejúcia szeregowego
-VSEROR $020C $EA90 Wektor IRQ gotowoúci wyjúcia szeregowego
-VSEROC $020E $EAD1 Wektor IRQ zakoÒczenia przesy≥ania szereg.
-VTIMR1 $0210 $E7B3 Wektor IRQ licznika 1 uk≥adu POKEY
-VTIMR2 $0212 $E7B3 Wektor IRQ licznika 2 uk≥adu POKEY
-VTIMR4 $0214 $E7B3 Wektor IRQ licznika 4 uk≥adu POKEY
+VSERIN $020A $EB11 Wektor IRQ gotowo≈õci wej≈õcia szeregowego
+VSEROR $020C $EA90 Wektor IRQ gotowo≈õci wyj≈õcia szeregowego
+VSEROC $020E $EAD1 Wektor IRQ zako≈Ñczenia przesy≈Çania szereg.
+VTIMR1 $0210 $E7B3 Wektor IRQ licznika 1 uk≈Çadu POKEY
+VTIMR2 $0212 $E7B3 Wektor IRQ licznika 2 uk≈Çadu POKEY
+VTIMR4 $0214 $E7B3 Wektor IRQ licznika 4 uk≈Çadu POKEY
 
-VIMIRQ $0216 $E6F6 Wektor sterownika przerwaÒ IRQ
+VIMIRQ $0216 $E6F6 Wektor sterownika przerwa≈Ñ IRQ
 VVBLKI $0222 $E7D1 Wektor NMI natychmiastowego VBI
-VVBLKD $0224 $E93E Wektor NMI opÛünionego VBI
+VVBLKD $0224 $E93E Wektor NMI op√≥≈∫nionego VBI
 CDTMA1 $0226 $XXXX Adres JSR licznika systemowego 1
 CDTMA2 $0228 $XXXX Adres JSR licznika systemowego 2
 BRKKEY $0236 $E754 Wektor IRQ klawisza BREAK **
@@ -35006,8 +35006,8 @@ begin
 
 	if Ident[GetIdent(lab)].AllocElementType = RECORDTOK then begin
 
-	 asm65(#9'mwy '+lab+' :bp2');			// !!! koniecznie w ten sposÛb
-							// !!! kolejne optymalizacje podstawiπ pod :BP2 -> LAB
+	 asm65(#9'mwy '+lab+' :bp2');			// !!! koniecznie w ten spos√≥b
+							// !!! kolejne optymalizacje podstawiƒÖ pod :BP2 -> LAB
 	 asm65(#9'lda :bp2');
 	 asm65(#9'add #' + svar + '-DATAORIGIN');
 	 asm65(#9'sta :bp2');
@@ -45165,7 +45165,7 @@ WHILETOK:
   INCTOK, DECTOK:
 // dwie wersje
 // krotka i szybka, jesli mamy jeden parametr, np. INC(VAR), DEC(VAR)
-// d≥uga i wolna, jesli mamy tablice lub dwa parametry, np. INC(TMP[1]), DEC(VAR, VALUE+12)
+// d≈Çuga i wolna, jesli mamy tablice lub dwa parametry, np. INC(TMP[1]), DEC(VAR, VALUE+12)
     begin
 
       Value := 0;
@@ -48743,7 +48743,7 @@ while Tok[i].Kind in
 	 if Ident[ForwardIdentIndex].NumParams <> ParamIndex then
 	   Error(i, 'Wrong number of parameters specified for call to '+''''+Ident[ForwardIdentIndex].Name+'''');
 
-//	   function header îarg1î doesnít match forward : var name changes arg2 = arg3
+//	   function header ‚Äùarg1‚Äù doesn‚Äôt match forward : var name changes arg2 = arg3
 
 	 for ParamIndex := 1 to Ident[ForwardIdentIndex].NumParams do
 	  if ((Ident[ForwardIdentIndex].Param[ParamIndex].Name <> Param[ParamIndex].Name) or (Ident[ForwardIdentIndex].Param[ParamIndex].DataType <> Param[ParamIndex].DataType)) then

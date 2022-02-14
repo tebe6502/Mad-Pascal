@@ -1,5 +1,5 @@
 
-// przyk≥ad uzycia GetXDL, SetXDL
+// przyk≈Çad uzycia GetXDL, SetXDL
 
 {$r amiga.rc}
 

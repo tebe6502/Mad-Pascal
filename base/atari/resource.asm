@@ -158,28 +158,28 @@ ext_b	= $4000		;cokolwiek z zakresu $4000-$7FFF
 	lda ext_b
 	pha
 
-	ldx #$0f	;zapamiêtanie bajtów ext (z 16 bloków po 64k)
+	ldx #$0f	;zapamiÄ™tanie bajtÃ³w ext (z 16 blokÃ³w po 64k)
 _p0	jsr setpb
 	lda ext_b
 	sta bsav,x
 	dex
 	bpl _p0
 
-	ldx #$0f	;wyzerowanie ich (w oddzielnej pêtli, bo nie wiadomo
-_p1	jsr setpb	;które kombinacje bitów PORTB wybieraj¹ te same banki)
+	ldx #$0f	;wyzerowanie ich (w oddzielnej pÄ™tli, bo nie wiadomo
+_p1	jsr setpb	;ktÃ³re kombinacje bitÃ³w PORTB wybierajÄ… te same banki)
 	lda #$00
 	sta ext_b
 	dex
 	bpl _p1
 
-	stx portb	;eliminacja pamiêci podstawowej
+	stx portb	;eliminacja pamiÄ™ci podstawowej
 	stx ext_b
-	stx $00		;niezbêdne dla niektórych rozszerzeñ do 256k
+	stx $00		;niezbÄ™dne dla niektÃ³rych rozszerzeÅ„ do 256k
 
-	ldy #$00	;pêtla zliczaj¹ca bloki 64k
+	ldy #$00	;pÄ™tla zliczajÄ…ca bloki 64k
 	ldx #$0f
 _p2	jsr setpb
-	lda ext_b	;jeœli ext_b jest ró¿ne od zera, blok 64k ju¿ zliczony
+	lda ext_b	;jeÅ›li ext_b jest rÃ³Å¼ne od zera, blok 64k juÅ¼ zliczony
 	bne _n2
 
 	dec ext_b	;w przeciwnym wypadku zaznacz jako zliczony
@@ -187,9 +187,9 @@ _p2	jsr setpb
 	lda ext_b	;sprawdz, czy sie zaznaczyl; jesli nie -> cos nie tak ze sprzetem
 	bpl _n2
 
-	lda portb	;wpisz wartoœæ PORTB do tablicy dla banku 0
+	lda portb	;wpisz wartoÅ›Ä‡ PORTB do tablicy dla banku 0
 	sta @mem_banks,y
-	eor #%00000100	;uzupe³nij wartoœci dla banków 1, 2, 3
+	eor #%00000100	;uzupeÅ‚nij wartoÅ›ci dla bankÃ³w 1, 2, 3
 	sta @mem_banks+1,y
 	eor #%00001100
 	sta @mem_banks+2,y
@@ -203,7 +203,7 @@ _p2	jsr setpb
 _n2	dex
 	bpl _p2
 
-	ldx #$0f	;przywrócenie zawartoœci ext
+	ldx #$0f	;przywrÃ³cenie zawartoÅ›ci ext
 _p3	jsr setpb
 	lda bsav,x
 	sta ext_b
@@ -222,13 +222,13 @@ _p3	jsr setpb
 	rts
 
 ; podprogramy
-setpb	txa		;zmiana kolejnoœci bitów: %0000dcba -> %cba000d0
+setpb	txa		;zmiana kolejnoÅ›ci bitÃ³w: %0000dcba -> %cba000d0
 	lsr
 	ror
 	ror
 	ror
 	adc #$01	;ustawienie bitu nr 1 w zaleznosci od stanu C
-	ora #$01	;ustawienie bitu steruj¹cego OS ROM na wartosc domyslna
+	ora #$01	;ustawienie bitu sterujÄ…cego OS ROM na wartosc domyslna
 	sta portb
 	rts
 
@@ -594,7 +594,7 @@ ofset	= new_add-old_add
 
 	.get [old_add-6] :1
 
-	.put[old_add-4] = .lo(new_add)			// poprawiamy nag³ówek DOS'a
+	.put[old_add-4] = .lo(new_add)			// poprawiamy nagÅ‚Ã³wek DOS'a
 	.put[old_add-3] = .hi(new_add)			// tak aby zawieral informacje o nowym
 
 	.put[old_add-2] = .lo(new_add + length - 1)	// adresie modulu RMT

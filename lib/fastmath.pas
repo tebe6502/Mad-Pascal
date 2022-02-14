@@ -37,7 +37,7 @@ function atan2(x1,x2,y1,y2: byte): byte; assembler;
 * In otherwords nothing new or particularily clever but nevertheless
 * quite useful.
 *
-* by Johan Forslöf (doynax)
+* by Johan ForslÃ¶f (doynax)
 * https://codebase64.org/doku.php?id=base:8bit_atan2_8-bit_angle
 
 @param: x1 - byte
