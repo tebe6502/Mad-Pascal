@@ -317,9 +317,9 @@ card_give_gold_bishop
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_bishop) ; actor pointer
 	dta a(txt_desc_give_gold) ; common description / question
-	; Najjaśniejszy Panie, potrzeba nam złota
+	; NajjaĹ›niejszy Panie, potrzeba nam zĹ‚ota
 	dta a(txt_quote_give_gold_bishop) ; actor sentence
-	; Katedra popada w ruinę, wspomóż...
+	; Katedra popada w ruinÄ™, wspomĂłĹĽ...
 	dta a(txt_yes_generosity) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -341,9 +341,9 @@ card_give_gold_general
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_general) ; actor pointer
 	dta a(txt_desc_give_gold) ; common description / question
-	; Najjaśniejszy Panie, potrzeba nam złota
+	; NajjaĹ›niejszy Panie, potrzeba nam zĹ‚ota
 	dta a(txt_quote_give_gold_general) ; actor sentence
-	; Musimy doposażyć nowych rekrutów.
+	; Musimy doposaĹĽyÄ‡ nowych rekrutĂłw.
 	dta a(txt_yes_ofc) ; yes response
 	dta a(txt_no_no_chance) ; No response
 
@@ -364,9 +364,9 @@ card_give_gold_medic
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_medic) ; actor pointer
 	dta a(txt_desc_give_gold) ; common description / question
-	; Najjaśniejszy Panie, potrzeba nam złota
+	; NajjaĹ›niejszy Panie, potrzeba nam zĹ‚ota
 	dta a(txt_quote_give_gold_medic) ; actor sentence
-	; w szpitalach brak medykamentów.
+	; w szpitalach brak medykamentĂłw.
 	dta a(txt_yes_yes) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -387,9 +387,9 @@ card_crime_rises_executioner
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_executioner) ; actor pointer
 	dta a(txt_desc_crime_rises) ; common description / question
-	; Przestępczość rośnie Jaśniepanie
+	; PrzestÄ™pczoĹ›Ä‡ roĹ›nie JaĹ›niepanie
 	dta a(txt_quote_crime_rises_executioner) ; actor sentence
-	; może jakieś publiczne wieszanko?
+	; moĹĽe jakieĹ› publiczne wieszanko?
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_no_way) ; No response
 
@@ -410,9 +410,9 @@ card_crime_rises_stargazer
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_stargazer) ; actor pointer
 	dta a(txt_desc_crime_rises) ; common description / question
-	; Przestępczość rośnie Jaśniepanie
+	; PrzestÄ™pczoĹ›Ä‡ roĹ›nie JaĹ›niepanie
 	dta a(txt_quote_crime_rises_stargazer) ; actor sentence
-	; gwiazdy mówią igrzysk!
+	; gwiazdy mĂłwiÄ… igrzysk!
 	dta a(txt_yes_let_it_be) ; yes response
 	dta a(txt_no_no_way) ; No response
 
@@ -434,9 +434,9 @@ card_crime_rises_treasurer
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_treasurer) ; actor pointer
 	dta a(txt_desc_crime_rises) ; common description / question
-	; Przestępczość rośnie Jaśniepanie
+	; PrzestÄ™pczoĹ›Ä‡ roĹ›nie JaĹ›niepanie
 	dta a(txt_quote_crime_rises_treasurer) ; actor sentence
-	; Zbudujmy więcej więzień!
+	; Zbudujmy wiÄ™cej wiÄ™zieĹ„!
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_no_chance) ; No response
 
@@ -460,9 +460,9 @@ card_luck_check_jester
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_jester) ; actor pointer
 	dta a(txt_desc_luck_check) ; common description / question
-	; Zobaczmy czy sprzyja władcy szczęście
+	; Zobaczmy czy sprzyja wĹ‚adcy szczÄ™Ĺ›cie
 	dta a(txt_quote_luck_check_jester) ; actor sentence
-	; Może zagramy partyjkę Wista?
+	; MoĹĽe zagramy partyjkÄ™ Wista?
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -480,9 +480,9 @@ card_enemy_approach_knight
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_knight) ; actor pointer
 	dta a(txt_desc_enemy_approach) ; common description / question
-	; Wrogowie stoją u bram miasta!
+	; Wrogowie stojÄ… u bram miasta!
 	dta a(txt_quote_enemy_approach_knight) ; actor sentence
-	; Pozwól Panie, że wzmocnimy straże.
+	; PozwĂłl Panie, ĹĽe wzmocnimy straĹĽe.
 	dta a(txt_yes_ofc) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -506,9 +506,9 @@ card_give_gold_peasant
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_peasant) ; actor pointer
 	dta a(txt_desc_give_gold) ; common description / question
-	; Najjaśniejszy Panie, potrzeba nam złota
+	; NajjaĹ›niejszy Panie, potrzeba nam zĹ‚ota
 	dta a(txt_quote_give_gold_peasant) ; actor sentence
-	; Plony słabe, susza, żyć nie ma za co...
+	; Plony sĹ‚abe, susza, ĹĽyÄ‡ nie ma za co...
 	dta a(txt_yes_generosity) ; yes response
 	dta a(txt_no_go_away) ; No response
 
@@ -530,9 +530,9 @@ card_betrayal_jester
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_jester) ; actor pointer
 	dta a(txt_desc_betrayal) ; common description / question
-	; Mam wrażenie Panie, że ktoś spiskuje
+	; Mam wraĹĽenie Panie, ĹĽe ktoĹ› spiskuje
 	dta a(txt_quote_betrayal_jester) ; actor sentence
-	; powinniśmy ograniczyć wpływy kościoła.
+	; powinniĹ›my ograniczyÄ‡ wpĹ‚ywy koĹ›cioĹ‚a.
 	dta a(txt_yes_yes) ; yes response
 	dta a(txt_no_no_way) ; No response
 
@@ -554,9 +554,9 @@ card_luck_check_bishop
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_bishop) ; actor pointer
 	dta a(txt_desc_luck_check) ; common description / question
-	; Zobaczmy czy sprzyja władcy szczęście
+	; Zobaczmy czy sprzyja wĹ‚adcy szczÄ™Ĺ›cie
 	dta a(txt_quote_luck_check_bishop) ; actor sentence
-	; Hojna ofiara pomoże uzyskać łaski...
+	; Hojna ofiara pomoĹĽe uzyskaÄ‡ Ĺ‚aski...
 	dta a(txt_yes_generosity) ; yes response
 	dta a(txt_no_no_chance) ; No response
 
@@ -579,9 +579,9 @@ card_betrayal_stargazer
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_stargazer) ; actor pointer
 	dta a(txt_desc_betrayal) ; common description / question
-	; Mam wrażenie Panie, że ktoś spiskuje
+	; Mam wraĹĽenie Panie, ĹĽe ktoĹ› spiskuje
 	dta a(txt_quote_betrayal_stargazer) ; actor sentence
-	; Gwiazdy mówią, aby inwestować w armię.
+	; Gwiazdy mĂłwiÄ…, aby inwestowaÄ‡ w armiÄ™.
 	dta a(txt_yes_ofc) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -601,9 +601,9 @@ card_luck_check_stargazer
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_stargazer) ; actor pointer
 	dta a(txt_desc_luck_check) ; common description / question
-	; Zobaczmy czy sprzyja władcy szczęście
+	; Zobaczmy czy sprzyja wĹ‚adcy szczÄ™Ĺ›cie
 	dta a(txt_quote_luck_check_stargazer) ; actor sentence
-	; Czy postawić najjaśniejszemu horoskop?
+	; Czy postawiÄ‡ najjaĹ›niejszemu horoskop?
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -626,7 +626,7 @@ card_luck_check_treasurer
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_treasurer) ; actor pointer
 	dta a(txt_desc_luck_check) ; common description / question
-	; Zobaczmy czy sprzyja władcy szczęście
+	; Zobaczmy czy sprzyja wĹ‚adcy szczÄ™Ĺ›cie
 	dta a(txt_quote_luck_check_treasurer) ; actor sentence
 	; Zainwestujmy w drogocenne kruszce!
 	dta a(txt_yes_yes) ; yes response
@@ -648,7 +648,7 @@ card_give_gold_knight
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_knight) ; actor pointer
 	dta a(txt_desc_give_gold) ; common description / question
-	; Najjaśniejszy Panie, potrzeba nam złota
+	; NajjaĹ›niejszy Panie, potrzeba nam zĹ‚ota
 	dta a(txt_quote_give_gold_knight) ; actor sentence
 	; Zorganizujmy turniej rycerski!
 	dta a(txt_yes_generosity) ; yes response
@@ -674,7 +674,7 @@ card_luck_check_medic
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_medic) ; actor pointer
 	dta a(txt_desc_luck_check) ; common description / question
-	; Zobaczmy czy sprzyja władcy szczęście
+	; Zobaczmy czy sprzyja wĹ‚adcy szczÄ™Ĺ›cie
 	dta a(txt_quote_luck_check_medic) ; actor sentence
 	; Mam dla Pana nowy lek z dalekiego kraju
 	dta a(txt_yes_yes) ; yes response
@@ -695,9 +695,9 @@ card_enemy_approach_general
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_general) ; actor pointer
 	dta a(txt_desc_enemy_approach) ; common description / question
-	; Wrogowie stoją u bram miasta!
+	; Wrogowie stojÄ… u bram miasta!
 	dta a(txt_quote_enemy_approach_general) ; actor sentence
-	; Panie, ogłośmy powszechną mobilizację!
+	; Panie, ogĹ‚oĹ›my powszechnÄ… mobilizacjÄ™!
 	dta a(txt_yes_ofc) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -720,9 +720,9 @@ card_dragon_peasant
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_peasant) ; actor pointer
 	dta a(txt_desc_dragon) ; common description / question
-	; W królestwie grasuje okrutny smok!
+	; W krĂłlestwie grasuje okrutny smok!
 	dta a(txt_quote_dragon_peasant) ; actor sentence
-	; Panie wyślij armię, chroń nasz dobytek.
+	; Panie wyĹ›lij armiÄ™, chroĹ„ nasz dobytek.
 	dta a(txt_yes_ofc) ; yes response
 	dta a(txt_no_go_away) ; No response
 
@@ -744,9 +744,9 @@ card_betrayal_executioner
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_executioner) ; actor pointer
 	dta a(txt_desc_betrayal) ; common description / question
-	; Mam wrażenie Panie, że ktoś spiskuje
+	; Mam wraĹĽenie Panie, ĹĽe ktoĹ› spiskuje
 	dta a(txt_quote_betrayal_executioner) ; actor sentence
-	; Może zetniemy na pokaz kilku zdrajców?
+	; MoĹĽe zetniemy na pokaz kilku zdrajcĂłw?
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -768,9 +768,9 @@ card_betrayal_bishop
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_bishop) ; actor pointer
 	dta a(txt_desc_betrayal) ; common description / question
-	; Mam wrażenie Panie, że ktoś spiskuje
+	; Mam wraĹĽenie Panie, ĹĽe ktoĹ› spiskuje
 	dta a(txt_quote_betrayal_bishop) ; actor sentence
-	; Wypędźmy wrogów kościoła z kraju.
+	; WypÄ™dĹşmy wrogĂłw koĹ›cioĹ‚a z kraju.
 	dta a(txt_yes_let_it_be) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -794,9 +794,9 @@ card_luck_check_executioner
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_executioner) ; actor pointer
 	dta a(txt_desc_luck_check) ; common description / question
-	; Zobaczmy czy sprzyja władcy szczęście
+	; Zobaczmy czy sprzyja wĹ‚adcy szczÄ™Ĺ›cie
 	dta a(txt_quote_luck_check_executioner) ; actor sentence
-	; Zetnijmy kogoś na chybił trafił!
+	; Zetnijmy kogoĹ› na chybiĹ‚ trafiĹ‚!
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -817,9 +817,9 @@ card_crime_rises_general
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_general) ; actor pointer
 	dta a(txt_desc_crime_rises) ; common description / question
-	; Przestępczość rośnie Jaśniepanie
+	; PrzestÄ™pczoĹ›Ä‡ roĹ›nie JaĹ›niepanie
 	dta a(txt_quote_crime_rises_general) ; actor sentence
-	; Zwiększmy patrole! Więcej wojska!
+	; ZwiÄ™kszmy patrole! WiÄ™cej wojska!
 	dta a(txt_yes_generosity) ; yes response
 	dta a(txt_no_no_way) ; No response
 
@@ -844,9 +844,9 @@ card_dragon_jester
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_jester) ; actor pointer
 	dta a(txt_desc_dragon) ; common description / question
-	; W królestwie grasuje okrutny smok!
+	; W krĂłlestwie grasuje okrutny smok!
 	dta a(txt_quote_dragon_jester) ; actor sentence
-	; Najlepszy moment by pozbyć się dziewic!
+	; Najlepszy moment by pozbyÄ‡ siÄ™ dziewic!
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -870,9 +870,9 @@ card_dragon_knight
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_knight) ; actor pointer
 	dta a(txt_desc_dragon) ; common description / question
-	; W królestwie grasuje okrutny smok!
+	; W krĂłlestwie grasuje okrutny smok!
 	dta a(txt_quote_dragon_knight) ; actor sentence
-	; Pozwól Panie, że spróbuje ubić gada.
+	; PozwĂłl Panie, ĹĽe sprĂłbuje ubiÄ‡ gada.
 	dta a(txt_yes_ofc) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -896,9 +896,9 @@ card_disease_medic
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_medic) ; actor pointer
 	dta a(txt_desc_disease) ; common description / question
-	; Wybuchła zaraza, czarna śmierć w kraju
+	; WybuchĹ‚a zaraza, czarna Ĺ›mierÄ‡ w kraju
 	dta a(txt_quote_disease_medic) ; actor sentence
-	; Potrzeba pieniędzy na nowe szpitale.
+	; Potrzeba pieniÄ™dzy na nowe szpitale.
 	dta a(txt_yes_generosity) ; yes response
 	dta a(txt_no_no_chance) ; No response
 
@@ -922,9 +922,9 @@ card_disease_peasant
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_peasant) ; actor pointer
 	dta a(txt_desc_disease) ; common description / question
-	; Wybuchła zaraza, czarna śmierć w kraju
+	; WybuchĹ‚a zaraza, czarna Ĺ›mierÄ‡ w kraju
 	dta a(txt_quote_disease_peasant) ; actor sentence
-	; Chcemy schronić się w murach miasta.
+	; Chcemy schroniÄ‡ siÄ™ w murach miasta.
 	dta a(txt_yes_let_it_be) ; yes response
 	dta a(txt_no_go_away) ; No response
 
@@ -949,9 +949,9 @@ card_betrayal_treasurer
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_treasurer) ; actor pointer
 	dta a(txt_desc_betrayal) ; common description / question
-	; Mam wrażenie Panie, że ktoś spiskuje
+	; Mam wraĹĽenie Panie, ĹĽe ktoĹ› spiskuje
 	dta a(txt_quote_betrayal_treasurer) ; actor sentence
-	; A może czas zbudować sieć wywiadowczą?
+	; A moĹĽe czas zbudowaÄ‡ sieÄ‡ wywiadowczÄ…?
 	dta a(txt_yes_yes) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -974,9 +974,9 @@ card_neardeath_death
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_death) ; actor pointer
 	dta a(txt_desc_neardeath) ; common description / question
-	; Podupadłeś na zdrowiu jaśniepanie.
+	; PodupadĹ‚eĹ› na zdrowiu jaĹ›niepanie.
 	dta a(txt_quote_neardeath_death) ; actor sentence
-	; Możesz poświęcić życie kilku poddanych.
+	; MoĹĽesz poĹ›wiÄ™ciÄ‡ ĹĽycie kilku poddanych.
 	dta a(txt_yes_yes) ; yes response
 	dta a(txt_no_go_away) ; No response
 
@@ -1000,9 +1000,9 @@ card_trade_devil
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_devil) ; actor pointer
 	dta a(txt_desc_trade) ; common description / question
-	; Witam najjaśniejszego, pohandlujemy?
+	; Witam najjaĹ›niejszego, pohandlujemy?
 	dta a(txt_quote_trade_devil) ; actor sentence
-	; Za Twą dusze, bogactwa oddam wielkie.
+	; Za TwÄ… dusze, bogactwa oddam wielkie.
 	dta a(txt_yes_let_it_be) ; yes response
 	dta a(txt_no_no_way) ; No response
 
@@ -1026,9 +1026,9 @@ card_welcome_angel
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_angel) ; actor pointer
 	dta a(txt_desc_welcome) ; common description / question
-	; Witam sprawiedliwego jaśniepana.
+	; Witam sprawiedliwego jaĹ›niepana.
 	dta a(txt_quote_welcome_angel) ; actor sentence
-	; Oferuję swe łaski za hojną ofiarę.
+	; OferujÄ™ swe Ĺ‚aski za hojnÄ… ofiarÄ™.
 	dta a(txt_yes_generosity) ; yes response
 	dta a(txt_no_rather_no) ; No response
 
@@ -1055,9 +1055,9 @@ card_bigarmy_general
 	dta 0 ; type   0:resource_card 1:gamble_card
 	dta a(actor_general) ; actor pointer
 	dta a(txt_desc_bigarmy) ; common description / question
-	; Nasza armia jest już potężna,
+	; Nasza armia jest juĹĽ potÄ™ĹĽna,
 	dta a(txt_quote_bigarmy_general) ; actor sentence
-	; może złupimy sąsiedni kraj?
+	; moĹĽe zĹ‚upimy sÄ…siedni kraj?
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_overstatement) ; No response
 
@@ -1085,7 +1085,7 @@ card_unhappy_bishop
 	dta a(txt_desc_unhappy) ; common description / question
 	; Lud niespokojny ostatnimi czasy,
 	dta a(txt_quote_unhappy_bishop) ; actor sentence
-	; może trzeba urządzić wielką procesję?
+	; moĹĽe trzeba urzÄ…dziÄ‡ wielkÄ… procesjÄ™?
 	dta a(txt_yes_great_idea) ; yes response
 	dta a(txt_no_go_away) ; No response
 

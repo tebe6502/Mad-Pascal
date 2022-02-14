@@ -108,7 +108,7 @@ procedure xBiosRenameEntry(var filename:TString); assembler;
 * @description:
 * This function allows you to rename a file or directory. 
 * There is no limit to the characters used in the filename apart from that they must fit 
-* a case insensitive “8.3” format without the dot. If your filename is not 8 characters long, 
+* a case insensitive "8.3" format without the dot. If your filename is not 8 characters long, 
 * pad it out with spaces.
 * 
 * @param: filename - string containing both names, source and destination, padded with spaces. 

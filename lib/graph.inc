@@ -872,11 +872,11 @@ var
 begin
 
    // Algorytm Cohena-Sutherlanda
-   // 1. Zakoduj koÒce odcinka zgodnie z kodami obszarÛw
+   // 1. Zakoduj ko≈Ñce odcinka zgodnie z kodami obszar√≥w
    rcode1 := calcRegCode(x1, y1);
    rcode2 := calcRegCode(x2, y2);
-   // 2. Jeøeli iloczyn logiczny (AND) tych kodÛw <>0,
-   // to odcinek moøe byÊ pominiÍty (w ca≥oúci poza
+   // 2. Je≈ºeli iloczyn logiczny (AND) tych kod√≥w <>0,
+   // to odcinek mo≈ºe byƒá pominiƒôty (w ca≈Ço≈õci poza
    // oknem) - zaznacz go na czerwono
 //   if ((rcode1 and rcode2) <> 0) then
 //   begin
@@ -884,8 +884,8 @@ begin
 //      Image1.Canvas.MoveTo(x1, y1);
 //      Image1.Canvas.LineTo(x2, y2);
 //   end
-   // 3. Jeøeli suma logiczna (OR)tych kodÛw = 0,
-   // to odcinek w ca≥oúci mieúci siÍ w okienku
+   // 3. Je≈ºeli suma logiczna (OR)tych kod√≥w = 0,
+   // to odcinek w ca≈Ço≈õci mie≈õci siƒô w okienku
    // - zaznacz go na zielono
 //   else
    if ((rcode1 or rcode2) = 0) then

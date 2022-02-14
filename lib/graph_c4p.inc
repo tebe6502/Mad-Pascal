@@ -25,7 +25,7 @@ begin
 
 ;$FFED
 ;SCREEN. Fetch number of screen rows and columns.
-;Input: –
+;Input: â€“
 ;Output: X = Number of columns (40); Y = Number of rows (25).
 ;Used registers: X, Y.
 ;Real address: $E505.
