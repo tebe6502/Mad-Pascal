@@ -220,7 +220,7 @@ dzx5s_other_offset
 		asl   @
 		bne   dzx5s_other_offset_skip
 		jsr   _GET_BYTE
-		sec	; mo縩a usun规 je渓i dekompresja z pami阠i a nie pliku
+		sec	; mo偶na usun膮膰 je艣li dekompresja z pami臋ci a nie pliku
 		rol   @
 dzx5s_other_offset_skip
 		bcc   dzx5s_prev_offset
@@ -289,7 +289,7 @@ dzx5s_elias_loop
 		asl   @
 		bne   dzx5s_elias_skip
 		jsr   _GET_BYTE
-		sec	; mo縩a usun规 je渓i dekompresja z pami阠i a nie pliku
+		sec	; mo偶na usun膮膰 je艣li dekompresja z pami臋ci a nie pliku
 		rol   @
 dzx5s_elias_skip
 		bcc   dzx5s_elias_backtrack
@@ -421,7 +421,7 @@ dzx5s_other_offset
 		asl   @
 		bne   dzx5s_other_offset_skip
 		jsr   _GET_BYTE
-		sec	; mo縩a usun规 je渓i dekompresja z pami阠i a nie pliku
+		sec	; mo偶na usun膮膰 je艣li dekompresja z pami臋ci a nie pliku
 		rol   @
 dzx5s_other_offset_skip
 		bcc   dzx5s_prev_offset
@@ -490,7 +490,7 @@ dzx5s_elias_loop
 		asl   @
 		bne   dzx5s_elias_skip
 		jsr   _GET_BYTE
-		sec	; mo縩a usun规 je渓i dekompresja z pami阠i a nie pliku
+		sec	; mo偶na usun膮膰 je艣li dekompresja z pami臋ci a nie pliku
 		rol   @
 dzx5s_elias_skip
 		bcc   dzx5s_elias_backtrack

@@ -1,7 +1,7 @@
 unit vbxe;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe), Daniel KoümiÒski
+ @author: Tomasz Biela (Tebe), Daniel Ko≈∫mi≈Ñski
  @name: Video Board XE unit
 
  @version: 1.1
