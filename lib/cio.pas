@@ -1,7 +1,7 @@
 unit cio;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe), Daniel KoümiÒski (Dely)
+ @author: Tomasz Biela (Tebe), Daniel Ko≈∫mi≈Ñski (Dely)
  @name: CIO interface
  @version: 1.0
 

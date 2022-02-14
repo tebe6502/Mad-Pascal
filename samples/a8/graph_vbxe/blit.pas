@@ -39,7 +39,7 @@ const
 	$99, $96, $93, $90, $8c, $89, $86, $83
 	);
 
-	bonus = VBXE_OVRADR+320*256;				// adres bitmapy w pamiêci VBXE, ladowana przez RESOURCE $R
+	bonus = VBXE_OVRADR+320*256;				// adres bitmapy w pamiÄ™ci VBXE, ladowana przez RESOURCE $R
 
 	src0 = bonus + 0;
 	src1 = bonus + 16;
