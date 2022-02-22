@@ -48463,6 +48463,8 @@ while Tok[i].Kind in
 	   if Ident[NumIdent].isAbsolute = false then inc(tmpVarDataSize, DataSize[POINTERTOK]);		// wskaznik dla ^record
 
 
+	 idx := Ident[NumIdent].Value - DATAORIGIN;
+
 //writeln(NumAllocElements);
 //!@!@
 	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do									// label: ^record
@@ -48523,7 +48525,12 @@ while Tok[i].Kind in
 
 	inc(i);
 
-	idx := Ident[NumIdent].Value - DATAORIGIN;
+
+	if (VarType = POINTERTOK) and (AllocElementType in [RECORDTOK, OBJECTTOK]) then
+
+	else
+	 idx := Ident[NumIdent].Value - DATAORIGIN;
+
 
 	if not (VarType in Pointers) then begin
 
