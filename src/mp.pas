@@ -40073,17 +40073,28 @@ begin
 
        end;
 
+       asm65(#9'lda #$4C');
+       asm65(#9'sta :TMP');
+
      end else begin
 
-       asm65(#9'lda ' + svar);
-       asm65(#9'sta :TMP+1');
-       asm65(#9'lda ' + svar + '+1');
-       asm65(#9'sta :TMP+2');
+       if Ident[ProcVarIndex].isAbsolute then begin
+
+        asm65(#9'jsr *+6');
+        asm65(#9'jmp *+6');
+
+       end else begin
+        asm65(#9'lda ' + svar);
+        asm65(#9'sta :TMP+1');
+        asm65(#9'lda ' + svar + '+1');
+        asm65(#9'sta :TMP+2');
+
+        asm65(#9'lda #$4C');
+        asm65(#9'sta :TMP');
+       end;
 
      end;
 
-     asm65(#9'lda #$4C');
-     asm65(#9'sta :TMP');
 
    end;
 
@@ -40376,9 +40387,14 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
  // sickx
 
-  if ProcVarIndex > 0 then
-   asm65(#9'jsr :TMP')
-  else
+  if ProcVarIndex > 0 then begin
+
+   if Ident[ProcVarIndex].isAbsolute then
+    asm65(#9'jmp (' + GetLocalName(ProcVarIndex) + ')')
+   else
+    asm65(#9'jsr :TMP');
+
+  end else
    asm65(#9'jsr ' + svar);				// GenerateCall
 
  end;
@@ -45752,9 +45768,10 @@ end;// CompileStatement
 function DeclareFunction(i: integer; out ProcVarIndex: cardinal): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType: Byte;
+     ListPassMethod, VarType, AllocElementType, ActualParamType: Byte;
      NumAllocElements: cardinal;
      IsNestedFunction: Boolean;
+     ConstVal: Int64;
 
 begin
       inc(NumProc);
@@ -45771,7 +45788,7 @@ begin
 	end;
 
 // sickx
-
+      NumVarOfSameType := 0;
       ProcVarIndex := NumProc;			// -> NumAllocElements_
 
       dec(i);
@@ -45892,8 +45909,6 @@ begin
     Ident[NumIdent].isStdCall := true;
     Ident[NumIdent].IsNestedFunction := IsNestedFunction;
 
-    CheckTok(i, SEMICOLONTOK);
-
     Result := i;
 
 end;
@@ -45921,6 +45936,9 @@ begin
 	DefineIdent(i + 1, Tok[i + 1].Name^, FUNC, 0, 0, 0, 0);
 	IsNestedFunction := TRUE;
 	end;
+
+
+      NumVarOfSameType := 0;
 
       if (Tok[i + 2].Kind = OPARTOK) and (Tok[i + 3].Kind = CPARTOK) then inc(i, 2);
 
