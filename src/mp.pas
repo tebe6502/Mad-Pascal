@@ -282,13 +282,14 @@ const
   PASCALTOK		= 105;
   STDCALLTOK		= 106;
   INLINETOK		= 107;
+  NORETURNTOK		= 108;
 
-  SUCCTOK		= 108;
-  PREDTOK		= 109;
-  PACKEDTOK		= 110;
-  GOTOTOK		= 111;
-  INTOK			= 112;
-  VOLATILETOK		= 113;
+  SUCCTOK		= 109;
+  PREDTOK		= 110;
+  PACKEDTOK		= 111;
+  GOTOTOK		= 112;
+  INTOK			= 113;
+  VOLATILETOK		= 114;
 
 
   SETTOK		= 127;	// Size = 32 SET OF
@@ -434,7 +435,7 @@ const
 {$i targets/type.inc}
 
 type
-  ModifierCode = (mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
+  ModifierCode = (mNoReturn = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
   irCode = (iDLI, iVBL, iTIM1, iTIM2, iTIM4);
 
@@ -568,6 +569,8 @@ type
 	 isPascal,
 	 isInline,
 	 isAsm,
+	 isExternal,
+	 isNoReturn,
 	 isVolatile,
 	 IsNotDead: Boolean;);
 
@@ -33435,7 +33438,7 @@ var
        end else
 *)
 
-      if (cmd = 'L') then begin					// {$L filename}
+      if (cmd = 'L') or (cmd = 'LINK') then begin		// {$L filename}
        AddToken(LINKTOK, UnitIndex, Line, 1, 0);
 
        s := LowerCase( get_string(i, d) );
@@ -34374,6 +34377,7 @@ Spelling[INTERRUPTTOK	] := 'INTERRUPT';
 Spelling[PASCALTOK	] := 'PASCAL';
 Spelling[STDCALLTOK	] := 'STDCALL';
 Spelling[INLINETOK      ] := 'INLINE';
+Spelling[NORETURNTOK    ] := 'NORETURN';
 
 Spelling[ASSIGNFILETOK	] := 'ASSIGN';
 Spelling[RESETTOK	] := 'RESET';
@@ -42995,7 +42999,8 @@ case Tok[i].Kind of
     begin
     IdentIndex := GetIdent(Tok[i].Name^);
 
-    if (IdentIndex > 0) and (Ident[IdentIndex].Kind = FUNC)  and (BlockStackTop > 1) then
+
+    if (IdentIndex > 0) and (Ident[IdentIndex].Kind = FUNC) and (BlockStackTop > 1) and (Tok[i + 1].Kind <> OPARTOK) then
      for j:=NumIdent downto 1 do
       if (Ident[j].ProcAsBlock = NumBlocks) and (Ident[j].Kind = FUNC) then begin
 	if (Ident[j].Name = Ident[IdentIndex].Name) and (Ident[j].UnitIndex = Ident[IdentIndex].UnitIndex) then IdentIndex := GetIdentResult(NumBlocks);
@@ -43157,6 +43162,7 @@ case Tok[i].Kind of
 	    end;
 
 // sickx
+
 	   if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) and (Tok[i + 1].Kind <> ASSIGNTOK) then begin
 
 //     	 	writeln('?? ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
@@ -46075,7 +46081,7 @@ begin
     isInt := false;
     isInl := false;
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, EXTERNALTOK, NORETURNTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -46138,6 +46144,20 @@ begin
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
+
+	    EXTERNALTOK: begin
+			   Ident[NumIdent].isExternal := true;
+			   isForward := true;
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+
+            NORETURNTOK: begin
+			   Ident[NumIdent].isNoReturn := true;
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+
 	  end;
 
 	  inc(i);
@@ -47039,7 +47059,12 @@ begin
 		   if size = 0 then varbegin := Ident[IdentIndex].Name;
 
 		   if Ident[IdentIndex].idType <> DATAORIGINOFFSET then			// indeksy do RECORD nie zliczaj
-		     inc(size, DataSize[Ident[IdentIndex].DataType]);
+
+		     if (Ident[IdentIndex].Name = 'RESULT') and (Ident[BlockIdentIndex].Kind = FUNCTIONTOK) then	// RESULT nie zliczaj
+
+		     else
+		      inc(size, DataSize[Ident[IdentIndex].DataType]);
+
 		  end;
 
       CONSTANT: if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
@@ -47300,7 +47325,7 @@ begin
 end;
 
 
-procedure FormalParameterList(var i: integer; var NumParams: integer; var Param: TParamList; out Status: byte; IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte);
+procedure FormalParameterList(var i: integer; var NumParams: integer; var Param: TParamList; out Status: word; IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte);
 var ListPassMethod, NumVarOfSameType, VarTYpe, AllocElementType: byte;
     NumAllocElements: cardinal;
     VarOfSameTypeIndex: integer;
@@ -47427,7 +47452,7 @@ begin
 	CheckTok(i, SEMICOLONTOK);
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, NORETURNTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -47475,6 +47500,12 @@ begin
 
 	      PASCALTOK: begin
 			   Status := Status or ord(mPascal);
+			   inc(i);
+			   CheckTok(i + 1, SEMICOLONTOK);
+			 end;
+
+             NORETURNTOK: begin
+			   Status := Status or ord(mNoReturn);
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -47534,7 +47565,7 @@ var
   iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp, varPassMethod: Byte;
-  TmpResult: byte;
+  TmpResult: word;
 
   UnitList: array of TString;
 
@@ -48782,13 +48813,14 @@ while Tok[i].Kind in
 
 	 Tmp := 0;
 
-	 if Ident[ForwardIdentIndex].isOverload then Tmp := Tmp or ord(mOverload);
-	 if Ident[ForwardIdentIndex].isAsm then Tmp := Tmp or ord(mAssembler);
-	 if Ident[ForwardIdentIndex].isRegister then Tmp := Tmp or ord(mRegister);
+	 if Ident[ForwardIdentIndex].isNoReturn	then Tmp := Tmp or ord(mNoReturn);
+	 if Ident[ForwardIdentIndex].isOverload	then Tmp := Tmp or ord(mOverload);
+	 if Ident[ForwardIdentIndex].isAsm	then Tmp := Tmp or ord(mAssembler);
+	 if Ident[ForwardIdentIndex].isRegister	then Tmp := Tmp or ord(mRegister);
 	 if Ident[ForwardIdentIndex].isInterrupt then Tmp := Tmp or ord(mInterrupt);
-	 if Ident[ForwardIdentIndex].isPascal then Tmp := Tmp or ord(mPascal);
-	 if Ident[ForwardIdentIndex].isStdCall then Tmp := Tmp or ord(mStdCall);
-	 if Ident[ForwardIdentIndex].isInline then Tmp := Tmp or ord(mInline);
+	 if Ident[ForwardIdentIndex].isPascal	then Tmp := Tmp or ord(mPascal);
+	 if Ident[ForwardIdentIndex].isStdCall	then Tmp := Tmp or ord(mStdCall);
+	 if Ident[ForwardIdentIndex].isInline	then Tmp := Tmp or ord(mInline);
 
 	 if Tmp <> TmpResult then
 	   Error(i, 'Function header doesn''t match the previous declaration ''' + Ident[ForwardIdentIndex].Name + '''');
@@ -48871,7 +48903,7 @@ while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
   if Ident[j].Kind in [PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK] then
-    if Ident[j].IsUnresolvedForward then
+    if (Ident[j].IsUnresolvedForward) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
   Dec(j);
@@ -48956,7 +48988,7 @@ j := NumIdent;
      begin
   // If procedure or function, delete parameters first
       if Ident[j].Kind in [PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK] then
-       if Ident[j].IsUnresolvedForward then
+       if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
 	 Error(j, 'Unresolved forward declaration of ' + Ident[j].Name);
 
      Dec(j);
