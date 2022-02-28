@@ -173,26 +173,55 @@ begin
   Result := RndSeed mod range;
 
 asm
-{ lda range+1
-  bpl plus
+	lda range+1
+	bpl plus
 
-  lda Result+1
-  bmi ok
-  bpl sign
+	lda Result+1
+	bmi ok
+	bpl sign
 
-plus  lda Result+1
-  bpl ok
+plus	lda Result+1
+	bpl ok
 
-sign  lda #0
-  sub Result
-  sta Result
+sign 	lda #0
+	sub Result
+	sta Result
 
-  lda #0
-  sbc Result+1
-  sta Result+1
+	lda #0
+	sbc Result+1
+	sta Result+1
 ok
-};
+end;
 
-  end;
+ end;
 
 end;
+
+
+function ParamCount: byte; assembler;
+(*
+@description:
+Return number of command-line parameters passed to the program.
+
+@returns: byte
+*)
+asm
+
+
+end;
+
+
+function ParamStr(i: byte): TString; assembler;
+(*
+@description:
+Return value of a command-line argument.
+
+@param: i - of a command-line argument
+
+@returns: string[32]
+*)
+asm
+
+
+end;
+

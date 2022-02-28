@@ -1252,7 +1252,7 @@ Calculate numerical value of a string
 @param: code - pointer to integer - error code
 *)
 asm
-{	@StrToInt s
+	@StrToInt s
 
 	tya
 	pha
@@ -1269,7 +1269,6 @@ asm
 	mva :edx+1 (:bp2),y+
 	mva :edx+2 (:bp2),y+
 	mva :edx+3 (:bp2),y
-};
 end;
 
 
@@ -1961,37 +1960,6 @@ end;
 
 
 {$i '../src/targets/system.inc'}
-
-
-function ParamCount: byte; assembler;
-(*
-@description:
-Return number of command-line parameters passed to the program.
-
-@returns: byte
-*)
-asm
-	@cmdline #255
-	sta Result
-end;
-
-
-function ParamStr(i: byte): TString; assembler;
-(*
-@description:
-Return value of a command-line argument.
-
-@param: i - of a command-line argument
-
-@returns: string[32]
-*)
-asm
-	@cmdline i
-
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
-end;
 
 
 function Concat(a,b: PString): string; assembler; overload;
