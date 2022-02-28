@@ -4,13 +4,11 @@ procedure Pause; assembler; overload;
 Delay program execution (1/50 second).
 *)
 asm
-{
 w1	bit vic_cr1
 	bpl w1
 
 w2	bit vic_cr1
 	bmi w2
-};
 end;
 
 
@@ -22,7 +20,6 @@ Delay program execution (N * 1/50 second).
 @param: N - number of '1/50 second'
 *)
 asm
-{
 loop	lda n
 	ora n+1
 	beq stop
@@ -37,8 +34,8 @@ w2	bit vic_cr1
 
 	jmp loop
 stop
-};
 end;
+
 
 procedure Randomize; assembler;
 (*
@@ -46,9 +43,8 @@ procedure Randomize; assembler;
 Initialize random number generator
 *)
 asm
-{	mva $d20a RndSeed
+	mva $d20a RndSeed
 	mva #$00  RndSeed+1
-};
 end;
 
 
@@ -211,6 +207,33 @@ sign	lda #0
 ok
 end;
 
-  end;
+ end;
 
 end;
+
+
+function ParamCount: byte; assembler;
+(*
+@description:
+Return number of command-line parameters passed to the program.
+
+@returns: byte
+*)
+asm
+
+end;
+
+
+function ParamStr(i: byte): TString; assembler;
+(*
+@description:
+Return value of a command-line argument.
+
+@param: i - of a command-line argument
+
+@returns: string[32]
+*)
+asm
+
+end;
+

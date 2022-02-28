@@ -78,9 +78,7 @@ Generate random number
 @returns: byte
 *)
 asm
-{
 
-};
 end;
 
 
@@ -96,3 +94,30 @@ Generate random number
 begin
 
 end;
+
+
+function ParamCount: byte; assembler;
+(*
+@description:
+Return number of command-line parameters passed to the program.
+
+@returns: byte
+*)
+asm
+
+end;
+
+
+function ParamStr(i: byte): TString; assembler;
+(*
+@description:
+Return value of a command-line argument.
+
+@param: i - of a command-line argument
+
+@returns: string[32]
+*)
+asm
+
+end;
+
