@@ -1,3 +1,10 @@
+08.03.2022
+- optymalizacja :EAX, tag: 2022-03-08
+
+06.03.2022
+- poprawiona optymalizacja 'PeepholeOptimization_STACK' tag: 2022-03-05
+- tests\tests-record\record_typed_pointers.pas
+
 24.02.2022
 - nowy modyfikator EXTERNAL dla procedur/funkcji
 
