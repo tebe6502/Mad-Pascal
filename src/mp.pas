@@ -7120,15 +7120,17 @@ var i, l, k, m, x: integer;
      end;
 
 
-    if (listing[i] = #9'jsr andAL_CL') and							// jsr andAL_CL				; 0
-       dex(i+1) and										// dex					; 1
+    if (listing[i] = #9'sty :STACKORIGIN,x') and						// sty :STACKORIGIN,x			; 0		2022-03-05
+       (listing[i+1] = #9'jsr andAL_CL') and							// jsr andAL_CL				; 1
        dex(i+2) and										// dex					; 2
-       (listing[i+3] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 3
+       dex(i+3) and										// dex					; 3
+       (listing[i+4] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 4
      begin
        listing[i]   := #9'dex';
        listing[i+1] := #9'dex';
-       listing[i+2] := #9'lda :STACKORIGIN+1,x';
-       listing[i+3] := #9'and :STACKORIGIN+2,x';
+       listing[i+2] := #9'tya';
+       listing[i+3] := #9'and :STACKORIGIN+1,x';
+       listing[i+4] := #9'sta :STACKORIGIN+1,x';
 
        Result:=false; Break;
      end;
@@ -13616,7 +13618,7 @@ end;
 
 
 {
-if (pos('sta :STACKORIGIN+9', listing[i]) > 0) then begin
+if (pos('asl :STACK', listing[i]) > 0) and (pos('rol :STACK', listing[i+1]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -17472,6 +17474,94 @@ end;
       end;
 
 
+    if lda_im_0(i) and									// lda #$00				; 0		2022-03-08
+       sta_stack(i+1) and								// sta :eax+1				; 1
+       lda(i+2) and									// lda					; 2
+       asl_a(i+3) and									// asl @				; 3
+       rol_stack(i+4) and								// rol :eax+1				; 4
+       asl_a(i+5) and									// asl @				; 5
+       rol_stack(i+6) and								// rol :eax+1				; 6
+       add(i+7) and									// add					; 7
+       sta_stack(i+8) and								// sta :eax				; 8
+       lda_stack(i+9) and								// lda :eax+1				; 9
+       adc_im_0(i+10) and								// adc #$00				; 10
+       sta_stack(i+11) and								// sta :eax+1				; 11
+       asl_stack(i+12) and								// asl :eax				; 12
+       rol_stack(i+13) and								// rol :eax+1				; 13
+       lda_stack(i+14) and								// lda :eax				; 14
+       add_sub(i+15) and								// add|sub 				; 15
+       (tay(i+16) or sta_stack(i+16)) then						// tay:sta :STACKORIGIN			; 16
+     if ((copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256))) and
+        ((copy(listing[i+4], 6, 256) = copy(listing[i+6], 6, 256))) and
+        ((copy(listing[i+6], 6, 256) = copy(listing[i+9], 6, 256))) and
+        ((copy(listing[i+9], 6, 256) = copy(listing[i+11], 6, 256))) and
+        ((copy(listing[i+11], 6, 256) = copy(listing[i+13], 6, 256))) and
+        ((copy(listing[i+8], 6, 256) = copy(listing[i+12], 6, 256))) and
+        ((copy(listing[i+12], 6, 256) = copy(listing[i+14], 6, 256))) then
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+4] := '';
+	listing[i+6] := '';
+
+	listing[i+8]  := '';
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+
+	listing[i+14] := #9'asl @';
+
+	Result:=false; Break;
+       end;
+
+
+    if lda_im_0(i) and									// lda #$00				; 0		2022-03-08
+       sta_stack(i+1) and								// sta :eax+1				; 1
+       lda(i+2) and									// lda					; 2
+       asl_a(i+3) and									// asl @				; 3
+       rol_stack(i+4) and								// rol :eax+1				; 4
+       asl_a(i+5) and									// asl @				; 5
+       rol_stack(i+6) and								// rol :eax+1				; 6
+       add(i+7) and									// add					; 7
+       sta_stack(i+8) and								// sta :eax				; 8
+       lda_stack(i+9) and								// lda :eax+1				; 9
+       adc_im_0(i+10) and								// adc #$00				; 10
+       sta_stack(i+11) and								// sta :eax+1				; 11
+       asl_stack(i+12) and								// asl :eax				; 12
+       rol_stack(i+13) and								// rol :eax+1				; 13
+       lda(i+14) and									// lda					; 14
+       add_stack(i+15) and								// add :eax				; 15
+       tay(i+16) then									// tay					; 16
+     if ((copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256))) and
+        ((copy(listing[i+4], 6, 256) = copy(listing[i+6], 6, 256))) and
+        ((copy(listing[i+6], 6, 256) = copy(listing[i+9], 6, 256))) and
+        ((copy(listing[i+9], 6, 256) = copy(listing[i+11], 6, 256))) and
+        ((copy(listing[i+11], 6, 256) = copy(listing[i+13], 6, 256))) and
+        ((copy(listing[i+8], 6, 256) = copy(listing[i+12], 6, 256))) and
+        ((copy(listing[i+12], 6, 256) = copy(listing[i+15], 6, 256))) then
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	listing[i+4] := '';
+	listing[i+6] := '';
+
+	listing[i+8]  := '';
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := #9'asl @';
+	listing[i+14] := #9'add ' + copy(listing[i+14],6, 256);
+	listing[i+15] := '';
+
+	Result:=false; Break;
+       end;
+
+
     if lda(i) and										// lda B+1				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        lda(i+2) and										// lda B				; 2
@@ -18191,7 +18281,7 @@ end;
 
 
     if ldy_im_0(i) and										// ldy #$00				; 0
-       lda(i+1) and (lda_stack(i+1) = false) and						// lda :eax+1				; 1
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
        spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey 					; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
@@ -18208,6 +18298,33 @@ end;
 
 	listing[i+8] := '';
 	listing[i+9] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if ldy_im_0(i) and										// ldy #$00				; 0		2022-03-08
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda CX				; 1
+       spl(i+2) and										// spl					; 2
+       dey(i+3) and										// dey 					; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN			; 4
+       sty_stack(i+5) and									// sty :STACKORIGIN+STACKWIDTH		; 5
+       sty_stack(i+6) and									// sty :STACKORIGIN+STACKWIDTH*2	; 6
+       sty_stack(i+7) and									// sty :STACKORIGIN+STACKWIDTH*3	; 7
+       ldy_im_0(i+8) and									// ldy #$00				; 8
+       lda(i+9) and (lda_stack(i+9) = false) and						// lda CX				; 9
+       spl(i+10) and										// spl					; 10
+       dey(i+11) and										// dey 					; 11
+       sta_stack(i+12) and									// sta :STACKORIGIN			; 12
+       sty_stack(i+13) and									// sty :STACKORIGIN+STACKWIDTH		; 13
+       sty_stack(i+14) and									// sty :STACKORIGIN+STACKWIDTH*2	; 14
+       sty_stack(i+15) then									// sty :STACKORIGIN+STACKWIDTH*3	; 15
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+9], 6, 256)) then
+       begin
+	listing[i+8]  := '';
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
 
 	Result:=false; Break;
        end;
@@ -35178,14 +35295,27 @@ case IndirectionLevel of
 
   if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
-    if pos('.', svar) > 0 then
-     asm65(#9'mwy '+copy(svar,1, pos('.', svar)-1)+' :bp2')
-    else
+//    writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements);
+
+    if pos('.', svar) > 0 then begin
+
+     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
+      asm65(#9'mwy '+svar+' :bp2')
+     else
+      asm65(#9'mwy '+copy(svar,1, pos('.', svar)-1)+' :bp2');
+
+    end else
      asm65(#9'mwy '+svar+' :bp2');
 
-    if pos('.', svar) > 0 then
-     asm65(#9'ldy #'+svar+'-DATAORIGIN')
-    else
+
+    if pos('.', svar) > 0 then begin
+
+     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
+      asm65(#9'ldy #$' + IntToHex(par, 2))
+     else
+      asm65(#9'ldy #'+svar+'-DATAORIGIN');
+
+    end else
      asm65(#9'ldy #$' + IntToHex(par, 2));
 
     case Size of
@@ -36368,18 +36498,29 @@ case IndirectionLevel of
 
   if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
 
+//  writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
-    if pos('.', svar) > 0 then
-     asm65(#9'mwy '+copy(svar, 1, pos('.', svar)-1)+' :bp2')
-    else
-     asm65(#9'mwy '+svar+' :bp2');
+    if pos('.', svar) > 0 then begin
+
+     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
+      asm65(#9'mwy ' + svar + ' :bp2')
+     else
+      asm65(#9'mwy '+copy(svar, 1, pos('.', svar)-1)+' :bp2');
+
+    end else
+     asm65(#9'mwy ' + svar + ' :bp2');
 
     if ParamY<>'' then
      asm65(#9'ldy #'+ParamY)
     else
-     if pos('.', svar) > 0 then
-      asm65(#9'ldy #'+svar+'-DATAORIGIN')
-     else
+     if pos('.', svar) > 0 then begin
+
+       if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
+        asm65(#9'ldy #$00')
+       else
+        asm65(#9'ldy #' + svar + '-DATAORIGIN');
+
+     end else
       asm65(#9'ldy #$00');
 
     case Size of
@@ -44091,9 +44232,11 @@ WHILETOK:
 
     SaveBreakAddress;
 
+
     StartOptimization(i + 1);
 
     j := CompileExpression(i + 1, ExpressionType);
+
 
     GetCommonType(j, BOOLEANTOK, ExpressionType);
 
