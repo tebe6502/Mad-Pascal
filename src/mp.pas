@@ -13636,7 +13636,9 @@ end;
        (lda_im(i+1) = false) and lda_a(i+1) then
     begin
      listing[i]   := '';
-     listing[i+1] := #9'lda +' + copy(listing[i+1], 6, 256);
+
+     if copy(listing[i+1], 6, 256)[1] <> '+' then
+      listing[i+1] := #9'lda +' + copy(listing[i+1], 6, 256);
 
      Result:=false; Break;
     end;
