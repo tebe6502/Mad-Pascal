@@ -1,3 +1,6 @@
+09.04.2022
+- poprawiona funkcja 'CardToHalf' przeliczająca stałe na typ Float16 ('if frac(s) <> 0 then Result := f32Tof16(Src)')
+
 08.03.2022
 - optymalizacja :EAX, tag: 2022-03-08
 

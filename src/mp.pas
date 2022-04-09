@@ -37,7 +37,7 @@ Contributors:
 	- unit GRAPHICS: TextOut
 	- unit EFAST
 
-+ Daniel Koźmiński :
++ Daniel KoĹşmiĹ„ski :
 	- unit STRINGUTILS
 	- unit CIO
 
@@ -58,7 +58,7 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
-+ Marcin Żukowski :
++ Marcin Ĺ»ukowski :
 	- unit FASTGRAPH: fLine
 
 + Michael Jaskula :
@@ -84,7 +84,7 @@ Contributors:
 	- 8x8 => 16 multiplication routine (base\common\byte.asm)
 	- 16x16 => 32 multiplication routine (base\common\word.asm)
 
-+ Wojciech Bociański :
++ Wojciech BociaĹ„ski :
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
 	- MADSTRAP
 	- PASDOC
@@ -93,7 +93,7 @@ Contributors:
 # rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
 
-# typ REAL Fixed-Point Q16.16 przekracza 32 bity dla MUL i DIV, częsty OVERFLOW
+# typ REAL Fixed-Point Q16.16 przekracza 32 bity dla MUL i DIV, czÄ™sty OVERFLOW
 
 # uzywaj asm65('') zamiast #13#10, POS bedzie wlasciwie zwracalo indeks
 
@@ -107,7 +107,7 @@ Contributors:
 
 # wartosc dla typu POINTER zwiekszana jest o CODEORIGIN
 
-# :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia się tylko :BP+1
+# :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia siÄ™ tylko :BP+1
 # :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
 # indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
@@ -331,10 +331,11 @@ const
   CHARLITERALTOK	= 183;
   STRINGLITERALTOK	= 184;
 
-  LINKTOK		= 188;
-  MACRORELEASE		= 189;
-  PROCALIGNTOK		= 190;
-  LOOPALIGNTOK		= 191;
+  LINKTOK		= 187;
+  MACRORELEASE		= 188;
+  PROCALIGNTOK		= 189;
+  LOOPALIGNTOK		= 190;
+  LINKALIGNTOK		= 191;
   INFOTOK		= 192;
   WARNINGTOK		= 193;
   ERRORTOK		= 194;
@@ -380,7 +381,7 @@ const
   MAXIDENTS		= 16384;
   MAXBLOCKS		= 16384;	// maksymalna liczba blokow
   MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
-  MAXVARS		= 256;		// maksymalna liczba parametrów dla VAR
+  MAXVARS		= 256;		// maksymalna liczba parametrĂłw dla VAR
   MAXUNITS		= 512;
   MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
   MAXALLOWEDUNITS	= 256;
@@ -687,7 +688,7 @@ var
 	     end;
 
   codealign : record
-		proc, loop : integer;
+		proc, loop, link : integer;
 	      end;
 
 
@@ -33488,7 +33489,8 @@ var
 
        if AnsiUpperCase(s) = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
         if AnsiUpperCase(s) = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
-	 Error(NumTok, 'Illegal alignment directive');
+         if AnsiUpperCase(s) = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0) else
+	  Error(NumTok, 'Illegal alignment directive');
 
        omin_spacje(i, d);
 
@@ -33536,8 +33538,6 @@ var
        s := LowerCase( get_string(i, d) );
        AddResource( FindFile(s, 'resource') );
 
-
-
        dec(NumTok);
       end else
 (*
@@ -33557,7 +33557,7 @@ var
        end else
 *)
 
-      if (cmd = 'L') or (cmd = 'LINK') then begin		// {$L filename}
+      if (cmd = 'L') or (cmd = 'LINK') then begin		// {$L filename} | {$LINK filename}
        AddToken(LINKTOK, UnitIndex, Line, 1, 0);
 
        s := LowerCase( get_string(i, d) );
@@ -33568,6 +33568,8 @@ var
        Tok[NumTok].Value := v;
 
        SetLength(linkObj, v+2);
+
+       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        //dec(NumTok);
       end else
@@ -34106,6 +34108,7 @@ var
 
 	 end;
 
+
 	 if CurToken = ASMTOK then begin
 
 	  Tok[NumTok].Kind := CurToken;
@@ -34456,7 +34459,6 @@ begin
   Tokenize( UnitName[UnitIndex].Path );
 
   if UnitIndex > 1 then begin
-
     CheckTok(NumTok, DOTTOK);
     CheckTok(NumTok - 1, ENDTOK);
 
@@ -35059,28 +35061,28 @@ end;
 (*
 procedure GenerateInterrupt(InterruptNumber: Byte);
 
- DLI     5  ($200)   Wektor przerwań NMI listy displejowej
+ DLI     5  ($200)   Wektor przerwaĹ„ NMI listy displejowej
  VBI     6  ($222)   Wektor NMI natychmiastowego VBI
- VBL     7  ($224)   Wektor NMI opóźnionego VBI
+ VBL     7  ($224)   Wektor NMI opĂłĹşnionego VBI
  RESET
  IRQ
  BRK
 
-VDSLST $0200 $E7B3 Wektor przerwań NMI listy displejowej
+VDSLST $0200 $E7B3 Wektor przerwaĹ„ NMI listy displejowej
 VPRCED $0202 $E7B3 Wektor IRQ procedury pryferyjnej
-VINTER $0204 $E7B3 Wektor IRQ urządzeń peryferyjnych
+VINTER $0204 $E7B3 Wektor IRQ urzÄ…dzeĹ„ peryferyjnych
 VBREAK $0206 $E7B3 Wektor IRQ programowej instrukcji BRK
 VKEYBD $0208 $EFBE Wektor IRQ klawiatury
-VSERIN $020A $EB11 Wektor IRQ gotowości wejścia szeregowego
-VSEROR $020C $EA90 Wektor IRQ gotowości wyjścia szeregowego
-VSEROC $020E $EAD1 Wektor IRQ zakończenia przesyłania szereg.
-VTIMR1 $0210 $E7B3 Wektor IRQ licznika 1 układu POKEY
-VTIMR2 $0212 $E7B3 Wektor IRQ licznika 2 układu POKEY
-VTIMR4 $0214 $E7B3 Wektor IRQ licznika 4 układu POKEY
+VSERIN $020A $EB11 Wektor IRQ gotowoĹ›ci wejĹ›cia szeregowego
+VSEROR $020C $EA90 Wektor IRQ gotowoĹ›ci wyjĹ›cia szeregowego
+VSEROC $020E $EAD1 Wektor IRQ zakoĹ„czenia przesyĹ‚ania szereg.
+VTIMR1 $0210 $E7B3 Wektor IRQ licznika 1 ukĹ‚adu POKEY
+VTIMR2 $0212 $E7B3 Wektor IRQ licznika 2 ukĹ‚adu POKEY
+VTIMR4 $0214 $E7B3 Wektor IRQ licznika 4 ukĹ‚adu POKEY
 
-VIMIRQ $0216 $E6F6 Wektor sterownika przerwań IRQ
+VIMIRQ $0216 $E6F6 Wektor sterownika przerwaĹ„ IRQ
 VVBLKI $0222 $E7D1 Wektor NMI natychmiastowego VBI
-VVBLKD $0224 $E93E Wektor NMI opóźnionego VBI
+VVBLKD $0224 $E93E Wektor NMI opĂłĹşnionego VBI
 CDTMA1 $0226 $XXXX Adres JSR licznika systemowego 1
 CDTMA2 $0228 $XXXX Adres JSR licznika systemowego 2
 BRKKEY $0236 $E754 Wektor IRQ klawisza BREAK **
@@ -35129,8 +35131,8 @@ begin
 
 	if Ident[GetIdent(lab)].AllocElementType = RECORDTOK then begin
 
-	 asm65(#9'mwy '+lab+' :bp2');			// !!! koniecznie w ten sposób
-							// !!! kolejne optymalizacje podstawią pod :BP2 -> LAB
+	 asm65(#9'mwy '+lab+' :bp2');			// !!! koniecznie w ten sposĂłb
+							// !!! kolejne optymalizacje podstawiÄ… pod :BP2 -> LAB
 	 asm65(#9'lda :bp2');
 	 asm65(#9'add #' + svar + '-DATAORIGIN');
 	 asm65(#9'sta :bp2');
@@ -38347,7 +38349,7 @@ begin
 
   s := PSingle(@Src)^;
 
-  if s > 1 then
+  if frac(s) <> 0 then
 
    Result := f32Tof16(Src)
 
@@ -43984,6 +43986,14 @@ case Tok[i].Kind of
     end;
 
 
+  LINKALIGNTOK:
+    begin
+     codealign.link := Tok[i].Value;
+
+     Result := i;
+    end;
+
+
   GOTOTOK:
     begin
      CheckTok(i + 1, IDENTTOK);
@@ -45332,7 +45342,7 @@ WHILETOK:
   INCTOK, DECTOK:
 // dwie wersje
 // krotka i szybka, jesli mamy jeden parametr, np. INC(VAR), DEC(VAR)
-// długa i wolna, jesli mamy tablice lub dwa parametry, np. INC(TMP[1]), DEC(VAR, VALUE+12)
+// dĹ‚uga i wolna, jesli mamy tablice lub dwa parametry, np. INC(TMP[1]), DEC(VAR, VALUE+12)
     begin
 
       Value := 0;
@@ -47086,6 +47096,13 @@ var IdentIndex, size: integer;
 
       size := 0;
      end else
+
+     if Ident[IdentIndex].isExternal then begin
+
+      Result := #9'= ' + Tok[Ident[IdentIndex].Value + 1].Name^;
+
+     end else
+
      if Ident[IdentIndex].isAbsolute then begin
 
       if Ident[IdentIndex].Value < 0 then
@@ -47097,6 +47114,7 @@ var IdentIndex, size: integer;
         Result := #9'= $'+IntToHex(Ident[IdentIndex].Value, 4);
 
      end else
+
       if Ident[IdentIndex].NumAllocElements > 0 then
 	Result := #9'= CODEORIGIN+$'+IntToHex(Ident[IdentIndex].Value - CODEORIGIN_BASE - CODEORIGIN, 4)
       else
@@ -47706,7 +47724,7 @@ var
   ForwardIdentIndex, IdentIndex: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
-  IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isForward, ImplementationUse: Boolean;
+  IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isExternal, isForward, ImplementationUse: Boolean;
   iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, Tmp, varPassMethod: Byte;
@@ -48050,15 +48068,19 @@ while Tok[i].Kind in
  [CONSTTOK, TYPETOK, VARTOK, LABELTOK, PROCEDURETOK, FUNCTIONTOK, PROGRAMTOK, USESTOK, LIBRARYTOK, EXPORTSTOK,
   CONSTRUCTORTOK, DESTRUCTORTOK, LINKTOK,
   UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF,
-  PROCALIGNTOK, LOOPALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
+  PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
   begin
 
 
   if Tok[i].Kind = LINKTOK then begin
+
+   if codealign.link > 0 then begin
+    asm65(#9'.align $' + IntToHex(codealign.link,4));
+    asm65;
+   end;
+
    asm65(#9'.link ''' + linkObj[ Tok[i].Value ] + '''');
-
-   inc(i,1);
-
+   inc(i, 2);
   end;
 
 
@@ -48070,6 +48092,12 @@ while Tok[i].Kind in
 
   if Tok[i].Kind = LOOPALIGNTOK then begin
    if Pass = CODEGENERATIONPASS then codealign.loop := Tok[i].Value;
+   inc(i, 2);
+  end;
+
+
+  if Tok[i].Kind = LINKALIGNTOK then begin
+   if Pass = CODEGENERATIONPASS then codealign.link := Tok[i].Value;
    inc(i, 2);
   end;
 
@@ -48506,6 +48534,7 @@ while Tok[i].Kind in
       i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
       isAbsolute := false;
+      isExternal := false;
 
       if IdType = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
@@ -48522,6 +48551,34 @@ while Tok[i].Kind in
 	ConstVal := (VarRegister+3) shl 24 + 1 ;
 
 	inc(i);
+
+      end else
+
+      if Tok[i + 1].Kind = EXTERNALTOK then begin
+
+       if NumVarOfSameType > 1 then
+	 Error(i + 1, 'Only one variable can be initialized');
+
+//	 Ident[NumIdent].isExternal:=true;
+
+       isAbsolute := true;
+       isExternal := true;
+
+//	 Ident[NumIdent].isInit := true;
+
+       inc(i);
+
+       if Tok[i + 1].Kind <> IDENTTOK then
+         iError(i + 1, IdentifierExpected);
+
+//       ConstVal := GetIdent(Tok[i + 1].Name^);
+
+        ConstVal:=i+1;
+
+       inc(i);
+
+//       VarType := POINTERTOK;
+
 
       end else
 
@@ -48701,6 +48758,9 @@ while Tok[i].Kind in
 	  end;
 
       end;
+
+
+       if isExternal then Ident[NumIdent].isExternal := true;
 
 
        if isAbsolute then
@@ -48944,7 +49004,7 @@ while Tok[i].Kind in
 	 if Ident[ForwardIdentIndex].NumParams <> ParamIndex then
 	   Error(i, 'Wrong number of parameters specified for call to '+''''+Ident[ForwardIdentIndex].Name+'''');
 
-//	   function header ”arg1” doesn’t match forward : var name changes arg2 = arg3
+//	   function header â€ťarg1â€ť doesnâ€™t match forward : var name changes arg2 = arg3
 
 	 for ParamIndex := 1 to Ident[ForwardIdentIndex].NumParams do
 	  if ((Ident[ForwardIdentIndex].Param[ParamIndex].Name <> Param[ParamIndex].Name) or (Ident[ForwardIdentIndex].Param[ParamIndex].DataType <> Param[ParamIndex].DataType)) then
@@ -49015,7 +49075,7 @@ OutputDisabled := (Pass = CODEGENERATIONPASS) and (BlockStack[BlockStackTop] <> 
 if not isAsm then begin
  GenerateDeclarationEpilog;  // Make jump to block entry point
 
- if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK]) then
+ if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
   CheckTok(i, BEGINTOK);
 
 end;
@@ -49727,6 +49787,7 @@ begin
 
  DefaultFormatSettings.DecimalSeparator := '.';
 
+ SetLength(linkObj, 1);
  SetLength(resArray, 1);
 
 
