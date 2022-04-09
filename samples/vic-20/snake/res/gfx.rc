@@ -1,0 +1,3 @@
+CRT_CHARS_ADR  rcdata 'res/snake_cbm.fnt'
+CRT_TITLE_ADR  rcdata 'res/title_cbm.scr'
+
