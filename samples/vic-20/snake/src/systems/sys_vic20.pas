@@ -155,8 +155,6 @@ const
   CART_ADR     = $a000;
   CART_SIZE    = $2000;
 
-  GAME_VBI_ADR = $1400;
-
   JOY_UP       = %00000100;
   JOY_DOWN     = %00001000;
   JOY_LEFT     = %00010000;
@@ -338,7 +336,7 @@ asm
       eor #%10111100                  // inverse values
       sta JOY
 
-      jsr GAME_VBI_ADR
+      jsr VBI
 
       mva #%01000000 VIA2IFR
       plr
