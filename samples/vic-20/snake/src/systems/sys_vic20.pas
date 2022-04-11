@@ -167,7 +167,6 @@ const
 var
   RTCLOCK  : byte absolute $60;
   JOY      : byte absolute $61;
-  RND      : byte absolute $62;
 
 //:-------------------------------------------------------------:
 
@@ -183,8 +182,8 @@ procedure put_char(col, c: byte); assembler; register;
 procedure update_counter_2(v: byte; counter, scr_counter: pointer); assembler; register;
 procedure update_counter_4(v: byte; counter, scr_counter: pointer); assembler; register;
 
-procedure prnd; assembler; overload;
-procedure prnd(a, b, mask: byte); register; overload;
+function prnd: byte; register; assembler; overload;
+function prnd(a, b, mask: byte): byte; register; overload;
 
 //o-------------------------------------------------------------o
 
@@ -525,7 +524,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure prnd; assembler; overload;
+function prnd: byte; register; assembler; overload;
 asm
       lda VICCR4
       adc RTCLOCK
@@ -533,23 +532,19 @@ asm
       eor VIA2T1LL
       eor VIA1T1CL
       eor VIA1T1CH
-      sta RND
+      sta RESULT
 end;
 
 //:-------------------------------------------------------------:
 
-procedure prnd(a, b, mask: byte); register; overload;
+function prnd(a, b, mask: byte): byte; register; overload;
 begin
-  prnd;
+  RESULT := prnd and mask;
 
-  t0b := RND and mask;
-
-  if t0b < a then inc(t0b,a);
-  if t0b > b then repeat
-    t0b := t0b shr 1;
-  until t0b <= b;
-
-  RND := t0b;
+  if RESULT < a then inc(RESULT,a);
+  if RESULT > b then repeat
+    RESULT := RESULT shr 1;
+  until RESULT <= b;
 end;
 
 
