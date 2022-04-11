@@ -58,8 +58,6 @@ var
 	CurrentX, CurrentY: smallint;
 
 
-{$i graph3.inc}
-
 (*
 	TheFillSettings : FillSettingsType;
 
@@ -845,6 +843,25 @@ end;
 {$i graph2.inc}
 
 
+function Scanline(y: smallint): PByte;
+(*
+@description:
+
+*)
+var i: byte;
+begin
+
+ i:=y;
+
+ if y < 0 then i:=0 else
+  if y >= ScreenHeight then i:=ScreenHeight-1;
+
+ Result:=pointer(VideoRam + lineLo[i] + lineHi[i] shl 8);
+
+end;
+
+
+
 procedure LineTo(x, y: smallint);
 (*
 @description:
@@ -1198,24 +1215,6 @@ end;
 end;
 
 
-function Scanline(y: smallint): PByte;
-(*
-@description:
-
-*)
-var i: byte;
-begin
-
- i:=y;
-
- if y < 0 then i:=0 else
-  if y >= ScreenHeight then i:=ScreenHeight-1;
-
- Result:=pointer(VideoRam + lineLo[i] + lineHi[i] shl 8);
-
-end;
-
-
 procedure InitGraph(driver, mode: byte; dev: PByte); overload;
 begin
 
@@ -1245,6 +1244,8 @@ end;
 
 end;
 
+
+{$i graph3.inc}
 
 {$i vbxe.inc}
 {$i graph.inc}

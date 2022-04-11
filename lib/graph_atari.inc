@@ -12,9 +12,6 @@ begin
 end;
 
 
-{$i graph3.inc}
-
-
 procedure InitGraph(mode: byte); overload;
 (*
 @description:
@@ -118,6 +115,9 @@ stop
 end;
 
 end;
+
+
+{$i graph3.inc}
 
 
 procedure SetBkColor(color: byte); assembler;
@@ -308,5 +308,4 @@ _3
 end;
 
 end;
-
 

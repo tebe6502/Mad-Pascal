@@ -56,10 +56,35 @@ var
 	CurrentX, CurrentY: word;
 
 
-{$i graph2.inc}
+function Scanline(y: smallint): PByte;
+(*
+@description:
+ScanLine give access to memory starting point for each row raw data.
+*)
+var i: byte;
+    a: word;
+begin
+
+ i:=y;
+
+ if y < 0 then i:=0 else
+  if y >= ScreenHeight then i:=ScreenHeight-1;
+
+ if Scanline_Width <> 40 then
+  a:=i * Scanline_Width
+ else begin
+  a:=i shl 3;
+  a:=a + a shl 2;
+ end;
+
+ Result:=pointer(VideoRam + a);
+
+end;
 
 
 {$i '../src/targets/graph.inc'}
+
+{$i graph2.inc}
 
 
 procedure Line(x1, y1, x2, y2: smallint);
@@ -123,32 +148,6 @@ asm
 };
 end;
 *)
-
-
-function Scanline(y: smallint): PByte;
-(*
-@description:
-ScanLine give access to memory starting point for each row raw data.
-*)
-var i: byte;
-    a: word;
-begin
-
- i:=y;
-
- if y < 0 then i:=0 else
-  if y >= ScreenHeight then i:=ScreenHeight-1;
-
- if Scanline_Width <> 40 then
-  a:=i * Scanline_Width
- else begin
-  a:=i shl 3;
-  a:=a + a shl 2;
- end;
-
- Result:=pointer(VideoRam + a);
-
-end;
 
 
 {$ifdef atari}

@@ -497,10 +497,10 @@ loop	cpw _adr+1 siz+1
 	bcs skp
 
 	ldy #20
-	mva:rpl bltClr,y MAIN.SYSTEM.VBXE_WINDOW+$e0,y-
+	mva:rpl bltClr,y MAIN.SYSTEM.VBXE_WINDOW+MAIN.SYSTEM.VBXE_BCBTMP,y-
 
-	fxs FX_BL_ADR0 #$e0		; program blittera od adresu $0000e0
-	fxs FX_BL_ADR1 #$00		; zaraz za programem VBXE Display List
+	fxs FX_BL_ADR0 #MAIN.SYSTEM.VBXE_BCBTMP	; program blittera od adresu MAIN.SYSTEM.VBXE_BCBTMP
+	fxs FX_BL_ADR1 #$00			; zaraz za programem VBXE Display List
 	fxsa FX_BL_ADR2
 
 	fxs FX_BLITTER_START #$01	; !!! start gdy 1 !!!
