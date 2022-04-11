@@ -100,21 +100,16 @@ procedure draw_frame;
 var
   i : byte absolute $70; // t0b
 begin
-  t0w := SCREEN_ADR + ROW_SIZE; t1w := COLORMAP_ADR + ROW_SIZE;
+  t0w := SCREEN_ADR + ROW_SIZE;
   for i := (COL_SIZE - 4) downto 0 do begin
     poke(t0w, C_WALL_VW);
     poke(t0w + (ROW_SIZE - 1), C_WALL_VE);
-    poke(t1w, GAME_YELLOW);
-    poke(t1w + (ROW_SIZE - 1), GAME_YELLOW);
     inc(t0w, ROW_SIZE);
-    inc(t1w, ROW_SIZE);
   end;
 
   for i := (ROW_SIZE - 1) downto 0 do begin
     poke(SCREEN_ADR + i, C_WALL_H);
     poke((SCREEN_ADR + SCREEN_SIZE - 2 * ROW_SIZE) + i, C_WALL_H);
-    poke(COLORMAP_ADR + i, GAME_YELLOW);
-    poke((COLORMAP_ADR + SCREEN_SIZE - 2 * ROW_SIZE) + i, GAME_YELLOW);
   end;
 end;
 
@@ -323,8 +318,8 @@ end;
 
 procedure put_fruit;
 begin
-  prnd(1, 24, ROW_MASK); t0b := RND;
-  prnd(1, 27, COL_MASK); t1b := RND;
+  t0b := prnd(1, 24, ROW_MASK);
+  t1b := prnd(1, 27, COL_MASK);
 
   t0w := ROW_SIZE * t1b; inc(t0w, SCREEN_ADR); inc(t0w, t0b);
 
@@ -336,7 +331,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure update_time;
+procedure update_time; inline;
 begin
   dec(time_entity);
   if time_entity = 0 then begin
@@ -347,7 +342,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure snake_step;
+procedure snake_step; inline;
 begin
   snake_speed := GAME_SPEED - level;
   if snake_speed < SPEED_THOLD then snake_speed := SPEED_THOLD;
@@ -365,7 +360,8 @@ end;
 
 procedure set_game;
 begin
-  clrscr(C_SPACE); draw_frame; draw_bottom_line; put_snake; print_hi_score;
+  clrscr(C_SPACE); clrcol(GAME_YELLOW);
+  draw_frame; draw_bottom_line; put_snake; print_hi_score;
 
   time_entity    := TIME_E_SET;
   level_up       := LEVEL_THOLD;
