@@ -282,7 +282,7 @@ const
   PASCALTOK		= 105;
   STDCALLTOK		= 106;
   INLINETOK		= 107;
-  NORETURNTOK		= 108;
+  KEEPTOK		= 108;
 
   SUCCTOK		= 109;
   PREDTOK		= 110;
@@ -436,7 +436,7 @@ const
 {$i targets/type.inc}
 
 type
-  ModifierCode = (mNoReturn = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
+  ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
   irCode = (iDLI, iVBL, iTIM1, iTIM2, iTIM4);
 
@@ -571,7 +571,7 @@ type
 	 isInline,
 	 isAsm,
 	 isExternal,
-	 isNoReturn,
+	 isKeep,
 	 isVolatile,
 	 IsNotDead: Boolean;);
 
@@ -10459,7 +10459,7 @@ var i, l, k, m, x: integer;
 
 
 function OptimizeEAX: Boolean;
-var p,i: integer;
+var i: integer;
     tmp: string;
 begin
 
@@ -34476,7 +34476,7 @@ Spelling[INTERRUPTTOK	] := 'INTERRUPT';
 Spelling[PASCALTOK	] := 'PASCAL';
 Spelling[STDCALLTOK	] := 'STDCALL';
 Spelling[INLINETOK      ] := 'INLINE';
-Spelling[NORETURNTOK    ] := 'NORETURN';
+Spelling[KEEPTOK        ] := 'KEEP';
 
 Spelling[ASSIGNFILETOK	] := 'ASSIGN';
 Spelling[RESETTOK	] := 'RESET';
@@ -39824,6 +39824,9 @@ begin
 		GenerateBinaryOperation(PLUSTOK, WORDTOK);
 
 	    end;
+
+//asm65(#9'nop');
+//writeln(Ident[IdentIndex].Name,',',Elements(IdentIndex));
 
  Result := i;
 end;
@@ -46217,7 +46220,7 @@ begin
     isInt := false;
     isInl := false;
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, EXTERNALTOK, NORETURNTOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, EXTERNALTOK, KEEPTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -46288,8 +46291,9 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
-            NORETURNTOK: begin
-			   Ident[NumIdent].isNoReturn := true;
+                 KEEPTOK: begin
+			   Ident[NumIdent].isKeep := true;
+			   Ident[NumIdent].IsNotDead := true;
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -46614,6 +46618,7 @@ end else
 
 	  Inc(NumBlocks);
 	  Ident[NumIdent].ProcAsBlock := NumBlocks;
+
 	  Ident[NumIdent].IsUnresolvedForward := TRUE;
 
 	  Ident[NumIdent].ObjectIndex := RecType;
@@ -46701,6 +46706,7 @@ end else
 
 	  Inc(NumBlocks);
 	  Ident[NumIdent].ProcAsBlock := NumBlocks;
+
 	  Ident[NumIdent].IsUnresolvedForward := TRUE;
 
 	  Ident[NumIdent].ObjectIndex := RecType;
@@ -47596,7 +47602,7 @@ begin
 	CheckTok(i, SEMICOLONTOK);
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, NORETURNTOK] do begin
+	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, KEEPTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
@@ -47648,12 +47654,11 @@ begin
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
-             NORETURNTOK: begin
-			   Status := Status or ord(mNoReturn);
+             KEEPTOK: begin
+			   Status := Status or ord(mKeep);
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
-
 	  end;
 
 	  inc(i);
@@ -48937,6 +48942,7 @@ while Tok[i].Kind in
       begin
       Inc(NumBlocks);
       Ident[NumIdent].ProcAsBlock := NumBlocks;
+
       Ident[NumIdent].IsUnresolvedForward := TRUE;
 
       //GenerateForwardReference;
@@ -49009,7 +49015,7 @@ while Tok[i].Kind in
 
 	 Tmp := 0;
 
-	 if Ident[ForwardIdentIndex].isNoReturn	then Tmp := Tmp or ord(mNoReturn);
+	 if Ident[ForwardIdentIndex].isKeep	then Tmp := Tmp or ord(mKeep);
 	 if Ident[ForwardIdentIndex].isOverload	then Tmp := Tmp or ord(mOverload);
 	 if Ident[ForwardIdentIndex].isAsm	then Tmp := Tmp or ord(mAssembler);
 	 if Ident[ForwardIdentIndex].isRegister	then Tmp := Tmp or ord(mRegister);
