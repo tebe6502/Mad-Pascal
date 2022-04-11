@@ -1,0 +1,32 @@
+; This file is used to load external resources
+; use following syntax:
+;
+; RCLABEL RCTYPE RCFILE [ PAR0 PAR1 PAR2 PAR3 PAR4 PAR5 PAR6 PAR7 ] 
+;
+; RCLABEL must be declared in your program 
+; RCTYPE defines data type
+; allowed types:
+; RCDATA - raw binary data
+; RCASM	- assembly filed to be linked and assembled
+; DOSFILE - file with Atari DOS header. loading address of this file must be identical with RCLABEL
+; RELOC - relocable file in Mad-Assembler. File will be relocated to address declared in RCLABEL
+; RMT - Raster Music Tracker module. File will be relocated to address declared in RCLABEL
+; MPT - Music ProTracker module. File will be relocated to address declared in RCLABEL
+; CMC - Chaos Music Composer module. File will be relocated to address declared in RCLABEL
+; RMTPLAY - RMT player features. RCFILE must point to *.FEAT file and PAR0 defines player mode 0..3
+;     0 => compile RMTplayer for 4 tracks mono
+;     1 => compile RMTplayer for 8 tracks stereo
+;     2 => compile RMTplayer for 4 tracks stereo L1 R2 R3 L4
+;     3 => compile RMTplayer for 4 tracks stereo L1 L2 R3 R4	
+; MPTPLAY - MPT player
+; CMCPLAY - CMC player
+; XBMP - Windows Bitmap (8 BitsPerPixel) file. Loaded into VBXE memory at address declared in RCLABEL,
+;        from color index set as PAR0, in VBXE pallette nr 1
+; 
+; remove # to uncomment and use examples below:
+ 
+KEY_MAP rcdata 'keymap.bin'
+DISPLAY_LIST_ADDRESS rcasm 'dlist.asm'
+BIN_HEADER rcdata 'head.bin'
+
+
