@@ -21,12 +21,16 @@ unit zxlib;
 	- Text "Press any key to start a game" moved upper in text mode 1
 	- Flashing of this text
 	- Added additional text parameter
-  
+
   Version 1.3:
 	- [Added] Beep procedure, simulating ZX Spectrum beeper in middle C
 	- PrintAt procedure: check x boundaries for text mode 1 and 2
 	- ZXTitle procedure: minor updates
 	- [Bug fix] FlashAt procedure: removed annoying messed up alternating text
+
+  Version 1.4:
+	- Text -> Txt
+	- Beep (duration : real; pitch : integer); -> Beep (duration : real; pitch : shortint);
 *)
 
 interface
@@ -44,7 +48,7 @@ function Screen(var f : file; y, x : byte) : char; overload;
 function SetRAM(pages : byte) : word;
 procedure ZXTitle(title : string; y, x : byte; author, dev, txt, misc : string);
 function Sgn(number : integer) : integer;
-procedure Beep (duration : real; pitch : integer);
+procedure Beep (duration : real; pitch : shortint);
 
 implementation
 
@@ -353,10 +357,10 @@ begin
 end;
 
 
-procedure Beep (duration : real; pitch : integer);
+procedure Beep (duration : real; pitch : shortint);
 (*
 * @description:
-* Emulate ZX Spectrum beeper 
+* Emulate ZX Spectrum beeper
 *
 * @param: duration - duration of the sound
 * @param: pitch    - pitch is given in semitones above middle C using negative
