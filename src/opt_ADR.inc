@@ -14,6 +14,7 @@
      tmp:=#9'sta ' + copy(listing[i], 6, 256);
 
      for p:=i-1 downto 0 do
+      if onBreak(p) then Break else
       if listing[p] = tmp then begin
 
 // -----------------------------------------------------------------------------

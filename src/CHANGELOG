@@ -1,5 +1,6 @@
 11.04.2022
 - dodany modyfikator KEEP dla procedur/funkcji, oznaczona w ten sposób procedura/funkcja zostanie zawsze skompilowana
+- issue #85 fixed ('opt_ADR.inc')
 
 10.04.2022
 - modyfikator REGISTER dla funkcji spowoduje alokację wartości funkcji na stronie zerowej (typy proste)
