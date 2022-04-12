@@ -32307,6 +32307,18 @@ begin
       end;
 
      end else
+     if (pos('inc ', listing[i]) > 0) then begin
+
+      if (optyY <> '') and (listing[i] = #9'inc ' + optyY) then begin arg0 := ''; optyY := '' end;
+
+     end else
+
+     if (pos('dec ', listing[i]) > 0) then begin
+
+      if (optyY <> '') and (listing[i] = #9'dec ' + optyY) then begin arg0 := ''; optyY := '' end;
+
+     end else
+
      if iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or
         (pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) or ((optyA = optyY) and (optyA <> '')) or
         (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or
@@ -46294,6 +46306,7 @@ begin
                  KEEPTOK: begin
 			   Ident[NumIdent].isKeep := true;
 			   Ident[NumIdent].IsNotDead := true;
+
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -49517,6 +49530,7 @@ procedure OptimizeProgram;
 begin
 // Perform dead code elimination
  MarkNotDead(GetIdent('MAIN'));
+
 end;
 
 
