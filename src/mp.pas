@@ -10550,7 +10550,7 @@ end;
 }
 
 
-     if ADD_SUB_STACK(i) or ADC_SBC_STACK(i) or AND_ORA_EOR_STACK(i) then			// add|sub|adc|sbc STACK
+     if (ADD_SUB_STACK(i) or ADC_SBC_STACK(i) or AND_ORA_EOR_STACK(i)) and (pos('_EAX', listing[i]) = 0) then			// add|sub|adc|sbc STACK
       begin
 
 	tmp:=copy(listing[i], 6, 256);
@@ -10565,10 +10565,10 @@ end;
 	   listing[i] := copy(listing[i], 1, 5) +  copy(listing[p-1], 6, 256);
 
 	   if sta(p+1) then
-	    //listing[p] := ''
+	    listing[p] := ''
 	   else begin
-	    //listing[p-1] := '';
-	    //listing[p]   := '';
+	    listing[p-1] := '';
+	    listing[p]   := '';
 	   end;
 
 	   Result:=false; Break;
@@ -10621,7 +10621,7 @@ end;
       end;
 
 
-     if lda_stack(i) and (pos('EAX', listing[i]) = 0) and								// lda :STACKORIGIN		; 0
+     if lda_stack(i) and (pos('_EAX', listing[i]) = 0) and								// lda :STACKORIGIN		; 0
 	sta_a(i+1) and (iy(i+1) = false) and						// sta				; 1
 	(pos(':bp2', listing[i+1]) = 0) and
 	(sta_a(i+2) = false) and (tay(i+2) = false) and 				// ~sta				; 2
@@ -13602,7 +13602,7 @@ end;
 
 
 {
-if (pos('lda :STACKORIGIN+12', listing[i]) > 0) then begin
+if (pos(':ecx+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
