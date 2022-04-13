@@ -32307,16 +32307,16 @@ begin
       end;
 
      end else
-     if (pos('inc ', listing[i]) > 0) then begin
-
-      if (optyY <> '') and (listing[i] = #9'inc ' + optyY) then begin arg0 := ''; optyY := '' end;
-
-     end else
-
-     if (pos('dec ', listing[i]) > 0) then begin
-
-      if (optyY <> '') and (listing[i] = #9'dec ' + optyY) then begin arg0 := ''; optyY := '' end;
-
+     if (pos('inc ', listing[i]) > 0) then begin								// issue #91 fixed
+														//
+      if (optyY <> '') and (listing[i] = #9'inc ' + optyY) then begin arg0 := ''; optyY := '' end;		//
+														//
+     end else													//
+														//
+     if (pos('dec ', listing[i]) > 0) then begin								//
+														//
+      if (optyY <> '') and (listing[i] = #9'dec ' + optyY) then begin arg0 := ''; optyY := '' end;		//
+														//
      end else
 
      if iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or
@@ -46306,7 +46306,6 @@ begin
                  KEEPTOK: begin
 			   Ident[NumIdent].isKeep := true;
 			   Ident[NumIdent].IsNotDead := true;
-
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
@@ -46396,7 +46395,6 @@ var
 
    end else
     inc(Types[RecType].Size, DataSize[FieldType]);
-
 
    Types[RecType].Field[x].Kind := 0;
   end;
@@ -46680,22 +46678,24 @@ end else
     if Tok[j].Kind = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
 
-    for FieldInListIndex := 1 to NumFieldsInList do
-     DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);
-
-    if DataType in [RECORDTOK, OBJECTTOK] then
-      for FieldInListIndex := 1 to NumFieldsInList do
-       for k := 1 to Types[NumAllocElements].NumFields do begin
-	DeclareField(FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,
-		     Types[NumAllocElements].Field[k].DataType//,
-		     //Types[NumAllocElements].Field[k].NumAllocElements,
+    for FieldInListIndex := 1 to NumFieldsInList do begin							// issue #92 fixed
+      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);	//
+														//
+      if DataType in [RECORDTOK, OBJECTTOK] then								//
+//      for FieldInListIndex := 1 to NumFieldsInList do								//
+         for k := 1 to Types[NumAllocElements].NumFields do begin						//
+	  DeclareField(FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,	//
+		     Types[NumAllocElements].Field[k].DataType//,						//
+		     //Types[NumAllocElements].Field[k].NumAllocElements,					//
 		     //Types[NumAllocElements].Field[k].AllocElementType
 		     );
 
-	Types[RecType].Field[ Types[RecType].NumFields ].Kind := OBJECTVARIABLE;
+	  Types[RecType].Field[ Types[RecType].NumFields ].Kind := OBJECTVARIABLE;
 
 //	writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,',', Types[NumAllocElements].Field[k].NumAllocElements);
-       end;
+         end;
+
+     end;
 
 
     ExitLoop := FALSE;
@@ -46797,14 +46797,15 @@ end else// if OBJECTTOK
 
     //NumAllocElements:=0;		// ??? arrays not allowed, only pointers ???
 
-    for FieldInListIndex := 1 to NumFieldsInList do
-     DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);
+    for FieldInListIndex := 1 to NumFieldsInList do begin								// issue #92 fixed
+      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);		//
+															//
+      if DataType = RECORDTOK then											//
+        //for FieldInListIndex := 1 to NumFieldsInList do								//
+        for k := 1 to Types[NumAllocElements].NumFields do
+ 	  DeclareField(FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name, Types[NumAllocElements].Field[k].DataType);
 
-    if DataType = RECORDTOK then
-      for FieldInListIndex := 1 to NumFieldsInList do
-       for k := 1 to Types[NumAllocElements].NumFields do
-	DeclareField(FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name, Types[NumAllocElements].Field[k].DataType);
-
+    end;
 
     ExitLoop := FALSE;
     if Tok[i + 1].Kind <> SEMICOLONTOK then begin
@@ -47173,7 +47174,7 @@ begin
 		 if (Ident[IdentIndex].PassMethod <> VARPASSING) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
 
 		  asm65('adr.'+Ident[IdentIndex].Name + Value);
-		  asm65('.var '+Ident[IdentIndex].Name+#9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		  asm65('.var '+Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
 		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
@@ -47196,17 +47197,21 @@ begin
 
 		  else begin
 
+		   if Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] then
+		     asm65('adr.' + Ident[IdentIndex].Name + Value(true) + #9'; [' + IntToStr(RecordSize(IdentIndex)) + '] ' + InfoAboutToken(Ident[IdentIndex].DataType))
+		   else
+
 		   if Elements(IdentIndex) > 0 then begin
 
-		    if (Ident[IdentIndex].NumAllocElements_ > 0) and not (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK])  then
-		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements_) + ']' + mads_data_size)
+		    if (Ident[IdentIndex].NumAllocElements_ > 0) and not (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+		     asm65('adr.' + Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements_) + ']' + mads_data_size)
 		    else
-		     asm65('adr.'+Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);
+  		     asm65('adr.' + Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);
 
 		   end else
-		    asm65('adr.'+Ident[IdentIndex].Name + Value(true));
+		    asm65('adr.' + Ident[IdentIndex].Name + Value(true));
 
-		   asm65('.var '+Ident[IdentIndex].Name+#9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		   asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  end;
 
@@ -47777,7 +47782,6 @@ if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIn
  end;
 
 end;
-
 
 
 if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
@@ -48752,7 +48756,7 @@ while Tok[i].Kind in
 	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do
 	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
 
-//	    writeln(VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType);
+//	    writeln(VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,' | ',Ident[NumIdent].Value);
 
 	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
