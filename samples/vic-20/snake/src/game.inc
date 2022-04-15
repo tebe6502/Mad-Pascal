@@ -388,7 +388,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure vbi;
+procedure vbi; keep;
 begin
   if not game_over then begin
     update_time;
@@ -404,12 +404,6 @@ procedure prepare;
 begin
   Move(pointer(CRT_CHARS_ADR), pointer(CHARSET_ADR), CHARSET_SIZE);
   Move(pointer(CRT_TITLE_ADR), pointer(SCREEN_ADR), SCREEN_SIZE);
-
-  {*
-    hack for the compiler, call vbi procedure
-    in other case optimizer remove unused - from his point of view - code
-  *}
-  vbi;
 end;
 
 //o-------------------------------------------------------------o
