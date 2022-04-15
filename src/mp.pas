@@ -379,11 +379,12 @@ const
   MAXTYPES		= 1024;
 //  MAXTOKENS		= 32768;
   MAXIDENTS		= 16384;
-  MAXBLOCKS		= 16384;	// maksymalna liczba blokow
-  MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
-  MAXVARS		= 256;		// maksymalna liczba parametrow dla VAR
+  MAXBLOCKS		= 16384; // maksymalna liczba blokow
+  MAXPARAMS		= 8;     // maksymalna liczba parametrow dla PROC, FUNC
+  MAXKEEPS    = 255;   // maksymalna liczba PROC, FUNC oznaczonych jako KEEP
+  MAXVARS		= 256;     // maksymalna liczba parametrow dla VAR
   MAXUNITS		= 512;
-  MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
+  MAXDEFINES		= 256; // maksymalna liczba $DEFINE
   MAXALLOWEDUNITS	= 256;
 
   CODEORIGIN		= $100;
@@ -640,7 +641,11 @@ var
   BreakPosStack: array [0..1023] of TPosStack;
   CodePosStack: array [0..1023] of Word;
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
-  CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;	// For dead code elimination
+  CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
+  Keeper: array [0..MAXKEEPS] of integer;             // tablica z ID PROC, FUNC oznaczonymi jako `keep`
+
+
+  KeepIndex: byte = 0;
 
   OldConstValType: byte;
 
@@ -46315,6 +46320,12 @@ begin
 	  inc(i);
 	end;// while
 
+  if Ident[NumIdent].isKeep then begin
+    Keeper[KeepIndex] := NumIdent;
+    inc(KeepIndex);
+    if KeepIndex > MAXKEEPS then
+      Error(i, 'You have exceeded the allowed number of "KEEP" code blocks');
+  end;
 
   if Ident[NumIdent].isRegister and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion) then
    Error(i, 'Calling convention directive "REGISTER" not applicable with "PASCAL"');
@@ -49517,24 +49528,28 @@ end;// CompileProgram
 
 
 procedure OptimizeProgram;
+  var
+    keepIter: byte;
 
   procedure MarkNotDead(IdentIndex: Integer);
   var
     ChildIndex, ChildIdentIndex: Integer;
-  begin
 
+  begin
   Ident[IdentIndex].IsNotDead := TRUE;
 
   for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
     for ChildIdentIndex := 1 to NumIdent do
       if Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex] then
-	MarkNotDead(ChildIdentIndex);
+        MarkNotDead(ChildIdentIndex);
   end;
 
 begin
-// Perform dead code elimination
- MarkNotDead(GetIdent('MAIN'));
+ // Perform dead code elimination
+ for keepIter := 0 to (KeepIndex - 1) do
+   MarkNotDead(Keeper[keepIter]);
 
+ MarkNotDead(GetIdent('MAIN'));
 end;
 
 
