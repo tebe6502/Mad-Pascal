@@ -381,7 +381,7 @@ const
   MAXIDENTS		= 16384;
   MAXBLOCKS		= 16384; // maksymalna liczba blokow
   MAXPARAMS		= 8;     // maksymalna liczba parametrow dla PROC, FUNC
-  MAXKEEPS    = 255;   // maksymalna liczba PROC, FUNC oznaczonych jako KEEP
+  MAXKEEPS    = 127;   // maksymalna liczba PROC, FUNC oznaczonych jako KEEP
   MAXVARS		= 256;     // maksymalna liczba parametrow dla VAR
   MAXUNITS		= 512;
   MAXDEFINES		= 256; // maksymalna liczba $DEFINE
