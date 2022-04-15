@@ -49546,8 +49546,10 @@ procedure OptimizeProgram;
 
 begin
  // Perform dead code elimination
- for keepIter := 0 to (KeepIndex - 1) do
-   MarkNotDead(Keeper[keepIter]);
+
+ if KeepIndex > 0 then
+   for keepIter := 0 to (KeepIndex - 1) do
+     MarkNotDead(Keeper[keepIter]);
 
  MarkNotDead(GetIdent('MAIN'));
 end;
