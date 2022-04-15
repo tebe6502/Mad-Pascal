@@ -11,7 +11,7 @@ mads 2.1.5
    108
    109 A114			START
    110 A114 BA				tsx
-   111 A115 8E 5D A9			stx MAIN.@halt+1
+   111 A115 8E 5A A9			stx MAIN.@halt+1
    112
    113 					.ifdef fmulinit
    114 					fmulinit
@@ -46,7 +46,7 @@ Source: vic20.a65
    140
    141 A12A			.local	MAIN						; PROCEDURE
    142
-   143 A12A 4C E4 A8			jmp l_0067
+   143 A12A 4C E1 A8			jmp l_0067
    144
    145 				; ------------------------------------------------------------
    146
@@ -2403,295 +2403,291 @@ Macro: MAIN.SYSTEM.MOVE_00B1.M@INLINE [Source: vic20.a65]
      4 A8DD 20 A7 A0			jsr @move
 Source: vic20.a65
   2454 					.endl
-  2455
-  2456 				; optimize FAIL ('VBI', game.inc), line = 412
-  2457
-  2458 A8E0 20 53 A8			jsr VBI
-  2459 A8E3			@exit
-  2460 					.ifdef @new
-  2461 					lda <@VarData
-  2462 					sta :ztmp
-  2463 					lda >@VarData
-  2464 					ldy #@VarDataSize-1
-  2465 					jmp @FreeMem
-  2466 					els
-  2467 A8E3 60				rts						; ret
-  2468 					eif
-  2469 				.endl
-  2470 A8E4			l_0067
-  2471
-  2472 				; optimize OK (game.inc), line = 418
-  2473
-  2474 A8E4 A9 01			lda #$01
-  2475 A8E6 85 FB			sta GAME_OVER
-  2476
-  2477 				; optimize FAIL ('PREPARE', game.inc), line = 420
-  2478
-  2479 A8E8 20 AA A8			jsr PREPARE
-  2480 A8EB 20 91 A1			jsr SYS_VIC20.SYS_INIT
-  2481 A8EE				.local +MAIN.WELCOME_SCR
-  2482 A8EE				m@INLINE
+  2455 A8E0			@exit
+  2456 					.ifdef @new
+  2457 					lda <@VarData
+  2458 					sta :ztmp
+  2459 					lda >@VarData
+  2460 					ldy #@VarDataSize-1
+  2461 					jmp @FreeMem
+  2462 					els
+  2463 A8E0 60				rts						; ret
+  2464 					eif
+  2465 				.endl
+  2466 A8E1			l_0067
+  2467
+  2468 				; optimize OK (game.inc), line = 412
+  2469
+  2470 A8E1 A9 01			lda #$01
+  2471 A8E3 85 FB			sta GAME_OVER
+  2472
+  2473 				; optimize FAIL ('PREPARE', game.inc), line = 414
+  2474
+  2475 A8E5 20 AA A8			jsr PREPARE
+  2476 A8E8 20 91 A1			jsr SYS_VIC20.SYS_INIT
+  2477 A8EB				.local +MAIN.WELCOME_SCR
+  2478 A8EB				m@INLINE
 Macro: MAIN.WELCOME_SCR.M@INLINE [Source: vic20.a65]
-     4 A8EE A9 01			lda #$01
-     5 A8F0 20 EC A1			jsr SYS_VIC20.CLRCOL
-     9 A8F3 A9 0C			lda #$0C
-    10 A8F5 85 70			sta T0B
-    11 A8F7 85 72			sta T2B
-    15 A8F9 AD 53 A0			lda adr.TXT_INFO
-    16 A8FC 4A				lsr @
-    17 A8FD 85 71			sta T1B
-    18 A8FF A5 70			lda T0B
-    19 A901 38 E5 71			sub T1B
-    20 A904 85 70			sta T0B
-    24 A906 85 08			sta SYS_VIC20.SET_XY.X
-    25 A908 A9 02			lda #$02
-    26 A90A 85 0C			sta SYS_VIC20.SET_XY.Y
-    27 A90C 20 FF A1			jsr SYS_VIC20.SET_XY
-    31 A90F A9 07			lda #$07
-    32 A911 85 08			sta SYS_VIC20.PRINT.COL
-    33 A913 A9 53			lda #$53
-    34 A915 85 0C			sta SYS_VIC20.PRINT.S
-    35 A917 A9 A0			lda #$A0
-    36 A919 85 0D			sta SYS_VIC20.PRINT.S+1
-    37 A91B 20 3A A2			jsr SYS_VIC20.PRINT
-    41 A91E AD 3E A0			lda adr.TXT_TURBO
-    42 A921 4A				lsr @
-    43 A922 85 71			sta T1B
-    44 A924 A5 72			lda T2B
-    45 A926 38 E5 71			sub T1B
-    46 A929 85 72			sta T2B
-    50 A92B 85 08			sta SYS_VIC20.SET_XY.X
-    51 A92D A9 19			lda #$19
-    52 A92F 85 0C			sta SYS_VIC20.SET_XY.Y
-    53 A931 20 FF A1			jsr SYS_VIC20.SET_XY
-    57 A934 A9 07			lda #$07
-    58 A936 85 08			sta SYS_VIC20.PRINT.COL
-    59 A938 A9 3E			lda #$3E
-    60 A93A 85 0C			sta SYS_VIC20.PRINT.S
-    61 A93C A9 A0			lda #$A0
-    62 A93E 85 0D			sta SYS_VIC20.PRINT.S+1
-    63 A940 20 3A A2			jsr SYS_VIC20.PRINT
-    66 A943			l_01A6
-    70 A943 A5 61			lda SYS_VIC20.JOY
-    71 A945 29 20			and #$20
-    72 A947 F0 FA			jeq l_01A6
+     4 A8EB A9 01			lda #$01
+     5 A8ED 20 EC A1			jsr SYS_VIC20.CLRCOL
+     9 A8F0 A9 0C			lda #$0C
+    10 A8F2 85 70			sta T0B
+    11 A8F4 85 72			sta T2B
+    15 A8F6 AD 53 A0			lda adr.TXT_INFO
+    16 A8F9 4A				lsr @
+    17 A8FA 85 71			sta T1B
+    18 A8FC A5 70			lda T0B
+    19 A8FE 38 E5 71			sub T1B
+    20 A901 85 70			sta T0B
+    24 A903 85 08			sta SYS_VIC20.SET_XY.X
+    25 A905 A9 02			lda #$02
+    26 A907 85 0C			sta SYS_VIC20.SET_XY.Y
+    27 A909 20 FF A1			jsr SYS_VIC20.SET_XY
+    31 A90C A9 07			lda #$07
+    32 A90E 85 08			sta SYS_VIC20.PRINT.COL
+    33 A910 A9 53			lda #$53
+    34 A912 85 0C			sta SYS_VIC20.PRINT.S
+    35 A914 A9 A0			lda #$A0
+    36 A916 85 0D			sta SYS_VIC20.PRINT.S+1
+    37 A918 20 3A A2			jsr SYS_VIC20.PRINT
+    41 A91B AD 3E A0			lda adr.TXT_TURBO
+    42 A91E 4A				lsr @
+    43 A91F 85 71			sta T1B
+    44 A921 A5 72			lda T2B
+    45 A923 38 E5 71			sub T1B
+    46 A926 85 72			sta T2B
+    50 A928 85 08			sta SYS_VIC20.SET_XY.X
+    51 A92A A9 19			lda #$19
+    52 A92C 85 0C			sta SYS_VIC20.SET_XY.Y
+    53 A92E 20 FF A1			jsr SYS_VIC20.SET_XY
+    57 A931 A9 07			lda #$07
+    58 A933 85 08			sta SYS_VIC20.PRINT.COL
+    59 A935 A9 3E			lda #$3E
+    60 A937 85 0C			sta SYS_VIC20.PRINT.S
+    61 A939 A9 A0			lda #$A0
+    62 A93B 85 0D			sta SYS_VIC20.PRINT.S+1
+    63 A93D 20 3A A2			jsr SYS_VIC20.PRINT
+    66 A940			l_01A6
+    70 A940 A5 61			lda SYS_VIC20.JOY
+    71 A942 29 20			and #$20
+    72 A944 F0 FA			jeq l_01A6
 Source: vic20.a65
-  2483 					.endl
-  2484
-  2485 				; optimize OK (game.inc), line = 422
-  2486
-  2487 A949 A9 00			lda #$00
-  2488 A94B 85 82			sta HI_SCORE_BCD
-  2489 A94D 85 83			sta HI_SCORE_BCD+1
-  2490 A94F 20 0E A8			jsr SET_GAME
-  2491
-  2492 				; --- RepeatUntilProlog
-  2493 A952			l_080D
-  2494
-  2495 				; optimize OK (game.inc), line = 425
-  2496
-  2497 A952 A5 FB			lda GAME_OVER
-  2498 A954 F0 03			jeq l_0819
-  2499 A956 20 44 A8			jsr RESTART_GAME
-  2500 A959			l_0819
+  2479 					.endl
+  2480
+  2481 				; optimize OK (game.inc), line = 416
+  2482
+  2483 A946 A9 00			lda #$00
+  2484 A948 85 82			sta HI_SCORE_BCD
+  2485 A94A 85 83			sta HI_SCORE_BCD+1
+  2486 A94C 20 0E A8			jsr SET_GAME
+  2487
+  2488 				; --- RepeatUntilProlog
+  2489 A94F			l_080C
+  2490
+  2491 				; optimize OK (game.inc), line = 419
+  2492
+  2493 A94F A5 FB			lda GAME_OVER
+  2494 A951 F0 03			jeq l_0818
+  2495 A953 20 44 A8			jsr RESTART_GAME
+  2496 A956			l_0818
+  2497
+  2498 				; optimize OK (game.inc), line = 420
+  2499
+  2500 A956 4C 4F A9			jmp l_080C
   2501
-  2502 				; optimize OK (game.inc), line = 426
+  2502 				; ------------------------------------------------------------
   2503
-  2504 A959 4C 52 A9			jmp l_080D
-  2505
-  2506 				; ------------------------------------------------------------
-  2507
-  2508 = BC00			CRT_CHARS_ADR	= $BC00
-  2509 = B912			CRT_TITLE_ADR	= $B912
-  2510 = 0000			GAME_BLACK	= $00
-  2511 = 0001			GAME_WHITE	= $01
-  2512 = 0002			GAME_RED	= $02
-  2513 = 0003			GAME_CYAN	= $03
-  2514 = 0004			GAME_PURPLE	= $04
-  2515 = 0005			GAME_GREEN	= $05
-  2516 = 0006			GAME_BLUE	= $06
-  2517 = 0007			GAME_YELLOW	= $07
-  2518 = 0008			GAME_ORANGE	= $08
-  2519 = 0020			C_SPACE	= $20
-  2520 = 0040			C_FRUIT	= $40
-  2521 = 0041			C_WALL_H	= $41
-  2522 = 0042			C_WALL_VE	= $42
-  2523 = 0043			C_WALL_VW	= $43
-  2524 = 0044			C_TAIL_UP	= $44
-  2525 = 0045			C_TAIL_DOWN	= $45
-  2526 = 0046			C_TAIL_RIGHT	= $46
-  2527 = 0047			C_TAIL_LEFT	= $47
-  2528 = 0048			C_HEAD_UP	= $48
-  2529 = 0049			C_HEAD_DOWN	= $49
-  2530 = 004A			C_HEAD_LEFT	= $4A
-  2531 = 004B			C_HEAD_RIGHT	= $4B
-  2532 = 004C			C_BODY_V	= $4C
-  2533 = 004D			C_BODY_H	= $4D
-  2534 = 004E			C_BODY_SW	= $4E
-  2535 = 004F			C_BODY_SE	= $4F
-  2536 = 0050			C_BODY_NW	= $50
-  2537 = 0051			C_BODY_NE	= $51
-  2538 = A00C			adr.TXT_LEVEL	= CODEORIGIN+$0000
-  2539 A95C			.var TXT_LEVEL	= adr.TXT_LEVEL .word
-  2540 = A016			adr.TXT_POINTS	= CODEORIGIN+$000A
-  2541 A95C			.var TXT_POINTS	= adr.TXT_POINTS .word
-  2542 = A023			adr.TXT_TIME	= CODEORIGIN+$0017
-  2543 A95C			.var TXT_TIME	= adr.TXT_TIME .word
-  2544 = A029			adr.TXT_HSCORE	= CODEORIGIN+$001D
-  2545 A95C			.var TXT_HSCORE	= adr.TXT_HSCORE .word
-  2546 = A032			adr.TXT_FIRE	= CODEORIGIN+$0026
-  2547 A95C			.var TXT_FIRE	= adr.TXT_FIRE .word
-  2548 = A03E			adr.TXT_TURBO	= CODEORIGIN+$0032
-  2549 A95C			.var TXT_TURBO	= adr.TXT_TURBO .word
-  2550 = A053			adr.TXT_INFO	= CODEORIGIN+$0047
-  2551 A95C			.var TXT_INFO	= adr.TXT_INFO .word
-  2552 = 0002			SNAKE_SIZE	= $02
-  2553 = 000E			GAME_SPEED	= $0E
-  2554 = 000A			LEVEL_THOLD	= $0A
-  2555 = 0002			SPEED_THOLD	= $02
-  2556 = 00C8			TIME_E_SET	= $C8
-  2557 = 0099			TIME_THOLD	= $99
-  2558 = 0044			UP	= $44
-  2559 = 0045			DOWN	= $45
-  2560 = 0047			LEFT	= $47
-  2561 = 0046			RIGHT	= $46
-  2562 = 00E7			MOVE_UP	= $E7
-  2563 = 0019			MOVE_DOWN	= $19
-  2564 = 00FF			MOVE_LEFT	= $FF
-  2565 = 0001			MOVE_RIGHT	= $01
-  2566 = 0070			T0B	= $70
-  2567 = 0071			T1B	= $71
-  2568 = 0072			T2B	= $72
-  2569 = 0073			T0W	= $73
-  2570 = 0075			T1W	= $75
-  2571 = 0077			SNAKE_SPEED	= $77
-  2572 = 0078			SNAKE_SPD_C	= $78
-  2573 = 0079			TAIL_DIR	= $79
-  2574 = 007A			HEAD_DIR	= $7A
-  2575 = 007B			LEVEL_UP	= $7B
-  2576 = 007C			TIME_ENTITY	= $7C
-  2577 = 007D			TIME_BCD	= $7D
-  2578 = 007E			LEVEL_BCD	= $7E
-  2579 = 007F			LEVEL	= $7F
-  2580 = 0080			SCORE_BCD	= $80
-  2581 = 0082			HI_SCORE_BCD	= $82
-  2582 = 0084			HEAD_POS	= $84
-  2583 = 0086			HEAD_POS_COL	= $86
-  2584 = 0088			TAIL_POS	= $88
-  2585 = 008A			FRUIT_ON_BOARD	= $8A
-  2586 = 008B			adr.SNAKE	= $8B
-  2587 A95C			.var SNAKE	= adr.SNAKE .word
-  2588 = 008B			SNAKE.HEAD	= $8B
-  2589 = 008C			SNAKE.BODY	= $8C
-  2590 = 008D			SNAKE.M	= $8D
-  2591 = 00FB			GAME_OVER	= $FB
-  2592 = 00FB			SF0B	= $FB
-  2593 = 00FC			SF1B	= $FC
-  2594 = 1C05			HI_SCR_SCORE	= $1C05
-  2595 = 1EEA			SCR_SCORE	= $1EEA
-  2596 = 1ED9			SCR_LEVEL	= $1ED9
-  2597 = 1EDE			SCR_TIME	= $1EDE
-  2598 A95C			@exit
-  2599
-  2600 A95C A2 00		@halt	ldx #$00
-  2601 A95E 9A				txs
+  2504 = BC00			CRT_CHARS_ADR	= $BC00
+  2505 = B912			CRT_TITLE_ADR	= $B912
+  2506 = 0000			GAME_BLACK	= $00
+  2507 = 0001			GAME_WHITE	= $01
+  2508 = 0002			GAME_RED	= $02
+  2509 = 0003			GAME_CYAN	= $03
+  2510 = 0004			GAME_PURPLE	= $04
+  2511 = 0005			GAME_GREEN	= $05
+  2512 = 0006			GAME_BLUE	= $06
+  2513 = 0007			GAME_YELLOW	= $07
+  2514 = 0008			GAME_ORANGE	= $08
+  2515 = 0020			C_SPACE	= $20
+  2516 = 0040			C_FRUIT	= $40
+  2517 = 0041			C_WALL_H	= $41
+  2518 = 0042			C_WALL_VE	= $42
+  2519 = 0043			C_WALL_VW	= $43
+  2520 = 0044			C_TAIL_UP	= $44
+  2521 = 0045			C_TAIL_DOWN	= $45
+  2522 = 0046			C_TAIL_RIGHT	= $46
+  2523 = 0047			C_TAIL_LEFT	= $47
+  2524 = 0048			C_HEAD_UP	= $48
+  2525 = 0049			C_HEAD_DOWN	= $49
+  2526 = 004A			C_HEAD_LEFT	= $4A
+  2527 = 004B			C_HEAD_RIGHT	= $4B
+  2528 = 004C			C_BODY_V	= $4C
+  2529 = 004D			C_BODY_H	= $4D
+  2530 = 004E			C_BODY_SW	= $4E
+  2531 = 004F			C_BODY_SE	= $4F
+  2532 = 0050			C_BODY_NW	= $50
+  2533 = 0051			C_BODY_NE	= $51
+  2534 = A00C			adr.TXT_LEVEL	= CODEORIGIN+$0000
+  2535 A959			.var TXT_LEVEL	= adr.TXT_LEVEL .word
+  2536 = A016			adr.TXT_POINTS	= CODEORIGIN+$000A
+  2537 A959			.var TXT_POINTS	= adr.TXT_POINTS .word
+  2538 = A023			adr.TXT_TIME	= CODEORIGIN+$0017
+  2539 A959			.var TXT_TIME	= adr.TXT_TIME .word
+  2540 = A029			adr.TXT_HSCORE	= CODEORIGIN+$001D
+  2541 A959			.var TXT_HSCORE	= adr.TXT_HSCORE .word
+  2542 = A032			adr.TXT_FIRE	= CODEORIGIN+$0026
+  2543 A959			.var TXT_FIRE	= adr.TXT_FIRE .word
+  2544 = A03E			adr.TXT_TURBO	= CODEORIGIN+$0032
+  2545 A959			.var TXT_TURBO	= adr.TXT_TURBO .word
+  2546 = A053			adr.TXT_INFO	= CODEORIGIN+$0047
+  2547 A959			.var TXT_INFO	= adr.TXT_INFO .word
+  2548 = 0002			SNAKE_SIZE	= $02
+  2549 = 000E			GAME_SPEED	= $0E
+  2550 = 000A			LEVEL_THOLD	= $0A
+  2551 = 0002			SPEED_THOLD	= $02
+  2552 = 00C8			TIME_E_SET	= $C8
+  2553 = 0099			TIME_THOLD	= $99
+  2554 = 0044			UP	= $44
+  2555 = 0045			DOWN	= $45
+  2556 = 0047			LEFT	= $47
+  2557 = 0046			RIGHT	= $46
+  2558 = 00E7			MOVE_UP	= $E7
+  2559 = 0019			MOVE_DOWN	= $19
+  2560 = 00FF			MOVE_LEFT	= $FF
+  2561 = 0001			MOVE_RIGHT	= $01
+  2562 = 0070			T0B	= $70
+  2563 = 0071			T1B	= $71
+  2564 = 0072			T2B	= $72
+  2565 = 0073			T0W	= $73
+  2566 = 0075			T1W	= $75
+  2567 = 0077			SNAKE_SPEED	= $77
+  2568 = 0078			SNAKE_SPD_C	= $78
+  2569 = 0079			TAIL_DIR	= $79
+  2570 = 007A			HEAD_DIR	= $7A
+  2571 = 007B			LEVEL_UP	= $7B
+  2572 = 007C			TIME_ENTITY	= $7C
+  2573 = 007D			TIME_BCD	= $7D
+  2574 = 007E			LEVEL_BCD	= $7E
+  2575 = 007F			LEVEL	= $7F
+  2576 = 0080			SCORE_BCD	= $80
+  2577 = 0082			HI_SCORE_BCD	= $82
+  2578 = 0084			HEAD_POS	= $84
+  2579 = 0086			HEAD_POS_COL	= $86
+  2580 = 0088			TAIL_POS	= $88
+  2581 = 008A			FRUIT_ON_BOARD	= $8A
+  2582 = 008B			adr.SNAKE	= $8B
+  2583 A959			.var SNAKE	= adr.SNAKE .word
+  2584 = 008B			SNAKE.HEAD	= $8B
+  2585 = 008C			SNAKE.BODY	= $8C
+  2586 = 008D			SNAKE.M	= $8D
+  2587 = 00FB			GAME_OVER	= $FB
+  2588 = 00FB			SF0B	= $FB
+  2589 = 00FC			SF1B	= $FC
+  2590 = 1C05			HI_SCR_SCORE	= $1C05
+  2591 = 1EEA			SCR_SCORE	= $1EEA
+  2592 = 1ED9			SCR_LEVEL	= $1ED9
+  2593 = 1EDE			SCR_TIME	= $1EDE
+  2594 A959			@exit
+  2595
+  2596 A959 A2 00		@halt	ldx #$00
+  2597 A95B 9A				txs
+  2598
+  2599 A95C 60				rts
+  2600
+  2601 				; ------------------------------------------------------------
   2602
-  2603 A95F 60				rts
+  2603 				; ------------------------------------------------------------
   2604
-  2605 				; ------------------------------------------------------------
-  2606
-  2607 				; ------------------------------------------------------------
+  2605 A95D			.local	@DEFINES
+  2606 A95D			RAW
+  2607 				.endl
   2608
-  2609 A960			.local	@DEFINES
-  2610 A960			RAW
-  2611 				.endl
-  2612
-  2613 A960			.local	@RESOURCE
-  2614 				.endl
-  2615
-  2616 = A960 0C A0		TXT_LEVEL
-  2616 = A962 16 A0		TXT_POINTS
-  2616 = A964 23 A0		TXT_TIME
-  2616 = A966 29 A0		TXT_HSCORE
-  2616 = A968 32 A0		TXT_FIRE
-  2616 = A96A 3E A0		TXT_TURBO
-  2616 = A96C 53 A0		TXT_INFO
-  2616 = A96E 8B 00		SNAKE
-  2616 				.endl							; MAIN
-  2617
-  2618 				; ------------------------------------------------------------
-  2619 				; ------------------------------------------------------------
-  2620
-  2621 				.macro	UNITINITIALIZATION
+  2609 A95D			.local	@RESOURCE
+  2610 				.endl
+  2611
+  2612 = A95D 0C A0		TXT_LEVEL
+  2612 = A95F 16 A0		TXT_POINTS
+  2612 = A961 23 A0		TXT_TIME
+  2612 = A963 29 A0		TXT_HSCORE
+  2612 = A965 32 A0		TXT_FIRE
+  2612 = A967 3E A0		TXT_TURBO
+  2612 = A969 53 A0		TXT_INFO
+  2612 = A96B 8B 00		SNAKE
+  2612 				.endl							; MAIN
+  2613
+  2614 				; ------------------------------------------------------------
+  2615 				; ------------------------------------------------------------
+  2616
+  2617 				.macro	UNITINITIALIZATION
+  2618 				
+  2619 					.ifdef MAIN.SYSTEM.@UnitInit
+  2620 					jsr MAIN.SYSTEM.@UnitInit
+  2621 					.fi
   2622 				
-  2623 					.ifdef MAIN.SYSTEM.@UnitInit
-  2624 					jsr MAIN.SYSTEM.@UnitInit
+  2623 					.ifdef MAIN.SYS_VIC20.@UnitInit
+  2624 					jsr MAIN.SYS_VIC20.@UnitInit
   2625 					.fi
-  2626 				
-  2627 					.ifdef MAIN.SYS_VIC20.@UnitInit
-  2628 					jsr MAIN.SYS_VIC20.@UnitInit
-  2629 					.fi
-  2630 				.endm
-  2631
-  2632 				; ------------------------------------------------------------
+  2626 				.endm
+  2627
+  2628 				; ------------------------------------------------------------
+  2629
+  2630 					ift .SIZEOF(MAIN.SYSTEM) > 0
+  2631 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+  2631 				SYSTEM: $A12D..$A158
+  2632 					eif
   2633
-  2634 					ift .SIZEOF(MAIN.SYSTEM) > 0
-  2635 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
-  2635 				SYSTEM: $A12D..$A158
+  2634 					ift .SIZEOF(MAIN.SYS_VIC20) > 0
+  2635 					.print 'SYS_VIC20: ',MAIN.SYS_VIC20,'..',MAIN.SYS_VIC20+.SIZEOF(MAIN.SYS_VIC20)-1
+  2635 				SYS_VIC20: $A159..$A306
   2636 					eif
   2637
-  2638 					ift .SIZEOF(MAIN.SYS_VIC20) > 0
-  2639 					.print 'SYS_VIC20: ',MAIN.SYS_VIC20,'..',MAIN.SYS_VIC20+.SIZEOF(MAIN.SYS_VIC20)-1
-  2639 				SYS_VIC20: $A159..$A306
-  2640 					eif
+  2638 					.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+  2638 				CODE: $A00C..$A95C
+  2639
+  2640 				; ------------------------------------------------------------
   2641
-  2642 					.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
-  2642 				CODE: $A00C..$A95F
+  2642 A96D				.align $0004
   2643
-  2644 				; ------------------------------------------------------------
+  2644 A970			DATAORIGIN
   2645
-  2646 A970				.align $0004
-  2647
-  2648 A970			DATAORIGIN
-  2649
-  2650 = 0000			VARINITSIZE	= *-DATAORIGIN
-  2651 = 000D			VARDATASIZE	= 13
+  2646 = 0000			VARINITSIZE	= *-DATAORIGIN
+  2647 = 000D			VARDATASIZE	= 13
+  2648
+  2649 = A97D			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  2650
+  2651 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+  2651 				DATA: $A970..$A97D
   2652
-  2653 = A97D			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  2653 				; ------------------------------------------------------------
   2654
-  2655 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
-  2655 				DATA: $A970..$A97D
-  2656
-  2657 				; ------------------------------------------------------------
-  2658
-  2659 				.macro	STATICDATA
-  2660 				.by  $08 $0C $05 $16 $05 $0C $20 $30  $30 $00 $0B $10 $0F $09 $0E $14  $13 $20 $30 $30 $30 $30 $00 $04
-  2661 				.by  $14 $3A $30 $30 $00 $07 $08 $09  $3A $30 $30 $30 $30 $00 $0A $10  $12 $05 $13 $13 $20 $06 $09 $12
-  2662 				.by  $05 $00 $13 $08 $0F $0C $04 $20  $06 $09 $12 $05 $20 $06 $0F $12  $20 $14 $15 $12 $02 $0F $00 $17
-  2663 				.by  $13 $03 $0F $12 $05 $20 $10 $0F  $09 $0E $14 $13 $20 $15 $0E $14  $09 $0C $20 $14 $3A $39 $39 $00
-  2664 				.by  $09 $1A $19 $3C $00 $FC $00 $00  $FF $FF $00 $00 $00 $00 $00 $6E
-  2665 				.endm
-  2666
-  2667 A970			.local	RESOURCE
-  2668 A970				icl 'raw\resource.asm'
+  2655 				.macro	STATICDATA
+  2656 				.by  $08 $0C $05 $16 $05 $0C $20 $30  $30 $00 $0B $10 $0F $09 $0E $14  $13 $20 $30 $30 $30 $30 $00 $04
+  2657 				.by  $14 $3A $30 $30 $00 $07 $08 $09  $3A $30 $30 $30 $30 $00 $0A $10  $12 $05 $13 $13 $20 $06 $09 $12
+  2658 				.by  $05 $00 $13 $08 $0F $0C $04 $20  $06 $09 $12 $05 $20 $06 $0F $12  $20 $14 $15 $12 $02 $0F $00 $17
+  2659 				.by  $13 $03 $0F $12 $05 $20 $10 $0F  $09 $0E $14 $13 $20 $15 $0E $14  $09 $0C $20 $14 $3A $39 $39 $00
+  2660 				.by  $09 $1A $19 $3C $00 $FC $00 $00  $FF $FF $00 $00 $00 $00 $00 $6E
+  2661 				.endm
+  2662
+  2663 A970			.local	RESOURCE
+  2664 A970				icl 'raw\resource.asm'
 Source: resource.asm
      1
     48 					opt l+
-  2669
-  2670 A970				RCDATA 'res/title_cbm.scr' CRT_TITLE_ADR 0 0 0 0 0 0 0 0
+  2665
+  2666 A970				RCDATA 'res/title_cbm.scr' CRT_TITLE_ADR 0 0 0 0 0 0 0 0
 Macro: RESOURCE.RCDATA [Source: resource.asm]
      6 A970				org main.CRT_TITLE_ADR
      8 B912 20 20 20 20 20 20 + 	ins 'res/title_cbm.scr',0
     10 					.print '$R RCDATA  ',main.CRT_TITLE_ADR,'..',*-1," 'res/title_cbm.scr'"
     10 				$R RCDATA  $B912..$BBFF 'res/title_cbm.scr'
 Source: vic20.a65
-  2671 BC00				RCDATA 'res/snake_cbm.fnt' CRT_CHARS_ADR 0 0 0 0 0 0 0 0
+  2667 BC00				RCDATA 'res/snake_cbm.fnt' CRT_CHARS_ADR 0 0 0 0 0 0 0 0
 Macro: RESOURCE.RCDATA [Source: resource.asm]
      6 BC00				org main.CRT_CHARS_ADR
      8 BC00 00 3C 66 6E 6E 60 + 	ins 'res/snake_cbm.fnt',0
     10 					.print '$R RCDATA  ',main.CRT_CHARS_ADR,'..',*-1," 'res/snake_cbm.fnt'"
     10 				$R RCDATA  $BC00..$BFFF 'res/snake_cbm.fnt'
 Source: vic20.a65
-  2672 				.endl
-  2673
-  2674 					end
+  2668 				.endl
+  2669
+  2670 					end

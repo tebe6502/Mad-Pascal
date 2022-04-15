@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------
-; Mad Pascal Compiler version 1.6.6 [2022/04/11] for 6502
+; Mad Pascal Compiler version 1.6.6 [2022/04/15] for 6502
 ; ------------------------------------------------------------
 
 STACKWIDTH	= 16
@@ -2452,10 +2452,6 @@ l_07C1
 	.local +MAIN.SYSTEM.MOVE_00B1
 	m@INLINE
 	.endl
-
-; optimize FAIL ('VBI', game.inc), line = 412
-
-	jsr VBI
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -2469,12 +2465,12 @@ l_07C1
 .endl
 l_0067
 
-; optimize OK (game.inc), line = 418
+; optimize OK (game.inc), line = 412
 
 	lda #$01
 	sta GAME_OVER
 
-; optimize FAIL ('PREPARE', game.inc), line = 420
+; optimize FAIL ('PREPARE', game.inc), line = 414
 
 	jsr PREPARE
 	jsr SYS_VIC20.SYS_INIT
@@ -2482,7 +2478,7 @@ l_0067
 	m@INLINE
 	.endl
 
-; optimize OK (game.inc), line = 422
+; optimize OK (game.inc), line = 416
 
 	lda #$00
 	sta HI_SCORE_BCD
@@ -2490,18 +2486,18 @@ l_0067
 	jsr SET_GAME
 
 ; --- RepeatUntilProlog
-l_080D
+l_080C
 
-; optimize OK (game.inc), line = 425
+; optimize OK (game.inc), line = 419
 
 	lda GAME_OVER
-	jeq l_0819
+	jeq l_0818
 	jsr RESTART_GAME
-l_0819
+l_0818
 
-; optimize OK (game.inc), line = 426
+; optimize OK (game.inc), line = 420
 
-	jmp l_080D
+	jmp l_080C
 
 ; ------------------------------------------------------------
 
