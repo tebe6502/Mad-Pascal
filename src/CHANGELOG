@@ -1,3 +1,6 @@
+16.04.2022
+- poprawione dzialanie modyfikatorow KEEP i INTERRUPT, kompilator automatycznie oznaczy procedury/funkcje z takiego bloku do kompilacji
+
 12.04.2022
 - issue #92 fixed
 
