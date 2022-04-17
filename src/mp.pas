@@ -13599,7 +13599,7 @@ end;
 
 
 {
-if (pos(':ecx+1', listing[i]) > 0) then begin
+if (pos('PRINTPOINT', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -35142,7 +35142,7 @@ var Kind: byte;
     svar, svara, lab: string;
 begin
 
- if IdentIndex>0 then begin
+ if IdentIndex > 0 then begin
   Kind := Ident[IdentIndex].Kind;
 
   if Ident[IdentIndex].DataType = ENUMTYPE then begin
@@ -35224,8 +35224,8 @@ case IndirectionLevel of
 	end;
 
         end else begin
-	 asm65(#9'mva '+svar+ GetStackVariable(0));
-	 asm65(#9'mva '+svar+'+1' + GetStackVariable(1));
+	 asm65(#9'mva ' + svar + GetStackVariable(0));
+	 asm65(#9'mva ' + svar + '+1' + GetStackVariable(1));
         end;
 
 	ExpandWord;
@@ -39969,7 +39969,7 @@ begin
 		 (Ident[IdentIndex].PassMethod = VARPASSING) or
 		 (VarPass and (Ident[IdentIndex].DataType in Pointers))  then begin
 
-// writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Tok[i + 2].Kind);
+ //writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].PassMethod,',',Tok[i + 2].Kind);
 
 		 DEREFERENCE := false;
 
@@ -39999,6 +39999,9 @@ begin
 	            AllocElementType := IdentTemp shr 16;
 
 		    IdentTemp:=GetIdent(svar + '.' + string(Tok[i + 4].Name^) );
+
+		    if IdentTemp = 0 then
+		     iError(i + 4, UnknownIdentifier);
 
 		    Push(Ident[IdentTemp].Value, ASPOINTER, DataSize[POINTERTOK], IdentTemp);
 
@@ -47865,7 +47868,7 @@ for ParamIndex := 1 to NumParams do
        DefineIdent(i, Param[ParamIndex].Name, VARIABLE, POINTERTOK, 0, Param[ParamIndex].DataType, 0);
 
 
-     if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then begin
+     if (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then begin
 
       tmpVarDataSize := VarDataSize;
 
@@ -47908,6 +47911,31 @@ for ParamIndex := 1 to NumParams do
 
      end else
       DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
+
+//   writeln(Param[ParamIndex].Name,',',Param[ParamIndex].DataType);
+
+     if (Param[ParamIndex].DataType = POINTERTOK) and (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin		// fix issue #94
+																	//
+      tmpVarDataSize := VarDataSize;													//
+																	//
+      for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin							//
+																	//
+       DefineIdent(i, Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,				//
+		   VARIABLE,														//
+		   Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,								//
+		   Types[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,							//
+		   Types[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0, DATAORIGINOFFSET);				//
+																	//
+       Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize;									//
+       Ident[NumIdent].PassMethod := Param[ParamIndex].PassMethod;									//
+																	//
+       if Ident[NumIdent].AllocElementType = UNTYPETOK then Ident[NumIdent].AllocElementType := Ident[NumIdent].DataType;		//
+																	//
+      end;																//
+																	//
+      VarDataSize := tmpVarDataSize;													//
+																	//
+     end else
 
      if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then
       for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin
