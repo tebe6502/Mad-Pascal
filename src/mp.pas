@@ -22083,14 +22083,14 @@ end;
 	end;
 
 
-    if lda_a(i) and									// lda :eax				; 0
+    if lda_a(i) and									// lda 					; 0
        sta_stack(i+1) and								// sta :STACKORIGIN+10			; 1
-       lda_a(i+2) and									// lda :eax+1				; 2
+       lda_a(i+2) and									// lda 					; 2
        sta_stack(i+3) and								// sta :STACKORIGIN+STACKWIDTH+10	; 3
-       lda_a(i+4) and									// lda :eax+2				; 4
-       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH*2+10	; 5
-       lda_a(i+6) and									// lda :eax+3				; 6
-       sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH*3+10	; 7
+       lda_a(i+4) and									// lda					; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+??			; 5
+       lda_a(i+6) and									// lda					; 6
+       sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH+??	; 7
        lda_stack(i+8) and								// lda :STACKORIGIN+10			; 8
        add(i+9) and									// add 					; 9
        sta(i+10) and									// sta ERROR				; 10
@@ -22108,10 +22108,10 @@ end;
 	listing[i+1] := '';
 	listing[i+2] := '';
 	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-	listing[i+6] := '';
-	listing[i+7] := '';
+//	listing[i+4] := '';
+//	listing[i+5] := '';
+//	listing[i+6] := '';
+//	listing[i+7] := '';
 
 	Result:=false; Break;
 	end;
