@@ -217,6 +217,17 @@ const
 
 (* color defines *)
 {$ifdef atari}
+	PAL_PMCOLOR0	= 0;		// palette index Palette[..] , HPalette[..]
+	PAL_PMCOLOR1	= 1;
+	PAL_PMCOLOR2	= 2;
+	PAL_PMCOLOR3	= 3;
+
+	PAL_COLOR0	= 4;
+	PAL_COLOR1	= 5;
+	PAL_COLOR2	= 6;
+	PAL_COLOR3	= 7;
+	PAL_COLBAK	= 8;
+
 	COLOR_BLACK		= $00;
 	COLOR_WHITE		= $0e;
 	COLOR_RED		= $32;
