@@ -1,11 +1,19 @@
 uses crt;
 
 
+function test: byte;
+begin
+
+ result:=117;
+
+end;
+
+
 procedure beep; keep;
 var a,b : byte;
 begin
 
- b:=117;
+ b:=test;
 
  writeln('ok');
 
