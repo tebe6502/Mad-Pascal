@@ -33627,6 +33627,8 @@ var
 
        s := LowerCase( get_string(i, d) );
 
+       FindFile(s, 'link object');
+
        v := High(linkObj);
        linkObj[v] := s;
 
