@@ -1,3 +1,6 @@
+24.04.2022
+- poprawki dla optymalizacji 'PeepholeOptimization_STA' (argument z LDA nie moze wystapic w przedziale p..i)
+
 17.04.2022
 - fixed issue #94
 

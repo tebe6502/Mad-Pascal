@@ -10576,9 +10576,9 @@ end;
 
 
    function PeepholeOptimization_STA: Boolean;
-   var i, p: integer;
+   var i, p, k: integer;
        tmp, old: string;
-       yes: Boolean;
+       yes, ok: Boolean;
    begin
 
    Result:=true;
@@ -10612,6 +10612,18 @@ end;
 	  if ((p>1) and (skip(p-2) = false) and (lda_stack(p-1) = false) and (lda_bp2_y(p-1) = false) and (lda(p-1) or lda_adr(p-1)) and sta(p)) or
 	     ((p=1) and (lda(0) or lda_adr(0)) and sta(1) and (lda_bp2_y(0) = false)) then
 	  begin
+
+
+	   ok := false;
+	   if lda_im(p-1) = false then begin						// argument z LDA nie moze wystapic w przedziale p..i
+	    old:=copy(listing[p-1], 6, 256);
+
+	    for k:=p to i do
+	     if pos(old, listing[k]) > 0 then begin ok := true; Break end;
+
+	   end;
+	   if ok then Break;
+
 
 	   listing[i] := copy(listing[i], 1, 5) +  copy(listing[p-1], 6, 256);
 
@@ -10647,6 +10659,18 @@ end;
 	  if (p>0) and lda_a(p-1) and sta(p) and (lda_stack(p-1) = false) {and (sta(p+1) = false)} then begin
 
 	   if iy(p-1) and yes then Break;
+
+
+	   ok := false;
+	   if lda_im(p-1) = false then begin						// argument z LDA nie moze wystapic w przedziale p..i
+	    old:=copy(listing[p-1], 6, 256);
+
+	    for k:=p to i do
+	     if pos(old, listing[k]) > 0 then begin ok := true; Break end;
+
+	   end;
+	   if ok then Break;
+
 
 	   listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
 
@@ -14580,7 +14604,7 @@ end;
 
     if (i>0) and
        (ldy(i-1) = false) and (tay(i-1) = false) and						// sta A			; 0
-       sta_a(i) and (listing[i] <> #9'sta #$00') and (pos(' :eax', listing[i]) = 0) and		// lda A			; 1
+       sta_a(i) and (pos(' :eax', listing[i]) = 0) and						// lda A			; 1
        lda_a(i+1) and 										//~add|sub|adc|sbc		; 2
        (add_sub(i+2) = false) and (adc_sbc(i+2) = false) then
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin
