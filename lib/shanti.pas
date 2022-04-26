@@ -2,7 +2,7 @@ unit shanti;
 
 (*
  @type: unit
- @author: Tomasz Chabowski (Shanti77), Tomasz Biela (Tebe)
+ @author: Janusz Chabowski (Shanti77), Tomasz Biela (Tebe)
  @name: Shanti Sprites Multiplexer
  @version: 1.0
 
