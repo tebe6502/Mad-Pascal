@@ -15,6 +15,10 @@ $d800..$dfff	- charsets
 
 {$r test_mux.rc}
 
+	procedure monster(a: byte); external;
+	procedure face(a: byte); external;
+	procedure thing(a: byte); external;
+
 
 const
 
@@ -26,6 +30,8 @@ CHARSET_RAM_ADDRESS	= $d800;
 
 var
 	ad: array [0..3] of byte;
+
+	spd_face, spd_thing: byte;
 
 
 
@@ -100,27 +106,22 @@ begin
 end;
 
 
-{$link assets\font0.obx}
+{$link assets\monster.obx}
+{$link assets\face.obx}
+{$link assets\thing.obx}
 
 
-procedure addShapes; assembler;
-asm
- mwa #shp0._01 shanti.shape_tab01
- mwa #shp0._23 shanti.shape_tab23
+procedure addShapes;
+begin
 
- mwa #shp1._01 shanti.shape_tab01+2
- mwa #shp1._23 shanti.shape_tab23+2
-
- mwa #shp2._01 shanti.shape_tab01+4
- mwa #shp2._23 shanti.shape_tab23+4
-
- mwa #shp3._01 shanti.shape_tab01+6
- mwa #shp3._23 shanti.shape_tab23+6
+ monster(0);		// monster	->	shapes 0..7	8 frames
+ face(8);		// face		->	shapes 8..20	13 frames
+ thing(8+13);		// thing	->	shapes 21..23	3 frames
 
 end;
 
 
-procedure addSprite(num, col0, col1, shp, x, y, spd: byte); assembler;
+procedure addSprite(num, col0, col1, shp, x, y, spd, cnt: byte); assembler;
 asm
 	ldy num
 
@@ -130,7 +131,7 @@ asm
 	mva x		shanti.adr.spr_x,y
 	mva y		shanti.adr.spr_y,y
 	mva spd		shanti.adr.spr_v,y	; anim speed
-	mva #$fc	shanti.adr.spr_a,y	; 'number of frames' xor $ff (default = $ff -> 1 frame)
+	mva cnt		shanti.adr.spr_a,y	; 'number of frames' -1, -2, -4, -8, -16
 
 end;
 
@@ -144,13 +145,13 @@ begin
 
  addShapes;					// all shapes
 
- addSprite(0, $54,$a, 0, 100, 34, 15);		// sprite #0
- addSprite(1, $14,$7a, 0, 100, 74, 15);		// sprite #1
- addSprite(2, $c4,$3a, 0, 70, 100 , 15);	// sprite #2
+ addSprite(0, $54,$a, 0, 100, 34, 3, -8);		// sprite #0
+ addSprite(1, $14,$7a, 8+13, 100, 74, 3, -1);		// sprite #1
+ addSprite(2, $c4,$3a, 8, 70, 100 , 3, -1);		// sprite #2
 
- ad[0]:=1;
+ ad[0]:=2;
  ad[1]:=1;
- ad[2]:=1;
+ ad[2]:=2;
  ad[3]:=1;
 
  while true do begin
@@ -171,6 +172,18 @@ begin
  spr_x[1] := spr_x[1] + ad[1]; if (spr_x[1] > 200) or (spr_x[1] < 60) then ad[1]:=-ad[1];
 
  spr_y[2] := spr_y[2] + ad[2]; if (spr_y[2] > 140) or (spr_y[2] < 20) then ad[2]:=-ad[2];
+
+
+ inc(spd_thing, 16);
+ if spd_thing = 0 then begin
+  inc(spr_s[1]); if spr_s[1] = 8+13+3 then spr_s[1] := 8+13;
+ end;
+
+
+ inc(spd_face, 64);
+ if spd_face = 0 then begin
+  inc(spr_s[2]); if spr_s[2] = 8+13 then spr_s[2] := 8;
+ end;
 
  end;
 
