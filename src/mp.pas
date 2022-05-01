@@ -47,6 +47,9 @@ Contributors:
 + Jerzy Kut :
 	- {$DEFINE ROMOFF}
 
++ Janusz Chabowski :
+	- unit SHANTI
+
 + Konrad Kokoszkiewicz :
 	- base\atari\cmdline.asm
 	- base\atari\vbxedetect.asm
@@ -37676,7 +37679,7 @@ case op of
 
      end else
      if ResultType = SINGLETOK then
-       asm65(#9'jsr FSUB.FADD')
+       asm65(#9'jsr @FSUB.FADD')
      else
 
      case DataSize[ResultType] of
@@ -37711,7 +37714,7 @@ case op of
 
     end else
     if ResultType = SINGLETOK then
-      asm65(#9'jsr FSUB')
+      asm65(#9'jsr @FSUB')
     else
 
     case DataSize[ResultType] of
@@ -37784,7 +37787,7 @@ case op of
 
 		end;
 
-	  SINGLETOK: asm65(#9'jsr FMUL');		// IEEE754 32bit
+	  SINGLETOK: asm65(#9'jsr @FMUL');		// IEEE754 32bit
 
       HALFSINGLETOK:					// IEEE754 16bit
 		begin
@@ -37866,7 +37869,8 @@ case op of
 		end;
 
 	    REALTOK: asm65(#9'jsr divmulINT.REAL');		// Q24.8 fixed-point
-	  SINGLETOK: asm65(#9'jsr FDIV');			// IEEE754 32bit
+
+	  SINGLETOK: asm65(#9'jsr @FDIV');			// IEEE754 32bit
 
       HALFSINGLETOK:						// IEEE754 16bit
 		begin
@@ -38416,7 +38420,7 @@ begin
 
   s := PSingle(@Src)^;
 
-  if frac(s) <> 0 then
+  if (frac(s) <> 0) and (abs(s) >= 0.000060975552) then
 
    Result := f32Tof16(Src)
 
@@ -41081,8 +41085,8 @@ case Tok[i].Kind of
 		     end;
 
           SINGLETOK: begin
-      			asm65(#9'jsr F2I');
-      			asm65(#9'jsr I2F');
+      			asm65(#9'jsr @F2I');
+      			asm65(#9'jsr @I2F');
 		     end;
 
        SHORTREALTOK: asm65(#9'jsr @INT_SHORT');
@@ -41107,7 +41111,8 @@ case Tok[i].Kind of
 
      case ActualParamType of
             REALTOK: asm65(#9'jsr @FRAC');
-          SINGLETOK: asm65(#9'jsr FFRAC');
+
+          SINGLETOK: asm65(#9'jsr @FFRAC');
 
       HALFSINGLETOK: begin
 			asm65(#9'lda :STACKORIGIN,x');
@@ -41211,7 +41216,7 @@ case Tok[i].Kind of
 
                      end;
 
-          SINGLETOK: asm65(#9'jsr F2I');
+          SINGLETOK: asm65(#9'jsr @F2I');
 
        SHORTREALTOK: begin
 		      asm65(#9'jsr @TRUNC_SHORT');
@@ -41270,8 +41275,8 @@ case Tok[i].Kind of
 		end;
 
           SINGLETOK: begin
-		      asm65(#9'jsr FROUND');
-		      asm65(#9'jsr F2I');
+		      asm65(#9'jsr @FROUND');
+		      asm65(#9'jsr @F2I');
                      end;
 
       HALFSINGLETOK: begin
@@ -41586,7 +41591,7 @@ case Tok[i].Kind of
 			begin
 				ExpandParam(INTEGERTOK, ValType);
 
-				asm65(#9'jsr I2F');
+				asm65(#9'jsr @I2F');
 
 				ValType := SINGLETOK;
 			end;
@@ -42311,7 +42316,7 @@ case Tok[i].Kind of
 
 	    ExpandParam(INTEGERTOK, ValType);
 
-	    asm65(#9'jsr I2F');
+	    asm65(#9'jsr @I2F');
 
 	  end else
 	   Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "'+InfoAboutToken(SINGLETOK) + '"');
@@ -42478,7 +42483,7 @@ begin
 
    ExpandParam(INTEGERTOK, RightValType);
 
-   asm65(#9'jsr I2F');
+   asm65(#9'jsr @I2F');
 
    if (ValType <> SINGLETOK) and (Kind = SINGLETOK) then
     RightValType := Kind
@@ -42491,7 +42496,7 @@ begin
 
    ExpandParam_m1(INTEGERTOK, ValType);
 
-   asm65(#9'jsr I2F_m');
+   asm65(#9'jsr @I2F_m');
 
    if (RightValType <> SINGLETOK) and (Kind = SINGLETOK) then
     ValType := Kind
