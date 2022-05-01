@@ -1,3 +1,6 @@
+01.05.2022
+- issue #101 fixed (poprawiony plik common\single.asm)
+
 24.04.2022
 - poprawki dla optymalizacji 'PeepholeOptimization_STA' (argument z LDA nie moze wystapic w przedziale p..i)
 
