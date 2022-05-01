@@ -45,7 +45,7 @@ FPEXP	.ds 1
 @rx	= bp+1
 
 
-.proc	NEGINT
+.proc	@NEGINT
 
 	LDA	#$00
 	SEC
@@ -65,7 +65,7 @@ enter	SBC	FPMAN0
 .endp
 
 
-.proc	FFRAC
+.proc	@FFRAC
 	inx
 	lda :STACKORIGIN-1,x
 	sta :STACKORIGIN,x
@@ -82,8 +82,8 @@ enter	SBC	FPMAN0
 
 	dex
 
-	jsr F2I
-	jsr I2F
+	jsr @F2I
+	jsr @I2F
 
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	eor #$80
@@ -91,7 +91,7 @@ enter	SBC	FPMAN0
 
 	inx
 
-	jsr FSUB
+	jsr @FSUB
 
 	dex
 
@@ -99,7 +99,7 @@ enter	SBC	FPMAN0
 .endp
 
 
-.proc	FROUND
+.proc	@FROUND
 ;	LDA	#$00
 ;	STA	FP2SGN
 
@@ -141,7 +141,7 @@ enter	SBC	FPMAN0
 
 	inx
 
-	jsr FSUB.enter
+	jsr @FSUB.enter
 
 	dex
 
@@ -149,7 +149,7 @@ enter	SBC	FPMAN0
 .endp
 
 
-.proc	FSUB
+.proc	@FSUB
 	LDA	#$80		; TOGGLE SIGN
 	BNE	@+
 FADD:	LDA	#$00
@@ -208,7 +208,7 @@ enter	ROL
 	STA	FPEXP
 	SEC
 	SBC	FP2EXP
-	BEQ	FADDMAN
+	BEQ	@FADDMAN
 	BCS	@+
 	EOR	#$FF
 	TAY
@@ -223,7 +223,7 @@ enter	ROL
 	STA	FP1MAN2
 	STA	FP1MAN1
 	STA	FP1MAN0
-	BEQ	FADDMAN
+	BEQ	@FADDMAN
 FP1SHFT:	CMP	#$80	; SHIFT FP1 DOWN
 	ROR
 	ROR	FP1MAN2
@@ -232,7 +232,7 @@ FP1SHFT:	CMP	#$80	; SHIFT FP1 DOWN
 	DEY
 	BNE	FP1SHFT
 	STA	FP1MAN3
-	JMP	FADDMAN
+	JMP	@FADDMAN
 
 @	TAY
 	LDA	FP2MAN3
@@ -243,7 +243,7 @@ FP1SHFT:	CMP	#$80	; SHIFT FP1 DOWN
 	STA	FP2MAN2
 	STA	FP2MAN1
 	STA	FP2MAN0
-	BEQ	FADDMAN
+	BEQ	@FADDMAN
 FP2SHFT:	CMP	#$80	; SHIFT FP2 DOWN
 	ROR
 	ROR	FP2MAN2
@@ -252,7 +252,7 @@ FP2SHFT:	CMP	#$80	; SHIFT FP2 DOWN
 	DEY
 	BNE	FP2SHFT
 	STA	FP2MAN3
-FADDMAN:	LDA	FP1MAN0
+@FADDMAN:	LDA	FP1MAN0
 	CLC
 	ADC	FP2MAN0
 	STA	FPMAN0
@@ -265,18 +265,18 @@ FADDMAN:	LDA	FP1MAN0
 	LDA	FP1MAN3
 	ADC	FP2MAN3
 	STA	FPMAN3
-	BPL	FPNORM
+	BPL	@FPNORM
 
 	LDA	#$80
 	STA	FPSGN
 
-	JSR	NEGINT
+	JSR	@NEGINT
 
-	jmp FPNORM
+	jmp	@FPNORM
 .endp
 
 
-.proc	FPNORM
+.proc	@FPNORM
 
 MIN_EXPONENT	= 10
 MAX_EXPONENT	= 255
@@ -403,7 +403,7 @@ FPNORMDONE:	ASL
 .endp
 
 
-.proc	FMUL
+.proc	@FMUL
 
 	stx @rx
 
@@ -476,7 +476,7 @@ FMULNEXTBYTE:	LDA	FP1MAN0,X
 
 	ldx @rx
 	LDA	FPMAN3
-	JMP	FPNORM
+	JMP	@FPNORM
 
 @	EOR	#$FF
 	LDX	#$08
@@ -509,11 +509,11 @@ FMULNEXTTST:	DEX
 
 	ldx @rx
 	LDA	FPMAN3
-	JMP	FPNORM
+	JMP	@FPNORM
 .endp
 
 
-.proc	FDIV
+.proc	@FDIV
 
 	stx @rx
 
@@ -597,9 +597,9 @@ FDIVNEXTBIT:	ROL	FPMAN0
 	DEX
 	BNE	FDIVLOOP
 
-	ldx @rx
+	ldx	@rx
 	LDA	#$00
-	JMP	FPNORM
+	JMP	@FPNORM
 .endp
 
 
@@ -705,7 +705,7 @@ FCMPLTSGN:	LDA	#$FF	; LESS THAN
 */
 
 
-.proc	F2I
+.proc	@F2I
 
 	lda :STACKORIGIN,x
 	STA	FPMAN0
@@ -752,7 +752,7 @@ F2ICHKNEG:	LDA	FPSGN
 	BPL	@+		; CHECK FOR NEGATIVE
 	ASL	@		; LDA #$00; SEC
 
-	JSR	NEGINT.enter
+	JSR	@NEGINT.enter
 
 @	LDA	FPMAN3
 	STA :STACKORIGIN+STACKWIDTH*3,x
@@ -791,7 +791,7 @@ F2ISHL:	CMP	#32
 .endp
 
 
-.proc	I2F
+.proc	@I2F
 
 	lda :STACKORIGIN,x
 	STA	FPMAN0
@@ -805,21 +805,21 @@ F2ISHL:	CMP	#32
 	STA	FPSGN
 	BPL	@+
 ;	LDX	#FPMAN0
-	JSR	NEGINT
+	JSR	@NEGINT
 @	LDA	#$7F+23
 	STA	FPEXP
 
 	inx			; ten zabieg zapisze pod :STACKORIGIN,x
 				; zamiast :STACKORIGIN-1,x
 	LDA	FPMAN3
-	JSR	FPNORM
+	JSR	@FPNORM
 
 	dex
 	rts
 .endp
 
 
-.proc	I2F_m
+.proc	@I2F_m
 
 	lda :STACKORIGIN-1,x
 	STA	FPMAN0
@@ -834,10 +834,10 @@ F2ISHL:	CMP	#32
 	STA	FPSGN
 	BPL	@+
 ;	LDX	#FPMAN0
-	JSR	NEGINT
+	JSR	@NEGINT
 @	LDA	#$7F+23
 	STA	FPEXP
 
 	LDA	FPMAN3
-	JMP	FPNORM
+	JMP	@FPNORM
 .endp
