@@ -4,12 +4,12 @@
 
 .proc	@xmsWriteBuf (.word ptr1, ptr2) .var
 
-ptr1 = dx	; buffer	(2)
+ptr1 =	:edx	; buffer	(2)
 
-ptr2 = cx	; count		(2)
-pos = cx+2	; position	(2) pointer
+ptr2 =	:ecx	; count		(2)
+pos  =	:ecx+2	; position	(2) pointer
 
-ptr3 = eax	; position	(4)
+ptr3 =	:eax	; position	(4)
 
 	txa:pha
 
@@ -32,37 +32,42 @@ lp1	lda portb		; wylacz dodatkowe banki
 	sta portb
 
 	ldy #0			; przepisz 256b z BUFFER do @BUF
-	mva:rne (dx),y @buf,y+
-
-	jsr @xmsBank		; wlacz dodatkowy bank
+	mva:rne (ptr1),y @buf,y+
 
 	lda ptr2+1
 	beq lp2
 
-	lda ztmp+1		; jesli przekraczamy granice banku $7FFF
+	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP
+
+	lda :ztmp+1		; jesli przekraczamy granice banku $7FFF
 	cmp #$7f
 	bne skp
-	lda ztmp
+	lda :ztmp
 	beq skp
 
 	lda #0			; to realizuj wyjatek NEXTBANK, kopiuj 256b
 	jsr nextBank
 	jmp skp2
 
-skp	mva:rne @buf,y (ztmp),y+
+skp	mva:rne @buf,y (:ztmp),y+
 
-skp2	inc dx+1		// inc(dx, $100)
+skp2	inc ptr1+1		// inc(buffer, $100)
 
 	inl ptr3+1		// inc(position, $100)
 
 	dec ptr2+1
 	bne lp1
+	
+lp2	lda ptr2
+	beq quit
 
-lp2	lda ztmp+1		; zakonczenie kopiowania
+	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP
+
+	lda :ztmp+1		; zakonczenie kopiowania
 	cmp #$7f		; jesli przekraczamy granice banku $7FFF
 	bne skp_
 
-	lda ztmp
+	lda :ztmp
 	add ptr2
 	bcc skp_
 
@@ -72,7 +77,7 @@ lp2	lda ztmp+1		; zakonczenie kopiowania
 
 skp_	ldy #0
 lp3	lda @buf,y
-	sta (ztmp),y
+	sta (:ztmp),y
 
 	iny
 	cpy ptr2
@@ -89,14 +94,14 @@ quit	lda portb
 
 	sta max
 
-	mwa ztmp dst
+	mwa :ztmp dst
 
 	ldy #0
 mv0	lda @buf,y
 	sta $ffff,y
 dst	equ *-2
 	iny
-	inc ztmp
+	inc :ztmp
 	bne mv0
 
 	lda portb
@@ -108,12 +113,14 @@ dst	equ *-2
 mv1	cpy #0
 max	equ *-1
 	beq stp
+
 	lda @buf,y
 	sta $4000,x
 	inx
 	iny
 	bne mv1
-stp	rts
+stp
+	rts
 .endl
 
 .endp
