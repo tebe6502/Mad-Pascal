@@ -1266,13 +1266,9 @@ begin
 
 Result := 0;
 
-for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
+//for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
   for IdentIndex := 1 to NumIdent do
-    if (Ident[IdentIndex].Name = 'RESULT') and (Ident[IdentIndex].Block = ProcAsBlock) then begin
-
-	Result := IdentIndex;
-	exit;
-      end;
+    if (Ident[IdentIndex].Name = 'RESULT') and (Ident[IdentIndex].Block = ProcAsBlock) then exit(IdentIndex);
 
 end;
 
@@ -1281,9 +1277,9 @@ function GetLocalName(IdentIndex: integer; a: string =''): string;
 begin
 
  if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section then
-  Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
+   Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
  else
-  Result := a + Ident[IdentIndex].Name;
+   Result := a + Ident[IdentIndex].Name;
 
 end;
 
@@ -40584,9 +40580,18 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
  if Ident[IdentIndex].isInline then begin
 
 // if pass = CODEGENERATIONPASS then
-//  writeln(svar,',', Ident[IdentIndex].ProcAsBlock,',', BlockStack[BlockStackTop], ',' ,Ident[IdentIndex].Block ,',', Ident[IdentIndex].UnitIndex );
+//    writeln(svar,',', Ident[IdentIndex].ProcAsBlock,',', BlockStack[BlockStackTop], ',' ,Ident[IdentIndex].Block ,',', Ident[IdentIndex].UnitIndex );
 
 //  asm65(#9'.local ' + svar);
+
+
+  if (Ident[IdentIndex].Block > 1) and (Ident[IdentIndex].Block <> BlockStack[BlockStackTop]) then	// issue #102 fixed
+    for IdentTemp := 1 to NumIdent  do
+      if (Ident[IdentTemp].Kind in [PROCEDURETOK, FUNCTIONTOK]) and (Ident[IdentTemp].ProcAsBlock = Ident[IdentIndex].Block) then begin
+        svar := Ident[IdentTemp].Name + '.' + svar;
+	Break;
+      end;
+
 
   if (BlockStack[BlockStackTop] <> 1) and (Ident[IdentIndex].Block = BlockStack[BlockStackTop]) then	// w aktualnym bloku procedury/funkcji
    asm65(#9'.local ' + svar)
@@ -47553,8 +47558,8 @@ begin
  if Ident[BlockIdentIndex].isOverload then info := info + ' | OVERLOAD';
  if Ident[BlockIdentIndex].isRegister then info := info + ' | REGISTER';
  if Ident[BlockIdentIndex].isInterrupt then info := info + ' | INTERRUPT';
+ if Ident[BlockIdentIndex].isKeep then info := info + ' | KEEP';
  if Ident[BlockIdentIndex].isPascal then info := info + ' | PASCAL';
-// if Ident[BlockIdentIndex].isStdCall then info := info + ' | STDCALL';
  if Ident[BlockIdentIndex].isInline then info := info + ' | INLINE';
 
  asm65;
