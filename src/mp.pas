@@ -2356,7 +2356,7 @@ begin
 
 
 {
-if (pos('sta Y+1', TemporaryBuf[0]) > 0) then begin
+if (pos('mwy ', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
@@ -3711,6 +3711,24 @@ end;
            (TemporaryBuf[p] = #9'tya') or
            (TemporaryBuf[p] = #9'tay') then yes:=false;
 
+     end;
+
+
+   if (pos('mwy ', TemporaryBuf[0]) > 0) and (pos(' :bp2', TemporaryBuf[0]) > 0) and		// mwy ... :bp2		; 0
+      (TemporaryBuf[1] = #9'lda :bp2') and							// lda :bp2		; 1
+      (pos('add #', TemporaryBuf[2]) > 0) and							// add #		; 2
+      (TemporaryBuf[3] = #9'sta :bp2') and							// sta :bp2		; 3
+      (TemporaryBuf[4] = #9'lda :bp2+1') and							// lda :bp2+1		; 4
+      (TemporaryBuf[5] = #9'adc #$00') and							// adc #$00		; 5
+      (TemporaryBuf[6] = #9'sta :bp2+1') then							// sta :bp2+1		; 6
+     begin
+      TemporaryBuf[0] := #9'lda ' + GetString(0);
+      TemporaryBuf[1] := #9'ldy ' + GetString(0) + '+1';
+
+      TemporaryBuf[3] := #9'scc';
+      TemporaryBuf[4] := #9'iny';
+      TemporaryBuf[5] := #9'sta :bp2';
+      TemporaryBuf[6] := #9'sty :bp2+1';
      end;
 
 
@@ -43204,7 +43222,7 @@ var
   Param: TParamList;
   ExpressionType, IndirectionLevel, ActualParamType, ConstValType, VarType, SelectorType: Byte;
   Value, ConstVal, ConstVal2: Int64;
-  Down, ExitLoop, yes: Boolean;			  // To distinguish TO / DOWNTO loops
+  Down, ExitLoop, yes, DEREFERENCE: Boolean;			  // To distinguish TO / DOWNTO loops
   CaseLabelArray: TCaseLabelArray;
   CaseLabel: TCaseLabel;
   Name, EnumName, svar, par1, par2: string;
@@ -43408,7 +43426,7 @@ case Tok[i].Kind of
 	    CheckTok(i + 1, ASSIGNTOK);
 
 
-//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',IndirectionLevel);
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',IndirectionLevel);
 
 
 	    if (Ident[IdentIndex].DataType in Pointers) and
@@ -43684,12 +43702,12 @@ case Tok[i].Kind of
 
 	      end;
 
-{
-	if (Tok[k].Kind = IDENTTOK) then
-	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
-	else
-	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
-}
+
+//	if (Tok[k].Kind = IDENTTOK) then
+//	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
+//	else
+//	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
+
 
 	      CheckAssignment(i + 1, IdentIndex);
 
@@ -43826,7 +43844,7 @@ case Tok[i].Kind of
 
 		svar := Tok[k].Name^;
 
-		if Ident[IdentTemp].DataType = RECORDTOK then
+		if (Ident[IdentTemp].DataType = RECORDTOK) and (Ident[IdentTemp].AllocElementType <> RECORDTOK) then
 		  Name := 'adr.' + svar
 		else
 		  Name := svar;
@@ -43839,8 +43857,29 @@ case Tok[i].Kind of
 		  Name := svar + '.adr.result';
 		  svar := svar + '.result';
 		end;
-// sick
+
+
+		DEREFERENCE := false;
+	        if (Tok[k + 1].Kind = DEREFERENCETOK) then begin
+		 inc(k);
+
+		 CheckTok(k + 1, DOTTOK);
+
+		 DEREFERENCE := true;
+		end;
+
+
+	        if Tok[k + 1].Kind = DOTTOK then begin
+
+		 CheckTok(k + 2, IDENTTOK);
+
+		 Name := svar + '.' + Tok[k+2].Name^;
+		 IdentTemp := GetIdent(Name);
+
+		end;
+
 //writeln( Ident[IdentIndex].Name,',', Ident[IdentIndex].NumAllocElements, ',', Ident[IdentIndex].AllocElementType  ,' / ', Ident[IdentTemp].Name,',', Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].AllocElementType );
+//writeln( '>', Ident[IdentIndex].Name,',', Ident[IdentIndex].DataType, ',', Ident[IdentIndex].AllocElementTYpe );
 //writeln( '>', Ident[IdentTemp].Name,',', Ident[IdentTemp].DataType, ',', Ident[IdentTemp].AllocElementTYpe );
 //writeln(Types[5].Field[0].Name);
 
@@ -43853,6 +43892,43 @@ case Tok[i].Kind of
 
 		ResetOpty;
 
+
+		if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType = RECORDTOK) and (Ident[IdentTemp].AllocElementTYpe = RECORDTOK) then begin
+
+		  if DEREFERENCE then begin								// issue #98 fixed
+
+	            asm65(#9'lda :bp2');
+	            asm65(#9'add #' + Name + '-DATAORIGIN');
+	            asm65(#9'sta :bp2');
+	            asm65(#9'lda :bp2+1');
+	            asm65(#9'adc #$00');
+	            asm65(#9'sta :bp2+1');
+
+		  end else begin
+
+	            asm65(#9'sta :bp2');
+	            asm65(#9'sty :bp2+1');
+
+		  end;
+
+
+	          if RecordSize(IdentIndex) <= 8 then begin
+
+		   asm65(#9'ldy #$00');
+
+		   for j:=0 to RecordSize(IdentIndex)-1 do begin
+		    asm65(#9'lda (:bp2),y');
+		    asm65(#9'sta adr.'+Ident[IdentIndex].Name + '+' + IntToStr(j));
+
+		    if j<>RecordSize(IdentIndex)-1 then asm65(#9'iny');
+		   end;
+
+		  end else begin
+		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+		    asm65(#9'mva:rpl (:bp2),y adr.'+Ident[IdentIndex].Name+',y-');
+		  end;
+
+		end else
 		if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType = RECORDTOK) and (RecordSize(IdentIndex) <= 8) then
 		  asm65(#9':'+IntToStr(RecordSize(IdentIndex))+' mva '+Name+'+# '+GetLocalName(IdentIndex, 'adr.')+'+#')
 		else
