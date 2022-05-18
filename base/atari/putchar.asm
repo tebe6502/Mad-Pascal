@@ -16,7 +16,7 @@
 
 .proc	@putchar (.byte a) .reg
 
-vbxe	bit *			; jsr vbxe_cmap
+vbxe	bit *			; jsr @vbxe_put
 
 	ldx #$00		; $60 -> S2:
 chn	equ *-1
@@ -33,5 +33,4 @@ main
 	tya
 
 	rts
-
 .endp
