@@ -37,9 +37,9 @@ lp1	lda portb		; wylacz dodatkowe banki
 	lda ptr2+1
 	beq lp2
 
-	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP
+	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP, :ZTMP+1
 
-	lda :ztmp+1		; jesli przekraczamy granice banku $7FFF
+;	lda :ztmp+1		; jesli przekraczamy granice banku $7FFF
 	cmp #$7f
 	bne skp
 	lda :ztmp
@@ -61,9 +61,9 @@ skp2	inc ptr1+1		// inc(buffer, $100)
 lp2	lda ptr2
 	beq quit
 
-	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP
+	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP, :ZTMP+1
 
-	lda :ztmp+1		; zakonczenie kopiowania
+;	lda :ztmp+1		; zakonczenie kopiowania
 	cmp #$7f		; jesli przekraczamy granice banku $7FFF
 	bne skp_
 

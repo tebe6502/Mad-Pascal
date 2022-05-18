@@ -29,9 +29,9 @@ ptr3 =	:eax	; position	(4)
 	lda ptr2+1
 	beq lp2
 
-lp1	jsr @xmsBank
+lp1	jsr @xmsBank		; ZTMP+1
 
-	lda :ztmp+1
+;	lda :ztmp+1
 	cmp #$7f
 	bne skp
 	lda :ztmp
@@ -52,16 +52,16 @@ skp2	lda portb
 	ldy #0
 	mva:rne @buf,y (ptr1),y+
 
-	inc ptr1+1	// inc(buffer, $100)
+	inc ptr1+1		; inc(buffer, $100)
 
-	inl ptr3+1	// inc(position, $100)
+	inl ptr3+1		; inc(position, $100)
 
 	dec ptr2+1
 	bne lp1
 
-lp2	jsr @xmsBank
+lp2	jsr @xmsBank		; ZTMP+1
 
-	lda :ztmp+1		; zakonczenie kopiowania
+;	lda :ztmp+1		; zakonczenie kopiowania
 	cmp #$7f		; jesli przekraczamy granice banku $7FFF
 	bne skp_
 
