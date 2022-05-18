@@ -1,3 +1,6 @@
+15.05.2022
+- poprawiony plik 'targets\generate_program_prolog.inc', przywrócone działanie FASTMUL
+
 04.05.2022
 - issue #98 fixed
 

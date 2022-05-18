@@ -254,9 +254,7 @@ if Pass = CODEGENERATIONPASS then begin
 
 
  asm65;
- asm65(#9'.ifdef fmulinit');
- asm65(#9'fmulinit');
- asm65(#9'.fi');
+ if FastMul > 0 then asm65(#9'fmulinit');
 
 
  asm65;

@@ -13,12 +13,601 @@
 
      tmp:=#9'sta ' + copy(listing[i], 6, 256);
 
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------	// CARDINAL
+// -----------------------------------------------------------------------------
+
      for p:=i-1 downto 0 do
-      if onBreak(p) then Break else			// issue #85 fixed
       if listing[p] = tmp then begin
+
+    if (p > 0) and
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		CARDINAL	[byte]
+											// sta :STACKORIGIN			; p
+       lda_im_0(p+1) and								// lda #$00				; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       asl_stack(p+4) and								// asl :STACKORIGIN			; p+4
+       rol_a(p+5) and									// rol @				; p+5
+       sta_stack(p+6) then								// sta :STACKORIGIN+STACKWIDTH		; p+6
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 1) and
+       lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-CARDINAL	[byte]
+       add_sub(p-1) and (add_sub_stack(p-1) = false) and				// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       lda_im_0(p+1) and								// lda #$00				; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       asl_stack(p+4) and								// asl :STACKORIGIN			; p+4
+       rol_a(p+5) and									// rol @				; p+5
+       sta_stack(p+6) then								// sta :STACKORIGIN+STACKWIDTH		; p+6
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+
+	Result:=false; Break;
+      end;
 
 // -----------------------------------------------------------------------------
 
+    if (p > 1) and
+       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-CARDINAL
+       add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       adc(p+2) and									// adc 					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
+       rol_a(p+6) and									// rol @				; p+6
+       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+	listing[p+7] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+
+    if (p > 1) and
+       (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
+       ((lda(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+CARDINAL
+        (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       adc(p+2) and									// adc 					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
+       rol_a(p+6) and									// rol @				; p+6
+       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
+      begin
+
+	if lda_im(p-2) then begin
+	 q:=GetWORD(p-2, p+1);
+	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+	end else begin
+	 q:=GetWORD(p-1, p+2);
+	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+	end;
+
+	q:=q * 4;
+
+	listing[i+1]  := #9'asl @';
+	listing[i+2]  := #9'asl @';
+	listing[i+3]  := #9'tay';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	LDA_STA_ADR(i,q,'+');
+{
+	if lda_adr(i+6) and iy(i+6) then begin
+	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
+	 listing[i+6] := listing[i+6] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+7) and iy(i+7) then begin
+	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
+	 listing[i+7] := listing[i+7] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+8) and iy(i+8) then begin
+	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
+	 listing[i+8] := listing[i+8] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+9) and iy(i+9) then begin
+	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
+	 listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+10) and iy(i+10) then begin
+	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
+	 listing[i+10] := listing[i+10] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+11) and iy(i+11) then begin
+	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
+	 listing[i+11] := listing[i+11] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+12) and iy(i+12) then begin
+	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
+	 listing[i+12] := listing[i+12] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+13) and iy(i+13) then begin
+	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
+	 listing[i+13] := listing[i+13] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+}
+	listing[p-2] := '';
+	listing[p-1] := '';
+	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+	listing[p+7] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+
+    if (p > 1) and
+       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
+       lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1) and 				// lda  				; p-2		#-CARDINAL
+//        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       sbc(p+2) and									// sbc 					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
+       rol_a(p+6) and									// rol @				; p+6
+       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
+      begin
+
+//	if lda_im(p-2) then begin
+//	 q:=GetWORD(p-2, p+1);
+//	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+//	end else begin
+	 q:=GetWORD(p-1, p+2);
+	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+//	end;
+
+	q:=q * 4;
+
+	listing[i+1]  := #9'asl @';
+	listing[i+2]  := #9'asl @';
+	listing[i+3]  := #9'tay';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	LDA_STA_ADR(i,q,'-');
+
+{
+	if lda_adr(i+6) and iy(i+6) then begin
+	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
+	 listing[i+6] := listing[i+6] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+7) and iy(i+7) then begin
+	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
+	 listing[i+7] := listing[i+7] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+8) and iy(i+8) then begin
+	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
+	 listing[i+8] := listing[i+8] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+9) and iy(i+9) then begin
+	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
+	 listing[i+9] := listing[i+9] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+10) and iy(i+10) then begin
+	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
+	 listing[i+10] := listing[i+10] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+11) and iy(i+11) then begin
+	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
+	 listing[i+11] := listing[i+11] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+12) and iy(i+12) then begin
+	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
+	 listing[i+12] := listing[i+12] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+13) and iy(i+13) then begin
+	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
+	 listing[i+13] := listing[i+13] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+}
+
+	listing[p-2] := '';
+	listing[p-1] := '';
+	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+	listing[p+7] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+
+       Break;
+      end else	// for p:=
+        if onBreak(p) then Break;
+
+     if Result = false then Break;
+
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------	// WORD
+// -----------------------------------------------------------------------------
+
+
+     for p:=i-1 downto 0 do
+      if listing[p] = tmp then begin
+
+
+    if (p > 1) and
+       lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-WORD	[byte]
+       add_sub(p-1) and (add_sub_stack(p-1) = false) and 				// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       lda_im_0(p+1) and								// lda #$00				; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'tay';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 2) and
+       lda(p-3) and (lda_stack(p-3) = false) and					// lda					; p-3		+-WORD	[byte]
+       add_sub(p-2) and (add_sub_stack(p-2) = false) and 				// add|sub				; p-2
+       and_ora_eor(p-1) and								// and|ora|eor				; p-1
+											// sta :STACKORIGIN			; p
+       lda_im_0(p+1) and								// lda #$00				; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'tay';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 0) and
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD	[byte]
+											// sta :STACKORIGIN			; p
+       lda_im_0(p+1) and								// lda #$00				; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'tay';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 1) and
+       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-WORD
+       add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and 									// lda					; p+1
+       adc(p+2) and									// adc					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'tay';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 0) and
+       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD
+											// sta :STACKORIGIN			; p
+       lda(p+1) and 									// lda					; p+1
+       adc(p+2) and									// adc					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'tay';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+
+    if (p > 1) and
+       (lda_a(p-2) = false) and								//~lda					; p-2		#+-WORD
+       add_sub_im(p-1) and					 			// add #|sub #				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       adc_sbc_im(p+2) and								// adc #|sbc #				; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
+      begin
+
+	q:=GetWORD(p-1, p+2);
+
+	listing[i] := #9'lda ' + copy(listing[p], 6, 256);
+
+	q:=q * 2;
+
+	listing[i+1]  := #9'asl @';
+	listing[i+2]  := #9'tay';
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	if add_im(p-1) then
+	 LDA_STA_ADR(i,q,'+')
+	else
+	 LDA_STA_ADR(i,q,'-');
+
+	listing[p-1] := '';
+//	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 1) and
+       (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
+       ((lda(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+WORD
+        (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       adc(p+2) and									// adc 					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
+      begin
+
+	if lda_im(p-2) then begin
+	 q:=GetWORD(p-2, p+1);
+	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+	end else begin
+	 q:=GetWORD(p-1, p+2);
+	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+	end;
+
+	q:=q * 2;
+
+	listing[i+1]  := #9'asl @';
+	listing[i+2]  := #9'tay';
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	LDA_STA_ADR(i,q,'+');
+{
+	if lda_adr(i+6) and iy(i+6) then begin
+	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
+	 listing[i+6] := listing[i+6] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+7) and iy(i+7) then begin
+	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
+	 listing[i+7] := listing[i+7] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+8) and iy(i+8) then begin
+	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
+	 listing[i+8] := listing[i+8] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+9) and iy(i+9) then begin
+	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
+	 listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2) + ',y';
+	end;
+}
+	listing[p-2] := '';
+	listing[p-1] := '';
+	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+
+    if (p > 1) and
+       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
+       (lda(p-2) or lda_adr(p-2)) and (lda_im(p-2) = false) and sub_im(p-1) and 	// lda  				; p-2		#-WORD
+//        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
+											// sta :STACKORIGIN			; p
+       lda(p+1) and									// lda 					; p+1
+       sbc(p+2) and									// sbc 					; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
+      begin
+
+//	if lda_im(p-2) then begin
+//	 q:=GetWORD(p-2, p+1);
+//	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+//	end else begin
+	 q:=GetWORD(p-1, p+2);
+	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+//	end;
+
+	q:=q * 2;
+
+	listing[i+1]  := #9'asl @';
+	listing[i+2]  := #9'tay';
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+
+	LDA_STA_ADR(i,q,'-');
+{
+	if lda_adr(i+6) and iy(i+6) then begin
+	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
+	 listing[i+6] := listing[i+6] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+7) and iy(i+7) then begin
+	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
+	 listing[i+7] := listing[i+7] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if lda_adr(i+8) and iy(i+8) then begin
+	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
+	 listing[i+8] := listing[i+8] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+
+	if sta_adr(i+9) and iy(i+9) then begin
+	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
+	 listing[i+9] := listing[i+9] + '-$' + IntToHex(q, 2) + ',y';
+	end;
+}
+	listing[p-2] := '';
+	listing[p-1] := '';
+	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+
+       Break;
+      end else	// for p:=
+        if onBreak(p) then Break;
+
+     if Result = false then Break;
+
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------	// BYTE
+// -----------------------------------------------------------------------------
+
+     for p:=i-1 downto 0 do
+      if listing[p] = tmp then begin
 
     if (p > 2) and
        ((lda_a(p-3) = false) or
@@ -332,7 +921,6 @@
        sbc(p+2) and									// sbc 					; p+2
        sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
       begin
-
 	q:=GetWORD(p-1, p+2);
 
 	if iy(p-2) = false then begin
@@ -389,569 +977,11 @@
 	Result:=false; Break;
       end;
 
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
-       lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-WORD	[byte]
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and 				// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda_im_0(p+1) and								// lda #$00				; p+1
-       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
-       rol_a(p+3) and									// rol @				; p+3
-       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'tay';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-
-	Result:=false; Break;
-      end;
-
-
-    if (p > 2) and
-       lda(p-3) and (lda_stack(p-3) = false) and					// lda					; p-3		+-WORD	[byte]
-       add_sub(p-2) and (add_sub_stack(p-2) = false) and 				// add|sub				; p-2
-       and_ora_eor(p-1) and								// and|ora|eor				; p-1
-											// sta :STACKORIGIN			; p
-       lda_im_0(p+1) and								// lda #$00				; p+1
-       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
-       rol_a(p+3) and									// rol @				; p+3
-       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'tay';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-
-	Result:=false; Break;
-      end;
-
-
-    if (p > 0) and
-       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD	[byte]
-											// sta :STACKORIGIN			; p
-       lda_im_0(p+1) and								// lda #$00				; p+1
-       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
-       rol_a(p+3) and									// rol @				; p+3
-       sta_stack(p+4) then								// sta :STACKORIGIN+STACKWIDTH		; p+4
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'tay';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-
-	Result:=false; Break;
-      end;
-
-
-    if (p > 1) and
-       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-WORD
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and 									// lda					; p+1
-       adc(p+2) and									// adc					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'tay';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-
-	Result:=false; Break;
-      end;
-
-
-    if (p > 0) and
-       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		WORD
-											// sta :STACKORIGIN			; p
-       lda(p+1) and 									// lda					; p+1
-       adc(p+2) and									// adc					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'tay';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
-       (lda_a(p-2) = false) and								//~lda					; p-2		#+-WORD
-       add_sub_im(p-1) and					 			// add #|sub #				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and									// lda 					; p+1
-       adc_sbc_im(p+2) and								// adc #|sbc #				; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
-      begin
-
-	q:=GetWORD(p-1, p+2);
-
-	listing[i] := #9'lda ' + copy(listing[p], 6, 256);
-
-	q:=q * 2;
-
-	listing[i+1]  := #9'asl @';
-	listing[i+2]  := #9'tay';
-	listing[i+3]  := '';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-
-	if add_im(p-1) then
-	 LDA_STA_ADR(i,q,'+')
-	else
-	 LDA_STA_ADR(i,q,'-');
-
-	listing[p-1] := '';
-//	listing[p]   := '';
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-
-	Result:=false; Break;
-      end;
-
-
-    if (p > 1) and
-       (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
-       ((lda(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+WORD
-        (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and									// lda 					; p+1
-       adc(p+2) and									// adc 					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
-      begin
-
-	if lda_im(p-2) then begin
-	 q:=GetWORD(p-2, p+1);
-	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
-	end else begin
-	 q:=GetWORD(p-1, p+2);
-	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
-	end;
-
-	q:=q * 2;
-
-	listing[i+1]  := #9'asl @';
-	listing[i+2]  := #9'tay';
-	listing[i+3]  := '';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-
-	LDA_STA_ADR(i,q,'+');
-{
-	if lda_adr(i+6) and iy(i+6) then begin
-	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 listing[i+6] := listing[i+6] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+7) and iy(i+7) then begin
-	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 listing[i+7] := listing[i+7] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+8) and iy(i+8) then begin
-	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+9) and iy(i+9) then begin
-	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-}
-	listing[p-2] := '';
-	listing[p-1] := '';
-	listing[p]   := '';
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
-       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
-       (lda(p-2) or lda_adr(p-2)) and (lda_im(p-2) = false) and sub_im(p-1) and 	// lda  				; p-2		#-WORD
-//        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and									// lda 					; p+1
-       sbc(p+2) and									// sbc 					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       sta_stack(p+5) then								// sta :STACKORIGIN+STACKWIDTH		; p+5
-      begin
-
-//	if lda_im(p-2) then begin
-//	 q:=GetWORD(p-2, p+1);
-//	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
-//	end else begin
-	 q:=GetWORD(p-1, p+2);
-	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
-//	end;
-
-	q:=q * 2;
-
-	listing[i+1]  := #9'asl @';
-	listing[i+2]  := #9'tay';
-	listing[i+3]  := '';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-
-	LDA_STA_ADR(i,q,'-');
-{
-	if lda_adr(i+6) and iy(i+6) then begin
-	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 listing[i+6] := listing[i+6] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+7) and iy(i+7) then begin
-	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 listing[i+7] := listing[i+7] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+8) and iy(i+8) then begin
-	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+9) and iy(i+9) then begin
-	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-}
-	listing[p-2] := '';
-	listing[p-1] := '';
-	listing[p]   := '';
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 0) and
-       lda_a(p-1) and (lda_stack(p-1) = false) and (lda_im(p-1) = false) and		// lda					; p-1		CARDINAL	[byte]
-											// sta :STACKORIGIN			; p
-       lda_im_0(p+1) and								// lda #$00				; p+1
-       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
-       rol_a(p+3) and									// rol @				; p+3
-       asl_stack(p+4) and								// asl :STACKORIGIN			; p+4
-       rol_a(p+5) and									// rol @				; p+5
-       sta_stack(p+6) then								// sta :STACKORIGIN+STACKWIDTH		; p+6
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'asl @';
-	listing[i+4] := #9'tay';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-	listing[p+6] := '';
-
-	Result:=false; Break;
-      end;
-
-
-    if (p > 1) and
-       lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-CARDINAL	[byte]
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and				// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda_im_0(p+1) and								// lda #$00				; p+1
-       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
-       rol_a(p+3) and									// rol @				; p+3
-       asl_stack(p+4) and								// asl :STACKORIGIN			; p+4
-       rol_a(p+5) and									// rol @				; p+5
-       sta_stack(p+6) then								// sta :STACKORIGIN+STACKWIDTH		; p+6
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'asl @';
-	listing[i+4] := #9'tay';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-	listing[p+6] := '';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
-       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-CARDINAL
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and									// lda 					; p+1
-       adc(p+2) and									// adc 					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
-       rol_a(p+6) and									// rol @				; p+6
-       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'asl @';
-	listing[i+4] := #9'tay';
-	listing[i+5] := '';
-
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-	listing[p+6] := '';
-	listing[p+7] := '';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
-       (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
-       ((lda(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+CARDINAL
-        (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and									// lda 					; p+1
-       adc(p+2) and									// adc 					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
-       rol_a(p+6) and									// rol @				; p+6
-       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
-      begin
-
-	if lda_im(p-2) then begin
-	 q:=GetWORD(p-2, p+1);
-	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
-	end else begin
-	 q:=GetWORD(p-1, p+2);
-	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
-	end;
-
-	q:=q * 4;
-
-	listing[i+1]  := #9'asl @';
-	listing[i+2]  := #9'asl @';
-	listing[i+3]  := #9'tay';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-
-	LDA_STA_ADR(i,q,'+');
-{
-	if lda_adr(i+6) and iy(i+6) then begin
-	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 listing[i+6] := listing[i+6] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+7) and iy(i+7) then begin
-	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 listing[i+7] := listing[i+7] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+8) and iy(i+8) then begin
-	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+9) and iy(i+9) then begin
-	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+10) and iy(i+10) then begin
-	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
-	 listing[i+10] := listing[i+10] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+11) and iy(i+11) then begin
-	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
-	 listing[i+11] := listing[i+11] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+12) and iy(i+12) then begin
-	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
-	 listing[i+12] := listing[i+12] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+13) and iy(i+13) then begin
-	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
-	 listing[i+13] := listing[i+13] + '+$' + IntToHex(q, 2) + ',y';
-	end;
-
-}
-	listing[p-2] := '';
-	listing[p-1] := '';
-	listing[p]   := '';
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-	listing[p+6] := '';
-	listing[p+7] := '';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
-       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and
-       lda(p-2) and (lda_im(p-2) = false) and sub_im(p-1) and 				// lda  				; p-2		#-CARDINAL
-//        (lda_im(p-2) and sub(p-1) and (sub_im(p-1) = false))) and			// sub #				; p-1
-											// sta :STACKORIGIN			; p
-       lda(p+1) and									// lda 					; p+1
-       sbc(p+2) and									// sbc 					; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
-       rol_a(p+6) and									// rol @				; p+6
-       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
-      begin
-
-//	if lda_im(p-2) then begin
-//	 q:=GetWORD(p-2, p+1);
-//	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
-//	end else begin
-	 q:=GetWORD(p-1, p+2);
-	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
-//	end;
-
-	q:=q * 4;
-
-	listing[i+1]  := #9'asl @';
-	listing[i+2]  := #9'asl @';
-	listing[i+3]  := #9'tay';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-
-	LDA_STA_ADR(i,q,'-');
-
-{
-	if lda_adr(i+6) and iy(i+6) then begin
-	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 listing[i+6] := listing[i+6] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+7) and iy(i+7) then begin
-	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 listing[i+7] := listing[i+7] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+8) and iy(i+8) then begin
-	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+9) and iy(i+9) then begin
-	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+10) and iy(i+10) then begin
-	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
-	 listing[i+10] := listing[i+10] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+11) and iy(i+11) then begin
-	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
-	 listing[i+11] := listing[i+11] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if lda_adr(i+12) and iy(i+12) then begin
-	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
-	 listing[i+12] := listing[i+12] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+13) and iy(i+13) then begin
-	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
-	 listing[i+13] := listing[i+13] + '-$' + IntToHex(q, 2) + ',y';
-	end;
-}
-
-	listing[p-2] := '';
-	listing[p-1] := '';
-	listing[p]   := '';
-	listing[p+1] := '';
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-	listing[p+6] := '';
-	listing[p+7] := '';
-
-	Result:=false; Break;
-      end;
-
 // -----------------------------------------------------------------------------
 
        Break;
-      end;	// for p:=
+      end else	// for p:=
+        if onBreak(p) or (listing[p] = #9'asl ' + copy(listing[i], 6, 256)) then Break;
 
      if Result = false then Break;
     end;
