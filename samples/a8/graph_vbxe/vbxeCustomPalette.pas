@@ -1,45 +1,32 @@
 
-uses crt, graph, vbxe;
+(*
+
+ VGALo: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors.
+
+VGAMed: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
+
+ VGAHi: pixel mode 640x192/16 colors (hires)
+
+*)
+
+uses crt, vbxe;
 
 var
-	vram: TVBXEMemoryStream;
+	a: byte;
 
-
-procedure initVBXE;
-var a: word;
 begin
 
- InitGraph(mVBXE, 0, '');
-
- if GraphResult <> grOK then begin
+ if VBXE.GraphResult <> VBXE.grOK then begin
   writeln('VBXE not detected');
   halt;
  end;
 
- SetHorizontalRes(MedRes);
- ColorMapOff;
-
- VBXEControl(vc_xdl+vc_xcolor+vc_no_trans);
-
-// SetOverlayPalette(1);		// default Overlay Palette = 1
-
+ VBXEMode(VBXE.VGAMed, 1);		// VBXE MODE, OVERLAY PALETTE #1
 
  SetRGBPalette(1);
 
  for a:=0 to 255 do
   SetRGBPalette(a, a, a);
-
-
- vram.position:=VBXE_OVRADR;
- vram.size:=VBXE_OVRADR+320*256;
- vram.Clear;
-
-end;
-
-
-begin
-
- initVBXE;
 
  vbxe.SetColor($16);
 
