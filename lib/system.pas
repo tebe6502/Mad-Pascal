@@ -128,6 +128,12 @@ type	PCardinal = ^cardinal;
 
 	*)
 
+type	PSmallint = ^smallint;
+	(*
+	@description:
+
+	*)
+
 type	PInteger = ^integer;
 	(*
 	@description:
@@ -296,6 +302,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Cos(x: Real): Real; overload;
 	function Cos(x: Single): Single; overload;
 	function Cos(x: float16): float16; overload;
+	procedure Delete(var s: string; index, count: byte);
 	function DPeek(a: word): word; register; stdcall; assembler;
 	procedure DPoke(a: word; value: word); register; stdcall; assembler;
 	function Eof(var f: file): Boolean;
@@ -331,6 +338,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure Pause(n: word); assembler; overload;						//platform dependent
 	function Peek(a: word): byte; register; stdcall; assembler;
 	procedure Poke(a: word; value: byte); register; stdcall; assembler;
+	function Pos(c: char; s: string): byte; overload;
+	function Pos(s1: string; s2: string): byte; overload;
 	function Random: Real; overload;							//platform dependent
 	function Random(range: byte): byte; assembler; overload;				//platform dependent
 	function Random(range: smallint): smallint; overload;					//platform dependent
@@ -1972,6 +1981,88 @@ end;
 
 
 {$i '../src/targets/system.inc'}
+
+
+procedure Delete(var s: string; index, count: byte);
+var l: byte;
+    ch: char;
+begin
+
+ l:=length(s);
+
+ if index > l then exit;
+
+ if index + count > l then count := l - index + 1;
+
+
+ while index <= l do begin
+
+  s[index] := s[index + count];
+
+  inc(index);
+ end;
+
+
+ if count > l then
+  ch := #0
+ else
+  ch := chr(l - count);
+
+ s[0] := ch;
+
+end;
+
+
+function Pos(c: char; s: string): byte; overload;
+var
+    slen: byte;
+    i    : byte;
+begin
+    slen := Length(s);
+    result := 0;
+
+    for i := 1 to slen - 1 do
+    begin
+        if s[i] = c then
+        begin
+            result := i;
+            break;
+        end;
+    end
+end;
+
+
+function Pos(s1: string; s2: string): byte; overload;
+var
+    s1len: byte;
+    s2len: byte;
+    i    : byte;
+    j    : byte;
+begin
+    s1len := Length(s1);
+    s2len := Length(s2);
+
+    result := 0;
+
+    for i := 1 to s2len - s1len do // 1 to 14
+    begin
+
+        for j := 0 to s1len - 1 do // 0 to 17
+        begin
+            if s2[i+j] <> s1[j+1] then // 1 <> 1
+            begin
+                break;
+            end;
+        end;
+
+        if j = s1len then 
+        begin
+            result := i;
+            break;
+        end;
+
+    end
+end;
 
 
 function Concat(a,b: PString): string; assembler; overload;
