@@ -568,7 +568,7 @@
 
 
      if lda(i+9) and			 						// lda			; 9
-        ((listing[i+10] = #9'add #$01') or (listing[i+10] = #9'sub #$01')) and		// add|sub #$01		; 10
+	add_sub_im(i+10) and								// add|sub #		; 10
         ((listing[i+11] = #9'add :eax') or (listing[i+11] = #9'sub :eax')) and		// add|sub :eax		; 11
         tay(i+12) then 									// tay			; 12
       begin
@@ -590,14 +590,20 @@
 	else
 	 listing[i+9] := #9'sub ' + copy(listing[i+9], 6, 256);
 
-	if listing[i+10] = #9'add #$01' then
-	 listing[i+11] := #9'iny'
-	else
-	 listing[i+11] := #9'dey';
 
-	listing[i+10] := #9'tay';
+	if (listing[i+10] = #9'add #$01') or (listing[i+10] = #9'sub #$01') then begin
 
-	listing[i+12] := '';
+	 if listing[i+10] = #9'add #$01' then
+	  listing[i+11] := #9'iny'
+	 else
+ 	  listing[i+11] := #9'dey';
+
+	 listing[i+10] := #9'tay';
+
+ 	 listing[i+12] := '';
+
+	end else
+	 listing[i+11] := '';
 
 	Result:=false; Break;
       end;
