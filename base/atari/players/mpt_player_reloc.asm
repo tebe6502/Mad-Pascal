@@ -3,7 +3,7 @@
   Player MPT 2.4
   coded by Fox
   07,19,25,30/07/96
-  mads reloc by Tebe 06/03/2016
+  mads reloc by Tebe 06/03/2016; 10/06/2022
   original version by Jaskier/Taquart
 */
 
@@ -46,32 +46,78 @@ speed	equ $03
 init	stx zp
 	sty zp+1
 
-	adw zp #$1c0 m_01c0+1
-	adw zp #$1c4 m_01c4+1
+	;adw zp #$1c0 m_01c0+1
+	txa
+	add <$1c0
+	sta m_01c0+1
+	tya
+	adc >$1c0
+	sta m_01c0+2
 
-	adw zp #$41 m_0041+1
-	adw zp #$40 m_0040+1
+	;adw zp #$1c4 m_01c4+1
+	txa
+	add <$1c4
+	sta m_01c4+1
+	tya
+	adc >$1c4
+	sta m_01c4+2
 
-	lda zp
+	;adw zp #$41 m_0041+1
+	txa
+	add <$41
+	sta m_0041+1
+	tya
+	adc >$41
+	sta m_0041+2
+	
+	;adw zp #$40 m_0040+1
+	txa
+	add <$40
+	sta m_0040+1
+	tya
+	adc >$40
+	sta m_0040+2
+
+	txa
 	add #$c0
 	sta m_00c0+1
 	sta m_00c0_+1
-	lda zp+1
+	tya
 	adc #0
 	sta m_00c0+2
 	sta m_00c0_+2	
 	
-	lda zp
+	txa
 	sta m_0000+1
 	add #1
 	sta m_0001+1
-	lda zp+1
+	tya
 	sta m_0000+2
 	adc #0
 	sta m_0001+2
 
-	adw zp #$1c8 _adr+1
+	;adw zp #$1c8 _adr+1
+	txa
+	add <$1c8
+	sta _adr+1
+	tya
+	adc >$1c8
+	sta _adr+2
 
+;---	clr
+
+	ldx #18*4-1
+	lda #$00
+	sta:rpl branch,x-
+
+	sta pozsng+1
+	sta licz+1
+
+	lda #1
+	sta zegar
+	
+	stx pozptr+1	; X = $ff
+;---
 	jsr _adr
 	stx l00+1
 	stx l01+1

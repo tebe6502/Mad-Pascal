@@ -1,5 +1,5 @@
 // Mono:
-// Ja tam robi≈Çem jakie≈õ modyfikacje do patchowanej tabeli bas√≥w 0a i do
+// Ja tam robi≥em jakieú modyfikacje do patchowanej tabeli basÛw 0a i do
 // playera analmuxa (sa dwa rozne).
 // Odpowiada za to zmienna patch (bajt).
 // 0=standard RMT 1.28
