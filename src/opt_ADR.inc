@@ -759,9 +759,9 @@
        lda_a(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-BYTE
        add_sub(p-1) and (add_sub_stack(p-1) = false) and				// add|sub				; p-1
 											// sta :STACKORIGIN			; p
-//       lda(p+1) and									//~lda 					; p+1
-       (adc_sbc(p+2) = false) then							//~adc|sbc				; p+2
-//       sta_stack(p+3) then								//~sta :STACKORIGIN+STACKWIDTH		; p+3
+											//					; p+1
+       (adc_sbc(p+2) = false) and							//~adc|sbc				; p+2
+       (tay(p+3) = false) then								//~tay					; p+3
       begin
 	listing[i+3] := '';
 	listing[i+4] := '';
@@ -778,7 +778,8 @@
        add_sub(p+2) and									// add|sub				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
 											//					; p+4
-       (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
+       (adc_sbc(p+5) = false) and							//~adc|sbc				; p+5
+       (tay(p+6) = false) then								//~tay					; p+6
       begin
 	listing[p+1] := '';
 	listing[p+2] := '';
