@@ -1,5 +1,4 @@
 
-
 .macro	m@index2 (Ofset)
 	asl :STACKORIGIN-%%Ofset,x
 	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
@@ -13,7 +12,7 @@
 .endm
 
 
-m@call	.macro (os_proc)
+.macro	m@call (os_proc)
 
 	.ifdef MAIN.@DEFINES.ROMOFF
 
@@ -29,38 +28,14 @@ m@call	.macro (os_proc)
 
 	.endif
 
-	.endm
+.endm
 
 
+.macro m@string
 
-/*
-m@move	.macro (src, dst, pages)
-	ldy #$00
-move	:+%%pages mva %%src+#*$100,y %%dst+#*$100,y
-	:+%%pages mva %%src+$80+#*$100,y %%dst+$80+#*$100,y
-	iny
-	bpl move
-	.endm
-
-
-m@fill	.macro
-	lda #0
-	tay
-	tax
-
-loop	cpx >VLEN
-	bne fil
-	cpy <VLEN
-	beq @+
-
-fil	sta VADR,y
-	iny
-	bne loop
-	inx
-	inc fil+2
-	bne loop
-
-@	mva >VADR fil+2
-	.endm
-*/
+	dta .len(str)
+	.local str
+	dta ":1"
+	.endl
+.endm
 
