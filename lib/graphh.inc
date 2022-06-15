@@ -6,7 +6,6 @@ type
 		       end;
 
 const
-	{ graphic drivers }
 
 	{ graphic drivers }
 	CurrentDriver	= -128;
@@ -106,6 +105,12 @@ var	WIN_LEFT: smallint = 0;
 
 	GetColor: byte;
 
+	VideoRAM: pointer;
+
+{$ifdef c64}
+	ScreenRAM : pointer;
+{$endif}
+
 	LastArcCoords: TLastArcCoords;
 
 	procedure Arc(X, Y, StAngle, EndAngle, Radius: Word);
@@ -137,11 +142,14 @@ var	WIN_LEFT: smallint = 0;
 	procedure SetClipRect(x0,y0,x1,y1: smallint); overload;
 	procedure SetClipRect(Rect: TRect); overload;
 	procedure SetColor(color: byte); assembler;
+//	procedure SetFillStyle(pattern, color: byte);
+	procedure CloseGraph; assembler;
+
+{$ifdef atari}
 	procedure SetColorMapEntry; overload; assembler;
 	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
 	procedure SetColorMapDimensions(w,h: byte); register; assembler;
 	procedure SetCurrentPaletteEntry(nr: word); register;
-//	procedure SetFillStyle(pattern, color: byte);
 	procedure SetPaletteEntry(nr: word; r,g,b: byte); register; overload;
 	procedure SetPaletteEntry(r,g,b: byte); register; overload;
 	procedure SetRGBPalette(pal: byte); assembler; register; overload;
@@ -152,3 +160,4 @@ var	WIN_LEFT: smallint = 0;
 	procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
 	procedure SetPlayfieldPalette(a: byte); register; assembler;
 	procedure SetOverlayPalette(a: byte); register; assembler;
+{$endif}

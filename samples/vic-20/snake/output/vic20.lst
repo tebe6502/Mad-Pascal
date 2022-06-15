@@ -1,0 +1,2693 @@
+mads 2.1.5
+    57 				  opt l+
+   102
+   103 				.print 'ZPAGE: ',zpage,'..',zpend-1
+   103 				ZPAGE: $0000..$0053
+   104
+   105 				.print 'RTLIB: ',RTLIB,'..',*-1
+   105 				RTLIB: $A07C..$A113
+   106
+   107 				; ------------------------------------------------------------
+   108
+   109 A114			START
+   110 A114 BA				tsx
+   111 A115 8E 5A A9			stx MAIN.@halt+1
+   112
+   113 					.ifdef fmulinit
+   114 					fmulinit
+   115 					.fi
+   116
+   117 = 000D			VLEN	= VARDATASIZE-VARINITSIZE
+   118 = A970			VADR	= DATAORIGIN+VARINITSIZE
+   119
+   120 					ift VADR > $BFFF
+   121 					ert 'Invalid memory address range ',VADR
+   122 					eli (VLEN>0) && (VLEN<=256)
+   123 A118 A2 F3			ldx #256-VLEN
+   124 A11A A9 00			lda #$00
+   125 A11C 9D 7D A8 E8 D0 FA		sta:rne VADR+VLEN-256,x+
+   126 					eli VLEN>256
+   127 					@fill #VADR #VLEN #$00
+   128 					eif
+   129
+   130 				.ifdef :psptr
+   131 					mwa #PROGRAMSTACK :psptr
+   132 				.fi
+   133
+   134 A122 A2 00			ldx #$00
+   135 A124 86 00			stx bp						; BP = 0
+   136
+   137 A126 CA				dex						; X = 255
+   138
+   139 A127				UNITINITIALIZATION
+Macro: UNITINITIALIZATION [Source: vic20.a65]
+     7 A127 20 F4 A2			jsr MAIN.SYS_VIC20.@UnitInit
+Source: vic20.a65
+   140
+   141 A12A			.local	MAIN						; PROCEDURE
+   142
+   143 A12A 4C E1 A8			jmp l_0067
+   144
+   145 				; ------------------------------------------------------------
+   146
+   147 A12D			.local	SYSTEM						; UNIT
+   148
+   149 A12D			.local	PEEK						; FUNCTION | ASSEMBLER | REGISTER
+   150
+   151 				; ------------------------------------------------------------
+   152
+   153 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   154 				; as Pointer
+   155 A12D B5 14			lda :STACKORIGIN,x
+   156 A12F 85 08			sta A
+   157 A131 B5 24			lda :STACKORIGIN+STACKWIDTH,x
+   158 A133 85 09			sta A+1
+   159 A135 CA				dex
+   160 A136			@main
+   161
+   162 				; -------------------  ASM Block 00000002  -------------------
+   163
+   164 A136 A0 00			ldy #0
+   165 A138 B1 08 85 10			mva (:edx),y Result
+   166
+   167 A13C			@exit
+   168
+   169 				; ------------------------------------------------------------
+   170
+   171 				; Push BYTE / CHAR / SHORTINT / BOOLEAN
+   172 				; as Pointer
+   173
+   174 A13C E8				inx
+   175 A13D A5 10 95 14			mva RESULT :STACKORIGIN,x
+   176
+   177 					.ifdef @new
+   178 					lda <@VarData
+   179 					sta :ztmp
+   180 					lda >@VarData
+   181 					ldy #@VarDataSize-1
+   182 					jmp @FreeMem
+   183 					eif
+   184
+   185 				; ------------------------------------------------------------
+   186
+   187 = 0008			A	= :EDX
+   188 = 0010			RESULT	= :STACKORIGIN-4
+   189 A141 60				rts						; ret
+   190 				.endl
+   191
+   192 A142			.local	POKE						; PROCEDURE | ASSEMBLER | REGISTER
+   193
+   194 				; ------------------------------------------------------------
+   195
+   196 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   197 				; as Pointer
+   198 A142 B5 14			lda :STACKORIGIN,x
+   199 A144 85 08			sta A
+   200 A146 B5 24			lda :STACKORIGIN+STACKWIDTH,x
+   201 A148 85 09			sta A+1
+   202 A14A CA				dex
+   203 A14B 30 05			jmi @main
+   204
+   205 				; ------------------------------------------------------------
+   206
+   207 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   208 				; as Pointer
+   209 A14D B5 14			lda :STACKORIGIN,x
+   210 A14F 85 0C			sta VALUE
+   211 A151 CA				dex
+   212 A152			@main
+   213
+   214 				; -------------------  ASM Block 00000018  -------------------
+   215
+   216 A152 A0 00			ldy #0
+   217 A154 A5 0C 91 08			mva value (:edx),y
+   218
+   219 				; ------------------------------------------------------------
+   220
+   221 = 0008			A	= :EDX
+   222 = 000C			VALUE	= :ECX
+   223 A158			@exit
+   224 					.ifdef @new
+   225 					lda <@VarData
+   226 					sta :ztmp
+   227 					lda >@VarData
+   228 					ldy #@VarDataSize-1
+   229 					jmp @FreeMem
+   230 					els
+   231 A158 60				rts						; ret
+   232 					eif
+   233 				.endl
+   234
+   235 A159			.local	MOVE_00B1					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+   236
+   237 					.MACRO m@INLINE
+   238 				
+   239 				; -------------------  ASM Block 00000028  -------------------
+   240 				
+   241 					jsr @move
+   242 				
+   243 					.ENDM
+   244
+   245 				; ------------------------------------------------------------
+   246
+   247 = 0008			SOURCE	= :EDX
+   248 = 000C			DEST	= :ECX
+   249 = 0004			COUNT	= :EAX
+   250 A159			@exit
+   251 				.endl
+   252
+   253 				; ------------------------------------------------------------
+   254
+   255 = 0648			M_PI_2	= $0648
+   256 = 0192			D_PI_2	= $0192
+   257 = 0004			D_PI_180	= $04
+   258 = A970			RNDSEED	= DATAORIGIN+$0000
+   259
+   260 				.endl							; UNIT SYSTEM
+   261
+   262 				; ------------------------------------------------------------
+   263
+   264 A159			.local	SYS_VIC20					; UNIT
+   265
+   266 A159			.local	SYS_VBI						; PROCEDURE | ASSEMBLER | INTERRUPT
+   267
+   268 				; -------------------  ASM Block 00000048  -------------------
+   269
+   270 A159 E6 60		      inc RTCLOCK
+   271
+   272 A15B AE 13 91		      ldx VIA1DDRA
+   273 A15E AC 22 91		      ldy VIA2DDRB
+   274 A161 A9 C3 8D 13 91	      mva #%11000011 VIA1DDRA
+   275 A166 AD 11 91		      lda VIA1PA
+   276 A169 8E 13 91		      stx VIA1DDRA
+   277 A16C 29 3C		      and #%00111100                  // up, down, left, fire
+   278 A16E 85 61		      sta JOY
+   279 A170 A9 7F 8D 22 91	      mva #%01111111 VIA2DDRB
+   280 A175 AD 20 91		      lda VIA2PB
+   281 A178 8C 22 91		      sty VIA2DDRB
+   282 A17B 29 80		      and #%10000000                  // right
+   283 A17D 05 61		      ora JOY
+   284 A17F 49 BC		      eor #%10111100                  // inverse values
+   285 A181 85 61		      sta JOY
+   286
+   287 A183 20 53 A8		      jsr VBI
+   288
+   289 A186 A9 40 8D 2D 91	      mva #%01000000 VIA2IFR
+   290 A18B 68 A8 68 AA 68	      plr
+   291
+   292 A190 40				rti						; ret
+   293 				.endl
+   294
+   295 A191			.local	SYS_INIT					; PROCEDURE | ASSEMBLER
+   296
+   297 				; -------------------  ASM Block 00000049  -------------------
+   298
+   299 A191 78			      sei
+   300
+   301 A192 A9 7F 8D 1E 91	      mva #%01111111 VIA1IER          // disable all NMI
+   302 A197 A9 C0 8D 2E 91	      mva #%11000000 VIA2IER          // enable IRQ via2/timer1
+   303 A19C A9 40 8D 2B 91	      mva #%01000000 VIA2ACR          // put via2/timer1 in continuous free-running mode
+   304
+   305 A1A1 A9 59 8D 14 03 A9 +       mwa #SYS_VBI CINV               // register IRQ procedure
+   306
+   307 A1AB A9 00 85 60		      mva #0 RTCLOCK                  // reset raster
+   308
+   309 A1AF A9 92		      lda #VBI_START                  // wait for 130 raster line
+   310 A1B1 CD 04 90		@     cmp VICCR4
+   311 A1B4 D0 FB		      bne @-
+   312
+   313 A1B6 A9 86 8D 24 91 A9 +       mwa #PAL_TIMER1 VIA2T1CL        // set via2/timer1; 1/50 sec.
+   314
+   315 A1C0 A0 0F		      ldy #15
+   316 A1C2 B9 6C A0 99 00 90 +       mva:rpl adr.VIC_DEF,y VICCR0,y- // init VIC registers
+   317
+   318 A1CB 58			      cli
+   319
+   320 A1CC			@exit
+   321 					.ifdef @new
+   322 					lda <@VarData
+   323 					sta :ztmp
+   324 					lda >@VarData
+   325 					ldy #@VarDataSize-1
+   326 					jmp @FreeMem
+   327 					els
+   328 A1CC 60				rts						; ret
+   329 					eif
+   330 				.endl
+   331
+   332 A1CD			.local	WAIT_00DC					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER
+   333 A1CD 85 08			sta N
+   334
+   335 				; -------------------  ASM Block 00000052  -------------------
+   336
+   337 A1CF A5 08		      lda n
+   338 A1D1 18 65 60		      add RTCLOCK
+   339 A1D4 C5 60		@     cmp RTCLOCK
+   340 A1D6 D0 FC		      bne @-
+   341
+   342 				; ------------------------------------------------------------
+   343
+   344 = 0008			N	= :EDX
+   345 A1D8			@exit
+   346 					.ifdef @new
+   347 					lda <@VarData
+   348 					sta :ztmp
+   349 					lda >@VarData
+   350 					ldy #@VarDataSize-1
+   351 					jmp @FreeMem
+   352 					els
+   353 A1D8 60				rts						; ret
+   354 					eif
+   355 				.endl
+   356
+   357 A1D9			.local	CLRSCR						; PROCEDURE | ASSEMBLER | REGISTER
+   358 A1D9 85 08			sta V
+   359
+   360 				; -------------------  ASM Block 00000053  -------------------
+   361
+   362 A1DB A0 00		      ldy #0
+   363 A1DD A5 08		      lda v
+   364 A1DF 99 00 1C		@     sta SCREEN_ADR,y
+   365 A1E2 99 00 1D		      sta SCREEN_ADR + $100,y
+   366 A1E5 99 00 1E		      sta SCREEN_ADR + $200,y
+   367 A1E8 C8			      iny
+   368 A1E9 D0 F4		      bne @-
+   369
+   370 				; ------------------------------------------------------------
+   371
+   372 = 0008			V	= :EDX
+   373 A1EB			@exit
+   374 					.ifdef @new
+   375 					lda <@VarData
+   376 					sta :ztmp
+   377 					lda >@VarData
+   378 					ldy #@VarDataSize-1
+   379 					jmp @FreeMem
+   380 					els
+   381 A1EB 60				rts						; ret
+   382 					eif
+   383 				.endl
+   384
+   385 A1EC			.local	CLRCOL						; PROCEDURE | ASSEMBLER | REGISTER
+   386 A1EC 85 08			sta C
+   387
+   388 				; -------------------  ASM Block 00000054  -------------------
+   389
+   390 A1EE A0 00		      ldy #0
+   391 A1F0 A5 08		      lda c
+   392 A1F2 99 00 94		@     sta COLORMAP_ADR,y
+   393 A1F5 99 00 95		      sta COLORMAP_ADR + $100,y
+   394 A1F8 99 00 96		      sta COLORMAP_ADR + $200,y
+   395 A1FB C8			      iny
+   396 A1FC D0 F4		      bne @-
+   397
+   398 				; ------------------------------------------------------------
+   399
+   400 = 0008			C	= :EDX
+   401 A1FE			@exit
+   402 					.ifdef @new
+   403 					lda <@VarData
+   404 					sta :ztmp
+   405 					lda >@VarData
+   406 					ldy #@VarDataSize-1
+   407 					jmp @FreeMem
+   408 					els
+   409 A1FE 60				rts						; ret
+   410 					eif
+   411 				.endl
+   412
+   413 A1FF			.local	SET_XY						; PROCEDURE | REGISTER
+   414
+   415 				; optimize OK (SYS_VIC20), line = 433
+   416
+   417 A1FF A5 08			lda X
+   418 A201 85 54			sta T0B
+   419 A203 A5 0C			lda Y
+   420 A205 85 55			sta T1B
+   421
+   422 				; optimize OK (SYS_VIC20), line = 434
+   423
+   424 A207 A9 19			lda #$19
+   425 A209 85 0C			sta :ecx
+   426 A20B A5 55			lda T1B
+   427 A20D 85 04			sta :eax
+   428 					.ifdef fmulinit
+   429 					fmulu_8
+   430 					els
+   431 A20F 20 FC A0			imulCL
+   432 					eif
+   433 A212 A5 04			lda :eax
+   434 A214 85 5A			sta TMP
+   435 A216 A5 05			lda :eax+1
+   436 A218 85 5B			sta TMP+1
+   437 A21A A5 5A			lda TMP
+   438 A21C 18 65 54			add T0B
+   439 A21F 85 5A			sta TMP
+   440 A221 90 02			scc
+   441 A223 E6 5B			inc TMP+1
+   442
+   443 				; optimize OK (SYS_VIC20), line = 436
+   444
+   445 A225 85 56			sta SCR
+   446 A227 A5 5B			lda TMP+1
+   447 A229 18 69 1C			add #$1C
+   448 A22C 85 57			sta SCR+1
+   449
+   450 				; optimize OK (SYS_VIC20), line = 437
+   451
+   452 A22E A5 5A			lda TMP
+   453 A230 85 58			sta COLMAP
+   454 A232 A5 5B			lda TMP+1
+   455 A234 18 69 94			add #$94
+   456 A237 85 59			sta COLMAP+1
+   457
+   458 				; ------------------------------------------------------------
+   459
+   460 = 0008			X	= :EDX
+   461 = 000C			Y	= :ECX
+   462 A239			@exit
+   463 					.ifdef @new
+   464 					lda <@VarData
+   465 					sta :ztmp
+   466 					lda >@VarData
+   467 					ldy #@VarDataSize-1
+   468 					jmp @FreeMem
+   469 					els
+   470 A239 60				rts						; ret
+   471 					eif
+   472 				.endl
+   473
+   474 A23A			.local	PRINT						; PROCEDURE | ASSEMBLER | REGISTER
+   475
+   476 				; -------------------  ASM Block 00000055  -------------------
+   477
+   478 A23A A0 00		      ldy #0
+   479 A23C B1 0C 85 54		      mva (s),y ZP_0_B
+   480 A240 A8 88 E6 0C		      tay:dey:inc s
+   481 A244 B1 0C 91 56		@     mva (s),y (scr),y
+   482 A248 A5 08 91 58		      mva col (colmap),y
+   483 A24C 88			      dey
+   484 A24D 10 F5		      bpl @-
+   485
+   486 				; ------------------------------------------------------------
+   487
+   488 = 0008			COL	= :EDX
+   489 = 000C			S	= :ECX
+   490 A24F			@exit
+   491 					.ifdef @new
+   492 					lda <@VarData
+   493 					sta :ztmp
+   494 					lda >@VarData
+   495 					ldy #@VarDataSize-1
+   496 					jmp @FreeMem
+   497 					els
+   498 A24F 60				rts						; ret
+   499 					eif
+   500 				.endl
+   501
+   502 A250			.local	PUT_CHAR					; PROCEDURE | ASSEMBLER | REGISTER
+   503
+   504 				; -------------------  ASM Block 00000056  -------------------
+   505
+   506 A250 A0 00		      ldy #0
+   507 A252 A5 0C 91 56		      mva c (scr),y
+   508 A256 A5 08 91 58		      mva col (colmap),y
+   509
+   510 				; ------------------------------------------------------------
+   511
+   512 = 0008			COL	= :EDX
+   513 = 000C			C	= :ECX
+   514 A25A			@exit
+   515 					.ifdef @new
+   516 					lda <@VarData
+   517 					sta :ztmp
+   518 					lda >@VarData
+   519 					ldy #@VarDataSize-1
+   520 					jmp @FreeMem
+   521 					els
+   522 A25A 60				rts						; ret
+   523 					eif
+   524 				.endl
+   525
+   526 A25B			.local	UPDATE_COUNTER_2				; PROCEDURE | ASSEMBLER | REGISTER
+   527
+   528 				; -------------------  ASM Block 00000057  -------------------
+   529
+   530 A25B F8			      sed
+   531
+   532 A25C A0 00		      ldy #0
+   533 A25E B1 0C		      lda (counter),y
+   534 A260 18 65 08		      add v
+   535 A263 91 0C		      sta (counter),y
+   536
+   537 A265 D8			      cld
+   538
+   539 A266 A0 00		      ldy #0
+   540 A268 B1 0C		      lda (counter),y
+   541 A26A 48			      pha
+   542 A26B 29 0F		      and #%00001111
+   543 A26D 09 30		      ora #%00110000
+   544 A26F A0 03		      ldy #3
+   545 A271 91 04		      sta (scr_counter),y
+   546 A273 68			      pla
+   547 A274 4A 4A 4A 4A		:4    lsr
+   548 A278 09 30		      ora #%00110000
+   549 A27A 88			      dey
+   550 A27B 91 04		      sta (scr_counter),y
+   551
+   552 				; ------------------------------------------------------------
+   553
+   554 = 0008			V	= :EDX
+   555 = 000C			COUNTER	= :ECX
+   556 = 0004			SCR_COUNTER	= :EAX
+   557 A27D			@exit
+   558 					.ifdef @new
+   559 					lda <@VarData
+   560 					sta :ztmp
+   561 					lda >@VarData
+   562 					ldy #@VarDataSize-1
+   563 					jmp @FreeMem
+   564 					els
+   565 A27D 60				rts						; ret
+   566 					eif
+   567 				.endl
+   568
+   569 A27E			.local	UPDATE_COUNTER_4				; PROCEDURE | ASSEMBLER | REGISTER
+   570
+   571 				; -------------------  ASM Block 00000058  -------------------
+   572
+   573 A27E F8			      sed
+   574
+   575 A27F A0 00		      ldy #0
+   576 A281 B1 0C		      lda (counter),y
+   577 A283 18 65 08		      add v
+   578 A286 91 0C		      sta (counter),y
+   579 A288 90 08		      bcc @+
+   580 A28A C8			      iny
+   581 A28B B1 0C		      lda (counter),y
+   582 A28D 18 69 01		      add #1
+   583 A290 91 0C		      sta (counter),y
+   584
+   585 A292 D8			@     cld
+   586
+   587 A293 A0 00		      ldy #0
+   588 A295 B1 0C		      lda (counter),y
+   589 A297 48			      pha
+   590 A298 29 0F		      and #%00001111
+   591 A29A 09 30		      ora #%00110000
+   592 A29C A0 03		      ldy #3
+   593 A29E 91 04		      sta (scr_counter),y
+   594 A2A0 68			      pla
+   595 A2A1 4A 4A 4A 4A		:4    lsr
+   596 A2A5 09 30		      ora #%00110000
+   597 A2A7 88			      dey
+   598 A2A8 91 04		      sta (scr_counter),y
+   599
+   600 A2AA 88			      dey
+   601 A2AB B1 0C		      lda (counter),y
+   602 A2AD 29 0F		      and #%00001111
+   603 A2AF 09 30		      ora #%00110000
+   604 A2B1 91 04		      sta (scr_counter),y
+   605 A2B3 B1 0C		      lda (counter),y
+   606 A2B5 4A 4A 4A 4A		:4    lsr
+   607 A2B9 09 30		      ora #%00110000
+   608 A2BB 88			      dey
+   609 A2BC 91 04		      sta (scr_counter),y
+   610
+   611 				; ------------------------------------------------------------
+   612
+   613 = 0008			V	= :EDX
+   614 = 000C			COUNTER	= :ECX
+   615 = 0004			SCR_COUNTER	= :EAX
+   616 A2BE			@exit
+   617 					.ifdef @new
+   618 					lda <@VarData
+   619 					sta :ztmp
+   620 					lda >@VarData
+   621 					ldy #@VarDataSize-1
+   622 					jmp @FreeMem
+   623 					els
+   624 A2BE 60				rts						; ret
+   625 					eif
+   626 				.endl
+   627
+   628 A2BF			.local	PRND_0112					; FUNCTION | ASSEMBLER | OVERLOAD | REGISTER
+   629
+   630 				; -------------------  ASM Block 00000059  -------------------
+   631
+   632 A2BF AD 04 90		      lda VICCR4
+   633 A2C2 65 60		      adc RTCLOCK
+   634 A2C4 4D 27 91		      eor VIA2T1LH
+   635 A2C7 4D 26 91		      eor VIA2T1LL
+   636 A2CA 4D 14 91		      eor VIA1T1CL
+   637 A2CD 4D 15 91		      eor VIA1T1CH
+   638 A2D0 85 10		      sta RESULT
+   639
+   640 A2D2			@exit
+   641
+   642 				; ------------------------------------------------------------
+   643
+   644 = 0010			RESULT	= :STACKORIGIN-4
+   645 A2D2 60				rts						; ret
+   646 				.endl
+   647
+   648 A2D3			.local	PRND_0113					; FUNCTION | OVERLOAD | REGISTER
+   649
+   650 				; optimize FAIL ('PRND_0112', SYS_VIC20), line = 554
+   651
+   652 A2D3 20 BF A2			jsr PRND_0112
+   653 A2D6 A5 10			lda PRND_0112.RESULT
+   654 A2D8 25 04			and MASK
+   655 A2DA 85 10			sta RESULT
+   656
+   657 				; optimize OK (SYS_VIC20), line = 556
+   658
+   659 A2DC C5 08			cmp A
+   660 A2DE B0 05			jcs l_0134
+   661 A2E0 18 65 08			add A
+   662 A2E3 85 10			sta RESULT
+   663 A2E5			l_0134
+   664
+   665 				; optimize OK (SYS_VIC20), line = 557
+   666
+   667 A2E5 A5 0C			lda B
+   668 A2E7 C5 10			cmp RESULT
+   669 A2E9 B0 08			jcs l_014E
+   670
+   671 				; --- RepeatUntilProlog
+   672 A2EB			l_0150
+   673
+   674 				; optimize OK (SYS_VIC20), line = 558
+   675
+   676 A2EB 46 10			lsr RESULT
+   677
+   678 				; optimize OK (SYS_VIC20), line = 559
+   679
+   680 A2ED A5 0C			lda B
+   681 A2EF C5 10			cmp RESULT
+   682 A2F1 90 F8			jcc l_0150
+   683 A2F3			l_014E
+   684 A2F3			@exit
+   685
+   686 				; ------------------------------------------------------------
+   687
+   688 = 0008			A	= :EDX
+   689 = 000C			B	= :ECX
+   690 = 0004			MASK	= :EAX
+   691 = 0010			RESULT	= :STACKORIGIN-4
+   692 A2F3 60				rts						; ret
+   693 				.endl
+   694
+   695 				; ------------------------------------------------------------
+   696 				; ------------------------------------------------------------
+   697 A2F4			@UnitInit
+   698
+   699 				; optimize OK (SYS_VIC20), line = 566
+   700
+   701 A2F4 A9 00			lda #$00
+   702 A2F6 85 56			sta SCR
+   703 A2F8 A9 1C			lda #$1C
+   704 A2FA 85 57			sta SCR+1
+   705
+   706 				; optimize OK (SYS_VIC20), line = 567
+   707
+   708 A2FC A9 00			lda #$00
+   709 A2FE 85 58			sta COLMAP
+   710 A300 A9 94			lda #$94
+   711 A302 85 59			sta COLMAP+1
+   712
+   713 A304 60				rts
+   714
+   715 				; ------------------------------------------------------------
+   716
+   717 = 0000			BLACK	= $00
+   718 = 0001			WHITE	= $01
+   719 = 0002			RED	= $02
+   720 = 0003			CYAN	= $03
+   721 = 0004			PURPLE	= $04
+   722 = 0005			GREEN	= $05
+   723 = 0006			BLUE	= $06
+   724 = 0007			YELLOW	= $07
+   725 = 0008			ORANGE	= $08
+   726 = 0009			LIGHT_ORANGE	= $09
+   727 = 000A			LIGHT_RED	= $0A
+   728 = 000B			LIGHT_CYAN	= $0B
+   729 = 000C			LIGHT_PURPLE	= $0C
+   730 = 000D			LIGHT_GREEN	= $0D
+   731 = 000E			LIGHT_BLUE	= $0E
+   732 = 000F			LIGHT_YELLOW	= $0F
+   733 = 1000			CHARSET_ADR	= $1000
+   734 = 1C00			SCREEN_ADR	= $1C00
+   735 = 9400			COLORMAP_ADR	= $9400
+   736 = 0019			ROW_SIZE	= $19
+   737 = 001E			COL_SIZE	= $1E
+   738 = 001F			ROW_MASK	= $1F
+   739 = 001F			COL_MASK	= $1F
+   740 = 02EE			SCREEN_SIZE	= $02EE
+   741 = 0400			CHARSET_SIZE	= $0400
+   742 = A000			CART_ADR	= $A000
+   743 = 2000			CART_SIZE	= $2000
+   744 = 0004			JOY_UP	= $04
+   745 = 0008			JOY_DOWN	= $08
+   746 = 0010			JOY_LEFT	= $10
+   747 = 0080			JOY_RIGHT	= $80
+   748 = 0020			JOY_FIRE	= $20
+   749 = 10011100		JOY_DIR_MASK	= $10011100
+   750 = 0060			RTCLOCK	= $60
+   751 = 0061			JOY	= $61
+   752 = 0054			ZP_0_B	= $54
+   753 = 0055			ZP_1_B	= $55
+   754 = 0056			ZP_0_W	= $56
+   755 = 0058			ZP_1_W	= $58
+   756 = 005A			ZP_2_W	= $5A
+   757 = 005C			ZP_3_W	= $5C
+   758 = 005E			ZP_0_P	= $5E
+   759 = A06C			adr.VIC_DEF	= CODEORIGIN+$0060
+   760 A305			.var VIC_DEF	= adr.VIC_DEF .word
+   761 = 5686			PAL_TIMER1	= $5686
+   762 = 0092			VBI_START	= $92
+   763 = 0314			CINV	= $0314
+   764 = 0316			CBINV	= $0316
+   765 = 0318			NMINV	= $0318
+   766 = 9000			VICCR0	= $9000
+   767 = 9001			VICCR1	= $9001
+   768 = 9002			VICCR2	= $9002
+   769 = 9003			VICCR3	= $9003
+   770 = 9004			VICCR4	= $9004
+   771 = 9005			VICCR5	= $9005
+   772 = 9006			VICCR6	= $9006
+   773 = 9007			VICCR7	= $9007
+   774 = 9008			VICCR8	= $9008
+   775 = 9009			VICCR9	= $9009
+   776 = 900A			VICCRA	= $900A
+   777 = 900B			VICCRB	= $900B
+   778 = 900C			VICCRC	= $900C
+   779 = 900D			VICCRD	= $900D
+   780 = 900E			VICCRE	= $900E
+   781 = 900F			VICCRF	= $900F
+   782 = 9110			VIA1PB	= $9110
+   783 = 9111			VIA1PA	= $9111
+   784 = 9112			VIA1DDRB	= $9112
+   785 = 9113			VIA1DDRA	= $9113
+   786 = 9114			VIA1T1CL	= $9114
+   787 = 9115			VIA1T1CH	= $9115
+   788 = 9116			VIA1T1LL	= $9116
+   789 = 9117			VIA1T1LH	= $9117
+   790 = 9118			VIA1T2CL	= $9118
+   791 = 9119			VIA1T2CH	= $9119
+   792 = 911A			VIA1SR	= $911A
+   793 = 911B			VIA1ACR	= $911B
+   794 = 911C			VIA1PCR	= $911C
+   795 = 911D			VIA1IFR	= $911D
+   796 = 911E			VIA1IER	= $911E
+   797 = 911F			VIA1PA2	= $911F
+   798 = 9120			VIA2PB	= $9120
+   799 = 9121			VIA2PA	= $9121
+   800 = 9122			VIA2DDRB	= $9122
+   801 = 9123			VIA2DDRA	= $9123
+   802 = 9124			VIA2T1CL	= $9124
+   803 = 9125			VIA2T1CH	= $9125
+   804 = 9126			VIA2T1LL	= $9126
+   805 = 9127			VIA2T1LH	= $9127
+   806 = 9128			VIA2T2CL	= $9128
+   807 = 9129			VIA2T2CH	= $9129
+   808 = 912A			VIA2SR	= $912A
+   809 = 912B			VIA2ACR	= $912B
+   810 = 912C			VIA2PCR	= $912C
+   811 = 912D			VIA2IFR	= $912D
+   812 = 912E			VIA2IER	= $912E
+   813 = 912F			VIA2PA2	= $912F
+   814 = 0056			SCR	= $56
+   815 = 0058			COLMAP	= $58
+   816 = 005A			TMP	= $5A
+   817 = 005E			GAME_VBI	= $5E
+   818 = 0054			T0B	= $54
+   819 = 0055			T1B	= $55
+   820
+   821 = A305 6C A0		VIC_DEF
+   821 				.endl							; UNIT SYS_VIC20
+   822
+   823 A307			.local	WELCOME_SCR					; PROCEDURE | INLINE
+   824
+   825 					.MACRO m@INLINE
+   826 				
+   827 				; optimize OK (game.inc), line = 82
+   828 				
+   829 					lda #$01
+   830 					jsr SYS_VIC20.CLRCOL
+   831 				
+   832 				; optimize OK (game.inc), line = 84
+   833 				
+   834 					lda #$0C
+   835 					sta T0B
+   836 					sta T2B
+   837 				
+   838 				; optimize OK (game.inc), line = 86
+   839 				
+   840 					lda adr.TXT_INFO
+   841 					lsr @
+   842 					sta T1B
+   843 					lda T0B
+   844 					sub T1B
+   845 					sta T0B
+   846 				
+   847 				; optimize OK (game.inc), line = 87
+   848 				
+   849 					sta SYS_VIC20.SET_XY.X
+   850 					lda #$02
+   851 					sta SYS_VIC20.SET_XY.Y
+   852 					jsr SYS_VIC20.SET_XY
+   853 				
+   854 				; optimize OK (game.inc), line = 88
+   855 				
+   856 					lda #$07
+   857 					sta SYS_VIC20.PRINT.COL
+   858 					lda #$53
+   859 					sta SYS_VIC20.PRINT.S
+   860 					lda #$A0
+   861 					sta SYS_VIC20.PRINT.S+1
+   862 					jsr SYS_VIC20.PRINT
+   863 				
+   864 				; optimize OK (game.inc), line = 90
+   865 				
+   866 					lda adr.TXT_TURBO
+   867 					lsr @
+   868 					sta T1B
+   869 					lda T2B
+   870 					sub T1B
+   871 					sta T2B
+   872 				
+   873 				; optimize OK (game.inc), line = 91
+   874 				
+   875 					sta SYS_VIC20.SET_XY.X
+   876 					lda #$19
+   877 					sta SYS_VIC20.SET_XY.Y
+   878 					jsr SYS_VIC20.SET_XY
+   879 				
+   880 				; optimize OK (game.inc), line = 92
+   881 				
+   882 					lda #$07
+   883 					sta SYS_VIC20.PRINT.COL
+   884 					lda #$3E
+   885 					sta SYS_VIC20.PRINT.S
+   886 					lda #$A0
+   887 					sta SYS_VIC20.PRINT.S+1
+   888 					jsr SYS_VIC20.PRINT
+   889 				
+   890 				; --- RepeatUntilProlog
+   891 				l_01A6
+   892 				
+   893 				; optimize OK (game.inc), line = 94
+   894 				
+   895 					lda SYS_VIC20.JOY
+   896 					and #$20
+   897 					jeq l_01A6
+   898 					.ENDM
+   899 A307			@exit
+   900 				.endl
+   901
+   902 A307			.local	DRAW_FRAME					; PROCEDURE
+   903
+   904 				; optimize OK (game.inc), line = 103
+   905
+   906 A307 A9 19			lda #$19
+   907 A309 85 73			sta T0W
+   908 A30B A9 1C			lda #$1C
+   909 A30D 85 74			sta T0W+1
+   910
+   911 				; optimize OK (game.inc), line = 104
+   912
+   913 A30F A9 1A			lda #$1A
+   914 A311 85 70			sta I
+   915
+   916 A313			l_01C8
+   917 				; --- ForToDoCondition
+   918
+   919 				; optimize OK (game.inc), line = 105
+   920
+   921 A313 A4 74			ldy T0W+1
+   922 A315 84 01			sty :bp+1
+   923 A317 A4 73			ldy T0W
+   924 A319 A9 43			lda #$43
+   925 A31B 91 00			sta (:bp),y
+   926
+   927 				; optimize OK (game.inc), line = 106
+   928
+   929 A31D A4 73 84 02 A4 74 + 	mwy T0W :bp2
+   930 A325 A0 18			ldy #$18
+   931 A327 A9 42			lda #$42
+   932 A329 91 02			sta (:bp2),y
+   933
+   934 				; optimize OK (game.inc), line = 107
+   935
+   936 A32B A5 73			lda T0W
+   937 A32D 18 69 19			add #$19
+   938 A330 85 73			sta T0W
+   939 A332 90 02			scc
+   940 A334 E6 74			inc T0W+1
+   941
+   942 				; --- ForToDoEpilog
+   943 A336 C6 70			dec I
+   944 A338 10 D9			jpl l_01C8
+   945 A33A			l_01D6
+   946
+   947 				; optimize OK (game.inc), line = 110
+   948
+   949 A33A A9 18			lda #$18
+   950 A33C 85 70			sta I
+   951
+   952 A33E			l_01F1
+   953 				; --- ForToDoCondition
+   954
+   955 				; optimize OK (game.inc), line = 111
+   956
+   957 A33E A4 70			ldy I
+   958 A340 A9 41			lda #$41
+   959 A342 99 00 1C			sta $1C00,y
+   960
+   961 				; optimize OK (game.inc), line = 112
+   962
+   963 A345 99 BC 1E			sta $1EBC,y
+   964
+   965 				; --- ForToDoEpilog
+   966 A348 C6 70			dec I
+   967 A34A 10 F2			jpl l_01F1
+   968 A34C			l_01FF
+   969
+   970 				; ------------------------------------------------------------
+   971
+   972 = 0070			I	= $70
+   973 A34C			@exit
+   974 					.ifdef @new
+   975 					lda <@VarData
+   976 					sta :ztmp
+   977 					lda >@VarData
+   978 					ldy #@VarDataSize-1
+   979 					jmp @FreeMem
+   980 					els
+   981 A34C 60				rts						; ret
+   982 					eif
+   983 				.endl
+   984
+   985 A34D			.local	PRESS_FIRE					; PROCEDURE
+   986
+   987 				; optimize OK (game.inc), line = 120
+   988
+   989 A34D A9 19			lda #$19
+   990 A34F 38 ED 32 A0			sub adr.TXT_FIRE
+   991 A353 38 E9 02			sub #$02
+   992 A356 85 08			sta SYS_VIC20.SET_XY.X
+   993 A358 A9 00			lda #$00
+   994 A35A 85 0C			sta SYS_VIC20.SET_XY.Y
+   995 A35C 20 FF A1			jsr SYS_VIC20.SET_XY
+   996
+   997 				; optimize OK (game.inc), line = 121
+   998
+   999 A35F A9 01			lda #$01
+  1000 A361 85 08			sta SYS_VIC20.PRINT.COL
+  1001 A363 A9 32			lda #$32
+  1002 A365 85 0C			sta SYS_VIC20.PRINT.S
+  1003 A367 A9 A0			lda #$A0
+  1004 A369 85 0D			sta SYS_VIC20.PRINT.S+1
+  1005 A36B 20 3A A2			jsr SYS_VIC20.PRINT
+  1006
+  1007 				; --- RepeatUntilProlog
+  1008 A36E			l_0228
+  1009
+  1010 				; optimize OK (game.inc), line = 123
+  1011
+  1012 A36E A5 61			lda SYS_VIC20.JOY
+  1013 A370 29 20			and #$20
+  1014 A372 F0 FA			jeq l_0228
+  1015 A374			@exit
+  1016 					.ifdef @new
+  1017 					lda <@VarData
+  1018 					sta :ztmp
+  1019 					lda >@VarData
+  1020 					ldy #@VarDataSize-1
+  1021 					jmp @FreeMem
+  1022 					els
+  1023 A374 60				rts						; ret
+  1024 					eif
+  1025 				.endl
+  1026
+  1027 A375			.local	PUT_SNAKE					; PROCEDURE
+  1028
+  1029 				; optimize OK (game.inc), line = 130
+  1030
+  1031 A375 A9 44			lda #$44
+  1032 A377 85 7A			sta HEAD_DIR
+  1033
+  1034 				; optimize OK (game.inc), line = 131
+  1035
+  1036 A379 85 79			sta TAIL_DIR
+  1037
+  1038 				; optimize OK (game.inc), line = 132
+  1039
+  1040 A37B A9 83			lda #$83
+  1041 A37D 85 84			sta HEAD_POS
+  1042 A37F A9 1D			lda #$1D
+  1043 A381 85 85			sta HEAD_POS+1
+  1044
+  1045 				; optimize OK (game.inc), line = 133
+  1046
+  1047 A383 A9 83			lda #$83
+  1048 A385 85 86			sta HEAD_POS_COL
+  1049 A387 A9 95			lda #$95
+  1050 A389 85 87			sta HEAD_POS_COL+1
+  1051
+  1052 				; optimize OK (game.inc), line = 135
+  1053
+  1054 A38B A4 85			ldy HEAD_POS+1
+  1055 A38D 84 01			sty :bp+1
+  1056 A38F A4 84			ldy HEAD_POS
+  1057 A391 A9 48			lda #$48
+  1058 A393 91 00			sta (:bp),y
+  1059 A395 A4 87			ldy HEAD_POS_COL+1
+  1060 A397 84 01			sty :bp+1
+  1061 A399 A4 86			ldy HEAD_POS_COL
+  1062 A39B A9 01			lda #$01
+  1063 A39D 91 00			sta (:bp),y
+  1064
+  1065 				; optimize OK (game.inc), line = 137
+  1066
+  1067 A39F A5 84			lda HEAD_POS
+  1068 A3A1 85 73			sta T0W
+  1069 A3A3 A5 85			lda HEAD_POS+1
+  1070 A3A5 85 74			sta T0W+1
+  1071 A3A7 A5 86			lda HEAD_POS_COL
+  1072 A3A9 85 75			sta T1W
+  1073 A3AB A5 87			lda HEAD_POS_COL+1
+  1074 A3AD 85 76			sta T1W+1
+  1075
+  1076 				; optimize OK (game.inc), line = 138
+  1077
+  1078 A3AF A9 00			lda #$00
+  1079 A3B1 85 70			sta T0B
+  1080
+  1081 A3B3			l_0268
+  1082 				; --- ForToDoCondition
+  1083
+  1084 				; optimize OK (game.inc), line = 139
+  1085
+  1086 A3B3 A5 73			lda T0W
+  1087 A3B5 18 69 19			add #$19
+  1088 A3B8 85 73			sta T0W
+  1089 A3BA 90 02			scc
+  1090 A3BC E6 74			inc T0W+1
+  1091 A3BE A5 75			lda T1W
+  1092 A3C0 18 69 19			add #$19
+  1093 A3C3 85 75			sta T1W
+  1094 A3C5 90 02			scc
+  1095 A3C7 E6 76			inc T1W+1
+  1096
+  1097 				; optimize OK (game.inc), line = 140
+  1098
+  1099 A3C9 A4 74			ldy T0W+1
+  1100 A3CB 84 01			sty :bp+1
+  1101 A3CD A4 73			ldy T0W
+  1102 A3CF A9 4C			lda #$4C
+  1103 A3D1 91 00			sta (:bp),y
+  1104 A3D3 A4 76			ldy T1W+1
+  1105 A3D5 84 01			sty :bp+1
+  1106 A3D7 A4 75			ldy T1W
+  1107 A3D9 A9 01			lda #$01
+  1108 A3DB 91 00			sta (:bp),y
+  1109
+  1110 				; --- ForToDoEpilog
+  1111 A3DD C6 70			dec T0B
+  1112 A3DF 10 D2			jpl l_0268
+  1113 A3E1			l_0276
+  1114
+  1115 				; optimize OK (game.inc), line = 143
+  1116
+  1117 A3E1 A5 73			lda T0W
+  1118 A3E3 18 69 19			add #$19
+  1119 A3E6 85 73			sta T0W
+  1120 A3E8 90 02			scc
+  1121 A3EA E6 74			inc T0W+1
+  1122 A3EC A5 75			lda T1W
+  1123 A3EE 18 69 19			add #$19
+  1124 A3F1 85 75			sta T1W
+  1125 A3F3 90 02			scc
+  1126 A3F5 E6 76			inc T1W+1
+  1127 A3F7 A5 73			lda T0W
+  1128 A3F9 85 88			sta TAIL_POS
+  1129 A3FB A5 74			lda T0W+1
+  1130 A3FD 85 89			sta TAIL_POS+1
+  1131
+  1132 				; optimize OK (game.inc), line = 144
+  1133
+  1134 A3FF 85 01			sta :bp+1
+  1135 A401 A4 88			ldy TAIL_POS
+  1136 A403 A9 44			lda #$44
+  1137 A405 91 00			sta (:bp),y
+  1138 A407 A4 76			ldy T1W+1
+  1139 A409 84 01			sty :bp+1
+  1140 A40B A4 75			ldy T1W
+  1141 A40D A9 01			lda #$01
+  1142 A40F 91 00			sta (:bp),y
+  1143
+  1144 				; ------------------------------------------------------------
+  1145
+  1146 A411			@exit
+  1147 					.ifdef @new
+  1148 					lda <@VarData
+  1149 					sta :ztmp
+  1150 					lda >@VarData
+  1151 					ldy #@VarDataSize-1
+  1152 					jmp @FreeMem
+  1153 					els
+  1154 A411 60				rts						; ret
+  1155 					eif
+  1156 				.endl
+  1157
+  1158 A412			.local	DRAW_BOTTOM_LINE				; PROCEDURE
+  1159
+  1160 				; optimize OK (game.inc), line = 151
+  1161
+  1162 A412 A9 00			lda #$00
+  1163 A414 85 08			sta SYS_VIC20.SET_XY.X
+  1164 A416 A9 1D			lda #$1D
+  1165 A418 85 0C			sta SYS_VIC20.SET_XY.Y
+  1166 A41A 20 FF A1			jsr SYS_VIC20.SET_XY
+  1167
+  1168 				; optimize OK (game.inc), line = 152
+  1169
+  1170 A41D A9 01			lda #$01
+  1171 A41F 85 08			sta SYS_VIC20.PRINT.COL
+  1172 A421 A9 0C			lda #$0C
+  1173 A423 85 0C			sta SYS_VIC20.PRINT.S
+  1174 A425 A9 A0			lda #$A0
+  1175 A427 85 0D			sta SYS_VIC20.PRINT.S+1
+  1176 A429 20 3A A2			jsr SYS_VIC20.PRINT
+  1177
+  1178 				; optimize OK (game.inc), line = 154
+  1179
+  1180 A42C AD 0C A0			lda adr.TXT_LEVEL
+  1181 A42F 18 69 01			add #$01
+  1182 A432 85 08			sta SYS_VIC20.SET_XY.X
+  1183 A434 A9 1D			lda #$1D
+  1184 A436 85 0C			sta SYS_VIC20.SET_XY.Y
+  1185 A438 20 FF A1			jsr SYS_VIC20.SET_XY
+  1186
+  1187 				; optimize OK (game.inc), line = 155
+  1188
+  1189 A43B A9 01			lda #$01
+  1190 A43D 85 08			sta SYS_VIC20.PRINT.COL
+  1191 A43F A9 23			lda #$23
+  1192 A441 85 0C			sta SYS_VIC20.PRINT.S
+  1193 A443 A9 A0			lda #$A0
+  1194 A445 85 0D			sta SYS_VIC20.PRINT.S+1
+  1195 A447 20 3A A2			jsr SYS_VIC20.PRINT
+  1196
+  1197 				; optimize OK (game.inc), line = 157
+  1198
+  1199 A44A A9 19			lda #$19
+  1200 A44C 38 ED 16 A0			sub adr.TXT_POINTS
+  1201 A450 85 08			sta SYS_VIC20.SET_XY.X
+  1202 A452 A9 1D			lda #$1D
+  1203 A454 85 0C			sta SYS_VIC20.SET_XY.Y
+  1204 A456 20 FF A1			jsr SYS_VIC20.SET_XY
+  1205
+  1206 				; optimize OK (game.inc), line = 158
+  1207
+  1208 A459 A9 01			lda #$01
+  1209 A45B 85 08			sta SYS_VIC20.PRINT.COL
+  1210 A45D A9 16			lda #$16
+  1211 A45F 85 0C			sta SYS_VIC20.PRINT.S
+  1212 A461 A9 A0			lda #$A0
+  1213 A463 85 0D			sta SYS_VIC20.PRINT.S+1
+  1214 A465 20 3A A2			jsr SYS_VIC20.PRINT
+  1215 A468			@exit
+  1216 					.ifdef @new
+  1217 					lda <@VarData
+  1218 					sta :ztmp
+  1219 					lda >@VarData
+  1220 					ldy #@VarDataSize-1
+  1221 					jmp @FreeMem
+  1222 					els
+  1223 A468 60				rts						; ret
+  1224 					eif
+  1225 				.endl
+  1226
+  1227 A469			.local	PRINT_HI_SCORE					; PROCEDURE
+  1228
+  1229 				; optimize OK (game.inc), line = 165
+  1230
+  1231 A469 A9 02			lda #$02
+  1232 A46B 85 08			sta SYS_VIC20.SET_XY.X
+  1233 A46D A9 00			lda #$00
+  1234 A46F 85 0C			sta SYS_VIC20.SET_XY.Y
+  1235 A471 20 FF A1			jsr SYS_VIC20.SET_XY
+  1236
+  1237 				; optimize OK (game.inc), line = 166
+  1238
+  1239 A474 A9 01			lda #$01
+  1240 A476 85 08			sta SYS_VIC20.PRINT.COL
+  1241 A478 A9 29			lda #$29
+  1242 A47A 85 0C			sta SYS_VIC20.PRINT.S
+  1243 A47C A9 A0			lda #$A0
+  1244 A47E 85 0D			sta SYS_VIC20.PRINT.S+1
+  1245 A480 20 3A A2			jsr SYS_VIC20.PRINT
+  1246
+  1247 				; optimize OK (game.inc), line = 167
+  1248
+  1249 A483 A9 00			lda #$00
+  1250 A485 85 08			sta SYS_VIC20.UPDATE_COUNTER_4.V
+  1251 A487 A9 82			lda #$82
+  1252 A489 85 0C			sta SYS_VIC20.UPDATE_COUNTER_4.COUNTER
+  1253 A48B A9 00			lda #$00
+  1254 A48D 85 0D			sta SYS_VIC20.UPDATE_COUNTER_4.COUNTER+1
+  1255 A48F A9 05			lda #$05
+  1256 A491 85 04			sta SYS_VIC20.UPDATE_COUNTER_4.SCR_COUNTER
+  1257 A493 A9 1C			lda #$1C
+  1258 A495 85 05			sta SYS_VIC20.UPDATE_COUNTER_4.SCR_COUNTER+1
+  1259 A497 20 7E A2			jsr SYS_VIC20.UPDATE_COUNTER_4
+  1260 A49A			@exit
+  1261 					.ifdef @new
+  1262 					lda <@VarData
+  1263 					sta :ztmp
+  1264 					lda >@VarData
+  1265 					ldy #@VarDataSize-1
+  1266 					jmp @FreeMem
+  1267 					els
+  1268 A49A 60				rts						; ret
+  1269 					eif
+  1270 				.endl
+  1271
+  1272 A49B			.local	HALL_OF_FAME					; PROCEDURE
+  1273
+  1274 				; optimize OK (game.inc), line = 174
+  1275
+  1276 A49B A5 83			lda HI_SCORE_BCD+1
+  1277 A49D C5 81			cmp SCORE_BCD+1
+  1278 A49F D0 04			bne @+
+  1279 A4A1 A5 82			lda HI_SCORE_BCD
+  1280 A4A3 C5 80			cmp SCORE_BCD
+  1281 				@
+  1282 A4A5 B0 08			jcs l_02D4
+  1283 A4A7 A5 80			lda SCORE_BCD
+  1284 A4A9 85 82			sta HI_SCORE_BCD
+  1285 A4AB A5 81			lda SCORE_BCD+1
+  1286 A4AD 85 83			sta HI_SCORE_BCD+1
+  1287 A4AF			l_02D4
+  1288
+  1289 				; optimize FAIL ('PRINT_HI_SCORE', game.inc), line = 175
+  1290
+  1291 A4AF 20 69 A4			jsr PRINT_HI_SCORE
+  1292 A4B2			@exit
+  1293 					.ifdef @new
+  1294 					lda <@VarData
+  1295 					sta :ztmp
+  1296 					lda >@VarData
+  1297 					ldy #@VarDataSize-1
+  1298 					jmp @FreeMem
+  1299 					els
+  1300 A4B2 60				rts						; ret
+  1301 					eif
+  1302 				.endl
+  1303
+  1304 A4B3			.local	MOVE_TAIL					; PROCEDURE
+  1305
+  1306 				; optimize OK (game.inc), line = 182
+  1307
+  1308 A4B3 A4 89			ldy TAIL_POS+1
+  1309 A4B5 84 01			sty :bp+1
+  1310 A4B7 A4 88			ldy TAIL_POS
+  1311 A4B9 A9 20			lda #$20
+  1312 A4BB 91 00			sta (:bp),y
+  1313
+  1314 				; optimize OK (game.inc), line = 184
+  1315
+  1316 A4BD A5 79			lda TAIL_DIR
+  1317 A4BF 8D 72 A9			sta @CASETMP_0003
+  1318 A4C2 C9 44			cmp #$44
+  1319 A4C4 D0 0E			jne l_02F0
+  1320 				@
+  1321
+  1322 				; optimize OK (game.inc), line = 185
+  1323
+  1324 A4C6 A5 88			lda TAIL_POS
+  1325 A4C8 38 E9 19			sub #$19
+  1326 A4CB 85 88			sta TAIL_POS
+  1327 A4CD B0 02			scs
+  1328 A4CF C6 89			dec TAIL_POS+1
+  1329
+  1330 A4D1 4C FF A4			jmp a_0003
+  1331 A4D4			l_02F0
+  1332 A4D4 C9 45			cmp #$45
+  1333 A4D6 D0 0E			jne l_02FA
+  1334 				@
+  1335
+  1336 				; optimize OK (game.inc), line = 186
+  1337
+  1338 A4D8 A5 88			lda TAIL_POS
+  1339 A4DA 18 69 19			add #$19
+  1340 A4DD 85 88			sta TAIL_POS
+  1341 A4DF 90 02			scc
+  1342 A4E1 E6 89			inc TAIL_POS+1
+  1343
+  1344 A4E3 4C FF A4			jmp a_0003
+  1345 A4E6			l_02FA
+  1346 A4E6 C9 46			cmp #$46
+  1347 A4E8 D0 09			jne l_0304
+  1348 				@
+  1349
+  1350 				; optimize FAIL (0, game.inc), line = 187
+  1351
+  1352 A4EA E6 88			inc TAIL_POS
+  1353 A4EC D0 02			sne
+  1354 A4EE E6 89			inc TAIL_POS+1
+  1355
+  1356 A4F0 4C FF A4			jmp a_0003
+  1357 A4F3			l_0304
+  1358 A4F3 C9 47			cmp #$47
+  1359 A4F5 D0 08			jne l_0311
+  1360 				@
+  1361
+  1362 				; optimize FAIL (0, game.inc), line = 188
+  1363
+  1364 A4F7 A5 88			lda TAIL_POS
+  1365 A4F9 D0 02			bne @+
+  1366 A4FB C6 89			dec TAIL_POS+1
+  1367 				@
+  1368 A4FD C6 88			dec TAIL_POS
+  1369
+  1370 A4FF			l_0311
+  1371 A4FF			a_0003
+  1372
+  1373 				; optimize OK (game.inc), line = 191
+  1374
+  1375 A4FF A4 89			ldy TAIL_POS+1
+  1376 A501 84 01			sty :bp+1
+  1377 A503 A4 88			ldy TAIL_POS
+  1378 A505 B1 00			lda (:bp),y
+  1379 A507 85 70			sta T0B
+  1380
+  1381 				; optimize OK (game.inc), line = 193
+  1382
+  1383 A509 A5 79			lda TAIL_DIR
+  1384 A50B 8D 73 A9			sta @CASETMP_0004
+  1385 A50E C9 44			cmp #$44
+  1386 A510 F0 04			beq @+
+  1387 A512 C9 45			cmp #$45
+  1388 A514 D0 23			jne l_0330
+  1389 				@
+  1390
+  1391 				; optimize OK (game.inc), line = 195
+  1392
+  1393 A516 A5 70			lda T0B
+  1394 A518 8D 74 A9			sta @CASETMP_0005
+  1395 A51B C9 50			cmp #$50
+  1396 A51D F0 04			beq @+
+  1397 A51F C9 4E			cmp #$4E
+  1398 A521 D0 07			jne l_033D
+  1399 				@
+  1400
+  1401 				; optimize OK (game.inc), line = 196
+  1402
+  1403 A523 A9 47			lda #$47
+  1404 A525 85 79			sta TAIL_DIR
+  1405
+  1406 A527 4C 36 A5			jmp a_0005
+  1407 A52A			l_033D
+  1408 A52A C9 51			cmp #$51
+  1409 A52C F0 04			beq @+
+  1410 A52E C9 4F			cmp #$4F
+  1411 A530 D0 04			jne l_034C
+  1412 				@
+  1413
+  1414 				; optimize OK (game.inc), line = 197
+  1415
+  1416 A532 A9 46			lda #$46
+  1417 A534 85 79			sta TAIL_DIR
+  1418
+  1419 A536			l_034C
+  1420 A536			a_0005
+  1421
+  1422 A536 4C 61 A5			jmp a_0004
+  1423 A539			l_0330
+  1424 A539 C9 46			cmp #$46
+  1425 A53B F0 04			beq @+
+  1426 A53D C9 47			cmp #$47
+  1427 A53F D0 20			jne l_0361
+  1428 				@
+  1429
+  1430 				; optimize OK (game.inc), line = 201
+  1431
+  1432 A541 A5 70			lda T0B
+  1433 A543 8D 75 A9			sta @CASETMP_0006
+  1434 A546 C9 4E			cmp #$4E
+  1435 A548 F0 04			beq @+
+  1436 A54A C9 4F			cmp #$4F
+  1437 A54C D0 07			jne l_036E
+  1438 				@
+  1439
+  1440 				; optimize OK (game.inc), line = 202
+  1441
+  1442 A54E A9 44			lda #$44
+  1443 A550 85 79			sta TAIL_DIR
+  1444
+  1445 A552 4C 61 A5			jmp a_0006
+  1446 A555			l_036E
+  1447 A555 C9 50			cmp #$50
+  1448 A557 F0 04			beq @+
+  1449 A559 C9 51			cmp #$51
+  1450 A55B D0 04			jne l_037D
+  1451 				@
+  1452
+  1453 				; optimize OK (game.inc), line = 203
+  1454
+  1455 A55D A9 45			lda #$45
+  1456 A55F 85 79			sta TAIL_DIR
+  1457
+  1458 A561			l_037D
+  1459 A561			a_0006
+  1460
+  1461 A561			l_0361
+  1462 A561			a_0004
+  1463
+  1464 				; optimize OK (game.inc), line = 208
+  1465
+  1466 A561 A4 89			ldy TAIL_POS+1
+  1467 A563 84 01			sty :bp+1
+  1468 A565 A4 88			ldy TAIL_POS
+  1469 A567 A5 79			lda TAIL_DIR
+  1470 A569 91 00			sta (:bp),y
+  1471
+  1472 				; ------------------------------------------------------------
+  1473
+  1474 = A972			@CASETMP_0003	= DATAORIGIN+$0002
+  1475 = A973			@CASETMP_0004	= DATAORIGIN+$0003
+  1476 = A974			@CASETMP_0005	= DATAORIGIN+$0004
+  1477 = A975			@CASETMP_0006	= DATAORIGIN+$0005
+  1478
+  1479 = A972			@VarData	= @CASETMP_0003
+  1480 = 0004			@VarDataSize	= 4
+  1481
+  1482 A56B			@exit
+  1483 					.ifdef @new
+  1484 					lda <@VarData
+  1485 					sta :ztmp
+  1486 					lda >@VarData
+  1487 					ldy #@VarDataSize-1
+  1488 					jmp @FreeMem
+  1489 					els
+  1490 A56B 60				rts						; ret
+  1491 					eif
+  1492 				.endl
+  1493
+  1494 A56C			.local	UPDATE_SNAKE					; PROCEDURE | REGISTER
+  1495 A56C 85 08			sta S
+  1496
+  1497 				; optimize OK (game.inc), line = 215
+  1498
+  1499 A56E 29 3F			and #$3F
+  1500 A570 8D 76 A9			sta @CASETMP_0007
+  1501 A573 C9 01			cmp #$01
+  1502 A575 D0 07			jne l_03A6
+  1503 				@
+  1504
+  1505 				; optimize OK (game.inc), line = 216
+  1506
+  1507 A577 A9 4F			lda #$4F
+  1508 A579 85 8C			sta SNAKE.BODY
+  1509
+  1510 A57B 4C B2 A5			jmp a_0007
+  1511 A57E			l_03A6
+  1512 A57E C9 02			cmp #$02
+  1513 A580 D0 07			jne l_03B3
+  1514 				@
+  1515
+  1516 				; optimize OK (game.inc), line = 217
+  1517
+  1518 A582 A9 4E			lda #$4E
+  1519 A584 85 8C			sta SNAKE.BODY
+  1520
+  1521 A586 4C B2 A5			jmp a_0007
+  1522 A589			l_03B3
+  1523 A589 C9 04			cmp #$04
+  1524 A58B D0 07			jne l_03C0
+  1525 				@
+  1526
+  1527 				; optimize OK (game.inc), line = 218
+  1528
+  1529 A58D A9 51			lda #$51
+  1530 A58F 85 8C			sta SNAKE.BODY
+  1531
+  1532 A591 4C B2 A5			jmp a_0007
+  1533 A594			l_03C0
+  1534 A594 C9 08			cmp #$08
+  1535 A596 D0 07			jne l_03CD
+  1536 				@
+  1537
+  1538 				; optimize OK (game.inc), line = 219
+  1539
+  1540 A598 A9 50			lda #$50
+  1541 A59A 85 8C			sta SNAKE.BODY
+  1542
+  1543 A59C 4C B2 A5			jmp a_0007
+  1544 A59F			l_03CD
+  1545 A59F C9 10			cmp #$10
+  1546 A5A1 D0 07			jne l_03DA
+  1547 				@
+  1548
+  1549 				; optimize OK (game.inc), line = 220
+  1550
+  1551 A5A3 A9 4C			lda #$4C
+  1552 A5A5 85 8C			sta SNAKE.BODY
+  1553
+  1554 A5A7 4C B2 A5			jmp a_0007
+  1555 A5AA			l_03DA
+  1556 A5AA C9 20			cmp #$20
+  1557 A5AC D0 04			jne l_03E7
+  1558 				@
+  1559
+  1560 				; optimize OK (game.inc), line = 221
+  1561
+  1562 A5AE A9 4D			lda #$4D
+  1563 A5B0 85 8C			sta SNAKE.BODY
+  1564
+  1565 A5B2			l_03E7
+  1566 A5B2			a_0007
+  1567
+  1568 				; optimize OK (game.inc), line = 224
+  1569
+  1570 A5B2 A5 08			lda S
+  1571 A5B4 29 C0			and #$C0
+  1572 A5B6 8D 77 A9			sta @CASETMP_0008
+  1573 A5B9 C9 00			cmp #$00
+  1574 A5BB D0 0B			jne l_0404
+  1575 				@
+  1576
+  1577 				; optimize OK (game.inc), line = 225
+  1578
+  1579 A5BD A9 48			lda #$48
+  1580 A5BF 85 8B			sta SNAKE.HEAD
+  1581 A5C1 A9 E7			lda #$E7
+  1582 A5C3 85 8D			sta SNAKE.M
+  1583
+  1584 A5C5 4C F2 A5			jmp a_0008
+  1585 A5C8			l_0404
+  1586 A5C8 C9 40			cmp #$40
+  1587 A5CA D0 0B			jne l_0415
+  1588 				@
+  1589
+  1590 				; optimize OK (game.inc), line = 226
+  1591
+  1592 A5CC A9 49			lda #$49
+  1593 A5CE 85 8B			sta SNAKE.HEAD
+  1594 A5D0 A9 19			lda #$19
+  1595 A5D2 85 8D			sta SNAKE.M
+  1596
+  1597 A5D4 4C F2 A5			jmp a_0008
+  1598 A5D7			l_0415
+  1599 A5D7 C9 80			cmp #$80
+  1600 A5D9 D0 0B			jne l_0426
+  1601 				@
+  1602
+  1603 				; optimize OK (game.inc), line = 227
+  1604
+  1605 A5DB A9 4B			lda #$4B
+  1606 A5DD 85 8B			sta SNAKE.HEAD
+  1607 A5DF A9 01			lda #$01
+  1608 A5E1 85 8D			sta SNAKE.M
+  1609
+  1610 A5E3 4C F2 A5			jmp a_0008
+  1611 A5E6			l_0426
+  1612 A5E6 C9 C0			cmp #$C0
+  1613 A5E8 D0 08			jne l_0437
+  1614 				@
+  1615
+  1616 				; optimize OK (game.inc), line = 228
+  1617
+  1618 A5EA A9 4A			lda #$4A
+  1619 A5EC 85 8B			sta SNAKE.HEAD
+  1620 A5EE A9 FF			lda #$FF
+  1621 A5F0 85 8D			sta SNAKE.M
+  1622
+  1623 A5F2			l_0437
+  1624 A5F2			a_0008
+  1625
+  1626 				; optimize OK (game.inc), line = 231
+  1627
+  1628 A5F2 A0 00			ldy #$00
+  1629 A5F4 A5 8D			lda SNAKE.M
+  1630 A5F6 10 01			spl
+  1631 A5F8 88				dey
+  1632 A5F9 18 65 84			add HEAD_POS
+  1633 A5FC 85 73			sta T0W
+  1634 A5FE 98				tya
+  1635 A5FF 65 85			adc HEAD_POS+1
+  1636 A601 85 74			sta T0W+1
+  1637
+  1638 				; optimize OK (game.inc), line = 232
+  1639
+  1640 A603 85 01			sta :bp+1
+  1641 A605 A4 73			ldy T0W
+  1642 A607 B1 00			lda (:bp),y
+  1643 A609 85 75			sta T1W
+  1644 A60B A9 00			lda #$00
+  1645 A60D 85 76			sta T1W+1
+  1646
+  1647 				; optimize OK (game.inc), line = 234
+  1648
+  1649 A60F D0 04			bne @+
+  1650 A611 A5 75			lda T1W
+  1651 A613 C9 20			cmp #$20
+  1652 				@
+  1653 A615 F0 0D			jeq l_0474x
+  1654 A617 A5 76			lda T1W+1
+  1655 A619 D0 04			bne @+
+  1656 A61B A5 75			lda T1W
+  1657 A61D C9 40			cmp #$40
+  1658 				@
+  1659 A61F F0 03 4C AA A6		jne l_0474
+  1660 A624			l_0474x
+  1661
+  1662 				; optimize OK (game.inc), line = 236
+  1663
+  1664 A624 A5 76			lda T1W+1
+  1665 A626 D0 04			bne @+
+  1666 A628 A5 75			lda T1W
+  1667 A62A C9 40			cmp #$40
+  1668 				@
+  1669 A62C D0 3F			jne l_0486
+  1670
+  1671 				; optimize OK (game.inc), line = 237
+  1672
+  1673 A62E A9 00			lda #$00
+  1674 A630 85 8A			sta FRUIT_ON_BOARD
+  1675
+  1676 				; optimize OK (game.inc), line = 239
+  1677
+  1678 A632 A9 10			lda #$10
+  1679 A634 85 08			sta SYS_VIC20.UPDATE_COUNTER_4.V
+  1680 A636 A9 80			lda #$80
+  1681 A638 85 0C			sta SYS_VIC20.UPDATE_COUNTER_4.COUNTER
+  1682 A63A A9 00			lda #$00
+  1683 A63C 85 0D			sta SYS_VIC20.UPDATE_COUNTER_4.COUNTER+1
+  1684 A63E A9 EA			lda #$EA
+  1685 A640 85 04			sta SYS_VIC20.UPDATE_COUNTER_4.SCR_COUNTER
+  1686 A642 A9 1E			lda #$1E
+  1687 A644 85 05			sta SYS_VIC20.UPDATE_COUNTER_4.SCR_COUNTER+1
+  1688 A646 20 7E A2			jsr SYS_VIC20.UPDATE_COUNTER_4
+  1689
+  1690 				; optimize FAIL (0, game.inc), line = 241
+  1691
+  1692 A649 C6 7B			dec LEVEL_UP
+  1693
+  1694 				; optimize OK (game.inc), line = 242
+  1695
+  1696 A64B D0 1D			jne l_04A5
+  1697
+  1698 				; optimize FAIL (0, game.inc), line = 243
+  1699
+  1700 A64D E6 7F			inc LEVEL
+  1701
+  1702 				; optimize OK (game.inc), line = 244
+  1703
+  1704 A64F A9 01			lda #$01
+  1705 A651 85 08			sta SYS_VIC20.UPDATE_COUNTER_2.V
+  1706 A653 A9 7E			lda #$7E
+  1707 A655 85 0C			sta SYS_VIC20.UPDATE_COUNTER_2.COUNTER
+  1708 A657 A9 00			lda #$00
+  1709 A659 85 0D			sta SYS_VIC20.UPDATE_COUNTER_2.COUNTER+1
+  1710 A65B A9 D9			lda #$D9
+  1711 A65D 85 04			sta SYS_VIC20.UPDATE_COUNTER_2.SCR_COUNTER
+  1712 A65F A9 1E			lda #$1E
+  1713 A661 85 05			sta SYS_VIC20.UPDATE_COUNTER_2.SCR_COUNTER+1
+  1714 A663 20 5B A2			jsr SYS_VIC20.UPDATE_COUNTER_2
+  1715
+  1716 				; optimize OK (game.inc), line = 245
+  1717
+  1718 A666 A9 0A			lda #$0A
+  1719 A668 85 7B			sta LEVEL_UP
+  1720 A66A			l_04A5
+  1721 A66A 4C 70 A6			jmp l_04BD
+  1722 A66D			l_0486
+  1723
+  1724 				; optimize FAIL ('MOVE_TAIL', game.inc), line = 249
+  1725
+  1726 A66D 20 B3 A4			jsr MOVE_TAIL
+  1727 A670			l_04BD
+  1728
+  1729 				; optimize OK (game.inc), line = 251
+  1730
+  1731 A670 A4 85			ldy HEAD_POS+1
+  1732 A672 84 01			sty :bp+1
+  1733 A674 A4 84			ldy HEAD_POS
+  1734 A676 A5 8C			lda SNAKE.BODY
+  1735 A678 91 00			sta (:bp),y
+  1736
+  1737 				; optimize OK (game.inc), line = 253
+  1738
+  1739 A67A A0 00			ldy #$00
+  1740 A67C A5 8D			lda SNAKE.M
+  1741 A67E 10 01			spl
+  1742 A680 88				dey
+  1743 A681 18 65 86			add HEAD_POS_COL
+  1744 A684 85 86			sta HEAD_POS_COL
+  1745 A686 98				tya
+  1746 A687 65 87			adc HEAD_POS_COL+1
+  1747 A689 85 87			sta HEAD_POS_COL+1
+  1748
+  1749 				; optimize OK (game.inc), line = 254
+  1750
+  1751 A68B A4 74			ldy T0W+1
+  1752 A68D 84 01			sty :bp+1
+  1753 A68F A4 73			ldy T0W
+  1754 A691 A5 8B			lda SNAKE.HEAD
+  1755 A693 91 00			sta (:bp),y
+  1756
+  1757 				; optimize OK (game.inc), line = 255
+  1758
+  1759 A695 A4 87			ldy HEAD_POS_COL+1
+  1760 A697 84 01			sty :bp+1
+  1761 A699 A4 86			ldy HEAD_POS_COL
+  1762 A69B A9 01			lda #$01
+  1763 A69D 91 00			sta (:bp),y
+  1764
+  1765 				; optimize OK (game.inc), line = 256
+  1766
+  1767 A69F A5 73			lda T0W
+  1768 A6A1 85 84			sta HEAD_POS
+  1769 A6A3 A5 74			lda T0W+1
+  1770 A6A5 85 85			sta HEAD_POS+1
+  1771 A6A7 4C AE A6			jmp l_04E7
+  1772 A6AA			l_0474
+  1773
+  1774 				; optimize OK (game.inc), line = 259
+  1775
+  1776 A6AA A9 01			lda #$01
+  1777 A6AC 85 FB			sta GAME_OVER
+  1778 A6AE			l_04E7
+  1779
+  1780 				; ------------------------------------------------------------
+  1781
+  1782 = 0008			S	= :EDX
+  1783 = A976			@CASETMP_0007	= DATAORIGIN+$0006
+  1784 = A977			@CASETMP_0008	= DATAORIGIN+$0007
+  1785
+  1786 = A976			@VarData	= @CASETMP_0007
+  1787 = 0002			@VarDataSize	= 2
+  1788
+  1789 A6AE			@exit
+  1790 					.ifdef @new
+  1791 					lda <@VarData
+  1792 					sta :ztmp
+  1793 					lda >@VarData
+  1794 					ldy #@VarDataSize-1
+  1795 					jmp @FreeMem
+  1796 					els
+  1797 A6AE 60				rts						; ret
+  1798 					eif
+  1799 				.endl
+  1800
+  1801 A6AF			.local	MOVE_SNAKE					; PROCEDURE
+  1802
+  1803 				; optimize OK (game.inc), line = 265
+  1804
+  1805 A6AF A5 7A			lda HEAD_DIR
+  1806 A6B1 8D 78 A9			sta @CASETMP_0009
+  1807 A6B4 C9 44			cmp #$44
+  1808 A6B6 D0 07			jne l_04FA
+  1809 				@
+  1810
+  1811 				; optimize OK (game.inc), line = 266
+  1812
+  1813 A6B8 A9 10			lda #$10
+  1814 A6BA 85 70			sta T0B
+  1815
+  1816 A6BC 4C DD A6			jmp a_0009
+  1817 A6BF			l_04FA
+  1818 A6BF C9 45			cmp #$45
+  1819 A6C1 D0 07			jne l_0507
+  1820 				@
+  1821
+  1822 				; optimize OK (game.inc), line = 267
+  1823
+  1824 A6C3 A9 50			lda #$50
+  1825 A6C5 85 70			sta T0B
+  1826
+  1827 A6C7 4C DD A6			jmp a_0009
+  1828 A6CA			l_0507
+  1829 A6CA C9 46			cmp #$46
+  1830 A6CC D0 07			jne l_0514
+  1831 				@
+  1832
+  1833 				; optimize OK (game.inc), line = 268
+  1834
+  1835 A6CE A9 A0			lda #$A0
+  1836 A6D0 85 70			sta T0B
+  1837
+  1838 A6D2 4C DD A6			jmp a_0009
+  1839 A6D5			l_0514
+  1840 A6D5 C9 47			cmp #$47
+  1841 A6D7 D0 04			jne l_0521
+  1842 				@
+  1843
+  1844 				; optimize OK (game.inc), line = 269
+  1845
+  1846 A6D9 A9 E0			lda #$E0
+  1847 A6DB 85 70			sta T0B
+  1848
+  1849 A6DD			l_0521
+  1850 A6DD			a_0009
+  1851
+  1852 				; optimize OK (game.inc), line = 272
+  1853
+  1854 A6DD A5 70			lda T0B
+  1855 A6DF 20 6C A5			jsr UPDATE_SNAKE
+  1856
+  1857 				; ------------------------------------------------------------
+  1858
+  1859 = A978			@CASETMP_0009	= DATAORIGIN+$0008
+  1860
+  1861 = A978			@VarData	= @CASETMP_0009
+  1862 = 0001			@VarDataSize	= 1
+  1863
+  1864 A6E2			@exit
+  1865 					.ifdef @new
+  1866 					lda <@VarData
+  1867 					sta :ztmp
+  1868 					lda >@VarData
+  1869 					ldy #@VarDataSize-1
+  1870 					jmp @FreeMem
+  1871 					els
+  1872 A6E2 60				rts						; ret
+  1873 					eif
+  1874 				.endl
+  1875
+  1876 A6E3			.local	JOY_HANDLER					; PROCEDURE
+  1877
+  1878 				; optimize OK (game.inc), line = 279
+  1879
+  1880 A6E3 A9 00			lda #$00
+  1881 A6E5 85 70			sta T0B
+  1882
+  1883 				; optimize OK (game.inc), line = 281
+  1884
+  1885 A6E7 A5 61			lda SYS_VIC20.JOY
+  1886 A6E9 29 04			and #$04
+  1887 A6EB F0 23			jeq l_055B
+  1888 A6ED A5 7A			lda HEAD_DIR
+  1889 A6EF C9 45			cmp #$45
+  1890 A6F1 F0 1D			jeq l_055B
+  1891
+  1892 				; optimize OK (game.inc), line = 282
+  1893
+  1894 A6F3 8D 79 A9			sta @CASETMP_000A
+  1895 A6F6 C9 47			cmp #$47
+  1896 A6F8 D0 07			jne l_0567
+  1897 				@
+  1898
+  1899 				; optimize OK (game.inc), line = 283
+  1900
+  1901 A6FA A9 01			lda #$01
+  1902 A6FC 85 70			sta T0B
+  1903
+  1904 A6FE 4C 09 A7			jmp a_000A
+  1905 A701			l_0567
+  1906 A701 C9 46			cmp #$46
+  1907 A703 D0 04			jne l_0574
+  1908 				@
+  1909
+  1910 				; optimize OK (game.inc), line = 284
+  1911
+  1912 A705 A9 02			lda #$02
+  1913 A707 85 70			sta T0B
+  1914
+  1915 A709			l_0574
+  1916 A709			a_000A
+  1917
+  1918 				; optimize OK (game.inc), line = 286
+  1919
+  1920 A709 A9 44			lda #$44
+  1921 A70B 85 7A			sta HEAD_DIR
+  1922 A70D 4C 86 A7			jmp l_058B
+  1923 A710			l_055B
+  1924
+  1925 				; optimize OK (game.inc), line = 288
+  1926
+  1927 A710 A5 61			lda SYS_VIC20.JOY
+  1928 A712 29 08			and #$08
+  1929 A714 F0 23			jeq l_05AD
+  1930 A716 A5 7A			lda HEAD_DIR
+  1931 A718 C9 44			cmp #$44
+  1932 A71A F0 1D			jeq l_05AD
+  1933
+  1934 				; optimize OK (game.inc), line = 289
+  1935
+  1936 A71C 8D 7A A9			sta @CASETMP_000B
+  1937 A71F C9 47			cmp #$47
+  1938 A721 D0 07			jne l_05B9
+  1939 				@
+  1940
+  1941 				; optimize OK (game.inc), line = 290
+  1942
+  1943 A723 A9 44			lda #$44
+  1944 A725 85 70			sta T0B
+  1945
+  1946 A727 4C 32 A7			jmp a_000B
+  1947 A72A			l_05B9
+  1948 A72A C9 46			cmp #$46
+  1949 A72C D0 04			jne l_05C6
+  1950 				@
+  1951
+  1952 				; optimize OK (game.inc), line = 291
+  1953
+  1954 A72E A9 48			lda #$48
+  1955 A730 85 70			sta T0B
+  1956
+  1957 A732			l_05C6
+  1958 A732			a_000B
+  1959
+  1960 				; optimize OK (game.inc), line = 293
+  1961
+  1962 A732 A9 45			lda #$45
+  1963 A734 85 7A			sta HEAD_DIR
+  1964 A736 4C 86 A7			jmp l_05DD
+  1965 A739			l_05AD
+  1966
+  1967 				; optimize OK (game.inc), line = 295
+  1968
+  1969 A739 A5 61			lda SYS_VIC20.JOY
+  1970 A73B 10 23			jpl l_05FF
+  1971 A73D A5 7A			lda HEAD_DIR
+  1972 A73F C9 47			cmp #$47
+  1973 A741 F0 1D			jeq l_05FF
+  1974
+  1975 				; optimize OK (game.inc), line = 296
+  1976
+  1977 A743 8D 7B A9			sta @CASETMP_000C
+  1978 A746 C9 44			cmp #$44
+  1979 A748 D0 07			jne l_060B
+  1980 				@
+  1981
+  1982 				; optimize OK (game.inc), line = 297
+  1983
+  1984 A74A A9 84			lda #$84
+  1985 A74C 85 70			sta T0B
+  1986
+  1987 A74E 4C 59 A7			jmp a_000C
+  1988 A751			l_060B
+  1989 A751 C9 45			cmp #$45
+  1990 A753 D0 04			jne l_0618
+  1991 				@
+  1992
+  1993 				; optimize OK (game.inc), line = 298
+  1994
+  1995 A755 A9 81			lda #$81
+  1996 A757 85 70			sta T0B
+  1997
+  1998 A759			l_0618
+  1999 A759			a_000C
+  2000
+  2001 				; optimize OK (game.inc), line = 300
+  2002
+  2003 A759 A9 46			lda #$46
+  2004 A75B 85 7A			sta HEAD_DIR
+  2005 A75D 4C 86 A7			jmp l_062F
+  2006 A760			l_05FF
+  2007
+  2008 				; optimize OK (game.inc), line = 302
+  2009
+  2010 A760 A5 61			lda SYS_VIC20.JOY
+  2011 A762 29 10			and #$10
+  2012 A764 F0 20			jeq l_0651
+  2013 A766 A5 7A			lda HEAD_DIR
+  2014 A768 C9 46			cmp #$46
+  2015 A76A F0 1A			jeq l_0651
+  2016
+  2017 				; optimize OK (game.inc), line = 303
+  2018
+  2019 A76C 8D 7C A9			sta @CASETMP_000D
+  2020 A76F C9 44			cmp #$44
+  2021 A771 D0 07			jne l_065D
+  2022 				@
+  2023
+  2024 				; optimize OK (game.inc), line = 304
+  2025
+  2026 A773 A9 C8			lda #$C8
+  2027 A775 85 70			sta T0B
+  2028
+  2029 A777 4C 82 A7			jmp a_000D
+  2030 A77A			l_065D
+  2031 A77A C9 45			cmp #$45
+  2032 A77C D0 04			jne l_066A
+  2033 				@
+  2034
+  2035 				; optimize OK (game.inc), line = 305
+  2036
+  2037 A77E A9 C2			lda #$C2
+  2038 A780 85 70			sta T0B
+  2039
+  2040 A782			l_066A
+  2041 A782			a_000D
+  2042
+  2043 				; optimize OK (game.inc), line = 307
+  2044
+  2045 A782 A9 47			lda #$47
+  2046 A784 85 7A			sta HEAD_DIR
+  2047 A786			l_0651
+  2048 A786			l_062F
+  2049 A786			l_05DD
+  2050 A786			l_058B
+  2051
+  2052 				; optimize OK (game.inc), line = 309
+  2053
+  2054 A786 A5 61			lda SYS_VIC20.JOY
+  2055 A788 29 20			and #$20
+  2056 A78A F0 06			jeq l_0690
+  2057 A78C A5 77			lda SNAKE_SPEED
+  2058 A78E 4A				lsr @
+  2059 A78F 4A				lsr @
+  2060 A790 85 77			sta SNAKE_SPEED
+  2061 A792			l_0690
+  2062
+  2063 				; optimize OK (game.inc), line = 311
+  2064
+  2065 A792 A5 70			lda T0B
+  2066 A794 F0 09			jeq l_06AF
+  2067
+  2068 				; optimize OK (game.inc), line = 312
+  2069
+  2070 A796 A5 77			lda SNAKE_SPEED
+  2071 A798 85 78			sta SNAKE_SPD_C
+  2072
+  2073 				; optimize OK (game.inc), line = 313
+  2074
+  2075 A79A A5 70			lda T0B
+  2076 A79C 20 6C A5			jsr UPDATE_SNAKE
+  2077 A79F			l_06AF
+  2078
+  2079 				; ------------------------------------------------------------
+  2080
+  2081 = A979			@CASETMP_000A	= DATAORIGIN+$0009
+  2082 = A97A			@CASETMP_000B	= DATAORIGIN+$000A
+  2083 = A97B			@CASETMP_000C	= DATAORIGIN+$000B
+  2084 = A97C			@CASETMP_000D	= DATAORIGIN+$000C
+  2085
+  2086 = A979			@VarData	= @CASETMP_000A
+  2087 = 0004			@VarDataSize	= 4
+  2088
+  2089 A79F			@exit
+  2090 					.ifdef @new
+  2091 					lda <@VarData
+  2092 					sta :ztmp
+  2093 					lda >@VarData
+  2094 					ldy #@VarDataSize-1
+  2095 					jmp @FreeMem
+  2096 					els
+  2097 A79F 60				rts						; ret
+  2098 					eif
+  2099 				.endl
+  2100
+  2101 A7A0			.local	PUT_FRUIT					; PROCEDURE
+  2102
+  2103 				; optimize OK (game.inc), line = 321
+  2104
+  2105 A7A0 A9 01			lda #$01
+  2106 A7A2 85 08			sta SYS_VIC20.PRND_0113.A
+  2107 A7A4 A9 18			lda #$18
+  2108 A7A6 85 0C			sta SYS_VIC20.PRND_0113.B
+  2109 A7A8 A9 1F			lda #$1F
+  2110 A7AA 85 04			sta SYS_VIC20.PRND_0113.MASK
+  2111 A7AC 20 D3 A2			jsr SYS_VIC20.PRND_0113
+  2112 A7AF A5 10			lda SYS_VIC20.PRND_0113.RESULT
+  2113 A7B1 85 70			sta T0B
+  2114
+  2115 				; optimize OK (game.inc), line = 322
+  2116
+  2117 A7B3 A9 01			lda #$01
+  2118 A7B5 85 08			sta SYS_VIC20.PRND_0113.A
+  2119 A7B7 A9 1B			lda #$1B
+  2120 A7B9 85 0C			sta SYS_VIC20.PRND_0113.B
+  2121 A7BB A9 1F			lda #$1F
+  2122 A7BD 85 04			sta SYS_VIC20.PRND_0113.MASK
+  2123 A7BF 20 D3 A2			jsr SYS_VIC20.PRND_0113
+  2124 A7C2 A5 10			lda SYS_VIC20.PRND_0113.RESULT
+  2125 A7C4 85 71			sta T1B
+  2126
+  2127 				; optimize OK (game.inc), line = 324
+  2128
+  2129 A7C6 85 0C			sta :ecx
+  2130 A7C8 A9 19			lda #$19
+  2131 A7CA 85 04			sta :eax
+  2132 					.ifdef fmulinit
+  2133 					fmulu_8
+  2134 					els
+  2135 A7CC 20 FC A0			imulCL
+  2136 					eif
+  2137 A7CF A5 04			lda :eax
+  2138 A7D1 85 73			sta T0W
+  2139 A7D3 A5 05			lda :eax+1
+  2140 A7D5 85 74			sta T0W+1
+  2141 A7D7 18 69 1C			add #$1C
+  2142 A7DA 85 74			sta T0W+1
+  2143 A7DC A5 73			lda T0W
+  2144 A7DE 18 65 70			add T0B
+  2145 A7E1 85 73			sta T0W
+  2146 A7E3 90 02			scc
+  2147 A7E5 E6 74			inc T0W+1
+  2148
+  2149 				; optimize OK (game.inc), line = 326
+  2150
+  2151 A7E7 A4 74			ldy T0W+1
+  2152 A7E9 84 01			sty :bp+1
+  2153 A7EB A4 73			ldy T0W
+  2154 A7ED B1 00			lda (:bp),y
+  2155 A7EF C9 20			cmp #$20
+  2156 A7F1 D0 1A			jne l_06EE
+  2157
+  2158 				; optimize OK (game.inc), line = 327
+  2159
+  2160 A7F3 A5 70			lda T0B
+  2161 A7F5 85 08			sta SYS_VIC20.SET_XY.X
+  2162 A7F7 A5 71			lda T1B
+  2163 A7F9 85 0C			sta SYS_VIC20.SET_XY.Y
+  2164 A7FB 20 FF A1			jsr SYS_VIC20.SET_XY
+  2165 A7FE A9 05			lda #$05
+  2166 A800 85 08			sta SYS_VIC20.PUT_CHAR.COL
+  2167 A802 A9 40			lda #$40
+  2168 A804 85 0C			sta SYS_VIC20.PUT_CHAR.C
+  2169 A806 20 50 A2			jsr SYS_VIC20.PUT_CHAR
+  2170
+  2171 				; optimize OK (game.inc), line = 328
+  2172
+  2173 A809 A9 01			lda #$01
+  2174 A80B 85 8A			sta FRUIT_ON_BOARD
+  2175 A80D			l_06EE
+  2176 A80D			@exit
+  2177 					.ifdef @new
+  2178 					lda <@VarData
+  2179 					sta :ztmp
+  2180 					lda >@VarData
+  2181 					ldy #@VarDataSize-1
+  2182 					jmp @FreeMem
+  2183 					els
+  2184 A80D 60				rts						; ret
+  2185 					eif
+  2186 				.endl
+  2187
+  2188 A80E			.local	UPDATE_TIME					; PROCEDURE | INLINE
+  2189
+  2190 					.MACRO m@INLINE
+  2191 				
+  2192 				; optimize FAIL (0, game.inc), line = 336
+  2193 				
+  2194 					dec TIME_ENTITY
+  2195 				
+  2196 				; optimize OK (game.inc), line = 337
+  2197 				
+  2198 					jne l_0719
+  2199 				
+  2200 				; optimize OK (game.inc), line = 338
+  2201 				
+  2202 					lda #$C8
+  2203 					sta TIME_ENTITY
+  2204 				
+  2205 				; optimize OK (game.inc), line = 339
+  2206 				
+  2207 					lda #$01
+  2208 					sta SYS_VIC20.UPDATE_COUNTER_2.V
+  2209 					lda #$7D
+  2210 					sta SYS_VIC20.UPDATE_COUNTER_2.COUNTER
+  2211 					lda #$00
+  2212 					sta SYS_VIC20.UPDATE_COUNTER_2.COUNTER+1
+  2213 					lda #$DE
+  2214 					sta SYS_VIC20.UPDATE_COUNTER_2.SCR_COUNTER
+  2215 					lda #$1E
+  2216 					sta SYS_VIC20.UPDATE_COUNTER_2.SCR_COUNTER+1
+  2217 					jsr SYS_VIC20.UPDATE_COUNTER_2
+  2218 				l_0719
+  2219 					.ENDM
+  2220 A80E			@exit
+  2221 				.endl
+  2222
+  2223 A80E			.local	SNAKE_STEP					; PROCEDURE | INLINE
+  2224
+  2225 					.MACRO m@INLINE
+  2226 				
+  2227 				; optimize OK (game.inc), line = 347
+  2228 				
+  2229 					lda #$0E
+  2230 					sub LEVEL
+  2231 					sta SNAKE_SPEED
+  2232 				
+  2233 				; optimize OK (game.inc), line = 348
+  2234 				
+  2235 					cmp #$02
+  2236 					jcs l_0744
+  2237 					lda #$02
+  2238 					sta SNAKE_SPEED
+  2239 				l_0744
+  2240 				
+  2241 				; optimize FAIL ('JOY_HANDLER', game.inc), line = 350
+  2242 				
+  2243 					jsr JOY_HANDLER
+  2244 				
+  2245 				; optimize OK (game.inc), line = 352
+  2246 				
+  2247 					lda SNAKE_SPD_C
+  2248 					jne l_075E
+  2249 				
+  2250 				; optimize FAIL ('MOVE_SNAKE', game.inc), line = 353
+  2251 				
+  2252 					jsr MOVE_SNAKE
+  2253 				
+  2254 				; optimize OK (game.inc), line = 354
+  2255 				
+  2256 					lda SNAKE_SPEED
+  2257 					sta SNAKE_SPD_C
+  2258 					jmp l_076F
+  2259 				l_075E
+  2260 				
+  2261 				; optimize FAIL (0, game.inc), line = 356
+  2262 				
+  2263 					dec SNAKE_SPD_C
+  2264 				l_076F
+  2265 					.ENDM
+  2266 A80E			@exit
+  2267 				.endl
+  2268
+  2269 A80E			.local	SET_GAME					; PROCEDURE
+  2270
+  2271 				; optimize OK (game.inc), line = 363
+  2272
+  2273 A80E A9 20			lda #$20
+  2274 A810 20 D9 A1			jsr SYS_VIC20.CLRSCR
+  2275 A813 A9 07			lda #$07
+  2276 A815 20 EC A1			jsr SYS_VIC20.CLRCOL
+  2277
+  2278 				; optimize FAIL ('DRAW_FRAME', game.inc), line = 364
+  2279
+  2280 A818 20 07 A3			jsr DRAW_FRAME
+  2281 A81B 20 12 A4			jsr DRAW_BOTTOM_LINE
+  2282 A81E 20 75 A3			jsr PUT_SNAKE
+  2283 A821 20 69 A4			jsr PRINT_HI_SCORE
+  2284
+  2285 				; optimize OK (game.inc), line = 366
+  2286
+  2287 A824 A9 C8			lda #$C8
+  2288 A826 85 7C			sta TIME_ENTITY
+  2289
+  2290 				; optimize OK (game.inc), line = 367
+  2291
+  2292 A828 A9 0A			lda #$0A
+  2293 A82A 85 7B			sta LEVEL_UP
+  2294
+  2295 				; optimize OK (game.inc), line = 368
+  2296
+  2297 A82C A9 00			lda #$00
+  2298 A82E 85 80			sta SCORE_BCD
+  2299 A830 85 81			sta SCORE_BCD+1
+  2300
+  2301 				; optimize OK (game.inc), line = 369
+  2302
+  2303 A832 85 7D			sta TIME_BCD
+  2304
+  2305 				; optimize OK (game.inc), line = 370
+  2306
+  2307 A834 85 7E			sta LEVEL_BCD
+  2308
+  2309 				; optimize OK (game.inc), line = 371
+  2310
+  2311 A836 85 7F			sta LEVEL
+  2312
+  2313 				; optimize OK (game.inc), line = 372
+  2314
+  2315 A838 85 78			sta SNAKE_SPD_C
+  2316
+  2317 				; optimize OK (game.inc), line = 373
+  2318
+  2319 A83A 85 8A			sta FRUIT_ON_BOARD
+  2320
+  2321 				; optimize OK (game.inc), line = 374
+  2322
+  2323 A83C 85 FB			sta GAME_OVER
+  2324
+  2325 				; optimize OK (game.inc), line = 376
+  2326
+  2327 A83E A9 01			lda #$01
+  2328 A840 20 CD A1			jsr SYS_VIC20.WAIT_00DC
+  2329 A843			@exit
+  2330 					.ifdef @new
+  2331 					lda <@VarData
+  2332 					sta :ztmp
+  2333 					lda >@VarData
+  2334 					ldy #@VarDataSize-1
+  2335 					jmp @FreeMem
+  2336 					els
+  2337 A843 60				rts						; ret
+  2338 					eif
+  2339 				.endl
+  2340
+  2341 A844			.local	RESTART_GAME					; PROCEDURE
+  2342
+  2343 				; optimize FAIL ('HALL_OF_FAME', game.inc), line = 383
+  2344
+  2345 A844 20 9B A4			jsr HALL_OF_FAME
+  2346
+  2347 				; optimize OK (game.inc), line = 384
+  2348
+  2349 A847 A9 19			lda #$19
+  2350 A849 20 CD A1			jsr SYS_VIC20.WAIT_00DC
+  2351
+  2352 				; optimize FAIL ('PRESS_FIRE', game.inc), line = 385
+  2353
+  2354 A84C 20 4D A3			jsr PRESS_FIRE
+  2355
+  2356 				; optimize FAIL ('SET_GAME', game.inc), line = 386
+  2357
+  2358 A84F 20 0E A8			jsr SET_GAME
+  2359 A852			@exit
+  2360 					.ifdef @new
+  2361 					lda <@VarData
+  2362 					sta :ztmp
+  2363 					lda >@VarData
+  2364 					ldy #@VarDataSize-1
+  2365 					jmp @FreeMem
+  2366 					els
+  2367 A852 60				rts						; ret
+  2368 					eif
+  2369 				.endl
+  2370
+  2371 A853			.local	VBI						; PROCEDURE
+  2372
+  2373 				; optimize OK (game.inc), line = 393
+  2374
+  2375 A853 A5 FB			lda GAME_OVER
+  2376 A855 D0 52			jne l_07C1
+  2377
+  2378 				; optimize FAIL ('m@INLINE', game.inc), line = 394
+  2379
+  2380 A857				.local +MAIN.UPDATE_TIME
+  2381 A857				m@INLINE
+Macro: MAIN.UPDATE_TIME.M@INLINE [Source: vic20.a65]
+     4 A857 C6 7C			dec TIME_ENTITY
+     8 A859 D0 1B			jne l_0719
+    12 A85B A9 C8			lda #$C8
+    13 A85D 85 7C			sta TIME_ENTITY
+    17 A85F A9 01			lda #$01
+    18 A861 85 08			sta SYS_VIC20.UPDATE_COUNTER_2.V
+    19 A863 A9 7D			lda #$7D
+    20 A865 85 0C			sta SYS_VIC20.UPDATE_COUNTER_2.COUNTER
+    21 A867 A9 00			lda #$00
+    22 A869 85 0D			sta SYS_VIC20.UPDATE_COUNTER_2.COUNTER+1
+    23 A86B A9 DE			lda #$DE
+    24 A86D 85 04			sta SYS_VIC20.UPDATE_COUNTER_2.SCR_COUNTER
+    25 A86F A9 1E			lda #$1E
+    26 A871 85 05			sta SYS_VIC20.UPDATE_COUNTER_2.SCR_COUNTER+1
+    27 A873 20 5B A2			jsr SYS_VIC20.UPDATE_COUNTER_2
+    28 A876			l_0719
+Source: vic20.a65
+  2382 					.endl
+  2383
+  2384 				; optimize FAIL ('m@INLINE', game.inc), line = 395
+  2385
+  2386 A876				.local +MAIN.SNAKE_STEP
+  2387 A876				m@INLINE
+Macro: MAIN.SNAKE_STEP.M@INLINE [Source: vic20.a65]
+     4 A876 A9 0E			lda #$0E
+     5 A878 38 E5 7F			sub LEVEL
+     6 A87B 85 77			sta SNAKE_SPEED
+    10 A87D C9 02			cmp #$02
+    11 A87F B0 04			jcs l_0744
+    12 A881 A9 02			lda #$02
+    13 A883 85 77			sta SNAKE_SPEED
+    14 A885			l_0744
+    18 A885 20 E3 A6			jsr JOY_HANDLER
+    22 A888 A5 78			lda SNAKE_SPD_C
+    23 A88A D0 0A			jne l_075E
+    27 A88C 20 AF A6			jsr MOVE_SNAKE
+    31 A88F A5 77			lda SNAKE_SPEED
+    32 A891 85 78			sta SNAKE_SPD_C
+    33 A893 4C 98 A8			jmp l_076F
+    34 A896			l_075E
+    38 A896 C6 78			dec SNAKE_SPD_C
+    39 A898			l_076F
+Source: vic20.a65
+  2388 					.endl
+  2389
+  2390 				; optimize OK (game.inc), line = 396
+  2391
+  2392 A898 A5 8A			lda FRUIT_ON_BOARD
+  2393 A89A D0 03			jne l_07D3
+  2394 A89C 20 A0 A7			jsr PUT_FRUIT
+  2395 A89F			l_07D3
+  2396
+  2397 				; optimize OK (game.inc), line = 397
+  2398
+  2399 A89F A5 7D			lda TIME_BCD
+  2400 A8A1 C9 99			cmp #$99
+  2401 A8A3 D0 04			jne l_07E9
+  2402 A8A5 A9 01			lda #$01
+  2403 A8A7 85 FB			sta GAME_OVER
+  2404 A8A9			l_07E9
+  2405 A8A9			l_07C1
+  2406 A8A9			@exit
+  2407 					.ifdef @new
+  2408 					lda <@VarData
+  2409 					sta :ztmp
+  2410 					lda >@VarData
+  2411 					ldy #@VarDataSize-1
+  2412 					jmp @FreeMem
+  2413 					els
+  2414 A8A9 60				rts						; ret
+  2415 					eif
+  2416 				.endl
+  2417
+  2418 A8AA			.local	PREPARE						; PROCEDURE
+  2419
+  2420 				; optimize OK (game.inc), line = 405
+  2421
+  2422 A8AA A9 00			lda #$00
+  2423 A8AC 85 08			sta SYSTEM.MOVE_00B1.SOURCE
+  2424 A8AE A9 BC			lda #$BC
+  2425 A8B0 85 09			sta SYSTEM.MOVE_00B1.SOURCE+1
+  2426 A8B2 A9 00			lda #$00
+  2427 A8B4 85 0C			sta SYSTEM.MOVE_00B1.DEST
+  2428 A8B6 A9 10			lda #$10
+  2429 A8B8 85 0D			sta SYSTEM.MOVE_00B1.DEST+1
+  2430 A8BA A9 00			lda #$00
+  2431 A8BC 85 04			sta SYSTEM.MOVE_00B1.COUNT
+  2432 A8BE A9 04			lda #$04
+  2433 A8C0 85 05			sta SYSTEM.MOVE_00B1.COUNT+1
+  2434 A8C2				.local +MAIN.SYSTEM.MOVE_00B1
+  2435 A8C2				m@INLINE
+Macro: MAIN.SYSTEM.MOVE_00B1.M@INLINE [Source: vic20.a65]
+     4 A8C2 20 A7 A0			jsr @move
+Source: vic20.a65
+  2436 					.endl
+  2437
+  2438 				; optimize OK (game.inc), line = 406
+  2439
+  2440 A8C5 A9 12			lda #$12
+  2441 A8C7 85 08			sta SYSTEM.MOVE_00B1.SOURCE
+  2442 A8C9 A9 B9			lda #$B9
+  2443 A8CB 85 09			sta SYSTEM.MOVE_00B1.SOURCE+1
+  2444 A8CD A9 00			lda #$00
+  2445 A8CF 85 0C			sta SYSTEM.MOVE_00B1.DEST
+  2446 A8D1 A9 1C			lda #$1C
+  2447 A8D3 85 0D			sta SYSTEM.MOVE_00B1.DEST+1
+  2448 A8D5 A9 EE			lda #$EE
+  2449 A8D7 85 04			sta SYSTEM.MOVE_00B1.COUNT
+  2450 A8D9 A9 02			lda #$02
+  2451 A8DB 85 05			sta SYSTEM.MOVE_00B1.COUNT+1
+  2452 A8DD				.local +MAIN.SYSTEM.MOVE_00B1
+  2453 A8DD				m@INLINE
+Macro: MAIN.SYSTEM.MOVE_00B1.M@INLINE [Source: vic20.a65]
+     4 A8DD 20 A7 A0			jsr @move
+Source: vic20.a65
+  2454 					.endl
+  2455 A8E0			@exit
+  2456 					.ifdef @new
+  2457 					lda <@VarData
+  2458 					sta :ztmp
+  2459 					lda >@VarData
+  2460 					ldy #@VarDataSize-1
+  2461 					jmp @FreeMem
+  2462 					els
+  2463 A8E0 60				rts						; ret
+  2464 					eif
+  2465 				.endl
+  2466 A8E1			l_0067
+  2467
+  2468 				; optimize OK (game.inc), line = 412
+  2469
+  2470 A8E1 A9 01			lda #$01
+  2471 A8E3 85 FB			sta GAME_OVER
+  2472
+  2473 				; optimize FAIL ('PREPARE', game.inc), line = 414
+  2474
+  2475 A8E5 20 AA A8			jsr PREPARE
+  2476 A8E8 20 91 A1			jsr SYS_VIC20.SYS_INIT
+  2477 A8EB				.local +MAIN.WELCOME_SCR
+  2478 A8EB				m@INLINE
+Macro: MAIN.WELCOME_SCR.M@INLINE [Source: vic20.a65]
+     4 A8EB A9 01			lda #$01
+     5 A8ED 20 EC A1			jsr SYS_VIC20.CLRCOL
+     9 A8F0 A9 0C			lda #$0C
+    10 A8F2 85 70			sta T0B
+    11 A8F4 85 72			sta T2B
+    15 A8F6 AD 53 A0			lda adr.TXT_INFO
+    16 A8F9 4A				lsr @
+    17 A8FA 85 71			sta T1B
+    18 A8FC A5 70			lda T0B
+    19 A8FE 38 E5 71			sub T1B
+    20 A901 85 70			sta T0B
+    24 A903 85 08			sta SYS_VIC20.SET_XY.X
+    25 A905 A9 02			lda #$02
+    26 A907 85 0C			sta SYS_VIC20.SET_XY.Y
+    27 A909 20 FF A1			jsr SYS_VIC20.SET_XY
+    31 A90C A9 07			lda #$07
+    32 A90E 85 08			sta SYS_VIC20.PRINT.COL
+    33 A910 A9 53			lda #$53
+    34 A912 85 0C			sta SYS_VIC20.PRINT.S
+    35 A914 A9 A0			lda #$A0
+    36 A916 85 0D			sta SYS_VIC20.PRINT.S+1
+    37 A918 20 3A A2			jsr SYS_VIC20.PRINT
+    41 A91B AD 3E A0			lda adr.TXT_TURBO
+    42 A91E 4A				lsr @
+    43 A91F 85 71			sta T1B
+    44 A921 A5 72			lda T2B
+    45 A923 38 E5 71			sub T1B
+    46 A926 85 72			sta T2B
+    50 A928 85 08			sta SYS_VIC20.SET_XY.X
+    51 A92A A9 19			lda #$19
+    52 A92C 85 0C			sta SYS_VIC20.SET_XY.Y
+    53 A92E 20 FF A1			jsr SYS_VIC20.SET_XY
+    57 A931 A9 07			lda #$07
+    58 A933 85 08			sta SYS_VIC20.PRINT.COL
+    59 A935 A9 3E			lda #$3E
+    60 A937 85 0C			sta SYS_VIC20.PRINT.S
+    61 A939 A9 A0			lda #$A0
+    62 A93B 85 0D			sta SYS_VIC20.PRINT.S+1
+    63 A93D 20 3A A2			jsr SYS_VIC20.PRINT
+    66 A940			l_01A6
+    70 A940 A5 61			lda SYS_VIC20.JOY
+    71 A942 29 20			and #$20
+    72 A944 F0 FA			jeq l_01A6
+Source: vic20.a65
+  2479 					.endl
+  2480
+  2481 				; optimize OK (game.inc), line = 416
+  2482
+  2483 A946 A9 00			lda #$00
+  2484 A948 85 82			sta HI_SCORE_BCD
+  2485 A94A 85 83			sta HI_SCORE_BCD+1
+  2486 A94C 20 0E A8			jsr SET_GAME
+  2487
+  2488 				; --- RepeatUntilProlog
+  2489 A94F			l_080C
+  2490
+  2491 				; optimize OK (game.inc), line = 419
+  2492
+  2493 A94F A5 FB			lda GAME_OVER
+  2494 A951 F0 03			jeq l_0818
+  2495 A953 20 44 A8			jsr RESTART_GAME
+  2496 A956			l_0818
+  2497
+  2498 				; optimize OK (game.inc), line = 420
+  2499
+  2500 A956 4C 4F A9			jmp l_080C
+  2501
+  2502 				; ------------------------------------------------------------
+  2503
+  2504 = BC00			CRT_CHARS_ADR	= $BC00
+  2505 = B912			CRT_TITLE_ADR	= $B912
+  2506 = 0000			GAME_BLACK	= $00
+  2507 = 0001			GAME_WHITE	= $01
+  2508 = 0002			GAME_RED	= $02
+  2509 = 0003			GAME_CYAN	= $03
+  2510 = 0004			GAME_PURPLE	= $04
+  2511 = 0005			GAME_GREEN	= $05
+  2512 = 0006			GAME_BLUE	= $06
+  2513 = 0007			GAME_YELLOW	= $07
+  2514 = 0008			GAME_ORANGE	= $08
+  2515 = 0020			C_SPACE	= $20
+  2516 = 0040			C_FRUIT	= $40
+  2517 = 0041			C_WALL_H	= $41
+  2518 = 0042			C_WALL_VE	= $42
+  2519 = 0043			C_WALL_VW	= $43
+  2520 = 0044			C_TAIL_UP	= $44
+  2521 = 0045			C_TAIL_DOWN	= $45
+  2522 = 0046			C_TAIL_RIGHT	= $46
+  2523 = 0047			C_TAIL_LEFT	= $47
+  2524 = 0048			C_HEAD_UP	= $48
+  2525 = 0049			C_HEAD_DOWN	= $49
+  2526 = 004A			C_HEAD_LEFT	= $4A
+  2527 = 004B			C_HEAD_RIGHT	= $4B
+  2528 = 004C			C_BODY_V	= $4C
+  2529 = 004D			C_BODY_H	= $4D
+  2530 = 004E			C_BODY_SW	= $4E
+  2531 = 004F			C_BODY_SE	= $4F
+  2532 = 0050			C_BODY_NW	= $50
+  2533 = 0051			C_BODY_NE	= $51
+  2534 = A00C			adr.TXT_LEVEL	= CODEORIGIN+$0000
+  2535 A959			.var TXT_LEVEL	= adr.TXT_LEVEL .word
+  2536 = A016			adr.TXT_POINTS	= CODEORIGIN+$000A
+  2537 A959			.var TXT_POINTS	= adr.TXT_POINTS .word
+  2538 = A023			adr.TXT_TIME	= CODEORIGIN+$0017
+  2539 A959			.var TXT_TIME	= adr.TXT_TIME .word
+  2540 = A029			adr.TXT_HSCORE	= CODEORIGIN+$001D
+  2541 A959			.var TXT_HSCORE	= adr.TXT_HSCORE .word
+  2542 = A032			adr.TXT_FIRE	= CODEORIGIN+$0026
+  2543 A959			.var TXT_FIRE	= adr.TXT_FIRE .word
+  2544 = A03E			adr.TXT_TURBO	= CODEORIGIN+$0032
+  2545 A959			.var TXT_TURBO	= adr.TXT_TURBO .word
+  2546 = A053			adr.TXT_INFO	= CODEORIGIN+$0047
+  2547 A959			.var TXT_INFO	= adr.TXT_INFO .word
+  2548 = 0002			SNAKE_SIZE	= $02
+  2549 = 000E			GAME_SPEED	= $0E
+  2550 = 000A			LEVEL_THOLD	= $0A
+  2551 = 0002			SPEED_THOLD	= $02
+  2552 = 00C8			TIME_E_SET	= $C8
+  2553 = 0099			TIME_THOLD	= $99
+  2554 = 0044			UP	= $44
+  2555 = 0045			DOWN	= $45
+  2556 = 0047			LEFT	= $47
+  2557 = 0046			RIGHT	= $46
+  2558 = 00E7			MOVE_UP	= $E7
+  2559 = 0019			MOVE_DOWN	= $19
+  2560 = 00FF			MOVE_LEFT	= $FF
+  2561 = 0001			MOVE_RIGHT	= $01
+  2562 = 0070			T0B	= $70
+  2563 = 0071			T1B	= $71
+  2564 = 0072			T2B	= $72
+  2565 = 0073			T0W	= $73
+  2566 = 0075			T1W	= $75
+  2567 = 0077			SNAKE_SPEED	= $77
+  2568 = 0078			SNAKE_SPD_C	= $78
+  2569 = 0079			TAIL_DIR	= $79
+  2570 = 007A			HEAD_DIR	= $7A
+  2571 = 007B			LEVEL_UP	= $7B
+  2572 = 007C			TIME_ENTITY	= $7C
+  2573 = 007D			TIME_BCD	= $7D
+  2574 = 007E			LEVEL_BCD	= $7E
+  2575 = 007F			LEVEL	= $7F
+  2576 = 0080			SCORE_BCD	= $80
+  2577 = 0082			HI_SCORE_BCD	= $82
+  2578 = 0084			HEAD_POS	= $84
+  2579 = 0086			HEAD_POS_COL	= $86
+  2580 = 0088			TAIL_POS	= $88
+  2581 = 008A			FRUIT_ON_BOARD	= $8A
+  2582 = 008B			adr.SNAKE	= $8B
+  2583 A959			.var SNAKE	= adr.SNAKE .word
+  2584 = 008B			SNAKE.HEAD	= $8B
+  2585 = 008C			SNAKE.BODY	= $8C
+  2586 = 008D			SNAKE.M	= $8D
+  2587 = 00FB			GAME_OVER	= $FB
+  2588 = 00FB			SF0B	= $FB
+  2589 = 00FC			SF1B	= $FC
+  2590 = 1C05			HI_SCR_SCORE	= $1C05
+  2591 = 1EEA			SCR_SCORE	= $1EEA
+  2592 = 1ED9			SCR_LEVEL	= $1ED9
+  2593 = 1EDE			SCR_TIME	= $1EDE
+  2594 A959			@exit
+  2595
+  2596 A959 A2 00		@halt	ldx #$00
+  2597 A95B 9A				txs
+  2598
+  2599 A95C 60				rts
+  2600
+  2601 				; ------------------------------------------------------------
+  2602
+  2603 				; ------------------------------------------------------------
+  2604
+  2605 A95D			.local	@DEFINES
+  2606 A95D			RAW
+  2607 				.endl
+  2608
+  2609 A95D			.local	@RESOURCE
+  2610 				.endl
+  2611
+  2612 = A95D 0C A0		TXT_LEVEL
+  2612 = A95F 16 A0		TXT_POINTS
+  2612 = A961 23 A0		TXT_TIME
+  2612 = A963 29 A0		TXT_HSCORE
+  2612 = A965 32 A0		TXT_FIRE
+  2612 = A967 3E A0		TXT_TURBO
+  2612 = A969 53 A0		TXT_INFO
+  2612 = A96B 8B 00		SNAKE
+  2612 				.endl							; MAIN
+  2613
+  2614 				; ------------------------------------------------------------
+  2615 				; ------------------------------------------------------------
+  2616
+  2617 				.macro	UNITINITIALIZATION
+  2618 				
+  2619 					.ifdef MAIN.SYSTEM.@UnitInit
+  2620 					jsr MAIN.SYSTEM.@UnitInit
+  2621 					.fi
+  2622 				
+  2623 					.ifdef MAIN.SYS_VIC20.@UnitInit
+  2624 					jsr MAIN.SYS_VIC20.@UnitInit
+  2625 					.fi
+  2626 				.endm
+  2627
+  2628 				; ------------------------------------------------------------
+  2629
+  2630 					ift .SIZEOF(MAIN.SYSTEM) > 0
+  2631 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+  2631 				SYSTEM: $A12D..$A158
+  2632 					eif
+  2633
+  2634 					ift .SIZEOF(MAIN.SYS_VIC20) > 0
+  2635 					.print 'SYS_VIC20: ',MAIN.SYS_VIC20,'..',MAIN.SYS_VIC20+.SIZEOF(MAIN.SYS_VIC20)-1
+  2635 				SYS_VIC20: $A159..$A306
+  2636 					eif
+  2637
+  2638 					.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+  2638 				CODE: $A00C..$A95C
+  2639
+  2640 				; ------------------------------------------------------------
+  2641
+  2642 A96D				.align $0004
+  2643
+  2644 A970			DATAORIGIN
+  2645
+  2646 = 0000			VARINITSIZE	= *-DATAORIGIN
+  2647 = 000D			VARDATASIZE	= 13
+  2648
+  2649 = A97D			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  2650
+  2651 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+  2651 				DATA: $A970..$A97D
+  2652
+  2653 				; ------------------------------------------------------------
+  2654
+  2655 				.macro	STATICDATA
+  2656 				.by  $08 $0C $05 $16 $05 $0C $20 $30  $30 $00 $0B $10 $0F $09 $0E $14  $13 $20 $30 $30 $30 $30 $00 $04
+  2657 				.by  $14 $3A $30 $30 $00 $07 $08 $09  $3A $30 $30 $30 $30 $00 $0A $10  $12 $05 $13 $13 $20 $06 $09 $12
+  2658 				.by  $05 $00 $13 $08 $0F $0C $04 $20  $06 $09 $12 $05 $20 $06 $0F $12  $20 $14 $15 $12 $02 $0F $00 $17
+  2659 				.by  $13 $03 $0F $12 $05 $20 $10 $0F  $09 $0E $14 $13 $20 $15 $0E $14  $09 $0C $20 $14 $3A $39 $39 $00
+  2660 				.by  $09 $1A $19 $3C $00 $FC $00 $00  $FF $FF $00 $00 $00 $00 $00 $6E
+  2661 				.endm
+  2662
+  2663 A970			.local	RESOURCE
+  2664 A970				icl 'raw\resource.asm'
+Source: resource.asm
+     1
+    48 					opt l+
+  2665
+  2666 A970				RCDATA 'res/title_cbm.scr' CRT_TITLE_ADR 0 0 0 0 0 0 0 0
+Macro: RESOURCE.RCDATA [Source: resource.asm]
+     6 A970				org main.CRT_TITLE_ADR
+     8 B912 20 20 20 20 20 20 + 	ins 'res/title_cbm.scr',0
+    10 					.print '$R RCDATA  ',main.CRT_TITLE_ADR,'..',*-1," 'res/title_cbm.scr'"
+    10 				$R RCDATA  $B912..$BBFF 'res/title_cbm.scr'
+Source: vic20.a65
+  2667 BC00				RCDATA 'res/snake_cbm.fnt' CRT_CHARS_ADR 0 0 0 0 0 0 0 0
+Macro: RESOURCE.RCDATA [Source: resource.asm]
+     6 BC00				org main.CRT_CHARS_ADR
+     8 BC00 00 3C 66 6E 6E 60 + 	ins 'res/snake_cbm.fnt',0
+    10 					.print '$R RCDATA  ',main.CRT_CHARS_ADR,'..',*-1," 'res/snake_cbm.fnt'"
+    10 				$R RCDATA  $BC00..$BFFF 'res/snake_cbm.fnt'
+Source: vic20.a65
+  2668 				.endl
+  2669
+  2670 					end

@@ -63,25 +63,74 @@ const
 	C40	= CO40;
 	C80	= CO80;
 
-{ Foreground and background color constants }
-	Black		= 0;
-	Blue		= 1;
-	Green		= 2;
-	Cyan		= 3;
-	Red		= 4;
-	Magenta		= 5;
-	Brown		= 6;
-	LightGray	= 7;
 
-{ Foreground color constants }
-	DarkGray	= 8;
-	LightBlue	= 9;
-	LightGreen	= 10;
-	LightCyan	= 11;
-	LightRed	= 12;
-	LightMagenta	= 13;
-	Yellow		= 14;
-	White		= 15;
+{ Foreground and background color constants }
+
+{$IFDEF C64}
+
+  BLACK                 = $0;
+  WHITE                 = $1;
+  RED                   = $2;
+  CYAN                  = $3;
+  PURPLE                = $4;
+  GREEN                 = $5;
+  BLUE                  = $6;
+  YELLOW                = $7;
+  ORANGE                = $8;
+  BROWN                 = $9;
+  LIGHT_RED             = $A;
+  DARK_GREY             = $B;
+  GREY                  = $C;
+  LIGHT_GREEN           = $D;
+  LIGHT_BLUE            = $E;
+  LIGHT_GREY            = $F;
+
+{$ENDIF}
+
+
+{$IFDEF C4P}
+
+  BLACK                 = $0;
+  WHITE                 = $1;
+  RED                   = $2;
+  CYAN                  = $3;
+  PURPLE                = $4;
+  GREEN                 = $5;
+  BLUE                  = $6;
+  YELLOW                = $7;
+  ORANGE                = $8;
+  BROWN                 = $9;
+  YELLOW_GREEN          = $A;
+  PINK                  = $B;
+  BLUE_GREEN            = $C;
+  LIGHT_BLUE            = $D;
+  DARK_BLUE             = $E;
+  LIGHT_GREEN           = $F;
+
+{$ENDIF}
+
+
+{$IFDEF ATARI}
+
+  BLACK                 = $00;
+  WHITE                 = $0F;
+  RED                   = $26;
+  CYAN                  = $AC;
+  PURPLE                = $48;
+  GREEN                 = $B6;
+  BLUE                  = $86;
+  YELLOW                = $DC;
+  ORANGE                = $18;
+  BROWN                 = $F4;
+  LIGHT_RED             = $2A;
+  DARK_GREY             = $04;
+  GREY                  = $08;
+  LIGHT_GREEN           = $BC;
+  LIGHT_BLUE            = $9A;
+  LIGHT_GREY            = $0C;
+
+{$ENDIF}
+
 
 { Add-in for blinking }
 	Blink		= 128;
@@ -108,389 +157,14 @@ const
 
 implementation
 
-//{$IFDEF ATARI}
+{$IFDEF ATARI}
 
 uses atari;
 
-//{$ENDIF}
-
-
-procedure CursorOff;
-(*
-@description: Hide cursor
-*)
-begin
-
- crsinh:=1;		// znacznik widocznosci kursora
-
- write( CH_CURS_RIGHT, CH_CURS_LEFT );
-
-end;
-
-
-procedure CursorOn;
-(*
-@description: Display cursor
-*)
-begin
-
- crsinh:=0;		// znacznik widocznosci kursora
-
- write( CH_CURS_RIGHT, CH_CURS_LEFT );
-
-end;
-
-
-procedure ClrScr;
-(*
-@description: Clear screen
-*)
-begin
-{$IFDEF ATARI}
- write( CH_CLR );
-{$ELSE}
-asm
-{	jsr $e544
-};
 {$ENDIF}
-end;
 
 
-procedure DelLine;
-(*
-@description: Delete line at cursor position
-*)
-begin
- write( CH_DELLINE );
-end;
+{$i '../src/targets/crt.inc'}
 
-
-procedure InsLine;
-(*
-@description: Insert an empty line at cursor position
-*)
-begin
- write( CH_INSLINE );
-end;
-
-
-function ReadKey: char; assembler;
-(*
-@description: Read key from keybuffer
-
-@returns: char
-*)
-{$IFDEF ATARI}
-asm
-{	m@call @GetKey
-	sta Result
-};
-{$ELSE}
-asm
-{	txa:pha
-	jsr $ffe4	; GETIN
-	sta Result
-	pla:tax
-};
-{$ENDIF}
-end;
-
-
-procedure TextBackground(a: byte); assembler;
-(*
-@description: Set text background
-
-@param: a - color value 0..255
-*)
-asm
-{	mwa a colpf2s
-};
-end;
-
-
-procedure TextColor(a: byte); assembler;
-(*
-@description: Set text color
-
-@param: a - color value 0..255
-*)
-asm
-{	mva a colpf1s
-};
-end;
-
-
-procedure Delay(count: word); assembler;
-(*
-@description: Waits a specified number of milliseconds
-
-@param: count - number of milliseconds
-*)
-asm
-{	txa:pha
-
-	ldx #0
-	ldy #0
-
-loop	cpy count
-	bne @+
-	cpx count+1
-	beq stop
-
-@	:8 lda:cmp:req vcount
-
-	iny
-	sne
-	inx
-
-	bne loop
-
-stop	pla:tax
-};
-end;
-
-
-function Keypressed: Boolean; assembler;
-(*
-@description: Check if there is a keypress in the keybuffer
-
-@returns: TRUE key has been pressed
-@returns: FALSE otherwise
-*)
-{$IFDEF ATARI}
-asm
-{	ldy #$00	; false
-	lda kbcodes
-	cmp #$ff
-	beq skp
-	iny		; true
-
-;	sty kbcodes
-
-skp	sty Result
-};
-{$ELSE}
-asm
-{	ldy #$00	; false
-	lda $cb
-	cmp #$40
-	beq skp
-	iny		; true
-
-;	sty kbcodes
-
-skp	sty Result
-};
-{$ENDIF}
-end;
-
-
-procedure GotoXY(x,y: byte); assembler;
-(*
-@description:
-Set cursor position on screen.
-
-
-GotoXY positions the cursor at (X,Y), X in horizontal, Y in vertical direction relative to
-
-the origin of the current window. The origin is located at (1,1), the upper-left corner of the window.
-
-@param: x - horizontal positions (1..40)
-@param: y - vertical positions (1..24)
-*)
-
-{$IFDEF ATARI}
-asm
-{	ldy x
-	beq @+
-
-	dey
-
-@	sty colcrs
-	mvy #$00 colcrs+1
-
-	ldy y
-	beq @+
-
-	dey
-
-@	sty rowcrs
-};
-{$ELSE}
-asm
-{	txa:pha
-	clc
-
-	ldx y
-	seq
-	dex
-
-	ldy x
-	seq
-	dey
-
-	jsr $FFF0	; PLOT
-
-	pla:tax
-};
-{$ENDIF}
-end;
-
-
-function WhereX: byte; assembler;
-(*
-@description: Return X (horizontal) cursor position
-
-@returns: byte (1..40)
-*)
-{$IFDEF ATARI}
-asm
-{
-	ldy colcrs
-	iny
-	sty Result
-};
-{$ELSE}
-asm
-{	txa:pha
-	sec
-
-	jsr $FFF0	; PLOT
-	iny
-	sty Result
-
-	pla:tax
-};
-{$ENDIF}
-end;
-
-
-function WhereY: byte; assembler;
-(*
-@description: Return Y (vertical) cursor position
-
-@returns: byte (1..24)
-*)
-{$IFDEF ATARI}
-asm
-{
-	ldy rowcrs
-	iny
-	sty Result
-};
-{$ELSE}
-asm
-{	txa:pha
-	sec
-
-	jsr $FFF0	; PLOT
-	inx
-	stx Result
-
-	pla:tax
-};
-{$ENDIF}
-end;
-
-
-procedure ClrEol;
-(*
-@description:
-ClrEol clears the current line, starting from the cursor position, to the end of the window.
-
-The cursor doesn't move.
-*)
-begin
- FillChar( pointer(word(DPeek(88)+WhereX)+WhereY*40-41), byte(41-byte(WhereX)), 0);
-end;
-
-
-procedure NoSound; assembler;
-(*
-@description: Reset POKEY
-*)
-asm
-{	lda #0
-	sta $d208
-	sta $d218
-
-	ldy #3
-	sty $d20f
-	sty $d21f
-
-	ldy #8
-lp	sta $d200,y
-	sta $d210,y
-	dey
-	bpl lp
-};
-end;
-
-
-procedure Sound(Chan,Freq,Dist,Vol: byte); assembler;
-(*
-@description: Plays sound
-
-@param: Chan - channel (0..3) primary POKEY, (4..7) secondary POKEY
-@param: Freq - frequency (0..255)
-@param: Dist - distortion (0,2,4,6,8,10,12,14)
-@param: Vol - volume (0..15)
-*)
-//----------------------------------------------------------------------------------------------
-// Chan = 0..3 primary Pokey
-// Chan = 4..7 secondary Pokey
-//----------------------------------------------------------------------------------------------
-asm
-{	lda Chan
-	and #7
-
-	ldy #$10
-	cmp #4
-	scs
-	ldy #$00
-	sty npokey
-
-	and #3
-
-	asl @
-	add #0
-npokey	equ *-1
-	tay
-
-	lda #$00
-	sta audctl
-	lda #$03
-	sta skctl
-
-	lda Freq
-	sta audf1,y
-
-	lda Vol
-	and #$0F
-	sta _t
-
-	lda Dist	; -> bit 7-6-5
-	:4 asl @
-	ora #0
-_t	equ *-1
-	sta audc1,y
-};
-end;
-
-
-procedure TextMode(Mode: byte); assembler;
-(*
-@description: Reset E: device
-
-@param: Mode - unused value
-*)
-asm
-{	txa:pha
-
-	@clrscr
-
-	pla:tax
-};
-end;
 
 end.

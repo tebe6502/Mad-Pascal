@@ -84,7 +84,7 @@ asm
 	ora Count+1
 	beq skp
 
-	mwa position cx+2
+	mwa position :ecx+2
 	jsr @xmsReadBuf
 skp
 };
@@ -100,7 +100,7 @@ asm
 	ora Count+1
 	beq skp
 
-	mwa position cx+2
+	mwa position :ecx+2
 	jsr @xmsWriteBuf
 skp
 };
@@ -112,7 +112,7 @@ function TMemoryStream.ReadByte: Byte; assembler;
 @description:
 *)
 asm
-{	mwa position cx+2
+{	mwa position :ecx+2
 	@xmsReadBuf #Result #1
 };
 end;
@@ -123,7 +123,7 @@ function TMemoryStream.ReadWord: Word; assembler;
 @description:
 *)
 asm
-{	mwa position cx+2
+{	mwa position :ecx+2
 	@xmsReadBuf #Result #2
 };
 end;
@@ -134,7 +134,7 @@ function TMemoryStream.ReadDWord: Cardinal; assembler;
 @description:
 *)
 asm
-{	mwa position cx+2
+{	mwa position :ecx+2
 	@xmsReadBuf #Result #4
 };
 end;
@@ -145,7 +145,7 @@ procedure TMemoryStream.WriteByte(b: Byte); assembler;
 @description:
 *)
 asm
-{	mwa position cx+2
+{	mwa position :ecx+2
 	@xmsWriteBuf #b #1
 };
 end;
@@ -156,7 +156,7 @@ procedure TMemoryStream.WriteWord(w: Word); assembler;
 @description:
 *)
 asm
-{	mwa position cx+2
+{	mwa position :ecx+2
 	@xmsWriteBuf #w #2
 };
 end;
@@ -167,7 +167,7 @@ procedure TMemoryStream.WriteDWord(d: Cardinal); assembler;
 @description:
 *)
 asm
-{	mwa position cx+2
+{	mwa position :ecx+2
 	@xmsWriteBuf #d #4
 };
 end;

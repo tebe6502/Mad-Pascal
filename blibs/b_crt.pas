@@ -516,12 +516,12 @@ begin
     CRT_cursor := y * CRT_screenWidth + x + CRT_vram;
 end;
 
-function CRT_WhereY: byte;
+function CRT_WhereY:byte;
 begin
     result := word(CRT_cursor - CRT_vram) div CRT_screenWidth;
 end;
 
-function CRT_WhereX: byte;
+function CRT_WhereX:byte;
 begin
     result := word(CRT_cursor - CRT_vram) mod CRT_screenWidth;
 end;
@@ -761,7 +761,7 @@ end;
 
 function CRT_HelpPressed:boolean;
 begin
-    result := CRT_KeyPressed and (kbcode and %00111111 = 17);
+    result := (skstat and 4 = 0) and (kbcode and %00111111 = 17);
 end;
 
 end.

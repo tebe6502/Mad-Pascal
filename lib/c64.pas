@@ -2,27 +2,6 @@ unit c64;
 
 interface
 
-const
-
-// colors
-  BLACK                 = $0;
-  WHITE                 = $1;
-  RED                   = $2;
-  CYAN                  = $3;
-  PURPLE                = $4;
-  GREEN                 = $5;
-  BLUE                  = $6;
-  YELLOW                = $7;
-  ORANGE                = $8;
-  BROWN                 = $9;
-  LIGHT_RED             = $A;
-  DARK_GREY             = $B;
-  GREY                  = $C;
-  LIGHT_GREEN           = $D;
-  LIGHT_BLUE            = $E;
-  LIGHT_GREY            = $F;
-
-
 var
 
 (*
@@ -216,7 +195,7 @@ var
   SIGVOL              : byte absolute $D418;
   POTX                : byte absolute $D419;
   POTY                : byte absolute $D41A;
-  RANDOM              : byte absolute $D41B;
+  [volatile]	RANDOM              : byte absolute $D41B;
   ENV3                : byte absolute $D41C;
   COLORRAM            : byte absolute $D800;
   CIAPRA              : byte absolute $DC00;

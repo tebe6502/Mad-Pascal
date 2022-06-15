@@ -232,17 +232,22 @@ end;
 
 procedure BurnByte(bank:byte;addr:word;val:byte);
 begin
+    CmdInit;
     CmdUnlock;
     Wr5555($A0);
     SetBank(bank);
     Poke(addr,val);
+    CmdCleanup;
 end;
 
 procedure BurnBlock(bank: byte; src, dest, size: word);
 begin
     CmdInit;
     repeat
-        BurnByte(bank,dest,peek(src));
+        CmdUnlock;
+        Wr5555($A0);
+        SetBank(bank);
+        Poke(dest,peek(src));
         inc(src);
         inc(dest);
         if dest = CARTOP + 1 then begin
@@ -281,6 +286,8 @@ _quickpage
         jsr incptr      ;; Increment pointers and banks, decrement work pages.
         bpl _nextpage
         
+        jsr cmdcleanup
+        
         pla 
         tax
         
@@ -303,7 +310,7 @@ _decpage
         rts 
 
 };
-    CmdCleanup;
+    
 end;
 
 

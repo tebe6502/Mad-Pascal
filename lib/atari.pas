@@ -29,6 +29,11 @@ var
 	irqens: byte absolute $10;		// rejestr cien IRQEN
 
 	rtclok: byte absolute $12;
+
+	rtclok1: byte absolute $12;
+	rtclok2: byte absolute $13;
+	rtclok3: byte absolute $14;
+
 	atract: byte absolute $4D;
 	lmargin: byte absolute $52;		// lewy margines ekranu
 	rmargin: byte absolute $53;		// prawy margines ekranu

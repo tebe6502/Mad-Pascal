@@ -76,3 +76,28 @@ class Test_Structs:
             assert test.getByte(monstersArray[i] + 1) == i * 2
 
 
+    def test_struct3(self):
+        
+        test.runCode("""
+        var
+		x,y: smallint;
+
+		w: cardinal;
+
+		s: string;
+
+		temp : record a,b: ^word end;
+        begin
+
+	x:=100;
+	y:=2000;
+
+	temp.a:=@x;
+	temp.b:=@y;
+
+	w:=temp.b^;
+
+        end.
+        """)
+        
+        assert test.varWord('w') == 2000

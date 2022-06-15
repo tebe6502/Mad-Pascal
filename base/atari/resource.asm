@@ -331,6 +331,8 @@ data
 
 .endl
 
+	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+$0755
+
 	ini mcpy
 .endm
 
@@ -362,6 +364,7 @@ data
 	.link 'atari\players\mpt_player_reloc.obx'
 
 .endl
+	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+$049e
 
 	ini mcpy
 .endm
@@ -564,6 +567,8 @@ len = .filesize(%%1)
  els
 	org main.%%lab
 	.link %%1
+
+	.print '$R RELOC   ',main.%%lab,'..',*-1," %%1"
  eif
 .endm
 
@@ -811,6 +816,8 @@ data	mpt_relocator %%1,main.%%lab
  els
 	org main.%%lab
 	mpt_relocator %%1,main.%%lab
+	
+	.print '$R MPT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
  eif
 .endm
 
@@ -894,6 +901,8 @@ data	cmc_relocator %%1,main.%%lab
  els
 	org main.%%lab
 	cmc_relocator %%1,main.%%lab
+	
+	.print '$R CMC     ',main.%%lab,'..',main.%%lab+len-6," %%1"	
  eif
 .endm
 

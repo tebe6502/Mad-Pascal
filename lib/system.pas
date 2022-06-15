@@ -116,13 +116,37 @@ type	PWord = ^word;
 
 	*)
 
+type	PLongWord = ^cardinal;
+	(*
+	@description:
+
+	*)
+
 type	PCardinal = ^cardinal;
 	(*
 	@description:
 
 	*)
 
+type	PSmallint = ^smallint;
+	(*
+	@description:
+
+	*)
+
 type	PInteger = ^integer;
+	(*
+	@description:
+
+	*)
+
+type	PSingle = ^single;
+	(*
+	@description:
+
+	*)
+
+type	PFloat16 = ^float16;
 	(*
 	@description:
 
@@ -147,7 +171,8 @@ type	PWordArray = ^word;
 	*)
 
 const
-{$ifndef raw}
+
+{$ifdef atari}
 	__PORTB_BANKS = $0101;		// memory banks array
 {$endif}
 
@@ -162,6 +187,7 @@ const
 //	NARROW	= $20;			// narrow screen
 
 	VBXE_XDLADR = $0000;		// XDLIST
+	VBXE_BCBTMP = $00E0;		// BLITTER TEMP
 	VBXE_BCBADR = $0100;		// BLITTER LIST ADDRESS
 	VBXE_MAPADR = $1000;		// COLOR MAP ADDRESS
 	VBXE_CHBASE = $1000;		// CHARSET BASE ADDRESS
@@ -170,10 +196,14 @@ const
 
 	iDLI = 0;			// set new DLI vector
 	iVBL = 1;			// set new VBL vector
+	iTIM1 = 2;			// set new IRQ TIMER1 vector
+	iTIM2 = 3;			// set new IRQ TIMER2 vector
+	iTIM4 = 4;			// set new IRQ TIMER4 vector
+
 {$endif}
 
 (* Character codes *)
-{$ifndef raw}
+{$ifdef atari}
 	CH_DELCHR	= chr($FE);	// delete char under the cursor
 	CH_ENTER	= chr($9B);
 	CH_ESC		= chr($1B);
@@ -193,6 +223,17 @@ const
 
 (* color defines *)
 {$ifdef atari}
+	PAL_PMCOLOR0	= 0;		// palette index Palette[..] , HPalette[..]
+	PAL_PMCOLOR1	= 1;
+	PAL_PMCOLOR2	= 2;
+	PAL_PMCOLOR3	= 3;
+
+	PAL_COLOR0	= 4;
+	PAL_COLOR1	= 5;
+	PAL_COLOR2	= 6;
+	PAL_COLOR3	= 7;
+	PAL_COLBAK	= 8;
+
 	COLOR_BLACK		= $00;
 	COLOR_WHITE		= $0e;
 	COLOR_RED		= $32;
@@ -225,10 +266,12 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	DateSeparator: Char = '-';
 
-	Rnd: byte absolute $d20a;
+{$ifdef atari}
+	[volatile] Rnd: byte absolute $d20a;
 
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
+{$endif}
 
 	FileMode: byte = fmOpenReadWrite;
 
@@ -241,6 +284,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 
 	function Abs(x: Real): Real; register; assembler; overload;
 	function Abs(x: Single): Single; register; assembler; overload;
+	function Abs(x: float16): float16; register; assembler; overload;
 	function Abs(x: shortint): shortint; register; assembler; overload;
 	function Abs(x: smallint): smallint; register; assembler; overload;
 	function Abs(x: Integer): Integer; register; assembler; overload;
@@ -257,6 +301,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 	function Cos(x: Real): Real; overload;
 	function Cos(x: Single): Single; overload;
+	function Cos(x: float16): float16; overload;
+	procedure Delete(var s: string; index, count: byte);
 	function DPeek(a: word): word; register; stdcall; assembler;
 	procedure DPoke(a: word; value: word); register; stdcall; assembler;
 	function Eof(var f: file): Boolean;
@@ -292,16 +338,20 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure Pause(n: word); assembler; overload;						//platform dependent
 	function Peek(a: word): byte; register; stdcall; assembler;
 	procedure Poke(a: word; value: byte); register; stdcall; assembler;
+	function Pos(c: char; s: string): byte; overload;
+	function Pos(s1: string; s2: string): byte; overload;
 	function Random: Real; overload;							//platform dependent
 	function Random(range: byte): byte; assembler; overload;				//platform dependent
 	function Random(range: smallint): smallint; overload;					//platform dependent
 	function RandomF: Float;								//platform dependent
+	function RandomF16: Float16;								//platform dependent
 	procedure Randomize; assembler;								//platform dependent
 	procedure RunError(a: byte);
 	procedure Seek(var f: file; a: cardinal); assembler;
 	procedure SetLength(var S: string; Len: byte); register; assembler;
 	function Sin(x: Real): Real; overload;
 	function Sin(x: Single): Single; overload;
+	function Sin(x: float16): float16; overload;
 	function Space(b: Byte): ^string; assembler;
 	procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
 	procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
@@ -311,6 +361,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sqr(x: integer): integer; overload;
 	function Sqrt(x: Real): Real; overload;
 	function Sqrt(x: Single): Single; overload;
+	function Sqrt(x: float16): float16; overload;
 	function Sqrt(x: Integer): Single; overload;
 	function UpCase(a: char): char;
 	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
@@ -341,7 +392,6 @@ end;
 
 function ata2int(a: char): char; assembler;
 asm
-{
         asl
         php
         cmp #2*$60
@@ -353,7 +403,6 @@ asm
         ror
 
 	sta Result;
-};
 end;
 
 
@@ -368,12 +417,11 @@ Convert cardinal value to string with hexadecimal representation.
 @returns: string[32]
 *)
 asm
-{	jsr @hexStr
+	jsr @hexStr
 
 ;	@move #@buf Result #33
 	ldy #256-33
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
-};
 end;
 
 
@@ -387,9 +435,8 @@ Reads BYTE from the desired memory address
 @returns: byte
 *)
 asm
-{	ldy #0
-	mva (edx),y Result
-};
+	ldy #0
+	mva (:edx),y Result
 end;
 
 
@@ -403,11 +450,10 @@ Reads WORD from the desired memory address
 @returns: word
 *)
 asm
-{	ldy #0
-	mva (edx),y Result
+	ldy #0
+	mva (:edx),y Result
 	iny
-	mva (edx),y Result+1
-};
+	mva (:edx),y Result+1
 end;
 
 
@@ -423,15 +469,14 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Real (Q24.8)
 *)
 asm
-{	lda edx+3
+	lda :edx+3
 	spl
 	jsr negEDX
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
-	mva edx+3 Result+3
-};
+	mva :edx Result
+	mva :edx+1 Result+1
+	mva :edx+2 Result+2
+	mva :edx+3 Result+3
 end;
 
 
@@ -447,14 +492,33 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Single
 *)
 asm
-{	lda edx+3
+	lda :edx+3
 	and #$7f
 	sta Result+3
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
-};
+	mva :edx Result
+	mva :edx+1 Result+1
+	mva :edx+2 Result+2
+end;
+
+
+function Abs(x: float16): float16; register; assembler; overload;
+(*
+@description:
+Abs returns the absolute value of a variable.
+
+The result of the function has the same type as its argument, which can be any numerical type.
+
+@param: x - Single
+
+@returns: Single
+*)
+asm
+	lda :edx+1
+	and #$7f
+	sta Result+1
+
+	mva :edx Result
 end;
 
 
@@ -470,14 +534,13 @@ The result of the function has the same type as its argument, which can be any n
 @returns: shortint
 *)
 asm
-{	lda edx
+	lda :edx
 	bpl @+
 
 	eor #$ff
 	add #1
 @
 	sta Result
-};
 end;
 
 
@@ -493,20 +556,19 @@ The result of the function has the same type as its argument, which can be any n
 @returns: smallint
 *)
 asm
-{	lda edx+1
+	lda :edx+1
 	bpl @+
 
 	lda #$00
-	sub edx
-	sta edx
+	sub :edx
+	sta :edx
 	lda #$00
-	sbc edx+1
-	sta edx+1
+	sbc :edx+1
+	sta :edx+1
 @
 	sta Result+1
 
-	mva edx Result
-};
+	mva :edx Result
 end;
 
 
@@ -522,16 +584,15 @@ The result of the function has the same type as its argument, which can be any n
 @returns: Integer
 *)
 asm
-{	lda edx+3
+	lda :edx+3
 	spl
 	jsr negEDX
 
 	sta Result+3
 
-	mva edx Result
-	mva edx+1 Result+1
-	mva edx+2 Result+2
-};
+	mva :edx Result
+	mva :edx+1 Result+1
+	mva :edx+2 Result+2
 end;
 
 
@@ -632,13 +693,43 @@ begin
 
 	c:=cardinal(x);
 
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
+	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;	// 1 = f32($3f800000)
 
 	Result := sp^;
 
 	Result:=(Result+x/Result) * 0.5;
 	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
+end;
+
+
+function Sqrt(x: float16): float16; overload;
+(*
+@description
+Sqrt returns the square root of its argument X, which must be positive
+
+@param: x - Single
+
+@returns: Single
+*)
+var sp: ^float16;
+    c: word;
+begin
+	Result:=0;
+
+	if x <= 0 then exit;
+
+	sp:=@c;
+
+	c:=word(x);
+
+	if c > $3c00 then c := (c - $3c00) shr 1 + $3c00;
+
+	Result := sp^;
+
 	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
 end;
 
 
@@ -668,7 +759,7 @@ begin
 
 	Result:=(Result+x/Result) * 0.5;
 	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
+//	Result:=(Result+x/Result) * 0.5;
 end;
 
 
@@ -989,27 +1080,27 @@ asm
 
 	sty IOResult
 
-	mva icax3,x eax
-	mva icax4,x eax+1
-	mva icax5,x eax+2
+	mva icax3,x :eax
+	mva icax4,x :eax+1
+	mva icax5,x :eax+2
 
-	mva #$00 eax+3
-	sta ecx+2
-	sta ecx+3
+	mva #$00 :eax+3
+	sta :ecx+2
+	sta :ecx+3
 
 	ldy #s@file.record
 	lda (:bp2),y
-	sta ecx
+	sta :ecx
 	iny
 	lda (:bp2),y
-	sta ecx+1
+	sta :ecx+1
 
 	jsr idivEAX_ECX.main
 
-	mva eax Result
-	mva eax+1 Result+1
-	mva eax+2 Result+2
-	mva eax+3 Result+3
+	mva :eax Result
+	mva :eax+1 Result+1
+	mva :eax+2 Result+2
+	mva :eax+3 Result+3
 
 	pla:tax
 };
@@ -1037,24 +1128,24 @@ asm
 
 	ldy #s@file.record
 	lda (:bp2),y
-	sta eax
+	sta :eax
 	iny
 	lda (:bp2),y
-	sta eax+1
+	sta :eax+1
 	lda #$00
-	sta eax+2
-	sta eax+3
+	sta :eax+2
+	sta :eax+3
 
-	mva a ecx
-	mva a+1 ecx+1
-	mva a+2 ecx+2
-	mva a+3 ecx+3
+	mva a :ecx
+	mva a+1 :ecx+1
+	mva a+2 :ecx+2
+	mva a+3 :ecx+3
 
 	jsr imulECX
 
-	mva eax icax3,x
-	mva eax+1 icax4,x
-	mva eax+2 icax5,x
+	mva :eax icax3,x
+	mva :eax+1 icax4,x
+	mva :eax+2 icax5,x
 
 	m@call	ciov
 
@@ -1182,7 +1273,7 @@ Calculate numerical value of a string
 @param: code - pointer to integer - error code
 *)
 asm
-{	@StrToInt s
+	@StrToInt s
 
 	tya
 	pha
@@ -1195,11 +1286,10 @@ asm
 
 	mwa v :bp2
 
-	mva edx (:bp2),y+
-	mva edx+1 (:bp2),y+
-	mva edx+2 (:bp2),y+
-	mva edx+3 (:bp2),y
-};
+	mva :edx (:bp2),y+
+	mva :edx+1 (:bp2),y+
+	mva :edx+2 (:bp2),y+
+	mva :edx+3 (:bp2),y
 end;
 
 
@@ -1341,9 +1431,9 @@ Convert a float value to a string
 @returns: string[32]
 *)
 asm
-{	txa:pha
+	txa:pha
 
-	inx
+	inx		; parameter A
 
 	@ValueToStr #@printREAL
 
@@ -1351,7 +1441,6 @@ asm
 	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
-};
 end;
 
 
@@ -1364,16 +1453,16 @@ Convert a numerical value to a string
 @param: s - string[32] - result
 *)
 asm
-{	txa:pha
+	txa:pha
 
-	inx
+	inx		; parameter A
+	inx		; parameter S
 
 	@ValueToStr #@printINT
 
 	@move #@buf s #16	; !!! koniecznie przez wskaznik
 
 	pla:tax
-};
 end;
 
 
@@ -1386,16 +1475,16 @@ Convert a numerical value to a string
 @param: s - string[32] - result
 *)
 asm
-{	txa:pha
+	txa:pha
 
-	inx
+	inx		; parameter A
+	inx		; parameter S
 
 	@ValueToStr #@printCARD
 
 	@move #@buf s #16	; !!! koniecznie przez wskaznik
 
 	pla:tax
-};
 end;
 
 
@@ -1408,9 +1497,8 @@ Store BYTE at the desired memory address
 @param: value (0..255)
 *)
 asm
-{	ldy #0
-	mva value (edx),y
-};
+	ldy #0
+	mva value (:edx),y
 end;
 
 
@@ -1423,11 +1511,10 @@ Store WORD at the desired memory address
 @param: value (0..65535)
 *)
 asm
-{	ldy #0
-	mva value (edx),y
+	ldy #0
+	mva value (:edx),y
 	iny
-	mva value+1 (edx),y
-};
+	mva value+1 (:edx),y
 end;
 
 
@@ -1689,6 +1776,71 @@ begin
 end;
 
 
+function fsincos16(x: float16; sc: boolean): float16;
+//----------------------------------------------------------------------------------------------
+// https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
+//----------------------------------------------------------------------------------------------
+var i: byte;
+begin
+
+    while x > M_PI_2 do x := x - M_PI_2;
+    while x < 0.0 do x := x + M_PI_2;
+
+    { Normalize argument, divide by (pi/2) }
+    x := x * 0.63661977236758134308;
+
+    { Get's integer part, should be }
+    i := trunc(x);
+
+    { Fixes negative part, needed to calculate "fractional" part }
+    if smallint(x) < 0 then dec(i); { this is shorter than "x < 0" }
+
+    { And finally get's fractional part }
+    x := x - i ;
+
+    { If we need cosine, adds pi/2 }
+    if sc then inc(i);
+
+    { Test quadrant, odd values are reflected }
+    if (i and 1) = 0 then x := 1 - x;
+
+    { Calculate cosine(x) with optimal polynomial approximation }
+    x := x * x;
+    Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
+
+    { Test quadrant to return negative values }
+    if (i and 2) = 2 then Result := -Result;
+end;
+
+
+function Sin(x: float16): float16; overload;
+(*
+@description:
+Calculate sine of angle
+
+@param: X - angle in radians (Single)
+
+@returns: Single
+*)
+begin
+    Result := fsincos16(x, false);
+end;
+
+
+function Cos(x: float16): float16; overload;
+(*
+@description:
+Calculate cosine of angle
+
+@param: X - angle in radians (Single)
+
+@returns: Single
+*)
+begin
+    Result := fsincos16(x, true);
+end;
+
+
 function Space(b: Byte): ^string; assembler;
 (*
 @description:
@@ -1699,14 +1851,13 @@ Return a string of spaces
 @returns: pointer to string
 *)
 asm
-{	ldy #0
+	ldy #0
 	lda #' '
 	sta:rne @buf,y+
 
 	mva b @buf
 
 	mwa #@buf Result
-};
 end;
 
 
@@ -1721,14 +1872,13 @@ Return a string consisting of 1 character repeated N times.
 @returns: pointer to string
 *)
 asm
-{	ldy #0
+	ldy #0
 	lda c
 	sta:rne @buf,y+
 
 	mva l @buf
 
 	mwa #@buf Result
-};
 end;
 
 
@@ -1741,9 +1891,8 @@ Set length of a string.
 @param: len - new length (BYTE)
 *)
 asm
-{	ldy #0
-	mva Len (edx),y
-};
+	ldy #0
+	mva Len (:edx),y
 end;
 
 
@@ -1758,7 +1907,7 @@ Convert integer to string with binary representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	ldy Digits
 	cpy #32
@@ -1782,7 +1931,6 @@ _tob1	lda #0
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
-};
 end;
 
 
@@ -1797,7 +1945,7 @@ Convert integer to a string with octal representation.
 @returns: string[32]
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	ldy Digits
 	cpy #32
@@ -1829,41 +1977,91 @@ _toct2	lsr Value+3
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
 
 	pla:tax
-};
 end;
+
 
 {$i '../src/targets/system.inc'}
 
-function ParamCount: byte; assembler;
-(*
-@description:
-Return number of command-line parameters passed to the program.
 
-@returns: byte
-*)
-asm
-{	@cmdline #255
-	sta Result
-};
+procedure Delete(var s: string; index, count: byte);
+var l: byte;
+    ch: char;
+begin
+
+ l:=length(s);
+
+ if index > l then exit;
+
+ if index + count > l then count := l - index + 1;
+
+
+ while index <= l do begin
+
+  s[index] := s[index + count];
+
+  inc(index);
+ end;
+
+
+ if count > l then
+  ch := #0
+ else
+  ch := chr(l - count);
+
+ s[0] := ch;
+
 end;
 
 
-function ParamStr(i: byte): TString; assembler;
-(*
-@description:
-Return value of a command-line argument.
+function Pos(c: char; s: string): byte; overload;
+var
+    slen: byte;
+    i    : byte;
+begin
+    slen := Length(s);
+    result := 0;
 
-@param: i - of a command-line argument
+    for i := 1 to slen - 1 do
+    begin
+        if s[i] = c then
+        begin
+            result := i;
+            break;
+        end;
+    end
+end;
 
-@returns: string[32]
-*)
-asm
-{	@cmdline i
 
-;	@move #@buf Result #33
-	ldy #256-33
-	mva:rne @buf+33-256,y adr.Result+33-256,y+
-};
+function Pos(s1: string; s2: string): byte; overload;
+var
+    s1len: byte;
+    s2len: byte;
+    i    : byte;
+    j    : byte;
+begin
+    s1len := Length(s1);
+    s2len := Length(s2);
+
+    result := 0;
+
+    for i := 1 to s2len - s1len do // 1 to 14
+    begin
+
+        for j := 0 to s1len - 1 do // 0 to 17
+        begin
+            if s2[i+j] <> s1[j+1] then // 1 <> 1
+            begin
+                break;
+            end;
+        end;
+
+        if j = s1len then 
+        begin
+            result := i;
+            break;
+        end;
+
+    end
 end;
 
 
@@ -1878,7 +2076,7 @@ Append one string to another.
 @returns: string (a+b)
 *)
 asm
-{	cpw a #@buf
+	cpw a #@buf
 	beq skp
 
 	mva #0 @buf
@@ -1888,7 +2086,6 @@ skp
 
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
-};
 end;
 
 
@@ -1898,7 +2095,7 @@ function Concat(a: PString; b: char): string; assembler; overload;
 
 *)
 asm
-{	cpw a #@buf
+	cpw a #@buf
 	beq skp
 
 	mva #0 @buf
@@ -1911,7 +2108,6 @@ skp
 
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
-};
 end;
 
 
@@ -1921,14 +2117,13 @@ function Concat(a: char; b: PString): string; assembler; overload;
 
 *)
 asm
-{	mva #1 @buf
+	mva #1 @buf
 	lda a
 	sta @buf+1
 	@addString b
 
 	ldy #0
 	mva:rne @buf,y adr.Result,y+
-};
 end;
 
 
@@ -1950,7 +2145,7 @@ function Copy(var S: String; Index: Byte; Count: Byte): string; assembler;
 
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa S :bp2
 	ldy #0
@@ -1995,7 +2190,6 @@ lp	lda (:bp2),y
 	bne lp
 
 stop	pla:tax
-};
 end;
 
 
@@ -2040,7 +2234,6 @@ Getmem reserves Size bytes memory, and returns a pointer to this memory in p.
 @param: size
 *)
 asm
-{
 	ldy #$00
 	lda :psptr
 	sta (P),y
@@ -2049,7 +2242,6 @@ asm
 	sta (P),y
 
 	adw :psptr size
-};
 end;
 
 
@@ -2062,7 +2254,6 @@ Freemem releases the memory occupied by the pointer P
 @param: size
 *)
 asm
-{
 	cpw psptr #:PROGRAMSTACK
 	beq skp
 	bcc skp
@@ -2075,7 +2266,6 @@ asm
 
 	sbw :psptr size
 skp
-};
 end;
 
 

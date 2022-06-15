@@ -1,20 +1,20 @@
 unit vbxe;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe), Daniel KoŸmiñski
+ @author: Tomasz Biela (Tebe), Daniel KoÅºmiÅ„ski
  @name: Video Board XE unit
 
  @version: 1.1
 
  @description:
 
-1: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color.
+   VGA: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color.
 
-2: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors.
+ VGALo: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors.
 
-3: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
+VGAMed: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
 
-4: pixel mode 640x192/16 colors (hires)
+ VGAHi: pixel mode 640x192/16 colors (hires)
 
 The mode 0 is reserved for text console.
 *)
@@ -170,14 +170,11 @@ type	TVBXEMemoryStream = Object
 	end;
 
 const
-	LoRes	= 1;
-	MedRes	= 2;
-	HiRes	= 3;
-
 	VC_XDL		= 1;
 	VC_XCOLOR	= 2;
 	VC_NO_TRANS	= 4;
 	VC_TRANS15	= 8;
+
 
 var
 	vram: TVBXEMemoryStream;
@@ -204,6 +201,7 @@ var
 	procedure VBXEMode(mode, pal: byte);
 
 	procedure ClearDevice;
+	procedure CloseGraph; assembler;
 	procedure TextOut(a: char; c: byte); overload;
 	procedure TextOut(s: PByte; c: byte); overload;
 	procedure Position(x,y: byte);
@@ -234,11 +232,11 @@ var
 
 implementation
 
+uses graph;
+
 var	fildat: byte absolute $2fd;
 	rowcrs: byte absolute $54;		// pionowa pozycja kursora
 	colcrs: byte absolute $55;		// (2) pozioma pozycja kursora
-
-	hres: byte;
 
 	mem_vbxe: ^byte;
 
@@ -499,10 +497,10 @@ loop	cpw _adr+1 siz+1
 	bcs skp
 
 	ldy #20
-	mva:rpl bltClr,y MAIN.SYSTEM.VBXE_WINDOW+$e0,y-
+	mva:rpl bltClr,y MAIN.SYSTEM.VBXE_WINDOW+MAIN.SYSTEM.VBXE_BCBTMP,y-
 
-	fxs FX_BL_ADR0 #$e0		; program blittera od adresu $0000e0
-	fxs FX_BL_ADR1 #$00		; zaraz za programem VBXE Display List
+	fxs FX_BL_ADR0 #MAIN.SYSTEM.VBXE_BCBTMP	; program blittera od adresu MAIN.SYSTEM.VBXE_BCBTMP
+	fxs FX_BL_ADR1 #$00			; zaraz za programem VBXE Display List
 	fxsa FX_BL_ADR2
 
 	fxs FX_BLITTER_START #$01	; !!! start gdy 1 !!!
@@ -549,7 +547,7 @@ procedure SetColor(a: byte);
 
 *)
 begin
-	if hres = 3 then
+	if GraphMode = VGAHi then
 	 fildat := (a and $0f) or (a shl 4)
 	else
 	 fildat := a;
@@ -567,7 +565,7 @@ begin
 
     vram.position := VBXE_OVRADR + y*320;
 
-    if hres = 3 then begin
+    if GraphMode = VGAHi then begin
 
 	inc(vram.position, x shr 1);
 
@@ -763,7 +761,6 @@ end;
 
 function ata2int(a: byte): byte; assembler;
 asm
-{
         asl
         php
         cmp #2*$60
@@ -775,7 +772,6 @@ asm
         ror
 
 	sta Result;
-};
 end;
 
 
@@ -789,10 +785,8 @@ begin
  fildat := c;
 
 asm
-{
 	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-
-};
+end;
 
  mem_vbxe^ := ata2int(ord(a));
  inc(mem_vbxe);
@@ -803,9 +797,8 @@ asm
  WrapCursor;
 
 asm
-{
  	fxs FX_MEMS #$00		; disable VBXE BANK
-};
+end;
 
 end;
 
@@ -821,10 +814,8 @@ begin
  fildat := c;
 
 asm
-{
 	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-
-};
+end;
 
  for i:=1 to s[0] do begin
 
@@ -838,9 +829,8 @@ asm
  end;
 
 asm
-{
  	fxs FX_MEMS #$00		; disable VBXE BANK
-};
+end;
 
 end;
 
@@ -851,8 +841,7 @@ procedure OverlayOff; assembler;
 
 *)
 asm
-{	@setxdl #e@xdl.ovroff
-};
+	@setxdl #e@xdl.ovroff
 end;
 
 
@@ -862,8 +851,7 @@ procedure ColorMapOn; assembler;
 
 *)
 asm
-{	@setxdl #e@xdl.mapon
-};
+	@setxdl #e@xdl.mapon
 end;
 
 procedure ColorMapOff; assembler;
@@ -872,8 +860,7 @@ procedure ColorMapOff; assembler;
 
 *)
 asm
-{	@setxdl #e@xdl.mapoff
-};
+	@setxdl #e@xdl.mapoff
 end;
 
 
@@ -903,24 +890,26 @@ procedure SetHorizontalRes(a: byte; s: word); overload;
 
 *)
 begin
+	GraphMode := a;
+
 	ScreenHeight := 192;
 
 	case a of
-	 1: ScreenWidth := 160;
-	 2: ScreenWidth := 320;
-	 3: ScreenWidth := 640;
+	  VGALo: begin ScreenWidth := 160; a := 1 end;
+	 VGAMed: begin ScreenWidth := 320; a := 2 end;
+	  VGAHi: begin ScreenWidth := 640; a := 3 end;
 	else
 
 	 begin
 	   ScreenWidth := 80;
 	   ScreenHeight := 24;
-	   a:=2;
+	   a := 2;
 	  end;
 
 	end;
 
 asm
-{	txa:pha
+	txa:pha
 
 	lda MAIN.SYSTEM.ScreenWidth
 	ldx MAIN.SYSTEM.ScreenWidth+1
@@ -929,11 +918,7 @@ asm
 
 	@SCREENSIZE
 
-	lda a
-	and #3
-	sta hres
-
-	@setxdl @
+	@setxdl a
 
 	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
 
@@ -948,7 +933,8 @@ asm
 	fxs FX_MEMS #$00
 
 	pla:tax
-};
+end;
+
 end;
 
 
@@ -1051,10 +1037,9 @@ function BlitterBusy: Boolean; assembler;
 
 *)
 asm
-{	ldy #FX_BLITTER_BUSY
+	ldy #FX_BLITTER_BUSY
 	lda (fxptr),y
 	sta Result
-};
 end;
 
 
@@ -1064,7 +1049,7 @@ procedure RunBCB(var a: TBCB); assembler;
 
 *)
 asm
-{	fxs	FX_BL_ADR0	a
+	fxs	FX_BL_ADR0	a
 	lda	a+1
 	and	#$0f
 	fxsa	FX_BL_ADR1
@@ -1074,7 +1059,6 @@ asm
 
 ;wait	fxla	FX_BLITTER_BUSY
 ;	bne	wait
-};
 end;
 
 
@@ -1084,7 +1068,7 @@ procedure GetXDL(var a: txdl); register; assembler;
 
 *)
 asm
-{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
 
 	ldy #.sizeof(s@xdl)-1
 
@@ -1094,7 +1078,6 @@ lp	lda MAIN.SYSTEM.VBXE_XDLADR+MAIN.SYSTEM.VBXE_WINDOW,y
 	bpl lp
 
 	fxs FX_MEMS #0
-};
 end;
 
 
@@ -1104,7 +1087,7 @@ procedure SetXDL(var a: txdl); register; assembler;
 
 *)
 asm
-{	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
 
 	ldy #.sizeof(s@xdl)-1
 
@@ -1114,7 +1097,6 @@ lp	lda (a),y
 	bpl lp
 
 	fxs FX_MEMS #0
-};
 end;
 
 
@@ -1124,9 +1106,7 @@ procedure VBXEControl(a: byte); assembler;
 
 *)
 asm
-{
 	fxs FX_VIDEO_CONTROL a
-};
 end;
 
 
@@ -1136,7 +1116,7 @@ procedure VBXEOff; assembler;
 
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	sta FX_CORE_RESET
 
@@ -1147,8 +1127,6 @@ asm
 	@clrscr
 
 	pla:tax
-};
-
 end;
 
 
@@ -1166,12 +1144,17 @@ procedure VBXEMode(mode, pal: byte);
 var p: pointer;
 begin
 
- mode:=mode and $0f;
+// mode:=mode and $0f;
 
  if mode > 0 then begin
 
 	case mode of
-	  1: begin
+
+	   VGALo, VGAMed, VGAHi: SetHorizontalRes(mode);
+
+	else
+
+	  begin
 		SetHorizontalRes($80,160);
 
 		p:=pointer(peek(756)*256);
@@ -1181,14 +1164,10 @@ begin
 		Position(0,0);
 
 		asm
-		@setxdl #e@xdl.tmon
+			@setxdl #e@xdl.tmon
 		end;
 
-	     end;
-
-	  2: SetHorizontalRes(loRes);
-	  3: SetHorizontalRes(medRes);
-	  4: SetHorizontalRes(hiRes);
+	  end;
 
 	end;
 
@@ -1203,5 +1182,24 @@ begin
 
 end;
 
+
+initialization
+
+asm
+	txa:pha
+
+	jsr @vbxe_detect
+	bcc ok
+
+	ldx #MAIN.GRAPH.grNoInitGraph
+	bne status
+
+ok	jsr @vbxe_init
+
+	ldx #MAIN.GRAPH.grOK
+status	stx MAIN.GRAPH.GraphResult
+
+	pla:tax
+end;
 
 end.

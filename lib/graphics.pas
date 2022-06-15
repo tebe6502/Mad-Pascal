@@ -46,7 +46,8 @@ type	TBrushBitmap = array [0..7] of byte;
 	Pen: TPen;
 	Brush: TBrush;
 
-	procedure Create;
+	constructor Create;
+
 	procedure Font(Charset: pointer); overload;
 	function Font(const Charset: TString): Boolean; overload;
 	procedure FontInitialize; assembler;
@@ -600,7 +601,7 @@ end;
 
 
 
-procedure TCanvas.Create;
+constructor TCanvas.Create;
 var br: TBrushBitmap = ($ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);
 begin
 

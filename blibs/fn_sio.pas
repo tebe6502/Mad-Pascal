@@ -3,7 +3,7 @@ unit fn_sio;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: SIO library for #FujiNet interface.
-* @version: 0.9.2
+* @version: 0.9.4
 
 * @description:
 * Set of procedures to communicate with #FujiNet interface on SIO level. <https://fujinet.online/>
@@ -27,7 +27,7 @@ end;
 
 var FN_timeout: byte = 5; // default timeout value
 
-procedure FN_Open(var fn_uri:PChar);
+procedure FN_Open(var fn_uri:PChar);overload;
 (*
 * @description:
 * Opens connection to remote host at selected port using declared protocol.
@@ -40,6 +40,23 @@ procedure FN_Open(var fn_uri:PChar);
 * <https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec>
 *
 *)
+
+procedure FN_Open(var fn_uri:PChar; aux1, aux2: byte);overload;
+(*
+* @description:
+* Opens connection to remote host at selected port using declared protocol.
+*
+* @param: fn_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/
+* @param: aux1 - additional param passed to DCB
+* @param: aux2 - additional param passed to DCB 
+*
+* The N: Device spec can be found here: 
+* 
+* <https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec>
+*
+*)
+
+procedure FN_nlogin(user, pass:pointer);
 
 procedure FN_WriteBuffer(buf: pointer; len: word);
 (*
@@ -73,14 +90,14 @@ procedure FN_Close;
 * Closes network connection.
 *)
 
-procedure FN_Command(cmd, dstats, dbyt, aux1, aux2:byte; dbufa: word);
+procedure FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word);
 (*
 * @description:
 * Sends SIO command to #FN device
 *
 * @param: cmd - DCB.DCMND byte
 * @param: dstats - DCB.STATS byte
-* @param: dbyt - DCB.DBYT byte
+* @param: dbyt - DCB.DBYT word
 * @param: aux1 - DCB.DAUX1 byte
 * @param: aux2 - DCB.DAUX2 byte
 * @param: dbufa - DCB.DBUFA word
@@ -89,7 +106,7 @@ procedure FN_Command(cmd, dstats, dbyt, aux1, aux2:byte; dbufa: word);
 
 implementation
 
-procedure FN_Command(cmd, dstats, dbyt, aux1, aux2:byte; dbufa: word);
+procedure FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word);
 begin
     DCB.DDEVIC := $70;
     DCB.dunit := 1;
@@ -104,7 +121,7 @@ begin
 end;
 
 
-procedure FN_Open(var fn_uri:PChar);
+procedure FN_Open(var fn_uri:PChar);overload;
 begin
     PACTL := PACTL or 1;
     DCB.DDEVIC := $71;
@@ -114,8 +131,23 @@ begin
     DCB.DBUFA := word(@fn_uri);
     DCB.DTIMLO := FN_timeout;
     DCB.DBYT := 256;
-    DCB.DAUX1 := 12;    
+    DCB.DAUX1 := 4;    
     DCB.DAUX2 := 0;   
+    ExecSIO;
+end;
+
+procedure FN_Open(var fn_uri:PChar; aux1, aux2: byte);overload;
+begin
+    PACTL := PACTL or 1;
+    DCB.DDEVIC := $71;
+    DCB.dunit := 1;
+    DCB.DCMND := byte('O');
+    DCB.DSTATS := _W;
+    DCB.DBUFA := word(@fn_uri);
+    DCB.DTIMLO := FN_timeout;
+    DCB.DBYT := 256;
+    DCB.DAUX1 := aux1;    
+    DCB.DAUX2 := aux2;   
     ExecSIO;
 end;
 
@@ -130,6 +162,24 @@ begin
     DCB.DBYT := len;
     DCB.DAUX1 := Lo(len);    
     DCB.DAUX2 := Hi(len);    
+    ExecSIO;    
+end;
+
+procedure FN_nlogin(user, pass:pointer);
+begin
+    DCB.DDEVIC := $71;
+    DCB.dunit := 1;
+    DCB.DCMND := $FD;
+    DCB.DSTATS := _W;
+    DCB.DBUFA := word(@user);
+    DCB.DTIMLO := FN_timeout;
+    DCB.DBYT := 256;
+    DCB.DAUX1 := 0;    
+    DCB.DAUX2 := 0;    
+    ExecSIO;    
+    DCB.DCMND := $FE;
+    DCB.DSTATS := _W;   
+    DCB.DBUFA := word(@pass);
     ExecSIO;    
 end;
 

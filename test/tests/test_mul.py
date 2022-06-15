@@ -32,6 +32,10 @@ class Test_Multiplications:
 	    breaktest;
 
 	    a:=b*256;
+	    breaktest;
+
+	    a:=$78 + b*2;
+
         end.
         ''', ['breaktest'])
 
@@ -55,6 +59,9 @@ class Test_Multiplications:
 
         test.resume()
         assert test.varWord('a') == 27 * 256
+
+        test.resume()
+        assert test.varWord('a') == 0x78 + 27 * 2
 
     def test_another_multiplication_inline(self):
 

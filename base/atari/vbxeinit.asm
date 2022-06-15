@@ -46,18 +46,18 @@ cmapini	lda colpf1s
 loop	fxs FX_MEMS ztmp
 
 	lda >MAIN.SYSTEM.VBXE_WINDOW
-	sta bp+1
+	sta :bp+1
 
 	ldx #16
 	ldy #0
 
-lop	mva #$00	(bp),y+
-	mva colpf1s	(bp),y+
-	mva colpf2s	(bp),y+
-	mva #%00010000	(bp),y+		; overlay palette #1
+lop	mva #$00	(:bp),y+
+	mva colpf1s	(:bp),y+
+	mva colpf2s	(:bp),y+
+	mva #%00010000	(:bp),y+	; overlay palette #1
 	bne lop
 
-	inc bp+1
+	inc :bp+1
 	dex
 	bne lop
 

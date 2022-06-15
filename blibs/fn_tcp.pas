@@ -3,7 +3,7 @@ unit fn_tcp;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: #FujiNet interface TCP communication library.
-* @version: 0.7.0
+* @version: 0.7.2
 
 * @description:
 * This library provides an easy interface to estabilish TCP connection, and transfer data both directions.
@@ -52,7 +52,7 @@ procedure TCP_DetachIRQ;
 * Removes custom SIO interrupt handler. Do not call this procedure without TCP_AttachIRQ before.
 *)
 
-function TCP_Connect(var tcp_uri:PChar):byte;
+function TCP_Connect(var tcp_uri:PChar):byte;overload;
 (*
 * @description:
 * Opens #FujiNet connection to remote host, at selected port using declared protocol.
@@ -66,7 +66,22 @@ function TCP_Connect(var tcp_uri:PChar):byte;
 *
 *)
 
-procedure TCP_GetStatus;
+function TCP_Connect(var tcp_uri: PChar; aux1,aux2: byte):byte;overload;
+(*
+* @description:
+* Opens #FujiNet connection to remote host, at selected port using declared protocol.
+*
+* @param: tcp_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/
+* @param: aux1 - additional param passed to DCB
+* @param: aux2 - additional param passed to DCB 
+* 
+* The N: Device spec can be found here: 
+* 
+* <https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec>
+*
+*)
+
+function TCP_GetStatus:byte;
 (*
 * @description:
 * Reads network device status and stores information in TCP_status variable.
@@ -192,16 +207,24 @@ begin
     asm { cli};
 end;
 
-function TCP_Connect(var tcp_uri:PChar):byte;
+function TCP_Connect(var tcp_uri:PChar):byte;overload;
 begin
     TCP_ClearBuffer;
     FN_Open(tcp_uri);
     result := sioStatus;
 end;
 
-procedure TCP_GetStatus;
+function TCP_Connect(var tcp_uri: PChar; aux1,aux2: byte):byte;overload;
+begin
+    TCP_ClearBuffer;
+    FN_Open(tcp_uri, aux1, aux2);
+    result := sioStatus;
+end;
+
+function TCP_GetStatus:byte;
 begin
     FN_ReadStatus(TCP_status);
+    result := sioStatus;
     if sioStatus = 1 then 
         TCP_bytesWaiting := TCP_status.dataSize;  
 end;

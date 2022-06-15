@@ -13,21 +13,22 @@ Variable allocation is static; there is no dynamic memory management. Parameters
 
 The available features are:
 
-* `If` `Case` `For` `While` `Repeat` statements
+* `If` `Case` `For To` `For In` `While` `Repeat` statements
 * Compound statements
 * `Label` `Goto` statements
 * Arithmetic and boolean operators
 * Procedures and functions with up to 8 parameters. Returned value of a function is assigned to a predefined `RESULT` variable
 * Static local variables
-* Primitive data types, all types except the `ShortReal/Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
+* Primitive data types, all types except the `ShortReal`/`Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
     * `Cardinal` `Word` `Byte` `Boolean`
-    * `Char` `String` `PChar`
     * `Integer` `SmallInt` `ShortInt`
-    * `Pointer` `File`
+    * `Char` `String` `PChar`
+    * `Pointer` `File` `Text`
     * `ShortReal` `Real` (fixed-point)
-    * `Single` `Float` (IEEE-754)
+    * `Float16` https://en.wikipedia.org/wiki/Half-precision_floating-point_format
+    * `Single` https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 * One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters
-* Predefined type string `[N]` which is equivalent to `array [0..N] of Char`
+* Predefined type `String` `[N]` which is equivalent to `array [0..N] of Char`
 * `Type` aliases.
 * `Records`
 * `Objects`
@@ -97,8 +98,11 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [cart builder](https://gitlab.com/bocianu/cart_builder)
 * [Mole](https://github.com/GSoftwareDevelopment/Mole)
 * [SFX-Tracker](https://github.com/GSoftwareDevelopment/SFX-Tracker)
+* [SFX-Engine](https://github.com/GSoftwareDevelopment/SFX-Engine)
+* [MIDICar-Player](https://github.com/GSoftwareDevelopment/MIDICar-Player)
 * [heatmap](https://gitlab.com/delysio/heatmap)
 * [Flob](https://gitlab.com/bocianu/flob)
+* [Ultima V](https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483)
 
 ## Benchmarks
 

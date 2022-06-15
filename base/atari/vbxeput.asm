@@ -25,17 +25,17 @@ skp	lda rowcrs
 	pla
 	and #$0f
 	add >MAIN.SYSTEM.VBXE_WINDOW
-	sta bp+1
+	sta :bp+1
 
 	lda colcrs
 	asl @
 	asl @
 	tay
-	mva colpf0s (bp),y
+	mva colpf0s (:bp),y
 	iny
-	mva colpf1s (bp),y
+	mva colpf1s (:bp),y
 	iny
-	mva colpf2s (bp),y
+	mva colpf2s (:bp),y
 
 	fxs FX_MEMS #$00
 
@@ -43,3 +43,4 @@ stop	pla
 
 	rts
 .endp
+

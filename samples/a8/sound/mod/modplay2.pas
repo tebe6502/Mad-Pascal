@@ -1,7 +1,7 @@
 
 // 6502 MOD Player 2.3 (VBL, IRQ) 8 kHz (POKEY 1.7 MHz)
 // pattern limit = 37
-// sample length limit = 16384 bytes , ladowane do koñca banku ($7fff)
+// sample length limit = 16384 bytes , ladowane do koÅ„ca banku ($7fff)
 
 // volume $de00 - $feff
 

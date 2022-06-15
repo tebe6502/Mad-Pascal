@@ -1,7 +1,7 @@
-{ Test: Functions with one arguments. 
+{ Test: Functions with one arguments.
   This program computes the sum 1+2+...+10 = 55. }
 program bar;
-var 
+var
   sum:integer;
 
 function f(x:integer):integer;
@@ -14,6 +14,8 @@ function f(x:integer):integer;
     else
       f:=sum;
   end;
+
+
 begin
   sum:=0;
   writeln(f(10));

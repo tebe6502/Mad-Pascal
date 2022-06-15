@@ -9,9 +9,10 @@
 
 chrout	= $ffd2                ;kernel character output sub
 
-	jsr chrout
+	cmp #64
+	scc
+	eor #%00100000
 
-	lda #$00
-	sta $d4
-	rts
+	jmp chrout
+
 .endp

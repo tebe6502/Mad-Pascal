@@ -10,9 +10,9 @@
 
 .proc	@moveu			; assert Y = 0
 
-ptr1	= edx
-ptr2	= ecx
-ptr3	= eax
+ptr1	= :edx
+ptr2	= :ecx
+ptr3	= :eax
 
 	stx @sp
 
@@ -58,9 +58,9 @@ done	ldx #0
 
 @move	.proc (.word ptr1, ptr2, ptr3) .var
 
-ptr1	= edx
-ptr2	= ecx
-ptr3	= eax
+ptr1	= :edx
+ptr2	= :ecx
+ptr3	= :eax
 
 src	= ptr1
 dst	= ptr2

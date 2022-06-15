@@ -21,20 +21,24 @@ unit zxlib;
 	- Text "Press any key to start a game" moved upper in text mode 1
 	- Flashing of this text
 	- Added additional text parameter
-  
+
   Version 1.3:
 	- [Added] Beep procedure, simulating ZX Spectrum beeper in middle C
 	- PrintAt procedure: check x boundaries for text mode 1 and 2
 	- ZXTitle procedure: minor updates
 	- [Bug fix] FlashAt procedure: removed annoying messed up alternating text
+
+  Version 1.4:
+	- Text -> Txt
+	- Beep (duration : real; pitch : integer); -> Beep (duration : real; pitch : shortint);
 *)
 
 interface
 
 procedure PrintAt(y, x : byte; c : char); overload;
-procedure PrintAt(y, x : byte; text : string); overload;
+procedure PrintAt(y, x : byte; txt : string); overload;
 procedure PrintAt(var f : file; y, x : byte; c : char); overload;
-procedure PrintAt(var f : file; y, x : byte; text : string); overload;
+procedure PrintAt(var f : file; y, x : byte; txt : string); overload;
 procedure Flash(y, x : byte; char01, char02 : char); overload;
 procedure Flash(y, x : byte; str : string); overload;
 procedure Flash(var f : file; y, x : byte; str : string); overload;
@@ -42,9 +46,9 @@ procedure Flash(var f : file; y, x, rep : byte; str : string); overload;
 function Screen(y, x : byte) : char; overload;
 function Screen(var f : file; y, x : byte) : char; overload;
 function SetRAM(pages : byte) : word;
-procedure ZXTitle(title : string; y, x : byte; author, dev, text, misc : string);
+procedure ZXTitle(title : string; y, x : byte; author, dev, txt, misc : string);
 function Sgn(number : integer) : integer;
-procedure Beep (duration : real; pitch : integer);
+procedure Beep (duration : real; pitch : shortint);
 
 implementation
 
@@ -72,18 +76,18 @@ begin
 end;
 
 
-procedure PrintAt (y, x : byte; text : string); overload;
+procedure PrintAt (y, x : byte; txt : string); overload;
 (*
 * @description:
 * Print string on location y, x in text mode 0
 *
 * @param: y - coordinate Y
 * @param: x - coordinate X
-* @param: text - string to be displayed
+* @param: txt - string to be displayed
 *)
 begin
   GotoXY(x+1, y+1);
-  Write(text);
+  Write(txt);
 end;
 
 
@@ -106,7 +110,7 @@ begin
 end;
 
 
-procedure PrintAt (var f : file; y, x : byte; text : string); overload;
+procedure PrintAt (var f : file; y, x : byte; txt : string); overload;
 (*
 * @description:
 * Print string on location y, x to screen device S:
@@ -114,13 +118,13 @@ procedure PrintAt (var f : file; y, x : byte; text : string); overload;
 * @param: f - variable holder for screen device S: (text mode 1, 2)
 * @param: y - coordinate Y
 * @param: x - coordinate X
-* @param: text - string to be displayed
+* @param: txt - string to be displayed
 *)
 begin
   if (x >= 0) and (x <= 19) then begin
     //and (y >= 0) and (y <= 23) then begin
     GotoXY(x+1, y+1);
-    blockwrite(f, text[1], length(text));
+    blockwrite(f, txt[1], length(txt));
   end;
 end;
 
@@ -266,7 +270,7 @@ begin
 end;
 
 
-procedure ZXTitle (title : string; y, x : byte; author, dev, text, misc : string);
+procedure ZXTitle (title : string; y, x : byte; author, dev, txt, misc : string);
 (*
 * @description:
 * ZX Spectrum title screen
@@ -276,7 +280,7 @@ procedure ZXTitle (title : string; y, x : byte; author, dev, text, misc : string
 * @param: x      - coordinate X
 * @param: author - author
 * @param: dev    - port by...
-* @param: text   - miscellaneous text
+* @param: txt    - miscellaneous text
 * @param: misc   - additional text
 *)
 var
@@ -289,7 +293,7 @@ begin
 
   // Display text
   PrintAt(f, y, x, title);
-  PrintAt(f, 3, 0, text);
+  PrintAt(f, 3, 0, txt);
 
   if dev <> '' then
     Write('Original author: ', author,
@@ -353,10 +357,10 @@ begin
 end;
 
 
-procedure Beep (duration : real; pitch : integer);
+procedure Beep (duration : real; pitch : shortint);
 (*
 * @description:
-* Emulate ZX Spectrum beeper 
+* Emulate ZX Spectrum beeper
 *
 * @param: duration - duration of the sound
 * @param: pitch    - pitch is given in semitones above middle C using negative

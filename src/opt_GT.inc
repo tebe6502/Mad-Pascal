@@ -2,16 +2,16 @@
 //					GT.
 // -------------------------------------------------------------------------------------------
 
-    if lda(i) and										// lda W+3		; 0	opt_092 | CARDINAL > 0
+    if lda_a(i) and										// lda W+3		; 0	opt_092 | CARDINAL > 0
        cmp_im(i+1) and										// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
-       lda(i+3) and										// lda W+2		; 3
+       lda_a(i+3) and										// lda W+2		; 3
        cmp_im(i+4) and										// cmp #$00		; 4
        bne(i+5) and										// bne @+		; 5
-       lda(i+6) and										// lda W+1		; 6
+       lda_a(i+6) and										// lda W+1		; 6
        cmp_im(i+7) and										// cmp #$00		; 7
        bne(i+8) and										// bne @+		; 8
-       lda(i+9) and										// lda W		; 9
+       lda_a(i+9) and										// lda W		; 9
        cmp_im(i+10) and										// cmp #$00		; 10
        (listing[i+11] = '@') and								//@			; 11
        jcc(i+12) and										// jcc l_		; 12
@@ -101,10 +101,10 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda W+1		; 0	opt_093 | WORD > 0
+       lda_a(i) and										// lda W+1		; 0	opt_093 | WORD > 0
        cmp_im(i+1) and										// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
-       lda(i+3) and										// lda W		; 3
+       lda_a(i+3) and										// lda W		; 3
        cmp_im(i+4) and										// cmp #$00		; 4
        (listing[i+5] = '@') and									//@			; 5
        jcc(i+6) and										// jcc l_		; 6
@@ -150,10 +150,10 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda W+1		; 0	opt_091 | WORD > 0
+       lda_a(i) and										// lda W+1		; 0	opt_091 | WORD > 0
        cmp_im(i+1) and										// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
-       lda(i+3) and										// lda W		; 3
+       lda_a(i+3) and										// lda W		; 3
        cmp_im(i+4) and										// cmp #		; 4
        (listing[i+5] = '@') and									//@			; 5
        beq(i+6) and										// beq @+		; 6
@@ -190,10 +190,10 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda W+1		; 0	BOOL := WORD > WORD
+       lda_a(i) and										// lda W+1		; 0	BOOL := WORD > WORD
        cmp_im(i+1) and										// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
-       lda(i+3) and										// lda W		; 3
+       lda_a(i+3) and										// lda W		; 3
        cmp_im(i+4) and										// cmp #		; 4
        (listing[i+5] = '@') and									//@			; 5
        seq(i+6) and										// seq			; 6
@@ -230,10 +230,10 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda W+1		; 0	WORD_1 > WORD_2 => WORD_2 < WORD_1
+       lda_a(i) and										// lda W+1		; 0	WORD_1 > WORD_2 => WORD_2 < WORD_1
        cmp(i+1) and (cmp_im(i+1) = false) and 							// cmp 			; 1
        bne(i+2) and										// bne @+		; 2
-       lda(i+3) and										// lda W		; 3
+       lda_a(i+3) and										// lda W		; 3
        cmp(i+4) and (cmp_im(i+4) = false) and							// cmp			; 4
        (listing[i+5] = '@') and									//@			; 5
        seq(i+6) and										// seq			; 6
@@ -257,7 +257,7 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda			; 0	opt_094	| BYTE > 0
+       lda_a(i) and										// lda			; 0	opt_094	| BYTE > 0
        cmp_im(i+1) and										// cmp #		; 1
        jcc(i+2) and										// jcc l_		; 2
        jeq(i+3) then										// jeq l_		; 3
@@ -294,7 +294,7 @@
 
 
     if (SKIP(i-1) = false) and
-       lda(i) and										// lda			; 0	BYTE > 0
+       lda_a(i) and										// lda			; 0	BYTE > 0
        cmp_im(i+1) and										// cmp #		; 1
        seq(i+2) and										// seq			; 2
        (listing[i+3] = #9'bcs @+') then								// bcs @+		; 3
@@ -319,6 +319,23 @@
 
        end;
 
+      end;
+
+
+    if (SKIP(i-1) = false) and
+       lda_a(i) and										// lda			; 0	BYTE_1 > BYTE_2 => BYTE_2 < BYTE_1
+       cmp(i+1) and (cmp_im(i+1) = false) and							// cmp			; 1
+       seq(i+2) and										// seq			; 2
+       (listing[i+3] = #9'bcs @+') then								// bcs @+		; 3
+      begin
+	tmp := listing[i];
+
+	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'cmp ' + copy(tmp, 6, 256);
+	listing[i+2] := #9'bcc @+';
+	listing[i+3] := '';
+
+	Result:=false; Break;
       end;
 
 
@@ -748,18 +765,6 @@
       end;
 
 
-{
-	lda R+1
-	bmi @+
-	ora R
-	sne
-@
-	dey
-@
-	tya
-	sta SKIP
-}
-
     if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
        jmi(i+23) and										// jmi			; 23
        jeq(i+24) and										// jeq			; 24
@@ -786,12 +791,26 @@
        (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
+
+       if listing[i+1] = #9'lda #$00' then begin
+
+	listing[i]   := #9'lda ' + copy(listing[i+4], 6, 256);
+	listing[i+1] := #9'ora ' + copy(listing[i+7], 6, 256);
+	listing[i+2] := #9'ora ' + copy(listing[i+10], 6, 256);
+	listing[i+3] := #9'jeq ' + copy(listing[i+23], 6, 256);
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+       end else begin
+
 	listing[i]   := listing[i+1];
 	listing[i+1] := #9'jmi ' + copy(listing[i+23], 6, 256);
 	listing[i+2] := #9'ora ' + copy(listing[i+4], 6, 256);
 	listing[i+3] := #9'ora ' + copy(listing[i+7], 6, 256);
 	listing[i+4] := #9'ora ' + copy(listing[i+10], 6, 256);
 	listing[i+5] := #9'jeq ' + copy(listing[i+23], 6, 256);
+
+       end;
 
 	listing[i+6] := '';
 	listing[i+7] := '';

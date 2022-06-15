@@ -7,52 +7,106 @@
 */
 
 
-.proc	mulSHORTREAL
+.proc	@SHORTREAL_MUL
 
-	jsr imulWORD
+A	= :ECX
+B	= :EAX
 
-	mva #0 eax+3
-	mva eax+1 eax
-	mva eax+2 eax+1
+RESULT	= :EAX
 
-	ldy eax+3
+	mva B	B0+1
+	mva B+1	B1+1
 
-	lda :STACKORIGIN-1+STACKWIDTH,x	; t1
+	mva A	A0+1
+	mva A+1	A1+1
+
+	.ifdef fmulinit
+	jsr fmulu_16
+	els
+	jsr imulCX
+	eif	
+
+	mva :eax+1 :eax
+	mva :eax+2 :eax+1
+
+A1	lda #0				; t1
 	bpl @+
 	sec
-	lda eax+1
-	sbc :STACKORIGIN,x
-	sta eax+1
-	tya
-	sbc :STACKORIGIN+STACKWIDTH,x
-	tay
+	lda :eax+1
+B0	sbc #0
+	sta :eax+1
 @
-	lda :STACKORIGIN+STACKWIDTH,x	; t2
+
+B1	lda #0				; t2
 	bpl @+
 	sec
-	lda eax+1
-	sbc :STACKORIGIN-1,x
-	sta eax+1
-	tya
-	sbc :STACKORIGIN-1+STACKWIDTH,x
-	tay
+	lda :eax+1
+A0	sbc #0
+	sta :eax+1
 @
-	sty eax+2
-
-	jmp movaBX_EAX
+	
+	rts
 .endp
 
 
+.proc	@SHORTREAL_DIV
 
-.proc	divSHORTREAL
-	jsr iniEAX_ECX_WORD
+A	= :EAX
+B	= :ECX
 
-	mva eax+1 eax+2
-	mva eax eax+1
+RESULT	= :EAX
+
+	ldy #0
+
+	lda A+1				; dividend sign
+	bpl @+
+	
+	lda #$00
+	sub A
+	sta A
+
+	lda #$00
+	sbc A+1
+	sta A+1
+
+	iny
+@
+	lda B+1				; divisor sign
+	bpl @+
+
+	lda #$00
+	sub B
+	sta B
+
+	lda #$00
+	sbc B+1
+	sta B+1
+
+	iny
+@
+	tya
+	and #1
+	pha
+
+	mva :eax+1 :eax+2
+	mva :eax :eax+1
+	
 	lda #0
-	sta eax
-	sta eax+3
-	sta ecx+3
+	sta :eax
+	sta :eax+3
 
-	jmp idivEAX_ECX.main
+	jsr idivEAX_CX
+
+	pla
+	beq @+
+
+	lda #$00
+	sub :eax
+	sta :eax
+
+	lda #$00
+	sbc :eax+1
+	sta :eax+1
+@
+	rts
 .endp

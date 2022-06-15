@@ -12,7 +12,7 @@
 ------------------------------------------------------------------------------}
 
 uses
-  graph, crt, joystick, sysutils, zxlib;
+  graph, crt, joystick, zxlib, sysutils;
 
 var
    // Mervin
@@ -57,7 +57,7 @@ var
   b, a : integer;  // Mervin direction
   level : byte;    // Level of play (1 - easy, 2 - hard)
   s : integer;     // Your score
-  c : integer;     // Number of cheese hit 
+  c : integer;     // Number of cheese hit
   highScore : integer = 0;    // High score
   loop : integer = 34*7;  // Number of cheese required to finish a screen (eat all cheese)
   m : real;     // Random number to move Mervin more randomly in x position
@@ -80,14 +80,14 @@ var
 begin
   // Set new top RAM address for character set
   topMem := SetRAM(14);
-  
+
   // Redefine characters for the game
   Move(_mervin, pointer(topMem + 3*8), SizeOf(_mervin));
   Move(_cheese, pointer(topMem + 4*8), SizeOf(_mervin));
   Move(_ship01, pointer(topMem + 5*8), SizeOf(_ship01));
   Move(_ship02, pointer(topMem + 6*8), SizeOf(_ship01));
   Move(_ship03, pointer(topMem + 7*8), SizeOf(_ship01));
-  
+
   Move(_char_s, pointer(topMem + 51*8), SizeOf(_char_s));
   Move(_char_c, pointer(topMem + 35*8), SizeOf(_char_s));
   Move(_char_o, pointer(topMem + 47*8), SizeOf(_char_s));
@@ -113,10 +113,10 @@ begin
   Randomize;
 end;
 
-procedure PrintAtEx(y, x : byte; text : string);
+procedure PrintAtEx(y, x : byte; t : string);
 begin
   GotoXY(x + 1, y + 1);
-  blockwrite(fn, text[1], length(text));
+  blockwrite(fn, t[1], length(t));
 end;
 
 procedure Score;
@@ -310,7 +310,7 @@ begin
             end;
           end;
         end;
-        
+
         NewGame;
       end;
 

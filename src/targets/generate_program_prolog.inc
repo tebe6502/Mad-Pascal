@@ -21,6 +21,9 @@ if Pass = CODEGENERATIONPASS then begin
  if target.id = 'a8' then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
+// if target.id = 'raw' then
+//  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
+
  asm65;
 
  asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
@@ -36,11 +39,21 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
  asm65;
+ asm65('zpage');
+ asm65;
 
- if target.id = 'a8' then
+ if target.id = 'a8' then begin
+
+  asm65('.ifdef @vbxe_detect');
   asm65('fxptr'#9'.ds 2','; VBXE pointer');
+  asm65('.fi');
+  asm65;
 
+ end;
+
+ asm65('.if .def(@AllocMem)||.def(MAIN.SYSTEM.GETMEM)||.def(MAIN.SYSTEM.FREEMEM)');
  asm65('psptr'#9'.ds 2','; PROGRAMSTACK Pointer');
+ asm65('.fi');
  asm65;
 
  asm65('bp'#9'.ds 2');
@@ -136,14 +149,14 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'org CODEORIGIN');
   asm65(#9'icl ''atari\basicoff.asm''');
   asm65(#9'ini CODEORIGIN');
-  asm65(#9'.endif');
+  asm65(#9'.fi');
 
   asm65;
   asm65(#9'.ifdef MAIN.@DEFINES.S_VBXE');
   asm65(#9'opt h-');
   asm65(#9'ins ''atari\s_vbxe\sdxld2.obx''');
   asm65(#9'opt h+');
-  asm65(#9'.endif');
+  asm65(#9'.fi');
  end;
 
  if (High(resArray) > 0) and (target.id = 'a8') then begin
@@ -174,6 +187,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
+
  if target.id = 'a8' then begin
   asm65;
   asm65(#9'org CODEORIGIN');
@@ -181,8 +195,23 @@ if Pass = CODEGENERATIONPASS then begin
   for header in target.header do
    if (header = 'END') then break else
     if header <> '' then asm65(#9''+header) else asm65;
+
+  if target.id = 'raw' then begin
+
+   asm65;
+   asm65(#9'opt h-f+');
+   asm65;
+   asm65(#9'org $' + IntToHex(raw.codeorigin, 4));
+   asm65(#9'jmp START');
+   asm65;
+
+   CODEORIGIN_BASE := target.codeorigin + 3;
+
+  end else
+   CODEORIGIN_BASE := target.codeorigin;
+
   asm65('CODEORIGIN');
-  CODEORIGIN_BASE := target.codeorigin;
+
  end;
 
 
@@ -205,10 +234,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65;
 
- if target.id = 'a8' then
-  asm65('.print ''ZPAGE: '',fxptr,''..'',zpend-1')
- else
-  asm65('.print ''ZPAGE: '',psptr,''..'',zpend-1');
+ asm65('.print ''ZPAGE: '',zpage,''..'',zpend-1');
 
  asm65;
  asm65('.print ''RTLIB: '',RTLIB,''..'',*-1');
@@ -228,9 +254,7 @@ if Pass = CODEGENERATIONPASS then begin
 
 
  asm65;
- asm65(#9'.ifdef fmulinit');
- asm65(#9'fmulinit');
- asm65(#9'eif');
+ if FastMul > 0 then asm65(#9'fmulinit');
 
 
  asm65;
@@ -245,18 +269,28 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'sta:rne VADR+VLEN-256,x+');
  asm65(#9'eli VLEN>256');
  asm65(#9'@fill #VADR #VLEN #$00');
-// asm65(#9'm@fill');
  asm65(#9'eif');
  asm65;
 
- asm65(#9'mwa #PROGRAMSTACK psptr');
+ asm65('.ifdef :psptr');
+ asm65(#9'mwa #PROGRAMSTACK :psptr');
+ asm65('.fi');
  asm65;
+
+
+ if (target.id = 'c64') or (target.id = 'c4p') then begin
+
+  asm65(#9'lda #$0e');
+  asm65(#9'jsr $ffd2','; shifted charset');
+
+ end;
+
 
  if target.id = 'a8' then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
   asm65(#9'icl ''atari\romoff.asm''');
-  asm65(#9'.endif');
+  asm65(#9'.fi');
   asm65;
 
   asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
@@ -284,7 +318,9 @@ if Pass = CODEGENERATIONPASS then begin
 
  end;
 
- if CPUMode = 65816 then asm65(#9'opt c+');
+
+// if CPUMode = 65816 then asm65(#9'opt c+');
+
 
  asm65;
  asm65(#9'UNITINITIALIZATION');

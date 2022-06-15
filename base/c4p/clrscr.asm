@@ -3,6 +3,6 @@
 
 .proc	@ClrScr
 
-	jmp $e544
+	jmp $ff81
 
 .endp

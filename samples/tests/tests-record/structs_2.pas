@@ -1,3 +1,13 @@
+{ Test:
+
+        Expected result:
+
+	0,0
+	1,2
+	2,4
+	3,6
+}
+
 uses crt;
 
 type
@@ -7,9 +17,9 @@ var
 	monster: array [0..3] of ^monsters;
 
 	i: byte;
-	
+
 	a,b,c,d: monsters;
-	
+
 	tmp: ^monsters;
 begin
 

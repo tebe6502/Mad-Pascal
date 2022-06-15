@@ -3,7 +3,7 @@ unit b_utils;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Common Utils
-* @version: 0.5.4
+* @version: 0.6.0
 * @description:
 * Set of useful procedures to simplify common tasks in Atari 8-bit programming.
 *
@@ -83,7 +83,7 @@ procedure ExpandRLE(src: word; dest: word);
 * @param: src (word) - source address of compressed data 
 * @param: dest (word) - destination address where data is expanded
 *)
-procedure ExpandLZ4(source: word; dest: word):assembler;
+procedure ExpandLZ4(source: word; dest: word);assembler;
 (*
 * @description:
 * Expands LZ4 compressed data from source memory location and 
@@ -121,10 +121,109 @@ function HexChar2Dec(c:char):byte;
 * @returns: (byte) - decimal value (0-15), on error (invalid char) returns 255
 *)
 
+procedure Base64Init;
+(*
+* @description:
+* Initializes base64 encoding tables. Must be started once, prior to any compression or decompression process.
+*)
 
+procedure Base64Encode(var src, dest: string);
+(*
+* @description:
+* Encodes string using base64 code.
+* Be sure that trlaslation arrays are initialized by calling Base64Init first. Once.
+* 
+* @param: src (string) - source string
+* @param: dest (string) - destination string where data is encoded
+* 
+*)
 
+procedure Base64Decode(var src, dest: string);
+(*
+* @description:
+* Decodes base 64 encoded string 
+* Be sure that trlaslation arrays are initialized by calling Base64Init first. Once.
+* 
+* @param: src (string) - encoded source string
+* @param: dest (string) - destination string where data is decoded
+* 
+*)
 
 implementation
+
+var base64chars: pChar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'; // @nodoc 
+var base64inv: array [0..127] of byte; // @nodoc 
+
+procedure Base64Init;
+var i:byte;
+begin
+	for i := 0 to 63 do
+		base64inv[byte(base64chars[i])] := i; 
+end;
+
+procedure Base64Encode(var src, dest: string);
+var
+	l,c,d:byte;
+	p:string[3];
+	chunk: array[0..3] of char;
+begin
+	p := '';
+	l := byte(src[0]);
+	c := l mod 3;
+	if c>0 then
+		while c<3 do begin
+			Inc(p[0]);
+			p[byte(p[0])] := '=';
+			inc(c);
+	end;
+	c:=1;
+	d:=1;
+	repeat
+		chunk[0] := base64chars[byte(src[c]) shr 2];
+		chunk[1] := base64chars[((byte(src[c]) and 3) shl 4) or ((byte(src[c+1]) and $f0) shr 4)];
+		chunk[2] := base64chars[((byte(src[c+2]) and 192) shr 6) or ((byte(src[c+1]) and $0f) shl 2)];
+		chunk[3] := base64chars[byte(src[c+2]) and 63];
+		move(chunk,dest[d],4);
+		Inc(d,4);
+		Inc(c,3);
+	until c > l;
+	dest[0] := char(d - 1);
+	l := byte(dest[0]);
+	for c:=1 to length(p) do begin
+		dest[l] := p[c];
+		dec(l);
+	end;
+	
+end;
+
+procedure Base64Decode(var src, dest: string);
+var
+	l,c,d:byte;
+	p:byte;
+	chunk: array[0..2] of char;
+begin
+	l := Length(src);
+	p := 0;
+	if src[l] = '=' then begin
+		src[l] := 'A';
+		Inc(p);
+		if src[l-1] = '=' then begin
+			src[l-1] := 'A';
+			Inc(p);
+		end;
+	end;
+	c:=1;
+	d:=1;
+	repeat
+		chunk[0] := char((base64inv[byte(src[c])] shl 2) or (base64inv[byte(src[c+1])] shr 4));
+		chunk[1] := char((base64inv[byte(src[c+1])] shl 4) or (base64inv[byte(src[c+2])] shr 2));
+		chunk[2] := char((base64inv[byte(src[c+2])] shl 6) or base64inv[byte(src[c+3])]);
+		move(chunk,dest[d],3);
+		Inc(c,4);
+		Inc(d,3);
+	until c > l;
+	dest[0] := char(d - p - 1);
+end;
 
 procedure WriteRightAligned(w: byte; s: TString);
 var len: byte;
@@ -192,7 +291,7 @@ begin
     end;
 end; 
 
-procedure ExpandLZ4(source: word; dest: word):assembler;
+procedure ExpandLZ4(source: word; dest: word);assembler;
 asm {
                   mwa dest xdest
                   mwa source xsource

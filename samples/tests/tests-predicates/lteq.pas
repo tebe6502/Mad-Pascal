@@ -1,4 +1,4 @@
-// 764  bytes	10
+// 773  bytes	10
 
 var
 	i: byte;
@@ -6,11 +6,11 @@ var
 	a: byte;
 	b: word;
 	c: cardinal;
-	
+
 	d: shortint;
 	e: smallint;
 	f: integer;
-	
+
 
 begin
 
@@ -27,7 +27,7 @@ f:=-1000;
 	if c <= 0 then inc(i);
 
 	if d <= 0 then inc(i);
-	if e <= 0 then inc(i);		
+	if e <= 0 then inc(i);
 	if f <= 0 then inc(i);
 
 	if a <= 7 then inc(i);
@@ -36,12 +36,12 @@ f:=-1000;
 
 	if b <= $1234 then inc(i);
 
-	if c <= $11 then inc(i);	
+	if c <= $11 then inc(i);
 	if c <= $1122 then inc(i);
 	if c <= $112233 then inc(i);
-	if c <= $11223344 then inc(i);	
-	
-	if d <= 117 then inc(i);	
+	if c <= $11223344 then inc(i);
+
+	if d <= 117 then inc(i);
 	if e <= 1117 then inc(i);
 	if f <= 11117 then inc(i);
 
@@ -51,6 +51,6 @@ f:=-1000;
 	if f <= low(integer) then inc(i);
 
 	writeln(i);
-	
+
 	while true do;
 end.

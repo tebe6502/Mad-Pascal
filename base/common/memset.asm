@@ -6,9 +6,9 @@
 
 .proc	@fill (.word ptr1, ptr3 .byte ptr2) .var
 
-ptr1 = edx
-ptr3 = ecx
-ptr2 = eax
+ptr1 = :edx
+ptr3 = :ecx
+ptr2 = :eax
 
 	txa:pha
 

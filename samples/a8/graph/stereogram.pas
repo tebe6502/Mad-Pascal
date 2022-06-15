@@ -433,7 +433,7 @@ end;
 
 var
   X, Y: Word;
-  S, L: Byte;
+  S, L: Word;
 begin
   for Y := 0 to 191 do
     for X := 0 to 31 do

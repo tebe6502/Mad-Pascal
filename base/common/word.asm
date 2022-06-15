@@ -201,12 +201,17 @@ MUL2	DEY
 
 .proc	imulCX
 
-ptr1 = eax
-sreg = eax+2
-ptr3 = ecx
+ptr1 = :eax
+sreg = :eax+2
+ptr3 = :ecx
+
+	lda	ptr1+1
+	ora	ptr3+1
+	jeq	imulCL
 
         lda     #0
         sta     sreg+1
+
         ldy     #16             ; Number of bits
 
         lsr     ptr1+1
@@ -236,11 +241,11 @@ ptr3 = ecx
 
 .proc	imulWORD
 
-	mva :STACKORIGIN,x ecx
-	mva :STACKORIGIN+STACKWIDTH,x ecx+1
+	mva :STACKORIGIN,x :ecx
+	mva :STACKORIGIN+STACKWIDTH,x :ecx+1
 
-	mva :STACKORIGIN-1,x eax
-	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+	mva :STACKORIGIN-1,x :eax
+	mva :STACKORIGIN-1+STACKWIDTH,x :eax+1
 
 	.ifdef fmulinit
 	jmp fmulu_16
@@ -253,11 +258,11 @@ ptr3 = ecx
 .proc	idivWORD
 
 MOD
-	mva :STACKORIGIN,x ecx
-	mva :STACKORIGIN+STACKWIDTH,x ecx+1
+	mva :STACKORIGIN,x :ecx
+	mva :STACKORIGIN+STACKWIDTH,x :ecx+1
 
-	mva :STACKORIGIN-1,x eax
-	mva :STACKORIGIN-1+STACKWIDTH,x eax+1
+	mva :STACKORIGIN-1,x :eax
+	mva :STACKORIGIN-1+STACKWIDTH,x :eax+1
 
 	jmp idivAX_CX
 .endp
@@ -277,8 +282,8 @@ main
 	STA ztmp+2
 	STA ztmp+3
 
-	sta eax+2
-	sta eax+3
+	sta :eax+2
+	sta :eax+3
 
 	.ifdef fmulinit
 	.rept 16
@@ -343,8 +348,8 @@ sreg	= ztmp
 	STA ztmp+2
 	STA ztmp+3
 
-	sta eax+2
-	sta eax+3
+	sta :eax+2
+	sta :eax+3
 
 	ldy #$10
 

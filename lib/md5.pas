@@ -9,7 +9,7 @@ unit md5;
  @description:
  Implements a MD5 digest algorithm (RFC 1321)
 
- <https://github.com/graemeg/freepascal/blob/master/packages/hash/src/md5.pp>
+ <https://github.com/alrieckert/freepascal/blob/master/packages/hash/src/md5.pp>
 
 *)
 
@@ -190,7 +190,7 @@ begin
   Num := 0;
 
   // 1. Transform existing data in buffer
-  if Context.BufCnt > 0 then
+  if Context.BufCnt <> 0 then
   begin
     // 1.1 Try to fill buffer to "Align" bytes
     Num := Align - Context.BufCnt;
@@ -205,7 +205,7 @@ begin
     // 1.2 If buffer contains "Align" bytes, transform it
     if Context.BufCnt = Align then
     begin
-      MDHash(Context, Context.Buffer);
+      MDHash(@Context, @Context.Buffer);
       Context.BufCnt := 0;
     end;
   end;
@@ -215,7 +215,7 @@ begin
 
   while Num >= Align do
   begin
-    MDHash(Context, Src);
+    MDHash(@Context, Src);
     Src := Pointer(PtrUInt(Src) + Align);
     Num := Num - Align;
   end;
@@ -257,6 +257,7 @@ begin
 
   MDUpdate(Context, Len, 4);
 
+  // 4. Invert state to digest
   Context.State[0]:=reverse32(Context.State[0]);
   Context.State[1]:=reverse32(Context.State[1]);
   Context.State[2]:=reverse32(Context.State[2]);

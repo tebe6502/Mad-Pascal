@@ -69,7 +69,7 @@ Detect ANTIC PAL/NTSC
 @returns: FALSE = NTSC
 *)
 asm
-{
+
 // ANTIC PAL Test for Atari 8-bits
 // (C) 2019 Guillermo Fuenzalida
 
@@ -96,7 +96,7 @@ scanline equ *-1
 	iny
 ntsc
 	sty Result
-};
+
 end;
 
 
@@ -116,7 +116,7 @@ begin
  if DetectCPU > $7f then
 
 asm
-{
+
 adr	= eax
 bcnt	= Result
 bfirst	= Result+1
@@ -185,7 +185,8 @@ ramsize	stz adr
 @sp	equ *-1
 
 	opt c-
-};
+end;
+
 end;
 
 
@@ -202,7 +203,7 @@ Detect VBXE card
 @returns: bit 8..15 variable: VBXE PAGE
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	jsr @vbxe_detect
 
@@ -216,7 +217,7 @@ asm
 	sta (p),y
 
 	pla:tax
-};
+
 end;
 
 
@@ -229,7 +230,7 @@ Detect EVIE card
 *)
 
 asm
-{	ldy #3
+	ldy #3
 lp	lda $d2fa,y
 	cmp _evie,y
 	bne _no
@@ -247,14 +248,17 @@ _no	lda #false
 _evie	dta c'Evie'
 
 stop
-};
+
 end;
 
 
+{
 function DetectStereo: Boolean; assembler;
 (*
 @description:
 Second POKEY detect routine
+
+<http://atariki.krap.pl/index.php/Programowanie:_Detekcja_stereo>
 
 author:
 Seban/SLIGHT
@@ -262,9 +266,10 @@ Seban/SLIGHT
 (c) 1995,96
 
 @returns: TRUE present, FALSE otherwise
+
 *)
 asm
-{	txa:pha
+	txa:pha
 
 pokey1	= $d200
 pokey2	= $d210
@@ -298,7 +303,50 @@ stop	lda $10
 	stx Result
 
 	pla:tax
-};
+end;
+}
+
+
+function DetectStereo: Boolean; assembler;
+(*
+@description:
+Second POKEY detect routine
+
+<http://atariki.krap.pl/index.php/Programowanie:_Detekcja_stereo>
+
+author: KMK
+
+@returns: X = 0 mono
+@returns: X = 1 stereo
+
+*)
+asm
+	txa:pha
+
+	ldx #$00
+	stx $d20f	;halt pokey 0
+	stx $d21f	;halt pokey 1
+	ldy #$03
+	sty $d21f	;release pokey 1
+
+	sta $d40a	;delay necessary for
+	sta $d40a	;accelerator boards
+
+	lda #$ff
+loop	and $d20a	;see if pokey 0 is halted ($d20a = $ff)
+	inx
+	bne loop
+
+	sty $d20f
+
+	cmp #$ff
+	bne mono
+
+	inx
+mono
+	stx Result
+
+	pla:tax
 end;
 
 
@@ -322,7 +370,7 @@ function DetectCPU: byte; assembler;
 @returns: $80 - 65816
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	opt c+
 
@@ -355,7 +403,7 @@ stop	sta Result
 	opt c-
 
 	pla:tax
-};
+
 end;
 
 
@@ -372,7 +420,7 @@ var clkm, fr0: word;
 begin
 
 asm
-{	stx @sp
+	stx @sp
 
 	tsx
 	stx	stk
@@ -445,7 +493,9 @@ oldp	equ *-1
 
 	ldx #0
 @sp	equ *-1
-};
+
+end;
+
 	Result := ((fr0 shl 16 + clkm) / 487) * 1.7734;
 end;
 
@@ -459,7 +509,7 @@ Detect amount additional memory PORTB
 @returns: banks code PORTB = BANKS[0..63] at address $0101
 *)
 asm
-{	txa:pha
+	txa:pha
 
 bsav	= @buf
 
@@ -490,28 +540,28 @@ copy
 	lda ext_b
 	pha
 
-	ldx #$0f	;zapamiêtanie bajtów ext (z 16 bloków po 64k)
+	ldx #$0f	;zapamiÄ™tanie bajtÃ³w ext (z 16 blokÃ³w po 64k)
 _p0	jsr setpb
 	lda ext_b
 	sta bsav,x
 	dex
 	bpl _p0
 
-	ldx #$0f	;wyzerowanie ich (w oddzielnej pêtli, bo nie wiadomo
-_p1	jsr setpb	;które kombinacje bitów PORTB wybieraj¹ te same banki)
+	ldx #$0f	;wyzerowanie ich (w oddzielnej pÄ™tli, bo nie wiadomo
+_p1	jsr setpb	;ktÃ³re kombinacje bitÃ³w PORTB wybierajÄ… te same banki)
 	lda #$00
 	sta ext_b
 	dex
 	bpl _p1
 
-	stx portb	;eliminacja pamiêci podstawowej
+	stx portb	;eliminacja pamiÄ™ci podstawowej
 	stx ext_b
-	stx $00		;niezbêdne dla niektórych rozszerzeñ do 256k
+	stx $00		;niezbÄ™dne dla niektÃ³rych rozszerzeÅ„ do 256k
 
-	ldy #$00	;pêtla zliczaj¹ca bloki 64k
+	ldy #$00	;pÄ™tla zliczajÄ…ca bloki 64k
 	ldx #$0f
 _p2	jsr setpb
-	lda ext_b	;jeœli ext_b jest ró¿ne od zera, blok 64k ju¿ zliczony
+	lda ext_b	;jeÅ›li ext_b jest rÃ³Å¼ne od zera, blok 64k juÅ¼ zliczony
 	bne _n2
 
 	dec ext_b	;w przeciwnym wypadku zaznacz jako zliczony
@@ -519,12 +569,12 @@ _p2	jsr setpb
 	lda ext_b	;sprawdz, czy sie zaznaczyl; jesli nie -> cos nie tak ze sprzetem
 	bpl _n2
 
-	lda portb	;wpisz wartoœæ PORTB do tablicy dla banku 0
+	lda portb	;wpisz wartoÅ›Ä‡ PORTB do tablicy dla banku 0
 
 	and #$fe
 
 	sta adr.banks,y
-	eor #%00000100	;uzupe³nij wartoœci dla banków 1, 2, 3
+	eor #%00000100	;uzupeÅ‚nij wartoÅ›ci dla bankÃ³w 1, 2, 3
 	sta adr.banks+1,y
 	eor #%00001100
 	sta adr.banks+2,y
@@ -538,7 +588,7 @@ _p2	jsr setpb
 _n2	dex
 	bpl _p2
 
-	ldx #$0f	;przywrócenie zawartoœci ext
+	ldx #$0f	;przywrÃ³cenie zawartoÅ›ci ext
 _p3	jsr setpb
 	lda bsav,x
 	sta ext_b
@@ -558,13 +608,13 @@ _p3	jsr setpb
 	rts
 
 ; podprogramy
-setpb	txa		;zmiana kolejnoœci bitów: %0000dcba -> %cba000d0
+setpb	txa		;zmiana kolejnoÅ›ci bitÃ³w: %0000dcba -> %cba000d0
 	lsr
 	ror
 	ror
 	ror
 	adc #$01	;ustawienie bitu nr 1 w zaleznosci od stanu C
-	ora #$01	;ustawienie bitu steruj¹cego OS ROM na wartosc domyslna
+	ora #$01	;ustawienie bitu sterujÄ…cego OS ROM na wartosc domyslna
 	sta portb
 	rts
 
@@ -572,7 +622,6 @@ setpb	txa		;zmiana kolejnoœci bitów: %0000dcba -> %cba000d0
 
 stop	pla:tax
 
-};
 end;
 
 
@@ -586,7 +635,6 @@ Detect MapRAM
 @returns: TRUE present, FALSE otherwise
 *)
 asm
-{
 
 bsav	= DX
 ext_b	= $5000		;cokolwiek z zakresu $5000-$57FF
@@ -626,7 +674,7 @@ _p0	jsr setb
 	sta ext_b
 
 	lda #$ff
-	sta portb	;eliminacja pamiêci podstawowej
+	sta portb	;eliminacja pamiÄ™ci podstawowej
 	sta ext_b
 
 _p2	jsr setb
@@ -663,7 +711,6 @@ setb	lda portb
 
 stop	pla:tax
 
-};
 end;
 
 
@@ -677,7 +724,7 @@ Detect BASIC
 @returns: 234 = 'Atari Basic Rev.C'
 *)
 asm
-{
+
 BASROM	= $a8e2
 
 	lda PORTB
@@ -695,8 +742,7 @@ stop	sta Result
 	lda #$ff
 old	equ *-1
 	sta PORTB
-};
+
 end;
 
 end.
-

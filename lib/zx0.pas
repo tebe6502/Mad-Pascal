@@ -210,7 +210,7 @@ dzx0s_elias_loop
 		asl   @
 		bne   dzx0s_elias_skip
 		jsr   GET_BYTE
-		sec   ; mo¿na usun¹æ jeœli dekompresja z pamiêci a nie pliku
+		sec   ; moÅ¼na usunÄ…Ä‡ jeÅ›li dekompresja z pamiÄ™ci a nie pliku
 		rol   @
 dzx0s_elias_skip
 		bcc   dzx0s_elias_backtrack
@@ -381,7 +381,7 @@ dzx0s_elias_loop
 		asl   @
 		bne   dzx0s_elias_skip
 		jsr   GET_BYTE
-		sec   ; mo¿na usun¹æ jeœli dekompresja z pamiêci a nie pliku
+		sec   ; moÅ¼na usunÄ…Ä‡ jeÅ›li dekompresja z pamiÄ™ci a nie pliku
 		rol   @
 dzx0s_elias_skip
 		bcc   dzx0s_elias_backtrack
