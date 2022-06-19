@@ -66,11 +66,11 @@ var
     s: TString;
     i: byte;
     flag:boolean;
-    
+
     secret:array [0..SECRET_LEN-1] of byte;
 	secret_id:byte;
 	cheat_mode:boolean;
-	
+
 	startingLevel:byte;
 
     msx: TRMT;
@@ -98,6 +98,7 @@ asm
     lda:cmp:req 20
     sei
     mva #0 _ATARI._NMIEN
+    sta _atari._sdmctl_
     mva #$fe _ATARI._PORTB
     mva >CHARSET_TITLE_ADDRESS _ATARI._CHBASE
     mwa #nmi _ATARI._NMIVEC
@@ -455,7 +456,7 @@ begin
             if cell = TILE_VOID then begin
 				t := GetNeighbours(col,row) and 15;
                 tile := fences[t];
-                if (Hi(tile) = $4f) and CanMoveTo(col+1, row+1) then 
+                if (Hi(tile) = $4f) and CanMoveTo(col+1, row+1) then
 					tile := (tile and $00ff) or $5000;
             end else begin
                 tile := tiles[cell];
@@ -631,7 +632,7 @@ var a:array[0..3] of byte;
     ai:byte;
 begin
 	ai:=0;
-	for result:=0 to 3 do 
+	for result:=0 to 3 do
 		if dirs[result] and mask <> 0 then begin
 			a[ai]:=dirs[result];
 			inc(ai)
@@ -827,7 +828,7 @@ begin
         if spawnCounter = 40 then begin
             PaintOnBoard(Hi(spawners[spawnerActive]),Lo(spawners[spawnerActive]),TILE_SPAWNER_OPEN2);
         end;
-        if (spawnCounter = 0) then begin 
+        if (spawnCounter = 0) then begin
 			Inc(spawnCounter);
 			if (pac.frame = ghostNumber + 1) then begin
 				PaintOnBoard(Hi(spawners[spawnerActive]),Lo(spawners[spawnerActive]),TILE_SPAWNER);
@@ -991,7 +992,7 @@ begin
 				if secret_id = SECRET_LEN then begin
 					secret_id:=0;
 					cheat_mode := not cheat_mode;
-					if cheat_mode then poke(TXT_RAM,32) 
+					if cheat_mode then poke(TXT_RAM,32)
 					else poke(TXT_RAM,0);
 				end;
 			end;
@@ -1012,7 +1013,7 @@ begin
     PMG_clear;
     ClearTxT;
 	secret_id:=0;
-	if cheat_mode then poke(TXT_RAM,32) 
+	if cheat_mode then poke(TXT_RAM,32)
 	else poke(TXT_RAM,0);
 
     UpdateHiScore;
@@ -1039,17 +1040,17 @@ begin
         if music then msx.Play;
         Pause;
         ghostFrame := (frame shr 4) and 1;
-        
-        if selectFrame = 0 then begin 
+
+        if selectFrame = 0 then begin
 			Move(strings[12],pointer(TXT_RAM+40*15+8),23);
 			UpdateLevel
 		end;
         if selectFrame = 150 then Move(strings[2],pointer(TXT_RAM+40*15+11),19);
         if (selectFrame = 100) or (selectFrame = 250) then FillByte(pointer(TXT_RAM+40*15+8),26,0);
-		
+
 		Inc(selectFrame);
 		if selectFrame=300 then selectFrame:=0;
-		
+
 		ReadSecret;
 
         case titleStage of
@@ -1377,7 +1378,7 @@ begin
 end;
 
 procedure VFrame(vtop: word; hsize: byte);
-begin 
+begin
 	repeat
 		poke(dltop + word(vtop - 1), $60);
 		poke(dltop + vtop + 24, $60);
@@ -1420,7 +1421,7 @@ begin
     count:=0;
     MoveViewport;
     PMG_clear;
-    if not cheat_mode then 
+    if not cheat_mode then
 		if score >= hiscore then begin
 			hiscore := score;
 		end;
@@ -1535,7 +1536,7 @@ begin
 
                     CheckIfPacTurnsBack;
                     if pac.step = 0 then begin // pac enters new field
-                        
+
                         CheckIfPacTurns;
                     end;
 
