@@ -294,7 +294,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
 	function CompareByte(P1,P2: PByte; Len: word): smallint; register; overload;
 	function CompareByte(P1,P2: PByte; Len: byte): smallint; register; overload;
-	function Concat(a,b: String): string; assembler; overload;
+	function Concat(a,b: PString): string; assembler; overload;
 	function Concat(a: PString; b: char): string; assembler; overload;
 	function Concat(a: char; b: PString): string; assembler; overload;
 	function Concat(a,b: char): string; overload;
@@ -310,14 +310,11 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Exp(x: Float): Float; overload;
 	function FilePos(var f: file): cardinal; assembler;
 	function FileSize(var f: file): cardinal; assembler;
-	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
-	procedure FillByte(var x; count: word; value: byte); assembler; register; overload; inline;
+	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; inline;
 	procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
-	procedure FillChar(var x; count: word; value: char); assembler; register; overload; inline;
-	procedure FillChar(var x; count: word; value: byte); assembler; register; overload; inline;
-	procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload; inline;
+	procedure FillChar(var a; count: word; value: byte); assembler; register; overload; inline;
 	function FloatToStr(a: real): TString; stdcall; assembler;
 	procedure FreeMem(var p; size: word); assembler; register;
 	procedure GetMem(var p; size: word); assembler; register;
@@ -331,6 +328,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure Move(source, dest: pointer; count: word); assembler; register; overload; inline;
 	procedure Move(var source, dest; count: word); assembler; register; overload; inline;
 	procedure Move(var source; dest: pointer; count: word); assembler; register; overload; inline;
+	procedure Move(source: pointer;var dest; count: word); assembler; register; overload; inline;
 	function OctStr(Value: cardinal; Digits: byte): TString; assembler;
 	function ParamCount: byte; assembler;
 	function ParamStr(i: byte): TString; assembler;
@@ -1557,35 +1555,22 @@ asm
 	jsr @fill
 end;
 
-procedure FillChar(var x; count: word; value: char); assembler; register; overload; inline;
+
+procedure FillChar(var a; count: word; value: Byte); assembler; register; overload; inline;
 (*
 @description:
+Fills the memory starting at A with Count Characters with value equal to Value
 
-*)
-asm
-	jsr @fill
-end;
-
-procedure FillChar(var x; count: word; value: byte); assembler; register; overload; inline;
-(*
-@description:
-
-*)
-asm
-	jsr @fill
-end;
-
-procedure FillChar(var x; count: word; value: Boolean); assembler; register; overload; inline;
-(*
-@description:
-
+@param: a - formal type
+@param: count
+@param: value - Boolean
 *)
 asm
 	jsr @fill
 end;
 
 
-procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
+procedure FillByte(a: pointer; count: word; value: byte); assembler; register; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
@@ -1593,15 +1578,6 @@ Fills the memory starting at A with Count Characters with value equal to Value
 @param: a - pointer
 @param: count
 @param: value - Byte
-*)
-asm
-	jsr @fill
-end;
-
-procedure FillByte(var x; count: word; value: byte); assembler; register; overload; inline;
-(*
-@description:
-
 *)
 asm
 	jsr @fill
@@ -1620,8 +1596,7 @@ Moves Count bytes from Source to Dest
 @returns: cardinal
 *)
 asm
-{	jsr @move
-};
+	jsr @move
 end;
 
 procedure Move(var source, dest; count: word); assembler; register; overload; inline;
@@ -1630,8 +1605,7 @@ procedure Move(var source, dest; count: word); assembler; register; overload; in
 
 *)
 asm
-{	jsr @move
-};
+	jsr @move
 end;
 
 procedure Move(var source; dest: pointer; count: word); assembler; register; overload; inline;
@@ -1640,8 +1614,17 @@ procedure Move(var source; dest: pointer; count: word); assembler; register; ove
 
 *)
 asm
-{	jsr @move
-};
+	jsr @move
+end;
+
+
+procedure Move(source: pointer;var dest; count: word); assembler; register; overload; inline;
+(*
+@description:
+
+*)
+asm
+	jsr @move
 end;
 
 
@@ -1984,6 +1967,14 @@ end;
 
 
 procedure Delete(var s: string; index, count: byte);
+(*
+@description:
+Delete removes Count characters from string S, starting at position Index.
+
+@param: s
+        index
+	count
+*)
 var l: byte;
     ch: char;
 begin
@@ -2014,6 +2005,13 @@ end;
 
 
 function Pos(c: char; s: string): byte; overload;
+(*
+@description:
+Pos returns the index of Substr in S, if S contains Substr. In case Substr isn't found, 0 is returned. The search is case-sensitive.
+
+@param: c - char (Substr)
+        s - string
+*)
 var
     slen: byte;
     i    : byte;
@@ -2033,6 +2031,13 @@ end;
 
 
 function Pos(s1: string; s2: string): byte; overload;
+(*
+@description:
+Pos returns the index of Substr in S, if S contains Substr. In case Substr isn't found, 0 is returned. The search is case-sensitive.
+
+@param: s1 - string (Substr)
+        s2 - string
+*)
 var
     s1len: byte;
     s2len: byte;
@@ -2055,7 +2060,7 @@ begin
             end;
         end;
 
-        if j = s1len then 
+        if j = s1len then
         begin
             result := i;
             break;

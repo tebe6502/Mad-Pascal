@@ -12,7 +12,7 @@ unit siodisk;
 
 {
 
-ReradBoot
+ReadBoot
 ReadConfig
 ReadSector
 WriteBoot

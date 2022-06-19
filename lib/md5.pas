@@ -205,7 +205,7 @@ begin
     // 1.2 If buffer contains "Align" bytes, transform it
     if Context.BufCnt = Align then
     begin
-      MDHash(@Context, @Context.Buffer);
+      MDHash(Context, Context.Buffer);
       Context.BufCnt := 0;
     end;
   end;
@@ -215,7 +215,7 @@ begin
 
   while Num >= Align do
   begin
-    MDHash(@Context, Src);
+    MDHash(Context, Src^);
     Src := Pointer(PtrUInt(Src) + Align);
     Num := Num - Align;
   end;

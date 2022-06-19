@@ -978,7 +978,7 @@ procedure IniBCB(var a: TBCB; src,dst: cardinal; w0, w1: smallint; w: word; h: b
 
 *)
 begin
- fillbyte(a, sizeof(a), 0);
+ fillbyte(@a, sizeof(a), 0);
 
  a.src_adr.byte2:=src shr 16;
  a.src_adr.byte1:=src shr 8;
