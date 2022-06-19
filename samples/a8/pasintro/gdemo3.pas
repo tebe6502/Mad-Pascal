@@ -258,9 +258,9 @@ begin
    fillchar(pointer(LineAdr), width, fil);
 
    x1 := cx + sine[a];
-   x2 := cx + sine[a + 64];
-   x3 := cx + sine[a + 128];
-   x4 := cx + sine[a + 192];
+   x2 := cx + sine[byte(a+64)];
+   x3 := cx + sine[byte(a+128)];
+   x4 := cx + sine[byte(a+192)];
 
    if x1<x2 then HLine(x1,x2, 1);
    if x2<x3 then HLine(x2,x3, 2);
@@ -596,9 +596,9 @@ repeat
   DPoke(560, dlist3);
   DPoke($d402, dlist3);
 
-  ClrBar(tmp1, 0);
-  KefrenSinus(tmp1, Add1, Add2);
-  DrawBar(tmp1, 0);
+  ClrBar(@tmp1, 0);
+  KefrenSinus(@tmp1, Add1, Add2);
+  DrawBar(@tmp1, 0);
 
   KefrenPMG;
 
@@ -606,9 +606,9 @@ repeat
   DPoke(560, dlist2);
   DPoke($d402, dlist2);
 
-  ClrBar(tmp2, 32);
-  KefrenSinus(tmp2, Add1, Add2);
-  DrawBar(tmp2, 32);
+  ClrBar(@tmp2, 32);
+  KefrenSinus(@tmp2, Add1, Add2);
+  DrawBar(@tmp2, 32);
 
   KefrenPMG;
 
