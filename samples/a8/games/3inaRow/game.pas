@@ -258,7 +258,7 @@ end;
 
 procedure eraseBoard;
 var line:byte;
-    offset:word; 
+    offset:word;
 begin
     offset := VRAM_ADDRESS + 4;
     line := 0;
@@ -819,7 +819,7 @@ begin
             FallBalls(false);
             cursorShown:=0;
         end;
-        fillByte(scoreCounters,6,0);
+        fillByte(@scoreCounters,6,0);
         findTriples;
     end;
     paintBoard;
@@ -908,7 +908,7 @@ begin
     cy:=cursorY;
     b:=board[cx, cy];
     if isSwapable(b) then begin
-        fillByte(scoreCounters,6,0);
+        fillByte(@scoreCounters,6,0);
         updateCursor:=0;
         triplesFound:=false;
         if dx<>0 then begin
@@ -1155,7 +1155,7 @@ end;
 
 procedure InitializeBoard;
 begin
-    FillByte(board,100,0);
+    FillByte(@board,100,0);
 end;
 
 procedure showTrophies(x,y:byte);
@@ -1544,7 +1544,7 @@ begin
         end;
         mask:= mask shl 1;
     end;
-    fillbyte(board,100,TILE_EMPTY);
+    fillbyte(@board,100,TILE_EMPTY);
     InitializeBoard;
     DrawObstacles;
     FillBalls(true);
@@ -1568,8 +1568,8 @@ begin
 
     DrawShadows;
     movesCountUpdate := true;
-    fillByte(comboCounters,6,0);
-    fillByte(chainCounters,6,0);
+    fillByte(@comboCounters,6,0);
+    fillByte(@chainCounters,6,0);
     score:=0;
     levelMovesCount:=0;
     timerTicks := level.time;
