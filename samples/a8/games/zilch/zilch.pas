@@ -26,7 +26,7 @@ var
 
     key: char;
     s:string;
-    
+
     msx: TRMT;
 
     oldDli: pointer = @bank;
@@ -36,7 +36,7 @@ var
 (***************************************)
 (**************************************** DATA OPERATIONS *)
 (***************************************)
-    
+
 procedure pushScore(score: smallInt; dices: byte; name: Tstring);
 begin
     scoreTemp.score := score;
@@ -184,7 +184,7 @@ end;
 procedure setMenupos(pos:byte);
 begin
 	menupos:=pos;
-	if (pos and %1111) <> 0 then begin 
+	if (pos and %1111) <> 0 then begin
 		getScore(pos-1);
 		blinkDices:=scoreTemp.dices;
 	end else blinkDices:=0;
@@ -414,7 +414,7 @@ end;
 
 procedure clearMenu;
 begin
-	fillchar(pointer(savmsc+320),320,0);	
+	fillchar(pointer(savmsc+320),320,0);
 end;
 
 procedure clearDices;
@@ -615,9 +615,9 @@ begin
             GotoXY(10*p+2,24);
             s:=placeStrings[place];
             Write(s);
-            if place=0 then 
+            if place=0 then
 				if Length(winstr)=0 then winstr:=pname
-				else begin 
+				else begin
 					winstr:=concat(winstr,' and ');
 					winstr:=concat(winstr,pname);
 				end;
@@ -664,7 +664,7 @@ begin
 		gotoxy(1,3);
 		s:=Concat('Turn of the ',player.name);
 		WritelnCentered(s);
-		putTile(16,4,8,3,roll);
+		putTile(16,4,8,3,@roll);
 		waitUserInput;
 	end;
 end;
@@ -687,7 +687,7 @@ begin
 	WritelnCentered('bocianu hereby presents');
 	Writeln;
 	WritelnCentered('THE GAME OF');
-	putTile(15,4,9,3,zilch);
+	putTile(15,4,9,3,@zilch);
 	putDiceTile(1,5);
 	putDiceTile(7,1);
 	putDiceTile(27,1);
@@ -714,11 +714,11 @@ begin
 	ClrScr;
 	setMenupos(MENU_NONE);
 	PMG_clear;
-	
+
 	// screen 1
-	
+
 	WritelnCentered('How to play the fine game of');
-	putTile(15,2,9,3,zilch);
+	putTile(15,2,9,3,@zilch);
 	Gotoxy(1,6);
 	Writeln(StringOfChar(#18,40));
 	Writeln('1. Roll the dice'*);
@@ -759,11 +759,11 @@ begin
 	Writeln('score with. Once you have scored points');
 	Writeln('from all six dice you get a free roll!');
 	waitUserInput;
-	
+
 	// screen 3
-	
+
 	ClrScr;
-	putTile(15,0,9,3,zilch);
+	putTile(15,0,9,3,@zilch);
 	Gotoxy(1,4);
 	WritelnCentered('SCORING GUIDE');
 	Write(StringOfChar(#18,40));
@@ -791,9 +791,9 @@ begin
 	Writeln;
 	Write  ('3&four'*,' 400    ','3&five'*,' 500   ','3&six  '*,' 600');
 	waitUserInput;
-	
+
 	// screen 4
-	
+
 	FillChar(pointer(savmsc+240),720,0);
 	Gotoxy(1,6);
 	Writeln('Four or more of a kind:'*);
@@ -827,9 +827,9 @@ begin
 	Gotoxy(32,22);
 	Write('2400 pts');
 	waitUserInput;
-	
+
 	// screen 5
-	
+
 	FillChar(pointer(savmsc+200),760,0);
 	Gotoxy(1,6);
 	Writeln('Special rolls:'*);
@@ -850,7 +850,7 @@ begin
 	drawDiceTile(10,13,4);
 	drawDiceTile(15,13,4);
 	drawDiceTile(20,13,3);
-	drawDiceTile(25,13,3);	
+	drawDiceTile(25,13,3);
 	Gotoxy(32,14);
 	Write('3 pairs');
 	Gotoxy(32,15);
@@ -862,7 +862,7 @@ begin
 	drawDiceTile(10,19,3);
 	drawDiceTile(15,19,4);
 	drawDiceTile(20,19,6);
-	drawDiceTile(25,19,3);	
+	drawDiceTile(25,19,3);
 	Gotoxy(32,20);
 	Write('no score');
 	Gotoxy(32,21);
@@ -870,7 +870,7 @@ begin
 	Gotoxy(32,23);
 	Write('FREEROLL'*);
 	waitUserInput;
-	
+
 	nmien:=192;
 	drawTitleScreen;
 end;
@@ -879,7 +879,7 @@ procedure showTitleScreen;
 begin
     msx.Init(0);
 	drawTitleScreen;
-	repeat 
+	repeat
 		pause;
 		if ((consol and 2) = 0) then begin // SELECT
 			if playerCurrent=PLAYER_NONE then playerCurrent:=0
@@ -898,7 +898,7 @@ begin
 			if key=#27 then quitGame:=true;
 		end;
 		if HELPFG=17 then showHelpScreen;
-	
+
 	until (strig0=0) or ((consol and 1) = 0) or quitGame;
     repeat until strig0=1;
 end;
@@ -1051,7 +1051,7 @@ begin
     poke(712,BGCOLOR);
     poke(710,BGCOLOR);
     poke(709,14);
-    
+
     poke(dpeek(560)+2, peek(dpeek(560)+2) + 128); // inject DLI
 	PMG_Init(Hi(PMGBASE));
     PMG_Clear;
@@ -1059,7 +1059,7 @@ begin
     msx.player := pointer(RMT_PLAYER);
     msx.modul := pointer(RMT_MODULE);
     msx.Init(3);
-    
+
     GetIntVec(iDLI,oldDli);
     GetIntVec(iVBL,oldVbli);
     SetIntVec(iDLI,@dli);
@@ -1083,12 +1083,12 @@ begin
 
 	quitGame:=false;
 	gamePMGInit;
-	
+
 	repeat;
 		showTitleScreen;
 		msx.Init(3);
 
-		if not quitGame then begin 
+		if not quitGame then begin
 			fillGamePMG;
 			clrScr;
 			showPlayers;
@@ -1114,7 +1114,7 @@ begin
 					zilchPlayer;
 					showPlayers;
 					fillchar(pointer(savmsc+320),320,0);
-					putTile(14,8,11,5,zilchTile);
+					putTile(14,8,11,5,@zilchTile);
 					waitUserInput;
 					nextPlayer;
 
@@ -1128,10 +1128,10 @@ begin
 						showScores;
 						if banked>0 then begin
 							canRoll := true;
-							putTile(10,8,10,5,rollTile);
+							putTile(10,8,10,5,@rollTile);
 							if (bank>=300) then begin
 								canBank := true;
-								putTile(20,8,10,5,bankTile);
+								putTile(20,8,10,5,@bankTile);
 							end;
 						end;
 
@@ -1142,22 +1142,22 @@ begin
 							clearDices;
 							gotoxy(1,3);
 							WritelnCentered('FREE  ');
-							putTile(16,4,8,3,roll);
+							putTile(16,4,8,3,@roll);
 						end;
 
 						if player.ptype = PLAYER_HUMAN then menuchoice:=getUserChoice
 							else menuchoice:=getCpuChoice;
-							
+
 						if menuchoice = MENU_QUIT then gameOn:=false
 						else begin
 							setMenupos(menuchoice);
 							userDelay;
 						end;
-						if keypressed then begin 
+						if keypressed then begin
 							key:=readkey;
 							if (key=#27) then gameOn:=false;
 						end;
-						
+
 						case menuchoice of
 							1..8: begin
 								if scoresCount>=menuchoice then begin
