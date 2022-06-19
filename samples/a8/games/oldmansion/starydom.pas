@@ -3,14 +3,14 @@ uses atari, crt, graph, rmt;
 
 type String40 = string[40];
 
-const 
+const
 {$i const.inc}
 {$r resources.rc}
-{$i io.inc} 
+{$i io.inc}
 { $i lang_pl.inc}
 {$i lang_en.inc}
 
-var 
+var
     msx: TRMT;
     inventory, currentPassword, weaponName: TString;
     aStr, bStr: TString; // reusable temporary strings
@@ -44,8 +44,8 @@ asm {
     };
 end;
 
-procedure Dli:assembler;interrupt;
-asm {  
+procedure Dli; assembler;interrupt;
+asm {
     pha
 @   sta wsync
     lda vcount
@@ -63,7 +63,7 @@ asm {
     sta wsync
     sta colbak
     sta colpf2
-    lda #2 
+    lda #2
     sta colpf1
 @   sta wsync
     lda vcount
@@ -95,7 +95,7 @@ function StrCmp(a, b: TString): boolean;
 var i:byte;
 begin
     result:= true;
-    for i:=0 to length(a)-1 do 
+    for i:=0 to length(a)-1 do
         if a[i]<>b[i] then exit(false);
 end;
 
@@ -119,23 +119,23 @@ end;
 
 procedure VarInit;
 begin
-    x := 6; 
-    y := 1; 
+    x := 6;
+    y := 1;
     roomDifficulty := 1;
     maxDifficulty := 15 * 8;
-    fillchar(inventory[1], 4, TILE_EMPTY_SLOT);
+    fillchar(@inventory[1], 4, TILE_EMPTY_SLOT);
     inventory[0] := char(4);
     currentPassword := passwords[Random(9)];
     consecutiveWaits := 0;
-    weapon := 1; 
+    weapon := 1;
     gold := 0;
     wounds := 0;
-    energy := 3; 
+    energy := 3;
     seenPassword := 0;
     moves := 0;
     currentRoomTile := TILE_ROOM;
     weaponName := weapons[weapon - 1];
-    fillByte(lootHistory, ITEMS_COUNT - 1, 0);
+    fillByte(@lootHistory, ITEMS_COUNT - 1, 0);
 end;
 
 // ************************************* GUI
@@ -210,13 +210,13 @@ end;
 procedure PaintBoard;
 var row, room:byte;
 begin
-    
+
     //initGraph(0);
     CursorOff;
     color2 := 0;
     color1 := 0;
     savmsc := SCREEN_BASE;
-    
+
     VarInit;
     fillbyte(pointer(SCREEN_BASE),40*17,128);
     fillbyte(pointer(SCREEN_BASE+40*17),5,$ff);
@@ -229,34 +229,34 @@ begin
     Print(char(TILE_BORDER_H), #5);
 
     for row:=0 to 7 do begin
-    
+
         // rooms
         Position(5, row * 2 + 1);
         Print(char(TILE_BORDER_V));
-        for room:=1 to 14 do 
+        for room:=1 to 14 do
             Print(char(TILE_ROOM), char(GetRandomEntranceV));
-        Print(char(TILE_ROOM), char(TILE_BORDER_V)); 
+        Print(char(TILE_ROOM), char(TILE_BORDER_V));
 
         // inner walls
         Position(5, row * 2 + 2);
         Print(#1);
-        for room:=1 to 14 do 
+        for room:=1 to 14 do
             Print(char(GetRandomEntranceH), #19);
         Print(char(GetRandomEntranceH), #4);
-   
+
     end;
-    
-    
+
+
     Position(5, 16); // bottom row of board
     Print(#26);
     for room:=1 to 14 do Print(char(TILE_BORDER_H), #24);
     Print(char(TILE_BORDER_H), #3);
-    
+
     Position(7, 1); Print(char(TILE_ENTRANCE_V));
     Position(6, 2); Print(char(TILE_ENTRANCE_H));
     Position(x, y); Print(TILE_PLAYER);
     Position(34, 15); Print(char(TILE_EXIT),char(TILE_EXIT2));
-    
+
     Pause;
     chbas := Hi(CHARSET_BASE);
     SDLSTL := DISPLAY_LIST_BASE;
@@ -300,14 +300,14 @@ function HasItem(c: char):boolean;
 var i: byte;
 begin
     result := false;
-    for i := 1 to 4 do 
+    for i := 1 to 4 do
         if inventory[i] = c then exit(true);
 end;
 
 procedure DelItem(c: char);
 var i: byte;
 begin
-    for i := 1 to 4 do 
+    for i := 1 to 4 do
         if inventory[i] = c then begin
             inventory[i] := TILE_EMPTY_SLOT;
             exit;
@@ -317,7 +317,7 @@ end;
 procedure AddItem(c: char);
 var i: byte;
 begin
-    for i := 1 to 4 do 
+    for i := 1 to 4 do
         if inventory[i] = TILE_EMPTY_SLOT then begin
             inventory[i] := c;
             exit;
@@ -336,15 +336,15 @@ var door, room: byte;
     dx, dy: shortInt;
     isIn, stepFinished, waited, skipMonster: boolean;
     itemLost: char;
-    
-    
+
+
 procedure PayRansom;
 begin
     gold := round(gold - round(monsterSize * Random));  // pay ransom
     if gold < 0 then gold := 0;
     stepFinished := true;
     ShowStats;
-end;    
+end;
 
 procedure FoundWeapon;
 begin
@@ -374,7 +374,7 @@ end;
 procedure DecLootCounters;
 var item:byte;
 begin
-    for item:=0 to ITEMS_COUNT-2 do 
+    for item:=0 to ITEMS_COUNT-2 do
         if lootHistory[item]>0 then Dec(lootHistory[item]);
 end;
 
@@ -389,13 +389,13 @@ begin
     if monsterLevel >= MONSTERS_COUNT then monsterLevel := MONSTERS_COUNT - 1;
     result := monsterLevel;
 end;
-    
+
 procedure FoundItem;
-var 
+var
     item:byte;
-begin 
+begin
     DecLootCounters;
-    repeat 
+    repeat
         item := Random(ITEMS_COUNT-1);
     until lootHistory[item] = 0;
     lootHistory[item] := 6;
@@ -420,7 +420,7 @@ begin
                 stepFinished := false;
                 repeat
                     StatusLine2(s_LEAVE_WHAT);
-                    repeat 
+                    repeat
                         keycode := getKey;
                     until (keycode > 65) and (keycode < 90);
                     if hasItem(char(keycode)) then begin
@@ -438,16 +438,16 @@ begin
         end;
     end;
 end;
-    
+
 procedure GetLoot();
 begin
-    r := Random(11) + 1; 
+    r := Random(11) + 1;
     case r of
         1,2,3,4,5,6,7,8: foundItem;
         9: foundWeapon;
         10: FoundPassword;
     end;
-end;    
+end;
 
 procedure MovePlayer(nx, ny:byte);
 begin
@@ -461,8 +461,8 @@ begin
     Print(char(TILE_PLAYER));
     roomDifficulty := ((x - 4) shr 1) * ((y + 1) shr 1);
 end;
-    
-begin 
+
+begin
     ShowStats;
     isIn := false;
     stepFinished := false;
@@ -484,10 +484,10 @@ begin
         stepFinished := true;
         ShowStats;
         Inc(consecutiveWaits);
-    
+
     end else begin                  // ************* moving
         Inc(consecutiveWaits);
-        Position(7, 22);     
+        Position(7, 22);
         Write(s_LEFT,', ',s_RIGHT,', ',s_UP,', ',s_DOWN,' ?');
         keycode := getKey(k_LEFT, k_RIGHT, k_UP, k_DOWN);
         ClearLine;
@@ -499,12 +499,12 @@ begin
             k_DOWN: dy := 1;
             k_UP: dy := -1;
         end;
-        
+
         door := Locate(x + dx, y + dy);
         //Position(1,1); Write(door);
-        
+
         if (door <> TILE_BORDER_H) and (door <> TILE_BORDER_V) then begin // not a border ?
-        
+
             if (door = TILE_ENTRANCE_H) or (door = TILE_ENTRANCE_V) then begin     // ***********************  check doors
                 StatusLine(s_DOOR_OPENED);
                 isIn := true;
@@ -535,9 +535,9 @@ begin
                     Print(char(door));
                 end;
             end;
-            
+
             ReadKey;
-            
+
             if isIn then begin  // *******************************   check room
                 room := Locate(x + 2 * dx, y + 2 * dy);
                 if room = TILE_ROOM then begin
@@ -553,11 +553,11 @@ begin
                         end;
                     end;
                 end;
-                
+
                 if room = TILE_DARK then begin    //  ********************* dark room
                     Position(x + 2 * dx, y + 2 * dy);
                     Print(char(TILE_DARK));
-                    StatusLine(s_ROOM_DARK); 
+                    StatusLine(s_ROOM_DARK);
                     Writeln;
                     if hasItem(itemSymbols[1]) then begin
                         Write(s_USED, s_LANTERN, '.');
@@ -567,7 +567,7 @@ begin
                         isIn := false;
                     end;
                     ReadKey;
-                    clearLine;                    
+                    clearLine;
                 end;
                 if room = TILE_HOLE then begin    //  ********************* no floor
                     Position(x + 2 * dx, y + 2 * dy);
@@ -623,30 +623,30 @@ begin
                         Pause(3);
                         Readkey;
                         gameEnded := true;
-                    end; 
-                
+                    end;
+
                 end;
 
             end;
-            
+
             if isIn and not gameEnded then begin // ***********   entered new room, update map
                 MovePlayer(x + 2 * dx, y + 2 * dy);
                 energy := energy - 0.5;
                 stepFinished := true;
             end;
-            
-    
+
+
         end else begin  // **********************************   hit the wall
             StatusLineln(s_BUMP);
             Write(s_NO_PASARAN);
             energy := energy - 0.5;
             KeyAndShowStat;
         end;
-        
+
     end;
-    
+
     if stepFinished and not gameEnded then begin  // ********************  Random events
-    
+
         r := Random(40)+3;
         if r < consecutiveWaits then begin
             StatusLine(s_BACK_TO_START);
@@ -657,8 +657,8 @@ begin
             r := Random(15);
             itemLost := TILE_EMPTY_SLOT;
             case r of
-                0,1,2,3,4,5,6,7: 
-                   if hasItem(itemSymbols[r]) then begin 
+                0,1,2,3,4,5,6,7:
+                   if hasItem(itemSymbols[r]) then begin
                         StatusLineln(s_ITEM_BROKE[r]);
                         itemLost := itemSymbols[r];
                    end;
@@ -666,9 +666,9 @@ begin
                         FoundPassword;
                         skipMonster := true;
                    end;
-                9,10: 
+                9,10:
                     begin
-                        if weapon > 1 then begin 
+                        if weapon > 1 then begin
                             StatusLine(s_BROKE);
                             Writeln(weaponName, ', ');
                             weapon := weapon - 4;
@@ -688,9 +688,9 @@ begin
                 ShowStats;
             end;
         end;
-    
+
     end;
-    
+
     if not skipMonster and not gameEnded then begin
         r := Random(4);
         if r>0 then begin  // ********************************** encounter !!!
@@ -704,7 +704,7 @@ begin
 
             stepFinished := false;
             repeat
-                
+
                 if ((strength = 0) or (wounds > 4)) and (gold = 0) then begin
                     Position(2,23);
                     Print(s_TOO_WEAK_POOR);
@@ -714,7 +714,7 @@ begin
                     stepFinished := true;
                     wounds := 0;
                     KeyAndShowStat;
-                end else begin 
+                end else begin
                     if (strength = 0) or (wounds > 4) then begin // ***********     too weak ?
                         Position(2,23);
                         Write(s_TOO_WEAK);
@@ -731,16 +731,16 @@ begin
                         keycode := getKey(k_FIGHT, k_RANSOM);
                     end;
                 end;
-                
+
                 if keycode = k_FIGHT then begin  // ************** fight choosen
                     // get hurt
-                    if (strength < monsterStrength * 1.2) and (Random(10) >= 4) then   
+                    if (strength < monsterStrength * 1.2) and (Random(10) >= 4) then
                         wounds := wounds + 1;
                     // hit monster
-                    monsterStrength := round(monsterStrength - ((Random * 2) + 1) * strength * 0.57); 
-                    
+                    monsterStrength := round(monsterStrength - ((Random * 2) + 1) * strength * 0.57);
+
                     ShowStats;
-                    
+
                     if (monsterStrength <= 0) or (Random(10) >= 5) then begin // ********* monster killed
                         r := Random(5) + 1;  // loot size
                         StatusLine(aStr);
@@ -759,20 +759,20 @@ begin
             until stepFinished;
 
         end;
-        
+
         GetLoot;
-    
+
     end;
 
     if not gameEnded then begin // *********************************** use items
         stepFinished := false;
         if HasAnythingToUse then
-            repeat 
+            repeat
                 StatusLine(s_WANNA_USE);
                 keycode := getKey(k_YES, k_NO);
                 if keycode = k_YES then begin
                     StatusLine2(s_WHICH);
-                    repeat 
+                    repeat
                         keycode := getKey;
                     until (keycode > 65) and (keycode < 90);
                     if not hasItem(char(keycode)) then begin
@@ -781,7 +781,7 @@ begin
                         ReadKey;
                     end else
                         if (keycode = k_BANDAGE) or (keycode = k_MEDKIT) then begin
-                            DelItem(char(keycode));    
+                            DelItem(char(keycode));
                             case keycode of
                                 k_BANDAGE: wounds := wounds - 1;
                                 k_MEDKIT: wounds := wounds - 3;
@@ -810,19 +810,19 @@ begin
     Randomize;
     SetIntVec(iDLI, @Dli);
     SetIntVec(iVBL, @Vbl);
-    
+
     repeat
         StartMusic(0);
         TitleScreen;
         ShowManual;
-        
+
         StopMusic;
         PaintBoard;
         StartMusic(7);
-        
+
         gameEnded := false;
         while not gameEnded do MakeMove;
     until false;
-    
+
     Close(fscr);
 end.
