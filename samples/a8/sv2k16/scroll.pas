@@ -1,4 +1,4 @@
-uses crt, graph, vbxe, rmt;
+uses crt, vbxe, rmt;
 
 const
 	sinustable: array [0..255] of byte = (
@@ -67,7 +67,7 @@ const
 	7*32, 7*32+wf*32, 7*32+wf*64, 7*32+wf*96+1+wf
 	);
 
-	text =
+	txt =
 	'       '+
 	'Howdy Atari Cowboys! Here we strike once again with another invitation for the biggest '+
 	'Atari demoscene event in Europe! Silly Venture - the most maverick and unconventional '+
@@ -115,7 +115,7 @@ var
 	palntsc: byte absolute $d014;
 
 	a: char;
-	txt: ^char;
+	ptxt: ^char;
 
 	vram: TVBXEMemoryStream;
 
@@ -158,14 +158,12 @@ begin
 
  for i:=0 to 255 do sinLogo[i]:=logo + sinusTable[i] + (sinusTable[i shl 1] shr 1)*560;
 
- InitGraph(mVBXE, 0, '');
-
- if GraphResult <> grOK then begin
+ if VBXE.GraphResult <> VBXE.grOK then begin
   writeln('VBXE not detected');
   halt;
  end;
 
- SetHRes(MedRes);
+ SetHRes(VBXE.VGAMed);
  ColorMapOff;
 
  msx.player:=pointer(player);
@@ -175,7 +173,7 @@ begin
 
  poke(559, 0);		// dma disable
 
- txt:=pointer(text);
+ ptxt:=pointer(txt);
 
  hsc:=step-1;
 
@@ -243,29 +241,29 @@ begin
 		chr11.src_adr := chr12.src_adr;
 		chr12.src_adr := chr13.src_adr;
 
-		a:=UpCase(txt^);
+		a:=UpCase(ptxt^);
 		x:=fonts;
 
 		case a of
-		'A'..'Z': x:=fonts+fnt_order[ord(a)-ord('A')];
-		'0'..'9': x:=fonts+dig_order[ord(a)-ord('0')];
-		     ' ': x:=fonts;
-		     '.': x:=fonts+4*32+wf*32*3;
-		     ',': x:=fonts+4*32+wf*32*4;
-		    '''': x:=fonts+4*32+wf*32*5;
-		     '!': x:=fonts+5*32;
-		     '?': x:=fonts+5*32+wf*32*1;
-		     '-': x:=fonts+5*32+wf*32*2;
-		     ':': x:=fonts+5*32+wf*32*3;
-	     '(',')','/': x:=fonts+5*32+wf*32*4;
-		 #255: txt:=pointer(text);
+		'A'..'Z': x := fonts + fnt_order[ord(a)-ord('A')];
+		'0'..'9': x := fonts + dig_order[ord(a)-ord('0')];
+		     ' ': x := fonts;
+		     '.': x := fonts+4*32+wf*32*3;
+		     ',': x := fonts+4*32+wf*32*4;
+		    '''': x := fonts+4*32+wf*32*5;
+		     '!': x := fonts+5*32;
+		     '?': x := fonts+5*32+wf*32*1;
+		     '-': x := fonts+5*32+wf*32*2;
+		     ':': x := fonts+5*32+wf*32*3;
+	     '(',')','/': x := fonts+5*32+wf*32*4;
+		 #255: ptxt := pointer(txt);
 		end;
 
 		chr13.src_adr.byte2 := x shr 16;
 		chr13.src_adr.byte1 := x shr 8;
 		chr13.src_adr.byte0 := x;
 
-		inc(txt);
+		inc(ptxt);
 	end;
 
 	base:=base xor (buf0 xor buf1);
@@ -371,10 +369,7 @@ begin
 
  until keypressed;
 
- NoSound;
-
- VBXEOff;
- InitGraph(0);
+ CloseGraph;
 
 end.
 
