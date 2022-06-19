@@ -68,7 +68,7 @@ const
 implementation
 
 var
-	Buffer	: array [0..0] of byte absolute $0400;
+	Buffer	: array [0..255] of byte absolute $0400;
 
 	vram: TVBXEMemoryStream;
 

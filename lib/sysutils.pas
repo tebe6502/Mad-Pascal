@@ -103,6 +103,8 @@ const
 	function StrToInt(s: PString): integer; assembler; overload;
 	function TimeToStr(d: TDateTime): TString;
 	function Trim(var S: string): string;
+	function TryStrToInt(s: PString; var i: integer): Boolean; assembler; overload;
+	function TryStrToInt(s: PString; var i: byte): Boolean; assembler; overload;
 
 implementation
 
@@ -457,7 +459,7 @@ https://codebase64.org/doku.php?id=base:tiny_.a_to_ascii_routine
 *)
 
 asm
-{	txa:pha
+	txa:pha
 
 	lda a
 	ldy #$2f
@@ -493,7 +495,6 @@ lp	cpy #1
 skp	sty adr.Result
 
 	pla:tax
-};
 end;
 
 
@@ -506,7 +507,7 @@ function IntToStr(a: integer): TString; assembler; stdcall; overload;
 @returns: pointer to string
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	inx
 
@@ -516,7 +517,6 @@ asm
 	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
-};
 end;
 
 
@@ -529,7 +529,7 @@ function IntToStr(a: cardinal): TString; assembler; stdcall; overload;
 @returns: pointer to string
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	inx
 
@@ -539,7 +539,6 @@ asm
 	mva:rpl @buf,x adr.Result,x-
 
 	pla:tax
-};
 end;
 
 
@@ -552,13 +551,12 @@ function StrToInt(const s: char): byte; assembler; overload;
 @returns: byte
 *)
 asm
-{	mva s @buf+1
+	mva s @buf+1
 	mva #1 @buf
 
 	@StrToInt #@buf
 
 	mva edx Result
-};
 end;
 
 
@@ -571,14 +569,95 @@ function StrToInt(s: PString): integer; assembler; overload;
 @returns: integer (32bit)
 *)
 asm
-{	@StrToInt s
+	@StrToInt s
 
 	mva edx Result
 	mva edx+1 Result+1
 	mva edx+2 Result+2
 	mva edx+3 Result+3
-};
 end;
+
+
+
+function TryStrToInt(s: PString; var i: integer): Boolean; assembler; overload;
+(*
+@description:
+TryStrToInt tries to convert the string S to an integer, and returns True if this was successful.
+In that case the converted integer is returned in I. If the conversion failed, (an invalid string,
+or the value is out of range) then False is returned.
+
+@param: s: string[32]
+
+@returns: i      - integer (32bit)
+          result - Boolean
+*)
+asm
+	@StrToInt s
+
+	cpy #0
+	beq ok
+
+	lda #$00
+	sta :edx
+	sta :edx+1
+	sta :edx+2
+	sta :edx+3
+
+	ldy #$ff	; Y = $FF + 1 (FALSE)
+ok	iny		; Y = $00 + 1 (TRUE)
+
+	sty Result
+
+	mwa i :bp2
+	ldy #0
+	mva :edx (:bp2),y+
+	mva :edx+1 (:bp2),y+
+	mva :edx+2 (:bp2),y+
+	mva :edx+3 (:bp2),y
+end;
+
+
+function TryStrToInt(s: PString; var i: byte): Boolean; assembler; overload;
+(*
+@description:
+TryStrToInt tries to convert the string S to an byte, and returns True if this was successful.
+In that case the converted integer is returned in I. If the conversion failed, (an invalid string,
+or the value is out of range) then False is returned.
+
+@param: s: string[32]
+
+@returns: i      - byte
+          result - Boolean
+*)
+asm
+	@StrToInt s
+
+	cpy #0
+	beq ok
+
+err	lda #$00
+	sta :edx
+	sta :edx+1
+	sta :edx+2
+	sta :edx+3
+
+	ldy #$ff	; Y = $FF + 1 (FALSE)
+ok	iny		; Y = $00 + 1 (TRUE)
+
+	sty Result
+
+	lda :edx+1	; > 255 (out of range)
+	ora :edx+2
+	ora :edx+3
+	bne err
+
+	ldy i+1
+	sty :bp+1
+	ldy i
+	lda :edx
+	sta (:bp),y
+end;
+
 
 
 function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;
@@ -591,12 +670,11 @@ function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;
 @returns: string[32]
 *)
 asm
-{	jsr @hexStr
+	jsr @hexStr
 
 ;	@move #@buf Result #33
 	ldy #256-33
 	mva:rne @buf+33-256,y adr.Result+33-256,y+
-};
 end;
 
 
