@@ -276,7 +276,7 @@ end;
 procedure ZeroOut;
 begin
 
-  fillByte(missile, 1280, 0);
+  fillByte(@missile, 1280, 0);
 
   for i:=0 TO 3 do begin
     hposp[i]:=0;
@@ -548,7 +548,7 @@ begin
   PmSet;
   ZeroOut;
 
-  fillByte(missile,1280,0);
+  fillByte(@missile,1280,0);
   fillByte(pointer(misc_adr),3000,0);
 
   screen:=pointer(savmsc);

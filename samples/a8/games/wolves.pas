@@ -4,10 +4,10 @@
   Original author: Primoz Petrlin
   Original game written for ZX Spectrum in Sinclair BASIC
   Ported to Atari XL/XE/400/800 in Mad Pascal: Bostjan Gorisek 2016
-  
+
   Version 1.1:
     - Joystick control
-    - Label referencing dead wolves renamed to Dead wolves  
+    - Label referencing dead wolves renamed to Dead wolves
 -------------------------------------------------------------------------------}
 
 uses
@@ -16,14 +16,14 @@ uses
 var
   topMem : word;
   CHBAS : byte absolute $2F4;
-  RAMTOP : byte absolute $6A;  
+  RAMTOP : byte absolute $6A;
   playerName : string[15] = 'M.M';
   playerScore : shortInt = 10;
   score, lives,
   a, b,          // Our hero's coordinates
-  s, d  : byte;  // Wolf coordinates  
+  s, d  : byte;  // Wolf coordinates
   isNewGame : boolean = true;
-  
+
   // Data for new characters
   _grave : array[0..6] of byte = (
     %01111100, %10000010, %10000010, %10000010, %10000010, %01010100, %11111110);  // character g
@@ -41,8 +41,8 @@ var
     0, %00011100, %00111110, %01111111, %00111110, %00010100, %00010100, 0);  // character h
 
 // Custom write routines
-procedure PrintAt(x, y : byte; text : string); overload; begin GotoXY(x+1, y+1); Write(text); end;
-procedure PrintAt(x, y : byte; text : char); overload; begin GotoXY(x+1, y+1); Write(text); end;
+procedure PrintAt(x, y : byte; t : string); overload; begin GotoXY(x+1, y+1); Write(t); end;
+procedure PrintAt(x, y : byte; t : char); overload; begin GotoXY(x+1, y+1); Write(t); end;
 
 // New game?
 function NewGame : boolean;
@@ -63,11 +63,11 @@ begin
   result := isNewGame;
 end;
 
-// High score code block 
+// High score code block
 function HighScore : boolean;
 var
   i, j : byte;
-begin  
+begin
   Poke($D201, 168);
   for i:=200 downTo 100 do begin
     Poke($D200, i); Delay(10);
@@ -85,7 +85,7 @@ begin
     for i:=6 to 16 do begin
       PrintAt(11, i, 'HURA'); PrintAt(26, i, 'HURA');
     end;
-  end;  
+  end;
   for i:=255 downTo 60 do begin
     Poke($D200, i); Delay(10);
   end;
@@ -102,15 +102,15 @@ end;
 // Game is on
 procedure Game;
 var
-  y, x, z, n, m : byte;  
+  y, x, z, n, m : byte;
 begin
   FillChar(Pointer($D200), 8, 0);
   ClrScr;
   PrintAt(1, 0, 'ppppp');
   score := 0;  // Initialize score
-  lives := 5;  // You have 5 lives  
+  lives := 5;  // You have 5 lives
   Randomize;
-  
+
   // Draw trees on random locations
   for y := 1 to 38 do begin
     z := Random(22);
@@ -126,16 +126,16 @@ begin
   // Wolf coordinates
   d := 36; s := Random(22) + 1;
 
-  // Game play loop  
+  // Game play loop
   repeat
     PrintAt(b, a, 'po');  // Hero position
 
     // Keep track of hero deaths
     if lives < 5 then
       PrintAt(lives+1, 0, ' g');
-    
+
     PrintAt(d, s, 'd');  // Draw attacking wolf
-          
+
     Dec(d);
     //if d = 0 then Continue;
     // Wolf reached your village :(
@@ -147,13 +147,13 @@ begin
         break;
       end;
     end;
-        
+
     PrintAt(d+2, s, ' ');
 
     // Hero control
     case joy_1 of
       joy_right: begin
-        Inc(b); 
+        Inc(b);
         if b = 37 then b := 36;
         PrintAt(b-1, a, '  ');
       end;
@@ -173,9 +173,9 @@ begin
         PrintAt(b, a+1, '  ');
       end;
     end;
-    
+
     PrintAt(b, a, 'po');  // Hero position
-    
+
     // You hit a wolf
     if (a = s) and (b = d) then begin
       // beep beep
@@ -190,10 +190,10 @@ begin
       GotoXY(24, 1); Write('DEAD WOLVES=', score);
       PrintAt(b+2, a, 'j');
     end;
-    
+
     Delay(60);
   until lives = 0;
-  
+
   ClrScr;
   if score <= playerScore then begin
     PrintAt(1, 11, 'VILLAGE PEOPLE ARE DEAD.'#$9b'YOU KILLED ');
@@ -215,9 +215,9 @@ begin
   // Prepare new character set
   topMem := RAMTOP - 8;
   topMem := topMem * 256;
-  CHBAS := topMem div 256;  
+  CHBAS := topMem div 256;
   move(pointer(57344), pointer(topMem), 1023);
-  
+
   // Redefine characters for the game
   move(_grave, pointer(topMem+103*8), sizeOf(_grave));          // g
   move(_hero02, pointer(topMem+99*8), sizeOf(_hero02));         // c
