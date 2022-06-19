@@ -103,10 +103,10 @@ begin
     //clouds
     vram := GFX_RAM;
     count := 5;
-    putCloud(cloud1);
+    putCloud(@cloud1);
     vram := GFX_RAM + SCREENLINEWIDTH;
     count := 2;
-    putCloud(cloud2);
+    putCloud(@cloud2);
 
     vram := GFX_RAM ;
     for line := 0 to 16 do begin
@@ -199,7 +199,7 @@ begin
     FillByte(pointer(TXT_RAM + 52), energy shr 1, $4e);
 end;
 
-procedure showHiscore:assembler;
+procedure showHiscore; assembler;
 asm {
         txa
         pha
@@ -212,9 +212,9 @@ end;
 
 begin
     // init planes
-    FillByte(planesX, 5, 0);
-    FillByte(planesH, 5, 7);
-    FillByte(planesC, 5, 0);
+    FillByte(@planesX, 5, 0);
+    FillByte(@planesH, 5, 7);
+    FillByte(@planesC, 5, 0);
     // clear vram
     FillByte(pointer(TXT_RAM), $2400, 0);
     // mixup charsets
@@ -272,8 +272,8 @@ begin
         move(pointer(STRINGS + 40), pointer(TXT_RAM+4), 34);
         //showHiscore;
 
-        FillByte(wallPosX, 4, 1);
-        FillByte(wallWait, 4, 100);
+        FillByte(@wallPosX, 4, 1);
+        FillByte(@wallWait, 4, 100);
         bonusX:=1;     //            -- might be unnecesary
         moveplanes;
 
