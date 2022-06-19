@@ -1,3 +1,7 @@
+// 160 / 4142
+
+// F73654DB8A587962996923D44A99D420
+
 uses crt, sysutils, md5;
 
 const
@@ -71,7 +75,7 @@ $4A, $4A, $8D, $79, $02, $8D, $7B, $02
 
 var
 
- ticks: word;
+ ticks: cardinal;
  i, cnt: byte;
  md: TMD5;
 
@@ -91,12 +95,10 @@ begin
 
  writeln( MD5Print(md) );
 
- ticks:=word(GetTickCount)-ticks;
+ ticks:=GetTickCount-ticks;
 
  writeln(ticks,' TICKS');
 
  repeat until keypressed;
 
 end.
-
-// fpc: writeln(MD5Print(MD5Buffer(test, 512)));

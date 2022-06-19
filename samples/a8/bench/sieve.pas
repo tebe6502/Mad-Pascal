@@ -20,10 +20,10 @@ var
   ticks: word;
 
 {$ifdef FAST}
-  i: word absolute $e0;
-  k: word absolute $e2;
-  prime: word absolute $e4;
-  count: word absolute $e6;
+  i: word register;
+  k: word register;
+  prime: word register;
+  count: word register;
 {$else}
   i, k, prime, count: word;
 {$endif}
@@ -38,7 +38,7 @@ begin
 
 	for iter:=iter_max-1 downto 0 do begin
 
-		fillchar(flags, sizeof(flags), true);
+		fillchar(@flags, sizeof(flags), true);
 
 		count := 0;
 
