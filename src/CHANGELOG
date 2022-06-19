@@ -1,3 +1,9 @@
+12.06.2022
+- poprawione przekazywania parametrów typu POINTER do procedur/funkcji (funkcja CompileAddress), rozróżniany jest parametr 'var buf' (formal type) a 'var buf:pointer', https://wiki.freepascal.org/Variable_parameter
+- poprawione przekazywanie parametrów do procedury BLOCKREAD
+
+  blockread(f, ptr^, len);
+
 27.05.2022
 - rozbudowana funkcja RemoveUnusedSTACK
 
