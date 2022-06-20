@@ -1,5 +1,6 @@
 { Test: Functions with no arguments.
   This program computes the sum 1+2+...+10 = 55. }
+
 program bar;
 var
   x:integer;
