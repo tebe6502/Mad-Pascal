@@ -8,7 +8,7 @@ begin
   v:='Hello worlc!';
   // write('length of s: ');
   // writeln(length(s));
-  
+
   writeln('These comparisons are all true:');
   writeln(s=t);
   writeln(s<u);
@@ -17,6 +17,6 @@ begin
   writeln(s<=u);
   writeln(s>=v);
   writeln(s<>u);
-  
+
   while true do;
 end.

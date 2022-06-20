@@ -1,9 +1,11 @@
 program hcf;
+
 { Highest common factor.
   Expeced result: 4 }
+
 var
   r:integer;
-  
+
 function mod_(x,y:integer):integer;
   begin
     mod_ := x-(x div y)*y;
@@ -22,6 +24,6 @@ function hcf(p,q:integer):integer;
   end;
 begin
   writeln(hcf(2*2*3,2*2*5));
-  
+
   while true do;
 end.
