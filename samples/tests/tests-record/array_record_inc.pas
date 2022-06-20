@@ -1,3 +1,17 @@
+{
+
+0,0
+1,2
+2,4
+3,6
+
+Let's move first monster
+2,0
+4,0
+
+}
+
+
 uses crt;
 
 type
