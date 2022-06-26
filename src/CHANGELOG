@@ -1,3 +1,6 @@
+26.06.2022
+- poprawione VOLATILE
+
 12.06.2022
 - poprawione przekazywania parametrów typu POINTER do procedur/funkcji (funkcja CompileAddress), rozróżniany jest parametr 'var buf' (formal type) a 'var buf:pointer', https://wiki.freepascal.org/Variable_parameter
 - poprawione przekazywanie parametrów do procedury BLOCKREAD
