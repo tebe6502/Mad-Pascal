@@ -26,6 +26,8 @@ ptr3 =	:eax	; position	(4)
 	lda (pos),y
 	sta ptr3+3
 
+;-------------------------
+
 lp1	lda portb		; wylacz dodatkowe banki
 	and #1
 	ora #$fe
@@ -33,7 +35,7 @@ lp1	lda portb		; wylacz dodatkowe banki
 
 	ldy #0			; przepisz 256b z BUFFER do @BUF
 	mva:rne (ptr1),y @buf,y+
-
+				; Y = 0
 	lda ptr2+1
 	beq lp2
 
@@ -42,6 +44,7 @@ lp1	lda portb		; wylacz dodatkowe banki
 ;	lda :ztmp+1		; jesli przekraczamy granice banku $7FFF
 	cmp #$7f
 	bne skp
+
 	lda :ztmp
 	beq skp
 
@@ -55,11 +58,25 @@ skp2	inc ptr1+1		// inc(buffer, $100)
 
 	inl ptr3+1		// inc(position, $100)
 
-	dec ptr2+1
+	dec ptr2+1		// dec(count, $100)
 	bne lp1
-	
+
+;-------------------------
+
 lp2	lda ptr2
 	beq quit
+
+	lda portb		; wylacz dodatkowe banki
+	and #1
+	ora #$fe
+	sta portb
+
+	ldy #0			; przepisz PTR2 z BUFFER do @BUF
+cp	lda (ptr1),y 
+	sta @buf,y
+	iny
+	cpy ptr2
+	bne cp
 
 	jsr @xmsBank		; wlacz dodatkowy bank, ustaw :ZTMP, :ZTMP+1
 
@@ -78,7 +95,6 @@ lp2	lda ptr2
 skp_	ldy #0
 lp3	lda @buf,y
 	sta (:ztmp),y
-
 	iny
 	cpy ptr2
 	bne lp3
@@ -98,8 +114,7 @@ quit	lda portb
 
 	ldy #0
 mv0	lda @buf,y
-	sta $ffff,y
-dst	equ *-2
+	sta dst: $ffff,y
 	iny
 	inc :ztmp
 	bne mv0

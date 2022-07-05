@@ -34,6 +34,7 @@ lp1	jsr @xmsBank		; ZTMP+1
 ;	lda :ztmp+1
 	cmp #$7f
 	bne skp
+
 	lda :ztmp
 	beq skp
 
