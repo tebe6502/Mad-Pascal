@@ -314,6 +314,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
+	procedure FillChar(var a; count: word; value: Boolean); assembler; register; overload; inline;
 	procedure FillChar(var a; count: word; value: byte); assembler; register; overload; inline;
 	function FloatToStr(a: real): TString; stdcall; assembler;
 	procedure FreeMem(var p; size: word); assembler; register;
@@ -328,7 +329,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure Move(source, dest: pointer; count: word); assembler; register; overload; inline;
 	procedure Move(var source, dest; count: word); assembler; register; overload; inline;
 	procedure Move(var source; dest: pointer; count: word); assembler; register; overload; inline;
-	procedure Move(source: pointer;var dest; count: word); assembler; register; overload; inline;
+	procedure Move(source: pointer; var dest; count: word); assembler; register; overload; inline;
 	function OctStr(Value: cardinal; Digits: byte): TString; assembler;
 	function ParamCount: byte; assembler;
 	function ParamStr(i: byte): TString; assembler;
@@ -1529,6 +1530,7 @@ asm
 	jsr @fill
 end;
 
+
 procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 (*
 @description:
@@ -1541,6 +1543,7 @@ Fills the memory starting at A with Count Characters with value equal to Value
 asm
 	jsr @fill
 end;
+
 
 procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
 (*
@@ -1556,12 +1559,26 @@ asm
 end;
 
 
+procedure FillChar(var a; count: word; value: Boolean); assembler; register; overload; inline;
+(*
+@description:
+Fills the memory starting at A with Count Characters with value equal to Value
+
+@param: a - array
+@param: count
+@param: value - Boolean
+*)
+asm
+	jsr @fill
+end;
+
+
 procedure FillChar(var a; count: word; value: Byte); assembler; register; overload; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
 
-@param: a - formal type
+@param: a - array
 @param: count
 @param: value - Boolean
 *)
