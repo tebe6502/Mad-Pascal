@@ -1,5 +1,10 @@
+04.07.2022
+- naprawiony WriteBuffer (TMemoryStream)
+
 26.06.2022
 - poprawione VOLATILE
+- poprawione tworzenie nazwy do tablicy znajdującej się w innym unicie, której rozmiar nie przekracza 256 bajtów
+- issue #99 fixed (https://github.com/tebe6502/Mad-Pascal/issues/99)
 
 12.06.2022
 - poprawione przekazywania parametrów typu POINTER do procedur/funkcji (funkcja CompileAddress), rozróżniany jest parametr 'var buf' (formal type) a 'var buf:pointer', https://wiki.freepascal.org/Variable_parameter
@@ -14,25 +19,25 @@
 - poprawiony plik 'targets\generate_program_prolog.inc', przywrócone działanie FASTMUL
 
 04.05.2022
-- issue #98 fixed
+- issue #98 fixed (https://github.com/tebe6502/Mad-Pascal/issues/98)
 
 03.05.2022
-- issue #102 fixed (Mad Assembler 2.1.6)
+- issue #102 fixed (Mad Assembler 2.1.6, https://github.com/tebe6502/Mad-Pascal/issues/102)
 
 01.05.2022
-- issue #101 fixed (poprawiony plik common\single.asm)
+- issue #101 fixed (https://github.com/tebe6502/Mad-Pascal/issues/101)
 
 24.04.2022
 - poprawki dla optymalizacji 'PeepholeOptimization_STA' (argument z LDA nie moze wystapic w przedziale p..i)
 
 17.04.2022
-- fixed issue #94
+- issue #94 fixed (https://github.com/tebe6502/Mad-Pascal/issues/94)
 
 16.04.2022
 - poprawione dzialanie modyfikatorow KEEP i INTERRUPT, kompilator automatycznie oznaczy procedury/funkcje z takiego bloku do kompilacji
 
 12.04.2022
-- issue #92 fixed
+- issue #92 fixed (https://github.com/tebe6502/Mad-Pascal/issues/92)
 
 11.04.2022
 - dodany modyfikator KEEP dla procedur/funkcji, oznaczona w ten sposób procedura/funkcja zostanie zawsze skompilowana
@@ -44,7 +49,7 @@
 - poprawiona funkcja 'CardToHalf' przeliczająca stałe na typ Float16 ('if frac(s) <> 0 then Result := f32Tof16(Src)')
 
 08.03.2022
-- optymalizacja :EAX, tag: 2022-03-08
+- optymalizacja :EAX (tag: 2022-03-08)
 
 06.03.2022
 - poprawiona optymalizacja 'PeepholeOptimization_STACK' tag: 2022-03-05
@@ -60,7 +65,7 @@
 - ustalenie adresu wskażnika dla typu proceduralnego oznacza inny sposób wywołania procedury/funkcji, przez JMP (LABEL)
 
 21.02.2022
-- fixed issue #76
+- issue #76 fixed (https://github.com/tebe6502/Mad-Pascal/issues/76)
 
 14.02.2022
 - nowa funkcja Tab2Space
@@ -80,16 +85,16 @@
 - wstępna obsługa InitGraph dla C64, tryb bitmapy HiRes
 
 12.01.2022
-- fix issue #78 (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_val.pas)
+- issue #78 fixed (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_val.pas)
 
 11.01.2022
-- fix issue #77 (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_var.pas)
+- issue #77 fixed (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_var.pas)
 
 10.01.2022
 - dodana obsługa dyrektywy LINK {$L filename} https://www.freepascal.org/docs-html/prog/progsu43.html
 
 06.01.2022
-- fix issue #75 (https://github.com/tebe6502/Mad-Pascal/blob/master/samples/tests/tests-pointer/arithmetic.pas)
+- issue #75 fixed (https://github.com/tebe6502/Mad-Pascal/blob/master/samples/tests/tests-pointer/arithmetic.pas)
 
 05.01.2022
 - zmiana sposobu przekazywania paramatrów do procedur/funkcji (od prawej do lewej strony), tak jak FPC, Delphi
