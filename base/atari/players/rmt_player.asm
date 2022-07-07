@@ -34,7 +34,7 @@ TRACKS		equ 4
 ;	icl "rmt_feat.a65"
 ;*
 ;* RMT ZeroPage addresses
-	org $e0
+;	org $e0
 p_tis
 p_instrstable		org *+2
 p_trackslbstable	org *+2
@@ -51,6 +51,9 @@ tmp			org *+1
 	IFT FEAT_COMMAND2
 frqaddcmd2		org *+1
 	EIF
+	
+zp_end
+	
 	IFT TRACKS>4
 	org PLAYER-$400+$40
 	ELS
