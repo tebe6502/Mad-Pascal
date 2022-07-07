@@ -374,10 +374,16 @@ data
 /* RMTPLAY
 /* ----------------------------------------------------------------------- */
 
-.macro	RMTPLAY (nam, lab, mode)
+.macro	RMTPLAY (nam, lab, mode, zp)
 
 STEREOMODE	= %%mode
 PLAYER		= main.%%lab
+
+	ift %%zp=0
+	org $e0
+	els
+	org %%zp
+	eif	
 
 	ert <PLAYER <> 0,'RMT player routine MUST be compiled from the begin of the memory page'
 
@@ -387,7 +393,7 @@ PLAYER		= main.%%lab
 
 	ert *>=$c000
 
-	.echo '$R RMTPLAY ',track_variables,'..',RMTPLAYEREND," %%nam"
+	.echo '$R RMTPLAY ',p_tis,'..',zp_end,', ',track_variables,'..',RMTPLAYEREND," %%nam"
 .endm
 
 
