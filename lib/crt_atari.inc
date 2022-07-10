@@ -218,34 +218,34 @@ procedure TextMode(Mode: byte); assembler;
 @param: Mode - unused value
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	@clrscr
 
 	pla:tax
-};
 end;
 
 
 procedure NoSound; assembler;
 (*
 @description: Reset POKEY
+
+https://atariage.com/forums/topic/151841-init-of-the-pokey/?do=findComment&comment=1856144
 *)
 asm
-{	lda #0
-	sta $d208
-	sta $d218
-
-	ldy #3
-	sty $d20f
-	sty $d21f
+	lda #0
+	sta $d20f
+	sta $d21f
 
 	ldy #8
 lp	sta $d200,y
 	sta $d210,y
 	dey
 	bpl lp
-};
+
+	lda #3
+	sta $d20f
+	sta $d21f
 end;
 
 
@@ -263,7 +263,7 @@ procedure Sound(Chan,Freq,Dist,Vol: byte); assembler;
 // Chan = 4..7 secondary Pokey
 //----------------------------------------------------------------------------------------------
 asm
-{	lda Chan
+	lda Chan
 	and #7
 
 	ldy #$10
@@ -296,6 +296,5 @@ npokey	equ *-1
 	ora #0
 _t	equ *-1
 	sta audc1,y
-};
 end;
 
