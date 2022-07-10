@@ -234,18 +234,18 @@ https://atariage.com/forums/topic/151841-init-of-the-pokey/?do=findComment&comme
 *)
 asm
 	lda #0
-	sta $d20f
-	sta $d21f
+	sta $d208
+	sta $d218
+
+	ldy #3
+	sty $d20f
+	sty $d21f
 
 	ldy #8
 lp	sta $d200,y
 	sta $d210,y
 	dey
 	bpl lp
-
-	lda #3
-	sta $d20f
-	sta $d21f
 end;
 
 
