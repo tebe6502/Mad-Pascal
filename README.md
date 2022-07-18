@@ -103,6 +103,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [heatmap](https://gitlab.com/delysio/heatmap)
 * [Flob](https://gitlab.com/bocianu/flob)
 * [Ultima V](https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483)
+* [a8-mad-pascal-playground](https://github.com/zbyti/mad-pascal-playground)
 
 ## Benchmarks
 
