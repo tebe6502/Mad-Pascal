@@ -99,6 +99,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [Mole](https://github.com/GSoftwareDevelopment/Mole)
 * [SFX-Tracker](https://github.com/GSoftwareDevelopment/SFX-Tracker)
 * [SFX-Engine](https://github.com/GSoftwareDevelopment/SFX-Engine)
+   * [SFX-Engine-example](https://github.com/GSoftwareDevelopment/SFX-Engine-example)
 * [MIDICar-Player](https://github.com/GSoftwareDevelopment/MIDICar-Player)
 * [heatmap](https://gitlab.com/delysio/heatmap)
 * [Flob](https://gitlab.com/bocianu/flob)
