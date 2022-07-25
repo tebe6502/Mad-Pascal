@@ -952,13 +952,17 @@ asm
 
 	.ifdef PutPixel
 	 lda WIN_RIGHT
+	 add #1
 	 sta PutPixel.lsw
 	 lda WIN_RIGHT+1
+	 adc #0
 	 sta PutPixel.hsw
 
 	 lda WIN_BOTTOM
+	 add #1
 	 sta PutPixel.lsh
 	 lda WIN_BOTTOM+1
+	 adc #0
 	 sta PutPixel.hsh
 	eif
 
