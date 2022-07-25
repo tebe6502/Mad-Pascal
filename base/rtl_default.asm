@@ -58,6 +58,8 @@
 	icl 'common\float16_mul.asm'	; mul -> HALFSINGLE		IEEE-754 16bit
 	icl 'common\float16_div.asm'	; div -> HALFSINGLE		IEEE-754 16bit
 	icl 'common\float16_int.asm'	; int -> HALFSINGLE		IEEE-754 16bit
+	icl 'common\float16_round.asm'	; round -> HALFSINGLE		IEEE-754 16bit
+	icl 'common\float16_frac.asm'	; frac -> HALFSINGLE		IEEE-754 16bit
 	icl 'common\float16_cmp.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
 	icl 'common\float16_i2f.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
 
