@@ -7,6 +7,8 @@ unit f16;
 
  @description:
 
+ <http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf>
+
  <https://github.com/artyom-beilis/float16>
 
  <https://galfar.vevb.net/wp/2011/16bit-half-float-in-pascaldelphi/>
