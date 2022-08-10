@@ -44,10 +44,10 @@
 		; Setup T1 if changed
 .proc	fmulu_16
 
-t1	= eax
-t2	= ecx
+t1	= :eax
+t2	= :ecx
 
-product	= eax
+product	= :eax
 
 	stx @sp
 ;		bcc @+
@@ -123,9 +123,9 @@ _BB_:		lda #0
 _CC_:		adc #0
 		sta PRODUCT+2
 		bcc @+
-;		    inc PRODUCT+3
+;		inc PRODUCT+3
 		inx
-		    clc
+		clc
 @
 		tya
 _cc:		adc #0
@@ -135,7 +135,7 @@ _dd:		lda #0
 		adc PRODUCT+2
 		sta PRODUCT+2
 		scc
-;		    inc PRODUCT+3
+;		inc PRODUCT+3
 		inx
 
 	stx PRODUCT+3
