@@ -4,6 +4,24 @@
 ; http://vm02.cvs.sourceforge.net/viewvc/vm02/vm02/src/
 
 /*
+
+  @NEGINT
+  @FFRAC
+  @FROUND
+  @FSUB
+  @FPNORM
+  @FMUL
+  @FDIV
+  @FCMPL
+  @F2I
+  @I2F
+  @I2F_M
+
+*/
+
+
+
+/*
 	org eax
 
 FP1MAN0	.ds 1
@@ -819,7 +837,7 @@ F2ISHL:	CMP	#32
 .endp
 
 
-.proc	@I2F_m
+.proc	@I2F_M
 
 	lda :STACKORIGIN-1,x
 	STA	FPMAN0
