@@ -1,26 +1,22 @@
 <html>
 <head>
 	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
-	<title>unit datamatrix - reference</title>
+	<title>unit ZX2 - reference</title>
 </head>
 <body>
 
 <!--********************* HEADER **************************-->
 
-<h1>unit datamatrix</h1>
-<h3>Datamatrix library</h3>
-<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
-<br><p><a href='https://github.com/pfusik/datamatrix6502'>https://github.com/pfusik/datamatrix6502</a> <br> adapted into MadPascal by bocianu '2017</p>
+<h1>unit ZX2</h1>
+<h3>ZX2</h3>
+<p>author: Einar Saukas, Daniel Serpell, Tomasz 'Tebe' Biela</p>
+<br><p>ZX2 decompressor <br> <a href='https://github.com/dmsc/zx02'>https://github.com/dmsc/zx02</a></p>
 
 <!--********************* CONSTANTS **************************-->
 
-<h2>Constants:</h2>
-<table class='consts'>
-<tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
-<tr><td class='tname'>DataMatrix_EOF</td><td class='tvalue'>255</td><td class='tdesc'></td></tr>
 
-</table>
+
 
 <!--********************* TYPES **************************-->
 
@@ -46,10 +42,8 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>CalculateMatrix</td><td class='tdesc'><h4>procedure CalculateMatrix; assembler;</h4><br>
-	<br><ul></ul></td></tr>
-<tr><td class='tname fname'>SetMessage</td><td class='tdesc'><h4>procedure SetMessage(msg:string; dmData:word);</h4><br>
-	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>unZX2</td><td class='tdesc'><h4>procedure unZX2(inputPointer, outputPointer: pointer); register; assembler; overload;</h4><br>
+	ZX0 decompressor (Daniel Serpell)<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
 
 </table>
 

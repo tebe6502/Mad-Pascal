@@ -9,8 +9,8 @@
 
 <h1>unit vbxe</h1>
 <h3>Video Board XE unit</h3>
-<p>author: Tomasz Biela (Tebe)</p>
-
+<p>author: Tomasz Biela (Tebe), Daniel Koźmiński</p>
+<br><p>VGA: text mode 80x24 in 2 colors per character. This is like GR.0 in 80 columns and color. <br> VGALo: pixel mode 160x192/256 colors (lowres). This is like GR.15 in 256 colors. <br> VGAMed: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors. <br> VGAHi: pixel mode 640x192/16 colors (hires) <br> The mode 0 is reserved for text console.</p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -18,9 +18,6 @@
 <table class='consts'>
 <tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
-<tr><td class='tname'>LoRes</td><td class='tvalue'>1</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>MedRes</td><td class='tvalue'>2</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>HiRes</td><td class='tvalue'>3</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>VC_XDL</td><td class='tvalue'>1</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>VC_XCOLOR</td><td class='tvalue'>2</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>VC_NO_TRANS</td><td class='tvalue'>4</td><td class='tdesc'></td></tr>
@@ -35,7 +32,7 @@
 <tr><th>name:</th><th>type:</th><th>description:</th></tr>
 
 <tr><td class='tname'>TUInt24</td><td class='ttype'>record<ul class='record'><li>byte0: byte;</li><li>byte1: byte;</li><li>byte2: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>TXDL</td><td class='ttype'>record<ul class='record'><li>xdlc_: word; <span class='comment'>// blank</span></li><li>rptl_: byte;</li><li>xdlc: word;</li><li>rptl: byte;</li><li>ov_adr: TUInt24;</li><li>ov_step: word;</li><li>mp_adr: TUInt24;</li><li>mp_step: word;</li><li>mp_hscrol: byte;</li><li>mp_vscrol: byte;</li><li>mp_width: byte;</li><li>mp_height: byte;</li><li>ov_width: byte;</li><li>ov_prior: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>TXDL</td><td class='ttype'>record<ul class='record'><li>xdlc_: word; <span class='comment'>// blank</span></li><li>rptl_: byte;</li><li>xdlc: word;</li><li>rptl: byte;</li><li>ov_adr: TUInt24;</li><li>ov_step: word;</li><li>ov_chbase: byte;</li><li>mp_adr: TUInt24;</li><li>mp_step: word;</li><li>mp_hscrol: byte;</li><li>mp_vscrol: byte;</li><li>mp_width: byte;</li><li>mp_height: byte;</li><li>ov_width: byte;</li><li>ov_prior: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>TBCB</td><td class='ttype'>record<ul class='record'><li>src_adr: TUInt24;</li><li>src_step_y: smallint;</li><li>src_step_x: shortint;</li><li>dst_adr: TUInt24;</li><li>dst_step_y: smallint;</li><li>dst_step_x: shortint;</li><li>blt_width: word;</li><li>blt_height: byte;</li><li>blt_and_mask: byte;</li><li>blt_xor_mask: byte;</li><li>blt_collision_mask: byte;</li><li>blt_zoom: byte;</li><li>pattern_feature: byte;</li><li>blt_control: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>TVBXEMemoryStream</td><td class='ttype'>Object<ul class='record'><li>Position: cardinal;</li><li>Size: cardinal; <span class='comment'>// 0..Size-1</span></li><li><a href='#TVBXEMEMORYSTREAM.CREATE'>	procedure Create;</a></li><li><a href='#TVBXEMEMORYSTREAM.CLEAR'>	procedure Clear;</a></li><li><a href='#TVBXEMEMORYSTREAM.SETBANK'>	procedure SetBank;</a></li><li><a href='#TVBXEMEMORYSTREAM.READBUFFER'>	procedure ReadBuffer(var Buffer; Count: word);</a></li><li><a href='#TVBXEMEMORYSTREAM.WRITEBUFFER'>	procedure WriteBuffer(var Buffer; Count: word);</a></li><li><a href='#TVBXEMEMORYSTREAM.READBYTE'>	function ReadByte: Byte;</a></li><li><a href='#TVBXEMEMORYSTREAM.READWORD'>	function ReadWord: Word;</a></li><li><a href='#TVBXEMEMORYSTREAM.READDWORD'>	function ReadDWord: Cardinal;</a></li><li><a href='#TVBXEMEMORYSTREAM.WRITEBYTE'>	procedure WriteByte(b: Byte);</a></li><li><a href='#TVBXEMEMORYSTREAM.WRITEWORD'>	procedure WriteWord(w: Word);</a></li><li><a href='#TVBXEMEMORYSTREAM.WRITEDWORD'>	procedure WriteDWord(d: Cardinal);</a></li></ul><br clear='all'>end;</td><td class='tdesc'></td></tr>
 
@@ -43,9 +40,15 @@
 
 <!--********************* ABSOLUTE VARIABLES **************************-->
 
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
+<tr><td class='tname'>fildat</td><td class='taddress'>$2fd</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>rowcrs</td><td class='taddress'>$54</td><td class='ttype'>byte</td><td class='tdesc'>pionowa pozycja kursora</td></tr>
+<tr><td class='tname'>colcrs</td><td class='taddress'>$55</td><td class='ttype'>byte</td><td class='tdesc'>(2) pozioma pozycja kursora</td></tr>
 
-
+</table>
 
 <!--********************* GLOBAL VARIABLES **************************-->
 
@@ -87,15 +90,35 @@
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'><a name='TVBXEMEMORYSTREAM.CLEAR'></a>TVBXEMemoryStream.Clear</td><td class='tdesc'><h4>procedure TVBXEMemoryStream.Clear;</h4><br>
 	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>SetColor</td><td class='tdesc'><h4>procedure SetColor(a: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>PutPixel</td><td class='tdesc'><h4>procedure PutPixel(x: word; y: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>HLine</td><td class='tdesc'><h4>procedure HLine(x1, x2: word; y1: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>VLine</td><td class='tdesc'><h4>procedure VLine(x1: word; y1, y2: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Line</td><td class='tdesc'><h4>procedure Line(x1: word; y1: byte; x2: word; y2: byte);</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Position</td><td class='tdesc'><h4>procedure Position(x,y: byte);</h4><br>
+	Set cursor position on screen. <br> Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.<br><ul><h5>parameters:</h5><li>x - horizontal positions</li><li>y - vertical positions</li></ul></td></tr>
+<tr><td class='tname fname'>TextOut</td><td class='tdesc'><h4>procedure TextOut(a: char; c: byte); overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TextOut</td><td class='tdesc'><h4>procedure TextOut(s: PByte; c: byte); overload;</h4><br>
+	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>OverlayOff</td><td class='tdesc'><h4>procedure OverlayOff; assembler;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>ColorMapOn</td><td class='tdesc'><h4>procedure ColorMapOn; assembler;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>ColorMapOff</td><td class='tdesc'><h4>procedure ColorMapOff; assembler;</h4><br>
 	<br><ul></ul></td></tr>
-<tr><td class='tname fname'>SetHorizontalRes</td><td class='tdesc'><h4>procedure SetHorizontalRes(a: byte); assembler;</h4><br>
+<tr><td class='tname fname'>SetHorizontalRes</td><td class='tdesc'><h4>procedure SetHorizontalRes(a: byte; s: word); overload;</h4><br>
 	<br><ul></ul></td></tr>
-<tr><td class='tname fname'>SetHRes</td><td class='tdesc'><h4>procedure SetHRes(a: byte); assembler;</h4><br>
+<tr><td class='tname fname'>SetHorizontalRes</td><td class='tdesc'><h4>procedure SetHorizontalRes(a: byte); overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>SetHRes</td><td class='tdesc'><h4>procedure SetHRes(a: byte); overload;</h4><br>
+	<br><ul></ul></td></tr>
+<tr><td class='tname fname'>SetHRes</td><td class='tdesc'><h4>procedure SetHRes(a: byte; s: word); overload;</h4><br>
 	<br><ul></ul></td></tr>
 <tr><td class='tname fname'>IniBCB</td><td class='tdesc'><h4>procedure IniBCB(var a: TBCB; src,dst: cardinal; w0, w1: smallint; w: word; h: byte; ctrl: byte);</h4><br>
 	<br><ul></ul></td></tr>

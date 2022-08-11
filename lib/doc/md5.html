@@ -10,7 +10,7 @@
 <h1>unit md5</h1>
 <h3>MD5</h3>
 <p>author: Free Pascal development team, Tomasz Biela (Tebe)</p>
-<br><p>Implements a MD5 digest algorithm (RFC 1321) <br> <a href='https://github.com/graemeg/freepascal/blob/master/packages/hash/src/md5.pp'>https://github.com/graemeg/freepascal/blob/master/packages/hash/src/md5.pp</a></p>
+<br><p>Implements a MD5 digest algorithm (RFC 1321) <br> <a href='https://github.com/alrieckert/freepascal/blob/master/packages/hash/src/md5.pp'>https://github.com/alrieckert/freepascal/blob/master/packages/hash/src/md5.pp</a></p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -18,7 +18,7 @@
 <table class='consts'>
 <tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
-<tr><td class='tname'>s: array[0..63] of cardinal</td><td class='tvalue'>(</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>s: array[0..63] of byte</td><td class='tvalue'>(</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>K: array[0..63] of cardinal</td><td class='tvalue'>(</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>PADDING_MD45: array[0..15] of Cardinal</td><td class='tvalue'>($80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)</td><td class='tdesc'></td></tr>
 
@@ -36,7 +36,7 @@
 <table class='registers'>
 <tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
-<tr><td class='tname'>Block</td><td class='taddress'>Buffer</td><td class='ttype'>PBlock;//</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>Block</td><td class='taddress'>Buffer</td><td class='ttype'>PBlock</td><td class='tdesc'></td></tr>
 
 </table>
 

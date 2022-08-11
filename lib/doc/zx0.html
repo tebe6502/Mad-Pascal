@@ -1,0 +1,61 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit ZX0 - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit ZX0</h1>
+<h3>ZX0</h3>
+<p>author: Einar Saukas, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela</p>
+<br><p>ZX0 decompressor <br> <a href='https://github.com/einar-saukas/ZX0'>https://github.com/einar-saukas/ZX0</a> <br> <a href='https://xxl.atari.pl/zx0-decompressor/'>https://xxl.atari.pl/zx0-decompressor/</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+<h2>Register Variables:</h2>
+<table class='registers'>
+<tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>buf</td><td class='taddress'>$0400</td><td class='ttype'>array [0..255] of byte</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>unZX0</td><td class='tdesc'><h4>procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;</h4><br>
+	ZX0 I/O stream decompressor (Einar Saukas, Krzysztof 'XXL' Dudek)<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
+<tr><td class='tname fname'>unZX0</td><td class='tdesc'><h4>procedure unZX0(inputPointer, outputPointer: pointer); assembler; register; overload;</h4><br>
+	ZX0 decompressor (Einar Saukas, Krzysztof 'XXL' Dudek)<br><ul><h5>parameters:</h5><li>inputPointer - source data address</li><li>outputPointer - destination data address</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

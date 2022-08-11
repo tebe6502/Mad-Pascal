@@ -34,7 +34,11 @@
 <table class='registers'>
 <tr><th>name:</th><th>address:</th><th>type:</th><th>description:</th></tr>
 
+<tr><td class='tname'>irqens</td><td class='taddress'>$10</td><td class='ttype'>byte</td><td class='tdesc'>rejestr cien IRQEN</td></tr>
 <tr><td class='tname'>rtclok</td><td class='taddress'>$12</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>rtclok1</td><td class='taddress'>$12</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>rtclok2</td><td class='taddress'>$13</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>rtclok3</td><td class='taddress'>$14</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>atract</td><td class='taddress'>$4D</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>lmargin</td><td class='taddress'>$52</td><td class='ttype'>byte</td><td class='tdesc'>lewy margines ekranu</td></tr>
 <tr><td class='tname'>rmargin</td><td class='taddress'>$53</td><td class='ttype'>byte</td><td class='tdesc'>prawy margines ekranu</td></tr>
@@ -98,6 +102,7 @@
 <tr><td class='tname'>prior</td><td class='taddress'>$D01B</td><td class='ttype'>byte</td><td class='tdesc'>rejestr piorytetu GTIA</td></tr>
 <tr><td class='tname'>gractl</td><td class='taddress'>$D01D</td><td class='ttype'>byte</td><td class='tdesc'>rejestr kontroli PMG</td></tr>
 <tr><td class='tname'>hitclr</td><td class='taddress'>$D01E</td><td class='ttype'>byte</td><td class='tdesc'>rejestr zerujacy kolizje PMG</td></tr>
+<tr><td class='tname'>consol</td><td class='taddress'>$D01F</td><td class='ttype'>byte</td><td class='tdesc'>console keys status</td></tr>
 <tr><td class='tname'>audf1</td><td class='taddress'>$D200</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>audc1</td><td class='taddress'>$D201</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>audf2</td><td class='taddress'>$D202</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
@@ -107,6 +112,8 @@
 <tr><td class='tname'>audf4</td><td class='taddress'>$D206</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>audc4</td><td class='taddress'>$D207</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>audctl</td><td class='taddress'>$D208</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>kbcode</td><td class='taddress'>$D209</td><td class='ttype'>byte</td><td class='tdesc'>code of last pressed key</td></tr>
+<tr><td class='tname'>irqen</td><td class='taddress'>$D20E</td><td class='ttype'>byte</td><td class='tdesc'>zezwolenie przerwan IRQ (Z)</td></tr>
 <tr><td class='tname'>skstat</td><td class='taddress'>$D20F</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>porta</td><td class='taddress'>$D300</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>portb</td><td class='taddress'>$D301</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
@@ -118,10 +125,13 @@
 <tr><td class='tname'>pmbase</td><td class='taddress'>$D407</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>chbase</td><td class='taddress'>$D409</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>wsync</td><td class='taddress'>$D40A</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
-<tr><td class='tname'>vcount</td><td class='taddress'>$D40B</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>[volatile] vcount</td><td class='taddress'>$D40B</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>penh</td><td class='taddress'>$D40C</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>penv</td><td class='taddress'>$D40D</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
 <tr><td class='tname'>nmien</td><td class='taddress'>$D40E</td><td class='ttype'>byte</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>nmivec</td><td class='taddress'>$FFFA</td><td class='ttype'>word</td><td class='tdesc'>wektor przerwania NMI (6502)</td></tr>
+<tr><td class='tname'>resetvec</td><td class='taddress'>$FFFC</td><td class='ttype'>word</td><td class='tdesc'>wektor przerwania RESET</td></tr>
+<tr><td class='tname'>irqvec</td><td class='taddress'>$FFFE</td><td class='ttype'>word</td><td class='tdesc'>wektor przerwania IRQ</td></tr>
 
 </table>
 
