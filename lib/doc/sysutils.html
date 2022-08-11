@@ -76,14 +76,18 @@
 	Check whether a particular file exists in the filesystem<br><ul><h5>parameters:</h5><li>name: string[32]</li><h5>returns:</h5><li class='returns'>TRUE - file exists</li><li class='returns'>FALSE - file not exists</li></ul></td></tr>
 <tr><td class='tname fname'>ByteToStr</td><td class='tdesc'><h4>function ByteToStr(a: byte): TString; assembler;</h4><br>
 	Converts input byte to a string<br> https://codebase64.org/doku.php?id=base:tiny_.a_to_ascii_routine<br><ul><h5>parameters:</h5><li>a: byte</li><h5>returns:</h5><li class='returns'>pointer to string.Y = hundreds, .X = tens, .A = ones</li></ul></td></tr>
-<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): TString; assembler; overload;</h4><br>
+<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: integer): TString; assembler; stdcall; overload;</h4><br>
 	Convert an INTEGER value to a decimal string<br><ul><h5>parameters:</h5><li>a: integer</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
-<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: cardinal): TString; assembler; overload;</h4><br>
+<tr><td class='tname fname'>IntToStr</td><td class='tdesc'><h4>function IntToStr(a: cardinal): TString; assembler; stdcall; overload;</h4><br>
 	Convert an CARDINAL value to a decimal string<br><ul><h5>parameters:</h5><li>a: cardinal</li><h5>returns:</h5><li class='returns'>pointer to string</li></ul></td></tr>
 <tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(const s: char): byte; assembler; overload;</h4><br>
 	Convert a char to an byte value<br><ul><h5>parameters:</h5><li>s: char</li><h5>returns:</h5><li class='returns'>byte</li></ul></td></tr>
 <tr><td class='tname fname'>StrToInt</td><td class='tdesc'><h4>function StrToInt(s: PString): integer; assembler; overload;</h4><br>
 	Convert a string to an integer value<br><ul><h5>parameters:</h5><li>s: string[32]</li><h5>returns:</h5><li class='returns'>integer (32bit)</li></ul></td></tr>
+<tr><td class='tname fname'>TryStrToInt</td><td class='tdesc'><h4>function TryStrToInt(s: PString; var i: integer): Boolean; assembler; overload;</h4><br>
+	TryStrToInt tries to convert the string S to an integer, and returns True if this was successful. In that case the converted integer is returned in I. If the conversion failed, (an invalid string, or the value is out of range) then False is returned.<br><ul><h5>parameters:</h5><li>s: string[32]</li><h5>returns:</h5><li class='returns'>i      - integer (32bit)result - Boolean</li></ul></td></tr>
+<tr><td class='tname fname'>TryStrToInt</td><td class='tdesc'><h4>function TryStrToInt(s: PString; var i: byte): Boolean; assembler; overload;</h4><br>
+	TryStrToInt tries to convert the string S to an byte, and returns True if this was successful. In that case the converted integer is returned in I. If the conversion failed, (an invalid string, or the value is out of range) then False is returned.<br><ul><h5>parameters:</h5><li>s: string[32]</li><h5>returns:</h5><li class='returns'>i      - byteresult - Boolean</li></ul></td></tr>
 <tr><td class='tname fname'>IntToHex</td><td class='tdesc'><h4>function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;</h4><br>
 	Convert an integer value to a hexadecimal string<br><ul><h5>parameters:</h5><li>Value: cardinal (32bit)</li><li>Digits - number of characters</li><h5>returns:</h5><li class='returns'>string[32]</li></ul></td></tr>
 <tr><td class='tname fname'>StrToFloat</td><td class='tdesc'><h4>function StrToFloat(var s: string): real;</h4><br>

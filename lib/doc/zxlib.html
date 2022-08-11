@@ -54,12 +54,12 @@
 
 <tr><td class='tname fname'>PrintAt</td><td class='tdesc'><h4>procedure PrintAt (y, x : byte; c : char); overload;</h4><br>
 	Print character on location y, x in text mode 0<br><ul><h5>parameters:</h5><li>y - coordinate Y</li><li>x - coordinate X</li><li>c - character to be displayed</li></ul></td></tr>
-<tr><td class='tname fname'>PrintAt</td><td class='tdesc'><h4>procedure PrintAt (y, x : byte; text : string); overload;</h4><br>
-	Print string on location y, x in text mode 0<br><ul><h5>parameters:</h5><li>y - coordinate Y</li><li>x - coordinate X</li><li>text - string to be displayed</li></ul></td></tr>
+<tr><td class='tname fname'>PrintAt</td><td class='tdesc'><h4>procedure PrintAt (y, x : byte; txt : string); overload;</h4><br>
+	Print string on location y, x in text mode 0<br><ul><h5>parameters:</h5><li>y - coordinate Y</li><li>x - coordinate X</li><li>txt - string to be displayed</li></ul></td></tr>
 <tr><td class='tname fname'>PrintAt</td><td class='tdesc'><h4>procedure PrintAt (var f : file; y, x : byte; c : char); overload;</h4><br>
 	Print character on location y, x to screen device S:<br><ul><h5>parameters:</h5><li>f - variable holder for screen device S: (text mode 1, 2)</li><li>y - coordinate Y</li><li>x - coordinate X</li><li>c - character to be displayed</li></ul></td></tr>
-<tr><td class='tname fname'>PrintAt</td><td class='tdesc'><h4>procedure PrintAt (var f : file; y, x : byte; text : string); overload;</h4><br>
-	Print string on location y, x to screen device S:<br><ul><h5>parameters:</h5><li>f - variable holder for screen device S: (text mode 1, 2)</li><li>y - coordinate Y</li><li>x - coordinate X</li><li>text - string to be displayed</li></ul></td></tr>
+<tr><td class='tname fname'>PrintAt</td><td class='tdesc'><h4>procedure PrintAt (var f : file; y, x : byte; txt : string); overload;</h4><br>
+	Print string on location y, x to screen device S:<br><ul><h5>parameters:</h5><li>f - variable holder for screen device S: (text mode 1, 2)</li><li>y - coordinate Y</li><li>x - coordinate X</li><li>txt - string to be displayed</li></ul></td></tr>
 <tr><td class='tname fname'>Flash</td><td class='tdesc'><h4>procedure Flash (y, x : byte; char01, char02 : char); overload;</h4><br>
 	Alternate flashing of two characters on location y, x<br><ul><h5>parameters:</h5><li>y - coordinate Y</li><li>x - coordinate X</li><li>char01 - first character to flash</li><li>char02 - second character to flash</li></ul></td></tr>
 <tr><td class='tname fname'>Flash</td><td class='tdesc'><h4>procedure Flash (y, x : byte; str : string); overload;</h4><br>
@@ -72,13 +72,13 @@
 	Locate character on location y, x in text mode 0<br><ul><h5>parameters:</h5><li>y - coordinate Y</li><li>x - coordinate X</li></ul></td></tr>
 <tr><td class='tname fname'>Screen</td><td class='tdesc'><h4>function Screen (var f : file; y, x : byte) : char; overload;</h4><br>
 	Locate character on location y, x on screen device S:<br><ul><h5>parameters:</h5><li>f - variable holder for screen device S: (text mode 1, 2)</li><li>y - coordinate Y</li><li>x - coordinate X</li></ul></td></tr>
-<tr><td class='tname fname'>ZXTitle</td><td class='tdesc'><h4>procedure ZXTitle (title : string; y, x : byte; author, dev, text, misc : string);</h4><br>
-	ZX Spectrum title screen<br><ul><h5>parameters:</h5><li>title  - title name</li><li>y      - coordinate Y</li><li>x      - coordinate X</li><li>author - author</li><li>dev    - port by...</li><li>text   - miscellaneous text</li><li>misc   - additional text</li></ul></td></tr>
+<tr><td class='tname fname'>ZXTitle</td><td class='tdesc'><h4>procedure ZXTitle (title : string; y, x : byte; author, dev, txt, misc : string);</h4><br>
+	ZX Spectrum title screen<br><ul><h5>parameters:</h5><li>title  - title name</li><li>y      - coordinate Y</li><li>x      - coordinate X</li><li>author - author</li><li>dev    - port by...</li><li>txt    - miscellaneous text</li><li>misc   - additional text</li></ul></td></tr>
 <tr><td class='tname fname'>SetRAM</td><td class='tdesc'><h4>function SetRAM (pages : byte) : word;</h4><br>
 	Set new top free RAM and character set address<br><ul><h5>parameters:</h5><li>pages - number of pages reserved at the top of free memory</li></ul></td></tr>
 <tr><td class='tname fname'>Sgn</td><td class='tdesc'><h4>function Sgn (number : integer) : integer;</h4><br>
 	Return signed or zero number depending on input number<br><ul><h5>parameters:</h5><li>number - Number to be checked</li><h5>returns:</h5><li class='returns'>number > 0: returned value 1</li><li class='returns'>number < 0: returned value -1</li><li class='returns'>number = 0: returned value 0</li></ul></td></tr>
-<tr><td class='tname fname'>Beep</td><td class='tdesc'><h4>procedure Beep (duration : real; pitch : integer);</h4><br>
+<tr><td class='tname fname'>Beep</td><td class='tdesc'><h4>procedure Beep (duration : real; pitch : shortint);</h4><br>
 	Emulate ZX Spectrum beeper<br><ul><h5>parameters:</h5><li>duration - duration of the sound</li><li>pitch    - pitch is given in semitones above middle C using negativenumbers for notes below middle C</li></ul></td></tr>
 
 </table>

@@ -42,30 +42,14 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>SetActiveBuffer</td><td class='tdesc'><h4>procedure SetActiveBuffer(var a: TDisplayBuffer);</h4><br>
-	<br><ul></ul></td></tr>
-<tr><td class='tname fname'>InitGraph</td><td class='tdesc'><h4>procedure InitGraph(mode: byte); overload;</h4><br>
-	Init graphics mode<br><ul></ul></td></tr>
-<tr><td class='tname fname'>SetBkColor</td><td class='tdesc'><h4>procedure SetBkColor(color: byte); assembler;</h4><br>
-	Sets the background color to Color<br><ul></ul></td></tr>
-<tr><td class='tname fname'>SetColor</td><td class='tdesc'><h4>procedure SetColor(color: byte); assembler;</h4><br>
-	Sets the foreground color to Color<br><ul></ul></td></tr>
-<tr><td class='tname fname'>PutPixel</td><td class='tdesc'><h4>procedure PutPixel(x,y: smallint); assembler; overload;</h4><br>
-	Puts a point at (X,Y) using color Color<br><ul></ul></td></tr>
-<tr><td class='tname fname'>PutPixel</td><td class='tdesc'><h4>procedure PutPixel(x,y: smallint; color: byte); overload;</h4><br>
-	Puts a point at (X,Y) using color Color<br><ul></ul></td></tr>
-<tr><td class='tname fname'>GetPixel</td><td class='tdesc'><h4>function GetPixel(x,y: smallint): byte; assembler;</h4><br>
-	Return color of pixel<br><ul></ul></td></tr>
-<tr><td class='tname fname'>LineTo</td><td class='tdesc'><h4>procedure LineTo(x, y: smallint); assembler;</h4><br>
-	Draw a line starting from current position to a given point<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Scanline</td><td class='tdesc'><h4>function Scanline(y: smallint): PByte;</h4><br>
+	ScanLine give access to memory starting point for each row raw data.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>Line</td><td class='tdesc'><h4>procedure Line(x1, y1, x2, y2: smallint);</h4><br>
 	Draw a line between 2 points<br><ul></ul></td></tr>
 <tr><td class='tname fname'>HLine</td><td class='tdesc'><h4>procedure HLine(x1,x2,y: smallint);</h4><br>
 	Draw horizontal line between 2 points<br><ul></ul></td></tr>
 <tr><td class='tname fname'>fLine</td><td class='tdesc'><h4>procedure fLine(x0, y0, x1, y1: smallint);</h4><br>
 	Draw a line between 2 points<br><ul></ul></td></tr>
-<tr><td class='tname fname'>Scanline</td><td class='tdesc'><h4>function Scanline(y: smallint): PByte;</h4><br>
-	ScanLine give access to memory starting point for each row raw data.<br><ul></ul></td></tr>
 
 </table>
 
