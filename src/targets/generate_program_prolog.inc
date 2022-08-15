@@ -301,9 +301,11 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'stx bp','; BP = 0');
 
   asm65;
-  asm65(#9'stx skctl','; reset POKEY');
+  asm65(#9'stx audctl','; reset POKEY');
+  asm65(#9'stx audctl+$10');
   asm65(#9'lda #3');
   asm65(#9'sta skctl');
+  asm65(#9'sta skctl+$10');
   asm65;
   asm65(#9'dex','; X = 255');
   asm65;
