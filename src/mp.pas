@@ -35955,6 +35955,9 @@ begin
       if VarType <> 0 then
        if DataSize[VarType] > m then m:=DataSize[VarType];	// okreslamy najwiekszy wspolny typ
 
+      if VarType = BOOLEANTOK then inc(m);		// dla sytuacji np.: boolean := (shortint + shorint > 0)
+
+
       if (ValType in SignedOrdinalTypes) or (RightValType in SignedOrdinalTypes) then
        sign:=true
       else
