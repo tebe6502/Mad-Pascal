@@ -52,3 +52,22 @@ class Test_conditions:
         assert test.isVarTrue('r2')
         assert test.isVarTrue('r3')
 
+
+    def test_3(self):
+
+        test.runCode("""
+        var a, b: shortint;
+	    r: Boolean;
+        begin
+	 a:=100;
+	 b:=-120;       	 
+	
+	 if (a+b) < 0 then
+	  r:=true
+	 else
+	  r:=false;
+	 
+        end.
+        """)
+    
+        assert test.isVarTrue('r')
