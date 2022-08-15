@@ -1,3 +1,6 @@
+12.08.2022
+- poprawione reset POKEY-a (src\targets\generate_program_prolog.inc)
+
 23.07.2022
 - unit ZX2
 
