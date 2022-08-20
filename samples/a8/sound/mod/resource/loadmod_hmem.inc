@@ -146,7 +146,7 @@ begin
 
    dec(p0, $100);
 
-   xms.WriteBuffer(p0, $300);
+   xms.WriteBuffer(p0^, $300);
 
  end;
 

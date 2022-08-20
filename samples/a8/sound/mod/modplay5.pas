@@ -11,7 +11,7 @@
 // playloop		= $0400
 // mainloop		= $0400..$5ff
 
-// changes 02.11.2018
+// changes 02.11.2018; 20.08.2022
 
 
 program ModPlay;
@@ -40,7 +40,7 @@ const
 	sample_start = $100000;
 
 
-procedure Play: assembler;
+procedure Play; assembler;
 asm
 {
 /****************************************************************************
@@ -66,11 +66,14 @@ asm
 .zpvar nr0, nr1, nr2, nr3, patno, patend, cnts, pause, track_pos .byte
 .zpvar pat0, pat1, pat2 .long
 
-	stx _rx
-
 	jsr wait
 
 	sei
+
+	stx _rx
+
+	tsx
+	stx _ps
 
 	stz nmien
 	stz irqen
@@ -190,6 +193,18 @@ start
 	mwa	#nmi nmivec16		; custom NMI handler
 	mwa	#irq irqvec16		; custom IRQ handler
 
+
+	;set IRQ position in scanline for consistency and disable keyboard scan
+
+	sta	wsync
+
+	lda	#0
+	sta	skctl
+	sta	skctl+$10
+
+	sta	audctl+$10
+
+
 ;	mva	#$01	AUDCTL		; 0=POKEY 64KHz, 1=15KHz
 
 	mva #%01000000	AUDCTL
@@ -198,16 +213,10 @@ start
 
 	mva #$01	IRQEN
 
-	;set IRQ position in scanline for consistency and disable keyboard scan
-	mva	#0 skctl
-	sta	wsync
-
-	ldx	#16			; raster shift (right border)
-	dex:rne
+;	lda	#1
 	sta	skctl
+	sta	skctl+$10
 	sta	stimer
-	lda	#1
-	sta	skctl
 
 	mva	#$40	nmien
 
@@ -239,27 +248,13 @@ NMI	jmp player+mainloop
 
 	.ia8
 
-	lda #0
+	lda #0			; opcode 'inc.l' not exists
 	sta.l IRQEN
 	lda #1
 	sta.l IRQEN
 
 
-	ldx #0
-voice	equ *-1
-
-	lda vol6bit,x
-	sta.l audc1
-
-	lda vol6bit+$100,x
-	sta.l audc2
-
-	lda vol6bit+$200,x
-	sta.l audc3
-
-
-	ldx #0
-voice_	equ *-1
+	ldx voice: #0
 
 	lda vol6bit,x
 	sta.l audc1+$10
@@ -269,6 +264,18 @@ voice_	equ *-1
 
 	lda vol6bit+$200,x
 	sta.l audc3+$10
+
+
+	ldx voice_: #0
+
+	lda vol6bit,x
+	sta.l audc1
+
+	lda vol6bit+$100,x
+	sta.l audc2
+
+	lda vol6bit+$200,x
+	sta.l audc3
 
 
 	.ifdef MAIN.@DEFINES.STATUS
@@ -397,12 +404,8 @@ ivol2	adc volume
 
 	.ia16
 
-	lda.w #0
-regA	equ *-2
-
-	ldx.w #0
-regX	equ *-2
-
+	lda.w regA: #0
+	ldx.w regX: #0
 
 ;	plb
 	rti
@@ -699,14 +702,9 @@ skp
 
 	.ia16
 
-	lda.w #0
-regA	equ *-2
-
-	ldx.w #0
-regX	equ *-2
-
-	ldy.w #0
-regY	equ *-2
+	lda.w regA: #0
+	ldx.w regX: #0
+	ldy.w regY: #0
 
 ;	plb
 	rti
@@ -758,11 +756,13 @@ stop2
 	lda	#3
 	sta	skctl
 
+	ldx _ps: #0
+	txs
+
+	ldx _rx: #0
+
 	mva #$40 nmien
 	cli
-
-	ldx #0
-_rx	equ *-1
 
 	opt c-
 
