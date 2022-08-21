@@ -98,11 +98,10 @@ end;
 
 begin
 
-  FillSinHigh(sinusTable); InitDivision16; InitCharset;
+  FillSinHigh(@sinusTable); InitDivision16; InitCharset;
 
   repeat
     Pause; doPlasma;
   until false;
 
 end.
-
