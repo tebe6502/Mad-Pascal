@@ -24,8 +24,8 @@ const
 	$32,$32,$32,$32,$32,$32,$32,$32,
 	$32,$32,$32,$32,$32,$32,$32,$32,
 	$41,lo(dlist), hi(dlist));
-	
-    text: PChar = '        DYCP     Different Y Char Position         '~ + #$ff;
+
+    txt: PChar = '        DYCP     Different Y Char Position         '~ + #$ff;
 
 
     sinTable: array [0..255] of byte = (
@@ -68,7 +68,7 @@ var
 	screen, charset: word;
 
 	rowScrAdr: array [0..29] of word;
-	
+
 	ptxt: ^char;
 
 	chrAdr: array [0..255] of byte;
@@ -104,13 +104,13 @@ begin
   schr:=pointer(charset_font + chrAdr[i+ichr] * 8);
 
   asm
-  {	mwa pchr bp2
-  };
+  	mwa pchr bp2
+  end;
 
   case dy of
   0:
 	asm
-	{	ldy #8
+		ldy #8
 		lda #0
 		sta (bp2),y
 		iny
@@ -127,11 +127,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   1:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 
@@ -149,11 +149,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   2:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 		iny
@@ -171,11 +171,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   3:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 		iny
@@ -193,11 +193,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   4:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 		iny
@@ -215,11 +215,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   5:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 		iny
@@ -237,11 +237,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   6:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 		iny
@@ -259,11 +259,11 @@ begin
 		sta (bp2),y
 		iny
 		sta (bp2),y
-	};
+	end;
 
   7:
 	asm
-	{	ldy #0
+		ldy #0
 		tya
 		sta (bp2),y
 		iny
@@ -281,12 +281,12 @@ begin
 
 		ldy #15
 		sta (bp2),y
-	};
+	end;
   end;
 
 
  asm
- {	mwa schr eax
+ 	mwa schr eax
 
 	lda pchr
 	add dy
@@ -321,22 +321,22 @@ begin
 	sta (bp2),y
 
 	mwa pscr bp2
-};
+end;
 
 	case y of
 	 0: ;
 	 1:
 		asm
-		{	sbw bp2 #scrWidth eax
+			sbw bp2 #scrWidth eax
 
 			ldy #0
 			tya
 			sta (eax),y
-		};
+		end;
 
 	 2:
 		asm
-		{	sbw bp2 #scrWidth*2 eax
+			sbw bp2 #scrWidth*2 eax
 
 			ldy #0
 			tya
@@ -344,10 +344,10 @@ begin
 
 			ldy #scrWidth
 			sta (eax),y
-		};
+		end;
 	else
 		asm
-		{	sbw bp2 #scrWidth*3 eax
+			sbw bp2 #scrWidth*3 eax
 
 			ldy #0
 			tya
@@ -358,11 +358,11 @@ begin
 
 			ldy #scrWidth*2
 			sta (eax),y
-		};
+		end;
 	end;
 
 asm
-{	lda ch
+	lda ch
 	ldy #0
 	sta (bp2),y
 
@@ -373,30 +373,30 @@ asm
 
 	adc #1
 	sta ch
-};
+end;
 
 	case y of
 	 13:
 		asm
-		{	lda #0
+			lda #0
 			ldy #scrWidth*2
 			sta (bp2),y
 
 			ldy #scrWidth*3
 			sta (bp2),y
-		};
+		end;
 
 	 14:
 		asm
-		{	lda #0
+			lda #0
 			ldy #scrWidth*2
 			sta (bp2),y
-		};
+		end;
 	 15: ;
 
 	else
 		asm
-		{	lda #0
+			lda #0
 			ldy #scrWidth*2
 			sta (bp2),y
 
@@ -405,7 +405,7 @@ asm
 
 			ldy #scrWidth*4
 			sta (bp2),y
-		};
+		end;
 
 	end;
 
@@ -450,7 +450,7 @@ begin
  hsc:=3;
  ichr:=0;
 
- ptxt:=text;
+ ptxt:=txt;
 
  repeat
 
@@ -470,7 +470,7 @@ begin
    chrAdr[ichr+fntLimit] := ord(ptxt^);			// ring buffer
    inc(ptxt);
 
-   if ptxt^ = #$ff then ptxt:=text;
+   if ptxt^ = #$ff then ptxt:=txt;
 
    inc(ichr);
   end;
@@ -480,4 +480,3 @@ begin
  until keypressed;
 
 end.
-

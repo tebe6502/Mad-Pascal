@@ -74,7 +74,7 @@ begin
  Poke(709, $76);
  Poke(710, $f6);
 
- FillSinLow(sine);		// initialize SINUS table
+ FillSinLow(@sine);		// initialize SINUS table
 
  mv:=0;
  mv2:=65;
@@ -95,6 +95,5 @@ begin
    dec(mv2, 2);
 
  until keypressed;
-
 
 end.
