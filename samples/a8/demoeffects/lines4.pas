@@ -80,8 +80,6 @@ end;
 
 begin
 
-// NewDisplayBuffer(buffer, mode, ramtop)
-
  NewDisplayBuffer(buf1, 7 + 16, $c0);		// ramtop = $c0
  ts[0]:=Scanline(0);
 

@@ -17,10 +17,11 @@ const
 
 procedure h_line(x0,x1: byte; c: byte); assembler;
 asm
-{	txa:pha
+	txa:pha
 
 	lda c
-	:2 asl @
+	asl @
+	asl @
 	sta color
 	tay
 	lda left,y
@@ -43,7 +44,8 @@ color	equ *-1
 	sta lcol
 
 	lda x0
-	:2 lsr @
+	lsr @
+	lsr @
 	tay
 	sty lf
 
@@ -61,7 +63,8 @@ color	equ *-1
 	sta rcol
 
 	lda x1
-	:2 lsr @
+	lsr @
+	lsr @
 	tay
 	sty rg
 
@@ -105,7 +108,7 @@ lmask	dta %00000000
 	dta %11110000
 	dta %11111100
 
-left	:4 brk
+left	dta 0,0,0,0
 
 	dta %01010101
 	dta %00010101
@@ -123,7 +126,7 @@ rmask
 	dta %00001111
 	dta %00000011
 
-right	:4 brk
+right	dta 0,0,0,0
 
 	dta %01000000
 	dta %01010000
@@ -150,7 +153,6 @@ _rmsk	equ *-1
 
 exit
 	pla:tax
-};
 end;
 
 

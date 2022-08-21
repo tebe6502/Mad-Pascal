@@ -60,7 +60,7 @@ end;
 procedure doPlasma (p: pointer);
 var _c1a, _c1b: byte;
     i, ii, tmp: byte;
-    scrn: PByte absolute $e0;
+    scrn: PByte register;
 begin
     scrn := p;
 
@@ -93,7 +93,8 @@ end;
 
 begin
 
- FillSinHigh(sinustable);
+
+ FillSinHigh(@sinustable);
  InitDivision16;
  InitCharset;
 
@@ -110,3 +111,4 @@ begin
 
 end.
 
+// 1248
