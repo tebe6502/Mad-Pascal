@@ -11,7 +11,10 @@
 // playloop		= $0400
 // mainloop		= $0400..$5ff
 
-// changes 02.11.2018; 21.08.2022
+// changes
+// 02.11.2018
+// 21.08.2022
+// 28.08.2022	exit to DOS
 
 
 program ModPlay;
