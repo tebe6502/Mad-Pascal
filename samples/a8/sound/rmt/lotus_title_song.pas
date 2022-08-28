@@ -18,15 +18,15 @@ var	msx: TRMT;
 
 	old_dli, old_vbl: pointer;
 
-		
+
 {$r 'lotus.rc'}
 
 
 procedure vbl; interrupt;
 begin
- 
+
  msx.play;
- 
+
 asm
 {
 	jmp xitvbv

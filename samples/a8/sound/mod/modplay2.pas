@@ -8,7 +8,8 @@
 // playloop		= $0000
 // mainloop		= $0400..$5ff
 
-// changes: 09.10.2018
+// changes: 09.10.2018; 21.08.2022
+
 
 program ModPlay;
 
@@ -238,22 +239,23 @@ start	lda #0
 
 ;	mva	#$01	AUDCTL		; 0=POKEY 64KHz, 1=15KHz
 
+	;set IRQ position in scanline for consistency and disable keyboard scan
+	sta	wsync
+	lda	#0
+	sta	skctl
+	sta	skctl+$10
+
+	sta	AUDCTL+$10
+
 	mva #%01000000	AUDCTL
 
 	mva #218	AUDF1		; 8 kHz
 
 	mva	#$01	IRQEN
 
-	;set IRQ position in scanline for consistency and disable keyboard scan
-	mva	#0 skctl
-	sta	wsync
-
-	ldx	#19			; raster shift (right border)
-	dex:rne
-	sta	skctl
-	sta	stimer
 	lda	#1
 	sta	skctl
+	sta	stimer
 
 	mva	#$40	nmien
 
@@ -269,10 +271,10 @@ start	lda #0
 
 	inc IRQEN
 
-v0	lda #0
-v1	ldx #0
+	lda v0: #0
+	ldx v1: #0
 	sta audc1
-v2	lda #0
+	lda v2: #0
 	stx audc2
 	sta audc3
 
@@ -391,13 +393,13 @@ ivol3	adc volume,x
 	tax
 
 	lda vol6bit,x
-	sta v0+1
+	sta v0
 
 	lda vol6bit+$100,x
-	sta v1+1
+	sta v1
 
 	lda vol6bit+$200,x
-	sta v2+1
+	sta v2
 
 
 	.ifdef MAIN.@DEFINES.STATUS
@@ -406,10 +408,8 @@ ivol3	adc volume,x
 	.endif
 
 
-	lda #0
-regA	equ *-1
-	ldx #0
-regX	equ *-1
+	lda regA: #0
+	ldx regX: #0
 
 	rti
 
@@ -701,12 +701,9 @@ i_end
 	sta stop
 
 skp
-	lda #0
-regA	equ *-1
-	ldx #0
-regX	equ *-1
-	ldy #0
-regY	equ *-1
+	lda regA: #0
+	ldx regX: #0
+	ldy regY: #0
 
 	rti
 

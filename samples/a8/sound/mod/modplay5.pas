@@ -11,7 +11,7 @@
 // playloop		= $0400
 // mainloop		= $0400..$5ff
 
-// changes 02.11.2018; 20.08.2022
+// changes 02.11.2018; 21.08.2022
 
 
 program ModPlay;
@@ -42,7 +42,7 @@ const
 
 procedure Play; assembler;
 asm
-{
+
 /****************************************************************************
   MOVE - copy memory block >...
   X = source
@@ -72,9 +72,6 @@ asm
 
 	stx _rx
 
-	tsx
-	stx _ps
-
 	stz nmien
 	stz irqen
 
@@ -87,7 +84,9 @@ lp	stz AUDF1,x
 	bpl lp
 
 	ldx #0
-	mva:rne 0,x ZPAGE,x+
+	mva:rne 0,x ZPAGE,x+		; copy $00 page
+	mva:rne $300,x ZPAGE+$100,x+	; copy $03 page
+
 
 ;	ldx #0
 mv1	lda .adr(mainloop),x
@@ -111,10 +110,10 @@ mv0	lda .adr(playloop),x
 ;	sta mainloop.patres+1
 
 	lda >volume		; silence
-	sta playloop.ivol0+2
-	sta playloop.ivol1+2
-	sta playloop.ivol2+2
-	sta playloop.ivol3+2
+	sta playloop.ivol0+1
+	sta playloop.ivol1+1
+	sta playloop.ivol2+1
+	sta playloop.ivol3+1
 /*
 	lda POKEY
 	bne skip
@@ -232,9 +231,9 @@ start
 	jmp player+mainloop.stop
 
 
-IRQ	jmp player+playloop
+IRQ	jmp player+playloop	; PLAYLOOP
 
-NMI	jmp player+mainloop
+NMI	jmp player+mainloop	; MAINLOOP
 
 
 .local	playloop,play_smp
@@ -376,23 +375,23 @@ ext_3	sta p_3c+1
 
 
 p_0c	lda.l sample_start+$FFFF	; ch #1
-	sta ivol0+1
+	sta ivol0
 p_1c	lda.l sample_start+$FFFF	; ch #2
-	sta ivol1+1
+	sta ivol1
 p_2c	lda.l sample_start+$FFFF	; ch #3
-	sta ivol2+1
+	sta ivol2
 p_3c	lda.l sample_start+$FFFF	; ch #4
-	sta ivol3+1
+	sta ivol3
 
 	clc
-ivol0	lda volume
-ivol3	adc volume
+	lda ivol0: volume
+	adc ivol3: volume
 	sta voice
 
 
 	clc
-ivol1	lda volume
-ivol2	adc volume
+	lda ivol1: volume
+	adc ivol2: volume
 	sta voice_
 
 
@@ -415,6 +414,9 @@ ivol2	adc volume
 .endl
 
 
+; ----------------------------------------
+; copy to HighMem
+; ----------------------------------------
 
 .local	mainloop,main_lop
 
@@ -447,7 +449,7 @@ i_0	;ldy #1
 	tax
 	sta nr0
 	lda adr.tivol-1,x
-	sta playloop.ivol0+2
+	sta playloop.ivol0+1
 
 i_0c	ldx EFFECT
 	beq i_0f
@@ -455,7 +457,7 @@ i_0c	ldx EFFECT
 	bne @+
 	;ldy #2
 	lda [pat2],y
-	sta playloop.ivol0+2
+	sta playloop.ivol0+1
 @	cpx #$c0
 	bne @+
 	;ldy #2
@@ -503,7 +505,7 @@ i_1	iny
 	tax
 	sta nr1
 	lda adr.tivol-1,x
-	sta playloop.ivol1+2
+	sta playloop.ivol1+1
 
 i_1c	ldx EFFECT
 	beq i_1f
@@ -511,7 +513,7 @@ i_1c	ldx EFFECT
 	bne @+
 	;ldy #5
 	lda [pat2],y
-	sta playloop.ivol1+2
+	sta playloop.ivol1+1
 @	cpx #$c0
 	bne @+
 	;ldy #5
@@ -559,7 +561,7 @@ i_2	iny
 	tax
 	sta nr2
 	lda adr.tivol-1,x
-	sta playloop.ivol2+2
+	sta playloop.ivol2+1
 
 i_2c	ldx EFFECT
 	beq i_2f
@@ -567,7 +569,7 @@ i_2c	ldx EFFECT
 	bne @+
 	;ldy #8
 	lda [pat2],y
-	sta playloop.ivol2+2
+	sta playloop.ivol2+1
 @	cpx #$c0
 	bne @+
 	;ldy #8
@@ -615,7 +617,7 @@ i_3	iny
 	tax
 	sta nr3
 	lda adr.tivol-1,x
-	sta playloop.ivol3+2
+	sta playloop.ivol3+1
 
 i_3c	ldx EFFECT
 	beq i_3f
@@ -623,7 +625,7 @@ i_3c	ldx EFFECT
 	bne @+
 	;ldy #11
 	lda [pat2],y
-	sta playloop.ivol3+2
+	sta playloop.ivol3+1
 @	cpx #$c0
 	bne @+
 	;ldy #11
@@ -712,13 +714,9 @@ skp
 
 stop	jmp *			; do nothing
 
-	lda.l:rne vcount
+	.ia8
 
-	sei
 	lda #0
-	sta.l NMIEN
-	sta.l IRQEN
-
 	pha
 	plb
 
@@ -726,6 +724,10 @@ stop	jmp *			; do nothing
 
 .endl
 
+
+; ----------------------------------------
+; memory bank #0 (0000..FFFF)
+; ----------------------------------------
 
 wait	lda skstat	; wait on keypress
 	and #4
@@ -735,13 +737,18 @@ wait	lda skstat	; wait on keypress
 	rts
 
 stop2
+	lda:rne vcount
+
+	sei
+	stz NMIEN
+	stz IRQEN
+
 	stz AUDCTL
 	stz AUDCTL+$10
 
 	ldx #0
-	mva:rne ZPAGE,x 0,x+
-
-	jsr wait
+	mva:rne ZPAGE,x 0,x+		; restore $00 page
+	mva:rne ZPAGE+$100,x $300,x+	; restore $03 page
 
 	sec:xce
 
@@ -755,9 +762,7 @@ stop2
 
 	lda	#3
 	sta	skctl
-
-	ldx _ps: #0
-	txs
+	sta	skctl+$10
 
 	ldx _rx: #0
 
@@ -766,7 +771,6 @@ stop2
 
 	opt c-
 
-};
 end;
 
 
@@ -798,5 +802,7 @@ begin
  Play;
 
  end;
+
+ halt(0);
 
 end.
