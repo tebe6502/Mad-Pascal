@@ -7,10 +7,15 @@ const
 var
 	msx: TCMC;
 
+	ch: char;
+
 {$r 'cmc_play.rc'}
 
 
 begin
+
+	while true do begin
+
 	msx.player:=pointer(cmc_player);
 	msx.modul:=pointer(cmc_modul);
 
@@ -24,7 +29,10 @@ begin
 		msx.play;
 
 	until keypressed;
+	ch:=readkey();
 
 	msx.stop;
+
+	end;
 
 end.

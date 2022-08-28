@@ -7,10 +7,14 @@ const
 var
 	msx: TMPT;
 
+	ch: char;
+
 {$r 'mpt_play.rc'}
 
 
 begin
+	while true do begin
+
 	msx.player:=pointer(mpt_player);
 	msx.modul:=pointer(mpt_modul);
 
@@ -25,7 +29,10 @@ begin
 
 	until keypressed;
 
+	ch:=readkey();
+
 	msx.stop;
 
-end.
+	end;
 
+end.

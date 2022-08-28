@@ -9,10 +9,14 @@ const
 var
 	msx: TRMT;
 
+	ch: char;
+
 {$r 'rmt_play.rc'}
 
 
 begin
+	while true do begin
+
 	msx.player:=pointer(rmt_player);
 	msx.modul:=pointer(rmt_modul);
 
@@ -26,8 +30,11 @@ begin
 		msx.play;
 
 	until keypressed;
+	ch:=readkey();
 
 	msx.stop;
+
+	end;
 
 end.
 

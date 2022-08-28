@@ -192,7 +192,7 @@ begin
   TREPL[i] := lo(word(temp));
   TREPH[i] := hi(word(temp));
 
-  TIVOL[i] := hi(VOLUME) + smp.volume shr 1;
+  TIVOL[i] := smp.volume shr 1 + hi(VOLUME);
 
   while len > 0 do begin
 
