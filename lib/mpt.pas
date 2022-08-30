@@ -47,7 +47,7 @@ procedure TMPT.Init; assembler;
 Initialize MPT player
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TMPT :bp2
 
@@ -71,7 +71,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 
@@ -81,7 +80,7 @@ procedure TMPT.Play; assembler;
 Play music, call this procedure every VBL frame
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	asl ntsc		; =0 PAL, =4 NTSC
 	bcc skp
@@ -104,7 +103,6 @@ adr	equ *-2
 ptr	equ *-2
 
 quit	pla:tax
-};
 end;
 
 
@@ -114,18 +112,17 @@ procedure TMPT.Stop; assembler;
 Halt MPT player
 *)
 asm
-{	lda #0
+	lda #0
 	sta $d208
 	sta $d218
 	ldy #3
 	sty $d20f
 	sty $d21f
 	ldy #8
-si1	sta $d200,y
+clr	sta $d200,y
 	sta $d210,y
 	dey
-	bpl si1
-};
+	bpl clr
 end;
 
 

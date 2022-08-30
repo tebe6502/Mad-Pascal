@@ -125,6 +125,7 @@ var
 
 	porta: byte absolute $D300;
 	portb: byte absolute $D301;
+	pactl: byte absolute $D302;
 
 	dmactl: byte absolute $D400;
 	chactl: byte absolute $D401;

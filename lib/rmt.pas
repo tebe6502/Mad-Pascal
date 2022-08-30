@@ -51,7 +51,7 @@ Initialize RMT player
 @param: a - song number
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TRMT :bp2
 
@@ -76,7 +76,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 
@@ -90,7 +89,7 @@ Play sound effect
 @param: note
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TRMT :bp2
 
@@ -114,7 +113,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 
@@ -124,7 +122,7 @@ procedure TRMT.Play; assembler;
 Play music, call this procedure every VBL frame
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	asl ntsc		; =0 PAL, =4 NTSC
 	bcc skp
@@ -147,7 +145,6 @@ adr	equ *-2
 ptr	equ *-2
 
 quit	pla:tax
-};
 end;
 
 
@@ -157,13 +154,13 @@ procedure TRMT.Stop; assembler;
 Halt RMT player
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TRMT :bp2
 
 	ldy #0
 	lda (:bp2),y
-	add #9		; jsr player+9
+	add #9			; jsr player+9
 	sta adr
 	iny
 	lda (:bp2),y
@@ -174,7 +171,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 

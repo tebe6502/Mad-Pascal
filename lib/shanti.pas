@@ -43,7 +43,7 @@ uses atari;
 
 {$codealign link = $100}
 
-{$link shanti_engine.obx}
+{$link shanti.obx}
 
 {$codealign link = 0}
 
