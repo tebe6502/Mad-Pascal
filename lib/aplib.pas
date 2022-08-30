@@ -222,15 +222,14 @@ GET_BYTE	lda adr.buf
 		jsr READ_BUF
 		pla
 		plp
-
-@		rts
+@
+		rts
 
 to_exit		lda #0
 		tya
 		sta:rne @buf,y+
 
-		ldx #0
-@sp		equ *-1
+		ldx @sp: #0
 end;
 
  close(f);
@@ -248,7 +247,7 @@ apLib decompressor (John Brandwood, Krzysztof 'XXL' Dudek)
 *)
 
 asm
-{		stx @sp
+		stx @sp
 
 		mwa inputPointer	GET_BYTE+1
 		mwa outputPointer	dest_ap
@@ -394,11 +393,9 @@ src		equ *-2
 		bne source
 		jmp nxt_token
 
-
 GET_BYTE	lda $ffff
 		inw GET_BYTE+1
 		rts
-};
 end;
 
 end.

@@ -15,6 +15,8 @@ unit CMC;
 TCMC.Init
 TCMC.Play
 TCMC.Stop
+TCMC.Pause
+TCMC.Cont
 
 }
 
@@ -50,7 +52,7 @@ procedure TCMC.Init; assembler;
 Initialize CMC player
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TCMC :bp2
 
@@ -83,7 +85,6 @@ init	jmp $ffff
 adr	equ *-2
 
 stop	pla:tax
-};
 end;
 
 
@@ -93,7 +94,7 @@ procedure TCMC.Play; assembler;
 Play music, call this procedure every VBL frame
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	asl ntsc		; =0 PAL, =4 NTSC
 	bcc skp
@@ -116,7 +117,7 @@ adr	equ *-2
 ptr	equ *-2
 
 quit	pla:tax
-};
+
 end;
 
 
@@ -126,7 +127,7 @@ procedure TCMC.Stop; assembler;
 Halt CMC player
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TCMC :bp2
 
@@ -145,7 +146,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 
@@ -155,7 +155,7 @@ procedure TCMC.Pause; assembler;
 Interrupt CMC player
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TCMC :bp2
 
@@ -174,7 +174,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 
@@ -184,7 +183,7 @@ procedure TCMC.Cont; assembler;
 Continue CMC player
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa TCMC :bp2
 
@@ -203,7 +202,6 @@ asm
 adr	equ *-2
 
 	pla:tax
-};
 end;
 
 

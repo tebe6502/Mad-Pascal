@@ -4,9 +4,11 @@ unit joystick;
  @author: Tomasz Biela (Tebe)
  @name: Joystick memory registers (Atari XE/XL)
 
- @version: 1.1
+ @version: 1.2
 
  @description:
+
+ changes: 22-08-2022
  *)
 
 
@@ -67,10 +69,14 @@ var
 	[volatile] trig0 : byte absolute $d010;	// (R)
 	[volatile] trig1 : byte absolute $d011;	// (R)
 
+	[volatile] pot0 : byte absolute $d200;	// (R)
+
+	[volatile] potgo: byte absolute $d20b;	// (W) Start the POT scan sequence. You must read your POT values first and then start the scan sequence,
+						// since POTGO resets the POT registers to zero. Written by the stage two VBLANK sequence.
+
 
 implementation
 
 
 
 end.
-
