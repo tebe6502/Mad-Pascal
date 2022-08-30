@@ -23,7 +23,7 @@ Contributors:
 
 + Bartosz Zbytniewski :
 	- Bug Hunter
-	- Commodore C16/264 minimal unit SYSTEM setup
+	- Commodore C4+/C64 minimal unit SYSTEM setup
 
 + Chriss Hutt :
 	- unit SMP
@@ -260,43 +260,44 @@ const
   BLOCKWRITETOK		= 78;
   CLOSEFILETOK		= 79;
   GETRESOURCEHANDLETOK	= 80;
+  SIZEOFRESOURCETOK     = 81;
 
-  WRITELNTOK		= 81;
-  SIZEOFTOK		= 82;
-  LENGTHTOK		= 83;
-  HIGHTOK		= 84;
-  LOWTOK		= 85;
-  INTTOK		= 86;
-  FRACTOK		= 87;
-  TRUNCTOK		= 88;
-  ROUNDTOK		= 89;
-  ODDTOK		= 90;
+  WRITELNTOK		= 82;
+  SIZEOFTOK		= 83;
+  LENGTHTOK		= 84;
+  HIGHTOK		= 85;
+  LOWTOK		= 86;
+  INTTOK		= 87;
+  FRACTOK		= 88;
+  TRUNCTOK		= 89;
+  ROUNDTOK		= 90;
+  ODDTOK		= 91;
 
-  PROGRAMTOK		= 91;
-  LIBRARYTOK		= 92;
-  EXPORTSTOK		= 93;
-  EXTERNALTOK		= 94;
-  INTERFACETOK		= 95;
-  IMPLEMENTATIONTOK     = 96;
-  INITIALIZATIONTOK     = 97;
-  CONSTRUCTORTOK	= 98;
-  DESTRUCTORTOK		= 99;
-  OVERLOADTOK		= 100;
-  ASSEMBLERTOK		= 101;
-  FORWARDTOK		= 102;
-  REGISTERTOK		= 103;
-  INTERRUPTTOK		= 104;
-  PASCALTOK		= 105;
-  STDCALLTOK		= 106;
-  INLINETOK		= 107;
-  KEEPTOK		= 108;
+  PROGRAMTOK		= 92;
+  LIBRARYTOK		= 93;
+  EXPORTSTOK		= 94;
+  EXTERNALTOK		= 95;
+  INTERFACETOK		= 96;
+  IMPLEMENTATIONTOK     = 97;
+  INITIALIZATIONTOK     = 98;
+  CONSTRUCTORTOK	= 99;
+  DESTRUCTORTOK		= 100;
+  OVERLOADTOK		= 101;
+  ASSEMBLERTOK		= 102;
+  FORWARDTOK		= 103;
+  REGISTERTOK		= 104;
+  INTERRUPTTOK		= 105;
+  PASCALTOK		= 106;
+  STDCALLTOK		= 107;
+  INLINETOK		= 108;
+  KEEPTOK		= 109;
 
-  SUCCTOK		= 109;
-  PREDTOK		= 110;
-  PACKEDTOK		= 111;
-  GOTOTOK		= 112;
-  INTOK			= 113;
-  VOLATILETOK		= 114;
+  SUCCTOK		= 110;
+  PREDTOK		= 111;
+  PACKEDTOK		= 112;
+  GOTOTOK		= 113;
+  INTOK			= 114;
+  VOLATILETOK		= 115;
 
 
   SETTOK		= 127;	// Size = 32 SET OF
@@ -35580,6 +35581,8 @@ Spelling[BLOCKWRITETOK	] := 'BLOCKWRITE';
 Spelling[CLOSEFILETOK	] := 'CLOSE';
 
 Spelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
+Spelling[SIZEOFRESOURCETOK] := 'SIZEOFRESOURCE';
+
 
 Spelling[FILETOK	] := 'FILE';
 Spelling[TEXTFILETOK	] := 'TEXTFILE';
@@ -43863,7 +43866,10 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
 
   case Tok[j + 1].Kind of							// !!! tutaj a nie przed ExpandExpression
    MULTOK: begin ResizeType(ValType); ExpandExpression(VarType, 0, 0) end;
-   SHLTOK, SHRTOK: begin ResizeType(ValType); ResizeType(ValType) end;		// !!! Silly Intro lub "x(byte) shl 14" tego wymaga
+
+//   SHRTOK: if DataSize[ValType] > 1 then begin ResizeType(ValType); ResizeType(ValType) end;
+
+   SHLTOK: begin ResizeType(ValType); ResizeType(ValType) end;	 	        // !!! Silly Intro lub "x(byte) shl 14" tego wymaga
   end;
 
   j := k;
@@ -46309,6 +46315,41 @@ WHILETOK:
 	asm65('; GetResourceHandle');
 
 	asm65(#9'mwa #MAIN.@RESOURCE.'+svar+' '+Tok[i + 2].Name^);
+
+	inc(i, 5);
+
+	Result := i;
+      end;
+
+
+  SIZEOFRESOURCETOK:
+    if Tok[i + 1].Kind <> OPARTOK then
+      iError(i + 1, OParExpected)
+    else
+      if Tok[i + 2].Kind <> IDENTTOK then
+	iError(i + 2, IdentifierExpected)
+      else
+	begin
+	IdentIndex := GetIdent(Tok[i + 2].Name^);
+
+	if not(Ident[IdentIndex].DataType in IntegerTypes) then
+	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
+
+	CheckTok(i + 3, COMMATOK);
+
+        CheckTok(i + 4, STRINGLITERALTOK);
+
+	svar:='';
+
+	for k:=1 to Tok[i+4].StrLength do
+	 svar:=svar + chr(StaticStringData[Tok[i+4].StrAddress - CODEORIGIN+k]);
+
+	CheckTok(i + 5, CPARTOK);
+
+	asm65;
+	asm65('; GetResourceHandle');
+
+	asm65(#9'mwa #MAIN.@RESOURCE.'+svar+'.end-MAIN.@RESOURCE.'+svar+' '+Tok[i + 2].Name^);
 
 	inc(i, 5);
 

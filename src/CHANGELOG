@@ -1,3 +1,7 @@
+29.08.2022
+- SizeOfResource(variable, name)
+- unit SAPLZSS
+
 15.08.2022
 - poprawiona procedura ExpandExpression, uwzglednia VARTYPE = BOOLEANTOK, np.: 'boolean := (shortint + shorint > 0)
 
