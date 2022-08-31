@@ -41,9 +41,6 @@ implementation
 
 uses misc;
 
-const
-	sap_lzss.zp = $e0;
-
 var	ntsc: byte;
 
 
@@ -58,7 +55,7 @@ Initialize SAP-R LZSS player
 asm
 	txa:pha
 
-	lda TLZSSPlay
+	ldx TLZSSPlay
 	ldy TLZSSPlay+1
 
 	jsr sap_lzss.init
@@ -91,17 +88,7 @@ procedure TLZSSPlay.Stop; assembler;
 Halt SAP-R LZSS player
 *)
 asm
-	lda #0
-	sta $d208
-	sta $d218
-	ldy #3
-	sty $d20f
-	sty $d21f
-	ldy #8
-clr	sta $d200,y
-	sta $d210,y
-	dey
-	bpl clr
+	jmp sap_lzss.stop
 end;
 
 
