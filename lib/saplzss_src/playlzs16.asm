@@ -18,20 +18,14 @@
 
 POKEY = $D200
 
-sap_lzss.zp	ext .byte
+sap_lzss.zp	= $90
 
 len = sap_lzss.chn_bits1-sap_lzss.chn_bits0
 
-.public sap_lzss.init, sap_lzss.play
+.public sap_lzss.init, sap_lzss.play, sap_lzss.stop
 
 
     .RELOC
-
-.macro	gbyte
-    lda (sap_lzss.zp),y
-
-    iny
-.endm
 
 
 .local sap_lzss
@@ -41,23 +35,26 @@ len = sap_lzss.chn_bits1-sap_lzss.chn_bits0
 init
 
 ; --------------------
-    sta sap_lzss.zp
+
+    lda sap_lzss.zp
+    pha
+    lda sap_lzss.zp+1
+    pha
+
+    stx sap_lzss.zp
     sty sap_lzss.zp+1
 
     ldy #0
 
-    sty audctl
-    sty audctl+$10
-	
     lda (sap_lzss.zp),y
-	
+
     sta sptr
-	
+
     iny
     lda (sap_lzss.zp),y
 
     sta sptr+1
-	
+
     iny
     lda (sap_lzss.zp),y
     sta size_l
@@ -75,7 +72,7 @@ init
     inx
     stx buf_lda1+2
     stx buf_sta1+2
-    inx    
+    inx
     stx buf_lda2+2
     stx buf_sta2+2
     inx
@@ -96,7 +93,7 @@ init
     inx
     stx buf_lda8+2
     stx buf_sta8+2
-    
+
     iny
     lda (sap_lzss.zp),y
     tax
@@ -120,13 +117,12 @@ init
     inx
     stx chn_pokey8+1
 
-    lda #3
-    sta SKCTL
-    sta SKCTL+$10
+
+    jsr stop
 
 
     ldx #8+1
-    
+
 clear
     lda sptr: $1000
 
@@ -142,7 +138,7 @@ clear
     sta sap_lzss.zp
     lda >chn_bits0
     sta sap_lzss.zp+1
-    
+
 
     lda chn_temp+9
     sta bit_data
@@ -150,9 +146,9 @@ clear
     .rept 9,#
     lsr bit_data
     bcs @+
-    
+
     lda #3
-    dta {bit $100}   
+    dta {bit $100}
 @
     lda #len			; skip channel
 
@@ -163,9 +159,13 @@ clear
     sta chn_bits:1+2
 
     adw sap_lzss.zp #len
-    
+
     .endr
 
+    pla
+    sta sap_lzss.zp+1
+    pla
+    sta sap_lzss.zp
 
 ; --------------------
 
@@ -214,13 +214,13 @@ cbuf
     stx bit_data		; =1
 
     lda sptr
-    sta sap_lzss.zp
+    sta ladr
     clc
     adc size_l: #0
     sta song_end_l
 
     lda sptr+1
-    sta sap_lzss.zp+1
+    sta hadr
     adc size_h: #0
     sta song_end_h
 
@@ -231,6 +231,12 @@ cbuf
 bit_data brk
 
 
+.macro	gbyte
+    lda (sap_lzss.zp),y
+
+    iny
+.endm
+
 ; --------------------
 
 play
@@ -239,10 +245,21 @@ play
 
     stx regX
 
+    lda sap_lzss.zp
+    sta ltmp
+    lda sap_lzss.zp+1
+    sta htmp
+
+    lda ladr: #0
+    sta sap_lzss.zp
+
+    lda hadr: #0
+    sta sap_lzss.zp+1
+
     ldy #0
 
     ldx cur_pos: #$00
-    inc cur_pos   
+    inc cur_pos
 
 
     .rept 9,8-#,#,#+1
@@ -318,7 +335,10 @@ chn_bits9
     scc
     inc sap_lzss.zp+1
 
+    sta ladr
+
     lda sap_lzss.zp+1
+    sta hadr
     cmp song_end_h: #0
     bne @+
     lda sap_lzss.zp
@@ -326,13 +346,37 @@ chn_bits9
 @
     bcc toExit
 
-    jsr restart    
+    jsr restart
 
-toExit	
+toExit
+
+    lda ltmp: #0
+    sta sap_lzss.zp
+
+    lda htmp: #0
+    sta sap_lzss.zp+1
 
     ldx regX: #0
     rts
 
 chn_temp :10 brk
+
+
+; --------------------
+
+stop
+
+; --------------------
+
+    ldy chn_pokeyA+1
+
+    lda #0
+    sta AUDCTL,y
+    lda #3
+    sta SKCTL,y
+    lda #0
+    :8 sta POKEY+#,y
+
+    rts
 
 .endl
