@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------
-; Mad Pascal Compiler version 1.6.6 [2022/06/13] for 6502
+; Mad Pascal Compiler version 1.6.6 [2021/07/22] for 6502
 ; ------------------------------------------------------------
 
 STACKWIDTH	= 16
@@ -12,15 +12,8 @@ FALSE		= 0
 
 	org $80
 
-zpage
-
-.ifdef @vbxe_detect
 fxptr	.ds 2						; VBXE pointer
-.fi
-
-.if .def(@AllocMem)||.def(MAIN.SYSTEM.GETMEM)||.def(MAIN.SYSTEM.FREEMEM)
 psptr	.ds 2						; PROGRAMSTACK Pointer
-.fi
 
 bp	.ds 2
 bp2	.ds 2
@@ -93,13 +86,13 @@ FPEXP	.ds 1
 	org CODEORIGIN
 	icl 'atari\basicoff.asm'
 	ini CODEORIGIN
-	.fi
+	.endif
 
 	.ifdef MAIN.@DEFINES.S_VBXE
 	opt h-
 	ins 'atari\s_vbxe\sdxld2.obx'
 	opt h+
-	.fi
+	.endif
 
 .local	RESOURCE
 	icl 'atari\resource.asm'
@@ -122,7 +115,7 @@ FPEXP	.ds 1
 RTLIB
 	icl 'rtl6502_a8.asm'
 
-.print 'ZPAGE: ',zpage,'..',zpend-1
+.print 'ZPAGE: ',fxptr,'..',zpend-1
 
 .print 'RTLIB: ',RTLIB,'..',*-1
 
@@ -131,6 +124,10 @@ RTLIB
 START
 	tsx
 	stx MAIN.@halt+1
+
+	.ifdef fmulinit
+	fmulinit
+	eif
 
 VLEN	= VARDATASIZE-VARINITSIZE
 VADR	= DATAORIGIN+VARINITSIZE
@@ -145,13 +142,11 @@ VADR	= DATAORIGIN+VARINITSIZE
 	@fill #VADR #VLEN #$00
 	eif
 
-.ifdef :psptr
-	mwa #PROGRAMSTACK :psptr
-.fi
+	mwa #PROGRAMSTACK psptr
 
 	.ifdef MAIN.@DEFINES.ROMOFF
 	icl 'atari\romoff.asm'
-	.fi
+	.endif
 
 	ldx #$0F					; DOS II+/D ParamStr
 	mva:rpl $340,x MAIN.IOCB@COPY,x-
@@ -177,7 +172,7 @@ VADR	= DATAORIGIN+VARINITSIZE
 
 .local	HEXSTR						; FUNCTION | ASSEMBLER | REGISTER
 
-; -------------------  ASM Block 00000001  -------------------
+; ---------------------  ASM Block 001  ---------------------
 
 	jsr @hexStr
 
@@ -189,8 +184,25 @@ VADR	= DATAORIGIN+VARINITSIZE
 
 ; ------------------------------------------------------------
 
-VALUE	= :EDX
-DIGITS	= :ECX
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+VALUE	= edx
+DIGITS	= ecx
 adr.RESULT	= [DATAORIGIN+$000B] .array [33]
 .var RESULT	= adr.RESULT .word
 
@@ -211,12 +223,11 @@ adr.RESULT	= [DATAORIGIN+$000B] .array [33]
 	lda :STACKORIGIN+STACKWIDTH,x
 	sta A+1
 	dex
-@main
 
-; -------------------  ASM Block 00000002  -------------------
+; ---------------------  ASM Block 002  ---------------------
 
 	ldy #0
-	mva (:edx),y Result
+	mva (edx),y Result
 
 @exit
 
@@ -238,16 +249,21 @@ adr.RESULT	= [DATAORIGIN+$000B] .array [33]
 
 ; ------------------------------------------------------------
 
-A	= :EDX
-RESULT	= :STACKORIGIN-4
+A	= edx
+RESULT	= DATAORIGIN+$002C
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
 .local	UPCASE						; FUNCTION
 	sta A
 
-; optimize OK (SYSTEM), line = 1255
+; optimize OK (SYSTEM), line = 1166
 
+	lda A
 	sta @CASETMP_0002
 	clc						; clear carry for add
 	adc #$FF-$7A					; make m = $FF
@@ -255,7 +271,7 @@ RESULT	= :STACKORIGIN-4
 	jcc l_041D
 @
 
-; optimize OK (SYSTEM), line = 1256
+; optimize OK (SYSTEM), line = 1167
 
 	lda A
 	sub #$20
@@ -264,7 +280,7 @@ RESULT	= :STACKORIGIN-4
 	jmp a_0002
 l_041D
 
-; optimize OK (SYSTEM), line = 1258
+; optimize OK (SYSTEM), line = 1169
 
 	lda A
 	sta RESULT
@@ -273,17 +289,43 @@ a_0002
 
 ; ------------------------------------------------------------
 
-A	= DATAORIGIN+$002C
-RESULT	= DATAORIGIN+$002D
-@CASETMP_0002	= DATAORIGIN+$002E
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+A	= DATAORIGIN+$002D
+RESULT	= DATAORIGIN+$002E
+@CASETMP_0002	= DATAORIGIN+$002F
 
 @VarData	= A
-@VarDataSize	= 2
+@VarDataSize	= 3
 
 	rts						; ret
 .endl
 
-.local	STR_0449					; PROCEDURE | ASSEMBLER | OVERLOAD
+.local	STR_044C					; PROCEDURE | ASSEMBLER | OVERLOAD
+
+; ------------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	lda :STACKORIGIN,x
+	sta S
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta S+1
+	dex
 
 ; ------------------------------------------------------------
 
@@ -298,25 +340,12 @@ RESULT	= DATAORIGIN+$002D
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	sta A+3
 	dex
-	jmi @main
 
-; ------------------------------------------------------------
-
-; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
-; as Pointer
-	lda :STACKORIGIN,x
-	sta S
-	lda :STACKORIGIN+STACKWIDTH,x
-	sta S+1
-	dex
-@main
-
-; -------------------  ASM Block 00000017  -------------------
+; ---------------------  ASM Block 016  ---------------------
 
 	txa:pha
 
-	inx		; parameter A
-	inx		; parameter S
+	inx
 
 	@ValueToStr #@printCARD
 
@@ -324,10 +353,11 @@ RESULT	= DATAORIGIN+$002D
 
 	pla:tax
 
+
 ; ------------------------------------------------------------
 
-A	= DATAORIGIN+$002F
-S	= DATAORIGIN+$0033
+A	= DATAORIGIN+$0030
+S	= DATAORIGIN+$0034
 
 @VarData	= A
 @VarDataSize	= 6
@@ -348,6 +378,14 @@ S	= DATAORIGIN+$0033
 
 ; ------------------------------------------------------------
 
+; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+	lda :STACKORIGIN,x
+	sta VALUE
+	dex
+
+; ------------------------------------------------------------
+
 ; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
 ; as Pointer
 	lda :STACKORIGIN,x
@@ -355,26 +393,17 @@ S	= DATAORIGIN+$0033
 	lda :STACKORIGIN+STACKWIDTH,x
 	sta A+1
 	dex
-	jmi @main
 
-; ------------------------------------------------------------
-
-; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
-; as Pointer
-	lda :STACKORIGIN,x
-	sta VALUE
-	dex
-@main
-
-; -------------------  ASM Block 00000018  -------------------
+; ---------------------  ASM Block 017  ---------------------
 
 	ldy #0
-	mva value (:edx),y
+	mva value (edx),y
+
 
 ; ------------------------------------------------------------
 
-A	= :EDX
-VALUE	= :ECX
+A	= edx
+VALUE	= ecx
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -387,11 +416,11 @@ VALUE	= :ECX
 	eif
 .endl
 
-.local	FILLBYTE					; PROCEDURE | ASSEMBLER | REGISTER | INLINE
+.local	FILLBYTE_045A					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
 
 	.MACRO m@INLINE
 
-; -------------------  ASM Block 00000024  -------------------
+; ---------------------  ASM Block 025  ---------------------
 
 	jsr @fill
 
@@ -399,17 +428,17 @@ VALUE	= :ECX
 
 ; ------------------------------------------------------------
 
-A	= :EDX
-COUNT	= :ECX
-VALUE	= :EAX
+A	= edx
+COUNT	= ecx
+VALUE	= eax
 @exit
 .endl
 
-.local	MOVE_0458					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+.local	MOVE_045B					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
 
 	.MACRO m@INLINE
 
-; -------------------  ASM Block 00000025  -------------------
+; ---------------------  ASM Block 027  ---------------------
 
 	jsr @move
 
@@ -417,17 +446,17 @@ VALUE	= :EAX
 
 ; ------------------------------------------------------------
 
-SOURCE	= :EDX
-DEST	= :ECX
-COUNT	= :EAX
+SOURCE	= edx
+DEST	= ecx
+COUNT	= eax
 @exit
 .endl
 
-.local	MOVE_0459					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+.local	MOVE_045C					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
 
 	.MACRO m@INLINE
 
-; -------------------  ASM Block 00000026  -------------------
+; ---------------------  ASM Block 028  ---------------------
 
 	jsr @move
 
@@ -435,17 +464,17 @@ COUNT	= :EAX
 
 ; ------------------------------------------------------------
 
-SOURCE	= :EDX
-DEST	= :ECX
-COUNT	= :EAX
+SOURCE	= edx
+DEST	= ecx
+COUNT	= eax
 @exit
 .endl
 
-.local	MOVE_045A					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+.local	MOVE_045D					; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
 
 	.MACRO m@INLINE
 
-; -------------------  ASM Block 00000027  -------------------
+; ---------------------  ASM Block 029  ---------------------
 
 	jsr @move
 
@@ -453,15 +482,15 @@ COUNT	= :EAX
 
 ; ------------------------------------------------------------
 
-SOURCE	= :EDX
-DEST	= :ECX
-COUNT	= :EAX
+SOURCE	= edx
+DEST	= ecx
+COUNT	= eax
 @exit
 .endl
 
-.local	PAUSE_0479					; PROCEDURE | ASSEMBLER | OVERLOAD
+.local	PAUSE_0472					; PROCEDURE | ASSEMBLER | OVERLOAD
 
-; -------------------  ASM Block 00000034  -------------------
+; ---------------------  ASM Block 035  ---------------------
 
 	lda:cmp:req :rtclok+2
 
@@ -486,7 +515,6 @@ D_PI_180	= $04
 MGTIA	= $00
 MVBXE	= $80
 VBXE_XDLADR	= $00
-VBXE_BCBTMP	= $E0
 VBXE_BCBADR	= $0100
 VBXE_MAPADR	= $1000
 VBXE_CHBASE	= $1000
@@ -494,9 +522,6 @@ VBXE_OVRADR	= $5000
 VBXE_WINDOW	= $B000
 IDLI	= $00
 IVBL	= $01
-ITIM1	= $02
-ITIM2	= $03
-ITIM4	= $04
 CH_DELCHR	= $FE
 CH_ENTER	= $9B
 CH_ESC	= $1B
@@ -511,15 +536,6 @@ CH_BELL	= $FD
 CH_DEL	= $7E
 CH_DELLINE	= $9C
 CH_INSLINE	= $9D
-PAL_PMCOLOR0	= $00
-PAL_PMCOLOR1	= $01
-PAL_PMCOLOR2	= $02
-PAL_PMCOLOR3	= $03
-PAL_COLOR0	= $04
-PAL_COLOR1	= $05
-PAL_COLOR2	= $06
-PAL_COLOR3	= $07
-PAL_COLBAK	= $08
 COLOR_BLACK	= $00
 COLOR_WHITE	= $0E
 COLOR_RED	= $32
@@ -564,9 +580,6 @@ RNDSEED	= DATAORIGIN+$0009
 
 IRQENS	= $10
 RTCLOK	= $12
-RTCLOK1	= $12
-RTCLOK2	= $13
-RTCLOK3	= $14
 ATRACT	= $4D
 LMARGIN	= $52
 RMARGIN	= $53
@@ -669,7 +682,7 @@ IRQVEC	= $FFFE
 
 .local	READKEY						; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000050  -------------------
+; ---------------------  ASM Block 050  ---------------------
 
 	m@call @GetKey
 	sta Result
@@ -678,33 +691,76 @@ IRQVEC	= $FFFE
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0036
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0037
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
 .local	KEYPRESSED					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000054  -------------------
+; ---------------------  ASM Block 054  ---------------------
 
 	ldy #$00	; false
 	lda kbcodes
 	cmp #$ff
-	seq
+	beq skp
 	iny		; true
-	sty Result
+
+;	sty kbcodes
+
+skp	sty Result
 
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0037
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0038
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
 .local	TEXTMODE					; PROCEDURE | ASSEMBLER
 	sta MODE
 
-; -------------------  ASM Block 00000058  -------------------
+; ---------------------  ASM Block 060  ---------------------
 
 	txa:pha
 
@@ -712,9 +768,10 @@ RESULT	= DATAORIGIN+$0037
 
 	pla:tax
 
+
 ; ------------------------------------------------------------
 
-MODE	= DATAORIGIN+$0038
+MODE	= DATAORIGIN+$0039
 
 @VarData	= MODE
 @VarDataSize	= 1
@@ -733,7 +790,7 @@ MODE	= DATAORIGIN+$0038
 
 ; ------------------------------------------------------------
 
-TEXTATTR	= DATAORIGIN+$0035
+TEXTATTR	= DATAORIGIN+$0036
 CONSOL	= $D01F
 CN_START_SELECT_OPTION	= $00
 CN_SELECT_OPTION	= $01
@@ -751,21 +808,21 @@ MONO	= $07
 C40	= $01
 C80	= $03
 BLACK	= $00
+BLUE	= $01
+GREEN	= $02
+CYAN	= $03
+RED	= $04
+MAGENTA	= $05
+BROWN	= $06
+LIGHTGRAY	= $07
+DARKGRAY	= $08
+LIGHTBLUE	= $09
+LIGHTGREEN	= $0A
+LIGHTCYAN	= $0B
+LIGHTRED	= $0C
+LIGHTMAGENTA	= $0D
+YELLOW	= $0E
 WHITE	= $0F
-RED	= $26
-CYAN	= $AC
-PURPLE	= $48
-GREEN	= $B6
-BLUE	= $86
-YELLOW	= $DC
-ORANGE	= $18
-BROWN	= $F4
-LIGHT_RED	= $2A
-DARK_GREY	= $04
-GREY	= $08
-LIGHT_GREEN	= $BC
-LIGHT_BLUE	= $9A
-LIGHT_GREY	= $0C
 BLINK	= $80
 
 .endl							; UNIT CRT
@@ -799,14 +856,10 @@ PALNTSC	= $D014
 ; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
 ; as Pointer
 	lda :STACKORIGIN,x
-	sta :bp2
+	sta SEARCHRESULT
 	lda :STACKORIGIN+STACKWIDTH,x
-	sta :bp2+1
-	ldy #$20
-	mva:rpl (:bp2),y adr.FILEMASK,y-
-	mwa #adr.FILEMASK FILEMASK
+	sta SEARCHRESULT+1
 	dex
-	jmi @main
 
 ; ------------------------------------------------------------
 
@@ -815,22 +868,23 @@ PALNTSC	= $D014
 	lda :STACKORIGIN,x
 	sta ATTRIBUTES
 	dex
-	jmi @main
 
 ; ------------------------------------------------------------
 
 ; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
 ; as Pointer
 	lda :STACKORIGIN,x
-	sta SEARCHRESULT
+	sta :bp2
 	lda :STACKORIGIN+STACKWIDTH,x
-	sta SEARCHRESULT+1
+	sta :bp2+1
+	ldy #$20
+	mva:rpl (:bp2),y adr.FILEMASK,y-
+	mwa #adr.FILEMASK FILEMASK
 	dex
-@main
 
 ; AssignFile
 
-; optimize OK (SYSUTILS), line = 180
+; optimize OK (SYSUTILS), line = 178
 
 	mwy F :bp2
 	ldy #s@file.pfname
@@ -843,7 +897,7 @@ PALNTSC	= $D014
 	lda #$00
 	sta (:bp2),y
 
-; -------------------  ASM Block 00000066  -------------------
+; ---------------------  ASM Block 066  ---------------------
 
 	txa:pha
 
@@ -904,26 +958,42 @@ loop
 
 ; ------------------------------------------------------------
 
-adr.FILEMASK	= [DATAORIGIN+$0039] .array [33]
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+adr.FILEMASK	= [DATAORIGIN+$003A] .array [33]
 .var FILEMASK	= adr.FILEMASK .word
-ATTRIBUTES	= DATAORIGIN+$005A
-SEARCHRESULT	= DATAORIGIN+$005B
+ATTRIBUTES	= DATAORIGIN+$005B
+SEARCHRESULT	= DATAORIGIN+$005C
 SEARCHRESULT.ATTR	= DATAORIGIN+$0000
 SEARCHRESULT.EXCLUDEATTR	= DATAORIGIN+$0001
 SEARCHRESULT.NAME	= DATAORIGIN+$0002
 SEARCHRESULT.FINDHANDLE	= DATAORIGIN+$0023
-RESULT	= DATAORIGIN+$005D
-.var F	= DATAORIGIN+$005E .word
+RESULT	= DATAORIGIN+$005E
+.var F	= DATAORIGIN+$005F .word
 
 @VarData	= FILEMASK
-@VarDataSize	= 36
+@VarDataSize	= 37
 
 	rts						; ret
 .endl
 
 .local	FINDNEXT					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000067  -------------------
+; ---------------------  ASM Block 067  ---------------------
 
 	txa:pha
 
@@ -957,22 +1027,38 @@ loop	mwa f :bp2
 
 ; ------------------------------------------------------------
 
-F	= DATAORIGIN+$006A
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+F	= DATAORIGIN+$006B
 F.ATTR	= DATAORIGIN+$0000
 F.EXCLUDEATTR	= DATAORIGIN+$0001
 F.NAME	= DATAORIGIN+$0002
 F.FINDHANDLE	= DATAORIGIN+$0023
-RESULT	= DATAORIGIN+$006C
+RESULT	= DATAORIGIN+$006D
 
 @VarData	= F
-@VarDataSize	= 2
+@VarDataSize	= 3
 
 	rts						; ret
 .endl
 
 .local	FINDCLOSE					; PROCEDURE | ASSEMBLER
 
-; -------------------  ASM Block 00000068  -------------------
+; ---------------------  ASM Block 068  ---------------------
 
 	txa:pha
 
@@ -987,9 +1073,10 @@ RESULT	= DATAORIGIN+$006C
 
 	pla:tax
 
+
 ; ------------------------------------------------------------
 
-F	= DATAORIGIN+$006D
+F	= DATAORIGIN+$006E
 F.ATTR	= DATAORIGIN+$0000
 F.EXCLUDEATTR	= DATAORIGIN+$0001
 F.NAME	= DATAORIGIN+$0002
@@ -1012,13 +1099,13 @@ F.FINDHANDLE	= DATAORIGIN+$0023
 
 .local	FILEEXISTS					; FUNCTION
 
-; optimize OK (SYSUTILS), line = 435
+; optimize OK (SYSUTILS), line = 433
 
 	lda SYSTEM.FILEMODE
 	sta FM
 ; AssignFile
 
-; optimize OK (SYSUTILS), line = 438
+; optimize OK (SYSUTILS), line = 436
 
 	mwy F :bp2
 	ldy #s@file.pfname
@@ -1031,13 +1118,13 @@ F.FINDHANDLE	= DATAORIGIN+$0023
 	lda #$00
 	sta (:bp2),y
 
-; optimize OK (SYSUTILS), line = 439
+; optimize OK (SYSUTILS), line = 437
 
 	lda #$04
 	sta SYSTEM.FILEMODE
 ; Reset
 
-; optimize OK (SYSUTILS), line = 440
+; optimize OK (SYSUTILS), line = 438
 
 	ldy #s@file.record
 	lda #$80
@@ -1051,17 +1138,17 @@ F.FINDHANDLE	= DATAORIGIN+$0023
 	@openfile F, MAIN.SYSTEM.FileMode
 	pla:tax
 
-; optimize OK (SYSUTILS), line = 441
+; optimize OK (SYSUTILS), line = 439
 
 	lda SYSTEM.IORESULT
-	jmi l_04E9s
+	jmi l_04E2s
 	ldy NAME+1
 	sty :bp+1
 	ldy NAME
 	lda (:bp),y
-	jeq l_04E9s
+	jeq l_04E2s
 	mva:sne #true RESULT
-l_04E9s
+l_04E2s
 	mva #false RESULT
 ; CloseFile
 
@@ -1070,7 +1157,7 @@ l_04E9s
 	@closefile F
 	pla:tax
 
-; optimize OK (SYSUTILS), line = 445
+; optimize OK (SYSUTILS), line = 443
 
 	lda FM
 	sta SYSTEM.FILEMODE
@@ -1078,20 +1165,36 @@ l_04E9s
 
 ; ------------------------------------------------------------
 
-NAME	= DATAORIGIN+$006F
-RESULT	= DATAORIGIN+$0071
-.var F	= DATAORIGIN+$0072 .word
-FM	= DATAORIGIN+$007E
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+NAME	= DATAORIGIN+$0070
+RESULT	= DATAORIGIN+$0072
+.var F	= DATAORIGIN+$0073 .word
+FM	= DATAORIGIN+$007F
 
 @VarData	= NAME
-@VarDataSize	= 3
+@VarDataSize	= 4
 
 	rts						; ret
 .endl
 
 .local	ANSIUPPERCASE					; FUNCTION | REGISTER
 
-; optimize OK (SYSUTILS), line = 806
+; optimize OK (SYSUTILS), line = 728
 
 	lda A
 	sta @move.src
@@ -1101,7 +1204,7 @@ FM	= DATAORIGIN+$007E
 	ldy #$00
 	mva:rne (@move.src),y (:bp2),y+
 
-; optimize OK (SYSUTILS), line = 808
+; optimize OK (SYSUTILS), line = 730
 
 	ldy A+1
 	sty :bp+1
@@ -1109,33 +1212,52 @@ FM	= DATAORIGIN+$007E
 	lda (:bp),y
 	sta J
 
-l_0512
+l_050E
 ; --- ForToDoCondition
 	lda J
 	cmp #$01
-	jcc l_0520
+	jcc l_051C
 	inx
 	mva J :STACKORIGIN,x
 	ldy J
 	lda adr.RESULT,y
 	jsr SYSTEM.UPCASE
-	ldy :STACKORIGIN,x
-	lda SYSTEM.UPCASE.RESULT
+	ldy :STACKORIGIN-1,x
+	lda :STACKORIGIN,x
 	sta adr.RESULT,y
+	dex
 	dex
 
 ; --- ForToDoEpilog
 	dec J
-	jne l_0512
-l_0520
+	jne l_050E
+l_051C
 @exit
 
 ; ------------------------------------------------------------
 
-A	= :EDX
-adr.RESULT	= [DATAORIGIN+$007F] .array [256]
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+A	= edx
+adr.RESULT	= [DATAORIGIN+$0080] .array [256]
 .var RESULT	= adr.RESULT .word
-J	= DATAORIGIN+$017F
+J	= DATAORIGIN+$0180
+@FORTMP_050B	= $01
 
 @VarData	= RESULT
 @VarDataSize	= 257
@@ -1159,10 +1281,10 @@ FAANYFILE	= $3F
 
 .local	B_CRT						; UNIT
 
-.local	ATASCII2ANTIC_0541				; FUNCTION | OVERLOAD
+.local	ATASCII2ANTIC_053F				; FUNCTION | OVERLOAD
 	sta C
 
-; -------------------  ASM Block 00000081  -------------------
+; ---------------------  ASM Block 079  ---------------------
 
 
         lda c
@@ -1181,19 +1303,35 @@ FAANYFILE	= $3F
 
 ; ------------------------------------------------------------
 
-C	= DATAORIGIN+$0189
-RESULT	= DATAORIGIN+$018A
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+C	= DATAORIGIN+$018A
+RESULT	= DATAORIGIN+$018B
 
 @VarData	= C
-@VarDataSize	= 1
+@VarDataSize	= 2
 
 	rts						; ret
 .endl
 
-.local	ANTIC2ATASCII_0545				; FUNCTION | OVERLOAD
+.local	ANTIC2ATASCII_0546				; FUNCTION | OVERLOAD
 	sta C
 
-; -------------------  ASM Block 00000082  -------------------
+; ---------------------  ASM Block 080  ---------------------
 
 
         lda c
@@ -1212,16 +1350,32 @@ RESULT	= DATAORIGIN+$018A
 
 ; ------------------------------------------------------------
 
-C	= DATAORIGIN+$018B
-RESULT	= DATAORIGIN+$018C
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+C	= DATAORIGIN+$018C
+RESULT	= DATAORIGIN+$018D
 
 @VarData	= C
-@VarDataSize	= 1
+@VarDataSize	= 2
 
 	rts						; ret
 .endl
 
-.local	ATASCII2ANTIC_0549				; FUNCTION | OVERLOAD
+.local	ATASCII2ANTIC_054D				; FUNCTION | OVERLOAD
 
 ; ------------------------------------------------------------
 
@@ -1235,7 +1389,6 @@ RESULT	= DATAORIGIN+$018C
 	mva:rne (:bp2),y adr.S,y+
 	mwa #adr.S S
 	dex
-@main
 
 ; optimize OK (B_CRT), line = 468
 
@@ -1246,13 +1399,14 @@ RESULT	= DATAORIGIN+$018C
 
 	lda #$01
 	sta I
-	mva adr.S+$00 @FORTMP_0560_0
+	mva adr.S+$00 :@FORTMP?0564_0
 
-l_0563
+l_0567
 ; --- ForToDoCondition
-	lda @FORTMP_0560_0:#$00
+.def :@FORTMP?0564_0 = *+1
+	lda #$00
 	cmp I
-	jcc l_0571
+	jcc l_0575
 
 ; optimize FAIL (1, B_CRT), line = 470
 
@@ -1260,25 +1414,44 @@ l_0563
 	mva I :STACKORIGIN,x
 	ldy I
 	lda adr.S,y
-	jsr ATASCII2ANTIC_0541
-	ldy :STACKORIGIN,x
-	lda ATASCII2ANTIC_0541.RESULT
+	jsr ATASCII2ANTIC_053F
+	ldy :STACKORIGIN-1,x
+	lda :STACKORIGIN,x
 	sta adr.RESULT,y
+	dex
 	dex
 
 ; --- ForToDoEpilog
 	inc I
-	jne l_0563
-l_0571
+	jne l_0567
+l_0575
 @exit
 
 ; ------------------------------------------------------------
 
-adr.S	= [DATAORIGIN+$018D] .array [256]
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+adr.S	= [DATAORIGIN+$018E] .array [256]
 .var S	= adr.S .word
-adr.RESULT	= [DATAORIGIN+$028D] .array [256]
+adr.RESULT	= [DATAORIGIN+$028E] .array [256]
 .var RESULT	= adr.RESULT .word
-I	= DATAORIGIN+$038D
+I	= DATAORIGIN+$038E
+@FORTMP_0564	= $00
 
 @VarData	= S
 @VarDataSize	= 513
@@ -1286,7 +1459,7 @@ I	= DATAORIGIN+$038D
 	rts						; ret
 .endl
 
-.local	ANTIC2ATASCII_0584				; FUNCTION | OVERLOAD
+.local	ANTIC2ATASCII_058A				; FUNCTION | OVERLOAD
 
 ; ------------------------------------------------------------
 
@@ -1300,7 +1473,6 @@ I	= DATAORIGIN+$038D
 	mva:rne (:bp2),y adr.S,y+
 	mwa #adr.S S
 	dex
-@main
 
 ; optimize OK (B_CRT), line = 476
 
@@ -1311,13 +1483,14 @@ I	= DATAORIGIN+$038D
 
 	lda #$01
 	sta I
-	mva adr.S+$00 @FORTMP_059B_0
+	mva adr.S+$00 :@FORTMP?05A1_0
 
-l_059E
+l_05A4
 ; --- ForToDoCondition
-	lda @FORTMP_059B_0:#$00
+.def :@FORTMP?05A1_0 = *+1
+	lda #$00
 	cmp I
-	jcc l_05AC
+	jcc l_05B2
 
 ; optimize FAIL (1, B_CRT), line = 478
 
@@ -1325,25 +1498,44 @@ l_059E
 	mva I :STACKORIGIN,x
 	ldy I
 	lda adr.S,y
-	jsr ANTIC2ATASCII_0545
-	ldy :STACKORIGIN,x
-	lda ANTIC2ATASCII_0545.RESULT
+	jsr ANTIC2ATASCII_0546
+	ldy :STACKORIGIN-1,x
+	lda :STACKORIGIN,x
 	sta adr.RESULT,y
+	dex
 	dex
 
 ; --- ForToDoEpilog
 	inc I
-	jne l_059E
-l_05AC
+	jne l_05A4
+l_05B2
 @exit
 
 ; ------------------------------------------------------------
 
-adr.S	= [DATAORIGIN+$038F] .array [256]
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+adr.S	= [DATAORIGIN+$0390] .array [256]
 .var S	= adr.S .word
-adr.RESULT	= [DATAORIGIN+$048F] .array [256]
+adr.RESULT	= [DATAORIGIN+$0490] .array [256]
 .var RESULT	= adr.RESULT .word
-I	= DATAORIGIN+$058F
+I	= DATAORIGIN+$0590
+@FORTMP_05A1	= $00
 
 @VarData	= S
 @VarDataSize	= 513
@@ -1351,7 +1543,7 @@ I	= DATAORIGIN+$058F
 	rts						; ret
 .endl
 
-.local	CRT_INIT_05BF					; PROCEDURE | OVERLOAD
+.local	CRT_INIT_05C7					; PROCEDURE | OVERLOAD
 
 ; optimize OK (B_CRT), line = 483
 
@@ -1398,9 +1590,9 @@ I	= DATAORIGIN+$058F
 
 ; ------------------------------------------------------------
 
-VRAM_ADDRESS	= DATAORIGIN+$0591
-WIDTH	= DATAORIGIN+$0593
-HEIGHT	= DATAORIGIN+$0594
+VRAM_ADDRESS	= DATAORIGIN+$0592
+WIDTH	= DATAORIGIN+$0594
+HEIGHT	= DATAORIGIN+$0595
 
 @VarData	= VRAM_ADDRESS
 @VarDataSize	= 4
@@ -1445,8 +1637,8 @@ HEIGHT	= DATAORIGIN+$0594
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0595
-Y	= DATAORIGIN+$0596
+X	= DATAORIGIN+$0596
+Y	= DATAORIGIN+$0597
 
 @VarData	= X
 @VarDataSize	= 2
@@ -1463,7 +1655,7 @@ Y	= DATAORIGIN+$0596
 	eif
 .endl
 
-.local	CRT_WRITE_0604					; PROCEDURE | OVERLOAD
+.local	CRT_WRITE_060C					; PROCEDURE | OVERLOAD
 
 ; ------------------------------------------------------------
 
@@ -1477,23 +1669,22 @@ Y	= DATAORIGIN+$0596
 	mva:rne (:bp2),y adr.S,y+
 	mwa #adr.S S
 	dex
-@main
 
 ; optimize OK (B_CRT), line = 531
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
 	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
+	sta SYSTEM.MOVE_045D.SOURCE
 	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda CRT_CURSOR
-	sta SYSTEM.MOVE_045A.DEST
-	lda CRT_CURSOR+1
-	sta SYSTEM.MOVE_045A.DEST+1
+	sta SYSTEM.MOVE_045D.SOURCE+1
+	lda adr.S+$00
+	sta SYSTEM.MOVE_045D.COUNT
 	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
+	sta SYSTEM.MOVE_045D.COUNT+1
+	lda CRT_CURSOR
+	sta SYSTEM.MOVE_045D.DEST
+	lda CRT_CURSOR+1
+	sta SYSTEM.MOVE_045D.DEST+1
+	.local +MAIN.SYSTEM.MOVE_045D
 	m@INLINE
 	.endl
 
@@ -1507,7 +1698,7 @@ Y	= DATAORIGIN+$0596
 
 ; ------------------------------------------------------------
 
-adr.S	= [DATAORIGIN+$0597] .array [256]
+adr.S	= [DATAORIGIN+$0598] .array [256]
 .var S	= adr.S .word
 
 @VarData	= S
@@ -1525,7 +1716,7 @@ adr.S	= [DATAORIGIN+$0597] .array [256]
 	eif
 .endl
 
-.local	CRT_PUT_0617					; PROCEDURE | OVERLOAD
+.local	CRT_PUT_061F					; PROCEDURE | OVERLOAD
 	sta B
 
 ; optimize OK (B_CRT), line = 574
@@ -1544,7 +1735,7 @@ adr.S	= [DATAORIGIN+$0597] .array [256]
 
 ; ------------------------------------------------------------
 
-B	= DATAORIGIN+$0697
+B	= DATAORIGIN+$0698
 
 @VarData	= B
 @VarDataSize	= 1
@@ -1572,15 +1763,35 @@ B	= DATAORIGIN+$0697
 
 	lda ATARI.SKSTAT
 	and #$04
-	jne l_0642
+	jne l_064A
 	lda #$01
 	sta RESULT
-l_0642
+l_064A
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0698
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0699
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -1592,13 +1803,11 @@ RESULT	= DATAORIGIN+$0698
 	sta RESULT
 
 ; --- RepeatUntilProlog
-l_0654
+l_065F
 
 ; optimize FAIL ('CRT_KEYPRESSED', B_CRT), line = 599
 
 	jsr CRT_KEYPRESSED
-	inx
-	mva CRT_KEYPRESSED.RESULT :STACKORIGIN,x
 	jsr notBOOLEAN
 	dex
 	ldy #1
@@ -1609,16 +1818,17 @@ l_0654
 @
 	tya
 	ora :STACKORIGIN+1,x
-	jeq l_0654
+	jeq l_065F
 
 ; --- RepeatUntilProlog
-l_066B
+l_0676
 
 ; optimize FAIL ('CRT_KEYPRESSED', B_CRT), line = 600
 
 	jsr CRT_KEYPRESSED
-	lda CRT_KEYPRESSED.RESULT
-	jeq l_066B
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_0676
 
 ; optimize OK (B_CRT), line = 601
 
@@ -1628,31 +1838,73 @@ l_066B
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0699
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$069A
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
 .local	CRT_READCHAR					; FUNCTION
 
 ; --- RepeatUntilProlog
-l_067B
+l_0689
 
 ; optimize FAIL (0, B_CRT), line = 607
 
 	jsr CRT_READKEY
-	ldy CRT_READKEY.RESULT
+	ldy :STACKORIGIN,x
 	lda adr.CRT_KEYCODE,y
 	sta RESULT
+	dex
 
 ; optimize OK (B_CRT), line = 608
 
+	lda RESULT
 	cmp #$FF
-	jeq l_067B
+	jeq l_0689
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$069A
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$069B
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -1661,54 +1913,74 @@ RESULT	= DATAORIGIN+$069A
 ; optimize FAIL ('CRT_READCHAR', B_CRT), line = 613
 
 	jsr CRT_READCHAR
-	lda CRT_READCHAR.RESULT
-	jsr ATASCII2ANTIC_0541
-	lda ATASCII2ANTIC_0541.RESULT
+	lda :STACKORIGIN,x
+	dex
+	jsr ATASCII2ANTIC_053F
+	lda :STACKORIGIN,x
 	sta RESULT
+	dex
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$069B
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$069C
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
-.local	CRT_READSTRINGI_0699				; FUNCTION | OVERLOAD
+.local	CRT_READSTRINGI_06AD				; FUNCTION | OVERLOAD
 	sta LIMIT
 
 	mva #$00 adr.RESULT
 
 ; --- RepeatUntilProlog
-l_069D
+l_06B1
 
 ; optimize FAIL ('CRT_READCHARI', B_CRT), line = 621
 
 	jsr CRT_READCHARI
-	lda CRT_READCHARI.RESULT
+	lda :STACKORIGIN,x
 	sta A
+	dex
 
 ; optimize OK (B_CRT), line = 622
 
+	lda A
 	cmp #$DB
-	jne l_06B3
+	jne l_06C7
 	jmp @exit					; exit
-l_06B3
+l_06C7
 
 ; optimize OK (B_CRT), line = 623
 
 	lda A
 	cmp #$7E
-	jne l_06DA
+	jne l_06EE
 	lda adr.RESULT+$00
-	jeq l_06DA
+	jeq l_06EE
 
 ; optimize FAIL (0, B_CRT), line = 624
 
-	lda CRT_CURSOR
-	bne @+
-	dec CRT_CURSOR+1
-@
-	dec CRT_CURSOR
+	dew CRT_CURSOR
 
 ; optimize OK (B_CRT), line = 625
 
@@ -1721,30 +1993,30 @@ l_06B3
 ; optimize OK (B_CRT), line = 626
 
 	dec adr.RESULT+$00
-	jmp l_06EE
-l_06DA
+	jmp l_0702
+l_06EE
 
 ; optimize OK (B_CRT), line = 628
 
 	lda A
 	cmp #$C2
-	jeq l_073F
+	jeq l_0753
 	cmp #$C1
-	jeq l_073F
+	jeq l_0753
 	cmp #$7F
-	jeq l_073F
+	jeq l_0753
 	cmp #$5B
-	jeq l_073F
+	jeq l_0753
 	cmp #$7E
-	jeq l_073F
+	jeq l_0753
 	lda adr.RESULT+$00
 	cmp LIMIT
-	jcs l_073F
+	jcs l_0753
 
 ; optimize OK (B_CRT), line = 634
 
 	lda A
-	jsr CRT_PUT_0617
+	jsr CRT_PUT_061F
 
 ; optimize OK (B_CRT), line = 635
 
@@ -1755,20 +2027,37 @@ l_06DA
 	ldy adr.RESULT+$00
 	lda A
 	sta adr.RESULT,y
-l_073F
-l_06EE
+l_0753
+l_0702
 
 ; optimize OK (B_CRT), line = 638
 
-	jmp l_069D
+	jmp l_06B1
 @exit
 
 ; ------------------------------------------------------------
 
-LIMIT	= DATAORIGIN+$069C
-adr.RESULT	= [DATAORIGIN+$069D] .array [256]
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+LIMIT	= DATAORIGIN+$069D
+adr.RESULT	= [DATAORIGIN+$069E] .array [256]
 .var RESULT	= adr.RESULT .word
-A	= DATAORIGIN+$079D
+A	= DATAORIGIN+$079E
 
 @VarData	= LIMIT
 @VarDataSize	= 258
@@ -1776,20 +2065,17 @@ A	= DATAORIGIN+$079D
 	rts						; ret
 .endl
 
-.local	CRT_READSTRING_0758				; FUNCTION | OVERLOAD
+.local	CRT_READSTRING_076E				; FUNCTION | OVERLOAD
 	sta LIMIT
 
 ; optimize OK (B_CRT), line = 648
 
-	jsr CRT_READSTRINGI_0699
-	inx
-	mva CRT_READSTRINGI_0699.RESULT :STACKORIGIN,x
-	mva CRT_READSTRINGI_0699.RESULT+1 :STACKORIGIN+STACKWIDTH,x
-	jsr ANTIC2ATASCII_0584
-	inx
-	lda ANTIC2ATASCII_0584.RESULT
+	lda LIMIT
+	jsr CRT_READSTRINGI_06AD
+	jsr ANTIC2ATASCII_058A
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda ANTIC2ATASCII_0584.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	mwy RESULT :bp2
 	ldy #$00
@@ -1799,8 +2085,25 @@ A	= DATAORIGIN+$079D
 
 ; ------------------------------------------------------------
 
-LIMIT	= DATAORIGIN+$079E
-adr.RESULT	= [DATAORIGIN+$079F] .array [256]
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+LIMIT	= DATAORIGIN+$079F
+adr.RESULT	= [DATAORIGIN+$07A0] .array [256]
 .var RESULT	= adr.RESULT .word
 
 @VarData	= LIMIT
@@ -1825,7 +2128,27 @@ adr.RESULT	= [DATAORIGIN+$079F] .array [256]
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$089F
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$08A0
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -1845,7 +2168,27 @@ RESULT	= DATAORIGIN+$089F
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$08A0
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$08A1
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -1865,29 +2208,71 @@ RESULT	= DATAORIGIN+$08A0
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$08A1
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$08A2
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
 .local	CRT_HELPPRESSED					; FUNCTION
 
-; optimize OK (B_CRT), line = 764
+; optimize FAIL ('CRT_KEYPRESSED', B_CRT), line = 764
 
-	lda ATARI.SKSTAT
-	and #$04
-	jne l_07C6s
+	jsr CRT_KEYPRESSED
 	lda KBCODE
+	ldy #1
 	and #$3F
 	cmp #$11
-	jne l_07C6s
-	mva:sne #true RESULT
-l_07C6s
-	mva #false RESULT
+	beq @+
+	dey
+@
+	tya
+	and :STACKORIGIN+1,x
+	sta RESULT
+	dex
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$08A2
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$08A3
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -1909,12 +2294,12 @@ ICHAR_INVERSE	= $C1
 ICHAR_CAPS	= $C2
 adr.CRT_KEYCODE	= CODEORIGIN+$03DA
 .var CRT_KEYCODE	= adr.CRT_KEYCODE .word
-CRT_VRAM	= DATAORIGIN+$0180
-CRT_SIZE	= DATAORIGIN+$0182
-CRT_SCREENWIDTH	= DATAORIGIN+$0184
-CRT_SCREENHEIGHT	= DATAORIGIN+$0185
-CRT_CURSOR	= DATAORIGIN+$0186
-CRT_LEFTMARGIN	= DATAORIGIN+$0188
+CRT_VRAM	= DATAORIGIN+$0181
+CRT_SIZE	= DATAORIGIN+$0183
+CRT_SCREENWIDTH	= DATAORIGIN+$0185
+CRT_SCREENHEIGHT	= DATAORIGIN+$0186
+CRT_CURSOR	= DATAORIGIN+$0187
+CRT_LEFTMARGIN	= DATAORIGIN+$0189
 KBCODE	= $D209
 CONSOL	= $D01F
 
@@ -1926,7 +2311,7 @@ CONSOL	= $D01F
 
 ; ------------------------------------------------------------
 
-__NMIEN	= DATAORIGIN+$08A3
+__NMIEN	= DATAORIGIN+$08A4
 PORTB_SELFTEST_OFF	= $80
 PORTB_BASIC_OFF	= $02
 PORTB_SYSTEM_ON	= $01
@@ -1937,7 +2322,7 @@ PORTB_SYSTEM_ON	= $01
 
 .local	B_PMG						; UNIT
 
-.local	PMG_INIT_07CA					; PROCEDURE | OVERLOAD
+.local	PMG_INIT_07E2					; PROCEDURE | OVERLOAD
 
 ; optimize OK (B_PMG), line = 171
 
@@ -1975,7 +2360,7 @@ PORTB_SYSTEM_ON	= $01
 
 	lda SDMCTL
 	and #$10
-	jeq l_0815
+	jeq l_082D
 
 ; optimize OK (B_PMG), line = 178
 
@@ -1988,8 +2373,8 @@ PORTB_SYSTEM_ON	= $01
 	sta PMG_SIZE
 	lda #$08
 	sta PMG_SIZE+1
-	jmp l_0827
-l_0815
+	jmp l_083F
+l_082D
 
 ; optimize OK (B_PMG), line = 181
 
@@ -2001,14 +2386,14 @@ l_0815
 	sta PMG_SIZE
 	lda #$04
 	sta PMG_SIZE+1
-l_0827
+l_083F
 
 ; ------------------------------------------------------------
 
-BASE	= DATAORIGIN+$08A9
-SDMCTL	= DATAORIGIN+$08AA
-GRACTL	= DATAORIGIN+$08AB
-SDMCTL_FLAGS	= DATAORIGIN+$08AC
+BASE	= DATAORIGIN+$08AA
+SDMCTL	= DATAORIGIN+$08AB
+GRACTL	= DATAORIGIN+$08AC
+SDMCTL_FLAGS	= DATAORIGIN+$08AD
 
 @VarData	= BASE
 @VarDataSize	= 4
@@ -2025,23 +2410,23 @@ SDMCTL_FLAGS	= DATAORIGIN+$08AC
 	eif
 .endl
 
-.local	PMG_INIT_0830					; PROCEDURE | OVERLOAD
+.local	PMG_INIT_0848					; PROCEDURE | OVERLOAD
 
 ; optimize OK (B_PMG), line = 189
 
-	lda BASE
-	sta PMG_INIT_07CA.BASE
-	lda SDMCTL
-	sta PMG_INIT_07CA.SDMCTL
 	lda GRACTL
-	sta PMG_INIT_07CA.GRACTL
-	jsr PMG_INIT_07CA
+	sta PMG_INIT_07E2.GRACTL
+	lda SDMCTL
+	sta PMG_INIT_07E2.SDMCTL
+	lda BASE
+	sta PMG_INIT_07E2.BASE
+	jsr PMG_INIT_07E2
 
 ; ------------------------------------------------------------
 
-BASE	= DATAORIGIN+$08AD
-SDMCTL	= DATAORIGIN+$08AE
-GRACTL	= DATAORIGIN+$08AF
+BASE	= DATAORIGIN+$08AE
+SDMCTL	= DATAORIGIN+$08AF
+GRACTL	= DATAORIGIN+$08B0
 
 @VarData	= BASE
 @VarDataSize	= 3
@@ -2058,20 +2443,21 @@ GRACTL	= DATAORIGIN+$08AF
 	eif
 .endl
 
-.local	PMG_INIT_083E					; PROCEDURE | OVERLOAD
+.local	PMG_INIT_0856					; PROCEDURE | OVERLOAD
 	sta BASE
 
 ; optimize OK (B_PMG), line = 195
 
-	sta PMG_INIT_0830.BASE
 	lda SDMCTL
-	sta PMG_INIT_0830.SDMCTL
-	jsr PMG_INIT_0830
+	sta PMG_INIT_0848.SDMCTL
+	lda BASE
+	sta PMG_INIT_0848.BASE
+	jsr PMG_INIT_0848
 
 ; ------------------------------------------------------------
 
-BASE	= DATAORIGIN+$08B0
-SDMCTL	= DATAORIGIN+$08B1
+BASE	= DATAORIGIN+$08B1
+SDMCTL	= DATAORIGIN+$08B2
 
 @VarData	= BASE
 @VarDataSize	= 2
@@ -2111,7 +2497,7 @@ SDMCTL	= DATAORIGIN+$08B1
 
 ; ------------------------------------------------------------
 
-SDMCTL_FLAGS	= DATAORIGIN+$08B2
+SDMCTL_FLAGS	= DATAORIGIN+$08B3
 
 @VarData	= SDMCTL_FLAGS
 @VarDataSize	= 1
@@ -2220,9 +2606,9 @@ PMG_VDELAY	= $D01C
 PMG_GRACTL	= $D01D
 PMG_HITCLR	= $D01E
 PMG_PMBASE	= $D407
-PMG_ONELINE	= DATAORIGIN+$08A4
-PMG_BASE	= DATAORIGIN+$08A5
-PMG_SIZE	= DATAORIGIN+$08A7
+PMG_ONELINE	= DATAORIGIN+$08A5
+PMG_BASE	= DATAORIGIN+$08A6
+PMG_SIZE	= DATAORIGIN+$08A8
 
 .endl							; UNIT B_PMG
 
@@ -2278,7 +2664,7 @@ TRIG1	= $D011
 
 .local	DLI						; PROCEDURE | ASSEMBLER | INTERRUPT
 
-; -------------------  ASM Block 00000093  -------------------
+; ---------------------  ASM Block 091  ---------------------
 
 
     pha ; store registers
@@ -2297,7 +2683,7 @@ TRIG1	= $D011
 
 .local	DLI2						; PROCEDURE | ASSEMBLER | INTERRUPT
 
-; -------------------  ASM Block 00000094  -------------------
+; ---------------------  ASM Block 092  ---------------------
 
 
     pha ; store registers
@@ -2315,7 +2701,7 @@ TRIG1	= $D011
 
 .local	DLI3						; PROCEDURE | ASSEMBLER | INTERRUPT
 
-; -------------------  ASM Block 00000095  -------------------
+; ---------------------  ASM Block 093  ---------------------
 
 
     pha ; store registers
@@ -2336,7 +2722,7 @@ TRIG1	= $D011
 
 .local	VBL						; PROCEDURE | ASSEMBLER | INTERRUPT
 
-; -------------------  ASM Block 00000096  -------------------
+; ---------------------  ASM Block 094  ---------------------
 
 
     phr ; store registers
@@ -2418,9 +2804,9 @@ cursorBrightness
 
 ; ------------------------------------------------------------
 
-A	= DATAORIGIN+$0A28
-B	= DATAORIGIN+$0A2A
-C	= DATAORIGIN+$0A2C
+A	= DATAORIGIN+$0A29
+B	= DATAORIGIN+$0A2B
+C	= DATAORIGIN+$0A2D
 
 @VarData	= A
 @VarDataSize	= 5
@@ -2451,19 +2837,19 @@ C	= DATAORIGIN+$0A2C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 93
 
-	lda <adr.S+$03
-	sta SYSTEM.MOVE_0459.DEST
-	lda >adr.S+$03
-	sta SYSTEM.MOVE_0459.DEST+1
 	lda <adr.S+$01
-	sta SYSTEM.MOVE_0459.SOURCE
+	sta SYSTEM.MOVE_045C.SOURCE
 	lda >adr.S+$01
-	sta SYSTEM.MOVE_0459.SOURCE+1
+	sta SYSTEM.MOVE_045C.SOURCE+1
+	lda <adr.S+$03
+	sta SYSTEM.MOVE_045C.DEST
+	lda >adr.S+$03
+	sta SYSTEM.MOVE_045C.DEST+1
 	lda L
-	sta SYSTEM.MOVE_0459.COUNT
+	sta SYSTEM.MOVE_045C.COUNT
 	lda #$00
-	sta SYSTEM.MOVE_0459.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0459
+	sta SYSTEM.MOVE_045C.COUNT+1
+	.local +MAIN.SYSTEM.MOVE_045C
 	m@INLINE
 	.endl
 
@@ -2479,7 +2865,7 @@ C	= DATAORIGIN+$0A2C
 
 ; ------------------------------------------------------------
 
-L	= DATAORIGIN+$0A2D
+L	= DATAORIGIN+$0A2E
 
 @VarData	= L
 @VarDataSize	= 1
@@ -2511,7 +2897,7 @@ L	= DATAORIGIN+$0A2D
 	clc						; clear carry for add
 	adc #$FF-$19					; make m = $FF
 	adc #$19-$10+1					; carry set if in range n to m
-	jcc l_08CB
+	jcc l_08E3
 @
 
 ; optimize OK (test\tools\artur\artur.pas), line = 102
@@ -2521,12 +2907,12 @@ L	= DATAORIGIN+$0A2D
 	sta RESULT
 
 	jmp a_0005
-l_08CB
+l_08E3
 	lda @CASETMP_0005
 	clc						; clear carry for add
 	adc #$FF-$66					; make m = $FF
 	adc #$66-$61+1					; carry set if in range n to m
-	jcc l_08DE
+	jcc l_08F6
 @
 
 ; optimize OK (test\tools\artur\artur.pas), line = 103
@@ -2536,12 +2922,12 @@ l_08CB
 	sta RESULT
 
 	jmp a_0005
-l_08DE
+l_08F6
 	lda @CASETMP_0005
 	clc						; clear carry for add
 	adc #$FF-$26					; make m = $FF
 	adc #$26-$21+1					; carry set if in range n to m
-	jcc l_08F1
+	jcc l_0909
 @
 
 ; optimize OK (test\tools\artur\artur.pas), line = 104
@@ -2550,18 +2936,34 @@ l_08DE
 	sub #$17
 	sta RESULT
 
-l_08F1
+l_0909
 a_0005
 @exit
 
 ; ------------------------------------------------------------
 
-C	= DATAORIGIN+$0A2E
-RESULT	= DATAORIGIN+$0A2F
-@CASETMP_0005	= DATAORIGIN+$0A30
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+C	= DATAORIGIN+$0A2F
+RESULT	= DATAORIGIN+$0A30
+@CASETMP_0005	= DATAORIGIN+$0A31
 
 @VarData	= C
-@VarDataSize	= 2
+@VarDataSize	= 3
 
 	rts						; ret
 .endl
@@ -2591,20 +2993,22 @@ RESULT	= DATAORIGIN+$0A2F
 	sta POS
 
 ; --- RepeatUntilProlog
-l_091A
+l_0935
 
 ; optimize OK (test\tools\artur\artur.pas), line = 116
 
 	ldy POS
 	lda adr.S,y
 	jsr HEX2DECDIGIT
-	lda HEX2DECDIGIT.RESULT
+	lda :STACKORIGIN,x
 	sta DIGIT
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 117
 
+	lda DIGIT
 	cmp #$FF
-	jne l_0936
+	jne l_0951
 
 ; optimize OK (test\tools\artur\artur.pas), line = 118
 
@@ -2613,26 +3017,28 @@ l_091A
 	lda #$01
 	sta (:bp2),y
 	jmp @exit					; exit
-l_0936
+l_0951
 
-; optimize OK (test\tools\artur\artur.pas), line = 121
+; optimize FAIL (50, test\tools\artur\artur.pas), line = 121
 
+	inx
 	mwy I :bp2
 	ldy #$00
-	lda (:bp2),y
-	sta :STACKORIGIN+9
-	lda DIGIT
-	ldy BASE
-	beq l_0000_e
-l_0000_b
-	asl @
-	dey
-	bne l_0000_b
-l_0000_e
-	add :STACKORIGIN+9
+	mva (:bp2),y :STACKORIGIN,x
+	inx
+	mva DIGIT :STACKORIGIN,x
+	inx
+	mva BASE :STACKORIGIN,x
+	jsr shlEAX_CL.BYTE
+	dex
+	jsr @expandToCARD1.BYTE
+	jsr addAL_CL
+	dex
 	mwy I :bp2
 	ldy #$00
+	lda :STACKORIGIN,x
 	sta (:bp2),y
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 122
 
@@ -2646,15 +3052,15 @@ l_0000_e
 
 ; optimize OK (test\tools\artur\artur.pas), line = 124
 
-	jne l_091A
+	jne l_0935
 
 ; ------------------------------------------------------------
 
-I	= DATAORIGIN+$0A31
-ERR	= DATAORIGIN+$0A33
-POS	= DATAORIGIN+$0A35
-DIGIT	= DATAORIGIN+$0A36
-BASE	= DATAORIGIN+$0A37
+I	= DATAORIGIN+$0A32
+ERR	= DATAORIGIN+$0A34
+POS	= DATAORIGIN+$0A36
+DIGIT	= DATAORIGIN+$0A37
+BASE	= DATAORIGIN+$0A38
 
 @VarData	= I
 @VarDataSize	= 7
@@ -2684,43 +3090,43 @@ BASE	= DATAORIGIN+$0A37
 
 ; optimize OK (test\tools\artur\artur.pas), line = 131
 
-	lda +JOYSTICK.STICK0
+	lda JOYSTICK.STICK0
 	and #$01
-	jne l_0983
+	jne l_099E
 	lda #$FF
 	sta JOYY
-l_0983
+l_099E
 
 ; optimize OK (test\tools\artur\artur.pas), line = 132
 
-	lda +JOYSTICK.STICK0
+	lda JOYSTICK.STICK0
 	and #$02
-	jne l_09A0
+	jne l_09BB
 	lda #$01
 	sta JOYY
-l_09A0
+l_09BB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 133
 
-	lda +JOYSTICK.STICK0
+	lda JOYSTICK.STICK0
 	and #$04
-	jne l_09BD
+	jne l_09D8
 	lda #$FF
 	sta JOYX
-l_09BD
+l_09D8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 134
 
-	lda +JOYSTICK.STICK0
+	lda JOYSTICK.STICK0
 	and #$08
-	jne l_09DA
+	jne l_09F5
 	lda #$01
 	sta JOYX
-l_09DA
+l_09F5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 135
 
-	lda +JOYSTICK.STRIG0
+	lda JOYSTICK.STRIG0
 	sta JOYFIRE
 @exit
 	.ifdef @new
@@ -2739,7 +3145,7 @@ l_09DA
 ; optimize OK (test\tools\artur\artur.pas), line = 163
 
 	lda #$70
-	jsr B_PMG.PMG_INIT_083E
+	jsr B_PMG.PMG_INIT_0856
 
 ; optimize OK (test\tools\artur\artur.pas), line = 164
 
@@ -2748,12 +3154,20 @@ l_09DA
 
 ; optimize OK (test\tools\artur\artur.pas), line = 165
 
+	lda #$0D
+	sta SYSTEM.MOVE_045B.COUNT
+	lda #$00
+	sta SYSTEM.MOVE_045B.COUNT+1
+	sta SYSTEM.MOVE_045B.DEST
+	lda #$D0
+	sta SYSTEM.MOVE_045B.DEST+1
 	lda PMGSETTINGS
-	sta :bp2
+	sta SYSTEM.MOVE_045B.SOURCE
 	lda PMGSETTINGS+1
-	sta :bp2+1
-	ldy #$0C
-	mva:rpl (:bp2),y $D000,y-
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
+	m@INLINE
+	.endl
 
 ; optimize OK (test\tools\artur\artur.pas), line = 166
 
@@ -2766,9 +3180,9 @@ l_09DA
 
 ; ------------------------------------------------------------
 
-adr.FRAME	= [DATAORIGIN+$0A38] .array [6]
+adr.FRAME	= [DATAORIGIN+$0A39] .array [6]
 .var FRAME	= adr.FRAME .word
-adr.PMGSETTINGS	= [DATAORIGIN+$0A3E] .array [13]
+adr.PMGSETTINGS	= [DATAORIGIN+$0A3F] .array [13]
 .var PMGSETTINGS	= adr.PMGSETTINGS .word
 
 @VarData	= FRAME
@@ -2798,15 +3212,35 @@ adr.PMGSETTINGS	= [DATAORIGIN+$0A3E] .array [13]
 
 	lda RESULT
 	cmp #$40
-	jne l_0A1B
+	jne l_0A36
 	lda #$00
 	sta RESULT
-l_0A1B
+l_0A36
 @exit
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0A4B
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0A4C
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -2819,10 +3253,10 @@ RESULT	= DATAORIGIN+$0A4B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 183
 
-	jne l_0A3E
+	jne l_0A5C
 	lda #$40
 	sta RESULT
-l_0A3E
+l_0A5C
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 184
 
@@ -2831,7 +3265,27 @@ l_0A3E
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0A4C
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0A4D
+
+@VarData	= RESULT
+@VarDataSize	= 1
+
 	rts						; ret
 .endl
 
@@ -2844,17 +3298,17 @@ RESULT	= DATAORIGIN+$0A4C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 191
 
-	lda UNDOACTIONS
-	sta SYSTEM.FILLBYTE.A
-	lda UNDOACTIONS+1
-	sta SYSTEM.FILLBYTE.A+1
-	lda #$C0
-	sta SYSTEM.FILLBYTE.COUNT
-	lda #$00
-	sta SYSTEM.FILLBYTE.COUNT+1
 	lda #$FF
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.VALUE
+	lda #$C0
+	sta SYSTEM.FILLBYTE_045A.COUNT
+	lda #$00
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
+	lda UNDOACTIONS
+	sta SYSTEM.FILLBYTE_045A.A
+	lda UNDOACTIONS+1
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 
@@ -2871,7 +3325,7 @@ RESULT	= DATAORIGIN+$0A4C
 	sta UNDOPTR+1
 
 ; --- RepeatUntilProlog
-l_0A5F
+l_0A80
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 195
 
@@ -2899,11 +3353,11 @@ l_0A5F
 ; optimize OK (test\tools\artur\artur.pas), line = 198
 
 	lda UNDOBUFFERIDX
-	jne l_0A5F
+	jne l_0A80
 
 ; ------------------------------------------------------------
 
-UNDOPTR	= DATAORIGIN+$0A4D
+UNDOPTR	= DATAORIGIN+$0A4E
 
 @VarData	= UNDOPTR
 @VarDataSize	= 2
@@ -2933,16 +3387,14 @@ UNDOPTR	= DATAORIGIN+$0A4D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 204
 
-	iny
 	lda Y
-	sta adr.UNDOACTIONS,y
+	sta adr.UNDOACTIONS+$01,y
 
 ; optimize OK (test\tools\artur\artur.pas), line = 205
 
 	lda IDX
 	asl @
 	add IDX
-	add #$02
 	sta :STACKORIGIN+9
 	lda Y
 	asl @
@@ -2956,13 +3408,13 @@ UNDOPTR	= DATAORIGIN+$0A4D
 	ldy :STACKORIGIN+10
 	lda (:bp),y
 	ldy :STACKORIGIN+9
-	sta adr.UNDOACTIONS,y
+	sta adr.UNDOACTIONS+$02,y
 
 ; ------------------------------------------------------------
 
-IDX	= DATAORIGIN+$0A4F
-X	= DATAORIGIN+$0A50
-Y	= DATAORIGIN+$0A51
+IDX	= DATAORIGIN+$0A50
+X	= DATAORIGIN+$0A51
+Y	= DATAORIGIN+$0A52
 
 @VarData	= IDX
 @VarDataSize	= 3
@@ -2983,18 +3435,18 @@ Y	= DATAORIGIN+$0A51
 
 ; optimize OK (test\tools\artur\artur.pas), line = 210
 
-	lda UNDOACTIONSIDX
-	sta SETUNDOFROMXY.IDX
-	lda X
-	sta SETUNDOFROMXY.X
 	lda Y
 	sta SETUNDOFROMXY.Y
+	lda X
+	sta SETUNDOFROMXY.X
+	lda UNDOACTIONSIDX
+	sta SETUNDOFROMXY.IDX
 	jsr SETUNDOFROMXY
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0A52
-Y	= DATAORIGIN+$0A53
+X	= DATAORIGIN+$0A53
+Y	= DATAORIGIN+$0A54
 
 @VarData	= X
 @VarDataSize	= 2
@@ -3016,27 +3468,28 @@ Y	= DATAORIGIN+$0A53
 
 ; optimize OK (test\tools\artur\artur.pas), line = 215
 
+	lda BUFNUM
 	asl @
 	tay
 	lda adr.UNDOBUFFERS,y
-	sta SYSTEM.MOVE_0458.DEST
+	sta SYSTEM.MOVE_045B.DEST
 	lda adr.UNDOBUFFERS+1,y
-	sta SYSTEM.MOVE_0458.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.SOURCE
-	lda #$7C
-	sta SYSTEM.MOVE_0458.SOURCE+1
+	sta SYSTEM.MOVE_045B.DEST+1
 	lda #$C0
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$03
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.SOURCE
+	lda #$7C
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 
 ; ------------------------------------------------------------
 
-BUFNUM	= DATAORIGIN+$0A54
+BUFNUM	= DATAORIGIN+$0A55
 
 @VarData	= BUFNUM
 @VarDataSize	= 1
@@ -3058,27 +3511,28 @@ BUFNUM	= DATAORIGIN+$0A54
 
 ; optimize OK (test\tools\artur\artur.pas), line = 220
 
+	lda BUFNUM
 	asl @
 	tay
 	lda adr.UNDOBUFFERS,y
-	sta SYSTEM.MOVE_0458.SOURCE
+	sta SYSTEM.MOVE_045B.SOURCE
 	lda adr.UNDOBUFFERS+1,y
-	sta SYSTEM.MOVE_0458.SOURCE+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.DEST
-	lda #$7C
-	sta SYSTEM.MOVE_0458.DEST+1
+	sta SYSTEM.MOVE_045B.SOURCE+1
 	lda #$C0
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$03
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.DEST
+	lda #$7C
+	sta SYSTEM.MOVE_045B.DEST+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 
 ; ------------------------------------------------------------
 
-BUFNUM	= DATAORIGIN+$0A55
+BUFNUM	= DATAORIGIN+$0A56
 
 @VarData	= BUFNUM
 @VarDataSize	= 1
@@ -3104,15 +3558,15 @@ BUFNUM	= DATAORIGIN+$0A55
 	sta UNDOPTR
 
 ; --- RepeatUntilProlog
-l_0AF6
+l_0B17
 
 ; optimize OK (test\tools\artur\artur.pas), line = 228
 
 	lda UNDOPTR
-	jne l_0B08
+	jne l_0B29
 	lda #$40
 	sta UNDOPTR
-l_0B08
+l_0B29
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 229
 
@@ -3130,45 +3584,40 @@ l_0B08
 ; optimize OK (test\tools\artur\artur.pas), line = 231
 
 	cmp #$FE
-	jne l_0B36
+	jne l_0B57
 
 ; optimize OK (test\tools\artur\artur.pas), line = 232
 
-	iny
-	lda adr.UNDOACTIONS,y
+	lda adr.UNDOACTIONS+$01,y
 	cmp BUFNUM
-	jne l_0B56
+	jne l_0B77
 
 ; optimize OK (test\tools\artur\artur.pas), line = 233
 
-	lda UNDOPTR
-	asl @
-	add UNDOPTR
-	tay
 	lda #$FF
 	sta adr.UNDOACTIONS,y
 
 ; optimize OK (test\tools\artur\artur.pas), line = 234
 
 	sta ACTION
-l_0B56
-l_0B36
+l_0B77
+l_0B57
 
 ; optimize OK (test\tools\artur\artur.pas), line = 236
 
 	lda ACTION
 	cmp #$FF
-	jeq l_0AF6x
+	jeq l_0B17x
 	lda UNDOPTR
 	cmp UNDOACTIONSIDX
-	jne l_0AF6
-l_0AF6x
+	jne l_0B17
+l_0B17x
 
 ; ------------------------------------------------------------
 
-BUFNUM	= DATAORIGIN+$0A56
-UNDOPTR	= DATAORIGIN+$0A57
-ACTION	= DATAORIGIN+$0A58
+BUFNUM	= DATAORIGIN+$0A57
+UNDOPTR	= DATAORIGIN+$0A58
+ACTION	= DATAORIGIN+$0A59
 
 @VarData	= BUFNUM
 @VarDataSize	= 3
@@ -3208,9 +3657,8 @@ ACTION	= DATAORIGIN+$0A58
 
 ; optimize OK (test\tools\artur\artur.pas), line = 244
 
-	iny
 	lda UNDOBUFFERIDX
-	sta adr.UNDOACTIONS,y
+	sta adr.UNDOACTIONS+$01,y
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 245
 
@@ -3220,10 +3668,10 @@ ACTION	= DATAORIGIN+$0A58
 
 	lda UNDOBUFFERIDX
 	cmp #$08
-	jne l_0BCB
+	jne l_0BEC
 	lda #$00
 	sta UNDOBUFFERIDX
-l_0BCB
+l_0BEC
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3241,6 +3689,7 @@ l_0BCB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 252
 
+	lda IDX
 	asl @
 	add IDX
 	tay
@@ -3249,18 +3698,12 @@ l_0BCB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 253
 
-	iny
-	lda adr.UNDOACTIONS,y
+	lda adr.UNDOACTIONS+$01,y
 	sta RY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 254
 
-	lda IDX
-	asl @
-	add IDX
-	add #$02
-	tay
-	lda adr.UNDOACTIONS,y
+	lda adr.UNDOACTIONS+$02,y
 	sta RC
 
 ; optimize OK (test\tools\artur\artur.pas), line = 255
@@ -3270,20 +3713,20 @@ l_0BCB
 	tay
 	lda RX
 	add adr.LINEOFFSET,y
-	sta :STACKORIGIN+10
+	sta :STACKORIGIN+9
 	lda #$7C
 	adc adr.LINEOFFSET+1,y
 	sta :bp+1
-	ldy :STACKORIGIN+10
+	ldy :STACKORIGIN+9
 	lda RC
 	sta (:bp),y
 
 ; ------------------------------------------------------------
 
-IDX	= DATAORIGIN+$0A59
-RX	= DATAORIGIN+$0A5A
-RY	= DATAORIGIN+$0A5B
-RC	= DATAORIGIN+$0A5C
+IDX	= DATAORIGIN+$0A5A
+RX	= DATAORIGIN+$0A5B
+RY	= DATAORIGIN+$0A5C
+RC	= DATAORIGIN+$0A5D
 
 @VarData	= IDX
 @VarDataSize	= 4
@@ -3305,12 +3748,13 @@ RC	= DATAORIGIN+$0A5C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 260
 
+	lda ACTIONIDX
 	asl @
 	add ACTIONIDX
 	tay
 	lda adr.UNDOACTIONS,y
 	cmp #$FE
-	jne l_0C3D
+	jne l_0C5E
 
 ; optimize FAIL ('STOREUNDOBUFFER', test\tools\artur\artur.pas), line = 261
 
@@ -3326,27 +3770,21 @@ RC	= DATAORIGIN+$0A5C
 	asl @
 	add ACTIONIDX
 	tay
-	iny
-	lda adr.UNDOACTIONS,y
+	lda adr.UNDOACTIONS+$01,y
 	jsr RESTORESCREENFROMUNDOBUFFER
-	jmp l_0C5D
-l_0C3D
+	jmp l_0C7E
+l_0C5E
 
 ; optimize OK (test\tools\artur\artur.pas), line = 265
 
-	lda ACTIONIDX
-	asl @
-	add #$01
-	add ACTIONIDX
-	tay
-	lda adr.UNDOACTIONS,y
-	sta STOREUNDOFROMXY.Y
 	lda ACTIONIDX
 	asl @
 	add ACTIONIDX
 	tay
 	lda adr.UNDOACTIONS,y
 	sta STOREUNDOFROMXY.X
+	lda adr.UNDOACTIONS+$01,y
+	sta STOREUNDOFROMXY.Y
 	jsr STOREUNDOFROMXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 266
@@ -3357,11 +3795,11 @@ l_0C3D
 ; optimize OK (test\tools\artur\artur.pas), line = 267
 
 	jsr RESTORECHARFROMUNDO
-l_0C5D
+l_0C7E
 
 ; ------------------------------------------------------------
 
-ACTIONIDX	= DATAORIGIN+$0A5D
+ACTIONIDX	= DATAORIGIN+$0A5E
 
 @VarData	= ACTIONIDX
 @VarDataSize	= 1
@@ -3389,29 +3827,30 @@ ACTIONIDX	= DATAORIGIN+$0A5D
 ; optimize OK (test\tools\artur\artur.pas), line = 274
 
 	lda WHOLESCREEN
-	jeq l_0C98
+	jeq l_0CB9
 
 ; optimize FAIL ('STOREUNDOBUFFER', test\tools\artur\artur.pas), line = 275
 
 	jsr STOREUNDOBUFFER
-	jmp l_0CA3
-l_0C98
-	lda CURSORX
-	sta STOREUNDOFROMXY.X
+	jmp l_0CC4
+l_0CB9
 	lda CURSORY
 	sta STOREUNDOFROMXY.Y
+	lda CURSORX
+	sta STOREUNDOFROMXY.X
 	jsr STOREUNDOFROMXY
-l_0CA3
+l_0CC4
 
 ; optimize FAIL ('NEXTACTION', test\tools\artur\artur.pas), line = 276
 
 	jsr NEXTACTION
-	lda NEXTACTION.RESULT
+	lda :STACKORIGIN,x
 	sta UNDOACTIONSIDX
+	dex
 
 ; ------------------------------------------------------------
 
-WHOLESCREEN	= DATAORIGIN+$0A5E
+WHOLESCREEN	= DATAORIGIN+$0A5F
 
 @VarData	= WHOLESCREEN
 @VarDataSize	= 1
@@ -3433,17 +3872,19 @@ WHOLESCREEN	= DATAORIGIN+$0A5E
 ; optimize FAIL ('PREVACTION', test\tools\artur\artur.pas), line = 282
 
 	jsr PREVACTION
-	lda PREVACTION.RESULT
+	lda :STACKORIGIN,x
 	sta PREV
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 283
 
+	lda PREV
 	asl @
 	add PREV
 	tay
 	lda adr.UNDOACTIONS,y
 	cmp #$FF
-	jeq l_0CD3
+	jeq l_0CF4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 284
 
@@ -3458,20 +3899,19 @@ WHOLESCREEN	= DATAORIGIN+$0A5E
 	tay
 	lda adr.UNDOACTIONS,y
 	cmp #$FE
-	jne l_0CF5
-	iny
-	lda adr.UNDOACTIONS,y
+	jne l_0D16
+	lda adr.UNDOACTIONS+$01,y
 	sta UNDOBUFFERIDX
-l_0CF5
+l_0D16
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 286
 
 	inc REDOCOUNT
-l_0CD3
+l_0CF4
 
 ; ------------------------------------------------------------
 
-PREV	= DATAORIGIN+$0A5F
+PREV	= DATAORIGIN+$0A60
 
 @VarData	= PREV
 @VarDataSize	= 1
@@ -3493,13 +3933,14 @@ PREV	= DATAORIGIN+$0A5F
 ; optimize FAIL ('NEXTACTION', test\tools\artur\artur.pas), line = 293
 
 	jsr NEXTACTION
-	lda NEXTACTION.RESULT
+	lda :STACKORIGIN,x
 	sta NEXT
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 294
 
 	lda REDOCOUNT
-	jeq l_0D29
+	jeq l_0D4A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 295
 
@@ -3509,7 +3950,7 @@ PREV	= DATAORIGIN+$0A5F
 	tay
 	lda adr.UNDOACTIONS,y
 	cmp #$FF
-	jeq l_0D47
+	jeq l_0D68
 
 ; optimize OK (test\tools\artur\artur.pas), line = 296
 
@@ -3519,12 +3960,12 @@ PREV	= DATAORIGIN+$0A5F
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 297
 
 	dec REDOCOUNT
-l_0D47
-l_0D29
+l_0D68
+l_0D4A
 
 ; ------------------------------------------------------------
 
-NEXT	= DATAORIGIN+$0A60
+NEXT	= DATAORIGIN+$0A61
 
 @VarData	= NEXT
 @VarDataSize	= 1
@@ -3546,16 +3987,16 @@ NEXT	= DATAORIGIN+$0A60
 ; optimize OK (test\tools\artur\artur.pas), line = 309
 
 	lda #$00
-	sta SYSTEM.FILLBYTE.A
-	lda #$7C
-	sta SYSTEM.FILLBYTE.A+1
+	sta SYSTEM.FILLBYTE_045A.VALUE
 	lda #$C0
-	sta SYSTEM.FILLBYTE.COUNT
+	sta SYSTEM.FILLBYTE_045A.COUNT
 	lda #$03
-	sta SYSTEM.FILLBYTE.COUNT+1
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
 	lda #$00
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.A
+	lda #$7C
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 @exit
@@ -3575,16 +4016,16 @@ NEXT	= DATAORIGIN+$0A60
 ; optimize OK (test\tools\artur\artur.pas), line = 314
 
 	lda #$00
-	sta SYSTEM.FILLBYTE.A
-	lda #$78
-	sta SYSTEM.FILLBYTE.A+1
+	sta SYSTEM.FILLBYTE_045A.VALUE
 	lda #$C0
-	sta SYSTEM.FILLBYTE.COUNT
+	sta SYSTEM.FILLBYTE_045A.COUNT
 	lda #$03
-	sta SYSTEM.FILLBYTE.COUNT+1
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
 	lda #$00
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.A
+	lda #$78
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 @exit
@@ -3603,19 +4044,19 @@ NEXT	= DATAORIGIN+$0A60
 
 ; optimize OK (test\tools\artur\artur.pas), line = 319
 
-	lda #$00
-	sta SYSTEM.MOVE_0458.SOURCE
-	lda #$7C
-	sta SYSTEM.MOVE_0458.SOURCE+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.DEST
-	lda #$78
-	sta SYSTEM.MOVE_0458.DEST+1
 	lda #$C0
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$03
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.DEST
+	lda #$78
+	sta SYSTEM.MOVE_045B.DEST+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.SOURCE
+	lda #$7C
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 @exit
@@ -3634,19 +4075,19 @@ NEXT	= DATAORIGIN+$0A60
 
 ; optimize OK (test\tools\artur\artur.pas), line = 324
 
-	lda #$00
-	sta SYSTEM.MOVE_0458.SOURCE
-	lda #$78
-	sta SYSTEM.MOVE_0458.SOURCE+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.DEST
-	lda #$7C
-	sta SYSTEM.MOVE_0458.DEST+1
 	lda #$C0
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$03
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.DEST
+	lda #$7C
+	sta SYSTEM.MOVE_045B.DEST+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.SOURCE
+	lda #$78
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 @exit
@@ -3676,21 +4117,21 @@ NEXT	= DATAORIGIN+$0A60
 	sta CARRET+1
 
 ; --- RepeatUntilProlog
-l_0D8B
+l_0DAC
 
 ; optimize OK (test\tools\artur\artur.pas), line = 332
 
-	lda CARRET
-	sta SYSTEM.FILLBYTE.A
-	lda CARRET+1
-	sta SYSTEM.FILLBYTE.A+1
-	lda W
-	sta SYSTEM.FILLBYTE.COUNT
-	lda #$00
-	sta SYSTEM.FILLBYTE.COUNT+1
 	lda C
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.VALUE
+	lda W
+	sta SYSTEM.FILLBYTE_045A.COUNT
+	lda #$00
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
+	lda CARRET
+	sta SYSTEM.FILLBYTE_045A.A
+	lda CARRET+1
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 
@@ -3708,16 +4149,16 @@ l_0D8B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 335
 
-	jne l_0D8B
+	jne l_0DAC
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0A61
-Y	= DATAORIGIN+$0A62
-W	= DATAORIGIN+$0A63
-H	= DATAORIGIN+$0A64
-C	= DATAORIGIN+$0A65
-CARRET	= DATAORIGIN+$0A66
+X	= DATAORIGIN+$0A62
+Y	= DATAORIGIN+$0A63
+W	= DATAORIGIN+$0A64
+H	= DATAORIGIN+$0A65
+C	= DATAORIGIN+$0A66
+CARRET	= DATAORIGIN+$0A67
 
 @VarData	= X
 @VarDataSize	= 7
@@ -3749,12 +4190,13 @@ CARRET	= DATAORIGIN+$0A66
 
 	lda CONFIG.KEYCODEDISPLAY
 	cmp #$02
-	jne l_0DCE
+	jne l_0DEF
 	lda CURSORCHAR
-	jsr B_CRT.ANTIC2ATASCII_0545
-	lda B_CRT.ANTIC2ATASCII_0545.RESULT
+	jsr B_CRT.ANTIC2ATASCII_0546
+	lda :STACKORIGIN,x
 	sta CURSORCHAR
-l_0DCE
+	dex
+l_0DEF
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3769,28 +4211,25 @@ l_0DCE
 
 .local	UPDATEXYK					; PROCEDURE
 
-; optimize FAIL ('SYSTEM.STR_0449', test\tools\artur\artur.pas), line = 346
+; optimize FAIL ('SYSTEM.STR_044C', test\tools\artur\artur.pas), line = 346
 
-	inx
-	mva S :STACKORIGIN,x
-	mva S+1 :STACKORIGIN+STACKWIDTH,x
 	inx
 	mva CURSORX :STACKORIGIN,x
-	mva #$00 :STACKORIGIN+STACKWIDTH,x
-	mva #$00 :STACKORIGIN+STACKWIDTH*2,x
-	mva #$00 :STACKORIGIN+STACKWIDTH*3,x
-	jsr SYSTEM.STR_0449
+	jsr @expandToCARD.BYTE
+	inx
+	mva S :STACKORIGIN,x
+	mva S+1 :STACKORIGIN+STACKWIDTH,x
+	jsr SYSTEM.STR_044C
 
-; optimize FAIL ('B_CRT.ATASCII2ANTIC_0549', test\tools\artur\artur.pas), line = 347
+; optimize FAIL ('B_CRT.ATASCII2ANTIC_054D', test\tools\artur\artur.pas), line = 347
 
 	inx
 	mva S :STACKORIGIN,x
 	mva S+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.ATASCII2ANTIC_0549
-	inx
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT
+	jsr B_CRT.ATASCII2ANTIC_054D
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
@@ -3802,44 +4241,28 @@ l_0DCE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 349
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$CB
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7F
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7FCA,y-
 
-; optimize FAIL ('SYSTEM.STR_0449', test\tools\artur\artur.pas), line = 351
+; optimize FAIL ('SYSTEM.STR_044C', test\tools\artur\artur.pas), line = 351
 
-	inx
-	mva S :STACKORIGIN,x
-	mva S+1 :STACKORIGIN+STACKWIDTH,x
 	inx
 	mva CURSORY :STACKORIGIN,x
-	mva #$00 :STACKORIGIN+STACKWIDTH,x
-	mva #$00 :STACKORIGIN+STACKWIDTH*2,x
-	mva #$00 :STACKORIGIN+STACKWIDTH*3,x
-	jsr SYSTEM.STR_0449
+	jsr @expandToCARD.BYTE
+	inx
+	mva S :STACKORIGIN,x
+	mva S+1 :STACKORIGIN+STACKWIDTH,x
+	jsr SYSTEM.STR_044C
 
-; optimize FAIL ('B_CRT.ATASCII2ANTIC_0549', test\tools\artur\artur.pas), line = 352
+; optimize FAIL ('B_CRT.ATASCII2ANTIC_054D', test\tools\artur\artur.pas), line = 352
 
 	inx
 	mva S :STACKORIGIN,x
 	mva S+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.ATASCII2ANTIC_0549
-	inx
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT
+	jsr B_CRT.ATASCII2ANTIC_054D
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
@@ -3851,26 +4274,13 @@ l_0DCE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 354
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$CF
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7F
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7FCE,y-
 
 ; optimize OK (test\tools\artur\artur.pas), line = 356
 
 	lda CONFIG.KEYCODEDISPLAY
-	jeq l_0E14
+	jeq l_0E35
 
 ; optimize OK (test\tools\artur\artur.pas), line = 357
 
@@ -3879,45 +4289,28 @@ l_0DCE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 358
 
+	lda #$02
+	sta SYSTEM.HEXSTR.DIGITS
 	lda CURSORCHAR
 	sta SYSTEM.HEXSTR.VALUE
 	lda #$00
 	sta SYSTEM.HEXSTR.VALUE+1
 	sta SYSTEM.HEXSTR.VALUE+2
 	sta SYSTEM.HEXSTR.VALUE+3
-	lda #$02
-	sta SYSTEM.HEXSTR.DIGITS
 	jsr SYSTEM.HEXSTR
-	inx
-	mva SYSTEM.HEXSTR.RESULT :STACKORIGIN,x
-	mva SYSTEM.HEXSTR.RESULT+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.ATASCII2ANTIC_0549
-	inx
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT
+	jsr B_CRT.ATASCII2ANTIC_054D
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 359
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$D3
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7F
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0E14
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7FD2,y-
+l_0E35
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -3932,9 +4325,9 @@ l_0E14
 
 .local	SHOWSTATUS					; PROCEDURE
 
-; optimize FAIL ('SYSTEM.PAUSE_0479', test\tools\artur\artur.pas), line = 365
+; optimize FAIL ('SYSTEM.PAUSE_0472', test\tools\artur\artur.pas), line = 365
 
-	jsr SYSTEM.PAUSE_0479
+	jsr SYSTEM.PAUSE_0472
 
 ; optimize OK (test\tools\artur\artur.pas), line = 366
 
@@ -3946,21 +4339,8 @@ l_0E14
 
 ; optimize OK (test\tools\artur\artur.pas), line = 368
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$C0
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7F
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7FBF,y-
 	ldy #256-6
 	mva:rne CODEORIGIN+$0029+6-256,y adr.S+6-256,y+
 
@@ -3968,37 +4348,24 @@ l_0E14
 
 	lda MODE
 	cmp #$01
-	jne l_0E49
+	jne l_0E6A
 	ldy #256-6
 	mva:rne CODEORIGIN+$0030+6-256,y adr.S+6-256,y+
-l_0E49
+l_0E6A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 372
 
 	lda MODE
 	cmp #$02
-	jne l_0E5E
+	jne l_0E7F
 	ldy #256-6
 	mva:rne CODEORIGIN+$0037+6-256,y adr.S+6-256,y+
-l_0E5E
+l_0E7F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 373
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$C4
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7F
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7FC3,y-
 
 ; optimize FAIL ('UPDATEXYK', test\tools\artur\artur.pas), line = 375
 
@@ -4009,22 +4376,21 @@ l_0E5E
 	lda #$11
 	sta B
 
-l_0E72
+l_0E93
 ; --- ForToDoCondition
-	ldy B
-	lda adr.BRUSHHISTORY,y
-	sta :STACKORIGIN+9
 	lda #$E7
 	sub B
-	tay
+	sta :STACKORIGIN+9
 	lda #$7F
 	sbc #$00
 	sta :bp+1
-	lda :STACKORIGIN+9
+	ldy B
+	lda adr.BRUSHHISTORY,y
+	ldy :STACKORIGIN+9
 	sta (:bp),y
 	dec B
-	jpl l_0E72
-l_0E80
+	jpl l_0E93
+l_0EA1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 378
 
@@ -4033,6 +4399,7 @@ l_0E80
 
 ; ------------------------------------------------------------
 
+@FORTMP_0E90	= $00
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -4056,270 +4423,140 @@ l_0E80
 ; optimize OK (test\tools\artur\artur.pas), line = 384
 
 	lda MODE
-	jne l_0EBA
+	jne l_0EDB
 	ldy #256-41
 	mva:rne CODEORIGIN+$003E+41-256,y adr.S+41-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 386
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$C0
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BBF,y-
 
 ; optimize OK (test\tools\artur\artur.pas), line = 387
 
 	lda CURSORFORWARD
-	jeq l_0ECE
+	jeq l_0EEF
 	ldy #256-7
 	mva:rne CODEORIGIN+$0068+7-256,y adr.S+7-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 389
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$DA
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0ECE
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BD9,y-
+l_0EEF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 391
 
 	lda INVERT
-	jeq l_0EE4
+	jeq l_0F05
 	ldy #256-8
 	mva:rne CODEORIGIN+$0070+8-256,y adr.S+8-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 393
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$E1
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0EE4
-l_0EBA
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BE0,y-
+l_0F05
+l_0EDB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 396
 
 	lda MODE
 	cmp #$01
-	jne l_0F02
+	jne l_0F23
 	ldy #256-41
 	mva:rne CODEORIGIN+$0079+41-256,y adr.S+41-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 402
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$C0
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BBF,y-
 
 ; optimize OK (test\tools\artur\artur.pas), line = 403
 
 	lda DRAWTOOL
-	jne l_0F1C
+	jne l_0F3D
 	ldy #256-5
 	mva:rne CODEORIGIN+$00A3+5-256,y adr.S+5-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 405
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$CD
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0F1C
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BCC,y-
+l_0F3D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 407
 
 	lda DRAWTOOL
 	cmp #$01
-	jne l_0F38
+	jne l_0F59
 	ldy #256-5
 	mva:rne CODEORIGIN+$00A9+5-256,y adr.S+5-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 409
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$D4
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0F38
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BD3,y-
+l_0F59
 
 ; optimize OK (test\tools\artur\artur.pas), line = 411
 
 	lda DRAWTOOL
 	cmp #$02
-	jne l_0F54
+	jne l_0F75
 	ldy #256-6
 	mva:rne CODEORIGIN+$00AF+6-256,y adr.S+6-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 413
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$DB
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0F54
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BDA,y-
+l_0F75
 
 ; optimize OK (test\tools\artur\artur.pas), line = 415
 
 	lda DRAWTOOL
 	cmp #$03
-	jne l_0F70
+	jne l_0F91
 	ldy #256-6
 	mva:rne CODEORIGIN+$00B6+6-256,y adr.S+6-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 417
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$E3
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0F70
-l_0F02
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BE2,y-
+l_0F91
+l_0F23
 
 ; optimize OK (test\tools\artur\artur.pas), line = 420
 
 	lda MODE
 	cmp #$02
-	jne l_0F8E
+	jne l_0FAF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 421
 
 	lda P2X
 	cmp #$FF
-	jne l_0FA1
+	jne l_0FC2
 	ldy #256-32
 	mva:rne CODEORIGIN+$00BD+32-256,y adr.S+32-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 423
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$C0
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-	jmp l_0FB2
-l_0FA1
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BBF,y-
+	jmp l_0FD3
+l_0FC2
 	ldy #256-33
 	mva:rne CODEORIGIN+$00DE+33-256,y adr.S+33-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 430
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
-	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
-	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda #$C0
-	sta SYSTEM.MOVE_045A.DEST
-	lda #$7B
-	sta SYSTEM.MOVE_045A.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
-	m@INLINE
-	.endl
-l_0FB2
-l_0F8E
+	ldy adr.S+$00
+	mva:rne adr.S+$01-$01,y $7BBF,y-
+l_0FD3
+l_0FAF
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -4395,7 +4632,7 @@ l_0F8E
 	sta PX
 
 ; --- RepeatUntilProlog
-l_1002
+l_1023
 
 ; optimize OK (test\tools\artur\artur.pas), line = 450
 
@@ -4418,15 +4655,15 @@ l_1002
 
 ; optimize OK (test\tools\artur\artur.pas), line = 453
 
-	jne l_1002
+	jne l_1023
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0A68
-Y	= DATAORIGIN+$0A69
-PX	= DATAORIGIN+$0A6A
-CURSOR_MASK	= DATAORIGIN+$0A6B
-CURSOR_PMG	= DATAORIGIN+$0A6C
+X	= DATAORIGIN+$0A69
+Y	= DATAORIGIN+$0A6A
+PX	= DATAORIGIN+$0A6B
+CURSOR_MASK	= DATAORIGIN+$0A6C
+CURSOR_PMG	= DATAORIGIN+$0A6D
 
 @VarData	= X
 @VarDataSize	= 6
@@ -4447,17 +4684,17 @@ CURSOR_PMG	= DATAORIGIN+$0A6C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 458
 
-	lda #$80
-	sta SYSTEM.FILLBYTE.A
-	lda #$71
-	sta SYSTEM.FILLBYTE.A+1
-	lda #$70
-	sta SYSTEM.FILLBYTE.COUNT
-	lda #$02
-	sta SYSTEM.FILLBYTE.COUNT+1
 	lda #$00
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.VALUE
+	lda #$70
+	sta SYSTEM.FILLBYTE_045A.COUNT
+	lda #$02
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
+	lda #$80
+	sta SYSTEM.FILLBYTE_045A.A
+	lda #$71
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 @exit
@@ -4490,10 +4727,10 @@ CURSOR_PMG	= DATAORIGIN+$0A6C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 466
 
-	lda CURSORX
-	sta XORCURSOR.X
 	lda CURSORY
 	sta XORCURSOR.Y
+	lda CURSORX
+	sta XORCURSOR.X
 	jsr XORCURSOR
 @exit
 	.ifdef @new
@@ -4517,69 +4754,72 @@ CURSOR_PMG	= DATAORIGIN+$0A6C
 
 	lda PC2X
 	cmp PC1X
-	jcs l_105B
-	lda <PC1X
-	sta SWAP.A
-	lda >PC1X
-	sta SWAP.A+1
+	jcs l_107C
 	lda <PC2X
 	sta SWAP.B
 	lda >PC2X
 	sta SWAP.B+1
+	lda <PC1X
+	sta SWAP.A
+	lda >PC1X
+	sta SWAP.A+1
 	jsr SWAP
-l_105B
+l_107C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 474
 
 	lda PC2Y
 	cmp PC1Y
-	jcs l_1075
-	lda <PC1Y
-	sta SWAP.A
-	lda >PC1Y
-	sta SWAP.A+1
+	jcs l_1096
 	lda <PC2Y
 	sta SWAP.B
 	lda >PC2Y
 	sta SWAP.B+1
+	lda <PC1Y
+	sta SWAP.A
+	lda >PC1Y
+	sta SWAP.A+1
 	jsr SWAP
-l_1075
+l_1096
 
 ; optimize OK (test\tools\artur\artur.pas), line = 475
 
 	lda PC1X
 	sta X
+	lda PC2X
+	sta :@FORTMP?10A6_0
 
-l_1088
+l_10A9
 ; --- ForToDoCondition
-	lda X
-	cmp PC2X
-	scc
-	jne l_1096
+.def :@FORTMP?10A6_0 = *+1
+	lda #$00
+	cmp X
+	jcc l_10B7
 
 ; optimize OK (test\tools\artur\artur.pas), line = 476
 
-	sta XORCURSOR.X
 	lda PC1Y
 	sta XORCURSOR.Y
+	lda X
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 477
 
 	lda PC1Y
 	cmp PC2Y
-	jeq l_10B1
-	lda X
-	sta XORCURSOR.X
+	jeq l_10D2
 	lda PC2Y
 	sta XORCURSOR.Y
+	lda X
+	sta XORCURSOR.X
 	jsr XORCURSOR
-l_10B1
+l_10D2
 
 ; --- ForToDoEpilog
 	inc X
-	jne l_1088
-l_1096
+	jne l_10A9
+l_10B7
 
 ; optimize OK (test\tools\artur\artur.pas), line = 479
 
@@ -4588,47 +4828,50 @@ l_1096
 	sty Y
 	ldy PC2Y
 	dey
-	sty @FORTMP_10D2_0
+	sty :@FORTMP?10F3_0
 
-l_10D5
+l_10F6
 ; --- ForToDoCondition
-	lda @FORTMP_10D2_0:#$00
+.def :@FORTMP?10F3_0 = *+1
+	lda #$00
 	cmp Y
-	jcc l_10E3
+	jcc l_1104
 
 ; optimize OK (test\tools\artur\artur.pas), line = 480
 
-	lda PC1X
-	sta XORCURSOR.X
 	lda Y
 	sta XORCURSOR.Y
+	lda PC1X
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 481
 
 	lda PC1X
 	cmp PC2X
-	jeq l_10FE
-	lda PC2X
-	sta XORCURSOR.X
+	jeq l_111F
 	lda Y
 	sta XORCURSOR.Y
+	lda PC2X
+	sta XORCURSOR.X
 	jsr XORCURSOR
-l_10FE
+l_111F
 
 ; --- ForToDoEpilog
 	inc Y
-	jne l_10D5
-l_10E3
+	jne l_10F6
+l_1104
 
 ; ------------------------------------------------------------
 
-PC1X	= DATAORIGIN+$0A6E
-PC1Y	= DATAORIGIN+$0A6F
-PC2X	= DATAORIGIN+$0A70
-PC2Y	= DATAORIGIN+$0A71
-X	= DATAORIGIN+$0A72
-Y	= DATAORIGIN+$0A73
+PC1X	= DATAORIGIN+$0A6F
+PC1Y	= DATAORIGIN+$0A70
+PC2X	= DATAORIGIN+$0A71
+PC2Y	= DATAORIGIN+$0A72
+X	= DATAORIGIN+$0A73
+Y	= DATAORIGIN+$0A74
+@FORTMP_10A6	= $00
+@FORTMP_10F3	= $00
 
 @VarData	= PC1X
 @VarDataSize	= 6
@@ -4660,10 +4903,10 @@ Y	= DATAORIGIN+$0A73
 
 ; optimize OK (test\tools\artur\artur.pas), line = 495
 
-	jne l_112C
+	jne l_114D
 	lda #$01
 	jsr STOREUNDOACTION
-l_112C
+l_114D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 497
 
@@ -4683,11 +4926,11 @@ l_112C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 500
 
-	jpl l_115B
+	jpl l_117C
 	lda #$00
 	sub DELTAX
 	sta DELTAX
-l_115B
+l_117C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 501
 
@@ -4697,11 +4940,11 @@ l_115B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 502
 
-	jpl l_1185
+	jpl l_11A6
 	lda #$00
 	sub DELTAY
 	sta DELTAY
-l_1185
+l_11A6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 504
 
@@ -4709,7 +4952,7 @@ l_1185
 	sub DELTAY
 	svc
 	eor #$80
-	jmi l_11A5
+	jmi l_11C6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 506
 
@@ -4755,8 +4998,8 @@ l_1185
 
 	lda #$01
 	sta YINC2
-	jmp l_11F3
-l_11A5
+	jmp l_1214
+l_11C6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 516
 
@@ -4801,13 +5044,13 @@ l_11A5
 ; optimize OK (test\tools\artur\artur.pas), line = 523
 
 	sta YINC2
-l_11F3
+l_1214
 
 ; optimize OK (test\tools\artur\artur.pas), line = 526
 
 	lda P2X
 	cmp P1X
-	jcs l_124B
+	jcs l_126C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 527
 
@@ -4820,13 +5063,13 @@ l_11F3
 	lda #$00
 	sub XINC2
 	sta XINC2
-l_124B
+l_126C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 530
 
 	lda P2Y
 	cmp P1Y
-	jcs l_1274
+	jcs l_1295
 
 ; optimize OK (test\tools\artur\artur.pas), line = 531
 
@@ -4839,7 +5082,7 @@ l_124B
 	lda #$00
 	sub YINC2
 	sta YINC2
-l_1274
+l_1295
 
 ; optimize OK (test\tools\artur\artur.pas), line = 535
 
@@ -4855,32 +5098,34 @@ l_1274
 
 	lda #$01
 	sta I
+	lda NUMPIXELS
+	sta :@FORTMP?12BE_0
 
-l_12A0
+l_12C1
 ; --- ForToDoCondition
-	lda I
-	cmp NUMPIXELS
-	scc
-	jne l_12AE
+.def :@FORTMP?12BE_0 = *+1
+	lda #$00
+	cmp I
+	jcc l_12CF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 539
 
 	lda CUR
-	jeq l_12BA
+	jeq l_12DB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 540
 
 	lda I
 	cmp NUMPIXELS
-	jcs l_12CF
-	lda X
-	sta XORCURSOR.X
+	jcs l_12F0
 	lda Y
 	sta XORCURSOR.Y
+	lda X
+	sta XORCURSOR.X
 	jsr XORCURSOR
-l_12CF
-	jmp l_12E2
-l_12BA
+l_12F0
+	jmp l_1303
+l_12DB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 541
 
@@ -4889,19 +5134,19 @@ l_12BA
 	tay
 	lda adr.LINEOFFSET,y
 	add X
-	sta :STACKORIGIN+10
+	sta :STACKORIGIN+9
 	lda adr.LINEOFFSET+1,y
 	adc #$7C
 	sta :bp+1
-	ldy :STACKORIGIN+10
+	ldy :STACKORIGIN+9
 	lda BRUSH
 	sta (:bp),y
-l_12E2
+l_1303
 
 ; optimize OK (test\tools\artur\artur.pas), line = 542
 
 	lda D
-	jpl l_1307
+	jpl l_1328
 
 ; optimize OK (test\tools\artur\artur.pas), line = 543
 
@@ -4919,8 +5164,8 @@ l_12E2
 	lda Y
 	add YINC1
 	sta Y
-	jmp l_1335
-l_1307
+	jmp l_1356
+l_1328
 
 ; optimize OK (test\tools\artur\artur.pas), line = 548
 
@@ -4939,37 +5184,38 @@ l_1307
 	lda Y
 	add YINC2
 	sta Y
-l_1335
+l_1356
 
 ; --- ForToDoEpilog
 	inc I
-	jne l_12A0
-l_12AE
+	jne l_12C1
+l_12CF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 553
 
 	lda CUR
-	jeq l_136A
+	jeq l_138B
 	lda #$FF
 	sta P2X
-l_136A
+l_138B
 
 ; ------------------------------------------------------------
 
-DELTAX	= DATAORIGIN+$0A75
-DELTAY	= DATAORIGIN+$0A76
-D	= DATAORIGIN+$0A77
-DINC1	= DATAORIGIN+$0A78
-DINC2	= DATAORIGIN+$0A79
-XINC1	= DATAORIGIN+$0A7A
-XINC2	= DATAORIGIN+$0A7B
-YINC1	= DATAORIGIN+$0A7C
-YINC2	= DATAORIGIN+$0A7D
-NUMPIXELS	= DATAORIGIN+$0A7E
-X	= DATAORIGIN+$0A7F
-Y	= DATAORIGIN+$0A80
-I	= DATAORIGIN+$0A81
-CUR	= DATAORIGIN+$0A82
+DELTAX	= DATAORIGIN+$0A77
+DELTAY	= DATAORIGIN+$0A78
+D	= DATAORIGIN+$0A79
+DINC1	= DATAORIGIN+$0A7A
+DINC2	= DATAORIGIN+$0A7B
+XINC1	= DATAORIGIN+$0A7C
+XINC2	= DATAORIGIN+$0A7D
+YINC1	= DATAORIGIN+$0A7E
+YINC2	= DATAORIGIN+$0A7F
+NUMPIXELS	= DATAORIGIN+$0A80
+X	= DATAORIGIN+$0A81
+Y	= DATAORIGIN+$0A82
+I	= DATAORIGIN+$0A83
+CUR	= DATAORIGIN+$0A84
+@FORTMP_12BE	= $00
 
 @VarData	= DELTAX
 @VarDataSize	= 14
@@ -4988,9 +5234,9 @@ CUR	= DATAORIGIN+$0A82
 
 .local	MOVECURSOR					; PROCEDURE
 
-; optimize FAIL ('SYSTEM.PAUSE_0479', test\tools\artur\artur.pas), line = 559
+; optimize FAIL ('SYSTEM.PAUSE_0472', test\tools\artur\artur.pas), line = 559
 
-	jsr SYSTEM.PAUSE_0479
+	jsr SYSTEM.PAUSE_0472
 
 ; optimize OK (test\tools\artur\artur.pas), line = 560
 
@@ -4999,10 +5245,10 @@ CUR	= DATAORIGIN+$0A82
 
 ; optimize OK (test\tools\artur\artur.pas), line = 561
 
-	lda CURSORX
-	sta XORCURSOR.X
 	lda CURSORY
 	sta XORCURSOR.Y
+	lda CURSORX
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 563
@@ -5014,19 +5260,19 @@ CUR	= DATAORIGIN+$0A82
 ; optimize OK (test\tools\artur\artur.pas), line = 564
 
 	cmp #$FF
-	jne l_139F
+	jne l_13C0
 	lda #$27
 	sta CURSORX
-l_139F
+l_13C0
 
 ; optimize OK (test\tools\artur\artur.pas), line = 565
 
 	lda CURSORX
 	cmp #$28
-	jne l_13B8
+	jne l_13D9
 	lda #$00
 	sta CURSORX
-l_13B8
+l_13D9
 
 ; optimize OK (test\tools\artur\artur.pas), line = 566
 
@@ -5037,19 +5283,19 @@ l_13B8
 ; optimize OK (test\tools\artur\artur.pas), line = 567
 
 	cmp #$FF
-	jne l_13DD
+	jne l_13FE
 	lda #$17
 	sta CURSORY
-l_13DD
+l_13FE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 568
 
 	lda CURSORY
 	cmp #$18
-	jne l_13F6
+	jne l_1417
 	lda #$00
 	sta CURSORY
-l_13F6
+l_1417
 
 ; optimize OK (test\tools\artur\artur.pas), line = 569
 
@@ -5067,19 +5313,19 @@ l_13F6
 
 	lda MODE
 	cmp #$01
-	jeq l_1429x
+	jeq l_144Ax
 	cmp #$02
-	jne l_1429
-l_1429x
+	jne l_144A
+l_144Ax
 
 ; optimize OK (test\tools\artur\artur.pas), line = 574
 
 	lda P1X
 	cmp #$FF
-	jeq l_1448
+	jeq l_1469
 	lda P2X
 	cmp #$FF
-	jne l_1448
+	jne l_1469
 
 ; optimize FAIL ('ERASEALLCURSORS', test\tools\artur\artur.pas), line = 575
 
@@ -5089,47 +5335,47 @@ l_1429x
 
 	lda MODE
 	cmp #$01
-	jne l_1468
+	jne l_1489
 	lda DRAWTOOL
 	cmp #$01
-	jne l_1468
+	jne l_1489
 
 ; optimize FAIL ('DRAWLINE', test\tools\artur\artur.pas), line = 577
 
 	jsr DRAWLINE
-	jmp l_1473
-l_1468
+	jmp l_1494
+l_1489
 
 ; optimize OK (test\tools\artur\artur.pas), line = 578
 
-	lda P1X
-	sta DRAWSELECTION.PC1X
-	lda P1Y
-	sta DRAWSELECTION.PC1Y
-	lda CURSORX
-	sta DRAWSELECTION.PC2X
 	lda CURSORY
 	sta DRAWSELECTION.PC2Y
+	lda CURSORX
+	sta DRAWSELECTION.PC2X
+	lda P1Y
+	sta DRAWSELECTION.PC1Y
+	lda P1X
+	sta DRAWSELECTION.PC1X
 	jsr DRAWSELECTION
 
 ; optimize OK (test\tools\artur\artur.pas), line = 579
 
 	lda #$01
 	sta SELECTIONMODE
-l_1473
-l_1448
-l_1429
+l_1494
+l_1469
+l_144A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 583
 
 	lda SELECTIONMODE
-	jne l_1497
-	lda CURSORX
-	sta XORCURSOR.X
+	jne l_14B8
 	lda CURSORY
 	sta XORCURSOR.Y
+	lda CURSORX
+	sta XORCURSOR.X
 	jsr XORCURSOR
-l_1497
+l_14B8
 
 ; optimize FAIL ('READCURSORCHAR', test\tools\artur\artur.pas), line = 584
 
@@ -5146,9 +5392,9 @@ l_1497
 
 ; ------------------------------------------------------------
 
-DX	= DATAORIGIN+$0A83
-DY	= DATAORIGIN+$0A84
-SELECTIONMODE	= DATAORIGIN+$0A85
+DX	= DATAORIGIN+$0A86
+DY	= DATAORIGIN+$0A87
+SELECTIONMODE	= DATAORIGIN+$0A88
 
 @VarData	= DX
 @VarDataSize	= 3
@@ -5179,10 +5425,10 @@ SELECTIONMODE	= DATAORIGIN+$0A85
 
 ; optimize OK (test\tools\artur\artur.pas), line = 593
 
-	lda CURSORX
-	sta XORCURSOR.X
 	lda CURSORY
 	sta XORCURSOR.Y
+	lda CURSORX
+	sta XORCURSOR.X
 	jsr XORCURSOR
 @exit
 	.ifdef @new
@@ -5204,56 +5450,56 @@ SELECTIONMODE	= DATAORIGIN+$0A85
 	lda #$06
 	add OFFSET
 	cmp KEY
-	jne l_14D7
-	lda #$FF
-	sta MOVECURSOR.DX
+	jne l_14F8
 	lda #$00
 	sta MOVECURSOR.DY
+	lda #$FF
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_14D7
+l_14F8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 599
 
 	lda #$07
 	add OFFSET
 	cmp KEY
-	jne l_14F5
-	lda #$01
-	sta MOVECURSOR.DX
+	jne l_1516
 	lda #$00
 	sta MOVECURSOR.DY
+	lda #$01
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_14F5
+l_1516
 
 ; optimize OK (test\tools\artur\artur.pas), line = 600
 
 	lda #$0E
 	add OFFSET
 	cmp KEY
-	jne l_1513
-	lda #$00
-	sta MOVECURSOR.DX
+	jne l_1534
 	lda #$FF
 	sta MOVECURSOR.DY
+	lda #$00
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_1513
+l_1534
 
 ; optimize OK (test\tools\artur\artur.pas), line = 601
 
 	lda #$0F
 	add OFFSET
 	cmp KEY
-	jne l_1531
-	lda #$00
-	sta MOVECURSOR.DX
+	jne l_1552
 	lda #$01
 	sta MOVECURSOR.DY
+	lda #$00
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_1531
+l_1552
 
 ; ------------------------------------------------------------
 
-OFFSET	= DATAORIGIN+$0A86
+OFFSET	= DATAORIGIN+$0A89
 
 @VarData	= OFFSET
 @VarDataSize	= 1
@@ -5286,27 +5532,27 @@ OFFSET	= DATAORIGIN+$0A86
 
 ; optimize OK (test\tools\artur\artur.pas), line = 614
 
-	lda adr.S+$00
-	sta SYSTEM.MOVE_045A.COUNT
 	lda <adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE
+	sta SYSTEM.MOVE_045D.SOURCE
 	lda >adr.S+$01
-	sta SYSTEM.MOVE_045A.SOURCE+1
-	lda CARRET
-	sta SYSTEM.MOVE_045A.DEST
-	lda CARRET+1
-	sta SYSTEM.MOVE_045A.DEST+1
+	sta SYSTEM.MOVE_045D.SOURCE+1
+	lda adr.S+$00
+	sta SYSTEM.MOVE_045D.COUNT
 	lda #$00
-	sta SYSTEM.MOVE_045A.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_045A
+	sta SYSTEM.MOVE_045D.COUNT+1
+	lda CARRET
+	sta SYSTEM.MOVE_045D.DEST
+	lda CARRET+1
+	sta SYSTEM.MOVE_045D.DEST+1
+	.local +MAIN.SYSTEM.MOVE_045D
 	m@INLINE
 	.endl
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0A87
-Y	= DATAORIGIN+$0A88
-CARRET	= DATAORIGIN+$0A89
+X	= DATAORIGIN+$0A8A
+Y	= DATAORIGIN+$0A8B
+CARRET	= DATAORIGIN+$0A8C
 
 @VarData	= X
 @VarDataSize	= 4
@@ -5332,25 +5578,25 @@ CARRET	= DATAORIGIN+$0A89
 
 ; optimize OK (test\tools\artur\artur.pas), line = 621
 
-	lda X
-	sta B_CRT.CRT_GOTOXY.X
 	lda Y
 	sta B_CRT.CRT_GOTOXY.Y
+	lda X
+	sta B_CRT.CRT_GOTOXY.X
 	jsr B_CRT.CRT_GOTOXY
 
-; optimize FAIL ('B_CRT.CRT_WRITE_0604', test\tools\artur\artur.pas), line = 622
+; optimize FAIL ('B_CRT.CRT_WRITE_060C', test\tools\artur\artur.pas), line = 622
 
 	inx
 	mva #$00 :STACKORIGIN,x
 	mva #$21 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.CRT_WRITE_0604
+	jsr B_CRT.CRT_WRITE_060C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 623
 
-	lda X
-	sta XORCURSOR.X
 	lda Y
 	sta XORCURSOR.Y
+	lda X
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 624
@@ -5364,50 +5610,49 @@ CARRET	= DATAORIGIN+$0A89
 
 ; optimize OK (test\tools\artur\artur.pas), line = 625
 
-	lda X
-	sta B_CRT.CRT_GOTOXY.X
 	lda Y
 	sta B_CRT.CRT_GOTOXY.Y
+	lda X
+	sta B_CRT.CRT_GOTOXY.X
 	jsr B_CRT.CRT_GOTOXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 626
 
 	lda #$02
-	jsr B_CRT.CRT_READSTRINGI_0699
-	inx
-	lda B_CRT.CRT_READSTRINGI_0699.RESULT
+	jsr B_CRT.CRT_READSTRINGI_06AD
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.CRT_READSTRINGI_0699.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 627
 
-	lda <I
-	sta PARSEHEX.I
-	lda >I
-	sta PARSEHEX.I+1
 	lda <ERR
 	sta PARSEHEX.ERR
 	lda >ERR
 	sta PARSEHEX.ERR+1
+	lda <I
+	sta PARSEHEX.I
+	lda >I
+	sta PARSEHEX.I+1
 	jsr PARSEHEX
 
 ; optimize OK (test\tools\artur\artur.pas), line = 628
 
 	lda ERR
-	jne l_1598
+	jne l_15B9
 	lda I
 	sta RESULT
-l_1598
+l_15B9
 
 ; optimize OK (test\tools\artur\artur.pas), line = 629
 
-	lda X
-	sta XORCURSOR.X
 	lda Y
 	sta XORCURSOR.Y
+	lda X
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 630
@@ -5422,15 +5667,31 @@ l_1598
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0A8B
-Y	= DATAORIGIN+$0A8C
-DEFAULT	= DATAORIGIN+$0A8D
-RESULT	= DATAORIGIN+$0A8E
-ERR	= DATAORIGIN+$0A8F
-I	= DATAORIGIN+$0A90
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+X	= DATAORIGIN+$0A8E
+Y	= DATAORIGIN+$0A8F
+DEFAULT	= DATAORIGIN+$0A90
+RESULT	= DATAORIGIN+$0A91
+ERR	= DATAORIGIN+$0A92
+I	= DATAORIGIN+$0A93
 
 @VarData	= X
-@VarDataSize	= 5
+@VarDataSize	= 6
 
 	rts						; ret
 .endl
@@ -5439,16 +5700,16 @@ I	= DATAORIGIN+$0A90
 
 ; optimize OK (test\tools\artur\artur.pas), line = 639
 
-	lda X
-	sta DRAWRECT.X
-	lda Y
-	sta DRAWRECT.Y
-	lda #$17
-	sta DRAWRECT.W
-	lda #$06
-	sta DRAWRECT.H
 	lda #$00
 	sta DRAWRECT.C
+	lda #$06
+	sta DRAWRECT.H
+	lda #$17
+	sta DRAWRECT.W
+	lda Y
+	sta DRAWRECT.Y
+	lda X
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-16
 	mva:rne CODEORIGIN+$0104+16-256,y adr.S+16-256,y+
@@ -5461,10 +5722,10 @@ I	= DATAORIGIN+$0A90
 
 ; optimize OK (test\tools\artur\artur.pas), line = 642
 
-	lda X
-	sta WRITESXY.X
 	lda Y
 	sta WRITESXY.Y
+	lda X
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 643
@@ -5477,30 +5738,31 @@ I	= DATAORIGIN+$0A90
 	lda X
 	sta I
 	add #$0D
-	sta @FORTMP_15EA_0
+	sta :@FORTMP?160E_0
 
-l_15ED
+l_1611
 ; --- ForToDoCondition
-	lda @FORTMP_15EA_0:#$00
+.def :@FORTMP?160E_0 = *+1
+	lda #$00
 	cmp I
-	jcc l_15FB
-	lda I
-	sta XORCURSOR.X
+	jcc l_161F
 	lda Y
 	sta XORCURSOR.Y
+	lda I
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; --- ForToDoEpilog
 	inc I
-	jne l_15ED
-l_15FB
+	jne l_1611
+l_161F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 645
 
-	lda X
-	sta B_CRT.CRT_GOTOXY.X
 	lda Y
 	sta B_CRT.CRT_GOTOXY.Y
+	lda X
+	sta B_CRT.CRT_GOTOXY.X
 	jsr B_CRT.CRT_GOTOXY
 	ldy #256-13
 	mva:rne CODEORIGIN+$0115+13-256,y adr.S+13-256,y+
@@ -5508,11 +5770,10 @@ l_15FB
 ; optimize OK (test\tools\artur\artur.pas), line = 647
 
 	lda #$0C
-	jsr B_CRT.CRT_READSTRING_0758
-	inx
-	lda B_CRT.CRT_READSTRING_0758.RESULT
+	jsr B_CRT.CRT_READSTRING_076E
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.CRT_READSTRING_0758.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
@@ -5522,23 +5783,24 @@ l_15FB
 	lda X
 	sta I
 	add #$0D
-	sta @FORTMP_161E_0
+	sta :@FORTMP?1642_0
 
-l_1621
+l_1645
 ; --- ForToDoCondition
-	lda @FORTMP_161E_0:#$00
+.def :@FORTMP?1642_0 = *+1
+	lda #$00
 	cmp I
-	jcc l_162F
-	lda I
-	sta XORCURSOR.X
+	jcc l_1653
 	lda Y
 	sta XORCURSOR.Y
+	lda I
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; --- ForToDoEpilog
 	inc I
-	jne l_1621
-l_162F
+	jne l_1645
+l_1653
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 649
 
@@ -5546,22 +5808,21 @@ l_162F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 650
 
-	lda X
-	sta B_CRT.CRT_GOTOXY.X
 	lda Y
 	sta B_CRT.CRT_GOTOXY.Y
+	lda X
+	sta B_CRT.CRT_GOTOXY.X
 	jsr B_CRT.CRT_GOTOXY
 
 ; optimize FAIL ('CRT.KEYPRESSED', test\tools\artur\artur.pas), line = 651
 
 	jsr CRT.KEYPRESSED
-	lda CRT.KEYPRESSED.RESULT
-	jeq l_1650
-	jsr CRT.READKEY
-	inx
-	mva CRT.READKEY.RESULT :STACKORIGIN,x
 	dex
-l_1650
+	lda :STACKORIGIN+1,x
+	jeq l_1674
+	jsr CRT.READKEY
+	dex
+l_1674
 
 ; optimize OK (test\tools\artur\artur.pas), line = 652
 
@@ -5570,10 +5831,9 @@ l_1650
 	lda S+1
 	sta SYSUTILS.ANSIUPPERCASE.A+1
 	jsr SYSUTILS.ANSIUPPERCASE
-	inx
-	lda SYSUTILS.ANSIUPPERCASE.RESULT
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda SYSUTILS.ANSIUPPERCASE.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
@@ -5584,11 +5844,13 @@ l_1650
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0A91
-Y	= DATAORIGIN+$0A92
+X	= DATAORIGIN+$0A94
+Y	= DATAORIGIN+$0A95
 FIL_W	= $17
 FIL_H	= $06
-I	= DATAORIGIN+$0A93
+I	= DATAORIGIN+$0A96
+@FORTMP_160E	= $00
+@FORTMP_1642	= $00
 
 @VarData	= X
 @VarDataSize	= 3
@@ -5610,6 +5872,7 @@ I	= DATAORIGIN+$0A93
 
 ; optimize OK (test\tools\artur\artur.pas), line = 658
 
+	lda TOOL
 	sta DRAWTOOL
 
 ; optimize FAIL ('SHOWMENUBAR', test\tools\artur\artur.pas), line = 659
@@ -5627,7 +5890,7 @@ I	= DATAORIGIN+$0A93
 
 ; ------------------------------------------------------------
 
-TOOL	= DATAORIGIN+$0A96
+TOOL	= DATAORIGIN+$0A99
 
 @VarData	= TOOL
 @VarDataSize	= 1
@@ -5654,10 +5917,10 @@ TOOL	= DATAORIGIN+$0A96
 
 	lda MODE
 	cmp #$03
-	jne l_1682
+	jne l_16A6
 	lda #$00
 	sta MODE
-l_1682
+l_16A6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 668
 
@@ -5731,32 +5994,32 @@ l_1682
 ; optimize OK (test\tools\artur\artur.pas), line = 686
 
 	lda #$00
-	sta MOVECURSOR.DX
 	sta MOVECURSOR.DY
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 687
 
 	lda P2X
 	cmp #$FF
-	jeq l_16B9
-	lda P1X
-	sta DRAWSELECTION.PC1X
-	lda P1Y
-	sta DRAWSELECTION.PC1Y
-	lda P2X
-	sta DRAWSELECTION.PC2X
+	jeq l_16DD
 	lda P2Y
 	sta DRAWSELECTION.PC2Y
+	lda P2X
+	sta DRAWSELECTION.PC2X
+	lda P1Y
+	sta DRAWSELECTION.PC1Y
+	lda P1X
+	sta DRAWSELECTION.PC1X
 	jsr DRAWSELECTION
-l_16B9
+l_16DD
 
 ; optimize OK (test\tools\artur\artur.pas), line = 688
 
-	lda CURSORX
-	sta XORCURSOR.X
 	lda CURSORY
 	sta XORCURSOR.Y
+	lda CURSORX
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 689
@@ -5790,10 +6053,10 @@ l_16B9
 
 	lda BRUSHINDEX
 	cmp #$12
-	jcc l_16F2
+	jcc l_1716
 	lda #$00
 	sta BRUSHINDEX
-l_16F2
+l_1716
 
 ; optimize OK (test\tools\artur\artur.pas), line = 702
 
@@ -5821,10 +6084,10 @@ l_16F2
 ; optimize OK (test\tools\artur\artur.pas), line = 708
 
 	lda BRUSHINDEX
-	jne l_1719
+	jne l_173D
 	lda #$12
 	sta BRUSHINDEX
-l_1719
+l_173D
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 709
 
@@ -5871,15 +6134,15 @@ l_1719
 	sta adr.BRUSHHISTORY,y
 
 ; --- RepeatUntilProlog
-l_1749
+l_176D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 721
 
 	lda PREV
 	cmp C
-	jne l_175D
+	jne l_1781
 	jmp @exit					; exit
-l_175D
+l_1781
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 722
 
@@ -5905,13 +6168,13 @@ l_175D
 
 	lda I
 	cmp #$12
-	jcc l_1749
+	jcc l_176D
 
 ; ------------------------------------------------------------
 
-C	= DATAORIGIN+$0A97
-I	= DATAORIGIN+$0A98
-PREV	= DATAORIGIN+$0A99
+C	= DATAORIGIN+$0A9A
+I	= DATAORIGIN+$0A9B
+PREV	= DATAORIGIN+$0A9C
 
 @VarData	= C
 @VarDataSize	= 3
@@ -5933,10 +6196,11 @@ PREV	= DATAORIGIN+$0A99
 
 ; optimize OK (test\tools\artur\artur.pas), line = 731
 
+	lda C
 	cmp adr.BRUSHHISTORY+$00
-	jne l_17A2
+	jne l_17C6
 	jmp @exit					; exit
-l_17A2
+l_17C6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 732
 
@@ -5963,7 +6227,7 @@ l_17A2
 
 ; ------------------------------------------------------------
 
-C	= DATAORIGIN+$0A9A
+C	= DATAORIGIN+$0A9D
 
 @VarData	= C
 @VarDataSize	= 1
@@ -6018,18 +6282,19 @@ C	= DATAORIGIN+$0A9A
 	mwy KEYCHARS :bp2
 	ldy KEY
 	lda (:bp2),y
-	jsr B_CRT.ATASCII2ANTIC_0541
-	lda B_CRT.ATASCII2ANTIC_0541.RESULT
+	jsr B_CRT.ATASCII2ANTIC_053F
+	lda :STACKORIGIN,x
 	sta B
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 749
 
 	lda INVERT
-	jeq l_17E0
+	jeq l_1804
 	lda B
 	eor #$80
 	sta B
-l_17E0
+l_1804
 
 ; optimize OK (test\tools\artur\artur.pas), line = 750
 
@@ -6062,10 +6327,10 @@ l_17E0
 ; optimize OK (test\tools\artur\artur.pas), line = 757
 
 	lda INVERT
-	jeq l_180D
+	jeq l_1831
 	lda #$80
 	sta BRUSH
-l_180D
+l_1831
 
 ; optimize OK (test\tools\artur\artur.pas), line = 758
 
@@ -6099,16 +6364,16 @@ l_180D
 
 .local	BRUSHSELECTOR					; FUNCTION
 
-	jmp l_1825
+	jmp l_1849
 
 .local	UPDATEBRUSHCURSOR				; PROCEDURE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 777
 
-	lda CX
-	sta XORCURSOR.X
 	lda CY
 	sta XORCURSOR.Y
+	lda CX
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 778
@@ -6130,10 +6395,9 @@ l_180D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 780
 
+	sta XORCURSOR.Y
 	lda CX
 	sta XORCURSOR.X
-	lda CY
-	sta XORCURSOR.Y
 	jsr XORCURSOR
 @exit
 	.ifdef @new
@@ -6146,7 +6410,7 @@ l_180D
 	rts						; ret
 	eif
 .endl
-l_1825
+l_1849
 
 ; optimize FAIL ('ERASEALLCURSORS', test\tools\artur\artur.pas), line = 784
 
@@ -6172,26 +6436,26 @@ l_1825
 
 ; optimize OK (test\tools\artur\artur.pas), line = 789
 
-	lda #$0B
-	sta DRAWRECT.X
-	lda #$02
-	sta DRAWRECT.Y
-	lda #$12
-	sta DRAWRECT.W
-	lda #$14
-	sta DRAWRECT.H
 	lda #$80
 	sta DRAWRECT.C
+	lda #$14
+	sta DRAWRECT.H
+	lda #$12
+	sta DRAWRECT.W
+	lda #$02
+	sta DRAWRECT.Y
+	lda #$0B
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-13
 	mva:rne CODEORIGIN+$0123+13-256,y adr.S+13-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 791
 
-	lda #$0C
-	sta WRITESXY.X
 	lda #$03
 	sta WRITESXY.Y
+	lda #$0C
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 794
@@ -6209,7 +6473,7 @@ l_1825
 	sta B
 
 ; --- RepeatUntilProlog
-l_188D
+l_18B1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 797
 
@@ -6233,18 +6497,18 @@ l_188D
 
 	lda B
 	and #$0F
-	jne l_18B1
+	jne l_18D5
 	lda VRAM
 	add #$18
 	sta VRAM
 	scc
 	inc VRAM+1
-l_18B1
+l_18D5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 801
 
 	lda B
-	jne l_188D
+	jne l_18B1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 803
 
@@ -6269,10 +6533,9 @@ l_18B1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 806
 
+	sta XORCURSOR.Y
 	lda CX
 	sta XORCURSOR.X
-	lda CY
-	sta XORCURSOR.Y
 	jsr XORCURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 808
@@ -6281,7 +6544,7 @@ l_18B1
 	sta DONE
 
 ; --- RepeatUntilProlog
-l_18F8
+l_191C
 
 ; optimize FAIL ('READJOYSTICK', test\tools\artur\artur.pas), line = 811
 
@@ -6290,44 +6553,47 @@ l_18F8
 ; optimize OK (test\tools\artur\artur.pas), line = 813
 
 	lda KEYREPEATCOUNTER
-	jne l_190B
+	jne l_192F
 
 ; optimize FAIL ('CRT.KEYPRESSED', test\tools\artur\artur.pas), line = 814
 
 	jsr CRT.KEYPRESSED
-	lda CRT.KEYPRESSED.RESULT
-	jeq l_1916
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_193A
 
 ; optimize FAIL ('CRT.READKEY', test\tools\artur\artur.pas), line = 815
 
 	jsr CRT.READKEY
-	lda CRT.READKEY.RESULT
+	lda :STACKORIGIN,x
 	sta C
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 816
 
+	lda C
 	cmp #$1B
-	jne l_192D
+	jne l_1951
 	lda #$01
 	sta DONE
-l_192D
+l_1951
 
 ; optimize OK (test\tools\artur\artur.pas), line = 817
 
 	lda ATARI.KBCODE
 	cmp #$0C
-	jeq l_1952x
+	jeq l_1976x
 	cmp #$3C
-	jne l_1952
-l_1952x
+	jne l_1976
+l_1976x
 
 ; optimize OK (test\tools\artur\artur.pas), line = 818
 
 	lda CBRUSH
-	jpl l_1965
+	jpl l_1989
 	lda #$01
 	sta INVERT
-l_1965
+l_1989
 
 ; optimize OK (test\tools\artur\artur.pas), line = 819
 
@@ -6343,7 +6609,7 @@ l_1965
 
 	lda #$01
 	sta DONE
-l_1952
+l_1976
 
 ; optimize OK (test\tools\artur\artur.pas), line = 823
 
@@ -6354,7 +6620,7 @@ l_1952
 
 	lda ATARI.KBCODE
 	cmp #$21
-	jne l_1992
+	jne l_19B6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 825
 
@@ -6365,7 +6631,7 @@ l_1952
 
 	lda #$01
 	sta MOVED
-l_1992
+l_19B6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 828
 
@@ -6375,17 +6641,17 @@ l_1992
 ; optimize OK (test\tools\artur\artur.pas), line = 829
 
 	lda CONFIG.ARROWSRAW
-	jeq l_19AD
+	jeq l_19D1
 	lda #$00
 	sta KOFFSET
-l_19AD
+l_19D1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 830
 
 	lda #$06
 	add KOFFSET
 	cmp ATARI.KBCODE
-	jne l_19CC
+	jne l_19F0
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 831
 
@@ -6395,14 +6661,14 @@ l_19AD
 
 	lda #$01
 	sta MOVED
-l_19CC
+l_19F0
 
 ; optimize OK (test\tools\artur\artur.pas), line = 834
 
 	lda #$07
 	add KOFFSET
 	cmp ATARI.KBCODE
-	jne l_19EF
+	jne l_1A13
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 835
 
@@ -6412,14 +6678,14 @@ l_19CC
 
 	lda #$01
 	sta MOVED
-l_19EF
+l_1A13
 
 ; optimize OK (test\tools\artur\artur.pas), line = 838
 
 	lda #$0E
 	add KOFFSET
 	cmp ATARI.KBCODE
-	jne l_1A12
+	jne l_1A36
 
 ; optimize OK (test\tools\artur\artur.pas), line = 839
 
@@ -6431,14 +6697,14 @@ l_19EF
 
 	lda #$01
 	sta MOVED
-l_1A12
+l_1A36
 
 ; optimize OK (test\tools\artur\artur.pas), line = 842
 
 	lda #$0F
 	add KOFFSET
 	cmp ATARI.KBCODE
-	jne l_1A32
+	jne l_1A56
 
 ; optimize OK (test\tools\artur\artur.pas), line = 843
 
@@ -6450,36 +6716,37 @@ l_1A12
 
 	lda #$01
 	sta MOVED
-l_1A32
+l_1A56
 
 ; optimize OK (test\tools\artur\artur.pas), line = 846
 
 	lda MOVED
-	jeq l_1A46
+	jeq l_1A6A
 
 ; optimize FAIL ('UPDATEBRUSHCURSOR', test\tools\artur\artur.pas), line = 847
 
 	jsr UPDATEBRUSHCURSOR
-	jmp l_1A51
-l_1A46
+	jmp l_1A75
+l_1A6A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 848
 
 	mwy KEYCHARS :bp2
 	ldy ATARI.KBCODE
 	lda (:bp2),y
-	jsr B_CRT.ATASCII2ANTIC_0541
-	lda B_CRT.ATASCII2ANTIC_0541.RESULT
+	jsr B_CRT.ATASCII2ANTIC_053F
+	lda :STACKORIGIN,x
 	sta B
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 849
 
 	lda INVERT
-	jeq l_1A67
+	jeq l_1A8B
 	lda B
 	eor #$80
 	sta B
-l_1A67
+l_1A8B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 850
 
@@ -6489,36 +6756,29 @@ l_1A67
 ; optimize FAIL ('SHOWSTATUS', test\tools\artur\artur.pas), line = 851
 
 	jsr SHOWSTATUS
-l_1A51
+l_1A75
 
 ; optimize OK (test\tools\artur\artur.pas), line = 853
 
 	lda #$0A
 	sta KEYREPEATCOUNTER
-l_1916
+l_193A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 856
 
 	lda JOYX
-	jne l_1A9Fx
+	jne l_1AC3x
 	lda JOYY
-	jeq l_1A9F
-l_1A9Fx
+	jeq l_1AC3
+l_1AC3x
 
 ; optimize OK (test\tools\artur\artur.pas), line = 857
 
-	lda #$10
-	sta :ecx
-	sta :ztmp8
 	lda JOYY
-	sta :eax
-	sta :ztmp10
-	.ifdef fmulinit
-	fmulu_8
-	els
-	imulCL
-	eif
-	lda :eax
+	asl @
+	asl @
+	asl @
+	asl @
 	sta JOYY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 858
@@ -6540,20 +6800,20 @@ l_1A9Fx
 
 	lda #$04
 	sta KEYREPEATCOUNTER
-l_1A9F
+l_1AC3
 
 ; optimize OK (test\tools\artur\artur.pas), line = 863
 
 	lda JOYFIRE
-	jne l_1ADB
+	jne l_1AFF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 864
 
 	lda CBRUSH
-	jpl l_1AEE
+	jpl l_1B12
 	lda #$01
 	sta INVERT
-l_1AEE
+l_1B12
 
 ; optimize OK (test\tools\artur\artur.pas), line = 865
 
@@ -6569,20 +6829,20 @@ l_1AEE
 
 	lda #$01
 	sta DONE
-l_1ADB
-l_190B
+l_1AFF
+l_192F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 873
 
 	lda DONE
-	jeq l_18F8
+	jeq l_191C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 875
 
-	lda CX
-	sta XORCURSOR.X
 	lda CY
 	sta XORCURSOR.Y
+	lda CX
+	sta XORCURSOR.X
 	jsr XORCURSOR
 
 ; optimize FAIL ('CLOSEMODAL', test\tools\artur\artur.pas), line = 876
@@ -6592,21 +6852,37 @@ l_190B
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0A9B
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0A9E
 BRS_X	= $0B
 BRS_Y	= $02
 BRS_W	= $12
 BRS_H	= $14
-VRAM	= DATAORIGIN+$0A9C
-CBRUSH	= DATAORIGIN+$0A9E
-CX	= DATAORIGIN+$0A9F
-CY	= DATAORIGIN+$0AA0
-KOFFSET	= DATAORIGIN+$0AA1
-MOVED	= DATAORIGIN+$0AA2
-DONE	= DATAORIGIN+$0AA3
+VRAM	= DATAORIGIN+$0A9F
+CBRUSH	= DATAORIGIN+$0AA1
+CX	= DATAORIGIN+$0AA2
+CY	= DATAORIGIN+$0AA3
+KOFFSET	= DATAORIGIN+$0AA4
+MOVED	= DATAORIGIN+$0AA5
+DONE	= DATAORIGIN+$0AA6
 
-@VarData	= VRAM
-@VarDataSize	= 8
+@VarData	= RESULT
+@VarDataSize	= 9
 
 	rts						; ret
 .endl
@@ -6617,33 +6893,33 @@ DONE	= DATAORIGIN+$0AA3
 
 	lda P2X
 	cmp P1X
-	jcs l_1B2E
-	lda <P1X
-	sta SWAP.A
-	lda >P1X
-	sta SWAP.A+1
+	jcs l_1B55
 	lda <P2X
 	sta SWAP.B
 	lda >P2X
 	sta SWAP.B+1
+	lda <P1X
+	sta SWAP.A
+	lda >P1X
+	sta SWAP.A+1
 	jsr SWAP
-l_1B2E
+l_1B55
 
 ; optimize OK (test\tools\artur\artur.pas), line = 887
 
 	lda P2Y
 	cmp P1Y
-	jcs l_1B48
-	lda <P1Y
-	sta SWAP.A
-	lda >P1Y
-	sta SWAP.A+1
+	jcs l_1B6F
 	lda <P2Y
 	sta SWAP.B
 	lda >P2Y
 	sta SWAP.B+1
+	lda <P1Y
+	sta SWAP.A
+	lda >P1Y
+	sta SWAP.A+1
 	jsr SWAP
-l_1B48
+l_1B6F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 888
 
@@ -6660,7 +6936,28 @@ l_1B48
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0AA4
+; Push WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+	mva RESULT+1 :STACKORIGIN+STACKWIDTH,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$0AA7
+
+@VarData	= RESULT
+@VarDataSize	= 2
+
 	rts						; ret
 .endl
 
@@ -6675,50 +6972,62 @@ RESULT	= DATAORIGIN+$0AA4
 
 	jsr SORTPOINTSANDGETCORNER
 	inx
-	lda SORTPOINTSANDGETCORNER.RESULT
+	lda :STACKORIGIN-1,x
 	sub P1X
 	sta VRAM
-	lda SORTPOINTSANDGETCORNER.RESULT+1
+	lda :STACKORIGIN-1+STACKWIDTH,x
 	sbc #$00
 	sta VRAM+1
+	dex
 	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 897
 
 	lda P1Y
 	sta Y
+	lda P2Y
+	sta :@FORTMP?1BA3_0
 
-l_1B7D
+l_1BA6
 ; --- ForToDoCondition
-	lda Y
-	cmp P2Y
-	scc
-	jne l_1B8B
+.def :@FORTMP?1BA3_0 = *+1
+	lda #$00
+	cmp Y
+	jcc l_1BB4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 898
 
 	lda P1X
 	sta X
+	lda P2X
+	sta :@FORTMP?1BBE_0
 
-l_1B98
+l_1BC1
 ; --- ForToDoCondition
-	lda X
-	cmp P2X
-	scc
-	jne l_1BA6
+.def :@FORTMP?1BBE_0 = *+1
+	lda #$00
+	cmp X
+	jcc l_1BCF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 899
 
+	lda VRAM
+	add X
+	sta :STACKORIGIN+9
+	lda VRAM+1
+	adc #$00
+	sta :bp+1
 	mwy VRAM :bp2
 	ldy X
 	lda (:bp2),y
 	eor #$80
-	sta (:bp2),y
+	ldy :STACKORIGIN+9
+	sta (:bp),y
 
 ; --- ForToDoEpilog
 	inc X
-	jne l_1B98
-l_1BA6
+	jne l_1BC1
+l_1BCF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 901
 
@@ -6730,14 +7039,16 @@ l_1BA6
 
 ; --- ForToDoEpilog
 	inc Y
-	jne l_1B7D
-l_1B8B
+	jne l_1BA6
+l_1BB4
 
 ; ------------------------------------------------------------
 
-X	= DATAORIGIN+$0AA6
-Y	= DATAORIGIN+$0AA7
-VRAM	= DATAORIGIN+$0AA8
+X	= DATAORIGIN+$0AA9
+Y	= DATAORIGIN+$0AAA
+VRAM	= DATAORIGIN+$0AAB
+@FORTMP_1BA3	= $00
+@FORTMP_1BBE	= $00
 
 @VarData	= X
 @VarDataSize	= 4
@@ -6791,10 +7102,11 @@ VRAM	= DATAORIGIN+$0AA8
 ; optimize FAIL ('SORTPOINTSANDGETCORNER', test\tools\artur\artur.pas), line = 915
 
 	jsr SORTPOINTSANDGETCORNER
-	lda SORTPOINTSANDGETCORNER.RESULT
+	lda :STACKORIGIN,x
 	sta VRAM
-	lda SORTPOINTSANDGETCORNER.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta VRAM+1
+	dex
 
 ; optimize FAIL ('CALCULATEWIDTHANDHEIGHT', test\tools\artur\artur.pas), line = 916
 
@@ -6802,21 +7114,21 @@ VRAM	= DATAORIGIN+$0AA8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 917
 
-	lda P1X
-	sta DRAWRECT.X
-	lda P1Y
-	sta DRAWRECT.Y
-	lda W
-	sta DRAWRECT.W
-	lda H
-	sta DRAWRECT.H
 	lda BRUSH
 	sta DRAWRECT.C
+	lda H
+	sta DRAWRECT.H
+	lda W
+	sta DRAWRECT.W
+	lda P1Y
+	sta DRAWRECT.Y
+	lda P1X
+	sta DRAWRECT.X
 	jsr DRAWRECT
 
 ; ------------------------------------------------------------
 
-VRAM	= DATAORIGIN+$0AAA
+VRAM	= DATAORIGIN+$0AAF
 
 @VarData	= VRAM
 @VarDataSize	= 2
@@ -6845,13 +7157,9 @@ VRAM	= DATAORIGIN+$0AAA
 
 	jsr SORTPOINTSANDGETCORNER
 	inx
-	lda SORTPOINTSANDGETCORNER.RESULT
-	sub #$00
-	sta :STACKORIGIN,x
-	lda SORTPOINTSANDGETCORNER.RESULT+1
-	sbc #$7C
-	sta :STACKORIGIN+STACKWIDTH,x
-	inx
+	mva #$00 :STACKORIGIN,x
+	mva #$7C :STACKORIGIN+STACKWIDTH,x
+	jsr subAX_CX
 	lda :STACKORIGIN-1,x
 	sta BRAM
 	lda :STACKORIGIN-1+STACKWIDTH,x
@@ -6877,22 +7185,22 @@ VRAM	= DATAORIGIN+$0AAA
 	lda CURSORX
 	add W
 	cmp #$28
-	jcc l_1C3A
+	jcc l_1C63
 	lda #$28
 	sub CURSORX
 	sta W
-l_1C3A
+l_1C63
 
 ; optimize OK (test\tools\artur\artur.pas), line = 928
 
 	lda CURSORY
 	add H
 	cmp #$18
-	jcc l_1C5F
+	jcc l_1C88
 	lda #$18
 	sub CURSORY
 	sta H
-l_1C5F
+l_1C88
 
 ; optimize FAIL ('STOREEDITINBUFFER', test\tools\artur\artur.pas), line = 929
 
@@ -6901,20 +7209,20 @@ l_1C5F
 ; optimize OK (test\tools\artur\artur.pas), line = 930
 
 	lda MOVEBLOCK
-	jeq l_1C79
+	jeq l_1CA2
 
 ; optimize OK (test\tools\artur\artur.pas), line = 931
 
-	lda P1X
-	sta DRAWRECT.X
-	lda P1Y
-	sta DRAWRECT.Y
-	lda W
-	sta DRAWRECT.W
-	lda H
-	sta DRAWRECT.H
 	lda #$00
 	sta DRAWRECT.C
+	lda H
+	sta DRAWRECT.H
+	lda W
+	sta DRAWRECT.W
+	lda P1Y
+	sta DRAWRECT.Y
+	lda P1X
+	sta DRAWRECT.X
 	jsr DRAWRECT
 
 ; optimize OK (test\tools\artur\artur.pas), line = 932
@@ -6943,43 +7251,42 @@ l_1C5F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 936
 
-	lda P1X
-	sta DRAWSELECTION.PC1X
-	lda P1Y
-	sta DRAWSELECTION.PC1Y
+	sta DRAWSELECTION.PC2Y
 	lda P2X
 	sta DRAWSELECTION.PC2X
-	lda P2Y
-	sta DRAWSELECTION.PC2Y
+	lda P1Y
+	sta DRAWSELECTION.PC1Y
+	lda P1X
+	sta DRAWSELECTION.PC1X
 	jsr DRAWSELECTION
 
 ; optimize OK (test\tools\artur\artur.pas), line = 937
 
-	lda CURSORX
-	sta XORCURSOR.X
 	lda CURSORY
 	sta XORCURSOR.Y
+	lda CURSORX
+	sta XORCURSOR.X
 	jsr XORCURSOR
-l_1C79
+l_1CA2
 
 ; --- RepeatUntilProlog
-l_1CCB
+l_1CF4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 940
 
-	lda BRAM
-	sta SYSTEM.MOVE_0458.SOURCE
-	lda BRAM+1
-	sta SYSTEM.MOVE_0458.SOURCE+1
-	lda VRAM
-	sta SYSTEM.MOVE_0458.DEST
-	lda VRAM+1
-	sta SYSTEM.MOVE_0458.DEST+1
 	lda W
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$00
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda VRAM
+	sta SYSTEM.MOVE_045B.DEST
+	lda VRAM+1
+	sta SYSTEM.MOVE_045B.DEST+1
+	lda BRAM
+	sta SYSTEM.MOVE_045B.SOURCE
+	lda BRAM+1
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 
@@ -7003,18 +7310,18 @@ l_1CCB
 
 	lda VRAM+1
 	cmp #$7F
-	bne @+
+	jcc l_1D0F\ bne @+
 	lda VRAM
 	cmp #$C0
+	jcc l_1D0F
 @
-	jcc l_1CE6
 	lda VRAM
 	sub #$C0
 	sta VRAM
 	lda VRAM+1
 	sbc #$03
 	sta VRAM+1
-l_1CE6
+l_1D0F
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 944
 
@@ -7022,13 +7329,13 @@ l_1CE6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 945
 
-	jne l_1CCB
+	jne l_1CF4
 
 ; ------------------------------------------------------------
 
-MOVEBLOCK	= DATAORIGIN+$0AAC
-VRAM	= DATAORIGIN+$0AAD
-BRAM	= DATAORIGIN+$0AAF
+MOVEBLOCK	= DATAORIGIN+$0AB1
+VRAM	= DATAORIGIN+$0AB2
+BRAM	= DATAORIGIN+$0AB4
 
 @VarData	= MOVEBLOCK
 @VarDataSize	= 5
@@ -7055,10 +7362,11 @@ BRAM	= DATAORIGIN+$0AAF
 ; optimize FAIL ('SORTPOINTSANDGETCORNER', test\tools\artur\artur.pas), line = 952
 
 	jsr SORTPOINTSANDGETCORNER
-	lda SORTPOINTSANDGETCORNER.RESULT
+	lda :STACKORIGIN,x
 	sta VRAM
-	lda SORTPOINTSANDGETCORNER.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta VRAM+1
+	dex
 
 ; optimize FAIL ('CALCULATEWIDTHANDHEIGHT', test\tools\artur\artur.pas), line = 953
 
@@ -7066,17 +7374,17 @@ BRAM	= DATAORIGIN+$0AAF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 954
 
-	lda VRAM
-	sta SYSTEM.FILLBYTE.A
-	lda VRAM+1
-	sta SYSTEM.FILLBYTE.A+1
-	lda W
-	sta SYSTEM.FILLBYTE.COUNT
-	lda #$00
-	sta SYSTEM.FILLBYTE.COUNT+1
 	lda BRUSH
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.VALUE
+	lda W
+	sta SYSTEM.FILLBYTE_045A.COUNT
+	lda #$00
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
+	lda VRAM
+	sta SYSTEM.FILLBYTE_045A.A
+	lda VRAM+1
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 
@@ -7085,8 +7393,8 @@ BRAM	= DATAORIGIN+$0AAF
 	dec H
 
 ; --- WhileProlog
-	jmp l_1D15
-l_1D16
+	jmp l_1D3E
+l_1D3F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 957
 
@@ -7122,32 +7430,32 @@ l_1D16
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 960
 
 	dec H
-l_1D15
+l_1D3E
 
 ; optimize OK (test\tools\artur\artur.pas), line = 956
 
 	lda H
-	jne l_1D16
+	jne l_1D3F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 962
 
-	lda VRAM
-	sta SYSTEM.FILLBYTE.A
-	lda VRAM+1
-	sta SYSTEM.FILLBYTE.A+1
-	lda W
-	sta SYSTEM.FILLBYTE.COUNT
-	lda #$00
-	sta SYSTEM.FILLBYTE.COUNT+1
 	lda BRUSH
-	sta SYSTEM.FILLBYTE.VALUE
-	.local +MAIN.SYSTEM.FILLBYTE
+	sta SYSTEM.FILLBYTE_045A.VALUE
+	lda W
+	sta SYSTEM.FILLBYTE_045A.COUNT
+	lda #$00
+	sta SYSTEM.FILLBYTE_045A.COUNT+1
+	lda VRAM
+	sta SYSTEM.FILLBYTE_045A.A
+	lda VRAM+1
+	sta SYSTEM.FILLBYTE_045A.A+1
+	.local +MAIN.SYSTEM.FILLBYTE_045A
 	m@INLINE
 	.endl
 
 ; ------------------------------------------------------------
 
-VRAM	= DATAORIGIN+$0AB1
+VRAM	= DATAORIGIN+$0AB6
 
 @VarData	= VRAM
 @VarDataSize	= 2
@@ -7173,53 +7481,53 @@ VRAM	= DATAORIGIN+$0AB1
 	lda SYSTEM.IORESULT
 	sta @CASETMP_0006
 	cmp #$85
-	jne l_1D55
+	jne l_1D7E
 @
 	ldy #256-14
 	mva:rne CODEORIGIN+$0131+14-256,y adr.S+14-256,y+
 
 	jmp a_0006
-l_1D55
+l_1D7E
 	cmp #$88
 	beq @+
 	cmp #$8B
-	jne l_1D60
+	jne l_1D89
 @
 	ldy #256-14
 	mva:rne CODEORIGIN+$0140+14-256,y adr.S+14-256,y+
 
 	jmp a_0006
-l_1D60
+l_1D89
 	cmp #$A8
-	jne l_1D69
+	jne l_1D92
 @
 	ldy #256-14
 	mva:rne CODEORIGIN+$0140+14-256,y adr.S+14-256,y+
 
 	jmp a_0006
-l_1D69
+l_1D92
 	cmp #$01
 	beq @+
 	cmp #$03
-	jne l_1D74
+	jne l_1D9D
 @
 	ldy #256-9
 	mva:rne CODEORIGIN+$014F+9-256,y adr.S+9-256,y+
 
-l_1D74
+l_1D9D
 a_0006
 
-; optimize FAIL ('B_CRT.CRT_WRITE_0604', test\tools\artur\artur.pas), line = 982
+; optimize FAIL ('B_CRT.CRT_WRITE_060C', test\tools\artur\artur.pas), line = 982
 
 	inx
 	mva S :STACKORIGIN,x
 	mva S+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.CRT_WRITE_0604
+	jsr B_CRT.CRT_WRITE_060C
 
 ; optimize FAIL ('CRT.READKEY', test\tools\artur\artur.pas), line = 983
 
 	jsr CRT.READKEY
-	mva CRT.READKEY.RESULT :STACKORIGIN+1,x
+	dex
 ; CloseFile
 
 	txa:pha
@@ -7229,7 +7537,7 @@ a_0006
 
 ; ------------------------------------------------------------
 
-@CASETMP_0006	= DATAORIGIN+$0AB3
+@CASETMP_0006	= DATAORIGIN+$0AB8
 
 @VarData	= @CASETMP_0006
 @VarDataSize	= 1
@@ -7284,10 +7592,10 @@ a_0006
 
 	mwy AFILE :bp2
 	ldy #s@file.buffer
-	lda <BUF
+	lda BUF
 	sta (:bp2),y
 	iny
-	lda >BUF
+	lda BUF+1
 	sta (:bp2),y
 	ldy #s@file.nrecord
 	lda SIZE
@@ -7307,8 +7615,8 @@ a_0006
 
 ; ------------------------------------------------------------
 
-BUF	= DATAORIGIN+$0AB4
-SIZE	= DATAORIGIN+$0AB6
+BUF	= DATAORIGIN+$0AB9
+SIZE	= DATAORIGIN+$0ABB
 
 @VarData	= BUF
 @VarDataSize	= 4
@@ -7363,10 +7671,10 @@ SIZE	= DATAORIGIN+$0AB6
 
 	mwy AFILE :bp2
 	ldy #s@file.buffer
-	lda <BUF
+	lda BUF
 	sta (:bp2),y
 	iny
-	lda >BUF
+	lda BUF+1
 	sta (:bp2),y
 	ldy #s@file.nrecord
 	lda SIZE
@@ -7386,8 +7694,8 @@ SIZE	= DATAORIGIN+$0AB6
 
 ; ------------------------------------------------------------
 
-BUF	= DATAORIGIN+$0AB8
-SIZE	= DATAORIGIN+$0ABA
+BUF	= DATAORIGIN+$0ABD
+SIZE	= DATAORIGIN+$0ABF
 
 @VarData	= BUF
 @VarDataSize	= 4
@@ -7420,8 +7728,9 @@ SIZE	= DATAORIGIN+$0ABA
 	lda S+1
 	sta SYSUTILS.FILEEXISTS.NAME+1
 	jsr SYSUTILS.FILEEXISTS
-	lda SYSUTILS.FILEEXISTS.RESULT
-	jeq l_1DC7
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_1DF2
 ; AssignFile
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1008
@@ -7482,7 +7791,7 @@ SIZE	= DATAORIGIN+$0ABA
 	@closefile AFILE
 	pla:tax
 
-l_1DC7
+l_1DF2
 @exit
 	.ifdef @new
 	lda <@VarData
@@ -7506,14 +7815,14 @@ l_1DC7
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1019
 
-	lda CONFIG
-	sta SAVEDATA.BUF
-	lda CONFIG+1
-	sta SAVEDATA.BUF+1
 	lda #$04
 	sta SAVEDATA.SIZE
 	lda #$00
 	sta SAVEDATA.SIZE+1
+	lda CONFIG
+	sta SAVEDATA.BUF
+	lda CONFIG+1
+	sta SAVEDATA.BUF+1
 	jsr SAVEDATA
 @exit
 	.ifdef @new
@@ -7535,50 +7844,50 @@ l_1DC7
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1032
 
-	lda #$05
-	sta DRAWRECT.X
-	lda #$02
-	sta DRAWRECT.Y
-	lda #$1E
-	sta DRAWRECT.W
-	lda #$0C
-	sta DRAWRECT.H
 	lda #$80
 	sta DRAWRECT.C
+	lda #$0C
+	sta DRAWRECT.H
+	lda #$1E
+	sta DRAWRECT.W
+	lda #$02
+	sta DRAWRECT.Y
+	lda #$05
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-18
 	mva:rne CODEORIGIN+$0167+18-256,y adr.S+18-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1034
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$03
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-29
 	mva:rne CODEORIGIN+$017A+29-256,y adr.S+29-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1036
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$04
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1037
 
 	lda #$06
-	sta B_CRT.CRT_GOTOXY.X
 	sta B_CRT.CRT_GOTOXY.Y
+	sta B_CRT.CRT_GOTOXY.X
 	jsr B_CRT.CRT_GOTOXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1038
 
 	lda #$06
-	sta GETFILENAME.X
 	sta GETFILENAME.Y
+	sta GETFILENAME.X
 	jsr GETFILENAME
 ; AssignFile
 
@@ -7614,12 +7923,13 @@ l_1DC7
 
 	jsr SORTPOINTSANDGETCORNER
 	inx
-	lda SORTPOINTSANDGETCORNER.RESULT
+	lda :STACKORIGIN-1,x
 	sub #$00
 	sta PTR
-	lda SORTPOINTSANDGETCORNER.RESULT+1
+	lda :STACKORIGIN-1+STACKWIDTH,x
 	sbc #$7C
 	sta PTR+1
+	dex
 	dex
 
 ; optimize FAIL ('CALCULATEWIDTHANDHEIGHT', test\tools\artur\artur.pas), line = 1044
@@ -7627,7 +7937,7 @@ l_1DC7
 	jsr CALCULATEWIDTHANDHEIGHT
 
 ; --- RepeatUntilProlog
-l_1E17
+l_1E42
 ; BlockWrite
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1046
@@ -7668,7 +7978,7 @@ l_1E17
 ; optimize OK (test\tools\artur\artur.pas), line = 1049
 
 	lda H
-	jne l_1E17
+	jne l_1E42
 
 ; optimize FAIL ('IOSTATUS', test\tools\artur\artur.pas), line = 1051
 
@@ -7682,7 +7992,7 @@ l_1E17
 
 adr.VRAM	= $7800
 .var VRAM	= adr.VRAM .word
-PTR	= DATAORIGIN+$0ABC
+PTR	= DATAORIGIN+$0AC1
 SVB_X	= $05
 SVB_Y	= $02
 SVB_W	= $1E
@@ -7842,132 +8152,130 @@ adr.CHARSET	= $7400
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1085
 
-	lda #$05
-	sta DRAWRECT.X
-	lda #$02
-	sta DRAWRECT.Y
-	lda #$1E
-	sta DRAWRECT.W
-	lda #$14
-	sta DRAWRECT.H
 	lda #$80
 	sta DRAWRECT.C
+	lda #$14
+	sta DRAWRECT.H
+	lda #$1E
+	sta DRAWRECT.W
+	lda #$02
+	sta DRAWRECT.Y
+	lda #$05
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-29
 	mva:rne CODEORIGIN+$0198+29-256,y adr.S+29-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1087
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$03
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1088
 
-	lda VERSION
-	sta SYSTEM.MOVE_0459.SOURCE
-	lda VERSION+1
-	sta SYSTEM.MOVE_0459.SOURCE+1
-	lda S
-	sta SYSTEM.MOVE_0459.DEST
-	lda S+1
-	sta SYSTEM.MOVE_0459.DEST+1
 	lda #$0A
-	sta SYSTEM.MOVE_0459.COUNT
+	sta SYSTEM.MOVE_045C.COUNT
 	lda #$00
-	sta SYSTEM.MOVE_0459.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0459
+	sta SYSTEM.MOVE_045C.COUNT+1
+	lda S
+	sta SYSTEM.MOVE_045C.DEST
+	lda S+1
+	sta SYSTEM.MOVE_045C.DEST+1
+	lda VERSION
+	sta SYSTEM.MOVE_045C.SOURCE
+	lda VERSION+1
+	sta SYSTEM.MOVE_045C.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045C
 	m@INLINE
 	.endl
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1089
 
-	lda #$10
-	sta WRITESXY.X
 	lda #$03
 	sta WRITESXY.Y
+	lda #$10
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-29
 	mva:rne CODEORIGIN+$017A+29-256,y adr.S+29-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1091
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$04
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-19
 	mva:rne CODEORIGIN+$01B6+19-256,y adr.S+19-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1093
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$05
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-18
 	mva:rne CODEORIGIN+$01CA+18-256,y adr.S+18-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1095
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$08
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-21
 	mva:rne CODEORIGIN+$01DD+21-256,y adr.S+21-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1097
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$0A
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-18
 	mva:rne CODEORIGIN+$01F3+18-256,y adr.S+18-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1099
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$0C
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-21
 	mva:rne CODEORIGIN+$0206+21-256,y adr.S+21-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1101
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$0E
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-14
 	mva:rne CODEORIGIN+$021C+14-256,y adr.S+14-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1104
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$14
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; --- RepeatUntilProlog
-l_1E90
+l_1EBB
 
 ; optimize FAIL ('B_CRT.CRT_HELPPRESSED', test\tools\artur\artur.pas), line = 1107
 
 	jsr B_CRT.CRT_HELPPRESSED
-	inx
-	mva B_CRT.CRT_HELPPRESSED.RESULT :STACKORIGIN,x
 	dex
 	ldy #1
 	lda KEYREPEATCOUNTER
@@ -7976,17 +8284,17 @@ l_1E90
 @
 	tya
 	and :STACKORIGIN+1,x
-	sta :STACKORIGIN+1,x
-	jeq l_1EA6
-	jmp b_1E90					; break
-l_1EA6
+	jeq l_1ED1
+	jmp b_1EBB					; break
+l_1ED1
 
 ; optimize FAIL ('CRT.KEYPRESSED', test\tools\artur\artur.pas), line = 1108
 
 	jsr CRT.KEYPRESSED
-	lda CRT.KEYPRESSED.RESULT
-	jeq l_1E90
-b_1E90
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_1EBB
+b_1EBB
 
 ; optimize FAIL ('CLOSEMODAL', test\tools\artur\artur.pas), line = 1109
 
@@ -7995,13 +8303,12 @@ b_1E90
 ; optimize FAIL ('CRT.KEYPRESSED', test\tools\artur\artur.pas), line = 1110
 
 	jsr CRT.KEYPRESSED
-	lda CRT.KEYPRESSED.RESULT
-	jeq l_1EB9
-	jsr CRT.READKEY
-	inx
-	mva CRT.READKEY.RESULT :STACKORIGIN,x
 	dex
-l_1EB9
+	lda :STACKORIGIN+1,x
+	jeq l_1EE4
+	jsr CRT.READKEY
+	dex
+l_1EE4
 
 ; ------------------------------------------------------------
 
@@ -8038,7 +8345,7 @@ HLP_H	= $14
 	sta EI
 
 ; --- RepeatUntilProlog
-l_1ECE
+l_1EF9
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1120
 
@@ -8046,10 +8353,10 @@ l_1ECE
 	ldy I
 	lda (:bp2),y
 	cmp #$0E
-	jne l_1EE3
+	jne l_1F0E
 	lda #$01
 	sta RESULT
-l_1EE3
+l_1F0E
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1121
 
@@ -8059,31 +8366,33 @@ l_1EE3
 
 	lda I
 	cmp #$0A
-	jeq l_1ECEx
+	jeq l_1EF9x
 	lda:sne RESULT
-	jmp l_1ECE
-l_1ECEx
+	jmp l_1EF9
+l_1EF9x
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1123
 
 	lda RESULT
-	jeq l_1F0D
+	jeq l_1F38
 
 ; --- RepeatUntilProlog
-l_1F0F
+l_1F3A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1125
 
 	mwy S :bp2
 	ldy I
 	lda (:bp2),y
+	sta :STACKORIGIN+9
 	mwy E :bp2
 	ldy EI
+	lda :STACKORIGIN+9
 	cmp (:bp2),y
-	jeq l_1F29
+	jeq l_1F54
 	lda #$00
 	sta RESULT
-l_1F29
+l_1F54
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1126
 
@@ -8096,37 +8405,54 @@ l_1F29
 ; optimize OK (test\tools\artur\artur.pas), line = 1128
 
 	lda RESULT
-	jeq l_1F0Fx
+	jeq l_1F3Ax
 	lda EI
 	cmp #$04
-	jne l_1F0F
-l_1F0Fx
-l_1F0D
+	jne l_1F3A
+l_1F3Ax
+l_1F38
 @exit
 
 ; ------------------------------------------------------------
 
-S	= DATAORIGIN+$0ABE
-E	= DATAORIGIN+$0AC0
-RESULT	= DATAORIGIN+$0AC2
-I	= DATAORIGIN+$0AC3
-EI	= DATAORIGIN+$0AC4
+; Push BYTE / CHAR / SHORTINT / BOOLEAN
+; as Pointer
+
+	inx
+	mva RESULT :STACKORIGIN,x
+
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	eif
+
+; ------------------------------------------------------------
+
+S	= DATAORIGIN+$0AC3
+E	= DATAORIGIN+$0AC5
+RESULT	= DATAORIGIN+$0AC7
+I	= DATAORIGIN+$0AC8
+EI	= DATAORIGIN+$0AC9
 
 @VarData	= S
-@VarDataSize	= 6
+@VarDataSize	= 7
 
 	rts						; ret
 .endl
 
 .local	SHOWIOMENU					; PROCEDURE
 
-	jmp l_1F54
+	jmp l_1F82
 
 .local	SHOWDIR						; PROCEDURE
 	sta PAGE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1150
 
+	lda PAGE
 	asl @
 	asl @
 	asl @
@@ -8135,41 +8461,42 @@ EI	= DATAORIGIN+$0AC4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1151
 
-	lda #$1A
-	sta DRAWRECT.X
-	lda #$04
-	sta DRAWRECT.Y
-	lda #$0C
-	sta DRAWRECT.W
-	lda #$10
-	sta DRAWRECT.H
 	lda #$00
 	sta DRAWRECT.C
+	lda #$10
+	sta DRAWRECT.H
+	lda #$0C
+	sta DRAWRECT.W
+	lda #$04
+	sta DRAWRECT.Y
+	lda #$1A
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-13
 	mva:rne CODEORIGIN+$022B+13-256,y adr.S+13-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1153
 
-	lda #$1A
-	sta WRITESXY.X
 	lda #$15
 	sta WRITESXY.Y
+	lda #$1A
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize FAIL ('SYSUTILS.FINDFIRST', test\tools\artur\artur.pas), line = 1154
 
 	inx
-	mva INFO :STACKORIGIN,x
-	mva INFO+1 :STACKORIGIN+STACKWIDTH,x
+	mva #$39 :STACKORIGIN,x
+	mva #$22 :STACKORIGIN+STACKWIDTH,x
 	inx
 	mva #$3F :STACKORIGIN,x
 	inx
-	mva #$39 :STACKORIGIN,x
-	mva #$22 :STACKORIGIN+STACKWIDTH,x
+	mva INFO :STACKORIGIN,x
+	mva INFO+1 :STACKORIGIN+STACKWIDTH,x
 	jsr SYSUTILS.FINDFIRST
-	lda SYSUTILS.FINDFIRST.RESULT
-	jne l_1F7E
+	dex
+	lda :STACKORIGIN+1,x
+	jne l_1FAC
 @
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1155
@@ -8180,40 +8507,40 @@ EI	= DATAORIGIN+$0AC4
 	mva:rne CODEORIGIN+$0240+4-256,y adr.EXT+4-256,y+
 
 ; --- RepeatUntilProlog
-l_1F84
+l_1FB2
 
-; optimize FAIL ('B_CRT.ATASCII2ANTIC_0549', test\tools\artur\artur.pas), line = 1158
+; optimize FAIL ('B_CRT.ATASCII2ANTIC_054D', test\tools\artur\artur.pas), line = 1158
 
 	inx
 	mva INFO.NAME :STACKORIGIN,x
 	mva INFO.NAME+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.ATASCII2ANTIC_0549
-	inx
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT
+	jsr B_CRT.ATASCII2ANTIC_054D
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1159
 
-	lda S
-	sta HASEXT.S
-	lda S+1
-	sta HASEXT.S+1
 	lda EXT
 	sta HASEXT.E
 	lda EXT+1
 	sta HASEXT.E+1
+	lda S
+	sta HASEXT.S
+	lda S+1
+	sta HASEXT.S+1
 	jsr HASEXT
-	lda HASEXT.RESULT
-	jne l_1F98
+	dex
+	lda :STACKORIGIN+1,x
+	jne l_1FC6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1160
 
 	lda SKIP
-	jne l_1FAB
+	jne l_1FD9
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1161
 
@@ -8227,14 +8554,14 @@ l_1F84
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1162
 
 	inc ROW
-	jmp l_1FC6
-l_1FAB
+	jmp l_1FF4
+l_1FD9
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1163
 
 	dec SKIP
+l_1FF4
 l_1FC6
-l_1F98
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1165
 
@@ -8243,16 +8570,18 @@ l_1F98
 	lda INFO+1
 	sta SYSUTILS.FINDNEXT.F+1
 	jsr SYSUTILS.FINDNEXT
-	lda SYSUTILS.FINDNEXT.RESULT
+	lda :STACKORIGIN,x
 	sta NEXT
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1166
 
-	jne l_1F84x
+	lda NEXT
+	jne l_1FB2x
 	lda ROW
 	cmp #$10
-	jne l_1F84
-l_1F84x
+	jne l_1FB2
+l_1FB2x
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1167
 
@@ -8261,47 +8590,47 @@ l_1F84x
 	lda INFO+1
 	sta SYSUTILS.FINDCLOSE.F+1
 	jsr SYSUTILS.FINDCLOSE
-l_1F7E
+l_1FAC
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1169
 
 	lda NEXT
-	jne l_2002
+	jne l_2030
 	mva #$01 adr.S
 	mva #$1E adr.S+1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1171
 
-	lda #$25
-	sta WRITESXY.X
 	lda #$15
 	sta WRITESXY.Y
+	lda #$25
+	sta WRITESXY.X
 	jsr WRITESXY
-l_2002
+l_2030
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1173
 
 	lda PAGE
-	jeq l_201A
+	jeq l_2048
 	mva #$01 adr.S
 	mva #$1C adr.S+1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1175
 
-	lda #$1A
-	sta WRITESXY.X
 	lda #$15
 	sta WRITESXY.Y
+	lda #$1A
+	sta WRITESXY.X
 	jsr WRITESXY
-l_201A
+l_2048
 
 ; ------------------------------------------------------------
 
-PAGE	= DATAORIGIN+$0AED
-ROW	= DATAORIGIN+$0AEE
-adr.EXT	= [DATAORIGIN+$0AEF] .array [4]
+PAGE	= DATAORIGIN+$0AF2
+ROW	= DATAORIGIN+$0AF3
+adr.EXT	= [DATAORIGIN+$0AF4] .array [4]
 .var EXT	= adr.EXT .word
-SKIP	= DATAORIGIN+$0AF3
+SKIP	= DATAORIGIN+$0AF8
 
 @VarData	= PAGE
 @VarDataSize	= 7
@@ -8317,7 +8646,7 @@ SKIP	= DATAORIGIN+$0AF3
 	rts						; ret
 	eif
 .endl
-l_1F54
+l_1F82
 
 ; optimize FAIL ('OPENMODAL', test\tools\artur\artur.pas), line = 1182
 
@@ -8325,15 +8654,15 @@ l_1F54
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1183
 
-	lda #$01
-	sta DRAWRECT.X
-	sta DRAWRECT.Y
-	lda #$26
-	sta DRAWRECT.W
-	lda #$16
-	sta DRAWRECT.H
 	lda #$80
 	sta DRAWRECT.C
+	lda #$16
+	sta DRAWRECT.H
+	lda #$26
+	sta DRAWRECT.W
+	lda #$01
+	sta DRAWRECT.Y
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-31
 	mva:rne CODEORIGIN+$0245+31-256,y adr.S+31-256,y+
@@ -8341,98 +8670,98 @@ l_1F54
 ; optimize OK (test\tools\artur\artur.pas), line = 1185
 
 	lda #$02
-	sta WRITESXY.X
 	sta WRITESXY.Y
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-37
 	mva:rne CODEORIGIN+$0265+37-256,y adr.S+37-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1187
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$03
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-18
 	mva:rne CODEORIGIN+$028B+18-256,y adr.S+18-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1189
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$05
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-19
 	mva:rne CODEORIGIN+$029E+19-256,y adr.S+19-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1191
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$07
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-19
 	mva:rne CODEORIGIN+$02B2+19-256,y adr.S+19-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1193
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$09
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-23
 	mva:rne CODEORIGIN+$02C6+23-256,y adr.S+23-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1195
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$0B
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-20
 	mva:rne CODEORIGIN+$02DE+20-256,y adr.S+20-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1197
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$0D
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-24
 	mva:rne CODEORIGIN+$02F3+24-256,y adr.S+24-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1199
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$0F
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-12
 	mva:rne CODEORIGIN+$030C+12-256,y adr.S+12-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1201
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$11
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-20
 	mva:rne CODEORIGIN+$0319+20-256,y adr.S+20-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1203
 
-	lda #$02
-	sta WRITESXY.X
 	lda #$15
 	sta WRITESXY.Y
+	lda #$02
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1205
@@ -8454,18 +8783,20 @@ l_1F54
 	jsr SHOWDIR
 
 ; --- RepeatUntilProlog
-l_2057
+l_2085
 
 ; optimize FAIL ('CRT.READKEY', test\tools\artur\artur.pas), line = 1211
 
 	jsr CRT.READKEY
-	lda CRT.READKEY.RESULT
+	lda :STACKORIGIN,x
 	sta C
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1212
 
+	lda C
 	cmp #$6E
-	jne l_206D
+	jne l_209B
 
 ; optimize FAIL ('CLEARBUFFER', test\tools\artur\artur.pas), line = 1213
 
@@ -8475,32 +8806,32 @@ l_2057
 
 	lda #$01
 	sta DONE
-l_206D
+l_209B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1216
 
 	lda C
 	cmp #$6C
-	jne l_2087
+	jne l_20B5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1217
 
-	lda #$02
-	sta GETFILENAME.X
 	lda #$08
 	sta GETFILENAME.Y
+	lda #$02
+	sta GETFILENAME.X
 	jsr GETFILENAME
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1218
 
-	lda #$00
-	sta LOADDATA.BUF
-	lda #$78
-	sta LOADDATA.BUF+1
 	lda #$C0
 	sta LOADDATA.SIZE
 	lda #$03
 	sta LOADDATA.SIZE+1
+	lda #$00
+	sta LOADDATA.BUF
+	lda #$78
+	sta LOADDATA.BUF+1
 	jsr LOADDATA
 
 ; optimize FAIL ('INITUNDOSTORAGE', test\tools\artur\artur.pas), line = 1219
@@ -8511,52 +8842,52 @@ l_206D
 
 	lda #$01
 	sta DONE
-l_2087
+l_20B5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1222
 
 	lda C
 	cmp #$73
-	jne l_20A7
+	jne l_20D5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1223
 
-	lda #$02
-	sta GETFILENAME.X
 	lda #$0A
 	sta GETFILENAME.Y
+	lda #$02
+	sta GETFILENAME.X
 	jsr GETFILENAME
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1224
 
-	lda #$00
-	sta SAVEDATA.BUF
-	lda #$78
-	sta SAVEDATA.BUF+1
 	lda #$C0
 	sta SAVEDATA.SIZE
 	lda #$03
 	sta SAVEDATA.SIZE+1
+	lda #$00
+	sta SAVEDATA.BUF
+	lda #$78
+	sta SAVEDATA.BUF+1
 	jsr SAVEDATA
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1225
 
 	lda #$01
 	sta DONE
-l_20A7
+l_20D5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1227
 
 	lda C
 	cmp #$78
-	jne l_20C6
+	jne l_20F4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1228
 
-	lda #$02
-	sta GETFILENAME.X
 	lda #$0C
 	sta GETFILENAME.Y
+	lda #$02
+	sta GETFILENAME.X
 	jsr GETFILENAME
 
 ; optimize FAIL ('SAVEBINARY', test\tools\artur\artur.pas), line = 1229
@@ -8567,61 +8898,61 @@ l_20A7
 
 	lda #$01
 	sta DONE
-l_20C6
+l_20F4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1232
 
 	lda C
 	cmp #$63
-	jne l_20E3
+	jne l_2111
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1233
 
-	lda #$02
-	sta GETFILENAME.X
 	lda #$0E
 	sta GETFILENAME.Y
+	lda #$02
+	sta GETFILENAME.X
 	jsr GETFILENAME
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1234
 
 	lda #$00
-	sta LOADDATA.BUF
-	lda #$74
-	sta LOADDATA.BUF+1
-	lda #$00
 	sta LOADDATA.SIZE
 	lda #$04
 	sta LOADDATA.SIZE+1
+	lda #$00
+	sta LOADDATA.BUF
+	lda #$74
+	sta LOADDATA.BUF+1
 	jsr LOADDATA
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1235
 
 	lda #$01
 	sta DONE
-l_20E3
+l_2111
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1237
 
 	lda C
 	cmp #$64
-	jne l_2102
+	jne l_2130
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1238
 
 	lda #$00
-	sta SYSTEM.MOVE_0458.SOURCE
-	lda #$E0
-	sta SYSTEM.MOVE_0458.SOURCE+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.DEST
-	lda #$74
-	sta SYSTEM.MOVE_0458.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$04
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.DEST
+	lda #$74
+	sta SYSTEM.MOVE_045B.DEST+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.SOURCE
+	lda #$E0
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 
@@ -8629,13 +8960,13 @@ l_20E3
 
 	lda #$01
 	sta DONE
-l_2102
+l_2130
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1241
 
 	lda C
 	cmp #$71
-	jne l_211F
+	jne l_214D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1242
 
@@ -8646,15 +8977,15 @@ l_2102
 
 	lda #$01
 	sta DONE
-l_211F
+l_214D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1245
 
 	lda C
 	cmp #$3E
-	jne l_213C
+	jne l_216A
 	lda NEXT
-	jne l_214F
+	jne l_217D
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1246
 
@@ -8664,16 +8995,16 @@ l_211F
 
 	lda DIRPAGE
 	jsr SHOWDIR
-l_214F
-l_213C
+l_217D
+l_216A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1249
 
 	lda C
 	cmp #$3C
-	jne l_216E
+	jne l_219C
 	lda DIRPAGE
-	jeq l_2181
+	jeq l_21AF
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1250
 
@@ -8683,22 +9014,22 @@ l_213C
 
 	lda DIRPAGE
 	jsr SHOWDIR
-l_2181
-l_216E
+l_21AF
+l_219C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1253
 
 	lda C
 	cmp #$1B
-	jne l_21A0
+	jne l_21CE
 	lda #$01
 	sta DONE
-l_21A0
+l_21CE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1254
 
 	lda DONE
-	jeq l_2057
+	jeq l_2085
 
 ; optimize FAIL ('CLOSEMODAL', test\tools\artur\artur.pas), line = 1255
 
@@ -8710,16 +9041,16 @@ IO_X	= $01
 IO_Y	= $01
 IO_W	= $26
 IO_H	= $16
-DONE	= DATAORIGIN+$0AC5
-adr.INFO	= DATAORIGIN+$0AC6	; [37] RECORD
+DONE	= DATAORIGIN+$0ACA
+adr.INFO	= [DATAORIGIN+$0ACB] .array [7]
 .var INFO	= adr.INFO .word
-INFO.ATTR	= DATAORIGIN+$0AC6
-INFO.EXCLUDEATTR	= DATAORIGIN+$0AC7
-adr.INFO.NAME	= [DATAORIGIN+$0AC8] .array [33]
+INFO.ATTR	= DATAORIGIN+$0ACB
+INFO.EXCLUDEATTR	= DATAORIGIN+$0ACC
+adr.INFO.NAME	= [DATAORIGIN+$0ACD] .array [33]
 .var INFO.NAME	= adr.INFO.NAME .word
-INFO.FINDHANDLE	= DATAORIGIN+$0AE9
-DIRPAGE	= DATAORIGIN+$0AEB
-NEXT	= DATAORIGIN+$0AEC
+INFO.FINDHANDLE	= DATAORIGIN+$0AEE
+DIRPAGE	= DATAORIGIN+$0AF0
+NEXT	= DATAORIGIN+$0AF1
 
 @VarData	= DONE
 @VarDataSize	= 40
@@ -8744,160 +9075,152 @@ NEXT	= DATAORIGIN+$0AEC
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1266
 
-	lda #$05
-	sta DRAWRECT.X
-	lda #$02
-	sta DRAWRECT.Y
-	lda #$1E
-	sta DRAWRECT.W
-	lda #$14
-	sta DRAWRECT.H
 	lda #$80
 	sta DRAWRECT.C
+	lda #$14
+	sta DRAWRECT.H
+	lda #$1E
+	sta DRAWRECT.W
+	lda #$02
+	sta DRAWRECT.Y
+	lda #$05
+	sta DRAWRECT.X
 	jsr DRAWRECT
 	ldy #256-16
 	mva:rne CODEORIGIN+$032E+16-256,y adr.S+16-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1268
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$03
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-29
 	mva:rne CODEORIGIN+$017A+29-256,y adr.S+29-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1270
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$04
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; --- RepeatUntilProlog
-l_21C1
+l_21EF
 	ldy #256-20
 	mva:rne CODEORIGIN+$033F+20-256,y adr.S+20-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1274
 
 	lda #$06
-	sta WRITESXY.X
 	sta WRITESXY.Y
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1275
 
+	lda #$02
+	sta SYSTEM.HEXSTR.DIGITS
 	lda CONFIG.EDITORBACKGROUNDCOLOR
 	sta SYSTEM.HEXSTR.VALUE
 	lda #$00
 	sta SYSTEM.HEXSTR.VALUE+1
 	sta SYSTEM.HEXSTR.VALUE+2
 	sta SYSTEM.HEXSTR.VALUE+3
-	lda #$02
-	sta SYSTEM.HEXSTR.DIGITS
 	jsr SYSTEM.HEXSTR
-	inx
-	mva SYSTEM.HEXSTR.RESULT :STACKORIGIN,x
-	mva SYSTEM.HEXSTR.RESULT+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.ATASCII2ANTIC_0549
-	inx
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT
+	jsr B_CRT.ATASCII2ANTIC_054D
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1276
 
-	lda #$19
-	sta WRITESXY.X
 	lda #$06
 	sta WRITESXY.Y
+	lda #$19
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-20
 	mva:rne CODEORIGIN+$0354+20-256,y adr.S+20-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1279
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$08
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1280
 
+	lda #$02
+	sta SYSTEM.HEXSTR.DIGITS
 	lda CONFIG.EDITORFOREGROUNDCOLOR
 	sta SYSTEM.HEXSTR.VALUE
 	lda #$00
 	sta SYSTEM.HEXSTR.VALUE+1
 	sta SYSTEM.HEXSTR.VALUE+2
 	sta SYSTEM.HEXSTR.VALUE+3
-	lda #$02
-	sta SYSTEM.HEXSTR.DIGITS
 	jsr SYSTEM.HEXSTR
-	inx
-	mva SYSTEM.HEXSTR.RESULT :STACKORIGIN,x
-	mva SYSTEM.HEXSTR.RESULT+1 :STACKORIGIN+STACKWIDTH,x
-	jsr B_CRT.ATASCII2ANTIC_0549
-	inx
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT
+	jsr B_CRT.ATASCII2ANTIC_054D
+	lda :STACKORIGIN,x
 	sta @move.src
-	lda B_CRT.ATASCII2ANTIC_0549.RESULT+1
+	lda :STACKORIGIN+STACKWIDTH,x
 	sta @move.src+1
 	@moveSTRING S #41
 	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1281
 
-	lda #$19
-	sta WRITESXY.X
 	lda #$08
 	sta WRITESXY.Y
+	lda #$19
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-22
 	mva:rne CODEORIGIN+$0369+22-256,y adr.S+22-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1284
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$0A
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1285
 
 	lda CONFIG.ARROWSRAW
-	jeq l_21E8
+	jeq l_2216
 	ldy #256-4
 	mva:rne CODEORIGIN+$0380+4-256,y adr.S+4-256,y+
-	jmp l_21F2
-l_21E8
+	jmp l_2220
+l_2216
 	ldy #256-4
 	mva:rne CODEORIGIN+$0385+4-256,y adr.S+4-256,y+
-l_21F2
+l_2220
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1287
 
-	lda #$1B
-	sta WRITESXY.X
 	lda #$0A
 	sta WRITESXY.Y
+	lda #$1B
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-19
 	mva:rne CODEORIGIN+$038A+19-256,y adr.S+19-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1290
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$0C
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-8
 	mva:rne CODEORIGIN+$039E+8-256,y adr.S+8-256,y+
@@ -8906,58 +9229,60 @@ l_21F2
 
 	lda CONFIG.KEYCODEDISPLAY
 	cmp #$02
-	jne l_220A
+	jne l_2238
 	ldy #256-8
 	mva:rne CODEORIGIN+$03A7+8-256,y adr.S+8-256,y+
-l_220A
+l_2238
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1293
 
 	lda CONFIG.KEYCODEDISPLAY
 	cmp #$01
-	jne l_221F
+	jne l_224D
 	ldy #256-8
 	mva:rne CODEORIGIN+$03B0+8-256,y adr.S+8-256,y+
-l_221F
+l_224D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1294
 
-	lda #$18
-	sta WRITESXY.X
 	lda #$0C
 	sta WRITESXY.Y
+	lda #$18
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-12
 	mva:rne CODEORIGIN+$03B9+12-256,y adr.S+12-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1297
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$0E
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 	ldy #256-19
 	mva:rne CODEORIGIN+$03C6+19-256,y adr.S+19-256,y+
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1300
 
-	lda #$06
-	sta WRITESXY.X
 	lda #$14
 	sta WRITESXY.Y
+	lda #$06
+	sta WRITESXY.X
 	jsr WRITESXY
 
 ; optimize FAIL ('CRT.READKEY', test\tools\artur\artur.pas), line = 1302
 
 	jsr CRT.READKEY
-	lda CRT.READKEY.RESULT
+	lda :STACKORIGIN,x
 	sta C
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1303
 
+	lda C
 	cmp #$61
-	jne l_2241
+	jne l_226F
 	ldy #1
 	lda CONFIG.ARROWSRAW
 	beq @+
@@ -8965,45 +9290,47 @@ l_221F
 @
 	tya
 	sta CONFIG.ARROWSRAW
-l_2241
+l_226F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1304
 
 	lda C
 	cmp #$62
-	jne l_225F
-	lda #$19
-	sta GETHEXVAL.X
-	lda #$06
-	sta GETHEXVAL.Y
+	jne l_228D
 	lda CONFIG.EDITORBACKGROUNDCOLOR
 	sta GETHEXVAL.DEFAULT
+	lda #$06
+	sta GETHEXVAL.Y
+	lda #$19
+	sta GETHEXVAL.X
 	jsr GETHEXVAL
-	lda GETHEXVAL.RESULT
+	lda :STACKORIGIN,x
 	sta CONFIG.EDITORBACKGROUNDCOLOR
-l_225F
+	dex
+l_228D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1305
 
 	lda C
 	cmp #$66
-	jne l_227D
-	lda #$19
-	sta GETHEXVAL.X
-	lda #$08
-	sta GETHEXVAL.Y
+	jne l_22AB
 	lda CONFIG.EDITORFOREGROUNDCOLOR
 	sta GETHEXVAL.DEFAULT
+	lda #$08
+	sta GETHEXVAL.Y
+	lda #$19
+	sta GETHEXVAL.X
 	jsr GETHEXVAL
-	lda GETHEXVAL.RESULT
+	lda :STACKORIGIN,x
 	sta CONFIG.EDITORFOREGROUNDCOLOR
-l_227D
+	dex
+l_22AB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1306
 
 	lda C
 	cmp #$63
-	jne l_229B
+	jne l_22C9
 
 ; optimize FAIL (0, test\tools\artur\artur.pas), line = 1307
 
@@ -9013,24 +9340,24 @@ l_227D
 
 	lda CONFIG.KEYCODEDISPLAY
 	cmp #$03
-	jne l_22B2
+	jne l_22E0
 	lda #$00
 	sta CONFIG.KEYCODEDISPLAY
-l_22B2
-l_229B
+l_22E0
+l_22C9
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1310
 
 	lda C
 	cmp #$73
-	jne l_22CD
+	jne l_22FB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1311
 
-	lda #$06
-	sta B_CRT.CRT_GOTOXY.X
 	lda #$0E
 	sta B_CRT.CRT_GOTOXY.Y
+	lda #$06
+	sta B_CRT.CRT_GOTOXY.X
 	jsr B_CRT.CRT_GOTOXY
 
 ; optimize FAIL ('SAVECONFIG', test\tools\artur\artur.pas), line = 1312
@@ -9041,13 +9368,13 @@ l_229B
 
 	lda #$1B
 	sta C
-l_22CD
+l_22FB
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1315
 
 	lda C
 	cmp #$1B
-	jne l_21C1
+	jne l_21EF
 
 ; optimize FAIL ('CLOSEMODAL', test\tools\artur\artur.pas), line = 1317
 
@@ -9072,9 +9399,9 @@ OPT_H	= $14
 .endl
 l_03E1
 
-; optimize FAIL ('SYSTEM.PAUSE_0479', test\tools\artur\artur.pas), line = 1332
+; optimize FAIL ('SYSTEM.PAUSE_0472', test\tools\artur\artur.pas), line = 1332
 
-	jsr SYSTEM.PAUSE_0479
+	jsr SYSTEM.PAUSE_0472
 
 	lda VVBLKD
 	sta OLDVBL
@@ -9116,31 +9443,31 @@ l_03E1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1339
 
-	lda #$00
-	sta B_CRT.CRT_INIT_05BF.VRAM_ADDRESS
-	lda #$7C
-	sta B_CRT.CRT_INIT_05BF.VRAM_ADDRESS+1
-	lda #$28
-	sta B_CRT.CRT_INIT_05BF.WIDTH
 	lda #$18
-	sta B_CRT.CRT_INIT_05BF.HEIGHT
-	jsr B_CRT.CRT_INIT_05BF
+	sta B_CRT.CRT_INIT_05C7.HEIGHT
+	lda #$28
+	sta B_CRT.CRT_INIT_05C7.WIDTH
+	lda #$00
+	sta B_CRT.CRT_INIT_05C7.VRAM_ADDRESS
+	lda #$7C
+	sta B_CRT.CRT_INIT_05C7.VRAM_ADDRESS+1
+	jsr B_CRT.CRT_INIT_05C7
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1341
 
 	lda #$00
-	sta SYSTEM.MOVE_0458.SOURCE
-	lda #$E0
-	sta SYSTEM.MOVE_0458.SOURCE+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.DEST
-	lda #$74
-	sta SYSTEM.MOVE_0458.DEST+1
-	lda #$00
-	sta SYSTEM.MOVE_0458.COUNT
+	sta SYSTEM.MOVE_045B.COUNT
 	lda #$04
-	sta SYSTEM.MOVE_0458.COUNT+1
-	.local +MAIN.SYSTEM.MOVE_0458
+	sta SYSTEM.MOVE_045B.COUNT+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.DEST
+	lda #$74
+	sta SYSTEM.MOVE_045B.DEST+1
+	lda #$00
+	sta SYSTEM.MOVE_045B.SOURCE
+	lda #$E0
+	sta SYSTEM.MOVE_045B.SOURCE+1
+	.local +MAIN.SYSTEM.MOVE_045B
 	m@INLINE
 	.endl
 
@@ -9202,53 +9529,57 @@ l_03E1
 	jsr SHOWHELP
 
 ; --- RepeatUntilProlog
-l_2313
+l_2341
 
-; optimize FAIL ('SYSTEM.PAUSE_0479', test\tools\artur\artur.pas), line = 1360
+; optimize FAIL ('SYSTEM.PAUSE_0472', test\tools\artur\artur.pas), line = 1360
 
-	jsr SYSTEM.PAUSE_0479
+	jsr SYSTEM.PAUSE_0472
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1364
 
 	lda KEYREPEATCOUNTER
-	jne l_2326
+	jne l_2354
 
 ; optimize FAIL ('B_CRT.CRT_STARTPRESSED', test\tools\artur\artur.pas), line = 1365
 
 	jsr B_CRT.CRT_STARTPRESSED
-	lda B_CRT.CRT_STARTPRESSED.RESULT
-	jeq l_2331
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_235F
 	jsr SHOWIOMENU
-l_2331
+l_235F
 
 ; optimize FAIL ('B_CRT.CRT_SELECTPRESSED', test\tools\artur\artur.pas), line = 1366
 
 	jsr B_CRT.CRT_SELECTPRESSED
-	lda B_CRT.CRT_SELECTPRESSED.RESULT
-	jeq l_233F
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_236D
 	jsr NEXTMODE
-l_233F
+l_236D
 
 ; optimize FAIL ('B_CRT.CRT_OPTIONPRESSED', test\tools\artur\artur.pas), line = 1367
 
 	jsr B_CRT.CRT_OPTIONPRESSED
-	lda B_CRT.CRT_OPTIONPRESSED.RESULT
-	jeq l_234D
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_237B
 	jsr SHOWSETTINGS
-l_234D
+l_237B
 
 ; optimize FAIL ('B_CRT.CRT_HELPPRESSED', test\tools\artur\artur.pas), line = 1368
 
 	jsr B_CRT.CRT_HELPPRESSED
-	lda B_CRT.CRT_HELPPRESSED.RESULT
-	jeq l_235B
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_2389
 	jsr SHOWHELP
-l_235B
+l_2389
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1370
 
 	lda KEYDOWN
-	jeq l_236B
+	jeq l_2399
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1372
 
@@ -9258,16 +9589,16 @@ l_235B
 ; optimize OK (test\tools\artur\artur.pas), line = 1373
 
 	lda CONFIG.ARROWSRAW
-	jeq l_237A
+	jeq l_23A8
 	lda #$00
 	jsr CHECKCURSORKEYS
-l_237A
+l_23A8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1375
 
 	lda KEY
 	cmp #$27
-	jne l_2391
+	jne l_23BF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1376
 
@@ -9297,19 +9628,20 @@ l_237A
 
 	lda #$00
 	sta KEYDOWN
-l_2391
+l_23BF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1383
 
 	lda KEY
 	cmp #$3C
-	jne l_23BF
+	jne l_23ED
 
 ; optimize FAIL ('BRUSHSELECTOR', test\tools\artur\artur.pas), line = 1384
 
 	jsr BRUSHSELECTOR
-	lda BRUSHSELECTOR.RESULT
+	lda :STACKORIGIN,x
 	sta BRUSH
+	dex
 
 ; optimize FAIL ('SHOWSTATUS', test\tools\artur\artur.pas), line = 1385
 
@@ -9319,13 +9651,13 @@ l_2391
 
 	lda #$00
 	sta KEYDOWN
-l_23BF
+l_23ED
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1389
 
 	lda KEY
 	cmp #$7C
-	jne l_23DD
+	jne l_240B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1390
 
@@ -9344,13 +9676,13 @@ l_23BF
 
 	lda #$00
 	sta KEYDOWN
-l_23DD
+l_240B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1395
 
 	lda KEY
 	cmp #$2C
-	jne l_2401
+	jne l_242F
 
 ; optimize FAIL ('HISTORYBACK', test\tools\artur\artur.pas), line = 1396
 
@@ -9364,13 +9696,13 @@ l_23DD
 
 	lda #$00
 	sta KEYDOWN
-l_2401
+l_242F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1401
 
 	lda KEY
 	cmp #$6C
-	jne l_241C
+	jne l_244A
 
 ; optimize FAIL ('HISTORYFWD', test\tools\artur\artur.pas), line = 1402
 
@@ -9384,13 +9716,13 @@ l_2401
 
 	lda #$00
 	sta KEYDOWN
-l_241C
+l_244A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1407
 
 	lda KEY
 	cmp #$5C
-	jne l_2437
+	jne l_2465
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1408
 
@@ -9406,13 +9738,13 @@ l_241C
 
 	lda #$00
 	sta KEYDOWN
-l_2437
+l_2465
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1412
 
 	lda KEY
 	cmp #$B4
-	jne l_2459
+	jne l_2487
 
 ; optimize FAIL ('TRYUNDO', test\tools\artur\artur.pas), line = 1413
 
@@ -9426,13 +9758,13 @@ l_2437
 
 	lda #$00
 	sta KEYDOWN
-l_2459
+l_2487
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1417
 
 	lda KEY
 	cmp #$F4
-	jne l_2474
+	jne l_24A2
 
 ; optimize FAIL ('TRYREDO', test\tools\artur\artur.pas), line = 1418
 
@@ -9446,8 +9778,8 @@ l_2459
 
 	lda #$00
 	sta KEYDOWN
-l_2474
-l_236B
+l_24A2
+l_2399
 
 ; optimize FAIL ('READJOYSTICK', test\tools\artur\artur.pas), line = 1425
 
@@ -9456,35 +9788,35 @@ l_236B
 ; optimize OK (test\tools\artur\artur.pas), line = 1427
 
 	lda JOYX
-	jne l_249Ex
+	jne l_24CCx
 	lda JOYY
-	jeq l_249E
-l_249Ex
+	jeq l_24CC
+l_24CCx
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1428
 
-	lda JOYX
-	sta MOVECURSOR.DX
 	lda JOYY
 	sta MOVECURSOR.DY
+	lda JOYX
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1429
 
 	lda #$04
 	sta KEYREPEATCOUNTER
-l_249E
-l_2326
+l_24CC
+l_2354
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1436
 
 	lda MODE
-	jne l_24C0
+	jne l_24EE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1437
 
 	lda JOYFIRE
-	jne l_24D3
+	jne l_2501
 
 ; optimize FAIL ('POKEBRUSH', test\tools\artur\artur.pas), line = 1438
 
@@ -9504,18 +9836,18 @@ l_2326
 
 	lda #$00
 	sta KEYDOWN
-l_24D3
+l_2501
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1443
 
 	lda KEYDOWN
-	jeq l_24EF
+	jeq l_251D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1444
 
 	lda KEY
 	cmp #$0C
-	jne l_2502
+	jne l_2530
 
 ; optimize FAIL ('POKEBRUSH', test\tools\artur\artur.pas), line = 1445
 
@@ -9529,25 +9861,25 @@ l_24D3
 ; optimize OK (test\tools\artur\artur.pas), line = 1447
 
 	lda CURSORFORWARD
-	jeq l_2514
-	lda #$01
-	sta MOVECURSOR.DX
+	jeq l_2542
 	lda #$00
 	sta MOVECURSOR.DY
+	lda #$01
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_2514
+l_2542
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1448
 
 	lda #$00
 	sta KEYDOWN
-l_2502
+l_2530
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1450
 
 	lda KEY
 	cmp #$77
-	jne l_2532
+	jne l_2560
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1451
 
@@ -9567,13 +9899,13 @@ l_2502
 
 	lda #$00
 	sta KEYDOWN
-l_2532
+l_2560
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1455
 
 	lda KEY
 	cmp #$21
-	jne l_2555
+	jne l_2583
 
 ; optimize FAIL ('WRITESPACE', test\tools\artur\artur.pas), line = 1456
 
@@ -9582,45 +9914,45 @@ l_2532
 ; optimize OK (test\tools\artur\artur.pas), line = 1457
 
 	lda CURSORFORWARD
-	jeq l_2563
-	lda #$01
-	sta MOVECURSOR.DX
+	jeq l_2591
 	lda #$00
 	sta MOVECURSOR.DY
+	lda #$01
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_2563
-l_2555
+l_2591
+l_2583
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1459
 
 	lda CURSORFORWARD
-	jeq l_2577
+	jeq l_25A5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1460
 
 	lda KEY
 	cmp #$34
-	jne l_258A
+	jne l_25B8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1461
 
-	lda #$FF
-	sta MOVECURSOR.DX
 	lda #$00
 	sta MOVECURSOR.DY
+	lda #$FF
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
 
 ; optimize FAIL ('WRITESPACE', test\tools\artur\artur.pas), line = 1462
 
 	jsr WRITESPACE
-l_258A
-l_2577
-l_24EF
+l_25B8
+l_25A5
+l_251D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1467
 
 	lda KEYDOWN
-	jeq l_25A1
+	jeq l_25CF
 
 ; optimize FAIL ('SETBRUSHFROMKEY', test\tools\artur\artur.pas), line = 1468
 
@@ -9638,30 +9970,30 @@ l_24EF
 ; optimize OK (test\tools\artur\artur.pas), line = 1471
 
 	lda CURSORFORWARD
-	jeq l_25B4
-	lda #$01
-	sta MOVECURSOR.DX
+	jeq l_25E2
 	lda #$00
 	sta MOVECURSOR.DY
+	lda #$01
+	sta MOVECURSOR.DX
 	jsr MOVECURSOR
-l_25B4
+l_25E2
 
 ; optimize FAIL ('SHOWSTATUS', test\tools\artur\artur.pas), line = 1472
 
 	jsr SHOWSTATUS
-l_25A1
-l_24C0
+l_25CF
+l_24EE
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1479
 
 	lda MODE
 	cmp #$01
-	jne l_25D1
+	jne l_25FF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1480
 
 	lda JOYFIRE
-	jne l_25E4
+	jne l_2612
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1481
 
@@ -9676,18 +10008,18 @@ l_24C0
 
 	lda #$14
 	sta KEYREPEATCOUNTER
-l_25E4
+l_2612
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1485
 
 	lda KEYDOWN
-	jeq l_25FF
+	jeq l_262D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1486
 
 	lda KEY
 	cmp #$1C
-	jne l_2612
+	jne l_2640
 
 ; optimize FAIL ('CLEARSELECTION', test\tools\artur\artur.pas), line = 1487
 
@@ -9697,13 +10029,13 @@ l_25E4
 
 	lda #$00
 	sta KEYDOWN
-l_2612
+l_2640
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1490
 
 	lda KEY
 	cmp #$0C
-	jne l_262C
+	jne l_265A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1491
 
@@ -9714,13 +10046,13 @@ l_2612
 
 	lda #$00
 	sta KEYDOWN
-l_262C
+l_265A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1495
 
 	lda KEY
 	cmp #$21
-	jne l_2649
+	jne l_2677
 
 ; optimize FAIL ('WRITESPACE', test\tools\artur\artur.pas), line = 1496
 
@@ -9733,49 +10065,49 @@ l_262C
 ; optimize FAIL ('SHOWSTATUS', test\tools\artur\artur.pas), line = 1498
 
 	jsr SHOWSTATUS
-l_2649
+l_2677
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1500
 
 	lda C
 	cmp #$64
-	jne l_2661
+	jne l_268F
 	lda #$00
 	jsr SELECTTOOL
-l_2661
+l_268F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1501
 
 	lda C
 	cmp #$6C
-	jne l_2678
+	jne l_26A6
 	lda #$01
 	jsr SELECTTOOL
-l_2678
+l_26A6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1502
 
 	lda C
 	cmp #$66
-	jne l_268F
+	jne l_26BD
 	lda #$02
 	jsr SELECTTOOL
-l_268F
+l_26BD
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1503
 
 	lda C
 	cmp #$62
-	jne l_26A6
+	jne l_26D4
 	lda #$03
 	jsr SELECTTOOL
-l_26A6
-l_25FF
+l_26D4
+l_262D
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1505
 
 	lda KEYDOWN
-	jeq l_26B9
+	jeq l_26E7
 
 ; optimize FAIL ('SETBRUSHFROMKEY', test\tools\artur\artur.pas), line = 1506
 
@@ -9784,17 +10116,17 @@ l_25FF
 ; optimize FAIL ('SHOWSTATUS', test\tools\artur\artur.pas), line = 1507
 
 	jsr SHOWSTATUS
-l_26B9
+l_26E7
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1510
 
 	lda PENDOWN
-	jeq l_26CA
+	jeq l_26F8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1511
 
 	lda DRAWTOOL
-	jne l_26DD
+	jne l_270B
 
 ; optimize FAIL ('POKEBRUSH', test\tools\artur\artur.pas), line = 1512
 
@@ -9804,14 +10136,14 @@ l_26B9
 
 	lda BRUSH
 	jsr USEBRUSH
-	jmp l_26EC
-l_26DD
+	jmp l_271A
+l_270B
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1515
 
 	lda P1X
 	cmp #$FF
-	jne l_26FE
+	jne l_272C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1516
 
@@ -9822,14 +10154,14 @@ l_26DD
 
 	lda CURSORY
 	sta P1Y
-	jmp l_2714
-l_26FE
+	jmp l_2742
+l_272C
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1519
 
 	lda P2X
 	cmp #$FF
-	jne l_2726
+	jne l_2754
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1520
 
@@ -9845,25 +10177,25 @@ l_26FE
 
 	lda DRAWTOOL
 	cmp #$01
-	jne l_2745
+	jne l_2773
 	jsr DRAWLINE
-l_2745
+l_2773
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1523
 
 	lda DRAWTOOL
 	cmp #$02
-	jne l_275B
+	jne l_2789
 	jsr DRAWFRAME
-l_275B
+l_2789
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1524
 
 	lda DRAWTOOL
 	cmp #$03
-	jne l_2771
+	jne l_279F
 	jsr DRAWBLOCK
-l_2771
+l_279F
 
 ; optimize FAIL ('READCURSORCHAR', test\tools\artur\artur.pas), line = 1525
 
@@ -9877,27 +10209,27 @@ l_2771
 ; optimize FAIL ('CLEARSELECTION', test\tools\artur\artur.pas), line = 1527
 
 	jsr CLEARSELECTION
-l_2726
-l_2714
-l_26EC
+l_2754
+l_2742
+l_271A
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1530
 
 	lda #$00
 	sta PENDOWN
-l_26CA
-l_25D1
+l_26F8
+l_25FF
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1537
 
 	lda MODE
 	cmp #$02
-	jne l_2797
+	jne l_27C5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1538
 
 	lda JOYFIRE
-	jne l_27AA
+	jne l_27D8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1539
 
@@ -9912,18 +10244,18 @@ l_25D1
 
 	lda #$14
 	sta KEYREPEATCOUNTER
-l_27AA
+l_27D8
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1543
 
 	lda KEYDOWN
-	jeq l_27C5
+	jeq l_27F3
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1544
 
 	lda KEY
 	cmp #$1C
-	jne l_27D8
+	jne l_2806
 
 ; optimize FAIL ('CLEARSELECTION', test\tools\artur\artur.pas), line = 1545
 
@@ -9937,13 +10269,13 @@ l_27AA
 
 	lda #$00
 	sta KEYDOWN
-l_27D8
+l_2806
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1549
 
 	lda KEY
 	cmp #$0C
-	jne l_27F3
+	jne l_2821
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1550
 
@@ -9954,55 +10286,55 @@ l_27D8
 
 	lda #$00
 	sta KEYDOWN
-l_27F3
+l_2821
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1553
 
 	lda P2X
 	cmp #$FF
-	jeq l_2810
+	jeq l_283E
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1554
 
 	lda C
 	cmp #$63
-	jne l_2823
+	jne l_2851
 	lda #$00
 	jsr COPYBLOCK
-l_2823
+l_2851
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1555
 
 	lda C
 	cmp #$6D
-	jne l_283A
+	jne l_2868
 	lda #$01
 	jsr COPYBLOCK
-l_283A
+l_2868
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1556
 
 	lda C
 	cmp #$73
-	jne l_2851
+	jne l_287F
 	jsr SAVEBLOCK
-l_2851
+l_287F
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1557
 
 	lda C
 	cmp #$69
-	jne l_2867
+	jne l_2895
 	jsr INVERTBLOCK
-l_2867
+l_2895
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1558
 
 	lda C
 	cmp #$66
-	jne l_287D
+	jne l_28AB
 	jsr DRAWBLOCK
-l_287D
+l_28AB
 
 ; optimize FAIL ('READCURSORCHAR', test\tools\artur\artur.pas), line = 1559
 
@@ -10011,19 +10343,19 @@ l_287D
 ; optimize FAIL ('SHOWSTATUS', test\tools\artur\artur.pas), line = 1560
 
 	jsr SHOWSTATUS
-l_2810
-l_27C5
+l_283E
+l_27F3
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1565
 
 	lda PENDOWN
-	jeq l_2893
+	jeq l_28C1
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1566
 
 	lda P1X
 	cmp #$FF
-	jne l_28A6
+	jne l_28D4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1567
 
@@ -10034,14 +10366,14 @@ l_27C5
 
 	lda CURSORY
 	sta P1Y
-	jmp l_28BC
-l_28A6
+	jmp l_28EA
+l_28D4
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1570
 
 	lda P2X
 	cmp #$FF
-	jne l_28CE
+	jne l_28FC
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1571
 
@@ -10055,17 +10387,16 @@ l_28A6
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1573
 
+	sta XORCURSOR.Y
 	lda CURSORX
 	sta XORCURSOR.X
-	lda CURSORY
-	sta XORCURSOR.Y
 	jsr XORCURSOR
 
 ; optimize FAIL ('SHOWMENUBAR', test\tools\artur\artur.pas), line = 1574
 
 	jsr SHOWMENUBAR
-	jmp l_28EC
-l_28CE
+	jmp l_291A
+l_28FC
 
 ; optimize FAIL ('CLEARSELECTION', test\tools\artur\artur.pas), line = 1576
 
@@ -10074,35 +10405,37 @@ l_28CE
 ; optimize FAIL ('SHOWMENUBAR', test\tools\artur\artur.pas), line = 1577
 
 	jsr SHOWMENUBAR
-l_28EC
-l_28BC
+l_291A
+l_28EA
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1580
 
 	lda #$00
 	sta PENDOWN
-l_2893
-l_2797
+l_28C1
+l_27C5
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1584
 
 	lda KEYDOWN
-	jeq l_2902
+	jeq l_2930
 	lda #$00
 	sta KEYDOWN
-l_2902
+l_2930
 
 ; optimize FAIL ('CRT.KEYPRESSED', test\tools\artur\artur.pas), line = 1586
 
 	jsr CRT.KEYPRESSED
-	lda CRT.KEYPRESSED.RESULT
-	jeq l_2913
+	dex
+	lda :STACKORIGIN+1,x
+	jeq l_2941
 
 ; optimize FAIL ('CRT.READKEY', test\tools\artur\artur.pas), line = 1587
 
 	jsr CRT.READKEY
-	lda CRT.READKEY.RESULT
+	lda :STACKORIGIN,x
 	sta C
+	dex
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1588
 
@@ -10113,17 +10446,17 @@ l_2902
 
 	lda #$01
 	sta KEYDOWN
-l_2913
+l_2941
 
 ; optimize OK (test\tools\artur\artur.pas), line = 1592
 
 	lda MODE
 	cmp #$FF
-	jne l_2313
+	jne l_2341
 
-; optimize FAIL ('SYSTEM.PAUSE_0479', test\tools\artur\artur.pas), line = 1596
+; optimize FAIL ('SYSTEM.PAUSE_0472', test\tools\artur\artur.pas), line = 1596
 
-	jsr SYSTEM.PAUSE_0479
+	jsr SYSTEM.PAUSE_0472
 
 ; optimize FAIL ('B_PMG.PMG_DISABLE', test\tools\artur\artur.pas), line = 1597
 
@@ -10202,59 +10535,59 @@ MAX_BRUSH_HISTORY	= $11
 CODE_DISPLAY_NONE	= $00
 CODE_DISPLAY_ANTIC	= $01
 CODE_DISPLAY_ATASCII	= $02
-adr.VERSION	= [DATAORIGIN+$08B3] .array [6]
+adr.VERSION	= [DATAORIGIN+$08B4] .array [6]
 .var VERSION	= adr.VERSION .word
-adr.CONFIG	= DATAORIGIN+$08B9	; [4] RECORD
+adr.CONFIG	= [DATAORIGIN+$08BA] .array [8]
 .var CONFIG	= adr.CONFIG .word
-CONFIG.EDITORBACKGROUNDCOLOR	= DATAORIGIN+$08B9
-CONFIG.EDITORFOREGROUNDCOLOR	= DATAORIGIN+$08BA
-CONFIG.ARROWSRAW	= DATAORIGIN+$08BB
-CONFIG.KEYCODEDISPLAY	= DATAORIGIN+$08BC
-B	= DATAORIGIN+$08BD
-H	= DATAORIGIN+$08BE
-W	= DATAORIGIN+$08BF
-adr.S	= [DATAORIGIN+$08C0] .array [41]
+CONFIG.EDITORBACKGROUNDCOLOR	= DATAORIGIN+$08BA
+CONFIG.EDITORFOREGROUNDCOLOR	= DATAORIGIN+$08BB
+CONFIG.ARROWSRAW	= DATAORIGIN+$08BC
+CONFIG.KEYCODEDISPLAY	= DATAORIGIN+$08BD
+B	= DATAORIGIN+$08BE
+H	= DATAORIGIN+$08BF
+W	= DATAORIGIN+$08C0
+adr.S	= [DATAORIGIN+$08C1] .array [41]
 .var S	= adr.S .word
-C	= DATAORIGIN+$08E9
-KEY	= DATAORIGIN+$08EA
-.var AFILE	= DATAORIGIN+$08EB .word
-JOYX	= DATAORIGIN+$08F7
-JOYY	= DATAORIGIN+$08F8
-JOYFIRE	= DATAORIGIN+$08F9
-BRUSH	= DATAORIGIN+$08FA
-KEYREPEATCOUNTER	= DATAORIGIN+$08FB
-OLDVBL	= DATAORIGIN+$08FC
-OLDDLI	= DATAORIGIN+$08FE
-MODE	= DATAORIGIN+$0900
-DRAWTOOL	= DATAORIGIN+$0901
-CURSORX	= DATAORIGIN+$0902
-CURSORY	= DATAORIGIN+$0903
-CURSOR	= DATAORIGIN+$0904
-CURSORCHAR	= DATAORIGIN+$0906
-KEYDOWN	= DATAORIGIN+$0907
-PENDOWN	= DATAORIGIN+$0908
-INVERT	= DATAORIGIN+$0909
-CURSORFORWARD	= DATAORIGIN+$090A
-STATUSCUSTOMCHARSET	= DATAORIGIN+$090B
-EDITORCHARSET	= DATAORIGIN+$090C
-P1X	= DATAORIGIN+$090D
-P2X	= DATAORIGIN+$090E
-P1Y	= DATAORIGIN+$090F
-P2Y	= DATAORIGIN+$0910
-adr.BRUSHHISTORY	= [DATAORIGIN+$0911] .array [18]
+C	= DATAORIGIN+$08EA
+KEY	= DATAORIGIN+$08EB
+.var AFILE	= DATAORIGIN+$08EC .word
+JOYX	= DATAORIGIN+$08F8
+JOYY	= DATAORIGIN+$08F9
+JOYFIRE	= DATAORIGIN+$08FA
+BRUSH	= DATAORIGIN+$08FB
+KEYREPEATCOUNTER	= DATAORIGIN+$08FC
+OLDVBL	= DATAORIGIN+$08FD
+OLDDLI	= DATAORIGIN+$08FF
+MODE	= DATAORIGIN+$0901
+DRAWTOOL	= DATAORIGIN+$0902
+CURSORX	= DATAORIGIN+$0903
+CURSORY	= DATAORIGIN+$0904
+CURSOR	= DATAORIGIN+$0905
+CURSORCHAR	= DATAORIGIN+$0907
+KEYDOWN	= DATAORIGIN+$0908
+PENDOWN	= DATAORIGIN+$0909
+INVERT	= DATAORIGIN+$090A
+CURSORFORWARD	= DATAORIGIN+$090B
+STATUSCUSTOMCHARSET	= DATAORIGIN+$090C
+EDITORCHARSET	= DATAORIGIN+$090D
+P1X	= DATAORIGIN+$090E
+P2X	= DATAORIGIN+$090F
+P1Y	= DATAORIGIN+$0910
+P2Y	= DATAORIGIN+$0911
+adr.BRUSHHISTORY	= [DATAORIGIN+$0912] .array [18]
 .var BRUSHHISTORY	= adr.BRUSHHISTORY .word
-BRUSHINDEX	= DATAORIGIN+$0923
-BRUSHFRAMEPOSX	= DATAORIGIN+$0924
+BRUSHINDEX	= DATAORIGIN+$0924
+BRUSHFRAMEPOSX	= DATAORIGIN+$0925
 adr.KEYCHARS	= $8000
 .var KEYCHARS	= adr.KEYCHARS .word
-adr.UNDOBUFFERS	= [DATAORIGIN+$0925] .array [8] .word
+adr.UNDOBUFFERS	= [DATAORIGIN+$0926] .array [8] .word
 .var UNDOBUFFERS	= adr.UNDOBUFFERS .word
-adr.UNDOACTIONS	= [DATAORIGIN+$0935] .array [64] [3]
+adr.UNDOACTIONS	= [DATAORIGIN+$0936] .array [64] [64]
 .var UNDOACTIONS	= adr.UNDOACTIONS .word
-UNDOBUFFERIDX	= DATAORIGIN+$09F5
-UNDOACTIONSIDX	= DATAORIGIN+$09F6
-REDOCOUNT	= DATAORIGIN+$09F7
-adr.LINEOFFSET	= [DATAORIGIN+$09F8] .array [24] .word
+UNDOBUFFERIDX	= DATAORIGIN+$09F6
+UNDOACTIONSIDX	= DATAORIGIN+$09F7
+REDOCOUNT	= DATAORIGIN+$09F8
+adr.LINEOFFSET	= [DATAORIGIN+$09F9] .array [24] .word
 .var LINEOFFSET	= adr.LINEOFFSET .word
 @exit
 
@@ -10262,7 +10595,7 @@ adr.LINEOFFSET	= [DATAORIGIN+$09F8] .array [24] .word
 	txs
 	.ifdef MAIN.@DEFINES.ROMOFF
 	inc portb
-	.fi
+	.endif
 
 	ldy #$01
 
@@ -10290,43 +10623,43 @@ ATARI
 
 	.ifdef MAIN.SYSTEM.@UnitInit
 	jsr MAIN.SYSTEM.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.ATARI.@UnitInit
 	jsr MAIN.ATARI.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.CRT.@UnitInit
 	jsr MAIN.CRT.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.DOS.@UnitInit
 	jsr MAIN.DOS.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.STRUTILS.@UnitInit
 	jsr MAIN.STRUTILS.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.SYSUTILS.@UnitInit
 	jsr MAIN.SYSUTILS.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.B_CRT.@UnitInit
 	jsr MAIN.B_CRT.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.B_SYSTEM.@UnitInit
 	jsr MAIN.B_SYSTEM.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.B_PMG.@UnitInit
 	jsr MAIN.B_PMG.@UnitInit
-	.fi
+	eif
 
 	.ifdef MAIN.JOYSTICK.@UnitInit
 	jsr MAIN.JOYSTICK.@UnitInit
-	.fi
+	eif
 .endm
 
 ; ------------------------------------------------------------
@@ -10371,7 +10704,7 @@ ATARI
 	.print 'JOYSTICK: ',MAIN.JOYSTICK,'..',MAIN.JOYSTICK+.SIZEOF(MAIN.JOYSTICK)-1
 	eif
 
-	.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+	.print 'CODE: ',CODEORIGIN,'..',*-1
 
 ; ------------------------------------------------------------
 
@@ -10470,27 +10803,27 @@ DATAORIGIN
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $03  $00 $0E $00 $04 $90 $8E $98 $98
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $03 $00 $0E $00 $04 $90 $8E $98
+.by  $98 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $01 $80 $14 <[DATAORIGIN+$08FC] >[DATAORIGIN+$08FC] <[DATAORIGIN+$08FE] >[DATAORIGIN+$08FE]
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $FF $FF $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $01 $80 $14 <[DATAORIGIN+$08FD] >[DATAORIGIN+$08FD] <[DATAORIGIN+$08FF]
+.by  >[DATAORIGIN+$08FF] $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $FF $FF  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $28 $00 $50 $00 $78 $00  $A0 $00 $C8 $00 $F0 $00 $18 $01
-.by  $40 $01 $68 $01 $90 $01 $B8 $01  $E0 $01 $08 $02 $30 $02 $58 $02  $80 $02 $A8 $02 $D0 $02 $F8 $02
-.by  $20 $03 $48 $03 $70 $03 $98 $03  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $3F $21 $21 $21 $21 $3F $50 $70  $90 $B0 $48 $40 $38 $30 $03 $03  $03 $03 $FF
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $28 $00 $50 $00 $78  $00 $A0 $00 $C8 $00 $F0 $00 $18
+.by  $01 $40 $01 $68 $01 $90 $01 $B8  $01 $E0 $01 $08 $02 $30 $02 $58  $02 $80 $02 $A8 $02 $D0 $02 $F8
+.by  $02 $20 $03 $48 $03 $70 $03 $98  $03 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $3F $21 $21 $21 $21 $3F $50  $70 $90 $B0 $48 $40 $38 $30 $03  $03 $03 $03 $FF
 
 VARINITSIZE	= *-DATAORIGIN
-VARDATASIZE	= 2804
+VARDATASIZE	= 2809
 
 PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
 
