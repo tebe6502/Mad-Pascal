@@ -1,5 +1,5 @@
-// 138 ticks	horizontal
-// 294 ticks	diamond
+// 113 ticks	horizontal
+// 239 ticks	diamond
 
 program main;
 
@@ -7,12 +7,12 @@ uses crt, sysutils, fastgraph;
 
 {$define horizontal}
 
-var	ticks: word;
+var	ticks: cardinal;
 
 begin
 
  InitGraph(7);
- 
+
  pause;
  ticks := GetTickCount;
 
@@ -22,7 +22,7 @@ begin
  SetColor(2); Circle(50,20, 8);
 
  SetColor(3); Circle(35,56, 10);
- 
+
 
  {$ifdef horizontal}
 
