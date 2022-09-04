@@ -1,4 +1,4 @@
-uses crt, sio;
+uses crt, siodisk;
 
 var
 	density: byte;
@@ -8,7 +8,6 @@ var
 	f: file;
 
 	x: word;
-
 
 begin
 

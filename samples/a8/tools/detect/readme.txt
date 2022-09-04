@@ -1,3 +1,14 @@
+SOPHIA $D01E (R)
+    Bit    - 7 -     - 6 -     - 5 -     - 4 -     - 3 -     - 2 -     - 1 -     - 0
+SOPHIA7 SOPHIA6  SOPHIA5  SOPHIA4  SOPHIA3  SOPHIA2  SOPHIA1  SOPHIA0
+Initial 0     1     0     1     0     0     1     1
+Ten rejestr służy do wykrycia obecności SOPHII w systemie. Zawiera stałą wartość 53 hex (“S”).
+
+
+
+
+
+
             org $c000  
 
              dta $9B

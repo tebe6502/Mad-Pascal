@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------
-; Mad Pascal Compiler version 1.6.6 [2022/04/11] for 6502
+; Mad Pascal Compiler version 1.6.6 [2022/06/17] for 6502
 ; ------------------------------------------------------------
 
 STACKWIDTH	= 16
@@ -122,10 +122,6 @@ START
 	tsx
 	stx MAIN.@halt+1
 
-	.ifdef fmulinit
-	fmulinit
-	.fi
-
 VLEN	= VARDATASIZE-VARINITSIZE
 VADR	= DATAORIGIN+VARINITSIZE
 
@@ -228,6 +224,15 @@ CH_BELL	= $FD
 CH_DEL	= $7E
 CH_DELLINE	= $9C
 CH_INSLINE	= $9D
+PAL_PMCOLOR0	= $00
+PAL_PMCOLOR1	= $01
+PAL_PMCOLOR2	= $02
+PAL_PMCOLOR3	= $03
+PAL_COLOR0	= $04
+PAL_COLOR1	= $05
+PAL_COLOR2	= $06
+PAL_COLOR3	= $07
+PAL_COLBAK	= $08
 COLOR_BLACK	= $00
 COLOR_WHITE	= $0E
 COLOR_RED	= $32
@@ -377,7 +382,7 @@ IRQVEC	= $FFFE
 
 .local	KEYPRESSED					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000056  -------------------
+; -------------------  ASM Block 00000054  -------------------
 
 	ldy #$00	; false
 	lda kbcodes
@@ -439,7 +444,7 @@ BLINK	= $80
 
 .local	DETECTANTIC					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000063  -------------------
+; -------------------  ASM Block 00000061  -------------------
 
 
 // ANTIC PAL Test for Atari 8-bits
@@ -491,10 +496,10 @@ RESULT	= DATAORIGIN+$002E
 	jsr DETECTCPU
 	lda #$7F
 	cmp DETECTCPU.RESULT
-	jcs l_0229
+	jcs l_0235
 @
 
-; -------------------  ASM Block 00000064  -------------------
+; -------------------  ASM Block 00000062  -------------------
 
 
 adr	= eax
@@ -566,7 +571,7 @@ ramsize	stz adr
 
 	opt c-
 
-l_0229
+l_0235
 @exit
 
 ; ------------------------------------------------------------
@@ -577,7 +582,7 @@ RESULT	= DATAORIGIN+$002F
 
 .local	DETECTVBXE					; FUNCTION | ASSEMBLER | REGISTER
 
-; -------------------  ASM Block 00000065  -------------------
+; -------------------  ASM Block 00000063  -------------------
 
 	txa:pha
 
@@ -606,7 +611,7 @@ RESULT	= :STACKORIGIN-4
 
 .local	DETECTSTEREO					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000067  -------------------
+; -------------------  ASM Block 00000065  -------------------
 
 	txa:pha
 
@@ -645,7 +650,7 @@ RESULT	= DATAORIGIN+$0031
 
 .local	DETECTCPU					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000068  -------------------
+; -------------------  ASM Block 00000066  -------------------
 
 	txa:pha
 
@@ -692,7 +697,7 @@ RESULT	= DATAORIGIN+$0032
 
 .local	DETECTCPUSPEED					; FUNCTION
 
-; -------------------  ASM Block 00000069  -------------------
+; -------------------  ASM Block 00000067  -------------------
 
 	stx @sp
 
@@ -831,7 +836,7 @@ FR0	= DATAORIGIN+$0039
 
 .local	DETECTMEM					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000070  -------------------
+; -------------------  ASM Block 00000068  -------------------
 
 	txa:pha
 
@@ -957,7 +962,7 @@ RESULT	= DATAORIGIN+$003B
 
 .local	DETECTMAPRAM					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000071  -------------------
+; -------------------  ASM Block 00000069  -------------------
 
 
 bsav	= DX
@@ -1046,7 +1051,7 @@ RESULT	= DATAORIGIN+$003C
 
 .local	DETECTBASIC					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000072  -------------------
+; -------------------  ASM Block 00000070  -------------------
 
 
 BASROM	= $a8e2
@@ -1108,7 +1113,7 @@ l_01AA
 
 	sta @CASETMP_0003
 	cmp #$00
-	jne l_0266
+	jne l_0272
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 27
@@ -1116,9 +1121,9 @@ l_01AA
 	@printSTRING #CODEORIGIN+$000B
 
 	jmp a_0003
-l_0266
+l_0272
 	cmp #$01
-	jne l_0272
+	jne l_027E
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 28
@@ -1126,7 +1131,7 @@ l_0266
 	@printSTRING #CODEORIGIN+$0011
 
 	jmp a_0003
-l_0272
+l_027E
 
 ; optimize FAIL ('@print', detect.pas), line = 30
 
@@ -1168,7 +1173,7 @@ a_0003
 ; optimize OK (detect.pas), line = 50
 
 	lda A
-	jeq l_02A3
+	jeq l_02AF
 
 ; optimize FAIL ('@print', detect.pas), line = 51
 
@@ -1199,10 +1204,10 @@ a_0003
 ; optimize OK (detect.pas), line = 52
 
 	lda P
-	jpl l_02D7
+	jpl l_02E3
 	@printSTRING #CODEORIGIN+$0043
-l_02D7
-l_02A3
+l_02E3
+l_02AF
 
 ; optimize FAIL ('@print', detect.pas), line = 54
 
@@ -1218,7 +1223,7 @@ l_02A3
 	lda MISC.DETECTANTIC.RESULT
 	sta @CASETMP_0004
 	cmp #$01
-	jne l_02EB
+	jne l_02F7
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 78
@@ -1227,9 +1232,9 @@ l_02A3
 	@printEOL
 
 	jmp a_0004
-l_02EB
+l_02F7
 	cmp #$00
-	jne l_02F7
+	jne l_0303
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 79
@@ -1237,7 +1242,7 @@ l_02EB
 	@printSTRING #CODEORIGIN+$005B
 	@printEOL
 
-l_02F7
+l_0303
 a_0004
 
 ; optimize FAIL ('@print', detect.pas), line = 87
@@ -1250,7 +1255,7 @@ a_0004
 	lda MISC.DETECTBASIC.RESULT
 	sta @CASETMP_0005
 	cmp #$00
-	jne l_030C
+	jne l_0318
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 90
@@ -1259,9 +1264,9 @@ a_0004
 	@printEOL
 
 	jmp a_0005
-l_030C
+l_0318
 	cmp #$A2
-	jne l_0318
+	jne l_0324
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 91
@@ -1270,9 +1275,9 @@ l_030C
 	@printEOL
 
 	jmp a_0005
-l_0318
+l_0324
 	cmp #$60
-	jne l_0324
+	jne l_0330
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 92
@@ -1281,9 +1286,9 @@ l_0318
 	@printEOL
 
 	jmp a_0005
-l_0324
+l_0330
 	cmp #$EA
-	jne l_0330
+	jne l_033C
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 93
@@ -1292,7 +1297,7 @@ l_0324
 	@printEOL
 
 	jmp a_0005
-l_0330
+l_033C
 
 ; optimize FAIL ('@print', detect.pas), line = 95
 
@@ -1309,7 +1314,7 @@ a_0005
 	lda MISC.DETECTOS
 	sta @CASETMP_0006
 	cmp #$01
-	jne l_034C
+	jne l_0358
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 106
@@ -1318,9 +1323,9 @@ a_0005
 	@printEOL
 
 	jmp a_0006
-l_034C
+l_0358
 	cmp #$02
-	jne l_0358
+	jne l_0364
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 107
@@ -1329,9 +1334,9 @@ l_034C
 	@printEOL
 
 	jmp a_0006
-l_0358
+l_0364
 	cmp #$03
-	jne l_0364
+	jne l_0370
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 108
@@ -1340,9 +1345,9 @@ l_0358
 	@printEOL
 
 	jmp a_0006
-l_0364
+l_0370
 	cmp #$04
-	jne l_0370
+	jne l_037C
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 109
@@ -1351,9 +1356,9 @@ l_0364
 	@printEOL
 
 	jmp a_0006
-l_0370
+l_037C
 	cmp #$0A
-	jne l_037C
+	jne l_0388
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 110
@@ -1362,9 +1367,9 @@ l_0370
 	@printEOL
 
 	jmp a_0006
-l_037C
+l_0388
 	cmp #$0B
-	jne l_0388
+	jne l_0394
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 111
@@ -1373,9 +1378,9 @@ l_037C
 	@printEOL
 
 	jmp a_0006
-l_0388
+l_0394
 	cmp #$3B
-	jne l_0394
+	jne l_03A0
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 112
@@ -1384,9 +1389,9 @@ l_0388
 	@printEOL
 
 	jmp a_0006
-l_0394
+l_03A0
 	cmp #$40
-	jne l_03A0
+	jne l_03AC
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 113
@@ -1395,9 +1400,9 @@ l_0394
 	@printEOL
 
 	jmp a_0006
-l_03A0
+l_03AC
 	cmp #$FD
-	jne l_03AC
+	jne l_03B8
 @
 
 ; optimize FAIL ('@print', detect.pas), line = 114
@@ -1406,26 +1411,26 @@ l_03A0
 	@printEOL
 
 	jmp a_0006
-l_03AC
+l_03B8
 
 ; optimize OK (detect.pas), line = 116
 
 	lda ATARI.PORTB
 	and #$01
-	jne l_03C9
+	jne l_03D5
 
 ; optimize FAIL ('@print', detect.pas), line = 117
 
 	@printSTRING #CODEORIGIN+$006C
 	@printEOL
-	jmp l_03D6
-l_03C9
+	jmp l_03E2
+l_03D5
 
 ; optimize FAIL ('@print', detect.pas), line = 119
 
 	@printSTRING #CODEORIGIN+$00AE
 	@printEOL
-l_03D6
+l_03E2
 a_0006
 
 ; optimize FAIL ('@print', detect.pas), line = 127
@@ -1451,7 +1456,7 @@ a_0006
 ; optimize OK (detect.pas), line = 141
 
 	lda CPU
-	jpl l_0406
+	jpl l_0412
 
 ; optimize FAIL ('@print', detect.pas), line = 142
 
@@ -1473,7 +1478,7 @@ a_0006
 	dex
 	@printSTRING #CODEORIGIN+$0177
 	@printEOL
-l_0406
+l_0412
 
 ; optimize FAIL ('MISC.DETECTMEM', detect.pas), line = 149
 
@@ -1497,17 +1502,17 @@ l_0406
 	sta I
 	ldy BNK
 	dey
-	sty @FORTMP_043B_0
+	sty @FORTMP_0447_0
 
-l_043E
+l_044A
 ; --- ForToDoCondition
 	lda I
-	sub @FORTMP_043B_0:#$00
+	sub @FORTMP_0447_0:#$00
 	svc
 	eor #$80
 	bmi *+7
 	beq *+5
-	jmp l_044C
+	jmp l_0458
 
 ; optimize FAIL ('divmulSHORTINT.MOD', detect.pas), line = 154
 
@@ -1519,11 +1524,11 @@ l_043E
 	dex
 	dex
 	lda :STACKORIGIN+1,x
-	jne l_0467
+	jne l_0473
 @
 	@printEOL
 	@printSTRING #CODEORIGIN+$018E
-l_0467
+l_0473
 
 ; optimize OK (detect.pas), line = 156
 
@@ -1544,8 +1549,8 @@ l_0467
 	inc I
 	lda I
 	cmp #$80
-	jne l_043E
-l_044C
+	jne l_044A
+l_0458
 
 ; optimize FAIL ('@print', detect.pas), line = 160
 
@@ -1558,13 +1563,13 @@ l_044C
 	@printEOL
 
 ; --- RepeatUntilProlog
-l_0482
+l_048E
 
 ; optimize FAIL ('CRT.KEYPRESSED', detect.pas), line = 163
 
 	jsr CRT.KEYPRESSED
 	lda CRT.KEYPRESSED.RESULT
-	jeq l_0482
+	jeq l_048E
 
 ; ------------------------------------------------------------
 

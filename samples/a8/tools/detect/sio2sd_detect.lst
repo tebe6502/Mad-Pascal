@@ -1,5 +1,5 @@
-mads 2.1.3 build 44 (4 Jun 21)
-   150 					opt l+
+mads 2.1.6 build 2 (3 May 22)
+    78 					opt l+
    106
    107 				.print 'ZPAGE: ',fxptr,'..',zpend-1
    107 				ZPAGE: $0080..$00D7
