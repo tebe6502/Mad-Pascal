@@ -20,7 +20,7 @@ const
 
 	PATTERN_LIMIT = 85;
 
-	ZPAGE	= $d900;		// kopia strony zerowej
+	ZPAGE	= $d900;		// kopia strony $00 i $03 ($d900..$daff)
 
 	EFFECT	= $dc00;		// dekodowaniu kodu dla efektu sampla
 	TADCL	= $dd00;		// mlodsze bajty przyrostu offsetu dla sampla (nuta)
