@@ -2036,7 +2036,7 @@ begin
     slen := Length(s);
     result := 0;
 
-    for i := 1 to slen - 1 do
+    for i := 1 to slen do
     begin
         if s[i] = c then
         begin
