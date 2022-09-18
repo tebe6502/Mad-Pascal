@@ -94,6 +94,8 @@ var
 
 	Pal: byte absolute $D014;		// (R) znacznik systemu TV PAL = 1, NTSC = 15
 
+	[volatile] trig3: byte absolute $d013;	// (R) znacznik podlaczenia cartridga
+
 	colpm0: byte absolute $D012;		// rejestry sprzetowe kolorow duchow i pociskow
 	colpm1: byte absolute $D013;
 	colpm2: byte absolute $D014;

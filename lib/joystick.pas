@@ -69,14 +69,82 @@ var
 	[volatile] trig0 : byte absolute $d010;	// (R)
 	[volatile] trig1 : byte absolute $d011;	// (R)
 
-	[volatile] pot0 : byte absolute $d200;	// (R)
+	[volatile] pot0 : byte absolute $d200;		// (R)
+	[volatile] allpot : byte absolute $d208;	// (R)
 
 	[volatile] potgo: byte absolute $d20b;	// (W) Start the POT scan sequence. You must read your POT values first and then start the scan sequence,
 						// since POTGO resets the POT registers to zero. Written by the stage two VBLANK sequence.
 
 
+	function paddle0: byte; assembler;	// call only on begining VBL
+	function fire2: byte;			// call only on begining VBL
+
 implementation
 
 
+function paddle0: byte; assembler;
+asm
+	ldy pot0
+
+	lda allpot
+	and #1
+	sne
+
+	dta $2c		; bit*
+	ldy #1
+	sty Result
+
+	sta potgo
+end;
+
+
+function fire2: byte;
+(*
+@description:
+Second FIRE
+
+<https://github.com/ascrnet/Joy2Bplus>
+
+author:
+Abel Carrasco (ascrnet)
+
+@returns: 0		FIRE2 Button not pressed
+	  $8f..$0e	FIRE2 Button pressed
+*)
+begin
+
+ paddle0;
+
+ asm
+	cpy #$e4
+	beq pressed
+
+	lda exists: #$00
+	ora #$02
+	sta exists
+
+	lda #0
+	beq setvol
+pressed
+	lda exists
+	and #$02
+	beq next
+
+	lda vol_b1: #$00
+	bne decay
+	lda #$8f
+	bne setvol
+decay
+	cmp #$f
+	bcc next
+	sbc #1
+setvol
+	sta vol_b1
+next
+	lda vol_b1
+	sta Result
+ end;
+
+end;
 
 end.
