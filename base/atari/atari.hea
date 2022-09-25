@@ -266,6 +266,11 @@ irqst	=	$D20E	; status przerwa? IRQ (O)
 skctl	=	$D20F	; rejestr kontroli z??cza szeregowego (Z)
 skstat	=	$D20F	; rejestr statusu z??cza szeregowego (O)
 
+pot0	=	$d200	; (O)
+allpot	=	$d208	; (O)
+
+potgo	=	$d20b	; (Z)
+
 * ---------------------------------------------------------------------------------------------
 * ---	PIA
 * ---------------------------------------------------------------------------------------------

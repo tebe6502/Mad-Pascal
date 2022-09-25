@@ -14,6 +14,8 @@
 	RMT
 	RMTPLAY
 	XBMP
+	SAPR
+	SAPRPLAY
 */
 
 	org CODEORIGIN
@@ -365,6 +367,41 @@ data
 
 .endl
 	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+$049e
+
+	ini mcpy
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+/* SAPRPLAY (SAP-R LZSS PLAYER)
+/* ----------------------------------------------------------------------- */
+
+.macro	SAPRPLAY (nam, lab)
+
+	org RESORIGIN
+
+len	= .sizeof(_%%2)
+
+	ert <main.%%lab <> 0,'SAP-R LZSS PLAYER routine MUST be compiled from the begin of the memory page'
+
+mcpy	ift (main.%%lab<$bc20) && (main.%%lab+len >= $bc20)
+	mva #0 sdmctl
+	sta dmactl
+	eif
+
+	jsr sys.off
+
+	memcpy #data #main.%%lab #len
+
+	jmp sys.on
+data
+
+.local	_%%2, main.%%lab
+
+	.link 'atari\players\playlzs16_reloc.obx'
+
+.endl
+	.print '$R SAPRPLAY ',main.%%lab,'..',main.%%lab+$c00-1
 
 	ini mcpy
 .endm
@@ -807,6 +844,8 @@ ofs	= 6
 
 len = .filesize(%%1)
 
+	ert main.%%lab+len-6>$FFFF,'Memory overrun ',main.%%lab+len-6
+
  ift main.%%lab+len-6 >= $c000
 	org RESORIGIN
 
@@ -821,15 +860,55 @@ data	mpt_relocator %%1,main.%%lab
 	ini mcpy
  els
 	org main.%%lab
-	mpt_relocator %%1,main.%%lab
-	
-	.print '$R MPT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
+	mpt_relocator %%1,main.%%lab	
  eif
+	.print '$R MPT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
 .endm
 
 
 /* ----------------------------------------------------------------------- */
+/* SAPR (SAPR LZSS DATA)
+/* ----------------------------------------------------------------------- */
 
+.macro	SAPR (nam, lab)
+
+len = .filesize(%%1)
+
+	ert main.%%lab+len+2>$FFFF,'Memory overrun ',main.%%lab+len+2
+
+ ift main.%%lab+len+2 >= $c000
+	org RESORIGIN
+
+mcpy	jsr sys.off
+
+	memcpy #data #main.%%lab #len+2
+
+	jmp sys.on
+
+.def :MAIN.@RESOURCE.%%lab = main.%%lab
+.def :MAIN.@RESOURCE.%%lab.end = main.%%lab+len+2
+
+data	dta a(len)
+	ins %%1
+
+	ini mcpy
+ els
+	org main.%%lab
+
+.def :MAIN.@RESOURCE.%%lab = *
+	
+	dta a(len)
+	ins %%1
+	
+.def :MAIN.@RESOURCE.%%lab.end = *
+	
+ eif
+ 
+	.print '$R SAPR    ',main.%%lab,'..',main.%%lab+len+2," %%1"
+.endm
+
+
+/* ----------------------------------------------------------------------- */
 
 /*
   CMC Relocator
@@ -853,7 +932,7 @@ new_add	= :2					// nowy adres dla modulu CMC
 
 old_add	= .get[2] + .get[3]<<8			// stary adres modulu CMC
 
-length	= .get[4] + .get[5]<<8 - old_add + 1	// dlugosc pliku MPT bez naglowka DOS'u
+length	= .get[4] + .get[5]<<8 - old_add + 1	// dlugosc pliku CMC bez naglowka DOS'u
 
 	.put[2] = .lo(new_add)			// poprawiamy naglowek DOS'a
 	.put[3] = .hi(new_add)			// tak aby zawieral informacje o nowym
@@ -892,6 +971,8 @@ ofs	equ 6
 
 len = .filesize(%%1)
 
+	ert main.%%lab+len-6>$FFFF,'Memory overrun ',main.%%lab+len-6
+
  ift main.%%lab+len-6 >= $c000
 	org RESORIGIN
 
@@ -906,10 +987,9 @@ data	cmc_relocator %%1,main.%%lab
 	ini mcpy
  els
 	org main.%%lab
-	cmc_relocator %%1,main.%%lab
-	
-	.print '$R CMC     ',main.%%lab,'..',main.%%lab+len-6," %%1"	
+	cmc_relocator %%1,main.%%lab	
  eif
+ 	.print '$R CMC     ',main.%%lab,'..',main.%%lab+len-6," %%1"
 .endm
 
 
