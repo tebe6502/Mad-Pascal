@@ -13,6 +13,7 @@ unit SAPLZSS;
 {
 
 TLZSSPlay.Init
+TLZSSPlay.Decode
 TLZSSPlay.Play
 TLZSSPlay.Stop
 
@@ -25,29 +26,26 @@ type	TLZSSPlay = Object
 @description:
 object for controling SAP-R LZSS Player
 *)
-	data: pointer;			// SAP-R LZSS data address
-	size: word;			// SAP-R LZSS data size
-	buffer: byte;			// SAP-R LZSS buffer (hi byte), 9*256 bytes
-	pokey: byte;			// POKEY address (low byte), $00 -> $d200, $10 -> $d210
+	jmp: byte;			// dta $4c
 
-	procedure Init; assembler;	// initializes
-	procedure Play; assembler;	// play
-	procedure Stop; assembler;	// stops music
+	player: pointer;		// memory address of a player
+	modul: pointer;			// memory address of a module
+
+	// A = POKEY address (low byte), $00 -> $d200, $10 -> $d210
+
+	procedure Init(a: byte); assembler;	// initializes
+	procedure Decode; assembler; 		// decode stream
+	procedure Play; assembler;		// play
+	procedure Stop; assembler;		// stops music
 
 	end;
 
 
 implementation
 
-uses misc;
-
-var	ntsc: byte;
 
 
-{$link saplzss.obx}
-
-
-procedure TLZSSPlay.Init; assembler;
+procedure TLZSSPlay.Init(a: byte); assembler;
 (*
 @description:
 Initialize SAP-R LZSS player
@@ -55,30 +53,64 @@ Initialize SAP-R LZSS player
 asm
 	txa:pha
 
-	ldx TLZSSPlay
-	ldy TLZSSPlay+1
+	mwa TLZSSPlay :bp2
 
-	jsr sap_lzss.init
+	ldy #0
+	lda #$4c	; JMP
+	sta (:bp2),y
+
+	iny
+	lda (:bp2),y
+	add #6		; jsr player+6
+	sta adr
+	iny
+	lda (:bp2),y
+	adc #0
+	sta adr+1
+
+	ldy #4
+	lda (:bp2),y
+	tax		; hi byte of MPT module to Y reg
+	dey
+	lda (:bp2),y	; low byte of MPT module to X reg
+
+	ldy a		; POKEY: $00 | $10 | ...
+
+	jsr $ffff
+adr	equ *-2
 
 	pla:tax
+end;
+
+
+procedure TLZSSPlay.Decode; assembler;
+(*
+@description:
+Decode stream music
+*)
+asm
+	mwa TLZSSPlay ptr
+
+	clc
+
+	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
+ptr	equ *-2
+
 end;
 
 
 procedure TLZSSPlay.Play; assembler;
 (*
 @description:
-Play music, call this procedure every VBL frame
+Play music
 *)
 asm
-	asl ntsc		; =0 PAL, =4 NTSC
-	bcc skp
+	mwa TLZSSPlay ptr
 
-	lda #%00000100
-	sta ntsc
+	sec
 
-	bne @exit
-skp
-	jmp sap_lzss.play
+	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
+ptr	equ *-2
 end;
 
 
@@ -88,15 +120,21 @@ procedure TLZSSPlay.Stop; assembler;
 Halt SAP-R LZSS player
 *)
 asm
-	jmp sap_lzss.stop
+	lda #0
+	sta $d208
+	sta $d218
+	ldy #3
+	sty $d20f
+	sty $d21f
+	ldy #8
+clr	sta $d200,y
+	sta $d210,y
+	dey
+	bpl clr
 end;
 
 
 initialization
 
-if DetectAntic then
- ntsc:=0
-else
- ntsc:=4;
 
 end.
