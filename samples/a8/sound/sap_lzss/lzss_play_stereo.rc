@@ -1,0 +1,5 @@
+mod_r	SAPR	'lzss\acid_r.lz16'
+mod_l	SAPR	'lzss\acid_l.lz16'
+
+play_r SAPRPLAY
+play_l SAPRPLAY
