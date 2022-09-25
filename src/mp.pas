@@ -1206,7 +1206,7 @@ var a: string;
 begin
 
  if Pass = CODEGENERATIONPASS then
-  if pos('.', Ident[IdentIndex].Name)=0 then begin
+  if pos('.', Ident[IdentIndex].Name) = 0 then begin
 
    a := UnitName[Tok[NoteTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[NoteTokenIndex].Line) + ')' + ' Note: Local ';
 
@@ -1936,7 +1936,9 @@ begin
        (AnsiUpperCase(res.resType) = 'MPTPLAY') or
        (AnsiUpperCase(res.resType) = 'CMCPLAY') or
        (AnsiUpperCase(res.resType) = 'EXTMEM') or
-       (AnsiUpperCase(res.resType) = 'XBMP')
+       (AnsiUpperCase(res.resType) = 'XBMP') or
+       (AnsiUpperCase(res.resType) = 'SAPR') or
+       (AnsiUpperCase(res.resType) = 'SAPRPLAY')
       then
 
       else
@@ -2071,9 +2073,11 @@ else
    NumAllocElements_ := NumAllocElements shr 16;		// , yy]
    NumAllocElements  := NumAllocElements and $FFFF;		// [xx,
 
-  if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = CODEGENERATIONPASS) then
-    if not ( (Ident[NumIdent].Pass in [CALLDETERMPASS , CODEGENERATIONPASS]) or (Ident[NumIdent].IsNotDead) ) then
+  if Name <> 'RESULT' then
+   if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = CODEGENERATIONPASS) then
+     if not ( (Ident[NumIdent].Pass in [CALLDETERMPASS , CODEGENERATIONPASS]) or (Ident[NumIdent].IsNotDead) ) then
       Note(ErrTokenIndex, NumIdent);
+
 
   case Kind of
 
@@ -46297,6 +46301,9 @@ WHILETOK:
 	begin
 	IdentIndex := GetIdent(Tok[i + 2].Name^);
 
+	if IdentIndex = 0 then
+	 iError(i + 2, UnknownIdentifier);
+
 	if Ident[IdentIndex].DataType <> POINTERTOK then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
 
@@ -46331,6 +46338,9 @@ WHILETOK:
       else
 	begin
 	IdentIndex := GetIdent(Tok[i + 2].Name^);
+
+	if IdentIndex = 0 then
+	 iError(i + 2, UnknownIdentifier);
 
 	if not(Ident[IdentIndex].DataType in IntegerTypes) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -50815,15 +50825,28 @@ asm65(#13#10'.local'#9'@RESOURCE');
      else
       tmp := GetLocalName(IdentIndex);
 
+//     asm65(resArray[i].resName+' = ' + tmp);
+//     asm65(resArray[i].resName+'.end');
+
      yes:=true; Break;
     end;
 
+
   if not yes then
+   if AnsiUpperCase(resArray[i].resType) = 'SAPR' then begin
+    asm65(resArray[i].resName);
+    asm65(#9'dta a('+resArray[i].resName+'.end-'+resArray[i].resName+'-2)');
+    asm65(#9'ins '''+resArray[i].resFile+'''');
+    asm65(resArray[i].resName+'.end');
+    resArray[i].resStream := true;
+   end else
+
    if AnsiUpperCase(resArray[i].resType) = 'RCDATA' then begin
     asm65(resArray[i].resName+#9'ins '''+resArray[i].resFile+'''');
     asm65(resArray[i].resName+'.end');
     resArray[i].resStream := true;
    end else
+
     Error(NumTok, 'Resource identifier not found: Type = '+resArray[i].resType+', Name = '+resArray[i].resName);
 
 //  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);

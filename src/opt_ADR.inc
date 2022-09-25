@@ -1035,12 +1035,12 @@
 
 	if lda_adr(i+6) and iy(i+6) then begin
 	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 listing[i+6] := listing[i+6] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+6] := listing[i+6] + '+$' + IntToHex(q, 2);
 	end;
 
 	if sta_adr(i+7) and iy(i+7) then begin
 	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 listing[i+7] := listing[i+7] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+7] := listing[i+7] + '+$' + IntToHex(q, 2);
 	end;
 
 	listing[i] := '';
@@ -1049,36 +1049,36 @@
 
 	if lda_adr(i+8) and iy(i+8) then begin
 	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+8] := listing[i+8] + '+$' + IntToHex(q, 2);
 	end;
 
 	if sta_adr(i+9) and iy(i+9) then begin
 	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2);
 	end;
 
 	if (lda_adr(i+10) = false) and (sta_adr(i+11) = false) then begin Result:=false; Break end;
 
 	if lda_adr(i+10) and iy(i+10) then begin
 	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
-	 listing[i+10] := listing[i+10] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+10] := listing[i+10] + '+$' + IntToHex(q, 2);
 	end;
 
 	if sta_adr(i+11) and iy(i+11) then begin
 	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
-	 listing[i+11] := listing[i+11] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+11] := listing[i+11] + '+$' + IntToHex(q, 2);
 	end;
 
 	if (lda_adr(i+12) = false) and (sta_adr(i+13) = false) then begin Result:=false; Break end;
 
 	if lda_adr(i+12) and iy(i+12) then begin
 	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
-	 listing[i+12] := listing[i+12] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+12] := listing[i+12] + '+$' + IntToHex(q, 2);
 	end;
 
 	if sta_adr(i+13) and iy(i+13) then begin
 	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
-	 listing[i+13] := listing[i+13] + '+$' + IntToHex(q, 2);
+	 if q<>0 then listing[i+13] := listing[i+13] + '+$' + IntToHex(q, 2);
 	end;
 
 	Result:=false; Break;
