@@ -1,3 +1,15 @@
+25.09.2022
+- poprawki dla {$define romoff} zestaw znakow przepisywany jest pod ROM przed RESOURCE
+
+19.09.2022
+- nowy typ zasobu, SAPR, SAPRPLAY
+
+18.09.2022
+- unit JOYSTICK: PADDLE0, FIRE2
+
+07.09.2022
+- usunięcie komunikatu 'Note: Local variable 'RESULT' not used'
+
 29.08.2022
 - SizeOfResource(variable, name)
 - unit SAPLZSS

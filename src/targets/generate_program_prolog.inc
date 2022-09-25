@@ -159,6 +159,10 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'.fi');
  end;
 
+ asm65('.local'#9'MAIN.@RESOURCE');
+ asm65('.endl');
+
+
  if (High(resArray) > 0) and (target.id = 'a8') then begin
 
   asm65;
