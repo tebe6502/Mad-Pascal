@@ -1,1 +1,2 @@
-lzss_modul	RCDATA	'lzss\test.lz16'
+sapr_player	SAPRPLAY
+sapr_modul	SAPR	'lzss\humblebee.lz16'

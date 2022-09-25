@@ -2,6 +2,11 @@
 
 uses crt, saplzss;
 
+const
+
+sapr_player = $9000;	// ..$9BFF
+sapr_modul  = $9c00;
+
 var
 	msx: TLZSSPlay;
 
@@ -13,19 +18,17 @@ var
 begin
 	while true do begin
 
-	GetResourceHandle(msx.data, 'lzss_modul');
-	SizeOfResource(msx.size, 'lzss_modul');
+	msx.modul:=pointer(sapr_modul);
+	msx.player:=pointer(sapr_player);
 
-	msx.buffer:=hi($a000);
-	msx.pokey:=$00;
-
-	msx.init;
+	msx.init(0);
 
 	writeln('Pascal SAP-R LZSS player example');
 
 	repeat
 		pause;
 
+		msx.decode;
 		msx.play;
 
 	until keypressed;
