@@ -36063,6 +36063,11 @@ begin
     NumAllocElements := Types[i].Field[j].NumAllocElements;
     AllocElementType :=  Types[i].Field[j].AllocElementType;
 
+    if AllocElementType = FORWARDTYPE then begin
+     AllocElementType := POINTERTOK;
+     NumAllocElements := 0;
+    end;
+
     if Types[i].Field[j].Name = field then begin yes:=true; Break end;
 
     if FieldType <> RECORDTOK then
@@ -39834,10 +39839,12 @@ case Tok[i].Kind of
 
      end else begin
 
+      if Tok[i + 2].Kind <> IDENTTOK then
+        iError(i + 2, IdentifierExpected);
+
       j:=CompileConstExpression(i + 2, ConstVal, ConstValType);
 
       if isError then Exit;
-
 
       ConstVal := GetSizeof(i, ConstValType);
 
@@ -42006,6 +42013,9 @@ case Tok[i].Kind of
        j:=i + 2;
 
       end else begin
+
+      if Tok[i + 2].Kind <> IDENTTOK then
+        iError(i + 2, IdentifierExpected);
 
       oldPass := Pass;
       oldCodeSize := CodeSize;
