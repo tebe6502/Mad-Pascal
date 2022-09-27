@@ -159,6 +159,9 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'.fi');
  end;
 
+ asm65;
+ asm65(#9'org CODEORIGIN');
+ asm65;
  asm65('.local'#9'MAIN.@RESOURCE');
  asm65('.endl');
 
