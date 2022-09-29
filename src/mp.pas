@@ -50457,9 +50457,24 @@ while Tok[i].Kind in
 
 	   if (Ident[NumIdent].NumAllocElements = 0) then 					// var label: pchar = ''
 	    SaveToDataSegment(idx, Tok[i].StrAddress - CODEORIGIN + 1, CODEORIGINOFFSET)
-	   else
-	    for j := 0 to ParamIndex-1 do							// var label: string = ''
-	     SaveToDataSegment(idx + j, ord( StaticStringData[ Tok[i].StrAddress - CODEORIGIN + j ] ), BYTETOK);
+	   else begin
+
+	     if (IdType = ARRAYTOK) and (AllocElementType = CHARTOK) then begin			// var label: array of char = ''
+
+	      if Tok[i].StrLength > NumAllocElements then
+     	        Error(i, 'string length is larger than array of char length');
+
+ 	      for j := 0 to Ident[NumIdent].NumAllocElements-1 do
+	       if j > Tok[i].StrLength-1 then
+ 	         SaveToDataSegment(idx + j, ord(' '), CHARTOK)
+	       else
+ 	         SaveToDataSegment(idx + j, ord( StaticStringData[ Tok[i].StrAddress - CODEORIGIN + j + 1] ), CHARTOK);
+
+	     end else
+ 	      for j := 0 to ParamIndex-1 do							// var label: string = ''
+ 	        SaveToDataSegment(idx + j, ord( StaticStringData[ Tok[i].StrAddress - CODEORIGIN + j ] ), BYTETOK);
+
+	   end;
 
 	  end else
 	   if Ident[NumIdent].NumAllocElements = 0 then
