@@ -159,11 +159,16 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'.fi');
  end;
 
- asm65;
- asm65(#9'org CODEORIGIN');
- asm65;
- asm65('.local'#9'MAIN.@RESOURCE');
- asm65('.endl');
+
+if target.id = 'a8' then begin
+
+  asm65;
+  asm65(#9'org CODEORIGIN');
+  asm65;
+  asm65('.local'#9'MAIN.@RESOURCE');
+  asm65('.endl');
+
+end;
 
 
  if (High(resArray) > 0) and (target.id = 'a8') then begin
