@@ -269,10 +269,11 @@ Seban/SLIGHT
 
 *)
 asm
-	txa:pha
 
 pokey1	= $d200
 pokey2	= $d210
+
+	txa:pha
 
 	sei
 	inc nmien

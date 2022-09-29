@@ -4,7 +4,7 @@ unit md5;
  @author: Free Pascal development team, Tomasz Biela (Tebe)
  @name: MD5
 
- @version: 1.0
+ @version: 1.1 (2022-09-28)
 
  @description:
  Implements a MD5 digest algorithm (RFC 1321)
@@ -53,16 +53,6 @@ type
 
 implementation
 
-
-{$ifdef atari}
-type
-	PtrUInt = word;
-{$endif}
-
-{$ifdef c64}
-type
-	PtrUInt = word;
-{$endif}
 
 const
 

@@ -32,10 +32,12 @@ FillChar	; optimization build in compiler
 IsLetter
 IsDigit
 iSqrt		; fast inverse square root
+GetResourceHandle; optimization build in compiler
 HexStr
 Ln
 LowerCase
 Move		; optimization build in compiler
+NtoBE
 OctStr
 ParamCount
 ParamStr
@@ -49,6 +51,7 @@ RunError
 Seek
 SetLength
 Sin		; real, single
+SizeOfResource	; optimization build in compiler
 Space
 Str
 StringOfChar
@@ -93,6 +96,12 @@ type	TDateTime = record yy,mm,dd,h,m,s: byte end;
 	*)
 
 type	TLastArcCoords = record x,y,xstart,ystart,xend,yend: smallint end;
+	(*
+	@description:
+
+	*)
+
+type	PtrUInt = word;
 	(*
 	@description:
 
@@ -330,6 +339,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure Move(var source, dest; count: word); assembler; register; overload; inline;
 	procedure Move(var source; dest: pointer; count: word); assembler; register; overload; inline;
 	procedure Move(source: pointer; var dest; count: word); assembler; register; overload; inline;
+	function NtoBE(AValue: word): word; overload;
+	function NtoBE(AValue: cardinal): cardinal; overload;
 	function OctStr(Value: cardinal; Digits: byte): TString; assembler;
 	function ParamCount: byte; assembler;
 	function ParamStr(i: byte): TString; assembler;
@@ -345,7 +356,22 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function RandomF: Float;								//platform dependent
 	function RandomF16: Float16;								//platform dependent
 	procedure Randomize; assembler;								//platform dependent
+	function RolByte(Const AValue : Byte): Byte; overload;
+	function RolByte(Const AValue : Byte;const Dist : Byte): Byte; overload;
+	function RolWord(Const AValue : Word): Word; overload;
+	function RolWord(Const AValue : Word;const Dist : Byte): Word; overload;
+	function RolDWord(Const AValue : DWord): DWord; overload;
+	function RolDWord(Const AValue : DWord;const Dist : Byte): DWord; overload;
+	function RorByte(Const AValue : Byte): Byte; overload;
+	function RorByte(Const AValue : Byte;const Dist : Byte): Byte; overload;
+	function RorWord(Const AValue : Word): Word; overload;
+	function RorWord(Const AValue : Word;const Dist : Byte): Word; overload;
+	function RorDWord(const AValue: DWord): DWord; overload;
+	function RorDWord(const AValue: DWord; const Dist: Byte): DWord; overload;
 	procedure RunError(a: byte);
+	function SarShortint(Const AValue : Shortint;const Shift : Byte): Shortint;
+	function SarSmallint(Const AValue : Smallint;const Shift : Byte): Smallint;
+	function SarLongint(Const AValue : Longint;const Shift : Byte): Longint;
 	procedure Seek(var f: file; a: cardinal); assembler;
 	procedure SetLength(var S: string; Len: byte); register; assembler;
 	function Sin(x: Real): Real; overload;
@@ -2353,5 +2379,126 @@ begin
 
 end;
 
+
+function NtoBE(AValue: word): word; overload;
+(*
+@description:
+Convert Native-ordered integer to a Big Endian-ordered integer
+
+<https://www.freepascal.org/docs-html/rtl/system/ntobe.html>
+
+@param: AValue - Word
+@result: Word
+*)
+begin
+
+ Result := (AValue shl 8) or (AValue shr 8);
+
+end;
+
+
+function NtoBE(AValue: cardinal): cardinal; overload;
+(*
+@description:
+Convert Native-ordered integer to a Big Endian-ordered integer
+
+@param: AValue - Cardinal
+@result: Cardinal
+*)
+begin
+
+ Result := ((AValue and $FF) shl 24) or ((AValue and $FF00) shl 8) or ((AValue and $FF0000) shr 8) or ((AValue and $FF000000) shr 24);
+
+end;
+
+
+function RorByte(Const AValue : Byte): Byte; overload;
+begin
+  Result:=(AValue shr 1) or (AValue shl 7);
+end;
+
+
+function RorByte(Const AValue : Byte;const Dist : Byte): Byte; overload;
+begin
+  Result:=(AValue shr (Dist and 7)) or (AValue shl (8-(Dist and 7)));
+end;
+
+
+function RolByte(Const AValue : Byte): Byte; overload;
+begin
+  Result:=(AValue shl 1) or (AValue shr 7);
+end;
+
+
+function RolByte(Const AValue : Byte;const Dist : Byte): Byte; overload;
+begin
+  Result:=(AValue shl (Dist and 7)) or (AValue shr (8-(Dist and 7)));
+end;
+
+
+function RorWord(Const AValue : Word): Word; overload;
+begin
+  Result:=(AValue shr 1) or (AValue shl 15);
+end;
+
+
+function RorWord(Const AValue : Word;const Dist : Byte): Word; overload;
+begin
+  Result:=(AValue shr (Dist and 15)) or (AValue shl (16-(Dist and 15)));
+end;
+
+
+function RolWord(Const AValue : Word): Word; overload;
+begin
+  Result:=(AValue shl 1) or (AValue shr 15);
+end;
+
+
+function RolWord(Const AValue : Word;const Dist : Byte): Word; overload;
+begin
+  Result:=(AValue shl (Dist and 15)) or (AValue shr (16-(Dist and 15)));
+end;
+
+
+function RorDWord(const AValue: DWord): DWord; overload;
+begin
+  Result:=(AValue shr 1) or (AValue shl 31);
+end;
+
+
+function RorDWord(const AValue: DWord; const Dist: Byte): DWord; overload;
+begin
+  Result:=(AValue shr (Dist and 31)) or (AValue shl (32-(Dist and 31)));
+end;
+
+
+function RolDWord(Const AValue : DWord): DWord; overload;
+begin
+  Result:=(AValue shl 1) or (AValue shr 31);
+end;
+
+
+function RolDWord(Const AValue : DWord;const Dist : Byte): DWord; overload;
+begin
+  Result:=(AValue shl (Dist and 31)) or (AValue shr (32-(Dist and 31)));
+end;
+
+
+function SarShortint(Const AValue : Shortint;const Shift : Byte): Shortint;
+begin
+  Result:=shortint(byte(byte(byte(AValue) shr (Shift and 7)) or (byte(shortint(byte(0-byte(byte(AValue) shr 7)) and byte(shortint(0-(ord((Shift and 7)<>0){ and 1}))))) shl (8-(Shift and 7)))));
+end;
+
+
+function SarSmallint(Const AValue : Smallint;const Shift : Byte): Smallint;
+begin
+  Result:=smallint(word(word(word(AValue) shr (Shift and 15)) or (word(smallint(word(0-word(word(AValue) shr 15)) and word(smallint(0-(ord((Shift and 15)<>0){ and 1}))))) shl (16-(Shift and 15)))));
+end;
+
+
+function SarLongint(Const AValue : Longint;const Shift : Byte): Longint;
+begin
+  Result:=longint(dword(dword(dword(AValue) shr (Shift and 31)) or (dword(longint(dword(0-dword(dword(AValue) shr 31)) and dword(longint(0-(ord((Shift and 31)<>0){ and 1}))))) shl (32-(Shift and 31)))));
+end;
 
 end.

@@ -10,11 +10,13 @@ unit CRC;
 * compute the CRC-32 of a data stream
 *
 * <https://github.com/graemeg/freepascal/blob/master/packages/hash/src/crc.pas>
+*
+* <https://emn178.github.io/online-tools/crc32.html>
 *)
 
 {
 
-unAPL
+crc32
 
 }
 
@@ -32,7 +34,6 @@ procedure make_table; assembler;
 @description:
 *)
 asm
-{
 POLYNOMIAL	=	$EDB88320
 
 tmp1	= eax
@@ -85,9 +86,7 @@ sreg	= eax+2
 	bne	@L1
 RET:
 	pla:tax
-};
 end;
-
 
 
 function crc32(crc: cardinal; buf: Pbyte; len: word): cardinal; register;
@@ -101,8 +100,7 @@ begin
   while (len > 0) do
   begin
 
-asm
-{
+    asm
 	ldy #$00
 	lda CRC
 	eor (buf),y
@@ -122,7 +120,7 @@ asm
 
 	lda adr.TABLE_3,y
 	sta CRC+3
-};
+    end;
 
     inc(buf);
     dec(len);
@@ -131,7 +129,6 @@ asm
  Result:=crc xor $ffffffff;
 
 end;
-
 
 
 initialization

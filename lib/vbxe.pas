@@ -203,7 +203,9 @@ var
 	procedure ClearDevice;
 	procedure CloseGraph; assembler;
 	procedure TextOut(a: char; c: byte); overload;
+	procedure TextOut(a: char); overload;
 	procedure TextOut(s: PByte; c: byte); overload;
+	procedure TextOut(s: PByte); overload;
 	procedure Position(x,y: byte);
 
 	procedure SetColorMapEntry; overload; assembler;
@@ -722,7 +724,7 @@ begin
 
  inc(colcrs);
 
- if colcrs >= 80 then begin
+ if colcrs >=79 then begin
   inc(rowcrs);
 
   inc(mem_vbxe, 2);
@@ -734,7 +736,7 @@ begin
 end;
 
 
-procedure Position(x,y: byte);
+procedure Position(x, y: byte);
 (*
 @description:
 Set cursor position on screen.
@@ -747,10 +749,24 @@ Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.
 var tmp: word;
 begin
 
- colcrs := x;
- rowcrs := y;
+asm
+	ldy x
+	beq @+
 
- tmp := y*160 + x shl 1;
+	dey
+
+@	sty colcrs
+	mvy #$00 colcrs+1
+
+	ldy y
+	beq @+
+
+	dey
+
+@	sty rowcrs
+end;
+
+ tmp := rowcrs*160 + colcrs shl 1;
 
  vram.position:=VBXE_OVRADR + tmp;
 
@@ -771,6 +787,7 @@ asm
 @       plp
         ror
 
+	lda a
 	sta Result;
 end;
 
@@ -803,6 +820,39 @@ end;
 end;
 
 
+procedure TextOut(a: char); overload;
+(*
+@description:
+
+*)
+begin
+
+asm
+	lda colpf2s	; TextBackground
+	:4 asl @
+	ora colpf1s	; TextColor
+	ora #$80
+
+	sta fildat
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+end;
+
+ mem_vbxe^ := ata2int(ord(a));
+ inc(mem_vbxe);
+
+ mem_vbxe^ := fildat;
+ inc(mem_vbxe);
+
+ WrapCursor;
+
+asm
+ 	fxs FX_MEMS #$00		; disable VBXE BANK
+end;
+
+end;
+
+
 procedure TextOut(s: PByte; c: byte); overload;
 (*
 @description:
@@ -823,6 +873,43 @@ end;
   inc(mem_vbxe);
 
   mem_vbxe^ := c;
+  inc(mem_vbxe);
+
+  WrapCursor;
+ end;
+
+asm
+ 	fxs FX_MEMS #$00		; disable VBXE BANK
+end;
+
+end;
+
+
+procedure TextOut(s: PByte); overload;
+(*
+@description:
+
+*)
+var i: byte;
+begin
+
+asm
+	lda colpf2s	; TextBackground
+	:4 asl @
+	ora colpf1s	; TextColor
+	ora #$80
+
+	sta fildat
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+end;
+
+ for i:=1 to s[0] do begin
+
+  mem_vbxe^ := ata2int(s[i]);
+  inc(mem_vbxe);
+
+  mem_vbxe^ := fildat;
   inc(mem_vbxe);
 
   WrapCursor;
