@@ -214,7 +214,7 @@ skp
  end;
 
  fillchar(VideoRam, 25*320, 0);
- fillchar(ScreenRAM, 25*40, WHITE *16 + BLUE);
+ fillchar(ScreenRAM, 25*40, 32);	// 32 = WHITE * 16 + BLUE
 
  SetColor(0);
 

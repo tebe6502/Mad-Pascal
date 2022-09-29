@@ -3,7 +3,7 @@ unit MPT;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Music Pro Tracker library
- @version: 1.0
+ @version: 1.1 (2022-09-20)
 
  @description:
  <http://atariki.krap.pl/index.php/Music_Protracker>
@@ -25,6 +25,8 @@ type	TMPT = Object
 @description:
 object for controling MPT player
 *)
+	jmp: byte;			// $4c
+
 	player: pointer;		// memory address of player
 	modul: pointer;			// memory address of a module
 
@@ -52,6 +54,10 @@ asm
 	mwa TMPT :bp2
 
 	ldy #0
+	lda #$4c
+	sta (:bp2),y
+
+	iny
 	lda (:bp2),y
 	add #3		; jsr player+3
 	sta adr
@@ -90,14 +96,7 @@ asm
 
 	bne quit
 skp
-	mwa TMPT adr
-
-	ldy #1
-mov	lda $ff00,y
-adr	equ *-2
-	sta ptr,y
-	dey
-	bpl mov
+	mwa TMPT ptr
 
 	jsr $ff00		; jmp (TMPT)	6502 buggy indirect jump
 ptr	equ *-2
