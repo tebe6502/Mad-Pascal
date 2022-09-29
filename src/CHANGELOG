@@ -1,3 +1,12 @@
+29.09.2022
+- SYSTEM: NtoBE
+- możliwość zaincjowania tablicy typu CHAR przez STRING (jeśli string jest krótszy zostaną wstawione spacje), np.:
+
+ tab: array [0..15] of char = '0123456789ABCDEF';
+
+27.09.2022
+- poprawki dla SIZEOF
+
 25.09.2022
 - poprawki dla {$define romoff} zestaw znakow przepisywany jest pod ROM przed RESOURCE
 

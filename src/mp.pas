@@ -48946,14 +48946,33 @@ end;
 
 begin
 
- CheckTok(i, OPARTOK);
+  if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
- NumActualParams := 0;
- NumActualParams_:= 0;
+   if Tok[i].StrLength > NumAllocElements then
+     Error(i, 'string length is larger than array of char length');
 
- NumAllocElements_ := NumAllocElements shr 16;
- NumAllocElements  := NumAllocElements and $ffff;
+   for NumActualParams:=1 to NumAllocElements do begin
 
+    if NumActualParams > Tok[i].StrLength then
+     ConstVal:=byte(' ')
+    else
+     ConstVal := byte(StaticStringData[Tok[i].StrAddress - CODEORIGIN + NumActualParams]);
+
+    SaveDataSegment(CHARTOK);
+   end;
+
+   Result := i;
+   exit;
+  end;
+
+
+  CheckTok(i, OPARTOK);
+
+  NumActualParams := 0;
+  NumActualParams_:= 0;
+
+  NumAllocElements_ := NumAllocElements shr 16;
+  NumAllocElements  := NumAllocElements and $ffff;
 
   repeat
 
@@ -49981,7 +50000,6 @@ while Tok[i].Kind in
 	   if AllocElementType <> CHARTOK then iError(j, IllegalExpression);
 
 	  CheckTok(j + 1, EQTOK);
-
 
 	  if Tok[i + 3].Kind in StringTypes then begin
 
