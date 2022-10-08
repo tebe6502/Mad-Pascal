@@ -40,6 +40,14 @@ The available features are:
     mp.exe filename.pas
     mads.exe filename.a65 -x -i:base
 
+BAT
+    path\MP.exe %1 -ipath:path\MP\lib\ -ipath:path\MP\blibs
+
+    if exist %~dp1%~n1.a65 (
+	    mads.exe "%~dp1%~n1.a65" -xli:path\MP\base\
+	    if exist "%~dp1%~n1.obx" altirra "%~dp1%~n1.obx"
+    )
+
 ## Tools
 
 ### [MadStrap](http://bocianu.atari.pl/blog/madstrap)
