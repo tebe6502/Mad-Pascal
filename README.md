@@ -41,6 +41,7 @@ The available features are:
     mads.exe filename.a65 -x -i:base
 
 BAT
+
     path\MP.exe %1 -ipath:path\MP\lib\ -ipath:path\MP\blibs
 
     if exist %~dp1%~n1.a65 (
