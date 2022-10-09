@@ -1,10 +1,17 @@
-// 160 / 4104
+{
 
-// F73654DB8A587962996923D44A99D420
+be1073e5e48aa8032496a687eec5e50b84f4db57
 
-uses crt, sysutils, md5;
+}
 
-const
+// http://www.sha1-online.com/
+
+uses crt, sysutils, sha1;
+
+var ticks: cardinal;
+
+    d, e: TSHA1Digest;
+
 
 test: array [0..511] of byte = (
 $11, $92, $10, $05, $83, $00, $42, $42,
@@ -73,29 +80,32 @@ $8D, $2B, $02, $AD, $00, $D3, $4A, $4A,
 $4A, $4A, $8D, $79, $02, $8D, $7B, $02
 );
 
-var
-
- ticks: cardinal;
- i, cnt: byte;
- md: TMD5;
-
- txt:string;
-
 
 begin
 
- pause;
-
  ticks:=GetTickCount;
 
+ { ------------------------- }
 
- for i:=0 to 4 do MD5Buffer(test, 512, md);
+ writeln('SHA1Buffer');
+ d:=SHA1Buffer(test, 512);
+ writeln(SHA1Print(d));
 
- writeln( MD5Print(md) );
+ writeln;
 
+ writeln('SHA1File');
+ e:=SHA1File('D:BYTES512.DAT');
+ writeln(SHA1Print(e));
+
+ writeln;
+
+ writeln(SHA1Match(d,e));
+
+ { ------------------------- }
 
  ticks:=GetTickCount-ticks;
 
+ writeln;
  writeln(ticks,' TICKS');
 
  repeat until keypressed;
