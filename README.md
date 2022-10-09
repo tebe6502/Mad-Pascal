@@ -37,6 +37,8 @@ The available features are:
 
 ## Usage
 
+[Mad Pascal i Geany](http://bocianu.atari.pl/blog/madgeany)
+
     mp.exe filename.pas
     mads.exe filename.a65 -x -i:base
 
