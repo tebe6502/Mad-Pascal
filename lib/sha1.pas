@@ -1,10 +1,29 @@
+unit sha1;
+(*
+ @type: unit
+ @author: Free Pascal development team, Tomasz Biela (Tebe)
+ @name: SHA1
+
+ @version: 1.1 (2022-10-09)
+
+ @description:
+ Implements a SHA-1 digest algorithm (RFC 3174)
+
+ <https://github.com/alrieckert/freepascal/blob/master/packages/hash/src/sha1.pp>
+
+ <https://emn178.github.io/online-tools/index.html>
+
+*)
 
 {
     This file is part of the Free Pascal packages.
     Copyright (c) 2009-2014 by the Free Pascal development team
+
     Implements a SHA-1 digest algorithm (RFC 3174)
+
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -12,9 +31,6 @@
     https://github.com/transmission-remote-gui/transgui/blob/master/COPYING.FPC
 }
 
-// https://emn178.github.io/online-tools/index.html
-
-unit sha1;
 
 interface
 
@@ -38,7 +54,7 @@ procedure SHA1Final(var ctx: TSHA1Context; var Digest: TSHA1Digest);
 { auxiliary }
 function SHA1String(const S: String): TSHA1Digest;
 function SHA1Buffer(var Buf; BufLen: PtrUInt): TSHA1Digest;
-function SHA1File(const Filename: String): TSHA1Digest;
+function SHA1File(const Filename: TString): TSHA1Digest;
 
 { helpers }
 function SHA1Print(const Digest: TSHA1Digest): TSHAString;
@@ -267,7 +283,7 @@ begin
 end;
 
 
-function SHA1File(const Filename: String): TSHA1Digest;
+function SHA1File(const Filename: TString): TSHA1Digest;
 var
   F: File;
   Buf: Pchar;
