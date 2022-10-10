@@ -36,7 +36,7 @@ object for controling SAP-R LZSS Player
 	procedure Init(a: byte); assembler;	// initializes
 	procedure Decode; assembler; 		// decode stream
 	procedure Play; assembler;		// play
-	procedure Stop; assembler;		// stops music
+	procedure Stop(a: byte); assembler;	// stops music
 
 	end;
 
@@ -114,23 +114,28 @@ ptr	equ *-2
 end;
 
 
-procedure TLZSSPlay.Stop; assembler;
+procedure TLZSSPlay.Stop(a: byte); assembler;
 (*
 @description:
-Halt SAP-R LZSS player
+Reset POKEY
 *)
 asm
+	ldy a		; POKEY: $00 | $10 | ...
+
 	lda #0
-	sta $d208
-	sta $d218
-	ldy #3
-	sty $d20f
-	sty $d21f
-	ldy #8
-clr	sta $d200,y
-	sta $d210,y
-	dey
-	bpl clr
+	sta $d208,y
+	lda #3
+	sta $d20f,y
+
+	lda #0
+	sta $d200,y
+	sta $d201,y
+	sta $d202,y
+	sta $d203,y
+	sta $d204,y
+	sta $d205,y
+	sta $d206,y
+	sta $d207,y
 end;
 
 
