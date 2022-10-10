@@ -45164,7 +45164,7 @@ case Tok[i].Kind of
 		      IdentTemp := GetIdentResult(Ident[IdentTemp].ProcAsBlock);
 
 		    {if (Tok[i + 3].Kind <> OBRACKETTOK) and ((Elements(IdentTemp) <> Elements(IdentIndex)) or (Ident[IdentTemp].AllocElementType <> Ident[IdentIndex].AllocElementType)) then
-		     halt//iError(k, IncompatibleTypesArray, GetIdent(Tok[k].Name^), ExpressionType )
+		     iError(k, IncompatibleTypesArray, GetIdent(Tok[k].Name^), ExpressionType )
 		    else
 		     if (Elements(IdentTemp) > 0) and (Tok[i + 3].Kind <> OBRACKETTOK) then
 		      iError(k, IncompatibleTypesArray, IdentTemp, ExpressionType )
@@ -45174,13 +45174,15 @@ case Tok[i].Kind of
 		    // GetCommonType(i + 1, VarType, RECORDTOK)
 		    else
 
-		    if (Ident[IdentTemp].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].AllocElementType <> Ident[IdentIndex].AllocElementType) and (Tok[k + 1].Kind <> OBRACKETTOK) then begin
+		    if (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].AllocElementType <> Ident[IdentIndex].AllocElementType) and (Tok[k + 1].Kind <> OBRACKETTOK) then begin
 
-		     if ((Ident[IdentTemp].NumAllocElements > 0) {and (Ident[IdentTemp].AllocElementType <> RECORDTOK)}) and ((Ident[IdentIndex].NumAllocElements > 0) {and (Ident[IdentIndex].AllocElementType <> RECORDTOK)}) then
+		      if ((Ident[IdentTemp].NumAllocElements > 0) {and (Ident[IdentTemp].AllocElementType <> RECORDTOK)}) and ((Ident[IdentIndex].NumAllocElements > 0) {and (Ident[IdentIndex].AllocElementType <> RECORDTOK)}) then
 //c64
-		      iError(k, IncompatibleTypesArray, IdentTemp, -IdentIndex)
-		     else
-		      iError(k, IncompatibleTypesArray, IdentTemp, ExpressionType);
+		        iError(k, IncompatibleTypesArray, IdentTemp, -IdentIndex)
+		      else
+		        iError(k, IncompatibleTypesArray, IdentTemp, ExpressionType);
+
+//      writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[IdentTemp].Name,',',Ident[IdentTemp].DataType,':',Ident[IdentTemp].AllocElementType,':',Ident[IdentTemp].NumAllocElements);
 
 		    end;
 
