@@ -44,10 +44,10 @@ The available features are:
 
 BAT
 
-    path\MP.exe %1 -ipath:path\MP\lib\ -ipath:path\MP\blibs
+    <MadPascalPath>\MP.exe %1 -ipath:<MadPascalPath>\lib -ipath:<MadPascalPath>\blibs
 
     if exist %~dp1%~n1.a65 (
-	    mads.exe "%~dp1%~n1.a65" -xli:path\MP\base\
+	    mads.exe "%~dp1%~n1.a65" -xli:<MadPascalPath>\base
 	    if exist "%~dp1%~n1.obx" altirra "%~dp1%~n1.obx"
     )
 
