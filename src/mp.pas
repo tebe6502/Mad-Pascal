@@ -50152,9 +50152,11 @@ while Tok[i].Kind in
 
 	  if Tok[j].Kind in StringTypes then begin
 
-	   if Tok[j].StrLength > 255 then ConstValType:=POINTERTOK;
+	   if Tok[j].StrLength > 255 then
+	     DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, POINTERTOK, 0, CHARTOK, ConstVal + CODEORIGIN, PCHARTOK)
+	   else
+	     DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, ConstValType, Tok[j].StrLength, CHARTOK, ConstVal + CODEORIGIN, Tok[j].Kind);
 
-	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, ConstValType, Tok[j].StrLength, CHARTOK, ConstVal + CODEORIGIN, Tok[j].Kind);
 	  end else
    	   if (ConstValType in Pointers) then
 	     iError(j, IllegalExpression)
