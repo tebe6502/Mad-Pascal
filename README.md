@@ -118,6 +118,7 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 * [mad-pascal-playground](https://github.com/zbyti/mad-pascal-playground)
 * [A8 Mad-Pascal Window Library](https://github.com/Ripjetski6502/A8MadPascalLibrary)
 * [Cartfall](https://gitlab.com/bocianu/cartfall)
+* [Unicode](https://gitlab.com/amarok8bit/unicode)
 
 ## Benchmarks
 
