@@ -91,7 +91,6 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 
 CutAs, FiDL, SprED, Sprite XL
 
-
 ## Projects in Mad-Pascal
 
 * [StarVagrant](https://github.com/MADRAFi/StarVagrant)
