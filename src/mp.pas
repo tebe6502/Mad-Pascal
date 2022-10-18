@@ -45,11 +45,14 @@ Contributors:
 + Guillermo Fuenzalida :
 	- unit MISC: DetectANTIC
 
++ Janusz Chabowski :
+	- unit SHANTI
+
 + Jerzy Kut :
 	- {$DEFINE ROMOFF}
 
-+ Janusz Chabowski :
-	- unit SHANTI
++ Joseph Zatarski :
+	- uniti VBXEANSI
 
 + Konrad Kokoszkiewicz :
 	- base\atari\cmdline.asm
@@ -44570,6 +44573,7 @@ par2:='';
 
 StopOptimization;
 
+
 case Tok[i].Kind of
 
 
@@ -45179,10 +45183,18 @@ case Tok[i].Kind of
 		      if ((Ident[IdentTemp].NumAllocElements > 0) {and (Ident[IdentTemp].AllocElementType <> RECORDTOK)}) and ((Ident[IdentIndex].NumAllocElements > 0) {and (Ident[IdentIndex].AllocElementType <> RECORDTOK)}) then
 //c64
 		        iError(k, IncompatibleTypesArray, IdentTemp, -IdentIndex)
-		      else
-		        iError(k, IncompatibleTypesArray, IdentTemp, ExpressionType);
+		      else begin
 
 //      writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[IdentTemp].Name,',',Ident[IdentTemp].DataType,':',Ident[IdentTemp].AllocElementType,':',Ident[IdentTemp].NumAllocElements);
+
+		        if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements = 0) and
+		           (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].NumAllocElements = 0) then
+			  Error(k, 'Incompatible types: got "^'+InfoAboutToken(Ident[IdentTemp].AllocElementType)+'" expected "^' + InfoAboutToken(Ident[IdentIndex].AllocElementType) + '"')
+			else
+			  iError(k, IncompatibleTypesArray, IdentTemp, ExpressionType);
+
+		     end;
+
 
 		    end;
 

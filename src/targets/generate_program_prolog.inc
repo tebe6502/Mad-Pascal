@@ -44,7 +44,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  if target.id = 'a8' then begin
 
-  asm65('.ifdef @vbxe_detect');
+  asm65('.if .def(@vbxe_detect)||.def(MAIN.@DEFINES.A_VBXE)');
   asm65('fxptr'#9'.ds 2','; VBXE pointer');
   asm65('.fi');
   asm65;
@@ -156,6 +156,13 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'opt h-');
   asm65(#9'ins ''atari\s_vbxe\sdxld2.obx''');
   asm65(#9'opt h+');
+  asm65(#9'.fi');
+
+  asm65;
+  asm65(#9'.ifdef MAIN.@DEFINES.A_VBXE');
+  asm65(#9'org CODEORIGIN');
+  asm65(#9'.link ''atari\a_vbxe\vbxeansi_init.obx''');
+  asm65(#9'ini CODEORIGIN');
   asm65(#9'.fi');
  end;
 
