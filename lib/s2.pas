@@ -342,7 +342,7 @@ begin
  assign(f, fnam); rewrite(f, 1);
  blockwrite(f, Header, sizeof(TBMPHeader));
 
- GetPaletteEntries(Buffer);
+ GetPaletteEntries(@Buffer);
 
  for i:=0 to 255 do begin
   a:=Buffer[$200+i];
@@ -425,7 +425,7 @@ begin
   Buffer[i]	:= a shr 16;
  end;
 
- SetPaletteEntries(Buffer);
+ SetPaletteEntries(@Buffer);
 
  while (h <> $FFFF) {not eof(f)} do begin
 
