@@ -1,0 +1,3240 @@
+mads 2.1.6 build 15 (25 Sep 22)
+Source: test_ansi.a65
+     1 				; ------------------------------------------------------------
+     2 				; Mad Pascal Compiler version 1.6.6 [2022/10/16] for 6502
+     3 				; ------------------------------------------------------------
+     4
+     5 = 0010			STACKWIDTH	= 16
+     6 = 2000			CODEORIGIN	= $2000
+     7
+     8 = 0001			TRUE		= 1
+     9 = 0000			FALSE		= 0
+    10
+    11 				; ------------------------------------------------------------
+    12
+    13 					org $80
+    14
+    15 				zpage
+    16
+    17 				.if .def(@vbxe_detect)||.def(MAIN.@DEFINES.A_VBXE)
+    18 = 0080			fxptr	.ds 2						; VBXE pointer
+    19 				.fi
+    20
+    21 				.if .def(@AllocMem)||.def(MAIN.SYSTEM.GETMEM)||.def(MAIN.SYSTEM.FREEMEM)
+    22 				psptr	.ds 2						; PROGRAMSTACK Pointer
+    23 				.fi
+    24
+    25 = 0082			bp	.ds 2
+    26 = 0084			bp2	.ds 2
+    27
+    28 = 0086			eax	.ds 4						;8 bytes (aex + edx) -> divREAL
+    29 = 008A			edx	.ds 4
+    30 = 008E			ecx	.ds 4
+    31
+    32 				TMP
+    33 				ztmp
+    34 = 0092			ztmp8	.ds 1
+    35 = 0093			ztmp9	.ds 1
+    36 = 0094			ztmp10	.ds 1
+    37 = 0095			ztmp11	.ds 1
+    38
+    39 = 0096			STACKORIGIN	.ds STACKWIDTH*4
+    40 				zpend
+    41
+    42 				; ------------------------------------------------------------
+    43
+    44 = 0086			ax	= eax
+    45 = 0086			al	= eax
+    46 = 0087			ah	= eax+1
+    47
+    48 = 008E			cx	= ecx
+    49 = 008E			cl	= ecx
+    50 = 008F			ch	= ecx+1
+    51
+    52 = 008A			dx	= edx
+    53 = 008A			dl	= edx
+    54 = 008B			dh	= edx+1
+    55
+    56 					org eax
+    57
+    58 = 0086			FP1MAN0	.ds 1
+    59 = 0087			FP1MAN1	.ds 1
+    60 = 0088			FP1MAN2	.ds 1
+    61 = 0089			FP1MAN3	.ds 1
+    62
+    63 					org ztmp8
+    64
+    65 = 0092			FP1SGN	.ds 1
+    66 = 0093			FP1EXP	.ds 1
+    67
+    68 					org edx
+    69
+    70 = 008A			FP2MAN0	.ds 1
+    71 = 008B			FP2MAN1	.ds 1
+    72 = 008C			FP2MAN2	.ds 1
+    73 = 008D			FP2MAN3	.ds 1
+    74
+    75 					org ztmp10
+    76
+    77 = 0094			FP2SGN	.ds 1
+    78 = 0095			FP2EXP	.ds 1
+    79
+    80 					org ecx
+    81
+    82 = 008E			FPMAN0	.ds 1
+    83 = 008F			FPMAN1	.ds 1
+    84 = 0090			FPMAN2	.ds 1
+    85 = 0091			FPMAN3	.ds 1
+    86
+    87 					org bp2
+    88
+    89 = 0084			FPSGN	.ds 1
+    90 = 0085			FPEXP	.ds 1
+    91
+    92 					.ifdef MAIN.@DEFINES.BASICOFF
+    93 					org CODEORIGIN
+    94 					icl 'atari\basicoff.asm'
+    95 					ini CODEORIGIN
+    96 					.fi
+    97
+    98 					.ifdef MAIN.@DEFINES.S_VBXE
+    99 					opt h-
+   100 					ins 'atari\s_vbxe\sdxld2.obx'
+   101 					opt h+
+   102 					.fi
+   103
+   104 					.ifdef MAIN.@DEFINES.A_VBXE
+   105 					org CODEORIGIN
+   106 FFFF> 2000-2A66> 20 9B + 	.link 'atari\a_vbxe\vbxeansi_init.obx'
+   107 02E2-02E3> 00 20			ini CODEORIGIN
+   108 					.fi
+   109
+   110 2A67				org CODEORIGIN
+   111
+   112 2000			.local	MAIN.@RESOURCE
+   113 				.endl
+   114
+   115 				; ------------------------------------------------------------
+   116
+   117 2000				org CODEORIGIN
+   118
+   119 2000				STATICDATA
+Macro: STATICDATA [Source: test_ansi.a65]
+     1 2000-2C6C> 0D 44 3A 43 + .by  $0D $44 $3A $43 $45 $53 $50 $4C  $41 $54 $2E $41 $4E $53 $00
+Source: test_ansi.a65
+   120
+   121 				; ------------------------------------------------------------
+   122
+   123 200F			RTLIB
+   124 200F				icl 'rtl6502_a8.asm'
+Source: rtl6502_a8.asm
+    78 					opt l+
+   125
+   126 				.print 'ZPAGE: ',zpage,'..',zpend-1
+   126 				ZPAGE: $0080..$00D5
+   127
+   128 				.print 'RTLIB: ',RTLIB,'..',*-1
+   128 				RTLIB: $200F..$2343
+   129
+   130 				; ------------------------------------------------------------
+   131
+   132 2344			START
+   133 2344 BA				tsx
+   134 2345 8E 73 30			stx MAIN.@halt+1
+   135
+   136 = 0188			VLEN	= VARDATASIZE-VARINITSIZE
+   137 = 309A			VADR	= DATAORIGIN+VARINITSIZE
+   138
+   139 					ift VADR > $BFFF
+   140 					ert 'Invalid memory address range ',VADR
+   141 					eli (VLEN>0) && (VLEN<=256)
+   142 					ldx #256-VLEN
+   143 					lda #$00
+   144 					sta:rne VADR+VLEN-256,x+
+   145 					eli VLEN>256
+   146 					@fill #VADR #VLEN #$00
+   146 				 MWA #VADR @FILL.PTR1\ MWA #VLEN @FILL.PTR3\ MVA #$00 @FILL.PTR2\ JSR @FILL
+   146 2348 A9 9A 85 8A A9 30 +  MWA #VADR @FILL.PTR1
+   146 2350 A9 88 85 8E A9 01 +  MWA #VLEN @FILL.PTR3
+   146 2358 A9 00 85 86		 MVA #$00 @FILL.PTR2
+   146 235C 20 D3 21		 JSR @FILL
+   147 					eif
+   148
+   149 				.ifdef :psptr
+   150 					mwa #PROGRAMSTACK :psptr
+   151 				.fi
+   152
+   153 					.ifdef MAIN.@DEFINES.ROMOFF
+   154 					icl 'atari\romoff.asm'
+   155 					.fi
+   156
+   157 235F A2 0F			ldx #$0F					; DOS II+/D ParamStr
+   158 2361 BD 40 03 9D 78 30 + 	mva:rpl $340,x MAIN.IOCB@COPY,x-
+   159
+   160 236A E8				inx						; X = 0
+   161 236B 86 82			stx bp						; BP = 0
+   162
+   163 236D 8E 08 D2			stx audctl					; reset POKEY
+   164 2370 8E 18 D2			stx audctl+$10
+   165 2373 A9 03			lda #3
+   166 2375 8D 0F D2			sta skctl
+   167 2378 8D 1F D2			sta skctl+$10
+   168
+   169 237B CA				dex						; X = 255
+   170
+   171 237C				UNITINITIALIZATION
+Macro: UNITINITIALIZATION [Source: test_ansi.a65]
+     7 237C 20 85 26			jsr MAIN.VBXEANSI.@UnitInit
+Source: test_ansi.a65
+   172
+   173 237F			.local	MAIN						; PROCEDURE
+   174
+   175 237F 4C 81 2E			jmp l_0016
+   176
+   177 				; ------------------------------------------------------------
+   178
+   179 2382			.local	SYSTEM						; UNIT
+   180
+   181 2382			.local	PEEK						; FUNCTION | ASSEMBLER | REGISTER
+   182
+   183 				; ------------------------------------------------------------
+   184
+   185 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   186 				; as Pointer
+   187 2382 B5 96			lda :STACKORIGIN,x
+   188 2384 85 8A			sta A
+   189 2386 B5 A6			lda :STACKORIGIN+STACKWIDTH,x
+   190 2388 85 8B			sta A+1
+   191 238A CA				dex
+   192 238B			@main
+   193
+   194 				; -------------------  ASM Block 00000002  -------------------
+   195
+   196 238B A0 00			ldy #0
+   197 238D B1 8A 85 92			mva (:edx),y Result
+   198
+   199 2391			@exit
+   200
+   201 				; ------------------------------------------------------------
+   202
+   203 				; Push BYTE / CHAR / SHORTINT / BOOLEAN
+   204 				; as Pointer
+   205
+   206 2391 E8				inx
+   207 2392 A5 92 95 96			mva RESULT :STACKORIGIN,x
+   208
+   209 					.ifdef @new
+   210 					lda <@VarData
+   211 					sta :ztmp
+   212 					lda >@VarData
+   213 					ldy #@VarDataSize-1
+   214 					jmp @FreeMem
+   215 					eif
+   216
+   217 				; ------------------------------------------------------------
+   218
+   219 = 008A			A	= :EDX
+   220 = 0092			RESULT	= :STACKORIGIN-4
+   221 2396 60				rts						; ret
+   222 				.endl
+   223
+   224 2397			.local	POKE						; PROCEDURE | ASSEMBLER | REGISTER
+   225
+   226 				; ------------------------------------------------------------
+   227
+   228 				; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+   229 				; as Pointer
+   230 2397 B5 96			lda :STACKORIGIN,x
+   231 2399 85 8A			sta A
+   232 239B B5 A6			lda :STACKORIGIN+STACKWIDTH,x
+   233 239D 85 8B			sta A+1
+   234 239F CA				dex
+   235 23A0 30 05			jmi @main
+   236
+   237 				; ------------------------------------------------------------
+   238
+   239 				; Generate Assignment for BYTE / CHAR / SHORTINT / BOOLEAN
+   240 				; as Pointer
+   241 23A2 B5 96			lda :STACKORIGIN,x
+   242 23A4 85 8E			sta VALUE
+   243 23A6 CA				dex
+   244 23A7			@main
+   245
+   246 				; -------------------  ASM Block 00000018  -------------------
+   247
+   248 23A7 A0 00			ldy #0
+   249 23A9 A5 8E 91 8A			mva value (:edx),y
+   250
+   251 				; ------------------------------------------------------------
+   252
+   253 = 008A			A	= :EDX
+   254 = 008E			VALUE	= :ECX
+   255 23AD			@exit
+   256 					.ifdef @new
+   257 					lda <@VarData
+   258 					sta :ztmp
+   259 					lda >@VarData
+   260 					ldy #@VarDataSize-1
+   261 					jmp @FreeMem
+   262 					els
+   263 23AD 60				rts						; ret
+   264 					eif
+   265 				.endl
+   266
+   267 23AE			.local	PAUSE_007E					; PROCEDURE | ASSEMBLER | OVERLOAD
+   268
+   269 				; -------------------  ASM Block 00000035  -------------------
+   270
+   271 23AE A5 14 C5 14 F0 FC		lda:cmp:req :rtclok+2
+   272
+   273 23B4			@exit
+   274 					.ifdef @new
+   275 					lda <@VarData
+   276 					sta :ztmp
+   277 					lda >@VarData
+   278 					ldy #@VarDataSize-1
+   279 					jmp @FreeMem
+   280 					els
+   281 23B4 60				rts						; ret
+   282 					eif
+   283 				.endl
+   284
+   285 				; ------------------------------------------------------------
+   286
+   287 = 0101			__PORTB_BANKS	= $0101
+   288 = 0648			M_PI_2	= $0648
+   289 = 0192			D_PI_2	= $0192
+   290 = 0004			D_PI_180	= $04
+   291 = 0000			MGTIA	= $00
+   292 = 0080			MVBXE	= $80
+   293 = 0000			VBXE_XDLADR	= $00
+   294 = 00E0			VBXE_BCBTMP	= $E0
+   295 = 0100			VBXE_BCBADR	= $0100
+   296 = 1000			VBXE_MAPADR	= $1000
+   297 = 1000			VBXE_CHBASE	= $1000
+   298 = 5000			VBXE_OVRADR	= $5000
+   299 = B000			VBXE_WINDOW	= $B000
+   300 = 0000			IDLI	= $00
+   301 = 0001			IVBL	= $01
+   302 = 0002			ITIM1	= $02
+   303 = 0003			ITIM2	= $03
+   304 = 0004			ITIM4	= $04
+   305 = 00FE			CH_DELCHR	= $FE
+   306 = 009B			CH_ENTER	= $9B
+   307 = 001B			CH_ESC	= $1B
+   308 = 001C			CH_CURS_UP	= $1C
+   309 = 001D			CH_CURS_DOWN	= $1D
+   310 = 001E			CH_CURS_LEFT	= $1E
+   311 = 001F			CH_CURS_RIGHT	= $1F
+   312 = 007F			CH_TAB	= $7F
+   313 = 009B			CH_EOL	= $9B
+   314 = 007D			CH_CLR	= $7D
+   315 = 00FD			CH_BELL	= $FD
+   316 = 007E			CH_DEL	= $7E
+   317 = 009C			CH_DELLINE	= $9C
+   318 = 009D			CH_INSLINE	= $9D
+   319 = 0000			PAL_PMCOLOR0	= $00
+   320 = 0001			PAL_PMCOLOR1	= $01
+   321 = 0002			PAL_PMCOLOR2	= $02
+   322 = 0003			PAL_PMCOLOR3	= $03
+   323 = 0004			PAL_COLOR0	= $04
+   324 = 0005			PAL_COLOR1	= $05
+   325 = 0006			PAL_COLOR2	= $06
+   326 = 0007			PAL_COLOR3	= $07
+   327 = 0008			PAL_COLBAK	= $08
+   328 = 0000			COLOR_BLACK	= $00
+   329 = 000E			COLOR_WHITE	= $0E
+   330 = 0032			COLOR_RED	= $32
+   331 = 0096			COLOR_CYAN	= $96
+   332 = 0068			COLOR_VIOLET	= $68
+   333 = 00C4			COLOR_GREEN	= $C4
+   334 = 0074			COLOR_BLUE	= $74
+   335 = 00EE			COLOR_YELLOW	= $EE
+   336 = 0028			COLOR_ORANGE	= $28
+   337 = 00E4			COLOR_BROWN	= $E4
+   338 = 003C			COLOR_LIGHTRED	= $3C
+   339 = 0004			COLOR_GRAY1	= $04
+   340 = 0006			COLOR_GRAY2	= $06
+   341 = 000A			COLOR_GRAY3	= $0A
+   342 = 00CC			COLOR_LIGHTGREEN	= $CC
+   343 = 007C			COLOR_LIGHTBLUE	= $7C
+   344 = 0004			FMOPENREAD	= $04
+   345 = 0008			FMOPENWRITE	= $08
+   346 = 0009			FMOPENAPPEND	= $09
+   347 = 000C			FMOPENREADWRITE	= $0C
+   348 = 3094			SCREENWIDTH	= DATAORIGIN+$0000
+   349 = 3096			SCREENHEIGHT	= DATAORIGIN+$0002
+   350 = 3098			DATESEPARATOR	= DATAORIGIN+$0004
+   351 = D20A			RND	= $D20A
+   352 = 02C0			adr.PALETTE	= $02C0
+   353 23B5			.var PALETTE	= adr.PALETTE .word
+   354 = D012			adr.HPALETTE	= $D012
+   355 23B5			.var HPALETTE	= adr.HPALETTE .word
+   356 = 3099			FILEMODE	= DATAORIGIN+$0005
+   357 = 309A			GRAPHMODE	= DATAORIGIN+$0006
+   358 = 309B			IORESULT	= DATAORIGIN+$0007
+   359 = 309C			EOLN	= DATAORIGIN+$0008
+   360 = 309D			RNDSEED	= DATAORIGIN+$0009
+   361
+   362 = 23B5 C0 02		PALETTE
+   362 = 23B7 12 D0		HPALETTE
+   362 				.endl							; UNIT SYSTEM
+   363
+   364 				; ------------------------------------------------------------
+   365
+   366 23B9			.local	VBXEANSI					; UNIT
+   367
+   368 23B9			.local	VBXEMEMORYBANK					; PROCEDURE | ASSEMBLER
+   369 23B9 8D A0 30			sta B
+   370
+   371 				; -------------------  ASM Block 00000051  -------------------
+   372
+   373 23BC				fxs FX_MEMS b
+Macro: FXS [Source: vbxe.hea]
+     2 23BC AD A0 30		        lda     B
+     3 23BF A0 5F		        ldy     #FX_MEMS
+     4 23C1 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   374
+   375 				; ------------------------------------------------------------
+   376
+   377 = 30A0			B	= DATAORIGIN+$000C
+   378
+   379 = 30A0			@VarData	= B
+   380 = 0001			@VarDataSize	= 1
+   381
+   382 23C3			@exit
+   383 					.ifdef @new
+   384 					lda <@VarData
+   385 					sta :ztmp
+   386 					lda >@VarData
+   387 					ldy #@VarDataSize-1
+   388 					jmp @FreeMem
+   389 					els
+   390 23C3 60				rts						; ret
+   391 					eif
+   392 				.endl
+   393
+   394 23C4			.local	TVBXEMEMORYSTREAM.CREATE			; PROCEDURE
+   395 23C4 8D A1 30			sta TVBXEMEMORYSTREAM
+   396 23C7 8C A2 30			sty TVBXEMEMORYSTREAM+1
+   397 23CA 8D A3 30			sta POSITION
+   398 23CD 8C A4 30			sty POSITION+1
+   399 23D0 18 69 04			add #4
+   400 23D3 90 01			scc
+   401 23D5 C8				iny
+   402 23D6 8D A5 30			sta SIZE
+   403 23D9 8C A6 30			sty SIZE+1
+   404
+   405 				; optimize OK (vbxe_memorystream.inc), line = 57
+   406
+   407 23DC AC A3 30 84 84 AC + 	mwy POSITION :bp2
+   408 23E6 A0 00			ldy #$00
+   409 23E8 98				tya
+   410 23E9 91 84			sta (:bp2),y
+   411 23EB C8				iny
+   412 23EC 91 84			sta (:bp2),y
+   413 23EE C8				iny
+   414 23EF 91 84			sta (:bp2),y
+   415 23F1 C8				iny
+   416 23F2 91 84			sta (:bp2),y
+   417
+   418 				; optimize OK (vbxe_memorystream.inc), line = 58
+   419
+   420 23F4 AC A5 30 84 84 AC + 	mwy SIZE :bp2
+   421 23FE A0 00			ldy #$00
+   422 2400 91 84			sta (:bp2),y
+   423 2402 C8				iny
+   424 2403 91 84			sta (:bp2),y
+   425 2405 C8				iny
+   426 2406 A9 08			lda #$08
+   427 2408 91 84			sta (:bp2),y
+   428 240A C8				iny
+   429 240B A9 00			lda #$00
+   430 240D 91 84			sta (:bp2),y
+   431
+   432 				; ------------------------------------------------------------
+   433
+   434 = 30A1			TVBXEMEMORYSTREAM	= DATAORIGIN+$000D
+   435 = 30A3			POSITION	= DATAORIGIN+$000F
+   436 = 30A5			SIZE	= DATAORIGIN+$0011
+   437
+   438 = 30A1			@VarData	= TVBXEMEMORYSTREAM
+   439 = 0006			@VarDataSize	= 6
+   440
+   441 240F			@exit
+   442 					.ifdef @new
+   443 					lda <@VarData
+   444 					sta :ztmp
+   445 					lda >@VarData
+   446 					ldy #@VarDataSize-1
+   447 					jmp @FreeMem
+   448 					els
+   449 240F 60				rts						; ret
+   450 					eif
+   451 				.endl
+   452
+   453 2410			.local	TVBXEMEMORYSTREAM.READBUFFER			; PROCEDURE
+   454 2410 8D AB 30			sta TVBXEMEMORYSTREAM
+   455 2413 8C AC 30			sty TVBXEMEMORYSTREAM+1
+   456 2416 8D B1 30			sta POSITION
+   457 2419 8C B2 30			sty POSITION+1
+   458 241C 18 69 04			add #4
+   459 241F 90 01			scc
+   460 2421 C8				iny
+   461 2422 8D B3 30			sta SIZE
+   462 2425 8C B4 30			sty SIZE+1
+   463
+   464 				; optimize OK (vbxe_memorystream.inc), line = 87
+   465
+   466 2428 AC B1 30 84 84 AC + 	mwy POSITION :bp2
+   467 2432 A0 01			ldy #$01
+   468 2434 B1 84			lda (:bp2),y
+   469 2436 85 9F			sta :STACKORIGIN+9
+   470 2438 C8				iny
+   471 2439 B1 84			lda (:bp2),y
+   472 243B 4A				lsr @
+   473 243C 66 9F			ror :STACKORIGIN+9
+   474 243E 4A				lsr @
+   475 243F 66 9F			ror :STACKORIGIN+9
+   476 2441 4A				lsr @
+   477 2442 66 9F			ror :STACKORIGIN+9
+   478 2444 4A				lsr @
+   479 2445 66 9F			ror :STACKORIGIN+9
+   480 2447 A5 9F			lda :STACKORIGIN+9
+   481 2449 09 80			ora #$80
+   482 244B 8D B5 30			sta BNK
+   483
+   484 				; optimize OK (vbxe_memorystream.inc), line = 88
+   485
+   486 244E A0 00			ldy #$00
+   487 2450 B1 84			lda (:bp2),y
+   488 2452 8D B6 30			sta ADR
+   489 2455 C8				iny
+   490 2456 B1 84			lda (:bp2),y
+   491 2458 29 0F			and #$0F
+   492 245A 09 B0			ora #$B0
+   493 245C 8D B7 30			sta ADR+1
+   494
+   495 				; optimize OK (vbxe_memorystream.inc), line = 90
+   496
+   497 245F AD B5 30			lda BNK
+   498 2462 20 B9 23			jsr VBXEMEMORYBANK
+   499
+   500 				; optimize OK (vbxe_memorystream.inc), line = 92
+   501
+   502 2465 AD AD 30			lda BUFFER
+   503 2468 8D BA 30			sta DST
+   504 246B AD AE 30			lda BUFFER+1
+   505 246E 8D BB 30			sta DST+1
+   506
+   507 				; optimize OK (vbxe_memorystream.inc), line = 94
+   508
+   509 2471 A9 00			lda #$00
+   510 2473 8D B8 30			sta I
+   511 2476 8D B9 30			sta I+1
+   512 2479 AD AF 30			lda COUNT
+   513 247C 38 E9 01			sub #$01
+   514 247F 8D 92 24			sta @FORTMP_00D2_0
+   515 2482 AD B0 30			lda COUNT+1
+   516 2485 E9 00			sbc #$00
+   517 2487 8D 8B 24			sta @FORTMP_00D2_1
+   518
+   519 248A			l_00D5
+   520 				; --- ForToDoCondition
+   521 248A A9 00			lda @FORTMP_00D2_1:#$00
+   522 248C CD B9 30			cmp I+1
+   523 248F D0 05			bne @+
+   524 2491 A9 00			lda @FORTMP_00D2_0:#$00
+   525 2493 CD B8 30			cmp I
+   526 				@
+   527 2496 90 4F			jcc l_00E1
+   528
+   529 				; optimize OK (vbxe_memorystream.inc), line = 96
+   530
+   531 2498 AC B7 30			ldy ADR+1
+   532 249B 84 83			sty :bp+1
+   533 249D AC B6 30			ldy ADR
+   534 24A0 B1 82			lda (:bp),y
+   535 24A2 AC BB 30 84 83		mvy DST+1 :bp+1
+   536 24A7 AC BA 30			ldy DST
+   537 24AA 91 82			sta (:bp),y
+   538
+   539 				; optimize FAIL (0, vbxe_memorystream.inc), line = 98
+   540
+   541 24AC EE B6 30			inc ADR
+   542 24AF D0 03			sne
+   543 24B1 EE B7 30			inc ADR+1
+   544
+   545 				; optimize FAIL (0, vbxe_memorystream.inc), line = 99
+   546
+   547 24B4 EE BA 30			inc DST
+   548 24B7 D0 03			sne
+   549 24B9 EE BB 30			inc DST+1
+   550
+   551 				; optimize OK (vbxe_memorystream.inc), line = 101
+   552
+   553 24BC AD B7 30			lda ADR+1
+   554 24BF C9 C0			cmp #$C0
+   555 24C1 90 1A			jcc l_0100
+   556 24C3 D0 05			bne @+
+   557 24C5 AD B6 30			lda ADR
+   558 24C8 90 13			jcc l_0100
+   559 				@
+   560
+   561 				; optimize FAIL (0, vbxe_memorystream.inc), line = 102
+   562
+   563 24CA EE B5 30			inc BNK
+   564
+   565 				; optimize OK (vbxe_memorystream.inc), line = 103
+   566
+   567 24CD AD B5 30			lda BNK
+   568 24D0 20 B9 23			jsr VBXEMEMORYBANK
+   569
+   570 				; optimize OK (vbxe_memorystream.inc), line = 104
+   571
+   572 24D3 A9 00			lda #$00
+   573 24D5 8D B6 30			sta ADR
+   574 24D8 A9 B0			lda #$B0
+   575 24DA 8D B7 30			sta ADR+1
+   576 24DD			l_0100
+   577
+   578 				; --- ForToDoEpilog
+   579 24DD EE B8 30			inc I
+   580 24E0 D0 A8			jne l_00D5
+   581 24E2 EE B9 30			inc I+1
+   582 24E5 D0 A3			jne l_00D5
+   583 24E7			l_00E1
+   584
+   585 				; optimize OK (vbxe_memorystream.inc), line = 109
+   586
+   587 24E7 A9 00			lda #$00
+   588 24E9 20 B9 23			jsr VBXEMEMORYBANK
+   589
+   590 				; optimize OK (vbxe_memorystream.inc), line = 111
+   591
+   592 24EC AC B1 30 84 84 AC + 	mwy POSITION :bp2
+   593 24F6 A0 00			ldy #$00
+   594 24F8 B1 84			lda (:bp2),y
+   595 24FA 18 6D AF 30			add COUNT
+   596 24FE 91 84			sta (:bp2),y
+   597 2500 C8				iny
+   598 2501 B1 84			lda (:bp2),y
+   599 2503 6D B0 30			adc COUNT+1
+   600 2506 91 84			sta (:bp2),y
+   601 2508 C8				iny
+   602 2509 B1 84			lda (:bp2),y
+   603 250B 69 00			adc #$00
+   604 250D 91 84			sta (:bp2),y
+   605 250F C8				iny
+   606 2510 B1 84			lda (:bp2),y
+   607 2512 69 00			adc #$00
+   608 2514 91 84			sta (:bp2),y
+   609
+   610 				; ------------------------------------------------------------
+   611
+   612 = 30AB			TVBXEMEMORYSTREAM	= DATAORIGIN+$0017
+   613 = 30AD			BUFFER	= DATAORIGIN+$0019
+   614 = 30AF			COUNT	= DATAORIGIN+$001B
+   615 = 30B1			POSITION	= DATAORIGIN+$001D
+   616 = 30B3			SIZE	= DATAORIGIN+$001F
+   617 = 30B5			BNK	= DATAORIGIN+$0021
+   618 = 30B6			ADR	= DATAORIGIN+$0022
+   619 = 30B8			I	= DATAORIGIN+$0024
+   620 = 30BA			DST	= DATAORIGIN+$0026
+   621
+   622 = 30AB			@VarData	= TVBXEMEMORYSTREAM
+   623 = 0011			@VarDataSize	= 17
+   624
+   625 2516			@exit
+   626 					.ifdef @new
+   627 					lda <@VarData
+   628 					sta :ztmp
+   629 					lda >@VarData
+   630 					ldy #@VarDataSize-1
+   631 					jmp @FreeMem
+   632 					els
+   633 2516 60				rts						; ret
+   634 					eif
+   635 				.endl
+   636
+   637 2517			.local	TVBXEMEMORYSTREAM.WRITEBUFFER			; PROCEDURE
+   638 2517 8D BE 30			sta TVBXEMEMORYSTREAM
+   639 251A 8C BF 30			sty TVBXEMEMORYSTREAM+1
+   640 251D 8D C4 30			sta POSITION
+   641 2520 8C C5 30			sty POSITION+1
+   642 2523 18 69 04			add #4
+   643 2526 90 01			scc
+   644 2528 C8				iny
+   645 2529 8D C6 30			sta SIZE
+   646 252C 8C C7 30			sty SIZE+1
+   647
+   648 				; optimize OK (vbxe_memorystream.inc), line = 124
+   649
+   650 252F AC C4 30 84 84 AC + 	mwy POSITION :bp2
+   651 2539 A0 01			ldy #$01
+   652 253B B1 84			lda (:bp2),y
+   653 253D 85 9F			sta :STACKORIGIN+9
+   654 253F C8				iny
+   655 2540 B1 84			lda (:bp2),y
+   656 2542 4A				lsr @
+   657 2543 66 9F			ror :STACKORIGIN+9
+   658 2545 4A				lsr @
+   659 2546 66 9F			ror :STACKORIGIN+9
+   660 2548 4A				lsr @
+   661 2549 66 9F			ror :STACKORIGIN+9
+   662 254B 4A				lsr @
+   663 254C 66 9F			ror :STACKORIGIN+9
+   664 254E A5 9F			lda :STACKORIGIN+9
+   665 2550 09 80			ora #$80
+   666 2552 8D C8 30			sta BNK
+   667
+   668 				; optimize OK (vbxe_memorystream.inc), line = 125
+   669
+   670 2555 A0 00			ldy #$00
+   671 2557 B1 84			lda (:bp2),y
+   672 2559 8D C9 30			sta ADR
+   673 255C C8				iny
+   674 255D B1 84			lda (:bp2),y
+   675 255F 29 0F			and #$0F
+   676 2561 09 B0			ora #$B0
+   677 2563 8D CA 30			sta ADR+1
+   678
+   679 				; optimize OK (vbxe_memorystream.inc), line = 127
+   680
+   681 2566 AD C8 30			lda BNK
+   682 2569 20 B9 23			jsr VBXEMEMORYBANK
+   683
+   684 				; optimize OK (vbxe_memorystream.inc), line = 129
+   685
+   686 256C AD C0 30			lda BUFFER
+   687 256F 8D CD 30			sta SRC
+   688 2572 AD C1 30			lda BUFFER+1
+   689 2575 8D CE 30			sta SRC+1
+   690
+   691 				; optimize OK (vbxe_memorystream.inc), line = 131
+   692
+   693 2578 A9 00			lda #$00
+   694 257A 8D CB 30			sta I
+   695 257D 8D CC 30			sta I+1
+   696 2580 AD C2 30			lda COUNT
+   697 2583 38 E9 01			sub #$01
+   698 2586 8D 99 25			sta @FORTMP_0148_0
+   699 2589 AD C3 30			lda COUNT+1
+   700 258C E9 00			sbc #$00
+   701 258E 8D 92 25			sta @FORTMP_0148_1
+   702
+   703 2591			l_014B
+   704 				; --- ForToDoCondition
+   705 2591 A9 00			lda @FORTMP_0148_1:#$00
+   706 2593 CD CC 30			cmp I+1
+   707 2596 D0 05			bne @+
+   708 2598 A9 00			lda @FORTMP_0148_0:#$00
+   709 259A CD CB 30			cmp I
+   710 				@
+   711 259D 90 53			jcc l_0157
+   712
+   713 				; optimize OK (vbxe_memorystream.inc), line = 133
+   714
+   715 259F AC CD 30 84 84 AC + 	mwy SRC :bp2
+   716 25A9 A0 00			ldy #$00
+   717 25AB B1 84			lda (:bp2),y
+   718 25AD AC CA 30			ldy ADR+1
+   719 25B0 84 83			sty :bp+1
+   720 25B2 AC C9 30			ldy ADR
+   721 25B5 91 82			sta (:bp),y
+   722
+   723 				; optimize FAIL (0, vbxe_memorystream.inc), line = 135
+   724
+   725 25B7 EE C9 30			inc ADR
+   726 25BA D0 03			sne
+   727 25BC EE CA 30			inc ADR+1
+   728
+   729 				; optimize FAIL (0, vbxe_memorystream.inc), line = 136
+   730
+   731 25BF EE CD 30			inc SRC
+   732 25C2 D0 03			sne
+   733 25C4 EE CE 30			inc SRC+1
+   734
+   735 				; optimize OK (vbxe_memorystream.inc), line = 138
+   736
+   737 25C7 AD CA 30			lda ADR+1
+   738 25CA C9 C0			cmp #$C0
+   739 25CC 90 1A			jcc l_0176
+   740 25CE D0 05			bne @+
+   741 25D0 AD C9 30			lda ADR
+   742 25D3 90 13			jcc l_0176
+   743 				@
+   744
+   745 				; optimize FAIL (0, vbxe_memorystream.inc), line = 139
+   746
+   747 25D5 EE C8 30			inc BNK
+   748
+   749 				; optimize OK (vbxe_memorystream.inc), line = 140
+   750
+   751 25D8 AD C8 30			lda BNK
+   752 25DB 20 B9 23			jsr VBXEMEMORYBANK
+   753
+   754 				; optimize OK (vbxe_memorystream.inc), line = 141
+   755
+   756 25DE A9 00			lda #$00
+   757 25E0 8D C9 30			sta ADR
+   758 25E3 A9 B0			lda #$B0
+   759 25E5 8D CA 30			sta ADR+1
+   760 25E8			l_0176
+   761
+   762 				; --- ForToDoEpilog
+   763 25E8 EE CB 30			inc I
+   764 25EB D0 A4			jne l_014B
+   765 25ED EE CC 30			inc I+1
+   766 25F0 D0 9F			jne l_014B
+   767 25F2			l_0157
+   768
+   769 				; optimize OK (vbxe_memorystream.inc), line = 146
+   770
+   771 25F2 A9 00			lda #$00
+   772 25F4 20 B9 23			jsr VBXEMEMORYBANK
+   773
+   774 				; optimize OK (vbxe_memorystream.inc), line = 148
+   775
+   776 25F7 AC C4 30 84 84 AC + 	mwy POSITION :bp2
+   777 2601 A0 00			ldy #$00
+   778 2603 B1 84			lda (:bp2),y
+   779 2605 18 6D C2 30			add COUNT
+   780 2609 91 84			sta (:bp2),y
+   781 260B C8				iny
+   782 260C B1 84			lda (:bp2),y
+   783 260E 6D C3 30			adc COUNT+1
+   784 2611 91 84			sta (:bp2),y
+   785 2613 C8				iny
+   786 2614 B1 84			lda (:bp2),y
+   787 2616 69 00			adc #$00
+   788 2618 91 84			sta (:bp2),y
+   789 261A C8				iny
+   790 261B B1 84			lda (:bp2),y
+   791 261D 69 00			adc #$00
+   792 261F 91 84			sta (:bp2),y
+   793
+   794 				; ------------------------------------------------------------
+   795
+   796 = 30BE			TVBXEMEMORYSTREAM	= DATAORIGIN+$002A
+   797 = 30C0			BUFFER	= DATAORIGIN+$002C
+   798 = 30C2			COUNT	= DATAORIGIN+$002E
+   799 = 30C4			POSITION	= DATAORIGIN+$0030
+   800 = 30C6			SIZE	= DATAORIGIN+$0032
+   801 = 30C8			BNK	= DATAORIGIN+$0034
+   802 = 30C9			ADR	= DATAORIGIN+$0035
+   803 = 30CB			I	= DATAORIGIN+$0037
+   804 = 30CD			SRC	= DATAORIGIN+$0039
+   805
+   806 = 30BE			@VarData	= TVBXEMEMORYSTREAM
+   807 = 0011			@VarDataSize	= 17
+   808
+   809 2621			@exit
+   810 					.ifdef @new
+   811 					lda <@VarData
+   812 					sta :ztmp
+   813 					lda >@VarData
+   814 					ldy #@VarDataSize-1
+   815 					jmp @FreeMem
+   816 					els
+   817 2621 60				rts						; ret
+   818 					eif
+   819 				.endl
+   820
+   821 2622			.local	SETOVERLAYADDRESS				; PROCEDURE | ASSEMBLER
+   822
+   823 				; -------------------  ASM Block 00000053  -------------------
+   824
+   825 2622				fxs FX_MEMS #$80
+Macro: FXS [Source: vbxe.hea]
+     2 2622 A9 80		        lda     #$80
+     3 2624 A0 5F		        ldy     #FX_MEMS
+     4 2626 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   826
+   827 2628 AD ED 30			lda a
+   828 262B 8D 08 B8			sta MAIN.SYSTEM.VBXE_WINDOW+VBXE_ANSIXDL+8
+   829 262E AD EE 30			lda a+1
+   830 2631 8D 09 B8			sta MAIN.SYSTEM.VBXE_WINDOW+VBXE_ANSIXDL+9
+   831 2634 AD EF 30			lda a+2
+   832 2637 8D 0A B8			sta MAIN.SYSTEM.VBXE_WINDOW+VBXE_ANSIXDL+10
+   833
+   834 263A				fxs FX_MEMS #$00
+Macro: FXS [Source: vbxe.hea]
+     2 263A A9 00		        lda     #$00
+     3 263C A0 5F		        ldy     #FX_MEMS
+     4 263E 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   835
+   836 				; ------------------------------------------------------------
+   837
+   838 = 30ED			A	= DATAORIGIN+$0059
+   839
+   840 = 30ED			@VarData	= A
+   841 = 0004			@VarDataSize	= 4
+   842
+   843 2640			@exit
+   844 					.ifdef @new
+   845 					lda <@VarData
+   846 					sta :ztmp
+   847 					lda >@VarData
+   848 					ldy #@VarDataSize-1
+   849 					jmp @FreeMem
+   850 					els
+   851 2640 60				rts						; ret
+   852 					eif
+   853 				.endl
+   854
+   855 2641			.local	ANSICHAR					; PROCEDURE | ASSEMBLER
+   856 2641 8D F1 30			sta A
+   857
+   858 				; -------------------  ASM Block 00000056  -------------------
+   859
+   860 2644 8A 48			txa:pha
+   861
+   862 2646				fxs FX_MEMS #$ff
+Macro: FXS [Source: vbxe.hea]
+     2 2646 A9 FF		        lda     #$FF
+     3 2648 A0 5F		        ldy     #FX_MEMS
+     4 264A 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   863
+   864 264C AD F1 30			lda a
+   865 264F 8D FB 02			sta atachr
+   866
+   867 2652 20 F1 26			jsr @ansi.process_char
+   868
+   869 2655				fxs FX_MEMS #$00
+Macro: FXS [Source: vbxe.hea]
+     2 2655 A9 00		        lda     #$00
+     3 2657 A0 5F		        ldy     #FX_MEMS
+     4 2659 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   870
+   871 265B 68 AA			pla:tax
+   872
+   873 				; ------------------------------------------------------------
+   874
+   875 = 30F1			A	= DATAORIGIN+$005D
+   876
+   877 = 30F1			@VarData	= A
+   878 = 0001			@VarDataSize	= 1
+   879
+   880 265D			@exit
+   881 					.ifdef @new
+   882 					lda <@VarData
+   883 					sta :ztmp
+   884 					lda >@VarData
+   885 					ldy #@VarDataSize-1
+   886 					jmp @FreeMem
+   887 					els
+   888 265D 60				rts						; ret
+   889 					eif
+   890 				.endl
+   891
+   892 265E			.local	NORMVIDEO					; PROCEDURE | ASSEMBLER
+   893
+   894 				; -------------------  ASM Block 00000062  -------------------
+   895
+   896 265E 8A 48		  	txa:pha
+   897
+   898 2660 8D 80 D0			sta FX_CORE_RESET
+   899
+   900 2663				fxs FX_MEMC #0
+Macro: FXS [Source: vbxe.hea]
+     2 2663 A9 00		        lda     #0
+     3 2665 A0 5E		        ldy     #FX_MEMC
+     4 2667 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   901
+   902 2669 A9 00		        lda     #0
+   903 266B A0 5E		        ldy     #FX_MEMC
+   904 266D 91 80		        sta     (fxptr),y
+   905
+   906 266F				fxsa FX_MEMS
+Macro: FXSA [Source: vbxe.hea]
+     2 266F A0 5F		        ldy     #FX_MEMS
+     3 2671 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   907
+   908 2673 A0 5F			ldy     #FX_MEMS
+   909 2675 91 80		        sta     (fxptr),y
+   910
+   911 2677				fxsa FX_VIDEO_CONTROL
+Macro: FXSA [Source: vbxe.hea]
+     2 2677 A0 40		        ldy     #FX_VIDEO_CONTROL
+     3 2679 91 80		        sta     (fxptr),y
+Source: test_ansi.a65
+   912
+   913 267B A0 40		        ldy     #FX_VIDEO_CONTROL
+   914 267D 91 80		        sta     (fxptr),y
+   915
+   916 267F 20 94 21			@clrscr
+   917
+   918 2682 68 AA			pla:tax
+   919
+   920 2684			@exit
+   921 					.ifdef @new
+   922 					lda <@VarData
+   923 					sta :ztmp
+   924 					lda >@VarData
+   925 					ldy #@VarDataSize-1
+   926 					jmp @FreeMem
+   927 					els
+   928 2684 60				rts						; ret
+   929 					eif
+   930 				.endl
+   931
+   932 				; ------------------------------------------------------------
+   933 				; ------------------------------------------------------------
+   934 2685			@UnitInit
+   935
+   936 				; -------------------  ASM Block 00000063  -------------------
+   937
+   938 2685			   .local @ansi
+   939
+   940 2685				icl 'atari\a_vbxe\vbxeansi_main.asm'
+Source: vbxeansi_main.asm
+     1
+     2 				;######################################################################################################################################
+     3 				;
+     4 				;
+     5 				;	   ##	 ##   #	  ####	  ###		 #     # #####	 #     # ######
+     6 				;	  #  #	 # #  #	 #    #	   #		 #     #  #   #	  #   #	  #   #
+     7 				;	 #    #	 #  # #	 #	   #		 #     #  #   #	   # #	  # #
+     8 				;	 #    #	 #   ##	  ####	   #	 ######	 #     #  ####	    #	  ###
+     9 				;	 ######	 #    #	      #	   #		  #   #	  #   #	   # #	  # #
+    10 				;	 #    #	 #    #	 #    #	   #		   # #	  #   #	  #   #	  #   #
+    11 				;	 #    #	 #    #	  ####	  ###		    #	 #####	 #     # ######
+    12 				;
+    13 				;	 ####### ######	 #####	 ##   ##  ###	 ##   #	   ##	 ###
+    14 				;	 #  #  #  #   #	  #   #	 # # # #   #	 # #  #	  #  #	  #
+    15 				;	    #	  # #	  #   #	 #  #  #   #	 #  # #	 #    #	  #
+    16 				;	    #	  ###	  ####	 #     #   #	 #   ##	 #    #	  #
+    17 				;	    #	  # #	  # #	 #     #   #	 #    #	 ######	  #
+    18 				;	    #	  #   #	  #  #	 #     #   #	 #    #	 #    #	  #   #
+    19 				;	   ###	 ######	 ###  #	 #     #  ###	 #    #	 #    #	 ######
+    20 				;
+    21 				;	Written by: Joseph Zatarski, Tomasz Biela
+    22 				;
+    23 				;	terminal emulator that supports ANSI/ECMA-48 control sequences and a 256 character font
+    24 				;
+    25 				;	https://en.wikipedia.org/wiki/ANSI_escape_code
+    26 				;
+    27 				;	https://forums.atariage.com/topic/225063-full-color-ansi-vbxe-terminal-in-the-works/
+    28 				;
+    29 				;######################################################################################################################################
+    30 				;
+    31 				; TODO:	add recieve buffer so that I don't call CIOV to do one character at a time. (done)
+    32 				;	label scroll contains some unnecesary math (refer to comments near it) (done)
+    33 				;	add stuff beyond just the C0 (ASCII) and C1 control character/sequence sets (this means finally starting on the cool stuff)
+    34 				;		SGR - set graphics rendition (color, high intensity, etc.) - done unless I want to improve support for 'default colors'
+    35 				;		add J code - ED - erase in page
+    36 				;		add A code
+    37 				;		add C code
+    38 				;		add D code
+    39 				;
+    40 2685					icl	'atarios.equ'		; atari OS equates,
+Source: atarios.equ
+     1 				;###################################################################################################################
+     2 				;
+     3 				;
+     4 				;	   ##	 #######   ##	 #####	  ###		 ######	  ####	 #    #	   ##	 ####### ######	  ####
+     5 				;	  #  #	 #  #  #  #  #	  #   #	   #		  #   #	 #    #	 #    #	  #  #	 #  #  #  #   #	 #    #
+     6 				;	 #    #	    #	 #    #   #   #	   #		  # #	 #    #	 #    #	 #    #	    #	  # #	 #
+     7 				;	 #    #	    #	 #    #	  ####	   #		  ###	 #    #	 #    #	 #    #	    #	  ###	  ####
+     8 				;	 ######	    #	 ######   # #	   #		  # #	 #  # #	 #    #	 ######	    #	  # #	      #
+     9 				;	 #    #	    #	 #    #	  #  #	   #		  #   #	  ####	 #    #	 #    #	    #	  #   #	 #    #
+    10 				;	 #    #	   ###	 #    #	 ###  #	  ###		 ######	      ##  ####	 #    #	   ###	 ######	  ####
+    11 				;
+    12 				;	OS Equates
+    13 				;###################################################################################################################
+    14
+    15 				; IOCB equates
+    16 = 0342			ICCOM		equ	$342			; command
+    17 = 0343			ICSTA		equ	$343			; status
+    18 = 0344			ICBA		equ	$344			; 2 bytes, buffer address for data or filename
+    19 = 0348			ICBL		equ	$348			; 2 bytes, buffer length
+    20 = 034A			ICAX1		equ	$34A			; Auxiliary byte 1
+    21 = 034B			ICAX2		equ	$34B			; Auxiliary byte 2
+    22
+    23 = 02EA			DVSTAT0		equ	$2EA			; holds that status bytes after a status command
+    24 = 02EB			DVSTAT1		equ	$2EB
+    25 = 02EC			DVSTAT2		equ	$2EC
+    26 = 02ED			DVSTAT3		equ	$2ED
+    27
+    28 				; OS vectors and addresses
+    29 = E456			CIOV		equ	$E456			; address for CIO
+    30 = 000A			DOSVEC		equ	$A			; vector for DOS
+    31 = 0208			VKEYBD		equ	$208			; vector for KB interupt
+    32
+    33 				; OS variables and shadow registers
+    34 = 022F			SDMCTL		equ	$22F			; DMA Control
+    35 = 0012			RTCLOK		equ	$12			; jiffy counter
+    36 = 02F2			CH1		equ	$2F2			; used for KB IRQ
+    37 = 02F1			KEYDEL		equ	$2F1			; key delay counter for debouncing
+    38 = 004D			ATRACT		equ	$4D			; attract mode timer/flag
+    39 = 022B			SRTIMR		equ	$22B			; key repeat delay counter. decremented once every jiffy.
+    40
+    41 = 0054			rowcrs	=	$54	; wiersz  kursora
+    42 = 0055			colcrs	=	$55	; (2) Kolumna kursora
+    43
+    44 = 005A			oldrow	=	$5A
+    45 = 005B			oldcol	=	$5B
+    46
+    47 = 005E			oldadr	=	$5E	; Retains the memory location of the current cursor location
+    48
+    49 = 02FB			atachr	=	$02FB	; numer koloru dla PLOT, DRAW (kod ATASCII znaku)
+    50 = 02FD			fildat	=	$02FD	; numer koloru dla FILL
+    41 2685					icl	'atarihardware.equ'	; general atari hardware equates,
+Source: atarihardware.equ
+     1 				;###################################################################################################################
+     2 				;
+     3 				;
+     4 				;	   ##	 #######   ##	 #####	  ###		 ######	  ####	 #    #	   ##	 ####### ######	  ####
+     5 				;	  #  #	 #  #  #  #  #	  #   #	   #		  #   #	 #    #	 #    #	  #  #	 #  #  #  #   #	 #    #
+     6 				;	 #    #	    #	 #    #   #   #	   #		  # #	 #    #	 #    #	 #    #	    #	  # #	 #
+     7 				;	 #    #	    #	 #    #	  ####	   #		  ###	 #    #	 #    #	 #    #	    #	  ###	  ####
+     8 				;	 ######	    #	 ######   # #	   #		  # #	 #  # #	 #    #	 ######	    #	  # #	      #
+     9 				;	 #    #	    #	 #    #	  #  #	   #		  #   #	  ####	 #    #	 #    #	    #	  #   #	 #    #
+    10 				;	 #    #	   ###	 #    #	 ###  #	  ###		 ######	      ##  ####	 #    #	   ###	 ######	  ####
+    11 				;
+    12 				;	Hardware Equates
+    13 				;###################################################################################################################
+    14 				; ANTIC equates
+    15 = D40B			VCOUNT		equ	$D40B			; line count / 2
+    16 				; GTIA equates
+    17 = D01F			CONSOL		equ	$D01F			; console key register
+    18 				; POKEY equates
+    19 = D209			KBCODE		equ	$D209			; keyboard code register
+    42 2685					icl	'VBXE.equ'		; and VBXE equates
+Source: VBXE.equ
+     1 				;###################################################################################################################
+     2 				;
+     3 				;
+     4 				;	   ##	 #######   ##	 #####	  ###		 ######	  ####	 #    #	   ##	 ####### ######	  ####
+     5 				;	  #  #	 #  #  #  #  #	  #   #	   #		  #   #	 #    #	 #    #	  #  #	 #  #  #  #   #	 #    #
+     6 				;	 #    #	    #	 #    #   #   #	   #		  # #	 #    #	 #    #	 #    #	    #	  # #	 #
+     7 				;	 #    #	    #	 #    #	  ####	   #		  ###	 #    #	 #    #	 #    #	    #	  ###	  ####
+     8 				;	 ######	    #	 ######   # #	   #		  # #	 #  # #	 #    #	 ######	    #	  # #	      #
+     9 				;	 #    #	    #	 #    #	  #  #	   #		  #   #	  ####	 #    #	 #    #	    #	  #   #	 #    #
+    10 				;	 #    #	   ###	 #    #	 ###  #	  ###		 ######	      ##  ####	 #    #	   ###	 ######	  ####
+    11 				;
+    12 				;	VBXE Equates
+    13 				;###################################################################################################################
+    14
+    15 				; VBXE equates
+    16 = B000			vbxe_mem_base	equ	$B000			; If I put it here, it should be OK and it won't conflict with the extended RAM.
+    17
+    18 = B100			vbxe_screen_top	equ	vbxe_mem_base + 256	; points to where the first character of the screen would be
+    19
+    20
+    21 				; VBXE equates
+    22 = 0040			core_version	equ	$40			; tells us whether FX or GTIA-emu core
+    23 = 0041			minor_revision	equ	$41			; tells us minor revision number (like 26 in 1.26)
+    24
+    25 				; memory window B control register
+    26 				; bit 0 - 4 - bank number (banks are all 16K)
+    27 				; bit 6 - MBAE - ANTIC access enable
+    28 				; bit 7 - MBCE - CPU access enable
+    29
+    30 = 005D			memac_b_control	equ	$5D
+    31
+    32 				; memory window A control register
+    33 				; bit 0 and 1 - window size - 00 for 4K, 01 for 8K, 10 for 16K, 11 for 32K
+    34 				; bit 2 - MAE - when set, antic can see VBXE RAM
+    35 				; bit 3 - MCE - when set, CPU can see VBXE RAM
+    36
+    37 = 005E			memac_control	equ	$5E
+    38
+    39 = 005F			memac_bank_sel	equ	$5F			; controls bank number of movable window (MEMAC A). bit 7 is an enable bit
+    40 = 0044			csel		equ	$44			; selects current color number for write
+    41 = 0045			psel		equ	$45			; selects the pallette number to load into
+    42 = 0046			cr		equ	$46			; red component value
+    43 = 0047			cg		equ	$47			; green component value
+    44 = 0048			cb		equ	$48			; blue component value
+    45 = 0041			xdl_adr		equ	$41			; xdl address registers (3 consecutive)
+    46
+    47 				; video control register
+    48 				; bit 0 - xdl_enabled - set to enable XDL
+    49 				; bit 1 - xcolor - set to enable 16 luminances and separate ANTIC hi-res foreground and background hues
+    50 				; bit 2 - no_trans - clear means color 0 is transparent
+    51 				; bit 3	- trans15 - allows additional transparent colors. only works when no_trans is 0
+    52
+    53 = 0040			video_control	equ	$40
+    54
+    55 = 0049			colmask		equ	$49			; AND mask for collisions with GTIA/ANTIC and VBXE stuff
+    56 = 004A			colclr		equ	$4A			; clears coldetect (any value written here)
+    57 = 004A			coldetect	equ	$4A			; collisions detected.
+    58 = 0050			blt_adr		equ	$50			; blitter list address (3 bytes, consecutive)
+    59 = 0050			blt_collision	equ	$50			; collision codes that blitter has set
+    60 = 0053			blt_start	equ	$53			; bit 0 set to start blitter
+    61 = 0053			blt_busy	equ	$53			; bit 1 for busy, bit 0 for BCB load. register will read 0 when blitter is stopped.
+    62 = 0054			irq_control	equ	$54			; set bit 0 to enable blitter IRQ
+    63 = 0054			irq_status	equ	$54			; bit 0 set means blitter threw an IRQ
+    64 = 0055			P0		equ	$55			; priority select registers when attribute map is enabled.
+    65 = 0056			P1		equ	$56
+    66 = 0057			P2		equ	$57
+    67 = 0058			P3		equ	$58
+    68
+    69
+    70 				.STRUCT	BCB
+    71 = 0000			src_adr		.long
+    72 = 0003			src_step_y	.word
+    73 = 0005			src_step_x	.byte
+    74 = 0006			dest_adr	.long
+    75 = 0009			dest_step_y	.word
+    76 = 000B			dest_step_x	.byte
+    77 = 000C			blt_width	.word
+    78 = 000E			blt_height	.byte
+    79 = 000F			blt_and_mask	.byte
+    80 = 0010			blt_xor_mask	.byte
+    81 = 0011			blt_coll_mask	.byte
+    82 = 0012			blt_zoom	.byte
+    83 = 0013			pattern_feature	.byte
+    84 = 0014			blt_control	.byte
+    85 				.ENDS
+    43
+    44 				;###################################################################################################################
+    45
+    46 				; Display Handler Equates (among others)
+    47
+    48 = 0400			row_slide_out	= @buf
+    49
+    50 = 005E			cursor_address	= oldadr			; points to the address where the text cursor points
+    51
+    52 = 0054			row		= rowcrs			; cursor row
+    53 = 0055			column		= colcrs			; cursor column
+    54
+    55 = 02FB			temp_char	= atachr			; holds a character temporarily for the recieve processing routines
+    56 = 02FD			text_color	= fildat			; current text color to be put on the screen.
+    57
+    58
+    59 				;###################################################################################################################
+    60
+    61 2685 8A 48		start		txa:pha
+    62
+    63 2687 A9 80				lda	#$80
+    64 2689 A0 5F				ldy	#memac_bank_sel
+    65 268B 91 80				sta	(fxptr),y
+    66
+    67 				; load the xdl and blitter lists
+    68
+    69 268D A9 3A				lda	#<xdl			; setup source pointer
+    70 268F 8D 7D 2A				sta	mem_move.src_ptr
+    71 2692 A9 2B				lda	#>xdl
+    72 2694 8D 7E 2A				sta	mem_move.src_ptr+1
+    73
+    74 2697 A9 00				lda	#<(vbxe_mem_base+$0800)	; destination pointer
+    75 2699 8D 80 2A				sta	mem_move.dst_ptr
+    76 269C A9 B8				lda	#>(vbxe_mem_base+$0800)
+    77 269E 8D 81 2A				sta	mem_move.dst_ptr+1
+    78
+    79 26A1 A9 8D				lda	#<(bcb_end - xdl - 1)	; and byte count - 1
+    80 26A3 8D 73 2C				sta	counter
+    81 26A6 A9 00				lda	#>(bcb_end - xdl)
+    82 26A8 8D 74 2C				sta	counter+1
+    83
+    84 26AB 20 7A 2A				jsr	mem_move
+    85
+    86 				; load the xdl address
+    87
+    88 26AE A9 00				lda	#$00
+    89 26B0 A0 41				ldy	#xdl_adr
+    90 26B2 91 80				sta	(fxptr),y
+    91 26B4 C8					iny
+    92 26B5 C8					iny
+    93 26B6 91 80				sta	(fxptr),y
+    94 26B8 88					dey
+    95 26B9 A9 08				lda	#$08
+    96 26BB 91 80				sta	(fxptr),y
+    97
+    98 				; enable xdl and disable transparent colors
+    99
+   100 26BD A9 05				lda	#$05
+   101 26BF A0 40				ldy	#video_control
+   102 26C1 91 80				sta	(fxptr),y
+   103
+   104 				; set the memac window to the display ram (the top of VBXE memory)
+   105
+   106 26C3 A9 FF				lda	#$FF
+   107 26C5 A0 5F				ldy	#memac_bank_sel
+   108 26C7 91 80				sta	(fxptr),y
+   109
+   110 				; done initializing the VBXE
+   111 				;###################################################################################################################
+   112 				; now we start initializing the variables for the terminal state
+   113 				; initialize the cursor address to be at the home position
+   114
+   115 26C9 A9 00				lda	#<vbxe_screen_top
+   116 26CB 85 5E				sta	cursor_address
+   117 26CD A9 B1				lda	#>vbxe_screen_top
+   118 26CF 85 5F				sta	cursor_address + 1
+   119
+   120 				; initialize the text color
+   121
+   122 26D1 A9 87				lda	#$87			; $87 is white on black
+   123 26D3 8D FD 02				sta	text_color
+   124
+   125 				; initialize the cursor position
+   126 26D6 A9 00				lda	#$00
+   127 26D8 85 54				sta	row
+   128 26DA 85 55				sta	column
+   129
+   130 				; the flags for escape and CSI
+   131 26DC 8D 6D 2C				sta	ctrl_seq_flg
+   132
+   133 				; the flag for the cursor
+   134 26DF 8D 6E 2C				sta	cursor_flg		; cursor is not on yet.
+   135
+   136 				; turn the cursor on
+   137 				; normally, the screen windows starts in a state of all 0.
+   138 				; that is fine for the characters
+   139 				; but for the colors, this means the overlay bit is not set
+   140 				; so all the colors are transparent and the cursor doesn't show up right
+   141 				; so we clear the page first, which fills the page with null and the default color
+   142
+   143 26E2 20 EE 2A				jsr	scroll_page
+   144 26E5 20 1D 2B				jsr	cursor_on
+   145
+   146 26E8 A9 00				lda	#0
+   147 26EA A0 5F				ldy	#memac_bank_sel
+   148 26EC 91 80				sta	(fxptr),y
+   149 						
+   150 26EE 68 AA				pla:tax
+   151 						
+   152 26F0 60					rts
+   153
+   154 				/*
+   155 				lp		lda ans_adr: data
+   156 						sta temp_char
+   157
+   158
+   159 						jsr 	process_char		; process the character
+   160
+   161
+   162 						inw ans_adr
+   163
+   164 						cpw ans_adr #data_end
+   165 						bne lp
+   166
+   167 				;		jsr scroll_1d
+   168
+   169
+   170
+   171 						lda	#0
+   172 						ldy	#memac_bank_sel
+   173 						sta	(fxptr),y
+   174
+   175 						jmp *
+   176 				*/
+   176
+   177
+   178 26F1			process_char	.local
+   179 26F1 2C 6D 2C				bit	ctrl_seq_flg
+   180 26F4 70 11				bvs	is_ctrl_seq		; if overflow set, it's a control sequence
+   181 26F6 10 3A				bpl	not_C1			; if escape flag not set, it's not a C1 character
+   182 26F8 A9 00				lda	#0			; if it is, we clear the escape flag for the next character.
+   183 26FA 8D 6D 2C				sta	ctrl_seq_flg
+   184 26FD AD FB 02				lda	temp_char
+   185 2700 29 E0				and	#%11100000		; AND mask for C1 set
+   186 2702 C9 40				cmp	#$40			; if it's $40 after ANDing,
+   187 2704 F0 47				beq	is_C1			; it's part of the C1 set
+   188 2706 60					rts				; otherwise, it's some other character preceded by escape, which we do nothing with (don't even print it)
+   189
+   190 2707			is_ctrl_seq	.local
+   191 2707 AD FB 02				lda	temp_char
+   192 270A C9 20				cmp	#$20
+   193 270C 90 13				bcc	bad_ctrl_seq		; control sequence is bad if character isn't greater than or equal to #$20
+   194 270E C9 7F				cmp	#$7F			; control sequence is bad if character is greater than or equal to #$7F
+   195 2710 B0 0F				bcs	bad_ctrl_seq		; this is all in the ECMA 48 spec.
+   196 2712 AE 6F 2C				ldx	ctrl_seq_index		; get index
+   197 2715 9D 79 2C				sta	ctrl_seq_buf,x		; store byte in the buffer
+   198 2718 E8					inx
+   199 2719 8E 6F 2C				stx	ctrl_seq_index
+   200 271C C9 40				cmp	#$40			; if control sequence byte is greater than or equal to #$40, then it's the final byte.
+   201 271E B0 07				bcs	is_final_byte
+   202 2720 60					rts
+   203
+   204 2721 A9 00		bad_ctrl_seq	lda	#0
+   205 2723 8D 6D 2C				sta	ctrl_seq_flg
+   206 2726 60					rts
+   207
+   208 2727 8D 70 2C		is_final_byte	sta	final_byte
+   209 272A A9 00				lda	#0
+   210 272C 8D 6D 2C				sta	ctrl_seq_flg
+   211 272F 4C 61 27				jmp	do_ctrl_seq
+   212 						.endl
+   213
+   214
+   215 2732 AD FB 02		not_C1		lda	temp_char
+   216 2735 C9 20				cmp	#32
+   217 2737 90 03				bcc	is_C0			; if the character is less than 32, it's a part of the C0 control set
+   218
+   219 2739 4C A5 27				jmp	put_byte		; if it's not part of the C0 set, just print it.
+   220
+   221
+   222 273C 0A			is_C0		asl				; multiply by two to get an offset into the C0 handler table
+   223 273D AA					tax				; transfer to X to be used as an index
+   224 273E BD C8 2B				lda	C0_handler_table, x	; transfer the address of the proper handler
+   225 2741 8D 4B 27				sta	jump_C0 + 1
+   226 2744 BD C9 2B				lda	C0_handler_table + 1, x
+   227 2747 8D 4C 27				sta	jump_C0 + 2
+   228 274A 4C 00 00		jump_C0		jmp	$0000			; into the operand of this JSR
+   229
+   230 274D			is_C1
+   231 274D AD FB 02				lda	temp_char
+   232 2750 0A					asl
+   233 2751 AA					tax
+   234 2752 BD 88 2B				lda	C1_handler_table-$80,x	; transfer the address of the proper handler
+   235 2755 8D 5F 27				sta	jump_C1 + 1
+   236 2758 BD 89 2B				lda	C1_handler_table-$7F,x
+   237 275B 8D 60 27				sta	jump_C1 + 2
+   238 275E 4C 00 00		jump_C1		jmp	$0000
+   239 						.endl
+   240
+   241 2761			do_ctrl_seq	.local
+   242 2761 AE 6F 2C				ldx	ctrl_seq_index
+   243 2764 CA					dex
+   244 2765 CA					dex
+   245 2766 BD 79 2C				lda	ctrl_seq_buf,x
+   246 2769 C9 30				cmp	#$30
+   247 276B B0 06				bcs	no_inter_byte		; if this byte is less than #$30, it's an intermediate byte.
+   248 276D 8D 71 2C				sta	inter_byte
+   249 2770 4C 78 27				jmp	find_entry
+   250 2773 A9 00		no_inter_byte	lda	#0
+   251 2775 8D 71 2C				sta	inter_byte
+   252
+   253 2778 A2 00		find_entry	ldx	#0
+   254 277A BD 48 2C		next_entry	lda	ctrl_seq_table,x	; get final byte from table
+   255 277D F0 25				beq	last_entry		; if the last entry is reached, jump
+   256 277F CD 70 2C				cmp	final_byte		; compare to actual final byte
+   257 2782 D0 19				bne	wrong_f_byte		; jump if they don't match
+   258 2784 E8					inx
+   259 2785 BD 48 2C				lda	ctrl_seq_table,x	; get intermediate byte
+   260 2788 CD 71 2C				cmp	inter_byte		; compare to actual intermediate byte
+   261 278B D0 11				bne	wrong_i_byte		; jump if they don't match
+   262 278D E8					inx				; point at low address of handler
+   263 278E BD 48 2C				lda	ctrl_seq_table,x
+   264 2791 8D 9B 27				sta	ctrl_seq_jmp+1
+   265 2794 BD 49 2C				lda	ctrl_seq_table+1,x
+   266 2797 8D 9C 27				sta	ctrl_seq_jmp+2		; set up the jump
+   267
+   268 279A 4C 00 00		ctrl_seq_jmp	jmp	$0000			; jump to control sequence handler (the address here will be changed)
+   269
+   270 279D E8			wrong_f_byte	inx				; points to intermediate byte after this
+   271 279E E8			wrong_i_byte	inx				; points to low address byte after this
+   272 279F E8					inx				; points to high address byte after this
+   273 27A0 E8					inx				; points to next final byte after this
+   274 27A1 4C 7A 27				jmp	next_entry
+   275
+   276 27A4 60			last_entry	rts				; if we searched the whole list and didn't find it, do nothing.
+   277 						.endl
+   278
+   279
+   280 27A5			put_byte	.local				; put the byte on the screen
+   281 27A5 20 23 2B				jsr	cursor_off
+   282 27A8 A2 00				ldx	#$00
+   283
+   284 27AA AD FB 02				lda	temp_char
+   285 27AD 81 5E				sta	(cursor_address, x)
+   286
+   287 27AF E6 5E				inc	cursor_address
+   288
+   289 27B1 AD FD 02				lda	text_color		; get the current text color
+   290 27B4 81 5E				sta	(cursor_address, x)
+   291
+   292 27B6 E6 5E				inc	cursor_address
+   293 27B8 D0 02				bne	no_carry		; if the increment resulted in 0, then we rolled over and need to carry
+   294 27BA E6 5F				inc	cursor_address + 1	; carry means high address needs to be incremented
+   295
+   296 27BC E6 55		no_carry	inc	column			; move the cursor forward
+   297 27BE A9 4F				lda	#79
+   298 27C0 C5 55				cmp	column
+   299 27C2 B0 0C				bcs	no_new_line		; if 79 >= col, no new line is needed
+   300 27C4 A5 54				lda	row
+   301 27C6 C9 17				cmp	#23			; if row is 23, then we need to scroll a line
+   302 27C8 F0 09				beq	scroll
+   303 27CA E6 54				inc	row			; otherwise (when col > 79) go to the next line
+   304 27CC A9 00				lda	#00
+   305 27CE 85 55				sta	column			; set column back to 0
+   306 27D0 4C 1D 2B		no_new_line	jmp	cursor_on
+   307
+   308 27D3 A9 60		scroll		lda	#<(vbxe_mem_base + $1000 - 160)
+   309 27D5 85 5E				sta	cursor_address
+   310 27D7 A9 BF				lda	#>(vbxe_mem_base + $1000 - 160)
+   311 27D9 85 5F				sta	cursor_address + 1
+   312 						/*
+   313 						lda	cursor_address		; what do I do this for? this is really unnecesary, all this math
+   314 						sec				; I know that the only time I jump here is when I am pointing off the bottom of the
+   315 						sbc	#160			; screen, just past the end of the VBXE window. so this math always results in the same
+   316 						sta	cursor_address		; thing.
+   317 						bcs	no_carry_1		; if carry clear (borrow)
+   318 						dec	cursor_address+1	; decrement the high byte
+   319 						*/
+   319
+   320 27DB A9 00		no_carry_1	lda	#0			; otherwise, don't
+   321 27DD 85 55				sta	column			; set column to 0. row stays 23
+   322 27DF 20 A6 2A				jsr	scroll_1d		; run the blitter routine to scroll one line down.
+   323 27E2 4C 1D 2B				jmp	cursor_on
+   324 						.endl
+   325
+   326 				;###################################################################################################################
+   327 				; control sequence handlers
+   328 27E5			SOH_adr						; Start of Header prints a character
+   329 27E5			STX_adr						; Start of Text prints a character
+   330 27E5			ETX_adr						; End of Text prints a character
+   331 27E5			EOT_adr						; End of Transmission prints a character
+   332 27E5			ACK_adr						; Acknowledge prints a character
+   333 27E5			SO_adr						; Shift Out prints a character
+   334 27E5			SI_adr						; Shift In prints a character
+   335 27E5			DLE_adr						; Data Link Escape prints a character
+   336 27E5			DC1_adr						; Device Control 1-4 print a character
+   337 27E5			DC2_adr
+   338 27E5			DC3_adr
+   339 27E5			DC4_adr
+   340 27E5			NAK_adr						; Non-Acknowledge prints a character
+   341 27E5			SYN_adr						; Synchronous Idle prints a character
+   342 27E5			ETB_adr						; End of Transmission Block prints a character
+   343 27E5			CAN_adr						; Cancel prints a character
+   344 27E5			EM_adr						; End of Medium prints a character
+   345 27E5			SUB_adr						; Substitute prints a character
+   346 27E5			IS1_adr						; Information Separator 1-4 print characters
+   347 27E5			IS2_adr
+   348 27E5			IS3_adr
+   349 27E5			IS4_adr
+   350 27E5 4C A5 27				jmp 	put_byte		; the put_byte routine will return for us
+   351 27E8			ESC_adr						; Escape sets the escape flag
+   352 27E8 A9 80				lda	#$80
+   353 27EA 8D 6D 2C				sta	ctrl_seq_flg
+   354 27ED 60					rts
+   355 27EE			CSI_adr						; Control Sequence Introducer sets the CSI flag which causes interpretation of a control sequence to begin
+   356 27EE A9 00				lda	#0
+   357 27F0 8D 6F 2C				sta	ctrl_seq_index
+   358 27F3 A9 40				lda	#$40
+   359 27F5 8D 6D 2C				sta	ctrl_seq_flg
+   360 27F8 60					rts
+   361 27F9			VT_adr						; Vertical Tab. for now, same as LF
+   362 27F9			IND_adr						; Index is same as LF
+   363 27F9			LF_adr		.local				; Line Feed moves the cursor down one line BUT only if we're not on the last line
+   364 										; down one line is forward 80 columns, or 160 bytes
+   365 27F9 20 23 2B				jsr	cursor_off
+   366 27FC A5 54				lda	row
+   367 27FE C9 17				cmp	#23			; if row is at 24,
+   368 2800 F0 10				beq	scroll			; we scroll
+   369 2802 A9 A0				lda	#160			; otherwise, we add 160.
+   370 2804 18					clc				; clear the carry in prep for the addition.
+   371 2805 65 5E				adc	cursor_address		; add 160 to the low part of the cursor address.
+   372 2807 85 5E				sta	cursor_address
+   373 2809 90 02				bcc	no_carry		; if there's a carry,
+   374 280B E6 5F				inc	cursor_address + 1	; increment the high half of the address.
+   375 280D E6 54		no_carry	inc	row			; Line Feed increments row
+   376 280F 4C 1D 2B				jmp	cursor_on
+   377 2812 20 A6 2A		scroll		jsr	scroll_1d		; scroll one line down. we don't need to touch the cursor address, the row, or column.
+   378 2815 4C 1D 2B				jmp	cursor_on
+   379 						.endl
+   380
+   381 2818			CR_adr		.local				; Carriage Return puts the cursor at the home position of the current line
+   382 				                                                ; (AKA, cursor gets column number * 2 bytes/char subtracted from it)
+   383 2818 20 23 2B				jsr	cursor_off
+   384 281B A5 5E				lda	cursor_address		; get cursor
+   385 281D 38					sec				; set carry for subtraction
+   386 281E E5 55				sbc	column			; do the subtraction
+   387 2820 B0 02				bcs	no_borrow1		; carry will be clear if no borrow
+   388 2822 C6 5F				dec	cursor_address + 1	; otherwise it borrowed, so decrement cursor_address high byte
+   389 2824 38			no_borrow1	sec				; prepare for another subtraction
+   390 2825 E5 55				sbc	column			; do it
+   391 2827 B0 02				bcs	no_borrow2		; borrow thing again...
+   392 2829 C6 5F				dec	cursor_address + 1
+   393 282B 85 5E		no_borrow2	sta	cursor_address		; store the result
+   394 282D A9 00				lda 	#00
+   395 282F 85 55				sta	column			; set column to 0
+   396 2831 4C 1D 2B				jmp	cursor_on
+   397 						.endl
+   398
+   399 2834			BEL_adr		.local				; Bell is supposed to play a tone, flash the screen, something.
+   400 										; this routine is copied out of the atari OS. it is what Atari used to do a bell character.
+   401 										; it's slightly modified. the original routine called the keyclick routine 32 (#$20) times.
+   402 										; I use a nested loop.
+   403 										; perhaps later, I will separate the keyclick routine for my own purposes.
+   404 2834 A0 20				ldy	#$20
+   405 2836 A2 7E		repeat		ldx	#$7E
+   406 2838 8E 1F D0		spk		stx	CONSOL
+   407 283B AD 0B D4				lda	VCOUNT
+   408 283E CD 0B D4		wait		cmp	VCOUNT
+   409 2841 F0 FB				beq	wait
+   410 2843 CA					dex
+   411 2844 CA					dex
+   412 2845 10 F1				bpl	spk
+   413 2847 88					dey
+   414 2848 10 EC				bpl	repeat
+   415 284A 60					rts
+   416 						.endl
+   417
+   418 284B			FF_adr						; Form Feed clears the screen and sets cursor to the home position.
+   419 284B 20 23 2B				jsr	cursor_off
+   420 284E A9 00				lda	#0			; home the cursor
+   421 2850 85 54				sta	row
+   422 2852 85 55				sta	column
+   423 2854 A9 00				lda	#<vbxe_screen_top
+   424 2856 85 5E				sta	cursor_address
+   425 2858 A9 B1				lda	#>vbxe_screen_top
+   426 285A 85 5F				sta	cursor_address + 1
+   427 285C 20 EE 2A				jsr	scroll_page		; clear the screen
+   428 285F 4C 1D 2B				jmp	cursor_on
+   429
+   430 2862			BS_adr		.local				; Back Space moves the cursor left by one character (2 bytes).
+   431 2862 20 23 2B				jsr	cursor_off
+   432 2865 A5 55				lda	column
+   433 2867 D0 01				bne	not_left		; if we're not at the left side yet, keep going
+   434 2869 60					rts				; but if we ARE at the left side, do nothing
+   435 286A C6 55		not_left	dec	column			; if column isn't 0, we just decrement it
+   436 286C A5 5E				lda	cursor_address
+   437 286E D0 02				bne	no_borrow		; if the cursor address low half isn't 0, we don't borrow
+   438 2870 C6 5F				dec	cursor_address + 1	; otherwise, borrow
+   439 2872 C6 5E		no_borrow	dec	cursor_address		; if it weren't for the fact that cursor_address should always be even,
+   440 2874 C6 5E				dec 	cursor_address		; we would have to look for a borrow here too.
+   441 2876 4C 1D 2B				jmp	cursor_on
+   442 						.endl
+   443 2879			NUL_adr						; null does nothing
+   444 2879			ENQ_adr						; Enquiry is probably supposed to return an ACK, but for now, it does nothing
+   445 2879			HT_adr						; Horizontal Tab normally causes the cursor to move to the next tab stop. for now, nothing
+   446 2879			HTS_adr						; no tab stuff just yet
+   447 2879			HTJ_adr
+   448 2879			VTS_adr
+   449 2879			BPH_adr						; BPH doesn't apply in this case.
+   450 2879			NBH_adr						; nor do any of the following
+   451 2879			SSA_adr
+   452 2879			ESA_adr
+   453 2879			PLD_adr
+   454 2879			PLU_adr
+   455 2879			RI_adr
+   456 2879			SS2_adr
+   457 2879			SS3_adr
+   458 2879			DCS_adr
+   459 2879			PU1_adr
+   460 2879			PU2_adr
+   461 2879			STS_adr
+   462 2879			CCH_adr
+   463 2879			MW_adr
+   464 2879			SPA_adr
+   465 2879			EPA_adr
+   466 2879			SOS_adr
+   467 2879			SCI_adr
+   468 2879			ST_adr
+   469 2879			OSC_adr
+   470 2879			PM_adr
+   471 2879			APC_adr
+   472
+   473 2879 60					rts
+   474 287A			NEL_adr						; Next Line is combination of CR and LF
+   475 287A 20 18 28				jsr	CR_adr
+   476 287D 4C F9 27				jmp	LF_adr
+   477
+   478
+   479 				;###################################################################################################################
+   480
+   481 2880			.local	get_param
+   482
+   483 2880 A9 00				lda	#0
+   484 2882 8D C9 28				sta	param_idx+1
+   485
+   486 2885 A2 FF				ldx	#$FF
+   487 2887 A9 00		next_parm	lda	#0
+   488 2889 8D 72 2C				sta	parameter_val		; zero parameter value, this is the default value for this control sequence also
+   489 288C E8			next_byte	inx				; increment index
+   490 288D BD 79 2C				lda	ctrl_seq_buf,x		; get byte of control sequence
+   491 2890 A8					tay				; save original value
+   492 2891 29 F0				and	#$F0
+   493 2893 C9 30				cmp	#$30			; if it's #$3x, then it's a parameter value
+   494 2895 D0 31				bne	is_last_parm		; otherwise, it has to be the final byte.
+   495 2897 98					tya				; get value back
+   496 2898 C9 3A				cmp	#$3A
+   497 289A 90 09				bcc	add_digit		; if it's less than #$3A, then append the digit to parameter_val
+   498 289C F0 EE				beq	next_byte		; if it's #$3A, then ignore it
+   499 289E C9 3B				cmp	#$3B
+   500 28A0 F0 20				beq	parse_parm		; if it's #$3B, then it's the end of a parameter substring
+   501 28A2 4C 8C 28				jmp	next_byte		; otherwise, at this point, it must be a bad value (#$3C through #$3F)
+   502
+   503 28A5 29 0F		add_digit	and	#$0F			; we just want the last 4 bits
+   504 28A7 A8					tay				; save this
+   505 28A8 AD 72 2C				lda	parameter_val		; append the digit to parameter_val
+   506
+   507 28AB 0A					ASL @		;multiply by 2
+   508 28AC 8D B3 28				STA TEMP+1	;temp store in TEMP
+   509 28AF 0A					ASL @		;again multiply by 2 (*4)
+   510 28B0 0A					ASL @		;again multiply by 2 (*8)
+   511 28B1 18					CLC
+   512 28B2 69 00		TEMP		ADC #0		;as result, A = x*8 + x*2
+   513
+   514 28B4 8D 72 2C				sta	parameter_val
+   515 28B7 98					tya
+   516 28B8 18 6D 72 2C				add	parameter_val
+   517 28BC 8D 72 2C				sta	parameter_val
+   518 28BF 4C 8C 28				jmp	next_byte
+   519
+   520 28C2			parse_parm
+   521 28C2 20 C8 28				jsr	is_last_parm
+   522 28C5 4C 87 28				jmp	next_parm
+   523
+   524 28C8			is_last_parm
+   525
+   526 28C8 A0 00		param_idx	ldy	#0
+   527 28CA C0 03				cpy	#3
+   528 28CC B0 09				bcs	_rts
+   529
+   530 28CE AD 72 2C				lda	parameter_val
+   531
+   532 28D1 99 75 2C				sta	parameters,y
+   533
+   534 28D4 EE C9 28				inc	param_idx+1
+   535
+   536 28D7 60			_rts		rts
+   537
+   538 				.endl
+   539
+   540
+   541 				;###################################################################################################################
+   542
+   543 28D8			ED_adr		.local				; Erase in Display
+   544
+   545 28D8 AD 79 2C				lda ctrl_seq_buf
+   546
+   547 28DB C9 32				cmp #'2'			; clear entire screen (and moves cursor to upper left corner)
+   548 28DD F0 01				beq clr
+   549
+   550 28DF 60					rts
+   551
+   552 28E0 4C EE 2A		clr		jmp scroll_page
+   553
+   554 						.endl
+   555
+   556 				;###################################################################################################################
+   557
+   558 28E3			SCP_adr		.local				; Save Current Cursor Position
+   559
+   560 28E3 A5 54				lda row
+   561 28E5 85 5A				sta oldrow
+   562
+   563 28E7 A5 55				lda column
+   564 28E9 85 5B				sta oldcol
+   565
+   566 28EB 60					rts
+   567
+   568 						.endl
+   569
+   570 				;###################################################################################################################
+   571
+   572 28EC			RCP_adr		.local				; Restore Saved Cursor Position
+   573
+   574 28EC A5 5A				lda oldrow
+   575 28EE 85 54				sta row
+   576
+   577 28F0 A5 5B				lda oldcol
+   578 28F2 85 55				sta column
+   579
+   580 28F4 4C 6F 29				jmp cursor_set
+   581
+   582 						.endl
+   583
+   584 				;###################################################################################################################
+   585
+   586 28F7			CUF_adr		.local				; Cursor Forward
+   587
+   588 28F7 20 80 28				jsr get_param
+   589
+   590 28FA AD 75 2C				lda parameters
+   591 28FD D0 02				sne
+   592 28FF A9 01				lda #1
+   593
+   594 2901 18 65 55				add column
+   595 2904 85 55				sta column
+   596
+   597 2906 4C 6F 29				jmp cursor_set
+   598
+   599 						.endl
+   600
+   601 				;###################################################################################################################
+   602
+   603 2909			CUU_adr		.local				; Cursor Up
+   604
+   605 2909 20 80 28				jsr get_param
+   606 						
+   607 290C AD 75 2C				lda parameters
+   608 290F D0 02				sne
+   609 2911 A9 01				lda #1
+   610 2913 8D 75 2C				sta parameters
+   611
+   612 2916 A5 54				lda row
+   613 2918 F0 06				beq skp
+   614
+   615 291A 38 ED 75 2C				sub parameters
+   616 291E 85 54				sta row
+   617
+   618 2920 4C 6F 29		skp		jmp cursor_set
+   619
+   620 						.endl
+   621
+   622 				;###################################################################################################################
+   623
+   624 2923			CUB_adr		.local				; Cursor Back
+   625
+   626 2923 20 80 28				jsr get_param
+   627 						
+   628 2926 AD 75 2C				lda parameters
+   629 2929 D0 02				sne
+   630 292B A9 01				lda #1
+   631 292D 8D 75 2C				sta parameters
+   632 						
+   633 2930 A5 55				lda column
+   634 2932 F0 06				beq skp
+   635
+   636 2934 38 ED 75 2C				sub parameters
+   637 2938 85 55				sta column
+   638
+   639 293A 4C 6F 29		skp		jmp cursor_set
+   640
+   641 						.endl
+   642
+   643 				;###################################################################################################################
+   644
+   645 293D			CUD_adr		.local				; Cursor Down
+   646
+   647 293D 20 80 28				jsr get_param
+   648
+   649 2940 AD 75 2C				lda parameters
+   650 2943 D0 02				sne
+   651 2945 A9 01				lda #1
+   652 2947 8D 75 2C				sta parameters
+   653 						
+   654 294A A5 54				lda row
+   655 294C C9 17				cmp #23
+   656 294E B0 06				bcs skp
+   657 						
+   658 2950 18 6D 75 2C				add parameters
+   659 2954 85 54				sta row
+   660
+   661 2956 4C 6F 29		skp		jmp cursor_set
+   662
+   663 						.endl
+   664
+   665 				;###################################################################################################################
+   666
+   667 2959			CUP_adr		.local				; Cursor Position
+   668 										; Moves the cursor to row n, column m. The values are 1-based, and default to 1 (top left corner) if omitted		
+   669 2959 20 80 28				jsr get_param
+   670
+   671 295C AD 76 2C				lda parameters+1
+   672 295F 38 E9 01				sub #1
+   673 2962 85 55				sta column
+   674
+   675 2964 AD 75 2C				lda parameters
+   676 2967 38 E9 01				sub #1
+   677 296A 85 54				sta row
+   678
+   679 296C 4C 6F 29				jmp cursor_set
+   680
+   681 						.endl
+   682
+   683
+   684 296F			cursor_set	.local
+   685
+   686 296F 20 23 2B				jsr cursor_off
+   687 						
+   688 2972 A5 54				lda row
+   689 2974 C9 18		srow		cmp #24
+   690 2976 90 06				bcc ok
+   691 						
+   692 2978 38 E9 18				sub #24
+   693 297B 4C 74 29				jmp srow
+   694
+   695 297E 85 54		ok		sta row
+   696 2980 A8					tay
+   697
+   698 2981 A5 55				lda column
+   699 2983 0A					asl @
+   700 						
+   701 2984 18 79 94 29				add lmul,y
+   702 2988 85 5E				sta cursor_address
+   703
+   704 298A A9 00				lda #0
+   705 298C 79 AC 29				adc hmul,y
+   706 298F 85 5F				sta cursor_address+1
+   707
+   708 2991 4C 1D 2B				jmp cursor_on
+   709 						
+   710 2994 00 A0 40 E0 80 20 + lmul		:24 dta l(vbxe_screen_top+#*160)
+   711 29AC B1 B1 B2 B2 B3 B4 + hmul		:24 dta h(vbxe_screen_top+#*160)
+   712
+   713 						.endl
+   714
+   715 				;###################################################################################################################
+   716
+   717 29C4			SGR_adr		.local				; set graphics rendition control sequence
+   718 29C4 A2 FF				ldx	#$FF
+   719 29C6 A9 00		next_parm	lda	#0
+   720 29C8 8D 72 2C				sta	parameter_val		; zero parameter value, this is the default value for this control sequence also
+   721 29CB E8			next_byte	inx				; increment index
+   722 29CC BD 79 2C				lda	ctrl_seq_buf,x		; get byte of control sequence
+   723 29CF A8					tay				; save original value
+   724 29D0 29 F0				and	#$F0
+   725 29D2 C9 30				cmp	#$30			; if it's #$3x, then it's a parameter value
+   726 29D4 D0 2B				bne	is_last_parm		; otherwise, it has to be the final byte.
+   727 29D6 98					tya				; get value back
+   728 29D7 C9 3A				cmp	#$3A
+   729 29D9 90 09				bcc	add_digit		; if it's less than #$3A, then append the digit to parameter_val
+   730 29DB F0 EE				beq	next_byte		; if it's #$3A, then ignore it
+   731 29DD C9 3B				cmp	#$3B
+   732 29DF F0 1A				beq	parse_parm		; if it's #$3B, then it's the end of a parameter substring
+   733 29E1 4C CB 29				jmp	next_byte		; otherwise, at this point, it must be a bad value (#$3C through #$3F)
+   734
+   735 29E4 29 0F		add_digit	and	#$0F			; we just want the last 4 bits
+   736 29E6 A8					tay				; save this
+   737 29E7 AD 72 2C				lda	parameter_val		; append the digit to parameter_val
+   738 29EA 0A					asl
+   739 29EB 0A					asl
+   740 29EC 0A					asl
+   741 29ED 0A					asl
+   742 29EE 8D 72 2C				sta	parameter_val
+   743 29F1 98					tya
+   744 29F2 0D 72 2C				ora	parameter_val
+   745 29F5 8D 72 2C				sta	parameter_val
+   746 29F8 4C CB 29				jmp	next_byte
+   747
+   748 29FB			parse_parm
+   749 29FB 20 01 2A				jsr	is_last_parm
+   750 29FE 4C C6 29				jmp	next_parm
+   751
+   752 2A01			is_last_parm	.local
+   753 2A01 AD 72 2C				lda	parameter_val
+   754 2A04 29 F0				and	#$F0
+   755 2A06 F0 09				beq	simple_attrib		; if it's zero, it's a simple attribute (bold, inverse, etc.)
+   756 2A08 C9 30				cmp	#$30
+   757 2A0A F0 3A				beq	forecolor_attr		; foreground (text) color change
+   758 2A0C C9 40				cmp	#$40
+   759 2A0E F0 4E				beq	backcolor_attr		; background color change
+   760 2A10 60					rts				; otherwise it's not supported
+   761
+   762 2A11			simple_attrib	.local
+   763 2A11 AD 72 2C				lda	parameter_val
+   764 2A14 29 0F				and	#$0F
+   765 2A16 F0 0D				beq	default
+   766 2A18 C9 01				cmp	#$1
+   767 2A1A F0 0F				beq	bold
+   768 2A1C C9 02				cmp	#$2
+   769 2A1E F0 14				beq	unbold
+   770 2A20 C9 07				cmp	#$7
+   771 2A22 F0 19				beq	inverse
+   772 2A24 60					rts
+   773
+   774 2A25 A9 87		default		lda	#$87
+   775 2A27 8D FD 02				sta	text_color
+   776 2A2A 60					rts
+   777
+   778 2A2B AD FD 02		bold		lda	text_color
+   779 2A2E 09 08				ora	#%00001000
+   780 2A30 8D FD 02				sta	text_color
+   781 2A33 60					rts
+   782
+   783 2A34 AD FD 02		unbold		lda	text_color
+   784 2A37 29 F7				and	#%11110111
+   785 2A39 8D FD 02				sta	text_color
+   786 2A3C 60					rts
+   787
+   788 2A3D AD FD 02		inverse		lda	text_color
+   789 2A40 49 77				eor	#%01110111
+   790 2A42 8D FD 02				sta	text_color
+   791 2A45 60					rts
+   792 						.endl
+   793
+   794 2A46			forecolor_attr	.local
+   795 2A46 AD 72 2C				lda	parameter_val
+   796 2A49 C9 38				cmp	#$38
+   797 2A4B B0 10				bcs	ignore
+   798 2A4D 29 0F				and	#$0F
+   799 2A4F 8D 72 2C				sta	parameter_val
+   800 2A52 AD FD 02				lda	text_color
+   801 2A55 29 F8				and	#$F8
+   802 2A57 0D 72 2C				ora	parameter_val
+   803 2A5A 8D FD 02				sta	text_color
+   804 2A5D 60			ignore		rts
+   805 						.endl
+   806
+   807 2A5E			backcolor_attr	.local
+   808 2A5E AD 72 2C				lda	parameter_val
+   809 2A61 C9 48				cmp	#$48
+   810 2A63 B0 14				bcs	ignore
+   811 2A65 29 0F				and	#$0F
+   812 2A67 0A					asl
+   813 2A68 0A					asl
+   814 2A69 0A					asl
+   815 2A6A 0A					asl
+   816 2A6B 8D 72 2C				sta	parameter_val
+   817 2A6E AD FD 02				lda	text_color
+   818 2A71 29 8F				and	#$8F
+   819 2A73 0D 72 2C				ora	parameter_val
+   820 2A76 8D FD 02				sta	text_color
+   821 2A79 60			ignore		rts
+   822 						.endl
+   823
+   824 						.endl
+   825
+   826 						.endl
+   827
+   828 2A7A			mem_move	.local				; memory move routine.
+   829 				; copies number of bytes in counter + 1 from address in src_ptr to address in dst_ptr
+   830
+   831 2A7A A0 00				ldy	#0			; we don't want an offset actually, but the 6502 uses one anyway
+   832 2A7C B9 00 10		loop		lda	src_ptr: $1000,y	; move a byte
+   833 2A7F 99 00 10				sta	dst_ptr: $1000,y
+   834
+   835 2A82 EE 7D 2A D0 03 EE + 		inw	src_ptr			; increment the pointer
+   836 2A8A EE 80 2A D0 03 EE + 		inw	dst_ptr			; increment the other pointer
+   837
+   838 2A92 AD 73 2C				lda	counter			; check to see if count is 0
+   839 2A95 D0 08				bne	no_borrow		; if it's not, we don't borrow
+   840 2A97 AD 74 2C				lda	counter+1		; check to see if count's high byte is 0 also
+   841 2A9A F0 09				beq	done			; in which case we're done
+   842 2A9C CE 74 2C				dec	counter+1		; but if we're not, we borrow
+   843 2A9F CE 73 2C		no_borrow	dec	counter
+   844 2AA2 4C 7C 2A				jmp	loop
+   845 2AA5 60			done		rts
+   846 						.endl
+   847
+   848 2AA6			scroll_1d	.local				; scroll one down routine.
+   849
+   850 				; copy row #0 to buffer
+   851
+   852 2AA6 AD 9F 30				lda row_slide_status
+   853 2AA9 D0 11				bne skip
+   854
+   855 2AAB A0 4F				ldy #79
+   856 2AAD B9 00 B1		cpRow		lda vbxe_screen_top,y
+   857 2AB0 99 00 04				sta row_slide_out,y
+   858 2AB3 B9 50 B1				lda vbxe_screen_top+80,y
+   859 2AB6 99 50 04				sta row_slide_out+80,y
+   860 2AB9 88					dey
+   861 2ABA 10 F1				bpl cpRow
+   862
+   863 2ABC			skip
+   864
+   865 				; uses the blitter to move everything up just one line.
+   866
+   867 2ABC A0 5F				ldy	#memac_bank_sel		; get the old bank number (should be the last bank, but we can't assume)
+   868 2ABE B1 80				lda	(fxptr),y
+   869 2AC0 48					pha
+   870
+   871 2AC1 A9 80				lda	#$80			; bank 0, so we can put the color byte as the fill byte
+   872 2AC3 91 80				sta	(fxptr),y
+   873
+   874 2AC5 AD FD 02				lda	text_color		; put the color in the fill pattern location.
+   875 2AC8 8D 4A B8				sta	scroll_1d_color-xdl+$0800+vbxe_mem_base
+   876
+   877 2ACB A9 10				lda	#<(bcb_one_down - xdl + $800)
+   878 2ACD A0 50				ldy	#blt_adr
+   879 2ACF 91 80				sta	(fxptr),y
+   880 2AD1 A9 08				lda	#>(bcb_one_down - xdl + $800)
+   881 2AD3 C8					iny
+   882 2AD4 91 80				sta	(fxptr),y
+   883 2AD6 A9 00				lda	#^(bcb_one_down - xdl + $800)
+   884 2AD8 C8					iny
+   885 2AD9 91 80				sta	(fxptr),y
+   886
+   887 2ADB A9 01				lda	#1
+   888 						
+   889 2ADD 8D 9F 30				sta	row_slide_status
+   890 						
+   891 2AE0 A0 53				ldy	#blt_start
+   892 2AE2 91 80				sta	(fxptr),y
+   893
+   894 2AE4 B1 80		loop		lda	(fxptr),y
+   895 2AE6 D0 FC				bne	loop
+   896
+   897 2AE8 68					pla
+   898 2AE9 A0 5F				ldy	#memac_bank_sel
+   899 2AEB 91 80				sta	(fxptr),y
+   900 2AED 60					rts
+   901 						.endl
+   902
+   903 2AEE			scroll_page	.local				; scroll one page
+   904 				; used for FF and also to initialize the screen so the color is not all $00
+   905
+   906 2AEE A0 5F				ldy	#memac_bank_sel		; get the old bank number (should be the last bank, but we can't assume)
+   907 2AF0 B1 80				lda	(fxptr),y
+   908 2AF2 48					pha
+   909
+   910 2AF3 A9 80				lda	#$80			; bank 0, so we can put the color byte as the fill byte
+   911 2AF5 91 80				sta	(fxptr),y
+   912
+   913 2AF7 AD FD 02				lda	text_color		; put the color in the fill pattern location.
+   914 2AFA 8D 89 B8				sta	clr_scr_color-xdl+$0800+vbxe_mem_base
+   915
+   916 2AFD A9 4F				lda	#<(bcb_clr_scr - xdl + $800)
+   917 2AFF A0 50				ldy	#blt_adr
+   918 2B01 91 80				sta	(fxptr),y
+   919 2B03 A9 08				lda	#>(bcb_clr_scr - xdl + $800)
+   920 2B05 C8					iny
+   921 2B06 91 80				sta	(fxptr),y
+   922 2B08 A9 00				lda	#^(bcb_clr_scr - xdl + $800)
+   923 2B0A C8					iny
+   924 2B0B 91 80				sta	(fxptr),y
+   925
+   926 2B0D A9 01				lda	#1
+   927 2B0F A0 53				ldy	#blt_start
+   928 2B11 91 80				sta	(fxptr),y
+   929
+   930 2B13 B1 80		loop		lda	(fxptr),y
+   931 2B15 D0 FC				bne	loop
+   932
+   933 2B17 68					pla
+   934 2B18 A0 5F				ldy	#memac_bank_sel
+   935 2B1A 91 80				sta	(fxptr),y
+   936 2B1C 60					rts
+   937 						.endl
+   938
+   939 2B1D			cursor_on	.local				; turn on the cursor
+   940 				; but ONLY if the cursor isn't already on
+   941 2B1D 2C 6E 2C				bit	cursor_flg
+   942 2B20 10 07				bpl	cursor_toggle
+   943 2B22 60			skip		rts
+   944 						.endl
+   945
+   946 2B23			cursor_off	.local				; turn off the cursor
+   947 				; but ONLY if the cursor isn't already off
+   948 2B23 2C 6E 2C				bit	cursor_flg
+   949 2B26 30 01				bmi	cursor_toggle
+   950 2B28 60			skip		rts
+   951 						.endl
+   952
+   953 2B29			cursor_toggle					; inverts the color of the current character to show the cursor
+   954 2B29 A0 01				ldy	#1
+   955 2B2B B1 5E				lda	(cursor_address),y
+   956 2B2D 49 77				eor	#$77			; invert the color, but not bit 7 (transparency bit) or bit 3 (foreground intensity)
+   957 2B2F 91 5E				sta	(cursor_address),y
+   958 2B31 AD 6E 2C				lda	cursor_flg
+   959 2B34 49 80				eor	#$80			; flip the cursor flag
+   960 2B36 8D 6E 2C				sta	cursor_flg
+   961 2B39 60					rts
+   962
+   963
+   964 				;###################################################################################################################
+   965
+   966 2B3A			xdl		; start of xdl
+   967
+   968 				; XDLC bits
+   969 = 0001			XDLC_TMON	equ     1
+   970 = 0002			XDLC_GMON	equ     2
+   971 = 0004			XDLC_OVOFF	equ     4
+   972 = 0008			XDLC_MAPON	equ     8
+   973 = 0010			XDLC_MAPOFF	equ     0x10
+   974 = 0020			XDLC_RPTL	equ     0x20
+   975 = 0040			XDLC_OVADR	equ     0x40
+   976 = 0080			XDLC_OVSCRL	equ     0x80
+   977 = 0100			XDLC_CHBASE	equ     0x100
+   978 = 0200			XDLC_MAPADR	equ     0x200
+   979 = 0400			XDLC_MAPPAR	equ     0x400
+   980 = 0800			XDLC_OVATT	equ     0x800
+   981 = 0800			XDLC_ATT	equ     0x800
+   982 = 1000			XDLC_HR		equ     0x1000
+   983 = 2000			XDLC_LR		equ     0x2000
+   984 = 8000			XDLC_END	equ     0x8000
+   985
+   986 				; displays 24 scanlines of no overlay (ANTIC display list should be displaying blank
+   987 				; lines of GTIA background color)
+   988
+   989 2B3A 34					.byte	%00110100		; OVOFF, MAPOFF, RPTL - overlay off, color map off, repeat scanlines
+   990 2B3B 08					.byte	%00001000		; ATT - display size and overlay priority
+   991 2B3C 17					.byte	24-1			; 24 scanlines
+   992 2B3D 11					.byte	%00010001		; pallette #1, ANTIC normal mode
+   993 2B3E FF					.byte	%11111111		; overlay is priority over everything
+   994
+   995 				; now on to the 80x24 text portion
+   996
+   997 2B3F 61					.byte	%01100001		; RPTL, OVADR
+   998 2B40 89					.byte	%10001001		; CHBASE, OVATT, XDL_END
+   999 2B41 BF					.byte	192-1			; 192 scanlines of text (24 rows)
+  1000
+  1001 				; overlay address starts at top of memory - 3840. this means the last line is at the top of memory
+  1002 				;8
+  1003 2B42 00 F1 07				.long	VBXE_ANSIADR		; overlay address starts at the top of VBXE memory - bytes per screen
+  1004 2B45 A0 00				.word	80 + 80			; each line of text is 80 characters and 80 colors (80 + 80 bytes)
+  1005 2B47 00					.byte	$00			; font is at the beginning of memory (far from text window)
+  1006
+  1007 2B48 11					.byte	%00010001		; pallette #1, ANTIC normal mode
+  1008 2B49 FF					.byte	%11111111		; overlay is priority over everything
+  1009
+  1010 2B4A			xdl_end
+  1011
+  1012 2B4A			bcb_start	; start of blitter lists
+  1013
+  1014 2B4A			bcb_one_down	; blitter to scroll one line down
+  1015 2B4A A0 B5 07				.long	$07B5A0			; top of VBXE ram is $80000. this address is 5 pages back, plus one line. (src)
+  1016 2B4D A0 00		                .word	80*2			; one line is 160 bytes wide, and we're working our way down, so positive
+  1017 2B4F 01			                .byte	1			; x step is 1 (we want forwards and to not skip stuff)
+  1018 2B50 00 B5 07		                .long	$07B500			; top of VBXE ram is $80000. this address is 5 pages back. (dst)
+  1019 2B53 A0 00		                .word	80*2			; x and y step is the same as the source ones
+  1020 2B55 01			                .byte	1
+  1021 2B56 9F 00		                .word	[80*2]-1		; width same as y step less one
+  1022 2B58 76					.byte	[5*24]-2		; 5 pages less one line, then minus one because that's what the doc says
+  1023 2B59 FF					.byte	$FF			; AND mask. don't modify the data
+  1024 2B5A 00					.byte	$00			; XOR mask. don't modify the data
+  1025 2B5B 00					.byte	$00			; no collisions
+  1026 2B5C 00					.byte	$00			; 1:1 zoom
+  1027 2B5D 00					.byte	$00			; no pattern
+  1028 2B5E 08					.byte	%00001000		; NOT last entry, copy mode
+  1029
+  1030 2B5F 00 00 00				.long	0			; doesn't matter
+  1031 2B62 00 00				.word	0			; doesn't matter
+  1032 2B64 00					.byte	0			; doesn't matter
+  1033 2B65 60 FF 07				.long	$7FF60			; one line before the end of the screen
+  1034 2B68 A0 00				.word	80*2			; y step really doesn't matter, since we're only doing one line, but it's 80 characters
+  1035 2B6A 02					.byte	2			; x step is 2, we only want the character bytes, not color (for now)
+  1036 2B6B 4F 00				.word	80-1			; width is 80 bytes
+  1037 2B6D 00					.byte	1-1			; just the last line
+  1038 2B6E 00					.byte	0			; filling with a pattern
+  1039 2B6F 00					.byte	0			; fill value is 0
+  1040 2B70 00					.byte	0			; no collisions
+  1041 2B71 00					.byte	0			; 1:1 zoom
+  1042 2B72 00					.byte	0			; no pattern
+  1043 2B73 08					.byte	%00001000	        ; NOT last entry, copy mode.
+  1044
+  1045 2B74 00 00 00				.long	0			; doesn't matter
+  1046 2B77 00 00				.word	0			; doesn't matter
+  1047 2B79 00					.byte	0			; doesn't matter
+  1048 2B7A 61 FF 07				.long	$7FF61			; one line before the end of the screen, and one more so we fill the color bytes.
+  1049 2B7D A0 00				.word	80*2			; y step really doesn't matter, since we're only doing one line, but it's 80 characters
+  1050 2B7F 02					.byte	2			; x step is 2, we only want the color bytes, not character
+  1051 2B80 4F 00				.word	80-1			; width is 80 bytes
+  1052 2B82 00					.byte	1-1			; just the last line
+  1053 2B83 00					.byte	0			; filling with a pattern
+  1054 2B84 00			scroll_1d_color	.byte	0			; fill value will be changed by whatever uses this blitter list
+  1055 2B85 00					.byte	0			; no collisions
+  1056 2B86 00					.byte	0			; 1:1 zoom
+  1057 2B87 00					.byte	0			; no pattern
+  1058 2B88 00					.byte	0			; last entry, copy mode.
+  1059
+  1060 2B89			bcb_clr_scr	; blitter to scroll a whole page up
+  1061 2B89 00 C4 07				.long	$07C400			; top of VBXE ram is $80000. this address is 4 pages back. (src)
+  1062 2B8C A0 00		                .word	80*2			; one line is 160 bytes wide, and we're working our way down, so positive
+  1063 2B8E 01			                .byte	1			; x step is 1 (we want forwards and to not skip stuff)
+  1064 2B8F 00 B5 07		                .long	$07B500			; top of VBXE ram is $80000. this address is 5 pages back. (dst)
+  1065 2B92 A0 00		                .word	80*2			; x and y step is the same as the source ones
+  1066 2B94 01			                .byte	1
+  1067 2B95 9F 00		                .word	[80*2]-1		; width same as y step less one
+  1068 2B97 5F					.byte	[4*24]-1		; number of lines to move less one
+  1069 2B98 FF					.byte	$FF			; AND mask. don't modify the data
+  1070 2B99 00					.byte	$00			; XOR mask. don't modify the data
+  1071 2B9A 00					.byte	$00			; no collisions
+  1072 2B9B 00					.byte	$00			; 1:1 zoom
+  1073 2B9C 00					.byte	$00			; no pattern
+  1074 2B9D 08					.byte	%00001000		; NOT last entry, copy mode
+  1075
+  1076 2B9E 00 00 00				.long	0			; doesn't matter
+  1077 2BA1 00 00				.word	0			; doesn't matter
+  1078 2BA3 00					.byte	0			; doesn't matter
+  1079 2BA4 00 F1 07				.long	$7F100			; one page before the end of the screen
+  1080 2BA7 A0 00				.word	80*2			; y step is 80 characters
+  1081 2BA9 02					.byte	2			; x step is 2, we only want the character bytes, not color
+  1082 2BAA 4F 00				.word	80-1			; width is 80 bytes
+  1083 2BAC 17					.byte	24-1			; 24 lines
+  1084 2BAD 00					.byte	0			; filling with a pattern
+  1085 2BAE 00					.byte	0			; fill value is 0
+  1086 2BAF 00					.byte	0			; no collisions
+  1087 2BB0 00					.byte	0			; 1:1 zoom
+  1088 2BB1 00					.byte	0			; no pattern
+  1089 2BB2 08					.byte	%00001000		; NOT last entry, copy mode.
+  1090
+  1091 2BB3 00 00 00				.long	0			; doesn't matter
+  1092 2BB6 00 00				.word	0			; doesn't matter
+  1093 2BB8 00					.byte	0			; doesn't matter
+  1094 2BB9 01 F1 07				.long	$7F101			; one page before the end of the screen, and one more so we fill the color bytes.
+  1095 2BBC A0 00				.word	80*2			; y step really doesn't matter, since we're only doing one line, but it's 80 characters
+  1096 2BBE 02					.byte	2			; x step is 2, we only want the color bytes, not characters
+  1097 2BBF 4F 00				.word	80-1			; width is 80 bytes
+  1098 2BC1 17					.byte	24-1			; 24 lines
+  1099 2BC2 00					.byte	0			; filling with a pattern
+  1100 2BC3 00			clr_scr_color	.byte	0			; fill value will be changed by whatever uses this blitter list
+  1101 2BC4 00					.byte	0			; no collisions
+  1102 2BC5 00					.byte	0			; 1:1 zoom
+  1103 2BC6 00					.byte	0			; no pattern
+  1104 2BC7 00					.byte	0			; last entry, copy mode.
+  1105
+  1106 2BC8			bcb_end
+  1107
+  1108 				;###################################################################################################################
+  1109 				; table of addresses for control function handlers
+  1110 2BC8			C0_handler_table
+  1111 2BC8 79 28				.word	NUL_adr
+  1112 2BCA E5 27				.word	SOH_adr
+  1113 2BCC E5 27				.word	STX_adr
+  1114 2BCE E5 27				.word	ETX_adr
+  1115 2BD0 E5 27				.word	EOT_adr
+  1116 2BD2 79 28				.word	ENQ_adr
+  1117 2BD4 E5 27				.word	ACK_adr
+  1118 2BD6 34 28				.word	BEL_adr
+  1119 2BD8 62 28				.word	BS_adr
+  1120 2BDA 79 28				.word	HT_adr
+  1121 2BDC F9 27				.word	LF_adr
+  1122 2BDE F9 27				.word	VT_adr
+  1123 2BE0 4B 28				.word	FF_adr
+  1124 2BE2 18 28				.word	CR_adr
+  1125 2BE4 E5 27				.word	SO_adr
+  1126 2BE6 E5 27				.word	SI_adr
+  1127 2BE8 E5 27				.word	DLE_adr
+  1128 2BEA E5 27				.word	DC1_adr
+  1129 2BEC E5 27				.word	DC2_adr
+  1130 2BEE E5 27				.word	DC3_adr
+  1131 2BF0 E5 27				.word	DC4_adr
+  1132 2BF2 E5 27				.word	NAK_adr
+  1133 2BF4 E5 27				.word	SYN_adr
+  1134 2BF6 E5 27				.word	ETB_adr
+  1135 2BF8 E5 27				.word	CAN_adr
+  1136 2BFA E5 27				.word	EM_adr
+  1137 2BFC E5 27				.word	SUB_adr
+  1138 2BFE E8 27				.word	ESC_adr
+  1139 2C00 E5 27				.word	IS4_adr
+  1140 2C02 E5 27				.word	IS3_adr
+  1141 2C04 E5 27				.word	IS2_adr
+  1142 2C06 E5 27				.word	IS1_adr
+  1143
+  1144 2C08			C1_handler_table
+  1145 2C08 79 28				.word	NUL_adr			; this one is unused
+  1146 2C0A 79 28				.word	NUL_adr			; so is this one
+  1147 2C0C 79 28				.word	BPH_adr
+  1148 2C0E 79 28				.word	NBH_adr
+  1149 2C10 F9 27				.word	IND_adr
+  1150 2C12 7A 28				.word	NEL_adr
+  1151 2C14 79 28				.word	SSA_adr
+  1152 2C16 79 28				.word	ESA_adr
+  1153 2C18 79 28				.word	HTS_adr
+  1154 2C1A 79 28				.word	HTJ_adr
+  1155 2C1C 79 28				.word	VTS_adr
+  1156 2C1E 79 28				.word	PLD_adr
+  1157 2C20 79 28				.word	PLU_adr
+  1158 2C22 79 28				.word	RI_adr
+  1159 2C24 79 28				.word	SS2_adr
+  1160 2C26 79 28				.word	SS3_adr
+  1161 2C28 79 28				.word	DCS_adr
+  1162 2C2A 79 28				.word	PU1_adr
+  1163 2C2C 79 28				.word	PU2_adr
+  1164 2C2E 79 28				.word	STS_adr
+  1165 2C30 79 28				.word	CCH_adr
+  1166 2C32 79 28				.word	MW_adr
+  1167 2C34 79 28				.word	SPA_adr
+  1168 2C36 79 28				.word	EPA_adr
+  1169 2C38 79 28				.word	SOS_adr
+  1170 2C3A 79 28				.word	NUL_adr			; unused
+  1171 2C3C 79 28				.word	SCI_adr
+  1172 2C3E EE 27				.word	CSI_adr
+  1173 2C40 79 28				.word	ST_adr
+  1174 2C42 79 28				.word	OSC_adr
+  1175 2C44 79 28				.word	PM_adr
+  1176 2C46 79 28				.word	APC_adr
+  1177
+  1178 				;###################################################################################################################
+  1179 				; table of addresses for control sequences
+  1180 				; entry format is this: final byte, intermediate byte, low address, high address
+  1181 				; last entry has 0 for final byte
+  1182 				; if there is no intermediate byte, then it is 0 in the entry.
+  1183 				; I can either implement a sorted list here and do a binary search in the future, or I can implement a list sorted so that more common
+  1184 				; control sequences come first. I don't know which I'll choose for the final design yet, but I'll choose at some point.
+  1185
+  1186 2C48			ctrl_seq_table
+  1187 2C48 6D 00				.byte	'm', 0
+  1188 2C4A C4 29				.word	SGR_adr			; set graphics rendition
+  1189
+  1190 2C4C 4A 00				.byte 'J',0			; Erase in Display
+  1191 2C4E D8 28				.word ED_adr
+  1192
+  1193 2C50 48 00				.byte 'H',0			; Cursor Position
+  1194 2C52 59 29				.word CUP_adr
+  1195
+  1196 2C54 43 00				.byte 'C',0			; Cursor Forward
+  1197 2C56 F7 28				.word CUF_adr
+  1198
+  1199 2C58 73 00				.byte 's',0			; Save Current Cursor Position
+  1200 2C5A E3 28				.word SCP_adr
+  1201
+  1202 2C5C 75 00				.byte 'u',0			; Restore Saved Cursor Position
+  1203 2C5E EC 28				.word RCP_adr
+  1204
+  1205 2C60 41 00				.byte 'A',0			; Cursor Up
+  1206 2C62 09 29				.word CUU_adr
+  1207
+  1208 2C64 42 00				.byte 'B',0			; Cursor Down
+  1209 2C66 3D 29				.word CUD_adr
+  1210
+  1211 2C68 44 00				.byte 'D',0			; Cursor Back
+  1212 2C6A 23 29				.word CUB_adr
+  1213
+  1214 2C6C 00					.byte	0			; this shows the end of the list.
+  1215
+  1216
+  1217 				;###################################################################################################################
+  1218
+  1219 = 2C6D			ctrl_seq_flg	.ds 1				; bit 7 indicates escape received, bit 6 indicates CSI received.
+  1220
+  1221 = 2C6E			cursor_flg	.ds 1				; bit 7 indicates whether or not the cursor is currently visible
+  1222 										; that is, if it's a 1, then the color of the current character
+  1223 										; has been inverted to show the cursor.
+  1224
+  1225 = 2C6F			ctrl_seq_index	.ds 1				; points to the current position in the control sequence buffer.
+  1226
+  1227 = 2C70			final_byte	.ds 1				; holds the control sequence final byte
+  1228 = 2C71			inter_byte	.ds 1				; holds the control sequence intermediate byte
+  1229 = 2C72			parameter_val	.ds 1				; holds a single parameter value
+  1230
+  1231 = 2C73			counter		.ds 2				; byte counter for MEM_MOVE
+  1232
+  1233 = 2C75			parameters	.ds 4
+  1234
+  1235 				;###################################################################################################################
+  1236
+  1237 = 2C79			ctrl_seq_buf	.ds 256				; a buffer for the control sequence. I'll have to mess around with various sizes for
+  1238 										; this. 256 bytes seems way overkill, so I probably only need 16 or so. For now, it's
+  1239 										; 256 though.
+   941
+   942 				   .endl
+   943 				  
+   944 2D79-3091> 60			rts
+   945
+   946 				; ------------------------------------------------------------
+   947
+   948 = 07F100			VBXE_ANSIADR	= $7F100
+   949 = 080F00			VBXE_ANSIFRE	= $80F00
+   950 = 0800			VBXE_ANSIXDL	= $0800
+   951 = 0000			TCBLACK	= $00
+   952 = 0001			TCRED	= $01
+   953 = 0002			TCGREEN	= $02
+   954 = 0003			TCYELLOW	= $03
+   955 = 0004			TCBLUE	= $04
+   956 = 0005			TCMAGENTA	= $05
+   957 = 0006			TCCYAN	= $06
+   958 = 0007			TCWHITE	= $07
+   959 = 0008			TCBRIGHTBLACK	= $08
+   960 = 0009			TCBRIGHTRED	= $09
+   961 = 000A			TCBRIGHTGREEN	= $0A
+   962 = 000B			TCBRIGHTYELLOW	= $0B
+   963 = 000C			TCBRIGHTBLUE	= $0C
+   964 = 000D			TCBRIGHTMAGENTA	= $0D
+   965 = 000E			TCBRIGHTCYAN	= $0E
+   966 = 000F			TCBRIGHTWHITE	= $0F
+   967 = 0080			BCBLACK	= $80
+   968 = 0090			BCRED	= $90
+   969 = 00A0			BCGREEN	= $A0
+   970 = 00B0			BCYELLOW	= $B0
+   971 = 00C0			BCBLUE	= $C0
+   972 = 00D0			BCMAGENTA	= $D0
+   973 = 00E0			BCCYAN	= $E0
+   974 = 00F0			BCWHITE	= $F0
+   975 = 309F			ROW_SLIDE_STATUS	= DATAORIGIN+$000B
+   976
+   977 				.endl							; UNIT VBXEANSI
+   978
+   979 				; ------------------------------------------------------------
+   980
+   981 2D7A			.local	ATARI						; UNIT
+   982
+   983 				; ------------------------------------------------------------
+   984
+   985 = 0010			IRQENS	= $10
+   986 = 0012			RTCLOK	= $12
+   987 = 0012			RTCLOK1	= $12
+   988 = 0013			RTCLOK2	= $13
+   989 = 0014			RTCLOK3	= $14
+   990 = 004D			ATRACT	= $4D
+   991 = 0052			LMARGIN	= $52
+   992 = 0053			RMARGIN	= $53
+   993 = 0054			ROWCRS	= $54
+   994 = 0055			COLCRS	= $55
+   995 = 0057			DINDEX	= $57
+   996 = 0058			SAVMSC	= $58
+   997 = 0062			PALNTS	= $62
+   998 = 006A			RAMTOP	= $6A
+   999 = 0200			VDSLST	= $0200
+  1000 = 0230			SDLSTL	= $0230
+  1001 = 0290			TXTROW	= $0290
+  1002 = 0291			TXTCOL	= $0291
+  1003 = 0293			TINDEX	= $0293
+  1004 = 0294			TXTMSC	= $0294
+  1005 = 022F			SDMCTL	= $022F
+  1006 = 026F			GPRIOR	= $026F
+  1007 = 02F0			CRSINH	= $02F0
+  1008 = 02F3			CHACT	= $02F3
+  1009 = 02F4			CHBAS	= $02F4
+  1010 = 02FC			CH	= $02FC
+  1011 = 02C0			PCOLR0	= $02C0
+  1012 = 02C1			PCOLR1	= $02C1
+  1013 = 02C2			PCOLR2	= $02C2
+  1014 = 02C3			PCOLR3	= $02C3
+  1015 = 02C4			COLOR0	= $02C4
+  1016 = 02C5			COLOR1	= $02C5
+  1017 = 02C6			COLOR2	= $02C6
+  1018 = 02C7			COLOR3	= $02C7
+  1019 = 02C8			COLOR4	= $02C8
+  1020 = 02C8			COLBAKS	= $02C8
+  1021 = D000			HPOSP0	= $D000
+  1022 = D001			HPOSP1	= $D001
+  1023 = D002			HPOSP2	= $D002
+  1024 = D003			HPOSP3	= $D003
+  1025 = D004			HPOSM0	= $D004
+  1026 = D005			HPOSM1	= $D005
+  1027 = D006			HPOSM2	= $D006
+  1028 = D007			HPOSM3	= $D007
+  1029 = D008			SIZEP0	= $D008
+  1030 = D009			SIZEP1	= $D009
+  1031 = D00A			SIZEP2	= $D00A
+  1032 = D00B			SIZEP3	= $D00B
+  1033 = D00C			SIZEM	= $D00C
+  1034 = D00D			GRAFP0	= $D00D
+  1035 = D00E			GRAFP1	= $D00E
+  1036 = D00F			GRAFP2	= $D00F
+  1037 = D010			GRAFP3	= $D010
+  1038 = D011			GRAFM	= $D011
+  1039 = D004			P0PF	= $D004
+  1040 = D014			PAL	= $D014
+  1041 = D013			TRIG3	= $D013
+  1042 = D012			COLPM0	= $D012
+  1043 = D013			COLPM1	= $D013
+  1044 = D014			COLPM2	= $D014
+  1045 = D015			COLPM3	= $D015
+  1046 = D016			COLPF0	= $D016
+  1047 = D017			COLPF1	= $D017
+  1048 = D018			COLPF2	= $D018
+  1049 = D019			COLPF3	= $D019
+  1050 = D01A			COLBK	= $D01A
+  1051 = D01B			PRIOR	= $D01B
+  1052 = D01D			GRACTL	= $D01D
+  1053 = D01E			HITCLR	= $D01E
+  1054 = D01F			CONSOL	= $D01F
+  1055 = D200			AUDF1	= $D200
+  1056 = D201			AUDC1	= $D201
+  1057 = D202			AUDF2	= $D202
+  1058 = D203			AUDC2	= $D203
+  1059 = D204			AUDF3	= $D204
+  1060 = D205			AUDC3	= $D205
+  1061 = D206			AUDF4	= $D206
+  1062 = D207			AUDC4	= $D207
+  1063 = D208			AUDCTL	= $D208
+  1064 = D209			KBCODE	= $D209
+  1065 = D20E			IRQEN	= $D20E
+  1066 = D20F			SKSTAT	= $D20F
+  1067 = D300			PORTA	= $D300
+  1068 = D301			PORTB	= $D301
+  1069 = D302			PACTL	= $D302
+  1070 = D400			DMACTL	= $D400
+  1071 = D401			CHACTL	= $D401
+  1072 = D402			DLISTL	= $D402
+  1073 = D404			HSCROL	= $D404
+  1074 = D405			VSCROL	= $D405
+  1075 = D407			PMBASE	= $D407
+  1076 = D409			CHBASE	= $D409
+  1077 = D40A			WSYNC	= $D40A
+  1078 = D40B			VCOUNT	= $D40B
+  1079 = D40C			PENH	= $D40C
+  1080 = D40D			PENV	= $D40D
+  1081 = D40E			NMIEN	= $D40E
+  1082 = FFFA			NMIVEC	= $FFFA
+  1083 = FFFC			RESETVEC	= $FFFC
+  1084 = FFFE			IRQVEC	= $FFFE
+  1085
+  1086 				.endl							; UNIT ATARI
+  1087
+  1088 				; ------------------------------------------------------------
+  1089
+  1090 2D7A			.local	CRT						; UNIT
+  1091
+  1092 2D7A			.local	NOSOUND						; PROCEDURE | ASSEMBLER
+  1093
+  1094 				; -------------------  ASM Block 00000073  -------------------
+  1095
+  1096 2D7A A9 00			lda #0
+  1097 2D7C 8D 08 D2			sta $d208
+  1098 2D7F 8D 18 D2			sta $d218
+  1099
+  1100 2D82 A0 03			ldy #3
+  1101 2D84 8C 0F D2			sty $d20f
+  1102 2D87 8C 1F D2			sty $d21f
+  1103
+  1104 2D8A A0 08			ldy #8
+  1105 2D8C 99 00 D2		lp	sta $d200,y
+  1106 2D8F 99 10 D2			sta $d210,y
+  1107 2D92 88				dey
+  1108 2D93 10 F7			bpl lp
+  1109
+  1110 2D95			@exit
+  1111 					.ifdef @new
+  1112 					lda <@VarData
+  1113 					sta :ztmp
+  1114 					lda >@VarData
+  1115 					ldy #@VarDataSize-1
+  1116 					jmp @FreeMem
+  1117 					els
+  1118 2D95 60				rts						; ret
+  1119 					eif
+  1120 				.endl
+  1121
+  1122 				; ------------------------------------------------------------
+  1123
+  1124 = 30F2			TEXTATTR	= DATAORIGIN+$005E
+  1125 = D01F			CONSOL	= $D01F
+  1126 = 0000			CN_START_SELECT_OPTION	= $00
+  1127 = 0001			CN_SELECT_OPTION	= $01
+  1128 = 0002			CN_START_OPTION	= $02
+  1129 = 0003			CN_OPTION	= $03
+  1130 = 0004			CN_START_SELECT	= $04
+  1131 = 0005			CN_SELECT	= $05
+  1132 = 0006			CN_START	= $06
+  1133 = 0007			CN_NONE	= $07
+  1134 = 0000			BW40	= $00
+  1135 = 0001			CO40	= $01
+  1136 = 0002			BW80	= $02
+  1137 = 0003			CO80	= $03
+  1138 = 0007			MONO	= $07
+  1139 = 0001			C40	= $01
+  1140 = 0003			C80	= $03
+  1141 = 0000			BLACK	= $00
+  1142 = 000F			WHITE	= $0F
+  1143 = 0026			RED	= $26
+  1144 = 00AC			CYAN	= $AC
+  1145 = 0048			PURPLE	= $48
+  1146 = 00B6			GREEN	= $B6
+  1147 = 0086			BLUE	= $86
+  1148 = 00DC			YELLOW	= $DC
+  1149 = 0018			ORANGE	= $18
+  1150 = 00F4			BROWN	= $F4
+  1151 = 002A			LIGHT_RED	= $2A
+  1152 = 0004			DARK_GREY	= $04
+  1153 = 0008			GREY	= $08
+  1154 = 00BC			LIGHT_GREEN	= $BC
+  1155 = 009A			LIGHT_BLUE	= $9A
+  1156 = 000C			LIGHT_GREY	= $0C
+  1157 = 0080			BLINK	= $80
+  1158
+  1159 				.endl							; UNIT CRT
+  1160
+  1161 2D96			.local	KEYSCAN						; PROCEDURE
+  1162
+  1163 2D96 4C BB 2D			jmp l_0197
+  1164
+  1165 2D99			.local	GET_KEY						; PROCEDURE | ASSEMBLER
+  1166
+  1167 				; -------------------  ASM Block 00000075  -------------------
+  1168
+  1169 = 0001			key_delay = 1
+  1170
+  1171 2D99 AD 0F D2			lda $d20f
+  1172 2D9C 29 04			and #4
+  1173 2D9E D0 1A			bne @exit
+  1174
+  1175 2DA0 AD 09 D2			lda $d209
+  1176
+  1177 2DA3 C9 00			cmp onKey_: #0
+  1178 2DA5 D0 08			bne skp
+  1179
+  1180 2DA7 A0 01			ldy delay: #key_delay
+  1181 2DA9 88				dey
+  1182 2DAA 8C A8 2D			sty delay
+  1183 2DAD D0 0B			bne @exit
+  1184 2DAF			skp
+  1185 2DAF 8D 1D 32			sta onKey
+  1186 2DB2 8D A4 2D			sta onKey_
+  1187
+  1188 2DB5 A9 01 8D A8 2D		mva #key_delay delay
+  1189
+  1190 2DBA			@exit
+  1191 					.ifdef @new
+  1192 					lda <@VarData
+  1193 					sta :ztmp
+  1194 					lda >@VarData
+  1195 					ldy #@VarDataSize-1
+  1196 					jmp @FreeMem
+  1197 					els
+  1198 2DBA 60				rts						; ret
+  1199 					eif
+  1200 				.endl
+  1201 2DBB			l_0197
+  1202
+  1203 				; optimize FAIL ('GET_KEY', test_ansi.pas), line = 51
+  1204
+  1205 2DBB 20 99 2D			jsr GET_KEY
+  1206
+  1207 				; optimize OK (test_ansi.pas), line = 53
+  1208
+  1209 2DBE A9 00			lda #$00
+  1210 2DC0 8D 1C 32			sta A
+  1211
+  1212 				; optimize OK (test_ansi.pas), line = 55
+  1213
+  1214 2DC3 AD 1D 32			lda ONKEY
+  1215 2DC6 F0 24			jeq l_01AF
+  1216
+  1217 				; optimize OK (test_ansi.pas), line = 57
+  1218
+  1219 2DC8 8D 1E 32			sta @CASETMP_0003
+  1220 2DCB C9 1C			cmp #$1C
+  1221 2DCD D0 08			jne l_01BB
+  1222 				@
+  1223
+  1224 				; optimize OK (test_ansi.pas), line = 58
+  1225
+  1226 2DCF A9 01			lda #$01
+  1227 2DD1 8D 03 31			sta STOP
+  1228
+  1229 2DD4 4C EC 2D			jmp a_0003
+  1230 2DD7			l_01BB
+  1231 2DD7 C9 2E			cmp #$2E
+  1232 2DD9 D0 08			jne l_01C8
+  1233 				@
+  1234
+  1235 				; optimize OK (test_ansi.pas), line = 60
+  1236
+  1237 2DDB A9 01			lda #$01
+  1238 2DDD 8D 1C 32			sta A
+  1239
+  1240 2DE0 4C EC 2D			jmp a_0003
+  1241 2DE3			l_01C8
+  1242 2DE3 C9 3E			cmp #$3E
+  1243 2DE5 D0 05			jne l_01D5
+  1244 				@
+  1245
+  1246 				; optimize OK (test_ansi.pas), line = 61
+  1247
+  1248 2DE7 A9 02			lda #$02
+  1249 2DE9 8D 1C 32			sta A
+  1250
+  1251 2DEC			l_01D5
+  1252 2DEC			a_0003
+  1253 2DEC			l_01AF
+  1254
+  1255 				; optimize OK (test_ansi.pas), line = 66
+  1256
+  1257 2DEC A9 00			lda #$00
+  1258 2DEE 8D 1D 32			sta ONKEY
+  1259
+  1260 				; optimize OK (test_ansi.pas), line = 68
+  1261
+  1262 2DF1 AD 1C 32			lda A
+  1263 2DF4 8D 1F 32			sta @CASETMP_0004
+  1264 2DF7 C9 01			cmp #$01
+  1265 2DF9 D0 40			jne l_01F1
+  1266 				@
+  1267
+  1268 				; optimize OK (test_ansi.pas), line = 69
+  1269
+  1270 2DFB AD 17 32			lda VADR+3
+  1271 2DFE C9 00			cmp #$00
+  1272 2E00 D0 13			bne @+
+  1273 2E02 AD 16 32			lda VADR+2
+  1274 2E05 C9 08			cmp #$08
+  1275 2E07 D0 0C			bne @+
+  1276 2E09 AD 15 32			lda VADR+1
+  1277 2E0C C9 0F			cmp #$0F
+  1278 2E0E D0 05			bne @+
+  1279 2E10 AD 14 32			lda VADR
+  1280 2E13 C9 01			cmp #$01
+  1281 				@
+  1282 2E15 90 21			jcc l_0201
+  1283 2E17 AD 14 32			lda VADR
+  1284 2E1A 38 E9 A0			sub #$A0
+  1285 2E1D 8D 14 32			sta VADR
+  1286 2E20 AD 15 32			lda VADR+1
+  1287 2E23 E9 00			sbc #$00
+  1288 2E25 8D 15 32			sta VADR+1
+  1289 2E28 AD 16 32			lda VADR+2
+  1290 2E2B E9 00			sbc #$00
+  1291 2E2D 8D 16 32			sta VADR+2
+  1292 2E30 AD 17 32			lda VADR+3
+  1293 2E33 E9 00			sbc #$00
+  1294 2E35 8D 17 32			sta VADR+3
+  1295 2E38			l_0201
+  1296
+  1297 2E38 4C 80 2E			jmp a_0004
+  1298 2E3B			l_01F1
+  1299 2E3B C9 02			cmp #$02
+  1300 2E3D D0 41			jne l_020E
+  1301 				@
+  1302
+  1303 				; optimize OK (test_ansi.pas), line = 70
+  1304
+  1305 2E3F AD 17 32			lda VADR+3
+  1306 2E42 CD 1B 32			cmp ANSIEND+3
+  1307 2E45 D0 16			bne @+
+  1308 2E47 AD 16 32			lda VADR+2
+  1309 2E4A CD 1A 32			cmp ANSIEND+2
+  1310 2E4D D0 0E			bne @+
+  1311 2E4F AD 15 32			lda VADR+1
+  1312 2E52 CD 19 32			cmp ANSIEND+1
+  1313 2E55 D0 06			bne @+
+  1314 2E57 AD 14 32			lda VADR
+  1315 2E5A CD 18 32			cmp ANSIEND
+  1316 				@
+  1317 2E5D B0 21			jcs l_021E
+  1318 2E5F AD 14 32			lda VADR
+  1319 2E62 18 69 A0			add #$A0
+  1320 2E65 8D 14 32			sta VADR
+  1321 2E68 AD 15 32			lda VADR+1
+  1322 2E6B 69 00			adc #$00
+  1323 2E6D 8D 15 32			sta VADR+1
+  1324 2E70 AD 16 32			lda VADR+2
+  1325 2E73 69 00			adc #$00
+  1326 2E75 8D 16 32			sta VADR+2
+  1327 2E78 AD 17 32			lda VADR+3
+  1328 2E7B 69 00			adc #$00
+  1329 2E7D 8D 17 32			sta VADR+3
+  1330 2E80			l_021E
+  1331
+  1332 2E80			l_020E
+  1333 2E80			a_0004
+  1334
+  1335 				; ------------------------------------------------------------
+  1336
+  1337 = 321C			A	= DATAORIGIN+$0188
+  1338 = 321D			ONKEY	= DATAORIGIN+$0189
+  1339 = 321E			@CASETMP_0003	= DATAORIGIN+$018A
+  1340 = 321F			@CASETMP_0004	= DATAORIGIN+$018B
+  1341
+  1342 = 321C			@VarData	= A
+  1343 = 0004			@VarDataSize	= 4
+  1344
+  1345 2E80			@exit
+  1346 					.ifdef @new
+  1347 					lda <@VarData
+  1348 					sta :ztmp
+  1349 					lda >@VarData
+  1350 					ldy #@VarDataSize-1
+  1351 					jmp @FreeMem
+  1352 					els
+  1353 2E80 60				rts						; ret
+  1354 					eif
+  1355 				.endl
+  1356 2E81			l_0016
+  1357
+  1358 				; optimize FAIL ('VBXEANSI.TVBXEMEMORYSTREAM.CREATE', test_ansi.pas), line = 79
+  1359
+  1360 2E81 AD 8E 30			lda VRAM
+  1361 2E84 AC 8F 30			ldy VRAM+1
+  1362 2E87 20 C4 23			jsr VBXEANSI.TVBXEMEMORYSTREAM.CREATE
+  1363
+  1364 				; optimize OK (test_ansi.pas), line = 80
+  1365
+  1366 2E8A A9 00			lda #$00
+  1367 2E8C 8D 04 32			sta VRAM.POSITION
+  1368 2E8F A9 0F			lda #$0F
+  1369 2E91 8D 05 32			sta VRAM.POSITION+1
+  1370 2E94 A9 08			lda #$08
+  1371 2E96 8D 06 32			sta VRAM.POSITION+2
+  1372 2E99 A9 00			lda #$00
+  1373 2E9B 8D 07 32			sta VRAM.POSITION+3
+  1374
+  1375 				; optimize OK (test_ansi.pas), line = 82
+  1376
+  1377 2E9E 8D 9F 30			sta VBXEANSI.ROW_SLIDE_STATUS
+  1378 				; AssignFile
+  1379
+  1380 				; optimize OK (test_ansi.pas), line = 85
+  1381
+  1382 2EA1 AC 88 30 84 84 AC + 	mwy F :bp2
+  1383 2EAB A0 00			ldy #s@file.pfname
+  1384 2EAD 91 84			sta (:bp2),y
+  1385 2EAF C8				iny
+  1386 2EB0 A9 20			lda #$20
+  1387 2EB2 91 84			sta (:bp2),y
+  1388 2EB4 A0 05			ldy #s@file.status
+  1389 2EB6 A9 00			lda #$00
+  1390 2EB8 91 84			sta (:bp2),y
+  1391 				; Reset
+  1392 2EBA A0 02			ldy #s@file.record
+  1393 2EBC A9 01			lda #$01
+  1394 2EBE 91 84			sta (:bp2),y
+  1395 2EC0 C8				iny
+  1396 2EC1 A9 00			lda #$00
+  1397 2EC3 91 84			sta (:bp2),y
+  1398
+  1399 2EC5 8A 48			txa:pha
+  1400 2EC7 38				sec
+  1401 					@openfile F, MAIN.SYSTEM.FileMode
+  1401 				 LDY F+1\ LDA F\ LDX MAIN.SYSTEM.FILEMODE\ JSR @OPENFILE
+  1401 2EC8 AC 89 30		 LDY F+1
+  1401 2ECB AD 88 30		 LDA F
+  1401 2ECE AE 99 30		 LDX MAIN.SYSTEM.FILEMODE
+  1401 2ED1 20 0F 20		 JSR @OPENFILE
+  1402 2ED4 68 AA			pla:tax
+  1403
+  1404 				; --- RepeatUntilProlog
+  1405 2ED6			l_023F
+  1406 				; BlockRead
+  1407
+  1408 				; optimize OK (test_ansi.pas), line = 89
+  1409
+  1410 2ED6 AC 88 30 84 84 AC + 	mwy F :bp2
+  1411 2EE0 A0 06			ldy #s@file.buffer
+  1412 2EE2 AD 8A 30			lda BF
+  1413 2EE5 91 84			sta (:bp2),y
+  1414 2EE7 C8				iny
+  1415 2EE8 AD 8B 30			lda BF+1
+  1416 2EEB 91 84			sta (:bp2),y
+  1417 2EED A0 08			ldy #s@file.nrecord
+  1418 2EEF A9 00			lda #$00
+  1419 2EF1 91 84			sta (:bp2),y
+  1420 2EF3 C8				iny
+  1421 2EF4 A9 01			lda #$01
+  1422 2EF6 91 84			sta (:bp2),y
+  1423 2EF8 A0 0A			ldy #s@file.numread
+  1424 2EFA A9 FF			lda <NUM
+  1425 2EFC 91 84			sta (:bp2),y
+  1426 2EFE C8				iny
+  1427 2EFF A9 30			lda >NUM
+  1428 2F01 91 84			sta (:bp2),y
+  1429
+  1430 2F03 8A 48			txa:pha
+  1431 2F05 38				sec
+  1432 					@readfile F, #135
+  1432 				 LDY F+1\ LDA F\ LDX# 135\ JSR @READFILE
+  1432 2F06 AC 89 30		 LDY F+1
+  1432 2F09 AD 88 30		 LDA F
+  1432 2F0C A2 87		 LDX# 135
+  1432 2F0E 20 D2 20		 JSR @READFILE
+  1433 2F11 68 AA			pla:tax
+  1434
+  1435 				; optimize OK (test_ansi.pas), line = 91
+  1436
+  1437 2F13 AD 00 31			lda NUM+1
+  1438 2F16 0D FF 30			ora NUM
+  1439 2F19 F0 63			jeq l_025D
+  1440
+  1441 				; optimize OK (test_ansi.pas), line = 92
+  1442
+  1443 2F1B A9 00			lda #$00
+  1444 2F1D 8D 01 31			sta I
+  1445 2F20 8D 02 31			sta I+1
+  1446 2F23 AD FF 30			lda NUM
+  1447 2F26 38 E9 01			sub #$01
+  1448 2F29 8D 3C 2F			sta @FORTMP_0269_0
+  1449 2F2C AD 00 31			lda NUM+1
+  1450 2F2F E9 00			sbc #$00
+  1451 2F31 8D 35 2F			sta @FORTMP_0269_1
+  1452
+  1453 2F34			l_026C
+  1454 				; --- ForToDoCondition
+  1455 2F34 A9 00			lda @FORTMP_0269_1:#$00
+  1456 2F36 CD 02 31			cmp I+1
+  1457 2F39 D0 05			bne @+
+  1458 2F3B A9 00			lda @FORTMP_0269_0:#$00
+  1459 2F3D CD 01 31			cmp I
+  1460 				@
+  1461 2F40 90 3C			jcc l_0278
+  1462
+  1463 				; optimize OK (test_ansi.pas), line = 93
+  1464
+  1465 2F42 AC 01 31			ldy I
+  1466 2F45 B9 04 31			lda adr.BF,y
+  1467 2F48 20 41 26			jsr VBXEANSI.ANSICHAR
+  1468
+  1469 				; optimize OK (test_ansi.pas), line = 96
+  1470
+  1471 2F4B AD 9F 30			lda VBXEANSI.ROW_SLIDE_STATUS
+  1472 2F4E F0 24			jeq l_028A
+  1473
+  1474 				; optimize OK (test_ansi.pas), line = 98
+  1475
+  1476 2F50 AD 8C 30			lda ROW0
+  1477 2F53 8D C0 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.BUFFER
+  1478 2F56 AD 8D 30			lda ROW0+1
+  1479 2F59 8D C1 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.BUFFER+1
+  1480 2F5C A9 A0			lda #$A0
+  1481 2F5E 8D C2 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.COUNT
+  1482 2F61 A9 00			lda #$00
+  1483 2F63 8D C3 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.COUNT+1
+  1484 2F66 AD 8E 30			lda VRAM
+  1485 2F69 AC 8F 30			ldy VRAM+1
+  1486 2F6C 20 17 25			jsr VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER
+  1487
+  1488 				; optimize OK (test_ansi.pas), line = 100
+  1489
+  1490 2F6F A9 00			lda #$00
+  1491 2F71 8D 9F 30			sta VBXEANSI.ROW_SLIDE_STATUS
+  1492 2F74			l_028A
+  1493
+  1494 				; --- ForToDoEpilog
+  1495 2F74 EE 01 31			inc I
+  1496 2F77 D0 BB			jne l_026C
+  1497 2F79 EE 02 31			inc I+1
+  1498 2F7C D0 B6			jne l_026C
+  1499 2F7E			l_0278
+  1500 2F7E			l_025D
+  1501
+  1502 				; optimize OK (test_ansi.pas), line = 107
+  1503
+  1504 2F7E AD 00 31			lda NUM+1
+  1505 2F81 0D FF 30			ora NUM
+  1506 2F84 F0 03 4C D6 2E		jne l_023F
+  1507 				; CloseFile
+  1508
+  1509 2F89 8A 48			txa:pha
+  1510 2F8B 38				sec
+  1511 					@closefile F
+  1511 				 LDY F+1\ LDA F\ JSR @CLOSEFILE
+  1511 2F8C AC 89 30		 LDY F+1
+  1511 2F8F AD 88 30		 LDA F
+  1511 2F92 20 A5 20		 JSR @CLOSEFILE
+  1512 2F95 68 AA			pla:tax
+  1513
+  1514 				; optimize FAIL ('CRT.NOSOUND', test_ansi.pas), line = 111
+  1515
+  1516 2F97 20 7A 2D			jsr CRT.NOSOUND
+  1517
+  1518 				; optimize FAIL ('VBXEANSI.TVBXEMEMORYSTREAM.CREATE', test_ansi.pas), line = 114
+  1519
+  1520 2F9A AD 90 30			lda SRC
+  1521 2F9D AC 91 30			ldy SRC+1
+  1522 2FA0 20 C4 23			jsr VBXEANSI.TVBXEMEMORYSTREAM.CREATE
+  1523
+  1524 				; optimize OK (test_ansi.pas), line = 115
+  1525
+  1526 2FA3 A9 00			lda #$00
+  1527 2FA5 8D 0C 32			sta SRC.POSITION
+  1528 2FA8 A9 F1			lda #$F1
+  1529 2FAA 8D 0D 32			sta SRC.POSITION+1
+  1530 2FAD A9 07			lda #$07
+  1531 2FAF 8D 0E 32			sta SRC.POSITION+2
+  1532 2FB2 A9 00			lda #$00
+  1533 2FB4 8D 0F 32			sta SRC.POSITION+3
+  1534
+  1535 				; optimize OK (test_ansi.pas), line = 118
+  1536
+  1537 2FB7 8D 01 31			sta I
+  1538 2FBA 8D 02 31			sta I+1
+  1539
+  1540 2FBD			l_02B7
+  1541 				; --- ForToDoCondition
+  1542 2FBD AD 01 31			lda I
+  1543 2FC0 C9 18			cmp #$18
+  1544 2FC2 B0 43			jcs l_02C4
+  1545
+  1546 				; optimize OK (test_ansi.pas), line = 120
+  1547
+  1548 2FC4 AD 8A 30			lda BF
+  1549 2FC7 8D AD 30			sta VBXEANSI.TVBXEMEMORYSTREAM.READBUFFER.BUFFER
+  1550 2FCA AD 8B 30			lda BF+1
+  1551 2FCD 8D AE 30			sta VBXEANSI.TVBXEMEMORYSTREAM.READBUFFER.BUFFER+1
+  1552 2FD0 A9 A0			lda #$A0
+  1553 2FD2 8D AF 30			sta VBXEANSI.TVBXEMEMORYSTREAM.READBUFFER.COUNT
+  1554 2FD5 A9 00			lda #$00
+  1555 2FD7 8D B0 30			sta VBXEANSI.TVBXEMEMORYSTREAM.READBUFFER.COUNT+1
+  1556 2FDA AD 90 30			lda SRC
+  1557 2FDD AC 91 30			ldy SRC+1
+  1558 2FE0 20 10 24			jsr VBXEANSI.TVBXEMEMORYSTREAM.READBUFFER
+  1559
+  1560 				; optimize OK (test_ansi.pas), line = 122
+  1561
+  1562 2FE3 AD 8A 30			lda BF
+  1563 2FE6 8D C0 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.BUFFER
+  1564 2FE9 AD 8B 30			lda BF+1
+  1565 2FEC 8D C1 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.BUFFER+1
+  1566 2FEF A9 A0			lda #$A0
+  1567 2FF1 8D C2 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.COUNT
+  1568 2FF4 A9 00			lda #$00
+  1569 2FF6 8D C3 30			sta VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER.COUNT+1
+  1570 2FF9 AD 8E 30			lda VRAM
+  1571 2FFC AC 8F 30			ldy VRAM+1
+  1572 2FFF 20 17 25			jsr VBXEANSI.TVBXEMEMORYSTREAM.WRITEBUFFER
+  1573
+  1574 				; --- ForToDoEpilog
+  1575 3002 EE 01 31			inc I
+  1576 3005 D0 B6			jne l_02B7
+  1577 3007			l_02C4
+  1578
+  1579 				; optimize OK (test_ansi.pas), line = 127
+  1580
+  1581 3007 AD 04 32			lda VRAM.POSITION
+  1582 300A 8D 18 32			sta ANSIEND
+  1583 300D AD 05 32			lda VRAM.POSITION+1
+  1584 3010 38 E9 0F			sub #$0F
+  1585 3013 8D 19 32			sta ANSIEND+1
+  1586 3016 AD 06 32			lda VRAM.POSITION+2
+  1587 3019 E9 00			sbc #$00
+  1588 301B 8D 1A 32			sta ANSIEND+2
+  1589 301E AD 07 32			lda VRAM.POSITION+3
+  1590 3021 E9 00			sbc #$00
+  1591 3023 8D 1B 32			sta ANSIEND+3
+  1592
+  1593 				; optimize OK (test_ansi.pas), line = 129
+  1594
+  1595 3026 AD 18 32			lda ANSIEND
+  1596 3029 8D 14 32			sta VADR
+  1597 302C AD 19 32			lda ANSIEND+1
+  1598 302F 8D 15 32			sta VADR+1
+  1599 3032 AD 1A 32			lda ANSIEND+2
+  1600 3035 8D 16 32			sta VADR+2
+  1601 3038 AD 1B 32			lda ANSIEND+3
+  1602 303B 8D 17 32			sta VADR+3
+  1603
+  1604 				; optimize OK (test_ansi.pas), line = 131
+  1605
+  1606 303E A9 00			lda #$00
+  1607 3040 8D 03 31			sta STOP
+  1608
+  1609 				; --- RepeatUntilProlog
+  1610 3043			l_02E6
+  1611
+  1612 				; optimize FAIL ('SYSTEM.PAUSE_007E', test_ansi.pas), line = 135
+  1613
+  1614 3043 20 AE 23			jsr SYSTEM.PAUSE_007E
+  1615
+  1616 				; optimize FAIL ('KEYSCAN', test_ansi.pas), line = 137
+  1617
+  1618 3046 20 96 2D			jsr KEYSCAN
+  1619
+  1620 				; optimize OK (test_ansi.pas), line = 139
+  1621
+  1622 3049 AD 14 32			lda VADR
+  1623 304C 8D ED 30			sta VBXEANSI.SETOVERLAYADDRESS.A
+  1624 304F AD 15 32			lda VADR+1
+  1625 3052 8D EE 30			sta VBXEANSI.SETOVERLAYADDRESS.A+1
+  1626 3055 AD 16 32			lda VADR+2
+  1627 3058 8D EF 30			sta VBXEANSI.SETOVERLAYADDRESS.A+2
+  1628 305B AD 17 32			lda VADR+3
+  1629 305E 8D F0 30			sta VBXEANSI.SETOVERLAYADDRESS.A+3
+  1630 3061 20 22 26			jsr VBXEANSI.SETOVERLAYADDRESS
+  1631
+  1632 				; optimize OK (test_ansi.pas), line = 141
+  1633
+  1634 3064 AD 03 31			lda STOP
+  1635 3067 F0 03			jeq l_02F6
+  1636 3069 4C 6F 30			jmp b_02E6					; break
+  1637 306C			l_02F6
+  1638
+  1639 				; optimize OK (test_ansi.pas), line = 143
+  1640
+  1641 306C 4C 43 30			jmp l_02E6
+  1642 306F			b_02E6
+  1643
+  1644 				; optimize FAIL ('VBXEANSI.NORMVIDEO', test_ansi.pas), line = 146
+  1645
+  1646 306F 20 5E 26			jsr VBXEANSI.NORMVIDEO
+  1647
+  1648 				; ------------------------------------------------------------
+  1649
+  1650 3072			.var F	= DATAORIGIN+$005F .word
+  1651 = 30FF			NUM	= DATAORIGIN+$006B
+  1652 = 3101			I	= DATAORIGIN+$006D
+  1653 = 3103			STOP	= DATAORIGIN+$006F
+  1654 = 3104			adr.BF	= [DATAORIGIN+$0070] .array [256]
+  1655 3072			.var BF	= adr.BF .word
+  1656 = 0400			adr.ROW0	= $0400
+  1657 3072			.var ROW0	= adr.ROW0 .word
+  1658 = 3204			adr.VRAM	= DATAORIGIN+$0170	; [8] OBJECT
+  1659 3072			.var VRAM	= adr.VRAM .word
+  1660 = 3204			VRAM.POSITION	= DATAORIGIN+$0170
+  1661 = 3208			VRAM.SIZE	= DATAORIGIN+$0174
+  1662 = 320C			adr.SRC	= DATAORIGIN+$0178	; [8] OBJECT
+  1663 3072			.var SRC	= adr.SRC .word
+  1664 = 320C			SRC.POSITION	= DATAORIGIN+$0178
+  1665 = 3210			SRC.SIZE	= DATAORIGIN+$017C
+  1666 = 3214			VADR	= DATAORIGIN+$0180
+  1667 = 3218			ANSIEND	= DATAORIGIN+$0184
+  1668 3072			@exit
+  1669
+  1670 3072 A2 00		@halt	ldx #$00
+  1671 3074 9A				txs
+  1672 					.ifdef MAIN.@DEFINES.ROMOFF
+  1673 					inc portb
+  1674 					.fi
+  1675
+  1676 3075 A0 01			ldy #$01
+  1677
+  1678 3077 60				rts
+  1679
+  1680 				; ------------------------------------------------------------
+  1681
+  1682 3078 00 00 00 00 00 00 + IOCB@COPY	:16 brk
+  1683
+  1684 				; ------------------------------------------------------------
+  1685
+  1686 3088			.local	@DEFINES
+  1687 3088			ATARI
+  1688 3088			A_VBXE
+  1689 				.endl
+  1690
+  1691 3088			.local	@RESOURCE
+  1692 				.endl
+  1693
+  1694 = 3088 F3 30		F
+  1694 = 308A 04 31		BF
+  1694 = 308C 00 04		ROW0
+  1694 = 308E 04 32		VRAM
+  1694 = 3090 0C 32		SRC
+  1694 				.endl							; MAIN
+  1695
+  1696 				; ------------------------------------------------------------
+  1697 				; ------------------------------------------------------------
+  1698
+  1699 				.macro	UNITINITIALIZATION
+  1700 				
+  1701 					.ifdef MAIN.SYSTEM.@UnitInit
+  1702 					jsr MAIN.SYSTEM.@UnitInit
+  1703 					.fi
+  1704 				
+  1705 					.ifdef MAIN.VBXEANSI.@UnitInit
+  1706 					jsr MAIN.VBXEANSI.@UnitInit
+  1707 					.fi
+  1708 				
+  1709 					.ifdef MAIN.ATARI.@UnitInit
+  1710 					jsr MAIN.ATARI.@UnitInit
+  1711 					.fi
+  1712 				
+  1713 					.ifdef MAIN.CRT.@UnitInit
+  1714 					jsr MAIN.CRT.@UnitInit
+  1715 					.fi
+  1716 				.endm
+  1717
+  1718 				; ------------------------------------------------------------
+  1719
+  1720 					ift .SIZEOF(MAIN.SYSTEM) > 0
+  1721 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+  1721 				SYSTEM: $2382..$23B8
+  1722 					eif
+  1723
+  1724 					ift .SIZEOF(MAIN.VBXEANSI) > 0
+  1725 					.print 'VBXEANSI: ',MAIN.VBXEANSI,'..',MAIN.VBXEANSI+.SIZEOF(MAIN.VBXEANSI)-1
+  1725 				VBXEANSI: $23B9..$2D79
+  1726 					eif
+  1727
+  1728 					ift .SIZEOF(MAIN.ATARI) > 0
+  1729 					.print 'ATARI: ',MAIN.ATARI,'..',MAIN.ATARI+.SIZEOF(MAIN.ATARI)-1
+  1730 					eif
+  1731
+  1732 					ift .SIZEOF(MAIN.CRT) > 0
+  1733 					.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
+  1733 				CRT: $2D7A..$2D95
+  1734 					eif
+  1735
+  1736 					.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+  1736 				CODE: $2000..$3087
+  1737
+  1738 				; ------------------------------------------------------------
+  1739
+  1740 3092				.align $0004
+  1741
+  1742 3094			DATAORIGIN
+  1743 3094-3099> 28 00 18 00 + .by  $28 $00 $18 $00 $2D $0C
+  1744
+  1745 = 0006			VARINITSIZE	= *-DATAORIGIN
+  1746 = 018E			VARDATASIZE	= 398
+  1747
+  1748 = 3222			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+  1749
+  1750 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+  1750 				DATA: $3094..$3222
+  1751
+  1752 02E0-02E1> 44 23			run START
+  1753
+  1754 				; ------------------------------------------------------------
+  1755
+  1756 				.macro	STATICDATA
+  1757 				.by  $0D $44 $3A $43 $45 $53 $50 $4C  $41 $54 $2E $41 $4E $53 $00
+  1758 				.endm
+  1759
+  1760 					end
