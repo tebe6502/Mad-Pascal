@@ -20,9 +20,12 @@ m@call	.macro (os_proc)
 		inc portb
 
 		jsr %%os_proc
-
+		
+		php		; save flags on stack
+		
 		dec portb
 
+		plp		; restore flags from stack
 	.else
 
 		jsr %%os_proc
