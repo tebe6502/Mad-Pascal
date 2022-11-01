@@ -34,3 +34,38 @@ main
 
 	rts
 .endp
+
+
+// mode 80 (VBXE)
+.proc	@putchar_80
+
+	cmp #eol
+	beq _eol
+	
+	jsr @ata2int
+	sta atachr
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	jsr @vbxe_setcursor
+
+	jsr @vbxe_putbyte
+
+	fxs FX_MEMS #$00		; disable VBXE BANK
+	
+	rts
+	
+_eol	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	jsr @vbxe_cursor.off
+
+	lda #79
+	sta colcrs
+	
+	jsr @vbxe_putbyte.no_carry
+
+	fxs FX_MEMS #$00		; disable VBXE BANK
+	
+	rts
+
+.endp

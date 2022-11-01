@@ -127,3 +127,12 @@ fxla    .macro
         lda     (fxptr),y
 
         .endm
+
+; set putchar
+.macro	m@putchar (cod, prc)
+
+	mva #:cod	@putchar.vbxe		; jmp|jsr @vbxe_put
+	mwa #:prc	@putchar.vbxe+1		;
+	mva #$00	@putchar.chn		; #0
+
+.endm
