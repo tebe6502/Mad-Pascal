@@ -70,6 +70,8 @@ oldadr	=	$5E
 palnts	=	$62
 logcol	=	$63
 
+savadr	=	$68	; (2) pomocniczy rejestr adresowy
+
 keydef	=	$79	; (2) tablica konwersji kodow klawiatury na ATASCII
 
 vdslst	=	$0200	; (2) wektor przerwan NMI listy displejowej

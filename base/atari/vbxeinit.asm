@@ -26,9 +26,11 @@
 
 	fxs FX_P0 #$ff
 
-	mva #{jsr*}	@putchar.vbxe		; jsr @vbxe_put
-	mwa #@vbxe_put	@putchar.vbxe+1		;
-	mva #$00	@putchar.chn		; #0
+;	mva #{jsr*}	@putchar.vbxe		; jsr @vbxe_put
+;	mwa #@vbxe_put	@putchar.vbxe+1		;
+;	mva #$00	@putchar.chn		; #0
+	
+	m@putchar	{jsr*}, @vbxe_put
 
 	fxs FX_VIDEO_CONTROL #VC_XDL_ENABLED|VC_XCOLOR	;|VC_NO_TRANS
 
