@@ -63,6 +63,12 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'atari\vbxeinit.asm'	; @vbxe_init
 	icl 'atari\vbxexdl.asm'		; @set_xdl
 	icl 'atari\vbxeput.asm'		; @vbxe_put
+	icl 'atari\vbxeansi.asm'	; @ansi
+	icl 'atari\vbxeclrscr.asm'	; @vbxe_clrscr
+	icl 'atari\vbxecrs.asm'		; @vbxe_cursor
+	icl 'atari\vbxesetcrs.asm'	; @vbxe_setcursor
+	icl 'atari\vbxeputbyte.asm'	; @vbxe_putbyte
+	icl 'atari\vbxescroll.asm'	; @vbxe_scroll
 
 	icl 'atari\xmsbank.asm'		; @xmsBank
 	icl 'atari\xmspos.asm'		; @xmsAddPosition, @xmsUpdatePosition
