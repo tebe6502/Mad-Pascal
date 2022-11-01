@@ -1,3 +1,9 @@
+01.11.2022
+- rezygnacja z VBXEANSI, zintegrowanie z VBXE, TEXTOUT zastąpione przez WRITE/WRITELN
+
+30.10.2022
+- poprawki dla 'GetIdentProc', wybiera spośród przeciążonych funkcji/procedur tą której parametry są najmniejszego pasującego typu (poprzednio decydowała kolejność deklaracji)
+
 18.10.2022
 - unit VBXEANSI
 
