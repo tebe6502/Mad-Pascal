@@ -88,7 +88,7 @@ const
 	function ExtractFilePath(a: PString): string;
 	function FileExists(name: PString): Boolean;
 	procedure FindClose(var f: TSearchRec); assembler;
-	function FindFirst (const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;
+	function FindFirst (FileMask: PString; Attributes: Byte; var SearchResult: TSearchRec): byte;
 	function FindNext(var f: TSearchRec): byte; assembler;
 	function GetTickCount: cardinal; assembler;
 	function IntToHex(Value: cardinal; Digits: byte): TString; register; assembler;
@@ -127,10 +127,8 @@ procedure Click ; assembler;
 @description: Sound the system click
 *)
 asm
-{
 	LDA #$00	;poke zero into
 	STA $D01F	;...CONSOL (53279)
-};
 end;
 
 
@@ -142,14 +140,14 @@ function GetTickCount: cardinal; assembler;
 *)
 {$IFDEF ATARI}
 asm
-{	mva :rtclok+2 Result
+	mva :rtclok+2 Result
 	mva :rtclok+1 Result+1
 	mva :rtclok Result+2
 	mva #$00 Result+3
-};
+end;
 {$ELSE}
 asm
-{	txa:pha
+	txa:pha
 
 	jsr $FFDE
 	sta Result
@@ -160,12 +158,11 @@ asm
 	sta Result+3
 
 	pla:tax
-};
-{$ENDIF}
 end;
+{$ENDIF}
 
 
-function FindFirst(const FileMask: TString; Attributes: Byte; var SearchResult: TSearchRec): byte;
+function FindFirst(FileMask: PString; Attributes: Byte; var SearchResult: TSearchRec): byte;
 (*
 @description: Start a file search and return a findhandle
 
@@ -178,8 +175,8 @@ function FindFirst(const FileMask: TString; Attributes: Byte; var SearchResult: 
 var f: file;
 begin
 	assign(f, FileMask);
-asm
-{	txa:pha
+ asm
+	txa:pha
 
 	clc			; iocheck off
 	@openfile f #6
@@ -233,7 +230,8 @@ loop
 	beq loop
 
 	pla:tax
-};
+ end;
+
 end;
 
 
@@ -246,7 +244,7 @@ function FindNext(var f: TSearchRec): byte; assembler;
 @returns: =0 record matching the criteria, successful
 *)
 asm
-{	txa:pha
+	txa:pha
 
 loop	mwa f :bp2
 	ldy #f.FindHandle-DATAORIGIN
@@ -273,7 +271,6 @@ loop	mwa f :bp2
 	beq loop
 
 	pla:tax
-};
 end;
 
 
@@ -284,7 +281,7 @@ procedure FindClose(var f: TSearchRec); assembler;
 @param: var f: TSearchRec
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa f :bp2
 	ldy #f.FindHandle-DATAORIGIN
@@ -296,7 +293,6 @@ asm
 	@closefile edx
 
 	pla:tax
-};
 end;
 
 
@@ -311,7 +307,7 @@ function RenameFile(var OldName,NewName: TString): Boolean; assembler;
 @returns: FALSE - I/O error
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mva #0 @buf
 
@@ -349,7 +345,6 @@ ok	lda #true
 	sta Result
 
 	pla:tax
-};
 end;
 
 
@@ -363,7 +358,7 @@ function DeleteFile(var FileName: TString): Boolean; assembler;
 @returns: FALSE - I/O error
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	sec			; iocheck on
 	jsr @openfile.lookup
@@ -394,7 +389,6 @@ ok	lda #true
 	sta Result
 
 	pla:tax
-};
 end;
 
 
