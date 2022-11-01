@@ -1417,17 +1417,21 @@ end;
 
 
 function GetIdentProc(S: TString; ProcIdentIndex: integer; Param: TParamList; NumParams: integer): integer;
-var IdentIndex, BlockStackIndex, i, k, b: Integer;
-    cnt: byte;
-    hits, m: word;
+var IdentIndex, BlockStackIndex, i, k, b, df: Integer;
+    hits, m, mask: cardinal;
     yes: Boolean;
     best: array of record
 		    IdentIndex, b: integer;
-		    hit: word;
+		    hit: cardinal;
 		   end;
 
-const
-    mask : array [0..15] of word = ($01,$02,$04,$08,$10,$20,$40,$80,$0100,$0200,$0400,$0800,$1000,$2000,$4000,$8000);
+	procedure doHit;
+	begin
+		//hits := hits or mask;
+		//mask := mask shl 1;
+
+		inc(hits);
+	end;
 
 begin
 
@@ -1438,14 +1442,25 @@ SetLength(best, 1);
 for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
   begin
   for IdentIndex := NumIdent downto 1 do
-    if (Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) and
+    if (Ident[IdentIndex].Kind = Ident[ProcIdentIndex].Kind{ in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]}) and
        (Ident[IdentIndex].UnitIndex = Ident[ProcIdentIndex].UnitIndex) and
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) and
        (Ident[IdentIndex].NumParams = NumParams) then
       begin
 
       hits := 0;
-      cnt:= 0;
+      mask := 1;
+
+{
+if Ident[IdentIndex].Name = 'TTX' then begin
+
+write(pass,' > ');
+      for i := 1 to NumParams do
+	   write (Param[i].DataType,',');
+
+ writeln;
+end;
+}
 
 
       for i := 1 to NumParams do
@@ -1490,20 +1505,9 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 
 	      end;
 
+	      if yes then doHit;
 
-	      if yes then begin
-
-	       hits := hits or mask[cnt];
-	       inc(cnt);
-
-	      end;
-
-	   end else begin
-
-	       hits := hits or mask[cnt];
-	       inc(cnt);
-
-	   end;
+	   end else doHit;
 
 {
 writeln('_C: ', Ident[IdentIndex].Name);
@@ -1525,10 +1529,45 @@ writeln('_A: ', Ident[IdentIndex].Name);
 	   writeln (Ident[IdentIndex].Param[i].AllocElementType ,',', Param[i].AllocElementType);
 	   writeln (Ident[IdentIndex].Param[i].NumAllocElements,',', Param[i].NumAllocElements);
 }
-	       hits := hits or mask[cnt];
-	       inc(cnt);
+	       doHit;
 
             end;
+
+
+          if (Ident[IdentIndex].Param[i].DataType in IntegerTypes) and (Param[i].DataType in IntegerTypes) then begin
+
+	    if Ident[IdentIndex].Param[i].DataType in UnsignedOrdinalTypes then begin
+
+	     b := DataSize[Ident[IdentIndex].Param[i].DataType];	// required parameter type
+	     k := DataSize[Param[i].DataType];				// type of parameter passed
+
+//	     writeln('+ ',Ident[IdentIndex].Name,' - ',b,',',k,',',4 - abs(b-k),' / ',Param[i].DataType,' | ',Ident[IdentIndex].Param[i].DataType);
+
+	     if b >= k then begin
+	      df := 4 - abs(b-k);
+	      if Param[i].DataType in UnsignedOrdinalTypes then inc(df, 2);	// +2pts
+	      while df > 0 do begin doHit; dec(df) end;
+	     end;
+
+
+	    end else begin						// signed
+
+	     b := DataSize[Ident[IdentIndex].Param[i].DataType];	// required parameter type
+	     k := DataSize[Param[i].DataType];				// type of parameter passed
+
+	     if Param[i].DataType in [BYTETOK, WORDTOK] then inc(k);	// -> signed
+
+//	     writeln('- ',Ident[IdentIndex].Name,' - ',b,',',k,',',4 - abs(b-k),' / ',Param[i].DataType,' | ',Ident[IdentIndex].Param[i].DataType);
+
+	     if b >= k then begin
+	      df := 4 - abs(b-k);
+	      if Param[i].DataType in SignedOrdinalTypes then inc(df, 2);	// +2pts if the same types
+	      while df > 0 do begin doHit; dec(df) end;
+	     end;
+
+	    end;
+
+	  end;
 
 
 	   if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) and
@@ -1538,16 +1577,14 @@ writeln('_A: ', Ident[IdentIndex].Name);
 {
 writeln('_D: ', Ident[IdentIndex].Name);
 
-	   writeln (Ident[IdentIndex].Name,',',IdentIndex);
+	   writeln (Ident[IdentIndex].Name,',',IdentIndex, ' - ',Ident[IdentIndex].NumParams,',', NumParams);
 	   writeln (Ident[IdentIndex].Param[i].DataType,',', Param[i].DataType);
 	   writeln (Ident[IdentIndex].Param[i].AllocElementType ,',', Param[i].AllocElementType);
 	   writeln (Ident[IdentIndex].Param[i].NumAllocElements,',', Param[i].NumAllocElements);
 }
-	       hits := hits or mask[cnt];
-	       inc(cnt);
+	       doHit;
 
 	    end;
-
 
 
 	   if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) and
@@ -1562,13 +1599,12 @@ writeln('_D: ', Ident[IdentIndex].Name);
 {
 writeln('_B: ', Ident[IdentIndex].Name);
 
-	   writeln (Ident[IdentIndex].Name,',',IdentIndex);
+	   writeln (Ident[IdentIndex].Name,',',IdentIndex, ' - ',Ident[IdentIndex].NumParams,',', NumParams);
 	   writeln (Ident[IdentIndex].Param[i].DataType,',', Param[i].DataType);
 	   writeln (Ident[IdentIndex].Param[i].AllocElementType ,',', Param[i].AllocElementType);
 	   writeln (Ident[IdentIndex].Param[i].NumAllocElements,',', Param[i].NumAllocElements);
 }
-	       hits := hits or mask[cnt];
-	       inc(cnt);
+	       doHit;
 
 	    end;
 
@@ -41708,6 +41744,8 @@ begin
 
 	i := CompileExpression(i + 2, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);	// Evaluate actual parameters and push them onto the stack
 
+// writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+
 
 	if (Tok[i].Kind = IDENTTOK) and (ActualParamType in [RECORDTOK, OBJECTTOK]) and not (Ident[IdentIndex].Param[NumActualParams].DataType in Pointers) then
 	 if Ident[GetIdent(Tok[i].Name^)].isNestedFunction then begin
@@ -41776,9 +41814,18 @@ begin
           if (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) and (Tok[i].Kind = IDENTTOK) then begin
 	    IdentTemp := GetIdent(Tok[i].Name^);
 
+            if (Ident[IdentTemp].DataType = STRINGPOINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) then
+ 	      Error(i, 'Incompatible types: got '+InfoAboutToken(Ident[IdentTemp].DataType)+' expected "^' + InfoAboutToken(Ident[IdentIndex].Param[NumActualParams].AllocElementType) + '"');
+
 	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
-	  end else
+	  end else begin
+
+            if (ActualParamType = STRINGPOINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) then
+ 	      Error(i, 'Incompatible types: got '+InfoAboutToken(ActualParamType)+' expected "^' + InfoAboutToken(Ident[IdentIndex].Param[NumActualParams].AllocElementType) + '"');
+
 	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+
+	  end;
 
 	end;
 
@@ -46746,6 +46793,9 @@ WHILETOK:
     StartOptimization(i);
 
     yes := (Tok[i].Kind = WRITELNTOK);
+
+
+    if (Tok[i + 1].Kind = OPARTOK) and (Tok[i + 2].Kind = CPARTOK) then inc(i, 2);
 
 
     if Tok[i + 1].Kind = SEMICOLONTOK then begin
