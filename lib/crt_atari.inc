@@ -77,7 +77,10 @@ procedure TextBackground(a: byte); assembler;
 @param: a - color value 0..255
 *)
 asm
-	mwa a colpf2s
+	mva a colpf2s
+
+	ora colpf1s
+	sta fildat
 end;
 
 
@@ -89,6 +92,9 @@ procedure TextColor(a: byte); assembler;
 *)
 asm
 	mva a colpf1s
+
+	ora colpf2s
+	sta fildat
 end;
 
 
@@ -166,7 +172,14 @@ asm
 
 	dey
 
-@	sty rowcrs
+@	tya
+test	cmp #24
+	bcc @+
+
+	sbc #24
+	jmp test
+@
+	sta rowcrs
 end;
 
 

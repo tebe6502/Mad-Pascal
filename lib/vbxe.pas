@@ -1,10 +1,10 @@
 unit vbxe;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe), Daniel Koźmiński
+ @author: Tomasz Biela (Tebe), Daniel Koźmiński, Joseph Zatarski
  @name: Video Board XE unit
 
- @version: 1.1
+ @version: 1.2
 
  @description:
 
@@ -17,6 +17,10 @@ VGAMed: pixel mode 320x192/256 colors (stdres). This is like GR.8 in 256 colors.
  VGAHi: pixel mode 640x192/16 colors (hires)
 
 The mode 0 is reserved for text console.
+
+ <https://forums.atariage.com/topic/225063-full-color-ansi-vbxe-terminal-in-the-works/>
+
+ <https://en.wikipedia.org/wiki/ANSI_escape_code>
 *)
 
 
@@ -31,6 +35,7 @@ The mode 0 is reserved for text console.
 
 {
 
+AnsiChar
 BlitterBusy
 ClearDevice
 ColorMapOff
@@ -41,6 +46,7 @@ GetXDL
 HLine
 IniBCB
 Line
+NormVideo
 OverlayOff
 Position
 PutPixel
@@ -53,6 +59,7 @@ SetCurrentPaletteEntry
 SetPaletteEntry
 SetHRes
 SetHorizontalRes
+SetOverlayAddress
 SetOverlayPalette
 SetPlayfieldPalette
 SetRGBPalette
@@ -150,18 +157,56 @@ const
 	VC_NO_TRANS	= 4;
 	VC_TRANS15	= 8;
 
+// TextColor (ANSI)
+
+	tcBlack          = 0;
+	tcRed            = 1;
+	tcGreen          = 2;
+	tcYellow         = 3;
+	tcBlue           = 4;
+	tcMagenta        = 5;
+	tcCyan           = 6;
+	tcWhite          = 7;
+	tcBrightBlack    = 8;
+	tcBrightRed      = 9;
+	tcBrightGreen    = 10;
+	tcBrightYellow   = 11;
+	tcBrightBlue     = 12;
+	tcBrightMagenta  = 13;
+	tcBrightCyan     = 14;
+	tcBrightWhite    = 15;
+
+ // TextBackground (ANSI)
+
+	tbBlack        = $80;
+	tbRed          = $90;
+	tbGreen        = $a0;
+	tbYellow       = $b0;
+	tbBlue         = $c0;
+	tbMagenta      = $d0;
+	tbCyan         = $e0;
+	tbWhite        = $f0;
 
 var
 	vram: TVBXEMemoryStream;
 
+	scrollback_fill: Boolean absolute $63;		// TRUE -> row #0 was copied to the scrollback_buffer ($0400..$049F)
+
+	procedure AnsiChar(a: char); assembler;
+	procedure AnsiString(s: string); assembler;
 	function BlitterBusy: Boolean; assembler;
+	procedure ClrScr; assembler;
 	procedure ColorMapOn; assembler;
 	procedure ColorMapOff; assembler;
 	procedure ColorMap(a: Boolean); overload;
 	procedure ColorMap(w, h: byte); overload;
+	procedure CursorOn; assembler;
+	procedure CursorOff; assembler;
 	procedure DstBCB(var a: TBCB; dst: cardinal);
+	function EnableANSIMode: Boolean;
 	procedure GetXDL(var a: txdl); register; assembler;
 	procedure IniBCB(var a: TBCB; src,dst: cardinal; w0, w1: smallint; w: word; h: byte; ctrl: byte);
+	procedure NormVideo;
 	procedure OverlayOff; assembler;
 	procedure RunBCB(var a: TBCB); assembler;
 	procedure VBXEMemoryBank(b: byte); assembler;
@@ -170,6 +215,7 @@ var
 	procedure SetHRes(a: byte); overload;
 	procedure SetHRes(a: byte; s: word); overload;
 	procedure SrcBCB(var a: TBCB; src: cardinal);
+	procedure SetOverlayAddress(a: cardinal); assembler;
 	procedure SetXDL(var a: txdl); register; assembler;
 	procedure VBXEControl(a: byte); assembler;
 	procedure VBXEOff; assembler;
@@ -177,11 +223,11 @@ var
 
 	procedure ClearDevice;
 	procedure CloseGraph; assembler;
-	procedure TextOut(a: char; c: byte); overload;
-	procedure TextOut(a: char); overload;
-	procedure TextOut(s: PByte; c: byte); overload;
-	procedure TextOut(s: PByte); overload;
-	procedure Position(x,y: byte);
+//	procedure TextOut(a: char; c: byte); overload;
+//	procedure TextOut(a: char); overload;
+//	procedure TextOut(s: PString; c: byte); overload;
+//	procedure TextOut(s: PString); overload;
+//	procedure Position(x,y: byte); assembler;
 
 	procedure SetColorMapEntry; overload; assembler;
 	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
@@ -215,7 +261,7 @@ var	fildat: byte absolute $2fd;
 	rowcrs: byte absolute $54;		// pionowa pozycja kursora
 	colcrs: byte absolute $55;		// (2) pozioma pozycja kursora
 
-	mem_vbxe: ^byte;
+	crsadr: word absolute $68;
 
 
 {$i vbxe.inc}
@@ -399,24 +445,7 @@ begin
 end;
 
 
-procedure WrapCursor;
-begin
-
- inc(colcrs);
-
- if colcrs >=79 then begin
-  inc(rowcrs);
-
-  inc(mem_vbxe, 2);
-  colcrs:=0;
- end;
-
- if rowcrs > 24 then ;
-
-end;
-
-
-procedure Position(x, y: byte);
+procedure Position(x, y: byte); assembler;
 (*
 @description:
 Set cursor position on screen.
@@ -426,10 +455,9 @@ Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.
 @param: x - horizontal positions
 @param: y - vertical positions
 *)
-var tmp: word;
-begin
-
 asm
+	jsr @vbxe_Cursor.off
+
 	ldy x
 	beq @+
 
@@ -444,31 +472,8 @@ asm
 	dey
 
 @	sty rowcrs
-end;
 
- tmp := rowcrs*160 + colcrs shl 1;
-
- vram.position:=VBXE_OVRADR + tmp;
-
- mem_vbxe:=pointer(VBXE_WINDOW + tmp);
-
-end;
-
-
-function ata2int(a: byte): byte; assembler;
-asm
-        asl
-        php
-        cmp #2*$60
-        bcs @+
-        sbc #2*$20-1
-        bcs @+
-        adc #2*$60
-@       plp
-        ror
-
-	lda a
-	sta Result;
+	jmp @vbxe_SetCursor
 end;
 
 
@@ -481,21 +486,14 @@ begin
 
  fildat := c;
 
-asm
+ asm
 	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-end;
 
- mem_vbxe^ := ata2int(ord(a));
- inc(mem_vbxe);
+	lda a
+	jsr @putchar_80
 
- mem_vbxe^ := c;
- inc(mem_vbxe);
-
- WrapCursor;
-
-asm
  	fxs FX_MEMS #$00		; disable VBXE BANK
-end;
+ end;
 
 end;
 
@@ -507,97 +505,76 @@ procedure TextOut(a: char); overload;
 *)
 begin
 
-asm
-	lda colpf2s	; TextBackground
-	:4 asl @
-	ora colpf1s	; TextColor
-	ora #$80
-
-	sta fildat
-
+ asm
 	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-end;
 
- mem_vbxe^ := ata2int(ord(a));
- inc(mem_vbxe);
+	lda a
+	jsr @putchar_80
 
- mem_vbxe^ := fildat;
- inc(mem_vbxe);
-
- WrapCursor;
-
-asm
  	fxs FX_MEMS #$00		; disable VBXE BANK
-end;
+ end;
 
 end;
 
 
-procedure TextOut(s: PByte; c: byte); overload;
+procedure TextOut(s: PString; c: byte); overload;
 (*
 @description:
 
 *)
 var i: byte;
+    a: char;
 begin
 
  fildat := c;
 
-asm
-	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-end;
-
  for i:=1 to s[0] do begin
 
-  mem_vbxe^ := ata2int(s[i]);
-  inc(mem_vbxe);
+  a := s[i];
 
-  mem_vbxe^ := c;
-  inc(mem_vbxe);
+  asm
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
 
-  WrapCursor;
- end;
+	lda a
+	jsr @putchar_80
 
-asm
- 	fxs FX_MEMS #$00		; disable VBXE BANK
-end;
+	fxs FX_MEMS #$00		; disable VBXE BANK
+  end;
 
 end;
 
+end;
 
-procedure TextOut(s: PByte); overload;
+
+procedure TextOut(s: PString); overload;
 (*
 @description:
 
 *)
 var i: byte;
+    a: char;
 begin
 
 asm
 	lda colpf2s	; TextBackground
-	:4 asl @
 	ora colpf1s	; TextColor
-	ora #$80
-
 	sta fildat
-
-	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
 end;
 
  for i:=1 to s[0] do begin
 
-  mem_vbxe^ := ata2int(s[i]);
-  inc(mem_vbxe);
+  a := s[i];
 
-  mem_vbxe^ := fildat;
-  inc(mem_vbxe);
+  asm
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
 
-  WrapCursor;
+	lda a
+	jsr @putchar_80
+
+	fxs FX_MEMS #$00		; disable VBXE BANK
+  end;
+
  end;
-
-asm
- 	fxs FX_MEMS #$00		; disable VBXE BANK
-end;
 
 end;
 
@@ -867,6 +844,26 @@ lp	lda (a),y
 end;
 
 
+procedure SetOverlayAddress(a: cardinal); assembler;
+(*
+@description:
+Set Overlay Address (XDLC_OVADR)
+
+*)
+asm
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+	lda a
+	sta MAIN.SYSTEM.VBXE_XDLADR+MAIN.SYSTEM.VBXE_WINDOW+6
+	lda a+1
+	sta MAIN.SYSTEM.VBXE_XDLADR+MAIN.SYSTEM.VBXE_WINDOW+7
+	lda a+2
+	sta MAIN.SYSTEM.VBXE_XDLADR+MAIN.SYSTEM.VBXE_WINDOW+8
+
+	fxs FX_MEMS #$00
+end;
+
+
 procedure VBXEControl(a: byte); assembler;
 (*
 @description:
@@ -880,6 +877,7 @@ end;
 procedure VBXEOff; assembler;
 (*
 @description:
+Disable VBXE, reset E:
 
 *)
 asm
@@ -897,13 +895,161 @@ asm
 end;
 
 
+procedure NormVideo;
+(*
+@description:
+Disable VBXE, reset E:
+
+*)
+begin
+
+ VBXEOff;
+
+end;
+
+
 procedure ClearDevice;
+(*
+@description:
+
+
+*)
 begin
 
  vram.position:=VBXE_OVRADR;
  vram.size:=VBXE_OVRADR+320*256;
  vram.Clear;
 
+end;
+
+
+procedure AnsiChar(a: char); assembler;
+(*
+@description:
+ANSI character processing
+
+*)
+asm
+	txa:pha
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	lda a
+	sta atachr
+
+	jsr @ansi.process_char
+
+	fxs FX_MEMS #$00
+
+	pla:tax
+end;
+
+
+procedure AnsiString(s: string); assembler;
+(*
+@description:
+ANSI character processing
+
+*)
+asm
+	txa:pha
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	lda #0
+	sta cnt
+
+loop	ldy cnt: #0
+	cpy adr.s
+	beq toExit
+
+	lda adr.s+1,y
+	sta atachr
+
+	jsr @ansi.process_char
+
+	inc cnt
+	bne loop
+toExit
+	fxs FX_MEMS #$00
+
+	pla:tax
+end;
+
+
+procedure ClrScr; assembler;
+(*
+@description:
+Clear Screen
+
+*)
+asm
+	txa:pha
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	jsr @FF_adr
+
+	lda savadr		; fill
+	sta adr
+	lda savadr+1
+	sta adr+1
+
+	ldx #$0e		; 15 * 256 = 3840 -> 24 * 160
+	ldy #$00
+
+	lda fildat
+fil
+	iny
+	sta adr: $1000,y
+	iny
+
+	bne fil
+
+	inc adr+1
+
+	dex
+	bpl fil
+
+	fxs FX_MEMS #$00
+
+	pla:tax
+end;
+
+
+procedure CursorOn; assembler;
+(*
+@description:
+Cursor ON
+
+*)
+asm
+	lda #$00
+	sta crsinh
+
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	jsr @vbxe_cursor.on
+
+	fxs FX_MEMS #$00
+end;
+
+
+procedure CursorOff; assembler;
+(*
+@description:
+Cursor OFF
+
+*)
+asm
+	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+
+	jsr @vbxe_cursor.off
+
+	fxs FX_MEMS #$00
+
+	lda #$ff
+	sta crsinh
 end;
 
 
@@ -928,10 +1074,31 @@ begin
 		vram.position:=VBXE_CHBASE;
 		vram.WriteBuffer(p^, 2048);
 
-		Position(0,0);
-
 		asm
+			lda	<MAIN.SYSTEM.VBXE_WINDOW
+			sta	savadr
+			lda	>MAIN.SYSTEM.VBXE_WINDOW
+			sta	savadr + 1
+
+			lda #$00
+			sta rowcrs
+			sta colcrs
+			sta colcrs+1
+			sta crsinh			; cursor_flg
+			sta oldchr			; ctrl_seq_flg
+
+			lda #7
+			sta colpf1s
+
+			lda #$80
+			sta colpf2s
+
+			lda #$87
+			sta fildat			; $87 is white on black (ANSI MODE)
+
 			@setxdl #e@xdl.tmon
+
+			m@putchar {jmp*}, @putchar_80
 		end;
 
 	  end;
@@ -948,6 +1115,52 @@ begin
  end;
 
 end;
+
+
+function EnableANSIMode: Boolean;
+var a, b: byte;
+
+const
+    vga: array [0..15] of cardinal = (
+    $000000,	// black
+    $AA0000,	// red
+    $00AA00,	// green
+    $AA5500,	// yellow
+    $0000AA,	// blue
+    $AA00AA,	// magenta
+    $00AAAA,	// cyan
+    $AAAAAA,	// white
+    $555555,	// bright black
+    $FF5555,	// bright red
+    $55FF55,	// bright green
+    $FFFF55,	// bright yellow
+    $5555FF,	// bright blue
+    $FF55FF,	// bright magenta
+    $55FFFF,	// bright cyan
+    $FFFFFF	// bright white
+    );
+
+begin
+
+ Result:=false;
+
+ if VBXE.GraphResult <> VBXE.grOK then exit;
+
+ SetRGBPalette(1);					// create Palette #1
+
+ for a:=0 to 127 do SetRGBPalette(vga[a and $0f]);
+
+ for b:=0 to 7 do
+  for a:=0 to 15 do SetRGBPalette(vga[b]);
+
+ SetRGBPalette(128, 16,16,16);				// background color
+
+ VBXEMode(VBXE.VGA, 1);					// VBXE MODE, OVERLAY PALETTE #1
+
+ ClrScr;
+
+end;
+
 
 
 initialization
