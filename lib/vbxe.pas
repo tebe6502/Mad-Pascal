@@ -190,7 +190,9 @@ const
 var
 	vram: TVBXEMemoryStream;
 
-	scrollback_fill: Boolean absolute $63;		// TRUE -> row #0 was copied to the scrollback_buffer ($0400..$049F)
+	scrollback_fill: Boolean absolute $63;				// (LOGCOL = $63) TRUE -> row #0 was copied to the scrollback_buffer
+
+        scrollback_buffer: array [0..255] of byte absolute $0400;	// ROW #0 buffer, filled if 'row_slide_status = true'
 
 	procedure AnsiChar(a: char); assembler;
 	procedure AnsiString(s: string); assembler;
@@ -1086,6 +1088,7 @@ begin
 			sta colcrs+1
 			sta crsinh			; cursor_flg
 			sta oldchr			; ctrl_seq_flg
+			sta scrollback_fill
 
 			lda #7
 			sta colpf1s
@@ -1121,7 +1124,7 @@ function EnableANSIMode: Boolean;
 var a, b: byte;
 
 const
-    vga: array [0..15] of cardinal = (
+    vgaPal: array [0..15] of cardinal = (
     $000000,	// black
     $AA0000,	// red
     $00AA00,	// green
@@ -1148,16 +1151,16 @@ begin
 
  SetRGBPalette(1);					// create Palette #1
 
- for a:=0 to 127 do SetRGBPalette(vga[a and $0f]);
+ for a:=0 to 127 do SetRGBPalette(vgaPal[a and $0f]);
 
  for b:=0 to 7 do
-  for a:=0 to 15 do SetRGBPalette(vga[b]);
+  for a:=0 to 15 do SetRGBPalette(vgaPal[b]);
 
  SetRGBPalette(128, 16,16,16);				// background color
 
  VBXEMode(VBXE.VGA, 1);					// VBXE MODE, OVERLAY PALETTE #1
 
- ClrScr;
+ vbxe.ClrScr;
 
 end;
 
