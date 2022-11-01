@@ -1,63 +1,35 @@
 
 (*
 
- DISPLAY ANSI FILE
+ DISPLAY *.ANS FILE
 
 *)
 
+uses vbxe, crt, sysutils;
 
-// !!! 'vbxeansi' at the beginning of the USES list
+{$r vbxe_ansi.rc}
 
-uses vbxeansi, crt, sysutils;
+const
 
-type
+    ANSI_BUFFER = VBXE_OVRADR + $1000;
 
-   TShortFilename = string[16];
+    ibmfnt = $8000;
 
 
 var f: file;
 
-    num, i: word;
+    Info : TSearchRec;
+    fn: TString;
 
-    x,
-    cfnam: byte;			// maximum number of file names
+    num, i: word;
 
     stop, next: Boolean;
 
     bf: array [0..255] of char;
 
-    row0: array [0..255] of byte absolute $0400;	// ROW #0 buffer, filled if 'row_slide_status = true'
-
-    fnam: array [0..99] of TShortFilename;
-
     vram, src: TVBXEMemoryStream;
 
     vadr, ansiend : cardinal;
-
-
-procedure ReadDIR;
-var Info : TSearchRec;
-    fn: TShortFilename;
-begin
-
-  if FindFirst('D:*.ANS', faAnyFile, Info) = 0 then
-  begin
-    repeat
-
-      fn:=Info.Name;				// FILENAME
-      fn:=Concat('D:', fn);			// D:FILENAME
-
-      if cfnam <= High(fnam) then begin		// maximum 100 files [0..99]
-       fnam[cfnam]:=fn;
-       inc(cfnam);
-      end;
-
-    until FindNext(Info) <> 0;
-
-    FindClose(Info);
-  end;
-
-end;
 
 
 Procedure KeyScan;
@@ -88,8 +60,7 @@ skp
 	mva #key_delay delay
 end;
 
-
-BEGIN
+begin
 	get_key;
 
 	a:=0;
@@ -109,34 +80,38 @@ BEGIN
 	onKey:=0;
 
 	case a of
-	  1: if vadr > VBXE_ANSIFRE then dec(vadr, 160);
+	  1: if vadr > ANSI_BUFFER then dec(vadr, 160);
 	  2: if vadr < ansiend then inc(vadr, 160);
 	end;
 
-END;
+end;
 
 
+
+procedure LoadANSI;
+var f: file;
+
+    num, i: word;
+
+    bf: array [0..255] of char;
 
 begin
 
-ReadDIR;
+
+vbxe.clrscr;
 
 vram.create;
 
+
 (*--------------------------------------------------------------------*)
 
-while true do begin
+SetOverlayAddress(VBXE_OVRADR);
 
-SetOverlayAddress(VBXE_ANSIADR);
+vram.position := ANSI_BUFFER;
 
-clrscr;
+scrollback_fill:=false;
 
-vram.position:=VBXE_ANSIFRE;
-
-row_slide_status:=false;
-
-
-assign(f, fnam[x]); reset(f, 1);
+assign(f, fn); reset(f, 1);
 
 repeat
 
@@ -147,11 +122,11 @@ repeat
    AnsiChar(bf[i]);
 
 
-   if row_slide_status then begin
+   if scrollback_fill then begin
 
-    vram.WriteBuffer(row0, 160);	// copy ROW #0 to VRAM
+    vram.WriteBuffer(scrollback_buffer, 160);	// copy ROW #0 to VRAM
 
-    row_slide_status:=false;
+    scrollback_fill:=false;
 
    end;
 
@@ -167,7 +142,7 @@ NoSound;	// reset POKEY-s
 (*--------------------------------------------------------------------*)
 
 src.create;
-src.position:=VBXE_ANSIADR;		// copy whole console window to VRAM row by row (x24)
+src.position := VBXE_OVRADR;		// copy whole console window to VRAM row by row (x24)
 
 for i:=0 to 23 do begin
 
@@ -177,13 +152,9 @@ for i:=0 to 23 do begin
 
 end;
 
-(*--------------------------------------------------------------------*)
-
 ansiend := vram.position - 24*160;	// end
 
 vadr:=ansiend;
-
-next:=false;
 
 (*--------------------------------------------------------------------*)
 
@@ -199,17 +170,40 @@ repeat
 
 until false;
 
-(*--------------------------------------------------------------------*)
-
-inc(x);
-
-if x >= cfnam then x:=0;
-
-if stop then Break;			// program exit
-
-end;	// while
+end;
 
 
-NormVideo;				// disable VBXE
+
+begin
+
+ Poke(756, hi(ibmfnt));
+
+ EnableANSIMode;
+
+ vbxe.CursorOff;
+
+
+  if FindFirst('D:*.ANS', faAnyFile, Info) = 0 then
+  begin
+    repeat
+
+      fn:=Info.Name;				// FILENAME
+      fn:=Concat('D:', fn);			// D:FILENAME
+
+      next := false;
+
+      LoadANSI;
+
+      if stop then Break;
+
+    until FindNext(Info) <> 0;
+
+    FindClose(Info);
+  end;
+
+
+  repeat until keypressed;
+
+  NormVideo;
 
 end.

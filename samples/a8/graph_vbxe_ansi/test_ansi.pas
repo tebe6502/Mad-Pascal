@@ -1,7 +1,5 @@
 
-// !!! 'vbxeansi' at the beginning of the USES list
-
-uses vbxeansi, crt;
+uses vbxe, crt;
 
 var f: file;
 
@@ -75,6 +73,8 @@ END;
 
 
 begin
+
+EnableANSIMode;
 
 vram.create;
 vram.position:=VBXE_ANSIFRE;
