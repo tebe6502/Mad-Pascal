@@ -221,7 +221,7 @@ skp
 end;
 
 
-procedure InitGraph(driver, mode: byte; dev: PByte); overload;
+procedure InitGraph(driver, mode: byte; dev: PString); overload;
 (*
 @description:
 Init graphics mode

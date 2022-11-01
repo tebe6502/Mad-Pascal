@@ -57,6 +57,7 @@ var
 	chact: byte absolute $2F3;		// rejestr cien CHRCTL
 	chbas: byte absolute $2F4;		// rejestr cien CHBASE
 	ch: byte absolute $2FC;			// rejestr cien KBCODE
+	fildat: byte absolute $02FD;		// numer koloru dla FILL
 
 	pcolr0: byte absolute $02C0;		// cienie rejestrow kolorow $D012 .. $D01A
 	pcolr1: byte absolute $02C1;

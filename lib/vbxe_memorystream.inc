@@ -239,7 +239,7 @@ begin
 	adr:=Position;
 	siz:=Size;
 asm
-{	txa:pha
+	txa:pha
 
 	mva adr _adr
 	mva adr+1 _adr+1
@@ -288,7 +288,7 @@ _siz	.word 0xff	; width
 	dta 0x00	; control
 
 stop	pla:tax
-};
+end;
 	Position:=0;
 	Size:=512*1024;
 end;
