@@ -9,9 +9,9 @@ one
 
 		ldy #79					; @buf = scrollback_buffer
 cpRow		lda MAIN.SYSTEM.VBXE_WINDOW,y
-		sta @buf,y
+		sta MAIN.VBXE.adr.scrollback_buffer,y
 		lda MAIN.SYSTEM.VBXE_WINDOW+80,y
-		sta @buf+80,y
+		sta MAIN.VBXE.adr.scrollback_buffer+80,y
 		dey
 		bpl cpRow
 

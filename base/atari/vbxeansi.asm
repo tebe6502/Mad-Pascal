@@ -862,13 +862,13 @@ ctrl_seq_table
 
 ;###################################################################################################################
 
-ctrl_seq_index	.ds 1				; points to the current position in the control sequence buffer.
+ctrl_seq_index	brk				; points to the current position in the control sequence buffer.
 
-final_byte	.ds 1				; holds the control sequence final byte
-inter_byte	.ds 1				; holds the control sequence intermediate byte
-parameter_val	.ds 1				; holds a single parameter value
+final_byte	brk				; holds the control sequence final byte
+inter_byte	brk				; holds the control sequence intermediate byte
+parameter_val	brk				; holds a single parameter value
 
-parameters	.ds 4
+parameters	dta 0,0,0,0
 
 ;###################################################################################################################
 
