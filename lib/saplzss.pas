@@ -89,6 +89,8 @@ procedure TLZSSPlay.Decode; assembler;
 Decode stream music
 *)
 asm
+	txa:pha
+
 	mwa TLZSSPlay ptr
 
 	clc
@@ -96,6 +98,7 @@ asm
 	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
 ptr	equ *-2
 
+	pla:tax
 end;
 
 
@@ -105,12 +108,16 @@ procedure TLZSSPlay.Play; assembler;
 Play music
 *)
 asm
+	txa:pha
+
 	mwa TLZSSPlay ptr
 
 	sec
 
 	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
 ptr	equ *-2
+
+	pla:tax
 end;
 
 
