@@ -20,7 +20,6 @@ cpRow		lda MAIN.SYSTEM.VBXE_WINDOW,y
 		lda #$ff
 		
 		bne bcb_start
-
 page							; scroll one page
 
 ; used for FF and also to initialize the screen so the color is not all $00

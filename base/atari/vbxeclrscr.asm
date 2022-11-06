@@ -6,6 +6,7 @@
 		lda	#0			; home the cursor
 		sta	rowcrs
 		sta	colcrs
+		sta	colcrs+1
 		lda	<MAIN.SYSTEM.VBXE_WINDOW
 		sta	savadr
 		lda	>MAIN.SYSTEM.VBXE_WINDOW 
