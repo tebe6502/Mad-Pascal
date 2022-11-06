@@ -461,7 +461,7 @@ parse_parm
 is_last_parm
 
 param_idx	ldy	#0
-		cpy	#3
+		cpy	#4
 		bcs	_rts
 
 		lda	parameter_val
@@ -605,23 +605,19 @@ CUP_adr		.local				; Cursor Position
 						; Moves the cursor to row n, column m. The values are 1-based, and default to 1 (top left corner) if omitted
 		jsr get_param
 
-	
-		lda parameters
-		sne
-		lda #1
-		sta parameters
-		
 
 		lda parameters+1
 		sne
 		lda #1
-		sta parameters+1
 
-		lda parameters+1
 		sub #1
 		sta column
 
+
 		lda parameters
+		sne
+		lda #1
+
 		sub #1
 
 srow		cmp #24
@@ -872,8 +868,8 @@ parameters	dta 0,0,0,0
 
 ;###################################################################################################################
 
-ctrl_seq_buf	.ds 256				; a buffer for the control sequence. I'll have to mess around with various sizes for
-						; this. 256 bytes seems way overkill, so I probably only need 16 or so. For now, it's
+ctrl_seq_buf	dta 0,0,0,0,0,0,0,0		; a buffer for the control sequence. I'll have to mess around with various sizes for
+		dta 0,0,0,0,0,0,0,0		; this. 256 bytes seems way overkill, so I probably only need 16 or so. For now, it's
 						; 256 though.
 
 .endp
