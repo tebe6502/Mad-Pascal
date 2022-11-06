@@ -1,3 +1,6 @@
+06.11.2022
+- SAPLZSS, poprawione restartowanie modulu (players/playlzs16_reloc.asm)
+
 01.11.2022
 - rezygnacja z VBXEANSI, zintegrowanie z VBXE, TEXTOUT zastąpione przez WRITE/WRITELN
 
