@@ -51185,7 +51185,7 @@ asm65;
 if DATA_Atari > 0 then
  asm65(#9'org $'+IntToHex(DATA_Atari, 4))
 else
- asm65(#9'.align $0004');
+ asm65(#9'.align $0004,$00');
 
 asm65;
 asm65('DATAORIGIN');
