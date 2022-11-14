@@ -123,6 +123,7 @@ CutAs, FiDL, SprED, Sprite XL
 * [A8 Mad-Pascal Window Library](https://github.com/Ripjetski6502/A8MadPascalLibrary)
 * [Cartfall](https://gitlab.com/bocianu/cartfall)
 * [Unicode](https://gitlab.com/amarok8bit/unicode)
+* [Arcadia](https://gitlab.com/amarok8bit/arcadia)
 
 ## Benchmarks
 
