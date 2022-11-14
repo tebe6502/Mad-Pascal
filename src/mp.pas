@@ -52,7 +52,7 @@ Contributors:
 	- {$DEFINE ROMOFF}
 
 + Joseph Zatarski :
-	- uniti VBXEANSI
+	- base\atari\vbxeansi.asm
 
 + Konrad Kokoszkiewicz :
 	- base\atari\cmdline.asm
@@ -4337,16 +4337,16 @@ end;
    if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
     if (pos('lda ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'lda ' +  fortmp(GetSTRING(0)) + ':#$00'
+     TemporaryBuf[0] := #9'lda ' +  fortmp(GetSTRING(0)) + '::#$00'
     else
     if (pos('cmp ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + ':#$00'
+     TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00'
     else
     if (pos('sub ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + ':#$00'
+     TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00'
     else
     if (pos('sbc ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + ':#$00'
+     TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00'
     else
     if (pos('sta ', TemporaryBuf[0]) > 0) then
       TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
@@ -12012,6 +12012,18 @@ end;
      end;
 
 
+    if (l = i + 3) and
+       lda_im_0(i) and									// lda #$00				; 0
+       add(i+1) and (add_im_0(i+1) = false) and						// add					; 1
+       sta_a(i+2) and (sta_stack(i+2) = false) then					// sta					; 2
+     begin
+	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := '';
+
+	Result:=false; Break;
+     end;
+
+
     if (l = i + 5) and
        ldy_im_0(i) and									// ldy #$00				; 0
        lda_a(i+1) and									// lda					; 1
@@ -14395,7 +14407,7 @@ end;
 
 
 {
-if (pos('sta :STACKORIGIN+STACKWIDTH*3+9', listing[i]) > 0) then begin
+if (pos('sta :ecx+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -15848,7 +15860,7 @@ end;
 	 listing[i+2] := '';
 
 	end else begin
-	 listing[i]   := #9'ldy '+copy(listing[i], 6, 256);
+	 listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
 	 listing[i+1] := #9'dey';
 	 listing[i+2] := '';
 	end;
@@ -16236,7 +16248,7 @@ end;
       Result:=false; Break;
      end;
 
-  end;
+   end;
 
 
 // -----------------------------------------------------------------------------
@@ -16299,6 +16311,40 @@ end;
      end;
 
  end;
+
+
+
+  if (listing[i] = #9'sta :eax') and							// sta :eax				; 0
+     lda(i+1) and									// lda					; 1
+     (listing[i+2] = #9'sta :ecx') and							// sta :ecx				; 2
+     lda(i+3) and									// lda 					; 3
+     (listing[i+4] = #9'sta :ecx+1') and				 		// sta :ecx+1				; 4
+     lda(i+5) and									// lda					; 5
+     (listing[i+6] = #9'sta :eax+1') and				 		// sta :eax+1				; 6
+     IFDEF_MUL16(i+7) then								// .ifdef fmulinit			; 7
+      											// fmulu_16				; 8
+       											// els					; 9
+      											// imulCX				; 10
+       											// eif					; 11
+   begin
+    listing_tmp[0] := listing[i];
+    listing_tmp[1] := listing[i+5];
+    listing_tmp[2] := listing[i+6];
+    listing_tmp[3] := listing[i+1];
+    listing_tmp[4] := listing[i+2];
+    listing_tmp[5] := listing[i+3];
+    listing_tmp[6] := listing[i+4];
+
+    listing[i]   := listing_tmp[0];
+    listing[i+1] := listing_tmp[1];
+    listing[i+2] := listing_tmp[2];
+    listing[i+3] := listing_tmp[3];
+    listing[i+4] := listing_tmp[4];
+    listing[i+5] := listing_tmp[5];
+    listing[i+6] := listing_tmp[6];
+
+    Result:=false; Break;
+   end;
 
 
 // -----------------------------------------------------------------------------
@@ -21738,7 +21784,7 @@ end;
 
 	p := GetBYTE(i) xor GetBYTE(i+1);
 
-	listing[i]   := #9'lda #$'+IntToHex(p, 2);
+	listing[i]   := #9'lda #$' + IntToHex(p, 2);
 	listing[i+1] := '';
 	Result:=false; Break;
      end;
@@ -27769,7 +27815,12 @@ end;
        (copy(listing[i+5], 6, 256) = copy(listing[i+16], 6, 256)) and
        (copy(listing[i+8], 6, 256) = copy(listing[i+13], 6, 256)) then
       begin
-	listing[i] := #9'ldy ' + copy(listing[i], 6, 256) + '+$03';
+
+	if pos(#9'ldy #$', listing[i]) = 1 then begin
+          p:=GetBYTE(i) + 3;
+	  listing[i] := #9'ldy #$' + IntToHex(p, 2);
+	end else
+	  listing[i] := #9'ldy ' + copy(listing[i], 6, 256) + '+$03';
 
 	listing[i+1] := #9'lda (:bp2),y';
 	listing[i+2] := listing[i+11];
@@ -27904,7 +27955,12 @@ end;
        (listing[i+9] = '@') then								//@					; 9
     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) then
       begin
-	listing[i] := #9'ldy ' + copy(listing[i], 6, 256) + '+$01';
+
+	if pos(#9'ldy #$', listing[i]) = 1 then begin
+          p:=GetBYTE(i) + 1;
+ 	  listing[i] := #9'ldy #$' + IntToHex(p, 2);
+	end else
+	  listing[i] := #9'ldy ' + copy(listing[i], 6, 256) + '+$01';
 
 	listing[i+1] := #9'lda (:bp2),y';
 	listing[i+2] := listing[i+5];
@@ -33395,6 +33451,10 @@ begin
 
      arg0:=GetString(i);
 
+     if ldy_im_0(i) and lda(i+1) and spl(i+2) then begin
+      arg0:=''; optyY:='';
+     end else
+
      if arg0 = optyY then
        listing[i] := ''
      else begin
@@ -33418,6 +33478,10 @@ begin
 // --------------------------------------------------------------------------
      if iny(i) then begin
 
+      if SKIP(i-1) then begin
+       arg0:=''; optyY:='';
+      end else
+
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
         optyY:='#$' + IntToHex( byte( StrToInt(copy(optyY,2,256)) + 1), 2)
@@ -33429,6 +33493,10 @@ begin
 // 					DEY
 // --------------------------------------------------------------------------
      if dey(i) then begin
+
+      if SKIP(i-1) then begin
+       arg0:=''; optyY:='';
+      end else
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
@@ -33577,7 +33645,7 @@ begin
 
      if iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or
         (pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) or ((optyA = optyY) and (optyA <> '')) or
-        (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or
+        {(listing[i] = '@') or} (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or
 	(pos(#9'jsr ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyY := '' end;
 
 
