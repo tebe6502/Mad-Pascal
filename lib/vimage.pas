@@ -1,7 +1,7 @@
 
 {****************************************************************************
 ** VIMAGE unit (14.01.2018) VBXE					   **
-**   by Steven Don, Tomasz Biela					   **
+**   by Steven Henk Don, Tomasz Biela					   **
 *****************************************************************************
 ** A unit to load a variety of image formats to a buffer.		   **
 **                                                                         **
@@ -29,7 +29,7 @@ unit vimage;
 (*
 @type: unit
 @name: A unit to load a variety of image formats for VBXE
-@author: Steven Don, Tomasz Biela (Tebe)
+@author: Steven Henk Don (https://www.shdon.com/), Tomasz Biela (Tebe)
 
 @description:
 VBXE Image

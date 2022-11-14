@@ -1,7 +1,7 @@
 
 {****************************************************************************
 ** IMAGE unit, ANTIC/GTIA						   **
-**	by Steven Don, Tomasz Biela					   **
+**  by Steven Henk Don, Tomasz Biela					   **
 *****************************************************************************
 ** A unit to load a variety of image formats.				   **
 **                                                                         **
@@ -11,7 +11,7 @@
 **				MIC Micropainter			   **
 **				PIC Koala Microillustrator		   **
 **                                                                         **
-** Images must be in 256 colours and may be up to 320x192 in size.         **
+** Images must be in 4 colours and may be up to 320x192 in size.           **
 *****************************************************************************
 ** Three functions are available to the calling program:                   **
 **                                                                         **
@@ -31,7 +31,7 @@ unit image;
 (*
 @type: unit
 @name: A unit to load a variety of image formats for ANTIC/GTIA
-@author: Steven Don, Tomasz Biela (Tebe)
+@author: Steven Henk Don (https://www.shdon.com/), Tomasz Biela (Tebe)
 
 @description:
 GTIA

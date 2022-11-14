@@ -22,6 +22,12 @@ SetTime
 
 interface
 
+type	PathStr = string[32];
+	(*
+	@description:
+
+	*)
+
 	function DosVersion: word; assembler;
 	procedure GetTime(var hour, minute, second, msec: word);
 	procedure SetTime(hour, minute, second, msec: word);
