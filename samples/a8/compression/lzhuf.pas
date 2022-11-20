@@ -406,7 +406,7 @@ begin
     begin
       i:=freadbyte;
 
-      getbuf := getbuf or (i shl (8 - getlen));
+      getbuf := getbuf or (word(i) shl (8 - getlen));
       getlen := getlen + 8;
     end;
 
@@ -441,7 +441,7 @@ begin
 end;
 
 
-procedure Putcode(l:word ;  c:word);		{**** output c bits ****}
+procedure Putcode(l:byte ;  c:word);		{**** output c bits ****}
 begin
     putbuf := putbuf or (c shr putlen);
     putlen := putlen + l;
@@ -569,7 +569,7 @@ begin
     c := prnt[c + T];
 
     repeat
-        freq[c]:=freq[c]+1;
+	inc(freq[c]);
         k := freq[c];
 
         {**** swap nodes to keep the tree freq-ordered ****}
@@ -604,8 +604,8 @@ end;
 
 procedure EncodeChar(c:word);
 var
-  i:word;
-  j,k:word;
+  j: byte;
+  i,k:word;
 begin
     i := 0;
     j := 0;
@@ -690,7 +690,8 @@ begin
     while (j<>0) do
       begin
         j:=j-1;
-        i := (i shl 1) + GetBit;
+        i := (i shl 1);
+	i := i + GetBit;
       end;
     j:=j-1;
     DecodePosition := c or i and $3f;
@@ -900,4 +901,4 @@ begin
   main;
 end.
 
-// 11262
+// 10722
