@@ -365,6 +365,25 @@
       end;
 
 
+    if ldy_1(i) and 										// ldy #1		; 0	BOOL := smallint < 0
+       lda(i+1) and (lda_stack(i+1) = false) and						// lda			; 1
+       (listing[i+2] = #9'bmi @+') and								// bmi @+		; 2
+       dey(i+3) and										// dey			; 3
+       (listing[i+4] = '@') and									//@			; 4
+       tya(i+5) and										// tya			; 5
+       sta(i+6) then										// sta			; 6
+     begin
+	listing[i]   := '';
+
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'lda #$00';
+	listing[i+4] := #9'rol @';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+     end;
+
+
     if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
        (bpl(i+16) or bmi(i+16)) and								// bpl|bmi		; 16
        dey(i+17) and										// dey			; 17

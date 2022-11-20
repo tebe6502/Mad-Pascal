@@ -186,8 +186,25 @@
 	  sta(i+16) and									// sta			; 16
           (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
 	begin
-	 listing[i+4] := #9'asl :eax';
-	 listing[i+5] := #9'rol :eax+1';
+
+	 if (sta_stack(i+14) = false) and
+	    (sta_stack(i+16) = false) then
+	 begin
+	  listing[i]   := listing[i+14];
+
+	  listing[i+3] := listing[i+16];
+	  listing[i+4] := #9'asl ' + copy(listing[i+14], 6, 256);
+	  listing[i+5] := #9'rol ' + copy(listing[i+16], 6, 256);
+
+	  listing[i+13] := '';
+	  listing[i+14] := '';
+	  listing[i+15] := '';
+	  listing[i+16] := '';
+	 end else begin
+	  listing[i+4] := #9'asl :eax';
+	  listing[i+5] := #9'rol :eax+1';
+	 end;
+
 	 listing[i+6]  := '';
 	 listing[i+7]  := '';
 	 listing[i+8]  := '';
@@ -270,6 +287,60 @@
 	 Result:=false; Break;
 	end;
 
+
+     end;
+
+
+
+    if (listing[i] = #9'sta :eax') and							// sta :eax				; 0	* 4
+       lda(i+1) and									// lda					; 1
+       adc_sbc(i+2) and									// adc|sbc				; 2
+       (listing[i+3] = #9'sta :eax+1') and						// sta :eax+1				; 3
+       (listing[i+4] = #9'lda #$04') and						// lda #$04				; 4
+       (listing[i+5] = #9'sta :ecx') and 						// sta :ecx				; 5
+       lda_im_0(i+6) and								// lda #$00				; 6
+       (listing[i+7] = #9'sta :ecx+1') then 						// sta :ecx+1				; 7
+
+     begin
+
+
+       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+	  sta(i+14) and									// sta			; 14
+          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+	  sta(i+16) and									// sta			; 16
+          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+	begin
+
+	 if (sta_stack(i+14) = false) and
+	    (sta_stack(i+16) = false) then
+	 begin
+	  listing[i]   := listing[i+14];
+
+	  listing[i+3] := listing[i+16];
+	  listing[i+4] := #9'asl ' + copy(listing[i+14], 6, 256);
+	  listing[i+5] := #9'rol ' + copy(listing[i+16], 6, 256);
+	  listing[i+6] := #9'asl ' + copy(listing[i+14], 6, 256);
+	  listing[i+7] := #9'rol ' + copy(listing[i+16], 6, 256);
+
+	  listing[i+13] := '';
+	  listing[i+14] := '';
+	  listing[i+15] := '';
+	  listing[i+16] := '';
+	 end else begin
+	  listing[i+4] := #9'asl :eax';
+	  listing[i+5] := #9'rol :eax+1';
+	  listing[i+6] := #9'asl :eax';
+	  listing[i+7] := #9'rol :eax+1';
+	 end;
+
+	 listing[i+8]  := '';
+	 listing[i+9]  := '';
+	 listing[i+10] := '';
+	 listing[i+11] := '';
+	 listing[i+12] := '';
+
+	 Result:=false; Break;
+	end;
 
      end;
 
@@ -843,7 +914,6 @@
 
 
      end;
-
 
 
     if lda_a(i) and									// lda 					; 0	* 256
