@@ -1,3 +1,8 @@
+19.11.2022
+- poprawione INC, DEC dla tablic rozmiaru większego niż 256 bajty, np.:
+
+ inc(tb[i], 37);
+
 14.11.2022
 - poprawiona optymalizacja rejestru Y
 

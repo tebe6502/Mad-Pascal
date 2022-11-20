@@ -1008,6 +1008,8 @@
       end else	// for p:=
         if onBreak(p) or (listing[p] = #9'asl ' + copy(listing[i], 6, 256)) then Break;
 
+// -----------------------------------------------------------------------------
+
      if Result = false then Break;
     end;
 
