@@ -37,12 +37,8 @@ type	TINIFile = Object
 	function ReadInteger(const Section, Ident: TString; Default: integer): integer;
 	function ReadBool(const Section, Ident: TString; Default: Boolean): Boolean;
 
+//	function ReadFloat(const Section, Ident: TString; Default: Single): Single;
 
-	function Search(Section, Ident: TString): TString;
-
-{
-	function ReadFloat(const Section, Ident: TString; Default: Single): Single;
-}
 	end;
 
 
@@ -65,13 +61,15 @@ begin
 end;
 
 
-function TINIFile.Search(Section, Ident: TString): TString;
+function Search(var FileName, Section, Ident: TString): TString;
 var t: text;
     yes: Boolean;
     s: string;
 begin
 
  Result:='';
+
+// writeln(FileName,',',Section,',',Ident);
 
  assign(t, FileName); reset(t);
 
@@ -137,7 +135,7 @@ function TINIFile.ReadString(const Section, Ident, Default: TString): TString;
 *)
 begin
 
- Result:=TINIFile.Search(Section, Ident);
+ Result := Search(FileName, Section, Ident);
 
  if length(Result) = 0 then
   Result := Default
@@ -155,7 +153,7 @@ function TINIFile.ReadInteger(const Section, Ident: TString; Default: integer): 
 var i: byte;
 begin
 
- tmp:=TINIFile.Search(Section, Ident);
+ tmp := Search(FileName, Section, Ident);
 
  val(tmp, Result, i);
 
@@ -170,7 +168,7 @@ function TINIFile.ReadBool(const Section, Ident: TString; Default: Boolean): Boo
 *)
 begin
 
- tmp:=TINIFile.Search(Section, Ident);
+ tmp := Search(FileName, Section, Ident);
 
  if length(tmp) = 1 then
   Result := (tmp[1] = '1')
