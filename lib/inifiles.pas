@@ -69,8 +69,6 @@ begin
 
  Result:='';
 
-// writeln(FileName,',',Section,',',Ident);
-
  assign(t, FileName); reset(t);
 
  yes:=true;
@@ -170,9 +168,14 @@ begin
 
  tmp := Search(FileName, Section, Ident);
 
- if length(tmp) = 1 then
-  Result := (tmp[1] = '1')
- else
+ if length(tmp) <> 0 then begin
+
+  if length(tmp) = 1 then
+   Result := (tmp[1] = '1')
+  else
+   Result := false;
+
+ end else
   Result := Default;
 
 end;
