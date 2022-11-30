@@ -842,6 +842,7 @@
 
 // -----------------------------------------------------------------------------
 
+
     if (p > 7) and
        lda_a(p-8) and (lda_stack(p-8) = false) and					// lda					; p-8		#-+BYTE
        add_sub_im(p-7) and								// add|sub #				; p-7
@@ -884,7 +885,7 @@
 
 
     if (p > 1) and
-       (lda_stack(p-2) = false) and (add_stack(p-1) = false) and
+       (lda_stack(p-2) = false) and (add_stack(p-1) = false) and (iy(p-2) = false) and
        ((lda_a(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+BYTE
         (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
 											// sta :STACKORIGIN			; p
@@ -901,12 +902,8 @@
 	end else begin
 	 q:=GetWORD(p-1, p+2);
 
-	 if iy(p-2) = false then begin
- 	  listing[i]   := #9'ldy ' + copy(listing[p-2], 6, 256);
- 	  listing[i+1] := '';
-	 end else
-	  listing[i+1] := #9'tay';
-
+	 listing[i]   := #9'ldy ' + copy(listing[p-2], 6, 256);
+ 	 listing[i+1] := '';
 	end;
 
 	listing[i+2]  := '';
@@ -939,7 +936,7 @@
 // -----------------------------------------------------------------------------
 
     if (p > 1) and
-       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and			// lda					; p-2		#-BYTE
+       (lda_stack(p-2) = false) and (sub_stack(p-1) = false) and (iy(p-2) = false) and	// lda					; p-2		#-BYTE
        (lda_a(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) and			// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
@@ -948,12 +945,8 @@
       begin
 	q:=GetWORD(p-1, p+2);
 
-	if iy(p-2) = false then begin
- 	  listing[i]   := #9'ldy ' + copy(listing[p-2], 6, 256);
- 	  listing[i+1] := '';
-	end else
-	  listing[i+1] := #9'tay';
-
+ 	listing[i]   := #9'ldy ' + copy(listing[p-2], 6, 256);
+ 	listing[i+1] := '';
 	listing[i+2]  := '';
 	listing[i+3]  := '';
 	listing[i+4]  := '';

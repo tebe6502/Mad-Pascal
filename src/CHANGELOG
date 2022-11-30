@@ -1,3 +1,6 @@
+30.11.2022
+- issue #110 fixed (LENGTH) (https://github.com/tebe6502/Mad-Pascal/issues/110)
+
 19.11.2022
 - poprawione INC, DEC dla tablic rozmiaru większego niż 256 bajty, np.:
 

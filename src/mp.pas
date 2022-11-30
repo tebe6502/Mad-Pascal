@@ -4809,7 +4809,7 @@ var i, l, k, m, x: integer;
 
    function LDA(i: integer): Boolean;
    begin
-     Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda adr.', listing[i]) = 0) and (pos(#9'.adr.', listing[i]) = 0);
+     Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
    end;
 
    function LDA_A(i: integer): Boolean;
@@ -4844,7 +4844,7 @@ var i, l, k, m, x: integer;
 
    function STA(i: integer): Boolean;
    begin
-     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta adr.', listing[i]) = 0) and (pos(#9'.adr.', listing[i]) = 0) and (pos(#9'sta #$00', listing[i]) = 0);
+     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0) and (pos(#9'sta #$00', listing[i]) = 0);
    end;
 
    function STA_A(i: integer): Boolean;
@@ -18089,14 +18089,14 @@ end;
     if lda(i) and										// lda U				; 0
        asl_a(i+1) and										// asl @				; 1
        tay(i+2) and										// tay					; 2
-       lda(i+5) and										// lda adr.MX,y				; 3
-       asl_a(i+6) and										// sta :STACKORIGIN+9			; 4
-       tay(i+7) and										// lda U				; 5
-       lda_adr(i+3) and										// asl @				; 6
-       sta_stack(i+4) and									// tay					; 7
+       lda_adr(i+3) and										// lda adr.MX,y				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+9			; 4
+       lda(i+5) and										// lda U				; 5
+       asl_a(i+6) and										// asl @				; 6
+       tay(i+7) and										// tay					; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+9			; 8
-       sta(i+10) and										// sub adr.MY,y				; 9
-       ((pos('add adr.', listing[i+9]) > 0) or (pos('sub adr.', listing[i+9]) > 0)) then	// sta U				; 10
+       (add_adr(i+9) or sub_adr(i+9)) and							// add|sub adr.MY,y			; 9
+       sta(i+10) then										// sta U				; 10
      if (copy(listing[i+4], 6, 256) = copy(listing[i+8], 6, 256)) and
 	(copy(listing[i], 6, 256) = copy(listing[i+5], 6, 256)) then
        begin
@@ -42690,10 +42690,10 @@ case Tok[i].Kind of
 
 		if (Ident[IdentIndex].NumAllocElements * 2 > 256) or (Ident[IdentIndex].NumAllocElements in [0,1]) or (Ident[IdentIndex].PassMethod = VARPASSING) then begin
 
-    		asm65(#9'lda '+Ident[IdentIndex].Name);
+    		asm65(#9'lda ' + Ident[IdentIndex].Name);
      		asm65(#9'add :STACKORIGIN-1,x');
      		asm65(#9'sta :bp2');
-     		asm65(#9'lda '+Ident[IdentIndex].Name+'+1');
+     		asm65(#9'lda ' + Ident[IdentIndex].Name + '+1');
      		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
      		asm65(#9'sta :bp2+1');
 
@@ -42707,9 +42707,9 @@ case Tok[i].Kind of
 		end else begin
 
 		asm65(#9'ldy :STACKORIGIN-1,x');
-     		asm65(#9'lda adr.'+Ident[IdentIndex].Name+'+1,y');
+     		asm65(#9'lda adr.' + Ident[IdentIndex].Name + '+1,y');
      		asm65(#9'sta :bp+1');
-    		asm65(#9'lda adr.'+Ident[IdentIndex].Name+',y');
+    		asm65(#9'lda adr.' + Ident[IdentIndex].Name + ',y');
      		asm65(#9'tay');
 
 		end;
@@ -42732,16 +42732,16 @@ case Tok[i].Kind of
 		if (Ident[IdentIndex].PassMethod = VARPASSING) or (Ident[IdentIndex].NumAllocElements = 0) then begin
 		 a65(__addBX);
 
-		 asm65(#9'ldy '+Ident[IdentIndex].Name+'+1');
+		 asm65(#9'ldy ' + Ident[IdentIndex].Name + '+1');
 		 asm65(#9'sty :bp+1');
-		 asm65(#9'ldy '+Ident[IdentIndex].Name);
+		 asm65(#9'ldy ' + Ident[IdentIndex].Name);
 		 asm65(#9'lda (:bp),y');
 	 	 asm65(#9'sta :STACKORIGIN,x');
 
 		end else begin
 		 a65(__addBX);
 
-		 asm65(#9'lda adr.'+Ident[IdentIndex].Name);
+		 asm65(#9'lda ' + GetLocalName(IdentIndex, 'adr.'));
 		 asm65(#9'sta :STACKORIGIN,x');
 
 		end;
@@ -45348,26 +45348,26 @@ case Tok[i].Kind of
 
 		     ASPOINTERTOPOINTER:
 		     begin
-		       asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
+		       asm65(#9'mwy ' + Ident[IdentIndex].Name + ' :bp2');
 		       asm65(#9'ldy #$00');
 		       asm65(#9'mva #$01 (:bp2),y');
 		       asm65(#9'iny');
-		       asm65(#9'mva #$'+IntToHex(Tok[i + 2].Value , 2)+' (:bp2),y');
+		       asm65(#9'mva #$' + IntToHex(Tok[i + 2].Value , 2) + ' (:bp2),y');
 		     end;
 
 		     ASPOINTERTOARRAYORIGIN:
 		     begin
-		       asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
+		       asm65(#9'mwy ' + Ident[IdentIndex].Name+' :bp2');
 		       asm65(#9'ldy :STACKORIGIN,x');
-		       asm65(#9'mva #$'+IntToHex(Tok[i + 2].Value , 2)+' (:bp2),y');
+		       asm65(#9'mva #$' + IntToHex(Tok[i + 2].Value , 2) + ' (:bp2),y');
 
 		       a65(__subBX);
 		     end;
 
 		     ASPOINTER:
 		     begin
-		       asm65(#9'mva #$01 '+GetLocalName(IdentIndex, 'adr.'));
-		       asm65(#9'mva #$'+IntToHex(Tok[i + 2].Value , 2)+' '+GetLocalName(IdentIndex, 'adr.')+'+1');
+		       asm65(#9'mva #$01 ' + GetLocalName(IdentIndex, 'adr.'));
+		       asm65(#9'mva #$' + IntToHex(Tok[i + 2].Value , 2) + ' ' + GetLocalName(IdentIndex, 'adr.') + '+1');
 		     end;
 
 		 end;		// case IndirectionLevel
