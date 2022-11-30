@@ -31,16 +31,16 @@ interface
 	procedure Cls(chn: byte); assembler;
 	function FindFirstFreeChannel: byte; assembler;
 	function Get(chn: byte): byte; assembler;
-	procedure Opn(chn, ax1, ax2: byte; device: PString); assembler;
+	procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
 	procedure Put(chn, a: byte); assembler;
 	function RGet(chn: byte; buffer: PByte): TString; register;
 	procedure RSkip(chn: byte; buffer: PByte); assembler; register;
-	procedure XIO(cmd, chn, ax1, ax2: byte; device: PString); assembler;
+	procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
 
 implementation
 
 
-procedure Opn(chn, ax1, ax2: byte; device: PString); assembler;
+procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
 (*
 @description:
 Open channel
@@ -244,7 +244,7 @@ asm
 end;
 
 
-procedure XIO(cmd, chn, ax1, ax2: byte; device: PString); assembler;
+procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
 (*
 @description:
 Special command
