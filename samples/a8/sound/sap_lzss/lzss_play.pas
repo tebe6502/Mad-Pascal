@@ -4,13 +4,15 @@ uses crt, saplzss;
 
 const
 
-sapr_player = $9000;	// ..$9BFF
-sapr_modul  = $9c00;
+sapr_player = $6000;	// ..$9BFF
+sapr_modul  = $6c00;
 
 var
 	msx: TLZSSPlay;
 
 	ch: char;
+
+	i: word;
 
 {$r 'lzss_play.rc'}
 
@@ -35,7 +37,7 @@ begin
 
 	ch:=readkey();
 
-	msx.stop;
+	msx.stop(0);
 
 	end;
 

@@ -65,6 +65,7 @@ begin
 
 	ch:=readkey();
 
-	msx_r.stop;
+	msx_r.stop($00);
+	msx_l.stop($10);
 
 end.
