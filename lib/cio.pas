@@ -35,7 +35,7 @@ interface
 	procedure Put(chn, a: byte); assembler;
 	function RGet(chn: byte; buffer: PByte): TString; register;
 	procedure RSkip(chn: byte; buffer: PByte); assembler; register;
-	procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
+	procedure XIO(cmd, chn, ax1, ax2: byte; device: PString); assembler;
 
 implementation
 
@@ -244,7 +244,7 @@ asm
 end;
 
 
-procedure XIO(cmd, chn, ax1, ax2: byte; device: PByte); assembler;
+procedure XIO(cmd, chn, ax1, ax2: byte; device: PString); assembler;
 (*
 @description:
 Special command
