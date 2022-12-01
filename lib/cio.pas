@@ -31,7 +31,7 @@ interface
 	procedure Cls(chn: byte); assembler;
 	function FindFirstFreeChannel: byte; assembler;
 	function Get(chn: byte): byte; assembler;
-	procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
+	procedure Opn(chn, ax1, ax2: byte; device: PString); assembler;
 	procedure Put(chn, a: byte); assembler;
 	function RGet(chn: byte; buffer: PByte): TString; register;
 	procedure RSkip(chn: byte; buffer: PByte); assembler; register;
@@ -40,7 +40,7 @@ interface
 implementation
 
 
-procedure Opn(chn, ax1, ax2: byte; device: PByte); assembler;
+procedure Opn(chn, ax1, ax2: byte; device: PString); assembler;
 (*
 @description:
 Open channel
