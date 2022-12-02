@@ -45528,7 +45528,7 @@ case Tok[i].Kind of
 			asm65(#9'sta @move.src+1');
 
 			if Ident[IdentIndex].DataType = POINTERTOK then
-			 asm65(#9'@moveSTRING_1 ' + Ident[IdentIndex].Name)
+			 asm65(#9'@moveSTRING_1 ' + GetLocalName(IdentIndex) )
 			else begin
 
 		         if Ident[IdentIndex].NumAllocElements = 256 then begin
@@ -45539,7 +45539,7 @@ case Tok[i].Kind of
 			  asm65(#9'mva:rne (@move.src),y (:bp2),y+');
 
 			 end else
-			  asm65(#9'@moveSTRING ' + Ident[IdentIndex].Name + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements));
+			  asm65(#9'@moveSTRING ' + GetLocalName(IdentIndex) + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements));
 
 			end;
 

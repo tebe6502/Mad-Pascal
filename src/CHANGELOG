@@ -1,3 +1,6 @@
+01.12.2022
+- unit CIO, poprawione parametry 'Device: PBYTE' na 'Device: PSTRING'
+
 30.11.2022
 - issue #110 fixed (LENGTH) (https://github.com/tebe6502/Mad-Pascal/issues/110)
 
