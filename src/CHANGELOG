@@ -1,3 +1,6 @@
+03.12.2022
+- unit SAPLZSS, Decode jako funkcja zwraca TRUE kiedy zostaje osiągnięty koniec strumienia danych
+
 01.12.2022
 - unit CIO, poprawione parametry 'Device: PBYTE' na 'Device: PSTRING'
 
