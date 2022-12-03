@@ -1,4 +1,4 @@
-; code by dmsc, unrolled by tebe (2022-09-12; 2022-09-19; 2022-11-06)
+; code by dmsc, unrolled by tebe (2022-09-12; 2022-09-19; 2022-11-06; 2022-12-03)
 ;
 ; LZSS Compressed SAP player for 16 match bits (Mad Pascal)
 ; ---------------------------------------------------------
@@ -58,9 +58,9 @@ chn_pokey = chn_pokey8-chn_pokey0
     pha
 
     lda song_ptr
-    sta tmp0
+    sta sng_l
     lda song_ptr+1
-    sta tmp1
+    sta sng_h
 
     ; Example: here initializes song pointer:
     pla
@@ -161,18 +161,6 @@ cbuf
     sta song_ptr_h
 ;    sta song_h
 
-    clc
-    
-    ldy tmp0: #$00	; restore ZP: SONG_PTR
-    lda tmp1: #$00
-
-reset
-
-    sty song_ptr
-    sta song_ptr+1
-    
-    bcs restart
-
     ; Initialize buffer pointer:
 ;    sty bptr
     ldy #1
@@ -191,7 +179,7 @@ reset
     sty chn_copy7+1
     sty chn_copy8+1
 
-_rts rts
+    jmp end_loop	; restore ZP: SONG_PTR
 
 chn_bits
     sta $1000,y
@@ -334,17 +322,22 @@ chn_bits9
 @
     bcc end_loop
 
-    ldy song_l: #$00	; C = 1
+    ldy song_l: #$00
     lda song_h: #$00
 
-    jsr init_song.reset
+    jsr reset_ptr
+    jsr init_song.restart
+
+    sec			; C = 1		song end marker
 
 end_loop
 
-    lda sng_l: #$00
-    sta song_ptr
-
+    ldy sng_l: #$00
     lda sng_h: #$00
+
+reset_ptr
+
+    sty song_ptr
     sta song_ptr+1
 
     rts
@@ -352,7 +345,11 @@ end_loop
 bit_data
     dta 0
 
+    dta 0,0,0,0,0	; align to new page
+
+
     ert <* <> 0
+
 
 buffers
 ;    :256*9 brk
