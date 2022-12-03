@@ -3,7 +3,10 @@ unit SAPLZSS;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: SAP-R LZSS Player
- @version: 1.0
+ @version: 1.1
+
+   Version 1.1:
+	- function Decode: Boolean; (TRUE = end of song)
 
  @description:
  <https://github.com/dmsc/lzss-sap>
@@ -34,7 +37,7 @@ object for controling SAP-R LZSS Player
 	// A = POKEY address (low byte), $00 -> $d200, $10 -> $d210
 
 	procedure Init(a: byte); assembler;	// initializes
-	procedure Decode; assembler; 		// decode stream
+	function Decode: Boolean; assembler;	// decode stream
 	procedure Play; assembler;		// play
 	procedure Stop(a: byte); assembler;	// stops music
 
@@ -83,7 +86,7 @@ adr	equ *-2
 end;
 
 
-procedure TLZSSPlay.Decode; assembler;
+function TLZSSPlay.Decode: Boolean; assembler;
 (*
 @description:
 Decode stream music
@@ -97,6 +100,10 @@ asm
 
 	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
 ptr	equ *-2
+
+	lda #0
+	rol @
+	sta Result		; C = 1	-> 	if TRUE then 'end of song'
 
 	pla:tax
 end;
