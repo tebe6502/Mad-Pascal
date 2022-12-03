@@ -30,7 +30,8 @@ begin
 	repeat
 		pause;
 
-		msx.decode;
+		if msx.decode then begin writeln('end of song'); Break end;
+
 		msx.play;
 
 	until keypressed;
