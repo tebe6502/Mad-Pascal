@@ -204,10 +204,12 @@ const
 	VBXE_WINDOW = $B000;		// 4K WINDOW $B000..$BFFF
 
 	iDLI = 0;			// set new DLI vector
-	iVBL = 1;			// set new VBL vector
-	iTIM1 = 2;			// set new IRQ TIMER1 vector
-	iTIM2 = 3;			// set new IRQ TIMER2 vector
-	iTIM4 = 4;			// set new IRQ TIMER4 vector
+	iVBL = 1;			// set new VBLD vector
+	iVBLD = 1;
+	iVBLI = 2;			// set new VBLI vector
+	iTIM1 = 3;			// set new IRQ TIMER1 vector
+	iTIM2 = 4;			// set new IRQ TIMER2 vector
+	iTIM4 = 5;			// set new IRQ TIMER4 vector
 
 {$endif}
 
