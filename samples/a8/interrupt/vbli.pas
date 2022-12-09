@@ -7,26 +7,29 @@ var old_vbl: pointer;
 
 procedure vbl; assembler; interrupt;
 asm
+	lda rtclok+2
+	and #3
+	bne skp
 
- lda rtclok+2
- sta colbak
-
- jmp xitvbv
-
+	lda $bc40
+	eor #$80
+	sta $bc40
+skp
+	jmp sysvbv
 end;
 
 
 begin
 
- GetIntVec(iVBL, old_vbl);	// VBL deferred ($0224)
+ GetIntVec(iVBLI, old_vbl);	// VBL immediate ($0222)
 
- SetIntVec(iVBL, @vbl);
+ SetIntVec(iVBLI, @vbl);
 
 
  writeln('Press any key to exit');
 
  repeat until keypressed;
 
- SetIntVec(iVBL, old_vbl);
+ SetIntVec(iVBLI, old_vbl);
 
 end.
