@@ -1,0 +1,17 @@
+The VUPlayer routine is actually pretty simple for this purpose: 
+
+CheckForTwoToneBit
+	ldy #3			; default SKCTL register state
+	ldx POKC0		; AUDC1
+	cpx #$F0		; is the tune expected to run with Proper Volume Only output?
+	bcs NoTwoTone		; if equal or above, this is not used for Two-Tone, don't set it
+	txa
+	and #$10		; test the Volume Only bit
+	beq NoTwoTone		; if it is not set, there is no Two-Tone Filter active
+	txa
+	eor #$10		; reverse the Volume Only bit
+	sta POKC0		; overwrite the AUDC
+	ldy #$8B		; set the Two-Tone Filter output
+NoTwoTone
+	sty POKSKC0		; overwrite the buffered SKCTL byte with the new value
+	rts
