@@ -145,8 +145,10 @@ icax6	=	$034F	; rejestr pomocniczy dla operacji I/O
 casbuf	=	$0400	; bufor magnetofonu
 casben	=	$047F	; koniec bufora magnetofonu
 
-setvbv	=	$E45C
-xitvbv	=	$E462
+setvbv	=	$E45C	; ustanowienie wektora przerwania
+sysvbv  =	$E45F	; koniec przerwania VBLI (VBL natychmiastowe - $0222..$0223)
+xitvbv	=	$E462	; koniec przerwania VBLD (VBL opoznione - $224..$225)
+
 ciov	=	$E456	; Wektor do CIOMAIN
 jsioint	=	$E459	; Wektor do SIO
 jdskint	=	$E453	; Wektor do sterownika dyskowego
