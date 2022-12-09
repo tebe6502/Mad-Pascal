@@ -80,11 +80,11 @@ vtimr2	=	$0212	; (2) wektor przerwania IRQ TIMER2
 vtimr4	=	$0214	; (2) wektor przerwania IRQ TIMER4
 timcnt3	=	$021C	; trzeci licznik systemu
 vvblki	=	$0222	; (2) wektor NMI natychmiastowego VBI
-vvblkd	=	$0224	; (2) wektor NMI op??nionego VBI
+vvblkd	=	$0224	; (2) wektor NMI opoznionego VBI
 timflg3	=	$022A	; znacznik wyzerowania licznika TIMCNT3
-sdmctl	=	$022F	; cieñ DMACTL
-sdlstl	=	$0230	; cieñ DLISTL
-sdlsth	=	$0231	; cieñ DLISTH
+sdmctl	=	$022F	; cien DMACTL
+sdlstl	=	$0230	; cien DLISTL
+sdlsth	=	$0231	; cien DLISTH
 
 gtictls = 	$026F
 
@@ -102,9 +102,9 @@ runad	=	$02E0	; Used by DOS for the run address read from the disk sector one or
 initad	= 	$02E2	; Initialization address read from the disk. An autoboot file must load an address value into either RUNAD above or INITAD.
 memlo	=	$02E7
 dvstat	=	$02EA	; (4) device status
-crsinh	=	$02F0	; znacznik widoczno?ci kursora
+crsinh	=	$02F0	; znacznik widocznosci kursora
 chact	=	$02F3	; rejestr cien CHRCTL
-chart	=	$02F3	; cien rejestru kontroli wyswietlania znak?w (CHRCTL)
+chart	=	$02F3	; cien rejestru kontroli wyswietlania znakow (CHRCTL)
 chbas	=	$02F4	; rejestr cien CHBASE
 atachr	=	$02FB	; numer koloru dla PLOT, DRAW (kod ATASCII znaku)
 kbcodes	=	$02FC	; kod ostatnio nacisnietego klawisza, $ff jesli zaden nie zostal nacisniety (KBCODE)
@@ -112,14 +112,14 @@ fildat	=	$02FD	; numer koloru dla FILL
 ssflag	=	$02FF
 
 ddevic	=	$0300	; Device Control Block, identyfikator urzadzenia
-dunit	=	$0301	; Numer urz?dzenia; w przypadku stacji dyskow numer nap?du
+dunit	=	$0301	; Numer urzadzenia; w przypadku stacji dyskow numer napedu
 dcmnd	=	$0302	; Komenda dla urzadzenia.
-dstats	=	$0303	; Przed wywo?aniem SIO nalezy ustawic tu rodzaj operacji ($40 odczyt, $80 zapis, $C0 zapis i odczyt, $00 brak transferu danych). Po powrocie z systemu znajduje si? tu status operacji (kod b??du).
-dbufa	=	$0304	; (2) Adres bufora. Przy operacji zapisu i odczytu jednocze?nie (DSTATS = $C0) bufor na odczytywane dane znajduje sie w tym samym miejscu, co bufor danch przeznaczonych do zapisu.
-dtimlo	=	$0306	; Czas oczekiwania na pozytywn? odpowied? urz?dzenia, tzw. timeout, najczesciej = 7
-dunuse	=	$0307	; Bajt nieuzywany, zarezerwowany do przysz?ych zastosowa?.
+dstats	=	$0303	; Przed wywolaniem SIO nalezy ustawic tu rodzaj operacji ($40 odczyt, $80 zapis, $C0 zapis i odczyt, $00 brak transferu danych). Po powrocie z systemu znajduje sie tu status operacji (kod bledu).
+dbufa	=	$0304	; (2) Adres bufora. Przy operacji zapisu i odczytu jednoczesnie (DSTATS = $C0) bufor na odczytywane dane znajduje sie w tym samym miejscu, co bufor danch przeznaczonych do zapisu.
+dtimlo	=	$0306	; Czas oczekiwania na pozytywna odpowiedz urzadzenia, tzw. timeout, najczesciej = 7
+dunuse	=	$0307	; Bajt nieuzywany, zarezerwowany do przyszlych zastosowan.
 dbyt	=	$0308	; (2) Wielkosc bufora; musi byc zgodna z wielkoscia transmitowanego bloku danych. Zero oznacza 64 kilobajty.
-daux1	=	$030A	; Pierwszy bajt pomocniczy. W operacjach dyskowych m?odszy bajt numeru sektora.
+daux1	=	$030A	; Pierwszy bajt pomocniczy. W operacjach dyskowych mlodszy bajt numeru sektora.
 daux2	=	$030B	; Drugi bajt pomocniczy. W operacjach dyskowych starszy bajt numeru sektora.
 casflg	=	$030F	; When set to zero, the current operation is a standard SIO operation; when non-zero, it is a cassette operation.
 
@@ -153,8 +153,8 @@ ciov	=	$E456	; Wektor do CIOMAIN
 jsioint	=	$E459	; Wektor do SIO
 jdskint	=	$E453	; Wektor do sterownika dyskowego
 
-warmsv	=	$E474	; Punkt wejœcia do ciep³ego startu (RESET SYSTEMU)
-coldsv	=	$E477	; Punkt wejœcia do zimnego startu (w³¹czanie zasilania)
+warmsv	=	$E474	; Punkt wejscia do cieplego startu (RESET SYSTEMU)
+coldsv	=	$E477	; Punkt wejscia do zimnego startu (wlaczanie zasilania)
 		
 * ---------------------------------------------------------------------------------------------
 * ---	KEY ($d209)
@@ -190,12 +190,12 @@ sizep0	=	$D008	; poziomy rozmiar gracza 0 (Z)
 sizep1	=	$D009	; poziomy rozmiar gracza 1 (Z)
 sizep2	=	$D00A	; poziomy rozmiar gracza 2 (Z)
 sizep3	=	$D00B	; poziomy rozmiar gracza 3 (Z)
-sizem	=	$D00C	; poziomy rozmiar pocisk?w (Z)
+sizem	=	$D00C	; poziomy rozmiar pociskow (Z)
 grafp0	=	$D00D	; rejestr grafiki gracza 0 (Z)
 grafp1	=	$D00E	; rejestr grafiki gracza 1 (Z)
 grafp2	=	$D00F	; rejestr grafiki gracza 2 (Z)
 grafp3	=	$D010	; rejestr grafiki gracza 3 (Z)
-grafm	=	$D011	; rejestr grafiki pocisk?w (Z)
+grafm	=	$D011	; rejestr grafiki pociskow (Z)
 colpm0	=	$D012	; rejestr koloru gracza i pocisku 0 (Z)
 colpm1	=	$D013	; rejestr koloru gracza i pocisku 1 (Z)
 colpm2	=	$D014	; rejestr koloru gracza i pocisku 2 (Z)
@@ -205,7 +205,7 @@ colpf1	=	$D017	; rejestr koloru pola gry 1 (Z)
 colpf2	=	$D018	; rejestr koloru pola gry 2 (Z)
 colpf3	=	$D019	; rejestr koloru pola gry 3 (Z)
 colpf4	=	$D01A
-colbak	=	$D01A	; rejestr koloru t?a (Z)
+colbak	=	$D01A	; rejestr koloru tla (Z)
 
 color0	=	colpf0
 color1	=	colpf1
@@ -230,45 +230,45 @@ kolp2p	=	$D00E	; kolizja gracza 2 z innym graczem (O)
 kolp3p	=	$D00F	; kolizja gracza 3 z innym graczem (O)
 trig0	=	$D010	; stan przycisku joysticka 0 (O)
 trig1	=	$D011	; stan przycisku joysticka 1 (O)
-trig3	=	$D013	; znacznik do??czenia cartridge-a (O)
+trig3	=	$D013	; znacznik dolaczenia cartridge-a (O)
 pal	=	$D014	; znacznik systemu TV (O) PAL = 1, NTSC = 15
 
-gtictl	=	$D01B	; rejestr kontroli uk?adu GTIA
+gtictl	=	$D01B	; rejestr kontroli ukladu GTIA
 gtiactl	=	gtictl
 
-vdelay	=	$D01C	; licznik op??nienia pionowego P/MG
-pmcntl	=	$D01D	; rejestr kontroli graczy i pocisk?w
+vdelay	=	$D01C	; licznik opoznienia pionowego P/MG
+pmcntl	=	$D01D	; rejestr kontroli graczy i pociskow
 gractl	=	PMCNTL
-hitclr	=	$D01E	; rejestr kasowania rejestr?w kolizji
+hitclr	=	$D01E	; rejestr kasowania rejestrow kolizji
 consol	=	$D01F	; rejestr stanu klawiszy konsoli
 
 * ---------------------------------------------------------------------------------------------
 * ---	POKEY
 * ---------------------------------------------------------------------------------------------
 
-irqens	=	$0010	; rejestr-cie? IRQEN
-irqstat	=	$0011	; rejestr-cie? IRQST
+irqens	=	$0010	; rejestr-cien IRQEN
+irqstat	=	$0011	; rejestr-cien IRQST
 
-audf1	=	$d200	; cz?stotliwo?? pracy generatora 1 (Z)
-audc1	=	$d201	; rejestr kontroli d?wi?ku generatora 1 (Z)
-audf2	=	$d202	; cz?stotliwo?? pracy generatora 2 (Z)
-audc2	=	$d203	; rejestr kontroli d?wi?ku generatora 2 (Z)
-audf3	=	$d204	; cz?stotliwo?? pracy generatora 3 (Z)
-audc3	=	$d205	; rejestr kontroli d?wi?ku generatora 3 (Z)
-audf4	=	$d206	; cz?stotliwo?? pracy generatora 4 (Z)
-audc4	=	$d207	; rejestr kontroli d?wi?ku generatora 4 (Z)
+audf1	=	$d200	; czestotliwosc pracy generatora 1 (Z)
+audc1	=	$d201	; rejestr kontroli dzwieku generatora 1 (Z)
+audf2	=	$d202	; czestotliwosc pracy generatora 2 (Z)
+audc2	=	$d203	; rejestr kontroli dzwieku generatora 2 (Z)
+audf3	=	$d204	; czestotliwosc pracy generatora 3 (Z)
+audc3	=	$d205	; rejestr kontroli dzwieku generatora 3 (Z)
+audf4	=	$d206	; czestotliwosc pracy generatora 4 (Z)
+audc4	=	$d207	; rejestr kontroli dzwieku generatora 4 (Z)
 
-audctl	=	$D208	; rejestr kontroli generator?w d?wi?ku (Z)
-stimer	=	$D209	; rejestr zerowania licznik?w (Z)
-kbcode	=	$D209	; kod ostatnio naci?ni?tego klawisza (O)
-skstres	=	$D20A	; rejestr statusu z??cza szeregowego (Z)
+audctl	=	$D208	; rejestr kontroli generatorow dzwieku (Z)
+stimer	=	$D209	; rejestr zerowania licznikow (Z)
+kbcode	=	$D209	; kod ostatnio nacisnietego klawisza (O)
+skstres	=	$D20A	; rejestr statusu zlacza szeregowego (Z)
 random	=	$D20A	; rejestr liczby losowej (O)
-serout	=	$D20D	; szeregowy rejestr wyj?ciowy (Z)
-serin	=	$D20D	; szeregowy rejestr wej?ciowy (O)
-irqen	=	$D20E	; zezwolenie przerwa? IRQ (Z)
-irqst	=	$D20E	; status przerwa? IRQ (O)
-skctl	=	$D20F	; rejestr kontroli z??cza szeregowego (Z)
-skstat	=	$D20F	; rejestr statusu z??cza szeregowego (O)
+serout	=	$D20D	; szeregowy rejestr wyjsciowy (Z)
+serin	=	$D20D	; szeregowy rejestr wejsciowy (O)
+irqen	=	$D20E	; zezwolenie przerwan IRQ (Z)
+irqst	=	$D20E	; status przerwan IRQ (O)
+skctl	=	$D20F	; rejestr kontroli zlacza szeregowego (Z)
+skstat	=	$D20F	; rejestr statusu zlacza szeregowego (O)
 
 pot0	=	$d200	; (O)
 allpot	=	$d208	; (O)
@@ -279,8 +279,8 @@ potgo	=	$d20b	; (Z)
 * ---	PIA
 * ---------------------------------------------------------------------------------------------
 
-porta	=	$D300	; port A uk?adu PIA
-portb	=	$D301	; port B uk?adu PIA
+porta	=	$D300	; port A ukladu PIA
+portb	=	$D301	; port B ukladu PIA
 pactl	=	$D302	; rejestr kontroli portu A
 pbctl	=	$D303	; rejestr kontroli portu B
 
@@ -288,21 +288,21 @@ pbctl	=	$D303	; rejestr kontroli portu B
 * ---	ANTIC
 * ---------------------------------------------------------------------------------------------
 
-dmactl	=	$D400	; rejestr kontroli dost?pu do pami?ci
-chrctl	=	$D401	; rejestr kontroli wy?wietlania znak?w
+dmactl	=	$D400	; rejestr kontroli dostepu do pamieci
+chrctl	=	$D401	; rejestr kontroli wyswietlania znakow
 dlptr	=	$D402	; adres programu ANTIC-a
 dlistl	=	$D402
 dlisth	=	$D403
 hscrol	=	$D404	; znacznik poziomego przesuwu obrazu
 vscrol	=	$D405	; znacznik pionowego przesuwu obrazu
-pmbase	=	$D407	; adres pami?ci graczy i pocisk?w
-chbase	=	$D409	; adres zestawu znak?w
-wsync	=	$D40A	; znacznik oczekiwania na synchronizacj? poziom?
+pmbase	=	$D407	; adres pamieci graczy i pociskow
+chbase	=	$D409	; adres zestawu znakow
+wsync	=	$D40A	; znacznik oczekiwania na synchronizacje pozioma
 vcount	=	$D40B	; licznik linii obrazu
-lpenh	=	$D40C	; poziome po?o?enie pi?ra ?wietlengo
-lpenv	=	$D40D	; pionowe po?o?enie pi?ra ?wietlnego
-nmien	=	$D40E	; rejestr zezwole? na przerwania NMI
-nmist	=	$D40F	; rejestr statusu przerwa? NMI (O)
+lpenh	=	$D40C	; poziome polozenie piora swietlengo
+lpenv	=	$D40D	; pionowe polozenie piora swietlnego
+nmien	=	$D40E	; rejestr zezwolen na przerwania NMI
+nmist	=	$D40F	; rejestr statusu przerwan NMI (O)
 nmires	=	$D40F	; (Z)
 
 * ---------------------------------------------------------------------------------------------
@@ -315,4 +315,3 @@ irqvec	=	$FFFE	; wektor przerwania IRQ
 
 nmivec16 =	$FFEA	; wektor przerwania NMI (nativ 65816)
 irqvec16 =	$FFEE	; wektor przerwania IRQ
-
