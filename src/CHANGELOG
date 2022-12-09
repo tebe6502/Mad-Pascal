@@ -1,3 +1,6 @@
+08.12.2022
+- unit SYSTEM: dodana obsługa przerwania VBL natychmiastowego (IVBLI), https://mads.atari8.info/doc/pl/przerwania/
+
 03.12.2022
 - unit SAPLZSS, Decode jako funkcja zwraca TRUE kiedy zostaje osiągnięty koniec strumienia danych
 
