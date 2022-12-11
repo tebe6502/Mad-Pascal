@@ -125,6 +125,7 @@ CutAs, FiDL, SprED, Sprite XL
 * [Cartfall](https://gitlab.com/bocianu/cartfall)
 * [Unicode](https://gitlab.com/amarok8bit/unicode)
 * [Arcadia](https://gitlab.com/amarok8bit/arcadia)
+* [atascii compo3](https://gitlab.com/bocianu/atasciicompo3)
 
 ## Benchmarks
 
