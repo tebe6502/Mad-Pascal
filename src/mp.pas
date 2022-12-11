@@ -11129,7 +11129,7 @@ end;
 
 
 {
-if (pos('add ', listing[i]) > 0) then begin
+if (pos('asl :STACK', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -12271,6 +12271,24 @@ end;
        sta(i+3) and (sta_stack(i+3) = false) then					// sta					; 3
      if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) and
 	(copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i] := '';
+
+	Result:=false; Break;
+       end;
+
+// cyyyyyyyyyyyy
+
+    if (l = i + 7) and
+       lda_a(i) and									// lda					; 0
+       adc_sbc(i+1) and									// adc|sbc				; 1
+       UNUSED_A(i+2) and								// UNUSED_A				; 2
+       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
+       lda(i+4) and (lda_stack(i+4) = false) and					// lda					; 4
+       (add_sub_stack(i+5) or and_ora_eor_stack(i+5)) and				// add|sub|and|ora|eor :STACKORIGIN	; 5
+       sta(i+6) and (sta_stack(i+6) = false) then					// sta					; 6
+     if (copy(listing[i+2], 6, 256) <> copy(listing[i+3], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
        begin
 	listing[i] := '';
 
@@ -14602,7 +14620,7 @@ end;
 // cxxxxxxxxxxxxxxxx
 
 {
-if (pos('add #$08', listing[i]) > 0) then begin
+if (pos('asl :STACK', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -35035,11 +35053,11 @@ var
 
 		k:=High(msgUser);
 
-		AddToken(Kind, UnitIndex, Line, 1, k);  AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+		AddToken(Kind, UnitIndex, Line, 1, k); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-		omin_spacje(i,d);
+		omin_spacje(i, d);
 
-		msgUser[k]:=copy(d, i, length(d)-i);
+		msgUser[k] := copy(d, i, length(d)-i);
 		SetLength(msgUser, k+2);
 
 	end;
@@ -35227,8 +35245,11 @@ var
        end else
 
        if (cmd = 'IFDEF') or (cmd = 'IFNDEF') then begin
+
 	found := 0 <> SearchDefine( get_label(i, d) );
+
 	if cmd = 'IFNDEF' then found := not found;
+
 	if not found then
 	begin
 	 if SkipCodeUntilElseEndif then
@@ -50420,6 +50441,8 @@ while Tok[i].Kind in
 
    CheckTok(i + 3, SEMICOLONTOK);
 
+   while Tok[i + 4].Kind in [WARNINGTOK, ERRORTOK, INFOTOK] do inc(i,2);
+
    CheckTok(i + 4, INTERFACETOK);
 
    INTERFACETOK_USE := true;
@@ -52089,6 +52112,7 @@ begin
 
  SetLength(linkObj, 1);
  SetLength(resArray, 1);
+ SetLength(msgUser, 1);
 
 
  {$IFDEF USEOPTFILE}
@@ -52125,8 +52149,6 @@ begin
  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
 
 
-//if NumUnits > 2 then begin			// jeszcze raz tym razem z unitami
-
  fillchar(Ident, sizeof(Ident), 0);
  fillchar(DataSegment, sizeof(DataSegment), 0);
  fillchar(StaticStringData, sizeof(StaticStringData), 0);
@@ -52156,7 +52178,6 @@ begin
 
  TokenizeProgram(false);
 
-//end;
 
  NumStaticStrCharsTmp :=  NumStaticStrChars;
 
