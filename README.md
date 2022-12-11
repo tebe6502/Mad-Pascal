@@ -117,6 +117,7 @@ CutAs, FiDL, SprED, Sprite XL
    * [SFX-Engine-example](https://github.com/GSoftwareDevelopment/SFX-Engine-example)
 * [MIDICar-Player](https://github.com/GSoftwareDevelopment/MIDICar-Player)
 * [heatmap](https://gitlab.com/delysio/heatmap)
+* [sinus scroll 2x2](https://gitlab.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll)
 * [Flob](https://gitlab.com/bocianu/flob)
 * [Ultima V](https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483)
 * [mad-pascal-playground](https://github.com/zbyti/mad-pascal-playground)
