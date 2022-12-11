@@ -1,3 +1,7 @@
+11.12.2022
+- 'base\atari\basicoff.asm' dodane wyłączenie klawisza BREAK (poke $10,$70)
+- unit xSFX
+
 08.12.2022
 - unit SYSTEM: dodana obsługa przerwania VBL natychmiastowego (IVBLI), https://mads.atari8.info/doc/pl/przerwania/
 
