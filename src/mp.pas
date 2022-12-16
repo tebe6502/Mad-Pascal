@@ -5095,7 +5095,7 @@ var i, l, k, m, x: integer;
 
    function UNUSED_A(i: integer): Boolean;
    begin
-    Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or rol_a(i) or ror_a(i);
+    Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or rol_stack(i) or ror_stack(i) or adc_sbc(i);
    end;
 
 
@@ -12279,21 +12279,21 @@ end;
 
 // cyyyyyyyyyyyy
 
-    if (l = i + 7) and
-       lda_a(i) and									// lda					; 0
-       adc_sbc(i+1) and									// adc|sbc				; 1
-       UNUSED_A(i+2) and								// UNUSED_A				; 2
-       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
-       lda(i+4) and (lda_stack(i+4) = false) and					// lda					; 4
-       (add_sub_stack(i+5) or and_ora_eor_stack(i+5)) and				// add|sub|and|ora|eor :STACKORIGIN	; 5
-       sta(i+6) and (sta_stack(i+6) = false) then					// sta					; 6
-     if (copy(listing[i+2], 6, 256) <> copy(listing[i+3], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
+
+    if (l = i + 5) and
+       UNUSED_A(i) and									// UNUSED_A				; 0
+       asl_stack(i+1) and								// asl :STACKORIGIN			; 1
+       lda(i+2) and (lda_stack(i+2) = false) and					// lda					; 2
+       (add_sub_stack(i+3) or and_ora_eor_stack(i+3)) and				// add|sub|and|ora|eor :STACKORIGIN	; 3
+       sta(i+4) and (sta_stack(i+4) = false) then					// sta					; 4
+     if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) and
+	(copy(listing[i], 6, 256) <> copy(listing[i+3], 6, 256)) then
        begin
 	listing[i] := '';
 
 	Result:=false; Break;
        end;
+
 
 
     if (l = i + 3) and
@@ -12976,6 +12976,32 @@ end;
 
 	Result:=false; Break;
      end;
+
+
+    if sta_stack(i) and									// sta :STACKORIGIN+9		; 0
+       asl_stack(i+1) and								// asl :STACKORIGIN+9		; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) then					// lda				; 2
+     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+      begin
+	listing[i+1] := listing[i];
+
+	listing[i] := #9'asl @';
+
+	Result:=false; Break;
+      end;
+
+
+    if sta_stack(i) and 								// sta :STACKORIGIN+10		; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and					// lda 				; 1
+       ora_stack(i+2) then								// ora :STACKORIGIN+10		; 2
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i] := '';
+	listing[i+1] := #9'ora ' + copy(listing[i+1], 6, 256);
+	listing[i+2] := '';
+
+	Result:=false; Break;
+       end;
 
 
 // -----------------------------------------------------------------------------
@@ -18404,6 +18430,19 @@ end;
 
 
     if sta_stack(i) and										// sta :STACKORIGIN+9		; 0
+       asl_stack(i+1) and									// asl :STACKORIGIN+9		; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) then						// lda				; 2
+     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+      begin
+	listing[i+1] := listing[i];
+
+	listing[i] := #9'asl @';
+
+	Result:=false; Break;
+      end;
+
+
+    if sta_stack(i) and										// sta :STACKORIGIN+9		; 0
        lda_a(i+1) and										// lda				; 1
        asl_stack(i+2) and									// asl :STACKORIGIN+9		; 2
        asl_stack(i+3) and									// asl :STACKORIGIN+9		; 3
@@ -21615,6 +21654,19 @@ l_0000_e
 
     if sta_stack(i) and 								// sta :STACKORIGIN+10	; 0
        lda_a(i+1) and 									// lda 			; 1
+       ora_stack(i+2) then								// ora :STACKORIGIN+10	; 2
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i] := '';
+	listing[i+1] := #9'ora ' + copy(listing[i+1], 6, 256);
+	listing[i+2] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if sta_stack(i) and 								// sta :STACKORIGIN+10	; 0
+       lda_a(i+1) and (lda_stack(i+1) = false) and					// lda 			; 1
        ora_stack(i+2) then								// ora :STACKORIGIN+10	; 2
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
        begin
@@ -33852,29 +33904,31 @@ begin
       if (i>1) and
          ( (add_sub_im(i-1) and (adc_sbc(i+2) = false) and lda_a(i-2) and (lda_stack(i-2) = false) and (iy(i-2) = false)) or
            (asl_a(i-1) and lda_a(i-2) and (lda_stack(i-2) = false) and (iy(i-2) = false)) or
-           (asl_a(i-1) and asl_a(i-2) and lda_a(i-3) and (lda_stack(i-3) = false) and (iy(i-3) = false)) or
-           (asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) and (lda_stack(i-4) = false) and (iy(i-4) = false)) or
 
-           (add(i-1) and asl_a(i-2) and lda_a(i-3) and (copy(listing[i-1], 6, 256) = copy(listing[i-3], 6, 256)) and (lda_stack(i-3) = false) and (iy(i-3) = false)) or
+           ((i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) and (lda_stack(i-3) = false) and (iy(i-3) = false)) or
+           ((i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) and (lda_stack(i-4) = false) and (iy(i-4) = false)) or
 
-           (add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) and (copy(listing[i-3], 6, 256) = copy(listing[i-6], 6, 256)) and (lda_stack(i-6) = false) and (iy(i-6) = false)) )
+           ((i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) and (copy(listing[i-1], 6, 256) = copy(listing[i-3], 6, 256)) and (lda_stack(i-3) = false) and (iy(i-3) = false)) or
+
+           ((i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) and (copy(listing[i-3], 6, 256) = copy(listing[i-6], 6, 256)) and (lda_stack(i-6) = false) and (iy(i-6) = false)) )
 
       then begin
 
-       if add(i-1) and lda_a(i-2) then arg0 := '+' + copy(listing[i-1], 6, 256) + GetString(i-2);		// +#$00Label
-       if sub(i-1) and lda_a(i-2) then arg0 := '-' + copy(listing[i-1], 6, 256) + GetString(i-2);		// -#$00Label
-       if asl_a(i-1) and lda_a(i-2) then arg0 := '*#$02' + GetString(i-2);					// *#$02Label
-       if asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$04' + GetString(i-3);			// *#$04Label
-       if asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then arg0 := '*#$08' + GetString(i-4);	// *#$08Label
+       if add(i-1) and lda_a(i-2) then arg0 := '+' + copy(listing[i-1], 6, 256) + GetString(i-2);			// +#$00Label
+       if sub(i-1) and lda_a(i-2) then arg0 := '-' + copy(listing[i-1], 6, 256) + GetString(i-2);			// -#$00Label
+       if asl_a(i-1) and lda_a(i-2) then arg0 := '*#$02' + GetString(i-2);						// *#$02Label
 
-       if add(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$03' + GetString(i-3);				// *#$03Label
+       if (i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$04' + GetString(i-3);			// *#$04Label
+       if (i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then arg0 := '*#$08' + GetString(i-4);	// *#$08Label
 
-       if add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then arg0 := '*#$0A' + GetString(i-6)+'+'+GetString(i-1);	// *#$0ALabel1+Label2
+       if (i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$03' + GetString(i-3);			// *#$03Label
+
+       if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then arg0 := '*#$0A' + GetString(i-6)+'+'+GetString(i-1);	// *#$0ALabel1+Label2
 
 
        if arg0 = optyY then begin
 
-        if add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then begin
+        if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then begin
          listing[i-6] := '';
          listing[i-5] := '';
          listing[i-4] := '';
@@ -33883,20 +33937,20 @@ begin
          listing[i-1] := '';
          listing[i]   := '';
 	end else
-        if asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then begin
+        if (i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then begin
          listing[i-4] := '';
          listing[i-3] := '';
          listing[i-2] := '';
          listing[i-1] := '';
          listing[i]   := '';
 	end else
-        if add(i-1) and asl_a(i-2) and lda_a(i-3) then begin
+        if (i > 2) and  add(i-1) and asl_a(i-2) and lda_a(i-3) then begin
          listing[i-3] := '';
          listing[i-2] := '';
          listing[i-1] := '';
          listing[i]   := '';
 	end else
-        if asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then begin
+        if (i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then begin
          listing[i-3] := '';
          listing[i-2] := '';
          listing[i-1] := '';
