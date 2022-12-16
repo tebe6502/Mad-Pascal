@@ -87,7 +87,7 @@ end;
 {$i graph2.inc}
 
 
-procedure Line(x1, y1, x2, y2: smallint);
+procedure Line(x1, y1, x2, y2: smallint); overload;
 (*
 @description:
 Draw a line between 2 points
@@ -103,6 +103,33 @@ begin
 	CurrentX:=x;
 	CurrentY:=y;
 end;
+
+
+procedure Line(x1, y1, x2, y2: float16); overload;
+(*
+@description:
+Draw a line between 2 points
+*)
+var x, y, a, b: smallint;
+begin
+	x:=CurrentX;
+	y:=CurrentY;
+
+	a:=round(x1);
+	b:=round(y1);
+
+	MoveTo(a,b);
+
+	a:=round(x2);
+	b:=round(y2);
+
+	LineTo(a,b);
+
+	CurrentX:=x;
+	CurrentY:=y;
+end;
+
+
 
 
 procedure HLine(x1,x2,y: smallint);

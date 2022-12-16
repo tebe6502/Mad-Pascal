@@ -313,6 +313,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Cos(x: Real): Real; overload;
 	function Cos(x: Single): Single; overload;
 	function Cos(x: float16): float16; overload;
+	function Cos(x: ShortReal): ShortReal; overload;
 	procedure Delete(var s: string; index, count: byte);
 	function DPeek(a: word): word; register; stdcall; assembler;
 	procedure DPoke(a: word; value: word); register; stdcall; assembler;
@@ -379,6 +380,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sin(x: Real): Real; overload;
 	function Sin(x: Single): Single; overload;
 	function Sin(x: float16): float16; overload;
+	function Sin(x: shortreal): shortreal; overload;
 	function Space(b: Byte): ^string; assembler;
 	procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
 	procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
@@ -1737,6 +1739,73 @@ Calculate cosine of angle
 begin
 	Result := rsincos(x, true);
 end;
+
+
+function srsincos(x: ShortReal; sc: boolean): ShortReal;
+//----------------------------------------------------------------------------------------------
+// http://atariage.com/forums/topic/240919-mad-pascal/page-10#entry3818764
+//----------------------------------------------------------------------------------------------
+var i: byte;
+begin
+
+ while x > M_PI_2 do x := x - M_PI_2;
+ while x < 0.0    do x := x + M_PI_2;
+
+    { Normalize argument, divide by (pi/2) }
+    x := x * 0.63661977236758134308;
+
+    { Get's integer part, should be }
+    i := trunc(x);
+
+    { Fixes negative part, needed to calculate "fractional" part }
+    if x<0 then dec(i);
+
+    { And finally get's fractional part }
+    x := x - shortint(i);
+
+    { If we need cosine, adds pi/2 }
+    if sc then inc(i);
+
+    { Test quadrant, odd values are reflected }
+    if (i and 1) = 0 then x := 1 - x;
+
+    { Calculate cosine(x) with optimal polynomial approximation }
+    x := x * x;
+    Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
+
+    { Test quadrant to return negative values }
+    if (i and 2) = 2 then Result := -Result;
+
+end;
+
+
+function Sin(x: ShortReal): ShortReal; overload;
+(*
+@description:
+Calculate sine of angle
+
+@param: X - angle in radians (Q24.8)
+
+@returns: Q24.8
+*)
+begin
+	Result := srsincos(x, false);
+end;
+
+
+function Cos(x: ShortReal): ShortReal; overload;
+(*
+@description:
+Calculate cosine of angle
+
+@param: X - angle in radians (Q24.8)
+
+@returns: Q24.8
+*)
+begin
+	Result := srsincos(x, true);
+end;
+
 
 
 function fsincos(x: single; sc: boolean): single;
