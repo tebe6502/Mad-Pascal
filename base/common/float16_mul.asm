@@ -9,7 +9,7 @@
 
 // ----------------------------------------------------------------
 // f16_mul
-// changes: 2021-11-21
+// changes: 2021-11-21 ; 2022-12-17
 // ----------------------------------------------------------------
 
 RESULT	= :EAX
@@ -31,19 +31,20 @@ B	= :EDX+2
 	lda A+1
 	and #$7F
 	cmp #$7C
-	bne @+
-	lda A
-	cmp #$00
-@
-	jcs l_05D2x
+;	bne @+
+;	lda A
+;	cmp #$00
+;@
+	bcs l_05D2x
+
 	lda B+1
 	and #$7F
 	cmp #$7C
-	bne @+
-	lda B
-	cmp #$00
-@
-	jcc l_05D2
+;	bne @+
+;	lda B
+;	cmp #$00
+;@
+	bcc l_05D2
 l_05D2x
 
 	lda A+1
@@ -51,21 +52,25 @@ l_05D2x
 	cmp #$7C
 	bne @+
 	lda A
-	cmp #$00
+;	cmp #$00
+	bne l_05F7x
+	beq l_05D3
 @
 	seq
-	bcs @+
-	jmp *+6
-@	jmp l_05F7x
+	bcs l_05F7x
+l_05D3
 	lda B+1
 	and #$7F
 	cmp #$7C
 	bne @+
 	lda B
-	cmp #$00
+;	cmp #$00
+	bne l_05F7x
+	beq l_05F7
 @
-	jcc l_05F7
-	jeq l_05F7
+	bcc l_05F7
+	beq l_05F7
+
 l_05F7x
 	lda #$FF
 	sta RESULT
@@ -77,21 +82,24 @@ l_05F7
 	lda #$00
 	sta RESULT
 	lda #$7C
-	jmp _exit				; exit
+	ora SIGN
+	sta RESULT+1
+	rts					;exit
+
 l_05D2
 
 	lda A+1
 	and #$7F
 	bne @+
 	lda A
+	beq l_062Dx
 @
-	jeq l_062Dx
 	lda B+1
 	and #$7F
-	bne @+
+	bne l_062D
 	lda B
-@
-	jne l_062D
+	bne l_062D
+
 l_062Dx
 	lda #$00
 	sta RESULT
@@ -101,7 +109,7 @@ l_062D
 
 	lda A+1
 	and #$7C
-	jne l_066A
+	bne l_066A
 
 	lda A+1
 	and #$03
@@ -120,7 +128,7 @@ l_067D
 
 	lda B+1
 	and #$7C
-	jne l_069F
+	bne l_069F
 
 	lda B+1
 	and #$03
@@ -192,7 +200,7 @@ AX	adc #0
 
 	lda V+2
 	and #$20
-	jeq l_073D
+	beq l_073D
 
 	lda V+1
 	sta V
@@ -223,7 +231,7 @@ l_073D
 
 	lda V+2
 	and #$10
-	jeq l_0767
+	beq l_0767
 
 	lda V+1
 	sta V
@@ -245,7 +253,7 @@ l_073D
 	
 	sta V+3
 
-	jmp l_0779
+	jmp l_0753
 l_0767
 
 	tya
@@ -268,62 +276,57 @@ l_077C
 ;	cmp #$00
 ;	bne @+
 	lda V+2
-	cmp #$00
-	bne @+
+;	cmp #$00
+	bne l_077D
 	lda V+1
 	cmp #$08
-	bne @+
-	lda V
-	cmp #$00
-@
-	jcs l_077D
+;	bne @+
+;	lda V
+;	cmp #$00
+;@
+	bcs l_077D
 
-l_0779
 l_0753
 	;sty NEW_EXP
 	tya
 	bmi @+
-	jne l_07A5
+	bne l_07A5
 @
 	eor #$ff
-	add #1
-;	lda #$00
-;	sub NEW_EXP
 	tay
 	iny
-;	sta :STACKORIGIN+10
-	lda V
-;	ldy :STACKORIGIN+10
-;	beq l_0002_e
-l_0002_b
-;	lsr V+3
-	lsr V+2
-	ror V+1
-	ror @
-	dey
-	bne l_0002_b
-l_0002_e
-;	sta V
-;	sta RESULT
-
+	
 	lda V+1
+
+l_0002_b
+	lsr V+2
+	ror @
+
+	dey
+	bpl l_0002_b		; +1	BPL
+
 	and #$03
-	jmp _exit
+	ora SIGN
+	sta RESULT+1
+	rts					;exit
+
 l_07A5
 
 ;	lda NEW_EXP
 	sub #$1F
 	svc
 	eor #$80
-	jmi l_07D6
+	bmi l_07D6
 
 	lda #$00
 	sta RESULT
 	lda #$7C
-	jmp _exit			; exit
+	ora SIGN
+	sta RESULT+1
+	rts					;exit
+
 l_07D6
 	tya
-l_07C4
 
 ;	lda NEW_EXP
 	asl @
@@ -337,7 +340,7 @@ l_07C4
 	and #$03
 	ora M2
 	
-_exit	ora SIGN
+	ora SIGN
 	sta RESULT+1
 
 	RTS

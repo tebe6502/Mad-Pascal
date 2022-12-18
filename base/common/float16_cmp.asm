@@ -1,5 +1,6 @@
 
 // ----------------------------------------------------------------
+// changes: 2022-12-17
 // ----------------------------------------------------------------
 
 .proc	@F16_EQ				; FUNCTION
@@ -12,21 +13,23 @@ B	= :EAX+2
 	cmp #$7C
 	bne @+
 	lda A
-	cmp #$00
+;	cmp #$00
+	bne l_1005x
 @
 	seq
-	bcs @+
-	jmp *+6
-@	jmp l_1005x
+	bcs l_1005x
+
 	lda B+1
 	and #$7F
 	cmp #$7C
 	bne @+
 	lda B
-	cmp #$00
+;	cmp #$00
+	bne l_1005x
+	beq l_1005
 @
-	jcc l_1005
-	jeq l_1005
+	bcc l_1005
+	beq l_1005
 l_1005x
 
 	lda #$00
@@ -39,10 +42,10 @@ l_1005
 	lda A+1
 	ora B+1
 	and #$7F
-	bne @+
+	bne l_1026
+
 	tya
-@
-	jne l_1026
+	bne l_1026
 
 	lda #$01
 	rts				; exit
@@ -64,6 +67,7 @@ l_1026
 
 
 // ----------------------------------------------------------------
+// changes: 2022-12-17
 // ----------------------------------------------------------------
 
 
@@ -78,10 +82,10 @@ B	= :EAX+2
 	lda A+1
 	ora B+1
 	and #$7F
-	bne @+
+	bne l_0F34
+
 	tya
-@
-	jne l_0F34
+	bne l_0F34
 
 	lda #$01
 	rts				; exit
@@ -92,21 +96,23 @@ l_0F34
 	cmp #$7C
 	bne @+
 	lda A
-	cmp #$00
+;	cmp #$00
+	bne l_0F5Fx
 @
 	seq
-	bcs @+
-	jmp *+6
-@	jmp l_0F5Fx
+	bcs l_0F5Fx
+
 	lda B+1
 	and #$7F
 	cmp #$7C
 	bne @+
 	lda B
-	cmp #$00
+;	cmp #$00
+	bne l_0F5Fx
+	beq l_0F5F
 @
-	jcc l_0F5F
-	jeq l_0F5F
+	bcc l_0F5F
+	beq l_0F5F
 l_0F5Fx
 
 	lda #$00
@@ -114,10 +120,10 @@ l_0F5Fx
 l_0F5F
 
 	lda A+1
-	jmi l_0F7B
+	bmi l_0F7B
 
 	lda B+1
-	jpl l_0F91
+	bpl l_0F91
 
 	lda #$01
 	rts				; exit
@@ -137,18 +143,21 @@ l_0F91
 	rts				; exit
 
 l_0F7B
-	lda B+1
-	jmi l_0FC2
+	ldy B+1
+	bmi l_0FC2
 	
 	lda #$00
 	rts				; exit
 
 l_0FC2
-	lda A+1
+;	lda A+1
 	and #$7F
 	sta _cm+1
-	lda B+1
+
+;	lda B+1
+	tya
 	and #$7F
+
 	ldy #1
 _cm	cmp #0
 	bne @+
@@ -162,7 +171,9 @@ _cm	cmp #0
 	rts				; exit
 .endp
 
+
 // ----------------------------------------------------------------
+// changes: 2022-12-17
 // ----------------------------------------------------------------
 
 
@@ -177,10 +188,10 @@ B	= :EAX+2
 	lda A+1
 	ora B+1
 	and #$7F
-	bne @+
+	bne l_0E6D
+
 	tya
-@
-	jne l_0E6D
+	bne l_0E6D
 
 	lda #$01
 	rts				; exit
@@ -191,21 +202,23 @@ l_0E6D
 	cmp #$7C
 	bne @+
 	lda A
-	cmp #$00
+;	cmp #$00
+	bne l_0E98x
 @
 	seq
-	bcs @+
-	jmp *+6
-@	jmp l_0E98x
+	bcs l_0E98x
+
 	lda B+1
 	and #$7F
 	cmp #$7C
 	bne @+
 	lda B
-	cmp #$00
+;	cmp #$00
+	bne l_0E98x
+	beq l_0E98
 @
-	jcc l_0E98
-	jeq l_0E98
+	bcc l_0E98
+	beq l_0E98
 l_0E98x
 
 	lda #$00
@@ -213,10 +226,10 @@ l_0E98x
 l_0E98
 
 	lda A+1
-	jmi l_0EB4
+	bmi l_0EB4
 
 	lda B+1
-	jpl l_0ECA
+	bpl l_0ECA
 	
 	lda #$01
 	rts				; exit
@@ -236,18 +249,21 @@ l_0ECA
 	rts				; exit
 l_0EB4
 
-	lda B+1
-	jmi l_0EFB
+	ldy B+1
+	bmi l_0EFB
 	
 	lda #$00
 	rts				; exit
 l_0EFB
 
-	lda A+1
+;	lda A+1
 	and #$7F
 	sta _cm+1
-	lda B+1
+
+;	lda B+1
+	tya
 	and #$7F
+
 	ldy #1
 _cm	cmp #0
 	bne @+

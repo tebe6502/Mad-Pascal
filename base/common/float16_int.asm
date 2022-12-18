@@ -1,4 +1,9 @@
 
+// ----------------------------------------------------------------
+// f16_int
+// changes: 2022-12-17
+// ----------------------------------------------------------------
+
 .proc	@F16_INT						; FUNCTION
 
 RESULT	= :EAX
@@ -8,7 +13,7 @@ A	= :EAX+2
 
 	lda A+1
 	and #$7C
-	jne l_0A7F
+	bne l_0A7F
 
 	lda A+1
 	and #$03
@@ -30,10 +35,10 @@ l_0A92
 	lsr @
 	lsr @
 	sub #$19
-	tay
+;	tay
 
-	jmi l_0AC1
-	jeq l_0AC1
+	bmi l_0AC1
+	beq l_0AE6
 
 	lda VALUE
 l_0004_b
@@ -46,24 +51,27 @@ l_0004_b
 	jmp l_0AD5
 l_0AC1
 
-	tya
-	jpl l_0AE6
+;	tya
+;	bpl l_0AE6
 	
 	eor #$ff
-	add #$01
 	tay
+	;iny
+
 	lda VALUE
 l_0005_b
 	lsr VALUE+1
 	ror @
+
 	dey
-	bne l_0005_b
+	bpl l_0005_b
+
 	sta VALUE
 l_0AE6
 l_0AD5
 
 	lda A+1
-	jpl l_0B0B
+	bpl l_0B0B
 
 	lda #$00
 	sub VALUE

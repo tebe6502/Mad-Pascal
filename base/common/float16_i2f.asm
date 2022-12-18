@@ -1,4 +1,9 @@
 
+// ----------------------------------------------------------------
+// f16_inf
+// changes: 2022-12-17
+// ----------------------------------------------------------------
+
 .proc	@F16_I2F				; FUNCTION
 
 SV	= :EAX
@@ -11,7 +16,7 @@ SIG	= :ECX
 	sta SIG
 
 	lda SV+3
-	jpl l_0A75
+	bpl l_0A75
 
 	lda #$00
 	sub SV
@@ -45,7 +50,7 @@ l_0A8A
 	ora V+2
 	ora V+1
 	ora V
-	jne l_0A9E
+	bne l_0A9E
 
 ;	lda #$00
 	sta RESULT
@@ -69,18 +74,18 @@ l_0AAC
 l_0AAB
 
 	lda V+3
-	cmp #$00
-	bne @+
+;	cmp #$00
+	bne l_0AAC
 	lda V+2
-	cmp #$00
-	bne @+
+;	cmp #$00
+	bne l_0AAC
 	lda V+1
 	cmp #$08
-	bne @+
-	lda V
-	cmp #$00
-@
-	jcs l_0AAC
+;	bne @+
+;	lda V
+;	cmp #$00
+;@
+	bcs l_0AAC
 
 ; --- WhileProlog
 	jmp l_0AC5
@@ -95,22 +100,22 @@ l_0AC6
 l_0AC5
 
 	lda V+3
-	cmp #$00
-	bne @+
+;	cmp #$00
+	bne l_0AC7
 	lda V+2
-	cmp #$00
-	bne @+
+;	cmp #$00
+	bne l_0AC7
 	lda V+1
 	cmp #$04
-	bne @+
-	lda V
-	cmp #$00
-@
-	jcc l_0AC6
-
+;	bne @+
+;	lda V
+;	cmp #$00
+;@
+	bcc l_0AC6
+l_0AC7
 ;	lda E
 	cpy #$1F
-	jcc l_0AED
+	bcc l_0AED
 
 	lda #$00
 	sta RESULT

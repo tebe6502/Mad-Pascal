@@ -97,13 +97,13 @@ SIGN	= :EAX+3
 l_03B2
 
 	tya
-	jne l_03FC
+	bne l_03FC
 
 	lda MANTISSA+3
 	ora MANTISSA+2
 	ora MANTISSA+1
 	ora MANTISSA
-	jne l_03FC
+	bne l_03FC
 
 ;	lda #$00
 	sta DST
@@ -137,7 +137,7 @@ l_0429
 
 	lda MANTISSA+1
 	and #$04
-	jeq l_042A
+	beq l_042A
 
 	iny
 
@@ -213,13 +213,13 @@ l_0426
 
 	tya
 	cmp #$1F
-	jne l_049C
+	bne l_049C
 
 	lda MANTISSA+3
 	ora MANTISSA+2
 	ora MANTISSA+1
 	ora MANTISSA
-	jne l_049C
+	bne l_049C
 
 ;	lda #$00
 	sta DST
