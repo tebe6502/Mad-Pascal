@@ -1,5 +1,6 @@
 16.12.2022
-- poprawiona optymalizacja rejestru Y, aby nie powodowała błędów ochrony pamięci
+- poprawiona optymalizacja rejestru Y w celu zapobiegania występowania błędów ochrony pamięci
+- dodatkowe optymalizacje szybkości dla float16 (base\common\float16*.asm)
 
 11.12.2022
 - 'base\atari\basicoff.asm' dodane wyłączenie klawisza BREAK (poke $10,$70)
