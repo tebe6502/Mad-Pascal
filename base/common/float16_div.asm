@@ -10,7 +10,7 @@
 
 // ----------------------------------------------------------------
 // f16_div
-// changes: 2021-11-21
+// changes: 2021-11-21 ; 2022-12-17
 // ----------------------------------------------------------------
 
 RESULT	= :EAX
@@ -34,19 +34,20 @@ B	= :EDX+2
 	lda A+1
 	and #$7F
 	cmp #$7C
-	bne @+
-	lda A
-	cmp #$00
-@
-	jcs l_0826x
+;	bne @+
+;	lda A
+;	cmp #$00
+;@
+	bcs l_0826x
+
 	lda B+1
 	and #$7F
 	cmp #$7C
-	bne @+
-	lda B
-	cmp #$00
-@
-	jcc l_0826
+;	bne @+
+;	lda B
+;	cmp #$00
+;@
+	bcc l_0826
 l_0826x
 
 	lda #$FF
@@ -59,28 +60,31 @@ l_0826
 	lda A+1
 	and #$7C
 	cmp #$7C
-	bne @+
-	lda #$00
-@
-	jeq l_0851x
+;	bne @+
+;	lda #$00
+;@
+	beq l_0851x
+
 	lda B+1
 	and #$7F
-	bne @+
+	bne l_0851
 	lda B
-@
-	jne l_0851
+	bne l_0851
 l_0851x
 
 	lda #$00
 	sta RESULT
 	lda #$7C
-	jmp _exit					; exit
+	ora SIGN
+	sta RESULT+1
+	rts					;exit
+
 l_0851
 
 	lda B+1
 	and #$7C
 	cmp #$7C
-	jne l_0872
+	bne l_0872
 
 	lda #$00
 	sta RESULT
@@ -90,10 +94,9 @@ l_0872
 
 	lda A+1
 	and #$7F
-	bne @+
+	bne l_088E
 	lda A
-@
-	jne l_088E
+	bne l_088E
 
 	lda #$00
 	sta RESULT
@@ -103,7 +106,7 @@ l_088E
 
 	lda A+1
 	and #$7C
-	jne l_08AA
+	bne l_08AA
 
 	lda A+1
 	and #$03
@@ -122,7 +125,7 @@ l_08BD
 
 	lda B+1
 	and #$7C
-	jne l_08DF
+	bne l_08DF
 
 	lda B+1
 	and #$03
@@ -233,19 +236,19 @@ BX	sbc #0
 ;	ora V+2
 	lda V+1
 	ora V
-	jne l_097A
+	bne l_0983
+
 	lda REM+1
 	ora REM
-	jne l_097A
+	bne l_0983
 
 	lda #$00
 	sta RESULT
 	sta RESULT+1
 	RTS					; exit
-l_097A
 
 ; --- WhileProlog
-	jmp l_0983
+
 l_0984
 
 	asl V
@@ -262,7 +265,7 @@ l_0984
 	lda REM
 	cmp M2
 @
-	jcc l_09A7
+	bcc l_09A7
 
 	inw V
 
@@ -285,15 +288,15 @@ l_0983
 ;	bne @+
 	lda V+1
 	cmp #$04
-	bne @+
-	lda V
-	cmp #$00
-@
-	jcs l_09D5
+;	bne @+
+;	lda V
+;	cmp #$00
+;@
+	bcs l_09D5
 
 	tya
-	jmi l_09D5
-	jne l_0984
+	bmi l_09D5
+	bne l_0984
 
 ; --- WhileProlog
 	jmp l_09D5
@@ -313,52 +316,51 @@ l_09D5
 ;	bne @+
 	lda V+1
 	cmp #$08
-	bne @+
-	lda V
-	cmp #$00
-@
-	jcs l_09D6
+;	bne @+
+;	lda V
+;	cmp #$00
+;@
+	bcs l_09D6
 
 	tya
 	bmi @+
-	jne l_09FE
+	bne l_09FE
 @
 	eor #$ff
-	add #1
 	tay
 	iny
-	lda V
-;	cpy #$00
-;	beq l_0003_e
-l_0003_b
-	lsr V+1
-	ror @
-	dey
-	bne l_0003_b
-l_0003_e
-;	sta V
-
-;	lda #$00
-;	sta NEW_EXP
 
 	lda V+1
+
+l_0003_b
+	lsr @
+
+	dey
+	bpl l_0003_b		; +1	BPL
+
 	and #$03
-	jmp _exit				; exit
+	ora SIGN
+	sta RESULT+1
+	rts					;exit
+
 l_09FE
 
-	tya
+;	tya
 	sub #$1F
 	svc
 	eor #$80
-	jmi l_0A2F
+	bmi l_0A2F
 
 	lda #$00
 	sta RESULT
 	lda #$7C
-	jmp _exit				; exit
+	ora SIGN
+	sta RESULT+1
+	rts					;exit
+
 l_0A2F
 	tya
-l_0A1D
+
 ;	lda NEW_EXP
 	asl @
 	asl @
@@ -370,7 +372,8 @@ l_0A1D
 	lda V+1
 	and #$03
 	ora REM
-_exit	ora SIGN
+
+	ora SIGN
 	sta RESULT+1
 
 	RTS
