@@ -240,8 +240,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'icl ''rtl6502_'+target.id+'.asm''');
 
  asm65;
-
  asm65('.print ''ZPAGE: '',zpage,''..'',zpend-1');
+
+ asm65;
+ asm65('.print ''RTBUF: '',@buf,''..'',@buf+255');
 
  asm65;
  asm65('.print ''RTLIB: '',RTLIB,''..'',*-1');
