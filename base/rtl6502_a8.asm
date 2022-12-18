@@ -44,6 +44,10 @@ numread	.word		; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
+	icl 'rtl_default.asm'
+
+; -----------------------------------------------------------------------
+
 	icl 'atari\vbxe.hea'
 	icl 'atari\atari.hea'
 
@@ -74,10 +78,6 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'atari\xmspos.asm'		; @xmsAddPosition, @xmsUpdatePosition
 	icl 'atari\xmsread.asm'		; @xmsReadBuf
 	icl 'atari\xmswrite.asm'	; @xmsWriteBuf
-
-; -----------------------------------------------------------------------
-
-	icl 'rtl_default.asm'
 
 ; -----------------------------------------------------------------------
 

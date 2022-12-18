@@ -45,14 +45,14 @@ numread	.word		; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
+	icl 'rtl_default.asm'
+
+; -----------------------------------------------------------------------
+
 	icl 'c4p\c4p.hea'
 	icl 'c64\putpixel.asm'		; @putpixel	
 	icl 'c4p\putchar.asm'		; @putchar
 	icl 'c4p\clrscr.asm'		; @clrscr
-
-; -----------------------------------------------------------------------
-
-	icl 'rtl_default.asm'
 
 ; -----------------------------------------------------------------------
 
