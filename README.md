@@ -126,6 +126,7 @@ CutAs, FiDL, SprED, Sprite XL
 * [Unicode](https://gitlab.com/amarok8bit/unicode)
 * [Arcadia](https://gitlab.com/amarok8bit/arcadia)
 * [atascii compo3](https://gitlab.com/bocianu/atasciicompo3)
+* [ProHiBan](https://github.com/zbyti/ProHiBan)
 
 ## Benchmarks
 
