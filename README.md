@@ -127,7 +127,7 @@ CutAs, FiDL, SprED, Sprite XL
 * [Arcadia](https://gitlab.com/amarok8bit/arcadia)
 * [atascii compo3](https://gitlab.com/bocianu/atasciicompo3)
 * [ProHiBan](https://github.com/zbyti/ProHiBan)
-* [The Hangman](https://gitlab.com/bocianu/thehangmad)
+* [The Hangmad](https://gitlab.com/bocianu/thehangmad)
 
 ## Benchmarks
 
