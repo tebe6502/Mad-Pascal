@@ -69,9 +69,9 @@ var	Font: Object
 	procedure SetPaletteEntries(pal: pointer);
 	function LoadBitmap(fnam: PString): Boolean;
 	procedure SaveBitmap(fnam: PString);
-	procedure TextOut(x: word; y: byte; s: PByte); overload;
+	procedure TextOut(x: word; y: byte; s: PString); overload;
 	procedure TextOut(a: char); overload;
-	procedure TextOut(s: PByte); overload;
+	procedure TextOut(s: PString); overload;
 
 
 implementation
@@ -190,7 +190,7 @@ asm
 end;
 
 
-procedure TextOut(x: word; y: byte; s: PByte); overload;
+procedure TextOut(x: word; y: byte; s: PString); overload;
 (*
 @description:
 *)
@@ -227,7 +227,7 @@ asm
 end;
 
 
-procedure TextOut(s: PByte); overload;
+procedure TextOut(s: PString); overload;
 (*
 @description:
 *)
