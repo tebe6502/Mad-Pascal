@@ -79,24 +79,12 @@ BEGIN
 end;
 
 
-procedure LoadANSI;
-var f: file;
-
-    fn: TString;
-
-    num, i: word;
-
-    bf: array [0..255] of char;
-
-    scrollback_buffer: array [0..255] of byte absolute $0400;	// ROW #0 buffer, filled if 'scrollback_status = true'
-
+procedure Syntax;
 begin
-
-if ParamCount = 0 then begin
 
  NormVideo;
 
- writeln('VBXE Ansi Display v1.1');
+ writeln('VBXE Display ANSI v1.2');
  writeln('Syntax: VANSI.EXE filename.ans');
  writeln();
  writeln('Key W   - scroll UP');
@@ -107,7 +95,25 @@ if ParamCount = 0 then begin
 
  halt(2);
 
-end else begin
+end;
+
+
+procedure LoadANSI;
+var f: file;
+
+    fn: TString;
+
+    num, i: word;
+
+    bf: array [0..255] of char;
+
+begin
+
+if ParamCount = 0 then
+
+ Syntax
+
+else begin
 
  fn:=ParamStr(1);
 
