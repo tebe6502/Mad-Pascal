@@ -16,6 +16,7 @@ uses crt, vbxe;
 
 var i: byte;
 
+    fildat: byte absolute $02FD;
 
 begin
 
@@ -26,18 +27,22 @@ begin
 
  VBXEMode(VBXE.VGA, 0);		// VBXE MODE, OVERLAY PALETTE #0
 
- Position(0,0);
- for i:=0 to 127 do TextOut(chr(i), i);
 
- Position(0,3);
- for i:=0 to 127 do TextOut(chr(i), ($80 or i) and $f0);
+ GotoXY(0,0);
+ for i:=0 to 127 do begin fildat:=i; write(chr(i)) end;
 
- Position(0,6);
- TextOut('Atari is back', 12);
+ GotoXY(0,3);
+ for i:=0 to 127 do begin fildat:=($80 or i) and $f0; write(chr(i)) end;
 
- TextOut('a', 28);
- TextOut('A', 28);
+ TextBackground(0);
 
+ GotoXY(0,24);
+ TextColor(12);
+ write('Atari is back');
+
+ TextColor(28);
+ write('a');
+ write('A');
 
  repeat until keypressed;
 

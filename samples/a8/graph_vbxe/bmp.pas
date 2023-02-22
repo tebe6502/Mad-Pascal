@@ -1,7 +1,7 @@
 
 {$r amiga.rc}
 
-uses crt, graph, vbxe;
+uses crt, vbxe;
 
 const
 	pic = VBXE_OVRADR;
@@ -16,18 +16,18 @@ var	xdl: txdl absolute VBXE_XDLADR+VBXE_WINDOW;
 
 begin
 
- InitGraph(mVBXE, 15, '');
-
- if GraphResult <> grOK then begin
+ if VBXE.GraphResult <> VBXE.grOK then begin
   writeln('VBXE not detected');
   halt;
  end;
 
- SetHorizontalRes(MedRes);
+ SetHorizontalRes(VBXE.VGAMed);
 
  VBXEMemoryBank($80);
 
  xdl.ov_step:=640;
+
+ poke(559,0);
 
  dx:=2;
  dy:=4;

@@ -1,6 +1,6 @@
-// changes: 14.01.2018
+// changes: 23.01.2022
 
-uses crt, graph, vbxe, atari, vimage, sysutils;
+uses crt, vbxe, atari, vimage, sysutils;
 
 var	fnam, ext: TString;
 
@@ -12,14 +12,12 @@ begin
 
  if ParamCount > 0 then begin
 
- InitGraph(mVBXE, 0, '');
-
- if GraphResult <> grOK then begin
+ if VBXE.GraphResult <> VBXE.grOK then begin
   writeln('VBXE not detected');
   halt;
  end;
 
- SetHorizontalRes(MedRes);
+ SetHorizontalRes(VBXE.VGAMed);
  ColorMapOff;
 
  VBXEControl(vc_xdl+vc_xcolor+vc_no_trans);
@@ -36,12 +34,10 @@ begin
 
  fnam:=concat('D:',fnam);
 
-
  if ext='.BMP' then status:=LoadVBMP(fnam, VBXE_OVRADR) else
   if ext='.PCX' then status:=LoadVPCX(fnam, VBXE_OVRADR) else
    if ext='.GIF' then status:=LoadVGIF(fnam, VBXE_OVRADR) else
     status:=false;
-
 
  if status=false then begin
 
@@ -63,3 +59,5 @@ begin
  end;
 
 end.
+
+// 9675

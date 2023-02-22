@@ -235,7 +235,7 @@ begin
 
  p:=pointer(charsets);
  assign(f, 'D:BLINKYS.FNT'); reset(f, 1);
- blockread(f, p, 1024*8);
+ blockread(f, p^, 1024*8);
  close(f);
 
  vram.position:=VBXE_MAPADR;

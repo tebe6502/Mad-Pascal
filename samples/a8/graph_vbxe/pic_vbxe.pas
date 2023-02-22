@@ -1,6 +1,6 @@
 // VBXE Color Map Graphics
 
-uses crt, vbxe, graph;
+uses crt, graph, vbxe;
 
 const
 	charsets = $8000;
