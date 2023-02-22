@@ -1,25 +1,27 @@
-uses crt, graph, vbxe, atari, sysutils;
+uses crt, vbxe, atari, sysutils;
 
 var vram: TVBXEMemoryStream;
 
 
 procedure InitVBXE();
 begin
- InitGraph(mVBXE, 0, '');
 
- if GraphResult <> grOK then begin
+ if VBXE.GraphResult <> VBXE.grOK then begin
   writeln('VBXE not detected');
   halt;
  end;
 
- SetHorizontalRes(MedRes);
+ SetHorizontalRes(VBXE.VGAMed);
  ColorMapOff;
- 
 
- SetRGBPalette(4);
+
+ SetRGBPalette(1);
 
  SetRGBPalette(0,0,0);
  SetRGBPalette(100,100,100);
+
+ SetColor(1);
+ Line(10,10,50,50);
 
 
  VBXEControl(vc_xdl+vc_xcolor+vc_no_trans);

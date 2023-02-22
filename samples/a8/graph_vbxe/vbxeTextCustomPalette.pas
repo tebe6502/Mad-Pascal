@@ -86,56 +86,53 @@ begin
 
  initVBXE;
 
- for i:=0 to 15 do begin
+ TextBackground(tbBlack);
 
-   Position(0, i+4);
-   TextOut(colors[i], i);
+ vbxe.CursorOff;
 
- end;
+ for i:=0 to 7 do begin		// top bar
+   TextColor(i);
 
-
-
- for i:=0 to 7 do begin
-   Position(16+i*8, 2);
-   TextOut(colors[i], i);
+   GotoXY(16+i*8, 2);
+   write(colors[i]);
  end;
 
 
  for i:=0 to 15 do begin
 
- // COLOR FOREGROUND = 0..15
- // COLOR BACKGROUND = 0..7
+   TextColor(i);
 
- // COLOR = FOREGROUND + BACKGROUND * 16 + 128
+   TextBackground(tbBlack);
+   GotoXY(0, i+4);	write(colors[i]);
 
-   Position(16, i+4);
-   TextOut('00001111', byte(i + 0*16 + 128));
 
-   Position(16+8, i+4);
-   TextOut('22223333', byte(i + 1*16 + 128));
+   GotoXY(16, i+4);	write('00001111');
 
-   Position(16+8*2, i+4);
-   TextOut('44445555', byte(i + 2*16 + 128));
+   TextBackground(tbRed);
+   GotoXY(16+8, i+4);	write('22223333');
 
-   Position(16+8*3, i+4);
-   TextOut('66667777', byte(i + 3*16 + 128));
+   TextBackground(tbGreen);
+   GotoXY(16+8*2, i+4);	write('44445555');
 
-   Position(16+8*4, i+4);
-   TextOut('88889999', byte(i + 4*16 + 128));
+   TextBackground(tbYellow);
+   GotoXY(16+8*3, i+4);	write('66667777');
 
-   Position(16+8*5, i+4);
-   TextOut('AAAABBBB', byte(i + 5*16 + 128));
+   TextBackground(tbBlue);
+   GotoXY(16+8*4, i+4);	write('88889999');
 
-   Position(16+8*6, i+4);
-   TextOut('CCCCDDDD', byte(i + 6*16 + 128));
+   TextBackground(tbMagenta);
+   GotoXY(16+8*5, i+4);	write('AAAABBBB');
 
-   Position(16+8*7, i+4);
-   TextOut('EEEEFFFF', byte(i + 7*16 + 128));
+   TextBackground(tbCyan);
+   GotoXY(16+8*6, i+4);	write('CCCCDDDD');
+
+   TextBackground(tbWhite);
+   GotoXY(16+8*7, i+4);	write('EEEEFFFF');
 
  end;
-
-
 
  repeat until keypressed;
+
+ VBXEOff;
 
 end.

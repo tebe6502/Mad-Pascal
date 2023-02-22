@@ -5,7 +5,7 @@
 
 Program Snake;
 
-Uses GRAPH, CRT, joystick, vbxe;
+Uses CRT, joystick, vbxe;
 
 const
 	SnakeBody = 'O';
@@ -227,9 +227,8 @@ End;
 
 
 BEGIN
-InitGraph(mVBXE, 0, '');
 
-if GraphResult <> grOK then begin
+if VBXE.GraphResult <> VBXE.grOK then begin
  writeln('VBXE not detected');
  halt;
 end;
