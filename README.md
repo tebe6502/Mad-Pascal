@@ -37,6 +37,8 @@ The available features are:
 
 ## Usage
 
+[WUDSN + Mad Pascal](https://forums.atariage.com/topic/348660-wudsn-mad-pascal-quick-hack-increasing-usability/)
+
 [Mad Pascal i Geany](http://bocianu.atari.pl/blog/madgeany)
 
     mp.exe filename.pas
