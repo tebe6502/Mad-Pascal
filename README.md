@@ -29,7 +29,7 @@ The available features are:
     * [`Single`](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)
 * One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters
 * Predefined type `String` `[N]` which is equivalent to `array [0..N] of Char`
-* `Type` aliases.
+* `Type` aliases
 * `Records`
 * `Objects`
 * Separate program modules
