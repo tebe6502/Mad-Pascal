@@ -24,7 +24,7 @@ The available features are:
     * `Integer` `SmallInt` `ShortInt`
     * `Char` `String` `PChar`
     * `Pointer` `File` `Text`
-    * `ShortReal` `Real` (fixed-point)
+    * `ShortReal` `Real` [fixed-point](https://en.wikipedia.org/wiki/Fixed-point_arithmetic)
     * [`Float16`](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
     * [`Single`](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)
 * One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters
