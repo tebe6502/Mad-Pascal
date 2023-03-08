@@ -54,15 +54,15 @@ BAT
     )
 ```
 
-### Commodore 64
+### [Commodore 64](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/c64)
     mp.exe -t c64 filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
     
-### Commodore Plus/4
+### [Commodore Plus/4](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/c4plus)
     mp.exe -t c4p filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
     
-### RAW
+### [RAW](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/raw)
     mp.exe -t raw filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
