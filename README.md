@@ -180,8 +180,8 @@ CutAs, FiDL, SprED, Sprite XL
 ## Links
 
 * [HOME Page](http://mads.atari8.info/)
-* [Atari Age Forum](https://atariage.com/forums/topic/240919-mad-pascal/)
-* [Atari Area Forum](http://www.atari.org.pl/forum/viewtopic.php?id=13373)
+* [Mad Pascal on Atari Age Forum](https://atariage.com/forums/topic/240919-mad-pascal/)
+* [Mad Pascal on Atari Area Forum](http://www.atari.org.pl/forum/viewtopic.php?id=13373)
 * [Mad Pascal Announcement for WUDSN](https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/?do=findComment&comment=4340150)
 * [Some advice](https://github.com/ilmenit/CC65-Advanced-Optimizations)
 * [Turbo Pascal "Sokoban"](https://youtu.be/bsQsEM3TYTA)
