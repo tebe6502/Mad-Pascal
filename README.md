@@ -36,22 +36,22 @@ The available features are:
 * Recursion
 
 ## Usage
-
 [WUDSN + Mad Pascal](https://forums.atariage.com/topic/348660-wudsn-mad-pascal-quick-hack-increasing-usability/)
-
 [Mad Pascal i Geany](http://bocianu.atari.pl/blog/madgeany)
 
+## Atari XE/XL
     mp.exe filename.pas
     mads.exe filename.a65 -x -i:base
 
 BAT
-
+```
     <MadPascalPath>\MP.exe %1 -ipath:<MadPascalPath>\lib -ipath:<MadPascalPath>\blibs
 
     if exist %~dp1%~n1.a65 (
 	    mads.exe "%~dp1%~n1.a65" -xli:<MadPascalPath>\base
 	    if exist "%~dp1%~n1.obx" altirra "%~dp1%~n1.obx"
     )
+```
 
 ## Tools
 
