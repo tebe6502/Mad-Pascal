@@ -188,4 +188,4 @@ CutAs, FiDL, SprED, Sprite XL
 * [Programowanie w Mad Pascal dla C+4](https://c64portal.pl/2021/02/22/programowanie-w-mad-pascal-dla-c4/)
 * [Tron +4. Mad Pascal i C+4](https://youtu.be/a4Y2TYj1ymg)
 * [Commodore Plus/4, Mad Pascal i bitmapy](https://c64portal.pl/2021/04/10/commodore-plus-4-mad-pascal-i-bitmapy/)
-* [Mad Pascal Commodore Plus/4 plasma effect with TEDzakker demo music] (https://youtu.be/Yg10zHR--14)
+* [Mad Pascal Commodore Plus/4 plasma effect with TEDzakker demo music](https://youtu.be/Yg10zHR--14)
