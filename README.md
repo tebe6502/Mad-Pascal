@@ -37,21 +37,32 @@ The available features are:
 
 ## Usage
 [WUDSN + Mad Pascal](https://forums.atariage.com/topic/348660-wudsn-mad-pascal-quick-hack-increasing-usability/)
+
 [Mad Pascal i Geany](http://bocianu.atari.pl/blog/madgeany)
 
-## Atari XE/XL
-    mp.exe filename.pas
-    mads.exe filename.a65 -x -i:base
+# Atari XE/XL
+    mp.exe filename.pas -ipath:<MadPascalPath>\lib
+    mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
 BAT
-```
     <MadPascalPath>\MP.exe %1 -ipath:<MadPascalPath>\lib -ipath:<MadPascalPath>\blibs
 
     if exist %~dp1%~n1.a65 (
 	    mads.exe "%~dp1%~n1.a65" -xli:<MadPascalPath>\base
 	    if exist "%~dp1%~n1.obx" altirra "%~dp1%~n1.obx"
     )
-```
+
+# Commodore 64
+    mp.exe -t 64 filename.pas -ipath:<MadPascalPath>\lib
+    mads.exe filename.a65 -x -i:<MadPascalPath>\base
+    
+# Commodore 4 plus
+    mp.exe -t c4p filename.pas -ipath:<MadPascalPath>\lib
+    mads.exe filename.a65 -x -i:<MadPascalPath>\base
+    
+# RAW
+    mp.exe -t raw filename.pas -ipath:<MadPascalPath>\lib
+    mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
 ## Tools
 
