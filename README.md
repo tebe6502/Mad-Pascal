@@ -58,7 +58,7 @@ BAT
     mp.exe -t c64 filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
     
-### Commodore 4 plus
+### Commodore Plus/4
     mp.exe -t c4p filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
     
