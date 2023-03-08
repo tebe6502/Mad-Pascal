@@ -45,11 +45,14 @@ The available features are:
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
 BAT
+```
     <MadPascalPath>\MP.exe %1 -ipath:<MadPascalPath>\lib -ipath:<MadPascalPath>\blibs
+
     if exist %~dp1%~n1.a65 (
 	    mads.exe "%~dp1%~n1.a65" -xli:<MadPascalPath>\base
 	    if exist "%~dp1%~n1.obx" altirra "%~dp1%~n1.obx"
     )
+```
 
 ### Commodore 64
     mp.exe -t 64 filename.pas -ipath:<MadPascalPath>\lib
