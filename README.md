@@ -40,7 +40,7 @@ The available features are:
 
 [Mad Pascal i Geany](http://bocianu.atari.pl/blog/madgeany)
 
-### Atari XE/XL
+### Atari XE/XL(https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8)
     mp.exe filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
