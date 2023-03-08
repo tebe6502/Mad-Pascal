@@ -184,5 +184,8 @@ CutAs, FiDL, SprED, Sprite XL
 * [Atari Area Forum](http://www.atari.org.pl/forum/viewtopic.php?id=13373)
 * [Mad Pascal Announcement for WUDSN](https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/?do=findComment&comment=4340150)
 * [Some advice](https://github.com/ilmenit/CC65-Advanced-Optimizations)
+* [Turbo Pascal "Sokoban"](https://youtu.be/bsQsEM3TYTA)
 * [Programowanie w Mad Pascal dla C+4](https://c64portal.pl/2021/02/22/programowanie-w-mad-pascal-dla-c4/)
+* [Tron +4. Mad Pascal i C+4](https://youtu.be/a4Y2TYj1ymg)
 * [Commodore Plus/4, Mad Pascal i bitmapy](https://c64portal.pl/2021/04/10/commodore-plus-4-mad-pascal-i-bitmapy/)
+* [Mad Pascal Commodore Plus/4 plasma effect with TEDzakker demo music] (https://youtu.be/Yg10zHR--14)
