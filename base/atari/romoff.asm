@@ -9,6 +9,12 @@
         lda #%11111110
         sta PORTB       ;$D301
 
+; Wprowadzona zmiana pozwala wyłączyć z poziomu kodu Pascala, kopiowanie czcionek z pamięci ROM do RAM przy wyłączonym ROMie
+; Proces ten (niefortunnie) powoduje nadpisanie danych w obszarze $E000..$E3FF, gdy w zasobach umieścimi dane, które
+; w ten obszar są wczytywane. Za pomocą definicji '{$DEFINE NOROMFONT}` można wyłączyć przerzut danych czcionek z ROM do RAMu,
+; co pozwala zachować, wczytywane zasoby.
+
+.ifndef MAIN.@DEFINES.NOROMFONT
 	ldx #3
 	ldy #0
 mv	inc portb
@@ -21,6 +27,7 @@ afnt1	sta $e000,y
 	inc afnt1+2
 	dex
 	bpl mv
+.endif
 
         ldx #<nmiint
         ldy #>nmiint
