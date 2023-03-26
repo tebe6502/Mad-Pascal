@@ -8,7 +8,7 @@ class Test_Word_shl:
         test.runCode('''
         procedure breaktest; begin end;
 
-        var b: word;
+        var d,b: word;
 	    a: cardinal;
 
         begin
@@ -138,6 +138,10 @@ class Test_Word_shl:
 
             b:=1;
             a:=b shl 31;
+            breaktest;
+	
+            d:=4317;
+            b:=d shl 2;
 
         end.
         ''', ['breaktest'])
@@ -236,3 +240,6 @@ class Test_Word_shl:
 
         test.resume()
         assert test.varCardinal('a') == 0x80000000
+
+        test.resume()
+        assert test.varCardinal('b') == 17268
