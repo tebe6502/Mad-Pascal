@@ -13,6 +13,10 @@ class Test_Multiplications:
 
         begin
             b:=27;
+	    
+            a:=b*1;
+            breaktest;
+	    
             a:=b*3;
             breaktest;
 
@@ -28,6 +32,9 @@ class Test_Multiplications:
             a:=b*9;
 	    breaktest;
 
+            a:=b*10;
+	    breaktest;
+
 	    a:=b*128;
 	    breaktest;
 
@@ -40,6 +47,9 @@ class Test_Multiplications:
         ''', ['breaktest'])
 
         assert test.varByte('b') == 27;
+        assert test.varWord('a') == 27 * 1
+
+        test.resume()
         assert test.varWord('a') == 27 * 3
 
         test.resume()
@@ -53,6 +63,9 @@ class Test_Multiplications:
 
         test.resume()
         assert test.varWord('a') == 27 * 9
+
+        test.resume()
+        assert test.varWord('a') == 27 * 10
 
         test.resume()
         assert test.varWord('a') == 27 * 128
