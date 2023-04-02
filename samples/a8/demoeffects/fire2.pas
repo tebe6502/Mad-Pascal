@@ -1,7 +1,7 @@
 (*
 * Fire by koalka/bbsl/karzelki
 *)
-// 376
+// 378
 // volatile psuje optymaslizacje o kilka bajtow
 
 
