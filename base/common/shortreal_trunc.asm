@@ -6,16 +6,28 @@
 
 .proc	@SHORTREAL_TRUNC
 
-	ldy :STACKORIGIN+STACKWIDTH,x
-	spl
-	jsr negSHORT
+RESULT	= :EAX
 
-	sta :STACKORIGIN,x
-	mva #$00 :STACKORIGIN+STACKWIDTH,x
+A	= :EAX
+
+	ldy A+1
+	bpl @+
+
+	jsr negA
+@
+	sta A
+	mva #$00 A+1
 
 	tya
-	spl
-	jsr negSHORT
+	bpl @+
+	
+negA	lda #$00
+	sub A
+	sta A
 
+	lda #$00
+	sbc A+1
+	sta A+1
+@
 	rts
 .endp

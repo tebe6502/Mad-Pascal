@@ -9,8 +9,8 @@
 
 .proc	@SHORTREAL_MUL
 
-A	= :ECX
-B	= :EAX
+A	= :EAX
+B	= :ECX
 
 RESULT	= :EAX
 
