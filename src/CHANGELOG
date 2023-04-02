@@ -3,13 +3,15 @@
 - przepisany optymalizator RemoveUnusedStack
 - kod rozdzielony na oddzielne pliki
 - przepisane operacje DIV, MOD dla BYTE, WORD, CARDINAL, SHORTINT, SMALLINT, INTEGER
+- rozpisane optymalizacje dla BYTE DIV 2..32
+- rozpisane optymalizacje dla BYTE MUL 0,1,2,3,4,5,7,8,10,16,32,40,64,96,128,255
 - dla wyrażeń ze znakiem MINUS następuje promowanie do typu SIGNED
 - wyrażenia promowane są do większego typu jeśli występują w nich operacje PLUS, MINUS
 - issue #114 fixed (https://github.com/tebe6502/Mad-Pascal/issues/114)
 - nowa dyrektywa {$DEFINE NOROMFONT} jako uzupelnienie dla {$DEFINE ROMOFF} wylaczajaca przepisywanie zestawu znakowego z ROM do RAM
 - dodano możliwość użycia typu ENUM w pętli FOR
 - dodane stałe MAXINT, MAXSMALLINT
-- nowy sposob ustalenia adresu DATAORIGIN eleiminujacy ryzyko wystapienia 'infinite loop' podczas assemblacji
+- nowy sposób ustalenia adresu DATAORIGIN eliminujący ryzyko wystąpienia 'infinite loop' podczas assemblacji
 
 16.12.2022
 - poprawiona optymalizacja rejestru Y w celu zapobiegania występowania błędów ochrony pamięci
