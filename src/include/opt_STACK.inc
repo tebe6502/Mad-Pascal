@@ -22,7 +22,7 @@
 
     if (l = i + 3) and
        inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        dex(i+2) then										// dex					; 2
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
       begin
@@ -36,8 +36,8 @@
 
     if (l = i + 4) and
        inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva   :STACKORIGIN+STACKWIDTH,x	; 2
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
        dex(i+3) then										// dex					; 3
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
         (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
@@ -53,10 +53,10 @@
 
     if (l = i + 6) and
        inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva   :STACKORIGIN+STACKWIDTH,x	; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva   :STACKORIGIN+STACKWIDTH*2,x	; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva   :STACKORIGIN+STACKWIDTH*3,x	; 4
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
+       mva(i+3) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 3
+       mva(i+4) and										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 4
        dex(i+5) then										// dex					; 5
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
         (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
@@ -165,7 +165,7 @@
      end;
 
 
-    if mva(i) and (mva_stack(i) = false) and							// mva I :STACKORIGIN,x		; 0
+    if mva(i) and										// mva I :STACKORIGIN,x		; 0
        (listing[i+1] = #9'lda :STACKORIGIN,x') then						// lda :STACKORIGIN,x		; 1
      if (pos(':STACKORIGIN,x', listing[i]) > 0) then
      begin
@@ -428,7 +428,7 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+1) and										// mva					; 1
        mwy_bp2(i+2) and										// mwy G :bp2				; 2
        ldy(i+3) and (ldy_stack(i+3) = false) and						// ldy					; 3
        (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
@@ -448,8 +448,8 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+1) and										// mva					; 1
+       mva(i+2) and										// mva					; 2
        mwy_bp2(i+3) and										// mwy G :bp2				; 3
        ldy(i+4) and (ldy_stack(i+4) = false) and						// ldy					; 4
        (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
@@ -476,8 +476,8 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
        (listing[i+3] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 3
        (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
        sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
@@ -498,7 +498,7 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+1) and										// mva					; 1
        (listing[i+2] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 2
        (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
        sta_a(i+4) and (sta_stack(i+4) = false) then						// sta					; 4
@@ -513,7 +513,7 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
        sta_a(i+3) and (sta_stack(i+3) = false) and						// sta 					; 3
        (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
@@ -529,7 +529,7 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+1) and 										// mva					; 1
        dex(i+2) and										// dex					; 2
        mwy_bp2(i+3) and										// mwy 					; 3
        ldy(i+4) and (ldy_stack(i+4) = false) and						// ldy					; 4
@@ -547,8 +547,8 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+1) and										// mva					; 1
+       mva(i+2) and 										// mva					; 2
        (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
        sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
        dex(i+5) then										// dex					; 5
@@ -565,8 +565,8 @@
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and										// mva					; 2
        (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
        sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
        (listing[i+5] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 5
@@ -586,8 +586,8 @@
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
        lda(i+3) and (lda_stack(i+3) = false) and						// lda					; 3
        sta(i+4) and										// sta					; 4
        lda(i+5) and (lda_stack(i+5) = false) and						// lda					; 5
@@ -611,10 +611,10 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and 										// mva					; 3
+       mva(i+4) and 										// mva					; 4
        (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
        sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
        dex(i+7) then										// dex					; 7
@@ -636,10 +636,10 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and										// mva					; 3
+       mva(i+4) and 										// mva					; 4
        (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
        sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
        (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
@@ -665,8 +665,8 @@
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva	 :STACKORIGIN,x			; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva	 :STACKORIGIN+STACKWIDTH,x	; 2
+       mva(i+1) and 										// mva	 :STACKORIGIN,x			; 1
+       mva(i+2) and										// mva	 :STACKORIGIN+STACKWIDTH,x	; 2
        inx(i+3) and										// inx					; 3
        lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
        sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
@@ -757,9 +757,9 @@
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and 										// mva					; 3
        (listing[i+4] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 4
        sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
        (listing[i+6] = #9'lda :STACKORIGIN-1+STACKWIDTH,x') and					// lda :STACKORIGIN-1+STACKWIDTH,x	; 6
@@ -787,10 +787,10 @@
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and 										// mva					; 3
+       mva(i+4) and 										// mva					; 4
        (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
        sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
        (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
@@ -822,10 +822,38 @@
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and 										// mva					; 3
+       mva(i+4) and 										// mva					; 4
+       (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
+       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
+       sta_a(i+8) and (sta_stack(i+8) = false) and						// sta					; 8
+       (listing[i+9] <> #9'lda :STACKORIGIN+STACKWIDTH*2,x') then				// lda :STACKORIGIN+STACKWIDTH*2,x	; 9
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) then
+     begin
+	listing[i+5] := #9'lda ' + GetString(i+1);
+
+	listing[i+7] := #9'lda ' + GetString(i+2);
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+       Result:=false; Break;
+     end;
+
+
+    if //inx(i) and										// inx					; 0
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and 										// mva					; 3
+       mva(i+4) and 										// mva					; 4
        (listing[i+5] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 5
        (listing[i+6] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 6
        sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
@@ -858,10 +886,10 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and 										// mva					; 3
+       mva(i+4) and 										// mva					; 4
        lda(i+5) and (lda_stack(i+5) = false) and						// lda					; 5
        ldy(i+6) and (ldy_stack(i+6) = false) and						// ldy					; 6
        add_im(i+7) and										// add #				; 7
@@ -925,7 +953,7 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+1) and 										// mva					; 1
        lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
        (add_sub_stack(i+3) or and_ora_eor_stack(i+3)) and					// add|sub|and|ora|eor :STACKORIGIN,x	; 3
        sta_a(i+4) and (sta_stack(i+4) = false) then						// sta					; 4
@@ -940,7 +968,7 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
+       mva(i+1) and										// mva					; 1
        dex(i+2) and										// dex					; 2
        (listing[i+3] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 3
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
@@ -2744,8 +2772,8 @@
      end;
 
 
-    if mva(i) and (mva_stack(i) = false) and							// mva ... :STACKORIGIN,x		; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
+    if mva(i) and 										// mva ... :STACKORIGIN,x		; 0
+       mva(i+1) and 										// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and 										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) and 										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
        (listing[i+4] = #9'm@index4 0') and							// m@index4 0				; 4
@@ -2838,7 +2866,7 @@
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // shlEAX
 
-    if mva(i) and (mva_stack(i) = false) and							// mva  :STACKORIGIN,x			; 0
+    if mva(i) and 										// mva  :STACKORIGIN,x			; 0
        mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        inx(i+2) and 										// inx					; 2
        (listing[i+3] = #9'mva #$10 :STACKORIGIN,x') and 					// mva #$10 :STACKORIGIN,x		; 3
@@ -2879,7 +2907,7 @@
      end;
 
 
-    if ((mva(i) and (mva_stack(i) = false)) or (listing[i] = #9'sta :STACKORIGIN,x')) and	// mva I :STACKORIGIN,x			; 0
+    if (mva(i) or (listing[i] = #9'sta :STACKORIGIN,x')) and					// mva I :STACKORIGIN,x			; 0
        (listing[i+1] = #9'mva #$00 :STACKORIGIN+STACKWIDTH,x') and				// mva #$00 :STACKORIGIN+STACKWIDTH,x	; 1
        ((listing[i+2] = #9'm@index2 0') or (listing[i+2] = #9'm@index4 0')) and			// m@index2 0|m@index4 0		; 2
        (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
@@ -2915,10 +2943,10 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva					; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva					; 2
-       mva(i+3) and (mva_stack(i+3) = false) and						// mva					; 3
-       mva(i+4) and (mva_stack(i+4) = false) and						// mva					; 4
+       mva(i+1) and 										// mva					; 1
+       mva(i+2) and 										// mva					; 2
+       mva(i+3) and										// mva					; 3
+       mva(i+4) and										// mva					; 4
        (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
        add_sub(i+6) and (add_sub_stack(i+6) = false) and					// add|sub				; 6
        sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
@@ -2983,7 +3011,7 @@
      end;
 
 
-    if mva(i) and (mva_stack(i) = false) and							// mva   :STACKORIGIN+STACKWIDTH	; 0
+    if mva(i) and 										// mva   :STACKORIGIN+STACKWIDTH	; 0
        (listing[i+1] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 1
        add_sub(i+2) and 									// add|sub				; 2
        sta(i+3) and										// sta					; 3
@@ -3042,7 +3070,7 @@
      end;
 
 
-    if mva(i) and (mva_stack(i) = false) and							// mva  :STACKORIGIN,x			; 0
+    if mva(i) and										// mva  :STACKORIGIN,x			; 0
        mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and										// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) and 										// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
@@ -3189,8 +3217,8 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva   :STACKORIGIN-1+STACKWIDTH	; 2
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) and										// mva   :STACKORIGIN-1+STACKWIDTH	; 2
        mva(i+3) and 										// mva   :STACKORIGIN-1+STACKWIDTH*2	; 3
        mva(i+4) then 										// mva   :STACKORIGIN-1+STACKWIDTH*3	; 4
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
@@ -3216,8 +3244,8 @@
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
-       mva(i+2) and (mva_stack(i+2) = false) and						// mva   :STACKORIGIN-1+STACKWIDTH	; 2
+       mva(i+1) and 										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) and 										// mva   :STACKORIGIN-1+STACKWIDTH	; 2
        mva(i+3) then 										// mva   :STACKORIGIN+STACKWIDTH	; 3
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
 	(pos(':STACKORIGIN-1+STACKWIDTH,x', listing[i+2]) > 0) and
@@ -3242,7 +3270,7 @@
 // ----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    if mva(i) and (mva_stack(i) = false) and (pos(' :STACK', listing[i]) > 0) and		// mva YY+3 :STACKORIGIN+STACKWIDTH*3,x	; 0
+    if mva(i) and (pos(' :STACK', listing[i]) > 0) and						// mva YY+3 :STACKORIGIN+STACKWIDTH*3,x	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 1
        and_ora_eor(i+2) and									// and|ora|eor				; 2
        sta_stack(i+3) then									// sta :STACKORIGIN+STACKWIDTH*3,x	; 3
@@ -3256,8 +3284,8 @@
       end;
 
 
-    if mva(i) and (mva_stack(i) = false) and							// mva YY :STACKORIGIN,x		; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva YY+1 :STACKORIGIN+STACKWIDTH,x	; 1
+    if mva(i) and 										// mva YY :STACKORIGIN,x		; 0
+       mva(i+1) and										// mva YY+1 :STACKORIGIN+STACKWIDTH,x	; 1
        (listing[i+2] = #9'jsr hiWORD') then							// jsr hiWORD				; 2
      if (pos(' :STACKORIGIN,x', listing[i]) > 0) and
         (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) then
@@ -3432,7 +3460,7 @@
 
 
 // -----------------------------------------------------------------------------
-// ===		 	    ABSOLUTE BP. :STACK				  === //
+// ===		 	    ABSOLUTE BP. :STACK
 // -----------------------------------------------------------------------------
 
      if (mva(i) = false) and									// inx					; 0
@@ -3484,129 +3512,30 @@
     end;
 
 
-{
+// -----------------------------------------------------------------------------
 
-    if //inx(i) and										// inx					; 0
-       mva(i+1) and mva(i+2) and								// mva aa :STACKORIGIN,x		; 1
-       sta_stack(i+3) and sta_stack(i+4) and							// mva bb :STACKORIGIN+STACKWIDTH,x	; 2
-       lda_stack(i+5) and lda_stack(i+7) and							// sta :STACKORIGIN+STACKWIDTH*2,x	; 3
-       lda_stack(i+9) and lda_stack(i+11) and							// sta :STACKORIGIN+STACKWIDTH*3,x	; 4
-       (listing[i+6] = #9'sta :ecx') and (listing[i+8] = #9'sta :ecx+1') and			// lda :STACKORIGIN,x			; 5
-       (listing[i+10] = #9'sta :ecx+2') and (listing[i+12] = #9'sta :ecx+3') then		// sta :ecx				; 6
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and						// lda :STACKORIGIN+STACKWIDTH,x	; 7
-	(pos(':STACKORIGIN,x', listing[i+5]) > 0) and						// sta :ecx+1				; 8
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and				// lda :STACKORIGIN+STACKWIDTH*2,	; 9
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) and				// sta :ecx+2				; 10
-	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and				// lda :STACKORIGIN+STACKWIDTH*3,x	; 11
-	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+9]) > 0) and				// sta :ecx+3				; 12
-	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+11]) > 0) then
-     begin
-       listing[i+7]  := listing[i+2];
-       listing[i+8]  := listing[i+3];
-       listing[i+9]  := listing[i+4];
-       listing[i+10] := #9'sta :ecx+1';
-       listing[i+11] := #9'sta :ecx+2';
 
-       listing[i+2] := '';
-       listing[i+3] := '';
-       listing[i+4] := '';
-       listing[i+5] := '';
+     if mva(i) and										// mva   :STACKORIGIN,x			; 0
+        mva(i+1) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 1
+	mva(i+2) and										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 2
+	mva(i+3) and										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 3
+	(listing[i+4] = #9'jsr @expandToREAL') then
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+2]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+3]) > 0) then
+      begin
+       listing_tmp[0] := #9'mva ' + GetSTRING(i+2) + ' :STACKORIGIN+STACKWIDTH*3,x';
+       listing_tmp[1] := #9'mva ' + GetSTRING(i+1) + ' :STACKORIGIN+STACKWIDTH*2,x';
+       listing_tmp[2] := #9'mva ' + GetSTRING(i) + ' :STACKORIGIN+STACKWIDTH,x';
+       listing_tmp[3] := #9'mva #$00 :STACKORIGIN,x';
+
+       listing[i]  := listing_tmp[3];
+       listing[i+1]:= listing_tmp[2];
+       listing[i+2]:= listing_tmp[1];
+       listing[i+3]:= listing_tmp[0];
+       listing[i+4]:= '';
 
        Result:=false; Break;
-     end;
+      end;
 
-
-    if inx(i) and										// inx					; 0
-       mva(i+1) and (mva_stack(i+1) = false) and						// mva   :STACKORIGIN,x			; 1
-       mva(i+2) and 										// mva   :STACKORIGIN-1+STACKWIDTH,x	; 2
-       (listing[i+3] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x	; 3
-       add_sub_AX_CX(i+4) then									// jsr addAX_CX|subAX_CX		; 4
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN-1+STACKWIDTH,x', listing[i+2]) > 0) then
-     begin
-
-       listing[i+2] := #9'mva ' + GetString(i+2) + ' :STACKORIGIN+STACKWIDTH,x';
-       listing[i+3] := #9'sta :STACKORIGIN-1+STACKWIDTH,x';
-
-       Result:=false; Break;
-     end;
-
-
-    if lda(i) and (lda_stack(i) = false) and							// lda					; 0
-       (listing[i+1] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 1
-       inx(i+2) and										// inx					; 2
-       mva(i+3) and										// mva  :STACKORIGIN,x			; 3
-       mva_im(i+4) and										// mva #  :STACKORIGIN-1+STACKWIDTH,x	; 4
-       (listing[i+5] = #9'sta :STACKORIGIN+STACKWIDTH,x') and 					// sta :STACKORIGIN+STACKWIDTH,x	; 5
-       add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
-       dex(i+7) then										// dex					; 7
-     if (pos(':STACKORIGIN,x', listing[i+3]) > 0) and
-	(pos(':STACKORIGIN-1+STACKWIDTH,x', listing[i+4]) > 0) then
-     begin
-
-       if listing[i+6] = #9'jsr addAX_CX' then
-        listing[i+1] := #9'add ' + GetString(i+3)
-       else
-        listing[i+1] := #9'sub ' + GetString(i+3);
-
-       listing[i+2] := #9'sta :STACKORIGIN,x';
-
-       tmp := GetString(i+4);
-
-       listing[i+3] := #9'lda ' + tmp;
-
-       if listing[i+6] = #9'jsr addAX_CX' then
-        listing[i+4] := #9'adc ' + tmp
-       else
-        listing[i+4] := #9'sbc ' + tmp;
-
-       listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
-
-       listing[i+6] :='';
-       listing[i+7] :='';
-
-       Result:=false; Break;
-     end;
-
-
-    if //inx(i) and										// inx					; 0
-       mva(i+1) and										// mva  :STACKORIGIN,x			; 1
-       inx(i+2) and										// inx					; 2
-       mva(i+3) and										// mva  :STACKORIGIN,x			; 3
-       mva_im(i+4) and										// mva #  :STACKORIGIN+STACKWIDTH,x	; 4
-       sta(i+5) and 										// sta :STACKORIGIN-1+STACKWIDTH,x	; 5
-       add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
-       dex(i+7) then										// dex					; 7
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+3]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+4]) > 0) and
-	(pos(':STACKORIGIN-1+STACKWIDTH,x', listing[i+5]) > 0) then
-     begin
-
-       listing[i+1] := #9'lda ' + GetString(i+1);
-
-       if listing[i+6] = #9'jsr addAX_CX' then
-        listing[i+2] := #9'add ' + GetString(i+3)
-       else
-        listing[i+2] := #9'sub ' + GetString(i+3);
-
-       listing[i+3] := #9'sta :STACKORIGIN,x';
-
-       tmp := GetString(i+4);
-
-       listing[i+4] := #9'lda ' + tmp;
-
-       if listing[i+6] = #9'jsr addAX_CX' then
-        listing[i+5] := #9'adc ' + tmp
-       else
-        listing[i+5] := #9'sbc ' + tmp;
-
-       listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
-
-       listing[i+7] :='';
-
-       Result:=false; Break;
-     end;
-
-}
