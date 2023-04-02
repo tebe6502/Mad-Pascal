@@ -244,11 +244,19 @@ procedure NoSound; assembler;
 @description: Reset POKEY
 
 https://atariage.com/forums/topic/151841-init-of-the-pokey/?do=findComment&comment=1856144
+
+https://atarionline.pl/forum/comments.php?DiscussionID=6889&page=1#Item_17
 *)
 asm
 	lda #0
 	sta $d208
 	sta $d218
+
+	sta $d20f
+	sta $d21f
+
+	sta wsync
+	sta wsync
 
 	ldy #3
 	sty $d20f

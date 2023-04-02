@@ -72,8 +72,7 @@ asm
 	tay		; hi byte of RMT module to Y reg
 
 	lda a		; starting song line 0-255 to A reg
-	jsr $ffff
-adr	equ *-2
+	jsr adr: $ffff
 
 	pla:tax
 end;
@@ -109,8 +108,7 @@ asm
 	ldx channel
 	lda note
 
-	jsr $ffff
-adr	equ *-2
+	jsr adr: $ffff
 
 	pla:tax
 end;
@@ -141,8 +139,7 @@ adr	equ *-2
 	dey
 	bpl mov
 
-	jsr $ff00		; jmp (TRMT)	6502 buggy indirect jump
-ptr	equ *-2
+	jsr ptr: $ff00		; jmp (TRMT)	6502 buggy indirect jump
 
 quit	pla:tax
 end;
@@ -167,8 +164,7 @@ asm
 	adc #0
 	sta adr+1
 
-	jsr $ffff
-adr	equ *-2
+	jsr adr: $ffff
 
 	pla:tax
 end;

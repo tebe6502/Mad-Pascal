@@ -134,14 +134,14 @@ begin
 	  f := (b and c) or ((not b) and d);
 	end else
 	if i < 32 then begin
-	  g := ((5*i + 1) and $0f);
+	  g := (5*i + 1) and $0f;
 	  f := (d and b) or ((not d) and c);
 	end else
 	if i < 48 then begin
-	  g := ((3*i + 5) and $0f);
+	  g := (3*i + 5) and $0f;
 	  f := b xor c xor d;
 	end else begin
-	  g := ((7*i) and $0f);
+	  g := (7*i) and $0f;
 	  f := c xor (b or (not d));
 	end;
 
