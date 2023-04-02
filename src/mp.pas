@@ -4083,7 +4083,7 @@ end;
 // cxxxxxxxxxxxxxxxx
 
 {
-if (pos('XBIT', listing[i]) > 0) then begin
+if (pos('ldy :STACKORIGIN+9', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -5563,6 +5563,8 @@ begin				// OptimizeASM
       else
 
       if pos('@REAL_ROUND', arg0) > 0 then	// @REAL_ROUND		accepted
+      else
+      if pos('@SHORTREAL_TRUNC', arg0) > 0 then	// @SHORTREAL_TRUNC	accepted
       else
       if pos('@REAL_TRUNC', arg0) > 0 then	// @REAL_TRUNC		accepted
       else
@@ -10395,6 +10397,9 @@ procedure ExpandExpression(var ValType: Byte; RightValType, VarType: Byte; Force
 var m: Byte;
     sign: Boolean;
 begin
+
+ if (ValType in Pointers) or (RightValType in Pointers) then ValType:=POINTERTOK
+ else
 
  if (ValType in IntegerTypes) and (RightValType in IntegerTypes) then begin
 
@@ -17175,15 +17180,26 @@ case Tok[i].Kind of
 
       case ActualParamType of
 
-       SHORTREALTOK: begin
-		      asm65(#9'jsr @SHORTREAL_TRUNC');
+       SHORTREALTOK:
+       		begin
+		      //asm65(#9'jsr @SHORTREAL_TRUNC');
 
-		      ValType := SHORTINTTOK;
-		     end;
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @SHORTREAL_TRUNC.A');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @SHORTREAL_TRUNC.A+1');
 
-            REALTOK:// asm65(#9'jsr @REAL_TRUNC');
+			asm65(#9'jsr @SHORTREAL_TRUNC');
+
+			asm65(#9'lda :eax');
+			asm65(#9'sta :STACKORIGIN,x');
+
+		        ValType := SHORTINTTOK;
+		end;
+
+            REALTOK:
 	    	begin
-
+		// asm65(#9'jsr @REAL_TRUNC');
 			asm65(#9'lda :STACKORIGIN,x');
 			asm65(#9'sta @REAL_TRUNC.A');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
@@ -17203,10 +17219,10 @@ case Tok[i].Kind of
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
 			asm65(#9'lda :eax+3');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-
 		end;
 
-      HALFSINGLETOK: begin
+      HALFSINGLETOK:
+      		begin
 		     // asm65(#9'jsr @F16_INT');
 
 			asm65(#9'lda :STACKORIGIN,x');
@@ -17224,8 +17240,7 @@ case Tok[i].Kind of
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
 			asm65(#9'lda :eax+3');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-
-                     end;
+                end;
 
           SINGLETOK: asm65(#9'jsr @F2I');
 
@@ -18727,6 +18742,7 @@ var
   j, k: Integer;
   ConstVal: Int64;
   RightValType: Byte;
+  ForcePointer: Boolean;
   ftmp: TFloat;
   fl: single;
 begin
@@ -18815,8 +18831,13 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   RealTypeConversion(ValType, RightValType);//, VarType);
 
 
-  if (ValType = POINTERTOK) {and (VarType = POINTERTOK)} and (RightValType in IntegerTypes) then RightValType := POINTERTOK;
-//    CheckOperator(i, Tok[j + 1].Kind, ValType, RightValType);
+  ForcePointer := false;
+
+  if (Tok[j + 1].Kind in [PLUSTOK, MINUSTOK]) then begin
+   if ValType = POINTERTOK then begin ValType := WORDTOK; ForcePointer := true end;
+   if RightValType = POINTERTOK then begin RightValType := WORDTOK; ForcePointer := true end;
+  end;
+
 
   ValType := GetCommonType(j + 1, ValType, RightValType);
 
@@ -18842,9 +18863,9 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
    if DataSize[ValType] > DataSize[VarType] then ValType:=VarType;
 
 
-//  if (VarType = INTEGERTOK) and (Tok[j + 1].Kind in [PLUSTOK, MINUSTOK]) then ResizeType(ValType);		// dla PLUSTOK, MINUSTOK rozszerz typ wyniku
-
   GenerateBinaryOperation(Tok[j + 1].Kind, ValType);
+
+  if ForcePointer then ValType := POINTERTOK;
 
   j := k;
   end;
