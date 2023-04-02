@@ -5,9 +5,9 @@
 // -----------------------------------------------------------------------------
 
      if ldy_stack(i) and								// ldy :STACKORIGIN		; 0
-	(lda_adr(i+1) or sta_adr(i+1) or beq(i+1) or sta_adr(i+2)) then			// lda adr.|sta adr.|beq	; 1
+	(lda_adr(i+1) or sta_adr(i+1) or beq(i+1) or sta_adr(i+2) or sta_adr(i+3)) then	// lda adr.|sta adr.|beq	; 1
       begin										//         |sta adr.		; 2
-
+											//	   |sta adr.		; 3
 	tmp:=#9'sta ' + copy(listing[i], 6, 256);
 
 	for p:=i-1 downto 0 do
