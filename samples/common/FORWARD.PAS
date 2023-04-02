@@ -1,5 +1,5 @@
-                                (* Chapter 5 - Program 8 *)
 program Forward_Reference_Example;
+uses crt;
 
 var Number_Of_Times : integer;
 
@@ -24,9 +24,9 @@ begin  (* main program *)
    Writeln;
    Number_Of_Times := 7;
    Write_A_Line(Number_Of_Times);
+
+   repeat until keypressed;
 end.  (* of main program *)
-
-
 
 
 { Result of execution
@@ -47,4 +47,3 @@ The value of the count is now    2
 The value of the count is now    1
 
 }
-

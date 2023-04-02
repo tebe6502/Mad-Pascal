@@ -37,14 +37,13 @@ begin  (* main program *)
    Self^.Name.Initial    := 'Z';
    Self^.Name.Last_Name  := 'Brown';
 
-      Self^.City := 'Anywhere';
-      Self^.State := 'CA';
-      Self^.Zipcode := '97342';
-      Self^.Birthday.Day := 17;
+   Self^.City := 'Anywhere';
+   Self^.State := 'CA';
+   Self^.Zipcode := '97342';
+   Self^.Birthday.Day := 17;
 
-      Self^.Birthday.Month := 7;
-      Self^.Birthday.Year := 1938;
-//   end;    (* all data for self now defined *)
+   Self^.Birthday.Month := 7;
+   Self^.Birthday.Year := 1938;		//   (* all data for self now defined *)
 
 //   New(Mother);
    GetMem(Mother, sizeof(Person));
@@ -58,17 +57,15 @@ begin  (* main program *)
 //      New(Friend[Index]);
       GetMem(Friend[Index], sizeof(Person));
 
-//      Friend[Index]^ := Mother^;
+      Friend[Index]^ := Mother^;
    end;
 
-Temp.Name.First_Name := '11';
-
-//   Temp := Friend[27]^;
-//   Write(Temp.Name.First_Name,' ');
-//   Temp := Friend[33]^;
+   Temp := Friend[27]^;
+   Write(Temp.Name.First_Name,' ');
+   Temp := Friend[33]^;
    Write(Temp.Name.Initial,' ');
    Temp := Father^;
-//   Write(Temp.Name.Last_Name);
+   Write(Temp.Name.Last_Name);
    Writeln;
 
 //   Dispose(Self);
