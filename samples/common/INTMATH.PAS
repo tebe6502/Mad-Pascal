@@ -1,5 +1,5 @@
-                                (* Chapter 3 - Program 5 *)
 program Integer_Math_Demo;
+uses crt;
 
 var A,B,C,D : integer;
     E       : real;
@@ -23,11 +23,8 @@ begin
 end.
 
 
-
-
 { Result of execution
 
 (There is no output from this program)
 
 }
-
