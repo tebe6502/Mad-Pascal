@@ -322,7 +322,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Exp(x: Float): Float; overload;
 	function FilePos(var f: file): cardinal; assembler;
 	function FileSize(var f: file): cardinal; assembler;
-	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; inline;
+	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
+	procedure FillByte(var a; count: word; value: byte); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: char); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 	procedure FillChar(a: pointer; count: word; value: Boolean); assembler; register; overload; inline;
@@ -415,7 +416,7 @@ Print error message
 *)
 begin
 	writeln(#69,#82,#82,#32, a);	// 'ERR ',a	; kody znakow oddzielone przecinkiem nie zostana potraktowane jako ciag znakowy ktory kompilator zapisuje do stalych
-	halt;
+	halt(2);
 end;
 
 
@@ -1061,7 +1062,7 @@ Size of file (SDX only)
 @returns: cardinal
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa f :bp2
 
@@ -1081,7 +1082,6 @@ asm
 	mva #$00 result+3
 
 	pla:tax
-};
 end;
 
 
@@ -1095,7 +1095,7 @@ Get position in file (SDX only)
 @returns: cardinal
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa f :bp2
 
@@ -1124,7 +1124,7 @@ asm
 	lda (:bp2),y
 	sta :ecx+1
 
-	jsr idivEAX_ECX.main
+	jsr @CARDINAL.DIV		; common\cardinal.asm
 
 	mva :eax Result
 	mva :eax+1 Result+1
@@ -1132,7 +1132,6 @@ asm
 	mva :eax+3 Result+3
 
 	pla:tax
-};
 end;
 
 
@@ -1145,7 +1144,7 @@ Set file position (SDX only)
 @param: a - new position
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	mwa f :bp2
 
@@ -1181,7 +1180,6 @@ asm
 	sty IOResult
 
 	pla:tax
-};
 end;
 
 
@@ -1489,7 +1487,7 @@ asm
 
 	@ValueToStr #@printINT
 
-	@move #@buf s #16	; !!! koniecznie przez wskaznik
+	@buf2str s	; !!! koniecznie przez wskaznik
 
 	pla:tax
 end;
@@ -1511,7 +1509,7 @@ asm
 
 	@ValueToStr #@printCARD
 
-	@move #@buf s #16	; !!! koniecznie przez wskaznik
+	@buf2str s	; !!! koniecznie przez wskaznik
 
 	pla:tax
 end;
@@ -1617,12 +1615,26 @@ asm
 end;
 
 
-procedure FillByte(a: pointer; count: word; value: byte); assembler; register; inline;
+procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
 (*
 @description:
 Fills the memory starting at A with Count Characters with value equal to Value
 
 @param: a - pointer
+@param: count
+@param: value - Byte
+*)
+asm
+	jsr @fill
+end;
+
+
+procedure FillByte(var a; count: word; value: byte); assembler; register; overload; inline;
+(*
+@description:
+Fills the memory starting at A with Count Characters with value equal to Value
+
+@param: a - array
 @param: count
 @param: value - Byte
 *)
@@ -1903,6 +1915,7 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     x := x * x;
+
     Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
 
     { Test quadrant to return negative values }

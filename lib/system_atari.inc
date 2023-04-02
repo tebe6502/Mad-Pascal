@@ -55,15 +55,13 @@ Generate random number
 begin
 
  asm
+	lda $d20a
+	sta Result
 
- lda $d20a
- sta Result
-
- lda #$00
- sta Result+1
- sta Result+2
- sta Result+3
-
+	lda #$00
+	sta Result+1
+	sta Result+2
+	sta Result+3
  end;
 
  Result:= 1 - Result;
@@ -81,17 +79,20 @@ Generate random number
 begin
 
  asm
+	lda $d20a
+	and #$7f
+	sta Result+2
 
- lda $d20a
- and #$7f
- sta Result+2
- mva $d20a Result+1
+	nop
+	nop
 
- lda #$00
- sta Result
- lda #$3f
- sta Result+3
+	lda $d20a		; minimum interval between RANDOM register reads is 8 cycles
+	sta Result+1
 
+	lda #$00
+	sta Result
+	lda #$3f
+	sta Result+3
  end;
 
  Result:= 1 - Result;
@@ -114,7 +115,10 @@ begin
 	and #$7f
 	sta a+1
 
-	lda $d20a
+	nop
+	nop
+
+	lda $d20a		; minimum interval between RANDOM register reads is 8 cycles
 	sta a
  end;
 
