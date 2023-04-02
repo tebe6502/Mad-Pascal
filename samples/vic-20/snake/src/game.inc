@@ -59,10 +59,9 @@ var
   head_pos_col   : word absolute $86;
   tail_pos       : word absolute $88;
 
-  fruit_on_board : boolean absolute $8a;
+  snake          : TSnake absolute $8a;
 
-  snake          : TSnake absolute $8b;
-
+  fruit_on_board : boolean absolute $8d;
 
   // system free ZP variables
   game_over      : boolean absolute $fb;
@@ -100,16 +99,21 @@ procedure draw_frame;
 var
   i : byte absolute $70; // t0b
 begin
-  t0w := SCREEN_ADR + ROW_SIZE;
+  t0w := SCREEN_ADR + ROW_SIZE; t1w := COLORMAP_ADR + ROW_SIZE;
   for i := (COL_SIZE - 4) downto 0 do begin
     poke(t0w, C_WALL_VW);
     poke(t0w + (ROW_SIZE - 1), C_WALL_VE);
+    poke(t1w, GAME_YELLOW);
+    poke(t1w + (ROW_SIZE - 1), GAME_YELLOW);
     inc(t0w, ROW_SIZE);
+    inc(t1w, ROW_SIZE);
   end;
 
   for i := (ROW_SIZE - 1) downto 0 do begin
     poke(SCREEN_ADR + i, C_WALL_H);
     poke((SCREEN_ADR + SCREEN_SIZE - 2 * ROW_SIZE) + i, C_WALL_H);
+    poke(COLORMAP_ADR + i, GAME_YELLOW);
+    poke((COLORMAP_ADR + SCREEN_SIZE - 2 * ROW_SIZE) + i, GAME_YELLOW);
   end;
 end;
 
@@ -117,7 +121,7 @@ end;
 
 procedure press_fire;
 begin
-  set_xy(ROW_SIZE - length(txt_fire) - 2, 0);
+  set_xy(ROW_SIZE - length(txt_points) - 1, 0);
   print(GAME_WHITE, txt_fire);
 
   repeat until (JOY and JOY_FIRE) <> 0;
@@ -191,16 +195,32 @@ begin
   t0b := peek(tail_pos);
 
   case tail_dir of
-    UP, DOWN : begin
+    UP : begin
       case t0b of
-        C_BODY_NW, C_BODY_SW : tail_dir := LEFT;
-        C_BODY_NE, C_BODY_SE : tail_dir := RIGHT;
+        C_BODY_V  : tail_dir := UP;
+        C_BODY_NW : tail_dir := LEFT;
+        C_BODY_NE : tail_dir := RIGHT;
       end;
     end;
-    RIGHT, LEFT : begin
+    DOWN : begin
       case t0b of
-        C_BODY_SW, C_BODY_SE : tail_dir := UP;
-        C_BODY_NW, C_BODY_NE : tail_dir := DOWN;
+        C_BODY_V  : tail_dir := DOWN;
+        C_BODY_SW : tail_dir := LEFT;
+        C_BODY_SE : tail_dir := RIGHT;
+      end;
+    end;
+    RIGHT : begin
+      case t0b of
+        C_BODY_H  : tail_dir := RIGHT;
+        C_BODY_SW : tail_dir := UP;
+        C_BODY_NW : tail_dir := DOWN;
+      end;
+    end;
+    LEFT : begin
+      case t0b of
+        C_BODY_H  : tail_dir := LEFT;
+        C_BODY_SE : tail_dir := UP;
+        C_BODY_NE : tail_dir := DOWN;
       end;
     end;
   end;
@@ -210,24 +230,8 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure update_snake(s: byte); register;
+procedure update_snake;
 begin
-  case (s and %00111111) of
-    $01: snake.body := C_BODY_SE;
-    $02: snake.body := C_BODY_SW;
-    $04: snake.body := C_BODY_NE;
-    $08: snake.body := C_BODY_NW;
-    $10: snake.body := C_BODY_V;
-    $20: snake.body := C_BODY_H;
-  end;
-
-  case (s and %11000000) of
-    $00 : begin snake.head := C_HEAD_UP;    snake.m := MOVE_UP    end;
-    $40 : begin snake.head := C_HEAD_DOWN;  snake.m := MOVE_DOWN  end;
-    $80 : begin snake.head := C_HEAD_RIGHT; snake.m := MOVE_RIGHT end;
-    $c0 : begin snake.head := C_HEAD_LEFT;  snake.m := MOVE_LEFT  end;
-  end;
-
   t0w := head_pos + snake.m;
   t1w := peek(t0w);
 
@@ -263,54 +267,58 @@ end;
 procedure move_snake;
 begin
   case head_dir of
-    UP    : t0b := %00010000; // %00 01 xxxx => body: C_BODY_V
-    DOWN  : t0b := %01010000; // %01 01 xxxx => body: C_BODY_V
-    RIGHT : t0b := %10100000; // %10 10 xxxx => body: C_BODY_H
-    LEFT  : t0b := %11100000; // %11 10 xxxx => body: C_BODY_H
+    UP    : begin snake.head := C_HEAD_UP;    snake.body := C_BODY_V; snake.m := MOVE_UP    end;
+    DOWN  : begin snake.head := C_HEAD_DOWN;  snake.body := C_BODY_V; snake.m := MOVE_DOWN  end;
+    RIGHT : begin snake.head := C_HEAD_RIGHT; snake.body := C_BODY_H; snake.m := MOVE_RIGHT end;
+    LEFT  : begin snake.head := C_HEAD_LEFT;  snake.body := C_BODY_H; snake.m := MOVE_LEFT  end;
   end;
 
-  update_snake(t0b);
+  update_snake;
 end;
 
 //:-------------------------------------------------------------:
 
 procedure joy_handler;
 begin
-  t0b := 0;
+  snake.body := 0;
 
   if (JOY and JOY_UP <> 0) and (head_dir <> DOWN) then begin
+    snake.head := C_HEAD_UP; snake.m := MOVE_UP;
     case head_dir of
-      LEFT  : t0b := %00000001; // C_BODY_SE
-      RIGHT : t0b := %00000010; // C_BODY_SW
+      LEFT  : snake.body := C_BODY_SE;
+      RIGHT : snake.body := C_BODY_SW;
     end;
     head_dir := UP;
   end
   else if (JOY and JOY_DOWN <> 0) and (head_dir <> UP) then begin
+    snake.head := C_HEAD_DOWN; snake.m := MOVE_DOWN;
     case head_dir of
-      LEFT  : t0b := %01000100; // C_BODY_NE
-      RIGHT : t0b := %01001000; // C_BODY_NW
+      LEFT  : snake.body := C_BODY_NE;
+      RIGHT : snake.body := C_BODY_NW;
     end;
     head_dir := DOWN;
   end
   else if (JOY and JOY_RIGHT <> 0) and (head_dir <> LEFT) then begin
+    snake.head := C_HEAD_RIGHT; snake.m := MOVE_RIGHT;
     case head_dir of
-      UP    : t0b := %10000100; // C_BODY_NE
-      DOWN  : t0b := %10000001; // C_BODY_SE
+      UP    : snake.body := C_BODY_NE;
+      DOWN  : snake.body := C_BODY_SE;
     end;
     head_dir := RIGHT;
   end
   else if (JOY and JOY_LEFT <> 0) and (head_dir <> RIGHT) then begin
+    snake.head := C_HEAD_LEFT; snake.m := MOVE_LEFT;
     case head_dir of
-      UP    : t0b := %11001000; // C_BODY_NW
-      DOWN  : t0b := %11000010; // C_BODY_SW
+      UP    : snake.body := C_BODY_NW;
+      DOWN  : snake.body := C_BODY_SW;
     end;
     head_dir := LEFT;
   end;
   if (JOY and JOY_FIRE <> 0) then snake_speed := snake_speed shr 2;
 
-  if t0b <> 0 then begin
+  if snake.body <> 0 then begin
     snake_spd_c := snake_speed;
-    update_snake(t0b);
+    update_snake;
   end;
 end;
 
@@ -318,8 +326,8 @@ end;
 
 procedure put_fruit;
 begin
-  t0b := prnd(1, 24, ROW_MASK);
-  t1b := prnd(1, 27, COL_MASK);
+  prnd(1, 24, ROW_MASK); t0b := RND;
+  prnd(1, 27, COL_MASK); t1b := RND;
 
   t0w := ROW_SIZE * t1b; inc(t0w, SCREEN_ADR); inc(t0w, t0b);
 
@@ -331,7 +339,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure update_time; inline;
+procedure update_time;
 begin
   dec(time_entity);
   if time_entity = 0 then begin
@@ -342,7 +350,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure snake_step; inline;
+procedure snake_step;
 begin
   snake_speed := GAME_SPEED - level;
   if snake_speed < SPEED_THOLD then snake_speed := SPEED_THOLD;
@@ -360,8 +368,7 @@ end;
 
 procedure set_game;
 begin
-  clrscr(C_SPACE); clrcol(GAME_YELLOW);
-  draw_frame; draw_bottom_line; put_snake; print_hi_score;
+  clrscr(C_SPACE); draw_frame; draw_bottom_line; put_snake; print_hi_score;
 
   time_entity    := TIME_E_SET;
   level_up       := LEVEL_THOLD;
@@ -388,7 +395,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-procedure vbi; keep;
+procedure vbi;
 begin
   if not game_over then begin
     update_time;
@@ -398,10 +405,12 @@ begin
   end;
 end;
 
-//o-------------------------------------------------------------o
-
+{*
+  This must be right after VBI procedure!
+*}
 procedure prepare;
 begin
+  Move(@vbi, pointer(GAME_VBI_ADR), word(@prepare - @vbi));
   Move(pointer(CRT_CHARS_ADR), pointer(CHARSET_ADR), CHARSET_SIZE);
   Move(pointer(CRT_TITLE_ADR), pointer(SCREEN_ADR), SCREEN_SIZE);
 end;
@@ -409,10 +418,9 @@ end;
 //o-------------------------------------------------------------o
 
 begin
-  game_over := true;
-
-  prepare; sys_init; welcome_scr;
-
+  prepare;
+  game_over := false; sys_init;
+  welcome_scr;
   hi_score_bcd := $0; set_game;
 
   repeat

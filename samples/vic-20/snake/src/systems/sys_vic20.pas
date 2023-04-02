@@ -155,6 +155,8 @@ const
   CART_ADR     = $a000;
   CART_SIZE    = $2000;
 
+  GAME_VBI_ADR = $1400;
+
   JOY_UP       = %00000100;
   JOY_DOWN     = %00001000;
   JOY_LEFT     = %00010000;
@@ -167,6 +169,7 @@ const
 var
   RTCLOCK  : byte absolute $60;
   JOY      : byte absolute $61;
+  RND      : byte absolute $62;
 
 //:-------------------------------------------------------------:
 
@@ -182,8 +185,8 @@ procedure put_char(col, c: byte); assembler; register;
 procedure update_counter_2(v: byte; counter, scr_counter: pointer); assembler; register;
 procedure update_counter_4(v: byte; counter, scr_counter: pointer); assembler; register;
 
-function prnd: byte; register; assembler; overload;
-function prnd(a, b, mask: byte): byte; register; overload;
+procedure prnd; assembler; overload;
+procedure prnd(a, b, mask: byte); register; overload;
 
 //o-------------------------------------------------------------o
 
@@ -335,7 +338,7 @@ asm
       eor #%10111100                  // inverse values
       sta JOY
 
-      jsr VBI
+      jsr GAME_VBI_ADR
 
       mva #%01000000 VIA2IFR
       plr
@@ -524,7 +527,7 @@ end;
 
 //:-------------------------------------------------------------:
 
-function prnd: byte; register; assembler; overload;
+procedure prnd; assembler; overload;
 asm
       lda VICCR4
       adc RTCLOCK
@@ -532,19 +535,23 @@ asm
       eor VIA2T1LL
       eor VIA1T1CL
       eor VIA1T1CH
-      sta RESULT
+      sta RND
 end;
 
 //:-------------------------------------------------------------:
 
-function prnd(a, b, mask: byte): byte; register; overload;
+procedure prnd(a, b, mask: byte); register; overload;
 begin
-  RESULT := prnd and mask;
+  prnd;
 
-  if RESULT < a then inc(RESULT,a);
-  if RESULT > b then repeat
-    RESULT := RESULT shr 1;
-  until RESULT <= b;
+  t0b := RND and mask;
+
+  if t0b < a then inc(t0b,a);
+  if t0b > b then repeat
+    t0b := t0b shr 1;
+  until t0b <= b;
+
+  RND := t0b;
 end;
 
 
