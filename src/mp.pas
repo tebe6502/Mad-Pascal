@@ -170,7 +170,7 @@ uses
 
 const
 
-  title = '1.6.6';
+  title = '1.6.7';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -21666,7 +21666,7 @@ WHILETOK:
 
 //		writeln(Ident[IdentIndex].Name,',',ExpressionType,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].idType);
 
-		if (ExpressionType = STRINGPOINTERTOK) or (Ident[IdentIndex].Kind = FUNC) then
+		if (ExpressionType = STRINGPOINTERTOK) or (Ident[IdentIndex].Kind = FUNC) or ((ExpressionType = POINTERTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
 		 GenerateWriteString(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, Ident[IdentIndex].DataType)
 		else
 		if (Ident[IdentIndex].AllocElementType in [CHARTOK, POINTERTOK]) {and (Ident[IdentIndex].NumAllocElements = 0)} then

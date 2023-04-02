@@ -12,6 +12,7 @@
 - dodano możliwość użycia typu ENUM w pętli FOR
 - dodane stałe MAXINT, MAXSMALLINT
 - nowy sposób ustalenia adresu DATAORIGIN eliminujący ryzyko wystąpienia 'infinite loop' podczas assemblacji
+- poprawione adresowanie wskażników do rekordów, https://github.com/tebe6502/Mad-Pascal/blob/dev/samples/common/LINKLIST.PAS
 
 16.12.2022
 - poprawiona optymalizacja rejestru Y w celu zapobiegania występowania błędów ochrony pamięci
