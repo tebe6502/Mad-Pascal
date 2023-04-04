@@ -1,3 +1,10 @@
+
+function opt_STA_ZTMP(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      ZTMP.
 // -----------------------------------------------------------------------------
@@ -30,7 +37,7 @@
 	listing[i+7]:= '';
 	listing[i+8]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -55,7 +62,7 @@
 	listing[i+7]:= '';
 	listing[i+8]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -77,7 +84,7 @@
 	listing[i+7]:= '';
 	listing[i+8]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
    end;
@@ -116,7 +123,7 @@
 	listing[i+11]:= '';
 	listing[i+15]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -148,7 +155,7 @@
 	listing[i+10]:= '';
 	listing[i+13]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -178,7 +185,7 @@
       listing[i+8]  := '';
       listing[i+11] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -207,7 +214,7 @@
       listing[i+7]  := '';
       listing[i+10] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -229,7 +236,7 @@
       listing[i+2]  := '';
       listing[i+5]  := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -261,7 +268,7 @@
 	listing[i+7]:= '';
 	listing[i+8]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -282,7 +289,7 @@
 	listing[i+4]:= '';
 	listing[i+5]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -305,7 +312,7 @@
 	listing[i+4]:= '';
 	listing[i+5]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -340,7 +347,7 @@
 
       for p:=0 to 11 do listing[i+1+p] := listing_tmp[p];
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -363,7 +370,7 @@
 	listing[i+4]:= '';
 	listing[i+5]:= '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -417,5 +424,7 @@
 
       for p:=0 to 15 do listing[i+p] := listing_tmp[p];
 
-      Result:=false; Break;
+      exit(false);
      end;
+
+end;		// function

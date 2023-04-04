@@ -1,3 +1,12 @@
+
+function opt_GT(i: integer): Boolean;
+var p: integer;
+    c: cardinal;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 //					GT.
 // -----------------------------------------------------------------------------
@@ -41,7 +50,7 @@
         listing[i+11] := '';
         listing[i+12] := '';
 
-        Result:=false; Break;
+        exit(false);
        end else
        if c < $FFFFFFFF then begin
         listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 24), 2);
@@ -54,7 +63,7 @@
 
 	listing[i+13] := '';
 
-        Result:=false; Break;
+        exit(false);
        end else
        if c = $FFFFFFFF then begin
 	listing[i] := '';
@@ -73,7 +82,7 @@
 
 	listing[i+13] := #9'jmp ' + copy(listing[i+13], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
        end;
 
       end;
@@ -98,7 +107,7 @@
         listing[i+5] := '';
         listing[i+6] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -123,7 +132,7 @@
          listing[i+5] := '';
          listing[i+6] := '';
 
-	 Result:=false; Break;
+	 exit(false);
         end else
 	if c < $FFFF then begin									// faster than by SUB
 	 listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
@@ -132,7 +141,7 @@
 
 	 listing[i+7] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end else
 	if c = $FFFF then begin
 	 listing[i] := '';
@@ -145,7 +154,7 @@
 
 	 listing[i+7] := #9'jmp ' + copy(listing[i+7], 6, 256);
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
       end;
@@ -174,7 +183,7 @@
          listing[i+6] := '';
          listing[i+7] := #9'jne ' + copy(listing[i+7], 6, 256);
 
-	 Result:=false; Break;
+	 exit(false);
         end else
 	if c < $FFFF then begin
 	 listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
@@ -185,7 +194,7 @@
 
 	 listing[i+8] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
       end;
@@ -224,7 +233,7 @@
 
 	listing[i+12] := #9'jmp ' + copy(listing[i+12], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -253,7 +262,7 @@
          listing[i+6] := '';
          listing[i+7] := #9'bne @+';
 
-	 Result:=false; Break;
+	 exit(false);
         end else
 	if c < $FFFF then begin
 	 listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
@@ -262,7 +271,7 @@
 
 	 listing[i+6] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
       end;
@@ -290,9 +299,8 @@
 	listing[i+6] := '';
 	listing[i+7] := #9'bcc @+';
 
-	Result:=false; Break;
+	exit(false);
       end;
-
 
 
     if (SKIP(i-1) = false) and
@@ -306,25 +314,25 @@
         listing[i+1] := '';
         listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end else begin
 	c:=GetByte(i+1);
 
-	if c < $FF then begin
-	 listing[i+1] := #9'cmp #$' + IntToHex(c + 1, 2);
+	if c < 255 then begin
+	 listing[i+1] := #9'cmp #$' + IntToHex(byte(c + 1), 2);
 
 	 listing[i+3] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end else
-	if c = $FF then begin
+	if c = 255 then begin
 	 listing[i] := '';
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 
 	 listing[i+3] := #9'jmp ' + copy(listing[i+3], 6, 256);
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
        end;
@@ -344,16 +352,16 @@
         listing[i+2] := '';
 	listing[i+3] := #9'bne @+';
 
-	Result:=false; Break;
+	exit(false);
        end else begin
 	c:=GetByte(i+1);
 
 	if c < 255 then begin
-	 listing[i+1] := #9'cmp #$' + IntToHex(c+1, 2);
+	 listing[i+1] := #9'cmp #$' + IntToHex(byte(c+1), 2);
 
 	 listing[i+2] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
        end;
@@ -374,7 +382,7 @@
 	listing[i+2] := #9'bcc @+';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -391,7 +399,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -417,7 +425,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -458,7 +466,7 @@
 	listing[i+9] := '';
 	listing[i+10] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -486,7 +494,7 @@
 	listing[i+9]  := '';
 	listing[i+10] := #9'bmi @+';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -534,7 +542,7 @@
 	listing[i+18] := '';
 	listing[i+19] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -577,7 +585,7 @@
 	listing[i+16] := '';
 	listing[i+17] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -644,7 +652,7 @@
 	listing[i+9] := '';
 	listing[i+10] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -682,7 +690,7 @@
 	listing[i+16] := '';
 	listing[i+17] := #9'bmi @+';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -743,7 +751,7 @@
 	listing[i+23] := '';
 	listing[i+24] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -801,7 +809,7 @@
 	listing[i+23] := '';
 	listing[i+24] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -872,7 +880,7 @@
 	listing[i+23] := '';
 	listing[i+24] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -928,5 +936,7 @@
 	listing[i+23] := '';
 	listing[i+24] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
+
+end;		// function

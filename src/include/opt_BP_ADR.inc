@@ -1,3 +1,11 @@
+
+function opt_BP_ADR(i: integer): Boolean;
+var p,q: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				    BP -> ADR.
 // -----------------------------------------------------------------------------
@@ -221,7 +229,7 @@
        Break;
       end;	// for p:=
 
-     if Result = false then Break;
+     if Result = false then exit(false);
     end;
 
 
@@ -251,7 +259,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
     end;
 
 
@@ -275,5 +283,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
     end;
+
+end;		// function

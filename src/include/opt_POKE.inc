@@ -1,3 +1,12 @@
+
+function opt_POKE(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+    yes: Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				     POKE.
 // -----------------------------------------------------------------------------
@@ -29,7 +38,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -52,7 +61,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -78,7 +87,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -102,7 +111,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -124,7 +133,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -148,7 +157,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -168,7 +177,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -190,7 +199,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -212,7 +221,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -234,7 +243,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
   end;
@@ -276,7 +285,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -304,7 +313,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
   end;
@@ -335,7 +344,7 @@
      if yes then begin
       listing[i] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
     end;
@@ -356,7 +365,7 @@
      if yes then begin
       listing[i] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
     end;
@@ -384,7 +393,7 @@
 
 	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -404,7 +413,7 @@
 
 	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -419,11 +428,10 @@
 	if lda_bp_y(i+4) then listing[i+4] := #9'lda (:bp2),y';
 	if sta_bp_y(i+6) then listing[i+6] := #9'sta (:bp2),y';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
   end;
-
 
 
   if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
@@ -448,7 +456,9 @@
 
 	if sta_bp_y(i+8) then listing[i+8] := #9'sta (:bp2),y';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
    end;
+
+ end;		// function

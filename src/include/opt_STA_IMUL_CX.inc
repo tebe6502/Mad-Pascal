@@ -11,6 +11,11 @@
 
 }
 
+function opt_STA_IMUL_CX(i: integer): Boolean;
+var tmp: string;
+begin
+
+    Result := true;
 
 // -----------------------------------------------------------------------------
 // ===				imulCX					  === //
@@ -42,7 +47,7 @@
       listing[i+2] := listing[i+6];
       listing[i+6] := tmp;
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -64,7 +69,7 @@
       listing[i+9]  := #9'fmulu_8';
       listing[i+11] := #9'imulCL';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -108,7 +113,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -135,7 +140,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -161,7 +166,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
      end;
@@ -213,7 +218,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -257,7 +262,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -284,7 +289,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -339,7 +344,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
      end;
@@ -382,7 +387,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -409,7 +414,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -446,7 +451,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -471,7 +476,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -517,7 +522,7 @@
 	listing[i+15] := #9'rol @';
 	listing[i+16] := #9'sta ' + copy(listing[i+3], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -555,7 +560,7 @@
 	listing[i+15] := #9'rol @';
 	listing[i+16] := #9'sta ' + copy(listing[i+3], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -591,7 +596,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -616,7 +621,7 @@
 	 listing[i+11] := '';
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
        end;
 
      end;
@@ -668,7 +673,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -687,7 +692,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
   end;
@@ -743,7 +748,7 @@
       listing[i+6] := '';
       listing[i+16] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -777,7 +782,7 @@
       listing[i+6] := '';
       listing[i+17] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
    end;
@@ -821,7 +826,7 @@
 
 	 listing[i+12] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
 
@@ -863,7 +868,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -887,7 +892,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -913,7 +918,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -938,7 +943,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
     end;		// *256
@@ -976,7 +981,7 @@
       listing[i+11] := '';
       listing[i+12] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -1016,7 +1021,7 @@
       listing[i+11] := '';
       listing[i+12] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -1047,7 +1052,7 @@
       listing[i+11] := '';
       listing[i+12] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -1073,7 +1078,7 @@
    begin
     listing[i+11] := #9'imulCX_AL';
 
-    Result:=false; Break;
+    exit(false);
    end;
 
 
@@ -1095,7 +1100,7 @@
    begin
     listing[i+11]:= #9'imulCX_AL';
 
-    Result:=false; Break;
+    exit(false);
    end;
 
 
@@ -1125,7 +1130,7 @@
 
     listing[i+11]:= #9'imulCX_AL';
 
-    Result:=false; Break;
+    exit(false);
    end;
 
 
@@ -1161,5 +1166,7 @@
     listing[i+5] := listing_tmp[5];
     listing[i+6] := listing_tmp[6];
 
-    Result:=false; Break;
+    exit(false);
    end;
+
+end;		// function

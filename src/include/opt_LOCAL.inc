@@ -1,3 +1,9 @@
+
+function opt_LOCAL(i: integer): Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      LOCAL.
 // -----------------------------------------------------------------------------
@@ -10,7 +16,8 @@
       if (i > 0) and lda_a(i-1) then listing[i-1] := '';
 
       listing[i] := '';
-      Result:=false; Break;
+
+      exit(false);
      end;
 
 
@@ -21,7 +28,7 @@
       listing[i+1] := listing[i];
       listing[i] := #9'.LOCAL';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -31,7 +38,7 @@
        lda_a(i+3) then										// lda					; 3
       begin
 	listing[i] := '';
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -41,7 +48,7 @@
       begin
 	listing[i]   := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -56,7 +63,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -75,7 +82,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -94,7 +101,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -111,7 +118,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -133,7 +140,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -158,7 +165,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -183,7 +190,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -220,7 +227,7 @@
        listing[i+3] := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -253,7 +260,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -282,7 +289,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -305,7 +312,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -328,7 +335,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -346,7 +353,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -376,7 +383,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -400,7 +407,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -424,7 +431,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -450,7 +457,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -473,7 +480,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -493,7 +500,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -531,7 +538,7 @@
        listing[i+3] := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -565,7 +572,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -610,7 +617,7 @@
 
        listing[i+15] := #9'cmp #$00';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -652,7 +659,7 @@
 
        listing[i+15] := #9'cmp #$00';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -693,7 +700,7 @@
 
        listing[i+14] := #9'lda #$00';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -734,7 +741,7 @@
 
        listing[i+14] := #9'lda #$00';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -780,7 +787,7 @@
 
        listing[i+16] := #9'lda #$00';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -824,7 +831,7 @@
 
        listing[i+16] := #9'lda #$00';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -878,7 +885,7 @@
 	listing[i+21] := '';
 	listing[i+22] := '';
 
-        Result:=false; Break;
+        exit(false);
 
        end;
 
@@ -932,5 +939,7 @@
        listing[i+20] := 'L5';
        listing[i+21] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
+
+end;		// function

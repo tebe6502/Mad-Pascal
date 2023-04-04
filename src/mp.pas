@@ -125,6 +125,8 @@ Contributors:
 
 # wartosc dla typu POINTER zwiekszana jest o CODEORIGIN
 
+# indeks do tablicy zawsze promowany jest do typu WORD
+
 # :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia sie tylko :BP+1
 # :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
@@ -2654,7 +2656,7 @@ type
 var i, l, k, m, x: integer;
     a, t, {arg,} arg0, arg1: string;
     inxUse, found: Boolean;
-    t0, t1, t2, t3: string;
+//    t0, t1, t2, t3: string;
     listing, listing_tmp: TListing;
     s: array [0..15, 0..3] of string;
 
@@ -3881,10 +3883,22 @@ var i, l, k, m, x: integer;
   end;		// RemoveUnusedSTACK
 
 
+{$i include/opt_STACK.inc}
+
+{$i include/opt_STACK_ADR.inc}
+
+{$i include/opt_STACK_AL_CL.inc}
+
+{$i include/opt_STACK_AX_CX.inc}
+
+{$i include/opt_STACK_EAX_ECX.inc}
+
+{$i include/opt_STACK_PRINT.inc}
+
+
  function PeepholeOptimization_STACK: Boolean;
- var i, p, q: integer;
+ var i: integer;
      tmp: string;
-     yes: Boolean;
  begin
 
   Result := true;
@@ -3919,19 +3933,12 @@ if (pos('mva FINDERX :STACKORIGIN,x', listing[i]) > 0) then begin
 end;
 }
 
-
-{$i include/opt_STACK.inc}
-
-{$i include/opt_STACK_ADR.inc}
-
-{$i include/opt_STACK_AL_CL.inc}
-
-{$i include/opt_STACK_AX_CX.inc}
-
-{$i include/opt_STACK_EAX_ECX.inc}
-
-{$i include/opt_STACK_PRINT.inc}
-
+     if opt_STACK(i) = false then begin Result := false; Break end;
+     if opt_STACK_ADR(i) = false then begin Result := false; Break end;
+     if opt_STACK_AL_CL(i) = false then begin Result := false; Break end;
+     if opt_STACK_AX_CX(i) = false then begin Result := false; Break end;
+     if opt_STACK_EAX_ECX(i) = false then begin Result := false; Break end;
+     if opt_STACK_PRINT(i) = false then begin Result := false; Break end;
 
   end;
 
@@ -3985,38 +3992,16 @@ end;
  procedure OptimizeAssignment;
  var k: integer;
 
-(*
-   function PeepholeOptimization_END: Boolean;
-   var i, p: integer;
-       old: string;
-   begin
 
-   Result:=true;
+{$i include/opt_STA_LDY.inc}
 
-   Rebuild;
+{$i include/opt_STA_LSR.inc}
 
-   for i := 0 to l - 1 do
-    if listing[i] <> '' then begin
+{$i include/opt_STA_IMUL.inc}
 
-    p:=i;
+{$i include/opt_STA_IMUL_CX.inc}
 
-    old := listing[p];
-
-    while (pos('lda #', old) > 0) and sta_a(p+1) and lda_im(p+2) and (p < l-2) do begin	// lda #$28	; 0
-											// sta		; 1
-     if (copy(old, 6, 256) = copy(listing[p+2], 6, 256)) then begin			// lda #$28	; 2
-      listing[p+2] := '';
-      Result:=false;
-     end else
-      old:=listing[p+2];
-
-     inc(p, 2);
-    end;
-
-   end;
-
-   end;		// PeepholeOptimization_END
-*)
+{$i include/opt_STA_ZTMP.inc}
 
 
    function PeepholeOptimization_STA: Boolean;
@@ -4046,35 +4031,67 @@ end;
 }
 
 
-{$i include/opt_STA_LDY.inc}
+     if opt_STA_LDY(i) = false then begin Result := false; Break end;
 
 {$i include/opt_STA.inc}
 
-{$i include/opt_STA_LSR.inc}
-
-{$i include/opt_STA_IMUL.inc}
-
-{$i include/opt_STA_IMUL_CX.inc}
-
-{$i include/opt_STA_ZTMP.inc}
+     if opt_STA_LSR(i) = false then begin Result := false; Break end;
+     if opt_STA_IMUL(i) = false then begin Result := false; Break end;
+     if opt_STA_IMUL_CX(i) = false then begin Result := false; Break end;
+     if opt_STA_ZTMP(i) = false then begin Result := false; Break end;
 
    end;
 
    end;		// PeepholeOptimization_STA
 
 
+
+{$i include/opt_LDA.inc}
+
+{$i include/opt_TAY.inc}
+
+{$i include/opt_LDY.inc}
+
+{$i include/opt_AND.inc}
+
+{$i include/opt_ORA.inc}
+
+{$i include/opt_EOR.inc}
+
+{$i include/opt_NOT.inc}
+
+{$i include/opt_ADD.inc}
+
+{$i include/opt_SUB.inc}
+
+{$i include/opt_LSR.inc}
+
+{$i include/opt_ASL.inc}
+
+{$i include/opt_SPL.inc}
+
+{$i include/opt_POKE.inc}
+
+{$i include/opt_STA_0.inc}
+
+{$i include/opt_BP.inc}
+
+{$i include/opt_BP_ADR.inc}
+
+{$i include/opt_BP2_ADR.inc}
+
+{$i include/opt_ADR.inc}
+
+{$i include/opt_FORTMP.inc}
+
+
   function PeepholeOptimization: Boolean;
-  var i, p, q, err: integer;
-      tmp: string;
-      yes: Boolean;
+  var i: integer;
   begin
 
   Result:=true;
 
   Rebuild;
-
-  tmp:='';
-
 
   for i := 0 to l - 1 do
    if listing[i] <> '' then begin
@@ -4083,7 +4100,7 @@ end;
 // cxxxxxxxxxxxxxxxx
 
 {
-if (pos('ldy :STACKORIGIN+9', listing[i]) > 0) then begin
+if (pos('PTR', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -4091,8 +4108,7 @@ if (pos('ldy :STACKORIGIN+9', listing[i]) > 0) then begin
 end;
 }
 
-
-{$i include/opt_FORTMP.inc}
+     if opt_FORTMP(i) = false then begin Result := false; Break end;
 
 
     if (i = l - 1) and										// "samotna" instrukcja na koncu bloku
@@ -4148,43 +4164,24 @@ end;
      end;
 
 
-{$i include/opt_ILLEGAL_STA_0.inc}
-
-{$i include/opt_LDA.inc}
-
-{$i include/opt_TAY.inc}
-
-{$i include/opt_LDY.inc}
-
-{$i include/opt_BP.inc}
-
-{$i include/opt_AND.inc}
-
-{$i include/opt_ORA.inc}
-
-{$i include/opt_EOR.inc}
-
-{$i include/opt_NOT.inc}
-
-{$i include/opt_ADD.inc}
-
-{$i include/opt_SUB.inc}
-
-
-{$i include/opt_BP_ADR.inc}
-
-{$i include/opt_BP2_ADR.inc}
-
-{$i include/opt_ADR.inc}
-
-{$i include/opt_LSR.inc}
-
-{$i include/opt_ASL.inc}
-
-{$i include/opt_SPL.inc}
-
-{$i include/opt_POKE.inc}
-
+     if opt_STA_0(i) = false then begin Result := false; Break end;
+     if opt_LDA(i) = false then begin Result := false; Break end;
+     if opt_TAY(i) = false then begin Result := false; Break end;
+     if opt_LDY(i) = false then begin Result := false; Break end;
+     if opt_BP(i) = false then begin Result := false; Break end;
+     if opt_AND(i) = false then begin Result := false; Break end;
+     if opt_ORA(i) = false then begin Result := false; Break end;
+     if opt_EOR(i) = false then begin Result := false; Break end;
+     if opt_NOT(i) = false then begin Result := false; Break end;
+     if opt_ADD(i) = false then begin Result := false; Break end;
+     if opt_SUB(i) = false then begin Result := false; Break end;
+     if opt_BP_ADR(i) = false then begin Result := false; Break end;
+     if opt_BP2_ADR(i) = false then begin Result := false; Break end;
+     if opt_ADR(i) = false then begin Result := false; Break end;
+     if opt_LSR(i) = false then begin Result := false; Break end;
+     if opt_ASL(i) = false then begin Result := false; Break end;
+     if opt_SPL(i) = false then begin Result := false; Break end;
+     if opt_POKE(i) = false then begin Result := false; Break end;
 
   end;
 
@@ -4196,15 +4193,30 @@ end;
   repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
-
-//  repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
-
  end;
+
+
+{$i include/opt_LT_GTEQ.inc}
+
+{$i include/opt_LTEQ.inc}
+
+{$i include/opt_GT.inc}
+
+{$i include/opt_NE_EQ.inc}
+
+{$i include/opt_CMP.inc}
+
+{$i include/opt_CMP_0.inc}
+
+{$i include/opt_CMP_BP2.inc}
+
+{$i include/opt_LOCAL.inc}
+
+{$i include/opt_BRANCH.inc}
 
 
  function OptimizeRelation: Boolean;
  var i, p: integer;
-     c: cardinal;
      tmp: string;
      yes: Boolean;
  begin
@@ -4505,26 +4517,17 @@ end;
 
 // -----------------------------------------------------------------------------
 
-{$i include/opt_CMP.inc}
-
-{$i include/opt_LOCAL.inc}
-
-{$i include/opt_POKE.inc}
-
-{$i include/opt_CMP_BP2.inc}
-
-{$i include/opt_CMP_0.inc}
-
+     if opt_CMP(i) = false then begin Result := false; Break end;
+     if opt_LOCAL(i) = false then begin Result := false; Break end;
+     if opt_CMP_BP2(i) = false then begin Result := false; Break end;
+     if opt_CMP_0(i) = false then begin Result := false; Break end;
 
 // -----------------------------------------------------------------------------
 
-{$i include/opt_LT_GTEQ.inc}
-
-{$i include/opt_LTEQ.inc}
-
-{$i include/opt_GT.inc}
-
-{$i include/opt_NE_EQ.inc}
+     if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
+     if opt_LTEQ(i) = false then begin Result := false; Break end;
+     if opt_GT(i) = false then begin Result := false; Break end;
+     if opt_NE_EQ(i) = false then begin Result := false; Break end;
 
 // -----------------------------------------------------------------------------
 
@@ -4540,8 +4543,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-{$i include/opt_BRANCH.inc}
-
+     if opt_BRANCH(i) = false then begin Result := false; Break end;
 
    end;   // for
 
@@ -5322,7 +5324,7 @@ begin				// OptimizeASM
 
 	m:=l;
 
-	listing[l]   := #9'lda '+GetARG(0, x);		t0 := listing[l];
+	listing[l]   := #9'lda '+GetARG(0, x);		//t0 := listing[l];
 	listing[l+1] := #9'sta :ecx';
 
 	if arg0 = 'mulSMALLINT' then begin
@@ -5330,7 +5332,7 @@ begin				// OptimizeASM
 	 inc(l);
 	end;
 
-	listing[l+2]  := #9'lda '+GetARG(1, x);		t1 := listing[l+2];
+	listing[l+2]  := #9'lda '+GetARG(1, x);		//t1 := listing[l+2];
 	listing[l+3]  := #9'sta :ecx+1';
 
 	if arg0 = 'mulSMALLINT' then begin
@@ -5338,7 +5340,7 @@ begin				// OptimizeASM
 	 inc(l);
 	end;
 
-	listing[l+4]  := #9'lda '+GetARG(0, x-1);	t2 := listing[l+4];
+	listing[l+4]  := #9'lda '+GetARG(0, x-1);	//t2 := listing[l+4];
 	listing[l+5]  := #9'sta :eax';
 
 	if arg0 = 'mulSMALLINT' then begin
@@ -5346,7 +5348,7 @@ begin				// OptimizeASM
 	 inc(l);
 	end;
 
-	listing[l+6]  := #9'lda '+GetARG(1, x-1);	t3 :=listing[l+6];
+	listing[l+6]  := #9'lda '+GetARG(1, x-1);	//t3 :=listing[l+6];
 	listing[l+7]  := #9'sta :eax+1';
 
 	if arg0 = 'mulSMALLINT' then begin
@@ -8254,6 +8256,7 @@ var
 
 begin
 
+ TextPos:=0;
  i:=1;
 
  while i <= length(a) do begin
@@ -8753,7 +8756,6 @@ var
   ch, ch2: Char;
   CurToken: Byte;
   StrParams: TArrayString;
-  fl: double;
 
 
   procedure TokenizeUnit(a: integer); forward;
@@ -10321,7 +10323,7 @@ begin
    1: if (Source in SignedOrdinalTypes) then	// to WORD
        asm65(#9'jsr @expandSHORT2SMALL')
       else
-       asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH,x', '; expand to WORD');
+       asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH,x');
 
    2: if (Source in SignedOrdinalTypes) then	// to CARDINAL
        asm65(#9'jsr @expandToCARD.SMALL')
@@ -10397,9 +10399,6 @@ procedure ExpandExpression(var ValType: Byte; RightValType, VarType: Byte; Force
 var m: Byte;
     sign: Boolean;
 begin
-
- if (ValType in Pointers) or (RightValType in Pointers) then ValType:=POINTERTOK
- else
 
  if (ValType in IntegerTypes) and (RightValType in IntegerTypes) then begin
 
@@ -15613,13 +15612,20 @@ begin
 
 		 GetCommonType(i, ActualParamType, ArrayIndexType);
 
-		 if DataSize[ArrayIndexType] = 1 then
-		  ArrayIndexType := BYTETOK
-		 else
+		 case ArrayIndexType of
+		  SHORTINTTOK: ArrayIndexType := BYTETOK;
+		  SMALLINTTOK: ArrayIndexType := WORDTOK;
+		   INTEGERTOK: ArrayIndexType := CARDINALTOK;
+		 end;
+
+		 if DataSize[ArrayIndexType] = 1 then begin
+		  ExpandParam(WORDTOK, ArrayIndexType);
+//		  ArrayIndexType := WORDTOK;
+		 end else
 		  ArrayIndexType := WORDTOK;
 
 		  if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0,1]) {or (NumAllocElements_ > 0)} then begin
-		    ExpandParam(WORDTOK, ArrayIndexType);
+//		    ExpandParam(WORDTOK, ArrayIndexType);
 		    ArrayIndexType := WORDTOK;
 		  end;
 
@@ -15628,16 +15634,7 @@ begin
 		   Push(integer(NumAllocElements_ * Size), ASVALUE, DataSize[ArrayIndexType]);
 
 		   GenerateBinaryOperation(MULTOK, ArrayIndexType);
-{
-		   asm65(#9'lda :STACKORIGIN,x');
-		   asm65(#9'sta :STACKORIGIN,x');
-		   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-		   asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		   asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-		   asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-		   asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-}
+
 		 end else
 		   GenerateIndexShift( Ident[IdentIndex].AllocElementType );
 
@@ -15680,16 +15677,22 @@ begin
 
 		  GetCommonType(i, ActualParamType, ArrayIndexType);
 
+		  case ArrayIndexType of
+		   SHORTINTTOK: ArrayIndexType := BYTETOK;
+		   SMALLINTTOK: ArrayIndexType := WORDTOK;
+		    INTEGERTOK: ArrayIndexType := CARDINALTOK;
+		  end;
+
 		  if DataSize[ArrayIndexType] = 1 then begin
 		   ExpandParam(WORDTOK, ArrayIndexType);
-		   ArrayIndexType := BYTETOK;
+		   ArrayIndexType := WORDTOK;
 		  end else
 		   ArrayIndexType := WORDTOK;
 
-		  if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0,1]) {or (NumAllocElements_ > 0)} then begin
-		    ExpandParam(WORDTOK, ArrayIndexType);
-		    ArrayIndexType := WORDTOK;
-		  end;
+//		  if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0,1]) {or (NumAllocElements_ > 0)} then begin
+//		    ExpandParam(WORDTOK, ArrayIndexType);
+//		    ArrayIndexType := WORDTOK;
+//		  end;
 
 		  GenerateIndexShift( Ident[IdentIndex].AllocElementType );
 
@@ -16059,23 +16062,25 @@ begin
 
 	if (ActualParamType = POINTERTOK) and (Tok[i].Kind = IDENTTOK) then begin
 
-	  if (Tok[i - 1].Kind = ADDRESSTOK) and (not (Ident[GetIdent(Tok[i].Name^)].DataType in [RECORDTOK, OBJECTTOK])) then
+	  IdentTemp := GetIdent(Tok[i].Name^);
+
+	  if (Tok[i - 1].Kind = ADDRESSTOK) and (not (Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK])) then
 
 	  else begin
-	   AllocElementType := Ident[GetIdent(Tok[i].Name^)].AllocElementType;
-	   NumAllocElements := Ident[GetIdent(Tok[i].Name^)].NumAllocElements;
+	   AllocElementType := Ident[IdentTemp].AllocElementType;
+	   NumAllocElements := Ident[IdentTemp].NumAllocElements;
 	  end;
 
 
-	  if Ident[GetIdent(Tok[i].Name^)].Kind in [PROCEDURETOK, FUNCTIONTOK] then begin
+	  if Ident[IdentTemp].Kind in [PROCEDURETOK, FUNCTIONTOK] then begin
 
-           Result[NumActualParams].Name := Ident[GetIdent(Tok[i].Name^)].Name;
+           Result[NumActualParams].Name := Ident[IdentTemp].Name;
 
-	   AllocElementType := Ident[GetIdent(Tok[i].Name^)].Kind;
+	   AllocElementType := Ident[IdentTemp].Kind;
 
 	  end;
 
-//writeln(Ident[GetIdent(Tok[i].Name^)].Name,',',ActualParamType,',',AllocElementType,',',Ident[GetIdent(Tok[i].Name^)].NumAllocElements);
+//writeln(Ident[IdentTemp].Name,',',ActualParamType,',',AllocElementType,',',Ident[IdentTemp].NumAllocElements);
 
 	end else begin
 
@@ -16083,14 +16088,13 @@ begin
 
 	  IdentTemp := GetIdent(Tok[i].Name^);
 
-	  AllocElementType := Ident[GetIdent(Tok[i].Name^)].AllocElementType;
-	  NumAllocElements := Ident[GetIdent(Tok[i].Name^)].NumAllocElements;
+	  AllocElementType := Ident[IdentTemp].AllocElementType;
+	  NumAllocElements := Ident[IdentTemp].NumAllocElements;
 
 	  //writeln(Ident[IdentTemp].Name,' > ',ActualPAramType,',',AllocElementType,',',NumAllocElements,' | ',Ident[IdentTemp].DataType,',',Ident[IdentTemp].AllocElementType,',',Ident[IdentTemp].NumAllocElements);
 
 	 end else
 	  AllocElementType := UNTYPETOK;
-
 
 	end;
 
@@ -18742,7 +18746,6 @@ var
   j, k: Integer;
   ConstVal: Int64;
   RightValType: Byte;
-  ForcePointer: Boolean;
   ftmp: TFloat;
   fl: single;
 begin
@@ -18831,12 +18834,8 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   RealTypeConversion(ValType, RightValType);//, VarType);
 
 
-  ForcePointer := false;
-
-  if (Tok[j + 1].Kind in [PLUSTOK, MINUSTOK]) then begin
-   if ValType = POINTERTOK then begin ValType := WORDTOK; ForcePointer := true end;
-   if RightValType = POINTERTOK then begin RightValType := WORDTOK; ForcePointer := true end;
-  end;
+  if (ValType = POINTERTOK) and (RightValType in IntegerTypes) then begin ExpandParam(WORDTOK, RightValType); RightValType := POINTERTOK end;
+  if (RightValType = POINTERTOK) and (ValType in IntegerTypes) then begin ExpandParam_m1(WORDTOK, ValType); ValType := POINTERTOK end;
 
 
   ValType := GetCommonType(j + 1, ValType, RightValType);
@@ -18864,8 +18863,6 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
 
 
   GenerateBinaryOperation(Tok[j + 1].Kind, ValType);
-
-  if ForcePointer then ValType := POINTERTOK;
 
   j := k;
   end;
@@ -23572,8 +23569,8 @@ var IdentIndex, size: integer;
      if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) then begin
 
       case byte((Ident[IdentIndex].Value shr 24) and $7f) of
-       1..3 : Result := #9'= '+reg[(Ident[IdentIndex].Value shr 24) and $7f];
-       4..19: Result := #9'= :STACKORIGIN-'+IntToStr(byte((Ident[IdentIndex].Value shr 24) and $7f)-3);
+       1..3 : Result := #9'= ' + reg[(Ident[IdentIndex].Value shr 24) and $7f];
+       4..19: Result := #9'= :STACKORIGIN-' + IntToStr(byte((Ident[IdentIndex].Value shr 24) and $7f)-3);
       else
        Result := #9'= ''out of resource'''
       end;
@@ -24251,7 +24248,6 @@ VarRegister := 0;
 varPassMethod := 255;
 
 ImplementationUse:=false;
-pack:=false;
 
 Param := Ident[BlockIdentIndex].Param;
 isAsm := Ident[BlockIdentIndex].isAsm;
@@ -25061,8 +25057,8 @@ while Tok[i].Kind in
 
       CheckTok(i, COLONTOK);
 
-      pack:=false;
 
+      pack:=false;
 
       if Tok[i + 1].Kind = PACKEDTOK then begin
 

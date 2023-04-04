@@ -1,3 +1,9 @@
+
+function opt_STACK_EAX_ECX(i: integer): Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				  ADDEAX_ECX|SUBEAX_ECX
 // -----------------------------------------------------------------------------
@@ -80,7 +86,7 @@
 	listing[i+17] := '';
 	listing[i+18] := '';
 
-       Result:=false; Break;
+        exit(false);
      end;
 
 
@@ -151,7 +157,7 @@
 	listing[i+14] := '';
 	listing[i+15] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -218,7 +224,7 @@
 
 	listing[i+12] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -291,7 +297,7 @@
 	listing[i+17] := '';
 	listing[i+18] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -354,5 +360,7 @@
 	listing[i+10] := listing_tmp[10];
 	listing[i+11] := listing_tmp[11];
 
-       Result:=false; Break;
+       exit(false);
      end;
+
+end;		// function

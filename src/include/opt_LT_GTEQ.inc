@@ -1,3 +1,10 @@
+
+function opt_LT_GTEQ(i: integer): Boolean;
+var p, k: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 //				      LT.
 //				      GTEQ.
@@ -64,7 +71,7 @@
 	  listing[i+12] := '@';
 	 end;
 
-        Result:=false; Break;
+        exit(false);
       end;
 
 
@@ -100,7 +107,7 @@
 
 	end;
 
-        Result:=false; Break;
+        exit(false);
       end;
 
 
@@ -140,7 +147,7 @@
 	  listing[i+6] := '@';
 	 end;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -169,7 +176,7 @@
 	listing[i+7]  := '';
 	listing[i+8]  := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -187,7 +194,7 @@
 	else
 	 listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -233,7 +240,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -269,7 +276,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -300,7 +307,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -320,7 +327,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -361,7 +368,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -403,7 +410,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -422,7 +429,7 @@
 	listing[i+4] := #9'rol @';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -466,7 +473,7 @@
 	listing[i+14] := '';
 	listing[i+15] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -510,7 +517,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -532,7 +539,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -594,7 +601,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -648,7 +655,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -710,7 +717,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -766,7 +773,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -824,5 +831,7 @@
 	listing[i+21] := '';
 	listing[i+22] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
+
+end;		// function

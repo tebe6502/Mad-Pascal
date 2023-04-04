@@ -1,3 +1,12 @@
+
+function opt_ASL(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+    yes: Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      ASL.
 // -----------------------------------------------------------------------------
@@ -24,7 +33,7 @@
 	listing[i+4] := listing_tmp[4];
 	listing[i+5] := listing_tmp[5];
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -34,7 +43,7 @@
       begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -43,7 +52,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -54,7 +63,7 @@
      begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -72,7 +81,7 @@
        begin
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -94,7 +103,7 @@
 	listing[i+6] := '';
 	listing[i+7] := #9'tay';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -112,7 +121,7 @@
 	listing[i+3] := #9'asl @';
 	listing[i+4] := #9'tay';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -134,7 +143,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -147,7 +156,7 @@
 	listing[i+2] := listing[i+1];
 	listing[i+1] := #9'asl @';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -160,7 +169,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -173,7 +182,7 @@
      if (copy(listing[i], 6, 256) = copy(listing[i+5], 6, 256)) then begin
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -182,7 +191,7 @@
      begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -191,7 +200,7 @@
      begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -208,7 +217,7 @@
 	listing[i+2] := #9'asl @';
 	listing[i+3] := #9'tay';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -222,7 +231,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -233,7 +242,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -246,7 +255,7 @@
 
 	listing[i] := #9'asl @';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -269,7 +278,7 @@
 	else
 	 listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -283,7 +292,7 @@
 	listing[i+1] := #9'asl @';
 	listing[i+2] := #9'tay';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -299,7 +308,7 @@
 	listing[i+2] := #9'asl @';
 	listing[i+3] := #9'tay';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -312,7 +321,7 @@
       begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -348,7 +357,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -377,7 +386,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -417,7 +426,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -448,7 +457,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -476,7 +485,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -519,7 +528,7 @@
 
 	  listing[i+4] := '';
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
        end;
@@ -558,7 +567,7 @@
 
 	  listing[i+2] := '';
 
-	  Result:=false; Break;
+	  exit(false);
 	end else
 
 	if sta_stack(k-1) and (copy(listing[k-1], 6, 256) = copy(listing[i+1], 6, 256)) then begin	// sta :STACKORIGIN+STACKWIDHT	// k-1
@@ -583,7 +592,7 @@
 
 	  listing[i+3] := '';
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
        end;
@@ -637,7 +646,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -659,7 +668,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -688,7 +697,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -716,7 +725,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -744,7 +753,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -772,7 +781,7 @@
 	 listing[i+8] := '';
 	 listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -793,7 +802,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -816,7 +825,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -834,7 +843,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -855,7 +864,7 @@
 	listing[i+3] := #9'add ' + copy(listing[i+3], 6, 256);
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -872,7 +881,7 @@
         listing[i+1] := #9'rol @';
 	listing[i+2] := tmp;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -891,7 +900,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -916,7 +925,7 @@
 	  listing[i+2+p] := #9'asl @';
 	end;
 
-	Result := false; Break;
+	exit(false);
        end;
 
 
@@ -935,7 +944,7 @@
 	 dec(p, 2);
 	end;
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -987,7 +996,7 @@
 	listing[i+10] := #9'rol ' + copy(listing[i+5], 6, 256) ;
 	listing[i+11] := #9'rol ' + copy(listing[i+7], 6, 256) ;
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -1002,7 +1011,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1025,7 +1034,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1057,7 +1066,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1089,7 +1098,7 @@
 	listing[i+8] := #9'scc';
 	listing[i+9] := #9'inc ' + copy(listing[i+9], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1123,7 +1132,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -1180,7 +1189,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -1227,7 +1236,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -1275,7 +1284,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -1305,7 +1314,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -1324,7 +1333,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1340,7 +1349,7 @@
 
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1359,7 +1368,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1380,7 +1389,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1402,7 +1411,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1425,7 +1434,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1447,7 +1456,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1464,7 +1473,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1475,7 +1484,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1488,7 +1497,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1503,7 +1512,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1520,7 +1529,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1539,7 +1548,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1558,7 +1567,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1568,7 +1577,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1579,7 +1588,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1591,7 +1600,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1604,7 +1613,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1618,7 +1627,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1633,9 +1642,10 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
     end;
 
+end;		// function

@@ -1,3 +1,11 @@
+
+function opt_LDY(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      LDY.
 // -----------------------------------------------------------------------------
@@ -7,7 +15,7 @@
      begin
 	listing[i]   := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -17,7 +25,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -28,7 +36,7 @@
 
 	optyY := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -45,7 +53,7 @@
 
 	optyY := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -58,7 +66,7 @@
  	 listing[i]   := #9'ldy #$' + IntToHex(p, 2);
 	 listing[i+1] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
        end;
@@ -73,7 +81,7 @@
        listing[i+1] := listing[i+2];
        listing[i+2] := #9'iny';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -89,7 +97,7 @@
 
 	listing[i] := #9'ldy ' + copy(listing[i], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -113,7 +121,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -124,7 +132,7 @@
 	listing[i] := '';
 	listing[i+1] := #9'sta ' + copy(listing[i+1], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -136,7 +144,7 @@
         listing[i]   := '';
 
 	listing[i+2] := #9'tay';
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -149,7 +157,7 @@
 	listing[i]   := listing[i+1];
 	listing[i+1] := tmp;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -163,7 +171,7 @@
 
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -176,7 +184,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -192,7 +200,7 @@
 
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -210,7 +218,7 @@
 	listing[i+2] := '';
 
 	listing[i+5] := #9'iny';
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -223,7 +231,7 @@
 	listing[i]   := #9'tay';
 
 	listing[i+2] := '';
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -234,7 +242,7 @@
       begin
 	listing[i+3] := #9'dey';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -250,7 +258,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -271,7 +279,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -294,7 +302,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -331,7 +339,7 @@
 	listing[i+11]:= '';
 	listing[i+12]:= '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -346,7 +354,7 @@
       begin
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -360,7 +368,7 @@
       begin
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -372,7 +380,7 @@
       begin
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -385,7 +393,7 @@
       begin
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -408,7 +416,7 @@
 	listing[i+2]  := '';
 	listing[i+3]  := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -437,7 +445,7 @@
 
 	if listing[i] = listing[i+3] then listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -453,7 +461,7 @@
 	listing[i+4] := copy(listing[i+5], 1, 5) + copy(listing[i+4], 6, 256);
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -474,7 +482,7 @@
 	listing[i+4] := copy(listing[i+7], 1, 5) + copy(listing[i+4], 6, 256);
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -498,7 +506,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -522,7 +530,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -546,7 +554,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -575,7 +583,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -589,7 +597,7 @@
 
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -630,7 +638,7 @@
 	listing[i+9] := '';
 	listing[i+10]:= '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -645,6 +653,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
+end;		// function

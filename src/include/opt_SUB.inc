@@ -1,3 +1,10 @@
+
+function opt_SUB(i: integer): Boolean;
+var p, err: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      SUB.
 // -----------------------------------------------------------------------------
@@ -23,7 +30,7 @@
 	if p <> 0 then listing[i+3] := listing[i+3] + '-$' + IntToHex(p, 2);
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -33,7 +40,7 @@
       begin
 	listing[i] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -55,7 +62,7 @@
 	listing[i+2] := #9'sty '+copy(listing[i+2], 6, 256);
        end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -68,7 +75,7 @@
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 
-	 Result := false; Break;
+	exit(false);
        end;
 
 
@@ -83,7 +90,7 @@
       listing[i+3] := #9'dey';
       listing[i+4] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -106,7 +113,7 @@
 
 	listing[i+4] := '';
 
-	Result := false; Break;
+	exit(false);
        end;
 
 
@@ -117,7 +124,7 @@
 	listing[i]   := '';
 	listing[i+2] := #9'sub ' + copy(listing[i+2], 6, 256);
 
-	Result := false; Break;
+	exit(false);
        end;
 
 
@@ -127,7 +134,7 @@
      begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -140,7 +147,7 @@
       listing[i+1] := '';
       listing[i+4] := #9'sub ' + copy(listing[i+4], 6, 256);
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -152,7 +159,7 @@
      begin
       listing[i+1] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -161,7 +168,7 @@
      begin
 	listing[i+1] := '';
 
-	Result := false; Break;
+	exit(false);
      end;
 
 
@@ -207,7 +214,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -238,7 +245,7 @@
 
 	  listing[i+9] := #9'sbc (:bp2),y';
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
 
@@ -264,7 +271,7 @@
 
 	  listing[i+8] := listing[i];
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
 
@@ -307,7 +314,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -350,7 +357,7 @@
 	listing[i+18] := '';
 	listing[i+19] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -381,7 +388,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -406,7 +413,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -426,7 +433,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -445,7 +452,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -466,7 +473,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -481,7 +488,7 @@
 	listing[i]   := '';
 	listing[i+3] := #9'tya';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -516,7 +523,7 @@
 	listing[i+10] := '@';
 	listing[i+11] := #9'dec ' + copy(listing[i], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
     end;
 
 
@@ -543,7 +550,7 @@
 	 listing[i+5] := '';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -560,7 +567,7 @@
 	listing[i+4] := #9'dec '+copy(listing[i+5], 6, 256);
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -580,7 +587,7 @@
       listing[i+4] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
       listing[i+5] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -600,7 +607,7 @@
       listing[i+3] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
       listing[i+4] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -615,7 +622,7 @@
 
       listing[i+1] := #9'lda #$' + IntToHex(p and $ff, 2);
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -629,7 +636,7 @@
       listing[i+1] := '';
       listing[i+2] := #9'sub #$' + IntToHex(p and $ff, 2);
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -651,7 +658,7 @@
       listing[i+4] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
       listing[i+5] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -677,7 +684,7 @@
       listing[i+6] := #9'lda #$' + IntToHex(byte(p shr 16), 2);
       listing[i+7] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -713,7 +720,7 @@
       listing[i+10] := '';
       listing[i+11] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -745,7 +752,7 @@
 	listing[i+7] := '';
 	listing[i+10] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -772,7 +779,7 @@
 	listing[i+4] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -833,7 +840,7 @@
       listing[i+22] := '';
       listing[i+23] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -894,7 +901,7 @@
       listing[i+22] := '';
       listing[i+23] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -915,7 +922,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -936,7 +943,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -964,7 +971,7 @@
 	listing[i+10] := #9'dec :bp+1';
 	listing[i+11] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -983,5 +990,7 @@
 
 	listing[i+6] := #9'scc';
 
-	Result:=false; Break;
+	exit(false);
        end;
+
+end;		// function

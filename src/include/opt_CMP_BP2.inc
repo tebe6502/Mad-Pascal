@@ -1,3 +1,10 @@
+
+function opt_CMP_BP2(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      CMP :BP2.
 // -----------------------------------------------------------------------------
@@ -12,7 +19,7 @@
        listing[i]   := #9'mvy ' + GetString(i) + '+1 :bp+1';
        listing[i+2] := #9'lda (:bp),y';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -73,7 +80,7 @@
 	listing[i+19] := '';
 	listing[i+20] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -125,7 +132,7 @@
 	listing[i+18] := '';
 	listing[i+19] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -150,7 +157,7 @@
         listing[i+8] := '';
         listing[i+9] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -170,7 +177,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -202,5 +209,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
+
+end;		// function

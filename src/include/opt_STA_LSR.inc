@@ -1,3 +1,10 @@
+
+function opt_STA_LSR(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      LSR.
 // -----------------------------------------------------------------------------
@@ -24,6 +31,7 @@
 
 	  listing[p+1] := '';
 
+	  exit(false);
 	end;
 
        end;
@@ -50,6 +58,7 @@
 
 	  listing[p+1] := '';
 
+	  exit(false);
 	end;
 
        end;
@@ -84,7 +93,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -119,7 +128,7 @@
 
 	listing[i]   := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -146,7 +155,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -173,7 +182,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -202,7 +211,7 @@
 
 	listing[i]   := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -227,7 +236,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -253,7 +262,7 @@
 
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -280,9 +289,10 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
     end;	// if
 
+end;		// function

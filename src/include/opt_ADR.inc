@@ -1,3 +1,11 @@
+
+function opt_ADR(i: integer): Boolean;
+var p, q: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				       ADR.
 // -----------------------------------------------------------------------------
@@ -209,7 +217,7 @@
       end;// else	// for p:=
         //if onBreak(p) then Break;
 
-     if Result = false then Break;
+     if Result = false then exit(false);
 
 
 // -----------------------------------------------------------------------------
@@ -525,7 +533,7 @@
       end;// else	// for p:=
         //if onBreak(p) then Break;
 
-     if Result = false then Break;
+     if Result = false then exit(false);
 
 
 // -----------------------------------------------------------------------------
@@ -1389,7 +1397,7 @@
 
 // -----------------------------------------------------------------------------
 
-     if Result = false then Break;
+     if Result = false then exit(false);
     end;
 
 
@@ -1428,7 +1436,7 @@
 
 	listing[i] := '';
 
-	if (lda_adr(i+8) = false) and (sta_adr(i+9) = false) then begin Result:=false; Break end;
+	if (lda_adr(i+8) = false) and (sta_adr(i+9) = false) then exit(false);
 
 	if lda_adr(i+8) and iy(i+8) then begin
 	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
@@ -1440,7 +1448,7 @@
 	 if q<>0 then listing[i+9] := listing[i+9] + '+$' + IntToHex(q, 2);
 	end;
 
-	if (lda_adr(i+10) = false) and (sta_adr(i+11) = false) then begin Result:=false; Break end;
+	if (lda_adr(i+10) = false) and (sta_adr(i+11) = false) then exit(false);
 
 	if lda_adr(i+10) and iy(i+10) then begin
 	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
@@ -1452,7 +1460,7 @@
 	 if q<>0 then listing[i+11] := listing[i+11] + '+$' + IntToHex(q, 2);
 	end;
 
-	if (lda_adr(i+12) = false) and (sta_adr(i+13) = false) then begin Result:=false; Break end;
+	if (lda_adr(i+12) = false) and (sta_adr(i+13) = false) then exit(false);
 
 	if lda_adr(i+12) and iy(i+12) then begin
 	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
@@ -1464,7 +1472,7 @@
 	 if q<>0 then listing[i+13] := listing[i+13] + '+$' + IntToHex(q, 2);
 	end;
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1483,7 +1491,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1538,7 +1546,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1588,7 +1596,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1639,7 +1647,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1691,5 +1699,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
+
+end;		// function

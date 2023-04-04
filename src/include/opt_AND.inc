@@ -1,3 +1,10 @@
+
+function opt_AND(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      AND.
 // -----------------------------------------------------------------------------
@@ -8,7 +15,7 @@
      begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -19,7 +26,7 @@
 	listing[i]   := '';
 	listing[i+1] := #9'lda #$00';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -31,7 +38,7 @@
 	listing[i]   := '';
 	listing[i+1] := #9'lda #$00';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -47,7 +54,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -59,7 +66,7 @@
 	listing[i]   := '';
 	listing[i+1] := #9'and ' + copy(listing[i+1], 6, 256);
 	listing[i+2] := '';
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -96,5 +103,7 @@
 	  listing[p+2]:= '';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
+
+end;		// function

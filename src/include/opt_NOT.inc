@@ -1,3 +1,9 @@
+
+function opt_NOT(i: integer): Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      NOT.
 // -----------------------------------------------------------------------------
@@ -18,5 +24,7 @@
 	listing[i+4] := #9'eor #$01';
 	listing[i+5] := #9'sta ' + copy(listing[i+5], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
        end;
+
+end;		// function
