@@ -1,3 +1,11 @@
+
+function opt_STA_LDY(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				     LDY :STACKORIGIN
 // ===				     LDA adr.|STA adr.|beq
@@ -473,5 +481,7 @@
 	     lab_a(i) or (listing[i] = #9'eif') or
 	     ((pos(#9'jsr ', listing[i]) = 1) and (pos(#9'jsr @', listing[i]) = 0)) then Break;
 
-	if Result = false then Break;
+	if Result = false then exit(false);
       end;
+
+end;		// function

@@ -1,3 +1,10 @@
+
+function opt_TAY(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===		     		      TAY.
 // -----------------------------------------------------------------------------
@@ -8,7 +15,8 @@
      begin
 	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
 	listing[i+1] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -30,7 +38,7 @@
 	 listing[i+2] := '';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -42,7 +50,8 @@
 	listing[i]   := #9'iny';
 	listing[i+1] := '';
 	listing[i+2] := '';
-	Result:=false; Break;
+
+	exit(false);
       end;
 
 
@@ -54,7 +63,8 @@
 	listing[i]   := #9'dey';
 	listing[i+1] := '';
 	listing[i+2] := '';
-	Result:=false; Break;
+
+	exit(false);
       end;
 
 
@@ -67,7 +77,8 @@
 	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
 	listing[i+1] := #9'iny';
 	listing[i+2] := '';
-	Result:=false; Break;
+
+	exit(false);
       end;
 
 
@@ -77,7 +88,8 @@
        (adc(i+3) = false) then									//~adc				; 3
       begin
 	listing[i] := '';
-	Result:=false; Break;
+
+	exit(false);
       end;
 
 
@@ -87,7 +99,8 @@
        (sbc(i+3) = false) then									//~sbc				; 3
       begin
 	listing[i] := '';
-	Result:=false; Break;
+
+	exit(false);
       end;
 
 
@@ -96,7 +109,8 @@
       begin
 	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
 	listing[i+1] := '';
-	Result:=false; Break;
+
+	exit(false);
       end;
 
 
@@ -110,7 +124,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -123,7 +137,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -141,7 +155,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -160,7 +174,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -184,7 +198,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -211,7 +225,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -230,7 +244,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -250,7 +264,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -293,7 +307,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -333,7 +347,7 @@
 
        for p:=0 to 8 do listing[i+p] := listing_tmp[p];
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -355,7 +369,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -377,7 +391,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -402,7 +416,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -433,7 +447,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -460,7 +474,7 @@
 	listing[i+10]:= '';
 	listing[i+11]:= '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -490,7 +504,7 @@
 
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -514,7 +528,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -549,7 +563,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -584,7 +598,7 @@
 	listing[i+14] := '';
 	listing[i+15] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -617,7 +631,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -631,7 +645,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -646,7 +660,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -662,7 +676,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -679,7 +693,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -691,7 +705,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -704,7 +718,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -718,7 +732,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -732,7 +746,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -749,7 +763,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -764,7 +778,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -783,7 +797,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -800,7 +814,7 @@
        begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -818,7 +832,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -834,7 +848,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -851,7 +865,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -869,7 +883,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -887,7 +901,7 @@
        begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -905,7 +919,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -926,7 +940,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -950,7 +964,7 @@
 	else
 	 listing[i+4] := #9'sub ' + copy(listing[i], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -969,7 +983,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -991,7 +1005,7 @@
        begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1013,7 +1027,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1033,7 +1047,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -1056,7 +1070,7 @@
        begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1079,7 +1093,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -1102,7 +1116,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-      	Result:=false; Break;
+      	exit(false);
      end;
 
 
@@ -1119,7 +1133,7 @@
        begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1136,5 +1150,7 @@
        begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
+
+end;		// function

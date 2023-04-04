@@ -1,3 +1,11 @@
+
+function opt_BP2_ADR(i: integer): Boolean;
+var p, q: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				    BP2 -> ADR.
 // -----------------------------------------------------------------------------
@@ -57,7 +65,7 @@
       end else	// for p:=
         if onBreak(p) then Break;
 
-     if Result = false then Break;
+     if Result = false then exit(false);
 
 
 // -----------------------------------------------------------------------------
@@ -103,7 +111,7 @@
       end else	// for p:=
         if onBreak(p) then Break;
 
-     if Result = false then Break;
+     if Result = false then exit(false);
 
 
 // -----------------------------------------------------------------------------
@@ -145,6 +153,7 @@
 
 // -----------------------------------------------------------------------------
 
-     if Result = false then Break;
+     if Result = false then exit(false);
     end;
 
+end;		// function

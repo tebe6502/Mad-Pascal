@@ -1,3 +1,11 @@
+
+function opt_STACK_AL_CL(i: integer): Boolean;
+var p, q: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				    ADDAL_CL|SUBAL_CL
 // -----------------------------------------------------------------------------
@@ -25,7 +33,7 @@
        listing[i+3] := '';
        listing[i+4] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -39,7 +47,7 @@
 
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -55,7 +63,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -77,7 +85,7 @@
        listing[i+3] := #9'sta :STACKORIGIN,x';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -102,7 +110,7 @@
 
         listing[i+3] := #9'inx';
 
-        Result:=false; Break;
+        exit(false);
      end;
 
 
@@ -127,7 +135,7 @@
        listing[i+5] := '';
        listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -152,7 +160,7 @@
        listing[i+3] := #9'inx';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -176,7 +184,7 @@
        listing[i+4] := #9'sta :STACKORIGIN,x';
        listing[i+5] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -205,7 +213,7 @@
        listing[i+5] := #9'sta :STACKORIGIN,x';
        listing[i+6] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -230,7 +238,7 @@
 
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -255,7 +263,7 @@
        listing[i+5] := #9'sta :STACKORIGIN,x';
        listing[i+6] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -282,7 +290,7 @@
        listing[i+6] := #9'sta :STACKORIGIN,x';
        listing[i+7] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -308,7 +316,7 @@
        listing[i+5] := #9'sta :STACKORIGIN,x';
        listing[i+6] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -327,7 +335,7 @@
 
        if (i>0) and (pos('jsr @expand', listing[i-1]) > 0) then listing[i-1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -350,5 +358,7 @@
 
        listing[i+3] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
+
+end;		// function

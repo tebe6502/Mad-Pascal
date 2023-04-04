@@ -1,3 +1,12 @@
+
+function opt_BP(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+    yes: Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      BP.
 // -----------------------------------------------------------------------------
@@ -6,7 +15,7 @@
      begin
       listing[i] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -26,7 +35,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -46,7 +55,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -70,7 +79,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -87,7 +96,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -105,7 +114,7 @@
 	listing[i+5] := '';
 	listing[i+6] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -124,7 +133,7 @@
 	listing[i+2] := #9'ldy ' + copy(listing[i+2], 6, 256);
 	listing[i+3] := #9'sty :bp+1';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -148,7 +157,7 @@
 	 listing[i+2] := '';
 	end;
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -178,7 +187,7 @@
 	 listing[i+5] := '';
 	end;
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -191,7 +200,7 @@
 	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
 	listing[i+1] := #9'sty :bp+1';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -206,7 +215,7 @@
 	listing[i+1] := #9'sty :bp+1';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -223,7 +232,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -241,7 +250,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -257,7 +266,7 @@
 
         listing[i+5] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -270,7 +279,7 @@
 	listing[i]   := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -281,7 +290,7 @@
       begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -303,7 +312,7 @@
 	 listing[i+2] := #9'ldy ' + tmp;
 	 listing[i+3] := #9'sta (:bp),y';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
       end;
@@ -327,7 +336,7 @@
 	 listing[i+2] := #9'ldy ' + tmp;
 	 listing[i+3] := #9'sta (:bp),y';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
        end;
@@ -354,7 +363,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -381,7 +390,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -427,7 +436,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -459,7 +468,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -504,7 +513,7 @@
 	listing[i+16] := '';
 	listing[i+17] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -561,7 +570,7 @@
 	 listing[i+22] := #9'sbc (:bp2),y';
 	end;
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -619,7 +628,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -677,7 +686,7 @@
 	listing[i+27] := '';
 	listing[i+28] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -761,7 +770,7 @@
 	listing[i+28] := '';
 	listing[i+29] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -816,7 +825,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -866,7 +875,7 @@
 	listing[i+14] := '';
 	listing[i+15] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -901,7 +910,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -936,7 +945,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -959,7 +968,7 @@
 	listing[i+4]  := '';
 	listing[i+5]  := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1034,7 +1043,7 @@
 	listing[i+28] := '';
 	listing[i+29] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1068,7 +1077,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1105,7 +1114,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1135,7 +1144,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1171,7 +1180,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1200,7 +1209,7 @@
 
 	listing[i+9] := #9'sta $' + IntToHex(p+1, 4);
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1231,7 +1240,7 @@
 	listing[i+5] := '';
 	listing[i+6] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1261,7 +1270,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1280,7 +1289,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1298,7 +1307,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1327,7 +1336,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1367,7 +1376,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1412,7 +1421,7 @@
 	listing[i+9] := '';
 	listing[i+10] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1451,7 +1460,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1483,7 +1492,7 @@
 	listing[i] := '';
 	listing[i+1] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1502,7 +1511,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1523,7 +1532,7 @@
 	listing[i+2] := #9'ldy ' + copy(listing[i+2], 6, 256);
 	listing[i+3] := #9'sty :bp+1';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1548,7 +1557,7 @@
 	 listing[i+5] := '';
 	 listing[i+6] := '';
 
-	 Result := false; Break;
+	 exit(false);
 	end;
 
       end;
@@ -1568,7 +1577,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1584,7 +1593,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1600,7 +1609,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1617,7 +1626,7 @@
 	listing[i+2] := #9'lda (:bp2),y';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
    end;
 
 
@@ -1634,7 +1643,7 @@
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1660,7 +1669,7 @@
 	if lda_bp_y(i+7) then listing[i+7] := #9'lda (:bp2),y';
 	if sta_bp_y(i+8) then listing[i+8] := #9'sta (:bp2),y';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1686,7 +1695,7 @@
 	if lda_bp_y(i+7) then listing[i+7] := #9'lda (:bp2),y';
 	if sta_bp_y(i+8) then listing[i+8] := #9'sta (:bp2),y';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1729,7 +1738,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1747,7 +1756,7 @@
 	listing[i+5] := '';
 	listing[i+6] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1765,7 +1774,7 @@
 
 	listing[i+7] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1785,7 +1794,7 @@
 	listing[i+7] := listing[i+6];
 	listing[i+6] := #9'tya';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1802,7 +1811,7 @@
 
 	listing[i+4] := #9'add ' + copy(listing[i+4], 6 ,256);
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1819,7 +1828,7 @@
 
 	listing[i+4] := #9'add ' + copy(listing[i+4], 6 ,256);
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1836,7 +1845,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -1897,7 +1906,7 @@
 	 listing[i+9]  := '';
 	 listing[i+10] := '';
 
-	 Result := false; Break;
+	 exit(false);
 	end;
 
 
@@ -1935,7 +1944,7 @@
 	listing[i+14] := '';
 	listing[i+15] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -1979,7 +1988,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -2004,7 +2013,7 @@
 
 	  listing[i+9] := #9'adc (:bp2),y';
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
 
@@ -2026,7 +2035,7 @@
 
 	  listing[i+8] := listing[i];
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
 
@@ -2109,7 +2118,7 @@
 	listing[i+28] := '';
 	listing[i+29] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -2140,7 +2149,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -2177,7 +2186,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
 	end;
 
 
@@ -2216,6 +2225,7 @@
 	listing[i+14] := '';
 	listing[i+15] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
+end;		// function

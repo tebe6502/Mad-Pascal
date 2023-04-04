@@ -1,3 +1,12 @@
+
+function opt_LTEQ(i: integer): Boolean;
+var p: integer;
+    c: cardinal;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 //				      LTEQ.
 // -----------------------------------------------------------------------------
@@ -36,7 +45,7 @@
 
        listing[i+14] := '';
 
-       Result:=false; Break;
+       exit(false);
       end else
       if c < $FFFFFFFF then begin
 
@@ -60,7 +69,7 @@
 	listing[i+13] := #9'jcs ' + copy(listing[i+13], 6, 256);
 	listing[i+14] := '';
 
-	Result:=false; Break;
+	exit(false);
       end else begin
 	listing[i]    := '';
 	listing[i+1] := '';
@@ -78,7 +87,7 @@
 	listing[i+13] := '';
 	listing[i+14] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
      end;
@@ -112,7 +121,7 @@
        listing[i+4] := listing[i+3];
        listing[i+3] := #9'bne @+';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
      end;
@@ -142,7 +151,7 @@
 
        listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
       end else
       if p < $FFFF then begin
 
@@ -162,7 +171,7 @@
 	listing[i+7] := #9'jcs ' + copy(listing[i+7], 6, 256);
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
       end else begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -174,7 +183,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
      end;
@@ -204,7 +213,7 @@
 
 	  listing[i+7] := '';
 
-     	  Result:=false; Break;
+     	  exit(false);
 	 end;
 
 	end else begin
@@ -220,7 +229,7 @@
 	 listing[i+6] := #9'bcs @+';
 	 listing[i+7] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 
 //	end;
 
@@ -252,7 +261,7 @@
 
 	  listing[i+6] := '';
 
-     	  Result:=false; Break;
+     	  exit(false);
 	end else
 
 	if c < $FFFF then begin
@@ -262,7 +271,7 @@
 
 	  listing[i+7] := '';
 
-     	  Result:=false; Break;
+     	  exit(false);
 	end;
 
       end;
@@ -282,7 +291,7 @@
 
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
       end else
       if p < $FF then begin
 	listing[i+1] := #9'cmp #$'+IntToHex((p+1) and $ff, 2);
@@ -291,7 +300,7 @@
 	listing[i+3] := #9'jcs ' + copy(listing[i+3], 6, 256);
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end else begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -299,7 +308,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
      end;
@@ -317,7 +326,7 @@
 
        listing[i+3] := #9'jcs ' + copy(listing[i+3], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -336,7 +345,7 @@
 
        listing[i+3] := #9'bcs @+';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -378,7 +387,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -405,7 +414,7 @@
 	listing[i+9]  := #9'bpl @+';
 	listing[i+10] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 {
@@ -435,7 +444,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 }
 
@@ -508,7 +517,7 @@
  	listing[i+17] := '';
 	listing[i+18] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 {
@@ -554,7 +563,7 @@
  	listing[i+17] := '';
 	listing[i+18] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
      }
 
@@ -592,7 +601,7 @@
 	listing[i+16] := '';
 	listing[i+17] := #9'bpl @+';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -652,7 +661,7 @@
 	listing[i+24] := '';
 	listing[i+25] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -711,5 +720,7 @@
 	listing[i+24] := '';
 	listing[i+25] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
+
+end;		// function

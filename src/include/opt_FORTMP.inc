@@ -1,3 +1,10 @@
+
+function opt_FORTMP(i: integer): Boolean;
+var tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				     FORTMP.
 // -----------------------------------------------------------------------------
@@ -7,7 +14,8 @@
     begin
      listing[i+1] := #9'mva ' + copy(listing[i], 6, 4) + ' ' +  copy(listing[i+1], 6, 256);
      listing[i] := '';
-     Result:=false; Break;
+
+     exit(false);
     end;
 
 
@@ -16,7 +24,8 @@
     begin
      listing[i+1] := #9'mva ' + copy(listing[i], 6, 256) + ' ' +  copy(listing[i+1], 6, 256);
      listing[i] := '';
-     Result:=false; Break;
+
+     exit(false);
     end;
 
 
@@ -32,7 +41,8 @@
        listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
        listing[i+2] := #9'sta' + copy(listing[i+2], 10, 256);
        listing[i+3] := #9'sta' + copy(listing[i+3], 10, 256);
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -51,7 +61,8 @@
        listing[i+2] := tmp;
 
        listing[i+3] := #9'sta' + copy(listing[i+3], 10, 256);
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -62,7 +73,8 @@
 
        listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
        listing[i+2] := #9'sta' + copy(listing[i+2], 10, 256);
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -77,7 +89,8 @@
        listing[i+1] := tmp;
 
        listing[i+2] := #9'sta' + copy(listing[i+2], 10, 256);
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -86,7 +99,8 @@
      if (copy(listing[i], 6, 4) = copy(listing[i+2], 6, 4)) then begin				// mva #$xx	; 2
 
        listing[i+2] := #9'sta' + copy(listing[i+2], 10, 256);
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -95,8 +109,11 @@
      if copy(listing[i], 6, 4) = copy(listing[i+1], 6, 4) then begin
 
        listing[i+1] := #9'sta' + copy(listing[i+1], 10, 256);
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
   end;  // @FORTMP_
+
+end;		// function

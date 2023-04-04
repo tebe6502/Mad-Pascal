@@ -1,3 +1,12 @@
+
+function opt_EOR(i: integer): Boolean;
+var p: integer;
+//    tmp: string;
+//    yes: Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      EOR.
 // -----------------------------------------------------------------------------
@@ -64,7 +73,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -130,7 +139,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -204,7 +213,7 @@
 	listing[i+26] := '';
 	listing[i+27] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -247,7 +256,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
     if lda_a(i) and									// lda					; 0
@@ -270,7 +279,7 @@
 
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -283,7 +292,7 @@
 	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -292,7 +301,7 @@
        sta_a(i+2) then									// sta			; 2
      begin
 	listing[i+1] := '';
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -305,7 +314,7 @@
 
 	listing[i]   := #9'lda #$' + IntToHex(p, 2);
 	listing[i+1] := '';
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -315,7 +324,7 @@
        sta_a(i+3) then									// sta			; 3
      begin
 	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -326,5 +335,7 @@
        (sbc(i+4) = false) then								// ~sbc			; 4
      begin
 	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);
-	Result:=false; Break;
+	exit(false);
      end;
+
+end;		// function

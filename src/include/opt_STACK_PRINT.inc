@@ -1,3 +1,11 @@
+
+function opt_STACK_PRINT(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      PRINT.
 // -----------------------------------------------------------------------------
@@ -13,7 +21,7 @@
 	listing[i]   := '';
 	listing[i+1] := '';
 
- 	Result:=false; Break;
+ 	exit(false);
       end;
 
 
@@ -29,7 +37,7 @@
 	  listing[i]   := '';
 	  listing[i+1] := '';
 
-  	  Result:=false; Break;
+  	  exit(false);
 	end;
 
       end;
@@ -58,7 +66,7 @@
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+7] := ''; listing[p] := ''; Break end;
 
-  	Result:=false; Break;
+  	exit(false);
       end;
 
 
@@ -70,7 +78,7 @@
 
 	listing[i]   := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -86,7 +94,7 @@
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -101,7 +109,7 @@
 	 listing[i] := '';
 	 listing[p] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
       end;
@@ -118,7 +126,7 @@
        else
         listing[i] := #9'sbb :STACKORIGIN-1,x :STACKORIGIN,x';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -134,7 +142,7 @@
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -151,7 +159,7 @@
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -171,7 +179,7 @@
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+3] := ''; listing[p] := ''; Break end;
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -197,5 +205,7 @@
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+5] := ''; listing[p] := ''; Break end;
 
-	Result:=false; Break;
+	exit(false);
       end;
+
+end;		// function

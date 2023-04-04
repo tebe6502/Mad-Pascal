@@ -1,3 +1,9 @@
+
+function opt_ORA(i: integer): Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      ORA.
 // -----------------------------------------------------------------------------
@@ -44,7 +50,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -80,7 +86,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
     end;
@@ -101,7 +107,7 @@
 
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -111,7 +117,7 @@
      begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -120,7 +126,7 @@
      begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -131,7 +137,7 @@
 	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256) ;
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -142,7 +148,7 @@
 	listing[i]   := '';
 	listing[i+1] := #9'lda #$FF';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -155,7 +161,7 @@
 	listing[i+1] := #9'ora ' + copy(listing[i+1], 6, 256);
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -177,7 +183,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -202,7 +208,7 @@
 //	listing[i+2] := '';
 //	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -238,7 +244,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
 
@@ -273,7 +279,7 @@
 	  listing[i+10] := '';
 	  listing[i+11] := '';
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
 
@@ -309,6 +315,7 @@
 	  listing[i+10] := '';
 	  listing[i+11] := '';
 
-	  Result:=false; Break;
+	  exit(false);
 	end;
 
+end;		// function

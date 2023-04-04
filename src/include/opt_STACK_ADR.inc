@@ -1,3 +1,10 @@
+
+function opt_STACK_ADR(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				 STACK ADR.
 // -----------------------------------------------------------------------------
@@ -65,7 +72,7 @@
 	 listing[i+16] := listing[i+16] + '-$' + IntToHex(p, 2) + ',y';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -132,7 +139,7 @@
 	 listing[i+16] := listing[i+16] + '+$' + IntToHex(p, 2) + ',y';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -223,7 +230,7 @@
 	 listing[i+20] := listing[i+20] + '-$' + IntToHex(p, 2) + ',y';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -314,7 +321,7 @@
 	 listing[i+20] := listing[i+20] + '+$' + IntToHex(p, 2) + ',y';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -397,7 +404,7 @@
        listing[i+6] := '';
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -435,7 +442,7 @@
        listing[i+7] := '';
        listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -457,6 +464,7 @@
        listing[i+4] := '';
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
+end;		// function

@@ -1,3 +1,12 @@
+
+function opt_STACK(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+    yes: Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      STACK.
 // -----------------------------------------------------------------------------
@@ -7,7 +16,8 @@
      begin
        listing[i]   := '';
        listing[i+1] := '';
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -16,7 +26,8 @@
      begin
        listing[i]   := '';
        listing[i+1] := '';
-       Result:=false; Break;
+
+       exit(false);
      end;
 
 
@@ -30,7 +41,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -47,7 +58,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -70,7 +81,7 @@
        listing[i+4] := '';
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -81,14 +92,14 @@
      begin
        listing[i]   := '';
        listing[i+3] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
     if (listing[i] = #9'sta @PARAM?.@NIL') then							// sta @PARAM?.@NIL		; 0
      begin
        listing[i] := #9'sta #$00';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -98,7 +109,7 @@
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin
        listing[i]   := '';
        listing[i+1] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -107,7 +118,7 @@
      begin
        listing[i]   := '';
        listing[i+1] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -117,7 +128,7 @@
        listing[i]   := #9'sta :STACKORIGIN,x';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -129,7 +140,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -142,7 +153,7 @@
       begin
        listing[i+2] := '';
        listing[i+3] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -150,7 +161,7 @@
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin			// lda :STACKORIGIN+9		; 1
        listing[i]   := #9'tya';
        listing[i+1] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -161,7 +172,7 @@
      begin
        listing[i]   := '';
        listing[i+2] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -172,7 +183,7 @@
        listing[i+1] := #9'lda ' + GetSTRING(i);
        listing[i]   := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -183,7 +194,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -201,7 +212,7 @@
 
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -220,7 +231,7 @@
        listing[i+5] := '';
        listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -233,7 +244,7 @@
        if inx(i+1) and (listing[i-2] = listing[i+2]) then
 	listing[i+2] := #9'sta ' + copy(listing[i+2], pos(':STACK', listing[i+2]), 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -253,7 +264,7 @@
 
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -273,7 +284,7 @@
 
        listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -287,7 +298,7 @@
 
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -300,7 +311,7 @@
 
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -315,7 +326,7 @@
 
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -334,7 +345,7 @@
 
        listing[i+9] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -350,7 +361,7 @@
 
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -366,7 +377,7 @@
 
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -384,7 +395,7 @@
 
        listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -406,7 +417,7 @@
 
        listing[i+10] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -423,7 +434,7 @@
 
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -443,7 +454,7 @@
 
 	listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -471,7 +482,7 @@
 
 	listing[i+10] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -493,12 +504,27 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
+     end;
+
+
+    if mva(i) and										// mva	 :STACKORIGIN,x			; 0
+       mva(i+1) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 1
+       (listing[i+2] = #9'ldy :STACKORIGIN,x') then						// ldy :STACKORIGIN,x			; 2
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) and
+        (pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) then
+     begin
+       listing[i+2] := #9'ldy ' + GetSTRING(i);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+
+       exit(false);
      end;
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and										// mva					; 1
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        (listing[i+2] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 2
        (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
        sta_a(i+4) and (sta_stack(i+4) = false) then						// sta					; 4
@@ -508,7 +534,7 @@
 
 	listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -524,12 +550,12 @@
 
 	listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and 										// mva					; 1
+       mva(i+1) and 										// mva   :STACKORIGIN,x			; 1
        dex(i+2) and										// dex					; 2
        mwy_bp2(i+3) and										// mwy 					; 3
        ldy(i+4) and (ldy_stack(i+4) = false) and						// ldy					; 4
@@ -542,13 +568,13 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
     if inx(i) and										// inx					; 0
-       mva(i+1) and										// mva					; 1
-       mva(i+2) and 										// mva					; 2
+       mva(i+1) and										// mva	 :STACKORIGIN,x			; 1
+       mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
        (listing[i+3] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 3
        sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
        dex(i+5) then										// dex					; 5
@@ -560,7 +586,7 @@
 
 	listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -581,7 +607,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -606,7 +632,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -631,7 +657,7 @@
 
 	listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -660,7 +686,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -686,7 +712,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -724,7 +750,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -752,7 +778,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -782,7 +808,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -817,7 +843,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -845,7 +871,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -881,7 +907,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -932,7 +958,7 @@
 
 	listing[i+24] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -948,7 +974,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -963,7 +989,7 @@
 
 	listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -978,7 +1004,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -991,7 +1017,7 @@
        listing[i]   := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1003,7 +1029,7 @@
        listing[i]   := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1016,7 +1042,7 @@
        listing[i]   := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1029,7 +1055,7 @@
 
        listing[i+2] := #9'mva :ztmp8 ' + copy(listing[i+2], 21, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1042,7 +1068,7 @@
        listing[i+3] := #9'cmp ' + GetString(i);
        listing[i]   := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1057,7 +1083,7 @@
        listing[i+1] := #9'lda :STACKORIGIN-1,x';
        listing[i] := #9'ldy #1';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1070,7 +1096,7 @@
        listing[i+3] := #9'lda ' + GetString(i);
        listing[i]   := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1083,7 +1109,7 @@
      begin
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1096,7 +1122,7 @@
      begin
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1112,7 +1138,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -1127,7 +1153,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1142,7 +1168,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1155,7 +1181,7 @@
 
        listing[i] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1169,7 +1195,7 @@
        listing[i+2] := #9'asl @';
        listing[i+3] := #9'tay';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1197,7 +1223,7 @@
        listing[i+5] := '';
        listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1224,7 +1250,7 @@
        listing[i+5] := '';
        listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1246,7 +1272,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1277,7 +1303,7 @@
 	 listing[i+5] := '';
 	 listing[i+6] := '';
 
-	 Result:=false; Break;
+	 exit(false);
 	end;
 
        if Result then begin
@@ -1289,7 +1315,7 @@
 	listing[i+5] := #9'iny';
 	listing[i+6] := #9'sty :bp2+1';
 
-	Result:=false; Break;
+	exit(false);
        end;
 
      end;
@@ -1304,7 +1330,7 @@
        listing[i+1] := '';
        listing[i+4] := #9'tya';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1319,7 +1345,7 @@
        listing[i+2] := copy(listing[i+3], 1, 5) + copy(listing[i+2], 6, 256);
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1337,7 +1363,7 @@
        listing[i+3] := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1351,7 +1377,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1363,7 +1389,7 @@
        listing[i]   := '';
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1381,7 +1407,7 @@
        listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1399,7 +1425,7 @@
        listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1419,7 +1445,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1437,7 +1463,7 @@
        listing[i+6] := '';
 
        listing[i] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1457,7 +1483,7 @@
        listing[i+7] := '';
 
        listing[i] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1470,7 +1496,7 @@
        listing[i+7] := '';
 
        listing[i] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1484,13 +1510,13 @@
        listing[i+8] := '';
 
        listing[i] := '';
-       Result:=false; Break;
+       exit(false);
      end;
 
 
     if cmp_im_0(i+2) then begin
      listing[i+2] := '';
-     Result:=false; Break;
+     exit(false);
     end;
 
   end;
@@ -1517,7 +1543,7 @@
        listing[i+6] := '';
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1537,7 +1563,7 @@
        listing[i+8] := #9'sty :STACKORIGIN,x';
        listing[i+9] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1560,7 +1586,7 @@
        listing[i+11] := #9'sty :STACKORIGIN,x';
        listing[i+12] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1576,7 +1602,7 @@
        listing[i+3] := #9'and ' + GetString(i);
        listing[i]   := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1592,7 +1618,7 @@
        listing[i+3] := #9'and :STACKORIGIN+1,x';
        listing[i+4] := #9'sta :STACKORIGIN+1,x';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1606,7 +1632,7 @@
        listing[i+2] := #9'sta :STACKORIGIN-2,x';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1622,7 +1648,7 @@
        listing[i+3] := #9'and :STACKORIGIN,x';
        listing[i+4] := #9'sta ' + copy(listing[i+4], 21, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1638,7 +1664,7 @@
        listing[i+2] := #9'and :STACKORIGIN+1,x';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1656,7 +1682,7 @@
        listing[i+4] := #9'and :STACKORIGIN+1,x';
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1672,7 +1698,7 @@
        listing[i+2] := #9'ora :STACKORIGIN,x';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1688,7 +1714,7 @@
        listing[i+3] := #9'ora :STACKORIGIN+1,x';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1703,7 +1729,7 @@
        listing[i+3] := #9'lda :STACKORIGIN+1,x';
        listing[i+4] := #9'ora :STACKORIGIN+2,x';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1721,7 +1747,7 @@
        listing[i+4] := #9'ora :STACKORIGIN+1,x';
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1737,7 +1763,7 @@
        listing[i+5] := #9'lda :STACKORIGIN+1,x';
        listing[i+4] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1751,7 +1777,7 @@
        listing[i+1] := #9'lda :STACKORIGIN+1,x';
        listing[i]   := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1769,7 +1795,7 @@
        listing[i+4] := #9'and :STACKORIGIN+1,x';
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1784,7 +1810,7 @@
        listing[i+1] := #9'tya';
        listing[i+2] := #9'and :STACKORIGIN+1,x';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1805,7 +1831,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1824,7 +1850,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1845,7 +1871,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1866,7 +1892,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1887,7 +1913,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1908,7 +1934,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1929,7 +1955,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1952,7 +1978,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1975,7 +2001,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -1998,7 +2024,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2021,7 +2047,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2044,7 +2070,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2065,7 +2091,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2086,7 +2112,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2107,7 +2133,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2123,7 +2149,7 @@
        listing[i+6] := #9'dex';
        listing[i+7] := #9'sty :STACKORIGIN,x';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2144,7 +2170,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2163,7 +2189,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2184,7 +2210,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2205,7 +2231,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2226,7 +2252,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2247,7 +2273,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2270,7 +2296,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2293,7 +2319,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2316,7 +2342,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2339,7 +2365,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2365,7 +2391,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2384,7 +2410,7 @@
 
        listing[i] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2397,7 +2423,7 @@
        listing[i+1] := '';
        listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2428,7 +2454,7 @@
 	listing[i]   := #9'inx';
 	listing[i+1] := #9'ldy #1';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2458,7 +2484,7 @@
 
        listing[i+4] := #9'bne @+';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2483,7 +2509,7 @@
 
        listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2503,7 +2529,7 @@
 
         listing[i+4] := '';
 
-        Result:=false; Break;
+        exit(false);
        end;
 
      end;
@@ -2525,7 +2551,7 @@
        listing[i+2] := #9'sta :STACKORIGIN,x';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2543,7 +2569,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2556,7 +2582,7 @@
        listing[i+2] := #9'iny';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2567,7 +2593,7 @@
      begin
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2583,7 +2609,7 @@
 
        listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
 
-        Result:=false; Break;
+        exit(false);
      end;
 
 
@@ -2600,7 +2626,7 @@
 
        listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
 
-        Result:=false; Break;
+        exit(false);
      end;
 
 
@@ -2613,7 +2639,7 @@
      begin
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2650,7 +2676,7 @@
 	 listing[i+9] := #9'lda (:bp2),y';
 	end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2674,7 +2700,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2695,7 +2721,7 @@
 
        listing[i] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2711,7 +2737,7 @@
        listing[i+3] := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2735,7 +2761,7 @@
        listing[i+8] := '';
        listing[i+9] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2768,7 +2794,7 @@
        listing[i+7]:= '';
        listing[i+8]:= '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2809,7 +2835,7 @@
        listing[i+9] := #9'adc ' + GetString(tmp);
        listing[i+10]:= #9'sta :bp2+1';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2833,7 +2859,7 @@
 
        listing[i+8] := #9'adc (:bp2),y';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2847,7 +2873,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2859,7 +2885,7 @@
        listing[i+1] := #9'tay';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2882,7 +2908,7 @@
        listing[i]   := #9'mva #$00 :STACKORIGIN,x';
        listing[i+1] := #9'mva #$00 :STACKORIGIN+STACKWIDTH,x';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
@@ -2903,7 +2929,7 @@
        listing[i+6] := '';
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2938,7 +2964,7 @@
        listing[i+7] := '';
        listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -2968,7 +2994,7 @@
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
     if inx(i) and										// inx					; 0
@@ -2988,7 +3014,7 @@
 
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3007,7 +3033,7 @@
 
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3024,7 +3050,7 @@
 
        listing[i] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3066,7 +3092,7 @@
        listing[i+10] := '';
        listing[i+11] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3114,7 +3140,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3154,7 +3180,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3178,7 +3204,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3208,7 +3234,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3239,7 +3265,7 @@
 	listing[i+3] := listing_tmp[3];
 	listing[i+4] := listing_tmp[4];
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3262,7 +3288,7 @@
 	listing[i+2] := listing_tmp[2];
 	listing[i+3] := listing_tmp[3];
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3280,7 +3306,7 @@
 	listing[i]   := #9'lda ' + GetString(i);
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3295,7 +3321,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3308,7 +3334,7 @@
 
 	listing[i+3] := #9'jne ' + copy(listing[i+3], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3325,7 +3351,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3343,7 +3369,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -3353,7 +3379,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3363,7 +3389,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3373,7 +3399,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jcs ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3383,7 +3409,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jcc ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3393,7 +3419,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jmi ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3403,7 +3429,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jpl ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3416,7 +3442,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3429,7 +3455,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3442,7 +3468,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3455,7 +3481,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -3474,7 +3500,7 @@
        listing[i+2] := listing[i+1];
        listing[i+1] := tmp;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -3506,7 +3532,7 @@
      if yes then begin
       listing[i] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
     end;
@@ -3536,6 +3562,7 @@
        listing[i+3]:= listing_tmp[0];
        listing[i+4]:= '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
+end;		// function

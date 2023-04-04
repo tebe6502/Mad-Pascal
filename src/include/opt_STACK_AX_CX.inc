@@ -1,3 +1,11 @@
+
+function opt_STACK_AX_CX(i: integer): Boolean;
+var p, q: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				    ADDAX_CX|SUBAX_CX
 // -----------------------------------------------------------------------------
@@ -31,7 +39,7 @@
        listing[i+5] := '';
        listing[i+6] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -64,7 +72,7 @@
        listing[i+5] := '';
        listing[i+6] := #9'inx';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -113,7 +121,7 @@
        listing[i+5] := '';
        listing[i+6] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -159,7 +167,7 @@
        listing[i+12]:= '';
        listing[i+13]:= '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -204,7 +212,7 @@
        listing[i+4]:= '';
        listing[i+5]:= '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -242,7 +250,7 @@
        listing[i+7] := '';
        listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -282,7 +290,7 @@
 
        listing[i+7] :='';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -317,7 +325,7 @@
        listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
        listing[i+6] :='';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -343,7 +351,7 @@
 	listing[i+7] := '';
 	listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -384,7 +392,7 @@
 
        listing[i+7] := #9'dex';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -418,7 +426,7 @@
        listing[i+7] := #9'dex';
        listing[i+8] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -460,7 +468,7 @@
        listing[i+9]  := '';
        listing[i+10] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -511,7 +519,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -562,7 +570,7 @@
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -611,5 +619,7 @@
 	listing[i+9] := '';
 	listing[i+10]:= '';
 
-       Result:=false; Break;
+       exit(false);
      end;
+
+end;		// function

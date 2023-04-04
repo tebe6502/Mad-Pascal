@@ -1,3 +1,9 @@
+
+function opt_CMP_0(i: integer): Boolean;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 //				      CMP #$00
 // -----------------------------------------------------------------------------
@@ -32,7 +38,7 @@
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	Result := false; Break;
+	exit(false);
       end;
 
 
@@ -62,7 +68,7 @@
 
        listing[i+11] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -80,7 +86,7 @@
 
        listing[i+5] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -93,7 +99,7 @@
       begin
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -108,7 +114,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -133,7 +139,7 @@
       begin
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -152,7 +158,7 @@
       begin
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -171,6 +177,7 @@
 
 //       if cmp_im_0(i+4) then listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
+end;		// function

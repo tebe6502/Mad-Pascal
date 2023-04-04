@@ -1,3 +1,10 @@
+
+function opt_NE_EQ(i: integer): Boolean;
+var p: integer;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 //				      NE.
 //				      EQ.
@@ -26,7 +33,7 @@
        listing[i+5] := '';
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -58,7 +65,7 @@
 
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -81,7 +88,7 @@
 
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -106,7 +113,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -138,7 +145,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -166,7 +173,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -189,7 +196,7 @@
        listing[i+6] := '';
        listing[i+7] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -216,7 +223,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -276,7 +283,7 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -331,7 +338,7 @@
 	listing[i+21] := '';
 	listing[i+22] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -404,5 +411,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
+
+end;		// function

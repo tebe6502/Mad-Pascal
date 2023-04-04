@@ -1,3 +1,11 @@
+
+function opt_BRANCH(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      BRANCH.
 // -----------------------------------------------------------------------------
@@ -7,7 +15,8 @@
      begin											// bcs @+		; 2
 	listing[i+1] := #9'bmi @+';								// dey			; 3
 	listing[i+2] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -16,7 +25,8 @@
      begin											// bcc @+		; 2
 	listing[i+1] := #9'bpl @+';								// dey			; 3
 	listing[i+2] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -27,7 +37,8 @@
 	listing[i+1] := #9'bmi @+';								// dey			; 4
 	listing[i+2] := '';
 	listing[i+3] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -38,7 +49,8 @@
 	listing[i+1] := #9'bpl @+';								// dey			; 4
 	listing[i+2] := '';
 	listing[i+3] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -50,7 +62,8 @@
 	listing[i+1] := #9'bpl *+5';
 	listing[i+2] := '';
 	listing[i+3] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -65,7 +78,7 @@
      begin
 	listing[i+1] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -77,7 +90,8 @@
        lab_a(i+2) then										// @			; 2	!!! to oznacza krotki test !!!
      begin
 	listing[i+1] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -90,7 +104,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -100,11 +114,13 @@
        cmp_im_0(i+2) and									// beq|bne		; 3
        (beq(i+3) or bne(i+3) ) then
      begin
-	a := listing[i];
+	tmp := listing[i];
+
 	listing[i]   := listing[i+1];
-	listing[i+1] := a;
+	listing[i+1] := tmp;
 	listing[i+2] := '';
-	Result:=false; Break;
+
+	exit(false);
      end;
 
 
@@ -122,7 +138,7 @@
 	 listing[i+4] := '';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -136,7 +152,7 @@
 	else
 	 listing[i+1] := #9'jmi ' + copy(listing[i+1], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -160,7 +176,7 @@
 	else
 	 listing[i+6] := #9'jpl ' + copy(listing[i+6], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -174,7 +190,7 @@
 	else
 	 listing[i+1] := #9'jmi ' + copy(listing[i+1], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -190,7 +206,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -203,7 +219,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -217,7 +233,7 @@
        listing[i+2] := #9'jne ' + copy(listing[i+3], 6, 256);
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -233,7 +249,7 @@
        listing[i+3] := '';
        listing[i+4] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -254,7 +270,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -275,7 +291,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -295,7 +311,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -315,7 +331,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -340,7 +356,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -359,7 +375,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -381,7 +397,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -402,7 +418,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -422,7 +438,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -442,7 +458,7 @@
        for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -463,7 +479,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -484,7 +500,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -504,7 +520,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -524,7 +540,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -544,7 +560,7 @@
 	for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -564,7 +580,7 @@
       for p:=i-1 downto 0 do
 	if ldy_1(p) then begin listing[p]:=''; Break end;
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -577,7 +593,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -590,7 +606,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -602,7 +618,7 @@
        listing[i+1] := #9'jne ' + copy(listing[i+2], 6, 256);
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -624,7 +640,7 @@
       for p:=i-1 downto 0 do
 	if ldy_1(p) then begin listing[p]:=''; Break end;
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -646,7 +662,7 @@
       for p:=i-1 downto 0 do
 	if ldy_1(p) then begin listing[p]:=''; Break end;
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -659,7 +675,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -673,7 +689,7 @@
        listing[i+2] := '';
        listing[i+3] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -686,7 +702,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -699,7 +715,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -712,7 +728,7 @@
        listing[i+1] := '';
        listing[i+2] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -723,7 +739,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -734,7 +750,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -745,7 +761,7 @@
        listing[i]   := '';
        listing[i+1] := #9'jcc ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -756,7 +772,7 @@
        listing[i] := #9'jne ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -765,7 +781,7 @@
       begin
        listing[i] := '';
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -775,7 +791,7 @@
        listing[i] := '';
        listing[i+1] := #9'jmp ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -785,7 +801,7 @@
        listing[i] := '';
        listing[i+1] := #9'jmp ' + copy(listing[i+1], 6, 256);
 
-       Result:=false; Break;
+       exit(false);
       end;
 
 
@@ -799,7 +815,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -813,7 +829,7 @@
 	listing[i+1] := '';
 	listing[i+2] := #9'jmp ' + copy(listing[i+2], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -829,7 +845,7 @@
       listing[i+2] := '';
       listing[i+3] := #9'jmp ' + copy(listing[i+3], 6, 256);
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -843,7 +859,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -857,7 +873,7 @@
        listing[i]   := #9'jcs ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -868,7 +884,7 @@
        listing[i]   := #9'jcc ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -879,7 +895,7 @@
        listing[i]   := #9'jeq ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -890,7 +906,7 @@
        listing[i]   := #9'jne ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';
 
-       Result:=false; Break;
+       exit(false);
      end;
 
 
@@ -904,7 +920,7 @@
 	listing[i+1] := '@';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -920,7 +936,7 @@
 	listing[i+2] := '';
 	listing[i+3] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -938,7 +954,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -956,7 +972,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
 
 
@@ -974,5 +990,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
       end;
+
+end;		// function

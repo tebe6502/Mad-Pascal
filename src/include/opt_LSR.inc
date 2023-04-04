@@ -1,3 +1,11 @@
+
+function opt_LSR(i: integer): Boolean;
+var p: integer;
+    tmp: string;
+begin
+
+    Result := true;
+
 // -----------------------------------------------------------------------------
 // ===				      LSR.
 // -----------------------------------------------------------------------------
@@ -18,7 +26,7 @@
       listing[i+5] := '';
       listing[i+6] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -45,7 +53,7 @@
       listing[i+7] := listing[i+8];
       listing[i+8] := listing[i+3];
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -56,7 +64,7 @@
      begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -71,7 +79,7 @@
       listing[i]   := '';
       listing[i+1] := '';
 
-      Result:=false; Break;
+      exit(false);
      end;
 
 
@@ -99,7 +107,7 @@
 	end;
 
 	listing[i+4] := '';
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -126,7 +134,7 @@
 	end;
 
 	listing[i+3] := '';
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -151,7 +159,7 @@
 	end;
 
 	listing[i+2] := '';
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -194,7 +202,7 @@
 		listing[p+2] := #9'ror @';
 	end;
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -215,7 +223,7 @@
 
 	listing[i+3] := #9'lsr ' + copy(listing[i+3], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -241,7 +249,7 @@
 
 	listing[i+5] := #9'lsr ' + copy(listing[i+5], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -265,7 +273,7 @@
 	listing[i+5] := #9'ror @';
 	listing[i+6] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -291,7 +299,7 @@
 	listing[i+6] := '';
 	listing[i+7] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -348,7 +356,7 @@
 	listing[i+18] := '';
 	listing[i+19] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -379,7 +387,7 @@
 
 	listing[i+10] := #9'lsr ' + copy(listing[i+10], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -415,7 +423,7 @@
 	listing[i+13] := '';
 	listing[i+14] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -436,7 +444,7 @@
 	listing[i+5] := listing[i+6];
 	listing[i+6] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -455,7 +463,7 @@
 
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -469,7 +477,7 @@
         listing[i]   := '';
 	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -483,7 +491,7 @@
         listing[i]   := '';
 	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -497,7 +505,7 @@
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -508,7 +516,7 @@
      begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -520,7 +528,7 @@
      begin
 	listing[i] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -551,7 +559,7 @@
 	listing[i+12] := '';
 	listing[i+13] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -608,7 +616,7 @@
 	listing[i+22] := '';
 	listing[i+23] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
 
@@ -639,9 +647,10 @@
 	listing[i+8] := '';
 	listing[i+9] := '';
 
-	Result:=false; Break;
+	exit(false);
      end;
 
+end;		// function
 
 
 {
@@ -678,6 +687,6 @@
 	 dec(p);
 	end;
 
-	Result:=false; Break;
+	exit(false);
        end;
 }
