@@ -198,3 +198,9 @@ CutAs, FiDL, SprED, Sprite XL
 * [Turbo Pascal "Sokoban"](https://youtu.be/bsQsEM3TYTA)
 * [Tron +4. Mad Pascal i C+4](https://youtu.be/a4Y2TYj1ymg)
 * [Mad Pascal Commodore Plus/4 plasma effect with TEDzakker demo music](https://youtu.be/Yg10zHR--14)
+
+## Pascal compilers for the Atari XE/XL computer 
+
+* [Kyan Pascal](https://atariwiki.org/wiki/Wiki.jsp?page=Kyan%20Pascal)
+* [Draper Pascal](https://atariwiki.org/wiki/Wiki.jsp?page=Draper%20Pascal)
+
