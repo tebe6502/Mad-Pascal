@@ -201,6 +201,8 @@ CutAs, FiDL, SprED, Sprite XL
 
 ## Pascal compilers for the Atari XE/XL computer 
 
+* [APX Atari Pascal](https://atariwiki.org/wiki/Wiki.jsp?page=APX%20Atari%20Pascal)
 * [Kyan Pascal](https://atariwiki.org/wiki/Wiki.jsp?page=Kyan%20Pascal)
 * [Draper Pascal](https://atariwiki.org/wiki/Wiki.jsp?page=Draper%20Pascal)
+* [CLSN Pascal](https://atariwiki.org/wiki/attach/Pascal/CLSN_Pascal-Manual.pdf)
 
