@@ -1,7 +1,14 @@
+18.04.2023
+- przepisana procedura SQRT (SYSTEM) dla REAL, SHORTREAL
+- przepisana procedura @REAL_MUL (base\common\real.asm)
+- przepisana procedura @REAL_DIV (base\common\real.asm)
+- przepisana procedura @SHORTREAL_DIV (base\common\real.asm)
+- przepisana procedura @SHORTREAL_DIV (base\common\real.asm)
+
 02.04.2023
 - bugfixes and optimizations
 - przepisany optymalizator RemoveUnusedStack
-- kod rozdzielony na oddzielne pliki
+- kod rozdzielony na oddzielne pliki, oddzielne mniejsze procedury
 - przepisane operacje DIV, MOD dla BYTE, WORD, CARDINAL, SHORTINT, SMALLINT, INTEGER
 - rozpisane optymalizacje dla BYTE DIV 2..32
 - rozpisane optymalizacje dla BYTE MUL 0,1,2,3,4,5,7,8,10,16,32,40,64,96,128,255

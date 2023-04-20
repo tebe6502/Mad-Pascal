@@ -76,6 +76,7 @@ Contributors:
 	- {$DEFINE BASICOFF} (base\atari\basicoff.asm)
 
 + Piotr Fusik (https://github.com/pfusik) :
+	- base\common\shortreal.asm (div24by15)
 	- base\runtime\icmp.asm
 	- unit GRAPH: detect X:Y graphics resolution (OS mode)
 	- unit CRC
@@ -486,16 +487,16 @@ type
   __putCHAR, __putEOL,
   __addBX, __subBX, __movaBX_Value,
   __imulECX,
-  __notaBX, __negaBX, __notBOOLEAN,
+  __notaBX, //__negaBX, __notBOOLEAN,
   __addAL_CL, __addAX_CX, __addEAX_ECX,
   __shlAL_CL, __shlAX_CL, __shlEAX_CL,
   __subAL_CL, __subAX_CX, __subEAX_ECX,
-  __cmpAX_CX, __cmpEAX_ECX, __cmpINT, __cmpSHORTINT, __cmpSMALLINT,
+  __cmpINT, //__cmpEAX_ECX, __cmpAX_CX, __cmpSMALLINT, __cmpSHORTINT,
   __cmpSTRING, __cmpSTRING2CHAR, __cmpCHAR2STRING,
   __shrAL_CL, __shrAX_CL, __shrEAX_CL,
-  __andEAX_ECX, __andAX_CX, __andAL_CL,
-  __orEAX_ECX, __orAX_CX, __orAL_CL,
-  __xorEAX_ECX, __xorAX_CX, __xorAL_CL
+  __andEAX_ECX, __andAX_CX, //__andAL_CL,
+  __orEAX_ECX, __orAX_CX, //__orAL_CL,
+  __xorEAX_ECX, __xorAX_CX //__xorAL_CL
 
   );
 
@@ -3197,6 +3198,11 @@ var i, l, k, m, x: integer;
      Result := (pos(#9'dec ', listing[i]) = 1);
    end;
 
+   function JMP(i: integer): Boolean;
+   begin
+     Result := (pos(#9'jmp l_', listing[i]) = 1);
+   end;
+
 
    function ADD(i: integer): Boolean;
    begin
@@ -3661,6 +3667,27 @@ var i, l, k, m, x: integer;
 // -----------------------------------------------------------------------------
 
 
+   function CmpString(j, k: integer): Boolean;
+   var i: integer;
+       a, tmp: string;
+   begin
+
+    tmp:='';
+    i:=6;
+
+    a:=listing[j];
+
+    if a<>'' then
+     while not(a[i] in [' ',',',#9]) and (i <= length(a)) do begin
+      tmp := tmp + a[i];
+      inc(i);
+     end;
+
+    Result := pos(tmp, listing[k]) > 0;
+
+   end;
+
+
    function GetString(a: string): string; overload;
    var i: integer;
    begin
@@ -3883,7 +3910,11 @@ var i, l, k, m, x: integer;
   end;		// RemoveUnusedSTACK
 
 
+{$i include/opt_STA_0.inc}
+
 {$i include/opt_STACK.inc}
+
+{$i include/opt_STACK_CMP.inc}
 
 {$i include/opt_STACK_ADR.inc}
 
@@ -3895,9 +3926,23 @@ var i, l, k, m, x: integer;
 
 {$i include/opt_STACK_PRINT.inc}
 
+{$i include/opt_CMP_BRANCH.inc}
+
+{$i include/opt_CMP_LT_GTEQ.inc}
+
+{$i include/opt_CMP_LTEQ.inc}
+
+{$i include/opt_CMP_GT.inc}
+
+{$i include/opt_CMP_NE_EQ.inc}
+
+{$i include/opt_CMP.inc}
+
+{$i include/opt_CMP_0.inc}
+
 
  function PeepholeOptimization_STACK: Boolean;
- var i: integer;
+ var i, p: integer;
      tmp: string;
  begin
 
@@ -3925,7 +3970,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('mva FINDERX :STACKORIGIN,x', listing[i]) > 0) then begin
+if (pos('PP.RESULT', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -3933,7 +3978,18 @@ if (pos('mva FINDERX :STACKORIGIN,x', listing[i]) > 0) then begin
 end;
 }
 
+     if opt_CMP(i) = false then begin Result := false; Break end;
+     if opt_CMP_0(i) = false then begin Result := false; Break end;
+
+     if opt_BRANCH(i) = false then begin Result := false; Break end;
+
+     if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
+     if opt_LTEQ(i) = false then begin Result := false; Break end;
+     if opt_GT(i) = false then begin Result := false; Break end;
+     if opt_NE_EQ(i) = false then begin Result := false; Break end;
+
      if opt_STACK(i) = false then begin Result := false; Break end;
+     if opt_STACK_CMP(i) = false then begin Result := false; Break end;
      if opt_STACK_ADR(i) = false then begin Result := false; Break end;
      if opt_STACK_AL_CL(i) = false then begin Result := false; Break end;
      if opt_STACK_AX_CX(i) = false then begin Result := false; Break end;
@@ -4072,8 +4128,6 @@ end;
 
 {$i include/opt_POKE.inc}
 
-{$i include/opt_STA_0.inc}
-
 {$i include/opt_BP.inc}
 
 {$i include/opt_BP_ADR.inc}
@@ -4086,7 +4140,7 @@ end;
 
 
   function PeepholeOptimization: Boolean;
-  var i: integer;
+  var p, i: integer;
   begin
 
   Result:=true;
@@ -4100,7 +4154,7 @@ end;
 // cxxxxxxxxxxxxxxxx
 
 {
-if (pos('PTR', listing[i]) > 0) then begin
+if (pos('RADIUS+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -4117,6 +4171,29 @@ end;
         lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
      begin
 	listing[i] := '';
+
+	Result:=false; Break;
+     end;
+
+
+    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
+       jmp(i+1) and										// jmp l_
+       (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or iny(i) or
+        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
+        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
+     begin
+	listing[i] := '';
+
+	Result:=false; Break;
+     end;
+
+
+    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
+       sta_im_0(i) and
+       iny(i+1) then
+     begin
+	listing[i]   := '';
+	listing[i+1] := '';
 
 	Result:=false; Break;
      end;
@@ -4164,6 +4241,7 @@ end;
      end;
 
 
+
      if opt_STA_0(i) = false then begin Result := false; Break end;
      if opt_LDA(i) = false then begin Result := false; Break end;
      if opt_TAY(i) = false then begin Result := false; Break end;
@@ -4175,12 +4253,12 @@ end;
      if opt_NOT(i) = false then begin Result := false; Break end;
      if opt_ADD(i) = false then begin Result := false; Break end;
      if opt_SUB(i) = false then begin Result := false; Break end;
-     if opt_BP_ADR(i) = false then begin Result := false; Break end;
-     if opt_BP2_ADR(i) = false then begin Result := false; Break end;
-     if opt_ADR(i) = false then begin Result := false; Break end;
      if opt_LSR(i) = false then begin Result := false; Break end;
      if opt_ASL(i) = false then begin Result := false; Break end;
      if opt_SPL(i) = false then begin Result := false; Break end;
+     if opt_ADR(i) = false then begin Result := false; Break end;
+     if opt_BP_ADR(i) = false then begin Result := false; Break end;
+     if opt_BP2_ADR(i) = false then begin Result := false; Break end;
      if opt_POKE(i) = false then begin Result := false; Break end;
 
   end;
@@ -4196,23 +4274,10 @@ end;
  end;
 
 
-{$i include/opt_LT_GTEQ.inc}
-
-{$i include/opt_LTEQ.inc}
-
-{$i include/opt_GT.inc}
-
-{$i include/opt_NE_EQ.inc}
-
-{$i include/opt_CMP.inc}
-
-{$i include/opt_CMP_0.inc}
-
 {$i include/opt_CMP_BP2.inc}
 
-{$i include/opt_LOCAL.inc}
+{$i include/opt_CMP_LOCAL.inc}
 
-{$i include/opt_BRANCH.inc}
 
 
  function OptimizeRelation: Boolean;
@@ -4237,7 +4302,7 @@ end;
 
 
 {
-if (pos('jcc l_0796', listing[i]) > 0) then begin
+if (pos('RADIUS', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -4433,7 +4498,7 @@ end;
        Result:=false; Break;
       end;
 }
-
+{
     if adc_sbc(i+1) and										// adc|sbc		; 1
        sta_im_0(i+2) and									// sta #$00		; 2
        lda_a(i+3) and										// lda			; 3
@@ -4470,6 +4535,16 @@ end;
      end;
 
 
+    if sta_im_0(i) and										// sta #$00		; 0
+       bne(i+1) and										// bne			; 1
+       (SKIP(i+2) = false) then
+     begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	Result:=false; Break;
+     end;
+}
+
     if adc_sbc(i) and										// adc|sbc		; 0
        (lda(i+1) or mva(i+1) or mwa(i+1)) then							// lda|mva|mwa		; 1
      begin
@@ -4478,16 +4553,6 @@ end;
 
       listing[i] := '';
       Result:=false; Break;
-     end;
-
-
-    if sta_im_0(i) and										// sta #$00		; 0
-       bne(i+1) and										// bne			; 1
-       (SKIP(i+2) = false) then
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	Result:=false; Break;
      end;
 
 
@@ -4505,8 +4570,8 @@ end;
       end;
 
 
-    if (sty_stack(i) or sta_stack(i)) and							// sty|sta :STACKORIGIN+9	; 0
-       mva_stack(i+1) and									// mva :STACKORIGIN+9 STOP	; 1
+    if (sty_stack(i) or sta_stack(i)) and							// sty|sta :STACKORIGIN		; 0
+       mva_stack(i+1) and									// mva :STACKORIGIN STOP	; 1
        (copy(listing[i], 6, 256) = GetString(i+1)) then
      begin
 	listing[i+1] := copy(listing[i], 1, 5) + copy(listing[i+1], length(GetString(i+1)) + 7, 256);
@@ -4517,17 +4582,18 @@ end;
 
 // -----------------------------------------------------------------------------
 
-     if opt_CMP(i) = false then begin Result := false; Break end;
      if opt_LOCAL(i) = false then begin Result := false; Break end;
-     if opt_CMP_BP2(i) = false then begin Result := false; Break end;
-     if opt_CMP_0(i) = false then begin Result := false; Break end;
 
-// -----------------------------------------------------------------------------
+     if opt_BRANCH(i) = false then begin Result := false; Break end;
 
      if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
      if opt_LTEQ(i) = false then begin Result := false; Break end;
      if opt_GT(i) = false then begin Result := false; Break end;
      if opt_NE_EQ(i) = false then begin Result := false; Break end;
+
+     if opt_CMP(i) = false then begin Result := false; Break end;
+     if opt_CMP_0(i) = false then begin Result := false; Break end;
+     if opt_CMP_BP2(i) = false then begin Result := false; Break end;
 
 // -----------------------------------------------------------------------------
 
@@ -4543,7 +4609,6 @@ end;
 
 // -----------------------------------------------------------------------------
 
-     if opt_BRANCH(i) = false then begin Result := false; Break end;
 
    end;   // for
 
@@ -4827,6 +4892,7 @@ begin				// OptimizeASM
        inc(l, 23);
 
       end else
+{
       if arg0 = 'cmpSMALLINT' then begin
        t:='';
 
@@ -4849,6 +4915,7 @@ begin				// OptimizeASM
 
        inc(l, 16);
       end else
+
       if arg0 = 'cmpSHORTINT' then begin
        t:='';
 
@@ -4874,6 +4941,7 @@ begin				// OptimizeASM
        end;
 
       end else
+}
       if arg0 = 'negBYTE' then begin
        t:='';
 
@@ -4912,7 +4980,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
-
+{
       if arg0 = 'notBOOLEAN' then begin
        t:='';
 
@@ -4925,6 +4993,7 @@ begin				// OptimizeASM
 
        inc(l, 6);
       end else
+}
       if arg0 = 'negCARD' then begin
        t:='';
 
@@ -6071,6 +6140,7 @@ begin				// OptimizeASM
      end;
 
      end else
+
       if arg0 = 'shrEAX_CL' then begin			// SHR CARDINAL
 	t:='';
 
@@ -6133,23 +6203,22 @@ begin				// OptimizeASM
 	 listing[l+5] := #9'sta ' + GetARG(2, x-1);
 
 	 listing[l+6] := #9'lda #$00';
+	 listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
-	 listing[l+7] := #9'asl ' + GetARG(0, x-1);
-	 listing[l+8] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+9] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+10] := #9'rol @';
+	 listing[l+8] := #9'asl ' + GetARG(0, x-1);
+	 listing[l+9] := #9'rol ' + GetARG(1, x-1);
+	 listing[l+10] := #9'rol ' + GetARG(2, x-1);
+	 listing[l+11] := #9'rol ' + GetARG(3, x-1);
 
-	 listing[l+11] := #9'asl ' + GetARG(0, x-1);
-	 listing[l+12] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+13] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+14] := #9'rol @';
+	 listing[l+12] := #9'asl ' + GetARG(0, x-1);
+	 listing[l+13] := #9'rol ' + GetARG(1, x-1);
+	 listing[l+14] := #9'rol ' + GetARG(2, x-1);
+	 listing[l+15] := #9'rol ' + GetARG(3, x-1);
 
-	 listing[l+15] := #9'asl ' + GetARG(0, x-1);
-	 listing[l+16] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+17] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+18] := #9'rol @';
-
-	 listing[l+19] := #9'sta ' + GetARG(3, x-1);
+	 listing[l+16] := #9'asl ' + GetARG(0, x-1);
+	 listing[l+17] := #9'rol ' + GetARG(1, x-1);
+	 listing[l+18] := #9'rol ' + GetARG(2, x-1);
+	 listing[l+19] := #9'rol ' + GetARG(3, x-1);
 
 	 inc(l, 20);
 {
@@ -6172,7 +6241,7 @@ begin				// OptimizeASM
 	end else
 	if k = 23 then begin
 
-	 listing[l]   := #9'lda ' + GetARG(2, x-1);
+	 listing[l]   := #9'lda ' + GetARG(2, x-1);		// bit7 -> C
 	 listing[l+1] := #9'asl @';
 	 s[x-1][0] := '';
 	 listing[l+2] := #9'lda ' + GetARG(3, x-1);
@@ -7288,6 +7357,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+{
       if arg0 = 'andAL_CL' then begin
        t:='';
 
@@ -7297,6 +7367,7 @@ begin				// OptimizeASM
 
        inc(l, 3);
       end else
+}
       if arg0 = 'andAX_CX' then begin
        t:='';
 
@@ -7331,6 +7402,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+{
       if arg0 = 'orAL_CL' then begin
        t:='';
 
@@ -7340,6 +7412,7 @@ begin				// OptimizeASM
 
        inc(l, 3);
       end else
+}
       if arg0 = 'orAX_CX' then begin
        t:='';
 
@@ -7374,6 +7447,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+{
       if arg0 = 'xorAL_CL' then begin
        t:='';
 
@@ -7383,6 +7457,7 @@ begin				// OptimizeASM
 
        inc(l, 3);
       end else
+}
       if arg0 = 'xorAX_CX' then begin
        t:='';
 
@@ -7438,6 +7513,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+{
       if arg0 = 'cmpEAX_ECX' then begin
        t:='';
 
@@ -7456,6 +7532,9 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+}
+
+{
       if arg0 = 'cmpEAX_ECX.AX_CX' then begin
        t:='';
 
@@ -7468,7 +7547,7 @@ begin				// OptimizeASM
 
        inc(l, 6);
       end else
-
+}
 {
       if arg0='@expandToCARD1.BYTE' then begin
        t:='';
@@ -10224,38 +10303,38 @@ begin
 	  __addBX: asm65(#9'inx');//, '; add bx, 1');
 	  __subBX: asm65(#9'dex');//, '; sub bx, 1');
 
-       __addAL_CL: asm65(#9'jsr addAL_CL', '; add al, cl');
-       __addAX_CX: asm65(#9'jsr addAX_CX', '; add ax, cx');
-     __addEAX_ECX: asm65(#9'jsr addEAX_ECX', '; add :eax, :ecx');
+       __addAL_CL: asm65(#9'jsr addAL_CL');
+       __addAX_CX: asm65(#9'jsr addAX_CX');
+     __addEAX_ECX: asm65(#9'jsr addEAX_ECX');
 
-       __subAL_CL: asm65(#9'jsr subAL_CL', '; sub al, cl');
-       __subAX_CX: asm65(#9'jsr subAX_CX', '; sub ax, cx');
-     __subEAX_ECX: asm65(#9'jsr subEAX_ECX', '; sub :eax, :ecx');
+       __subAL_CL: asm65(#9'jsr subAL_CL');
+       __subAX_CX: asm65(#9'jsr subAX_CX');
+     __subEAX_ECX: asm65(#9'jsr subEAX_ECX');
 
-	__imulECX: asm65(#9'jsr imulECX', '; imul :ecx');
+	__imulECX: asm65(#9'jsr imulECX');
 
-     __notBOOLEAN: asm65(#9'jsr notBOOLEAN', '; not BOOLEAN');
+//     __notBOOLEAN: asm65(#9'jsr notBOOLEAN');
 	 __notaBX: asm65(#9'jsr notaBX');
 
-	 __negaBX: asm65(#9'jsr negaBX');
+//	 __negaBX: asm65(#9'jsr negaBX');
 
-     __xorEAX_ECX: asm65(#9'jsr xorEAX_ECX', '; xor :eax, :ecx');
-       __xorAX_CX: asm65(#9'jsr xorAX_CX', '; xor ax, cx');
-       __xorAL_CL: asm65(#9'jsr xorAL_CL', '; xor al, cl');
+     __xorEAX_ECX: asm65(#9'jsr xorEAX_ECX');
+       __xorAX_CX: asm65(#9'jsr xorAX_CX');
+//       __xorAL_CL: asm65(#9'jsr xorAL_CL');
 
-     __andEAX_ECX: asm65(#9'jsr andEAX_ECX', '; and :eax, :ecx');
-       __andAX_CX: asm65(#9'jsr andAX_CX', '; and ax, cx');
-       __andAL_CL: asm65(#9'jsr andAL_CL', '; and al, cl');
+     __andEAX_ECX: asm65(#9'jsr andEAX_ECX');
+       __andAX_CX: asm65(#9'jsr andAX_CX');
+//       __andAL_CL: asm65(#9'jsr andAL_CL');
 
-      __orEAX_ECX: asm65(#9'jsr orEAX_ECX', '; or :eax, :ecx');
-	__orAX_CX: asm65(#9'jsr orAX_CX', '; or ax, cx');
-	__orAL_CL: asm65(#9'jsr orAL_CL', '; or al, cl');
+      __orEAX_ECX: asm65(#9'jsr orEAX_ECX');
+	__orAX_CX: asm65(#9'jsr orAX_CX');
+//	__orAL_CL: asm65(#9'jsr orAL_CL');
 
-     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX', '; cmp :eax, :ecx');
-       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX', '; cmp ax, cx');
-	 __cmpINT: asm65(#9'jsr cmpINT', '; cmp :eax, :ecx');
-    __cmpSHORTINT: asm65(#9'jsr cmpSHORTINT', '; cmp :eax, :ecx');
-    __cmpSMALLINT: asm65(#9'jsr cmpSMALLINT', '; cmp :eax, :ecx');
+//     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
+//       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
+	 __cmpINT: asm65(#9'jsr cmpINT');
+//    __cmpSHORTINT: asm65(#9'jsr cmpSHORTINT');
+//    __cmpSMALLINT: asm65(#9'jsr cmpSMALLINT');
 
       __cmpSTRING: asm65(#9'jsr cmpSTRING');
  __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
@@ -13128,9 +13207,21 @@ case op of
     begin
     Gen; Gen; Gen;						// not dword ptr [bx]
 
-    if ValType = BOOLEANTOK then
-     a65(__notBOOLEAN)
-    else begin
+    if ValType = BOOLEANTOK then begin
+//     a65(__notBOOLEAN)
+
+//     asm65(#9'lda :STACKORIGIN,x');
+//     asm65(#9'eor #$01');
+//     asm65(#9'sta :STACKORIGIN,x');
+
+       asm65(#9'ldy #1');					// !!! wymagana konwencja
+       asm65(#9'lda :STACKORIGIN,x');
+       asm65(#9'beq @+');
+       asm65(#9'dey');
+       asm65('@');
+       asm65(#9'sty :STACKORIGIN,x');
+
+    end else begin
 
      ExpandParam(INTEGERTOK, ValType);
 
@@ -13810,7 +13901,13 @@ case op of
     begin
 
     case DataSize[ResultType] of
-      1: a65(__andAL_CL);
+      1: //a65(__andAL_CL);
+      begin
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'and :STACKORIGIN,x');
+	asm65(#9'sta :STACKORIGIN-1,x');
+      end;
+
       2: a65(__andAX_CX);
       4: a65(__andEAX_ECX)
     end;
@@ -13822,7 +13919,13 @@ case op of
     begin
 
     case DataSize[ResultType] of
-      1: a65(__orAL_CL);
+      1: //a65(__orAL_CL);
+      begin
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'ora :STACKORIGIN,x');
+	asm65(#9'sta :STACKORIGIN-1,x');
+      end;
+
       2: a65(__orAX_CX);
       4: a65(__orEAX_ECX)
     end;
@@ -13834,7 +13937,13 @@ case op of
     begin
 
     case DataSize[ResultType] of
-      1: a65(__xorAL_CL);
+      1: //a65(__xorAL_CL);
+      begin
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'eor :STACKORIGIN,x');
+	asm65(#9'sta :STACKORIGIN-1,x');
+      end;
+
       2: a65(__xorAX_CX);
       4: a65(__xorEAX_ECX)
     end;
@@ -14036,10 +14145,43 @@ begin
 	end;
 
      SHORTINTTOK:
-	a65(__cmpSHORTINT);
+	begin
+//	a65(__cmpSHORTINT);
+
+         asm65(#9'.LOCAL');
+         asm65(#9'lda :STACKORIGIN-1,x');
+         asm65(#9'sub :STACKORIGIN,x');
+         asm65(#9'beq L5');
+         asm65(#9'bvc L5');
+         asm65(#9'eor #$FF');
+         asm65(#9'ora #$01');
+         asm65('L5');
+         asm65(#9'.ENDL');
+
+	end;
 
      SMALLINTTOK, SHORTREALTOK:
-	a65(__cmpSMALLINT);
+	begin
+//	a65(__cmpSMALLINT);
+
+         asm65(#9'.LOCAL');
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+         asm65(#9'sub :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'bne L4');
+         asm65(#9'lda :STACKORIGIN-1,x');
+         asm65(#9'cmp :STACKORIGIN,x');
+         asm65(#9'beq L5');
+         asm65(#9'lda #$00');
+         asm65(#9'adc #$FF');
+         asm65(#9'ora #$01');
+         asm65(#9'bne L5');
+         asm65('L4'#9'bvc L5');
+         asm65(#9'eor #$FF');
+         asm65(#9'ora #$01');
+         asm65('L5');
+         asm65(#9'.ENDL');
+
+	end;
 
      SINGLETOK: asm65(#9'jsr @FCMPL');
 
@@ -14047,9 +14189,37 @@ begin
 	a65(__cmpINT);
 
      WORDTOK, POINTERTOK, STRINGPOINTERTOK:
-	a65(__cmpAX_CX);
+     	begin
+//	a65(__cmpAX_CX);
+
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+         asm65(#9'cmp :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'bne @+');
+         asm65(#9'lda :STACKORIGIN-1,x');
+         asm65(#9'cmp :STACKORIGIN,x');
+         asm65('@');
+
+	end;
+
  else
-   a65(__cmpEAX_ECX);					// CARDINALTOK
+	begin
+   	//a65(__cmpEAX_ECX);					// CARDINALTOK
+
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+         asm65(#9'cmp :STACKORIGIN+STACKWIDTH*3,x');
+         asm65(#9'bne @+');
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+         asm65(#9'cmp :STACKORIGIN+STACKWIDTH*2,x');
+         asm65(#9'bne @+');
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+         asm65(#9'cmp :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'bne @+');
+         asm65(#9'lda :STACKORIGIN-1,x');
+         asm65(#9'cmp :STACKORIGIN,x');
+         asm65('@');
+
+	end;
+
  end;
 
  GenerateRelationOperation(rel, ValType);
@@ -15628,6 +15798,7 @@ begin
 //		    ExpandParam(WORDTOK, ArrayIndexType);
 		    ArrayIndexType := WORDTOK;
 		  end;
+
 
 		 if NumAllocElements_ > 0 then begin
 
@@ -17277,6 +17448,7 @@ case Tok[i].Kind of
 
        SHORTREALTOK: begin
 		      asm65(#9'jsr @SHORTREAL_ROUND');
+
 		      ValType := SHORTINTTOK;
 		     end;
 
