@@ -134,6 +134,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure InitGraph(driver, mode: byte; dev: PString); overload;
 	procedure Line(x1,y1,x2,y2: smallint); overload;
 	procedure Line(x1, y1, x2, y2: float16); overload;
+	procedure Line(x1, y1, x2, y2: real); overload;
 	procedure MoveRel(Dx, Dy: smallint);
 	procedure MoveTo(x, y: smallint); assembler;
 	procedure PieSlice(X, Y, StAngle, EndAngle, Radius: Word);
