@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.1
+ @version: 1.2
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -144,6 +144,12 @@ type	PSmallint = ^smallint;
 	*)
 
 type	PInteger = ^integer;
+	(*
+	@description:
+
+	*)
+
+type	PReal = ^real;
 	(*
 	@description:
 
@@ -389,6 +395,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sqr(x: Real): Real; overload;
 	function Sqr(x: Single): Single; overload;
 	function Sqr(x: integer): integer; overload;
+	function Sqrt(x: ShortReal): ShortReal; overload;
 	function Sqrt(x: Real): Real; overload;
 	function Sqrt(x: Single): Single; overload;
 	function Sqrt(x: float16): float16; overload;
@@ -674,6 +681,63 @@ begin
 end;
 
 
+function Sqrt(x: ShortReal): ShortReal; overload;
+(*
+@description
+Sqrt returns the square root of its argument X, which must be positive
+
+@param: x - ShortReal (Q8.8)
+
+@returns: ShortReal (Q8.8)
+*)
+var sp: ^shortreal;
+    c: word;
+begin
+	Result:=0.0;
+
+	if x < 0.0 then exit;
+
+	sp:=@c;
+
+	c:=word(x);
+
+	c:=(c shr 4) + $10;
+
+	Result := sp^;
+
+	Result:=(Result+x/Result);// * 0.5;
+
+	asm
+	 lda Result+1
+	 asl @
+
+	 ror Result+1
+	 ror Result
+	end;
+
+	Result:=(Result+x/Result) ;//* 0.5;
+
+	asm
+	 lda Result+1
+	 asl @
+
+	 ror Result+1
+	 ror Result
+	end;
+
+	Result:=(Result+x/Result) ;//* 0.5;
+
+	asm
+	 lda Result+1
+	 asl @
+
+	 ror Result+1
+	 ror Result
+	end;
+
+end;
+
+
 function Sqrt(x: Real): Real; overload;
 (*
 @description
@@ -683,22 +747,57 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: Real (Q24.8)
 *)
-var Divisor: Real;
+var sp: ^real;
+    c: cardinal;
 begin
-{ Hero's algorithm }
+	Result:=0.0;
 
-Result:=0.0;
+	if x < 0.0 then exit;
 
-if x <= 0.0 then exit;
+	sp:=@c;
 
-Result  := x;
-Divisor := 1.0;
+	c:=cardinal(x);
 
-while Abs(Result - Divisor) > 0.01 do
-  begin
-   Divisor := (Result + Divisor) * 0.5;
-   Result := x / Divisor;
-  end;
+	c:=(c shr 8) + $100;
+
+	Result := sp^;
+
+	Result:=(Result+x/Result) ;//* 0.5;
+
+	asm
+	 lda Result+3
+	 asl @
+
+	 ror Result+3
+	 ror Result+2
+	 ror Result+1
+	 ror Result
+	end;
+
+	Result:=(Result+x/Result) ;//* 0.5;
+
+
+	asm
+	 lda Result+3
+	 asl @
+
+	 ror Result+3
+	 ror Result+2
+	 ror Result+1
+	 ror Result
+	end;
+
+	Result:=(Result+x/Result);// * 0.5;
+
+	asm
+	 lda Result+3
+	 asl @
+
+	 ror Result+3
+	 ror Result+2
+	 ror Result+1
+	 ror Result
+	end;
 
 end;
 
@@ -717,7 +816,7 @@ var sp: ^single;
 begin
 	Result:=0;
 
-	if x <= 0 then exit;
+	if x < 0 then exit;
 
 	sp:=@c;
 
@@ -738,16 +837,16 @@ function Sqrt(x: float16): float16; overload;
 @description
 Sqrt returns the square root of its argument X, which must be positive
 
-@param: x - Single
+@param: x - float16
 
-@returns: Single
+@returns: float16
 *)
 var sp: ^float16;
     c: word;
 begin
 	Result:=0;
 
-	if x <= 0 then exit;
+	if x < 0 then exit;
 
 	sp:=@c;
 
@@ -777,7 +876,7 @@ var sp: ^single;
 begin
 	Result:=0;
 
-	if x <= 0 then exit;
+	if x < 0 then exit;
 
 	sp:=@c;
 

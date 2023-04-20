@@ -456,6 +456,24 @@ begin
 end;
 
 
+procedure Line(x1,y1,x2,y2: real); overload;
+(*
+@description:
+Bresenham line
+*)
+var a,b,c,d: smallint;
+begin
+
+ a:=round(x1);
+ b:=round(y1);
+ c:=round(x2);
+ d:=round(y2);
+
+ Line(a,b,c,d);
+
+end;
+
+
 procedure Hline(x0,x1,y: smallint);
 (*
 @description:
