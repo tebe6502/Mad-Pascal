@@ -2,7 +2,7 @@
 ; REAL	fixed-point Q24.8, 32bit
 ; https://en.wikipedia.org/wiki/Q_(number_format)
 ;
-; changes: 2023-04-18
+; changes: 2023-04-22
 ;
 
 /*
@@ -141,7 +141,7 @@ B	= :ECX
 
 	jsr @negB
 @	
-	
+
 .local divREAL
 
 	mva :ecx ecx0
@@ -158,13 +158,12 @@ B	= :ECX
 	sta :eax+6
 	sta :eax+7
 
-	sta :ZTMP8
-
-	LDY #48+1
-
-UDIV	dey
-	beq stop
-
+	LDY #40
+	jmp UDIV321
+	
+UDIV320	DEY
+	BEQ stop
+UDIV321
 	ASL :eax
 	ROL :eax+1
 	ROL :eax+2
@@ -173,33 +172,36 @@ UDIV	dey
 	ROL :eax+5
 	ROL :eax+6
 	ROL :eax+7
-	ROL :ZTMP8
-
-	LDA :eax+5	;do a subtraction
+			;do a subtraction
+	LDA :eax+4
 	CMP ecx0: #0
-	LDA :eax+6
-	SBC ecx1: #0
-	LDA :eax+7
-	SBC ecx2: #0
-	LDA :ZTMP8
-	SBC ecx3: #0
-	BCC UDIV
- 			;overflow, do the subtraction again, this time store the result
-	STA ecx3	;we have the high byte already
-
 	LDA :eax+5
-	SBC ecx0_: #0	;byte 0
-	STA :eax+5
+	SBC ecx1: #0
 	LDA :eax+6
-	SBC ecx1_: #0
-	STA :eax+6	;byte 1
+	SBC ecx2: #0
 	LDA :eax+7
-	SBC ecx2_: #0
-	STA :eax+7	;byte 2
+	SBC ecx3: #0
+	BCC UDIV320
 
 	INC :eax	;set result bit
 
-	jmp UDIV
+	DEY
+	BEQ stop
+
+ 			;overflow, do the subtraction again, this time store the result
+	STA :eax+7	;we have the high byte already
+
+	LDA :eax+4
+	SBC ecx0_: #0	;byte 0
+	STA :eax+4
+	LDA :eax+5
+	SBC ecx1_: #0
+	STA :eax+5	;byte 1
+	LDA :eax+6
+	SBC ecx2_: #0
+	STA :eax+6	;byte 2
+
+	JMP UDIV321
 stop
 
 .endl

@@ -8,6 +8,10 @@
 	idivEAX_CX
 */
 
+;
+; changes: 2023-04-22
+;
+
 ;---------------------------------------------------------------------------
 
 .proc	imulCARD
@@ -123,48 +127,64 @@ B	= :ECX
 RESULT	= :ZTMP
 	.endl
 
+	mva :ecx ecx0
+	sta ecx0_
+	mva :ecx+1 ecx1
+	sta ecx1_
+	mva :ecx+2 ecx2
+	sta ecx2_
+	mva :ecx+3 ecx3
+
 	LDA #0
-	STA :ZTMP8
-	STA :ZTMP9
-	STA :ZTMP10
-	STA :ZTMP11
+	sta :eax+4
+	sta :eax+5
+	sta :eax+6
+	sta :eax+7
 
 	LDY #32
-
-UDIV320	ASL :eax
+	jmp UDIV321
+	
+UDIV320	DEY
+	BEQ stop
+UDIV321
+	ASL :eax
 	ROL :eax+1
 	ROL :eax+2
 	ROL :eax+3
-	ROL :ZTMP8
-	ROL :ZTMP9
-	ROL :ZTMP10
-	ROL :ZTMP11
+	ROL :eax+4
+	ROL :eax+5
+	ROL :eax+6
+	ROL :eax+7
 			;do a subtraction
-	LDA :ZTMP8
-	CMP :ecx
-	LDA :ZTMP9
-	SBC :ecx+1
-	LDA :ZTMP10
-	SBC :ecx+2
-	LDA :ZTMP11
-	SBC :ecx+3
-	BCC UDIV321
+	LDA :eax+4
+	CMP ecx0: #0
+	LDA :eax+5
+	SBC ecx1: #0
+	LDA :eax+6
+	SBC ecx2: #0
+	LDA :eax+7
+	SBC ecx3: #0
+	BCC UDIV320
  			;overflow, do the subtraction again, this time store the result
-	STA :ecx+3	;we have the high byte already
-	LDA :ZTMP8
-	SBC :ecx	;byte 0
-	STA :ZTMP8
-	LDA :ZTMP9
-	SBC :ecx+1
-	STA :ZTMP9	;byte 1
-	LDA :ZTMP10
-	SBC :ecx+2
-	STA :ZTMP10	;byte 2
+	STA :eax+7	;we have the high byte already
+
+	LDA :eax+4
+	SBC ecx0_: #0	;byte 0
+	STA :eax+4
+	LDA :eax+5
+	SBC ecx1_: #0
+	STA :eax+5	;byte 1
+	LDA :eax+6
+	SBC ecx2_: #0
+	STA :eax+6	;byte 2
+
 	INC :eax	;set result bit
 
-UDIV321	DEY
-	BNE UDIV320
+	DEY
+	BEQ stop
 
+	JMP UDIV321
+stop
 	rts
 .endp
 
