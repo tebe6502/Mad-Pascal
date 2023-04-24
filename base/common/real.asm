@@ -29,19 +29,17 @@ B	= :ECX
 	bpl @+
 
 	jsr @negA
-
 @
 	bit B+3
 	bpl @+
 
 	jsr @negB
 @
-
 	lda A+3
 	ora B+3
 	ora A+2
 	ora B+2
-	bne skp
+	bne m32
 
 	.ifdef fmulinit
 	jsr fmulu_16
@@ -49,15 +47,32 @@ B	= :ECX
 	jsr imulCX
 	eif
 
+	pla
+	bpl @+
+
+	lda #0
+	sub A+1
+	sta A
+	lda #0
+	sbc A+2
+	sta A+1
+	lda #0
+	sbc A+3
+	sta A+2
+	lda #0
+	sbc #0
+	sta A+3
+
+	rts
+@
 	mva A+1 A
 	mva A+2 A+1
 	mva A+3 A+2
 
 	mva #0 A+3
 
-	jmp skip
-skp
-
+	rts
+m32
 	lda #$00
 	sta :EDX	;Clear upper half of
 	sta :EDX+1	;product
@@ -70,15 +85,16 @@ skp
 
 	ldy #$20	;Set binary count to 32
 
-SHIFT_R	lsr A+3		;Shift multiplyer right
+SHIFT_R
+	lsr A+3		;Shift multiplyer right
 	ror A+2
 	ror A+1
 	ror A
 	bcc ROTATE_R	;Go rotate right if c = 0
 
+	clc
 	lda :EDX	;Get upper half of product
-	clc		;and add multiplicand to
-	adc B
+	adc B		;and add multiplicand to
 	sta :EDX
 	lda :EDX+1
 	adc B+1
@@ -89,30 +105,95 @@ SHIFT_R	lsr A+3		;Shift multiplyer right
 	lda :EDX+3
 	adc B+3
 
-ROTATE_R  ror @		;Rotate partial product
-        sta :EDX+3	;right
-        ror :EDX+2
-        ror :EDX+1
-        ror :EDX
-        ror :ZTMP10
-        ror :ZTMP9
-        ror :ZTMP8
+ROTATE_R
+	ror @		;Rotate partial product
+	sta :EDX+3	;right
 
-        dey		;Decrement bit count and
-        bne SHIFT_R	;loop until 32 bits are
+	ror :EDX+2
+	ror :EDX+1
+	ror :EDX
+	ror :ZTMP10
+	ror :ZTMP9
+	ror :ZTMP8
 
+	dey		;Decrement bit count and
+	bne SHIFT_R	;loop until 32 bits are
+
+	pla
+	bpl @+
+
+	lda #0
+	sub :ZTMP8
+	sta A
+	lda #0
+	sbc :ZTMP9
+	sta A+1
+	lda #0
+	sbc :ZTMP10
+	sta A+2
+	lda #0
+	sbc :EDX
+	sta A+3
+
+	rts
+@
 	mva :ZTMP8 A
 	mva :ZTMP9 A+1
 	mva :ZTMP10 A+2
 
 	mva :EDX A+3
 
-skip
-	pla
-	bpl @+
+	rts
+.endp
 
-	jmp @negA
-@
+
+;---------------------------------------------------------------------------
+
+
+.proc	@negA
+
+A	= :EAX
+
+	lda #$00
+	sub A
+	sta A
+
+	lda #$00
+	sbc A+1
+	sta A+1
+
+	lda #$00
+	sbc A+2
+	sta A+2
+
+	lda #$00
+	sbc A+3
+	sta A+3
+
+	rts
+.endp
+
+
+.proc	@negB
+
+B	= :ECX
+
+	lda #$00
+	sub B
+	sta B
+
+	lda #$00
+	sbc B+1
+	sta B+1
+
+	lda #$00
+	sbc B+2
+	sta B+2
+
+	lda #$00
+	sbc B+3
+	sta B+3
+
 	rts
 .endp
 
@@ -129,7 +210,7 @@ B	= :ECX
 
 	lda A+3
 	eor B+3
-	pha
+	sta sign
 
 	bit A+3				; dividend sign
 	bpl @+
@@ -141,9 +222,6 @@ B	= :ECX
 
 	jsr @negB
 @	
-
-.local divREAL
-
 	mva :ecx ecx0
 	sta ecx0_
 	mva :ecx+1 ecx1
@@ -203,62 +281,10 @@ UDIV321
 
 	JMP UDIV321
 stop
-
-.endl
-
-	pla
+	lda sign: #0
 	bpl @+
 	
 	jmp @negA
 @
-	rts
-
-.endp
-
-
-.proc	@negA
-
-A	= :EAX
-
-	lda #$00
-	sub A
-	sta A
-
-	lda #$00
-	sbc A+1
-	sta A+1
-
-	lda #$00
-	sbc A+2
-	sta A+2
-
-	lda #$00
-	sbc A+3
-	sta A+3
-
-	rts
-.endp
-
-
-.proc	@negB
-
-B	= :ECX
-
-	lda #$00
-	sub B
-	sta B
-
-	lda #$00
-	sbc B+1
-	sta B+1
-
-	lda #$00
-	sbc B+2
-	sta B+2
-
-	lda #$00
-	sbc B+3
-	sta B+3
-
 	rts
 .endp
