@@ -40,6 +40,10 @@ The available features are:
 * Separate program modules
 * Recursion
 
+## Compile
+
+    fpc -MDelphi -vh -O3 mp.pas
+
 ## Usage
 [WUDSN + Mad Pascal](https://forums.atariage.com/topic/348660-wudsn-mad-pascal-quick-hack-increasing-usability/)
 
