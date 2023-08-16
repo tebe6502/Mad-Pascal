@@ -30,9 +30,10 @@ type	TBrushBitmap = array [0..7] of byte;
 		end;
 
 	TBrush = record
+		Bitmap: ^TBrushBitmap;
+
 		Mode,
 		Color: Byte;
-		Bitmap: TBrushBitmap;
 		end;
 
 
@@ -44,6 +45,7 @@ type	TBrushBitmap = array [0..7] of byte;
 	fsize: array [0..127] of byte;
 
 	Pen: TPen;
+	
 	Brush: TBrush;
 
 	constructor Create;
@@ -111,7 +113,7 @@ var lpos: word;
 
 procedure HLine(x0,x1, y: smallint); assembler;
 asm
-{	txa:pha
+	txa:pha
 
 	mwa brush :bp2
 	ldy #brush.mode-DATAORIGIN
@@ -239,7 +241,6 @@ mode2	ora (ztmp),y
 
 exit
 	pla:tax
-};
 end;
 
 

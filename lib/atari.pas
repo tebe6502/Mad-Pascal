@@ -26,13 +26,13 @@ type	TDMACtl = (blank = %00, narrow = %01, normal = %10, wide = %11, missiles= %
 	*)
 
 var
-	irqens: byte absolute $10;		// rejestr cien IRQEN
+	[volatile] irqens: byte absolute $10;		// rejestr cien IRQEN
 
-	rtclok: byte absolute $12;
+	[volatile] rtclok: byte absolute $12;
 
-	rtclok1: byte absolute $12;
-	rtclok2: byte absolute $13;
-	rtclok3: byte absolute $14;
+	[volatile] rtclok1: byte absolute $12;
+	[volatile] rtclok2: byte absolute $13;
+	[volatile] rtclok3: byte absolute $14;
 
 	atract: byte absolute $4D;
 	lmargin: byte absolute $52;		// lewy margines ekranu
