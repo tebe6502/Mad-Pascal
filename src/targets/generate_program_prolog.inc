@@ -6,8 +6,8 @@ begin
 
 if Pass = CODEGENERATIONPASS then begin
 
- tmp := optimize.use;
- optimize.use := false;
+ tmp := common.optimize.use;
+ common.optimize.use := false;
 
  Gen;
 
@@ -338,7 +338,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
  asm65(#9'UNITINITIALIZATION');
 
- optimize.use := tmp;
+ common.optimize.use := tmp;
 end;
 
 end;

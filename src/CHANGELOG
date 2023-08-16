@@ -1,3 +1,7 @@
+16.08.2023
+- przepisany kod Mad Pascala na oddzielne moduły
+- przepisana obsługa tablic ze wskażnikami rekordów 'tab: array [0..x] of ^record'
+
 18.04.2023
 - przepisana procedura SQRT (SYSTEM) dla REAL, SHORTREAL
 - przepisana procedura @REAL_MUL (base\common\real.asm)

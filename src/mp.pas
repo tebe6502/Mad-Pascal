@@ -11,7 +11,7 @@ IDE WUDSN
 https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
 
 
-Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2022
+Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2023
 
 Contributors:
 
@@ -29,7 +29,7 @@ Contributors:
 	- unit SMP
 
 + David Schmenk :
-	- IEEE-754 (32bit) Single
+	- IEEE-754 (32bit) Single[Float]
 
 + Daniel Serpell (https://github.com/dmsc) :
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
@@ -131,17 +131,8 @@ Contributors:
 # :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia sie tylko :BP+1
 # :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
-# VAR RECORD
-# DataType = RECORDTOK ; AllocElementType = 0 ; NumAllocElements = RecType
-
-# VAR ^RECORD
-# DataType = POINTERTOK ; AllocElementType = RECORDTOK ; NumAllocElements = RecType
-
 # indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
 # indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * DataSize[AllocElementType]) + b * DataSize[AllocElementType]
-
-# tablice typu RECORD, OBJECT sa tylko jendowymiarowe [0..x], OBJECT nie testowane
-# DataType = POINTERTOK ; AllocElementType = [RECORDTOK, OBJECTTOK] ; NumAllocElements = RecType ; NumAllocElements shl 16 = Array Size
 
 # dla typu OBJECT przekazywany jest poczatkowy adres alokacji danych pamieci (HI = regY, LO = regA), potem sa obliczane kolejne adresy w naglowku procedury/funkcji
 
@@ -150,590 +141,32 @@ Contributors:
 # (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 0) wersja z { }
 # (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 1) wersja bez { }
 
+# --------------------------------------------------------------------------------------------------------------
+#                          |      DataType      |  AllocElementType  |  NumAllocElements  |  NumAllocElements_ |
+# --------------------------------------------------------------------------------------------------------------
+# VAR RECORD               | RECORDTOK          | 0                  | RecType            | 0                  |
+# VAR ^RECORD              | POINTERTOK         | RECORDTOK          | RecType            | 0                  |
+# ARRAY [0..X]             | POINTERTOK         | Type               | X Array Size       | 0                  |
+# ARRAY [0..X, 0..Y]       | POINTERTOK         | Type               | X Array Size       | Y Array Size       |
+# ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK          | RecType            | X Array Size       |
+# ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK          | RecType            | X Array Size       |
+# --------------------------------------------------------------------------------------------------------------
+
 *)
 
 
 program MADPASCAL;
 
-//{$DEFINE WHILEDO}
-
-//{$DEFINE USEOPTFILE}
-
-{$DEFINE OPTIMIZECODE}
-
-{$I+}
+{$i define.inc}
 
 uses
-  SysUtils,
+	Crt, SysUtils,
 
 {$IFDEF WINDOWS}
-	windows,
+	Windows,
 {$ENDIF}
-	crt;
 
-const
-
-  title = '1.6.7';
-
-  TAB = ^I;		// Char for a TAB
-  CR  = ^M;		// Char for a CR
-  LF  = ^J;		// Char for a LF
-
-  AllowDirectorySeparators : set of char = ['/','\'];
-
-  AllowWhiteSpaces	: set of char = [' ',TAB,CR,LF];
-  AllowQuotes		: set of char = ['''','"'];
-  AllowLabelFirstChars	: set of char = ['A'..'Z','_'];
-  AllowLabelChars	: set of char = ['A'..'Z','0'..'9','_','.'];
-  AllowDigitFirstChars	: set of char = ['0'..'9','%','$'];
-  AllowDigitChars	: set of char = ['0'..'9','A'..'F'];
-
-
-  // Token codes
-
-  UNTYPETOK		= 0;
-
-  CONSTTOK		= 1;     // !!! nie zmieniac
-  TYPETOK		= 2;     // !!!
-  VARTOK		= 3;     // !!!
-  PROCEDURETOK		= 4;     // !!!
-  FUNCTIONTOK		= 5;     // !!!
-  LABELTOK		= 6;	 // !!!
-  UNITTOK		= 7;	 // !!!
-
-
-  GETINTVECTOK		= 10;
-  SETINTVECTOK		= 11;
-  CASETOK		= 12;
-  BEGINTOK		= 13;
-  ENDTOK		= 14;
-  IFTOK			= 15;
-  THENTOK		= 16;
-  ELSETOK		= 17;
-  WHILETOK		= 18;
-  DOTOK			= 19;
-  REPEATTOK		= 20;
-  UNTILTOK		= 21;
-  FORTOK		= 22;
-  TOTOK			= 23;
-  DOWNTOTOK		= 24;
-  ASSIGNTOK		= 25;
-  WRITETOK		= 26;
-  READLNTOK		= 27;
-  HALTTOK		= 28;
-  USESTOK		= 29;
-  ARRAYTOK		= 30;
-  OFTOK			= 31;
-  STRINGTOK		= 32;
-  INCTOK		= 33;
-  DECTOK		= 34;
-  ORDTOK		= 35;
-  CHRTOK		= 36;
-  ASMTOK		= 37;
-  ABSOLUTETOK		= 38;
-  BREAKTOK		= 39;
-  CONTINUETOK		= 40;
-  EXITTOK		= 41;
-  RANGETOK		= 42;
-
-  EQTOK			= 43;
-  NETOK			= 44;
-  LTTOK			= 45;
-  LETOK			= 46;
-  GTTOK			= 47;
-  GETOK			= 48;
-  LOTOK			= 49;
-  HITOK			= 50;
-
-  DOTTOK		= 51;
-  COMMATOK		= 52;
-  SEMICOLONTOK		= 53;
-  OPARTOK		= 54;
-  CPARTOK		= 55;
-  DEREFERENCETOK	= 56;
-  ADDRESSTOK		= 57;
-  OBRACKETTOK		= 58;
-  CBRACKETTOK		= 59;
-  COLONTOK		= 60;
-
-  PLUSTOK		= 61;
-  MINUSTOK		= 62;
-  MULTOK		= 63;
-  DIVTOK		= 64;
-  IDIVTOK		= 65;
-  MODTOK		= 66;
-  SHLTOK		= 67;
-  SHRTOK		= 68;
-  ORTOK			= 69;
-  XORTOK		= 70;
-  ANDTOK		= 71;
-  NOTTOK		= 72;
-
-  ASSIGNFILETOK		= 73;
-  RESETTOK		= 74;
-  REWRITETOK		= 75;
-  APPENDTOK		= 76;
-  BLOCKREADTOK		= 77;
-  BLOCKWRITETOK		= 78;
-  CLOSEFILETOK		= 79;
-  GETRESOURCEHANDLETOK	= 80;
-  SIZEOFRESOURCETOK     = 81;
-
-  WRITELNTOK		= 82;
-  SIZEOFTOK		= 83;
-  LENGTHTOK		= 84;
-  HIGHTOK		= 85;
-  LOWTOK		= 86;
-  INTTOK		= 87;
-  FRACTOK		= 88;
-  TRUNCTOK		= 89;
-  ROUNDTOK		= 90;
-  ODDTOK		= 91;
-
-  PROGRAMTOK		= 92;
-  LIBRARYTOK		= 93;
-  EXPORTSTOK		= 94;
-  EXTERNALTOK		= 95;
-  INTERFACETOK		= 96;
-  IMPLEMENTATIONTOK     = 97;
-  INITIALIZATIONTOK     = 98;
-  CONSTRUCTORTOK	= 99;
-  DESTRUCTORTOK		= 100;
-  OVERLOADTOK		= 101;
-  ASSEMBLERTOK		= 102;
-  FORWARDTOK		= 103;
-  REGISTERTOK		= 104;
-  INTERRUPTTOK		= 105;
-  PASCALTOK		= 106;
-  STDCALLTOK		= 107;
-  INLINETOK		= 108;
-  KEEPTOK		= 109;
-
-  SUCCTOK		= 110;
-  PREDTOK		= 111;
-  PACKEDTOK		= 112;
-  GOTOTOK		= 113;
-  INTOK			= 114;
-  VOLATILETOK		= 115;
-
-
-  SETTOK		= 127;	// Size = 32 SET OF
-
-  BYTETOK		= 128;	// Size = 1 BYTE
-  WORDTOK		= 129;	// Size = 2 WORD
-  CARDINALTOK		= 130;	// Size = 4 CARDINAL
-  SHORTINTTOK		= 131;	// Size = 1 SHORTINT
-  SMALLINTTOK		= 132;	// Size = 2 SMALLINT
-  INTEGERTOK		= 133;	// Size = 4 INTEGER
-  CHARTOK		= 134;	// Size = 1 CHAR
-  BOOLEANTOK		= 135;	// Size = 1 BOOLEAN
-  POINTERTOK		= 136;	// Size = 2 POINTER
-  STRINGPOINTERTOK	= 137;	// Size = 2 POINTER to STRING
-  FILETOK		= 138;	// Size = 2/12 FILE
-  RECORDTOK		= 139;	// Size = 2/???
-  OBJECTTOK		= 140;	// Size = 2/???
-  SHORTREALTOK		= 141;	// Size = 2 SHORTREAL			Fixed-Point Q8.8
-  REALTOK		= 142;	// Size = 4 REAL			Fixed-Point Q24.8
-  SINGLETOK		= 143;	// Size = 4 SINGLE / FLOAT		IEEE-754 32bit
-  HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16bit
-  PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
-  ENUMTOK		= 146;	// Size = 1 BYTE
-  PROCVARTOK		= 147;	// Size = 2
-  TEXTFILETOK		= 148;	// Size = 2/12 FILE
-  FORWARDTYPE		= 149;	// Size = 2
-
-  SHORTSTRINGTOK	= 150;	// zamieniamy na STRINGTOK
-  FLOATTOK		= 151;	// zamieniamy na SINGLETOK
-  FLOAT16TOK		= 152;	// zamieniamy na HALFSINGLETOK
-  TEXTTOK		= 153;	// zamieniamy na TEXTFILETOK
-
-  DEREFERENCEARRAYTOK	= 154;	// dla wskaznika do tablicy
-
-
-  DATAORIGINOFFSET	= 160;
-  CODEORIGINOFFSET	= 161;
-
-  IDENTTOK		= 180;
-  INTNUMBERTOK		= 181;
-  FRACNUMBERTOK		= 182;
-  CHARLITERALTOK	= 183;
-  STRINGLITERALTOK	= 184;
-
-  LINKTOK		= 187;
-  MACRORELEASE		= 188;
-  PROCALIGNTOK		= 189;
-  LOOPALIGNTOK		= 190;
-  LINKALIGNTOK		= 191;
-  INFOTOK		= 192;
-  WARNINGTOK		= 193;
-  ERRORTOK		= 194;
-  UNITBEGINTOK		= 195;
-  UNITENDTOK		= 196;
-  IOCHECKON		= 197;
-  IOCHECKOFF		= 198;
-  EOFTOK		= 199;     // MAXTOKENNAMES = 200
-
-  UnsignedOrdinalTypes	= [BYTETOK, WORDTOK, CARDINALTOK];
-  SignedOrdinalTypes	= [SHORTINTTOK, SMALLINTTOK, INTEGERTOK];
-  RealTypes		= [SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK];
-
-  IntegerTypes		= UnsignedOrdinalTypes + SignedOrdinalTypes;
-  OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK, ENUMTOK];
-
-  Pointers		= [POINTERTOK, PROCVARTOK, STRINGPOINTERTOK];
-
-  AllTypes		= OrdinalTypes + RealTypes + Pointers;
-
-  StringTypes		= [STRINGLITERALTOK, STRINGTOK, PCHARTOK];
-
-  // Identifier kind codes
-
-  CONSTANT		= CONSTTOK;
-  USERTYPE		= TYPETOK;
-  VARIABLE		= VARTOK;
-//  PROC			= PROCEDURETOK;
-  FUNC			= FUNCTIONTOK;
-  LABELTYPE		= LABELTOK;
-  UNITTYPE		= UNITTOK;
-
-  ENUMTYPE		= ENUMTOK;
-
-  // Compiler parameters
-
-  MAXNAMELENGTH		= 32;
-  MAXTOKENNAMES		= 200;
-  MAXSTRLENGTH		= 255;
-  MAXFIELDS		= 256;
-  MAXTYPES		= 1024;
-//  MAXTOKENS		= 32768;
-  MAXIDENTS		= 16384;
-  MAXBLOCKS		= 16384;	// maksymalna liczba blokow
-  MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
-  MAXVARS		= 256;		// maksymalna liczba parametrow dla VAR
-  MAXUNITS		= 512;
-  MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
-  MAXALLOWEDUNITS	= 256;
-
-  CODEORIGIN		= $100;
-  DATAORIGIN		= $8000;
-
-  CALLDETERMPASS	= 1;
-  CODEGENERATIONPASS	= 2;
-
-  // Indirection levels
-
-  ASVALUE		 = 0;
-  ASPOINTER		 = 1;
-  ASPOINTERTOPOINTER	 = 2;
-  ASPOINTERTOARRAYORIGIN = 3;
-  ASPOINTERTOARRAYORIGIN2= 4;
-  ASPOINTERTORECORD	 = 5;
-  ASPOINTERTOARRAYRECORD = 6;
-  ASSTRINGPOINTERTOARRAYORIGIN = 7;
-  ASPOINTERTODEREFERENCE = 8;
-
-  ASCHAR		= 6;	// GenerateWriteString
-  ASBOOLEAN		= 7;
-  ASREAL		= 8;
-  ASSHORTREAL		= 9;
-  ASHALFSINGLE		= 10;
-  ASSINGLE		= 11;
-  ASPCHAR		= 12;
-
-  OBJECTVARIABLE	= 1;
-  RECORDVARIABLE	= 2;
-
-  // Fixed-point 32-bit real number storage
-
-  FRACBITS		= 8;	// Float Fixed Point
-  TWOPOWERFRACBITS	= 256;
-
-  // Parameter passing
-
-  VALPASSING		= 1;
-  CONSTPASSING		= 2;
-  VARPASSING		= 3;
-
-
-  // Data sizes
-
-  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,2,1,2,2,2);
-
-  fBlockRead_ParamType : array [1..3] of byte = (UNTYPETOK, WORDTOK, POINTERTOK);
-
-{$i targets/type.inc}
-
-type
-  ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
-
-  irCode = (iDLI, iVBLD, iVBLI, iTIM1, iTIM2, iTIM4);
-
-  ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
-
-  ErrorCode =
-  (
-  UnknownIdentifier, OParExpected, IdentifierExpected, IncompatibleTypeOf, UserDefined,
-  IdNumExpExpected, IncompatibleTypes, IncompatibleEnum, OrdinalExpectedFOR, CantAdrConstantExp,
-  VariableExpected, WrongNumParameters, OrdinalExpExpected, RangeCheckError, RangeCheckError_,
-  VariableNotInit, ShortStringLength, StringTruncated, TypeMismatch, CantReadWrite,
-  SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
-  IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
-  UnreachableCode, IllegalQualifier, LoHi
-  );
-
-  code65 =
-  (
-  __je, __jne, __jg, __jge, __jl, __jle,
-  __putCHAR, __putEOL,
-  __addBX, __subBX, __movaBX_Value,
-  __imulECX,
-  __notaBX, //__negaBX, __notBOOLEAN,
-  __addAL_CL, __addAX_CX, __addEAX_ECX,
-  __shlAL_CL, __shlAX_CL, __shlEAX_CL,
-  __subAL_CL, __subAX_CX, __subEAX_ECX,
-  __cmpINT, //__cmpEAX_ECX, __cmpAX_CX, __cmpSMALLINT, __cmpSHORTINT,
-  __cmpSTRING, __cmpSTRING2CHAR, __cmpCHAR2STRING,
-  __shrAL_CL, __shrAX_CL, __shrEAX_CL,
-  __andEAX_ECX, __andAX_CX, //__andAL_CL,
-  __orEAX_ECX, __orAX_CX, //__orAL_CL,
-  __xorEAX_ECX, __xorAX_CX //__xorAL_CL
-
-  );
-
-  TString = string [MAXSTRLENGTH];
-  TName   = string [MAXNAMELENGTH];
-
-
-  TDefinesParam = array [1..MAXPARAMS] of TString;
-
-  TDefines = record
-    Name: TName;
-    Macro: string;
-    Line: integer;
-    Param: TDefinesParam;
-  end;
-
-  TParam = record
-    Name: TString;
-    DataType: Byte;
-    NumAllocElements: Cardinal;
-    AllocElementType: Byte;
-    PassMethod: Byte;
-    i, i_: integer;
-   end;
-
-  TFloat = array [0..1] of integer;
-
-  TParamList = array [1..MAXPARAMS] of TParam;
-
-  TVariableList = array [1..MAXVARS] of TParam;
-
-  TField = record
-    Name: TName;
-    Value: Int64;
-    DataType: Byte;
-    NumAllocElements: Cardinal;
-    AllocElementType: Byte;
-    Kind: Byte;
-  end;
-
-  TType = record
-    Block: Integer;
-    NumFields: Integer;
-    Size: Integer;
-    Field: array [0..MAXFIELDS] of TField;
-  end;
-
-  TToken = record
-    UnitIndex: Integer;
-    Line, Column: Integer;
-    case Kind: Byte of
-      IDENTTOK:
-	(Name: ^TString);
-      INTNUMBERTOK:
-	(Value: Int64);
-      FRACNUMBERTOK:
-	(FracValue: Single);
-      STRINGLITERALTOK:
-	(StrAddress: Word;
-	 StrLength: Word);
-    end;
-
-  TIdentifier = record
-    Name: TString;
-    Value: Int64;			// Value for a constant, address for a variable, procedure or function
-    Block: Integer;			// Index of a block in which the identifier is defined
-    UnitIndex : Integer;
-    DataType: Byte;
-    IdType: Byte;
-    PassMethod: Byte;
-    Pass: Byte;
-
-    NestedNumAllocElements: cardinal;
-    NestedAllocElementType: Byte;
-    NestedDataType: Byte;
-
-    NestedFunctionNumAllocElements: cardinal;
-    NestedFunctionAllocElementType: Byte;
-    isNestedFunction: Boolean;
-
-    LoopVariable,
-    isAbsolute,
-    isInit,
-    isInitialized,
-    Section: Boolean;
-
-    case Kind: Byte of
-      PROCEDURETOK, FUNCTIONTOK:
-	(NumParams: Word;
-	 Param: TParamList;
-	 ProcAsBlock: Integer;
-	 ObjectIndex: Integer;
-	 IsUnresolvedForward,
-	 isOverload,
-	 isRegister,
-	 isInterrupt,
-	 isRecursion,
-	 isStdCall,
-	 isPascal,
-	 isInline,
-	 isAsm,
-	 isExternal,
-	 isKeep,
-	 isVolatile,
-	 IsNotDead: Boolean;);
-
-      VARIABLE, USERTYPE:
-	(NumAllocElements, NumAllocElements_: Cardinal;
-	 AllocElementType: Byte);
-    end;
-
-
-  TCallGraphNode =
-    record
-     ChildBlock: array [1..MAXBLOCKS] of Integer;
-     NumChildren: Word;
-    end;
-
-  TUnit =
-    record
-     Name: TString;
-     Path: String;
-     Units: integer;
-     Allow: array [1..MAXALLOWEDUNITS] of TString;
-    end;
-
-  TResource =
-    record
-     resStream: Boolean;
-     resName, resType, resFile: TString;
-     resValue: integer;
-     resFullName: string;
-     resPar: array [1..MAXPARAMS] of TString;
-    end;
-
-  TCaseLabel =
-    record
-     left, right: Int64;
-     equality: Boolean;
-    end;
-
-  TPosStack =
-    record
-     ptr: word;
-     brk, cnt: Boolean;
-    end;
-
-  TCaseLabelArray = array of TCaseLabel;
-
-  TArrayString = array of string;
-
-{$i targets/var.inc}
-
-var
-
-  PROGRAM_NAME: string = 'Program';
-
-  AsmBlock: array [0..4095] of string;
-
-  Data, DataSegment, StaticStringData: array [0..$FFFF] of Word;
-
-  Types: array [1..MAXTYPES] of TType;
-  Tok: array of TToken;
-  Ident: array [1..MAXIDENTS] of TIdentifier;
-  Spelling: array [1..MAXTOKENNAMES] of TString;
-  UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;
-  Defines: array [1..MAXDEFINES] of TDefines;
-  IFTmpPosStack: array of integer;
-  BreakPosStack: array [0..1023] of TPosStack;
-  CodePosStack: array [0..1023] of Word;
-  BlockStack: array [0..MAXBLOCKS - 1] of Integer;
-  CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;	// For dead code elimination
-
-  OldConstValType: byte;
-
-  NumTok: integer = 0;
-
-  AddDefines: integer = 1;
-  NumDefines: integer = 1;	// NumDefines = AddDefines
-
-  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
-  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, Debug: Integer;
-
-  iOut: integer = -1;
-
-  start_time: QWord;
-
-  CODEORIGIN_BASE: integer = $2000;
-
-   DATA_Atari: integer = -1;
-  ZPAGE_Atari: integer = -1;
-  STACK_Atari: integer = -1;
-
-  UnitNameIndex: Integer = 1;
-
-  FastMul: Integer = -1;
-
-  CPUMode: Integer = 6502;
-
-  OutFile: TextFile;
-
-  asmLabels: array of integer;
-
-  TemporaryBuf: array [0..255] of string;
-
-  resArray: array of TResource;
-
-  MainPath, FilePath, optyA, optyY, optyBP2: string;
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: string;
-
-  msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
-
-  optimize : record
-	      use: Boolean;
-	      unitIndex, line, old: integer;
-	     end;
-
-  codealign : record
-		proc, loop, link : integer;
-	      end;
-
-
-  PROGRAMTOK_USE, INTERFACETOK_USE: Boolean;
-  OutputDisabled, isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
-
-  DiagMode: Boolean = false;
-  DataSegmentUse: Boolean = false;
-
-  PublicSection : Boolean = true;
-
-
-{$IFDEF USEOPTFILE}
-
-  OptFile: TextFile;
-
-{$ENDIF}
+	Common, Messages, Scanner, Parser, Optimize, Diagnostic;
 
 
 function Tab2Space(a: string; spc: byte = 8): string;
@@ -767,538 +200,8 @@ begin
 end;
 
 
-function StrToInt(const a: string): Int64;
-(*----------------------------------------------------------------------------*)
-(*----------------------------------------------------------------------------*)
-var i: integer;
-begin
- val(a,Result, i);
-end;
-
-
-function IntToStr(const a: Int64): string;
-(*----------------------------------------------------------------------------*)
-(*----------------------------------------------------------------------------*)
-begin
- str(a, Result);
-end;
-
-
-function Min(a,b: integer): integer;
-begin
-
- if a < b then
-  Result := a
- else
-  Result := b;
-
-end;
-
-
-procedure FreeTokens;
-var i: Integer;
-begin
-
- for i := 1 to NumTok do
-  if (Tok[i].Kind = IDENTTOK) and (Tok[i].Name <> nil) then Dispose(Tok[i].Name);
-
- SetLength(Tok, 0);
- SetLength(IFTmpPosStack, 0);
- SetLength(UnitPath, 0);
-end;
-
-
-function GetSpelling(i: Integer): TString;
-begin
-
-if i > NumTok then
-  Result := 'no token'
-else if (Tok[i].Kind > 0) and (Tok[i].Kind < IDENTTOK) then
-  Result := Spelling[Tok[i].Kind]
-else if Tok[i].Kind = IDENTTOK then
-  Result := 'identifier'
-else if (Tok[i].Kind = INTNUMBERTOK) or (Tok[i].Kind = FRACNUMBERTOK) then
-  Result := 'number'
-else if (Tok[i].Kind = CHARLITERALTOK) or (Tok[i].Kind = STRINGLITERALTOK) then
-  Result := 'literal'
-else if (Tok[i].Kind = UNITENDTOK) then
-  Result := 'END'
-else if (Tok[i].Kind = EOFTOK) then
-  Result := 'end of file'
-else
-  Result := 'unknown token';
-
-end;
-
-
-function ErrTokenFound(ErrTokenIndex: Integer): string;
-begin
-
- Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
-
-end;
-
-
-function InfoAboutToken(t: Byte): string;
-begin
-
-   case t of
-
-	 EQTOK: Result := '=';
-	 NETOK: Result := '<>';
-	 LTTOK: Result := '<';
-	 LETOK: Result := '<=';
-	 GTTOK: Result := '>';
-	 GETOK: Result := '>=';
-
-	 INTOK: Result := 'IN';
-
-	DOTTOK: Result := '.';
-      COMMATOK: Result := ',';
-  SEMICOLONTOK: Result := ';';
-       OPARTOK: Result := '(';
-       CPARTOK: Result := ')';
-DEREFERENCETOK: Result := '^';
-    ADDRESSTOK: Result := '@';
-   OBRACKETTOK: Result := '[';
-   CBRACKETTOK: Result := ']';
-      COLONTOK: Result := ':';
-       PLUSTOK: Result := '+';
-      MINUSTOK: Result := '-';
-	MULTOK: Result := '*';
-	DIVTOK: Result := '/';
-
-       IDIVTOK: Result := 'DIV';
-	MODTOK: Result := 'MOD';
-	SHLTOK: Result := 'SHL';
-	SHRTOK: Result:= 'SHR';
-	 ORTOK: Result := 'OR';
-	XORTOK: Result := 'XOR';
-	ANDTOK: Result := 'AND';
-	NOTTOK: Result := 'NOT';
-
-      CONSTTOK: Result := 'CONST';
-       TYPETOK: Result := 'TYPE';
-	VARTOK: Result := 'VARIABLE';
-  PROCEDURETOK: Result := 'PROCEDURE';
-   FUNCTIONTOK: Result := 'FUNCTION';
-CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
- DESTRUCTORTOK: Result := 'DESTRUCTOR';
-
-      LABELTOK: Result := 'LABEL';
-       UNITTOK: Result := 'UNIT';
-      ENUMTYPE: Result := 'ENUM';
-
-     RECORDTOK: Result := 'RECORD';
-     OBJECTTOK: Result := 'OBJECT';
-       BYTETOK: Result := 'BYTE';
-   SHORTINTTOK: Result := 'SHORTINT';
-       CHARTOK: Result := 'CHAR';
-    BOOLEANTOK: Result := 'BOOLEAN';
-       WORDTOK: Result := 'WORD';
-   SMALLINTTOK: Result := 'SMALLINT';
-   CARDINALTOK: Result := 'CARDINAL';
-    INTEGERTOK: Result := 'INTEGER';
-    POINTERTOK,
-    DATAORIGINOFFSET,
-    CODEORIGINOFFSET: Result := 'POINTER';
-
-    PROCVARTOK: Result := '"<Procedure Variable>"';
-
- STRINGPOINTERTOK: Result := 'STRING';
-
- STRINGLITERALTOK: Result := 'literal';
-
-  SHORTREALTOK: Result := 'SHORTREAL';
-       REALTOK: Result := 'REAL';
-     SINGLETOK: Result := 'SINGLE';
- HALFSINGLETOK: Result := 'FLOAT16';
-	SETTOK: Result := 'SET';
-       FILETOK: Result := 'FILE';
-   TEXTFILETOK: Result := 'TEXTFILE';
-      PCHARTOK: Result := 'PCHAR';
-
-   REGISTERTOK: Result := 'REGISTER';
-     PASCALTOK: Result := 'PASCAL';
-    STDCALLTOK: Result := 'STDCALL';
-     INLINETOK: Result := 'INLINE';
-        ASMTOK: Result := 'ASM';
-  INTERRUPTTOK: Result := 'INTERRUPT';
-
- else
-  Result := 'UNTYPED'
- end;
-
-end;
-
-
-procedure WritelnMsg;
-var i: integer;
-begin
-
- TextColor(LIGHTGREEN);
-
- for i := 0 to High(msgWarning) - 1 do writeln(msgWarning[i]);
-
- TextColor(LIGHTCYAN);
-
- for i := 0 to High(msgNote) - 1 do writeln(msgNote[i]);
-
- NormVideo;
-
-end;
-
-
-function GetEnumName(IdentIndex: integer): TString;
-var IdentTtemp: integer;
-
-
-  function Search(Num: cardinal): integer;
-  var IdentIndex, BlockStackIndex: Integer;
-  begin
-
-    Result := 0;
-
-    for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
-    for IdentIndex := 1 to NumIdent do
-      if (Ident[IdentIndex].DataType = ENUMTYPE) and (Ident[IdentIndex].NumAllocElements = Num) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
-	exit(IdentIndex);
-  end;
-
-
-begin
-
- Result := '';
-
- if Ident[IdentIndex].NumAllocElements > 0 then begin
-  IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
-
-  if IdentTtemp > 0 then
-   Result := Ident[IdentTtemp].Name;
- end else
-  if Ident[IdentIndex].DataType = ENUMTYPE then begin
-   IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
-
-   if IdentTtemp > 0 then
-    Result := Ident[IdentTtemp].Name;
-  end;
-
-end;
-
-
-function LowBound(i: integer; DataType: Byte): Int64; forward;
-function HighBound(i: integer; DataType: Byte): Int64; forward;
-
-
-function ErrorMessage(ErrTokenIndex: Integer; err: ErrorCode; IdentIndex: Integer = 0; SrcType: Int64 = 0; DstType: Int64 = 0): string;
-begin
-
- Result := '';
-
- case err of
-
-	UserDefined: Result := 'User defined: ' + msgUser[Tok[ErrTokenIndex].Value];
-
-  UnknownIdentifier: Result := 'Identifier not found ''' + Tok[ErrTokenIndex].Name^ + '''';
- IncompatibleTypeOf: Result := 'Incompatible type of ' + Ident[IdentIndex].Name;
-   IncompatibleEnum: if DstType < 0 then
-   			Result := 'Incompatible types: got "'+GetEnumName(SrcType)+'" expected "'+InfoAboutToken(abs(DstType))+ '"'
-		     else
-   		     if SrcType < 0 then
-   			Result := 'Incompatible types: got "'+InfoAboutToken(abs(SrcType))+'" expected "'+GetEnumName(DstType)+ '"'
-		     else
-   	   		Result := 'Incompatible types: got "'+GetEnumName(SrcType)+'" expected "'+GetEnumName(DstType)+ '"';
-
- WrongNumParameters: Result := 'Wrong number of parameters specified for call to ' + Ident[IdentIndex].Name;
-
- CantAdrConstantExp: Result := 'Can''t take the address of constant expressions';
-
-       OParExpected: Result := '''(''' + ErrTokenFound(ErrTokenIndex);
-
-  IllegalExpression: Result := 'Illegal expression';
-   VariableExpected: Result := 'Variable identifier expected';
- OrdinalExpExpected: Result := 'Ordinal expression expected';
- OrdinalExpectedFOR: Result := 'Ordinal expression expected as ''FOR'' loop counter value';
-
-  IncompatibleTypes: begin
-                      Result := 'Incompatible types: got "';
-
-		      if SrcType < 0 then Result := Result + '^';
-
-		      Result := Result + InfoAboutToken(abs(SrcType)) + '" expected "';
-
-		      if DstType < 0 then Result := Result + '^';
-
-		      Result := Result + InfoAboutToken(abs(DstType)) + '"';
-		     end;
-
- IdentifierExpected: Result := 'Identifier' + ErrTokenFound(ErrTokenIndex);
-   IdNumExpExpected: Result := 'Identifier, number or expression' + ErrTokenFound(ErrTokenIndex);
-
-	       LoHi: Result := 'lo/hi(dword/qword) returns the upper/lower word/dword';
-
-     IllegalTypeConversion, IncompatibleTypesArray:
-		     begin
-
-		      if err = IllegalTypeConversion then
-     		       Result := 'Illegal type conversion: "Array[0..'
-		      else begin
-		       Result := 'Incompatible types: got ';
-		       if Ident[IdentIndex].NumAllocElements > 0 then Result := Result + '"Array[0..';
-		      end;
-
-
-     		      if Ident[IdentIndex].NumAllocElements_ > 0 then
-		       Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements-1)+'] Of Array[0..'+IntToStr(Ident[IdentIndex].NumAllocElements_-1)+'] Of '+InfoAboutToken(Ident[IdentIndex].AllocElementType)+'" '
-       		      else
-		       if Ident[IdentIndex].NumAllocElements = 0 then begin
-
-			if Ident[IdentIndex].AllocElementType <> UNTYPETOK then
-			 Result := Result + '"^'+InfoAboutToken(Ident[IdentIndex].AllocElementType)+'" '
-			else
-			 Result := Result + '"'+InfoAboutToken(POINTERTOK)+'" ';
-
-		       end else
-			Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements-1)+'] Of '+InfoAboutToken(Ident[IdentIndex].AllocElementType)+'" ';
-
-		      if err = IllegalTypeConversion then
-		       Result := Result + 'to "'+InfoAboutToken(SrcType)+'"'
-		      else
-		       if SrcType < 0 then begin
-
-       			Result := Result + 'expected ';
-
-			if Ident[abs(SrcType)].NumAllocElements_ > 0 then
-			 Result := Result + '"Array[0..' + IntToStr(Ident[abs(SrcType)].NumAllocElements-1)+'] Of Array[0..'+IntToStr(Ident[abs(SrcType)].NumAllocElements_-1)+'] Of '+InfoAboutToken(Ident[IdentIndex].AllocElementType)+'"'
-       			else
-			 if Ident[abs(SrcType)].AllocElementType in [RECORDTOK, OBJECTTOK] then
-			  Result := Result + '"^'+Types[Ident[abs(SrcType)].NumAllocElements].Field[0].Name+'"'
-			 else begin
-
-			  if Ident[abs(SrcType)].DataType in [RECORDTOK, OBJECTTOK] then
-			   Result := Result +  '"'+Types[Ident[abs(SrcType)].NumAllocElements].Field[0].Name+'"'
-			  else
-			   Result := Result + '"Array[0..' + IntToStr(Ident[abs(SrcType)].NumAllocElements-1)+'] Of '+InfoAboutToken(Ident[abs(SrcType)].AllocElementType)+'"';
-
-			 end;
-
-		       end else
-			Result := Result + 'expected "'+InfoAboutToken(SrcType)+'"';
-
-		     end;
-
-	 AlwaysTrue: Result := 'Comparison might be always true due to range of constant and expression';
-
-	AlwaysFalse: Result := 'Comparison might be always false due to range of constant and expression';
-
-    RangeCheckError: begin
-   		      Result := 'Range check error while evaluating constants ('+IntToStr(SrcType)+' must be between '+IntToStr(LowBound(ErrTokenIndex, DstType))+' and ';
-
-		      if IdentIndex > 0 then
-		       Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements-1)+')'
-		      else
-		       Result := Result + IntToStr(HighBound(ErrTokenIndex, DstType))+')';
-
-		     end;
-
-   RangeCheckError_: begin
-		      Result := 'Range check error while evaluating constants ('+IntToStr(SrcType)+' must be between '+IntToStr(LowBound(ErrTokenIndex, DstType))+' and ';
-
-		      if IdentIndex > 0 then
-		       Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements_-1)+')'
-		      else
-		       Result := Result + IntToStr(HighBound(ErrTokenIndex, DstType))+')';
-
-		     end;
-
-    VariableNotInit: Result := 'Variable '''+Ident[IdentIndex].Name+''' does not seem to be initialized';
-  ShortStringLength: Result := 'String literal has more characters than short string length';
-    StringTruncated: Result := 'String constant truncated to fit STRING['+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+']';
-      CantReadWrite: Result := 'Can''t read or write variables of this type';
-       TypeMismatch: Result := 'Type mismatch';
-    UnreachableCode: Result := 'unreachable code';
-   IllegalQualifier: Result := 'Illegal qualifier';
-     SubrangeBounds: Result := 'Constant expression violates subrange bounds';
-  TooManyParameters: Result := 'Too many formal parameters in ' + Ident[IdentIndex].Name;
-      CantDetermine: Result := 'Can''t determine which overloaded function '''+ Ident[IdentIndex].Name +''' to call';
-  UpperBoundOfRange: Result := 'Upper bound of range is less than lower bound';
-	  HighLimit: Result := 'High range limit > '+IntToStr(High(word));
-
- end;
-
-end;
-
-
-procedure iError(ErrTokenIndex: Integer; err: ErrorCode; IdentIndex: Integer = 0; SrcType: Int64 = 0; DstType: Int64 = 0);
-var Msg: string;
-begin
-
- if not isConst then begin
-
- //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
-
- WritelnMsg;
-
- Msg:=ErrorMessage(ErrTokenIndex, err, IdentIndex, SrcType, DstType);
-
- if ErrTokenIndex > NumTok then ErrTokenIndex := NumTok;
-
- TextColor(LIGHTRED);
-
- WriteLn(UnitName[Tok[ErrTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[ErrTokenIndex].Line) + ',' + IntToStr(Succ(Tok[ErrTokenIndex - 1].Column)) + ')'  + ' Error: ' + Msg);
-
- NormVideo;
-
- FreeTokens;
-
- CloseFile(OutFile);
- Erase(OutFile);
-
- Halt(2);
-
- end;
-
- isError := true;
-
-end;
-
-
-procedure Error(ErrTokenIndex: Integer; Msg: string);
-begin
-
- if not isConst then begin
-
- //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
-
- WritelnMsg;
-
- if ErrTokenIndex > NumTok then ErrTokenIndex := NumTok;
-
- TextColor(LIGHTRED);
-
- WriteLn(UnitName[Tok[ErrTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[ErrTokenIndex].Line) + ',' + IntToStr(Succ(Tok[ErrTokenIndex - 1].Column)) + ')'  + ' Error: ' + Msg);
-
- NormVideo;
-
- FreeTokens;
-
- CloseFile(OutFile);
- Erase(OutFile);
-
- Halt(2);
-
- end;
-
- isError := true;
-
-end;
-
-
-procedure Warning(WarnTokenIndex: Integer; err: ErrorCode; IdentIndex: Integer = 0; SrcType: Int64 = 0; DstType: Int64 = 0);
-var i: integer;
-    Msg, a: string;
-begin
-
- if Pass = CODEGENERATIONPASS then begin
-
-  Msg:=ErrorMessage(WarnTokenIndex, err, IdentIndex, SrcType, DstType);
-
-  a := UnitName[Tok[WarnTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[WarnTokenIndex].Line) + ')' + ' Warning: ' + Msg;
-
-  for i := High(msgWarning)-1 downto 0 do
-   if msgWarning[i] = a then exit;
-
-  i := High(msgWarning);
-  msgWarning[i] := a;
-  SetLength(msgWarning, i+2);
-
- end;
-
-end;
-
-
-procedure newMsg(var msg: TArrayString; var a: string);
-var i: integer;
-begin
-
-    i:=High(msg);
-    msg[i] := a;
-
-    SetLength(msg, i+2);
-
-end;
-
-
-procedure Note(NoteTokenIndex: Integer; IdentIndex: Integer); overload;
-var a: string;
-begin
-
- if Pass = CODEGENERATIONPASS then
-  if pos('.', Ident[IdentIndex].Name) = 0 then begin
-
-   a := UnitName[Tok[NoteTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[NoteTokenIndex].Line) + ')' + ' Note: Local ';
-
-   if Ident[IdentIndex].Kind <> UNITTYPE then begin
-
-    case Ident[IdentIndex].Kind of
-      CONSTANT: a := a + 'const';
-      USERTYPE: a := a + 'type';
-     LABELTYPE: a := a + 'label';
-
-      VARIABLE: if Ident[IdentIndex].isAbsolute then
-		 a := a + 'absolutevar'
-		else
-		 a := a + 'variable';
-
-  PROCEDURETOK: a := a + 'proc';
-	  FUNC: a := a + 'func';
-    end;
-
-    a := a +' ''' + Ident[IdentIndex].Name + '''' + ' not used';
-
-    newMsg(msgNote, a);
-
-   end;
-
-  end;
-
-end;
-
-
-procedure Note(NoteTokenIndex: Integer; Msg: string); overload;
-var a: string;
-begin
-
- if Pass = CODEGENERATIONPASS then begin
-
-   a := UnitName[Tok[NoteTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[NoteTokenIndex].Line) + ')' + ' Note: ';
-
-   a := a + Msg;
-
-   newMsg(msgNote, a);
-
- end;
-
-end;
-
-
-function GetStandardToken(S: TString): Integer;
-var
-  i: Integer;
-begin
-Result := 0;
-
-if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL' else
- if (S = 'UINT16') then S := 'WORD' else
-  if (S = 'LONGINT') then S := 'INTEGER';
-
-for i := 1 to MAXTOKENNAMES do
-  if S = Spelling[i] then
-    begin
-    Result := i;
-    Break;
-    end;
-end;
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function GetIdentResult(ProcAsBlock: integer): integer;
@@ -1313,17 +216,8 @@ Result := 0;
 end;
 
 
-procedure ResetOpty;
-begin
-
- optyA := '';
- optyY := '';
- optyBP2 := '';
-
-end;
-
-
-procedure asm65(a: string = ''; comment : string =''); forward;
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function GetLocalName(IdentIndex: integer; a: string =''): string;
@@ -1337,107 +231,8 @@ begin
 end;
 
 
-function GetIdent(S: TString): Integer;
-var TempIndex: integer;
-
-  function UnitAllowedAccess(IdentIndex, Index: integer): Boolean;
-  var i: integer;
-  begin
-
-   Result := false;
-
-   if Ident[IdentIndex].Section then
-    for i := 1 to MAXALLOWEDUNITS do
-      if UnitName[Index].Allow[i] = UnitName[Ident[IdentIndex].UnitIndex].Name then exit(true);
-
-  end;
-
-
-  function Search(X: TString; UnitIndex: integer): integer;
-  var IdentIndex, BlockStackIndex: Integer;
-  begin
-
-    Result := 0;
-
-    for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
-    for IdentIndex := NumIdent downto 1 do
-      if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
-	if (Ident[IdentIndex].UnitIndex = UnitIndex) {or Ident[IdentIndex].Section} or (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') or UnitAllowedAccess(IdentIndex, UnitIndex) then begin
-	  Result := IdentIndex;
-	  Ident[IdentIndex].Pass := Pass;
-
-	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
-
-	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') then exit;
-	end
-
-  end;
-
-
-  function SearchCurrentUnit(X: TString; UnitIndex: integer): integer;
-  var IdentIndex, BlockStackIndex: Integer;
-  begin
-
-    Result := 0;
-
-    for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
-    for IdentIndex := NumIdent downto 1 do
-      if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
-	if (Ident[IdentIndex].UnitIndex = UnitIndex) or UnitAllowedAccess(IdentIndex, UnitIndex) then begin
-	  Result := IdentIndex;
-	  Ident[IdentIndex].Pass := Pass;
-
-	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
-
-	  if (Ident[IdentIndex].UnitIndex = UnitIndex) then exit;
-	end
-
-  end;
-
-
-
-begin
-
-  Result := Search(S, UnitNameIndex);
-
-  if (Result = 0) and (pos('.', S) > 0) then begin   // potencjalnie odwolanie do unitu / obiektu
-
-    TempIndex := Search(copy(S, 1, pos('.', S)-1), UnitNameIndex);
-
-//    writeln(S,',',Ident[TempIndex].Kind,' - ', Ident[TempIndex].DataType, ' / ',Ident[TempIndex].AllocElementType);
-
-    if TempIndex > 0 then
-     if (Ident[TempIndex].Kind = UNITTYPE) or (Ident[TempIndex].DataType = ENUMTYPE) then
-       Result := SearchCurrentUnit(copy(S, pos('.', S)+1, length(S)), Ident[TempIndex].UnitIndex)
-     else
-      if Ident[TempIndex].DataType = OBJECTTOK then
-       Result := SearchCurrentUnit(Types[Ident[TempIndex].NumAllocElements].Field[0].Name + copy(S, pos('.', S), length(S)), Ident[TempIndex].UnitIndex)
-      ;{else
-       if ( (Ident[TempIndex].DataType in Pointers) and (Ident[TempIndex].AllocElementType = RECORDTOK) ) then
-	Result := TempIndex;}
-
-//    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIndex,'/',Result,' | ',Ident[TempIndex].Kind,',',UnitName[Ident[TempIndex].UnitIndex].Name);
-
-  end;
-
-end;
-
-
-{
-function GetRecordField(i: integer; field: string): Byte;
-var j: integer;
-begin
-
- Result:=0;
-
- for j:=1 to Types[i].NumFields do
-  if Types[i].Field[j].Name = field then begin Result:=Types[i].Field[j].DataType; Break end;
-
- if Result = 0 then
-  Error(0, 'Record field not found');
-
-end;
-}
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function GetIdentProc(S: TString; ProcIdentIndex: integer; Param: TParamList; NumParams: integer): integer;
@@ -1663,6 +458,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure TestIdentProc(x: integer; S: TString);
 var IdentIndex, BlockStackIndex: Integer;
     k, m: integer;
@@ -1773,579 +572,8 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
 end;
 
 
-procedure omin_spacje (var i:integer; var a:string);
-(*----------------------------------------------------------------------------*)
-(*  omijamy tzw. "biale spacje" czyli spacje, tabulatory		      *)
-(*----------------------------------------------------------------------------*)
-begin
-
- if a<>'' then
-  while (i<=length(a)) and (a[i] in AllowWhiteSpaces) do inc(i);
-
-end;
-
-
-function get_digit(var i:integer; var a:string): string;
-(*----------------------------------------------------------------------------*)
-(*  pobierz ciag zaczynajaca sie znakami '0'..'9','%','$'		      *)
-(*----------------------------------------------------------------------------*)
-begin
- Result:='';
-
- if a<>'' then begin
-
-  omin_spacje(i,a);
-
-  if UpCase(a[i]) in AllowDigitFirstChars then begin
-
-   Result:=UpCase(a[i]);
-   inc(i);
-
-   while UpCase(a[i]) in AllowDigitChars do begin Result:=Result+UpCase(a[i]); inc(i) end;
-
-  end;
-
- end;
-
-end;
-
-
-function get_label(var i:integer; var a:string; up: Boolean = true): string;
-(*----------------------------------------------------------------------------*)
-(*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'		      *)
-(*----------------------------------------------------------------------------*)
-begin
- Result:='';
-
- if a<>'' then begin
-
-  omin_spacje(i,a);
-
-  if UpCase(a[i]) in AllowLabelFirstChars then
-   while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do begin
-
-    if up then
-     Result:=Result+UpCase(a[i])
-    else
-     Result:=Result + a[i];
-
-    inc(i);
-   end;
-
- end;
-
-end;
-
-
-function get_string(var i:integer; var a:string; up: Boolean = true): string;
-(*----------------------------------------------------------------------------*)
-(*  pobiera ciag znakow, ograniczony znakami '' lub ""			      *)
-(*  podwojny '' oznacza literalne '					      *)
-(*  podwojny "" oznacza literalne "					      *)
-(*----------------------------------------------------------------------------*)
-var len: integer;
-    znak, gchr: char;
-begin
- Result:='';
-
- omin_spacje(i,a);
-
- if a[i] = '%' then begin
-
-   while UpCase(a[i]) in ['A'..'Z','%'] do begin Result:=Result + Upcase(a[i]); inc(i) end;
-
- end else
- if not(a[i] in AllowQuotes) then begin
-
-  Result := get_label(i, a, up);
-
- end else begin
-
-  gchr:=a[i]; len:=length(a);
-
-  while i<=len do begin
-   inc(i);	 // omijamy pierwszy znak ' lub "
-
-   znak:=a[i];
-
-   if znak=gchr then begin inc(i); Break end;
-{    inc(i);
-    if a[i]=gchr then znak:=gchr;
-   end;}
-
-   Result:=Result+znak;
-  end;
-
- end;
-
-end;
-
-
-procedure NormalizePath(var Name: string);
-begin
-
-  {$IFDEF UNIX}
-   if Pos('\', Name) > 0 then
-    Name := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-    Name := LowerCase(Name);
-  {$ENDIF}
-
-end;
-
-
-function FindFile(Name: string; ftyp: TString): string; overload;
-var i: integer;
-begin
-
-  NormalizePath(Name);
-
-  i:=0;
-
-  repeat
-
-   Result :=  Name;
-
-   if not FileExists( Result ) then begin
-    Result := UnitPath[i] + Name;
-
-     if not FileExists( Result ) and (i > 0) then begin
-      Result := FilePath + UnitPath[i] + Name;
-     end;
-
-   end;
-
-   inc(i);
-
-  until (i > High(UnitPath)) or FileExists( Result );
-
-  if not FileExists( Result ) then
-   if ftyp = 'unit' then
-    Error(NumTok, 'Can''t find unit '+ChangeFileExt(Name,'')+' used by '+PROGRAM_NAME)
-   else
-    Error(NumTok, 'Can''t open '+ftyp+' file '''+Result+'''');
-
-end;
-
-
-function FindFile(Name: string): Boolean; overload;
-var i: integer;
-    fnm: string;
-begin
-
-  NormalizePath(Name);
-
-  i:=0;
-
-  repeat
-
-   fnm :=  Name;
-
-   if not FileExists( fnm ) then begin
-    fnm := UnitPath[i] + Name;
-
-     if not FileExists( fnm ) and (i > 0) then begin
-      fnm := FilePath + UnitPath[i] + Name;
-     end;
-
-   end;
-
-   inc(i);
-
-  until (i > High(UnitPath)) or FileExists( fnm );
-
-  Result := FileExists( fnm );
-
-end;
-
-
-procedure AddResource(fnam: string);
-var i, j: integer;
-    t: textfile;
-    res: TResource;
-    s, tmp: string;
-begin
-
- AssignFile(t, fnam); FileMode:=0; Reset(t);
-
-  while not eof(t) do begin
-
-    readln(t, s);
-
-    i:=1;
-    omin_spacje(i, s);
-
-    if (length(s) > i-1) and (not (s[i] in ['#',';'])) then begin
-
-     res.resName := get_label(i, s);
-     res.resType := get_label(i, s);
-     res.resFile := get_string(i, s, false);	// nie zmieniaj wielkosci liter
-
-    if (AnsiUpperCase(res.resType) = 'RCDATA') or
-       (AnsiUpperCase(res.resType) = 'RCASM') or
-       (AnsiUpperCase(res.resType) = 'DOSFILE') or
-       (AnsiUpperCase(res.resType) = 'RELOC') or
-       (AnsiUpperCase(res.resType) = 'RMT') or
-       (AnsiUpperCase(res.resType) = 'MPT') or
-       (AnsiUpperCase(res.resType) = 'CMC') or
-       (AnsiUpperCase(res.resType) = 'RMTPLAY') or
-       (AnsiUpperCase(res.resType) = 'MPTPLAY') or
-       (AnsiUpperCase(res.resType) = 'CMCPLAY') or
-       (AnsiUpperCase(res.resType) = 'EXTMEM') or
-       (AnsiUpperCase(res.resType) = 'XBMP') or
-       (AnsiUpperCase(res.resType) = 'SAPR') or
-       (AnsiUpperCase(res.resType) = 'SAPRPLAY')
-      then
-
-      else
-        Error(NumTok, 'Undefined resource type: Type = UNKNOWN, Name = '''+res.resName+'''');
-
-
-     if (res.resFile <> '') and not(FindFile(res.resFile)) then
-       Error(NumTok, 'Resource file not found: Type = '+res.resType+', Name = '''+res.resName+'''');
-
-
-     for j := 1 to MAXPARAMS do begin
-
-      if s[i] in ['''','"'] then
-       tmp := get_string(i, s)
-      else
-       tmp := get_digit(i, s);
-
-      if tmp = '' then tmp:='0';
-
-      res.resPar[j]  := tmp;
-     end;
-
-//     writeln(res.resName,',',res.resType,',',res.resFile);
-
-     for j := High(resArray)-1 downto 0 do
-      if resArray[j].resName = res.resName then
-       Error(NumTok, 'Duplicate resource: Type = '+res.resType+', Name = '''+res.resName+'''');
-
-     j:=High(resArray);
-     resArray[j] := res;
-
-     SetLength(resArray, j+2);
-
-    end;
-
-  end;
-
- CloseFile(t);
-
-end;
-
-
-procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
-begin
-
- Inc(NumTok);
-
- if NumTok > High(Tok) then
-  SetLength(Tok, NumTok+1);
-
-// if NumTok > MAXTOKENS then
-//    Error(NumTok, 'Out of resources, TOK');
-
- Tok[NumTok].UnitIndex := UnitIndex;
- Tok[NumTok].Kind := Kind;
- Tok[NumTok].Value := Value;
-
- if NumTok = 1 then
-  Column := 1
- else begin
-
-  if Tok[NumTok - 1].Line <> Line then
-//   Column := 1
-  else
-    Column := Column + Tok[NumTok - 1].Column;
-
- end;
-
-// if Tok[NumTok- 1].Line <> Line then writeln;
-
- Tok[NumTok].Line := Line;
- Tok[NumTok].Column := Column;
-
- //if line=46 then  writeln(Kind,',',Column);
-
-end;
-
-
-function Elements(IdentIndex: integer): cardinal;
-begin
-
- if (Ident[IdentIndex].DataType = ENUMTYPE) then
-  Result := 0
- else
-
-   if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType in [PROCVARTOK, RECORDTOK, OBJECTTOK]) then
-    Result := Ident[IdentIndex].NumAllocElements
-   else
-    Result := Ident[IdentIndex].NumAllocElements * Ident[IdentIndex].NumAllocElements_;
-
-end;
-
-
-procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: Byte; DataType: Byte; NumAllocElements: Cardinal; AllocElementType: Byte; Data: Int64; IdType: Byte = IDENTTOK);
-var
-  i: Integer;
-  NumAllocElements_ : Cardinal;
-begin
-
-i := GetIdent(Name);
-
-if (i > 0) and (not (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK])) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
-  Error(ErrTokenIndex, 'Identifier ' + Name + ' is already defined')
-else
-  begin
-
-  Inc(NumIdent);
-
-  if NumIdent > High(Ident) then
-    Error(NumTok, 'Out of resources, IDENT');
-
-  Ident[NumIdent].Name := Name;
-  Ident[NumIdent].Kind := Kind;
-  Ident[NumIdent].DataType := DataType;
-  Ident[NumIdent].Block := BlockStack[BlockStackTop];
-  Ident[NumIdent].NumParams := 0;
-  Ident[NumIdent].isAbsolute := false;
-  Ident[NumIdent].PassMethod := VALPASSING;
-  Ident[NumIdent].IsUnresolvedForward := false;
-
-  Ident[NumIdent].Section := PublicSection;
-
-  Ident[NumIdent].UnitIndex := UnitNameIndex;
-
-  Ident[NumIdent].IdType := IdType;
-
-  if (Kind = VARIABLE) and (Data <> 0) then begin
-   Ident[NumIdent].isAbsolute := true;
-   Ident[NumIdent].isInit := true;
-  end;
-
-   NumAllocElements_ := NumAllocElements shr 16;		// , yy]
-   NumAllocElements  := NumAllocElements and $FFFF;		// [xx,
-
-  if Name <> 'RESULT' then
-   if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = CODEGENERATIONPASS) then
-     if not ( (Ident[NumIdent].Pass in [CALLDETERMPASS , CODEGENERATIONPASS]) or (Ident[NumIdent].IsNotDead) ) then
-      Note(ErrTokenIndex, NumIdent);
-
-  case Kind of
-
-    PROCEDURETOK, FUNCTIONTOK, UNITTYPE, CONSTRUCTORTOK, DESTRUCTORTOK:
-      begin
-      Ident[NumIdent].Value := CodeSize;			// Procedure entry point address
-//      Ident[NumIdent].Section := true;
-      end;
-
-    VARIABLE:
-      begin
-
-      if Ident[NumIdent].isAbsolute then
-       Ident[NumIdent].Value := Data - 1
-      else
-       Ident[NumIdent].Value := DATAORIGIN + VarDataSize;	// Variable address
-
-      if not OutputDisabled then
-	VarDataSize := VarDataSize + DataSize[DataType];
-
-      Ident[NumIdent].NumAllocElements := NumAllocElements;	// Number of array elements (0 for single variable)
-      Ident[NumIdent].NumAllocElements_ := NumAllocElements_;
-
-      Ident[NumIdent].AllocElementType := AllocElementType;
-
-      if not OutputDisabled then begin
-
-       if DataType in [ENUMTYPE] then
-        inc(VarDataSize)
-       else
-       if (DataType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements > 0) then
-	VarDataSize := VarDataSize + 0
-       else
-       if (DataType in [FILETOK, TEXTFILETOK]) and (NumAllocElements > 0) then
-	VarDataSize := VarDataSize + 12
-       else
-	VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
-
-       if NumAllocElements > 0 then dec(VarDataSize, DataSize[DataType]);
-
-      end;
-
-      end;
-
-    CONSTANT, ENUMTYPE:
-      begin
-      Ident[NumIdent].Value := Data;				// Constant value
-
-      if DataType in Pointers + [ENUMTOK] then begin
-       Ident[NumIdent].NumAllocElements := NumAllocElements;
-       Ident[NumIdent].NumAllocElements_ := NumAllocElements_;
-
-       Ident[NumIdent].AllocElementType := AllocElementType;
-      end;
-
-      Ident[NumIdent].isInit := true;
-      end;
-
-    USERTYPE:
-      begin
-       Ident[NumIdent].NumAllocElements := NumAllocElements;
-       Ident[NumIdent].NumAllocElements_ := NumAllocElements_;
-
-       Ident[NumIdent].AllocElementType := AllocElementType;
-      end;
-
-    LABELTYPE:
-      begin
-       Ident[NumIdent].isInit := false;
-      end;
-
-  end;// case
-  end;// else
-end;
-
-
-
-procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
-var
-  i, j, k, len: Integer;
-  yes: Boolean;
-begin
-
-Fillchar(Data, sizeof(Data), 0);
-
-len:=Length(StrValue);
-
-if len > 255 then
- Data[0]:=255
-else
- Data[0]:=len;
-
-for i:=1 to len do Data[i] := ord(StrValue[i]);
-
-i:=0;
-j:=0;
-yes:=false;
-
-while (i < NumStaticStrChars) and (yes=false) do begin
-
- j:=0;
- k:=i;
- while (Data[j] = StaticStringData[k+j]) and (j < len+2) and (k+j < NumStaticStrChars) do inc(j);
-
- if j = len+2 then begin yes:=true; Break end;
-
- inc(i);
-end;
-
-Tok[StrTokenIndex].StrLength := len;
-
-if yes then begin
- Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
- exit;
-end;
-
-Tok[StrTokenIndex].StrAddress := CODEORIGIN + NumStaticStrChars;
-
-StaticStringData[NumStaticStrChars] := Data[0];//length(StrValue);
-Inc(NumStaticStrChars);
-
-for i := 1 to len do
-  begin
-  StaticStringData[NumStaticStrChars] := ord(StrValue[i]);
-  Inc(NumStaticStrChars);
-  end;
-
-StaticStringData[NumStaticStrChars] := 0;
-Inc(NumStaticStrChars);
-
-end;
-
-
-procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
-begin
-
-//writeln(tok[ErrTokenIndex].Name^,',', op,',',DataType);
-
- if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
-   ((DataType in RealTypes) and
-       not (op in [MULTOK, DIVTOK, PLUSTOK, MINUSTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK])) or
-   ((DataType in IntegerTypes) and
-       not (op in [MULTOK, IDIVTOK, MODTOK, SHLTOK, SHRTOK, ANDTOK, PLUSTOK, MINUSTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or
-   ((DataType = CHARTOK) and
-       not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or
-   ((DataType = BOOLEANTOK) and
-       not (op in [ANDTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK])) or
-   ((DataType in Pointers) and
-       not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK]))
-then
- if DataType = RightType then
-  Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' + InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
- else
-  Error(ErrTokenIndex, 'Operation "' + InfoAboutToken(op) + '" not supported for types "' +  InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"');
-
-end;
-
-
-function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = true): Boolean;
-begin
-
-  Result := false;
-
-  if (DataSize[DstType] < DataSize[SrcType]) or
-     ( (DstType = REALTOK) and (SrcType <> REALTOK) ) or
-     ( (DstType <> REALTOK) and (SrcType = REALTOK) ) or
-
-     ( (DstType = SINGLETOK) and (SrcType <> SINGLETOK) ) or
-     ( (DstType <> SINGLETOK) and (SrcType = SINGLETOK) ) or
-
-     ( (DstType = HALFSINGLETOK) and (SrcType <> HALFSINGLETOK) ) or
-     ( (DstType <> HALFSINGLETOK) and (SrcType = HALFSINGLETOK) ) or
-
-     ( (DstType = SHORTREALTOK) and (SrcType <> SHORTREALTOK) ) or
-     ( (DstType <> SHORTREALTOK) and (SrcType = SHORTREALTOK) ) or
-
-     ( (DstType in IntegerTypes) and (SrcType in [CHARTOK, BOOLEANTOK, POINTERTOK, DATAORIGINOFFSET, CODEORIGINOFFSET, STRINGPOINTERTOK]) ) or
-     ( (SrcType in IntegerTypes) and (DstType in [CHARTOK, BOOLEANTOK]) ) then
-
-     if err then
-      iError(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
-     else
-      Result := true;
-
-end;
-
-
-function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
-begin
-
- Result := 0;
-
- if LeftType = RightType then		 // General rule
-
-  Result := LeftType
-
- else
-  if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
-    Result := LeftType;
-
-  if (LeftType in Pointers) and (RightType in Pointers) then
-    Result := LeftType;
-
- if LeftType = UNTYPETOK then Result := RightType;
-
-// if LeftType in Pointers then Result :in Pointers;
-
- if Result = 0 then
-   iError(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
-
-end;
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure AddCallGraphChild(ParentBlock, ChildBlock: Integer);
@@ -2361,7893 +589,8 @@ begin
 end;
 
 
-procedure SaveAsmBlock(a: char);
-begin
-
- AsmBlock[AsmBlockIndex] := AsmBlock[AsmBlockIndex] + a;
-
-end;
-
-
-function GetVAL(a: string): integer;
-var err: integer;
-begin
-
- Result := -1;
-
- if a <> '' then
-  if a[1] = '#' then begin
-   val(copy(a, 2, length(a)), Result, err);
-
-   if err > 0 then Result := -1;
-
-  end;
-
-end;
-
-
-procedure OptimizeTemporaryBuf;
-var p, k , q: integer;
-    tmp: string;
-    yes: Boolean;
-
-
-  function SKIP(i: integer): Boolean;
-  begin
-
-      Result :=	(TemporaryBuf[i] = #9'seq') or (TemporaryBuf[i] = #9'sne') or
-		(TemporaryBuf[i] = #9'spl') or (TemporaryBuf[i] = #9'smi') or
-		(TemporaryBuf[i] = #9'scc') or (TemporaryBuf[i] = #9'scs') or
-		(TemporaryBuf[i] = #9'svc') or (TemporaryBuf[i] = #9'svs') or
-
-		(pos('jne ', TemporaryBuf[i]) > 0) or (pos('jeq ', TemporaryBuf[i]) > 0) or
-		(pos('jcc ', TemporaryBuf[i]) > 0) or (pos('jcs ', TemporaryBuf[i]) > 0) or
-		(pos('jmi ', TemporaryBuf[i]) > 0) or (pos('jpl ', TemporaryBuf[i]) > 0) or
-
-		(pos('bne ', TemporaryBuf[i]) > 0) or (pos('beq ', TemporaryBuf[i]) > 0) or
-		(pos('bcc ', TemporaryBuf[i]) > 0) or (pos('bcs ', TemporaryBuf[i]) > 0) or
-		(pos('bmi ', TemporaryBuf[i]) > 0) or (pos('bpl ', TemporaryBuf[i]) > 0);
-  end;
-
-
-  function IFDEF_MUL8(i: integer): Boolean;
-  begin
-      Result :=	//(TemporaryBuf[i+4] = #9'eif') and
-      		//(TemporaryBuf[i+3] = #9'imulCL') and
-      		//(TemporaryBuf[i+2] = #9'els') and
-		(TemporaryBuf[i+1] = #9'fmulu_8') and
-		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
-  end;
-
-
-  function IFDEF_MUL16(i: integer): Boolean;
-  begin
-      Result :=	//(TemporaryBuf[i+4] = #9'eif') and
-      		//(TemporaryBuf[i+3] = #9'imulCX') and
-      		//(TemporaryBuf[i+2] = #9'els') and
-		(TemporaryBuf[i+1] = #9'fmulu_16') and
-		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
-  end;
-
-
-  function fortmp(a: string): string;
-  // @FORTMP_xxxx
-  // @FORTMP_xxxx+1
-  begin
-
-    Result:=a;
-
-//    Result[8] := '?';
-
-    if length(Result) > 12 then
-      Result[13] := '_'
-    else
-      Result := Result + '_0';
-
-  end;
-
-
-  function GetBYTE(i: integer): integer;
-  begin
-    Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
-  end;
-
-  function GetWORD(i, j: integer): integer;
-  begin
-    Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;
-  end;
-
-
-  function GetSTRING(j: integer): string;
-  var i: integer;
-       a: string;
-  begin
-
-    Result := '';
-    i:=6;
-
-    a:=TemporaryBuf[j];
-
-    if a<>'' then
-     while not(a[i] in [' ',#9]) and (i <= length(a)) do begin
-      Result := Result + a[i];
-      inc(i);
-     end;
-
-  end;
-
-
-begin
-
-{
-if (pos('sub #$01', TemporaryBuf[0]) > 0) then begin
-
-      for p:=0 to 11 do writeln(TemporaryBuf[p]);
-      writeln('-------');
-
-end;
-}
-
-
-{$i include/opt_TEMP.inc}
-
-{$i include/opt_TEMP_IFTMP.inc}
-
-{$i include/opt_TEMP_IMUL_CX.inc}
-
-{$i include/opt_TEMP_WHILE.inc}
-
-{$i include/opt_TEMP_FOR.inc}
-
-{$i include/opt_TEMP_FORDEC.inc}
-
-{$i include/opt_TEMP_ORD.inc}
-
-{$i include/opt_TEMP_X.inc}
-
-{$i include/opt_TEMP_EAX.inc}
-
-{$i include/opt_TEMP_JMP.inc}
-
-
-    if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
-       (TemporaryBuf[1] = #9'lda @BYTE.MOD.RESULT') then				// lda @BYTE.MOD.RESULT			; 1
-       begin
-	TemporaryBuf[0] := '~';
-	TemporaryBuf[1] := '~';
-       end;
-
-    if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
-       (TemporaryBuf[1] = #9'ldy @BYTE.MOD.RESULT') then				// lda @BYTE.MOD.RESULT			; 1
-       begin
-	TemporaryBuf[0] := #9'tay';
-	TemporaryBuf[1] := '~';
-       end;
-
-
-    if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
-       (pos('sta ', TemporaryBuf[1]) > 0) and						// sta F				; 1
-       (TemporaryBuf[2] = #9'lda :STACKORIGIN+STACKWIDTH,x') and			// lda :STACKORIGIN+STACKWIDTH,x	; 2
-       (pos('sta ', TemporaryBuf[3]) > 0) and						// sta F+1				; 3
-       (TemporaryBuf[4] = #9'dex') and							// dex					; 2
-       (TemporaryBuf[5] = ':move') then							//:move					; 3
-       begin
-	TemporaryBuf[1] := #9'sta :bp2';
-	TemporaryBuf[3] := #9'sta :bp2+1';
-
-	tmp:=TemporaryBuf[6];
-	p:=StrToInt(TemporaryBuf[7]);
-
-	if p = 256 then begin
-     	 TemporaryBuf[4] := #9'ldy #$00';
-     	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.'+tmp+',y+';
-    	end else
-    	if p <= 128 then begin
-     	 TemporaryBuf[4] := #9'ldy #$'+IntToHex(p-1, 2);
-     	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.'+tmp+',y-';
-    	end else begin
-     	 TemporaryBuf[4] := #9'@move '+tmp+' #adr.'+tmp+' #$'+IntToHex(p,2);
-     	 TemporaryBuf[5] := '~';
-	end;
-
-     	TemporaryBuf[6] := #9'mwa #adr.'+tmp+' '+tmp;
-     	TemporaryBuf[7] := #9'dex';
-       end;
-
-// -----------------------------------------------------------------------------
-
-{$i include/opt_TEMP_MOVE.inc}
-
-{$i include/opt_TEMP_FILL.inc}
-
-
-// #asm
-
-   if TemporaryBuf[0] = '#asm' then begin
-
-    writeln(OutFile, AsmBlock[StrToInt(TemporaryBuf[1])]);
-
-    TemporaryBuf[0] := '~';
-    TemporaryBuf[1] := '~';
-
-   end;
-
-
-// @PARAM?
-
-   if TemporaryBuf[0] = #9'sta @PARAM?' then TemporaryBuf[0] := '~';
-
-   if TemporaryBuf[0] = #9'sty @PARAM?' then TemporaryBuf[0] := #9'tya';
-
-
-// @FORTMP?
-
-   if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
-
-    if (pos('lda ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'lda ' +  fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('cmp ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('sub ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('sbc ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('sta ', TemporaryBuf[0]) > 0) then
-      TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
-    else
-    if (pos('sty ', TemporaryBuf[0]) > 0) then
-      TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
-    else
-    if (pos('mva ', TemporaryBuf[0]) > 0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
-     tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
-     TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + fortmp(tmp);
-    end else
-     writeln('Unassigned: ' + TemporaryBuf[0] );
-
-   //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
-  //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
-
-end;
-
-
-procedure WriteOut(a: string);
-var i: integer;
-begin
-
- if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
-
-
- if iOut < High(TemporaryBuf) then begin
-  inc(iOut);
-  TemporaryBuf[iOut] := a;
- end else begin
-
-  OptimizeTemporaryBuf;
-
-  if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
-   if (a = '') or (pos('; optimize OK', a) > 0) then exit;
-
-  if TemporaryBuf[0] <> '~' then begin
-   if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
-
-   outTmp := TemporaryBuf[0];
-  end;
-
-  for i:=1 to iOut do TemporaryBuf[i-1] := TemporaryBuf[i];
-
-  TemporaryBuf[iOut] := a;
-
- end;
-
-end;
-
-
-procedure OptimizeASM;
-(* -------------------------------------------------------------------------- *)
-(* optymalizacja powiodla sie jesli na wyjsciu X=0
-(* peephole optimization
-(* -------------------------------------------------------------------------- *)
-type
-    TListing = array [0..511] of string;
-
-var i, l, k, m, x: integer;
-    a, t, {arg,} arg0, arg1: string;
-    inxUse, found: Boolean;
-//    t0, t1, t2, t3: string;
-    listing, listing_tmp: TListing;
-    s: array [0..15, 0..3] of string;
-
-// -----------------------------------------------------------------------------
-
-
-   function GetBYTE(i: integer): integer;
-   begin
-    Result := GetVAL(copy(listing[i], 6, 4));
-   end;
-
-   function GetWORD(i,j: integer): integer;
-   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
-   end;
-
-
-   function TAY(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'tay'
-   end;
-
-   function TYA(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'tya'
-   end;
-
-   function INY(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'iny'
-   end;
-
-   function DEY(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'dey'
-   end;
-
-   function INX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'inx'
-   end;
-
-   function DEX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'dex'
-   end;
-
-   function AND_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'and (:bp),y'
-   end;
-
-   function ORA_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'ora (:bp),y'
-   end;
-
-   function EOR_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'eor (:bp),y'
-   end;
-
-   function LDA_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda (:bp),y'
-   end;
-
-   function CMP_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'cmp (:bp),y'
-   end;
-
-   function STA_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta (:bp),y'
-   end;
-
-   function STA_BP(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :bp'
-   end;
-
-   function INC_BP_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'inc :bp+1'
-   end;
-
-   function STA_BP_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :bp+1'
-   end;
-
-   function STY_BP_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sty :bp+1'
-   end;
-
-   function LDA_BP2_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda (:bp2),y'
-   end;
-
-   function LDA_BP2(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda :bp2'
-   end;
-
-   function LDA_BP2_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda :bp2+1'
-   end;
-
-   function STA_BP2(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :bp2'
-   end;
-
-   function STA_BP2_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :bp2+1'
-   end;
-
-   function INC_BP2_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'inc :bp2+1'
-   end;
-
-   function STA_BP2_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta (:bp2),y'
-   end;
-
-   function ADD_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'add (:bp),y'
-   end;
-
-   function SUB_BP_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sub (:bp),y'
-   end;
-
-   function ADD_BP2_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'add (:bp2),y'
-   end;
-
-   function ADC_BP2_Y(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'adc (:bp2),y'
-   end;
-
-   function LDA_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda #$00'
-   end;
-
-   function ADD_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'add #$00'
-   end;
-
-   function SUB_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sub #$00'
-   end;
-
-   function ADC_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'adc #$00'
-   end;
-
-   function CMP_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'cmp #$00'
-   end;
-
-   function SBC_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sbc #$00'
-   end;
-
-   function ADC_SBC_IM_0(i: integer): Boolean;
-   begin
-     Result := (listing[i] = #9'adc #$00') or (listing[i] = #9'sbc #$00')
-   end;
-
-   function LDY_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'ldy #$00'
-   end;
-
-   function AND_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'and #$00'
-   end;
-
-   function ORA_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'ora #$00'
-   end;
-
-   function EOR_IM_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'eor #$00'
-   end;
-
-   function ROR_A(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'ror @'
-   end;
-
-   function ROL_A(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'rol @'
-   end;
-
-   function LSR_A(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lsr @'
-   end;
-
-   function ASL_A(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'asl @'
-   end;
-
-   function LDY_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'ldy #1'
-   end;
-
-   function ROL_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'rol :eax+1'
-   end;
-
-   function LDA_EAX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda :eax'
-   end;
-
-   function LDA_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'lda :eax+1'
-   end;
-
-   function STA_EAX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :eax'
-   end;
-
-   function STA_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :eax+1'
-   end;
-
-   function ADD_EAX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'add :eax'
-   end;
-
-   function ADD_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'add :eax+1'
-   end;
-
-   function ADC_EAX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'adc :eax'
-   end;
-
-   function ADC_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'adc :eax+1'
-   end;
-
-   function SUB_EAX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sub :eax'
-   end;
-
-   function SUB_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sub :eax+1'
-   end;
-
-   function SBC_EAX(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sbc :eax'
-   end;
-
-   function SBC_EAX_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sbc :eax+1'
-   end;
-
-
-   function STA_im_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta #$00'
-   end;
-
-   function STY_im_0(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sty #$00'
-   end;
-
-   function LAB_a(i: integer): Boolean;
-   begin
-     Result := listing[i] = '@'
-   end;
-
-
-   function IX(i: integer): Boolean;
-   begin
-    Result := pos(',x', listing[i]) > 0;
-   end;
-
-   function IY(i: integer): Boolean;
-   begin
-    Result := pos(',y', listing[i]) > 0;
-   end;
-
-
-   function CMP_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'cmp #', listing[i]) = 1;
-   end;
-
-   function LDY_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'ldy #', listing[i]) = 1;
-   end;
-
-   function LDY(i: integer): Boolean;
-   begin
-     Result := pos(#9'ldy ', listing[i]) = 1;
-   end;
-
-   function LDY_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'ldy :STACK', listing[i]) = 1;
-   end;
-
-   function STY(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sty ', listing[i]) = 1) and (pos(#9'sty #$00', listing[i]) = 0);
-   end;
-
-   function STY_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'sty :STACK', listing[i]) = 1;
-   end;
-
-   function ROR(i: integer): Boolean;
-   begin
-     Result := pos(#9'ror ', listing[i]) = 1;
-   end;
-
-   function ROR_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'ror :STACK', listing[i]) = 1;
-   end;
-
-   function LSR(i: integer): Boolean;
-   begin
-     Result := pos(#9'lsr ', listing[i]) = 1;
-   end;
-
-   function LSR_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'lsr :STACK', listing[i]) = 1;
-   end;
-
-   function ROL(i: integer): Boolean;
-   begin
-     Result := pos(#9'rol ', listing[i]) = 1;
-   end;
-
-   function ROL_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'rol :STACK', listing[i]) = 1;
-   end;
-
-   function ASL(i: integer): Boolean;
-   begin
-     Result := pos(#9'asl ', listing[i]) = 1;
-   end;
-
-   function ASL_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'asl :STACK', listing[i]) = 1;
-   end;
-
-   function CMP(i: integer): Boolean;
-   begin
-     Result := pos(#9'cmp ', listing[i]) = 1;
-   end;
-
-   function CMP_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'cmp :STACK', listing[i]) = 1;
-   end;
-
-   function MWA(i: integer): Boolean;
-   begin
-     Result := pos(#9'mwa ', listing[i]) = 1;
-   end;
-
-   function MWY(i: integer): Boolean;
-   begin
-     Result := pos(#9'mwy ', listing[i]) = 1;
-   end;
-
-   function MVY(i: integer): Boolean;
-   begin
-     Result := pos(#9'mvy ', listing[i]) = 1;
-   end;
-
-   function MVY_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'mvy #', listing[i]) = 1;
-   end;
-
-   function MVA(i: integer): Boolean;
-   begin
-     Result := pos(#9'mva ', listing[i]) = 1;
-   end;
-
-   function MVA_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'mva #', listing[i]) = 1;
-   end;
-
-   function MVA_IM_0(i: integer): Boolean;
-   begin
-     Result := pos(#9'mva #$00', listing[i]) = 1;
-   end;
-
-   function MVA_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'mva :STACK', listing[i]) = 1;
-   end;
-
-   function ORA(i: integer): Boolean;
-   begin
-     Result := pos(#9'ora ', listing[i]) = 1;
-   end;
-
-   function AND_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'and #', listing[i]) = 1;
-   end;
-
-   function LDA_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'lda #', listing[i]) = 1;
-   end;
-
-   function LDA_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'lda :STACK', listing[i]) = 1;
-   end;
-
-   function LDA_ADR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'lda adr.', listing[i]) = 1) or ((pos(#9'lda ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-   end;
-
-   function LDA(i: integer): Boolean;
-   begin
-     Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
-   end;
-
-   function LDA_A(i: integer): Boolean;
-   begin
-     Result := (pos(#9'lda ', listing[i]) = 1);
-   end;
-
-   function ADD_ADR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add adr.', listing[i]) = 1) or ((pos(#9'add ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-   end;
-
-   function SUB_ADR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sub adr.', listing[i]) = 1) or ((pos(#9'sub ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-   end;
-
-   function ADC_ADR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc adr.', listing[i]) = 1) or ((pos(#9'adc ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-   end;
-
-   function SBC_ADR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sbc adr.', listing[i]) = 1) or ((pos(#9'sbc ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-   end;
-
-   function STA_ADR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sta adr.', listing[i]) = 1) or ((pos(#9'sta ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-   end;
-
-   function STA(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0) and (pos(#9'sta #$00', listing[i]) = 0);
-   end;
-
-   function STA_A(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta #$00', listing[i]) = 0);
-   end;
-
-   function STA_STACK(i: integer): Boolean;
-   begin
-     Result := pos(#9'sta :STACK', listing[i]) = 1;
-   end;
-
-   function INC_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'inc :STACK', listing[i]) = 1);
-   end;
-
-   function DEC_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'dec :STACK', listing[i]) = 1);
-   end;
-
-   function INC_(i: integer): Boolean;
-   begin
-     Result := (pos(#9'inc ', listing[i]) = 1);
-   end;
-
-   function DEC_(i: integer): Boolean;
-   begin
-     Result := (pos(#9'dec ', listing[i]) = 1);
-   end;
-
-   function JMP(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jmp l_', listing[i]) = 1);
-   end;
-
-
-   function ADD(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add ', listing[i]) = 1);
-   end;
-
-   function ADD_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add #', listing[i]) = 1);
-   end;
-
-   function ADC(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc ', listing[i]) = 1);
-   end;
-
-   function ADC_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc #', listing[i]) = 1);
-   end;
-
-   function ADD_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add :STACK', listing[i]) = 1);
-   end;
-
-   function ADC_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc :STACK', listing[i]) = 1);
-   end;
-
-   function ADD_SUB_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add :STACK', listing[i]) = 1) or (pos(#9'sub :STACK', listing[i]) = 1);
-   end;
-
-   function ADC_SBC_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc :STACK', listing[i]) = 1) or (pos(#9'sbc :STACK', listing[i]) = 1);
-   end;
-
-   function SUB(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sub ', listing[i]) = 1);
-   end;
-
-   function SUB_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sub #', listing[i]) = 1);
-   end;
-
-   function SBC(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sbc ', listing[i]) = 1);
-   end;
-
-   function SBC_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sbc #', listing[i]) = 1);
-   end;
-
-   function SUB_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sub :STACK', listing[i]) = 1);
-   end;
-
-   function SBC_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'sbc :STACK', listing[i]) = 1);
-   end;
-
-   function ADC_SBC_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc #', listing[i]) = 1) or (pos(#9'sbc #', listing[i]) = 1);
-   end;
-
-   function ADD_SUB_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add #', listing[i]) = 1) or (pos(#9'sub #', listing[i]) = 1);
-   end;
-
-   function ADD_SUB(i: integer): Boolean;
-   begin
-     Result := (pos(#9'add ', listing[i]) = 1) or (pos(#9'sub ', listing[i]) = 1);
-   end;
-
-   function ADD_SUB_VAL(i: integer): Boolean;
-   begin
-     Result := ((pos(#9'add ', listing[i]) = 1) and (pos(#9'add :STACK', listing[i]) = 0)) or
-               ((pos(#9'sub ', listing[i]) = 1) and (pos(#9'sub :STACK', listing[i]) = 0));
-   end;
-
-   function ADC_SBC(i: integer): Boolean;
-   begin
-     Result := (pos(#9'adc ', listing[i]) = 1) or (pos(#9'sbc ', listing[i]) = 1);
-   end;
-
-   function ADC_SBC_VAL(i: integer): Boolean;
-   begin
-     Result := ((pos(#9'adc ', listing[i]) = 1) and (pos(#9'adc :STACK', listing[i]) = 0)) or
-               ((pos(#9'sbc ', listing[i]) = 1) and (pos(#9'sbc :STACK', listing[i]) = 0));
-   end;
-
-   function AND_(i: integer): Boolean;
-   begin
-     Result := (pos(#9'and ', listing[i]) = 1);
-   end;
-
-   function AND_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'and :STACK', listing[i]) = 1);
-   end;
-
-   function ORA_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'ora :STACK', listing[i]) = 1);
-   end;
-
-   function EOR_STACK(i: integer): Boolean;
-   begin
-     Result := (pos(#9'eor :STACK', listing[i]) = 1);
-   end;
-
-   function AND_ORA_EOR_STACK(i: integer): Boolean;
-   begin
-     Result := and_stack(i) or ora_stack(i) or eor_stack(i);
-   end;
-
-   function AND_ORA_EOR_IM(i: integer): Boolean;
-   begin
-     Result := (pos(#9'and #', listing[i]) = 1) or (pos(#9'ora #', listing[i]) = 1) or (pos(#9'eor #', listing[i]) = 1);
-   end;
-
-   function AND_ORA_EOR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'and ', listing[i]) = 1) or (pos(#9'ora ', listing[i]) = 1) or (pos(#9'eor ', listing[i]) = 1);
-   end;
-
-   function MWY_BP2(i: integer): Boolean;
-   begin
-     Result := (pos(#9'mwy ', listing[i]) = 1) and (pos(' :bp2', listing[i]) > 0);
-   end;
-
-
-   function ADD_SUB_AL_CL(i: integer): Boolean;
-   begin
-     Result := (listing[i] = #9'jsr addAL_CL') or (listing[i] = #9'jsr subAL_CL');
-   end;
-
-   function ADD_SUB_AX_CX(i: integer): Boolean;
-   begin
-     Result := (listing[i] = #9'jsr addAX_CX') or (listing[i] = #9'jsr subAX_CX');
-   end;
-
-   function ADD_SUB_EAX_ECX(i: integer): Boolean;
-   begin
-     Result := (listing[i] = #9'jsr addEAX_ECX') or (listing[i] = #9'jsr subEAX_ECX');
-   end;
-
-
-   function JSR(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jsr ', listing[i]) = 1);
-   end;
-
-
-   function JEQ(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jeq ', listing[i]) = 1);
-   end;
-
-   function JNE(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jne ', listing[i]) = 1);
-   end;
-
-   function JPL(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jpl ', listing[i]) = 1);
-   end;
-
-   function JMI(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jmi ', listing[i]) = 1);
-   end;
-
-   function JCC(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jcc ', listing[i]) = 1);
-   end;
-
-   function JCS(i: integer): Boolean;
-   begin
-     Result := (pos(#9'jcs ', listing[i]) = 1);
-   end;
-
-
-   function BEQ(i: integer): Boolean;
-   begin
-     Result := (pos(#9'beq ', listing[i]) = 1);
-   end;
-
-   function BNE(i: integer): Boolean;
-   begin
-     Result := (pos(#9'bne ', listing[i]) = 1);
-   end;
-
-   function BCC(i: integer): Boolean;
-   begin
-     Result := (pos(#9'bcc ', listing[i]) = 1);
-   end;
-
-   function BCS(i: integer): Boolean;
-   begin
-     Result := (pos(#9'bcs ', listing[i]) = 1);
-   end;
-
-   function BPL(i: integer): Boolean;
-   begin
-     Result := (pos(#9'bpl ', listing[i]) = 1);
-   end;
-
-   function BMI(i: integer): Boolean;
-   begin
-     Result := (pos(#9'bmi ', listing[i]) = 1);
-   end;
-
-
-   function BNE_A(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'bne @+'
-   end;
-
-   function SEQ(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'seq'
-   end;
-
-   function SNE(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sne'
-   end;
-
-   function SPL(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'spl'
-   end;
-
-   function SMI(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'smi'
-   end;
-
-   function SCC(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'scc'
-   end;
-
-   function SCS(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'scs'
-   end;
-
-
-// !!! kolejny rozkaz po UNUSED_A na pozycji 'i+1' musi koniecznie byc conajmniej 'LDA ' !!!
-
-   function UNUSED_A(i: integer): Boolean;
-   begin
-     Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or rol_stack(i) or ror_stack(i) or adc_sbc(i);
-   end;
-
-
-   function onBreak(i: integer): Boolean;
-   begin
-     Result := (listing[i] = '@') or (pos(#9'jsr ', listing[i]) = 1) or (listing[i] = #9'eif');		// !!! eif !!! koniecznie
-   end;
-
-
-   procedure WriteInstruction(i: integer);
-   begin
-
-     if isInterrupt and ( (pos(' :bp', listing[i]) > 0) or (pos(' :STACK', listing[i]) > 0) ) then begin
-//       WritelnMsg;
-
-       TextColor(LIGHTRED);
-
-       WriteLn(UnitName[optimize.unitIndex].Path + ' (' + IntToStr(optimize.line) + ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
-
-       NormVideo;
-
-//       FreeTokens;
-
-//       CloseFile(OutFile);
-//       Erase(OutFile);
-
-//       Halt(2);
-     end;
-
-     WriteOut( listing[i] );
-
-   end;
-
-
-   function SKIP(i: integer): Boolean;
-   begin
-
-     if i < 0 then
-      Result := False
-     else
-      Result :=	seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or
-		jeq(i) or jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or
-		beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i);
-   end;
-
-
-
-   function LabelIsUsed(i: integer): Boolean;									// issue #91 fixed
-
-(*
-
- +#$00Label
- -#$00Label
-
- *#$02Label
- *#$03Label
- *#$04Label
- *#$08Label
-
- *+$01Label|Label
- *-$01Label|Label
-
-*)
-
-     procedure LabelTest(const mne: string);
-     begin
-
-      case optyY[1] of
-
-       '+','-' : Result := (listing[i] = mne + copy(optyY, 6, 256));
-
-           '*' : if optyY[2] in ['+', '-'] then
-	          Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
-		 else
-	          Result := (listing[i] = mne + copy(optyY, 6, 256));
-
-      else
-       Result := (listing[i] = mne + optyY);
-      end;
-
-     end;
-
-
-   begin
-
-     Result:=false;
-
-     if optyY <> '' then
-      if (pos(#9'sta ', listing[i]) = 1) then LabelTest(#9'sta ') else
-       if (pos(#9'inc ', listing[i]) = 1) then LabelTest(#9'inc ') else
-        if (pos(#9'dec ', listing[i]) = 1) then LabelTest(#9'dec ');
-
-   end;
-
-
-   function EAX(i: integer): Boolean;
-   begin
-     Result := (pos(' :eax', listing[i]) > 0);
-   end;
-
-
-   function IFDEF_MUL8(i: integer): Boolean;
-   begin
-      Result :=	//(listing[i+4] = #9'eif') and
-      		//(listing[i+3] = #9'imulCL') and
-      		//(listing[i+2] = #9'els') and
-		(listing[i+1] = #9'fmulu_8') and
-		(listing[i]   = #9'.ifdef fmulinit');
-   end;
-
-   function IFDEF_MUL16(i: integer): Boolean;
-   begin
-      Result :=	//(listing[i+4] = #9'eif') and
-		//(listing[i+3] = #9'imulCX') and
-		//(listing[i+2] = #9'els') and
-		(listing[i+1] = #9'fmulu_16') and
-      		(listing[i]   = #9'.ifdef fmulinit');
-   end;
-
-
-   procedure LDA_STA_ADR(i, q: integer; op: char);
-   begin
-
-	if lda_adr(i+6) and iy(i+6) then begin
-	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 listing[i+6] := listing[i+6] + op +'$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+7) and iy(i+7) then begin
-	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 listing[i+7] := listing[i+7] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if (lda_adr(i+8) = false) and (sta_adr(i+9) = false) then exit;
-
-	if lda_adr(i+8) and iy(i+8) then begin
-	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+9) and iy(i+9) then begin
-	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if (lda_adr(i+10) = false) and (sta_adr(i+11) = false) then exit;
-
-	if lda_adr(i+10) and iy(i+10) then begin
-	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
-	 listing[i+10] := listing[i+10] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+11) and iy(i+11) then begin
-	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
-	 listing[i+11] := listing[i+11] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if (lda_adr(i+12) = false) and (sta_adr(i+13) = false) then exit;
-
-	if lda_adr(i+12) and iy(i+12) then begin
-	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
-	 listing[i+12] := listing[i+12] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-	if sta_adr(i+13) and iy(i+13) then begin
-	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
-	 listing[i+13] := listing[i+13] + op + '$' + IntToHex(q, 2) + ',y';
-	end;
-
-   end;
-
-// -----------------------------------------------------------------------------
-
-   procedure Rebuild;
-   var k, i: integer;
-   begin
-
-    k:=0;
-    for i := 0 to l - 1 do
-     if (listing[i] <> '') and (listing[i][1] <> ';') then begin
-      listing[k] := listing[i];
-      inc(k);
-     end;
-
-    listing[k]   := '';
-    listing[k+1] := '';
-    listing[k+2] := '';
-
-    l := k;
-   end;
-
-
-// -----------------------------------------------------------------------------
-
-
-   function CmpString(j, k: integer): Boolean;
-   var i: integer;
-       a, tmp: string;
-   begin
-
-    tmp:='';
-    i:=6;
-
-    a:=listing[j];
-
-    if a<>'' then
-     while not(a[i] in [' ',',',#9]) and (i <= length(a)) do begin
-      tmp := tmp + a[i];
-      inc(i);
-     end;
-
-    Result := pos(tmp, listing[k]) > 0;
-
-   end;
-
-
-   function GetString(a: string): string; overload;
-   var i: integer;
-   begin
-
-    Result := '';
-    i:=6;
-
-    if a<>'' then
-     while not(a[i] in [' ',#9]) and (i <= length(a)) do begin
-      Result := Result + a[i];
-      inc(i);
-     end;
-
-   end;
-
-
-
-   function GetString(j: integer): string; overload;
-   var i: integer;
-       a: string;
-   begin
-
-    Result := '';
-    i:=6;
-
-    a:=listing[j];
-
-    if a<>'' then
-     while not(a[i] in [' ',#9]) and (i <= length(a)) do begin
-      Result := Result + a[i];
-      inc(i);
-     end;
-
-   end;
-
-
-   function GetStringLast(j: integer): string; overload;
-   var i: integer;
-       a: string;
-   begin
-
-    Result := '';
-
-    a:=listing[j];
-
-    if a<>'' then begin
-     i:=length(a);
-
-     while not(a[i] in [' ',#9]) and (i>0) do dec(i);
-
-     Result:=copy(a, i+1, 256);
-    end;
-
-   end;
-
-
-  function GetARG(n: byte; x: shortint; reset: Boolean = true): string;
-  var i: integer;
-      a: string;
-  begin
-
-   Result:='';
-
-   if x < 0 then exit;
-
-   a := s[x][n];
-
-   if (a='') then begin
-
-    case n of
-     0: Result := ':STACKORIGIN+'+IntToStr(shortint(x+8));
-     1: Result := ':STACKORIGIN+STACKWIDTH+'+IntToStr(shortint(x+8));
-     2: Result := ':STACKORIGIN+STACKWIDTH*2+'+IntToStr(shortint(x+8));
-     3: Result := ':STACKORIGIN+STACKWIDTH*3+'+IntToStr(shortint(x+8));
-    end;
-
-   end else begin
-
-    i := 6;
-
-    while a[i] in [' ',#9] do inc(i);
-
-    while not(a[i] in [' ',#9]) and (i <= length(a)) do begin
-     Result := Result + a[i];
-     inc(i);
-    end;
-
-    if reset then s[x][n] := '';
-
-   end;
-
-  end;
-
-
-  function RemoveUnusedSTACK: Boolean;
-  var j: byte;
-      i: integer;
-      cnt_l,					// licznik odczytow stosu
-      cnt_s: array [0..7+1, 0..3] of Boolean;	// licznik zapisow stosu
-
-
-   procedure Clear;
-   var i: byte;
-   begin
-
-    for i := 0 to 15 do begin
-     s[i][0] := '';
-     s[i][1] := '';
-     s[i][2] := '';
-     s[i][3] := '';
-    end;
-
-    fillchar(cnt_l, sizeof(cnt_l), false);
-    fillchar(cnt_s, sizeof(cnt_s), false);
-
-   end;
-
-
-   function unrelated(i: integer): Boolean;	// unrelated stack references
-   var j, k: byte;
-   begin
-
-     Result := false;
-
-     for j := 0 to 7 do
-      for k := 0 to 3 do
-       if pos(GetARG(k, j, false), listing[i]) > 0 then exit( (cnt_s[j, k] and (cnt_l[j, k] = false)) or		// sa zapisy, brak odczytow
-	                                                      ((cnt_s[j, k] = false) and cnt_l[j, k]) );		// brak zapisow, sa odczyty
-
-
-    // wyjatek dla :STACKORIGIN+16 (cnt_s[8,k] ; cnt_l[8,k]) ktory mapuje :EAX
-
-      for k := 0 to 3 do
-       if pos(GetARG(k, 8, false), listing[i]) > 0 then 								// sa zapisy, brak odczytu
-         exit( (cnt_s[8, 0] or cnt_s[8 ,1] or cnt_s[8, 2] or cnt_s[8, 3] = true ) and (cnt_l[8, 0] or cnt_l[8, 1] or cnt_l[8, 2] or cnt_l[8, 3] = false) );
-
-{
-;----	4x zapis :EAX, 1x odczyt :EAX
-
-	lda SCORE
-	sta :eax
-	lda SCORE+1
-	sta :eax+1
-	lda SCORE+2
-	sta :eax+2
-	lda SCORE+3
-	sta :eax+3
-	lda #$0A
-	sta :ecx
-	lda #$00
-	sta :ecx+1
-	jsr idivEAX_CX
-	ldy :STACKORIGIN+9
-	lda :eax
-	sta adr.TB,y
-
-
-;----	 zapis i odczyt :EAX+1 (byte * 256)
-
-	lda A
-	sta :eax+1
-	lda #$00
-	sta A
-	lda :eax+1
-	sta A+1
-}
-   end;
-
-
-  begin
-
-  Result:=false;
-
- // szukamy pojedynczych odwolan do :STACKORIGIN+N
-
-  Rebuild;
-
-  Clear;
-
-  // !!!!!!!!!!!!!!!!!!!!
-  // czytamy listing szukajac zapisow :STACKORIGIN (STA, STY), kazde inne odwolanie do :STACKORIGIN traktujemy jako odczyt
-  // jesli mamy tylko zapisy bez odczytow to kasujemy takie odwolanie
-  // !!!!!!!!!!!!!!!!!!!!
-
-  for i := 0 to l - 1 do 	       // zliczamy odwolania do :STACKORIGIN+N
-   if (pos(' :STACK', listing[i]) > 0) then
-
-     if sta_stack(i) or sty_stack(i) then begin
-
-      for j := 0 to 7+1 do
-       if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_s[j, 0] := true; Break end else
-        if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_s[j, 1] := true; Break end else
-         if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_s[j, 2] := true; Break end else
-          if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_s[j, 3] := true; Break end;
-
-     end else begin
-
-      for j := 0 to 7+1 do
-       if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_l[j, 0] := true; Break end else
-        if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_l[j, 1] := true; Break end else
-         if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_l[j, 2] := true; Break end else
-          if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_l[j, 3] := true; Break end;
-
-     end;
-
-
-  for i := 0 to l - 1 do
-   if (pos(' :STACK', listing[i]) > 0) then
-    if unrelated(i) then begin
-      a := listing[i];		// zamieniamy na potencjalne 'illegal instruction'
-      k:=pos(' :STACK', a);
-      delete(a, k, 256);
-      insert(' #$00', a, k);
-
-      listing[i] := a;
-
-      Result := true;
-    end;
-
-  end;		// RemoveUnusedSTACK
-
-
-{$i include/opt_STA_0.inc}
-
-{$i include/opt_STACK.inc}
-
-{$i include/opt_STACK_CMP.inc}
-
-{$i include/opt_STACK_ADR.inc}
-
-{$i include/opt_STACK_AL_CL.inc}
-
-{$i include/opt_STACK_AX_CX.inc}
-
-{$i include/opt_STACK_EAX_ECX.inc}
-
-{$i include/opt_STACK_PRINT.inc}
-
-{$i include/opt_CMP_BRANCH.inc}
-
-{$i include/opt_CMP_LT_GTEQ.inc}
-
-{$i include/opt_CMP_LTEQ.inc}
-
-{$i include/opt_CMP_GT.inc}
-
-{$i include/opt_CMP_NE_EQ.inc}
-
-{$i include/opt_CMP.inc}
-
-{$i include/opt_CMP_0.inc}
-
-
- function PeepholeOptimization_STACK: Boolean;
- var i, p: integer;
-     tmp: string;
- begin
-
-  Result := true;
-
-  tmp:='';
-
-  for i := 0 to l - 1 do begin
-
-   if jsr(i) or cmp(i) or SKIP(i) then Break;
-
-   if mwy_bp2(i) then
-    if tmp = listing[i] then
-     listing[i] := ''
-    else
-     tmp := listing[i];
-
-  end;
-
-  Rebuild;
-
-
-  for i := 0 to l - 1 do
-   if listing[i] <> '' then begin
-
-
-{
-if (pos('PP.RESULT', listing[i]) > 0) then begin
-
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
-
-end;
-}
-
-     if opt_CMP(i) = false then begin Result := false; Break end;
-     if opt_CMP_0(i) = false then begin Result := false; Break end;
-
-     if opt_BRANCH(i) = false then begin Result := false; Break end;
-
-     if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
-     if opt_LTEQ(i) = false then begin Result := false; Break end;
-     if opt_GT(i) = false then begin Result := false; Break end;
-     if opt_NE_EQ(i) = false then begin Result := false; Break end;
-
-     if opt_STACK(i) = false then begin Result := false; Break end;
-     if opt_STACK_CMP(i) = false then begin Result := false; Break end;
-     if opt_STACK_ADR(i) = false then begin Result := false; Break end;
-     if opt_STACK_AL_CL(i) = false then begin Result := false; Break end;
-     if opt_STACK_AX_CX(i) = false then begin Result := false; Break end;
-     if opt_STACK_EAX_ECX(i) = false then begin Result := false; Break end;
-     if opt_STACK_PRINT(i) = false then begin Result := false; Break end;
-
-  end;
-
- end;		// PeepholeOptimization_STACK
-
-
-function OptimizeEAX: Boolean;
-var i: integer;
-    tmp: string;
-begin
-
- Result := false;
-
- for i:=0 to l-1 do
-
-    if (pos(' :eax', listing[i]) = 5) and (pos(#9'.if', listing[i+1]) = 0) then begin
-      Result := true;
-
-      tmp := copy(listing[i], 6, 256);
-
-      if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
-       if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
-        if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
-         if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
-
-    end;
-
-end;
-
-
-procedure OptimizeEAX_OFF;
-var i: integer;
-    tmp: string;
-begin
-
- for i:=0 to l-1 do
-
-    if pos(' :STACKORIGIN+', listing[i]) = 5 then begin
-      tmp := copy(listing[i], 6, 256);
-
-      if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax' else
-       if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+1' else
-        if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+2' else
-         if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+3';
-
-    end;
-
-end;
-
-
- procedure OptimizeAssignment;
- var k: integer;
-
-
-{$i include/opt_STA_LDY.inc}
-
-{$i include/opt_STA_LSR.inc}
-
-{$i include/opt_STA_IMUL.inc}
-
-{$i include/opt_STA_IMUL_CX.inc}
-
-{$i include/opt_STA_ZTMP.inc}
-
-
-   function PeepholeOptimization_STA: Boolean;
-   var i, p, k: integer;
-       tmp, old: string;
-       yes, ok: Boolean;
-   begin
-
-   Result:=true;
-
-   Rebuild;
-
-   tmp:='';
-   old:='';
-
-
-   for i := 0 to l - 1 do
-    if (listing[i] <> '') then begin
-
-{
-if (pos('RADIUS', listing[i]) > 0) then begin
-
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
-
-end;
-}
-
-
-     if opt_STA_LDY(i) = false then begin Result := false; Break end;
-
-{$i include/opt_STA.inc}
-
-     if opt_STA_LSR(i) = false then begin Result := false; Break end;
-     if opt_STA_IMUL(i) = false then begin Result := false; Break end;
-     if opt_STA_IMUL_CX(i) = false then begin Result := false; Break end;
-     if opt_STA_ZTMP(i) = false then begin Result := false; Break end;
-
-   end;
-
-   end;		// PeepholeOptimization_STA
-
-
-
-{$i include/opt_LDA.inc}
-
-{$i include/opt_TAY.inc}
-
-{$i include/opt_LDY.inc}
-
-{$i include/opt_AND.inc}
-
-{$i include/opt_ORA.inc}
-
-{$i include/opt_EOR.inc}
-
-{$i include/opt_NOT.inc}
-
-{$i include/opt_ADD.inc}
-
-{$i include/opt_SUB.inc}
-
-{$i include/opt_LSR.inc}
-
-{$i include/opt_ASL.inc}
-
-{$i include/opt_SPL.inc}
-
-{$i include/opt_POKE.inc}
-
-{$i include/opt_BP.inc}
-
-{$i include/opt_BP_ADR.inc}
-
-{$i include/opt_BP2_ADR.inc}
-
-{$i include/opt_ADR.inc}
-
-{$i include/opt_FORTMP.inc}
-
-
-  function PeepholeOptimization: Boolean;
-  var p, i: integer;
-  begin
-
-  Result:=true;
-
-  Rebuild;
-
-  for i := 0 to l - 1 do
-   if listing[i] <> '' then begin
-
-
-// cxxxxxxxxxxxxxxxx
-
-{
-if (pos('RADIUS+1', listing[i]) > 0) then begin
-
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
-
-end;
-}
-
-     if opt_FORTMP(i) = false then begin Result := false; Break end;
-
-
-    if (i = l - 1) and										// "samotna" instrukcja na koncu bloku
-       (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or {iny(i) or}	// !!! 'iny' moze poprzedzac 'scc'
-        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
-        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
-     begin
-	listing[i] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
-       jmp(i+1) and										// jmp l_
-       (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or iny(i) or
-        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
-        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
-     begin
-	listing[i] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
-       sta_im_0(i) and
-       iny(i+1) then
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
-       ((lda_a(i+1) and (lda_stack(i+1) = false)) or tya(i+1)) and
-       sta_a(i+2) and
-
-       (lda_a(i) or and_ora_eor(i) or
-        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
-        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i)) then
-     begin
-	listing[i] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if (i = l - 4) and										// "samotna" instrukcja na koncu bloku
-       lda_a(i+1) and (lda_stack(i+1) = false) and
-       sta_a(i+2) and
-       sta_a(i+3) and
-
-       (lda_a(i) or and_ora_eor(i) or
-        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
-        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i)) then
-     begin
-	listing[i] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if (i = l - 4) and										// "samotna" instrukcja na koncu bloku
-       lda_stack(i) and
-       sta_stack(i+1) and
-       ((lda_a(i+2) and (lda_stack(i+2) = false)) or tya(i+2)) and
-       sta_a(i+3) then
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-
-	Result:=false; Break;
-     end;
-
-
-
-     if opt_STA_0(i) = false then begin Result := false; Break end;
-     if opt_LDA(i) = false then begin Result := false; Break end;
-     if opt_TAY(i) = false then begin Result := false; Break end;
-     if opt_LDY(i) = false then begin Result := false; Break end;
-     if opt_BP(i) = false then begin Result := false; Break end;
-     if opt_AND(i) = false then begin Result := false; Break end;
-     if opt_ORA(i) = false then begin Result := false; Break end;
-     if opt_EOR(i) = false then begin Result := false; Break end;
-     if opt_NOT(i) = false then begin Result := false; Break end;
-     if opt_ADD(i) = false then begin Result := false; Break end;
-     if opt_SUB(i) = false then begin Result := false; Break end;
-     if opt_LSR(i) = false then begin Result := false; Break end;
-     if opt_ASL(i) = false then begin Result := false; Break end;
-     if opt_SPL(i) = false then begin Result := false; Break end;
-     if opt_ADR(i) = false then begin Result := false; Break end;
-     if opt_BP_ADR(i) = false then begin Result := false; Break end;
-     if opt_BP2_ADR(i) = false then begin Result := false; Break end;
-     if opt_POKE(i) = false then begin Result := false; Break end;
-
-  end;
-
- end;			// Peepholeoptimization
-
-
- begin			// OptimizeAssignment
-
-  repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
-  repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
-
- end;
-
-
-{$i include/opt_CMP_BP2.inc}
-
-{$i include/opt_CMP_LOCAL.inc}
-
-
-
- function OptimizeRelation: Boolean;
- var i, p: integer;
-     tmp: string;
-     yes: Boolean;
- begin
-
-  Result := true;
-
-  // usuwamy puste '@'
-  for i := 0 to l - 1 do begin
-   if (pos('@+', listing[i]) > 0) then Break;
-   if listing[i] = '@' then listing[i] := '';
-  end;
-
-
-  Rebuild;
-
-   for i := 0 to l - 1 do
-    if listing[i] <> '' then begin
-
-
-{
-if (pos('RADIUS', listing[i]) > 0) then begin
-
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
-
-end;
-}
-
-
-    if lda_im(i) and 										// lda #$		; 0
-       add_im(i+1) and										// add #$		; 1
-       sta(i+2) and										// sta			; 2
-       (adc(i+4) = false) then
-     begin
-
-      p := GetBYTE(i) + GetBYTE(i+1);
-
-      listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
-      listing[i+1] := '';
-
-      Result:=false; Break;
-     end;
-
-
-    if lda_im(i) and 										// lda #$		; 0
-       sub_im(i+1) and										// sub #$		; 1
-       sta(i+2) and										// sta			; 2
-       (sbc(i+4) = false) then
-     begin
-
-      p := GetBYTE(i) - GetBYTE(i+1);
-
-      listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
-      listing[i+1] := '';
-
-      Result:=false; Break;
-     end;
-
-
-    if lda(i) and										// lda		; 0
-       ldy_1(i+1) and										// ldy #1	; 1
-       (listing[i+2] = #9'and #$00') and							// and #$00	; 2
-       bne(i+3) and										// bne @+	; 3
-       lda(i+4) then										// lda		; 4
-     begin
-	listing[i] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-	Result:=false; Break;
-     end;
-
-
-    if (i>0) and (listing[i] = #9'and #$00') then						// lda #$00	; -1
-     if lda_im_0(i-1) then begin								// and #$00	; 0
-	listing[i] := '';
-	Result:=false; Break;
-     end;
-
-
-    if lda_im_0(i) and										// lda #$00	; 0
-       bne(i+1) and										// bne		; 1
-       lda(i+2) then										// lda		; 2
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	Result:=false; Break;
-     end;
-
-
-    if lda(i) and										// lda A	; 0
-       SKIP(i+1) and										// SKIP		; 1
-       lda(i+2) and										// lda A	; 2
-       (listing[i] = listing[i+2]) then
-     begin
-	listing[i+2] := '';
-	Result:=false; Break;
-     end;
-
-
-    if (lda_a(i) or adc_sbc(i)) and								// lda|adc|sbc		; 0
-       ((listing[i+1] = #9'eor #$00') or (listing[i+1] = #9'ora #$00')) and			// eor|ora #$00		; 1
-       SKIP(i+2) then										// SKIP			; 2
-     begin
-	listing[i+1] := '';
-	Result:=false; Break;
-     end;
-
-
-    if and_ora_eor(i) and									// and|ora|eor		; 0
-       ((listing[i+1] = #9'eor #$00') or (listing[i+1] = #9'ora #$00')) and			// eor|ora #$00		; 1
-       SKIP(i+2) then										// SKIP			; 2
-     begin
-	listing[i+1] := '';
-	Result:=false; Break;
-     end;
-
-
-    if sta_stack(i) and										// sta :STACKORIGIN+9		; 0
-       iny(i+1) and										// iny				; 1
-       lda_stack(i+2) and									// lda :STACKORIGIN+9		; 2
-       cmp(i+3) then										// cmp				; 3
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
-       begin
-	listing[i]   := '';
-
-	listing[i+2] := '';
-	Result:=false; Break;
-       end;
-
-
-    if sta_stack(i) and										// sta :STACKORIGIN+9		; 0
-       lda(i+1) and										// lda				; 1
-       AND_ORA_EOR_STACK(i+2) then 								// ora|and|eor :STACKORIGIN+9	; 2
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
-       begin
-	listing[i]   := '';
-	listing[i+1] := copy(listing[i+2], 1, 5) + copy(listing[i+1], 6, 256);
-	listing[i+2] := '';
-	Result:=false; Break;
-       end;
-
-
-    if sty_stack(i) and										// sty :STACKORIGIN+10		; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN+9		; 1
-       AND_ORA_EOR_STACK(i+2) and								// ora|and|eor :STACKORIGIN+10	; 2
-       sta_stack(i+3) then									// sta :STACKORIGIN+9		; 3
-       if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
-          (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
-       begin
-	listing[i]   := #9'tya';
-	listing[i+1] := copy(listing[i+2], 1, 5) + copy(listing[i+1], 6, 256);
-	listing[i+2] := '';
-	Result:=false; Break;
-       end;
-
-
-    if sty_stack(i) and										// sty :STACKORIGIN+10		; 0
-       lda(i+1) and										// lda 				; 1
-       add_stack(i+2) and									// add :STACKORIGIN+10		; 2
-       sta(i+3) then										// sta				; 3
-       if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
-       begin
-	listing[i]   := #9'tya';
-	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
-	listing[i+2] := '';
-	Result:=false; Break;
-       end;
-
-
-    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH	; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN		; 1
-       AND_ORA_EOR(i+2) and (and_ora_eor_stack(i+2) = false) and				// ora|and|eor			; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN		; 3
-       lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH	; 4
-       bne(i+5) and										// bne @+			; 5
-       lda_stack(i+6) then									// lda :STACKORIGIN		; 6
-       if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) and
-          (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
-          (copy(listing[i+3], 6, 256) = copy(listing[i+6], 6, 256)) then
-       begin
-	listing[i]   := listing[i+5];
-
-//	listing[i+3] := '';
-
-	listing[i+4] := '';
-	listing[i+5] := '';
-	listing[i+6] := '';
-
-	Result:=false; Break;
-       end;
-
-{
-    if lda_stack(i) and										// lda :STACKORIGIN+10	; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+10	; 1
-       lda_stack(i+2) then									// lda :STACKORIGIN+10	; 2
-       if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	  (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
-       begin
-	listing[i+1] := '';
-	listing[i+2] := '';
-	Result:=false; Break;
-       end;
-
-
-    if sta_stack(i) and 									// sta :STACKORIGIN+9	; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN+9	; 1
-       (add_im_0(i+2) = false) and (cmp(i+2) = false) then					//~add #$00|~cmp	; 2
-     if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then
-      begin
-       listing[i+1] := '';
-
-       if (asl(i+2) = false) and (lsr(i+2) = false) then listing[i] := '';			// !!!
-
-       Result:=false; Break;
-      end;
-}
-{
-    if adc_sbc(i+1) and										// adc|sbc		; 1
-       sta_im_0(i+2) and									// sta #$00		; 2
-       lda_a(i+3) and										// lda			; 3
-       cmp(i+4) then										// cmp			; 4
-     begin
-	listing[i+1] := '';
-	listing[i+2] := '';
-
-	if lda_a(i) then listing[i] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if sta_im_0(i) and										// sta #$00		; 0
-       (cmp_im_0(i+1) or and_ora_eor(i+1)) and							// cmp #$00		; 1
-       bne(i+2) then										// bne			; 2
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	Result:=false; Break;
-     end;
-
-
-    if sta_im_0(i) and										// sta #$00		; 0
-       adc_sbc(i+1) then									// adc|sbc		; 1
-     begin
-	listing[i+1] := '';
-
-	if sta(i+2) then listing[i+2] := '';
-
-	Result:=false; Break;
-     end;
-
-
-    if sta_im_0(i) and										// sta #$00		; 0
-       bne(i+1) and										// bne			; 1
-       (SKIP(i+2) = false) then
-     begin
-	listing[i]   := '';
-	listing[i+1] := '';
-	Result:=false; Break;
-     end;
-}
-
-    if adc_sbc(i) and										// adc|sbc		; 0
-       (lda(i+1) or mva(i+1) or mwa(i+1)) then							// lda|mva|mwa		; 1
-     begin
-
-      if (i>0) and lda(i-1) then listing[i-1] := '';
-
-      listing[i] := '';
-      Result:=false; Break;
-     end;
-
-
-    if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor		; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+N	; 1
-       ldy_1(i+2) and										// ldy #1		; 2
-       lda_stack(i+3) and 									// lda :STACKORIGIN+N	; 3
-       (bne(i+4) or beq(i+4)) then								// bne|beq		; 4
-     if copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256) then
-      begin
-       listing[i+1] := '';
-       listing[i+3] := listing[i];
-       listing[i]   := '';
-       Result:=false; Break;
-      end;
-
-
-    if (sty_stack(i) or sta_stack(i)) and							// sty|sta :STACKORIGIN		; 0
-       mva_stack(i+1) and									// mva :STACKORIGIN STOP	; 1
-       (copy(listing[i], 6, 256) = GetString(i+1)) then
-     begin
-	listing[i+1] := copy(listing[i], 1, 5) + copy(listing[i+1], length(GetString(i+1)) + 7, 256);
-	listing[i]   := '';
-	Result:=false; Break;
-     end;
-
-
-// -----------------------------------------------------------------------------
-
-     if opt_LOCAL(i) = false then begin Result := false; Break end;
-
-     if opt_BRANCH(i) = false then begin Result := false; Break end;
-
-     if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
-     if opt_LTEQ(i) = false then begin Result := false; Break end;
-     if opt_GT(i) = false then begin Result := false; Break end;
-     if opt_NE_EQ(i) = false then begin Result := false; Break end;
-
-     if opt_CMP(i) = false then begin Result := false; Break end;
-     if opt_CMP_0(i) = false then begin Result := false; Break end;
-     if opt_CMP_BP2(i) = false then begin Result := false; Break end;
-
-// -----------------------------------------------------------------------------
-
-{$i include/opt_IF_AND.inc}
-
-{$i include/opt_IF_OR.inc}
-
-{$i include/opt_WHILE_AND.inc}
-
-{$i include/opt_WHILE_OR.inc}
-
-{$i include/opt_BOOLEAN_AND.inc}
-
-// -----------------------------------------------------------------------------
-
-
-   end;   // for
-
- end;
-
-
- procedure index(k: byte; x: integer; msb: Boolean = true);
- var m: byte;
- begin
-
-   if msb then begin
-
-	listing[l]   := #9'lda ' + GetARG(0, x);
-	listing[l+1] := #9'sta ' + GetARG(0, x);
-	listing[l+2] := #9'lda ' + GetARG(1, x);
-
-	inc(l, 3);
-
-	for m := 0 to k - 1 do begin
-
-	  listing[l]   := #9'asl ' + GetARG(0, x);
-	  listing[l+1] := #9'rol @';
-
-	  inc(l, 2);
-	end;
-
-	listing[l]   := #9'sta ' + GetARG(1, x);
-	listing[l+1] := #9'lda ' + GetARG(0, x);
-	listing[l+2] := #9'sta ' + GetARG(0, x);
-
-   end else begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x);
-	listing[l+1] := #9'sta ' + GetARG(1, x);
-	listing[l+2] := #9'lda ' + GetARG(0, x);
-
-	inc(l, 3);
-
-	for m := 0 to k - 1 do begin
-
-	  listing[l]   := #9'asl @';
-	  listing[l+1] := #9'rol ' + GetARG(1, x);
-
-	  inc(l, 2);
-	end;
-
-	listing[l]   := #9'sta ' + GetARG(0, x);
-	listing[l+1] := #9'lda ' + GetARG(1, x);
-	listing[l+2] := #9'sta ' + GetARG(1, x);
-
-   end;
-
-   inc(l, 3);
-
- end;
-
-
-{$i include/opt_IMUL_CL.inc}
-
-
-begin				// OptimizeASM
-
- l:=0;
- x:=0;
-
- arg0 := '';
- arg1 := '';
-
- inxUse := false;
-
- for i := 0 to High(s) do
-  for k := 0 to 3 do s[i][k] := '';
-
- for i := 0 to High(listing) do listing[i]:='';
-
-
- for i := 0 to High(OptimizeBuf) - 1 do begin
-  a := OptimizeBuf[i];
-
-  if (a <> '') and (pos(';', a) = 0) then begin
-
-   t:=a;
-
-   if pos(#9'inx', a) > 0 then begin inc(x); inxUse:=true; t:='' end;
-   if pos(#9'dex', a) > 0 then begin dec(x); t:='' end;
-
-
-   if (pos('@print', a) > 0) then begin x:=51; arg0:='@print'; resetOpty; Break end;		// zakoncz optymalizacje niepowodzeniem
-
-     if (pos(#9'jsr ', a) > 0) or (pos('m@', a) > 0) then begin
-
-      if (pos(#9'jsr ', a) > 0) then
-       arg0 := copy(a, 6, 256)
-      else
-       arg0 := copy(a, 2, 256);
-
-
-      if arg0='@expandSHORT2SMALL1' then begin
-       t:='';
-
-       listing[l]   := #9'ldy #$00';
-       listing[l+1] := #9'lda '+GetARG(0, x-1);
-       listing[l+2] := #9'spl';
-       listing[l+3] := #9'dey';
-       listing[l+4] := #9'sty '+GetARG(1, x-1);
-       listing[l+5] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0='@expandSHORT2SMALL' then begin
-       t:='';
-
-       listing[l]   := #9'ldy #$00';
-       listing[l+1] := #9'lda '+GetARG(0, x);
-       listing[l+2] := #9'spl';
-       listing[l+3] := #9'dey';
-       listing[l+4] := #9'sty '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(0, x);
-
-       inc(l, 6);
-      end else
-      if arg0 = '@expandToCARD.SHORT' then begin
-	t:='';
-
-	if (s[x][1]='') and (s[x][2]='') and (s[x][3]='') then begin
-
-	listing[l]   := #9'ldy #$00';
-	listing[l+1] := #9'lda '+GetARG(0, x);
-	listing[l+2] := #9'spl';
-	listing[l+3] := #9'dey';
-	listing[l+4] := #9'sta '+GetARG(0, x);
-	listing[l+5] := #9'sty '+GetARG(1, x);
-	listing[l+6] := #9'sty '+GetARG(2, x);
-	listing[l+7] := #9'sty '+GetARG(3, x);
-
-	inc(l, 8);
-	end;
-
-      end else
-      if arg0 = '@expandToCARD1.SHORT' then begin
-	t:='';
-
-	if (s[x-1][1]='') and (s[x-1][2]='') and (s[x-1][3]='') then begin
-
-	listing[l]   := #9'ldy #$00';
-	listing[l+1] := #9'lda '+GetARG(0, x-1);
-	listing[l+2] := #9'spl';
-	listing[l+3] := #9'dey';
-	listing[l+4] := #9'sta '+GetARG(0, x-1);
-	listing[l+5] := #9'sty '+GetARG(1, x-1);
-	listing[l+6] := #9'sty '+GetARG(2, x-1);
-	listing[l+7] := #9'sty '+GetARG(3, x-1);
-
-	inc(l, 8);
-	end;
-
-      end else
-      if arg0 = '@expandToCARD.SMALL' then begin
-	t:='';
-
-	if (s[x][2]='') and (s[x][3]='') then begin
-
-	listing[l]   := #9'lda '+GetARG(0, x);
-	listing[l+1] := #9'sta '+GetARG(0, x);
-	listing[l+2] := #9'ldy #$00';
-	listing[l+3] := #9'lda '+GetARG(1, x);
-	listing[l+4] := #9'spl';
-	listing[l+5] := #9'dey';
-	listing[l+6] := #9'sta '+GetARG(1, x);
-	listing[l+7] := #9'sty '+GetARG(2, x);
-	listing[l+8] := #9'sty '+GetARG(3, x);
-
-	inc(l, 9);
-	end;
-
-      end else
-      if arg0 = '@expandToCARD1.SMALL' then begin
-	t:='';
-
-	if (s[x-1][2]='') and (s[x-1][3]='') then begin
-
-	listing[l]   := #9'lda '+GetARG(0, x-1);
-	listing[l+1] := #9'sta '+GetARG(0, x-1);
-	listing[l+2] := #9'ldy #$00';
-	listing[l+3] := #9'lda '+GetARG(1, x-1);
-	listing[l+4] := #9'spl';
-	listing[l+5] := #9'dey';
-	listing[l+6] := #9'sta '+GetARG(1, x-1);
-	listing[l+7] := #9'sty '+GetARG(2, x-1);
-	listing[l+8] := #9'sty '+GetARG(3, x-1);
-
-	inc(l, 9);
-	end;
-
-      end else
-
-      if arg0 = '@expandToREAL' then begin
-	t:='';
-
-	s[x][3] := '';					// -> :STACKORIGIN+STACKWIDTH*3
-
-	listing[l]   := #9'lda ' + GetARG(2, x);
-	listing[l+1] := #9'sta ' + GetARG(3, x);
-	listing[l+2] := #9'lda ' + GetARG(1, x);
-	listing[l+3] := #9'sta ' + GetARG(2, x);
-	listing[l+4] := #9'lda ' + GetARG(0, x);
-	listing[l+5] := #9'sta ' + GetARG(1, x);
-	listing[l+6] := #9'lda #$00';
-
-	s[x][0] := '';					// -> :STACKORIGIN
-	listing[l+7] := #9'sta ' + GetARG(0, x);
-
-	inc(l,8);
-
-      end else
-      if arg0 = '@expandToREAL1' then begin
-	t:='';
-
-	s[x-1][3] := '';				// -> :STACKORIGIN-1+STACKWIDTH*3
-
-	listing[l]   := #9'lda ' + GetARG(2, x-1);
-	listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	listing[l+4] := #9'lda ' + GetARG(0, x-1);
-	listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	listing[l+6] := #9'lda #$00';
-
-	s[x-1][0] := '';				// -> :STACKORIGIN-1
-	listing[l+7] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l,8);
-
-      end else
-
-      if arg0 = 'm@index4 1' then begin
-       t:='';
-       index(2, x-1);
-      end else
-      if arg0 = 'm@index4 0' then begin
-       t:='';
-       index(2, x);
-      end else
-      if arg0 = 'm@index2 1' then begin
-       t:='';
-       index(1, x-1);
-      end else
-      if arg0 = 'm@index2 0' then begin
-       t:='';
-       index(1, x);
-      end else
-      if arg0 = 'cmpINT' then begin
-       t:='';
-
-       listing[l] := #9'.LOCAL';
-
-       listing[l+1] := #9'lda '+GetARG(3, x-1);
-       listing[l+2] := #9'sub ' + GetARG(3, x);		// SBC ustawi znacznik V, gdy brak SUB #$00 => clv:sec
-       listing[l+3] := #9'bne L4';
-       listing[l+4] := #9'lda '+GetARG(2, x-1);
-       listing[l+5] := #9'cmp '+GetARG(2, x);
-       listing[l+6] := #9'bne L1';
-       listing[l+7] := #9'lda '+GetARG(1, x-1);
-       listing[l+8] := #9'cmp '+GetARG(1, x);
-       listing[l+9] := #9'bne L1';
-       listing[l+10]:= #9'lda '+GetARG(0, x-1);
-       listing[l+11]:= #9'cmp '+GetARG(0, x);
-
-       listing[l+12]:= 'L1'#9'beq L5';
-       listing[l+13]:= #9'bcs L3';
-       listing[l+14]:= #9'lda #$FF';
-       listing[l+15]:= #9'bne L5';
-       listing[l+16]:= 'L3'#9'lda #$01';
-       listing[l+17]:= #9'bne L5';
-       listing[l+18]:= 'L4'#9'bvc L5';
-       listing[l+19]:= #9'eor #$FF';
-       listing[l+20]:= #9'ora #$01';
-       listing[l+21]:= 'L5';
-       listing[l+22]:= #9'.ENDL';
-
-       inc(l, 23);
-
-      end else
-{
-      if arg0 = 'cmpSMALLINT' then begin
-       t:='';
-
-       listing[l]   := #9'.LOCAL';
-       listing[l+1] := #9'lda '+GetARG(1, x-1);
-       listing[l+2] := #9'sub '+GetARG(1, x);
-       listing[l+3] := #9'bne L4';
-       listing[l+4] := #9'lda '+GetARG(0, x-1);
-       listing[l+5] := #9'cmp '+GetARG(0, x);
-       listing[l+6] := #9'beq L5';
-       listing[l+7] := #9'lda #$00';
-       listing[l+8] := #9'adc #$FF';
-       listing[l+9] := #9'ora #$01';
-       listing[l+10]:= #9'bne L5';
-       listing[l+11]:= 'L4'#9'bvc L5';
-       listing[l+12]:= #9'eor #$FF';
-       listing[l+13]:= #9'ora #$01';
-       listing[l+14]:= 'L5';
-       listing[l+15]:= #9'.ENDL';
-
-       inc(l, 16);
-      end else
-
-      if arg0 = 'cmpSHORTINT' then begin
-       t:='';
-
-       arg1 := GetARG(0, x);
-
-       if arg1 = '#$00' then begin
-        listing[l] := #9'lda ' + GetARG(0, x-1);
-
-        inc(l, 1);
-       end else begin
-
-       listing[l]   := #9'.LOCAL';
-       listing[l+1] := #9'lda ' + GetARG(0, x-1);
-       listing[l+2] := #9'sub ' + arg1;
-       listing[l+3] := #9'beq L5';
-       listing[l+4] := #9'bvc L5';
-       listing[l+5] := #9'eor #$FF';
-       listing[l+6] := #9'ora #$01';
-       listing[l+7] := 'L5';
-       listing[l+8] := #9'.ENDL';
-
-       inc(l, 9);
-       end;
-
-      end else
-}
-      if arg0 = 'negBYTE' then begin
-       t:='';
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc #$00';
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-      if arg0 = 'negWORD' then begin
-       t:='';
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-{
-      if arg0 = 'notBOOLEAN' then begin
-       t:='';
-
-       listing[l]   := #9'ldy #1';			// !!! wymagana konwencja
-       listing[l+1] := #9'lda '+GetARG(0, x);
-       listing[l+2] := #9'beq @+';
-       listing[l+3] := #9'dey';
-       listing[l+4] := '@';
-       listing[l+5] := #9'sty '+GetARG(0, x);
-
-       inc(l, 6);
-      end else
-}
-      if arg0 = 'negCARD' then begin
-       t:='';
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-      if arg0 = 'hiBYTE' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x);
-       listing[l+1] := #9':4 lsr @';
-       listing[l+2] := #9'sta '+GetARG(0, x);
-
-       inc(l, 3);
-      end else
-
-      if arg0 = 'hiWORD' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(1, x);
-       s[x][0] := '';
-       listing[l+1] := #9'sta '+GetARG(0, x);
-
-       inc(l, 2);
-      end else
-      if arg0 = 'hiCARD' then begin
-       t:='';
-
-       s[x][0] := '';
-       s[x][1] := '';
-
-       listing[l]   := #9'lda '+GetARG(3, x);
-       listing[l+1] := #9'sta '+GetARG(1, x);
-
-       listing[l+2] := #9'lda '+GetARG(2, x);
-       listing[l+3] := #9'sta '+GetARG(0, x);
-
-       inc(l, 4);
-      end else
-
-      if arg0 = 'movZTMP_aBX' then begin
-	t:='';
-
-	s[x-1, 0] := '';
-	s[x-1, 1] := '';
-	s[x-1, 2] := '';
-	s[x-1, 3] := '';
-
-	listing[l]   := #9'lda :ztmp8';
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'lda :ztmp9';
-	listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	listing[l+4] := #9'lda :ztmp10';
-	listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	listing[l+6] := #9'lda :ztmp11';
-	listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	inc(l, 8);
-
-      end else
-
-      if arg0 = 'movaBX_EAX' then begin
-	t:='';
-
-	s[x-1, 0] := '';
-	s[x-1, 1] := '';
-	s[x-1, 2] := '';
-	s[x-1, 3] := '';
-
-	listing[l]   := #9'lda :eax';
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'lda :eax+1';
-	listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	listing[l+4] := #9'lda :eax+2';
-	listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	listing[l+6] := #9'lda :eax+3';
-	listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	inc(l, 8);
-
-      end else
-
-      if (arg0 = '@BYTE.MOD') then begin
-	t:='';
-
-	if (l > 3) and lda_im(l-4) then
-	  k := GetBYTE(l-4)
-	else
-	  k:=0;
-
-	if k in [2,4,8,16,32,64,128] then begin
-
-	 listing[l-4] := listing[l-2];
-
-	 dec(l, 4);
-
-	 case k of
-	    2: listing[l+1] := #9'and #$01';
-	    4: listing[l+1] := #9'and #$03';
-	    8: listing[l+1] := #9'and #$07';
-	   16: listing[l+1] := #9'and #$0F';
-	   32: listing[l+1] := #9'and #$1F';
-	   64: listing[l+1] := #9'and #$3F';
-	  128: listing[l+1] := #9'and #$7F';
-	 end;
-
-	 listing[l+2] := #9'jsr #$00';
-
-	 inc(l, 3);
-
-	end else begin
-
-	 listing[l] := #9'jsr @BYTE.MOD';
-
-	 inc(l, 1);
-
-	end;
-
-{
-	t0 := GetArg(0, x);
-	t1 := GetArg(0, x-1);
-
-	if (pos('#$', t0) > 0) and (pos('#$', t1) > 0) then begin
-
-	  k:=GetVal(t1) mod GetVal(t0);
-
-	  listing[l]   := #9'lda #$'+IntToHex(k and $ff, 2);
-	  listing[l+1] := #9'sta :ztmp8';
-
-	  s[x-1, 1] := #9'lda #$00';
-	  s[x-1, 2] := #9'lda #$00';
-	  s[x-1, 3] := #9'lda #$00';
-
-	  inc(l, 2);
-	end else begin
-	  listing[l]   := #9'lda ' + t1;
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda ' + t0;
-	  listing[l+3] := #9'sta :ecx';
-	  listing[l+4] := #9'jsr idivAL_CL.MOD';
-
-	  inc(l, 5);
-	end;
-}
-      end else
-
-
-      if (arg0 = '@BYTE.DIV') then begin
-	t:='';
-
-	if (l > 3) and lda_im(l-4) then
-	  k := GetBYTE(l-4)
-	else
-	  k:=0;
-
-	if k in [2..32] then begin
-
-	 listing[l-4] := listing[l-2];
-
-	 dec(l, 4);
-
-{$i include/opt_BYTE_DIV.inc}
-
-	 listing[l]   := #9'lda ' + GetARG(0, x-1);
-	 listing[l+1] := #9'sta :eax';
-
-	 inc(l, 2);
-
-	end else begin
-
-	 listing[l]   := #9'jsr @BYTE.DIV';
-
-	 inc(l, 1);
-
-	end;
-
-      end else
-{
-      if (arg0 = '@WORD.MOD') then begin
-	t:='';
-
-	t0 := GetArg(0, x);
-	t1 := GetArg(1, x);
-
-	t2 := GetArg(0, x-1);
-	t3 := GetArg(1, x-1);
-
-	if (pos('#$', t0) > 0) and (pos('#$', t1) > 0) and (pos('#$', t2) > 0) and (pos('#$', t3) > 0) then begin
-
-	  k:=(GetVal(t2) + GetVal(t3) shl 8) mod (GetVal(t0) + GetVal(t1) shl 8);
-
-	  listing[l]   := #9'lda #$' + IntToHex(k and $ff, 2);
-	  listing[l+1] := #9'sta :ztmp8';
-	  listing[l+2] := #9'lda #$' + IntToHex(byte(k shr 8), 2);
-	  listing[l+3] := #9'sta :ztmp9';
-
-	  s[x-1, 2] := #9'lda #$00';
-	  s[x-1, 3] := #9'lda #$00';
-
-	  inc(l, 4);
-	end else begin
-	  listing[l]   := #9'lda ' + t2;
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda ' + t3;
-	  listing[l+3] := #9'sta :eax+1';
-	  listing[l+4] := #9'lda ' + t0;
-	  listing[l+5] := #9'sta :ecx';
-	  listing[l+6] := #9'lda ' + t1;
-	  listing[l+7] := #9'sta :ecx+1';
-	  listing[l+8] := #9'jsr idivAX_CX.MOD';
-
-	  inc(l, 9);
-	end;
-
-      end else
-}
-
-{
-      if (arg0 = '@WORD.DIV') then begin
-	t:='';
-
-	t0 := GetArg(0, x);
-	t1 := GetArg(1, x);
-
-	t2 := GetArg(0, x-1);
-	t3 := GetArg(1, x-1);
-
-	if (pos('#$', t0) > 0) and (pos('#$', t1) > 0) and (pos('#$', t2) > 0) and (pos('#$', t3) > 0) then begin
-
-	  k:=(GetVal(t2) + GetVal(t3) shl 8) div (GetVal(t0) + GetVal(t1) shl 8);
-
-	  listing[l]   := #9'lda #$'+IntToHex(k and $ff, 2);
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda #$'+IntToHex(byte(k shr 8), 2);
-	  listing[l+3] := #9'sta :eax+1';
-
-	  s[x-1, 2] := #9'lda #$00';
-	  s[x-1, 3] := #9'lda #$00';
-
-	  inc(l, 4);
-	end else begin
-	  listing[l]   := #9'lda ' + t2;
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda ' + t3;
-	  listing[l+3] := #9'sta :eax+1';
-	  listing[l+4] := #9'lda ' + t0;
-	  listing[l+5] := #9'sta :ecx';
-	  listing[l+6] := #9'lda ' + t1;
-	  listing[l+7] := #9'sta :ecx+1';
-	  listing[l+8] := #9'jsr idivAX_CX';
-
-	  inc(l, 9);
-	end;
-
-      end else
-}
-
-{
-      if (arg0 = '@CARDINAL.DIV') or (arg0 = '@CARDINAL.MOD') then begin
-	t:='';
-
-	listing[l]   := #9'lda ' + GetArg(0, x-1);
-	listing[l+1] := #9'sta :eax';
-	listing[l+2] := #9'lda ' + GetArg(1, x-1);
-	listing[l+3] := #9'sta :eax+1';
-	listing[l+4] := #9'lda ' + GetArg(2, x-1);
-	listing[l+5] := #9'sta :eax+2';
-	listing[l+6] := #9'lda ' + GetArg(3, x-1);
-	listing[l+7] := #9'sta :eax+3';
-	listing[l+8] := #9'lda ' + GetArg(0, x);
-	listing[l+9] := #9'sta :ecx';
-	listing[l+10] := #9'lda ' + GetArg(1, x);
-	listing[l+11] := #9'sta :ecx+1';
-	listing[l+12] := #9'lda ' + GetArg(2, x);
-	listing[l+13] := #9'sta :ecx+2';
-	listing[l+14] := #9'lda ' + GetArg(3, x);
-	listing[l+15] := #9'sta :ecx+3';
-
-	if arg0 = '@CARDINAL.DIV' then
-	 listing[l+16] := #9'jsr idivEAX_ECX.CARD'
-	else
-	 listing[l+16] := #9'jsr idivEAX_ECX.CARD.MOD';
-
-	inc(l, 17);
-
-      end else
-}
-      if (arg0 = 'imulBYTE') or (arg0 = 'mulSHORTINT') then begin
-	t:='';
-
-	s[x, 1] := '';
-	s[x, 2] := '';
-	s[x, 3] := '';
-
-	s[x-1, 1] := '';
-	s[x-1, 2] := '';
-	s[x-1, 3] := '';
-
-	m:=l;
-
-	listing[l]   := #9'lda '+GetARG(0, x);
-	listing[l+1] := #9'sta :ecx';
-
-	if arg0 = 'mulSHORTINT' then begin
-	 listing[l+2] := #9'sta :ztmp8';
-	 inc(l);
-	end;
-
-	listing[l+2]  := #9'lda '+GetARG(0, x-1);
-	listing[l+3]  := #9'sta :eax';
-
-	if arg0 = 'mulSHORTINT' then begin
-	 listing[l+4] := #9'sta :ztmp10';
-	 inc(l);
-	end;
-
-	listing[l+4] := #9'.ifdef fmulinit';
-	listing[l+5] := #9'fmulu_8';
-	listing[l+6] := #9'els';
-	listing[l+7] := #9'imulCL';
-	listing[l+8] := #9'eif';
-
-
-	if lda_im(l) and					// #const
-	   (listing[l+1] = #9'sta :ecx') and
-	   lda_im(l+2) and	   				// #const
-	   (listing[l+3] = #9'sta :eax') then
-	begin
-
-	  k := GetBYTE(l) * GetBYTE(l+2);
-
-      	  listing[l]  := #9'lda #$' + IntToHex(k and $ff, 2);
-      	  listing[l+1]:= #9'sta :eax';
-      	  listing[l+2]:= #9'lda #$' + IntToHex(byte(k shr 8), 2);
-      	  listing[l+3]:= #9'sta :eax+1';
-
-	  inc(l, 4);
-
-	end else
-	 if imulCL_opt then inc(l, 9);
-
-
-	if arg0 = 'mulSHORTINT' then begin
-
-	 listing[l]   := #9'lda :ztmp10';
-	 listing[l+1] := #9'bpl @+';
-	 listing[l+2] := #9'sec';
-	 listing[l+3] := #9'lda :eax+1';
-	 listing[l+4] := #9'sbc :ztmp8';
-  	 listing[l+5] := #9'sta :eax+1';
-
-	 listing[l+6] := '@';
-
-	 listing[l+7]  := #9'lda :ztmp8';
-	 listing[l+8]  := #9'bpl @+';
-	 listing[l+9]  := #9'sec';
-	 listing[l+10] := #9'lda :eax+1';
-	 listing[l+11] := #9'sbc :ztmp10';
-	 listing[l+12] := #9'sta :eax+1';
-
-	 listing[l+13] := '@';
-
-	 listing[l+14] := #9'lda :eax';
-	 listing[l+15] := #9'sta '+GetARG(0, x-1);
-	 listing[l+16] := #9'lda :eax+1';
-	 listing[l+17] := #9'sta '+GetARG(1, x-1);
-	 listing[l+18] := #9'lda #$00';
-	 listing[l+19] := #9'sta '+GetARG(2, x-1);
-	 listing[l+20] := #9'lda #$00';
-	 listing[l+21] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 22);
-	end;
-
-      end else
-
-      if (arg0 = 'imulWORD') or (arg0 = 'mulSMALLINT') then begin
-	t:='';
-
-	s[x, 2] := '';
-	s[x, 3] := '';
-
-	s[x-1, 2] := '';
-	s[x-1, 3] := '';
-
-	m:=l;
-
-	listing[l]   := #9'lda '+GetARG(0, x);		//t0 := listing[l];
-	listing[l+1] := #9'sta :ecx';
-
-	if arg0 = 'mulSMALLINT' then begin
-	 listing[l+2] := #9'sta :ztmp8';
-	 inc(l);
-	end;
-
-	listing[l+2]  := #9'lda '+GetARG(1, x);		//t1 := listing[l+2];
-	listing[l+3]  := #9'sta :ecx+1';
-
-	if arg0 = 'mulSMALLINT' then begin
-	 listing[l+4] := #9'sta :ztmp9';
-	 inc(l);
-	end;
-
-	listing[l+4]  := #9'lda '+GetARG(0, x-1);	//t2 := listing[l+4];
-	listing[l+5]  := #9'sta :eax';
-
-	if arg0 = 'mulSMALLINT' then begin
-	 listing[l+6] := #9'sta :ztmp10';
-	 inc(l);
-	end;
-
-	listing[l+6]  := #9'lda '+GetARG(1, x-1);	//t3 :=listing[l+6];
-	listing[l+7]  := #9'sta :eax+1';
-
-	if arg0 = 'mulSMALLINT' then begin
-	 listing[l+8] := #9'sta :ztmp11';
-	 inc(l);
-	end;
-
-
-        if lda_im(l) and
-	   (listing[l+1] = #9'sta :ecx') and
-	   lda_im(l+2) and
-	   (listing[l+3] = #9'sta :ecx+1') and
-	   lda_im(l+4) and
-	   (listing[l+5] = #9'sta :eax') and
-	   lda_im(l+6) and
-	   (listing[l+7] = #9'sta :eax+1') then
-	begin
-
-	 k := GetWORD(l, l+2) * GetWORD(l+4, l+6);
-
-         listing[l]   := #9'lda #$' + IntToHex(k and $ff, 2);
-	 listing[l+1] := #9'sta :eax';
-         listing[l+2] := #9'lda #$' + IntToHex(byte(k shr 8), 2);
-	 listing[l+3] := #9'sta :eax+1';
-         listing[l+4] := #9'lda #$' + IntToHex(byte(k shr 16), 2);
-	 listing[l+5] := #9'sta :eax+2';
-         listing[l+6] := #9'lda #$' + IntToHex(byte(k shr 24), 2);
-	 listing[l+7] := #9'sta :eax+3';
-         listing[l+8] := '';
-         listing[l+9] := '';
-         listing[l+10]:= '';
-         listing[l+11]:= '';
-         listing[l+12]:= '';
-
-	end else begin
-
-	 listing[l+8]  := #9'.ifdef fmulinit';
-	 listing[l+9]  := #9'fmulu_16';
-	 listing[l+10] := #9'els';
-	 listing[l+11] := #9'imulCX';
-	 listing[l+12] := #9'eif';
-
-	end;
-
-	inc(l, 13);
-
-	if arg0 = 'mulSMALLINT' then begin
-
-	listing[l]   := #9'lda :ztmp11';
-	listing[l+1] := #9'bpl @+';
-	listing[l+2] := #9'sec';
-	listing[l+3] := #9'lda :eax+2';
-	listing[l+4] := #9'sbc :ztmp8';
-  	listing[l+5] := #9'sta :eax+2';
-	listing[l+6] := #9'lda :eax+3';
-	listing[l+7] := #9'sbc :ztmp9';
-	listing[l+8] := #9'sta :eax+3';
-
-	listing[l+9] := '@';
-
-	listing[l+10] := #9'lda :ztmp9';
-	listing[l+11] := #9'bpl @+';
-	listing[l+12] := #9'sec';
-	listing[l+13] := #9'lda :eax+2';
-	listing[l+14] := #9'sbc :ztmp10';
-	listing[l+15] := #9'sta :eax+2';
-	listing[l+16] := #9'lda :eax+3';
-	listing[l+17] := #9'sbc :ztmp11';
-	listing[l+18] := #9'sta :eax+3';
-
-	listing[l+19] := '@';
-
-	listing[l+20] := #9'lda :eax';
-	listing[l+21] := #9'sta '+GetARG(0, x-1);
-	listing[l+22] := #9'lda :eax+1';
-	listing[l+23] := #9'sta '+GetARG(1, x-1);
-	listing[l+24] := #9'lda :eax+2';
-	listing[l+25] := #9'sta '+GetARG(2, x-1);
-	listing[l+26] := #9'lda :eax+3';
-	listing[l+27] := #9'sta '+GetARG(3, x-1);
-
-	inc(l, 28);
-	end;
-
-
-    if //lda_a(m) and {(lda_stack(m) = false) and}					// lda					; 0
-       (listing[m+1] = #9'sta :ecx') and 						// sta :ecx				; 1
-       lda_im_0(m+2) and								// lda #$00				; 2
-       (listing[m+3] = #9'sta :ecx+1') and 						// sta :ecx+1				; 3
-       lda_a(m+4) and {(lda_stack(m+4) = false) and}					// lda 					; 4
-       (listing[m+5] = #9'sta :eax') and						// sta :eax				; 5
-       lda_im_0(m+6) and								// lda #$00				; 6
-       (listing[m+7] = #9'sta :eax+1') and						// sta :eax+1				; 7
-
-       IFDEF_MUL16(m+8) then								// .ifdef fmulinit			; 8
-       											// fmulu_16				; 9
-     begin
-      listing[m+2] := listing[m+4];
-      listing[m+3] := listing[m+5];
-
-      listing[m+4] := listing[m+8];
-      listing[m+5] := #9'fmulu_8';
-      listing[m+6] := listing[m+10];
-      listing[m+7] := #9'imulCL';
-      listing[m+8] := listing[m+12];
-
-      l:=m+9;
-
-      imulCL_opt;
-     end;
-
-
-      end else
-
-      if (arg0 = 'imulCARD') or (arg0 = 'mulINTEGER') then begin
-	t:='';
-
-	listing[l]    := #9'lda '+GetARG(0, x);
-	listing[l+1]  := #9'sta :ecx';
-	listing[l+2]  := #9'lda '+GetARG(1, x);
-	listing[l+3]  := #9'sta :ecx+1';
-	listing[l+4]  := #9'lda '+GetARG(2, x);
-	listing[l+5]  := #9'sta :ecx+2';
-	listing[l+6]  := #9'lda '+GetARG(3, x);
-	listing[l+7]  := #9'sta :ecx+3';
-
-	listing[l+8]  := #9'lda '+GetARG(0, x-1);
-	listing[l+9]  := #9'sta :eax';
-	listing[l+10] := #9'lda '+GetARG(1, x-1);
-	listing[l+11] := #9'sta :eax+1';
-	listing[l+12] := #9'lda '+GetARG(2, x-1);
-	listing[l+13] := #9'sta :eax+2';
-	listing[l+14] := #9'lda '+GetARG(3, x-1);
-	listing[l+15] := #9'sta :eax+3';
-
-	listing[l+16] := #9'jsr imulECX';
-
-	inc(l, 17);
-
-	if arg0 = 'mulINTEGER' then begin
-	listing[l]   := #9'lda :eax';
-	listing[l+1] := #9'sta '+GetARG(0, x-1);
-	listing[l+2] := #9'lda :eax+1';
-	listing[l+3] := #9'sta '+GetARG(1, x-1);
-	listing[l+4] := #9'lda :eax+2';
-	listing[l+5] := #9'sta '+GetARG(2, x-1);
-	listing[l+6] := #9'lda :eax+3';
-	listing[l+7] := #9'sta '+GetARG(3, x-1);
-
-	if sta_im_0(l+1) then begin
-	 listing[l]   := '';
-	 listing[l+1] := '';
-	end;
-
-	if sta_im_0(l+3) then begin
-	 listing[l+2] := '';
-	 listing[l+3] := '';
-	end;
-
-	if sta_im_0(l+5) then begin
-	 listing[l+4] := '';
-	 listing[l+5] := '';
-	end;
-
-	if sta_im_0(l+7) then begin
-	 listing[l+6] := '';
-	 listing[l+7] := '';
-	end;
-
-	inc(l, 8);
-	end;
-
-      end else
-
-      if pos('@FCMPL', arg0) > 0 then		// @FCMPL		accepted
-      else
-
-      if pos('@FTOA', arg0) > 0 then		// @FTOA		accepted
-      else
-
-      if pos('@SHORTINT.DIV', arg0) > 0 then	// @SHORTINT.DIV	accepted
-      else
-      if pos('@SMALLINT.DIV', arg0) > 0 then	// @SMALLINT.DIV	accepted
-      else
-      if pos('@INTEGER.DIV', arg0) > 0 then	// @INTEGER.DIV		accepted
-      else
-      if pos('@SHORTINT.MOD', arg0) > 0 then	// @SHORTINT.MOD	accepted
-      else
-      if pos('@SMALLINT.MOD', arg0) > 0 then	// @SMALLINT.MOD	accepted
-      else
-      if pos('@INTEGER.MOD', arg0) > 0 then	// @INTEGER.MOD		accepted
-      else
-
-      if pos('@BYTE.DIV', arg0) > 0 then	// @BYTE.DIV		accepted
-      else
-      if pos('@WORD.DIV', arg0) > 0 then	// @WORD.DIV		accepted
-      else
-      if pos('@CARDINAL.DIV', arg0) > 0 then	// @CARDINAL.DIV	accepted
-      else
-      if pos('@BYTE.MOD', arg0) > 0 then	// @BYTE.MOD		accepted
-      else
-      if pos('@WORD.MOD', arg0) > 0 then	// @WORD.MOD		accepted
-      else
-      if pos('@CARDINAL.MOD', arg0) > 0 then	// @CARDINAL.MOD	accepted
-      else
-
-      if pos('@SHORTREAL_MUL', arg0) > 0 then	// @SHORTREAL_MUL	accepted
-      else
-      if pos('@REAL_MUL', arg0) > 0 then	// @REAL_MUL		accepted
-      else
-      if pos('@SHORTREAL_DIV', arg0) > 0 then	// @SHORTREAL_DIV	accepted
-      else
-      if pos('@REAL_DIV', arg0) > 0 then	// @REAL_DIV		accepted
-      else
-
-      if pos('@REAL_ROUND', arg0) > 0 then	// @REAL_ROUND		accepted
-      else
-      if pos('@SHORTREAL_TRUNC', arg0) > 0 then	// @SHORTREAL_TRUNC	accepted
-      else
-      if pos('@REAL_TRUNC', arg0) > 0 then	// @REAL_TRUNC		accepted
-      else
-      if pos('@REAL_FRAC', arg0) > 0 then	// @REAL_FRAC		accepted
-      else
-
-      if pos('@F16_F2A', arg0) > 0 then		// @F16_F2A		accepted
-      else
-      if pos('@F16_ADD', arg0) > 0 then		// @F16_ADD		accepted
-      else
-      if pos('@F16_SUB', arg0) > 0 then 	// @F16_SUB		accepted
-      else
-      if pos('@F16_MUL', arg0) > 0 then		// @F16_MUL		accepted
-      else
-      if pos('@F16_DIV', arg0) > 0 then		// @F16_DIV		accepted
-      else
-      if pos('@F16_INT', arg0) > 0 then		// @F16_INT		accepted
-      else
-      if pos('@F16_ROUND', arg0) > 0 then	// @F16_ROUND		accepted
-      else
-      if pos('@F16_FRAC', arg0) > 0 then	// @F16_FRAC		accepted
-      else
-      if pos('@F16_I2F', arg0) > 0 then		// @F16_I2F		accepted
-      else
-      if pos('@F16_EQ', arg0) > 0 then		// @F16_EQ		accepted
-      else
-      if pos('@F16_GT', arg0) > 0 then		// @F16_GT		accepted
-      else
-      if pos('@F16_GTE', arg0) > 0 then		// @F16_GTE		accepted
-      else
-
-      if arg0 = 'SYSTEM.PEEK' then begin
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) then begin
-
-	  listing[l]   := #9'ldy '+GetARG(1, x);
-	  listing[l+1] := #9'sty :bp+1';
-	  listing[l+2] := #9'ldy '+GetARG(0, x);
-	  listing[l+3] := #9'lda (:bp),y';
-	  listing[l+4] := #9'sta '+GetARG(0, x);
-
-	  inc(l,5);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l]   := #9'lda $'+IntToHex(k, 4);
-	  listing[l+1] := #9'sta '+GetARG(0, x);
-
-	  inc(l, 2);
-
-	end;
-
-      end else
-      if arg0 = 'SYSTEM.POKE' then begin
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(0, x-1, false)) < 0) or (GetVAL(GetARG(1, x-1, false)) < 0) then begin
-
-	  listing[l]   := #9'ldy '+GetARG(1, x);
-	  listing[l+1] := #9'sty :bp+1';
-	  listing[l+2] := #9'ldy '+GetARG(0, x);
-	  listing[l+3] := #9'lda '+GetARG(0, x-1);
-	  listing[l+4] := #9'sta (:bp),y';
-
-	  inc(l,5);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x-1));
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
-
-	  inc(l, 2);
-	end;
-
-	dec(x, 2);
-
-      end else
-      if arg0 = 'SYSTEM.DPEEK' then begin
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) then begin
-
-	  listing[l]   := #9'lda '+GetARG(0, x);
-	  listing[l+1] := #9'sta :bp2';
-	  listing[l+2] := #9'lda '+GetARG(1, x);
-	  listing[l+3] := #9'sta :bp2+1';
-	  listing[l+4] := #9'ldy #$00';
-	  listing[l+5] := #9'lda (:bp2),y';
-	  listing[l+6] := #9'sta '+GetARG(0, x);
-	  listing[l+7] := #9'iny';
-	  listing[l+8] := #9'lda (:bp2),y';
-	  listing[l+9] := #9'sta '+GetARG(1, x);
-
-	  inc(l, 10);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l]   := #9'lda $'+IntToHex(k, 4);
-	  listing[l+1] := #9'sta '+GetARG(0, x);
-	  listing[l+2] := #9'lda $'+IntToHex(k, 4)+'+1';
-	  listing[l+3] := #9'sta '+GetARG(1, x);
-
-	  inc(l, 4);
-	end;
-
-      end else
-      if arg0 = 'SYSTEM.DPOKE' then begin
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) or (GetVAL(GetARG(0, x-1, false)) < 0) or (GetVAL(GetARG(1, x-1, false)) < 0) then begin
-
-	  listing[l]   := #9'lda '+GetARG(0, x);
-	  listing[l+1] := #9'sta :bp2';
-	  listing[l+2] := #9'lda '+GetARG(1, x);
-	  listing[l+3] := #9'sta :bp2+1';
-	  listing[l+4] := #9'ldy #$00';
-	  listing[l+5] := #9'lda '+GetARG(0, x-1);
-	  listing[l+6] := #9'sta (:bp2),y';
-	  listing[l+7] := #9'iny';
-	  listing[l+8] := #9'lda '+GetARG(1, x-1);
-	  listing[l+9] := #9'sta (:bp2),y';
-
-	  inc(l,10);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x-1));
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
-
-	  k := GetVAL(GetARG(1, x-1));
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-	  listing[l+2] := #9'lda #$'+IntToHex(k, 2);
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
-	  listing[l+3] := #9'sta $'+IntToHex(k, 4)+'+1';
-
-	  inc(l, 4);
-	end;
-
-	dec(x, 2);
-
-      end else
-      if arg0 = 'shrAL_CL.BYTE' then begin		// SHR BYTE
-	t:='';
-
-	k := GetVAL(GetARG(0, x));
-
-	if {(k > 7) or} (k < 0) then begin x:=50; Break end;
-
-	if k > 7 then begin
-
-	s[x-1, 0] := #9'mva #$00';
-	s[x-1, 1] := #9'mva #$00';
-	s[x-1, 2] := #9'mva #$00';
-	s[x-1, 3] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(0, x-1);
-	listing[l+1] := #9'sta '+GetARG(0, x-1);
-	listing[l+2] := #9'lda '+GetARG(1, x-1);
-	listing[l+3] := #9'sta '+GetARG(1, x-1);
-	listing[l+4] := #9'lda '+GetARG(2, x-1);
-	listing[l+5] := #9'sta '+GetARG(2, x-1);
-	listing[l+6] := #9'lda '+GetARG(3, x-1);
-	listing[l+7] := #9'sta '+GetARG(3, x-1);
-
-	inc(l, 8);
-
-	end else begin
-
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	inc(l);
-
-	for m := 0 to k - 1 do begin
-	 listing[l] := #9'lsr @';
-	 inc(l);
-	end;
-
-	listing[l]   := #9'sta '+GetARG(0, x-1);
-
-	inc(l);
-{
-	s[x-1, 1] := '';//#9'mva #$00';
-	s[x-1, 2] := '';//#9'mva #$00';
-	s[x-1, 3] := '';//#9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-}
-	inc(l, 2);
-	end;
-
-      end else
-      if arg0 = 'shrAX_CL.WORD' then begin		// SHR WORD
-	t:='';
-
-	k := GetVAL(GetARG(0, x, false));
-
-//	if {(k > 8) or} (k < 0) then begin x:=50; Break end;
-
-	s[x-1, 2] := #9'mva #$00';
-	s[x-1, 3] := #9'mva #$00';
-
-      if k < 0 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'ldy ' + GetARG(0, x);
-	 s[x][0]      := '';
-	 listing[l+8] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+10] := #9'lsr ' + GetARG(1, x-1);
-	 listing[l+11] := #9'ror @';
-
-	 listing[l+12] := #9'dey';
-	 listing[l+13] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+14] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+15] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 16);
-
-	 listing[l] := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 6);
-
-	 inc(ShrShlCnt);
-
-     end else
-     if k > 15 then begin
-
-	s[x-1, 0] := #9'mva #$00';
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(0, x-1);
-	listing[l+1] := #9'sta '+GetARG(0, x-1);
-	listing[l+2] := #9'lda '+GetARG(1, x-1);
-	listing[l+3] := #9'sta '+GetARG(1, x-1);
-	listing[l+4] := #9'lda '+GetARG(2, x-1);
-	listing[l+5] := #9'sta '+GetARG(2, x-1);
-	listing[l+6] := #9'lda '+GetARG(3, x-1);
-	listing[l+7] := #9'sta '+GetARG(3, x-1);
-
-	inc(l, 8);
-
-     end else
-
-     if k = 9 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'lsr @';
-	s[x-1][0] := '';
-	listing[l+2] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 3);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 10 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'lsr @';
-	listing[l+2] := #9'lsr @';
-	s[x-1][0] := '';
-	listing[l+3] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 4);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 11 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'lsr @';
-	listing[l+2] := #9'lsr @';
-	listing[l+3] := #9'lsr @';
-	s[x-1][0] := '';
-	listing[l+4] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 5);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 12 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'lsr @';
-	listing[l+2] := #9'lsr @';
-	listing[l+3] := #9'lsr @';
-	listing[l+4] := #9'lsr @';
-	s[x-1][0] := '';
-	listing[l+5] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 6);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 13 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'lsr @';
-	listing[l+2] := #9'lsr @';
-	listing[l+3] := #9'lsr @';
-	listing[l+4] := #9'lsr @';
-	listing[l+5] := #9'lsr @';
-	s[x-1][0] := '';
-	listing[l+6] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 7);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 14 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'lsr @';
-	listing[l+2] := #9'lsr @';
-	listing[l+3] := #9'lsr @';
-	listing[l+4] := #9'lsr @';
-	listing[l+5] := #9'lsr @';
-	listing[l+6] := #9'lsr @';
-	s[x-1][0] := '';
-	listing[l+7] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 8);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 15 then begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'asl @';
-	s[x-1][0] := '';
-	listing[l+2] := #9'lda #$00';
-	listing[l+3] := #9'rol @';
-	listing[l+4] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 5);
-
-	s[x-1, 1] := #9'mva #$00';
-	s[x-1, 2] := #9'mva #$00';
-	s[x-1, 3] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else
-
-     if k = 8 then begin
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	s[x-1][0] := '';
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 2);
-
-	s[x-1, 1] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(1, x-1);
-	listing[l+1] := #9'sta '+GetARG(1, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-     end else begin
-
-	listing[l]   := #9'lda ' + GetARG(1, x-1);
-	listing[l+1] := #9'sta ' + GetARG(1, x-1);
-	listing[l+2] := #9'lda ' + GetARG(0, x-1);
-
-	inc(l, 3);
-
-       for m := 0 to k - 1 do begin
-
-	listing[l]   := #9'lsr ' + GetARG(1, x-1);
-	listing[l+1] := #9'ror @';
-
-	inc(l, 2);
-       end;
-
-	listing[l]   := #9'sta ' + GetARG(0, x-1);
-	listing[l+1] := #9'lda ' + GetARG(1, x-1);
-	listing[l+2] := #9'sta ' + GetARG(1, x-1);
-
-	inc(l, 3);
-
-	listing[l]   := #9'lda '+GetARG(2, x-1);
-	listing[l+1] := #9'sta '+GetARG(2, x-1);
-	listing[l+2] := #9'lda '+GetARG(3, x-1);
-	listing[l+3] := #9'sta '+GetARG(3, x-1);
-
-	inc(l, 4);
-
-     end;
-
-     end else
-
-      if arg0 = 'shrEAX_CL' then begin			// SHR CARDINAL
-	t:='';
-
-	k := GetVAL(GetARG(0, x, false));
-
-	if k < 0 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'ldy ' + GetARG(0, x);
-	 s[x][0]      := '';
-	 listing[l+8] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+10] := #9'lsr ' + GetARG(3, x-1);
-	 listing[l+11] := #9'ror ' + GetARG(2, x-1);
-	 listing[l+12] := #9'ror ' + GetARG(1, x-1);
-	 listing[l+13] := #9'ror @';
-
-	 listing[l+14] := #9'dey';
-	 listing[l+15] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+16] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+17] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 18);
-
-	 listing[l] := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 6);
-
-	 inc(ShrShlCnt);
-
-	end else
-	if k = 13 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][0]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(2, x-1);
-
-	 listing[l+6] := #9'lda #$00';
-	 listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	 listing[l+8] := #9'asl ' + GetARG(0, x-1);
-	 listing[l+9] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+10] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+11] := #9'rol ' + GetARG(3, x-1);
-
-	 listing[l+12] := #9'asl ' + GetARG(0, x-1);
-	 listing[l+13] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+14] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+15] := #9'rol ' + GetARG(3, x-1);
-
-	 listing[l+16] := #9'asl ' + GetARG(0, x-1);
-	 listing[l+17] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+18] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+19] := #9'rol ' + GetARG(3, x-1);
-
-	 inc(l, 20);
-{
-	 s[x-1, 0] := #9'mva #$00';
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-	 s[x-1, 3] := #9'mva #$00';
-}
-	 listing[l]   := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(0, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(1, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(2, x-1);
-	 listing[l+6] := #9'lda #$00';
-	 listing[l+7] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 8);
-
-	end else
-	if k = 23 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(2, x-1);		// bit7 -> C
-	 listing[l+1] := #9'asl @';
-	 s[x-1][0] := '';
-	 listing[l+2] := #9'lda ' + GetARG(3, x-1);
-	 listing[l+3] := #9'rol @';
-	 listing[l+4] := #9'sta ' + GetARG(0, x-1);
-
-	 s[x-1][1] := '';
-	 listing[l+5] := #9'lda #$00';
-	 listing[l+6] := #9'rol @';
-	 listing[l+7] := #9'sta ' + GetARG(1, x-1);
-
-	 inc(l, 8);
-
-	 s[x-1, 2] := #9'mva #$00';
-	 s[x-1, 3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(2, x-1);
-	 listing[l+2] := #9'lda '+GetARG(3, x-1);
-	 listing[l+3] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 4);
-
-	end else
-	if k = 27 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1, 0] := '';
-	 listing[l+1] := #9'lsr @';
-	 listing[l+2] := #9'lsr @';
-	 listing[l+3] := #9'lsr @';
-	 listing[l+4] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 5);
-
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-	 s[x-1, 3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 6);
-
-	end else
-	if k = 31 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 listing[l+1] := #9'asl @';
-	 s[x-1][0] := '';
-	 listing[l+2] := #9'lda #$00';
-	 listing[l+3] := #9'rol @';
-	 listing[l+4] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 5);
-
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-	 s[x-1, 3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l,6);
-
-	end else begin
-
-	m := k div 8;
-	k := k mod 8;
-
-	if m > 3 then begin
-
-	 k:=0;
-
-	 listing[l]   := #9'lda #$00';
-	 listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	 listing[l+2] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	 inc(l, 5);
-	end else
-	 case m of
-	   1: begin
-	       listing[l]   := #9'lda ' + GetARG(1, x-1);
-	       s[x-1][0] := '';
-	       listing[l+1] := #9'sta ' + GetARG(0, x-1);
-
-	       listing[l+2]   := #9'lda ' + GetARG(2, x-1);
-	       s[x-1][1] := '';
-	       listing[l+3] := #9'sta ' + GetARG(1, x-1);
-
-	       listing[l+4]   := #9'lda ' + GetARG(3, x-1);
-	       s[x-1][2] := '';
-	       listing[l+5] := #9'sta ' + GetARG(2, x-1);
-
-	       listing[l+6] := #9'lda #$00';
-	       listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	       inc(l, 8);
-	      end;
-
-	   2: begin
-	       listing[l]   := #9'lda ' + GetARG(2, x-1);
-	       s[x-1][0] := '';
-	       listing[l+1] := #9'sta ' + GetARG(0, x-1);
-
-	       listing[l+2]   := #9'lda ' + GetARG(3, x-1);
-	       s[x-1][1] := '';
-	       listing[l+3] := #9'sta ' + GetARG(1, x-1);
-
-	       listing[l+4] := #9'lda #$00';
-	       listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	       listing[l+6] := #9'sta ' + GetARG(3, x-1);
-
-	       inc(l, 7);
-	      end;
-
-	   3: begin
-	       listing[l]   := #9'lda ' + GetARG(3, x-1);
-	       s[x-1][0] := '';
-	       listing[l+1] := #9'sta ' + GetARG(0, x-1);
-
-	       s[x-1][1] := '';
-	       s[x-1][2] := '';
-	       s[x-1][3] := '';
-
-	       listing[l+2] := #9'lda #$00';
-	       listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	       listing[l+4] := #9'sta ' + GetARG(2, x-1);
-	       listing[l+5] := #9'sta ' + GetARG(3, x-1);
-
-	       inc(l, 6);
-	      end;
-
-	   end;
-
-	if k > 0 then begin
-
-	  if m = 0 then begin
-
-	   listing[l]   := #9'lda ' + GetARG(0, x-1);
-	   listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	   listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	   listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	   listing[l+4] := #9'lda ' + GetARG(2, x-1);
-	   listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	   listing[l+6] := #9'lda ' + GetARG(3, x-1);
-	   listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	   inc(l, 8);
-	  end;
-
-	  for m := 0 to k - 1 do begin
-
-	    listing[l]   := #9'lsr ' + GetARG(3, x-1);
-	    listing[l+1] := #9'ror ' + GetARG(2, x-1);
-	    listing[l+2] := #9'ror ' + GetARG(1, x-1);
-	    listing[l+3] := #9'ror ' + GetARG(0, x-1);
-
-	    inc(l, 4);
-	  end;
-
-	  listing[l]   := #9'lda ' + GetARG(0, x-1);
-	  listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	  listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	  listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	  listing[l+4] := #9'lda ' + GetARG(2, x-1);
-	  listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	  listing[l+6] := #9'lda ' + GetARG(3, x-1);
-	  listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	  inc(l, 8);
-	end;
-
-	end;	// if k = 31
-
-     end else
-
-      if arg0 = 'shlEAX_CL.BYTE' then begin		// SHL BYTE
-	t:='';
-
-	k := GetVAL(GetARG(0, x, false));
-
-	s[x-1][1] := '';				// !!! bez tego nie zadziala gdy 'lda adr.' !!!
-	s[x-1][2] := '';
-	s[x-1][3] := '';
-
-	inc(l, 2);
-
-
-	if k > 31 then begin
-
-	s[x-1][0] := '';
-
-	listing[l]   := #9'lda #$00';			// shl 32..
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'lda #$00';
-	listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	listing[l+4] := #9'lda #$00';
-	listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	listing[l+6] := #9'lda #$00';
-	listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	inc(l, 8);
-
-	end else
-
-	if k = 31 then begin				// shl 31
-
-	 listing[l]   := #9'lda ' + GetARG(0, x-1);
-	 listing[l+1] := #9'lsr @';
-	 s[x-1][3] := '';
-	 listing[l+2] := #9'lda #$00';
-	 listing[l+3] := #9'ror @';
-	 listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	 inc(l, 5);
-
-	 s[x-1, 0] := #9'mva #$00';
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-
-	 listing[l]   := #9'lda '+GetARG(0, x-1);
-	 listing[l+1] := #9'sta '+GetARG(0, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(1, x-1);
-	 listing[l+4] := #9'lda '+GetARG(2, x-1);
-	 listing[l+5] := #9'sta '+GetARG(2, x-1);
-
-	 inc(l,6);
-	end else
-
-	if k = 10 then begin
-
-	 s[x-1][1] := #9'mva #$00';
-	 s[x-1][2] := #9'mva #$00';
-	 s[x-1][3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2]   := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'asl @';
-	 listing[l+8] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+9] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+10] := #9'asl @';
-	 listing[l+11] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+12] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+13] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l,14);
-
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(3, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(0, x-1);
-	 listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-	 s[x-1, 0] := #9'mva #$00';
-
-	 listing[l+6] := #9'lda '+GetARG(0, x-1);
-	 listing[l+7] := #9'sta '+GetARG(0, x-1);
-
-	 inc(l,8);
-
-	end else
-
-	if k = 11 then begin
-
-	 s[x-1][1] := #9'mva #$00';
-	 s[x-1][2] := #9'mva #$00';
-	 s[x-1][3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2]   := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'asl @';
-	 listing[l+8] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+9] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+10] := #9'asl @';
-	 listing[l+11] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+12] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+13] := #9'asl @';
-	 listing[l+14] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+15] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+16] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l,17);
-
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(3, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(0, x-1);
-	 listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-	 s[x-1, 0] := #9'mva #$00';
-
-	 listing[l+6] := #9'lda '+GetARG(0, x-1);
-	 listing[l+7] := #9'sta '+GetARG(0, x-1);
-
-	 inc(l,8);
-
-	end else
-
-	if k in [12..15] then begin			// shl 14 -> (shl 16) shr 2
-
-	k:=16-k;
-
-	listing[l]   := #9'lda #$00';			// shl 16
-	listing[l+1] := #9'sta ' + GetARG(1, x-1);
-	listing[l+2] := #9'lda #$00';
-	listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	listing[l+4] := #9'lda #$00';
-	listing[l+5] := #9'sta ' + GetARG(3, x-1);
-	listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	listing[l+7] := #9'sta ' + GetARG(2, x-1);
-	listing[l+8] := #9'lda #$00';
-	listing[l+9] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 10);
-
-	  for m := 0 to k-1 do begin			// shr 2
-
-	    listing[l]   := #9'lsr ' + GetARG(2, x-1);
-	    listing[l+1] := #9'ror @';
-
-	    inc(l, 2);
-	  end;
-
-	  listing[l]   := #9'sta ' + GetARG(1, x-1);
-	  listing[l+1] := #9'lda ' + GetARG(2, x-1);
-	  listing[l+2] := #9'sta ' + GetARG(2, x-1);
-
-          s[x-1][3] := #9'mva #$00';
-
-          listing[l+3] := #9'lda ' + GetARG(3, x-1);
-          listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	  inc(l, 5);
-
-	end else
-
-	if k in [8,16,24] then begin
-
-	listing[l]   := #9'lda #$00';
-	listing[l+1] := #9'sta ' + GetARG(1, x-1);
-	listing[l+2] := #9'lda #$00';
-	listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	listing[l+4] := #9'lda #$00';
-	listing[l+5] := #9'sta ' + GetARG(3, x-1);
-	listing[l+6] := #9'lda ' + GetARG(0, x-1);
-
-	 case k of
-	  8: listing[l+7] := #9'sta ' + GetARG(1, x-1);
-	 16: listing[l+7] := #9'sta ' + GetARG(2, x-1);
-	 24: listing[l+7] := #9'sta ' + GetARG(3, x-1);
-	 end;
-
-	listing[l+8] := #9'lda #$00';
-	listing[l+9] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 10);
-
-	end else begin
-
-	if (k > 7) or (k < 0) then begin //x:=50; Break end;
-
-	 listing[l]   := #9'lda #$00';
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda #$00';
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda #$00';
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-
-	 inc(l, 6);
-
-	 listing[l] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 inc(l, 3);
-
-	 listing[l] := #9'ldy ' + GetARG(0, x);
-	 s[x][0]      := '';
-	 listing[l+1] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+2] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+3] := #9'asl @';
-	 listing[l+4] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+5] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+6] := #9'rol ' + GetARG(3, x-1);
-
-	 listing[l+7] := #9'dey';
-	 listing[l+8] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+10] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 11);
-
-	 listing[l] := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 s[x-1][2] := '';
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 s[x-1][3] := '';
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 6);
-
-	 inc(ShrShlCnt);
-
-       end else begin
-
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'lda #$00';
-
-	inc(l, 3);
-
-        for m := 0 to k - 1 do begin
-
-	 listing[l]   := #9'asl ' + GetARG(0, x-1);
-	 listing[l+1] := #9'rol @';
-
-	 inc(l, 2);
-        end;
-
-        listing[l]   := #9'sta ' + GetARG(1, x-1);
-        listing[l+1] := #9'lda ' + GetARG(0, x-1);
-        listing[l+2] := #9'sta ' + GetARG(0, x-1);
-
-        inc(l, 3);
-
-       end;
-
-      end;
-
-      end else
-      if arg0 = 'shlEAX_CL.WORD' then begin	    // SHL WORD
-	t:='';
-
-	k := GetVAL(GetARG(0, x, false));
-
-	s[x-1][2] := '';
-	s[x-1][3] := '';
-
-        if k < 0 then begin
-
-	 listing[l]   := #9'lda #$00';
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda #$00';
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-
-	 inc(l, 4);
-
-	 listing[l] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 inc(l, 3);
-
-	 listing[l] := #9'ldy ' + GetARG(0, x);
-	 s[x][0]      := '';
-	 listing[l+1] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+2] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+3] := #9'asl @';
-	 listing[l+4] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+5] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+6] := #9'rol ' + GetARG(3, x-1);
-
-	 listing[l+7] := #9'dey';
-	 listing[l+8] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+10] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 11);
-
-	 listing[l] := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 6);
-
-	 inc(ShrShlCnt);
-
-        end else
-
-	if k = 16 then begin
-
-	s[x-1][2] := '';
-	s[x-1][3] := '';
-
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	listing[l+1] := #9'sta ' + GetARG(2, x-1);
-	listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	listing[l+3] := #9'sta ' + GetARG(3, x-1);
-
-	s[x-1][0] := '';
-	s[x-1][1] := '';
-
-	listing[l+4] := #9'lda #$00';
-	listing[l+5] := #9'sta '+GetARG(0, x-1);
-	listing[l+6] := #9'lda #$00';
-	listing[l+7] := #9'sta '+GetARG(1, x-1);
-
-	inc(l,8);
-
-	end else
-{
-	if k = 15 then begin
-
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	listing[l+1] := #9'lsr @';
-	s[x-1][1] := '';
-	listing[l+2] := #9'lda #$00';
-	listing[l+3] := #9'ror @';
-	listing[l+4] := #9'sta ' + GetARG(1, x-1);
-
-	inc(l, 5);
-
-	s[x-1, 0] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(0, x-1);
-	listing[l+1] := #9'sta '+GetARG(0, x-1);
-	listing[l+2] := #9'lda '+GetARG(2, x-1);
-	listing[l+3] := #9'sta '+GetARG(2, x-1);
-	listing[l+4] := #9'lda '+GetARG(3, x-1);
-	listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	inc(l,6);
-
-	end else
-}
-	if k = 10 then begin
-
-	 s[x-1][2] := #9'mva #$00';
-	 s[x-1][3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'asl @';
-	 listing[l+8] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+9] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+10] := #9'asl @';
-	 listing[l+11] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+12] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+13] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l,14);
-
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(3, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(0, x-1);
-	 listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-	 s[x-1, 0] := #9'mva #$00';
-
-	 listing[l+6] := #9'lda '+GetARG(0, x-1);
-	 listing[l+7] := #9'sta '+GetARG(0, x-1);
-
-	 inc(l,8);
-
-	end else
-
-	if k = 11 then begin
-
-	 s[x-1][2] := #9'mva #$00';
-	 s[x-1][3] := #9'mva #$00';
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'asl @';
-	 listing[l+8] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+9] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+10] := #9'asl @';
-	 listing[l+11] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+12] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+13] := #9'asl @';
-	 listing[l+14] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+15] := #9'rol ' + GetARG(2, x-1);
-
-	 listing[l+16] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l,17);
-
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(3, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(0, x-1);
-	 listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-	 s[x-1, 0] := #9'mva #$00';
-
-	 listing[l+6] := #9'lda '+GetARG(0, x-1);
-	 listing[l+7] := #9'sta '+GetARG(0, x-1);
-
-	 inc(l,8);
-
-	end else
-
-	if k = 31 then begin				// shl 31
-
-	 listing[l]   := #9'lda ' + GetARG(0, x-1);
-	 listing[l+1] := #9'lsr @';
-	 s[x-1][3] := '';
-	 listing[l+2] := #9'lda #$00';
-	 listing[l+3] := #9'ror @';
-	 listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	 inc(l, 5);
-
-	 s[x-1, 0] := #9'mva #$00';
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-
-	 listing[l]   := #9'lda '+GetARG(0, x-1);
-	 listing[l+1] := #9'sta '+GetARG(0, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(1, x-1);
-	 listing[l+4] := #9'lda '+GetARG(2, x-1);
-	 listing[l+5] := #9'sta '+GetARG(2, x-1);
-
-	 inc(l,6);
-	end else
-
-	if k = 8 then begin
-
-	listing[l]   := #9'lda #$00';
-	listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	listing[l+4] := #9'lda ' + GetARG(0, x-1);
-	listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	listing[l+6] := #9'lda #$00';
-	listing[l+7] := #9'sta ' + GetARG(0, x-1);
-
-	inc(l, 8);
-
-	end else begin
-
-	if (k > 7) {or (k < 0)} then begin x:=50; Break end;
-
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	listing[l+4] := #9'lda #$00';
-
-	inc(l, 5);
-
-       for m := 0 to k - 1 do begin
-
-	listing[l]   := #9'asl ' + GetARG(0, x-1);
-	listing[l+1] := #9'rol ' + GetARG(1, x-1);
-	listing[l+2] := #9'rol @';
-
-	inc(l, 3);
-       end;
-
-       listing[l]   := #9'sta ' + GetARG(2, x-1);
-       listing[l+1] := #9'lda ' + GetARG(0, x-1);
-       listing[l+2] := #9'sta ' + GetARG(0, x-1);
-       listing[l+3] := #9'lda ' + GetARG(1, x-1);
-       listing[l+4] := #9'sta ' + GetARG(1, x-1);
-
-       inc(l, 5);
-
-       end;
-
-      end else
-
-      if arg0 = 'shlEAX_CL.CARD' then begin	    // SHL CARD
-       t:='';
-
-       k := GetVAL(GetARG(0, x, false));
-
-
-	if k < 0 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-
-	 listing[l+7] := #9'ldy ' + GetARG(0, x);
-	 s[x][0]      := '';
-	 listing[l+8] := #9'beq l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+9] := 'l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+10] := #9'asl @';
-	 listing[l+11] := #9'rol ' + GetARG(1, x-1);
-	 listing[l+12] := #9'rol ' + GetARG(2, x-1);
-	 listing[l+13] := #9'rol ' + GetARG(3, x-1);
-
-	 listing[l+14] := #9'dey';
-	 listing[l+15] := #9'bne l_' + IntToHex(ShrShlCnt, 4) + '_b';
-	 listing[l+16] := 'l_' + IntToHex(ShrShlCnt, 4) + '_e';
-
-	 listing[l+17] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 18);
-
-	 listing[l] := #9'lda '+GetARG(1, x-1);
-	 listing[l+1] := #9'sta '+GetARG(1, x-1);
-	 listing[l+2] := #9'lda '+GetARG(2, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(3, x-1);
-	 listing[l+5] := #9'sta '+GetARG(3, x-1);
-
-	 inc(l, 6);
-
-	 inc(ShrShlCnt);
-
-	end else
-(*
-       if k = 7 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(3, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][0]    := '';
-	 listing[l+7] := #9'sta ' + GetARG(0, x-1);
-	 listing[l+8] := #9'lda #$00';
-
-	 listing[l+9] := #9'lsr ' + GetARG(3, x-1);
-	 listing[l+10] := #9'ror ' + GetARG(2, x-1);
-	 listing[l+11] := #9'ror ' + GetARG(1, x-1);
-	 listing[l+12] := #9'ror ' + GetARG(0, x-1);
-	 listing[l+13] := #9'ror @';
-
-	 listing[l+14] := #9'tay';
-
-	 inc(l, 15);
-{
-	 s[x-1, 0] := #9'mva #$00';
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-	 s[x-1, 3] := #9'mva #$00';
-}
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(3, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(0, x-1);
-	 listing[l+5] := #9'sta '+GetARG(1, x-1);
-         listing[l+6] := #9'tya';
-	 listing[l+7] := #9'sta '+GetARG(0, x-1);
-
-	 inc(l, 8);
-
-       end else
-*)
-       if k = 13 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(2, x-1);
-	 s[x-1][3]    := '';
-	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	 s[x-1][2]    := '';
-	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(0, x-1);
-	 s[x-1][1]    := '';
-	 listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	 s[x-1][0]    := '';
-	 listing[l+6] := #9'lda #$00';
-
-	 listing[l+7] := #9'lsr ' + GetARG(3, x-1);
-	 listing[l+8] := #9'ror ' + GetARG(2, x-1);
-	 listing[l+9] := #9'ror ' + GetARG(1, x-1);
-	 listing[l+10] := #9'ror @';
-
-	 listing[l+11] := #9'lsr ' + GetARG(3, x-1);
-	 listing[l+12] := #9'ror ' + GetARG(2, x-1);
-	 listing[l+13] := #9'ror ' + GetARG(1, x-1);
-	 listing[l+14] := #9'ror @';
-
-	 listing[l+15] := #9'lsr ' + GetARG(3, x-1);
-	 listing[l+16] := #9'ror ' + GetARG(2, x-1);
-	 listing[l+17] := #9'ror ' + GetARG(1, x-1);
-	 listing[l+18] := #9'ror @';
-
-	 listing[l+19] := #9'sta ' + GetARG(0, x-1);
-
-	 inc(l, 20);
-{
-	 s[x-1, 0] := #9'mva #$00';
-	 s[x-1, 1] := #9'mva #$00';
-	 s[x-1, 2] := #9'mva #$00';
-	 s[x-1, 3] := #9'mva #$00';
-}
-	 listing[l]   := #9'lda '+GetARG(2, x-1);
-	 listing[l+1] := #9'sta '+GetARG(3, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(2, x-1);
-	 listing[l+4] := #9'lda '+GetARG(0, x-1);
-	 listing[l+5] := #9'sta '+GetARG(1, x-1);
-	 listing[l+6] := #9'lda #$00';
-	 listing[l+7] := #9'sta '+GetARG(0, x-1);
-
-	 inc(l, 8);
-
-       end else
-       if k = 23 then begin
-
-	 listing[l]   := #9'lda ' + GetARG(1, x-1);
-	 listing[l+1] := #9'lsr @';
-	 s[x-1][3] := '';
-	 listing[l+2] := #9'lda ' + GetARG(0, x-1);
-	 listing[l+3] := #9'ror @';
-	 listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	 s[x-1][2] := '';
-	 listing[l+5] := #9'lda #$00';
-	 listing[l+6] := #9'ror @';
-	 listing[l+7] := #9'sta ' + GetARG(2, x-1);
-
-	 inc(l, 8);
-
-	 s[x-1, 0] := #9'mva #$00';
-	 s[x-1, 1] := #9'mva #$00';
-
-	 listing[l]   := #9'lda '+GetARG(0, x-1);
-	 listing[l+1] := #9'sta '+GetARG(0, x-1);
-	 listing[l+2] := #9'lda '+GetARG(1, x-1);
-	 listing[l+3] := #9'sta '+GetARG(1, x-1);
-
-	 inc(l, 4);
-
-       end else
-       if k = 31 then begin
-
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	listing[l+1] := #9'lsr @';
-	s[x-1][3] := '';
-	listing[l+2] := #9'lda #$00';
-	listing[l+3] := #9'ror @';
-	listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	inc(l, 5);
-
-	s[x-1, 0] := #9'mva #$00';
-	s[x-1, 1] := #9'mva #$00';
-	s[x-1, 2] := #9'mva #$00';
-
-	listing[l]   := #9'lda '+GetARG(0, x-1);
-	listing[l+1] := #9'sta '+GetARG(0, x-1);
-	listing[l+2] := #9'lda '+GetARG(1, x-1);
-	listing[l+3] := #9'sta '+GetARG(1, x-1);
-	listing[l+4] := #9'lda '+GetARG(2, x-1);
-	listing[l+5] := #9'sta '+GetARG(2, x-1);
-
-	inc(l,6);
-
-       end else begin
-
-//       if {(k > 7) or} (k < 0) then begin x:=50; Break end;
-
-       m:=k div 8;
-       k:=k mod 8;
-
-       if m > 3 then begin
-
-	k:=0;
-
-	listing[l]   := #9'lda #$00';
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'sta ' + GetARG(1, x-1);
-	listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	listing[l+4] := #9'sta ' + GetARG(3, x-1);
-
-	inc(l, 5);
-       end else
-	case m of
-	 1: begin
-	     listing[l]   := #9'lda ' + GetARG(1, x-1);
-	     listing[l+1] := #9'sta ' + GetARG(1, x-1);
-	     listing[l+2] := #9'lda ' + GetARG(2, x-1);
-	     listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	     listing[l+4] := #9'lda ' + GetARG(3, x-1);
-	     listing[l+5] := #9'sta ' + GetARG(3, x-1);
-
-	     inc(l, 6);
-
-	     listing[l]   := #9'lda ' + GetARG(2, x-1);
-
-	     	s[x-1, 3] := '';
-
-	     listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	     listing[l+2] := #9'lda ' + GetARG(1, x-1);
-
-	     	s[x-1, 2] := '';
-
-	     listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	     listing[l+4] := #9'lda ' + GetARG(0, x-1);
-
-	     	s[x-1, 1] := '';
-
-	     listing[l+5] := #9'sta ' + GetARG(1, x-1);
-	     listing[l+6] := #9'lda #$00';
-
-	     	s[x-1, 0] := '';
-
-	     listing[l+7] := #9'sta ' + GetARG(0, x-1);
-
-	     inc(l, 8);
-	    end;
-
-	 2: begin
-	     listing[l]   := #9'lda ' + GetARG(2, x-1);
-	     listing[l+1] := #9'sta ' + GetARG(2, x-1);
-	     listing[l+2] := #9'lda ' + GetARG(3, x-1);
-	     listing[l+3] := #9'sta ' + GetARG(3, x-1);
-
-	     inc(l, 4);
-
-	     listing[l]   := #9'lda ' + GetARG(1, x-1);
-
-		s[x-1, 3] := '';
-
-	     listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	     listing[l+2] := #9'lda ' + GetARG(0, x-1);
-
-	     	s[x-1, 2] := '';
-
-	     listing[l+3] := #9'sta ' + GetARG(2, x-1);
-	     listing[l+4] := #9'lda #$00';
-
-		s[x-1, 0] := '';
-	     	s[x-1, 1] := '';
-
-	     listing[l+5] := #9'sta ' + GetARG(0, x-1);
-	     listing[l+6] := #9'sta ' + GetARG(1, x-1);
-
-	     inc(l, 7);
-	    end;
-
-	 3: begin
-	     listing[l]   := #9'lda ' + GetARG(3, x-1);
-	     listing[l+1] := #9'sta ' + GetARG(3, x-1);
-
-	     inc(l, 2);
-
-	     listing[l]   := #9'lda ' + GetARG(0, x-1);
-
-	     	s[x-1, 3] := '';
-
-	     listing[l+1] := #9'sta ' + GetARG(3, x-1);
-	     listing[l+2] := #9'lda #$00';
-
-		s[x-1, 0] := '';
-	     	s[x-1, 1] := '';
-	     	s[x-1, 2] := '';
-
-	     listing[l+3] := #9'sta ' + GetARG(0, x-1);
-	     listing[l+4] := #9'sta ' + GetARG(1, x-1);
-	     listing[l+5] := #9'sta ' + GetARG(2, x-1);
-
-	     inc(l, 6);
-	    end;
-
-	end;
-
-       if k > 0 then begin
-
-	 if m = 0 then begin
-
-	  listing[l]   := #9'lda ' + GetARG(0, x-1);
-	  listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	  listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	  listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	  listing[l+4] := #9'lda ' + GetARG(2, x-1);
-	  listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	  listing[l+6] := #9'lda ' + GetARG(3, x-1);
-	  listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	  inc(l, 8);
-	 end;
-
-	 for m := 0 to k - 1 do begin
-
-	  listing[l]   := #9'asl ' + GetARG(0, x-1);
-	  listing[l+1] := #9'rol ' + GetARG(1, x-1);
-	  listing[l+2] := #9'rol ' + GetARG(2, x-1);
-	  listing[l+3] := #9'rol ' + GetARG(3, x-1);
-
-	  inc(l, 4);
-	 end;
-
-	 listing[l]   := #9'lda ' + GetARG(0, x-1);
-	 listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	 listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	 listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	 listing[l+4] := #9'lda ' + GetARG(2, x-1);
-	 listing[l+5] := #9'sta ' + GetARG(2, x-1);
-	 listing[l+6] := #9'lda ' + GetARG(3, x-1);
-	 listing[l+7] := #9'sta ' + GetARG(3, x-1);
-
-	 inc(l, 8);
-       end;
-
-       end;	// if k = 31
-
-      end else
-
-      if arg0 = 'andEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'and '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'and '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'and '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-{
-      if arg0 = 'andAL_CL' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 3);
-      end else
-}
-      if arg0 = 'andAX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'and '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0 = 'andEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'and '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'and '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9]  := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'and '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-{
-      if arg0 = 'orAL_CL' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'ora '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 3);
-      end else
-}
-      if arg0 = 'orAX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'ora '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'ora '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0 = 'orEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'ora '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'ora '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'ora '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'ora '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-{
-      if arg0 = 'xorAL_CL' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'eor '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 3);
-      end else
-}
-      if arg0 = 'xorAX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'eor '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'eor '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0 = 'xorEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'eor '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'eor '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'eor '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'eor '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-      if arg0 = 'notaBX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x);
-       listing[l+1] := #9'eor #$ff';
-       listing[l+2] := #9'sta '+GetARG(0, x);
-
-       listing[l+3] := #9'lda '+GetARG(1, x);
-       listing[l+4] := #9'eor #$ff';
-       listing[l+5] := #9'sta '+GetARG(1, x);
-
-       listing[l+6] := #9'lda '+GetARG(2, x);
-       listing[l+7] := #9'eor #$ff';
-       listing[l+8] := #9'sta '+GetARG(2, x);
-
-       listing[l+9] := #9'lda '+GetARG(3, x);
-       listing[l+10]:= #9'eor #$ff';
-       listing[l+11]:= #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-{
-      if arg0 = 'cmpEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda ' + GetARG(3, x-1);
-       listing[l+1] := #9'cmp ' + GetARG(3, x);
-       listing[l+2] := #9'bne @+';
-       listing[l+3] := #9'lda ' + GetARG(2, x-1);
-       listing[l+4] := #9'cmp ' + GetARG(2, x);
-       listing[l+5] := #9'bne @+';
-       listing[l+6] := #9'lda ' + GetARG(1, x-1);
-       listing[l+7] := #9'cmp ' + GetARG(1, x);
-       listing[l+8] := #9'bne @+';
-       listing[l+9] := #9'lda ' + GetARG(0, x-1);
-       listing[l+10]:= #9'cmp ' + GetARG(0, x);
-       listing[l+11]:= '@';
-
-       inc(l, 12);
-      end else
-}
-
-{
-      if arg0 = 'cmpEAX_ECX.AX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda ' + GetARG(1, x-1);
-       listing[l+1] := #9'cmp ' + GetARG(1, x);
-       listing[l+2] := #9'bne @+';
-       listing[l+3] := #9'lda ' + GetARG(0, x-1);
-       listing[l+4] := #9'cmp ' + GetARG(0, x);
-       listing[l+5] := '@';
-
-       inc(l, 6);
-      end else
-}
-{
-      if arg0='@expandToCARD1.BYTE' then begin
-       t:='';
-
-       s[x-1][1] := #9'mva #$00';
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-      end else
-      if arg0='@expandToCARD.BYTE' then begin
-       t:='';
-
-       s[x][1] := #9'mva #$00';
-       s[x][2] := #9'mva #$00';
-       s[x][3] := #9'mva #$00';
-      end else
-      if arg0='@expandToCARD.WORD' then begin
-       t:='';
-
-       s[x][2] := #9'mva #$00';
-       s[x][3] := #9'mva #$00';
-      end else
-      if arg0='@expandToCARD1.WORD' then begin
-       t:='';
-
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-      end else
-}
-
-      if (pos('add', arg0) > 0) or (pos('sub', arg0) > 0) then begin
-
-      t:='';
-
-      if (arg0 = 'subAL_CL') then begin
-
-       s[x-1][1] := #9'mva #$00';
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'sbc #$00';
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'sbc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'sbc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       listing[l+3] := '';
-       listing[l+4] := '';
-       listing[l+5] := '';
-
-       listing[l+6] := '';
-       listing[l+7] := '';
-       listing[l+8] := '';
-       listing[l+9] := '';
-       listing[l+10] := '';
-       listing[l+11] := '';
-
-       inc(l, 3);
-      end;
-
-      if (arg0 = 'subAX_CX') then begin
-
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'sbc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'sbc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       listing[l+6] := '';
-       listing[l+7] := '';
-       listing[l+8] := '';
-       listing[l+9] := '';
-       listing[l+10] := '';
-       listing[l+11] := '';
-
-       inc(l, 6);
-      end;
-
-      if (arg0 = 'subEAX_ECX') then begin
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9]  := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end;
-
-      if arg0 = 'addAL_CL' then begin
-
-       if (pos(',y', s[x-1][0]) >0 ) or (pos(',y', s[x][0]) >0 ) then begin x:=30; Break end;
-
-       s[x-1][1] := #9'mva #$00';
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'add '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'adc #$00';
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'adc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'adc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       listing[l+3] := '';
-       listing[l+4] := '';
-       listing[l+5] := '';
-
-       listing[l+6] := '';
-       listing[l+7] := '';
-       listing[l+8] := '';
-       listing[l+9] := '';
-       listing[l+10] := '';
-       listing[l+11] := '';
-
-       inc(l, 3);
-      end;
-
-      if arg0 = 'addAX_CX' then begin
-
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'add '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'adc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'adc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'adc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       listing[l+6] := '';
-       listing[l+7] := '';
-       listing[l+8] := '';
-       listing[l+9] := '';
-       listing[l+10] := '';
-       listing[l+11] := '';
-
-       inc(l, 6);
-      end;
-
-      if (arg0 = 'addEAX_ECX') then begin
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'add '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'adc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'adc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'adc '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-
-      end;
-
-      end else begin
-
-{$IFDEF USEOPTFILE}
-
-	writeln(arg0);
-
-{$ENDIF}
-
-	x:=51; Break;
-
-      end;
-
-     end;
-
-
-   if (pos(':STACKORIGIN,', t) > 7) and (pos('(:bp),', t) = 0) then begin	// kiedy odczytujemy tablice
-    s[x][0]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][0]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(0, x);
-     listing[l+1] := #9'sta ' + GetARG(0, x);
-
-     inc(l, 2);
-    end;
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) and (pos('(:bp),', t) = 0) then begin
-    s[x][1]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][1]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(1, x);
-     listing[l+1] := #9'sta ' + GetARG(1, x);
-
-     inc(l, 2);
-    end;
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) and (pos('(:bp),', t) = 0) then begin
-    s[x][2]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][2]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(2, x);
-     listing[l+1] := #9'sta ' + GetARG(2, x);
-
-     inc(l, 2);
-    end;
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) and (pos('(:bp),', t) = 0) then begin
-    s[x][3]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][3]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(3, x);
-     listing[l+1] := #9'sta ' + GetARG(3, x);
-
-     inc(l, 2);
-    end;
-   end;
-
-
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-
-
-   if (pos(':STACKORIGIN,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 14);
-
-    arg0 := GetARG(0, x);
-    insert(arg0, t, k );
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 25);
-
-    arg0 := GetARG(1, x);
-    insert(arg0, t, k );
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 27);
-
-    arg0 := GetARG(2, x);
-    insert(arg0, t, k );
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 27);
-
-    arg0 := GetARG(3, x);
-    insert(arg0, t, k );
-   end;
-
-
-   if (pos(':STACKORIGIN-1,', t) = 6) then		t:=copy(a, 1, pos(' :STACK', a)) + GetARG(0, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(1, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(2, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(3, x-1);
-
-
-   if (pos(':STACKORIGIN+1,', t) = 6) then		t:=copy(a, 1, pos(' :STACK', a)) + GetARG(0, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(1, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(2, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(3, x+1);
-
-   if t <> '' then begin
-    listing[l] := t;
-    inc(l);
-   end;
-
-  end;
-
- end;
-
-(* -------------------------------------------------------------------------- *)
-
- if ((x = 0) and inxUse) then begin   // succesfull
-
-  if optimize.line <> optimize.old then begin
-   WriteOut('');
-   WriteOut('; optimize OK ('+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
-   WriteOut('');
-
-   optimize.old := optimize.line;
-  end;
-
-{$IFDEF OPTIMIZECODE}
-
-  repeat
-
-    OptimizeAssignment;
-
-    repeat until OptimizeRelation;
-
-    OptimizeAssignment;
-
-  until OptimizeRelation;
-
-
-  if OptimizeEAX then begin
-    OptimizeAssignment;
-
-    OptimizeEAX_OFF;
-
-    OptimizeAssignment;
-  end;
-
-
-{$ENDIF}
-
-
-{$i include/opt_FOR.inc}
-
-
-{$I include/opt_REG_A.inc}
-
-{$I include/opt_REG_BP2.inc}
-
-{$I include/opt_REG_Y.inc}
-
-
-(* -------------------------------------------------------------------------- *)
-
-  for i := 0 to l - 1 do
-    if listing[i]<>'' then WriteInstruction(i);
-
-(* -------------------------------------------------------------------------- *)
-
-
- end else begin
-
-  l := High(OptimizeBuf);
-
-  if l > High(listing) then begin writeln('Out of resources, LISTING'); halt end;
-
-  for i := 0 to l-1 do
-   listing[i] := OptimizeBuf[i];
-
-
-{$IFDEF OPTIMIZECODE}
-
-  repeat until PeepholeOptimization_STACK;		// optymalizacja lda :STACK...,x \ sta :STACK...,x
-
-{$ENDIF}
-
-// optyA := '';
-
- if optyA <> '' then
-  for i:=0 to l-1 do
-   if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
-      lda(i) or lda_adr(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
-      (pos(#9'jmp ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin optyA := ''; Break end;
-
-
-// optyY := '';
-
- if optyY <> '' then
-  for i:=0 to l-1 do
-   if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
-      ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or
-      (pos(#9'jmp ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then begin optyY := ''; Break end;
-
-
-// optyBP2 := '';
-
- if optyBP2 <> '' then
-  for i:=0 to l-1 do begin
-
-   if (optyBP2 <> '') and (sta_a(i) or sty(i) or asl(i) or rol(i) or lsr(i) or ror(i) or inc_(i) or dec_(i)) then
-    if (pos('? '+copy(listing[i], 6, 256)+' ', optyBP2) > 0) or (pos(';'+copy(listing[i], 6, 256)+';', optyBP2) > 0) then begin optyBP2:=''; Break end;
-
-   if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or
-      (pos(#9'jmp ', listing[i]) > 0) then begin optyBP2 := ''; Break end;
-
-  end;
-
-
- if optimize.line <> optimize.old then begin
-  WriteOut('');
-
-  if x = 51 then
-   WriteOut('; optimize FAIL ('+''''+arg0+''''+ ', '+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line))
-  else
-   WriteOut('; optimize FAIL ('+IntToStr(x)+', '+UnitName[optimize.unitIndex].Name+'), line = '+IntToStr(optimize.line));
-
-  WriteOut('');
-
-  optimize.old := optimize.line;
- end;
-
-
-(* -------------------------------------------------------------------------- *)
-
-  for i := 0 to l - 1 do WriteInstruction(i);
-
-(* -------------------------------------------------------------------------- *)
-
- end;
-
-
-{$IFDEF USEOPTFILE}
-
- writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'SOURCE');
- writeln(OptFile, StringOfChar('-', 32));
-
-  for i := 0 to High(OptimizeBuf) - 1 do
-    Writeln(OptFile, OptimizeBuf[i]);
-
- writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitName[optimize.unitIndex].Name+') line = ',optimize.line);
- writeln(OptFile, StringOfChar('-', 32));
-
-  for i := 0 to l - 1 do
-    Writeln(OptFile, listing[i]);
-
- writeln(OptFile);
- writeln(OptFile, StringOfChar('-', 64));
- writeln(OptFile);
-
-{$ENDIF}
-
- SetLength(OptimizeBuf, 1);
-
-end;
-
-
-procedure asm65(a: string = ''; comment : string ='');
-var len, i: integer;
-    optimize_code: Boolean;
-    str: string;
-begin
-
-{$IFDEF OPTIMIZECODE}
- optimize_code := true;
-{$ELSE}
- optimize_code := false;
-{$ENDIF}
-
- if not OutputDisabled then
-
- if Pass = CODEGENERATIONPASS then begin
-
-  if optimize_code and optimize.use then begin
-
-   i:=High(OptimizeBuf);
-   OptimizeBuf[i] := a;
-
-   SetLength(OptimizeBuf, i+2);
-
-  end else begin
-
-   if High(OptimizeBuf) > 0 then
-
-     OptimizeASM
-
-   else begin
-
-    str:=a;
-
-    if comment<>'' then begin
-
-     len:=0;
-
-     for i := 1 to length(a) do
-      if a[i] = #9 then
-       inc(len, 8-(len mod 8))
-      else
-       if not(a[i] in [CR, LF]) then inc(len);
-
-     while len < 56 do begin str:=str+#9; inc(len, 8) end;
-
-     str:=str + comment;
-
-    end;
-
-    WriteOut(str);
-
-   end;
-
-  end;
-
- end;
-
-end;
-
-
-function GetValueType(Value: Int64): byte;
-begin
-
-    if Value < 0 then begin
-
-     if Value >= Low(shortint) then Result := SHORTINTTOK else
-      if Value >= Low(smallint) then Result := SMALLINTTOK else
-       Result := INTEGERTOK;
-
-    end else
-
-    case Value of
-           0..255: Result := BYTETOK;
-       256..$FFFF: Result := WORDTOK;
-      else
-       Result := CARDINALTOK
-    end;
-
-end;
-
-
-procedure CheckTok(i: integer; ExpectedTok: Byte);
-var s: string;
-begin
-
- if ExpectedTok < IDENTTOK then
-  s := Spelling[ExpectedTok]
- else if ExpectedTok = IDENTTOK then
-  s := 'identifier'
- else if (ExpectedTok = INTNUMBERTOK) then
-  s := 'number'
- else if (ExpectedTok = CHARLITERALTOK) then
-  s := 'literal'
- else if (ExpectedTok = STRINGLITERALTOK) then
-  s := 'string'
- else
-  s := 'unknown token';
-
- if Tok[i].Kind <> ExpectedTok then
-   Error(i, 'Syntax error, ' + ''''+ s +'''' + ' expected but ''' + GetSpelling(i) + ''' found');
-
-end;
-
-
-function SearchDefine(X: string): integer;
-var i: integer;
-begin
-   for i:=1 to NumDefines do
-    if X = Defines[i].Name then begin
-     Exit(i);
-    end;
-   Result := 0;
-end;
-
-
-procedure AddDefine(X: string);
-var S: TName;
-begin
-   S := X;
-   if SearchDefine(S) = 0 then
-   begin
-    Inc(NumDefines);
-    Defines[NumDefines].Name := S;
-
-    Defines[NumDefines].Macro := '';
-    Defines[NumDefines].Line := 0;
-   end;
-end;
-
-
-procedure AddPath(s: string);
-var k: integer;
-begin
-
-  for k:=1 to High(UnitPath)-1 do
-    if UnitPath[k] = s then exit;
-							// https://github.com/tebe6502/Mad-Pascal/issues/113
-  {$IFDEF UNIX}
-   if Pos('\', s) > 0 then
-    s := LowerCase(StringReplace(s, '\', '/', [rfReplaceAll]));
-  {$ENDIF}
-
-  k:=High(UnitPath);
-  UnitPath[k] := IncludeTrailingPathDelimiter ( s );
-
-  SetLength(UnitPath, k + 2);
-end;
-
-
-
-procedure TokenizeMacro(a: string; Line, Spaces: integer);
-var
-  Text: string;
-  Num, Frac: TString;
-  Err, Line2, TextPos, im: Integer;
-  Tmp: Int64;
-  yes: Boolean;
-  ch, ch2: Char;
-  CurToken: Byte;
-
-
-  procedure SkipWhiteSpace;				// 'string' + #xx + 'string'
-  begin
-    ch:=a[i]; inc(i);
-
-    while ch in AllowWhiteSpaces do begin ch:=a[i]; inc(i) end;
-
-    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
-  end;
-
-
-  procedure TextInvers(p: integer);
-  var i: integer;
-  begin
-
-   for i := p to length(Text) do
-    if ord(Text[i]) < 128 then
-     Text[i] := chr(ord(Text[i])+$80);
-
-  end;
-
-
-  procedure TextInternal(p: integer);
-  var i: integer;
-
-  function ata2int(const a: byte): byte;
-  (*----------------------------------------------------------------------------*)
-  (*  zamiana znakow ATASCII na INTERNAL					*)
-  (*----------------------------------------------------------------------------*)
-  begin
-   Result:=a;
-
-   case (a and $7f) of
-      0..31: inc(Result,64);
-     32..95: dec(Result,32);
-   end;
-
-  end;
-
-
-  function cbm(const a: char): byte;
-  begin
-   Result:=ord(a);
-
-      case a of
-       'a'..'z': dec(Result, 96);
-       '['..'_': dec(Result, 64);
-            '`': Result:=64;
-	    '@': Result:=0;
-      end;
-
-   end;
-
-
-  begin
-
-   if target.id = 'a8' then begin
-
-     for i := p to length(Text) do
-      Text[i] := chr(ata2int(ord(Text[i])));
-
-   end else begin
-
-     for i := p to length(Text) do
-      Text[i] := chr(cbm(Text[i]));
-
-   end;
-
-  end;
-
-
-  procedure ReadNumber;
-  var x, k, ln: integer;
-  begin
-
-    Num:='';
-
-    if ch='%' then begin		  // binary
-
-      ch:=a[i]; inc(i);
-
-      while ch in ['0', '1'] do
-       begin
-       Num := Num + ch;
-       ch:=a[i]; inc(i);
-       end;
-
-       if length(Num)=0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-       //remove leading zeros
-       x:=1;
-       while Num[x]='0' do inc(x);
-
-       tmp:=0;
-
-       ln:=length(Num);
-
-       //do the conversion
-       for k:=ln downto x do
-	if Num[k]='1' then
-	 tmp:=tmp+(1 shl (ln-k));
-
-       Num:=IntToStr(tmp);
-
-    end else
-
-    if ch='$' then begin		  // hexadecimal
-
-      ch:=a[i]; inc(i);
-
-      while UpCase(ch) in AllowDigitChars do
-       begin
-       Num := Num + ch;
-       ch:=a[i]; inc(i);
-       end;
-
-       if length(Num)=0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-       val('$'+Num, tmp, err);
-
-       Num:=IntToStr(tmp);
-
-    end else
-
-      while ch in ['0'..'9'] do		// Number suspected
-	begin
-	Num := Num + ch;
-	ch:=a[i]; inc(i);
-	end;
-
-  end;
-
-
-begin
-
- TextPos:=0;
- i:=1;
-
- while i <= length(a) do begin
-
-  while a[i] in AllowWhiteSpaces do begin
-
-   if a[i] = LF then begin
-    inc(Line); Spaces:=0;
-   end else
-    inc(Spaces);
-
-   inc(i);
-  end;
-
-  ch := UpCase(a[i]); inc(i);
-
-
-      Num:='';
-      if ch in ['0'..'9', '$', '%'] then ReadNumber;
-
-      if Length(Num) > 0 then			// Number found
-	begin
-	AddToken(INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
-
-	if ch = '.' then			// Fractional part suspected
-	  begin
-
-	  ch:=a[i]; inc(i);
-
-	  if ch = '.' then
-	    dec(i)				// Range ('..') token
-	  else
-	    begin				// Fractional part found
-	    Frac := '.';
-
-	    while ch in ['0'..'9'] do
-	      begin
-	      Frac := Frac + ch;
-
-	      ch:=a[i]; inc(i);
-	      end;
-
-	    Tok[NumTok].Kind := FRACNUMBERTOK;
-	    Tok[NumTok].FracValue := StrToFloat(Num + Frac);
-	    Tok[NumTok].Column := Tok[NumTok-1].Column + length(Num) + length(Frac) + Spaces; Spaces:=0;
-	    end;
-	  end;
-
-	Num := '';
-	Frac := '';
-	end;
-
-
-      if ch in ['A'..'Z', '_'] then		// Keyword or identifier suspected
-	begin
-
-	Text := '';
-
-	err:=0;
-
-	TextPos := i - 1;
-
-	while ch in ['A'..'Z', '_', '0'..'9','.'] do begin
-	  Text := Text + ch;
-	  inc(err);
-
-	  ch:=UpCase(a[i]); inc(i);
-	end;
-
-
-	if err > 255 then
-	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
-
-	if Length(Text) > 0 then
-	  begin
-
-	 CurToken := GetStandardToken(Text);
-
-	 im := SearchDefine(Text);
-
-	 if (im > 0) and (Defines[im].Macro <> '') then begin
-
- 	  ch:=#0;
-
-	  i:=TextPos;
-
-          if Defines[im].Macro = copy(a,i,length(text)) then
-	   Error(NumTok, 'Recursion in macros is not allowed');
-
-	  delete(a, i, length(Text));
-	  insert(Defines[im].Macro, a, i);
-
-	  CurToken := MACRORELEASE;
-
-	 end else begin
-
-	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
-	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
-	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
-	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
-
-	  AddToken(0, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
-
-	 end;
-
-	 if CurToken <> MACRORELEASE then
-
-	 if CurToken <> 0 then begin		// Keyword found
-
-	     Tok[NumTok].Kind := CurToken;
-
-	 end
-	 else begin				// Identifier found
-	     Tok[NumTok].Kind := IDENTTOK;
-	     New(Tok[NumTok].Name);
-	     Tok[NumTok].Name^ := Text;
-	   end;
-
-	 end;
-
-	 Text := '';
-	end;
-
-
-	if ch in ['''', '#'] then begin
-
-	 Text := '';
-	 yes:=true;
-
-	 repeat
-
-	 case ch of
-
-	  '''': begin
-
-		 if yes then begin
-		  TextPos := Length(Text)+1;
-		  yes:=false;
-		 end;
-
-		 inc(Spaces);
-
-		 repeat
-		  ch:=a[i]; inc(i);
-
-		  if ch = LF then	//Inc(Line);
-		   Error(NumTok, 'String exceeds line');
-
-		  if not(ch in ['''',CR,LF]) then
-		   Text := Text + ch
-		  else begin
-
-		   ch2:=a[i]; inc(i);
-
-		   if ch2='''' then begin
-		    Text := Text + '''';
-		    ch:=#0;
-		   end else
-		    dec(i);
-
-		  end;
-
-		 until ch = '''';
-
-		 inc(Spaces);
-
-		 ch:=a[i]; inc(i);
-
-		 if ch in [' ',TAB] then begin
-			ch2:=ch;
-			Err:=i;
-			while ch2 in [' ',TAB] do begin ch2:=a[i]; inc(i) end;
-
-			if ch2 in ['*','~','+'] then
-			 ch:=ch2
-			else
-			 i:=Err;
-		 end;
-
-
-		 if ch='*' then begin
-		  inc(Spaces);
-		  TextInvers(TextPos);
-		  ch:=a[i]; inc(i);
-		 end;
-
-		 if ch='~' then begin
-		  inc(Spaces);
-		  TextInternal(TextPos);
-		  ch:=a[i]; inc(i);
-
-		  if ch='*' then begin
-		   inc(Spaces);
-		   TextInvers(TextPos);
-		   ch:=a[i]; inc(i);
-		  end;
-
-		 end;
-
-		 if ch in [' ',TAB] then begin
-			ch2:=ch;
-			Err:=i;
-			while ch2 in [' ',TAB] do begin ch2:=a[i]; inc(i) end;
-
-			if ch2 in ['''','+'] then
-			 ch:=ch2
-			else
-			 i:=Err;
-		 end;
-
-
-		 if ch='+' then begin
-		  yes:=true;
-		  inc(Spaces);
-		  SkipWhiteSpace;
-		 end;
-
-		end;
-
-	   '#': begin
-		 ch:=a[i]; inc(i);
-
-		 Num:='';
-		 ReadNumber;
-
-		 if Length(Num)>0 then
-		  Text := Text + chr(StrToInt(Num))
-		 else
-		  Error(NumTok, 'Constant expression expected');
-
-		 if ch in [' ',TAB] then begin
-			ch2:=ch;
-			Err:=i;
-			while ch2 in [' ',TAB] do begin ch2:=a[i]; inc(i) end;
-
-			if ch2 in ['''','+'] then
-			 ch:=ch2
-			else
-			 i:=Err;
-		 end;
-
-		 if ch='+' then begin
-		  inc(Spaces);
-		  SkipWhiteSpace;
-		 end;
-
-		end;
-	 end;
-
-	 until not (ch in ['#', '''']);
-
-	 case ch of
-	  '*': begin TextInvers(TextPos); ch:=a[i]; inc(i) end;			// Invers
-	  '~': begin TextInternal(TextPos); ch:=a[i]; inc(i) end;		// Antic
- 	 end;
-
-	// if Length(Text) > 0 then
-	  if Length(Text) = 1 then begin
-	    AddToken(CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
-	  end else begin
-	    AddToken(STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
-	    DefineStaticString(NumTok, Text);
-	  end;
-
-	 Text := '';
-
-	end;
-
-
-      if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then begin
-	AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0); Spaces:=0;
-      end;
-
-
-      if ch in [':', '>', '<', '.'] then					// Double-character token suspected
-	begin
-
-	Line2:=Line;
-
-	ch2:=a[i]; inc(i);
-
-	if (ch2 = '=') or
-	   ((ch = '<') and (ch2 = '>')) or
-	   ((ch = '.') and (ch2 = '.')) then begin				// Double-character token found
-	  AddToken(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0); Spaces:=0;
-	end else
-	 if (ch='.') and (ch2 in ['0'..'9']) then begin
-
-	   AddToken(INTNUMBERTOK, 1, Line, 0, 0);
-
-	   Frac := '0.';		  // Fractional part found
-
-	   while ch2 in ['0'..'9'] do begin
-	    Frac := Frac + ch2;
-
-	    ch2:=a[i]; inc(i);
-	   end;
-
-	   Tok[NumTok].Kind := FRACNUMBERTOK;
-	   Tok[NumTok].FracValue := StrToFloat(Frac);
-	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
-
-	   Frac := '';
-
-	   dec(i);
-
-	 end else
-	  begin
-	  dec(i);
-	  Line:=Line2;
-
-	  if ch in [':','>', '<', '.'] then begin				// Single-character token found
-	    AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0); Spaces:=0;
-	  end;
-
-	  end;
-
-	end;
-
-end;
-
-end;
-
-
-function SplitString(a: string; const Sep: Char): TArrayString;
-(*----------------------------------------------------------------------------*)
-(*  wczytaj dowolne znaki rozdzielone 'Sep'		                      *)
-(*  jesli wystepuja znaki otwierajace ciag, czytaj taki ciag                  *)
-(*----------------------------------------------------------------------------*)
-
-var znak: char;
-    i, len: integer;
-    txt, s: string;
-
-
-procedure omin_spacje (var i:integer; var a:string);
-(*----------------------------------------------------------------------------*)
-(*  omijamy tzw. "biale spacje" czyli spacje, tabulatory		      *)
-(*----------------------------------------------------------------------------*)
-begin
-
- if a <> '' then
-  while (i<=length(a)) and (a[i] in AllowWhiteSpaces) do inc(i);
-
-end;
-
-
-function get_string(var i:integer; var a:string): string;
-(*----------------------------------------------------------------------------*)
-(*  pobiera ciag znakow, ograniczony znakami '' lub ""                        *)
-(*  podwojny '' oznacza literalne '                                           *)
-(*  podwojny "" oznacza literalne "                                           *)
-(*----------------------------------------------------------------------------*)
-var len: integer;
-    znak, gchr: char;
-begin
- Result:='';
-
- omin_spacje(i,a);
- if not(a[i] in AllowQuotes) then exit;
-
- gchr:=a[i]; len:=length(a);
-
- while i<=len do begin
-  inc(i);         // omijamy pierwszy znak ' lub "
-
-  znak:=a[i];
-
-  if znak=gchr then begin
-   inc(i);
-   if a[i]=gchr then znak:=gchr else exit;
-  end;
-
-  Result:=Result+znak;
- end;
-
-end;
-
-
-
-function ciag_ograniczony(var i:integer; var a:string): string;
-(*----------------------------------------------------------------------------*)
-(*  pobiera ciag ograniczony dwoma znakami 'LEWA' i 'PRAWA'                   *)
-(*  znaki 'LEWA' i 'PRAWA' moga byc zagniezdzone                              *)
-(*----------------------------------------------------------------------------*)
-var nawias, len: integer;
-    znak, lewa, prawa: char;
-    petla: Boolean;
-    txt: string;
-begin
- Result:='';
-
- if not(a[i] in ['(']) then exit;
-
- lewa:=a[i];
- if lewa='(' then prawa:=')' else prawa:=chr(ord(lewa)+2);
-
- nawias:=0; petla:=true; len:=length(a);
-
- while petla and (i<=len) do begin
-
-  znak := a[i];
-
-  if znak=lewa then inc(nawias) else
-   if znak=prawa then dec(nawias);
-
-//  if not(zag) then
-//   if nawias>1 then test_nawias(a,lewa,0);
-
-//  if nawias=0 then petla:=false;
-  petla := not(nawias=0);
-
-   if znak in AllowQuotes then begin
-
-   txt:= get_string(i,a);
-
-   Result := Result + znak + txt + znak;
-
-   if txt = znak then Result:=Result + znak;
-
-   end else begin
-    Result := Result + znak;
-    inc(i)
-   end;
-
- end;
-
-end;
-
-
-procedure AddString;
-var i: integer;
-begin
-
- i:=High(Result);
- Result[i] := s;
-
- SetLength(Result, i + 2);
-
- s:='';
-end;
-
-
-begin
- SetLength(Result, 1);
-
- i:=1;
-
- len:=length(a);
-
- s:='';
-
- while i <= len do
-
-  if a[i]=Sep then begin
-
-   AddString;
-
-   inc(i);
-
-  end else
-
-  case UpCase(a[i]) of
-   '(': s:=s + ciag_ograniczony(i,a);
-
-   '''','"':
-     begin
-      znak:=a[i];
-
-      txt:=get_string(i,a);
-
-      s:=s + znak + txt + znak;
-
-      if znak = txt then s:=s + znak;
-
-     end;
-
-  else
-   begin
-    s := s + a[i];
-    inc(i);
-   end;
-  end;
-
- if s <> '' then AddString;
-
-end;
-
-
-procedure TokenizeProgram(UsesOn: Boolean = true);
-var
-  Text: string;
-  Num, Frac: TString;
-  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
-  Tmp: Int64;
-  AsmFound, UsesFound, yes: Boolean;
-  ch, ch2: Char;
-  CurToken: Byte;
-  StrParams: TArrayString;
-
-
-  procedure TokenizeUnit(a: integer); forward;
-
-
-  procedure Tokenize(fnam: string);
-  var InFile: file of char;
-      _line: integer;
-      _uidx: integer;
-
-
-  procedure ReadUses;
-  var i, j: integer;
-      s, nam: string;
-      _line: integer;
-      _uidx: integer;
-  begin
-
-	 UsesFound := false;
-
-	 i := NumTok-1;
-
-	 while Tok[i].Kind <> USESTOK do begin
-
-	 CheckTok(i, IDENTTOK);
-
-	 nam := FindFile(Tok[i].Name^+'.pas', 'unit');
-
-	 s:=AnsiUpperCase(Tok[i].Name^);
-
-	 for j := 2 to NumUnits do		// kasujemy wczesniejsze odwolania
-	   if UnitName[j].Name = s then UnitName[j].Name := '';
-
-	  _line := Line;
-	 _uidx := UnitIndex;
-
-	 inc(NumUnits);
-	 UnitIndex := NumUnits;
-
-	 Line:=1;
-  	 UnitName[UnitIndex].Name := s;
-	 UnitName[UnitIndex].Path := nam;
-
-	 TokenizeUnit( UnitIndex );
-
-	 Line := _line;
-	 UnitIndex := _uidx;
-
-	 if Tok[i - 1].Kind = COMMATOK then
-	  dec(i, 2)
-	 else
-	  dec(i);
-	 end;
-
-  end;
-
-
-  procedure RemoveDefine(X: string);
-  var i: integer;
-  begin
-   i := SearchDefine(X);
-   if i <> 0 then
-   begin
-    Dec(NumDefines);
-    for i := i to NumDefines do
-     Defines[i] := Defines[i+1];
-   end;
-  end;
-
-
-  function SkipCodeUntilDirective: string;
-  var c: char;
-      i: Byte;
-  begin
-   i := 1;
-   Result := '';
-
-   repeat
-    Read(InFile, c);
-
-    if c = LF then Inc(Line);
-    case i of
-     1:
-      case c of
-      '(': i:= 2;
-      '{': i:= 5;
-      end;
-     2:
-      if c = '*' then i := 3 else i := 1;
-     3:
-      if c = '*' then i := 4;
-     4:
-      if c = ')' then i := 1 else i := 3;
-     5:
-      if c = '$' then i := 6 else begin i := 0+1; Result:='' end;
-     6:
-      if UpCase(c) in AllowLabelFirstChars then
-      begin
-       Result := UpCase(c);
-       i := 7;
-      end else begin i := 0+1; Result:='' end;
-     7:
-      if UpCase(c) in AllowLabelChars then
-       Result := Result + UpCase(c)
-      else if c = '}' then
-       i := 9
-      else
-       i := 8;
-     8:
-      if c = '}' then i := 9;
-    end;
-
-   until i = 9;
-
-  end;
-
-
-  function SkipCodeUntilElseEndif: boolean;
-  var dir: string;
-      lvl: integer;
-  begin
-   lvl := 0;
-   repeat
-     dir := SkipCodeUntilDirective;
-     if dir = 'ENDIF' then begin
-      Dec(lvl);
-      if lvl < 0 then
-       Exit(false);
-     end
-     else if (lvl = 0) and (dir = 'ELSE') then
-      Exit(true)
-     else if dir = 'IFDEF' then
-      Inc(lvl)
-     else if dir = 'IFNDEF' then
-      Inc(lvl);
-   until false;
-  end;
-
-
-  procedure ReadDirective(d: string; DefineLine: integer);
-  var i, v, x: integer;
-      cmd, s, nam: string;
-      found: Boolean;
-      Param: TDefinesParam;
-
-
-	procedure skip_spaces;
-	begin
-
- 	 while d[i] in AllowWhiteSpaces do begin
-   	  if d[i] = LF then inc(DefineLine);
- 	  inc(i);
-  	 end;
-
-	end;
-
-
-	procedure newMsgUser(Kind: Byte);
-	var k: integer;
-	begin
-
-		k:=High(msgUser);
-
-		AddToken(Kind, UnitIndex, Line, 1, k); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-		omin_spacje(i, d);
-
-		msgUser[k] := copy(d, i, length(d)-i);
-		SetLength(msgUser, k+2);
-
-	end;
-
-  begin
-
-    if UpCase(d[1]) in AllowLabelFirstChars then begin
-
-     i:=1;
-     cmd := get_label(i, d);
-
-     if cmd='INCLUDE' then cmd:='I';
-     if cmd='RESOURCE' then cmd:='R';
-
-     if cmd = 'WARNING' then newMsgUser(WARNINGTOK) else
-     if cmd = 'ERROR' then newMsgUser(ERRORTOK) else
-     if cmd = 'INFO' then newMsgUser(INFOTOK) else
-
-     if cmd = 'MACRO+' then macros:=true else
-     if cmd = 'MACRO-' then macros:=false else
-     if cmd = 'MACRO' then begin
-
-      s := get_string(i, d);
-
-      if s='ON' then macros:=true else
-       if s='OFF' then macros:=false else
-        Error(NumTok, 'Wrong switch toggle, use ON/OFF or +/-');
-
-     end else
-
-     if cmd = 'I' then begin					// {$i filename}
-								// {$i+-} iocheck
-      if d[i]='+' then begin AddToken(IOCHECKON, UnitIndex, Line, 1, 0); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0) end else
-       if d[i]='-' then begin AddToken(IOCHECKOFF, UnitIndex, Line, 1, 0); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0) end else
-	begin
-//	 AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-	 s := LowerCase( get_string(i, d) );
-
-	 if s = '%time%' then begin
-
-	   s:=TimeToStr(Now);
-
-	   AddToken(STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0); Spaces:=0;
-	   DefineStaticString(NumTok, s);
-
-	 end else
-	 if s = '%date%' then begin
-
-	   s:=DateToStr(Now);
-
-	   AddToken(STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0); Spaces:=0;
-	   DefineStaticString(NumTok, s);
-
-	 end else begin
-
-	  nam := FindFile(s, 'include');
-
-	  _line := Line;
-	  _uidx := UnitIndex;
-
-	  Line:=1;
-	  UnitName[IncludeIndex].Name := ExtractFileName(nam);
-	  UnitName[IncludeIndex].Path := nam;
-	  UnitIndex := IncludeIndex;
-	  inc(IncludeIndex);
-
-	  Tokenize( nam );
-
-	  Line := _line;
-	  UnitIndex := _uidx;
-
-	 end;
-
-	end;
-
-     end else
-
-      if (cmd = 'CODEALIGN') then begin
-
-       s := get_string(i, d);
-
-       if AnsiUpperCase(s) = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
-        if AnsiUpperCase(s) = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
-         if AnsiUpperCase(s) = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0) else
-	  Error(NumTok, 'Illegal alignment directive');
-
-       omin_spacje(i, d);
-
-       if d[i] <> '=' then Error(NumTok, 'Illegal alignment directive');
-       inc(i);
-       omin_spacje(i, d);
-
-	s := get_digit(i, d);
-
-	val(s, v, Err);
-
-	if Err > 0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-	GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
-
-	Tok[NumTok].Value := v;
-
-	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
-
-      end else
-
-      if (cmd = 'LIBRARYPATH') then begin			// {$librarypath path1;path2;...}
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-       repeat
-
-       s := get_string(i, d);
-
-       AddPath(s);
-
-       if d[i] = ';' then
-	inc(i)
-       else
-	Break;
-
-       until d[i] = ';';
-
-       dec(NumTok);
-      end else
-
-      if (cmd = 'R') and not (d[i] in ['+','-']) then begin	// {$R filename}
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-       s := LowerCase( get_string(i, d) );
-       AddResource( FindFile(s, 'resource') );
-
-       dec(NumTok);
-      end else
-(*
-       if cmd = 'C' then begin					// {$c 6502|65816}
-	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-	s := get_digit(i, d);
-
-	val(s,CPUMode, Err);
-
-	if Err > 0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-	GetCommonConstType(NumTok, CARDINALTOK, GetValueType(CPUMode));
-
-	dec(NumTok);
-       end else
-*)
-
-      if (cmd = 'L') or (cmd = 'LINK') then begin		// {$L filename} | {$LINK filename}
-       AddToken(LINKTOK, UnitIndex, Line, 1, 0);
-
-       s := LowerCase( get_string(i, d) );
-
-       s := FindFile(s, 'link object');
-
-       v := High(linkObj);
-       linkObj[v] := s;
-
-       Tok[NumTok].Value := v;
-
-       SetLength(linkObj, v+2);
-
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-       //dec(NumTok);
-      end else
-
-       if (cmd = 'F') or (cmd = 'FASTMUL') then begin		// {$F [page address]}
-	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-	s := get_digit(i, d);
-
-	val(s, FastMul, Err);
-
-	if Err <> 0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-	GetCommonConstType(NumTok, BYTETOK, GetValueType(FastMul));
-
-	dec(NumTok);
-       end else
-
-       if (cmd = 'IFDEF') or (cmd = 'IFNDEF') then begin
-
-	found := 0 <> SearchDefine( get_label(i, d) );
-
-	if cmd = 'IFNDEF' then found := not found;
-
-	if not found then
-	begin
-	 if SkipCodeUntilElseEndif then
-	  Inc(IfdefLevel);
-	end else
-	 Inc(IfdefLevel);
-       end else
-       if cmd = 'ELSE' then begin
-	if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
-	 Error(NumTok, 'Found $ELSE without $IFXXX');
-	if IfdefLevel > 0 then
-	 Dec(IfdefLevel)
-       end else
-       if cmd = 'ENDIF' then begin
-	if IfdefLevel = 0 then
-	 Error(NumTok, 'Found $ENDIF without $IFXXX')
-	else
-	 Dec(IfdefLevel)
-       end else
-       if cmd = 'DEFINE' then begin
-	nam := get_label(i, d);
-
-	Err := 0;
-
-	skip_spaces;
-
-	if d[i] = '(' then begin	// macro parameters
-
-	 Param[1] := '';
-	 Param[2] := '';
- 	 Param[3] := '';
-	 Param[4] := '';
-	 Param[5] := '';
-	 Param[6] := '';
-	 Param[7] := '';
-	 Param[8] := '';
-
-	 inc(i);
-	 skip_spaces;
-
-	 Tok[NumTok].Line := line;
-
-	 if not(UpCase(d[i]) in AllowLabelFirstChars) then
-	  Error(NumTok, 'Syntax error, ''identifier'' expected');
-
-	 repeat
-
-	  inc(Err);
-
-          if Err > MAXPARAMS then
-	   Error(NumTok, 'Too many formal parameters in ' + nam);
-
-	  Param[Err] := get_label(i, d);
-
-	  for x := 1 to Err - 1 do
-	   if Param[x] = Param[Err] then
-	    Error(NumTok, 'Duplicate identifier ''' + Param[Err] + '''');
-
-	  skip_spaces;
-
-	  if d[i] = ',' then begin
-	   inc(i);
-	   skip_spaces;
-
-	   if not(UpCase(d[i]) in AllowLabelFirstChars) then
-	    Error(NumTok, 'Syntax error, ''identifier'' expected');
-	  end;
-
-	 until d[i] = ')';
-
-	 inc(i);
-	 skip_spaces;
-
-	end;
-
-
-	if (d[i] = ':') and (d[i+1] = '=') then begin
-	 inc(i, 2);
-
-	 skip_spaces;
-
-	 AddDefine(nam);		// define macro
-
-	 s:=copy(d, i, length(d));
-	 SetLength(s, length(s)-1);
-
-	 Defines[NumDefines].Macro := s;
-	 Defines[NumDefines].Line := DefineLine;
-
-	 if Err > 0 then Defines[NumDefines].Param := Param;
-
-	end else
-	 AddDefine(nam);
-
-       end else
-       if cmd = 'UNDEF' then begin
-	nam := get_label(i, d);
-	RemoveDefine(nam);
-       end else
-	Error(NumTok, 'Illegal compiler directive $' + cmd + d[i]);
-
-    end;
-
-  end;
-
-
-  procedure ReadSingleLineComment;
-  begin
-
-   while (ch <> LF) do
-     Read(InFile, ch);
-
-  end;
-
-
-  procedure ReadChar(var c: Char);
-  var c2: Char;
-      dir: Boolean;
-      directive: string;
-      _line: integer;
-  begin
-
-  Read(InFile, c);
-
-   if c = '(' then begin
-    Read(InFile, c2);
-
-    if c2='*' then begin				// Skip comments (*   *)
-
-     repeat
-      c2:=c;
-      Read(InFile, c);
-
-      if c = LF then Inc(Line);
-     until (c2 = '*') and (c = ')');
-
-     Read(InFile, c);
-
-    end else
-     Seek(InFile, FilePos(InFile) - 1);
-
-   end;
-
-
-   if c = '{' then begin
-
-    dir:=false;
-    directive:='';
-
-    _line := Line;
-
-    Read(InFile, c2);
-
-    if c2='$' then
-     dir:=true
-    else
-     Seek(InFile, FilePos(InFile) - 1);
-
-    repeat						// Skip comments
-      Read(InFile, c);
-
-      if dir then directive := directive + c;
-
-      if c <> '}' then
-       if AsmFound then SaveAsmBlock(c);
-
-      if c = LF then Inc(Line);
-    until c = '}';
-
-    if dir then ReadDirective(directive, _line);
-
-    Read(InFile, c);
-
-   end else
-    if c = '/' then begin
-     Read(InFile, c2);
-
-     if c2 = '/' then
-      ReadSingleLineComment
-     else
-      Seek(InFile, FilePos(InFile) - 1);
-
-    end;
-
-  if c = LF then Inc(Line);				// Increment current line number
-  end;
-
-
-  function ReadParameters: String;
-  var opn: integer;
-  begin
-
-   Result := '(';
-   opn:=1;
-
-   while true do begin
-    ReadChar(ch);
-
-    if ch = LF then inc(Line);
-
-    if ch = '(' then inc(opn);
-    if ch = ')' then dec(opn);
-
-    if not(ch in [CR, LF]) then Result:=Result + ch;
-
-    if (length(Result) > 255) or (opn = 0) then Break;
-
-   end;
-
-   if ch = ')' then ReadChar(ch);
-
-  end;
-
-
-  procedure SafeReadChar(var c: Char);
-  begin
-
-  ReadChar(c);
-
-  c := UpCase(c);
-
-  if c in [' ',TAB] then inc(Spaces);
-
-  if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_', '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
-    begin
-    CloseFile(InFile);
-    Error(NumTok, 'Unknown character: ' + c);
-    end;
-  end;
-
-
-  procedure SkipWhiteSpace;				// 'string' + #xx + 'string'
-  begin
-    SafeReadChar(ch);
-
-    while ch in AllowWhiteSpaces do SafeReadChar(ch);
-
-    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
-  end;
-
-
-  procedure TextInvers(p: integer);
-  var i: integer;
-  begin
-
-   for i := p to length(Text) do
-    if ord(Text[i]) < 128 then
-     Text[i] := chr(ord(Text[i])+$80);
-
-  end;
-
-
-  procedure TextInternal(p: integer);
-  var i: integer;
-
-  function ata2int(const a: byte): byte;
-  (*----------------------------------------------------------------------------*)
-  (*  zamiana znakow ATASCII na INTERNAL					*)
-  (*----------------------------------------------------------------------------*)
-  begin
-   Result:=a;
-
-   case (a and $7f) of
-      0..31: inc(Result,64);
-     32..95: dec(Result,32);
-   end;
-
-  end;
-
-
-  function cbm(const a: char): byte;
-  begin
-   Result:=ord(a);
-
-      case a of
-       'a'..'z': dec(Result, 96);
-       '['..'_': dec(Result, 64);
-            '`': Result:=64;
-	    '@': Result:=0;
-      end;
-
-   end;
-
-
-  begin
-
-   if target.id = 'a8' then begin
-
-     for i := p to length(Text) do
-      Text[i] := chr(ata2int(ord(Text[i])));
-
-   end else begin
-
-     for i := p to length(Text) do
-      Text[i] := chr(cbm(Text[i]));
-
-   end;
-
-  end;
-
-
-  procedure ReadNumber;
-  var i, k, ln: integer;
-  begin
-
-    Num:='';
-
-    if ch='%' then begin		  // binary
-
-      SafeReadChar(ch);
-
-      while ch in ['0', '1'] do
-       begin
-       Num := Num + ch;
-       SafeReadChar(ch);
-       end;
-
-       if length(Num)=0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-       //remove leading zeros
-       i:=1;
-       while Num[i]='0' do inc(i);
-
-       tmp:=0;
-
-       ln:=length(Num);
-
-       //do the conversion
-       for k:=ln downto i do
-	if Num[k]='1' then
-	 tmp:=tmp+(1 shl (ln-k));
-
-       Num:=IntToStr(tmp);
-
-    end else
-
-    if ch='$' then begin		  // hexadecimal
-
-      SafeReadChar(ch);
-
-      while ch in AllowDigitChars do
-       begin
-       Num := Num + ch;
-       SafeReadChar(ch);
-       end;
-
-       if length(Num)=0 then
-	 iError(NumTok, OrdinalExpExpected);
-
-       val('$'+Num, tmp, err);
-
-       Num:=IntToStr(tmp);
-    end else
-
-      while ch in ['0'..'9'] do		// Number suspected
-	begin
-	Num := Num + ch;
-	SafeReadChar(ch);
-	end;
-
-  end;
-
-
-  begin
-
-  AssignFile(InFile, fnam );		// UnitIndex = 1 main program
-
-  Reset(InFile);
-
-  Text := '';
-
-  try
-    while TRUE do
-      begin
-      OldNumTok := NumTok;
-
-      repeat
-	ReadChar(ch);
-
-	if ch in [' ',TAB] then inc(Spaces);
-
-      until not (ch in [' ',TAB,LF,CR,'{'(*, '}'*)]);    // Skip space, tab, line feed, carriage return, comment braces
-
-
-      ch := UpCase(ch);
-
-
-      Num:='';
-      if ch in ['0'..'9', '$', '%'] then ReadNumber;
-
-      if Length(Num) > 0 then			// Number found
-	begin
-	AddToken(INTNUMBERTOK, UnitIndex, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
-
-	if ch = '.' then			// Fractional part suspected
-	  begin
-	  SafeReadChar(ch);
-	  if ch = '.' then
-	    Seek(InFile, FilePos(InFile) - 1)	// Range ('..') token
-	  else
-	    begin				// Fractional part found
-	    Frac := '.';
-
-	    while ch in ['0'..'9'] do
-	      begin
-	      Frac := Frac + ch;
-	      SafeReadChar(ch);
-	      end;
-
-	    Tok[NumTok].Kind := FRACNUMBERTOK;
-
-	    if length(Num) > 17 then
-	      Tok[NumTok].FracValue := 0
-	    else
-	      Tok[NumTok].FracValue := StrToFloat(Num + Frac);
-
-	    Tok[NumTok].Column := Tok[NumTok-1].Column + length(Num) + length(Frac) + Spaces; Spaces:=0;
-	    end;
-	  end;
-
-	Num := '';
-	Frac := '';
-	end;
-
-
-      if ch in ['A'..'Z', '_'] then		// Keyword or identifier suspected
-	begin
-	Text := '';
-
-	err:=0;
-	repeat
-	  Text := Text + ch;
-	  ch2:=ch;
-	  SafeReadChar(ch);
-
-	  if (ch='.') and (ch2='.') then begin ch:=#0; Break end;
-
-	  inc(err);
-	until not (ch in ['A'..'Z', '_', '0'..'9','.']);
-
-	if Text[length(Text)] = '.' then begin
-	 SetLength(Text, length(Text)-1);
-	 Seek(InFile, FilePos(InFile) - 2);
-	 dec(err);
-	end;
-
-	if err > 255 then
-	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
-
-	if Length(Text) > 0 then
-	  begin
-
-	 CurToken := GetStandardToken(Text);
-
-	 im := SearchDefine(Text);
-
-	 if (im > 0) and (Defines[im].Macro <> '') then begin
-
-	  tmp:=FilePos(InFile);
-	  ch2:=ch;
-	  Num:='';			// read parameters, max 255 chars
-
-	  if Defines[im].Param[1] <> '' then begin
-	    while ch in AllowWhiteSpaces do ReadChar(ch);
-	    if ch = '(' then Num := ReadParameters;
-	  end;
-
-	  SetLength(StrParams, 1);
-	  StrParams[0] := '';
-
-	  Tok[NumTok].Line := Line;
-
-	  if Num = '' then begin
-	   Seek(InFile, tmp);
-	   ch:=ch2;
-	  end else begin
-	   StrParams := SplitString(copy(Num, 2, length(Num)-2), ',');
-
-	  if High(StrParams) > MAXPARAMS then
-	   Error(NumTok, 'Too many formal parameters in ' + Text);
-
-	  end;
-
-	  if (StrParams[0] <> '') and (Defines[im].Param[1] = '') then
-	   Error(NumTok, 'Wrong number of parameters');
-
-
-	  OldNumDefines := NumDefines;
-
-	  Err:=1;
-
-	  while (Defines[im].Param[Err] <> '') and (Err <= MAXPARAMS) do begin
-
-	   if StrParams[Err - 1] = '' then
-	     Error(NumTok, 'Missing parameter');
-
-	   AddDefine(Defines[im].Param[Err]);
-	   Defines[NumDefines].Macro := StrParams[Err - 1];
-	   Defines[NumDefines].Line := Line;
-
-	   inc(Err);
-	  end;
-
-
-	  TokenizeMacro(Defines[im].Macro, Defines[im].Line, 0);
-
-	  NumDefines := OldNumDefines;
-
-	  CurToken := MACRORELEASE;
-	 end else begin
-
-	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
-	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
-	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
-	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
-
-	  AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
-
-	 end;
-
-
-	 if CurToken = ASMTOK then begin
-
-	  Tok[NumTok].Kind := CurToken;
-	  Tok[NumTok].Value:= 0;
-
-	  tmp:=FilePos(InFile);
-
-	  repeat
-	   Read(InFile, ch);
-	   if ch = LF then inc(line);
-	  until not(ch in AllowWhiteSpaces);
-
-
-	  if ch <> '{' then begin
-
-	   Tok[NumTok].Value := 1;
-
-	   Seek(InFile, tmp - 1);
-
-	   Read(InFile, ch);
-
-	   if ch in [CR,LF] then begin			// skip EOL after 'ASM'
-
-	    if ch = LF then inc(line);
-
-	    if ch = CR then Read(InFile, ch);		// CR LF
-
-	    AsmBlock[AsmBlockIndex] := '';
-	    Text:='';
-
-	   end else begin
-	    AsmBlock[AsmBlockIndex] := ch;
-	    Text:=ch;
-	   end;
-
-
-	   while true do begin
-	    Read(InFile, ch);
-
-	    SaveAsmBlock(ch);
-
-	    Text:=Text + UpperCase(ch);
-
-	    if pos('END;', Text) > 0 then begin
-	      SetLength(AsmBlock[AsmBlockIndex], length(AsmBlock[AsmBlockIndex])-4);
-
-//	      inc(line, AsmBlock[AsmBlockIndex].CountChar(LF));
-
-	      Break;
-	    end;
-
-	    if ch in [CR,LF] then begin
-	     if ch = LF then inc(line);
-	     Text:='';
-	    end;
-
-	   end;
-
-
-	  end else begin
-
-	  Seek(InFile, FilePos(InFile) - 1);
-
-	  AsmFound:=true;
-
-	  repeat
-	   ReadChar(ch);
-
-	   if ch in [' ',TAB] then inc(Spaces);
-
-	  until not (ch in [' ',TAB,LF,CR,'{','}']);    // Skip space, tab, line feed, carriage return, comment braces
-
-	  AsmFound:=false;
-
-	  end;
-
-	  inc(AsmBlockIndex);
-
-	  if AsmBlockIndex > High(AsmBlock) then begin
-	   Error(NumTok, 'Out of resources, ASMBLOCK');
-
-	   halt(2);
-	  end;
-
-	 end else begin
-
-	  if CurToken <> MACRORELEASE then
-
-	   if CurToken <> 0 then begin		// Keyword found
-	     Tok[NumTok].Kind := CurToken;
-
-	     if CurToken = USESTOK then UsesFound := true;
-
-	   end
-	   else begin				// Identifier found
-	     Tok[NumTok].Kind := IDENTTOK;
-	     New(Tok[NumTok].Name);
-	     Tok[NumTok].Name^ := Text;
-	   end;
-
-	 end;
-
-	 Text := '';
-	end;
-
-	end;
-
-
-	if ch in ['''', '#'] then begin
-
-	 Text := '';
-	 yes:=true;
-
-	 repeat
-
-	 case ch of
-
-	  '''': begin
-
-		 if yes then begin
-		  TextPos := Length(Text)+1;
-		  yes:=false;
-		 end;
-
-		 inc(Spaces);
-
-		 repeat
-		  Read(InFile, ch);
-
-		  if ch = LF then	//Inc(Line);
-		   Error(NumTok, 'String exceeds line');
-
-		  if not(ch in ['''',CR,LF]) then
-		   Text := Text + ch
-		  else begin
-
-		   Read(InFile, ch2);
-
-		   if ch2='''' then begin
-		    Text := Text + '''';
-		    ch:=#0;
-		   end else
-		    Seek(InFile, FilePos(InFile) - 1);
-
-		  end;
-
-		 until ch = '''';
-
-		 inc(Spaces);
-
-		 SafeReadChar(ch);
-
-		 if ch in [' ',TAB] then begin
-			ch2:=ch;
-			Err:=FilePos(InFile);
-			while ch2 in [' ',TAB] do Read(InFile, ch2);
-
-			if ch2 in ['*','~','+'] then
-			 ch:=ch2
-			else
-			 Seek(InFile, Err);
-		 end;
-
-
-		 if ch='*' then begin
-		  inc(Spaces);
-		  TextInvers(TextPos);
-		  SafeReadChar(ch);
-		 end;
-
-		 if ch='~' then begin
-		  inc(Spaces);
-		  TextInternal(TextPos);
-		  SafeReadChar(ch);
-
-		  if ch='*' then begin
-		   inc(Spaces);
-		   TextInvers(TextPos);
-		   SafeReadChar(ch);
-		  end;
-
-		 end;
-
-
-		 if ch in [' ',TAB] then begin
-			ch2:=ch;
-			Err:=FilePos(InFile);
-			while ch2 in [' ',TAB] do Read(InFile, ch2);
-
-			if ch2 in ['''','+'] then
-			 ch:=ch2
-			else
-			 Seek(InFile, Err);
-		 end;
-
-
-		 if ch='+' then begin
-		  yes:=true;
-		  inc(Spaces);
-		  SkipWhiteSpace;
-		 end;
-
-		end;
-
-	   '#': begin
-		 SafeReadChar(ch);
-
-		 Num:='';
-		 ReadNumber;
-
-		 if Length(Num)>0 then
-		  Text := Text + chr(StrToInt(Num))
-		 else
-		  Error(NumTok, 'Constant expression expected');
-
-		 if ch in [' ',TAB] then begin
-			ch2:=ch;
-			Err:=FilePos(InFile);
-			while ch2 in [' ',TAB] do Read(InFile, ch2);
-
-			if ch2 in ['''','+'] then
-			 ch:=ch2
-			else
-			 Seek(InFile, Err);
-		 end;
-
-		 if ch='+' then begin
-		  inc(Spaces);
-		  SkipWhiteSpace;
-		 end;
-
-		end;
-	 end;
-
-	 until not (ch in ['#', '''']);
-
-	 case ch of
-	  '*': begin TextInvers(TextPos); SafeReadChar(ch) end;			// Invers
-	  '~': begin TextInternal(TextPos); SafeReadChar(ch) end;		// Antic
- 	 end;
-
-	// if Length(Text) > 0 then
-	  if Length(Text) = 1 then begin
-	    AddToken(CHARLITERALTOK, UnitIndex, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
-	  end else begin
-	    AddToken(STRINGLITERALTOK, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
-	    DefineStaticString(NumTok, Text);
-	  end;
-
-	 Text := '';
-
-	end;
-
-
-      if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then begin
-	AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
-
-	if UsesFound and (ch = ';') then
-	  if UsesOn then ReadUses;
-      end;
-
-
-//      if ch in ['?','!','&','\','|','_','#'] then
-//	AddToken(UNKNOWNIDENTTOK, UnitIndex, Line, 1, ord(ch));
-
-
-      if ch in [':', '>', '<', '.'] then					// Double-character token suspected
-	begin
-	Line2:=Line;
-	SafeReadChar(ch2);
-	if (ch2 = '=') or
-	   ((ch = '<') and (ch2 = '>')) or
-	   ((ch = '.') and (ch2 = '.')) then begin				// Double-character token found
-	  AddToken(GetStandardToken(ch + ch2), UnitIndex, Line, 2 + Spaces, 0); Spaces:=0;
-	end else
-	 if (ch='.') and (ch2 in ['0'..'9']) then begin
-
-	   AddToken(INTNUMBERTOK, UnitIndex, Line, 0, 0);
-
-	   Frac := '0.';		  // Fractional part found
-
-	   while ch2 in ['0'..'9'] do begin
-	    Frac := Frac + ch2;
-	    SafeReadChar(ch2);
-	   end;
-
-	   Tok[NumTok].Kind := FRACNUMBERTOK;
-	   Tok[NumTok].FracValue := StrToFloat(Frac);
-	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
-
-	   Frac := '';
-
-	   Seek(InFile, FilePos(InFile) - 1);
-
-	 end else
-	  begin
-	  Seek(InFile, FilePos(InFile) - 1);
-	  Line:=Line2;
-
-	  if ch in [':','>', '<', '.'] then begin				// Single-character token found
-	    AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
-	  end else
-	    begin
-	    CloseFile(InFile);
-	    Error(NumTok, 'Unknown character: ' + ch);
-	    end;
-	  end;
-	end;
-
-
-      if NumTok = OldNumTok then	 // No token found
-	begin
-	CloseFile(InFile);
-	Error(NumTok, 'Illegal character '''+ch+''' ($'+IntToHex(ord(ch),2)+')');
-	end;
-
-      end;// while
-
-  except
-
-   if Text <> '' then
-    if Text='END.' then begin
-     AddToken(ENDTOK, UnitIndex, Line, 3, 0);
-     AddToken(DOTTOK, UnitIndex, Line, 1, 0);
-    end else begin
-     AddToken(GetStandardToken(Text), UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
-    end;
-
-    CloseFile(InFile);
-  end;// try
-
-  end;
-
-
-procedure TokenizeUnit(a: integer);
-// Read input file and get tokens
-begin
-
-  UnitIndex := a;
-
-  Line := 1;
-  Spaces := 0;
-
-  if UnitIndex > 1 then AddToken(UNITBEGINTOK, UnitIndex, Line, 0, 0);
-
-//  writeln('>',UnitIndex,',',UnitName[UnitIndex].Name);
-
-  Tokenize( UnitName[UnitIndex].Path );
-
-  if UnitIndex > 1 then begin
-    CheckTok(NumTok, DOTTOK);
-    CheckTok(NumTok - 1, ENDTOK);
-
-    dec(NumTok, 2);
-
-    AddToken(UNITENDTOK, UnitIndex, Line, 0, 0);
-  end else
-   AddToken(EOFTOK, UnitIndex, Line, 0, 0);
-
-end;
-
-
-begin
-// Token spelling definition
-
-Spelling[CONSTTOK	] := 'CONST';
-Spelling[TYPETOK	] := 'TYPE';
-Spelling[VARTOK		] := 'VAR';
-Spelling[PROCEDURETOK	] := 'PROCEDURE';
-Spelling[FUNCTIONTOK	] := 'FUNCTION';
-Spelling[OBJECTTOK	] := 'OBJECT';
-Spelling[PROGRAMTOK	] := 'PROGRAM';
-Spelling[LIBRARYTOK	] := 'LIBRARY';
-Spelling[EXPORTSTOK	] := 'EXPORTS';
-Spelling[EXTERNALTOK	] := 'EXTERNAL';
-Spelling[UNITTOK	] := 'UNIT';
-Spelling[INTERFACETOK	] := 'INTERFACE';
-Spelling[IMPLEMENTATIONTOK] := 'IMPLEMENTATION';
-Spelling[INITIALIZATIONTOK] := 'INITIALIZATION';
-Spelling[CONSTRUCTORTOK ] := 'CONSTRUCTOR';
-Spelling[DESTRUCTORTOK  ] := 'DESTRUCTOR';
-Spelling[OVERLOADTOK	] := 'OVERLOAD';
-Spelling[ASSEMBLERTOK	] := 'ASSEMBLER';
-Spelling[FORWARDTOK	] := 'FORWARD';
-Spelling[REGISTERTOK	] := 'REGISTER';
-Spelling[INTERRUPTTOK	] := 'INTERRUPT';
-Spelling[PASCALTOK	] := 'PASCAL';
-Spelling[STDCALLTOK	] := 'STDCALL';
-Spelling[INLINETOK      ] := 'INLINE';
-Spelling[KEEPTOK        ] := 'KEEP';
-
-Spelling[ASSIGNFILETOK	] := 'ASSIGN';
-Spelling[RESETTOK	] := 'RESET';
-Spelling[REWRITETOK	] := 'REWRITE';
-Spelling[APPENDTOK	] := 'APPEND';
-Spelling[BLOCKREADTOK	] := 'BLOCKREAD';
-Spelling[BLOCKWRITETOK	] := 'BLOCKWRITE';
-Spelling[CLOSEFILETOK	] := 'CLOSE';
-
-Spelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
-Spelling[SIZEOFRESOURCETOK] := 'SIZEOFRESOURCE';
-
-
-Spelling[FILETOK	] := 'FILE';
-Spelling[TEXTFILETOK	] := 'TEXTFILE';
-Spelling[SETTOK		] := 'SET';
-Spelling[PACKEDTOK	] := 'PACKED';
-Spelling[VOLATILETOK	] := 'VOLATILE';
-Spelling[LABELTOK	] := 'LABEL';
-Spelling[GOTOTOK	] := 'GOTO';
-Spelling[INTOK		] := 'IN';
-Spelling[RECORDTOK	] := 'RECORD';
-Spelling[CASETOK	] := 'CASE';
-Spelling[BEGINTOK	] := 'BEGIN';
-Spelling[ENDTOK		] := 'END';
-Spelling[IFTOK		] := 'IF';
-Spelling[THENTOK	] := 'THEN';
-Spelling[ELSETOK	] := 'ELSE';
-Spelling[WHILETOK	] := 'WHILE';
-Spelling[DOTOK		] := 'DO';
-Spelling[REPEATTOK	] := 'REPEAT';
-Spelling[UNTILTOK	] := 'UNTIL';
-Spelling[FORTOK		] := 'FOR';
-Spelling[TOTOK		] := 'TO';
-Spelling[DOWNTOTOK	] := 'DOWNTO';
-Spelling[ASSIGNTOK	] := ':=';
-Spelling[WRITETOK	] := 'WRITE';
-Spelling[WRITELNTOK	] := 'WRITELN';
-Spelling[SIZEOFTOK	] := 'SIZEOF';
-Spelling[LENGTHTOK	] := 'LENGTH';
-Spelling[HIGHTOK	] := 'HIGH';
-Spelling[LOWTOK		] := 'LOW';
-Spelling[INTTOK		] := 'INT';
-Spelling[FRACTOK	] := 'FRAC';
-Spelling[TRUNCTOK	] := 'TRUNC';
-Spelling[ROUNDTOK	] := 'ROUND';
-Spelling[ODDTOK		] := 'ODD';
-
-Spelling[READLNTOK	] := 'READLN';
-Spelling[HALTTOK	] := 'HALT';
-Spelling[BREAKTOK	] := 'BREAK';
-Spelling[CONTINUETOK	] := 'CONTINUE';
-Spelling[EXITTOK	] := 'EXIT';
-
-Spelling[SUCCTOK	] := 'SUCC';
-Spelling[PREDTOK	] := 'PRED';
-
-Spelling[INCTOK		] := 'INC';
-Spelling[DECTOK		] := 'DEC';
-Spelling[ORDTOK		] := 'ORD';
-Spelling[CHRTOK		] := 'CHR';
-Spelling[ASMTOK		] := 'ASM';
-Spelling[ABSOLUTETOK	] := 'ABSOLUTE';
-Spelling[USESTOK	] := 'USES';
-Spelling[LOTOK		] := 'LO';
-Spelling[HITOK		] := 'HI';
-Spelling[GETINTVECTOK	] := 'GETINTVEC';
-Spelling[SETINTVECTOK	] := 'SETINTVEC';
-Spelling[ARRAYTOK	] := 'ARRAY';
-Spelling[OFTOK		] := 'OF';
-Spelling[STRINGTOK	] := 'STRING';
-
-Spelling[RANGETOK	] := '..';
-
-Spelling[EQTOK		] := '=';
-Spelling[NETOK		] := '<>';
-Spelling[LTTOK		] := '<';
-Spelling[LETOK		] := '<=';
-Spelling[GTTOK		] := '>';
-Spelling[GETOK		] := '>=';
-
-Spelling[DOTTOK		] := '.';
-Spelling[COMMATOK	] := ',';
-Spelling[SEMICOLONTOK	] := ';';
-Spelling[OPARTOK	] := '(';
-Spelling[CPARTOK	] := ')';
-Spelling[DEREFERENCETOK	] := '^';
-Spelling[ADDRESSTOK	] := '@';
-Spelling[OBRACKETTOK	] := '[';
-Spelling[CBRACKETTOK	] := ']';
-Spelling[COLONTOK	] := ':';
-
-Spelling[PLUSTOK	] := '+';
-Spelling[MINUSTOK	] := '-';
-Spelling[MULTOK		] := '*';
-Spelling[DIVTOK		] := '/';
-Spelling[IDIVTOK	] := 'DIV';
-Spelling[MODTOK		] := 'MOD';
-Spelling[SHLTOK		] := 'SHL';
-Spelling[SHRTOK		] := 'SHR';
-Spelling[ORTOK		] := 'OR';
-Spelling[XORTOK		] := 'XOR';
-Spelling[ANDTOK		] := 'AND';
-Spelling[NOTTOK		] := 'NOT';
-
-Spelling[INTEGERTOK	] := 'INTEGER';
-Spelling[CARDINALTOK	] := 'CARDINAL';
-Spelling[SMALLINTTOK	] := 'SMALLINT';
-Spelling[SHORTINTTOK	] := 'SHORTINT';
-Spelling[WORDTOK	] := 'WORD';
-Spelling[BYTETOK	] := 'BYTE';
-Spelling[CHARTOK	] := 'CHAR';
-Spelling[BOOLEANTOK	] := 'BOOLEAN';
-Spelling[POINTERTOK	] := 'POINTER';
-Spelling[SHORTREALTOK	] := 'SHORTREAL';
-Spelling[REALTOK	] := 'REAL';
-Spelling[SINGLETOK	] := 'SINGLE';
-Spelling[HALFSINGLETOK	] := 'FLOAT16';
-Spelling[PCHARTOK	] := 'PCHAR';
-
-Spelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
-Spelling[FLOATTOK	] := 'FLOAT';
-Spelling[TEXTTOK	] := 'TEXT';
-
- AsmFound  := false;
- UsesFound := false;
-
- IncludeIndex := MAXUNITS;
-
- if UsesOn then
-  TokenizeUnit( 1 )	   // main_file
- else
-  for cnt := NumUnits downto 1 do
-    if UnitName[cnt].Name <> '' then TokenizeUnit( cnt );
-
-end;// TokenizeProgram
-
-
-
-// The following procedures implement machine code patterns
-// BX register serves as the expression stack top pointer
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure asm65separator(a: Boolean = true);
@@ -10258,6 +601,10 @@ begin
  asm65('; '+StringOfChar('-',60));
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function GetStackVariable(n: byte): TString;
@@ -10273,6 +620,10 @@ begin
   end;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure a65(code: code65; Value: Int64 = 0; Kind: Byte = CONSTANT; Size: Byte = 4; IdentIndex: integer = 0);
@@ -10293,15 +644,15 @@ begin
        __shrAX_CL: asm65(#9'jsr shrAX_CL.WORD');
       __shrEAX_CL: asm65(#9'jsr shrEAX_CL');
 
-	     __je: asm65(#9'beq *+5', '; je');					// =
-	    __jne: asm65(#9'bne *+5', '; jne');					// <>
-	     __jg: begin asm65(#9'seq', '; jg'); asm65(#9'bcs *+5') end;	// >
-	    __jge: asm65(#9'bcs *+5', '; jge');					// >=
-	     __jl: asm65(#9'bcc *+5', '; jl');					// <
-	    __jle: begin asm65(#9'bcc *+7', '; jle'); asm65(#9'beq *+5') end;	// <=
+	     __je: asm65(#9'beq *+5');					// =
+	    __jne: asm65(#9'bne *+5');					// <>
+	     __jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;	// >
+	    __jge: asm65(#9'bcs *+5');					// >=
+	     __jl: asm65(#9'bcc *+5');					// <
+	    __jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;	// <=
 
-	  __addBX: asm65(#9'inx');//, '; add bx, 1');
-	  __subBX: asm65(#9'dex');//, '; sub bx, 1');
+	  __addBX: asm65(#9'inx');
+	  __subBX: asm65(#9'dex');
 
        __addAL_CL: asm65(#9'jsr addAL_CL');
        __addAX_CX: asm65(#9'jsr addAX_CX');
@@ -10332,7 +683,7 @@ begin
 
 //     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
 //       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
-	 __cmpINT: asm65(#9'jsr cmpINT');
+//	 __cmpINT: asm65(#9'jsr cmpINT');
 //    __cmpSHORTINT: asm65(#9'jsr cmpSHORTINT');
 //    __cmpSMALLINT: asm65(#9'jsr cmpSMALLINT');
 
@@ -10378,12 +729,20 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure Gen;
 begin
 
  if not OutputDisabled then Inc(CodeSize);
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure ExpandParam(Dest, Source: Byte);
@@ -10430,6 +789,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure ExpandParam_m1(Dest, Source: Byte);
 (*----------------------------------------------------------------------------*)
 (*  wypelniamy zerami jesli przekazywany parametr jest mniejszy od docelowego *)
@@ -10446,7 +809,7 @@ begin
    1: if (Source in SignedOrdinalTypes) then	// to WORD
        asm65(#9'jsr @expandSHORT2SMALL1')
       else
-       asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH,x', '; expand to WORD');
+       asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH,x');
 
    2: if (Source in SignedOrdinalTypes) then	// to CARDINAL
        asm65(#9'jsr @expandToCARD1.SMALL')
@@ -10472,6 +835,10 @@ begin
  end;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure ExpandExpression(var ValType: Byte; RightValType, VarType: Byte; ForceMinusSign: Boolean = false);
@@ -10524,12 +891,20 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure ExpandWord; //(regA: integer = -1);
 begin
 
  Gen;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure ExpandByte;
@@ -10542,115 +917,8 @@ ExpandWord;// (0);
 end;
 
 
-
-function ObjectRecordSize(i: cardinal): integer;
-var j: integer;
-    FieldType, AllocElementType: Byte;
-    NumAllocElements: cardinal;
-begin
-
- Result := 0;
-
- FieldType := 0;
-
- if i > 0 then begin
-
-   for j := 1 to Types[i].NumFields do begin
-
-    FieldType := Types[i].Field[j].DataType;
-    NumAllocElements := Types[i].Field[j].NumAllocElements;
-    AllocElementType := Types[i].Field[j].AllocElementType;
-
-    if FieldType <> RECORDTOK then
-     inc(Result, DataSize[FieldType]);
-
-   end;
-
-end;
-
-end;
-
-
-function RecordSize(IdentIndex: integer; field: string =''): integer;
-var i, j: integer;
-    name, base: TName;
-    FieldType, AllocElementType: Byte;
-    NumAllocElements: cardinal;
-    yes: Boolean;
-begin
-
- if Ident[IdentIndex].NumAllocElements_ > 0 then
-  i:=Ident[IdentIndex].NumAllocElements_
- else
-  i := Ident[IdentIndex].NumAllocElements;
-
- Result := 0;
-
- FieldType := 0;
-
- yes := false;
-
- if i > 0 then begin
-
-   for j := 1 to Types[i].NumFields do begin
-
-    FieldType := Types[i].Field[j].DataType;
-    NumAllocElements := Types[i].Field[j].NumAllocElements;
-    AllocElementType :=  Types[i].Field[j].AllocElementType;
-
-    if AllocElementType = FORWARDTYPE then begin
-     AllocElementType := POINTERTOK;
-     NumAllocElements := 0;
-    end;
-
-    if Types[i].Field[j].Name = field then begin yes:=true; Break end;
-
-    if FieldType <> RECORDTOK then
-     if (FieldType in Pointers) and (NumAllocElements > 0) then
-      inc(Result, NumAllocElements * DataSize[AllocElementType])
-     else
-      inc(Result, DataSize[FieldType]);
-
-   end;
-
- end else begin
-
-  name:=Ident[IdentIndex].Name;
-
-  base:=copy(name, 1, pos('.',name)-1);
-
-  IdentIndex := GetIdent(base);
-
-  Result:=0;
-
-  for i := 1 to Types[Ident[IdentIndex].NumAllocElements].NumFields do
-   if pos(name, base+'.'+Types[Ident[IdentIndex].NumAllocElements].Field[i].Name) > 0 then
-    if Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType <> RECORDTOK then begin
-
-     FieldType := Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType;
-     NumAllocElements := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements;
-     AllocElementType := Types[Ident[IdentIndex].NumAllocElements].Field[i].AllocElementType;
-
-     if Types[Ident[IdentIndex].NumAllocElements].Field[i].Name = field then begin yes:=true; Break end;
-
-     if FieldType <> RECORDTOK then
-      if (FieldType in Pointers) and (NumAllocElements > 0) then
-       inc(Result, NumAllocElements * DataSize[AllocElementType])
-      else
-       inc(Result, DataSize[FieldType]);
-
-    end;
-
- end;
-
-
- if field <> '' then
-  if not yes then
-   Result := -1
-  else
-   Result := Result + FieldType shl 16;
-
-end;
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function InfoAboutSize(Size: Byte): string;
@@ -10665,6 +933,10 @@ begin
  end;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateIndexShift(ElementType: Byte; Ofset: Byte = 0);
@@ -10714,12 +986,16 @@ end;// GenerateInterrupt
 *)
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure StopOptimization;
 begin
 
  if run_func = 0 then begin
 
-  optimize.use := false;
+  common.optimize.use := false;
 
   if High(OptimizeBuf) > 0 then asm65;
 
@@ -10728,23 +1004,29 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure StartOptimization(i: integer);
 begin
 
   StopOptimization;
 
-  optimize.use := true;
-  optimize.unitIndex := Tok[i].UnitIndex;
-  optimize.line:= Tok[i].Line;
+  common.optimize.use := true;
+  common.optimize.unitIndex := Tok[i].UnitIndex;
+  common.optimize.line:= Tok[i].Line;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure LoadBP2(IdentIndex: integer; svar: string);
 var lab: string;
 begin
-
-//  if Ident[IdentIndex].PassMethod then
 
   if (pos('.', svar) > 0) then begin
 
@@ -10770,6 +1052,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: integer = 0; par: byte = 0);
 var Kind: byte;
     NumAllocElements: cardinal;
@@ -10783,7 +1069,7 @@ begin
    Size := DataSize[Ident[IdentIndex].AllocElementType];
    NumAllocElements := 0;
   end else
-   NumAllocElements := Elements(IdentIndex); //Ident[IdentIndex].NumAllocElements;
+   NumAllocElements := Elements(IdentIndex);	//Ident[IdentIndex].NumAllocElements;
 
   svar := GetLocalName(IdentIndex);
 
@@ -10795,9 +1081,9 @@ begin
 
  svara := svar;
  if pos('.', svar) > 0 then
-  svara:=GetLocalName(IdentIndex, 'adr.')
+  svara := GetLocalName(IdentIndex, 'adr.')
  else
-  svara:='adr.'+svar;
+  svara := 'adr.' + svar;
 
  asm65separator;
 
@@ -11153,7 +1439,7 @@ case IndirectionLevel of
     end;
 
 
-ASPOINTERTOARRAYRECORD:
+ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
     begin
     asm65('; as Pointer to Array ^Record');
     asm65;
@@ -11218,9 +1504,197 @@ ASPOINTERTOARRAYRECORD:
 
     end;
 
+
+ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].string
+    begin
+    asm65('; as Pointer to Array ^Record to String');
+    asm65;
+
+    Gen;
+
+    asm65(#9'lda'+GetStackVariable(0));
+
+    if pos('.', svar) > 0 then begin
+     asm65(#9'add '+copy(svar,1, pos('.', svar)-1));
+     asm65(#9'sta :bp2');
+     asm65(#9'lda'+GetStackVariable(1));
+     asm65(#9'adc '+copy(svar,1, pos('.', svar)-1)+'+1');
+     asm65(#9'sta :bp2+1');
+    end else begin
+     asm65(#9'add '+svar);
+     asm65(#9'sta :bp2');
+     asm65(#9'lda '+GetStackVariable(1));
+     asm65(#9'adc '+svar+'+1');
+     asm65(#9'sta :bp2+1');
+    end;
+
+    asm65(#9'ldy #$00');
+    asm65(#9'lda (:bp2),y');
+
+    if pos('.', svar) > 0 then
+     asm65(#9'add #'+svar+'-DATAORIGIN')
+    else
+     asm65(#9'add #$' + IntToHex(par, 2));
+
+    asm65(#9'sta'+GetStackVariable(0));
+
+    asm65(#9'iny');
+    asm65(#9'lda (:bp2),y');
+    asm65(#9'adc #$00');
+    asm65(#9'sta'+GetStackVariable(1));
+
+    end;
+
+
+ASPOINTERTORECORDARRAYORIGIN:									// record^.array[i]
+    begin
+    asm65('; as Pointer to Record^ Array Origin');
+    asm65;
+
+    Gen;
+
+    if pos('.', svar) > 0 then
+     asm65(#9'mwy ' + copy(svar,1, pos('.', svar)-1) + ' :bp2')
+    else
+     asm65(#9'mwy ' + svar + ' :bp2');
+
+    asm65(#9'lda' + GetStackVariable(0));
+
+    if pos('.', svar) > 0 then
+     asm65(#9'add #' + svar + '-DATAORIGIN')
+    else
+     asm65(#9'add #$' + IntToHex(par, 2));
+
+    asm65(#9'sta' + GetStackVariable(0));
+    asm65(#9'lda' + GetStackVariable(1));
+    asm65(#9'adc #$00');
+    asm65(#9'sta' + GetStackVariable(1));
+
+    asm65(#9'ldy' + GetStackVariable(0));
+
+    case Size of
+      1: begin
+
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+
+	 ExpandByte;
+	 end;
+
+      2: begin
+
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'iny');
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+
+	 ExpandWord;
+	 end;
+
+      4: begin
+
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'iny');
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'iny');
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(2));
+	 asm65(#9'iny');
+	 asm65(#9'mva (:bp2),y'+GetStackVariable(3));
+
+	 end;
+      end;
+
+    end;
+
+
+ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:							// record_array[index].array[i]
+    begin
+
+  if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
+
+    if pos('.', svar) > 0 then begin
+     asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1));
+     asm65(#9'add :STACKORIGIN-1,x');
+     asm65(#9'sta :TMP');
+     asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1)+'+1');
+     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+     asm65(#9'sta :TMP+1');
+    end else begin
+     asm65(#9'lda '+svar);
+     asm65(#9'add :STACKORIGIN-1,x');
+     asm65(#9'sta :TMP');
+     asm65(#9'lda '+svar+'+1');
+     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+     asm65(#9'sta :TMP+1');
+    end;
+
+    asm65(#9'ldy #$00');
+    asm65(#9'lda (:TMP),y');
+    asm65(#9'sta :bp2');
+    asm65(#9'iny');
+    asm65(#9'lda (:TMP),y');
+    asm65(#9'sta :bp2+1');
+
+   end else begin
+
+     asm65(#9'ldy :STACKORIGIN-1,x');
+     asm65(#9'lda adr.'+svar+',y');
+     asm65(#9'sta :bp2');
+     asm65(#9'lda adr.'+svar+'+1,y');
+     asm65(#9'sta :bp2+1');
+
+   end;
+
+   asm65(#9'lda :STACKORIGIN,x');
+   asm65(#9'add #$' + IntToHex(par,2));
+   asm65(#9'sta :STACKORIGIN,x');
+   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+   asm65(#9'adc #$00');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+   asm65(#9'ldy :STACKORIGIN,x');
+
+    case Size of
+      1: begin
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1,x');
+	 end;
+
+      2: begin
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1,x');
+	 asm65(#9'iny');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+	 end;
+
+      4: begin
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1,x');
+	 asm65(#9'iny');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+	 asm65(#9'iny');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
+	 asm65(#9'iny');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
+	 end;
+
+      end;
+
+//     a65(__subBX);
+     a65(__subBX);
+
+    end;
+
+
 end;// case
 
-end;
+end;	//Push
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure SaveToSystemStack(cnt: integer);
@@ -11247,6 +1721,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure RestoreFromSystemStack(cnt: integer);
 var i: integer;
 begin
@@ -11267,10 +1745,18 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure RemoveFromSystemStack;
 begin
-Gen; Gen;						// pop :eax
+ Gen; Gen;						// pop :eax
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateFileOpen(IdentIndex: Integer; Code: ioCode; NumParams: integer = 0);
@@ -11307,7 +1793,11 @@ begin
  asm65(#9'pla:tax');
  asm65;
 
-end;
+end;	//GenerateFileOpen
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateFileRead(IdentIndex: Integer; Code: ioCode; NumParams: integer = 0);
@@ -11340,10 +1830,14 @@ begin
  asm65(#9'pla:tax');
  asm65;
 
-end;
+end;	//GenerateFileRead
 
 
-procedure GenerateIncOperation(IndirectionLevel: Byte; ExpressionType: Byte; Down: Boolean; IdentIndex: integer);
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure GenerateIncDec(IndirectionLevel: Byte; ExpressionType: Byte; Down: Boolean; IdentIndex: integer);
 var b,c, svar, svara: string;
     NumAllocElements: cardinal;
 begin
@@ -11646,7 +2140,7 @@ begin
  end;
 
  a65(__subBX);
-end;
+end;	//GenerateIncDec
 
 
 procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: integer; Param: string = ''; ParamY: string = '');
@@ -11681,7 +2175,7 @@ begin
    Size := DataSize[Ident[IdentIndex].AllocElementType];
    NumAllocElements := 0;
   end else
-   NumAllocElements := Elements(IdentIndex);	//Ident[IdentIndex].NumAllocElements;
+   NumAllocElements := Elements(IdentIndex);
 
   svar := GetLocalName(IdentIndex);
  end else begin
@@ -11706,7 +2200,7 @@ begin
 
 case IndirectionLevel of
 
-  ASPOINTERTOARRAYRECORD:
+  ASPOINTERTOARRAYRECORD:						// array_of_record_pointers[index]
     begin
     asm65('; as Pointer to Array ^Record');
 
@@ -11743,16 +2237,6 @@ case IndirectionLevel of
      asm65(#9'sta :bp2+1');
 
    end;
-
-{
-    if ParamY<>'' then
-     asm65(#9'ldy #'+ParamY)
-    else
-     if pos('.', Ident[IdentIndex].Name) > 0 then
-      asm65(#9'ldy #'+svar+'-DATAORIGIN')
-     else
-      asm65(#9'ldy #$00');
-}
 
     LoadRegisterY;
 
@@ -11801,15 +2285,6 @@ case IndirectionLevel of
     asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
     asm65(#9'sta :bp2+1');
 
-{
-    if ParamY<>'' then
-     asm65(#9'ldy #'+ParamY)
-    else
-     if pos('.', Ident[IdentIndex].Name) > 0 then
-      asm65(#9'ldy #'+svar+'-DATAORIGIN')
-     else
-      asm65(#9'ldy #$00');
-}
     LoadRegisterY;
 
     case Size of
@@ -12102,7 +2577,7 @@ case IndirectionLevel of
 	   asm65(#9'lda >' + IntToStr(Ident[IdentIndex].NestedNumAllocElements));
 	   asm65(#9'sta @move.cnt+1');
 
-	   asm65(#9'.nowarn @move');
+	   asm65(#9'jsr @move');
 
 	   if Ident[IdentIndex].NestedNumAllocElements < 256 then begin
 	    asm65(#9'ldy #$00');
@@ -12122,7 +2597,7 @@ case IndirectionLevel of
 	   asm65(#9'iny');
 	   asm65(#9'sty @move.cnt+1');
 
-	   asm65(#9'.nowarn @move');
+	   asm65(#9'jsr @move');
 
 	  end;
 
@@ -12131,6 +2606,216 @@ case IndirectionLevel of
 
 	 end;
       end;
+    end;
+
+
+ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].string
+    begin
+
+    Gen;
+
+    asm65(#9'lda :STACKORIGIN-1,x');
+
+    if pos('.', svar) > 0 then begin
+     asm65(#9'add '+copy(svar,1, pos('.', svar)-1));
+     asm65(#9'sta :bp2');
+     asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+     asm65(#9'adc '+copy(svar,1, pos('.', svar)-1)+'+1');
+     asm65(#9'sta :bp2+1');
+    end else begin
+     asm65(#9'add '+svar);
+     asm65(#9'sta :bp2');
+     asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+     asm65(#9'adc '+svar+'+1');
+     asm65(#9'sta :bp2+1');
+    end;
+
+    asm65(#9'ldy #$00');
+    asm65(#9'lda (:bp2),y');
+
+    if pos('.', svar) > 0 then
+     asm65(#9'add #'+svar+'-DATAORIGIN')
+    else
+     asm65(#9'add #' + paramY);
+
+    asm65(#9'sta @move.dst');
+
+    asm65(#9'iny');
+    asm65(#9'lda (:bp2),y');
+    asm65(#9'adc #$00');
+    asm65(#9'sta @move.dst+1');
+
+    asm65(#9'lda :STACKORIGIN,x');
+    asm65(#9'sta @move.src');
+    asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+    asm65(#9'sta @move.src+1');
+
+    asm65(#9'lda <' + IntToStr(Ident[IdentIndex].NumAllocElements));
+    asm65(#9'sta @move.cnt');
+    asm65(#9'lda >' + IntToStr(Ident[IdentIndex].NumAllocElements));
+    asm65(#9'sta @move.cnt+1');
+
+    asm65(#9'jsr @move');
+
+    a65(__subBX);
+    a65(__subBX);
+
+    end;
+
+
+ASPOINTERTORECORDARRAYORIGIN:						// record^.array[i]
+  begin
+    asm65('; as Pointer to Record^ Array Origin');
+    asm65;
+
+    Gen;
+
+    if pos('.', svar) > 0 then
+      asm65(#9'mwy ' + copy(svar,1, pos('.', svar)-1) + ' :bp2')
+    else
+      asm65(#9'mwy ' + svar + ' :bp2');
+
+    asm65(#9'lda :STACKORIGIN-1,x');
+
+    if pos('.', svar) > 0 then
+     asm65(#9'add #' + svar + '-DATAORIGIN')
+    else
+     asm65(#9'add #' + ParamY);
+
+    asm65(#9'sta :STACKORIGIN-1,x');
+
+    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+    asm65(#9'adc #$00');
+    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+    asm65(#9'ldy :STACKORIGIN-1,x');
+
+    case Size of
+      1: begin
+
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+
+	 end;
+
+      2: begin
+
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	 asm65(#9'sta (:bp2),y');
+
+	 end;
+
+      4: begin
+
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+	 asm65(#9'sta (:bp2),y');
+
+	 end;
+
+    end;
+
+    a65(__subBX);
+    a65(__subBX);
+
+  end;
+
+
+ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
+    begin
+
+    asm65(#9'dex');							// maksymalnie mozemy uzyc :STACKORIGIN-1 lub :STACKORIGIN+1, pomagamy przez DEX/INX
+
+    if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
+
+	if pos('.', svar) > 0 then begin
+	   asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1));
+	   asm65(#9'add :STACKORIGIN-1,x');
+	   asm65(#9'sta :TMP');
+	   asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1)+'+1');
+	   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	   asm65(#9'sta :TMP+1');
+	end else begin
+	   asm65(#9'lda '+svar);
+	   asm65(#9'add :STACKORIGIN-1,x');
+	   asm65(#9'sta :TMP');
+	   asm65(#9'lda '+svar+'+1');
+	   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	   asm65(#9'sta :TMP+1');
+	end;
+
+	asm65(#9'ldy #$00');
+	asm65(#9'lda (:TMP),y');
+	asm65(#9'sta :bp2');
+	asm65(#9'iny');
+	asm65(#9'lda (:TMP),y');
+	asm65(#9'sta :bp2+1');
+
+    end else begin
+     asm65(#9'ldy :STACKORIGIN-1,x');
+     asm65(#9'lda adr.'+svar+',y');
+     asm65(#9'sta :bp2');
+     asm65(#9'lda adr.'+svar+'+1,y');
+     asm65(#9'sta :bp2+1');
+    end;
+
+   asm65(#9'inx');
+
+
+   asm65(#9'lda :STACKORIGIN-1,x');
+   asm65(#9'add #' + ParamY);
+   asm65(#9'sta :STACKORIGIN-1,x');
+   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+   asm65(#9'adc #$00');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+   asm65(#9'ldy :STACKORIGIN-1,x');
+
+    case Size of
+      1: begin
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+	 end;
+
+      2: begin
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	 asm65(#9'sta (:bp2),y');
+	 end;
+
+      4: begin
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+	 asm65(#9'sta (:bp2),y');
+	 end;
+
+      end;
+
+     a65(__subBX);
+     a65(__subBX);
+     a65(__subBX);
+
     end;
 
 
@@ -12151,21 +2836,6 @@ case IndirectionLevel of
 
     end else
      asm65(#9'mwy ' + svar + ' :bp2');
-
-{
-    if ParamY<>'' then
-     asm65(#9'ldy #'+ParamY)
-    else
-     if pos('.', Ident[IdentIndex].Name) > 0 then begin
-
-       if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
-        asm65(#9'ldy #$00')
-       else
-        asm65(#9'ldy #' + svar + '-DATAORIGIN');
-
-     end else
-      asm65(#9'ldy #$00');
-}
 
     LoadRegisterY;
 
@@ -12243,7 +2913,11 @@ end;// case
 
 StopOptimization;
 
-end;
+end;	//GenerateAssignment
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateReturn(IsFunction, isInt, isInl: Boolean);
@@ -12283,6 +2957,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateIfThenCondition;
 begin
 asm65;
@@ -12298,6 +2976,10 @@ a65(__jne);
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateElseCondition;
 begin
 //asm65;
@@ -12309,6 +2991,10 @@ Gen; Gen; Gen;								// mov :eax, [bx]
 a65(__je);
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 {$IFDEF WHILEDO}
@@ -12323,12 +3009,20 @@ end;
 {$ENDIF}
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateRepeatUntilCondition;
 begin
 
  GenerateIfThenCondition;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateRelationOperation(rel: Byte; ValType: Byte);
@@ -12400,15 +3094,19 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateForToDoCondition(ValType: Byte; Down: Boolean; IdentIndex: integer);
 var svar: string;
     CounterSize: Byte;
 begin
 
-svar := GetLocalName(IdentIndex);
+svar    := GetLocalName(IdentIndex);
 CounterSize := DataSize[ValType];
 
-asm65(';' + InfoAboutSize(CounterSize));
+asm65(';'+InfoAboutSize(CounterSize));
 
 Gen; Gen; Gen;						// mov :ecx, [bx]
 
@@ -12549,6 +3247,10 @@ else
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateIfThenProlog;
 begin
 Inc(CodePosStackTop);
@@ -12586,6 +3288,10 @@ end;
 asm65(#9'beq @+');
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateCaseRangeCheck(Value1, Value2: Int64; SelectorType: Byte; Join: Boolean; CaseLocalCnt: integer);
@@ -12666,12 +3372,20 @@ Gen; Gen;							// cmp :ecx, Value1
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateCaseStatementProlog;
 begin
 
 GenerateIfThenProlog;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateCaseStatementEpilog(cnt: integer);
@@ -12699,6 +3413,10 @@ CodePosStack[CodePosStackTop] := StoredCodeSize;
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateCaseEpilog(NumCaseStatements: Integer; cnt: integer);
 begin
 
@@ -12714,6 +3432,10 @@ if not OutputDisabled then Inc(CodeSize, NumCaseStatements);
 asm65('a_'+IntToHex(cnt, 4));
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateAsmLabels(l: integer);
@@ -12742,6 +3464,10 @@ if not OutputDisabled then
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateIfThenEpilog;
 var CodePos: Word;
 begin
@@ -12761,6 +3487,10 @@ procedure GenerateWhileDoProlog;
 begin
   GenerateIfThenProlog;
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateWhileDoEpilog;
@@ -12784,6 +3514,10 @@ GenerateAsmLabels(CodePos+3);
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateRepeatUntilProlog;
 begin
 
@@ -12793,6 +3527,10 @@ begin
  GenerateAsmLabels(CodeSize);
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateRepeatUntilEpilog;
@@ -12811,6 +3549,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateForToDoProlog;
 begin
 
@@ -12819,12 +3561,16 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateForToDoEpilog (ValType: Byte; Down: Boolean; IdentIndex: integer = 0; Epilog: Boolean = true; forBPL: byte = 0);
 var svar: string;
     CounterSize: Byte;
 begin
 
-svar := GetLocalName(IdentIndex);
+svar    := GetLocalName(IdentIndex);
 CounterSize := DataSize[ValType];
 
 case CounterSize of
@@ -12971,6 +3717,10 @@ end;
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 function CompilerTitle: string;
 begin
 
@@ -12979,7 +3729,15 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 {$i targets/generate_program_prolog.inc}
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateProgramEpilog(ExitCode: byte);
@@ -12990,6 +3748,10 @@ asm65(#9'lda #$'+IntToHex(ExitCode, 2));
 asm65(#9'jmp @halt');
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateDeclarationProlog;
@@ -13006,10 +3768,18 @@ asm65(#9'jmp l_'+IntToHex(CodeSize, 4));
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateDeclarationEpilog;
 begin
  GenerateIfThenEpilog;
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateRead;//(Value: Int64);
@@ -13018,7 +3788,11 @@ begin
 
  asm65(#9'@getline');
 
-end;// GenerateRead
+end;	// GenerateRead
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateWriteString(Address: Word; IndirectionLevel: byte; ValueType: byte = INTEGERTOK);
@@ -13121,7 +3895,7 @@ case IndirectionLevel of
 
   ASPOINTER:
     begin
-//    Gen; //Gen(Lo(Address)); Gen(Hi(Address));			// mov dx, Address
+//    Gen; //Gen(Lo(Address)); Gen(Hi(Address));		// mov dx, Address
 
     asm65(#9'@printSTRING #CODEORIGIN+$'+IntToHex(Address - CODEORIGIN, 4));
 
@@ -13154,7 +3928,11 @@ case IndirectionLevel of
 
 //Gen; Gen;							// int 21h
 
-end;// GenerateWriteString
+end;	//GenerateWriteString
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateUnaryOperation(op: Byte; ValType: Byte = 0);
@@ -13232,7 +4010,12 @@ case op of
     end;
 
 end;// case
+
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateBinaryOperation(op: Byte; ResultType: Byte);
@@ -13954,7 +4737,11 @@ end;// case
 
 a65(__subBX);
 
-end;
+end;	//GenerateBinaryOperation
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateRelationString(rel: Byte; LeftValType, RightValType: Byte);
@@ -13989,6 +4776,10 @@ begin
  a65(__subBX);
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateRelation(rel: Byte; ValType: Byte);
@@ -14186,7 +4977,34 @@ begin
      SINGLETOK: asm65(#9'jsr @FCMPL');
 
      REALTOK, INTEGERTOK:
-	a65(__cmpINT);
+	begin
+//	a65(__cmpINT);
+
+         asm65(#9'.LOCAL');
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+         asm65(#9'sub :STACKORIGIN+STACKWIDTH*3,x');
+         asm65(#9'bne L4');
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+         asm65(#9'cmp :STACKORIGIN+STACKWIDTH*2,x');
+         asm65(#9'bne L1');
+         asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+         asm65(#9'cmp :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'bne L1');
+         asm65(#9'lda :STACKORIGIN-1,x');
+         asm65(#9'cmp :STACKORIGIN,x');
+         asm65('L1'#9'beq L5');
+         asm65(#9'bcs L3');
+         asm65(#9'lda #$FF');
+         asm65(#9'bne L5');
+         asm65('L3'#9'lda #$01');
+         asm65(#9'bne L5');
+         asm65('L4'#9'bvc L5');
+         asm65(#9'eor #$FF');
+         asm65(#9'ora #$01');
+         asm65('L5');
+         asm65(#9'.ENDL');
+
+	end;
 
      WORDTOK, POINTERTOK, STRINGPOINTERTOK:
      	begin
@@ -14235,1472 +5053,43 @@ begin
 
  end; // if ValType = HALFSINGLETOK
 
-end;
+end;	//GenerateRelation
 
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // The following functions implement recursive descent parser in accordance with Sub-Pascal EBNF
 // Parameter i is the index of the first token of the current EBNF symbol, result is the index of the last one
 
-
-function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; VarType: Byte = INTEGERTOK; Err: Boolean = false; War: Boolean = true): Integer; forward;
 function CompileExpression(i: Integer; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer; forward;
 
 
-function LowBound(i: integer; DataType: Byte): Int64;
-begin
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
- Result := 0;
-
- case DataType of
-
-    UNTYPETOK: iError(i, CantReadWrite);
-   INTEGERTOK: Result := Low(Integer);
-  SMALLINTTOK: Result := Low(SmallInt);
-  SHORTINTTOK: Result := Low(ShortInt);
-      CHARTOK: Result := 0;
-   BOOLEANTOK: Result := ord(Low(Boolean));
-      BYTETOK: Result := Low(Byte);
-      WORDTOK: Result := Low(Word);
-  CARDINALTOK: Result := Low(Cardinal);
-    STRINGTOK: Result := 1;
-
- else
-  iError(i, TypeMismatch);
- end;// case
-
-end;
-
-
-function HighBound(i: integer; DataType: Byte): Int64;
-begin
-
- Result := 0;
-
- case DataType of
-
-    UNTYPETOK: iError(i, CantReadWrite);
-   INTEGERTOK: Result := High(Integer);
-  SMALLINTTOK: Result := High(SmallInt);
-  SHORTINTTOK: Result := High(ShortInt);
-      CHARTOK: Result := 255;
-   BOOLEANTOK: Result := ord(High(Boolean));
-      BYTETOK: Result := High(Byte);
-      WORDTOK: Result := High(Word);
-  CARDINALTOK: Result := High(Cardinal);
-    STRINGTOK: Result := 255;
-
- else
-  iError(i, TypeMismatch);
- end;// case
-
-end;
-
-
-
+{
 procedure InfoAboutArray(IdentIndex: Integer; c: Boolean = false);
 var t: string;
 begin
 
   if c then
-   t:=' Const'
+   t := ' Const'
   else
-   t:='';
+   t := '';
 
   asm65;
 
   if Ident[IdentIndex].NumAllocElements_ > 0 then
-   asm65(';'+t+' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+', 0..'+IntToStr(Ident[IdentIndex].NumAllocElements_ - 1)+']')
+   asm65(';' + t + ' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+', 0..'+IntToStr(Ident[IdentIndex].NumAllocElements_ - 1)+']')
   else
-   asm65(';'+t+' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+']');
+   asm65(';' + t + ' Array index '+Ident[IdentIndex].Name+'[0..'+IntToStr(Ident[IdentIndex].NumAllocElements - 1)+']');
 
 end;
-
-
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
-begin
-
-if Ident[IdentIndex].NumAllocElements > 0 then
- if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-  if Ident[IdentIndex].NumAllocElements <> 1 then warning(i, RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
-
-end;
-
-
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
-begin
-
-if Ident[IdentIndex].NumAllocElements_ > 0 then
- if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-  if Ident[IdentIndex].NumAllocElements_ <> 1 then warning(i, RangeCheckError_, IdentIndex, ArrayIndex, ArrayIndexType);
-
-end;
-
-
-function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer; forward;
-
-
-function CardToHalf(Src: uint32): word;
-var
-  Sign, Exp, Mantissa: LongInt;
-  s: single;
-
-
-function f32Tof16(fltInt32: uint32): word;
-//https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
-var
-//	fltInt32: uint32;
-	fltInt16, tmp: uint16;
-
-begin
-//	fltInt32 := PLongWord(@Float)^;
-	fltInt16 := (fltInt32 shr 31) shl 5;
-	tmp := (fltInt32 shr 23) and $ff;
-	tmp := (tmp - $70) and (LongWord(SarLongint(($70 - tmp), 4)) shr 27);
-	fltInt16 := (fltInt16 or tmp) shl 10;
-	result := fltInt16 or ((fltInt32 shr 13) and $3ff) + 1;
-end;
-
-
-begin
-
-  s := PSingle(@Src)^;
-
-  if (frac(s) <> 0) and (abs(s) >= 0.000060975552) then
-
-   Result := f32Tof16(Src)
-
-  else begin
-
-  // Extract sign, exponent, and mantissa from Single number
-  Sign := Src shr 31;
-  Exp := LongInt((Src and $7F800000) shr 23) - 127 + 15;
-  Mantissa := Src and $007FFFFF;
-
-  if (Exp > 0) and (Exp < 30) then
-  begin
-    // Simple case - round the significand and combine it with the sign and exponent
-    Result := (Sign shl 15) or (Exp shl 10) or ((Mantissa + $00001000) shr 13);
-  end
-  else if Src = 0 then
-  begin
-    // Input float is zero - return zero
-    Result := 0;
-  end
-  else
-  begin
-    // Difficult case - lengthy conversion
-    if Exp <= 0 then
-    begin
-      if Exp < -10 then
-      begin
-        // Input float's value is less than HalfMin, return zero
-         Result := 0;
-      end
-      else
-      begin
-        // Float is a normalized Single whose magnitude is less than HalfNormMin.
-        // We convert it to denormalized half.
-        Mantissa := (Mantissa or $00800000) shr (1 - Exp);
-        // Round to nearest
-        if (Mantissa and $00001000) > 0 then
-          Mantissa := Mantissa + $00002000;
-        // Assemble Sign and Mantissa (Exp is zero to get denormalized number)
-        Result := (Sign shl 15) or (Mantissa shr 13);
-      end;
-    end
-    else if Exp = 255 - 127 + 15 then
-    begin
-      if Mantissa = 0 then
-      begin
-        // Input float is infinity, create infinity half with original sign
-        Result := (Sign shl 15) or $7C00;
-      end
-      else
-      begin
-        // Input float is NaN, create half NaN with original sign and mantissa
-        Result := (Sign shl 15) or $7C00 or (Mantissa shr 13);
-      end;
-    end
-    else
-    begin
-      // Exp is > 0 so input float is normalized Single
-
-      // Round to nearest
-      if (Mantissa and $00001000) > 0 then
-      begin
-        Mantissa := Mantissa + $00002000;
-        if (Mantissa and $00800000) > 0 then
-        begin
-          Mantissa := 0;
-          Exp := Exp + 1;
-        end;
-      end;
-
-      if Exp > 30 then
-      begin
-        // Exponent overflow - return infinity half
-        Result := (Sign shl 15) or $7C00;
-      end
-      else
-        // Assemble normalized half
-        Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
-    end;
-  end;
-
-  end;
-
-end;
-
-
-procedure Int2Float(var ConstVal: Int64);
-var ftmp: TFloat;
-    fl: single;
-begin
-
-   fl := integer(ConstVal);
-
-   ftmp[0] := round(fl * TWOPOWERFRACBITS);
-   ftmp[1] := integer(fl);
-
-   move(ftmp, ConstVal, sizeof(ftmp));
-
-end;
-
-
-procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValType: Byte);
-var ftmp: TFloat;
-begin
-
-ftmp[0]:=0;
-ftmp[1]:=0;
-
-	 case ConstValType of
-
-	  SHORTINTTOK, BYTETOK, CHARTOK, BOOLEANTOK:
-		       DataSegment[ConstDataSize] := byte(ConstVal);
-
-	  SMALLINTTOK, WORDTOK, SHORTREALTOK, POINTERTOK, STRINGPOINTERTOK:
-		       begin
-			DataSegment[ConstDataSize]   := byte(ConstVal);
-			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
-		       end;
-
-	   DATAORIGINOFFSET:
-		       begin
-			DataSegment[ConstDataSize]   := byte(ConstVal) or $8000;
-			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8) or $4000;
-		       end;
-
-	   CODEORIGINOFFSET:
-		       begin
-			DataSegment[ConstDataSize]   := byte(ConstVal) or $2000;
-			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8) or $1000;
-		       end;
-
-	   INTEGERTOK, CARDINALTOK, REALTOK:
-		       begin
-			DataSegment[ConstDataSize]   := byte(ConstVal);
-			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
-			DataSegment[ConstDataSize+2] := byte(ConstVal shr 16);
-			DataSegment[ConstDataSize+3] := byte(ConstVal shr 24);
-		       end;
-
-	    SINGLETOK: begin
-			move(ConstVal, ftmp, sizeof(ftmp));
-
-			ConstVal := ftmp[1];
-
-			DataSegment[ConstDataSize]   := byte(ConstVal);
-			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
-			DataSegment[ConstDataSize+2] := byte(ConstVal shr 16);
-			DataSegment[ConstDataSize+3] := byte(ConstVal shr 24);
-		       end;
-
-	HALFSINGLETOK: begin
-			move(ConstVal, ftmp, sizeof(ftmp));
-			ConstVal := CardToHalf( ftmp[1] );
-
-			DataSegment[ConstDataSize]   := byte(ConstVal);
-			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
-		       end;
-
-	 end;
-
- DataSegmentUse := true;
-
-end;
-
-
-function GetSizeof(i: integer; ValType: byte): Int64;
-var IdentIndex: integer;
-begin
-
-     IdentIndex := GetIdent(Tok[i + 2].Name^);
-
-     case ValType of
-
-	ENUMTYPE: Result := DataSize[Ident[IdentIndex].AllocElementType];
-
-	RECORDTOK: if (Ident[IdentIndex].DataType = POINTERTOK) and (Tok[i + 3].Kind = CPARTOK) then
-	             Result := DataSize[POINTERTOK]
-		   else
-		     Result := RecordSize(IdentIndex);
-
-      POINTERTOK, STRINGPOINTERTOK:
-		  begin
-
-		    if Ident[IdentIndex].AllocElementType = RECORDTOK then begin
-
-		     if Ident[IdentIndex].NumAllocElements_ > 0 then begin
-
-		       if Tok[i + 3].Kind = OBRACKETTOK then
-			Result := DataSize[POINTERTOK]
-		       else
-			Result := Ident[IdentIndex].NumAllocElements * 2
-
-		     end else
-		      if Ident[IdentIndex].PassMethod = VARPASSING then
-		       Result := RecordSize(IdentIndex)
-		      else
-		       Result := DataSize[POINTERTOK];
-
-		    end else
-		     if Elements(IdentIndex) > 0 then
-		       Result := integer(Elements(IdentIndex) * DataSize[Ident[IdentIndex].AllocElementType])
-		     else
-		       Result := DataSize[POINTERTOK];
-
-		  end;
-
-      else
-
-	if ValType = UNTYPETOK then
-	 Result := 0
-	else
-	 Result := DataSize[ValType]
-
-     end;
-
-end;
-
-
-function CompileConstFactor(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
-var IdentIndex, j: Integer;
-    Kind, ArrayIndexType: Byte;
-    ArrayIndex: Int64;
-    ftmp: TFloat;
-    fl: single;
-
-    function GetStaticValue(x: byte): Int64;
-    begin
-
-      Result := StaticStringData[Ident[IdentIndex].Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex * DataSize[ConstValType] + x];
-
-    end;
-
-begin
-
- Result := i;
-
- ConstVal:=0;
- ConstValType:=0;
-
- ftmp[0]:=0;
- ftmp[1]:=0;
-
- fl:=0;
-
-// WRITELN(tok[i].line, ',', tok[i].kind);
-
-case Tok[i].Kind of
-
- LOWTOK:
-    begin
-     CheckTok(i + 1, OPARTOK);
-
-     if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
-
-      ConstValType := Tok[i + 2].Kind;
-
-      inc(i, 2);
-
-     end else begin
-
-      i:=CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if isError then Exit;
-
-     end;
-
-
-     if ConstValType in Pointers then
-      ConstVal := 0
-     else
-      ConstVal := LowBound(i, ConstValType);
-
-     ConstValType := GetValueType(ConstVal);
-
-     CheckTok(i + 1, CPARTOK);
-
-     Result:=i + 1;
-    end;
-
-
- HIGHTOK:
-    begin
-     CheckTok(i + 1, OPARTOK);
-
-     if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
-
-      ConstValType := Tok[i + 2].Kind;
-
-      inc(i, 2);
-
-     end else begin
-
-      i:=CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if isError then Exit;
-
-     end;
-
-     if ConstValType in Pointers then begin
-      IdentIndex := GetIdent(Tok[i].Name^);
-
-      if Ident[IdentIndex].NumAllocElements > 0 then
-       ConstVal := Ident[IdentIndex].NumAllocElements - 1
-      else
-       ConstVal := 0;
-
-     end else
-      ConstVal := HighBound(i, ConstValType);
-
-     ConstValType := GetValueType(ConstVal);
-
-     CheckTok(i + 1, CPARTOK);
-
-     Result:=i + 1;
-    end;
-
-
- LENGTHTOK:
-    begin
-     CheckTok(i + 1, OPARTOK);
-
-      ConstVal:=0;
-
-      if Tok[i + 2].Kind = IDENTTOK then begin
-
-	IdentIndex := GetIdent(Tok[i + 2].Name^);
-
-	if IdentIndex = 0 then
-	 iError(i + 2, UnknownIdentifier);
-
-	if Ident[IdentIndex].Kind in [VARIABLE, CONSTANT] then begin
-
-	  if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0)) then begin
-
-	   if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) or (Ident[IdentIndex].AllocElementType = CHARTOK) then begin
-
-	   isError := true;
-	   exit;
-
-	   end else begin
-	    ConstVal:=Ident[IdentIndex].NumAllocElements;
-
-	    ConstValType := GetValueType(ConstVal);
-	   end;
-
-	  end else
-	   iError(i+2, TypeMismatch);
-
-	end else
-	 iError(i + 2, IdentifierExpected);
-
-	inc(i, 2);
-      end else
-       iError(i + 2, IdentifierExpected);
-
-     CheckTok(i + 1, CPARTOK);
-
-     Result:=i + 1;
-    end;
-
-
- SIZEOFTOK:
-    begin
-     CheckTok(i + 1, OPARTOK);
-
-     if Tok[i + 2].Kind in OrdinalTypes + RealTypes + [POINTERTOK] then begin
-
-      ConstVal := DataSize[Tok[i + 2].Kind];
-      ConstValType := BYTETOK;
-
-      j:=i + 2;
-
-     end else begin
-
-      if Tok[i + 2].Kind <> IDENTTOK then
-        iError(i + 2, IdentifierExpected);
-
-      j:=CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if isError then Exit;
-
-      ConstVal := GetSizeof(i, ConstValType);
-
-      ConstValType := GetValueType(ConstVal);
-
-     end;
-
-     CheckTok(j + 1, CPARTOK);
-
-     Result:=j + 1;
-    end;
-
-
-  LOTOK:
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    OldConstValType:=0;
-
-    i := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then Exit;
-
-    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
-
-    GetCommonConstType(i, INTEGERTOK, ConstValType);
-
-    CheckTok(i + 1, CPARTOK);
-
-    case ConstValType of
-      INTEGERTOK, CARDINALTOK: ConstVal := ConstVal and $0000FFFF;
-	 SMALLINTTOK, WORDTOK: ConstVal := ConstVal and $00FF;
-	 SHORTINTTOK, BYTETOK: ConstVal := ConstVal and $0F;
-    end;
-
-    ConstValType := GetValueType(ConstVal);
-
-    Result:=i + 1;
-    end;
-
-
-  HITOK:
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    OldConstValType:=0;
-
-    i := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then Exit;
-
-    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
-
-    GetCommonConstType(i, INTEGERTOK, ConstValType);
-
-    CheckTok(i + 1, CPARTOK);
-
-    case ConstValType of
-      INTEGERTOK, CARDINALTOK: ConstVal := ConstVal shr 16;
-	 SMALLINTTOK, WORDTOK: ConstVal := ConstVal shr 8;
-	 SHORTINTTOK, BYTETOK: ConstVal := ConstVal shr 4;
-    end;
-
-    ConstValType := GetValueType(ConstVal);
-    Result:=i + 1;
-    end;
-
-
-  INTTOK, FRACTOK:
-    begin
-
-      Kind := Tok[i].Kind;
-
-      CheckTok(i + 1, OPARTOK);
-
-      i := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if isError then Exit;
-
-      if not (ConstValType in RealTypes) then
-	iError(i, IncompatibleTypes, 0, ConstValType, REALTOK);
-
-      CheckTok(i + 1, CPARTOK);
-
-      if ConstValType in [HALFSINGLETOK, SINGLETOK] then begin
-
-    	move(ConstVal, ftmp, sizeof(ftmp));
-	move(ftmp[1], fl, sizeof(fl));
-
-	case Kind of
-	  INTTOK: fl:=int(fl);
-	 FRACTOK: fl:=frac(fl);
-	end;
-
-	ftmp[0] := round(fl * TWOPOWERFRACBITS);
-	ftmp[1] := integer(fl);
-
-	move(ftmp, ConstVal, sizeof(ftmp));
-
-      end else
-
-      case Kind of
-	INTTOK: if ConstVal < 0 then
-		  ConstVal := -(abs(ConstVal) and $ffffffffffffff00)
-		else
-		  ConstVal := ConstVal and $ffffffffffffff00;
-
-       FRACTOK: if ConstVal < 0 then
-		  ConstVal := -(abs(ConstVal) and $ff)
-		else
-		  ConstVal := ConstVal and $ff;
-      end;
-
- //     ConstValType := REALTOK;
-      Result:=i + 1;
-    end;
-
-
-  ROUNDTOK, TRUNCTOK:
-    begin
-
-      Kind := Tok[i].Kind;
-
-      CheckTok(i + 1, OPARTOK);
-
-      i := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if isError then Exit;
-
-      GetCommonConstType(i, REALTOK, ConstValType);
-
-      CheckTok(i + 1, CPARTOK);
-
-      ConstVal := integer(ConstVal);
-
-      case Kind of
-	ROUNDTOK: if ConstVal < 0 then
-		   ConstVal := -( abs(ConstVal) shr 8 + ord( abs(ConstVal) and $ff > 127) )
-		  else
-		   ConstVal := ConstVal shr 8 + ord( abs(ConstVal) and $ff > 127);
-
-	TRUNCTOK: if ConstVal < 0 then
-		   ConstVal := -( abs(ConstVal) shr 8)
-		  else
-		   ConstVal := ConstVal shr 8;
-      end;
-
-      ConstValType := GetValueType(ConstVal);
-
-      Result:=i + 1;
-    end;
-
-
-  ODDTOK:
-    begin
-
-//      Kind := Tok[i].Kind;
-
-      CheckTok(i + 1, OPARTOK);
-
-      i := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if isError then Exit;
-
-      GetCommonConstType(i, CARDINALTOK, ConstValType);
-
-      CheckTok(i + 1, CPARTOK);
-
-      ConstVal := ord(odd(ConstVal));
-
-      ConstValType := BOOLEANTOK;
-
-      Result:=i + 1;
-    end;
-
-
-  CHRTOK:
-    begin
-
-      CheckTok(i + 1, OPARTOK);
-
-      i := CompileConstExpression(i + 2, ConstVal, ConstValType, BYTETOK);
-
-      if isError then Exit;
-
-      GetCommonConstType(i, INTEGERTOK, ConstValType);
-
-      CheckTok(i + 1, CPARTOK);
-
-      ConstValType := CHARTOK;
-      Result:=i + 1;
-    end;
-
-
-  ORDTOK:
-    begin
-      CheckTok(i + 1, OPARTOK);
-
-      j := i + 2;
-
-      i := CompileConstExpression(i + 2, ConstVal, ConstValType, BYTETOK);
-
-      if not(ConstValType in OrdinalTypes + [ENUMTYPE]) then
-	iError(i, OrdinalExpExpected);
-
-      if isError then Exit;
-
-      CheckTok(i + 1, CPARTOK);
-
-      if ConstValType in [CHARTOK, BOOLEANTOK, ENUMTOK] then
-       ConstValType := BYTETOK;
-
-      Result:=i + 1;
-    end;
-
-
-  PREDTOK, SUCCTOK:
-    begin
-      Kind := Tok[i].Kind;
-
-      CheckTok(i + 1, OPARTOK);
-
-      i := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-      if not(ConstValType in OrdinalTypes) then
-	iError(i, OrdinalExpExpected);
-
-      if isError then Exit;
-
-      CheckTok(i + 1, CPARTOK);
-
-      if Kind = PREDTOK then
-       dec(ConstVal)
-      else
-       inc(ConstVal);
-
-      if not (ConstValType in [CHARTOK, BOOLEANTOK]) then
-       ConstValType := GetValueType(ConstVal);
-
-      Result:=i + 1;
-    end;
-
-
-  IDENTTOK:
-    begin
-    IdentIndex := GetIdent(Tok[i].Name^);
-
-    if IdentIndex > 0 then
-
-	  if (Ident[IdentIndex].Kind = USERTYPE) and (Tok[i + 1].Kind = OPARTOK) then begin
-
-		CheckTok(i + 1, OPARTOK);
-
-		j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-		if isError then Exit;
-
-		if not(ConstValType in AllTypes) then
-		  iError(i, TypeMismatch);
-
-
-		if (Ident[GetIdent(Tok[i].Name^)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
-		// ok
-		end else
-		if Ident[GetIdent(Tok[i].Name^)].DataType in Pointers then
-		  Error(j, 'Illegal type conversion: "'+InfoAboutToken(ConstValType)+'" to "'+Tok[i].Name^+'"');
-
-		ConstValType := Ident[GetIdent(Tok[i].Name^)].DataType;
-
-		CheckTok(j + 1, CPARTOK);
-
-		i := j + 1;
-
-	  end else
-
-      if not (Ident[IdentIndex].Kind in [CONSTANT, USERTYPE, ENUMTYPE]) then
-	Error(i, 'Constant expected but ' + Ident[IdentIndex].Name + ' found')
-      else
-	if Tok[i + 1].Kind = OBRACKETTOK then					// Array element access
-	  if  not (Ident[IdentIndex].DataType in Pointers) then
-	    iError(i, IncompatibleTypeOf, IdentIndex)
-	  else
-	    begin
-
-	    j := CompileConstExpression(i + 2, ArrayIndex, ArrayIndexType);	// Array index
-
-	    if isError then Exit;
-
-	    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then begin
-	     isConst := false;
-	     iError(i, SubrangeBounds);
-	    end;
-
-	    CheckTok(j + 1, CBRACKETTOK);
-
-	    if Tok[j + 2].Kind = OBRACKETTOK then begin isError:=true; exit end;
-
-	    InfoAboutArray(IdentIndex, true);
-
-	    ConstValType := Ident[IdentIndex].AllocElementType;
-
-	    case DataSize[ConstValType] of
-	     1: ConstVal := GetStaticValue(0 + ord(Ident[IdentIndex].idType = PCHARTOK));
-	     2: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8;
-	     4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl 16 + GetStaticValue(3) shl 24;
-	    end;
-
-	    if ConstValType in [HALFSINGLETOK, SINGLETOK] then ConstVal := ConstVal shl 32;
-
-	    i := j + 1;
-	    end else
-
-	begin
-
-	ConstValType := Ident[IdentIndex].DataType;
-
-	if (ConstValType in Pointers) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then
-	 ConstVal := Ident[IdentIndex].Value - CODEORIGIN
-	else
-	 ConstVal := Ident[IdentIndex].Value;
-
-
-	if ConstValType = ENUMTYPE then begin
-	  CheckTok(i + 1, OPARTOK);
-
-	  j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-	  if isError then exit;
-
-	  CheckTok(j + 1, CPARTOK);
-
-	  ConstValType := Tok[i].Kind;
-
-	  i := j + 1;
-	end;
-
-	end
-    else
-      iError(i, UnknownIdentifier);
-
-    Result := i;
-    end;
-
-
-  ADDRESSTOK:
-    if Tok[i + 1].Kind <> IDENTTOK then
-      iError(i + 1, IdentifierExpected)
-    else begin
-      IdentIndex := GetIdent(Tok[i + 1].Name^);
-
-      if IdentIndex > 0 then begin
-
-	case Ident[IdentIndex].Kind of
-	  CONSTANT: if not( (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) ) then
-	   	      iError(i + 1, CantAdrConstantExp)
-		    else
-		      ConstVal := Ident[IdentIndex].Value - CODEORIGIN;
-
-	  VARIABLE: if Ident[IdentIndex].isAbsolute then 				// wyjatek gdy ABSOLUTE
-
-	   	      ConstVal := Ident[IdentIndex].Value
-
-		    else begin
-
-		     if isConst then begin isError:=true; exit end;			// !!! koniecznie zamiast Error !!!
-
-			ConstVal := Ident[IdentIndex].Value - DATAORIGIN;
-
-			ConstValType := DATAORIGINOFFSET;
-
-//        writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',ConstVal);
-
-	if (Ident[IdentIndex].DataType in Pointers) and					// zadziala tylko dla ABSOLUTE
-	   (Ident[IdentIndex].NumAllocElements > 0) and
-	   (Tok[i + 2].Kind = OBRACKETTOK)  then
-	   begin
-		j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);			// Array index [xx,
-
-		if isError then Exit;
-
-		CheckArrayIndex(j, IdentIndex, ArrayIndex, ArrayIndexType);
-
-		if Tok[j + 1].Kind = COMMATOK then begin
-    		 inc(ConstVal, ArrayIndex * DataSize[Ident[IdentIndex].AllocElementType] * Ident[IdentIndex].NumAllocElements_);
-
-		 j := CompileConstExpression(j + 2, ArrayIndex, ArrayIndexType);		// Array index ,yy]
-
-		 if isError then Exit;
-
-		 CheckArrayIndex(j, IdentIndex, ArrayIndex, ArrayIndexType);
-
-    		 inc(ConstVal, ArrayIndex * DataSize[Ident[IdentIndex].AllocElementType]);
-		end else
-		 inc(ConstVal, ArrayIndex * DataSize[Ident[IdentIndex].AllocElementType]);
-
-		i := j;
-
-		CheckTok(i + 1, CBRACKETTOK);
-	   end;
-			Result := i + 1;
-
-			exit;
-
-		    end;
-	else
-
-	  Error(i + 1, 'Can''t take the address of ' + InfoAboutToken(Ident[IdentIndex].Kind) );
-
-	end;
-
-	if (Ident[IdentIndex].DataType in Pointers) and					// zadziala tylko dla ABSOLUTE
-	   (Ident[IdentIndex].NumAllocElements > 0) and
-	   (Tok[i + 2].Kind = OBRACKETTOK)  then
-	   begin
-		j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);			// Array index [xx,
-
-		if isError then Exit;
-
-		CheckArrayIndex(j, IdentIndex, ArrayIndex, ArrayIndexType);
-
-		if Tok[j + 1].Kind = COMMATOK then begin
-    		 inc(ConstVal, ArrayIndex * DataSize[Ident[IdentIndex].AllocElementType] * Ident[IdentIndex].NumAllocElements_);
-
-		 j := CompileConstExpression(j + 2, ArrayIndex, ArrayIndexType);		// Array index ,yy]
-
-		 if isError then Exit;
-
-		 CheckArrayIndex(j, IdentIndex, ArrayIndex, ArrayIndexType);
-
-    		 inc(ConstVal, ArrayIndex * DataSize[Ident[IdentIndex].AllocElementType]);
-		end else
-		 inc(ConstVal, ArrayIndex * DataSize[Ident[IdentIndex].AllocElementType]);
-
-		i := j;
-
-		CheckTok(i + 1, CBRACKETTOK);
-	   end;
-
-	ConstValType := POINTERTOK;
-
-       end else
-	iError(i + 1, UnknownIdentifier);
-
-    Result := i + 1;
-    end;
-
-
-  INTNUMBERTOK:
-    begin
-    ConstVal := Tok[i].Value;
-    ConstValType := GetValueType(ConstVal);
-    Result := i;
-    end;
-
-
-  FRACNUMBERTOK:
-    begin
-    ftmp[0] := round( Tok[i].FracValue * TWOPOWERFRACBITS );
-    ftmp[1] := integer( Tok[i].FracValue );
-
-    move(ftmp, ConstVal, sizeof(ftmp));
-
-    ConstValType := REALTOK;
-    Result := i;
-    end;
-
-
-  STRINGLITERALTOK:
-    begin
-    ConstVal := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
-
-{    if Tok[i].StrLength > 255 then begin
-     ConstValType := POINTERTOK;
-     inc(ConstVal);
-    end else}
-     ConstValType := STRINGPOINTERTOK;
-
-    Result := i;
-    end;
-
-
-  CHARLITERALTOK:
-    begin
-    ConstVal := Tok[i].Value;
-    ConstValType := CHARTOK;
-    Result := i;
-    end;
-
-
-  OPARTOK:       // a whole expression in parentheses suspected
-    begin
-    j := CompileConstExpression(i + 1, ConstVal, ConstValType);
-
-    if isError then Exit;
-
-    CheckTok(j + 1, CPARTOK);
-
-    Result := j + 1;
-    end;
-
-
-  NOTTOK:
-    begin
-    Result := CompileConstFactor(i + 1, ConstVal, ConstValType);
-
-    if isError then Exit;
-
-    if ConstValType = BOOLEANTOK then
-     ConstVal := ord(not (ConstVal <> 0) )
-
-    else begin
-     ConstVal := not ConstVal;
-     ConstValType := GetValueType(ConstVal);
-    end;
-
-    end;
-
-{
-  SHORTREALTOK:					// SHORTREAL	fixed-point	Q8.8
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then exit;
-
-    if ConstValType = SINGLETOK then begin
-     isError := false;
-     isConst := false;
-
-     iError(i, IncompatibleTypes, 0, ConstValType, SHORTREALTOK);
-
-    end else
-    if not(ConstValType in RealTypes) then
-      ConstVal := ConstVal * TWOPOWERFRACBITS;
-
-    CheckTok(j + 1, CPARTOK);
-
-    ConstValType := SHORTREALTOK;
-
-    Result := j + 1;
-    end;
-
-
-  REALTOK:					// REAL		fixed-point	Q24.8
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then exit;
-
-    if ConstValType = SINGLETOK then begin
-     isError := false;
-     isConst := false;
-
-     iError(i, IncompatibleTypes, 0, ConstValType, REALTOK);
-
-    end else
-    if not(ConstValType in RealTypes) then
-      ConstVal := ConstVal * TWOPOWERFRACBITS;
-
-    CheckTok(j + 1, CPARTOK);
-
-    ConstValType := REALTOK;
-
-    Result := j + 1;
-    end;
 }
 
-  SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK:			// Q8.8 ; Q16.16 ; SINGLE 32bit ; FLOAT16
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then exit;
-
-    if not(ConstValType in RealTypes) then Int2Float(ConstVal);
-
-    CheckTok(j + 1, CPARTOK);
-
-    ConstValType := Tok[i].Kind;
-
-    Result := j + 1;
-
-    end;
-
-
-  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK,  PCHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:	// type conversion operations
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then exit;
-
-
-    if (ConstValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind <> OBRACKETTOK) then begin
-
-      IdentIndex := GetIdent(Tok[i + 2].Name^);
-
-      if (Ident[IdentIndex].DataType in Pointers) and ( (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) ) then
-       if ((Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0,1])) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then begin
-
-       end else
-	iError(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
-
-    end;
-
-
-    CheckTok(j + 1, CPARTOK);
-
-    if ConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then OldConstValType := ConstValType;
-
-    ConstValType := Tok[i].Kind;
-
-    Result := j + 1;
-    end;
-
-
-else
-  iError(i, IdNumExpExpected);
-
-end;// case
-
-
-end;// CompileConstFactor
-
-
-function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
-var
-  j, k: Integer;
-  RightConstVal: Int64;
-  RightConstValType: Byte;
-  ftmp, ftmp_: TFloat;
-  fl, fl_: single;
-begin
-
-Result:=i;
-
-j := CompileConstFactor(i, ConstVal, ConstValType);
-
-if isError then Exit;
-
-ftmp[0]:=0;
-ftmp[1]:=0;
-
-ftmp_[0]:=0;
-ftmp_[1]:=0;
-
-fl:=0;
-fl_:=0;
-
-while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTOK] do
-  begin
-
-  k := CompileConstFactor(j + 2, RightConstVal, RightConstValType);
-
-  if isError then Break;
-
-
-  if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then begin
-   Int2Float(RightConstVal);
-   RightConstValType := ConstValType;
-  end;
-
-  if (ConstValType in IntegerTypes) and (RightConstValType in RealTypes) then begin
-   Int2Float(ConstVal);
-   ConstValType := RightConstValType;
-  end;
-
-
-  if (Tok[j + 1].Kind = DIVTOK) and (ConstValType in IntegerTypes) then begin
-   Int2Float(ConstVal);
-   ConstValType := REALTOK;
-  end;
-
-  if (Tok[j + 1].Kind = DIVTOK) and (RightConstValType in IntegerTypes) then begin
-   Int2Float(RightConstVal);
-   RightConstValType := REALTOK;
-  end;
-
-
-  if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (RightConstValType in [SHORTREALTOK, REALTOK]) then
-   RightConstValType := ConstValType;
-
-  if (RightConstValType in [SINGLETOK, HALFSINGLETOK]) and (ConstValType in [SHORTREALTOK, REALTOK]) then
-   ConstValType := RightConstValType;
-
-
-  case Tok[j + 1].Kind of
-
-    MULTOK:  if ConstValType in RealTypes then begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		fl := fl * fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-    	      end else
-    		ConstVal := ConstVal * RightConstVal;
-
-    DIVTOK:  begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		if fl_ = 0 then begin
-		  isError := false;
-		  isConst := false;
-		  Error(i, 'Division by zero');
-		end;
-
-		fl := fl / fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-    	     end;
-
-    MODTOK:  ConstVal := ConstVal mod RightConstVal;
-   IDIVTOK:  ConstVal := ConstVal div RightConstVal;
-    SHLTOK:  ConstVal := ConstVal shl RightConstVal;
-    SHRTOK:  ConstVal := ConstVal shr RightConstVal;
-    ANDTOK:  ConstVal := ConstVal and RightConstVal;
-  end;
-
-  ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
-
-  if not(ConstValType in RealTypes + [BOOLEANTOK]) then
-   ConstValType := GetValueType(ConstVal);
-
-  CheckOperator(i, Tok[j + 1].Kind, ConstValType, RightConstValType);
-
-  j := k;
-  end;
-
- Result := j;
-end;// CompileConstTerm
-
-
-function CompileSimpleConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
-var
-  j, k: Integer;
-  RightConstVal: Int64;
-  RightConstValType: Byte;
-  ftmp, ftmp_: TFloat;
-  fl, fl_: single;
-
-begin
-
-Result:=i;
-
-if Tok[i].Kind in [PLUSTOK, MINUSTOK] then j := i + 1 else j := i;
-j := CompileConstTerm(j, ConstVal, ConstValType);
-
-if isError then exit;
-
-ftmp[0]:=0;
-ftmp[1]:=0;
-
-ftmp_[0]:=0;
-ftmp_[1]:=0;
-
-fl:=0;
-fl_:=0;
-
-if Tok[i].Kind = MINUSTOK then begin
-
- if ConstValType in RealTypes then begin	// Unary minus (RealTypes)
-
-  move(ConstVal, ftmp, sizeof(ftmp));
-  move(ftmp[1], fl, sizeof(fl));
-
-  fl := -fl;
-
-  ftmp[0] := round(fl * TWOPOWERFRACBITS);
-  ftmp[1] := integer(fl);
-
-  move(ftmp, ConstVal, sizeof(ftmp));
-
- end else begin
-  ConstVal := -ConstVal;     			// Unary minus (IntegerTypes)
-
-  if ConstValType in IntegerTypes then
-    ConstValType := GetValueType(ConstVal);
-
- end;
-
-end;
-
-
- while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do begin
-
-  k := CompileConstTerm(j + 2, RightConstVal, RightConstValType);
-
-  if isError then Break;
-
-
-//  if (ConstValType = POINTERTOK) and (RightConstValType in IntegerTypes) then RightConstValType := ConstValType;
-
-
-  if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then begin
-   Int2Float(RightConstVal);
-   RightConstValType := ConstValType;
-  end;
-
-  if (ConstValType in IntegerTypes) and (RightConstValType in RealTypes) then begin
-   Int2Float(ConstVal);
-   ConstValType := RightConstValType;
-  end;
-
-  if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (RightConstValType in [SHORTREALTOK, REALTOK]) then
-   RightConstValType := ConstValType;
-
-  if (RightConstValType in [SINGLETOK, HALFSINGLETOK]) and (ConstValType in [SHORTREALTOK, REALTOK]) then
-   ConstValType := RightConstValType;
-
-
-  case Tok[j + 1].Kind of
-    PLUSTOK:  if ConstValType in RealTypes then begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		fl := fl + fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-    	      end else
-    		ConstVal := ConstVal + RightConstVal;
-
-    MINUSTOK: if ConstValType in RealTypes then begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		fl := fl - fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-
-    	      end else
-    		ConstVal := ConstVal - RightConstVal;
-
-    ORTOK:    ConstVal := ConstVal or RightConstVal;
-    XORTOK:   ConstVal := ConstVal xor RightConstVal;
-  end;
-
-  ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
-
-  if not(ConstValType in RealTypes + [BOOLEANTOK]) then
-   ConstValType := GetValueType(ConstVal);
-
-  CheckOperator(i, Tok[j + 1].Kind, ConstValType, RightConstValType);
-
-  j := k;
- end;
-
-Result := j;
-end;// CompileSimpleConstExpression
-
-
-
-function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; VarType: Byte = INTEGERTOK; Err: Boolean = false; War: Boolean = True): Integer;
-var
-  j: Integer;
-  RightConstVal: Int64;
-  RightConstValType: Byte;
-  Yes: Boolean;
-begin
-
-Result:=i;
-
-i := CompileSimpleConstExpression(i, ConstVal, ConstValType);
-
-if isError then exit;
-
-if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
-  begin
-
-  j := CompileSimpleConstExpression(i + 2, RightConstVal, RightConstValType);
-//  CheckOperator(i, Tok[j + 1].Kind, ConstValType);
-
-  case Tok[i + 1].Kind of
-    EQTOK: Yes := ConstVal =  RightConstVal;
-    NETOK: Yes := ConstVal <> RightConstVal;
-    LTTOK: Yes := ConstVal <  RightConstVal;
-    LETOK: Yes := ConstVal <= RightConstVal;
-    GTTOK: Yes := ConstVal >  RightConstVal;
-    GETOK: Yes := ConstVal >= RightConstVal;
-  else
-   yes := false;
-  end;
-
-  if Yes then ConstVal := $ff else ConstVal := 0;
-//  ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
-
-  ConstValType := BOOLEANTOK;
-
-  i := j;
-  end;
-
-
- Result := i;
-
- if ConstValType in OrdinalTypes + Pointers then
- if VarType in OrdinalTypes + Pointers then begin
-
-  case VarType of
-   SHORTINTTOK: Yes := (ConstVal < Low(shortint)) or (ConstVal > High(shortint));
-   SMALLINTTOK: Yes := (ConstVal < Low(smallint)) or (ConstVal > High(smallint));
-    INTEGERTOK: Yes := (ConstVal < Low(integer)) or (ConstVal > High(integer));
-  else
-   Yes := (abs(ConstVal) > $FFFFFFFF) or (DataSize[ConstValType] > DataSize[VarType]) or ((ConstValType in SignedOrdinalTypes) and (VarType in UnsignedOrdinalTypes));
-  end;
-
- if Yes then
-  if Err then begin
-   isConst := false;
-   isError := false;
-   iError(i, RangeCheckError, 0, ConstVal, VarType);
-  end else
-   if War then
-   if VarType <> BOOLEANTOK then
-    warning(i, RangeCheckError, 0, ConstVal, VarType);
-
- end;
-
-end;// CompileConstExpression
-
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function SafeCompileConstExpression(var i: Integer; out ConstVal: Int64; out ValType: Byte; VarType: Byte; Err: Boolean = false; War: Boolean = true): Boolean;
@@ -15724,6 +5113,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 function CompileArrayIndex(i: integer; IdentIndex: integer): integer;
 var ConstVal: Int64;
     ActualParamType, ArrayIndexType, Size: Byte;
@@ -15731,9 +5124,9 @@ var ConstVal: Int64;
     j: integer;
     yes, ShortArrayIndex: Boolean;
 begin
-	if optimize.use = false then StartOptimization(i);
+	if common.optimize.use = false then StartOptimization(i);
 
-	InfoAboutArray(IdentIndex);
+//	InfoAboutArray(IdentIndex);
 
 	Size := DataSize[Ident[IdentIndex].AllocElementType];
 
@@ -15884,7 +5277,12 @@ begin
 // writeln(Ident[IdentIndex].Name,',',Elements(IdentIndex));
 
  Result := i;
-end;
+
+end;	//CompileArrayIndex
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileAddress(i: integer; out ValType, AllocElementType: Byte; VarPass: Boolean = false): integer;
@@ -15939,7 +5337,7 @@ begin
       if IdentIndex > 0 then
 	begin
 
-	if not(Ident[IdentIndex].Kind in [CONSTANT, VARIABLE, PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK, ADDRESSTOK]) then
+	if not(Ident[IdentIndex].Kind in [CONSTANT, VARIABLE, PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK, ADDRESSTOK]) then
 	 iError(i + 1, VariableExpected)
 	else begin
 
@@ -15950,7 +5348,7 @@ begin
 //	  asm65;
 //	  asm65('; address');
 
-	  if Ident[IdentIndex].Kind in [PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK] then begin
+	  if Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then begin
 
 	    Name := GetLocalName(IdentIndex);
 
@@ -16120,14 +5518,15 @@ begin
 		   if address or VarPass then begin
 //		   if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements = 0) {and (Ident[IdentIndex].PassMethod <> VARPASSING)} then begin
 
-// writeln('1: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].idType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,'..',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].PassMethod,',',DEREFERENCE);
+ //writeln('1: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].idType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,'..',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].PassMethod,',',DEREFERENCE,',',varpass);
 
-//		     if  ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK])) then
+//		     if  ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements_ = 0) and VarPass) then
 //		       Push(Ident[IdentIndex].Value, ASVALUE, DataSize[POINTERTOK], IdentIndex)
 //		     else
                      if (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK, FILETOK, TEXTFILETOK]) or
 		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].PassMethod = VARPASSING)) or
-		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements_ > 0)) or
+//		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].PassMethod = VARPASSING)) or
+		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements_ = 0)) or
 		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET)) or
 		        ((Ident[IdentIndex].DataType in Pointers) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements > 0)) or
 		        ((Ident[IdentIndex].DataType in Pointers) and {(Ident[IdentIndex].AllocElementType = UNTYPETOK) and} (Ident[IdentIndex].PassMethod = VARPASSING))
@@ -16182,7 +5581,11 @@ writeln('3: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].idType,',',Ident[Iden
 	iError(i + 1, UnknownIdentifier);
       end;
 
-end;
+end;	//CompileAddress
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function NumActualParameters(i: integer; IdentIndex: integer; out NumActualParams: integer): TParamList;
@@ -16289,6 +5692,10 @@ begin
      Pass := oldPass;
      CodeSize := oldCodeSize;
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
@@ -16719,7 +6126,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
   run_func:=0;
 
   if (Ident[IdentIndex].isStdCall = false) then
-						if Ident[IdentIndex].Kind = FUNC then
+						if Ident[IdentIndex].Kind = FUNCTIONTOK then
 	  						StartOptimization(i)
 						else
 	  						StopOptimization;
@@ -16797,7 +6204,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
  end;
 
 
-	if (Ident[IdentIndex].Kind = FUNC) and (Ident[IdentIndex].isStdCall = false) and (Ident[IdentIndex].isRecursion = false) then begin
+	if (Ident[IdentIndex].Kind = FUNCTIONTOK) and (Ident[IdentIndex].isStdCall = false) and (Ident[IdentIndex].isRecursion = false) then begin
 
 		  asm65(#9'inx');
 
@@ -16823,12 +6230,16 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
 	end;
 
-end;
+end;	//compileActualParameters
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileFactor(i: Integer; out isZero: Boolean; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer;
 var IdentTemp, IdentIndex, j, oldCodeSize: Integer;
-    ActualParamType, AllocElementType, Kind, oldPass: Byte;
+    ActualParamType, AllocElementType, IndirectionLevel, Kind, oldPass: Byte;
     yes: Boolean;
     Value, ConstVal: Int64;
     svar: string;
@@ -16843,6 +6254,7 @@ begin
 
  ValType := 0;
  ConstVal := 0;
+ IdentIndex := 0;
 
  ftmp[0]:=0;
  ftmp[1]:=0;
@@ -16899,6 +6311,9 @@ case Tok[i].Kind of
       if ValType in Pointers then begin
        IdentIndex := GetIdent(Tok[i + 2].Name^);
 
+       if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then
+	Value := Ident[IdentIndex].NumAllocElements_ - 1
+       else
        if Ident[IdentIndex].NumAllocElements > 0 then
 	Value := Ident[IdentIndex].NumAllocElements - 1
        else
@@ -17822,8 +7237,10 @@ case Tok[i].Kind of
 
 		 yes:=true;
 
+//writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType);
 
  	     	 if (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) or (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then begin
+
 
 	       	  if Tok[j + 2].Kind = DEREFERENCETOK then inc(j);
 
@@ -17928,7 +7345,7 @@ case Tok[i].Kind of
 
       if Ident[IdentIndex].Kind = PROCEDURETOK then
 	Error(i, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found')
-      else if Ident[IdentIndex].Kind = FUNC then       // Function call
+      else if Ident[IdentIndex].Kind = FUNCTIONTOK then       // Function call
 	begin
 
 	  Param := NumActualParameters(i, IdentIndex, j);
@@ -17950,7 +7367,7 @@ case Tok[i].Kind of
         if (Ident[IdentIndex].isStdCall = false) then
 	 StartOptimization(i)
 	else
-        if optimize.use = false then StartOptimization(i);
+        if common.optimize.use = false then StartOptimization(i);
 
 
 	inc(run_func);
@@ -17965,12 +7382,16 @@ case Tok[i].Kind of
 	end // FUNC
       else
 	begin
+
+// -----------------------------------------------------------------------------
+// ===				 record^.
+// -----------------------------------------------------------------------------
+
 	if (Tok[i + 1].Kind = DEREFERENCETOK) then
 	  if (Ident[IdentIndex].Kind <> VARIABLE) or not (Ident[IdentIndex].DataType in Pointers) then
 	    iError(i, IncompatibleTypeOf, IdentIndex)
 	  else
 	    begin
-// cyyyyyyyyyyyyyyyy
 
 	    if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) and (Ident[IdentIndex].NumAllocElements = 0) then
 	      ValType := STRINGPOINTERTOK
@@ -17985,10 +7406,14 @@ case Tok[i].Kind of
 	     Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[ValType], IdentIndex);
 
 	    end else
-	    if (ValType in [RECORDTOK, OBJECTTOK]) then begin			// record^.
+	    if (ValType in [RECORDTOK, OBJECTTOK]) then begin						// record^.
 
 
 	     if (Tok[i + 2].Kind = DOTTOK) then begin
+
+
+//	writeln(Ident[IdentIndex].Name,',',Tok[i + 3].Name^,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements);
+
 
 	      IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
@@ -17999,7 +7424,23 @@ case Tok[i].Kind of
 
 	      inc(i, 2);
 
-	      Push(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, DataSize[ValType], IdentIndex, IdentTemp and $ffff);  // record_lebel.field^
+
+	      if (Tok[i + 1].Kind = IDENTTOK) and (Tok[i + 2].Kind = OBRACKETTOK) then begin		// record^.label[x]
+
+	       inc(i);
+
+	       ValType := Ident[GetIdent(Ident[IdentIndex].Name + '.' + Tok[i].Name^)].AllocElementType;
+
+	       i := CompileArrayIndex(i, GetIdent(Ident[IdentIndex].Name + '.' + Tok[i].Name^));
+
+	       Push(Ident[IdentIndex].Value, ASPOINTERTORECORDARRAYORIGIN, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+	      end else
+
+	      if ValType = STRINGPOINTERTOK then
+	        Push(Ident[IdentIndex].Value, ASPOINTERTORECORD, DataSize[ValType], IdentIndex, IdentTemp and $ffff)	// record^.string
+	      else
+	        Push(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, DataSize[ValType], IdentIndex, IdentTemp and $ffff);  // record_lebel.field^
 
 	     end else
 	     // fake code, do nothing ;)
@@ -18010,7 +7451,13 @@ case Tok[i].Kind of
 
 	    Result := i + 1;
 	    end
-	else if Tok[i + 1].Kind = OBRACKETTOK then			// Array element access
+	else
+
+// -----------------------------------------------------------------------------
+// ===				 record [index].
+// -----------------------------------------------------------------------------
+
+	if Tok[i + 1].Kind = OBRACKETTOK then			// Array element access
 	  if not (Ident[IdentIndex].DataType in Pointers) {or ((Ident[IdentIndex].NumAllocElements = 0) and (Ident[IdentIndex].idType <> PCHARTOK))} then  // PByte, PWord
 	    iError(i, IncompatibleTypeOf, IdentIndex)
 	  else
@@ -18025,51 +7472,121 @@ case Tok[i].Kind of
 
             if (Tok[i + 2].Kind = DOTTOK) and (ValType in [RECORDTOK, OBJECTTOK]) then begin
 
-//	writeln(valType,' / ',Ident[IdentIndex].name,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_,',',Tok[i + 1].Kind );
+//	writeln(valType,' / ',Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_,',',Tok[i + 3].Kind );
 
-		CheckTok(i + 1, CBRACKETTOK);
 
-		IdentTemp:=GetIdent(Ident[IdentIndex].Name+ '.' + Tok[i + 3].Name^);
+	     CheckTok(i + 1, CBRACKETTOK);
 
-		if IdentTemp < 0 then
-	          Error(i + 3, 'identifier idents no member '''+Tok[i + 3].Name^+'''');
+	     IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
-		ValType := Ident[IdentTemp].AllocElementType;
+	     if IdentTemp < 0 then
+	      Error(i + 3, 'identifier idents no member '''+Tok[i + 3].Name^+'''');
 
-		Push(Ident[IdentTemp].Value, ASPOINTERTOARRAYRECORD, DataSize[ValType], IdentTemp);
+	     ValType := IdentTemp shr 16;
 
-		inc(i, 2);
+	     inc(i, 2);
 
-	{    end else
-	    if ValType in [RECORDTOK, OBJECTTOK] then begin
-	      ValType := POINTERTOK;
 
-//		!@!@
+	     if (Tok[i + 1].Kind = IDENTTOK) and (Tok[i + 2].Kind = OBRACKETTOK) then begin		// array_of_record_pointers[x].array[i]
 
-		Push(Ident[IdentIndex].Value, ASPOINTERTOARRAYORIGIN2, DataSize[Ident[IdentIndex].AllocElementType], IdentIndex);
+	       inc(i);
 
-		CheckTok(i + 1, CBRACKETTOK);
+	       ValType := Ident[GetIdent(Ident[IdentIndex].Name + '.' + Tok[i].Name^)].AllocElementType;
 
-}
+ 	       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
+
+
+	      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+
+
+//	writeln(ValType,',',Ident[IdentIndex].Name + '||' + Tok[i].Name^,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ );
+
+//asm65(#9'xxxx');
+
+	       IdentTemp := RecordSize(IdentIndex, Tok[i].Name^);
+
+	       if IdentTemp < 0 then
+	        Error(i, 'identifier idents no member '''+Tok[i].Name^+'''');
+
+	       ValType := Ident[GetIdent(Ident[IdentIndex].Name + '.' + Tok[i].Name^)].AllocElementType;
+
+	       IndirectionLevel := ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN;
+
+	      end;
+
+
+	       i := CompileArrayIndex(i, GetIdent(Ident[IdentIndex].Name + '.' + Tok[i].Name^));
+
+	       Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+	     end else
+
+	     if ValType = STRINGPOINTERTOK then 							// array_of_record_pointers[index].string
+ 	       Push(0, ASPOINTERTOARRAYRECORDTOSTRING, DataSize[ValType], IdentIndex, IdentTemp and $ffff)
+	     else
+ 	       Push(0, ASPOINTERTOARRAYRECORD, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+
 	    end else
 	    if (Tok[i + 2].Kind = OBRACKETTOK) and (ValType = STRINGPOINTERTOK) then begin
 
 	     Error(i, '-- under construction --');
-
+{
 	     ValType := CHARTOK;
 	     inc(i, 3);
 
 	     Push(2, ASVALUE, 2);
 
 	     GenerateBinaryOperation(PLUSTOK, WORDTOK);
-
+}
 	    end else begin
 
-	        if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
+// -----------------------------------------------------------------------------
+// 				 record.
+// record_ptr.label[index] traktowane jest jako 'record_ptr.label'
+// zamiast 'record_ptr'
+// -----------------------------------------------------------------------------
 
-		Push(Ident[IdentIndex].Value, ASPOINTERTOARRAYORIGIN2, DataSize[ValType], IdentIndex);
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ );
 
-		CheckTok(i + 1, CBRACKETTOK);
+	    IdentTemp := 0;
+
+	    IndirectionLevel := ASPOINTERTOARRAYORIGIN2;
+
+
+	    if (pos('.', Ident[IdentIndex].Name) > 0) then begin   			// record_ptr.field[index]
+
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].AllocElementType );
+
+	      IdentTemp := GetIdent( copy(Ident[IdentIndex].Name, 1, pos('.', Ident[IdentIndex].Name)-1) );
+
+	      if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+
+	       svar := copy(Ident[IdentIndex].Name, pos('.', Ident[IdentIndex].Name)+1, length(Ident[IdentIndex].Name));
+
+	       IdentIndex := IdentTemp;
+
+	       IdentTemp := RecordSize(IdentIndex, svar);
+
+	       if IdentTemp < 0 then
+	        Error(i + 3, 'identifier idents no member ''' + svar + '''');
+
+	       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
+
+//	       Push(Ident[IdentIndex].Value, ASPOINTERTORECORDARRAYORIGIN, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+
+	      end;
+
+	    end;
+
+
+	    if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
+
+	    Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+	    CheckTok(i + 1, CBRACKETTOK);
+
 
 	    end;
 
@@ -18104,7 +7621,6 @@ case Tok[i].Kind of
 	  end else
 	   ValType := Ident[IdentIndex].DataType;
 
-// cyyyyyyyyyyyyyyyyyyyyy
 	  if (ValType = STRINGPOINTERTOK) and (Ident[IdentIndex].NumAllocElements = 0) then
 	    ValType := POINTERTOK;
 
@@ -18419,7 +7935,6 @@ case Tok[i].Kind of
     end;
 
 
-
  HALFSINGLETOK:
    begin
 
@@ -18488,7 +8003,6 @@ case Tok[i].Kind of
     Result := j + 1;
 
    end;
-
 
 
   SINGLETOK:					// SINGLE	IEEE-754	Q32
@@ -18669,8 +8183,11 @@ else
   iError(i, IdNumExpExpected);
 end;// case
 
+end;	//CompileFactor
 
-end;// CompileFactor
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure ResizeType(var ValType: Byte);
@@ -18680,6 +8197,10 @@ begin
   if ValType in [BYTETOK, WORDTOK, SHORTINTTOK, SMALLINTTOK] then inc(ValType);
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure RealTypeConversion(var ValType, RightValType: Byte; Kind: Byte = 0);
@@ -18773,7 +8294,6 @@ begin
   end;
 
 
-
   If ((ValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) and (RightValType in IntegerTypes) then begin
 
    ExpandParam(INTEGERTOK, RightValType);
@@ -18820,7 +8340,11 @@ begin
 
   end;
 
-end;
+end;	//RealTypeConversion
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileTerm(i: Integer; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer;
@@ -18910,7 +8434,11 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
   end;
 
 Result := j;
-end;	// CompileTerm
+end;	//CompileTerm
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileSimpleExpression(i: Integer; out ValType: Byte; VarType: Byte): Integer;
@@ -19040,7 +8568,11 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
   end;
 
 Result := j;
-end;// CompileSimpleExpression
+end;	//CompileSimpleExpression
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileExpression(i: Integer; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer;
@@ -19052,12 +8584,14 @@ var
   ftmp: TFloat;
 begin
 
+ ConstVal:=0;
+
  ftmp[0]:=0;
  ftmp[1]:=0;
 
  isZero := INTEGERTOK;
 
- cRight:=false;
+ cRight:=false;		// constantRight
 
  if SafeCompileConstExpression(i, ConstVal, ValType, VarType, False) then begin
 
@@ -19088,8 +8622,8 @@ begin
 
 ConstValRight := 0;
 
-sLeft:=false;
-sRight:=false;
+sLeft:=false;		// stringLeft
+sRight:=false;		// stringRight
 
 
 i := CompileSimpleExpression(i, ValType, VarType);
@@ -19115,7 +8649,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   k := i + 2;
   if SafeCompileConstExpression(k, ConstVal, ConstValType, VarType, False) then
-   if (ConstValType in IntegerTypes) and (VarType in IntegerTypes) then begin
+   if (ConstValType in IntegerTypes) and (VarType in IntegerTypes + [BOOLEANTOK]) then begin
 
     if ConstVal = 0 then begin
       isZero := BYTETOK;
@@ -19163,7 +8697,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 //  writeln(VarType,  ' | ', ValType,'/',RightValType,',',isZero,',',Tok[i + 1].Kind ,' : ', ConstVal);
 
 
-  if (Tok[i + 1].Kind in [LTTOK, GTTOK]) and (ValType in IntegerTypes) then begin
+  if cRight and (Tok[i + 1].Kind in [LTTOK, GTTOK]) and (ValType in IntegerTypes) then begin
 
    yes:=false;
 
@@ -19286,7 +8820,11 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   end;
 
 Result := i;
-end;// CompileExpression
+end;	//CompileExpression
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure SaveBreakAddress;
@@ -19300,6 +8838,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure RestoreBreakAddress;
 begin
 
@@ -19310,6 +8852,10 @@ begin
   ResetOpty;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileBlockRead(var i: integer; IdentIndex: integer; IdentBlock: integer): integer;
@@ -19374,7 +8920,12 @@ begin
      inc(i);
 
      Result := NumActualParams;
-end;
+
+end;	//CompileBlockRead
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure UpdateCaseLabels(j: integer; var tb: TCaseLabelArray; lab: TCaseLabel);
@@ -19396,6 +8947,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure CheckAssignment(i: integer; IdentIndex: integer);
 begin
 
@@ -19406,6 +8961,10 @@ begin
    Error(i, 'Illegal assignment to for-loop variable '''+Ident[IdentIndex].Name+'''');
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileStatement(i: Integer; isAsm: Boolean = false): Integer;
@@ -19475,9 +9034,9 @@ case Tok[i].Kind of
     begin
      IdentIndex := GetIdent(Tok[i].Name^);
 
-    if (IdentIndex > 0) and (Ident[IdentIndex].Kind = FUNC) and (BlockStackTop > 1) and (Tok[i + 1].Kind <> OPARTOK) then
+    if (IdentIndex > 0) and (Ident[IdentIndex].Kind = FUNCTIONTOK) and (BlockStackTop > 1) and (Tok[i + 1].Kind <> OPARTOK) then
      for j:=NumIdent downto 1 do
-      if (Ident[j].ProcAsBlock = NumBlocks) and (Ident[j].Kind = FUNC) then begin
+      if (Ident[j].ProcAsBlock = NumBlocks) and (Ident[j].Kind = FUNCTIONTOK) then begin
 	if (Ident[j].Name = Ident[IdentIndex].Name) and (Ident[j].UnitIndex = Ident[IdentIndex].UnitIndex) then IdentIndex := GetIdentResult(NumBlocks);
 	Break;
       end;
@@ -19526,9 +9085,9 @@ case Tok[i].Kind of
 
            IndirectionLevel := ASPOINTERTOPOINTER;
 
-           if Tok[i + 1].Kind = OPARTOK then begin
+           if Tok[i + 1].Kind = OPARTOK then begin				// (pointer)
 
-//	    writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+//	    writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
 	    if not (Ident[IdentIndex].DataType in [POINTERTOK, RECORDTOK, OBJECTTOK]) then
 	      iError(i, IllegalExpression);
@@ -19583,7 +9142,6 @@ case Tok[i].Kind of
 
 	    end else begin
 
-
 	     if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 
 	       IndirectionLevel := ASPOINTERTODEREFERENCE;
@@ -19614,7 +9172,6 @@ case Tok[i].Kind of
 
 	    if not (Ident[IdentIndex].DataType in Pointers) then
 	      iError(i + 1, IncompatibleTypeOf, IdentIndex);
-// cyyyyyyyyyyyyyy
 
 	    if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) and (Ident[IdentIndex].NumAllocElements = 0) then
 	      VarType := STRINGPOINTERTOK
@@ -19624,38 +9181,55 @@ case Tok[i].Kind of
 	    IndirectionLevel := ASPOINTERTOPOINTER;
 
 
-//writeln(Ident[IdentIndex].name,',',VarTYpe,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements);
+//writeln('= ',Ident[IdentIndex].name,',',VarTYpe,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements);
 
-	    if Tok[i + 2].Kind = OBRACKETTOK then
-	    begin
+	    if Tok[i + 2].Kind = OBRACKETTOK then begin				// pp^[index] :=
 
-	    inc(i);
-	    if not (Ident[IdentIndex].DataType in Pointers) then
-	      iError(i + 1, IncompatibleTypeOf, IdentIndex);
+	     inc(i);
 
-	    IndirectionLevel := ASPOINTERTOARRAYORIGIN2;
+	     if not (Ident[IdentIndex].DataType in Pointers) then
+	       iError(i + 1, IncompatibleTypeOf, IdentIndex);
 
-	    i := CompileArrayIndex(i, IdentIndex);
+	     IndirectionLevel := ASPOINTERTOARRAYORIGIN2;
 
-	    CheckTok(i + 1, CBRACKETTOK);
+	     i := CompileArrayIndex(i, IdentIndex);
 
-	   // VarType := Ident[IdentIndex].AllocElementType;
+	     CheckTok(i + 1, CBRACKETTOK);
 
 	    end else
 
 	    if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 
-	     IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);		// pp^.field :=
-// !@!@
-// writeln('xxx,',Tok[i+3].line);
+	     IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
 	     if IdentTemp < 0 then
 	      Error(i + 3, 'identifier idents no member '''+Tok[i + 3].Name^+'''');
 
+
+	    if Tok[i + 4].Kind = OBRACKETTOK then begin				// pp^.field[index] :=
+
+	     if not (Ident[IdentIndex].DataType in Pointers) then
+	       iError(i + 2, IncompatibleTypeOf, IdentIndex);
+
+	     VarType := Ident[GetIdent(Ident[IdentIndex].Name + '.' + Tok[i + 3].Name^)].AllocElementType;
+	     par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+
+	     IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
+
+	     i := CompileArrayIndex(i + 3, GetIdent(Ident[IdentIndex].Name + '.' + Tok[i + 3].Name^));
+
+	     CheckTok(i + 1, CBRACKETTOK);
+
+	    end else begin							// pp^.field :=
+
 	     VarType := IdentTemp shr 16;
-	     par2 := '$'+IntToHex(IdentTemp and $ffff, 2);
+	     par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+
+	     if GetIdent(Ident[IdentIndex].name+'.'+Tok[i + 3].Name^) > 0 then IdentIndex := GetIdent(Ident[IdentIndex].name+'.'+Tok[i + 3].Name^);
 
 	     inc(i, 2);
+
+	    end;
 
 	    end;
 
@@ -19667,29 +9241,82 @@ case Tok[i].Kind of
 	    if not (Ident[IdentIndex].DataType in Pointers) then
 	      iError(i + 1, IncompatibleTypeOf, IdentIndex);
 
-	    IndirectionLevel := ASPOINTERTOARRAYORIGIN2;
+	    IndirectionLevel :=  ASPOINTERTOARRAYORIGIN2;
+
+	    j := i;
 
 	    i := CompileArrayIndex(i, IdentIndex);
 
     	    VarType := Ident[IdentIndex].AllocElementType;
 
-//	    if (Ident[IdentIndex].NumAllocElements = 0) and (VarType <> CHARTOK) then
-//	       Error(i, 'Array type required');
+										// label.field[index] -> label + field[index]
+
+	    if pos('.', Ident[IdentIndex].Name) > 0 then begin			// record_ptr.field[index] :=
+
+	      IdentTemp := GetIdent( copy(Ident[IdentIndex].Name, 1, pos('.', Ident[IdentIndex].Name)-1) );
+
+	      if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+	       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
+
+	       par2 := copy(Ident[IdentIndex].Name, pos('.', Ident[IdentIndex].Name)+1, length(Ident[IdentIndex].Name));
+
+	       IdentIndex := IdentTemp;
+
+	       IdentTemp := RecordSize(IdentIndex, par2);
+
+	       if IdentTemp < 0 then
+	        Error(i + 3, 'identifier idents no member ''' + par2 + '''');
+
+	       par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+
+	      end;
+
+	    end;
+
+
+
+//	    writeln(Ident[IdentIndex].Name,',',vartype,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Kind);//+ '.' + Tok[i + 3].Name^);
+
 
 	    if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 	       IndirectionLevel := ASPOINTERTOARRAYRECORD;
 
-	       IdentTemp:=GetIdent(Ident[IdentIndex].Name+ '.' + Tok[i + 3].Name^);
+	       IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
 	       if IdentTemp < 0 then
 	        Error(i + 3, 'identifier idents no member '''+Tok[i + 3].Name^+'''');
 
-	       VarType := Ident[IdentTemp].AllocElementType;
-	       par2 := '$'+IntToHex(Ident[IdentTemp].Value-DATAORIGIN, 2);
 
-	       optyBP2 := '';
+//	       writeln('>',Ident[IdentIndex].Name+ '||' + Tok[i + 3].Name^,',',IdentTemp shr 16,',',VarType,'||',Tok[i+4].Kind,',',ident[GetIdent(Ident[IdentIndex].Name+ '.' + Tok[i + 3].Name^)].AllocElementTYpe);
 
-	       inc(i, 2);
+
+	      if Tok[i + 4].Kind = OBRACKETTOK then begin				// array_to_record_pointers[x].field[index] :=
+
+	        if not (Ident[IdentIndex].DataType in Pointers) then
+	          iError(i + 2, IncompatibleTypeOf, IdentIndex);
+
+	        VarType := Ident[GetIdent(Ident[IdentIndex].Name + '.' + Tok[i + 3].Name^)].AllocElementType;
+	        par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+
+	        IndirectionLevel := ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN;
+
+	        i := CompileArrayIndex(i + 3, GetIdent(Ident[IdentIndex].Name + '.' + Tok[i + 3].Name^));
+
+	        CheckTok(i + 1, CBRACKETTOK);
+
+	      end else begin								// array_to_record_pointers[x].field :=
+//-------
+	        VarType := IdentTemp shr 16;
+	        par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+
+ 	        if GetIdent(Ident[IdentIndex].name+'.'+Tok[i + 3].Name^) > 0 then IdentIndex := GetIdent(Ident[IdentIndex].name+'.'+Tok[i + 3].Name^);
+
+		if VarType = STRINGPOINTERTOK then IndirectionLevel := ASPOINTERTOARRAYRECORDTOSTRING;
+
+	        inc(i, 2);
+
+	      end;
+
 
 	    end else
 	     if VarType in [RECORDTOK, OBJECTTOK, PROCVARTOK] then VarType := POINTERTOK;
@@ -19708,12 +9335,14 @@ case Tok[i].Kind of
 	     if Ident[IdentIndex].AllocElementType = UNTYPETOK then
 	      VarType := Ident[IdentIndex].DataType			// RECORD.
 	     else
-	      VarType := Ident[IdentIndex].AllocElementType;
+	       VarType := Ident[IdentIndex].AllocElementType;
 
 	    end else begin
 	     IndirectionLevel := ASPOINTER;
 	     VarType := Ident[IdentIndex].DataType;
 	    end;
+
+//	writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', VarType,',',IndirectionLevel);
 
 	    end;
 
@@ -20442,10 +10071,10 @@ case Tok[i].Kind of
 	  end;// VARIABLE
 
 
-	PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK:			// Procedure, Function (without assignment) call
+	PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK:		// Procedure, Function (without assignment) call
 	  begin
 
-//	  yes := (Ident[IdentIndex].Kind = FUNC);
+//	  yes := (Ident[IdentIndex].Kind = FUNCTIONTOK);
 
 	  if (Tok[i+1].Kind = OPARTOK) and (Tok[i+2].Kind=CPARTOK) then begin
 	   inc(i, 2);
@@ -20471,14 +10100,14 @@ case Tok[i].Kind of
           if (Ident[IdentIndex].isStdCall = false) then
 	    StartOptimization(i)
 	  else
-          if optimize.use = false then StartOptimization(i);
+          if common.optimize.use = false then StartOptimization(i);
 
 
 	  inc(run_func);
 
 	  CompileActualParameters(i, IdentIndex);
 
-	  if Ident[IdentIndex].Kind = FUNC then a65(__subBX);	// zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
+	  if Ident[IdentIndex].Kind = FUNCTIONTOK then a65(__subBX);	// zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
 
 	  dec(run_func);
 
@@ -21405,7 +11034,10 @@ WHILETOK:
 	asm65;
 	asm65('; GetResourceHandle');
 
-	asm65(#9'mwa #MAIN.@RESOURCE.'+svar+' '+Tok[i + 2].Name^);
+	asm65(#9'lda <MAIN.@RESOURCE.' + svar);
+	asm65(#9'sta ' + Tok[i + 2].Name^);
+	asm65(#9'lda >MAIN.@RESOURCE.' + svar);
+	asm65(#9'sta ' + Tok[i + 2].Name^ + '+1');
 
 	inc(i, 5);
 
@@ -21443,7 +11075,11 @@ WHILETOK:
 	asm65;
 	asm65('; GetResourceHandle');
 
-	asm65(#9'mwa #MAIN.@RESOURCE.'+svar+'.end-MAIN.@RESOURCE.'+svar+' '+Tok[i + 2].Name^);
+	asm65(#9'lda <MAIN.@RESOURCE.' + svar + '.end-MAIN.@RESOURCE.' + svar);
+	asm65(#9'sta ' + Tok[i + 2].Name^);
+
+	asm65(#9'mwa >MAIN.@RESOURCE.' + svar + '.end-MAIN.@RESOURCE.' + svar);
+	asm65(#9'sta ' + Tok[i + 2].Name^ + '+1');
 
 	inc(i, 5);
 
@@ -21856,7 +11492,7 @@ WHILETOK:
 
 //		writeln(Ident[IdentIndex].Name,',',ExpressionType,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].idType);
 
-		if (ExpressionType = STRINGPOINTERTOK) or (Ident[IdentIndex].Kind = FUNC) or ((ExpressionType = POINTERTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
+		if (ExpressionType = STRINGPOINTERTOK) or (Ident[IdentIndex].Kind = FUNCTIONTOK) or ((ExpressionType = POINTERTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
 		 GenerateWriteString(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, Ident[IdentIndex].DataType)
 		else
 		if (Ident[IdentIndex].AllocElementType in [CHARTOK, POINTERTOK]) {and (Ident[IdentIndex].NumAllocElements = 0)} then
@@ -22172,7 +11808,7 @@ WHILETOK:
 
 	  GenerateForToDoEpilog(ExpressionType, Down, IdentIndex, false, 0);		// +1, -1
 	 end else
-	  GenerateIncOperation(IndirectionLevel, ExpressionType, Down, IdentIndex);	// +N, -N
+	  GenerateIncDec(IndirectionLevel, ExpressionType, Down, IdentIndex);	// +N, -N
 
 	 StopOptimization;
 
@@ -22200,7 +11836,7 @@ WHILETOK:
       yes := false;
 
       for j:=1 to NumIdent do
-       if (Ident[j].ProcAsBlock = BlockStack[BlockStackTop]) and (Ident[j].Kind = FUNC) then begin
+       if (Ident[j].ProcAsBlock = BlockStack[BlockStackTop]) and (Ident[j].Kind = FUNCTIONTOK) then begin
 
 	IdentIndex := GetIdentResult(BlockStack[BlockStackTop]);
 
@@ -22221,7 +11857,7 @@ WHILETOK:
 
      end;
 
-     asm65(#9'jmp @exit', '; exit');
+     asm65(#9'jmp @exit');
 
      ResetOpty;
 
@@ -22559,1152 +12195,13 @@ WHILETOK:
 
 else
   Result := i - 1;
-end;// case
+end;	// case
 
-end;// CompileStatement
+end;	//CompileStatement
 
 
-function DeclareFunction(i: integer; out ProcVarIndex: cardinal): integer;
-var  VarOfSameType: TVariableList;
-     NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType, ActualParamType: Byte;
-     NumAllocElements: cardinal;
-     IsNestedFunction: Boolean;
-//     ConstVal: Int64;
-
-begin
-      inc(NumProc);
-
-      if Tok[i].Kind in [PROCEDURETOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-	begin
-	DefineIdent(i, '@FN' + IntToHex(NumProc, 4), Tok[i].Kind, 0, 0, 0, 0);
-	IsNestedFunction := FALSE;
-	end
-      else
-	begin
-	DefineIdent(i, '@FN' + IntToHex(NumProc, 4), FUNC, 0, 0, 0, 0);
-	IsNestedFunction := TRUE;
-	end;
-
-      NumVarOfSameType := 0;
-      ProcVarIndex := NumProc;			// -> NumAllocElements_
-
-      dec(i);
-
-      if (Tok[i + 2].Kind = OPARTOK) and (Tok[i + 3].Kind = CPARTOK) then inc(i, 2);
-
-      if Tok[i + 2].Kind = OPARTOK then						// Formal parameter list found
-	begin
-	i := i + 2;
-	repeat
-	  NumVarOfSameType := 0;
-
-	  ListPassMethod := VALPASSING;
-
-	  if Tok[i + 1].Kind = CONSTTOK then
-	    begin
-	    ListPassMethod := CONSTPASSING;
-	    inc(i);
-	    end
-	  else if Tok[i + 1].Kind = VARTOK then
-	    begin
-	    ListPassMethod := VARPASSING;
-	    inc(i);
-	    end;
-
-	    repeat
-
-	    if Tok[i + 1].Kind <> IDENTTOK then
-	      Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
-	    else
-	      begin
-
-		for x := 1 to NumVarOfSameType do
-		 if VarOfSameType[x].Name = Tok[i + 1].Name^ then
-		   Error(i + 1, 'Identifier ' + Tok[i + 1].Name^ + ' is already defined');
-
-	        Inc(NumVarOfSameType);
-	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name^;
-	      end;
-
-	    i := i + 2;
-	    until Tok[i].Kind <> COMMATOK;
-
-
-	  VarType := 0;								// UNTYPED
-	  NumAllocElements := 0;
-	  AllocElementType := 0;
-
-	  if (ListPassMethod = VARPASSING)  and (Tok[i].Kind <> COLONTOK) then begin
-
-	   dec(i);
-
-	  end else begin
-
-	   CheckTok(i, COLONTOK);
-
-	   if Tok[i + 1].Kind = DEREFERENCETOK then				// ^type
-	     Error(i + 1, 'Type identifier expected');
-
-	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
-
-	   if (VarType = FILETOK) and (ListPassMethod <> VARPASSING) then
-	     Error(i, 'File types must be var parameters');
-
-	  end;
-
-
-	  for VarOfSameTypeIndex := 1 to NumVarOfSameType do
-	    begin
-
-//	    if NumAllocElements > 0 then
-//	      Error(i, 'Structured parameters cannot be passed by value');
-
-	    Inc(Ident[NumIdent].NumParams);
-	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      iError(i, TooManyParameters, NumIdent)
-	    else
-	      begin
-	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
-
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].DataType		:= VarType;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].Name		:= VarOfSameType[VarOfSameTypeIndex].Name;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].NumAllocElements := NumAllocElements;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].AllocElementType := AllocElementType;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].PassMethod       := ListPassMethod;
-
-	      end;
-	    end;
-
-	  i := i + 1;
-	until Tok[i].Kind <> SEMICOLONTOK;
-
-	CheckTok(i, CPARTOK);
-
-	i := i + 1;
-	end// if Tok[i + 2].Kind = OPARTOR
-      else
-	i := i + 2;
-
-      if IsNestedFunction then
-	begin
-
-	CheckTok(i, COLONTOK);
-
-	if Tok[i + 1].Kind = ARRAYTOK then
-	 Error(i + 1, 'Type identifier expected');
-
-	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
-
-	Ident[NumIdent].DataType := VarType;					// Result
-	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;
-	Ident[NumIdent].NestedFunctionAllocElementType := AllocElementType;
-
-	i := i + 1;
-	end;// if IsNestedFunction
-
-
-    Ident[NumIdent].isStdCall := true;
-    Ident[NumIdent].IsNestedFunction := IsNestedFunction;
-
-    Result := i;
-
-end;
-
-
-function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
-var  VarOfSameType: TVariableList;
-     NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType: Byte;
-     NumAllocElements: cardinal;
-begin
-
-    if ForwardIdentIndex = 0 then begin
-
-      if Tok[i + 1].Kind <> IDENTTOK then
-	Error(i + 1, 'Reserved word used as identifier');
-
-      if Tok[i].Kind in [PROCEDURETOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-	begin
-	DefineIdent(i + 1, Tok[i + 1].Name^, Tok[i].Kind, 0, 0, 0, 0);
-	IsNestedFunction := FALSE;
-	end
-      else
-	begin
-	DefineIdent(i + 1, Tok[i + 1].Name^, FUNC, 0, 0, 0, 0);
-	IsNestedFunction := TRUE;
-	end;
-
-
-      NumVarOfSameType := 0;
-
-      if (Tok[i + 2].Kind = OPARTOK) and (Tok[i + 3].Kind = CPARTOK) then inc(i, 2);
-
-      if Tok[i + 2].Kind = OPARTOK then						// Formal parameter list found
-	begin
-	i := i + 2;
-	repeat
-	  NumVarOfSameType := 0;
-
-	  ListPassMethod := VALPASSING;
-
-	  if Tok[i + 1].Kind = CONSTTOK then
-	    begin
-	    ListPassMethod := CONSTPASSING;
-	    inc(i);
-	    end
-	  else if Tok[i + 1].Kind = VARTOK then
-	    begin
-	    ListPassMethod := VARPASSING;
-	    inc(i);
-	    end;
-
-	    repeat
-
-	    if Tok[i + 1].Kind <> IDENTTOK then
-	      Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
-	    else
-	      begin
-
-		for x := 1 to NumVarOfSameType do
-		 if VarOfSameType[x].Name = Tok[i + 1].Name^ then
-		   Error(i + 1, 'Identifier ' + Tok[i + 1].Name^ + ' is already defined');
-
-	        Inc(NumVarOfSameType);
-	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name^;
-	      end;
-
-	    i := i + 2;
-	    until Tok[i].Kind <> COMMATOK;
-
-
-	  VarType := 0;								// UNTYPED
-	  NumAllocElements := 0;
-	  AllocElementType := 0;
-
-	  if (ListPassMethod = VARPASSING)  and (Tok[i].Kind <> COLONTOK) then begin
-										// UNTYPED PARAM ('var buf')
-	   dec(i);
-
-	  end else begin
-
-	   CheckTok(i, COLONTOK);
-
-	   if Tok[i + 1].Kind = DEREFERENCETOK then				// ^type
-	     Error(i + 1, 'Type identifier expected');
-
-	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
-
-	   if (VarType = FILETOK) and (ListPassMethod <> VARPASSING) then
-	     Error(i, 'File types must be var parameters');
-
-	  end;
-
-
-	  for VarOfSameTypeIndex := 1 to NumVarOfSameType do
-	    begin
-
-//	    if NumAllocElements > 0 then
-//	      Error(i, 'Structured parameters cannot be passed by value');
-
-	    Inc(Ident[NumIdent].NumParams);
-	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      iError(i, TooManyParameters, NumIdent)
-	    else
-	      begin
-	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
-
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].DataType		:= VarType;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].Name		:= VarOfSameType[VarOfSameTypeIndex].Name;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].NumAllocElements := NumAllocElements;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].AllocElementType := AllocElementType;
-	      Ident[NumIdent].Param[Ident[NumIdent].NumParams].PassMethod       := ListPassMethod;
-
-	      end;
-	    end;
-
-	  i := i + 1;
-	until Tok[i].Kind <> SEMICOLONTOK;
-
-	CheckTok(i, CPARTOK);
-
-	i := i + 1;
-	end// if Tok[i + 2].Kind = OPARTOR
-      else
-	i := i + 2;
-
-      NestedFunctionResultType := 0;
-      NestedFunctionNumAllocElements := 0;
-      NestedFunctionAllocElementType := 0;
-
-      if IsNestedFunction then
-	begin
-
-	CheckTok(i, COLONTOK);
-
-	if Tok[i + 1].Kind = ARRAYTOK then
-	 Error(i + 1, 'Type identifier expected');
-
-	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
-
-	NestedFunctionResultType := VarType;
-
-//	if Tok[i].Kind = PCHARTOK then NestedFunctionResultType := PCHARTOK;
-
-	Ident[NumIdent].DataType := NestedFunctionResultType;			// Result
-
-	NestedFunctionNumAllocElements := NumAllocElements;
-	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;
-
-	NestedFunctionAllocElementType := AllocElementType;
-	Ident[NumIdent].NestedFunctionAllocElementType := AllocElementType;
-
-	Ident[NumIdent].isNestedFunction := true;
-
-	i := i + 1;
-	end;// if IsNestedFunction
-
-    CheckTok(i, SEMICOLONTOK);
-
-    end; //if ForwardIdentIndex = 0
-
-
-    isForward := false;
-    isInt := false;
-    isInl := false;
-
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, EXTERNALTOK, KEEPTOK] do begin
-
-	  case Tok[i + 1].Kind of
-
-	    OVERLOADTOK: begin
-			   Ident[NumIdent].isOverload := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	   ASSEMBLERTOK: begin
-			   Ident[NumIdent].isAsm := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	     FORWARDTOK: begin
-
-			   if INTERFACETOK_USE then
-			    if IsNestedFunction then
-			     Error(i, 'Function directive ''FORWARD'' not allowed in interface section')
-			    else
-			     Error(i, 'Procedure directive ''FORWARD'' not allowed in interface section');
-
-			   isForward := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	    REGISTERTOK: begin
-			   Ident[NumIdent].isRegister := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	     STDCALLTOK: begin
-			   Ident[NumIdent].isStdCall := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	     INLINETOK: begin
-	                   isInl := true;
-			   Ident[NumIdent].isInline := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	   INTERRUPTTOK: begin
-			   isInt := true;
-			   Ident[NumIdent].isInterrupt := true;
-			   Ident[NumIdent].IsNotDead := true;		// zawsze wygeneruj kod dla przerwania
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	      PASCALTOK: begin
-			   Ident[NumIdent].isRecursion := true;
-			   Ident[NumIdent].isPascal := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	    EXTERNALTOK: begin
-			   Ident[NumIdent].isExternal := true;
-			   isForward := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-                 KEEPTOK: begin
-			   Ident[NumIdent].isKeep := true;
-			   Ident[NumIdent].IsNotDead := true;
-			   inc(i);
-			   CheckTok(i + 1, SEMICOLONTOK);
-			 end;
-
-	  end;
-
-	  inc(i);
-	end;// while
-
-
-  if Ident[NumIdent].isRegister and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion) then
-   Error(i, 'Calling convention directive "REGISTER" not applicable with "PASCAL"');
-
-  if Ident[NumIdent].isInline and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion)  then
-   Error(i, 'Calling convention directive "INLINE" not applicable with "PASCAL"');
-
-  if Ident[NumIdent].isInline and (Ident[NumIdent].isInterrupt) then
-   Error(i, 'Procedure directive "INTERRUPT" cannot be used with "INLINE"');
-
-//  if Ident[NumIdent].isInterrupt and (Ident[NumIdent].isAsm = false) then
-//    Note(i, 'Use assembler block instead pascal');
-
- Result := i;
-end;
-
-
-function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer;
-var
-  NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
-  LowerBound, UpperBound, ConstVal, IdentIndex: Int64;
-  {ForwardIdentIndex,} NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
-  NestedDataType, ExpressionType, NestedAllocElementType, NestedFunctionAllocElementType, NestedFunctionResultType: Byte;
-  FieldInListName: array [1..MAXFIELDS] of TField;
-  ExitLoop, isForward, isInt, isInl, IsNestedFunction: Boolean;
-  Name: TString;
-
-
-  function BoundaryType: Byte;
-  begin
-
-    if (LowerBound < 0) or (UpperBound < 0) then begin
-
-     if (LowerBound >= Low(shortint)) and (UpperBound <= High(shortint)) then Result := SHORTINTTOK else
-      if (LowerBound >= Low(smallint)) and (UpperBound <= High(smallint)) then Result := SMALLINTTOK else
-	Result := INTEGERTOK;
-
-    end else begin
-
-     if (LowerBound >= Low(byte)) and (UpperBound <= High(byte)) then Result := BYTETOK else
-      if (LowerBound >= Low(word)) and (UpperBound <= High(word)) then Result := WORDTOK else
-	Result := CARDINALTOK;
-
-    end;
-
-  end;
-
-
-  procedure DeclareField(const Name: TName; FieldType: Byte; NumAllocElements: cardinal = 0; AllocElementType: Byte = 0; Data: Int64 = 0);
-  var x: Integer;
-  begin
-
-   for x := 1 to Types[RecType].NumFields do
-     if Types[RecType].Field[x].Name = Name then
-       Error(i, 'Duplicate identifier '''+Name+'''');
-
-   // Add new field
-   Inc(Types[RecType].NumFields);
-
-   x:=Types[RecType].NumFields;
-
-   if x >= MAXFIELDS then
-     Error(i, 'Out of resources, MAXFIELDS');
-
-   // Add new field
-   Types[RecType].Field[x].Name := Name;
-   Types[RecType].Field[x].DataType := FieldType;
-   Types[RecType].Field[x].Value := Data;
-   Types[RecType].Field[x].AllocElementType := AllocElementType;
-   Types[RecType].Field[x].NumAllocElements := NumAllocElements;
-
-   if not (FieldType in [RECORDTOK, OBJECTTOK]) then begin
-
-    if FieldType in Pointers then
-     inc(Types[RecType].Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) * DataSize[AllocElementType])
-    else
-     inc(Types[RecType].Size, DataSize[FieldType]);
-
-   end else
-    inc(Types[RecType].Size, DataSize[FieldType]);
-
-   Types[RecType].Field[x].Kind := 0;
-  end;
-
-
-begin
-
-
-if Tok[i].Kind in [PROCEDURETOK, FUNC] then begin			// PROCEDURE, FUNCTION
-
-  DataType := POINTERTOK;
-  AllocElementType := PROCVARTOK;
-
-  i := DeclareFunction(i, NestedNumAllocElements);
-
-  NumAllocElements := NestedNumAllocElements shl 16;	// NumAllocElements = NumProc shl 16
-
-  Result := i - 1;
-
-end else
-
-if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
-
- DataType := POINTERTOK;
-
- if Tok[i + 1].Kind = STRINGTOK then begin				// ^string
-  NumAllocElements := 0;
-  AllocElementType := CHARTOK;
-  DataType := STRINGPOINTERTOK;
- end else
- if Tok[i + 1].Kind = IDENTTOK then begin
-
-  IdentIndex := GetIdent(Tok[i + 1].Name^);
-
-  if IdentIndex = 0 then begin
-
-   NumAllocElements  := i + 1;
-   AllocElementType  := FORWARDTYPE;
-
-  end else
-
-  if (IdentIndex > 0) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) then begin
-    NumAllocElements := Ident[IdentIndex].NumAllocElements;
-
-    if Ident[IdentIndex].DataType in Pointers then begin
-
-     if Ident[IdentIndex].DataType = STRINGPOINTERTOK then begin
-       NumAllocElements := 0;
-       AllocElementType := CHARTOK;
-       DataType := STRINGPOINTERTOK;
-     end else begin
-       NumAllocElements := Ident[IdentIndex].NumAllocElements or (Ident[IdentIndex].NumAllocElements_ shl 16);
-       AllocElementType := Ident[IdentIndex].AllocElementType;
-       DataType := DEREFERENCEARRAYTOK;
-     end;
-
-    end else begin
-     AllocElementType := Ident[IdentIndex].DataType;
-     NumAllocElements := Ident[IdentIndex].NumAllocElements or (Ident[IdentIndex].NumAllocElements_ shl 16);
-    end;
-
-//  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType ,' | ',DataType,',',AllocElementType,',',NumAllocElements);
-
-  end;
-
- end else begin
-
-  if not (Tok[i + 1].Kind in OrdinalTypes + RealTypes) then
-   iError(i + 1, IdentifierExpected);
-
-  NumAllocElements := 0;
-  AllocElementType := Tok[i + 1].Kind;
-
- end;
-
-  Result := i + 1;
-
-end else
-
-if Tok[i].Kind = OPARTOK then begin					// enumerated
-
-    Name := Tok[i-2].Name^;
-
-    inc(NumTypes);
-    RecType := NumTypes;
-
-    if NumTypes > MAXTYPES then
-     Error(i, 'Out of resources, MAXTYPES');
-
-    inc(i);
-
-    Types[RecType].Field[0].Name := Name;
-    Types[RecType].NumFields := 0;
-
-    ConstVal := 0;
-    LowerBound := 0;
-    UpperBound := 0;
-    NumFieldsInList := 0;
-
-    repeat
-      CheckTok(i, IDENTTOK);
-
-      Inc(NumFieldsInList);
-      FieldInListName[NumFieldsInList].Name := Tok[i].Name^;
-
-      inc(i);
-
-      if Tok[i].Kind in [ASSIGNTOK, EQTOK] then begin
-
-	i := CompileConstExpression(i + 1, ConstVal, ExpressionType);
-//	GetCommonType(i, ConstValType, SelectorType);
-
-	inc(i);
-      end;
-
-      FieldInListName[NumFieldsInList].Value := ConstVal;
-
-      if NumFieldsInList = 1 then begin
-
-       LowerBound := ConstVal;
-       UpperBound := ConstVal;
-
-      end else begin
-
-       if ConstVal < LowerBound then LowerBound := ConstVal;
-       if ConstVal > UpperBound then UpperBound := ConstVal;
-
-       if FieldInListName[NumFieldsInList].Value < FieldInListName[NumFieldsInList - 1].Value then
-	 Note(i, 'Values in enumeration types have to be ascending');
-
-      end;
-
-      inc(ConstVal);
-
-      if Tok[i].Kind = COMMATOK then inc(i);
-
-    until Tok[i].Kind = CPARTOK;
-
-    DataType := BoundaryType;
-
-    for FieldInListIndex := 1 to NumFieldsInList do begin
-      DefineIdent(i, FieldInListName[FieldInListIndex].Name, ENUMTYPE, DataType, 0, 0, FieldInListName[FieldInListIndex].Value);
-{
-      DefineIdent(i, FieldInListName[FieldInListIndex].Name, CONSTANT, POINTERTOK, length(FieldInListName[FieldInListIndex].Name)+1, CHARTOK, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE , IDENTTOK);
-
-      StaticStringData[NumStaticStrChars] := length(FieldInListName[FieldInListIndex].Name);
-
-      for k:=1 to length(FieldInListName[FieldInListIndex].Name) do
-       StaticStringData[NumStaticStrChars + k] := ord(FieldInListName[FieldInListIndex].Name[k]);
-
-      inc(NumStaticStrChars, length(FieldInListName[FieldInListIndex].Name) + 1);
-}
-      Ident[NumIdent].NumAllocElements := RecType;
-      Ident[NumIdent].Pass := CALLDETERMPASS;
-
-      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, 0, 0, FieldInListName[FieldInListIndex].Value);
-    end;
-
-    Types[RecType].Block := BlockStack[BlockStackTop];
-
-    AllocElementType := DataType;
-
-    DataType := ENUMTYPE;
-    NumAllocElements := RecType;      // indeks do tablicy Types
-
-    Result := i;
-
-//    writeln('>',lowerbound,',',upperbound);
-
-end else
-
-if Tok[i].Kind = TEXTFILETOK then begin					// TextFile
-
- AllocElementType := BYTETOK;
- NumAllocElements := 1;
-
- DataType := TEXTFILETOK;
- Result := i;
-
-end else
-
-if Tok[i].Kind = FILETOK then begin					// File
-
- if Tok[i + 1].Kind = OFTOK then
-  i := CompileType(i + 2, DataType, NumAllocElements, AllocElementType)
- else begin
-  AllocElementType := 0;//BYTETOK;
-  NumAllocElements := 128;
- end;
-
- DataType := FILETOK;
- Result := i;
-
-end else
-
-if Tok[i].Kind = SETTOK then begin					// Set Of
-
- CheckTok(i + 1, OFTOK);
-
- if not (Tok[i + 2].Kind in [CHARTOK, BYTETOK]) then
-  Error(i + 2, 'Illegal type declaration of set elements');
-
- DataType := POINTERTOK;
- NumAllocElements := 32;
- AllocElementType := Tok[i + 2].Kind;
-
- Result := i + 2;
-
-end else
-
-
-  if Tok[i].Kind = OBJECTTOK then					// Object
-  begin
-
-  Name := Tok[i-2].Name^;
-
-  inc(NumTypes);
-  RecType := NumTypes;
-
-  if NumTypes > MAXTYPES then
-   Error(i, 'Out of resources, MAXTYPES');
-
-  inc(i);
-
-  Types[RecType].NumFields := 0;
-  Types[RecType].Field[0].Name := Name;
-
-    if (Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) then begin
-
-    	while Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] do begin
-
-	  IsNestedFunction := (Tok[i].Kind = FUNCTIONTOK);
-
-	  k := i;
-
-	  i := DefineFunction(i, 0, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
-
-	  Inc(NumBlocks);
-	  Ident[NumIdent].ProcAsBlock := NumBlocks;
-
-	  Ident[NumIdent].IsUnresolvedForward := TRUE;
-
-	  Ident[NumIdent].ObjectIndex := RecType;
-	  Ident[NumIdent].Name := Name + '.' + Tok[k + 1].Name^;
-
-     	  CheckTok(i, SEMICOLONTOK);
-
-     	  inc(i);
-    	end;
-
-      if (Tok[i].Kind in [IDENTTOK]) then
-	Error(i, 'Fields cannot appear after a method or property definition');
-
-    end else
-
-  repeat
-    NumFieldsInList := 0;
-
-    repeat
-
-      if (Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) then
-	Error(i, 'Fields cannot appear after a method or property definition');
-
-      CheckTok(i, IDENTTOK);
-
-      Inc(NumFieldsInList);
-      FieldInListName[NumFieldsInList].Name := Tok[i].Name^;
-
-      inc(i);
-
-      ExitLoop := FALSE;
-
-      if Tok[i].Kind = COMMATOK then
-	 inc(i)
-      else
-	ExitLoop := TRUE;
-
-    until ExitLoop;
-
-    CheckTok(i, COLONTOK);
-
-    j := i + 1;
-
-    i := CompileType(i + 1, DataType, NumAllocElements, AllocElementType);
-
-    if Tok[j].Kind = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
-
-
-    for FieldInListIndex := 1 to NumFieldsInList do begin							// issue #92 fixed
-      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);	//
-														//
-      if DataType in [RECORDTOK, OBJECTTOK] then								//
-//      for FieldInListIndex := 1 to NumFieldsInList do								//
-         for k := 1 to Types[NumAllocElements].NumFields do begin						//
-	  DeclareField(FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,	//
-		     Types[NumAllocElements].Field[k].DataType//,						//
-		     //Types[NumAllocElements].Field[k].NumAllocElements,					//
-		     //Types[NumAllocElements].Field[k].AllocElementType
-		     );
-
-	  Types[RecType].Field[ Types[RecType].NumFields ].Kind := OBJECTVARIABLE;
-
-//	writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,',', Types[NumAllocElements].Field[k].NumAllocElements);
-         end;
-
-     end;
-
-
-    ExitLoop := FALSE;
-    if Tok[i + 1].Kind <> SEMICOLONTOK then begin
-      inc(i);
-      ExitLoop := TRUE
-    end else
-      begin
-      inc(i, 2);
-
-      if Tok[i].Kind = ENDTOK then ExitLoop := TRUE else
-       if Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then begin
-
-    	while Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] do begin
-
-	  IsNestedFunction := (Tok[i].Kind = FUNCTIONTOK);
-
-	  k := i;
-
-	  i := DefineFunction(i, 0, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
-
-	  Inc(NumBlocks);
-	  Ident[NumIdent].ProcAsBlock := NumBlocks;
-
-	  Ident[NumIdent].IsUnresolvedForward := TRUE;
-
-	  Ident[NumIdent].ObjectIndex := RecType;
-	  Ident[NumIdent].Name := Name + '.' + Tok[k + 1].Name^;
-
-     	  CheckTok(i, SEMICOLONTOK);
-
-     	  inc(i);
-    	end;
-
-	ExitLoop := TRUE;
-       end;
-
-      end;
-
-  until ExitLoop;
-
-  CheckTok(i, ENDTOK);
-
-  Types[RecType].Block := BlockStack[BlockStackTop];
-
-  DataType := OBJECTTOK;
-  NumAllocElements := RecType;      // indeks do tablicy Types
-  AllocElementType := 0;
-
-  Result := i;
-end else// if OBJECTTOK
-
-  if (Tok[i].Kind = RECORDTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i+1].Kind = RECORDTOK)) then		// Record
-  begin
-
-  Name := Tok[i-2].Name^;
-
-  if Tok[i].Kind = PACKEDTOK then inc(i);
-
-  inc(NumTypes);
-  RecType := NumTypes;
-
-  if NumTypes > MAXTYPES then
-   Error(i, 'Out of resources, MAXTYPES');
-
-  inc(i);
-
-  Types[RecType].Size := 0;
-  Types[RecType].NumFields := 0;
-  Types[RecType].Field[0].Name := Name;
-
-  repeat
-    NumFieldsInList := 0;
-    repeat
-      CheckTok(i, IDENTTOK);
-
-      Inc(NumFieldsInList);
-      FieldInListName[NumFieldsInList].Name := Tok[i].Name^;
-
-      inc(i);
-
-      ExitLoop := FALSE;
-
-      if Tok[i].Kind = COMMATOK then
-	inc(i)
-      else
-	ExitLoop := TRUE;
-
-    until ExitLoop;
-
-    CheckTok(i, COLONTOK);
-
-    j := i + 1;
-
-    i := CompileType(i + 1, DataType, NumAllocElements, AllocElementType);
-
-    if Tok[j].Kind = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
-
-
-    //NumAllocElements:=0;		// ??? arrays not allowed, only pointers ???
-
-    for FieldInListIndex := 1 to NumFieldsInList do begin								// issue #92 fixed
-      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);		//
-															//
-      if DataType = RECORDTOK then											//
-        //for FieldInListIndex := 1 to NumFieldsInList do								//
-        for k := 1 to Types[NumAllocElements].NumFields do
- 	  DeclareField(FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name, Types[NumAllocElements].Field[k].DataType);
-
-    end;
-
-    ExitLoop := FALSE;
-    if Tok[i + 1].Kind <> SEMICOLONTOK then begin
-      inc(i);
-      ExitLoop := TRUE
-    end else
-      begin
-      inc(i, 2);
-      if Tok[i].Kind = ENDTOK then ExitLoop := TRUE;
-      end
-
-  until ExitLoop;
-
-  CheckTok(i, ENDTOK);
-
-  Types[RecType].Block := BlockStack[BlockStackTop];
-
-  DataType := RECORDTOK;
-  NumAllocElements := RecType;			// indeks do tablicy Types
-  AllocElementType := 0;
-
-  if Types[RecType].Size > 255 then
-   Error(i, 'Record size beyond the 256 bytes limit');
-
-  Result := i;
-end else// if RECORDTOK
-
-if Tok[i].Kind in AllTypes then
-  begin
-  DataType := Tok[i].Kind;
-  NumAllocElements := 0;
-  AllocElementType := 0;
-  Result := i;
-  end
-
-else if Tok[i].Kind = PCHARTOK then					// PChar
-  begin
-  DataType := POINTERTOK;
-  AllocElementType := CHARTOK;
-
-  NumAllocElements := 0;
-
-  Result:=i;
- end	// Pchar
-
-else if Tok[i].Kind = STRINGTOK then					// String
-  begin
-  DataType := STRINGPOINTERTOK;
-  AllocElementType := CHARTOK;
-
-  if Tok[i + 1].Kind <> OBRACKETTOK then begin
-
-   UpperBound:=255;				 // default string[255]
-
-   Result:=i;
-
-  end  else begin
- //   Error(i + 1, '[ expected but ' + GetSpelling(i + 1) + ' found');
-
-  i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
-
-  if (UpperBound < 1) or (UpperBound > 255) then
-    Error(i, 'string length must be a value from 1 to 255');
-
-  CheckTok(i + 1, CBRACKETTOK);
-
-  Result := i + 1;
-  end;
-
-  NumAllocElements := UpperBound + 1;
-
-  if UpperBound>255 then
-   iError(i, SubrangeBounds);
-
-  end	// if STRINGTOK
-else if (Tok[i].Kind = ARRAYTOK) or ((Tok[i].Kind = PACKEDTOK) and (Tok[i + 1].Kind = ARRAYTOK))  then		// Array
-  begin
-  DataType := POINTERTOK;
-
-  if Tok[i].Kind = PACKEDTOK then inc(i);
-
-  CheckTok(i + 1, OBRACKETTOK);
-
-  if Tok[i + 2].Kind in AllTypes + StringTypes then begin
-
-   if Tok[i + 2].Kind = BYTETOK then begin
-    LowerBound := 0;
-    UpperBound := 255;
-
-    NumAllocElements := 256;
-   end else
-    Error(i, 'Error in type definition');
-
-   inc(i, 2);
-
-  end else begin
-
-  i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
-  if not(ExpressionType in IntegerTypes) then
-    Error(i, 'Array lower bound must be integer');
-
-  if LowerBound <> 0 then
-    Error(i, 'Array lower bound is not zero');
-
-  CheckTok(i + 1, RANGETOK);
-
-  i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
-  if not(ExpressionType in IntegerTypes) then
-    Error(i, 'Array upper bound must be integer');
-
-  if UpperBound < 0 then
-    iError(i, UpperBoundOfRange);
-
-  if UpperBound > High(word) then
-    iError(i, HighLimit);
-
-  NumAllocElements := UpperBound - LowerBound + 1;
-
-  if Tok[i + 1].Kind = COMMATOK then begin				// [0..x, 0..y]
-
-    i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
-    if not(ExpressionType in IntegerTypes) then
-      Error(i, 'Array lower bound must be integer');
-
-    if LowerBound <> 0 then
-      Error(i, 'Array lower bound is not zero');
-
-    CheckTok(i + 1, RANGETOK);
-
-    i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
-    if not(ExpressionType in IntegerTypes) then
-      Error(i, 'Array upper bound must be integer');
-
-    if UpperBound < 0 then
-      iError(i, UpperBoundOfRange);
-
-    if UpperBound > High(word) then
-      iError(i, HighLimit);
-
-    NumAllocElements := NumAllocElements or (UpperBound - LowerBound + 1) shl 16;
-
-  end;
-
-  end;	// if Tok[i + 2].Kind in AllTypes + StringTypes
-
-  CheckTok(i + 1, CBRACKETTOK);
-  CheckTok(i + 2, OFTOK);
-
-  if Tok[i + 3].Kind = ARRAYTOK then begin
-    i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
-    Result := i;
-  end else begin
-    Result := i;
-    i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
-  end;
-
-
-  if (NumAllocElements shr 16) * (NumAllocElements and $0000FFFF) * DataSize[NestedDataType] > 40960-1 then
-    Error(i, 'Array [0..' + IntToStr(NumAllocElements and $0000FFFF-1)+', 0..' + IntToStr(NumAllocElements shr 16-1)+'] size exceeds available RAM');
-
-
-// sick3
-// writeln('>',NestedDataType,',',NestedAllocElementType,',',Tok[i].kind,',',hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
-
-//  if NestedAllocElementType = PROCVARTOK then
-//      Error(i, InfoAboutToken(NestedAllocElementType)+' arrays are not supported');
-
-
-  if NestedNumAllocElements > 0 then
-//    Error(i, 'Multidimensional arrays are not supported');
-   if NestedDataType in [RECORDTOK, OBJECTTOK, ENUMTOK] then begin			// !!! dla RECORD, OBJECT tablice nie zadzialaja !!!
-
-    if NumAllocElements shr 16 > 0 then
-      Error(i, 'Multidimensional ' + InfoAboutToken(NestedDataType) + ' arrays are not supported');
-
-//    if NestedDataType = RECORDTOK then
-//    else
-    if NestedDataType in [RECORDTOK, OBJECTTOK] then
-     Error(i, 'Only Array [0..'+IntToStr(NumAllocElements-1)+'] of ^'+InfoAboutToken(NestedDataType)+' supported')
-    else
-     Error(i, InfoAboutToken(NestedDataType)+' arrays are not supported');
-
-//    NumAllocElements := NestedNumAllocElements;
-//    NestedAllocElementType := NestedDataType;
-//    NestedDataType := POINTERTOK;
-
-//    NestedDataType := NestedAllocElementType;
-    NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
-
-   end else
-   if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].Kind <> PCHARTOK) then begin
-
-     if (NestedAllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
-       Error(i, 'Multidimensional arrays type ' +  InfoAboutToken(NestedAllocElementType) + ' are not supported');
-
-     NestedDataType := NestedAllocElementType;
-
-     if NestedAllocElementType = PROCVARTOK then
-      NumAllocElements := NumAllocElements or NestedNumAllocElements
-     else
-      if NestedAllocElementType in [RECORDTOK, OBJECTTOK] then
-       NumAllocElements := NestedNumAllocElements or (NumAllocElements shl 16)			// array [..] of ^record|^object
-      else
-       NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
-
-   end;
-
-  AllocElementType :=  NestedDataType;
-
-//  writeln('** ',hexstr(NumAllocElements,8));
-
-//  Result := i;
-  end // if ARRAYTOK
-else if (Tok[i].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i].Name^)].Kind = USERTYPE) then
-  begin
-  IdentIndex := GetIdent(Tok[i].Name^);
-
-  if IdentIndex = 0 then
-    iError(i, UnknownIdentifier);
-
-  if Ident[IdentIndex].Kind <> USERTYPE then
-    Error(i, 'Type expected but ' + Tok[i].Name^ + ' found');
-
-  DataType := Ident[IdentIndex].DataType;
-  NumAllocElements := Ident[IdentIndex].NumAllocElements or (Ident[IdentIndex].NumAllocElements_ shl 16);
-  AllocElementType := Ident[IdentIndex].AllocElementType;
-
-// writeln('> ',Ident[IdentIndex].Name,',',DataType,',',AllocElementType,',',NumAllocElements);
-
-  Result := i;
-  end // if IDENTTOK
-else begin
-
-   i := CompileConstExpression(i, ConstVal, ExpressionType);
-   LowerBound:=ConstVal;
-
-   CheckTok(i+1, RANGETOK);
-
-   i := CompileConstExpression(i+2, ConstVal, ExpressionType);
-   UpperBound:=ConstVal;
-
-   if UpperBound < LowerBound then
-     iError(i, UpperBoundOfRange);
-
- // Error(i, 'Error in type definition');
-
-  DataType := BoundaryType;
-  NumAllocElements := 0;
-  AllocElementType := 0;
-  Result := i;
-
-end;
-
-end;// CompileType
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure GenerateProcFuncAsmLabels(BlockIdentIndex: integer; VarSize: Boolean = false);
@@ -23841,9 +12338,9 @@ begin
 
 		 if (Ident[IdentIndex].PassMethod <> VARPASSING) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
 
-//		writeln(Ident[IdentIndex].Name,',', Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].IdType);
+//	writeln(Ident[IdentIndex].Name,',', Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].IdType);
 
-		  if (Ident[IdentIndex].IdType <> ARRAYTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+		  if ((Ident[IdentIndex].IdType <> ARRAYTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK])) or (Ident[IdentIndex].IdType = DATAORIGINOFFSET) then
 
 		    asm65(Ident[IdentIndex].Name + Value(true))
 
@@ -23855,15 +12352,17 @@ begin
 
 		   if Elements(IdentIndex) > 0 then begin
 
+//	writeln(Ident[IdentIndex].Name,' | ',Elements(IdentIndex),'/',Ident[IdentIndex].IdType,'/',Ident[IdentIndex].PassMethod ,' | ', Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].IdType);
+
 		    if (Ident[IdentIndex].NumAllocElements_ > 0) and not (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then
 		     asm65('adr.' + Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Ident[IdentIndex].NumAllocElements) + '] [' + IntToStr(Ident[IdentIndex].NumAllocElements_) + ']' + mads_data_size)
 		    else
-  		     asm65('adr.' + Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);
+  		     asm65('adr.' + Ident[IdentIndex].Name + Value(true, true) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);  // !!!!
 
 		   end else
 		    asm65('adr.' + Ident[IdentIndex].Name + Value(true));
 
-		   asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		   asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');    // !!!!
 
 		  end;
 
@@ -23907,7 +12406,11 @@ begin
 
  end;
 
-end;
+end;	//GenerateProcFuncAsmLabels
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure SaveToStaticDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValType: Byte);
@@ -23971,6 +12474,10 @@ ftmp[1]:=0;
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 function ReadDataArray(i: integer; ConstDataSize: integer; const ConstValType: Byte; NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
 var ActualParamType, ch: byte;
     NumActualParams, NumActualParams_, NumAllocElements_: cardinal;
@@ -23991,6 +12498,10 @@ begin
     inc(ConstDataSize, DataSize[DataType] );
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure SaveData;
@@ -24130,6 +12641,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure GenerateLocal(BlockIdentIndex: integer; IsFunction: Boolean);
 var info: string;
 begin
@@ -24164,6 +12679,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure FormalParameterList(var i: integer; var NumParams: integer; var Param: TParamList; out Status: word; IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte);
 var ListPassMethod, NumVarOfSameType, VarTYpe, AllocElementType: byte;
     NumAllocElements: cardinal;
@@ -24171,10 +12690,8 @@ var ListPassMethod, NumVarOfSameType, VarTYpe, AllocElementType: byte;
     VarOfSameType: TVariableList;
 begin
 
-{$PUSH}
-{$HINTS OFF}
-  FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
-{$POP}
+      FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+
 
       NumParams := 0;
 
@@ -24356,6 +12873,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure CheckForwardResolutions;
 var TypeIndex, IdentIndex: Integer;
     Name: string;
@@ -24373,7 +12894,7 @@ for TypeIndex := 1 to NumIdent do
           (Ident[IdentIndex].Block = BlockStack[BlockStackTop]) then begin
 
 	   Ident[TypeIndex].NumAllocElements  := Ident[IdentIndex].NumAllocElements;
-	   Ident[TypeIndex].NumAllocElements_ := 0;
+	   Ident[TypeIndex].NumAllocElements_ := Ident[IdentIndex].NumAllocElements_;
 	   Ident[TypeIndex].AllocElementType  := Ident[IdentIndex].DataType;
 
 	   Break;
@@ -24388,20 +12909,23 @@ for TypeIndex := 1 to NumIdent do
      (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then
     Error(TypeIndex, 'Unresolved forward reference to type ' + Ident[TypeIndex].Name);
 
-end;	// CheckForwardResolutions
+end;	//CheckForwardResolutions
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean; FunctionResultType: Byte; FunctionNumAllocElements: cardinal = 0; FunctionAllocElementType: byte = 0): Integer;
 var
   VarOfSameType: TVariableList;
   Param: TParamList;
-  j, ParamIndex, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize,  tmpVarDataSize_: Integer;
-  ForwardIdentIndex, IdentIndex: integer;
+  j, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize, tmpVarDataSize_, ParamIndex, ForwardIdentIndex, IdentIndex: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
-  IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isExternal, isForward, ImplementationUse: Boolean;
+  IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isExternal, isForward, ImplementationUse,
   iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
-  VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType: Byte;
+  VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
   Tmp, TmpResult: word;
 
@@ -24416,6 +12940,11 @@ FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
 j := 0;
 ConstVal := 0;
 VarRegister := 0;
+
+NestedDataType := 0;
+NestedAllocElementType := 0;
+NestedNumAllocElements := 0;
+ParamIndex := 0;
 
 varPassMethod := 255;
 
@@ -24614,6 +13143,8 @@ for ParamIndex := 1 to NumParams do
      if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then
       for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin
 
+// writeln(Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,',',Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,',',Types[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,',',Types[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType);
+
 	 DefineIdent(i, Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,
 		   VARIABLE,
 		   Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,
@@ -24731,7 +13262,12 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
 
   tmpVarDataSize := VarDataSize;
 
-//  writeln(Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,',',Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType, ' / ' );
+{
+  writeln(Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,',',
+          Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType,',',
+          Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,',',
+          Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType);
+}
 
   if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = OBJECTTOK then Error(i, '-- under construction --');
 
@@ -24756,9 +13292,6 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
 
   if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = OBJECTVARIABLE then begin
    Ident[NumIdent].Value := ConstVal + DATAORIGIN;
-
-   if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType <> UNTYPETOK then
-    Ident[NumIdent].DataType := Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType;
 
    inc(ConstVal, DataSize[Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType]);
 
@@ -24891,7 +13424,7 @@ while Tok[i].Kind in
    while (j > 0) and (Ident[j].UnitIndex = UnitNameIndex) do
      begin
   // If procedure or function, delete parameters first
-      if Ident[j].Kind in [PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK] then
+      if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
        if Ident[j].IsUnresolvedForward then
 	 Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -25229,8 +13762,8 @@ while Tok[i].Kind in
 
       CheckTok(i, COLONTOK);
 
-
       pack:=false;
+
 
       if Tok[i + 1].Kind = PACKEDTOK then begin
 
@@ -25343,7 +13876,6 @@ while Tok[i].Kind in
 
       for VarOfSameTypeIndex := 1 to NumVarOfSameType do begin
 
-// sick2
 // writeln(VarType,',',NumAllocElements and $FFFF,',',NumAllocElements shr 16,',',AllocElementType, ',',idType);
 
 
@@ -25370,6 +13902,8 @@ while Tok[i].Kind in
 
 	end else begin
 	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, VarType, NumAllocElements, AllocElementType, ord(isAbsolute) * ConstVal, IdType);
+
+//	  writeln(VarOfSameType[VarOfSameTypeIndex].Nam,',', NestedDataType,',',NestedAllocElementType,',',NestedNumAllocElements);
 
 	  Ident[NumIdent].NestedDataType := NestedDataType;
 	  Ident[NumIdent].NestedAllocElementType := NestedAllocElementType;
@@ -25416,26 +13950,21 @@ while Tok[i].Kind in
 
 	if ( (VarType in Pointers) and (AllocElementType = RECORDTOK) ) then begin
 
-//	 writeln('> ',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements);
+//	 writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NumAllocElements and $ffff,',',NumAllocElements shr 16);
 
 	 tmpVarDataSize_ := VarDataSize;
 
+
 	 if (NumAllocElements shr 16) > 0 then begin											// array [0..x] of record
 
-//	  NumAllocTypes := NumAllocElements shr 16;
-//	  NumAllocElements := NumAllocElements and $FFFF;
+	   Ident[NumIdent].NumAllocElements  := NumAllocElements and $FFFF;
+	   Ident[NumIdent].NumAllocElements_ := NumAllocElements shr 16;
 
-//  	   DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, POINTERTOK, NumAllocElements and $FFFF, AllocElementType);
-
-	   Ident[NumIdent].NumAllocElements := NumAllocElements and $FFFF;
-
-	   VarDataSize := tmpVarDataSize + (NumAllocElements and $FFFF) * DataSize[POINTERTOK];
-
-//  	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name+'.@ALLOC', VARIABLE, BYTETOK, (NumAllocElements and $FFFF)*RecordSize(NumIdent), BYTETOK, 0,0);
+	   VarDataSize := tmpVarDataSize + (NumAllocElements shr 16) * DataSize[POINTERTOK];
 
 	   tmpVarDataSize := VarDataSize;
 
-	   NumAllocElements := NumAllocElements shr 16;
+	   NumAllocElements := NumAllocElements and $FFFF;
 
 	 end else
 	   if Ident[NumIdent].isAbsolute = false then inc(tmpVarDataSize, DataSize[POINTERTOK]);		// wskaznik dla ^record
@@ -25448,7 +13977,7 @@ while Tok[i].Kind in
 	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do									// label: ^record
 	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
 
-//	    writeln(VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name);
+//	    writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements);
 
 	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
@@ -25458,7 +13987,7 @@ while Tok[i].Kind in
 
 	    Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize_;
 	    Ident[NumIdent].PassMethod := VARPASSING;
-	    Ident[NumIdent].AllocElementType := Ident[NumIdent].DataType;
+//	    Ident[NumIdent].AllocElementType := Ident[NumIdent].DataType;
 
 	  end;
 
@@ -25470,7 +13999,7 @@ while Tok[i].Kind in
 	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do
 	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
 
-//	    writeln(VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,' | ',Ident[NumIdent].Value);
+//	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
 
 	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
@@ -25846,7 +14375,7 @@ j := NumIdent;
 while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
-  if Ident[j].Kind in [PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK] then
+  if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
     if (Ident[j].IsUnresolvedForward) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -25898,9 +14427,13 @@ Dec(BlockStackTop);
   if Pass = CALLDETERMPASS then
     AddCallGraphChild(BlockStack[BlockStackTop], Ident[BlockIdentIndex].ProcAsBlock);
 
-
 //Result := j;
-end;// CompileBlock
+
+end;	//CompileBlock
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure CompileProgram;
@@ -25910,7 +14443,11 @@ var i, j, DataSegmentSize, IdentIndex: Integer;
     res: TResource;
 begin
 
-optimize.use := false;
+ResetOpty;
+
+common.optimize.use := false;
+
+tmp:='';
 
 IOCheck := true;
 
@@ -25937,7 +14474,7 @@ j := NumIdent;
    while (j > 0) and (Ident[j].UnitIndex = 1) do
      begin
   // If procedure or function, delete parameters first
-      if Ident[j].Kind in [PROCEDURETOK, FUNC, CONSTRUCTORTOK, DESTRUCTORTOK] then
+      if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
        if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
 	 Error(j, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -25999,6 +14536,10 @@ asm65(#13#10'.local'#9'@RESOURCE');
 //     asm65(resArray[i].resName+' = ' + tmp);
 //     asm65(resArray[i].resName+'.end');
 
+     resArray[i].resFullName := tmp;
+
+     Ident[IdentIndex].Pass := Pass;
+
      yes:=true; Break;
     end;
 
@@ -26022,9 +14563,9 @@ asm65(#13#10'.local'#9'@RESOURCE');
 
 //  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);
 
-  resArray[i].resFullName := tmp;
+//  resArray[i].resFullName := tmp;
 
-  Ident[IdentIndex].Pass := Pass;
+//  Ident[IdentIndex].Pass := Pass;
  end;
 
 asm65('.endl');
@@ -26078,7 +14619,7 @@ if DATA_Atari > 0 then
 else begin
 
  asm65(#9'?adr = *');
- asm65(#9'ift (?adr < ?old_adr) && (?old_adr - ?adr < 256)');
+ asm65(#9'ift (?adr < ?old_adr) && (?old_adr - ?adr < $120)');
  asm65(#9'?adr = ?old_adr');
  asm65(#9'eif');
  asm65;
@@ -26266,97 +14807,7 @@ asm65(#9'end');
 
 for i:=0 to High(TemporaryBuf) do WriteOut('');		// flush TemporaryBuf
 
-end;// CompileProgram
-
-
-procedure OptimizeProgram;
-
-  procedure MarkNotDead(IdentIndex: Integer);
-  var
-    ChildIndex, ChildIdentIndex: Integer;
-  begin
-
-  Ident[IdentIndex].IsNotDead := TRUE;
-
-  for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
-    for ChildIdentIndex := 1 to NumIdent do
-      if Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex] then
-	MarkNotDead(ChildIdentIndex);
-  end;
-
-begin
-// Perform dead code elimination
- MarkNotDead(GetIdent('MAIN'));
-
-end;
-
-
-procedure Diagnostics;
-var i, CharIndex, ChildIndex: Integer;
-    DiagFile: textfile;
-begin
-
-  AssignFile(DiagFile, ChangeFileExt( UnitName[1].Name, '.txt') );
-  Rewrite(DiagFile);
-
-  WriteLn(DiagFile);
-  WriteLn(DiagFile, 'Token list: ');
-  WriteLn(DiagFile);
-  WriteLn(DiagFile, '#': 6, 'Unit': 30, 'Line': 6, 'Token': 30);
-  WriteLn(DiagFile);
-
-  for i := 1 to NumTok do
-    begin
-    Write(DiagFile, i: 6, UnitName[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    if Tok[i].Kind = INTNUMBERTOK then
-      WriteLn(DiagFile, ' = ', Tok[i].Value)
-    else if Tok[i].Kind = FRACNUMBERTOK then
-      WriteLn(DiagFile, ' = ', Tok[i].FracValue: 8: 4)
-    else if Tok[i].Kind = IDENTTOK then
-      WriteLn(DiagFile, ' = ', Tok[i].Name^)
-    else if Tok[i].Kind = CHARLITERALTOK then
-      WriteLn(DiagFile, ' = ', Chr(Tok[i].Value))
-    else if Tok[i].Kind = STRINGLITERALTOK then
-      begin
-      Write(DiagFile, ' = ');
-      for CharIndex := 1 to Tok[i].StrLength do
-	Write(DiagFile, StaticStringData[Tok[i].StrAddress - CODEORIGIN + (CharIndex - 1)]);
-      WriteLn(DiagFile);
-      end
-    else
-      WriteLn(DiagFile);
-    end;// for
-
-  WriteLn(DiagFile);
-  WriteLn(DiagFile, 'Identifier list: ');
-  WriteLn(DiagFile);
-  WriteLn(DiagFile, '#': 6, 'Block': 6, 'Name': 30, 'Kind': 15, 'Type': 15, 'Items/Params': 15, 'Value/Addr': 15, 'Dead': 5);
-  WriteLn(DiagFile);
-
-  for i := 1 to NumIdent do
-    begin
-    Write(DiagFile, i: 6, Ident[i].Block: 6, Ident[i].Name: 30, Spelling[Ident[i].Kind]: 15);
-    if Ident[i].DataType <> 0 then Write(DiagFile, Spelling[Ident[i].DataType]: 15) else Write(DiagFile, 'N/A': 15);
-    Write(DiagFile, Ident[i].NumAllocElements: 15, IntToHex(Ident[i].Value, 8): 15);
-    if (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) and not Ident[i].IsNotDead then WriteLn(DiagFile, 'Yes': 5) else WriteLn(DiagFile, '': 5);
-    end;
-
-  WriteLn(DiagFile);
-  WriteLn(DiagFile, 'Call graph: ');
-  WriteLn(DiagFile);
-
-  for i := 1 to NumBlocks do
-    begin
-    Write(DiagFile, i: 6, '  ---> ');
-    for ChildIndex := 1 to CallGraph[i].NumChildren do
-      Write(DiagFile, CallGraph[i].ChildBlock[ChildIndex]: 5);
-    WriteLn(DiagFile);
-    end;
-
-  WriteLn(DiagFile);
-  CloseFile(DiagFile);
-
-end;
+end;	// CompileProgram
 
 
 {$i include/syntax.inc}
@@ -26544,7 +14995,9 @@ begin
 
  NumUnits:=1;			     // !!! 1 !!!
 
+
  ParseParam;
+
 
  Defines[1].Name := target.name;
 
@@ -26556,12 +15009,6 @@ begin
   FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
 
  DefaultFormatSettings.DecimalSeparator := '.';
-
- SetLength(linkObj, 1);
- SetLength(resArray, 1);
- SetLength(msgUser, 1);
- SetLength(msgWarning, 1);
- SetLength(msgNote, 1);
 
 
  {$IFDEF USEOPTFILE}
@@ -26584,11 +15031,10 @@ begin
 
  start_time:=GetTickCount64;
 
-// Set defines for first pass
-// NumDefines := AddDefines; IfdefLevel := 0;
-// Defines[1] := 'ATARI';
 
- TokenizeProgram;				// AsmBlockIndex = 0
+// ----------------------------------------------------------------------------
+// Set defines for first pass;
+ TokenizeProgram;
 
 
  if NumTok=0 then Error(1, '');
@@ -26598,45 +15044,18 @@ begin
  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
 
 
- fillchar(Ident, sizeof(Ident), 0);
- fillchar(DataSegment, sizeof(DataSegment), 0);
- fillchar(StaticStringData, sizeof(StaticStringData), 0);
-
- PublicSection := true;
- UnitNameIndex := 1;
-
- SetLength(linkObj, 1);
- SetLength(resArray, 1);
- SetLength(msgUser, 1);
- SetLength(msgWarning, 1);
- SetLength(msgNote, 1);
-
- BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0;
- VarDataSize := 0; NumStaticStrChars := 0;
- NumBlocks := 0; NumTypes := 0;
- CaseCnt :=0; IfCnt := 0; ShrShlCnt:=0; run_func := 0;
- NumTok := 0; NumIdent := 0; NumProc:=0;
- NumDefines := AddDefines; IfdefLevel := 0;
- //Defines[1] := 'ATARI';
- AsmBlockIndex := 0;
- ResetOpty;
- optyFOR0 := '';
- optyFOR1 := '';
- optyFOR2 := '';
- optyFOR3 := '';
-
- for i := 0 to High(AsmBlock) do AsmBlock[i]:='';
-
  TokenizeProgram(false);
+
+// ----------------------------------------------------------------------------
 
 
  NumStaticStrCharsTmp :=  NumStaticStrChars;
 
 // Predefined constants
- DefineIdent(1, 'BLOCKREAD',      FUNC, INTEGERTOK, 0, 0, $00000000);
- DefineIdent(1, 'BLOCKWRITE',     FUNC, INTEGERTOK, 0, 0, $00000000);
+ DefineIdent(1, 'BLOCKREAD',      FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
+ DefineIdent(1, 'BLOCKWRITE',     FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
 
- DefineIdent(1, 'GETRESOURCEHANDLE', FUNC, INTEGERTOK, 0, 0, $00000000);
+ DefineIdent(1, 'GETRESOURCEHANDLE', FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
 
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
@@ -26661,16 +15080,19 @@ begin
 
 
 // Visit call graph nodes and mark all procedures that are called as not dead
- OptimizeProgram;
+ OptimizeProgram(GetIdent('MAIN'));
+
 
 // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
  NumIdent := NumPredefIdent;
 
  fillchar(DataSegment, sizeof(DataSegment), 0);
 
- NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0;
- VarDataSize := 0; NumStaticStrChars := NumStaticStrCharsTmp;
- CaseCnt :=0; IfCnt := 0; ShrShlCnt:=0; NumTypes := 0; run_func := 0; NumProc:=0;
+ NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; VarDataSize := 0;
+ CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
+
+ NumStaticStrChars := NumStaticStrCharsTmp;
+
  ResetOpty;
  optyFOR0 := '';
  optyFOR1 := '';
@@ -26703,6 +15125,7 @@ begin
 
 // Diagnostics
  if DiagMode then Diagnostics;
+
 
  WritelnMsg;
 
