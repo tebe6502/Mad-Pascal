@@ -1871,7 +1871,7 @@ end;
 
 
 {
-if (pos('jsr #$00', listing[i]) > 0) then begin
+if (pos('cmp #$D8', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1943,7 +1943,7 @@ end;
     if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
        sta_stack(i) and
        (jne(i+1) or jeq(i+1)) and
-       (pos('l_', listing[i+2]) = 1) then
+       ((pos('l_', listing[i+2]) = 1) or (pos('b_', listing[i+2]) = 1)) then
      begin
 	listing[i] := '';
 
@@ -2057,7 +2057,7 @@ end;
 
 
 {
-if (pos('jcc l_', listing[i]) > 0) then begin
+if (pos('cmp #$D8', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
