@@ -1816,7 +1816,7 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     x := x * x;
-    Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
+    Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1-x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
@@ -1882,7 +1882,7 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     x := x * x;
-    Result := (((0.019940292 - x * 0.00084688153) * x - 0.23369547) * x + 1) * (1-x);
+    Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1-x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
