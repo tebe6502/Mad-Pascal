@@ -194,6 +194,8 @@ const
   CHARLITERALTOK	= 183;
   STRINGLITERALTOK	= 184;
 
+  LOOPUNROLLTOK		= 185;
+  NOLOOPUNROLLTOK	= 186;
   LINKTOK		= 187;
   MACRORELEASE		= 188;
   PROCALIGNTOK		= 189;
@@ -556,6 +558,10 @@ var
 	      use: Boolean;
 	      unitIndex, line, old: integer;
 	     end;
+
+  optimization : record
+		  loopunroll: Boolean;
+		 end;
 
   codealign : record
 		proc, loop, link : integer;

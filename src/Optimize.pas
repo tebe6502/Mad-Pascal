@@ -205,7 +205,7 @@ end;
        end;
 
     if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
-       (TemporaryBuf[1] = #9'ldy @BYTE.MOD.RESULT') then				// lda @BYTE.MOD.RESULT			; 1
+       (TemporaryBuf[1] = #9'ldy @BYTE.MOD.RESULT') then				// ldy @BYTE.MOD.RESULT			; 1
        begin
 	TemporaryBuf[0] := #9'tay';
 	TemporaryBuf[1] := '~';
@@ -316,23 +316,30 @@ begin
 
  if iOut < High(TemporaryBuf) then begin
 
-  if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
-   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    if (iOut >= 0) and (TemporaryBuf[iOut] <> '') then begin
 
-  if pos(#9'#for', TemporaryBuf[iOut]) > 0 then
-   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+	  if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+	   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+
+	  if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+	   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    end;
 
   inc(iOut);
   TemporaryBuf[iOut] := a;
+
  end else begin
 
   OptimizeTemporaryBuf;
 
-  if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
-   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    if TemporaryBuf[iOut] <> '' then begin
 
-  if pos(#9'#for', TemporaryBuf[iOut]) > 0 then
-   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+	  if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+	   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+
+	  if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+	   if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    end;
 
   if TemporaryBuf[0] <> '~' then begin
    if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
@@ -1864,7 +1871,7 @@ end;
 
 
 {
-if (pos('add #$4A', listing[i]) > 0) then begin
+if (pos('jsr #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1970,6 +1977,26 @@ end;
 
 	Result:=false; Break;
      end;
+
+
+    if (listing[i] = #9'jsr #$00') and								// jsr #$00				; 0
+       (listing[i+1] = #9'lda @BYTE.MOD.RESULT') then						// lda @BYTE.MOD.RESULT			; 1
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if (listing[i] = #9'jsr #$00') and								// jsr #$00				; 0
+       (listing[i+1] = #9'ldy @BYTE.MOD.RESULT') then						// ldy @BYTE.MOD.RESULT			; 1
+       begin
+	listing[i]   := #9'tay';
+	listing[i+1] := '';
+
+	Result:=false; Break;
+       end;
 
 
      if opt_STA_0(i) = false then begin Result := false; Break end;
