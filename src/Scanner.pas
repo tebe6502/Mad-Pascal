@@ -620,6 +620,18 @@ var
 
      end else
 
+      if (cmd = 'OPTIMIZATION') then begin
+
+       s := get_string(i, d);
+
+       if AnsiUpperCase(s) = 'LOOPUNROLL' then AddToken(LOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
+        if AnsiUpperCase(s) = 'NOLOOPUNROLL' then AddToken(NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
+	  Error(NumTok, 'Illegal optimization specified "' + AnsiUpperCase(s) + '"');
+
+	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
+
+      end else
+
       if (cmd = 'CODEALIGN') then begin
 
        s := get_string(i, d);

@@ -726,7 +726,7 @@ begin
    end;
 
 		   end;
-end;
+end;	//a65
 
 
 // ----------------------------------------------------------------------------
@@ -10164,6 +10164,22 @@ case Tok[i].Kind of
     end;
 
 
+  LOOPUNROLLTOK:
+    begin
+
+
+
+    end;
+
+
+  NOLOOPUNROLLTOK:
+    begin
+
+
+
+    end;
+
+
   PROCALIGNTOK:
     begin
      codealign.proc := Tok[i].Value;
@@ -13310,7 +13326,7 @@ if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezd
 while Tok[i].Kind in
  [CONSTTOK, TYPETOK, VARTOK, LABELTOK, PROCEDURETOK, FUNCTIONTOK, PROGRAMTOK, USESTOK, LIBRARYTOK, EXPORTSTOK,
   CONSTRUCTORTOK, DESTRUCTORTOK, LINKTOK,
-  UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF,
+  UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF, LOOPUNROLLTOK, NOLOOPUNROLLTOK,
   PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
   begin
 
@@ -13323,6 +13339,18 @@ while Tok[i].Kind in
    end;
 
    asm65(#9'.link ''' + linkObj[ Tok[i].Value ] + '''');
+   inc(i, 2);
+  end;
+
+
+  if Tok[i].Kind = LOOPUNROLLTOK then begin
+  // if Pass = CODEGENERATIONPASS then codealign.proc := Tok[i].Value;
+   inc(i, 2);
+  end;
+
+
+  if Tok[i].Kind = NOLOOPUNROLLTOK then begin
+  // if Pass = CODEGENERATIONPASS then codealign.proc := Tok[i].Value;
    inc(i, 2);
   end;
 
