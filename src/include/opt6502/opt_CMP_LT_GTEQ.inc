@@ -613,7 +613,7 @@ begin
        cmp(i+5) and {(cmp_im(i+5) = false) and}							// cmp			; 5
        (listing[i+6] = #9'bne L1') and								// bne L1		; 6
        lda_a(i+7) and										// lda E+1		; 7
-       cmp(i+8) and (cmp_im(i+8) = false) and							// cmp			; 8
+       cmp(i+8) and {(cmp_im(i+8) = false) and}							// cmp			; 8
        (listing[i+9] = #9'bne L1') and								// bne L1		; 9
        lda_a(i+10) and										// lda E		; 10
        cmp(i+11) and (cmp_im(i+11) = false) and							// cmp			; 11

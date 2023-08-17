@@ -360,6 +360,9 @@ begin
 // 				     BYTE
 // -----------------------------------------------------------------------------
 
+{
+!!! nadmiarowy kod
+
     if ldy_1(i) and 										// ldy #1		; 0	BOOL := BYTE > 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda			; 1
        cmp(i+2) and										// cmp			; 2
@@ -380,7 +383,7 @@ begin
 
 	exit(false);
      end;
-
+}
 
     if (SKIP(i-1) = false) and
        lda_a(i) and										// lda			; 0	opt_094	| BYTE > 0
@@ -839,5 +842,53 @@ begin
 	end;
 
       end;
+
+
+    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+       seq(i+23) and										// seq			; 23
+       bpl(i+24) and										// bpl @+		; 24
+       dey(i+25) and										// dey			; 25
+       lab_a(i+26) and										//@			; 26
+       tya(i+27) and										// tya			; 27
+       jeq(i+28) and										// jeq			; 28
+
+       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER >
+       lda_a(i+1) and										// lda E+3		; 1
+       sub(i+2) and {(sub_im(i+2) = false) and}							// sub			; 2
+       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       lda_a(i+4) and										// lda E+2		; 4
+       cmp(i+5) and {(cmp_im(i+5) = false) and}							// cmp			; 5
+       (listing[i+6] = #9'bne L1') and								// bne L1		; 6
+       lda_a(i+7) and										// lda E+1		; 7
+       cmp(i+8) and {(cmp_im(i+8) = false) and}							// cmp			; 8
+       (listing[i+9] = #9'bne L1') and								// bne L1		; 9
+       lda_a(i+10) and										// lda E		; 10
+       cmp(i+11) and (cmp_im(i+11) = false) and							// cmp			; 11
+       (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
+       (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
+       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       (listing[i+15] = #9'bne L5') and								// bne L5		; 15
+       (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
+       (listing[i+17] = #9'bne L5') and								// bne L5		; 17
+       (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
+       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
+       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       (listing[i+21] = 'L5') then								//L5			; 21
+      begin
+
+	listing[i+23] := #9'jmi ' + copy(listing[i+28], 6, 256);
+	listing[i+24] := #9'jeq ' + copy(listing[i+28], 6, 256);
+
+        for p:=i-1 downto 0 do
+	 if ldy_1(p) then begin listing[p]:=''; Break end;
+
+        listing[i+25] := '';
+        listing[i+26] := '';
+        listing[i+27] := '';
+        listing[i+28] := '';
+
+	exit(false);
+      end;
+
 
 end;		// function
