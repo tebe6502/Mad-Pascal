@@ -33,7 +33,7 @@ b[5]:=$24;
 b[6]:=$42;
 b[7]:=$81;
 
-canvas.brush.bitmap:=@b;
+canvas.brush.bitmap:=b;
 
 canvas.fillrect(Rect(10,12,319,30));
 
@@ -59,3 +59,4 @@ repeat until keypressed;
 
 end.
 
+// 4923
