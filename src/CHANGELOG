@@ -1,3 +1,6 @@
+18.08.2023
+- optymalizacja SIN/COS dla typów Real, ShortReal
+
 17.08.2023
 - unit Optimize, procedure WriteOut, dodany test (iOut >=0), ta zmienna ma na początku wartość -1
 
