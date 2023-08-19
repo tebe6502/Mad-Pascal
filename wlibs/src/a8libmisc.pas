@@ -25,6 +25,7 @@ uses
 // --------------------------------------------------
 function IKC2ATA(bN: Byte): Byte;
 function WaitKCX(bI: Byte): Word;
+function WMin(x, y: Byte): Byte;
 
 implementation
 
@@ -137,6 +138,15 @@ begin
 
     // Debounce key
     Poke(KEYPCH, KNONE);
+end;
+
+function WMin(x, y: Byte): Byte;
+(*
+@description: WMin returns the smallest value of X and Y.
+
+*)
+begin
+    if x < y then Result := x else Result := y;
 end;
 
 end.

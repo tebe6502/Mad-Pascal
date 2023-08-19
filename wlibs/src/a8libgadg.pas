@@ -1,15 +1,20 @@
 // --------------------------------------------------
 // Library: a8libgadg.pas
 // Desc...: Atari 8 Bit Gadget Library
-// Author.: Wade Ripkowski, amarok
-// Date...: 2022.09
+// Author.: Wade Ripkowski, amarok, MADRAFi
+// Date...: 2023.03
 // License: GNU General Public License v3.0
 // Note...: Requires: a8defines.pas
 //          -Converted from C
 // Require: a8libwin.pas
 //          a8libstr.pas
 //          a8libmisc.pas
+//          a8libmenu.pas
 // Revised:
+// - Added orientation parameter to function GButton 
+// - Added GCombo gadget
+// - Added GList gadget
+// - Added GConfirm gadget
 // --------------------------------------------------
 
 unit a8libgadg;
@@ -20,17 +25,20 @@ interface
 // Includes
 // --------------------------------------------------
 uses
-    a8defines, a8defwin;
+    a8defines, a8defwin, a8libmenu;
 
 
 // --------------------------------------------------
 // Function Prototypes
 // --------------------------------------------------
-procedure GAlert(pS: string);
+procedure GAlert(pS: string[40-2]);
 procedure GProg(bN, x, y, bS: Byte);
-function GButton(bN, x, y, bD, bS: Byte; pA: TStringArray): Byte;
+function GConfirm(pS: string[40-2]) : Boolean;
+function GButton(bN, x, y, bO, bD, bS: Byte; pA: TStringArray): Byte;
 function GCheck(bN, x, y, bI, bD: Byte): Byte;
 function GRadio(bN, x, y, bD, bE, bI, bS: Byte; pS: TStringArray): Byte;
+function GList(bN, x, y, bE, bI, bV, bS: Byte; pS: TStringArray): Byte;
+function GCombo(bN, x, y, bE, bI, bS: Byte; pS: TStringArray): Byte;
 function GSpin(bN, x, y, bL, bM, bI, bE: Byte): Byte;
 function GInput(bN, x, y, bT, bS: Byte; var pS: string): Byte;
 
@@ -46,19 +54,19 @@ uses
 // Param..: pS = Message string
 // Notes..: 38 characters max
 // ------------------------------------------------------------
-procedure GAlert(pS: string);
+procedure GAlert(pS: string[40-2]);
 var
     bW, bL, x: Byte;
 begin
     // Find left window position
     bL := Length(pS);
-    x := (38 - bL) div 2;
+    x := (40 - 2 - bL) div 2;
 
     // Show window
-    bW := WOpen(x, 10, bL + 2, 5, WOFF);
+    bW := WOpen(x, 10, bL + 2, 6, WOFF);
     WOrn(bW, WPTOP, WPCNT, 'Alert!');
-    WPrint(bW, WPCNT, 1, WOFF, pS);
-    WPrint(bW, WPCNT, 3, WON, ' OK ');
+    WPrint(bW, WPCNT, 2, WOFF, pS);
+    WPrint(bW, WPCNT, 4, WON, '[  OK  ]');
 
     // Wait for key
     x := WaitKCX(WOFF);
@@ -67,6 +75,45 @@ begin
     WClose(bW);
 end;
 
+// ------------------------------------------------------------
+// Func...: GConfirm(pS: string)
+// Desc...: Displays centered alert on screen and awaits confirmation
+// Param..: pS = Message string
+// Notes..: 38 characters max
+// ------------------------------------------------------------
+function GConfirm(pS: String[40-2]) : Boolean;
+var
+    bW, bL, bM, x1, x2: Byte;
+const
+    buttons : array[0..1] of string = ('[  OK  ]', '[Cancel]');
+
+begin
+    // Find left window position
+    bL := Length(pS);
+    if bL < 18 then bL:=18;
+    x1 := (40 - 2 - bL) div 2;
+    x2 := (bL + 2 - 18) div 2 + 1;
+
+    // Show window
+    bW := WOpen(x1, 10, bL + 2, 6, WOFF);
+    WOrn(bW, WPTOP, WPCNT, 'Confirm');
+    WPrint(bW, WPCNT, 2, WOFF, pS);
+    GButton(bW, x2, 4, GHORZ, GDISP, 2, buttons);
+
+    
+    repeat
+        // Buttons to confirm
+        bM := GButton(bW, x2, 4, GHORZ, GEDIT, 2, buttons);
+        GButton(bW, x2, 4, GHORZ, GDISP, 2, buttons);
+    until bM <> XTAB;
+    
+    // Check for acceptance (OK button), and set exit flag
+    if bM = 1 then Result := true
+    else Result := false;
+
+    // Close window
+    WClose(bW);
+end;
 
 // ------------------------------------------------------------
 // Func...: GProg(bN, x, y, bS: Byte)
@@ -96,21 +143,22 @@ end;
 
 
 // ------------------------------------------------------------
-// Func...: GButton(bN, x, y, bD, bS: Byte; pA: TStringArray): Byte
+// Func...: GButton(bN, x, y, bO, bD, bS: Byte; pA: TStringArray): Byte
 // Desc...: Displays buttons and get choice
 // Param..: bN = Window handle number
 //           x = Column of window to place buttons
 //           y = Row of window to place buttons
+//          bO = Orientation of button placement
 //          bD = Initial selected button (0 to display and exit)
 //          bS = Number of buttons
 //          pA = Array of button strings
 // Notes..: Button ornaments should be defined in strings.
 //          Max length of all buttons is 38.
 // ------------------------------------------------------------
-function GButton(bN, x, y, bD, bS: Byte; pA: TStringArray): Byte;
+function GButton(bN, x, y, bO, bD, bS: Byte; pA: TStringArray): Byte;
 var
     bF: Boolean;
-    bL, bK, bP: Byte;
+    bL, bK, xp, yp: Byte;
 begin
     bF := false;
 
@@ -121,22 +169,29 @@ begin
     while not bF do
     begin
         // Set drawing position offset
-        bP := 0;
-
+        xp := 0;
+        yp := 0;
         // Display buttons
         for bL := 0 to bS - 1 do
         begin
             // Display button (inverse if the selected one)
             if Result = bL + 1 then
             begin
-                WPrint(bN, x + bP, y, WON, pA[bL]);
+                WPrint(bN, x + xP, y + yP, WON, pA[bL]);
             end
             else begin
-                WPrint(bN, x + bP, y, WOFF, pA[bL]);
+                WPrint(bN, x + xP, y + yP, WOFF, pA[bL]);   
             end;
 
-            // Increase drawing position by button length
-            Inc(bP, Length(pA[bL]));
+            // Horizontal orientation
+            if bO = GHORZ then
+            begin
+                // Increase drawing position by button length
+                Inc(xP, Length(pA[bL]));
+            end
+            else begin
+                Inc(yP,2);
+            end;
         end;
 
         // If display item is 0, exit
@@ -200,7 +255,7 @@ function GCheck(bN, x, y, bI, bD: Byte): Byte;
 var
     bF: Boolean;
     bK, bC: Byte;
-    tmpStr: string;
+    tmpStr: string[1];
 begin
     bF := false;
 
@@ -240,10 +295,10 @@ begin
                 Result := XESC;
                 bF := true;
             end
-            else if bK = KTAB then
+            else if (bK = KTAB) or (bK = KENTER) then
             begin
                 // Set tab exit and exit flag
-                Result := XTAB;
+                Result := bC;
                 bF := true;
             end
             else if (bK = KSPACE) or (bK = KX) or (bK = KX_S) then
@@ -257,16 +312,12 @@ begin
                     bC := GCON;
                 end;
                 Result := bC;
-                bF := true;
-            end;
+            end
         end;
     end;
 
-    // If current and return are same
-    if Result = bC then
-    begin
         // Show exit value
-        if Result = GCON then
+        if bC = GCON then
         begin
             tmpStr := 'X';
         end
@@ -274,18 +325,6 @@ begin
             tmpStr := ' ';
         end;
         WPrint(bN, x + 1, y, WOFF, tmpStr);
-    end
-    else begin
-        // Show default value (no change)
-        if bD = GCON then
-        begin
-            tmpStr := 'X';
-        end
-        else begin
-            tmpStr := ' ';
-        end;
-        WPrint(bN, x + 1, y, WOFF, tmpStr);
-    end;
 end;
 
 
@@ -394,22 +433,233 @@ begin
                 Result := XESC;
                 bF := true;
             end
-            // Tab
-            else if bK = KTAB then
-            begin
-                Result := XTAB;
-                bF := true;
-            end
             // Space
             else if bK = KSPACE then
             begin
                 Result := bC;
             end
-            // Enter
-            else if bK = KENTER then
+            // Tab or Enter
+            else if (bK = KTAB) or (bK = KENTER) then
             begin
                 Result := bC;
                 bF := true;
+            end;
+        end;
+    end;
+end;
+
+// ------------------------------------------------------------
+// Func...: GList(bN, x, y, bE, bI, bV, bS: Byte; pS: TStringArray): Byte;
+// Desc...: Display list and get choice
+// Param..: bN = Window handle number
+//           x = Column of window to place list
+//           y = Row of window to place list
+//          bE = Edit or display indicator (0 to display and exit)
+//          bI = Initial selected option
+//          bV = Size of the List to display
+//          bS = Number of items in the List
+//          pS = Pointer to array of list option strings
+// ------------------------------------------------------------
+function GList(bN, x, y, bE, bI, bV, bS: Byte; pS: TStringArray): Byte;
+var
+    bF: Boolean;
+    bStart, bEnd, bK, bL, bM, bC, xp, yp: Byte;
+    tmp, size: Byte;
+    line: String[40];
+
+begin
+    bF := false;
+
+    // Set default return and current button tod default passed in
+    Result := bI;
+    bC := bI - 1; // calculate array index
+    if bI > bV then
+        bStart := bI - bV
+    else bStart := 0;
+    size:=0;
+
+    // Loop until exit
+    while not bF do
+    begin
+        // Set drawing position
+        xp := 0;
+        yp := 0;
+        bEnd := WMin(bStart + bV - 1, bS - 1);
+        
+        for bL := 0 to bS - 1 do
+        begin
+            tmp:= Length(pS[bL]);
+            if size < tmp then size:= tmp;
+        end;
+        SetLength(line, size);
+        
+        // Display buttons
+        for bL := bStart to bEnd do
+        begin
+            // If current item then add pointer
+            if (bL = bC)  then
+                tmp:=WON
+            else
+                tmp:=WOFF;
+
+            line:= pS[bL];
+            xp:= Length(line);
+            SetLength(line,size);
+            FillChar(@line[xp + 1], size - xp, CHSPACE);
+            WPrint(bN, x, y + yp, tmp, line);
+            Inc(yp);
+        end;
+        
+        // If initial item is display only, set exit flag
+        if bE = GDISP then
+        begin
+            bF := true;
+        end
+        // Not display, edit, do it.
+        else begin
+            // Get keystroke
+            bK := WaitKCX(WOFF);
+
+            // Process keystrokes
+            // Up or left
+            if (bK = KLEFT) or (bK = KPLUS) or (bK = KUP) or (bK = KMINUS) then
+            begin
+                // // Decrement and check for underrun
+                if (bC > 0) then Dec(bC);
+                if (bC < bStart) then Dec(bStart) 
+            end
+            // Down or right
+            else if (bK = KRIGHT) or (bK = KASTER) or (bK = KDOWN) or (bK = KEQUAL) then
+            begin
+                // // Increment and check for overrun
+                if (bC < bS - 1) then Inc(bC);
+                if (bC > bStart + bV - 1) then Inc(bStart);
+            end
+            // ESC
+            else if bK = KESC then
+            begin
+                Result := XESC;
+                bF := true;
+            end
+            // Space
+            else if bK = KSPACE then
+            begin
+                Result := bC + 1;
+            end
+            // Tab or Enter
+            else if (bK = KTAB) or (bK = KENTER) then
+            begin
+                Result := bC + 1;
+                bF := true;
+            end;
+        end;
+    end;
+end;
+
+// ------------------------------------------------------------
+// Func...: GCombo(bN, x, y, bE, bI, bS: Byte; pS: TStringArray): Byte;
+// Desc...: Display list and get choice
+// Param..: bN = Window handle number
+//           x = Column of window to place list
+//           y = Row of window to place list
+
+//          bE = Edit or display indicator (0 to display and exit)
+//          bI = Initial selected option
+//          bS = Number of options
+//          pS = Pointer to array of list option strings
+// ------------------------------------------------------------
+function GCombo(bN, x, y, bE, bI, bS: Byte; pS: TStringArray): Byte;
+var
+    bF, bM: Boolean;
+    bL, bK, bC: Byte;
+    bZ: Byte;
+    bA, i: Byte;
+
+begin
+    bF:= false;
+    bM:= false; // flag to display options or accept value
+
+    // Set default return and current button to default passed in
+    Result := bI;
+    bC := bI;
+
+    // calculate lenght of longeest string in pS
+    for i := 0 to bS - 1 do
+    begin
+        bA:= Length(pS[i]);
+        if bA > bL then bL:= bA;
+    end;
+    
+    // Loop until exit
+    while not bF do
+    begin
+        WPrint(bN, x, y, WOFF, pS[bC - 1]);
+        WPos(bN, x + bL, y);
+        WPut(bN, CHDN);
+        // Display options
+        // If initial item is display only, set exit flag
+        if bE = GDISP then
+        begin
+            bF := true;
+        end
+        // Not display, edit, do it.
+        else begin
+            WPrint(bN, x, y, WON, pS[bC - 1]);
+            WPos(bN, x + bL, y);
+            WPut(bN, CHDN_I);
+            // Get keystroke
+            bK := WaitKCX(WOFF);
+
+            // Process keystrokes
+            // Up or left
+            if (bK = KLEFT) or (bK = KPLUS) or (bK = KUP) or (bK = KMINUS) then
+            begin
+                // Decrement and check for underrun
+                Dec(bC);
+                if bC < 1 then
+                begin
+                    bC := bS;
+                end;
+            end
+            // Down or right
+            else if (bK = KRIGHT) or (bK = KASTER) or (bK = KDOWN) or (bK = KEQUAL) then
+            begin
+                // Increment and check for overrun
+                Inc(bC);
+                if bC > bS then
+                begin
+                    bC := 1;
+                end;
+            end
+            // ESC
+            else if bK = KESC then
+            begin
+                Result := XESC;
+                bF := true;
+            end
+            // Tab
+            else if bK = KTAB then
+            begin
+                // Result := XTAB;
+                Result := bC;
+                bF := true;
+            end
+            else if bK = KENTER then
+            begin
+                if not bM then
+                begin
+                    // calculating position based on parent window
+                    bZ:=WOpen(baW.bX[bN] + x - 1, baW.bY[bN] + y + 1, bL + 2, bS + 2, WOFF);
+
+                    bC:=WMenu(bZ, 1, 1, GVERT, WON, bC, bS, pS);
+                    WClose(bZ);
+                    bM := true;
+
+                end
+                else begin
+                    Result := bC;
+                    bF := true;
+                end;
             end;
         end;
     end;
@@ -493,13 +743,7 @@ begin
                 bF := true;
                 cL := ByteToStr3(bI);
             end
-            else if bK = KTAB then
-            begin
-                Result := XTAB;
-                bF := true;
-                cL := ByteToStr3(bI);
-            end
-            else if bK = KENTER then
+            else if (bK = KTAB) or (bK = KENTER) then
             begin
                 Result := bD;
                 bF := true;
@@ -548,7 +792,7 @@ begin
     begin
         // Copy display string from edit buffer
         SetLength(cD, bS);
-        Move(@cE[bD + 1], @cD[1], bs);
+        Move(@cE[bD + 1], @cD[1], bS);
 
         // Inverse the cursor char & make sure it doesnt run past visible end
         bI := bE - bD;
@@ -599,7 +843,11 @@ begin
             if bE > 0 then
             begin
                 Dec(bE);
-                cE[bE + 1] := CHSPACE;
+                // cE[bE + 1] := CHSPACE;
+                for bL := bE + 1 to bZ - 1 do
+                begin
+                    cE[bL] := cE[bL + 1];
+                end;
             end;
         end
         // Is internal code Shift_Del?  (clear line)
@@ -678,7 +926,7 @@ begin
             begin
                 bP := true;
             end
-            // For ALNUM, allow _ 0-9 A-Z a-z
+            // For ALNUM, allow ' ' 0-9 A-Z a-z
             else if bT = GALNUM then
             begin
                 if (bC = 32) or ((bC >= 48) and (bC <= 57)) or
@@ -688,7 +936,7 @@ begin
                     bP := true;
                 end;
             end
-            // For ALPHA, allow _ A-Z a-z
+            // For ALPHA, allow ' ' A-Z a-z
             else if bT = GALPHA then
             begin
                 if (bC = 32) or ((bC >= 65) and (bC <= 90)) or
@@ -702,6 +950,17 @@ begin
             begin
                 if (bC = 45) or (bC = 46) or
                    ((bC >= 48) and (bC <= 57)) then
+                begin
+                    bP := true;
+                end;
+            end
+            // For FILE, allow . _ - 0-9 A-Z a-z
+            else if bT = GFILE then
+            begin
+                if (bC = 45) or (bC = 46) or
+                   ((bC >= 48) and (bC <= 57)) or
+                   ((bC >= 65) and (bC <= 90)) or
+                   ((bC >= 97) and (bC <= 122)) then
                 begin
                     bP := true;
                 end;

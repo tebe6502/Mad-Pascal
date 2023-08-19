@@ -1,11 +1,12 @@
 // Library: a8defines.pas
 // Desc...: Atari 8 Bit Library Definitions
-// Author.: Wade Ripkowski, amarok
-// Date...: 2022.09
+// Author.: Wade Ripkowski, amarok, MADRAFi
+// Date...: 2023.03
 // License: GNU General Public License v3.0
 // Note...: Requires: a8defwin.pas
 //          -Converted from C
 // Revised:
+// - Added CHDN_I definition
 
 unit a8defines;
 
@@ -13,7 +14,7 @@ interface
 
 const
     // Version
-    LIB_VERSION = '1.0.0';
+    LIB_VERSION = '1.2.1';
 
     // Window Record and Memory Alloc
     WRECSZ = 10;
@@ -47,6 +48,7 @@ const
     GALNUM = 1;
     GALPHA = 2;
     GNUMER = 3;
+    GFILE  = 4;
 
     // Menu Exits
     XESC  = 253;
@@ -54,41 +56,41 @@ const
     XNONE = 255;
 
     // OS Registers
-    DMACTL = 559;
-    COLDST = 580;
-    GPRIOR = 623;
+    // DMACTL = 559;
+    // COLDST = 580;
+    // GPRIOR = 623;
     INVFLG = 694;
     SHFLOK = 702;
     HELPFG = 732;
     KEYPCH = 764;
-    GRACTL = 53277;
+    // GRACTL = 53277;
     CONSOL = 53279;
-    PMBASE = 54279;
+    // PMBASE = 54279;
 
     // PM Registers
-    HPOSP0 = 53248;
-    HPOSP1 = 53249;
-    HPOSP2 = 53250;
+    // HPOSP0 = 53248;
+    // HPOSP1 = 53249;
+    // HPOSP2 = 53250;
 
     // Screen Bits
     ALMARG = 82;
     RSCRN  = 88;
-    PCOLR0 = 704;
-    PCOLR1 = 705;
-    PCOLR2 = 706;
-    PCOLR3 = 707;
-    AFOREG = 709;
-    ABACKG = 710;
-    ABORDR = 712;
+    // PCOLR0 = 704;
+    // PCOLR1 = 705;
+    // PCOLR2 = 706;
+    // PCOLR3 = 707;
+    // AFOREG = 709;
+    // ABACKG = 710;
+    // ABORDR = 712;
     ACURIN = 752;
 
     // Colors
-    CBLACK  = 0;
-    CWHITE  = 14;
-    CGREEN  = 210;
-    CBLUE   = 146;
-    CRED    = 50;
-    CYELLOW = 222;
+    // CBLACK  = 0;
+    // CWHITE  = 14;
+    // CGREEN  = 210;
+    // CBLUE   = 146;
+    // CRED    = 50;
+    // CYELLOW = 222;
 
     // Keystroke Values
     KNOMAP = 199;
@@ -162,9 +164,11 @@ const
     CHDELLN = #156;
     CHINVSP = #160;
     CHBUZ   = #253;
-    CHRGT_I = #159;
     CHO_L   = #111;
+    CHDN_I  = #157;
+    CHRGT_I = #159;
     CHI_I   = #201;
+    
 
 implementation
 
