@@ -115,6 +115,10 @@ Simple binary data manipulation tool written in javascript (export to Action!, A
 
 CutAs, FiDL, SprED, Sprite XL
 
+### [A8 Mad-Pascal Window Library](https://github.com/Ripjetski6502/A8MadPascalLibrary)
+
+This is a text mode windowing library complete with window controls and modern gadgets (widgets). The gadgets allow you to build input forms that use buttons, radio buttons, input strings (with scrolled lengths and type restrictions), check boxes, progress bars, etc. This allows you to build applications with "modern"-ish interfaces.
+
 ## Projects in Mad-Pascal
 
 * [StarVagrant](https://github.com/MADRAFi/StarVagrant)
@@ -145,7 +149,6 @@ CutAs, FiDL, SprED, Sprite XL
 * [Flob](https://gitlab.com/bocianu/flob)
 * [Ultima V](https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483)
 * [mad-pascal-playground](https://github.com/zbyti/mad-pascal-playground)
-* [A8 Mad-Pascal Window Library](https://github.com/Ripjetski6502/A8MadPascalLibrary)
 * [Cartfall](https://gitlab.com/bocianu/cartfall)
 * [Unicode](https://gitlab.com/amarok8bit/unicode)
 * [Arcadia](https://gitlab.com/amarok8bit/arcadia)
