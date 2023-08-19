@@ -27,7 +27,7 @@ uses
 procedure StrInv(pS: PByte; bS: Byte);
 procedure StrAI(pS: PByte; bS: Byte);
 function CharAI(bC: Byte): Byte;
-function ByteToStr3(bN: Byte): string;
+function ByteToStr3(bN: Byte): string[3];
 
 implementation
 
@@ -66,23 +66,7 @@ begin
     // Process each element
     for bL := 0 to bS - 1 do
     begin
-        if (pS^ >= 0) and (pS^ <= 31) then
-        begin
-            pS^ := pS^ + 64;
-        end
-        else if (pS^ >= 32) and (pS^ <= 95) then
-        begin
-            pS^ := pS^ - 32;
-        end
-        else if (pS^ >= 128) and (pS^ <= 159) then
-        begin
-            pS^ := pS^ + 64;
-        end
-        else if (pS^ >= 160) and (pS^ <= 223) then
-        begin
-            pS^ := pS^ - 32;
-        end;
-
+        pS^ := byte(ata2int(char(pS^)));
         // Increment pointer to next char
         Inc(pS);
     end;
@@ -96,34 +80,16 @@ end;
 // ------------------------------------------------------------
 function CharAI(bC: Byte): Byte;
 begin
-    if (bC >= 0) and (bC <= 31) then
-    begin
-        Result := bC + 64;
-    end
-    else if (bC >= 32) and (bC <= 95) then
-    begin
-        Result := bC - 32;
-    end
-    else if (bC >= 128) and (bC <= 159) then
-    begin
-        Result := bC + 64;
-    end
-    else if (bC >= 160) and (bC <= 223) then
-    begin
-        Result := bC - 32;
-    end
-    else begin
-        Result := bC;
-    end;
+     Result := byte(ata2int(char(bC)));
 end;
 
 
 // ------------------------------------------------------------
-// Func...: ByteToStr3(bN: Byte): string;
+// Func...: ByteToStr3(bN: Byte): string[3];
 // Desc...: Converts byte number into string like %3d
 // Param..: bN = number to convert
 // ------------------------------------------------------------
-function ByteToStr3(bN: Byte): string;
+function ByteToStr3(bN: Byte): string[3];
 begin
     Result := '   ';
     Result[3] := Char(Byte('0') + bN mod 10);

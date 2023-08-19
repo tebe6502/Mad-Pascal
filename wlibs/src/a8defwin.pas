@@ -17,9 +17,9 @@ uses
 type
     // Window handle info
     td_wnrec = record
-        bU, bX, bY, bW, bH, bI: array[0..10] of Byte;
-        cM: array[0..10] of ^Byte;
-        cZ: array[0..10] of Word;
+        bU, bX, bY, bW, bH, bI: array[0..WRECSZ] of Byte;
+        cM: array[0..WRECSZ] of ^Byte;
+        cZ: array[0..WRECSZ] of Word;
     end;
 
     // Window position - virtual cursor
@@ -27,7 +27,7 @@ type
         vX, vY: Byte;
     end;
 
-    TStringArray = array[0..0] of string;
+    TStringArray = array[0..0] of String[40];
 
 implementation
 

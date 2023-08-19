@@ -13,6 +13,8 @@ I ran into some limitations with the Action! version in a project regarding memo
 
 Once the libraries were published and announced, Amarok on AtariAge kindly converted the C version source files of the library to Mad-Pascal.  Subsequently I created an API document to match the others for the Mad-Pascal version.  The Mad-Pascal version would not be here if it were not for Amarok!  Thank you Amarok for the conversion!
 
+In early 2023, MADRAFi converted the last few window functions over (WClr, and WDiv), added several gadgets (GConfirm, GCombo, and GList), and a horizontal menu (MenuH), as well as creating another full application demo that demonstrates the new features in the form of a file picker form.  Thank you MADRAFi for the contributions!
+
 License: GNU General Public License v3.0
 
 See the LICENSE file for full license information.

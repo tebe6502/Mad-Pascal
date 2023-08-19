@@ -64,7 +64,7 @@ begin
     while not bD do
     begin
         // Display menu and get choice
-        bC := MenuV(bW1, 1, 1, WOFF, 1, 3, pcM);
+        bC := WMenu(bW1, 1, 1, GVERT,WOFF, 1, 3, pcM);
 
         // Process choice
         case bC of
@@ -108,7 +108,7 @@ begin
     while not bD do
     begin
         // Call menu
-        bC := MenuV(bW2, 1, 2, WOFF, 1, 5, pcM);
+        bC := WMenu(bW2, 1, 2, GVERT, WOFF, 1, 5, pcM);
 
         // Process choice
         case bC of

@@ -1,8 +1,8 @@
 // --------------------------------------------------
 // Library: a8libmenu.pas
 // Desc...: Atari 8 Bit Menu Library
-// Author.: Wade Ripkowski, amarok
-// Date...: 2022.09
+// Author.: Wade Ripkowski, amarok, MADRAFi
+// Date...: 2023.03
 // License: GNU General Public License v3.0
 // Note...: Requires: a8defines.pas
 //          -Converted from C
@@ -10,6 +10,7 @@
 //          a8libstr.pas
 //          a8libmisc.pas
 // Revised:
+// - Merged MenuH and MenuV to single routine WMenu
 // --------------------------------------------------
 
 unit a8libmenu;
@@ -26,47 +27,35 @@ uses
 // --------------------------------------------------
 // Function Prototypes
 // --------------------------------------------------
-function MenuV(bN, x, y, bI, bS, bC: Byte; pS: TStringArray): Byte;
-
+function WMenu(bN, x, y, bO, bI, bS, bC: Byte; pS: TStringArray): Byte;
 
 implementation
 
 uses
     a8libwin, a8libmisc;
 
-// ------------------------------------------------------------
-// Func...: MenuV(bN, x, y, bI, bS, bC: Byte; pS: TStringArray): Byte
-// Desc...: Vertical menu
-// Param..: bN = Window handle number
-//           x = window column for cursor
-//           y = window row for cursor
-//          bI = Inverse flag (WON = leave on at selection)
-//          bS = Start item number
-//          bC = Number of menu items
-//          pS = pointer to array of menu item strings
-// Return.: Selected item #, ESC (XESC), or TAB (XTAB)
-// ------------------------------------------------------------
-function MenuV(bN, x, y, bI, bS, bC: Byte; pS: TStringArray): Byte;
+function WMenu(bN, x, y, bO, bI, bS, bC: Byte; pS: TStringArray): Byte;
 var
     bF: Boolean;
-    bL, bK, tmp: Byte;
+    bL, bK, tmp, l, pos: Byte;
     cL: string[39];
-    tmpStr: string;
+    tmpStr: string[39];  //40 - 1 
 begin
     bF := false;
-
     // Set default return to start item #
     Result := bS;
 
     // Continue until finished
     while not bF do
     begin
+        pos:=x;
         // Display each item
         for bL := 0 to bC - 1 do
         begin
             tmpStr := pS[bL];
             SetLength(cL, Length(tmpStr));
-            Move(@tmpStr[1], @cL[1], Length(cL));
+            l:=Length(cL);
+            Move(@tmpStr[1], @cL[1], l);
 
             // Display item at row count - inverse if start item
             if bL + 1 = Result then
@@ -76,7 +65,14 @@ begin
             else begin
                 tmp := WOFF;
             end;
-            WPrint(bN, x, y + bL, tmp, cL);
+            if bO = GHORZ then
+            begin
+                WPrint(bN, pos + bL, y, tmp, cL);
+                pos:= pos + l;
+            end
+            else begin
+                WPrint(bN, x, y + bL, tmp, cL);
+            end;
         end;
 
         // Get key (no inverse key)
@@ -85,7 +81,7 @@ begin
         // Process key
         if (bK = KDOWN) or (bK = KEQUAL) or (bK = KRIGHT) or (bK = KASTER) then
         begin
-            // Increment (move down list)
+            // Increment (move right list)
             Inc(Result);
 
             // Check for overrun and roll to top
@@ -96,7 +92,7 @@ begin
         end
         else if (bK = KUP) or (bK = KMINUS) or (bK = KLEFT) or (bK = KPLUS) then
         begin
-            // Decrement (move up list)
+            // Decrement (move left list)
             Dec(Result);
 
             // Check for underrun and roll to bottom
@@ -134,7 +130,11 @@ begin
         tmpStr := pS[bL - 1];
         SetLength(cL, Length(tmpStr));
         Move(@tmpStr[1], @cL[1], Length(cL));
-        WPrint(bN, x, y + bL - 1, WOFF, cL);
+        
+        if bO = GHORZ then
+            WPrint(bN, pos + bL - 1, y, WOFF, cL)
+        else
+            WPrint(bN, x, y + bL - 1, WOFF, cL);
     end;
 end;
 

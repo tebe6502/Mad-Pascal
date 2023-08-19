@@ -1,8 +1,8 @@
 // ------------------------------------------------------------
 // Program: appdemo.pas
 // Desc...: A8 Library Demo Application
-// Author.: Wade Ripkowski, amarok
-// Date...: 20220914
+// Author.: Wade Ripkowski, amarok, MADRAFi
+// Date...: 2023.03
 // License: GNU General Public License v3.0
 // Notes..: mp.exe src\appdemo.pas -ipath:src
 //          mads.exe src\appdemo.a65 -x -i:<MadPascalPath>\base -o:bin\appdemo.xex
@@ -114,7 +114,7 @@ begin
     GCheck(bW1, 21, 13, GDISP, bChbp);
     GCheck(bW1, 21, 14, GDISP, bChcp);
 
-    GButton(bW1, 21, 16, GDISP, 2, paB);
+    GButton(bW1, 21, 16, GHORZ, GDISP, 2, paB);
 
     // Display fields as is
     WPrint(bW1, 8, 2, WOFF, cA);
@@ -213,8 +213,8 @@ begin
         WOrn(bW1, WPBOT, WPLFT, cF);
 
         // Prompt to accept form and redisplay buttons
-        bM := GButton(bW1, 21, 16, GEDIT, 2, paB);
-        GButton(bW1, 21, 16, GDISP, 2, paB);
+        bM := GButton(bW1, 21, 16, GHORZ, GEDIT, 2, paB);
+        GButton(bW1, 21, 16, GHORZ, GDISP, 2, paB);
     until bM <> XTAB;
 
     // Check for acceptance (OK button), and set exit flag
@@ -309,7 +309,7 @@ begin
     WPrint(bW1, 4,      9, WOFF, 'V1-2021-Atari8: Action!');
     WPrint(bW1, 2,     10, WOFF, 'V1-C-2022-Atari8: C (CC65)');
     WPrint(bW1, 2,     11, WOFF, 'V1-PAS-2022-Atari8: PAS (MadPascal)');
-    WPrint(bW1, WPCNT, 13, WON,  ' Ok ');
+    WPrint(bW1, WPCNT, 13, WON,  '[  Ok  ]');
 
     // Wait for key
     WaitKCX(WOFF);
@@ -332,7 +332,7 @@ const
 
 begin
     bD := false;
-
+    bC := 1;
     // Open window
     bW1 := WOpen(16, 10, 14, 5, WOFF);
     WOrn(bW1, WPTOP, WPLFT, 'Sub-Menu');
@@ -341,7 +341,7 @@ begin
     while not bD do
     begin
         // Display menu and get choice
-        bC := MenuV(bW1, 1, 1, WOFF, 1, 3, pcM);
+        bC := MenuV(bW1, 1, 1, WOFF, bC, 3, pcM);
 
         // Process choice
         case bC of
@@ -366,6 +366,7 @@ const
       (' Input Form   ', ' Progress Bar ', ' Sub-Menu     ', ' About        ', ' Exit         ');
 begin
     bD := false;
+    bC := 1;
 
     // Setup screen
     WInit;
@@ -383,7 +384,7 @@ begin
     while not bD do
     begin
         // Call menu
-        bC := MenuV(bW2, 1, 2, WON, 1, 5, pcM);
+        bC := MenuV(bW2, 1, 2, WON, bC, 5, pcM);
 
         // Process choice
         case bC of
