@@ -15,10 +15,6 @@ unit hsc_util;
 interface
 uses sio,fn_sio;
 
-
-var cookieInfo : array [0..5] of byte = ( $c1,$b0,$ca,$fe,APPKEYMODE_READ,0);  // @nodoc 
-	boardSize : word;  (* @var Number of bytes received during last HSC_Get command *)
-
 const 
 	APPKEYMODE_READ = 0;  // @nodoc 
     SIO_FUJICMD_READ_APPKEY = $DD;  // @nodoc 
@@ -27,6 +23,9 @@ const
     _R = $40;  // @nodoc 
     _W = $80;  // @nodoc 
     _NO = $00;  // @nodoc 
+
+var cookieInfo : array [0..5] of byte = ( $c1,$b0,$ca,$fe,APPKEYMODE_READ,0);  // @nodoc 
+	boardSize : word;  (* @var Number of bytes received during last HSC_Get command *)
 
 type AOC = array [0..0] of char;  // @nodoc 
 
