@@ -155,6 +155,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [atascii compo3](https://gitlab.com/bocianu/atasciicompo3)
 * [ProHiBan](https://github.com/zbyti/ProHiBan)
 * [The Hangmad](https://gitlab.com/bocianu/thehangmad)
+* [Block Attack](https://github.com/tebe6502/Block-Attack)
 
 ## Benchmarks
 
