@@ -10697,6 +10697,7 @@ WHILETOK:
 	      forBPL := ord(ConstVal < 128);
 	    end else begin
 	      j := CompileExpression(j, ExpressionType, Ident[IdentIndex].DataType);
+
 	      ExpandParam(Ident[IdentIndex].DataType, ExpressionType);
 	    end;
 
@@ -10704,6 +10705,7 @@ WHILETOK:
 	      iError(j, OrdinalExpectedFOR);
 
 	    ActualParamType := ExpressionType;
+
 
 	    GenerateAssignment(ASPOINTER, DataSize[Ident[IdentIndex].DataType], IdentIndex);  //!!!!!
 
@@ -10761,6 +10763,10 @@ WHILETOK:
 
 	        if not (ExpressionType in OrdinalTypes) then
 		  iError(j, OrdinalExpectedFOR);
+
+
+		if DataSize[ExpressionType] > DataSize[Ident[IdentIndex].DataType] then
+		  Error(i, 'FOR loop counter variable type (' + InfoAboutToken(Ident[IdentIndex].DataType) + ') is smaller than the type of the maximum range (' + InfoAboutToken(ExpressionType) +')' );
 
 
 		if ((ActualParamType in UnsignedOrdinalTypes) and (ExpressionType in UnsignedOrdinalTypes)) or
@@ -12499,6 +12505,7 @@ var ActualParamType, ch: byte;
     NumActualParams, NumActualParams_, NumAllocElements_: cardinal;
     ConstVal: Int64;
 
+// ----------------------------------------------------------------------------
 
 procedure SaveDataSegment(DataType: Byte);
 begin
@@ -12517,8 +12524,6 @@ end;
 
 
 // ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
 
 procedure SaveData;
 begin
@@ -12581,6 +12586,7 @@ begin
 
 end;
 
+// ----------------------------------------------------------------------------
 
 begin
 
@@ -12654,7 +12660,146 @@ begin
 
  Result := i;
 
+end;	//ReadDataArray
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+function ReadDataOpenArray(i: integer; ConstDataSize: integer; const ConstValType: Byte; out NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
+var ActualParamType, ch: byte;
+    NumActualParams: cardinal;
+    ConstVal: Int64;
+
+// ----------------------------------------------------------------------------
+
+procedure SaveDataSegment(DataType: Byte);
+begin
+
+   if StaticData then
+    SaveToStaticDataSegment(ConstDataSize, ConstVal + ord(Add), DataType)
+   else
+    SaveToDataSegment(ConstDataSize, ConstVal + ord(Add), DataType);
+
+   if DataType = DATAORIGINOFFSET then
+    inc(ConstDataSize, DataSize[POINTERTOK] )
+   else
+    inc(ConstDataSize, DataSize[DataType] );
+
 end;
+
+
+// ----------------------------------------------------------------------------
+
+procedure SaveData;
+begin
+
+  i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
+
+
+  if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
+
+    if StaticData then
+      Error(i, 'Memory overlap due conversion CHAR to STRING, use VAR instead CONST');
+
+    ch := Tok[i].Value;
+    DefineStaticString(i, chr(ch));
+
+    ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
+    Tok[i].Value := ch;
+
+    ActualParamType := STRINGPOINTERTOK;
+
+  end;
+
+
+  if (ConstValType in StringTypes + [CHARTOK, STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
+    iError(i, IllegalExpression);
+
+
+  if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = CHARTOK) then
+   iError(i, IncompatibleTypes, 0, ActualParamType, ConstValType);
+
+
+  if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (ActualParamType = REALTOK) then
+   ActualParamType := ConstValType;
+
+  if (ConstValType in RealTypes) and (ActualParamType in IntegerTypes) then begin
+   Int2Float(ConstVal);
+   ActualParamType := ConstValType;
+  end;
+
+  if (ConstValType = SHORTREALTOK) and (ActualParamType = REALTOK) then
+   ActualParamType := SHORTREALTOK;
+
+
+  if ActualParamType = DATAORIGINOFFSET then
+
+   SaveDataSegment(DATAORIGINOFFSET)
+
+  else begin
+
+   if ConstValType in IntegerTypes then begin
+
+    if GetCommonConstType(i, ConstValType, ActualParamType, (ActualParamType in RealTypes + Pointers)) then
+     warning(i, RangeCheckError, 0, ConstVal, ConstValType);
+
+   end else
+    GetCommonConstType(i, ConstValType, ActualParamType);
+
+   SaveDataSegment(ConstValType);
+
+  end;
+
+end;
+
+// ----------------------------------------------------------------------------
+
+begin
+
+  if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
+
+   NumAllocElements := Tok[i].StrLength;
+
+   for NumActualParams:=1 to NumAllocElements do begin
+
+    if NumActualParams > Tok[i].StrLength then
+     ConstVal:=byte(' ')
+    else
+     ConstVal := byte(StaticStringData[Tok[i].StrAddress - CODEORIGIN + NumActualParams]);
+
+    SaveDataSegment(CHARTOK);
+   end;
+
+   Result := i;
+   exit;
+  end;
+
+
+  CheckTok(i, OBRACKETTOK);
+
+  NumActualParams := 0;
+  NumAllocElements := 0;
+
+  repeat
+
+  inc(NumActualParams);
+
+  SaveData;
+
+  inc(i);
+
+ until Tok[i].Kind <> COMMATOK;
+
+
+ CheckTok(i, CBRACKETTOK);
+
+ NumAllocElements := NumActualParams;
+
+ Result := i;
+
+end;	//ReadDataOpenArray
 
 
 // ----------------------------------------------------------------------------
@@ -12940,7 +13085,7 @@ var
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
   IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isExternal, isForward, ImplementationUse,
-  iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
+  open_array, iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
   Tmp, TmpResult: word;
@@ -13618,6 +13763,9 @@ while Tok[i].Kind in
 
   end;
 
+// -----------------------------------------------------------------------------
+//				   LABEL
+// -----------------------------------------------------------------------------
 
   if Tok[i].Kind = LABELTOK then begin
 
@@ -13636,8 +13784,11 @@ while Tok[i].Kind in
    until Tok[i].Kind <> IDENTTOK;
 
    i := i + 1;
-  end;// if LABELTOK
+  end;	// if LABELTOK
 
+// -----------------------------------------------------------------------------
+//				   CONST
+// -----------------------------------------------------------------------------
 
   if Tok[i].Kind = CONSTTOK then
     begin
@@ -13667,9 +13818,27 @@ while Tok[i].Kind in
 	end else
 	if Tok[i + 2].Kind = COLONTOK then begin
 
-	  j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
+	  open_array := false;
 
-	  if Tok[i +3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
+	  if (Tok[i + 3].Kind = ARRAYTOK) and (Tok[i + 4].Kind = OFTOK) then begin
+
+	   j := CompileType(i + 5, VarType, NumAllocElements, AllocElementType);
+
+	   NumAllocElements := 1;
+	   AllocElementType := VarType;
+	   VarType := POINTERTOK;
+
+	   open_array := true;
+
+	  end else begin
+
+	   j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
+
+	   if Tok[i + 3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
+	  end;
+
 
 	  if (VarType in Pointers) and (NumAllocElements = 0) then
 	   if AllocElementType <> CHARTOK then iError(j, IllegalExpression);
@@ -13688,9 +13857,17 @@ while Tok[i].Kind in
 	  end else
 
 	  if NumAllocElements > 0 then begin
+
 	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, POINTERTOK, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, IDENTTOK);
 
-	   j := ReadDataArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
+
+	   if open_array then begin
+	     j := ReadDataOpenArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
+
+	     Ident[NumIdent].NumAllocElements := NumAllocElements;
+	   end else
+	     j := ReadDataArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
+
 
 	   if NumAllocElements shr 16 > 0 then
 	     inc(NumStaticStrChars, ((NumAllocElements and $ffff) * (NumAllocElements shr 16)) * DataSize[AllocElementType])
@@ -13725,8 +13902,11 @@ while Tok[i].Kind in
     until Tok[i + 1].Kind <> IDENTTOK;
 
     inc(i);
-    end;// if CONSTTOK
+    end;	// if CONSTTOK
 
+// -----------------------------------------------------------------------------
+//				TYPE
+// -----------------------------------------------------------------------------
 
   if Tok[i].Kind = TYPETOK then
     begin
@@ -13755,8 +13935,11 @@ while Tok[i].Kind in
     CheckForwardResolutions;
 
     i := i + 1;
-    end;// if TYPETOK
+    end;	// if TYPETOK
 
+// -----------------------------------------------------------------------------
+//				  VAR
+// -----------------------------------------------------------------------------
 
   if Tok[i].Kind = VARTOK then
     begin
@@ -13805,12 +13988,38 @@ while Tok[i].Kind in
 
       IdType := Tok[i + 1].Kind;
 
-      i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
+      open_array := false;
 
       isAbsolute := false;
       isExternal := false;
 
-      if IdType = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
+      if (IdType = ARRAYTOK) and (Tok[i + 2].Kind = OFTOK) then begin			// array of type [Integer Types]
+
+	i := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
+
+	NumAllocElements := 1;
+	AllocElementType := VarType;
+	VarType := POINTERTOK;
+
+	if Tok[i +1].Kind <> EQTOK then isAbsolute := true;
+
+	ConstVal:=1;
+
+	open_array := true;
+
+      end else begin
+
+        i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
+
+        if IdType = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
+	if (NumAllocElements = 1) or (NumAllocElements = $10001) then begin
+	 ConstVal := 1;
+	 isAbsolute := true;
+	end;
+
+      end;
 
 
       if Tok[i + 1].Kind = REGISTERTOK then begin
@@ -14047,7 +14256,7 @@ while Tok[i].Kind in
        if isExternal then Ident[NumIdent].isExternal := true;
 
 
-       if isAbsolute then
+       if isAbsolute and (open_array = false) then
 
 	VarDataSize := tmpVarDataSize
 
@@ -14162,10 +14371,17 @@ while Tok[i].Kind in
 	   end;
 
 	  end else
-	   if Ident[NumIdent].NumAllocElements = 0 then
+	   if (Ident[NumIdent].NumAllocElements in [0,1]) and (open_array = false) then
 	    iError(i, IllegalExpression)
-	   else 										// array [] of type = ( )
-	    i := ReadDataArray(i, idx, Ident[NumIdent].AllocElementType, Ident[NumIdent].NumAllocElements or Ident[NumIdent].NumAllocElements_ shl 16, false, Tok[i-2].Kind = PCHARTOK);
+	   else
+	    if open_array then begin 								// array of type = [ ]
+	     i := ReadDataOpenArray(i, idx, Ident[NumIdent].AllocElementType, NumAllocElements, false, Tok[i-2].Kind = PCHARTOK);
+
+	     Ident[NumIdent].NumAllocElements := NumAllocElements;
+
+	     inc(VarDataSize, (NumAllocElements-1) * DataSize[Ident[NumIdent].AllocElementType]);
+	    end else										// array [] of type = ( )
+	     i := ReadDataArray(i, idx, Ident[NumIdent].AllocElementType, Ident[NumIdent].NumAllocElements or Ident[NumIdent].NumAllocElements_ shl 16, false, Tok[i-2].Kind = PCHARTOK);
 
 	end;
 

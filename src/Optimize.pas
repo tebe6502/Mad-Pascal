@@ -1690,9 +1690,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if //(pos('SYSTEM.ABS_004C.RESULT', listing[i]) > 0) then begin
-
-   mva(i) and mva(i+1) and mva(i+2) and mva(i+3) then begin
+if (pos('SYSTEM.ABS_004C.RESULT', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
