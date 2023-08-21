@@ -47,7 +47,16 @@ Poke		; optimization build in compiler
 Random
 ReadConfig
 ReadSector
+RolByte
+RolWord
+RolDWord
+RorByte
+RorWord
+RorDWord
 RunError
+SarShortint
+SarSmallint
+SarLongint
 Seek
 SetLength
 Sin		; real, single
