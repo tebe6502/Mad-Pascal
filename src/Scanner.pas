@@ -520,6 +520,36 @@ var
       Param: TDefinesParam;
 
 
+	procedure bin2csv(fn: string);
+	var bin: file;
+	    tmp: byte;
+	    NumRead: integer;
+	    yes: Boolean;
+	begin
+
+	  yes:=false;
+
+	  AssignFile(bin, fn); Reset(bin, 1);
+
+  	  Repeat
+    		BlockRead (bin, tmp, 1, NumRead);
+
+		if NumRead = 1 then begin
+
+	    		if yes then AddToken(GetStandardToken(','), UnitIndex, Line, 1, 0);
+
+	    		AddToken(INTNUMBERTOK, UnitIndex, Line, 1, tmp);
+
+	    		yes:=true;
+	   	end;
+
+  	  Until (NumRead = 0);
+
+	  CloseFile(bin);
+
+	end;
+
+
 	procedure skip_spaces;
 	begin
 
@@ -620,6 +650,16 @@ var
 
      end else
 
+      if (cmd = 'BIN2CSV') then begin
+
+       s := get_string(i, d, false);
+
+       s := FindFile(s, 'BIN2CSV');
+
+       bin2csv(s);
+
+      end else
+
       if (cmd = 'OPTIMIZATION') then begin
 
        s := get_string(i, d);
@@ -668,6 +708,9 @@ var
        repeat
 
        s := get_string(i, d, false);				// don't change the case
+
+       if s = '' then
+       	 Error(NumTok, 'An empty path cannot be used');
 
        AddPath(s);
 
