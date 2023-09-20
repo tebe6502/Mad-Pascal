@@ -1156,7 +1156,7 @@ var
   begin
 
   AssignFile(InFile, fnam );		// UnitIndex = 1 main program
-
+  FileMode := 0;
   Reset(InFile);
 
   Text := '';
