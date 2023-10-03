@@ -63,3 +63,11 @@ skp	cpx >VADR+VLEN
 	cpy <VADR+VLEN
 	bne clr
 .endm
+
+
+.macro	m@fill (adr, cnt)
+	ldy #$7f
+lp	:+:cnt sta :adr+#*$80,y
+	dey
+	bpl lp
+.endm
