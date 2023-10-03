@@ -409,7 +409,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Sqrt(x: Single): Single; overload;
 	function Sqrt(x: float16): float16; overload;
 	function Sqrt(x: Integer): Single; overload;
-	function UpCase(a: char): char;
+	function UpCase(a: char): char; overload;
+	function UpCase(a: string): string; overload;
 	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
 	procedure Val(s: PString; var v: real; var code: byte); overload; //register;
 	procedure Val(s: PString; var v: single; var code: byte); overload; //register;
@@ -1378,7 +1379,7 @@ begin
 end;
 
 
-function UpCase(a: char): char;
+function UpCase(a: char): char; overload;
 (*
 @description:
 Converts a character to uppercase
@@ -1393,6 +1394,36 @@ begin
   'a'..'z': Result := chr(byte(a) - 32)
  else
   Result := a
+ end;
+
+end;
+
+
+function UpCase(a: string): string; overload;
+var i: byte;
+    ch: char;
+(*
+@description:
+Converts characters to uppercase
+
+@param: a - string
+
+@returns: string
+*)
+begin
+
+ Result:=a;
+
+ for i:=1 to length(a) do begin
+ 
+   ch:=a[i];
+
+   case ch of
+    'a'..'z': ch := chr(byte(ch) - 32)
+   end;
+   
+   Result[i] := ch;
+   
  end;
 
 end;
