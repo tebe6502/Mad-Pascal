@@ -1651,6 +1651,47 @@ begin
        end;
 
 
+    if (lda_adr(i+12) or sta_adr(i+13)) and						// lda adr.|				; 12
+       (iy(i+12) or iy(i+13)) and							//         |sta adr.			; 13
+
+       lda_stack(i) and									// lda :STACKORIGIN+9			; 0
+       add_sub_im(i+1) and 								// add|sub #				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
+       lda(i+3) and									// lda :STACKORIGIN+STACKWIDTH+9	; 3
+       adc_sbc_im(i+4) and								// adc|sbc #				; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+9	; 5
+
+       lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
+       add_im_0(i+7) and								// add #$00				; 7
+       tay(i+8) and									// tay					; 8
+       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH+9	; 9
+       adc_im_0(i+10) and								// adc #$00				; 10
+       sta_stack(i+11) then								// sta :STACKORIGIN+STACKWIDTH+9	; 11
+
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
+        (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
+        (copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) and
+        (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) and
+        (copy(listing[i+9], 6, 256) = copy(listing[i+11], 6, 256)) then
+       begin
+	q:=GetWORD(i+1, i+4);
+
+	if add_im(i+1) then
+        	LDA_STA_ADR(i+6, q, '+')
+	else
+        	LDA_STA_ADR(i+6, q, '-');
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	exit(false);
+       end;
+
+
     if (lda_adr(i+18) or sta_adr(i+19)) and						// lda adr.|				; 18
        (iy(i+18) or iy(i+19)) and							//         |sta adr.			; 19
 

@@ -138,6 +138,22 @@ begin
       end;
 
 
+    if (TemporaryBuf[2] = #9'iny') and							// iny			; 2
+       (TemporaryBuf[3] = #9'lda #$00') and						// lda #$00		; 3
+       (pos('asl :STACK', TemporaryBuf[4]) > 0) then					// asl :STACKORIGIN	; 4
+     begin
+       TemporaryBuf[2] := '~';
+
+       if (TemporaryBuf[1] = #9'iny') then begin
+        TemporaryBuf[1] := '~';
+
+        if (TemporaryBuf[0] = #9'iny') then TemporaryBuf[0] := '~';
+
+       end;
+
+     end;
+
+
     if (pos('sta :STACK', TemporaryBuf[0]) > 0) and 					// sta :STACKORIGIN	; 0
        ((TemporaryBuf[1] = #9'iny') or (TemporaryBuf[1] = #9'dey')) and			// iny|dey		; 1
        (pos('lda :STACK', TemporaryBuf[2]) > 0) and					// lda :STACKORIGIN	; 2
@@ -147,6 +163,23 @@ begin
 	TemporaryBuf[0] := '~';
 	TemporaryBuf[2] := '~';
       end;
+
+
+    if (TemporaryBuf[0] = #9'tay') and							// tay			; 0
+       (TemporaryBuf[1] = #9'iny') and							// iny			; 1
+       (TemporaryBuf[2] = #9'iny') then							// iny			; 2
+     begin
+
+       if (TemporaryBuf[3] = #9'iny') then begin					// iny			; 3
+	TemporaryBuf[0] := #9'add #$03';
+
+        TemporaryBuf[3] := '~';
+       end else
+	TemporaryBuf[0] := #9'add #$02';
+
+       TemporaryBuf[1] := #9'tay';
+       TemporaryBuf[2] := '~';
+     end;
 
 
     if (TemporaryBuf[0] = #9'bcc *+7') and						// bcc *+7		; 0
@@ -269,6 +302,26 @@ begin
 
 
    if (pos('mva #', TemporaryBuf[0]) > 0) and						// mva #$xx		; 0
+      (pos('mva #', TemporaryBuf[1]) > 0) and						// mva #$xx		; 1
+      (pos('mva #', TemporaryBuf[2]) > 0) then						// mva #$xx		; 2
+    if (copy(TemporaryBuf[0], 6, 4) = copy(TemporaryBuf[1], 6, 4)) and
+       (copy(TemporaryBuf[1], 6, 4) = copy(TemporaryBuf[2], 6, 4)) then
+     begin
+
+      if (pos('mva #', TemporaryBuf[3]) > 0) then begin					// mva #$yy		; 3
+
+       if (copy(TemporaryBuf[1], 6, 4) = copy(TemporaryBuf[3], 6, 4)) then
+         TemporaryBuf[3] := #9'sta' + copy(TemporaryBuf[3], 10, 256);
+
+      end;
+
+      TemporaryBuf[1] := #9'sta' + copy(TemporaryBuf[1], 10, 256);
+      TemporaryBuf[2] := #9'sta' + copy(TemporaryBuf[2], 10, 256);
+
+     end;
+
+
+   if (pos('mva #', TemporaryBuf[0]) > 0) and						// mva #$xx		; 0
       (pos('mva #', TemporaryBuf[1]) > 0) then						// mva #$xx		; 1
     if (copy(TemporaryBuf[0], 6, 4) = copy(TemporaryBuf[1], 6, 4)) then
      begin
@@ -276,14 +329,11 @@ begin
       if (pos('mva #', TemporaryBuf[2]) > 0) then begin					// mva #$yy		; 2
 
        if (copy(TemporaryBuf[1], 6, 4) = copy(TemporaryBuf[2], 6, 4)) then
-        begin
-          TemporaryBuf[1] := #9'sta' + copy(TemporaryBuf[1], 10, 256);
-          TemporaryBuf[2] := #9'sta' + copy(TemporaryBuf[2], 10, 256);
-        end else
-	  TemporaryBuf[1] := #9'sta' + copy(TemporaryBuf[1], 10, 256);
+         TemporaryBuf[2] := #9'sta' + copy(TemporaryBuf[2], 10, 256);
 
-      end else
-	  TemporaryBuf[1] := #9'sta' + copy(TemporaryBuf[1], 10, 256);
+      end;
+
+      TemporaryBuf[1] := #9'sta' + copy(TemporaryBuf[1], 10, 256);
 
      end;
 

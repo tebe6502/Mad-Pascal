@@ -2796,7 +2796,7 @@ end else// if OBJECTTOK
   AllocElementType := 0;
 
   if Types[RecType].Size > 255 then
-   Error(i, 'Record size beyond the 256 bytes limit' + inttostr(Types[RecType].Size));
+   Error(i, 'Record size (' + inttostr(Types[RecType].Size) + ') beyond the 256 bytes limit');
 
   Result := i;
 end else// if RECORDTOK

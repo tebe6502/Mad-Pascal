@@ -174,8 +174,9 @@ var p, k , q: integer;
 
 begin
 
+
 {
-if (pos('; --- ForToDoCondition', TemporaryBuf[0]) > 0) then begin
+if (pos('sta SYSTEM.FILLCHAR_009D.A+1', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
@@ -219,18 +220,22 @@ end;
        (TemporaryBuf[4] = #9'dex') and							// dex					; 2
        (TemporaryBuf[5] = ':move') then							//:move					; 3
        begin
-	TemporaryBuf[1] := #9'sta :bp2';
-	TemporaryBuf[3] := #9'sta :bp2+1';
 
 	tmp:=TemporaryBuf[6];
 	p:=StrToInt(TemporaryBuf[7]);
 
 	if p = 256 then begin
+	 TemporaryBuf[1] := #9'sta :bp2';
+	 TemporaryBuf[3] := #9'sta :bp2+1';
+
      	 TemporaryBuf[4] := #9'ldy #$00';
      	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.'+tmp+',y+';
     	end else
     	if p <= 128 then begin
-     	 TemporaryBuf[4] := #9'ldy #$'+IntToHex(p-1, 2);
+	 TemporaryBuf[1] := #9'sta :bp2';
+	 TemporaryBuf[3] := #9'sta :bp2+1';
+
+	 TemporaryBuf[4] := #9'ldy #$'+IntToHex(p-1, 2);
      	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.'+tmp+',y-';
     	end else begin
      	 TemporaryBuf[4] := #9'@move '+tmp+' #adr.'+tmp+' #$'+IntToHex(p,2);
@@ -366,10 +371,10 @@ procedure OptimizeASM;
 (* peephole optimization
 (* -------------------------------------------------------------------------- *)
 type
-    TListing = array [0..511] of string;
+    TListing = array [0..1023] of string;
 
 var i, l, k, m, x: integer;
-    a, t, {arg,} arg0, arg1: string;
+    a, t, {arg,} arg0{, arg1}: string;
     inxUse, found: Boolean;
 //    t0, t1, t2, t3: string;
     listing, listing_tmp: TListing;
@@ -1070,6 +1075,11 @@ var i, l, k, m, x: integer;
      Result := (pos(#9'and ', listing[i]) = 1) or (pos(#9'ora ', listing[i]) = 1) or (pos(#9'eor ', listing[i]) = 1);
    end;
 
+   function AND_ORA_EOR_BP2_Y(i: integer): Boolean;
+   begin
+     Result := (listing[i] = #9'and (:bp2),y') or (listing[i] = #9'ora (:bp2),y') or (listing[i] = #9'eor (:bp2),y');
+   end;
+
    function MWY_BP2(i: integer): Boolean;
    begin
      Result := (pos(#9'mwy ', listing[i]) = 1) and (pos(' :bp2', listing[i]) > 0);
@@ -1627,37 +1637,22 @@ var i, l, k, m, x: integer;
 
 
 {$i include/opt6502/opt_STA_0.inc}
-
 {$i include/opt6502/opt_STACK.inc}
-
+{$i include/opt6502/opt_STACK_INX.inc}
 {$i include/opt6502/opt_STACK_ADD.inc}
-
 {$i include/opt6502/opt_STACK_CMP.inc}
-
 {$i include/opt6502/opt_STACK_ADR.inc}
-
 {$i include/opt6502/opt_STACK_AL_CL.inc}
-
 {$i include/opt6502/opt_STACK_AX_CX.inc}
-
 {$i include/opt6502/opt_STACK_EAX_ECX.inc}
-
 {$i include/opt6502/opt_STACK_PRINT.inc}
-
 {$i include/opt6502/opt_CMP_BRANCH.inc}
-
 {$i include/opt6502/opt_CMP_BP2.inc}
-
 {$i include/opt6502/opt_CMP_LOCAL.inc}
-
 {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
-
 {$i include/opt6502/opt_CMP_LTEQ.inc}
-
 {$i include/opt6502/opt_CMP_GT.inc}
-
 {$i include/opt6502/opt_CMP_NE_EQ.inc}
-
 {$i include/opt6502/opt_CMP.inc}
 
 
@@ -1682,22 +1677,19 @@ var i, l, k, m, x: integer;
 
   end;
 
+
   Rebuild;
 
-
-  for i := 0 to l - 1 do
-   if listing[i] <> '' then begin
-
+  for i := 0 to l - 1 do begin
 
 {
-if (pos('SYSTEM.ABS_004C.RESULT', listing[i]) > 0) then begin
+if (pos('lda adr.N2DIR,y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
-
 
      if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
      if opt_LTEQ(i) = false then begin Result := false; Break end;
@@ -1709,6 +1701,7 @@ end;
      if opt_BRANCH(i) = false then begin Result := false; Break end;
 
      if opt_STACK(i) = false then begin Result := false; Break end;
+     if opt_STACK_INX(i) = false then begin Result := false; Break end;
      if opt_STACK_ADD(i) = false then begin Result := false; Break end;
      if opt_STACK_CMP(i) = false then begin Result := false; Break end;
      if opt_STACK_ADR(i) = false then begin Result := false; Break end;
@@ -1719,7 +1712,7 @@ end;
 
   end;
 
- end;	// PeepholeOptimization_STACK
+ end;	//PeepholeOptimization_STACK
 
 
 function OptimizeEAX: Boolean;
@@ -1770,6 +1763,7 @@ end;
  var k: integer;
 
 
+{$i include/opt6502/opt_STA_ADD.inc}
 {$i include/opt6502/opt_STA_LDY.inc}
 {$i include/opt6502/opt_STA_BP.inc}
 {$i include/opt6502/opt_STA_LSR.inc}
@@ -1778,9 +1772,31 @@ end;
 {$i include/opt6502/opt_STA_ZTMP.inc}
 
 
-   function PeepholeOptimization_STA: Boolean;
+   function PeepholeOptimization_END: Boolean;
    var i, p, k: integer;
        tmp, old: string;
+       yes, ok: Boolean;
+   begin
+
+    Result:=true;
+
+    Rebuild;
+
+    tmp:='';
+    old:='';
+
+    for i := 0 to l - 1 do begin
+
+{$i include/opt6502/opt_STA.inc}
+
+    end;
+
+   end;	//PeepholeOptimization_END
+
+
+
+   function PeepholeOptimization_STA: Boolean;
+   var i, p, k: integer;
        yes, ok: Boolean;
    begin
 
@@ -1788,16 +1804,11 @@ end;
 
    Rebuild;
 
-   tmp:='';
-   old:='';
-
-
-   for i := 0 to l - 1 do
-    if (listing[i] <> '') then begin
+   for i := 0 to l - 1 do begin
 
 
 {
-if (pos('RADIUS', listing[i]) > 0) then begin
+if (pos('eor ', listing[i]) > 0) and then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1805,8 +1816,8 @@ if (pos('RADIUS', listing[i]) > 0) then begin
 end;
 }
 
-     {$i include/opt6502/opt_STA.inc}
 
+     if opt_STA_ADD(i) = false then begin Result := false; Break end;
      if opt_STA_LDY(i) = false then begin Result := false; Break end;
      if opt_STA_BP(i) = false then begin Result := false; Break end;
      if opt_STA_LSR(i) = false then begin Result := false; Break end;
@@ -1816,43 +1827,26 @@ end;
 
    end;
 
-  end;		// PeepholeOptimization_STA
+  end;	//PeepholeOptimization_STA
 
 
 {$i include/opt6502/opt_LDA.inc}
-
 {$i include/opt6502/opt_TAY.inc}
-
 {$i include/opt6502/opt_LDY.inc}
-
 {$i include/opt6502/opt_AND.inc}
-
 {$i include/opt6502/opt_ORA.inc}
-
 {$i include/opt6502/opt_EOR.inc}
-
 {$i include/opt6502/opt_NOT.inc}
-
 {$i include/opt6502/opt_ADD.inc}
-
 {$i include/opt6502/opt_SUB.inc}
-
 {$i include/opt6502/opt_LSR.inc}
-
 {$i include/opt6502/opt_ASL.inc}
-
 {$i include/opt6502/opt_SPL.inc}
-
 {$i include/opt6502/opt_POKE.inc}
-
 {$i include/opt6502/opt_BP.inc}
-
 {$i include/opt6502/opt_BP_ADR.inc}
-
 {$i include/opt6502/opt_BP2_ADR.inc}
-
 {$i include/opt6502/opt_ADR.inc}
-
 {$i include/opt6502/opt_FORTMP.inc}
 
 
@@ -1864,12 +1858,10 @@ end;
 
   Rebuild;
 
-  for i := 0 to l - 1 do
-   if listing[i] <> '' then begin
-
+  for i := 0 to l - 1 do begin
 
 {
-if (pos('cmp #$D8', listing[i]) > 0) then begin
+if (pos('sta #$00', listing[i+1]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1877,7 +1869,7 @@ if (pos('cmp #$D8', listing[i]) > 0) then begin
 end;
 }
 
-     if opt_FORTMP(i) = false then begin Result := false; Break end;
+    if opt_FORTMP(i) = false then begin Result := false; Break end;
 
 
     if (i = l - 1) and										// "samotna" instrukcja na koncu bloku
@@ -1998,6 +1990,7 @@ end;
 
 
      if opt_STA_0(i) = false then begin Result := false; Break end;
+
      if opt_LDA(i) = false then begin Result := false; Break end;
      if opt_TAY(i) = false then begin Result := false; Break end;
      if opt_LDY(i) = false then begin Result := false; Break end;
@@ -2025,6 +2018,7 @@ end;
 
   repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+  repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
  end;
 
@@ -2050,9 +2044,7 @@ end;
 
   Rebuild;
 
-   for i := 0 to l - 1 do
-    if listing[i] <> '' then begin
-
+  for i := 0 to l - 1 do begin
 
 {
 if (pos('cmp #$D8', listing[i]) > 0) then begin
@@ -2063,12 +2055,11 @@ if (pos('cmp #$D8', listing[i]) > 0) then begin
 end;
 }
 
-
-    if lda_im(i) and 										// lda #$		; 0
-       add_im(i+1) and										// add #$		; 1
-       sta(i+2) and										// sta			; 2
-												//			; 3
-       (adc(i+4) = false) then									//~adc			; 4
+    if lda_im(i) and 										// lda #$			; 0
+       add_im(i+1) and										// add #$			; 1
+       sta(i+2) and										// sta				; 2
+												//				; 3
+       (adc(i+4) = false) then									//~adc				; 4
      begin
 
       p := GetBYTE(i) + GetBYTE(i+1);
@@ -2080,11 +2071,11 @@ end;
      end;
 
 
-    if lda_im(i) and 										// lda #$		; 0
-       sub_im(i+1) and										// sub #$		; 1
-       sta(i+2) and										// sta			; 2
-												//			; 3
-       (sbc(i+4) = false) then									//~sbc			; 4
+    if lda_im(i) and 										// lda #$			; 0
+       sub_im(i+1) and										// sub #$			; 1
+       sta(i+2) and										// sta				; 2
+												//				; 3
+       (sbc(i+4) = false) then									//~sbc				; 4
      begin
 
       p := GetBYTE(i) - GetBYTE(i+1);
@@ -2096,11 +2087,11 @@ end;
      end;
 
 
-    if lda(i) and										// lda		; 0
-       ldy_1(i+1) and										// ldy #1	; 1
-       (listing[i+2] = #9'and #$00') and							// and #$00	; 2
-       bne(i+3) and										// bne @+	; 3
-       lda(i+4) then										// lda		; 4
+    if lda(i) and										// lda				; 0
+       ldy_1(i+1) and										// ldy #1			; 1
+       (listing[i+2] = #9'and #$00') and							// and #$00			; 2
+       bne(i+3) and										// bne @+			; 3
+       lda(i+4) then										// lda				; 4
      begin
 	listing[i] := '';
 	listing[i+2] := '';
@@ -2109,16 +2100,16 @@ end;
      end;
 
 
-    if (i>0) and (listing[i] = #9'and #$00') then						// lda #$00	; -1
-     if lda_im_0(i-1) then begin								// and #$00	; 0
+    if (i>0) and (listing[i] = #9'and #$00') then						// lda #$00			; -1
+     if lda_im_0(i-1) then begin								// and #$00			; 0
 	listing[i] := '';
 	Result:=false; Break;
      end;
 
 
-    if lda_im_0(i) and										// lda #$00	; 0
-       bne(i+1) and										// bne		; 1
-       lda(i+2) then										// lda		; 2
+    if lda_im_0(i) and										// lda #$00			; 0
+       bne(i+1) and										// bne				; 1
+       lda(i+2) then										// lda				; 2
      begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2126,9 +2117,9 @@ end;
      end;
 
 
-    if lda(i) and										// lda A	; 0
-       SKIP(i+1) and										// SKIP		; 1
-       lda(i+2) and										// lda A	; 2
+    if lda(i) and										// lda A			; 0
+       SKIP(i+1) and										// SKIP				; 1
+       lda(i+2) and										// lda A			; 2
        (listing[i] = listing[i+2]) then
      begin
 	listing[i+2] := '';
@@ -2136,18 +2127,18 @@ end;
      end;
 
 
-    if (lda_a(i) or adc_sbc(i)) and								// lda|adc|sbc		; 0
-       ((listing[i+1] = #9'eor #$00') or (listing[i+1] = #9'ora #$00')) and			// eor|ora #$00		; 1
-       SKIP(i+2) then										// SKIP			; 2
+    if (lda_a(i) or adc_sbc(i)) and								// lda|adc|sbc			; 0
+       ((listing[i+1] = #9'eor #$00') or (listing[i+1] = #9'ora #$00')) and			// eor|ora #$00			; 1
+       SKIP(i+2) then										// SKIP				; 2
      begin
 	listing[i+1] := '';
 	Result:=false; Break;
      end;
 
 
-    if and_ora_eor(i) and									// and|ora|eor		; 0
-       ((listing[i+1] = #9'eor #$00') or (listing[i+1] = #9'ora #$00')) and			// eor|ora #$00		; 1
-       SKIP(i+2) then										// SKIP			; 2
+    if and_ora_eor(i) and									// and|ora|eor			; 0
+       ((listing[i+1] = #9'eor #$00') or (listing[i+1] = #9'ora #$00')) and			// eor|ora #$00			; 1
+       SKIP(i+2) then										// SKIP				; 2
      begin
 	listing[i+1] := '';
 	Result:=false; Break;
@@ -2229,8 +2220,8 @@ end;
        end;
 
 
-    if adc_sbc(i) and										// adc|sbc		; 0
-       (lda(i+1) or mva(i+1) or mwa(i+1)) then							// lda|mva|mwa		; 1
+    if adc_sbc(i) and										// adc|sbc			; 0
+       (lda(i+1) or mva(i+1) or mwa(i+1)) then							// lda|mva|mwa			; 1
      begin
 
       if (i>0) and lda(i-1) then listing[i-1] := '';
@@ -2240,11 +2231,11 @@ end;
      end;
 
 
-    if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor		; 0
-       sta_stack(i+1) and									// sta :STACKORIGIN+N	; 1
-       ldy_1(i+2) and										// ldy #1		; 2
-       lda_stack(i+3) and 									// lda :STACKORIGIN+N	; 3
-       (bne(i+4) or beq(i+4)) then								// bne|beq		; 4
+    if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor			; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+N		; 1
+       ldy_1(i+2) and										// ldy #1			; 2
+       lda_stack(i+3) and 									// lda :STACKORIGIN+N		; 3
+       (bne(i+4) or beq(i+4)) then								// bne|beq			; 4
      if copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256) then
       begin
        listing[i+1] := '';
@@ -2281,19 +2272,14 @@ end;
 // -----------------------------------------------------------------------------
 
 {$i include/opt6502/opt_IF_AND.inc}
-
 {$i include/opt6502/opt_IF_OR.inc}
-
 {$i include/opt6502/opt_WHILE_AND.inc}
-
 {$i include/opt6502/opt_WHILE_OR.inc}
-
 {$i include/opt6502/opt_BOOLEAN_AND.inc}
 
 // -----------------------------------------------------------------------------
 
-
-   end;   // for
+  end;   // for
 
  end;	// OptimizeRelation
 
@@ -2361,7 +2347,7 @@ begin				// OptimizeASM
  x:=0;
 
  arg0 := '';
- arg1 := '';
+ //arg1 := '';
 
  inxUse := false;
 
@@ -2532,18 +2518,30 @@ begin				// OptimizeASM
 
       if arg0 = 'm@index4 1' then begin
        t:='';
+       s[x-1][2] := '';
+       s[x-1][3] := '';
+
        index(2, x-1);
       end else
       if arg0 = 'm@index4 0' then begin
        t:='';
+       s[x][2] := '';
+       s[x][3] := '';
+
        index(2, x);
       end else
       if arg0 = 'm@index2 1' then begin
        t:='';
+       s[x-1][2] := '';
+       s[x-1][3] := '';
+
        index(1, x-1);
       end else
       if arg0 = 'm@index2 0' then begin
        t:='';
+       s[x][2] := '';
+       s[x][3] := '';
+
        index(1, x);
       end else
 {
@@ -3281,6 +3279,9 @@ begin				// OptimizeASM
 	end;
 
       end else
+
+      if pos('@cmpSTRING', arg0) > 0 then	// @cmpSTRING		accepted
+      else
 
       if pos('@FCMPL', arg0) > 0 then		// @FCMPL		accepted
       else

@@ -10,12 +10,24 @@ begin
 // ===		     		      LDA.
 // -----------------------------------------------------------------------------
 
-    if ldy(i) and 										// ldy I		; 0
-       lda_a(i+1) and										// lda I		; 1
-       sta_a(i+2) and										// sta			; 2
-       sty(i+3) and										// sty			; 3
-       sty(i+4) and										// sty			; 4
-       sty(i+5) then										// sty			; 5
+
+    if lda_im(i) and										// lda #			; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN		; 1
+       iny(i+2) then										// iny				; 2
+      begin
+	listing[i+2] := listing[i+1];
+	listing[i+1] := listing[i];
+	listing[i]   := #9'iny';
+//	exit(false);
+      end;
+
+
+    if ldy(i) and 										// ldy I			; 0
+       lda_a(i+1) and										// lda I			; 1
+       sta_a(i+2) and										// sta				; 2
+       sty(i+3) and										// sty				; 3
+       sty(i+4) and										// sty				; 4
+       sty(i+5) then										// sty				; 5
      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
       begin
 	listing[i] := '';
@@ -375,6 +387,7 @@ begin
 
       listing[i] := '';
       if (i>0) and iny(i-1) then listing[i-1] := '';
+
       exit(false);
      end;
 
@@ -1068,10 +1081,10 @@ begin
        end;
 
 
-    if (listing[i] = #9'sta @PARAM?') and							// sta @PARAM?			; 0
-       iny(i+1) and										// iny				; 1
-       lda(i+2) and										// lda				; 2
-       sta(i+3) then										// sta				; 3
+    if (listing[i] = #9'sta @PARAM?') and							// sta @PARAM?				; 0
+       iny(i+1) and										// iny					; 1
+       lda(i+2) and										// lda					; 2
+       sta(i+3) then										// sta					; 3
       begin
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -1081,14 +1094,14 @@ begin
       end;
 
 
-    if add_sub(i) and										// add|sub			; 0
-       sta_bp2(i+1) and										// sta :bp2			; 1
-       lda(i+2) and										// lda				; 2
-       adc_sbc(i+3) and										// adc|sbc			; 3
-       sta_bp2_1(i+4) and									// sta :bp2+1			; 4
-       ldy_im_0(i+5) and									// ldy #$00			; 5
-       lda_bp2_y(i+6) and									// lda (:bp2),y			; 6
-       (listing[i+7] = #9'sta @PARAM?') then							// sta @PARAM?			; 7
+    if add_sub(i) and										// add|sub				; 0
+       sta_bp2(i+1) and										// sta :bp2				; 1
+       lda(i+2) and										// lda					; 2
+       adc_sbc(i+3) and										// adc|sbc				; 3
+       sta_bp2_1(i+4) and									// sta :bp2+1				; 4
+       ldy_im_0(i+5) and									// ldy #$00				; 5
+       lda_bp2_y(i+6) and									// lda (:bp2),y				; 6
+       (listing[i+7] = #9'sta @PARAM?') then							// sta @PARAM?				; 7
       begin
 	listing[i+1] := #9'tay';
 
@@ -1100,11 +1113,11 @@ begin
       end;
 
 
-    if iny(i) and										// iny				; 0
-       lda_a(i+1) and										// lda				; 1
-       iny(i+2) and										// iny				; 2
-       lda_a(i+3) and										// lda				; 3
-       lda_a(i+4) then										// lda				; 4
+    if iny(i) and										// iny					; 0
+       lda_a(i+1) and										// lda					; 1
+       iny(i+2) and										// iny					; 2
+       lda_a(i+3) and										// lda					; 3
+       lda_a(i+4) then										// lda					; 4
       begin
 	listing[i]   := '';
 	listing[i+1] := '';

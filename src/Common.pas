@@ -487,6 +487,12 @@ type
      brk, cnt: Boolean;
     end;
 
+  TForLoop =
+     record
+      begin_value, end_value: Int64;
+      begin_const, end_const: Boolean;
+     end;
+
   TCaseLabelArray = array of TCaseLabel;
 
   TArrayString = array of string;
@@ -522,8 +528,8 @@ var
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
-  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, Debug: Integer;
+  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt, debug_cnt,
+  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   iOut: integer = -1;
 
@@ -554,14 +560,11 @@ var
 
   msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
 
+
   optimize : record
 	      use: Boolean;
 	      unitIndex, line, old: integer;
 	     end;
-
-  optimization : record
-		  loopunroll: Boolean;
-		 end;
 
   codealign : record
 		proc, loop, link : integer;
@@ -573,6 +576,8 @@ var
 
   DiagMode: Boolean = false;
   DataSegmentUse: Boolean = false;
+
+  LoopUnroll : Boolean = false;
 
   PublicSection : Boolean = true;
 

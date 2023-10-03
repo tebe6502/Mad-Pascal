@@ -10,10 +10,35 @@ begin
 // ===				      LDY.
 // -----------------------------------------------------------------------------
 
+{
+    if iny(i+1) and														// iny				; 1
+
+       (SKIP(i) = false) and (ldy(i) = false) and (iny(i) = false) and (tay(i) = false) and (iy(i) = false) and			//~ldy|iny|tay|SKIP		; 0
+       (iy(i+2) = false) and (lda_a(i+2) or sta_a(i+2) or and_ora_eor(i+2)) and							// lda|sta|and|ora|eor		; 2
+       (SKIP(i+3) = false) and (cmp(i+3) = false)  and (add_sub(i+3) = false) and (asl(i+3) = false) and (lsr(i+3) = false) then//~SKIP|cmp|add|sub		; 3
+     begin
+       listing[i+1] := listing[i+2];
+       listing[i+2] := #9'iny';
+
+       exit(false);
+     end;
+}
+
+
+    if iny(i) and										// iny					; 0
+       lda_im_0(i+1) and									// lda #$00				; 1
+       asl_stack(i+2) then									// asl :STACKORIGIN			; 2
+     begin
+	listing[i] := '';
+
+      	exit(false);
+     end;
+
+
     if iny(i) and										// iny					; 0
        (lsr_stack(i+1) or asl_stack(i+1)) then							// lsr|asl :STACKORIGIN			; 1
      begin
-	listing[i]   := '';
+	listing[i] := '';
 
       	exit(false);
      end;
@@ -70,19 +95,6 @@ begin
 	end;
 
        end;
-
-
-    if iny(i+1) and														// iny				; 1
-
-       (SKIP(i) = false) and (ldy(i) = false) and (iny(i) = false) and (tay(i) = false) and (iy(i) = false) and			//~ldy|iny|tay|SKIP		; 0
-       (iy(i+2) = false) and (lda_a(i+2) or sta_a(i+2) or and_ora_eor(i+2)) and							// lda|sta|and|ora|eor		; 2
-       (SKIP(i+3) = false) and (cmp(i+3) = false)  and (add_sub(i+3) = false) and (asl(i+3) = false) and (lsr(i+3) = false) then//~SKIP|cmp|add|sub		; 3
-     begin
-       listing[i+1] := listing[i+2];
-       listing[i+2] := #9'iny';
-
-       exit(false);
-     end;
 
 
     if lda_a(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda I			; 0

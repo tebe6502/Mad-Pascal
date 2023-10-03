@@ -47,7 +47,7 @@ begin
 
     if rol_a(i) and										// rol @				; 0
        lda_a(i+1) and										// lda					; 1
-       (sta_a(i+2) or lsr_a(i+2)) then								// sta|lsr @				; 2
+       (sta_a(i+2) or lsr_a(i+2) or asl_a(i+2)) then						// sta|lsr @|asl @			; 2
       begin
 	listing[i] := '';
 
@@ -791,6 +791,35 @@ begin
 	 listing[i+9] := #9'add ' + copy(listing[i+9], 6, 256);
 	 listing[i+10]:='';
 
+	 exit(false);
+       end;
+
+
+    if lda_a(i) and (iy(i) = false) and								// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda 					; 2
+       asl_stack(i+3) and									// asl :STACKORIGIN			; 3
+       rol_a(i+4) and										// rol @				; 4
+       asl_stack(i+5) and									// asl :STACKORIGIN			; 5
+       rol_a(i+6) and										// rol @				; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH		; 7
+       mwy_bp2(i+8) and										// mwy XX :bp2				; 8
+       ldy_stack(i+9) then									// ldy :STACKORIGIN			; 9
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
+        (copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) and
+        (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
+       begin
+	listing[i+2] := listing[i+1];
+	listing[i+1] := listing[i];
+
+	listing[i] := listing[i+8];
+
+	listing[i+4] := '';
+
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+
 	exit(false);
        end;
 
@@ -1023,7 +1052,6 @@ begin
 
 	exit(false);
       end;
-
 
 
 // wspolna procka dla Nx ASL
@@ -1694,6 +1722,66 @@ begin
 
     if mwy_bp2(i+2) and								// mwy				; 2
        lda_a(i+3) then								// lda				; 3
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if rol_a(i+2) and								// rol @			; 2
+       lda_a(i+3) then								// lda				; 3
+      begin
+	listing[i] := '';
+
+	listing[i+2] := '';
+
+	exit(false);
+      end;
+
+
+    if rol_a(i+2) and								// rol @			; 2
+       mwy_bp2(i+3) and								// mwy				; 3
+       lda_a(i+4) then								// lda				; 4
+      begin
+	listing[i] := '';
+
+	listing[i+2] := '';
+
+	exit(false);
+      end;
+
+
+    if rol_a(i+2) and								// rol @			; 2
+       mwy_bp2(i+3) and								// mwy				; 3
+       ldy(i+4) and								// ldy				; 4
+       lda_a(i+5) then								// lda				; 5
+      begin
+	listing[i] := '';
+
+	listing[i+2] := '';
+
+	exit(false);
+      end;
+
+
+    if rol_a(i+2) and								// rol @			; 2
+       mwy_bp2(i+3) and								// mwy				; 3
+       ldy(i+4) and								// ldy				; 4
+       iny(i+5) and								// iny				; 5
+       lda_a(i+6) then								// lda				; 6
+      begin
+	listing[i] := '';
+
+	listing[i+2] := '';
+
+	exit(false);
+      end;
+
+
+    if mwy_bp2(i+2) and								// mwy				; 2
+       ldy(i+3) and								// ldy				; 3
+       lda_a(i+4) then								// lda				; 4
       begin
 	listing[i] := '';
 
