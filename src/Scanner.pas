@@ -529,7 +529,7 @@ var
 
 	  yes:=false;
 
-	  AssignFile(bin, fn); Reset(bin, 1);
+	  AssignFile(bin, fn); FileMode:=0; Reset(bin, 1);
 
   	  Repeat
     		BlockRead (bin, tmp, 1, NumRead);
@@ -1156,7 +1156,7 @@ var
   begin
 
   AssignFile(InFile, fnam );		// UnitIndex = 1 main program
-  FileMode := 0;
+  FileMode:=0;
   Reset(InFile);
 
   Text := '';

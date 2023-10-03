@@ -4,6 +4,7 @@
 // -----------------------------------------------------------------------------
 
 procedure opt_TEMP_FILL;
+var p: integer;
 begin
 
  if (pos(#9'jsr SYSTEM.FILL', TemporaryBuf[10]) = 1) or
@@ -41,7 +42,24 @@ begin
 
 	yes:=false;
 
-	if k < 6 then begin
+	if (k = $200) or (k = $300) or (k = $400) or (k = $500) or (k = $600) or (k = $700) or (k = $800) then begin
+	  TemporaryBuf[0] := TemporaryBuf[8];
+	  TemporaryBuf[1] := #9'm@fill $' + IntToHex(q, 4) + ' ' + IntToStr(k div $80);
+
+	  TemporaryBuf[2] := '~';
+	  TemporaryBuf[3] := '~';
+	  TemporaryBuf[4] := '~';
+	  TemporaryBuf[5] := '~';
+	  TemporaryBuf[6] := '~';
+	  TemporaryBuf[7] := '~';
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  yes:=true;
+
+	end else
+	if k <= 8 then begin
 	  TemporaryBuf[0] := TemporaryBuf[8];
 	  TemporaryBuf[1] := #9':' + IntToStr(k) + ' sta $' + IntToHex(q, 4) + '+#';
 
@@ -111,15 +129,14 @@ begin
        (pos(#9'lda #', TemporaryBuf[5]) = 1) and
        (TemporaryBuf[7] = #9'lda #$00') then
        begin
-{
-						; 0		***
+{						; 0		***
 	lda #					; 1
 	sta SYSTEM.FILLCHAR_02D2.A		; 2
 	lda #					; 3
 	sta SYSTEM.FILLCHAR_02D2.A+1		; 4
 	lda #					; 5
 	sta SYSTEM.FILLCHAR_02D2.COUNT		; 6
-	lda #$00				; 7
+	lda #					; 7
 	sta SYSTEM.FILLCHAR_02D2.COUNT+1	; 8
 	sta SYSTEM.FILLCHAR_02D2.VALUE		; 9
 }
@@ -128,7 +145,24 @@ begin
 
 	yes:=false;
 
-	if k < 6 then begin
+	if (k = $200) or (k = $300) or (k = $400) or (k = $500) or (k = $600) or (k = $700) or (k = $800) then begin
+	  TemporaryBuf[0] := TemporaryBuf[7];
+	  TemporaryBuf[1] := #9'm@fill $' + IntToHex(q, 4) + ' ' + IntToStr(k div $80);
+
+	  TemporaryBuf[2] := '~';
+	  TemporaryBuf[3] := '~';
+	  TemporaryBuf[4] := '~';
+	  TemporaryBuf[5] := '~';
+	  TemporaryBuf[6] := '~';
+	  TemporaryBuf[7] := '~';
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  yes:=true;
+
+	end else
+	if k <= 8 then begin
 	  TemporaryBuf[1] := TemporaryBuf[7];
 	  TemporaryBuf[2] := #9':' + IntToStr(k) + ' sta $' + IntToHex(q, 4) + '+#';
 
@@ -195,8 +229,7 @@ begin
        (pos(#9'lda ', TemporaryBuf[1]) = 1) and (pos(#9'lda #', TemporaryBuf[1]) = 0) and
        (pos(#9'lda ', TemporaryBuf[3]) = 1) then
        begin
-{
-						; 0		***
+{						; 0		***
 	lda QBOARD				; 1
 	sta SYSTEM.FILLCHAR_02D2.A		; 2
 	lda QBOARD+1				; 3
@@ -314,6 +347,67 @@ begin
        end;
 
 
+    if (pos(#9'sta SYSTEM.FILL', TemporaryBuf[2]) = 1) and (pos('.A+1', TemporaryBuf[2]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[4]) = 1) and (pos('.A', TemporaryBuf[4]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[8]) = 1) and (pos('.COUNT+1', TemporaryBuf[8]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[6]) = 1) and (pos('.COUNT', TemporaryBuf[6]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
+       (pos(#9'lda #', TemporaryBuf[7]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[5]) = 1) and
+       (pos(#9'lda ', TemporaryBuf[3]) = 1) and (pos(#9'lda #', TemporaryBuf[3]) = 0) then
+       begin
+{						; 0		***
+						; 1
+	sta SYSTEM.FILLBYTE_0058.A+1		; 2
+	lda					; 3
+	sta SYSTEM.FILLBYTE_0058.A		; 4
+	lda #					; 5
+	sta SYSTEM.FILLBYTE_0058.COUNT		; 6
+	lda #					; 7
+	sta SYSTEM.FILLBYTE_0058.COUNT+1	; 8
+	sta SYSTEM.FILLBYTE_0058.VALUE		; 9
+}
+	k:=GetWORD(5, 7);		// len
+
+	yes:=false;
+
+	if k = 256 then begin
+	  TemporaryBuf[2] := #9'sta :bp2+1';
+
+	  TemporaryBuf[4] := #9'sta :bp2';
+	  TemporaryBuf[5] := TemporaryBuf[7];
+	  TemporaryBuf[6] := #9'ldy #$00';
+	  TemporaryBuf[7] := #9'sta:rne (:bp2),y+';
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  yes:=true;
+
+	end else
+	if k <= 128 then begin
+	  TemporaryBuf[2] := #9'sta :bp2+1';
+
+	  TemporaryBuf[4] := #9'sta :bp2';
+	  TemporaryBuf[5] := TemporaryBuf[7];
+	  TemporaryBuf[6] := #9'ldy #$'+IntToHex(k-1, 2);
+	  TemporaryBuf[7] := #9'sta:rpl (:bp2),y-';
+	  TemporaryBuf[8] := '~';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  yes:=true;
+
+	 end;
+
+        if yes and (TemporaryBuf[11] = #9'm@INLINE') then begin
+	 TemporaryBuf[11] := '~';
+	 TemporaryBuf[12] := '~';
+	end;
+
+       end;
+
+
     if (pos(#9'sta SYSTEM.FILL', TemporaryBuf[8]) = 1) and (pos('.COUNT+1', TemporaryBuf[8]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[6]) = 1) and (pos('.COUNT', TemporaryBuf[6]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
@@ -324,8 +418,7 @@ begin
        (TemporaryBuf[7] = #9'lda #$00') and
        (pos(#9'lda #', TemporaryBuf[5]) = 1) then
        begin
-{
-						; 0		***
+{						; 0		***
 	sta SYSTEM.FILLCHAR_009E.A		; 1
 	lda					; 2
 	add|sub|adc|sbc				; 3

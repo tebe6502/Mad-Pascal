@@ -1,3 +1,26 @@
+03.10.2023
+- nowa dyrektywa kompilatora {$optimization loopunroll}, {$optimization noloopunroll}, dokonuje rozpętlenia pętli FOR przy stałych parametrach
+
+11.09.2023
+- Bugfixes and Optimizations
+
+10.09.2023
+- poprawiony odczyt open_array dla VAR
+
+var tab: array of char = 'D:PLIK.DAT'
+
+21.08.2023
+- nowa dyrektywa kompilatora {$bin2csv filename} pozwala inicjować tablice np.:
+
+var tb: array of byte = [ {$bin2csv filename} ];
+
+20.08.2023
+- poprawiona alokacja pamięci dla tablic [0..0], wymuszany jest wstępnie 'ABSOLUTE $0000', oszczędzamy 1 bajt pamięci
+- dodana możliwość deklaracji tablic bez podania ich rozmiaru, np.:
+
+var tab: array of byte = [1,3,4,3,1];
+var tb: array of char = 'abcdefghij';
+
 18.08.2023
 - optymalizacja SIN/COS dla typów Real, ShortReal
 

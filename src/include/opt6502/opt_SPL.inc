@@ -117,7 +117,7 @@ begin
 
 
     if ldy_im_0(i) and										// ldy #$00				; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN+9			; 1
+       lda_a(i+1) and										// lda					; 1
        spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4

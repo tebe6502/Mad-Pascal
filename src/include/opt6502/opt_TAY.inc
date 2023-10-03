@@ -23,8 +23,9 @@ begin
     if lda(i) and (iy(i) = false) and								// lda				; 0
        (listing[i+1] = #9'sub #$01') and							// sub #$01			; 1
        tay(i+2) and 										// tay				; 2
-       (sbc(i+4) = false) then									// lda				; 3
-     begin											// ~sbc				; 4
+												// lda				; 3
+       (sbc(i+4) = false) then									// ~sbc				; 4
+     begin
 	if lda_im(i) then begin
 	 p := GetBYTE(i);
 
@@ -387,6 +388,25 @@ begin
 
 	listing[i+3] := #9'tay';
 
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i) and (listing[i] = listing[i+5]) and						// lda I				; 0
+
+       asl_a(i+1) and 										// asl @				; 1
+       asl_a(i+2) and										// asl @				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+9			; 3
+       mwy_bp2(i+4) and										// mwy					; 4
+       lda_a(i+5) and										// lda I				; 5
+       asl_a(i+6) and										// asl @				; 6
+       asl_a(i+7) and										// asl @				; 7
+       tay(i+8) then										// tay					; 8
+      begin
 	listing[i+5] := '';
 	listing[i+6] := '';
 	listing[i+7] := '';

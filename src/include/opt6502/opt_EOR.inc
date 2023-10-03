@@ -259,6 +259,68 @@ begin
 	exit(false);
        end;
 
+
+    if lda_bp2_y(i) and									// lda (:bp2),y				; 0
+       sta_stack(i+1) and								// sta :STACKORIGIN+10			; 1
+       iny(i+2) and									// iny					; 2
+       lda_bp2_y(i+3) and								// lda (:bp2),y				; 3
+       sta_stack(i+4) and								// sta :STACKORIGIN+STACKWIDTH+10	; 4
+       iny(i+5) and									// iny					; 5
+       lda_bp2_y(i+6) and								// lda (:bp2),y				; 6
+       sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH*2+10	; 7
+       iny(i+8) and									// iny					; 8
+       lda_bp2_y(i+9) and								// lda (:bp2),y				; 9
+       sta_stack(i+10) and								// sta :STACKORIGIN+STACKWIDTH*3+10	; 10
+
+       lda(i+11) and									// lda					; 11
+       eor_stack(i+12) and								// eor :STACKORIGIN+10			; 12
+       sta(i+13) and									// sta					; 13
+       lda(i+14) and									// lda					; 14
+       eor_stack(i+15) and								// eor :STACKORIGIN+STACKWIDTH+10	; 15
+       sta(i+16) and									// sta					; 16
+       lda(i+17) and									// lda					; 17
+       eor_stack(i+18) and								// eor :STACKORIGIN+STACKWIDTH*2+10	; 18
+       sta(i+19) and									// sta					; 19
+       lda(i+20) and									// lda					; 20
+       eor_stack(i+21) and								// eor :STACKORIGIN+STACKWIDTH*3+10	; 21
+       sta(i+22) then									// sta					; 22
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+12], 6, 256)) and
+	(copy(listing[i+4], 6, 256) = copy(listing[i+15], 6, 256)) and
+	(copy(listing[i+7], 6, 256) = copy(listing[i+18], 6, 256)) and
+	(copy(listing[i+10], 6, 256) = copy(listing[i+21], 6, 256)) then
+       begin
+	listing[i]   := listing[i+11];
+	listing[i+1] := #9'eor (:bp2),y';
+	listing[i+2] := listing[i+13];
+	listing[i+3] := #9'iny';
+
+	listing[i+4] := listing[i+14];
+	listing[i+5] := #9'eor (:bp2),y';
+	listing[i+6] := listing[i+16];
+	listing[i+7] := #9'iny';
+
+	listing[i+8] := listing[i+17];
+	listing[i+9] := #9'eor (:bp2),y';
+	listing[i+10]:= listing[i+19];
+	listing[i+11]:= #9'iny';
+
+	listing[i+12]:= listing[i+20];
+	listing[i+13]:= #9'eor (:bp2),y';
+	listing[i+14]:= listing[i+22];
+
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+
+	exit(false);
+       end;
+
+
     if lda_a(i) and									// lda					; 0
        and_ora_eor(i+1) and								// and|ora|eor				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2

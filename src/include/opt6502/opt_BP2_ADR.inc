@@ -35,7 +35,7 @@ begin
        add_im(p-1) and									// add #				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
-       adc_im_0(p+2) and								// adc #$00				; p+2
+       adc_im(p+2) and									// adc #				; p+2
        asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
        rol_a(p+4) and									// rol @				; p+4
        asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
