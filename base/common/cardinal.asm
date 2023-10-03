@@ -124,7 +124,7 @@ MOD	.local
 A	= :EAX
 B	= :ECX
 
-RESULT	= :ZTMP
+RESULT	= :EAX+4
 	.endl
 
 	mva :ecx ecx0
