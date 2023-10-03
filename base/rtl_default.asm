@@ -14,10 +14,6 @@
 	icl 'runtime\neg.asm'		; negBYTE, negWORD, negCARD, negBYTE1, negWORD1, negCARD1
 					; negEDX, negSHORT
 
-	icl 'runtime\or.asm'		; orAL_CL, orAX_CX, or_EAX_ECX
-	icl 'runtime\xor.asm'		; xorAL_CL, xorAX_CX, xor_EAX_ECX
-	icl 'runtime\and.asm'		; andAL_CL, andAX_CX, and_EAX_ECX
-
 	icl 'runtime\expand.asm'	; @xpandSHORT2SMALL, @expandSHORT2SMALL1
 					; @expandToCARD.SHORT, @expandToCARD.SMALL, @expandToCARD.BYTE, @expandToCARD.WORD
 					; @expandToCARD1.SHORT, @expandToCARD1.SMALL, @expandToCARD1.BYTE, @expandToCARD1.WORD
