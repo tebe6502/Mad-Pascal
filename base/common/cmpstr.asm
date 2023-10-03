@@ -2,7 +2,7 @@
 /*
 	cmpSTRING2CHAR
 	cmpCHAR2STRING
-	cmpSTRING
+	@cmpSTRING
 */
 
 .proc	cmpSTRING2CHAR
@@ -124,17 +124,10 @@ begin
 end;
 */
 
-.proc	cmpSTRING
+.proc	@cmpSTRING
 
-	lda :STACKORIGIN-1,x
-	sta ztmp8
-	lda :STACKORIGIN-1+STACKWIDTH,x
-	sta ztmp8+1
-
-	lda :STACKORIGIN,x
-	sta ztmp10
-	lda :STACKORIGIN+STACKWIDTH,x
-	sta ztmp10+1
+A	= :TMP		; ztmp8
+B	= :TMP+2	; ztmp10
 
 	ldy #0
 	
