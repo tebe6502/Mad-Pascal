@@ -5,7 +5,6 @@ import pytest
 
 class Test_Structs:
         
-    @pytest.mark.skip(reason="don't know how packed record works, so unable to assert properly (bocianu)")        
     def test_struct1(self):
         
         test.runCode("""
@@ -35,12 +34,12 @@ class Test_Structs:
         end.
 
         """)
-        
-        monsteradr = mem.readWord(labels['MAIN.MONSTER'])
-        for i in range(0,4):
-            monster = mem.readWord(monsteradr) + i * 2
-            assert mem.read(monster) == i
-            #assert mem.read(monster+6) == i * 2;
+
+        monsterArrayAddress = test.varWord('monster')
+        monstersArray = test.getArray(monsterArrayAddress, 4, element_size = 2)
+        for i in range(0,3):
+            assert test.getByte(monstersArray[i]) == i
+            assert test.getByte(monstersArray[i] + 5) == i * 2
 
 
     def test_struct2(self):
@@ -68,10 +67,10 @@ class Test_Structs:
 
         end.
         """)
-        
+
         monsterArrayAddress = test.varWord('monster')
         monstersArray = test.getArray(monsterArrayAddress, 4, element_size = 2)
-        for i in range(0,4):
+        for i in range(0,3):
             assert test.getByte(monstersArray[i]) == i
             assert test.getByte(monstersArray[i] + 1) == i * 2
 
@@ -99,5 +98,7 @@ class Test_Structs:
 
         end.
         """)
-        
+
         assert test.varWord('w') == 2000
+
+

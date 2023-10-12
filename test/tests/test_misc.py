@@ -137,6 +137,28 @@ class Test_misc:
 	""")
 
         assert test.varWord('a') == 1
-	
-	
-	
+
+
+    def test_misc8(self):
+
+        test.runCode("""
+	var
+	  p: PByte;
+	  ptr: pointer;
+	  i: byte;
+	  
+	  tb, bf: array [0..31] of byte;
+	  
+	begin
+	 ptr:=pointer($3043);
+	 i:=3;
+	 tb[3] := $a3;
+	 bf[3] := $9a;
+
+	 p:=pointer(ptr + tb[i] + bf[i] shl 8);
+
+	end.
+	""")
+
+        assert test.varWord('p') == 51942
+
