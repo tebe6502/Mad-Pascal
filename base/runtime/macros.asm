@@ -1,4 +1,4 @@
-
+/*
 .macro	m@index2 (Ofset)
 	asl :STACKORIGIN-%%Ofset,x
 	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
@@ -10,7 +10,7 @@
 	asl :STACKORIGIN-%%Ofset,x
 	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
 .endm
-
+*/
 
 .macro	m@call (os_proc)
 
