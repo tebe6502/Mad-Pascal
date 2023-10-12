@@ -1,6 +1,6 @@
 
 // ----------------------------------------------------------------
-// changes: 2022-12-17
+// changes: 2022-12-17 ; 2023-10-08
 // ----------------------------------------------------------------
 
 .proc	@F16_EQ				; FUNCTION
@@ -9,9 +9,11 @@ A	= :EAX
 B	= :EAX+2
 
 	lda A+1
+_
 	and #$7F
 	cmp #$7C
 	bne @+
+
 	lda A
 ;	cmp #$00
 	bne l_1005x
@@ -76,15 +78,14 @@ l_1026
 A	= :EAX
 B	= :EAX+2
 
-	lda A
-	ora B
-	tay
 	lda A+1
+_
 	ora B+1
 	and #$7F
 	bne l_0F34
 
-	tya
+	lda A
+	ora B
 	bne l_0F34
 
 	lda #$01
@@ -182,15 +183,14 @@ l_0FC2
 A	= :EAX
 B	= :EAX+2
 
-	lda A
-	ora B
-	tay
 	lda A+1
+_
 	ora B+1
 	and #$7F
 	bne l_0E6D
 
-	tya
+	lda A
+	ora B
 	bne l_0E6D
 
 	lda #$01
@@ -201,6 +201,7 @@ l_0E6D
 	and #$7F
 	cmp #$7C
 	bne @+
+
 	lda A
 ;	cmp #$00
 	bne l_0E98x
@@ -224,7 +225,6 @@ l_0E98x
 	lda #$00
 	rts				; exit
 l_0E98
-
 	lda A+1
 	bmi l_0EB4
 

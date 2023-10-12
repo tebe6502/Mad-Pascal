@@ -26,6 +26,7 @@ A	= :EDX
 B	= :EDX+2
 
 	lda A+1
+_
 	eor B+1
 	and #$80
 	sta SIGN
@@ -69,8 +70,8 @@ l_0826
 	bne l_0851
 	lda B
 	bne l_0851
-l_0851x
 
+l_0851x
 	lda #$00
 	sta RESULT
 	lda #$7C
@@ -85,7 +86,7 @@ l_0851
 	cmp #$7C
 	bne l_0872
 
-	lda #$00
+;	lda #$00
 	sta RESULT
 	sta RESULT+1
 	RTS					; exit
@@ -97,7 +98,7 @@ l_0872
 	lda A
 	bne l_088E
 
-	lda #$00
+;	lda #$00
 	sta RESULT
 	sta RESULT+1
 	RTS					; exit
@@ -241,7 +242,7 @@ BX	sbc #0
 	ora REM
 	bne l_0983
 
-	lda #$00
+;	lda #$00
 	sta RESULT
 	sta RESULT+1
 	RTS					; exit

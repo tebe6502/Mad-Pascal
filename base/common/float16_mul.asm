@@ -9,7 +9,8 @@
 
 // ----------------------------------------------------------------
 // f16_mul
-// changes: 2021-11-21 ; 2022-12-17 ; 2023-03-03 ; 2023-03-08
+// changes: 2021-11-21 ; 2022-12-17 ; 2023-03-03 ; 2023-03-08 ;
+//          2023-10-08
 // ----------------------------------------------------------------
 
 RESULT	= :EAX
@@ -24,6 +25,7 @@ A	= :EDX
 B	= :EDX+2
 
 	lda A+1
+_
 	eor B+1
 	and #$80
 	sta SIGN
@@ -77,8 +79,8 @@ l_05F7x
 	lda #$7F
 	sta RESULT+1
 	RTS					; exit
-l_05F7
 
+l_05F7
 	lda #$00
 	sta RESULT
 	lda #$7C
@@ -101,7 +103,7 @@ l_05D2
 	bne l_062D
 
 l_062Dx
-	lda #$00
+	;lda #$00
 	sta RESULT
 	sta RESULT+1
 	RTS					; exit
@@ -155,10 +157,12 @@ ptr3 = :ecx
         lda     #0
         sta     sreg+1
 
-        ldy     #16             ; Number of bits
+;	ldy     #16             ; Number of bits
 
         lsr     ptr1+1
         ror     ptr1            ; Get first bit into carry
+
+/*
 @L0:    bcc     @L1
 
         clc
@@ -176,8 +180,30 @@ ptr3 = :ecx
         ror     @
         ror     ptr1+1
         ror     ptr1
-        dey
-        bne     @L0
+*/
+
+	.rept 16
+	bcc     @+
+
+        clc
+        adc     ptr3
+        
+	tay
+
+        lda     ptr3+1
+        adc     sreg+1
+        sta     sreg+1
+
+        tya
+
+@	ror     sreg+1
+        ror     @
+        ror     ptr1+1
+        ror     ptr1
+	.endr	
+	
+;	dey
+;	bne     @L0
 
         sta     sreg            ; Save byte 3
 .endl
@@ -231,8 +257,8 @@ ptr3 = :ecx
 
 	iny
 	jmp l_0753
-l_073D
 
+l_073D
 	lda V+2
 	and #$10
 	beq l_0767
@@ -258,14 +284,15 @@ l_073D
 	sta V+3
 
 	jmp l_0753
-l_0767
 
+l_0767
 	tya
 	sub #$0A
 	tay
 
 ; --- WhileProlog
 	jmp l_077C
+
 l_077D
 
 ;	lsr V+3
