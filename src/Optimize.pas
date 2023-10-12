@@ -614,6 +614,11 @@ var i, l, k, m, x: integer;
      Result := listing[i] = #9'rol :eax+1'
    end;
 
+   function LDA_EAX_X(i: integer): Boolean;
+   begin
+     Result := pos(#9'lda :eax', listing[i]) > 0
+   end;
+
    function LDA_EAX(i: integer): Boolean;
    begin
      Result := listing[i] = #9'lda :eax'
@@ -1683,7 +1688,7 @@ var i, l, k, m, x: integer;
   for i := 0 to l - 1 do begin
 
 {
-if (pos('lda adr.N2DIR,y', listing[i]) > 0) then begin
+if (pos('lda :STACKORIGIN-1,x', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1860,14 +1865,16 @@ end;
 
   for i := 0 to l - 1 do begin
 
+
 {
-if (pos('sta #$00', listing[i+1]) > 0) then begin
+if (pos('add #$00', listing[i+1]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
     if opt_FORTMP(i) = false then begin Result := false; Break end;
 
@@ -1883,9 +1890,9 @@ end;
      end;
 
 
-    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
-       SKIP(i+1) and										// sta :STACKORIGIN
-       sta_stack(i) then									// SKIP
+    if (i = l - 2) and
+       SKIP(i+1) and										// sta :STACKORIGIN			; 1
+       sta_stack(i) then									// SKIP					; 0
      begin
 	listing[i] := '';
 
@@ -1941,6 +1948,17 @@ end;
      end;
 
 
+    if (i = l - 3) and
+       iny(i) and										// iny					; 0
+       and_ora_eor(i+1) and (iy(i+1) = false) and						// and|ora|eor				; 1
+       sta_a(i+2) and (iy(i+2) = false) then							// sta					; 2
+     begin
+	listing[i]   := '';
+
+	Result:=false; Break;
+     end;
+
+
     if (i = l - 4) and										// "samotna" instrukcja na koncu bloku
        lda_a(i+1) and (lda_stack(i+1) = false) and
        sta_a(i+2) and
@@ -1956,17 +1974,30 @@ end;
      end;
 
 
-    if (i = l - 4) and										// "samotna" instrukcja na koncu bloku
-       lda_stack(i) and
-       sta_stack(i+1) and
-       ((lda_a(i+2) and (lda_stack(i+2) = false)) or tya(i+2)) and
-       sta_a(i+3) then
+    if (i = l - 4) and
+       lda_stack(i) and										// lda :STACKORIGIN			; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       ((lda_a(i+2) and (lda_stack(i+2) = false)) or tya(i+2)) and				// lda|tya				; 2
+       sta_a(i+3) then										// sta					; 3
      begin
 	listing[i]   := '';
 	listing[i+1] := '';
 
 	Result:=false; Break;
      end;
+
+
+    if (i = l - 4) and
+       iny(i) and										// iny					; 0
+       lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
+       and_ora_eor(i+2) and (iy(i+2) = false) and						// and|ora|eor				; 2
+       sta_a(i+3) and (iy(i+3) = false) then							// sta					; 3
+     begin
+	listing[i]   := '';
+
+	Result:=false; Break;
+     end;
+
 
 
     if (listing[i] = #9'jsr #$00') and								// jsr #$00				; 0
@@ -1987,6 +2018,7 @@ end;
 
 	Result:=false; Break;
        end;
+
 
 
      if opt_STA_0(i) = false then begin Result := false; Break end;
@@ -2515,7 +2547,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-
+{
       if arg0 = 'm@index4 1' then begin
        t:='';
        s[x-1][2] := '';
@@ -2544,7 +2576,7 @@ begin				// OptimizeASM
 
        index(1, x);
       end else
-{
+
       if arg0 = 'cmpINT' then begin
        t:='';
 
@@ -5220,75 +5252,16 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
-{
-      if arg0 = 'cmpEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda ' + GetARG(3, x-1);
-       listing[l+1] := #9'cmp ' + GetARG(3, x);
-       listing[l+2] := #9'bne @+';
-       listing[l+3] := #9'lda ' + GetARG(2, x-1);
-       listing[l+4] := #9'cmp ' + GetARG(2, x);
-       listing[l+5] := #9'bne @+';
-       listing[l+6] := #9'lda ' + GetARG(1, x-1);
-       listing[l+7] := #9'cmp ' + GetARG(1, x);
-       listing[l+8] := #9'bne @+';
-       listing[l+9] := #9'lda ' + GetARG(0, x-1);
-       listing[l+10]:= #9'cmp ' + GetARG(0, x);
-       listing[l+11]:= '@';
-
-       inc(l, 12);
-      end else
-}
-
-{
-      if arg0 = 'cmpEAX_ECX.AX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda ' + GetARG(1, x-1);
-       listing[l+1] := #9'cmp ' + GetARG(1, x);
-       listing[l+2] := #9'bne @+';
-       listing[l+3] := #9'lda ' + GetARG(0, x-1);
-       listing[l+4] := #9'cmp ' + GetARG(0, x);
-       listing[l+5] := '@';
-
-       inc(l, 6);
-      end else
-}
-{
-      if arg0='@expandToCARD1.BYTE' then begin
-       t:='';
-
-       s[x-1][1] := #9'mva #$00';
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-      end else
-      if arg0='@expandToCARD.BYTE' then begin
-       t:='';
-
-       s[x][1] := #9'mva #$00';
-       s[x][2] := #9'mva #$00';
-       s[x][3] := #9'mva #$00';
-      end else
-      if arg0='@expandToCARD.WORD' then begin
-       t:='';
-
-       s[x][2] := #9'mva #$00';
-       s[x][3] := #9'mva #$00';
-      end else
-      if arg0='@expandToCARD1.WORD' then begin
-       t:='';
-
-       s[x-1][2] := #9'mva #$00';
-       s[x-1][3] := #9'mva #$00';
-      end else
-}
 
       if (pos('add', arg0) > 0) or (pos('sub', arg0) > 0) then begin
 
       t:='';
 
       if (arg0 = 'subAL_CL') then begin
+
+       s[x][1] := '';
+       s[x][2] := '';
+       s[x][3] := '';
 
        s[x-1][1] := #9'mva #$00';
        s[x-1][2] := #9'mva #$00';
@@ -5313,7 +5286,6 @@ begin				// OptimizeASM
        listing[l+3] := '';
        listing[l+4] := '';
        listing[l+5] := '';
-
        listing[l+6] := '';
        listing[l+7] := '';
        listing[l+8] := '';
@@ -5325,6 +5297,9 @@ begin				// OptimizeASM
       end;
 
       if (arg0 = 'subAX_CX') then begin
+
+       s[x][2] := '';
+       s[x][3] := '';
 
        s[x-1][2] := #9'mva #$00';
        s[x-1][3] := #9'mva #$00';
@@ -5379,6 +5354,10 @@ begin				// OptimizeASM
 
        if (pos(',y', s[x-1][0]) >0 ) or (pos(',y', s[x][0]) >0 ) then begin x:=30; Break end;
 
+       s[x][1] := '';
+       s[x][2] := '';
+       s[x][3] := '';
+
        s[x-1][1] := #9'mva #$00';
        s[x-1][2] := #9'mva #$00';
        s[x-1][3] := #9'mva #$00';
@@ -5402,7 +5381,6 @@ begin				// OptimizeASM
        listing[l+3] := '';
        listing[l+4] := '';
        listing[l+5] := '';
-
        listing[l+6] := '';
        listing[l+7] := '';
        listing[l+8] := '';
@@ -5414,6 +5392,9 @@ begin				// OptimizeASM
       end;
 
       if arg0 = 'addAX_CX' then begin
+
+       s[x][2] := '';
+       s[x][3] := '';
 
        s[x-1][2] := #9'mva #$00';
        s[x-1][3] := #9'mva #$00';
