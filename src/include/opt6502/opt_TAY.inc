@@ -24,7 +24,7 @@ begin
        (listing[i+1] = #9'sub #$01') and							// sub #$01			; 1
        tay(i+2) and 										// tay				; 2
 												// lda				; 3
-       (sbc(i+4) = false) then									// ~sbc				; 4
+       (sbc(i+4) = false) then									//~sbc				; 4
      begin
 	if lda_im(i) then begin
 	 p := GetBYTE(i);
@@ -653,6 +653,100 @@ begin
 
 	exit(false);
       end;
+
+
+    if lda_a(i) and (listing[i] = listing[i+16]) and						// lda A				; 0
+       asl_a(i+1) and										// asl @				; 1
+       asl_a(i+2) and										// asl @				; 2
+       tay(i+3) and										// tay					; 3
+       lda_a(i+4) and										// lda					; 4
+       and_ora_eor(i+5) and									// and|ora|eor				; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN			; 6
+       lda_a(i+7) and										// lda 					; 7
+       and_ora_eor(i+8) and									// and|ora|eor				; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH		; 9
+       lda_a(i+10) and										// lda 					; 10
+       and_ora_eor(i+11) and									// and|ora|eor				; 11
+       sta_stack(i+12) and									// sta :STACKORIGIN+STACKWIDTH*2	; 12
+       lda_a(i+13) and										// lda 					; 13
+       and_ora_eor(i+14) and									// and|ora|eor				; 14
+       sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
+
+//       lda_a(i+16) and 									// lda A				; 16
+       asl_a(i+17) and										// asl @				; 17
+       asl_a(i+18) and										// asl @				; 18
+       tay(i+19) and										// tay					; 19
+       lda_stack(i+20) and									// lda :STACKORIGIN			; 20
+       sta_a(i+21) and										// sta 					; 21
+       lda_stack(i+22) and									// lda :STACKORIGIN+STACKWIDTH		; 22
+       sta_a(i+23) and										// sta 					; 23
+       lda_stack(i+24) and									// lda :STACKORIGIN+STACKWIDTH*2	; 24
+       sta_a(i+25) and										// sta 					; 25
+       lda_stack(i+26) and									// lda :STACKORIGIN+STACKWIDTH*3	; 26
+       sta_a(i+27) then										// sta 					; 27
+     if (copy(listing[i+6], 6, 256) = copy(listing[i+20], 6, 256)) and
+	(copy(listing[i+9], 6, 256) = copy(listing[i+22], 6, 256)) and
+	(copy(listing[i+12], 6, 256) = copy(listing[i+24], 6, 256)) and
+	(copy(listing[i+15], 6, 256) = copy(listing[i+26], 6, 256)) then
+     begin
+	listing[i+6] := listing[i+21];
+
+	listing[i+9] := listing[i+23];
+
+	listing[i+12] := listing[i+25];
+
+	listing[i+15] := listing[i+27];
+
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+	listing[i+23] := '';
+	listing[i+24] := '';
+	listing[i+25] := '';
+	listing[i+26] := '';
+	listing[i+27] := '';
+
+      	exit(false);
+     end;
+
+
+    if lda_a(i) and (listing[i] = listing[i+9]) and						// lda A				; 0
+       asl_a(i+1) and										// asl @				; 1
+       tay(i+2) and										// tay					; 2
+       lda_a(i+3) and										// lda					; 3
+       and_ora_eor(i+4) and									// and|ora|eor				; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN			; 5
+       lda_a(i+6) and										// lda 					; 6
+       and_ora_eor(i+7) and									// and|ora|eor				; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH		; 8
+//       lda_a(i+9) and 									// lda A				; 9
+       asl_a(i+10) and										// asl @				; 10
+       tay(i+11) and										// tay					; 11
+       lda_stack(i+12) and									// lda :STACKORIGIN			; 12
+       sta_a(i+13) and										// sta 					; 13
+       lda_stack(i+14) and									// lda :STACKORIGIN+STACKWIDTH		; 14
+       sta_a(i+15) then										// sta 					; 15
+     if (copy(listing[i+5], 6, 256) = copy(listing[i+12], 6, 256)) and
+	(copy(listing[i+8], 6, 256) = copy(listing[i+14], 6, 256)) then
+     begin
+	listing[i+5] := listing[i+13];
+
+	listing[i+8] := listing[i+15];
+
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+
+      	exit(false);
+     end;
 
 
     if (lda_adr(i+4) or sta_adr(i+5)) and							// lda adr.|				; 4

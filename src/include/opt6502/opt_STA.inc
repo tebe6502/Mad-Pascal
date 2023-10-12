@@ -46,10 +46,6 @@
 	 end else
 	  if ldy(p) or iny(p) or dey(p) or tay(p) or tya(p) or onBreak(p) then Break;
 
-//inc(debug_cnt);
-//writeln(result,',',debug_cnt);
-// 28 ; 1433
-
 	if Result = false then Break;
       end;
 
@@ -66,8 +62,11 @@
 }
 
      if lda_stack(i) and											// lda :STACKORIGIN
-        (add_sub(i+1) or adc_sbc(i+1) or (asl_a(i+1) and tay(i+2)) or (lsr_a(i+1) and tay(i+2))) then		// add|adc|sub|sbc|asl @|lsr @
-      begin													//                |tay  |tay
+        (add_sub(i+1) or adc_sbc(i+1) or									// add|adc|sub|sbc|asl @|asl @|lsr @
+	 (asl_a(i+1) and tay(i+2)) or										//                |tay  |asl @|tay
+	 (asl_a(i+1) and  asl_a(i+2) and tay(i+3)) or								//			|tay  |
+	 (lsr_a(i+1) and tay(i+2))) then
+      begin
 
         //if add_im_0(i+1) or sub_im_0(i+1) or adc_im_0(i+1) or sbc_im_0(i+1) then Break;
 

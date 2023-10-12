@@ -60,6 +60,14 @@ begin
      end;
 
 
+    if lda_a(i) and										// lda				; 0
+       sta_im_0(i+1) then									// sta #$00			; 1
+     begin
+       listing[i+1] := '';
+       exit(false);
+     end;
+
+
     if sta_stack(i) and										// sta :STACK			; 0
        sta_im_0(i+1) then									// sta #$00			; 1
      begin
@@ -267,6 +275,16 @@ begin
 	listing[i]   := '';
 	listing[i+1] := '';
 	listing[i+2] := '';
+	exit(false);
+     end;
+
+
+    if sta_im_0(i) and										// sta #$00			; 0
+       (beq(i+1) or bne(i+1)) and								// beq|bne			; 1
+       jmp(i+2) then										// jmp				; 2
+     begin
+	listing[i]   := '';
+
 	exit(false);
      end;
 

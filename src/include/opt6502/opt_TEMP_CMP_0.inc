@@ -192,6 +192,33 @@ begin
     end;
 
 
+   if (pos('lda ', TemporaryBuf[2]) > 0) and							// lda W		; 2
+      (TemporaryBuf[3] = #9'cmp #$00') and							// cmp #$00		; 3
+      (TemporaryBuf[4] = #9'bne @+') and							// bne @+		; 4
+      (pos('lda ', TemporaryBuf[5]) > 0) and							// lda W		; 5
+      (TemporaryBuf[6] = #9'cmp #$00') and							// cmp #$00		; 6
+      (TemporaryBuf[7] = #9'bne @+') and							// bne @+		; 7
+      (pos('lda ', TemporaryBuf[8]) > 0) and							// lda W		; 8
+      (TemporaryBuf[9] = #9'cmp #$00') and							// cmp #$00		; 9
+      (TemporaryBuf[10] = #9'bne @+') and							// bne @+		; 10
+      (pos('lda ', TemporaryBuf[11]) > 0) and							// lda W		; 11
+      (TemporaryBuf[12] = #9'cmp #$00') and							// cmp #$00		; 12
+      (TemporaryBuf[13] = '@') and								//@			; 13
+      ((TemporaryBuf[14] = #9'beq @+') or (TemporaryBuf[14] = #9'bne @+')) and			// beq @+|bne @+	; 14
+      (TemporaryBuf[15] = #9'dey') and								// dey			; 15
+      (TemporaryBuf[16] = '@') and								//@			; 16
+      ((TemporaryBuf[17] = #9'tya') or (pos('sty ', TemporaryBuf[17]) >0)) then			// tya|sty		; 17
+    begin
+     TemporaryBuf[3] := '~';
+
+     TemporaryBuf[6] := '~';
+
+     TemporaryBuf[9] := '~';
+
+     TemporaryBuf[12] := '~';
+    end;
+
+
     if (TemporaryBuf[0] = #9'ldy #1') and							// ldy #1		; 0
        (pos('lda ', TemporaryBuf[1]) > 0) and							// lda W+1		; 1
        (TemporaryBuf[2] = #9'cmp #$00') and							// cmp #$00		; 2

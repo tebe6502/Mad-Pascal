@@ -173,6 +173,19 @@ begin
       end;
 
 
+    if sty_stack(i) and										// sty :STACKORIGIN			; 0
+       tya(i+1) and										// tya					; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
+       lda(i+3) then										// lda					; 3
+      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	exit(false);
+       end;
+
+
     if sty_stack(i) and										// sty :STACKORIGIN			; 1
        lda_a(i+1) and 										// lda					; 1
        add_sub(i+2) and 									// add|sub				; 2
@@ -185,19 +198,6 @@ begin
 
 	exit(false);
       end;
-
-
-    if sty_stack(i) and										// sty :STACKORIGIN			; 0
-       tya(i+1) and										// tya					; 1
-       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
-       lda(i+3) then										// lda					; 3
-      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
-       begin
-	listing[i+1] := '';
-	listing[i+2] := '';
-
-	exit(false);
-       end;
 
 
     if sta_stack(i) and										// sta :STACKORIGIN			; 0
@@ -235,9 +235,9 @@ begin
 
 
     if sta_stack(i) and										// sta :STACKORIGIN+9			; 0
-       (lda_a(i+1) or AND_ORA_EOR(i+1)) and							// lda|ora|and|eor			; 1
+       (lda_a(i+1) or AND_ORA_EOR(i+1)) and (iy(i+1) = false) and				// lda|ora|and|eor			; 1
        ldy_stack(i+2) and									// ldy :STACKORIGIN+9			; 2
-       sta(i+3) then										// sta					; 3
+       sta_a(i+3) then										// sta					; 3
       if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
        begin
 	listing[i]   := #9'tay';
@@ -247,15 +247,18 @@ begin
        end;
 
 
-    if ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
-       iny(i+1) and 										// iny					; 1
-       (lda_a(i+2) or sta_a(i+2)) then								// lda|sta xxx				; 2
-//       ldy(i+3) then										// ldy I				; 3
-      begin
-	listing[i+3] := #9'dey';
+    if sta_stack(i) and										// sta :STACKORIGIN+9			; 0
+       lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
+       and_ora_eor(i+2) and (iy(i+2) = false) and						// and|ora|eor				; 2
+       ldy_stack(i+3) and									// ldy :STACKORIGIN+9			; 3
+       sta_a(i+4) then										// sta					; 4
+      if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) then
+       begin
+	listing[i]   := #9'tay';
 
+	listing[i+3] := '';
 	exit(false);
-      end;
+       end;
 
 
     if lda_a(i) and (iy(i) = false) and								// lda					; 0
@@ -272,6 +275,17 @@ begin
 
       	exit(false);
      end;
+
+
+    if ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
+       iny(i+1) and 										// iny					; 1
+       (lda_a(i+2) or sta_a(i+2)) then								// lda|sta xxx				; 2
+//       ldy(i+3) then										// ldy I				; 3
+      begin
+	listing[i+3] := #9'dey';
+
+	exit(false);
+      end;
 
 
     if lda_a(i) and (lda_stack(i) = false) and							// lda I				; 0

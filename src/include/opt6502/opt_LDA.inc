@@ -393,6 +393,15 @@ begin
 
 
     if lda_a(i) and (iy(i) = false) and								// lda			; 0
+       mwy_bp2(i+1) and										// mwy  		; 1
+       (lda_a(i+2) or mva(i+2) or mwa(i+2)) then						// lda|mva|mwa		; 2
+     begin
+      listing[i] := '';
+      exit(false);
+     end;
+
+
+    if lda_a(i) and (iy(i) = false) and								// lda			; 0
        (lda_a(i+1) or mva(i+1) or mwa(i+1)) then						// lda|mva|mwa		; 1
      begin
       listing[i] := '';
