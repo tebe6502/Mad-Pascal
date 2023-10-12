@@ -12,6 +12,7 @@ VALUE	= :EAX
 A	= :EAX+2
 
 	lda A+1
+_
 	and #$7C
 	bne l_0A7F
 

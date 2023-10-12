@@ -23,7 +23,6 @@ SIGN		= :EDX+2
 
 A		= :ECX
 B		= :ECX+2
-
     
 	lda A+1
 	eor B+1
@@ -121,8 +120,8 @@ l_0464x
 	lda #$7F
 	sta RESULT+1
 	RTS					; exit
-l_0464
 
+l_0464
 	lda #$00
 	sta RESULT
 	lda #$7C
@@ -156,12 +155,11 @@ l_0447
 	and #$03
 	ora #$04
 	sta B+1
+
 	jmp l_04DA
 l_04C3
-
 	dey
 l_04DA
-
 	lda B
 ;	ldy SHIFT
 ;	beq l_0001_e
@@ -171,6 +169,7 @@ l_0001_b
 
 	dey
 	bne l_0001_b
+
 l_0001_e
 	sta B
 	jmp l_04F2
@@ -289,7 +288,6 @@ SIGN		= :EDX+2
 
 A		= :ECX
 B		= :ECX+2
-
 
 	lda A+1
 	eor B+1
@@ -424,8 +422,8 @@ l_01F1
 ;	lda RES+1
 ;	sta RESULT+1
 	RTS					; exit
-l_0212
 
+l_0212
 	lda #$00
 	sta RESULT
 	lda RES+1
@@ -467,6 +465,7 @@ l_0000_b
 
 	dey
 	bne l_0000_b
+
 ;l_0000_e
 	sta B
 	jmp l_0296
@@ -524,13 +523,15 @@ l_0296
 	and #$F8
 	cmp EXP_PART
 	bne l_030F
+	
+	lda R+1
 
-	lsr R+1
+	lsr @
 	ror R
 
 ;	lda R
 ;	sta RESULT
-	lda R+1
+;	lda R+1
 	ora SIGN
 	sta RESULT+1
 	rts					;exit
@@ -557,7 +558,7 @@ l_030F
 	ora NEW_M
 	bne l_034D
 
-	lda #$00
+;	lda #$00
 	sta RESULT
 	sta RESULT+1
 	RTS					; exit
