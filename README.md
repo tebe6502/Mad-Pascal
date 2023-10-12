@@ -205,6 +205,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [ProHiBan (Sokoban)](https://youtu.be/4VDKaIR_moY)
 * [The Hangmad](https://youtu.be/6nkBs1NJUPU)
 * [gravity](https://youtu.be/xCwlX6QSn80)
+* [Block Attack](https://youtu.be/2LqFITTgDPI)
 * [Turbo Pascal "Sokoban"](https://youtu.be/bsQsEM3TYTA)
 * [Tron +4. Mad Pascal i C+4](https://youtu.be/a4Y2TYj1ymg)
 * [Mad Pascal Commodore Plus/4 plasma effect with TEDzakker demo music](https://youtu.be/Yg10zHR--14)
