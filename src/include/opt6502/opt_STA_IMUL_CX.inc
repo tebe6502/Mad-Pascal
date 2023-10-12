@@ -89,13 +89,13 @@ begin
      begin
 
 
-       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       if lda_eax(i+13) and								// lda :eax		; 13
 	  add_sub(i+14) and								// add|sub		; 14
 	  sta(i+15) and									// sta			; 15
-          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+          lda_eax_1(i+16) and								// lda :eax+1		; 16
 	  adc_sbc(i+17) and								// adc|sbc		; 17
           sta(i+18) and									// sta			; 18
-	  (listing[i+19] <> #9'lda :eax+2') then					//~lda :eax+2		; 19
+	  (lda_eax_x(i+19) = false) then						//~lda :eax+2		; 19
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -118,11 +118,11 @@ begin
 
 
        if ldy(i+13) and									// ldy			; 13
-          (listing[i+14] = #9'lda :eax') and						// lda :eax		; 14
+          lda_eax(i+14) and								// lda :eax		; 14
 	  sta(i+15) and									// sta			; 15
-          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+          lda_eax_1(i+16) and								// lda :eax+1		; 16
 	  sta(i+17) and									// sta			; 17
-          (listing[i+18] <> #9'lda :eax+2') then					//~lda :eax+2		; 18
+          (lda_eax_x(i+18) = false) then						//~lda :eax+2		; 18
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -144,11 +144,11 @@ begin
 	end;
 
 
-       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       if lda_eax(i+13) and								// lda :eax		; 13
 	  sta(i+14) and									// sta			; 14
-          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+          lda_eax_1(i+15) and								// lda :eax+1		; 15
 	  sta(i+16) and									// sta			; 16
-          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+          (lda_eax_x(i+17) = false) then						//~lda :eax+2		; 17
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -185,11 +185,11 @@ begin
      begin
 
 
-       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       if lda_eax(i+13) and								// lda :eax		; 13
 	  sta(i+14) and									// sta			; 14
-          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+          lda_eax_1(i+15) and								// lda :eax+1		; 15
 	  sta(i+16) and									// sta			; 16
-          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+          (lda_eax_x(i+17) = false) then						//~lda :eax+2		; 17
 	begin
 
 	 if (sta_stack(i+14) = false) and
@@ -240,11 +240,11 @@ begin
      begin
 
 
-       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       if lda_eax(i+13) and								// lda :eax		; 13
 	  sta(i+14) and									// sta			; 14
-          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+          lda_eax_1(i+15) and								// lda :eax+1		; 15
 	  sta(i+16) and									// sta			; 16
-          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+          (lda_eax_x(i+17) = false) then						//~lda :eax+2		; 17
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -267,11 +267,11 @@ begin
 
 
        if ldy(i+13) and									// ldy			; 13
-          (listing[i+14] = #9'lda :eax') and						// lda :eax		; 14
+          lda_eax(i+14) and								// lda :eax		; 14
 	  sta(i+15) and									// sta			; 15
-          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+          lda_eax_1(i+16) and								// lda :eax+1		; 16
 	  sta(i+17) and									// sta			; 17
-          (listing[i+18] <> #9'lda :eax+2') then					//~lda :eax+2		; 18
+          (lda_eax_x(i+18) = false) then						//~lda :eax+2		; 18
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -309,11 +309,11 @@ begin
      begin
 
 
-       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       if lda_eax(i+13) and								// lda :eax		; 13
 	  sta(i+14) and									// sta			; 14
-          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+          lda_eax_1(i+15) and								// lda :eax+1		; 15
 	  sta(i+16) and									// sta			; 16
-          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+          (lda_eax_x(i+17) = false) then						//~lda :eax+2		; 17
 	begin
 
 	 if (sta_stack(i+14) = false) and
@@ -347,6 +347,7 @@ begin
 	 exit(false);
 	end;
 
+
      end;
 
 
@@ -364,12 +365,13 @@ begin
        sta_eax_1(i+7) then		 						// sta :eax+1				; 7
      begin
 
+
        if ldy(i+13) and									// ldy			; 13
-          (listing[i+14] = #9'lda :eax') and						// lda :eax		; 14
+          lda_eax(i+14) and								// lda :eax		; 14
 	  sta(i+15) and									// sta			; 15
-          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+          lda_eax_1(i+16) and								// lda :eax+1		; 16
 	  sta(i+17) and									// sta			; 17
-          (listing[i+18] <> #9'lda :eax+2') then					//~lda :eax+2		; 18
+          (lda_eax_x(i+18) = false) then						//~lda :eax+2		; 18
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -392,10 +394,10 @@ begin
 
 
        if lda(i+13) and									// lda			; 13
-          ((listing[i+14] = #9'add :eax') or (listing[i+14] = #9'sub :eax')) and	// add|sub :eax		; 14
+          (add_eax(i+14) or sub_eax(i+14)) and						// add|sub :eax		; 14
 	  tay(i+15) and									// tay			; 15
           lda(i+16) and									// lda			; 16
-	  ((listing[i+17] = #9'adc :eax+1') or (listing[i+17] = #9'sbc :eax+1')) and	// adc|sbc :eax+1	; 17
+	  (adc_eax_1(i+17) or sbc_eax_1(i+17)) and					// adc|sbc :eax+1	; 17
           sta_bp_1(i+18) then								// sta :bp+1		; 18
 	begin
 	 listing[i]   := listing[i+6];
@@ -433,11 +435,11 @@ begin
      begin
 
 
-       if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       if lda_eax(i+13) and								// lda :eax		; 13
 	  sta(i+14) and									// sta			; 14
-          (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+          lda_eax_1(i+15) and								// lda :eax+1		; 15
 	  sta(i+16) and									// sta			; 16
-          (listing[i+17] <> #9'lda :eax+2') then					//~lda :eax+2		; 17
+          (lda_eax_x(i+17) = false) then						//~lda :eax+2		; 17
 	begin
 	 listing[i+3] := #9'asl :eax';
 	 listing[i+4] := #9'rol @';
@@ -456,13 +458,13 @@ begin
 
 
        if lda(i+13) and									// lda			; 13
-          ((listing[i+14] = #9'add :eax') or (listing[i+14] = #9'sub :eax')) and	// add|sub :eax		; 14
+          (add_eax(i+14) or sub_eax(i+14)) and						// add|sub :eax		; 14
 	  sta(i+15) and									// sta			; 15
 	  lda(i+16) and									// lda			; 16
-          ((listing[i+17] = #9'adc :eax+1') or (listing[i+17] = #9'sbc :eax+1')) and	// adc|sbc :eax+1	; 17
+          (adc_eax_1(i+17) or sbc_eax_1(i+17)) and					// adc|sbc :eax+1	; 17
 	  sta(i+18) and									// sta			; 18
 											//			; 19
-          (pos(' :eax+2', listing[i+20]) = 0) then					//~adc|sbc :eax+2	; 20
+          (adc_sbc(i+20) = false) then							//~adc|sbc :eax+2	; 20
 	begin
 	 listing[i+3] := #9'asl :eax';
 	 listing[i+4] := #9'rol @';
@@ -497,11 +499,11 @@ begin
        lda_im_0(i+6) and 								// lda #$00				; 6
        (listing[i+7] = #9'sta :ecx+1') and 						// sta :ecx+1				; 7
 
-       (listing[i+13] = #9'lda :eax') and
+       lda_eax(i+13) and
        sta(i+14) and
-       (listing[i+15] = #9'lda :eax+1') and
+       lda_eax_1(i+15) and
        sta(i+16) and
-       (listing[i+17] <> #9'lda :eax+2') then
+       (lda_eax_x(i+17) = false) then
      begin
 	listing[i+1] := listing[i+14];
 
@@ -535,11 +537,11 @@ begin
        lda_im_0(i+6) and 								// lda #$00				; 6
        sta_eax_1(i+7) and 								// sta :eax+1				; 7
 
-       (listing[i+13] = #9'lda :eax') and
+       lda_eax(i+13) and
        sta(i+14) and
-       (listing[i+15] = #9'lda :eax+1') and
+       lda_eax_1(i+15) and
        sta(i+16) and
-       (listing[i+17] <> #9'lda :eax+2') then
+       (lda_eax_x(i+17) = false) then
      begin
 	listing[i+1] := listing[i+14];
 
@@ -575,7 +577,7 @@ begin
      begin
 
 
-      if (listing[i+13] = #9'lda :eax') and 						// lda :eax		; 13
+      if lda_eax(i+13) and 								// lda :eax		; 13
          add_sub(i+14) and								// add|sub		; 14
          tay(i+15) then  								// tay			; 15
        begin
@@ -602,7 +604,7 @@ begin
 
       if lda(i+13) and 									// lda 			; 13
          add_sub(i+14) and								// add|sub		; 14
-         ((listing[i+15] = #9'add :eax') or (listing[i+15] = #9'sub :eax')) and		// add|sub :eax		; 15
+         (add_eax(i+15) or sub_eax(i+15)) and						// add|sub :eax		; 15
          tay(i+16) then 								// tay			; 16
        begin
 	 listing[i]   := listing[i+4];
@@ -644,7 +646,7 @@ begin
   begin
 
 
-     if (listing[i+9] = #9'lda :eax') and 						// lda :eax				; 9
+     if lda_eax(i+9) and 								// lda :eax				; 9
         add_sub(i+10) and								// add|sub				; 10
         tay(i+11) then 									// tay					; 11
       begin
@@ -679,7 +681,7 @@ begin
 
      if lda(i+9) and 									// lda 					; 9
         AND_ORA_EOR(i+10) and								// and|ora|eor				; 10
-        ((listing[i+11] = #9'add :eax') or (listing[i+11] = #9'sub :eax')) and		// add|sub :eax				; 11
+        (add_eax(i+11) or sub_eax(i+11)) and						// add|sub :eax				; 11
         (tay(i+12) or sta_stack(i+12)) then						// tay|sta :STACK			; 12
       begin
 	listing[i]   := #9'lda :eax';
@@ -720,7 +722,7 @@ begin
 
 
     if lda(i+15) and 									// lda 					; 15
-       ((listing[i+16] = #9'add :eax') or (listing[i+16] = #9'sub :eax')) and		// add|sub :eax				; 16
+       (add_eax(i+16) or sub_eax(i+16)) and						// add|sub :eax				; 16
        tay(i+17) then									// tay					; 17
      begin
       listing[i] := '';
@@ -754,7 +756,7 @@ begin
 
     if lda(i+15) and 									// lda 					; 15
        add_sub(i+16) and								// add|sub				; 16
-       ((listing[i+17] = #9'add :eax') or (listing[i+17] = #9'sub :eax')) and		// add|sub :eax				; 17
+       (add_eax(i+17) or sub_eax(i+17)) and						// add|sub :eax				; 17
        (sta(i+18) or tay(i+18)) then							// sta|tay				; 18
      begin
       listing[i] := '';
@@ -804,11 +806,11 @@ begin
 
 
        if ldy(i+13) and									// ldy			; 13
-          (listing[i+14] = #9'lda :eax') and						// lda :eax		; 14
+          lda_eax(i+14) and								// lda :eax		; 14
 	  sta(i+15) and									// sta			; 15
-          (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+          lda_eax_1(i+16) and								// lda :eax+1		; 16
 	  sta(i+17) and									// sta			; 17
-          (listing[i+18] <> #9'lda :eax+2') then					//~lda :eax+2		; 18
+          (lda_eax_x(i+18) = false) then						//~lda :eax+2		; 18
 	begin
 	 listing[i]   := listing[i+6];
 	 listing[i+1] := listing[i+7];
@@ -830,6 +832,33 @@ begin
 	end;
 
 
+      if lda_eax(i+13) and								// lda :eax		; 13
+	 add_sub(i+14) and								// add|sub		; 14
+         sta(i+15) and									// sta			; 15
+         lda_eax_1(i+16) and								// lda :eax+1		; 16
+	 adc_sbc(i+17) and								// adc|sbc		; 17
+         sta(i+18) and									// sta			; 18
+         (lda_eax_x(i+19) = false) then							//~lda :eax+2		; 19
+       begin
+	 listing[i]   := listing[i+6];
+	 listing[i+1] := listing[i+7];
+	 listing[i+2] := listing[i+4];
+
+	 listing[i+3] := #9'asl @';
+	 listing[i+4] := #9'rol :eax+1';
+	 listing[i+5] := #9'asl @';
+	 listing[i+6] := #9'rol :eax+1';
+	 listing[i+7] := #9'asl @';
+	 listing[i+8] := #9'rol :eax+1';
+	 listing[i+9] := #9'asl @';
+	 listing[i+10] := #9'rol :eax+1';
+	 listing[i+11] := #9'sta :eax';
+
+	 listing[i+12] := '';
+
+	exit(false);
+       end;
+
      end;
 
 
@@ -848,11 +877,11 @@ begin
     begin
 
 
-      if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+      if lda_eax(i+13) and								// lda :eax		; 13
          sta(i+14) and									// sta			; 14
-         (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+         lda_eax_1(i+15) and								// lda :eax+1		; 15
          sta(i+16) and									// sta			; 16
-         (pos(#9'lda :eax', listing[i+17]) = 0) then					//~lda :eax+2		; 17
+         (lda_eax_x(i+17) = false) then							//~lda :eax+2		; 17
        begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -872,11 +901,11 @@ begin
        end;
 
 
-      if (listing[i+13] = #9'lda :eax+1') and						// lda :eax		; 13
+      if lda_eax_1(i+13) and								// lda :eax+1		; 13
          sta(i+14) and									// sta			; 14
-         (listing[i+15] = #9'lda :eax') and						// lda :eax+1		; 15
+         lda_eax(i+15) and								// lda :eax		; 15
          sta(i+16) and									// sta			; 16
-         (pos(#9'lda :eax', listing[i+17]) = 0) then					//~lda :eax+2		; 17
+         (lda_eax_x(i+17) = false) then							//~lda :eax+2		; 17
        begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -896,13 +925,13 @@ begin
        end;
 
 
-      if (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+      if lda_eax(i+13) and								// lda :eax		; 13
 	 add_sub(i+14) and								// add|sub		; 14
          sta(i+15) and									// sta			; 15
-         (listing[i+16] = #9'lda :eax+1') and						// lda :eax+1		; 16
+         lda_eax_1(i+16) and								// lda :eax+1		; 16
 	 adc_sbc(i+17) and								// adc|sbc		; 17
          sta(i+18) and									// sta			; 18
-         (listing[i+19] <> #9'lda :eax+2') then						//~lda :eax+2		; 19
+         (lda_eax_x(i+19) = false) then							//~lda :eax+2		; 19
        begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -923,10 +952,10 @@ begin
 
 
       if lda(i+13) and									// lda			; 13
-	 ((listing[i+14] = #9'add :eax') or (listing[i+14] = #9'sub :eax')) and		// add|sub :eax		; 14
+	 (add_eax(i+14) or sub_eax(i+14)) and						// add|sub :eax		; 14
          tay(i+15) and									// tay			; 15
 	 lda(i+16) and									// lda			; 16
-	 ((listing[i+17] = #9'adc :eax+1') or (listing[i+17] = #9'sbc :eax+1')) and	// adc|sbc :eax+1	; 17
+	 (adc_eax_1(i+17) or sbc_eax_1(i+17)) and					// adc|sbc :eax+1	; 17
          sta_bp_1(i+18) then								// sta :bp+1		; 18
        begin
 	listing[i]   := '';
@@ -961,11 +990,11 @@ begin
        (listing[i+6] = #9'lda #$01') and 						// lda #$01				; 6
        sta_eax_1(i+7) and 								// sta :eax+1				; 7
 
-       (listing[i+13] = #9'lda :eax') and						// lda :eax		; 13
+       lda_eax(i+13) and								// lda :eax		; 13
        sta(i+14) and									// sta			; 14
-       (listing[i+15] = #9'lda :eax+1') and						// lda :eax+1		; 15
+       lda_eax_1(i+15) and								// lda :eax+1		; 15
        sta(i+16) and									// sta			; 16
-       (listing[i+17] <> #9'lda :eax+2') then						//~lda :eax+2		; 17
+       (lda_eax_x(i+17) = false) then							//~lda :eax+2		; 17
      begin
       listing[i+6] := listing[i];
       listing[i+4] := #9'lda #$00';
@@ -995,10 +1024,10 @@ begin
        (listing[i+7] = #9'sta :ecx+1') and 						// sta :ecx+1				; 7
 
        lda(i+13) and									// lda			; 13
-       ((listing[i+14] = #9'add :eax') or (listing[i+14] = #9'sub :eax')) and		// add|sub :eax		; 14
+       (add_eax(i+14) or sub_eax(i+14)) and						// add|sub :eax		; 14
        sta(i+15) and									// sta			; 15
        lda(i+16) and									// lda			; 16
-       ((listing[i+17] = #9'adc :eax+1') or (listing[i+17] = #9'sbc :eax+1')) and	// adc|sbc :eax+1	; 17
+       (adc_eax_1(i+17) or sbc_eax_1(i+17)) and						// adc|sbc :eax+1	; 17
        sta(i+18) and									// sta			; 18
 
        (adc_sbc(i+20) = false) then							//~adc|sbc		; 20

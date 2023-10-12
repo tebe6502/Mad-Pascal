@@ -278,6 +278,16 @@ begin
      end;
 
 
+    if (listing[i] = #9'asl #$00') and								// asl #$00				; 0
+       (listing[i+1] = #9'rol #$00') then							// rol #$00				; 1
+     begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+     end;
+
+
     if (asl_stack(i) or asl_a(i)) and								// asl @|asl :STACKORIGIN		; 0
        (listing[i+1] = #9'rol #$00') then							// rol #$00				; 1
      begin
