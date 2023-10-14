@@ -1,3 +1,6 @@
+// 1364
+
+// 1,2,3,3,3,1,1,12,12,12,12,3,2,222
 
 uses crt;
 
@@ -11,7 +14,7 @@ var
 
 procedure RLEDecompress(src,dst: pointer); assembler; register;
 asm
-{	txa:pha
+	txa:pha
 
 	dew edx
 
@@ -50,7 +53,7 @@ inputPointer	equ *-2
 	rts
 
 stop	pla:tax
-};
+
 end;
 
 
@@ -142,11 +145,10 @@ begin
  writeln;
  writeln;
 
- RLEDecompress(sav,tst);
+ RLEDecompress(@sav,@tst);
 
  writeln('Decompress:');
  for i:=0 to 13 do write(tst[i],',');
-
 
  repeat until keypressed;
 

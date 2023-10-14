@@ -675,7 +675,8 @@ begin
     Decodechar:= c;
 end;
 
-function DecodePosition:word;
+
+function DecodePosition: word;
 var
   i,j,c:word;
 begin
@@ -828,7 +829,8 @@ begin
           end
         else
           begin
-            i := (r - DecodePosition - 1) and (N - 1);
+	    k := DecodePosition;
+            i := (r - k - 1) and (N - 1);
             j := c - 255 + THRESHOLD;
             for k := 0 to j-1 do
               begin
@@ -854,7 +856,7 @@ end;
 
 procedure Syntax;
 begin
-        writeln('Usage:lzhuf e(compression)|d(uncompression) infile outfile');
+        writeln('Usage: LZHUF.EXE E(compression)|D(uncompression) infile outfile');
         halt;
 end;
 
@@ -901,4 +903,4 @@ begin
   main;
 end.
 
-// 10722
+// 10689
