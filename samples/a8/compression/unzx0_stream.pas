@@ -8,7 +8,7 @@ begin
 
  fn:='D:KORONIS.ZX0';
 
- unZX0(fn, pointer(dpeek(88)),0 );
+ unZX0(fn, pointer(dpeek(88)) );
 
  repeat until keypressed;
 
