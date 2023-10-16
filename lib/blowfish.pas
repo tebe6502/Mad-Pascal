@@ -19,7 +19,7 @@ unit blowfish;
  @type: unit
  @author: Free Pascal development team, Tomasz Biela
  @name: Blowfish
- @version: 1.0
+ @version: 1.1
 
  @description:
 
@@ -56,6 +56,14 @@ Type
 var
     PBox    : array[0..(BFRounds+1)] of cardinal;
     SBox    : array[0..3, 0..255] of cardinal;
+
+    Count, Res, FPos: word;
+
+    MVSize,  FBufPos: byte;
+
+    Block: TBFBlock;
+
+    P: PByte;
 
 
 { Blowfish lookup tables }
@@ -412,7 +420,7 @@ begin
 end;
 
 
-procedure Encrypt(var Block : TBFBlock);
+procedure Encrypt;
 var
   I : byte;
   xl,xr,temp : Cardinal;
@@ -441,7 +449,7 @@ begin
 end;
 
 
-procedure Decrypt(var Block : TBFBlock);
+procedure Decrypt;
 var
   I : byte;
   xl,xr,temp : Cardinal;
@@ -474,9 +482,8 @@ procedure Create(Key : TBlowFishKey; KeySize : word); overload;
 var
   I     : word;
   J     : word;
-  K     : word;
+  K     : byte;
   Data  : Cardinal;
-  Block : TBFBlock;
 
 begin
   Move(bf_P, PBox, SizeOf(PBox));
@@ -500,7 +507,7 @@ begin
   Block[1] := 0;
   I := 0;
   repeat
-    Encrypt(Block);
+    Encrypt;
     PBox[I] := Block[0];
     PBox[I+1] := Block[1];
     Inc(I, 2);
@@ -510,7 +517,7 @@ begin
   for J := 0 to 3 do begin
     I := 0;
     repeat
-      Encrypt(Block);
+      Encrypt;
       SBox[J, I] := Block[0];
       SBox[J, I+1] := Block[1];
       Inc(I, 2);
@@ -537,21 +544,12 @@ end;
 
 
 function EncryptString(aString: string): string;
- var
-    Count, Res, FPos, FBufPos: word;
-
-    MVSize: byte;
-
-    FData: TBFBlock;
-
-    P: PByte;
-
 begin
 
-  FData[0]:=0;
-  FData[1]:=0;
+  Block[0]:=0;
+  Block[1]:=0;
 
-  P:=@FData;
+  P:=@Block;
 
   Count:=length(aString) + 1;
 
@@ -565,16 +563,16 @@ begin
     begin
     MVsize:=Count;
 
-    If Mvsize > byte(SizeOf(Fdata) - FBufPos) then mvsize:=SizeOf(FData) - FBufPos;
+    If Mvsize > byte(SizeOf(Block) - FBufPos) then mvsize:=SizeOf(Block) - FBufPos;
 
     move(aString[Res], P[FBufPos], MVSize);
 
-    If FBufPos+mvSize = Sizeof(FData) then
+    If FBufPos+mvSize = Sizeof(Block) then
       begin
       // Empty buffer.
-      Encrypt(FData);
+      Encrypt;
       // this will raise an exception if needed.
-      move(P[0], Result[FPos], SizeOf(FData));
+      move(P[0], Result[FPos], SizeOf(Block));
 
       inc(FPos, 8);
 
@@ -591,10 +589,10 @@ begin
   If FBufPos>0 then
     begin
     // Fill with nulls
-    Fillbyte(P[FBufPos],SizeOf(FData)-FBufPos,0);
-    EnCrypt(FData);
+    Fillbyte(P[FBufPos],SizeOf(Block)-FBufPos,0);
+    EnCrypt;
 
-    move(P[0], Result[FPos], SizeOf(FData));
+    move(P[0], Result[FPos], SizeOf(Block));
 
     inc(FPos, FBufPos);
 
@@ -607,22 +605,14 @@ end;
 
 
 function DecryptString(var Buffer: string): string;
- var
-    Count, Res, FPos, FBufPos: word;
-
-    MVSize: byte;
-
-    FData: TBFBlock;
-
-    P: PByte;
 begin
 
-  Count:=length(Buffer) -1;
+  Count:=length(Buffer)-1;
 
-  FData[0]:=0;
-  FData[1]:=0;
+  Block[0]:=0;
+  Block[1]:=0;
 
-  P:=@FData;
+  P:=@Block;
 
   FPos := 0;
   FBufPos := 0;
@@ -641,8 +631,8 @@ begin
 
       inc(Fpos, MVSize);
 
-      If ((Sizeof(FData)-MvSize) > 0) then
-        Move(P[mvSize], P[0], Sizeof(FData)-MvSize);
+      If ((Sizeof(Block)-MvSize) > 0) then
+        Move(P[mvSize], P[0], Sizeof(Block)-MvSize);
 
       Dec(Count,mvsize);
 
@@ -660,12 +650,12 @@ begin
 
 //      If mvsize > 0 then
 //        begin
-        If MvSize<SizeOf(FData) Then
+        If MvSize<SizeOf(Block) Then
           // Fill with nulls
-          FillByte(P[mvsize],SizeOf(FData)-mvsize,0);
+          FillByte(P[mvsize],SizeOf(Block)-mvsize,0);
 
-        Decrypt(FData);
-        FBufPos:=SizeOf(FData);
+        Decrypt;
+        FBufPos:=SizeOf(Block);
 //        end
 //      else
 //        Count:=0; // No more data available from stream;
