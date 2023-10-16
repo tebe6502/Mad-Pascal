@@ -205,7 +205,7 @@ begin
 
 
     if ldy(i) and										// ldy				; 0
-       lda(i+1) and										// lda				; 1
+       lda(i+1) and (iy(i+1) = false) and							// lda				; 1
        add_im_0(i+2) and									// add #$00			; 2
        sta_bp_1(i+3) then									// sta :bp+1			; 3
       begin
@@ -1517,7 +1517,7 @@ begin
 
     if lda(i) and (iy(i) = false) and								// lda				; 0
        sta_stack(i+1) and 									// sta :STACKORIGIN		; 1
-       lda(i+2) and										// lda TB+1			; 2
+       lda(i+2) and (iy(i+2) = false) and							// lda TB+1			; 2
        sta_bp_1(i+3) and									// sta :bp+1			; 3
        ldy(i+4) and										// ldy TB			; 4
        lda_stack(i+5) and									// lda :STACKORIGIN		; 5
@@ -1536,7 +1536,7 @@ begin
       end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda TB			; 0
+    if lda(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda TB			; 0
        add_im(i+1) and 										// add #			; 1
        sta_bp2(i+2) and										// sta :bp2			; 2
        lda(i+3) and (lda_stack(i+3) = false) and						// lda TB+1			; 3
@@ -1647,7 +1647,7 @@ begin
       end;
 
 
-    if lda(i) and 										// lda TB			; 0
+    if lda(i) and (iy(i) = false) and								// lda TB			; 0
        add(i+1) and (iy(i+1) = false) and							// add				; 1
        sta_stack(i+2) and 									// sta :STACKORIGIN+9		; 2
        (listing[i+3] = listing[i] + '+1') and							// lda TB+1			; 3
@@ -1798,7 +1798,7 @@ begin
       end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda				; 0
+    if lda(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda				; 0
        add_im_0(i+1) and 									// add #$00			; 1
        tay(i+2) and										// tay				; 2
        lda(i+3) and (lda_stack(i+3) = false) and						// lda				; 3
@@ -1816,7 +1816,7 @@ begin
 
 
     if lda_im_0(i) and										// lda #$00			; 0
-       add(i+1) and (add_stack(i+1) = false) and						// add 				; 1
+       add(i+1) and (add_stack(i+1) = false) and (iy(i+1) = false) and				// add 				; 1
        tay(i+2) and										// tay				; 2
        lda(i+3) and (lda_stack(i+3) = false) and						// lda				; 3
        adc(i+4) and (adc_stack(i+4) = false) and						// adc				; 4
@@ -1832,7 +1832,7 @@ begin
       end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda #$00			; 0
+    if lda_a(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN		; 1
        mwy_bp2(i+2) and										// mwy   :bp2			; 2
        ldy(i+3) and										// ldy X			; 3
