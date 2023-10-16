@@ -1,3 +1,11 @@
+14.10.2023
+- Bugfixes and Optimizations
+
+12.10.2023
+- Bugfixes and Optimizations
+- nowy moduł BLOWFISH
+- nowy przykład AES-Rijndeal
+
 03.10.2023
 - nowa dyrektywa kompilatora {$optimization loopunroll}, {$optimization noloopunroll}, dokonuje rozpętlenia pętli FOR przy stałych parametrach
 
