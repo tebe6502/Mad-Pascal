@@ -23,13 +23,13 @@ unZX0
 interface
 
 	procedure unZX0(inputPointer, outputPointer: pointer); assembler; register; overload;
-	procedure unZX0(fnam: PString; outputPointer: pointer; a: byte); register; overload;
+	procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;
 
 implementation
 
 
 
-procedure unZX0(fnam: PString; outputPointer: pointer; a: byte); register; overload;
+procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;
 (*
 @description:
 ZX0 I/O stream decompressor (Einar Saukas, Krzysztof 'XXL' Dudek)
@@ -76,12 +76,12 @@ end;
 
 
 begin
- 
+
  assign(f, fnam); reset(f,1);
 
  if IOResult > 127 then begin
   close(f);
-  
+
   Exit;
  end;
 
