@@ -1059,11 +1059,19 @@ case Tok[i].Kind of
 		    else
 		      ConstVal := Ident[IdentIndex].Value - CODEORIGIN;
 
-	  VARIABLE: if Ident[IdentIndex].isAbsolute then 				// wyjatek gdy ABSOLUTE
+	  VARIABLE: if Ident[IdentIndex].isAbsolute then begin				// wyjatek gdy ABSOLUTE
 
-	   	      ConstVal := Ident[IdentIndex].Value
 
-		    else begin
+		     if (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) then begin
+
+		      isError := true;
+		      exit(0);
+
+		     end else
+	   	      ConstVal := Ident[IdentIndex].Value;
+
+
+		    end else begin
 
 		     if isConst then begin isError:=true; exit end;			// !!! koniecznie zamiast Error !!!
 
@@ -1071,7 +1079,7 @@ case Tok[i].Kind of
 
 			ConstValType := DATAORIGINOFFSET;
 
-//        writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',ConstVal);
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',ConstVal);
 
 	if (Ident[IdentIndex].DataType in Pointers) and					// zadziala tylko dla ABSOLUTE
 	   (Ident[IdentIndex].NumAllocElements > 0) and

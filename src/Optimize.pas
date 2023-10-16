@@ -1867,7 +1867,7 @@ end;
 
 
 {
-if (pos('add #$00', listing[i+1]) > 0) then begin
+if (pos('#I.Y-DATAORIGIN', listing[i+1]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2020,7 +2020,6 @@ end;
        end;
 
 
-
      if opt_STA_0(i) = false then begin Result := false; Break end;
 
      if opt_LDA(i) = false then begin Result := false; Break end;
@@ -2078,6 +2077,7 @@ end;
 
   for i := 0 to l - 1 do begin
 
+
 {
 if (pos('cmp #$D8', listing[i]) > 0) then begin
 
@@ -2086,6 +2086,7 @@ if (pos('cmp #$D8', listing[i]) > 0) then begin
 
 end;
 }
+
 
     if lda_im(i) and 										// lda #$			; 0
        add_im(i+1) and										// add #$			; 1
