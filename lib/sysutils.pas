@@ -1170,41 +1170,20 @@ function blank_char(a: char): Boolean;
 begin
 
  Result:=false;
- 
+
  {$ifdef atari}
- 
+
  case a of
-  ' ', #9, #27..#31, #$7d..#$7f, #$9b..#$9d, #$fd..#$fe: Result := true;  
+  ' ', #9, #27..#31, #$7d..#$7f, #$9b..#$9d, #$fd..#$fe: Result := true;
  end;
- 
+
  {$else}
- 
+
  case a of
-  ' ', #9: Result := true; 
+  ' ', #9: Result := true;
  end;
- 
+
  {$endif}
- 
-end;
-
-
-function Trim(var S: string): string;
-(*
-@description:
-Trim whitespace from the ends of a string.
-
-@param: S: String
-
-@return: string
-*)
-var i : byte;
-begin
-
- i:=length(s);
- while (i>0) and blank_char(s[i]) do dec(i);
-
- Result:=s;
- Result[0]:=chr(i);
 
 end;
 
@@ -1212,7 +1191,7 @@ end;
 function TrimRight(var S: string): string;
 (*
 @description:
-Trim whitespace from the ends of a string.
+Trim strips blank characters at the end of S and returns the resulting string.
 
 @param: S: String
 
@@ -1262,6 +1241,24 @@ begin
  end;
 
 end;
+
+
+function Trim(var S: string): string;
+(*
+@description:
+Trim strips blank characters at the beginning and end of S and returns the resulting string.
+
+@param: S: String
+
+@return: string
+*)
+begin
+
+ Result := TrimLeft(S);
+ Result := TrimRight(Result);
+
+end;
+
 
 
 function CompareMem(P1,P2: PByte; Len: word): Boolean; register;
