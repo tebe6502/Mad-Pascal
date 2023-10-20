@@ -42,6 +42,10 @@ StrToBool
 StrToFloat
 StrToInt
 TimeToStr
+Trim
+TrimLeft
+TrimRight
+TryStrToInt
 
 }
 
@@ -103,6 +107,8 @@ const
 	function StrToInt(s: PString): integer; assembler; overload;
 	function TimeToStr(d: TDateTime): TString;
 	function Trim(var S: string): string;
+	function TrimRight(var S: string): string;
+	function TrimLeft(var S: string): string;
 	function TryStrToInt(s: PString; var i: integer): Boolean; assembler; overload;
 	function TryStrToInt(s: PString; var i: byte): Boolean; assembler; overload;
 
@@ -1160,6 +1166,28 @@ begin
 end;
 
 
+function blank_char(a: char): Boolean;
+begin
+
+ Result:=false;
+ 
+ {$ifdef atari}
+ 
+ case a of
+  ' ', #9, #27..#31, #$7d..#$7f, #$9b..#$9d, #$fd..#$fe: Result := true;  
+ end;
+ 
+ {$else}
+ 
+ case a of
+  ' ', #9: Result := true; 
+ end;
+ 
+ {$endif}
+ 
+end;
+
+
 function Trim(var S: string): string;
 (*
 @description:
@@ -1173,10 +1201,65 @@ var i : byte;
 begin
 
  i:=length(s);
- while (i>0) and (s[i]=' ') do dec(i);
+ while (i>0) and blank_char(s[i]) do dec(i);
 
  Result:=s;
  Result[0]:=chr(i);
+
+end;
+
+
+function TrimRight(var S: string): string;
+(*
+@description:
+Trim whitespace from the ends of a string.
+
+@param: S: String
+
+@return: string
+*)
+var i : byte;
+begin
+
+ i:=length(s);
+ while (i>0) and blank_char(s[i]) do dec(i);
+
+ Result:=s;
+ Result[0]:=chr(i);
+
+end;
+
+
+function TrimLeft(var S: string): string;
+(*
+@description:
+Trim strips blank characters at the beginning of S and returns the resulting string.
+
+@param: S: String
+
+@return: string
+*)
+var i, k : byte;
+begin
+
+ Result:=S;
+
+ if length(S) > 0 then begin
+
+ i:=1;
+ while blank_char(s[i]) do inc(i);
+
+ k:=0;
+ while i <= length(S) do begin
+  Result[k+1] := S[i];
+
+  inc(k);
+  inc(i);
+ end;
+
+ Result[0]:=chr(k);
+
+ end;
 
 end;
 
