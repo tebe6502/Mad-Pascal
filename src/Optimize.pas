@@ -1867,7 +1867,7 @@ end;
 
 
 {
-if (pos('#I.Y-DATAORIGIN', listing[i+1]) > 0) then begin
+if (pos('.LOCAL', listing[i+1]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2079,7 +2079,7 @@ end;
 
 
 {
-if (pos('cmp #$D8', listing[i]) > 0) then begin
+if (pos('ldy #1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

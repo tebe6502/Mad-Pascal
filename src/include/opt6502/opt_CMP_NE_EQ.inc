@@ -256,10 +256,10 @@ begin
 
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT <>	BNE
        lda_a(i+1) and										// lda E+1		; 1	SMALLINT =	BEQ
-       sub(i+2) and (sub_stack(i+2) = false) and						// sub 			; 2
+       sub(i+2) and {(sub_stack(i+2) = false) and}						// sub 			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda_a(i+4) and										// lda E		; 4
-       cmp(i+5) and (cmp_stack(i+5) = false) and						// cmp			; 5
+       cmp(i+5) and {(cmp_stack(i+5) = false) and}						// cmp			; 5
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
@@ -314,16 +314,16 @@ begin
 
        (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER <>	BNE
        lda_a(i+1) and										// lda E+3		; 1	INTEGER =	BEQ
-       sub(i+2) and (sub_stack(i+2) = false) and						// sub			; 2
+       sub(i+2) and {(sub_stack(i+2) = false) and}						// sub			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
        lda_a(i+4) and										// lda E+2		; 4
-       cmp(i+5) and (cmp_stack(i+5) = false) and						// cmp			; 5
+       cmp(i+5) and {(cmp_stack(i+5) = false) and}						// cmp			; 5
        (listing[i+6] = #9'bne L1') and								// bne L1		; 6
        lda_a(i+7) and										// lda E+1		; 7
-       cmp(i+8) and (cmp_stack(i+8) = false) and						// cmp			; 8
+       cmp(i+8) and {(cmp_stack(i+8) = false) and}						// cmp			; 8
        (listing[i+9] = #9'bne L1') and								// bne L1		; 9
        lda_a(i+10) and										// lda E		; 10
-       cmp(i+11) and (cmp_stack(i+11) = false) and						// cmp			; 11
+       cmp(i+11) and {(cmp_stack(i+11) = false) and}						// cmp			; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
        (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
