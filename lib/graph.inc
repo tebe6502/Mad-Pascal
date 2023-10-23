@@ -15,6 +15,7 @@ GetMaxY
 GetX
 GetY
 Ellipse
+FillCircle
 FillEllipse
 FillRect
 FloodFill
@@ -101,13 +102,12 @@ begin
 end;
 
 
-procedure Circle(x0,y0,radius: word);
+procedure Circle(x0, y0, radius: word);
 (*
 @description:
 Bresenham Circle
 *)
-var	x,y, dx,dy, txp, typ, txm, tym: word;
-	d: smallint;
+var	x,y, dx,dy, txp, typ, txm, tym, d: word;
 
 	procedure DrawCircle;
 	begin
@@ -129,9 +129,9 @@ begin
 
 	while (x <= y) do begin
 
-		if d >= 0 then begin
+		if d and $8000 = 0 then begin		// if d >= 0
 
-			d := 4 + d - dy ;
+			d := 4 + d - dy;
 
 			dec(dy, 4);
 
@@ -153,6 +153,41 @@ begin
 		inc(dx, 4);
 
 		inc(x);
+	end;
+
+end;
+
+
+procedure FillCircle(x0, y0, radius: word);
+(*
+@description:
+Bresenham filled Circle with center (X0,Y0) and radius RADIUS.
+
+https://github.com/tuupola/hagl/blob/master/src/hagl_circle.c
+*)
+var	x, y, d: word;
+
+begin
+	x := 0;
+	y := radius;
+	d := 3 - radius shl 1;
+
+	while y >= x do begin
+
+	 HLine(x0 - x, x0 + x, y0 + y);
+	 HLine(x0 - x, x0 + x, y0 - y);
+
+	 HLine(x0 - y, x0 + y, y0 + x);
+	 HLine(x0 - y, x0 + y, y0 - x);
+
+	 if d and $8000 = 0 then begin		// if d >= 0
+	  d := d + 10 + (x - y) shl 2;
+	  dec(y);
+	 end else
+	  d := d + 6 + x shl 2;
+
+	 inc(x);
+
 	end;
 
 end;
