@@ -347,6 +347,74 @@ begin
        end;
 
 
+    if (pos(#9'sta SYSTEM.FILL', TemporaryBuf[5]) = 1) and (pos('.A+1', TemporaryBuf[5]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[3]) = 1) and (pos('.A', TemporaryBuf[3]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.COUNT+1', TemporaryBuf[9]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[7]) = 1) and (pos('.COUNT', TemporaryBuf[7]) > 0) and
+       (pos(#9'sta SYSTEM.FILL', TemporaryBuf[1]) = 1) and (pos('.VALUE', TemporaryBuf[1]) > 0) and
+       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
+       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
+       (pos(#9'lda ', TemporaryBuf[0]) = 1) and
+       (pos(#9'lda ', TemporaryBuf[2]) = 1) and (pos(#9'lda #', TemporaryBuf[2]) = 0) and
+       (pos(#9'lda ', TemporaryBuf[4]) = 1) then
+       begin
+{
+	lda					; 0		***
+	sta SYSTEM.FILLBYTE_0058.VALUE		; 1
+	lda					; 2
+	sta SYSTEM.FILLBYTE_0058.A		; 3
+	lda					; 4
+	sta SYSTEM.FILLBYTE_0058.A+1		; 5
+	lda #					; 6
+	sta SYSTEM.FILLBYTE_0058.COUNT		; 7
+	lda #					; 8
+	sta SYSTEM.FILLBYTE_0058.COUNT+1	; 9
+}
+	k:=GetWORD(6, 8);		// len
+
+	yes:=false;
+
+	if k = 256 then begin
+	  TemporaryBuf[3] := #9'sta :bp2';
+
+	  TemporaryBuf[5] := #9'sta :bp2+1';
+	  TemporaryBuf[6] := TemporaryBuf[0];
+	  TemporaryBuf[7] := #9'ldy #$00';
+	  TemporaryBuf[8] := #9'sta:rne (:bp2),y+';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  TemporaryBuf[0] := '~';
+	  TemporaryBuf[1] := '~';
+
+	  yes:=true;
+
+	end else
+	if k <= 128 then begin
+	  TemporaryBuf[3] := #9'sta :bp2';
+
+	  TemporaryBuf[5] := #9'sta :bp2+1';
+	  TemporaryBuf[6] := TemporaryBuf[0];
+	  TemporaryBuf[7] := #9'ldy #$'+IntToHex(k-1, 2);
+	  TemporaryBuf[8] := #9'sta:rpl (:bp2),y-';
+	  TemporaryBuf[9] := '~';
+	  TemporaryBuf[10] := '~';
+
+	  TemporaryBuf[0] := '~';
+	  TemporaryBuf[1] := '~';
+
+	  yes:=true;
+
+	 end;
+
+        if yes and (TemporaryBuf[11] = #9'm@INLINE') then begin
+	 TemporaryBuf[11] := '~';
+	 TemporaryBuf[12] := '~';
+	end;
+
+       end;
+
+
     if (pos(#9'sta SYSTEM.FILL', TemporaryBuf[2]) = 1) and (pos('.A+1', TemporaryBuf[2]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[4]) = 1) and (pos('.A', TemporaryBuf[4]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[8]) = 1) and (pos('.COUNT+1', TemporaryBuf[8]) > 0) and
