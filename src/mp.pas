@@ -3336,16 +3336,13 @@ end;
 
 procedure GenerateCaseEqualityCheck(Value: Int64; SelectorType: Byte; Join: Boolean; CaseLocalCnt: integer);
 begin
-//asm65;
-//asm65('; GenerateCaseEqualityCheck');
-
 Gen; Gen;							// cmp :ecx, Value
 
 case DataSize[SelectorType] of
 
  1: if join=false then begin
-//      asm65(#9'lda :STACKORIGIN+1,x');
       asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
+
       if Value <> 0 then asm65(#9'cmp #$'+IntToHex(byte(Value),2));
     end else
       asm65(#9'cmp #$'+IntToHex(byte(Value),2));
@@ -3370,41 +3367,45 @@ Gen; Gen;							// cmp :ecx, Value1
  if (SelectorType in [BYTETOK, CHARTOK, ENUMTYPE]) and (Value1 >= 0) and (Value2 >= 0) then begin
 
    if (Value1 = 0) and (Value2 = 255) then begin
-//    asm65;
+
     asm65(#9'jmp @+');
    end else
    if Value1 = 0 then begin
-//	    asm65;
+
     if join=false then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
-    if Value2 = 127 then
+    if Value2 = 127 then begin
+     asm65(#9'cmp #$00');
      asm65(#9'bpl @+')
-    else begin
+    end else begin
      asm65(#9'cmp #$' + IntToHex(Value2 + 1,2));
      asm65(#9'bcc @+');
     end;
 
    end else
    if Value2 = 255 then begin
-//    asm65;
+
     if join=false then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
-    if Value1 = 128 then
+    if Value1 = 128 then begin
+     asm65(#9'cmp #$00');
      asm65(#9'bmi @+')
-    else begin
+    end else begin
      asm65(#9'cmp #$' + IntToHex(Value1,2));
      asm65(#9'bcs @+');
     end;
 
    end else
    if Value1 = Value2 then begin
-//    asm65;
+
     if join=false then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
+
     asm65(#9'cmp #$' + IntToHex(Value1,2));
     asm65(#9'beq @+');
    end else begin
-//    asm65;
+
     if join=false then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
+
     asm65(#9'clc', '; clear carry for add');
     asm65(#9'adc #$FF-$'+IntToHex(Value2,2), '; make m = $FF');
     asm65(#9'adc #$'+IntToHex(Value2,2)+'-$'+IntToHex(Value1,2)+'+1', '; carry set if in range n to m');
@@ -3416,7 +3417,8 @@ Gen; Gen;							// cmp :ecx, Value1
   case DataSize[SelectorType] of
    1: begin
        if join=false then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
-       asm65(#9'cmp #'+IntToStr(byte(Value1)));
+
+       asm65(#9'cmp #' + IntToStr(byte(Value1)));
       end;
 
   end;
@@ -3426,7 +3428,8 @@ Gen; Gen;							// cmp :ecx, Value1
   case DataSize[SelectorType] of
    1: begin
 //       asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
-       asm65(#9'cmp #'+IntToStr(byte(Value2)));
+
+       asm65(#9'cmp #' + IntToStr(byte(Value2)));
       end;
 
   end;
@@ -10436,7 +10439,6 @@ case Tok[i].Kind of
     DefineIdent(i, '@CASETMP_'+IntToHex(CaseLocalCnt, 4), VARIABLE, SelectorType, 0, 0, 0);
 
     GetIdent('@CASETMP_'+IntToHex(CaseLocalCnt, 4));
-
 
     yes:=true;
 

@@ -1,3 +1,17 @@
+24.10.2023
+- Bugfixes and Optimizations (opt_CMP_BRANCH)
+
+20.10.2023
+- SYSUTILS: Trim, TrimRight, TrimLeft
+
+14.10.2023
+- Bugfixes and Optimizations
+
+12.10.2023
+- Bugfixes and Optimizations
+- nowy moduł BLOWFISH
+- nowy przykład AES-Rijndeal
+
 03.10.2023
 - nowa dyrektywa kompilatora {$optimization loopunroll}, {$optimization noloopunroll}, dokonuje rozpętlenia pętli FOR przy stałych parametrach
 
