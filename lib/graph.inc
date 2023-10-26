@@ -8,6 +8,7 @@ calcRegCode
 Circle
 ClipLine
 DisplayBuffer
+DrawPoly
 FrameBuffer
 GetMaxColor
 GetMaxX
@@ -17,6 +18,7 @@ GetY
 Ellipse
 FillCircle
 FillEllipse
+FillPoly
 FillRect
 FloodFill
 FloodFillH
@@ -991,4 +993,119 @@ begin
 //         Image1.Canvas.LineTo(x2, y2);
 //      end;
    end;
+end;
+
+
+procedure DrawPoly(amount: byte; var vertices);
+(*
+@description:
+Draw polygon
+*)
+var i: byte;
+    P, Q: PWord;
+begin
+
+ P:=@vertices;
+ Q:=@vertices;
+
+ for i:=0 to amount-2 do begin
+  Line(P[0], P[1], P[2], P[3]);
+
+  inc(P, 2);
+ end;
+
+ Line(Q[0], Q[1], P[0], P[1]);
+
+end;
+
+
+procedure FillPoly(amount: byte; var vertices);
+(*
+@description:
+Fill polygon
+
+Adapted from  http://alienryderflex.com/polygon_fill/
+
+https://github.com/tuupola/hagl/blob/master/src/hagl_polygon.c
+*)
+var i, j, y, miny, maxy, count: byte;
+    P, Q: PWord;
+    x0,y0,x1,y1, swap: word;
+    nodes: array [0..63] of word;
+begin
+
+ miny := 255;
+ maxy := 0;
+
+ P:=@vertices;
+
+ for i := 0 to amount-1 do begin
+
+   if (miny > P[1]) then miny := P[1];
+
+   if (maxy < P[1]) then maxy := P[1];
+
+   inc(P, 2);
+
+ end;
+
+ // Loop through the rows of the image.
+    for y := miny to maxy-1 do begin
+
+        // Build a list of nodes.
+        count := 0;
+        j := amount - 1;
+
+	P:=@vertices;
+	Q:=@vertices + j shl 2;
+
+        for i := 0 to amount-1 do begin
+
+            x0 := P[0];
+            y0 := P[1];
+
+            x1 := Q[0];
+            y1 := Q[1];
+
+            if ( ((y0 < y) and (y1 >= y)) or ((y1 < y) and (y0 >= y)) ) then begin
+
+                nodes[count] := trunc(x0 + (y - y0) / (y1 - y0) * (x1 - x0));
+
+                inc(count);
+            end;
+
+	    Q:=P;
+
+	    inc(P, 2);
+	end;
+
+ // Sort the nodes, via a simple 'Bubble' sort.
+        i := 0;
+        while (i < count - 1) do begin
+
+            if (nodes[i] > nodes[i + 1]) then begin
+
+                swap := nodes[i];
+                nodes[i] := nodes[i + 1];
+                nodes[i + 1] := swap;
+
+                if i<>0 then dec(i);
+
+            end else
+             inc(i);
+
+        end;
+
+
+ // Draw lines between nodes.
+	i:=0;
+        while i < count do begin
+
+	    Hline(nodes[i], nodes[i + 1], y);
+
+	    inc(i, 2);
+        end;
+
+    end;
+
 end;
