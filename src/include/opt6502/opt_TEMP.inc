@@ -229,6 +229,50 @@ begin
       end;
 
 
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_			; 0
+      (pos('lda ', TemporaryBuf[1]) > 0) and						// lda			; 1
+      (pos('cmp ', TemporaryBuf[2]) > 0) and						// cmp			; 2
+      (pos('beq @+', TemporaryBuf[3]) > 0) and						// beq @+		; 3
+      (pos('jmp l_', TemporaryBuf[4]) > 0) and 						// jmp l_xxxx		; 4
+      (TemporaryBuf[5] = '@') then							//@			; 5
+    begin
+     TemporaryBuf[3] := #9'jne ' + copy(TemporaryBuf[4], 6, 256);
+     TemporaryBuf[4] := '~';
+     TemporaryBuf[5] := '~';
+    end;
+
+
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_			; 0
+      (pos('lda ', TemporaryBuf[1]) > 0) and						// lda			; 1
+      (pos('cmp ', TemporaryBuf[2]) > 0) and						// cmp			; 2
+      (pos('jne ', TemporaryBuf[3]) > 0) and						// jne			; 3
+      (TemporaryBuf[4] = '@') then							//@			; 4
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_			; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      (pos('beq @+', TemporaryBuf[2]) > 0) and						// beq @+		; 2
+      (pos('jmp l_', TemporaryBuf[3]) > 0) and 						// jmp l_xxxx		; 3
+      (TemporaryBuf[4] = '@') then							//@			; 4
+    begin
+     TemporaryBuf[2] := #9'jne ' + copy(TemporaryBuf[3], 6, 256);
+     TemporaryBuf[3] := '~';
+     TemporaryBuf[4] := '~';
+    end;
+
+
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_			; 0
+      (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
+      (pos('jne ', TemporaryBuf[2]) > 0) and						// jne			; 2
+      (TemporaryBuf[3] = '@') then							//@			; 3
+    begin
+     TemporaryBuf[3] := '~';
+    end;
+
+
    if (SKIP(0) = false) and								//~SKIP			; 0
       (pos('beq @+', TemporaryBuf[1]) > 0) and						// beq @+		; 1
       (pos('jmp l_', TemporaryBuf[2]) > 0) and						// jmp l_xxxx		; 2
@@ -236,6 +280,35 @@ begin
     begin
      TemporaryBuf[1] := #9'jne ' + copy(TemporaryBuf[2], 6, 256);
      TemporaryBuf[2] := '~';
+    end;
+
+
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_			; 0
+      (pos('lda ', TemporaryBuf[1]) > 0) and						// adc			; 1
+      (pos(#9'clc', TemporaryBuf[2]) = 1) and						// clc			; 2
+      (pos('adc ', TemporaryBuf[3]) > 0) and						// adc			; 3
+      (pos('adc ', TemporaryBuf[4]) > 0) and						// adc			; 4
+      (pos('bcs @+', TemporaryBuf[5]) > 0) and						// bcs @+		; 5
+      (pos('jmp l_', TemporaryBuf[6]) > 0) and 						// jmp l_xxxx		; 6
+      (TemporaryBuf[7] = '@') then							//@			; 7
+    begin
+     TemporaryBuf[5] := #9'jcc ' + copy(TemporaryBuf[6], 6, 256);
+     TemporaryBuf[6] := '~';
+     TemporaryBuf[7] := '~';
+    end;
+
+
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_			; 0
+      (pos(#9'clc', TemporaryBuf[1]) = 1) and						// clc			; 1
+      (pos('adc ', TemporaryBuf[2]) > 0) and						// adc			; 2
+      (pos('adc ', TemporaryBuf[3]) > 0) and						// adc			; 3
+      (pos('bcs @+', TemporaryBuf[4]) > 0) and						// bcs @+		; 4
+      (pos('jmp l_', TemporaryBuf[5]) > 0) and 						// jmp l_xxxx		; 5
+      (TemporaryBuf[6] = '@') then							//@			; 6
+    begin
+     TemporaryBuf[4] := #9'jcc ' + copy(TemporaryBuf[5], 6, 256);
+     TemporaryBuf[5] := '~';
+     TemporaryBuf[6] := '~';
     end;
 
 

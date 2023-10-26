@@ -176,7 +176,7 @@ begin
 
 
 {
-if (pos('sta SYSTEM.FILLCHAR_009D.A+1', TemporaryBuf[0]) > 0) then begin
+if (pos('l_0FB5', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
@@ -3313,82 +3313,85 @@ begin				// OptimizeASM
 
       end else
 
-      if pos('@cmpSTRING', arg0) > 0 then	// @cmpSTRING		accepted
+      if arg0 = '@move' then		// @move		accepted
       else
 
-      if pos('@FCMPL', arg0) > 0 then		// @FCMPL		accepted
+      if arg0 = '@cmpSTRING' then	// @cmpSTRING		accepted
       else
 
-      if pos('@FTOA', arg0) > 0 then		// @FTOA		accepted
+      if arg0 = '@FCMPL' then		// @FCMPL		accepted
       else
 
-      if pos('@SHORTINT.DIV', arg0) > 0 then	// @SHORTINT.DIV	accepted
-      else
-      if pos('@SMALLINT.DIV', arg0) > 0 then	// @SMALLINT.DIV	accepted
-      else
-      if pos('@INTEGER.DIV', arg0) > 0 then	// @INTEGER.DIV		accepted
-      else
-      if pos('@SHORTINT.MOD', arg0) > 0 then	// @SHORTINT.MOD	accepted
-      else
-      if pos('@SMALLINT.MOD', arg0) > 0 then	// @SMALLINT.MOD	accepted
-      else
-      if pos('@INTEGER.MOD', arg0) > 0 then	// @INTEGER.MOD		accepted
+      if arg0 = '@FTOA' then		// @FTOA		accepted
       else
 
-      if pos('@BYTE.DIV', arg0) > 0 then	// @BYTE.DIV		accepted
+      if arg0 = '@SHORTINT.DIV' then	// @SHORTINT.DIV	accepted
       else
-      if pos('@WORD.DIV', arg0) > 0 then	// @WORD.DIV		accepted
+      if arg0 = '@SMALLINT.DIV' then	// @SMALLINT.DIV	accepted
       else
-      if pos('@CARDINAL.DIV', arg0) > 0 then	// @CARDINAL.DIV	accepted
+      if arg0 = '@INTEGER.DIV' then	// @INTEGER.DIV		accepted
       else
-      if pos('@BYTE.MOD', arg0) > 0 then	// @BYTE.MOD		accepted
+      if arg0 = '@SHORTINT.MOD' then	// @SHORTINT.MOD	accepted
       else
-      if pos('@WORD.MOD', arg0) > 0 then	// @WORD.MOD		accepted
+      if arg0 = '@SMALLINT.MOD' then	// @SMALLINT.MOD	accepted
       else
-      if pos('@CARDINAL.MOD', arg0) > 0 then	// @CARDINAL.MOD	accepted
-      else
-
-      if pos('@SHORTREAL_MUL', arg0) > 0 then	// @SHORTREAL_MUL	accepted
-      else
-      if pos('@REAL_MUL', arg0) > 0 then	// @REAL_MUL		accepted
-      else
-      if pos('@SHORTREAL_DIV', arg0) > 0 then	// @SHORTREAL_DIV	accepted
-      else
-      if pos('@REAL_DIV', arg0) > 0 then	// @REAL_DIV		accepted
+      if arg0 = '@INTEGER.MOD' then	// @INTEGER.MOD		accepted
       else
 
-      if pos('@REAL_ROUND', arg0) > 0 then	// @REAL_ROUND		accepted
+      if arg0 = '@BYTE.DIV' then	// @BYTE.DIV		accepted
       else
-      if pos('@SHORTREAL_TRUNC', arg0) > 0 then	// @SHORTREAL_TRUNC	accepted
+      if arg0 = '@WORD.DIV' then	// @WORD.DIV		accepted
       else
-      if pos('@REAL_TRUNC', arg0) > 0 then	// @REAL_TRUNC		accepted
+      if arg0 = '@CARDINAL.DIV' then	// @CARDINAL.DIV	accepted
       else
-      if pos('@REAL_FRAC', arg0) > 0 then	// @REAL_FRAC		accepted
+      if arg0 = '@BYTE.MOD' then	// @BYTE.MOD		accepted
+      else
+      if arg0 = '@WORD.MOD' then	// @WORD.MOD		accepted
+      else
+      if arg0 = '@CARDINAL.MOD' then	// @CARDINAL.MOD	accepted
       else
 
-      if pos('@F16_F2A', arg0) > 0 then		// @F16_F2A		accepted
+      if arg0 = '@SHORTREAL_MUL' then	// @SHORTREAL_MUL	accepted
       else
-      if pos('@F16_ADD', arg0) > 0 then		// @F16_ADD		accepted
+      if arg0 = '@REAL_MUL' then	// @REAL_MUL		accepted
       else
-      if pos('@F16_SUB', arg0) > 0 then 	// @F16_SUB		accepted
+      if arg0 = '@SHORTREAL_DIV' then	// @SHORTREAL_DIV	accepted
       else
-      if pos('@F16_MUL', arg0) > 0 then		// @F16_MUL		accepted
+      if arg0 = '@REAL_DIV' then	// @REAL_DIV		accepted
       else
-      if pos('@F16_DIV', arg0) > 0 then		// @F16_DIV		accepted
+
+      if arg0 = '@REAL_ROUND' then	// @REAL_ROUND		accepted
       else
-      if pos('@F16_INT', arg0) > 0 then		// @F16_INT		accepted
+      if arg0 = '@SHORTREAL_TRUNC' then	// @SHORTREAL_TRUNC	accepted
       else
-      if pos('@F16_ROUND', arg0) > 0 then	// @F16_ROUND		accepted
+      if arg0 = '@REAL_TRUNC' then	// @REAL_TRUNC		accepted
       else
-      if pos('@F16_FRAC', arg0) > 0 then	// @F16_FRAC		accepted
+      if arg0 = '@REAL_FRAC' then	// @REAL_FRAC		accepted
       else
-      if pos('@F16_I2F', arg0) > 0 then		// @F16_I2F		accepted
+
+      if arg0 = '@F16_F2A' then		// @F16_F2A		accepted
       else
-      if pos('@F16_EQ', arg0) > 0 then		// @F16_EQ		accepted
+      if arg0 = '@F16_ADD' then		// @F16_ADD		accepted
       else
-      if pos('@F16_GT', arg0) > 0 then		// @F16_GT		accepted
+      if arg0 = '@F16_SUB' then 	// @F16_SUB		accepted
       else
-      if pos('@F16_GTE', arg0) > 0 then		// @F16_GTE		accepted
+      if arg0 = '@F16_MUL' then		// @F16_MUL		accepted
+      else
+      if arg0 = '@F16_DIV' then		// @F16_DIV		accepted
+      else
+      if arg0 = '@F16_INT' then		// @F16_INT		accepted
+      else
+      if arg0 = '@F16_ROUND' then	// @F16_ROUND		accepted
+      else
+      if arg0 = '@F16_FRAC' then	// @F16_FRAC		accepted
+      else
+      if arg0 = '@F16_I2F' then		// @F16_I2F		accepted
+      else
+      if arg0 = '@F16_EQ' then		// @F16_EQ		accepted
+      else
+      if arg0 = '@F16_GT' then		// @F16_GT		accepted
+      else
+      if arg0 = '@F16_GTE' then		// @F16_GTE		accepted
       else
 
       if arg0 = 'SYSTEM.PEEK' then begin
