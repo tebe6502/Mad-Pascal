@@ -88,6 +88,18 @@ begin
      end;
 
 
+    if (listing[i] = #9'sty :STACKORIGIN,x') and						// sty :STACKORIGIN,x			; 0
+       dex(i+1) and										// dex					; 1
+       (listing[i+2] = #9'lda :STACKORIGIN+1,x') then						// lda :STACKORIGIN+1,x			; 2
+     begin
+       listing[i]   := #9'dex';
+       listing[i+1] := #9'tya';
+       listing[i+2] := '';
+
+       exit(false);
+     end;
+
+
 // -----------------------------------------------------------------------------
 
 

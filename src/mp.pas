@@ -3101,20 +3101,20 @@ begin
   EQTOK:
     begin
     Gen; Gen;								// je +3   =
-    asm65(#9'beq @+', '; =');
+    asm65(#9'beq @+');
     end;
 
   NETOK, 0:
     begin
     Gen; Gen;								// jne +3  <>
-    asm65(#9'bne @+', '; <>');
+    asm65(#9'bne @+');
     end;
 
   GTTOK:
     begin
     Gen; Gen;								// jg +3   >
 
-    asm65(#9'seq', '; >');
+    asm65(#9'seq');
 
     if ValType in (RealTypes + SignedOrdinalTypes) then
      asm65(#9'bpl @+')
@@ -3128,9 +3128,9 @@ begin
     Gen; Gen;								// jge +3  >=
 
     if ValType in (RealTypes + SignedOrdinalTypes) then
-     asm65(#9'bpl @+', '; >=')
+     asm65(#9'bpl @+')
     else
-     asm65(#9'bcs @+', '; >=');
+     asm65(#9'bcs @+');
 
     end;
 
@@ -3139,9 +3139,9 @@ begin
     Gen; Gen;								// jl +3   <
 
     if ValType in (RealTypes + SignedOrdinalTypes) then
-     asm65(#9'bmi @+', '; <')
+     asm65(#9'bmi @+')
     else
-     asm65(#9'bcc @+', '; <');
+     asm65(#9'bcc @+');
 
     end;
 
@@ -3150,15 +3150,16 @@ begin
     Gen; Gen;								// jle +3  <=
 
     if ValType in (RealTypes + SignedOrdinalTypes) then begin
-     asm65(#9'bmi @+', '; <=');
+     asm65(#9'bmi @+');
      asm65(#9'beq @+');
     end else begin
-     asm65(#9'bcc @+', '; <=');
+     asm65(#9'bcc @+');
      asm65(#9'beq @+');
     end;
 
     end;
- end;// case
+
+ end;	// case
 
 end;
 
@@ -3463,8 +3464,6 @@ end;
 procedure GenerateCaseStatementEpilog(cnt: integer);
 var StoredCodeSize: Integer;
 begin
-asm65;
-//asm65('; GenerateCaseStatementEpilog');
 
 asm65(#9'jmp a_'+IntToHex(cnt,4));
 
@@ -7026,62 +7025,68 @@ case Tok[i].Kind of
 
       case ActualParamType of
 
-       SHORTREALTOK: begin
-		      asm65(#9'jsr @SHORTREAL_ROUND');
-
-		      ValType := SHORTINTTOK;
-		     end;
-
-            REALTOK: //asm65(#9'jsr @REAL_ROUND');
+	SHORTREALTOK:
 		begin
 
-		asm65(#9'lda :STACKORIGIN,x');
-		asm65(#9'sta @REAL_ROUND.A');
-		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'sta @REAL_ROUND.A+1');
-		asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		asm65(#9'sta @REAL_ROUND.A+2');
-		asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-		asm65(#9'sta @REAL_ROUND.A+3');
+		  asm65(#9'jsr @SHORTREAL_ROUND');
 
-		asm65(#9'jsr @REAL_ROUND');
-
-		asm65(#9'lda :eax');
-		asm65(#9'sta :STACKORIGIN,x');
-		asm65(#9'lda :eax+1');
-		asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'lda :eax+2');
-		asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-		asm65(#9'lda :eax+3');
-		asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+		  ValType := SHORTINTTOK;
 
 		end;
 
-      HALFSINGLETOK: begin
-		     // asm65(#9'jsr @F16_ROUND');
+        REALTOK:
+		begin
 
-			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @F16_ROUND.A');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @F16_ROUND.A+1');
+		 asm65(#9'lda :STACKORIGIN,x');
+		 asm65(#9'sta @REAL_ROUND.A');
+		 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+		 asm65(#9'sta @REAL_ROUND.A+1');
+		 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+		 asm65(#9'sta @REAL_ROUND.A+2');
+		 asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+		 asm65(#9'sta @REAL_ROUND.A+3');
 
-			asm65(#9'jsr @F16_ROUND');
+		 asm65(#9'jsr @REAL_ROUND');
 
-			asm65(#9'lda :eax');
-			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda :eax+1');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'lda :eax+2');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'lda :eax+3');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+		 asm65(#9'lda :eax');
+		 asm65(#9'sta :STACKORIGIN,x');
+		 asm65(#9'lda :eax+1');
+		 asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+		 asm65(#9'lda :eax+2');
+		 asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+		 asm65(#9'lda :eax+3');
+		 asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
-                     end;
+		end;
 
-          SINGLETOK: begin
-		      asm65(#9'jsr @FROUND');
-		      asm65(#9'jsr @F2I');
-                     end;
+	HALFSINGLETOK:
+      		begin
+
+		 asm65(#9'lda :STACKORIGIN,x');
+		 asm65(#9'sta @F16_ROUND.A');
+		 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+		 asm65(#9'sta @F16_ROUND.A+1');
+
+		 asm65(#9'jsr @F16_ROUND');
+
+		 asm65(#9'lda :eax');
+		 asm65(#9'sta :STACKORIGIN,x');
+		 asm65(#9'lda :eax+1');
+		 asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+		 asm65(#9'lda :eax+2');
+		 asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+		 asm65(#9'lda :eax+3');
+		 asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+        	end;
+
+        SINGLETOK:
+		begin
+
+		 asm65(#9'jsr @FROUND');
+		 asm65(#9'jsr @F2I');
+
+        	end;
 
       end;
 

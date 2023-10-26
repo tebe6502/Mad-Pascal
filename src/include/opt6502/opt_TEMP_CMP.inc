@@ -59,7 +59,7 @@ begin
    if (pos('lda ', TemporaryBuf[0]) > 0) and (TemporaryBuf[0] = TemporaryBuf[3]) and	// lda I		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
-//      (pos('lda ', TemporaryBuf[0]) > 0) and						// lda I		; 3
+//      (pos('lda ', TemporaryBuf[3]) > 0) and						// lda I		; 3
       ((pos('jeq ', TemporaryBuf[4]) > 0) or (pos('jne ', TemporaryBuf[4]) > 0)) then	// jeq|jne		; 4
     begin
      TemporaryBuf[3] := #9'cmp #$00';
