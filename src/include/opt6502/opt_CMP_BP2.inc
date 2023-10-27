@@ -265,6 +265,38 @@ begin
        lda_bp2_y(i+1) and 									// lda (:bp2),y				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        iny(i+3) and										// iny					; 3
+       lda_a(i+4) and 										// lda					; 4
+       cmp_bp2_y(i+5) and									// cmp (:bp2),y				; 5
+       (listing[i+6] = #9'bne @+') and								// bne @+				; 6
+       lda_a(i+7) and										// lda					; 7
+       cmp_stack(i+8) and									// cmp :STACKORIGIN			; 8
+       lab_a(i+9) then										//@					; 9
+    if (copy(listing[i+2], 6, 256) = copy(listing[i+8], 6, 256)) then
+      begin
+
+	if pos(#9'ldy #$', listing[i]) = 1 then begin
+          p:=GetBYTE(i) + 1;
+ 	  listing[i] := #9'ldy #$' + IntToHex(p, 2);
+	end else
+	  listing[i] := #9'ldy ' + copy(listing[i], 6, 256) + '+$01';
+
+	listing[i+1] := listing[i+4];
+	listing[i+2] := listing[i+5];
+	listing[i+3] := #9'bne @+';
+	listing[i+4] := #9'dey';
+	listing[i+5] := listing[i+7];
+	listing[i+6] := #9'cmp (:bp2),y';
+	listing[i+7] := '';
+	listing[i+8] := '';
+
+	exit(false);
+      end;
+
+
+    if ldy_im(i) and										// ldy #				; 0
+       lda_bp2_y(i+1) and 									// lda (:bp2),y				; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
+       iny(i+3) and										// iny					; 3
        lda_bp2_y(i+4) and 									// lda (:bp2),y				; 4
        SKIP(i+5) and										// SKIP					; 5
        and_ora_eor_stack(i+6) and								// and|ora|eor :STACKORIGIN		; 6

@@ -1589,4 +1589,95 @@ begin
 	exit(false);
       end;
 
+
+    if lda_a(i) and (listing[i] = listing[i+7]) and						// lda I				; 0
+       asl_a(i+1) and										// asl @				; 1
+       tay(i+2) and										// tay					; 2
+       lda_adr(i+3) and										// lda adr.				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN			; 4
+       lda_adr(i+5) and										// lda adr.				; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH		; 6
+//     lda_a(i+7) and										// lda I				; 7
+       asl_a(i+8) and										// asl @				; 8
+       tay(i+9) and										// tay					; 9
+       lda_a(i+10) and										// lda					; 10
+       cmp_stack(i+11) and									// cmp :STACKORIGIN+STACKWIDTH		; 11
+       bne(i+12) and										// bne					; 12
+       lda_a(i+13) and 										// lda					; 13
+       cmp_stack(i+14) then									// cmp :STACKORIGIN			; 14
+     if (copy(listing[i+4], 6, 256) = copy(listing[i+14], 6, 256)) and
+	(copy(listing[i+6], 6, 256) = copy(listing[i+11], 6, 256)) then
+      begin
+	listing[i+11] := #9'cmp ' + copy(listing[i+5], 6, 256);
+
+	listing[i+14] := #9'cmp ' + copy(listing[i+3], 6, 256);
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+        listing[i+7] := '';
+        listing[i+8] := '';
+        listing[i+9] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i) and (listing[i] = listing[i+12]) and						// lda I				; 0
+       asl_a(i+1) and										// asl @				; 1
+       asl_a(i+2) and										// asl @				; 2
+       tay(i+3) and										// tay					; 3
+       lda_adr(i+4) and										// lda adr.				; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN			; 5
+       lda_adr(i+6) and										// lda adr.				; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH		; 7
+       lda_adr(i+8) and										// lda adr.				; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*2	; 9
+       lda_adr(i+10) and									// lda adr.				; 10
+       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3	; 11
+//     lda_a(i+12) and										// lda I				; 12
+       asl_a(i+13) and										// asl @				; 13
+       asl_a(i+14) and										// asl @				; 14
+       tay(i+15) and										// tay					; 15
+       lda_stack(i+16) and									// lda :STACKORIGIN+STACKWIDTH*3	; 16
+       cmp(i+17) and										// cmp					; 17
+       bne(i+18) and										// bne					; 18
+       lda_stack(i+19) and 									// lda :STACKORIGIN+STACKWIDTH*2	; 19
+       cmp(i+20) and										// cmp					; 20
+       bne(i+21) and										// bne					; 21
+       lda_stack(i+22) and 									// lda :STACKORIGIN+STACKWIDTH		; 22
+       cmp(i+23) and										// cmp					; 23
+       bne(i+24) and										// bne					; 24
+       lda_stack(i+25) and 									// lda :STACKORIGIN			; 25
+       cmp(i+26) then										// cmp					; 26
+     if (copy(listing[i+5], 6, 256) = copy(listing[i+25], 6, 256)) and
+	(copy(listing[i+7], 6, 256) = copy(listing[i+22], 6, 256)) and
+	(copy(listing[i+9], 6, 256) = copy(listing[i+19], 6, 256)) and
+	(copy(listing[i+11], 6, 256) = copy(listing[i+16], 6, 256)) then
+      begin
+	listing[i+16] := listing[i+10];
+
+	listing[i+19] := listing[i+8];
+
+	listing[i+22] := listing[i+6];
+
+	listing[i+25] := listing[i+4];
+
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+        listing[i+7] := '';
+        listing[i+8] := '';
+        listing[i+9] := '';
+        listing[i+10]:= '';
+        listing[i+11]:= '';
+        listing[i+12]:= '';
+        listing[i+13]:= '';
+        listing[i+14]:= '';
+        listing[i+15]:= '';
+
+	exit(false);
+      end;
+
 end;		// function

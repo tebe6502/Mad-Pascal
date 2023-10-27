@@ -449,6 +449,11 @@ var i, l, k, m, x: integer;
      Result := listing[i] = #9'cmp (:bp),y'
    end;
 
+   function CMP_BP2_Y(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'cmp (:bp2),y'
+   end;
+
    function STA_BP_Y(i: integer): Boolean;
    begin
      Result := listing[i] = #9'sta (:bp),y'
@@ -2079,7 +2084,7 @@ end;
 
 
 {
-if (pos('ldy #1', listing[i]) > 0) then begin
+if (pos('lda adr.NODES+1+$02,y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
