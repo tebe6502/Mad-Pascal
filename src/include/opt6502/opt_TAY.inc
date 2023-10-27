@@ -277,7 +277,7 @@ begin
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH*2	; 5
        lda_a(i+6) and (iy(i+6) = false) and							// lda					; 6
        sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
-       lda(i+8) and										// lda					; 8
+       lda_a(i+8) and										// lda					; 8
        asl_a(i+9) and										// asl @				; 9
        asl_a(i+10) and										// asl @				; 10
        tay(i+11) and										// tay					; 11
@@ -318,7 +318,7 @@ begin
        lda_a(i+3) and (iy(i+3) = false) and							// lda					; 3
        adc_sbc(i+4) and (iy(i+4) = false) and							// adc|sbc				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+9	; 5
-       lda(i+6) and										// lda					; 6
+       lda_a(i+6) and										// lda					; 6
        asl_a(i+7) and										// asl @				; 7
        tay(i+8) and										// tay					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+9			; 9
@@ -671,7 +671,6 @@ begin
        lda_a(i+13) and										// lda 					; 13
        and_ora_eor(i+14) and									// and|ora|eor				; 14
        sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
-
 //       lda_a(i+16) and 									// lda A				; 16
        asl_a(i+17) and										// asl @				; 17
        asl_a(i+18) and										// asl @				; 18
