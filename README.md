@@ -150,6 +150,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [Ultima V](https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483)
 * [mad-pascal-playground](https://github.com/zbyti/mad-pascal-playground)
 * [simple-games-easy-for-develop](https://github.com/zbyti/simple-games-easy-for-develop)
+* [siege-ai-playground](https://github.com/zbyti/siege-ai-playground)
 * [Cartfall](https://gitlab.com/bocianu/cartfall)
 * [gravity](https://gitlab.com/bocianu/gravity)
 * [Unicode](https://gitlab.com/amarok8bit/unicode)
