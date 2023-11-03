@@ -152,7 +152,7 @@ B	= :ECX
 A	= :EAX
 B	= :ECX
 
-RESULT	= :ZTMP
+RESULT	= :EAX+4
 
 	ldy #0
 
@@ -205,20 +205,20 @@ RESULT	= :ZTMP
 	beq @+
 
 	lda #$00
-	sub :ZTMP
-	sta :ZTMP
+	sub RESULT
+	sta RESULT
 
 	lda #$00
-	sbc :ZTMP+1
-	sta :ZTMP+1
+	sbc RESULT+1
+	sta RESULT+1
 
 	lda #$00
-	sbc :ZTMP+2
-	sta :ZTMP+2
+	sbc RESULT+2
+	sta RESULT+2
 
 	lda #$00
-	sbc :ZTMP+3
-	sta :ZTMP+3
+	sbc RESULT+3
+	sta RESULT+3
 @
 	rts
 .endp

@@ -136,12 +136,12 @@ RESULT	= :ZTMP
 	beq @+
 
 	lda #$00
-	sub :ZTMP
-	sta :ZTMP
+	sub RESULT
+	sta RESULT
 
 	lda #$00
-	sbc :ZTMP+1
-	sta :ZTMP+1
+	sbc RESULT+1
+	sta RESULT+1
 @
 	rts
 .endp
