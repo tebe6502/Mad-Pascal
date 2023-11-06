@@ -1323,6 +1323,64 @@
       end;
 
 
+    if (l = i + 4) and
+       rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0
+       asl_a(i+1) and									// asl @				; 1
+       add_sub_stack(i+2) and								// add|sub :STACKORIGIN			; 2
+       sta(i+3) and (sta_stack(i+3) = false) then					// sta TMP+1				; 3
+     if (copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256)) then
+      begin
+	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (l = i + 5) and
+       rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0
+       asl_a(i+1) and									// asl @				; 1
+       asl_a(i+2) and									// asl @				; 2
+       add_sub_stack(i+3) and								// add|sub :STACKORIGIN			; 3
+       sta(i+4) and (sta_stack(i+4) = false) then					// sta TMP+1				; 4
+     if (copy(listing[i], 6, 256) <> copy(listing[i+3], 6, 256)) then
+      begin
+	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (l = i + 6) and
+       rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0
+       asl_a(i+1) and									// asl @				; 1
+       asl_a(i+2) and									// asl @				; 2
+       asl_a(i+3) and									// asl @				; 3
+       add_sub_stack(i+4) and								// add|sub :STACKORIGIN			; 4
+       sta(i+5) and (sta_stack(i+5) = false) then					// sta TMP+1				; 5
+     if (copy(listing[i], 6, 256) <> copy(listing[i+4], 6, 256)) then
+      begin
+	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (l = i + 7) and
+       rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0
+       asl_a(i+1) and									// asl @				; 1
+       asl_a(i+2) and									// asl @				; 2
+       asl_a(i+3) and									// asl @				; 3
+       asl_a(i+4) and									// asl @				; 4
+       add_sub_stack(i+5) and								// add|sub :STACKORIGIN			; 5
+       sta(i+6) and (sta_stack(i+6) = false) then					// sta TMP+1				; 6
+     if (copy(listing[i], 6, 256) <> copy(listing[i+5], 6, 256)) then
+      begin
+	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (l = i + 5) and
        rol_stack(i) and									// rol :STACKORIGIN			; 0		2023-02-05
        asl_a(i+1) and									// asl @				; 1

@@ -1061,11 +1061,12 @@ case Tok[i].Kind of
 
 	  VARIABLE: if Ident[IdentIndex].isAbsolute then begin				// wyjatek gdy ABSOLUTE
 
+		     if (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) or
+		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0..1])) then
+		     begin
 
-		     if (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) then begin
-
-		      isError := true;
-		      exit(0);
+			isError := true;
+			exit(0);
 
 		     end else
 	   	      ConstVal := Ident[IdentIndex].Value;
@@ -3031,7 +3032,7 @@ else
   NumAllocElements := Ident[IdentIndex].NumAllocElements or (Ident[IdentIndex].NumAllocElements_ shl 16);
   AllocElementType := Ident[IdentIndex].AllocElementType;
 
-//  writeln('> ',Ident[IdentIndex].Name,',',DataType,',',AllocElementType,',',NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
+//	writeln('> ',Ident[IdentIndex].Name,',',DataType,',',AllocElementType,',',NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
 
   Result := i;
   end // if IDENTTOK

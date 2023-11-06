@@ -1692,14 +1692,16 @@ var i, l, k, m, x: integer;
 
   for i := 0 to l - 1 do begin
 
+
 {
-if (pos('lda :STACKORIGIN-1,x', listing[i]) > 0) then begin
+if (pos('addEAX_ECX', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
      if opt_LT_GTEQ(i) = false then begin Result := false; Break end;
      if opt_LTEQ(i) = false then begin Result := false; Break end;
@@ -1806,8 +1808,7 @@ end;
 
 
    function PeepholeOptimization_STA: Boolean;
-   var i, p, k: integer;
-       yes, ok: Boolean;
+   var i: integer;
    begin
 
    Result:=true;
@@ -1872,7 +1873,7 @@ end;
 
 
 {
-if (pos('.LOCAL', listing[i+1]) > 0) then begin
+if (pos('add #$02', listing[i+1]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2084,7 +2085,7 @@ end;
 
 
 {
-if (pos('lda adr.NODES+1+$02,y', listing[i]) > 0) then begin
+if (pos('and #$80', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
