@@ -1590,14 +1590,14 @@ begin
       end;
 
 
-    if lda_a(i) and (listing[i] = listing[i+7]) and						// lda I				; 0
+    if lda_a(i) and (listing[i] = listing[i+7]) and						// lda					; 0
        asl_a(i+1) and										// asl @				; 1
        tay(i+2) and										// tay					; 2
        lda_adr(i+3) and										// lda adr.				; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
        lda_adr(i+5) and										// lda adr.				; 5
        sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH		; 6
-//     lda_a(i+7) and										// lda I				; 7
+//     lda_a(i+7) and										// lda					; 7
        asl_a(i+8) and										// asl @				; 8
        tay(i+9) and										// tay					; 9
        lda_a(i+10) and										// lda					; 10
@@ -1624,7 +1624,7 @@ begin
       end;
 
 
-    if lda_a(i) and (listing[i] = listing[i+12]) and						// lda I				; 0
+    if lda_a(i) and (listing[i] = listing[i+12]) and						// lda					; 0
        asl_a(i+1) and										// asl @				; 1
        asl_a(i+2) and										// asl @				; 2
        tay(i+3) and										// tay					; 3
@@ -1636,7 +1636,7 @@ begin
        sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*2	; 9
        lda_adr(i+10) and									// lda adr.				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3	; 11
-//     lda_a(i+12) and										// lda I				; 12
+//     lda_a(i+12) and										// lda					; 12
        asl_a(i+13) and										// asl @				; 13
        asl_a(i+14) and										// asl @				; 14
        tay(i+15) and										// tay					; 15

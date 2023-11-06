@@ -188,19 +188,47 @@ begin
        (listing[i+2] = #9'cmp #$80') and							// cmp #$80		; 2
        bne(i+3) and										// bne			; 3
        lda_im_0(i+4) and									// lda #$00		; 4
-       lab_a(i+5) and										//@			; 5
-       (jeq(i+6) or jne(i+6)) then								// jeq|jne		; 6
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+       lab_a(i+6) and										//@			; 6
+       (jeq(i+7) or jne(i+7)) then								// jeq|jne		; 7
      begin
 	listing[i+1] := '';
 	listing[i+2] := '';
 	listing[i+3] := '';
 	listing[i+4] := '';
 	listing[i+5] := '';
+	listing[i+6] := '';
 
-	if jeq(i+6) then
-	 listing[i+6] := #9'jmi ' + copy(listing[i+6], 6, 256)
+	if jeq(i+7) then
+	 listing[i+7] := #9'jmi ' + copy(listing[i+7], 6, 256)
 	else
-	 listing[i+6] := #9'jpl ' + copy(listing[i+6], 6, 256);
+	 listing[i+7] := #9'jpl ' + copy(listing[i+7], 6, 256);
+
+	exit(false);
+     end;
+
+
+    if (SKIP(i-1) = false) and
+       lda(i) and 										// lda			; 0
+       (listing[i+1] = #9'and #$80') and							// and #$80		; 1
+       (listing[i+2] = #9'cmp #$00') and							// cmp #$00		; 2
+       bne(i+3) and										// bne			; 3
+       lda_im_0(i+4) and									// lda #$00		; 4
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+       lab_a(i+6) and										//@			; 6
+       (jeq(i+7) or jne(i+7)) then								// jeq|jne		; 7
+     begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+
+	if jeq(i+7) then
+	 listing[i+7] := #9'jpl ' + copy(listing[i+7], 6, 256)
+	else
+	 listing[i+7] := #9'jmi ' + copy(listing[i+7], 6, 256);
 
 	exit(false);
      end;

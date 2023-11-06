@@ -5687,12 +5687,12 @@ begin
 //	writeln('1: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].idType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,'..',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].PassMethod,',',DEREFERENCE,',',varpass,' o ',Ident[IdentIndex].isAbsolute);
 
                      if (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK, FILETOK, TEXTFILETOK]) or
-		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].PassMethod = VARPASSING)) or
+		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (VarPass or (Ident[IdentIndex].PassMethod = VARPASSING)) ) or
 		        (Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127])) or
 		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements_ = 0)) or
 		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET)) or
 		        ((Ident[IdentIndex].DataType in Pointers) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements > 0)) or
-		        ((Ident[IdentIndex].DataType in Pointers) and {(Ident[IdentIndex].AllocElementType = UNTYPETOK) and} (Ident[IdentIndex].PassMethod = VARPASSING))
+		        ((Ident[IdentIndex].DataType in Pointers) and {(Ident[IdentIndex].AllocElementType = UNTYPETOK) and} (VarPass or (Ident[IdentIndex].PassMethod = VARPASSING)) )
 		     then
 		       Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex)
 		     else
@@ -9443,7 +9443,6 @@ case Tok[i].Kind of
 	      end;
 
 	    end;
-
 
 
 //	    writeln(Ident[IdentIndex].Name,',',vartype,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Kind);//+ '.' + Tok[i + 3].Name^);
@@ -14237,7 +14236,11 @@ while Tok[i].Kind in
 
       end;
 
+
       IdType := Tok[i + 1].Kind;
+
+      idx := i + 1;
+
 
       open_array := false;
 
@@ -14360,6 +14363,11 @@ while Tok[i].Kind in
       end;
 
 
+
+      if IdType = IDENTTOK then IdType := Ident[GetIdent(Tok[idx].Name^)].IdType;
+
+
+
       tmpVarDataSize := VarDataSize;		// dla ABSOLUTE, RECORD
 
       for VarOfSameTypeIndex := 1 to NumVarOfSameType do begin
@@ -14391,7 +14399,7 @@ while Tok[i].Kind in
 	end else begin
 	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, VarType, NumAllocElements, AllocElementType, ord(isAbsolute) * ConstVal, IdType);
 
-//	  writeln(VarOfSameType[VarOfSameTypeIndex].Nam,',', NestedDataType,',',NestedAllocElementType,',',NestedNumAllocElements);
+//	  writeln('? ',VarOfSameType[VarOfSameTypeIndex].Name,',', NestedDataType,',',NestedAllocElementType,',',NestedNumAllocElements,'|',IdType);
 
 	  Ident[NumIdent].NestedDataType := NestedDataType;
 	  Ident[NumIdent].NestedAllocElementType := NestedAllocElementType;
