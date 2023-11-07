@@ -27,9 +27,9 @@ max_iterations = 16;
 max_size = 4;
 
 var
-Q : array[0..255] of single;
+Q : array[0..255] of real;
 XMax,YMax,XMin,YMin,
-P,deltaP,deltaQ,X,Y,Xsquare,Ysquare : single;
+P,deltaP,deltaQ,X,Y,Xsquare,Ysquare : real;
 GraphDriver,GraphMode : smallint;
 color, maxcol, col, maxrow, row: byte;
 ch : char;

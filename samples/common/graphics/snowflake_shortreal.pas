@@ -1,16 +1,12 @@
 // Koch Snowflake
 // https://en.wikipedia.org/wiki/Koch_snowflake
 
-// float16	188
-// real		240
-// single	243
-
-// 109
+// 113
 
 uses crt, graph, sysutils;
 
 type
-	TFloat = float16;
+	TFloat = shortreal;
 
 	FPoint =
 	RECORD
@@ -27,7 +23,7 @@ const
 	cx = 160;
 	cy = 115;
 
-	ray0 = TFloat(70.0);
+	ray0 = TFloat(30.0);
 	ray1 = TFloat(ray0 / 2);
 
 	sqrt3 = TFloat(1.7320580756);		// SQRT(3.0)
@@ -64,11 +60,11 @@ end;
 
       IF   n > 0
       THEN BEGIN
-        r.x := (ax + ax + bx) * (1/3);
-        r.y := (ay + ay + by) * (1/3);
+        r.x := (ax + ax + bx) /3;//* (1/3);
+        r.y := (ay + ay + by) /3;//* (1/3);
 
-        t.x := (ax + bx + bx) * (1/3);
-        t.y := (ay + by + by) * (1/3);
+        t.x := (ax + bx + bx) /3 ;//* (1/3);
+        t.y := (ay + by + by) /3 ;//* (1/3);
 
         middle.x := (ax + bx) * 0.5;
         middle.y := (ay + by) * 0.5;
