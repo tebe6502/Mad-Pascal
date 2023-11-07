@@ -1,15 +1,15 @@
 // archimedes spiral
 
-// 69859	real
-// 20239	single
-// 11825	float16
+// 20399	single		5173 bytes
+// 10564	float16		5230 bytes
+// 10230	real		4158 bytes
 
 program fedora_hat;
 
 uses crt, graph, sysutils;
 
 type
- TFloat = float16;
+ TFloat = real;
 
 const
  sx: TFloat = 144;
@@ -29,9 +29,9 @@ var
  gd, gm,
  x1, y1: smallint;
 
- xi, xl: word;
+ xi, xl: byte;
 
- zi: shortint;
+ zi: byte;
 
  tim: cardinal;
 
@@ -61,7 +61,7 @@ ifz:=fz*64;
 
 xf:=4.71238905/sx;
 
-for zi:=64 downto -64 do begin
+for zi:=127 downto 0 do begin		// -64 .. 64
 
  zs:=zt*zt;
  xl:=trunc(sqrt(sx_2-zs) + half);
@@ -69,7 +69,7 @@ for zi:=64 downto -64 do begin
  zx:=ifz+scx;
  zy:=ifz+scy;
 
- for xi:=0 to xl do begin
+ for xi:=xl downto 0 do begin
 
   a:=sin(sqrt(xi*xi+zs)*xf);
 
@@ -88,7 +88,9 @@ for zi:=64 downto -64 do begin
 
 end;
 
-writeln(GetTickCount - tim,' tick');
+tim:=GetTickCount - tim;
+
+writeln(tim,' tick');
 
 repeat until keypressed;
 

@@ -12,7 +12,7 @@ var r: word;
     x: word;
     y: byte;
 
-    r_rad: float16;
+    r_rad: real;
 
 const
 	turns = 5;		// number of turns
@@ -27,8 +27,8 @@ For r := 0 To 360 * turns do begin
 
   r_rad := r * pi/180;
 
-  x := 160 + round(r * Cos(r_rad)  / 20);
-  y := 96 - round(r * Sin(r_rad)  / 20);
+  x := 160 + round(r * Cos(r_rad)  * 0.05);
+  y := 96 - round(r * Sin(r_rad)  * 0.05);
 
   LineTo(x, y);
 end;

@@ -3,7 +3,7 @@
 uses crt, graph;
 
 type
-	TFloat = single;
+	TFloat = real;
 
 const
   dt : TFloat = 0.01;
