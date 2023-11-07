@@ -879,6 +879,42 @@ begin
        end;
 
 
+    if lda_a(i) and (iy(i) = false) and								// lda					; 0		06-11-2023
+       sta_a(i+1) and										// sta :STACKORIGIN			; 1
+       lda_a(i+2) and (iy(i+2) = false) and							// lda					; 2
+       sta_a(i+3) and										// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_a(i+4) and (iy(i+4) = false) and							// lda					; 4
+       sta_a(i+5) and										// sta :STACKORIGIN+STACKWIDTH*2	; 5
+       lda_a(i+6) and (iy(i+6) = false) and							// lda					; 6
+       sta_a(i+7) and										// sta :STACKORIGIN+STACKWIDTH*3	; 7
+       ldy(i+8) and										// ldy					; 8
+       lda_a(i+9) and										// lda					; 9
+       sta_bp2(i+10) and									// sta :bp2				; 10
+       lda_a(i+11) and										// lda					; 11
+       sta_bp2_1(i+12) and									// sta :bp2+1				; 12
+       ldy(i+13) and										// ldy					; 13
+       lda_a(i+14) and										// lda :STACKORIGIN			; 14
+       STA_BP2_Y(i+15) and									// sta (:bp2),y				; 15
+       iny(i+16) and										// iny					; 16
+       lda_a(i+17) and										// lda :STACKORIGIN+STACKWIDTH		; 17
+       STA_BP2_Y(i+18) and									// sta (:bp2),y				; 18
+       (lda_a(i+19) = false) then								//~lda					; 19
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+14], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+17], 6, 256)) then
+       begin
+	listing[i+14] := listing[i];
+
+	listing[i+17] := listing[i+2];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	exit(false);
+       end;
+
+
     if mwy_bp2(i) and										// mwy FIRST bp2			; 0
        mwy_bp2(i+7) and										// ldy #				; 1
        (listing[i+1] = listing[i+8]) and							// lda (:bp2),y				; 2

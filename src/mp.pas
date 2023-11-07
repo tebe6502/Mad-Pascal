@@ -14049,7 +14049,7 @@ while Tok[i].Kind in
       else
 	if Tok[i + 2].Kind = EQTOK then begin
 
-	  j := CompileConstExpression(i + 3, ConstVal, ConstValType);
+	  j := CompileConstExpression(i + 3, ConstVal, ConstValType, INTEGERTOK, false, false);
 
 	  if Tok[j].Kind in StringTypes then begin
 

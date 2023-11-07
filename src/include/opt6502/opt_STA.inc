@@ -187,7 +187,8 @@
 
 	   ok := false;
 	   if lda_im(p-1) = false then begin						// argument z LDA nie moze wystapic w przedziale p..i
-	    old:=copy(listing[p-1], 6-1, 256);
+
+	    old := copy(listing[p-1], 6-1, 256);
 
 	    for k:=p to i do
 	     if pos(old, listing[k]) > 0 then begin ok := true; Break end;

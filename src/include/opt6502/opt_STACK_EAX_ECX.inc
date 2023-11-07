@@ -302,6 +302,92 @@ begin
      end;
 
 
+    if dex(i+13) and										// dex					; 13
+
+       lda_a(i) and (lda_stack(i) = false) and							// lda A				; 0
+       (listing[i+1] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 1
+       lda_a(i+2) and										// lda A+1				; 2
+       (listing[i+3] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
+       lda_a(i+4) and										// lda A+2				; 4
+       (listing[i+5] = #9'sta :STACKORIGIN-1+STACKWIDTH*2,x') and				// sta :STACKORIGIN-1+STACKWIDTH*2,x	; 5
+       lda_a(i+6) and										// lda A+3				; 6
+       (listing[i+7] = #9'sta :STACKORIGIN-1+STACKWIDTH*3,x') and				// sta :STACKORIGIN-1+STACKWIDTH*3,x	; 7
+       mva(i+8) and 										// mva  :STACKORIGIN,x			; 8
+       mva(i+9) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 9
+       mva(i+10) and										// mva  :STACKORIGIN+STACKWIDTH*2,x	; 10
+       mva(i+11) and 										// mva  :STACKORIGIN+STACKWIDTH*3,x	; 11
+       ADD_SUB_EAX_ECX(i+12) and								// jsr addEAX_ECX|subEAX_ECX		; 12
+
+       (listing[i+14] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 14
+       sta(i+15) and (sta_stack(i+15) = false) and						// sta A				; 15
+       (listing[i+16] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 16
+       sta(i+17) and										// sta A+1				; 17
+       (listing[i+18] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and				// lda :STACKORIGIN+STACKWIDTH*2,x	; 18
+       sta(i+19) and										// sta A+2				; 19
+       (listing[i+20] = #9'lda :STACKORIGIN+STACKWIDTH*3,x') and				// lda :STACKORIGIN+STACKWIDTH*3,x	; 20
+       sta(i+21) then										// sta A+3				; 21
+     if (pos(':STACKORIGIN,x', listing[i+8]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+9]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+10]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+11]) > 0) then
+     begin
+
+	if (listing[i+12] = #9'jsr addEAX_ECX') then begin
+	 listing_tmp[0] := listing[i];
+	 listing_tmp[1] := #9'add ' + GetString(i+8);
+	 listing_tmp[2] := listing[i+15];
+	 listing_tmp[3] := listing[i+2];
+	 listing_tmp[4] := #9'adc ' + GetString(i+9);
+	 listing_tmp[5] := listing[i+17];
+	 listing_tmp[6] := listing[i+4];
+	 listing_tmp[7] := #9'adc ' + GetString(i+10);
+	 listing_tmp[8] := listing[i+19];
+	 listing_tmp[9]  := listing[i+6];
+	 listing_tmp[10] := #9'adc ' + GetString(i+11);
+	 listing_tmp[11] := listing[i+21];
+	end else begin
+	 listing_tmp[0] := listing[i];
+	 listing_tmp[1] := #9'sub ' + GetString(i+8);
+	 listing_tmp[2] := listing[i+15];
+	 listing_tmp[3] := listing[i+2];
+	 listing_tmp[4] := #9'sbc ' + GetString(i+9);
+	 listing_tmp[5] := listing[i+17];
+	 listing_tmp[6] := listing[i+4];
+	 listing_tmp[7] := #9'sbc ' + GetString(i+10);
+	 listing_tmp[8] := listing[i+19];
+	 listing_tmp[9]  := listing[i+6];
+	 listing_tmp[10] := #9'sbc ' + GetString(i+11);
+	 listing_tmp[11] := listing[i+21];
+	end;
+
+	listing[i]   := #9'dex';
+	listing[i+1] := listing_tmp[0];
+	listing[i+2] := listing_tmp[1];
+	listing[i+3] := listing_tmp[2];
+	listing[i+4] := listing_tmp[3];
+	listing[i+5] := listing_tmp[4];
+	listing[i+6] := listing_tmp[5];
+	listing[i+7] := listing_tmp[6];
+	listing[i+8] := listing_tmp[7];
+	listing[i+9] := listing_tmp[8];
+	listing[i+10] := listing_tmp[9];
+	listing[i+11] := listing_tmp[10];
+	listing[i+12] := listing_tmp[11];
+
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+
+       exit(false);
+     end;
+
+
     if tay(i) and										// tay					; 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda A				; 1
        (listing[i+2] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 2
