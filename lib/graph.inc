@@ -1004,11 +1004,13 @@ Draw polygon
 var i: byte;
     P, Q: PWord;
 begin
+  
+ if amount < 2 then exit;
 
  P:=@vertices;
  Q:=@vertices;
 
- for i:=0 to amount-2 do begin
+ for i:=amount-2 downto 0 do begin
   Line(P[0], P[1], P[2], P[3]);
 
   inc(P, 2);
@@ -1028,22 +1030,36 @@ Adapted from  http://alienryderflex.com/polygon_fill/
 
 https://github.com/tuupola/hagl/blob/master/src/hagl_polygon.c
 *)
-var i, j, y, miny, maxy, count: byte;
-    P, Q: PWord;
+var P, Q: PWord;
+
+    i: byte register;
+    j: byte register;
+    k: byte register;
+    y: byte register;
+    count: byte register;
+    miny: byte register;
+    maxy: byte register;
+
     x0,y0,x1,y1, swap: word;
     nodes: array [0..63] of word;
 begin
 
+ if amount < 2 then exit;
+
  miny := 255;
  maxy := 0;
 
+ k := amount - 1;
+	
  P:=@vertices;
 
- for i := 0 to amount-1 do begin
+ for i := k downto 0 do begin
+ 
+   swap := P[1];
 
-   if (miny > P[1]) then miny := P[1];
+   if (miny > swap) then miny := swap;
 
-   if (maxy < P[1]) then maxy := P[1];
+   if (maxy < swap) then maxy := swap;
 
    inc(P, 2);
 
@@ -1054,12 +1070,11 @@ begin
 
         // Build a list of nodes.
         count := 0;
-        j := amount - 1;
 
 	P:=@vertices;
-	Q:=@vertices + j shl 2;
+	Q:=@vertices + k shl 2;
 
-        for i := 0 to amount-1 do begin
+        for i := k downto 0 do begin
 
             x0 := P[0];
             y0 := P[1];
@@ -1069,7 +1084,7 @@ begin
 
             if ( ((y0 < y) and (y1 >= y)) or ((y1 < y) and (y0 >= y)) ) then begin
 
-                nodes[count] := trunc(x0 + (y - y0) / (y1 - y0) * (x1 - x0));
+                nodes[count] := x0 + trunc((y - y0) / (y1 - y0) * (x1 - x0));
 
                 inc(count);
             end;
@@ -1080,8 +1095,12 @@ begin
 	end;
 
  // Sort the nodes, via a simple 'Bubble' sort.
+     if count > 0 then begin
+     
+	j := count - 1;
         i := 0;
-        while (i < count - 1) do begin
+	
+        while (i < j) do begin
 
             if (nodes[i] > nodes[i + 1]) then begin
 
@@ -1095,6 +1114,8 @@ begin
              inc(i);
 
         end;
+	
+     end;
 
 
  // Draw lines between nodes.

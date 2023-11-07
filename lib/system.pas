@@ -335,6 +335,7 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Eof(var f: file): Boolean;
 	function Exp(x: Real): Real; overload;
 	function Exp(x: Float): Float; overload;
+	function Exp(x: Float16): Float16; overload;
 	function FilePos(var f: file): cardinal; assembler;
 	function FileSize(var f: file): cardinal; assembler;
 	procedure FillByte(a: pointer; count: word; value: byte); assembler; register; overload; inline;
@@ -1057,6 +1058,34 @@ Exp returns the exponent of X, i.e. the number e to the power X.
 @returns: Float (Single)
 *)
 var P, Fraction, I, L: Float;
+begin
+    Fraction := x;
+    P := x + 1;
+    I := 1;
+
+    while L<>P do begin
+        I := I + 1;
+        Fraction :=Fraction * (x / I);
+        L := P;
+        P := P + Fraction;
+    end;
+
+    Result := P;
+end;
+
+
+function Exp(x: Float16): Float16; overload;
+(*
+@description:
+Exp returns the exponent of X, i.e. the number e to the power X.
+
+<https://www.codeproject.com/Tips/311714/Natural-Logarithms-and-Exponent>
+
+@param: x - Float16
+
+@returns: Float16
+*)
+var P, Fraction, I, L: Float16;
 begin
     Fraction := x;
     P := x + 1;

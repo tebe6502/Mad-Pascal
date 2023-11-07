@@ -320,7 +320,7 @@ end;
 
 function SHA1Print(const Digest: TSHA1Digest): TSHAString;
 var
-  I: Integer;
+  I: byte;
   P: PChar;
 begin
   SetLength(Result, 40);
