@@ -1873,7 +1873,7 @@ end;
 
 
 {
-if (pos('lda adr.PLIST+1,y', listing[i]) > 0) then begin
+if (pos('sta :bp2', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2259,11 +2259,12 @@ end;
        end;
 
 
-    if adc_sbc(i) and										// adc|sbc			; 0
+    if												// lda #$00			; -1
+       adc_sbc_im_0(i) and									// adc|sbc #$00			; 0
        (lda(i+1) or mva(i+1) or mwa(i+1)) then							// lda|mva|mwa			; 1
      begin
 
-      if (i>0) and lda(i-1) then listing[i-1] := '';
+      if (i>0) and lda_im_0(i-1) then listing[i-1] := '';
 
       listing[i] := '';
       Result:=false; Break;

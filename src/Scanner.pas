@@ -386,7 +386,7 @@ var
 
 
   procedure ReadUses;
-  var i, j: integer;
+  var i, j, k: integer;
       _line: integer;
       _uidx: integer;
       s, nam: string;
@@ -394,13 +394,34 @@ var
 
 	 UsesFound := false;
 
-	 i := NumTok-1;
+	 i := NumTok - 1;
+
 
 	 while Tok[i].Kind <> USESTOK do begin
 
-	 CheckTok(i, IDENTTOK);
 
-	 nam := FindFile(Tok[i].Name^+'.pas', 'unit');
+	  if Tok[i].Kind = STRINGLITERALTOK then begin
+
+	   CheckTok(i - 1, INTOK);
+	   CheckTok(i - 2, IDENTTOK);
+
+	   nam := '';
+
+	   for k:=1 to Tok[i].StrLength do
+	    nam := nam + chr( StaticStringData[Tok[i].StrAddress - CODEORIGIN + k] );
+
+	   nam := FindFile(nam, 'unit');
+
+	   dec(i, 2);
+
+	  end else begin
+
+	   CheckTok(i, IDENTTOK);
+
+	   nam := FindFile(Tok[i].Name^ + '.pas', 'unit');
+
+	  end;
+
 
 	 s:=AnsiUpperCase(Tok[i].Name^);
 
@@ -426,7 +447,8 @@ var
 	  dec(i, 2)
 	 else
 	  dec(i);
-	 end;
+
+	 end;	//while
 
   end;
 
@@ -700,6 +722,28 @@ var
 
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
 
+      end else
+
+      if (cmd = 'UNITPATH') then begin			// {$unitpath path1;path2;...}
+       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+
+       repeat
+
+       s := get_string(i, d, false);				// don't change the case
+
+       if s = '' then
+       	 Error(NumTok, 'An empty path cannot be used');
+
+       AddPath(s);
+
+       if d[i] = ';' then
+	inc(i)
+       else
+	Break;
+
+       until d[i] = ';';
+
+       dec(NumTok);
       end else
 
       if (cmd = 'LIBRARYPATH') then begin			// {$librarypath path1;path2;...}

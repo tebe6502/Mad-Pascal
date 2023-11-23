@@ -254,19 +254,25 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
  asm65('START');
 
- Gen; Gen; Gen;             // mov bx, :STACKORIGIN
-// asm65(#9'mwa #:STACKORIGIN bx', '; mov bx, :STACKORIGIN');
+// Gen; Gen; Gen;             // mov bx, :STACKORIGIN
 
  asm65(#9'tsx');
  asm65(#9'stx MAIN.@halt+1');
-// asm65(#9'mva #$ff portb');
-
-
  asm65;
- if FastMul > 0 then asm65(#9'fmulinit');
+
+ if target.id = 'a8' then begin
+
+  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
+  asm65(#9'icl ''atari\romoff.asm''');
+  asm65(#9'.fi');
+  asm65;
+
+ end;
 
 
- asm65;
+ if FastMul > 0 then begin asm65(#9'fmulinit'); asm65; end;
+
+
  asm65('VLEN'#9'= VARDATASIZE-VARINITSIZE');
  asm65('VADR'#9'= DATAORIGIN+VARINITSIZE');
  asm65;
@@ -282,7 +288,6 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'eif');
  asm65;
 
-
  asm65('.ifdef psptr');
  asm65(#9'mwa #PROGRAMSTACK psptr');
  asm65('.fi');
@@ -293,16 +298,12 @@ if Pass = CODEGENERATIONPASS then begin
 
   asm65(#9'lda #$0e');
   asm65(#9'jsr $ffd2','; shifted charset');
+  asm65;
 
  end;
 
 
  if target.id = 'a8' then begin
-
-  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
-  asm65(#9'icl ''atari\romoff.asm''');
-  asm65(#9'.fi');
-  asm65;
 
   asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
   asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
@@ -310,8 +311,8 @@ if Pass = CODEGENERATIONPASS then begin
 
   asm65(#9'inx','; X = 0');
   asm65(#9'stx bp','; BP = 0');
-
   asm65;
+
   asm65(#9'stx audctl','; reset POKEY');
   asm65(#9'stx audctl+$10');
   asm65(#9'lda #3');
@@ -335,8 +336,8 @@ if Pass = CODEGENERATIONPASS then begin
 // if CPUMode = 65816 then asm65(#9'opt c+');
 
 
- asm65;
  asm65(#9'UNITINITIALIZATION');
+ asm65;
 
  common.optimize.use := tmp;
 end;

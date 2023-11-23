@@ -1964,37 +1964,37 @@ begin
 
 	     case DataSize[ExpressionType] of
 	      1: begin
-		  asm65(#9'lda '+svar);
-		  asm65(#9+b+' :STACKORIGIN,x');
-		  asm65(#9'sta '+svar);
+		  asm65(#9'lda ' + svar);
+		  asm65(#9 + b + ' :STACKORIGIN,x');
+		  asm65(#9'sta ' + svar);
 		 end;
 
 	      2: begin
-		  asm65(#9'lda '+svar);
-		  asm65(#9+b+' :STACKORIGIN,x');
-		  asm65(#9'sta '+svar);
+		  asm65(#9'lda ' + svar);
+		  asm65(#9 + b + ' :STACKORIGIN,x');
+		  asm65(#9'sta ' + svar);
 
-		  asm65(#9'lda '+svar+'+1');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'sta '+svar+'+1');
+		  asm65(#9'lda ' + svar + '+1');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		  asm65(#9'sta ' + svar + '+1');
 		 end;
 
 	      4: begin
-		  asm65(#9'lda '+svar);
-		  asm65(#9+b+' :STACKORIGIN,x');
-		  asm65(#9'sta '+svar);
+		  asm65(#9'lda ' + svar);
+		  asm65(#9 + b + ' :STACKORIGIN,x');
+		  asm65(#9'sta ' + svar);
 
-		  asm65(#9'lda '+svar+'+1');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'sta '+svar+'+1');
+		  asm65(#9'lda ' + svar + '+1');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		  asm65(#9'sta ' + svar + '+1');
 
-		  asm65(#9'lda '+svar+'+2');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*2,x');
-		  asm65(#9'sta '+svar+'+2');
+		  asm65(#9'lda ' + svar + '+2');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
+		  asm65(#9'sta ' + svar + '+2');
 
-		  asm65(#9'lda '+svar+'+3');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*3,x');
-		  asm65(#9'sta '+svar+'+3');
+		  asm65(#9'lda ' + svar + '+3');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
+		  asm65(#9'sta ' + svar + '+3');
 	      end;
 
 	     end;
@@ -2015,35 +2015,35 @@ begin
 	     case DataSize[ExpressionType] of
 	      1: begin
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
+		  asm65(#9 + b + ' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		 end;
 
 	      2: begin
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
+		  asm65(#9 + b + ' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
 		  asm65(#9'sta (:bp2),y');
 		 end;
 
 	      4: begin
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
+		  asm65(#9 + b + ' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*2,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*3,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
 		  asm65(#9'sta (:bp2),y');
 	      end;
 
@@ -2063,33 +2063,35 @@ begin
 
 		  if (NumAllocElements > 256) or (NumAllocElements in [0,1]) then begin
 
-		   asm65(#9'lda '+svar);
+		   asm65(#9'lda ' + svar);
 		   asm65(#9'add :STACKORIGIN-1,x');
 		   asm65(#9'tay');
 
-		   asm65(#9'lda '+svar+'+1');
+		   asm65(#9'lda ' + svar + '+1');
 		   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 		   asm65(#9'sta :bp+1');
 
 		   asm65;
 		   asm65(#9'lda (:bp),y');
-		   asm65(#9+b+' :STACKORIGIN,x');
+		   asm65(#9 + b + ' :STACKORIGIN,x');
 		   asm65(#9'sta (:bp),y');
 
 		  end else begin
 
 		   if Ident[IdentIndex].PassMethod = VARPASSING then begin
+
 		    LoadBP2(IdentIndex, svar);
 
 		    asm65(#9'ldy :STACKORIGIN-1,x');
 		    asm65(#9'lda (:bp2),y');
-		    asm65(#9+b+' :STACKORIGIN,x');
+		    asm65(#9 + b + ' :STACKORIGIN,x');
 		    asm65(#9'sta (:bp2),y');
+
 		   end else begin
 {
 		    asm65(#9'ldy :STACKORIGIN-1,x');
 		    asm65(#9'lda '+svara+',y');
-		    asm65(#9+b+' :STACKORIGIN,x');
+		    asm65(#9 + b + ' :STACKORIGIN,x');
 		    asm65(#9'sta '+svara+',y');
 }
 		    asm65(#9'lda <'+svara);
@@ -2101,7 +2103,7 @@ begin
 		    asm65(#9'sta :bp+1');
 
 		    asm65(#9'lda (:bp),y');
-		    asm65(#9+b+' :STACKORIGIN,x');
+		    asm65(#9 + b + ' :STACKORIGIN,x');
 		    asm65(#9'sta (:bp),y');
 
 		   end;
@@ -2123,29 +2125,45 @@ begin
 
 		  asm65(#9'ldy #$00');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
+		  asm65(#9 + b + ' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
+		  asm65(#9 + c  + ' :STACKORIGIN+STACKWIDTH,x');
 		  asm65(#9'sta (:bp2),y');
 
 	      	 end else begin
-		  asm65(#9'lda '+svar);
-		  asm65(#9'add :STACKORIGIN-1,x');
-		  asm65(#9'sta :bp2');
-		  asm65(#9'lda '+svar+'+1');
-		  asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-		  asm65(#9'sta :bp2+1');
 
-		  asm65(#9'ldy #$00');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
-		  asm65(#9'sta (:bp2),y');
-		  asm65(#9'iny');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'sta (:bp2),y');
+	 	  if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
+
+		   asm65(#9'lda ' + svar);
+		   asm65(#9'add :STACKORIGIN-1,x');
+		   asm65(#9'sta :bp2');
+		   asm65(#9'lda ' + svar + '+1');
+		   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		   asm65(#9'sta :bp2+1');
+
+		   asm65(#9'ldy #$00');
+		   asm65(#9'lda (:bp2),y');
+		   asm65(#9 + b + ' :STACKORIGIN,x');
+		   asm65(#9'sta (:bp2),y');
+		   asm65(#9'iny');
+		   asm65(#9'lda (:bp2),y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		   asm65(#9'sta (:bp2),y');
+
+		  end else begin
+
+		   asm65(#9'ldy :STACKORIGIN-1,x');
+		   asm65(#9'lda ' + svara + ',y');
+		   asm65(#9 + b + ' :STACKORIGIN,x');
+		   asm65(#9'sta ' + svara + ',y');
+		   asm65(#9'lda ' + svara + '+1,y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		   asm65(#9'sta ' + svara + '+1,y');
+
+		  end;
+
 		 end;
 
 	      4: if Ident[IdentIndex].PassMethod = VARPASSING then begin
@@ -2161,45 +2179,67 @@ begin
 
 		  asm65(#9'ldy #$00');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
+		  asm65(#9 + b + ' :STACKORIGIN,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*2,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
 		  asm65(#9'sta (:bp2),y');
 		  asm65(#9'iny');
 		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*3,x');
+		  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
 		  asm65(#9'sta (:bp2),y');
 
 	      	 end else begin
-		  asm65(#9'lda '+svar);
-		  asm65(#9'add :STACKORIGIN-1,x');
-		  asm65(#9'sta :bp2');
-		  asm65(#9'lda '+svar+'+1');
-		  asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-		  asm65(#9'sta :bp2+1');
 
-		  asm65(#9'ldy #$00');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+b+' :STACKORIGIN,x');
-		  asm65(#9'sta (:bp2),y');
-		  asm65(#9'iny');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH,x');
-		  asm65(#9'sta (:bp2),y');
-		  asm65(#9'iny');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*2,x');
-		  asm65(#9'sta (:bp2),y');
-		  asm65(#9'iny');
-		  asm65(#9'lda (:bp2),y');
-		  asm65(#9+c+' :STACKORIGIN+STACKWIDTH*3,x');
-		  asm65(#9'sta (:bp2),y');
+	 	  if (NumAllocElements * 4 > 256) or (NumAllocElements in [0,1]) then begin
+
+		   asm65(#9'lda ' + svar);
+		   asm65(#9'add :STACKORIGIN-1,x');
+		   asm65(#9'sta :bp2');
+		   asm65(#9'lda ' + svar + '+1');
+		   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		   asm65(#9'sta :bp2+1');
+
+		   asm65(#9'ldy #$00');
+		   asm65(#9'lda (:bp2),y');
+		   asm65(#9 + b + ' :STACKORIGIN,x');
+		   asm65(#9'sta (:bp2),y');
+		   asm65(#9'iny');
+		   asm65(#9'lda (:bp2),y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		   asm65(#9'sta (:bp2),y');
+		   asm65(#9'iny');
+		   asm65(#9'lda (:bp2),y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
+		   asm65(#9'sta (:bp2),y');
+		   asm65(#9'iny');
+		   asm65(#9'lda (:bp2),y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
+		   asm65(#9'sta (:bp2),y');
+
+		  end else begin
+
+		   asm65(#9'ldy :STACKORIGIN-1,x');
+		   asm65(#9'lda ' + svara + ',y');
+		   asm65(#9 + b + ' :STACKORIGIN,x');
+		   asm65(#9'sta ' + svara + ',y');
+		   asm65(#9'lda ' + svara + '+1,y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		   asm65(#9'sta ' + svara + '+1,y');
+		   asm65(#9'lda ' + svara + '+2,y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
+		   asm65(#9'sta ' + svara + '+2,y');
+		   asm65(#9'lda ' + svara + '+3,y');
+		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
+		   asm65(#9'sta ' + svara + '+3,y');
+
+		  end;
+
 		 end;
 
 	     end;
@@ -13972,6 +14012,12 @@ while Tok[i].Kind in
 
    if Tok[i].Kind = COMMATOK then inc(i);
 
+   if Tok[i].Kind = INTOK then begin
+    CheckTok(i + 1, STRINGLITERALTOK);
+
+    inc(i,2);
+   end;
+
   until Tok[i].Kind <> IDENTTOK;
 
 
@@ -14006,6 +14052,12 @@ while Tok[i].Kind in
    inc(i);
 
    if Tok[i].Kind = COMMATOK then inc(i);
+
+   if Tok[i].Kind = INTOK then begin
+    CheckTok(i + 1, STRINGLITERALTOK);
+
+    inc(i,2);
+   end;
 
   until Tok[i].Kind <> IDENTTOK;
 

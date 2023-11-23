@@ -1,3 +1,12 @@
+22.11.2023
+- umożliwienie alokacji tablic dla FASTMUL pod ROM gdy {$define ROMOFF}
+- optymalizacja szybkośći operacji DIV dla typu WORD, SMALLINT (zależnie od aktywacji FASTMUL}
+- {$UNITPATH filename}
+- USES unit in 'filename'
+
+12.11.2023
+- Bugfixes and Optimizations
+
 05.11.2023
 - Bugfixes and Optimizations
 

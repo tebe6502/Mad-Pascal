@@ -2949,6 +2949,11 @@ else
   CheckTok(i + 1, CBRACKETTOK);
   CheckTok(i + 2, OFTOK);
 
+
+  if Tok[i + 3].Kind in [RECORDTOK, OBJECTTOK] then
+     Error(i, 'Only arrays of ^'+InfoAboutToken(Tok[i + 3].Kind)+' are supported');
+
+
   if Tok[i + 3].Kind = ARRAYTOK then begin
     i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
     Result := i;
