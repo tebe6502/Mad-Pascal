@@ -2,7 +2,7 @@
 /*
 	fmulu_16
 	imulCX
-	imulCX_AL
+	@imulCX_AL
 	imulWORD
 	idivWORD
 	@WORD.DIV
@@ -239,8 +239,10 @@ ptr3 = :ECX
         adc     :ECX
 @L1:    ror	@
         ror     :EAX
+
         dey
         bne     @L0
+
         sta	:EAX+1
 
 	rts
@@ -256,7 +258,7 @@ ptr3 = :ECX
 ; CC65 runtime: 8x16 => 24 unsigned multiplication
 ;
 
-.proc	imulCX_AL
+.proc	@imulCX_AL
 
 ptr1 = :EAX
 sreg = :EAX+2
@@ -296,6 +298,67 @@ ptr3 = :ECX
 
 
 ;---------------------------------------------------------------------------
+; 16by8 division
+
+.proc	@divAX_CL
+
+MOD
+
+ptr1	= :ax
+ptr4	= :cx
+sreg	= :ztmp
+
+	LDA #0
+	STA :ztmp+1
+	STA :ztmp+2
+	STA :ztmp+3
+
+	sta :eax+2
+	sta :eax+3
+
+udiv16by8a:
+
+     .ifdef fmulinit
+
+	.REPT 16
+	asl     ptr1
+	rol     ptr1+1
+	rol     @
+	bcs     @+0
+
+	cmp     ptr4
+	bcc     @+1
+@	sbc     ptr4
+	inc     ptr1
+@
+	.ENDR
+
+     els
+
+	ldy #$10
+
+@L0:    asl     ptr1
+        rol     ptr1+1
+        rol     @
+        bcs     @L1
+
+        cmp     ptr4
+        bcc     @L2
+@L1:    sbc     ptr4
+        inc     ptr1
+
+@L2:    dey
+        bne     @L0
+
+     eif
+
+        sta     sreg
+
+	rts
+.endp
+
+
+;---------------------------------------------------------------------------
 ; DIVIDE ROUTINE (16 BIT)
 ; AX/CX -> ACC, remainder in ZTMP
 
@@ -312,14 +375,41 @@ B	= :ECX
 
 RESULT	= :ZTMP
 	.endl
+	
+	lda DIV.B+1
+	jeq @divAX_CL
 
 	LDA #0
-	STA ztmp+1
-	STA ztmp+2
-	STA ztmp+3
+	STA :ztmp+1
+	STA :ztmp+2
+	STA :ztmp+3
 
 	sta :eax+2
 	sta :eax+3
+
+     .ifdef fmulinit
+
+	.REPT 16,#
+	ASL :ax
+	ROL :ax+1
+	ROL @
+	ROL :ztmp+1
+	tay
+	CMP :cx
+	LDA :ztmp+1
+	SBC :cx+1
+	BCC @+
+	STA :ztmp+1
+	INC :ax
+	tya
+	SBC :cx
+	jmp s:1
+@	
+	tya
+s:1
+	.ENDR
+	
+     els
 
 	LDY #$10
 
@@ -333,57 +423,19 @@ LOOP	ASL :ax
 	SBC :cx+1
 	BCC DIV2
 	STA :ztmp+1
+	INC :ax
 	lda :edx
 	SBC :cx
-	sta :edx
-	INC :ax
+	jmp DIV3
+;	sta :edx
 DIV2	lda :edx
-
+DIV3
 	DEY
 	BNE LOOP
+	
+     eif
 
 	STA :ztmp
-
-	rts
-.endp
-
-
-;---------------------------------------------------------------------------
-; 16by8 division
-
-.proc	@divAX_CL
-
-MOD
-
-ptr1	= ax
-ptr4	= cx
-sreg	= ztmp
-
-	LDA #0
-	STA ztmp+1
-	STA ztmp+2
-	STA ztmp+3
-
-	sta :eax+2
-	sta :eax+3
-
-	ldy #$10
-
-udiv16by8a:
-@L0:    asl     ptr1
-        rol     ptr1+1
-        rol     @
-        bcs     @L1
-
-        cmp     ptr4
-        bcc     @L2
-@L1:    sbc     ptr4
-        inc     ptr1
-
-@L2:    dey
-        bne     @L0
-
-        sta     sreg
 
 	rts
 .endp
