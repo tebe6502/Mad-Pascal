@@ -1404,6 +1404,23 @@ begin
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
+    if (lda_adr(i+6) or sta_adr(i+7)) and						// lda adr.|				; 6
+       (iy(i+6) or iy(i+7)) and								//         |sta adr.			; 7
+
+       lda_a(i) and (lda_im(i) = false) and (lda_stack(i) = false) and			// lda 					; 0		BYTE
+       add(i+1) and (add_im_0(i+1) = false) and (add_stack(i+1) = false) and		// add 					; 1
+       tay(i+2) and									// tay					; 2
+       lda(i+3) and									// lda					; 3
+       adc_im_0(i+4) and								// adc #$00				; 4
+       sta_stack(i+5) then		 						// sta :STACKORIGIN+STACKWIDTH		; 5
+      begin
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	exit(false);
+       end;
+
 
     if (lda_adr(i+6) or sta_adr(i+7)) and						// lda adr.|				; 6
        (iy(i+6) or iy(i+7)) and								//         |sta adr.			; 7

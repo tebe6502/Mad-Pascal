@@ -1663,6 +1663,20 @@ begin
      end;
 
 
+    if add(i) and									// add					; 0
+       sta_stack(i+1) and								// sta :STACKORIGIN			; 1
+       lda_stack(i+2) and								// lda :STACKORIGIN			; 2
+       add_im_0(i+3) then								// add #$00				; 3
+     if copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256) then
+     begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	exit(false);
+     end;
+
+
     if lda(i) and (iy(i) = false) and							// lda A				; 0
        add_im_0(i+1) and								// add #$00				; 1
        sta(i+2) and (iy(i+2) = false) and						// sta A				; 2

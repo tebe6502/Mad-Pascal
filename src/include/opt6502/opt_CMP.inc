@@ -31,6 +31,44 @@ begin
       end;
 
 
+    if ldy_1(i) and										// ldy #1				; 0
+       												// lda|jsr				; 1
+       bmi(i+2) and										// bmi @+				; 2
+       dey(i+3) and 										// dey					; 3
+       lab_a(i+4) and										//@					; 4
+       tya(i+5) and										// tya					; 5
+       sta_a(i+6) then										// sta					; 6
+      begin
+       listing[i] := '';
+
+       listing[i+2] := #9'asl @';
+       listing[i+3] := #9'lda #$00';
+       listing[i+4] := #9'adc #$00';
+       listing[i+5] := '';
+
+       exit(false);
+      end;
+
+
+    if ldy_1(i) and										// ldy #1				; 0
+       												// lda|jsr				; 1
+       bpl(i+2) and										// bpl @+				; 2
+       dey(i+3) and 										// dey					; 3
+       lab_a(i+4) and										//@					; 4
+       tya(i+5) and										// tya					; 5
+       sta_a(i+6) then										// sta					; 6
+      begin
+       listing[i] := '';
+
+       listing[i+2] := #9'eor #$80';
+       listing[i+3] := #9'asl @';
+       listing[i+4] := #9'lda #$00';
+       listing[i+5] := #9'adc #$00';
+
+       exit(false);
+      end;
+
+
     if lda_a(i) and										// lda					; 0
        and_im(i+1) and (listing[i+1] = listing[i+4]) and					// and #				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
