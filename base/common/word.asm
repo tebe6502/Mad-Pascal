@@ -2,7 +2,7 @@
 /*
 	fmulu_16
 	imulCX
-	@imulCX_AL
+	imulCX_AL
 	imulWORD
 	idivWORD
 	@WORD.DIV
@@ -258,7 +258,7 @@ ptr3 = :ECX
 ; CC65 runtime: 8x16 => 24 unsigned multiplication
 ;
 
-.proc	@imulCX_AL
+.proc	imulCX_AL
 
 ptr1 = :EAX
 sreg = :EAX+2
