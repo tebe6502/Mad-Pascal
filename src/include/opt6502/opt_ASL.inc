@@ -1730,7 +1730,7 @@ begin
       end;
 
 
-    if mwy_bp2(i+2) and								// mwy				; 2
+    if (mwy_bp2(i+2) or ldy(i+2)) and						// mwy|ldy			; 2
        lda_a(i+3) then								// lda				; 3
       begin
 	listing[i] := '';
@@ -1751,7 +1751,7 @@ begin
 
 
     if rol_a(i+2) and								// rol @			; 2
-       mwy_bp2(i+3) and								// mwy				; 3
+       (mwy_bp2(i+3) or ldy(i+3)) and						// mwy|ldy			; 3
        lda_a(i+4) then								// lda				; 4
       begin
 	listing[i] := '';
@@ -1809,11 +1809,64 @@ begin
       end;
 
 
-
     if lda_a(i+4) and								// lda				; 4
 
        asl_stack(i+2) and							// asl :STACKORIGIN		; 2
-       mwy_bp2(i+3) then							// mwy				; 3
+       (mwy_bp2(i+3) or ldy(i+3)) then						// mwy|ldy			; 3
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i+5) and								// lda				; 5
+
+       asl_stack(i+2) and							// asl :STACKORIGIN		; 2
+       asl_stack(i+3) and							// asl :STACKORIGIN		; 3
+       (mwy_bp2(i+4) or ldy(i+4)) then						// mwy|ldy			; 4
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i+6) and								// lda				; 6
+
+       asl_stack(i+2) and							// asl :STACKORIGIN		; 2
+       asl_stack(i+3) and							// asl :STACKORIGIN		; 3
+       asl_stack(i+4) and							// asl :STACKORIGIN		; 4
+       (mwy_bp2(i+5) or ldy(i+5)) then						// mwy|ldy			; 5
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i+7) and								// lda				; 7
+
+       asl_stack(i+2) and							// asl :STACKORIGIN		; 2
+       asl_stack(i+3) and							// asl :STACKORIGIN		; 3
+       asl_stack(i+4) and							// asl :STACKORIGIN		; 4
+       asl_stack(i+5) and							// asl :STACKORIGIN		; 5
+       (mwy_bp2(i+6) or ldy(i+6)) then						// mwy|ldy			; 6
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i+8) and								// lda				; 8
+
+       asl_stack(i+2) and							// asl :STACKORIGIN		; 2
+       asl_stack(i+3) and							// asl :STACKORIGIN		; 3
+       asl_stack(i+4) and							// asl :STACKORIGIN		; 4
+       asl_stack(i+5) and							// asl :STACKORIGIN		; 5
+       asl_stack(i+6) and							// asl :STACKORIGIN		; 6
+       (mwy_bp2(i+7) or ldy(i+7)) then						// mwy|ldy			; 7
       begin
 	listing[i] := '';
 

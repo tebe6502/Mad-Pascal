@@ -94,6 +94,16 @@ begin
      end;
 
 
+    if sty_stack(i) and										// sty :STACKORIGIN		; 0
+       sty_stack(i+1) then									// sty :STACKORIGIN		; 1
+    if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then
+     begin
+	listing[i+1] := '';
+
+	exit(false);
+     end;
+
+
     if ldy(i) and										// ldy				; 0
        lda_a(i+1) and										// lda				; 1
        sty(i+2) and										// sty				; 2
@@ -385,11 +395,30 @@ begin
        sta(i) and										// clc|sec			; 1
        lda(i+2) and 										// lda :STACKORIGIN+9		; 2
        ((listing[i+1] = #9'clc') or (listing[i+1] = #9'sec')) then
-     if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then begin
+     if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
+      begin
 	listing[i]   := '';
 	listing[i+2] := '';
 	exit(false);
-     end;
+      end;
+
+
+    if lda_a(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN		; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and (iy(i+2) = false) and			// lda				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH	; 3
+       mwy_bp2(i+4) and										// mwy				; 4
+       ldy(i+5) and (ldy_stack(i+5) = false) and						// ldy				; 5
+       lda_stack(i+6) then									// lda :STACKORIGIN		; 6
+     if copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256) then
+      begin
+	listing[i+6] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
 
 
     if LDA_BP2_Y(i) and										// lda (:bp2),y		; 0

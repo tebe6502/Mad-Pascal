@@ -84,6 +84,18 @@ begin
      end;
 
 
+    if sta_im_0(i) and										// sta #$00			; 0
+       lda_im_0(i+1) and									// lda #$00			; 1
+       adc_sbc_im_0(i+2) then									// adc|sbc #$00			; 2
+     begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	exit(false);
+     end;
+
+
     if (lda_a(i) or tya(i)) and									// lda|tya			; 0
        add_sub(i+1) and										// add				; 1
        sta_im_0(i+2) and									// sta #$00			; 2
