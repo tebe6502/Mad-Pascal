@@ -115,7 +115,7 @@ function DegNormalize(deg : single) : single;
 *)
 begin
   Result:=Deg-single(Trunc(Deg/360))*360;
-  If Result<0 then Result:=Result+360;
+  If integer(Result) < 0 then Result:=Result+360;
 end;
 
 
@@ -490,7 +490,7 @@ begin
               i:=i-1;
               Result:=Result*base;
            end;
-         if exponent<0 then
+         if exponent < 0 then
            Result:=1.0/Result;
        end;
 end;
@@ -520,7 +520,7 @@ begin
               i:=i-1;
               Result:=Result*base;
            end;
-         if exponent<0 then
+         if exponent < 0 then
            Result:=1.0/Result;
        end;
 end;
@@ -550,7 +550,7 @@ begin
               i:=i-1;
               Result:=Result*base;
            end;
-         if exponent<0 then
+         if exponent < 0 then
            Result:=0;
        end;
 end;
@@ -563,9 +563,9 @@ function arctan2(y,x : real) : real;
 arctan2 calculates arctan(y/x), and returns an angle in the correct quadrant. The returned angle will be in the range $-\pi$ to $\pi$ radians.
 *)
 begin
-    if (x=0.0) then
+    if (x = 0.0) then
       begin
-        if y=0.0 then
+        if y = 0.0 then
           Result:=0.0
         else if y>0.0 then
           Result:=D_PI_2
@@ -574,8 +574,10 @@ begin
       end
     else
       Result:=ArcTan(y/x);
-    if x<0.0 then
+      
+    if x < 0.0 then
       Result:=Result+pi;
+      
     if Result>pi then
       Result:=Result-M_PI_2;
 end;
@@ -594,7 +596,7 @@ const
 
 begin
 
- if (x>=-1) and (x<=1) then
+ if (x >= -1) and (x <= 1) then
   Result:= a0 - sqrt(1 - x)*(a0 + a1*x + a2*x*x + a3*x*x*x);
 
 end;
@@ -774,7 +776,7 @@ function Sign(const AValue: Single): Single; overload;
 *)
 begin
 
- if AValue < 0 then
+ if integer(AValue) < 0 then
   Result := -1
  else
   Result := 1;

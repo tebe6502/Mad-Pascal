@@ -68,7 +68,7 @@ begin
  i:=y;
 
  if y < 0 then i:=0 else
-  if y >= ScreenHeight then i:=ScreenHeight-1;
+  if y > ScreenHeight then i:=ScreenHeight-1;
 
  if Scanline_Width <> 40 then
   a:=i * Scanline_Width
