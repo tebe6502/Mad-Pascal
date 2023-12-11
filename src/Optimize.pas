@@ -176,7 +176,7 @@ begin
 
 
 {
-if (pos('l_0FB5', TemporaryBuf[0]) > 0) then begin
+if (pos('l_0336', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
@@ -1873,7 +1873,7 @@ end;
 
 
 {
-if (pos('sta :bp2', listing[i]) > 0) then begin
+if (pos('lda Q+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2085,13 +2085,24 @@ end;
 
 
 {
-if (pos('and #$80', listing[i]) > 0) then begin
-
-      for p:=0 to l-1 do writeln(listing[p]);
+if (pos('l_0458', listing[i]) > 0) then begin
+      for p:=i to i+5 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
+
+
+    if cmp(i) and										// cmp				; 0
+       lab_a(i+1) and 										//@				; 1
+       (jeq(i+2) or jne(i+2)) and 								// jeq|jne			; 2
+       lab_a(i+3) then 										//@				; 3
+     begin
+      listing[i+3] := '';
+
+      Result:=false; Break;
+     end;
 
 
     if lda_im(i) and 										// lda #$			; 0

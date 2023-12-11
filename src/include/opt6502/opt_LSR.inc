@@ -67,7 +67,6 @@ begin
      end;
 
 
-
     if lda(i) and (lda_stack(i) = false) and							// lda W				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda(i+2) and (lda_stack(i+2) = false) and						// lda W+1				; 2
@@ -229,14 +228,31 @@ begin
 
     if lda(i) and 										// lda					; 0
        adc_sbc(i+1) and										// adc|sbc				; 1
-       lsr_stack(i+2) and									// lsr :STACKORIGIN+STACKWIDTH*2+9	; 2
-       ror_stack(i+3) and									// ror :STACKORIGIN+STACKWIDTH+9	; 3
-       ror_stack(i+4) and									// ror :STACKORIGIN+9			; 4
-       lda_stack(i+5) then									// lda :STACKORIGIN+9			; 5
+       lsr_stack(i+2) and									// lsr :STACKORIGIN+STACKWIDTH*2	; 2
+       ror_stack(i+3) and									// ror :STACKORIGIN+STACKWIDTH		; 3
+       ror_stack(i+4) and									// ror :STACKORIGIN			; 4
+       lda_stack(i+5) then									// lda :STACKORIGIN			; 5
      if (copy(listing[i+4], 6, 256) = copy(listing[i+5], 6, 256)) then
      begin
       listing[i]   := '';
       listing[i+1] := '';
+
+      exit(false);
+     end;
+
+
+    if sta_stack(i) and 									// sta :STACKORIGIN			; 0
+       lsr_stack(i+1) and									// lsr :STACKORIGIN+STACKWIDTH*2	; 1
+       ror_stack(i+2) and									// ror :STACKORIGIN+STACKWIDTH		; 2
+       ror_stack(i+3) and									// ror :STACKORIGIN			; 3
+       lda_stack(i+4) then									// lda :STACKORIGIN			; 4
+     if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) and
+        (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) then
+     begin
+      listing[i]   := '';
+
+      listing[i+3] := #9'ror @';
+      listing[i+4] := '';
 
       exit(false);
      end;
