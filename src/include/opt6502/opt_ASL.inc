@@ -752,6 +752,24 @@ begin
        end;
 
 
+    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
+       asl_stack(i+1) and									// asl :STACKORIGN			; 1
+       rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH		; 2
+       lda_stack(i+3) and									// lda :STACKORIGIN+STACKWIDTH		; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       (lda_stack(i+5) = false) then								//~lda :STACKORIGIN+			; 5
+     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
+        (copy(listing[i+2], 6, 256) = copy(listing[i+3], 6, 256)) then
+       begin
+        listing[i]   := '';
+
+        listing[i+2] := #9'rol @';
+        listing[i+3] := '';
+
+	exit(false);
+       end;
+
+
     if asl_stack(i) and										// asl :STACKORIGN			; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        lda_stack(i+2) and									// lda :STACKORIGIN			; 2
@@ -771,6 +789,65 @@ begin
 	listing[i+1] := '';
 
 	exit(false);
+       end;
+
+
+    if lda_a(i) and (lda_stack(i) = false) and							// lda A				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda A+1				; 2
+       asl_stack(i+3) and									// asl :STACKORIGIN			; 3
+       rol_a(i+4) and										// rol @				; 4
+       asl_stack(i+5) and									// asl :STACKORIGIN			; 5
+       rol_a(i+6) and										// rol @				; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH		; 7
+       lda_a(i+8) and (lda_stack(i+8) = false) and						// lda					; 8
+       add_stack(i+9) then									// add :STACKORIGIN			; 9
+      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
+         (copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) and
+         (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
+       begin
+	 listing[i+1] := listing[i+7];
+
+	 listing[i+9] := #9'add ' + copy(listing[i+8], 6, 256);
+	 listing[i+8] := #9'rol ' + copy(listing[i+7], 6, 256);
+	 listing[i+7] := #9'asl @';
+	 listing[i+6] := listing[i+8];
+	 listing[i+5] := #9'asl @';
+	 listing[i+4] := listing[i];
+	 listing[i+3] := '';
+
+	 listing[i] := listing[i+2];
+
+	 listing[i+2] := '';
+
+	 exit(false);
+       end;
+
+
+    if lda_a(i) and (lda_stack(i) = false) and							// lda A				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda A+1				; 2
+       asl_stack(i+3) and									// asl :STACKORIGIN			; 3
+       rol_a(i+4) and										// rol @				; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
+       lda_a(i+6) and (lda_stack(i+6) = false) and						// lda					; 6
+       add_stack(i+7) then									// add :STACKORIGIN			; 7
+      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
+         (copy(listing[i+3], 6, 256) = copy(listing[i+7], 6, 256)) then
+       begin
+	 listing[i+1] := listing[i+5];
+
+	 listing[i+7] := #9'add ' + copy(listing[i+6], 6, 256);
+	 listing[i+6] := #9'rol ' + copy(listing[i+5], 6, 256);
+	 listing[i+5] := #9'asl @';
+	 listing[i+4] := listing[i];
+	 listing[i+3] := '';
+
+	 listing[i] := listing[i+2];
+
+	 listing[i+2] := '';
+
+	 exit(false);
        end;
 
 

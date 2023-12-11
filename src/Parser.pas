@@ -216,7 +216,7 @@ begin
     NumAllocElements := Types[i].Field[j].NumAllocElements;
     AllocElementType :=  Types[i].Field[j].AllocElementType;
 
-    if AllocElementType = FORWARDTYPE then begin
+    if AllocElementType in [FORWARDTYPE, PROCVARTOK] then begin
      AllocElementType := POINTERTOK;
      NumAllocElements := 0;
     end;
@@ -1887,8 +1887,9 @@ begin
 	  NumAllocElements := 0;
 	  AllocElementType := 0;
 
-	  if (ListPassMethod = VARPASSING)  and (Tok[i].Kind <> COLONTOK) then begin
+	  if (ListPassMethod in [CONSTPASSING, VARPASSING])  and (Tok[i].Kind <> COLONTOK) then begin
 
+	   ListPassMethod := VARPASSING;
 	   dec(i);
 
 	  end else begin
@@ -2040,8 +2041,9 @@ begin
 	  NumAllocElements := 0;
 	  AllocElementType := 0;
 
-	  if (ListPassMethod = VARPASSING)  and (Tok[i].Kind <> COLONTOK) then begin
-										// UNTYPED PARAM ('var buf')
+	  if (ListPassMethod in [CONSTPASSING, VARPASSING])  and (Tok[i].Kind <> COLONTOK) then begin
+
+	   ListPassMethod := VARPASSING;
 	   dec(i);
 
 	  end else begin

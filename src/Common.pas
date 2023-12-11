@@ -423,6 +423,7 @@ type
     LoopVariable,
     isAbsolute,
     isInit,
+    isUntype,
     isInitialized,
     Section: Boolean;
 

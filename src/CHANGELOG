@@ -1,8 +1,24 @@
+11.12.2023
+- Bugfixes
+- poprawiona obsługa przekazywania parametrów 'nieoznaczonych' (untyped)
+
+  procedure name (var par);
+
+- poprawione wykonywanie typu proceduralnego przekazywanego przez wskażnik
+
+  procedure name(var proc);
+  begin
+
+   proc;
+
+  end; 
+
+
 22.11.2023
 - umożliwienie alokacji tablic dla FASTMUL pod ROM gdy {$define ROMOFF}
 - optymalizacja szybkośći operacji DIV dla typu WORD, SMALLINT (zależnie od aktywacji FASTMUL}
 - {$UNITPATH filename}
-- USES unit in 'filename'
+- USES unit_name in 'filename'
 
 12.11.2023
 - Bugfixes and Optimizations
