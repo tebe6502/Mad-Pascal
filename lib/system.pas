@@ -773,7 +773,7 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result+x/Result) ;//* 0.5;
+	Result:=(Result+x/Result); //* 0.5;
 
 	asm
 	 lda Result+3
@@ -785,7 +785,7 @@ begin
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result) ;//* 0.5;
+	Result:=(Result+x/Result); //* 0.5;
 
 
 	asm
@@ -798,7 +798,7 @@ begin
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result);// * 0.5;
+	Result:=(Result+x/Result); //* 0.5;
 
 	asm
 	 lda Result+3
@@ -827,7 +827,7 @@ var sp: ^single;
 begin
 	Result:=0;
 
-	if x < 0 then exit;
+	if integer(x) < 0 then exit;
 
 	sp:=@c;
 
@@ -857,7 +857,7 @@ var sp: ^float16;
 begin
 	Result:=0;
 
-	if x < 0 then exit;
+	if smallint(x) < 0 then exit;
 
 	sp:=@c;
 
@@ -994,11 +994,11 @@ begin
   x:=value;
   y:=0;
 
-  if (value=0) then begin
+  if (integer(value) = 0) then begin
     Result:=0;
     exit;
   end else
-   if (x < 0) then begin
+   if (integer(x) < 0) then begin
     sign:=true;
     x:=-x;
    end;
@@ -1035,7 +1035,7 @@ begin
     P := x + 1;
     I := 1;
 
-    while L<>P do begin
+    while L <> P do begin
         I := I + 1;
         Fraction :=Fraction * (x / I);
         L := P;
@@ -1063,7 +1063,7 @@ begin
     P := x + 1;
     I := 1;
 
-    while L<>P do begin
+    while L <> P do begin
         I := I + 1;
         Fraction :=Fraction * (x / I);
         L := P;
@@ -1091,7 +1091,7 @@ begin
     P := x + 1;
     I := 1;
 
-    while L<>P do begin
+    while L <> P do begin
         I := I + 1;
         Fraction :=Fraction * (x / I);
         L := P;
@@ -1163,7 +1163,7 @@ begin
 		P := x;
 		N := 0;
 
-	if x>Float(0) then begin
+	if x > Float(0) then begin
 
                 // This speeds up the convergence by calculating the integral
 		while(P >= E) do begin
@@ -1444,15 +1444,15 @@ begin
  Result:=a;
 
  for i:=1 to length(a) do begin
- 
+
    ch:=a[i];
 
    case ch of
     'a'..'z': ch := chr(byte(ch) - 32)
    end;
-   
+
    Result[i] := ch;
-   
+
  end;
 
 end;
@@ -1996,7 +1996,7 @@ var i: byte;
 begin
 
     while x > single(M_PI_2) do x := x - M_PI_2;
-    while x < 0 do x := x + M_PI_2;
+    while integer(x) < 0 do x := x + M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
     x := x * 0.63661977236758134308;
@@ -2061,7 +2061,7 @@ var i: byte;
 begin
 
     while x > M_PI_2 do x := x - M_PI_2;
-    while x < 0.0 do x := x + M_PI_2;
+    while smallint(x) < 0 do x := x + M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
     x := x * 0.63661977236758134308;

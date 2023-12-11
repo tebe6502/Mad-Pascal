@@ -10,6 +10,23 @@ begin
 end;
 
 
+procedure ClrBuffer;
+var x, y: pointer;
+    l: word;
+begin
+
+ x:=Scanline(WIN_TOP);
+
+ y:=Scanline(WIN_BOTTOM + 1);
+ l:=word(y);
+ 
+ dec(l, word(x));
+ 
+ fillbyte(x, l, 0);
+
+end;
+
+
 function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
 (*
 @description:
@@ -24,6 +41,8 @@ begin
  a.dl := sdlstl;
  a.bp := savmsc;
 
+ a.clr := @ClrBuffer;
+
 end;
 
 
@@ -33,8 +52,6 @@ procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
 Switch graphical buffer between A <> B
 *)
 var tmp: TDisplayBuffer;
-    x, y: pointer;
-    l: word;
 begin
 
  tmp:=b;
@@ -44,16 +61,8 @@ begin
 
  SetDisplayBuffer(a);
  SetActiveBuffer(b);
-
- x:=Scanline(WIN_TOP);
-
- y:=Scanline(WIN_BOTTOM);
- l:=word(y);
- y:=Scanline(WIN_TOP);
-
- dec(l, word(y));
-
- fillchar(x, l, 0);
+ 
+ b.clr;
 
 end;
 

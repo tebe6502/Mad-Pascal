@@ -3,6 +3,7 @@ type
 	TDisplayBuffer = record
 			dl: word;
 			bp: word;
+			clr: procedure ();
 		       end;
 
 const
@@ -120,7 +121,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure ClipLine(x1, y1, x2, y2: smallint);
 	procedure DrawPoly(amount: byte; var vertices);
 	procedure FillCircle(x0, y0, radius: word);
-	procedure FillPoly(amount: byte; var vertices);	
+	procedure FillPoly(amount: byte; var vertices);
 	procedure Ellipse(x0, y0, a, b: word); overload;
 	procedure Ellipse(X, Y, StAngle, EndAngle, xRadius,yRadius: Word); overload;
 	procedure FillEllipse(x0, y0, a, b: word);

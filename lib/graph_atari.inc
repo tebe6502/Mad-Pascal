@@ -147,8 +147,6 @@ procedure PutPixel(x,y: smallint); assembler; overload;
 Puts a point at (X,Y) using color Color
 *)
 asm
-	txa:pha
-
 	lda y+1
 	bmi stop
 	cmp MAIN.SYSTEM.ScreenHeight+1
@@ -167,6 +165,8 @@ sk0
 sk1
 	bcs stop
 
+	stx @sp
+	
 	mwa x colcrs
 	mva y rowcrs
 
@@ -178,7 +178,8 @@ sk1
 
 	m@call	@putchar.main
 
-stop	pla:tax
+	ldx @sp: #$00
+stop	
 
 end;
 
