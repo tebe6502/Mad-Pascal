@@ -347,7 +347,8 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	procedure FillChar(var a; count: word; value: byte); assembler; register; overload; inline;
 	function FloatToStr(a: real): TString; stdcall; assembler;
 	procedure FreeMem(var p; size: word); assembler; register;
-	procedure GetMem(var p; size: word); assembler; register;
+	procedure GetMem(var p; size: word); assembler; register; overload;
+	function GetMem(size: word): pointer; assembler; register; overload;
 	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
 	function IsLetter(A: char): Boolean;
 	function IsDigit(A: char): Boolean;
@@ -2525,7 +2526,7 @@ begin
 end;
 
 
-procedure GetMem(var p; size: word); assembler; register;
+procedure GetMem(var p; size: word); assembler; register; overload;
 (*
 @description:
 Getmem reserves Size bytes memory, and returns a pointer to this memory in p.
@@ -2540,6 +2541,23 @@ asm
 	iny
 	lda :psptr+1
 	sta (P),y
+
+	adw :psptr size
+end;
+
+
+function GetMem(size: word): pointer; assembler; register; overload;
+(*
+@description:
+Getmem reserves Size bytes memory, and returns a pointer to this memory in Result.
+
+@param: size
+*)
+asm
+	lda :psptr
+	sta Result
+	lda :psptr+1
+	sta Result+1
 
 	adw :psptr size
 end;

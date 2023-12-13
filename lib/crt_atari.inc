@@ -77,10 +77,19 @@ procedure TextBackground(a: byte); assembler;
 @param: a - color value 0..255
 *)
 asm
-	mva a colpf2s
+;	mva a colpf2s
+
+	ldy #0
+
+	lda a
+	seq
+
+	ldy #$80
 
 	ora colpf1s
 	sta fildat
+
+	sty MAIN.CRT.TextAttr
 end;
 
 

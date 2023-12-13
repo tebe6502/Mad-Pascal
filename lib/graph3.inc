@@ -19,9 +19,9 @@ begin
 
  y:=Scanline(WIN_BOTTOM + 1);
  l:=word(y);
- 
+
  dec(l, word(x));
- 
+
  fillbyte(x, l, 0);
 
 end;
@@ -61,7 +61,7 @@ begin
 
  SetDisplayBuffer(a);
  SetActiveBuffer(b);
- 
+
  b.clr;
 
 end;
