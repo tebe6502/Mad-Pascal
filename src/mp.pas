@@ -3031,14 +3031,14 @@ end;	//GenerateAssignment
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateReturn(IsFunction, isInt, isInl: Boolean);
+procedure GenerateReturn(IsFunction, isInt, isInl, isOvr: Boolean);
 var yes: Boolean;
 begin
  Gen;						// ret
 
  yes:=true;
 
- if not isInt then
+ if not isInt then				// not Interrupt
   if not IsFunction then begin
    asm65('@exit');
 
@@ -3064,6 +3064,10 @@ begin
    asm65(#9'rts', '; ret');
 
  asm65('.endl');
+
+ if isOvr then begin
+  asm65('.endl', '; overload');
+ end;
 
 end;
 
@@ -5570,7 +5574,7 @@ begin
 
 	    Name := GetLocalName(IdentIndex);
 
-	    if Ident[IdentIndex].isOverload then Name:=Name+'_'+IntToHex(Ident[IdentIndex].Value, 4);
+	    if Ident[IdentIndex].isOverload then Name:=Name+'.@'+IntToHex(Ident[IdentIndex].Value, 4);
 
 	    a65(__addBX);
 	    asm65(#9'mva <'+Name+' :STACKORIGIN,x');
@@ -6325,7 +6329,7 @@ begin
 
 
  if Ident[IdentIndex].isOverload then
-  svar := GetLocalName(IdentIndex) + '_' + IntToHex(Ident[IdentIndex].Value, 4)
+  svar := GetLocalName(IdentIndex) + '.@' + IntToHex(Ident[IdentIndex].Value, 4)
  else
   svar := GetLocalName(IdentIndex);
 
@@ -7518,7 +7522,9 @@ case Tok[i].Kind of
 		if ((ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in OrdinalTypes + RealTypes + [RECORDTOK, OBJECTTOK])) or
 		   ((ValType = POINTERTOK) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK])) then begin
 
-		 yes:=true;
+//		 yes:=true;
+
+		 yes := (Tok[j + 2].Kind = DEREFERENCETOK);
 
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType);
 
@@ -10080,7 +10086,6 @@ case Tok[i].Kind of
 		   GetCommonType(i + 1, Ident[IdentIndex].DataType, ExpressionType);
 
 	      end;
-
 
 
 	      if (VarType in [RECORDTOK, OBJECTTOK]) or ((VarType = POINTERTOK) and (ExpressionType in [RECORDTOK, OBJECTTOK]) ) then begin
@@ -13185,11 +13190,17 @@ begin
   asm65;
  end;
 
+ asm65('.local'#9 + Ident[BlockIdentIndex].Name, info);
+
+ if Ident[BlockIdentIndex].isOverload then
+   asm65('.local'#9 + '@' + IntToHex(Ident[BlockIdentIndex].Value, 4));
+
+{
  if Ident[BlockIdentIndex].isOverload then
    asm65('.local'#9 + Ident[BlockIdentIndex].Name+'_'+IntToHex(Ident[BlockIdentIndex].Value, 4), info)
  else
    asm65('.local'#9 + Ident[BlockIdentIndex].Name, info);
-
+}
  if Ident[BlockIdentIndex].isInline then asm65(#13#10#9'.MACRO m@INLINE');
 
 end;	//GenerateLocal
@@ -13439,8 +13450,8 @@ var
   j, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize, tmpVarDataSize_, ParamIndex, ForwardIdentIndex, IdentIndex: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
-  IsNestedFunction, isAsm, isReg, isInt, isInl, isAbsolute, isExternal, isForward, ImplementationUse,
-  open_array, iocheck_old, isVolatile, isInterrupt_old, yes, pack: Boolean;
+  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, pack,
+  IsNestedFunction, isAbsolute, isExternal, isForward, isVolatile, isAsm, isReg, isInt, isInl, isOvr: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
   Tmp, TmpResult: word;
@@ -13471,6 +13482,7 @@ isAsm := Ident[BlockIdentIndex].isAsm;
 isReg := Ident[BlockIdentIndex].isRegister;
 isInt := Ident[BlockIdentIndex].isInterrupt;
 isInl := Ident[BlockIdentIndex].isInline;
+isOvr := Ident[BlockIdentIndex].isOverload;
 
 isInterrupt:=isInt;
 
@@ -14228,7 +14240,9 @@ while Tok[i].Kind in
 
 	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, POINTERTOK, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, IDENTTOK);
 
-
+	   if (Ident[NumIdent].NumAllocElements in [0,1]) and (open_array = false) then
+	    iError(i, IllegalExpression)
+	   else
 	   if open_array then begin
 	     j := ReadDataOpenArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
 
@@ -14749,6 +14763,7 @@ while Tok[i].Kind in
 	   end;
 
 	  end else
+
 	   if (Ident[NumIdent].NumAllocElements in [0,1]) and (open_array = false) then
 	    iError(i, IllegalExpression)
 	   else
@@ -14831,7 +14846,7 @@ while Tok[i].Kind in
 
 //    writeln(ForwardIdentIndex,',',tok[i].line,',',Ident[ForwardIdentIndex].isOverload,',',Ident[ForwardIdentIndex].IsUnresolvedForward,' / ',Tok[i].Kind = PROCEDURETOK,',',  ((Tok[i].Kind = PROCEDURETOK) and (Ident[ForwardIdentIndex].Kind <> PROC)));
 
-    i := DefineFunction(i, ForwardIdentIndex, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
+    i := DefineFunction(i, ForwardIdentIndex, isForward, isInt, isInl, isOvr, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
 
     // Check for a FORWARD directive (it is not a reserved word)
@@ -14843,8 +14858,6 @@ while Tok[i].Kind in
 
       Ident[NumIdent].IsUnresolvedForward := TRUE;
 
-      //GenerateForwardReference;
-      //NextTok;
       end
     else
       begin
@@ -14869,7 +14882,7 @@ while Tok[i].Kind in
 
 	i := j + 1;
 
-	GenerateReturn(IsNestedFunction, isInt, isInl);
+	GenerateReturn(IsNestedFunction, isInt, isInl, isOvr);
 
 	if OutputDisabled then OutputDisabled := FALSE;
 
@@ -14941,7 +14954,7 @@ while Tok[i].Kind in
 
 	i := j + 1;
 
-	GenerateReturn(IsNestedFunction, isInt, Ident[ForwardIdentIndex].isInline);
+	GenerateReturn(IsNestedFunction, isInt, Ident[ForwardIdentIndex].isInline, Ident[ForwardIdentIndex].isOverload);
 
 	if OutputDisabled then OutputDisabled := FALSE;
 
@@ -15195,7 +15208,6 @@ asm65('.endl');
 
 asm65;
 asm65('.endl','; MAIN');
-//GenerateReturn(false, false);
 
 asm65separator;
 asm65separator(false);

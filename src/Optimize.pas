@@ -1873,7 +1873,7 @@ end;
 
 
 {
-if (pos('lda Q+1', listing[i]) > 0) then begin
+if (pos('beq l_0001_e', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2085,13 +2085,12 @@ end;
 
 
 {
-if (pos('l_0458', listing[i]) > 0) then begin
-      for p:=i to i+5 do writeln(listing[p]);
+if (pos('lda adr.RET,y', listing[i]) > 0) then begin
+      for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
-
 
 
     if cmp(i) and										// cmp				; 0

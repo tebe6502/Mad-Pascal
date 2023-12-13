@@ -18,7 +18,7 @@ uses Common;
 
 	procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: Byte; DataType: Byte; NumAllocElements: Cardinal; AllocElementType: Byte; Data: Int64; IdType: Byte = IDENTTOK);
 
-	function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
+	function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 
 	function Elements(IdentIndex: integer): cardinal;
 
@@ -1969,7 +1969,7 @@ end;	//DeclareFunction
 // ----------------------------------------------------------------------------
 
 
-function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
+function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
      ListPassMethod, VarType, AllocElementType: Byte;
@@ -2132,12 +2132,14 @@ begin
     isForward := false;
     isInt := false;
     isInl := false;
+    isOvr := false;
 
 	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, EXTERNALTOK, KEEPTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
 	    OVERLOADTOK: begin
+	       		   isOvr := true;
 			   Ident[NumIdent].isOverload := true;
 			   inc(i);
 			   CheckTok(i + 1, SEMICOLONTOK);
@@ -2241,10 +2243,10 @@ function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardi
 var
   NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   LowerBound, UpperBound, ConstVal, IdentIndex: Int64;
-  {ForwardIdentIndex,} NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
+  NumFieldsInList, FieldInListIndex, RecType, k, j: integer;
   NestedDataType, ExpressionType, NestedAllocElementType, NestedFunctionAllocElementType, NestedFunctionResultType: Byte;
   FieldInListName: array [1..MAXFIELDS] of TField;
-  ExitLoop, isForward, isInt, isInl, IsNestedFunction: Boolean;
+  ExitLoop, isForward, IsNestedFunction, isInt, isInl, isOvr: Boolean;
   Name: TString;
 
 
@@ -2597,7 +2599,7 @@ end else
 
 	  k := i;
 
-	  i := DefineFunction(i, 0, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
+	  i := DefineFunction(i, 0, isForward, isInt, isInl, isOvr, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
 	  Inc(NumBlocks);
 	  Ident[NumIdent].ProcAsBlock := NumBlocks;
@@ -2687,7 +2689,7 @@ end else
 
 	  k := i;
 
-	  i := DefineFunction(i, 0, isForward, isInt, isInl, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
+	  i := DefineFunction(i, 0, isForward, isInt, isInl, isOvr, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
 	  Inc(NumBlocks);
 	  Ident[NumIdent].ProcAsBlock := NumBlocks;
