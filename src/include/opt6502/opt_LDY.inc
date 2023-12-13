@@ -186,10 +186,11 @@ begin
        end;
 
 
-    if sty_stack(i) and										// sty :STACKORIGIN			; 1
+    if sty_stack(i) and										// sty :STACKORIGIN			; 0
        lda_a(i+1) and 										// lda					; 1
        add_sub(i+2) and 									// add|sub				; 2
-       ldy_stack(i+3) then									// ldy :STACKORIGIN			; 3
+       ldy_stack(i+3) and									// ldy :STACKORIGIN			; 3
+       (SKIP(i+4) = false) then									//~SKIP					; 4
      if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) then
       begin
 	listing[i] := '';
@@ -279,7 +280,7 @@ begin
 
     if ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
        iny(i+1) and 										// iny					; 1
-       (lda_a(i+2) or sta_a(i+2)) then								// lda|sta xxx				; 2
+       (lda_a(i+2) or sta_a(i+2)) then								// lda|sta				; 2
 //       ldy(i+3) then										// ldy I				; 3
       begin
 	listing[i+3] := #9'dey';
