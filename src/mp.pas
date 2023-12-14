@@ -11460,7 +11460,7 @@ WHILETOK:
 	asm65(#9'lda <MAIN.@RESOURCE.' + svar + '.end-MAIN.@RESOURCE.' + svar);
 	asm65(#9'sta ' + Tok[i + 2].Name^);
 
-	asm65(#9'mwa >MAIN.@RESOURCE.' + svar + '.end-MAIN.@RESOURCE.' + svar);
+	asm65(#9'lda >MAIN.@RESOURCE.' + svar + '.end-MAIN.@RESOURCE.' + svar);
 	asm65(#9'sta ' + Tok[i + 2].Name^ + '+1');
 
 	inc(i, 5);
