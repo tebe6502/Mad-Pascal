@@ -27,15 +27,15 @@ begin
        begin
 {
 	lda #					; 0		***
-	sta SYSTEM.FILLCHAR.02D2.A		; 1
+	sta SYSTEM.FILLCHAR_02D2.A		; 1
 	lda #					; 2
-	sta SYSTEM.FILLCHAR.02D2.A+1		; 3
+	sta SYSTEM.FILLCHAR_02D2.A+1		; 3
 	lda #					; 4
-	sta SYSTEM.FILLCHAR.02D2.COUNT		; 5
+	sta SYSTEM.FILLCHAR_02D2.COUNT		; 5
 	lda #					; 6
-	sta SYSTEM.FILLCHAR.02D2.COUNT+1	; 7
+	sta SYSTEM.FILLCHAR_02D2.COUNT+1	; 7
 	lda					; 8
-	sta SYSTEM.FILLCHAR.02D2.VALUE		; 9
+	sta SYSTEM.FILLCHAR_02D2.VALUE		; 9
 }
 	q:=GetWORD(0, 2);		// dst
 	k:=GetWORD(4, 6);		// len
@@ -131,14 +131,14 @@ begin
        begin
 {						; 0		***
 	lda #					; 1
-	sta SYSTEM.FILLCHAR.02D2.A		; 2
+	sta SYSTEM.FILLCHAR_02D2.A		; 2
 	lda #					; 3
-	sta SYSTEM.FILLCHAR.02D2.A+1		; 4
+	sta SYSTEM.FILLCHAR_02D2.A+1		; 4
 	lda #					; 5
-	sta SYSTEM.FILLCHAR.02D2.COUNT		; 6
+	sta SYSTEM.FILLCHAR_02D2.COUNT		; 6
 	lda #					; 7
-	sta SYSTEM.FILLCHAR.02D2.COUNT+1	; 8
-	sta SYSTEM.FILLCHAR.02D2.VALUE		; 9
+	sta SYSTEM.FILLCHAR_02D2.COUNT+1	; 8
+	sta SYSTEM.FILLCHAR_02D2.VALUE		; 9
 }
 	q:=GetWORD(1, 3);		// dst
 	k:=GetWORD(5, 7);		// len
@@ -231,14 +231,14 @@ begin
        begin
 {						; 0		***
 	lda QBOARD				; 1
-	sta SYSTEM.FILLCHAR.02D2.A		; 2
+	sta SYSTEM.FILLCHAR_02D2.A		; 2
 	lda QBOARD+1				; 3
-	sta SYSTEM.FILLCHAR.02D2.A+1		; 4
+	sta SYSTEM.FILLCHAR_02D2.A+1		; 4
 	lda #$08				; 5
-	sta SYSTEM.FILLCHAR.02D2.COUNT		; 6
+	sta SYSTEM.FILLCHAR_02D2.COUNT		; 6
 	lda #$00				; 7
-	sta SYSTEM.FILLCHAR.02D2.COUNT+1	; 8
-	sta SYSTEM.FILLCHAR.02D2.VALUE		; 9
+	sta SYSTEM.FILLCHAR_02D2.COUNT+1	; 8
+	sta SYSTEM.FILLCHAR_02D2.VALUE		; 9
 }
 	k:=GetWORD(5, 7);		// len
 
@@ -294,15 +294,15 @@ begin
        begin
 {
 	lda					; 0		***
-	sta SYSTEM.FILLBYTE.0058.A		; 1
+	sta SYSTEM.FILLBYTE_0058.A		; 1
 	lda					; 2
-	sta SYSTEM.FILLBYTE.0058.A+1		; 3
+	sta SYSTEM.FILLBYTE_0058.A+1		; 3
 	lda #					; 4
-	sta SYSTEM.FILLBYTE.0058.COUNT		; 5
+	sta SYSTEM.FILLBYTE_0058.COUNT		; 5
 	lda #					; 6
-	sta SYSTEM.FILLBYTE.0058.COUNT+1	; 7
+	sta SYSTEM.FILLBYTE_0058.COUNT+1	; 7
 	lda					; 8
-	sta SYSTEM.FILLBYTE.0058.VALUE		; 9
+	sta SYSTEM.FILLBYTE_0058.VALUE		; 9
 }
 	k:=GetWORD(4, 6);		// len
 
@@ -360,15 +360,15 @@ begin
        begin
 {
 	lda					; 0		***
-	sta SYSTEM.FILLBYTE.0058.VALUE		; 1
+	sta SYSTEM.FILLBYTE_0058.VALUE		; 1
 	lda					; 2
-	sta SYSTEM.FILLBYTE.0058.A		; 3
+	sta SYSTEM.FILLBYTE_0058.A		; 3
 	lda					; 4
-	sta SYSTEM.FILLBYTE.0058.A+1		; 5
+	sta SYSTEM.FILLBYTE_0058.A+1		; 5
 	lda #					; 6
-	sta SYSTEM.FILLBYTE.0058.COUNT		; 7
+	sta SYSTEM.FILLBYTE_0058.COUNT		; 7
 	lda #					; 8
-	sta SYSTEM.FILLBYTE.0058.COUNT+1	; 9
+	sta SYSTEM.FILLBYTE_0058.COUNT+1	; 9
 }
 	k:=GetWORD(6, 8);		// len
 
@@ -426,14 +426,14 @@ begin
        begin
 {						; 0		***
 						; 1
-	sta SYSTEM.FILLBYTE.0058.A+1		; 2
+	sta SYSTEM.FILLBYTE_0058.A+1		; 2
 	lda					; 3
-	sta SYSTEM.FILLBYTE.0058.A		; 4
+	sta SYSTEM.FILLBYTE_0058.A		; 4
 	lda #					; 5
-	sta SYSTEM.FILLBYTE.0058.COUNT		; 6
+	sta SYSTEM.FILLBYTE_0058.COUNT		; 6
 	lda #					; 7
-	sta SYSTEM.FILLBYTE.0058.COUNT+1	; 8
-	sta SYSTEM.FILLBYTE.0058.VALUE		; 9
+	sta SYSTEM.FILLBYTE_0058.COUNT+1	; 8
+	sta SYSTEM.FILLBYTE_0058.VALUE		; 9
 }
 	k:=GetWORD(5, 7);		// len
 
@@ -487,15 +487,15 @@ begin
        (pos(#9'lda #', TemporaryBuf[5]) = 1) then
        begin
 {						; 0		***
-	sta SYSTEM.FILLCHAR.009E.A		; 1
+	sta SYSTEM.FILLCHAR_009E.A		; 1
 	lda					; 2
 	add|sub|adc|sbc				; 3
-	sta SYSTEM.FILLCHAR.009E.A+1		; 4
+	sta SYSTEM.FILLCHAR_009E.A+1		; 4
 	lda #					; 5
-	sta SYSTEM.FILLCHAR.009E.COUNT		; 6
+	sta SYSTEM.FILLCHAR_009E.COUNT		; 6
 	lda #					; 7
-	sta SYSTEM.FILLCHAR.009E.COUNT+1	; 8
-	sta SYSTEM.FILLCHAR.009E.VALUE		; 9
+	sta SYSTEM.FILLCHAR_009E.COUNT+1	; 8
+	sta SYSTEM.FILLCHAR_009E.VALUE		; 9
 }
 	k:=GetWORD(5, 7);		// len
 
@@ -533,16 +533,16 @@ begin
        (pos(#9'lda #', TemporaryBuf[6]) = 1) then
        begin
 {
-	sta SYSTEM.FILLCHAR.009E.A		; 0		***
+	sta SYSTEM.FILLCHAR_009E.A		; 0		***
 	lda 					; 1
 	add|sub|adc|sbc				; 2
-	sta SYSTEM.FILLCHAR.009E.A+1		; 3
+	sta SYSTEM.FILLCHAR_009E.A+1		; 3
 	lda #					; 4
-	sta SYSTEM.FILLCHAR.009E.COUNT		; 5
+	sta SYSTEM.FILLCHAR_009E.COUNT		; 5
 	lda #					; 6
-	sta SYSTEM.FILLCHAR.009E.COUNT+1	; 7
+	sta SYSTEM.FILLCHAR_009E.COUNT+1	; 7
 	lda 					; 8
-	sta SYSTEM.FILLCHAR.009E.VALUE		; 9
+	sta SYSTEM.FILLCHAR_009E.VALUE		; 9
 }
 	k:=GetWORD(4, 6);		// len
 

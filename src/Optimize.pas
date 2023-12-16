@@ -170,6 +170,7 @@ var p, k , q: integer;
 {$i include/opt6502/opt_TEMP_X.inc}
 {$i include/opt6502/opt_TEMP_EAX.inc}
 {$i include/opt6502/opt_TEMP_JMP.inc}
+{$i include/opt6502/opt_TEMP_ZTMP.inc}
 
 
 begin
@@ -196,6 +197,7 @@ end;
     opt_TEMP_X;
     opt_TEMP_EAX;
     opt_TEMP_JMP;
+    opt_TEMP_ZTMP;
 
 
     if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
@@ -1873,7 +1875,7 @@ end;
 
 
 {
-if (pos('beq l_0001_e', listing[i]) > 0) then begin
+if (pos('sta :ztmp10', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
