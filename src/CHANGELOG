@@ -1,9 +1,3 @@
-12.12.2023
-- przepisany sposób alokacji bloków OVERLOAD
-- CRT_ATARI: TextBackground (wartosc <> 0 włącza inwers znaku)
-- poprawione PutChar
-- SYSTEM: GetMem(a: size): pointer;
-
 11.12.2023
 - Bugfixes
 - poprawiona obsługa przekazywania parametrów 'nieoznaczonych' (untyped)
