@@ -104,11 +104,64 @@ begin
 end;
 
 
-procedure Circle(x0, y0, radius: word);
+procedure Circle(x,y, r: word);
 (*
 @description:
-Bresenham Circle
+
+ https://atariwiki.org/wiki/Wiki.jsp?page=Super%20fast%20circle%20routine
+
+ REM *******************************
+ REM PROGRAM  : FAST CIRCLE DRAWING
+ REM AUTHOR   : ZLATKO BLEHA
+ REM PUBLISHER: MOJ MIKRO MAGAZINE
+ REM ISSUE NO.: 1989, NO.3, PAGE 29
+ REM *******************************
+
 *)
+var a: smallint;
+    b, c: byte;
+begin
+
+ if r = 0 then exit;
+
+ b:=r;
+ a:=r-1;
+ c:=0;
+
+while (b >= c) do begin
+
+ while (a >= 0) and (b >= c) do begin
+
+  PutPixel(x+C,Y+B);
+  PutPixel(x+C,Y-B);
+  PutPixel(x-C,Y-B);
+  PutPixel(x-C,Y+B);
+  PutPixel(x+B,Y+C);
+  PutPixel(x+B,Y-C);
+  PutPixel(x-B,Y-C);
+  PutPixel(x-B,Y+C);
+
+  inc(c);
+
+  inc(a);
+  dec(a, c);
+  dec(a, c);
+
+ end;
+
+ dec(b);
+
+ inc(a, b);
+ inc(a, b);
+
+end;
+
+end;
+
+
+
+(*
+procedure Circle(x0, y0, radius: word);
 var	x,y, dx,dy, txp, typ, txm, tym, d: word;
 
 	procedure DrawCircle;
@@ -120,6 +173,7 @@ var	x,y, dx,dy, txp, typ, txm, tym, d: word;
 	end;
 
 begin
+	if radius = 0 then exit;
 
 	x := 0;
 	dx := 0;
@@ -158,6 +212,7 @@ begin
 	end;
 
 end;
+*)
 
 
 procedure FillCircle(x0, y0, radius: word);
@@ -170,6 +225,8 @@ https://github.com/tuupola/hagl/blob/master/src/hagl_circle.c
 var	x, y, d: word;
 
 begin
+	if radius = 0 then exit;
+
 	x := 0;
 	y := radius;
 	d := 3 - radius shl 1;
