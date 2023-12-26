@@ -102,6 +102,9 @@ Contributors:
 	- MADSTRAP
 	- PASDOC
 
++ Zlatko Bleha (https://atariwiki.org/wiki/Wiki.jsp?page=Super%20fast%20circle%20routine) :
+	- GRAPH.INC Circle
+
 
 # rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
 # stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
@@ -5122,7 +5125,6 @@ begin
 
  end else begin
 
-
  	if ValType = SINGLETOK then begin
 
 		asm65(#9'lda :STACKORIGIN,x');
@@ -5142,7 +5144,6 @@ begin
 		asm65(#9'sta @FCMPL.B+2');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
 		asm65(#9'sta @FCMPL.B+3');
-
  	end;
 
  asm65(#9'ldy #1');
@@ -5157,8 +5158,7 @@ begin
 	end;
 
      SHORTINTTOK:
-	begin
-//	a65(__cmpSHORTINT);
+	begin	//a65(__cmpSHORTINT);
 
          asm65(#9'.LOCAL');
          asm65(#9'lda :STACKORIGIN-1,x');
@@ -5173,8 +5173,7 @@ begin
 	end;
 
      SMALLINTTOK, SHORTREALTOK:
-	begin
-//	a65(__cmpSMALLINT);
+	begin	//a65(__cmpSMALLINT);
 
          asm65(#9'.LOCAL');
          asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
@@ -5198,8 +5197,7 @@ begin
      SINGLETOK: asm65(#9'jsr @FCMPL');
 
      REALTOK, INTEGERTOK:
-	begin
-//	a65(__cmpINT);
+	begin	//a65(__cmpINT);
 
          asm65(#9'.LOCAL');
          asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
@@ -5228,8 +5226,7 @@ begin
 	end;
 
      WORDTOK, POINTERTOK, STRINGPOINTERTOK:
-     	begin
-//	a65(__cmpAX_CX);
+     	begin	//a65(__cmpAX_CX);
 
          asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
          asm65(#9'cmp :STACKORIGIN+STACKWIDTH,x');
@@ -5241,8 +5238,7 @@ begin
 	end;
 
  else
-	begin
-   	//a65(__cmpEAX_ECX);					// CARDINALTOK
+	begin	//a65(__cmpEAX_ECX);					// CARDINALTOK
 
          asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
          asm65(#9'cmp :STACKORIGIN+STACKWIDTH*3,x');
@@ -11097,6 +11093,8 @@ WHILETOK:
 	        StartOptimization(j);
 		ResetOpty;			// !!!
 
+		yes:=true;
+
 
 		if loopunroll and forLoop.begin_const and forLoop.end_const then begin
 
@@ -11110,7 +11108,20 @@ WHILETOK:
 
 		  while ConstVal <> forLoop.end_value do begin
 
+		   ResetOpty;
+
 		   CompileStatement(j + 2);
+
+		   if yes then begin
+
+		    if Down then
+		     asm65('---unroll---')
+		    else
+		     asm65('+++unroll+++');
+
+		    yes:=false;
+		   end else
+		    asm65('===unroll===');
 
 		   if Down then
 		    dec(ConstVal)
@@ -11119,37 +11130,70 @@ WHILETOK:
 
 		   case DataSize[ActualParamType] of
 		    1: begin
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex));
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex));
 		       end;
 
 		    2: begin
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex));
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal shr 8), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex));
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 8), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+1');
 		       end;
 
 		    4: begin
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex));
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal shr 8), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex)+'+1');
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal shr 16), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex)+'+2');
-		        asm65(#9'lda #$' + IntToHex(byte(ConstVal shr 24), 2));
-		        asm65(#9'sta ' + GetLocalName(IdentIndex)+'+3');
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex));
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 8), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+1');
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 16), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+2');
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 24), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+3');
 		       end;
 
  		   end;
 
+
 		  end;
 
-		  j := CompileStatement(j + 2);
+		   ResetOpty;
+
+		   j := CompileStatement(j + 2);
+
+		   asm65('===unroll===');
+
+		   optyY := '';
+
+		   case DataSize[ActualParamType] of
+		    1: begin
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex));
+		       end;
+
+		    2: begin
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex));
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 8), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+1');
+		       end;
+
+		    4: begin
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex));
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 8), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+1');
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 16), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+2');
+		        asm65(#9'ldy #$' + IntToHex(byte(ConstVal shr 24), 2));
+		        asm65(#9'sty ' + GetLocalName(IdentIndex)+'+3');
+		       end;
+
+ 		   end;
+
 
 		  end else	//if ((Down = false)
 	            Error(j, 'for loop with invalid range');
-
 
 		end else begin
 
