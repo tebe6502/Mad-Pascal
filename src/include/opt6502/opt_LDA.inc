@@ -390,7 +390,7 @@ begin
       end;
 
 
-    if (i>0) and
+    if (i > 0) and
        (ldy(i-1) = false) and (tay(i-1) = false) and						// sta :STACKORIGIN+9		; 0
        sta(i) and										// clc|sec			; 1
        lda(i+2) and 										// lda :STACKORIGIN+9		; 2
@@ -684,7 +684,8 @@ begin
 
     if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN		; 1
-       ldy_stack(i+2) then									// ldy :STACKORIGIN+STACKWIDTH	; 2
+       ldy_stack(i+2) and									// ldy :STACKORIGIN+STACKWIDTH	; 2
+       (SKIP(i+3) = false) then									//~SKIP				; 3
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
         (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then
        begin

@@ -171,6 +171,7 @@ var p, k , q: integer;
 {$i include/opt6502/opt_TEMP_EAX.inc}
 {$i include/opt6502/opt_TEMP_JMP.inc}
 {$i include/opt6502/opt_TEMP_ZTMP.inc}
+{$i include/opt6502/opt_TEMP_UNROLL.inc}
 
 
 begin
@@ -198,6 +199,7 @@ end;
     opt_TEMP_EAX;
     opt_TEMP_JMP;
     opt_TEMP_ZTMP;
+    opt_TEMP_UNROLL;
 
 
     if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
@@ -1801,7 +1803,7 @@ end;
 
     for i := 0 to l - 1 do begin
 
-{$i include/opt6502/opt_STA.inc}
+{$i include/opt6502/opt_END_STA.inc}
 
     end;
 
@@ -1810,7 +1812,7 @@ end;
 
 
    function PeepholeOptimization_STA: Boolean;
-   var i: integer;
+   var i, p: integer;
    begin
 
    Result:=true;
@@ -1821,7 +1823,7 @@ end;
 
 
 {
-if (pos('eor ', listing[i]) > 0) and then begin
+if (pos('adr.RET', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1875,7 +1877,7 @@ end;
 
 
 {
-if (pos('sta :ztmp10', listing[i]) > 0) then begin
+if (pos('adr.RET', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2087,7 +2089,7 @@ end;
 
 
 {
-if (pos('lda adr.RET,y', listing[i]) > 0) then begin
+if (pos('jcs l_039E', listing[i]) > 0) then begin
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
@@ -2567,119 +2569,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-{
-      if arg0 = 'm@index4 1' then begin
-       t:='';
-       s[x-1][2] := '';
-       s[x-1][3] := '';
 
-       index(2, x-1);
-      end else
-      if arg0 = 'm@index4 0' then begin
-       t:='';
-       s[x][2] := '';
-       s[x][3] := '';
-
-       index(2, x);
-      end else
-      if arg0 = 'm@index2 1' then begin
-       t:='';
-       s[x-1][2] := '';
-       s[x-1][3] := '';
-
-       index(1, x-1);
-      end else
-      if arg0 = 'm@index2 0' then begin
-       t:='';
-       s[x][2] := '';
-       s[x][3] := '';
-
-       index(1, x);
-      end else
-
-      if arg0 = 'cmpINT' then begin
-       t:='';
-
-       listing[l] := #9'.LOCAL';
-
-       listing[l+1] := #9'lda '+GetARG(3, x-1);
-       listing[l+2] := #9'sub ' + GetARG(3, x);		// SBC ustawi znacznik V, gdy brak SUB #$00 => clv:sec
-       listing[l+3] := #9'bne L4';
-       listing[l+4] := #9'lda '+GetARG(2, x-1);
-       listing[l+5] := #9'cmp '+GetARG(2, x);
-       listing[l+6] := #9'bne L1';
-       listing[l+7] := #9'lda '+GetARG(1, x-1);
-       listing[l+8] := #9'cmp '+GetARG(1, x);
-       listing[l+9] := #9'bne L1';
-       listing[l+10]:= #9'lda '+GetARG(0, x-1);
-       listing[l+11]:= #9'cmp '+GetARG(0, x);
-
-       listing[l+12]:= 'L1'#9'beq L5';
-       listing[l+13]:= #9'bcs L3';
-       listing[l+14]:= #9'lda #$FF';
-       listing[l+15]:= #9'bne L5';
-       listing[l+16]:= 'L3'#9'lda #$01';
-       listing[l+17]:= #9'bne L5';
-       listing[l+18]:= 'L4'#9'bvc L5';
-       listing[l+19]:= #9'eor #$FF';
-       listing[l+20]:= #9'ora #$01';
-       listing[l+21]:= 'L5';
-       listing[l+22]:= #9'.ENDL';
-
-       inc(l, 23);
-
-      end else
-}
-{
-      if arg0 = 'cmpSMALLINT' then begin
-       t:='';
-
-       listing[l]   := #9'.LOCAL';
-       listing[l+1] := #9'lda '+GetARG(1, x-1);
-       listing[l+2] := #9'sub '+GetARG(1, x);
-       listing[l+3] := #9'bne L4';
-       listing[l+4] := #9'lda '+GetARG(0, x-1);
-       listing[l+5] := #9'cmp '+GetARG(0, x);
-       listing[l+6] := #9'beq L5';
-       listing[l+7] := #9'lda #$00';
-       listing[l+8] := #9'adc #$FF';
-       listing[l+9] := #9'ora #$01';
-       listing[l+10]:= #9'bne L5';
-       listing[l+11]:= 'L4'#9'bvc L5';
-       listing[l+12]:= #9'eor #$FF';
-       listing[l+13]:= #9'ora #$01';
-       listing[l+14]:= 'L5';
-       listing[l+15]:= #9'.ENDL';
-
-       inc(l, 16);
-      end else
-
-      if arg0 = 'cmpSHORTINT' then begin
-       t:='';
-
-       arg1 := GetARG(0, x);
-
-       if arg1 = '#$00' then begin
-        listing[l] := #9'lda ' + GetARG(0, x-1);
-
-        inc(l, 1);
-       end else begin
-
-       listing[l]   := #9'.LOCAL';
-       listing[l+1] := #9'lda ' + GetARG(0, x-1);
-       listing[l+2] := #9'sub ' + arg1;
-       listing[l+3] := #9'beq L5';
-       listing[l+4] := #9'bvc L5';
-       listing[l+5] := #9'eor #$FF';
-       listing[l+6] := #9'ora #$01';
-       listing[l+7] := 'L5';
-       listing[l+8] := #9'.ENDL';
-
-       inc(l, 9);
-       end;
-
-      end else
-}
       if arg0 = 'negBYTE' then begin
        t:='';
 
@@ -3332,227 +3222,106 @@ begin				// OptimizeASM
 
       end else
 
-      if arg0 = '@move' then		// @move		accepted
+      if arg0 = '@move' then			// @move		accepted
       else
 
-      if arg0 = '@cmpSTRING' then	// @cmpSTRING		accepted
+      if arg0 = '@cmpSTRING' then		// @cmpSTRING		accepted
       else
 
-      if arg0 = '@FCMPL' then		// @FCMPL		accepted
+      if arg0 = '@FCMPL' then			// @FCMPL		accepted
       else
 
-      if arg0 = '@FTOA' then		// @FTOA		accepted
+      if arg0 = '@FTOA' then			// @FTOA		accepted
       else
 
-      if arg0 = '@SHORTINT.DIV' then	// @SHORTINT.DIV	accepted
+      if arg0 = '@SHORTINT.DIV' then		// @SHORTINT.DIV	accepted
       else
-      if arg0 = '@SMALLINT.DIV' then	// @SMALLINT.DIV	accepted
+      if arg0 = '@SMALLINT.DIV' then		// @SMALLINT.DIV	accepted
       else
-      if arg0 = '@INTEGER.DIV' then	// @INTEGER.DIV		accepted
+      if arg0 = '@INTEGER.DIV' then		// @INTEGER.DIV		accepted
       else
-      if arg0 = '@SHORTINT.MOD' then	// @SHORTINT.MOD	accepted
+      if arg0 = '@SHORTINT.MOD' then		// @SHORTINT.MOD	accepted
       else
-      if arg0 = '@SMALLINT.MOD' then	// @SMALLINT.MOD	accepted
+      if arg0 = '@SMALLINT.MOD' then		// @SMALLINT.MOD	accepted
       else
-      if arg0 = '@INTEGER.MOD' then	// @INTEGER.MOD		accepted
-      else
-
-      if arg0 = '@BYTE.DIV' then	// @BYTE.DIV		accepted
-      else
-      if arg0 = '@WORD.DIV' then	// @WORD.DIV		accepted
-      else
-      if arg0 = '@CARDINAL.DIV' then	// @CARDINAL.DIV	accepted
-      else
-      if arg0 = '@BYTE.MOD' then	// @BYTE.MOD		accepted
-      else
-      if arg0 = '@WORD.MOD' then	// @WORD.MOD		accepted
-      else
-      if arg0 = '@CARDINAL.MOD' then	// @CARDINAL.MOD	accepted
+      if arg0 = '@INTEGER.MOD' then		// @INTEGER.MOD		accepted
       else
 
-      if arg0 = '@SHORTREAL_MUL' then	// @SHORTREAL_MUL	accepted
+      if arg0 = '@BYTE.DIV' then		// @BYTE.DIV		accepted
       else
-      if arg0 = '@REAL_MUL' then	// @REAL_MUL		accepted
+      if arg0 = '@WORD.DIV' then		// @WORD.DIV		accepted
       else
-      if arg0 = '@SHORTREAL_DIV' then	// @SHORTREAL_DIV	accepted
+      if arg0 = '@CARDINAL.DIV' then		// @CARDINAL.DIV	accepted
       else
-      if arg0 = '@REAL_DIV' then	// @REAL_DIV		accepted
+      if arg0 = '@BYTE.MOD' then		// @BYTE.MOD		accepted
       else
-
-      if arg0 = '@REAL_ROUND' then	// @REAL_ROUND		accepted
+      if arg0 = '@WORD.MOD' then		// @WORD.MOD		accepted
       else
-      if arg0 = '@SHORTREAL_TRUNC' then	// @SHORTREAL_TRUNC	accepted
-      else
-      if arg0 = '@REAL_TRUNC' then	// @REAL_TRUNC		accepted
-      else
-      if arg0 = '@REAL_FRAC' then	// @REAL_FRAC		accepted
+      if arg0 = '@CARDINAL.MOD' then		// @CARDINAL.MOD	accepted
       else
 
-      if arg0 = '@F16_F2A' then		// @F16_F2A		accepted
+      if arg0 = '@SHORTREAL_MUL' then		// @SHORTREAL_MUL	accepted
       else
-      if arg0 = '@F16_ADD' then		// @F16_ADD		accepted
+      if arg0 = '@REAL_MUL' then		// @REAL_MUL		accepted
       else
-      if arg0 = '@F16_SUB' then 	// @F16_SUB		accepted
+      if arg0 = '@SHORTREAL_DIV' then		// @SHORTREAL_DIV	accepted
       else
-      if arg0 = '@F16_MUL' then		// @F16_MUL		accepted
+      if arg0 = '@REAL_DIV' then		// @REAL_DIV		accepted
       else
-      if arg0 = '@F16_DIV' then		// @F16_DIV		accepted
+
+      if arg0 = '@REAL_ROUND' then		// @REAL_ROUND		accepted
       else
-      if arg0 = '@F16_INT' then		// @F16_INT		accepted
+      if arg0 = '@SHORTREAL_TRUNC' then		// @SHORTREAL_TRUNC	accepted
       else
-      if arg0 = '@F16_ROUND' then	// @F16_ROUND		accepted
+      if arg0 = '@REAL_TRUNC' then		// @REAL_TRUNC		accepted
       else
-      if arg0 = '@F16_FRAC' then	// @F16_FRAC		accepted
+      if arg0 = '@REAL_FRAC' then		// @REAL_FRAC		accepted
       else
-      if arg0 = '@F16_I2F' then		// @F16_I2F		accepted
+
+      if arg0 = '@F16_F2A' then			// @F16_F2A		accepted
       else
-      if arg0 = '@F16_EQ' then		// @F16_EQ		accepted
+      if arg0 = '@F16_ADD' then			// @F16_ADD		accepted
       else
-      if arg0 = '@F16_GT' then		// @F16_GT		accepted
+      if arg0 = '@F16_SUB' then 		// @F16_SUB		accepted
       else
-      if arg0 = '@F16_GTE' then		// @F16_GTE		accepted
+      if arg0 = '@F16_MUL' then			// @F16_MUL		accepted
+      else
+      if arg0 = '@F16_DIV' then			// @F16_DIV		accepted
+      else
+      if arg0 = '@F16_INT' then			// @F16_INT		accepted
+      else
+      if arg0 = '@F16_ROUND' then		// @F16_ROUND		accepted
+      else
+      if arg0 = '@F16_FRAC' then		// @F16_FRAC		accepted
+      else
+      if arg0 = '@F16_I2F' then			// @F16_I2F		accepted
+      else
+      if arg0 = '@F16_EQ' then			// @F16_EQ		accepted
+      else
+      if arg0 = '@F16_GT' then			// @F16_GT		accepted
+      else
+      if arg0 = '@F16_GTE' then			// @F16_GTE		accepted
       else
 
       if arg0 = 'SYSTEM.PEEK' then begin
 
 	if system_peek then begin x:=50; Break end;
 
-{
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) then begin
-
-	  listing[l]   := #9'ldy '+GetARG(1, x);
-	  listing[l+1] := #9'sty :bp+1';
-	  listing[l+2] := #9'ldy '+GetARG(0, x);
-	  listing[l+3] := #9'lda (:bp),y';
-	  listing[l+4] := #9'sta '+GetARG(0, x);
-
-	  inc(l,5);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l]   := #9'lda $'+IntToHex(k, 4);
-	  listing[l+1] := #9'sta '+GetARG(0, x);
-
-	  inc(l, 2);
-
-	end;
-}
       end else
       if arg0 = 'SYSTEM.POKE' then begin
 
 	if system_poke then begin x:=50; Break end;
 
-{
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(0, x-1, false)) < 0) or (GetVAL(GetARG(1, x-1, false)) < 0) then begin
-
-	  listing[l]   := #9'ldy '+GetARG(1, x);
-	  listing[l+1] := #9'sty :bp+1';
-	  listing[l+2] := #9'ldy '+GetARG(0, x);
-	  listing[l+3] := #9'lda '+GetARG(0, x-1);
-	  listing[l+4] := #9'sta (:bp),y';
-
-	  inc(l,5);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x-1));
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
-
-	  inc(l, 2);
-	end;
-
-	dec(x, 2);
-}
       end else
       if arg0 = 'SYSTEM.DPEEK' then begin
 
 	if system_dpeek then begin x:=50; Break end;
 
-{
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) then begin
-
-	  listing[l]   := #9'lda '+GetARG(0, x);
-	  listing[l+1] := #9'sta :bp2';
-	  listing[l+2] := #9'lda '+GetARG(1, x);
-	  listing[l+3] := #9'sta :bp2+1';
-	  listing[l+4] := #9'ldy #$00';
-	  listing[l+5] := #9'lda (:bp2),y';
-	  listing[l+6] := #9'sta '+GetARG(0, x);
-	  listing[l+7] := #9'iny';
-	  listing[l+8] := #9'lda (:bp2),y';
-	  listing[l+9] := #9'sta '+GetARG(1, x);
-
-	  inc(l, 10);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l]   := #9'lda $'+IntToHex(k, 4);
-	  listing[l+1] := #9'sta '+GetARG(0, x);
-	  listing[l+2] := #9'lda $'+IntToHex(k, 4)+'+1';
-	  listing[l+3] := #9'sta '+GetARG(1, x);
-
-	  inc(l, 4);
-	end;
-}
       end else
       if arg0 = 'SYSTEM.DPOKE' then begin
 
 	if system_dpoke then begin x:=50; Break end;
 
-{
-	t:='';
-
-	if (GetVAL(GetARG(0, x, false)) < 0) or (GetVAL(GetARG(1, x, false)) < 0) or (GetVAL(GetARG(0, x-1, false)) < 0) or (GetVAL(GetARG(1, x-1, false)) < 0) then begin
-
-	  listing[l]   := #9'lda '+GetARG(0, x);
-	  listing[l+1] := #9'sta :bp2';
-	  listing[l+2] := #9'lda '+GetARG(1, x);
-	  listing[l+3] := #9'sta :bp2+1';
-	  listing[l+4] := #9'ldy #$00';
-	  listing[l+5] := #9'lda '+GetARG(0, x-1);
-	  listing[l+6] := #9'sta (:bp2),y';
-	  listing[l+7] := #9'iny';
-	  listing[l+8] := #9'lda '+GetARG(1, x-1);
-	  listing[l+9] := #9'sta (:bp2),y';
-
-	  inc(l,10);
-	end else begin
-
-	  k := GetVAL(GetARG(0, x-1));
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
-
-	  k := GetVAL(GetARG(1, x-1));
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-	  listing[l+2] := #9'lda #$'+IntToHex(k, 2);
-
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then begin x:=50; Break end;
-
-	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
-	  listing[l+3] := #9'sta $'+IntToHex(k, 4)+'+1';
-
-	  inc(l, 4);
-	end;
-
-	dec(x, 2);
-}
       end else
       if arg0 = 'shrAL_CL.BYTE' then begin		// SHR BYTE
 	t:='';
@@ -5098,27 +4867,6 @@ begin				// OptimizeASM
 
       end else
 
-      if arg0 = 'andEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'and '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'and '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'and '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
 {
       if arg0 = 'andAL_CL' then begin
        t:='';
@@ -5129,7 +4877,7 @@ begin				// OptimizeASM
 
        inc(l, 3);
       end else
-}
+
       if arg0 = 'andAX_CX' then begin
        t:='';
 
@@ -5164,6 +4912,8 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+}
+
 {
       if arg0 = 'orAL_CL' then begin
        t:='';
@@ -5174,7 +4924,7 @@ begin				// OptimizeASM
 
        inc(l, 3);
       end else
-}
+
       if arg0 = 'orAX_CX' then begin
        t:='';
 
@@ -5209,6 +4959,8 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+}
+
 {
       if arg0 = 'xorAL_CL' then begin
        t:='';
@@ -5219,7 +4971,7 @@ begin				// OptimizeASM
 
        inc(l, 3);
       end else
-}
+
       if arg0 = 'xorAX_CX' then begin
        t:='';
 
@@ -5254,6 +5006,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+}
       if arg0 = 'notaBX' then begin
        t:='';
 
@@ -5354,6 +5107,7 @@ begin				// OptimizeASM
       end;
 
       if (arg0 = 'subEAX_ECX') then begin
+
        listing[l]   := #9'lda '+GetARG(0, x-1);
        listing[l+1] := #9'sub '+GetARG(0, x);
        listing[l+2] := #9'sta '+GetARG(0, x-1);
