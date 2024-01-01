@@ -415,8 +415,7 @@ oo1a
 	lda reg1
 	IFT FEAT_GLOBALVOLUMEFADE
 	sec
-	sbc #$00
-RMTGLOBALVOLUMEFADE equ *-1
+	sbc RMTGLOBALVOLUMEFADE:: #$00
 	bcs voig
 	lda #0
 voig
