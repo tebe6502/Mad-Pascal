@@ -497,7 +497,7 @@ begin
  end;
 
 asm
-{	txa:pha
+	stx rX
 
 	jmp skp
 
@@ -549,13 +549,14 @@ ok2
 	lda GetColor
 	and #3
 
-	:2 asl @
+	asl @
+	asl @
 	sta color
 	tay
 	lda left,y
 	sta fill
 
-	lda x0		; left edge
+	lda x0			; left edge
 	and #3
 	tax
 	lda lmask,x
@@ -563,18 +564,19 @@ ok2
 	eor #$ff
 	sta _lmsk
 	txa
-	add #0
-color	equ *-1
+	clc
+	adc color: #0
 	tax
 	lda left,x
 	sta lcol
 
 	lda x0
-	:2 lsr @
+	lsr @
+	lsr @
 	tay
 	sty lf
 
-	lda x1		; right edge
+	lda x1			; right edge
 	and #3
 	tax
 	lda rmask,x
@@ -588,53 +590,56 @@ color	equ *-1
 	sta rcol
 
 	lda x1
-	:2 lsr @
-	tay
-	sty rg
+	lsr @
+	lsr @
 
-	ldy #0
-lf	equ *-1
-	cpy rg
-	beq piksel
+	sec
+	sbc lf: #0
+	bne next
 
-	lda (:bp2),y
-	and #0
-lmsk	equ *-1
-	ora #0
-lcol	equ *-1
+	lda fill		; Right and left edge in the same byte
+	and _lmsk: #0
+	and _rmsk: #0
+	ora (:bp2),y
+
+;	sta (:bp2),y
+	
+	jmp exit
+
+next	tax
+
+	lda (:bp2),y		; Byte with Left edge
+	and lmsk: #0
+	ora lcol: #0
 	sta (:bp2),y
 
-	lda #0
-rg	equ *-1
-	clc
-	sbc lf
+	dex
 	beq stop
-	tax
 
-	lda #0
-fill	equ *-1
+	lda fill: #0
 
-loop	iny
+lp	iny
 	sta (:bp2),y
 	dex
-	bne loop
+	bne lp
+
 
 stop	iny
-	lda (:bp2),y
-	and #0
-rmsk	equ *-1
-	ora #0
-rcol	equ *-1
-	sta (:bp2),y
+	lda (:bp2),y		; Byte with Right edge
+	and rmsk: #0
+	ora rcol: #0
+
+;	sta (:bp2),y
 
 	jmp exit
+
 
 lmask	dta %00000000
 	dta %11000000
 	dta %11110000
 	dta %11111100
 
-left	:4 brk
+left	dta 0,0,0,0
 
 	dta %01010101
 	dta %00010101
@@ -652,7 +657,7 @@ rmask
 	dta %00001111
 	dta %00000011
 
-right	:4 brk
+right	dta 0,0,0,0
 
 	dta %01000000
 	dta %01010000
@@ -669,17 +674,12 @@ right	:4 brk
 	dta %11111100
 	dta %11111111
 
-piksel	lda fill
-	and #0
-_lmsk	equ *-1
-	and #0
-_rmsk	equ *-1
-	ora (:bp2),y
-	sta (:bp2),y
 
-exit
-	pla:tax
-};
+exit	sta (:bp2),y
+
+	ldx rX: #$00
+end;
+
 end;
 
 
@@ -692,7 +692,6 @@ A quick hack by eru
 *)
 
 asm
-{
 dx	= ztmp
 dy	= ztmp+1
 tmp	= ztmp+2
@@ -872,7 +871,7 @@ ddr_skip
 	bne ddr_loop
 
 stop	pla:tax
-};
+
 end;
 
 

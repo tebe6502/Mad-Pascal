@@ -6,8 +6,8 @@ procedure SetActiveBuffer(var a: TDisplayBuffer);
 *)
 begin
 
- VideoRam := pointer(a.bp);
- savmsc := word(VideoRam);
+ VideoRAM := pointer(a.bp);
+ savmsc := word(VideoRAM);
 
 end;
 
@@ -166,7 +166,7 @@ sk1
 	bcs stop
 
 	stx @sp
-	
+
 	mwa x colcrs
 	mva y rowcrs
 
@@ -179,7 +179,7 @@ sk1
 	m@call	@putchar.main
 
 	ldx @sp: #$00
-stop	
+stop
 
 end;
 
