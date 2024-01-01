@@ -16,6 +16,30 @@ begin
 // ~adc adr.label
 //
 
+    if lda_a(i) and (lda_stack(i) = false) and						// lda					; 0
+       adc_sbc(i+1) and									// adc|sbc				; 1
+       sta_a(i+2) and (listing[i+2] = listing[i+4]) and					// sta :STACKORIGIN			; 2
+       lda_a(i+3) and (lda_stack(i+3) = false) then					// lda					; 3
+//       sta_a(i+4) then								// sta :STACKORIGIN			; 4
+     begin
+      listing[i]   := '';
+      listing[i+1] := '';
+      listing[i+2] := '';
+
+      exit(false);
+     end;
+
+
+    if adc_sbc(i) and									// adc|sbc				; 0
+       lda_a(i+1) and									// lda					; 1
+       add_sub(i+2) then								// add|sub				; 2
+     begin
+	listing[i]   := '';
+
+	exit(false);
+     end;
+
+
     if (pos('lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0
        add_im(i+1) and									// add #				; 1
        sta(i+2) and									// sta					; 2

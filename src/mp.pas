@@ -7518,11 +7518,15 @@ case Tok[i].Kind of
 		if ((ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in OrdinalTypes + RealTypes + [RECORDTOK, OBJECTTOK])) or
 		   ((ValType = POINTERTOK) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK])) then begin
 
-//		 yes:=true;
+		 yes:=false;
 
-		 yes := (Tok[j + 2].Kind = DEREFERENCETOK);
+		 if (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) and (Tok[j].Kind = DEREFERENCETOK) then yes:=true;
+		 if (Ident[IdentIndex].DataType = POINTERTOK) and (Tok[j + 2].Kind = DEREFERENCETOK) then yes:=true;
 
-//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType);
+//		 yes := (Tok[j + 2].Kind = DEREFERENCETOK);
+
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Tok[j ].Kind,',',Tok[j + 1].Kind,',',Tok[j + 2].Kind);
 
  	     	 if (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) or (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then begin
 
@@ -12196,6 +12200,8 @@ WHILETOK:
 	     if (Ident[IdentIndex].PassMethod = VARPASSING) or (Ident[IdentIndex].NumAllocElements > 0) or (IndirectionLevel = ASPOINTERTOPOINTER) or ((Ident[IdentIndex].NumAllocElements = 0) and (IndirectionLevel = ASPOINTERTOARRAYORIGIN)) then begin
 
 	       ExpressionType := Ident[IdentIndex].AllocElementType;
+ 	       if ExpressionType = UNTYPETOK then ExpressionType := Ident[IdentIndex].DataType;
+
 
 	       if ExpressionType in [RECORDTOK, OBJECTTOK] then
 		Push(RecordSize(IdentIndex), ASVALUE, 2)
@@ -13297,7 +13303,7 @@ begin
 	    until Tok[i].Kind <> COMMATOK;
 
 
-	  VarType := 0;							  // UNTYPED
+	  VarType := 0;							// UNTYPED
 	  NumAllocElements := 0;
 	  AllocElementType := 0;
 
@@ -13310,7 +13316,7 @@ begin
 
 	   CheckTok(i, COLONTOK);
 
-	   if Tok[i + 1].Kind = DEREFERENCETOK then			      // ^type
+	   if Tok[i + 1].Kind = DEREFERENCETOK then			// ^type
 	     Error(i + 1, 'Type identifier expected');
 
 	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);

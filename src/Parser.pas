@@ -2376,7 +2376,7 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
   if (IdentIndex > 0) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) then begin
     NumAllocElements := Ident[IdentIndex].NumAllocElements;
 
-//    writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ shl 16 );
+//    writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ shl 16 );
 
 {
     if Ident[IdentIndex].DataType in Pointers then begin
