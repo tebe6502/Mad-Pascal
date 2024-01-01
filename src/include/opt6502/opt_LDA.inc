@@ -755,17 +755,6 @@ begin
      end;
 
 
-    if adc_sbc(i) and										// adc|sbc			; 0
-       (lda_a(i+1) or mva(i+1) or mwa(i+1)) then						// lda|mva|mwa			; 1
-     begin
-
-      if (i>0) and lda_a(i-1) then listing[i-1] := '';
-
-      listing[i] := '';
-      exit(false);
-     end;
-
-
     if ldy_im_0(i) and										// ldy #$00			; 0
        iny(i+1) then										// iny				; 1
      begin

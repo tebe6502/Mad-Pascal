@@ -511,11 +511,11 @@
     if mwy_bp2(i) and										// mwy   :bp2			; 0
        ldy(i+1) and										// ldy #$XX			; 1
        lda_stack(i+2) and									// lda :STACKORIGIN+9		; 2
-       add_sub(i+3) and										// add				; 3
+       add_sub(i+3) and										// add|sub			; 3
        sta_bp2_y(i+4) and									// sta (:bp2),y			; 4
        iny(i+5) and										// iny				; 5
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH+9; 6
-       adc_sbc(i+7) and										// adc				; 7
+       adc_sbc(i+7) and										// adc|sbc			; 7
        sta_bp2_y(i+8) and									// sta (:bp2),y			; 8
        (iny(i+9) = false) then
       begin
@@ -699,17 +699,6 @@
 	listing[i+2] := '';
 	Result:=false; Break;
       end;
-
-
-    if adc_sbc(i) and									// adc|sbc				; 0
-       (lda_a(i+1) or mva(i+1) or mwa(i+1)) then					// lda|mva|mwa				; 1
-     begin
-
-      if (i>0) and lda_a(i-1) then listing[i-1] := '';
-
-      listing[i] := '';
-      Result:=false; Break;
-     end;
 
 
     if lda_a(i) and (iy(i) = false) and							// lda					; 0

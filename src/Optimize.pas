@@ -1877,7 +1877,7 @@ end;
 
 
 {
-if (pos('adr.RET', listing[i]) > 0) then begin
+if (pos('lda F+2', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2271,18 +2271,6 @@ end;
 
 	Result:=false; Break;
        end;
-
-
-    if												// lda #$00			; -1
-       adc_sbc_im_0(i) and									// adc|sbc #$00			; 0
-       (lda(i+1) or mva(i+1) or mwa(i+1)) then							// lda|mva|mwa			; 1
-     begin
-
-      if (i>0) and lda_im_0(i-1) then listing[i-1] := '';
-
-      listing[i] := '';
-      Result:=false; Break;
-     end;
 
 
     if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor			; 0
@@ -5362,6 +5350,7 @@ begin				// OptimizeASM
    common.optimize.old := common.optimize.line;
   end;
 
+
 {$IFDEF OPTIMIZECODE}
 
   repeat
@@ -5382,7 +5371,6 @@ begin				// OptimizeASM
 
     OptimizeAssignment;
   end;
-
 
 {$ENDIF}
 

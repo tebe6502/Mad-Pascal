@@ -17,7 +17,7 @@ begin
       end;
 
 
-    if (i=0) and sta_im_0(i) then begin								// jedno linijkowy sta #$00
+    if (i=0) and sta_im_0(i) then begin								// sta #$00			; 0
        listing[i] := '';
        exit(false);
      end;
@@ -84,6 +84,37 @@ begin
      end;
 
 
+    if lda_im_0(i) and										// lda #$00			; 0
+       adc_sbc_im_0(i+1) and									// adc|sbc #$00			; 1
+       sta_im_0(i+2) then									// sta #$00			; 2
+     begin
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+
+       if lda_im_0(i+3) and						// lda #$00			; 3
+          adc_sbc_im_0(i+4) and						// adc|sbc #$00			; 4
+          sta_im_0(i+5) then						// sta #$00			; 5
+	begin
+         listing[i+3] := '';
+         listing[i+4] := '';
+         listing[i+5] := '';
+
+         if lda_im_0(i+6) and						// lda #$00			; 6
+            adc_sbc_im_0(i+7) and					// adc|sbc #$00			; 7
+            sta_im_0(i+8) then						// sta #$00			; 8
+	  begin
+           listing[i+6] := '';
+           listing[i+7] := '';
+           listing[i+8] := '';
+          end;
+
+	end;
+
+	exit(false);
+     end;
+
+
     if sta_im_0(i) and										// sta #$00			; 0
        lda_im_0(i+1) and									// lda #$00			; 1
        adc_sbc_im_0(i+2) then									// adc|sbc #$00			; 2
@@ -91,6 +122,16 @@ begin
 	listing[i]   := '';
 	listing[i+1] := '';
 	listing[i+2] := '';
+
+	exit(false);
+     end;
+
+
+    if sta_im_0(i) and										// sta #$00			; 0
+       lda_a(i+1) and (lda_im_0(i+1) = false) and						// lda				; 1
+       adc_sbc_im_0(i+2) then									// adc|sbc #$00			; 2
+     begin
+	listing[i] := '';
 
 	exit(false);
      end;

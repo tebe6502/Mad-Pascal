@@ -1,3 +1,19 @@
+31.12.2023
+- Bugfixes
+- FASTGRAPH: HLine
+
+23.12.2023
+- szybsza wersja procedury Circle (lib\graph.inc)
+
+18.12.2023
+- {$OPTIMIZATION loopunroll} bugfixes
+
+12.12.2023
+- przepisany sposób alokacji bloków OVERLOAD
+- CRT_ATARI: TextBackground (wartosc <> 0 włącza inwers znaku)
+- poprawione PutChar
+- SYSTEM: GetMem(a: size): pointer;
+
 11.12.2023
 - Bugfixes
 - poprawiona obsługa przekazywania parametrów 'nieoznaczonych' (untyped)
