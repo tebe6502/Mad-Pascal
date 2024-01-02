@@ -14007,6 +14007,8 @@ while Tok[i].Kind in
 
    GenerateProcFuncAsmLabels(BlockIdentIndex);
 
+   VarRegister := 0;
+
    asm65;
    asm65('.endl', '; UNIT ' + UnitName[Tok[i].UnitIndex].Name);
 
