@@ -21,9 +21,9 @@ vbxe	bit *			; jsr @vbxe_put
 	ldx #$00		; $60 -> S2:
 chn	equ *-1
 
-	;.ifdef MAIN.CRT.TextAttr
+	.ifdef MAIN.CRT.TextAttr
 	ora MAIN.CRT.TextAttr
-	;.endif
+	.endif
 main
 	tay
 	lda icputb+1,x
