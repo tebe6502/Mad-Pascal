@@ -69,7 +69,8 @@ no_sparta
 	lda	#{bit*}
 	sta	res
 
-; ... or channel #0
+.IF .NOT .DEF MAIN.@DEFINES.DISABLEIOCBCOPY
+; GET DATA FROM COPY OF IOCB#0
 	lda	MAIN.SYSTEM.adr.IOCB_COPY+2	; command
 	cmp	#5			; read line
 	bne	_no_command_line
@@ -92,6 +93,32 @@ no_sparta
 	lda	MAIN.SYSTEM.adr.IOCB_COPY+5
 	sbc	#0
 	sta	tmp+1
+.ELSE
+@IOCB0 = $0340
+; GET DATA DIRECTLY FROM IOCB#0
+	lda	@IOCB0+2	; command
+	cmp	#5			; read line
+	bne	_no_command_line
+	lda	@IOCB0+3	; status
+	bmi	_no_command_line
+; don't assume the line is EOL-terminated
+; DOS II+/D overwrites the EOL with ".COM"
+; that's why we rely on the length
+	lda	@IOCB0+9	; length hi
+	bne	_no_command_line
+	ldx	@IOCB0+8	; length lo
+	beq	_no_command_line
+	inx:inx
+	stx	arg_len
+; give access to three bytes before the input buffer
+; in DOS II+/D the device prompt ("D1:") is there
+	lda	@IOCB0+4
+	sub	#3
+	sta	tmp
+	lda	@IOCB0+5
+	sbc	#0
+	sta	tmp+1
+.ENDIF
 
 	lda	#0
 	ldy	#0
