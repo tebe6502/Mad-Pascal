@@ -15187,13 +15187,14 @@ end;
 asm65;
 asm65(#9'rts');
 
-asm65separator;
+// Deklaracja kopii bloku IOCB#0 przeniesiona do biblioteki SYSTEM
+(* asm65separator;
 
 if target.id = 'a8' then begin
  asm65;
  asm65('IOCB@COPY'#9':16 brk');
 end;
-
+ *)
 asm65separator;
 
 asm65;
