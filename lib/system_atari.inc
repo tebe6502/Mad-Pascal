@@ -202,8 +202,9 @@ end;
 
 end;
 
-var
-	IOCB_COPY:array[0..15] of byte;		// kopia bloku IOCB#0.
+const
+	IOCB_COPY:array[0..15] of byte =		// kopia bloku IOCB#0
+(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0);
 
 function ParamCount: byte; assembler;
 (*
