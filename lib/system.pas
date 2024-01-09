@@ -2775,8 +2775,10 @@ initialization
 {$ifdef atari}
 // Tworzenie kopii bloku IOCB#0 na potrzeby funkcji ParamStr i ParamCount
 asm
+.IF .NOT .DEF MAIN.@DEFINES.DISABLEIOCBCOPY
   ldx #$0F	; DOS II+/D ParamStr
   mva:rpl $340,x MAIN.SYSTEM.adr.IOCB_COPY,x-
+.ENDIF
 end;
 {$endif}
 
