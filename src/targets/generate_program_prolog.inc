@@ -305,11 +305,14 @@ if Pass = CODEGENERATIONPASS then begin
 
  if target.id = 'a8' then begin
 
-  asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
-  asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
-  asm65;
+  asm65(#9'ldx #0');
+  // Inicjacja kopii bloku IOCB#0 przeniesiona do biblioteki SYSTEM
+  // w sekcji INITIALIZATION, obwarowana dyrektywą
+  // asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
+  // asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
+  // asm65;
 
-  asm65(#9'inx','; X = 0');
+  // asm65(#9'inx','; X = 0');
   asm65(#9'stx bp','; BP = 0');
   asm65;
 
