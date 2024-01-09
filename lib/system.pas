@@ -2771,4 +2771,13 @@ begin
   Result:=longint(dword(dword(dword(AValue) shr (Shift and 31)) or (dword(longint(dword(0-dword(dword(AValue) shr 31)) and dword(longint(0-(ord((Shift and 31)<>0){ and 1}))))) shl (32-(Shift and 31)))));
 end;
 
+initialization
+{$ifdef atari}
+// Tworzenie kopii bloku IOCB#0 na potrzeby funkcji ParamStr i ParamCount
+asm
+  ldx #$0F	; DOS II+/D ParamStr
+  mva:rpl $340,x MAIN.SYSTEM.adr.IOCB_COPY,x-
+end;
+{$endif}
+
 end.
