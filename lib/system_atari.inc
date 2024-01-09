@@ -202,9 +202,11 @@ end;
 
 end;
 
+{$ifndef DISABLEIOCBCOPY}
 const
 	IOCB_COPY:array[0..15] of byte =		// kopia bloku IOCB#0
 (0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0);
+{$endif}
 
 function ParamCount: byte; assembler;
 (*
