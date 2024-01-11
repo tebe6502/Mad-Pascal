@@ -90,7 +90,7 @@ procedure FN_Close;
 * Closes network connection.
 *)
 
-procedure FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word);
+function FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word):byte;
 (*
 * @description:
 * Sends SIO command to #FN device
@@ -102,11 +102,13 @@ procedure FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word);
 * @param: aux2 - DCB.DAUX2 byte
 * @param: dbufa - DCB.DBUFA word
 *
+* 
+* @returns: (byte) - sio operation result (1 for success)
 *)
 
 implementation
 
-procedure FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word);
+function FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word):byte;
 begin
     DCB.DDEVIC := $70;
     DCB.dunit := 1;
@@ -118,6 +120,7 @@ begin
     DCB.DAUX1 := aux1;    
     DCB.DAUX2 := aux2;   
     ExecSIO;
+    result:=DCB.DSTATS;
 end;
 
 
