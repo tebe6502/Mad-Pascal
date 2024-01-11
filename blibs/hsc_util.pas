@@ -171,8 +171,9 @@ end;
 
 function HSC_Get_Formated(id:byte;buff:pointer):byte;overload;
 var uri:pchar = 'N:https://atari.pl/hsc/jboard.php?x='#0#0#0#0;
-	s:string[4];
+	s:string[32];
 begin
+	result:=1;
 	Str(id,s);
 	move(s[1], pointer(word(@uri)+36), byte(s[0]));
 	FN_Open(uri);
@@ -184,8 +185,9 @@ end;
 
 function HSC_Get(id:byte;buff:pointer):byte;overload;
 var uri:pchar = 'N:https://atari.pl/hsc/jboard.php?f=J&x='#0#0#0#0;
-	s:string[4];
+	s:string[32];
 begin
+	result:=1;
 	Str(id,s);
 	move(s[1], pointer(word(@uri)+40), byte(s[0]));
 	FN_Open(uri);
