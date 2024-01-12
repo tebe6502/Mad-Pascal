@@ -127,27 +127,25 @@ EBPH		equ *-1
 		jmp lenffff
 
 normalcodepair	dex
-		stx offsetH
-		stx EBPH
-		jsr GET_BYTE
-		sta offsetL
-		sta EBPL
-		jsr getgamma
-		lda offsetH
-		beq _ceck7f
-		cmp #$7d
-		bcs  plus2
-		cmp #$05
-		bcs  plus1
-		bcc normal1	; zawsze
-_ceck7f		lda offsetL
-		bmi normal1
+		stx    offsetH
+		stx    EBPH
+		jsr    GET_BYTE
+		sta    offsetL
+		sta    EBPL
+		jsr    getgamma
+		lda    offsetH
+		beq    _ceck7f
+		cmp    #$7d
+		bcs	 plus2
+		cmp    #$05
+		bcs	 plus1
+		bcc    normal1               ; zawsze
+_ceck7f		lda	 offsetL
+		bmi    normal1
 plus2		inx
-		bne plus1
+		bne    plus1
 		iny
 plus1		inx
-		bne normal1
-		iny
 normal1
 lenffff		iny
 		sec
@@ -170,27 +168,26 @@ getgamma	lda #$00
 		tay
 		rts
 
-get_token_bit	lda #$ff
-token		equ *-1
-		asl @
-		bne @+
+get_token_bit	asl    token
+		bne    @+
 		php
-		jsr GET_BYTE
+		jsr    GET_BYTE
 		plp
-		rol @
-@		sta token
-		rts
+		rol    @
+		sta    token
+@		rts
+token		.byte $00
 
 store		sta $ffff
 dest_ap		equ *-2
 		inw dest_ap
 		rts
 
-len01		ldx #$01
-len0203		ldy #$01
-		sta offsetL
-		lda #0
-		sta offsetH
+len01		ldx    #$01
+len0203		ldy    #$00
+		sta    offsetL
+		sty    offsetH
+		iny
 
 domatch		lda dest_ap
 		sec
