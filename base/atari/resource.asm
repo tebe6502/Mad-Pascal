@@ -913,8 +913,9 @@ data	dta a(len)
 /*
   CMC Relocator
 
-  $0014..$0053	- LSB adresu patternu
-  $0054..$0093	- MSB adresu patternu
+  Offsets in the CMC file (after the DOS header):
+  $0014..$0053	- LSB of pattern address
+  $0054..$0093	- MSB of pattern address
 
   Example:
 		cmc_relocator 'file.cmc' , new_address
@@ -922,44 +923,44 @@ data	dta a(len)
 
 .macro	cmc_relocator
 
-	.get :1					// wczytujemy plik do bufora MADS'a
+	.get :1					// Load the CMC file into the MADS buffer
 
 	ift (.get[0] + .get[1]<<8) <> $FFFF
 	 ert 'Bad file format'
 	eif
 
-new_add	= :2					// nowy adres dla modulu CMC
+new_add equ :2					// Get the new address for the CMC module
 
-old_add	= .get[2] + .get[3]<<8			// stary adres modulu CMC
+old_add	equ .get[2] + .get[3]<<8		// Get the old addressof the CMC module
 
-length	= .get[4] + .get[5]<<8 - old_add + 1	// dlugosc pliku CMC bez naglowka DOS'u
+	.def ?length = .get[4] + .get[5]<<8 - old_add + 1 // Length of the CMC file without the DOS header
 
-	.put[2] = .lo(new_add)			// poprawiamy naglowek DOS'a
-	.put[3] = .hi(new_add)			// tak aby zawieral informacje o nowym
+	.put[2] = .lo(new_add)			// Correct the DOS header
+	.put[3] = .hi(new_add)			// so it contains the information
 
-	.put[4] = .lo(new_add + length - 1)	// adresie modulu CMC
-	.put[5] = .hi(new_add + length - 1)
+	.put[4] = .lo(new_add + ?length - 1)	// about the new CMC module address
+	.put[5] = .hi(new_add + ?length - 1)
 
 ofs	equ 6
 
-// patterns
-
-	.rept 64
+	.rept 64				// Loop over all 64 patterns
 
 	?tmp = .get[ofs+$14+#] + .get[ofs+$54+#]<<8
 
-	ift ?tmp <> $FFFF
+	ift ?tmp < $FF00			// High byte $ff indicates unused pattern
 	?hlp = ?tmp - old_add + new_add
 
 	.put[ofs+$14+#] = .lo(?hlp)
 	.put[ofs+$54+#] = .hi(?hlp)
+	.else
+	.put[ofs+$14+#] = $ff			// Normalize also the low byte to $ff
+	.put[ofs+$54+#] = $ff
 	eif
 
 	.endr
 
-// out new file
+	.sav [6] ?length			// Save the relocated music into the current output file
 
-	.sav [6] length				// zapisujemy zawartosc bufora MADS'a do pliku
 .endm
 
 
