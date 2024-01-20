@@ -714,7 +714,7 @@ PREPARE	.MACRO
 
 ; ==========================================================================
 drawto
-	txa:pha
+	stx rX
 
 ; check if going right (x1 <= x0)
 	ldx x1
@@ -870,7 +870,7 @@ ddr_skip
 	dec todo
 	bne ddr_loop
 
-stop	pla:tax
+stop	ldx rX: #$00
 
 end;
 

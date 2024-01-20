@@ -86,6 +86,7 @@ begin
   GetXDL(xdl);
 
   xdl.ov_step := 336;
+  xdl.ov_width := %00010010;	// playfield pal = 0 ; overlay pal = 1 ; width = 3
 
   xdl.ov_adr.byte2 := Location shr 16;
   xdl.ov_adr.byte1 := Location shr 8;

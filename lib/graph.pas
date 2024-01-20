@@ -173,7 +173,9 @@ procedure fLine(x0, y0, x1, y1: smallint);
 Draw a line between 2 points
 *)
 begin
+
  Line(x0,y0,x1,y1);
+
 end;
 
 
