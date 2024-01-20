@@ -1,3 +1,10 @@
+20.01.2023
+- issue #125 fixed (https://github.com/tebe6502/Mad-Pascal/issues/125)
+- issue #126 fixed (https://github.com/tebe6502/Mad-Pascal/issues/126)
+
+13.01.2023
+- unit Common, procedure DefineStaticString, usunięty ostatni nadmiarowy bajt ciągu znakowego
+
 31.12.2023
 - Bugfixes
 - FASTGRAPH: HLine
