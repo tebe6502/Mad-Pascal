@@ -1243,10 +1243,10 @@ begin
        lda_im(i+2) and										// lda #$			; 2
        sta_bp2_1(i+3) and									// sta :bp2+1			; 3
        ldy_im_0(i+4) and									// ldy #$00			; 4
-       lda_stack(i+5) and									// lda :STACKORIGIN+10		; 5
+       lda_a(i+5) and										// lda				; 5
        STA_BP2_Y(i+6) and									// sta (:bp2),y			; 6
        iny(i+7) and 										// iny				; 7
-       lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH+	; 8
+       lda_a(i+8) and										// lda				; 8
        STA_BP2_Y(i+9) and									// sta (:bp2),y			; 9
        (iny(i+10) = false) then									// ~iny				; 10
        begin

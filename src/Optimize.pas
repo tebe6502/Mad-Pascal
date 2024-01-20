@@ -1698,7 +1698,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('lda adr.PLIST+1,y', listing[i]) > 0) then begin
+if (pos('jsr B_CRT.CRT_READ', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1877,7 +1877,7 @@ end;
 
 
 {
-if (pos('lda F+2', listing[i]) > 0) then begin
+if (pos('jsr B_CRT.CRT_READ', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

@@ -5956,6 +5956,8 @@ var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
     Param: TParamList;
 begin
 
+//   if Ident[IdentIndex].Name = 'CRT_READSTRING' then writeln(IdentIndex);
+
    j := i;
 
    if Ident[IdentIndex].ProcAsBlock = BlockStack[BlockStackTop] then Ident[IdentIndex].isRecursion := true;
@@ -6433,7 +6435,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
 
   if (Ident[IdentIndex].Block > 1) and (Ident[IdentIndex].Block <> BlockStack[BlockStackTop]) then	// issue #102 fixed
-    for IdentTemp := 1 to NumIdent  do
+    for IdentTemp := NumIdent downto 1  do
       if (Ident[IdentTemp].Kind in [PROCEDURETOK, FUNCTIONTOK]) and (Ident[IdentTemp].ProcAsBlock = Ident[IdentIndex].Block) then begin
         svar := Ident[IdentTemp].Name + '.' + svar;
 	Break;
@@ -6506,7 +6508,7 @@ if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
 
 	end;
 
-end;	//compileActualParameters
+end;	//CompileActualParameters
 
 
 // ----------------------------------------------------------------------------
@@ -8384,6 +8386,16 @@ case Tok[i].Kind of
 
     j := CompileExpression(i + 2, ValType, Tok[i].Kind);
 
+{
+    if (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 2].Name^ = 'CRT_READCHARI') then begin
+      IdentIndex := GetIdent(Tok[i + 2].Name^);
+
+      writeln(Pass,' | ',ValType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+
+
+
+   end;
+}
     if (ValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind <> OBRACKETTOK) then begin
 
       IdentIndex := GetIdent(Tok[i + 2].Name^);
@@ -12747,6 +12759,7 @@ begin
      emptyLine:=false;
     end;
 
+if Ident[IdentIndex].AllocElementType in [FORWARDTYPE] then writeln(Ident[IdentIndex].Name);
 
     case Ident[IdentIndex].Kind of
 
@@ -13107,7 +13120,6 @@ begin
 
   i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
 
-
   if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
 
     if StaticData then
@@ -13454,7 +13466,7 @@ end;	//FormalParameterList
 // ----------------------------------------------------------------------------
 
 
-procedure CheckForwardResolutions;
+procedure CheckForwardResolutions(typ: Boolean = true);
 var TypeIndex, IdentIndex: Integer;
     Name: string;
 begin
@@ -13465,6 +13477,8 @@ for TypeIndex := 1 to NumIdent do
      (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then begin
 
      Name := Ident[GetIdent(Tok[Ident[TypeIndex].NumAllocElements].Name^)].Name;
+
+     if Ident[GetIdent(Tok[Ident[TypeIndex].NumAllocElements].Name^)].Kind = TYPETOK then
 
      for IdentIndex := 1 to NumIdent do
        if (Ident[IdentIndex].Name = Name) and
@@ -13484,7 +13498,11 @@ for TypeIndex := 1 to NumIdent do
 for TypeIndex := 1 to NumIdent do
   if (Ident[TypeIndex].AllocElementType = FORWARDTYPE) and
      (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then
-    Error(TypeIndex, 'Unresolved forward reference to type ' + Ident[TypeIndex].Name);
+
+      if typ then
+        Error(TypeIndex, 'Unresolved forward reference to type ' + Ident[TypeIndex].Name)
+      else
+        Error(TypeIndex, 'Identifier not found "' + Ident[GetIdent(Tok[Ident[TypeIndex].NumAllocElements].Name^)].Name + '"');
 
 end;	//CheckForwardResolutions
 
@@ -14847,6 +14865,8 @@ while Tok[i].Kind in
     i := i + 1;
     until Tok[i + 1].Kind <> IDENTTOK;
 
+    CheckForwardResolutions(false);								// issue #126 fixed
+
     i := i + 1;
     end;// if VARTOK
 
@@ -14866,7 +14886,7 @@ while Tok[i].Kind in
        ForwardIdentIndex := GetIdent(Tok[i + 1].Name^);
 
 
-      if (ForwardIdentIndex <> 0) and (Ident[ForwardIdentIndex].isOverload) then begin     // !!! dla forward; overload;
+      if (ForwardIdentIndex <> 0) and (Ident[ForwardIdentIndex].isOverload) then begin     	// !!! dla forward; overload;
 
        j:=i;
        FormalParameterList(j, ParamIndex, Param, TmpResult, IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
@@ -15238,6 +15258,10 @@ asm65(#13#10'.local'#9'@RESOURCE');
     asm65(#9'ins '''+resArray[i].resFile+'''');
     asm65(resArray[i].resName+'.end');
     resArray[i].resStream := true;
+   end else
+
+   if AnsiUpperCase(resArray[i].resType) = 'DOSFILE' then begin
+
    end else
 
    if AnsiUpperCase(resArray[i].resType) = 'RCDATA' then begin

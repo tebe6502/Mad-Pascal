@@ -1331,8 +1331,8 @@ for i := 1 to len do
   Inc(NumStaticStrChars);
   end;
 
-StaticStringData[NumStaticStrChars] := 0;
-Inc(NumStaticStrChars);
+//StaticStringData[NumStaticStrChars] := 0;
+//Inc(NumStaticStrChars);
 
 end;	//DefineStaticString
 
