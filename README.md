@@ -159,6 +159,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [ProHiBan](https://github.com/zbyti/ProHiBan)
 * [The Hangmad](https://gitlab.com/bocianu/thehangmad)
 * [Block Attack](https://github.com/tebe6502/Block-Attack)
+* [Dungeon Adventurer](https://gitlab.com/delysio/dungeon-adventurer/)
 
 ## Benchmarks
 
