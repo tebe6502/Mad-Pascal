@@ -8,7 +8,7 @@ interface
 
 const
 
-  title = '1.7.0';
+  title = '1.7.1';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
@@ -406,7 +406,6 @@ type
     Name: TString;
     Value: Int64;			// Value for a constant, address for a variable, procedure or function
     Block: Integer;			// Index of a block in which the identifier is defined
-    BlockStack: Integer;		// updateResolvedForward
     UnitIndex : Integer;
     DataType: Byte;
     IdType: Byte;
@@ -436,6 +435,7 @@ type
 	 ObjectIndex: Integer;
 	 IsUnresolvedForward,
 	 updateResolvedForward,
+	 isInterface,
 	 isOverload,
 	 isRegister,
 	 isInterrupt,

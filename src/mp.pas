@@ -6317,17 +6317,13 @@ begin
 }
 
 
-   if Pass = CALLDETERMPASS then begin
+   if Pass = CALLDETERMPASS then
+    if Ident[IdentIndex].isUnresolvedForward and (Ident[IdentIndex].isInterface = FALSE) then
 
-    if Ident[IdentIndex].isUnresolvedForward and (Ident[IdentIndex].isRecursion = false) then begin
-
-      Ident[IdentIndex].updateResolvedForward := true;
-      Ident[IdentIndex].BlockStack := BlockStack[BlockStackTop];
-
-    end else
+      Ident[IdentIndex].updateResolvedForward := true
+      
+    else
       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
-
-   end;
 
 
 (*------------------------------------------------------------------------------------------------------------*)
@@ -14930,6 +14926,7 @@ while Tok[i].Kind in
 //      Inc(NumBlocks);
 //      Ident[NumIdent].ProcAsBlock := NumBlocks;
       Ident[NumIdent].IsUnresolvedForward := TRUE;
+      Ident[NumIdent].isInterface := INTERFACETOK_USE;
 
       end
     else
@@ -15032,8 +15029,7 @@ while Tok[i].Kind in
 	if OutputDisabled then OutputDisabled := FALSE;
 
 	Ident[ForwardIdentIndex].IsUnresolvedForward := FALSE;
-
-	if Ident[ForwardIdentIndex].updateResolvedForward then AddCallGraphChild(Ident[ForwardIdentIndex].BlockStack, Ident[ForwardIdentIndex].ProcAsBlock);
+	Ident[ForwardIdentIndex].isInterface := FALSE;
 
 	end;
 
@@ -15132,8 +15128,9 @@ end;
 
 Dec(BlockStackTop);
 
- if (Ident[BlockIdentIndex].isKeep) or (Ident[BlockIdentIndex].isInterrupt) then
-  if Pass = CALLDETERMPASS then
+
+ if Pass = CALLDETERMPASS then
+  if Ident[BlockIdentIndex].isKeep or Ident[BlockIdentIndex].isInterrupt or Ident[BlockIdentIndex].updateResolvedForward then
     AddCallGraphChild(BlockStack[BlockStackTop], Ident[BlockIdentIndex].ProcAsBlock);
 
 //Result := j;
