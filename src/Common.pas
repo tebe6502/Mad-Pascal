@@ -406,6 +406,7 @@ type
     Name: TString;
     Value: Int64;			// Value for a constant, address for a variable, procedure or function
     Block: Integer;			// Index of a block in which the identifier is defined
+    BlockStack: Integer;		// updateResolvedForward
     UnitIndex : Integer;
     DataType: Byte;
     IdType: Byte;
