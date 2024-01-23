@@ -6319,9 +6319,12 @@ begin
 
    if Pass = CALLDETERMPASS then begin
 
-    if Ident[IdentIndex].isUnresolvedForward then
-      Ident[IdentIndex].updateResolvedForward := true
-    else
+    if Ident[IdentIndex].isUnresolvedForward then begin
+
+      Ident[IdentIndex].updateResolvedForward := true;
+      Ident[IdentIndex].BlockStack := BlockStack[BlockStackTop];
+
+    end else
       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
 
    end;
@@ -15030,7 +15033,7 @@ while Tok[i].Kind in
 
 	Ident[ForwardIdentIndex].IsUnresolvedForward := FALSE;
 
-	if Ident[ForwardIdentIndex].updateResolvedForward then AddCallGraphChild(BlockStack[BlockStackTop], Ident[ForwardIdentIndex].ProcAsBlock);
+	if Ident[ForwardIdentIndex].updateResolvedForward then AddCallGraphChild(Ident[ForwardIdentIndex].BlockStack, Ident[ForwardIdentIndex].ProcAsBlock);
 
 	end;
 
