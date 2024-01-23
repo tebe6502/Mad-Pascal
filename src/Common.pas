@@ -434,6 +434,7 @@ type
 	 ProcAsBlock: Integer;
 	 ObjectIndex: Integer;
 	 IsUnresolvedForward,
+	 updateResolvedForward,
 	 isOverload,
 	 isRegister,
 	 isInterrupt,
