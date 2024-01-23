@@ -6316,8 +6316,15 @@ begin
      iError(i, WrongNumParameters, IdentIndex);
 }
 
-   if Pass = CALLDETERMPASS then
-     AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
+   if Pass = CALLDETERMPASS then begin
+
+    if Ident[IdentIndex].isUnresolvedForward then
+      Ident[IdentIndex].updateResolvedForward := true
+    else
+      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
+   end;
 
 
 (*------------------------------------------------------------------------------------------------------------*)
@@ -7527,7 +7534,7 @@ case Tok[i].Kind of
 
 //		 yes := (Tok[j + 2].Kind = DEREFERENCETOK);
 
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Tok[j ].Kind,',',Tok[j + 1].Kind,',',Tok[j + 2].Kind);
 
  	     	 if (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) or (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then begin
@@ -8384,18 +8391,10 @@ case Tok[i].Kind of
    if Tok[i + 1].Kind <> OPARTOK then
     Error(i, 'type identifier not allowed here');
 
+
     j := CompileExpression(i + 2, ValType, Tok[i].Kind);
 
-{
-    if (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 2].Name^ = 'CRT_READCHARI') then begin
-      IdentIndex := GetIdent(Tok[i + 2].Name^);
 
-      writeln(Pass,' | ',ValType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
-
-
-
-   end;
-}
     if (ValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind <> OBRACKETTOK) then begin
 
       IdentIndex := GetIdent(Tok[i + 2].Name^);
@@ -8407,6 +8406,7 @@ case Tok[i].Kind of
 	iError(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
 
     end;
+
 
 // ASPOINTERTODEREFERENCE
 
@@ -14924,10 +14924,8 @@ while Tok[i].Kind in
     // Check for a FORWARD directive (it is not a reserved word)
     if ((ForwardIdentIndex = 0) and isForward) or INTERFACETOK_USE then  // Forward declaration
       begin
-
-      Inc(NumBlocks);
-      Ident[NumIdent].ProcAsBlock := NumBlocks;
-
+//      Inc(NumBlocks);
+//      Ident[NumIdent].ProcAsBlock := NumBlocks;
       Ident[NumIdent].IsUnresolvedForward := TRUE;
 
       end
@@ -15032,6 +15030,8 @@ while Tok[i].Kind in
 
 	Ident[ForwardIdentIndex].IsUnresolvedForward := FALSE;
 
+	if Ident[ForwardIdentIndex].updateResolvedForward then AddCallGraphChild(BlockStack[BlockStackTop], Ident[ForwardIdentIndex].ProcAsBlock);
+
 	end;
 
       end;
@@ -15128,7 +15128,6 @@ if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DE
 end;
 
 Dec(BlockStackTop);
-
 
  if (Ident[BlockIdentIndex].isKeep) or (Ident[BlockIdentIndex].isInterrupt) then
   if Pass = CALLDETERMPASS then
