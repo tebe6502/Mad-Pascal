@@ -6319,7 +6319,7 @@ begin
 
    if Pass = CALLDETERMPASS then begin
 
-    if Ident[IdentIndex].isUnresolvedForward then begin
+    if Ident[IdentIndex].isUnresolvedForward and (Ident[IdentIndex].isRecursion = false) then begin
 
       Ident[IdentIndex].updateResolvedForward := true;
       Ident[IdentIndex].BlockStack := BlockStack[BlockStackTop];
