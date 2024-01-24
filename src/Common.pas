@@ -435,7 +435,6 @@ type
 	 ObjectIndex: Integer;
 	 IsUnresolvedForward,
 	 updateResolvedForward,
-	 isInterface,
 	 isOverload,
 	 isRegister,
 	 isInterrupt,

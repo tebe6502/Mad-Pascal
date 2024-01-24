@@ -1,4 +1,5 @@
 24.01.2023
+- issue #103 fixed (https://github.com/tebe6502/Mad-Pascal/issues/103)
 - IFTMP_xxxx (opt_TEMP_IFTMP.inc) bugfixes
 
 23.01.2023
@@ -40,7 +41,7 @@
 
    proc;
 
-  end; 
+  end;
 
 
 22.11.2023
