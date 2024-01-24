@@ -4,6 +4,7 @@
 // -----------------------------------------------------------------------------
 
 procedure opt_TEMP_JMP;
+var p: integer;
 begin
 
 
@@ -27,7 +28,8 @@ begin
 
     if (pos('jne l_', TemporaryBuf[0]) > 0) and						// jne l_xxxx		; 0
        (TemporaryBuf[1] = #9'jmp @exit') and						// jmp @exit		; 1
-       (pos(TemporaryBuf[2], TemporaryBuf[0]) > 0) then					//l_xxxx		; 2
+       (pos(TemporaryBuf[2], TemporaryBuf[0]) > 0) and					//l_xxxx		; 2
+       (pos('lda IFTMP_', TemporaryBuf[3]) = 0) then					//~lda IFTMP_		; 3
      begin
       TemporaryBuf[0] := #9'jeq @exit';
       TemporaryBuf[1] := '~';
@@ -65,7 +67,8 @@ begin
 
     if (SKIP(0) = false) and								//~SKIP			; 0
        (pos('jmp l_', TemporaryBuf[1]) > 0) and						// jmp l_xxxx		; 1
-       (TemporaryBuf[2] = copy(TemporaryBuf[1], 6, 256)) then				//l_xxxx		; 2
+       (TemporaryBuf[2] = copy(TemporaryBuf[1], 6, 256)) and				//l_xxxx		; 2
+       (pos('lda IFTMP_', TemporaryBuf[3]) = 0) then					//~lda IFTMP_		; 3
      begin
       TemporaryBuf[1] := '~';
       TemporaryBuf[2] := '~';
@@ -75,7 +78,8 @@ begin
     if (SKIP(0) = false) and								//~SKIP			; 0
        (pos('jmp l_', TemporaryBuf[1]) > 0) and						// jmp l_xxxx		; 1
        (pos('l_', TemporaryBuf[2]) = 1) and						//l_yyyy		; 2
-       (TemporaryBuf[3] = copy(TemporaryBuf[1], 6, 256)) then				//l_xxxx		; 3
+       (TemporaryBuf[3] = copy(TemporaryBuf[1], 6, 256)) and				//l_xxxx		; 3
+       (pos('lda IFTMP_', TemporaryBuf[4]) = 0) then					//~lda IFTMP_		; 4
       begin
 	TemporaryBuf[1] := '~';
 
