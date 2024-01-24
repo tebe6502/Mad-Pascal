@@ -181,7 +181,7 @@ begin
 
 
 {
-if (pos('l_0336', TemporaryBuf[0]) > 0) then begin
+if (pos('l_00E9', TemporaryBuf[3]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
