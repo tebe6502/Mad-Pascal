@@ -1056,7 +1056,7 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
     DATAORIGINOFFSET,
     CODEORIGINOFFSET: Result := 'POINTER';
 
-    PROCVARTOK: Result := '"<Procedure Variable>"';
+    PROCVARTOK: Result := '<Procedure Variable>';
 
  STRINGPOINTERTOK: Result := 'STRING';
 

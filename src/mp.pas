@@ -303,7 +303,7 @@ end;
 
 	   if (Ident[IdentIndex].Param[i].AllocElementType = PROCVARTOK) then begin
 
-//writeln(Ident[IdentIndex].Name,',', Ident[GetIdent('@FN' + IntToHex(Ident[IdentIndex].Param[i].NumAllocElements shr 16, 4))].NumParams,',',Param[i].AllocElementType,' | ', Ident[IdentIndex].Param[i].DataType,',', Param[i].AllocElementType,',',Ident[GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))].NumParams);
+//	writeln(Ident[IdentIndex].Name,',', Ident[GetIdent('@FN' + IntToHex(Ident[IdentIndex].Param[i].NumAllocElements shr 16, 4))].NumParams,',',Param[i].AllocElementType,' | ', Ident[IdentIndex].Param[i].DataType,',', Param[i].AllocElementType,',',Ident[GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))].NumParams);
 
 	      case Param[i].AllocElementType of
 
@@ -6048,10 +6048,46 @@ begin
 
 	 end else begin
 
-          asm65(#9'lda ' + svar);
-          asm65(#9'sta :TMP+1');
-          asm65(#9'lda ' + svar + '+1');
-          asm65(#9'sta :TMP+2');
+//	 writeln(Ident[ProcVarIndex].Name,',',Ident[ProcVarIndex].DataType,',',   Ident[ProcVarIndex].NumAllocElements,',', Ident[ProcVarIndex].AllocElementType);
+
+	  if Ident[ProcVarIndex].NumAllocElements = 0 then begin
+
+           asm65(#9'lda ' + svar);
+           asm65(#9'sta :TMP+1');
+           asm65(#9'lda ' + svar + '+1');
+           asm65(#9'sta :TMP+2');
+
+	  end else
+
+       	  if (Ident[ProcVarIndex].NumAllocElements * 2 > 256) or (Ident[ProcVarIndex].NumAllocElements in [1]) then begin
+
+	   asm65(#9'lda ' + svar);
+           asm65(#9'add :STACKORIGIN,x');
+           asm65(#9'sta :bp2');
+           asm65(#9'lda ' + svar + '+1');
+           asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+           asm65(#9'sta :bp2+1');
+           asm65(#9'ldy #$00');
+           asm65(#9'lda (:bp2),y');
+           asm65(#9'sta :TMP+1');
+           asm65(#9'iny');
+           asm65(#9'lda (:bp2),y');
+           asm65(#9'sta :TMP+2');
+
+       	  end else begin
+
+	   asm65(#9'lda :STACKORIGIN,x');
+	   asm65(#9'add #$00');
+	   asm65(#9'tay');
+	   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	   asm65(#9'adc #$00');
+	   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	   asm65(#9'lda adr.' + svar + ',y');
+           asm65(#9'sta :TMP+1');
+           asm65(#9'lda adr.' + svar + '+1,y');
+           asm65(#9'sta :TMP+2');
+
+       	  end;
 
 	 end;
 
@@ -6061,7 +6097,6 @@ begin
        end;
 
      end;
-
 
    end;
 
@@ -7625,6 +7660,8 @@ case Tok[i].Kind of
 
 	  end else
 
+
+
       if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
 
 //        writeln('!! ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
@@ -7634,11 +7671,36 @@ case Tok[i].Kind of
 //	if Ident[IdentTemp].IsNestedFunction = FALSE then
 //	 Error(i, 'Variable, constant or function name expected but procedure ' + Ident[IdentIndex].Name + ' found');
 
-	CompileActualParameters(i, IdentTemp, IdentIndex);
 
-	ValType := Ident[IdentTemp].DataType;
+	if Tok[i + 1].Kind = OBRACKETTOK then begin
+	  i := CompileArrayIndex(i, IdentIndex);
+
+          CheckTok(i + 1, CBRACKETTOK);
+
+          inc(i);
+	end;
+
+
+	if Tok[i + 1].Kind = OPARTOK then
+
+	  CompileActualParameters(i, IdentTemp, IdentIndex)
+
+	else begin
+
+	  svar:=GetLocalName(IdentIndex);
+
+	  asm65(#9'inx');
+	  asm65(#9'lda ' + svar);
+	  asm65(#9'sta :STACKORIGIN,x');
+	  asm65(#9'lda ' + svar + '+1');
+	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+	end;
+
+ 	ValType := POINTERTOK;
 
 	Result := i;
+
 
       end else
 
@@ -9939,10 +10001,23 @@ case Tok[i].Kind of
 	      end;
 
 
+
 //	if (Tok[k].Kind = IDENTTOK) then
 //	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
 //	else
 //	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
+
+
+	     if  VarType <> ExpressionType then
+	      if (ExpressionType = POINTERTOK) and (Tok[k].Kind = IDENTTOK) then
+	       if (Ident[GetIdent(Tok[k].Name^)].DataType = POINTERTOK) and (Ident[GetIdent(Tok[k].Name^)].AllocElementType = PROCVARTOK) then begin
+
+	         IdentTemp := GetIdent('@FN' + IntToHex(Ident[GetIdent(Tok[k].Name^)].NumAllocElements_, 4) );
+
+		 if Ident[IdentTemp].Kind = FUNCTIONTOK then ExpressionType := Ident[IdentTemp].DataType;
+
+	       end;
+
 
 
 	      CheckAssignment(i + 1, IdentIndex);
@@ -11933,8 +12008,40 @@ WHILETOK:
 		 else
 		  iError(i, CantReadWrite);
 
-//		writeln(Ident[IdentIndex].Name,',',ExpressionType,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].idType);
 
+//		writeln(Ident[IdentIndex].Name,',',ExpressionType,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].Kind);
+
+
+		if (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
+
+		  IdentTemp := GetIdent('@FN' + IntToHex(Ident[IdentIndex].NumAllocElements_, 4) );
+
+		  if Ident[IdentTemp].Kind =  FUNCTIONTOK then
+		   ExpressionType := Ident[IdentTemp].DataType
+		  else
+		   ExpressionType := UNTYPETOK;
+
+
+		  if (ExpressionType = STRINGPOINTERTOK) then
+		        GenerateWriteString(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, POINTERTOK)
+		  else if (ExpressionType in IntegerTypes) then
+			GenerateWriteString(Tok[i].Value, ASVALUE, ExpressionType)	// Integer argument
+		  else if (ExpressionType = BOOLEANTOK) then
+			GenerateWriteString(Tok[i].Value, ASBOOLEAN)			// Boolean argument
+		  else if (ExpressionType = CHARTOK) then
+			GenerateWriteString(Tok[i].Value, ASCHAR)			// Character argument
+		  else if ExpressionType = REALTOK then
+			GenerateWriteString(Tok[i].Value, ASREAL)			// Real argument
+		  else if ExpressionType = SHORTREALTOK then
+			GenerateWriteString(Tok[i].Value, ASSHORTREAL)			// ShortReal argument
+		  else if ExpressionType = HALFSINGLETOK then
+			GenerateWriteString(Tok[i].Value, ASHALFSINGLE)			// Half Single argument
+		  else if ExpressionType = SINGLETOK then
+			GenerateWriteString(Tok[i].Value, ASSINGLE)			// Single argument
+		  else iError(i, CantReadWrite);
+
+
+		end else
 		if (ExpressionType = STRINGPOINTERTOK) or (Ident[IdentIndex].Kind = FUNCTIONTOK) or ((ExpressionType = POINTERTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
 		 GenerateWriteString(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, Ident[IdentIndex].DataType)
 		else
