@@ -265,17 +265,6 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
 
       hits := 0;
 
-{
-if Ident[IdentIndex].Name = 'UNZX0' then begin
-
-writeln(pass,' > ',IdentIndex);
-      for i := 1 to NumParams do
-	   writeln (Ident[IdentIndex].Param[i].DataType ,' ? ',Param[i].DataType);
-
- writeln;
-end;
-}
-
 
       for i := 1 to NumParams do
        if (
@@ -5955,8 +5944,6 @@ var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
     yes: Boolean;
     Param: TParamList;
 begin
-
-//   if Ident[IdentIndex].Name = 'CRT_READSTRING' then writeln(IdentIndex);
 
    j := i;
 
@@ -12111,13 +12098,6 @@ WHILETOK:
 
      end;
 
-//   writeln(OutputDisabled,',',Pass);
-//   writeln('----------------------');
-
-//     writeln(AsmBlock[AsmBlockIndex]);
-
-
-//     asm65(AsmBlock[AsmBlockIndex]);
 
      asm65('#asm');
      asm65(IntToStr(AsmBlockIndex));
@@ -12867,7 +12847,6 @@ begin
      emptyLine:=false;
     end;
 
-if Ident[IdentIndex].AllocElementType in [FORWARDTYPE] then writeln(Ident[IdentIndex].Name);
 
     case Ident[IdentIndex].Kind of
 
