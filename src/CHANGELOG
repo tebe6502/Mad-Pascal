@@ -1,3 +1,6 @@
+25.01.2023
+- poprawione typy proceduralne w tablicach
+
 24.01.2023
 - issue #103 fixed (https://github.com/tebe6502/Mad-Pascal/issues/103)
 - IFTMP_xxxx (opt_TEMP_IFTMP.inc) bugfixes
