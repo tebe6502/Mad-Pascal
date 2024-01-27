@@ -3212,7 +3212,12 @@ begin				// OptimizeASM
 	end;
 
       end else
-
+{
+      if arg0 = ':TMP' then			// :TMP			!!! not accepted !!!
+      else
+      if arg0 = '*+6' then			// *+6			!!! not accepted !!!
+      else
+}
       if arg0 = '@move' then			// @move		accepted
       else
 
