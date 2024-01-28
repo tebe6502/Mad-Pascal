@@ -44,15 +44,18 @@ procedure OptimizeProgram(MainIndex: Integer);
     ChildIndex, ChildIdentIndex: Integer;
   begin
 
-  Ident[IdentIndex].IsNotDead := TRUE;
+    if Ident[IdentIndex].ProcAsBlock > 0 then begin
 
-  for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
-    for ChildIdentIndex := 1 to NumIdent do begin
+  	Ident[IdentIndex].IsNotDead := TRUE;
 
-      if (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then
-	MarkNotDead(ChildIdentIndex);
+  	for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
+	    for ChildIdentIndex := 1 to NumIdent do
 
-      end;
+	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then
+		MarkNotDead(ChildIdentIndex);
+
+    end;
+
   end;
 
 begin
