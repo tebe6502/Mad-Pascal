@@ -3,7 +3,7 @@ unit misc;
  @type: unit
  @author: Tomasz Biela, Konrad Kokoszkiewicz, Guillermo Fuenzalida, Sebastian Igielski
  @name: Miscellaneous procedures for detect additional hardware
- @version: 1.0
+ @version: 1.1
 
  @description:
 *)
@@ -96,96 +96,6 @@ scanline equ *-1
 	iny
 ntsc
 	sty Result
-
-end;
-
-
-function DetectHighMem: word;
-(*
-@description:
-Detect 65816 linear memory
-
-<http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej>
-
-@returns: amount of memory in KB
-*)
-begin
-
- Result:=0;
-
- if DetectCPU > $7f then
-
-asm
-
-adr	= eax
-bcnt	= Result
-bfirst	= Result+1
-
-	opt c+
-
-	stx @sp
-
-	sei
-	inc nmien
-
-ramsize	stz adr
-	stz adr+1
-	lda #$01
-	sta adr+2
-
-	stz bfirst
-	stz bcnt
-
-?lp0	stz.w $0000
-
-	lda [adr]
-	eor #$ff
-	sta [adr]
-	cmp [adr]
-	bne ?nx
-	ldx.w $0000
-	bne ?nx
-	eor #$ff
-	sta [adr]
-	bra ?fnd
-
-?nx	inc adr+2
-	bne ?lp0
-
-	bra ?abt
-
-?fnd	lda adr+2
-	sta bfirst
-
-	inc adr+2
-	inc bcnt
-
-?lp1	stz.w $0000
-
-	lda [adr]
-	eor #$ff
-	sta [adr]
-	cmp [adr]
-	bne ?abt
-	ldx.w $0000
-	bne ?abt
-	eor #$ff
-	sta [adr]
-	inc bcnt
-	inc adr+2
-	bne ?lp1
-
-        dec bcnt
-
-?abt
-	dec nmien
-	cli
-
-	ldx #0
-@sp	equ *-1
-
-	opt c-
-end;
 
 end;
 
@@ -745,5 +655,96 @@ old	equ *-1
 	sta PORTB
 
 end;
+
+
+function DetectHighMem: word;
+(*
+@description:
+Detect 65816 linear memory
+
+<http://atariki.krap.pl/index.php/Obliczenie_rozmiaru_pami%C4%99ci_liniowej>
+
+@returns: amount of memory in KB
+*)
+begin
+
+ Result:=0;
+
+ if DetectCPU > $7f then
+
+asm
+
+adr	= eax
+bcnt	= Result
+bfirst	= Result+1
+
+	opt c+
+
+	stx @sp
+
+	sei
+	inc nmien
+
+ramsize	stz adr
+	stz adr+1
+	lda #$01
+	sta adr+2
+
+	stz bfirst
+	stz bcnt
+
+?lp0	stz.w $0000
+
+	lda [adr]
+	eor #$ff
+	sta [adr]
+	cmp [adr]
+	bne ?nx
+	ldx.w $0000
+	bne ?nx
+	eor #$ff
+	sta [adr]
+	bra ?fnd
+
+?nx	inc adr+2
+	bne ?lp0
+
+	bra ?abt
+
+?fnd	lda adr+2
+	sta bfirst
+
+	inc adr+2
+	inc bcnt
+
+?lp1	stz.w $0000
+
+	lda [adr]
+	eor #$ff
+	sta [adr]
+	cmp [adr]
+	bne ?abt
+	ldx.w $0000
+	bne ?abt
+	eor #$ff
+	sta [adr]
+	inc bcnt
+	inc adr+2
+	bne ?lp1
+
+        dec bcnt
+
+?abt
+	dec nmien
+	cli
+
+	ldx #0
+@sp	equ *-1
+
+	opt c-
+end;
+
+end;
+
 
 end.
