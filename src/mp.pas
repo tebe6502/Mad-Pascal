@@ -6337,7 +6337,7 @@ begin
    NumActualParams := ParamIndex;
 
 
-// writeln(Ident[IdentIndex].name,',',NumActualParams,',',Ident[IdentIndex].NumParams ,',',Ident[IdentIndex].Kind );
+ //writeln(Ident[IdentIndex].name,',',NumActualParams,',',Ident[IdentIndex].isUnresolvedForward ,',',Ident[IdentIndex].isRecursion );
 
 {
    if NumActualParams <> Ident[IdentIndex].NumParams then
@@ -6349,13 +6349,10 @@ begin
 
 
    if Pass = CALLDETERMPASS then
-    if Ident[IdentIndex].isUnresolvedForward then begin
+    if Ident[IdentIndex].isUnresolvedForward then
 
-      if Ident[IdentIndex].isRecursion = FALSE then Ident[IdentIndex].IsNotDead := FALSE;
-
-      Ident[IdentIndex].updateResolvedForward := TRUE;
-
-    end else
+      Ident[IdentIndex].updateResolvedForward := TRUE
+    else
       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
 
 
@@ -6559,7 +6556,7 @@ end;	//CompileActualParameters
 
 
 function CompileFactor(i: Integer; out isZero: Boolean; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer;
-var IdentTemp, IdentIndex, j, oldCodeSize: Integer;
+var IdentTemp, IdentIndex, oldCodeSize, j: Integer;
     ActualParamType, AllocElementType, IndirectionLevel, Kind, oldPass: Byte;
     yes: Boolean;
     Value, ConstVal: Int64;
@@ -10011,6 +10008,7 @@ case Tok[i].Kind of
 //	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
 
 
+
 	     if  VarType <> ExpressionType then
 	      if (ExpressionType = POINTERTOK) and (Tok[k].Kind = IDENTTOK) then
 	       if (Ident[GetIdent(Tok[k].Name^)].DataType = POINTERTOK) and (Ident[GetIdent(Tok[k].Name^)].AllocElementType = PROCVARTOK) then begin
@@ -10022,7 +10020,6 @@ case Tok[i].Kind of
 		 if Ident[IdentTemp].Kind = FUNCTIONTOK then ExpressionType := Ident[IdentTemp].DataType;
 
                end;
-
 
 
 
@@ -10234,7 +10231,8 @@ case Tok[i].Kind of
 		else
 		  Name := svar;
 
-		if Ident[IdentTemp].Kind = FUNCTIONTOK then begin
+
+		if (Ident[IdentTemp].Kind = FUNCTIONTOK) then begin
 		  svar := GetLocalName(IdentTemp);
 
 		  IdentTemp := GetIdentResult(Ident[IdentTemp].ProcAsBlock);
@@ -10266,6 +10264,7 @@ case Tok[i].Kind of
 //writeln( '>', Ident[IdentTemp].Name,',', Ident[IdentTemp].DataType, ',', Ident[IdentTemp].AllocElementTYpe );
 //writeln(Types[5].Field[0].Name);
 
+		if IdentTemp > 0 then
 
 		if Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements then		// porownanie indeksow do tablicy TYPES
 //		  iError(i, IncompatibleTypeOf, IdentTemp);
@@ -10273,6 +10272,7 @@ case Tok[i].Kind of
                     Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "' + InfoAboutToken(Ident[IdentIndex].DataType) + '"')
 	          else
                     Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+
 
 		a65(__subBX);
 		StopOptimization;
