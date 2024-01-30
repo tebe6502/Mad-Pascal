@@ -10001,12 +10001,10 @@ case Tok[i].Kind of
 	      end;
 
 
-
 //	if (Tok[k].Kind = IDENTTOK) then
 //	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
 //	else
 //	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
-
 
 
 	     if  VarType <> ExpressionType then
@@ -10020,7 +10018,6 @@ case Tok[i].Kind of
 		 if Ident[IdentTemp].Kind = FUNCTIONTOK then ExpressionType := Ident[IdentTemp].DataType;
 
                end;
-
 
 
 	      CheckAssignment(i + 1, IdentIndex);
@@ -14725,6 +14722,10 @@ while Tok[i].Kind in
 //	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
 
 	  if (VarType = POINTERTOK) and (AllocElementType = STRINGPOINTERTOK) and (NestedNumAllocElements > 0) and (NumAllocElements > 1) then begin	// array [ ][ ] of string;
+
+
+	   if Ident[NumIdent].isAbsolute then
+	     Error(i, 'ABSOLUTE modifier is not available for this type of array');
 
 	   idx := Ident[NumIdent].Value - DATAORIGIN;
 

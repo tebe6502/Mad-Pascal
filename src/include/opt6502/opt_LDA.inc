@@ -559,7 +559,8 @@ begin
       listing[i+4] := '';
 
       if listing[i+1] = listing[i+5] then listing[i+5] := '';
-      if listing[i+2] = listing[i+6] then listing[i+6] := '';
+//      if listing[i+2] = listing[i+6] then listing[i+6] := '';									// issue #127 fixed
+
       exit(false);
      end;
 

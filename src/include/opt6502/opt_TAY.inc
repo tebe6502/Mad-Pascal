@@ -398,6 +398,26 @@ begin
 
     if lda_a(i) and (listing[i] = listing[i+5]) and						// lda I				; 0
 
+       add_im(i+1) and (listing[i+1] = listing[i+6]) and					// add #				; 1
+       asl_a(i+2) and 										// asl @				; 2
+       asl_a(i+3) and										// asl @				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+9			; 4
+//       lda_a(i+5) and										// lda I				; 5
+//       add_im(i+6) and									// add #				; 6
+       asl_a(i+7) and										// asl @				; 7
+       asl_a(i+8) then										// asl @				; 8
+      begin
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i) and (listing[i] = listing[i+5]) and						// lda I				; 0
+
        asl_a(i+1) and 										// asl @				; 1
        asl_a(i+2) and										// asl @				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+9			; 3

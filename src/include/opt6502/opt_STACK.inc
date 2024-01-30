@@ -1246,6 +1246,25 @@ begin
      end;
 
 
+    if mva(i) and										// mva   :STACKORIGIN,x			; 0
+       mva(i+1) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 1
+       mva(i+2) and										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 2
+       mva(i+3) and										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 3
+       (listing[i+4] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 4
+       (listing[i+5] = #9'asl :STACKORIGIN,x') and						// asl :STACKORIGIN,x			; 5
+       rol_a(i+6) then										// rol @				; 6
+     if (pos(':STACKORIGIN,x', listing[i]) > 0) and
+     	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+2]) > 0) and
+     	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+3]) > 0) then
+     begin
+       listing[i+2] := '';
+       listing[i+3] := '';
+
+       exit(false);
+     end;
+
+
 // ----------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -1292,7 +1311,7 @@ begin
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // andAL_CL
 
-    if mva(i) and										// mwa   :STACKORIGIN,x			; 0
+    if mva(i) and										// mva   :STACKORIGIN,x			; 0
        (listing[i+1] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 1
        and_ora_eor_stack(i+2) and								// and|ora|eor :STACKORIGIN,x		; 2
        (listing[i+3] = #9'sta :STACKORIGIN-1,x') then						// sta :STACKORIGIN-1,x			; 3
