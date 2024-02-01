@@ -247,9 +247,9 @@ const
   MAXBLOCKS		= 16384;	// maksymalna liczba blokow
   MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
   MAXVARS		= 256;		// maksymalna liczba parametrow dla VAR
-  MAXUNITS		= 512;
-  MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
+  MAXUNITS		= 2048;
   MAXALLOWEDUNITS	= 256;
+  MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
 
   CODEORIGIN		= $100;
   DATAORIGIN		= $8000;
@@ -505,6 +505,7 @@ type
 var
 
   PROGRAM_NAME: string = 'Program';
+  LIBRARY_NAME: string;
 
   AsmBlock: array [0..4095] of string;
 
@@ -514,7 +515,7 @@ var
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
   Spelling: array [1..MAXTOKENNAMES] of TString;
-  UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;
+  UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefines;
   IFTmpPosStack: array of integer;
   BreakPosStack: array [0..1023] of TPosStack;
@@ -573,7 +574,7 @@ var
 	      end;
 
 
-  PROGRAMTOK_USE, INTERFACETOK_USE,
+  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE,
   OutputDisabled, isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
   DiagMode: Boolean = false;
@@ -1296,6 +1297,9 @@ if len > 255 then
  Data[0]:=255
 else
  Data[0]:=len;
+
+
+if (len < 0) or (len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
 
