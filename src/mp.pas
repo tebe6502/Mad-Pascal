@@ -12965,6 +12965,8 @@ procedure SaveToStaticDataSegment(ConstDataSize: integer; ConstVal: Int64; Const
 var ftmp: TFloat;
 begin
 
+	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then begin writeln('SaveToStaticDataSegment: ', ConstDataSize); halt end;
+
 ftmp[0]:=0;
 ftmp[1]:=0;
 
@@ -14169,6 +14171,19 @@ while Tok[i].Kind in
   end;
 
 
+  if Tok[i].Kind = EXPORTSTOK then begin
+
+
+//   j := CompileStatement(i + 1);
+//   while Tok[j + 1].Kind = SEMICOLONTOK do j := CompileStatement(j + 2);
+
+   inc(i);
+
+  end;
+
+
+
+
   if Tok[i].Kind = INITIALIZATIONTOK then begin
 
    if not ImplementationUse then
@@ -14187,6 +14202,26 @@ while Tok[i].Kind in
 
    i := j + 1;
   end;
+
+
+
+  if Tok[i].Kind = LIBRARYTOK then begin       // na samym poczatku listingu
+
+   if LIBRARYTOK_USE then CheckTok(i, BEGINTOK);
+
+   CheckTok(i + 1, IDENTTOK);
+
+   LIBRARY_NAME := Tok[i + 1].Name^;
+
+   inc(i);
+
+   CheckTok(i + 1, SEMICOLONTOK);
+
+   inc(i, 2);
+
+   LIBRARYTOK_USE := true;
+  end;
+
 
 
   if Tok[i].Kind = PROGRAMTOK then begin       // na samym poczatku listingu
@@ -14698,6 +14733,7 @@ while Tok[i].Kind in
 
 
 	if VarType = ENUMTYPE then begin
+
 
 	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, AllocElementType, 0, 0, 0, IdType);
 

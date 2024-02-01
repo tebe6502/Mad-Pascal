@@ -434,6 +434,9 @@ var
 	 inc(NumUnits);
 	 UnitIndex := NumUnits;
 
+	 if UnitIndex > High(UnitName) then
+	  Error(NumTok, 'Out of resources, UnitIndex: '+IntToStr(UnitIndex));
+
 	 Line:=1;
   	 UnitName[UnitIndex].Name := s;
 	 UnitName[UnitIndex].Path := nam;
@@ -660,6 +663,9 @@ var
 	  UnitName[IncludeIndex].Path := nam;
 	  UnitIndex := IncludeIndex;
 	  inc(IncludeIndex);
+
+	  if IncludeIndex > High(UnitName) then
+	    Error(NumTok, 'Out of resources, IncludeIndex: '+IntToStr(IncludeIndex));
 
 	  Tokenize( nam );
 
@@ -1705,6 +1711,7 @@ begin
   Tokenize( UnitName[UnitIndex].Path );
 
   if UnitIndex > 1 then begin
+
     CheckTok(NumTok, DOTTOK);
     CheckTok(NumTok - 1, ENDTOK);
 
