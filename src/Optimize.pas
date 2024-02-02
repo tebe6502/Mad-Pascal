@@ -2095,7 +2095,8 @@ end;
 
 
 {
-if (pos('jcs l_039E', listing[i]) > 0) then begin
+if (pos('20', listing[i]) > 0) then begin
+
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
