@@ -70,6 +70,10 @@ BAT
 ### [Commodore Plus/4](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/c4plus)
     mp.exe -t c4p filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
+
+### [Neo6502}(https://github.com/tebe6502/Mad-Pascal/tree/master/samples/neo6502)
+    mp.exe -t neo filename.pas -ipath:<MadPascalPath>\lib
+    mads.exe filename.a65 -x -i:<MadPascalPath>\base
     
 ### [RAW](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/raw)
     mp.exe -t raw filename.pas -ipath:<MadPascalPath>\lib
