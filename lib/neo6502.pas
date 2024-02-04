@@ -6,15 +6,20 @@ unit neo6502;
 * @version: 0.1.0
 
 * @description:
-* Set of procedures to cover API functionality provided by:
-* https://www.olimex.com/Products/Retro-Computers/Neo6502/open-source-hardware
-* https://www.neo6502.com/
+* Set of procedures to cover API functionality provided by:    
 *
-* API documentation can be found here:
-*   https://github.com/paulscottrobson/neo6502-firmware/wiki
+* https://www.olimex.com/Products/Retro-Computers/Neo6502/open-source-hardware     
 *
-* It's work in progress, so please report any bugs you will find.
-* 
+* https://www.neo6502.com/     
+*
+*    
+* API documentation can be found here:   
+*
+*   https://github.com/paulscottrobson/neo6502-firmware/wiki     
+*
+*   
+* It's work in progress, so please report any bugs you will find.   
+*   
 *)
 
 interface
@@ -74,8 +79,6 @@ procedure NeoWaitMessage;assembler;
 * @description:
 * Waits until Message from API is returned. 
 *)
-
-/////////////// GROUP 1 - system
 procedure NeoReset;
 (*
 * @description:
@@ -132,6 +135,7 @@ function NeoLoad(name:TString;dest:word):byte;
 (*
 * @description:
 * Loads a named file from storage to selected address. 
+*
 * If the address is $FFFF the file is loaded into the graphic memory area used for sprites, tiles, images.
 * 
 * @param: name (TString) - name of the file with extension
@@ -284,6 +288,7 @@ procedure NeoUpdateSprite(s0:byte;x,y:word;image,flip,anchor:byte);
 * @description:
 * Updates selected sprite.
 * To not update a value set its byte values to $80 (or $8080 for a coordinate). 
+*
 * The coordinates cannot be set independently. Sprite 0 is the turtle sprite.
 * 
 * @param: s0 (byte) - sprite number
@@ -295,10 +300,15 @@ procedure NeoUpdateSprite(s0:byte;x,y:word;image,flip,anchor:byte);
 *
 * Anchor points:
 *
+*
 *  7 | 8 | 9   
+*
 * ---+---+---    
+*
 *  4 |0/5| 6    
+*
 * ---+---+---    
+*
 *  1 | 2 | 3    
 *
 *)
