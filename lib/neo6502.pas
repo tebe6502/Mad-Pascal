@@ -8,14 +8,14 @@ unit neo6502;
 * @description:
 * Set of procedures to cover API functionality provided by:    
 *
-* https://www.olimex.com/Products/Retro-Computers/Neo6502/open-source-hardware     
+* <https://www.olimex.com/Products/Retro-Computers/Neo6502/open-source-hardware>
 *
-* https://www.neo6502.com/     
+* <https://www.neo6502.com/>     
 *
 *    
 * API documentation can be found here:   
 *
-*   https://github.com/paulscottrobson/neo6502-firmware/wiki     
+*   <https://github.com/paulscottrobson/neo6502-firmware/wiki>
 *
 *   
 * It's work in progress, so please report any bugs you will find.   
