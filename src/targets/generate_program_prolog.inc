@@ -203,12 +203,23 @@ if Pass = CODEGENERATIONPASS then begin
    if (header = 'END') then break else
     if header <> '' then asm65(#9''+header) else asm65;
 
-  if target.id = 'raw' then begin
+  if (target.id = 'raw') then begin
 
    asm65;
    asm65(#9'opt h-f+');
    asm65;
    asm65(#9'org $' + IntToHex(raw.codeorigin, 4));
+   asm65(#9'jmp START');
+   asm65;
+
+   CODEORIGIN_BASE := target.codeorigin + 3;
+
+  end else if (target.id = 'neo') then begin
+
+   asm65;
+   asm65(#9'opt h-f+c+');
+   asm65;
+   asm65(#9'org $' + IntToHex(neo.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
 
