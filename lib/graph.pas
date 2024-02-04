@@ -27,6 +27,10 @@ SetColor
 
 interface
 
+{$ifdef neo}
+uses types;
+{$endif}
+
 {$ifdef atari}
 uses types, atari;
 {$endif}
@@ -37,16 +41,19 @@ uses types, c64;
 
 	{$i graphh.inc}
 
-	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure fLine(x0, y0, x1, y1: smallint);
-	procedure SetActiveBuffer(var a: TDisplayBuffer);
 	procedure HLine(x1,x2, y: smallint);
 	procedure LineTo(x, y: smallint);
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
+
+{$ifndef neo}
+	procedure SetDisplayBuffer(var a: TDisplayBuffer);
+	procedure SetActiveBuffer(var a: TDisplayBuffer);
 	function Scanline(y: smallint): PByte;
 	function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
 	procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
+{$endif}
 
 implementation
 
