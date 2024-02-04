@@ -20,7 +20,6 @@ begin
 
      tmp:=#9'sta ' + copy(listing[i], 6, 256);
 
-
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------	// array of CARDINAL
 // -----------------------------------------------------------------------------
@@ -1337,8 +1336,8 @@ begin
        ((lda_a(p-2) and (lda_im(p-2) = false) and add_im(p-1)) or 			// lda  |lda #				; p-2		#+BYTE
         (lda_im(p-2) and add(p-1) and (add_im(p-1) = false))) and			// add #|add				; p-1
 											// sta :STACKORIGIN			; p
-       lda_a(p+1) and									// lda 					; p+1
-       adc(p+2) and									// adc 					; p+2
+       lda_a(p+1) and (lda_stack(p+1) = false) and					// lda 					; p+1
+       adc(p+2) and (adc_stack(p+2) = false) and					// adc 					; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
 											// 					; p+4
        (adc(p+5) = false) then								//~adc					; p+5
@@ -1383,7 +1382,7 @@ begin
        (lda_a(p-2) and (lda_im(p-2) = false) and sub_im(p-1)) and			// sub #				; p-1
 											// sta :STACKORIGIN			; p
        lda_a(p+1) and									// lda 					; p+1
-       sbc(p+2) and									// sbc 					; p+2
+       sbc_im(p+2) and									// sbc #				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
 											// 					; p+4
        (sbc(p+5) = false) then								//~sbc					; p+5
