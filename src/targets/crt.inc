@@ -12,3 +12,7 @@
 {$ifdef raw}
   {$i crt_raw.inc}
 {$endif}
+{$ifdef neo}
+  {$i crt_neo.inc}
+{$endif}
+

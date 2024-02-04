@@ -15696,6 +15696,7 @@ begin
      if err<>0 then Syntax(3);
 
      raw.codeorigin := CODEORIGIN_BASE;
+	 neo.codeorigin := CODEORIGIN_BASE;
 
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
@@ -15704,6 +15705,7 @@ begin
      if err<>0 then Syntax(3);
 
      raw.codeorigin := CODEORIGIN_BASE;
+	 neo.codeorigin := CODEORIGIN_BASE;
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin

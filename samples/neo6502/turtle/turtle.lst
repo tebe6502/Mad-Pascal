@@ -1,0 +1,911 @@
+mads 2.1.7 build 4 (2 Oct 23)
+    54 				  opt l+
+   102
+   103 				.print 'ZPAGE: ',zpage,'..',zpend-1
+   103 				ZPAGE: $0000..$0053
+   104
+   105 				.print 'RTBUF: ',@buf,'..',@buf+255
+   105 				RTBUF: $0200..$02FF
+   106
+   107 				.print 'RTLIB: ',RTLIB,'..',*-1
+   107 				RTLIB: $8003..$8068
+   108
+   109 				; ------------------------------------------------------------
+   110
+   111 8069			START
+   112 8069 BA				tsx
+   113 806A 8E D1 82			stx MAIN.@halt+1
+   114
+   115 = 0020			VLEN	= VARDATASIZE-VARINITSIZE
+   116 = 82F6			VADR	= DATAORIGIN+VARINITSIZE
+   117
+   118 					ift VADR > $BFFF
+   119 					ert 'Invalid memory address range ',VADR
+   120 					eli (VLEN > 0) && (VLEN <= 256)
+   121 806D A2 E0			ldx #256-VLEN
+   122 806F A9 00			lda #$00
+   123 8071 9D 16 82 E8 D0 FA		sta:rne VADR+VLEN-256,x+
+   124 					eli VLEN>256
+   125 					m@init
+   126 					eif
+   127
+   128 				.ifdef psptr
+   129 					mwa #PROGRAMSTACK psptr
+   130 				.fi
+   131
+   132 8077 A2 00			ldx #$00
+   133 8079 86 00			stx bp						; BP = 0
+   134
+   135 807B CA				dex						; X = 255
+   136
+   137 807C				UNITINITIALIZATION
+Macro: UNITINITIALIZATION [Source: turtle.a65]
+Source: turtle.a65
+   138
+   139 807C			.local	MAIN						; PROCEDURE
+   140
+   141 807C 4C A9 81			jmp l_0004
+   142
+   143 				; ------------------------------------------------------------
+   144
+   145 807F			.local	SYSTEM						; UNIT
+   146
+   147 807F			.local	PAUSE						; PROCEDURE | ASSEMBLER | OVERLOAD
+   148 807F			.local	@006A
+   149
+   150 				; -------------------  ASM Block 00000042  -------------------
+   151
+   152 807F 20 1B 80			@SendMessage
+   153 8082 01 01			dta 1,1
+   154 8084 20 4B 80			@WaitMessage
+   155 8087 AD 04 FF 8D 99 80		mva DParameters last
+   156 				@	
+   157 808D 20 1B 80			@SendMessage
+   158 8090 01 01			dta 1,1
+   159 8092 20 4B 80			@WaitMessage
+   160 8095 AD 04 FF			lda DParameters 
+   161 8098 C9 00		    cmp #0 
+   162 = 8099			last = *-1
+   163 809A F0 F1			beq @-
+   164 809C 60				rts 
+   165
+   166 809D			@exit
+   167 					.ifdef @new
+   168 					lda <@VarData
+   169 					sta :ztmp
+   170 					lda >@VarData
+   171 					ldy #@VarDataSize-1
+   172 					jmp @FreeMem
+   173 					els
+   174 809D 60				rts						; ret
+   175 					eif
+   176 				.endl
+   177 				.endl							; overload
+   178
+   179 809E			.local	PAUSE						; PROCEDURE | ASSEMBLER | OVERLOAD
+   180 809E			.local	@006B
+   181
+   182 				; -------------------  ASM Block 00000043  -------------------
+   183
+   184 809E 20 1B 80			@SendMessage
+   185 80A1 01 01			dta 1,1
+   186 80A3 20 4B 80			@WaitMessage
+   187 80A6 AD 04 FF 8D DE 80 + 	mwa DParameters last
+   188 80B2 18 AD DE 80 6D DF + 	adw last n last
+   189 				@	
+   190 80C5 20 1B 80			@SendMessage
+   191 80C8 01 01			dta 1,1
+   192 80CA 20 4B 80			@WaitMessage
+   193 80CD AD 05 FF CD DF 80 + 	cpw DParameters last
+   194 80DB 30 E8			bmi @-
+   195 80DD 60				rts 
+   196 80DE			last 
+   197 80DE 00 00			dta a(0)
+   198
+   199 				; ------------------------------------------------------------
+   200
+   201 = 82DF			N	= DATAORIGIN+$000B
+   202
+   203 = 82DF			@VarData	= N
+   204 = 0002			@VarDataSize	= 2
+   205
+   206 80E0			@exit
+   207 					.ifdef @new
+   208 					lda <@VarData
+   209 					sta :ztmp
+   210 					lda >@VarData
+   211 					ldy #@VarDataSize-1
+   212 					jmp @FreeMem
+   213 					els
+   214 80E0 60				rts						; ret
+   215 					eif
+   216 				.endl
+   217 				.endl							; overload
+   218
+   219 				; ------------------------------------------------------------
+   220
+   221 = 0648			M_PI_2	= $0648
+   222 = 0192			D_PI_2	= $0192
+   223 = 0004			D_PI_180	= $04
+   224 = 0004			FMOPENREAD	= $04
+   225 = 0008			FMOPENWRITE	= $08
+   226 = 0009			FMOPENAPPEND	= $09
+   227 = 000C			FMOPENREADWRITE	= $0C
+   228 = 82D4			SCREENWIDTH	= DATAORIGIN+$0000
+   229 = 82D6			SCREENHEIGHT	= DATAORIGIN+$0002
+   230 = 82D8			DATESEPARATOR	= DATAORIGIN+$0004
+   231 = 82D9			FILEMODE	= DATAORIGIN+$0005
+   232 = 82DA			GRAPHMODE	= DATAORIGIN+$0006
+   233 = 82DB			IORESULT	= DATAORIGIN+$0007
+   234 = 82DC			EOLN	= DATAORIGIN+$0008
+   235 = 82DD			RNDSEED	= DATAORIGIN+$0009
+   236
+   237 				.endl							; UNIT SYSTEM
+   238
+   239 				; ------------------------------------------------------------
+   240
+   241 80E1			.local	NEO6502						; UNIT
+   242
+   243 80E1			.local	NEOWAITMESSAGE					; PROCEDURE | ASSEMBLER
+   244
+   245 				; -------------------  ASM Block 00000059  -------------------
+   246
+   247 80E1 20 4B 80		   @WaitMessage 
+   248
+   249 80E4			@exit
+   250 					.ifdef @new
+   251 					lda <@VarData
+   252 					sta :ztmp
+   253 					lda >@VarData
+   254 					ldy #@VarDataSize-1
+   255 					jmp @FreeMem
+   256 					els
+   257 80E4 60				rts						; ret
+   258 					eif
+   259 				.endl
+   260
+   261 80E5			.local	NEOSENDMESSAGE					; FUNCTION
+   262
+   263 				; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 432
+   264
+   265 80E5 20 E1 80			jsr NEOWAITMESSAGE
+   266
+   267 				; optimize OK (NEO6502), line = 433
+   268
+   269 80E8 AD E2 82			lda FUNC
+   270 80EB 8D 01 FF			sta NEOMESSAGE.FUNC
+   271
+   272 				; optimize OK (NEO6502), line = 434
+   273
+   274 80EE AD E1 82			lda GROUP
+   275 80F1 8D 00 FF			sta NEOMESSAGE.GROUP
+   276
+   277 				; --- RepeatUntilProlog
+   278 80F4			l_0095
+   279
+   280 				; optimize OK (NEO6502), line = 435
+   281
+   282 80F4 AD 00 FF			lda NEOMESSAGE.GROUP
+   283 80F7 D0 FB			jne l_0095
+   284
+   285 				; optimize OK (NEO6502), line = 436
+   286
+   287 80F9 AD 04 FF			lda adr.NEOMESSAGE.PARAMS
+   288 80FC 8D E3 82			sta RESULT
+   289 80FF			@exit
+   290
+   291 				; ------------------------------------------------------------
+   292
+   293 = 82E1			GROUP	= DATAORIGIN+$000D
+   294 = 82E2			FUNC	= DATAORIGIN+$000E
+   295 = 82E3			RESULT	= DATAORIGIN+$000F
+   296
+   297 = 82E1			@VarData	= GROUP
+   298 = 0002			@VarDataSize	= 2
+   299
+   300 80FF 60				rts						; ret
+   301 				.endl
+   302
+   303 8100			.local	NEOSETPALETTE					; PROCEDURE
+   304
+   305 				; optimize OK (NEO6502), line = 622
+   306
+   307 8100 AD E4 82			lda COL
+   308 8103 8D 04 FF			sta adr.NEOMESSAGE.PARAMS
+   309
+   310 				; optimize OK (NEO6502), line = 623
+   311
+   312 8106 AD E5 82			lda R
+   313 8109 8D 05 FF			sta adr.NEOMESSAGE.PARAMS+$01
+   314
+   315 				; optimize OK (NEO6502), line = 624
+   316
+   317 810C AD E6 82			lda G
+   318 810F 8D 06 FF			sta adr.NEOMESSAGE.PARAMS+$02
+   319
+   320 				; optimize OK (NEO6502), line = 625
+   321
+   322 8112 AD E7 82			lda B
+   323 8115 8D 07 FF			sta adr.NEOMESSAGE.PARAMS+$03
+   324
+   325 				; optimize OK (NEO6502), line = 626
+   326
+   327 8118 A9 05			lda #$05
+   328 811A 8D E1 82			sta NEOSENDMESSAGE.GROUP
+   329 811D A9 20			lda #$20
+   330 811F 8D E2 82			sta NEOSENDMESSAGE.FUNC
+   331 8122 20 E5 80			jsr NEOSENDMESSAGE
+   332
+   333 				; ------------------------------------------------------------
+   334
+   335 = 82E4			COL	= DATAORIGIN+$0010
+   336 = 82E5			R	= DATAORIGIN+$0011
+   337 = 82E6			G	= DATAORIGIN+$0012
+   338 = 82E7			B	= DATAORIGIN+$0013
+   339
+   340 = 82E4			@VarData	= COL
+   341 = 0004			@VarDataSize	= 4
+   342
+   343 8125			@exit
+   344 					.ifdef @new
+   345 					lda <@VarData
+   346 					sta :ztmp
+   347 					lda >@VarData
+   348 					ldy #@VarDataSize-1
+   349 					jmp @FreeMem
+   350 					els
+   351 8125 60				rts						; ret
+   352 					eif
+   353 				.endl
+   354
+   355 8126			.local	TURTLEINIT					; PROCEDURE
+   356 8126 8D E8 82			sta S0
+   357
+   358 				; optimize OK (NEO6502), line = 689
+   359
+   360 8129 8D 04 FF			sta adr.NEOMESSAGE.PARAMS
+   361
+   362 				; optimize OK (NEO6502), line = 690
+   363
+   364 812C A9 09			lda #$09
+   365 812E 8D E1 82			sta NEOSENDMESSAGE.GROUP
+   366 8131 A9 01			lda #$01
+   367 8133 8D E2 82			sta NEOSENDMESSAGE.FUNC
+   368 8136 20 E5 80			jsr NEOSENDMESSAGE
+   369
+   370 				; ------------------------------------------------------------
+   371
+   372 = 82E8			S0	= DATAORIGIN+$0014
+   373
+   374 = 82E8			@VarData	= S0
+   375 = 0001			@VarDataSize	= 1
+   376
+   377 8139			@exit
+   378 					.ifdef @new
+   379 					lda <@VarData
+   380 					sta :ztmp
+   381 					lda >@VarData
+   382 					ldy #@VarDataSize-1
+   383 					jmp @FreeMem
+   384 					els
+   385 8139 60				rts						; ret
+   386 					eif
+   387 				.endl
+   388
+   389 813A			.local	TURTLERIGHT					; PROCEDURE
+   390
+   391 				; optimize OK (NEO6502), line = 695
+   392
+   393 813A AD E9 82			lda DEG
+   394 813D 8D 04 FF			sta adr.WORDPARAMS
+   395 8140 AD EA 82			lda DEG+1
+   396 8143 8D 05 FF			sta adr.WORDPARAMS+1
+   397
+   398 				; optimize OK (NEO6502), line = 696
+   399
+   400 8146 A9 09			lda #$09
+   401 8148 8D E1 82			sta NEOSENDMESSAGE.GROUP
+   402 814B A9 02			lda #$02
+   403 814D 8D E2 82			sta NEOSENDMESSAGE.FUNC
+   404 8150 20 E5 80			jsr NEOSENDMESSAGE
+   405
+   406 				; ------------------------------------------------------------
+   407
+   408 = 82E9			DEG	= DATAORIGIN+$0015
+   409
+   410 = 82E9			@VarData	= DEG
+   411 = 0002			@VarDataSize	= 2
+   412
+   413 8153			@exit
+   414 					.ifdef @new
+   415 					lda <@VarData
+   416 					sta :ztmp
+   417 					lda >@VarData
+   418 					ldy #@VarDataSize-1
+   419 					jmp @FreeMem
+   420 					els
+   421 8153 60				rts						; ret
+   422 					eif
+   423 				.endl
+   424
+   425 8154			.local	TURTLEMOVE					; PROCEDURE
+   426
+   427 				; optimize OK (NEO6502), line = 701
+   428
+   429 8154 AD EB 82			lda DIST
+   430 8157 8D 04 FF			sta adr.WORDPARAMS
+   431 815A AD EC 82			lda DIST+1
+   432 815D 8D 05 FF			sta adr.WORDPARAMS+1
+   433
+   434 				; optimize OK (NEO6502), line = 702
+   435
+   436 8160 AD ED 82			lda COL
+   437 8163 8D 06 FF			sta adr.NEOMESSAGE.PARAMS+$02
+   438
+   439 				; optimize OK (NEO6502), line = 703
+   440
+   441 8166 AD EE 82			lda DRAWING
+   442 8169 8D 07 FF			sta adr.NEOMESSAGE.PARAMS+$03
+   443
+   444 				; optimize OK (NEO6502), line = 704
+   445
+   446 816C A9 09			lda #$09
+   447 816E 8D E1 82			sta NEOSENDMESSAGE.GROUP
+   448 8171 A9 03			lda #$03
+   449 8173 8D E2 82			sta NEOSENDMESSAGE.FUNC
+   450 8176 20 E5 80			jsr NEOSENDMESSAGE
+   451
+   452 				; ------------------------------------------------------------
+   453
+   454 = 82EB			DIST	= DATAORIGIN+$0017
+   455 = 82ED			COL	= DATAORIGIN+$0019
+   456 = 82EE			DRAWING	= DATAORIGIN+$001A
+   457
+   458 = 82EB			@VarData	= DIST
+   459 = 0004			@VarDataSize	= 4
+   460
+   461 8179			@exit
+   462 					.ifdef @new
+   463 					lda <@VarData
+   464 					sta :ztmp
+   465 					lda >@VarData
+   466 					ldy #@VarDataSize-1
+   467 					jmp @FreeMem
+   468 					els
+   469 8179 60				rts						; ret
+   470 					eif
+   471 				.endl
+   472
+   473 817A			.local	TURTLEHOME					; PROCEDURE
+   474
+   475 				; optimize OK (NEO6502), line = 714
+   476
+   477 817A A9 09			lda #$09
+   478 817C 8D E1 82			sta NEOSENDMESSAGE.GROUP
+   479 817F A9 05			lda #$05
+   480 8181 8D E2 82			sta NEOSENDMESSAGE.FUNC
+   481 8184 20 E5 80			jsr NEOSENDMESSAGE
+   482 8187			@exit
+   483 					.ifdef @new
+   484 					lda <@VarData
+   485 					sta :ztmp
+   486 					lda >@VarData
+   487 					ldy #@VarDataSize-1
+   488 					jmp @FreeMem
+   489 					els
+   490 8187 60				rts						; ret
+   491 					eif
+   492 				.endl
+   493
+   494 				; ------------------------------------------------------------
+   495
+   496 = FF00			N6502MSG_ADDRESS	= $FF00
+   497 = FFFF			NEO_GFX_RAM	= $FFFF
+   498 = FF00			adr.NEOMESSAGE	= $FF00
+   499 8188			.var NEOMESSAGE	= adr.NEOMESSAGE .word
+   500 = FF00			NEOMESSAGE.GROUP	= $FF00
+   501 = FF01			NEOMESSAGE.FUNC	= $FF01
+   502 = FF02			NEOMESSAGE.ERROR	= $FF02
+   503 = FF03			NEOMESSAGE.STATUS	= $FF03
+   504 = FF04			adr.NEOMESSAGE.PARAMS	= $FF04
+   505 8188			.var NEOMESSAGE.PARAMS	= adr.NEOMESSAGE.PARAMS .word
+   506 = FF04			adr.WORDPARAMS	= $FF04
+   507 8188			.var WORDPARAMS	= adr.WORDPARAMS .word
+   508 = FF04			adr.DWORDPARAMS	= $FF04
+   509 8188			.var DWORDPARAMS	= adr.DWORDPARAMS .word
+   510 = FF05			adr.WORDXPARAMS	= $FF05
+   511 8188			.var WORDXPARAMS	= adr.WORDXPARAMS .word
+   512 = FF04			adr.SOUNDPARAMS	= $FF04
+   513 8188			.var SOUNDPARAMS	= adr.SOUNDPARAMS .word
+   514 = FF04			SOUNDPARAMS.CHANNEL	= $FF04
+   515 = FF05			SOUNDPARAMS.FREQ	= $FF05
+   516 = FF07			SOUNDPARAMS.LEN	= $FF07
+   517 = FF09			SOUNDPARAMS.SLIDE	= $FF09
+   518 = FF0B			SOUNDPARAMS.STYPE	= $FF0B
+   519
+   520 = 8188 00 FF		NEOMESSAGE
+   520 = 818A 04 FF		NEOMESSAGE.PARAMS
+   520 = 818C 04 FF		WORDPARAMS
+   520 = 818E 04 FF		DWORDPARAMS
+   520 = 8190 05 FF		WORDXPARAMS
+   520 = 8192 04 FF		SOUNDPARAMS
+   520 				.endl							; UNIT NEO6502
+   521
+   522 				; ------------------------------------------------------------
+   523
+   524 8194			.local	TYPES						; UNIT
+   525
+   526 				; ------------------------------------------------------------
+   527
+   528 				.endl							; UNIT TYPES
+   529
+   530 				; ------------------------------------------------------------
+   531
+   532 8194			.local	GRAPH						; UNIT
+   533
+   534 				; ------------------------------------------------------------
+   535
+   536 = 0080			CURRENTDRIVER	= $80
+   537 = 0000			DETECT	= $00
+   538 = 0001			CGA	= $01
+   539 = 0002			MCGA	= $02
+   540 = 0003			EGA	= $03
+   541 = 0004			EGA64	= $04
+   542 = 0005			EGAMONO	= $05
+   543 = 0006			LOWRES	= $06
+   544 = 0007			HERCMONO	= $07
+   545 = 0009			VGA	= $09
+   546 = 000A			VESA	= $0A
+   547 = 000B			D1BIT	= $0B
+   548 = 000C			D2BIT	= $0C
+   549 = 000D			D4BIT	= $0D
+   550 = 000E			D6BIT	= $0E
+   551 = 000F			D8BIT	= $0F
+   552 = 0010			D12BIT	= $10
+   553 = 0018			M640X400	= $18
+   554 = 0018			M640X480	= $18
+   555 = 0001			GROK	= $01
+   556 = 00FF			GRNOINITGRAPH	= $FF
+   557 = 00FE			GRNOTDETECTED	= $FE
+   558 = 00FD			GRFILENOTFOUND	= $FD
+   559 = 00FC			GRINVALIDDRIVER	= $FC
+   560 = 00FB			GRNOLOADMEM	= $FB
+   561 = 00FA			GRNOSCANMEM	= $FA
+   562 = 00F9			GRNOFLOODMEM	= $F9
+   563 = 00F8			GRFONTNOTFOUND	= $F8
+   564 = 00F7			GRNOFONTMEM	= $F7
+   565 = 00F6			GRINVALIDMODE	= $F6
+   566 = 00F5			GRERROR	= $F5
+   567 = 00F4			GRIOERROR	= $F4
+   568 = 00F3			GRINVALIDFONT	= $F3
+   569 = 00F2			GRINVALIDFONTNUM	= $F2
+   570 = 00EE			GRINVALIDVERSION	= $EE
+   571 = 0000			CGAC0	= $00
+   572 = 0001			CGAC1	= $01
+   573 = 0002			CGAC2	= $02
+   574 = 0003			CGAC3	= $03
+   575 = 0004			CGAHI	= $04
+   576 = 0000			MCGAC0	= $00
+   577 = 0001			MCGAC1	= $01
+   578 = 0002			MCGAC2	= $02
+   579 = 0003			MCGAC3	= $03
+   580 = 0004			MCGAMED	= $04
+   581 = 0005			MCGAHI	= $05
+   582 = 0000			EGALO	= $00
+   583 = 0001			EGAHI	= $01
+   584 = 0000			EGA64LO	= $00
+   585 = 0001			EGA64HI	= $01
+   586 = 0003			EGAMONOHI	= $03
+   587 = 000A			VGALO	= $0A
+   588 = 001F			VGAMED	= $1F
+   589 = 0018			VGAHI	= $18
+   590 = 82EF			WIN_LEFT	= DATAORIGIN+$001B
+   591 = 82F1			WIN_RIGHT	= DATAORIGIN+$001D
+   592 = 82F3			WIN_TOP	= DATAORIGIN+$001F
+   593 = 82F5			WIN_BOTTOM	= DATAORIGIN+$0021
+   594 = 82F7			GRAPHRESULT	= DATAORIGIN+$0023
+   595 = 82F8			GETCOLOR	= DATAORIGIN+$0024
+   596 = 82F9			VIDEORAM	= DATAORIGIN+$0025
+   597 = 82FB			adr.LASTARCCOORDS	= DATAORIGIN+$0027	; [12] RECORD
+   598 8194			.var LASTARCCOORDS	= adr.LASTARCCOORDS .word
+   599 = 82FB			LASTARCCOORDS.X	= DATAORIGIN+$0027
+   600 = 82FD			LASTARCCOORDS.Y	= DATAORIGIN+$0029
+   601 = 82FF			LASTARCCOORDS.XSTART	= DATAORIGIN+$002B
+   602 = 8301			LASTARCCOORDS.YSTART	= DATAORIGIN+$002D
+   603 = 8303			LASTARCCOORDS.XEND	= DATAORIGIN+$002F
+   604 = 8305			LASTARCCOORDS.YEND	= DATAORIGIN+$0031
+   605 = 8307			SCANLINE_WIDTH	= DATAORIGIN+$0033
+   606 = 8308			CURRENTX	= DATAORIGIN+$0034
+   607 = 830A			CURRENTY	= DATAORIGIN+$0036
+   608 = 830C			LINEX	= DATAORIGIN+$0038
+   609 = 830E			LINEY	= DATAORIGIN+$003A
+   610
+   611 = 8194 FB 82		LASTARCCOORDS
+   611 				.endl							; UNIT GRAPH
+   612
+   613 				; ------------------------------------------------------------
+   614
+   615 8196			.local	CRT						; UNIT
+   616
+   617 8196			.local	CLRSCR						; PROCEDURE
+   618
+   619 				; -------------------  ASM Block 00000069  -------------------
+   620
+   621 8196 20 63 80			@ClrScr
+   622 					
+   623 8199			@exit
+   624 					.ifdef @new
+   625 					lda <@VarData
+   626 					sta :ztmp
+   627 					lda >@VarData
+   628 					ldy #@VarDataSize-1
+   629 					jmp @FreeMem
+   630 					els
+   631 8199 60				rts						; ret
+   632 					eif
+   633 				.endl
+   634
+   635 819A			.local	KEYPRESSED					; FUNCTION | ASSEMBLER
+   636
+   637 				; -------------------  ASM Block 00000074  -------------------
+   638
+   639 819A 20 1B 80			@SendMessage
+   640 819D 02 02			dta 2,2
+   641 819F 20 4B 80			@WaitMessage
+   642 81A2 AD 04 FF			lda DParameters
+   643 81A5 8D 10 83			sta result
+   644
+   645 81A8			@exit
+   646
+   647 				; ------------------------------------------------------------
+   648
+   649 = 8310			RESULT	= DATAORIGIN+$003C
+   650 81A8 60				rts						; ret
+   651 				.endl
+   652
+   653 				; ------------------------------------------------------------
+   654
+   655 = 0000			BW40	= $00
+   656 = 0001			CO40	= $01
+   657 = 0002			BW80	= $02
+   658 = 0003			CO80	= $03
+   659 = 0007			MONO	= $07
+   660 = 0001			C40	= $01
+   661 = 0003			C80	= $03
+   662 = 0080			BLINK	= $80
+   663
+   664 				.endl							; UNIT CRT
+   665 81A9			l_0004
+   666
+   667 				; optimize OK (turtle.pas), line = 9
+   668
+   669 81A9 A9 01			lda #$01
+   670 81AB 8D 11 83			sta B
+   671
+   672 81AE			l_018C
+   673 				; --- ForToDoCondition
+   674 81AE AD 11 83			lda B
+   675 81B1 C9 10			cmp #$10
+   676 81B3 B0 1A			jcs l_019A
+   677 81B5 8D E4 82			sta NEO6502.NEOSETPALETTE.COL
+   678 81B8 A9 0A			lda #$0A
+   679 81BA 8D E5 82			sta NEO6502.NEOSETPALETTE.R
+   680 81BD A9 C8			lda #$C8
+   681 81BF 8D E6 82			sta NEO6502.NEOSETPALETTE.G
+   682 81C2 A9 FA			lda #$FA
+   683 81C4 8D E7 82			sta NEO6502.NEOSETPALETTE.B
+   684 81C7 20 00 81			jsr NEO6502.NEOSETPALETTE
+   685
+   686 				; --- ForToDoEpilog
+   687 81CA EE 11 83			inc B
+   688 81CD D0 DF			jne l_018C
+   689 81CF			l_019A
+   690
+   691 				; optimize FAIL ('CRT.CLRSCR', turtle.pas), line = 10
+   692
+   693 81CF 20 96 81			jsr CRT.CLRSCR
+   694
+   695 				; optimize OK (turtle.pas), line = 11
+   696
+   697 81D2 A9 00			lda #$00
+   698 81D4 20 26 81			jsr NEO6502.TURTLEINIT
+   699
+   700 				; optimize OK (turtle.pas), line = 12
+   701
+   702 81D7 A9 5A			lda #$5A
+   703 81D9 8D E9 82			sta NEO6502.TURTLERIGHT.DEG
+   704 81DC A9 00			lda #$00
+   705 81DE 8D EA 82			sta NEO6502.TURTLERIGHT.DEG+1
+   706 81E1 20 3A 81			jsr NEO6502.TURTLERIGHT
+   707
+   708 				; optimize OK (turtle.pas), line = 13
+   709
+   710 81E4 A9 01			lda #$01
+   711 81E6 8D 12 83			sta C
+   712
+   713 				; optimize OK (turtle.pas), line = 14
+   714
+   715 81E9 A9 00			lda #$00
+   716 81EB 8D 11 83			sta B
+   717
+   718 81EE			l_01B8
+   719 				; --- ForToDoCondition
+   720 81EE AD 11 83			lda B
+   721 81F1 C9 24			cmp #$24
+   722 81F3 B0 5D			jcs l_01C6
+   723
+   724 				; optimize OK (turtle.pas), line = 15
+   725
+   726 81F5 A9 00			lda #$00
+   727 81F7 8D 14 83			sta W
+   728 81FA 8D 15 83			sta W+1
+   729
+   730 81FD			l_01CF
+   731 				; --- ForToDoCondition
+   732 81FD AD 14 83			lda W
+   733 8200 C9 24			cmp #$24
+   734 8202 B0 2A			jcs l_01DD
+   735
+   736 				; optimize OK (turtle.pas), line = 16
+   737
+   738 8204 A9 0A			lda #$0A
+   739 8206 8D EB 82			sta NEO6502.TURTLEMOVE.DIST
+   740 8209 A9 00			lda #$00
+   741 820B 8D EC 82			sta NEO6502.TURTLEMOVE.DIST+1
+   742 820E AD 12 83			lda C
+   743 8211 8D ED 82			sta NEO6502.TURTLEMOVE.COL
+   744 8214 A9 01			lda #$01
+   745 8216 8D EE 82			sta NEO6502.TURTLEMOVE.DRAWING
+   746 8219 20 54 81			jsr NEO6502.TURTLEMOVE
+   747
+   748 				; optimize OK (turtle.pas), line = 17
+   749
+   750 821C A9 0A			lda #$0A
+   751 821E 8D E9 82			sta NEO6502.TURTLERIGHT.DEG
+   752 8221 A9 00			lda #$00
+   753 8223 8D EA 82			sta NEO6502.TURTLERIGHT.DEG+1
+   754 8226 20 3A 81			jsr NEO6502.TURTLERIGHT
+   755
+   756 				; --- ForToDoEpilog
+   757 8229 EE 14 83			inc W
+   758 822C D0 CF			jne l_01CF
+   759 822E			l_01DD
+   760
+   761 				; optimize FAIL ('SYSTEM.PAUSE.@006A', turtle.pas), line = 19
+   762
+   763 822E 20 7F 80			jsr SYSTEM.PAUSE.@006A
+   764
+   765 				; optimize OK (turtle.pas), line = 20
+   766
+   767 8231 A9 0A			lda #$0A
+   768 8233 8D E9 82			sta NEO6502.TURTLERIGHT.DEG
+   769 8236 A9 00			lda #$00
+   770 8238 8D EA 82			sta NEO6502.TURTLERIGHT.DEG+1
+   771 823B 20 3A 81			jsr NEO6502.TURTLERIGHT
+   772
+   773 				; optimize FAIL (0, turtle.pas), line = 21
+   774
+   775 823E EE 12 83			inc C
+   776
+   777 				; optimize OK (turtle.pas), line = 22
+   778
+   779 8241 AD 12 83			lda C
+   780 8244 C9 10			cmp #$10
+   781 8246 D0 05			jne l_0203
+   782 8248 A9 01			lda #$01
+   783 824A 8D 12 83			sta C
+   784 824D			l_0203
+   785
+   786 				; --- ForToDoEpilog
+   787 824D EE 11 83			inc B
+   788 8250 D0 9C			jne l_01B8
+   789 8252			l_01C6
+   790
+   791 				; optimize FAIL ('NEO6502.TURTLEHOME', turtle.pas), line = 24
+   792
+   793 8252 20 7A 81			jsr NEO6502.TURTLEHOME
+   794
+   795 				; optimize OK (turtle.pas), line = 25
+   796
+   797 8255 A9 00			lda #$00
+   798 8257 8D 13 83			sta O
+   799
+   800 				; --- RepeatUntilProlog
+   801 825A			l_0215
+   802
+   803 				; optimize OK (turtle.pas), line = 27
+   804
+   805 825A A9 01			lda #$01
+   806 825C 18 6D 13 83			add O
+   807 8260 8D 12 83			sta C
+   808
+   809 				; optimize OK (turtle.pas), line = 28
+   810
+   811 8263 A9 00			lda #$00
+   812 8265 8D 11 83			sta B
+   813
+   814 8268			l_0228
+   815 				; --- ForToDoCondition
+   816 8268 AD 11 83			lda B
+   817 826B C9 0F			cmp #$0F
+   818 826D B0 3D			jcs l_0236
+   819
+   820 				; optimize OK (turtle.pas), line = 29
+   821
+   822 826F AD 12 83			lda C
+   823 8272 C9 10			cmp #$10
+   824 8274 90 05			jcc l_0248
+   825 8276 A9 01			lda #$01
+   826 8278 8D 12 83			sta C
+   827 827B			l_0248
+   828
+   829 				; optimize OK (turtle.pas), line = 30
+   830
+   831 827B AD 11 83			lda B
+   832 827E 85 0C			sta :ecx
+   833 8280 A9 12			lda #$12
+   834 8282 85 04			sta :eax
+   835 					.ifdef fmulinit
+   836 					fmulu_8
+   837 					els
+   838 8284 20 03 80			imulCL
+   839 					eif
+   840 8287 8D 15 83			sta W+1
+   841 828A A5 04			lda :eax
+   842 828C 8D 14 83			sta W
+   843
+   844 				; optimize OK (turtle.pas), line = 31
+   845
+   846 828F AD 12 83			lda C
+   847 8292 8D E4 82			sta NEO6502.NEOSETPALETTE.COL
+   848 8295 AD 14 83			lda W
+   849 8298 8D E5 82			sta NEO6502.NEOSETPALETTE.R
+   850 829B 8D E6 82			sta NEO6502.NEOSETPALETTE.G
+   851 829E 8D E7 82			sta NEO6502.NEOSETPALETTE.B
+   852 82A1 20 00 81			jsr NEO6502.NEOSETPALETTE
+   853
+   854 				; optimize FAIL (0, turtle.pas), line = 32
+   855
+   856 82A4 EE 12 83			inc C
+   857
+   858 				; --- ForToDoEpilog
+   859 82A7 EE 11 83			inc B
+   860 82AA D0 BC			jne l_0228
+   861 82AC			l_0236
+   862
+   863 				; optimize FAIL (0, turtle.pas), line = 34
+   864
+   865 82AC EE 13 83			inc O
+   866
+   867 				; optimize OK (turtle.pas), line = 35
+   868
+   869 82AF AD 13 83			lda O
+   870 82B2 C9 0F			cmp #$0F
+   871 82B4 90 05			jcc l_0282
+   872 82B6 A9 00			lda #$00
+   873 82B8 8D 13 83			sta O
+   874 82BB			l_0282
+   875
+   876 				; optimize OK (turtle.pas), line = 36
+   877
+   878 82BB A9 05			lda #$05
+   879 82BD 8D DF 82			sta SYSTEM.PAUSE.@006B.N
+   880 82C0 A9 00			lda #$00
+   881 82C2 8D E0 82			sta SYSTEM.PAUSE.@006B.N+1
+   882 82C5 20 9E 80			jsr SYSTEM.PAUSE.@006B
+   883
+   884 				; optimize FAIL ('CRT.KEYPRESSED', turtle.pas), line = 37
+   885
+   886 82C8 20 9A 81			jsr CRT.KEYPRESSED
+   887 82CB AD 10 83			lda CRT.KEYPRESSED.RESULT
+   888 82CE F0 8A			jeq l_0215
+   889
+   890 				; ------------------------------------------------------------
+   891
+   892 = 8311			B	= DATAORIGIN+$003D
+   893 = 8312			C	= DATAORIGIN+$003E
+   894 = 8313			O	= DATAORIGIN+$003F
+   895 = 8314			W	= DATAORIGIN+$0040
+   896 82D0			@exit
+   897
+   898 82D0 A2 00		@halt	ldx #$00
+   899 82D2 9A				txs
+   900
+   901 82D3 60				rts
+   902
+   903 				; ------------------------------------------------------------
+   904
+   905 				; ------------------------------------------------------------
+   906
+   907 82D4			.local	@DEFINES
+   908 82D4			NEO
+   909 				.endl
+   910
+   911 82D4			.local	@RESOURCE
+   912 				.endl
+   913
+   914 				.endl							; MAIN
+   915
+   916 				; ------------------------------------------------------------
+   917 				; ------------------------------------------------------------
+   918
+   919 				.macro	UNITINITIALIZATION
+   920 				
+   921 					.ifdef MAIN.SYSTEM.@UnitInit
+   922 					jsr MAIN.SYSTEM.@UnitInit
+   923 					.fi
+   924 				
+   925 					.ifdef MAIN.NEO6502.@UnitInit
+   926 					jsr MAIN.NEO6502.@UnitInit
+   927 					.fi
+   928 				
+   929 					.ifdef MAIN.TYPES.@UnitInit
+   930 					jsr MAIN.TYPES.@UnitInit
+   931 					.fi
+   932 				
+   933 					.ifdef MAIN.GRAPH.@UnitInit
+   934 					jsr MAIN.GRAPH.@UnitInit
+   935 					.fi
+   936 				
+   937 					.ifdef MAIN.CRT.@UnitInit
+   938 					jsr MAIN.CRT.@UnitInit
+   939 					.fi
+   940 				.endm
+   941
+   942 				; ------------------------------------------------------------
+   943
+   944 					ift .SIZEOF(MAIN.SYSTEM) > 0
+   945 					.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+   945 				SYSTEM: $807F..$80E0
+   946 					eif
+   947
+   948 					ift .SIZEOF(MAIN.NEO6502) > 0
+   949 					.print 'NEO6502: ',MAIN.NEO6502,'..',MAIN.NEO6502+.SIZEOF(MAIN.NEO6502)-1
+   949 				NEO6502: $80E1..$8193
+   950 					eif
+   951
+   952 					ift .SIZEOF(MAIN.TYPES) > 0
+   953 					.print 'TYPES: ',MAIN.TYPES,'..',MAIN.TYPES+.SIZEOF(MAIN.TYPES)-1
+   954 					eif
+   955
+   956 					ift .SIZEOF(MAIN.GRAPH) > 0
+   957 					.print 'GRAPH: ',MAIN.GRAPH,'..',MAIN.GRAPH+.SIZEOF(MAIN.GRAPH)-1
+   957 				GRAPH: $8194..$8195
+   958 					eif
+   959
+   960 					ift .SIZEOF(MAIN.CRT) > 0
+   961 					.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
+   961 				CRT: $8196..$81A8
+   962 					eif
+   963
+   964 				.nowarn	.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+   964 				CODE: $8003..$82D3
+   965
+   966 				; ------------------------------------------------------------
+   967
+   968 = 82D4				?adr = *
+   969 					ift (?adr < ?old_adr) && (?old_adr - ?adr < $120)
+   970 					?adr = ?old_adr
+   971 					eif
+   972
+   973 					org ?adr
+   974 = 82D4				?old_adr = *
+   975
+   976 82D4			DATAORIGIN
+   977 82D4 28 00 18 00 2D 0C + .by  $28 $00 $18 $00 $2D $0C $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+   978 82EC 00 00 00 00 00 27 + .by  $00 $00 $00 $00 $00 $27 $00 $00  $00 $17
+   979
+   980 = 0022			VARINITSIZE	= *-DATAORIGIN
+   981 = 0042			VARDATASIZE	= 66
+   982
+   983 = 8316			PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+   984
+   985 					.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+   985 				DATA: $82D4..$8316
+   986
+   987 				; ------------------------------------------------------------
+   988
+   989 				.macro	STATICDATA
+   990 				.endm
+   991
+   992 					end

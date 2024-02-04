@@ -12,7 +12,7 @@ procedure MoveTo(x, y: smallint); assembler;
 Move cursor to absolute position.
 *)
 asm
-{	lda y+1
+	lda y+1
 	bpl _0
 
 	lda #0
@@ -38,5 +38,5 @@ _2
 _3
 	mwa x CurrentX
 	mwa y CurrentY
-};
+
 end;
