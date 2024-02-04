@@ -12,3 +12,6 @@
 {$ifdef raw}
   {$i graph_raw.inc}
 {$endif}
+{$ifdef neo}
+  {$i graph_neo.inc}
+{$endif}

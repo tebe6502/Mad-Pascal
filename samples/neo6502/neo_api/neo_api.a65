@@ -1,0 +1,3283 @@
+; ------------------------------------------------------------
+; Mad Pascal Compiler version 1.7.1 [2024/01/31] for 6502
+; ------------------------------------------------------------
+
+STACKWIDTH	= 16
+
+TRUE		= 1
+FALSE		= 0
+
+; ------------------------------------------------------------
+
+	org $00
+
+zpage
+
+.if .def(@AllocMem)||.def(MAIN.SYSTEM.GETMEM)||.def(MAIN.SYSTEM.FREEMEM)
+psptr	.ds 2						; PROGRAMSTACK Pointer
+.fi
+
+bp	.ds 2
+bp2	.ds 2
+
+eax	.ds 4						;8 bytes (aex + edx) -> divREAL
+edx	.ds 4
+ecx	.ds 4
+
+TMP
+ztmp
+ztmp8	.ds 1
+ztmp9	.ds 1
+ztmp10	.ds 1
+ztmp11	.ds 1
+
+STACKORIGIN	.ds STACKWIDTH*4
+zpend
+
+; ------------------------------------------------------------
+
+ax	= eax
+al	= eax
+ah	= eax+1
+
+cx	= ecx
+cl	= ecx
+ch	= ecx+1
+
+dx	= edx
+dl	= edx
+dh	= edx+1
+
+	org eax
+
+FP1MAN0	.ds 1
+FP1MAN1	.ds 1
+FP1MAN2	.ds 1
+FP1MAN3	.ds 1
+
+	org ztmp8
+
+FP1SGN	.ds 1
+FP1EXP	.ds 1
+
+	org edx
+
+FP2MAN0	.ds 1
+FP2MAN1	.ds 1
+FP2MAN2	.ds 1
+FP2MAN3	.ds 1
+
+	org ztmp10
+
+FP2SGN	.ds 1
+FP2EXP	.ds 1
+
+	org ecx
+
+FPMAN0	.ds 1
+FPMAN1	.ds 1
+FPMAN2	.ds 1
+FPMAN3	.ds 1
+
+	org bp2
+
+FPSGN	.ds 1
+FPEXP	.ds 1
+
+; ------------------------------------------------------------
+
+	opt h-f+c+
+
+	org $7000
+	jmp START
+
+CODEORIGIN
+
+	STATICDATA
+
+; ------------------------------------------------------------
+
+RTLIB
+	icl 'rtl6502_neo.asm'
+
+.print 'ZPAGE: ',zpage,'..',zpend-1
+
+.print 'RTBUF: ',@buf,'..',@buf+255
+
+.print 'RTLIB: ',RTLIB,'..',*-1
+
+; ------------------------------------------------------------
+
+START
+	tsx
+	stx MAIN.@halt+1
+
+VLEN	= VARDATASIZE-VARINITSIZE
+VADR	= DATAORIGIN+VARINITSIZE
+
+	ift VADR > $BFFF
+	ert 'Invalid memory address range ',VADR
+	eli (VLEN > 0) && (VLEN <= 256)
+	ldx #256-VLEN
+	lda #$00
+	sta:rne VADR+VLEN-256,x+
+	eli VLEN>256
+	m@init
+	eif
+
+.ifdef psptr
+	mwa #PROGRAMSTACK psptr
+.fi
+
+	ldx #$00
+	stx bp						; BP = 0
+
+	dex						; X = 255
+
+	UNITINITIALIZATION
+
+.local	MAIN						; PROCEDURE
+
+	jmp l_01ED
+
+; ------------------------------------------------------------
+
+.local	SYSTEM						; UNIT
+
+.local	MOVE						; PROCEDURE | ASSEMBLER | OVERLOAD | REGISTER | INLINE
+.local	@022B
+
+	.MACRO m@INLINE
+
+; -------------------  ASM Block 00000033  -------------------
+
+	jsr @move
+
+	.ENDM
+
+; ------------------------------------------------------------
+
+SOURCE	= :EDX
+DEST	= :ECX
+COUNT	= :EAX
+@exit
+.endl
+.endl							; overload
+
+.local	RSINCOS						; FUNCTION
+
+; --- WhileProlog
+	jmp l_0231
+l_0232
+
+; optimize OK (SYSTEM), line = 1866
+
+	lda X
+	sub #$48
+	sta X
+	lda X+1
+	sbc #$06
+	sta X+1
+	lda X+2
+	sbc #$00
+	sta X+2
+	lda X+3
+	sbc #$00
+	sta X+3
+l_0231
+	.LOCAL
+	lda X+3
+	sub #$00
+	bne L4
+	lda X+2
+	cmp #$00
+	bne L1
+	lda X+1
+	cmp #$06
+	bne L1
+	lda X
+	cmp #$48
+L1	beq L5
+	bcs L3
+	lda #$FF
+	bne L5
+L3	lda #$01
+	bne L5
+L4	bvc L5
+	eor #$FF
+	ora #$01
+L5
+	.ENDL
+	smi
+	jne l_0232
+
+; --- WhileProlog
+	jmp l_0246
+l_0247
+
+; optimize OK (SYSTEM), line = 1867
+
+	lda X
+	add #$48
+	sta X
+	lda X+1
+	adc #$06
+	sta X+1
+	lda X+2
+	adc #$00
+	sta X+2
+	lda X+3
+	adc #$00
+	sta X+3
+l_0246
+	lda X+3
+	jmi l_0247
+
+; optimize OK (SYSTEM), line = 1870
+
+	lda #$A3
+	sta @REAL_MUL.B
+	lda #$00
+	sta @REAL_MUL.B+1
+	sta @REAL_MUL.B+2
+	sta @REAL_MUL.B+3
+	lda X
+	sta @REAL_MUL.A
+	lda X+1
+	sta @REAL_MUL.A+1
+	lda X+2
+	sta @REAL_MUL.A+2
+	lda X+3
+	sta @REAL_MUL.A+3
+	jsr @REAL_MUL
+	lda :eax
+	sta X
+	lda :eax+1
+	sta X+1
+	lda :eax+2
+	sta X+2
+	lda :eax+3
+	sta X+3
+
+; optimize OK (SYSTEM), line = 1873
+
+	lda X
+	sta @REAL_TRUNC.A
+	lda X+1
+	sta @REAL_TRUNC.A+1
+	lda X+2
+	sta @REAL_TRUNC.A+2
+	lda X+3
+	sta @REAL_TRUNC.A+3
+	jsr @REAL_TRUNC
+	lda :eax
+	sta I
+
+; optimize OK (SYSTEM), line = 1876
+
+	lda X+3
+	jpl l_0275
+	dec I
+l_0275
+
+; optimize OK (SYSTEM), line = 1879
+
+	ldy #$00
+	lda I
+	spl
+	dey
+	sta :STACKORIGIN+STACKWIDTH+10
+	sty :STACKORIGIN+STACKWIDTH*2+10
+	sty :STACKORIGIN+STACKWIDTH*3+10
+	lda X+1
+	sub :STACKORIGIN+STACKWIDTH+10
+	sta X+1
+	lda X+2
+	sbc :STACKORIGIN+STACKWIDTH*2+10
+	sta X+2
+	lda X+3
+	sbc :STACKORIGIN+STACKWIDTH*3+10
+	sta X+3
+
+; optimize OK (SYSTEM), line = 1882
+
+	lda SC
+	jeq l_0292
+	inc I
+l_0292
+
+; optimize OK (SYSTEM), line = 1885
+
+	lda I
+	and #$01
+	jne l_02AF
+	lda #$00
+	sub X
+	sta X
+	lda #$01
+	sbc X+1
+	sta X+1
+	lda #$00
+	sbc X+2
+	sta X+2
+	lda #$00
+	sbc X+3
+	sta X+3
+l_02AF
+
+; optimize OK (SYSTEM), line = 1888
+
+	lda X
+	sta @REAL_MUL.B
+	lda X+1
+	sta @REAL_MUL.B+1
+	lda X+2
+	sta @REAL_MUL.B+2
+	lda X+3
+	sta @REAL_MUL.B+3
+	lda X
+	sta @REAL_MUL.A
+	lda X+1
+	sta @REAL_MUL.A+1
+	lda X+2
+	sta @REAL_MUL.A+2
+	lda X+3
+	sta @REAL_MUL.A+3
+	jsr @REAL_MUL
+	lda :eax
+	sta X
+	lda :eax+1
+	sta X+1
+	lda :eax+2
+	sta X+2
+	lda :eax+3
+	sta X+3
+
+; optimize OK (SYSTEM), line = 1889
+
+	lda X
+	sta @REAL_MUL.B
+	lda X+1
+	sta @REAL_MUL.B+1
+	lda X+2
+	sta @REAL_MUL.B+2
+	lda X+3
+	sta @REAL_MUL.B+3
+	lda #$05
+	sta @REAL_MUL.A
+	lda #$00
+	sta @REAL_MUL.A+1
+	sta @REAL_MUL.A+2
+	sta @REAL_MUL.A+3
+	jsr @REAL_MUL
+	lda :eax
+	sub #$3C
+	sta @REAL_MUL.A
+	lda :eax+1
+	sbc #$00
+	sta @REAL_MUL.A+1
+	lda :eax+2
+	sbc #$00
+	sta @REAL_MUL.A+2
+	lda :eax+3
+	sbc #$00
+	sta @REAL_MUL.A+3
+	lda X
+	sta @REAL_MUL.B
+	lda X+1
+	sta @REAL_MUL.B+1
+	lda X+2
+	sta @REAL_MUL.B+2
+	lda X+3
+	sta @REAL_MUL.B+3
+	jsr @REAL_MUL
+	lda :eax+1
+	add #$01
+	sta @REAL_MUL.A+1
+	lda :eax+2
+	adc #$00
+	sta @REAL_MUL.A+2
+	lda :eax+3
+	adc #$00
+	sta @REAL_MUL.A+3
+	lda #$00
+	sub X
+	sta @REAL_MUL.B
+	lda #$01
+	sbc X+1
+	sta @REAL_MUL.B+1
+	lda #$00
+	sbc X+2
+	sta @REAL_MUL.B+2
+	lda #$00
+	sbc X+3
+	sta @REAL_MUL.B+3
+	jsr @REAL_MUL
+	lda :eax
+	sta RESULT
+	lda :eax+1
+	sta RESULT+1
+	lda :eax+2
+	sta RESULT+2
+	lda :eax+3
+	sta RESULT+3
+
+; optimize OK (SYSTEM), line = 1892
+
+	lda I
+	and #$02
+	cmp #$02
+	jne l_02F4
+	lda #$00
+	sub RESULT
+	sta RESULT
+	lda #$00
+	sbc RESULT+1
+	sta RESULT+1
+	lda #$00
+	sbc RESULT+2
+	sta RESULT+2
+	lda #$00
+	sbc RESULT+3
+	sta RESULT+3
+l_02F4
+@exit
+
+; ------------------------------------------------------------
+
+X	= DATAORIGIN+$000B
+SC	= DATAORIGIN+$000F
+RESULT	= DATAORIGIN+$0010
+I	= DATAORIGIN+$0014
+
+@VarData	= X
+@VarDataSize	= 6
+
+	rts						; ret
+.endl
+
+.local	SIN						; FUNCTION | OVERLOAD
+.local	@02FF
+
+; optimize OK (SYSTEM), line = 1907
+
+	lda X
+	sta RSINCOS.X
+	lda X+1
+	sta RSINCOS.X+1
+	lda X+2
+	sta RSINCOS.X+2
+	lda X+3
+	sta RSINCOS.X+3
+	lda #$00
+	sta RSINCOS.SC
+	jsr RSINCOS
+	lda RSINCOS.RESULT
+	sta RESULT
+	lda RSINCOS.RESULT+1
+	sta RESULT+1
+	lda RSINCOS.RESULT+2
+	sta RESULT+2
+	lda RSINCOS.RESULT+3
+	sta RESULT+3
+@exit
+
+; ------------------------------------------------------------
+
+X	= DATAORIGIN+$0015
+RESULT	= DATAORIGIN+$0019
+
+@VarData	= X
+@VarDataSize	= 4
+
+	rts						; ret
+.endl
+.endl							; overload
+
+.local	PAUSE						; PROCEDURE | ASSEMBLER | OVERLOAD
+.local	@0327
+
+; -------------------  ASM Block 00000042  -------------------
+
+	@SendMessage
+	dta 1,1
+	@WaitMessage
+	mva DParameters last
+@	
+	@SendMessage
+	dta 1,1
+	@WaitMessage
+	lda DParameters 
+    cmp #0 
+last = *-1
+	beq @-
+	rts 
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+.endl							; overload
+
+.local	PAUSE						; PROCEDURE | ASSEMBLER | OVERLOAD
+.local	@0328
+
+; -------------------  ASM Block 00000043  -------------------
+
+	@SendMessage
+	dta 1,1
+	@WaitMessage
+	mwa DParameters last
+	adw last n last
+@	
+	@SendMessage
+	dta 1,1
+	@WaitMessage
+	cpw DParameters last
+	bmi @-
+	rts 
+last 
+	dta a(0)
+
+; ------------------------------------------------------------
+
+N	= DATAORIGIN+$001D
+
+@VarData	= N
+@VarDataSize	= 2
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+.endl							; overload
+
+.local	RANDOMIZE					; PROCEDURE | ASSEMBLER
+
+; -------------------  ASM Block 00000044  -------------------
+
+    lda #$2d 
+    sta randv0
+    lda #$10
+    sta randv1
+    @ShuffleLFSR
+    lda randv0
+    eor randv1 
+    sta RndSeed
+    mva #$00 RndSeed+1
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	RANDOM						; FUNCTION | ASSEMBLER | OVERLOAD
+.local	@032A
+	sta RANGE
+
+; -------------------  ASM Block 00000048  -------------------
+
+  @ShuffleLFSR
+  //lda randv0   ; RANDOM
+  lda randv1
+  tay
+
+  lda range
+  beq stop
+
+  sta :ecx
+  sty :eax
+
+  jsr imulCL
+  tay
+
+stop  sty Result
+
+@exit
+
+; ------------------------------------------------------------
+
+RANGE	= DATAORIGIN+$001F
+RESULT	= DATAORIGIN+$0020
+
+@VarData	= RANGE
+@VarDataSize	= 1
+
+	rts						; ret
+.endl
+.endl							; overload
+
+.local	RANDOM						; FUNCTION | OVERLOAD
+.local	@032B
+
+; optimize OK (system_neo.inc), line = 186
+
+	lda RANGE+1
+	ora RANGE
+	jne l_033F
+
+; optimize OK (system_neo.inc), line = 187
+
+	lda #$00
+	sta RESULT
+	sta RESULT+1
+	jmp l_034D
+l_033F
+
+; optimize OK (system_neo.inc), line = 190
+
+	lda RNDSEED
+	sta :ecx
+	lda RNDSEED+1
+	sta :ecx+1
+	lda #$95
+	sta :eax
+	lda #$45
+	sta :eax+1
+	.ifdef fmulinit
+	fmulu_16
+	els
+	imulCX
+	eif
+	lda :eax
+	sta RNDSEED
+	lda :eax+1
+	sta RNDSEED+1
+
+; optimize OK (system_neo.inc), line = 191
+
+	lda RANGE
+	sta @SMALLINT.MOD.B
+	lda RANGE+1
+	sta @SMALLINT.MOD.B+1
+	lda RNDSEED
+	sta @SMALLINT.MOD.A
+	lda RNDSEED+1
+	sta @SMALLINT.MOD.A+1
+	jsr @SMALLINT.MOD
+	lda @SMALLINT.MOD.RESULT
+	sta RESULT
+	lda @SMALLINT.MOD.RESULT+1
+	sta RESULT+1
+
+; -------------------  ASM Block 00000049  -------------------
+
+	lda range+1
+	bpl plus
+
+	lda Result+1
+	bmi ok
+	bpl sign
+
+plus	lda Result+1
+	bpl ok
+
+sign 	lda #0
+	sub Result
+	sta Result
+
+	lda #0
+	sbc Result+1
+	sta Result+1
+ok
+
+l_034D
+@exit
+
+; ------------------------------------------------------------
+
+RANGE	= DATAORIGIN+$0021
+RESULT	= DATAORIGIN+$0023
+
+@VarData	= RANGE
+@VarDataSize	= 2
+
+	rts						; ret
+.endl
+.endl							; overload
+
+.local	CONCAT						; FUNCTION | ASSEMBLER | OVERLOAD
+.local	@036D
+
+; -------------------  ASM Block 00000052  -------------------
+
+	cpw a #@buf
+	beq skp
+
+	mva #0 @buf
+	@addString a
+skp
+	@addString b
+
+	ldy #0
+	mva:rne @buf,y adr.Result,y+
+
+@exit
+
+; ------------------------------------------------------------
+
+A	= DATAORIGIN+$0025
+B	= DATAORIGIN+$0027
+adr.RESULT	= [DATAORIGIN+$0029] .array [256]
+.var RESULT	= adr.RESULT .word
+
+@VarData	= A
+@VarDataSize	= 260
+
+	rts						; ret
+.endl
+.endl							; overload
+
+; ------------------------------------------------------------
+
+M_PI_2	= $0648
+D_PI_2	= $0192
+D_PI_180	= $04
+FMOPENREAD	= $04
+FMOPENWRITE	= $08
+FMOPENAPPEND	= $09
+FMOPENREADWRITE	= $0C
+SCREENWIDTH	= DATAORIGIN+$0000
+SCREENHEIGHT	= DATAORIGIN+$0002
+DATESEPARATOR	= DATAORIGIN+$0004
+FILEMODE	= DATAORIGIN+$0005
+GRAPHMODE	= DATAORIGIN+$0006
+IORESULT	= DATAORIGIN+$0007
+EOLN	= DATAORIGIN+$0008
+RNDSEED	= DATAORIGIN+$0009
+
+.endl							; UNIT SYSTEM
+
+; ------------------------------------------------------------
+
+.local	NEO6502						; UNIT
+
+.local	NEOWAITMESSAGE					; PROCEDURE | ASSEMBLER
+
+; -------------------  ASM Block 00000059  -------------------
+
+   @WaitMessage 
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEOSENDMESSAGE					; FUNCTION
+
+; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 101
+
+	jsr NEOWAITMESSAGE
+
+; optimize OK (NEO6502), line = 102
+
+	lda FUNC
+	sta NEOMESSAGE.FUNC
+
+; optimize OK (NEO6502), line = 103
+
+	lda GROUP
+	sta NEOMESSAGE.GROUP
+
+; --- RepeatUntilProlog
+l_038A
+
+; optimize OK (NEO6502), line = 104
+
+	lda NEOMESSAGE.GROUP
+	jne l_038A
+
+; optimize OK (NEO6502), line = 105
+
+	lda adr.NEOMESSAGE.PARAMS
+	sta RESULT
+@exit
+
+; ------------------------------------------------------------
+
+GROUP	= DATAORIGIN+$0129
+FUNC	= DATAORIGIN+$012A
+RESULT	= DATAORIGIN+$012B
+
+@VarData	= GROUP
+@VarDataSize	= 2
+
+	rts						; ret
+.endl
+
+.local	NEOGETTIMER					; FUNCTION
+
+; optimize OK (NEO6502), line = 115
+
+	lda #$01
+	sta NEOSENDMESSAGE.GROUP
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; optimize OK (NEO6502), line = 116
+
+	lda adr.DWORDPARAMS
+	sta RESULT
+	lda adr.DWORDPARAMS+1
+	sta RESULT+1
+	lda adr.DWORDPARAMS+2
+	sta RESULT+2
+	lda adr.DWORDPARAMS+3
+	sta RESULT+3
+@exit
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$012C
+	rts						; ret
+.endl
+
+.local	NEOCREDITS					; PROCEDURE
+
+; optimize OK (NEO6502), line = 132
+
+	lda #$01
+	sta NEOSENDMESSAGE.GROUP
+	lda #$04
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEOSETCHAR					; PROCEDURE
+
+; optimize OK (NEO6502), line = 144
+
+	lda C
+	sta adr.NEOMESSAGE.PARAMS
+
+; optimize OK (NEO6502), line = 145
+
+	lda DATA
+	sta :bp2
+	lda DATA+1
+	sta :bp2+1
+	ldy #$06
+	mva:rpl (:bp2),y $FF05,y-
+
+; optimize OK (NEO6502), line = 146
+
+	lda #$02
+	sta NEOSENDMESSAGE.GROUP
+	lda #$05
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+C	= DATAORIGIN+$0130
+DATA	= DATAORIGIN+$0131
+
+@VarData	= C
+@VarDataSize	= 3
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEOLOAD						; FUNCTION
+
+; ------------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	lda :STACKORIGIN,x
+	sta :bp2
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta :bp2+1
+	ldy #$20
+	mva:rpl (:bp2),y adr.NAME,y-
+	mwa #adr.NAME NAME
+	dex
+	jmi @main
+
+; ------------------------------------------------------------
+
+; Generate Assignment for WORD / SMALLINT / SHORTREAL / POINTER
+; as Pointer
+	lda :STACKORIGIN,x
+	sta DEST
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta DEST+1
+	dex
+@main
+
+; optimize OK (NEO6502), line = 158
+
+	lda NAME
+	sta adr.WORDPARAMS
+	lda NAME+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 159
+
+	lda DEST
+	sta adr.WORDPARAMS+$02
+	lda DEST+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 160
+
+	lda #$03
+	sta NEOSENDMESSAGE.GROUP
+	lda #$02
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 161
+
+	jsr NEOWAITMESSAGE
+
+; optimize OK (NEO6502), line = 162
+
+	lda adr.NEOMESSAGE.PARAMS
+	sta RESULT
+@exit
+
+; ------------------------------------------------------------
+
+adr.NAME	= [DATAORIGIN+$0133] .array [33]
+.var NAME	= adr.NAME .word
+DEST	= DATAORIGIN+$0154
+RESULT	= DATAORIGIN+$0156
+
+@VarData	= NAME
+@VarDataSize	= 35
+
+	rts						; ret
+.endl
+
+.local	NEOGETJOY					; FUNCTION
+	sta PLAYER
+
+; optimize OK (NEO6502), line = 184
+
+	lda #$07
+	sta NEOSENDMESSAGE.GROUP
+	lda PLAYER
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+	lda NEOSENDMESSAGE.RESULT
+	sta RESULT
+@exit
+
+; ------------------------------------------------------------
+
+PLAYER	= DATAORIGIN+$0157
+RESULT	= DATAORIGIN+$0158
+
+@VarData	= PLAYER
+@VarDataSize	= 1
+
+	rts						; ret
+.endl
+
+.local	NEOSETCOLOR					; PROCEDURE
+
+; optimize OK (NEO6502), line = 232
+
+	lda ACOL
+	sta adr.NEOMESSAGE.PARAMS
+
+; optimize OK (NEO6502), line = 233
+
+	lda XCOL
+	sta adr.NEOMESSAGE.PARAMS+$01
+
+; optimize OK (NEO6502), line = 234
+
+	lda SOLID
+	sta adr.NEOMESSAGE.PARAMS+$02
+
+; optimize OK (NEO6502), line = 235
+
+	lda SIZE
+	sta adr.NEOMESSAGE.PARAMS+$03
+
+; optimize OK (NEO6502), line = 236
+
+	lda FLIP
+	sta adr.NEOMESSAGE.PARAMS+$04
+
+; optimize OK (NEO6502), line = 237
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$01
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+ACOL	= DATAORIGIN+$0159
+XCOL	= DATAORIGIN+$015A
+SOLID	= DATAORIGIN+$015B
+SIZE	= DATAORIGIN+$015C
+FLIP	= DATAORIGIN+$015D
+
+@VarData	= ACOL
+@VarDataSize	= 5
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEODRAWLINE					; PROCEDURE
+
+; optimize OK (NEO6502), line = 242
+
+	lda X0
+	sta adr.WORDPARAMS
+	lda X0+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 243
+
+	lda Y0
+	sta adr.WORDPARAMS+$02
+	lda Y0+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 244
+
+	lda X1
+	sta adr.WORDPARAMS+$04
+	lda X1+1
+	sta adr.WORDPARAMS+1+$04
+
+; optimize OK (NEO6502), line = 245
+
+	lda Y1
+	sta adr.WORDPARAMS+$06
+	lda Y1+1
+	sta adr.WORDPARAMS+1+$06
+
+; optimize OK (NEO6502), line = 246
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$02
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+X0	= DATAORIGIN+$015E
+Y0	= DATAORIGIN+$0160
+X1	= DATAORIGIN+$0162
+Y1	= DATAORIGIN+$0164
+
+@VarData	= X0
+@VarDataSize	= 8
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEODRAWRECT					; PROCEDURE
+
+; optimize OK (NEO6502), line = 251
+
+	lda X0
+	sta adr.WORDPARAMS
+	lda X0+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 252
+
+	lda Y0
+	sta adr.WORDPARAMS+$02
+	lda Y0+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 253
+
+	lda X1
+	sta adr.WORDPARAMS+$04
+	lda X1+1
+	sta adr.WORDPARAMS+1+$04
+
+; optimize OK (NEO6502), line = 254
+
+	lda Y1
+	sta adr.WORDPARAMS+$06
+	lda Y1+1
+	sta adr.WORDPARAMS+1+$06
+
+; optimize OK (NEO6502), line = 255
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$03
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+X0	= DATAORIGIN+$0166
+Y0	= DATAORIGIN+$0168
+X1	= DATAORIGIN+$016A
+Y1	= DATAORIGIN+$016C
+
+@VarData	= X0
+@VarDataSize	= 8
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEODRAWELLIPSE					; PROCEDURE
+
+; optimize OK (NEO6502), line = 260
+
+	lda X0
+	sta adr.WORDPARAMS
+	lda X0+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 261
+
+	lda Y0
+	sta adr.WORDPARAMS+$02
+	lda Y0+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 262
+
+	lda X1
+	sta adr.WORDPARAMS+$04
+	lda X1+1
+	sta adr.WORDPARAMS+1+$04
+
+; optimize OK (NEO6502), line = 263
+
+	lda Y1
+	sta adr.WORDPARAMS+$06
+	lda Y1+1
+	sta adr.WORDPARAMS+1+$06
+
+; optimize OK (NEO6502), line = 264
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$04
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+X0	= DATAORIGIN+$016E
+Y0	= DATAORIGIN+$0170
+X1	= DATAORIGIN+$0172
+Y1	= DATAORIGIN+$0174
+
+@VarData	= X0
+@VarDataSize	= 8
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEODRAWSTRING					; PROCEDURE
+
+; optimize OK (NEO6502), line = 276
+
+	lda X0
+	sta adr.WORDPARAMS
+	lda X0+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 277
+
+	lda Y0
+	sta adr.WORDPARAMS+$02
+	lda Y0+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 278
+
+	lda S
+	sta adr.WORDPARAMS+$04
+	lda S+1
+	sta adr.WORDPARAMS+1+$04
+
+; optimize OK (NEO6502), line = 279
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$06
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+X0	= DATAORIGIN+$0176
+Y0	= DATAORIGIN+$0178
+S	= DATAORIGIN+$017A
+
+@VarData	= X0
+@VarDataSize	= 6
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEODRAWIMAGE					; PROCEDURE
+
+; optimize OK (NEO6502), line = 284
+
+	lda X0
+	sta adr.WORDPARAMS
+	lda X0+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 285
+
+	lda Y0
+	sta adr.WORDPARAMS+$02
+	lda Y0+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 286
+
+	lda ID
+	sta adr.NEOMESSAGE.PARAMS+$04
+
+; optimize OK (NEO6502), line = 287
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$07
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+X0	= DATAORIGIN+$017C
+Y0	= DATAORIGIN+$017E
+ID	= DATAORIGIN+$0180
+
+@VarData	= X0
+@VarDataSize	= 5
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEODRAWTILEMAP					; PROCEDURE
+
+; optimize OK (NEO6502), line = 292
+
+	lda X0
+	sta adr.WORDPARAMS
+	lda X0+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 293
+
+	lda Y0
+	sta adr.WORDPARAMS+$02
+	lda Y0+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 294
+
+	lda X1
+	sta adr.WORDPARAMS+$04
+	lda X1+1
+	sta adr.WORDPARAMS+1+$04
+
+; optimize OK (NEO6502), line = 295
+
+	lda Y1
+	sta adr.WORDPARAMS+$06
+	lda Y1+1
+	sta adr.WORDPARAMS+1+$06
+
+; optimize OK (NEO6502), line = 296
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$08
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+X0	= DATAORIGIN+$0181
+Y0	= DATAORIGIN+$0183
+X1	= DATAORIGIN+$0185
+Y1	= DATAORIGIN+$0187
+
+@VarData	= X0
+@VarDataSize	= 8
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEOSELECTTILEMAP				; PROCEDURE
+
+; optimize OK (NEO6502), line = 322
+
+	lda MEM
+	sta adr.WORDPARAMS
+	lda MEM+1
+	sta adr.WORDPARAMS+1
+
+; optimize OK (NEO6502), line = 323
+
+	lda XOFFSET
+	sta adr.WORDPARAMS+$02
+	lda XOFFSET+1
+	sta adr.WORDPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 324
+
+	lda YOFFSET
+	sta adr.WORDPARAMS+$04
+	lda YOFFSET+1
+	sta adr.WORDPARAMS+1+$04
+
+; optimize OK (NEO6502), line = 325
+
+	lda #$05
+	sta NEOSENDMESSAGE.GROUP
+	lda #$23
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+MEM	= DATAORIGIN+$0189
+XOFFSET	= DATAORIGIN+$018B
+YOFFSET	= DATAORIGIN+$018D
+
+@VarData	= MEM
+@VarDataSize	= 6
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	NEOUPDATESPRITE					; PROCEDURE
+
+; optimize OK (NEO6502), line = 336
+
+	lda S0
+	sta adr.NEOMESSAGE.PARAMS
+
+; optimize OK (NEO6502), line = 337
+
+	lda X
+	sta adr.WORDXPARAMS
+	lda X+1
+	sta adr.WORDXPARAMS+1
+
+; optimize OK (NEO6502), line = 338
+
+	lda Y
+	sta adr.WORDXPARAMS+$02
+	lda Y+1
+	sta adr.WORDXPARAMS+1+$02
+
+; optimize OK (NEO6502), line = 339
+
+	lda IMAGE
+	sta adr.NEOMESSAGE.PARAMS+$05
+
+; optimize OK (NEO6502), line = 340
+
+	lda FLIP
+	sta adr.NEOMESSAGE.PARAMS+$06
+
+; optimize OK (NEO6502), line = 341
+
+	lda ANCHOR
+	sta adr.NEOMESSAGE.PARAMS+$07
+
+; optimize OK (NEO6502), line = 342
+
+	lda #$06
+	sta NEOSENDMESSAGE.GROUP
+	lda #$02
+	sta NEOSENDMESSAGE.FUNC
+	jsr NEOSENDMESSAGE
+
+; ------------------------------------------------------------
+
+S0	= DATAORIGIN+$018F
+X	= DATAORIGIN+$0190
+Y	= DATAORIGIN+$0192
+IMAGE	= DATAORIGIN+$0194
+FLIP	= DATAORIGIN+$0195
+ANCHOR	= DATAORIGIN+$0196
+
+@VarData	= S0
+@VarDataSize	= 8
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+; ------------------------------------------------------------
+
+N6502MSG_ADDRESS	= $FF00
+NEO_GFX_RAM	= $FFFF
+adr.NEOMESSAGE	= $FF00
+.var NEOMESSAGE	= adr.NEOMESSAGE .word
+NEOMESSAGE.GROUP	= $FF00
+NEOMESSAGE.FUNC	= $FF01
+NEOMESSAGE.ERROR	= $FF02
+NEOMESSAGE.STATUS	= $FF03
+adr.NEOMESSAGE.PARAMS	= $FF04
+.var NEOMESSAGE.PARAMS	= adr.NEOMESSAGE.PARAMS .word
+adr.WORDPARAMS	= $FF04
+.var WORDPARAMS	= adr.WORDPARAMS .word
+adr.WORDXPARAMS	= $FF05
+.var WORDXPARAMS	= adr.WORDXPARAMS .word
+adr.DWORDPARAMS	= $FF04
+.var DWORDPARAMS	= adr.DWORDPARAMS .word
+adr.SOUNDPARAMS	= $FF04
+.var SOUNDPARAMS	= adr.SOUNDPARAMS .word
+SOUNDPARAMS.CHANNEL	= $FF04
+SOUNDPARAMS.FREQ	= $FF05
+SOUNDPARAMS.LEN	= $FF07
+SOUNDPARAMS.SLIDE	= $FF09
+SOUNDPARAMS.STYPE	= $FF0B
+
+.endl							; UNIT NEO6502
+
+; ------------------------------------------------------------
+
+.local	TYPES						; UNIT
+
+; ------------------------------------------------------------
+
+.endl							; UNIT TYPES
+
+; ------------------------------------------------------------
+
+.local	GRAPH						; UNIT
+
+.local	INITGRAPH					; PROCEDURE | OVERLOAD
+.local	@0528
+	sta MODE
+
+; optimize OK (graph_neo.inc), line = 9
+
+	lda #$40
+	sta SYSTEM.SCREENWIDTH
+	lda #$01
+	sta SYSTEM.SCREENWIDTH+1
+
+; optimize OK (graph_neo.inc), line = 10
+
+	lda #$F0
+	sta SYSTEM.SCREENHEIGHT
+	lda #$00
+	sta SYSTEM.SCREENHEIGHT+1
+
+; -------------------  ASM Block 00000060  -------------------
+
+	    @ClrScr
+	
+; ------------------------------------------------------------
+
+MODE	= DATAORIGIN+$01B8
+
+@VarData	= MODE
+@VarDataSize	= 1
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+.endl							; overload
+
+; ------------------------------------------------------------
+
+CURRENTDRIVER	= $80
+DETECT	= $00
+CGA	= $01
+MCGA	= $02
+EGA	= $03
+EGA64	= $04
+EGAMONO	= $05
+LOWRES	= $06
+HERCMONO	= $07
+VGA	= $09
+VESA	= $0A
+D1BIT	= $0B
+D2BIT	= $0C
+D4BIT	= $0D
+D6BIT	= $0E
+D8BIT	= $0F
+D12BIT	= $10
+M640X400	= $18
+M640X480	= $18
+GROK	= $01
+GRNOINITGRAPH	= $FF
+GRNOTDETECTED	= $FE
+GRFILENOTFOUND	= $FD
+GRINVALIDDRIVER	= $FC
+GRNOLOADMEM	= $FB
+GRNOSCANMEM	= $FA
+GRNOFLOODMEM	= $F9
+GRFONTNOTFOUND	= $F8
+GRNOFONTMEM	= $F7
+GRINVALIDMODE	= $F6
+GRERROR	= $F5
+GRIOERROR	= $F4
+GRINVALIDFONT	= $F3
+GRINVALIDFONTNUM	= $F2
+GRINVALIDVERSION	= $EE
+CGAC0	= $00
+CGAC1	= $01
+CGAC2	= $02
+CGAC3	= $03
+CGAHI	= $04
+MCGAC0	= $00
+MCGAC1	= $01
+MCGAC2	= $02
+MCGAC3	= $03
+MCGAMED	= $04
+MCGAHI	= $05
+EGALO	= $00
+EGAHI	= $01
+EGA64LO	= $00
+EGA64HI	= $01
+EGAMONOHI	= $03
+VGALO	= $0A
+VGAMED	= $1F
+VGAHI	= $18
+WIN_LEFT	= DATAORIGIN+$0197
+WIN_RIGHT	= DATAORIGIN+$0199
+WIN_TOP	= DATAORIGIN+$019B
+WIN_BOTTOM	= DATAORIGIN+$019D
+GRAPHRESULT	= DATAORIGIN+$019F
+GETCOLOR	= DATAORIGIN+$01A0
+VIDEORAM	= DATAORIGIN+$01A1
+adr.LASTARCCOORDS	= DATAORIGIN+$01A3	; [12] RECORD
+.var LASTARCCOORDS	= adr.LASTARCCOORDS .word
+LASTARCCOORDS.X	= DATAORIGIN+$01A3
+LASTARCCOORDS.Y	= DATAORIGIN+$01A5
+LASTARCCOORDS.XSTART	= DATAORIGIN+$01A7
+LASTARCCOORDS.YSTART	= DATAORIGIN+$01A9
+LASTARCCOORDS.XEND	= DATAORIGIN+$01AB
+LASTARCCOORDS.YEND	= DATAORIGIN+$01AD
+SCANLINE_WIDTH	= DATAORIGIN+$01AF
+CURRENTX	= DATAORIGIN+$01B0
+CURRENTY	= DATAORIGIN+$01B2
+LINEX	= DATAORIGIN+$01B4
+LINEY	= DATAORIGIN+$01B6
+
+.endl							; UNIT GRAPH
+
+; ------------------------------------------------------------
+
+.local	CRT						; UNIT
+
+.local	CLRSCR						; PROCEDURE
+
+; -------------------  ASM Block 00000069  -------------------
+
+	@ClrScr
+	
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	READKEY						; FUNCTION | ASSEMBLER
+
+; -------------------  ASM Block 00000070  -------------------
+
+	@GetKey
+	sta result
+
+@exit
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$01B9
+	rts						; ret
+.endl
+
+.local	TEXTCOLOR					; PROCEDURE | ASSEMBLER
+	sta A
+
+; -------------------  ASM Block 00000072  -------------------
+
+	lda a
+	add #$80
+	@putchar 
+
+; ------------------------------------------------------------
+
+A	= DATAORIGIN+$01BA
+
+@VarData	= A
+@VarDataSize	= 1
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	DELAY						; PROCEDURE | ASSEMBLER
+
+; -------------------  ASM Block 00000073  -------------------
+
+	@SendMessage
+	dta 1,1
+	@WaitMessage
+	mwa DParameters last
+	adw last count last
+@	
+	@SendMessage
+	dta 1,1
+	@WaitMessage
+	cpw DParameters last
+	bmi @-
+	rts 
+last 
+	dta a(0)
+
+; ------------------------------------------------------------
+
+COUNT	= DATAORIGIN+$01BB
+
+@VarData	= COUNT
+@VarDataSize	= 2
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	KEYPRESSED					; FUNCTION | ASSEMBLER
+
+; -------------------  ASM Block 00000074  -------------------
+
+	@SendMessage
+	dta 2,2
+	@WaitMessage
+	lda DParameters
+	sta result
+
+@exit
+
+; ------------------------------------------------------------
+
+RESULT	= DATAORIGIN+$01BD
+	rts						; ret
+.endl
+
+.local	TEXTMODE					; PROCEDURE | ASSEMBLER
+	sta MODE
+
+; -------------------  ASM Block 00000078  -------------------
+
+	lda #$90 // background to 0
+	@putchar
+	lda #$82 // text color to 2
+	@putchar
+	@clrscr;
+
+; ------------------------------------------------------------
+
+MODE	= DATAORIGIN+$01BE
+
+@VarData	= MODE
+@VarDataSize	= 1
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+; ------------------------------------------------------------
+
+BW40	= $00
+CO40	= $01
+BW80	= $02
+CO80	= $03
+MONO	= $07
+C40	= $01
+C80	= $03
+BLINK	= $80
+
+.endl							; UNIT CRT
+
+.local	WAITFORANYKEYANDCLEAR				; PROCEDURE
+
+; optimize FAIL ('@print', neo_api.pas), line = 39
+
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 40
+
+	@printSTRING #CODEORIGIN+$0000
+	@printEOL
+
+; optimize FAIL ('CRT.READKEY', neo_api.pas), line = 41
+
+	jsr CRT.READKEY
+
+; optimize FAIL ('CRT.CLRSCR', neo_api.pas), line = 42
+
+	jsr CRT.CLRSCR
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+
+.local	DRAWBALL					; PROCEDURE
+
+; optimize OK (neo_api.pas), line = 47
+
+	lda F
+	asl @
+	asl @
+	add #$40
+	sta F
+
+; optimize OK (neo_api.pas), line = 48
+
+	sta NEO6502.NEOUPDATESPRITE.IMAGE
+	lda #$00
+	sta NEO6502.NEOUPDATESPRITE.S0
+	lda X
+	sta NEO6502.NEOUPDATESPRITE.X
+	lda #$00
+	sta NEO6502.NEOUPDATESPRITE.X+1
+	lda Y
+	sta NEO6502.NEOUPDATESPRITE.Y
+	lda #$00
+	sta NEO6502.NEOUPDATESPRITE.Y+1
+	sta NEO6502.NEOUPDATESPRITE.FLIP
+	sta NEO6502.NEOUPDATESPRITE.ANCHOR
+	jsr NEO6502.NEOUPDATESPRITE
+
+; optimize OK (neo_api.pas), line = 49
+
+	lda F
+	add #$01
+	sta NEO6502.NEOUPDATESPRITE.IMAGE
+	lda X
+	add #$20
+	sta NEO6502.NEOUPDATESPRITE.X
+	lda #$00
+	adc #$00
+	sta NEO6502.NEOUPDATESPRITE.X+1
+	lda #$01
+	sta NEO6502.NEOUPDATESPRITE.S0
+	lda Y
+	sta NEO6502.NEOUPDATESPRITE.Y
+	lda #$00
+	sta NEO6502.NEOUPDATESPRITE.Y+1
+	sta NEO6502.NEOUPDATESPRITE.FLIP
+	sta NEO6502.NEOUPDATESPRITE.ANCHOR
+	jsr NEO6502.NEOUPDATESPRITE
+
+; optimize OK (neo_api.pas), line = 50
+
+	lda F
+	add #$02
+	sta NEO6502.NEOUPDATESPRITE.IMAGE
+	lda Y
+	add #$20
+	sta NEO6502.NEOUPDATESPRITE.Y
+	lda #$00
+	adc #$00
+	sta NEO6502.NEOUPDATESPRITE.Y+1
+	lda #$02
+	sta NEO6502.NEOUPDATESPRITE.S0
+	lda X
+	sta NEO6502.NEOUPDATESPRITE.X
+	lda #$00
+	sta NEO6502.NEOUPDATESPRITE.X+1
+	sta NEO6502.NEOUPDATESPRITE.FLIP
+	sta NEO6502.NEOUPDATESPRITE.ANCHOR
+	jsr NEO6502.NEOUPDATESPRITE
+
+; optimize OK (neo_api.pas), line = 51
+
+	lda F
+	add #$03
+	sta NEO6502.NEOUPDATESPRITE.IMAGE
+	lda Y
+	add #$20
+	sta NEO6502.NEOUPDATESPRITE.Y
+	lda #$00
+	adc #$00
+	sta NEO6502.NEOUPDATESPRITE.Y+1
+	lda X
+	add #$20
+	sta NEO6502.NEOUPDATESPRITE.X
+	lda #$00
+	adc #$00
+	sta NEO6502.NEOUPDATESPRITE.X+1
+	lda #$03
+	sta NEO6502.NEOUPDATESPRITE.S0
+	lda #$00
+	sta NEO6502.NEOUPDATESPRITE.FLIP
+	sta NEO6502.NEOUPDATESPRITE.ANCHOR
+	jsr NEO6502.NEOUPDATESPRITE
+
+; ------------------------------------------------------------
+
+X	= DATAORIGIN+$0202
+Y	= DATAORIGIN+$0203
+F	= DATAORIGIN+$0204
+
+@VarData	= X
+@VarDataSize	= 3
+
+@exit
+	.ifdef @new
+	lda <@VarData
+	sta :ztmp
+	lda >@VarData
+	ldy #@VarDataSize-1
+	jmp @FreeMem
+	els
+	rts						; ret
+	eif
+.endl
+l_01ED
+
+; optimize FAIL ('NEO6502.NEOLOAD', neo_api.pas), line = 55
+
+	inx
+	mva #$FF :STACKORIGIN,x
+	sta :STACKORIGIN+STACKWIDTH,x
+	inx
+	mva #$1E :STACKORIGIN,x
+	mva #$70 :STACKORIGIN+STACKWIDTH,x
+	jsr NEO6502.NEOLOAD
+
+; optimize OK (neo_api.pas), line = 56
+
+	lda #$00
+	jsr CRT.TEXTMODE
+
+; optimize FAIL ('@print', neo_api.pas), line = 59
+
+	@printSTRING #CODEORIGIN+$0027
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 60
+
+	@printSTRING #CODEORIGIN+$0036
+	@printEOL
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 61
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 63
+
+	@printSTRING #CODEORIGIN+$0053
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 64
+
+	@printSTRING #CODEORIGIN+$0068
+	jsr NEO6502.NEOGETTIMER
+	mva NEO6502.NEOGETTIMER.RESULT :dx
+	mva NEO6502.NEOGETTIMER.RESULT+1 :dx+1
+	mva NEO6502.NEOGETTIMER.RESULT+2 :dx+2
+	mva NEO6502.NEOGETTIMER.RESULT+3 :dx+3
+	@printVALUE
+	@printEOL
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 65
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 67
+
+	@printSTRING #CODEORIGIN+$0077
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 68
+
+	@printSTRING #CODEORIGIN+$008C
+	@printEOL
+
+; optimize FAIL ('NEO6502.NEOCREDITS', neo_api.pas), line = 69
+
+	jsr NEO6502.NEOCREDITS
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 70
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 72
+
+	@printSTRING #CODEORIGIN+$0096
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 73
+
+	@printSTRING #CODEORIGIN+$00AB
+	@printEOL
+
+; optimize OK (neo_api.pas), line = 75
+
+	lda #$C0
+	sta NEO6502.NEOSETCHAR.C
+	lda CHAR1
+	sta NEO6502.NEOSETCHAR.DATA
+	lda CHAR1+1
+	sta NEO6502.NEOSETCHAR.DATA+1
+	jsr NEO6502.NEOSETCHAR
+
+; optimize OK (neo_api.pas), line = 76
+
+	lda #$C1
+	sta NEO6502.NEOSETCHAR.C
+	lda CHAR2
+	sta NEO6502.NEOSETCHAR.DATA
+	lda CHAR2+1
+	sta NEO6502.NEOSETCHAR.DATA+1
+	jsr NEO6502.NEOSETCHAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 77
+
+	@printSTRING #CODEORIGIN+$00BC
+	@printEOL
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 78
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 80
+
+	@printSTRING #CODEORIGIN+$00C6
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 81
+
+	@printSTRING #CODEORIGIN+$00DB
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 82
+
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 83
+
+	@printSTRING #CODEORIGIN+$00ED
+	@printEOL
+
+; --- RepeatUntilProlog
+l_061C
+
+; optimize OK (neo_api.pas), line = 85
+
+	lda #$00
+	sta K
+
+; optimize FAIL ('CRT.KEYPRESSED', neo_api.pas), line = 86
+
+	jsr CRT.KEYPRESSED
+	lda CRT.KEYPRESSED.RESULT
+	jeq l_062A
+	jsr CRT.READKEY
+	lda CRT.READKEY.RESULT
+	sta K
+l_062A
+
+; optimize OK (neo_api.pas), line = 87
+
+	lda #$01
+	jsr NEO6502.NEOGETJOY
+	lda NEO6502.NEOGETJOY.RESULT
+	sta B
+	mva #$00 adr.S
+
+; optimize OK (neo_api.pas), line = 89
+
+	lda B
+	and #$01
+	jeq l_064C
+	lda S
+	sta SYSTEM.CONCAT.@036D.A
+	lda S+1
+	sta SYSTEM.CONCAT.@036D.A+1
+	lda #$20
+	sta SYSTEM.CONCAT.@036D.B
+	lda #$71
+	sta SYSTEM.CONCAT.@036D.B+1
+	jsr SYSTEM.CONCAT.@036D
+	inx
+	lda SYSTEM.CONCAT.@036D.RESULT
+	sta @move.src
+	lda SYSTEM.CONCAT.@036D.RESULT+1
+	sta @move.src+1
+	@moveSTRING S #33
+	dex
+l_064C
+
+; optimize OK (neo_api.pas), line = 90
+
+	lda B
+	and #$02
+	jeq l_0669
+	lda S
+	sta SYSTEM.CONCAT.@036D.A
+	lda S+1
+	sta SYSTEM.CONCAT.@036D.A+1
+	lda #$26
+	sta SYSTEM.CONCAT.@036D.B
+	lda #$71
+	sta SYSTEM.CONCAT.@036D.B+1
+	jsr SYSTEM.CONCAT.@036D
+	inx
+	lda SYSTEM.CONCAT.@036D.RESULT
+	sta @move.src
+	lda SYSTEM.CONCAT.@036D.RESULT+1
+	sta @move.src+1
+	@moveSTRING S #33
+	dex
+l_0669
+
+; optimize OK (neo_api.pas), line = 91
+
+	lda B
+	and #$04
+	jeq l_0686
+	lda S
+	sta SYSTEM.CONCAT.@036D.A
+	lda S+1
+	sta SYSTEM.CONCAT.@036D.A+1
+	lda #$2D
+	sta SYSTEM.CONCAT.@036D.B
+	lda #$71
+	sta SYSTEM.CONCAT.@036D.B+1
+	jsr SYSTEM.CONCAT.@036D
+	inx
+	lda SYSTEM.CONCAT.@036D.RESULT
+	sta @move.src
+	lda SYSTEM.CONCAT.@036D.RESULT+1
+	sta @move.src+1
+	@moveSTRING S #33
+	dex
+l_0686
+
+; optimize OK (neo_api.pas), line = 92
+
+	lda B
+	and #$08
+	jeq l_06A3
+	lda S
+	sta SYSTEM.CONCAT.@036D.A
+	lda S+1
+	sta SYSTEM.CONCAT.@036D.A+1
+	lda #$31
+	sta SYSTEM.CONCAT.@036D.B
+	lda #$71
+	sta SYSTEM.CONCAT.@036D.B+1
+	jsr SYSTEM.CONCAT.@036D
+	inx
+	lda SYSTEM.CONCAT.@036D.RESULT
+	sta @move.src
+	lda SYSTEM.CONCAT.@036D.RESULT+1
+	sta @move.src+1
+	@moveSTRING S #33
+	dex
+l_06A3
+
+; optimize OK (neo_api.pas), line = 93
+
+	lda B
+	and #$10
+	jeq l_06C0
+	lda S
+	sta SYSTEM.CONCAT.@036D.A
+	lda S+1
+	sta SYSTEM.CONCAT.@036D.A+1
+	lda #$37
+	sta SYSTEM.CONCAT.@036D.B
+	lda #$71
+	sta SYSTEM.CONCAT.@036D.B+1
+	jsr SYSTEM.CONCAT.@036D
+	inx
+	lda SYSTEM.CONCAT.@036D.RESULT
+	sta @move.src
+	lda SYSTEM.CONCAT.@036D.RESULT+1
+	sta @move.src+1
+	@moveSTRING S #33
+	dex
+l_06C0
+
+; optimize OK (neo_api.pas), line = 94
+
+	lda B
+	and #$20
+	jeq l_06DD
+	lda S
+	sta SYSTEM.CONCAT.@036D.A
+	lda S+1
+	sta SYSTEM.CONCAT.@036D.A+1
+	lda #$3D
+	sta SYSTEM.CONCAT.@036D.B
+	lda #$71
+	sta SYSTEM.CONCAT.@036D.B+1
+	jsr SYSTEM.CONCAT.@036D
+	inx
+	lda SYSTEM.CONCAT.@036D.RESULT
+	sta @move.src
+	lda SYSTEM.CONCAT.@036D.RESULT+1
+	sta @move.src+1
+	@moveSTRING S #33
+	dex
+l_06DD
+
+; optimize FAIL ('@print', neo_api.pas), line = 95
+
+	@printSTRING #CODEORIGIN+$0140
+
+; optimize FAIL ('@print', neo_api.pas), line = 96
+
+	@printSTRING S
+	@printSTRING #CODEORIGIN+$0154
+
+; optimize OK (neo_api.pas), line = 97
+
+	lda #$03
+	sta CRT.DELAY.COUNT
+	lda #$00
+	sta CRT.DELAY.COUNT+1
+	jsr CRT.DELAY
+
+; optimize OK (neo_api.pas), line = 98
+
+	lda K
+	cmp #$20
+	jne l_061C
+
+; optimize FAIL ('CRT.CLRSCR', neo_api.pas), line = 99
+
+	jsr CRT.CLRSCR
+
+; optimize FAIL ('@print', neo_api.pas), line = 101
+
+	@printSTRING #CODEORIGIN+$0169
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 102
+
+	@printSTRING #CODEORIGIN+$0172
+	@printEOL
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 103
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('SYSTEM.RANDOMIZE', neo_api.pas), line = 104
+
+	jsr SYSTEM.RANDOMIZE
+
+; optimize OK (neo_api.pas), line = 105
+
+	lda #$00
+	jsr GRAPH.INITGRAPH.@0528
+	ldy #256-8
+	mva:rne CODEORIGIN+$018D+8-256,y adr.S+8-256,y+
+
+; optimize OK (neo_api.pas), line = 108
+
+	lda #$00
+	sta J
+
+l_0703
+; --- ForToDoCondition
+	lda J
+	cmp #$05
+	jcs l_0711
+
+; optimize OK (neo_api.pas), line = 110
+
+	lda #$00
+	sta I
+
+l_071A
+; --- ForToDoCondition
+	lda I
+	cmp #$33
+	jcs l_0728
+
+; optimize OK (neo_api.pas), line = 112
+
+	lda #$0E
+	sta SYSTEM.RANDOM.@032B.RANGE
+	lda #$01
+	sta SYSTEM.RANDOM.@032B.RANGE+1
+	jsr SYSTEM.RANDOM.@032B
+	inx
+	lda SYSTEM.RANDOM.@032B.RESULT
+	add #$0A
+	sta X
+	lda SYSTEM.RANDOM.@032B.RESULT+1
+	adc #$00
+	sta X+1
+	dex
+
+; optimize OK (neo_api.pas), line = 113
+
+	lda #$C8
+	jsr SYSTEM.RANDOM.@032A
+	lda SYSTEM.RANDOM.@032A.RESULT
+	add #$0A
+	sta Y
+
+; optimize OK (neo_api.pas), line = 114
+
+	lda #$1E
+	jsr SYSTEM.RANDOM.@032A
+	lda SYSTEM.RANDOM.@032A.RESULT
+	add #$14
+	sta W
+
+; optimize OK (neo_api.pas), line = 115
+
+	lda #$1E
+	jsr SYSTEM.RANDOM.@032A
+	lda SYSTEM.RANDOM.@032A.RESULT
+	add #$0A
+	sta H
+
+; optimize OK (neo_api.pas), line = 116
+
+	lda #$10
+	jsr SYSTEM.RANDOM.@032A
+	lda SYSTEM.RANDOM.@032A.RESULT
+	sta C
+
+; optimize FAIL (2, neo_api.pas), line = 117
+
+	inx
+	mva #$00 :STACKORIGIN,x
+	inx
+	mva #$01 :STACKORIGIN,x
+	lda #$02
+	jsr SYSTEM.RANDOM.@032A
+	inx
+	mva SYSTEM.RANDOM.@032A.RESULT :STACKORIGIN,x
+	lda #$00
+	sta NEO6502.NEOSETCOLOR.ACOL
+	lda C
+	sta NEO6502.NEOSETCOLOR.XCOL
+	lda :STACKORIGIN,x
+	sta NEO6502.NEOSETCOLOR.SOLID
+	dex
+	lda :STACKORIGIN,x
+	sta NEO6502.NEOSETCOLOR.SIZE
+	dex
+	lda :STACKORIGIN,x
+	sta NEO6502.NEOSETCOLOR.FLIP
+	dex
+	jsr NEO6502.NEOSETCOLOR
+
+; optimize OK (neo_api.pas), line = 118
+
+	lda J
+	sta @CASETMP_0005
+	jne l_0765
+@
+
+; optimize OK (neo_api.pas), line = 119
+
+	lda Y
+	add H
+	sta NEO6502.NEODRAWLINE.Y1
+	lda #$00
+	adc #$00
+	sta NEO6502.NEODRAWLINE.Y1+1
+	lda X
+	add W
+	sta NEO6502.NEODRAWLINE.X1
+	lda X+1
+	adc #$00
+	sta NEO6502.NEODRAWLINE.X1+1
+	lda X
+	sta NEO6502.NEODRAWLINE.X0
+	lda X+1
+	sta NEO6502.NEODRAWLINE.X0+1
+	lda Y
+	sta NEO6502.NEODRAWLINE.Y0
+	lda #$00
+	sta NEO6502.NEODRAWLINE.Y0+1
+	jsr NEO6502.NEODRAWLINE
+	jmp a_0005
+l_0765
+	cmp #$01
+	jne l_0783
+
+; optimize OK (neo_api.pas), line = 120
+
+	lda Y
+	add H
+	sta NEO6502.NEODRAWRECT.Y1
+	lda #$00
+	adc #$00
+	sta NEO6502.NEODRAWRECT.Y1+1
+	lda X
+	add W
+	sta NEO6502.NEODRAWRECT.X1
+	lda X+1
+	adc #$00
+	sta NEO6502.NEODRAWRECT.X1+1
+	lda X
+	sta NEO6502.NEODRAWRECT.X0
+	lda X+1
+	sta NEO6502.NEODRAWRECT.X0+1
+	lda Y
+	sta NEO6502.NEODRAWRECT.Y0
+	lda #$00
+	sta NEO6502.NEODRAWRECT.Y0+1
+	jsr NEO6502.NEODRAWRECT
+	jmp a_0005
+l_0783
+	cmp #$02
+	jne l_07A1
+
+; optimize OK (neo_api.pas), line = 121
+
+	lda Y
+	add H
+	sta NEO6502.NEODRAWELLIPSE.Y1
+	lda #$00
+	adc #$00
+	sta NEO6502.NEODRAWELLIPSE.Y1+1
+	lda X
+	add W
+	sta NEO6502.NEODRAWELLIPSE.X1
+	lda X+1
+	adc #$00
+	sta NEO6502.NEODRAWELLIPSE.X1+1
+	lda X
+	sta NEO6502.NEODRAWELLIPSE.X0
+	lda X+1
+	sta NEO6502.NEODRAWELLIPSE.X0+1
+	lda Y
+	sta NEO6502.NEODRAWELLIPSE.Y0
+	lda #$00
+	sta NEO6502.NEODRAWELLIPSE.Y0+1
+	jsr NEO6502.NEODRAWELLIPSE
+	jmp a_0005
+l_07A1
+	cmp #$03
+	jne l_07BF
+
+; optimize OK (neo_api.pas), line = 122
+
+	lda X
+	sta NEO6502.NEODRAWSTRING.X0
+	lda X+1
+	sta NEO6502.NEODRAWSTRING.X0+1
+	lda Y
+	sta NEO6502.NEODRAWSTRING.Y0
+	lda #$00
+	sta NEO6502.NEODRAWSTRING.Y0+1
+	lda S
+	sta NEO6502.NEODRAWSTRING.S
+	lda S+1
+	sta NEO6502.NEODRAWSTRING.S+1
+	jsr NEO6502.NEODRAWSTRING
+	jmp a_0005
+l_07BF
+	cmp #$04
+	jne l_07CE
+
+; optimize OK (neo_api.pas), line = 123
+
+	lda #$04
+	jsr SYSTEM.RANDOM.@032A
+	inx
+	mva SYSTEM.RANDOM.@032A.RESULT :STACKORIGIN,x
+	lda X
+	sta NEO6502.NEODRAWIMAGE.X0
+	lda X+1
+	sta NEO6502.NEODRAWIMAGE.X0+1
+	lda Y
+	sta NEO6502.NEODRAWIMAGE.Y0
+	lda #$00
+	sta NEO6502.NEODRAWIMAGE.Y0+1
+	lda :STACKORIGIN,x
+	sta NEO6502.NEODRAWIMAGE.ID
+	dex
+	jsr NEO6502.NEODRAWIMAGE
+l_07CE
+a_0005
+
+; optimize FAIL ('SYSTEM.PAUSE.@0327', neo_api.pas), line = 125
+
+	jsr SYSTEM.PAUSE.@0327
+
+; --- ForToDoEpilog
+	inc I
+	jne l_071A
+l_0728
+
+; --- ForToDoEpilog
+	inc J
+	jne l_0703
+l_0711
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 128
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 131
+
+	@printSTRING #CODEORIGIN+$0195
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 132
+
+	@printSTRING #CODEORIGIN+$019E
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 133
+
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 134
+
+	@printSTRING #CODEORIGIN+$01A9
+	lda TMAP.WIDTH
+	jsr @printBYTE._a
+	@printSTRING #CODEORIGIN+$01BB
+	lda TMAP.HEIGHT
+	jsr @printBYTE._a
+	@printEOL
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 135
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize OK (neo_api.pas), line = 137
+
+	lda #$00
+	sta X
+	sta X+1
+
+; --- RepeatUntilProlog
+l_07F5
+
+; optimize OK (neo_api.pas), line = 139
+
+	lda #$00
+	sta @REAL_MUL.A+3
+	lda X+1
+	sta @REAL_MUL.A+2
+	lda X
+	sta @REAL_MUL.A+1
+	lda #$00
+	sta @REAL_MUL.A
+	lda #$0D
+	sta @REAL_MUL.B
+	lda #$00
+	sta @REAL_MUL.B+1
+	sta @REAL_MUL.B+2
+	sta @REAL_MUL.B+3
+	jsr @REAL_MUL
+	lda :eax
+	sta SYSTEM.SIN.@02FF.X
+	lda :eax+1
+	sta SYSTEM.SIN.@02FF.X+1
+	lda :eax+2
+	sta SYSTEM.SIN.@02FF.X+2
+	lda :eax+3
+	sta SYSTEM.SIN.@02FF.X+3
+	jsr SYSTEM.SIN.@02FF
+	inx
+	inx
+	lda #$00
+	sta @REAL_MUL.B
+	lda #$14
+	sta @REAL_MUL.B+1
+	lda #$00
+	sta @REAL_MUL.B+2
+	lda #$00
+	sta @REAL_MUL.B+3
+	lda SYSTEM.SIN.@02FF.RESULT
+	sta @REAL_MUL.A
+	lda SYSTEM.SIN.@02FF.RESULT+1
+	sta @REAL_MUL.A+1
+	lda SYSTEM.SIN.@02FF.RESULT+2
+	sta @REAL_MUL.A+2
+	lda SYSTEM.SIN.@02FF.RESULT+3
+	sta @REAL_MUL.A+3
+	jsr @REAL_MUL
+	dex
+	jsr @REAL_TRUNC
+	lda :eax
+	sta :STACKORIGIN,x
+	lda :eax+1
+	sta :STACKORIGIN+STACKWIDTH,x
+	lda :eax+2
+	sta :STACKORIGIN+STACKWIDTH*2,x
+	lda :eax+3
+	sta :STACKORIGIN+STACKWIDTH*3,x
+	inx
+	mva #$1E :STACKORIGIN,x
+	mva #$00 :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
+	sta :STACKORIGIN+STACKWIDTH*3,x
+	lda :STACKORIGIN-1,x
+	add :STACKORIGIN,x
+	sta Y
+	dex
+	dex
+
+; optimize FAIL ('CRT.CLRSCR', neo_api.pas), line = 140
+
+	jsr CRT.CLRSCR
+
+; optimize OK (neo_api.pas), line = 141
+
+	lda X+1
+	cmp #$01
+	bne @+
+	lda X
+	cmp #$41
+@
+	jcc l_0819
+
+; optimize OK (neo_api.pas), line = 142
+
+	lda X
+	sub #$40
+	sta NEO6502.NEOSELECTTILEMAP.XOFFSET
+	lda X+1
+	sbc #$01
+	sta NEO6502.NEOSELECTTILEMAP.XOFFSET+1
+	lda #$00
+	sta NEO6502.NEOSELECTTILEMAP.MEM
+	lda #$90
+	sta NEO6502.NEOSELECTTILEMAP.MEM+1
+	lda #$00
+	sta NEO6502.NEOSELECTTILEMAP.YOFFSET
+	sta NEO6502.NEOSELECTTILEMAP.YOFFSET+1
+	jsr NEO6502.NEOSELECTTILEMAP
+
+; optimize OK (neo_api.pas), line = 143
+
+	lda #$A0
+	add Y
+	sta NEO6502.NEODRAWTILEMAP.Y1
+	lda #$00
+	adc #$00
+	sta NEO6502.NEODRAWTILEMAP.Y1+1
+	lda #$00
+	sta NEO6502.NEODRAWTILEMAP.X0
+	jmp l_0839
+l_0819
+
+; optimize OK (neo_api.pas), line = 145
+
+	lda #$00
+	sta NEO6502.NEOSELECTTILEMAP.MEM
+	lda #$90
+	sta NEO6502.NEOSELECTTILEMAP.MEM+1
+	lda #$00
+	sta NEO6502.NEOSELECTTILEMAP.XOFFSET
+	sta NEO6502.NEOSELECTTILEMAP.XOFFSET+1
+	sta NEO6502.NEOSELECTTILEMAP.YOFFSET
+	sta NEO6502.NEOSELECTTILEMAP.YOFFSET+1
+	jsr NEO6502.NEOSELECTTILEMAP
+
+; optimize OK (neo_api.pas), line = 146
+
+	lda #$A0
+	add Y
+	sta NEO6502.NEODRAWTILEMAP.Y1
+	lda #$00
+	adc #$00
+	sta NEO6502.NEODRAWTILEMAP.Y1+1
+	lda #$40
+	sub X
+	sta NEO6502.NEODRAWTILEMAP.X0
+	lda #$01
+	sbc X+1
+l_0839
+	sta NEO6502.NEODRAWTILEMAP.X0+1
+	lda Y
+	sta NEO6502.NEODRAWTILEMAP.Y0
+	lda #$00
+	sta NEO6502.NEODRAWTILEMAP.Y0+1
+	lda #$40
+	sta NEO6502.NEODRAWTILEMAP.X1
+	lda #$01
+	sta NEO6502.NEODRAWTILEMAP.X1+1
+	jsr NEO6502.NEODRAWTILEMAP
+
+; optimize FAIL ('SYSTEM.PAUSE.@0327', neo_api.pas), line = 148
+
+	jsr SYSTEM.PAUSE.@0327
+
+; optimize OK (neo_api.pas), line = 149
+
+	inc X
+	sne
+	inc X+1
+
+; optimize OK (neo_api.pas), line = 150
+
+	lda X+1
+	cmp #$03
+	bne @+
+	lda X
+	cmp #$D5
+@
+	jcc l_0862
+	lda #$00
+	sta X
+	sta X+1
+l_0862
+
+; optimize FAIL ('CRT.KEYPRESSED', neo_api.pas), line = 151
+
+	jsr CRT.KEYPRESSED
+	lda CRT.KEYPRESSED.RESULT
+	jeq l_07F5
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 152
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; optimize FAIL ('@print', neo_api.pas), line = 154
+
+	@printSTRING #CODEORIGIN+$01C5
+	@printEOL
+
+; optimize FAIL ('@print', neo_api.pas), line = 155
+
+	@printSTRING #CODEORIGIN+$01CE
+	@printEOL
+
+; optimize OK (neo_api.pas), line = 157
+
+	lda #$00
+	sta B
+
+; optimize OK (neo_api.pas), line = 158
+
+	lda #$64
+	sta X
+	lda #$00
+	sta X+1
+
+; optimize OK (neo_api.pas), line = 159
+
+	sta BY
+	sta BY+1
+	lda #$A0
+	sta BY+2
+	lda #$42
+	sta BY+3
+
+; optimize OK (neo_api.pas), line = 160
+
+	lda #$00
+	sta DY
+	sta DY+1
+	sta DY+2
+	sta DY+3
+
+; optimize OK (neo_api.pas), line = 161
+
+	lda #$02
+	sta DX
+
+; optimize OK (neo_api.pas), line = 162
+
+	lda #$01
+	sta XACC
+
+; --- RepeatUntilProlog
+l_0888
+
+; optimize FAIL ('@FROUND', neo_api.pas), line = 165
+
+	inx
+	mva B :STACKORIGIN,x
+	inx
+	mva BY :STACKORIGIN,x
+	mva BY+1 :STACKORIGIN+STACKWIDTH,x
+	mva BY+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva BY+3 :STACKORIGIN+STACKWIDTH*3,x
+	jsr @FROUND
+	jsr @F2I
+	lda X
+	sta DRAWBALL.X
+	lda :STACKORIGIN,x
+	sta DRAWBALL.Y
+	dex
+	lda :STACKORIGIN,x
+	sta DRAWBALL.F
+	dex
+	jsr DRAWBALL
+
+; optimize FAIL ('@FSUB.FADD', neo_api.pas), line = 167
+
+	inx
+	mva DY :STACKORIGIN,x
+	mva DY+1 :STACKORIGIN+STACKWIDTH,x
+	mva DY+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva DY+3 :STACKORIGIN+STACKWIDTH*3,x
+	inx
+	mva #$CD :STACKORIGIN,x
+	mva #$CC :STACKORIGIN+STACKWIDTH,x
+	sta :STACKORIGIN+STACKWIDTH*2,x
+	mva #$3D :STACKORIGIN+STACKWIDTH*3,x
+	jsr @FSUB.FADD
+	dex
+	lda :STACKORIGIN,x
+	sta DY
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta DY+1
+	lda :STACKORIGIN+STACKWIDTH*2,x
+	sta DY+2
+	lda :STACKORIGIN+STACKWIDTH*3,x
+	sta DY+3
+	dex
+
+; optimize OK (neo_api.pas), line = 168
+
+	ldy #$00
+	lda DX
+	spl
+	dey
+	add X
+	sta X
+	tya
+	adc X+1
+	sta X+1
+
+; optimize FAIL ('@FSUB.FADD', neo_api.pas), line = 169
+
+	inx
+	mva BY :STACKORIGIN,x
+	mva BY+1 :STACKORIGIN+STACKWIDTH,x
+	mva BY+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva BY+3 :STACKORIGIN+STACKWIDTH*3,x
+	inx
+	mva DY :STACKORIGIN,x
+	mva DY+1 :STACKORIGIN+STACKWIDTH,x
+	mva DY+2 :STACKORIGIN+STACKWIDTH*2,x
+	mva DY+3 :STACKORIGIN+STACKWIDTH*3,x
+	jsr @FSUB.FADD
+	dex
+	lda :STACKORIGIN,x
+	sta BY
+	lda :STACKORIGIN+STACKWIDTH,x
+	sta BY+1
+	lda :STACKORIGIN+STACKWIDTH*2,x
+	sta BY+2
+	lda :STACKORIGIN+STACKWIDTH*3,x
+	sta BY+3
+	dex
+
+; optimize OK (neo_api.pas), line = 170
+
+	lda X+1
+	jne l_08C6x
+	lda X
+	cmp #$FA
+	jcs l_08C6x
+	lda X+1
+	cmp #$00
+	bne @+
+	lda X
+	cmp #$29
+@
+	jcs l_08C6
+@
+l_08C6x
+	lda #$00
+	sub DX
+	sta DX
+l_08C6
+
+; optimize OK (neo_api.pas), line = 171
+
+	lda #$00
+	sta @FCMPL.A
+	sta @FCMPL.A+1
+	lda #$2A
+	sta @FCMPL.A+2
+	lda #$43
+	sta @FCMPL.A+3
+	lda BY
+	sta @FCMPL.B
+	lda BY+1
+	sta @FCMPL.B+1
+	lda BY+2
+	sta @FCMPL.B+2
+	lda BY+3
+	sta @FCMPL.B+3
+	jsr @FCMPL
+	jmi l_08EC
+	jeq l_08EC
+	lda #$00
+	sta @FCMPL.A
+	sta @FCMPL.A+1
+	sta @FCMPL.A+2
+	sta @FCMPL.A+3
+	lda DY
+	sta @FCMPL.B
+	lda DY+1
+	sta @FCMPL.B+1
+	lda DY+2
+	sta @FCMPL.B+2
+	lda DY+3
+	sta @FCMPL.B+3
+	jsr @FCMPL
+	jmi l_08EC
+	jeq l_08EC
+	lda DY+3
+	eor #$80
+	sta DY+3
+l_08EC
+
+; optimize OK (neo_api.pas), line = 172
+
+	lda B
+	add #$01
+	and #$03
+	sta B
+
+; optimize OK (neo_api.pas), line = 173
+
+	lda #$05
+	sta SYSTEM.PAUSE.@0328.N
+	lda #$00
+	sta SYSTEM.PAUSE.@0328.N+1
+	jsr SYSTEM.PAUSE.@0328
+
+; optimize FAIL ('CRT.KEYPRESSED', neo_api.pas), line = 175
+
+	jsr CRT.KEYPRESSED
+	lda CRT.KEYPRESSED.RESULT
+	jeq l_0888
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 176
+
+	jsr WAITFORANYKEYANDCLEAR
+	ldy #256-17
+	mva:rne CODEORIGIN+$01D8+17-256,y adr.S+17-256,y+
+
+; optimize OK (neo_api.pas), line = 180
+
+	lda #$00
+	sta B
+
+; optimize OK (neo_api.pas), line = 181
+
+	sta C
+
+; --- RepeatUntilProlog
+l_0915
+
+; optimize OK (neo_api.pas), line = 183
+
+	lda B
+	add C
+	and #$0F
+	jsr CRT.TEXTCOLOR
+
+; optimize FAIL ('@print', neo_api.pas), line = 184
+
+	inx
+	ldy B
+	iny
+	lda adr.S,y
+	sta :STACKORIGIN,x
+	@printCHAR
+	dex
+
+; optimize FAIL (0, neo_api.pas), line = 185
+
+	inc B
+
+; optimize OK (neo_api.pas), line = 186
+
+	lda B
+	cmp adr.S
+	jne l_0942
+
+; optimize OK (neo_api.pas), line = 188
+
+	lda #$0A
+	sta CRT.DELAY.COUNT
+	lda #$00
+	sta CRT.DELAY.COUNT+1
+	jsr CRT.DELAY
+
+; optimize OK (neo_api.pas), line = 189
+
+	lda #$00
+	sta B
+
+; optimize FAIL ('@print', neo_api.pas), line = 190
+
+	@print #$14
+
+; optimize FAIL (0, neo_api.pas), line = 191
+
+	inc C
+l_0942
+
+; optimize FAIL ('CRT.KEYPRESSED', neo_api.pas), line = 193
+
+	jsr CRT.KEYPRESSED
+	lda CRT.KEYPRESSED.RESULT
+	jeq l_0915
+
+; optimize FAIL ('WAITFORANYKEYANDCLEAR', neo_api.pas), line = 194
+
+	jsr WAITFORANYKEYANDCLEAR
+
+; ------------------------------------------------------------
+
+TILE_MAP_ADDRESS	= $9000
+B	= DATAORIGIN+$01BF
+C	= DATAORIGIN+$01C0
+I	= DATAORIGIN+$01C1
+J	= DATAORIGIN+$01C2
+Y	= DATAORIGIN+$01C3
+W	= DATAORIGIN+$01C4
+H	= DATAORIGIN+$01C5
+DX	= DATAORIGIN+$01C6
+BY	= DATAORIGIN+$01C7
+DY	= DATAORIGIN+$01CB
+XACC	= DATAORIGIN+$01CF
+X	= DATAORIGIN+$01D0
+K	= DATAORIGIN+$01D2
+adr.S	= [DATAORIGIN+$01D3] .array [33]
+.var S	= adr.S .word
+adr.CHAR1	= [DATAORIGIN+$01F4] .array [7]
+.var CHAR1	= adr.CHAR1 .word
+adr.CHAR2	= [DATAORIGIN+$01FB] .array [7]
+.var CHAR2	= adr.CHAR2 .word
+adr.TMAP	= $9000
+.var TMAP	= adr.TMAP .word
+TMAP.FORMAT	= $9000
+TMAP.WIDTH	= $9001
+TMAP.HEIGHT	= $9002
+@CASETMP_0005	= DATAORIGIN+$0205
+@exit
+
+@halt	ldx #$00
+	txs
+
+	rts
+
+; ------------------------------------------------------------
+
+; ------------------------------------------------------------
+
+.local	@DEFINES
+NEO
+.endl
+
+.local	@RESOURCE
+.endl
+
+.endl							; MAIN
+
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+
+.macro	UNITINITIALIZATION
+
+	.ifdef MAIN.SYSTEM.@UnitInit
+	jsr MAIN.SYSTEM.@UnitInit
+	.fi
+
+	.ifdef MAIN.NEO6502.@UnitInit
+	jsr MAIN.NEO6502.@UnitInit
+	.fi
+
+	.ifdef MAIN.TYPES.@UnitInit
+	jsr MAIN.TYPES.@UnitInit
+	.fi
+
+	.ifdef MAIN.GRAPH.@UnitInit
+	jsr MAIN.GRAPH.@UnitInit
+	.fi
+
+	.ifdef MAIN.CRT.@UnitInit
+	jsr MAIN.CRT.@UnitInit
+	.fi
+.endm
+
+; ------------------------------------------------------------
+
+	ift .SIZEOF(MAIN.SYSTEM) > 0
+	.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+	eif
+
+	ift .SIZEOF(MAIN.NEO6502) > 0
+	.print 'NEO6502: ',MAIN.NEO6502,'..',MAIN.NEO6502+.SIZEOF(MAIN.NEO6502)-1
+	eif
+
+	ift .SIZEOF(MAIN.TYPES) > 0
+	.print 'TYPES: ',MAIN.TYPES,'..',MAIN.TYPES+.SIZEOF(MAIN.TYPES)-1
+	eif
+
+	ift .SIZEOF(MAIN.GRAPH) > 0
+	.print 'GRAPH: ',MAIN.GRAPH,'..',MAIN.GRAPH+.SIZEOF(MAIN.GRAPH)-1
+	eif
+
+	ift .SIZEOF(MAIN.CRT) > 0
+	.print 'CRT: ',MAIN.CRT,'..',MAIN.CRT+.SIZEOF(MAIN.CRT)-1
+	eif
+
+.nowarn	.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+
+; ------------------------------------------------------------
+
+	?adr = *
+	ift (?adr < ?old_adr) && (?old_adr - ?adr < $120)
+	?adr = ?old_adr
+	eif
+
+	org ?adr
+	?old_adr = *
+
+DATAORIGIN
+.by  $28 $00 $18 $00 $2D $0C $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $27 $00 $00 $00 $17 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $3C $40 $90 $80
+.by  $9C $40 $3C $E0 $10 $48 $08 $C8  $10 $E0
+
+VARINITSIZE	= *-DATAORIGIN
+VARDATASIZE	= 518
+
+PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+
+	.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+
+; ------------------------------------------------------------
+
+.macro	STATICDATA
+.by  $1A $50 $72 $65 $73 $73 $20 $61  $6E $79 $20 $6B $65 $79 $20 $74  $6F $20 $63 $6F $6E $74 $69 $6E
+.by  $75 $65 $2E $0B $6E $65 $6F $5F  $61 $70 $69 $2E $67 $66 $78 $0E  $48 $65 $6C $6C $6F $20 $4E $65
+.by  $6F $36 $35 $30 $32 $21 $1C $4C  $65 $74 $27 $73 $20 $74 $72 $79  $20 $73 $6F $6D $65 $20 $41 $50
+.by  $49 $20 $72 $6F $75 $74 $69 $6E  $65 $73 $2E $14 $47 $72 $6F $75  $70 $3A $20 $31 $20 $46 $75 $6E
+.by  $63 $74 $69 $6F $6E $3A $20 $31  $0E $53 $79 $73 $74 $65 $6D $20  $54 $69 $6D $65 $72 $3A $20 $14
+.by  $47 $72 $6F $75 $70 $3A $20 $31  $20 $46 $75 $6E $63 $74 $69 $6F  $6E $3A $20 $34 $09 $43 $72 $65
+.by  $64 $69 $74 $73 $3A $20 $14 $47  $72 $6F $75 $70 $3A $20 $32 $20  $46 $75 $6E $63 $74 $69 $6F $6E
+.by  $3A $20 $35 $10 $44 $65 $66 $69  $6E $65 $20 $6E $65 $77 $20 $66  $6F $6E $74 $2E $09 $C0 $C1 $20
+.by  $C0 $C1 $20 $C0 $C1 $20 $14 $47  $72 $6F $75 $70 $3A $20 $37 $20  $46 $75 $6E $63 $74 $69 $6F $6E
+.by  $3A $20 $31 $11 $43 $6F $6E $74  $72 $6F $6C $6C $65 $72 $20 $74  $65 $73 $74 $3A $20 $2E $4D $6F
+.by  $76 $65 $20 $59 $6F $75 $72 $20  $63 $6F $6E $74 $72 $6F $6C $6C  $65 $72 $20 $6F $72 $20 $70 $72
+.by  $65 $73 $73 $20 $53 $70 $61 $63  $65 $20 $74 $6F $20 $66 $69 $6E  $69 $73 $68 $2E $00 $05 $6C $65
+.by  $66 $74 $20 $06 $72 $69 $67 $68  $74 $20 $03 $75 $70 $20 $05 $64  $6F $77 $6E $20 $05 $62 $75 $74
+.by  $41 $20 $05 $62 $75 $74 $42 $20  $13 $14 $13 $04 $04 $04 $04 $04  $04 $04 $04 $04 $04 $04 $04 $04
+.by  $04 $04 $04 $04 $14 $20 $20 $20  $20 $20 $20 $20 $20 $20 $20 $20  $20 $20 $20 $20 $20 $20 $20 $20
+.by  $20 $08 $47 $72 $6F $75 $70 $3A  $20 $35 $1A $56 $61 $72 $69 $6F  $75 $73 $20 $67 $72 $61 $70 $68
+.by  $69 $63 $73 $20 $72 $6F $75 $74  $69 $6E $65 $73 $20 $07 $4E $65  $6F $36 $35 $30 $32 $08 $47 $72
+.by  $6F $75 $70 $3A $20 $35 $0A $54  $69 $6C $65 $6D $61 $70 $73 $3A  $20 $11 $54 $69 $6C $65 $6D $61
+.by  $70 $20 $2D $20 $77 $69 $64 $74  $68 $3A $20 $09 $20 $68 $65 $69  $67 $68 $74 $3A $20 $08 $47 $72
+.by  $6F $75 $70 $3A $20 $36 $09 $53  $70 $72 $69 $74 $65 $73 $3A $20  $10 $54 $68 $61 $74 $27 $73 $20
+.by  $61 $6C $6C $20 $46 $6F $6C $6B  $73
+.endm
+
+.local	RESOURCE
+	icl 'neo\resource.asm'
+
+	RCASM 'tilemap.asm' TILE_MAP_ADDRESS 0 0 0 0 0 0 0 0
+.endl
+
+	end

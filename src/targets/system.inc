@@ -12,3 +12,6 @@
 {$ifdef raw}
   {$i system_raw.inc}
 {$endif}
+{$ifdef neo}
+  {$i system_neo.inc}
+{$endif}

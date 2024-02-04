@@ -41,3 +41,11 @@ raw.zpage      := 'org $00';
 raw.eol        := $0000000D;
 raw.codeorigin := $1000;
 raw.header[0]  := 'END';
+
+// NEO6502 binary target
+neo.id         := 'neo';
+neo.name       := 'NEO';
+neo.zpage      := 'org $00';
+neo.eol        := $0000000D;
+neo.codeorigin := $800;
+neo.header[0]  := 'END';
