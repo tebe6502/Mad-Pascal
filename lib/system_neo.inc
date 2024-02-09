@@ -101,8 +101,7 @@ begin
 	lda randv1		; minimum interval between RANDOM register reads is 8 cycles
 	sta Result+1
 
-	lda #$00
-	sta Result
+	stz Result
 	lda #$3f
 	sta Result+3
  end;
