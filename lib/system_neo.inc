@@ -76,10 +76,9 @@ begin
 	lda randv0
 	sta Result
 
-	lda #$00
-	sta Result+1
-	sta Result+2
-	sta Result+3
+	stz Result+1
+	stz Result+2
+	stz Result+3
  end;
 
  Result:= 1 - Result;
