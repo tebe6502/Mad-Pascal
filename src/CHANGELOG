@@ -1,3 +1,12 @@
+08.02.2023
+- Bugfixes
+
+04.02.2023
+- bocianu dodał nowy target 'neo6502' (-t neo)
+
+30.01.2023
+- issue #127 fixed (https://github.com/tebe6502/Mad-Pascal/issues/127)
+
 27.01.2023
 - poprawione typy proceduralne w tablicach
 

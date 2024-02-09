@@ -1310,18 +1310,10 @@ case Tok[i].Kind of
     CheckTok(i + 1, OPARTOK);
 
 
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-
-    if (Tok[i + 2].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i + 2].Name^)].Kind = FUNCTIONTOK) then begin				// issue #125 fixed
-																	//
-      IdentIndex := GetIdent(Tok[i + 2].Name^);												//
-																	//
-      ConstValType := Ident[IdentIndex].DataType;											//
-																	//
-      isError := false;															//
-																	//
-    end;																//
+    if (Tok[i + 2].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i + 2].Name^)].Kind = FUNCTIONTOK) then 					// issue #125 fixed
+     isError := TRUE
+    else
+     j := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
 
     if isError then exit;
