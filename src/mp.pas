@@ -240,7 +240,8 @@ end;
 
 
 function GetIdentProc(S: TString; ProcIdentIndex: integer; Param: TParamList; NumParams: integer): integer;
-var IdentIndex, BlockStackIndex, i, k, b, df: Integer;
+var IdentIndex, BlockStackIndex, i, k, b: Integer;
+    df: byte;
     hits, m: cardinal;
     yes: Boolean;
     best: array of record
@@ -253,6 +254,11 @@ begin
 Result := 0;
 
 SetLength(best, 1);
+
+best[0].IdentIndex := 0;
+best[0].b := 0;
+best[0].hit := 0;
+
 
 for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
   begin
@@ -350,7 +356,9 @@ writeln('_A: ', Ident[IdentIndex].Name);
 	     if b >= k then begin
 	      df := 4 - abs(b-k);
 	      if Param[i].DataType in UnsignedOrdinalTypes then inc(df, 2);	// +2pts
-	      while df > 0 do begin inc(hits); dec(df) end;
+
+	      inc(hits, df);
+	      //while df > 0 do begin inc(hits); dec(df) end;
 	     end;
 
 
@@ -366,7 +374,9 @@ writeln('_A: ', Ident[IdentIndex].Name);
 	     if b >= k then begin
 	      df := 4 - abs(b-k);
 	      if Param[i].DataType in SignedOrdinalTypes then inc(df, 2);	// +2pts if the same types
-	      while df > 0 do begin inc(hits); dec(df) end;
+
+	      inc(hits, df);
+	      //while df > 0 do begin inc(hits); dec(df) end;
 	     end;
 
 	    end;
@@ -10392,7 +10402,7 @@ case Tok[i].Kind of
 
 
 
-		 if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) and (ADDRESS = FALSE) {(Tok[k].Kind <> ADDRESSTOK)} then begin
+		 if (Tok[k].Kind <> ADDRESSTOK) and (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then begin
 
 		  GenerateAssignment(ASSTRINGPOINTERTOARRAYORIGIN, DataSize[VarType], IdentIndex);
 
