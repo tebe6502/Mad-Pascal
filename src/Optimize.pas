@@ -44,18 +44,18 @@ procedure OptimizeProgram(MainIndex: Integer);
     ChildIndex, ChildIdentIndex: Integer;
   begin
 
-    if Ident[IdentIndex].ProcAsBlock > 0 then begin
+    Ident[IdentIndex].IsNotDead := TRUE;
 
-  	Ident[IdentIndex].IsNotDead := TRUE;
+    if (Ident[IdentIndex].ProcAsBlock > 0) and (CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren > 0) then
 
   	for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
 	    for ChildIdentIndex := 1 to NumIdent do
 
-	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then
-		MarkNotDead(ChildIdentIndex);
+	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then begin
 
-    end;
+		MarkNotDead(ChildIdentIndex); Break;
 
+              end;
   end;
 
 begin
@@ -1883,7 +1883,7 @@ end;
 
 
 {
-if (pos('jsr B_CRT.CRT_READ', listing[i]) > 0) then begin
+if (pos('READKEY', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

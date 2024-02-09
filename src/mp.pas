@@ -101,6 +101,7 @@ Contributors:
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
 	- MADSTRAP
 	- PASDOC
+	- NEO6502 (-t neo)
 
 + Zlatko Bleha (https://atariwiki.org/wiki/Wiki.jsp?page=Super%20fast%20circle%20routine) :
 	- GRAPH.INC Circle
@@ -2610,7 +2611,6 @@ case IndirectionLevel of
 	 end;
       end;
     end;
-
 
 
   ASSTRINGPOINTERTOARRAYORIGIN:
@@ -6339,21 +6339,13 @@ begin
 
  //writeln(Ident[IdentIndex].name,',',NumActualParams,',',Ident[IdentIndex].isUnresolvedForward ,',',Ident[IdentIndex].isRecursion );
 
-{
-   if NumActualParams <> Ident[IdentIndex].NumParams then
-    if ProcVarIndex > 0 then begin
-     iError(i, WrongNumParameters, ProcVarIndex);
-    end else
-     iError(i, WrongNumParameters, IdentIndex);
-}
 
-
-   if Pass = CALLDETERMPASS then
-    if Ident[IdentIndex].isUnresolvedForward then
-
-      Ident[IdentIndex].updateResolvedForward := TRUE
-    else
-      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+   if Pass = CALLDETERMPASS then											// issue #103 fixed
+    if Ident[IdentIndex].isUnresolvedForward then									//
+															//
+      Ident[IdentIndex].updateResolvedForward := TRUE									//
+    else														//
+      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);					//
 
 
 (*------------------------------------------------------------------------------------------------------------*)
@@ -9723,6 +9715,7 @@ case Tok[i].Kind of
 	   end else
 	    CheckTok(i + 1, ASSIGNTOK);
 
+
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',IndirectionLevel);
 
 
@@ -10371,15 +10364,35 @@ case Tok[i].Kind of
 
 //	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType ,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].Name,',',IndirectionLevel,',',vartype,'||',Ident[GetIdent(Tok[k].Name^)].NumAllocElements,',',Ident[GetIdent(Tok[k].Name^)].PassMethod);
 
+//		writeln(address,',',Tok[k].kind,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].AllocElementType);
+(*
+		 if (Tok[k].Kind = ADDRESSTOK) and (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then begin
+
+		  IndirectionLevel := ASPOINTERTOARRAYORIGIN2  //ASPOINTERTOPOINTER
+
+
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+{
+		  GenerateAssignment(ASSTRINGPOINTERTOARRAYORIGIN, DataSize[VarType], IdentIndex);
+
+		  StopOptimization;
+
+		  ResetOpty;
+}
+
+		 end else
+
 
 		 if (Tok[k].Kind = ADDRESSTOK) and (Ident[IdentIndex].NumAllocElements > 0) then
 		   iError(i, IncompatibleTypes,  0, POINTERTOK, STRINGPOINTERTOK);
-
+*)
 //		 if (Ident[IdentIndex].NumAllocElements = 0) and (Tok[k].Kind = IDENTTOK) and (Ident[GetIdent(Tok[k].Name^)].NumAllocElements > 0) then
 //		   iError(i, IncompatibleTypes,  0, STRINGPOINTERTOK, POINTERTOK);
 
 
-		 if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then begin
+
+
+		 if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) and (ADDRESS = FALSE) {(Tok[k].Kind <> ADDRESSTOK)} then begin
 
 		  GenerateAssignment(ASSTRINGPOINTERTOARRAYORIGIN, DataSize[VarType], IdentIndex);
 
@@ -10389,6 +10402,9 @@ case Tok[i].Kind of
 
 		 end else
 		  GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex, par1, par2);
+
+
+
 
 	        end else
 
@@ -15732,7 +15748,7 @@ begin
      if err<>0 then Syntax(3);
 
      raw.codeorigin := CODEORIGIN_BASE;
-	 neo.codeorigin := CODEORIGIN_BASE;
+     neo.codeorigin := CODEORIGIN_BASE;
 
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
@@ -15741,7 +15757,7 @@ begin
      if err<>0 then Syntax(3);
 
      raw.codeorigin := CODEORIGIN_BASE;
-	 neo.codeorigin := CODEORIGIN_BASE;
+     neo.codeorigin := CODEORIGIN_BASE;
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
