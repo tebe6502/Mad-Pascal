@@ -44,11 +44,10 @@ procedure SetColor(color: byte); assembler;
 Sets the foreground color to Color
 *)
 asm
-    lda #0
-    sta	DParameters
-    sta DParameters+2
-    sta DParameters+3
-    sta DParameters+4
+    stz	DParameters
+    stz DParameters+2
+    stz DParameters+3
+    stz DParameters+4
     lda color
     sta DParameters+1
     @SendMessage 				
