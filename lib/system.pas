@@ -247,6 +247,28 @@ const
 	CH_INSLINE	= chr($9D);	// insert line
 {$endif}
 
+(* Character codes *)
+{$ifdef neo}
+	CH_CURSOR_LEFT 	= chr(1);
+	CH_CURSOR_RIGHT	= chr(4);
+	CH_INSERT	= chr(5);
+	CH_PAGE_DOWN	= chr(6);
+	CH_END		= chr(7);
+	CH_BACKSPACE	= chr(8);
+	CH_HTAB		= chr(9);	// horizontal tab
+	CH_LINE_FEED	= chr(10);
+	CH_CLEAR_SCREEN	= chr(12);
+	CH_ENTER	= chr(13);
+	CH_PAGE_UP	= chr(18);
+	CH_CURSOR_DOWN 	= chr(19);
+	CH_CURSOR_HOME	= chr(20);
+	CH_VTAB 	= chr(22);	// vertical tab
+	CH_CURSOR_UP	= chr(23);
+	CH_CURSOR_REV	= chr(24);	// cursor reverse
+	CH_DELETE	= chr(26);
+	CH_ESCAPE	= chr(27);	// general break – e.g. exits BASIC
+{$endif}
+
 (* color defines *)
 {$ifdef atari}
 	PAL_PMCOLOR0	= 0;		// palette index Palette[..] , HPalette[..]
