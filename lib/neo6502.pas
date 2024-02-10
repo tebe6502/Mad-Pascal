@@ -84,6 +84,13 @@ procedure NeoReset;
 * @description:
 * Resets the messaging system and its components. Should not normally be used.
 *)
+function NeoVblanks:cardinal;
+(*
+* @description:
+* Return the number of vblanks since power on. This isupdated at the start of the vblank period.
+*
+* @returns: (cardinal) - number of vblanks
+*)
 function NeoGetTimer:cardinal;
 (*
 * @description:
@@ -451,10 +458,16 @@ begin
     NeoSendMessage(1,0);
 end;
 
+function NeoVblanks:cardinal;
+begin
+    NeoSendMessage(5,37);
+    result := dwordParams[0];
+end;
+
 function NeoGetTimer:cardinal;
 begin
     NeoSendMessage(1,1);
-    result:=dwordParams[0];
+    result := dwordParams[0];
 end;
 
 function NeoIsKeyPressed(key:byte):byte;
