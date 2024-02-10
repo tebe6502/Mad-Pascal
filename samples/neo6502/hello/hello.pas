@@ -1,7 +1,14 @@
 program hello;
 uses crt;
+
 var c:char;
     s:TString;
+
+procedure CallBasic; assembler; inline;
+asm
+    jmp $800
+end;
+
 begin
     TextBackground(10);
     TextColor(15);
@@ -21,5 +28,5 @@ begin
     TextBackground(0);
     TextColor(2);
     ClrScr;
-    asm jmp $800 end;    
+    CallBasic;    
 end.
