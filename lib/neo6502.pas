@@ -479,7 +479,7 @@ begin
     NeoSendMessage(5,37);
     rtclok0 := peek(N6502MSG_P0);
     repeat NeoSendMessage(5,37) until rtclok0 <> peek(N6502MSG_P0);
-end
+end;
 
 function NeoGetTimer:cardinal;
 begin
