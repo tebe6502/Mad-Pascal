@@ -38,6 +38,7 @@ end;
 
 
 procedure OptimizeProgram(MainIndex: Integer);
+var ProcAsBlock: array [1..MAXBLOCKS] of Boolean;				// issue #125 fixed
 
   procedure MarkNotDead(IdentIndex: Integer);
   var
@@ -46,19 +47,22 @@ procedure OptimizeProgram(MainIndex: Integer);
 
     Ident[IdentIndex].IsNotDead := TRUE;
 
-    if (Ident[IdentIndex].ProcAsBlock > 0) and (CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren > 0) then
+    if (Ident[IdentIndex].ProcAsBlock > 0) and (CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren > 0) and (ProcAsBlock[Ident[IdentIndex].ProcAsBlock] = FALSE) then begin
+
+	ProcAsBlock[Ident[IdentIndex].ProcAsBlock] := TRUE;
 
   	for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
-	    for ChildIdentIndex := 1 to NumIdent do
+	   for ChildIdentIndex := 1 to NumIdent do
+	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then
+		MarkNotDead(ChildIdentIndex);
 
-	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then begin
+     end;
 
-		MarkNotDead(ChildIdentIndex); Break;
-
-              end;
   end;
 
 begin
+
+ fillbyte(ProcAsBlock, sizeof(ProcAsBlock), 0);
 
 // Perform dead code elimination
  MarkNotDead(MainIndex);

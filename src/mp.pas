@@ -14199,15 +14199,22 @@ while Tok[i].Kind in
 
   if Tok[i].Kind = EXPORTSTOK then begin
 
+   while Tok[i + 1].Kind = IDENTTOK do begin
 
-//   j := CompileStatement(i + 1);
-//   while Tok[j + 1].Kind = SEMICOLONTOK do j := CompileStatement(j + 2);
+    IdentIndex := GetIdent(Tok[i+1].Name^);
 
-   inc(i);
+    if Pass = CALLDETERMPASS then
+      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
+
+    CheckTok(i+2, SEMICOLONTOK);
+
+    inc(i,2);
+   end;
+
+   inc(i,2);
 
   end;
-
-
 
 
   if Tok[i].Kind = INITIALIZATIONTOK then begin
@@ -15222,8 +15229,10 @@ OutputDisabled := (Pass = CODEGENERATIONPASS) and (BlockStack[BlockStackTop] <> 
 if not isAsm then begin
  GenerateDeclarationEpilog;  // Make jump to block entry point
 
- if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
-  CheckTok(i, BEGINTOK);
+
+if LIBRARYTOK_USE = FALSE then
+  if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
+    CheckTok(i, BEGINTOK);
 
 end;
 
@@ -15984,9 +15993,10 @@ begin
  optyFOR2 := '';
  optyFOR3 := '';
 
- PROGRAMTOK_USE := false;
- INTERFACETOK_USE := false;
- PublicSection := true;
+ LIBRARYTOK_USE := FALSE;
+ PROGRAMTOK_USE := FALSE;
+ INTERFACETOK_USE := FALSE;
+ PublicSection := TRUE;
 
  for i := 1 to MAXUNITS do UnitName[i].Units := 0;
 
