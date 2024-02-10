@@ -26,6 +26,10 @@ interface
 const 
     N6502MSG_ADDRESS = $ff00;
     NEO_GFX_RAM = $ffff;
+    N6502MSG_P0 = N6502MSG_ADDRESS + 4;
+    N6502MSG_P1 = N6502MSG_ADDRESS + 5;
+    N6502MSG_P2 = N6502MSG_ADDRESS + 6;
+    N6502MSG_P3 = N6502MSG_ADDRESS + 7; 
 
 type TN6502Message = record
 (*
@@ -62,7 +66,7 @@ var
     wordParams: array[0..3] of word absolute N6502MSG_ADDRESS+4; // helping structure to easliy obrain or set word parametrs
     dwordParams: array[0..1] of cardinal absolute N6502MSG_ADDRESS+4; // helping structure to easliy obrain or set cardinal parametrs
     wordxParams: array[0..2] of word absolute N6502MSG_ADDRESS+5; // @nodoc
-    soundParams: TSound absolute N6502MSG_ADDRESS+4; // @nodoc
+    soundParams: TSound absolute N6502MSG_ADDRESS+4; // @nodoc  
 
 function NeoSendMessage(group,func:byte):byte;
 (*
@@ -90,6 +94,11 @@ function NeoGetVblanks:cardinal;
 * Return the number of vblanks since power on. This isupdated at the start of the vblank period.
 *
 * @returns: (cardinal) - number of vblanks
+*)
+procedure NeoWaitForVblank;
+(*
+* @description:
+* Wait for new vblank.
 *)
 function NeoGetTimer:cardinal;
 (*
@@ -464,6 +473,14 @@ begin
     result := dwordParams[0];
 end;
 
+procedure NeoWaitForVblank;
+    var rtclok0:byte;
+begin
+    NeoSendMessage(5,37);
+    rtclok0 := peek(N6502MSG_P0);
+    repeat NeoSendMessage(5,37) until rtclok0 <> peek(N6502MSG_P0);
+end
+
 function NeoGetTimer:cardinal;
 begin
     NeoSendMessage(1,1);
@@ -505,11 +522,11 @@ end;
 
 function NeoLoad(name:TString;dest:word):byte;
 begin
-    wordParams[0]:=word(@name);
-    wordParams[1]:=dest;
+    wordParams[0] := word(@name);
+    wordParams[1] := dest;
     NeoSendMessage(3,2);
     NeoWaitMessage;
-    result:=NeoMessage.params[0];
+    result := NeoMessage.params[0];
 end;
 
 function NeoSave(name:TString;dest,len:word):byte;
@@ -537,7 +554,7 @@ end;
 
 procedure NeoMute(channel:byte);overload;
 begin
-    NeoMessage.params[0]:=channel;
+    NeoMessage.params[0] := channel;
     NeoSendMessage(8,2);
 end;
 
