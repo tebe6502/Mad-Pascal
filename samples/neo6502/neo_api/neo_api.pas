@@ -75,6 +75,26 @@ begin
     Writeln(#192#193#32#192#193#32#192#193#32);
     WaitForAnyKeyAndClear;
 
+    Writeln('Group: 2 Function: 7');
+    Writeln('Set Cursor Position.');
+    GotoXY(5,5);
+    Write('5,5');
+    GotoXY(10,10);
+    Write('10,10');
+    GotoXY(15,15);
+    Write('15,15');
+    Writeln;
+    WaitForAnyKeyAndClear;
+
+(*  
+    Writeln('Group: 2 Function: 8');
+    Writeln('Display settings of function keys.');
+    Writeln;
+    
+    NeoGetFunctionKeys;
+    WaitForAnyKeyAndClear;
+*)
+  
     Writeln('Group: 7 Function: 1');
     Writeln('Controller test: ');
     Writeln;

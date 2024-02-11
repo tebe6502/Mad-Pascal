@@ -137,6 +137,11 @@ procedure NeoSetChar(c:byte;data:pointer);
 * @param: c (byte) - code of char to be defined (192-255)
 * @param: data (pointer) - pointer to 7 bytes of data
 *)
+procedure NeoGetFunctionKeys;
+(*
+* @description:
+* Displays the current settings of the function keys
+*)
 /////////////// GROUP 3 - filesystem
 procedure NeoShowDir;
 (*
@@ -289,6 +294,16 @@ procedure NeoSelectTileMap(mem,xoffset,yoffset:word);
 * @param: mem (word) - address in 6502 memory of Tilemap definition (header needed)
 * @param: xoffset (word) - left offset in pixels
 * @param: yoffset (word) - top offser in pixels
+*)
+function NeoGetSpritePixel(x,y:word):byte;
+(*
+* @description:
+* Reads pixel from sprite layer. (0-15, 0 = transparency) Sets error if out of range.
+* 
+* @param: x (word) - x coordinate 
+* @param: y (word) - y coordinate
+*
+* @returns: (byte) - returned pixel value
 *)
 procedure NeoResetSprites;
 (*
@@ -511,6 +526,11 @@ begin
     NeoSendMessage(2,5);
 end;
 
+procedure NeoGetFunctionKeys;
+begin
+    NeoSendMessage(2,8);
+end;
+
 procedure NeoShowDir;
 begin
     NeoSendMessage(3,1);
@@ -680,6 +700,13 @@ begin
     wordParams[1]:=xoffset;
     wordParams[2]:=yoffset;
     NeoSendMessage(5,35);
+end;
+
+function NeoGetSpritePixel(x,y:word):byte;
+begin
+    wordParams[0]:=x;
+    wordParams[1]:=y;
+    result := NeoSendMessage(5,36);
 end;
 
 procedure NeoResetSprites;
