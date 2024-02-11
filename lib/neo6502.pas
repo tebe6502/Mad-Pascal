@@ -26,10 +26,6 @@ interface
 const 
     N6502MSG_ADDRESS = $ff00;
     NEO_GFX_RAM = $ffff;
-    N6502MSG_P0 = N6502MSG_ADDRESS + 4;
-    N6502MSG_P1 = N6502MSG_ADDRESS + 5;
-    N6502MSG_P2 = N6502MSG_ADDRESS + 6;
-    N6502MSG_P3 = N6502MSG_ADDRESS + 7; 
 
 type TN6502Message = record
 (*
@@ -474,11 +470,11 @@ begin
 end;
 
 procedure NeoWaitForVblank;
-    var rtclok0:byte;
+    var vbcount0:byte;
 begin
     NeoSendMessage(5,37);
-    rtclok0 := peek(N6502MSG_P0);
-    repeat NeoSendMessage(5,37) until rtclok0 <> peek(N6502MSG_P0);
+    vbcount0 := NeoMessage.params[0];
+    repeat NeoSendMessage(5,37) until vbcount0 <> NeoMessage.params[0];
 end;
 
 function NeoGetTimer:cardinal;

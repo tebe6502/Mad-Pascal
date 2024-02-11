@@ -54,7 +54,6 @@ procedure DrawBall(x,y,f:byte);
 begin
     NeoLoad('neo_api.gfx',NEO_GFX_RAM);
     TextMode(0);
-
     Writeln('Hello Neo6502!');
     Writeln('Let''s try some API routines.');
     WaitForAnyKeyAndClear;
@@ -125,30 +124,35 @@ begin
                 end;
         end;
     WaitForAnyKeyAndClear;
- 
+
 
     Writeln('Group: 5');
     Writeln('Tilemaps: ');
     Writeln;
     Writeln('Tilemap - width: ',tmap.width,' height: ',tmap.height);
     WaitForAnyKeyAndClear;
-   
+
+    ClrScr;
+
     x:=0;
     repeat
         y:=Trunc(sin(x*0.05)*20)+30;
-        ClrScr;
         if x>320 then begin 
             NeoSelectTileMap(TILE_MAP_ADDRESS,x-320,0); 
+            NeoWaitForVblank;
+            ClrScr;
             NeoDrawTileMap(0,y,320,160+y);
         end else begin
             NeoSelectTileMap(TILE_MAP_ADDRESS,0,0); 
+            NeoWaitForVblank;
+            ClrScr;
             NeoDrawTileMap(320-x,y,320,160+y);
         end;
-        Pause;
         inc(x,1);
         if x>980 then x:=0;
     until keypressed;
     WaitForAnyKeyAndClear;
+ 
 
     Writeln('Group: 6');
     Writeln('Sprites: ');
@@ -161,6 +165,8 @@ begin
     xacc:=1;
     repeat
 
+        NeoWaitForVblank;
+        NeoWaitForVblank;
         DrawBall(x,Round(by),b);
 
         dy:=dy+0.1;
@@ -169,7 +175,6 @@ begin
         if (x>=250) or (x<=40) then dx:=-dx;
         if (by>170) and (dy>0) then dy:=-dy;
         b:=(b+1) and 3;
-        pause(5);
 
     until keypressed;
     WaitForAnyKeyAndClear;
