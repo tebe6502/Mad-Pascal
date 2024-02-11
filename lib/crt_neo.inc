@@ -148,7 +148,16 @@ the origin of the current window. The origin is located at (1,1), the upper-left
 *)
 
 asm
-
+	lda x 
+	seq 
+	dec
+	sta DParameters
+	lda y
+	seq 
+	dec
+	sta DParameters + 1
+	@SendMessage 				
+	.byte 	2,7	
 end;
 
 
