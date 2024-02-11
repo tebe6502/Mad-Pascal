@@ -1,5 +1,5 @@
 
-.proc	@putchar (.byte a) .reg
+.proc	@putchar 
   
 		pha
 		sta 	DParameters 				; sending A

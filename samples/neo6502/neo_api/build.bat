@@ -10,7 +10,7 @@
 
 mp.exe %NAME%.pas -target:neo -code:%ORG%
 @if %ERRORLEVEL% == 0 mads %NAME%.a65 -x -i:D:\atari\MadPascal\base -o:%NAME%.neo
-@if %ERRORLEVEL% == 0 neo.exe %NAME%.neo@%ORG% exec
+@if %ERRORLEVEL% == 0 neo.exe %NAME%.neo@%ORG% run@%ORG%
 
 :getparentdir
 @if "%~1" EQU "" goto :EOF

@@ -1,7 +1,8 @@
 
 .proc	@ClrScr
 
-	@putchar #12
+	lda #12
+	@putchar 
 	rts
 
 .endp
