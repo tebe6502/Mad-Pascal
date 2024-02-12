@@ -1,6 +1,6 @@
 program text_scroll;
 
-uses crt, graph, neo6502;
+uses crt, neo6502;
 
 const
     s0         = 'Lorem ipsum dolor sit amet, cons'; // 32 chars
