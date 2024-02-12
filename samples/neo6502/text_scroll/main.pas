@@ -26,6 +26,4 @@ begin
 
         if posX < (6 * stringSize) then inc(posX) else posX := 0;
     until Keypressed;
-    
-    NeoExecuteBasic;
 end.
