@@ -13,11 +13,6 @@ const
 var
     posX :word = 0;
 
-procedure CallBasic; assembler; inline;
-asm
-    jmp $800
-end;
-
 begin
     NeoSetColor(0,127,1,1,0);
 
@@ -32,5 +27,5 @@ begin
         if posX < (6 * stringSize) then inc(posX) else posX := 0;
     until Keypressed;
     
-    CallBasic;
+    NeoExecuteBasic;
 end.
