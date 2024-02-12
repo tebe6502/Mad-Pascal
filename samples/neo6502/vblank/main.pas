@@ -12,5 +12,4 @@ begin
         end;
         NeoWaitForVblank; dec(vcount);        
     until Keypressed;
-    NeoExecuteBasic;
 end.
