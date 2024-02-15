@@ -143,7 +143,9 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FPSGN'#9'.ds 1');
  asm65('FPEXP'#9'.ds 1');
 
- if target.id = 'a8' then begin
+
+ if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
+
   asm65;
   asm65(#9'.ifdef MAIN.@DEFINES.BASICOFF');
   asm65(#9'org CODEORIGIN');
@@ -157,10 +159,11 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'ins ''atari\s_vbxe\sdxld2.obx''');
   asm65(#9'opt h+');
   asm65(#9'.fi');
+
  end;
 
 
- if (High(resArray) > 0) and (target.id = 'a8') then begin
+ if (High(resArray) > 0) and (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
 
   asm65;
   asm65(#9'org CODEORIGIN');
@@ -271,7 +274,8 @@ if Pass = CODEGENERATIONPASS then begin
  asm65(#9'stx MAIN.@halt+1');
  asm65;
 
- if target.id = 'a8' then begin
+
+ if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
   asm65(#9'icl ''atari\romoff.asm''');
@@ -314,7 +318,7 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
 
- if target.id = 'a8' then begin
+ if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
 
   asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
   asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');

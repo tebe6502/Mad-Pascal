@@ -243,6 +243,7 @@ const
   MAXFIELDS		= 256;
   MAXTYPES		= 1024;
 //  MAXTOKENS		= 32768;
+  MAXPOSSTACK		= 512;
   MAXIDENTS		= 16384;
   MAXBLOCKS		= 16384;	// maksymalna liczba blokow
   MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
@@ -334,18 +335,18 @@ type
   __addAL_CL, __addAX_CX, __addEAX_ECX,
   __shlAL_CL, __shlAX_CL, __shlEAX_CL,
   __subAL_CL, __subAX_CX, __subEAX_ECX,
-//  __cmpINT, __cmpEAX_ECX, __cmpAX_CX, __cmpSMALLINT, __cmpSHORTINT,
   __cmpSTRING, __cmpSTRING2CHAR, __cmpCHAR2STRING,
-  __shrAL_CL, __shrAX_CL, __shrEAX_CL,
-  __andEAX_ECX, __andAX_CX, //__andAL_CL,
-  __orEAX_ECX, __orAX_CX, //__orAL_CL,
-  __xorEAX_ECX, __xorAX_CX //__xorAL_CL
+  __shrAL_CL, __shrAX_CL, __shrEAX_CL
+
+//  __cmpINT, __cmpEAX_ECX, __cmpAX_CX, __cmpSMALLINT, __cmpSHORTINT,
+//  __andEAX_ECX, __andAX_CX, __andAL_CL,
+//  __orEAX_ECX, __orAX_CX, __orAL_CL,
+//  __xorEAX_ECX, __xorAX_CX __xorAL_CL
 
   );
 
   TString = string [MAXSTRLENGTH];
   TName   = string [MAXNAMELENGTH];
-
 
   TDefinesParam = array [1..MAXPARAMS] of TString;
 
@@ -388,8 +389,8 @@ type
   end;
 
   TToken = record
-    UnitIndex: Integer;
-    Line, Column: Integer;
+    UnitIndex, Column: Smallint;
+    Line: Integer;
     case Kind: Byte of
       IDENTTOK:
 	(Name: ^TString);
@@ -407,6 +408,8 @@ type
     Value: Int64;			// Value for a constant, address for a variable, procedure or function
     Block: Integer;			// Index of a block in which the identifier is defined
     UnitIndex : Integer;
+    Alias : TString;			// EXTERNAL alias 'libraries'
+    Libraries : Integer;		// EXTERNAL alias 'libraries'
     DataType: Byte;
     IdType: Byte;
     PassMethod: Byte;
@@ -518,8 +521,8 @@ var
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefines;
   IFTmpPosStack: array of integer;
-  BreakPosStack: array [0..1023] of TPosStack;
-  CodePosStack: array [0..1023] of Word;
+  BreakPosStack: array [0..MAXPOSSTACK] of TPosStack;
+  CodePosStack: array [0..MAXPOSSTACK] of Word;
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;	// For dead code elimination
 
@@ -574,7 +577,7 @@ var
 	      end;
 
 
-  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE,
+  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE,
   OutputDisabled, isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
   DiagMode: Boolean = false;

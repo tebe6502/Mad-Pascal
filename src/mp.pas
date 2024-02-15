@@ -569,7 +569,7 @@ for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting lev
  for i:=0 to High(ov)-1 do
   if ov[i].j > 1 then
    if ov[i].i <> ov[i].j then
-    Error(x, 'Not all declarations of '+Ident[NumIdent].Name+' are declared with OVERLOAD');
+    Error(x, 'Not all declarations of ' + Ident[NumIdent].Name + ' are declared with OVERLOAD');
 
  SetLength(l, 0);
  SetLength(ov, 0);
@@ -3372,6 +3372,7 @@ procedure GenerateIfThenProlog;
 begin
 
  Inc(CodePosStackTop);
+
  CodePosStack[CodePosStackTop] := CodeSize;
 
  Gen;								// nop   ; jump to the IF..THEN block end will be inserted here
@@ -5984,7 +5985,7 @@ begin
 
        inc(i);
 
-       if (Ident[ProcVarIndex].NumAllocElements * 2 > 256) or (Ident[ProcVarIndex].NumAllocElements in [0,1]) then begin
+       if (Ident[ProcVarIndex].NumAllocElements * 2 > 256) or (Ident[ProcVarIndex].NumAllocElements in [0, 1]) then begin
 
 	asm65(#9'lda ' + svar);
         asm65(#9'add :STACKORIGIN,x');
@@ -6364,6 +6365,9 @@ begin
 //   Error(i, 'Unresolved forward declaration of ' + Ident[IdentIndex].Name);
 
 
+ if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then
+  svar := Ident[IdentIndex].Alias
+ else
  if Ident[IdentIndex].isOverload then
   svar := GetLocalName(IdentIndex) + '.@' + IntToHex(Ident[IdentIndex].Value, 4)
  else
@@ -9195,6 +9199,7 @@ procedure SaveBreakAddress;
 begin
 
   Inc(BreakPosStackTop);
+
   BreakPosStack[BreakPosStackTop].ptr := CodeSize;
   BreakPosStack[BreakPosStackTop].brk := false;
   BreakPosStack[BreakPosStackTop].cnt := false;
@@ -10370,7 +10375,6 @@ case Tok[i].Kind of
 		if// (Tok[k].Kind = IDENTTOK) and
 		   (VarType = STRINGPOINTERTOK) and (ExpressionType in Pointers) {and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK])} then begin
 
-//LUCI
 
 //	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType ,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].Name,',',IndirectionLevel,',',vartype,'||',Ident[GetIdent(Tok[k].Name^)].NumAllocElements,',',Ident[GetIdent(Tok[k].Name^)].PassMethod);
 
@@ -11043,7 +11047,7 @@ WHILETOK:
       inc(CodeSize);		      // !!! aby dzialaly zagniezdzone FOR
 
       if IdentIndex > 0 then
-	if not ( (Ident[IdentIndex].Kind = VARIABLE) and (Ident[IdentIndex].DataType in OrdinalTypes + Pointers) ) then
+	if not ( (Ident[IdentIndex].Kind = VARIABLE) and (Ident[IdentIndex].DataType in OrdinalTypes + Pointers) and (Ident[IdentIndex].AllocElementType = UNTYPETOK) ) then
 	  Error(i + 1, 'Ordinal variable expected as ''FOR'' loop counter')
 	 else
 	 if (Ident[IdentIndex].isInitialized) or (Ident[IdentIndex].PassMethod <> VALPASSING) then
@@ -12778,10 +12782,12 @@ end;	//CompileStatement
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateProcFuncAsmLabels(BlockIdentIndex: integer; VarSize: Boolean = false);
-var IdentIndex, size: integer;
-    emptyLine: Boolean;
+procedure GenerateProcFuncAsmLabels(i: integer; BlockIdentIndex: integer; VarSize: Boolean = false);
+var IdentIndex, size, k: integer;
+    emptyLine, yes: Boolean;
+    fnam, txt: string;
     varbegin: TString;
+    HeaFile: TextFile;
 
 
    function Value(dorig: Boolean = false; brackets: Boolean = false): string;
@@ -12821,11 +12827,9 @@ var IdentIndex, size: integer;
       size := 0;
      end else
 
-     if Ident[IdentIndex].isExternal then begin
-
-      Result := #9'= ' + Tok[Ident[IdentIndex].Value + 1].Name^;
-
-     end else
+//     if Ident[IdentIndex].isExternal then begin
+//      Result := #9'= ' + Tok[Ident[IdentIndex].Value + 1].Name^;
+//     end else
 
      if Ident[IdentIndex].isAbsolute then begin
 
@@ -12888,6 +12892,55 @@ begin
 
      emptyLine:=false;
     end;
+
+
+    if Ident[IdentIndex].isExternal then begin			// read file header *.hea
+
+//      writeln(Ident[IdentIndex].Alias,',',Ident[IdentIndex].Libraries);
+
+      if Ident[IdentIndex].Libraries > 0 then begin
+        fnam := '';
+
+        for k:=1 to Tok[Ident[IdentIndex].Libraries].StrLength do
+        fnam := fnam + chr( StaticStringData[Tok[Ident[IdentIndex].Libraries].StrAddress - CODEORIGIN + k] );
+
+	if ExtractFileExt(fnam) = '' then fnam := ChangeFileExt(fnam, '.hea');
+
+        fnam := FindFile(fnam, 'library');
+
+	yes := TRUE;
+
+        AssignFile(HeaFile, fnam); FileMode:=0; Reset(HeaFile);
+
+	while not eof(HeaFile) do begin
+	  readln(HeaFile, txt);
+
+	  if (length(txt) > 255) or (pos(#0, txt) > 0) then begin
+	   CloseFile(HeaFile);
+
+	   writeln('Error: MADS header file ''' + fnam + ''' has invalid format.');
+	   Halt(3);
+	  end;
+
+	  if (pos('MAIN.' + Ident[IdentIndex].Alias + #9, txt) = 1) or (pos('MAIN.' + Ident[IdentIndex].Alias + '.', txt) = 1) then begin
+	   yes := FALSE;
+
+	   asm65( Ident[IdentIndex].Name + copy(txt, 6 + length(Ident[IdentIndex].Alias), length(txt)) );
+
+	  end;
+
+	end;
+
+	if yes then begin
+	 writeln('Error: Identifier not found ''' + Ident[IdentIndex].Alias + '''' + ' in MADS header file ''' + fnam + '''');
+	 halt(3);
+	end;
+
+	CloseFile(HeaFile);
+
+      end;
+
+    end else
 
 
     case Ident[IdentIndex].Kind of
@@ -13659,6 +13712,9 @@ var
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
   Tmp, TmpResult: word;
 
+  external_libr : integer;
+  external_name: TString;
+
   UnitList: array of TString;
 
 begin
@@ -14158,7 +14214,7 @@ while Tok[i].Kind in
    if not ImplementationUse then
     CheckTok(i, IMPLEMENTATIONTOK);
 
-   GenerateProcFuncAsmLabels(BlockIdentIndex);
+   GenerateProcFuncAsmLabels(i, BlockIdentIndex);
 
    VarRegister := 0;
 
@@ -14199,20 +14255,30 @@ while Tok[i].Kind in
 
   if Tok[i].Kind = EXPORTSTOK then begin
 
-   while Tok[i + 1].Kind = IDENTTOK do begin
+   inc(i);
 
-    IdentIndex := GetIdent(Tok[i+1].Name^);
+   repeat
 
-    if Pass = CALLDETERMPASS then
+    CheckTok(i , IDENTTOK);
+
+    if Pass = CALLDETERMPASS then begin
+      IdentIndex := GetIdent(Tok[i].Name^);
+
+      if IdentIndex = 0 then
+       iError(i, UnknownIdentifier);
+
       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+    end;
 
+    inc(i);
 
-    CheckTok(i+2, SEMICOLONTOK);
+    if not (Tok[i].Kind in [COMMATOK, SEMICOLONTOK]) then CheckTok(i, SEMICOLONTOK);
 
-    inc(i,2);
-   end;
+    if Tok[i].Kind = COMMATOK then inc(i);
 
-   inc(i,2);
+   until Tok[i].Kind = SEMICOLONTOK;
+
+    inc(i,1);
 
   end;
 
@@ -14333,15 +14399,19 @@ while Tok[i].Kind in
 
    inc(i);
 
-   if Tok[i].Kind = COMMATOK then inc(i);
-
    if Tok[i].Kind = INTOK then begin
     CheckTok(i + 1, STRINGLITERALTOK);
 
     inc(i,2);
    end;
 
+   if not (Tok[i].Kind in [COMMATOK, SEMICOLONTOK]) then CheckTok(i, SEMICOLONTOK);
+
+   if Tok[i].Kind = COMMATOK then inc(i);
+
   until Tok[i].Kind <> IDENTTOK;
+
+  CheckTok(i, SEMICOLONTOK);
 
 
   i:=idx;
@@ -14359,7 +14429,7 @@ while Tok[i].Kind in
 
    yes:=true;
    for j := 1 to UnitName[UnitNameIndex].Units do
-    if (UnitName[UnitNameIndex].Allow[j] = Tok[i].Name^) or (Tok[i].Name^='SYSTEM') then yes:=false;
+    if (UnitName[UnitNameIndex].Allow[j] = Tok[i].Name^) or (Tok[i].Name^ = 'SYSTEM') then yes:=false;
 
    if yes then begin
 
@@ -14374,15 +14444,19 @@ while Tok[i].Kind in
 
    inc(i);
 
-   if Tok[i].Kind = COMMATOK then inc(i);
-
    if Tok[i].Kind = INTOK then begin
     CheckTok(i + 1, STRINGLITERALTOK);
 
     inc(i,2);
    end;
 
+   if not (Tok[i].Kind in [COMMATOK, SEMICOLONTOK]) then CheckTok(i, SEMICOLONTOK);
+
+   if Tok[i].Kind = COMMATOK then inc(i);
+
   until Tok[i].Kind <> IDENTTOK;
+
+  CheckTok(i, SEMICOLONTOK);
 
   inc(i);
 
@@ -14673,29 +14747,32 @@ while Tok[i].Kind in
        if NumVarOfSameType > 1 then
 	 Error(i + 1, 'Only one variable can be initialized');
 
-//	 Ident[NumIdent].isExternal:=true;
-
        isAbsolute := true;
        isExternal := true;
 
-//	 Ident[NumIdent].isInit := true;
-
        inc(i);
 
-       if Tok[i + 1].Kind <> IDENTTOK then
-         iError(i + 1, IdentifierExpected);
+       if Tok[i + 1].Kind = IDENTTOK then begin
 
-//       ConstVal := GetIdent(Tok[i + 1].Name^);
+        CheckTok(i + 2, STRINGLITERALTOK);
 
-        ConstVal:=i+1;
+	external_name := Tok[i + 1].Name^;
+	external_libr := i + 2;
 
-       inc(i);
+	inc(i, 2);
+       end else
+       if Tok[i + 1].Kind = STRINGLITERALTOK then begin
 
-//       VarType := POINTERTOK;
+	external_name := VarOfSameType[1].Name;
+	external_libr := i + 1;
 
+        inc(i);
+       end;
+
+
+       ConstVal := 1;
 
       end else
-
 
       if Tok[i + 1].Kind = ABSOLUTETOK then begin
 
@@ -14766,7 +14843,6 @@ while Tok[i].Kind in
 
 
 	if VarType = ENUMTYPE then begin
-
 
 	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, AllocElementType, 0, 0, 0, IdType);
 
@@ -14894,7 +14970,14 @@ while Tok[i].Kind in
       end;
 
 
-       if isExternal then Ident[NumIdent].isExternal := true;
+       if isExternal then begin
+
+	Ident[NumIdent].isExternal := true;
+
+        Ident[NumIdent].Alias := external_name;
+        Ident[NumIdent].Libraries := external_libr;
+
+       end;
 
 
        if isAbsolute and (open_array = false) then
@@ -15230,8 +15313,12 @@ if not isAsm then begin
  GenerateDeclarationEpilog;  // Make jump to block entry point
 
 
-if LIBRARYTOK_USE = FALSE then
   if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
+   if LIBRARYTOK_USE and (Tok[i].Kind <> BEGINTOK) then
+
+     inc(i)
+
+   else
     CheckTok(i, BEGINTOK);
 
 end;
@@ -15263,7 +15350,7 @@ while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
   if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-    if (Ident[j].IsUnresolvedForward) then
+    if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
   Dec(j);
@@ -15303,7 +15390,7 @@ if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DE
 
  if Ident[BlockIdentIndex].isInline then asm65(#9'.ENDM');
 
- GenerateProcFuncAsmLabels(BlockIdentIndex, true);
+ GenerateProcFuncAsmLabels(i, BlockIdentIndex, true);
 
 end;
 
@@ -15378,9 +15465,14 @@ asm65('@halt'#9'ldx #$00');
 asm65(#9'txs');
 
 if target.id = 'a8' then begin
- asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
- asm65(#9'inc portb');
- asm65(#9'.fi');
+
+ if LIBRARY_USE = FALSE then begin
+  asm65;
+  asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
+  asm65(#9'inc portb');
+  asm65(#9'.fi');
+ end;
+
  asm65;
  asm65(#9'ldy #$01');
 end;
@@ -15388,12 +15480,18 @@ end;
 asm65;
 asm65(#9'rts');
 
-asm65separator;
 
-if target.id = 'a8' then begin
- asm65;
- asm65('IOCB@COPY'#9':16 brk');
+if LIBRARY_USE = FALSE then begin
+
+  asm65separator;
+
+  if target.id = 'a8' then begin
+    asm65;
+    asm65('IOCB@COPY'#9':16 brk');
+  end;
+
 end;
+
 
 asm65separator;
 
@@ -15838,7 +15936,7 @@ begin
     UnitName[1].Path := UnitName[1].Name;
 
     if not FileExists(UnitName[1].Name) then begin
-     writeln('Error: Can''t open file '''+UnitName[1].Name+'''');
+     writeln('Error: Can''t open file ''' + UnitName[1].Name + '''');
      FreeTokens;
      Halt(3);
     end;
@@ -15992,6 +16090,8 @@ begin
  optyFOR1 := '';
  optyFOR2 := '';
  optyFOR3 := '';
+
+ LIBRARY_USE := LIBRARYTOK_USE;
 
  LIBRARYTOK_USE := FALSE;
  PROGRAMTOK_USE := FALSE;

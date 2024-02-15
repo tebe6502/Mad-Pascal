@@ -1887,7 +1887,7 @@ end;
 
 
 {
-if (pos('READKEY', listing[i]) > 0) then begin
+if (pos('jsr #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2018,6 +2018,24 @@ end;
 	Result:=false; Break;
      end;
 
+
+    if lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
+       and_im(i+1) and										// and #				; 1
+       (listing[i+2] = #9'jsr #$00') and							// jsr #$00				; 2
+       lda_im_0(i+3) and									// lda #$00				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
+       (listing[i+5] = #9'lda @BYTE.MOD.RESULT') then						// lda @BYTE.MOD.RESULT			; 5
+       begin
+	listing[i+2] := listing[i+4];
+	listing[i+3] := '';
+	listing[i+4] := listing[i];
+	listing[i+5] := listing[i+1];
+
+	listing[i]   := '';
+	listing[i+1] := #9'lda #$00';
+
+	Result:=false; Break;
+       end;
 
 
     if (listing[i] = #9'jsr #$00') and								// jsr #$00				; 0
