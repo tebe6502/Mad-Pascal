@@ -12782,7 +12782,7 @@ end;	//CompileStatement
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateProcFuncAsmLabels(i: integer; BlockIdentIndex: integer; VarSize: Boolean = false);
+procedure GenerateProcFuncAsmLabels(BlockIdentIndex: integer; VarSize: Boolean = false);
 var IdentIndex, size, k: integer;
     emptyLine, yes: Boolean;
     fnam, txt: string;
@@ -12894,7 +12894,7 @@ begin
     end;
 
 
-    if Ident[IdentIndex].isExternal then begin			// read file header *.hea
+    if Ident[IdentIndex].isExternal then begin			// read file header libraryname.hea
 
 //      writeln(Ident[IdentIndex].Alias,',',Ident[IdentIndex].Libraries);
 
@@ -12918,23 +12918,19 @@ begin
 	  if (length(txt) > 255) or (pos(#0, txt) > 0) then begin
 	   CloseFile(HeaFile);
 
-	   writeln('Error: MADS header file ''' + fnam + ''' has invalid format.');
-	   Halt(3);
+	   Error(Ident[IdentIndex].Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
 	  end;
 
 	  if (pos('MAIN.' + Ident[IdentIndex].Alias + #9, txt) = 1) or (pos('MAIN.' + Ident[IdentIndex].Alias + '.', txt) = 1) then begin
 	   yes := FALSE;
 
 	   asm65( Ident[IdentIndex].Name + copy(txt, 6 + length(Ident[IdentIndex].Alias), length(txt)) );
-
 	  end;
 
 	end;
 
-	if yes then begin
-	 writeln('Error: Identifier not found ''' + Ident[IdentIndex].Alias + '''' + ' in MADS header file ''' + fnam + '''');
-	 halt(3);
-	end;
+	if yes then
+	  iError(Ident[IdentIndex].Libraries, UnknownIdentifier, IdentIndex);
 
 	CloseFile(HeaFile);
 
@@ -14214,7 +14210,7 @@ while Tok[i].Kind in
    if not ImplementationUse then
     CheckTok(i, IMPLEMENTATIONTOK);
 
-   GenerateProcFuncAsmLabels(i, BlockIdentIndex);
+   GenerateProcFuncAsmLabels(BlockIdentIndex);
 
    VarRegister := 0;
 
@@ -15390,7 +15386,7 @@ if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DE
 
  if Ident[BlockIdentIndex].isInline then asm65(#9'.ENDM');
 
- GenerateProcFuncAsmLabels(i, BlockIdentIndex, true);
+ GenerateProcFuncAsmLabels(BlockIdentIndex, true);
 
 end;
 

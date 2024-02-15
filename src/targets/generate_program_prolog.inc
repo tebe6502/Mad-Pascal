@@ -288,20 +288,30 @@ if Pass = CODEGENERATIONPASS then begin
  if FastMul > 0 then begin asm65(#9'fmulinit'); asm65; end;
 
 
- asm65('VLEN'#9'= VARDATASIZE-VARINITSIZE');
- asm65('VADR'#9'= DATAORIGIN+VARINITSIZE');
- asm65;
+ if (LIBRARY_USE = FALSE) then begin
 
- asm65(#9'ift VADR > $BFFF');
- asm65(#9'ert ''Invalid memory address range '',VADR');
- asm65(#9'eli (VLEN > 0) && (VLEN <= 256)');
- asm65(#9'ldx #256-VLEN');
- asm65(#9'lda #$00');
- asm65(#9'sta:rne VADR+VLEN-256,x+');
- asm65(#9'eli VLEN>256');
- asm65(#9'm@init');
- asm65(#9'eif');
- asm65;
+  asm65('VLEN'#9'= VARDATASIZE-VARINITSIZE');
+  asm65('VADR'#9'= DATAORIGIN+VARINITSIZE');
+  asm65;
+
+  if (target.id = 'a8') then begin
+   asm65(#9'ift (VADR > $BFFF) && .not(.def MAIN.@DEFINES.ROMOFF)');
+   asm65(#9'ert ''Invalid memory address range '',VADR');
+   asm65(#9'eif');
+   asm65;
+  END;
+
+  asm65(#9'ift (VLEN > 0) && (VLEN <= 256)');
+  asm65(#9'ldx #256-VLEN');
+  asm65(#9'lda #$00');
+  asm65(#9'sta:rne VADR+VLEN-256,x+');
+  asm65(#9'eli VLEN>256');
+  asm65(#9'm@init');
+  asm65(#9'eif');
+  asm65;
+
+ end;
+
 
  asm65('.ifdef psptr');
  asm65(#9'mwa #PROGRAMSTACK psptr');
