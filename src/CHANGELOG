@@ -1,3 +1,10 @@
+15.02.2023
+- issue #134 fixed (https://github.com/tebe6502/Mad-Pascal/issues/134)
+- partialy added LIBRARY, EXTERNAL
+
+09.02.2023
+- issue #125 fixed again (Optimize.pas -> OptimizeProgram)
+
 08.02.2023
 - Bugfixes
 

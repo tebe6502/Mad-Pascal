@@ -1161,55 +1161,53 @@ case Tok[i].Kind of
 
   INTNUMBERTOK:
     begin
-    ConstVal := Tok[i].Value;
-    ConstValType := GetValueType(ConstVal);
-    Result := i;
+     ConstVal := Tok[i].Value;
+     ConstValType := GetValueType(ConstVal);
+
+     Result := i;
     end;
 
 
   FRACNUMBERTOK:
     begin
-    ftmp[0] := round( Tok[i].FracValue * TWOPOWERFRACBITS );
-    ftmp[1] := integer( Tok[i].FracValue );
+     ftmp[0] := round( Tok[i].FracValue * TWOPOWERFRACBITS );
+     ftmp[1] := integer( Tok[i].FracValue );
 
-    move(ftmp, ConstVal, sizeof(ftmp));
+     move(ftmp, ConstVal, sizeof(ftmp));
 
-    ConstValType := REALTOK;
-    Result := i;
+     ConstValType := REALTOK;
+
+     Result := i;
     end;
 
 
   STRINGLITERALTOK:
     begin
-    ConstVal := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
-
-{    if Tok[i].StrLength > 255 then begin
-     ConstValType := POINTERTOK;
-     inc(ConstVal);
-    end else}
+     ConstVal := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
      ConstValType := STRINGPOINTERTOK;
 
-    Result := i;
+     Result := i;
     end;
 
 
   CHARLITERALTOK:
     begin
-    ConstVal := Tok[i].Value;
-    ConstValType := CHARTOK;
-    Result := i;
+     ConstVal := Tok[i].Value;
+     ConstValType := CHARTOK;
+
+     Result := i;
     end;
 
 
   OPARTOK:       // a whole expression in parentheses suspected
     begin
-    j := CompileConstExpression(i + 1, ConstVal, ConstValType);
+     j := CompileConstExpression(i + 1, ConstVal, ConstValType);
 
-    if isError then Exit;
+     if isError then Exit;
 
-    CheckTok(j + 1, CPARTOK);
+     CheckTok(j + 1, CPARTOK);
 
-    Result := j + 1;
+     Result := j + 1;
     end;
 
 
@@ -1978,10 +1976,12 @@ end;	//DeclareFunction
 
 function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
-     NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
+     NumVarOfSameType, VarOfSameTypeIndex, x, id: Integer;
      ListPassMethod, VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
 begin
+
+    id := i + 1;
 
     FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
 
@@ -2209,6 +2209,28 @@ begin
 			   Ident[NumIdent].isExternal := true;
 			   isForward := true;
 			   inc(i);
+
+			   Ident[NumIdent].Alias := '';
+			   Ident[NumIdent].Libraries := 0;
+
+			   if Tok[i + 1].Kind = IDENTTOK then begin
+
+			    CheckTok(i + 2, STRINGLITERALTOK);
+
+			    Ident[NumIdent].Alias := Tok[i + 1].Name^;
+			    Ident[NumIdent].Libraries := i + 2;
+
+			    inc(i, 2);
+
+			   end else
+			   if Tok[i + 1].Kind = STRINGLITERALTOK then begin
+
+			     Ident[NumIdent].Alias := Ident[NumIdent].Name;
+			     Ident[NumIdent].Libraries := i + 1;
+
+			     inc(i);
+			   end;
+
 			   CheckTok(i + 1, SEMICOLONTOK);
 			 end;
 
