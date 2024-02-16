@@ -14308,6 +14308,15 @@ while Tok[i].Kind in
 
    LIBRARY_NAME := Tok[i + 1].Name^;
 
+   if (Tok[i + 2].Kind = COLONTOK) and (Tok[i + 3].Kind = INTNUMBERTOK) then begin
+
+     CODEORIGIN_BASE := Tok[i + 3].Value;
+     raw.codeorigin := CODEORIGIN_BASE;
+     neo.codeorigin := CODEORIGIN_BASE;
+
+     inc(i, 2);
+   end;
+
    inc(i);
 
    CheckTok(i + 1, SEMICOLONTOK);
@@ -14329,6 +14338,7 @@ while Tok[i].Kind in
 
    inc(i);
 
+
    if Tok[i+1].Kind = OPARTOK then begin
 
     inc(i);
@@ -14346,6 +14356,17 @@ while Tok[i].Kind in
     inc(i);
    end;
 
+
+   if (Tok[i + 1].Kind = COLONTOK) and (Tok[i + 2].Kind = INTNUMBERTOK) then begin
+
+     CODEORIGIN_BASE := Tok[i + 2].Value;
+     raw.codeorigin := CODEORIGIN_BASE;
+     neo.codeorigin := CODEORIGIN_BASE;
+
+     inc(i, 2);
+   end;
+
+
    CheckTok(i + 1, SEMICOLONTOK);
 
    inc(i, 2);
@@ -14356,11 +14377,22 @@ while Tok[i].Kind in
 
   if Tok[i].Kind = USESTOK then begin	  // co najwyzej po PROGRAM
 
+  if LIBRARYTOK_USE then begin
+
+   j:=i-1;
+
+   while Tok[j].Kind in [SEMICOLONTOK, IDENTTOK, COLONTOK, INTNUMBERTOK] do dec(j);
+
+   if Tok[j].Kind <> LIBRARYTOK then
+    CheckTok(i, BEGINTOK);
+
+  end;
+
   if PROGRAMTOK_USE then begin
 
    j:=i-1;
 
-   while Tok[j].Kind in [SEMICOLONTOK, CPARTOK, OPARTOK, IDENTTOK, COMMATOK] do dec(j);
+   while Tok[j].Kind in [SEMICOLONTOK, CPARTOK, OPARTOK, IDENTTOK, COMMATOK, COLONTOK, INTNUMBERTOK] do dec(j);
 
    if Tok[j].Kind <> PROGRAMTOK then
     CheckTok(i, BEGINTOK);
