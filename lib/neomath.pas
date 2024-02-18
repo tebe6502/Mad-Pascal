@@ -54,20 +54,20 @@ const
 
     STACK_SIZE = 2; // binary operations stack size
     
+type TMathVar = record
 (*
 * @description: 
 * Structure used to store value for unary operations
 *)
-type TMathVar = record
     ctrl:byte;
     val:array[0..3] of byte;
 end;
 
+type TMathStack = record
 (*
 * @description: 
 * Structure used to store value for binary operations
 *)
-type TMathStack = record
     ctrl:array [0..STACK_SIZE-1] of byte;
     v0:array [0..STACK_SIZE-1] of byte;
     v1:array [0..STACK_SIZE-1] of byte;
@@ -76,10 +76,12 @@ type TMathStack = record
 end;
 
 
-var mathVar: TMathVar; // unary operation register
+var 
+    mathVar: TMathVar; // unary operation register
     mathStack: TMathStack; // binary operations stack
     m_integer: integer absolute mathVar.val; // integer value returned from unary operations
     m_float: float absolute mathVar.val; // float value returned from unary operations
+
 
 
 
@@ -227,7 +229,7 @@ implementation
 
 
 procedure SetMathStack(v:float;i:byte);overload;
-var src:array [0..3] of byte absolute v;
+var src:array [0..3] of byte absolute v; // @nodoc 
 begin
     mathStack.ctrl[i]:=$40;
     mathStack.v0[i]:=src[0];
@@ -238,7 +240,7 @@ begin
 end;
 
 procedure SetMathStack(v:integer;i:byte);overload;
-var src:array [0..3] of byte absolute v;
+var src:array [0..3] of byte absolute v; // @nodoc 
 begin
     mathStack.ctrl[i]:=$40;
     mathStack.v0[i]:=src[0];
@@ -249,7 +251,7 @@ begin
 end;
 
 function GetMathStackFloat(ptr:byte):float;
-var src:array [0..3] of byte absolute result;
+var src:array [0..3] of byte absolute result; // @nodoc 
 begin
     src[0]:=mathStack.v0[ptr];
     src[1]:=mathStack.v1[ptr];
@@ -258,7 +260,7 @@ begin
 end;
 
 function GetMathStackInt(ptr:byte):integer;
-var src:array [0..3] of byte absolute result;
+var src:array [0..3] of byte absolute result; // @nodoc 
 begin
     src[0]:=mathStack.v0[ptr];
     src[1]:=mathStack.v1[ptr];
@@ -277,14 +279,14 @@ begin
 end;
 
 procedure SetMathVar(v:integer);overload;
-var target:integer absolute mathVar.val;
+var target:integer absolute mathVar.val; // @nodoc 
 begin
     MathVar.ctrl:=0;
     target:=v;
 end;
 
 procedure SetMathVar(v:float);overload;
-var target:float absolute mathVar.val;
+var target:float absolute mathVar.val; // @nodoc 
 begin
     MathVar.ctrl:=$40;
     target:=v;
