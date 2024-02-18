@@ -545,7 +545,7 @@ begin
 
 
   if ldy_im_0(i) and										// ldy #$00			; 0
-     lda_a(i+1) and										// lda 				; 1
+     (lda_a(i+1) or and_ora_eor(i+1)) and							// lda|and|ora|eor		; 1
      spl(i+2) and										// spl				; 2
      dey(i+3) then										// dey				; 3
   begin

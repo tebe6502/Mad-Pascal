@@ -1,27 +1,40 @@
-08.02.2023
+16.02.2024
+- dodana możliwość ustawienia adresu kompilacji z poziomu programu, np.:
+
+  program name : address;
+  library name : address
+
+15.02.2024
+- issue #134 fixed (https://github.com/tebe6502/Mad-Pascal/issues/134)
+- partialy added LIBRARY, EXTERNAL
+
+09.02.2024
+- issue #125 fixed again (Optimize.pas -> OptimizeProgram)
+
+08.02.2024
 - Bugfixes
 
-04.02.2023
+04.02.2024
 - bocianu dodał nowy target 'neo6502' (-t neo)
 
-30.01.2023
+30.01.2024
 - issue #127 fixed (https://github.com/tebe6502/Mad-Pascal/issues/127)
 
-27.01.2023
+27.01.2024
 - poprawione typy proceduralne w tablicach
 
-24.01.2023
+24.01.2024
 - issue #103 fixed (https://github.com/tebe6502/Mad-Pascal/issues/103)
 - IFTMP_xxxx (opt_TEMP_IFTMP.inc) bugfixes
 
-23.01.2023
+23.01.2024
 - poprawione procedure/function forward
 
-20.01.2023
+20.01.2024
 - issue #125 fixed (https://github.com/tebe6502/Mad-Pascal/issues/125)
 - issue #126 fixed (https://github.com/tebe6502/Mad-Pascal/issues/126)
 
-13.01.2023
+13.01.2024
 - unit Common, procedure DefineStaticString, usunięty ostatni nadmiarowy bajt ciągu znakowego
 
 31.12.2023

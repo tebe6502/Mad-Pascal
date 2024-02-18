@@ -63,7 +63,11 @@ begin
 
 	UserDefined: Result := 'User defined: ' + msgUser[Tok[ErrTokenIndex].Value];
 
-  UnknownIdentifier: Result := 'Identifier not found ''' + Tok[ErrTokenIndex].Name^ + '''';
+  UnknownIdentifier: if IdentIndex > 0 then
+			Result := 'Identifier not found ''' + Ident[IdentIndex].Alias + ''''
+		     else
+  			Result := 'Identifier not found ''' + Tok[ErrTokenIndex].Name^ + '''';
+
  IncompatibleTypeOf: Result := 'Incompatible type of ' + Ident[IdentIndex].Name;
    IncompatibleEnum: if DstType < 0 then
    			Result := 'Incompatible types: got "'+GetEnumName(SrcType)+'" expected "'+InfoAboutToken(abs(DstType))+ '"'

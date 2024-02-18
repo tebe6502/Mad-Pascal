@@ -339,14 +339,14 @@ procedure NeoUpdateSprite(s0:byte;x,y:word;image,flip,anchor:byte);
 *  1 | 2 | 3    
 *
 *)
-procedure HideSprite(s0:byte);
+procedure NeoHideSprite(s0:byte);
 (*
 * @description:
 * Hide the sprite.
 * 
 * @param: s0 (byte) - sprite number
 *)
-function InRange(s0,s1,range:byte):byte; 
+function NeoInRange(s0,s1,range:byte):byte; 
 (*
 * @description:
 * Returns not zero value if the distance between the centres of the sprites is less or equal range value.
@@ -725,13 +725,13 @@ begin
     NeoSendMessage(6,2);
 end;
 
-procedure HideSprite(s0:byte);
+procedure NeoHideSprite(s0:byte);
 begin
     NeoMessage.params[0]:=s0;    
     NeoSendMessage(6,3);
 end;
 
-function InRange(s0,s1,range:byte):byte; // not zero if dist <= range (dist mesaured from sprite centres);
+function NeoInRange(s0,s1,range:byte):byte; // not zero if dist <= range (dist mesaured from sprite centres);
 begin
     NeoMessage.params[0]:=s0;    
     NeoMessage.params[1]:=s1;    
