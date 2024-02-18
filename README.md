@@ -165,6 +165,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [Block Attack](https://github.com/tebe6502/Block-Attack)
 * [Dungeon Adventurer](https://gitlab.com/delysio/dungeon-adventurer/)
 * [neo Tetris](https://gitlab.com/bocianu/neo-tetris?fbclid=IwAR3EYa-u0ik7vTS156jJiRrqyyAJwq2Hl-xAYgrmCNtktC1Fvh3PZ2XLjXw)
+* [µSoukoban](https://github.com/zbyti/pikoban)
 
 ## Benchmarks
 
