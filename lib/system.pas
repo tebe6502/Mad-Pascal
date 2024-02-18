@@ -249,24 +249,46 @@ const
 
 (* Character codes *)
 {$ifdef neo}
-	CH_CURSOR_LEFT 	= chr(1);
-	CH_CURSOR_RIGHT	= chr(4);
-	CH_INSERT	= chr(5);
-	CH_PAGE_DOWN	= chr(6);
-	CH_END		= chr(7);
-	CH_BACKSPACE	= chr(8);
-	CH_HTAB		= chr(9);	// horizontal tab
-	CH_LINE_FEED	= chr(10);
-	CH_CLEAR_SCREEN	= chr(12);
-	CH_ENTER	= chr(13);
-	CH_PAGE_UP	= chr(18);
-	CH_CURSOR_DOWN 	= chr(19);
-	CH_CURSOR_HOME	= chr(20);
-	CH_VTAB 	= chr(22);	// vertical tab
-	CH_CURSOR_UP	= chr(23);
-	CH_CURSOR_REV	= chr(24);	// cursor reverse
-	CH_DELETE	= chr(26);
-	CH_ESCAPE	= chr(27);	// general break – e.g. exits BASIC
+	NEO_CURSOR_LEFT 	= chr(1);
+	NEO_CURSOR_RIGHT	= chr(4);
+	NEO_INSERT		= chr(5);
+	NEO_PAGE_DOWN		= chr(6);
+	NEO_END			= chr(7);
+	NEO_BACKSPACE		= chr(8);
+	NEO_HTAB		= chr(9);	// horizontal tab
+	NEO_LINE_FEED		= chr(10);
+	NEO_CLEAR_SCREEN	= chr(12);
+	NEO_ENTER		= chr(13);
+	NEO_PAGE_UP		= chr(18);
+	NEO_CURSOR_DOWN 	= chr(19);
+	NEO_CURSOR_HOME		= chr(20);
+	NEO_VTAB 		= chr(22);	// vertical tab
+	NEO_CURSOR_UP		= chr(23);
+	NEO_CURSOR_REV		= chr(24);	// cursor reverse
+	NEO_DELETE		= chr(26);
+	NEO_ESCAPE		= chr(27);	// general break – e.g. exits BASIC
+ 
+ 	;--------------------------;
+	; color control characters ;
+	;--------------------------;
+
+	NEO_COLOR_BLACK		= chr($80);
+	NEO_COLOR_RED		= chr($81);
+	NEO_COLOR_GREEN		= chr($82);
+	NEO_COLOR_YELLOW	= chr($83);
+	NEO_COLOR_BLUE		= chr($84);
+	NEO_COLOR_MAGENTA	= chr($85);
+	NEO_COLOR_CYAN		= chr($86);
+	NEO_COLOR_WHITE		= chr($87);
+	NEO_COLOR_ALT_BLACK	= chr($88);
+	NEO_COLOR_DARK_GREY	= chr($89);
+	NEO_COLOR_DARK_GREEN	= chr($8A);
+	NEO_COLOR_ORANGE	= chr($8B);
+	NEO_COLOR_DARK_ORANGE	= chr($8C);
+	NEO_COLOR_BROWN		= chr($8D);
+	NEO_COLOR_PINK		= chr($8E);
+	NEO_COLOR_LIGHT_GREY	= chr($8F);
+
 {$endif}
 
 (* color defines *)
