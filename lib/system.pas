@@ -268,9 +268,9 @@ const
 	NEO_DELETE		= chr(26);
 	NEO_ESCAPE		= chr(27);	// general break – e.g. exits BASIC
  
- 	;--------------------------;
-	; color control characters ;
-	;--------------------------;
+// 	;--------------------------;
+//	; color control characters ;
+//	;--------------------------;
 
 	NEO_COLOR_BLACK		= chr($80);
 	NEO_COLOR_RED		= chr($81);
