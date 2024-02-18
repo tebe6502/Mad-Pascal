@@ -171,7 +171,7 @@ function NeoSave(name:TString;dest,len:word):byte;
 *
 * @returns: (byte) - error code is returned (if aplicable)
 *)
-function NeoMath(func:byte):byte;
+function NeoDoMath(func:byte):byte;
 (*
 * @description:
 * Performs API request to math coprocessing library. Not well documented yet.
@@ -553,7 +553,7 @@ begin
     result := NeoSendMessage(3,3);
 end;
 
-function NeoMath(func:byte):byte;
+function NeoDoMath(func:byte):byte;
 begin
     result := NeoSendMessage(4,func);
 end;

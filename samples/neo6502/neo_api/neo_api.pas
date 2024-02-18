@@ -173,7 +173,6 @@ begin
     until keypressed;
     WaitForAnyKeyAndClear;
  
-
     Writeln('Group: 6');
     Writeln('Sprites: ');
 
