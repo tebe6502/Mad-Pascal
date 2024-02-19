@@ -1,5 +1,5 @@
 program mathTest;
-uses crt,neo6502,neomath;
+uses crt, neo6502, neo6502math;
 var 
     f0,f1:float;
     i0,i1:integer;
