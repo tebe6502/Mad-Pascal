@@ -1,4 +1,4 @@
-unit NeoMath;
+unit Neo6502Math;
 (*
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
