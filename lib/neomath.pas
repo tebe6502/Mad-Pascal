@@ -242,7 +242,7 @@ end;
 procedure SetMathStack(v:integer;i:byte);overload;
 var src:array [0..3] of byte absolute v; // @nodoc 
 begin
-    mathStack.ctrl[i]:=$40;
+    mathStack.ctrl[i]:=$00;
     mathStack.v0[i]:=src[0];
     mathStack.v1[i]:=src[1];
     mathStack.v2[i]:=src[2];
