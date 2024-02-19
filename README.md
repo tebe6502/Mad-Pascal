@@ -24,13 +24,13 @@ The available features are:
 * Arithmetic and boolean operators
 * Procedures and functions with up to 8 parameters. Returned value of a function is assigned to a predefined `RESULT` variable
 * Static local variables
-* Primitive data types, all types except the `ShortReal`/`Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
+* Primitive data types, all types except the `ShortReal`, `Real` type are compatible. Pointers are dereferenced as pointers to `Word`:
     * `Cardinal` `Word` `Byte` `Boolean`
     * `Integer` `SmallInt` `ShortInt`
     * `Char` `String` `PChar`
     * `Pointer` `File` `Text`
     * `ShortReal` `Real` [fixed-point](https://en.wikipedia.org/wiki/Fixed-point_arithmetic)
-    * [`Float16`](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
+    * [`Float16`](https://en.wikipedia.org/wiki/Half-precision_floating-point_,ormat)
     * [`Single`](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) / Float
 * One-dimensional and Two-dimensional arrays (with zero lower bound) of any primitive type. Arrays are treated as pointers to their origins (like in C) and can be passed to subroutines as parameters
 * Predefined type `String` `[N]` which is equivalent to `array [0..N] of Char`
