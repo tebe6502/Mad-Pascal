@@ -1,8 +1,11 @@
+19.02.2024
+- Bugfixes
+
 16.02.2024
 - dodana możliwość ustawienia adresu kompilacji z poziomu programu, np.:
 
   program name : address;
-  library name : address
+  library name : address;
 
 15.02.2024
 - issue #134 fixed (https://github.com/tebe6502/Mad-Pascal/issues/134)

@@ -114,9 +114,10 @@ function get_label(var i:integer; var a:string; up: Boolean = true): string;
 (*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'		      *)
 (*----------------------------------------------------------------------------*)
 begin
- Result:='';
 
- if a<>'' then begin
+ Result := '';
+
+ if a <> '' then begin
 
   omin_spacje(i,a);
 
@@ -124,9 +125,9 @@ begin
    while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do begin
 
     if up then
-     Result:=Result + UpCase(a[i])
+     Result := Result + UpCase(a[i])
     else
-     Result:=Result + a[i];
+     Result := Result + a[i];
 
     inc(i);
    end;

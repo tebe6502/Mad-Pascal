@@ -1887,7 +1887,7 @@ end;
 
 
 {
-if (pos('jsr #$00', listing[i]) > 0) then begin
+if (pos('spl', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

@@ -1106,11 +1106,16 @@ begin
 
   if (pos('.', svar) > 0) then begin
 
-	lab:=copy(svar,1,pos('.', svar)-1);
+//	lab:=copy(svar,1,pos('.', svar)-1);
+
+        if pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', svar) = 1 then	// skip UNTI name
+          lab := copy(svar, 1, svar.LastIndexOf('.'))
+        else
+          lab := copy(svar, 1, svar.IndexOf('.'));
 
 	if Ident[GetIdent(lab)].AllocElementType = RECORDTOK then begin
 
-	 asm65(#9'mwy '+lab+' :bp2');			// !!! koniecznie w ten sposob
+	 asm65(#9'mwy ' + lab + ' :bp2');		// !!! koniecznie w ten sposob
 							// !!! kolejne optymalizacje podstawia pod :BP2 -> LAB
 	 asm65(#9'lda :bp2');
 	 asm65(#9'add #' + svar + '-DATAORIGIN');
@@ -1120,10 +1125,10 @@ begin
 	 asm65(#9'sta :bp2+1');
 
 	end else
-	 asm65(#9'mwy '+svar+' :bp2');
+	 asm65(#9'mwy ' + svar + ' :bp2');
 
   end else
-	asm65(#9'mwy '+svar+' :bp2');
+	asm65(#9'mwy ' + svar + ' :bp2');
 
 end;	//LoadBP2
 
@@ -1136,6 +1141,19 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: int
 var Kind: byte;
     NumAllocElements: cardinal;
     svar, svara, lab: string;
+
+
+  function ExtractName: string;
+  begin
+
+    if pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', svar) = 1 then	// skip UNTI name
+      Result := copy(svar, 1, svar.LastIndexOf('.'))
+    else
+      Result := copy(svar, 1, svar.IndexOf('.'));
+
+  end;
+
+
 begin
 
  if IdentIndex > 0 then begin
@@ -1203,7 +1221,7 @@ case IndirectionLevel of
 
   	 if (pos('.', svar) > 0) then begin
 
-	  lab:=copy(svar,1,pos('.', svar)-1);
+	  lab := ExtractName;
 
 	  if Ident[GetIdent(lab)].AllocElementType = RECORDTOK then begin
 	   asm65(#9'lda ' + lab);
@@ -1253,10 +1271,10 @@ case IndirectionLevel of
      asm65(#9'lda #$' + IntToHex(par, 2));
 
     if pos('.', svar) > 0 then begin
-     asm65(#9'add ' + copy(svar,1, pos('.', svar)-1));
+     asm65(#9'add ' + ExtractName);
      asm65(#9'sta' + GetStackVariable(0));
      asm65(#9'lda #$00');
-     asm65(#9'adc ' + copy(svar,1, pos('.', svar)-1)+'+1');
+     asm65(#9'adc ' + ExtractName + '+1');
      asm65(#9'sta' + GetStackVariable(1));
     end else begin
      asm65(#9'add ' + svar);
@@ -1285,12 +1303,12 @@ case IndirectionLevel of
     if pos('.', svar) > 0 then begin
 
      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
-      asm65(#9'mwy '+svar+' :bp2')
+      asm65(#9'mwy ' + svar + ' :bp2')
      else
-      asm65(#9'mwy '+copy(svar,1, pos('.', svar)-1)+' :bp2');
+      asm65(#9'mwy ' + ExtractName + ' :bp2');
 
     end else
-     asm65(#9'mwy '+svar+' :bp2');
+     asm65(#9'mwy ' + svar + ' :bp2');
 
 
     if pos('.', svar) > 0 then begin
@@ -1523,10 +1541,10 @@ ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
     asm65(#9'lda'+GetStackVariable(0));
 
     if pos('.', svar) > 0 then begin
-     asm65(#9'add '+copy(svar,1, pos('.', svar)-1));
+     asm65(#9'add ' + ExtractName);
      asm65(#9'sta :TMP');
-     asm65(#9'lda'+GetStackVariable(1));
-     asm65(#9'adc '+copy(svar,1, pos('.', svar)-1)+'+1');
+     asm65(#9'lda' + GetStackVariable(1));
+     asm65(#9'adc ' + ExtractName + '+1');
      asm65(#9'sta :TMP+1');
     end else begin
      asm65(#9'add '+svar);
@@ -1589,16 +1607,16 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     asm65(#9'lda'+GetStackVariable(0));
 
     if pos('.', svar) > 0 then begin
-     asm65(#9'add '+copy(svar,1, pos('.', svar)-1));
+     asm65(#9'add ' + ExtractName);
      asm65(#9'sta :bp2');
-     asm65(#9'lda'+GetStackVariable(1));
-     asm65(#9'adc '+copy(svar,1, pos('.', svar)-1)+'+1');
+     asm65(#9'lda' + GetStackVariable(1));
+     asm65(#9'adc ' + ExtractName + '+1');
      asm65(#9'sta :bp2+1');
     end else begin
-     asm65(#9'add '+svar);
+     asm65(#9'add ' + svar);
      asm65(#9'sta :bp2');
-     asm65(#9'lda '+GetStackVariable(1));
-     asm65(#9'adc '+svar+'+1');
+     asm65(#9'lda ' + GetStackVariable(1));
+     asm65(#9'adc ' + svar + '+1');
      asm65(#9'sta :bp2+1');
     end;
 
@@ -1628,7 +1646,7 @@ ASPOINTERTORECORDARRAYORIGIN:									// record^.array[i]
     Gen;
 
     if pos('.', svar) > 0 then
-     asm65(#9'mwy ' + copy(svar,1, pos('.', svar)-1) + ' :bp2')
+     asm65(#9'mwy ' + ExtractName + ' :bp2')
     else
      asm65(#9'mwy ' + svar + ' :bp2');
 
@@ -1685,17 +1703,17 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:							// record_array[index].array[i]
   if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
     if pos('.', svar) > 0 then begin
-     asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1));
+     asm65(#9'lda ' + ExtractName);
      asm65(#9'add :STACKORIGIN-1,x');
      asm65(#9'sta :TMP');
-     asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1)+'+1');
+     asm65(#9'lda ' + ExtractName + '+1');
      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
      asm65(#9'sta :TMP+1');
     end else begin
-     asm65(#9'lda '+svar);
+     asm65(#9'lda ' + svar);
      asm65(#9'add :STACKORIGIN-1,x');
      asm65(#9'sta :TMP');
-     asm65(#9'lda '+svar+'+1');
+     asm65(#9'lda ' + svar+'+1');
      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
      asm65(#9'sta :TMP+1');
     end;
@@ -2283,6 +2301,17 @@ var NumAllocElements: cardinal;
   end;
 
 
+  function ExtractName: string;
+  begin
+
+    if pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', svar) = 1 then	// skip UNTI name
+      Result := copy(svar, 1, svar.LastIndexOf('.'))
+    else
+      Result := copy(svar, 1, svar.IndexOf('.'));
+
+  end;
+
+
 begin
 
  if IdentIndex > 0 then begin
@@ -2323,10 +2352,10 @@ case IndirectionLevel of
   if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
     if pos('.', svar) > 0 then begin
-     asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1));
+     asm65(#9'lda ' + ExtractName);
      asm65(#9'add :STACKORIGIN-1,x');
      asm65(#9'sta :TMP');
-     asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1)+'+1');
+     asm65(#9'lda ' + ExtractName + '+1');
      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
      asm65(#9'sta :TMP+1');
     end else begin
@@ -2730,10 +2759,10 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     asm65(#9'lda :STACKORIGIN-1,x');
 
     if pos('.', svar) > 0 then begin
-     asm65(#9'add '+copy(svar,1, pos('.', svar)-1));
+     asm65(#9'add ' + ExtractName);
      asm65(#9'sta :bp2');
      asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-     asm65(#9'adc '+copy(svar,1, pos('.', svar)-1)+'+1');
+     asm65(#9'adc ' + ExtractName + '+1');
      asm65(#9'sta :bp2+1');
     end else begin
      asm65(#9'add '+svar);
@@ -2747,7 +2776,7 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     asm65(#9'lda (:bp2),y');
 
     if pos('.', svar) > 0 then
-     asm65(#9'add #'+svar+'-DATAORIGIN')
+     asm65(#9'add #' + svar + '-DATAORIGIN')
     else
      asm65(#9'add #' + paramY);
 
@@ -2784,7 +2813,7 @@ ASPOINTERTORECORDARRAYORIGIN:						// record^.array[i]
     Gen;
 
     if pos('.', svar) > 0 then
-      asm65(#9'mwy ' + copy(svar,1, pos('.', svar)-1) + ' :bp2')
+      asm65(#9'mwy ' + ExtractName + ' :bp2')
     else
       asm65(#9'mwy ' + svar + ' :bp2');
 
@@ -2853,17 +2882,17 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
     if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
 	if pos('.', svar) > 0 then begin
-	   asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1));
+	   asm65(#9'lda ' + ExtractName);
 	   asm65(#9'add :STACKORIGIN-1,x');
 	   asm65(#9'sta :TMP');
-	   asm65(#9'lda '+copy(svar, 1, pos('.', svar)-1)+'+1');
+	   asm65(#9'lda ' + ExtractName + '+1');
 	   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 	   asm65(#9'sta :TMP+1');
 	end else begin
-	   asm65(#9'lda '+svar);
+	   asm65(#9'lda ' + svar);
 	   asm65(#9'add :STACKORIGIN-1,x');
 	   asm65(#9'sta :TMP');
-	   asm65(#9'lda '+svar+'+1');
+	   asm65(#9'lda ' + svar + '+1');
 	   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 	   asm65(#9'sta :TMP+1');
 	end;
@@ -2877,9 +2906,9 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
 
     end else begin
      asm65(#9'ldy :STACKORIGIN-1,x');
-     asm65(#9'lda adr.'+svar+',y');
+     asm65(#9'lda adr.' + svar + ',y');
      asm65(#9'sta :bp2');
-     asm65(#9'lda adr.'+svar+'+1,y');
+     asm65(#9'lda adr.' + svar + '+1,y');
      asm65(#9'sta :bp2+1');
     end;
 
@@ -2937,14 +2966,14 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
 
   if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
 
-//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitName[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
 
     if pos('.', svar) > 0 then begin
 
      if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK]) then
       asm65(#9'mwy ' + svar + ' :bp2')
      else
-      asm65(#9'mwy '+copy(svar, 1, pos('.', svar)-1)+' :bp2');
+      asm65(#9'mwy ' + ExtractName + ' :bp2');
 
     end else
      asm65(#9'mwy ' + svar + ' :bp2');
@@ -5600,7 +5629,13 @@ begin
 	svar := GetLocalName(IdentIndex);
 
   	if (pos('.', svar) > 0) then begin
-	 lab:=copy(svar,1,pos('.', svar)-1);
+//	 lab:=copy(svar,1,pos('.', svar)-1);
+
+         if pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', svar) = 1 then	// skip UNTI name
+           lab := copy(svar, 1, svar.LastIndexOf('.'))
+         else
+           lab := copy(svar, 1, svar.IndexOf('.'));
+
 	 rec:=(Ident[GetIdent(lab)].AllocElementType = RECORDTOK);
 	end;
 
@@ -5950,10 +5985,13 @@ end;	//NumActualParameters
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
 var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
     ActualParamType, AllocElementType: byte;
-    svar: string;
+    svar, lab: string;
     yes: Boolean;
     Param: TParamList;
 begin
+
+   svar:= '';
+   lab := '';
 
    j := i;
 
@@ -6034,7 +6072,13 @@ begin
          if (Ident[ProcVarIndex].PassMethod = VARPASSING) then begin
 
           if pos('.', svar) > 0 then begin
-           asm65(#9'mwy ' + copy(svar, 1, pos('.', svar)-1) + ' :bp2');
+
+          if pos(UnitName[Ident[ProcVarIndex].UnitIndex].Name + '.', svar) = 1 then	// skip UNTI name
+            lab := copy(svar, 1, svar.LastIndexOf('.'))
+          else
+            lab := copy(svar, 1, svar.IndexOf('.'));
+
+           asm65(#9'mwy ' + lab + ' :bp2');
            asm65(#9'ldy #' + svar + '-DATAORIGIN')
           end else begin
            asm65(#9'mwy ' + svar + ' :bp2');
@@ -15654,8 +15698,11 @@ if DataSegmentUse then begin
 
 // !!! musze zapisac wszystko, lacznie z 'zerami' !!! np. aby TextAtr dzialal
 
-  for j := VarDataSize - 1 downto 0 do
-   if DataSegment[j] <> 0 then begin DataSegmentSize := j+1; Break end;
+  DataSegmentSize := VarDataSize;
+
+  if LIBRARYTOK_USE = FALSE then
+   for j := VarDataSize - 1 downto 0 do
+    if DataSegment[j] <> 0 then begin DataSegmentSize := j+1; Break end;
 
   tmp:='';
 
@@ -15696,12 +15743,22 @@ end;{ else
  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
 }
 
-asm65;
-asm65('VARINITSIZE'#9'= *-DATAORIGIN');
-asm65('VARDATASIZE'#9'= '+IntToStr(VarDataSize));
 
-asm65;
-asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
+if LIBRARYTOK_USE then begin
+
+  asm65;
+  asm65('PROGRAMSTACK');
+
+end else begin
+
+  asm65;
+  asm65('VARINITSIZE'#9'= *-DATAORIGIN');
+  asm65('VARDATASIZE'#9'= '+IntToStr(VarDataSize));
+
+  asm65;
+  asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
+
+end;
 
 asm65;
 asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');

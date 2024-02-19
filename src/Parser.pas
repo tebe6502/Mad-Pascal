@@ -88,7 +88,7 @@ var TempIndex: integer;
     Result := 0;
 
     for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
-    for IdentIndex := NumIdent downto 1 do
+    for IdentIndex := 1 to NumIdent do
       if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
 	if (Ident[IdentIndex].UnitIndex = UnitIndex) {or Ident[IdentIndex].Section} or (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') or UnitAllowedAccess(IdentIndex, UnitIndex) then begin
 	  Result := IdentIndex;
@@ -109,7 +109,7 @@ var TempIndex: integer;
     Result := 0;
 
     for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
-    for IdentIndex := NumIdent downto 1 do
+    for IdentIndex := 1 to NumIdent do
       if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
 	if (Ident[IdentIndex].UnitIndex = UnitIndex) or UnitAllowedAccess(IdentIndex, UnitIndex) then begin
 	  Result := IdentIndex;
