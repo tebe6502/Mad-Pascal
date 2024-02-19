@@ -247,7 +247,7 @@ procedure NeoDrawImage(x0,y0:word;id:byte);
 * 
 * @param: x0 (word) - x coordinate
 * @param: y0 (word) - y coordinate
-* @param: id (byte) - image id (0-127 tiles, 128-191 sprites 16, 192-255, sprites 32);
+* @param: id (byte) - image id (0-127 tiles, 128-191 sprites 16, 192-255 sprites 32);
 *)
 procedure NeoDrawTileMap(x0,y0,x1,y1:word);
 (*
