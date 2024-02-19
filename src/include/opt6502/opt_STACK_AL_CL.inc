@@ -10,6 +10,64 @@ begin
 // ===				    ADDAL_CL|SUBAL_CL
 // -----------------------------------------------------------------------------
 
+    if add_sub_AL_CL(i+10) and									// jsr addAL_CL|subAL_CL		; 10
+
+     //inx(i) and										// inx					; 0
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
+       mva(i+3) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 3
+       mva(i+4) and 										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 4
+       inx(i+5) and										// inx					; 5
+       mva(i+6) and										// mva   :STACKORIGIN,x			; 6
+       mva(i+7) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 7
+       mva(i+8) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 8
+       mva(i+9) then 										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 9
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) and
+        (pos(':STACKORIGIN,x', listing[i+6]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+8]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+9]) > 0) then
+     begin
+
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+
+       exit(false);
+     end;
+
+
+    if add_sub_AL_CL(i+7) and									// jsr addAL_CL|subAL_CL		; 7
+
+     //inx(i) and										// inx					; 0
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
+       mva(i+3) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 3
+       mva(i+4) and 										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 4
+       inx(i+5) and										// inx					; 5
+       mva(i+6) then										// mva   :STACKORIGIN,x			; 6
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) and
+        (pos(':STACKORIGIN,x', listing[i+6]) > 0) then
+     begin
+
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+
+       exit(false);
+     end;
+
+
     if //inx(i) and										// inx					; 0
        mva_im(i+1) and										// mva # :STACKORIGIN,x			; 1
        inx(i+2) and										// inx					; 2
