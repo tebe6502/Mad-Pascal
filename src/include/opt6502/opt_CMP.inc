@@ -51,7 +51,7 @@ begin
 
 
     if ldy_1(i) and										// ldy #1				; 0
-       												// lda|jsr				; 1
+       (lda_stack(i+1) = false) and								// lda|jsr				; 1
        bpl(i+2) and										// bpl @+				; 2
        dey(i+3) and 										// dey					; 3
        lab_a(i+4) and										//@					; 4

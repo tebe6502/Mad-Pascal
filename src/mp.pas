@@ -235,13 +235,33 @@ begin
 end;
 
 
-function ExtractName(IdentIndex: integer; a: string): string;
+function ExtractName(IdentIndex: integer; const a: string): string;
+var lab: string;
 begin
 
- if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then	// skip UNTI name
-   Result := copy(a, 1, a.LastIndexOf('.'))
- else
+ if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then begin
+
+   lab := Ident[IdentIndex].Name;
+   if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
+
+   if (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.', a) = 1) then
+     Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.' +  lab
+   else
+     Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' +  lab;
+
+ end else
    Result := copy(a, 1, a.IndexOf('.'));
+
+end;
+
+
+function TestName(IdentIndex: integer; a: string): Boolean;
+begin
+
+  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+    a := copy(a, a.IndexOf('.') + 2, length(a));
+
+  Result := pos('.', a) > 0;
 
 end;
 
@@ -1213,7 +1233,7 @@ case IndirectionLevel of
 
       2: begin
 
-  	 if (pos('.', svar) > 0) then begin
+  	 if TestName(IdentIndex, svar) then begin
 
 	  lab := ExtractName(IdentIndex, svar);
 
@@ -1259,12 +1279,12 @@ case IndirectionLevel of
 
     a65(__addBX);
 
-    if pos('.', svar) > 0 then
+    if TestName(IdentIndex, svar) then
      asm65(#9'lda #' + svar + '-DATAORIGIN')
     else
      asm65(#9'lda #$' + IntToHex(par, 2));
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
      asm65(#9'add ' + ExtractName(IdentIndex, svar));
      asm65(#9'sta' + GetStackVariable(0));
      asm65(#9'lda #$00');
@@ -1294,7 +1314,7 @@ case IndirectionLevel of
 
 //    writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements);
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
 
      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
       asm65(#9'mwy ' + svar + ' :bp2')
@@ -1305,12 +1325,12 @@ case IndirectionLevel of
      asm65(#9'mwy ' + svar + ' :bp2');
 
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
 
      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
       asm65(#9'ldy #$' + IntToHex(par, 2))
      else
-      asm65(#9'ldy #'+svar+'-DATAORIGIN');
+      asm65(#9'ldy #' + svar + '-DATAORIGIN');
 
     end else
      asm65(#9'ldy #$' + IntToHex(par, 2));
@@ -1534,17 +1554,17 @@ ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
 
     asm65(#9'lda'+GetStackVariable(0));
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
      asm65(#9'add ' + ExtractName(IdentIndex, svar));
      asm65(#9'sta :TMP');
      asm65(#9'lda' + GetStackVariable(1));
      asm65(#9'adc ' + ExtractName(IdentIndex, svar) + '+1');
      asm65(#9'sta :TMP+1');
     end else begin
-     asm65(#9'add '+svar);
+     asm65(#9'add ' + svar);
      asm65(#9'sta :TMP');
-     asm65(#9'lda '+GetStackVariable(1));
-     asm65(#9'adc '+svar+'+1');
+     asm65(#9'lda ' + GetStackVariable(1));
+     asm65(#9'adc ' + svar + '+1');
      asm65(#9'sta :TMP+1');
     end;
 
@@ -1553,8 +1573,8 @@ ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
     asm65(#9'iny');
     asm65(#9'mva (:TMP),y :bp2+1');
 
-    if pos('.', svar) > 0 then
-     asm65(#9'ldy #'+svar+'-DATAORIGIN')
+    if TestName(IdentIndex, svar) then
+     asm65(#9'ldy #' + svar + '-DATAORIGIN')
     else
      asm65(#9'ldy #$' + IntToHex(par, 2));
 
@@ -1600,7 +1620,7 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
 
     asm65(#9'lda'+GetStackVariable(0));
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
      asm65(#9'add ' + ExtractName(IdentIndex, svar));
      asm65(#9'sta :bp2');
      asm65(#9'lda' + GetStackVariable(1));
@@ -1617,9 +1637,9 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     asm65(#9'ldy #$00');
     asm65(#9'lda (:bp2),y');
 
-    if pos('.', svar) > 0 then
-     asm65(#9'add #'+svar+'-DATAORIGIN')
-    else
+    if TestName(IdentIndex, svar) then begin
+     asm65(#9'add #' + svar + '-DATAORIGIN')
+    end else
      asm65(#9'add #$' + IntToHex(par, 2));
 
     asm65(#9'sta'+GetStackVariable(0));
@@ -1639,14 +1659,14 @@ ASPOINTERTORECORDARRAYORIGIN:									// record^.array[i]
 
     Gen;
 
-    if pos('.', svar) > 0 then
+    if TestName(IdentIndex, svar) then
      asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2')
     else
      asm65(#9'mwy ' + svar + ' :bp2');
 
     asm65(#9'lda' + GetStackVariable(0));
 
-    if pos('.', svar) > 0 then
+    if TestName(IdentIndex, svar) then
      asm65(#9'add #' + svar + '-DATAORIGIN')
     else
      asm65(#9'add #$' + IntToHex(par, 2));
@@ -1696,7 +1716,7 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:							// record_array[index].array[i]
 
   if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
      asm65(#9'lda ' + ExtractName(IdentIndex, svar));
      asm65(#9'add :STACKORIGIN-1,x');
      asm65(#9'sta :TMP');
@@ -1722,9 +1742,11 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:							// record_array[index].array[i]
    end else begin
 
      asm65(#9'ldy :STACKORIGIN-1,x');
-     asm65(#9'lda adr.'+svar+',y');
+//   asm65(#9'lda adr.' + svar + ',y');
+     asm65(#9'lda ' + svara + ',y');
      asm65(#9'sta :bp2');
-     asm65(#9'lda adr.'+svar+'+1,y');
+//   asm65(#9'lda adr.' + svar + '+1,y');
+     asm65(#9'lda ' + svara + '+1,y');
      asm65(#9'sta :bp2+1');
 
    end;
@@ -2334,7 +2356,7 @@ case IndirectionLevel of
 
   if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
      asm65(#9'lda ' + ExtractName(IdentIndex, svar));
      asm65(#9'add :STACKORIGIN-1,x');
      asm65(#9'sta :TMP');
@@ -2358,9 +2380,11 @@ case IndirectionLevel of
    end else begin
 
      asm65(#9'ldy :STACKORIGIN-1,x');
-     asm65(#9'lda adr.'+svar+',y');
+//   asm65(#9'lda adr.' + svar + ',y');
+     asm65(#9'lda ' + svara + ',y');
      asm65(#9'sta :bp2');
-     asm65(#9'lda adr.'+svar+'+1,y');
+//   asm65(#9'lda adr.'+svar+'+1,y');
+     asm65(#9'lda ' + svara + '+1,y');
      asm65(#9'sta :bp2+1');
 
    end;
@@ -2741,7 +2765,7 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
 
     asm65(#9'lda :STACKORIGIN-1,x');
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
      asm65(#9'add ' + ExtractName(IdentIndex, svar));
      asm65(#9'sta :bp2');
      asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
@@ -2758,7 +2782,7 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     asm65(#9'ldy #$00');
     asm65(#9'lda (:bp2),y');
 
-    if pos('.', svar) > 0 then
+    if TestName(IdentIndex, svar) then
      asm65(#9'add #' + svar + '-DATAORIGIN')
     else
      asm65(#9'add #' + paramY);
@@ -2795,14 +2819,14 @@ ASPOINTERTORECORDARRAYORIGIN:						// record^.array[i]
 
     Gen;
 
-    if pos('.', svar) > 0 then
+    if TestName(IdentIndex, svar) then
       asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2')
     else
       asm65(#9'mwy ' + svar + ' :bp2');
 
     asm65(#9'lda :STACKORIGIN-1,x');
 
-    if pos('.', svar) > 0 then
+    if TestName(IdentIndex, svar) then
      asm65(#9'add #' + svar + '-DATAORIGIN')
     else
      asm65(#9'add #' + ParamY);
@@ -2864,7 +2888,7 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
 
     if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
-	if pos('.', svar) > 0 then begin
+	if TestName(IdentIndex, svar) then begin
 	   asm65(#9'lda ' + ExtractName(IdentIndex, svar));
 	   asm65(#9'add :STACKORIGIN-1,x');
 	   asm65(#9'sta :TMP');
@@ -2889,9 +2913,11 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
 
     end else begin
      asm65(#9'ldy :STACKORIGIN-1,x');
-     asm65(#9'lda adr.' + svar + ',y');
+//   asm65(#9'lda adr.' + svar + ',y');
+     asm65(#9'lda ' + svara + ',y');
      asm65(#9'sta :bp2');
-     asm65(#9'lda adr.' + svar + '+1,y');
+//   asm65(#9'lda adr.' + svar + '+1,y');
+     asm65(#9'lda ' + svara + '+1,y');
      asm65(#9'sta :bp2+1');
     end;
 
@@ -2951,7 +2977,7 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
 
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitName[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
 
-    if pos('.', svar) > 0 then begin
+    if TestName(IdentIndex, svar) then begin
 
      if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK]) then
       asm65(#9'mwy ' + svar + ' :bp2')
@@ -5615,7 +5641,7 @@ begin
 //	 lab:=copy(svar,1,pos('.', svar)-1);
 	 lab := ExtractName(IdentIndex, svar);
 
-	 rec:=(Ident[GetIdent(lab)].AllocElementType = RECORDTOK);
+	 rec := (Ident[GetIdent(lab)].AllocElementType = RECORDTOK);
 	end;
 
 	AllocElementType := Ident[IdentIndex].AllocElementType;
@@ -5624,10 +5650,10 @@ begin
 
 	if rec then begin							// record.array[]
 
-	 asm65(#9'lda '+lab);
+	 asm65(#9'lda ' + lab);
 	 asm65(#9'add :STACKORIGIN,x');
 	 asm65(#9'sta :STACKORIGIN,x');
-	 asm65(#9'lda '+lab+'+1');
+	 asm65(#9'lda ' + lab + '+1');
 	 asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
 	 asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
@@ -5644,10 +5670,10 @@ begin
 
 	 if (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then begin
 
- 	  asm65(#9'lda '+svar);
+ 	  asm65(#9'lda ' + svar);
  	  asm65(#9'add :STACKORIGIN,x');
 	  asm65(#9'sta :bp2');
-	  asm65(#9'lda '+svar+'+1');
+	  asm65(#9'lda ' + svar + '+1');
 	  asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
 	  asm65(#9'sta :bp2+1');
 	  asm65(#9'ldy #$00');
@@ -5659,10 +5685,10 @@ begin
 
 	 end else begin
 
- 	  asm65(#9'lda '+svar);
+ 	  asm65(#9'lda ' + svar);
  	  asm65(#9'add :STACKORIGIN,x');
 	  asm65(#9'sta :STACKORIGIN,x');
-	  asm65(#9'lda '+svar+'+1');
+	  asm65(#9'lda ' + svar + '+1');
 	  asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
 	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
@@ -6027,6 +6053,7 @@ begin
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
 	asm65(#9'adc #$00');
 	asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
 	asm65(#9'lda adr.' + svar + ',y');
         asm65(#9'sta :TMP+1');
         asm65(#9'lda adr.' + svar + '+1,y');
@@ -7986,8 +8013,6 @@ case Tok[i].Kind of
 	  if Ident[IdentIndex].isVolatile then begin
 	   asm65('?volatile:');
 
-//	   writeln(GetLocalName(IdentIndex),',', Ident[IdentIndex].PassMethod);
-
 	   resetOPTY;
 	  end;
 
@@ -9388,7 +9413,6 @@ StopOptimization;
 
 case Tok[i].Kind of
 
-
   INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK, SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK :	// type conversion operations
     begin
 
@@ -10525,7 +10549,6 @@ case Tok[i].Kind of
 
 //	  end;
 
-
           if (Ident[IdentIndex].isStdCall = false) then
 	    StartOptimization(i)
 	  else
@@ -10536,9 +10559,12 @@ case Tok[i].Kind of
 
 	  CompileActualParameters(i, IdentIndex);
 
-	  if Ident[IdentIndex].Kind = FUNCTIONTOK then a65(__subBX);		// zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
-
 	  dec(run_func);
+
+	  if Ident[IdentIndex].Kind = FUNCTIONTOK then begin
+	    a65(__subBX);							// zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
+	    StartOptimization(i);
+	  end;
 
 	  Result := i;
 	  end;	// PROC
@@ -10856,6 +10882,7 @@ case Tok[i].Kind of
 
 	j := CompileStatement(j + 2);
 	GenerateIfThenEpilog;
+
 	Result := j;
 	end
       else
