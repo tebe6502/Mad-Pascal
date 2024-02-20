@@ -378,7 +378,7 @@ function NeoGetJoy(player:byte):byte;
 *
 * @returns: (byte) - controller state
 *)
-procedure NeoMute;
+procedure NeoMute;overload;
 (*
 * @description:
 * Resets the sound system.
@@ -563,7 +563,7 @@ begin
     result := NeoSendMessage(7,player);
 end;
 
-procedure NeoMute;
+procedure NeoMute;overload;
 begin
     NeoSendMessage(8,1);
 end;
