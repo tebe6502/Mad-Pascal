@@ -7,7 +7,9 @@ procedure opt_TEMP_CMP_0;
 var p: integer;
 begin
 
+
     if ((TemporaryBuf[2] = #9'cmp #$00') or (pos('lda ', TemporaryBuf[2]) > 0)) and		// lda|cmp #$00		; 2
+       (pos('lda IFTMP_', TemporaryBuf[2]) = 0) and						//~lda IFTMP_
        (pos('jne l_', TemporaryBuf[3]) > 0) and							// jne l_		; 3
        (pos('l_ ', TemporaryBuf[4]) = 0) then							//~l_xxxx		; 4
      begin
@@ -25,7 +27,7 @@ begin
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) or
-           (TemporaryBuf[p] = #9'tya') then Break
+           (TemporaryBuf[p] = #9'tya') then Break;
 
      end;
 
