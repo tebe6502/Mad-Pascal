@@ -14,4 +14,6 @@
 {$endif}
 {$ifdef neo}
   {$i system_neo.inc}
+{$ifdef x16}
+  {$i system_x16.inc}
 {$endif}

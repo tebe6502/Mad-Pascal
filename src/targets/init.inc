@@ -49,3 +49,18 @@ neo.zpage      := 'org $00';
 neo.eol        := $0000000D;
 neo.codeorigin := $800;
 neo.header[0]  := 'END';
+
+// Commander X16 target
+c64.id         := 'x16';
+c64.name       := 'X16';
+c64.zpage      := 'org $02';
+c64.eol        := $0000000D;
+c64.codeorigin := $0900;
+c64.header[0]  := 'opt h-f+';
+c64.header[1]  := 'org $801';
+c64.header[2]  := 'org [a($801)],$801';
+c64.header[3]  := 'basic_start(START)';
+c64.header[4]  := ''; // asm65;
+c64.header[5]  := 'org $900';
+c64.header[6]  := ''; // asm65;
+c64.header[7]  := 'END';
