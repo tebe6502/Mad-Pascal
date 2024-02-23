@@ -77,13 +77,16 @@ procedure TextBackground(a: byte); assembler;
 @param: a - color value 0..255
 *)
 asm
+	phx
+
 	lda a
 	jsr CHROUT
-	lda PETSCII_SWAP
+	lda #PETSCII_SWAP_COLOR
 	jsr CHROUT
 	lda PETSCII_COLOR_WHITE
 	jsr CHROUT
-
+	
+	plx
 end;
 
 
@@ -94,8 +97,10 @@ procedure TextColor(a: byte); assembler;
 @param: a - color value 0..255
 *)
 asm
+
 	lda a
-	JSR CHROUT
+	jsr CHROUT
+
 end;
 
 
@@ -106,7 +111,7 @@ procedure Delay(count: word); assembler;
 @param: count - number of milliseconds
 *)
 asm
-	txa:pha
+	phx
 
 	ldx #0
 	ldy #0
@@ -127,7 +132,8 @@ cnt	adc #1
 
 	bne loop
 
-stop	pla:tax
+stop	plx
+
 end;
 
 
@@ -139,7 +145,8 @@ function Keypressed: Boolean; assembler;
 @returns: FALSE otherwise
 *)
 asm
-	txa:pha
+	// txa:pha
+	phx
 
 	jsr GETIN
 	sta CURRKEY
@@ -148,7 +155,8 @@ asm
 	lda #1
 	sta Result
 
-	pla:tax
+	// pla:tax
+	plx
 end;
 
 
@@ -167,7 +175,8 @@ the origin of the current window. The origin is located at (1,1), the upper-left
 *)
 
 asm
-	txa:pha
+	// txa:pha
+	phx
 	clc
 
 	ldx y
@@ -180,7 +189,8 @@ asm
 
 	jsr PLOT
 
-	pla:tax
+	// pla:tax
+	plx
 end;
 
 
@@ -192,14 +202,16 @@ function WhereX: byte; assembler;
 *)
 
 asm
-	txa:pha
+	// txa:pha
+	phx
 	sec
 
 	jsr PLOT
 	iny
 	sty Result
 
-	pla:tax
+	// pla:tax
+	plx
 end;
 
 
@@ -211,14 +223,16 @@ function WhereY: byte; assembler;
 *)
 
 asm
-	txa:pha
+	// txa:pha
+	phx
 	sec
 
 	jsr PLOT
 	inx
 	stx Result
 
-	pla:tax
+	// pla:tax
+	plx
 end;
 
 
@@ -238,34 +252,37 @@ end;
 
 procedure TextMode(Mode: byte); assembler;
 (*
-@description: Get/Set the screen mode
+@description: Set the screen mode
 
 @param: Mode - screen mode
 
-$00     80x60 text
-$01     80x30 text
-$02     40x60 text
-$03     40x30 text
-$04     40x15 text
-$05     20x30 text
-$06     20x15 text
-$07     22x23 text
-$08     64x50 text
-$09     64x25 text
-$0A     32x50 text
-$0B     32x25 text
+CX16_80x60	$00     80x60 text
+CX16_80x30	$01     80x30 text
+CX16_40x60	$02     40x60 text
+CX16_40x30	$03     40x30 text
+CX16_40x15	$04     40x15 text
+CX16_20x30	$05     20x30 text
+CX16_20x15	$06     20x15 text
+CX16_22x23	$07     22x23 text
+CX16_64x50	$08     64x50 text
+CX16_64x25	$09     64x25 text
+CX16_32x50	$0A     32x50 text
+CX16_32x25	$0B     32x25 text
 
 *)
 asm
-	txa:pha
+	// txa:pha
+	phx
 
 	lda Mode
-	cmp $80
-	beq invalid
+	cmp #$0b
+	bcs stop
+
 	clc
-	jsr screen_mode;
-invalid:
-	pla:tax
+	jsr screen_mode
+
+// stop	pla:tax
+	plx
 end;
 
 procedure SetTextCharset(charset: pointer); assembler;
@@ -278,14 +295,16 @@ pointer to a 2 KB RAM area that gets uploaded as the new 8x8 character set. The 
 
 *)
 asm
-	txa:pha
+	// txa:pha
+	phx
 
 	lda #0
 	ldx #<CHARSET
 	ldy#>CHARSET
 	jsr screen_set_charset
 
-	pla:tax
+	// pla:tax
+	plx
 end;
 
 procedure NoSound; assembler;
@@ -293,11 +312,9 @@ procedure NoSound; assembler;
 @description: Reset sound
 *)
 asm
-	txa:pha
 
 	jsr IOINIT	; Initialize CIAs, SID volume
 
-	pla:tax
 end;
 
 

@@ -7,62 +7,6 @@ interface
   Documentation https://github.com/X16Community/x16-docs/blob/master/X16%20Reference%20-%2005%20-%20KERNAL.md
 *)
 
-const
-// PETSCII codes
-  PETSCII_SWAP		            = $01;
-  PETSCII_BELL		            = $07;
-  PETSCII_REVERSE_ON	        = $12;
-  PETSCII_REVERSE_OFF	        = $92;
-
-  PETSCII_CURSOR_UP	          = $91;
-  PETSCII_CURSOR_DOWN	        = $11;
-  PETSCII_CURSOR_RIGHT        = $1d;
-  PETSCII_CURSOR_LEFT         = $9d;
-  PETSCII_KEY_ESCAPE	        = $1b;
-  PETSCII_KEY_BACKSPACE	      = $14;
-  PETSCII_KEY_DEL	            = $19;
-  PETSCII_KEY_RETURN	        = $0d;
-  PETSCII_KEY_SHIFT_RETURN	  = $8d;
-  PETSCII_KEY_TAB	            = $09;
-  PETSCII_KEY_SHIFT_TAB	      = $18;
-  PETSCII_KEY_MENU	          = $06;
-  PETSCII_KEY_HOME	          = $13;
-  PETSCII_KEY_END	            = $04;
-  PETSCII_KEY_HELP	          = $84;
-
-  PETSCII_KEY_PAGEUP	        = $82;
-  PETSCII_KEY_PAGEDOWN	      = $02;
-  PETSCII_KEY_F1	            = $85;
-  PETSCII_KEY_F2	            = $89;
-  PETSCII_KEY_F3	            = $86;
-  PETSCII_KEY_F4	            = $8a;
-  PETSCII_KEY_F5	            = $87;
-  PETSCII_KEY_F6	            = $8b;
-  PETSCII_KEY_F7	            = $88;
-  PETSCII_KEY_F8	            = $8c;
-  PETSCII_KEY_F9	            = $10;
-  PETSCII_KEY_F10	            = $15;
-  PETSCII_KEY_F11	            = $16;
-  PETSCII_KEY_F12	            = $17;
-
-  PETSCII_COLOR_WHITE	        = $05;
-  PETSCII_COLOR_RED           = $1c;
-  PETSCII_COLOR_GREEN	        = $1e;
-  PETSCII_COLOR_BLUE	        = $1f;
-  PETSCII_COLOR_ORANGE	      = $81;
-  PETSCII_COLOR_BLACK	        = $90;
-  PETSCII_COLOR_BROWN	        = $95;
-  PETSCII_COLOR_PINK	        = $96;
-  PETSCII_COLOR_DARK_GREY	    = $97;
-  PETSCII_COLOR_GREY	        = $98;
-  PETSCII_COLOR_LIGHT_GREEN 	= $99;
-  PETSCII_COLOR_LIGHT_BLUE	  = $9a;
-  PETSCII_COLOR_LIGHT_GREY	  = $9b;
-  PETSCII_COLOR_PURPLE	      = $9c;
-  PETSCII_COLOR_YELLOW	      = $9e;
-  PETSCII_COLOR_CYAN	        = $9f;
-
-
 var
 
 // Standard Kernal ROM routines

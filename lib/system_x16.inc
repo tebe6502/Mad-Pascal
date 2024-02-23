@@ -43,8 +43,8 @@ procedure Randomize; assembler;
 Initialize random number generator
 *)
 asm
-	mva $d20a RndSeed
-	mva #$00  RndSeed+1
+	// mva $d20a RndSeed
+	// mva #$00  RndSeed+1
 end;
 
 

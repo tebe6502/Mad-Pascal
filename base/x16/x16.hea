@@ -1,8 +1,13 @@
 // PETSCII codes
-  PETSCII_SWAP		            = $01;
+  PETSCII_SWAP_COLOR		      = $01;
+  PETSCII_CLEAR	        		  = $93;
   PETSCII_BELL		            = $07;
   PETSCII_REVERSE_ON	        = $12;
   PETSCII_REVERSE_OFF	        = $92;
+  PETSCII_ISO_ON	            = $0f;
+  PETSCII_ISO_OFF	            = $8f;
+  PETSCII_SWAP_LOWCHARSET     = $0e;
+  PETSCII_SWAP_GFXCHARSET     = $8e;
 
   PETSCII_CURSOR_UP	          = $91;
   PETSCII_CURSOR_DOWN	        = $11;
@@ -17,6 +22,7 @@
   PETSCII_KEY_SHIFT_TAB	      = $18;
   PETSCII_KEY_MENU	          = $06;
   PETSCII_KEY_HOME	          = $13;
+  PETSCII_KEY_INSERT	        = $94;
   PETSCII_KEY_END	            = $04;
   PETSCII_KEY_HELP	          = $84;
 
@@ -52,7 +58,7 @@
   PETSCII_COLOR_YELLOW	      = $9e;
   PETSCII_COLOR_CYAN	        = $9f;
 
-  
+
   ACPTR      = $ffa5; // ACPTR. Read byte from peripheral bus.
   BASIN	     = $ffcf; // Get character.
   BSAVE      = $feba; // Like SAVE but omits the 2-byte header.

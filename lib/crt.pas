@@ -52,6 +52,7 @@ const
 	CN_NONE			= 7;
 {$ENDIF}
 
+{$IFDEF NOT X16}
 { CRT modes }
 	BW40	= 0;		{ 40x25 B/W on Color Adapter }
 	CO40	= 1;		{ 40x25 Color on Color Adapter }
@@ -59,12 +60,73 @@ const
 	CO80	= 3;		{ 80x25 Color on Color Adapter }
 	Mono	= 7;		{ 80x25 on Monochrome Adapter }
 
-{ Mode constants for 3.0 compatibility }
+  { Mode constants for 3.0 compatibility }
 	C40	= CO40;
 	C80	= CO80;
-
+{$ENDIF}
 
 { Foreground and background color constants }
+
+{$IFDEF X16}
+
+  PETSCII_COLOR_WHITE	        = $05;
+  PETSCII_COLOR_RED           = $1c;
+  PETSCII_COLOR_GREEN	        = $1e;
+  PETSCII_COLOR_BLUE	        = $1f;
+  PETSCII_COLOR_ORANGE	      = $81;
+  PETSCII_COLOR_BLACK	        = $90;
+  PETSCII_COLOR_BROWN	        = $95;
+  PETSCII_COLOR_PINK	        = $96;
+  PETSCII_COLOR_DARK_GREY	    = $97;
+  PETSCII_COLOR_GREY	        = $98;
+  PETSCII_COLOR_LIGHT_GREEN 	= $99;
+  PETSCII_COLOR_LIGHT_BLUE	  = $9a;
+  PETSCII_COLOR_LIGHT_GREY	  = $9b;
+  PETSCII_COLOR_PURPLE	      = $9c;
+  PETSCII_COLOR_YELLOW	      = $9e;
+  PETSCII_COLOR_CYAN	        = $9f;
+
+  BLACK                 = PETSCII_COLOR_BLACK;
+  WHITE                 = PETSCII_COLOR_WHITE;
+  RED                   = PETSCII_COLOR_RED;
+  CYAN                  = PETSCII_COLOR_CYAN;
+  PURPLE                = PETSCII_COLOR_PURPLE;
+  GREEN                 = PETSCII_COLOR_GREEN;
+  BLUE                  = PETSCII_COLOR_BLUE;
+  YELLOW                = PETSCII_COLOR_YELLOW;
+  ORANGE                = PETSCII_COLOR_ORANGE;
+  BROWN                 = PETSCII_COLOR_BROWN;
+  LIGHT_RED             = PETSCII_COLOR_PINK;
+  DARK_GREY             = PETSCII_COLOR_DARK_GREY;
+  GREY                  = PETSCII_COLOR_GREY;
+  LIGHT_GREEN           = PETSCII_COLOR_LIGHT_GREEN;
+  LIGHT_BLUE            = PETSCII_COLOR_LIGHT_BLUE;
+  LIGHT_GREY            = PETSCII_COLOR_LIGHT_GREY;
+
+{ CRT modes }
+  CX16_80x60  = $00;
+  CX16_80x30  = $01;     
+  CX16_40x60  = $02;
+  CX16_40x30  = $03;    
+  CX16_40x15  = $04;     
+  CX16_20x30  = $05;
+  CX16_20x15  = $06;
+  CX16_22x23  = $07;
+  CX16_64x50  = $08;     
+  CX16_64x25  = $09;     
+  CX16_32x50  = $0A;     
+  CX16_32x25  = $0B;     
+
+	BW40	= CX16_40x30;		{ 40x30 }
+	CO40	= CX16_40x60;		{ 40x60 }
+	BW80	= CX16_80x30;		{ 80x30 }
+	CO80	= CX16_80x60;		{ 80x60 }
+	Mono	= CX16_80x30;		{ 80x30 }
+  
+  { Mode constants for 3.0 compatibility }
+	C40	= CO40;
+	C80	= CO80;
+{$ENDIF}
 
 {$IFDEF C64}
 
@@ -130,6 +192,7 @@ const
   LIGHT_GREY            = $0C;
 
 {$ENDIF}
+
 
 
 { Add-in for blinking }
