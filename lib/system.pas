@@ -335,21 +335,16 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
 	DateSeparator: Char = '-';
+	FileMode: byte = fmOpenReadWrite;
+	GraphMode: byte;		(* @var current screen mode *)
+	IOResult: byte;			(* @var result of last file IO operation *)
+	EoLn: Boolean;			(* @var end of line status *)
+{$endif}
 
 {$ifdef atari}
 	[volatile] Rnd: byte absolute $d20a;
-
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
-{$endif}
-
-	FileMode: byte = fmOpenReadWrite;
-
-	GraphMode: byte;		(* @var current screen mode *)
-
-	IOResult: byte;			(* @var result of last file IO operation *)
-
-	EoLn: Boolean;			(* @var end of line status *)
 {$endif}
 
 	function Abs(x: Real): Real; register; assembler; overload;
