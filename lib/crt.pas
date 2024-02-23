@@ -163,6 +163,12 @@ uses atari;
 
 {$ENDIF}
 
+{$IFDEF X16}
+
+uses x16;
+
+{$ENDIF}
+
 
 {$i '../src/targets/crt.inc'}
 

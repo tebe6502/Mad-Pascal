@@ -14,6 +14,7 @@
 {$endif}
 {$ifdef neo}
   {$i graph_neo.inc}
+{$endif}
 {$ifdef x16}
   {$i graph_x16.inc}
 {$endif}

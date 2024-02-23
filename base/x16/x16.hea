@@ -1,52 +1,178 @@
+// PETSCII codes
+  PETSCII_SWAP		            = $01;
+  PETSCII_BELL		            = $07;
+  PETSCII_REVERSE_ON	        = $12;
+  PETSCII_REVERSE_OFF	        = $92;
 
+  PETSCII_CURSOR_UP	          = $91;
+  PETSCII_CURSOR_DOWN	        = $11;
+  PETSCII_CURSOR_RIGHT        = $1d;
+  PETSCII_CURSOR_LEFT         = $9d;
+  PETSCII_KEY_ESCAPE	        = $1b;
+  PETSCII_KEY_BACKSPACE	      = $14;
+  PETSCII_KEY_DEL	            = $19;
+  PETSCII_KEY_RETURN	        = $0d;
+  PETSCII_KEY_SHIFT_RETURN	  = $8d;
+  PETSCII_KEY_TAB	            = $09;
+  PETSCII_KEY_SHIFT_TAB	      = $18;
+  PETSCII_KEY_MENU	          = $06;
+  PETSCII_KEY_HOME	          = $13;
+  PETSCII_KEY_END	            = $04;
+  PETSCII_KEY_HELP	          = $84;
 
-vic_spr0_x		= $D000
-vic_spr0_y		= $D001
-vic_spr1_x		= $D002
-vic_spr1_y		= $D003
-vic_spr2_x		= $D004
-vic_spr2_y		= $D005
-vic_spr3_x		= $D006
-vic_spr3_y		= $D007
-vic_spr4_x		= $D008
-vic_spr4_y		= $D009
-vic_spr5_x		= $D00A
-vic_spr5_y		= $D00B
-vic_spr6_x		= $D00C
-vic_spr6_y		= $D00D
-vic_spr7_x		= $D00E
-vic_spr7_y		= $D00F
-vic_spr_hi_x		= $D010
-vic_cr1			= $D011
-vic_raster		= $D012
-vic_lp_x		= $D013
-vic_lp_y		= $D014
-vic_spr_ena		= $D015
-vic_cr2			= $D016
-vic_spr_exp_y		= $D017
-vic_mem			= $D018
-vic_irq			= $D019
-vic_irq_ena		= $D01A
-vic_spr_dp		= $D01B
-vic_spr_mcolor		= $D01C
-vic_spr_exp_x		= $D01D
-vic_spr_ss_col		= $D01E
-vic_spr_sd_col		= $D01F
-vic_border		= $D020
-vic_bg_color0		= $D021
-vic_bg_color1		= $D022
-vic_bg_color2		= $D023
-vic_bg_color3		= $D024
-vic_spr_color1		= $D025
-vic_spr_color2		= $D026
-vic_spr0_color		= $D027
-vic_spr1_color		= $D028
-vic_spr2_color		= $D029
-vic_spr3_color		= $D02A
-vic_spr4_color		= $D02B
-vic_spr5_color		= $D02C
-vic_spr6_color		= $D02D
-vic_spr7_color		= $D02E
+  PETSCII_KEY_PAGEUP	        = $82;
+  PETSCII_KEY_PAGEDOWN	      = $02;
+  PETSCII_KEY_F1	            = $85;
+  PETSCII_KEY_F2	            = $89;
+  PETSCII_KEY_F3	            = $86;
+  PETSCII_KEY_F4	            = $8a;
+  PETSCII_KEY_F5	            = $87;
+  PETSCII_KEY_F6	            = $8b;
+  PETSCII_KEY_F7	            = $88;
+  PETSCII_KEY_F8	            = $8c;
+  PETSCII_KEY_F9	            = $10;
+  PETSCII_KEY_F10	            = $15;
+  PETSCII_KEY_F11	            = $16;
+  PETSCII_KEY_F12	            = $17;
+
+  PETSCII_COLOR_WHITE	        = $05;
+  PETSCII_COLOR_RED           = $1c;
+  PETSCII_COLOR_GREEN	        = $1e;
+  PETSCII_COLOR_BLUE	        = $1f;
+  PETSCII_COLOR_ORANGE	      = $81;
+  PETSCII_COLOR_BLACK	        = $90;
+  PETSCII_COLOR_BROWN	        = $95;
+  PETSCII_COLOR_PINK	        = $96;
+  PETSCII_COLOR_DARK_GREY	    = $97;
+  PETSCII_COLOR_GREY	        = $98;
+  PETSCII_COLOR_LIGHT_GREEN 	= $99;
+  PETSCII_COLOR_LIGHT_BLUE	  = $9a;
+  PETSCII_COLOR_LIGHT_GREY	  = $9b;
+  PETSCII_COLOR_PURPLE	      = $9c;
+  PETSCII_COLOR_YELLOW	      = $9e;
+  PETSCII_COLOR_CYAN	        = $9f;
+
+  
+  ACPTR      = $ffa5; // ACPTR. Read byte from peripheral bus.
+  BASIN	     = $ffcf; // Get character.
+  BSAVE      = $feba; // Like SAVE but omits the 2-byte header.
+  BSOUT	     = $ffd2; // Write byte in A to default output. For writing to a file must call OPEN and CHKOUT beforehand.
+  CIOUT	     = $ffa8; // Send byte to peripheral bus.
+  CLOSEALLCH = $ffe7; // CLALL. Close all channels.
+  CLOSECH	   = $ffc3; // CLOSE. Close a channel.
+  CHKIN      = $ffc6; // Set channel for character input.
+  CHKOUT     = $ffc9; // CHKOUT. Define file as default output. (Must call OPEN beforehand.)
+  CHRIN      = $ffcf; // Alias for BASIN.
+  CHROUT     = $ffd2; // Alias for BSOUT.
+  CLOSE_ALL  = $ff4a; // Close all files on a device.
+  CLRCHN     = $ffcc; // Restore character I/O to screen/keyboard.
+  GETIN      = $ffe4; // Get character from keyboard.
+
+  IECIN      = $ffa5; // IECIN. Read byte from serial bus. (Must call TALK and TALKSA beforehand.)
+  IECOUT     = $ffa8; // IECOUT. Write byte to serial bus. (Must call LISTEN and LSTNSA beforehand.)
+  IOBASE     = $fff3; // Return start of I/O area.
+  IOINIT     = $ff84; // IOINIT. Initialize CIA's, SID volume; setup memory configuration; set and start interrupt timer.
+  LISTEN     = $ffb1; // Send LISTEN command to serial bus.
+  LKUPLA     = $ff59; // Search tables for given LA.
+  LKUPSA     = $ff5c; // Search tables for given SA.
+  LOAD       = $ffd5; // LOAD. Load or verify file. (Must call SETLFS and SETNAM beforehand.)
+  LSTNSA     = $ff93; // LSTNSA. Send LISTEN secondary address to serial bus. (Must call LISTEN beforehand.)
+  MEMBOT     = $ff99; // MEMBOT. Save or restore start address of BASIC work area.
+  MEMTOP     = $ff9c; // MEMTOP. Save or restore end address of BASIC work area.
+  OPEN       = $ffc0; // OPEN. Open file. (Must call SETLFS and SETNAM beforehand.)
+  PLOT       = $fff0; // PLOT. Save or restore cursor position.
+  PRIMM      = $ff7d; // Print string following the caller’s code.
+
+  RAMTAS     = $ff87; // RAMTAS. Clear memory addresses $0002-$0101 and $0200-$03FF; run memory test and set start and end address of BASIC work area accordingly; set screen memory to $0400 and datasette buffer to $033C.
+  RDTIM      = $ffde; // RDTIM. read Time of Day, at memory address $00A0-$00A2.
+  READST     = $ffb7; // READST. Fetch status of current input/output device, value of ST variable. (For RS232, status is cleared.)
+  RESTOR     = $ff8a; // RESTOR. Fill vector table at memory addresses $0314-$0333 with default values.
+  SAVE       = $ffd8; // SAVE. Save file. (Must call SETLFS and SETNAM beforehand.)
+  SCINIT     = $ff81; // SCINIT. Initialize VIC; restore default input/output to keyboard/screen; clear screen; set PAL/NTSC switch and interrupt timer.
+  SCNKEY     = $ff9f; // SCNKEY. Query keyboard; put current matrix code into memory address $00CB, current status of shift keys into memory address $028D and PETSCII code into keyboard buffer.
+  SCREEN     = $ffed; // SCREEN. Fetch number of screen rows and columns.
+
+  SETLFS     = $ffba; // SETLFS. Set file parameters.
+  SETMSG     = $ff90; // SETMSG. Set system error display switch at memory address $009D.
+  SETNAM     = $ffbd; // SETNAM. Set file name parameters.
+  SETTIM     = $ffdb; // SETTIM. Set Time of Day, at memory address $00A0-$00A2.
+  SETTMO     = $ffa2; // SETTMO. Unknown. (Set serial bus timeout.)
+  STOP       = $ffe1; // STOP. Query Stop key indicator, at memory address $0091; if pressed, call CLRCHN and clear keyboard buffer.
+  TALK       = $ffb4; // TALK. Send TALK command to serial bus.
+  TALKSA     = $ff96; // TALKSA. Send TALK secondary address to serial bus. (Must call TALK beforehand.)
+  UDTIM      = $ffea; // UDTIM. Update Time of Day, at memory address $00A0-$00A2, and Stop key indicator, at memory address $0091.
+  UNLSTN     = $ffae; // UNLSTN. Send UNLISTEN command to serial bus.
+  UNTALK     = $ffab; // UNTALK. Send UNTALK command to serial bus.
+  VECTOR     = $ff8d; // VECTOR. Copy vector table at memory addresses $0314-$0333 from or into user table.
+
+// x16 specific routines
+ clock_get_date_time    = $ff50; // Get the date and time.
+ clock_set_date_time    = $ff4d; //	Set the date and time.
+ entropy_get            = $fecf; // Get 24 random bits.
+ enter_basic            = $ff47; // Enter BASIC.
+ screen_mode            = $ff5f; // Get/Set screen mode.
+ screen_set_charset     = $ff62; // Activate 8x8 text mode charset.
+
+// floating point routines
+  MOVFM      = $bba2; // MOVFM. Move a Floating Point Number from Memory to FAC1
+  FOUT       = $bddd; // FOUT. Convert Contents of FAC1 to ASCII String
+  MOV2F      = $bbc7; // MOV2F. Move a Floating Point Number from FAC1 to Memory
+
+// interrupt routines and vectors
+  IRQVECLO   = $0314; // hardware interrupt (IRQ) vector, low byte
+  IRQVECHI   = $0315; // hardware interrupt (IRQ) vector, high byte
+  STDIRQ     = $ea31; //start address of standard interrupt routines
+
+// keyboard
+  CURRKEY    = $cb;
+
+; vic_spr0_x		= $D000
+; vic_spr0_y		= $D001
+; vic_spr1_x		= $D002
+; vic_spr1_y		= $D003
+; vic_spr2_x		= $D004
+; vic_spr2_y		= $D005
+; vic_spr3_x		= $D006
+; vic_spr3_y		= $D007
+; vic_spr4_x		= $D008
+; vic_spr4_y		= $D009
+; vic_spr5_x		= $D00A
+; vic_spr5_y		= $D00B
+; vic_spr6_x		= $D00C
+; vic_spr6_y		= $D00D
+; vic_spr7_x		= $D00E
+; vic_spr7_y		= $D00F
+; vic_spr_hi_x	= $D010
+; vic_cr1			= $D011
+; vic_raster		= $D012
+; vic_lp_x		= $D013
+; vic_lp_y		= $D014
+; vic_spr_ena		= $D015
+; vic_cr2			= $D016
+; vic_spr_exp_y	= $D017
+; vic_mem			= $D018
+; vic_irq			= $D019
+; vic_irq_ena		= $D01A
+; vic_spr_dp		= $D01B
+; vic_spr_mcolor	= $D01C
+; vic_spr_exp_x	= $D01D
+; vic_spr_ss_col	= $D01E
+; vic_spr_sd_col	= $D01F
+; vic_border		= $D020
+; vic_bg_color0	= $D021
+; vic_bg_color1	= $D022
+; vic_bg_color2	= $D023
+; vic_bg_color3	= $D024
+; vic_spr_color1	= $D025
+; vic_spr_color2	= $D026
+; vic_spr0_color	= $D027
+; vic_spr1_color	= $D028
+; vic_spr2_color	= $D029
+; vic_spr3_color	= $D02A
+; vic_spr4_color	= $D02B
+; vic_spr5_color	= $D02C
+; vic_spr6_color	= $D02D
+; vic_spr7_color	= $D02E
 
 
 .macro	basic_start(addr)

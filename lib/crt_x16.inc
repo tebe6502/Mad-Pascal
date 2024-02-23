@@ -59,7 +59,7 @@ function ReadKey: char; assembler;
 @returns: char
 *)
 asm
-getkey	lda $cb
+getkey	lda CURRKEY
 	cmp #$40
 	beq getkey
 
@@ -77,7 +77,13 @@ procedure TextBackground(a: byte); assembler;
 @param: a - color value 0..255
 *)
 asm
-	sta 647
+	lda a
+	jsr CHROUT
+	lda PETSCII_SWAP
+	jsr CHROUT
+	lda PETSCII_COLOR_WHITE
+	jsr CHROUT
+
 end;
 
 
@@ -88,7 +94,8 @@ procedure TextColor(a: byte); assembler;
 @param: a - color value 0..255
 *)
 asm
-	sta 646
+	lda a
+	JSR CHROUT
 end;
 
 
@@ -134,8 +141,8 @@ function Keypressed: Boolean; assembler;
 asm
 	txa:pha
 
-	jsr $F142
-	sta $cb
+	jsr GETIN
+	sta CURRKEY
 
 	seq
 	lda #1
@@ -155,8 +162,8 @@ GotoXY positions the cursor at (X,Y), X in horizontal, Y in vertical direction r
 
 the origin of the current window. The origin is located at (1,1), the upper-left corner of the window.
 
-@param: x - horizontal positions (1..40)
-@param: y - vertical positions (1..24)
+@param: x - horizontal positions (1..80)
+@param: y - vertical positions (1..60)
 *)
 
 asm
@@ -171,7 +178,7 @@ asm
 	seq
 	dey
 
-	jsr $FFF0	; PLOT
+	jsr PLOT
 
 	pla:tax
 end;
@@ -181,14 +188,14 @@ function WhereX: byte; assembler;
 (*
 @description: Return X (horizontal) cursor position
 
-@returns: byte (1..40)
+@returns: byte (1..80)
 *)
 
 asm
 	txa:pha
 	sec
 
-	jsr $FFF0	; PLOT
+	jsr PLOT
 	iny
 	sty Result
 
@@ -200,14 +207,14 @@ function WhereY: byte; assembler;
 (*
 @description: Return Y (vertical) cursor position
 
-@returns: byte (1..24)
+@returns: byte (1..60)
 *)
 
 asm
 	txa:pha
 	sec
 
-	jsr $FFF0	; PLOT
+	jsr PLOT
 	inx
 	stx Result
 
@@ -224,35 +231,71 @@ The cursor doesn't move.
 *)
 begin
 
- FillChar( pointer($400+WhereX+WhereY*40-41), byte(41-byte(WhereX)), 32);
+//  FillChar( pointer($400+WhereX+WhereY*40-41), byte(41-byte(WhereX)), 32);
 
 end;
 
 
 procedure TextMode(Mode: byte); assembler;
 (*
-@description: Reset E: device
+@description: Get/Set the screen mode
 
-@param: Mode - unused value
+@param: Mode - screen mode
+
+$00     80x60 text
+$01     80x30 text
+$02     40x60 text
+$03     40x30 text
+$04     40x15 text
+$05     20x30 text
+$06     20x15 text
+$07     22x23 text
+$08     64x50 text
+$09     64x25 text
+$0A     32x50 text
+$0B     32x25 text
+
 *)
 asm
 	txa:pha
 
-	jsr $FF81	; SCINIT. Initialize VIC
-	jsr $FF84	; IOINIT. Initialize CIA's, SID volume
+	lda Mode
+	cmp $80
+	beq invalid
+	clc
+	jsr screen_mode;
+invalid:
+	pla:tax
+end;
+
+procedure SetTextCharset(charset: pointer); assembler;
+(*
+@description: Sets charset
+pointer to a 2 KB RAM area that gets uploaded as the new 8x8 character set. The data has to consist of 256 characters of 8 bytes each, top to bottom, with the MSB on the left and set bits representing the foreground color.
+
+@param: charset - pointer to 2 KB RAM area
+
+
+*)
+asm
+	txa:pha
+
+	lda #0
+	ldx #<CHARSET
+	ldy#>CHARSET
+	jsr screen_set_charset
 
 	pla:tax
 end;
 
-
 procedure NoSound; assembler;
 (*
-@description: Reset POKEY
+@description: Reset sound
 *)
 asm
 	txa:pha
 
-	jsr $FF84	; IOINIT. Initialize CIA's, SID volume
+	jsr IOINIT	; Initialize CIAs, SID volume
 
 	pla:tax
 end;

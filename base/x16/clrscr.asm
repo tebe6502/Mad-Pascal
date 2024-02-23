@@ -3,6 +3,7 @@
 
 .proc	@ClrScr
 
-	jmp $e544
+	lda #$93	; Clear PETSCII code
+	jmp CHROUT
 
 .endp
