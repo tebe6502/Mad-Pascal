@@ -271,17 +271,16 @@ CX16_32x25	$0B     32x25 text
 
 *)
 asm
-	// txa:pha
 	phx
 
 	lda Mode
-	cmp #$0b
+	cmp #$0c
 	bcs stop
 
 	clc
 	jsr screen_mode
 
-// stop	pla:tax
+stop
 	plx
 end;
 

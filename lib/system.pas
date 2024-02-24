@@ -268,7 +268,7 @@ const
   PETSCII_CURSOR_DOWN	        = $11;
   PETSCII_CURSOR_RIGHT        	= $1d;
   PETSCII_CURSOR_LEFT         	= $9d;
-  PETSCII_KEY_ESCAPE	        = $1b;
+  PETSCII_KEY_ESC		        = $1b;
   PETSCII_KEY_BACKSPACE	      	= $14;
   PETSCII_KEY_DEL	            = $19;
   PETSCII_KEY_RETURN	        = $0d;
@@ -310,7 +310,7 @@ const
   X16_CURSOR_DOWN	      = chr(PETSCII_CURSOR_DOWN);
   X16_CURSOR_RIGHT        = chr(PETSCII_CURSOR_RIGHT);
   X16_CURSOR_LEFT         = chr(PETSCII_CURSOR_LEFT);
-  X16_KEY_ESCAPE	      = chr(PETSCII_KEY_ESCAPE);
+  X16_KEY_ESC	      	  = chr(PETSCII_KEY_ESC);
   X16_KEY_BACKSPACE	      = chr(PETSCII_KEY_BACKSPACE);
   X16_KEY_DEL	          = chr(PETSCII_KEY_DEL);
   X16_KEY_RETURN	      = chr(PETSCII_KEY_RETURN);

@@ -26,8 +26,6 @@ begin
     writeln('press any key');
     repeat until keypressed;
     writeln;
-    // TextColor(PETSCII_COLOR_GREY);
-    // write(X16_SWAP_COLOR);
     TextBackground(PETSCII_COLOR_GREY);
     for i:=0 to 15 do begin
         // TextBackground(PETSCII_COLOR_GREY);
