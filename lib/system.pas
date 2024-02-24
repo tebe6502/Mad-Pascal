@@ -358,27 +358,27 @@ const
 	NEO_CURSOR_UP		= chr(23);
 	NEO_CURSOR_REV		= chr(24);	// cursor reverse
 	NEO_DELETE			= chr(26);
-	NEO_ESCAPE		= chr(27);	// general break – e.g. exits BASIC
+	NEO_ESCAPE			= chr(27);	// general break – e.g. exits BASIC
  
 // 	;--------------------------;
 //	; color control characters ;
 //	;--------------------------;
 
-	NEO_COLOR_BLACK		= chr($80);
-	NEO_COLOR_RED		= chr($81);
-	NEO_COLOR_GREEN		= chr($82);
-	NEO_COLOR_YELLOW	= chr($83);
-	NEO_COLOR_BLUE		= chr($84);
-	NEO_COLOR_MAGENTA	= chr($85);
-	NEO_COLOR_CYAN		= chr($86);
-	NEO_COLOR_WHITE		= chr($87);
-	NEO_COLOR_ALT_BLACK	= chr($88);
-	NEO_COLOR_DARK_GREY	= chr($89);
+	NEO_COLOR_BLACK			= chr($80);
+	NEO_COLOR_RED			= chr($81);
+	NEO_COLOR_GREEN			= chr($82);
+	NEO_COLOR_YELLOW		= chr($83);
+	NEO_COLOR_BLUE			= chr($84);
+	NEO_COLOR_MAGENTA		= chr($85);
+	NEO_COLOR_CYAN			= chr($86);
+	NEO_COLOR_WHITE			= chr($87);
+	NEO_COLOR_ALT_BLACK		= chr($88);
+	NEO_COLOR_DARK_GREY		= chr($89);
 	NEO_COLOR_DARK_GREEN	= chr($8A);
-	NEO_COLOR_ORANGE	= chr($8B);
+	NEO_COLOR_ORANGE		= chr($8B);
 	NEO_COLOR_DARK_ORANGE	= chr($8C);
-	NEO_COLOR_BROWN		= chr($8D);
-	NEO_COLOR_PINK		= chr($8E);
+	NEO_COLOR_BROWN			= chr($8D);
+	NEO_COLOR_PINK			= chr($8E);
 	NEO_COLOR_LIGHT_GREY	= chr($8F);
 
 {$endif}
@@ -414,20 +414,24 @@ const
 	COLOR_LIGHTBLUE 	= $7c;
 {$endif}
 
-{$ifdef atari}
-	[volatile] Rnd: byte absolute $d20a;
-
-	Palette: array [0..8] of byte absolute 704;
-	HPalette: array [0..8] of byte absolute $d012;
-{$endif}
-
 (* file mode *)
 {$ifndef raw}
 	fmOpenRead	= $04;
 	fmOpenWrite	= $08;
 	fmOpenAppend	= $09;
 	fmOpenReadWrite	= $0c;
+{$endif}
 
+
+{$ifdef atari}
+var
+	[volatile] Rnd: byte absolute $d20a;
+
+	Palette: array [0..8] of byte absolute 704;
+	HPalette: array [0..8] of byte absolute $d012;
+{$endif}
+
+{$ifndef raw}
 var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
