@@ -427,9 +427,7 @@ const
 	fmOpenWrite	= $08;
 	fmOpenAppend	= $09;
 	fmOpenReadWrite	= $0c;
-{$endif}
 
-{$ifndef raw}
 var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	ScreenHeight: smallint = 24;	(* @var current screen height *)
 
@@ -555,12 +553,10 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	function Swap(a: word): word; overload;
 	function Swap(a: cardinal): cardinal; overload;
 
-
 implementation
 
 var
 	RndSeed: smallint;
-
 
 procedure RunError(a: byte);
 (*

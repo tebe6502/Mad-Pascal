@@ -52,7 +52,7 @@ const
 	CN_NONE			= 7;
 {$ENDIF}
 
-{$IFDEF NOT X16}
+{$IFNDEF X16}
 { CRT modes }
 	BW40	= 0;		{ 40x25 B/W on Color Adapter }
 	CO40	= 1;		{ 40x25 Color on Color Adapter }

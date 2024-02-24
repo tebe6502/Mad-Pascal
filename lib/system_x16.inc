@@ -43,8 +43,16 @@ procedure Randomize; assembler;
 Initialize random number generator
 *)
 asm
-	// mva $d20a RndSeed
-	// mva #$00  RndSeed+1
+	phx
+	
+	jsr entropy_get
+	stx RndSeed
+	eor RndSeed
+	sty RndSeed+1
+	eor RndSeed+1
+
+	plx
+
 end;
 
 
@@ -56,24 +64,36 @@ Generate random number
 @returns: Real (Q24.8)
 *)
 begin
+	asm
+		phx
 
- asm
-	lda $DC04	//CIA#1 Timer A Lo byte
-	eor $DC05	//CIA#1 Timer A Hi byte
-	eor $DD04	//CIA#2 Timer A Lo byte
-	adc $DD05	//CIA#2 Timer A Hi byte
-	eor $DD06	//CIA#2 Timer B Lo byte
-	eor $DD07	//CIA#2 Timer B Hi byte
-	sta Result
+	// again:
+	// 	jsr entropy_get
+	// 	stx Result
+	// 	eor Result
+	// 	sty Result+1
+	// 	eor Result+1
+	// 	sta Result+2
+	// 	lsr
+	// 	lsr
+	// 	lsr
+	// 	lsr
+	// 	eor Result+2
+	// 	and #7
+	// 	cmp #0
+	// 	beq again	; 0 is illegal
+	// 	cmp #7
+	// 	beq again	; 7 is illegal
 
-	lda #$00
-	sta Result+1
-	sta Result+2
-	sta Result+3
- end;
+			// 	jsr entropy_get
 
- Result:= 1 - Result;
+		stx Result
+		sty Result+1
+		sta Result+2
 
+		plx
+	end;
+	Result:= 1 - Result;
 end;
 
 
@@ -85,27 +105,19 @@ Generate random number
 @returns: Float (Single)
 *)
 begin
+	asm
 
- asm
-	lda $DC04	//CIA#1 Timer A Lo byte
-	eor $DC05	//CIA#1 Timer A Hi byte
-	eor $DD04	//CIA#2 Timer A Lo byte
-	sta Result+1
+		phx
 
-	adc $DD05	//CIA#2 Timer A Hi byte
-	eor $DD06	//CIA#2 Timer B Lo byte
-	eor $DD07	//CIA#2 Timer B Hi byte
-	and #$7f
-	sta Result+2
+		jsr entropy_get
+		stx Result
+		sty Result+1
+		sta Result+2
 
-	lda #$00
-	sta Result
-	lda #$3f
-	sta Result+3
- end;
+		plx
 
- Result:= 1 - Result;
-
+ 	end;
+	Result:= 1 - Result;
 end;
 
 
@@ -119,18 +131,16 @@ Generate random number
 var a: word;
 begin
 
- asm
-	lda $DC04	//CIA#1 Timer A Lo byte
-	eor $DC05	//CIA#1 Timer A Hi byte
-	eor $DD04	//CIA#2 Timer A Lo byte
-	sta a
+	asm
+		phx
 
-	adc $DD05	//CIA#2 Timer A Hi byte
-	eor $DD06	//CIA#2 Timer B Lo byte
-	eor $DD07	//CIA#2 Timer B Hi byte
-	and #$7f
-	sta a+1
- end;
+		jsr entropy_get
+		stx a
+		sty a+1
+		sta a+2
+
+		plx
+	end;
 
  Result:= a * (1/32767);
 
@@ -147,12 +157,10 @@ Generate random number
 @returns: byte
 *)
 asm
-	lda $DC04	//CIA#1 Timer A Lo byte
-	eor $DC05	//CIA#1 Timer A Hi byte
-	eor $DD04	//CIA#2 Timer A Lo byte
-	adc $DD05	//CIA#2 Timer A Hi byte
-	eor $DD06	//CIA#2 Timer B Lo byte
-	eor $DD07	//CIA#2 Timer B Hi byte
+	phx
+
+	jsr entropy_get
+	sta Result
 	tay
 
 	lda	range
@@ -165,6 +173,7 @@ asm
 	tay
 
 stop	sty	Result
+	plx
 end;
 
 

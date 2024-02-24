@@ -83,7 +83,7 @@ asm
 	jsr CHROUT
 	lda #PETSCII_SWAP_COLOR
 	jsr CHROUT
-	lda PETSCII_COLOR_WHITE
+	lda #PETSCII_COLOR_WHITE
 	jsr CHROUT
 	
 	plx
