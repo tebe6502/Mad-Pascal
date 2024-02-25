@@ -7,11 +7,11 @@
 	idivWORD
 	@WORD.DIV
 	@WORD.MOD
-	
+
 	@divAX_CL
 */
 
-; changes: 24.02.2024
+; changes: 25.02.2024
 ;
 ; Description: Unsigned 16-bit multiplication with unsigned 32-bit result.
 ;
@@ -39,7 +39,7 @@
 ;		 <T1 * >T2 = BBbb
 ;		 >T1 * <T2 = CCcc
 ;		 >T1 * >T2 = DDdd
-;		
+;
 ;			AAaa
 ;		     BBbb
 ;		     CCcc
@@ -48,72 +48,104 @@
 ;		   PRODUCT!
 ;
 ;		 Setup T1 if changed
+
+	.ifdef fmulinit
+	.align
+	eif
+
 .proc	fmulu_16
 
 t1	= :eax
 t2	= :ecx
 
-product	= :eax
+PRODUCT	= :eax
+
+_AA_	= t2
+_BB_	= PRODUCT+2
+
+	ldy T2
+	sec
 
 	lda t1+1
-	ora t2+1
-	jeq fmulu_8
+	bne _16x16
+	lda t2+1
+	bne _16x16
+_8x8
+	sta PRODUCT+2
+	sta PRODUCT+3
 
-;		bcc @+
-		    lda T1+0
-		    sta sm1a+1
-		    sta sm3a+1
-		    sta sm5a+1
-		    sta sm7a+1
-		    eor #$ff
-		    sta sm2a+1
-		    sta sm4a+1
-		    sta sm6a+1
-		    sta sm8a+1
+		lda T1
+		sta sm1+1
+		sta sm3+1
+		eor #$ff
+		sta sm2+1
+		sta sm4+1
 
-;@
-		; Perform <T1 * <T2 = AAaa
-		ldy T2+0
-		sec
-sm1a:		lda square1_lo,y
-sm2a:		sbc square2_lo,y
-		sta PRODUCT+0
-sm3a:		lda square1_hi,y
-sm4a:		sbc square2_hi,y
-		sta _AA_+1
+;	ldy T2
+;	sec
+sm1:	lda square1_lo,y
+sm2:	sbc square2_lo,y
+	sta PRODUCT
+sm3:	lda square1_hi,y
+sm4:	sbc square2_hi,y
+	sta PRODUCT+1
 
-		; Perform >T1 * <T2 = CCcc
-		lda T1+1
-		bne skp0
-		
+	rts
+
+_16x16
+		lda T1
+		sta sm1a+1
+		sta sm3a+1
+		sta sm5a+1
+		sta sm7a+1
+		eor #$ff
+		sta sm2a+1
+		sta sm4a+1
+		sta sm6a+1
+		sta sm8a+1
+
+	; Perform <T1 * <T2 = AAaa
+;	ldy T2
+;	sec
+sm1a:	lda square1_lo,y
+sm2a:	sbc square2_lo,y
+	sta PRODUCT
+sm3a:	lda square1_hi,y
+sm4a:	sbc square2_hi,y
+	sta _AA_
+
+	; Perform >T1 * <T2 = CCcc
+	lda T1+1
+	bne skp0
+
 		sta _cc+1
 		jmp nxt0
 
-skp0		sta sm1b+1
-		sta sm3b+1
-		eor #$ff
-		sta sm2b+1
-		sta sm4b+1
+skp0	sta sm1b+1
+	sta sm3b+1
+	eor #$ff
+	sta sm2b+1
+	sta sm4b+1
 
-		sec
-sm1b:		lda square1_lo,y
-sm2b:		sbc square2_lo,y
-		sta _cc+1
-sm3b:		lda square1_hi,y
-sm4b:		sbc square2_hi,y
+	sec
+sm1b:	lda square1_lo,y
+sm2b:	sbc square2_lo,y
+	sta _cc+1
+sm3b:	lda square1_hi,y
+sm4b:	sbc square2_hi,y
 
-nxt0		;sta _CC_+1
+nxt0	;sta _CC_+1
 
-		; Perform <T1 * >T2 = BBbb
-		ldy T2+1
-		bne skp1
+	; Perform <T1 * >T2 = BBbb
+	ldy T2+1
+	bne skp1
 
 		sty PRODUCT+3
 
-		tay
+		tay		; _CC_+1
 
 		clc
-		lda _AA_+1
+		lda _AA_
 		adc _cc+1
 		sta PRODUCT+1
 		tya
@@ -121,29 +153,29 @@ nxt0		;sta _CC_+1
 		sta PRODUCT+2
 
 		rts
-		
-skp1		sta _CC_+1
 
-		sec
-sm5a:		lda square1_lo,y
-sm6a:		sbc square2_lo,y
-		sta _bb+1
-sm7a:		lda square1_hi,y
-sm8a:		sbc square2_hi,y
-		sta _BB_+1
+skp1	sta _CC_+1
 
-		; Perform >T1 * >T2 = DDdd
-		
-		lda T1+1
-		bne skp2
+	sec
+sm5a:	lda square1_lo,y
+sm6a:	sbc square2_lo,y
+	sta _bb+1
+sm7a:	lda square1_hi,y
+sm8a:	sbc square2_hi,y
+	sta _BB_
+
+	; Perform >T1 * >T2 = DDdd
+
+	lda T1+1
+	bne skp2
 
 		sta PRODUCT+3
 
 		clc
-		lda _AA_+1
+		lda _AA_
 		adc _bb+1
 		tay
-		lda _BB_+1
+		lda _BB_
 		adc _CC_+1
 		sta PRODUCT+2
 
@@ -156,28 +188,27 @@ sm8a:		sbc square2_hi,y
 
 		rts
 
+skp2	sta sm5b+1
+	sta sm7b+1
+	eor #$ff
+	sta sm6b+1
+	sta sm8b+1
 
-skp2		sta sm5b+1
-		sta sm7b+1
-		eor #$ff
-		sta sm6b+1
-		sta sm8b+1
-
-		sec
-sm5b:		lda square1_lo,y
-sm6b:		sbc square2_lo,y
-		sta _dd+1
-sm7b:		lda square1_hi,y
-sm8b:		sbc square2_hi,y
-		sta PRODUCT+3
+	sec
+sm5b:	lda square1_lo,y
+sm6b:	sbc square2_lo,y
+	sta _dd+1
+sm7b:	lda square1_hi,y
+sm8b:	sbc square2_hi,y
+	sta PRODUCT+3
 
 		; Add the separate multiplications together
 		clc
-_AA_		lda #0
+		lda _AA_
 _bb:		adc #0
 ;		sta PRODUCT+1
 		tay
-_BB_		lda #0
+		lda _BB_
 _CC_:		adc #0
 		sta PRODUCT+2
 		bcc @+
@@ -245,7 +276,7 @@ ptr3 = :ECX
 	lda	ptr1+1
 	ora	ptr3+1
 	beq	umul8x8r16
-	
+
 	lda	ptr1+1
 	beq	imulCX_AL
 
@@ -279,7 +310,7 @@ ptr3 = :ECX
 .local	umul8x8r16
 
 	ldy #8
-	
+
 	sta :EAX+2
 	sta :EAX+3
 
@@ -358,6 +389,9 @@ ptr1	= :ax
 ptr4	= :cx
 sreg	= :ztmp
 
+	lda :eax+1
+	jeq @BYTE
+
 	LDA #0
 	STA :ztmp+1
 	STA :ztmp+2
@@ -425,7 +459,7 @@ B	= :ECX
 
 RESULT	= :ZTMP
 	.endl
-	
+
 	lda DIV.B+1
 	jeq @divAX_CL
 
@@ -454,11 +488,11 @@ RESULT	= :ZTMP
 	tya
 	SBC :cx
 	jmp s:1
-@	
+@
 	tya
 s:1
 	.ENDR
-	
+
      els
 
 	LDY #16
@@ -482,7 +516,7 @@ DIV2	lda :edx
 DIV3
 	DEY
 	BNE LOOP
-	
+
      eif
 
 	STA :ztmp
