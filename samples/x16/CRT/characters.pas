@@ -1,7 +1,7 @@
 uses crt;
 var i,j: byte;
 begin
-    write(X16_SWAP_CHARSET);
+    // write(X16_SWAP_CHARSET);
     writeln('press any key to continue');
     repeat until keypressed;
     
@@ -24,14 +24,17 @@ begin
     writeln;
     j:=1;
     for i:=$c0 to $ff do begin
-        write(HexStr(i,2));write(':',chr(i));write(' ');
+        write(HexStr(i,2));
+        write(':');
+        // write(X16_REVERSE_ON);
+        write(chr(i));
+        // write(X16_REVERSE_OFF);
+        write(' ');
         inc(j);
         if (j>10) then begin
             writeln;
             j:=1;
         end;
     end;
-//   write(X16_SWAP_CHARSET);
-//   writeln('hello world !');
     repeat until keypressed;
 end.

@@ -104,24 +104,24 @@ const
   LIGHT_GREY            = PETSCII_COLOR_LIGHT_GREY;
 
 { CRT modes }
-  CX16_80x60  = $00;
-  CX16_80x30  = $01;     
-  CX16_40x60  = $02;
-  CX16_40x30  = $03;    
-  CX16_40x15  = $04;     
-  CX16_20x30  = $05;
-  CX16_20x15  = $06;
-  CX16_22x23  = $07;
-  CX16_64x50  = $08;     
-  CX16_64x25  = $09;     
-  CX16_32x50  = $0A;     
-  CX16_32x25  = $0B;     
+  X16_MODE_80x60  = $00;
+  X16_MODE_80x30  = $01;     
+  X16_MODE_40x60  = $02;
+  X16_MODE_40x30  = $03;    
+  X16_MODE_40x15  = $04;     
+  X16_MODE_20x30  = $05;
+  X16_MODE_20x15  = $06;
+  X16_MODE_22x23  = $07;
+  X16_MODE_64x50  = $08;     
+  X16_MODE_64x25  = $09;     
+  X16_MODE_32x50  = $0A;     
+  X16_MODE_32x25  = $0B;     
 
-	BW40	= CX16_40x30;		{ 40x30 }
-	CO40	= CX16_40x60;		{ 40x60 }
-	BW80	= CX16_80x30;		{ 80x30 }
-	CO80	= CX16_80x60;		{ 80x60 }
-	Mono	= CX16_80x30;		{ 80x30 }
+	BW40	= X16_MODE_40x30;		{ 40x30 }
+	CO40	= X16_MODE_40x60;		{ 40x60 }
+	BW80	= X16_MODE_80x30;		{ 80x30 }
+	CO80	= X16_MODE_80x60;		{ 80x60 }
+	Mono	= X16_MODE_80x30;		{ 80x30 }
   
   { Mode constants for 3.0 compatibility }
 	C40	= CO40;

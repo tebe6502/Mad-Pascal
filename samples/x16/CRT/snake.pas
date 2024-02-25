@@ -220,7 +220,7 @@ begin
   clrscr;
 
   CursorOff;
-  TextMode(CX16_40x30);
+  TextMode(X16_MODE_40x30);
 
   randomize;
 

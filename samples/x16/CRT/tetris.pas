@@ -140,7 +140,7 @@ end;
 
 
 begin
-  Textmode(CX16_40x30);
+  Textmode(X16_MODE_40x30);
   // write(X16_ISO_ON);
   write(X16_SWAP_CHARSET);
   randomize;
@@ -188,6 +188,6 @@ begin
     end;
   until pus=1;
   // write(X16_ISO_OFF);
-  TextMode(CX16_80x60);
+  TextMode(X16_MODE_80x60);
 end.
 
