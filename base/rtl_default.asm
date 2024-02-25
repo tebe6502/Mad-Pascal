@@ -1,9 +1,6 @@
 
 	icl 'runtime\int.asm'		; @INT, @INT_SHORT
 
-	icl 'runtime\icmp.asm'		; cmpSHORTINT, cmpSMALLINT, cmpINT
-	icl 'runtime\lcmp.asm'		; cmpEAX_ECX
-
 	icl 'runtime\add.asm'		; addAL_CL, addAX_CX, addEAX_ECX
 	icl 'runtime\sub.asm'		; subAL_CL, subAX_CX, subEAX_ECX
 
