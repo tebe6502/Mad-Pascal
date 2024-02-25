@@ -1,7 +1,7 @@
 	opt l-
 
 /* -----------------------------------------------------------------------
-/*                   CPU 6502 Run Time Library - Atari XE/XL
+/*                   CPU 6502 runtime library - Atari XE/XL
 /*			        19.04.2018
 /* -----------------------------------------------------------------------
 /* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
