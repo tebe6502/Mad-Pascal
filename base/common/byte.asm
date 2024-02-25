@@ -8,6 +8,8 @@
 	@BYTE.DIV
 */
 
+; changes: 24.02.2024
+;
 ; Description: Unsigned 8-bit multiplication with unsigned 16-bit result.
 ;
 ; Input: 8-bit unsigned value in T1
@@ -35,7 +37,6 @@ t2	= :ecx
 
 product	= :eax
 
-	stx @sp
 ;		bcc :+
 		    lda T1
 		    sta sm1+1
@@ -44,20 +45,16 @@ product	= :eax
 		    sta sm2+1
 		    sta sm4+1
 
-		ldx T2
+		ldy T2
 		sec
-sm1:		lda square1_lo,x
-sm2:		sbc square2_lo,x
+sm1:		lda square1_lo,y
+sm2:		sbc square2_lo,y
 		sta PRODUCT+0
-sm3:		lda square1_hi,x
-sm4:		sbc square2_hi,x
-
+sm3:		lda square1_hi,y
+sm4:		sbc square2_hi,y
 		sta PRODUCT+1
 
-	ldx @sp: #0
-
 	rts
-
 .endp
 
 
