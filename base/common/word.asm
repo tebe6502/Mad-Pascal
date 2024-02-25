@@ -11,6 +11,8 @@
 	@divAX_CL
 */
 
+; changes: 24.02.2024
+;
 ; Description: Unsigned 16-bit multiplication with unsigned 32-bit result.
 ;
 ; Input: 16-bit unsigned value in T1
@@ -53,7 +55,10 @@ t2	= :ecx
 
 product	= :eax
 
-	stx @sp
+	lda t1+1
+	ora t2+1
+	jeq fmulu_8
+
 ;		bcc @+
 		    lda T1+0
 		    sta sm1a+1
@@ -65,88 +70,130 @@ product	= :eax
 		    sta sm4a+1
 		    sta sm6a+1
 		    sta sm8a+1
-		    lda T1+1
-		    sta sm1b+1
-		    sta sm3b+1
-		    sta sm5b+1
-		    sta sm7b+1
-		    eor #$ff
-		    sta sm2b+1
-		    sta sm4b+1
-		    sta sm6b+1
-		    sta sm8b+1
+
 ;@
 		; Perform <T1 * <T2 = AAaa
-		ldx T2+0
+		ldy T2+0
 		sec
-sm1a:		lda square1_lo,x
-sm2a:		sbc square2_lo,x
+sm1a:		lda square1_lo,y
+sm2a:		sbc square2_lo,y
 		sta PRODUCT+0
-sm3a:		lda square1_hi,x
-sm4a:		sbc square2_hi,x
-		;sta _AA+1
-		tay
+sm3a:		lda square1_hi,y
+sm4a:		sbc square2_hi,y
+		sta _AA_+1
 
-		; Perform >T1_hi * <T2 = CCcc
-		sec
-sm1b:		lda square1_lo,x
-sm2b:		sbc square2_lo,x
+		; Perform >T1 * <T2 = CCcc
+		lda T1+1
+		bne skp0
+		
 		sta _cc+1
-sm3b:		lda square1_hi,x
-sm4b:		sbc square2_hi,x
-		sta _CC_+1
+		jmp nxt0
+
+skp0		sta sm1b+1
+		sta sm3b+1
+		eor #$ff
+		sta sm2b+1
+		sta sm4b+1
+
+		sec
+sm1b:		lda square1_lo,y
+sm2b:		sbc square2_lo,y
+		sta _cc+1
+sm3b:		lda square1_hi,y
+sm4b:		sbc square2_hi,y
+
+nxt0		;sta _CC_+1
 
 		; Perform <T1 * >T2 = BBbb
-		ldx T2+1
+		ldy T2+1
+		bne skp1
+
+		sty PRODUCT+3
+
+		tay
+
+		clc
+		lda _AA_+1
+		adc _cc+1
+		sta PRODUCT+1
+		tya
+		adc #0
+		sta PRODUCT+2
+
+		rts
+		
+skp1		sta _CC_+1
+
 		sec
-sm5a:		lda square1_lo,x
-sm6a:		sbc square2_lo,x
+sm5a:		lda square1_lo,y
+sm6a:		sbc square2_lo,y
 		sta _bb+1
-sm7a:		lda square1_hi,x
-sm8a:		sbc square2_hi,x
+sm7a:		lda square1_hi,y
+sm8a:		sbc square2_hi,y
 		sta _BB_+1
 
 		; Perform >T1 * >T2 = DDdd
+		
+		lda T1+1
+		bne skp2
+
+		sta PRODUCT+3
+
+		clc
+		lda _AA_+1
+		adc _bb+1
+		tay
+		lda _BB_+1
+		adc _CC_+1
+		sta PRODUCT+2
+
+		clc
+		tya
+		adc _cc+1
+		sta PRODUCT+1
+		scc
+		inc PRODUCT+2
+
+		rts
+
+
+skp2		sta sm5b+1
+		sta sm7b+1
+		eor #$ff
+		sta sm6b+1
+		sta sm8b+1
+
 		sec
-sm5b:		lda square1_lo,x
-sm6b:		sbc square2_lo,x
+sm5b:		lda square1_lo,y
+sm6b:		sbc square2_lo,y
 		sta _dd+1
-sm7b:		lda square1_hi,x
-sm8b:		sbc square2_hi,x
-;		sta PRODUCT+3
-		tax
+sm7b:		lda square1_hi,y
+sm8b:		sbc square2_hi,y
+		sta PRODUCT+3
 
 		; Add the separate multiplications together
 		clc
-;_AA:		lda #0
-		tya
+_AA_		lda #0
 _bb:		adc #0
 ;		sta PRODUCT+1
 		tay
-_BB_:		lda #0
+_BB_		lda #0
 _CC_:		adc #0
 		sta PRODUCT+2
 		bcc @+
-;		inc PRODUCT+3
-		inx
+		inc PRODUCT+3
 		clc
 @
 		tya
 _cc:		adc #0
-;		adc PRODUCT+1
 		sta PRODUCT+1
 _dd:		lda #0
 		adc PRODUCT+2
 		sta PRODUCT+2
 		scc
-;		inc PRODUCT+3
-		inx
+		inc PRODUCT+3
 
-	stx PRODUCT+3
-
-	ldx @sp: #0
-
-	rts
+		rts
 .endp
 
 
@@ -198,6 +245,9 @@ ptr3 = :ECX
 	lda	ptr1+1
 	ora	ptr3+1
 	beq	umul8x8r16
+	
+	lda	ptr1+1
+	beq	imulCX_AL
 
         lda     #0
         sta     sreg+1
@@ -335,7 +385,7 @@ udiv16by8a:
 
      els
 
-	ldy #$10
+	ldy #16
 
 @L0:    asl     ptr1
         rol     ptr1+1
@@ -411,7 +461,7 @@ s:1
 	
      els
 
-	LDY #$10
+	LDY #16
 
 LOOP	ASL :ax
 	ROL :ax+1
