@@ -22,6 +22,5 @@ begin
     Readkey;
     TextBackground(0);
     TextColor(2);
-    ClrScr;
-    NeoExecuteBasic;    
+    ClrScr;  
 end.
