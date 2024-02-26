@@ -216,7 +216,9 @@ const
 	procedure TextMode(Mode: byte); assembler;
 	function WhereX: byte; assembler;                                                          //platform dependent
 	function WhereY: byte; assembler;                                                          //platform dependent
-
+{$IFDEF X16}
+  procedure TextCharset(charset: pointer); assembler;                                     //platform dependent
+{$ENDIF}
 
 implementation
 

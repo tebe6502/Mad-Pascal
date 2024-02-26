@@ -256,25 +256,25 @@ procedure TextMode(Mode: byte); assembler;
 
 @param: Mode - screen mode
 
-CX16_80x60	$00     80x60 text
-CX16_80x30	$01     80x30 text
-CX16_40x60	$02     40x60 text
-CX16_40x30	$03     40x30 text
-CX16_40x15	$04     40x15 text
-CX16_20x30	$05     20x30 text
-CX16_20x15	$06     20x15 text
-CX16_22x23	$07     22x23 text
-CX16_64x50	$08     64x50 text
-CX16_64x25	$09     64x25 text
-CX16_32x50	$0A     32x50 text
-CX16_32x25	$0B     32x25 text
-
+X16_MODE_80x60	- $00     80x60 text
+X16_MODE_80x30	- $01     80x30 text
+X16_MODE_40x60	- $02     40x60 text
+X16_MODE_40x30	- $03     40x30 text
+X16_MODE_40x15	- $04     40x15 text
+X16_MODE_20x30	- $05     20x30 text
+X16_MODE_20x15	- $06     20x15 text
+X16_MODE_22x23	- $07     22x23 text
+X16_MODE_64x50	- $08     64x50 text
+X16_MODE_64x25	- $09     64x25 text
+X16_MODE_32x50	- $0A     32x50 text
+X16_MODE_32x25	- $0B     32x25 text
+not available	- $80     320x240@256c 40x30 text, not availabe in CRT mode
 *)
 asm
 	phx
 
 	lda Mode
-	cmp #$0c
+	cmp #$0c; // $0b is the last valid value for text mode
 	bcs stop
 
 	clc
@@ -284,25 +284,24 @@ stop
 	plx
 end;
 
-procedure SetTextCharset(charset: pointer); assembler;
+procedure TextCharset(charset: pointer); assembler;
 (*
 @description: Sets charset
-pointer to a 2 KB RAM area that gets uploaded as the new 8x8 character set. The data has to consist of 256 characters of 8 bytes each, top to bottom, with the MSB on the left and set bits representing the foreground color.
+pointer to a 2 KB RAM area that gets uploaded as the new 8x8 character set. The data has to consist of 256 characters of 8 bytes each, top to bottom,
+with the MSB on the left and set bits representing the foreground color.
 
 @param: charset - pointer to 2 KB RAM area
 
 
 *)
 asm
-	// txa:pha
 	phx
 
 	lda #0
-	ldx #<CHARSET
-	ldy#>CHARSET
+	ldx CHARSET
+	ldy CHARSET+1
 	jsr screen_set_charset
 
-	// pla:tax
 	plx
 end;
 

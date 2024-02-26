@@ -7,7 +7,7 @@ type
 		       end;
 
 const
-
+{$ifndef x16}
 	{ graphic drivers }
 	CurrentDriver	= -128;
 	Detect		= 0;
@@ -49,6 +49,7 @@ const
 	grInvalidFontNum= -14;
 	grInvalidVersion= -18;
 
+
 	{ CGA Driver modes }
 	CGAC0 = 0;
 	CGAC1 = 1;
@@ -79,7 +80,10 @@ const
 	VGALo   = 10;		//0;
 	VGAMed  = 15+16;	//1;
 	VGAHi   = 8+16;		//2;
+{$endif}
+{$ifdef x16}
 
+{$endif}
 (*
 	{ fill pattern for Get/SetFillStyle: }
 	EmptyFill	= 0;	// Uses backgroundcolor
@@ -97,10 +101,19 @@ const
 	UserFill	= 12;	// Fills with a user-defined pattern
 *)
 
-var	WIN_LEFT: smallint = 0;
-	WIN_RIGHT: smallint = 39;
+var
+	WIN_LEFT: smallint = 0;
 	WIN_TOP: smallint = 0;
+{$ifndef x16}
+	WIN_RIGHT: smallint = 39;
 	WIN_BOTTOM: smallint = 23;
+{$endif}
+
+{$ifdef x16}
+	WIN_RIGHT: smallint = 39;
+	WIN_BOTTOM: smallint = 23;
+{$endif}
+
 
 	GraphResult: byte;
 

@@ -95,7 +95,7 @@ begin
 
 clrscr;
 CursorOff;
-TextMode(CX16_40x30);
+TextMode(X16_MODE_40x30);
 
 {Create initial population}
 Init(Field);
@@ -107,6 +107,6 @@ repeat
   Regenerate(Field);
   Delay(3000);
 until keypressed;
-TextMode(CX16_80x60);
+TextMode(X16_MODE_80x60);
 end.
 

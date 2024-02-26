@@ -27,6 +27,10 @@ SetColor
 
 interface
 
+{$ifdef x16}
+uses types, x16;
+{$endif}
+
 {$ifdef neo}
 uses types;
 {$endif}
@@ -47,7 +51,7 @@ uses types, c64;
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
 
-{$ifndef neo}
+{$ifndef neo AND x16}
 	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure SetActiveBuffer(var a: TDisplayBuffer);
 	function Scanline(y: smallint): PByte;

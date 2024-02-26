@@ -119,6 +119,20 @@
  screen_mode            = $ff5f; // Get/Set screen mode.
  screen_set_charset     = $ff62; // Activate 8x8 text mode charset.
 
+// Graphics routines
+  GRAPH_init            = $ff20; // Initialize graphics.
+  GRAPH_clear           = $ff23; // Clear screen.
+  GRAPH_set_window      = $ff26; // Set clipping region.
+  GRPAH_set_colors      = $ff29; // Set stroke, fill and background colors.
+  GRAPH_draw_line       = $ff2c; // Draw a line.
+  GRAPH_draw_rect       = $ff2f; // Draw a rectangle (optionally filled).
+  GRAPH_move_rect       = $ff32; // Move pixels.
+  GRAPH_draw_oval       = $ff35; // Draw an oval or circle.
+  GRAPH_draw_image      = $ff38; // Draw an image.
+  GRAPH_set_font        = $ff3b; // Set the current font.
+  GRAPH_get_char_size   = $ff3e; // Get the size of a character.
+  GRAPH_put_char        = $ff41; // Draw a character.
+
 // floating point routines
   MOVFM      = $bba2; // MOVFM. Move a Floating Point Number from Memory to FAC1
   FOUT       = $bddd; // FOUT. Convert Contents of FAC1 to ASCII String

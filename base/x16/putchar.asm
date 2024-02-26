@@ -11,8 +11,6 @@
 
 .proc	@putchar (.byte a) .reg
 
-chrout	= $ffd2			;kernel character output sub
-
 	tay
 
 	cmp #$20
@@ -25,7 +23,7 @@ chrout	= $ffd2			;kernel character output sub
 	jcc skp
 @
 	tya
-	jmp chrout
+	jmp CHROUT
 
 skp	tya
 
@@ -33,5 +31,5 @@ skp	tya
 	scc
 	eor #%00100000
 
-	jmp chrout
+	jmp CHROUT
 .endp

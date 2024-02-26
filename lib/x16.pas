@@ -63,12 +63,26 @@ var
   VECTOR     : byte absolute $ff8d; // VECTOR. Copy vector table at memory addresses $0314-$0333 from or into user table.
 
 // x16 specific routines
- clock_get_date_time    : byte absolute $ff50; // Get the date and time.
- clock_set_date_time    : byte absolute $ff4d; //	Set the date and time.
- entropy_get            : byte absolute $fecf; // Get 24 random bits.
- enter_basic            : byte absolute $ff47; // Enter BASIC.
- screen_mode            : byte absolute $ff5f; // Get/Set screen mode.
- screen_set_charset     : byte absolute $ff62; // Activate 8x8 text mode charset.
+  clock_get_date_time    : byte absolute $ff50; // Get the date and time.
+  clock_set_date_time    : byte absolute $ff4d; //	Set the date and time.
+  entropy_get            : byte absolute $fecf; // Get 24 random bits.
+  enter_basic            : byte absolute $ff47; // Enter BASIC.
+  screen_mode            : byte absolute $ff5f; // Get/Set screen mode.
+  screen_set_charset     : byte absolute $ff62; // Activate 8x8 text mode charset.
+
+// Graphics routines
+  GRAPH_init             : byte absolute $ff20; // Initialize graphics.
+  GRAPH_clear            : byte absolute $ff23; // Clear screen.
+  GRAPH_set_window       : byte absolute $ff26; // Set clipping region.
+  GRPAH_set_colors       : byte absolute $ff29; // Set stroke, fill and background colors.
+  GRAPH_draw_line        : byte absolute $ff2c; // Draw a line.
+  GRAPH_draw_rect        : byte absolute $ff2f; // Draw a rectangle (optionally filled).
+  GRAPH_move_rect        : byte absolute $ff32; // Move pixels.
+  GRAPH_draw_oval        : byte absolute $ff35; // Draw an oval or circle.
+  GRAPH_draw_image       : byte absolute $ff38; // Draw an image.
+  GRAPH_set_font         : byte absolute $ff3b; // Set the current font.
+  GRAPH_get_char_size    : byte absolute $ff3e; // Get the size of a character.
+  GRAPH_put_char         : byte absolute $ff41; // Draw a character.
 
 // floating point routines
   MOVFM      : byte absolute $bba2; // MOVFM. Move a Floating Point Number from Memory to FAC1
