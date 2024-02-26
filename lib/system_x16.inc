@@ -44,15 +44,10 @@ Initialize random number generator
 *)
 asm
 	phx
-	
 	jsr entropy_get
-	stx RndSeed
-	eor RndSeed
-	sty RndSeed+1
-	eor RndSeed+1
-
+	sta RndSeed
+	stx RndSeed+1
 	plx
-
 end;
 
 
@@ -66,31 +61,11 @@ Generate random number
 begin
 	asm
 		phx
-
-	// again:
-	// 	jsr entropy_get
-	// 	stx Result
-	// 	eor Result
-	// 	sty Result+1
-	// 	eor Result+1
-	// 	sta Result+2
-	// 	lsr
-	// 	lsr
-	// 	lsr
-	// 	lsr
-	// 	eor Result+2
-	// 	and #7
-	// 	cmp #0
-	// 	beq again	; 0 is illegal
-	// 	cmp #7
-	// 	beq again	; 7 is illegal
-
-			// 	jsr entropy_get
-
-		stx Result
-		sty Result+1
-		sta Result+2
-
+		jsr entropy_get
+		sta Result
+		stz Result+1
+		stz Result+2
+		stz Result+3
 		plx
 	end;
 	Result:= 1 - Result;
@@ -106,16 +81,15 @@ Generate random number
 *)
 begin
 	asm
-
 		phx
-
 		jsr entropy_get
-		stx Result
-		sty Result+1
+		and #$7f
 		sta Result+2
-
+		stx Result+1
+		stz Result
+		lda #$3f
+		sta Result+3
 		plx
-
  	end;
 	Result:= 1 - Result;
 end;
@@ -133,12 +107,10 @@ begin
 
 	asm
 		phx
-
 		jsr entropy_get
+		and #$7f
+		sta a+1
 		stx a
-		sty a+1
-		sta a+2
-
 		plx
 	end;
 
@@ -157,23 +129,16 @@ Generate random number
 @returns: byte
 *)
 asm
-	phx
-
-	jsr entropy_get
-	sta Result
-	tay
-
-	lda	range
-	beq	stop
-
-	sta	:ecx
-	sty	:eax
-
-	jsr	imulCL
-	tay
-
-stop	sty	Result
-	plx
+		phx
+		jsr entropy_get
+		lda range
+		beq stop
+		sta :ecx
+		sty :eax
+		jsr imulCL
+		tay
+stop	sty Result
+		plx
 end;
 
 
@@ -189,11 +154,11 @@ Generate random number
 begin
 
  if range = 0 then
-	Result := 0
+  Result := 0
  else begin
 
-	RndSeed := $4595 * RndSeed;
-	Result := RndSeed mod range;
+  RndSeed := $4595 * RndSeed;
+  Result := RndSeed mod range;
 
 asm
 	lda range+1
@@ -206,7 +171,7 @@ asm
 plus	lda Result+1
 	bpl ok
 
-sign	lda #0
+sign 	lda #0
 	sub Result
 	sta Result
 
