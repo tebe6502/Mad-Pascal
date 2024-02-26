@@ -31,6 +31,7 @@ characters:
 	$(X16EMU) -prg characters.prg -run
 
 resource:
+	mads space_font.asm -o:space_font.fnt
 	mp -t x16 resource.pas
 	mads resource.a65 -x -i:../../../base -o:resource.prg
 	$(X16EMU) -prg resource.prg -run -debug

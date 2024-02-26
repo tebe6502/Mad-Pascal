@@ -1,9 +1,9 @@
 uses crt;
 
 const
-    NEWFONT = $F000;
+    NEWFONT = $1F00;    // default address for font in ram
 
-{ $r resources.rc}
+{$r resource.rc}
 
 var
     i,j: byte;

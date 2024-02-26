@@ -1,34 +1,36 @@
 procedure Pause; assembler; overload;
 (*
 @description:
-Delay program execution (1/50 second).
+Delay program execution (1/60 second).
 *)
 asm
-w1	bit vic_cr1
-	bpl w1
-
-w2	bit vic_cr1
-	bmi w2
+	jsr RDTIM
+	sta R11L;	// zero page register to store start time
+	wait:
+		jsr RDTIM
+		cmp R11L
+		beq wait
 end;
 
 
 procedure Pause(n: word); assembler; overload;
 (*
 @description:
-Delay program execution (N * 1/50 second).
+Delay program execution (N * 1/60 second).
 
-@param: N - number of '1/50 second'
+@param: N - number of '1/60 second'
 *)
 asm
 loop	lda n
 	ora n+1
 	beq stop
 
-w1	bit vic_cr1
-	bpl w1
-
-w2	bit vic_cr1
-	bmi w2
+	jsr RDTIM
+	sta R11L;	// zero page register to store start time
+	wait:
+		jsr RDTIM
+		cmp R11L
+		beq wait
 
 	dew n
 

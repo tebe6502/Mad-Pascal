@@ -5,7 +5,7 @@ procedure CursorOff;
 *)
 begin
 
- poke(204, 1);
+//  poke(204, 1);
 
 end;
 
@@ -16,7 +16,7 @@ procedure CursorOn;
 *)
 begin
 
- poke(204, 0);
+//  poke(204, 0);
 
 end;
 
