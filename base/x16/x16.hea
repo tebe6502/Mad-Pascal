@@ -112,14 +112,36 @@
   VECTOR     = $ff8d; // VECTOR. Copy vector table at memory addresses $0314-$0333 from or into user table.
 
 // x16 specific routines
- clock_get_date_time    = $ff50; // Get the date and time.
- clock_set_date_time    = $ff4d; //	Set the date and time.
- entropy_get            = $fecf; // Get 24 random bits.
- enter_basic            = $ff47; // Enter BASIC.
- screen_mode            = $ff5f; // Get/Set screen mode.
- screen_set_charset     = $ff62; // Activate 8x8 text mode charset.
+  clock_get_date_time    = $ff50; // Get the date and time.
+  clock_set_date_time    = $ff4d; //	Set the date and time.
+  entropy_get            = $fecf; // Get 24 random bits.
+  enter_basic            = $ff47; // Enter BASIC.
+  screen_mode            = $ff5f; // Get/Set screen mode.
+  screen_set_charset     = $ff62; // Activate 8x8 text mode charset.
+  JSRFAR_kernal_addr     = $FF6E;
 
+  
 // Graphics routines
+  MEMORY_FILL               = $FEE4
+  MEMORY_COPY               = $FEE7
+  MEMORY_CRC                = $FEEA
+  MEMORY_DECOMPRESS         = $FEED
+  SPRITE_set_image          = $FEF0
+  SPRITE_set_position       = $FEF3
+  FB_init                   = $FEF6
+  FB_get_info               = $FEF9
+  FB_set_palette            = $FEFC
+  FB_cursor_position        = $FEFF
+  FB_cursor_next_line       = $FF02
+  FB_get_pixel              = $FF05
+  FB_get_pixels             = $FF08
+  FB_set_pixel              = $FF0B
+  FB_set_pixels             = $FF0E
+  FB_set_8_pixels           = $FF11
+  FB_set_8_pixels_opaque    = $FF14
+  FB_fill_pixels            = $FF17
+  FB_filter_pixels          = $FF1A
+  FB_move_pixels            = $FF1D
   GRAPH_init            = $ff20; // Initialize graphics.
   GRAPH_clear           = $ff23; // Clear screen.
   GRAPH_set_window      = $ff26; // Set clipping region.
@@ -139,9 +161,56 @@
   MOV2F      = $bbc7; // MOV2F. Move a Floating Point Number from FAC1 to Memory
 
 // interrupt routines and vectors
-  IRQVECLO   = $0314; // hardware interrupt (IRQ) vector, low byte
-  IRQVECHI   = $0315; // hardware interrupt (IRQ) vector, high byte
-  STDIRQ     = $ea31; //start address of standard interrupt routines
+  ; IRQVECLO   = $0314; // hardware interrupt (IRQ) vector, low byte
+  ; IRQVECHI   = $0315; // hardware interrupt (IRQ) vector, high byte  
+  IRQVec       = $0314; // hardware interrupt (IRQ) vector, low byte
+  BRKVec       = $0316 
+  NMIVec       = $0318
+  FETVec       = $03AF
+  ;STAVec      = TBD
+  ;CMPVec      = TBD
+  ; STDIRQ     = $ea31; //start address of standard interrupt routines
+
+  ; I/O Registers
+  VERA_addr_low     = $9F20
+  VERA_addr_high    = $9F21
+  VERA_addr_bank    = $9F22
+  VERA_data0        = $9F23
+  VERA_data1        = $9F24
+  VERA_ctrl         = $9F25
+  VERA_ien          = $9F26
+  VERA_isr          = $9F27
+  VERA_irqline_l    = $9F28
+  VERA_dc_video     = $9F29 ; VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_hscale    = $9F2A ; VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_vscale    = $9F2B ; VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_border    = $9F2C ; VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_hstart    = $9F29 ; VERA_ctrl(1) (DCSEL) = 1
+  VERA_dc_hstop     = $9F2A ; VERA_ctrl(1) (DCSEL) = 1
+  VERA_dc_vsstart   = $9F2B ; VERA_ctrl(1) (DCSEL) = 1
+  VERA_dc_vstop     = $9F2C ; VERA_ctrl(1) (DCSEL) = 1
+  VERA_L0_config    = $9F2D
+  VERA_L0_mapbase   = $9F2E
+  VERA_L0_tilebase  = $9F2F
+  VERA_L0_hscroll_l = $9F30
+  VERA_L0_hscroll_h = $9F31
+  VERA_L0_vscroll_l = $9F32
+  VERA_L0_vscroll_h = $9F33
+  VERA_L1_config    = $9F34
+  VERA_L1_mapbase   = $9F35
+  VERA_L1_tilebase  = $9F36
+  VERA_L1_hscroll_l = $9F37
+  VERA_L1_hscroll_h = $9F38
+  VERA_L1_vscroll_l = $9F39
+  VERA_L1_vscroll_h = $9F3A
+  VERA_audio_ctrl   = $9F3B
+  VERA_audio_rate   = $9F3C
+  VERA_audio_data   = $9F3D
+  VERA_spi_data     = $9F3E
+  VERA_spi_ctrl     = $9F3F
+
+
+
 
 // Zero page registers
 // arguments(saved)
@@ -186,6 +255,21 @@
 // keyboard
   CURRKEY    = $cb;
 
+
+  ; ROM Banks
+  KERNAL_ROM_BANK   = 0
+  KEYBOARD_ROM_BANK = 1
+  CBDOS_ROM_BANK    = 2
+  GEOS_ROM_BANK     = 3
+  BASIC_ROM_BANK    = 4
+  MONITOR_ROM_BANK  = 5
+  CHARSET_ROM_BANK  = 6
+
+  ; Banked Addresses
+  RAM_WIN           = $A000
+  RAM_WIN_SIZE      = $2000
+  ROM_WIN           = $C000
+
 .macro	basic_start(addr)
 
 	.word upstartEnd	// link address
@@ -228,4 +312,28 @@
 upstartEnd
 	.word 0			// empty link signals the end of the program
 
+.endm
+
+.macro VERA_SET_ADDR addr, stride
+   .ifnblank stride
+      .if stride < 0
+         lda #((^addr) | $08 | ((0-stride) << 4))
+      .else
+         lda #((^addr) | (stride << 4))
+      .endif
+   .else
+      lda #(^addr) | $10
+   .endif
+
+   sta VERA_addr_bank
+   lda #(>addr)
+   sta VERA_addr_high
+   lda #(<addr)
+   sta VERA_addr_low
+.endm
+
+.macro JSRFAR far_sr_addr, bank
+	jsr JSRFAR_kernal_addr
+	.addr far_sr_addr
+	.byte bank
 .endm
