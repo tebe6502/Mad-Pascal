@@ -166,6 +166,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [Dungeon Adventurer](https://gitlab.com/delysio/dungeon-adventurer/)
 * [neo Tetris](https://gitlab.com/bocianu/neo-tetris?fbclid=IwAR3EYa-u0ik7vTS156jJiRrqyyAJwq2Hl-xAYgrmCNtktC1Fvh3PZ2XLjXw)
 * [µSoukoban](https://github.com/zbyti/pikoban)
+* [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
 
 ## Benchmarks
 
