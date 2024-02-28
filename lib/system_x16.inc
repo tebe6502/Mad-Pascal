@@ -35,7 +35,7 @@ wait:   jsr RDTIM
 
         dew n
 
-        jmp loop
+        bra loop
 stop:   plx
 end;
 
