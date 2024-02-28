@@ -4,14 +4,14 @@ procedure Pause; assembler; overload;
 Delay program execution (1/60 second).
 *)
 asm
-	jsr RDTIM
-	sta R11L;	// zero page register to store start time
-	wait:
-		jsr RDTIM
-		cmp R11L
-		beq wait
+        phx
+        jsr RDTIM
+        sta r11L
+wait:   jsr RDTIM
+        cmp r11L
+        beq wait
+        plx
 end;
-
 
 procedure Pause(n: word); assembler; overload;
 (*
@@ -21,21 +21,22 @@ Delay program execution (N * 1/60 second).
 @param: N - number of '1/60 second'
 *)
 asm
-loop	lda n
-	ora n+1
-	beq stop
+        phx
+loop:   lda n
+        ora n+1
+        beq stop
 
-	jsr RDTIM
-	sta R11L;	// zero page register to store start time
-	wait:
-		jsr RDTIM
-		cmp R11L
-		beq wait
+        jsr RDTIM
+        sta r11L // zero page register to store start time
 
-	dew n
+wait:   jsr RDTIM
+        cmp r11L
+        beq wait
 
-	jmp loop
-stop
+        dew n
+
+        jmp loop
+stop:   plx
 end;
 
 
