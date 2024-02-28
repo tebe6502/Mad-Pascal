@@ -1,7 +1,7 @@
 uses graph, crt;
 
 const
-  LOGO = $8000;
+  LOGO = $4000;
 
 {$r gfx.rc}
 

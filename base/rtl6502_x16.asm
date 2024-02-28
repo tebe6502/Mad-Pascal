@@ -13,7 +13,7 @@
 
 MAXSIZE = 4
 EOL	= $0D
-@buf	= $0800		; lo addr = 0 !!!
+@buf	= $0400		; lo addr = 0 !!!
 
 fracpart = eax
 
