@@ -53,7 +53,7 @@ neo.header[0]  := 'END';
 // Commander X16 target
 x16.id         := 'x16';
 x16.name       := 'X16';
-x16.zpage      := 'org $02';
+x16.zpage      := 'org $22'; // 0x0022-0x007F;	94 bytes;	User zero page
 x16.eol        := $0000000D;
 x16.codeorigin := $0900;
 x16.header[0]  := 'opt h-f+c+';
