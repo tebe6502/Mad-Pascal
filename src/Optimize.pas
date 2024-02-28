@@ -292,18 +292,26 @@ end;
 
    if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
-    if (pos('lda ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'lda ' +  fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('cmp ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('sub ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00'
-    else
-    if (pos('sbc ', TemporaryBuf[0]) > 0) then
-     TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00'
-    else
+    if (pos('lda ', TemporaryBuf[0]) > 0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if (pos('cmp ', TemporaryBuf[0]) > 0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if (pos('sub ', TemporaryBuf[0]) > 0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if (pos('sbc ', TemporaryBuf[0]) > 0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
     if (pos('sta ', TemporaryBuf[0]) > 0) then
       TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
     else
@@ -312,6 +320,7 @@ end;
     else
     if (pos('mva ', TemporaryBuf[0]) > 0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
      tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
+
      TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + fortmp(tmp);
     end else
      writeln('Unassigned: ' + TemporaryBuf[0] );
