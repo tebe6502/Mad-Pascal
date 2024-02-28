@@ -33,7 +33,6 @@ begin
      begin
       TemporaryBuf[0] := #9'jeq @exit';
       TemporaryBuf[1] := '~';
-      TemporaryBuf[2] := '~';
      end;
 
 
