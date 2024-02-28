@@ -58,10 +58,6 @@
   PETSCII_COLOR_YELLOW	      = $9e;
   PETSCII_COLOR_CYAN	        = $9f;
 
-  R11        = $18;   // scratch word register. WARRING! there is MP stack on this target...
-  R11L       = R11;
-  R11H       = R11+1;
-
   ACPTR      = $ffa5; // ACPTR. Read byte from peripheral bus.
   BASIN	     = $ffcf; // Get character.
   BSAVE      = $feba; // Like SAVE but omits the 2-byte header.
@@ -243,7 +239,7 @@
   R10H       = $17; // virtual 16 bit register r10
 
 // scratch registers
-  R11L       = $18; // virtual 16 bit register r11
+  R11L       = $18; // virtual 16 bit register r11 // WARRING! there is MP stack on this target...
   R11H       = $19; // virtual 16 bit register r11
   R12L       = $1A; // virtual 16 bit register r12
   R12H       = $1B; // virtual 16 bit register r12
