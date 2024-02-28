@@ -58,7 +58,7 @@
   PETSCII_COLOR_YELLOW	      = $9e;
   PETSCII_COLOR_CYAN	        = $9f;
 
-  R11        = $18;   // scratch word register 
+  R11        = $18;   // scratch word register. WARRING! there is MP stack on this target...
   R11L       = R11;
   R11H       = R11+1;
 
