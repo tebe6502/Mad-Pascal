@@ -81,9 +81,12 @@ const
 	VGAMed  = 15+16;	//1;
 	VGAHi   = 8+16;		//2;
 {$endif}
-{$ifdef x16}
 
-{$endif}
+{$IFDEF X16}
+
+	X16_MODE_320x240           = $80;
+
+{$ENDIF}
 (*
 	{ fill pattern for Get/SetFillStyle: }
 	EmptyFill	= 0;	// Uses backgroundcolor
@@ -111,7 +114,7 @@ var
 
 {$ifdef x16}
 	WIN_RIGHT: smallint = 39;
-	WIN_BOTTOM: smallint = 23;
+	WIN_BOTTOM: smallint = 29;
 {$endif}
 
 
@@ -179,4 +182,9 @@ var
 	procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
 	procedure SetPlayfieldPalette(a: byte); register; assembler;
 	procedure SetOverlayPalette(a: byte); register; assembler;
+{$endif}
+
+{$ifdef x16}
+	procedure ClearDevice; assembler;
+	procedure DrawImage(x, y: word; ptr: pointer; width, height: word); assembler;
 {$endif}

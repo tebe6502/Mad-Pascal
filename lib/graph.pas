@@ -22,6 +22,9 @@ PutPixel
 SetBkColor
 SetColor
 
+// X16 Functions
+ClearDevice
+
 }
 
 
@@ -60,6 +63,7 @@ uses types, c64;
 {$endif}
 
 implementation
+
 
 var
 	Scanline_Width: byte;

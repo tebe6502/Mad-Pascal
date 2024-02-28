@@ -432,9 +432,7 @@ var
 {$endif}
 
 {$ifndef raw}
-var	ScreenWidth: smallint = 40;	(* @var current screen width *)
-	ScreenHeight: smallint = 24;	(* @var current screen height *)
-
+var
 	DateSeparator: Char = '-';
 
 	FileMode: byte = fmOpenReadWrite;
@@ -444,6 +442,32 @@ var	ScreenWidth: smallint = 40;	(* @var current screen width *)
 	IOResult: byte;			(* @var result of last file IO operation *)
 
 	EoLn: Boolean;			(* @var end of line status *)
+{$endif}
+
+
+{$ifdef atari}
+var	ScreenWidth: smallint = 40;	(* @var current screen width *)
+	ScreenHeight: smallint = 24;	(* @var current screen height *)
+{$endif}
+
+{$ifdef c64}
+var	ScreenWidth: smallint = 40;	(* @var current screen width *)
+	ScreenHeight: smallint = 24;	(* @var current screen height *)
+{$endif}
+
+{$ifdef c4p}
+var	ScreenWidth: smallint = 40;	(* @var current screen width *)
+	ScreenHeight: smallint = 24;	(* @var current screen height *)
+{$endif}
+
+{$ifdef neo}
+var	ScreenWidth: smallint = 40;	(* @var current screen width *)
+	ScreenHeight: smallint = 24;	(* @var current screen height *)
+{$endif}
+
+{$ifdef x16}
+var	ScreenWidth: smallint = 80;	(* @var current screen width *)
+	ScreenHeight: smallint = 60;	(* @var current screen height *)
 {$endif}
 
 	function Abs(x: Real): Real; register; assembler; overload;

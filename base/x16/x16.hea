@@ -142,6 +142,7 @@
   FB_fill_pixels            = $FF17
   FB_filter_pixels          = $FF1A
   FB_move_pixels            = $FF1D
+  
   GRAPH_init            = $ff20; // Initialize graphics.
   GRAPH_clear           = $ff23; // Clear screen.
   GRAPH_set_window      = $ff26; // Set clipping region.
@@ -210,47 +211,60 @@
   VERA_spi_ctrl     = $9F3F
 
 
-
-
 // Zero page registers
 // arguments(saved)
-  R0L        = $02; // virtual 16 bit register r0
-  R0H        = $03; // virtual 16 bit register r0
-  R1L        = $04; // virtual 16 bit register r1
-  R1H        = $05; // virtual 16 bit register r1
-  R2L        = $06; // virtual 16 bit register r2
-  R2H        = $07; // virtual 16 bit register r2
-  R3L        = $08; // virtual 16 bit register r3
-  R3H        = $09; // virtual 16 bit register r3
-  R4L        = $0a; // virtual 16 bit register r4
-  R4H        = $0b; // virtual 16 bit register r4
-  R5L        = $0c; // virtual 16 bit register r5
-  R5H        = $0d; // virtual 16 bit register r5
-  
-// saved registers
-  R6L        = $0e; // virtual 16 bit register r6
-  R6H        = $0f; // virtual 16 bit register r6
-  R7L        = $10; // virtual 16 bit register r7
-  R7H        = $11; // virtual 16 bit register r7
-  R8L        = $12; // virtual 16 bit register r8
-  R8H        = $13; // virtual 16 bit register r8
-  R9L        = $14; // virtual 16 bit register r9
-  R9H        = $15; // virtual 16 bit register r9
-  R10L       = $16; // virtual 16 bit register r10
-  R10H       = $17; // virtual 16 bit register r10
+  r0   = $02
+  r0L  = r0
+  r0H  = r0+1
+  r1   = $04
+  r1L  = r1
+  r1H  = r1+1
+  r2   = $06
+  r2L  = r2
+  r2H  = r2+1
+  r3   = $08
+  r3L  = r3
+  r3H  = r3+1
+  r4   = $0A
+  r4L  = r4
+  r4H  = r4+1
+  r5   = $0C
+  r5L  = r5
+  r5H  = r5+1
 
-// scratch registers
-  R11L       = $18; // virtual 16 bit register r11
-  R11H       = $19; // virtual 16 bit register r11
-  R12L       = $1A; // virtual 16 bit register r12
-  R12H       = $1B; // virtual 16 bit register r12
-  R13L       = $1C; // virtual 16 bit register r13
-  R13H       = $1D; // virtual 16 bit register r13
-  R14L       = $1E; // virtual 16 bit register r14
-  R14H       = $1F; // virtual 16 bit register r14
-  R15L       = $20; // virtual 16 bit register r15
-  R15H       = $21; // virtual 16 bit register r15
-  
+  // saved registers
+  r6   = $0E
+  r6L  = r6
+  r6H  = r6+1
+  r7   = $10
+  r7L  = r7
+  r7H  = r7+1
+  r8   = $12
+  r8L  = r8
+  r8H  = r8+1
+  r9   = $14
+  r9L  = r9
+  r9H  = r9+1
+  r10  = $16
+  r10L = r10
+  r10H = r10+1
+
+  // scratch registers
+  r11  = $18
+  r11L = r11
+  r11H = r11+1
+  r12  = $1A
+  r12L = r12
+  r12H = r12+1
+  r13  = $1C
+  r13L = r13
+  r13H = r13+1
+  r14  = $1E
+  r14L = r14
+  r14H = r14+1
+  r15  = $20
+  r15L = r15
+  r15H = r15+1
 
 // keyboard
   CURRKEY    = $cb;

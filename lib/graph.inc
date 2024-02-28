@@ -32,7 +32,6 @@ SwitchBuffer
 
 }
 
-
 function GetX: smallint;
 (*
 @description:
