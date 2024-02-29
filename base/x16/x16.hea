@@ -161,8 +161,6 @@
   MOV2F      = $bbc7; // MOV2F. Move a Floating Point Number from FAC1 to Memory
 
 // interrupt routines and vectors
-  ; IRQVECLO   = $0314; // hardware interrupt (IRQ) vector, low byte
-  ; IRQVECHI   = $0315; // hardware interrupt (IRQ) vector, high byte  
   IRQVec       = $0314; // hardware interrupt (IRQ) vector, low byte
   BRKVec       = $0316 
   NMIVec       = $0318

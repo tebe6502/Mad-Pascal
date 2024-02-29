@@ -159,7 +159,9 @@ begin
 
  asm
  	@ClrScr
-	jsr GRAPH_init
+	lda mode
+	jsr GRAPH_init //does not work as expected
+	// jsr screen_mode
 
  end;
 	case mode of
