@@ -1,6 +1,7 @@
 // Commodore C64 target
 c64.id         := 'c64';
 c64.name       := 'C64';
+c64.buf        := $0800;
 c64.zpage      := 'org $02';
 c64.eol        := $0000000D;
 c64.codeorigin := $0900;
@@ -16,6 +17,7 @@ c64.header[7]  := 'END';
 // Commodore Plus/4 target
 c4p.id         := 'c4p';
 c4p.name       := 'C4P';
+c4p.buf        := $0800;
 c4p.zpage      := 'org $02';
 c4p.eol        := $0000000D;
 c4p.codeorigin := $100E;
@@ -31,12 +33,14 @@ c4p.header[7]  := 'END';
 // Atari 8-bit target
 a8.id         := 'a8';
 a8.name       := 'ATARI';
+a8.buf        := $0400;
 a8.zpage      := 'org $80';
 a8.eol        := $0000009B;
 
 // RAW binary target
 raw.id         := 'raw';
 raw.name       := 'RAW';
+raw.buf        := $0200;
 raw.zpage      := 'org $00';
 raw.eol        := $0000000D;
 raw.codeorigin := $1000;
@@ -45,6 +49,7 @@ raw.header[0]  := 'END';
 // NEO6502 binary target
 neo.id         := 'neo';
 neo.name       := 'NEO';
+neo.buf        := $0200;
 neo.zpage      := 'org $00';
 neo.eol        := $0000000D;
 neo.codeorigin := $800;
