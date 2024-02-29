@@ -386,38 +386,3 @@ asm
 end;
 
 
-procedure DrawImage(x, y: word; ptr: pointer; width, height: word); assembler;
-(*
-@description:   Draw a rectangular image from data in memory
-
-*)
-asm
-	phx
-	lda x
-	sta r0L
-	lda x+1
-	sta r0H
-
-	lda y
-	sta r1L
-	lda y+1
-	sta r1H
-
-	lda ptr
-	sta r2L
-	lda ptr+1
-	sta r2H
-
-	lda width
-	sta r3L
-	lda width+1
-	sta r3H
-
-	lda height
-	sta r4L
-	lda height+1
-	sta r4H
-	
-	jsr GRAPH_draw_image
-	plx
-end;

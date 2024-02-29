@@ -186,5 +186,4 @@ var
 
 {$ifdef x16}
 	procedure ClearDevice; assembler;
-	procedure DrawImage(x, y: word; ptr: pointer; width, height: word); assembler;
 {$endif}

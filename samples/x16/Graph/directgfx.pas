@@ -6,8 +6,8 @@ begin
   repeat until keypressed;
 
   veraInit;
-  veraDirectLoad('splash.img');
-
+  // veraDirectLoad('test.img');
+  veraDirectLoad('SPLASH.IMG');
   repeat until keypressed;
 
 end.
