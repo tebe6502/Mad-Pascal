@@ -6,3 +6,7 @@ gfx:
 	mads gfx.a65 -x -i:../../../base -o:gfx.prg
 	$(X16EMU) -prg gfx.prg -run -debug
 
+direct:
+	mp -t x16 directgfx.pas
+	mads directgfx.a65 -x -i:../../../base -o:directgfx.prg
+	$(X16EMU) -prg directgfx.prg -run -debug
