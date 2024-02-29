@@ -1,3 +1,4 @@
+	MAXSIZE: = 4
 
 	icl 'runtime\int.asm'		; @INT, @INT_SHORT
 
@@ -7,7 +8,6 @@
 	icl 'runtime\shl.asm'		; shlEAX_CL.BYTE, shlEAX_CL.WORD, shlEAX_CL.CARD
 	icl 'runtime\shr.asm'		; shrAL_CL, shrAX_CL, shrEAX_CL
 
-	icl 'runtime\not.asm'		; notaBX, notBOOLEAN
 	icl 'runtime\neg.asm'		; negBYTE, negWORD, negCARD, negBYTE1, negWORD1, negCARD1
 					; negEDX, negSHORT
 
