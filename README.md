@@ -150,7 +150,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [Mole](https://github.com/GSoftwareDevelopment/Mole)
 * [SFX-Tracker](https://github.com/GSoftwareDevelopment/SFX-Tracker)
 * [SFX-Engine](https://github.com/GSoftwareDevelopment/SFX-Engine)
-   * [SFX-Engine-example](https://github.com/GSoftwareDevelopment/SFX-Engine-example)
+* [SFX-Engine-example](https://github.com/GSoftwareDevelopment/SFX-Engine-example)
 * [MIDICar-Player](https://github.com/GSoftwareDevelopment/MIDICar-Player)
 * [heatmap](https://gitlab.com/delysio/heatmap)
 * [sinus scroll 2x2](https://gitlab.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll)
@@ -170,6 +170,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [Dungeon Adventurer](https://gitlab.com/delysio/dungeon-adventurer/)
 * [neo Tetris](https://gitlab.com/bocianu/neo-tetris?fbclid=IwAR3EYa-u0ik7vTS156jJiRrqyyAJwq2Hl-xAYgrmCNtktC1Fvh3PZ2XLjXw)
 * [µSoukoban](https://github.com/zbyti/pikoban)
+* [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
 
 ## Benchmarks
 

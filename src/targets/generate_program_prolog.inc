@@ -28,6 +28,9 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
  asm65('FALSE'#9#9'= '+IntToStr(Ident[GetIdent('FALSE')].Value));
+ asm65('EOL'#9#9'= $'+IntToHex(Ident[GetIdent('EOL')].Value,2));
+ asm65('__BUFFER'#9'= $'+IntToHex(Ident[GetIdent('__BUFFER')].Value,4));
+ asm65('@BUF'#9#9'= __BUFFER'); 
 
  asm65separator;
  asm65;

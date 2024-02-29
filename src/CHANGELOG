@@ -1,5 +1,12 @@
-23.02.2024
+29.02.2024
 - Added Commander X16 target
+
+28.02.2023
+- Bugfixes
+- @buf dostępne z poziomu MP (__BUFFER)
+
+24.02.2024
+- optymalizacje fastmul, base\common\byte.asm, base\common\word.asm
 
 20.02.2024
 - function without assignment at end block, optimization fixed

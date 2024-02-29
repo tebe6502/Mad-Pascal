@@ -35,7 +35,6 @@ Contributors:
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
 	- unit SYSTEM: fsincos, fast SIN/COS (IEEE754-32 precision)
 	- unit GRAPHICS: TextOut
-	- unit GRAPHICS: TextOut
 	- unit EFAST
 	- unit ZX2
 
@@ -719,9 +718,9 @@ begin
 
 //     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
 //       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
-//	 __cmpINT: asm65(#9'jsr cmpINT');
 //    __cmpSHORTINT: asm65(#9'jsr cmpSHORTINT');
 //    __cmpSMALLINT: asm65(#9'jsr cmpSMALLINT');
+//	   __cmpINT: asm65(#9'jsr cmpINT');
 
 //      __cmpSTRING: asm65(#9'jsr cmpSTRING');
  __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
@@ -2659,6 +2658,80 @@ case IndirectionLevel of
     end;
 
 
+  ASSTRINGPOINTER1TOARRAYORIGIN:
+    begin
+    asm65('; as StringPointer to Array Origin');
+
+    case Size of
+
+      2: begin
+
+	 if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
+
+	 asm65(#9'lda '+svar);
+	 asm65(#9'add :STACKORIGIN-1,x');
+	 asm65(#9'sta :bp2');
+	 asm65(#9'lda '+svar+'+1');
+	 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	 asm65(#9'sta :bp2+1');
+
+	 asm65(#9'ldy #$00');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'pha');
+	 asm65(#9'iny');
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta :bp2+1');
+	 asm65(#9'pla');
+	 asm65(#9'sta :bp2');
+
+	 end else begin
+
+	 if Ident[IdentIndex].PassMethod = VARPASSING then begin
+
+	  LoadBP2(IdentIndex, svar);
+
+	  asm65(#9'ldy :STACKORIGIN-1,x');
+	  asm65(#9'lda (:bp2),y');
+	  asm65(#9'pha');
+	  asm65(#9'iny');
+	  asm65(#9'lda (:bp2),y');
+	  asm65(#9'sta :bp2+1');
+ 	  asm65(#9'pla');
+ 	  asm65(#9'sta :bp2');
+
+	 end else begin
+
+	  asm65(#9'lda :STACKORIGIN-1,x');
+	  asm65(#9'add #$00');
+	  asm65(#9'tay');
+	  asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	  asm65(#9'adc #$00');
+	  asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+	  asm65(#9'lda '+svara+',y');
+	  asm65(#9'sta :bp2');
+	  asm65(#9'lda '+svara+'+1,y');
+	  asm65(#9'sta :bp2+1');
+
+	 end;
+
+	 end;
+
+         asm65(#9'ldy #$00');
+	 asm65(#9'lda #$01');
+	 asm65(#9'sta (:bp2),y');
+	 asm65(#9'iny');
+	 asm65(#9'lda :STACKORIGIN,x');
+	 asm65(#9'sta (:bp2),y');
+
+	 a65(__subBX);
+	 a65(__subBX);
+
+	 end;
+      end;
+    end;
+
+
   ASSTRINGPOINTERTOARRAYORIGIN:
     begin
     asm65('; as StringPointer to Array Origin');
@@ -4152,10 +4225,6 @@ case op of
     if ValType = BOOLEANTOK then begin
 //     a65(__notBOOLEAN)
 
-//     asm65(#9'lda :STACKORIGIN,x');
-//     asm65(#9'eor #$01');
-//     asm65(#9'sta :STACKORIGIN,x');
-
        asm65(#9'ldy #1');					// !!! wymagana konwencja
        asm65(#9'lda :STACKORIGIN,x');
        asm65(#9'beq @+');
@@ -4167,7 +4236,20 @@ case op of
 
      ExpandParam(INTEGERTOK, ValType);
 
-     a65(__notaBX);
+//     a65(__notaBX);
+
+       asm65(#9'lda :STACKORIGIN,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN,x');
+       asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+       asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+       asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
     end;
 
@@ -6613,7 +6695,7 @@ var IdentTemp, IdentIndex, oldCodeSize, j: Integer;
     ActualParamType, AllocElementType, IndirectionLevel, Kind, oldPass: Byte;
     yes: Boolean;
     Value, ConstVal: Int64;
-    svar: string;
+    svar, lab: string;
     Param: TParamList;
     ftmp: TFloat;
     fl: single;
@@ -6828,7 +6910,27 @@ case Tok[i].Kind of
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].AllocElementType );
+
+
 	if Ident[IdentIndex].Kind in [VARIABLE, CONSTANT] then begin
+
+	  if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//	   writeln(Tok[i+3].kind);
+
+  	    i := CompileArrayIndex(i + 2, IdentIndex);							// array[ ].field
+
+	    ValType := Ident[IdentIndex].AllocElementType;
+
+
+//	  writeln(Tok[i+2].kind);
+
+
+
+
+
+	  end else
 
 	  if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0)) then begin
 
@@ -6841,12 +6943,14 @@ case Tok[i].Kind of
 
 		a65(__addBX);
 
+		svar := GetLocalName(IdentIndex);
+
 		if (Ident[IdentIndex].NumAllocElements * 2 > 256) or (Ident[IdentIndex].NumAllocElements in [0,1]) or (Ident[IdentIndex].PassMethod = VARPASSING) then begin
 
-    		asm65(#9'lda ' + Ident[IdentIndex].Name);
+    		asm65(#9'lda ' + svar);
      		asm65(#9'add :STACKORIGIN-1,x');
      		asm65(#9'sta :bp2');
-     		asm65(#9'lda ' + Ident[IdentIndex].Name + '+1');
+     		asm65(#9'lda ' + svar + '+1');
      		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
      		asm65(#9'sta :bp2+1');
 
@@ -6859,10 +6963,12 @@ case Tok[i].Kind of
 
 		end else begin
 
+		svar := GetLocalName(IdentIndex, 'adr.');
+
 		asm65(#9'ldy :STACKORIGIN-1,x');
-     		asm65(#9'lda adr.' + Ident[IdentIndex].Name + '+1,y');
+     		asm65(#9'lda ' + svar + '+1,y');
      		asm65(#9'sta :bp+1');
-    		asm65(#9'lda adr.' + Ident[IdentIndex].Name + ',y');
+    		asm65(#9'lda ' + svar + ',y');
      		asm65(#9'tay');
 
 		end;
@@ -6885,9 +6991,31 @@ case Tok[i].Kind of
 		if (Ident[IdentIndex].PassMethod = VARPASSING) or (Ident[IdentIndex].NumAllocElements = 0) then begin
 		 a65(__addBX);
 
-		 asm65(#9'ldy ' + Ident[IdentIndex].Name + '+1');
-		 asm65(#9'sty :bp+1');
-		 asm65(#9'ldy ' + Ident[IdentIndex].Name);
+		 svar := GetLocalName(IdentIndex);
+
+	  	 if TestName(IdentIndex, svar) then begin
+
+		  lab := ExtractName(IdentIndex, svar);
+
+		  if Ident[GetIdent(lab)].AllocElementType = RECORDTOK then begin
+		   asm65(#9'lda ' + lab);
+		   asm65(#9'ldy ' + lab + '+1');
+		   asm65(#9'add #' + svar + '-DATAORIGIN');
+		   asm65(#9'scc');
+		   asm65(#9'iny');
+		  end else begin
+		   asm65(#9'lda ' + svar);
+		   asm65(#9'ldy ' + svar + '+1');
+		  end;
+
+ 	         end else begin
+		  asm65(#9'lda ' + svar);
+		  asm65(#9'ldy ' + svar + '+1');
+	         end;
+
+	 	 asm65(#9'sty :bp+1');
+		 asm65(#9'tay');
+
 		 asm65(#9'lda (:bp),y');
 	 	 asm65(#9'sta :STACKORIGIN,x');
 
@@ -10078,9 +10206,15 @@ case Tok[i].Kind of
 
 	      if (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) {and not (Ident[IdentIndex].AllocElementType in [PROCEDURETOK, FUNC])} then begin
 
-//writeln(Ident[IdentIndex].idtype,',', Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Name);
-//writeln(Ident[GetIdent(Ident[IdentIndex].Name)].AllocElementType);
+//	writeln(ExpressionType,' | ',Ident[IdentIndex].idtype,',', Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Name,',',IndirectionLevel);
+//	writeln(Ident[GetIdent(Ident[IdentIndex].Name)].AllocElementType);
 
+
+	       if (ExpressionType = CHARTOK) and ( Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then
+
+		IndirectionLevel := ASSTRINGPOINTER1TOARRAYORIGIN		// tab[ ] := 'a'
+
+	       else
 	       if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then
 		 GetCommonType(i + 1, Ident[IdentIndex].DataType, ExpressionType)
 	       else
@@ -10130,8 +10264,6 @@ case Tok[i].Kind of
 
 		 end else
 		    if (ExpressionType in [RECORDTOK, OBJECTTOK]) then begin
-
-//writeln(vartype,',',ExpressionType);
 
 			IdentTemp := GetIdent(Tok[k].Name^);
 
@@ -14312,6 +14444,9 @@ while Tok[i].Kind in
       if IdentIndex = 0 then
        iError(i, UnknownIdentifier);
 
+      if Ident[IdentIndex].isInline then
+       Error(i, 'INLINE is not allowed to exports');
+
       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
     end;
 
@@ -16137,6 +16272,8 @@ begin
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
  DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, target.eol);
+
+ DefineIdent(1, '__BUFFER', CONSTANT, WORDTOK, 0, 0, target.buf);
 
  DefineIdent(1, 'TRUE',     CONSTANT, BOOLEANTOK, 0, 0, $00000001);
  DefineIdent(1, 'FALSE',    CONSTANT, BOOLEANTOK, 0, 0, $00000000);

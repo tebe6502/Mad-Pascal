@@ -426,7 +426,6 @@ const
 {$ifdef atari}
 var
 	[volatile] Rnd: byte absolute $d20a;
-
 	Palette: array [0..8] of byte absolute 704;
 	HPalette: array [0..8] of byte absolute $d012;
 {$endif}

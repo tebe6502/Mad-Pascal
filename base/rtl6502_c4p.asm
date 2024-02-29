@@ -1,8 +1,8 @@
 	opt l-
 
 /* -----------------------------------------------------------------------
-/*                        CPU 6502 Run Time Library - C4Plus
-/*			        19.04.2018
+/*                        CPU 6502 runtime library - C4Plus
+/* 19.04.2018 ; 28.02.2024
 /* -----------------------------------------------------------------------
 /* 16.03.2019	poprawka dla @printPCHAR, @printSTRING gdy [YA] = 0
 /* 29.02.2020	optymalizacja @printREAL, pozbycie sie
@@ -17,11 +17,10 @@
 
 */
 
-MAXSIZE = 4
-EOL	= $0D
-@buf	= $0800		; lo addr = 0 !!!
-
-fracpart = eax
+//MAXSIZE = 4
+//EOL	= $0D
+//@buf	= $0800		; lo addr = 0 !!!
+//fracpart = eax
 
 ; -----------------------------------------------------------------------
 
