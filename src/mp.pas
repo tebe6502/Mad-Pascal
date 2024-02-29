@@ -4225,10 +4225,6 @@ case op of
     if ValType = BOOLEANTOK then begin
 //     a65(__notBOOLEAN)
 
-//     asm65(#9'lda :STACKORIGIN,x');
-//     asm65(#9'eor #$01');
-//     asm65(#9'sta :STACKORIGIN,x');
-
        asm65(#9'ldy #1');					// !!! wymagana konwencja
        asm65(#9'lda :STACKORIGIN,x');
        asm65(#9'beq @+');
@@ -4240,7 +4236,20 @@ case op of
 
      ExpandParam(INTEGERTOK, ValType);
 
-     a65(__notaBX);
+//     a65(__notaBX);
+
+       asm65(#9'lda :STACKORIGIN,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN,x');
+       asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+       asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+       asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+       asm65(#9'eor #$FF');
+       asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
     end;
 
@@ -14435,6 +14444,9 @@ while Tok[i].Kind in
       if IdentIndex = 0 then
        iError(i, UnknownIdentifier);
 
+      if Ident[IdentIndex].isInline then
+       Error(i, 'INLINE is not allowed to exports');
+
       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
     end;
 
@@ -16260,6 +16272,8 @@ begin
  DefineIdent(1, 'NIL',      CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
 
  DefineIdent(1, 'EOL',      CONSTANT, CHARTOK, 0, 0, target.eol);
+
+ DefineIdent(1, '__BUFFER', CONSTANT, WORDTOK, 0, 0, target.buf);
 
  DefineIdent(1, 'TRUE',     CONSTANT, BOOLEANTOK, 0, 0, $00000001);
  DefineIdent(1, 'FALSE',    CONSTANT, BOOLEANTOK, 0, 0, $00000000);

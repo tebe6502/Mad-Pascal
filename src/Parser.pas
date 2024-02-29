@@ -1724,6 +1724,9 @@ else
    NumAllocElements_ := NumAllocElements shr 16;		// , yy]
    NumAllocElements  := NumAllocElements and $FFFF;		// [xx,
 
+
+//   if name = 'CH_EOL' then writeln( Ident[NumIdent].Block ,',', Ident[NumIdent].unitindex, ',',  Ident[NumIdent].Section,',', Ident[NumIdent].idType);
+
   if Name <> 'RESULT' then
    if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = CODEGENERATIONPASS) then
      if not ( (Ident[NumIdent].Pass in [CALLDETERMPASS , CODEGENERATIONPASS]) or (Ident[NumIdent].IsNotDead) ) then
@@ -2255,6 +2258,9 @@ begin
 
   if Ident[NumIdent].isInline and (Ident[NumIdent].isInterrupt) then
    Error(i, 'Procedure directive "INTERRUPT" cannot be used with "INLINE"');
+
+  if Ident[NumIdent].isInline and (Ident[NumIdent].isExternal) then
+   Error(i, 'Procedure directive "EXTERNAL" cannot be used with "INLINE"');
 
 //  if Ident[NumIdent].isInterrupt and (Ident[NumIdent].isAsm = false) then
 //    Note(i, 'Use assembler block instead pascal');
