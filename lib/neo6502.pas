@@ -79,7 +79,10 @@ procedure NeoWaitMessage;assembler;
 * @description:
 * Waits until Message from API is returned. 
 *)
-procedure NeoReset;
+
+/////////////// GROUP 1 - system
+
+procedure NeoSubReset;
 (*
 * @description:
 * Resets the messaging system and its components. Should not normally be used.
@@ -103,15 +106,6 @@ function NeoGetTimer:cardinal;
 *
 * @returns: (cardinal) - system timer
 *)
-function NeoIsKeyPressed(key:byte):byte;
-(*
-* @description:
-* Return the state of keyboard key
-* 
-* @param: key (byte) - key to be checked
-* 
-* @returns: (byte) - state of key
-*)
 procedure NeoExecuteBasic;
 (*
 * @description:
@@ -129,6 +123,32 @@ function NeoCheckSerial:byte;
 *
 * @returns: (byte) - serial state
 *)
+procedure NeoSetLocale(lang:string[2]);
+(*
+* @description:
+* Sets the specified locale code (EN.FR,GE...)
+*
+* @param: name (string[2]) - name of locale in upper-case ASCII 
+*)
+procedure NeoReset;
+(*
+* @description:
+* System Reset. This is a full hardware reset. It resets the RP2040 using the Watchdog timer, and this also resets the 65C02.
+*)
+
+
+/////////////// GROUP 2 - console
+
+function NeoIsKeyPressed(key:byte):byte;
+(*
+* @description:
+* Return the state of keyboard key
+* 
+* @param: key (byte) - key to be checked
+* 
+* @returns: (byte) - state of key
+*)
+
 procedure NeoSetChar(c:byte;data:pointer);
 (*
 * @description:
@@ -137,12 +157,38 @@ procedure NeoSetChar(c:byte;data:pointer);
 * @param: c (byte) - code of char to be defined (192-255)
 * @param: data (pointer) - pointer to 7 bytes of data
 *)
-procedure NeoGetFunctionKeys;
+
+procedure NeoDefineHotkey(keynum:byte;txt:pointer);
+(*
+* @description:
+* Define the function key F1..F10 ($01..$0A) specified as keynum
+* to emit the length-prefixed string stored at the memory location
+* specified in txt. F11 and F12 cannot currently be defined.
+* 
+* @param: keynum (byte) - Number of function key (1-10)
+* @param: txt (pointer) - pointer to the length-prefixed string to be emited on the key press
+*)
+
+procedure NeoShowHotkeys;
 (*
 * @description:
 * Displays the current settings of the function keys
 *)
+
+procedure NeoGetScreenSize(var height:byte;var width:byte);
+(*
+* @description:
+* Returns the console size in characters.
+* 
+* @param: height (byte) - height of the screen
+* @param: width (byte) - width of the screen
+* 
+* @returns: (byte) - state of key
+*)
+
 /////////////// GROUP 3 - filesystem
+
+
 procedure NeoShowDir;
 (*
 * @description:
@@ -473,9 +519,14 @@ begin
     result:=NeoMessage.params[0];
 end;
 
-procedure NeoReset;
+procedure NeoSubReset;
 begin
     NeoSendMessage(1,0);
+end;
+
+procedure NeoReset;
+begin
+    NeoSendMessage(1,7);
 end;
 
 function NeoGetVblanks:cardinal;
@@ -504,6 +555,13 @@ begin
     result := NeoSendMessage(1,2);
 end;
 
+procedure NeoSetLocale(lang:string[2]);
+begin
+    NeoMessage.params[0]:=byte(lang[1]);
+    NeoMessage.params[1]:=byte(lang[2]);
+    NeoSendMessage(1,6);
+end;
+
 procedure NeoExecuteBasic;
 begin
     NeoSendMessage(1,3);
@@ -526,9 +584,24 @@ begin
     NeoSendMessage(2,5);
 end;
 
-procedure NeoGetFunctionKeys;
+procedure NeoDefineHotkey(keynum:byte;txt:pointer);
+begin
+    NeoMessage.params[0] := keynum;
+    wordParams[0] := word(txt);
+    NeoSendMessage(2,4);
+end;
+
+procedure NeoShowHotkeys;
 begin
     NeoSendMessage(2,8);
+end;
+
+procedure NeoGetScreenSize(var height:byte;var width:byte);
+begin
+    NeoSendMessage(2,9);
+    NeoWaitMessage;
+    height := NeoMessage.params[0];
+    width := NeoMessage.params[1];
 end;
 
 procedure NeoShowDir;

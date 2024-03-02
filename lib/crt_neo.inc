@@ -34,7 +34,8 @@ procedure ClrScr;
 *)
 begin 
 	asm
-	@ClrScr
+		@SendMessage
+		dta 2,12
 	end;
 end;
 
@@ -44,6 +45,10 @@ procedure DelLine;
 @description: Delete line at cursor position
 *)
 begin
+	asm
+		@SendMessage
+		dta 2,11
+	end;
 end;
 
 
@@ -52,6 +57,10 @@ procedure InsLine;
 @description: Insert an empty line at cursor position
 *)
 begin
+	asm
+		@SendMessage
+		dta 2,10
+	end;
 end;
 
 
@@ -167,9 +176,12 @@ function WhereX: byte; assembler;
 
 @returns: byte (1..40)
 *)
-
 asm
-
+	@SendMessage
+	dta 2,13
+	@WaitMessage
+	lda DParameters
+	sta result
 end;
 
 
@@ -179,9 +191,12 @@ function WhereY: byte; assembler;
 
 @returns: byte (1..24)
 *)
-
 asm
-
+	@SendMessage
+	dta 2,13
+	@WaitMessage
+	lda DParameters+1
+	sta result
 end;
 
 
