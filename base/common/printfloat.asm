@@ -19,16 +19,16 @@
 	spl
 	jsr @printMINUS
 	
-	sta dx+2
+	sta :dx+2
 
-	mva :STACKORIGIN,x fracpart+2	; intpart := uvalue shr 8
-	mva :STACKORIGIN+STACKWIDTH,x dx; fracpart := uvalue and $FF (dx)
-	mva :STACKORIGIN+STACKWIDTH*2,x dx+1
-;	mva :STACKORIGIN+STACKWIDTH*3,x dx+2
-	mva #$00 dx+3
+	mva :STACKORIGIN,x :eax+2	; intpart := uvalue shr 8
+	mva :STACKORIGIN+STACKWIDTH,x :dx; :eax := uvalue and $FF (dx)
+	mva :STACKORIGIN+STACKWIDTH*2,x :dx+1
+;	mva :STACKORIGIN+STACKWIDTH*3,x :dx+2
+	mva #$00 :dx+3
 
-	sta fracpart
-	sta fracpart+1
+	sta :eax
+	sta :eax+1
 
 	mva #4 @float.afterpoint	; wymagana liczba miejsc po przecinku
 	@float #5000
@@ -52,12 +52,12 @@
 	sta @printVALUE.pout
 
 	lda #0
-	sta dx
-	sta dx+1
-	sta dx+2
-	sta dx+3
+	sta :dx
+	sta :dx+1
+	sta :dx+2
+	sta :dx+3
 
-loop	lda fracpart+2
+loop	lda :eax+2
 	bpl skp
 
 	clc
@@ -65,37 +65,37 @@ loop	lda fracpart+2
 ;	spl
 ;	sec
 
-	lda dx
-	adc cx
-	sta dx
-	lda dx+1
-	adc cx+1
-	sta dx+1
-	lda dx+2
-	adc cx+2
-	sta dx+2
-;	lda dx+3
+	lda :dx
+	adc :cx
+	sta :dx
+	lda :dx+1
+	adc :cx+1
+	sta :dx+1
+	lda :dx+2
+	adc :cx+2
+	sta :dx+2
+;	lda :dx+3
 ;	adc #0
-;	sta dx+3
+;	sta :dx+3
 
-skp	lsr cx+2
-	ror cx+1
-	ror cx
+skp	lsr :cx+2
+	ror :cx+1
+	ror :cx
 
-	asl fracpart
-	rol fracpart+1
-	rol fracpart+2
+	asl :eax
+	rol :eax+1
+	rol :eax+2
 
-	lda cx
-	ora cx+1
-	ora cx+2
+	lda :cx
+	ora :cx+1
+	ora :cx+2
 
 	bne loop
 
 	ldy #'.'
 	jsr @printVALUE.pout
 
-	:4 mva dx+# fracpart+#
+	:4 mva :dx+# :eax+#
 
 	lda @printVALUE.pout
 	pha
@@ -121,7 +121,7 @@ afterpoint equ *-1
 	inc cnt
 	bne lp
 
-ok	:4 mva fracpart+# dx+#
+ok	:4 mva :eax+# :dx+#
 	jmp @printVALUE			; print floating part
 
 .endp
