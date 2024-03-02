@@ -1,7 +1,7 @@
 program api_tests;
 uses neo6502, graph, crt;
 const 
-    TILE_MAP_ADDRESS = $9000;
+    TILE_MAP_ADDRESS = $A000;
 {$r resources.rc}
 
 var b,c: byte;

@@ -27,6 +27,34 @@ const
     N6502MSG_ADDRESS = $ff00;
     NEO_GFX_RAM = $ffff;
 
+    FI_PrintDir = 1;  // @nodoc  
+    FI_LoadFile = 2;  // @nodoc  
+    FI_SaveFile = 3;  // @nodoc  
+    FI_OpenFile = 4;  // @nodoc  
+    FI_CloseFile = 5;  // @nodoc  
+    FI_SeekPos = 6;  // @nodoc  
+    FI_TellPos = 7;  // @nodoc  
+    FI_ReadData = 8;  // @nodoc  
+    FI_WriteData = 9;  // @nodoc  
+    FI_GetSize = 10;  // @nodoc  
+    FI_SetSize = 11;  // @nodoc  
+    FI_Rename = 12;  // @nodoc  
+    FI_Delete = 13;  // @nodoc  
+    FI_NewDir = 14;  // @nodoc  
+    FI_ChangeDir = 15;  // @nodoc  
+    FI_StatFile = 16;  // @nodoc  
+    FI_OpenDir = 17;  // @nodoc  
+    FI_ReadDir = 18;  // @nodoc  
+    FI_CloseDir = 19;  // @nodoc  
+    FI_CopyFile = 20;  // @nodoc  
+
+    FI_PrintDirWildcard = 32;      // @nodoc  
+
+    OPEN_MODE_RO = 0 // opens the file for read-only access;
+    OPEN_MODE_WO = 1 // opens the file for write-only access;
+    OPEN_MODE_RW = 2 // opens the file for read-write access;
+    OPEN_MODE_NEW = 3 // creates the file if it doesn’t already exist, truncates it if it does, and opens the file for read-write access.
+
 type TN6502Message = record
 (*
 * @description: 
@@ -63,6 +91,17 @@ var
     dwordParams: array[0..1] of cardinal absolute N6502MSG_ADDRESS+4; // helping structure to easliy obrain or set cardinal parametrs
     wordxParams: array[0..2] of word absolute N6502MSG_ADDRESS+5; // @nodoc
     soundParams: TSound absolute N6502MSG_ADDRESS+4; // @nodoc  
+    FI_openfilename: ^string absolute N6502MSG_ADDRESS+5; // @nodoc  
+    FI_filename: ^string absolute N6502MSG_ADDRESS+4; // @nodoc  
+    FI_filename2: ^string absolute N6502MSG_ADDRESS+6; // @nodoc  
+    FI_dirSize: cardinal absolute N6502MSG_ADDRESS+6; // @nodoc  
+    FI_dirAttr: byte absolute N6502MSG_ADDRESS+10; // @nodoc  
+    FI_statSize: cardinal absolute N6502MSG_ADDRESS+4; // @nodoc  
+    FI_statAttr: byte absolute N6502MSG_ADDRESS+8; // @nodoc  
+    FI_channel: byte absolute N6502MSG_ADDRESS+8; // @nodoc  
+    FI_offset: cardinal absolute N6502MSG_ADDRESS+5; // @nodoc  
+    FI_address: word absolute N6502MSG_ADDRESS+5; // @nodoc  
+    FI_length: word absolute N6502MSG_ADDRESS+7; // @nodoc  
 
 function NeoSendMessage(group,func:byte):byte;
 (*
@@ -184,6 +223,39 @@ procedure NeoGetScreenSize(var height:byte;var width:byte);
 * @param: width (byte) - width of the screen
 * 
 * @returns: (byte) - state of key
+*)
+
+procedure NeoSetTextColor(foreground,background:byte);
+(*
+* @description:
+* Returns the console size in characters.
+* 
+* @param: foreground (byte) - foreground color
+* @param: background (byte) - background color
+*)
+
+procedure NeoGetCursorPos(var x:byte;var y:byte);
+(*
+* @description:
+* Returns cursor position
+* 
+* @param: x (byte) - horizontal position
+* @param: y (byte) - vertical position
+*)
+
+procedure NeoClearRegion(x0,y0,x1,y1:byte);
+(*
+* @description:
+* Erase all characters within the specified rectangular region.
+* 
+* @param: x0,y0 (byte) - starting point coordinates
+* @param: x1,y1 (byte) - ending point coordinates
+*)
+
+procedure NeoCursorInverse;
+(*
+* @description:
+* Toggles the cursor colour between normal and inverse (swaps FG and BG colors).
 *)
 
 /////////////// GROUP 3 - filesystem
@@ -516,8 +588,12 @@ begin
     NeoMessage.func:=func;
     NeoMessage.group:=group;
     repeat until NeoMessage.group=0;
-    result:=NeoMessage.params[0];
+    result := NeoMessage.params[0];
 end;
+
+//////////////////////////////////
+////////////////////////////////////////     1 - SYSTEM
+//////////////////////////////////
 
 procedure NeoSubReset;
 begin
@@ -527,20 +603,6 @@ end;
 procedure NeoReset;
 begin
     NeoSendMessage(1,7);
-end;
-
-function NeoGetVblanks:cardinal;
-begin
-    NeoSendMessage(5,37);
-    result := dwordParams[0];
-end;
-
-procedure NeoWaitForVblank;
-    var vbcount0:byte;
-begin
-    NeoSendMessage(5,37);
-    vbcount0 := NeoMessage.params[0];
-    repeat NeoSendMessage(5,37) until vbcount0 <> NeoMessage.params[0];
 end;
 
 function NeoGetTimer:cardinal;
@@ -577,6 +639,10 @@ begin
     result := NeoSendMessage(1,5);
 end;
 
+//////////////////////////////////
+////////////////////////////////////////     2 - CONSOLE
+//////////////////////////////////
+
 procedure NeoSetChar(c:byte;data:pointer);
 begin
     NeoMessage.params[0]:=c;
@@ -604,80 +670,209 @@ begin
     width := NeoMessage.params[1];
 end;
 
+procedure NeoSetTextColor(foreground,background:byte);
+begin
+    NeoMessage.params[0] := foreground;
+    NeoMessage.params[1] := background;
+    NeoSendMessage(2,15);
+end;
+
+procedure NeoGetCursorPos(var x:byte;var y:byte);
+begin
+    NeoSendMessage(2,13);
+    NeoWaitMessage;
+    x := NeoMessage.params[0];
+    y := NeoMessage.params[1];
+end;
+
+procedure NeoClearRegion(x0,y0,x1,y1:byte);
+begin
+    NeoMessage.params[0] := x0;
+    NeoMessage.params[1] := y0;
+    NeoMessage.params[2] := x1;
+    NeoMessage.params[3] := y1;
+    NeoSendMessage(2,14);
+end;
+
+procedure NeoCursorInverse;
+begin
+    NeoSendMessage(2,16);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     3 - FILE I/O
+//////////////////////////////////
+
+function FileIO(fn:byte):boolean;
+begin
+    NeoSendMessage(3,fn);
+    result := NeoMessage.error = 0;
+end;
+
 procedure NeoShowDir;
 begin
-    NeoSendMessage(3,1);
+    NeoSendMessage(3,FI_PrintDir);
 end;
 
-function NeoLoad(name:TString;dest:word):byte;
+function NeoLoad(name:TString;dest:word):boolean;
 begin
-    wordParams[0] := word(@name);
+    FI_filename := word(@name);
     wordParams[1] := dest;
-    NeoSendMessage(3,2);
-    NeoWaitMessage;
-    result := NeoMessage.params[0];
+    result := FileIO(FI_LoadFile);
 end;
 
-function NeoSave(name:TString;dest,len:word):byte;
+function NeoSave(name:TString;dest,len:word):boolean;
 begin
-    wordParams[0]:=word(@name);
-    wordParams[1]:=dest;
-    wordParams[2]:=len;
-    result := NeoSendMessage(3,3);
+    FI_filename := word(@name);
+    wordParams[1] := dest;
+    wordParams[2] := len;
+    result := FileIO(FI_SaveFile);
 end;
+
+function NeoOpenFile(channel:byte;fname:pointer;openmode:byte):boolean;
+begin
+    FI_openfilename := word(fname);
+    FI_channel := channel;
+    Neo6502.params[3] := openmode;
+    result := FileIO(FI_OpenFile);
+end;
+
+function NeoCloseFile(channel:byte):boolean;
+begin
+    FI_channel := channel;
+    result := FileIO(FI_CloseFile);
+end;
+
+function NeoSeekPos(channel:byte,pos:cardinal):boolean;
+begin
+    FI_channel := channel;
+    FI_offset := pos;
+    result := FileIO(FI_SeekPos);
+end;
+
+function NeoTellPos(channel:byte):cardinal;
+begin
+    result:=0;
+    FI_channel := channel;
+    if FileIO(FI_TellPos) then result := FI_offset;
+end;
+
+function NeoReadFile(channel:byte,addr:word;len:word):word;
+begin
+    result:=0;
+    FI_channel := channel;
+    FI_address := addr;
+    FI_length := len;
+    if FileIO(FI_ReadData) then result := FI_length;
+end;
+
+function NeoWriteFile(channel:byte,addr:word;len:word):word;
+begin
+    result:=0;
+    FI_channel := channel;
+    FI_address := addr;
+    FI_length := len;
+    if FileIO(FI_WriteData) then result := FI_length;
+end;
+
+function NeoGetFileSize(channel:byte):cardinal;
+begin
+    result:=0;
+    FI_channel := channel;
+    if FileIO(FI_GetSize) then result := FI_offset;
+end;
+
+function NeoSetFileSize(channel:byte;size:cardinal):boolean;
+begin
+    result:=0;
+    FI_channel := channel;
+    FI_offset := size;
+    result := FileIO(FI_GetSize);
+end;
+
+function NeoRenameFile(fin,fout:pointer):boolean;
+begin
+    FI_filename := word(fin);
+    FI_filename2 := word(fout);
+    result := FileIO(FI_Rename);
+end;
+
+function NeoRenameFile(fin:pointer):boolean;
+begin
+    FI_filename := word(fin);
+    result := FileIO(FI_Delete);
+end;
+
+function NeoCreateDirectiory(fin:pointer):boolean;
+begin
+    FI_filename := word(fin);
+    result := FileIO(FI_NewDir);
+end;
+
+function NeoChangeDirectiory(fin:pointer):boolean;
+begin
+    FI_filename := word(fin);
+    result := FileIO(FI_ChangeDir);
+end;
+
+function NeoStatFile(fin:pointer;var size:word;var attr:byte):boolean;
+begin
+    FI_filename := word(fin);
+    result := FileIO(FI_StatFile);
+    if result then begin
+        size:=FI_statSize;
+        attr:=FI_statAttr;
+    end;
+end;
+
+function NeoOpenDirectiory(fin:pointer):boolean;
+begin
+    FI_filename := word(fin);
+    result := FileIO(FI_OpenDir);
+end;
+
+function NeoReadDirectiory(var fname:string;var size:cardinal;var attr:byte):boolean;
+begin
+    FI_filename := word(@fname);
+    result := FileIO(FI_ReadDir);
+    if result then begin
+        size:=FI_dirSize;
+        attr:=FI_dirAttr;
+    end;
+end;
+
+function NeoCloseDirectiory:boolean;
+begin
+    result := FileIO(FI_CloseDir);
+end;
+
+function NeoCopyFile(fin,fout:pointer):boolean;
+begin
+    FI_filename := word(fin);
+    FI_filename2 := word(fout);
+    result := FileIO(FI_CopyFile);
+end;
+
+procedure NeoShowDir(var searchstring:string);
+begin
+    wordParams[0] := word(@searchstring);
+    NeoSendMessage(3,FI_PrintDirWildcard);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     4 - MATH
+//////////////////////////////////
 
 function NeoDoMath(func:byte):byte;
 begin
     result := NeoSendMessage(4,func);
 end;
 
-function NeoGetJoy(player:byte):byte;
-begin
-    result := NeoSendMessage(7,player);
-end;
+//////////////////////////////////
+////////////////////////////////////////     5 - GRAPHICS
+//////////////////////////////////
 
-procedure NeoMute;overload;
-begin
-    NeoSendMessage(8,1);
-end;
-
-procedure NeoMute(channel:byte);overload;
-begin
-    NeoMessage.params[0] := channel;
-    NeoSendMessage(8,2);
-end;
-
-procedure NeoBeep;
-begin
-    NeoSendMessage(8,3);
-end;
-
-procedure NeoQueueNote(channel:byte;freq,len,slide:word;stype:byte);
-begin
-    soundParams.channel := channel;
-    soundParams.freq := freq;
-    soundParams.len := len;
-    soundParams.slide := slide;
-    soundParams.stype := stype;
-    NeoSendMessage(8,4);
-end;
-
-procedure NeoSoundFx(channel,num:byte);
-begin
-    NeoMessage.params[0] := channel;
-    NeoMessage.params[1] := num;
-    NeoSendMessage(8,5);
-end;
-
-function NeoGetQueueLen(channel:byte):byte;
-begin
-    NeoMessage.params[0] := channel;
-    result := NeoSendMessage(8,6);
-end;
-
-//////////////// 
-
-procedure NeoSetColor(acol,xcol,solid,size,flip:byte);
+procedure NeoSetDefaults(acol,xcol,solid,size,flip:byte);
 begin
     NeoMessage.params[0]:=acol;
     NeoMessage.params[1]:=xcol;
@@ -782,6 +977,49 @@ begin
     result := NeoSendMessage(5,36);
 end;
 
+
+function NeoGetVblanks:cardinal;
+begin
+    NeoSendMessage(5,37);
+    result := dwordParams[0];
+end;
+
+procedure NeoWaitForVblank;
+    var vbcount0:byte;
+begin
+    NeoSendMessage(5,37);
+    vbcount0 := NeoMessage.params[0];
+    repeat NeoSendMessage(5,37) until vbcount0 <> NeoMessage.params[0];
+end;
+
+procedure NeoSetColor(col:byte);
+begin
+    NeoMessage.params[0]:=col;
+    NeoSendMessage(5,64);
+end;
+
+procedure NeoSetSolidFlag(flag:byte);
+begin
+    NeoMessage.params[0]:=flag;
+    NeoSendMessage(5,65);
+end;
+
+procedure NeoSetDrawSize(size:byte);
+begin
+    NeoMessage.params[0]:=size;
+    NeoSendMessage(5,66);
+end;
+
+procedure NeoSetFlip(flip:byte);
+begin
+    NeoMessage.params[0]:=flip;
+    NeoSendMessage(5,67);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     6 - SPRITES
+//////////////////////////////////
+
 procedure NeoResetSprites;
 begin
     NeoSendMessage(6,1);
@@ -819,6 +1057,62 @@ begin
     x:=wordxParams[0];
     y:=wordxParams[1];
 end;
+
+//////////////////////////////////
+////////////////////////////////////////     7 - CONTROLLERS
+//////////////////////////////////
+
+function NeoGetJoy(player:byte):byte;
+begin
+    result := NeoSendMessage(7,player);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     8 - SOUND
+//////////////////////////////////
+
+procedure NeoMute;overload;
+begin
+    NeoSendMessage(8,1);
+end;
+
+procedure NeoMute(channel:byte);overload;
+begin
+    NeoMessage.params[0] := channel;
+    NeoSendMessage(8,2);
+end;
+
+procedure NeoBeep;
+begin
+    NeoSendMessage(8,3);
+end;
+
+procedure NeoQueueNote(channel:byte;freq,len,slide:word;stype:byte);
+begin
+    soundParams.channel := channel;
+    soundParams.freq := freq;
+    soundParams.len := len;
+    soundParams.slide := slide;
+    soundParams.stype := stype;
+    NeoSendMessage(8,4);
+end;
+
+procedure NeoSoundFx(channel,num:byte);
+begin
+    NeoMessage.params[0] := channel;
+    NeoMessage.params[1] := num;
+    NeoSendMessage(8,5);
+end;
+
+function NeoGetQueueLen(channel:byte):byte;
+begin
+    NeoMessage.params[0] := channel;
+    result := NeoSendMessage(8,6);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     9 - TURTLE
+//////////////////////////////////
 
 procedure TurtleInit(s0:byte);
 begin
