@@ -71,11 +71,12 @@ end;  { HSVtoRGB }
 
 begin
     c:=0;
+    NeoSetDefaults(0,0,1,1,0);
     for i:=0 to 15 do begin
         for j:=0 to 15 do begin
             x:=j*CELL_W;
             y:=i*CELL_H;
-            NeoSetColor(0,c,1,1,0);
+            NeoSetColor(c);
             NeoDrawRect(x,y,x+CELL_W,y+CELL_H);
             if i>0 then begin
                 h:=(i-1)*24;

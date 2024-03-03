@@ -1,11 +1,14 @@
 ; ------------------------------------------------------------
-; Mad Pascal Compiler version 1.7.1 [2024/01/31] for 6502
+; Mad Pascal Compiler version 1.7.1 [2024/03/02] for 6502
 ; ------------------------------------------------------------
 
 STACKWIDTH	= 16
 
 TRUE		= 1
 FALSE		= 0
+EOL		= $0D
+__BUFFER	= $0200
+@BUF		= __BUFFER
 
 ; ------------------------------------------------------------
 
@@ -115,9 +118,7 @@ START
 VLEN	= VARDATASIZE-VARINITSIZE
 VADR	= DATAORIGIN+VARINITSIZE
 
-	ift VADR > $BFFF
-	ert 'Invalid memory address range ',VADR
-	eli (VLEN > 0) && (VLEN <= 256)
+	ift (VLEN > 0) && (VLEN <= 256)
 	ldx #256-VLEN
 	lda #$00
 	sta:rne VADR+VLEN-256,x+
@@ -176,51 +177,45 @@ last = *-1
 .endl
 .endl							; overload
 
-.local	PAUSE						; PROCEDURE | ASSEMBLER | OVERLOAD
-.local	@006B
-
-; -------------------  ASM Block 00000043  -------------------
-
-	@SendMessage
-	dta 1,1
-	@WaitMessage
-	mwa DParameters last
-	adw last n last
-@	
-	@SendMessage
-	dta 1,1
-	@WaitMessage
-	cpw DParameters last
-	bmi @-
-	rts 
-last 
-	dta a(0)
-
-; ------------------------------------------------------------
-
-N	= DATAORIGIN+$000B
-
-@VarData	= N
-@VarDataSize	= 2
-
-@exit
-	.ifdef @new
-	lda <@VarData
-	sta :ztmp
-	lda >@VarData
-	ldy #@VarDataSize-1
-	jmp @FreeMem
-	els
-	rts						; ret
-	eif
-.endl
-.endl							; overload
-
 ; ------------------------------------------------------------
 
 M_PI_2	= $0648
 D_PI_2	= $0192
 D_PI_180	= $04
+NEO_CURSOR_LEFT	= $01
+NEO_CURSOR_RIGHT	= $04
+NEO_INSERT	= $05
+NEO_PAGE_DOWN	= $06
+NEO_END	= $07
+NEO_BACKSPACE	= $08
+NEO_HTAB	= $09
+NEO_LINE_FEED	= $0A
+NEO_CLEAR_SCREEN	= $0C
+NEO_ENTER	= $0D
+NEO_PAGE_UP	= $12
+NEO_CURSOR_DOWN	= $13
+NEO_CURSOR_HOME	= $14
+NEO_VTAB	= $16
+NEO_CURSOR_UP	= $17
+NEO_CURSOR_REV	= $18
+NEO_DELETE	= $1A
+NEO_ESCAPE	= $1B
+NEO_COLOR_BLACK	= $80
+NEO_COLOR_RED	= $81
+NEO_COLOR_GREEN	= $82
+NEO_COLOR_YELLOW	= $83
+NEO_COLOR_BLUE	= $84
+NEO_COLOR_MAGENTA	= $85
+NEO_COLOR_CYAN	= $86
+NEO_COLOR_WHITE	= $87
+NEO_COLOR_ALT_BLACK	= $88
+NEO_COLOR_DARK_GREY	= $89
+NEO_COLOR_DARK_GREEN	= $8A
+NEO_COLOR_ORANGE	= $8B
+NEO_COLOR_DARK_ORANGE	= $8C
+NEO_COLOR_BROWN	= $8D
+NEO_COLOR_PINK	= $8E
+NEO_COLOR_LIGHT_GREY	= $8F
 FMOPENREAD	= $04
 FMOPENWRITE	= $08
 FMOPENAPPEND	= $09
@@ -260,29 +255,29 @@ RNDSEED	= DATAORIGIN+$0009
 
 .local	NEOSENDMESSAGE					; FUNCTION
 
-; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 432
+; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 548
 
 	jsr NEOWAITMESSAGE
 
-; optimize OK (NEO6502), line = 433
+; optimize OK (NEO6502), line = 549
 
 	lda FUNC
 	sta NEOMESSAGE.FUNC
 
-; optimize OK (NEO6502), line = 434
+; optimize OK (NEO6502), line = 550
 
 	lda GROUP
 	sta NEOMESSAGE.GROUP
 
 ; --- RepeatUntilProlog
-l_0095
+l_0094
 
-; optimize OK (NEO6502), line = 435
+; optimize OK (NEO6502), line = 551
 
 	lda NEOMESSAGE.GROUP
-	jne l_0095
+	jne l_0094
 
-; optimize OK (NEO6502), line = 436
+; optimize OK (NEO6502), line = 552
 
 	lda adr.NEOMESSAGE.PARAMS
 	sta RESULT
@@ -290,9 +285,9 @@ l_0095
 
 ; ------------------------------------------------------------
 
-GROUP	= DATAORIGIN+$000D
-FUNC	= DATAORIGIN+$000E
-RESULT	= DATAORIGIN+$000F
+GROUP	= DATAORIGIN+$000B
+FUNC	= DATAORIGIN+$000C
+RESULT	= DATAORIGIN+$000D
 
 @VarData	= GROUP
 @VarDataSize	= 2
@@ -302,27 +297,27 @@ RESULT	= DATAORIGIN+$000F
 
 .local	NEOSETPALETTE					; PROCEDURE
 
-; optimize OK (NEO6502), line = 622
+; optimize OK (NEO6502), line = 815
 
 	lda COL
 	sta adr.NEOMESSAGE.PARAMS
 
-; optimize OK (NEO6502), line = 623
+; optimize OK (NEO6502), line = 816
 
 	lda R
 	sta adr.NEOMESSAGE.PARAMS+$01
 
-; optimize OK (NEO6502), line = 624
+; optimize OK (NEO6502), line = 817
 
 	lda G
 	sta adr.NEOMESSAGE.PARAMS+$02
 
-; optimize OK (NEO6502), line = 625
+; optimize OK (NEO6502), line = 818
 
 	lda B
 	sta adr.NEOMESSAGE.PARAMS+$03
 
-; optimize OK (NEO6502), line = 626
+; optimize OK (NEO6502), line = 819
 
 	lda #$05
 	sta NEOSENDMESSAGE.GROUP
@@ -332,10 +327,10 @@ RESULT	= DATAORIGIN+$000F
 
 ; ------------------------------------------------------------
 
-COL	= DATAORIGIN+$0010
-R	= DATAORIGIN+$0011
-G	= DATAORIGIN+$0012
-B	= DATAORIGIN+$0013
+COL	= DATAORIGIN+$000E
+R	= DATAORIGIN+$000F
+G	= DATAORIGIN+$0010
+B	= DATAORIGIN+$0011
 
 @VarData	= COL
 @VarDataSize	= 4
@@ -355,11 +350,11 @@ B	= DATAORIGIN+$0013
 .local	TURTLEINIT					; PROCEDURE
 	sta S0
 
-; optimize OK (NEO6502), line = 689
+; optimize OK (NEO6502), line = 889
 
 	sta adr.NEOMESSAGE.PARAMS
 
-; optimize OK (NEO6502), line = 690
+; optimize OK (NEO6502), line = 890
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -369,7 +364,7 @@ B	= DATAORIGIN+$0013
 
 ; ------------------------------------------------------------
 
-S0	= DATAORIGIN+$0014
+S0	= DATAORIGIN+$0012
 
 @VarData	= S0
 @VarDataSize	= 1
@@ -388,14 +383,14 @@ S0	= DATAORIGIN+$0014
 
 .local	TURTLERIGHT					; PROCEDURE
 
-; optimize OK (NEO6502), line = 695
+; optimize OK (NEO6502), line = 895
 
 	lda DEG
 	sta adr.WORDPARAMS
 	lda DEG+1
 	sta adr.WORDPARAMS+1
 
-; optimize OK (NEO6502), line = 696
+; optimize OK (NEO6502), line = 896
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -405,7 +400,7 @@ S0	= DATAORIGIN+$0014
 
 ; ------------------------------------------------------------
 
-DEG	= DATAORIGIN+$0015
+DEG	= DATAORIGIN+$0013
 
 @VarData	= DEG
 @VarDataSize	= 2
@@ -424,24 +419,24 @@ DEG	= DATAORIGIN+$0015
 
 .local	TURTLEMOVE					; PROCEDURE
 
-; optimize OK (NEO6502), line = 701
+; optimize OK (NEO6502), line = 901
 
 	lda DIST
 	sta adr.WORDPARAMS
 	lda DIST+1
 	sta adr.WORDPARAMS+1
 
-; optimize OK (NEO6502), line = 702
+; optimize OK (NEO6502), line = 902
 
 	lda COL
 	sta adr.NEOMESSAGE.PARAMS+$02
 
-; optimize OK (NEO6502), line = 703
+; optimize OK (NEO6502), line = 903
 
 	lda DRAWING
 	sta adr.NEOMESSAGE.PARAMS+$03
 
-; optimize OK (NEO6502), line = 704
+; optimize OK (NEO6502), line = 904
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -451,9 +446,9 @@ DEG	= DATAORIGIN+$0015
 
 ; ------------------------------------------------------------
 
-DIST	= DATAORIGIN+$0017
-COL	= DATAORIGIN+$0019
-DRAWING	= DATAORIGIN+$001A
+DIST	= DATAORIGIN+$0015
+COL	= DATAORIGIN+$0017
+DRAWING	= DATAORIGIN+$0018
 
 @VarData	= DIST
 @VarDataSize	= 4
@@ -472,7 +467,7 @@ DRAWING	= DATAORIGIN+$001A
 
 .local	TURTLEHOME					; PROCEDURE
 
-; optimize OK (NEO6502), line = 714
+; optimize OK (NEO6502), line = 914
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -587,26 +582,26 @@ EGAMONOHI	= $03
 VGALO	= $0A
 VGAMED	= $1F
 VGAHI	= $18
-WIN_LEFT	= DATAORIGIN+$001B
-WIN_RIGHT	= DATAORIGIN+$001D
-WIN_TOP	= DATAORIGIN+$001F
-WIN_BOTTOM	= DATAORIGIN+$0021
-GRAPHRESULT	= DATAORIGIN+$0023
-GETCOLOR	= DATAORIGIN+$0024
-VIDEORAM	= DATAORIGIN+$0025
-adr.LASTARCCOORDS	= DATAORIGIN+$0027	; [12] RECORD
+WIN_LEFT	= DATAORIGIN+$0019
+WIN_RIGHT	= DATAORIGIN+$001B
+WIN_TOP	= DATAORIGIN+$001D
+WIN_BOTTOM	= DATAORIGIN+$001F
+GRAPHRESULT	= DATAORIGIN+$0021
+GETCOLOR	= DATAORIGIN+$0022
+VIDEORAM	= DATAORIGIN+$0023
+adr.LASTARCCOORDS	= DATAORIGIN+$0025	; [12] RECORD
 .var LASTARCCOORDS	= adr.LASTARCCOORDS .word
-LASTARCCOORDS.X	= DATAORIGIN+$0027
-LASTARCCOORDS.Y	= DATAORIGIN+$0029
-LASTARCCOORDS.XSTART	= DATAORIGIN+$002B
-LASTARCCOORDS.YSTART	= DATAORIGIN+$002D
-LASTARCCOORDS.XEND	= DATAORIGIN+$002F
-LASTARCCOORDS.YEND	= DATAORIGIN+$0031
-SCANLINE_WIDTH	= DATAORIGIN+$0033
-CURRENTX	= DATAORIGIN+$0034
-CURRENTY	= DATAORIGIN+$0036
-LINEX	= DATAORIGIN+$0038
-LINEY	= DATAORIGIN+$003A
+LASTARCCOORDS.X	= DATAORIGIN+$0025
+LASTARCCOORDS.Y	= DATAORIGIN+$0027
+LASTARCCOORDS.XSTART	= DATAORIGIN+$0029
+LASTARCCOORDS.YSTART	= DATAORIGIN+$002B
+LASTARCCOORDS.XEND	= DATAORIGIN+$002D
+LASTARCCOORDS.YEND	= DATAORIGIN+$002F
+SCANLINE_WIDTH	= DATAORIGIN+$0031
+CURRENTX	= DATAORIGIN+$0032
+CURRENTY	= DATAORIGIN+$0034
+LINEX	= DATAORIGIN+$0036
+LINEY	= DATAORIGIN+$0038
 
 .endl							; UNIT GRAPH
 
@@ -618,7 +613,8 @@ LINEY	= DATAORIGIN+$003A
 
 ; -------------------  ASM Block 00000069  -------------------
 
-	@ClrScr
+		@SendMessage
+		dta 2,12
 	
 @exit
 	.ifdef @new
@@ -634,7 +630,7 @@ LINEY	= DATAORIGIN+$003A
 
 .local	KEYPRESSED					; FUNCTION | ASSEMBLER
 
-; -------------------  ASM Block 00000074  -------------------
+; -------------------  ASM Block 00000076  -------------------
 
 	@SendMessage
 	dta 2,2
@@ -646,7 +642,7 @@ LINEY	= DATAORIGIN+$003A
 
 ; ------------------------------------------------------------
 
-RESULT	= DATAORIGIN+$003C
+RESULT	= DATAORIGIN+$003A
 	rts						; ret
 .endl
 
@@ -688,16 +684,16 @@ l_018C
 	jne l_018C
 l_019A
 
-; optimize FAIL ('CRT.CLRSCR', turtle.pas), line = 10
+; optimize FAIL ('CRT.CLRSCR', turtle.pas), line = 11
 
 	jsr CRT.CLRSCR
 
-; optimize OK (turtle.pas), line = 11
+; optimize OK (turtle.pas), line = 12
 
 	lda #$00
 	jsr NEO6502.TURTLEINIT
 
-; optimize OK (turtle.pas), line = 12
+; optimize OK (turtle.pas), line = 13
 
 	lda #$5A
 	sta NEO6502.TURTLERIGHT.DEG
@@ -705,12 +701,12 @@ l_019A
 	sta NEO6502.TURTLERIGHT.DEG+1
 	jsr NEO6502.TURTLERIGHT
 
-; optimize OK (turtle.pas), line = 13
+; optimize OK (turtle.pas), line = 14
 
 	lda #$01
 	sta C
 
-; optimize OK (turtle.pas), line = 14
+; optimize OK (turtle.pas), line = 15
 
 	lda #$00
 	sta B
@@ -721,7 +717,7 @@ l_01B8
 	cmp #$24
 	jcs l_01C6
 
-; optimize OK (turtle.pas), line = 15
+; optimize OK (turtle.pas), line = 16
 
 	lda #$00
 	sta W
@@ -733,7 +729,7 @@ l_01CF
 	cmp #$24
 	jcs l_01DD
 
-; optimize OK (turtle.pas), line = 16
+; optimize OK (turtle.pas), line = 17
 
 	lda #$0A
 	sta NEO6502.TURTLEMOVE.DIST
@@ -745,7 +741,7 @@ l_01CF
 	sta NEO6502.TURTLEMOVE.DRAWING
 	jsr NEO6502.TURTLEMOVE
 
-; optimize OK (turtle.pas), line = 17
+; optimize OK (turtle.pas), line = 18
 
 	lda #$0A
 	sta NEO6502.TURTLERIGHT.DEG
@@ -758,11 +754,11 @@ l_01CF
 	jne l_01CF
 l_01DD
 
-; optimize FAIL ('SYSTEM.PAUSE.@006A', turtle.pas), line = 19
+; optimize FAIL ('SYSTEM.PAUSE.@006A', turtle.pas), line = 20
 
 	jsr SYSTEM.PAUSE.@006A
 
-; optimize OK (turtle.pas), line = 20
+; optimize OK (turtle.pas), line = 21
 
 	lda #$0A
 	sta NEO6502.TURTLERIGHT.DEG
@@ -770,11 +766,11 @@ l_01DD
 	sta NEO6502.TURTLERIGHT.DEG+1
 	jsr NEO6502.TURTLERIGHT
 
-; optimize FAIL (0, turtle.pas), line = 21
+; optimize FAIL (0, turtle.pas), line = 22
 
 	inc C
 
-; optimize OK (turtle.pas), line = 22
+; optimize OK (turtle.pas), line = 23
 
 	lda C
 	cmp #$10
@@ -788,11 +784,11 @@ l_0203
 	jne l_01B8
 l_01C6
 
-; optimize FAIL ('NEO6502.TURTLEHOME', turtle.pas), line = 24
+; optimize FAIL ('NEO6502.TURTLEHOME', turtle.pas), line = 25
 
 	jsr NEO6502.TURTLEHOME
 
-; optimize OK (turtle.pas), line = 25
+; optimize OK (turtle.pas), line = 27
 
 	lda #$00
 	sta O
@@ -800,13 +796,13 @@ l_01C6
 ; --- RepeatUntilProlog
 l_0215
 
-; optimize OK (turtle.pas), line = 27
+; optimize OK (turtle.pas), line = 29
 
 	lda #$01
 	add O
 	sta C
 
-; optimize OK (turtle.pas), line = 28
+; optimize OK (turtle.pas), line = 30
 
 	lda #$00
 	sta B
@@ -817,7 +813,7 @@ l_0228
 	cmp #$0F
 	jcs l_0236
 
-; optimize OK (turtle.pas), line = 29
+; optimize OK (turtle.pas), line = 31
 
 	lda C
 	cmp #$10
@@ -826,7 +822,7 @@ l_0228
 	sta C
 l_0248
 
-; optimize OK (turtle.pas), line = 30
+; optimize OK (turtle.pas), line = 32
 
 	lda B
 	sta :ecx
@@ -841,7 +837,7 @@ l_0248
 	lda :eax
 	sta W
 
-; optimize OK (turtle.pas), line = 31
+; optimize OK (turtle.pas), line = 33
 
 	lda C
 	sta NEO6502.NEOSETPALETTE.COL
@@ -851,7 +847,7 @@ l_0248
 	sta NEO6502.NEOSETPALETTE.B
 	jsr NEO6502.NEOSETPALETTE
 
-; optimize FAIL (0, turtle.pas), line = 32
+; optimize FAIL (0, turtle.pas), line = 34
 
 	inc C
 
@@ -860,11 +856,11 @@ l_0248
 	jne l_0228
 l_0236
 
-; optimize FAIL (0, turtle.pas), line = 34
+; optimize FAIL (0, turtle.pas), line = 36
 
 	inc O
 
-; optimize OK (turtle.pas), line = 35
+; optimize OK (turtle.pas), line = 37
 
 	lda O
 	cmp #$0F
@@ -873,15 +869,7 @@ l_0236
 	sta O
 l_0282
 
-; optimize OK (turtle.pas), line = 36
-
-	lda #$05
-	sta SYSTEM.PAUSE.@006B.N
-	lda #$00
-	sta SYSTEM.PAUSE.@006B.N+1
-	jsr SYSTEM.PAUSE.@006B
-
-; optimize FAIL ('CRT.KEYPRESSED', turtle.pas), line = 37
+; optimize FAIL ('CRT.KEYPRESSED', turtle.pas), line = 38
 
 	jsr CRT.KEYPRESSED
 	lda CRT.KEYPRESSED.RESULT
@@ -889,10 +877,10 @@ l_0282
 
 ; ------------------------------------------------------------
 
-B	= DATAORIGIN+$003D
-C	= DATAORIGIN+$003E
-O	= DATAORIGIN+$003F
-W	= DATAORIGIN+$0040
+B	= DATAORIGIN+$003B
+C	= DATAORIGIN+$003C
+O	= DATAORIGIN+$003D
+W	= DATAORIGIN+$003E
 @exit
 
 @halt	ldx #$00
@@ -975,10 +963,10 @@ NEO
 
 DATAORIGIN
 .by  $28 $00 $18 $00 $2D $0C $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
-.by  $00 $00 $00 $00 $00 $27 $00 $00  $00 $17
+.by  $00 $00 $00 $27 $00 $00 $00 $17
 
 VARINITSIZE	= *-DATAORIGIN
-VARDATASIZE	= 66
+VARDATASIZE	= 64
 
 PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
 

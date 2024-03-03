@@ -1,6 +1,9 @@
 program slideshow;
 uses neo6502,crt;
-const BUF = $7000;
+const 
+  BUF = $7000;
+  chunksize = $1000;
+
 var buffer : array[0..0] of byte absolute BUF;
     fnum: byte;
     imgname: TString;
@@ -25,31 +28,32 @@ end;
 
 procedure LoadImage(fname:TString);
 var 
-  x,o:word;
-  y,c:byte;
-  chunkname:TString;
+  x,o,len:word;
+  y:byte;
+  done:boolean;
 begin
-    c:=0;
     y:=0;
     x:=0;
+    fname := concat(fname,'.img');
+    NeoOpenFile(0,@fname[0],OPEN_MODE_RO);
     repeat 
-      Str(c,chunkname);
-      chunkname := concat('.c',chunkname);
-      chunkname := concat(fname,chunkname);
-      NeoLoad(chunkname,BUF);
       o:=0;
-      repeat 
-        NeoSetColor(0,buffer[o],0,0,0);
+      len := NeoReadFile(0,BUF,chunksize);
+      done := len = 0;
+      while (len>0) do begin
+        NeoSetColor(buffer[o]);
         NeoDrawPixel(x,y);
         inc(x);
         inc(o);
+        dec(len);
         if x=320 then begin
           x:=0;
           inc(y);
+          if y=240 then done:=true;
         end;
-      until (y=240) or (o=$8000);
-      inc(c);
-    until (y=240)
+      end;
+    until done;
+    NeoCloseFile(0);
 end;
 
 procedure Wait5secOrKey;
@@ -67,6 +71,7 @@ end;
 
 begin
   fnum := 0;
+  NeoSetDefaults(0,0,1,1,0);
   repeat 
     Str(fnum,imgname);
     imgname := concat('slide',imgname);

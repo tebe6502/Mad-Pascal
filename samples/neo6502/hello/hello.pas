@@ -1,12 +1,11 @@
 program hello;
 uses crt;
 
-var c:char;
-    s:TString;
+var s:TString;
 
 begin
     TextBackground(10);
-    TextColor(15);
+    TextColor(2);
     ClrScr;
 
     Writeln('Hello Neo6502!');

@@ -1,7 +1,7 @@
 program api_tests;
-uses neo6502, graph, crt;
+uses neo6502, neo6502math, graph, crt;
 const 
-    TILE_MAP_ADDRESS = $9000;
+    TILE_MAP_ADDRESS = $A000;
 {$r resources.rc}
 
 var b,c: byte;
@@ -52,6 +52,7 @@ procedure DrawBall(x,y,f:byte);
     end;
 
 begin
+    NeoSetDefaults(0,0,1,1,0);
     NeoLoad('neo_api.gfx',NEO_GFX_RAM);
     TextMode(0);
     Writeln('Hello Neo6502!');
@@ -123,28 +124,30 @@ begin
     InitGraph(0);
     
     s := 'Neo6502';
+    
     for j:=0 to 4 do
         begin
             for i:=0 to 50 do
                 begin
-                    x := Random(270)+10;
-                    y := Random(200)+10;
-                    w := Random(30)+20;
-                    h := Random(30)+10;
-                    c := Random(16);
-                    NeoSetColor(0,c,Random(2),1,0);
+                    x := NeoIntRandom(270)+10;
+                    y := NeoIntRandom(200)+10;
+                    w := NeoIntRandom(30)+20;
+                    h := NeoIntRandom(30)+10;
+                    c := NeoIntRandom(16);
+                    //NeoSetColor(0,c,Random(2),1,0);
+                    NeoSetColor(c);
+                    NeoSetSolidFlag(NeoIntRandom(2));
                     case j of 
                         0: NeoDrawLine(x,y,x+w,y+h);
                         1: NeoDrawRect(x,y,x+w,y+h);
                         2: NeoDrawEllipse(x,y,x+w,y+h);
                         3: NeoDrawString(x,y,s);
-                        4: NeoDrawImage(x,y,Random(4));
+                        4: NeoDrawImage(x,y,NeoIntRandom(4));
                     end;
                     Pause;
                 end;
         end;
     WaitForAnyKeyAndClear;
-
 
     Writeln('Group: 5');
     Writeln('Tilemaps: ');
@@ -198,7 +201,6 @@ begin
     until keypressed;
     WaitForAnyKeyAndClear;
 
-
     s := 'That''s all Folks';
     b := 0;
     c := 0;
@@ -215,6 +217,5 @@ begin
             end;
     until Keypressed;
     WaitForAnyKeyAndClear;
-
 
 end.
