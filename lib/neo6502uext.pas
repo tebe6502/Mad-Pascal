@@ -31,7 +31,7 @@ const
     GPIO_PINMODE_OUTPUT = 2;     // 
     GPIO_PINMODE_ANALOGUE = 3;   // 
 
-    GPIO_HIGH = $ff; // GPIO pin value for level HIGH
+    GPIO_HIGH = 1; // GPIO pin value for level HIGH
     GPIO_LOW = 0; // GPIO pin value for level LOW
 
 var 
