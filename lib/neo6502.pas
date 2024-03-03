@@ -50,10 +50,10 @@ const
 
     FI_PrintDirWildcard = 32;      // @nodoc  
 
-    OPEN_MODE_RO = 0 // opens the file for read-only access;
-    OPEN_MODE_WO = 1 // opens the file for write-only access;
-    OPEN_MODE_RW = 2 // opens the file for read-write access;
-    OPEN_MODE_NEW = 3 // creates the file if it doesn’t already exist, truncates it if it does, and opens the file for read-write access.
+    OPEN_MODE_RO = 0; // opens the file for read-only access;
+    OPEN_MODE_WO = 1; // opens the file for write-only access;
+    OPEN_MODE_RW = 2; // opens the file for read-write access;
+    OPEN_MODE_NEW = 3; // creates the file if it doesn’t already exist, truncates it if it does, and opens the file for read-write access.
 
 type TN6502Message = record
 (*
@@ -91,14 +91,14 @@ var
     dwordParams: array[0..1] of cardinal absolute N6502MSG_ADDRESS+4; // helping structure to easliy obrain or set cardinal parametrs
     wordxParams: array[0..2] of word absolute N6502MSG_ADDRESS+5; // @nodoc
     soundParams: TSound absolute N6502MSG_ADDRESS+4; // @nodoc  
-    FI_openfilename: ^string absolute N6502MSG_ADDRESS+5; // @nodoc  
-    FI_filename: ^string absolute N6502MSG_ADDRESS+4; // @nodoc  
-    FI_filename2: ^string absolute N6502MSG_ADDRESS+6; // @nodoc  
+    FI_openfilename: word absolute N6502MSG_ADDRESS+5; // @nodoc  
+    FI_filename: word absolute N6502MSG_ADDRESS+4; // @nodoc  
+    FI_filename2: word absolute N6502MSG_ADDRESS+6; // @nodoc  
     FI_dirSize: cardinal absolute N6502MSG_ADDRESS+6; // @nodoc  
     FI_dirAttr: byte absolute N6502MSG_ADDRESS+10; // @nodoc  
     FI_statSize: cardinal absolute N6502MSG_ADDRESS+4; // @nodoc  
     FI_statAttr: byte absolute N6502MSG_ADDRESS+8; // @nodoc  
-    FI_channel: byte absolute N6502MSG_ADDRESS+8; // @nodoc  
+    FI_channel: byte absolute N6502MSG_ADDRESS+4; // @nodoc  
     FI_offset: cardinal absolute N6502MSG_ADDRESS+5; // @nodoc  
     FI_address: word absolute N6502MSG_ADDRESS+5; // @nodoc  
     FI_length: word absolute N6502MSG_ADDRESS+7; // @nodoc  
@@ -258,7 +258,7 @@ procedure NeoCursorInverse;
 * Toggles the cursor colour between normal and inverse (swaps FG and BG colors).
 *)
 
-/////////////// GROUP 3 - filesystem
+///////////////////////////////////////////////// GROUP 3 - filesystem
 
 
 procedure NeoShowDir;
@@ -266,7 +266,7 @@ procedure NeoShowDir;
 * @description:
 * Displays the storage directory.
 *)
-function NeoLoad(name:TString;dest:word):byte;
+function NeoLoad(name:TString;dest:word):boolean;
 (*
 * @description:
 * Loads a named file from storage to selected address. 
@@ -276,9 +276,9 @@ function NeoLoad(name:TString;dest:word):byte;
 * @param: name (TString) - name of the file with extension
 * @param: dest (word) - target data address
 *
-* @returns: (byte) - error code is returned (if aplicable)
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
 *)
-function NeoSave(name:TString;dest,len:word):byte;
+function NeoSave(name:TString;dest,len:word):boolean;
 (*
 * @description:
 * Saves chunk of memory from defined address to a named file on storage. 
@@ -287,8 +287,46 @@ function NeoSave(name:TString;dest,len:word):byte;
 * @param: dest (word) - source data address
 * @param: len (word) - numer of bytes to be saved
 *
-* @returns: (byte) - error code is returned (if aplicable)
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
 *)
+function NeoOpenFile(channel:byte;name:pointer;openmode:byte):boolean;
+
+function NeoCloseFile(channel:byte):boolean;
+
+function NeoSeekPos(channel:byte;pos:cardinal):boolean;
+
+function NeoTellPos(channel:byte):cardinal;
+
+function NeoReadFile(channel:byte;addr:word;len:word):word;
+
+function NeoWriteFile(channel:byte;addr:word;len:word):word;
+
+function NeoGetFileSize(channel:byte):cardinal;
+
+function NeoSetFileSize(channel:byte;size:cardinal):boolean;
+
+function NeoRenameFile(fin,fout:pointer):boolean;
+
+function NeoDeleteFile(fin:pointer):boolean;
+
+function NeoCreateDirectory(fin:pointer):boolean;
+
+function NeoChangeDirectory(fin:pointer):boolean;
+
+function NeoStatFile(fin:pointer;var size:word;var attr:byte):boolean;
+
+function NeoOpenDirectory(fin:pointer):boolean;
+
+function NeoReadDirectory(var fname:string;var size:cardinal;var attr:byte):boolean;
+
+function NeoCloseDirectory:boolean;
+
+function NeoCopyFile(fin,fout:pointer):boolean;
+
+procedure NeoSearchDir(var searchstring:string);
+
+//////////////////////////////////////////////////////////////////////////////
+
 function NeoDoMath(func:byte):byte;
 (*
 * @description:
@@ -296,7 +334,10 @@ function NeoDoMath(func:byte):byte;
 * 
 * @param: func (byte) - number of function to be called
 *)
-procedure NeoSetColor(acol,xcol,solid,size,flip:byte);
+
+//////////////////////////////////////////////////////////////////////////////
+
+procedure NeoSetDefaults(acol,xcol,solid,size,flip:byte);
 (*
 * @description:
 * Sets colour for upcoming drawing operations.
@@ -423,6 +464,22 @@ function NeoGetSpritePixel(x,y:word):byte;
 *
 * @returns: (byte) - returned pixel value
 *)
+
+
+procedure NeoSetColor(col:byte);
+
+
+procedure NeoSetSolidFlag(flag:byte);
+
+
+procedure NeoSetDrawSize(size:byte);
+
+
+procedure NeoSetFlip(flip:byte);
+
+
+////////////////////////////////////////////////////////  SPRITES
+
 procedure NeoResetSprites;
 (*
 * @description:
@@ -729,11 +786,11 @@ begin
     result := FileIO(FI_SaveFile);
 end;
 
-function NeoOpenFile(channel:byte;fname:pointer;openmode:byte):boolean;
+function NeoOpenFile(channel:byte;name:pointer;openmode:byte):boolean;
 begin
-    FI_openfilename := word(fname);
     FI_channel := channel;
-    Neo6502.params[3] := openmode;
+    FI_openfilename := word(name);
+    NeoMessage.params[3] := openmode;
     result := FileIO(FI_OpenFile);
 end;
 
@@ -743,7 +800,7 @@ begin
     result := FileIO(FI_CloseFile);
 end;
 
-function NeoSeekPos(channel:byte,pos:cardinal):boolean;
+function NeoSeekPos(channel:byte;pos:cardinal):boolean;
 begin
     FI_channel := channel;
     FI_offset := pos;
@@ -757,7 +814,7 @@ begin
     if FileIO(FI_TellPos) then result := FI_offset;
 end;
 
-function NeoReadFile(channel:byte,addr:word;len:word):word;
+function NeoReadFile(channel:byte;addr:word;len:word):word;
 begin
     result:=0;
     FI_channel := channel;
@@ -766,7 +823,7 @@ begin
     if FileIO(FI_ReadData) then result := FI_length;
 end;
 
-function NeoWriteFile(channel:byte,addr:word;len:word):word;
+function NeoWriteFile(channel:byte;addr:word;len:word):word;
 begin
     result:=0;
     FI_channel := channel;
@@ -784,7 +841,6 @@ end;
 
 function NeoSetFileSize(channel:byte;size:cardinal):boolean;
 begin
-    result:=0;
     FI_channel := channel;
     FI_offset := size;
     result := FileIO(FI_GetSize);
@@ -797,19 +853,19 @@ begin
     result := FileIO(FI_Rename);
 end;
 
-function NeoRenameFile(fin:pointer):boolean;
+function NeoDeleteFile(fin:pointer):boolean;
 begin
     FI_filename := word(fin);
     result := FileIO(FI_Delete);
 end;
 
-function NeoCreateDirectiory(fin:pointer):boolean;
+function NeoCreateDirectory(fin:pointer):boolean;
 begin
     FI_filename := word(fin);
     result := FileIO(FI_NewDir);
 end;
 
-function NeoChangeDirectiory(fin:pointer):boolean;
+function NeoChangeDirectory(fin:pointer):boolean;
 begin
     FI_filename := word(fin);
     result := FileIO(FI_ChangeDir);
@@ -825,13 +881,13 @@ begin
     end;
 end;
 
-function NeoOpenDirectiory(fin:pointer):boolean;
+function NeoOpenDirectory(fin:pointer):boolean;
 begin
     FI_filename := word(fin);
     result := FileIO(FI_OpenDir);
 end;
 
-function NeoReadDirectiory(var fname:string;var size:cardinal;var attr:byte):boolean;
+function NeoReadDirectory(var fname:string;var size:cardinal;var attr:byte):boolean;
 begin
     FI_filename := word(@fname);
     result := FileIO(FI_ReadDir);
@@ -841,7 +897,7 @@ begin
     end;
 end;
 
-function NeoCloseDirectiory:boolean;
+function NeoCloseDirectory:boolean;
 begin
     result := FileIO(FI_CloseDir);
 end;
@@ -853,7 +909,7 @@ begin
     result := FileIO(FI_CopyFile);
 end;
 
-procedure NeoShowDir(var searchstring:string);
+procedure NeoSearchDir(var searchstring:string);
 begin
     wordParams[0] := word(@searchstring);
     NeoSendMessage(3,FI_PrintDirWildcard);
@@ -976,7 +1032,6 @@ begin
     wordParams[1]:=y;
     result := NeoSendMessage(5,36);
 end;
-
 
 function NeoGetVblanks:cardinal;
 begin
