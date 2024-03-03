@@ -1,4 +1,7 @@
-28.02.2023
+03.03.204
+- możliwość używania procedur/funkcji overload z LIBRARY
+
+28.02.2024
 - Bugfixes
 - @buf dostępne z poziomu MP (__BUFFER)
 
