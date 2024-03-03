@@ -3,7 +3,7 @@ unit neo6502;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Neo6502 API library for Mad-Pascal.
-* @version: 0.1.0
+* @version: 0.2.0
 
 * @description:
 * Set of procedures to cover API functionality provided by:    
