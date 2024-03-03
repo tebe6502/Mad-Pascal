@@ -290,40 +290,203 @@ function NeoSave(name:TString;dest,len:word):boolean;
 * @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
 *)
 function NeoOpenFile(channel:byte;name:pointer;openmode:byte):boolean;
-
+(*
+* @description:
+* Opens a file into a specific channel. Modes 0 to 2 will fail if the file does not already exist. 
+* If the channel is already open, the call fails. Opening the same file more than once on
+* different channels has undefined behaviour and is not recommended.
+* 
+* @param: channel (byte) - channel number (0-255)
+* @param: name (pointer) - pointer to length prefixed string containing file name
+* @param: openmode (byte) - open mode. See constants above.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoCloseFile(channel:byte):boolean;
-
+(*
+* @description:
+* Closes a particular channel.
+* 
+* @param: channel (byte) - channel number (0-255)
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoSeekPos(channel:byte;pos:cardinal):boolean;
-
+(*
+* @description:
+* Seeks the file opened on a particular channel to a location.
+* You can seek beyond the end of a file to extend the file. Whether the
+* file size changes when the seek happens or when you perform the write
+* is undefined. 
+* 
+* @param: channel (byte) - channel number (0-255)
+* @param: pos (cardinal) - file location
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoTellPos(channel:byte):cardinal;
-
+(*
+* @description:
+* Returns the current seek location for the file opened on a particular channel.
+* 
+* @param: channel (byte) - channel number (0-255)
+*
+* @returns: (cardinal) - file location.
+*)
 function NeoReadFile(channel:byte;addr:word;len:word):word;
-
+(*
+* @description:
+* Reads data from an opened file.   
+* Data is read from the current seek position, which is advanced after the read.
+* 
+* @param: channel (byte) - channel number (0-255)
+* @param: addr (word) - points to the destination in memory, or $FFFF to write to graphics memory
+* @param: len (word) - amount of data to read
+*
+* @returns: (word) - returns the amount of data actually read
+*)
 function NeoWriteFile(channel:byte;addr:word;len:word):word;
-
+(*
+* @description:
+* Writes data to an opened file.
+* Data is written to the current seek position, which is advanced after the write.
+* 
+* @param: channel (byte) - channel number (0-255)
+* @param: addr (word) - points to the source of data in memory
+* @param: len (word) - amount of data to write
+*
+* @returns: (word) - returns the amount of data actually written
+*)
 function NeoGetFileSize(channel:byte):cardinal;
-
+(*
+* @description:
+* Returns the current size of an opened file
+*
+* This call should be used on open files and takes into account any
+* buffered data which has not yet been written to disk. As a result it
+* may return a different size to the NeoStatFile described below.
+* 
+* @param: channel (byte) - channel number (0-255)
+*
+* @returns: (cardinal) - file size
+*)
 function NeoSetFileSize(channel:byte;size:cardinal):boolean;
-
+(*
+* @description:
+* Extends or truncates an opened file to a particular size.
+* 
+* @param: channel (byte) - channel number (0-255)
+* @param: size (cardinal) - the new size of the file.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoRenameFile(fin,fout:pointer):boolean;
-
+(*
+* @description:
+* Renames a file.
+* 
+* @param: fin (pointer) - pointer to length-prefixed string for the old name
+* @param: fout (pointer) - pointer to length-prefixed string for the new name
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoDeleteFile(fin:pointer):boolean;
-
+(*
+* @description:
+* Deletes a file or directory.
+* 
+* @param: fin (pointer) - pointer to length-prefixed filename string.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoCreateDirectory(fin:pointer):boolean;
-
+(*
+* @description:
+* Creates a new directory.
+* 
+* @param: fin (pointer) - pointer to length-prefixed path string.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoChangeDirectory(fin:pointer):boolean;
-
-function NeoStatFile(fin:pointer;var size:word;var attr:byte):boolean;
-
+(*
+* @description:
+* Changes the current working directory.
+* 
+* @param: fin (pointer) - pointer to length-prefixed path string.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
+function NeoStatFile(fin:pointer;var size:cardinal;var attr:byte):boolean;
+(*
+* @description:
+* Retrieves information about a file by name and returns it by referenced variables.
+*
+* If the file is open for writing, this may not return the correct size due
+* to buffered data not having been flushed to disk. 
+*
+* File attributes are a bitfield as follows:
+* 0 - directory   
+* 1 - system    
+* 2 - archive   
+* 3 - read only   
+* 4 - hidden   
+* 
+* @param: fin (pointer) - pointer to length-prefixed path string.
+* @param: size (cardinal) - reference to size variable.
+* @param: attr (byte) - reference to attribute variable.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoOpenDirectory(fin:pointer):boolean;
-
+(*
+* @description:
+* Opens a directory for enumeration.
+* Only one directory at a time may be opened. If a directory is already
+* open when this call is made, it is automatically closed; however, an
+* open directory may make it impossible to delete the directory, so closing
+* the directory after use is good practice.
+* 
+* @param: fin (pointer) - pointer to length-prefixed path string.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoReadDirectory(var fname:string;var size:cardinal;var attr:byte):boolean;
-
+(*
+* @description:
+* Reads an item from the currently open directory.   
+* This call fails if there are no more items to read.
+* 
+* @param: fname (pointer) - reference to filename string that gets updated.
+* @param: size (cardinal) - reference to size variable.
+* @param: attr (byte) - reference to attribute variable.
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoCloseDirectory:boolean;
-
+(*
+* @description:
+* Closes any directory opened by Open Directory.
+* 
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 function NeoCopyFile(fin,fout:pointer):boolean;
-
+(*
+* @description:
+* Copies a file.
+* 
+* @param: fin (pointer) - pointer to length-prefixed string for the old name
+* @param: fout (pointer) - pointer to length-prefixed string for the new name
+*
+* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
+*)
 procedure NeoSearchDir(var searchstring:string);
+(*
+* @description:
+* Prints a filtered file listing of the current directory to the console. On input:
+* 
+* @param: searchString (string) - length-prefixed searchstring 
+*)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -464,19 +627,36 @@ function NeoGetSpritePixel(x,y:word):byte;
 *
 * @returns: (byte) - returned pixel value
 *)
-
-
 procedure NeoSetColor(col:byte);
-
-
+(*
+* @description:
+* Sets colour for upcoming drawing operations.
+* 
+* @param: col (byte) - value that will be XORED with current colour
+*)
 procedure NeoSetSolidFlag(flag:byte);
-
-
+(*
+* @description:
+* Sets the solid flag, which indicates either solid fill (for
+* shapes) or solid background (for images and fonts)
+* 
+* @param: flag (byte) - 0 empty / 1 solid
+*)
 procedure NeoSetDrawSize(size:byte);
-
-
+(*
+* @description:
+* Sets the drawing scale for images and fonts
+* 
+* @param: size (byte) - drawing size
+*)
 procedure NeoSetFlip(flip:byte);
-
+(*
+* @description:
+* Sets the flip bits for drawing images. Bit 0 set causes a horizontal flip,
+* bit 1 set causes a vertical flip.
+* 
+* @param: flip (byte) - flip byte
+*)
 
 ////////////////////////////////////////////////////////  SPRITES
 
@@ -871,7 +1051,7 @@ begin
     result := FileIO(FI_ChangeDir);
 end;
 
-function NeoStatFile(fin:pointer;var size:word;var attr:byte):boolean;
+function NeoStatFile(fin:pointer;var size:cardinal;var attr:byte):boolean;
 begin
     FI_filename := word(fin);
     result := FileIO(FI_StatFile);
