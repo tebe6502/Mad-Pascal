@@ -26,13 +26,10 @@ for file in os.listdir(directory):
 
     pixels = bytearray(img.getdata())
     palette = bytearray(img.getpalette())
-    cnum = 0
-    while len(pixels)>0:
-        with open(f'{outdir}/slide{fnum}.c{cnum}', 'wb') as out_file:
-            print(f'*** writing chunk {cnum} of {fname}')
-            out_file.write(pixels[0:0x8000])
-            pixels = pixels[0x8000:]
-            cnum += 1
+    if len(pixels)>0:
+        with open(f'{outdir}/slide{fnum}.img', 'wb') as out_file:
+            print(f'*** writing {fname}')
+            out_file.write(pixels)
     with open(f'{outdir}/slide{fnum}.pal', 'wb') as out_file:
         print(f'*** saving palette for {fname}')
         out_file.write(palette)
