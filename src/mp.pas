@@ -223,6 +223,23 @@ end;
 // ----------------------------------------------------------------------------
 
 
+function GetOverloadName(IdentIndex: integer): string;
+var ParamIndex: integer;
+begin
+
+// Result := '@' + IntToHex(Ident[IdentIndex].Value, 4);
+
+ Result := '@' + IntToHex(Ident[IdentIndex].NumParams, 2);
+
+ if Ident[IdentIndex].NumParams > 0 then
+  for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
+   Result := Result + IntToHex(Ident[IdentIndex].Param[ParamIndex].PassMethod, 2) +
+		      IntToHex(Ident[IdentIndex].Param[ParamIndex].DataType, 2) +
+		      IntToHex(Ident[IdentIndex].Param[ParamIndex].AllocElementType, 2);
+
+ end;
+
+
 function GetLocalName(IdentIndex: integer; a: string =''): string;
 begin
 
@@ -700,7 +717,7 @@ begin
 	__imulECX: asm65(#9'jsr imulECX');
 
 //     __notBOOLEAN: asm65(#9'jsr notBOOLEAN');
-	 __notaBX: asm65(#9'jsr notaBX');
+//	 __notaBX: asm65(#9'jsr notaBX');
 
 //	 __negaBX: asm65(#9'jsr negaBX');
 
@@ -5689,7 +5706,7 @@ begin
 
 	    Name := GetLocalName(IdentIndex);
 
-	    if Ident[IdentIndex].isOverload then Name:=Name+'.@'+IntToHex(Ident[IdentIndex].Value, 4);
+	    if Ident[IdentIndex].isOverload then Name := Name + '.' + GetOverloadName(IdentIndex);
 
 	    a65(__addBX);
 	    asm65(#9'mva <'+Name+' :STACKORIGIN,x');
@@ -6494,16 +6511,21 @@ begin
 //   Error(i, 'Unresolved forward declaration of ' + Ident[IdentIndex].Name);
 
 
- if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then
-  svar := Ident[IdentIndex].Alias
- else
+ if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then begin
+
+  if Ident[IdentIndex].isOverload then
+   svar := Ident[IdentIndex].Alias+ '.' + GetOverloadName(IdentIndex)
+  else
+   svar := Ident[IdentIndex].Alias;
+
+ end else
  if Ident[IdentIndex].isOverload then
-  svar := GetLocalName(IdentIndex) + '.@' + IntToHex(Ident[IdentIndex].Value, 4)
+  svar := GetLocalName(IdentIndex) + '.' + GetOverloadName(IdentIndex)
  else
   svar := GetLocalName(IdentIndex);
 
 
-if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
+if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
  for ParamIndex := 1 to NumActualParams do
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
@@ -6925,9 +6947,6 @@ case Tok[i].Kind of
 
 
 //	  writeln(Tok[i+2].kind);
-
-
-
 
 
 	  end else
@@ -12964,9 +12983,9 @@ end;	//CompileStatement
 
 
 procedure GenerateProcFuncAsmLabels(BlockIdentIndex: integer; VarSize: Boolean = false);
-var IdentIndex, size, k: integer;
+var IdentIndex, size: integer;
     emptyLine, yes: Boolean;
-    fnam, txt: string;
+    fnam, txt, svar: string;
     varbegin: TString;
     HeaFile: TextFile;
 
@@ -13018,9 +13037,9 @@ var IdentIndex, size, k: integer;
        Result := #9'= DATAORIGIN+$'+IntToHex(abs(Ident[IdentIndex].Value), 4)
       else
        if abs(Ident[IdentIndex].Value) < 256 then
-        Result := #9'= $'+IntToHex(byte(Ident[IdentIndex].Value), 2)
+        Result := #9'= $' + IntToHex(byte(Ident[IdentIndex].Value), 2)
        else
-        Result := #9'= $'+IntToHex(Ident[IdentIndex].Value, 4);
+        Result := #9'= $' + IntToHex(Ident[IdentIndex].Value, 4);
 
      end else
 
@@ -13080,14 +13099,17 @@ begin
 //      writeln(Ident[IdentIndex].Alias,',',Ident[IdentIndex].Libraries);
 
       if Ident[IdentIndex].Libraries > 0 then begin
-        fnam := '';
 
-        for k:=1 to Tok[Ident[IdentIndex].Libraries].StrLength do
-        fnam := fnam + chr( StaticStringData[Tok[Ident[IdentIndex].Libraries].StrAddress - CODEORIGIN + k] );
+        fnam := linkObj[ Tok[Ident[IdentIndex].Libraries].Value ];
 
 	if ExtractFileExt(fnam) = '' then fnam := ChangeFileExt(fnam, '.hea');
 
         fnam := FindFile(fnam, 'library');
+
+	if Ident[IdentIndex].isOverload then
+	 svar := Ident[IdentIndex].Alias + '.' + GetOverloadName(IdentIndex)
+	else
+	 svar := Ident[IdentIndex].Alias;
 
 	yes := TRUE;
 
@@ -13102,7 +13124,8 @@ begin
 	   Error(Ident[IdentIndex].Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
 	  end;
 
-	  if (pos('MAIN.' + Ident[IdentIndex].Alias + #9, txt) = 1) or (pos('MAIN.' + Ident[IdentIndex].Alias + '.', txt) = 1) then begin
+	  if (txt.IndexOf('.@EXIT') < 0) and (txt.IndexOf('.@VARDATA') < 0) then				// skip '@.EXIT', '.@VARDATA'
+	  if (pos('MAIN.' + svar + #9, txt) = 1) or (pos('MAIN.' + svar + '.', txt) = 1) then begin
 	   yes := FALSE;
 
 	   asm65( Ident[IdentIndex].Name + copy(txt, 6 + length(Ident[IdentIndex].Alias), length(txt)) );
@@ -13616,7 +13639,7 @@ begin
  asm65('.local'#9 + Ident[BlockIdentIndex].Name, info);
 
  if Ident[BlockIdentIndex].isOverload then
-   asm65('.local'#9 + '@' + IntToHex(Ident[BlockIdentIndex].Value, 4));
+   asm65('.local'#9 + GetOverloadName(BlockIdentIndex));
 
 {
  if Ident[BlockIdentIndex].isOverload then
@@ -14447,7 +14470,16 @@ while Tok[i].Kind in
       if Ident[IdentIndex].isInline then
        Error(i, 'INLINE is not allowed to exports');
 
-      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
+      if Ident[IdentIndex].isOverload then begin
+
+       for idx := 1 to NumIdent do
+	 if {(Ident[idx].ProcAsBlock = Ident[IdentIndex].ProcAsBlock) and} (Ident[idx].Name = Ident[IdentIndex].Name) then
+	  AddCallGraphChild(BlockStack[BlockStackTop], Ident[idx].ProcAsBlock);
+
+      end else
+       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
     end;
 
     inc(i);
