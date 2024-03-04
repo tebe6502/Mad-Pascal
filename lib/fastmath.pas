@@ -23,8 +23,64 @@ interface
 	procedure FillSinHigh(p: pointer);
 	procedure FillSinLow(p: pointer);
 	function sqrt16(a: word): byte; assembler;
-
+	
+	function fastdiv(divisor, divider: word): word; external 'fdiv';
+	
+	
 implementation
+
+
+
+procedure log2(a: byte); assembler;
+asm
+table	= $c000		;page aligned
+
+seed	.byte $00,$00
+	.byte $02,$05
+	.byte $0c,$1f
+
+reduce	pla
+	adc seed,y
+	sec
+next	pha
+	ldy #5
+	txa
+	sta shift+4
+
+shift	ror shift+4
+	sbx #$00
+	bcs reduce
+	tax
+	dey
+	bpl shift
+
+	pla
+store	sbc #$1f
+	sta table
+	lsr store+3
+	bcc store
+
+enter	dec *+4
+	lda #$00
+	sta store+3
+	asl a
+	tax
+	lda #$00
+	bcs next
+
+;	sta table	;do whatever makes most sense for log(0)
+	rts
+
+end;
+
+
+(*
+
+function fastdiv(divisor, divider: word): word;
+
+*)
+	{$link fdiv.obx}
+
 
 
 function atan2(x1,x2,y1,y2: byte): byte; assembler;
@@ -131,7 +187,7 @@ octant_adjust : array [0..7] of byte = (
 	);
 
 asm
-{	txa:pha
+	txa:pha
 
 octant	= :eax			// temporary zeropage variable
 
@@ -169,7 +225,7 @@ atan2		lda x1
 		sta Result
 
 	pla:tax
-};
+
 end;
 
 
@@ -184,7 +240,7 @@ https://codebase64.org/doku.php?id=base:16bit_and_24bit_sqrt
 @return: Result - Byte
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	LDY #$01	; lsby of first odd number = 1
 	STY :eax
@@ -213,8 +269,8 @@ nomore
 ;	STX $21		; and remainder
 
 	pla:tax
-};
 end;
+
 
 procedure FillSin(p: pointer; eor,add: byte); assembler;
 (*
@@ -223,7 +279,7 @@ procedure FillSin(p: pointer; eor,add: byte); assembler;
 https://codebase64.org/doku.php?id=base:generating_approximate_sines_in_assembly
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	lda p
 	sta a3+1
@@ -275,7 +331,6 @@ a3	sta $ff00,y
 	bpl loop
 
 	pla:tax
-};
 end;
 
 
