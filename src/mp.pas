@@ -241,8 +241,14 @@ begin
 
 
 function GetLocalName(IdentIndex: integer; a: string =''): string;
+var Name: string;
 begin
-
+{
+ if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then
+   Name := Ident[IdentIndex].Name
+ else
+   Name := Ident[IdentIndex].Name;
+}
  if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section then
    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
  else
@@ -6510,15 +6516,19 @@ begin
 // if Ident[IdentIndex].isUnresolvedForward then begin
 //   Error(i, 'Unresolved forward declaration of ' + Ident[IdentIndex].Name);
 
-
+{
  if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then begin
 
   if Ident[IdentIndex].isOverload then
    svar := Ident[IdentIndex].Alias+ '.' + GetOverloadName(IdentIndex)
   else
-   svar := Ident[IdentIndex].Alias;
+   svar := GetLocalName(IdentIndex) + '.' + Ident[IdentIndex].Alias;
 
  end else
+}
+
+
+
  if Ident[IdentIndex].isOverload then
   svar := GetLocalName(IdentIndex) + '.' + GetOverloadName(IdentIndex)
  else
@@ -13118,6 +13128,8 @@ begin
 	while not eof(HeaFile) do begin
 	  readln(HeaFile, txt);
 
+	  txt:=AnsiUpperCase(txt);
+
 	  if (length(txt) > 255) or (pos(#0, txt) > 0) then begin
 	   CloseFile(HeaFile);
 
@@ -14427,7 +14439,7 @@ while Tok[i].Kind in
      begin
   // If procedure or function, delete parameters first
       if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-       if Ident[j].IsUnresolvedForward then
+       if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
 	 Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
      Dec(j);
@@ -15589,7 +15601,7 @@ while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
   if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-    if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
+    if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
   Dec(j);
