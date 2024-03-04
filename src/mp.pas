@@ -6094,7 +6094,7 @@ end;	//NumActualParameters
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
 var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
-    ActualParamType, AllocElementType: byte;
+    ActualParamType, AllocElementType, ch: byte;
     svar, lab: string;
     yes: Boolean;
     Param: TParamList;
@@ -6466,7 +6466,18 @@ begin
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> BYTETOK then		// wyjatkowo akceptujemy PBYTE jako STRING
 	       iError(i, IncompatibleTypes, 0, Ident[IdentTemp].DataType, -Ident[IdentIndex].Param[NumActualParams].AllocElementType);
 
-	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
+	    if ActualParamType = CHARTOK then begin			// CHAR -> STRING
+	      asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta @buf+1');
+	      asm65(#9'lda #$01');
+	      asm65(#9'sta @buf');
+	      asm65(#9'lda <@buf');
+	      asm65(#9'sta :STACKORIGIN,x');
+	      asm65(#9'lda >@buf');
+	      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	    end else
+	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
+
 	  end else begin
 
 //	writeln('2 > ',Ident[IdentIndex].Name,',',ActualParamType,',',AllocElementType,',',Tok[i].Kind,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements);
@@ -6474,7 +6485,17 @@ begin
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
               iError(i, IncompatibleTypes, 0, ActualParamType, -STRINGPOINTERTOK);
 
-	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+	    if ActualParamType = CHARTOK then begin			// CHAR -> STRING
+	      asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta @buf+1');
+	      asm65(#9'lda #$01');
+	      asm65(#9'sta @buf');
+	      asm65(#9'lda <@buf');
+	      asm65(#9'sta :STACKORIGIN,x');
+	      asm65(#9'lda >@buf');
+	      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	    end else
+	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
 	  end;
 
