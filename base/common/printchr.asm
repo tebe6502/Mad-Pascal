@@ -13,7 +13,7 @@
 
 
 .proc	@printEOL
-	ldy #eol
+	ldy #EOL
 	jmp @print
 .endp
 
