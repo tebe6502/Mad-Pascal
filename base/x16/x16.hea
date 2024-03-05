@@ -263,11 +263,28 @@
   r15L = r15
   r15H = r15+1
 
+  // user available registers
+  ur0  = $22
+  ur1  = $24
+  ur2  = $26
+  ur3  = $28
+  ur4  = $2A
+  ur5  = $2C
+  ur6  = $2E
+  ur7  = $30
+  ur8  = $32
+  ur9  = $34
+  ur10 = $36
+
+
 // keyboard
   CURRKEY    = $cb;
 
 
   ; ROM Banks
+  ROMBank = $01
+  RAMBank = $00
+  
   KERNAL_ROM_BANK   = 0
   KEYBOARD_ROM_BANK = 1
   CBDOS_ROM_BANK    = 2
@@ -280,6 +297,8 @@
   RAM_WIN           = $A000
   RAM_WIN_SIZE      = $2000
   ROM_WIN           = $C000
+
+
 
 .macro	basic_start(addr)
 

@@ -1,0 +1,1 @@
+VTUI_LIB RCDATA  '../lib/vtui1.0.bin' 2

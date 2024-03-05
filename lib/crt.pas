@@ -86,22 +86,22 @@ const
   PETSCII_COLOR_YELLOW	      = $9e;
   PETSCII_COLOR_CYAN	        = $9f;
 
-  BLACK                 = PETSCII_COLOR_BLACK;
-  WHITE                 = PETSCII_COLOR_WHITE;
-  RED                   = PETSCII_COLOR_RED;
-  CYAN                  = PETSCII_COLOR_CYAN;
-  PURPLE                = PETSCII_COLOR_PURPLE;
-  GREEN                 = PETSCII_COLOR_GREEN;
-  BLUE                  = PETSCII_COLOR_BLUE;
-  YELLOW                = PETSCII_COLOR_YELLOW;
-  ORANGE                = PETSCII_COLOR_ORANGE;
-  BROWN                 = PETSCII_COLOR_BROWN;
-  LIGHT_RED             = PETSCII_COLOR_PINK;
-  DARK_GREY             = PETSCII_COLOR_DARK_GREY;
-  GREY                  = PETSCII_COLOR_GREY;
-  LIGHT_GREEN           = PETSCII_COLOR_LIGHT_GREEN;
-  LIGHT_BLUE            = PETSCII_COLOR_LIGHT_BLUE;
-  LIGHT_GREY            = PETSCII_COLOR_LIGHT_GREY;
+  BLACK                 = $0;
+  WHITE                 = $1;
+  RED                   = $2;
+  CYAN                  = $3;
+  PURPLE                = $4;
+  GREEN                 = $5;
+  BLUE                  = $6;
+  YELLOW                = $7;
+  ORANGE                = $8;
+  BROWN                 = $9;
+  LIGHT_RED             = $A;
+  DARK_GREY             = $B;
+  GREY                  = $C;
+  LIGHT_GREEN           = $D;
+  LIGHT_BLUE            = $E;
+  LIGHT_GREY            = $F;
 
 { CRT modes }
   X16_MODE_80x60  = $00;

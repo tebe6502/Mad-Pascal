@@ -34,7 +34,7 @@ resource:
 	mads space_font.asm -o:space_font.fnt
 	mp -t x16 resource.pas
 	mads resource.a65 -x -i:../../../base -o:resource.prg
-	$(X16EMU) -prg resource.prg -run -debug
+	$(X16EMU) -prg resource.prg -run -debug -scale 2
 
 piramid:
 	mp -t x16 piramid.pas

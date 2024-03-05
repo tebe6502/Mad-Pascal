@@ -1,0 +1,29 @@
+zsm_init_engine  = $8C00;
+zsm_tick         = $8C03;
+zsm_play         = $8C06;
+zsm_stop         = $8C09;
+zsm_rewind       = $8C0C;
+zsm_close        = $8C0F;
+zsm_fill_buffers = $8C12;
+zsm_setlfs       = $8C15;
+zsm_setfile      = $8C18;
+zsm_loadpcm      = $8C1B;
+zsm_setmem       = $8C1E;
+zsm_setatten     = $8C21;
+zsm_setcb        = $8C24;
+zsm_clearcb      = $8C27;
+zsm_getstate     = $8C2A;
+zsm_setrate      = $8C2D;
+zsm_getrate      = $8C30;
+zsm_setloop      = $8C33;
+zsm_opmatten     = $8C36;
+zsm_psgatten     = $8C39;
+zsm_pcmatten     = $8C3C;
+zsm_set_int_rate = $8C3F;
+
+zcm_setmem       = $8C4B;
+zcm_play         = $8C4E;
+zcm_stop         = $8C51;
+
+zsmkit_setisr    = $8C54;
+zsmkit_clearisr  = $8C57;

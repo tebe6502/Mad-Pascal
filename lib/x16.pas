@@ -90,9 +90,13 @@ var
   MOV2F      : byte absolute $bbc7; // MOV2F. Move a Floating Point Number from FAC1 to Memory
 
 // interrupt routines and vectors
-  IRQVECLO   : byte absolute $0314; // hardware interrupt (IRQ) vector, low byte
-  IRQVECHI   : byte absolute $0315; // hardware interrupt (IRQ) vector, high byte
-  STDIRQ     : byte absolute $ea31; //start address of standard interrupt routines
+  IRQVec     : byte absolute $0314; // hardware interrupt (IRQ) vector, low byte
+  BRKVec     : byte absolute $0316;
+  NMIVec     : byte absolute $0318;
+  FETVec     : byte absolute $03AF;
+  //STAVec      = TBD
+  //CMPVec      = TBD
+  //STDIRQ   : byte absolute $ea31; //start address of standard interrupt routines
 
 // keyboard
   CURRKEY    : byte absolute $cb;   // currently pressed keycode is stored to $00cb; $40  : byte absolute no key pressed

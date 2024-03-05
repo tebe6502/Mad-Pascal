@@ -25,11 +25,11 @@ begin
     // TextMode($00);
     writeln('press any key');
     repeat until keypressed;
-    TextBackground(PETSCII_COLOR_GREY);
+    TextBackground(GREY);
     ClrScr;
     writeln;
     for i:=0 to 15 do begin
-        // TextBackground(PETSCII_COLOR_GREY);
+        // TextBackground(GREY);
         TextColor(color[i]);
         writeln('text color ', color[i]);
         // Delay(3000);
