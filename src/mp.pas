@@ -6466,7 +6466,7 @@ begin
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> BYTETOK then		// wyjatkowo akceptujemy PBYTE jako STRING
 	       iError(i, IncompatibleTypes, 0, Ident[IdentTemp].DataType, -Ident[IdentIndex].Param[NumActualParams].AllocElementType);
 
-	    if ActualParamType = CHARTOK then begin			// CHAR -> STRING
+	    if ((Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK)) and (Ident[IdentTemp].DataType = CHARTOK) then begin	// CHAR -> STRING
 	      asm65(#9'lda :STACKORIGIN,x');
 	      asm65(#9'sta @buf+1');
 	      asm65(#9'lda #$01');
@@ -6485,7 +6485,7 @@ begin
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
               iError(i, IncompatibleTypes, 0, ActualParamType, -STRINGPOINTERTOK);
 
-	    if ActualParamType = CHARTOK then begin			// CHAR -> STRING
+	    if (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin		// CHAR -> STRING
 	      asm65(#9'lda :STACKORIGIN,x');
 	      asm65(#9'sta @buf+1');
 	      asm65(#9'lda #$01');
