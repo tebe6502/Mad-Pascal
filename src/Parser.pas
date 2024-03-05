@@ -2218,12 +2218,15 @@ begin
 
 			   if Tok[i + 1].Kind = IDENTTOK then begin
 
-			    CheckTok(i + 2, STRINGLITERALTOK);
-
 			    Ident[NumIdent].Alias := Tok[i + 1].Name^;
-			    Ident[NumIdent].Libraries := i + 2;
 
-			    inc(i, 2);
+			    if Tok[i + 2].Kind = STRINGLITERALTOK then begin
+			      Ident[NumIdent].Libraries := i + 2;
+
+			      inc(i);
+			    end;
+
+			    inc(i);
 
 			   end else
 			   if Tok[i + 1].Kind = STRINGLITERALTOK then begin

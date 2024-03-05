@@ -1339,10 +1339,8 @@ j := 0;
 
 yes := FALSE;
 
-
 for i:=0 to NumStaticStrChars-len-1 do
  if CompareWord(Data, StaticStringData[i], Len+1) = 0 then begin yes := TRUE; Break end;
-
 
 Tok[StrTokenIndex].StrLength := len;
 
