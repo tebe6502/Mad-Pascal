@@ -10160,9 +10160,10 @@ case Tok[i].Kind of
 			asm65(#9'sta @move.src+1');
 
 			if Ident[IdentIndex].DataType = POINTERTOK then
-			 asm65(#9'@moveSTRING_1 ' + GetLocalName(IdentIndex) )
-			else begin
-
+			 asm65(#9'@moveSTRING_P ' + GetLocalName(IdentIndex) )
+			else
+			 asm65(#9'@moveSTRING ' + GetLocalName(IdentIndex) + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1));
+{
 		         if Ident[IdentIndex].NumAllocElements = 256 then begin
 
 			  asm65(#9'mwy '+svar+' :bp2');
@@ -10174,7 +10175,7 @@ case Tok[i].Kind of
 			  asm65(#9'@moveSTRING ' + GetLocalName(IdentIndex) + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements));
 
 			end;
-
+}
 			a65(__subBX);
 
 			StopOptimization;
@@ -11811,6 +11812,8 @@ WHILETOK:
 	for k:=1 to Tok[i+4].StrLength do
 	 svar:=svar + chr(StaticStringData[Tok[i+4].StrAddress - CODEORIGIN+k]);
 
+//	 writeln(svar,',',Tok[i+4].StrLength);
+
 	CheckTok(i + 5, CPARTOK);
 
 	asm65;
@@ -13058,9 +13061,9 @@ var IdentIndex, size: integer;
       size := 0;
      end else
 
-//     if Ident[IdentIndex].isExternal then begin
-//      Result := #9'= ' + Tok[Ident[IdentIndex].Value + 1].Name^;
-//     end else
+     if Ident[IdentIndex].isExternal {and (Ident[IdentIndex].Libraries = 0)} then begin
+      Result := #9'= ' + Ident[IdentIndex].Alias;
+     end else
 
      if Ident[IdentIndex].isAbsolute then begin
 
@@ -13125,11 +13128,7 @@ begin
     end;
 
 
-    if Ident[IdentIndex].isExternal then begin			// read file header libraryname.hea
-
-//      writeln(Ident[IdentIndex].Alias,',',Ident[IdentIndex].Libraries);
-
-      if Ident[IdentIndex].Libraries > 0 then begin
+    if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) then begin				// read file header libraryname.hea
 
         fnam := linkObj[ Tok[Ident[IdentIndex].Libraries].Value ];
 
@@ -13170,8 +13169,6 @@ begin
 	  iError(Ident[IdentIndex].Libraries, UnknownIdentifier, IdentIndex);
 
 	CloseFile(HeaFile);
-
-      end;
 
     end else
 
@@ -15024,14 +15021,19 @@ while Tok[i].Kind in
 
        inc(i);
 
+       external_libr := 0;
+
        if Tok[i + 1].Kind = IDENTTOK then begin
 
-        CheckTok(i + 2, STRINGLITERALTOK);
-
 	external_name := Tok[i + 1].Name^;
-	external_libr := i + 2;
 
-	inc(i, 2);
+	if Tok[i + 2].Kind = STRINGLITERALTOK then begin
+	  external_libr := i + 2;
+
+	  inc(i);
+	end;
+
+	inc(i);
        end else
        if Tok[i + 1].Kind = STRINGLITERALTOK then begin
 

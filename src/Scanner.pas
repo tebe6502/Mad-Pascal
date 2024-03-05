@@ -1359,7 +1359,7 @@ var
 	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
 	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
-	  if CurToken = EXTERNALTOK then ExternalFound := true;
+	  if CurToken = EXTERNALTOK then ExternalFound := TRUE;
 
 	  AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
 
@@ -1622,13 +1622,13 @@ var
 
 	 Text := '';
 
-	 ExternalFound := false;
-
 	end;
 
 
       if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then begin
 	AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
+
+	ExternalFound := false;
 
 	if UsesFound and (ch = ';') then
 	  if UsesOn then ReadUses;
