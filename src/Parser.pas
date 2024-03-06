@@ -75,7 +75,7 @@ var TempIndex: integer;
    Result := false;
 
    if Ident[IdentIndex].Section then
-    for i := 1 to MAXALLOWEDUNITS do
+    for i := MAXALLOWEDUNITS downto 1 do
       if UnitName[Index].Allow[i] = UnitName[Ident[IdentIndex].UnitIndex].Name then exit(true);
 
   end;
@@ -96,7 +96,7 @@ var TempIndex: integer;
 
 	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
 
-	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') then exit;
+	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1){ or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM')} then exit;
 	end
 
   end;
