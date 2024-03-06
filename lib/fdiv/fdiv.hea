@@ -1,0 +1,7 @@
+main.fastdiv.divisor	= :eax
+main.fastdiv.divider	= :ecx
+main.fastdiv.result	= :eax+2
+
+main.fastdivS.divisor	= :eax
+main.fastdivS.divider	= :ecx
+main.fastdivS.result	= :eax+2
