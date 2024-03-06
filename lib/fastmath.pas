@@ -24,7 +24,8 @@ interface
 	procedure FillSinLow(p: pointer);
 	function sqrt16(a: word): byte; assembler;
 	
-	function fastdiv(divisor, divider: word): word; external 'fdiv';
+	function fastdiv(divisor, divider: word): word; external 'fdiv\fdiv';
+	function fastdivS(divisor, divider: smallint): smallint; external 'fdiv\fdiv';
 	
 	
 implementation
@@ -79,8 +80,12 @@ end;
 function fastdiv(divisor, divider: word): word;
 
 *)
-	{$link fdiv.obx}
 
+{$codealign link = $100}
+
+{$link fdiv\fdiv.obx}
+
+{$codealign link = 0}
 
 
 function atan2(x1,x2,y1,y2: byte): byte; assembler;
