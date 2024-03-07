@@ -7890,7 +7890,7 @@ case Tok[i].Kind of
 
 
 
-      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
+      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) {and (Ident[IdentIndex].NumAllocElements = 0)} then begin
 
 //        writeln('!! ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
 
@@ -7915,14 +7915,29 @@ case Tok[i].Kind of
 
 	else begin
 
-	  svar:=GetLocalName(IdentIndex);
+	  if Ident[IdentIndex].NumAllocElements > 0 then begin
 
-          a65(__addBX);
+	    svar:=GetLocalName(IdentIndex, 'adr.');
 
-	  asm65(#9'lda ' + svar);
-	  asm65(#9'sta :STACKORIGIN,x');
-	  asm65(#9'lda ' + svar + '+1');
-	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	    asm65(#9'ldy :STACKORIGIN,x');
+
+	    asm65(#9'lda ' + svar + ',y');
+	    asm65(#9'sta :STACKORIGIN,x');
+	    asm65(#9'lda ' + svar + '+1,y');
+	    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+	  end else begin
+
+	    svar:=GetLocalName(IdentIndex);
+
+            a65(__addBX);
+
+	    asm65(#9'lda ' + svar);
+	    asm65(#9'sta :STACKORIGIN,x');
+	    asm65(#9'lda ' + svar + '+1');
+	    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+	  end;
 
 	end;
 
@@ -9680,7 +9695,7 @@ case Tok[i].Kind of
 
            if Tok[i + 1].Kind = OPARTOK then begin				// (pointer)
 
-//	    writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+//	writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
 	    if not (Ident[IdentIndex].DataType in [POINTERTOK, RECORDTOK, OBJECTTOK]) then
 	      iError(i, IllegalExpression);
@@ -9932,6 +9947,7 @@ case Tok[i].Kind of
 
 	    end else begin
 	     IndirectionLevel := ASPOINTER;
+
 	     VarType := Ident[IdentIndex].DataType;
 	    end;
 
@@ -10235,7 +10251,7 @@ case Tok[i].Kind of
 
 
 //	if (Tok[k].Kind = IDENTTOK) then
-//	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
+//	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,':', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
 //	else
 //	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
 
@@ -10645,8 +10661,6 @@ case Tok[i].Kind of
 
 		 end else
 		  GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex, par1, par2);
-
-
 
 
 	        end else
