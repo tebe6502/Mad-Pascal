@@ -7915,29 +7915,10 @@ case Tok[i].Kind of
 
 	else begin
 
-	  if Ident[IdentIndex].NumAllocElements > 0 then begin
-
-	    svar:=GetLocalName(IdentIndex, 'adr.');
-
-	    asm65(#9'ldy :STACKORIGIN,x');
-
-	    asm65(#9'lda ' + svar + ',y');
-	    asm65(#9'sta :STACKORIGIN,x');
-	    asm65(#9'lda ' + svar + '+1,y');
-	    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-	  end else begin
-
-	    svar:=GetLocalName(IdentIndex);
-
-            a65(__addBX);
-
-	    asm65(#9'lda ' + svar);
-	    asm65(#9'sta :STACKORIGIN,x');
-	    asm65(#9'lda ' + svar + '+1');
-	    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-	  end;
+	  if Ident[IdentIndex].NumAllocElements > 0 then
+	    Push(0, ASPOINTERTOARRAYORIGIN2, DataSize[POINTERTOK], IdentIndex)
+	  else
+	    Push(0, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 
 	end;
 
