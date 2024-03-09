@@ -217,7 +217,8 @@ const
 	function WhereX: byte; assembler;                                                          //platform dependent
 	function WhereY: byte; assembler;                                                          //platform dependent
 {$IFDEF X16}
-  procedure TextCharset(charset: pointer); assembler;                                     //platform dependent
+  procedure TextCharset(charset: pointer); assembler; overload;                              //platform dependent
+  procedure TextCharset(filename: string); assembler; overload;                              //platform dependent
 {$ENDIF}
 
 implementation

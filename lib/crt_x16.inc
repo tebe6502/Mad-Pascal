@@ -284,7 +284,7 @@ stop
 	plx
 end;
 
-procedure TextCharset(charset: pointer); assembler;
+procedure TextCharset(charset: pointer); assembler; overload;
 (*
 @description: Sets charset
 pointer to a 2 KB RAM area that gets uploaded as the new 8x8 character set. The data has to consist of 256 characters of 8 bytes each, top to bottom,
@@ -298,12 +298,61 @@ asm
 	phx
 
 	lda #0
-	ldx CHARSET
-	ldy CHARSET+1
+	ldx charset
+	ldy charset+1
 	jsr screen_set_charset
 
 	plx
 end;
+
+procedure TextCharset(filename: string); assembler; overload; 
+(*
+@description: Sets charset
+* pointer to a 2 KB RAM area that gets uploaded as the new 8x8 character set. The data has to consist of 256 characters of 8 bytes each, top to bottom,
+* with the MSB on the left and set bits representing the foreground color.
+*
+* @param: filename (String) - character prepared in bin form 2kb
+*
+*
+*)
+asm
+	pha
+	phx
+	phy
+
+	lda #<(adr.filename+1)
+	sta r12L
+	lda #>(adr.filename+1)
+	sta r12H
+
+	lda adr.filename
+	// get pointer into x,y registers
+	ldx r12L
+	ldy r12H
+	jsr SETNAM
+
+	lda #1; // logical file number
+	ldx #8; // device number
+	ldy #2;
+	jsr SETLFS
+
+	; // loading into charset $1F000
+	lda #3
+	ldx #$00
+	ldy #$f0
+
+	jsr LOAD
+
+	// lda #0
+	// ldx CHARSET
+	// ldy CHARSET+1
+	// jsr screen_set_charset
+
+	ply
+	plx
+	pla
+end;
+
 
 procedure NoSound; assembler;
 (*

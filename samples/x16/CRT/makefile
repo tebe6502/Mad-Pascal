@@ -30,6 +30,11 @@ characters:
 	mads characters.a65 -x -i:../../../base -o:characters.prg
 	$(X16EMU) -prg characters.prg -run
 
+directchars:
+	mp -t x16 directchars.pas
+	mads directchars.a65 -x -i:../../../base -o:directchars.prg
+	$(X16EMU) -prg directchars.prg -run
+
 resource:
 	mads space_font.asm -o:space_font.fnt
 	mp -t x16 resource.pas
