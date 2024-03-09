@@ -9,7 +9,7 @@
 // The pivot is an index pointer just like the ones used in previous sorting algorithms.
 // The purpose of the pivot is to divide the list in two halves, one with elements greater than the pivot and the other
 // with elements smaller than the pivot. The pivot is usually chosen to be the left-most element of the list, however
-// it is not necessary and one may choose any random element from the list to be the pivot. Up till now, we have got 
+// it is not necessary and one may choose any random element from the list to be the pivot. Up till now, we have got
 // the array list divided into two halves. Now, we do the same procedure over this two halves just like we did to the whole
 // list - and this is what we call recursion. The longer the list, the more recursion there will be - thus
 // more resources are requested i.e. memory space.
@@ -21,9 +21,9 @@
 
 uses crt, sysutils;
 
-const 
+const
 	size = 256;
-	
+
 type
 	field = array [0..size-1] of byte;
 
@@ -33,7 +33,7 @@ var
 
 	numbers: field;
 
- 
+
 procedure QuickSort(Left, Right: word);
 var
   ptrLeft, ptrRight, Pivot, Temp: word;
@@ -41,14 +41,14 @@ begin
 
   ptrLeft := Left;
   ptrRight := Right;
-  Pivot := numbers[(Left + Right) shr 1];
+  Pivot := numbers[word(Left + Right) shr 1];
 
   repeat
- 
+
     while (ptrLeft < Right) and (numbers[ptrLeft] < Pivot) do inc(ptrLeft);
     while (ptrRight > Left) and (numbers[ptrRight] > Pivot) do dec(ptrRight);
- 
-    if ptrLeft <= ptrRight then  
+
+    if ptrLeft <= ptrRight then
       begin
         if ptrLeft < ptrRight then
           begin
@@ -61,11 +61,11 @@ begin
      end;
 
   until ptrLeft > ptrRight;
- 
+
   if ptrRight > Left then QuickSort(Left, ptrRight);
   if ptrLeft < Right then QuickSort(ptrLeft, Right);
 
-end;   
+end;
 
 
 begin
@@ -74,11 +74,13 @@ begin
 
  write('Quick sort, ',size,' elements');
 
- s:=GetTickCount; 
- 
+ s:=GetTickCount;
+
  QuickSort(0, size-1);
 
  writeln(', ',GetTickCount-s,' ticks');
+
+// for i:=0 to size-1 do write(numbers[i],',');
 
  repeat until keypressed;
 
