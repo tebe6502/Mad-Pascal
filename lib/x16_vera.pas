@@ -134,65 +134,29 @@ asm
         ldy #2; // doing bvload
         jsr SETLFS
 
-        // copy pointer to zero page
-        lda filename
+        lda #<(adr.filename+1)
         sta r12L
-        lda filename+1
+        lda #>(adr.filename+1)
         sta r12H
 
-        // read first pointed-at byte - string length
-        ldy #0
-        lda (r12L),y
-        
+        lda adr.filename
         // get pointer into x,y registers
         ldx r12L
         ldy r12H
-        
-        // increment past the length
-        inx
-        bne skip
-        iny
-
-    skip:
         jsr SETNAM
-
 
         lda #2; // BVLOAD to bank 0
         ldx #0; // address 0 (start of video mem)
         ldy #0
         jsr LOAD
-        plx   
+        plx
 end;
 
 procedure veraFade(FadeDirection: byte); assembler;
 asm
-    // jsr start
-
     jsr CopyPaletteToHighmem
     jsr Fade
-    jmp FadeEnd
-
-    PTR = ur0; // user register
-    FadeSpeed               = 200    ; // higher is slower, max 255
-    RambankForPaletteData   = 1      ; // Rambank which holds the original palette data for fading in
-
-
-    tmp:  .byte 0
-    tmp2: .byte 0
-    // ; FadeDirection: .byte 0  ;if=0>fade out, if=1->fade in
-
-
-    ; // not nececary, but makes reading easier
-    NibbleLeftNew:    .byte 0
-    NibbleRightNew:   .byte 0
-    NibbleLeftOrig:   .byte 0
-    NibbleRightOrig:  .byte 0
-
-    // start:
-    //     jsr CopyPaletteToHighmem
-    //     jsr Fade
-    //     // jmp FadeEnd
-
+    rts
 
     Fade:
         ldx #0
@@ -216,12 +180,11 @@ asm
         
         lda $00  ; // save current rambank and restore when done
         pha
-
             ; // set rambank to RambankForPaletteData
             lda #RambankForPaletteData
             sta $00
-            phx
 
+            phx
             ; // set vera address to palette offset, no auto increment
             lda #$00
             sta VERA_addr_low
@@ -242,23 +205,24 @@ asm
                     ldy FadeDirection
                     cpy #0
                     bne FadeIn
-                    ; // FadeOut
-                    pha
-                        ; // decrement the right nibble
+                    
+                        ; // FadeOut
+                        pha
+                            ; // decrement the right nibble
+                            sec
+                            sbc #$01
+                            AND #$0F ; // discard the left nibble
+                            sta tmp
+                        pla   
+                        
+                        ;decrement the left nible
                         sec
-                        sbc #$01
-                        AND #$0F ; // discard the left nibble
-                        sta tmp
-                    pla   
-                    
-                    ;decrement the left nible
-                    sec
-                    sbc #$10
-                    AND #$F0    ; // discard the right nible
-                    ora tmp     ; // merge the new left and right nibble
-                    
-                    jsr CheckNegative ; // check if any of the nibbles has become negarive, if so set nibble to 0
-                    jmp StoreNewColorData
+                        sbc #$10
+                        AND #$F0    ; // discard the right nible
+                        ora tmp     ; // merge the new left and right nibble
+                        
+                        jsr CheckNegative ; // check if any of the nibbles has become negarive, if so set nibble to 0
+                        jmp StoreNewColorData
                     
                     FadeIn:                    
                         ; // FadeIn
@@ -279,15 +243,12 @@ asm
                         
                     StoreNewColorData:                    
                         sta VERA_data0 ; // store new palette color values
-                        
                         ; // Increment VERA address
                         inc VERA_addr_low       ; //increase low byte
                         bne DoNotIncHighByte    
                         inc VERA_addr_high   ; // inc high byte if low byte became zero, we do not care about the 3rd byte
-                    
 
                     DoNotIncHighByte:
-                    
                         ; // Increment PTR to palette in rambank
                         inc PTR
                         bne DoNotIncHighBytePtr
@@ -318,8 +279,8 @@ asm
         lda tmp2
         AND #$0F ;negative, so set left nibble to zero
         sta tmp2
-        NotNegativeLeft:
         
+        NotNegativeLeft:
         ; // check right nible
         lda tmp2
         AND #$0F
@@ -427,8 +388,23 @@ asm
         plx
         ply
     rts
-    
-    FadeEnd:
+
+    // PTR = ur0;                         // user register
+    PTR = $22
+    FadeSpeed               = 200    ; // higher is slower, max 255
+    RambankForPaletteData   = 1      ; // Rambank which holds the original palette data for fading in
+
+
+    tmp:  .byte 0
+    tmp2: .byte 0
+    // ; FadeDirection: .byte 0  ;if=0>fade out, if=1->fade in
+
+
+    ; // not nececary, but makes reading easier
+    NibbleLeftNew:    .byte 0
+    NibbleRightNew:   .byte 0
+    NibbleLeftOrig:   .byte 0
+    NibbleRightOrig:  .byte 0
 
 end;
 

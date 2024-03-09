@@ -9,7 +9,7 @@ begin
     writeln('press any key to continue');
     repeat until keypressed;
 
-    TextCharset('space_font.fnt');
+    TextCharset('assets/space_font.fnt');
     writeln;
     writeln('printable characters $20 - $7f');
     writeln;
