@@ -756,27 +756,27 @@ begin
 
 		     svar := GetLocalName(IdentIndex);
 
-		     asm65(#9'mva <'+svar+ GetStackVariable(0));
-		     asm65(#9'mva >'+svar+ GetStackVariable(1));
+		     asm65(#9'mva <' + svar + GetStackVariable(0));
+		     asm65(#9'mva >' + svar + GetStackVariable(1));
 
 		    end else begin
 
 		     // Size:=4;
 
 		     v:=byte(Value);
-		     asm65(#9'mva #$'+IntToHex(byte(v), 2)+ GetStackVariable(0));
+		     asm65(#9'mva #$' + IntToHex(byte(v), 2) + GetStackVariable(0));
 
 		     if Size in [2,4] then begin
 		       v:=byte(Value shr 8);
-		       asm65(#9'mva #$'+IntToHex(v, 2)+ GetStackVariable(1));
+		       asm65(#9'mva #$' + IntToHex(v, 2) + GetStackVariable(1));
 		     end;
 
 		     if Size = 4 then begin
 		       v:=byte(Value shr 16);
-		       asm65(#9'mva #$'+IntToHex(v, 2)+ GetStackVariable(2));
+		       asm65(#9'mva #$' + IntToHex(v, 2) + GetStackVariable(2));
 
 		       v:=byte(Value shr 24);
-		       asm65(#9'mva #$'+IntToHex(v, 2)+ GetStackVariable(3));
+		       asm65(#9'mva #$' + IntToHex(v, 2) + GetStackVariable(3));
 		     end;
 
 		   end;
@@ -1455,17 +1455,35 @@ case IndirectionLevel of
 
 	 if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
-	  asm65(#9'lda '+svar);					// pushWORD
-	  asm65(#9'add'+GetStackVariable(0));
-	  asm65(#9'sta :bp2');
-	  asm65(#9'lda '+svar+'+1');
-	  asm65(#9'adc'+GetStackVariable(1));
-	  asm65(#9'sta :bp2+1');
+	  if Ident[IdentIndex].isStriped then begin
 
-	  asm65(#9'ldy #$00');
-	  asm65(#9'mva (:bp2),y'+GetStackVariable(0));
-	  asm65(#9'iny');
-	  asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	   asm65(#9'lda' + GetStackVariable(0));
+	   asm65(#9'add #$00');
+	   asm65(#9'tay');
+	   asm65(#9'lda' + GetStackVariable(1));
+	   asm65(#9'adc #$00');
+	   asm65(#9'sta' + GetStackVariable(1));
+
+	   asm65(#9'lda ' + svara + ',y');
+	   asm65(#9'sta' + GetStackVariable(0));
+	   asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	   asm65(#9'sta' + GetStackVariable(1));
+
+	  end else begin
+
+	   asm65(#9'lda '+svar);
+	   asm65(#9'add'+GetStackVariable(0));
+	   asm65(#9'sta :bp2');
+	   asm65(#9'lda '+svar+'+1');
+	   asm65(#9'adc'+GetStackVariable(1));
+	   asm65(#9'sta :bp2+1');
+
+	   asm65(#9'ldy #$00');
+	   asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	   asm65(#9'iny');
+	   asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+
+	  end;
 
 	 end else begin
 
@@ -1487,9 +1505,14 @@ case IndirectionLevel of
 	   asm65(#9'adc #$00');
 	   asm65(#9'sta' + GetStackVariable(1));
 
-	   asm65(#9'lda '+svara+',y');
+	   asm65(#9'lda ' + svara + ',y');
 	   asm65(#9'sta' + GetStackVariable(0));
-	   asm65(#9'lda '+svara+'+1,y');
+
+	   if Ident[IdentIndex].isStriped then
+	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y')
+	   else
+	     asm65(#9'lda ' + svara + '+1,y');
+
 	   asm65(#9'sta' + GetStackVariable(1));
 // =w'
 	  end;
@@ -1508,21 +1531,43 @@ case IndirectionLevel of
 
 	 if (NumAllocElements * 4 > 256) or (NumAllocElements in [0,1]) then begin
 
-	  asm65(#9'lda '+svar);					// pushCARD
-	  asm65(#9'add'+GetStackVariable(0));
-	  asm65(#9'sta :bp2');
-	  asm65(#9'lda '+svar+'+1');
-	  asm65(#9'adc'+GetStackVariable(1));
-	  asm65(#9'sta :bp2+1');
+	  if Ident[IdentIndex].isStriped then begin
 
-	  asm65(#9'ldy #$00');
-	  asm65(#9'mva (:bp2),y'+GetStackVariable(0));
-	  asm65(#9'iny');
-	  asm65(#9'mva (:bp2),y'+GetStackVariable(1));
-	  asm65(#9'iny');
-	  asm65(#9'mva (:bp2),y'+GetStackVariable(2));
-	  asm65(#9'iny');
-	  asm65(#9'mva (:bp2),y'+GetStackVariable(3));
+	    asm65(#9'lda' + GetStackVariable(0));
+	    asm65(#9'add #$00');
+	    asm65(#9'tay');
+	    asm65(#9'lda' + GetStackVariable(1));
+	    asm65(#9'adc #$00');
+	    asm65(#9'sta' + GetStackVariable(1));
+
+	    asm65(#9'lda ' + svara + ',y');
+	    asm65(#9'sta' + GetStackVariable(0));
+	    asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	    asm65(#9'sta' + GetStackVariable(1));
+	    asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+	    asm65(#9'sta' + GetStackVariable(2));
+ 	    asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+	    asm65(#9'sta' + GetStackVariable(3));
+
+	  end else begin
+
+	    asm65(#9'lda '+svar);
+	    asm65(#9'add'+GetStackVariable(0));
+	    asm65(#9'sta :bp2');
+	    asm65(#9'lda '+svar+'+1');
+	    asm65(#9'adc'+GetStackVariable(1));
+	    asm65(#9'sta :bp2+1');
+
+	    asm65(#9'ldy #$00');
+	    asm65(#9'mva (:bp2),y' + GetStackVariable(0));
+	    asm65(#9'iny');
+	    asm65(#9'mva (:bp2),y' + GetStackVariable(1));
+	    asm65(#9'iny');
+	    asm65(#9'mva (:bp2),y' + GetStackVariable(2));
+	    asm65(#9'iny');
+	    asm65(#9'mva (:bp2),y' + GetStackVariable(3));
+
+	  end;
 
 	 end else begin
 
@@ -1531,13 +1576,13 @@ case IndirectionLevel of
 	   LoadBP2(IdentIndex, svar);
 
 	   asm65(#9'ldy :STACKORIGIN,x');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(1));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(2));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(2));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(3));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(3));
 
 	  end else begin
 
@@ -1548,14 +1593,28 @@ case IndirectionLevel of
 	   asm65(#9'adc #$00');
 	   asm65(#9'sta' + GetStackVariable(1));
 
-	   asm65(#9'lda '+svara+',y');
+	   asm65(#9'lda ' + svara + ',y');
 	   asm65(#9'sta' + GetStackVariable(0));
-	   asm65(#9'lda '+svara+'+1,y');
-           asm65(#9'sta' + GetStackVariable(1));
-	   asm65(#9'lda '+svara+'+2,y');
-	   asm65(#9'sta' + GetStackVariable(2));
- 	   asm65(#9'lda '+svara+'+3,y');
-	   asm65(#9'sta' + GetStackVariable(3));
+
+	   if Ident[IdentIndex].isStriped then begin
+
+	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+             asm65(#9'sta' + GetStackVariable(1));
+	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+             asm65(#9'sta' + GetStackVariable(2));
+	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+             asm65(#9'sta' + GetStackVariable(3));
+
+	   end else begin
+
+	     asm65(#9'lda ' + svara + '+1,y');
+             asm65(#9'sta' + GetStackVariable(1));
+	     asm65(#9'lda ' + svara + '+2,y');
+	     asm65(#9'sta' + GetStackVariable(2));
+ 	     asm65(#9'lda ' + svara + '+3,y');
+	     asm65(#9'sta' + GetStackVariable(3));
+
+	   end;
 // =c'
 	  end;
 
@@ -2502,7 +2561,7 @@ case IndirectionLevel of
     asm65('; as Pointer to Array Origin');
 
     case Size of
-      1: begin
+      1: begin										// PULL BYTE
 
 	 if (NumAllocElements > 256) or (NumAllocElements in [0,1]) then begin
 
@@ -2549,26 +2608,44 @@ case IndirectionLevel of
 	 a65(__subBX);
 	 end;
 
-      2: begin
+      2: begin										// PULL WORD
 
 	 if IndirectionLevel = ASPOINTERTOARRAYORIGIN  then
 	 GenerateIndexShift(WORDTOK, 1);
 
 	 if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
-	 asm65(#9'lda '+svar);							// pullWORD
-	 asm65(#9'add :STACKORIGIN-1,x');
-	 asm65(#9'sta :bp2');
-	 asm65(#9'lda '+svar+'+1');
-	 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-	 asm65(#9'sta :bp2+1');
+	   if Ident[IdentIndex].isStriped  then begin
 
-	 asm65(#9'ldy #$00');
-	 asm65(#9'lda :STACKORIGIN,x');
-	 asm65(#9'sta (:bp2),y');
-	 asm65(#9'iny');
-	 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	 asm65(#9'sta (:bp2),y');
+		asm65(#9'lda :STACKORIGIN-1,x');
+		asm65(#9'add #$00');
+		asm65(#9'tay');
+		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+		asm65(#9'adc #$00');
+		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+		asm65(#9'lda :STACKORIGIN,x');
+		asm65(#9'sta ' + svara + ',y');
+		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+		asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+
+	   end else begin
+
+		asm65(#9'lda '+svar);
+		asm65(#9'add :STACKORIGIN-1,x');
+		asm65(#9'sta :bp2');
+		asm65(#9'lda '+svar+'+1');
+		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		asm65(#9'sta :bp2+1');
+
+	 	asm65(#9'ldy #$00');
+		asm65(#9'lda :STACKORIGIN,x');
+		asm65(#9'sta (:bp2),y');
+		asm65(#9'iny');
+		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+		asm65(#9'sta (:bp2),y');
+
+	   end;
 
 	 end else begin
 
@@ -2593,9 +2670,13 @@ case IndirectionLevel of
 	  asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
 
 	  asm65(#9'lda :STACKORIGIN,x');
-	  asm65(#9'sta '+svara+',y');
+	  asm65(#9'sta ' + svara + ',y');
 	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	  asm65(#9'sta '+svara+'+1,y');
+
+	  if Ident[IdentIndex].isStriped then
+	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y')
+	  else
+	    asm65(#9'sta ' + svara + '+1,y');
 // w='
 	 end;
 
@@ -2606,32 +2687,54 @@ case IndirectionLevel of
 
 	 end;
 
-      4: begin
+      4: begin										// PULL CARDINAL
 
 	 if IndirectionLevel = ASPOINTERTOARRAYORIGIN  then
 	  GenerateIndexShift(CARDINALTOK, 1);
 
 	 if (NumAllocElements * 4 > 256) or (NumAllocElements in [0,1]) then begin
 
-	 asm65(#9'lda '+svar);							// pullCARD
-	 asm65(#9'add :STACKORIGIN-1,x');
-	 asm65(#9'sta :bp2');
-	 asm65(#9'lda '+svar+'+1');
-	 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-	 asm65(#9'sta :bp2+1');
+	   if Ident[IdentIndex].isStriped then begin
 
-	 asm65(#9'ldy #$00');
-	 asm65(#9'lda :STACKORIGIN,x');
-	 asm65(#9'sta (:bp2),y');
-	 asm65(#9'iny');
-	 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	 asm65(#9'sta (:bp2),y');
-	 asm65(#9'iny');
-	 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	 asm65(#9'sta (:bp2),y');
-	 asm65(#9'iny');
-	 asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	 asm65(#9'sta (:bp2),y');
+	     asm65(#9'lda :STACKORIGIN-1,x');
+	     asm65(#9'add #$00');
+	     asm65(#9'tay');
+	     asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	     asm65(#9'adc #$00');
+	     asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+	     asm65(#9'lda :STACKORIGIN,x');
+	     asm65(#9'sta ' + svara + ',y');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+  	     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+  	     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+  	     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+
+	   end else begin
+
+	     asm65(#9'lda '+svar);
+	     asm65(#9'add :STACKORIGIN-1,x');
+	     asm65(#9'sta :bp2');
+	     asm65(#9'lda '+svar+'+1');
+	     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	     asm65(#9'sta :bp2+1');
+
+	     asm65(#9'ldy #$00');
+	     asm65(#9'lda :STACKORIGIN,x');
+	     asm65(#9'sta (:bp2),y');
+	     asm65(#9'iny');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	     asm65(#9'sta (:bp2),y');
+	     asm65(#9'iny');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+	     asm65(#9'sta (:bp2),y');
+	     asm65(#9'iny');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+	     asm65(#9'sta (:bp2),y');
+
+	   end;
 
 	 end else begin
 
@@ -2653,6 +2756,7 @@ case IndirectionLevel of
 	  asm65(#9'sta (:bp2),y');
 
 	 end else begin
+
 	  asm65(#9'lda :STACKORIGIN-1,x');
 	  asm65(#9'add #$00');
 	  asm65(#9'tay');
@@ -2661,13 +2765,26 @@ case IndirectionLevel of
 	  asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
 
 	  asm65(#9'lda :STACKORIGIN,x');
-	  asm65(#9'sta '+svara+',y');
+	  asm65(#9'sta ' + svara + ',y');
 	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	  asm65(#9'sta '+svara+'+1,y');
-	  asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	  asm65(#9'sta '+svara+'+2,y');
-	  asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	  asm65(#9'sta '+svara+'+3,y');
+
+	  if Ident[IdentIndex].isStriped then begin
+
+	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	    asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+	    asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+
+	  end else begin
+
+	    asm65(#9'sta ' + svara + '+1,y');
+	    asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+	    asm65(#9'sta ' + svara + '+2,y');
+	    asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+	    asm65(#9'sta ' + svara + '+3,y');
+
+	  end;
 // c='
 	 end;
 
@@ -5487,7 +5604,11 @@ begin
 	      if common.optimize.use = false then StartOptimization(i);
 
 
-   	      Size := DataSize[Ident[IdentIndex].AllocElementType];
+	      if Ident[IdentIndex].isStriped then
+	        Size := 1
+	      else
+   	        Size := DataSize[Ident[IdentIndex].AllocElementType];
+
 
 	      ShortArrayIndex := false;
 
@@ -5558,7 +5679,7 @@ begin
 		   GenerateBinaryOperation(MULTOK, ArrayIndexType);
 
 		 end else
-		   GenerateIndexShift( Ident[IdentIndex].AllocElementType );
+		   if Ident[IdentIndex].isStriped = FALSE then GenerateIndexShift( Ident[IdentIndex].AllocElementType );
 
 	      end;
 
@@ -5616,7 +5737,7 @@ begin
 //		    ArrayIndexType := WORDTOK;
 //		  end;
 
-		  GenerateIndexShift( Ident[IdentIndex].AllocElementType );
+		  if Ident[IdentIndex].isStriped = FALSE then GenerateIndexShift( Ident[IdentIndex].AllocElementType );
 
 		end;
 
@@ -7890,7 +8011,7 @@ case Tok[i].Kind of
 
 
 
-      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) {and (Ident[IdentIndex].NumAllocElements = 0)} then begin
+      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
 
 //        writeln('!! ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
 
@@ -13931,8 +14052,8 @@ var
   j, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize, tmpVarDataSize_, ParamIndex, ForwardIdentIndex, IdentIndex: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
-  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, pack,
-  IsNestedFunction, isAbsolute, isExternal, isForward, isVolatile, isAsm, isReg, isInt, isInl, isOvr: Boolean;
+  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, pack, IsNestedFunction,
+  isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm, isReg, isInt, isInl, isOvr: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
   Tmp, TmpResult: word;
@@ -14909,12 +15030,16 @@ while Tok[i].Kind in
   if Tok[i].Kind = VARTOK then
     begin
 
-    isVolatile := false;
+    isVolatile := FALSE;
+    isStriped  := FALSE;
 
-    if (Tok[i + 1].Kind = OBRACKETTOK) and (Tok[i + 2].Kind = VOLATILETOK) then begin
+    if (Tok[i + 1].Kind = OBRACKETTOK) and (Tok[i + 2].Kind in [VOLATILETOK, STRIPEDTOK]) then begin
        CheckTok(i + 3, CBRACKETTOK);
 
-       isVolatile := true;
+       if Tok[i + 2].Kind = VOLATILETOK then
+         isVolatile := TRUE
+       else
+         isStriped  := TRUE;
 
        inc(i, 3);
     end;
@@ -15130,6 +15255,9 @@ while Tok[i].Kind in
 	  Ident[NumIdent].isVolatile := isVolatile;
 
 	  if varPassMethod <> 255 then Ident[NumIdent].PassMethod := varPassMethod;
+
+	  if isStriped and (Ident[NumIdent].PassMethod <> VARPASSING) and ((NumAllocElements and $FFFF) * (NumAllocElements shr 16) <= 256) then
+	   Ident[NumIdent].isStriped := TRUE;
 
 	  varPassMethod := 255;
 
@@ -15386,15 +15514,20 @@ while Tok[i].Kind in
 
       CheckTok(i + 1, SEMICOLONTOK);
 
-      isVolatile := false;
+      isVolatile := FALSE;
+      isStriped  := FALSE;
 
-      if (Tok[i + 2].Kind = OBRACKETTOK) and (Tok[i + 3].Kind = VOLATILETOK) then begin
+      if (Tok[i + 2].Kind = OBRACKETTOK) and (Tok[i + 3].Kind in [VOLATILETOK, STRIPEDTOK]) then begin
        CheckTok(i + 4, CBRACKETTOK);
 
-       isVolatile := true;
+       if Tok[i + 3].Kind = VOLATILETOK then
+         isVolatile := TRUE
+       else
+         isStriped  := TRUE;
 
        inc(i, 3);
       end;
+
 
     i := i + 1;
     until Tok[i + 1].Kind <> IDENTTOK;
