@@ -75,7 +75,7 @@ var TempIndex: integer;
    Result := false;
 
    if Ident[IdentIndex].Section then
-    for i := 1 to MAXALLOWEDUNITS do
+    for i := MAXALLOWEDUNITS downto 1 do
       if UnitName[Index].Allow[i] = UnitName[Ident[IdentIndex].UnitIndex].Name then exit(true);
 
   end;
@@ -96,7 +96,7 @@ var TempIndex: integer;
 
 	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
 
-	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') then exit;
+	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1){ or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM')} then exit;
 	end
 
   end;
@@ -2218,12 +2218,15 @@ begin
 
 			   if Tok[i + 1].Kind = IDENTTOK then begin
 
-			    CheckTok(i + 2, STRINGLITERALTOK);
-
 			    Ident[NumIdent].Alias := Tok[i + 1].Name^;
-			    Ident[NumIdent].Libraries := i + 2;
 
-			    inc(i, 2);
+			    if Tok[i + 2].Kind = STRINGLITERALTOK then begin
+			      Ident[NumIdent].Libraries := i + 2;
+
+			      inc(i);
+			    end;
+
+			    inc(i);
 
 			   end else
 			   if Tok[i + 1].Kind = STRINGLITERALTOK then begin

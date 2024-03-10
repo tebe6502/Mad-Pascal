@@ -56,10 +56,21 @@ procedure veraDrawImage(x, y: word; ptr: pointer; width, height: word); assemble
 *
 *)
 
-procedure veraDirectLoad(filename: String); assembler;
+procedure veraDirectLoadImage(filename: String); assembler;
 (*
 * @description:
 * Loads a named file from storage directly to video memory. 
+*
+* 
+* 
+* @param: name (TString) - name of the file with extension
+*
+*)
+
+procedure veraDirectLoadPalette(filename: String); assembler;
+(*
+* @description:
+* Loads a palette file from storage directly to video memory. 
 *
 * 
 * 
@@ -126,7 +137,7 @@ asm
 	plx
 end;
 
-procedure veraDirectLoad(filename: String); assembler;
+procedure veraDirectLoadImage(filename: String); assembler;
 asm
         phx
         lda #1; // logical file number
@@ -148,6 +159,32 @@ asm
         lda #2; // BVLOAD to bank 0
         ldx #0; // address 0 (start of video mem)
         ldy #0
+        jsr LOAD
+        plx
+end;
+
+procedure veraDirectLoadPalette(filename: String); assembler;
+asm
+        phx
+        lda #1; // logical file number
+        ldx #8; // device number
+        ldy #2; // doing bvload
+        jsr SETLFS
+
+        lda #<(adr.filename+1)
+        sta r12L
+        lda #>(adr.filename+1)
+        sta r12H
+
+        lda adr.filename
+        // get pointer into x,y registers
+        ldx r12L
+        ldy r12H
+        jsr SETNAM
+
+        lda #3; // BVLOAD
+        ldx #$00;
+        ldy #$fa
         jsr LOAD
         plx
 end;

@@ -371,7 +371,7 @@ var
   Num, Frac: TString;
   OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   Tmp: Int64;
-  AsmFound, UsesFound, yes: Boolean;
+  AsmFound, UsesFound, ExternalFound, yes: Boolean;
   ch, ch2: Char;
   CurToken: Byte;
   StrParams: TArrayString;
@@ -807,13 +807,15 @@ var
 
        s := FindFile(s, 'link object');
 
+       DefineFilename(NumTok, s);
+{
        v := High(linkObj);
        linkObj[v] := s;
 
        Tok[NumTok].Value := v;
 
        SetLength(linkObj, v+2);
-
+}
        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        //dec(NumTok);
@@ -1357,6 +1359,8 @@ var
 	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
 	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
+	  if CurToken = EXTERNALTOK then ExternalFound := TRUE;
+
 	  AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
 
 	 end;
@@ -1608,7 +1612,12 @@ var
 	    AddToken(CHARLITERALTOK, UnitIndex, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
 	  end else begin
 	    AddToken(STRINGLITERALTOK, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
-	    DefineStaticString(NumTok, Text);
+
+	    if ExternalFound then
+	      DefineFilename(NumTok, Text)
+	    else
+	      DefineStaticString(NumTok, Text);
+
 	  end;
 
 	 Text := '';
@@ -1618,6 +1627,8 @@ var
 
       if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then begin
 	AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
+
+	ExternalFound := false;
 
 	if UsesFound and (ch = ';') then
 	  if UsesOn then ReadUses;
@@ -1879,6 +1890,7 @@ Spelling[TEXTTOK	] := 'TEXT';
 
  AsmFound  := false;
  UsesFound := false;
+ ExternalFound := false;
 
  IncludeIndex := MAXUNITS;
 

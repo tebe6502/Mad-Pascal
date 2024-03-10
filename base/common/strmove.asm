@@ -3,27 +3,34 @@
 
 /*
 	@moveSTRING
-	@moveSTRING_1
+	@moveSTRING_P
 	@buf2str
 */
 
-.proc	@moveSTRING (.word @move.dst .word @move.cnt) .var
-
-.nowarn	@move
-
-	dec @move.cnt
+.proc	@moveSTRING (.word @move.dst .byte len) .var
 
 	ldy #$00
-	lda @move.cnt
-	cmp (@move.src),y
-	scs
-	sta (@move.dst),y
+	sty @move.cnt+1
+	lda (@move.src),y	; string[0]
+	
+	cmp len: #0		; maximum availible destination string length
+	bcc ok
+	beq ok
 
-	rts
+	lda len
+
+ok	sta (@move.dst),y
+
+	sta @move.cnt
+
+	inw @move.src
+	inw @move.dst
+
+	jmp @move
 .endp
 
 
-.proc	@moveSTRING_1 (.word ya) .reg
+.proc	@moveSTRING_P (.word ya) .reg
 
 	sta @move.dst
 	sty @move.dst+1

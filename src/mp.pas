@@ -223,9 +223,32 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetLocalName(IdentIndex: integer; a: string =''): string;
+function GetOverloadName(IdentIndex: integer): string;
+var ParamIndex: integer;
 begin
 
+// Result := '@' + IntToHex(Ident[IdentIndex].Value, 4);
+
+ Result := '@' + IntToHex(Ident[IdentIndex].NumParams, 2);
+
+ if Ident[IdentIndex].NumParams > 0 then
+  for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
+   Result := Result + IntToHex(Ident[IdentIndex].Param[ParamIndex].PassMethod, 2) +
+		      IntToHex(Ident[IdentIndex].Param[ParamIndex].DataType, 2) +
+		      IntToHex(Ident[IdentIndex].Param[ParamIndex].AllocElementType, 2);
+
+ end;
+
+
+function GetLocalName(IdentIndex: integer; a: string =''): string;
+var Name: string;
+begin
+{
+ if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then
+   Name := Ident[IdentIndex].Name
+ else
+   Name := Ident[IdentIndex].Name;
+}
  if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section then
    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
  else
@@ -700,7 +723,7 @@ begin
 	__imulECX: asm65(#9'jsr imulECX');
 
 //     __notBOOLEAN: asm65(#9'jsr notBOOLEAN');
-	 __notaBX: asm65(#9'jsr notaBX');
+//	 __notaBX: asm65(#9'jsr notaBX');
 
 //	 __negaBX: asm65(#9'jsr negaBX');
 
@@ -5689,7 +5712,7 @@ begin
 
 	    Name := GetLocalName(IdentIndex);
 
-	    if Ident[IdentIndex].isOverload then Name:=Name+'.@'+IntToHex(Ident[IdentIndex].Value, 4);
+	    if Ident[IdentIndex].isOverload then Name := Name + '.' + GetOverloadName(IdentIndex);
 
 	    a65(__addBX);
 	    asm65(#9'mva <'+Name+' :STACKORIGIN,x');
@@ -6071,7 +6094,7 @@ end;	//NumActualParameters
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
 var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
-    ActualParamType, AllocElementType: byte;
+    ActualParamType, AllocElementType, ch: byte;
     svar, lab: string;
     yes: Boolean;
     Param: TParamList;
@@ -6443,7 +6466,18 @@ begin
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> BYTETOK then		// wyjatkowo akceptujemy PBYTE jako STRING
 	       iError(i, IncompatibleTypes, 0, Ident[IdentTemp].DataType, -Ident[IdentIndex].Param[NumActualParams].AllocElementType);
 
-	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
+	    if ((Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK)) and (Ident[IdentTemp].DataType = CHARTOK) then begin	// CHAR -> STRING
+	      asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta @buf+1');
+	      asm65(#9'lda #$01');
+	      asm65(#9'sta @buf');
+	      asm65(#9'lda <@buf');
+	      asm65(#9'sta :STACKORIGIN,x');
+	      asm65(#9'lda >@buf');
+	      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	    end else
+	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
+
 	  end else begin
 
 //	writeln('2 > ',Ident[IdentIndex].Name,',',ActualParamType,',',AllocElementType,',',Tok[i].Kind,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements);
@@ -6451,7 +6485,17 @@ begin
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
               iError(i, IncompatibleTypes, 0, ActualParamType, -STRINGPOINTERTOK);
 
-	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+	    if (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin		// CHAR -> STRING
+	      asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta @buf+1');
+	      asm65(#9'lda #$01');
+	      asm65(#9'sta @buf');
+	      asm65(#9'lda <@buf');
+	      asm65(#9'sta :STACKORIGIN,x');
+	      asm65(#9'lda >@buf');
+	      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	    end else
+	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
 	  end;
 
@@ -6493,17 +6537,26 @@ begin
 // if Ident[IdentIndex].isUnresolvedForward then begin
 //   Error(i, 'Unresolved forward declaration of ' + Ident[IdentIndex].Name);
 
+{
+ if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then begin
 
- if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then
-  svar := Ident[IdentIndex].Alias
- else
+  if Ident[IdentIndex].isOverload then
+   svar := Ident[IdentIndex].Alias+ '.' + GetOverloadName(IdentIndex)
+  else
+   svar := GetLocalName(IdentIndex) + '.' + Ident[IdentIndex].Alias;
+
+ end else
+}
+
+
+
  if Ident[IdentIndex].isOverload then
-  svar := GetLocalName(IdentIndex) + '.@' + IntToHex(Ident[IdentIndex].Value, 4)
+  svar := GetLocalName(IdentIndex) + '.' + GetOverloadName(IdentIndex)
  else
   svar := GetLocalName(IdentIndex);
 
 
-if (yes = false) and (Ident[IdentIndex].NumParams > 0) then begin
+if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
  for ParamIndex := 1 to NumActualParams do
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
@@ -6925,9 +6978,6 @@ case Tok[i].Kind of
 
 
 //	  writeln(Tok[i+2].kind);
-
-
-
 
 
 	  end else
@@ -7840,7 +7890,7 @@ case Tok[i].Kind of
 
 
 
-      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
+      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) {and (Ident[IdentIndex].NumAllocElements = 0)} then begin
 
 //        writeln('!! ',hexstr(Ident[IdentIndex].NumAllocElements_,8));
 
@@ -7865,14 +7915,10 @@ case Tok[i].Kind of
 
 	else begin
 
-	  svar:=GetLocalName(IdentIndex);
-
-          a65(__addBX);
-
-	  asm65(#9'lda ' + svar);
-	  asm65(#9'sta :STACKORIGIN,x');
-	  asm65(#9'lda ' + svar + '+1');
-	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	  if Ident[IdentIndex].NumAllocElements > 0 then
+	    Push(0, ASPOINTERTOARRAYORIGIN2, DataSize[POINTERTOK], IdentIndex)
+	  else
+	    Push(0, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 
 	end;
 
@@ -9630,7 +9676,7 @@ case Tok[i].Kind of
 
            if Tok[i + 1].Kind = OPARTOK then begin				// (pointer)
 
-//	    writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
+//	writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType);
 
 	    if not (Ident[IdentIndex].DataType in [POINTERTOK, RECORDTOK, OBJECTTOK]) then
 	      iError(i, IllegalExpression);
@@ -9882,6 +9928,7 @@ case Tok[i].Kind of
 
 	    end else begin
 	     IndirectionLevel := ASPOINTER;
+
 	     VarType := Ident[IdentIndex].DataType;
 	    end;
 
@@ -10110,9 +10157,10 @@ case Tok[i].Kind of
 			asm65(#9'sta @move.src+1');
 
 			if Ident[IdentIndex].DataType = POINTERTOK then
-			 asm65(#9'@moveSTRING_1 ' + GetLocalName(IdentIndex) )
-			else begin
-
+			 asm65(#9'@moveSTRING_P ' + GetLocalName(IdentIndex) )
+			else
+			 asm65(#9'@moveSTRING ' + GetLocalName(IdentIndex) + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1));
+{
 		         if Ident[IdentIndex].NumAllocElements = 256 then begin
 
 			  asm65(#9'mwy '+svar+' :bp2');
@@ -10124,7 +10172,7 @@ case Tok[i].Kind of
 			  asm65(#9'@moveSTRING ' + GetLocalName(IdentIndex) + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements));
 
 			end;
-
+}
 			a65(__subBX);
 
 			StopOptimization;
@@ -10184,7 +10232,7 @@ case Tok[i].Kind of
 
 
 //	if (Tok[k].Kind = IDENTTOK) then
-//	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
+//	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,':', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
 //	else
 //	  writeln(Ident[IdentIndex].Name,',', VarType,',', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' / ',IndirectionLevel);
 
@@ -10594,8 +10642,6 @@ case Tok[i].Kind of
 
 		 end else
 		  GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex, par1, par2);
-
-
 
 
 	        end else
@@ -11760,6 +11806,8 @@ WHILETOK:
 
 	for k:=1 to Tok[i+4].StrLength do
 	 svar:=svar + chr(StaticStringData[Tok[i+4].StrAddress - CODEORIGIN+k]);
+
+//	 writeln(svar,',',Tok[i+4].StrLength);
 
 	CheckTok(i + 5, CPARTOK);
 
@@ -12964,9 +13012,9 @@ end;	//CompileStatement
 
 
 procedure GenerateProcFuncAsmLabels(BlockIdentIndex: integer; VarSize: Boolean = false);
-var IdentIndex, size, k: integer;
+var IdentIndex, size: integer;
     emptyLine, yes: Boolean;
-    fnam, txt: string;
+    fnam, txt, svar: string;
     varbegin: TString;
     HeaFile: TextFile;
 
@@ -13008,9 +13056,9 @@ var IdentIndex, size, k: integer;
       size := 0;
      end else
 
-//     if Ident[IdentIndex].isExternal then begin
-//      Result := #9'= ' + Tok[Ident[IdentIndex].Value + 1].Name^;
-//     end else
+     if Ident[IdentIndex].isExternal {and (Ident[IdentIndex].Libraries = 0)} then begin
+      Result := #9'= ' + Ident[IdentIndex].Alias;
+     end else
 
      if Ident[IdentIndex].isAbsolute then begin
 
@@ -13018,9 +13066,9 @@ var IdentIndex, size, k: integer;
        Result := #9'= DATAORIGIN+$'+IntToHex(abs(Ident[IdentIndex].Value), 4)
       else
        if abs(Ident[IdentIndex].Value) < 256 then
-        Result := #9'= $'+IntToHex(byte(Ident[IdentIndex].Value), 2)
+        Result := #9'= $' + IntToHex(byte(Ident[IdentIndex].Value), 2)
        else
-        Result := #9'= $'+IntToHex(Ident[IdentIndex].Value, 4);
+        Result := #9'= $' + IntToHex(Ident[IdentIndex].Value, 4);
 
      end else
 
@@ -13075,19 +13123,18 @@ begin
     end;
 
 
-    if Ident[IdentIndex].isExternal then begin			// read file header libraryname.hea
+    if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) then begin				// read file header libraryname.hea
 
-//      writeln(Ident[IdentIndex].Alias,',',Ident[IdentIndex].Libraries);
-
-      if Ident[IdentIndex].Libraries > 0 then begin
-        fnam := '';
-
-        for k:=1 to Tok[Ident[IdentIndex].Libraries].StrLength do
-        fnam := fnam + chr( StaticStringData[Tok[Ident[IdentIndex].Libraries].StrAddress - CODEORIGIN + k] );
+        fnam := linkObj[ Tok[Ident[IdentIndex].Libraries].Value ];
 
 	if ExtractFileExt(fnam) = '' then fnam := ChangeFileExt(fnam, '.hea');
 
         fnam := FindFile(fnam, 'library');
+
+	if Ident[IdentIndex].isOverload then
+	 svar := Ident[IdentIndex].Alias + '.' + GetOverloadName(IdentIndex)
+	else
+	 svar := Ident[IdentIndex].Alias;
 
 	yes := TRUE;
 
@@ -13096,13 +13143,16 @@ begin
 	while not eof(HeaFile) do begin
 	  readln(HeaFile, txt);
 
+	  txt:=AnsiUpperCase(txt);
+
 	  if (length(txt) > 255) or (pos(#0, txt) > 0) then begin
 	   CloseFile(HeaFile);
 
 	   Error(Ident[IdentIndex].Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
 	  end;
 
-	  if (pos('MAIN.' + Ident[IdentIndex].Alias + #9, txt) = 1) or (pos('MAIN.' + Ident[IdentIndex].Alias + '.', txt) = 1) then begin
+	  if (txt.IndexOf('.@EXIT') < 0) and (txt.IndexOf('.@VARDATA') < 0) then				// skip '@.EXIT', '.@VARDATA'
+	  if (pos('MAIN.' + svar + #9, txt) = 1) or (pos('MAIN.' + svar + '.', txt) = 1) then begin
 	   yes := FALSE;
 
 	   asm65( Ident[IdentIndex].Name + copy(txt, 6 + length(Ident[IdentIndex].Alias), length(txt)) );
@@ -13114,8 +13164,6 @@ begin
 	  iError(Ident[IdentIndex].Libraries, UnknownIdentifier, IdentIndex);
 
 	CloseFile(HeaFile);
-
-      end;
 
     end else
 
@@ -13616,7 +13664,7 @@ begin
  asm65('.local'#9 + Ident[BlockIdentIndex].Name, info);
 
  if Ident[BlockIdentIndex].isOverload then
-   asm65('.local'#9 + '@' + IntToHex(Ident[BlockIdentIndex].Value, 4));
+   asm65('.local'#9 + GetOverloadName(BlockIdentIndex));
 
 {
  if Ident[BlockIdentIndex].isOverload then
@@ -14404,7 +14452,7 @@ while Tok[i].Kind in
      begin
   // If procedure or function, delete parameters first
       if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-       if Ident[j].IsUnresolvedForward then
+       if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
 	 Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
      Dec(j);
@@ -14447,7 +14495,16 @@ while Tok[i].Kind in
       if Ident[IdentIndex].isInline then
        Error(i, 'INLINE is not allowed to exports');
 
-      AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
+      if Ident[IdentIndex].isOverload then begin
+
+       for idx := 1 to NumIdent do
+	 if {(Ident[idx].ProcAsBlock = Ident[IdentIndex].ProcAsBlock) and} (Ident[idx].Name = Ident[IdentIndex].Name) then
+	  AddCallGraphChild(BlockStack[BlockStackTop], Ident[idx].ProcAsBlock);
+
+      end else
+       AddCallGraphChild(BlockStack[BlockStackTop], Ident[IdentIndex].ProcAsBlock);
+
     end;
 
     inc(i);
@@ -14959,14 +15016,19 @@ while Tok[i].Kind in
 
        inc(i);
 
+       external_libr := 0;
+
        if Tok[i + 1].Kind = IDENTTOK then begin
 
-        CheckTok(i + 2, STRINGLITERALTOK);
-
 	external_name := Tok[i + 1].Name^;
-	external_libr := i + 2;
 
-	inc(i, 2);
+	if Tok[i + 2].Kind = STRINGLITERALTOK then begin
+	  external_libr := i + 2;
+
+	  inc(i);
+	end;
+
+	inc(i);
        end else
        if Tok[i + 1].Kind = STRINGLITERALTOK then begin
 
@@ -15162,6 +15224,8 @@ while Tok[i].Kind in
 
 //	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
 
+ 	    tmpVarDataSize_ := VarDataSize;
+
 	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
 	    Types[NumAllocElements].Field[ParamIndex].DataType,
@@ -15169,8 +15233,8 @@ while Tok[i].Kind in
 	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, ord(isAbsolute) * ConstVal);
 
 	    if isAbsolute then
-	      if not (Types[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then
-		inc(ConstVal, DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
+	      if not (Types[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then				// fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
+		inc(ConstVal, VarDataSize - tmpVarDataSize_);//    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
 
 	  end;
 
@@ -15557,7 +15621,7 @@ while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
   if Ident[j].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-    if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
+    if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
   Dec(j);

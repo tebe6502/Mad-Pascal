@@ -513,7 +513,7 @@ var
 
   AsmBlock: array [0..4095] of string;
 
-  Data, DataSegment, StaticStringData: array [0..$FFFF] of Word;
+  Data, DataSegment, StaticStringData: array [0..$FFFF] of word;
 
   Types: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
@@ -610,6 +610,8 @@ var
 	procedure CheckTok(i: integer; ExpectedTok: Byte);
 
 	procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+
+	procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
 
 	function ErrTokenFound(ErrTokenIndex: Integer): string;
 
@@ -1287,6 +1289,32 @@ end;	//GetCommonType
 // ----------------------------------------------------------------------------
 
 
+procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+var i: integer;
+    yes: Boolean;
+begin
+
+  yes := true;
+
+  for i:=0 to High(linkObj)-1 do
+   if linkObj[i] = StrValue then begin yes := false; Break end;
+
+  if yes then begin
+
+    i := High(linkObj);
+    linkObj[i] := StrValue;
+
+    SetLength(linkObj, i+2);
+  end;
+
+  Tok[StrTokenIndex].Value := i;
+
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 var
   i, j, k, len: Integer;
@@ -1295,32 +1323,24 @@ begin
 
 Fillchar(Data, sizeof(Data), 0);
 
-len:=Length(StrValue);
+len := Length(StrValue);
 
 if len > 255 then
- Data[0]:=255
+ Data[0] := 255
 else
- Data[0]:=len;
-
+ Data[0] := len;
 
 if (len < 0) or (len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
 
-i:=0;
-j:=0;
-yes:=false;
+i := 0;
+j := 0;
 
-while (i < NumStaticStrChars) and (yes=false) do begin
+yes := FALSE;
 
- j:=0;
- k:=i;
- while (Data[j] = StaticStringData[k+j]) and (j < len+2) and (k+j < NumStaticStrChars) do inc(j);
-
- if j = len+2 then begin yes:=true; Break end;
-
- inc(i);
-end;
+for i:=0 to NumStaticStrChars-len-1 do
+ if CompareWord(Data, StaticStringData[i], Len+1) = 0 then begin yes := TRUE; Break end;
 
 Tok[StrTokenIndex].StrLength := len;
 

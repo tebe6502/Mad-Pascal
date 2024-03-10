@@ -1,7 +1,18 @@
+05.03.2024
+- poprawione @moveSTRING (base\strmove.asm)
+- poprawione GetIdent (Pasrser.pas), nie faworyzuje modułu SYSTEM
+
+04.03.2024
+- naprawiona alokacja tablic z rekordami absolute
+- naprawione przekazywanie CHAR gdy parametrem jest STRING
+
+03.03.2024
+- możliwość używania procedur/funkcji overload z LIBRARY
+
 29.02.2024
 - Added Commander X16 target
 
-28.02.2023
+28.02.2024
 - Bugfixes
 - @buf dostępne z poziomu MP (__BUFFER)
 
