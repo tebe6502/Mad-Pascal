@@ -85,7 +85,7 @@ const
 	'           Msx: wiecz0r    Text: Grey    Code: Tebe (MadPascal)       '+#255;
 
 var
-	sinScrol, sinLogo: array [0..255] of cardinal;
+	[striped] sinScrol, sinLogo: array [0..255] of cardinal;
 
 	msx: TRMT;
 
@@ -113,6 +113,8 @@ var
 	x, base, scrol_base, scrl: cardinal;
 
 	palntsc: byte absolute $d014;
+
+	old_vbl: pointer;
 
 	a: char;
 	ptxt: ^char;
@@ -152,7 +154,7 @@ end;
 begin
 
  for i:=0 to 127 do begin
-  sinScrol[i]:=(sinusTable[i shl 1] shr 1)*ov_step+16*ov_step;
+  sinScrol[i]:=(sinusTable[i shl 1] shr 1)*ov_step + 16*ov_step;
   sinScrol[i+128]:=sinScrol[i];
  end;
 
@@ -204,6 +206,10 @@ begin
  chr11:=chr0;
  chr12:=chr0;
  chr13:=chr0; chr13.blt_control:=1;	// = %0001 last program blitter
+
+
+ GetIntVec(iVBLI, old_vbl);
+
 
  if palntsc=1 then
   SetIntVec(iVBL, @vbl_pal)
@@ -369,8 +375,12 @@ begin
 
  until keypressed;
 
- CloseGraph;
+ poke(559, 34);
+
+ SetIntVec(iVBL, old_vbl);
+
+ msx.stop;
+
+ VBXEOff;
 
 end.
-
-
