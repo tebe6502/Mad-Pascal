@@ -270,11 +270,14 @@ begin
 
     TextCharset(@newfont);
     writeln;
-    writeln('printable characters $20 - $7f');
+    writeln('printable characters $00 - $7f');
     writeln;
     j:=1;
-    for i:=$20 to $7f do begin
-        write(HexStr(i,2));write(':',chr(i));write(' ');
+    for i:=$00 to $7f do begin
+        write(HexStr(i,2),':');
+        write(X16_VERBATIM_MODE);
+        write(chr(i));
+        write(' ');
         inc(j);
         if (j>10) then begin
             writeln;
@@ -284,13 +287,14 @@ begin
     
     writeln;
     writeln;
-    writeln('printable characters $c0 - $ff');
+    writeln('printable characters $80 - $ff');
     writeln;
     j:=1;
-    for i:=$c0 to $ff do begin
+    for i:=$80 to $ff do begin
         write(HexStr(i,2));
         write(':');
         // write(X16_REVERSE_ON);
+        write(X16_VERBATIM_MODE);
         write(chr(i));
         // write(X16_REVERSE_OFF);
         write(' ');
