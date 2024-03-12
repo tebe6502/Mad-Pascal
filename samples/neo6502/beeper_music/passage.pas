@@ -26,21 +26,16 @@ const
 
 var
     i : byte;
-    j : byte;
 
 begin
 
     repeat
         if NeoGetQueueLen(0) = 0 then begin
-
-            j := 0;
             for i := 0 to M_1 do begin
                 // NeoQueueNote(channel:byte;freq,len,slide:word;stype:byte);
-                NeoQueueNote(0, freq[j], leng[j], 0, 0);
+                NeoQueueNote(0, freq[i], leng[i], 0, 0);
                 NeoQueueNote(0, 0, P2, 0, 0);
-                inc(j);
             end;
-
         end;
     until false;
 
