@@ -332,12 +332,13 @@ if Pass = CODEGENERATIONPASS then begin
 
 
  if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
-
+{
   asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
   asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
   asm65;
+}
 
-  asm65(#9'inx','; X = 0');
+  asm65(#9'ldx #$00','; X = 0');
   asm65(#9'stx bp','; BP = 0');
   asm65;
 
