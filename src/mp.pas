@@ -7089,17 +7089,50 @@ case Tok[i].Kind of
 
 	if Ident[IdentIndex].Kind in [VARIABLE, CONSTANT] then begin
 
-	  if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//	   writeln(Tok[i+3].kind);
 
-  	    i := CompileArrayIndex(i + 2, IdentIndex);							// array[ ].field
+	  if Ident[IdentIndex].DataType = CHARTOK then begin					// length(CHAR) = 1
+
+	    Push(1, ASVALUE, 1);
+
+	    ValType := BYTETOK;
+
+	  end else
+
+	  if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+
+  	    i := CompileArrayIndex(i + 2, IdentIndex);						// array[ ].field
 
 	    ValType := Ident[IdentIndex].AllocElementType;
 
+	    CheckTok(i + 2, DOTTOK);
 
-//	  writeln(Tok[i+2].kind);
+	    IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
+	    if IdentTemp < 0 then
+	      Error(i + 3, 'identifier idents no member '''+Tok[i + 3].Name^+'''');
+
+//	     ValType := Ident[GetIdent(Ident[IdentIndex].Name + '.' + Tok[i + 3].Name^)].AllocElementType;
+
+
+	     if (IdentTemp shr 16) = CHARTOK then begin
+
+	       a65(__subBX);
+
+	       Push(1 , ASVALUE, 1);
+
+	     end else begin
+
+              if (IdentTemp shr 16) <> STRINGPOINTERTOK then iError(i + 1, TypeMismatch);
+
+	      Push(0, ASVALUE, 1);
+
+	      Push(1, ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN, 1, IdentIndex, IdentTemp and $ffff);
+
+ 	     end;
+
+	     ValType:=BYTETOK;
+
+	     inc(i);
 
 	  end else
 
@@ -7108,7 +7141,7 @@ case Tok[i].Kind of
 	   if ((Ident[IdentIndex].DataType = STRINGPOINTERTOK) or (Ident[IdentIndex].AllocElementType = CHARTOK)) or
 	      ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK)) then begin
 
-		if Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK then begin	// length(array[x])
+		if Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK then begin		// length(array[x])
 
 		i:=CompileArrayIndex(i + 2, IdentIndex);
 
@@ -7198,7 +7231,7 @@ case Tok[i].Kind of
 
 		end;
 
-		ValType:=BYTETOK;
+		ValType := BYTETOK;
 
 	   end else begin
 
@@ -7218,7 +7251,7 @@ case Tok[i].Kind of
 	   end;
 
 	  end else
-	   iError(i+2, TypeMismatch);
+	   iError(i + 2, TypeMismatch);
 
 	end else
 	 iError(i + 2, IdentifierExpected);
@@ -7229,7 +7262,7 @@ case Tok[i].Kind of
 
     CheckTok(i + 1, CPARTOK);
 
-    Result:=i + 1;
+    Result := i + 1;
     end;
 
 
@@ -15885,6 +15918,7 @@ asm65;
 asm65(#9'rts');
 
 
+{
 if LIBRARY_USE = FALSE then begin
 
   asm65separator;
@@ -15895,6 +15929,7 @@ if LIBRARY_USE = FALSE then begin
   end;
 
 end;
+}
 
 
 asm65separator;

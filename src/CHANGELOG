@@ -1,3 +1,9 @@
+12.03.2024
+- poprawione LENGTH dla length(array_with_records[ ].string), length(char)
+
+09.03.2024
+- [striped] dla tablic typu WORD, POINTER, CARDINAL, SMALLINT, INTEGER
+
 05.03.2024
 - poprawione @moveSTRING (base\strmove.asm)
 - poprawione GetIdent (Pasrser.pas), nie faworyzuje modułu SYSTEM
