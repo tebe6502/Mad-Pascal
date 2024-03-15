@@ -582,6 +582,10 @@ var	ScreenWidth: smallint = 80;	(* @var current screen width *)
 	procedure Val(s: PString; var v: single; var code: byte); overload; //register;
 	function Swap(a: word): word; overload;
 	function Swap(a: cardinal): cardinal; overload;
+{$ifdef x16}
+	function VPeek(bank: byte; addr: word): byte; register; stdcall; assembler;
+	procedure VPoke(bank: byte; addr:word; value:byte); register; stdcall; assembler;
+{$endif}
 
 implementation
 

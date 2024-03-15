@@ -10,3 +10,8 @@ direct:
 	mp -t x16 directgfx.pas
 	mads directgfx.a65 -x -i:../../../base -o:directgfx.prg
 	$(X16EMU) -prg directgfx.prg -run -debug
+
+peek:
+	mp -t x16 peek.pas
+	mads peek.a65 -x -i:../../../base -o:peek.prg
+	$(X16EMU) -prg peek.prg -run -debug

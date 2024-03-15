@@ -101,7 +101,6 @@ var
 // keyboard
   CURRKEY    : byte absolute $cb;   // currently pressed keycode is stored to $00cb; $40  : byte absolute no key pressed
 
-
 // VIC-II registers
   // Sprite0X             : byte absolute $d000; //  X coordinate sprite 0
   // Sprite0Y             : byte absolute $d001; //  Y coordinate sprite 0

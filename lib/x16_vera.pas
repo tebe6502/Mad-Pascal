@@ -21,7 +21,60 @@ interface
 
 // const
 
-// var
+var
+  // I/O registers
+  VERA_addr_low     : byte absolute $9F20;
+  VERA_addr_high    : byte absolute $9F21;
+  VERA_addr_bank    : byte absolute $9F22;
+  VERA_data0        : byte absolute $9F23;
+  VERA_data1        : byte absolute $9F24;
+  VERA_ctrl         : byte absolute $9F25;
+  VERA_ien          : byte absolute $9F26;
+  VERA_isr          : byte absolute $9F27;
+  VERA_irqline_l    : byte absolute $9F28;
+  VERA_dc_video     : byte absolute $9F29; // VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_hscale    : byte absolute $9F2A; // VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_vscale    : byte absolute $9F2B; // VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_border    : byte absolute $9F2C; // VERA_ctrl(1) (DCSEL) = 0
+  VERA_dc_hstart    : byte absolute $9F29; // VERA_ctrl(1) (DCSEL) = 1
+  VERA_dc_hstop     : byte absolute $9F2A; // VERA_ctrl(1) (DCSEL) = 1
+  VERA_dc_vsstart   : byte absolute $9F2B; // VERA_ctrl(1) (DCSEL) = 1
+  VERA_dc_vstop     : byte absolute $9F2C; // VERA_ctrl(1) (DCSEL) = 1
+  VERA_L0_config    : byte absolute $9F2D;
+  VERA_L0_mapbase   : byte absolute $9F2E;
+  VERA_L0_tilebase  : byte absolute $9F2F;
+  VERA_L0_hscroll_l : byte absolute $9F30;
+  VERA_L0_hscroll_h : byte absolute $9F31;
+  VERA_L0_vscroll_l : byte absolute $9F32;
+  VERA_L0_vscroll_h : byte absolute $9F33;
+  VERA_L1_config    : byte absolute $9F34;
+  VERA_L1_mapbase   : byte absolute $9F35;
+  VERA_L1_tilebase  : byte absolute $9F36;
+  VERA_L1_hscroll_l : byte absolute $9F37;
+  VERA_L1_hscroll_h : byte absolute $9F38;
+  VERA_L1_vscroll_l : byte absolute $9F39;
+  VERA_L1_vscroll_h : byte absolute $9F3A;
+  VERA_audio_ctrl   : byte absolute $9F3B;
+  VERA_audio_rate   : byte absolute $9F3C;
+  VERA_audio_data   : byte absolute $9F3D;
+  VERA_spi_data     : byte absolute $9F3E;
+  VERA_spi_ctrl     : byte absolute $9F3F;
+
+  // it is crucial to set bank=1 first
+  VERA_addr_sprites         : byte absolute $3000;
+  VERA_addr_text            : byte absolute $B000;
+  VERA_addr_charset         : byte absolute $F000;
+  VERA_addr_psg             : byte absolute $F9C0;
+  VERA_addr_palette         : byte absolute $FA00;
+  VERA_addr_sprite_attr     : byte absolute $FC00;
+
+// VERA addresses
+  VERA_sprites         : word = $3000;
+  VERA_text            : word = $B000;
+  VERA_charset         : word = $F000;
+  VERA_psg             : word = $F9C0;
+  VERA_palette         : word = $FA00;
+  VERA_sprite_attr     : word = $FC00;
 
 procedure veraInit; assembler;
 (*
@@ -88,7 +141,21 @@ procedure veraFade(FadeDirection: byte); assembler;
 * @param: inout (byte) - if set to 0, performs fade out. If set to 1, performs fade in.
 *
 *)
+function Petscii2Scr(input: Byte): Byte; assembler;
+(*
+* @description:
+* Convert PETSCII to screencode
+* 
+* @param: input (Char) - character to convert
+*)
 
+function Scr2Petscii(input: Byte): Byte; assembler;
+(*
+* @description:
+* Convert screencode to PETSCII 
+* 
+* @param: input (Char) - character to convert
+*)
 
 implementation
 
@@ -187,6 +254,45 @@ asm
         ldy #$fa
         jsr LOAD
         plx
+end;
+
+
+function Petscii2Scr(input: Byte): Byte; assembler;
+asm
+        lda input
+        
+        cmp	#$20
+        bcc	nonprintable	; .A < $20
+        cmp	#$40
+        bcc	.end		; .A < $40 means screen code is the same
+        ; .A >= $40 - might be letter
+        cmp	#$60		; .A < $60 so it is a letter
+        bcc	+
+    nonprintable:
+        lda	#$56+$40	; Load nonprintable char + value being subtracted.
+    +	sbc	#$3F		; subtract ($3F+1) to convert to screencode
+    .end:
+
+        sta result
+end;
+
+
+
+function Scr2Petscii(input: Byte): Byte; assembler;
+asm
+        lda input
+
+        cmp	#$40
+        bcs	@nonprintable	; .A >= $40
+        cmp	#$20
+        bcs	@end		; .A >=$20 & < $40 means petscii is the same
+        ; .A < $20 and is a letter
+        adc	#$40
+        rts
+    @nonprintable:
+        lda	#$76
+    @end:
+        sta result
 end;
 
 procedure veraFade(FadeDirection: byte); assembler;

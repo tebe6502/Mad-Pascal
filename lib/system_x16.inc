@@ -21,6 +21,7 @@ Delay program execution (N * 1/60 second).
 @param: N - number of '1/60 second'
 *)
 asm
+		pha
         phx
 loop:   lda n
         ora n+1
@@ -36,7 +37,9 @@ wait:   jsr RDTIM
         dew n
 
         bra loop
-stop:   plx
+stop:   
+		plx
+		pla
 end;
 
 
@@ -188,6 +191,45 @@ end;
 
 end;
 
+
+
+function VPeek(bank: byte; addr: word): byte; register; stdcall; assembler;
+(*
+@description:
+Reads byte from VERA memory.
+note: inefficient when reading multiple sequential bytes!
+*)
+asm
+	stz VERA_ctrl
+	lda bank
+	sta VERA_addr_bank
+	lda addr
+	sta VERA_addr_low
+	lda addr+1
+	sta VERA_addr_high
+	lda VERA_data0
+	sta Result
+end;
+
+procedure VPoke(bank: byte; addr:word; value:byte); register; stdcall; assembler;
+(*
+@description:
+Writes byte to VERA memory.
+note: inefficient when reading multiple sequential bytes!
+*)
+asm
+	phy
+	stz VERA_ctrl
+	lda bank
+	sta VERA_addr_bank
+	lda addr
+	sta VERA_addr_low
+	lda addr+1
+	sta VERA_addr_high
+	ldy value
+	sty VERA_data0
+	ply
+end;
 
 function ParamCount: byte; assembler;
 (*

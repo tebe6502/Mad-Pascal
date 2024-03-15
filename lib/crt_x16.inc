@@ -59,7 +59,8 @@ function ReadKey: char; assembler;
 @returns: char
 *)
 asm
-getkey	lda CURRKEY
+getkey:
+	lda CURRKEY
 	cmp #$40
 	beq getkey
 
