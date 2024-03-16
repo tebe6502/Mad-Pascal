@@ -150,6 +150,7 @@ const
   GOTOTOK		= 113;
   INTOK			= 114;
   VOLATILETOK		= 115;
+  STRIPEDTOK		= 116;
 
 
   SETTOK		= 127;	// Size = 32 SET OF
@@ -263,8 +264,8 @@ const
   ASVALUE			= 0;
   ASPOINTER			= 1;
   ASPOINTERTOPOINTER		= 2;
-  ASPOINTERTOARRAYORIGIN	= 3;
-  ASPOINTERTOARRAYORIGIN2	= 4;
+  ASPOINTERTOARRAYORIGIN	= 3;	// + GenerateIndexShift
+  ASPOINTERTOARRAYORIGIN2	= 4;	// - GenerateIndexShift
   ASPOINTERTORECORD		= 5;
   ASPOINTERTOARRAYRECORD	= 6;
   ASSTRINGPOINTERTOARRAYORIGIN	= 7;
@@ -437,6 +438,7 @@ type
 	 Param: TParamList;
 	 ProcAsBlock: Integer;
 	 ObjectIndex: Integer;
+
 	 IsUnresolvedForward,
 	 updateResolvedForward,
 	 isOverload,
@@ -450,6 +452,7 @@ type
 	 isExternal,
 	 isKeep,
 	 isVolatile,
+	 isStriped,
 	 IsNotDead: Boolean;);
 
       VARIABLE, USERTYPE:
