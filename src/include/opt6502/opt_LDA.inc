@@ -810,6 +810,51 @@ begin
      end;
 
 
+    if ldy(i) and (ldy_stack(i) = false) and (listing[i] = listing[i+9]) and			// ldy I				; 0
+       lda_a(i+1) and										// lda					; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN+10			; 2
+       lda_a(i+3) and										// lda 					; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH+10	; 4
+       lda_a(i+5) and										// lda 					; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH*2+10	; 6
+       lda_a(i+7) and										// lda 					; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*3+10	; 8
+       ldy(i+9) and										// ldy I				; 9
+       lda_stack(i+10) and									// lda :STACKORIGIN+10			; 10
+       sta_a(i+11) and										// sta					; 11
+       lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH+10	; 12
+       sta_a(i+13) and										// sta					; 13
+       lda_stack(i+14) and									// lda :STACKORIGIN+STACKWIDTH*2+10	; 14
+       sta_a(i+15) and										// sta					; 15
+       lda_stack(i+16) and									// lda :STACKORIGIN+STACKWIDTH*3+10	; 16
+       sta_a(i+17) then										// sta					; 17
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+10], 6, 256)) and
+	(copy(listing[i+4], 6, 256) = copy(listing[i+12], 6, 256)) and
+	(copy(listing[i+6], 6, 256) = copy(listing[i+14], 6, 256)) and
+	(copy(listing[i+8], 6, 256) = copy(listing[i+16], 6, 256)) then
+     begin
+	listing[i+10] := listing[i+1];
+
+	listing[i+12] := listing[i+3];
+
+	listing[i+14] := listing[i+5];
+
+	listing[i+16] := listing[i+7];
+
+	listing[i]    := '';
+	listing[i+1]  := '';
+	listing[i+2]  := '';
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+	listing[i+6]  := '';
+	listing[i+7]  := '';
+	listing[i+8]  := '';
+
+      	exit(false);
+     end;
+
+
     if lda(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+10			; 1
        lda(i+2) and										// lda 					; 2

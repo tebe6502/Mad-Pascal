@@ -1782,6 +1782,7 @@ Spelling[TEXTFILETOK	] := 'TEXTFILE';
 Spelling[SETTOK		] := 'SET';
 Spelling[PACKEDTOK	] := 'PACKED';
 Spelling[VOLATILETOK	] := 'VOLATILE';
+Spelling[STRIPEDTOK	] := 'STRIPED';
 Spelling[LABELTOK	] := 'LABEL';
 Spelling[GOTOTOK	] := 'GOTO';
 Spelling[INTOK		] := 'IN';

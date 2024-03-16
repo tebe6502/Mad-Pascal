@@ -31,6 +31,7 @@ begin
         if NeoGetQueueLen(0) = 0 then begin
             for i := 0 to 19 do begin
                 // NeoQueueNote(channel:byte;freq,len,slide:word;stype:byte);
+                NeoWaitForVblank;
                 NeoQueueNote(0, freq[j], (leng[j] shr 3), 0, 0);
                 if dele[j] <> 0 then pause(dele[j] shr 3);
                 inc(j);
