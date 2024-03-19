@@ -831,6 +831,9 @@ var
 	if Err <> 0 then
 	 iError(NumTok, OrdinalExpExpected);
 
+	AddDefine('FASTMUL');
+        AddDefines := NumDefines;
+
 	GetCommonConstType(NumTok, BYTETOK, GetValueType(FastMul));
 
 	dec(NumTok);
