@@ -7077,6 +7077,26 @@ case Tok[i].Kind of
 
       Value:=0;
 
+
+      if Tok[i + 2].Kind = CHARLITERALTOK then begin
+
+	Push(1, ASVALUE, 1);
+
+	ValType := BYTETOK;
+
+	inc(i, 2);
+
+      end else
+      if Tok[i + 2].Kind = STRINGLITERALTOK then begin
+
+	Push(Tok[i + 2].StrLength, ASVALUE, 1);
+
+	ValType := BYTETOK;
+
+	inc(i, 2);
+
+      end else
+
       if Tok[i + 2].Kind = IDENTTOK then begin
 
 	IdentIndex := GetIdent(Tok[i + 2].Name^);
@@ -16169,8 +16189,11 @@ asm65('.macro'#9'STATICDATA');
  for i := 0 to NumStaticStrChars - 1 do begin
 
   if (i mod 24=0) then begin
-   if i>0 then tmp:=tmp+#13#10;
-   tmp:=tmp+'.by ';
+
+   if i>0 then asm65(tmp);
+
+   tmp:='.by ';
+
   end else
    if (i>0) and (i mod 8=0) then tmp:=tmp+' ';
 
@@ -16190,7 +16213,7 @@ asm65('.macro'#9'STATICDATA');
 
  end;
 
- if tmp<>'' then asm65(tmp);
+ if tmp <> '' then asm65(tmp);
 
  asm65('.endm');
 

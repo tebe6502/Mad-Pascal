@@ -506,6 +506,7 @@ type
 
   TArrayString = array of string;
 
+
 {$i targets/var.inc}
 
 
@@ -515,6 +516,8 @@ var
   LIBRARY_NAME: string;
 
   AsmBlock: array [0..4095] of string;
+
+  TemporaryBuf: array [0..511] of string;
 
   Data, DataSegment, StaticStringData: array [0..$FFFF] of word;
 
@@ -561,12 +564,10 @@ var
 
   asmLabels: array of integer;
 
-  TemporaryBuf: array [0..511] of string;
-
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2,
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: string;
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
   msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
 
