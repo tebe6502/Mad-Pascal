@@ -14,7 +14,7 @@ begin
       (pos('l_', TemporaryBuf[4]) = 1) then						//l_00FB		; 4
     begin
 
-     for p:=5 to High(TemporaryBuf)-2 do
+     for p:=5 to High(TemporaryBuf)-1 do
       if (TemporaryBuf[p] = TemporaryBuf[0]) and					// sta K+1		; p
          (pos('l_', TemporaryBuf[p+1]) = 1) and						//l_00FA		; p+1
 	 (TemporaryBuf[p+1] = copy(TemporaryBuf[3], 6, 256)) then
@@ -65,7 +65,7 @@ begin
 
      tmp:=copy(TemporaryBuf[4], 6, 256);
 
-     for p:=7 to High(TemporaryBuf) do
+     for p:=7 to High(TemporaryBuf)-6 do
       if TemporaryBuf[p] = tmp then begin
 
 	if (SKIP(p-2) = false) and						//~SKIP			; p-2
@@ -148,7 +148,7 @@ begin
 
       tmp:=copy(TemporaryBuf[3], 6, 256);
 
-      for p:=8 to High(TemporaryBuf) do
+      for p:=8 to High(TemporaryBuf)-5 do
        if (TemporaryBuf[p-1] = #9'dec ' + copy(TemporaryBuf[p+4], 6, 256)) and
           (TemporaryBuf[p] = tmp) and				//l_00FA		; +0
           (TemporaryBuf[p+1] = '') and				//			; +1

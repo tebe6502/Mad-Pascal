@@ -20,59 +20,18 @@ unit fastmath;
 interface
 
 	function atan2(x1,x2,y1,y2: byte): byte; assembler;
+	function sqrt16(a: word): byte; assembler;
+
 	procedure FillSinHigh(p: pointer);
 	procedure FillSinLow(p: pointer);
-	function sqrt16(a: word): byte; assembler;
-	
+
+{$ifdef FASTMUL}
 	function fastdiv(divisor, divider: word): word; external 'fdiv\fdiv';
 	function fastdivS(divisor, divider: smallint): smallint; external 'fdiv\fdiv';
+{$endif}
 	
 	
 implementation
-
-
-
-procedure log2(a: byte); assembler;
-asm
-table	= $c000		;page aligned
-
-seed	.byte $00,$00
-	.byte $02,$05
-	.byte $0c,$1f
-
-reduce	pla
-	adc seed,y
-	sec
-next	pha
-	ldy #5
-	txa
-	sta shift+4
-
-shift	ror shift+4
-	sbx #$00
-	bcs reduce
-	tax
-	dey
-	bpl shift
-
-	pla
-store	sbc #$1f
-	sta table
-	lsr store+3
-	bcc store
-
-enter	dec *+4
-	lda #$00
-	sta store+3
-	asl a
-	tax
-	lda #$00
-	bcs next
-
-;	sta table	;do whatever makes most sense for log(0)
-	rts
-
-end;
 
 
 (*
@@ -81,11 +40,15 @@ function fastdiv(divisor, divider: word): word;
 
 *)
 
-{$codealign link = $100}
+{$ifdef FASTMUL}
 
-{$link fdiv\fdiv.obx}
+	{$codealign link = $100}
 
-{$codealign link = 0}
+	{$link fdiv\fdiv.obx}
+
+	{$codealign link = 0}
+
+{$endif}
 
 
 function atan2(x1,x2,y1,y2: byte): byte; assembler;

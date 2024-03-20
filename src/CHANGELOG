@@ -1,5 +1,11 @@
+19.03.2024
+- {$f page} powoduje dodanie {$define fastmul}
+- opt_TEMP_WHILE poprawione
+
 12.03.2024
-- poprawione LENGTH dla length(array_with_records[ ].string), length(char)
+- poprawione LENGTH dla length(array_with_records[ ].string), length(char), length('literal')
+- unit FASTMATH: FASTDIV, FASTDIVS
+- rezerwacja pamięci dla IOCB@COPY tylko gdy etykieta @CmdLine jest zdefiniowana
 
 09.03.2024
 - [striped] dla tablic typu WORD, POINTER, CARDINAL, SMALLINT, INTEGER
