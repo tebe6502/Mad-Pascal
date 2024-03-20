@@ -131,6 +131,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [justpong](https://gitlab.com/bocianu/justpong)
 * [hoppe](https://gitlab.com/bocianu/hoppe)
 * [PacMad](https://gitlab.com/bocianu/PacMad)
+* [PacMad neo6502](https://gitlab.com/bocianu/neo-pacmad)
 * [k12trailer](https://gitlab.com/bocianu/k12trailer)
 * [gr10](https://gitlab.com/bocianu/gr10)
 * [Old Mansion](https://gitlab.com/bocianu/oldmansion)
