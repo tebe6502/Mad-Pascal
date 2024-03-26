@@ -20,11 +20,35 @@ unit fastmath;
 interface
 
 	function atan2(x1,x2,y1,y2: byte): byte; assembler;
-	procedure FillSinHigh(p: pointer);
-	procedure FillSinLow(p: pointer);
 	function sqrt16(a: word): byte; assembler;
 
+	procedure FillSinHigh(p: pointer);
+	procedure FillSinLow(p: pointer);
+
+{$ifdef FASTMUL}
+	function fastdiv(divisor, divider: word): word; external 'fdiv\fdiv';
+	function fastdivS(divisor, divider: smallint): smallint; external 'fdiv\fdiv';
+{$endif}
+	
+	
 implementation
+
+
+(*
+
+function fastdiv(divisor, divider: word): word;
+
+*)
+
+{$ifdef FASTMUL}
+
+	{$codealign link = $100}
+
+	{$link fdiv\fdiv.obx}
+
+	{$codealign link = 0}
+
+{$endif}
 
 
 function atan2(x1,x2,y1,y2: byte): byte; assembler;
@@ -131,7 +155,7 @@ octant_adjust : array [0..7] of byte = (
 	);
 
 asm
-{	txa:pha
+	txa:pha
 
 octant	= :eax			// temporary zeropage variable
 
@@ -169,7 +193,7 @@ atan2		lda x1
 		sta Result
 
 	pla:tax
-};
+
 end;
 
 
@@ -184,7 +208,7 @@ https://codebase64.org/doku.php?id=base:16bit_and_24bit_sqrt
 @return: Result - Byte
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	LDY #$01	; lsby of first odd number = 1
 	STY :eax
@@ -213,8 +237,8 @@ nomore
 ;	STX $21		; and remainder
 
 	pla:tax
-};
 end;
+
 
 procedure FillSin(p: pointer; eor,add: byte); assembler;
 (*
@@ -223,7 +247,7 @@ procedure FillSin(p: pointer; eor,add: byte); assembler;
 https://codebase64.org/doku.php?id=base:generating_approximate_sines_in_assembly
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	lda p
 	sta a3+1
@@ -275,7 +299,6 @@ a3	sta $ff00,y
 	bpl loop
 
 	pla:tax
-};
 end;
 
 

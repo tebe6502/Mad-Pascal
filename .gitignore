@@ -1,5 +1,8 @@
 build.bat
 buildrun.bat
+mp
 mp.exe
 makeMP.bat
+*.o
+*.ppu
 .vscode

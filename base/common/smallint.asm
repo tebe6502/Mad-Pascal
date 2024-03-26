@@ -42,7 +42,9 @@
 A	= :EAX
 B	= :ECX
 
-	ldy #0
+	lda A+1
+	eor B+1
+	php
 
 	lda A+1				; dividend sign
 	bpl @+
@@ -54,8 +56,6 @@ B	= :ECX
 	lda #$00
 	sbc A+1
 	sta A+1
-
-	iny
 @
 	lda B+1				; divisor sign
 	bpl @+
@@ -67,17 +67,11 @@ B	= :ECX
 	lda #$00
 	sbc B+1
 	sta B+1
-
-	iny
 @
-	tya
-	and #1
-	pha
-
 	jsr @WORD.DIV
 
-	pla
-	beq @+
+	plp
+	bpl @+
 
 	lda #$00
 	sub :eax
@@ -101,9 +95,8 @@ B	= :ECX
 
 RESULT	= :ZTMP
 
-	ldy #0
-
 	lda A+1				; dividend sign
+	php
 	bpl @+
 	
 	lda #$00
@@ -113,8 +106,6 @@ RESULT	= :ZTMP
 	lda #$00
 	sbc A+1
 	sta A+1
-
-	iny
 @
 	lda B+1				; divisor sign
 	bpl @+
@@ -127,13 +118,10 @@ RESULT	= :ZTMP
 	sbc B+1
 	sta B+1
 @
-	tya
-	pha
-
 	jsr @WORD.DIV
 
-	pla
-	beq @+
+	plp
+	bpl @+
 
 	lda #$00
 	sub RESULT

@@ -1896,7 +1896,7 @@ end;
 
 
 {
-if (pos('volatile', listing[i]) > 0) then begin
+if (pos('sta ', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

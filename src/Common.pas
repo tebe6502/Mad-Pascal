@@ -150,6 +150,7 @@ const
   GOTOTOK		= 113;
   INTOK			= 114;
   VOLATILETOK		= 115;
+  STRIPEDTOK		= 116;
 
 
   SETTOK		= 127;	// Size = 32 SET OF
@@ -263,8 +264,8 @@ const
   ASVALUE			= 0;
   ASPOINTER			= 1;
   ASPOINTERTOPOINTER		= 2;
-  ASPOINTERTOARRAYORIGIN	= 3;
-  ASPOINTERTOARRAYORIGIN2	= 4;
+  ASPOINTERTOARRAYORIGIN	= 3;	// + GenerateIndexShift
+  ASPOINTERTOARRAYORIGIN2	= 4;	// - GenerateIndexShift
   ASPOINTERTORECORD		= 5;
   ASPOINTERTOARRAYRECORD	= 6;
   ASSTRINGPOINTERTOARRAYORIGIN	= 7;
@@ -437,6 +438,7 @@ type
 	 Param: TParamList;
 	 ProcAsBlock: Integer;
 	 ObjectIndex: Integer;
+
 	 IsUnresolvedForward,
 	 updateResolvedForward,
 	 isOverload,
@@ -450,6 +452,7 @@ type
 	 isExternal,
 	 isKeep,
 	 isVolatile,
+	 isStriped,
 	 IsNotDead: Boolean;);
 
       VARIABLE, USERTYPE:
@@ -503,6 +506,7 @@ type
 
   TArrayString = array of string;
 
+
 {$i targets/var.inc}
 
 
@@ -513,7 +517,9 @@ var
 
   AsmBlock: array [0..4095] of string;
 
-  Data, DataSegment, StaticStringData: array [0..$FFFF] of Word;
+  TemporaryBuf: array [0..511] of string;
+
+  Data, DataSegment, StaticStringData: array [0..$FFFF] of word;
 
   Types: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
@@ -558,12 +564,10 @@ var
 
   asmLabels: array of integer;
 
-  TemporaryBuf: array [0..511] of string;
-
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2,
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: string;
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
   msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
 
@@ -610,6 +614,8 @@ var
 	procedure CheckTok(i: integer; ExpectedTok: Byte);
 
 	procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+
+	procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
 
 	function ErrTokenFound(ErrTokenIndex: Integer): string;
 
@@ -1287,6 +1293,32 @@ end;	//GetCommonType
 // ----------------------------------------------------------------------------
 
 
+procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+var i: integer;
+    yes: Boolean;
+begin
+
+  yes := true;
+
+  for i:=0 to High(linkObj)-1 do
+   if linkObj[i] = StrValue then begin yes := false; Break end;
+
+  if yes then begin
+
+    i := High(linkObj);
+    linkObj[i] := StrValue;
+
+    SetLength(linkObj, i+2);
+  end;
+
+  Tok[StrTokenIndex].Value := i;
+
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 var
   i, j, k, len: Integer;
@@ -1295,32 +1327,24 @@ begin
 
 Fillchar(Data, sizeof(Data), 0);
 
-len:=Length(StrValue);
+len := Length(StrValue);
 
 if len > 255 then
- Data[0]:=255
+ Data[0] := 255
 else
- Data[0]:=len;
-
+ Data[0] := len;
 
 if (len < 0) or (len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
 
-i:=0;
-j:=0;
-yes:=false;
+i := 0;
+j := 0;
 
-while (i < NumStaticStrChars) and (yes=false) do begin
+yes := FALSE;
 
- j:=0;
- k:=i;
- while (Data[j] = StaticStringData[k+j]) and (j < len+2) and (k+j < NumStaticStrChars) do inc(j);
-
- if j = len+2 then begin yes:=true; Break end;
-
- inc(i);
-end;
+for i:=0 to NumStaticStrChars-len-1 do
+ if CompareWord(Data, StaticStringData[i], Len+1) = 0 then begin yes := TRUE; Break end;
 
 Tok[StrTokenIndex].StrLength := len;
 
