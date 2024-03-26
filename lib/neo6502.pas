@@ -55,12 +55,12 @@ const
     OPEN_MODE_RW = 2; // opens the file for read-write access;
     OPEN_MODE_NEW = 3; // creates the file if it doesn’t already exist, truncates it if it does, and opens the file for read-write access.
 
-    FI_ATTR_DIRECTORY = 1; // @nodoc
-    FI_ATTR_SYSTEM = 2; // @nodoc
-    FI_ATTR_ARCHIVE = 4; // @nodoc
-    FI_ATTR_READONLY = 8; // @nodoc
-    FI_ATTR_HIDDEN = 16; // @nodoc
-    
+    FI_ATTR_DIRECTORY = 1; // mask for directory attribute
+    FI_ATTR_SYSTEM = 2; // mask for system attribute
+    FI_ATTR_ARCHIVE = 4; // mask for archive attribute
+    FI_ATTR_READONLY = 8; // mask for read only attribute
+    FI_ATTR_HIDDEN = 16; // mask for hidden attribute
+
 type TN6502Message = record
 (*
 * @description: 
