@@ -1,0 +1,112 @@
+const 
+    KEY_A = $04; // Keyboard a and A
+    KEY_B = $05; // Keyboard b and B
+    KEY_C = $06; // Keyboard c and C
+    KEY_D = $07; // Keyboard d and D
+    KEY_E = $08; // Keyboard e and E
+    KEY_F = $09; // Keyboard f and F
+    KEY_G = $0a; // Keyboard g and G
+    KEY_H = $0b; // Keyboard h and H
+    KEY_I = $0c; // Keyboard i and I
+    KEY_J = $0d; // Keyboard j and J
+    KEY_K = $0e; // Keyboard k and K
+    KEY_L = $0f; // Keyboard l and L
+    KEY_M = $10; // Keyboard m and M
+    KEY_N = $11; // Keyboard n and N
+    KEY_O = $12; // Keyboard o and O
+    KEY_P = $13; // Keyboard p and P
+    KEY_Q = $14; // Keyboard q and Q
+    KEY_R = $15; // Keyboard r and R
+    KEY_S = $16; // Keyboard s and S
+    KEY_T = $17; // Keyboard t and T
+    KEY_U = $18; // Keyboard u and U
+    KEY_V = $19; // Keyboard v and V
+    KEY_W = $1a; // Keyboard w and W
+    KEY_X = $1b; // Keyboard x and X
+    KEY_Y = $1c; // Keyboard y and Y
+    KEY_Z = $1d; // Keyboard z and Z
+
+    KEY_1 = $1e; // Keyboard 1 and !
+    KEY_2 = $1f; // Keyboard 2 and @
+    KEY_3 = $20; // Keyboard 3 and #
+    KEY_4 = $21; // Keyboard 4 and $
+    KEY_5 = $22; // Keyboard 5 and %
+    KEY_6 = $23; // Keyboard 6 and ^
+    KEY_7 = $24; // Keyboard 7 and &
+    KEY_8 = $25; // Keyboard 8 and *
+    KEY_9 = $26; // Keyboard 9 and (
+    KEY_0 = $27; // Keyboard 0 and )
+
+    KEY_ENTER = $28; // Keyboard Return (ENTER)
+    KEY_ESC = $29; // Keyboard ESCAPE
+    KEY_BACKSPACE = $2a; // Keyboard DELETE (Backspace)
+    KEY_TAB = $2b; // Keyboard Tab
+    KEY_SPACE = $2c; // Keyboard Spacebar
+    KEY_MINUS = $2d; // Keyboard - and _
+    KEY_EQUAL = $2e; // Keyboard = and +
+    KEY_LEFTBRACE = $2f; // Keyboard [ and {
+    KEY_RIGHTBRACE = $30; // Keyboard ] and }
+    KEY_BACKSLASH = $31; // Keyboard \ and |
+    KEY_HASHTILDE = $32; // Keyboard Non-US # and ~
+    KEY_SEMICOLON = $33; // Keyboard ; and :
+    KEY_APOSTROPHE = $34; // Keyboard ' and "
+    KEY_GRAVE = $35; // Keyboard ` and ~
+    KEY_COMMA = $36; // Keyboard , and <
+    KEY_DOT = $37; // Keyboard . and >
+    KEY_SLASH = $38; // Keyboard / and ?
+    KEY_CAPSLOCK = $39; // Keyboard Caps Lock
+
+    KEY_F1 = $3a; // Keyboard F1
+    KEY_F2 = $3b; // Keyboard F2
+    KEY_F3 = $3c; // Keyboard F3
+    KEY_F4 = $3d; // Keyboard F4
+    KEY_F5 = $3e; // Keyboard F5
+    KEY_F6 = $3f; // Keyboard F6
+    KEY_F7 = $40; // Keyboard F7
+    KEY_F8 = $41; // Keyboard F8
+    KEY_F9 = $42; // Keyboard F9
+    KEY_F10 = $43; // Keyboard F10
+    KEY_F11 = $44; // Keyboard F11
+    KEY_F12 = $45; // Keyboard F12
+
+    KEY_SYSRQ = $46; // Keyboard Print Screen
+    KEY_SCROLLLOCK = $47; // Keyboard Scroll Lock
+    KEY_PAUSE = $48; // Keyboard Pause
+    KEY_INSERT = $49; // Keyboard Insert
+    KEY_HOME = $4a; // Keyboard Home
+    KEY_PAGEUP = $4b; // Keyboard Page Up
+    KEY_DELETE = $4c; // Keyboard Delete Forward
+    KEY_END = $4d; // Keyboard End
+    KEY_PAGEDOWN = $4e; // Keyboard Page Down
+    KEY_RIGHT = $4f; // Keyboard Right Arrow
+    KEY_LEFT = $50; // Keyboard Left Arrow
+    KEY_DOWN = $51; // Keyboard Down Arrow
+    KEY_UP = $52; // Keyboard Up Arrow
+
+    KEY_NUMLOCK = $53; // Keyboard Num Lock and Clear
+    KEY_KPSLASH = $54; // Keypad /
+    KEY_KPASTERISK = $55; // Keypad *
+    KEY_KPMINUS = $56; // Keypad -
+    KEY_KPPLUS = $57; // Keypad +
+    KEY_KPENTER = $58; // Keypad ENTER
+    KEY_KP1 = $59; // Keypad 1 and End
+    KEY_KP2 = $5a; // Keypad 2 and Down Arrow
+    KEY_KP3 = $5b; // Keypad 3 and PageDn
+    KEY_KP4 = $5c; // Keypad 4 and Left Arrow
+    KEY_KP5 = $5d; // Keypad 5
+    KEY_KP6 = $5e; // Keypad 6 and Right Arrow
+    KEY_KP7 = $5f; // Keypad 7 and Home
+    KEY_KP8 = $60; // Keypad 8 and Up Arrow
+    KEY_KP9 = $61; // Keypad 9 and Page Up
+    KEY_KP0 = $62; // Keypad 0 and Insert
+    KEY_KPDOT = $63; // Keypad . and Delete
+
+    KEY_102ND = $64; // Keyboard Non-US \ and |
+
+    KEY_MIN_CODE = $04;
+    KEY_MAX_CODE = $63;
+    
+    MOD_CTRL  = $11;   // 00010001
+    MOD_SHIFT = $22;   // 00100010
+    MOD_ALT   = $44;   // 01000100
+    MOD_META  = $88;   // 10001000
