@@ -27,7 +27,7 @@ var
 procedure error(s: string);
 begin
   writeln(s);
-  
+
   repeat until keypressed;
   halt;
 end;
@@ -65,7 +65,7 @@ begin
 
   val(n,v1,p);
 
-  if (p<>0) then 
+  if (p<>0) then
     error('Invalid constant');
 
 
@@ -120,13 +120,13 @@ begin
         5: v1:=cos(v1);
         6: v1:=sin(v1);
         7: v1:=sin(v1)/cos(v1);
-	
+
 	{$ifdef ATARI}
         8: v1:=RandomF;
 	{$else}
 	8: v1:=Random;
 	{$endif}
-	
+
         9: v1:=exp(v1);
        10: v1:=ln(v1);
        11: v1:=abs(v1);
@@ -137,7 +137,7 @@ begin
     if (s[cix]='(') then
       begin
         inc(cix);
-	
+
         v1:=simple_expression;
 
         skip_blanks;
@@ -175,10 +175,10 @@ function term: single; pascal;
 var
    op,i: byte;
   v1,v2: single;
-  
+
 begin
   v1:=factor;
-  
+
   repeat
     skip_blanks;
 
@@ -187,7 +187,7 @@ begin
     for i:=1 to 7 do
       if (op=0) then
         if (copy(s,cix,length(top[i])) = top[i]) then
-          op:=i;  
+          op:=i;
 
     if (op>0) then
       begin
@@ -262,7 +262,7 @@ begin
 
   for k:=1 to length(s) do
     s[k]:=upcase(s[k]);
-    
+
   evaluate:=simple_expression;
 end;
 
@@ -274,8 +274,8 @@ var
 begin
   repeat
     writeln('Enter an expression');
-    write('>'); 
-    readln(s); 
+    write('>');
+    readln(s);
 
     if (s<>'') then
       begin
@@ -283,7 +283,7 @@ begin
 
         writeln(s,'=',v:0:6);
         writeln;
-	
+
       end;
 
   until (s='');
@@ -292,6 +292,6 @@ end;
 
 begin
   clrscr;
- 
+
   start;
 end.

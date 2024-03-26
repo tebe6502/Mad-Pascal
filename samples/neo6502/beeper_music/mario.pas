@@ -99,6 +99,7 @@ begin
             Inc(song);
             if song = SONGS then song := 0;
             PlaySong(song);
+
         end;
         NeoWaitForVblank;
     until false;
