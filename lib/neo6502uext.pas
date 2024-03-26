@@ -55,7 +55,7 @@ procedure NeoWriteGPIO(pin,val:byte);
 * This will only display on the output pin if it is enabled,
 * and its direction is set to output.
 * 
-* @param: pin (byte) - Neo6502 GPIO pin number
+* @param: pin (byte) - Neo6502 GPIO pin number (1-10)
 * @param: val (byte) - value (0,1);
 * 
 *)
@@ -66,7 +66,7 @@ function NeoReadGPIO(pin:byte):byte;
 * If the pin is set to input, reads the level on pin on UEXT Params[0]. 
 * If it is set to output this reads the output latch for UEXT port Params[0].
 * 
-* @param: pin (byte) - Neo6502 GPIO pin number
+* @param: pin (byte) - Neo6502 GPIO pin number (1-10)
 * 
 * @returns: (byte) - level on pin
 *)
@@ -76,7 +76,7 @@ procedure NeoSetDirection(pin,dir:byte);
 * @description:
 * Set the port direction for UEXT Port.
 * 
-* @param: pin (byte) - Neo6502 GPIO pin number
+* @param: pin (byte) - Neo6502 GPIO pin number (1-10)
 * @param: dir (byte) - port direction
 *)
 
@@ -109,7 +109,7 @@ function NeoReadAnalog(pin:byte):integer;
 * Read the analogue value on specified UEXT Pin. This has to be set to analogue type to work. 
 * Returns a value from 0..4095, which represents an input value of 0 to 3.3 volts.
 * 
-* @param: pin (byte) - GPIO pin number
+* @param: pin (byte) - GPIO pin number (1-10)
 *
 * @returns: (byte) - value in range 0..4095
 *)
