@@ -2,7 +2,7 @@ program slideshow;
 uses neo6502,crt;
 const 
   BUF = $7000;
-  chunksize = $1000;
+  chunksize = $4000;
 
 var buffer : array[0..0] of byte absolute BUF;
     fnum: byte;
@@ -28,31 +28,21 @@ end;
 
 procedure LoadImage(fname:TString);
 var 
-  x,o,len:word;
+  len:word;
   y:byte;
-  done:boolean;
+  vram:cardinal;
 begin
-    y:=0;
-    x:=0;
+    vram := MEM_VRAM;
     fname := concat(fname,'.img');
     NeoOpenFile(0,@fname[0],OPEN_MODE_RO);
     repeat 
-      o:=0;
       len := NeoReadFile(0,BUF,chunksize);
-      done := len = 0;
-      while (len>0) do begin
-        NeoSetColor(buffer[o]);
-        NeoDrawPixel(x,y);
-        inc(x);
-        inc(o);
-        dec(len);
-        if x=320 then begin
-          x:=0;
-          inc(y);
-          if y=240 then done:=true;
-        end;
+      if (len>0) then begin
+        repeat until not NeoBlitterBusy;
+        NeoBlitterCopy(BUF,vram,len);
+        vram := vram + len;
       end;
-    until done;
+    until len=0;
     NeoCloseFile(0);
 end;
 
