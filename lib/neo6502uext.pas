@@ -34,12 +34,16 @@ const
     GPIO_HIGH = 1; // GPIO pin value for level HIGH
     GPIO_LOW = 0; // GPIO pin value for level LOW
 
+    UART_PROTOCOL_8N1 = 0;
+
 var 
     I2C_dev: byte absolute N6502MSG_ADDRESS+4; // @nodoc  
     I2C_reg: byte absolute N6502MSG_ADDRESS+5; // @nodoc  
     I2C_val: byte absolute N6502MSG_ADDRESS+6; // @nodoc  
-    I2C_addr: word absolute N6502MSG_ADDRESS+1; // @nodoc  
-    I2C_len: word absolute N6502MSG_ADDRESS+3; // @nodoc  
+    block_addr: word absolute N6502MSG_ADDRESS+5; // @nodoc  
+    block_len: word absolute N6502MSG_ADDRESS+7; // @nodoc  
+    uart_baudrate: cardinal absolute N6502MSG_ADDRESS+4; // @nodoc  
+    uart_protocol: byte absolute N6502MSG_ADDRESS+8; // @nodoc  
 
 procedure NeoUExtInitialize;
 (*
@@ -145,6 +149,76 @@ procedure NeoWriteBlockI2C(dev:byte;addr,len:word);
 * @param: len (word) - data lenght
 *)
 
+procedure NeoReadBlockSPI(addr,len:word);
+(*
+* @description:
+* Try to read a block of memory from SPI Device.
+*  
+* @param: addr (word) - target memory address
+* @param: len (word) - data lenght
+*)
+
+procedure NeoWriteBlockSPI(addr,len:word);
+(*
+* @description:
+* Try to write a block from memory to SPI Device.
+*  
+* @param: addr (word) - source memory address
+* @param: len (word) - data lenght
+*)
+
+procedure NeoReadBlockUART(addr,len:word);
+(*
+* @description:
+* Try to read a block of memory from the UART.
+*  
+* @param: addr (word) - target memory address
+* @param: len (word) - data lenght
+*)
+
+procedure NeoWriteBlockUART(addr,len:word);
+(*
+* @description:
+* Try to write a block from memory to the UART.
+*  
+* @param: addr (word) - source memory address
+* @param: len (word) - data lenght
+*)
+
+procedure NeoSetupUART(baudrate:cardinal;protocol:byte);
+(*
+* @description:
+* Set the Baud Rate and Serial Protocol for the UART interface.
+* Currently only 8N1 is supported (0).
+*  
+* @param: baudrate (cardinal) - baud rate
+* @param: protocol (byte) - protocol number
+*)
+
+procedure NeoWriteByteUART(b:byte);
+(*
+* @description:
+* Try to write a byte to the UART.
+*  
+* @param: b (byte) - byte of data
+*)
+
+function NeoReadByteUART():byte;
+(*
+* @description:
+* Try to read a byte from the UART.
+*  
+* @returns: (byte) - byte of data
+*)
+
+function NeoCheckUART():byte;
+(*
+* @description:
+* See if a byte is available in the UART input buffer.
+*  
+* @returns: (byte) - non zero if data is available.
+*)
+
 implementation
 
 procedure NeoUExtInitialize;
@@ -203,17 +277,68 @@ end;
 procedure NeoReadBlockI2C(dev:byte;addr,len:word);
 begin
     I2C_dev := dev;
-    I2C_addr := addr;
-    I2C_len := len;
+    block_addr := addr;
+    block_len := len;
     NeoSendMessage(10,9);
 end;
 
 procedure NeoWriteBlockI2C(dev:byte;addr,len:word);
 begin
     I2C_dev := dev;
-    I2C_addr := addr;
-    I2C_len := len;
+    block_addr := addr;
+    block_len := len;
     NeoSendMessage(10,10);
+end;
+
+procedure NeoReadBlockSPI(addr,len:word);
+begin
+    block_addr := addr;
+    block_len := len;
+    NeoSendMessage(10,11);
+end;
+
+procedure NeoWriteBlockSPI(addr,len:word);
+begin
+    block_addr := addr;
+    block_len := len;
+    NeoSendMessage(10,12);
+end;
+
+procedure NeoReadBlockUART(addr,len:word);
+begin
+    block_addr := addr;
+    block_len := len;
+    NeoSendMessage(10,13);
+end;
+
+procedure NeoWriteBlockUART(addr,len:word);
+begin
+    block_addr := addr;
+    block_len := len;
+    NeoSendMessage(10,14);
+end;
+
+procedure NeoSetupUART(baudrate:cardinal;protocol:byte);
+begin
+    uart_baudrate := baudrate;
+    uart_protocol := protocol;
+    NeoSendMessage(10,15);
+end;
+
+procedure NeoWriteByteUART(b:byte);
+begin
+    NeoMessage.params[0] := b;    
+    NeoSendMessage(10,16);
+end;
+
+function NeoReadByteUART():byte;
+begin
+    result NeoSendMessage(10,17);
+end;
+
+function NeoCheckUART():byte;
+begin
+    result NeoSendMessage(10,17);
 end;
 
 end.

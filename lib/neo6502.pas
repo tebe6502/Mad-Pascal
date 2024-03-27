@@ -61,6 +61,10 @@ const
     FI_ATTR_READONLY = 8; // mask for read only attribute
     FI_ATTR_HIDDEN = 16; // mask for hidden attribute
 
+    MEM_6502 = 0;       // 6502 ram offset 
+    MEM_VRAM = $800000; // Video ram offset for blitter addresing
+    MEM_GFX = $900000;  // Graphics ram (tiles/sprites) offset for blitter addresing
+
 type TN6502Message = record
 (*
 * @description: 
@@ -818,6 +822,41 @@ procedure TurtleHome;
 * Move the turtle to the home position (pointing up in the centre).
 *)
 
+procedure NeoSetMouseXY(x,y:word);
+(*
+* @description:
+* Positions the display cursor at x,y.
+*
+* @param: x (word) - x coordinate
+* @param: y (word) - y coordinate
+*)
+
+procedure NeoShowMouse(show:byte);
+(*
+* @description:
+* Shows or hides the mouse cursor.
+*
+* @param: show (byte) - 0 hide / 1 show
+*)
+
+function NeoBlitterBusy:boolean;
+(*
+* @description:
+* used to check availability and transfer completion.
+*
+* @returns: (boolean) - true if the blitter/DMA system is currently transferring data,
+*)
+
+procedure NeoBlitterCopy(src:cardinal;dst:cardinal;len:word);
+(*
+* @description:
+* Copy the block of memory. Allows transfer of data in between 6502 RAN, Video RAM and Graphics RAM.  
+*
+* The upper 8 bits of the address are : 6502 RAM ($00xxxx) VideoRAM ($8xxxxx) Graphics RAM($90xxxx).  
+*
+* Sets error flag if the transfer is not possible (e.g. illegal write addresses).  
+*)
+
 implementation
 
 procedure NeoWaitMessage;assembler;
@@ -1383,6 +1422,42 @@ end;
 procedure TurtleHome;
 begin
     NeoSendMessage(9,5);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     11 - MOUSE
+//////////////////////////////////
+
+procedure NeoSetMouseXY(x,y:word);
+begin
+    wordParams[0]:=x;
+    wordParams[1]:=y;
+    NeoSendMessage(11,1);
+end;
+
+procedure NeoShowMouse(show:byte);
+begin
+    NeoMessage.params[0]:=show;
+    NeoSendMessage(11,2);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     12 - BLITTER
+//////////////////////////////////
+
+function NeoBlitterBusy:boolean;
+begin
+    result := NeoSendMessage(12,1) <> 0;
+end;
+
+procedure NeoBlitterCopy(src:cardinal;dst:cardinal;len:word);
+begin
+    NeoMessage.params[0]:= src shr 16;
+    wordxParams[0] := src and $ffff;
+    NeoMessage.params[3] := dst shr 16;
+    wordParams[2] := dst and $ffff;
+    wordParams[3] := len;
+    NeoSendMessage(12,2);
 end;
 
 end.
