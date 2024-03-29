@@ -423,7 +423,7 @@ ftmp[1]:=0;
 	  SHORTINTTOK, BYTETOK, CHARTOK, BOOLEANTOK:
 		       DataSegment[ConstDataSize] := byte(ConstVal);
 
-	  SMALLINTTOK, WORDTOK, SHORTREALTOK, POINTERTOK, STRINGPOINTERTOK:
+	  SMALLINTTOK, WORDTOK, SHORTREALTOK, POINTERTOK, STRINGPOINTERTOK, PCHARTOK:
 		       begin
 			DataSegment[ConstDataSize]   := byte(ConstVal);
 			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
