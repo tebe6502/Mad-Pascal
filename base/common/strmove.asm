@@ -2,10 +2,33 @@
 ; @move -> memmove.asm
 
 /*
+	@movePCHAR
 	@moveSTRING
 	@moveSTRING_P
 	@buf2str
 */
+
+.proc	@movePCHAR (.word @move.dst .byte @move.cnt) .var
+
+	ldy #$00
+
+lp	lda (@move.src),y
+	beq skp
+
+	iny
+
+	sta (@move.dst),y
+	
+	cpy @move.cnt
+	bne lp
+skp	
+	tya
+	ldy #$00
+	sta (@move.dst),y
+
+	rts
+.endp
+
 
 .proc	@moveSTRING (.word @move.dst .byte len) .var
 
@@ -13,7 +36,7 @@
 	sty @move.cnt+1
 	lda (@move.src),y	; string[0]
 	
-	cmp len: #0		; maximum availible destination string length
+	cmp len: #$00		; maximum availible destination string length
 	bcc ok
 	beq ok
 
