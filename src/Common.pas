@@ -218,7 +218,7 @@ const
   IntegerTypes		= UnsignedOrdinalTypes + SignedOrdinalTypes;
   OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK, ENUMTOK];
 
-  Pointers		= [POINTERTOK, PROCVARTOK, STRINGPOINTERTOK];
+  Pointers		= [POINTERTOK, PROCVARTOK, STRINGPOINTERTOK, PCHARTOK];
 
   AllTypes		= OrdinalTypes + RealTypes + Pointers;
 

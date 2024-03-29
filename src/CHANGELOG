@@ -1,3 +1,6 @@
+29.03.2024
+- umożliwione przekazywanie znaku (CHARLITERLATOK) jako STRING do procedur/funkcji
+
 19.03.2024
 - {$f page} powoduje dodanie {$define fastmul}
 - opt_TEMP_WHILE poprawione
