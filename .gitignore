@@ -1,6 +1,6 @@
 build.bat
 buildrun.bat
-mp
+/mp
 mp.exe
 makeMP.bat
 *.o
