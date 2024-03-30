@@ -2,17 +2,17 @@ uses x16_zsmkit, x16, crt;
 
 
 begin
-  writeln('zsm init');
-  zsmInit;
-  writeln('setting isr');
+  writeln('ZSM INIT');
+  zsmInit(50);
+  writeln('SETTING ISR');
   zsmSetISR;
-  writeln('loading sound...');
-  zsmDirectLoad('music.zsm', 2, $A000);
-  writeln('set ram bank');
-  zsmSetMem(1, 2, $A000);
-  writeln('play?');
-  zsmPlay(1);
+  writeln('LOADING SOUND...');
+  zsmDirectLoad('music.zsm', 52, $A000);
+  writeln('SET RAM BANK');
+  zsmSetMem(0, 52, $A000);
+  writeln('PLAY?');
+  zsmPlay(0);
 
   writeln;
-  writeln('playing music in background.');
+  writeln('PLAYING MUSIC IN BACKGROUND.');
 end.

@@ -62,4 +62,7 @@ tetris:
 	mads tetris.a65 -x -i:../../../base -o:tetris.prg
 	$(X16EMU) -prg tetris.prg -run
 
-
+plasma:
+	mp -t x16 plasma.pas
+	mads plasma.a65 -x -i:../../../base -o:plasma.prg
+	$(X16EMU) -prg plasma.prg -run

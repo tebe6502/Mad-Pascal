@@ -29,12 +29,12 @@ var
     oldIRQ: Word;
 
 
-procedure zsmInit; assembler;
+procedure zsmInit(bank: byte); assembler;
 (*
 * @description:
 * Initialize engine. It sets Interrupts to trigger every 1/50th of a second to call zsm_tick().
 *
-* 
+* * @param (Byte) - RAM bank to init engine in.
 * 
 *)
 
@@ -118,10 +118,10 @@ procedure zsmSetAtten(priority, volume: Byte); assembler;
 implementation
 
 
-procedure zsmInit; assembler;
+procedure zsmInit(bank: byte); assembler;
 asm
     
-    lda #1
+    lda bank;
     jsr zsm_init_engine
 
     // lda IRQVec
