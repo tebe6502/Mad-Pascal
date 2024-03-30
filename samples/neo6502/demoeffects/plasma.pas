@@ -92,7 +92,7 @@ begin
     GotoXY(1, SCR_H + 1); Write(chuj_ci_w_dupe);
     //workaround end
 
-  Inc(c1A, 3); Dec(c1B, 5);
+    Inc(c1A, 3); Dec(c1B, 5);
 end;
 
 //------------------------------------------------------------------------------
