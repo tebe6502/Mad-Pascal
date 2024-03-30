@@ -47,17 +47,10 @@ var
 
 //------------------------------------------------------------------------------
 
-procedure InitDivision16;
-begin
-    for x := SizeOf(lookupDiv16) - 1 downto 0 do lookupDiv16[x] := x shr 4 + NEW_CHARS;
-end;
-
-//----
-
 procedure init;
 begin
     FillSinHigh(@sinusTable);
-    InitDivision16;
+    for x := SizeOf(lookupDiv16) - 1 downto 0 do lookupDiv16[x] := x shr 4 + NEW_CHARS;
     for x := 0 to (CHARS - 1) do NeoSetChar(NEW_CHARS + x, @DATA_CHAR + x * 7);
 end;
 
