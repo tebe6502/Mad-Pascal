@@ -41,8 +41,8 @@ var
     c1B               : byte = 5;
     x, y, tmp         : byte;
 
-    sinusTable        : array [0..255]   of byte absolute TABLES + PAGE * 0;
-    lookupDiv16       : array [0..255]   of byte absolute TABLES + PAGE * 1;
+    sinusTable        : array [0..PAGE - 1]   of byte absolute TABLES + PAGE * 0;
+    lookupDiv16       : array [0..PAGE - 1]   of byte absolute TABLES + PAGE * 1;
     xbuf              : array [0..SCR_W] of byte absolute TABLES + PAGE * 2;
 
 //------------------------------------------------------------------------------
