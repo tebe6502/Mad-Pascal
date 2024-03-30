@@ -10,12 +10,12 @@ const
     SCR_W     = 53;
     SCR_H     = 33;
     CHARS     = 16;
-    CHARS_W   = 7;
+    CHARS_H   = 7;
     NEW_CHARS = 192;
     PAGE      = $100;
     TABLES    = $F000;
 
-    DATA_CHAR: array [0..(CHARS * CHARS_W - 1)] of byte = (
+    DATA_CHAR: array [0..(CHARS * CHARS_H - 1)] of byte = (
         $00, $00, $00, $00, $00, $00, $00, // $00,
         $00, $00, $00, $10, $00, $00, $00, // $00,
         $00, $00, $18, $18, $00, $00, $00, // $00,
@@ -54,7 +54,7 @@ begin
     SetLength(row, SCR_W);
     FillSinHigh(@sinusTable);
     for x := SizeOf(lookupDiv16) - 1 downto 0 do lookupDiv16[x] := x shr 4 + NEW_CHARS;
-    for x := 0 to (CHARS - 1) do NeoSetChar(NEW_CHARS + x, @DATA_CHAR + x * 7);
+    for x := 0 to (CHARS - 1) do NeoSetChar(NEW_CHARS + x, @DATA_CHAR + x * CHARS_H);
 end;
 
 //----
@@ -78,10 +78,10 @@ begin
         for x := 1 to SCR_W do begin
             row[x] := chr(lookupDiv16[xbuf[x] + tmp]);
         end;
-        NeoDrawString(0, y * 7, row);
+        NeoDrawString(0, y * CHARS_H, row);
     end;
 
-    Inc(c1A, 3); Dec(c1B, 5);
+  Inc(c1A, 3); Dec(c1B, 5);
 end;
 
 //------------------------------------------------------------------------------
