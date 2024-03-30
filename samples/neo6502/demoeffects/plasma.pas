@@ -45,10 +45,15 @@ var
     lookupDiv16       : array [0..PAGE - 1] of byte absolute TABLES + PAGE * 1;
     xbuf              : array [0..SCR_W]    of byte absolute TABLES + PAGE * 2;
 
+    row               : string;
+    chuj_ci_w_dupe    : string;
+
 //------------------------------------------------------------------------------
 
 procedure init;
 begin
+    SetLength(row, SCR_W);
+    SetLength(chuj_ci_w_dupe, SCR_W - 1);
     FillSinHigh(@sinusTable);
     for x := SizeOf(lookupDiv16) - 1 downto 0 do lookupDiv16[x] := x shr 4 + NEW_CHARS;
     for x := 0 to (CHARS - 1) do NeoSetChar(NEW_CHARS + x, @DATA_CHAR + x * 7);
@@ -69,13 +74,23 @@ begin
         Inc(_c1a, 3); Inc(_c1b, 7);
     end;
 
-    for y := SCR_H downto 0 do begin
+    for y := 1 to SCR_H do begin
         tmp := sinusTable[_c1a] + sinusTable[_c1b];
         Inc(_c1a, 4); Inc(_c1b, 9);
-        for x := SCR_W downto 0 do begin
-            GotoXY(x, y); Write(chr(lookupDiv16[xbuf[x] + tmp]));
+        for x := 1 to SCR_W do begin
+            row[x] := chr(lookupDiv16[xbuf[x] + tmp]);
         end;
+        GotoXY(1, y); Write(row);
     end;
+
+    //workaround start
+    tmp := sinusTable[_c1a] + sinusTable[_c1b];
+    Inc(_c1a, 4); Inc(_c1b, 9);
+    for x := 1 to SCR_W - 1 do begin
+        chuj_ci_w_dupe[x] := chr(lookupDiv16[xbuf[x] + tmp]);
+    end;
+    GotoXY(1, SCR_H + 1); Write(chuj_ci_w_dupe);
+    //workaround end
 
   Inc(c1A, 3); Dec(c1B, 5);
 end;
