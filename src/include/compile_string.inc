@@ -122,11 +122,9 @@
 
 		 Ident[IdentIndex].isInit := true;
 
-		 //StopOptimization;
-
 		 Result := CompileExpression(i + 2, ExpressionType, VarType);      // Right-hand side expression
 
-//		 asm65;
+		 svar := GetLocalName(IdentIndex);
 
 
  // Character assignment to pointer  var f:=c
@@ -149,7 +147,7 @@
 		   ASPOINTERTOPOINTER:
 		     begin
 
-		       asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
+		       asm65(#9'mwy ' + svar + ' :bp2');
 		       asm65(#9'ldy #$00');
 		       asm65(#9'mva #$01 (:bp2),y');
 		       asm65(#9'iny');
@@ -161,7 +159,7 @@
 		   ASPOINTERTOARRAYORIGIN:
 		     begin
 
-		      asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
+		      asm65(#9'mwy ' + svar + ' :bp2');
 		      asm65(#9'ldy :STACKORIGIN-1,x');
 		      asm65(#9'lda :STACKORIGIN,x');
 		      asm65(#9'sta (:bp2),y');
@@ -181,19 +179,31 @@
 
 		if ExpressionType in Pointers then begin
 
-		  Ident[IdentIndex].isInit := true;
-
-		  svar := GetLocalName(IdentIndex);
-
 		  case IndirectionLevel of
 
 		    ASPOINTER, ASPOINTERTOPOINTER:
 		      begin
 
-			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @move.src');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @move.src+1');
+		      	if Tok[i+3].Kind = DEREFERENCETOK then begin
+
+		          asm65(#9'mwy ' + GetLocalName(GetIdent(Tok[i + 2].Name^)) + ' :bp2');
+		          asm65(#9'ldy #$00');
+		          asm65(#9'lda (:bp2),y');
+			  asm65(#9'sta @move.src');
+		          asm65(#9'iny');
+		          asm65(#9'lda (:bp2),y');
+			  asm65(#9'sta @move.src+1');
+
+			  inc(i);
+
+			end else begin
+
+			  asm65(#9'lda :STACKORIGIN,x');
+			  asm65(#9'sta @move.src');
+			  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			  asm65(#9'sta @move.src+1');
+
+			end;
 
 
 		        if (ExpressionType = PCHARTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then
@@ -226,4 +236,3 @@
 
 
 	      end; // case Tok[i + 2].Kind
-
