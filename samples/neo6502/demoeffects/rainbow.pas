@@ -47,12 +47,15 @@ var
 
 procedure createPalette;
 var
-    r, g, b, v: byte;
+    r, g, b: byte;
+    v: real;
 begin
     for i := 15 downto 0 do begin
         r := BASE_R[i]; g := BASE_G[i]; b := BASE_B[i];
-        for ii := 15 downto 0 do
-            NeoSetPalette(i * 16 + ii, round(r * (ii / 15)), round(g * (ii / 15)), round(b * (ii / 15)));
+        for ii := 15 downto 0 do begin
+            v := (ii / 15);
+            NeoSetPalette(i * 16 + ii, round(r * v), round(g * v), round(b * v));
+        end;
     end;
 end;
 
