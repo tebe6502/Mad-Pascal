@@ -175,7 +175,7 @@ const
   PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 146;	// Size = 1 BYTE
   PROCVARTOK		= 147;	// Size = 2
-  TEXTFILETOK		= 148;	// Size = 2/12 FILE
+  TEXTFILETOK		= 148;	// Size = 2/12 TEXTFILE
   FORWARDTYPE		= 149;	// Size = 2
 
   SHORTSTRINGTOK	= 150;	// zamieniamy na STRINGTOK
@@ -300,7 +300,30 @@ const
 
   // Data sizes
 
-  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,2,1,2,2,2);
+  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (
+  	1,	// Size = 1 BYTE
+  	2,	// Size = 2 WORD
+  	4,	// Size = 4 CARDINAL
+	1,	// Size = 1 SHORTINT
+	2,	// Size = 2 SMALLINT
+	4,	// Size = 4 INTEGER
+	1,	// Size = 1 CHAR
+	1,	// Size = 1 BOOLEAN
+	2,	// Size = 2 POINTER
+	2,	// Size = 2 POINTER to STRING
+	2,	// Size = 2 FILE
+	2,	// Size = 2 RECORD
+	2,	// Size = 2 OBJECT
+	2,	// Size = 2 SHORTREAL
+	4,	// Size = 4 REAL
+	4,	// Size = 4 SINGLE / FLOAT
+	2,	// Size = 2 HALFSINGLE / FLOAT16
+	2,	// Size = 2 PCHAR
+	1,	// Size = 1 BYTE
+	2,	// Size = 2 PROCVAR
+	2,	// Size = 2 TEXTFILE
+	2	// Size = 2 FORWARD
+	);
 
   fBlockRead_ParamType : array [1..3] of byte = (UNTYPETOK, WORDTOK, POINTERTOK);
 
