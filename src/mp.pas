@@ -5609,7 +5609,7 @@ begin
 	      if common.optimize.use = false then StartOptimization(i);
 
 
-	      if (Ident[IdentIndex].isStriped) or (Ident[IdentIndex].DataType = PCHARTOK) then
+	      if (Ident[IdentIndex].isStriped) then
 	        Size := 1
 	      else
    	        Size := DataSize[Ident[IdentIndex].AllocElementType];
@@ -5753,8 +5753,8 @@ begin
 
 	if ShortArrayIndex then begin
 
-//	  asm65(#9'lda #$00');
-//	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+	  asm65(#9'lda #$00');
+	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
 	end;
 
@@ -8011,7 +8011,6 @@ case Tok[i].Kind of
 
 		 end;
 
-
 		CheckTok(j + 1, CPARTOK);
 
 		if (ValType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = PROCVARTOK) then begin
@@ -8458,6 +8457,7 @@ case Tok[i].Kind of
 
 	   ValType := Ident[IdentIndex].AllocElementType;
 
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 	   if (ValType = CHARTOK) then
 
@@ -8541,7 +8541,6 @@ case Tok[i].Kind of
 	    end;
 
 	   end;
-
 
 	   Push(ConstVal, ASVALUE, DataSize[ValType]);
 
@@ -10104,11 +10103,7 @@ case Tok[i].Kind of
 
 	    i := CompileArrayIndex(i, IdentIndex);
 
-
-	    if Ident[IdentIndex].DataType = PCHARTOK then
-	     VarType := CHARTOK
-	    else
-    	     VarType := Ident[IdentIndex].AllocElementType;
+    	    VarType := Ident[IdentIndex].AllocElementType;
 
 
 //	    writeln(Ident[IdentIndex].Name,',',vartype,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Kind);//+ '.' + Tok[i + 3].Name^);
@@ -12289,6 +12284,7 @@ WHILETOK:
 	  j := i + 1;
 
 	  i := CompileExpression(j, ExpressionType);
+
 
 	  if (ExpressionType = CHARTOK) and (Tok[i].Kind = DEREFERENCETOK) then begin
 
@@ -15201,7 +15197,9 @@ while Tok[i].Kind in
 
 	  varPassMethod := 255;
 
+
 //	  writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
+
 
 	  if (VarType = POINTERTOK) and (AllocElementType = STRINGPOINTERTOK) and (NestedNumAllocElements > 0) and (NumAllocElements > 1) then begin	// array [ ][ ] of string;
 
