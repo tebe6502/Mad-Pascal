@@ -65,7 +65,7 @@ begin
     createPalette;
 
     for i := 0 to 239 do begin
-        NeoSetColor(i);
+        NeoSetColor(i + 16);
         NeoDrawLine(0, i, 319, i);
     end;
 
