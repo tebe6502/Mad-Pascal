@@ -60,10 +60,14 @@ end;
 //------------------------------------------------------------------------------
 
 begin
-    NeoWaitForVblank; clrscr; createPalette;
+    NeoWaitForVblank;
+    clrscr;
+    createPalette;
+
     for i := 0 to 239 do begin
         NeoSetColor(i);
         NeoDrawLine(0, i, 319, i);
     end;
+
     repeat until false;
 end.
