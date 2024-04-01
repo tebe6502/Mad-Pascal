@@ -21,7 +21,7 @@ var
 
 //------------------------------------------------------------------------------
 
-procedure drawBawr(n :byte; x: word); register;
+procedure drawBar(n :byte; x: word); register;
 var
     size : word absolute $54;
     h    : byte absolute $56;
@@ -46,7 +46,7 @@ begin
         clrscr;
 
         for ii := 0 to 59  do begin
-            drawBawr(ii, ii + sinusTable[i + (ii shl 1)]);
+            drawBar(ii, ii + sinusTable[i + (ii shl 1)]);
         end;
         inc(i);
     until false;
