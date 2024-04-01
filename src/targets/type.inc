@@ -1,6 +1,7 @@
 type
   TTarget = Record
     id, name, zpage : string;
+    cpu: tCPU;
     eol: byte;
     buf,
     codeorigin : word;

@@ -1717,7 +1717,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('jsr B_CRT.CRT_READ', listing[i]) > 0) then begin
+if (pos('ldy #1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1863,6 +1863,7 @@ end;
 
   end;	//PeepholeOptimization_STA
 
+{$i include/opt65c02/opt_STZ.inc}
 
 {$i include/opt6502/opt_LDA.inc}
 {$i include/opt6502/opt_TAY.inc}
@@ -1896,7 +1897,7 @@ end;
 
 
 {
-if (pos('sta ', listing[i]) > 0) then begin
+if (pos('lda adr.DATA,y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2087,6 +2088,12 @@ end;
      if opt_BP2_ADR(i) = false then begin Result := false; Break end;
      if opt_POKE(i) = false then begin Result := false; Break end;
 
+     if CPUMode <> CPU_6502 then begin
+
+       if opt_STZ(i) = false then begin Result := false; Break end;
+
+     end;
+
   end;
 
  end;			// Peepholeoptimization
@@ -2126,7 +2133,7 @@ end;
 
 
 {
-if (pos('20', listing[i]) > 0) then begin
+if (pos('cmp #$29', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

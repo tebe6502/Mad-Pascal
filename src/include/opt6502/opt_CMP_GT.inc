@@ -360,31 +360,6 @@ begin
 // 				     BYTE
 // -----------------------------------------------------------------------------
 
-{
-!!! nadmiarowy kod
-
-    if ldy_1(i) and 										// ldy #1		; 0	BOOL := BYTE > 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda			; 1
-       cmp(i+2) and										// cmp			; 2
-       (listing[i+3] = #9'bcs @+') and								// bcs @+		; 3
-       dey(i+4) and										// dey			; 4
-       lab_a(i+5) and										//@			; 5
-       tya(i+6) and										// tya			; 6
-       sta_a(i+7) and										// sta			; 7
-												//			; 8
-       (dex(i+9) = false) then									//~dex			; 9
-     begin
-	listing[i]   := '';
-
-	listing[i+3] := #9'lda #$00';
-	listing[i+4] := #9'rol @';
-	listing[i+5] := '';
-	listing[i+6] := '';
-
-	exit(false);
-     end;
-}
-
     if (SKIP(i-1) = false) and
        lda_a(i) and										// lda			; 0	opt_094	| BYTE > 0
        cmp_im(i+1) and										// cmp #		; 1

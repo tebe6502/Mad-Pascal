@@ -293,9 +293,19 @@
 	 if (pos(tmp, listing[p]) > 0) then begin
 
 	  if sta_stack(p) then begin
+
+	   if (p > 2) and
+	      tay(p-3)and				// tay				; p-3
+	      lda_stack(p-2) and			// lda :STACKORIGIN+STACKWIDTH	; p-2
+	      adc_im_0(p-1) 				// adc #$00			; p-1
+	   then
+
+	   else begin
 	    listing[p] := '';
 
 	    Result:=false; Break;
+	   end;
+
 	  end;
 
 	  Break;

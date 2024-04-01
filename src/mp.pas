@@ -16204,6 +16204,26 @@ begin
      AddPath(s);
 
    end else
+   if (AnsiUpperCase(ParamStr(i)) = '-CPU') then begin
+
+     s:=AnsiUpperCase(ParamStr(i+1));
+
+     if AnsiUpperCase(s) = '6502' then CPUMode := CPU_6502 else
+      if AnsiUpperCase(s) = '65C02' then CPUMode := CPU_65C02 else
+       if AnsiUpperCase(s) = '65816' then CPUMode := CPU_65816 else
+        Syntax(3);
+
+   end else
+   if pos('-CPU:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+
+     s:=copy(ParamStr(i), 6, 255);
+
+     if AnsiUpperCase(s) = '6502' then CPUMode := CPU_6502 else
+      if AnsiUpperCase(s) = '65C02' then CPUMode := CPU_65C02 else
+       if AnsiUpperCase(s) = '65816' then CPUMode := CPU_65816 else
+        Syntax(3);
+
+   end else
    if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then begin
 
      AddDefine(AnsiUpperCase(ParamStr(i+1)));
@@ -16400,8 +16420,7 @@ begin
 
 // ----------------------------------------------------------------------------
 
-
- NumStaticStrCharsTmp :=  NumStaticStrChars;
+ NumStaticStrCharsTmp := NumStaticStrChars;
 
 // Predefined constants
  DefineIdent(1, 'BLOCKREAD',      FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
@@ -16426,7 +16445,6 @@ begin
  DefineIdent(1, 'INFINITY', CONSTANT, SINGLETOK, 0, 0, $7F8000007F800000);
  DefineIdent(1, 'NEGINFINITY', CONSTANT, SINGLETOK, 0, 0, $FF800000FF800000);
 
-
 // First pass: compile the program and build call graph
  NumPredefIdent := NumIdent;
  Pass := CALLDETERMPASS;
@@ -16446,6 +16464,7 @@ begin
  CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
 
  NumStaticStrChars := NumStaticStrCharsTmp;
+
 
  ResetOpty;
  optyFOR0 := '';
