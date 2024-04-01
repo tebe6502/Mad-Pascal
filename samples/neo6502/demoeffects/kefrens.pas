@@ -45,7 +45,7 @@ begin
         NeoWaitForVblank;
         clrscr;
 
-        for ii := 0 to 59  do
+        for ii := 0 to 59 do
             drawBar(ii, ii + sinusTable[i + (ii shl 1)]);
         inc(i);
     until false;
