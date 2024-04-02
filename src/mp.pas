@@ -245,14 +245,8 @@ begin
 
 
 function GetLocalName(IdentIndex: integer; a: string =''): string;
-var Name: string;
 begin
-{
- if (Ident[IdentIndex].isExternal) and (Ident[IdentIndex].Libraries > 0) then
-   Name := Ident[IdentIndex].Name
- else
-   Name := Ident[IdentIndex].Name;
-}
+
  if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section then
    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
  else
@@ -6222,7 +6216,7 @@ end;	//NumActualParameters
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
 var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
-    ActualParamType, AllocElementType, ch: byte;
+    ActualParamType, AllocElementType: byte;
     svar, lab: string;
     yes: Boolean;
     Param: TParamList;
@@ -9825,7 +9819,7 @@ end;
 
 function CompileStatement(i: Integer; isAsm: Boolean = false): Integer;
 var
-  j, k, IdentIndex, IdentTemp, ProcVarIndex, NumActualParams, NumCharacters,
+  j, k, IdentIndex, IdentTemp, NumActualParams, NumCharacters,
   IfLocalCnt, CaseLocalCnt, NumCaseStatements, vlen, oldPass, oldCodeSize: integer;
   Param: TParamList;
   ExpressionType, IndirectionLevel, ActualParamType, ConstValType, VarType, SelectorType: Byte;
@@ -15947,8 +15941,8 @@ asm65separator;
 
 asm65;
 
-if DATA_Atari > 0 then
- asm65(#9'org $'+IntToHex(DATA_Atari, 4))
+if DATA_BASE > 0 then
+ asm65(#9'org $'+IntToHex(DATA_BASE, 4))
 else begin
 
  asm65(#9'?adr = *');
@@ -16168,10 +16162,8 @@ var i, err: integer;
     t, c: string[32];
 begin
 
- target.codeorigin := -1;
-
- t:='A8';
- c:='';
+  t := 'A8';		// target
+  c := '';		// cpu
 
  i:=1;
  while i <= ParamCount do begin
@@ -16237,55 +16229,51 @@ begin
 
      val('$'+ParamStr(i+1), CODEORIGIN_BASE, err);
      inc(i);
-     if err<>0 then Syntax(3);
-
-     target.codeorigin := CODEORIGIN_BASE;
+     if err <> 0 then Syntax(3);
 
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
      val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
-     if err<>0 then Syntax(3);
-
-     target.codeorigin := CODEORIGIN_BASE;
+     if err <> 0 then Syntax(3);
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
 
-     val('$'+ParamStr(i+1), DATA_Atari, err);
+     val('$'+ParamStr(i+1), DATA_BASE, err);
      inc(i);
      if err<>0 then Syntax(3);
 
    end else
    if pos('-DATA:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
-     val('$'+copy(ParamStr(i), 7, 255), DATA_Atari, err);
+     val('$'+copy(ParamStr(i), 7, 255), DATA_BASE, err);
      if err<>0 then Syntax(3);
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-STACK') or (AnsiUpperCase(ParamStr(i)) = '-S') then begin
 
-     val('$'+ParamStr(i+1), STACK_Atari, err);
+     val('$'+ParamStr(i+1), STACK_BASE, err);
      inc(i);
      if err<>0 then Syntax(3);
 
    end else
    if pos('-STACK:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
-     val('$'+copy(ParamStr(i), 8, 255), STACK_Atari, err);
+     val('$'+copy(ParamStr(i), 8, 255), STACK_BASE, err);
      if err<>0 then Syntax(3);
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-ZPAGE') or (AnsiUpperCase(ParamStr(i)) = '-Z') then begin
 
-     val('$'+ParamStr(i+1), ZPAGE_Atari, err);
+     val('$'+ParamStr(i+1), ZPAGE_BASE, err);
      inc(i);
      if err<>0 then Syntax(3);
 
    end else
    if pos('-ZPAGE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
-     val('$'+copy(ParamStr(i), 8, 255), ZPAGE_Atari, err);
+     val('$'+copy(ParamStr(i), 8, 255), ZPAGE_BASE, err);
      if err<>0 then Syntax(3);
 
    end else
@@ -16319,15 +16307,30 @@ begin
   inc(i);
  end;
 
+
 {$i targets/parse_param.inc}
 
 {$i targets/init.inc}
+
+
+ if CODEORIGIN_BASE < 0 then
+  CODEORIGIN_BASE := target.codeorigin
+ else
+  target.codeorigin := CODEORIGIN_BASE;
+
+
+ if ZPAGE_BASE < 0 then
+  ZPAGE_BASE := target.zpage
+ else
+  target.zpage := ZPAGE_BASE;
+
 
  if c <> '' then
   if AnsiUpperCase(c) = '6502' then target.cpu := CPU_6502 else
    if AnsiUpperCase(c) = '65C02' then target.cpu := CPU_65C02 else
     if AnsiUpperCase(c) = '65816' then target.cpu := CPU_65816 else
      Syntax(3);
+
 
  case target.cpu of
   CPU_6502: AddDefine('CPU_6502');

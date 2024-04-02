@@ -35,11 +35,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator;
  asm65;
 
- if ZPAGE_Atari > 0 then
-  asm65(#9'org $' + IntToHex(ZPAGE_Atari, 2))
- else begin
-  asm65(#9'' + target.zpage);
- end;
+ asm65(#9'org $' + IntToHex(ZPAGE_BASE, 2));
 
  asm65;
  asm65('zpage');
@@ -76,9 +72,9 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('ztmp10'#9'.ds 1');
  asm65('ztmp11'#9'.ds 1');
 
- if STACK_Atari > 0 then begin
+ if STACK_BASE >= 0 then begin
   asm65;
-  asm65(#9'org $'+IntToHex(STACK_Atari, 4));
+  asm65(#9'org $'+IntToHex(STACK_BASE, 4));
  end;
 
  asm65;
@@ -218,18 +214,14 @@ if Pass = CODEGENERATIONPASS then begin
    asm65(#9'jmp START');
    asm65;
 
-   CODEORIGIN_BASE := target.codeorigin + 3;
-
   end else if (target.id = ___neo) then begin
 
    asm65;
    asm65(#9'opt h-f+c+');
    asm65;
-   asm65(#9'org $' + IntToHex(target.codeorigin,4));
+   asm65(#9'org $' + IntToHex(target.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
-
-   CODEORIGIN_BASE := target.codeorigin + 3;
 
   end else
    CODEORIGIN_BASE := target.codeorigin;
