@@ -1,78 +1,101 @@
+case target.id of
+
+___C64: begin
+
 // Commodore C64 target
-c64.cpu        := cpu_6502;
-c64.id         := ___c64;
-c64.name       := 'C64';
-c64.buf        := $0800;
-c64.zpage      := 'org $02';
-c64.eol        := $0000000D;
-c64.codeorigin := $0900;
-c64.header[0]  := 'opt h-f+';
-c64.header[1]  := 'org $801';
-c64.header[2]  := 'org [a($801)],$801';
-c64.header[3]  := 'basic_start(START)';
-c64.header[4]  := ''; // asm65;
-c64.header[5]  := 'org $900';
-c64.header[6]  := ''; // asm65;
-c64.header[7]  := 'END';
+target.cpu        := cpu_6502;
+target.name       := 'C64';
+target.buf        := $0800;
+target.zpage      := 'org $02';
+target.eol        := $0000000D;
+target.codeorigin := $0900;
+target.header[0]  := 'opt h-f+';
+target.header[1]  := 'org $801';
+target.header[2]  := 'org [a($801)],$801';
+target.header[3]  := 'basic_start(START)';
+target.header[4]  := ''; // asm65;
+target.header[5]  := 'org $900';
+target.header[6]  := ''; // asm65;
+target.header[7]  := 'END';
+
+end;
+
+___C4P: begin
 
 // Commodore Plus/4 target
-c4p.cpu        := cpu_6502;
-c4p.id         := ___c4p;
-c4p.name       := 'C4P';
-c4p.buf        := $0800;
-c4p.zpage      := 'org $02';
-c4p.eol        := $0000000D;
-c4p.codeorigin := $100E;
-c4p.header[0]  := 'opt h-f+';
-c4p.header[1]  := 'org $1001';
-c4p.header[2]  := 'org [a($1001)],$1001';
-c4p.header[3]  := 'basic_start(START)';
-c4p.header[4]  := ''; // asm65;
-c4p.header[5]  := 'org $100E';
-c4p.header[6]  := ''; // asm65;
-c4p.header[7]  := 'END';
+target.cpu        := cpu_6502;
+target.name       := 'C4P';
+target.buf        := $0800;
+target.zpage      := 'org $02';
+target.eol        := $0000000D;
+target.codeorigin := $100E;
+target.header[0]  := 'opt h-f+';
+target.header[1]  := 'org $1001';
+target.header[2]  := 'org [a($1001)],$1001';
+target.header[3]  := 'basic_start(START)';
+target.header[4]  := ''; // asm65;
+target.header[5]  := 'org $100E';
+target.header[6]  := ''; // asm65;
+target.header[7]  := 'END';
+
+end;
+
+___A8: begin
 
 // Atari 8-bit target
-a8.cpu        := cpu_6502;
-a8.id         := ___a8;
-a8.name       := 'ATARI';
-a8.buf        := $0400;
-a8.zpage      := 'org $80';
-a8.eol        := $0000009B;
+target.cpu        := cpu_6502;
+target.name       := 'ATARI';
+target.buf        := $0400;
+target.zpage      := 'org $80';
+target.eol        := $0000009B;
+
+end;
+
+___RAW: begin
 
 // RAW binary target
-raw.cpu        := cpu_6502;
-raw.id         := ___raw;
-raw.name       := 'RAW';
-raw.buf        := $0200;
-raw.zpage      := 'org $00';
-raw.eol        := $0000000D;
-raw.codeorigin := $1000;
-raw.header[0]  := 'END';
+target.cpu        := cpu_6502;
+target.name       := 'RAW';
+target.buf        := $0200;
+target.zpage      := 'org $00';
+target.eol        := $0000000D;
+target.codeorigin := $1000;
+target.header[0]  := 'END';
+
+end;
+
+___NEO: begin
 
 // NEO6502 binary target
-neo.cpu        := cpu_65c02;
-neo.id         := ___neo;
-neo.name       := 'NEO';
-neo.buf        := $0200;
-neo.zpage      := 'org $00';
-neo.eol        := $0000000D;
-neo.codeorigin := $800;
-neo.header[0]  := 'END';
+target.cpu        := cpu_65c02;
+target.name       := 'NEO';
+target.buf        := $0200;
+target.zpage      := 'org $00';
+target.eol        := $0000000D;
+target.codeorigin := $800;
+target.header[0]  := 'END';
+
+end;
+
+___X16: begin
 
 // Commander X16 target
-x16.cpu        := cpu_65c02;
-x16.id         := ___x16;
-x16.name       := 'X16';
-x16.buf        := $0400;
-x16.zpage      := 'org $22'; // 0x0022-0x007F;	94 bytes;	User zero page
-x16.eol        := $0000000D;
-x16.codeorigin := $0900;
-x16.header[0]  := 'opt h-f+c+';
-x16.header[1]  := 'org $801';
-x16.header[2]  := 'org [a($801)],$801';
-x16.header[3]  := 'basic_start(START)';
-x16.header[4]  := ''; // asm65;
-x16.header[5]  := 'org $900';
-x16.header[6]  := ''; // asm65;
-x16.header[7]  := 'END';
+target.cpu        := cpu_65c02;
+target.name       := 'X16';
+target.buf        := $0400;
+target.zpage      := 'org $22'; // 0x0022-0x007F;	94 bytes;	User zero page
+target.eol        := $0000000D;
+target.codeorigin := $0900;
+target.header[0]  := 'opt h-f+c+';
+target.header[1]  := 'org $801';
+target.header[2]  := 'org [a($801)],$801';
+target.header[3]  := 'basic_start(START)';
+target.header[4]  := ''; // asm65;
+target.header[5]  := 'org $900';
+target.header[6]  := ''; // asm65;
+target.header[7]  := 'END';
+
+end;
+
+
+end;

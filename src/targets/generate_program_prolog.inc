@@ -1,7 +1,7 @@
 procedure GenerateProgramProlog;
 var i, j: Integer;
     tmp: Boolean;
-    a: string;
+    a, header: string;
 begin
 
 if Pass = CODEGENERATIONPASS then begin
@@ -30,15 +30,15 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FALSE'#9#9'= '+IntToStr(Ident[GetIdent('FALSE')].Value));
  asm65('EOL'#9#9'= $'+IntToHex(Ident[GetIdent('EOL')].Value,2));
  asm65('__BUFFER'#9'= $'+IntToHex(Ident[GetIdent('__BUFFER')].Value,4));
- asm65('@BUF'#9#9'= __BUFFER'); 
+ asm65('@BUF'#9#9'= __BUFFER');
 
  asm65separator;
  asm65;
 
  if ZPAGE_Atari > 0 then
-  asm65(#9'org $'+IntToHex(ZPAGE_Atari, 2))
+  asm65(#9'org $' + IntToHex(ZPAGE_Atari, 2))
  else begin
-  asm65(#9''+target.zpage);
+  asm65(#9'' + target.zpage);
  end;
 
  asm65;
@@ -214,7 +214,7 @@ if Pass = CODEGENERATIONPASS then begin
    asm65;
    asm65(#9'opt h-f+');
    asm65;
-   asm65(#9'org $' + IntToHex(raw.codeorigin, 4));
+   asm65(#9'org $' + IntToHex(target.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
 
@@ -225,7 +225,7 @@ if Pass = CODEGENERATIONPASS then begin
    asm65;
    asm65(#9'opt h-f+c+');
    asm65;
-   asm65(#9'org $' + IntToHex(neo.codeorigin, 4));
+   asm65(#9'org $' + IntToHex(target.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
 
@@ -255,7 +255,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('RTLIB');
 
 
- if target.id = ___a8 then 
+ if target.id = ___a8 then
   asm65(#9'icl ''rtl6502_a8.asm''')
  else
   asm65(#9'icl ''rtl6502_' + AnsiLowerCase(target.name) + '.asm''');
@@ -356,18 +356,8 @@ if Pass = CODEGENERATIONPASS then begin
   asm65;
 
  end;
- 
- 
- case target.id of
-  ___c64: CPUMode := c64.cpu;
-  ___c4p: CPUMode := c4p.cpu;
-   ___a8: CPUMode := a8.cpu;
-  ___raw: CPUMode := raw.cpu;
-  ___neo: CPUMode := neo.cpu;
-  ___x16: CPUMode := x16.cpu;
- end;
- 
- 
+
+
  if CPUMode <> CPU_6502 then asm65(#9'opt c+');
 
 

@@ -14609,8 +14609,8 @@ while Tok[i].Kind in
    if (Tok[i + 2].Kind = COLONTOK) and (Tok[i + 3].Kind = INTNUMBERTOK) then begin
 
      CODEORIGIN_BASE := Tok[i + 3].Value;
-     raw.codeorigin := CODEORIGIN_BASE;
-     neo.codeorigin := CODEORIGIN_BASE;
+
+     target.codeorigin := CODEORIGIN_BASE;
 
      inc(i, 2);
    end;
@@ -14658,8 +14658,8 @@ while Tok[i].Kind in
    if (Tok[i + 1].Kind = COLONTOK) and (Tok[i + 2].Kind = INTNUMBERTOK) then begin
 
      CODEORIGIN_BASE := Tok[i + 2].Value;
-     raw.codeorigin := CODEORIGIN_BASE;
-     neo.codeorigin := CODEORIGIN_BASE;
+
+     target.codeorigin := CODEORIGIN_BASE;
 
      inc(i, 2);
    end;
@@ -16244,8 +16244,7 @@ begin
      inc(i);
      if err<>0 then Syntax(3);
 
-     raw.codeorigin := CODEORIGIN_BASE;
-     neo.codeorigin := CODEORIGIN_BASE;
+     target.codeorigin := CODEORIGIN_BASE;
 
    end else
    if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
@@ -16253,8 +16252,7 @@ begin
      val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
      if err<>0 then Syntax(3);
 
-     raw.codeorigin := CODEORIGIN_BASE;
-     neo.codeorigin := CODEORIGIN_BASE;
+     target.codeorigin := CODEORIGIN_BASE;
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
@@ -16328,6 +16326,10 @@ begin
 
 {$i targets/parse_param.inc}
 
+{$i targets/init.inc}
+
+ CPUMode := target.cpu;
+
 end;
 
 
@@ -16342,10 +16344,6 @@ begin
 {$ENDIF}
 
 //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
-
-
- {$i targets/init.inc}
-
 
  WriteLn(CompilerTitle);
 
