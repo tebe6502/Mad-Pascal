@@ -29,7 +29,6 @@ begin
     size := BAR_H + n;
     if size > 239 then h := 239 else h := size;
 
-    NeoSetSolidFlag(1);
     NeoSetColor(BAR_COL1);
     NeoDrawRect(x, n , x + BAR_W_OUTER, h);
     NeoSetColor(BAR_COL2);
@@ -43,6 +42,7 @@ begin
     repeat
         NeoWaitForVblank;
         clrscr;
+        NeoSetSolidFlag(1);
         for ii := 0 to 59  do
             drawBar(ii, ii + sinusTable[i + (ii shl 1)]);
         inc(i);
