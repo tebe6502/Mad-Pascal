@@ -225,11 +225,11 @@ if Pass = CODEGENERATIONPASS then begin
    asm65;
    asm65(#9'opt h-f+c+');
    asm65;
-   asm65(#9'org $' + IntToHex(target.codeorigin, 4));
+   asm65(#9'org $' + IntToHex(CODEORIGIN_BASE,4));
    asm65(#9'jmp START');
    asm65;
 
-   CODEORIGIN_BASE := target.codeorigin + 3;
+   CODEORIGIN_BASE := CODEORIGIN_BASE + 3;
 
   end else
    CODEORIGIN_BASE := target.codeorigin;
