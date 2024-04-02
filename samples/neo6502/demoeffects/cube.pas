@@ -1,14 +1,18 @@
-program three_d;
+program wired_cube;
 
-{$f $80}
+//------------------------------------------------------------------------------
 
-uses
-    atari, crt, fastgraph;
+uses crt, neo6502;
+
+//------------------------------------------------------------------------------
 
 const
     sz                  : byte = 16;
     cx                  : byte = 79;
     cy                  : byte = 50;
+
+//------------------------------------------------------------------------------
+
 var
     angle               : shortreal = 0.0;
 
@@ -19,18 +23,18 @@ var
 
     X1, X2, Y1, Y2      : byte;
 
-    var	buf1, buf2      : TDisplayBuffer;
+//------------------------------------------------------------------------------
 
 procedure init_points;
 begin
-    pts[0,0] := -1; pts[0,1] := -1; pts[0,2] := -1;
-    pts[1,0] :=  1; pts[1,1] := -1; pts[1,2] := -1;
-    pts[2,0] :=  1; pts[2,1] :=  1; pts[2,2] := -1;
-    pts[3,0] := -1; pts[3,1] :=  1; pts[3,2] := -1;
-    pts[4,0] := -1; pts[4,1] := -1; pts[4,2] :=  1;
-    pts[5,0] :=  1; pts[5,1] := -1; pts[5,2] :=  1;
-    pts[6,0] :=  1; pts[6,1] :=  1; pts[6,2] :=  1;
-    pts[7,0] := -1; pts[7,1] :=  1; pts[7,2] :=  1;
+    pts[0,0] := -2; pts[0,1] := -2; pts[0,2] := -2;
+    pts[1,0] :=  2; pts[1,1] := -2; pts[1,2] := -2;
+    pts[2,0] :=  2; pts[2,1] :=  2; pts[2,2] := -2;
+    pts[3,0] := -2; pts[3,1] :=  2; pts[3,2] := -2;
+    pts[4,0] := -2; pts[4,1] := -2; pts[4,2] :=  2;
+    pts[5,0] :=  2; pts[5,1] := -2; pts[5,2] :=  2;
+    pts[6,0] :=  2; pts[6,1] :=  2; pts[6,2] :=  2;
+    pts[7,0] := -2; pts[7,1] :=  2; pts[7,2] :=  2;
 end;
 
 procedure rotate_points;
@@ -52,7 +56,6 @@ begin
         rxp[n,1] :=  cs * ryp[n,1] - sn * ryp[n,2];
         rxp[n,2] :=  sn * ryp[n,1] + cs * ryp[n,2];
     end;
-
 end;
 
 procedure draw_lines;
@@ -62,103 +65,87 @@ begin
     X2 := Trunc(ryp[1,0] * sz + cx);
     Y2 := Trunc(ryp[1,1] * sz + cy);
 
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[1,0] * sz + cx);
     Y1 := Trunc(ryp[1,1] * sz + cy);
     X2 := Trunc(ryp[2,0] * sz + cx);
     Y2 := Trunc(ryp[2,1] * sz + cy);
 
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[2,0] * sz + cx);
     Y1 := Trunc(ryp[2,1] * sz + cy);
     X2 := Trunc(ryp[3,0] * sz + cx);
     Y2 := Trunc(ryp[3,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[3,0] * sz + cx);
     Y1 := Trunc(ryp[3,1] * sz + cy);
     X2 := Trunc(ryp[0,0] * sz + cx);
     Y2 := Trunc(ryp[0,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[4,0] * sz + cx);
     Y1 := Trunc(ryp[4,1] * sz + cy);
     X2 := Trunc(ryp[5,0] * sz + cx);
     Y2 := Trunc(ryp[5,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[5,0] * sz + cx);
     Y1 := Trunc(ryp[5,1] * sz + cy);
     X2 := Trunc(ryp[6,0] * sz + cx);
     Y2 := Trunc(ryp[6,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[6,0] * sz + cx);
     Y1 := Trunc(ryp[6,1] * sz + cy);
     X2 := Trunc(ryp[7,0] * sz + cx);
     Y2 := Trunc(ryp[7,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[7,0] * sz + cx);
     Y1 := Trunc(ryp[7,1] * sz + cy);
     X2 := Trunc(ryp[4,0] * sz + cx);
     Y2 := Trunc(ryp[4,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[0,0] * sz + cx);
     Y1 := Trunc(ryp[0,1] * sz + cy);
     X2 := Trunc(ryp[4,0] * sz + cx);
     Y2 := Trunc(ryp[4,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[1,0] * sz + cx);
     Y1 := Trunc(ryp[1,1] * sz + cy);
     X2 := Trunc(ryp[5,0] * sz + cx);
     Y2 := Trunc(ryp[5,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[2,0] * sz + cx);
     Y1 := Trunc(ryp[2,1] * sz + cy);
     X2 := Trunc(ryp[6,0] * sz + cx);
     Y2 := Trunc(ryp[6,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
+    NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[3,0] * sz + cx);
     Y1 := Trunc(ryp[3,1] * sz + cy);
     X2 := Trunc(ryp[7,0] * sz + cx);
     Y2 := Trunc(ryp[7,1] * sz + cy);
-
-    fLine(X1,Y1,X2,Y2);
-
+    NeoDrawLine(X1,Y1,X2,Y2);
 end;
 
+//------------------------------------------------------------------------------
+
 begin
-    NewDisplayBuffer(buf1, 7 + 16, $c0);		// ramtop = $c0
-    NewDisplayBuffer(buf2, 7 + 16, $a0);		// ramtop = $a0
-
-    SetColor(1);
-
     init_points;
 
     repeat
-        pause;
-        SwitchDisplayBuffer(buf1, buf2);
+        NeoWaitForVblank;
+        clrscr;
+
         rotate_points;
         draw_lines;
         angle := angle + 0.1;
-    until keypressed;
-
+    until false;
 end.
-
-// 7773
