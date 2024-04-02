@@ -16213,6 +16213,10 @@ begin
        if AnsiUpperCase(s) = '65816' then CPUMode := CPU_65816 else
         Syntax(3);
 
+     AddDefine('CPU_' + s);
+     inc(i);
+     AddDefines := NumDefines;
+
    end else
    if pos('-CPU:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
@@ -16222,6 +16226,9 @@ begin
       if AnsiUpperCase(s) = '65C02' then CPUMode := CPU_65C02 else
        if AnsiUpperCase(s) = '65816' then CPUMode := CPU_65816 else
         Syntax(3);
+
+     AddDefine('CPU_' + s);
+     AddDefines := NumDefines;
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then begin
