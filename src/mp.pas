@@ -16168,6 +16168,8 @@ var i, err: integer;
     t, c: string[32];
 begin
 
+ target.codeorigin := - 1;
+
  t:='A8';
  c:='';
 
