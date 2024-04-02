@@ -583,7 +583,7 @@ var
 
   FastMul: Integer = -1;
 
-  CPUMode: tCPU = cpu_6502;
+//  CPUMode: tCPU = cpu_6502;
 
   OutFile: TextFile;
 

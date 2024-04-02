@@ -16164,10 +16164,12 @@ end;	// CompileProgram
 
 procedure ParseParam;
 var i, err: integer;
-    s, t: string;
+    s: string;
+    t, c: string[32];
 begin
 
  t:='A8';
+ c:='';
 
  i:=1;
  while i <= ParamCount do begin
@@ -16206,29 +16208,13 @@ begin
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-CPU') then begin
 
-     s:=AnsiUpperCase(ParamStr(i+1));
-
-     if AnsiUpperCase(s) = '6502' then CPUMode := CPU_6502 else
-      if AnsiUpperCase(s) = '65C02' then CPUMode := CPU_65C02 else
-       if AnsiUpperCase(s) = '65816' then CPUMode := CPU_65816 else
-        Syntax(3);
-
-     AddDefine('CPU_' + s);
+     c := AnsiUpperCase(ParamStr(i+1));
      inc(i);
-     AddDefines := NumDefines;
 
    end else
    if pos('-CPU:', AnsiUpperCase(ParamStr(i))) = 1 then begin
 
-     s:=copy(ParamStr(i), 6, 255);
-
-     if AnsiUpperCase(s) = '6502' then CPUMode := CPU_6502 else
-      if AnsiUpperCase(s) = '65C02' then CPUMode := CPU_65C02 else
-       if AnsiUpperCase(s) = '65816' then CPUMode := CPU_65816 else
-        Syntax(3);
-
-     AddDefine('CPU_' + s);
-     AddDefines := NumDefines;
+     c := copy(ParamStr(i), 6, 255);
 
    end else
    if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then begin
@@ -16335,7 +16321,19 @@ begin
 
 {$i targets/init.inc}
 
- CPUMode := target.cpu;
+ if c <> '' then
+  if AnsiUpperCase(c) = '6502' then target.cpu := CPU_6502 else
+   if AnsiUpperCase(c) = '65C02' then target.cpu := CPU_65C02 else
+    if AnsiUpperCase(c) = '65816' then target.cpu := CPU_65816 else
+     Syntax(3);
+
+ case target.cpu of
+  CPU_6502: AddDefine('CPU_6502');
+  cpu_65c02: AddDefine('CPU_65C02');
+  cpu_65816: AddDefine('CPU_65816');
+ end;
+
+ AddDefines := NumDefines;
 
 end;
 
