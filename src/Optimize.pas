@@ -2088,7 +2088,7 @@ end;
      if opt_BP2_ADR(i) = false then begin Result := false; Break end;
      if opt_POKE(i) = false then begin Result := false; Break end;
 
-     if CPUMode <> CPU_6502 then begin
+     if target.cpu <> CPU_6502 then begin
 
        if opt_STZ(i) = false then begin Result := false; Break end;
 

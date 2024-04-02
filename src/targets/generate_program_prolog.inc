@@ -358,7 +358,7 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
 
- if CPUMode <> CPU_6502 then asm65(#9'opt c+');
+ if target.cpu <> CPU_6502 then asm65(#9'opt c+');
 
 
  asm65(#9'UNITINITIALIZATION');
