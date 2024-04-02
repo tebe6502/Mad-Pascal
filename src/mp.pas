@@ -15806,7 +15806,7 @@ asm65;
 asm65('@halt'#9'ldx #$00');
 asm65(#9'txs');
 
-if target.id = 'a8' then begin
+if target.id = ___a8 then begin
 
  if LIBRARY_USE = FALSE then begin
   asm65;
@@ -15828,7 +15828,7 @@ if LIBRARY_USE = FALSE then begin
 
   asm65separator;
 
-  if target.id = 'a8' then begin
+  if target.id = ___a8 then begin
     asm65;
     asm65('IOCB@COPY'#9':16 brk');
   end;
@@ -16060,7 +16060,7 @@ if FastMul > 0  then begin
 
 end;
 
-if target.id = 'a8' then begin
+if target.id = ___a8 then begin
  asm65;
  asm65(#9'run START');
 end;
@@ -16103,12 +16103,12 @@ asm65('.macro'#9'STATICDATA');
  asm65('.endm');
 
 
- if (High(resArray) > 0) and (target.id <> 'a8') then begin
+ if (High(resArray) > 0) and (target.id <> ___a8) then begin
 
   asm65;
   asm65('.local'#9'RESOURCE');
 
-  asm65(#9'icl '''+target.id+'\resource.asm''');
+  asm65(#9'icl ''' + AnsiLowerCase(target.name) + '\resource.asm''');
 
   asm65;
 
@@ -16370,7 +16370,7 @@ begin
  ParseParam;
 
 
- Defines[1].Name := target.name;
+ Defines[1].Name := AnsiUpperCase(target.name);
 
  if (UnitName[1].Name='') then Syntax(3);
 

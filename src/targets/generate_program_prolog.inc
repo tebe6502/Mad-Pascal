@@ -18,10 +18,10 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65('STACKWIDTH'#9'= 16');
 
- if target.id = 'a8' then
+ if target.id = ___a8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
-// if target.id = 'raw' then
+// if target.id = ___raw then
 //  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
 
  asm65;
@@ -45,7 +45,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('zpage');
  asm65;
 
- if target.id = 'a8' then begin
+ if target.id = ___a8 then begin
 
   asm65('.if .def(@vbxe_detect)');
   asm65('fxptr'#9'.ds 2','; VBXE pointer');
@@ -147,7 +147,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FPEXP'#9'.ds 1');
 
 
- if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
+ if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
 
   asm65;
   asm65(#9'.ifdef MAIN.@DEFINES.BASICOFF');
@@ -166,7 +166,7 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
 
- if (High(resArray) > 0) and (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
+ if (High(resArray) > 0) and (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
 
   asm65;
   asm65(#9'org CODEORIGIN');
@@ -201,7 +201,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65separator;
 
 
- if target.id = 'a8' then begin
+ if target.id = ___a8 then begin
   asm65;
   asm65(#9'org CODEORIGIN');
  end else begin
@@ -209,7 +209,7 @@ if Pass = CODEGENERATIONPASS then begin
    if (header = 'END') then break else
     if header <> '' then asm65(#9''+header) else asm65;
 
-  if (target.id = 'raw') then begin
+  if (target.id = ___raw) then begin
 
    asm65;
    asm65(#9'opt h-f+');
@@ -220,7 +220,7 @@ if Pass = CODEGENERATIONPASS then begin
 
    CODEORIGIN_BASE := target.codeorigin + 3;
 
-  end else if (target.id = 'neo') then begin
+  end else if (target.id = ___neo) then begin
 
    asm65;
    asm65(#9'opt h-f+c+');
@@ -254,7 +254,11 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
  asm65('RTLIB');
 
- asm65(#9'icl ''rtl6502_'+target.id+'.asm''');
+
+ if target.id = ___a8 then 
+  asm65(#9'icl ''rtl6502_a8.asm''')
+ else
+  asm65(#9'icl ''rtl6502_' + AnsiLowerCase(target.name) + '.asm''');
 
  asm65;
  asm65('.print ''ZPAGE: '',zpage,''..'',zpend-1');
@@ -267,18 +271,15 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65separator;
 
-
  asm65;
  asm65('START');
-
-// Gen; Gen; Gen;             // mov bx, :STACKORIGIN
 
  asm65(#9'tsx');
  asm65(#9'stx MAIN.@halt+1');
  asm65;
 
 
- if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
+ if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
   asm65(#9'icl ''atari\romoff.asm''');
@@ -297,7 +298,7 @@ if Pass = CODEGENERATIONPASS then begin
   asm65('VADR'#9'= DATAORIGIN+VARINITSIZE');
   asm65;
 
-  if (target.id = 'a8') then begin
+  if (target.id = ___a8) then begin
    asm65(#9'ift (VADR > $BFFF) && .not(.def MAIN.@DEFINES.ROMOFF)');
    asm65(#9'ert ''Invalid memory address range '',VADR');
    asm65(#9'eif');
@@ -322,7 +323,7 @@ if Pass = CODEGENERATIONPASS then begin
  asm65;
 
 
- if (target.id = 'c64') or (target.id = 'c4p') then begin
+ if (target.id in [___c64, ___c4p]) then begin
 
   asm65(#9'lda #$0e');
   asm65(#9'jsr $ffd2','; shifted charset');
@@ -331,12 +332,7 @@ if Pass = CODEGENERATIONPASS then begin
  end;
 
 
- if (target.id = 'a8') and (LIBRARY_USE = FALSE) then begin
-{
-  asm65(#9'ldx #$0F','; DOS II+/D ParamStr');     // DOS II+/D ParamStr
-  asm65(#9'mva:rpl $340,x MAIN.IOCB@COPY,x-');
-  asm65;
-}
+ if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
 
   asm65(#9'ldx #$00','; X = 0');
   asm65(#9'stx bp','; BP = 0');
@@ -360,8 +356,18 @@ if Pass = CODEGENERATIONPASS then begin
   asm65;
 
  end;
-
-
+ 
+ 
+ case target.id of
+  ___c64: CPUMode := c64.cpu;
+  ___c4p: CPUMode := c4p.cpu;
+   ___a8: CPUMode := a8.cpu;
+  ___raw: CPUMode := raw.cpu;
+  ___neo: CPUMode := neo.cpu;
+  ___x16: CPUMode := x16.cpu;
+ end;
+ 
+ 
  if CPUMode <> CPU_6502 then asm65(#9'opt c+');
 
 

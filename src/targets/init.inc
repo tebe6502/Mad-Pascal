@@ -1,6 +1,6 @@
 // Commodore C64 target
 c64.cpu        := cpu_6502;
-c64.id         := 'c64';
+c64.id         := ___c64;
 c64.name       := 'C64';
 c64.buf        := $0800;
 c64.zpage      := 'org $02';
@@ -17,7 +17,7 @@ c64.header[7]  := 'END';
 
 // Commodore Plus/4 target
 c4p.cpu        := cpu_6502;
-c4p.id         := 'c4p';
+c4p.id         := ___c4p;
 c4p.name       := 'C4P';
 c4p.buf        := $0800;
 c4p.zpage      := 'org $02';
@@ -34,7 +34,7 @@ c4p.header[7]  := 'END';
 
 // Atari 8-bit target
 a8.cpu        := cpu_6502;
-a8.id         := 'a8';
+a8.id         := ___a8;
 a8.name       := 'ATARI';
 a8.buf        := $0400;
 a8.zpage      := 'org $80';
@@ -42,7 +42,7 @@ a8.eol        := $0000009B;
 
 // RAW binary target
 raw.cpu        := cpu_6502;
-raw.id         := 'raw';
+raw.id         := ___raw;
 raw.name       := 'RAW';
 raw.buf        := $0200;
 raw.zpage      := 'org $00';
@@ -52,7 +52,7 @@ raw.header[0]  := 'END';
 
 // NEO6502 binary target
 neo.cpu        := cpu_65c02;
-neo.id         := 'neo';
+neo.id         := ___neo;
 neo.name       := 'NEO';
 neo.buf        := $0200;
 neo.zpage      := 'org $00';
@@ -62,7 +62,7 @@ neo.header[0]  := 'END';
 
 // Commander X16 target
 x16.cpu        := cpu_65c02;
-x16.id         := 'x16';
+x16.id         := ___x16;
 x16.name       := 'X16';
 x16.buf        := $0400;
 x16.zpage      := 'org $22'; // 0x0022-0x007F;	94 bytes;	User zero page

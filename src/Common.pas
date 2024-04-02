@@ -328,17 +328,16 @@ const
   fBlockRead_ParamType : array [1..3] of byte = (UNTYPETOK, WORDTOK, POINTERTOK);
 
 
+{$i targets/type.inc}
+
+
 type
+
   ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
   irCode = (iDLI, iVBLD, iVBLI, iTIM1, iTIM2, iTIM4);
 
   ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
-
-  tCPU = (CPU_6502, CPU_65C02, CPU_65816);
-
-
-{$i targets/type.inc}
 
 
   ErrorCode =
