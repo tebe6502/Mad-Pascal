@@ -64,14 +64,12 @@ begin
     Y1 := Trunc(ryp[0,1] * sz + cy);
     X2 := Trunc(ryp[1,0] * sz + cx);
     Y2 := Trunc(ryp[1,1] * sz + cy);
-
     NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[1,0] * sz + cx);
     Y1 := Trunc(ryp[1,1] * sz + cy);
     X2 := Trunc(ryp[2,0] * sz + cx);
     Y2 := Trunc(ryp[2,1] * sz + cy);
-
     NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[2,0] * sz + cx);
