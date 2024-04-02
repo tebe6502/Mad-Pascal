@@ -14,7 +14,7 @@ var
     posX :word = 0;
 
 begin
-    NeoSetColor(0,127,1,1,0);
+    NeoSetDefaults(0,127,1,1,0);
 
     repeat
         NeoWaitForVblank;

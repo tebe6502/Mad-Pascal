@@ -26,7 +26,7 @@ begin
 end;
 
 begin
-    NeoSetColor(0,127,1,1,0);
+    NeoSetDefaults(0,127,1,1,0);
     stringOffset := 0;
     byteOffset := 0;
     SetLength(s,LineWidth+2);
@@ -35,7 +35,7 @@ begin
         NeoWaitForVblank;
         NeoDrawString(0-byteOffset, 0, s);
         Inc(byteOffset);
-        if byteOffset=CharWidth begin
+        if byteOffset=CharWidth then begin
             byteOffset := 0;
             Inc(stringOffset);
             if (s[1]=#0) then begin

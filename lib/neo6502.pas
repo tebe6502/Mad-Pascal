@@ -850,11 +850,16 @@ function NeoBlitterBusy:boolean;
 procedure NeoBlitterCopy(src:cardinal;dst:cardinal;len:word);
 (*
 * @description:
-* Copy the block of memory. Allows transfer of data in between 6502 RAN, Video RAM and Graphics RAM.  
+* Copy the block of memory. Allows transfer of data in between 6502 RAM, Video RAM and Graphics RAM.  
 *
 * The upper 8 bits of the address are : 6502 RAM ($00xxxx) VideoRAM ($8xxxxx) Graphics RAM($90xxxx).  
 *
 * Sets error flag if the transfer is not possible (e.g. illegal write addresses).  
+*
+* @param: src (cardinal) - source data address 
+* @param: dst (cardinal) - target data address
+* @param: len (word) - data length in bytes
+*
 *)
 
 implementation
