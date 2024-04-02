@@ -178,6 +178,12 @@ last = *-1
 .endl							; overload
 
 ; ------------------------------------------------------------
+; ------------------------------------------------------------
+@UnitInit
+
+	rts
+
+; ------------------------------------------------------------
 
 M_PI_2	= $0648
 D_PI_2	= $0192
@@ -220,13 +226,13 @@ FMOPENREAD	= $04
 FMOPENWRITE	= $08
 FMOPENAPPEND	= $09
 FMOPENREADWRITE	= $0C
-SCREENWIDTH	= DATAORIGIN+$0000
-SCREENHEIGHT	= DATAORIGIN+$0002
-DATESEPARATOR	= DATAORIGIN+$0004
-FILEMODE	= DATAORIGIN+$0005
-GRAPHMODE	= DATAORIGIN+$0006
-IORESULT	= DATAORIGIN+$0007
-EOLN	= DATAORIGIN+$0008
+DATESEPARATOR	= DATAORIGIN+$0000
+FILEMODE	= DATAORIGIN+$0001
+GRAPHMODE	= DATAORIGIN+$0002
+IORESULT	= DATAORIGIN+$0003
+EOLN	= DATAORIGIN+$0004
+SCREENWIDTH	= DATAORIGIN+$0005
+SCREENHEIGHT	= DATAORIGIN+$0007
 RNDSEED	= DATAORIGIN+$0009
 
 .endl							; UNIT SYSTEM
@@ -255,16 +261,16 @@ RNDSEED	= DATAORIGIN+$0009
 
 .local	NEOSENDMESSAGE					; FUNCTION
 
-; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 548
+; optimize FAIL ('NEOWAITMESSAGE', NEO6502), line = 869
 
 	jsr NEOWAITMESSAGE
 
-; optimize OK (NEO6502), line = 549
+; optimize OK (NEO6502), line = 870
 
 	lda FUNC
 	sta NEOMESSAGE.FUNC
 
-; optimize OK (NEO6502), line = 550
+; optimize OK (NEO6502), line = 871
 
 	lda GROUP
 	sta NEOMESSAGE.GROUP
@@ -272,12 +278,12 @@ RNDSEED	= DATAORIGIN+$0009
 ; --- RepeatUntilProlog
 l_0094
 
-; optimize OK (NEO6502), line = 551
+; optimize OK (NEO6502), line = 872
 
 	lda NEOMESSAGE.GROUP
 	jne l_0094
 
-; optimize OK (NEO6502), line = 552
+; optimize OK (NEO6502), line = 873
 
 	lda adr.NEOMESSAGE.PARAMS
 	sta RESULT
@@ -297,27 +303,27 @@ RESULT	= DATAORIGIN+$000D
 
 .local	NEOSETPALETTE					; PROCEDURE
 
-; optimize OK (NEO6502), line = 815
+; optimize OK (NEO6502), line = 1227
 
 	lda COL
 	sta adr.NEOMESSAGE.PARAMS
 
-; optimize OK (NEO6502), line = 816
+; optimize OK (NEO6502), line = 1228
 
 	lda R
 	sta adr.NEOMESSAGE.PARAMS+$01
 
-; optimize OK (NEO6502), line = 817
+; optimize OK (NEO6502), line = 1229
 
 	lda G
 	sta adr.NEOMESSAGE.PARAMS+$02
 
-; optimize OK (NEO6502), line = 818
+; optimize OK (NEO6502), line = 1230
 
 	lda B
 	sta adr.NEOMESSAGE.PARAMS+$03
 
-; optimize OK (NEO6502), line = 819
+; optimize OK (NEO6502), line = 1231
 
 	lda #$05
 	sta NEOSENDMESSAGE.GROUP
@@ -350,11 +356,11 @@ B	= DATAORIGIN+$0011
 .local	TURTLEINIT					; PROCEDURE
 	sta S0
 
-; optimize OK (NEO6502), line = 889
+; optimize OK (NEO6502), line = 1399
 
 	sta adr.NEOMESSAGE.PARAMS
 
-; optimize OK (NEO6502), line = 890
+; optimize OK (NEO6502), line = 1400
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -383,14 +389,14 @@ S0	= DATAORIGIN+$0012
 
 .local	TURTLERIGHT					; PROCEDURE
 
-; optimize OK (NEO6502), line = 895
+; optimize OK (NEO6502), line = 1405
 
 	lda DEG
 	sta adr.WORDPARAMS
 	lda DEG+1
 	sta adr.WORDPARAMS+1
 
-; optimize OK (NEO6502), line = 896
+; optimize OK (NEO6502), line = 1406
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -419,24 +425,24 @@ DEG	= DATAORIGIN+$0013
 
 .local	TURTLEMOVE					; PROCEDURE
 
-; optimize OK (NEO6502), line = 901
+; optimize OK (NEO6502), line = 1411
 
 	lda DIST
 	sta adr.WORDPARAMS
 	lda DIST+1
 	sta adr.WORDPARAMS+1
 
-; optimize OK (NEO6502), line = 902
+; optimize OK (NEO6502), line = 1412
 
 	lda COL
 	sta adr.NEOMESSAGE.PARAMS+$02
 
-; optimize OK (NEO6502), line = 903
+; optimize OK (NEO6502), line = 1413
 
 	lda DRAWING
 	sta adr.NEOMESSAGE.PARAMS+$03
 
-; optimize OK (NEO6502), line = 904
+; optimize OK (NEO6502), line = 1414
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -467,7 +473,7 @@ DRAWING	= DATAORIGIN+$0018
 
 .local	TURTLEHOME					; PROCEDURE
 
-; optimize OK (NEO6502), line = 914
+; optimize OK (NEO6502), line = 1424
 
 	lda #$09
 	sta NEOSENDMESSAGE.GROUP
@@ -490,6 +496,39 @@ DRAWING	= DATAORIGIN+$0018
 
 N6502MSG_ADDRESS	= $FF00
 NEO_GFX_RAM	= $FFFF
+FI_PRINTDIR	= $01
+FI_LOADFILE	= $02
+FI_SAVEFILE	= $03
+FI_OPENFILE	= $04
+FI_CLOSEFILE	= $05
+FI_SEEKPOS	= $06
+FI_TELLPOS	= $07
+FI_READDATA	= $08
+FI_WRITEDATA	= $09
+FI_GETSIZE	= $0A
+FI_SETSIZE	= $0B
+FI_RENAME	= $0C
+FI_DELETE	= $0D
+FI_NEWDIR	= $0E
+FI_CHANGEDIR	= $0F
+FI_STATFILE	= $10
+FI_OPENDIR	= $11
+FI_READDIR	= $12
+FI_CLOSEDIR	= $13
+FI_COPYFILE	= $14
+FI_PRINTDIRWILDCARD	= $20
+OPEN_MODE_RO	= $00
+OPEN_MODE_WO	= $01
+OPEN_MODE_RW	= $02
+OPEN_MODE_NEW	= $03
+FI_ATTR_DIRECTORY	= $01
+FI_ATTR_SYSTEM	= $02
+FI_ATTR_ARCHIVE	= $04
+FI_ATTR_READONLY	= $08
+FI_ATTR_HIDDEN	= $10
+MEM_6502	= $00
+MEM_VRAM	= $800000
+MEM_GFX	= $900000
 adr.NEOMESSAGE	= $FF00
 .var NEOMESSAGE	= adr.NEOMESSAGE .word
 NEOMESSAGE.GROUP	= $FF00
@@ -511,6 +550,17 @@ SOUNDPARAMS.FREQ	= $FF05
 SOUNDPARAMS.LEN	= $FF07
 SOUNDPARAMS.SLIDE	= $FF09
 SOUNDPARAMS.STYPE	= $FF0B
+FI_OPENFILENAME	= $FF05
+FI_FILENAME	= $FF04
+FI_FILENAME2	= $FF06
+FI_DIRSIZE	= $FF06
+FI_DIRATTR	= $FF0A
+FI_STATSIZE	= $FF04
+FI_STATATTR	= $FF08
+FI_CHANNEL	= $FF04
+FI_OFFSET	= $FF05
+FI_ADDRESS	= $FF05
+FI_LENGTH	= $FF07
 
 .endl							; UNIT NEO6502
 
@@ -665,11 +715,11 @@ l_0004
 	lda #$01
 	sta B
 
-l_018C
+l_0192
 ; --- ForToDoCondition
 	lda B
 	cmp #$10
-	jcs l_019A
+	jcs l_01A0
 	sta NEO6502.NEOSETPALETTE.COL
 	lda #$0A
 	sta NEO6502.NEOSETPALETTE.R
@@ -681,8 +731,8 @@ l_018C
 
 ; --- ForToDoEpilog
 	inc B
-	jne l_018C
-l_019A
+	jne l_0192
+l_01A0
 
 ; optimize FAIL ('CRT.CLRSCR', turtle.pas), line = 11
 
@@ -711,11 +761,11 @@ l_019A
 	lda #$00
 	sta B
 
-l_01B8
+l_01BE
 ; --- ForToDoCondition
 	lda B
 	cmp #$24
-	jcs l_01C6
+	jcs l_01CC
 
 ; optimize OK (turtle.pas), line = 16
 
@@ -723,11 +773,11 @@ l_01B8
 	sta W
 	sta W+1
 
-l_01CF
+l_01D5
 ; --- ForToDoCondition
 	lda W
 	cmp #$24
-	jcs l_01DD
+	jcs l_01E3
 
 ; optimize OK (turtle.pas), line = 17
 
@@ -751,8 +801,8 @@ l_01CF
 
 ; --- ForToDoEpilog
 	inc W
-	jne l_01CF
-l_01DD
+	jne l_01D5
+l_01E3
 
 ; optimize FAIL ('SYSTEM.PAUSE.@006A', turtle.pas), line = 20
 
@@ -774,15 +824,15 @@ l_01DD
 
 	lda C
 	cmp #$10
-	jne l_0203
+	jne l_0209
 	lda #$01
 	sta C
-l_0203
+l_0209
 
 ; --- ForToDoEpilog
 	inc B
-	jne l_01B8
-l_01C6
+	jne l_01BE
+l_01CC
 
 ; optimize FAIL ('NEO6502.TURTLEHOME', turtle.pas), line = 25
 
@@ -794,7 +844,7 @@ l_01C6
 	sta O
 
 ; --- RepeatUntilProlog
-l_0215
+l_021B
 
 ; optimize OK (turtle.pas), line = 29
 
@@ -807,20 +857,20 @@ l_0215
 	lda #$00
 	sta B
 
-l_0228
+l_022E
 ; --- ForToDoCondition
 	lda B
 	cmp #$0F
-	jcs l_0236
+	jcs l_023C
 
 ; optimize OK (turtle.pas), line = 31
 
 	lda C
 	cmp #$10
-	jcc l_0248
+	jcc l_024E
 	lda #$01
 	sta C
-l_0248
+l_024E
 
 ; optimize OK (turtle.pas), line = 32
 
@@ -853,8 +903,8 @@ l_0248
 
 ; --- ForToDoEpilog
 	inc B
-	jne l_0228
-l_0236
+	jne l_022E
+l_023C
 
 ; optimize FAIL (0, turtle.pas), line = 36
 
@@ -864,16 +914,16 @@ l_0236
 
 	lda O
 	cmp #$0F
-	jcc l_0282
+	jcc l_0288
 	lda #$00
 	sta O
-l_0282
+l_0288
 
 ; optimize FAIL ('CRT.KEYPRESSED', turtle.pas), line = 38
 
 	jsr CRT.KEYPRESSED
 	lda CRT.KEYPRESSED.RESULT
-	jeq l_0215
+	jeq l_021B
 
 ; ------------------------------------------------------------
 
@@ -962,7 +1012,7 @@ NEO
 	?old_adr = *
 
 DATAORIGIN
-.by  $28 $00 $18 $00 $2D $0C $00 $00  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
+.by  $2D $0C $00 $00 $00 $28 $00 $18  $00 $00 $00 $00 $00 $00 $00 $00  $00 $00 $00 $00 $00 $00 $00 $00
 .by  $00 $00 $00 $27 $00 $00 $00 $17
 
 VARINITSIZE	= *-DATAORIGIN
