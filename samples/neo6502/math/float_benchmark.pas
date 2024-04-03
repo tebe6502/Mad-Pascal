@@ -36,7 +36,7 @@ begin
         DoMathOnStack(MATHAdd);
     end;
     time2 := NeoGetTimer;
-    writeln(GetMathStackFloat(0));
+    writeln(GetMathStackFloat);
     writeln('API time   : ', time2 - time1);
 
     NeoWaitForVblank;
@@ -76,7 +76,7 @@ begin
         DoMathOnStack(MATHMul);
     end;
     time2 := NeoGetTimer;
-    writeln(GetMathStackFloat(0));
+    writeln(GetMathStackFloat);
     writeln('API time   : ', time2 - time1);
 
     NeoWaitForVblank;
@@ -116,7 +116,7 @@ begin
         DoMathOnStack(MATHFDiv)
     end;
     time2 := NeoGetTimer;
-    writeln(GetMathStackFloat(0));
+    writeln(GetMathStackFloat);
     writeln('API time   : ', time2 - time1);
 
     NeoWaitForVblank;
