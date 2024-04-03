@@ -123,7 +123,7 @@ function NeoSendMessage(group,func:byte):byte;
 * 
 * @returns: (byte) - Parameter0 is returned directly. All remaining returned params are avaliable via NeoMessage record
 *)
-procedure NeoWaitMessage;assembler;
+procedure NeoWaitMessage;inline;assembler;
 (*
 * @description:
 * Waits until Message from API is returned. 
@@ -859,7 +859,7 @@ procedure NeoBlitterCopy(src:cardinal;dst:cardinal;len:word);
 
 implementation
 
-procedure NeoWaitMessage;assembler;
+procedure NeoWaitMessage;inline;assembler;
 asm
    @WaitMessage 
 end;
@@ -869,7 +869,6 @@ begin
     NeoWaitMessage;
     NeoMessage.func:=func;
     NeoMessage.group:=group;
-    repeat until NeoMessage.group=0;
     result := NeoMessage.params[0];
 end;
 

@@ -21,59 +21,59 @@ begin
     SetMathStack(f0,0);
     SetMathStack(f1,1);
     DoMathOnStack(MATHAdd);
-    Writeln(GetMathStackFloat(0));
+    Writeln(GetMathStackFloat);
 
     Write('Add (i) ',i0,' + ',i1,' = ');
     SetMathStack(i0,0);
     SetMathStack(i1,1);
     DoMathOnStack(MATHAdd);
-    Writeln(GetMathStackInt(0));
+    Writeln(GetMathStackInt);
 
     // ------------------- sub
     Write('Sub (f) ',f0,' - ',f1,' = ');
     SetMathStack(f0,0);
     SetMathStack(f1,1);
     DoMathOnStack(MATHSub);
-    Writeln(GetMathStackFloat(0));
+    Writeln(GetMathStackFloat);
 
     Write('Sub (i) ',i0,' - ',i1,' = ');
     SetMathStack(i0,0);
     SetMathStack(i1,1);
     DoMathOnStack(MATHSub);
-    Writeln(GetMathStackInt(0));
+    Writeln(GetMathStackInt);
 
     // ------------------- mul
     Write('Mul (f) ',f0,' * ',f1,' = ');
     SetMathStack(f0,0);
     SetMathStack(f1,1);
     DoMathOnStack(MATHMul);
-    Writeln(GetMathStackFloat(0));
+    Writeln(GetMathStackFloat);
 
     Write('Mul (i) ',i0,' * ',i1,' = ');
     SetMathStack(i0,0);
     SetMathStack(i1,1);
     DoMathOnStack(MATHMul);
-    Writeln(GetMathStackInt(0));
+    Writeln(GetMathStackInt);
 
     // ------------------- div
     Write('Div (f) ',f0,' / ',f1,' = ');
     SetMathStack(f0,0);
     SetMathStack(f1,1);
     DoMathOnStack(MATHFDiv);
-    Writeln(GetMathStackFloat(0));
+    Writeln(GetMathStackFloat);
 
     Write('Div (i) ',i0,' / ',i1,' = ');
     SetMathStack(i0,0);
     SetMathStack(i1,1);
     DoMathOnStack(MATHIDiv);
-    Writeln(GetMathStackInt(0));
+    Writeln(GetMathStackInt);
 
     // ------------------- mod
     Write('Mod (i) ',i0,' % ',i1,' = ');
     SetMathStack(i0,0);
     SetMathStack(i1,1);
     DoMathOnStack(MATHMod);
-    Writeln(GetMathStackInt(0));
+    Writeln(GetMathStackInt);
     
     // ------------------- cmp
     Write('Cmp (f) ',f0,' > ',f1,' = ');
