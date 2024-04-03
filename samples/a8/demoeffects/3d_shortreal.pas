@@ -6,9 +6,6 @@ uses
     atari, crt, fastgraph;
 
 const
-    BUILD_DATE = {$INCLUDE %DATE%};
-
-const
     sz                  : byte = 16;
     cx                  : byte = 79;
     cy                  : byte = 50;
@@ -21,11 +18,8 @@ var
     rxp                 : array[0..7, 0..3] of shortreal;
 
     X1, X2, Y1, Y2      : byte;
-    A, B                : byte;
 
     var	buf1, buf2      : TDisplayBuffer;
-
-    rtc: byte absolute 20;
 
 procedure init_points;
 begin

@@ -986,7 +986,7 @@ begin
        begin
 	listing[i+2] := #9'clc';
 	listing[i+3] := #9'sbc ' + copy(listing[i+3], 6, 256);
-	listing[i+4] := #9'eor #$ff';
+	listing[i+4] := #9'eor #$FF';
 
 	listing[i+6] := #9'scc';
 

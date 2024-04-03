@@ -124,4 +124,21 @@ begin
     end;
 
 
+    if (TemporaryBuf[0] = #9'ldy #1') and 						// ldy #1		; 0	BOOL := BYTE > ?
+       (pos('lda ', TemporaryBuf[1]) > 0)and						// lda			; 1
+       (pos('cmp ', TemporaryBuf[2]) > 0) and						// cmp			; 2
+       (TemporaryBuf[3] = #9'bcs @+') and						// bcs @+		; 3
+       (TemporaryBuf[4] = #9'dey') and							// dey			; 4
+       (TemporaryBuf[5] = '@') and							//@			; 5
+       (TemporaryBuf[6] = #9'tya') then							// tya			; 6
+     begin
+	TemporaryBuf[0]   := '';
+
+	TemporaryBuf[3] := #9'lda #$00';
+	TemporaryBuf[4] := #9'rol @';
+	TemporaryBuf[5] := '~';
+	TemporaryBuf[6] := '~';
+
+     end;
+
 end;	// procedure

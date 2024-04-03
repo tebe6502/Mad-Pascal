@@ -83,6 +83,20 @@ begin
        end;
 
 
+    if lda_a(i) and (lda_stack(i) = false) and							// lda A			; 0
+       ldy(i+1) and										// ldy A+1			; 1
+       sty_bp_1(i+2) and									// sty :bp+1			; 2
+       tay(i+3) and										// tay				; 3
+       lda_bp_y(i+4) then									// lda (:bp),y			; 4
+      begin
+	listing[i+3] := #9'ldy ' + copy(listing[i], 6, 256);
+
+	listing[i] := '';
+
+	exit(false);
+       end;
+
+
     if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH	; 0
        sta_bp_1(i+1) and									// sta :bp+1			; 1
        lda_bp_y(i+2) and									// lda (:bp),y			; 2

@@ -3,6 +3,7 @@ begin
 
   WriteLn(Tab2Space('Syntax: mp <inputfile> [options]'));
   Writeln(Tab2Space('-o:filename'#9'Output file'));
+  Writeln(Tab2Space('-cpu'#9#9'CPU mode: 6502 (default), 65c02, 65816'));
   WriteLn(Tab2Space('-diag'#9#9'Diagnostics mode'));
   Writeln(Tab2Space('-define:symbol'#9'Defines the symbol'));
   Writeln(Tab2Space('-ipath:<x>'#9'Add <x> to include path'));

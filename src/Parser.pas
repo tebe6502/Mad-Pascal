@@ -1302,7 +1302,7 @@ case Tok[i].Kind of
     end;
 
 
-  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK,  PCHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:	// type conversion operations
+  INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, PCHARTOK, SHORTINTTOK, BYTETOK, BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:	// type conversion operations
     begin
 
     CheckTok(i + 1, OPARTOK);
@@ -2853,6 +2853,36 @@ end else// if OBJECTTOK
 end else// if RECORDTOK
 
 // -----------------------------------------------------------------------------
+//				PCHAR
+// -----------------------------------------------------------------------------
+
+if Tok[i].Kind = PCHARTOK then						// PChar
+  begin
+
+  DataType := POINTERTOK;
+  AllocElementType := CHARTOK;
+
+  NumAllocElements := 0;
+
+  Result:=i;
+ end else // Pchar
+
+
+
+
+
+
+// -----------------------------------------------------------------------------
+// this place is for new types
+// -----------------------------------------------------------------------------
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------------
 //			OrdinalTypes + RealTypes + Pointers
 // -----------------------------------------------------------------------------
 
@@ -2861,22 +2891,9 @@ if Tok[i].Kind in AllTypes then
   DataType := Tok[i].Kind;
   NumAllocElements := 0;
   AllocElementType := 0;
+
   Result := i;
-  end
-
-// -----------------------------------------------------------------------------
-//				PCHAR
-// -----------------------------------------------------------------------------
-
-else if Tok[i].Kind = PCHARTOK then					// PChar
-  begin
-  DataType := POINTERTOK;
-  AllocElementType := CHARTOK;
-
-  NumAllocElements := 0;
-
-  Result:=i;
- end	// Pchar
+ end
 
 // -----------------------------------------------------------------------------
 //				STRING
@@ -2911,7 +2928,7 @@ else if Tok[i].Kind = STRINGTOK then					// String
   if UpperBound>255 then
    iError(i, SubrangeBounds);
 
-  end	// if STRINGTOK
+  end// if STRINGTOK
 else
 
 // -----------------------------------------------------------------------------

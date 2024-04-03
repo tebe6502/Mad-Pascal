@@ -175,7 +175,7 @@ const
   PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 146;	// Size = 1 BYTE
   PROCVARTOK		= 147;	// Size = 2
-  TEXTFILETOK		= 148;	// Size = 2/12 FILE
+  TEXTFILETOK		= 148;	// Size = 2/12 TEXTFILE
   FORWARDTYPE		= 149;	// Size = 2
 
   SHORTSTRINGTOK	= 150;	// zamieniamy na STRINGTOK
@@ -300,7 +300,30 @@ const
 
   // Data sizes
 
-  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,2,1,2,2,2);
+  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (
+  	1,	// Size = 1 BYTE
+  	2,	// Size = 2 WORD
+  	4,	// Size = 4 CARDINAL
+	1,	// Size = 1 SHORTINT
+	2,	// Size = 2 SMALLINT
+	4,	// Size = 4 INTEGER
+	1,	// Size = 1 CHAR
+	1,	// Size = 1 BOOLEAN
+	2,	// Size = 2 POINTER
+	2,	// Size = 2 POINTER to STRING
+	2,	// Size = 2 FILE
+	2,	// Size = 2 RECORD
+	2,	// Size = 2 OBJECT
+	2,	// Size = 2 SHORTREAL
+	4,	// Size = 4 REAL
+	4,	// Size = 4 SINGLE / FLOAT
+	2,	// Size = 2 HALFSINGLE / FLOAT16
+	2,	// Size = 2 PCHAR
+	1,	// Size = 1 BYTE
+	2,	// Size = 2 PROCVAR
+	2,	// Size = 2 TEXTFILE
+	2	// Size = 2 FORWARD
+	);
 
   fBlockRead_ParamType : array [1..3] of byte = (UNTYPETOK, WORDTOK, POINTERTOK);
 
@@ -309,11 +332,13 @@ const
 
 
 type
+
   ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
   irCode = (iDLI, iVBLD, iVBLI, iTIM1, iTIM2, iTIM4);
 
   ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
+
 
   ErrorCode =
   (
@@ -548,17 +573,17 @@ var
 
   start_time: QWord;
 
-  CODEORIGIN_BASE: integer = $2000;
+  CODEORIGIN_BASE: integer = -1;
 
-   DATA_Atari: integer = -1;
-  ZPAGE_Atari: integer = -1;
-  STACK_Atari: integer = -1;
+   DATA_BASE: integer = -1;
+  ZPAGE_BASE: integer = -1;
+  STACK_BASE: integer = -1;
 
   UnitNameIndex: Integer = 1;
 
   FastMul: Integer = -1;
 
-  CPUMode: Integer = 6502;
+//  CPUMode: tCPU = cpu_6502;
 
   OutFile: TextFile;
 
@@ -1344,7 +1369,7 @@ j := 0;
 yes := FALSE;
 
 for i:=0 to NumStaticStrChars-len-1 do
- if CompareWord(Data, StaticStringData[i], Len+1) = 0 then begin yes := TRUE; Break end;
+ if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then begin yes := TRUE; Break end;
 
 Tok[StrTokenIndex].StrLength := len;
 
