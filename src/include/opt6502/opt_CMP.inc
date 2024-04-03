@@ -311,7 +311,7 @@ begin
       begin
        listing[i+2] := #9'adc ' + copy(listing[i+1], 6, 256);
 
-       listing[i]   := #9'eor #$ff';
+       listing[i]   := #9'eor #$FF';
        listing[i+1] := #9'sec';
 
        exit(false);

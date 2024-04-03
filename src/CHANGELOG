@@ -1,3 +1,9 @@
+01.04.2024
+- nowy przełącznik -cpu [6502, 65c02, 65816]
+
+31.03.2024
+- poprawki PCHAR, PSTRING
+
 29.03.2024
 - umożliwione przekazywanie znaku (CHARLITERLATOK) jako STRING do procedur/funkcji
 

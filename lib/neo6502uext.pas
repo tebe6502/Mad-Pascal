@@ -333,12 +333,12 @@ end;
 
 function NeoReadByteUART():byte;
 begin
-    result NeoSendMessage(10,17);
+    result := NeoSendMessage(10,17);
 end;
 
 function NeoCheckUART():byte;
 begin
-    result NeoSendMessage(10,17);
+    result := NeoSendMessage(10,17);
 end;
 
 end.

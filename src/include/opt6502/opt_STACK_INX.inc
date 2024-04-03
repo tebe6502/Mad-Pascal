@@ -417,4 +417,26 @@ begin
      end;
 
 
+    if dex(i+6) and										// dex					; 6
+
+       lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
+       (listing[i+1] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and 						// lda					; 2
+       (listing[i+3] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
+       lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
+       sta_a(i+5) and (sta_stack(i+5) = false) then						// sta					; 5
+//       dex(i+6) then										// dex					; 6
+     begin
+	listing[i+6] := listing[i+5];
+	listing[i+5] := listing[i+4];
+	listing[i+4] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+	listing[i+3] := listing[i+2];
+	listing[i+2] := #9'sta :STACKORIGIN,x';
+	listing[i+1] := listing[i];
+
+	listing[i] := #9'dex';
+
+       exit(false);
+     end;
+
 end;		// function

@@ -56,6 +56,63 @@ begin
 
 
     if (p > 1) and
+       lda_a(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		CARDINAL	[byte]
+       and_ora_eor(p-1) and								// and|ora|eor				; p-1
+											// sta :STACKORIGIN			; p
+       lda_a(p+1) and									// lda					; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       asl_stack(p+4) and								// asl :STACKORIGIN			; p+4
+       rol_a(p+5) and									// rol @				; p+5
+       sta_stack(p+6) then								// sta :STACKORIGIN+STACKWIDTH		; p+6
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 2) and
+       lda_a(p-3) and (lda_stack(p-3) = false) and (lda_im(p-3) = false) and		// lda					; p-3		CARDINAL	[byte]
+       add_sub(p-2) and									// add|sub				; p-2
+       and_ora_eor(p-1) and								// and|ora|eor				; p-1
+											// sta :STACKORIGIN			; p
+       lda_a(p+1) and									// lda					; p+1
+       asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
+       rol_a(p+3) and									// rol @				; p+3
+       asl_stack(p+4) and								// asl :STACKORIGIN			; p+4
+       rol_a(p+5) and									// rol @				; p+5
+       sta_stack(p+6) then								// sta :STACKORIGIN+STACKWIDTH		; p+6
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (p > 1) and
        lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-CARDINAL	[byte]
        add_sub_val(p-1) and								// add|sub				; p-1
 											// sta :STACKORIGIN			; p
