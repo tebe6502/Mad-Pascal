@@ -570,7 +570,7 @@ procedure NeoWritePixel(x0,y0:word;c:byte);
 *
 * @param: x0 (word) - x coordinate
 * @param: y0 (word) - y coordinate
-* @param: c (word) - color index
+* @param: c (byte) - color index
 *)
 procedure NeoDrawString(x0,y0:word;var s:string);
 (*
