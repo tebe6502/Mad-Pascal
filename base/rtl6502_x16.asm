@@ -42,7 +42,6 @@ numread	.word		; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 	icl 'x16\x16.hea'
-	icl 'x16\putpixel.asm'		; @putpixel
 	icl 'x16\putchar.asm'		; @putchar
 	icl 'x16\clrscr.asm'		; @clrscr
 

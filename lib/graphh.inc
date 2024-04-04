@@ -110,19 +110,17 @@ var
 {$ifndef x16}
 	WIN_RIGHT: smallint = 39;
 	WIN_BOTTOM: smallint = 23;
+	
+	GraphResult: byte;
+	GetColor: byte;
+	VideoRAM: pointer;
 {$endif}
 
 {$ifdef x16}
 	WIN_RIGHT: smallint = 39;
 	WIN_BOTTOM: smallint = 29;
+	
 {$endif}
-
-
-	GraphResult: byte;
-
-	GetColor: byte;
-
-	VideoRAM: pointer;
 
 {$ifdef c64}
 	ScreenRAM : pointer;

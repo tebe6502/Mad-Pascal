@@ -79,70 +79,7 @@ procedure SetColor(color: byte); assembler;
 Sets the foreground color to Color
 *)
 asm
-	lda MAIN.SYSTEM.GraphMode
-	cmp #VGAHi
-	beq HiRes
-	cmp #VGAMed
-	beq Multi
 
-	jmp @exit
-
-Multi	lda color
-	and #$03
-	cmp #1
-	beq c1_m
-	cmp #2
-	beq c2_m
-	cmp #3
-	beq c3_m
-
-c0_m
-	mva #{and#} @putpixel.msk
-
-	.put %11000000^$ff, %00110000^$ff, %00001100^$ff, %00000011^$ff
-	:4 mva #.get[#] @putpixel.color+#
-
-	jmp @exit
-
-c1_m
-	.put %01000000, %00010000, %00000100, %00000001
-	:4 mva #.get[#] @putpixel.color+#
-
-	bne skp
-
-c2_m
-	.put %10000000, %00100000, %00001000, %00000010
-	:4 mva #.get[#] @putpixel.color+#
-
-	bne skp
-
-c3_m
-	.put %11000000, %00110000, %00001100, %00000011
-	:4 mva #.get[#] @putpixel.color+#
-
-skp
-	mva #{ora#} @putpixel.msk
-
-	jmp @exit
-
-; ------------------------------------
-
-HiRes	lda color
-	and #1
-	bne c1_h
-c0_h
-	mva #{and#} @putpixel.msk
-
-	.put $80^$ff,$40^$ff,$20^$ff,$10^$ff,$08^$ff,$04^$ff,$02^$ff,$01^$ff
-	:8 mva #.get[#] @putpixel.color+#
-
-	jmp @exit
-
-c1_h
-	mva #{ora#} @putpixel.msk
-
-	.put $80,$40,$20,$10,$08,$04,$02,$01
-	:8 mva #.get[#] @putpixel.color+#
 end;
 
 
@@ -160,8 +97,8 @@ begin
  asm
  	@ClrScr
 	lda mode
-	jsr GRAPH_init //does not work as expected
-	// jsr screen_mode
+	// jsr GRAPH_init //does not work as expected
+	jsr screen_mode
 
  end;
 	case mode of
@@ -199,11 +136,110 @@ end;
 
 
 procedure PutPixel(x,y: smallint); assembler; overload;
+// (*
+// @description:
+// Puts a point at (X,Y) using white Color
+// *)
+asm
+// 	lda y+1
+// 	bmi stop
+// 	cmp MAIN.SYSTEM.ScreenHeight+1
+// 	bne sk0
+// 	lda y
+// 	cmp MAIN.SYSTEM.ScreenHeight
+// sk0
+// 	bcs stop
+
+// 	lda x+1
+// 	bmi stop
+// 	cmp MAIN.SYSTEM.ScreenWidth+1
+// 	bne sk1
+// 	lda x
+// 	cmp MAIN.SYSTEM.ScreenWidth
+// sk1
+// 	bcs stop
+
+// // ; -----------------------------------------
+
+// // 	lda MAIN.SYSTEM.GraphMode
+// // 	cmp #VGAHi
+// // 	beq HiRes
+
+// 	lda x
+// 	sta r0L
+// 	lda x+1
+// 	sta r0H
+
+// 	lda y
+// 	sta r1L
+// 	lda y+1
+// 	sta r1H
+
+// 	jsr FB_cursor_position
+
+// 	lda #00
+// 	jsr FB_set_pixel
+
+end;
+
+
+procedure PutPixel(x,y: smallint; color: byte); overload;
 (*
 @description:
 Puts a point at (X,Y) using color Color
 *)
+begin
+	asm
+		txa:pha
+	// 	lda y+1
+	// 	bmi stop
+	// 	cmp MAIN.SYSTEM.ScreenHeight+1
+	// 	bne sk0
+	// 	lda y
+	// 	cmp MAIN.SYSTEM.ScreenHeight
+	// sk0
+	// 	bcs stop
+
+	// 	lda x+1
+	// 	bmi stop
+	// 	cmp MAIN.SYSTEM.ScreenWidth+1
+	// 	bne sk1
+	// 	lda x
+	// 	cmp MAIN.SYSTEM.ScreenWidth
+	// sk1
+	// 	bcs stop
+
+	// ; -----------------------------------------
+
+	// 	lda MAIN.SYSTEM.GraphMode
+	// 	cmp #VGAHi
+	// 	beq HiRes
+
+		lda x
+		sta r0L
+		lda x+1
+		sta r0H
+
+		lda y
+		sta r1L
+		lda y+1
+		sta r1H
+
+		jsr FB_cursor_position
+
+		lda color
+		jsr FB_set_pixel
+		pla:tax
+	end;
+end;
+
+function GetPixel(x,y: smallint): byte; assembler;
+(*
+@description:
+Return color of pixel
+*)
 asm
+	txa:pha
 // 	lda y+1
 // 	bmi stop
 // 	cmp MAIN.SYSTEM.ScreenHeight+1
@@ -228,77 +264,22 @@ asm
 // 	cmp #VGAHi
 // 	beq HiRes
 
-// MedRes
-// 	lda X
-// 	and #3
-// 	tay
-// 	lda @putpixel.color,y
-// 	sta @putpixel.msk+1
+	lda x
+	sta r0L
+	lda x+1
+	sta r0H
 
-// 	ldy Y
+	lda y
+	sta r1L
+	lda y+1
+	sta r1H
 
-// 	lda X
-// 	and #%11111100
+	jsr FB_cursor_position
 
-// 	asl @
-// 	rol X+1
+	jsr FB_get_pixel
 
-// 	add @putpixel.ladr,y
-// 	sta :bp2
-// 	lda X+1
-// 	adc @putpixel.hadr,y
-// 	adc VideoRam+1
-// 	sta :bp2+1
-
-// 	jmp @putpixel
-
-// stop	rts
-
-// ; -----------------------------------------
-
-// HiRes
-// 	lda X
-// 	and #7
-// 	tay
-// 	lda @putpixel.color,y
-// 	sta @putpixel.msk+1
-
-// 	ldy Y
-
-// 	lda X
-// 	and #%11111000
-// 	add @putpixel.ladr,y
-// 	sta :bp2
-// 	lda X+1
-// 	adc @putpixel.hadr,y
-// 	adc VideoRam+1
-// 	sta :bp2+1
-
-// 	jmp @putpixel
-
-end;
-
-
-procedure PutPixel(x,y: smallint; color: byte); overload;
-(*
-@description:
-Puts a point at (X,Y) using color Color
-*)
-begin
-
-//  SetColor(color);
-
-//  PutPixel(x,y);
-
-end;
-
-
-function GetPixel(x,y: smallint): byte; assembler;
-(*
-@description:
-Return color of pixel
-*)
-asm
+stop	sta Result
+	pla:tax
 
 end;
 
@@ -311,58 +292,58 @@ Draw a line starting from current position to a given point
 var x1, y1, dx, dy, fraction, stepx, stepy: smallint;
 
 begin
-//     x1 := CurrentX;
-//     y1 := CurrentY;
+    x1 := CurrentX;
+    y1 := CurrentY;
 
-//     if x1<0 then x1:=0;
-//     if y1<0 then y1:=0;
+    if x1<0 then x1:=0;
+    if y1<0 then y1:=0;
 
-//     if x<0 then x:=0;
-//     if y<0 then y:=0;
+    if x<0 then x:=0;
+    if y<0 then y:=0;
 
-//     dy := y - y1;
-//     dx := x - x1;
+    dy := y - y1;
+    dx := x - x1;
 
-//     if (dy < 0) then begin dy := -dy; stepy := -1 end else stepy := 1;
-//     if (dx < 0) then begin dx := -dx; stepx := -1 end else stepx := 1;
-//     dy := dy + dy;	// dy is now 2*dy
-//     dx := dx + dx;	// dx is now 2*dx
+    if (dy < 0) then begin dy := -dy; stepy := -1 end else stepy := 1;
+    if (dx < 0) then begin dx := -dx; stepx := -1 end else stepx := 1;
+    dy := dy + dy;	// dy is now 2*dy
+    dx := dx + dx;	// dx is now 2*dx
 
-//     PutPixel(x1,y1);
+    PutPixel(x1,y1);
 
-//     if (dx > dy) then begin
+    if (dx > dy) then begin
 
-//         fraction := dy shl 1 - dx;
+        fraction := dy shl 1 - dx;
 
-//         while (x1 <> x) do begin
-//            if (fraction >= 0) then begin
-//                inc(y1, stepy);
-//                dec(fraction,dx);		// same as fraction -= 2*dx
-//            end;
-//            inc(x1, stepx);
-//            inc(fraction, dy);			// same as fraction -= 2*dy
+        while (x1 <> x) do begin
+           if (fraction >= 0) then begin
+               inc(y1, stepy);
+               dec(fraction,dx);		// same as fraction -= 2*dx
+           end;
+           inc(x1, stepx);
+           inc(fraction, dy);			// same as fraction -= 2*dy
 
-// 	   PutPixel(x1, y1);
-//         end;
+	   PutPixel(x1, y1);
+        end;
 
-//      end else begin
+     end else begin
 
-//         fraction := dx shl 1 - dy;
+        fraction := dx shl 1 - dy;
 
-//         while (y1 <> y) do begin
-//            if (fraction >= 0) then begin
-//                inc(x1, stepx);
-//                dec(fraction, dy);
-//            end;
-//            inc(y1, stepy);
-//            inc(fraction, dx);
+        while (y1 <> y) do begin
+           if (fraction >= 0) then begin
+               inc(x1, stepx);
+               dec(fraction, dy);
+           end;
+           inc(y1, stepy);
+           inc(fraction, dx);
 
-//            PutPixel(x1, y1);
-//         end;
-//      end;
+           PutPixel(x1, y1);
+        end;
+     end;
 
-//  CurrentX := x;
-//  CurrentY := y;
+ CurrentX := x;
+ CurrentY := y;
 
 end;
 
