@@ -186,4 +186,5 @@ var
 
 {$ifdef x16}
 	procedure ClearDevice; assembler;
+	procedure SetFillColor(color: byte); assembler;
 {$endif}

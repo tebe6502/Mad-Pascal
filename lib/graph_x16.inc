@@ -76,12 +76,64 @@ end;
 procedure SetColor(color: byte); assembler;
 (*
 @description:
-Sets the foreground color to Color
+Sets the foreground color used by draw procedures
+*)
+asm
+	pha
+	phx
+	phy
+	lda color
+	ldx MAIN.GRAPH.DRAW_FILL_COLOR
+	ldy MAIN.GRAPH.DRAW_BACK_COLOR
+
+	jsr GRAPH_set_colors
+
+	ply
+	plx
+	pla
+end;
+
+procedure SetBkColor(color: byte); assembler;
+(*
+@description:
+Sets the background color used by draw procedures
 *)
 asm
 
+	pha
+	phx
+	phy
+	lda MAIN.GRAPH.DRAW_COLOR
+	ldx MAIN.GRAPH.DRAW_FILL_COLOR
+	ldy color
+
+	jsr GRPAH_set_colors
+
+	ply
+	plx
+	pla
+
 end;
 
+procedure SetFillColor(color: byte); assembler;
+(*
+@description:
+Sets the fill color used by draw procedures
+*)
+asm
+	pha
+	phx
+	phy
+	lda MAIN.GRAPH.DRAW_COLOR
+	ldx color
+	ldy MAIN.GRAPH.DRAW_BACK_COLOR
+
+	jsr GRAPH_set_colors
+
+	ply
+	plx
+	pla
+end;
 
 procedure InitGraph(mode: byte); overload;
 (*
@@ -123,16 +175,7 @@ begin
 end;
 
 
-procedure SetBkColor(color: byte); assembler;
-(*
-@description:
-Sets the background color to Color
-*)
-asm
 
-//  sta MAIN.C64.Backgroundcolor0
-
-end;
 
 
 procedure PutPixel(x,y: smallint); assembler; overload;
@@ -347,6 +390,35 @@ begin
 
 end;
 
+
+
+procedure MoveTo(x, y: smallint); assembler;
+(*
+@description:
+Move cursor to absolute position.
+*)
+asm
+	pha
+	phx
+	phy
+
+	lda x
+	sta r0L
+	lda x+1
+	sta r0H
+
+	lda y
+	sta r1L
+	lda y+1
+	sta r1H
+
+	jsr FB_cursor_position
+
+	ply
+	plx
+	pla
+
+end;
 
 procedure CloseGraph; assembler;
 (*
