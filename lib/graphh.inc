@@ -119,7 +119,9 @@ var
 {$ifdef x16}
 	WIN_RIGHT: smallint = 39;
 	WIN_BOTTOM: smallint = 29;
-	
+	DRAW_COLOR: byte = $00;
+	DRAW_BACK_COLOR: byte = $ff;
+	DRAW_FILL_COLOR: byte = $00;
 {$endif}
 
 {$ifdef c64}
