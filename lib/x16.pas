@@ -74,7 +74,7 @@ var
   GRAPH_init             : byte absolute $ff20; // Initialize graphics.
   GRAPH_clear            : byte absolute $ff23; // Clear screen.
   GRAPH_set_window       : byte absolute $ff26; // Set clipping region.
-  GRPAH_set_colors       : byte absolute $ff29; // Set stroke, fill and background colors.
+  GRAPH_set_colors       : byte absolute $ff29; // Set stroke, fill and background colors.
   GRAPH_draw_line        : byte absolute $ff2c; // Draw a line.
   GRAPH_draw_rect        : byte absolute $ff2f; // Draw a rectangle (optionally filled).
   GRAPH_move_rect        : byte absolute $ff32; // Move pixels.

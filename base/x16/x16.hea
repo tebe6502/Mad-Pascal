@@ -145,7 +145,7 @@
   GRAPH_init            = $ff20; // Initialize graphics.
   GRAPH_clear           = $ff23; // Clear screen.
   GRAPH_set_window      = $ff26; // Set clipping region.
-  GRPAH_set_colors      = $ff29; // Set stroke, fill and background colors.
+  GRAPH_set_colors      = $ff29; // Set stroke, fill and background colors.
   GRAPH_draw_line       = $ff2c; // Draw a line.
   GRAPH_draw_rect       = $ff2f; // Draw a rectangle (optionally filled).
   GRAPH_move_rect       = $ff32; // Move pixels.
