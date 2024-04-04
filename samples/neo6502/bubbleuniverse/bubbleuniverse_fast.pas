@@ -81,8 +81,7 @@ begin
                 
                 x:=u+t;
 
-                NeoSetColor(col[i,j]);
-                NeoDrawPixel(Trunc(xx)+160,Trunc(yy)+120);
+                NeoWritePixel(Trunc(xx)+160,Trunc(yy)+120,col[i,j]);
             end;
         t:=t+0.025;
     //until false;
