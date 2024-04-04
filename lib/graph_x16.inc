@@ -181,7 +181,7 @@ end;
 procedure PutPixel(x,y: smallint); assembler; overload;
 // (*
 // @description:
-// Puts a point at (X,Y) using white Color
+// Puts a point at (X,Y) using DRAW_COLOR
 // *)
 asm
 // 	lda y+1
@@ -208,20 +208,20 @@ asm
 // // 	cmp #VGAHi
 // // 	beq HiRes
 
-// 	lda x
-// 	sta r0L
-// 	lda x+1
-// 	sta r0H
+	lda x
+	sta r0L
+	lda x+1
+	sta r0H
 
-// 	lda y
-// 	sta r1L
-// 	lda y+1
-// 	sta r1H
+	lda y
+	sta r1L
+	lda y+1
+	sta r1H
 
-// 	jsr FB_cursor_position
+	jsr FB_cursor_position
 
-// 	lda #00
-// 	jsr FB_set_pixel
+	lda MAIN.GRAPH.DRAW_COLOR
+	jsr FB_set_pixel
 
 end;
 
@@ -413,7 +413,10 @@ asm
 	sta r1H
 
 	jsr FB_cursor_position
-
+	
+	mwa x CurrentX
+	mwa y CurrentY
+	
 	ply
 	plx
 	pla

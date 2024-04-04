@@ -54,7 +54,7 @@ uses types, c64;
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
 
-{$ifndef neo AND x16}
+{$ifdef atari}
 	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure SetActiveBuffer(var a: TDisplayBuffer);
 	function Scanline(y: smallint): PByte;
@@ -62,15 +62,25 @@ uses types, c64;
 	procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
 {$endif}
 
+
+{$ifdef c64}
+	procedure SetDisplayBuffer(var a: TDisplayBuffer);
+	procedure SetActiveBuffer(var a: TDisplayBuffer);
+	function Scanline(y: smallint): PByte;
+	function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
+	procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
+{$endif}
+
+
 implementation
 
 
 var
-	Scanline_Width: byte;
-
 	CurrentX, CurrentY: word;
 
 
+{$ifndef x16}
+	Scanline_Width: byte;
 function Scanline(y: smallint): PByte;
 (*
 @description:
@@ -95,11 +105,13 @@ begin
  Result:=pointer(VideoRam + a);
 
 end;
-
+{$endif}
 
 {$i '../src/targets/graph.inc'}
 
+{$ifndef x16}
 {$i graph2.inc}
+{$endif}
 
 
 procedure Line(x1, y1, x2, y2: smallint); overload;

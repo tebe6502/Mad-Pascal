@@ -21,3 +21,14 @@ kaleidoscope:
 	mp -t x16 -ipath:$(MAD-PASCAL)lib kaleidoscope.pas
 	mads kaleidoscope.a65 -x -i:$(MAD-PASCAL)base -o:kaleidoscope.prg
 	$(X16EMU) -prg kaleidoscope.prg -run -debug
+
+diamond:
+	mp -t x16 -ipath:$(MAD-PASCAL)lib diamond.pas
+	mads diamond.a65 -x -i:$(MAD-PASCAL)base -o:diamond.prg
+	$(X16EMU) -prg diamond.prg -run -debug
+
+
+cube:
+	mp -t x16 -ipath:$(MAD-PASCAL)lib cube.pas
+	mads cube.a65 -x -i:$(MAD-PASCAL)base -o:cube.prg
+	$(X16EMU) -prg cube.prg -run -debug

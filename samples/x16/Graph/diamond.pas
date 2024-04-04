@@ -1,5 +1,5 @@
 program diamond;
-uses graph, crt; 
+uses graph, crt, x16; 
 const m = 2;
 var col: byte;
 
@@ -23,7 +23,7 @@ begin
 end;
 
 begin
-    InitGraph(0);
+    InitGraph(X16_MODE_320x240);
     col := 1;
     Draw(ScreenWidth shr 1, ScreenHeight shr 1, ScreenHeight shr 1);
     repeat until keypressed;
