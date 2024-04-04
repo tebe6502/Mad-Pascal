@@ -21,9 +21,6 @@ if Pass = CODEGENERATIONPASS then begin
  if target.id = ___a8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
-// if target.id = ___raw then
-//  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
-
  asm65;
 
  asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
@@ -57,6 +54,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65('bp'#9'.ds 2');
  asm65('bp2'#9'.ds 2');
+ asm65('bp3'#9'= bp+1');
  asm65;
 
  asm65('eax'#9'.ds 4', ';8 bytes (aex + edx) -> divREAL');
@@ -201,9 +199,10 @@ if Pass = CODEGENERATIONPASS then begin
   asm65;
   asm65(#9'org CODEORIGIN');
  end else begin
+ 
   for header in target.header do
    if (header = 'END') then break else
-    if header <> '' then asm65(#9''+header) else asm65;
+    if header <> '' then asm65(#9'' + header) else asm65;
 
   if (target.id = ___raw) then begin
 
@@ -220,15 +219,11 @@ if Pass = CODEGENERATIONPASS then begin
    asm65(#9'opt h-f+c+');
    asm65;
    asm65(#9'org $' + IntToHex(target.codeorigin, 4));
-   asm65(#9'stz $FF04');
-   asm65(#9'mva #35 $FF01');
-   asm65(#9'mva #4  $FF00');
    asm65(#9'jmp START');
    asm65;
 
-  end else
-   CODEORIGIN_BASE := target.codeorigin;
-
+  end;
+  
   asm65('CODEORIGIN');
 
  end;
@@ -323,6 +318,15 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'lda #$0e');
   asm65(#9'jsr $ffd2','; shifted charset');
   asm65;
+
+ end;
+
+
+ if (target.id = ___neo) then begin		// radians as default
+
+   asm65(#9'stz $FF04');
+   asm65(#9'mva #35 $FF01');
+   asm65(#9'mva #4  $FF00');
 
  end;
 
