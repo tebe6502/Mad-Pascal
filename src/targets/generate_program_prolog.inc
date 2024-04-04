@@ -220,6 +220,9 @@ if Pass = CODEGENERATIONPASS then begin
    asm65(#9'opt h-f+c+');
    asm65;
    asm65(#9'org $' + IntToHex(target.codeorigin, 4));
+   asm65(#9'mva #0  $FF04');
+   asm65(#9'mva #35 $FF01');
+   asm65(#9'mva #4  $FF00');
    asm65(#9'jmp START');
    asm65;
 
