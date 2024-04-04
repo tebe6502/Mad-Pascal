@@ -19,8 +19,6 @@ var
     tmpstr:Tstring;
     col:array[0..n,0..n] of byte;
 begin
-    SetRadianMode;
-
     // prepare palette
     NeoSetDefaults(0,$ff,1,1,0);
     NeoSetPalette($ff,0,0,0);
