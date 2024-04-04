@@ -23,8 +23,7 @@ begin
                 u:=sin(i+v)+sin((r*i)+x);
                 v:=cos(i+v)+cos((r*i)+x);
                 x:=u+t;
-                NeoSetColor(((i div 14) shl 4) or (j div 14));
-                NeoDrawPixel(Round(u*s)+160,Round(v*s)+120);
+                NeoWritePixel(Round(u*s)+160,Round(v*s)+120,((i div 14) shl 4) or (j div 14));
             end;
         t:=t+0.025;
     time:=(NeoGetTimer - time) div 100;
