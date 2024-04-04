@@ -68,6 +68,9 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
++ Krszysztof Swiecicki :
+	- unit PP
+
 + Marcin Żukowski :
 	- unit FASTGRAPH: fLine
 
@@ -15770,6 +15773,7 @@ SetLength(AsmLabels, 1);
 
 DefineIdent(1, 'MAIN', PROCEDURETOK, 0, 0, 0, 0);
 
+
 GenerateProgramProlog;
 
 
@@ -15871,9 +15875,9 @@ asm65(#13#10'.local'#9'@RESOURCE');
   if not yes then
    if AnsiUpperCase(resArray[i].resType) = 'SAPR' then begin
     asm65(resArray[i].resName);
-    asm65(#9'dta a('+resArray[i].resName+'.end-'+resArray[i].resName+'-2)');
-    asm65(#9'ins '''+resArray[i].resFile+'''');
-    asm65(resArray[i].resName+'.end');
+    asm65(#9'dta a(' + resArray[i].resName + '.end-' + resArray[i].resName + '-2)');
+    asm65(#9'ins ''' + resArray[i].resFile + '''');
+    asm65(resArray[i].resName + '.end');
     resArray[i].resStream := true;
    end else
 
@@ -15882,12 +15886,12 @@ asm65(#13#10'.local'#9'@RESOURCE');
    end else
 
    if AnsiUpperCase(resArray[i].resType) = 'RCDATA' then begin
-    asm65(resArray[i].resName+#9'ins '''+resArray[i].resFile+'''');
-    asm65(resArray[i].resName+'.end');
+    asm65(resArray[i].resName + #9'ins ''' + resArray[i].resFile + '''');
+    asm65(resArray[i].resName + '.end');
     resArray[i].resStream := true;
    end else
 
-    Error(NumTok, 'Resource identifier not found: Type = '+resArray[i].resType+', Name = '+resArray[i].resName);
+    Error(NumTok, 'Resource identifier not found: Type = ' + resArray[i].resType + ', Name = ' + resArray[i].resName);
 
 //  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);
 
@@ -16150,10 +16154,18 @@ asm65(#9'end');
 
 for i:=0 to High(TemporaryBuf) do WriteOut('');		// flush TemporaryBuf
 
-end;	// CompileProgram
+end;	//CompileProgram
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 {$i include/syntax.inc}
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 procedure ParseParam;
@@ -16340,10 +16352,12 @@ begin
 
  AddDefines := NumDefines;
 
-end;
+end;	//ParseParam
 
 
-// Main program
+// ----------------------------------------------------------------------------
+//                                 Main program
+// ----------------------------------------------------------------------------
 
 begin
 
