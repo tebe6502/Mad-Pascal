@@ -30,7 +30,8 @@ unit Neo6502Math;
 interface
 uses neo6502;
 
-const   
+const
+    N6502MSG_ADDRESS = $ff00;
 	MATHAdd = 0; 					// Add
 	MATHSub = 1; 					// Subtract
 	MATHMul = 2; 					// Multiply
@@ -201,8 +202,31 @@ function NeoParseFloat(var s:string):float;
 * 
 * @returns: (float) - parsed value
 *)
+procedure SetDegreeMode;assembler;inline;
+(*
+* @description:
+* Sets the use of degrees
+*)
+procedure SetRadianMode;assembler;inline;
+(*
+* @description:
+* Sets the use of radians
+*)
 implementation
 
+procedure SetDegreeMode;assembler;inline;
+asm
+    mva #1  N6502MSG_ADDRESS+4
+    mva #35 N6502MSG_ADDRESS+1
+    mva #4  N6502MSG_ADDRESS
+end;
+
+procedure SetRadianMode;assembler;inline;
+asm
+    mva #0  N6502MSG_ADDRESS+4
+    mva #35 N6502MSG_ADDRESS+1
+    mva #4  N6502MSG_ADDRESS
+end;
 
 procedure SetMathStack(v:float;i:byte);assembler;overload;
 asm

@@ -19,6 +19,8 @@ var
     tmpstr:Tstring;
     col:array[0..n,0..n] of byte;
 begin
+    SetRadianMode;
+
     // prepare palette
     NeoSetDefaults(0,$ff,1,1,0);
     NeoSetPalette($ff,0,0,0);
@@ -42,8 +44,8 @@ begin
                 SetMathStack(i,0);
                 SetMathStack(v,1);
                 DoMathOnStack(MATHAdd);
-                SetMathStack(rad,1);
-                DoMathOnStack(MATHMul);
+                //SetMathStack(rad,1);
+                //DoMathOnStack(MATHMul);
                 p := GetMathStackFloat;
     
                 SetMathStack(i,0);
@@ -51,8 +53,8 @@ begin
                 DoMathOnStack(MATHMul);
                 SetMathStack(x,1);
                 DoMathOnStack(MATHAdd);
-                SetMathStack(rad,1);
-                DoMathOnStack(MATHMul);
+                //SetMathStack(rad,1);
+                //DoMathOnStack(MATHMul);
                 q := GetMathStackFloat; 
                 
                 SetMathVar(p);
