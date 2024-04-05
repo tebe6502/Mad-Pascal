@@ -25,8 +25,8 @@ var
 	s     : byte      absolute $76;
 	c     : byte      absolute $77;
 	d     : byte      absolute $78;
-    time1 : cardinal  absolute $80;
-    time2 : cardinal  absolute $84;
+	time1 : cardinal  absolute $80;
+	time2 : cardinal  absolute $84;
 //----------------------------------------------------------
 
 begin
@@ -57,8 +57,7 @@ begin
 			a := u * s;
 			b := v * s;
 			c := ((i div 14) shl 4) or (j div 14);
-			//NeoSetColor(c);
-			//NeoDrawPixel(Round(a) + 160, Round(b) + 120);
+
 			NeoWritePixel(Round(a) + 160, Round(b) + 120, c);
 		end;
 
