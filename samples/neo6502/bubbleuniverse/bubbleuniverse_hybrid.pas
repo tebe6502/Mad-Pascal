@@ -8,13 +8,13 @@ uses crt, neo6502, neo6502Math;
 
 const
 	n = 200;
+	r = float((PI * 2) / 255);
 
 //----------------------------------------------------------
 
 var
 	a     : float     absolute $54;
 	b     : float     absolute $58;
-	r     : float     absolute $5c;
 	x     : float     absolute $60;
 	y     : float     absolute $64;
 	v     : float     absolute $68;
@@ -41,7 +41,6 @@ begin
 
 	// draw
 	x := 0; y := 0; v := 0; t := 0; s := 60;
-	r := (PI * 2) / 255;
 
 	NeoSetColor(255);
 	NeoDrawRect(0, 0, 319, 239);
