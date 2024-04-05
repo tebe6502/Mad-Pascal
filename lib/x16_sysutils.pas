@@ -10,7 +10,6 @@ unit x16_sysutils;
 
 {
 
-Beep
 BoolToStr
 ByteToStr
 Date
@@ -41,7 +40,13 @@ TimeToStr
 Trim
 TrimLeft
 TrimRight
-
+CurrentMinuteOfDay
+CurrentSecondOfDay
+CurrentSec100OfDay
+MinuteOfDay
+SecondOfDay
+MinutesToTime
+SecondsToTime
 
 }
 
