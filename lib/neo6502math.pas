@@ -212,7 +212,7 @@ procedure SetRadianMode;assembler;inline;
 * @description:
 * Sets the use of radians.
 *)
-function Sin(x:float):float;
+function NeoSin(x:float):float;
 (*
 * @description:
 * Accelerated sinus.
@@ -221,7 +221,7 @@ function Sin(x:float):float;
 *
 * @returns: (float)
 *)
-function Cos(x:float):float;
+function NeoCos(x:float):float;
 (*
 * @description:
 * Accelerated cosinus.
@@ -246,7 +246,7 @@ asm
     mva #4  N6502MSG_ADDRESS
 end;
 
-function Sin(x:float):float;
+function NeoSin(x:float):float;
 begin
     asm
         mva #$40 VAR_ADDRESS
@@ -265,7 +265,7 @@ begin
     result := m_float;
 end;
 
-function Cos(x:float):float;
+function NeoCos(x:float):float;
 begin
     asm
         mva #$40 VAR_ADDRESS
