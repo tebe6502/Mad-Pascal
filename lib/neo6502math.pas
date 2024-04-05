@@ -32,12 +32,12 @@ uses neo6502;
 
 const
     N6502MSG_ADDRESS = $ff00;
-	MATHAdd = 0; 					// Add
-	MATHSub = 1; 					// Subtract
-	MATHMul = 2; 					// Multiply
-	MATHFDiv = 3;					// Float Divide
-	MATHIDiv = 4;					// Int Divide
-	MATHMod = 5; 					// Int Modulus
+    MATHAdd = 0; 					// Add
+    MATHSub = 1; 					// Subtract
+    MATHMul = 2; 					// Multiply
+    MATHFDiv = 3;					// Float Divide
+    MATHIDiv = 4;					// Int Divide
+    MATHMod = 5; 					// Int Modulus
     MATHCmp = 6; 					// Compare
 
     MATHNeg = 16;                   // Unary Negate
@@ -223,7 +223,7 @@ end;
 
 procedure SetRadianMode;assembler;inline;
 asm
-    mva #0  N6502MSG_ADDRESS+4
+    stz N6502MSG_ADDRESS+4
     mva #35 N6502MSG_ADDRESS+1
     mva #4  N6502MSG_ADDRESS
 end;
