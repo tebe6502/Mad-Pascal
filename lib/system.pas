@@ -98,7 +98,7 @@ type	TPoint = record x,y: SmallInt end;
 	This record describes a coordinate.
 	*)
 
-type	TDateTime = record yy,mm,dd,h,m,s: byte end;
+type	TDateTime = record yy,mm,dd,h,m,s,ss: byte end;
 	(*
 	@description:
 	This record describes Date-Time.
@@ -436,6 +436,7 @@ var
 {$ifndef raw}
 var
 	DateSeparator: Char = '-';
+	TimeSeparator: Char = ':';
 
 	FileMode: byte = fmOpenReadWrite;
 
