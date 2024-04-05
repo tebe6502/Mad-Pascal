@@ -48,8 +48,8 @@ begin
 		for j := 0 to n do begin
 			a := i + v;
 			b := r * i + x;
-			u := sin(a) + sin(b);
-			v := cos(a) + cos(b);
+			u := NeoSin(a) + NeoSin(b);
+			v := NeoCos(a) + NeoCos(b);
 			x := u;
 
 			a := u * s;
