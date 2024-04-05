@@ -18,7 +18,6 @@ var
 	x     : float     absolute $60;
 	y     : float     absolute $64;
 	v     : float     absolute $68;
-	t     : float     absolute $6c;
 	u     : float     absolute $70;
 	i     : byte      absolute $74;
 	j     : byte      absolute $75;
@@ -40,7 +39,7 @@ begin
 			NeoSetPalette((i shl 4) or j, i * 16, j * 16, 100);
 
 	// draw
-	x := 0; y := 0; v := 0; t := 0; s := 60;
+	x := 0; y := 0; v := 0; s := 60;
 
 	NeoSetColor(255);
 	NeoDrawRect(0, 0, 319, 239);
