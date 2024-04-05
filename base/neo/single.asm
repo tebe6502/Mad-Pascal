@@ -445,8 +445,8 @@ STACK_SIZE        = 2
 	mva :STACKORIGIN+STACKWIDTH*2,x 	STACK_ADDRESS+6
 	mva :STACKORIGIN+STACKWIDTH*3,x 	STACK_ADDRESS+8
 
-		;SetMathStack(b,1);
-		mva #$40 STACK_ADDRESS+1
+	;SetMathStack(b,1);
+	mva #$40 STACK_ADDRESS+1
 	mva :STACKORIGIN-1,x 							STACK_ADDRESS+3
 	mva :STACKORIGIN-1+STACKWIDTH,x 	STACK_ADDRESS+5
 	mva :STACKORIGIN-1+STACKWIDTH*2,x STACK_ADDRESS+7
@@ -456,8 +456,8 @@ STACK_SIZE        = 2
 	mva #STACK_ADDRESS N6502MSG_ADDRESS+4 ; wordParams[0] := STACK_ADDRESS
 	mva #STACK_SIZE N6502MSG_ADDRESS+6 		; NeoMessage.params[2] := STACK_SIZE
 	jsr @WaitMessage 											; NeoWaitMessage
-	mva #2 N6502MSG_ADDRESS+1 						; NeoMessage.func:=cmd;
-	mva #4 N6502MSG_ADDRESS+0 						; NeoMessage.group:=4;
+	mva #2 N6502MSG_ADDRESS+1 						; NeoMessage.func := cmd;
+	mva #4 N6502MSG_ADDRESS+0 						; NeoMessage.group := 4;
 
 	;GetMathStackFloat;
 	mva STACK_ADDRESS+2 :STACKORIGIN-1,x
