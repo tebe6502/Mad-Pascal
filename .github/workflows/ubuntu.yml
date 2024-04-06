@@ -1,0 +1,54 @@
+name: Build and test on Ubuntu
+
+on:
+  push:
+    branches: [ "master", "devel", "citest" ]
+    tags:
+      - '**'
+  pull_request:
+    branches: [ "master", "devel" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: install prereq.
+      run:
+        sudo apt-get update &&
+        sudo apt-get install -y fpc
+    - name: build
+      run: make
+    - name: list build binaries
+      run: ls -l bin/
+    - uses: actions/upload-artifact@v4
+      with:
+        name: mp-bin-ubuntu
+        path: |
+          bin/
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: mp-bin-ubuntu
+        path: bin
+    - name: list binaries extracted from the artifact
+      run: ls -l bin/
+    - name: setup test environment
+      run: make test-setup
+    - name: run tests
+      run: make test
+    - name: list all files
+      run: find .
+    - name: store logs from failed tests
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: mp-failed-test-logs
+        path: |
+          test/test_temp/*
+          test/*.log
