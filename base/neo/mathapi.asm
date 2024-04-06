@@ -7,6 +7,7 @@ VAR_ADDRESS                   = $F0
 STACK_ADDRESS                 = $F5
 STACK_SIZE                    = 2
 
+
 VAR_FLOAT                     = $40
 VAR_INTEGER                   = 0
 
@@ -18,6 +19,8 @@ VAR2_B1                       = STACK_ADDRESS+3
 VAR2_B2                       = STACK_ADDRESS+5
 VAR2_B3                       = STACK_ADDRESS+7
 VAR2_B4                       = STACK_ADDRESS+9
+
+MATH_GROUP                    = 4
 
 MATH_ADD                      = 0; Add
 MATH_SUB                      = 1; Subtract
