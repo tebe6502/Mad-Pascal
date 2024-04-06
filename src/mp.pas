@@ -4440,7 +4440,7 @@ case op of
 
      end else
      if ResultType = SINGLETOK then
-       asm65(#9'jsr @FSUB.FADD')
+       asm65(#9'jsr @FADD')
      else
 
      case DataSize[ResultType] of
