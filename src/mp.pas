@@ -4440,7 +4440,10 @@ case op of
 
      end else
      if ResultType = SINGLETOK then
-       asm65(#9'jsr @FADD')
+       if target.id = ___NEO then
+         asm65(#9'jsr @FADD')
+       else
+         asm65(#9'jsr @FSUB.FADD')
      else
 
      case DataSize[ResultType] of
