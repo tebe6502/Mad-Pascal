@@ -27,8 +27,27 @@ jobs:
         path: |
           bin/
 
+  build-mads:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install prereq.
+        run:
+          sudo apt-get update &&
+          sudo apt-get install -y fpc
+      - name: get sources
+        run: wget https://github.com/tebe6502/Mad-Assembler/archive/refs/tags/2.1.5.tar.gz
+      - name: extract sources
+        run: tar xvf 2.1.5.tar.gz
+      - name: build
+        run: cd Mad-Assembler-2.1.5 ; fpc -Mdelphi -vh -O3 mads.pas
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mads-bin-ubuntu
+          path: |
+            Mad-Assembler-2.1.5/mads
+
   test:
-    needs: build
+    needs: [ build, build-mads ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -36,8 +55,16 @@ jobs:
       with:
         name: mp-bin-ubuntu
         path: bin
-    - name: list binaries extracted from the artifact
+    - name: list mp binaries from the artifact
       run: ls -l bin/
+    - uses: actions/download-artifact@v4
+      with:
+        name: mads-bin-ubuntu
+        path: mads
+    - name: list mads binaries from the artifact
+      run: ls -l mads
+    - name: install mads
+      run: sudo cp -v mads/mads /usr/local/bin/mads
     - name: setup test environment
       run: make test-setup
     - name: run tests
