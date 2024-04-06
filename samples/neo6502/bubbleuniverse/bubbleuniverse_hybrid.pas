@@ -2,66 +2,69 @@ program universe;
 
 //----------------------------------------------------------
 
-uses crt, neo6502, neo6502Math;
+uses crt, neo6502, Neo6502Math;
 
 //----------------------------------------------------------
 
 const
-	n = 200;
-	r = float((PI * 2) / 255);
+    n = 200;
+    r = float((PI * 2) / 255);
 
 //----------------------------------------------------------
 
 var
-	a     : float     absolute $54;
-	b     : float     absolute $58;
-	x     : float     absolute $60;
-	y     : float     absolute $64;
-	v     : float     absolute $68;
-	u     : float     absolute $70;
-	i     : byte      absolute $74;
-	j     : byte      absolute $75;
-	s     : byte      absolute $76;
-	c     : byte      absolute $77;
-	d     : byte      absolute $78;
-	time1 : cardinal  absolute $80;
-	time2 : cardinal  absolute $84;
+    a     : float absolute $54;
+    b     : float absolute $58;
+    x     : float absolute $60;
+    y     : float absolute $64;
+    v     : float absolute $68;
+    u     : float absolute $70;
+    i     : byte      absolute $74;
+    j     : byte      absolute $75;
+    s     : byte      absolute $76;
+    c     : byte      absolute $77;
+    d     : byte      absolute $78;
+    time1 : cardinal  absolute $80;
+    time2 : cardinal  absolute $84;
+
+    col   : array[0..n,0..n] of byte;
+
 //----------------------------------------------------------
 
 begin
-	time1 := NeoGetTimer;
+    // prepare palette
+    NeoSetDefaults(0, $ff, 1, 1, 0);
+    NeoSetPalette($ff, 0, 0, 0);
+    NeoSetColor($ff);
+    NeoDrawRect(0, 0, 319, 239);
 
-	// prepare palette
-	NeoSetDefaults(0, 255, 1, 0, 0);
-	NeoSetPalette(255, 0, 0, 0);
-	for i := 0 to 14 do
-		for j := 0 to 14 do
-			NeoSetPalette((i shl 4) or j, i * 16, j * 16, 100);
+    for i := 0 to n do
+        for j := 0 to n do begin
+            c:=((i div 14) shl 4) or (j div 14);
+            NeoSetPalette(c, i, j, 99);
+            col[i,j] := c;
+        end;
 
-	// draw
-	x := 0; y := 0; v := 0; s := 60;
+    x := 0; y := 0; v := 0; s := 60;
 
-	NeoSetColor(255);
-	NeoDrawRect(0, 0, 319, 239);
+    // draw
+    time1 := NeoGetTimer;
+    for i := 0 to n do
+        for j := 0 to n do begin
+            a := i + v;
+            b := r * i + x;
+            u := neosin(a) + neosin(b);
+            v := neocos(a) + neocos(b);
+            x := u;
 
-	for i := 0 to n do
-		for j := 0 to n do begin
-			a := i + v;
-			b := r * i + x;
-			u := NeoSin(a) + NeoSin(b);
-			v := NeoCos(a) + NeoCos(b);
-			x := u;
+            a := u * s;
+            b := v * s;
+            NeoWritePixel(Trunc(a) + 160, Trunc(b) + 120 ,col[i,j]);
+        end;
+    time2 := NeoGetTimer;
 
-			a := u * s;
-			b := v * s;
-			c := ((i div 14) shl 4) or (j div 14);
-
-			NeoWritePixel(Round(a) + 160, Round(b) + 120, c);
-		end;
-
-	time2 := NeoGetTimer;
-	NeoSetTextColor(16, 15);
-	GotoXY(1,1); write((time2 - time1) / 100);
-	repeat until false;
+    NeoSetTextColor(16, 15);
+    GotoXY(1,1); write((time2 - time1) / 100);
+    repeat until false;
 
 end.
