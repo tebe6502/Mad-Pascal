@@ -18,7 +18,9 @@ default:
 	      "or 'make setup' to just setup the test environment."
 
 test: setup
-	$(PYTEST) | tee test_output.log
+#	$(PYTEST) --log-file test_output.log   # no output...
+#	$(PYTEST) | tee test_output.log        # log ok, but no failure status returned...
+	$(PYTEST)                              # without the log file (only stdout/err output)
 
 setup: $(PIP3) $(PYTEST) $(PY65EMU) config.ini mp
 
