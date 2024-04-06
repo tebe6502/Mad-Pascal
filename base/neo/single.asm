@@ -19,6 +19,33 @@
 
 */
 
+/*
+Here's a breakdown of the floating-point math abbreviations you've listed. These are likely part of an instruction set architecture (ISA) or assembly language conventions.
+
+**Common Abbreviations**
+
+* **NEGINT:** Likely indicates "Negate Integer." Changes the sign of an integer value.
+* **FFRAC:** Could mean "Floating-point Fraction." This might extract the fractional portion of a floating-point number.
+* **FROUND:** "Floating-point Round." Rounds a floating-point number to a specified precision or rounding mode (e.g., round to nearest, round down, round up).
+* **FSUB:** "Floating-point Subtract." Subtracts two floating-point values.
+* **FPNORM:** "Floating-point Normalize." Adjusts the exponent of a floating-point number so the leading significant digit falls within a specific range, ensuring better precision in calculations.
+* **FMUL:** "Floating-point Multiply." Multiplies two floating-point values.
+* **FDIV:** "Floating-point Divide." Divides two floating-point values.
+* **FCMPL:** "Floating-point Compare Less." Compares two floating-point numbers and sets flags/registers to indicate if the first operand is less than the second.  Similar instructions might exist for other comparisons (greater than, equal, etc.).
+* **F2I:**  "Floating-point to Integer."  Converts a floating-point number to an integer, likely with truncation or rounding.
+* **I2F:** "Integer to Floating-point."  Converts an integer value to a floating-point representation.
+
+**Less Common/Context-Specific**
+
+* **I2F_M:**  This might be a more specific variant of "Integer to Floating-point." The "_M" could denote a particular conversion method or rounding mode.  To be sure, we would need more context on where you encountered this abbreviation.
+
+**Important Notes**
+
+* The exact interpretation of some of these abbreviations might depend on the specific processor architecture or the programming language's assembly instructions.
+* Floating-point instructions often have variations to handle different rounding modes, precisions (single vs. double), and to deal with special cases like NaNs (Not a Number) and infinities.
+
+*/
+
 
 
 /*
@@ -179,7 +206,6 @@ enter SBC FPMAN0
   mva :STACKORIGIN-1+STACKWIDTH,x   VAR1_B2
   mva :STACKORIGIN-1+STACKWIDTH*2,x VAR1_B3
   mva :STACKORIGIN-1+STACKWIDTH*3,x VAR1_B4
-
   mva #STACK_ADDRESS NEOMESSAGE_PAR1W
   mva #STACK_SIZE    NEOMESSAGE_PAR2W
   jsr @WaitMessage
@@ -216,6 +242,91 @@ FADD
   mva VAR1_B3 :STACKORIGIN-1+STACKWIDTH*2,x
   mva VAR1_B4 :STACKORIGIN-1+STACKWIDTH*3,x
   rts
+
+enter
+  ROL
+  STA FP1EXP
+  LDA #$00
+  BCC @+
+  SBC FP1MAN0
+  STA FP1MAN0
+  LDA #$00
+  SBC FP1MAN1
+  STA FP1MAN1
+  LDA #$00
+  SBC FP1MAN2
+  STA FP1MAN2
+  LDA #$FF
+@ STA FP1MAN3
+  LDA FP1EXP    ; CALCULATE WHICH MANTISSA TO SHIFT
+  STA FPEXP
+  SEC
+  SBC FP2EXP
+  BEQ @FADDMAN
+  BCS @+
+  EOR #$FF
+  TAY
+  INY
+  LDA FP2EXP
+  STA FPEXP
+  LDA FP1MAN3
+  CPY #24   ; KEEP SHIFT RANGE VALID
+  BCC FP1SHFT
+  LDA #$00
+  STA FP1MAN3
+  STA FP1MAN2
+  STA FP1MAN1
+  STA FP1MAN0
+  BEQ @FADDMAN
+FP1SHFT:  CMP #$80  ; SHIFT FP1 DOWN
+  ROR
+  ROR FP1MAN2
+  ROR FP1MAN1
+  ROR FP1MAN0
+  DEY
+  BNE FP1SHFT
+  STA FP1MAN3
+  JMP @FADDMAN
+
+@ TAY
+  LDA FP2MAN3
+  CPY #24   ; KEEP SHIFT RANGE VALID
+  BCC FP2SHFT
+  LDA #$00
+  STA FP2MAN3
+  STA FP2MAN2
+  STA FP2MAN1
+  STA FP2MAN0
+  BEQ @FADDMAN
+FP2SHFT:  CMP #$80  ; SHIFT FP2 DOWN
+  ROR
+  ROR FP2MAN2
+  ROR FP2MAN1
+  ROR FP2MAN0
+  DEY
+  BNE FP2SHFT
+  STA FP2MAN3
+@FADDMAN: LDA FP1MAN0
+  CLC
+  ADC FP2MAN0
+  STA FPMAN0
+  LDA FP1MAN1
+  ADC FP2MAN1
+  STA FPMAN1
+  LDA FP1MAN2
+  ADC FP2MAN2
+  STA FPMAN2
+  LDA FP1MAN3
+  ADC FP2MAN3
+  STA FPMAN3
+  BPL @FPNORM
+
+  LDA #$80
+  STA FPSGN
+
+  JSR @NEGINT
+
+  jmp @FPNORM
 .endp
 
 .proc @FPNORM
