@@ -422,49 +422,49 @@ FPNORMDONE: ASL
 
 ; --------------------------
 
-  N6502MSG_ADDRESS  = $ff00
-  NEOMESSAGE_GROUP  = N6502MSG_ADDRESS+0
-  NEOMESSAGE_FUNC   = N6502MSG_ADDRESS+1
-  NEOMESSAGE_PAR1W  = N6502MSG_ADDRESS+4
-  NEOMESSAGE_PAR2W  = N6502MSG_ADDRESS+6
-  VAR_ADDRESS       = $F0
-  STACK_ADDRESS     = $F5
-  STACK_SIZE        = 2
+  N6502MSG_ADDRESS              = $FF00
+  NEOMESSAGE_GROUP              = N6502MSG_ADDRESS+0
+  NEOMESSAGE_FUNC               = N6502MSG_ADDRESS+1
+  NEOMESSAGE_PAR1W              = N6502MSG_ADDRESS+4
+  NEOMESSAGE_PAR2W              = N6502MSG_ADDRESS+6
+  VAR_ADDRESS                   = $F0
+  STACK_ADDRESS                 = $F5
+  STACK_SIZE                    = 2
 
-  VAR_1B1           = STACK_ADDRESS+2
-  VAR_1B2           = STACK_ADDRESS+4
-  VAR_1B3           = STACK_ADDRESS+6
-  VAR_1B4           = STACK_ADDRESS+8
-  VAR_2B1           = STACK_ADDRESS+3
-  VAR_2B2           = STACK_ADDRESS+5
-  VAR_2B3           = STACK_ADDRESS+7
-  VAR_2B4           = STACK_ADDRESS+9
+  VAR_1B1                       = STACK_ADDRESS+2
+  VAR_1B2                       = STACK_ADDRESS+4
+  VAR_1B3                       = STACK_ADDRESS+6
+  VAR_1B4                       = STACK_ADDRESS+8
+  VAR_2B1                       = STACK_ADDRESS+3
+  VAR_2B2                       = STACK_ADDRESS+5
+  VAR_2B3                       = STACK_ADDRESS+7
+  VAR_2B4                       = STACK_ADDRESS+9
 
-  MATH_ADD           = 0; Add
-  MATH_SUB           = 1; Subtract
-  MATH_MUL           = 2; Multiply
-  MATH_FDIV          = 3; Float Divide
-  MATH_IDIV          = 4; Int Divide
-  MATH_MOD           = 5; Int Modulus
-  MATH_CMP           = 6; Compare
+  MATH_ADD                      = 0; Add
+  MATH_SUB                      = 1; Subtract
+  MATH_MUL                      = 2; Multiply
+  MATH_FDIV                     = 3; Float Divide
+  MATH_IDIV                     = 4; Int Divide
+  MATH_MOD                      = 5; Int Modulus
+  MATH_CMP                      = 6; Compare
 
-  MATH_NEG           = 16; Unary Negate
-  MATH_FLR           = 17; Floor (integer part)
-  MATH_SQR           = 18; Square root
-  MATH_SIN           = 19; Sine
-  MATH_COS           = 20; Cosine
-  MATH_TAN           = 21; Tangent
-  MATH_ATAN          = 22; Arc Tangent
-  MATH_EXP           = 23; Exponent
-  MATH_LOG           = 24; Logarithm (e)
-  MATH_ABS           = 25; Absolute value
-  MATH_SGN           = 26; Sign
-  MATH_FRND          = 27; Random (float)
-  MATH_IRND          = 28; Random (integer)
+  MATH_NEG                      = 16; Unary Negate
+  MATH_FLR                      = 17; Floor (integer part)
+  MATH_SQR                      = 18; Square root
+  MATH_SIN                      = 19; Sine
+  MATH_COS                      = 20; Cosine
+  MATH_TAN                      = 21; Tangent
+  MATH_ATAN                     = 22; Arc Tangent
+  MATH_EXP                      = 23; Exponent
+  MATH_LOG                      = 24; Logarithm (e)
+  MATH_ABS                      = 25; Absolute value
+  MATH_SGN                      = 26; Sign
+  MATH_FRND                     = 27; Random (float)
+  MATH_IRND                     = 28; Random (integer)
 
-  MATHProcessDecimal        = 32; Append BCD encoded decimal digits, convert to float
-  MATHConvertStringToNumber = 33; String to int/float
-  MATHConvertNumberToString = 34; int/float to string
+  MATH_PROCESS_DECIMAL          = 32; Append BCD encoded decimal digits, convert to float
+  MATH_CONVERT_STRING_TO_NUMBER = 33; String to int/float
+  MATH_CONVERT_NUMBER_TO_STRING = 34; int/float to string
 
 
 .proc @FMUL
