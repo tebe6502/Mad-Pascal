@@ -8,10 +8,13 @@ SRC = mp.pas \
   Scanner.pas \
   SplitString.pas
 
-mp: $(SRC)
-	fpc -Mdelphi -v -O3 $<
+BINDIR = ../bin
+BIN = $(BINDIR)/mp
+
+$(BIN): $(SRC)
+	fpc -Mdelphi -v -O3 $< -o$(BIN)
 
 clean:
-	rm -fv mp *.o *.ppu
+	rm -fv $(BIN) $(BINDIR)/*.o $(BINDIR)/*.ppu
 
 .PHONY: clean
