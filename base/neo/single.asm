@@ -422,10 +422,50 @@ FPNORMDONE: ASL
 
 ; --------------------------
 
-N6502MSG_ADDRESS  = $ff00
-VAR_ADDRESS       = $F0
-STACK_ADDRESS     = $F5
-STACK_SIZE        = 2
+  N6502MSG_ADDRESS  = $ff00
+  NEOMESSAGE_GROUP  = N6502MSG_ADDRESS+0
+  NEOMESSAGE_FUNC   = N6502MSG_ADDRESS+1
+  NEOMESSAGE_PAR1W  = N6502MSG_ADDRESS+4
+  NEOMESSAGE_PAR2W  = N6502MSG_ADDRESS+6
+  VAR_ADDRESS       = $F0
+  STACK_ADDRESS     = $F5
+  STACK_SIZE        = 2
+
+  VAR_1B1           = STACK_ADDRESS+2
+  VAR_1B2           = STACK_ADDRESS+4
+  VAR_1B3           = STACK_ADDRESS+6
+  VAR_1B4           = STACK_ADDRESS+8
+  VAR_2B1           = STACK_ADDRESS+3
+  VAR_2B2           = STACK_ADDRESS+5
+  VAR_2B3           = STACK_ADDRESS+7
+  VAR_2B4           = STACK_ADDRESS+9
+
+  MATH_ADD           = 0; Add
+  MATH_SUB           = 1; Subtract
+  MATH_MUL           = 2; Multiply
+  MATH_FDIV          = 3; Float Divide
+  MATH_IDIV          = 4; Int Divide
+  MATH_MOD           = 5; Int Modulus
+  MATH_CMP           = 6; Compare
+
+  MATH_NEG           = 16; Unary Negate
+  MATH_FLR           = 17; Floor (integer part)
+  MATH_SQR           = 18; Square root
+  MATH_SIN           = 19; Sine
+  MATH_COS           = 20; Cosine
+  MATH_TAN           = 21; Tangent
+  MATH_ATAN          = 22; Arc Tangent
+  MATH_EXP           = 23; Exponent
+  MATH_LOG           = 24; Logarithm (e)
+  MATH_ABS           = 25; Absolute value
+  MATH_SGN           = 26; Sign
+  MATH_FRND          = 27; Random (float)
+  MATH_IRND          = 28; Random (integer)
+
+  MATHProcessDecimal        = 32; Append BCD encoded decimal digits, convert to float
+  MATHConvertStringToNumber = 33; String to int/float
+  MATHConvertNumberToString = 34; int/float to string
+
 
 .proc @FMUL
   ;value eq 13
@@ -440,30 +480,30 @@ STACK_SIZE        = 2
 
   ;SetMathStack(a,0);
   mva #$40 STACK_ADDRESS
-  mva :STACKORIGIN,x                STACK_ADDRESS+2
-  mva :STACKORIGIN+STACKWIDTH,x     STACK_ADDRESS+4
-  mva :STACKORIGIN+STACKWIDTH*2,x   STACK_ADDRESS+6
-  mva :STACKORIGIN+STACKWIDTH*3,x   STACK_ADDRESS+8
+  mva :STACKORIGIN,x                VAR_1B1
+  mva :STACKORIGIN+STACKWIDTH,x     VAR_1B2
+  mva :STACKORIGIN+STACKWIDTH*2,x   VAR_1B3
+  mva :STACKORIGIN+STACKWIDTH*3,x   VAR_1B4
 
   ;SetMathStack(b,1);
   mva #$40 STACK_ADDRESS+1
-  mva :STACKORIGIN-1,x              STACK_ADDRESS+3
-  mva :STACKORIGIN-1+STACKWIDTH,x   STACK_ADDRESS+5
-  mva :STACKORIGIN-1+STACKWIDTH*2,x STACK_ADDRESS+7
-  mva :STACKORIGIN-1+STACKWIDTH*3,x STACK_ADDRESS+9
+  mva :STACKORIGIN-1,x              VAR_2B1
+  mva :STACKORIGIN-1+STACKWIDTH,x   VAR_2B2
+  mva :STACKORIGIN-1+STACKWIDTH*2,x VAR_2B3
+  mva :STACKORIGIN-1+STACKWIDTH*3,x VAR_2B4
 
   ;DoMathOnStack(MATHMul);
-  mva #STACK_ADDRESS N6502MSG_ADDRESS+4 ; wordParams[0] := STACK_ADDRESS
-  mva #STACK_SIZE N6502MSG_ADDRESS+6    ; NeoMessage.params[2] := STACK_SIZE
-  jsr @WaitMessage                      ; NeoWaitMessage
-  mva #2 N6502MSG_ADDRESS+1             ; NeoMessage.func := cmd;
-  mva #4 N6502MSG_ADDRESS+0             ; NeoMessage.group := 4;
+  mva #STACK_ADDRESS NEOMESSAGE_PAR1W ; wordParams[0] := STACK_ADDRESS
+  mva #STACK_SIZE    NEOMESSAGE_PAR2W ; NeoMessage.params[2] := STACK_SIZE
+  jsr @WaitMessage                    ; NeoWaitMessage
+  mva #MATH_MUL      NEOMESSAGE_FUNC  ; NeoMessage.func := MATHMul
+  mva #4             NEOMESSAGE_GROUP ; NeoMessage.group := 4
 
   ;GetMathStackFloat;
-  mva STACK_ADDRESS+2 :STACKORIGIN-1,x
-  mva STACK_ADDRESS+4 :STACKORIGIN-1+STACKWIDTH,x
-  mva STACK_ADDRESS+6 :STACKORIGIN-1+STACKWIDTH*2,x
-  mva STACK_ADDRESS+8 :STACKORIGIN-1+STACKWIDTH*3,x
+  mva VAR_1B1 :STACKORIGIN-1,x
+  mva VAR_1B2 :STACKORIGIN-1+STACKWIDTH,x
+  mva VAR_1B3 :STACKORIGIN-1+STACKWIDTH*2,x
+  mva VAR_1B4 :STACKORIGIN-1+STACKWIDTH*3,x
   rts
 .endp
 
