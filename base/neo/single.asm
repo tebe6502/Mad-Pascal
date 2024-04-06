@@ -431,14 +431,14 @@ FPNORMDONE: ASL
   STACK_ADDRESS                 = $F5
   STACK_SIZE                    = 2
 
-  VAR_1B1                       = STACK_ADDRESS+2
-  VAR_1B2                       = STACK_ADDRESS+4
-  VAR_1B3                       = STACK_ADDRESS+6
-  VAR_1B4                       = STACK_ADDRESS+8
-  VAR_2B1                       = STACK_ADDRESS+3
-  VAR_2B2                       = STACK_ADDRESS+5
-  VAR_2B3                       = STACK_ADDRESS+7
-  VAR_2B4                       = STACK_ADDRESS+9
+  VAR1_B1                       = STACK_ADDRESS+2
+  VAR1_B2                       = STACK_ADDRESS+4
+  VAR1_B3                       = STACK_ADDRESS+6
+  VAR1_B4                       = STACK_ADDRESS+8
+  VAR2_B1                       = STACK_ADDRESS+3
+  VAR2_B2                       = STACK_ADDRESS+5
+  VAR2_B3                       = STACK_ADDRESS+7
+  VAR2_B4                       = STACK_ADDRESS+9
 
   MATH_ADD                      = 0; Add
   MATH_SUB                      = 1; Subtract
@@ -480,17 +480,17 @@ FPNORMDONE: ASL
 
   ;SetMathStack(a,0);
   mva #$40 STACK_ADDRESS
-  mva :STACKORIGIN,x                VAR_1B1
-  mva :STACKORIGIN+STACKWIDTH,x     VAR_1B2
-  mva :STACKORIGIN+STACKWIDTH*2,x   VAR_1B3
-  mva :STACKORIGIN+STACKWIDTH*3,x   VAR_1B4
+  mva :STACKORIGIN,x                VAR1_B1
+  mva :STACKORIGIN+STACKWIDTH,x     VAR1_B2
+  mva :STACKORIGIN+STACKWIDTH*2,x   VAR1_B3
+  mva :STACKORIGIN+STACKWIDTH*3,x   VAR1_B4
 
   ;SetMathStack(b,1);
   mva #$40 STACK_ADDRESS+1
-  mva :STACKORIGIN-1,x              VAR_2B1
-  mva :STACKORIGIN-1+STACKWIDTH,x   VAR_2B2
-  mva :STACKORIGIN-1+STACKWIDTH*2,x VAR_2B3
-  mva :STACKORIGIN-1+STACKWIDTH*3,x VAR_2B4
+  mva :STACKORIGIN-1,x              VAR2_B1
+  mva :STACKORIGIN-1+STACKWIDTH,x   VAR2_B2
+  mva :STACKORIGIN-1+STACKWIDTH*2,x VAR2_B3
+  mva :STACKORIGIN-1+STACKWIDTH*3,x VAR2_B4
 
   ;DoMathOnStack(MATHMul);
   mva #STACK_ADDRESS NEOMESSAGE_PAR1W ; wordParams[0] := STACK_ADDRESS
@@ -500,10 +500,10 @@ FPNORMDONE: ASL
   mva #4             NEOMESSAGE_GROUP ; NeoMessage.group := 4
 
   ;GetMathStackFloat;
-  mva VAR_1B1 :STACKORIGIN-1,x
-  mva VAR_1B2 :STACKORIGIN-1+STACKWIDTH,x
-  mva VAR_1B3 :STACKORIGIN-1+STACKWIDTH*2,x
-  mva VAR_1B4 :STACKORIGIN-1+STACKWIDTH*3,x
+  mva VAR1_B1 :STACKORIGIN-1,x
+  mva VAR1_B2 :STACKORIGIN-1+STACKWIDTH,x
+  mva VAR1_B3 :STACKORIGIN-1+STACKWIDTH*2,x
+  mva VAR1_B4 :STACKORIGIN-1+STACKWIDTH*3,x
   rts
 .endp
 
