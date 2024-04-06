@@ -60,6 +60,54 @@ FPEXP .ds 1
 
 */
 
+; ------------------------------------------------------------------------------
+
+  N6502MSG_ADDRESS              = $FF00
+  NEOMESSAGE_GROUP              = N6502MSG_ADDRESS+0
+  NEOMESSAGE_FUNC               = N6502MSG_ADDRESS+1
+  NEOMESSAGE_PAR1W              = N6502MSG_ADDRESS+4
+  NEOMESSAGE_PAR2W              = N6502MSG_ADDRESS+6
+  VAR_ADDRESS                   = $F0
+  STACK_ADDRESS                 = $F5
+  STACK_SIZE                    = 2
+
+  VAR1_B1                       = STACK_ADDRESS+2
+  VAR1_B2                       = STACK_ADDRESS+4
+  VAR1_B3                       = STACK_ADDRESS+6
+  VAR1_B4                       = STACK_ADDRESS+8
+  VAR2_B1                       = STACK_ADDRESS+3
+  VAR2_B2                       = STACK_ADDRESS+5
+  VAR2_B3                       = STACK_ADDRESS+7
+  VAR2_B4                       = STACK_ADDRESS+9
+
+  MATH_ADD                      = 0; Add
+  MATH_SUB                      = 1; Subtract
+  MATH_MUL                      = 2; Multiply
+  MATH_FDIV                     = 3; Float Divide
+  MATH_IDIV                     = 4; Int Divide
+  MATH_MOD                      = 5; Int Modulus
+  MATH_CMP                      = 6; Compare
+
+  MATH_NEG                      = 16; Unary Negate
+  MATH_FLR                      = 17; Floor (integer part)
+  MATH_SQR                      = 18; Square root
+  MATH_SIN                      = 19; Sine
+  MATH_COS                      = 20; Cosine
+  MATH_TAN                      = 21; Tangent
+  MATH_ATAN                     = 22; Arc Tangent
+  MATH_EXP                      = 23; Exponent
+  MATH_LOG                      = 24; Logarithm (e)
+  MATH_ABS                      = 25; Absolute value
+  MATH_SGN                      = 26; Sign
+  MATH_FRND                     = 27; Random (float)
+  MATH_IRND                     = 28; Random (integer)
+
+  MATH_PROCESS_DECIMAL          = 32; Append BCD encoded decimal digits, convert to float
+  MATH_CONVERT_STRING_TO_NUMBER = 33; String to int/float
+  MATH_CONVERT_NUMBER_TO_STRING = 34; int/float to string
+
+; ------------------------------------------------------------------------------
+
 @rx = bp+1
 
 
@@ -420,52 +468,6 @@ FPNORMDONE: ASL
   rts
 .endp
 
-; --------------------------
-
-  N6502MSG_ADDRESS              = $FF00
-  NEOMESSAGE_GROUP              = N6502MSG_ADDRESS+0
-  NEOMESSAGE_FUNC               = N6502MSG_ADDRESS+1
-  NEOMESSAGE_PAR1W              = N6502MSG_ADDRESS+4
-  NEOMESSAGE_PAR2W              = N6502MSG_ADDRESS+6
-  VAR_ADDRESS                   = $F0
-  STACK_ADDRESS                 = $F5
-  STACK_SIZE                    = 2
-
-  VAR1_B1                       = STACK_ADDRESS+2
-  VAR1_B2                       = STACK_ADDRESS+4
-  VAR1_B3                       = STACK_ADDRESS+6
-  VAR1_B4                       = STACK_ADDRESS+8
-  VAR2_B1                       = STACK_ADDRESS+3
-  VAR2_B2                       = STACK_ADDRESS+5
-  VAR2_B3                       = STACK_ADDRESS+7
-  VAR2_B4                       = STACK_ADDRESS+9
-
-  MATH_ADD                      = 0; Add
-  MATH_SUB                      = 1; Subtract
-  MATH_MUL                      = 2; Multiply
-  MATH_FDIV                     = 3; Float Divide
-  MATH_IDIV                     = 4; Int Divide
-  MATH_MOD                      = 5; Int Modulus
-  MATH_CMP                      = 6; Compare
-
-  MATH_NEG                      = 16; Unary Negate
-  MATH_FLR                      = 17; Floor (integer part)
-  MATH_SQR                      = 18; Square root
-  MATH_SIN                      = 19; Sine
-  MATH_COS                      = 20; Cosine
-  MATH_TAN                      = 21; Tangent
-  MATH_ATAN                     = 22; Arc Tangent
-  MATH_EXP                      = 23; Exponent
-  MATH_LOG                      = 24; Logarithm (e)
-  MATH_ABS                      = 25; Absolute value
-  MATH_SGN                      = 26; Sign
-  MATH_FRND                     = 27; Random (float)
-  MATH_IRND                     = 28; Random (integer)
-
-  MATH_PROCESS_DECIMAL          = 32; Append BCD encoded decimal digits, convert to float
-  MATH_CONVERT_STRING_TO_NUMBER = 33; String to int/float
-  MATH_CONVERT_NUMBER_TO_STRING = 34; int/float to string
-
 
 .proc @FMUL
   ;value eq 13
@@ -478,14 +480,14 @@ FPNORMDONE: ASL
   ;00000000 #$00 => STA :STACKORIGIN-1+STACKWIDTH,x
   ;00000000 #$00 => STA :STACKORIGIN-1,x
 
-  ;SetMathStack(a,0);
+  ;SetMathStack(var1,0);
   mva #$40 STACK_ADDRESS
   mva :STACKORIGIN,x                VAR1_B1
   mva :STACKORIGIN+STACKWIDTH,x     VAR1_B2
   mva :STACKORIGIN+STACKWIDTH*2,x   VAR1_B3
   mva :STACKORIGIN+STACKWIDTH*3,x   VAR1_B4
 
-  ;SetMathStack(b,1);
+  ;SetMathStack(var2,1);
   mva #$40 STACK_ADDRESS+1
   mva :STACKORIGIN-1,x              VAR2_B1
   mva :STACKORIGIN-1+STACKWIDTH,x   VAR2_B2
@@ -510,92 +512,29 @@ FPNORMDONE: ASL
 ; --------------------------
 
 .proc @FDIV
+  mva #$40 STACK_ADDRESS
+  mva :STACKORIGIN,x                VAR2_B1
+  mva :STACKORIGIN+STACKWIDTH,x     VAR2_B2
+  mva :STACKORIGIN+STACKWIDTH*2,x   VAR2_B3
+  mva :STACKORIGIN+STACKWIDTH*3,x   VAR2_B4
 
-  stx @rx
+  mva #$40 STACK_ADDRESS+1
+  mva :STACKORIGIN-1,x              VAR1_B1
+  mva :STACKORIGIN-1+STACKWIDTH,x   VAR1_B2
+  mva :STACKORIGIN-1+STACKWIDTH*2,x VAR1_B3
+  mva :STACKORIGIN-1+STACKWIDTH*3,x VAR1_B4
 
-  lda :STACKORIGIN,x
-  STA FP2MAN0
-  lda :STACKORIGIN+STACKWIDTH,x
-  STA FP2MAN1
-  lda :STACKORIGIN+STACKWIDTH*2,x
-  CMP #$80    ; SET CARRY FROM MSB
-  ORA #$80    ; SET HIDDEN BIT
-  STA FP2MAN2
-  lda :STACKORIGIN+STACKWIDTH*3,x
-  ROL
-  STA FP2EXP
-  BNE @+
+  mva #STACK_ADDRESS NEOMESSAGE_PAR1W
+  mva #STACK_SIZE    NEOMESSAGE_PAR2W
+  jsr @WaitMessage
+  mva #MATH_FDIV     NEOMESSAGE_FUNC
+  mva #4             NEOMESSAGE_GROUP
 
-; LDA #$00
-ZERO: STA :STACKORIGIN-1,x
-  STA :STACKORIGIN-1+STACKWIDTH,x
-  STA :STACKORIGIN-1+STACKWIDTH*2,x
-  STA :STACKORIGIN-1+STACKWIDTH*3,x
+  mva VAR1_B1 :STACKORIGIN-1,x
+  mva VAR1_B2 :STACKORIGIN-1+STACKWIDTH,x
+  mva VAR1_B3 :STACKORIGIN-1+STACKWIDTH*2,x
+  mva VAR1_B4 :STACKORIGIN-1+STACKWIDTH*3,x
   rts
-; LDA #23   ; DIVIDE BY ZERO, ERROR
-; JMP SYSTHROW
-
-@ LDA #$00
-  ROR
-  STA FPSGN
-  lda :STACKORIGIN-1,x
-  STA FP1MAN0
-  lda :STACKORIGIN-1+STACKWIDTH,x
-  STA FP1MAN1
-  lda :STACKORIGIN-1+STACKWIDTH*2,x
-  CMP #$80    ; SET CARRY FROM MSB
-  ORA #$80    ; SET HIDDEN BIT
-  STA FP1MAN2
-  lda :STACKORIGIN-1+STACKWIDTH*3,x
-  ROL
-  STA FP1EXP
-  BEQ ZERO    ; DIVIDE ZERO, RESULT ZERO
-
-  LDA #$00
-  STA FP1MAN3
-  ROR
-  EOR FPSGN
-  STA FPSGN
-  LDA FP1EXP
-  SEC     ; SUBTRACT EXPONENTS
-  SBC FP2EXP
-  CLC
-  ADC #$7F    ; ADD BACK BIAS
-  STA FPEXP
-
-  LDX #24   ; #BITS
-FDIVLOOP: LDA FP1MAN0
-  SEC
-  SBC FP2MAN0
-  STA TMP
-  LDA FP1MAN1
-  SBC FP2MAN1
-  STA TMP+1
-  LDA FP1MAN2
-  SBC FP2MAN2
-  TAY
-  LDA FP1MAN3
-  SBC #$00
-  BCC FDIVNEXTBIT
-  STA FP1MAN3
-  STY FP1MAN2
-  LDA TMP+1
-  STA FP1MAN1
-  LDA TMP
-  STA FP1MAN0
-FDIVNEXTBIT:  ROL FPMAN0
-  ROL FPMAN1
-  ROL FPMAN2
-  ASL FP1MAN0
-  ROL FP1MAN1
-  ROL FP1MAN2
-  ROL FP1MAN3
-  DEX
-  BNE FDIVLOOP
-
-  ldx @rx
-  LDA #$00
-  JMP @FPNORM
 .endp
 
 
