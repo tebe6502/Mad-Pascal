@@ -17,7 +17,7 @@ default:
 	@echo "No default rule - do 'make test' to setup and run tests" \
 	      "or 'make setup' to just setup the test environment."
 
-test: $(MPBIN) setup
+test: setup
 	$(PYTEST) | tee test_output.log
 
 setup: $(PIP3) $(PYTEST) $(PY65EMU) config.ini mp
@@ -25,8 +25,8 @@ setup: $(PIP3) $(PYTEST) $(PY65EMU) config.ini mp
 config.ini:
 	cp -v $(CONFIG) config.ini
 
-
-mp: $(MPBIN) blibs dlibs lib wlibs
+#mp: $(MPBIN) blibs dlibs lib wlibs
+mp: blibs dlibs lib wlibs
 	cp -v $(MPBIN) mp
 
 blibs:
