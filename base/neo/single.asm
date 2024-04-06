@@ -211,7 +211,7 @@ enter SBC FPMAN0
   mva #STACK_SIZE    NEOMESSAGE_PAR2W
   jsr @WaitMessage
   mva #MATH_ADD      NEOMESSAGE_FUNC
-  mva #4             NEOMESSAGE_GROUP
+  mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   mva VAR1_B1 :STACKORIGIN-1,x
   mva VAR1_B2 :STACKORIGIN-1+STACKWIDTH,x
@@ -236,7 +236,7 @@ enter SBC FPMAN0
   mva #STACK_SIZE    NEOMESSAGE_PAR2W
   jsr @WaitMessage
   mva #MATH_SUB      NEOMESSAGE_FUNC
-  mva #4             NEOMESSAGE_GROUP
+  mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   mva VAR1_B1 :STACKORIGIN-1,x
   mva VAR1_B2 :STACKORIGIN-1+STACKWIDTH,x
@@ -487,7 +487,7 @@ FPNORMDONE: ASL
   mva #STACK_SIZE    NEOMESSAGE_PAR2W ; NeoMessage.params[2] := STACK_SIZE
   jsr @WaitMessage                    ; NeoWaitMessage
   mva #MATH_MUL      NEOMESSAGE_FUNC  ; NeoMessage.func := MATHMul
-  mva #4             NEOMESSAGE_GROUP ; NeoMessage.group := 4
+  mva #MATH_GROUP    NEOMESSAGE_GROUP ; NeoMessage.group := 4
 
   ;GetMathStackFloat;
   mva VAR1_B1 :STACKORIGIN-1,x
@@ -516,7 +516,7 @@ FPNORMDONE: ASL
   mva #STACK_SIZE    NEOMESSAGE_PAR2W
   jsr @WaitMessage
   mva #MATH_FDIV     NEOMESSAGE_FUNC
-  mva #4             NEOMESSAGE_GROUP
+  mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   mva VAR1_B1 :STACKORIGIN-1,x
   mva VAR1_B2 :STACKORIGIN-1+STACKWIDTH,x
