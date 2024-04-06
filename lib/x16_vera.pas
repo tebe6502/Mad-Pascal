@@ -76,7 +76,7 @@ var
   VERA_palette         : word = $FA00;
   VERA_sprite_attr     : word = $FC00;
 
-procedure veraInit; assembler;
+procedure veraGraphInit; assembler;
 (*
 * @description:
 * Initialize graphics mode 320x240@256c. 
@@ -160,7 +160,7 @@ function Scr2Petscii(input: Byte): Byte; assembler;
 implementation
 
 
-procedure veraInit; assembler;
+procedure veraGraphInit; assembler;
 asm
     @Clrscr
     lda #$80
