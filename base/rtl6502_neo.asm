@@ -41,6 +41,8 @@ numread .word               ; pointer to variable, length of loaded data
 
   MAXSIZE: = 4
 
+  icl 'neo\mathapi.asm'
+
   icl 'runtime\int.asm'   ; @INT, @INT_SHORT
 
   icl 'runtime\add.asm'   ; addAL_CL, addAX_CX, addEAX_ECX
