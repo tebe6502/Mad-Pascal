@@ -456,10 +456,10 @@ FPNORMDONE: ASL
 
 .proc @FMUL
 
-RESULT  = VAR1_B1
+RESULT  = VAR1
 
-A = VAR1_B1
-B = VAR2_B1
+A = VAR1
+B = VAR2
 
   lda #VAR_FLOAT
   sta VAR1_TYPE
@@ -478,10 +478,10 @@ B = VAR2_B1
 
 .proc @FDIV
 
-RESULT  = VAR1_B1
+RESULT  = VAR1
 
-A = VAR1_B1
-B = VAR2_B1
+A = VAR1
+B = VAR2
 
   lda #VAR_FLOAT
   sta VAR1_TYPE

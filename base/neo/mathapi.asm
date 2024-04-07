@@ -22,6 +22,8 @@ VAR2_B1                       = STACK_ADDRESS+3
 VAR2_B2                       = STACK_ADDRESS+5
 VAR2_B3                       = STACK_ADDRESS+7
 VAR2_B4                       = STACK_ADDRESS+9
+VAR1                          = VAR1_B1
+VAR2                          = VAR2_B1
 
 MATH_GROUP                    = 4
 
