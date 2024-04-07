@@ -2,48 +2,20 @@
 ; David Schmenk
 ; https://sourceforge.net/projects/vm02/
 ; http://vm02.cvs.sourceforge.net/viewvc/vm02/vm02/src/
+; changes: 2024-04-06
 
 /*
 
   @NEGINT
   @FFRAC
   @FROUND
-* @FADD
-* @FSUB
+  @FSUB
   @FPNORM
-* @FMUL
-* @FDIV
+  @FMUL
+  @FDIV
   @FCMPL
   @F2I
   @I2F
-  @I2F_M
-
-*/
-
-/*
-Here's a breakdown of the floating-point math abbreviations you've listed. These are likely part of an instruction set architecture (ISA) or assembly language conventions.
-
-**Common Abbreviations**
-
-* **NEGINT:** Likely indicates "Negate Integer." Changes the sign of an integer value.
-* **FFRAC:** Could mean "Floating-point Fraction." This might extract the fractional portion of a floating-point number.
-* **FROUND:** "Floating-point Round." Rounds a floating-point number to a specified precision or rounding mode (e.g., round to nearest, round down, round up).
-* **FSUB:** "Floating-point Subtract." Subtracts two floating-point values.
-* **FPNORM:** "Floating-point Normalize." Adjusts the exponent of a floating-point number so the leading significant digit falls within a specific range, ensuring better precision in calculations.
-* **FMUL:** "Floating-point Multiply." Multiplies two floating-point values.
-* **FDIV:** "Floating-point Divide." Divides two floating-point values.
-* **FCMPL:** "Floating-point Compare Less." Compares two floating-point numbers and sets flags/registers to indicate if the first operand is less than the second.  Similar instructions might exist for other comparisons (greater than, equal, etc.).
-* **F2I:**  "Floating-point to Integer."  Converts a floating-point number to an integer, likely with truncation or rounding.
-* **I2F:** "Integer to Floating-point."  Converts an integer value to a floating-point representation.
-
-**Less Common/Context-Specific**
-
-* **I2F_M:**  This might be a more specific variant of "Integer to Floating-point." The "_M" could denote a particular conversion method or rounding mode.  To be sure, we would need more context on where you encountered this abbreviation.
-
-**Important Notes**
-
-* The exact interpretation of some of these abbreviations might depend on the specific processor architecture or the programming language's assembly instructions.
-* Floating-point instructions often have variations to handle different rounding modes, precisions (single vs. double), and to deal with special cases like NaNs (Not a Number) and infinities.
 
 */
 
@@ -95,8 +67,7 @@ FPEXP .ds 1
 
   LDA #$00
   SEC
-
-enter SBC FPMAN0
+  SBC FPMAN0
   STA FPMAN0
   LDA #$00
   SBC FPMAN1
@@ -107,57 +78,56 @@ enter SBC FPMAN0
   LDA #$00
   SBC FPMAN3
   STA FPMAN3
+
   RTS
 .endp
 
 
 .proc @FFRAC
-  inx
-  lda :STACKORIGIN-1,x
-  sta :STACKORIGIN,x
 
-  lda :STACKORIGIN-1+STACKWIDTH,x
-  sta :STACKORIGIN+STACKWIDTH,x
+RESULT  = FPMAN0
 
-  lda :STACKORIGIN-1+STACKWIDTH*2,x
-  sta :STACKORIGIN+STACKWIDTH*2,x
+A = FPMAN0
 
-  lda :STACKORIGIN-1+STACKWIDTH*3,x
-  eor #$80
-  sta :STACKORIGIN+STACKWIDTH*3,x
+  LDA FPMAN0
+  STA FP2MAN0
+  LDA FPMAN1
+  STA FP2MAN1
+  LDA FPMAN2
+  STA FP2MAN2
+  LDA FPMAN3
+  EOR #$80
+  STA FP2MAN3
 
-  dex
+  JSR @F2I
+  JSR @I2F
 
-  jsr @F2I
-  jsr @I2F
+  LDA FPMAN0
+  STA FP1MAN0
+  LDA FPMAN1
+  STA FP1MAN1
+  LDA FPMAN2
+  STA FP1MAN2
+  LDA FPMAN3
+  EOR #$80
+  STA FP1MAN3
 
-  lda :STACKORIGIN+STACKWIDTH*3,x
-  eor #$80
-  sta :STACKORIGIN+STACKWIDTH*3,x
-
-  inx
-
-  jsr @FSUB
-
-  dex
-
-  rts
+  JMP @FSUB
 .endp
 
 
 .proc @FROUND
-; LDA #$00
-; STA FP2SGN
 
-  lda :STACKORIGIN,x
-  STA FP2MAN0
-  lda :STACKORIGIN+STACKWIDTH,x
-  STA FP2MAN1
-  lda :STACKORIGIN+STACKWIDTH*2,x
+RESULT  = FPMAN0
+
+A = FP2MAN0
+
+  LDA FP2MAN2
   CMP #$80    ; SET CARRY FROM MSB
   ORA #$80    ; SET HIDDEN BIT
   STA FP2MAN2
-  lda :STACKORIGIN+STACKWIDTH*3,x
+
+  LDA FP2MAN3
 ; EOR FP2SGN    ; TOGGLE SIGN FOR FSUB
   ROL
   STA FP2EXP
@@ -174,21 +144,79 @@ enter SBC FPMAN0
   STA FP2MAN2
   LDA #$FF
 @ STA FP2MAN3
-  lda #$00
+  ;LDA  #$00
   STA FP1MAN0
   STA FP1MAN1
+  CLC
+  LDA #$80    ; SET HIDDEN BIT
+  STA FP1MAN2
+
+  LDA FP2MAN3
+  AND #$80
+  ORA #$3F    ; 0.5 / -0.5
+
+  JSR @FSUB.ENTER
+
+  JMP @F2I
+.endp
+
+
+.proc @FADD
+
+RESULT  = FPMAN0
+
+A = FP1MAN0
+B = FP2MAN0
+
+  LDA #$00
+  JMP @FSUB.SGN
+.endp
+
+
+.proc @FSUB
+
+RESULT  = FPMAN0
+
+A = FP1MAN0
+B = FP2MAN0
+
+  LDA #$80    ; TOGGLE SIGN
+SGN:  STA FP2SGN
+
+  LDA FP2MAN2
+  CMP #$80    ; SET CARRY FROM MSB
+  ORA #$80    ; SET HIDDEN BIT
+  STA FP2MAN2
+
+  LDA FP2MAN3
+  EOR FP2SGN    ; TOGGLE SIGN FOR FSUB
+  ROL
+  STA FP2EXP
+  LDA #$00
+  STA FPSGN
+  BCC @+
+  SBC FP2MAN0
+  STA FP2MAN0
+  LDA #$00
+  SBC FP2MAN1
+  STA FP2MAN1
+  LDA #$00
+  SBC FP2MAN2
+  STA FP2MAN2
+  LDA #$FF
+@ STA FP2MAN3
+
+  LDA FP1MAN2
   CMP #$80    ; SET CARRY FROM MSB
   ORA #$80    ; SET HIDDEN BIT
   STA FP1MAN2
 
-  lda :STACKORIGIN+STACKWIDTH*3,x
-  and #$80
-  ora #$3f    ; 0.5 / -0.5
-
-  inx
-
-  ROL
+  LDA FP1MAN3
+ENTER ROL
   STA FP1EXP
+
+  stx @rx
+
   LDA #$00
   BCC @+
   SBC FP1MAN0
@@ -215,13 +243,18 @@ enter SBC FPMAN0
   LDA FP1MAN3
   CPY #24   ; KEEP SHIFT RANGE VALID
   BCC FP1SHFT
-  LDA #$00
-  STA FP1MAN3
-  STA FP1MAN2
-  STA FP1MAN1
-  STA FP1MAN0
-  BEQ @FADDMAN
-FP1SHFT:  CMP #$80  ; SHIFT FP1 DOWN
+
+  LDA FP2MAN0
+  STA FPMAN0
+  LDA FP2MAN1
+  STA FPMAN1
+  LDA FP2MAN2
+  STA FPMAN2
+  LDA FP2MAN3
+  JMP EXIT
+
+FP1SHFT:
+  CMP #$80    ; SHIFT FP1 DOWN
   ROR
   ROR FP1MAN2
   ROR FP1MAN1
@@ -229,19 +262,24 @@ FP1SHFT:  CMP #$80  ; SHIFT FP1 DOWN
   DEY
   BNE FP1SHFT
   STA FP1MAN3
-  BRA @FADDMAN
+  JMP @FADDMAN
 
 @ TAY
   LDA FP2MAN3
   CPY #24   ; KEEP SHIFT RANGE VALID
   BCC FP2SHFT
-  LDA #$00
-  STA FP2MAN3
-  STA FP2MAN2
-  STA FP2MAN1
-  STA FP2MAN0
-  BEQ @FADDMAN
-FP2SHFT:  CMP #$80  ; SHIFT FP2 DOWN
+
+  LDA FP1MAN0
+  STA FPMAN0
+  LDA FP1MAN1
+  STA FPMAN1
+  LDA FP1MAN2
+  STA FPMAN2
+  LDA FP1MAN3
+  JMP EXIT
+
+FP2SHFT:
+  CMP #$80    ; SHIFT FP2 DOWN
   ROR
   ROR FP2MAN2
   ROR FP2MAN1
@@ -249,7 +287,8 @@ FP2SHFT:  CMP #$80  ; SHIFT FP2 DOWN
   DEY
   BNE FP2SHFT
   STA FP2MAN3
-@FADDMAN: LDA FP1MAN0
+@FADDMAN:
+  LDA FP1MAN0
   CLC
   ADC FP2MAN0
   STA FPMAN0
@@ -261,6 +300,7 @@ FP2SHFT:  CMP #$80  ; SHIFT FP2 DOWN
   STA FPMAN2
   LDA FP1MAN3
   ADC FP2MAN3
+EXIT:
   STA FPMAN3
   BPL @FPNORM
 
@@ -269,61 +309,20 @@ FP2SHFT:  CMP #$80  ; SHIFT FP2 DOWN
 
   JSR @NEGINT
 
-  BRA @FPNORM
-
-  dex
-
-  rts
+  JMP @FPNORM
 .endp
 
-.proc @FADD
-
-RESULT  = VAR1
-
-A = VAR1
-B = VAR2
-
-  lda #VAR_FLOAT
-  sta VAR1_TYPE
-  sta VAR2_TYPE
-
-  mva #STACK_ADDRESS NEOMESSAGE_PAR1W
-  mva #STACK_SIZE    NEOMESSAGE_PAR2W
-  jsr @WaitMessage
-  mva #MATH_ADD      NEOMESSAGE_FUNC
-  mva #MATH_GROUP    NEOMESSAGE_GROUP
-
-  rts
-.endp
-
-.proc @FSUB
-
-RESULT  = VAR1
-
-A = VAR1
-B = VAR2
-
-  lda #VAR_FLOAT
-  sta VAR1_TYPE
-  sta VAR2_TYPE
-
-  mva #STACK_ADDRESS NEOMESSAGE_PAR1W
-  mva #STACK_SIZE    NEOMESSAGE_PAR2W
-  jsr @WaitMessage
-  mva #MATH_SUB      NEOMESSAGE_FUNC
-  mva #MATH_GROUP    NEOMESSAGE_GROUP
-
-  rts
-.endp
 
 .proc @FPNORM
+
+RESULT  = FPMAN0
 
 MIN_EXPONENT  = 10
 MAX_EXPONENT  = 255
 
-
   BEQ FPNORMLEFT  ; NORMALIZE FP, A = FPMANT3
-FPNORMRIGHT:  INC FPEXP
+FPNORMRIGHT:
+  INC FPEXP
   LSR
   STA FPMAN3
   ROR FPMAN2
@@ -341,21 +340,22 @@ FPNORMRIGHT:  INC FPEXP
   LDA FPMAN3
   ADC #$00
   BNE FPNORMRIGHT
-  LDA FPEXP
   ASL FPMAN2
+
+  JMP EXIT
+
+/*
+  LDA FPEXP
   LSR
   ORA FPSGN
 
-; ldx @rx
-  sta :STACKORIGIN-1+STACKWIDTH*3,x
-  LDA FPMAN2
-  ROR
-  sta :STACKORIGIN-1+STACKWIDTH*2,x
+  STA FPMAN3
+  ROR FPMAN2
 
-  lda :STACKORIGIN-1+STACKWIDTH*3,x
+  ;lda FPMAN3
   asl @
   tay
-  lda :STACKORIGIN-1+STACKWIDTH*2,x
+  lda FPMAN2
   spl
   iny
   cpy #MIN_EXPONENT ; to small 6.018531E-36
@@ -363,29 +363,30 @@ FPNORMRIGHT:  INC FPEXP
   cpy #MAX_EXPONENT
   beq zero    ; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
 
-  LDA FPMAN1
-  sta :STACKORIGIN-1+STACKWIDTH,x
-  LDA FPMAN0
-  sta :STACKORIGIN-1,x
   rts
+*/
 
-FPNORMLEFT: LDA FPMAN2
+FPNORMLEFT:
+  LDA FPMAN2
   BNE FPNORMLEFT1
   LDA FPMAN1
   BNE FPNORMLEFT8
   LDA FPMAN0
   BNE FPNORMLEFT16
 
-; ldx @rx     ; RESULT IS ZERO
-zero  lda #0
+zero  LDA #$00    ; RESULT IS ZERO
 
-  sta :STACKORIGIN-1,x
-  sta :STACKORIGIN-1+STACKWIDTH,x
-  sta :STACKORIGIN-1+STACKWIDTH*2,x
-  sta :STACKORIGIN-1+STACKWIDTH*3,x
-  rts
+  STA FPMAN0
+  STA FPMAN1
+  STA FPMAN2
+  STA FPMAN3
 
-FPNORMLEFT16: TAY
+  ldx @rx
+
+  RTS
+
+FPNORMLEFT16:
+  TAY
   LDA FPEXP
   SEC
   SBC #$10
@@ -395,7 +396,8 @@ FPNORMLEFT16: TAY
   STA FPMAN0
   TYA
   BNE FPNORMLEFT1
-FPNORMLEFT8:  TAY
+FPNORMLEFT8:
+  TAY
   LDA FPMAN0
   STA FPMAN1
   LDA FPEXP
@@ -405,28 +407,28 @@ FPNORMLEFT8:  TAY
   LDA #$00
   STA FPMAN0
   TYA
-FPNORMLEFT1:  BMI FPNORMDONE
+FPNORMLEFT1:
+  BMI FPNORMDONE
 @ DEC FPEXP
   ASL FPMAN0
   ROL FPMAN1
   ROL
   BPL @-
-FPNORMDONE: ASL
-  TAY
+FPNORMDONE:
+  ASL
+  STA FPMAN2
+EXIT:
   LDA FPEXP
   LSR
   ORA FPSGN
 
-; ldx @rx
-  sta :STACKORIGIN-1+STACKWIDTH*3,x
-  TYA
-  ROR
-  sta :STACKORIGIN-1+STACKWIDTH*2,x
+  STA FPMAN3
+  ROR FPMAN2
 
-  lda :STACKORIGIN-1+STACKWIDTH*3,x
+  ;lda FPMAN3
   asl @
   tay
-  lda :STACKORIGIN-1+STACKWIDTH*2,x
+  lda FPMAN2
   spl
   iny
   cpy #MIN_EXPONENT ; to small 6.018531E-36
@@ -434,171 +436,284 @@ FPNORMDONE: ASL
   cpy #MAX_EXPONENT
   beq zero    ; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
 
-  LDA FPMAN1
-  sta :STACKORIGIN-1+STACKWIDTH,x
-  LDA FPMAN0
-  sta :STACKORIGIN-1,x
+  ldx @rx
 
-  rts
+  RTS
 .endp
 
 
 .proc @FMUL
 
-RESULT  = VAR1
+RESULT  = FPMAN0
 
-A = VAR1
-B = VAR2
+A = FP1MAN0
+B = FP2MAN0
 
-  lda #VAR_FLOAT
-  sta VAR1_TYPE
-  sta VAR2_TYPE
+  LDA FP2MAN2
+  CMP #$80    ; SET CARRY FROM MSB
+  ORA #$80    ; SET HIDDEN BIT
+  STA FP2MAN2
 
-  mva #STACK_ADDRESS NEOMESSAGE_PAR1W
-  mva #STACK_SIZE    NEOMESSAGE_PAR2W
-  jsr @WaitMessage
-  mva #MATH_MUL      NEOMESSAGE_FUNC
-  mva #MATH_GROUP    NEOMESSAGE_GROUP
+  LDA FP2MAN3
+  ROL
+  STA FP2EXP
+  BNE @+
 
-  rts
+; MUL BY ZERO, RESULT ZERO
+; LDA #$00
+ZERO: STA RESULT
+  STA RESULT+1
+  STA RESULT+2
+  STA RESULT+3
+  RTS
+
+@ stx @rx
+
+  LDA #$00
+  ROR
+  STA FPSGN
+
+  LDA FP1MAN2
+  CMP #$80    ; SET CARRY FROM MSB
+  ORA #$80    ; SET HIDDEN BIT
+  STA FP1MAN2
+
+  LDA FP1MAN3
+  ROL
+  STA FP1EXP
+  BEQ ZERO    ; MUL BY ZERO, RESULT ZERO
+
+  LDA #$00
+  ROR
+  EOR FPSGN
+  STA FPSGN
+  LDA FP1EXP
+  CLC     ; ADD EXPONENTS
+  ADC FP2EXP
+  SEC     ; SUBTRACT BIAS
+  SBC #$7F
+  STA FPEXP
+
+  LDX #$00
+  STX FPMAN0
+  STX FPMAN1
+  STX FPMAN2
+  STX FPMAN3
+
+  LDX #-3
+  STX TMP
+FMULNEXTBYTE:
+  LDA FP1MAN0-253,X
+  BNE @+
+  LDX FPMAN1    ; SHORT CIRCUIT BYTE OF ZERO BITS
+  STX FPMAN0
+  LDX FPMAN2
+  STX FPMAN1
+  LDX FPMAN3
+  STX FPMAN2
+  STA FPMAN3
+
+  INC TMP
+  LDX TMP
+; CPX #$03
+  BNE FMULNEXTBYTE
+
+  LDA FPMAN3
+  JMP @FPNORM
+
+@ EOR #$FF
+  LDX #$08
+FMULTSTBITS:
+  LSR FPMAN3
+  ROR FPMAN2
+  ROR FPMAN1
+  ROR FPMAN0
+  LSR
+  BCS FMULNEXTTST
+  TAY
+  LDA FP2MAN0
+  ADC FPMAN0
+  STA FPMAN0
+  LDA FP2MAN1
+  ADC FPMAN1
+  STA FPMAN1
+  LDA FP2MAN2
+  ADC FPMAN2
+  STA FPMAN2
+  LDA #$00
+  ADC FPMAN3
+  STA FPMAN3
+  TYA
+FMULNEXTTST:
+  DEX
+  BNE FMULTSTBITS
+
+  INC TMP
+  LDX TMP
+; CPX #$03
+  BNE FMULNEXTBYTE
+
+  LDA FPMAN3
+  JMP @FPNORM
 .endp
 
-; --------------------------
 
 .proc @FDIV
 
-RESULT  = VAR1
+RESULT  = FPMAN0
 
-A = VAR1
-B = VAR2
+A = FP1MAN0
+B = FP2MAN0
 
-  lda #VAR_FLOAT
-  sta VAR1_TYPE
-  sta VAR2_TYPE
+  LDA :FP2MAN2
+  CMP #$80    ; SET CARRY FROM MSB
+  ORA #$80    ; SET HIDDEN BIT
+  STA FP2MAN2
 
-  mva #STACK_ADDRESS NEOMESSAGE_PAR1W
-  mva #STACK_SIZE    NEOMESSAGE_PAR2W
-  jsr @WaitMessage
-  mva #MATH_FDIV     NEOMESSAGE_FUNC
-  mva #MATH_GROUP    NEOMESSAGE_GROUP
+  LDA FP2MAN3
+  ROL
+  STA FP2EXP
+  BNE @+
 
-  rts
+; LDA #$00
+ZERO: STA RESULT
+  STA RESULT+1
+  STA RESULT+2
+  STA RESULT+3
+  RTS
+
+@ stx @rx
+
+  LDA #$00
+  ROR
+  STA FPSGN
+
+  LDA FP1MAN2
+  CMP #$80    ; SET CARRY FROM MSB
+  ORA #$80    ; SET HIDDEN BIT
+  STA FP1MAN2
+
+  LDA FP1MAN3
+  ROL
+  STA FP1EXP
+  BEQ ZERO    ; DIVIDE ZERO, RESULT ZERO
+
+  LDA #$00
+  STA FP1MAN3
+  ROR
+  EOR FPSGN
+  STA FPSGN
+  LDA FP1EXP
+  SEC     ; SUBTRACT EXPONENTS
+  SBC FP2EXP
+  CLC
+  ADC #$7F    ; ADD BACK BIAS
+  STA FPEXP
+
+  LDX #24   ; #BITS
+FDIVLOOP:
+  LDA FP1MAN0
+  SEC
+  SBC FP2MAN0
+  STA TMP
+  LDA FP1MAN1
+  SBC FP2MAN1
+  STA TMP+1
+  LDA FP1MAN2
+  SBC FP2MAN2
+  TAY
+  LDA FP1MAN3
+  SBC #$00
+  BCC FDIVNEXTBIT
+  STA FP1MAN3
+  STY FP1MAN2
+  LDA TMP+1
+  STA FP1MAN1
+  LDA TMP
+  STA FP1MAN0
+FDIVNEXTBIT:
+  ROL FPMAN0
+  ROL FPMAN1
+  ROL FPMAN2
+  ASL FP1MAN0
+  ROL FP1MAN1
+  ROL FP1MAN2
+  ROL FP1MAN3
+  DEX
+  BNE FDIVLOOP
+
+  ;LDA  #$00
+  TXA
+  JMP @FPNORM
 .endp
 
 
 .proc @FCMPL
 
-A = :FP1MAN0
-B = :FPMAN0
+A = FP1MAN0
+B = FPMAN0
 
 FCMPG:
   CLV
 
-  LDA :FP1MAN3      ; COMPARE SIGNS
+  LDA FP1MAN3   ; COMPARE SIGNS
   AND #$80
   STA FP2SGN
-  LDA :FPMAN3
+  LDA FPMAN3
   AND #$80
   CMP FP2SGN
   BCC FCMPGTSGN
   BEQ @+
   BCS FCMPLTSGN
-@ LDA :FPMAN3       ; COMPARE AS MAGNITUDE
-  CMP :FP1MAN3
+@ LDA FPMAN3    ; COMPARE AS MAGNITUDE
+  CMP FP1MAN3
   BCC FCMPLT
   BEQ @+
   BCS FCMPGT
-@ LDA :FPMAN2
-  CMP :FP1MAN2
+@ LDA FPMAN2
+  CMP FP1MAN2
   BCC FCMPLT
   BEQ @+
   BCS FCMPGT
-@ LDA :FPMAN1
-  CMP :FP1MAN1
+@ LDA FPMAN1
+  CMP FP1MAN1
   BCC FCMPLT
   BEQ @+
   BCS FCMPGT
-@ LDA :FPMAN0
-  CMP :FP1MAN0
+@ LDA FPMAN0
+  CMP FP1MAN0
   BCC FCMPLT
   BEQ FCMPEQ
   BCS FCMPGT
-FCMPEQ: LDA #0      ; EQUAL
+FCMPEQ: LDA #$00    ; EQUAL
   RTS
 
 FCMPGT: LDA FP2SGN    ; FLIP RESULT IF NEGATIVE #S
   BMI FCMPLTSGN
-FCMPGTSGN:  LDA #$01  ; GREATER THAN
+FCMPGTSGN:
+  LDA #$01    ; GREATER THAN
   RTS
 
 FCMPLT: LDA FP2SGN    ; FLIP RESULT IF NEGATIVE #S
   BMI FCMPGTSGN
-FCMPLTSGN:  LDA #$FF  ; LESS THAN
+FCMPLTSGN:
+  LDA #$FF    ; LESS THAN
   RTS
 .endp
-
-
-/*
-.proc @FCMPL
-FCMPG:
-  CLV
-
-  LDA :STACKORIGIN+STACKWIDTH*3,X ; COMPARE SIGNS
-  AND #$80
-  STA FP2SGN
-  LDA :STACKORIGIN-1+STACKWIDTH*3,X
-  AND #$80
-  CMP FP2SGN
-  BCC FCMPGTSGN
-  BEQ @+
-  BCS FCMPLTSGN
-@ LDA :STACKORIGIN-1+STACKWIDTH*3,X ; COMPARE AS MAGNITUDE
-  CMP :STACKORIGIN+STACKWIDTH*3,X
-  BCC FCMPLT
-  BEQ @+
-  BCS FCMPGT
-@ LDA :STACKORIGIN-1+STACKWIDTH*2,X
-  CMP :STACKORIGIN+STACKWIDTH*2,X
-  BCC FCMPLT
-  BEQ @+
-  BCS FCMPGT
-@ LDA :STACKORIGIN-1+STACKWIDTH,X
-  CMP :STACKORIGIN+STACKWIDTH,X
-  BCC FCMPLT
-  BEQ @+
-  BCS FCMPGT
-@ LDA :STACKORIGIN-1,X
-  CMP :STACKORIGIN,X
-  BCC FCMPLT
-  BEQ FCMPEQ
-  BCS FCMPGT
-FCMPEQ: LDA #0      ; EQUAL
-  RTS
-
-FCMPGT: LDA FP2SGN    ; FLIP RESULT IF NEGATIVE #S
-  BMI FCMPLTSGN
-FCMPGTSGN:  LDA #$01  ; GREATER THAN
-  RTS
-
-FCMPLT: LDA FP2SGN    ; FLIP RESULT IF NEGATIVE #S
-  BMI FCMPGTSGN
-FCMPLTSGN:  LDA #$FF  ; LESS THAN
-  RTS
-.endp
-*/
 
 
 .proc @F2I
 
-  lda :STACKORIGIN,x
-  STA FPMAN0
-  lda :STACKORIGIN+STACKWIDTH,x
-  STA FPMAN1
-  lda :STACKORIGIN+STACKWIDTH*2,x
+RESULT  = FPMAN0
+
+A = FPMAN0
+
+  LDA FPMAN2
   CMP #$80    ; SET CARRY FROM MSB
   ORA #$80    ; SET HIDDEN BIT
   STA FPMAN2
-  lda :STACKORIGIN+STACKWIDTH*3,x
+
+  LDA FPMAN3
   ROL @
   STA FPEXP
   LDA #$00
@@ -610,11 +725,11 @@ FCMPLTSGN:  LDA #$FF  ; LESS THAN
   BCS @+
 
 ZERO: LDA #$00    ; RETURN ZERO
-  STA :STACKORIGIN,x
-  STA :STACKORIGIN+STACKWIDTH,x
-  STA :STACKORIGIN+STACKWIDTH*2,x
-  STA :STACKORIGIN+STACKWIDTH*3,x
-  rts
+  STA RESULT
+  STA RESULT+1
+  STA RESULT+2
+  STA RESULT+3
+  RTS
 
 @ CMP #23
   BCS F2ISHL
@@ -631,31 +746,25 @@ F2ISHR: LSR @
   BNE F2ISHR
   STA FPMAN2
   STY FPMAN3
-F2ICHKNEG:  LDA FPSGN
+F2ICHKNEG:
+  LDA FPSGN
   BPL @+    ; CHECK FOR NEGATIVE
-  ASL @   ; LDA #$00; SEC
 
-  JSR @NEGINT.enter
-
-@ LDA FPMAN3
-  STA :STACKORIGIN+STACKWIDTH*3,x
-  LDA FPMAN2
-  STA :STACKORIGIN+STACKWIDTH*2,x
-  LDA FPMAN1
-  STA :STACKORIGIN+STACKWIDTH,x
-  LDA FPMAN0
-  STA :STACKORIGIN,x
-  rts
+  JMP @NEGINT
+@
+  RTS
 
 F2ISHL: CMP #32
   BCC @+
+
   LDA #$FF    ; OVERFLOW, STORE MAXINT
   STA FPMAN0
   STA FPMAN1
   STA FPMAN2
-  LSR @
+  LSR
   STA FPMAN3
   BNE F2ICHKNEG
+
 @ SEC
   SBC #23
   BNE @+
@@ -666,7 +775,7 @@ F2ISHL: CMP #32
 @ ASL FPMAN0
   ROL FPMAN1
   ROL FPMAN2
-  ROL @
+  ROL
   DEY
   BNE @-
   STA FPMAN3
@@ -676,47 +785,16 @@ F2ISHL: CMP #32
 
 .proc @I2F
 
-  lda :STACKORIGIN,x
-  STA FPMAN0
-  lda :STACKORIGIN+STACKWIDTH,x
-  STA FPMAN1
-  lda :STACKORIGIN+STACKWIDTH*2,x
-  STA FPMAN2
-  lda :STACKORIGIN+STACKWIDTH*3,x
-  STA FPMAN3
-  AND #$80
-  STA FPSGN
-  BPL @+
-; LDX #FPMAN0
-  JSR @NEGINT
-@ LDA #$7F+23
-  STA FPEXP
+RESULT  = FPMAN0
 
-  inx     ; ten zabieg zapisze pod :STACKORIGIN,x
-        ; zamiast :STACKORIGIN-1,x
+A = FPMAN0
+
+  stx @rx
+
   LDA FPMAN3
-  JSR @FPNORM
-
-  dex
-  rts
-.endp
-
-
-.proc @I2F_M
-
-  lda :STACKORIGIN-1,x
-  STA FPMAN0
-  lda :STACKORIGIN-1+STACKWIDTH,x
-  STA FPMAN1
-  lda :STACKORIGIN-1+STACKWIDTH*2,x
-  STA FPMAN2
-  lda :STACKORIGIN-1+STACKWIDTH*3,x
-
-  STA FPMAN3
   AND #$80
   STA FPSGN
   BPL @+
-; LDX #FPMAN0
   JSR @NEGINT
 @ LDA #$7F+23
   STA FPEXP
