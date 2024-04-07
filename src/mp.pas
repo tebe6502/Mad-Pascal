@@ -4451,30 +4451,30 @@ case op of
 	asm65(#9'lda :STACKORIGIN,x');
 	asm65(#9'sta @FADD.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @FADD.B+1');
+	asm65(#9'sta @FADD.B+' + chr(ord('0') + abstep * 1));
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	asm65(#9'sta @FADD.B+2');
+	asm65(#9'sta @FADD.B+' + chr(ord('0') + abstep * 2));
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	asm65(#9'sta @FADD.B+3');
+	asm65(#9'sta @FADD.B+' + chr(ord('0') + abstep * 3));
 
 	asm65(#9'lda :STACKORIGIN-1,x');
 	asm65(#9'sta @FADD.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @FADD.A+1');
+	asm65(#9'sta @FADD.A+' + chr(ord('0') + abstep * 1));
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'sta @FADD.A+2');
+	asm65(#9'sta @FADD.A+' + chr(ord('0') + abstep * 2));
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-	asm65(#9'sta @FADD.A+3');
+	asm65(#9'sta @FADD.A+' + chr(ord('0') + abstep * 3));
 
 	asm65(#9'jsr @FADD');
 
 	asm65(#9'lda @FADD.RESULT');
 	asm65(#9'sta :STACKORIGIN-1,x');
-	asm65(#9'lda @FADD.RESULT+1');
+	asm65(#9'lda @FADD.RESULT+' + chr(ord('0') + abstep * 1));
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'lda @FADD.RESULT+2');
+	asm65(#9'lda @FADD.RESULT+' + chr(ord('0') + abstep * 2));
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'lda @FADD.RESULT+3');
+	asm65(#9'lda @FADD.RESULT+' + chr(ord('0') + abstep * 3));
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
      end else
