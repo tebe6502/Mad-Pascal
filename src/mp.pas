@@ -4407,18 +4407,12 @@ end;
 
 
 procedure GenerateBinaryOperation(op: Byte; ResultType: Byte);
-var abstep  : byte;
 begin
 
 asm65;
 asm65('; Generate Binary Operation for '+InfoAboutToken(ResultType));
 
 Gen; Gen; Gen;							// mov :ecx, [bx]      :STACKORIGIN,x
-
-if target.id = ___NEO then
-  abstep := 2
-else
-  abstep := 1;
 
 case op of
 
@@ -4449,32 +4443,32 @@ case op of
 //       asm65(#9'jsr @FADD')
 
 	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @FADD.B');
+	asm65(#9'sta :FP2MAN0');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @FADD.B+' + chr(ord('0') + abstep * 1));
+	asm65(#9'sta :FP2MAN1');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	asm65(#9'sta @FADD.B+' + chr(ord('0') + abstep * 2));
+	asm65(#9'sta :FP2MAN2');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	asm65(#9'sta @FADD.B+' + chr(ord('0') + abstep * 3));
+	asm65(#9'sta :FP2MAN3');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @FADD.A');
+	asm65(#9'sta :FP1MAN0');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @FADD.A+' + chr(ord('0') + abstep * 1));
+	asm65(#9'sta :FP1MAN1');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'sta @FADD.A+' + chr(ord('0') + abstep * 2));
+	asm65(#9'sta :FP1MAN2');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-	asm65(#9'sta @FADD.A+' + chr(ord('0') + abstep * 3));
+	asm65(#9'sta :FP1MAN3');
 
 	asm65(#9'jsr @FADD');
 
-	asm65(#9'lda @FADD.RESULT');
+	asm65(#9'lda :FPMAN0');
 	asm65(#9'sta :STACKORIGIN-1,x');
-	asm65(#9'lda @FADD.RESULT+' + chr(ord('0') + abstep * 1));
+	asm65(#9'lda :FPMAN1');
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'lda @FADD.RESULT+' + chr(ord('0') + abstep * 2));
+	asm65(#9'lda :FPMAN2');
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'lda @FADD.RESULT+' + chr(ord('0') + abstep * 3));
+	asm65(#9'lda :FPMAN3');
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
      end else
@@ -4514,32 +4508,32 @@ case op of
 //      asm65(#9'jsr @FSUB')
 
 	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @FSUB.B');
+	asm65(#9'sta FP2MAN0');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @FSUB.B+' + chr(ord('0') + abstep * 1));
+	asm65(#9'sta FP2MAN1');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	asm65(#9'sta @FSUB.B+' + chr(ord('0') + abstep * 2));
+	asm65(#9'sta FP2MAN2');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	asm65(#9'sta @FSUB.B+' + chr(ord('0') + abstep * 3));
+	asm65(#9'sta FP2MAN3');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @FSUB.A');
+	asm65(#9'sta FP1MAN0');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @FSUB.A+' + chr(ord('0') + abstep * 1));
+	asm65(#9'sta FP1MAN1');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'sta @FSUB.A+' + chr(ord('0') + abstep * 2));
+	asm65(#9'sta FP1MAN2');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-	asm65(#9'sta @FSUB.A+' + chr(ord('0') + abstep * 3));
+	asm65(#9'sta FP1MAN3');
 
 	asm65(#9'jsr @FSUB');
 
-	asm65(#9'lda @FSUB.RESULT');
+	asm65(#9'lda :FPMAN0');
 	asm65(#9'sta :STACKORIGIN-1,x');
-	asm65(#9'lda @FSUB.RESULT+' + chr(ord('0') + abstep * 1));
+	asm65(#9'lda :FPMAN1');
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'lda @FSUB.RESULT+' + chr(ord('0') + abstep * 2));
+	asm65(#9'lda :FPMAN2');
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'lda @FSUB.RESULT+' + chr(ord('0') + abstep * 3));
+	asm65(#9'lda :FPMAN3');
 	asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
     end else
@@ -4619,32 +4613,32 @@ case op of
 		begin
 
 		asm65(#9'lda :STACKORIGIN,x');
-		asm65(#9'sta @FMUL.B');
+		asm65(#9'sta :FP2MAN0');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'sta @FMUL.B+' + chr(ord('0') + abstep * 1));
+		asm65(#9'sta :FP2MAN1');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		asm65(#9'sta @FMUL.B+' + chr(ord('0') + abstep * 2));
+		asm65(#9'sta :FP2MAN2');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-		asm65(#9'sta @FMUL.B+' + chr(ord('0') + abstep * 3));
+		asm65(#9'sta :FP2MAN3');
 
 		asm65(#9'lda :STACKORIGIN-1,x');
-		asm65(#9'sta @FMUL.A');
+		asm65(#9'sta :FP1MAN0');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-		asm65(#9'sta @FMUL.A+' + chr(ord('0') + abstep * 1));
+		asm65(#9'sta :FP1MAN1');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-		asm65(#9'sta @FMUL.A+' + chr(ord('0') + abstep * 2) );
+		asm65(#9'sta :FP1MAN2');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-		asm65(#9'sta @FMUL.A+' + chr(ord('0') + abstep * 3));
+		asm65(#9'sta :FP1MAN3');
 
 		asm65(#9'jsr @FMUL');
 
-		asm65(#9'lda @FMUL.RESULT');
+		asm65(#9'lda :FPMAN0');
 		asm65(#9'sta :STACKORIGIN-1,x');
-		asm65(#9'lda @FMUL.RESULT+' + chr(ord('0') + abstep * 1));
+		asm65(#9'lda :FPMAN1');
 		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-		asm65(#9'lda @FMUL.RESULT+' + chr(ord('0') + abstep * 2));
+		asm65(#9'lda :FPMAN2');
 		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-		asm65(#9'lda @FMUL.RESULT+' + chr(ord('0') + abstep * 3));
+		asm65(#9'lda :FPMAN3');
 		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
 		end;
@@ -4785,32 +4779,32 @@ case op of
 		begin
 
 		asm65(#9'lda :STACKORIGIN,x');
-		asm65(#9'sta @FDIV.B');
+		asm65(#9'sta :FP2MAN0');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'sta @FDIV.B+' + chr(ord('0') + abstep * 1));
+		asm65(#9'sta :FP2MAN1');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		asm65(#9'sta @FDIV.B+' + chr(ord('0') + abstep * 2));
+		asm65(#9'sta :FP2MAN2');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-		asm65(#9'sta @FDIV.B+' + chr(ord('0') + abstep * 3));
+		asm65(#9'sta :FP2MAN3');
 
 		asm65(#9'lda :STACKORIGIN-1,x');
-		asm65(#9'sta @FDIV.A');
+		asm65(#9'sta :FP1MAN0');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-		asm65(#9'sta @FDIV.A+' + chr(ord('0') + abstep * 1));
+		asm65(#9'sta :FP1MAN1');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-		asm65(#9'sta @FDIV.A+' + chr(ord('0') + abstep * 2));
+		asm65(#9'sta :FP1MAN2');
 		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-		asm65(#9'sta @FDIV.A+' + chr(ord('0') + abstep * 3));
+		asm65(#9'sta :FP1MAN3');
 
 		asm65(#9'jsr @FDIV');
 
-		asm65(#9'lda @FDIV.RESULT');
+		asm65(#9'lda :FPMAN0');
 		asm65(#9'sta :STACKORIGIN-1,x');
-		asm65(#9'lda @FDIV.RESULT+' + chr(ord('0') + abstep * 1));
+		asm65(#9'lda :FPMAN1');
 		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-		asm65(#9'lda @FDIV.RESULT+' + chr(ord('0') + abstep * 2));
+		asm65(#9'lda :FPMAN2');
 		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-		asm65(#9'lda @FDIV.RESULT+' + chr(ord('0') + abstep * 3));
+		asm65(#9'lda :FPMAN3');
 		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
 		end;
@@ -7592,24 +7586,24 @@ case Tok[i].Kind of
           SINGLETOK:
 	  	begin
 			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @F2I.A');
+			asm65(#9'sta :FPMAN0');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @F2I.A+1');
+			asm65(#9'sta :FPMAN1');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'sta @F2I.A+2');
+			asm65(#9'sta :FPMAN2');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-			asm65(#9'sta @F2I.A+3');
+			asm65(#9'sta :FPMAN3');
 
 			asm65(#9'jsr @F2I');
 			asm65(#9'jsr @I2F');
 
-			asm65(#9'lda @I2F.RESULT');
+			asm65(#9'lda :FPMAN0');
 			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda @I2F.RESULT+1');
+			asm65(#9'lda :FPMAN1');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'lda @I2F.RESULT+2');
+			asm65(#9'lda :FPMAN2');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'lda @I2F.RESULT+3');
+			asm65(#9'lda :FPMAN3');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 		end;
      end;
@@ -7676,23 +7670,23 @@ case Tok[i].Kind of
           SINGLETOK:
       		begin
 			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @FFRAC.A');
+			asm65(#9'sta :FPMAN0');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @FFRAC.A+1');
+			asm65(#9'sta :FPMAN1');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'sta @FFRAC.A+2');
+			asm65(#9'sta :FPMAN2');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-			asm65(#9'sta @FFRAC.A+3');
+			asm65(#9'sta :FPMAN3');
 
 			asm65(#9'jsr @FFRAC');
 
-			asm65(#9'lda @FFRAC.RESULT');
+			asm65(#9'lda :FPMAN0');
 			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda @FFRAC.RESULT+1');
+			asm65(#9'lda :FPMAN1');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'lda @FFRAC.RESULT+2');
+			asm65(#9'lda :FPMAN2');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'lda @FFRAC.RESULT+3');
+			asm65(#9'lda :FPMAN3');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
                 end;
 
@@ -7791,23 +7785,23 @@ case Tok[i].Kind of
 		     // asm65(#9'jsr @F2I');
 
 			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @F2I.A');
+			asm65(#9'sta :FPMAN0');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @F2I.A+1');
+			asm65(#9'sta :FPMAN1');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'sta @F2I.A+2');
+			asm65(#9'sta :FPMAN2');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-			asm65(#9'sta @F2I.A+3');
+			asm65(#9'sta :FPMAN3');
 
 			asm65(#9'jsr @F2I');
 
-			asm65(#9'lda @F2I.RESULT');
+			asm65(#9'lda :FPMAN0');
 			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda @F2I.RESULT+1');
+			asm65(#9'lda :FPMAN1');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'lda @F2I.RESULT+2');
+			asm65(#9'lda :FPMAN2');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'lda @F2I.RESULT+3');
+			asm65(#9'lda :FPMAN3');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
                 end;
 
@@ -7898,23 +7892,23 @@ case Tok[i].Kind of
 		 //asm65(#9'jsr @FROUND');
 
 		 asm65(#9'lda :STACKORIGIN,x');
-		 asm65(#9'sta @FROUND.A');
+		 asm65(#9'sta :FP2MAN0');
 		 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		 asm65(#9'sta @FROUND.A+1');
+		 asm65(#9'sta :FP2MAN1');
 		 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		 asm65(#9'sta @FROUND.A+2');
+		 asm65(#9'sta :FP2MAN2');
 		 asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-		 asm65(#9'sta @FROUND.A+3');
+		 asm65(#9'sta :FP2MAN3');
 
 		 asm65(#9'jsr @FROUND');
 
-		 asm65(#9'lda @FROUND.RESULT');
+		 asm65(#9'lda :FPMAN0');
 		 asm65(#9'sta :STACKORIGIN,x');
-		 asm65(#9'lda @FROUND.RESULT+1');
+		 asm65(#9'lda :FPMAN1');
 		 asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-		 asm65(#9'lda @FROUND.RESULT+2');
+		 asm65(#9'lda :FPMAN2');
 		 asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-		 asm65(#9'lda @FROUND.RESULT+3');
+		 asm65(#9'lda :FPMAN3');
 		 asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
         	end;
@@ -8199,7 +8193,23 @@ case Tok[i].Kind of
 			begin
 				ExpandParam(INTEGERTOK, ValType);
 
+				//asm65(#9'jsr @F16_I2F');
+
+				asm65(#9'lda :STACKORIGIN,x');
+				asm65(#9'sta @F16_I2F.SV');
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+				asm65(#9'sta @F16_I2F.SV+1');
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+				asm65(#9'sta @F16_I2F.SV+2');
+				asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+				asm65(#9'sta @F16_I2F.SV+3');
+
 				asm65(#9'jsr @F16_I2F');
+
+				asm65(#9'lda :eax');
+				asm65(#9'sta :STACKORIGIN,x');
+				asm65(#9'lda :eax+1');
+				asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
 				ValType := HALFSINGLETOK;
 			end;
@@ -8212,23 +8222,23 @@ case Tok[i].Kind of
 				//asm65(#9'jsr @I2F');
 
 				asm65(#9'lda :STACKORIGIN,x');
-				asm65(#9'sta @I2F.A');
+				asm65(#9'sta :FPMAN0');
 				asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-				asm65(#9'sta @I2F.A+1');
+				asm65(#9'sta :FPMAN1');
 				asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-				asm65(#9'sta @I2F.A+2');
+				asm65(#9'sta :FPMAN2');
 				asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-				asm65(#9'sta @I2F.A+3');
+				asm65(#9'sta :FPMAN3');
 
 				asm65(#9'jsr @I2F');
 
-				asm65(#9'lda @I2F.RESULT');
+				asm65(#9'lda :FPMAN0');
 				asm65(#9'sta :STACKORIGIN,x');
-				asm65(#9'lda @I2F.RESULT+1');
+				asm65(#9'lda :FPMAN1');
 				asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-				asm65(#9'lda @I2F.RESULT+2');
+				asm65(#9'lda :FPMAN2');
 				asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-				asm65(#9'lda @I2F.RESULT+3');
+				asm65(#9'lda :FPMAN3');
 				asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
 				ValType := SINGLETOK;
@@ -9149,23 +9159,23 @@ case Tok[i].Kind of
 		//asm65(#9'jsr @I2F');
 
 		asm65(#9'lda :STACKORIGIN,x');
-		asm65(#9'sta @I2F.A');
+		asm65(#9'sta :FPMAN0');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'sta @I2F.A+1');
+		asm65(#9'sta :FPMAN1');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-		asm65(#9'sta @I2F.A+2');
+		asm65(#9'sta :FPMAN2');
 		asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-		asm65(#9'sta @I2F.A+3');
+		asm65(#9'sta :FPMAN3');
 
 		asm65(#9'jsr @I2F');
 
-		asm65(#9'lda @I2F.RESULT');
+		asm65(#9'lda :FPMAN0');
 		asm65(#9'sta :STACKORIGIN,x');
-		asm65(#9'lda @I2F.RESULT+1');
+		asm65(#9'lda :FPMAN1');
 		asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'lda @I2F.RESULT+2');
+		asm65(#9'lda :FPMAN2');
 		asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-		asm65(#9'lda @I2F.RESULT+3');
+		asm65(#9'lda :FPMAN3');
 		asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
 	  end else
@@ -9315,23 +9325,23 @@ begin
 //   asm65(#9'jsr @I2F');
 
 			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @I2F.A');
+			asm65(#9'sta :FPMAN0');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @I2F.A+1');
+			asm65(#9'sta :FPMAN1');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'sta @I2F.A+2');
+			asm65(#9'sta :FPMAN2');
 			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-			asm65(#9'sta @I2F.A+3');
+			asm65(#9'sta :FPMAN3');
 
 			asm65(#9'jsr @I2F');
 
-			asm65(#9'lda @I2F.RESULT');
+			asm65(#9'lda :FPMAN0');
 			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda @I2F.RESULT+1');
+			asm65(#9'lda :FPMAN1');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'lda @I2F.RESULT+2');
+			asm65(#9'lda :FPMAN2');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'lda @I2F.RESULT+3');
+			asm65(#9'lda :FPMAN3');
 			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 
    if (ValType <> SINGLETOK) and (Kind = SINGLETOK) then
@@ -9348,23 +9358,23 @@ begin
 //   asm65(#9'jsr @I2F_M');
 
 			asm65(#9'lda :STACKORIGIN-1,x');
-			asm65(#9'sta @I2F.A');
+			asm65(#9'sta :FPMAN0');
 			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-			asm65(#9'sta @I2F.A+1');
+			asm65(#9'sta :FPMAN1');
 			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-			asm65(#9'sta @I2F.A+2');
+			asm65(#9'sta :FPMAN2');
 			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-			asm65(#9'sta @I2F.A+3');
+			asm65(#9'sta :FPMAN3');
 
 			asm65(#9'jsr @I2F');
 
-			asm65(#9'lda @I2F.RESULT');
+			asm65(#9'lda :FPMAN0');
 			asm65(#9'sta :STACKORIGIN-1,x');
-			asm65(#9'lda @I2F.RESULT+1');
+			asm65(#9'lda :FPMAN1');
 			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-			asm65(#9'lda @I2F.RESULT+2');
+			asm65(#9'lda :FPMAN2');
 			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-			asm65(#9'lda @I2F.RESULT+3');
+			asm65(#9'lda :FPMAN3');
 			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
    if (RightValType <> SINGLETOK) and (Kind = SINGLETOK) then
