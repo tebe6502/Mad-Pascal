@@ -97,7 +97,23 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('dl'#9'= edx');
  asm65('dh'#9'= edx+1');
 
-
+if (target.id = ___neo) then begin
+ asm65;
+ asm65('FP1MAN0 = VAR1_B0');
+ asm65('FP1MAN1 = VAR1_B1');
+ asm65('FP1MAN2 = VAR1_B2');
+ asm65('FP1MAN3 = VAR1_B3');
+ asm65;
+ asm65('FP2MAN0 = VAR2_B0');
+ asm65('FP2MAN1 = VAR2_B1');
+ asm65('FP2MAN2 = VAR2_B2');
+ asm65('FP2MAN3 = VAR2_B3');
+ asm65;
+ asm65('FPMAN0 = FP1MAN0');
+ asm65('FPMAN1 = FP1MAN1');
+ asm65('FPMAN2 = FP1MAN2');
+ asm65('FPMAN3 = FP1MAN3');
+end else begin
  asm65;
  asm65(#9'org eax');
  asm65;
@@ -105,6 +121,21 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FP1MAN1'#9'.ds 1');
  asm65('FP1MAN2'#9'.ds 1');
  asm65('FP1MAN3'#9'.ds 1');
+ asm65;
+ asm65(#9'org edx');
+ asm65;
+ asm65('FP2MAN0'#9'.ds 1');
+ asm65('FP2MAN1'#9'.ds 1');
+ asm65('FP2MAN2'#9'.ds 1');
+ asm65('FP2MAN3'#9'.ds 1');
+ asm65;
+ asm65(#9'org ecx');
+ asm65;
+ asm65('FPMAN0'#9'.ds 1');
+ asm65('FPMAN1'#9'.ds 1');
+ asm65('FPMAN2'#9'.ds 1');
+ asm65('FPMAN3'#9'.ds 1');
+end;
 
  asm65;
  asm65(#9'org ztmp8');
@@ -113,26 +144,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FP1EXP'#9'.ds 1');
 
  asm65;
- asm65(#9'org edx');
- asm65;
- asm65('FP2MAN0'#9'.ds 1');
- asm65('FP2MAN1'#9'.ds 1');
- asm65('FP2MAN2'#9'.ds 1');
- asm65('FP2MAN3'#9'.ds 1');
-
- asm65;
  asm65(#9'org ztmp10');
  asm65;
  asm65('FP2SGN'#9'.ds 1');
  asm65('FP2EXP'#9'.ds 1');
-
- asm65;
- asm65(#9'org ecx');
- asm65;
- asm65('FPMAN0'#9'.ds 1');
- asm65('FPMAN1'#9'.ds 1');
- asm65('FPMAN2'#9'.ds 1');
- asm65('FPMAN3'#9'.ds 1');
 
  asm65;
  asm65(#9'org bp2');
