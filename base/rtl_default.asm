@@ -50,7 +50,6 @@
 	icl 'common\real_round.asm'	; @REAL_ROUND
 	icl 'common\real_frac.asm'	; @REAL_FRAC
 	
-	icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754 32bit
 	icl 'common\float16_add_sub.asm'; add / sub -> HALFSINGLE	IEEE-754 16bit
 	icl 'common\float16_mul.asm'	; mul -> HALFSINGLE		IEEE-754 16bit
 	icl 'common\float16_div.asm'	; div -> HALFSINGLE		IEEE-754 16bit
@@ -82,3 +81,12 @@
 	icl 'common\printfloat16.asm'	; @F16_F2A
 	
 	icl 'common\allocmem.asm'	; @AllocMem, @FreeMem
+
+; -----------------------------------------------------------------------
+
+	.ifdef MAIN.@DEFINES.NEO_MATH
+		icl 'neo\mathapi.asm'
+		icl 'neo\single.asm'        ; mul / div -> SINGLE   IEEE-754 32bit
+	.else
+		icl 'common\single.asm'		; mul / div -> SINGLE		IEEE-754 32bit
+	.endif
