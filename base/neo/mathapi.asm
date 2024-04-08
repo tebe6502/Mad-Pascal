@@ -14,16 +14,16 @@ VAR_INTEGER                   = 0
 VAR1_TYPE                     = STACK_ADDRESS
 VAR2_TYPE                     = STACK_ADDRESS+1
 
-VAR1_B1                       = STACK_ADDRESS+2
-VAR1_B2                       = STACK_ADDRESS+4
-VAR1_B3                       = STACK_ADDRESS+6
-VAR1_B4                       = STACK_ADDRESS+8
-VAR2_B1                       = STACK_ADDRESS+3
-VAR2_B2                       = STACK_ADDRESS+5
-VAR2_B3                       = STACK_ADDRESS+7
-VAR2_B4                       = STACK_ADDRESS+9
-VAR1                          = VAR1_B1
-VAR2                          = VAR2_B1
+VAR1_B0                       = STACK_ADDRESS+2
+VAR1_B1                       = STACK_ADDRESS+4
+VAR1_B2                       = STACK_ADDRESS+6
+VAR1_B3                       = STACK_ADDRESS+8
+VAR2_B0                       = STACK_ADDRESS+3
+VAR2_B1                       = STACK_ADDRESS+5
+VAR2_B2                       = STACK_ADDRESS+7
+VAR2_B3                       = STACK_ADDRESS+9
+VAR1                          = VAR1_B0
+VAR2                          = VAR2_B0
 
 MATH_GROUP                    = 4
 
