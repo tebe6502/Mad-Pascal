@@ -65,7 +65,7 @@ var
     m_integer: integer absolute VAR_ADDRESS+1; // integer value returned from unary operations
     m_float: float absolute VAR_ADDRESS+1; // float value returned from unary operations
 
-procedure SetMathStack(v:float;i:byte);assembler;overload;
+procedure SetMathStack(v:float;i:byte);assembler;overload;register;
 (*
 * @description: 
 * Inserts float value to the Math stack at the specified position.
@@ -74,7 +74,7 @@ procedure SetMathStack(v:float;i:byte);assembler;overload;
 * @param: i (byte) - stack position
 * 
 *)
-procedure SetMathStack(v:integer;i:byte);assembler;overload;
+procedure SetMathStack(v:integer;i:byte);assembler;overload;register;
 (*
 * @description: 
 * Inserts integer value to the Math stack at the specified position.
@@ -113,28 +113,28 @@ function IsFloatVal:boolean;
 * 
 * @returns: (boolean) - returns true if float
 *)
-procedure SetMathVar(v:integer);overload;assembler;
+procedure SetMathVar(v:integer);overload;assembler;register;
 (*
 * @description: 
 * Sets integer value as the MathVar (operation register for unary)
 * 
 * @param: v (integer) - value to be inserted
 *)
-procedure SetMathVar(v:float);overload;assembler;
+procedure SetMathVar(v:float);overload;assembler;register;
 (*
 * @description: 
 * Sets float value as the MathVar (operation register for unary)
 * 
 * @param: v (integer) - value to be inserted
 *)
-procedure DoMathOnStack(cmd:byte);
+procedure DoMathOnStack(cmd:byte);register;
 (*
 * @description: 
 * Perform selected operation on the MathStack
 * 
 * @param: cmd (byte) - operation id
 *)
-procedure DoMathOnVar(cmd:byte);
+procedure DoMathOnVar(cmd:byte);register;
 (*
 * @description: 
 * Perform selected operation on the MathVar
@@ -204,7 +204,7 @@ function NeoParseFloat(var s:string):float;
 implementation
 
 
-procedure SetMathStack(v:float;i:byte);assembler;overload;
+procedure SetMathStack(v:float;i:byte);assembler;overload;register;
 asm
     lda i
     bne i1
@@ -221,7 +221,7 @@ i1
     mva v+3  STACK_ADDRESS+9
 end;
 
-procedure SetMathStack(v:integer;i:byte);assembler;overload;
+procedure SetMathStack(v:integer;i:byte);assembler;overload;register;
 asm
     lda i
     bne i1
@@ -266,7 +266,7 @@ begin
     result := peek(VAR_ADDRESS) and $40 <> 0;
 end;
 
-procedure SetMathVar(v:integer);overload;assembler;
+procedure SetMathVar(v:integer);overload;assembler;register;
 asm
     mva #$00 VAR_ADDRESS 
     mva v VAR_ADDRESS+1
@@ -275,7 +275,7 @@ asm
     mva v+3 VAR_ADDRESS+4
 end;
 
-procedure SetMathVar(v:float);overload;assembler;
+procedure SetMathVar(v:float);overload;assembler;register;
 asm
     mva #$40 VAR_ADDRESS
     mva v VAR_ADDRESS+1
@@ -284,21 +284,21 @@ asm
     mva v+3 VAR_ADDRESS+4
 end;
 
-procedure DoMathOnStack(cmd:byte);
+procedure DoMathOnStack(cmd:byte);register;
 begin
+    NeoMessage.func:=cmd;
     wordParams[0] := STACK_ADDRESS;
     NeoMessage.params[2] := STACK_SIZE;
     NeoWaitMessage;
-    NeoMessage.func:=cmd;
     NeoMessage.group:=4;
 end;
 
-procedure DoMathOnVar(cmd:byte);
+procedure DoMathOnVar(cmd:byte);register;
 begin
+    NeoMessage.func:=cmd;
     wordParams[0] := VAR_ADDRESS;
     NeoMessage.params[2] := 1;
     NeoWaitMessage;
-    NeoMessage.func:=cmd;
     NeoMessage.group:=4;
 end;
 
