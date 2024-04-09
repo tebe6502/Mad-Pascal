@@ -37,3 +37,12 @@ universe:
 	mads bubbleuniverse.a65 -x -i:$(MAD-PASCAL)base -o:bubbleuniverse.prg
 	$(X16EMU) -prg bubbleuniverse.prg -run -rtc
 
+dragon:
+	mp -t x16 -ipath:$(MAD-PASCAL)lib dragon.pas
+	mads dragon.a65 -x -i:$(MAD-PASCAL)base -o:dragon.prg
+	$(X16EMU) -prg dragon.prg -run -rtc
+
+kefrens:
+	mp -t x16 -ipath:$(MAD-PASCAL)lib kefrens.pas
+	mads kefrens.a65 -x -i:$(MAD-PASCAL)base -o:kefrens.prg
+	$(X16EMU) -prg kefrens.prg -run -rtc

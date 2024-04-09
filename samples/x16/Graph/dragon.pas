@@ -1,4 +1,4 @@
-uses crt, Neo6502, graph;
+uses crt, graph;
 type 
     TFloat =   real;
 
@@ -32,7 +32,7 @@ begin
 end;
 
 begin
-    InitGraph(0);
+    InitGraph(X16_MODE_320x240);
     c := 0;
     dragon(14, 0, 1, sep, sep / 2, sep * 5 / 6);
     repeat until keypressed;
