@@ -563,6 +563,15 @@ procedure NeoDrawPixel(x0,y0:word);
 * @param: x0 (word) - x coordinate
 * @param: y0 (word) - y coordinate
 *)
+procedure NeoWritePixel(x0,y0:word;c:byte);
+(*
+* @description:
+* Draws single pixel.
+*
+* @param: x0 (word) - x coordinate
+* @param: y0 (word) - y coordinate
+* @param: c (byte) - color index
+*)
 procedure NeoDrawString(x0,y0:word;var s:string);
 (*
 * @description:
@@ -1199,6 +1208,14 @@ begin
     wordParams[0]:=x0;
     wordParams[1]:=y0;
     NeoSendMessage(5,5);
+end;
+
+procedure NeoWritePixel(x0,y0:word;c:byte);
+begin
+    wordParams[0]:=x0;
+    wordParams[1]:=y0;
+    NeoMessage.params[4]:=c;
+    NeoSendMessage(5,39);
 end;
 
 procedure NeoDrawString(x0,y0:word;var s:string);

@@ -2202,7 +2202,30 @@ Calculate sine of angle
 @returns: Single
 *)
 begin
-    Result := fsincos(x, false);
+{$ifdef neo}
+  asm
+		mva x   VAR0_B0
+		mva x+1 VAR0_B1
+		mva x+2 VAR0_B2
+		mva x+3 VAR0_B3
+
+		mva #VAR_FLOAT     VAR0_TYPE
+		mva #STACK_ADDRESS NEOMESSAGE_PAR1W
+		mva #STACK_SIZE1   NEOMESSAGE_PAR2W
+		stz NEOMESSAGE_PAR1W+1
+		stz NEOMESSAGE_PAR2W+1
+		jsr @WaitMessage
+		mva #MATH_SIN      NEOMESSAGE_FUNC
+		mva #MATH_GROUP    NEOMESSAGE_GROUP
+
+		mva VAR0_B0 result
+		mva VAR0_B1 result+1
+		mva VAR0_B2 result+2
+		mva VAR0_B3 result+3
+  end;
+{$else}
+	Result := fsincos(x, false);
+{$endif}
 end;
 
 
@@ -2216,7 +2239,30 @@ Calculate cosine of angle
 @returns: Single
 *)
 begin
-    Result := fsincos(x, true);
+{$ifdef neo}
+  asm
+		mva x   VAR0_B0
+		mva x+1 VAR0_B1
+		mva x+2 VAR0_B2
+		mva x+3 VAR0_B3
+
+		mva #VAR_FLOAT     VAR0_TYPE
+		mva #STACK_ADDRESS NEOMESSAGE_PAR1W
+		mva #STACK_SIZE1   NEOMESSAGE_PAR2W
+		stz NEOMESSAGE_PAR1W+1
+		stz NEOMESSAGE_PAR2W+1
+		jsr @WaitMessage
+		mva #MATH_COS      NEOMESSAGE_FUNC
+		mva #MATH_GROUP    NEOMESSAGE_GROUP
+
+		mva VAR0_B0 result
+		mva VAR0_B1 result+1
+		mva VAR0_B2 result+2
+		mva VAR0_B3 result+3
+  end;
+{$else}
+	Result := fsincos(x, true);
+{$endif}
 end;
 
 

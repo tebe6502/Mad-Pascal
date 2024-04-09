@@ -21,9 +21,6 @@ if Pass = CODEGENERATIONPASS then begin
  if target.id = ___a8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
-// if target.id = ___raw then
-//  asm65('CODEORIGIN'#9'= $'+IntToHex(target.codeorigin, 4));
-
  asm65;
 
  asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
@@ -57,6 +54,7 @@ if Pass = CODEGENERATIONPASS then begin
 
  asm65('bp'#9'.ds 2');
  asm65('bp2'#9'.ds 2');
+ asm65('bp3'#9'= bp+1');
  asm65;
 
  asm65('eax'#9'.ds 4', ';8 bytes (aex + edx) -> divREAL');
@@ -99,7 +97,23 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('dl'#9'= edx');
  asm65('dh'#9'= edx+1');
 
-
+if (target.id = ___neo) then begin
+ asm65;
+ asm65('FP1MAN0 = VAR1_B0');
+ asm65('FP1MAN1 = VAR1_B1');
+ asm65('FP1MAN2 = VAR1_B2');
+ asm65('FP1MAN3 = VAR1_B3');
+ asm65;
+ asm65('FP2MAN0 = VAR2_B0');
+ asm65('FP2MAN1 = VAR2_B1');
+ asm65('FP2MAN2 = VAR2_B2');
+ asm65('FP2MAN3 = VAR2_B3');
+ asm65;
+ asm65('FPMAN0 = FP1MAN0');
+ asm65('FPMAN1 = FP1MAN1');
+ asm65('FPMAN2 = FP1MAN2');
+ asm65('FPMAN3 = FP1MAN3');
+end else begin
  asm65;
  asm65(#9'org eax');
  asm65;
@@ -107,6 +121,21 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FP1MAN1'#9'.ds 1');
  asm65('FP1MAN2'#9'.ds 1');
  asm65('FP1MAN3'#9'.ds 1');
+ asm65;
+ asm65(#9'org edx');
+ asm65;
+ asm65('FP2MAN0'#9'.ds 1');
+ asm65('FP2MAN1'#9'.ds 1');
+ asm65('FP2MAN2'#9'.ds 1');
+ asm65('FP2MAN3'#9'.ds 1');
+ asm65;
+ asm65(#9'org ecx');
+ asm65;
+ asm65('FPMAN0'#9'.ds 1');
+ asm65('FPMAN1'#9'.ds 1');
+ asm65('FPMAN2'#9'.ds 1');
+ asm65('FPMAN3'#9'.ds 1');
+end;
 
  asm65;
  asm65(#9'org ztmp8');
@@ -115,26 +144,10 @@ if Pass = CODEGENERATIONPASS then begin
  asm65('FP1EXP'#9'.ds 1');
 
  asm65;
- asm65(#9'org edx');
- asm65;
- asm65('FP2MAN0'#9'.ds 1');
- asm65('FP2MAN1'#9'.ds 1');
- asm65('FP2MAN2'#9'.ds 1');
- asm65('FP2MAN3'#9'.ds 1');
-
- asm65;
  asm65(#9'org ztmp10');
  asm65;
  asm65('FP2SGN'#9'.ds 1');
  asm65('FP2EXP'#9'.ds 1');
-
- asm65;
- asm65(#9'org ecx');
- asm65;
- asm65('FPMAN0'#9'.ds 1');
- asm65('FPMAN1'#9'.ds 1');
- asm65('FPMAN2'#9'.ds 1');
- asm65('FPMAN3'#9'.ds 1');
 
  asm65;
  asm65(#9'org bp2');
@@ -201,9 +214,10 @@ if Pass = CODEGENERATIONPASS then begin
   asm65;
   asm65(#9'org CODEORIGIN');
  end else begin
+ 
   for header in target.header do
    if (header = 'END') then break else
-    if header <> '' then asm65(#9''+header) else asm65;
+    if header <> '' then asm65(#9'' + header) else asm65;
 
   if (target.id = ___raw) then begin
 
@@ -223,9 +237,8 @@ if Pass = CODEGENERATIONPASS then begin
    asm65(#9'jmp START');
    asm65;
 
-  end else
-   CODEORIGIN_BASE := target.codeorigin;
-
+  end;
+  
   asm65('CODEORIGIN');
 
  end;
@@ -320,6 +333,15 @@ if Pass = CODEGENERATIONPASS then begin
   asm65(#9'lda #$0e');
   asm65(#9'jsr $ffd2','; shifted charset');
   asm65;
+
+ end;
+
+
+ if (target.id = ___neo) then begin
+
+   asm65(#9'stz $FF04');     // set radians as default
+   asm65(#9'mva #35 $FF01');
+   asm65(#9'mva #4  $FF00');
 
  end;
 

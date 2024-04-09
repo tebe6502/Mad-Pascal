@@ -1,7 +1,8 @@
 uses crt,neo6502,neo6502math;
-const n = 200;
-var 
-    g:float absolute($80);
+const
+    n = 200;
+    rad = float(180 / PI);
+var
     r:float absolute($84);
     x:float absolute($88);
     y:float absolute($8c);
@@ -34,7 +35,6 @@ begin
     // draw
     x:=0; y:=0; v:=0; t:=0; s:=60;
     r := (PI * 2) / 235;
-    g := 360 / (PI *2);
     time := NeoGetTimer;
     //repeat
         for i:=0 to n do 
@@ -42,8 +42,8 @@ begin
                 SetMathStack(i,0);
                 SetMathStack(v,1);
                 DoMathOnStack(MATHAdd);
-                SetMathStack(g,1);
-                DoMathOnStack(MATHMul);
+                //SetMathStack(rad,1);
+                //DoMathOnStack(MATHMul);
                 p := GetMathStackFloat;
     
                 SetMathStack(i,0);
@@ -51,8 +51,8 @@ begin
                 DoMathOnStack(MATHMul);
                 SetMathStack(x,1);
                 DoMathOnStack(MATHAdd);
-                SetMathStack(g,1);
-                DoMathOnStack(MATHMul);
+                //SetMathStack(rad,1);
+                //DoMathOnStack(MATHMul);
                 q := GetMathStackFloat; 
                 
                 SetMathVar(p);
@@ -81,8 +81,7 @@ begin
                 
                 x:=u+t;
 
-                NeoSetColor(col[i,j]);
-                NeoDrawPixel(Trunc(xx)+160,Trunc(yy)+120);
+                NeoWritePixel(Trunc(xx)+160,Trunc(yy)+120,col[i,j]);
             end;
         t:=t+0.025;
     //until false;
