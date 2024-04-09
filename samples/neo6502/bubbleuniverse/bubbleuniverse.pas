@@ -1,8 +1,8 @@
-program bubbleuniverse;
+program universe;
 
 //----------------------------------------------------------
 
-uses crt, neo6502;
+uses crt, neo6502; // neo6502math;
 
 //----------------------------------------------------------
 
@@ -40,7 +40,7 @@ begin
     // prepare palette
     for i := 0 to n do
         for j := 0 to n do begin
-            c:=((i div 14) shl 4) or (j div 14);
+            c := ((i div 14) shl 4) or (j div 14);
             NeoSetPalette(c, i, j, 99);
             col[i,j] := c;
         end;
@@ -60,7 +60,6 @@ begin
             a := u * s;
             b := v * s;
             NeoWritePixel(Trunc(a) + 160, Trunc(b) + 120 , col[i,j]);
-            //NeoWritePixel(Round(a) + 160, Round(b) + 120 , col[i,j]);
         end;
     time2 := NeoGetTimer;
 
