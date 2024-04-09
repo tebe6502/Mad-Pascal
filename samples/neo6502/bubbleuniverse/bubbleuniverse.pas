@@ -27,7 +27,7 @@ var
     time1 : cardinal  absolute $80;
     time2 : cardinal  absolute $84;
 
-    col   : array[0..n,0..n] of byte;
+    col   : array[0..n, 0..n] of byte;
 
 //----------------------------------------------------------
 
