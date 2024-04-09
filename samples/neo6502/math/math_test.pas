@@ -12,7 +12,7 @@ begin
     i0 := 6502;
     i1 := 666;
 
-    // BINARY
+    // BINARY 
     ClrScr;
     Writeln('Binary operations:');
     Writeln;
