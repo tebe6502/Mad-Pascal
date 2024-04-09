@@ -2204,22 +2204,22 @@ Calculate sine of angle
 begin
 {$ifdef neo}
   asm
-      mva #VAR_FLOAT VAR_ADDRESS
-      mva x+0 VAR_ADDRESS+1
-      mva x+1 VAR_ADDRESS+2
-      mva x+2 VAR_ADDRESS+3
-      mva x+3 VAR_ADDRESS+4
+		mva #VAR_FLOAT VAR_ADDRESS
+		mva x+0 VAR_ADDRESS+1
+		mva x+1 VAR_ADDRESS+2
+		mva x+2 VAR_ADDRESS+3
+		mva x+3 VAR_ADDRESS+4
 
-			mva #VAR_ADDRESS NEOMESSAGE_PAR1W
-			mva #STACK_SIZE1 NEOMESSAGE_PAR2W
-			jsr @WaitMessage
-			mva #MATH_SIN    NEOMESSAGE_FUNC
-			mva #MATH_GROUP  NEOMESSAGE_GROUP
+		mva #VAR_ADDRESS NEOMESSAGE_PAR1W
+		mva #STACK_SIZE1 NEOMESSAGE_PAR2W
+		jsr @WaitMessage
+		mva #MATH_SIN    NEOMESSAGE_FUNC
+		mva #MATH_GROUP  NEOMESSAGE_GROUP
 
-			mva VAR_ADDRESS+1 result
-			mva VAR_ADDRESS+2 result+1
-			mva VAR_ADDRESS+3 result+2
-			mva VAR_ADDRESS+4 result+3
+		mva VAR_ADDRESS+1 result
+		mva VAR_ADDRESS+2 result+1
+		mva VAR_ADDRESS+3 result+2
+		mva VAR_ADDRESS+4 result+3
   end;
 {$else}
 	Result := fsincos(x, false);
@@ -2239,22 +2239,22 @@ Calculate cosine of angle
 begin
 {$ifdef neo}
   asm
-      mva #VAR_FLOAT VAR_ADDRESS
-      mva x+0 VAR_ADDRESS+1
-      mva x+1 VAR_ADDRESS+2
-      mva x+2 VAR_ADDRESS+3
-      mva x+3 VAR_ADDRESS+4
+		mva #VAR_FLOAT VAR_ADDRESS
+		mva x+0 VAR_ADDRESS+1
+		mva x+1 VAR_ADDRESS+2
+		mva x+2 VAR_ADDRESS+3
+		mva x+3 VAR_ADDRESS+4
 
-			mva #VAR_ADDRESS NEOMESSAGE_PAR1W
-			mva #STACK_SIZE1 NEOMESSAGE_PAR2W
-			jsr @WaitMessage
-			mva #MATH_COS    NEOMESSAGE_FUNC
-			mva #MATH_GROUP  NEOMESSAGE_GROUP
+		mva #VAR_ADDRESS NEOMESSAGE_PAR1W
+		mva #STACK_SIZE1 NEOMESSAGE_PAR2W
+		jsr @WaitMessage
+		mva #MATH_COS    NEOMESSAGE_FUNC
+		mva #MATH_GROUP  NEOMESSAGE_GROUP
 
-			mva VAR_ADDRESS+1 result
-			mva VAR_ADDRESS+2 result+1
-			mva VAR_ADDRESS+3 result+2
-			mva VAR_ADDRESS+4 result+3
+		mva VAR_ADDRESS+1 result
+		mva VAR_ADDRESS+2 result+1
+		mva VAR_ADDRESS+3 result+2
+		mva VAR_ADDRESS+4 result+3
   end;
 {$else}
 	Result := fsincos(x, true);
