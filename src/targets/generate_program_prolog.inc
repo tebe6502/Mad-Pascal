@@ -337,9 +337,9 @@ end;
  end;
 
 
- if (target.id = ___neo) then begin		// radians as default
+ if (target.id = ___neo) then begin
 
-   asm65(#9'stz $FF04');
+   asm65(#9'stz $FF04');     // set radians as default
    asm65(#9'mva #35 $FF01');
    asm65(#9'mva #4  $FF00');
 
