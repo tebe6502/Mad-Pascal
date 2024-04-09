@@ -212,24 +212,6 @@ procedure SetRadianMode;assembler;inline;
 * @description:
 * Sets the use of radians.
 *)
-function NeoSin(x:float):float;
-(*
-* @description:
-* Accelerated sinus.
-*
-* @param: x (float)
-*
-* @returns: (float)
-*)
-function NeoCos(x:float):float;
-(*
-* @description:
-* Accelerated cosinus.
-*
-* @param: x (float)
-*
-* @returns: (float)
-*)
 implementation
 
 procedure SetDegreeMode;assembler;inline;
@@ -244,44 +226,6 @@ asm
     stz N6502MSG_ADDRESS+4
     mva #35 N6502MSG_ADDRESS+1
     mva #4  N6502MSG_ADDRESS
-end;
-
-function NeoSin(x:float):float;
-begin
-    asm
-        mva #$40 VAR_ADDRESS
-        mva x VAR_ADDRESS+1
-        mva x+1 VAR_ADDRESS+2
-        mva x+2 VAR_ADDRESS+3
-        mva x+3 VAR_ADDRESS+4
-    end;
-
-    wordParams[0] := VAR_ADDRESS;
-    NeoMessage.params[2] := 1;
-    NeoWaitMessage;
-    NeoMessage.func := MATHSin;
-    NeoMessage.group := 4;
-
-    result := m_float;
-end;
-
-function NeoCos(x:float):float;
-begin
-    asm
-        mva #$40 VAR_ADDRESS
-        mva x VAR_ADDRESS+1
-        mva x+1 VAR_ADDRESS+2
-        mva x+2 VAR_ADDRESS+3
-        mva x+3 VAR_ADDRESS+4
-    end;
-
-    wordParams[0] := VAR_ADDRESS;
-    NeoMessage.params[2] := 1;
-    NeoWaitMessage;
-    NeoMessage.func := MATHCos;
-    NeoMessage.group := 4;
-
-    result := m_float;
 end;
 
 procedure SetMathStack(v:float;i:byte);assembler;overload;

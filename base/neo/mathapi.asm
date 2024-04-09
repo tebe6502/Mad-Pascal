@@ -5,7 +5,8 @@ NEOMESSAGE_PAR1W              = N6502MSG_ADDRESS+4
 NEOMESSAGE_PAR2W              = N6502MSG_ADDRESS+6
 VAR_ADDRESS                   = $F0
 STACK_ADDRESS                 = $F5
-STACK_SIZE                    = 2
+STACK_SIZE2                   = 2
+STACK_SIZE1                   = 1
 
 
 VAR_FLOAT                     = $40
