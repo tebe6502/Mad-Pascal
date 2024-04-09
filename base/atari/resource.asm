@@ -2,20 +2,20 @@
 	opt l-
 
 /*
-	CMC
-	CMCPLAY
-	DOSFILE
+	CMC		RAM / ROM
+	CMCPLAY		RAM / ROM
+	DOSFILE		RAM / ROM
 	EXTMEM
-	MPT
-	MPTPLAY
-	RCASM
-	RCDATA
-	RELOC
-	RMT
-	RMTPLAY
+	MPT		RAM / ROM
+	MPTPLAY		RAM / ROM
+	RCASM		RAM / ROM
+	RCDATA		RAM / ROM
+	RELOC		RAM
+	RMT		RAM / ROM
+	RMTPLAY		RAM
 	XBMP
-	SAPR
-	SAPRPLAY
+	SAPR		RAM / ROM
+	SAPRPLAY	RAM / ROM
 */
 
 	org CODEORIGIN
@@ -152,7 +152,8 @@ ext_b	= $4000		;cokolwiek z zakresu $4000-$7FFF
 	lda portb
 	pha
 
-	lda:rne vcount
+	bit:rmi VCOUNT
+	bit:rpl VCOUNT
 
 ;	lda #$ff
 ;	sta portb
@@ -493,6 +494,10 @@ mcpy	jsr sys.off
 
 data	ins %%1,%%ofs
 
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
+
 	.print '$R RCDATA  ',main.%%lab,'..',main.%%lab+len-1," %%1"
 
 	ini mcpy
@@ -518,6 +523,7 @@ data	ins %%1,%%ofs
 ?len = .filesize(%%1)
 
  ift .wget[2]+?len-6 >= $c000
+
 	org RESORIGIN
 
 _stop	jmp stop
@@ -867,6 +873,63 @@ data	mpt_relocator %%1,main.%%lab
 
 
 /* ----------------------------------------------------------------------- */
+/* PP (Power Packer)
+/* ----------------------------------------------------------------------- */
+
+.macro	PP (nam, lab)
+
+len = .filesize(%%1)
+
+	ert main.%%lab+len > $FFFF,'Memory overrun ',main.%%lab+len
+
+ ift main.%%lab+len >= $c000
+	org RESORIGIN
+
+mcpy	jsr sys.off
+
+	memcpy #data #main.%%lab #len
+
+	jmp sys.on
+
+data
+	.get %%1
+	
+unp = .get[len-2]+.get[len-3]*256
+
+	.put[0] = <[unp-1]
+	.put[1] = >[unp-1]
+
+	.put[2] = <[len-4]
+	.put[3] = >[len-4]
+
+	.sav [0] len
+
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
+
+	ini mcpy
+ els
+	org main.%%lab
+
+	.get %%1
+
+unp = .get[len-2]+.get[len-3]*256
+
+	.put[0] = <[unp-1]
+	.put[1] = >[unp-1]
+
+	.put[2] = <[len-4]
+	.put[3] = >[len-4]
+
+	.sav [0] len
+ eif
+ 
+	.print '$R PP    ',main.%%lab,'..',main.%%lab+len+2," %%1"
+.endm
+
+
+/* ----------------------------------------------------------------------- */
 /* SAPR (SAPR LZSS DATA)
 /* ----------------------------------------------------------------------- */
 
@@ -890,6 +953,10 @@ mcpy	jsr sys.off
 
 data	dta a(len)
 	ins %%1
+
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
 
 	ini mcpy
  els
