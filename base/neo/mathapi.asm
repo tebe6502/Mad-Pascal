@@ -12,17 +12,26 @@ STACK_SIZE1                   = 1
 VAR_FLOAT                     = $40
 VAR_INTEGER                   = 0
 
+VAR0_TYPE                     = VAR_ADDRESS
 VAR1_TYPE                     = STACK_ADDRESS
 VAR2_TYPE                     = STACK_ADDRESS+1
+
+VAR0_B0                       = VAR_ADDRESS+1
+VAR0_B1                       = VAR_ADDRESS+2
+VAR0_B2                       = VAR_ADDRESS+3
+VAR0_B3                       = VAR_ADDRESS+4
 
 VAR1_B0                       = STACK_ADDRESS+2
 VAR1_B1                       = STACK_ADDRESS+4
 VAR1_B2                       = STACK_ADDRESS+6
 VAR1_B3                       = STACK_ADDRESS+8
+
 VAR2_B0                       = STACK_ADDRESS+3
 VAR2_B1                       = STACK_ADDRESS+5
 VAR2_B2                       = STACK_ADDRESS+7
 VAR2_B3                       = STACK_ADDRESS+9
+
+VAR0                          = VAR0_B0
 VAR1                          = VAR1_B0
 VAR2                          = VAR2_B0
 
