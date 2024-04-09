@@ -2204,12 +2204,12 @@ Calculate sine of angle
 begin
 {$ifdef neo}
   asm
-		mva #VAR_FLOAT VAR_ADDRESS
-		mva x+0 VAR_ADDRESS+1
+		mva x   VAR_ADDRESS+1
 		mva x+1 VAR_ADDRESS+2
 		mva x+2 VAR_ADDRESS+3
 		mva x+3 VAR_ADDRESS+4
 
+		mva #VAR_FLOAT   VAR_ADDRESS
 		mva #VAR_ADDRESS NEOMESSAGE_PAR1W
 		mva #STACK_SIZE1 NEOMESSAGE_PAR2W
 		jsr @WaitMessage
@@ -2239,12 +2239,12 @@ Calculate cosine of angle
 begin
 {$ifdef neo}
   asm
-		mva #VAR_FLOAT VAR_ADDRESS
-		mva x+0 VAR_ADDRESS+1
+		mva x   VAR_ADDRESS+1
 		mva x+1 VAR_ADDRESS+2
 		mva x+2 VAR_ADDRESS+3
 		mva x+3 VAR_ADDRESS+4
 
+		mva #VAR_FLOAT   VAR_ADDRESS
 		mva #VAR_ADDRESS NEOMESSAGE_PAR1W
 		mva #STACK_SIZE1 NEOMESSAGE_PAR2W
 		jsr @WaitMessage
