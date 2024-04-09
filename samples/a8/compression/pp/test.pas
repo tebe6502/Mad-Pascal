@@ -1,6 +1,5 @@
-uses crt, graph, pp;
+ uses crt, graph, pp;
 
-//{$define NOROMFONT}
 {$define romoff}
 
 {$r test.rc}
