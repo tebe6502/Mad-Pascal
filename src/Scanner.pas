@@ -267,7 +267,8 @@ begin
        (AnsiUpperCase(res.resType) = 'XBMP') or
        (AnsiUpperCase(res.resType) = 'SAPR') or
        (AnsiUpperCase(res.resType) = 'SAPRPLAY') or
-       (AnsiUpperCase(res.resType) = 'PP')
+       (AnsiUpperCase(res.resType) = 'PP') or
+       (AnsiUpperCase(res.resType) = 'LIBRARY')
       then
 
       else

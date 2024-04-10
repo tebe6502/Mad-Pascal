@@ -211,8 +211,10 @@ end;
 
 
  if target.id = ___a8 then begin
+
   asm65;
   asm65(#9'org CODEORIGIN');
+
  end else begin
  
   for header in target.header do
@@ -227,6 +229,8 @@ end;
    asm65(#9'org $' + IntToHex(target.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
+     
+   CODEORIGIN_BASE := target.codeorigin + 3;
 
   end else if (target.id = ___neo) then begin
 
@@ -236,6 +240,8 @@ end;
    asm65(#9'org $' + IntToHex(target.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
+
+   CODEORIGIN_BASE := target.codeorigin + 3;
 
   end;
   
@@ -339,7 +345,7 @@ end;
 
  if (target.id = ___neo) then begin
 
-   asm65(#9'stz $FF04');     // set radians as default
+   asm65(#9'stz $FF04','; set radians as default');
    asm65(#9'mva #35 $FF01');
    asm65(#9'mva #4  $FF00');
 
