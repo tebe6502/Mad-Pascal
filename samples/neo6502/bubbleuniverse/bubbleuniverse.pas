@@ -27,25 +27,20 @@ var
     time1 : cardinal  absolute $80;
     time2 : cardinal  absolute $84;
 
-    col   : array[0..n, 0..n] of byte;
-
 //----------------------------------------------------------
 
 begin
-    NeoSetDefaults(0, $ff, 1, 1, 0);
-    NeoSetPalette($ff, 0, 0, 0);
-    NeoSetColor($ff);
-    NeoDrawRect(0, 0, 319, 239);
+    x := 0; y := 0; v := 0; s := 60;
 
     // prepare palette
-    for i := 0 to n do
-        for j := 0 to n do begin
-            c := ((i div 14) shl 4) or (j div 14);
-            NeoSetPalette(c, i, j, 99);
-            col[i,j] := c;
-        end;
+    for i := 0 to 14 do
+        for j := 0 to 14 do
+            NeoSetPalette((i shl 4) or j, i * 16, j * 16, 100);
 
-    x := 0; y := 0; v := 0; s := 60;
+    NeoSetDefaults(0, 255, 1, 0, 0);
+    NeoSetPalette(255, 0, 0, 0);
+    NeoSetColor(255);
+    NeoDrawRect(0, 0, 319, 239);
 
     // draw
     time1 := NeoGetTimer;
@@ -59,7 +54,7 @@ begin
 
             a := u * s;
             b := v * s;
-            NeoWritePixel(Trunc(a) + 160, Trunc(b) + 120, col[i,j]);
+            NeoWritePixel(Trunc(a) + 160, Trunc(b) + 120, (c shl 4) or (j div 14));
         end;
     time2 := NeoGetTimer;
 
