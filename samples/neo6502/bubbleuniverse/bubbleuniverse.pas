@@ -59,7 +59,7 @@ begin
 
             a := u * s;
             b := v * s;
-            NeoWritePixel(Trunc(a) + 160, Trunc(b) + 120 , col[i,j]);
+            NeoWritePixel(Trunc(a) + 160, Trunc(b) + 120, col[i,j]);
         end;
     time2 := NeoGetTimer;
 
