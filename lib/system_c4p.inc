@@ -4,8 +4,7 @@ procedure Pause; assembler; overload;
 Delay program execution (1/50 second).
 *)
 asm
-{ lda:cmp:req :c4p_time+2
-};
+	lda:cmp:req :c4p_time+2
 end;
 
 
@@ -17,7 +16,6 @@ Delay program execution (N * 1/50 second).
 @param: N - number of '1/50 second'
 *)
 asm
-{
 loop  lda n
   ora n+1
   beq stop
@@ -28,8 +26,8 @@ loop  lda n
 
   jmp loop
 stop
-};
 end;
+
 
 procedure Randomize; assembler;
 (*
@@ -37,9 +35,8 @@ procedure Randomize; assembler;
 Initialize random number generator
 *)
 asm
-{ mva ted_timer_1 RndSeed
-  mva #$00  RndSeed+1
-};
+	mva ted_timer_1 RndSeed
+	mva #$00  RndSeed+1
 end;
 
 
@@ -53,15 +50,13 @@ Generate random number
 begin
 
  asm
+	lda ted_timer_1
+	sta Result
 
- lda ted_timer_1
- sta Result
-
- lda #$00
- sta Result+1
- sta Result+2
- sta Result+3
-
+	lda #$00
+	sta Result+1
+	sta Result+2
+	sta Result+3
  end;
 
  Result:= 1 - Result;
@@ -79,17 +74,15 @@ Generate random number
 begin
 
  asm
+	lda ted_timer_1
+	and #$7f
+	sta Result+2
+	mva ted_timer_1 Result+1
 
- lda ted_timer_1
- and #$7f
- sta Result+2
- mva ted_timer_1 Result+1
-
- lda #$00
- sta Result
- lda #$3f
- sta Result+3
-
+	lda #$00
+	sta Result
+	lda #$3f
+	sta Result+3
  end;
 
  Result:= 1 - Result;
