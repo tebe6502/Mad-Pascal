@@ -16074,9 +16074,6 @@ DefineIdent(1, 'MAIN', PROCEDURETOK, 0, 0, 0, 0);
 
 GenerateProgramProlog;
 
-writeln(Hexstr(CODEORIGIN_BASE,4),',',Hexstr(target.codeorigin,4));
-
-
 j := CompileBlock(1, NumIdent, 0, FALSE, 0);
 
 
