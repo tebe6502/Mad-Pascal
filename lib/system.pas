@@ -254,80 +254,80 @@ const
 (* Character codes *)
 {$ifdef X16}
 
-  PETSCII_SWAP_COLOR		    = $01;
-  PETSCII_CLEAR	        		= $93;
-  PETSCII_BELL		            = $07;
+  PETSCII_SWAP_COLOR		= $01;
+  PETSCII_CLEAR	        	= $93;
+  PETSCII_BELL		        = $07;
   PETSCII_REVERSE_ON	        = $12;
   PETSCII_REVERSE_OFF	        = $92;
-  PETSCII_ISO_ON	            = $0f;
-  PETSCII_ISO_OFF	            = $8f;
+  PETSCII_ISO_ON	        = $0f;
+  PETSCII_ISO_OFF	        = $8f;
   PETSCII_SWAP_LOWCHARSET       = $0e;
   PETSCII_SWAP_GFXCHARSET       = $8e;
-  PETSCII_VERBATIM_MODE			= $80;
+  PETSCII_VERBATIM_MODE		= $80;
 
-  PETSCII_CURSOR_UP	          	= $91;
+  PETSCII_CURSOR_UP	        = $91;
   PETSCII_CURSOR_DOWN	        = $11;
   PETSCII_CURSOR_RIGHT        	= $1d;
   PETSCII_CURSOR_LEFT         	= $9d;
-  PETSCII_KEY_ESC		        = $1b;
+  PETSCII_KEY_ESC		= $1b;
   PETSCII_KEY_BACKSPACE	      	= $14;
-  PETSCII_KEY_DEL	            = $19;
+  PETSCII_KEY_DEL	        = $19;
   PETSCII_KEY_RETURN	        = $0d;
-  PETSCII_KEY_SHIFT_RETURN		= $8d;
-  PETSCII_KEY_TAB	            = $09;
+  PETSCII_KEY_SHIFT_RETURN	= $8d;
+  PETSCII_KEY_TAB	        = $09;
   PETSCII_KEY_SHIFT_TAB	      	= $18;
-  PETSCII_KEY_MENU	         	= $06;
-  PETSCII_KEY_HOME	         	= $13;
+  PETSCII_KEY_MENU	        = $06;
+  PETSCII_KEY_HOME	        = $13;
   PETSCII_KEY_INSERT	        = $94;
-  PETSCII_KEY_END	            = $04;
-  PETSCII_KEY_HELP	          	= $84;
+  PETSCII_KEY_END	        = $04;
+  PETSCII_KEY_HELP	        = $84;
 
   PETSCII_KEY_PAGEUP	        = $82;
   PETSCII_KEY_PAGEDOWN	      	= $02;
-  PETSCII_KEY_F1	            = $85;
-  PETSCII_KEY_F2	            = $89;
-  PETSCII_KEY_F3	            = $86;
-  PETSCII_KEY_F4	            = $8a;
-  PETSCII_KEY_F5	            = $87;
-  PETSCII_KEY_F6	            = $8b;
-  PETSCII_KEY_F7	            = $88;
-  PETSCII_KEY_F8	            = $8c;
-  PETSCII_KEY_F9	            = $10;
-  PETSCII_KEY_F10	            = $15;
-  PETSCII_KEY_F11	            = $16;
-  PETSCII_KEY_F12	            = $17;
-  
-  X16_CLEAR_SCREEN	      = chr(PETSCII_CLEAR);
-  X16_SWAP_COLOR		  = chr(PETSCII_SWAP_COLOR);
-  X16_BELL		          = chr(PETSCII_BELL);
-  X16_REVERSE_ON	      = chr(PETSCII_REVERSE_ON);
-  X16_REVERSE_OFF	      = chr(PETSCII_REVERSE_OFF);
+  PETSCII_KEY_F1	        = $85;
+  PETSCII_KEY_F2	        = $89;
+  PETSCII_KEY_F3	        = $86;
+  PETSCII_KEY_F4	        = $8a;
+  PETSCII_KEY_F5	        = $87;
+  PETSCII_KEY_F6	        = $8b;
+  PETSCII_KEY_F7	        = $88;
+  PETSCII_KEY_F8	        = $8c;
+  PETSCII_KEY_F9	        = $10;
+  PETSCII_KEY_F10	        = $15;
+  PETSCII_KEY_F11	        = $16;
+  PETSCII_KEY_F12	        = $17;
+
+  X16_CLEAR_SCREEN	  = chr(PETSCII_CLEAR);
+  X16_SWAP_COLOR	  = chr(PETSCII_SWAP_COLOR);
+  X16_BELL		  = chr(PETSCII_BELL);
+  X16_REVERSE_ON	  = chr(PETSCII_REVERSE_ON);
+  X16_REVERSE_OFF	  = chr(PETSCII_REVERSE_OFF);
   X16_ISO_ON	          = chr(PETSCII_ISO_ON);
   X16_ISO_OFF	          = chr(PETSCII_ISO_OFF);
   X16_SWAP_CHARSET        = chr(PETSCII_SWAP_LOWCHARSET);
   X16_SWAP_GFXCHARSET     = chr(PETSCII_SWAP_GFXCHARSET);
-  X16_VERBATIM_MODE		  = chr(PETSCII_VERBATIM_MODE);
+  X16_VERBATIM_MODE	  = chr(PETSCII_VERBATIM_MODE);
 
 
   X16_CURSOR_UP	          = chr(PETSCII_CURSOR_UP);
-  X16_CURSOR_DOWN	      = chr(PETSCII_CURSOR_DOWN);
+  X16_CURSOR_DOWN	  = chr(PETSCII_CURSOR_DOWN);
   X16_CURSOR_RIGHT        = chr(PETSCII_CURSOR_RIGHT);
   X16_CURSOR_LEFT         = chr(PETSCII_CURSOR_LEFT);
   X16_KEY_ESC	      	  = chr(PETSCII_KEY_ESC);
-  X16_KEY_BACKSPACE	      = chr(PETSCII_KEY_BACKSPACE);
+  X16_KEY_BACKSPACE	  = chr(PETSCII_KEY_BACKSPACE);
   X16_KEY_DEL	          = chr(PETSCII_KEY_DEL);
-  X16_KEY_RETURN	      = chr(PETSCII_KEY_RETURN);
+  X16_KEY_RETURN	  = chr(PETSCII_KEY_RETURN);
   X16_KEY_SHIFT_RETURN	  = chr(PETSCII_KEY_SHIFT_RETURN);
   X16_KEY_TAB	          = chr(PETSCII_KEY_TAB);
-  X16_KEY_SHIFT_TAB	      = chr(PETSCII_KEY_SHIFT_TAB);
+  X16_KEY_SHIFT_TAB	  = chr(PETSCII_KEY_SHIFT_TAB);
   X16_KEY_MENU	          = chr(PETSCII_KEY_MENU);
   X16_KEY_HOME	          = chr(PETSCII_KEY_HOME);
-  X16_KEY_INSERT	      = chr(PETSCII_KEY_INSERT);
+  X16_KEY_INSERT	  = chr(PETSCII_KEY_INSERT);
   X16_KEY_END	          = chr(PETSCII_KEY_END);
   X16_KEY_HELP	          = chr(PETSCII_KEY_HELP);
 
-  X16_KEY_PAGEUP	      = chr(PETSCII_KEY_PAGEUP);
-  X16_KEY_PAGEDOWN	      = chr(PETSCII_KEY_PAGEDOWN);
+  X16_KEY_PAGEUP	  = chr(PETSCII_KEY_PAGEUP);
+  X16_KEY_PAGEDOWN	  = chr(PETSCII_KEY_PAGEDOWN);
   X16_KEY_F1	          = chr(PETSCII_KEY_F1);
   X16_KEY_F2	          = chr(PETSCII_KEY_F2);
   X16_KEY_F3	          = chr(PETSCII_KEY_F3);
@@ -346,23 +346,23 @@ const
 {$ifdef neo}
 	NEO_CURSOR_LEFT 	= chr(1);
 	NEO_CURSOR_RIGHT	= chr(4);
-	NEO_INSERT			= chr(5);
+	NEO_INSERT		= chr(5);
 	NEO_PAGE_DOWN		= chr(6);
-	NEO_END				= chr(7);
+	NEO_END			= chr(7);
 	NEO_BACKSPACE		= chr(8);
-	NEO_HTAB			= chr(9);	// horizontal tab
+	NEO_HTAB		= chr(9);	// horizontal tab
 	NEO_LINE_FEED		= chr(10);
 	NEO_CLEAR_SCREEN	= chr(12);
-	NEO_ENTER			= chr(13);
-	NEO_PAGE_UP			= chr(18);
+	NEO_ENTER		= chr(13);
+	NEO_PAGE_UP		= chr(18);
 	NEO_CURSOR_DOWN 	= chr(19);
 	NEO_CURSOR_HOME		= chr(20);
-	NEO_VTAB 			= chr(22);	// vertical tab
+	NEO_VTAB 		= chr(22);	// vertical tab
 	NEO_CURSOR_UP		= chr(23);
 	NEO_CURSOR_REV		= chr(24);	// cursor reverse
-	NEO_DELETE			= chr(26);
-	NEO_ESCAPE			= chr(27);	// general break – e.g. exits BASIC
- 
+	NEO_DELETE		= chr(26);
+	NEO_ESCAPE		= chr(27);	// general break – e.g. exits BASIC
+
 // 	;--------------------------;
 //	; color control characters ;
 //	;--------------------------;
@@ -377,12 +377,12 @@ const
 	NEO_COLOR_WHITE			= chr($87);
 	NEO_COLOR_ALT_BLACK		= chr($88);
 	NEO_COLOR_DARK_GREY		= chr($89);
-	NEO_COLOR_DARK_GREEN	= chr($8A);
+	NEO_COLOR_DARK_GREEN		= chr($8A);
 	NEO_COLOR_ORANGE		= chr($8B);
-	NEO_COLOR_DARK_ORANGE	= chr($8C);
+	NEO_COLOR_DARK_ORANGE		= chr($8C);
 	NEO_COLOR_BROWN			= chr($8D);
 	NEO_COLOR_PINK			= chr($8E);
-	NEO_COLOR_LIGHT_GREY	= chr($8F);
+	NEO_COLOR_LIGHT_GREY		= chr($8F);
 
 {$endif}
 
@@ -399,20 +399,20 @@ const
 	PAL_COLOR3	= 7;
 	PAL_COLBAK	= 8;
 
-	COLOR_BLACK			= $00;
-	COLOR_WHITE			= $0e;
-	COLOR_RED			= $32;
-	COLOR_CYAN			= $96;
+	COLOR_BLACK		= $00;
+	COLOR_WHITE		= $0e;
+	COLOR_RED		= $32;
+	COLOR_CYAN		= $96;
 	COLOR_VIOLET		= $68;
-	COLOR_GREEN			= $c4;
-	COLOR_BLUE			= $74;
+	COLOR_GREEN		= $c4;
+	COLOR_BLUE		= $74;
 	COLOR_YELLOW		= $ee;
 	COLOR_ORANGE		= $28;
-	COLOR_BROWN			= $e4;
+	COLOR_BROWN		= $e4;
 	COLOR_LIGHTRED		= $3c;
-	COLOR_GRAY1			= $04;
-	COLOR_GRAY2			= $06;
-	COLOR_GRAY3			= $0a;
+	COLOR_GRAY1		= $04;
+	COLOR_GRAY2		= $06;
+	COLOR_GRAY3		= $0a;
 	COLOR_LIGHTGREEN	= $cc;
 	COLOR_LIGHTBLUE 	= $7c;
 {$endif}
@@ -433,10 +433,11 @@ var
 	HPalette: array [0..8] of byte absolute $d012;
 {$endif}
 
-{$ifndef raw}
 var
 	DateSeparator: Char = '-';
 
+{$ifndef raw}
+var
 	FileMode: byte = fmOpenReadWrite;
 
 	GraphMode: byte;		(* @var current screen mode *)
@@ -569,6 +570,7 @@ var	ScreenWidth: smallint = 80;	(* @var current screen width *)
 	function StringOfChar(c: Char; l: byte): ^string; assembler;
 	function Sqr(x: Real): Real; overload;
 	function Sqr(x: Single): Single; overload;
+	function Sqr(x: float16): float16; overload;
 	function Sqr(x: integer): integer; overload;
 	function Sqrt(x: ShortReal): ShortReal; overload;
 	function Sqrt(x: Real): Real; overload;
@@ -843,6 +845,22 @@ begin
 end;
 
 
+function Sqr(x: float16): float16; overload;
+(*
+@description:
+Sqr returns the square of its argument X
+
+@param: x - float16
+
+@returns: float16
+*)
+begin
+
+ Result := x*x;
+
+end;
+
+
 function Sqr(x: integer): integer; overload;
 (*
 @description:
@@ -927,6 +945,7 @@ Sqrt returns the square root of its argument X, which must be positive
 *)
 var sp: ^real;
     c: cardinal;
+
 begin
 	Result:=0.0;
 
@@ -954,6 +973,17 @@ begin
 
 	Result:=(Result+x/Result); //* 0.5;
 
+	asm
+	 lda Result+3
+	 asl @
+
+	 ror Result+3
+	 ror Result+2
+	 ror Result+1
+	 ror Result
+	end;
+
+	Result:=(Result+x/Result); //* 0.5;
 
 	asm
 	 lda Result+3
@@ -2991,7 +3021,7 @@ initialization
 
 asm
 	.ifdef @CmdLine
-	
+
 	ldx #$0F
 	mva:rpl $340,x IOCB@COPY,x-
 	rts
@@ -3000,7 +3030,7 @@ IOCB@COPY	:16 brk
 	eif
 
 end;
-		
+
 {$endif}
 
 end.
