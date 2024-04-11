@@ -5996,7 +5996,7 @@ begin
 
 	AllocElementType := Ident[IdentIndex].AllocElementType;
 
-//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod );
+//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',VarPass );
 
 	if rec then begin							// record.array[]
 
@@ -6017,62 +6017,26 @@ begin
 	end else
 
 	if (Ident[IdentIndex].PassMethod = VARPASSING) or (NumAllocElements * DataSize[AllocElementType] > 256) or (NumAllocElements in [0,1]) then begin
-{
-	 if (Ident[IdentIndex].AllocElementType in Pointers) then begin
 
- 	  asm65(#9'lda ' + svar);
- 	  asm65(#9'add :STACKORIGIN,x');
-	  asm65(#9'sta :bp2');
-	  asm65(#9'lda ' + svar + '+1');
-	  asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
-	  asm65(#9'sta :bp2+1');
-	  asm65(#9'ldy #$00');
-	  asm65(#9'lda (:bp2),y');
- 	  asm65(#9'sta :STACKORIGIN,x');
-	  asm65(#9'iny');
-	  asm65(#9'lda (:bp2),y');
- 	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
 
-	 end else begin
-}
  	  asm65(#9'lda ' + svar);
  	  asm65(#9'add :STACKORIGIN,x');
 	  asm65(#9'sta :STACKORIGIN,x');
 	  asm65(#9'lda ' + svar + '+1');
 	  asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
 	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-//	 end;
 
 	end else begin
 
 //	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
-{
-         if (Ident[IdentIndex].AllocElementType in Pointers) then begin
 
-	  asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
-	  asm65(#9'add :STACKORIGIN,x');
-	  asm65(#9'sta :bp2');
-	  asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
-	  asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
-	  asm65(#9'sta :bp2+1');
-	  asm65(#9'ldy #$00');
-	  asm65(#9'lda (:bp2),y');
- 	  asm65(#9'sta :STACKORIGIN,x');
-	  asm65(#9'iny');
-	  asm65(#9'lda (:bp2),y');
- 	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-	 end else begin
-}
 	  asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
 	  asm65(#9'add :STACKORIGIN,x');
 	  asm65(#9'sta :STACKORIGIN,x');
 	  asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
 	  asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
 	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-//	 end;
 
 	end;
 
@@ -6545,6 +6509,26 @@ begin
        if (Ident[IdentIndex].Param[NumActualParams].PassMethod = VARPASSING) then begin
 
 	i := CompileAddress(i + 1, ActualParamType, AllocElementType, true);
+
+
+//	writeln(Ident[IdentIndex].Param[NumActualParams].Name,',',Ident[IdentIndex].Param[NumActualParams].DataType  ,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements and $FFFF,'/',Ident[IdentIndex].Param[NumActualParams].NumAllocElements shr 16,' | ',ActualParamType,',', AllocElementType);
+
+	if (Ident[IdentIndex].Param[NumActualParams].DataType <> UNTYPETOK) and (ActualParamType = POINTERTOK) and (AllocElementType in [POINTERTOK, STRINGPOINTERTOK, PCHARTOK]) then begin
+
+ 	  asm65(#9'lda :STACKORIGIN,x');
+	  asm65(#9'sta :bp2');
+ 	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	  asm65(#9'sta :bp2+1');
+
+	  asm65(#9'ldy #$00');
+	  asm65(#9'lda (:bp2),y');
+ 	  asm65(#9'sta :STACKORIGIN,x');
+	  asm65(#9'iny');
+	  asm65(#9'lda (:bp2),y');
+ 	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+	end;
+
 
 	if Tok[i].Kind = IDENTTOK then
 	 IdentTemp := GetIdent(Tok[i].Name^)
