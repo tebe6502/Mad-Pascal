@@ -175,7 +175,7 @@ uses
 	Windows,
 {$ENDIF}
 
-	Common, Messages, Scanner, Parser, Optimize, Diagnostic;
+	Common, Messages, Scanner, Parser, Optimize, Diagnostic, MathEvaluate;
 
 
 function Tab2Space(a: string; spc: byte = 8): string;
@@ -8406,9 +8406,13 @@ case Tok[i].Kind of
 	    IdentTemp := GetIdentProc( Ident[IdentIndex].Name, IdentIndex, Param, j);
 
 	    if IdentTemp = 0 then
-	     if Ident[IdentIndex].isOverload then
+	     if Ident[IdentIndex].isOverload then begin
+
+	      if Ident[IdentIndex].NumParams <> j then
+		iError(i, WrongNumParameters, IdentIndex);
+
 	      iError(i, CantDetermine, IdentIndex)
-	     else
+	     end else
               iError(i, WrongNumParameters, IdentIndex);
 
 	    IdentIndex := IdentTemp;
@@ -11042,9 +11046,13 @@ case Tok[i].Kind of
 	    IdentTemp := GetIdentProc(Ident[IdentIndex].Name, IdentIndex, Param, j);
 
 	    if IdentTemp = 0 then
-	     if Ident[IdentIndex].isOverload then
-	      iError(i, CantDetermine, IdentIndex)
-	     else
+	     if Ident[IdentIndex].isOverload then begin
+
+	      if Ident[IdentIndex].NumParams <> j then
+		iError(i, WrongNumParameters, IdentIndex);
+
+	      iError(i, CantDetermine, IdentIndex);
+	     end else
               iError(i, WrongNumParameters, IdentIndex);
 
 	    IdentIndex := IdentTemp;
@@ -13840,7 +13848,9 @@ var ActualParamType, ch: byte;
     NumActualParams: cardinal;
     ConstVal: Int64;
 
+
 // ----------------------------------------------------------------------------
+
 
 procedure SaveDataSegment(DataType: Byte);
 begin
@@ -13860,10 +13870,13 @@ end;
 
 // ----------------------------------------------------------------------------
 
-procedure SaveData;
+
+procedure SaveData(compile: Boolean = true);
 begin
 
-  i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
+   if compile then
+     i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
+
 
   if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
 
@@ -13873,7 +13886,7 @@ begin
     ch := Tok[i].Value;
     DefineStaticString(i, chr(ch));
 
-    ConstVal:=Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
+    ConstVal := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
     Tok[i].Value := ch;
 
     ActualParamType := STRINGPOINTERTOK;
@@ -13919,7 +13932,14 @@ begin
 
   end;
 
+  inc(NumActualParams);
+
 end;
+
+
+// ----------------------------------------------------------------------------
+
+{$i include/doevaluate.inc}
 
 // ----------------------------------------------------------------------------
 
@@ -13949,11 +13969,20 @@ begin
   NumActualParams := 0;
   NumAllocElements := 0;
 
+
+  if Tok[i + 1].Kind = CBRACKETTOK then
+
+   inc(i)
+
+  else
   repeat
 
-  inc(NumActualParams);
+//  inc(NumActualParams);
 
-  SaveData;
+  if Tok[i + 1].Kind = EVALTOK then
+   doEvaluate
+  else
+   SaveData;
 
   inc(i);
 
@@ -14662,7 +14691,6 @@ while Tok[i].Kind in
   UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF, LOOPUNROLLTOK, NOLOOPUNROLLTOK,
   PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
   begin
-
 
   if Tok[i].Kind = LINKTOK then begin
 

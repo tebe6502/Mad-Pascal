@@ -10,6 +10,14 @@ interface
 
 	procedure TokenizeMacro(a: string; Line, Spaces: integer);
 
+	function get_digit(var i:integer; var a:string): string;
+
+	function get_label(var i:integer; var a:string; up: Boolean = true): string;
+
+	function get_string(var i:integer; var a:string; up: Boolean = true): string;
+
+	procedure omin_spacje (var i:integer; var a:string);
+
 // ----------------------------------------------------------------------------
 
 implementation
@@ -152,7 +160,7 @@ var len: integer;
 begin
  Result:='';
 
- omin_spacje(i,a);
+ omin_spacje(i, a);
 
  if a[i] = '%' then begin
 
@@ -165,19 +173,17 @@ begin
 
  end else begin
 
-  gchr:=a[i]; len:=length(a);
+  gchr:=a[i];
+  len:=length(a);
 
-  while i<=len do begin
+  while i <= len do begin
    inc(i);	 // omijamy pierwszy znak ' lub "
 
    znak:=a[i];
 
    if znak=gchr then begin inc(i); Break end;
-{    inc(i);
-    if a[i]=gchr then znak:=gchr;
-   end;}
 
-   Result:=Result+znak;
+   Result := Result + znak;
   end;
 
  end;
@@ -681,6 +687,21 @@ var
 
      end else
 
+      if (cmd = 'EVAL') then begin
+
+       if  d.LastIndexOf('}') < 0 then Error(NumTok, 'Syntax error');
+
+       s := copy(d, i, d.LastIndexOf('}') - i + 1);
+       s := TrimRight(s);
+
+       if s[length(s)] <> '"' then Error(NumTok, 'Missing ''"''');
+
+       AddToken(EVALTOK, UnitIndex, Line, 1, 0);
+
+       DefineFilename(NumTok, s);
+
+      end else
+
       if (cmd = 'BIN2CSV') then begin
 
        s := get_string(i, d, false);
@@ -810,14 +831,7 @@ var
        s := FindFile(s, 'link object');
 
        DefineFilename(NumTok, s);
-{
-       v := High(linkObj);
-       linkObj[v] := s;
 
-       Tok[NumTok].Value := v;
-
-       SetLength(linkObj, v+2);
-}
        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        //dec(NumTok);
