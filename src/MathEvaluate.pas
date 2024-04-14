@@ -1,4 +1,4 @@
-program evaluate;
+unit MathEvaluate;
 
 (* source: CLSN PASCAL              *)
 (*				    *)
@@ -10,27 +10,32 @@ program evaluate;
 (* Mutual recursion was necessary   *)
 (* so the FORWARD clause was used   *)
 
-uses crt, math;
+interface
+
+
+	function evaluate(const a: string; i: integer): real;
+
+
+implementation
+
+uses math, common, parser, scanner, messages;
 
 type
-  sop=string[8];
+  sop=string[10];
 
 var
     s: string;
-  cix: byte;
+  cix: integer;
 
-  fop: array[0..13] of sop = (' ','PI','SQRT','SQR','ARCTAN','COS','SIN','TAN','RND','EXP','LN','ABS','INT','POW');
+  TokenIndex: integer;
+
+
+// if the names of the functions are similar then their longer versions should be placed earlier
+// arctan2 .. arctan
+  fop: array[0..14] of sop = (' ','PI','RND','SQRT','SQR','ARCTAN2','COS','SIN','TAN','EXP','LN','ABS','INT','POWER','ARCTAN');
+
   top: array[0..7] of sop=(' ','*','/','DIV','MOD','AND','SHL','SHR');
   seop: array[0..4] of sop=(' ','+','-','OR','XOR');
-
-
-procedure error(s: string);
-begin
-  writeln(s);
-
-  repeat until keypressed;
-  halt;
-end;
 
 
 function simple_expression: real; forward;
@@ -47,15 +52,17 @@ function constant: real;
 var
      n: string;
     v1: real;
-    p: byte;
+    p: word;
   pflg: boolean;
+
+  IdentTemp: integer;
 
 begin
   n:=''; pflg:=false;
 
   skip_blanks;
 
-  while ((s[cix]>='0') and (s[cix]<='9')) or ((s[cix]='.') and (not pflg)) do
+  while (s[cix] in ['0'..'9']) or ((s[cix]='.') and (not pflg)) do
     begin
       if (s[cix]='.') then
         pflg:=true;
@@ -65,8 +72,18 @@ begin
 
   val(n,v1,p);
 
-  if (p<>0) then
-    error('Invalid constant');
+  if (p<>0) then begin
+
+    n:=get_label(cix, s, true);
+
+    IdentTemp:=GetIdent(n);
+
+    if IdentTemp > 0 then
+     v1 := Ident[IdentTemp].Value
+    else
+     Error(TokenIndex, 'Invalid constant "' + n + '"');
+
+  end;
 
 
   constant:=v1;
@@ -88,6 +105,15 @@ var
        ch: char;
     op, i: byte;
 
+
+ procedure Wrong_number;
+ begin
+
+   Error(TokenIndex, 'Wrong number of parameters specified for call to "' + fop[op] + '"');
+
+ end;
+
+
 begin
   skip_blanks;
 
@@ -98,54 +124,65 @@ begin
       if (copy(s,cix,length(fop[i])) = fop[i]) then
         op:=i;
 
-  if (op>0) then
+  if (op > 0) then
     begin
       cix:=cix+length(fop[op]);
 
       skip_blanks;
 
-      if (op>1) then
+      if (op in [1,2]) and (s[cix] = '(') then
+        Wrong_number;
+
+
+      if (op > 2) then						// 0:' ', 1:'PI', 2:'RND'
         begin
           if (s[cix] <> '(') then
-            error('Error in function syntax');
+            Wrong_number;
 
           v1:=factor;
-	  
-	  if (op=13) and (s[cix] <> ',') then
-	     error('Wrong number of parameters');
-	  
+
+	  if (op in [5,13]) and (s[cix] <> ',') then		// 5:'ARCTAN2', 13:'POWER'
+	    Wrong_number;
+
 	  if s[cix] = ',' then begin
+
+	   if not (op in [5,13]) then				// 5:'ARCTAN2', 13:'POWER'
+	     Wrong_number;
+
 	   inc(cix);
-	   
+
 	   skip_blanks;
-	   
+
 	   v2:=factor;
-	   
-	   if s[cix] <> ')' then 
-	     error('Wrong number of parameters');
-	     
-	   inc(cix);  
-	   
+
+	   if s[cix] <> ')' then
+	     Wrong_number;
+
+	   inc(cix);
+
 	  end;
-	  
+
         end;
 
 
       case op of
         1: v1:=pi;
-        2: v1:=sqrt(v1);
-        3: v1:=sqr(v1);
-        4: v1:=arctan(v1);
-        5: v1:=cos(v1);
-        6: v1:=sin(v1);
-        7: v1:=sin(v1)/cos(v1);
-	8: v1:=Random;
+	2: v1:=Random;
+        3: v1:=sqrt(v1);
+        4: v1:=sqr(v1);
+        5: v1:=arctan2(v1,v2);
+        6: v1:=cos(v1);
+        7: v1:=sin(v1);
+        8: v1:=sin(v1)/cos(v1);
         9: v1:=exp(v1);
        10: v1:=ln(v1);
        11: v1:=abs(v1);
        12: v1:=int(v1);
        13: v1:=power(v1,v2);
+       14: v1:=arctan(v1);
       end;
+
+
     end
   else
     if (s[cix]='(') then
@@ -155,13 +192,13 @@ begin
         v1:=simple_expression;
 
         skip_blanks;
-	
+
 	if (s[cix] <> ',') then
 
         if (s[cix]=')') then
           inc(cix)
         else
-          error('Parenthesis Mismatch');
+          Error(TokenIndex, 'Parenthesis Mismatch');
       end
     else
       if (s[cix] = '-') or (s[cix] = '+') or (copy(s,cix,3)='NOT') then
@@ -268,45 +305,27 @@ begin
 end;
 
 
-function evaluate: real;
-var
-  k: byte;
-
+function evaluate(const a: string; i: integer): real;
+var k: word;
 begin
-  cix:=1;
 
-  for k:=1 to length(s) do
-    s[k]:=upcase(s[k]);
+  Result := 0;
 
-  evaluate:=simple_expression;
+  TokenIndex := i;
+
+  if a <> '' then begin
+
+    cix:=1;
+
+    s := a;
+    for k:=1 to length(s) do
+     s[k]:=upcase(s[k]);
+
+    evaluate := simple_expression;
+
+  end;
+
 end;
 
 
-procedure start;
-var
-  v: real;
-
-begin
-  repeat
-    writeln('Enter an expression');
-    write('>');
-    readln(s);
-
-    if (s<>'') then
-      begin
-        v:=evaluate;
-
-        writeln(s,'=',v:0:8);
-        writeln;
-
-      end;
-
-  until (s='');
-end;
-
-
-begin
-  clrscr;
-
-  start;
 end.

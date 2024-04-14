@@ -77,7 +77,7 @@ begin
 		     else
    	   		Result := 'Incompatible types: got "'+GetEnumName(SrcType)+'" expected "'+GetEnumName(DstType)+ '"';
 
- WrongNumParameters: Result := 'Wrong number of parameters specified for call to ' + Ident[IdentIndex].Name;
+ WrongNumParameters: Result := 'Wrong number of parameters specified for call to "' + Ident[IdentIndex].Name+'"';
 
  CantAdrConstantExp: Result := 'Can''t take the address of constant expressions';
 
@@ -344,7 +344,10 @@ begin
 
     a := a +' ''' + Ident[IdentIndex].Name + '''' + ' not used';
 
-    newMsg(msgNote, a);
+    if pos('@FN', Ident[IdentIndex].Name) = 1 then
+
+    else
+     newMsg(msgNote, a);
 
    end;
 
