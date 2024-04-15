@@ -879,6 +879,21 @@ procedure NeoReadMouse;
 * scrollwheelstate in neoMouseWheel as uint8 which changes according to scrolls.  
 *
 *)
+function NeoIsMousePresent:boolean;
+(*
+* @description:
+* returns true if mouse is plugged and detected.
+*
+* @returns: (boolean) - true if mouse available
+*)
+
+procedure NeoSelectCursor(shape:byte);
+(*
+* @description:
+* Select a mouse cursor from predefined shapes.
+*
+* @param: shape (byte) - shape number
+*)
 
 function NeoBlitterBusy:boolean;
 (*
@@ -1526,6 +1541,17 @@ end;
 procedure NeoReadMouse;
 begin
     NeoSendMessage(11,3);
+end;
+
+function NeoIsMousePresent:boolean;
+begin
+    result := NeoSendMessage(11,4) <> 0;
+end;
+
+procedure NeoSelectCursor(shape:byte);
+begin
+    NeoMessage.params[0]:=shape;
+    NeoSendMessage(11,4);
 end;
 
 //////////////////////////////////
