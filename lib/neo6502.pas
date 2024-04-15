@@ -838,6 +838,29 @@ procedure NeoShowMouse(show:byte);
 *
 * @param: show (byte) - 0 hide / 1 show
 *)
+procedure NeoReadMouse;
+(*
+* @description:
+* Returns the mouse position (screen pixel, unsigned) in neoMouseX, neoMouseY   
+* buttonstate in neoMouseButton (button 1 is 0x1, 2 0x2 etc., set when pressed),   
+* scrollwheelstate in neoMouseWheel as uint8 which changes according to scrolls.  
+*
+*)
+function NeoIsMousePresent:boolean;
+(*
+* @description:
+* returns true if mouse is plugged and detected.
+*
+* @returns: (boolean) - true if mouse available
+*)
+
+procedure NeoSelectCursor(shape:byte);
+(*
+* @description:
+* Select a mouse cursor from predefined shapes.
+*
+* @param: shape (byte) - shape number
+*)
 
 function NeoBlitterBusy:boolean;
 (*
@@ -1444,6 +1467,22 @@ procedure NeoShowMouse(show:byte);
 begin
     NeoMessage.params[0]:=show;
     NeoSendMessage(11,2);
+end;
+
+procedure NeoReadMouse;
+begin
+    NeoSendMessage(11,3);
+end;
+
+function NeoIsMousePresent:boolean;
+begin
+    result := NeoSendMessage(11,4) <> 0;
+end;
+
+procedure NeoSelectCursor(shape:byte);
+begin
+    NeoMessage.params[0]:=shape;
+    NeoSendMessage(11,4);
 end;
 
 //////////////////////////////////
