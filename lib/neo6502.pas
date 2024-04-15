@@ -1551,7 +1551,7 @@ end;
 procedure NeoSelectCursor(shape:byte);
 begin
     NeoMessage.params[0]:=shape;
-    NeoSendMessage(11,4);
+    NeoSendMessage(11,5);
 end;
 
 //////////////////////////////////
