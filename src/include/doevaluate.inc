@@ -23,7 +23,7 @@ var s: string;
      end;
 
 
-     tmp := get_label(k, s, true);
+     tmp := get_constant(k, s);
      if tmp <> '' then begin
 
       IdentTemp:=GetIdent(tmp);
@@ -53,7 +53,7 @@ begin
    _s := s;
 
    if _0 >= 0 then
-    while _s.IndexOf(':1') > 0 do begin
+    while _s.IndexOf(':1') >= 0 do begin
      p:=_s.IndexOf(':1');
 
      delete(_s, p+1, 2);
@@ -61,7 +61,7 @@ begin
     end;
 
    if _1 >= 0 then
-    while _s.IndexOf(':2') > 0 do begin
+    while _s.IndexOf(':2') >= 0 do begin
      p:=_s.IndexOf(':2');
 
      delete(_s, p+1, 2);
