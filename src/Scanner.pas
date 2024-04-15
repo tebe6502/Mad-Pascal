@@ -266,15 +266,17 @@ begin
        (AnsiUpperCase(res.resType) = 'EXTMEM') or
        (AnsiUpperCase(res.resType) = 'XBMP') or
        (AnsiUpperCase(res.resType) = 'SAPR') or
-       (AnsiUpperCase(res.resType) = 'SAPRPLAY')
+       (AnsiUpperCase(res.resType) = 'SAPRPLAY') or
+       (AnsiUpperCase(res.resType) = 'PP') or
+       (AnsiUpperCase(res.resType) = 'LIBRARY')
       then
 
       else
-        Error(NumTok, 'Undefined resource type: Type = UNKNOWN, Name = '''+res.resName+'''');
+        Error(NumTok, 'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + '''');
 
 
      if (res.resFile <> '') and not(FindFile(res.resFile)) then
-       Error(NumTok, 'Resource file not found: Type = '+res.resType+', Name = '''+res.resName+'''');
+       Error(NumTok, 'Resource file not found: Type = ' + res.resType + ', Name = ''' + res.resName + '''');
 
 
      for j := 1 to MAXPARAMS do begin
@@ -293,7 +295,7 @@ begin
 
      for j := High(resArray)-1 downto 0 do
       if resArray[j].resName = res.resName then
-       Error(NumTok, 'Duplicate resource: Type = '+res.resType+', Name = '''+res.resName+'''');
+       Error(NumTok, 'Duplicate resource: Type = ' + res.resType + ', Name = ''' + res.resName + '''');
 
      j:=High(resArray);
      resArray[j] := res;

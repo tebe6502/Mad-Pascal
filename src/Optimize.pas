@@ -3316,6 +3316,23 @@ begin				// OptimizeASM
       if arg0 = '@REAL_FRAC' then		// @REAL_FRAC		accepted
       else
 
+      if arg0 = '@FMUL' then			// @FMUL		accepted
+      else
+      if arg0 = '@FDIV' then			// @FDIV		accepted
+      else
+      if arg0 = '@FADD' then			// @FADD		accepted
+      else
+      if arg0 = '@FSUB' then			// @FSUB		accepted
+      else
+      if arg0 = '@I2F' then			// @I2F			accepted
+      else
+      if arg0 = '@F2I' then			// @F2I			accepted
+      else
+      if arg0 = '@FFRAC' then			// @FFRAC		accepted
+      else
+      if arg0 = '@FROUND' then			// @FROUND		accepted
+      else
+
       if arg0 = '@F16_F2A' then			// @F16_F2A		accepted
       else
       if arg0 = '@F16_ADD' then			// @F16_ADD		accepted

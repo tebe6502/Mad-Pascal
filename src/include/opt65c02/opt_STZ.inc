@@ -8,6 +8,9 @@ begin
 // ===				      STZ
 // -----------------------------------------------------------------------------
 
+  if listing[i+1] <> #9'sta @PARAM?' then begin
+
+
     if lda_im_0(i) and										// lda #$00			; 0
        sta_a(i+1) and (sta_stack(i+1) = false) and (iy(i+1) = false) and			// sta				; 1
        (lda_a(i+2) or jsr(i+2)) then								// lda|jsr			; 2
@@ -28,6 +31,9 @@ begin
 
 	exit(false);
      end;
+
+
+   end;
 
 
 end;		// function

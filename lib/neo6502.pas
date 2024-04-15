@@ -112,6 +112,10 @@ var
     FI_offset: cardinal absolute N6502MSG_ADDRESS+5; // @nodoc  
     FI_address: word absolute N6502MSG_ADDRESS+5; // @nodoc  
     FI_length: word absolute N6502MSG_ADDRESS+7; // @nodoc  
+    neoMouseX: word absolute N6502MSG_ADDRESS+4; // @nodoc  
+    neoMouseY: word absolute N6502MSG_ADDRESS+6; // @nodoc  
+    neoMouseButtons: byte absolute N6502MSG_ADDRESS+8; // @nodoc  
+    neoMouseWheel: byte absolute N6502MSG_ADDRESS+9; // @nodoc  
 
 function NeoSendMessage(group,func:byte):byte;
 (*
@@ -123,7 +127,7 @@ function NeoSendMessage(group,func:byte):byte;
 * 
 * @returns: (byte) - Parameter0 is returned directly. All remaining returned params are avaliable via NeoMessage record
 *)
-procedure NeoWaitMessage;assembler;
+procedure NeoWaitMessage;inline;assembler;
 (*
 * @description:
 * Waits until Message from API is returned. 
@@ -563,6 +567,15 @@ procedure NeoDrawPixel(x0,y0:word);
 * @param: x0 (word) - x coordinate
 * @param: y0 (word) - y coordinate
 *)
+procedure NeoWritePixel(x0,y0:word;c:byte);
+(*
+* @description:
+* Draws single pixel.
+*
+* @param: x0 (word) - x coordinate
+* @param: y0 (word) - y coordinate
+* @param: c (byte) - color index
+*)
 procedure NeoDrawString(x0,y0:word;var s:string);
 (*
 * @description:
@@ -733,16 +746,38 @@ procedure GetSpriteXY(s0:byte;var x:word;var y:word);
 *
 * @returns: (byte) - not zero if collided
 *)
-function NeoGetJoy(player:byte):byte;
+function NeoGetJoy:byte;overload;
 (*
 * @description:
-* Returns controller status.
+* Returns base controller status.
+*
+* Bits are (from zero) Left, Right, Up, Down, A, B. Active state is 1.
+*
+* @returns: (byte) - controller state
+*)
+function NeoGetJoyCount:byte;
+(*
+* @description:
+* returns the number of game controllers plugged in to the USB
+* This does not include the keyboard based controller, only physical controller hardware.
+*
+* @returns: (byte) - controllers number
+*)
+function NeoGetJoy(player:byte):byte;overload;
+(*
+* @description:
+* Returns specific controller status. Controller 0 is the keyboard
+* controller, Controllers 1 upwards are those physical USB devices.
+* This returns a 32 bit value in Params[0..3] which currently is compatible
+* with function 1, but allows for expansion.
+*
 * Bits are (from zero) Left, Right, Up, Down, A, B. Active state is 1.
 * 
 * @param: player (byte) - player number (must be 1 for now)
 *
 * @returns: (byte) - controller state
 *)
+
 procedure NeoMute;overload;
 (*
 * @description:
@@ -821,8 +856,7 @@ procedure TurtleHome;
 * @description:
 * Move the turtle to the home position (pointing up in the centre).
 *)
-
-procedure NeoSetMouseXY(x,y:word);
+procedure NeoSetCursorXY(x,y:word);
 (*
 * @description:
 * Positions the display cursor at x,y.
@@ -830,8 +864,7 @@ procedure NeoSetMouseXY(x,y:word);
 * @param: x (word) - x coordinate
 * @param: y (word) - y coordinate
 *)
-
-procedure NeoShowMouse(show:byte);
+procedure NeoShowCursor(show:byte);
 (*
 * @description:
 * Shows or hides the mouse cursor.
@@ -885,9 +918,27 @@ procedure NeoBlitterCopy(src:cardinal;dst:cardinal;len:word);
 *
 *)
 
+
+procedure NeoInitEditor;
+(*
+* @description:
+* Initialises the editor
+*
+*)
+
+procedure NeoReenterEditor;
+(*
+* @description:
+* Re-enters the system editor. Returns the function required for call out,
+* the editors sort of ’call backs’ - see editor specification
+*
+*)
+
+
+
 implementation
 
-procedure NeoWaitMessage;assembler;
+procedure NeoWaitMessage;inline;assembler;
 asm
    @WaitMessage 
 end;
@@ -897,7 +948,6 @@ begin
     NeoWaitMessage;
     NeoMessage.func:=func;
     NeoMessage.group:=group;
-    repeat until NeoMessage.group=0;
     result := NeoMessage.params[0];
 end;
 
@@ -1225,6 +1275,14 @@ begin
     NeoSendMessage(5,5);
 end;
 
+procedure NeoWritePixel(x0,y0:word;c:byte);
+begin
+    wordParams[0]:=x0;
+    wordParams[1]:=y0;
+    NeoMessage.params[4]:=c;
+    NeoSendMessage(5,39);
+end;
+
 procedure NeoDrawString(x0,y0:word;var s:string);
 begin
     wordParams[0]:=x0;
@@ -1370,9 +1428,20 @@ end;
 ////////////////////////////////////////     7 - CONTROLLERS
 //////////////////////////////////
 
-function NeoGetJoy(player:byte):byte;
+function NeoGetJoy:byte;overload;
 begin
-    result := NeoSendMessage(7,player);
+    result := NeoSendMessage(7,1);
+end;
+
+function NeoGetJoyCount:byte;
+begin
+    result := NeoSendMessage(7,2);
+end;
+
+function NeoGetJoy(player:byte):byte;overload;
+begin
+    NeoMessage.params[0] := player;
+    result := NeoSendMessage(7,3);
 end;
 
 //////////////////////////////////
@@ -1456,14 +1525,14 @@ end;
 ////////////////////////////////////////     11 - MOUSE
 //////////////////////////////////
 
-procedure NeoSetMouseXY(x,y:word);
+procedure NeoSetCursorXY(x,y:word);
 begin
     wordParams[0]:=x;
     wordParams[1]:=y;
     NeoSendMessage(11,1);
 end;
 
-procedure NeoShowMouse(show:byte);
+procedure NeoShowCursor(show:byte);
 begin
     NeoMessage.params[0]:=show;
     NeoSendMessage(11,2);
@@ -1502,6 +1571,20 @@ begin
     wordParams[2] := dst and $ffff;
     wordParams[3] := len;
     NeoSendMessage(12,2);
+end;
+
+//////////////////////////////////
+////////////////////////////////////////     12 - Editor Functions
+//////////////////////////////////
+
+procedure NeoInitEditor;
+begin
+    NeoSendMessage(13,1);
+end;
+
+procedure NeoReenterEditor;
+begin
+    NeoSendMessage(13,2);
 end;
 
 end.

@@ -1068,12 +1068,15 @@ begin
  Q:=@vertices;
 
  for i:=amount-2 downto 0 do begin
-  Line(P[0], P[1], P[2], P[3]);
+  //Line(P[0], P[1], P[2], P[3]);
+  
+  ClipLine(P[0], P[1], P[2], P[3]);
 
   inc(P, 2);
  end;
 
- Line(Q[0], Q[1], P[0], P[1]);
+ //Line(Q[0], Q[1], P[0], P[1]);
+ ClipLine(Q[0], Q[1], P[0], P[1]); 
 
 end;
 

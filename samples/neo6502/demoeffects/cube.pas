@@ -7,9 +7,9 @@ uses crt, neo6502;
 //------------------------------------------------------------------------------
 
 const
-    sz                  : byte = 16;
-    cx                  : byte = 79;
-    cy                  : byte = 50;
+    sz                  : byte = 50;
+    cx                  : byte = 160;
+    cy                  : byte = 120;
 
 //------------------------------------------------------------------------------
 
@@ -27,14 +27,14 @@ var
 
 procedure init_points;
 begin
-    pts[0,0] := -2; pts[0,1] := -2; pts[0,2] := -2;
-    pts[1,0] :=  2; pts[1,1] := -2; pts[1,2] := -2;
-    pts[2,0] :=  2; pts[2,1] :=  2; pts[2,2] := -2;
-    pts[3,0] := -2; pts[3,1] :=  2; pts[3,2] := -2;
-    pts[4,0] := -2; pts[4,1] := -2; pts[4,2] :=  2;
-    pts[5,0] :=  2; pts[5,1] := -2; pts[5,2] :=  2;
-    pts[6,0] :=  2; pts[6,1] :=  2; pts[6,2] :=  2;
-    pts[7,0] := -2; pts[7,1] :=  2; pts[7,2] :=  2;
+    pts[0,0] := -1; pts[0,1] := -1; pts[0,2] := -1;
+    pts[1,0] :=  1; pts[1,1] := -1; pts[1,2] := -1;
+    pts[2,0] :=  1; pts[2,1] :=  1; pts[2,2] := -1;
+    pts[3,0] := -1; pts[3,1] :=  1; pts[3,2] := -1;
+    pts[4,0] := -1; pts[4,1] := -1; pts[4,2] :=  1;
+    pts[5,0] :=  1; pts[5,1] := -1; pts[5,2] :=  1;
+    pts[6,0] :=  1; pts[6,1] :=  1; pts[6,2] :=  1;
+    pts[7,0] := -1; pts[7,1] :=  1; pts[7,2] :=  1;
 end;
 
 procedure rotate_points;
@@ -64,14 +64,12 @@ begin
     Y1 := Trunc(ryp[0,1] * sz + cy);
     X2 := Trunc(ryp[1,0] * sz + cx);
     Y2 := Trunc(ryp[1,1] * sz + cy);
-
     NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[1,0] * sz + cx);
     Y1 := Trunc(ryp[1,1] * sz + cy);
     X2 := Trunc(ryp[2,0] * sz + cx);
     Y2 := Trunc(ryp[2,1] * sz + cy);
-
     NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(ryp[2,0] * sz + cx);

@@ -573,11 +573,11 @@ var
 
   start_time: QWord;
 
-  CODEORIGIN_BASE: integer = $2000;
+  CODEORIGIN_BASE: integer = -1;
 
-   DATA_Atari: integer = -1;
-  ZPAGE_Atari: integer = -1;
-  STACK_Atari: integer = -1;
+   DATA_BASE: integer = -1;
+  ZPAGE_BASE: integer = -1;
+  STACK_BASE: integer = -1;
 
   UnitNameIndex: Integer = 1;
 
