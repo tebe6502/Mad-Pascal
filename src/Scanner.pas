@@ -12,6 +12,8 @@ interface
 
 	function get_digit(var i:integer; var a:string): string;
 
+	function get_constant(var i:integer; var a:string): string;
+
 	function get_label(var i:integer; var a:string; up: Boolean = true): string;
 
 	function get_string(var i:integer; var a:string; up: Boolean = true): string;
@@ -107,6 +109,35 @@ begin
    while UpCase(a[i]) in AllowDigitChars do begin Result:=Result+UpCase(a[i]); inc(i) end;
 
   end;
+
+ end;
+
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+function get_constant(var i:integer; var a:string): string;
+(*----------------------------------------------------------------------------*)
+(*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'		      *)
+(*----------------------------------------------------------------------------*)
+begin
+
+ Result := '';
+
+ if a <> '' then begin
+
+  omin_spacje(i,a);
+
+  if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
+   while UpCase(a[i]) in AllowLabelChars do begin
+
+    Result := Result + UpCase(a[i]);
+
+    inc(i);
+   end;
 
  end;
 

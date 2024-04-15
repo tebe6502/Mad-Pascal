@@ -74,7 +74,7 @@ begin
 
   if (p<>0) then begin
 
-    n:=get_label(cix, s, true);
+    n:=get_constant(cix, s);
 
     IdentTemp:=GetIdent(n);
 
