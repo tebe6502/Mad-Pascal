@@ -13979,6 +13979,9 @@ begin
 
 //  inc(NumActualParams);
 
+  if Pass = CALLDETERMPASS then
+   inc(i)
+  else
   if Tok[i + 1].Kind = EVALTOK then
    doEvaluate
   else
