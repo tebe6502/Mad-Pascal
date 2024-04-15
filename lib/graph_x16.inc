@@ -107,7 +107,7 @@ asm
 	ldx MAIN.GRAPH.DRAW_FILL_COLOR
 	ldy color
 
-	jsr GRPAH_set_colors
+	jsr GRAPH_set_colors
 
 	ply
 	plx
