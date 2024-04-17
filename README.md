@@ -136,7 +136,7 @@ This is a text mode windowing library complete with window controls and modern g
 * [gr10](https://gitlab.com/bocianu/gr10)
 * [Old Mansion](https://gitlab.com/bocianu/oldmansion)
 * [Old Mansion X16](https://github.com/MADRAFi/OldMansion)
-* [Old Mansion C64](https://github.com/t-m/old_mansion_c64)
+* [Old Mansion C64](https://gitlab.com/t-m/old_mansion_c64)
 * [artur](https://gitlab.com/bocianu/artur)
 * [jcq](https://gitlab.com/bocianu/jcq)
 * [Fujinet udp shoutbox](https://gitlab.com/bocianu/fujinet-udp-shoutbox)
