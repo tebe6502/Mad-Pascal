@@ -7,3 +7,4 @@ makeMP.bat
 *.o
 *.ppu
 .vscode
+*.pyc
