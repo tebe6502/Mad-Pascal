@@ -7,11 +7,11 @@ http://atarionline.pl/forum/comments.php?DiscussionID=4825&page=1
 
 https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
 
-IDE WUDSN
+WUDSN IDE
 https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
 
 
-Mad-Pascal cross compiler for 6502 (Atari XE/XL) by Tomasz Biela, 2015-2023
+Mad-Pascal cross-compiler for MOS 6502 CPU (Atari 8-bit, C64, ... ) by Tomasz Biela, 2015-2024
 
 Contributors:
 
