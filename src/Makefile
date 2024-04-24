@@ -6,10 +6,18 @@ SRC = mp.pas \
   Optimize.pas \
   Parser.pas \
   Scanner.pas \
-  SplitString.pas
+  SplitString.pas \
+  include/*.inc \
+  include/opt6502/*.inc \
+  include/opt65c02/*.inc \
+  targets/*.inc
 
 BINDIR = ../bin
-BIN = $(BINDIR)/mp
+ifeq ($(OS),Windows_NT)
+  BIN = $(BINDIR)/mp.exe
+else
+  BIN = $(BINDIR)/mp
+endif
 
 $(BIN): $(SRC)
 	fpc -Mdelphi -v -O3 $< -o$(BIN)
