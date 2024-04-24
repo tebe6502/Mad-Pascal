@@ -1,8 +1,9 @@
 procedure Syntax(ExitCode: byte);
 begin
   (* Keep in sync with https://mads.atari8.info/doc/en/usage/ *)
+  WriteLn('');
   WriteLn('Syntax: mp <inputfile>.pas [options]');
-
+  WriteLn('');
   Writeln('-ipath:<folder>    Add the folder <folder> to the unit include path');
   Writeln('-define:<symbol>   Define the symbol <symbol>');
   Writeln('-cpu:<cpu>         Specify the CPU mode: 6502 (default), 65c02, 65816');
