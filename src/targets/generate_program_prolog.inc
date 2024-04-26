@@ -158,6 +158,12 @@ end;
 
  if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
 
+  if RCLIBRARY then begin
+    asm65;
+    asm65(#9'org MAIN.SYSTEM.__PORTB_BANKS+$40');
+    asm65(#9'icl ''atari\xmsproc.asm''');
+  end;
+
   asm65;
   asm65(#9'.ifdef MAIN.@DEFINES.BASICOFF');
   asm65(#9'org CODEORIGIN');
@@ -173,6 +179,10 @@ end;
   asm65(#9'.fi');
 
  end;
+
+
+ if (High(resArray) > 0) and (target.id = ___a8) and LIBRARY_USE then
+ asm65(#9'ert ''Resources in LIBRARY not allowed''');
 
 
  if (High(resArray) > 0) and (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
@@ -216,7 +226,7 @@ end;
   asm65(#9'org CODEORIGIN');
 
  end else begin
- 
+
   for header in target.header do
    if (header = 'END') then break else
     if header <> '' then asm65(#9'' + header) else asm65;
@@ -229,7 +239,7 @@ end;
    asm65(#9'org $' + IntToHex(target.codeorigin, 4));
    asm65(#9'jmp START');
    asm65;
-     
+
    CODEORIGIN_BASE := target.codeorigin + 3;
 
   end else if (target.id = ___neo) then begin
@@ -244,7 +254,7 @@ end;
    CODEORIGIN_BASE := target.codeorigin + 3;
 
   end;
-  
+
   asm65('CODEORIGIN');
 
  end;
@@ -285,6 +295,10 @@ end;
  asm65;
  asm65('START');
 
+
+ if LIBRARY_USE then asm65(#9'stx MAIN.@regX+1');
+
+ 
  asm65(#9'tsx');
  asm65(#9'stx MAIN.@halt+1');
  asm65;

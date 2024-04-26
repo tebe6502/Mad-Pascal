@@ -271,14 +271,19 @@ end;
 
 // #asm
 
-   if TemporaryBuf[0] = '#asm' then begin
+   if TemporaryBuf[0].IndexOf('#asm:') = 0 then begin
 
-    writeln(OutFile, AsmBlock[StrToInt(TemporaryBuf[1])]);
+    writeln(OutFile, AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )]);
 
     TemporaryBuf[0] := '~';
-    TemporaryBuf[1] := '~';
 
    end;
+
+
+// #lib:label
+
+   if TemporaryBuf[0].IndexOf('#lib:') = 0 then
+    TemporaryBuf[0] := #9'm@lib ' + copy(TemporaryBuf[0], 6, 256);
 
 
 // @PARAM?
@@ -1717,7 +1722,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('ldy #1', listing[i]) > 0) then begin
+if (pos('portb', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

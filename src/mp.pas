@@ -4101,7 +4101,7 @@ end;
 function CompilerTitle: string;
 begin
 
- Result := 'Mad Pascal Compiler version '+title+' ['+{$I %DATE%}+'] for 6502';
+ Result := 'Mad Pascal Compiler version '+title+' ['+{$I %DATE%}+'] for MOS 6502 CPU';
 
 end;
 
@@ -5784,6 +5784,13 @@ begin
 		   INTEGERTOK: ArrayIndexType := CARDINALTOK;
 		 end;
 
+		 if DataSize[ArrayIndexType] = 4 then begin	// remove oldest bytes
+	  	  asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+		  asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+	  	  asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+		  asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+		 end;
+
 		 if DataSize[ArrayIndexType] = 1 then begin
 		  ExpandParam(WORDTOK, ArrayIndexType);
 //		  ArrayIndexType := WORDTOK;
@@ -5848,6 +5855,13 @@ begin
 		   SHORTINTTOK: ArrayIndexType := BYTETOK;
 		   SMALLINTTOK: ArrayIndexType := WORDTOK;
 		    INTEGERTOK: ArrayIndexType := CARDINALTOK;
+		  end;
+
+		  if DataSize[ArrayIndexType] = 4 then begin	// remove oldest bytes
+	  	   asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+		   asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+	  	   asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+		   asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
 		  end;
 
 		  if DataSize[ArrayIndexType] = 1 then begin
@@ -6846,6 +6860,13 @@ begin
   svar := GetLocalName(IdentIndex);
 
 
+ if Ident[IdentIndex].isExternal and RCLIBRARY and (Ident[IdentIndex].isStdCall = false) then begin
+
+   asm65('#lib:' + svar);
+
+ end;
+
+
 if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
  for ParamIndex := 1 to NumActualParams do
@@ -6995,7 +7016,23 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
     asm65(#9'jsr :TMP');
 
   end else
-   asm65(#9'jsr ' + svar);				// GenerateCall
+   if Ident[IdentIndex].isExternal and RCLIBRARY and Ident[IdentIndex].isStdCall then begin
+
+    asm65(#9'ldy <' + svar + '.@INITLIBRARY');
+    asm65(#9'sty @xmsProc.ini');
+    asm65(#9'ldy >' + svar + '.@INITLIBRARY');
+    asm65(#9'sty @xmsProc.ini+1');
+
+    asm65(#9'ldy <' + svar);
+    asm65(#9'sty @xmsProc.prc');
+    asm65(#9'ldy >' + svar);
+    asm65(#9'sty @xmsProc.prc+1');
+
+    asm65(#9'ldy #=' + svar);
+    asm65(#9'jsr @xmsProc');
+
+   end else
+    asm65(#9'jsr ' + svar);				// Generate Call
 
  end;
 
@@ -7025,6 +7062,15 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 		  end;
 
 	end;
+
+
+ if Ident[IdentIndex].isExternal and RCLIBRARY and (Ident[IdentIndex].isStdCall = false) then begin
+
+     asm65(#9'pla');
+     asm65(#9'sta portb');
+
+ end;
+
 
 end;	//CompileActualParameters
 
@@ -12717,8 +12763,7 @@ WHILETOK:
      end;
 
 
-     asm65('#asm');
-     asm65(IntToStr(AsmBlockIndex));
+     asm65('#asm:' + IntToStr(AsmBlockIndex));
 
 
 //     if (OutputDisabled=false) and (Pass = CODEGENERATIONPASS) then WriteOut(AsmBlock[AsmBlockIndex]);
@@ -13362,6 +13407,7 @@ var IdentIndex, size: integer;
     varbegin: TString;
     HeaFile: TextFile;
 
+// ----------------------------------------------------------------------------
 
    function Value(dorig: Boolean = false; brackets: Boolean = false): string;
    const reg: array [1..3] of string = (':EDX', ':ECX', ':EAX');			// !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
@@ -13426,6 +13472,7 @@ var IdentIndex, size: integer;
 
    end;
 
+// ----------------------------------------------------------------------------
 
   function mads_data_size: string;
   begin
@@ -13445,6 +13492,44 @@ var IdentIndex, size: integer;
 
   end;
 
+// ----------------------------------------------------------------------------
+
+  function SetBank: Boolean;
+  var i, IdentTemp: integer;
+      hnam, rnam: string;
+  begin
+
+    Result := false;
+
+    hnam:=AnsiUpperCase(ExtractFileName(fnam));
+    hnam:=ChangeFileExt(hnam, '');
+
+    for i := 0 to High(resArray) - 1 do begin
+
+     rnam:=AnsiUpperCase(ExtractFileName(resArray[i].resFile));
+     rnam:=ChangeFileExt(rnam, '');
+
+     if hnam = rnam then begin
+       IdentTemp := GetIdent(resArray[i].resName);
+
+       if IdentTemp > 0 then begin
+        asm65('');
+	asm65(#9'lmb #$' + IntToHex(Ident[IdentTemp].Value + 1,2));
+	asm65('');
+
+	Result := true;
+
+        exit(true);
+       end;
+
+
+     end;
+
+    end;
+
+  end;
+
+// ----------------------------------------------------------------------------
 
 begin
 
@@ -13467,13 +13552,18 @@ begin
     end;
 
 
-    if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) then begin				// read file header libraryname.hea
+    if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) then begin			// read file header libraryname.hea
 
         fnam := linkObj[ Tok[Ident[IdentIndex].Libraries].Value ];
 
+
+        if RCLIBRARY then
+	 if SetBank = false then Error(Ident[IdentIndex].Libraries, 'Error: Bank identifier missing.');
+
+
 	if ExtractFileExt(fnam) = '' then fnam := ChangeFileExt(fnam, '.hea');
 
-        fnam := FindFile(fnam, 'library');
+        fnam := FindFile(fnam, 'header');
 
 	if Ident[IdentIndex].isOverload then
 	 svar := Ident[IdentIndex].Alias + '.' + GetOverloadName(IdentIndex)
@@ -13495,7 +13585,7 @@ begin
 	   Error(Ident[IdentIndex].Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
 	  end;
 
-	  if (txt.IndexOf('.@EXIT') < 0) and (txt.IndexOf('.@VARDATA') < 0) then				// skip '@.EXIT', '.@VARDATA'
+	  if (txt.IndexOf('.@EXIT') < 0) and (txt.IndexOf('.@VARDATA') < 0) then			// skip '@.EXIT', '.@VARDATA'
 	  if (pos('MAIN.' + svar + #9, txt) = 1) or (pos('MAIN.' + svar + '.', txt) = 1) then begin
 	   yes := FALSE;
 
@@ -13508,6 +13598,8 @@ begin
 	  iError(Ident[IdentIndex].Libraries, UnknownIdentifier, IdentIndex);
 
 	CloseFile(HeaFile);
+
+        if RCLIBRARY then begin asm65(''); asm65(#9'rmb'); asm65('') end;				// reset bank -> #0
 
     end else
 
@@ -13593,11 +13685,18 @@ begin
 
    end;
 
-  if (BlockStack[BlockStackTop] <> 1) and VarSize and (size > 0) then begin
-   asm65;
-   asm65('@VarData'#9'= '+varbegin);
-   asm65('@VarDataSize'#9'= '+IntToStr(size));
-   asm65;
+  if (BlockStack[BlockStackTop] <> 1) then begin
+
+    asm65;
+
+    if RCLIBRARY then asm65('@InitLibrary'#9'= :START');
+
+    if VarSize and (size > 0) then begin
+      asm65('@VarData'#9'= '+varbegin);
+      asm65('@VarDataSize'#9'= '+IntToStr(size));
+      asm65;
+    end;
+
   end;
 
  end;
@@ -13766,6 +13865,9 @@ end;
 
 begin
 
+// yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+
+
   if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
    if Tok[i].StrLength > NumAllocElements then
@@ -13774,7 +13876,7 @@ begin
    for NumActualParams:=1 to NumAllocElements do begin
 
     if NumActualParams > Tok[i].StrLength then
-     ConstVal:=byte(' ')
+     ConstVal := byte(' ')
     else
      ConstVal := byte(StaticStringData[Tok[i].StrAddress - CODEORIGIN + NumActualParams]);
 
@@ -13945,6 +14047,8 @@ end;
 
 begin
 
+// yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+
   if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
    NumAllocElements := Tok[i].StrLength;
@@ -13952,7 +14056,7 @@ begin
    for NumActualParams:=1 to NumAllocElements do begin
 
     if NumActualParams > Tok[i].StrLength then
-     ConstVal:=byte(' ')
+     ConstVal := byte(' ')
     else
      ConstVal := byte(StaticStringData[Tok[i].StrAddress - CODEORIGIN + NumActualParams]);
 
@@ -13977,19 +14081,14 @@ begin
   else
   repeat
 
-//  inc(NumActualParams);
+    if Tok[i + 1].Kind = EVALTOK then
+      doEvaluate
+    else
+      SaveData;
 
-  if Pass = CALLDETERMPASS then
-   inc(i)
-  else
-  if Tok[i + 1].Kind = EVALTOK then
-   doEvaluate
-  else
-   SaveData;
+    inc(i);
 
-  inc(i);
-
- until Tok[i].Kind <> COMMATOK;
+  until Tok[i].Kind <> COMMATOK;
 
 
  CheckTok(i, CBRACKETTOK);
@@ -15193,11 +15292,11 @@ while Tok[i].Kind in
 	   if (Ident[NumIdent].NumAllocElements in [0,1]) and (open_array = false) then
 	    iError(i, IllegalExpression)
 	   else
-	   if open_array then begin
+	   if open_array then begin									// const array of type = [ ]
 	     j := ReadDataOpenArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
 
 	     Ident[NumIdent].NumAllocElements := NumAllocElements;
-	   end else
+	   end else											// const array of type = ( )
 	     j := ReadDataArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
 
 
@@ -16116,6 +16215,8 @@ asm65;
 asm65('@halt'#9'ldx #$00');
 asm65(#9'txs');
 
+if LIBRARY_USE then asm65('@regX'#9'ldx #$00');
+
 if target.id = ___a8 then begin
 
  if LIBRARY_USE = FALSE then begin
@@ -16175,6 +16276,8 @@ asm65(#13#10'.local'#9'@RESOURCE');
 
 //     asm65(resArray[i].resName+' = ' + tmp);
 //     asm65(resArray[i].resName+'.end');
+
+     if resArray[i].resType = 'LIBRARY' then RCLIBRARY := true;
 
      resArray[i].resFullName := tmp;
 
@@ -16748,7 +16851,6 @@ begin
 // Set defines for first pass;
  TokenizeProgram;
 
-
  if NumTok=0 then Error(1, '');
 
  inc(NumUnits);
@@ -16777,8 +16879,8 @@ begin
  DefineIdent(1, 'TRUE',     CONSTANT, BOOLEANTOK, 0, 0, $00000001);
  DefineIdent(1, 'FALSE',    CONSTANT, BOOLEANTOK, 0, 0, $00000000);
 
- DefineIdent(1, 'MAXINT',       CONSTANT, INTEGERTOK, 0, 0, MAXINT);
- DefineIdent(1, 'MAXSMALLINT',       CONSTANT, INTEGERTOK, 0, 0, MAXSMALLINT);
+ DefineIdent(1, 'MAXINT',      CONSTANT, INTEGERTOK, 0, 0, MAXINT);
+ DefineIdent(1, 'MAXSMALLINT', CONSTANT, INTEGERTOK, 0, 0, MAXSMALLINT);
 
  DefineIdent(1, 'PI',       CONSTANT, REALTOK, 0, 0, $40490FDB00000324);
  DefineIdent(1, 'NAN',      CONSTANT, SINGLETOK, 0, 0, $FFC00000FFC00000);
