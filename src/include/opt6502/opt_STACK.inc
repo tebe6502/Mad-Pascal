@@ -11,6 +11,79 @@ begin
 // ===				      STACK.
 // -----------------------------------------------------------------------------
 
+  if (listing[i] = #9'pla') and									// pla					; 0
+     (listing[i+1] = #9'sta portb') then begin							// sta portb				; 1
+
+    if dex(i+10) and
+
+       lda_stack(i+2) and						// lda :STACKORIGIN,x			; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and			// sta					; 3
+       lda_stack(i+4) and						// lda :STACKORIGIN+STACKWIDTH,x	; 4
+       sta_a(i+5) and (sta_stack(i+5) = false) and			// sta					; 5
+       lda_stack(i+6) and						// lda :STACKORIGIN+STACKWIDTH,x	; 6
+       sta_a(i+7) and (sta_stack(i+7) = false) and			// sta					; 7
+       lda_stack(i+8) and						// lda :STACKORIGIN+STACKWIDTH,x	; 8
+       sta_a(i+9) and (sta_stack(i+9) = false) then			// sta					; 9
+//       dex(i+10) then							// dex					; 10
+     begin
+	listing[i]   := listing[i+2];
+	listing[i+1] := listing[i+3];
+	listing[i+2] := listing[i+4];
+	listing[i+3] := listing[i+5];
+	listing[i+4] := listing[i+6];
+	listing[i+5] := listing[i+7];
+	listing[i+6] := listing[i+8];
+	listing[i+7] := listing[i+9];
+	listing[i+8] := #9'dex';
+	listing[i+9] := #9'pla';
+	listing[i+10] := #9'sta portb';
+
+        exit(false);
+     end;
+
+
+    if dex(i+6) and
+
+       lda_stack(i+2) and						// lda :STACKORIGIN,x			; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) and			// sta					; 3
+       lda_stack(i+4) and						// lda :STACKORIGIN+STACKWIDTH,x	; 4
+       sta_a(i+5) and (sta_stack(i+5) = false) then			// sta					; 5
+//       dex(i+6) then							// dex					; 6
+     begin
+	listing[i]   := listing[i+2];
+	listing[i+1] := listing[i+3];
+	listing[i+2] := listing[i+4];
+	listing[i+3] := listing[i+5];
+	listing[i+4] := #9'dex';
+	listing[i+5] := #9'pla';
+	listing[i+6] := #9'sta portb';
+
+        exit(false);
+     end;
+
+
+    if dex(i+4) and
+
+       lda_stack(i+2) and						// lda :STACKORIGIN,x			; 2
+       sta_a(i+3) and (sta_stack(i+3) = false) then			// sta					; 3
+//       dex(i+4) then							// dex					; 4
+     begin
+	listing[i]   := listing[i+2];
+	listing[i+1] := listing[i+3];
+	listing[i+2] := #9'dex';
+	listing[i+3] := #9'pla';
+	listing[i+4] := #9'sta portb';
+
+        exit(false);
+     end;
+
+
+    end;
+
+
+// -----------------------------------------------------------------------------
+
+
     if inx(i) and										// inx					; 0
        lda(i+1) and (ix(i+1) = false) and							// lda					; 1
        (listing[i+2] = #9'sta @PARAM?') and							// sta @PARAM?				; 2
@@ -777,14 +850,14 @@ begin
 
 
       if inx(i+5) and										// inx					; 5
-         lda(i+6) and (lda_stack(i+6) = false) and						// lda					; 6
-         sta(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
-         lda(i+8) and (lda_stack(i+8) = false) and						// lda					; 8
-         sta(i+9) and (sta_stack(i+9) = false) and						// sta					; 9
-         lda(i+10) and (lda_stack(i+10) = false) and						// lda					; 10
-         sta(i+11) and (sta_stack(i+11) = false) and						// sta					; 11
-         lda(i+12) and (lda_stack(i+12) = false) and						// lda					; 12
-         sta(i+13) and (sta_stack(i+13) = false) and						// sta					; 13
+         lda_a(i+6) and (lda_stack(i+6) = false) and						// lda					; 6
+         sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
+         lda_a(i+8) and (lda_stack(i+8) = false) and						// lda					; 8
+         sta_a(i+9) and (sta_stack(i+9) = false) and						// sta					; 9
+         lda_a(i+10) and (lda_stack(i+10) = false) and						// lda					; 10
+         sta_a(i+11) and (sta_stack(i+11) = false) and						// sta					; 11
+         lda_a(i+12) and (lda_stack(i+12) = false) and						// lda					; 12
+         sta_a(i+13) and (sta_stack(i+13) = false) and						// sta					; 13
          (listing[i+14] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 14
          sta_a(i+15) and (sta_stack(i+15) = false) and						// sta					; 15
          (listing[i+16] = #9'lda :STACKORIGIN-1+STACKWIDTH,x') and				// lda :STACKORIGIN-1+STACKWIDTH,x	; 16
