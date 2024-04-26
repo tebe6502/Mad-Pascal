@@ -1,19 +1,17 @@
 procedure Syntax(ExitCode: byte);
 begin
-  (* Keep in sync with https://mads.atari8.info/doc/en/usage/ *)
-  WriteLn('');
-  WriteLn('Syntax: mp <inputfile>.pas [options]');
-  WriteLn('');
-  Writeln('-ipath:<folder>    Add the folder <folder> to the unit include path');
-  Writeln('-define:<symbol>   Define the symbol <symbol>');
-  Writeln('-cpu:<cpu>         Specify the CPU mode: 6502 (default), 65c02, 65816');
-  Writeln('-target:<platform> Specify the target platform: a8 (default), c4p, c64, neo, raw, x16');
-  WriteLn('-code:<address>    Specify the memory start address for the code');
-  WriteLn('-data:<address>    Specify the memory start address for variables and arrays');
-  WriteLn('-stack:<address>   Specify the memory start address for the software stack (64 bytes required)');
-  WriteLn('-zpage:<address>   Specify the memory start address of variables in the zero page (26 bytes required)');
-  Writeln('-o:<outputfile>    Specify the output file path (default <inputfile>.a65)');
-  WriteLn('-diag              Activate diagnostics mode');
+
+  WriteLn(Tab2Space('Syntax: mp <inputfile> [options]'));
+  Writeln(Tab2Space('-o:filename'#9'Output file'));
+  Writeln(Tab2Space('-cpu'#9#9'CPU mode: 6502 (default), 65c02, 65816'));
+  WriteLn(Tab2Space('-diag'#9#9'Diagnostics mode'));
+  Writeln(Tab2Space('-define:symbol'#9'Defines the symbol'));
+  Writeln(Tab2Space('-ipath:<x>'#9'Add <x> to include path'));
+  Writeln(Tab2Space('-target:<x>'#9'Target system: a8 (default), c64, c4p, raw, neo, x16'));
+  WriteLn(Tab2Space('-code:address'#9'Code origin hex address'));
+  WriteLn(Tab2Space('-data:address'#9'Data origin hex address'));
+  WriteLn(Tab2Space('-stack:address'#9'Software stack hex address (size = 64 bytes)'));
+  WriteLn(Tab2Space('-zpage:address'#9'Variables on the zero page hex address (size = 26 bytes)'));
 
   Halt(ExitCode);
 
