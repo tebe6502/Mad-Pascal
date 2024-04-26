@@ -1,17 +1,17 @@
-/*
-.macro	m@index2 (Ofset)
-	asl :STACKORIGIN-%%Ofset,x
-	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
+
+.macro m@lib (label)
+
+	lda portb
+	pha
+	ldy #=%%label
+	and #$01
+	ora MAIN.SYSTEM.__PORTB_BANKS-1,y
+	sta portb
+
+	jsr %%label.@INITLIBRARY
 .endm
 
-.macro	m@index4 (Ofset)
-	asl :STACKORIGIN-%%Ofset,x
-	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
-	asl :STACKORIGIN-%%Ofset,x
-	rol :STACKORIGIN-%%Ofset+STACKWIDTH,x
-.endm
-*/
-
+   
 .macro	m@call (os_proc)
 
 	.ifdef MAIN.@DEFINES.ROMOFF
@@ -31,15 +31,6 @@
 
 	.endif
 
-.endm
-
-
-.macro m@string
-
-	dta .len(str)
-	.local str
-	dta ":1"
-	.endl
 .endm
 
 
@@ -70,4 +61,21 @@ skp	cpx >VADR+VLEN
 lp	:+:cnt sta :adr+#*$80,y
 	dey
 	bpl lp
+.endm
+
+
+; modify PP (Power Packer) file
+.macro m@pp
+	.get %%1
+	
+	len = .filesize(%%1)
+	unp = .get[len-2]+.get[len-3]*256
+
+	.put[0] = <[unp-1]
+	.put[1] = >[unp-1]
+
+	.put[2] = <[len-4]
+	.put[3] = >[len-4]
+
+	.sav [0] len
 .endm
