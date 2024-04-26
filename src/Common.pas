@@ -608,7 +608,7 @@ var
 	      end;
 
 
-  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE,
+  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY,
   OutputDisabled, isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
   DiagMode: Boolean = false;
@@ -1351,7 +1351,7 @@ var
   yes: Boolean;
 begin
 
-Fillchar(Data, sizeof(Data), 0);
+//Fillchar(Data, sizeof(Data), 0);
 
 len := Length(StrValue);
 
@@ -1373,6 +1373,9 @@ for i:=0 to NumStaticStrChars-len-1 do
  if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then begin yes := TRUE; Break end;
 
 Tok[StrTokenIndex].StrLength := len;
+
+//writeln(NumStaticStrChars,'/',len,' = ',data[0],',',yes,' || ',StrValue);
+//writeln;
 
 if yes then begin
  Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
