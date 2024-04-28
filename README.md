@@ -221,6 +221,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Tron +4. Mad Pascal i C+4](https://youtu.be/a4Y2TYj1ymg)
 * [Mad Pascal Commodore Plus/4 plasma effect with TEDzakker demo music](https://youtu.be/Yg10zHR--14)
 * [Dungeon Adventurer](https://youtu.be/7lLPm5MywPc)
+* [Time Wizard](https://youtu.be/E12bu5whjpQ)
 
 ## Pascal compilers for the Atari XE/XL computer 
 
