@@ -223,7 +223,7 @@ const
 
   AllTypes		= OrdinalTypes + RealTypes + Pointers;
 
-  StringTypes		= [STRINGLITERALTOK, STRINGTOK, PCHARTOK];
+  StringTypes		= [STRINGPOINTERTOK, STRINGLITERALTOK, PCHARTOK];
 
   // Identifier kind codes
 
@@ -583,8 +583,6 @@ var
   UnitNameIndex: Integer = 1;
 
   FastMul: Integer = -1;
-
-//  CPUMode: tCPU = cpu_6502;
 
   OutFile: TextFile;
 
@@ -1307,8 +1305,6 @@ begin
 
  if LeftType = UNTYPETOK then Result := RightType;
 
-// if LeftType in Pointers then Result :in Pointers;
-
  if Result = 0 then
    iError(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
 
@@ -1347,11 +1343,9 @@ end;
 
 procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 var
-  i, j, k, len: Integer;
+  i, len: Integer;
   yes: Boolean;
 begin
-
-//Fillchar(Data, sizeof(Data), 0);
 
 len := Length(StrValue);
 
@@ -1360,12 +1354,9 @@ if len > 255 then
 else
  Data[0] := len;
 
-if (len < 0) or (len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
+if (NumStaticStrChars + len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
-
-i := 0;
-j := 0;
 
 yes := FALSE;
 
@@ -1373,9 +1364,6 @@ for i:=0 to NumStaticStrChars-len-1 do
  if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then begin yes := TRUE; Break end;
 
 Tok[StrTokenIndex].StrLength := len;
-
-//writeln(NumStaticStrChars,'/',len,' = ',data[0],',',yes,' || ',StrValue);
-//writeln;
 
 if yes then begin
  Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
