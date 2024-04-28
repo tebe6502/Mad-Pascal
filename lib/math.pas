@@ -89,8 +89,6 @@ interface
 	function power(base : single; const exponent : shortint) : single; overload;
 	function power(base : float16; const exponent : shortint) : float16; overload;
 	function power(base : integer; const exponent : shortint) : integer; overload;
-	function power(base, exponent: real): real; overload;
-	function power(base, exponent: float): float; overload;
 	function arctan2(y,x : real) : real;
 	function Tan(x: Real): Real;
 	function Ceil(a: real): smallint;
@@ -589,26 +587,6 @@ begin
 end;
 
 
-function power(base, exponent : real) : real; overload;
-(*
-@description: Return real power.
-
-*)
-begin
-	Result := exp(exponent * ln(base));
-end;
-
-
-function power(base, exponent : float) : float; overload;
-(*
-@description: Return real power.
-
-*)
-begin
-	Result := exp(exponent * ln(base));
-end;
-
-
 function arctan2(y,x : real) : real;
 (*
 @description:
@@ -627,10 +605,10 @@ begin
       end
     else
       Result:=ArcTan(y/x);
-
+      
     if x < 0.0 then
       Result:=Result+pi;
-
+      
     if Result>pi then
       Result:=Result-M_PI_2;
 end;
