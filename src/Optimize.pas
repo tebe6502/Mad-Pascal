@@ -1722,7 +1722,7 @@ var i, l, k, m, x: integer;
 
 
 {
-if (pos('portb', listing[i]) > 0) then begin
+if (pos('@printSTRING', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1847,7 +1847,7 @@ end;
 
 
 {
-if (pos('adr.RET', listing[i]) > 0) then begin
+if (pos('ora (:bp2),y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1902,7 +1902,7 @@ end;
 
 
 {
-if (pos('lda adr.DATA,y', listing[i]) > 0) then begin
+if  (pos('ldy #$01', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

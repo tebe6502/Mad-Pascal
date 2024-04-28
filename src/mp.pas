@@ -15635,8 +15635,21 @@ while Tok[i].Kind in
 
 	  if varPassMethod <> 255 then Ident[NumIdent].PassMethod := varPassMethod;
 
-	  if isStriped and (Ident[NumIdent].PassMethod <> VARPASSING) and ((NumAllocElements and $FFFF) * (NumAllocElements shr 16) <= 256) then
-	   Ident[NumIdent].isStriped := TRUE;
+
+	  if isStriped and (Ident[NumIdent].PassMethod <> VARPASSING) then begin
+
+            if NumAllocElements shr 16 > 0 then
+              yes := (NumAllocElements and $FFFF) * (NumAllocElements shr 16) <= 256
+	    else
+	      yes := NumAllocElements <= 256;
+
+	    if yes then
+  	      Ident[NumIdent].isStriped := TRUE
+	    else
+	      warning(i, StripedAllowed);
+
+	  end;
+
 
 	  varPassMethod := 255;
 
