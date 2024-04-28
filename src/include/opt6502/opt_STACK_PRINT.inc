@@ -10,9 +10,45 @@ begin
 // ===				      PRINT.
 // -----------------------------------------------------------------------------
 
-    if lda_im(i) and										// lda #				; 0
-       ldy_im(i+1) and										// ldy #				; 1
-       (listing[i+2] = #9'jsr @printSTRING') then						// jsr @printSTRING			; 2
+    if (listing[i+2] = #9'jsr @printPCHAR') and							// jsr @printPCHAR			; 2
+
+       lda_im(i) and										// lda #				; 0
+       ldy_im(i+1) then										// ldy #				; 1
+      begin
+        p:=GetWORD(i+0, i+1);
+
+	listing[i+2] := #9'@printPCHAR #$' + IntToHex(p, 4);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+ 	exit(false);
+      end;
+
+
+    if (listing[i+2] = #9'jsr @printPCHAR') and							// jsr @printPCHAR			; 2
+
+       lda_a(i) and (lda_stack(i) = false) and							// lda 					; 0
+       ldy(i+1) then										// ldy					; 1
+      begin
+        tmp := copy(listing[i], 6, 256);
+
+	if tmp + '+1' = copy(listing[i+1], 6, 256) then begin
+	  listing[i+2] := #9'@printPCHAR ' + tmp;
+
+	  listing[i]   := '';
+	  listing[i+1] := '';
+
+  	  exit(false);
+	end;
+
+      end;
+
+
+    if (listing[i+2] = #9'jsr @printSTRING') and						// jsr @printSTRING			; 2
+
+       lda_im(i) and										// lda #				; 0
+       ldy_im(i+1) then										// ldy #				; 1
       begin
         p:=GetWORD(i+0, i+1);
 
@@ -25,9 +61,10 @@ begin
       end;
 
 
-    if lda_a(i) and (lda_stack(i) = false) and							// lda 					; 0
-       ldy(i+1) and										// ldy					; 1
-       (listing[i+2] = #9'jsr @printSTRING') then						// jsr @printSTRING			; 2
+    if (listing[i+2] = #9'jsr @printSTRING') and						// jsr @printSTRING			; 2
+
+       lda_a(i) and (lda_stack(i) = false) and							// lda 					; 0
+       ldy(i+1) then										// ldy					; 1
       begin
         tmp := copy(listing[i], 6, 256);
 
@@ -43,13 +80,14 @@ begin
       end;
 
 
-    if lda_a(i) and										// lda 					; 0
+    if ((listing[i+6] = #9'jsr @printSTRING') or (listing[i+6] = #9'@printPCHAR')) and		// jsr @printSTRING|@printPCHAR		; 6
+
+       lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and (iy(i+2) = false) and							// lda					; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       ldy_stack(i+5) and									// ldy :STACKORIGIN+STACKWIDTH		; 5
-       (listing[i+6] = #9'jsr @printSTRING') then						// jsr @printSTRING			; 6
+       ldy_stack(i+5) then									// ldy :STACKORIGIN+STACKWIDTH		; 5
      if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
         (copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
       begin
@@ -65,6 +103,28 @@ begin
 	 for p:=i-1 downto 0 do
 	  if jsr(p) then Break else
 	   if inx(p) then begin listing[i+7] := ''; listing[p] := ''; Break end;
+
+  	exit(false);
+      end;
+
+
+    if ((listing[i+4] = #9'jsr @printSTRING') or (listing[i+4] = #9'@printPCHAR')) and		// jsr @printSTRING|@printPCHAR		; 4
+
+       lda_a(i) and (iy(i) = false) and								// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
+       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       ldy_stack(i+3) then									// ldy :STACKORIGIN+STACKWIDTH		; 3
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
+      begin
+	listing[i+3] := #9'ldy ' + copy(listing[i], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	if dex(i+5) then
+	 for p:=i-1 downto 0 do
+	  if jsr(p) then Break else
+	   if inx(p) then begin listing[i+5] := ''; listing[p] := ''; Break end;
 
   	exit(false);
       end;

@@ -41,6 +41,23 @@ begin
     end;
 
 
+    if (TemporaryBuf[0] = #9'lda #$00') and						// lda #$00		; 0
+       (pos('sta :STACK', TemporaryBuf[1]) > 0) and					// sta :STACKORIGIN	; 1
+       (TemporaryBuf[2] = #9'iny') and							// iny			; 2
+       (pos('lda :STACK', TemporaryBuf[3]) > 0) and					// lda :STACKORIGIN	; 3
+       (pos('ora ', TemporaryBuf[4]) > 0) and						// ora			; 4
+       (pos('sta ', TemporaryBuf[5]) > 0) then						// sta			; 5
+     if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[3], 6, 256)) then
+     begin
+	TemporaryBuf[4] := #9'lda ' + copy(TemporaryBuf[4], 6, 256) ;
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+
+	TemporaryBuf[3] := '~';
+     end;
+
+
    if (pos('lsr ', TemporaryBuf[0]) > 0) and						// lsr I		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       (pos('; optimize OK', TemporaryBuf[2]) > 0) and					//; optimize OK		; 2

@@ -23,6 +23,16 @@
 
        or
 
+       ( lda_a(i) and							// lda TEXT_BUF				; 0
+         add(i+1) and (add_stack(i+1) = false) and			// add R				; 1
+	 tay(i+2) and							// tay					; 2
+	 (listing[i+3] = listing[i] + '+1') and				// lda TEXT_BUF+1			; 3
+	 adc(i+4) and							// adc R+1				; 4
+	 sta_bp_1(i+5) and						// sta :bp+1				; 5
+	 lda_bp_y(i+6) )						// lda (:bp),y				; 6
+
+       or
+
        ( lda_a(i) and (lda_stack(i) = false) and			// lda P+1				; 0
          sta_stack(i+1) and 						// sta :STACKORIGIN+STACKWIDTH		; 1
 	 lda_a(i+2) and (listing[i] = listing[i+2] + '+1') and		// lda P				; 2
@@ -59,6 +69,9 @@
         then begin
 
 
+	if lda_bp_y(i+6) then begin
+
+	end else
 	if asl_stack(i+3) and rol_a(i+4) then begin
 	 arg0:='&;'+GetString(i)+';'+GetString(i+2)+';'+GetString(i+6)+';'+GetString(i+9)+';';
 	 k:=12;
@@ -75,6 +88,29 @@
 	 k:=1;
 	end;
 
+
+	if lda_bp_y(i+6) then begin
+
+	 arg0:='+;'+GetString(i)+';'+GetString(i+1)+';'+GetString(i+3)+';'+GetString(i+4)+';';
+
+	 if arg0 = optyBP2 then begin
+
+	  listing[i]   := '';
+	  listing[i+1] := '';
+	  listing[i+2] := '';
+	  listing[i+3] := '';
+	  listing[i+4] := '';
+	  listing[i+5] := #9'ldy #$00';
+	  listing[i+6] := #9'lda (:bp2),y';
+
+	  k:=7;
+	 end else begin
+ 	  arg0 := optyBP2;
+
+	  k:=1;
+	 end;
+
+	end else
 
 	if arg0 = optyBP2 then begin
 

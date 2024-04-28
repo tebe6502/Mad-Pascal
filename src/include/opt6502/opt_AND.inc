@@ -58,6 +58,16 @@ begin
      end;
 
 
+    if and_ora_eor(i) and									// and|ora|eor			; 0
+       (listing[i+1] = #9'and #$FF') and							// and #$FF			; 1
+       sta_a(i+2) then										// sta 				; 2
+     begin
+	listing[i+1] := '';
+
+	exit(false);
+     end;
+
+
     if sta_stack(i) and										// sta :STACKORIGIN		; 0
        lda_a(i+1) and										// lda				; 1
        and_stack(i+2) then									// and :STACKORIGIN		; 2
