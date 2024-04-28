@@ -5349,7 +5349,7 @@ begin
 
  Gen;
 
- if (LeftValType = STRINGTOK) and (RightValType = STRINGTOK) then begin
+ if (LeftValType = STRINGPOINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 //  a65(__cmpSTRING)					// STRING ? STRING
 
  	asm65(#9'lda :STACKORIGIN,x');
@@ -6085,7 +6085,7 @@ begin
 		 if (Ident[IdentIndex].DataType in Pointers) {and (Tok[i + 2].Kind = DEREFERENCETOK)} then
 		  if (Ident[IdentIndex].AllocElementType = RECORDTOK) and (Tok[i +3].Kind = DOTTOK) then begin		// var record^.field
 
-		   // writeln(Tok[i + 2].Kind,',',Tok[i + 3].Kind,',',Tok[i + 4].Kind);
+//	writeln(Tok[i + 2].Kind,',',Tok[i + 3].Kind,',',Tok[i + 4].Kind);
 
 		    CheckTok(i + 3, DOTTOK);
 		    CheckTok(i + 4, IDENTTOK);
@@ -7112,7 +7112,7 @@ case Tok[i].Kind of
 
       CheckTok(i + 1, OPARTOK);
 
-      if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
+      if Tok[i + 2].Kind in AllTypes {+ [STRINGTOK]} then begin
 
        ValType := Tok[i + 2].Kind;
 
@@ -9985,13 +9985,13 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   if sLeft or sRight then begin
 
    if sLeft and sRight then
-    GenerateRelationString(Tok[i + 1].Kind, STRINGTOK, STRINGTOK)
+    GenerateRelationString(Tok[i + 1].Kind, STRINGPOINTERTOK, STRINGPOINTERTOK)
    else
    if ValType = CHARTOK then
-    GenerateRelationString(Tok[i + 1].Kind, CHARTOK, STRINGTOK)
+    GenerateRelationString(Tok[i + 1].Kind, CHARTOK, STRINGPOINTERTOK)
    else
    if RightValType = CHARTOK then
-    GenerateRelationString(Tok[i + 1].Kind, STRINGTOK, CHARTOK)
+    GenerateRelationString(Tok[i + 1].Kind, STRINGPOINTERTOK, CHARTOK)
    else
     GetCommonType(j, ValType, RightValType);
 
@@ -13867,7 +13867,7 @@ begin
 
 // yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
-
+{
   if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
    if Tok[i].StrLength > NumAllocElements then
@@ -13886,7 +13886,7 @@ begin
    Result := i;
    exit;
   end;
-
+}
 
   CheckTok(i, OPARTOK);
 
@@ -14048,7 +14048,7 @@ end;
 begin
 
 // yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
-
+{
   if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
    NumAllocElements := Tok[i].StrLength;
@@ -14066,7 +14066,7 @@ begin
    Result := i;
    exit;
   end;
-
+}
 
   CheckTok(i, OBRACKETTOK);
 
@@ -15272,6 +15272,7 @@ while Tok[i].Kind in
 	  if (VarType in Pointers) and (NumAllocElements = 0) then
 	   if AllocElementType <> CHARTOK then iError(j, IllegalExpression);
 
+
 	  CheckTok(j + 1, EQTOK);
 
 	  if Tok[i + 3].Kind in StringTypes then begin
@@ -15287,17 +15288,50 @@ while Tok[i].Kind in
 
 	  if NumAllocElements > 0 then begin
 
-	   DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, POINTERTOK, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, IDENTTOK);
+       	    DefineIdent(i + 1, Tok[i + 1].Name^, CONSTANT, VarType, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, IDENTTOK);
 
 	   if (Ident[NumIdent].NumAllocElements in [0,1]) and (open_array = false) then
 	    iError(i, IllegalExpression)
 	   else
 	   if open_array then begin									// const array of type = [ ]
-	     j := ReadDataOpenArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
 
-	     Ident[NumIdent].NumAllocElements := NumAllocElements;
-	   end else											// const array of type = ( )
-	     j := ReadDataArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
+	     if (Tok[j + 2].Kind = STRINGLITERALTOK) and (AllocElementType = CHARTOK) then begin	// = 'string'
+
+	       Ident[NumIdent].Value := Tok[j + 2].StrAddress + CODEORIGIN_BASE;
+       	       if VarType <> STRINGPOINTERTOK then inc(Ident[NumIdent].Value);
+
+	       Ident[NumIdent].NumAllocElements := Tok[j + 2].StrLength;
+
+	       j := j + 2;
+
+	       NumAllocElements := 0;
+
+	     end else begin
+	       j := ReadDataOpenArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
+
+	       Ident[NumIdent].NumAllocElements := NumAllocElements;
+	     end;
+
+	   end else begin										// const array [] of type = ( )
+
+	     if (Tok[j + 2].Kind = STRINGLITERALTOK) and (AllocElementType = CHARTOK) then begin	// = 'string'
+
+	       if Tok[j + 2].StrLength > NumAllocElements then
+     	         Error(j + 2, 'String length is larger than array of char length');
+
+	       Ident[NumIdent].Value := Tok[j + 2].StrAddress + CODEORIGIN_BASE;
+	       if VarType <> STRINGPOINTERTOK then inc(Ident[NumIdent].Value);
+
+	       Ident[NumIdent].NumAllocElements := Tok[j + 2].StrLength;
+
+	       j := j + 2;
+
+	       NumAllocElements := 0;
+
+	     end else
+	       j := ReadDataArray(j + 2, NumStaticStrChars, AllocElementType, NumAllocElements, true, Tok[j].Kind = PCHARTOK);
+
+	   end;
 
 
 	   if NumAllocElements shr 16 > 0 then
@@ -15808,6 +15842,13 @@ while Tok[i].Kind in
 	   VarType := POINTERTOK;
 
 	  end else
+	  if (Tok[i].Kind = STRINGLITERALTOK) and (open_array = false) and (VarType = POINTERTOK) and (AllocElementType = CHARTOK) then
+
+	    SaveToDataSegment(idx, Tok[i].StrAddress - CODEORIGIN + 1, CODEORIGINOFFSET)
+
+	  else
+
+{
 	  if (Tok[i].Kind = STRINGLITERALTOK) and (open_array = false) then begin
 
 	   if (Ident[NumIdent].NumAllocElements > 0 ) and (Tok[i].StrLength > Ident[NumIdent].NumAllocElements) then begin
@@ -15842,18 +15883,53 @@ while Tok[i].Kind in
 	   end;
 
 	  end else
+}
 
 	   if (Ident[NumIdent].NumAllocElements in [0,1]) and (open_array = false) then
 	    iError(i, IllegalExpression)
 	   else
-	    if open_array then begin 								// array of type = [ ]
-	     i := ReadDataOpenArray(i, idx, Ident[NumIdent].AllocElementType, NumAllocElements, false, Tok[i-2].Kind = PCHARTOK);
+	    if open_array then begin 									// array of type = [ ]
 
-	     Ident[NumIdent].NumAllocElements := NumAllocElements;
+	     if (Tok[i].Kind = STRINGLITERALTOK) and (AllocElementType = CHARTOK) then begin		// = 'string'
+
+	       Ident[NumIdent].Value := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
+	       if VarType <> STRINGPOINTERTOK then inc(Ident[NumIdent].Value);
+
+	       Ident[NumIdent].NumAllocElements := Tok[i].StrLength;
+
+	       Ident[NumIdent].isAbsolute := true;
+
+	       NumAllocElements := 1;
+
+	     end else begin
+	       i := ReadDataOpenArray(i, idx, Ident[NumIdent].AllocElementType, NumAllocElements, false, Tok[i-2].Kind = PCHARTOK);
+
+	       Ident[NumIdent].NumAllocElements := NumAllocElements;
+	     end;
 
 	     inc(VarDataSize, (NumAllocElements-1) * DataSize[Ident[NumIdent].AllocElementType]);
-	    end else										// array [] of type = ( )
-	     i := ReadDataArray(i, idx, Ident[NumIdent].AllocElementType, Ident[NumIdent].NumAllocElements or Ident[NumIdent].NumAllocElements_ shl 16, false, Tok[i-2].Kind = PCHARTOK);
+
+	    end else begin										// array [] of type = ( )
+
+	     if (Tok[i].Kind = STRINGLITERALTOK) and (AllocElementType = CHARTOK) then begin		// = 'string'
+
+	       if Tok[i].StrLength > NumAllocElements then
+     	         Error(i, 'string length is larger than array of char length');
+
+	       Ident[NumIdent].Value := Tok[i].StrAddress - CODEORIGIN + CODEORIGIN_BASE;
+	       if VarType <> STRINGPOINTERTOK then inc(Ident[NumIdent].Value);
+
+	       Ident[NumIdent].NumAllocElements := Tok[i].StrLength;
+
+	       Ident[NumIdent].isAbsolute := true;
+
+	      // NumAllocElements := 1;
+
+	     end else
+ 	       i := ReadDataArray(i, idx, Ident[NumIdent].AllocElementType, Ident[NumIdent].NumAllocElements or Ident[NumIdent].NumAllocElements_ shl 16, false, Tok[i-2].Kind = PCHARTOK);
+
+	    end;
+
 
 	end;
 

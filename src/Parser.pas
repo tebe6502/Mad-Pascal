@@ -570,7 +570,7 @@ case Tok[i].Kind of
     begin
      CheckTok(i + 1, OPARTOK);
 
-     if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
+     if Tok[i + 2].Kind in AllTypes {+ [STRINGTOK]} then begin
 
       ConstValType := Tok[i + 2].Kind;
 
@@ -602,7 +602,7 @@ case Tok[i].Kind of
     begin
      CheckTok(i + 1, OPARTOK);
 
-     if Tok[i + 2].Kind in AllTypes + [STRINGTOK] then begin
+     if Tok[i + 2].Kind in AllTypes {+ [STRINGTOK]} then begin
 
       ConstValType := Tok[i + 2].Kind;
 
@@ -2867,39 +2867,11 @@ if Tok[i].Kind = PCHARTOK then						// PChar
   Result:=i;
  end else // Pchar
 
-
-
-
-
-
-// -----------------------------------------------------------------------------
-// this place is for new types
-// -----------------------------------------------------------------------------
-
-
-
-
-
-
-
-// -----------------------------------------------------------------------------
-//			OrdinalTypes + RealTypes + Pointers
-// -----------------------------------------------------------------------------
-
-if Tok[i].Kind in AllTypes then
-  begin
-  DataType := Tok[i].Kind;
-  NumAllocElements := 0;
-  AllocElementType := 0;
-
-  Result := i;
- end
-
 // -----------------------------------------------------------------------------
 //				STRING
 // -----------------------------------------------------------------------------
 
-else if Tok[i].Kind = STRINGTOK then					// String
+ if Tok[i].Kind = STRINGTOK then					// String
   begin
   DataType := STRINGPOINTERTOK;
   AllocElementType := CHARTOK;
@@ -2930,6 +2902,32 @@ else if Tok[i].Kind = STRINGTOK then					// String
 
   end// if STRINGTOK
 else
+
+
+
+
+// -----------------------------------------------------------------------------
+// this place is for new types
+// -----------------------------------------------------------------------------
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------------
+//			OrdinalTypes + RealTypes + Pointers
+// -----------------------------------------------------------------------------
+
+if Tok[i].Kind in AllTypes then
+  begin
+  DataType := Tok[i].Kind;
+  NumAllocElements := 0;
+  AllocElementType := 0;
+
+  Result := i;
+ end else
 
 // -----------------------------------------------------------------------------
 //					ARRAY
