@@ -59,7 +59,7 @@ BEGIN
         WHILE src_pos < src_len DO BEGIN
                 copymask := copymask  SHL 1;
                 IF copymask  = (1 SHL BITS_IN_BYTE) THEN BEGIN
-                        IF dst_pos >= (dst_len - 1 - 2 * BITS_IN_BYTE) THEN BEGIN
+                        IF dst_pos >= WORD(dst_len - 1 - 2 * BITS_IN_BYTE) THEN BEGIN
                                 dst_pos := 0;
                                 BREAK;
                         END;
@@ -68,7 +68,7 @@ BEGIN
                         dst[dst_pos] := #0;
                         Inc(dst_pos);
                 END;
-                IF src_pos > (src_len - MATCH_MAX) THEN BEGIN
+                IF src_pos > WORD(src_len - MATCH_MAX) THEN BEGIN
                         dst[dst_pos] := src[src_pos];
                         Inc(dst_pos);
                         Inc(src_pos);
