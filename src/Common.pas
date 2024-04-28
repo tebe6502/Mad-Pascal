@@ -341,17 +341,6 @@ type
   ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
 
 
-  ErrorCode =
-  (
-  UnknownIdentifier, OParExpected, IdentifierExpected, IncompatibleTypeOf, UserDefined,
-  IdNumExpExpected, IncompatibleTypes, IncompatibleEnum, OrdinalExpectedFOR, CantAdrConstantExp,
-  VariableExpected, WrongNumParameters, OrdinalExpExpected, RangeCheckError, RangeCheckError_,
-  VariableNotInit, ShortStringLength, StringTruncated, TypeMismatch, CantReadWrite,
-  SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
-  IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
-  UnreachableCode, IllegalQualifier, LoHi
-  );
-
   code65 =
   (
 

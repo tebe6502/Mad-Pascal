@@ -6,6 +6,19 @@ interface
 
 uses Common;
 
+
+type
+  ErrorCode =
+  (
+  UnknownIdentifier, OParExpected, IdentifierExpected, IncompatibleTypeOf, UserDefined,
+  IdNumExpExpected, IncompatibleTypes, IncompatibleEnum, OrdinalExpectedFOR, CantAdrConstantExp,
+  VariableExpected, WrongNumParameters, OrdinalExpExpected, RangeCheckError, RangeCheckError_,
+  VariableNotInit, ShortStringLength, StringTruncated, TypeMismatch, CantReadWrite,
+  SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
+  IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
+  UnreachableCode, IllegalQualifier, LoHi, StripedAllowed
+  );
+
 // ----------------------------------------------------------------------------
 
 	procedure Error(ErrTokenIndex: Integer; Msg: string);
@@ -192,6 +205,8 @@ begin
   UpperBoundOfRange: Result := 'Upper bound of range is less than lower bound';
 	  HighLimit: Result := 'High range limit > '+IntToStr(High(word));
 
+
+     StripedAllowed: Result := 'Striped array is allowed for maximum [0..255] size';
  end;
 
 end;
@@ -281,7 +296,7 @@ begin
 
  if Pass = CODEGENERATIONPASS then begin
 
-  Msg:=ErrorMessage(WarnTokenIndex, err, IdentIndex, SrcType, DstType);
+  Msg := ErrorMessage(WarnTokenIndex, err, IdentIndex, SrcType, DstType);
 
   a := UnitName[Tok[WarnTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[WarnTokenIndex].Line) + ')' + ' Warning: ' + Msg;
 
