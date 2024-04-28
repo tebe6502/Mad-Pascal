@@ -62,7 +62,7 @@
 }
 
      if lda_stack(i) and											// lda :STACKORIGIN
-        (add_sub(i+1) or adc_sbc(i+1) or									// add|adc|sub|sbc|asl @|asl @|lsr @
+        (add_sub(i+1) or adc_sbc(i+1) or and_ora_eor(i+1) or							// add|adc|sub|sbc|asl @|asl @|lsr @
 	 (asl_a(i+1) and tay(i+2)) or										//                |tay  |asl @|tay
 	 (asl_a(i+1) and  asl_a(i+2) and tay(i+3)) or								//			|tay  |
 	 (lsr_a(i+1) and tay(i+2))) then
