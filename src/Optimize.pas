@@ -1900,9 +1900,8 @@ end;
 
   for i := 0 to l - 1 do begin
 
-
 {
-if  (pos('ldy #$01', listing[i]) > 0) then begin
+if (pos('lda DST', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
