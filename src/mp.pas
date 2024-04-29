@@ -102,6 +102,9 @@ Contributors:
 	- 16x8 => 24 multiplication routine (base\common\word.asm)
 	- 16x16 => 32 multiplication routine (base\common\word.asm)
 
++ Viacheslav Komenda :
+	- unit LZJB
+
 + Wojciech Bociański (http://bocianu.atari.pl/) :
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
 	- MADSTRAP
