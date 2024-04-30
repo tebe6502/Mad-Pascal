@@ -6,8 +6,10 @@
 	CMCPLAY		RAM / ROM
 	DOSFILE		RAM / ROM
 	EXTMEM
+	LIBRARY		PORTB -> RAM
 	MPT		RAM / ROM
 	MPTPLAY		RAM / ROM
+	PP		RAM / ROM
 	RCASM		RAM / ROM
 	RCDATA		RAM / ROM
 	RELOC		RAM
@@ -590,7 +592,7 @@ len	.word
 data	ins %%1
 data_end
 
-	.print '$R DOSFILE ',.wget[2],'..$xxxx'," %%1"
+	.print '$R DOSFILE ',.wget[2],'..',.wget[4]," %%1"
 
 	ini mcpy
  els
@@ -598,7 +600,7 @@ data_end
 	ins %%1
 	opt h+
 
-	.print '$R DOSFILE ',.wget[2],'..',*-1," %%1"
+	.print '$R DOSFILE ',.wget[2],'..',.wget[4]," %%1"
  eif
 .endm
 
@@ -1207,6 +1209,8 @@ len = .filesize(%%1)
 
 	org RESORIGIN
 
+	ert (*>$4000) && (*<$8000),'RESORIGIN memory overlap $4000..$7FFF'
+
 	mwa #[?adr&$3fff]+$4000 dst
 	rts
 
@@ -1288,6 +1292,73 @@ data
 
 	ini move
 	eif
+
+	ini quit
+
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+/* LIBRARY
+/* ----------------------------------------------------------------------- */
+
+.macro	LIBRARY (nam, lab)
+
+	.get %%1,0,6
+
+?len = .filesize(%%1)
+
+	ert .wget[2] < $4000,'library must fit in memory space $4000..$7FFF'
+	ert .wget[2]+?len-6 >= $8000,'library must fit in memory space $4000..$7FFF'
+
+
+	ift ?EXTDETECT=0
+	ini DetectMem
+	eif
+
+	.def ?EXTDETECT=1
+
+	ert (main.%%lab > 63), 'memory bank number must be in the range [0..63]'
+
+	org RESORIGIN
+
+	ert (*>$4000) && (*<$8000),'RESORIGIN memory overlap $4000..$7FFF'
+
+quit	mva #$ff portb
+	rts
+
+setbnk	ldx #main.%%lab
+
+	cpx DetectMem.bank
+	bcs nomem
+
+	lda @mem_banks,x
+	sta portb
+	rts
+
+noMem	.local
+
+	@print #outMem
+
+	pla
+	pla
+	rts
+
+outMem	dta c'Out of memory',$9b
+
+	.endl
+
+	ini setbnk
+
+/* ----------------------------------------------------------------------- */
+/* DOSFILE
+/* ----------------------------------------------------------------------- */
+
+ 	opt h-
+	ins %%1
+	opt h+
+
+	.print '$R LIBRARY ',.wget[2],'..',.wget[4],':',main.%%lab," %%1"
 
 	ini quit
 
