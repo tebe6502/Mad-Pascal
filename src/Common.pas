@@ -334,7 +334,7 @@ const
 
 type
 
-  ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
+  ModifierCode = ( mInline = $01, mStdCall = $02, mPascal = $04, mForward = $08, mAssembler = $10, mRegister = $20, mInterrupt = $40, mOverload= $80, mKeep = $100 );
 
   irCode = (iDLI, iVBLD, iVBLI, iTIM1, iTIM2, iTIM4);
 
@@ -373,8 +373,8 @@ type
 
   );
 
-  TString = string [MAXSTRLENGTH];
-  TName   = string [MAXNAMELENGTH];
+  TString = array [0..MAXSTRLENGTH-1] of string;
+  TName   = array [0..MAXNAMELENGTH-1] of string;
 
   TDefinesParam = array [1..MAXPARAMS] of TString;
 

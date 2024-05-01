@@ -5,12 +5,12 @@ type
   tComputer = (___c64, ___c4p, ___a8, ___raw, ___neo, ___x16);
 
   TTarget = Record
-    name : string[32];
+    name : array[0..31] of string;
     id: tComputer;
     cpu: tCPU;
     eol: byte;
     zpage,
     buf,
     codeorigin : word;
-    header          : array[0..15] of string;
+    header : array[0..15] of string;
   end;
