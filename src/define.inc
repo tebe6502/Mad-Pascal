@@ -6,4 +6,4 @@
 
 {$DEFINE OPTIMIZECODE}
 
-{$I+}
+{$IOCHECKS+}
