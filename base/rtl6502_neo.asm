@@ -73,11 +73,11 @@ numread .word               ; pointer to variable, length of loaded data
 
   icl 'common\shortint.asm' ; mul / div -> SHORTINT
   icl 'common\smallint.asm' ; mul / div -> SMALLINT
-  icl 'common\integer.asm'  ; mul / div -> INTEGER
+  icl 'neo\integer.asm'  ; mul / div -> INTEGER
 
   icl 'common\byte.asm'   ; mul / div -> BYTE
   icl 'common\word.asm'   ; mul / div -> WORD
-  icl 'common\cardinal.asm' ; mul / div -> CARDINAL
+  icl 'neo\cardinal.asm' ; mul / div -> CARDINAL
 
   icl 'common\shortreal.asm'  ; mul / div -> SHORTREAL  Q8.8
   icl 'common\shortreal_trunc.asm'; @SHORTREAL_TRUNC
