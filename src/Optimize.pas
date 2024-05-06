@@ -3222,10 +3222,6 @@ begin				// OptimizeASM
           listing[l+14] := #9'lda '+GetARG(3, x-1);
           listing[l+15] := #9'sta VAR2_B3';
 
-          listing[l+16] := #9'jsr imulECX';
-
-          inc(l, 17);
-
         end else begin
 
           listing[l]    := #9'lda '+GetARG(0, x);
@@ -3246,45 +3242,46 @@ begin				// OptimizeASM
           listing[l+14] := #9'lda '+GetARG(3, x-1);
           listing[l+15] := #9'sta :eax+3';
 
-          listing[l+16] := #9'jsr imulECX';
-
-          inc(l, 17);
         end;
 
+
+        listing[l+16] := #9'jsr imulECX';
+
+        inc(l, 17);
 
         if arg0 = 'mulINTEGER' then begin
-        listing[l]   := #9'lda :eax';
-        listing[l+1] := #9'sta '+GetARG(0, x-1);
-        listing[l+2] := #9'lda :eax+1';
-        listing[l+3] := #9'sta '+GetARG(1, x-1);
-        listing[l+4] := #9'lda :eax+2';
-        listing[l+5] := #9'sta '+GetARG(2, x-1);
-        listing[l+6] := #9'lda :eax+3';
-        listing[l+7] := #9'sta '+GetARG(3, x-1);
+          listing[l]   := #9'lda :eax';
+          listing[l+1] := #9'sta '+GetARG(0, x-1);
+          listing[l+2] := #9'lda :eax+1';
+          listing[l+3] := #9'sta '+GetARG(1, x-1);
+          listing[l+4] := #9'lda :eax+2';
+          listing[l+5] := #9'sta '+GetARG(2, x-1);
+          listing[l+6] := #9'lda :eax+3';
+          listing[l+7] := #9'sta '+GetARG(3, x-1);
 
-        if sta_im_0(l+1) then begin
-         listing[l]   := '';
-         listing[l+1] := '';
-        end;
+          if sta_im_0(l+1) then begin
+           listing[l]   := '';
+           listing[l+1] := '';
+          end;
 
-        if sta_im_0(l+3) then begin
-         listing[l+2] := '';
-         listing[l+3] := '';
-        end;
+          if sta_im_0(l+3) then begin
+           listing[l+2] := '';
+           listing[l+3] := '';
+          end;
 
-        if sta_im_0(l+5) then begin
-         listing[l+4] := '';
-         listing[l+5] := '';
-        end;
+          if sta_im_0(l+5) then begin
+           listing[l+4] := '';
+           listing[l+5] := '';
+          end;
 
-        if sta_im_0(l+7) then begin
-         listing[l+6] := '';
-         listing[l+7] := '';
-        end;
+          if sta_im_0(l+7) then begin
+           listing[l+6] := '';
+           listing[l+7] := '';
+          end;
 
-        inc(l, 8);
+          inc(l, 8);
 
-	end;
+	     end;
 
       end else
 {
