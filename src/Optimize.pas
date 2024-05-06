@@ -3244,7 +3244,6 @@ begin				// OptimizeASM
 
         end;
 
-
         listing[l+16] := #9'jsr imulECX';
 
         inc(l, 17);
