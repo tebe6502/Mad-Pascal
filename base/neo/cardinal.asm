@@ -36,15 +36,15 @@ MOD
 ; EAX * ECX -> EAX
 .proc	imulECX
 
-	mva :eax+0 VAR1_B0
-	mva :eax+1 VAR1_B1
-	mva :eax+2 VAR1_B2
-	mva :eax+3 VAR1_B3
+	;mva :eax+0 VAR1_B0
+	;mva :eax+1 VAR1_B1
+	;mva :eax+2 VAR1_B2
+	;mva :eax+3 VAR1_B3
 
-	mva :ecx+0 VAR2_B0
-	mva :ecx+1 VAR2_B1
-	mva :ecx+2 VAR2_B2
-	mva :ecx+3 VAR2_B3
+	;mva :ecx+0 VAR2_B0
+	;mva :ecx+1 VAR2_B1
+	;mva :ecx+2 VAR2_B2
+	;mva :ecx+3 VAR2_B3
 
 	stz VAR1_TYPE
 	stz VAR2_TYPE
