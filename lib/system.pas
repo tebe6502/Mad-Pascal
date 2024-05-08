@@ -567,6 +567,9 @@ var	ScreenWidth: smallint = 80;	(* @var current screen width *)
 	function Space(b: Byte): ^string; assembler;
 	procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
 	procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
+	{$ifdef neo}
+	procedure Str(a: float; var s: TString); overload; stdcall; assembler;
+	{$endif}
 	function StringOfChar(c: Char; l: byte): ^string; assembler;
 	function Sqr(x: Real): Real; overload;
 	function Sqr(x: Single): Single; overload;
@@ -1858,6 +1861,35 @@ asm
 	pla:tax
 end;
 
+{$ifdef neo}
+procedure Str(a: float; var s: TString); overload; stdcall; assembler;
+(*
+@description:
+Convert a numerical value to a string
+
+@param: a - float
+@param: s - string[32] - result
+*)
+asm
+	mva #MATH_CONVERT_NUMBER_TO_STRING NEOMESSAGE_FUNC
+
+	mva a   VAR0_B0
+	mva a+1 VAR0_B1
+	mva a+2 VAR0_B2
+	mva a+3 VAR0_B3
+
+	mwa s NEOMESSAGE_PAR3W
+
+	mva #VAR_FLOAT VAR0_TYPE
+	mva #STACK_ADDRESS NEOMESSAGE_PAR1W
+	mva #STACK_SIZE1 NEOMESSAGE_PAR2W
+	stz NEOMESSAGE_PAR1W+1
+	stz NEOMESSAGE_PAR2W+1
+
+	jsr @WaitMessage
+	mva #MATH_GROUP NEOMESSAGE_GROUP
+end;
+{$endif}
 
 procedure Str(a: integer; var s: TString); overload; stdcall; assembler;
 (*
@@ -1867,6 +1899,27 @@ Convert a numerical value to a string
 @param: a - integer
 @param: s - string[32] - result
 *)
+{$ifdef neo}
+asm
+	mva #MATH_CONVERT_NUMBER_TO_STRING NEOMESSAGE_FUNC
+
+	mva a   VAR0_B0
+	mva a+1 VAR0_B1
+	mva a+2 VAR0_B2
+	mva a+3 VAR0_B3
+
+	mwa s NEOMESSAGE_PAR3W
+
+	stz VAR0_TYPE
+	mva #STACK_ADDRESS NEOMESSAGE_PAR1W
+	mva #STACK_SIZE1 NEOMESSAGE_PAR2W
+	stz NEOMESSAGE_PAR1W+1
+	stz NEOMESSAGE_PAR2W+1
+
+	jsr @WaitMessage
+	mva #MATH_GROUP NEOMESSAGE_GROUP
+end;
+{$else}
 asm
 	txa:pha
 
@@ -1879,6 +1932,7 @@ asm
 
 	pla:tax
 end;
+{$endif}
 
 
 procedure Str(a: cardinal; var s: TString); overload; stdcall; assembler;
@@ -1889,6 +1943,27 @@ Convert a numerical value to a string
 @param: a - integer
 @param: s - string[32] - result
 *)
+{$ifdef neo}
+asm
+	mva #MATH_CONVERT_NUMBER_TO_STRING NEOMESSAGE_FUNC
+
+	mva a   VAR0_B0
+	mva a+1 VAR0_B1
+	mva a+2 VAR0_B2
+	mva a+3 VAR0_B3
+
+	mwa s NEOMESSAGE_PAR3W
+
+	stz VAR0_TYPE
+	mva #STACK_ADDRESS NEOMESSAGE_PAR1W
+	mva #STACK_SIZE1 NEOMESSAGE_PAR2W
+	stz NEOMESSAGE_PAR1W+1
+	stz NEOMESSAGE_PAR2W+1
+
+	jsr @WaitMessage
+	mva #MATH_GROUP NEOMESSAGE_GROUP
+end;
+{$else}
 asm
 	txa:pha
 
@@ -1901,6 +1976,7 @@ asm
 
 	pla:tax
 end;
+{$endif}
 
 
 procedure Poke(a: word; value: byte); register; stdcall; assembler;

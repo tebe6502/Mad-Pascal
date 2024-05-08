@@ -250,13 +250,13 @@ procedure SetMathStack(v:integer;i:byte);assembler;overload;register;
 asm
     lda i
     bne i1
-    mva #$00 STACK_ADDRESS
+    stz STACK_ADDRESS
     mva v    STACK_ADDRESS+2
     mva v+1  STACK_ADDRESS+4
     mva v+2  STACK_ADDRESS+6
     mva v+3  STACK_ADDRESS+8
 i1
-    mva #$00 STACK_ADDRESS+1
+    stz STACK_ADDRESS+1
     mva v    STACK_ADDRESS+3
     mva v+1  STACK_ADDRESS+5
     mva v+2  STACK_ADDRESS+7
@@ -293,7 +293,7 @@ end;
 
 procedure SetMathVar(v:integer);overload;assembler;register;
 asm
-    mva #$00 VAR_ADDRESS 
+    stz VAR_ADDRESS
     mva v VAR_ADDRESS+1
     mva v+1 VAR_ADDRESS+2
     mva v+2 VAR_ADDRESS+3
