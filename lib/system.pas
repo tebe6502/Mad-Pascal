@@ -1192,6 +1192,8 @@ var x, y: single;
 begin
 {$ifdef neo}
   asm
+    mva #MATH_ATAN     NEOMESSAGE_FUNC
+
     mva value   VAR0_B0
     mva value+1 VAR0_B1
     mva value+2 VAR0_B2
@@ -1203,7 +1205,6 @@ begin
     stz NEOMESSAGE_PAR1W+1
     stz NEOMESSAGE_PAR2W+1
     jsr @WaitMessage
-    mva #MATH_ATAN     NEOMESSAGE_FUNC
     mva #MATH_GROUP    NEOMESSAGE_GROUP
 
     mva VAR0_B0 result
@@ -2333,6 +2334,8 @@ Calculate sine of angle
 begin
 {$ifdef neo}
   asm
+		mva #MATH_SIN      NEOMESSAGE_FUNC
+
 		mva x   VAR0_B0
 		mva x+1 VAR0_B1
 		mva x+2 VAR0_B2
@@ -2344,7 +2347,6 @@ begin
 		stz NEOMESSAGE_PAR1W+1
 		stz NEOMESSAGE_PAR2W+1
 		jsr @WaitMessage
-		mva #MATH_SIN      NEOMESSAGE_FUNC
 		mva #MATH_GROUP    NEOMESSAGE_GROUP
 
 		mva VAR0_B0 result
@@ -2370,6 +2372,8 @@ Calculate cosine of angle
 begin
 {$ifdef neo}
   asm
+		mva #MATH_COS      NEOMESSAGE_FUNC
+
 		mva x   VAR0_B0
 		mva x+1 VAR0_B1
 		mva x+2 VAR0_B2
@@ -2381,7 +2385,6 @@ begin
 		stz NEOMESSAGE_PAR1W+1
 		stz NEOMESSAGE_PAR2W+1
 		jsr @WaitMessage
-		mva #MATH_COS      NEOMESSAGE_FUNC
 		mva #MATH_GROUP    NEOMESSAGE_GROUP
 
 		mva VAR0_B0 result
