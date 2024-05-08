@@ -35,6 +35,7 @@ MOD
 ; *** MUL32: 32-bit multiply
 ; EAX * ECX -> EAX
 .proc	imulECX
+	mva #MATH_MUL      NEOMESSAGE_FUNC
 
 	;mva :eax+0 VAR1_B0
 	;mva :eax+1 VAR1_B1
@@ -53,7 +54,6 @@ MOD
 	stz NEOMESSAGE_PAR1W+1
 	stz NEOMESSAGE_PAR2W+1
 	jsr @WaitMessage
-	mva #MATH_MUL      NEOMESSAGE_FUNC
 	mva #MATH_GROUP    NEOMESSAGE_GROUP
 
 	mva VAR1_B0 :eax+0

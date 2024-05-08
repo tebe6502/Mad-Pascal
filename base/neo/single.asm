@@ -162,6 +162,8 @@ A = FP2MAN0
 
 
 .proc @FADD
+  mva #MATH_ADD      NEOMESSAGE_FUNC
+
   lda #VAR_FLOAT
   sta VAR1_TYPE
   sta VAR2_TYPE
@@ -171,7 +173,6 @@ A = FP2MAN0
   stz NEOMESSAGE_PAR1W+1
   stz NEOMESSAGE_PAR2W+1
   jsr @WaitMessage
-  mva #MATH_ADD      NEOMESSAGE_FUNC
   mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   rts
@@ -179,6 +180,8 @@ A = FP2MAN0
 
 
 .proc @FSUB
+  mva #MATH_SUB      NEOMESSAGE_FUNC
+
   lda #VAR_FLOAT
   sta VAR1_TYPE
   sta VAR2_TYPE
@@ -188,7 +191,6 @@ A = FP2MAN0
   stz NEOMESSAGE_PAR1W+1
   stz NEOMESSAGE_PAR2W+1
   jsr @WaitMessage
-  mva #MATH_SUB      NEOMESSAGE_FUNC
   mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   rts
@@ -425,6 +427,8 @@ EXIT:
 
 
 .proc @FMUL
+  mva #MATH_MUL      NEOMESSAGE_FUNC
+
   lda #VAR_FLOAT
   sta VAR1_TYPE
   sta VAR2_TYPE
@@ -434,7 +438,6 @@ EXIT:
   stz NEOMESSAGE_PAR1W+1
   stz NEOMESSAGE_PAR2W+1
   jsr @WaitMessage
-  mva #MATH_MUL      NEOMESSAGE_FUNC
   mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   rts
@@ -442,6 +445,8 @@ EXIT:
 
 
 .proc @FDIV
+  mva #MATH_FDIV     NEOMESSAGE_FUNC
+
   lda #VAR_FLOAT
   sta VAR1_TYPE
   sta VAR2_TYPE
@@ -451,7 +456,6 @@ EXIT:
   stz NEOMESSAGE_PAR1W+1
   stz NEOMESSAGE_PAR2W+1
   jsr @WaitMessage
-  mva #MATH_FDIV     NEOMESSAGE_FUNC
   mva #MATH_GROUP    NEOMESSAGE_GROUP
 
   rts
