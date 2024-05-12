@@ -186,16 +186,14 @@ var p, k , q: integer;
 
 begin
 
-
 {
-if (pos('l_00E9', TemporaryBuf[3]) > 0) then begin
+if (pos('lda #$29', TemporaryBuf[3]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
 }
-
 
     opt_TEMP_ORD;
     opt_TEMP_CMP;
@@ -211,6 +209,64 @@ end;
     opt_TEMP_ZTMP;
     opt_TEMP_UNROLL;
 
+// -----------------------------------------------------------------------------
+
+
+    if (pos('@move ":bp2" ', TemporaryBuf[4]) > 1) and					// @move ":bp2"				; 4
+
+       (pos('lda ', TemporaryBuf[0]) > 1) and						// lda A				; 0
+       (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
+       (pos('lda ', TemporaryBuf[2]) > 1) and 						// lda A+1				; 2
+       (TemporaryBuf[2] = TemporaryBuf[0] + '+1') and					//
+       (TemporaryBuf[3] = #9'sta :bp2+1') then						// sta :bp2+1				; 3
+       begin
+	TemporaryBuf[4] := #9'@move ' + GetSTRING(0) + ' ' +  copy(TemporaryBuf[4], 15, 256);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+       end;
+
+
+    if (pos('mva:rpl (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rpl (:bp2),y			; 5
+
+       (pos('lda #', TemporaryBuf[0]) > 1) and						// lda #				; 0
+       (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
+       (pos('lda #', TemporaryBuf[2]) > 1) and						// lda #				; 2
+       (TemporaryBuf[3] = #9'sta :bp2+1') and						// sta :bp2+1				; 3
+       (pos('ldy #', TemporaryBuf[4]) > 1) then						// ldy #				; 4
+       begin
+	p := GetWORD(0, 2);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'mwa:rpl $' + IntToHex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+       end;
+
+
+    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mwa:rne (:bp2),y			; 5
+
+       (pos('lda #', TemporaryBuf[0]) > 1) and						// lda #				; 0
+       (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
+       (pos('lda #', TemporaryBuf[2]) > 1) and						// lda #				; 2
+       (TemporaryBuf[3] = #9'sta :bp2+1') and						// sta :bp2+1				; 3
+       (pos('ldy #', TemporaryBuf[4]) > 1) then						// ldy #				; 4
+       begin
+	p := GetWORD(0, 2);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'mwa:rne $' + IntToHex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+       end;
+
+// -----------------------------------------------------------------------------
 
     if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
        (TemporaryBuf[1] = #9'lda @BYTE.MOD.RESULT') then				// lda @BYTE.MOD.RESULT			; 1
@@ -226,6 +282,7 @@ end;
 	TemporaryBuf[1] := '~';
        end;
 
+// -----------------------------------------------------------------------------
 
     if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
        (pos('sta ', TemporaryBuf[1]) > 0) and						// sta F				; 1
@@ -256,7 +313,7 @@ end;
      	 TemporaryBuf[5] := '~';
 	end;
 
-     	TemporaryBuf[6] := #9'mwa #adr.'+tmp+' '+tmp;
+     	TemporaryBuf[6] := '~';//' #9'mwa #adr.'+tmp+' '+tmp;
      	TemporaryBuf[7] := #9'dex';
        end;
 
@@ -1847,7 +1904,7 @@ end;
 
 
 {
-if (pos('ora (:bp2),y', listing[i]) > 0) then begin
+if (pos('lda adr.NODES+64+$01', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1901,14 +1958,13 @@ end;
   for i := 0 to l - 1 do begin
 
 {
-if (pos('lda DST', listing[i]) > 0) then begin
+if (pos('mwy P :bp2', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
-
 
     if opt_FORTMP(i) = false then begin Result := false; Break end;
 
@@ -3202,85 +3258,60 @@ begin				// OptimizeASM
       if (arg0 = 'imulCARD') or (arg0 = 'mulINTEGER') then begin
 	t:='';
 
-        if (target.id = ___NEO) then begin
+	listing[l]    := #9'lda '+GetARG(0, x);
+	listing[l+1]  := #9'sta :ecx';
+	listing[l+2]  := #9'lda '+GetARG(1, x);
+	listing[l+3]  := #9'sta :ecx+1';
+	listing[l+4]  := #9'lda '+GetARG(2, x);
+	listing[l+5]  := #9'sta :ecx+2';
+	listing[l+6]  := #9'lda '+GetARG(3, x);
+	listing[l+7]  := #9'sta :ecx+3';
 
-          listing[l]    := #9'lda '+GetARG(0, x);
-          listing[l+1]  := #9'sta VAR1_B0';
-          listing[l+2]  := #9'lda '+GetARG(1, x);
-          listing[l+3]  := #9'sta VAR1_B1';
-          listing[l+4]  := #9'lda '+GetARG(2, x);
-          listing[l+5]  := #9'sta VAR1_B2';
-          listing[l+6]  := #9'lda '+GetARG(3, x);
-          listing[l+7]  := #9'sta VAR1_B3';
+	listing[l+8]  := #9'lda '+GetARG(0, x-1);
+	listing[l+9]  := #9'sta :eax';
+	listing[l+10] := #9'lda '+GetARG(1, x-1);
+	listing[l+11] := #9'sta :eax+1';
+	listing[l+12] := #9'lda '+GetARG(2, x-1);
+	listing[l+13] := #9'sta :eax+2';
+	listing[l+14] := #9'lda '+GetARG(3, x-1);
+	listing[l+15] := #9'sta :eax+3';
 
-          listing[l+8]  := #9'lda '+GetARG(0, x-1);
-          listing[l+9]  := #9'sta VAR2_B0';
-          listing[l+10] := #9'lda '+GetARG(1, x-1);
-          listing[l+11] := #9'sta VAR2_B1';
-          listing[l+12] := #9'lda '+GetARG(2, x-1);
-          listing[l+13] := #9'sta VAR2_B2';
-          listing[l+14] := #9'lda '+GetARG(3, x-1);
-          listing[l+15] := #9'sta VAR2_B3';
+	listing[l+16] := #9'jsr imulECX';
 
-        end else begin
+	inc(l, 17);
 
-          listing[l]    := #9'lda '+GetARG(0, x);
-          listing[l+1]  := #9'sta :ecx';
-          listing[l+2]  := #9'lda '+GetARG(1, x);
-          listing[l+3]  := #9'sta :ecx+1';
-          listing[l+4]  := #9'lda '+GetARG(2, x);
-          listing[l+5]  := #9'sta :ecx+2';
-          listing[l+6]  := #9'lda '+GetARG(3, x);
-          listing[l+7]  := #9'sta :ecx+3';
+	if arg0 = 'mulINTEGER' then begin
+	listing[l]   := #9'lda :eax';
+	listing[l+1] := #9'sta '+GetARG(0, x-1);
+	listing[l+2] := #9'lda :eax+1';
+	listing[l+3] := #9'sta '+GetARG(1, x-1);
+	listing[l+4] := #9'lda :eax+2';
+	listing[l+5] := #9'sta '+GetARG(2, x-1);
+	listing[l+6] := #9'lda :eax+3';
+	listing[l+7] := #9'sta '+GetARG(3, x-1);
 
-          listing[l+8]  := #9'lda '+GetARG(0, x-1);
-          listing[l+9]  := #9'sta :eax';
-          listing[l+10] := #9'lda '+GetARG(1, x-1);
-          listing[l+11] := #9'sta :eax+1';
-          listing[l+12] := #9'lda '+GetARG(2, x-1);
-          listing[l+13] := #9'sta :eax+2';
-          listing[l+14] := #9'lda '+GetARG(3, x-1);
-          listing[l+15] := #9'sta :eax+3';
+	if sta_im_0(l+1) then begin
+	 listing[l]   := '';
+	 listing[l+1] := '';
+	end;
 
-        end;
+	if sta_im_0(l+3) then begin
+	 listing[l+2] := '';
+	 listing[l+3] := '';
+	end;
 
-        listing[l+16] := #9'jsr imulECX';
+	if sta_im_0(l+5) then begin
+	 listing[l+4] := '';
+	 listing[l+5] := '';
+	end;
 
-        inc(l, 17);
+	if sta_im_0(l+7) then begin
+	 listing[l+6] := '';
+	 listing[l+7] := '';
+	end;
 
-        if arg0 = 'mulINTEGER' then begin
-          listing[l]   := #9'lda :eax';
-          listing[l+1] := #9'sta '+GetARG(0, x-1);
-          listing[l+2] := #9'lda :eax+1';
-          listing[l+3] := #9'sta '+GetARG(1, x-1);
-          listing[l+4] := #9'lda :eax+2';
-          listing[l+5] := #9'sta '+GetARG(2, x-1);
-          listing[l+6] := #9'lda :eax+3';
-          listing[l+7] := #9'sta '+GetARG(3, x-1);
-
-          if sta_im_0(l+1) then begin
-           listing[l]   := '';
-           listing[l+1] := '';
-          end;
-
-          if sta_im_0(l+3) then begin
-           listing[l+2] := '';
-           listing[l+3] := '';
-          end;
-
-          if sta_im_0(l+5) then begin
-           listing[l+4] := '';
-           listing[l+5] := '';
-          end;
-
-          if sta_im_0(l+7) then begin
-           listing[l+6] := '';
-           listing[l+7] := '';
-          end;
-
-          inc(l, 8);
-
-	     end;
+	inc(l, 8);
+	end;
 
       end else
 {

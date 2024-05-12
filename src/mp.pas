@@ -180,7 +180,7 @@ uses
 
 	Common, Messages, Scanner, Parser, Optimize, Diagnostic, MathEvaluate;
 
-
+{
 function Tab2Space(a: string; spc: byte = 8): string;
 var column, nextTabStop: integer;
     ch: char;
@@ -210,7 +210,7 @@ begin
   end;
 
 end;
-
+}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -1364,29 +1364,29 @@ case IndirectionLevel of
     case Size of
       1: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 
 	 ExpandByte;
 	 end;
 
       2: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(1));
 
 	 ExpandWord;
 	 end;
 
       4: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(1));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(2));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(2));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(3));
+	 asm65(#9'mva (:bp2),y' + GetStackVariable(3));
 
 	 end;
       end;
@@ -1411,13 +1411,13 @@ case IndirectionLevel of
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
 	  asm65(#9'lda '+svar);					// pushBYTE
-	  asm65(#9'add'+GetStackVariable(0));
+	  asm65(#9'add' + GetStackVariable(0));
 	  asm65(#9'tay');
 	  asm65(#9'lda '+svar+'+1');
-	  asm65(#9'adc'+GetStackVariable(1));
+	  asm65(#9'adc' + GetStackVariable(1));
 	  asm65(#9'sta :bp+1');
 	  asm65(#9'lda (:bp),y');
-	  asm65(#9'sta'+GetStackVariable(0));
+	  asm65(#9'sta' + GetStackVariable(0));
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');	// +lda
 
@@ -1476,16 +1476,16 @@ case IndirectionLevel of
 	  end else begin
 
 	   asm65(#9'lda '+svar);
-	   asm65(#9'add'+GetStackVariable(0));
+	   asm65(#9'add' + GetStackVariable(0));
 	   asm65(#9'sta :bp2');
 	   asm65(#9'lda '+svar+'+1');
-	   asm65(#9'adc'+GetStackVariable(1));
+	   asm65(#9'adc' + GetStackVariable(1));
 	   asm65(#9'sta :bp2+1');
 
 	   asm65(#9'ldy #$00');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(1));
 
 	  end;
 
@@ -1496,9 +1496,9 @@ case IndirectionLevel of
 	   LoadBP2(IdentIndex, svar);
 
 	   asm65(#9'ldy :STACKORIGIN,x');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	   asm65(#9'mva (:bp2),y' + GetStackVariable(1));
 
 	  end else begin
 
@@ -1556,10 +1556,10 @@ case IndirectionLevel of
 	  end else begin
 
 	    asm65(#9'lda '+svar);
-	    asm65(#9'add'+GetStackVariable(0));
+	    asm65(#9'add' + GetStackVariable(0));
 	    asm65(#9'sta :bp2');
 	    asm65(#9'lda '+svar+'+1');
-	    asm65(#9'adc'+GetStackVariable(1));
+	    asm65(#9'adc' + GetStackVariable(1));
 	    asm65(#9'sta :bp2+1');
 
 	    asm65(#9'ldy #$00');
@@ -1637,7 +1637,7 @@ ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
 
     Gen;
 
-    asm65(#9'lda'+GetStackVariable(0));
+    asm65(#9'lda' + GetStackVariable(0));
 
     if TestName(IdentIndex, svar) then begin
      asm65(#9'add ' + ExtractName(IdentIndex, svar));
@@ -1648,7 +1648,7 @@ ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
     end else begin
      asm65(#9'add ' + svar);
      asm65(#9'sta :TMP');
-     asm65(#9'lda ' + GetStackVariable(1));
+     asm65(#9'lda' + GetStackVariable(1));
      asm65(#9'adc ' + svar + '+1');
      asm65(#9'sta :TMP+1');
     end;
@@ -1666,29 +1666,36 @@ ASPOINTERTOARRAYRECORD:									// array [0..X] of ^record
     case Size of
       1: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(0));
 
 	 ExpandByte;
 	 end;
 
       2: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(0));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(1));
 
 	 ExpandWord;
 	 end;
 
       4: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(0));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(1));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(2));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(2));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(3));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(3));
 
 	 end;
       end;
@@ -1703,7 +1710,7 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
 
     Gen;
 
-    asm65(#9'lda'+GetStackVariable(0));
+    asm65(#9'lda' + GetStackVariable(0));
 
     if TestName(IdentIndex, svar) then begin
      asm65(#9'add ' + ExtractName(IdentIndex, svar));
@@ -1714,7 +1721,7 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     end else begin
      asm65(#9'add ' + svar);
      asm65(#9'sta :bp2');
-     asm65(#9'lda ' + GetStackVariable(1));
+     asm65(#9'lda' + GetStackVariable(1));
      asm65(#9'adc ' + svar + '+1');
      asm65(#9'sta :bp2+1');
     end;
@@ -1727,12 +1734,12 @@ ASPOINTERTOARRAYRECORDTOSTRING:									// array_of_pointer_to_record[index].str
     end else
      asm65(#9'add #$' + IntToHex(par, 2));
 
-    asm65(#9'sta'+GetStackVariable(0));
+    asm65(#9'sta' + GetStackVariable(0));
 
     asm65(#9'iny');
     asm65(#9'lda (:bp2),y');
     asm65(#9'adc #$00');
-    asm65(#9'sta'+GetStackVariable(1));
+    asm65(#9'sta' + GetStackVariable(1));
 
     end;
 
@@ -1745,16 +1752,16 @@ ASPOINTERTORECORDARRAYORIGIN:									// record^.array[i]
     Gen;
 
     if TestName(IdentIndex, svar) then
-     asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2')
+      asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2')
     else
-     asm65(#9'mwy ' + svar + ' :bp2');
+      asm65(#9'mwy ' + svar + ' :bp2');
 
     asm65(#9'lda' + GetStackVariable(0));
 
     if TestName(IdentIndex, svar) then
-     asm65(#9'add #' + svar + '-DATAORIGIN')
+      asm65(#9'add #' + svar + '-DATAORIGIN')
     else
-     asm65(#9'add #$' + IntToHex(par, 2));
+      asm65(#9'add #$' + IntToHex(par, 2));
 
     asm65(#9'sta' + GetStackVariable(0));
     asm65(#9'lda' + GetStackVariable(1));
@@ -1766,29 +1773,36 @@ ASPOINTERTORECORDARRAYORIGIN:									// record^.array[i]
     case Size of
       1: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(0));
 
 	 ExpandByte;
 	 end;
 
       2: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(0));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(1));
 
 	 ExpandWord;
 	 end;
 
       4: begin
 
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(0));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(0));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(1));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(1));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(2));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(2));
 	 asm65(#9'iny');
-	 asm65(#9'mva (:bp2),y'+GetStackVariable(3));
+	 asm65(#9'lda (:bp2),y');
+	 asm65(#9'sta' + GetStackVariable(3));
 
 	 end;
       end;
@@ -2380,6 +2394,7 @@ end;	//GenerateIncDec
 
 procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: integer; Param: string = ''; ParamY: string = '');
 var NumAllocElements: cardinal;
+    IdentTemp: integer;
     svar, svara: string;
 
 
@@ -2443,12 +2458,37 @@ case IndirectionLevel of
   if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
     if TestName(IdentIndex, svar) then begin
-     asm65(#9'lda ' + ExtractName(IdentIndex, svar));
-     asm65(#9'add :STACKORIGIN-1,x');
-     asm65(#9'sta :TMP');
-     asm65(#9'lda ' + ExtractName(IdentIndex, svar) + '+1');
-     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-     asm65(#9'sta :TMP+1');
+
+     IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
+     if (IdentTemp > 0) and (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType = RECORDTOK) and (Ident[IdentTemp].NumAllocElements_ > 1) and (Ident[IdentTemp].NumAllocElements_ <= 128) then begin
+
+       asm65(#9'lda :STACKORIGIN-1,x');
+       asm65(#9'add #$00');
+       asm65(#9'tay');
+       asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+       asm65(#9'adc #$00');
+       asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+       asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + ',y');
+       asm65(#9'sta :bp2');
+       asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + '+1,y');
+       asm65(#9'sta :bp2+1');
+
+     end else begin
+       asm65(#9'lda ' + ExtractName(IdentIndex, svar));
+       asm65(#9'add :STACKORIGIN-1,x');
+       asm65(#9'sta :TMP');
+       asm65(#9'lda ' + ExtractName(IdentIndex, svar) + '+1');
+       asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+       asm65(#9'sta :TMP+1');
+
+       asm65(#9'ldy #$00');
+       asm65(#9'mva (:TMP),y :bp2');
+       asm65(#9'iny');
+       asm65(#9'mva (:TMP),y :bp2+1');
+
+     end;
+
     end else begin
      asm65(#9'lda '+svar);
      asm65(#9'add :STACKORIGIN-1,x');
@@ -2456,13 +2496,19 @@ case IndirectionLevel of
      asm65(#9'lda '+svar+'+1');
      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
      asm65(#9'sta :TMP+1');
-    end;
 
+     asm65(#9'ldy #$00');
+     asm65(#9'mva (:TMP),y :bp2');
+     asm65(#9'iny');
+     asm65(#9'mva (:TMP),y :bp2+1');
+
+    end;
+{
     asm65(#9'ldy #$00');
     asm65(#9'mva (:TMP),y :bp2');
     asm65(#9'iny');
     asm65(#9'mva (:TMP),y :bp2+1');
-
+}
    end else begin
 
      asm65(#9'ldy :STACKORIGIN-1,x');
@@ -6343,7 +6389,7 @@ begin
 	     ((Ident[IdentIndex].Param[ParamIndex].DataType in Pointers) and (Ident[IdentIndex].Param[ParamIndex].NumAllocElements and $FFFF in [0,1])) or
 	     ((Ident[IdentIndex].Param[ParamIndex].DataType in Pointers) and (Ident[IdentIndex].Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK])) or
              (Ident[IdentIndex].Param[ParamIndex].DataType in OrdinalTypes + RealTypes)
-	   ) then begin yes:=true; Break end;
+	   ) then begin yes := TRUE; Break end;
 
 
 //   yes:=true;
@@ -6530,6 +6576,7 @@ begin
 
 //	writeln(Ident[IdentIndex].Param[NumActualParams].Name,',',Ident[IdentIndex].Param[NumActualParams].DataType  ,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements and $FFFF,'/',Ident[IdentIndex].Param[NumActualParams].NumAllocElements shr 16,' | ',ActualParamType,',', AllocElementType);
 
+
 	if (Ident[IdentIndex].Param[NumActualParams].DataType <> UNTYPETOK) and (ActualParamType = POINTERTOK) and (AllocElementType in [POINTERTOK, STRINGPOINTERTOK, PCHARTOK]) then begin
 
  	  asm65(#9'lda :STACKORIGIN,x');
@@ -6554,8 +6601,12 @@ begin
 
 	if IdentTemp > 0 then begin
 
-//      writeln(' - ',Tok[i].Name^,',',ActualParamType,',',AllocElementType, ',', Ident[IdentTemp].NumAllocElements );
-//      writeln(Ident[IdentTemp].DataType,',',Ident[IdentIndex].Param[NumActualParams].DataType);
+
+	if Ident[IdentTemp].Kind = FUNCTIONTOK then iError(i, CantAdrConstantExp);	// VARPASSING function not possible
+
+
+//	writeln(' - ',Tok[i].Name^,',',ActualParamType,',',AllocElementType, ',', Ident[IdentTemp].NumAllocElements );
+//	writeln(Ident[IdentTemp].Kind,',',Ident[IdentTemp].DataType,',',Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	if Ident[IdentTemp].DataType in Pointers then
 	  if not(Ident[IdentIndex].Param[NumActualParams].DataType in [FILETOK, TEXTFILETOK]) then begin
@@ -6576,6 +6627,8 @@ begin
 
 	  end;
 
+
+
 	 if (Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK]) {and (Ident[IdentIndex].Param[NumActualParams].DataType in [RECORDTOK, OBJECTTOK])} then
 	  if (Ident[IdentIndex].Param[NumActualParams].NumAllocElements > 0) and (Ident[IdentTemp].NumAllocElements <> Ident[IdentIndex].Param[NumActualParams].NumAllocElements) then begin
 
@@ -6585,16 +6638,19 @@ begin
 		iError(i, IncompatibleTypeOf, IdentTemp);
 	  end;
 
-	 if Ident[IdentTemp].AllocElementType = UNTYPETOK then begin
+
+	 if (Ident[IdentTemp].AllocElementType = UNTYPETOK) then begin
+
 	   GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
 
-	   if (Ident[IdentIndex].Param[NumActualParams].DataType <> UNTYPETOK) and (Ident[IdentIndex].Param[NumActualParams].DataType <> Ident[IdentTemp].DataType) then
-	     iError(i, IncompatibleTypes, 0, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	   if (Ident[IdentTemp].AllocElementType = UNTYPETOK) then
+	     if (Ident[IdentIndex].Param[NumActualParams].DataType <> UNTYPETOK) and (Ident[IdentIndex].Param[NumActualParams].DataType <> Ident[IdentTemp].DataType) then
+	       iError(i, IncompatibleTypes, 0, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	 end else
 	  if Ident[IdentIndex].Param[NumActualParams].DataType in Pointers then begin
 
-//	   GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].AllocElementType, Ident[IdentTemp].AllocElementType)
+//	   GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].AllocElementType, Ident[IdentTemp].AllocElementType);
 
 	   if (Ident[IdentIndex].Param[NumActualParams].NumAllocElements = 0) and (Ident[IdentTemp].NumAllocElements = 0) then
 // ok ?
@@ -6626,16 +6682,39 @@ begin
 
 	end else
 	  if  Ident[IdentIndex].Param[NumActualParams].DataType <> UNTYPETOK then
-	   if (Ident[IdentIndex].Param[NumActualParams].DataType <> AllocElementType)  then
-	     iError(i, IncompatibleTypes, 0, AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	   if (Ident[IdentIndex].Param[NumActualParams].DataType <> AllocElementType)  then begin
 
-//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].Param[NumActualParams].DataType,',',ActualParamType,' / ',IdentTemp);
+//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].Param[NumActualParams].AllocElementType,' | ',ActualParamType,',',AllocElementType);
+
+	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> UNTYPETOK then begin
+
+	       if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> AllocElementType then
+	         iError(i, IncompatibleTypes, 0, AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
+
+	     end else
+	       iError(i, IncompatibleTypes, 0, AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
+
+	   end;
+
+
+//	writeln('x ',Ident[IdentIndex].name,',', Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType,' | ',ActualParamType,',',AllocElementType,',',IdentTemp);
+
+
+	  if IdentTemp = 0 then
+	   if (Ident[IdentIndex].Param[NumActualParams].DataType = RECORDTOK) and (ActualParamType = POINTERTOK) and (AllocElementType = RECORDTOK) then
+
+	   else
+	   if (ActualParamType = POINTERTOK) and (AllocElementType <> UNTYPETOK) then
+	     GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, AllocElementType)
+	   else
+	    GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+
 
        end else begin
 
 	i := CompileExpression(i + 2, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);	// Evaluate actual parameters and push them onto the stack
 
-//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',    Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
 
 	if (Tok[i].Kind = IDENTTOK) and (ActualParamType in [RECORDTOK, OBJECTTOK]) and not (Ident[IdentIndex].Param[NumActualParams].DataType in Pointers) then
@@ -6810,6 +6889,74 @@ begin
 
 	ExpandParam(Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
        end;
+
+
+
+	if (Ident[IdentIndex].isRecursion = false) and (Ident[IdentIndex].isStdCall = false) and (ParamIndex > 1) and
+	   (Ident[IdentIndex].Param[NumActualParams].PassMethod <> VARPASSING) and
+	   (Ident[IdentIndex].Param[NumActualParams].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and
+	   (Ident[IdentIndex].Param[NumActualParams].NumAllocElements and $FFFF > 1) then
+
+	 if Ident[IdentIndex].Param[NumActualParams].DataType in [RECORDTOK, OBJECTTOK] then begin
+
+ 	  if Ident[IdentIndex].isOverload then
+  	    svar := GetLocalName(IdentIndex) + '.' + GetOverloadName(IdentIndex)
+ 	  else
+  	    svar := GetLocalName(IdentIndex);
+
+	  asm65(#9'lda :STACKORIGIN,x');
+	  asm65(#9'sta :bp2');
+	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	  asm65(#9'sta :bp2+1');
+
+	  j := RecordSize(GetIdent(Types[Ident[IdentIndex].Param[NumActualParams].Numallocelements].Field[0].Name ) );
+
+//	writeln('1: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].Kind ,',',  Ident[IdentIndex].Param[NumActualParams].name,',',Ident[IdentIndex].Param[NumActualParams].DataType,',',j);
+
+	  if j = 256 then begin
+	    asm65(#9'ldy #$00');;
+	    asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y+' );
+	  end else
+	  if j <= 128 then begin
+	    asm65(#9'ldy #$' + IntToHex(j - 1, 2));
+	    asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y-' );
+	  end else
+	    asm65(#9'@move ":bp2" #' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ' #' + IntToStr(j));
+
+
+	 end else
+         if not (Ident[IdentIndex].Param[NumActualParams].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+
+ 	  if Ident[IdentIndex].isOverload then
+  	    svar := GetLocalName(IdentIndex) + '.' + GetOverloadName(IdentIndex)
+ 	  else
+  	    svar := GetLocalName(IdentIndex);
+
+	  asm65(#9'lda :STACKORIGIN,x');
+	  asm65(#9'sta :bp2');
+	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	  asm65(#9'sta :bp2+1');
+
+    	  if Ident[IdentIndex].Param[NumActualParams].NumAllocElements shr 16 <> 0 then
+     	   j := (Ident[IdentIndex].Param[NumActualParams].NumAllocElements and $FFFF) * (Ident[IdentIndex].Param[NumActualParams].NumAllocElements shr 16)
+    	  else
+     	   j := Ident[IdentIndex].Param[NumActualParams].NumAllocElements;
+
+	  j := j * DataSize[Ident[IdentIndex].Param[NumActualParams].AllocElementType];
+
+//	writeln('2: ',Ident[IdentIndex].isStdCall ,',',Ident[IdentIndex].NumAllocElements,',',  Ident[IdentIndex].Param[NumActualParams].name,',',Ident[IdentIndex].Param[0].AllocElementType,',',j);
+
+	  if j = 256 then begin
+	    asm65(#9'ldy #$00');;
+	    asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y+' );
+	  end else
+	  if j <= 128 then begin
+	    asm65(#9'ldy #$' + IntToHex(j - 1, 2));
+	    asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y-' );
+	  end else
+	    asm65(#9'@move ":bp2" #' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ' #' + IntToStr(j));
+
+	 end;
 
 
        dec(NumActualParams);
@@ -8008,15 +8155,12 @@ case Tok[i].Kind of
 
       CheckTok(i + 1, CPARTOK);
 
-      Push(1, ASVALUE, DataSize[SHORTINTTOK]);
+      Push(1, ASVALUE, DataSize[ValType]);
 
       if Kind = PREDTOK then
        GenerateBinaryOperation(MINUSTOK, ValType)
       else
        GenerateBinaryOperation(PLUSTOK, ValType);
-
-//      if not (ConstValType in [CHARTOK, BOOLEANTOK]) then
-//       ConstValType := GetValueType(ConstVal);
 
       Result:=i + 1;
     end;
@@ -8576,8 +8720,9 @@ case Tok[i].Kind of
 
 	    ValType := Ident[IdentIndex].AllocElementType;
 
-
 	    if Tok[i + 2].Kind = DEREFERENCETOK then begin
+
+//	writeln(valType,' / ',Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
 
 	     Push(0, ASPOINTERTORECORDARRAYORIGIN, DataSize[ValType], IdentIndex, 0);
 
@@ -8657,7 +8802,7 @@ case Tok[i].Kind of
 // zamiast 'record_ptr'
 // -----------------------------------------------------------------------------
 
-//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ );
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
 
 	    IdentTemp := 0;
 
@@ -8728,8 +8873,6 @@ case Tok[i].Kind of
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].idType,'/',Ident[IdentIndex].Kind,' = ',Ident[IdentIndex].PassMethod ,' | ',ValType,',',Tok[j].kind,',',Tok[j+1].kind);
 
 	   ValType := Ident[IdentIndex].AllocElementType;
-
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 	   if (ValType = CHARTOK) then
 
@@ -10438,8 +10581,15 @@ case Tok[i].Kind of
     	    VarType := Ident[IdentIndex].AllocElementType;
 
 
-//	    writeln(Ident[IdentIndex].Name,',',vartype,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Kind);//+ '.' + Tok[i + 3].Name^);
+//	    writeln(Ident[IdentIndex].Name,',',vartype,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', Tok[i+2].Kind);
 
+
+	    if Tok[i + 2].Kind = DEREFERENCETOK then begin
+	     inc(i);
+
+	     Push(0, ASPOINTERTOARRAYORIGIN2, DataSize[VarType], IdentIndex, 0);
+
+	    end;
 
 										// label.field[index] -> label + field[index]
 
@@ -10466,8 +10616,7 @@ case Tok[i].Kind of
 	    end;
 
 
-//	    writeln(Ident[IdentIndex].Name,',',vartype,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].Kind);//+ '.' + Tok[i + 3].Name^);
-
+//	    writeln(Ident[IdentIndex].Name,',',vartype,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].Kind);//+ '.' + Tok[i + 3].Name^);
 
 	    if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 	       IndirectionLevel := ASPOINTERTOARRAYRECORD;
@@ -10620,6 +10769,14 @@ case Tok[i].Kind of
 	      end;
 
 
+ 	      if (Tok[i].Kind = DEREFERENCETOK) and (VarType = POINTERTOK) and (ExpressionType = RECORDTOK) then begin
+
+	         ExpressionType := RECORDTOK;
+	         VarType := RECORDTOK;
+
+	      end;
+
+
 //	if (Tok[k].Kind = IDENTTOK) then
 //	  writeln(Ident[IdentIndex].Name,'/',Tok[k].Name^,',', VarType,':', ExpressionType,' - ', Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[GetIdent(Tok[k].Name^)].DataType,':',Ident[GetIdent(Tok[k].Name^)].AllocElementType,':',Ident[GetIdent(Tok[k].Name^)].NumAllocElements ,' / ',IndirectionLevel)
 //	else
@@ -10652,10 +10809,17 @@ case Tok[i].Kind of
 		IndirectionLevel := ASSTRINGPOINTER1TOARRAYORIGIN		// tab[ ] := 'a'
 
 	       else
-	       if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then
-		 GetCommonType(i + 1, Ident[IdentIndex].DataType, ExpressionType)
-	       else
-	         GetCommonType(i + 1, Ident[IdentIndex].AllocElementType, ExpressionType);
+	       if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then begin
+
+
+		if (Ident[IdentIndex].DataType = POINTERTOK) and (ExpressionType in [RECORDTOK, OBJECTTOK]) then
+
+		else
+		  GetCommonType(i + 1, Ident[IdentIndex].DataType, ExpressionType);
+
+
+	        end else
+	          GetCommonType(i + 1, Ident[IdentIndex].AllocElementType, ExpressionType);
 
 	      end else
 	       if (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) then begin
@@ -10713,7 +10877,7 @@ case Tok[i].Kind of
 				   if (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK] ) then
 				    Error(k, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 			else
-			  GetCommonType(i + 1, VarType, ExpressionType)
+			  GetCommonType(i + 1, VarType, ExpressionType);
 
 			end;
 
@@ -10833,7 +10997,8 @@ case Tok[i].Kind of
 //			   if {(Tok[i + 1].Kind <> DEREFERENCETOK) and }(Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] ) then
 //			    Error(k, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 		  else
-  		    GetCommonType(i + 1, VarType, ExpressionType)
+  		    GetCommonType(i + 1, VarType, ExpressionType);
+
 		  end;
 
 
@@ -10841,12 +11006,17 @@ case Tok[i].Kind of
 
 //		   writeln('2> ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', Ident[IdentTemp].DataType,',',Ident[IdentTemp].AllocElementType,',',Ident[IdentTemp].NumAllocElements);
 
-		   if (ADDRESS = false) and {(Ident[IdentTemp].NumAllocElements > 0)} (Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements) and
-	            (ExpressionType in [RECORDTOK, OBJECTTOK]) {or (Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements)} then
-	  	     if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then
-                       Error(i, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"')
-		     else
-                       Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+  		   if Ident[IdentTemp].Kind = FUNCTIONTOK then
+		    yes := Ident[IdentIndex].NumAllocElements <> Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].NumAllocElements
+		   else
+		    yes := Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements;
+
+
+		   if yes and (ADDRESS = false) and (ExpressionType in [RECORDTOK, OBJECTTOK]) then
+	  	      if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+                        Error(i, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"')
+		      else
+                        Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 
 	       end;
 
@@ -10927,7 +11097,7 @@ case Tok[i].Kind of
 
 		  end;
 
-
+{
 	          if RecordSize(IdentIndex) <= 8 then begin
 
 		   asm65(#9'ldy #$00');
@@ -10938,58 +11108,89 @@ case Tok[i].Kind of
 
 		    if j <> RecordSize(IdentIndex)-1 then asm65(#9'iny');
 		   end;
+}
+		  if RecordSize(IdentIndex)  <= 128 then begin
 
-		  end else begin
-		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
-		    asm65(#9'mva:rpl (:bp2),y adr.'+Ident[IdentIndex].Name+',y-');
-		  end;
+			asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+			asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
+
+		  end else
+			asm65(#9'@move ":bp2" ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
+
 
 		end else
 		if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType = RECORDTOK) and (RecordSize(IdentIndex) <= 8) then begin
 
-		  if RecordSize(IdentIndex) = 1 then
-		   asm65(#9' mva '+Name+' '+GetLocalName(IdentIndex, 'adr.'))
-		  else
-		   asm65(#9':'+IntToStr(RecordSize(IdentIndex))+' mva '+Name+'+# '+GetLocalName(IdentIndex, 'adr.')+'+#');
+			if RecordSize(IdentIndex) = 1 then
+			  asm65(#9' mva ' + Name + ' ' + GetLocalName(IdentIndex, 'adr.'))
+			else
+			  asm65(#9':' + IntToStr(RecordSize(IdentIndex)) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#');
 
 		end else
 		 if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentTemp].DataType = POINTERTOK) then begin
-{
-		  if RecordSize(IdentIndex) <= 128 then begin
 
-		    asm65(#9'mwy '+Name+' :bp2');
-		    asm65(#9'mwy '+Ident[IdentIndex].Name+' :TMP');
-		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
-		    asm65(#9'mva:rpl (:bp2),y (:TMP),y-');
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType ,',',Ident[IdentIndex].NumAllocElements,'/',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].pASSmETHOD);
+//	writeln(Ident[IdentTemp].Name,',',Ident[IdentTemp].DataType,',',Ident[IdentTemp].AllocElementType ,',',Ident[IdentTemp].NumAllocElements,'/',Ident[IdentTemp].NumAllocElements_,',',Ident[IdentTemp].pASSmETHOD);
+//	writeln('--- ', IndirectionLevel);
 
-		  end else
-}
-		   asm65(#9'@move '+Name+' '+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)))
+			asm65(#9'@move ' + Name + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)))
 
 		 end else
 		  if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType = POINTERTOK) then begin
 
-		   if RecordSize(IdentIndex) <= 128 then begin
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType ,',',Ident[IdentIndex].NumAllocElements,'/',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].pASSmETHOD);
+//	writeln(Ident[IdentTemp].Name,',',Ident[IdentTemp].DataType,',',Ident[IdentTemp].AllocElementType ,',',Ident[IdentTemp].NumAllocElements,'/',Ident[IdentTemp].NumAllocElements_,',',Ident[IdentTemp].pASSmETHOD);
+//	writeln('--- ', IndirectionLevel);
 
-		    asm65(#9'mwy '+Name+' :bp2');
-		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
-		    asm65(#9'mva:rpl (:bp2),y adr.'+Ident[IdentIndex].Name+',y-');
 
-		   end else
-		    asm65(#9'@move '+Name+' #adr.'+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
+			if Ident[IdentTemp].PassMethod = VARPASSING then begin
+
+			  asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
+
+			  if RecordSize(IdentIndex) <= 128 then begin
+
+			    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+  			    asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
+
+			  end else
+			    asm65(#9'@move ":bp2" #' + GetLocalName(IdentIndex, 'adr.') + ' #' + IntToStr(RecordSize(IdentIndex)));
+
+			end else
+
+			if RecordSize(IdentIndex) <= 128 then begin
+
+			  asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
+
+			  asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+			  asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
+
+			end else
+			  asm65(#9'@move ' + Name + ' #' + GetLocalName(IdentIndex, 'adr.') + ' #' + IntToStr(RecordSize(IdentIndex)));
+
 
  		  end else begin
 
-		   if (pos('adr.', Name) > 0) and (RecordSize(IdentIndex) <= 128) then begin
+			if (pos('adr.', Name) > 0) and (RecordSize(IdentIndex) <= 128) then begin
 
-		    asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
-		    asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
-		    asm65(#9'mva:rpl '+Name+',y (:bp2),y-');
+			  if IndirectionLevel = ASPOINTERTOARRAYORIGIN2 then begin
 
-		   end else
-		    asm65(#9'@move #'+Name+' '+Ident[IdentIndex].Name+' #'+IntToStr(RecordSize(IdentIndex)));
+			    asm65(#9'lda' + GetStackVariable(0));
+			    asm65(#9'sta :bp2');
+			    asm65(#9'lda' + GetStackVariable(1));
+			    asm65(#9'sta :bp2+1');
+
+			  end else
+			    asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
+
+			  asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+			  asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
+
+			end else
+			  asm65(#9'@move #' + Name + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
 		  end;
+
+
 
      	       end else	   // ExpressionType <> RECORDTOK + OBJECTTOK
 		 GetCommonType(i + 1, ExpressionType, RECORDTOK);
@@ -11003,8 +11204,6 @@ case Tok[i].Kind of
 //	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType ,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].Name,',',IndirectionLevel,',',vartype,' || ',Ident[GetIdent(Tok[k].Name^)].NumAllocElements,',',Ident[GetIdent(Tok[k].Name^)].PassMethod);
 
 //	writeln(address,',',Tok[k].kind,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].AllocElementType,' / ', VarType,',',ExpressionType,',',IndirectionLevel);
-
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 		 if (Tok[k].Kind <> ADDRESSTOK) and (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and (Ident[IdentIndex].AllocElementType = STRINGPOINTERTOK) then begin
@@ -11064,9 +11263,9 @@ case Tok[i].Kind of
 		    ResetOpty;
 
 		    if (j <= 4) and (Ident[IdentTemp].AllocElementType <> RECORDTOK) then
-		     asm65(#9':'+IntToStr(j)+' mva '+Name+'+# '+GetLocalName(IdentIndex, 'adr.')+'+#')
+		     asm65(#9':' + IntToStr(j) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#')
 		    else
-		     asm65(#9'@move '+svar+' '+Ident[IdentIndex].Name+' #'+IntToStr(j));
+		     asm65(#9'@move ' + svar + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(j));
 
 		  end else
 		   GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex, par1, par2);
@@ -14398,10 +14597,10 @@ function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; 
 var
   VarOfSameType: TVariableList;
   Param: TParamList;
-  j, NumVarOfSameType, VarOfSameTypeIndex, idx, tmpVarDataSize, tmpVarDataSize_, ParamIndex, ForwardIdentIndex, IdentIndex: integer;
+  j, idx, NumVarOfSameType, VarOfSameTypeIndex, tmpVarDataSize, tmpVarDataSize_, ParamIndex, ForwardIdentIndex, IdentIndex: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
-  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, pack, IsNestedFunction,
+  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, Assignment, pack, IsNestedFunction,
   isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm, isReg, isInt, isInl, isOvr: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
@@ -14679,7 +14878,7 @@ for ParamIndex := NumParams downto 1 do
           ((Param[ParamIndex].DataType in Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF in [0,1])) or
           ((Param[ParamIndex].DataType in Pointers) and (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK])) or
 	  (Param[ParamIndex].DataType in OrdinalTypes + RealTypes)
-	) then begin yes:=true; Break end;
+	) then begin yes := TRUE; Break end;
 
 
 // yes:=true;
@@ -14694,46 +14893,69 @@ if (Ident[BlockIdentIndex].ObjectIndex = 0) then
 if yes then begin
  for ParamIndex := 1 to NumParams do begin
 
-//  if ParamIndex = 1 then begin
-//   asm65(#9'txa');
-//   asm65(#9'jmi @main');
-//  end;
+  if Ident[BlockIdentIndex].isRecursion or Ident[BlockIdentIndex].isStdCall or (NumParams = 1) then begin
 
-  if Param[ParamIndex].PassMethod = VARPASSING then
-     GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
-  else
-     GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	if Param[ParamIndex].PassMethod = VARPASSING then
+	  GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
+	else
+	  GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
 
-  if (Param[ParamIndex].PassMethod <> VARPASSING) and (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Param[ParamIndex].NumAllocElements and $FFFF > 1) then // copy arrays
-   if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then begin
 
-    idx := RecordSize(GetIdent(Param[ParamIndex].Name));
+  	if (Param[ParamIndex].PassMethod <> VARPASSING) and
+     	   (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and
+     	   (Param[ParamIndex].NumAllocElements and $FFFF > 1) then			// copy arrays
 
-    asm65(':move');
-    asm65(Param[ParamIndex].Name);
-    asm65(IntToStr(idx));
+   	if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then begin
 
-//    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(idx));
-//    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
-   end else
-   if not (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+    	   asm65(':move');
+    	   asm65(Param[ParamIndex].Name);
+    	   asm65(IntToStr( RecordSize(GetIdent(Param[ParamIndex].Name)) ));
 
-    if Param[ParamIndex].NumAllocElements shr 16 <> 0 then
-     NumAllocElements := (Param[ParamIndex].NumAllocElements and $FFFF) * (Param[ParamIndex].NumAllocElements shr 16)
-    else
-     NumAllocElements := Param[ParamIndex].NumAllocElements;
+   	end else
+  	 if not (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
 
-    asm65(':move');
-    asm65(Param[ParamIndex].Name);
-    asm65(IntToStr(integer(NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
+	   if Param[ParamIndex].NumAllocElements shr 16 <> 0 then
+     	     NumAllocElements := (Param[ParamIndex].NumAllocElements and $FFFF) * (Param[ParamIndex].NumAllocElements shr 16)
+    	   else
+     	     NumAllocElements := Param[ParamIndex].NumAllocElements;
 
-//    asm65(#9'@move '+Param[ParamIndex].Name+' #adr.'+Param[ParamIndex].Name+' #'+IntToStr(integer(Param[ParamIndex].NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
-//    asm65(#9'mwa #adr.'+Param[ParamIndex].Name+' '+Param[ParamIndex].Name);
-   end;
+    	   asm65(':move');
+    	   asm65(Param[ParamIndex].Name);
+    	   asm65(IntToStr(integer(NumAllocElements * DataSize[Param[ParamIndex].AllocElementType])));
+   	end;
 
-   if (Paramindex <> NumParams) then asm65(#9'jmi @main');
+  end else begin
+
+  	Assignment := true;
+
+  	if (Param[ParamIndex].PassMethod <> VARPASSING) and
+     	   (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and
+     	   (Param[ParamIndex].NumAllocElements and $FFFF > 1) then			// copy arrays
+
+   	if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then begin
+
+	   Assignment := false;
+	   asm65(#9'dex');
+
+ 	end else
+  	 if not (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+
+	   Assignment := false;
+	   asm65(#9'dex');
+
+	end;
+
+  	if Assignment then
+	  if Param[ParamIndex].PassMethod = VARPASSING then
+	    GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
+	  else
+	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+  end;
+
+  if (Paramindex <> NumParams) then asm65(#9'jmi @main');
 
  end;
+
 
 asm65('@main');
 end;
@@ -15257,11 +15479,26 @@ while Tok[i].Kind in
 
 	   j := CompileType(i + 5, VarType, NumAllocElements, AllocElementType);
 
-	   NumAllocElements := 1;
-	   AllocElementType := VarType;
-	   VarType := POINTERTOK;
+  	   if VarType in [RECORDTOK, OBJECTTOK] then
+	     Error(i, 'Only Array of ^'+InfoAboutToken(VarType)+' supported')
+	   else
+	   if VarType = ENUMTOK then
+	     Error(i, InfoAboutToken(VarType)+' arrays are not supported');
 
-	   open_array := true;
+	   if VarType = POINTERTOK then begin
+
+	    if AllocElementType = UNTYPETOK then begin
+	     NumAllocElements := 1;
+	     AllocElementType := VarType;
+	    end;
+
+	   end else begin
+	     NumAllocElements := 1;
+	     AllocElementType := VarType;
+	     VarType := POINTERTOK;
+	   end;
+
+	   if not (AllocElementType in [RECORDTOK, OBJECTTOK]) then open_array := true;
 
 	  end else begin
 
@@ -15386,12 +15623,21 @@ while Tok[i].Kind in
 
 	   CheckTok(i + 2, EQTOK);
 
-	   j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
+	   if (Tok[i + 3].Kind = ARRAYTOK) and (Tok[i + 4].Kind <> OBRACKETTOK) then begin
+	    j := CompileType(i + 5, VarType, NumAllocElements, AllocElementType);
 
-	   if Tok[i +3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+	    DefineIdent(i + 1, Tok[i + 1].Name^, USERTYPE, VarType, NumAllocElements, AllocElementType, 0, Tok[i + 3].Kind);
+	    Ident[NumIdent].Pass := CALLDETERMPASS;
 
-	   DefineIdent(i + 1, Tok[i + 1].Name^, USERTYPE, VarType, NumAllocElements, AllocElementType, 0, Tok[i + 3].Kind);
-	   Ident[NumIdent].Pass := CALLDETERMPASS;
+	   end else begin
+	    j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
+
+	    if Tok[i + 3].Kind = ARRAYTOK then j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
+
+	    DefineIdent(i + 1, Tok[i + 1].Name^, USERTYPE, VarType, NumAllocElements, AllocElementType, 0, Tok[i + 3].Kind);
+	    Ident[NumIdent].Pass := CALLDETERMPASS;
+
+	   end;
 
 	  end;
 
@@ -15404,7 +15650,6 @@ while Tok[i].Kind in
 
     i := i + 1;
     end;	// if TYPETOK
-
 // -----------------------------------------------------------------------------
 //				  VAR
 // -----------------------------------------------------------------------------
@@ -15414,6 +15659,10 @@ while Tok[i].Kind in
 
     isVolatile := FALSE;
     isStriped  := FALSE;
+
+    NestedDataType := 0;
+    NestedAllocElementType := 0;
+    NestedNumAllocElements := 0;
 
     if (Tok[i + 1].Kind = OBRACKETTOK) and (Tok[i + 2].Kind in [VOLATILETOK, STRIPEDTOK]) then begin
        CheckTok(i + 3, CBRACKETTOK);
@@ -15470,19 +15719,34 @@ while Tok[i].Kind in
       isExternal := false;
 
 
-      if (IdType = ARRAYTOK) and (Tok[i + 2].Kind = OFTOK) then begin			// array of type [Integer Types]
+      if (IdType = ARRAYTOK) and (Tok[i + 2].Kind = OFTOK) then begin			// array of type [Ordinal Types]
 
 	i := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
-	NumAllocElements := 1;
-	AllocElementType := VarType;
-	VarType := POINTERTOK;
+    	if VarType in [RECORDTOK, OBJECTTOK] then
+	  Error(i, 'Only Array of ^'+InfoAboutToken(VarType)+' supported')
+	else
+	if VarType = ENUMTOK then
+	  Error(i, InfoAboutToken(VarType)+' arrays are not supported');
 
-	if Tok[i +1].Kind <> EQTOK then isAbsolute := true;
+	if VarType = POINTERTOK then begin
 
-	ConstVal:=1;
+	  if AllocElementType = UNTYPETOK then begin
+	   NumAllocElements := 1;
+	   AllocElementType := VarType;
+	  end;
 
-	open_array := true;
+	end else begin
+	  NumAllocElements := 1;
+	  AllocElementType := VarType;
+	  VarType := POINTERTOK;
+	end;
+
+	if Tok[i + 1].Kind <> EQTOK then isAbsolute := true;
+
+	ConstVal := 1;
+
+	if not (AllocElementType in [RECORDTOK, OBJECTTOK]) then open_array := true;
 
       end else begin
 
@@ -15694,11 +15958,11 @@ while Tok[i].Kind in
 	end;
 
 
-//	writeln(VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
+//	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
 
 	if ( (VarType in Pointers) and (AllocElementType = RECORDTOK) ) then begin
 
-//	 writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NumAllocElements and $ffff,',',NumAllocElements shr 16);
+//	 writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
 
 	 tmpVarDataSize_ := VarDataSize;
 
@@ -15945,7 +16209,6 @@ while Tok[i].Kind in
  	       i := ReadDataArray(i, idx, Ident[NumIdent].AllocElementType, Ident[NumIdent].NumAllocElements or Ident[NumIdent].NumAllocElements_ shl 16, false, Tok[i-2].Kind = PCHARTOK);
 
 	    end;
-
 
 	end;
 
