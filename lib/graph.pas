@@ -57,7 +57,143 @@ SwitchBuffer
 
 interface
 
+{$IFDEF ATARI}
+uses types, atari;
+{$ELSE}
+uses types;
+{$ENDIF}
+
+
+type
+	TDisplayBuffer = record
+			dl: word;
+			bp: word;
+			clr: procedure ();
+		       end;
+
+const
+
+	{ graphic drivers }
+	CurrentDriver	= -128;
+	Detect		= 0;
+	CGA		= 1;
+	MCGA		= 2;
+	EGA		= 3;
+	EGA64		= 4;
+	EGAMono		= 5;
+	LowRes		= 6;	{ nickysn: used to be 1, but moved to 6, because I added CGA }
+	HercMono	= 7;
+	VGA		= 9;
+	VESA		= 10;
+
+	D1bit	= 11;
+	D2bit	= 12;
+	D4bit	= 13;
+	D6bit	= 14;		// 64 colors Half-brite mode - Amiga
+	D8bit	= 15;
+	D12bit	= 16;		// 4096 color modes HAM mode - Amiga
+
+	m640x400 = 8 + 16;
+	m640x480 = 8 + 16;
+
+	{ error codes }
+	grOK		= 1;
+	grNoInitGraph	= -1;
+	grNotDetected	= -2;
+	grFileNotFound	= -3;
+	grInvalidDriver	= -4;
+	grNoLoadMem	= -5;
+	grNoScanMem	= -6;
+	grNoFloodMem	= -7;
+	grFontNotFound	= -8;
+	grNoFontMem	= -9;
+	grInvalidMode	= -10;
+	grError		= -11;
+	grIOerror	= -12;
+	grInvalidFont	= -13;
+	grInvalidFontNum= -14;
+	grInvalidVersion= -18;
+
+	{ CGA Driver modes }
+	CGAC0 = 0;
+	CGAC1 = 1;
+	CGAC2 = 2;
+	CGAC3 = 3;
+	CGAHi = 4;
+
+	{ MCGA Driver modes }
+	MCGAC0 = 0;
+	MCGAC1 = 1;
+	MCGAC2 = 2;
+	MCGAC3 = 3;
+	MCGAMed = 4;
+	MCGAHi = 5;
+
+	{ EGA Driver modes }
+	EGALo      = 0;  { 640x200 16 color 4 page }
+	EGAHi      = 1;  { 640x350 16 color 2 page }
+
+	{ EGA64 Driver modes }
+	EGA64Lo    = 0;  { 640x200 16 color 1 page }
+	EGA64Hi    = 1;  { 640x350 4 color  1 page }
+
+	{ EGAMono Driver modes }
+	EGAMonoHi  = 3;  { 640x350 64K on card, 1 page; 256K on card, 2 page }
+
+	{ VGA Driver modes }
+	VGALo   = 10;		//0;
+	VGAMed  = 15+16;	//1;
+	VGAHi   = 8+16;		//2;
+
+var
+	GraphResult: byte;
+
+	GetColor: byte;
+
+	VideoRAM: pointer;
+
+	LastArcCoords: TLastArcCoords;
+
+
 {$i '../src/targets/graphh.inc'}
+
+
+	procedure Arc(X, Y, StAngle, EndAngle, Radius: Word);
+	procedure Bar(x1, y1, x2, y2: Smallint);
+	procedure Bar3D(x1, y1, x2, y2 : smallint;depth : word;top : boolean);
+	procedure Circle(x, y, r: word);
+	procedure ClipLine(x1, y1, x2, y2: smallint);
+	procedure DrawPoly(amount: byte; var vertices);
+	procedure FillCircle(x0, y0, radius: word);
+	procedure FillPoly(amount: byte; var vertices);
+	procedure Ellipse(x0, y0, a, b: word); overload;
+	procedure Ellipse(X, Y, StAngle, EndAngle, xRadius,yRadius: Word); overload;
+	procedure FillEllipse(x0, y0, a, b: word);
+	procedure FillRect(Rect: TRect);
+	procedure FloodFill(a,b: smallint; newcolor: byte);
+	procedure FloodFillH(x,y: smallint; color: byte);
+	function GetMaxX: word;
+	function GetMaxY: word;
+	function GetX: smallint;
+	function GetY: smallint;
+	function GetPixel(x,y: smallint): byte; assembler;
+	function GetMaxColor: word;
+	procedure InitGraph(mode: byte); overload;
+	procedure InitGraph(driver, mode: byte; dev: PString); overload;
+	procedure Line(x1,y1,x2,y2: smallint); overload;
+	procedure Line(x1, y1, x2, y2: float16); overload;
+	procedure Line(x1, y1, x2, y2: real); overload;
+	procedure MoveRel(Dx, Dy: smallint);
+	procedure MoveTo(x, y: smallint); assembler;
+	procedure PieSlice(X, Y, StAngle, EndAngle, Radius: Word);
+	procedure Rectangle(x1, y1, x2, y2: Smallint); overload;
+	procedure Rectangle(Rect: TRect); overload;
+	procedure SetBkColor(color: byte); assembler;
+	procedure SetClipRect(x0,y0,x1,y1: smallint); overload;
+	procedure SetClipRect(Rect: TRect); overload;
+	procedure SetColor(color: byte); assembler;
+//	procedure SetFillStyle(pattern, color: byte);
+	procedure CloseGraph; assembler;
 
 	procedure fLine(x0, y0, x1, y1: smallint);
 	procedure HLine(x1,x2, y: smallint);
