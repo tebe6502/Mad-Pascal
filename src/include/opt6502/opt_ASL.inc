@@ -912,6 +912,23 @@ begin
 
 
     if asl_stack(i) and										// asl :STACKORIGIN			; 0
+       rol_a(i+1) and										// rol @				; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH		; 2
+       mwy_bp2(i+3) and										// mwy XX :bp2				; 3
+       ldy_stack(i+4) then									// ldy :STACKORIGIN			; 4
+     if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) and
+        (copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256)) then
+       begin
+	listing[i+1] := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+2] := '';
+
+	listing[i+4] := #9'tay';
+
+	exit(false);
+       end;
+
+
+    if asl_stack(i) and										// asl :STACKORIGIN			; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3

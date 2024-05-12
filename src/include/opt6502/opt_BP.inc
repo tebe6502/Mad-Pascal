@@ -1748,6 +1748,22 @@ begin
       end;
 
 
+    if lda_adr(i) and (iy(i) = false) and							// lda adr.			; 0
+       sta_bp2(i+1) and										// sta :bp2			; 1
+       lda_adr(i+2) and (iy(i+2) = false) and							// lda adr.  +1			; 2
+       sta_bp2_1(i+3) and									// sta :bp2+1			; 3
+       ldy(i+4) then										// ldy				; 4
+//     if pos(listing[i], listing[i+2]) > 0 then
+      begin
+	listing[i] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	exit(false);
+      end;
+
+
     if lda(i) and (lda_stack(i) = false) and							// lda TB			; 0
        (listing[i+1] = #9'sta :TMP') and							// sta :TMP			; 1
        lda(i+2) and (lda_stack(i+2) = false) and						// lda TB+1			; 2
