@@ -1,6 +1,6 @@
 program match_benchmark;
 
-uses crt, neo6502, neo6502math;
+uses crt, neo6502system, neo6502, neo6502math;
 
 var
     time1      : cardinal absolute $60;
@@ -214,15 +214,15 @@ begin
     end;
     time2 := NeoGetTimer;
     writeln('65c02 float16 time : ', time2 - time1);
-
-    writeln('256 reps. for 65c02');
+    
+    writeln('1024 reps. for 65c02');
     NeoWaitForVblank;
     time1 := NeoGetTimer;
-    for i := 255 downto 0 do begin
+    for i := (1024 * 8 - 1) downto 0 do begin
         s := Sin(float(180.0));
     end;
     time2 := NeoGetTimer;
-    writeln('65c02 float time : ', time2 - time1, NEO_ENTER);
+    writeln('65c02 float time : ', time2 - time1, ' ', s, NEO_ENTER);
 
     repeat until false;
 
