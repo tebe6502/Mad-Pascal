@@ -40,7 +40,7 @@ begin
 
  end;
 
- VideoRam := $6000;
+ VideoRam := pointer($6000);
 
  fillchar(pointer($5000), 1024, 3);
 
