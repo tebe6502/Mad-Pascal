@@ -2414,7 +2414,7 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
   if (IdentIndex > 0) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) then begin
     NumAllocElements := Ident[IdentIndex].NumAllocElements;
 
-//    writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ shl 16 );
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_ shl 16 );
 
 {
     if Ident[IdentIndex].DataType in Pointers then begin
@@ -2450,7 +2450,7 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
 
  end else begin
 
-  if not (Tok[i + 1].Kind in OrdinalTypes + RealTypes) then
+  if not (Tok[i + 1].Kind in OrdinalTypes + RealTypes + [POINTERTOK]) then
    iError(i + 1, IdentifierExpected);
 
   NumAllocElements := 0;
@@ -3020,8 +3020,8 @@ if Tok[i].Kind in AllTypes then
   end;
 
 
-  if (NumAllocElements shr 16) * (NumAllocElements and $0000FFFF) * DataSize[NestedDataType] > 40960-1 then
-    Error(i, 'Array [0..' + IntToStr(NumAllocElements and $0000FFFF-1)+', 0..' + IntToStr(NumAllocElements shr 16-1)+'] size exceeds available RAM');
+  if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) * DataSize[NestedDataType] > 40960-1 then
+    Error(i, 'Array [0..' + IntToStr(NumAllocElements and $FFFF-1)+', 0..' + IntToStr(NumAllocElements shr 16-1)+'] size exceeds available RAM');
 
 
 // sick3

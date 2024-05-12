@@ -52,7 +52,8 @@ function constant: real;
 var
      n: string;
     v1: real;
-    p: word;
+     v, k, ln: integer;
+     p: word;
   pflg: boolean;
 
   IdentTemp: integer;
@@ -62,15 +63,71 @@ begin
 
   skip_blanks;
 
-  while (s[cix] in ['0'..'9']) or ((s[cix]='.') and (not pflg)) do
-    begin
-      if (s[cix]='.') then
-        pflg:=true;
+  p:=0;
 
-      n:=concat(n, s[cix]); inc(cix);
-    end;
 
-  val(n,v1,p);
+  if s[cix] = '%' then begin						// bin
+
+	  inc(cix);
+
+	  while (s[cix] in ['0', '1']) do
+	    begin
+	      n := n + s[cix];
+
+	      inc(cix);
+	    end;
+
+       if length(n)=0 then
+	 Error(TokenIndex, 'Invalid constant %');
+
+       //remove leading zeros
+       i:=1;
+       while n[i]='0' do inc(i);
+
+       ln:=length(n);
+       v:=0;
+
+       //do the conversion
+       for k:=ln downto i do
+	if n[k]='1' then
+	 v:=v+(1 shl (ln-k));
+
+       v1:=v;
+
+  end else
+
+
+  if s[cix] = '$' then begin						// hex
+
+	  n:='$';
+	  inc(cix);
+
+	  while (UpCase(s[cix]) in ['0'..'9', 'A'..'F']) do
+	    begin
+	      n := n + s[cix];
+
+	      inc(cix);
+	    end;
+
+	  val(n,v,p);
+
+	  v1:=v;
+
+  end else begin							// dec
+
+	  while (s[cix] in ['0'..'9']) or ((s[cix]='.') and (not pflg)) do
+	    begin
+	      if (s[cix]='.') then pflg:=true;
+
+	      n := n + s[cix];
+
+	      inc(cix);
+	    end;
+
+	  val(n,v1,p);
+
+  end;
+
 
   if (p<>0) then begin
 
@@ -126,7 +183,7 @@ begin
 
   if (op > 0) then
     begin
-      cix:=cix+length(fop[op]);
+      cix:=cix + length(fop[op]);
 
       skip_blanks;
 
