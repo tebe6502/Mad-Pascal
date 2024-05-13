@@ -624,7 +624,7 @@ var sp: ^shortreal;
 begin
 	Result:=0.0;
 
-	if x < 0.0 then exit;
+	if x <= 0.0 then exit;
 
 	sp:=@c;
 
@@ -682,7 +682,7 @@ var sp: ^real;
 begin
 	Result:=0.0;
 
-	if x < 0.0 then exit;
+	if x <= 0.0 then exit;
 
 	sp:=@c;
 
@@ -757,7 +757,7 @@ var sp: ^single;
 begin
 	Result:=0;
 
-	if integer(x) < 0 then exit;
+	if integer(x) <= 0 then exit;
 
 	sp:=@c;
 
@@ -787,7 +787,7 @@ var sp: ^float16;
 begin
 	Result:=0;
 
-	if smallint(x) < 0 then exit;
+	if smallint(x) <= 0 then exit;
 
 	sp:=@c;
 
@@ -817,7 +817,7 @@ var sp: ^single;
 begin
 	Result:=0;
 
-	if x < 0 then exit;
+	if x <= 0 then exit;
 
 	sp:=@c;
 
