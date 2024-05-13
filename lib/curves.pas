@@ -8,8 +8,8 @@ type
 	PPoint = ^TPoint;
 	ArrayPoints = array of PPoint;
 
-Procedure Curve (p1, p2, p3: TPoint; Segments: Byte); 
-Procedure CubicBezierCurve (p1, p2, p3, p4: TPoint; Segments: Byte); 
+Procedure Curve (p1, p2, p3: TPoint; Segments: Byte);
+Procedure CubicBezierCurve (p1, p2, p3, p4: TPoint; Segments: Byte);
 Procedure Catmull_Rom_Spline (NumPoints: Byte; var Points: ArrayPoints; Segments: Byte);
 Procedure BSpline (NumPoints: Byte; var Points: ArrayPoints; Segments: Byte);
 
@@ -17,7 +17,7 @@ Procedure BSpline (NumPoints: Byte; var Points: ArrayPoints; Segments: Byte);
 Implementation
 
 
-Procedure Curve (p1, p2, p3: TPoint; Segments: Byte); 
+Procedure Curve (p1, p2, p3: TPoint; Segments: Byte);
 { Draw a curve from (x1,y1) through (x2,y2) to (x3,y3) divided in "Segments" segments }
 Var
   lsteps: byte;
@@ -37,7 +37,7 @@ Begin
   fx:=(LongInt (p3.x-(p2.x shl 1)+p1.x) SHL 16) DIV (lsteps*lsteps);
   fy:=(LongInt (p3.y-(p2.y shl 1)+p1.y) SHL 16) DIV (lsteps*lsteps);
   Dec (lsteps);
-  
+
   While lsteps > 0 Do Begin
     t1:=p3.x;
     t2:=p3.y;
@@ -46,12 +46,12 @@ Begin
     Line ( t1,t2,p3.x,p3.y );
     Dec (lsteps);
   End;
-  
+
   Line ( p3.x,p3.y,p1.x,p1.y );
 End;
 
 
-Procedure CubicBezierCurve (p1, p2, p3, p4: TPoint; Segments: Byte); 
+Procedure CubicBezierCurve (p1, p2, p3, p4: TPoint; Segments: Byte);
 { Draw a cubic bezier-curve using the basis functions directly }
 Var
   tx1, tx2, tx3, ty1, ty2, ty3, mu, mu2, mu3, mudelta: float16;
@@ -70,7 +70,7 @@ Begin
   xstart:=p1.x;
   ystart:=p1.y;
   mu:=mu+mudelta;
-  
+
   For n:=1 to Segments Do Begin
     mu2:=mu*mu;
     mu3:=mu2*mu;
@@ -107,7 +107,7 @@ Var
 Begin
   mu2:=mu*mu;
   mu3:=mu2*mu;
-  
+
   tmp0:=(-p0 + 3*p1 - 3*p2 + p3);
   tmp1:=(2*p0 - 5*p1 + 4*p2 - p3);
 
@@ -123,18 +123,18 @@ Var
 Begin
   If (NumPoints<4) Or (NumPoints>31) then Exit;
   mudelta:=1/Segments;
-  
+
   For n:=3 to NumPoints-1 Do Begin
     mu:=0;
-  
+
     pt0:=Points[n-3];
     pt1:=Points[n-2];
     pt2:=Points[n-1];
     pt3:=Points[n];
-   
+
     x1:=Calculate (mu,pt0.x,pt1.x,pt2.x,pt3.x);
     y1:=Calculate (mu,pt0.y,pt1.y,pt2.y,pt3.y);
-        
+
     mu:=mu+mudelta;
     For h:=1 to Segments Do Begin
       pt0:=Points[n-3];
@@ -159,9 +159,11 @@ Procedure BSpline (NumPoints: Byte; var Points: ArrayPoints; Segments: Byte);
 type Rmas = array[0..10] of single;
 
 Var i, j: byte;
-    oldy,oldx,x,y: smallint;
-    part,t,xx,yy,xmin,xmax,sum: single;
-    
+    newx,newy,oldy,oldx,x,y: smallint;
+    part,t,xx,yy: single;
+
+    pt: PPoint;
+
     dx,dy,wx,wy,px,py,xp,yp,temp,path,zc,u: Rmas;
 
 Function f(g: single): single;
@@ -171,20 +173,27 @@ end;
 
 Begin
     if NumPoints>10 then exit;
-    
-    oldx:=999;
 
-    x:=Points[0].x;
-    y:=Points[0].y;
     zc[0]:=0.0;
-    
+
+    pt:=Points[0];
+
     for i:=1 to NumPoints do
     begin
-       xx:=Points[i-1].x - Points[i].x; 
-       yy:=Points[i-1].y - Points[i].y;
+       oldx:=pt.x;
+       oldy:=pt.y;
        
+       inc(pt);
+       
+       x:=pt.x;
+       y:=pt.y;
+       
+       xx:=oldx - x;
+       yy:=oldy - y;
+
        t:=sqrt(xx*xx+yy*yy);
-       zc[i]:=zc[i-1]+t;     {establish a proportional linear progression}
+
+       zc[i]:=zc[i-1] + t;     {establish a proportional linear progression}
     end;
 
 
@@ -193,25 +202,44 @@ Begin
     begin
        dx[i]:=2*(zc[i+1]-zc[i-1]);
        dy[i]:=2*(zc[i+1]-zc[i-1]);
-    end;    
-    
+    end;
+
     for i:=0 to NumPoints-1 do
     begin
        u[i]:=zc[i+1]-zc[i];
     end;
-        
+
+
+    pt:=Points[0];
+
     for i:=1 to NumPoints-1 do
     begin
-       wy[i]:=6*((Points[i+1].y-Points[i].y) / u[i]-(Points[i].y-Points[i-1].y)/u[i-1]);
-       wx[i]:=6*((Points[i+1].x-Points[i].x) / u[i]-(Points[i].x-Points[i-1].x)/u[i-1]);
+
+       oldx:=pt.x;
+       oldy:=pt.y;
+       
+       inc(pt);
+
+       x:=pt.x;
+       y:=pt.y;
+       
+       inc(pt);
+
+       newx:=pt.x;
+       newy:=pt.y;
+
+       dec(pt);
+ 
+       wy[i] := 6 * ((newy - y) / u[i] - (y - oldy) / u[i-1]);
+       wx[i] := 6 * ((newx - x) / u[i] - (x - oldx) / u[i-1]);
     end;
-    
-    py[0]:=0.0; 
-    px[0]:=0.0;    
-    px[1]:=0; 
-    py[1]:=0;
-    
-    py[NumPoints]:=0.0; 
+
+    py[0]:=0.0;
+    px[0]:=0.0;
+    px[1]:=0.0;
+    py[1]:=0.0;
+
+    py[NumPoints]:=0.0;
     px[NumPoints]:=0.0;
 
     for i:=1 to NumPoints-2 do
@@ -221,7 +249,7 @@ Begin
        wx[i+1]:=wx[i+1]-wx[i]*u[i]/dx[i];
        dx[i+1]:=dx[i+1]-u[i]*u[i]/dx[i];
     end;
-    
+
     for i:=NumPoints-1 downto 1 do
     begin
        py[i]:=(wy[i]-u[i]*py[i+1])/dy[i];
@@ -229,28 +257,38 @@ Begin
     end;
 
  { Draw spline	}
+    oldx:=999;
+
     for i:=0 to NumPoints-2 do
     begin
        for j:=0 to Segments-1 do
        begin
-	  part:=zc[i]-(((zc[i]-zc[i+1])/Segments)*j);
-	  t:=(part-zc[i])/u[i];
+	  part:=zc[i]-(((zc[i]-zc[i+1]) / Segments)*j);
+	  t:=(part-zc[i]) / u[i];
 
-	  part:=t*Points[i+1].y+(1-t)*Points[i].y+u[i]*u[i]*(f(t)*py[i+1]+f(1-t)*py[i]) * 0.166666667;	//   /6.0 -> *0,166666667
-	  y:=round(part);
+	  pt:=Points[i];
 
-	  part:=zc[i]-(((zc[i]-zc[i+1])/Segments)*j);
-	  t:=(part-zc[i])/u[i];
+	  x:=pt.x;
+	  y:=pt.y;
 
-	  part:=t*Points[i+1].x+(1-t)*Points[i].x+u[i]*u[i]*(f(t)*px[i+1]+f(1-t)*px[i]) * 0.166666667;
-	  x:=round(part);
+	  inc(pt);
 
-	  if oldx<>999 then line(oldx,oldy,x,y);
+	  newx:=pt.x;
+	  newy:=pt.y;
+
+	  yy:=t*newy+(1-t)*y+u[i]*u[i]*(f(t)*py[i+1]+f(1-t)*py[i]) * 0.166666667;	//   /6.0 -> *0,166666667
+
+	  xx:=t*newx+(1-t)*x+u[i]*u[i]*(f(t)*px[i+1]+f(1-t)*px[i]) * 0.166666667;
+
+	  x:=round(xx);
+	  y:=round(yy);
+
+	  if oldx <> 999 then line(oldx,oldy,x,y);
 	  oldx:=x;
 	  oldy:=y;
 	end;
      end;
   end;
 
- 
+
 END.
