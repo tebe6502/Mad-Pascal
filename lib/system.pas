@@ -74,10 +74,6 @@ WriteSector
 
 interface
 
-{$ifdef neo}
-uses neo6502system;
-{$endif}
-
 type	TString = string[32];
 	(*
 	@description:
