@@ -2,7 +2,7 @@ unit neo6502system;
 (*
  @type: unit
  @author: Bartosz Zbytniewski (zbyti)
- @name: Overdrive standard supported functions of Mad Pascal
+ @name: Override standard supported functions of Mad Pascal
 
  @version: 0.1
 
