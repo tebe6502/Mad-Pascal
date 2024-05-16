@@ -13891,7 +13891,7 @@ begin
 
     asm65;
 
-    if RCLIBRARY then asm65('@InitLibrary'#9'= :START');
+    if LIBRARY_USE then asm65('@InitLibrary'#9'= :START');
 
     if VarSize and (size > 0) then begin
       asm65('@VarData'#9'= '+varbegin);
