@@ -35,7 +35,78 @@ interface
 
 uses	types, atari;
 
-{$i graphh.inc}
+type
+	TDisplayBuffer = record
+			dl: word;
+			bp: word;
+			clr: procedure ();
+		       end;
+
+
+var	WIN_LEFT: smallint = 0;
+	WIN_RIGHT: smallint = 39;
+	WIN_TOP: smallint = 0;
+	WIN_BOTTOM: smallint = 23;
+
+	GraphResult: byte;
+
+	GetColor: byte;
+
+	VideoRAM: pointer;
+
+	LastArcCoords: TLastArcCoords;
+
+	procedure Arc(X, Y, StAngle, EndAngle, Radius: Word);
+	procedure Bar(x1, y1, x2, y2: Smallint);
+	procedure Bar3D(x1, y1, x2, y2 : smallint;depth : word;top : boolean);
+	procedure Circle(x, y, r: word);
+	procedure ClipLine(x1, y1, x2, y2: smallint);
+	procedure DrawPoly(amount: byte; var vertices);
+	procedure FillCircle(x0, y0, radius: word);
+	procedure FillPoly(amount: byte; var vertices);
+	procedure Ellipse(x0, y0, a, b: word); overload;
+	procedure Ellipse(X, Y, StAngle, EndAngle, xRadius,yRadius: Word); overload;
+	procedure FillEllipse(x0, y0, a, b: word);
+	procedure FillRect(Rect: TRect);
+	procedure FloodFill(a,b: smallint; newcolor: byte);
+	procedure FloodFillH(x,y: smallint; color: byte);
+	function GetMaxX: word;
+	function GetMaxY: word;
+	function GetX: smallint;
+	function GetY: smallint;
+	function GetPixel(x,y: smallint): byte; assembler;
+	function GetMaxColor: word;
+	procedure InitGraph(mode: byte); overload;
+	procedure InitGraph(driver, mode: byte; dev: PString); overload;
+	procedure Line(x1,y1,x2,y2: smallint); overload;
+	procedure Line(x1, y1, x2, y2: float16); overload;
+	procedure Line(x1, y1, x2, y2: real); overload;
+	procedure MoveRel(Dx, Dy: smallint);
+	procedure MoveTo(x, y: smallint); assembler;
+	procedure PieSlice(X, Y, StAngle, EndAngle, Radius: Word);
+	procedure Rectangle(x1, y1, x2, y2: Smallint); overload;
+	procedure Rectangle(Rect: TRect); overload;
+	procedure SetBkColor(color: byte); assembler;
+	procedure SetClipRect(x0,y0,x1,y1: smallint); overload;
+	procedure SetClipRect(Rect: TRect); overload;
+	procedure SetColor(color: byte); assembler;
+//	procedure SetFillStyle(pattern, color: byte);
+	procedure CloseGraph; assembler;
+
+	procedure SetColorMapEntry; overload; assembler;
+	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
+	procedure SetColorMapDimensions(w,h: byte); register; assembler;
+	procedure SetCurrentPaletteEntry(nr: word); register;
+	procedure SetPaletteEntry(nr: word; r,g,b: byte); register; overload;
+	procedure SetPaletteEntry(r,g,b: byte); register; overload;
+	procedure SetRGBPalette(pal: byte); assembler; register; overload;
+	procedure SetRGBPalette(pal, cnt: byte); assembler; register; overload;
+	procedure SetRGBPalette(cnt: byte; r,g,b: byte); assembler; overload;
+	procedure SetRGBPalette(r,g,b: byte); assembler; register; overload;
+	procedure SetRGBPalette(c: cardinal); assembler; register; overload;
+	procedure SetRGBPalette(cnt:byte; c: cardinal); assembler; register; overload;
+	procedure SetPlayfieldPalette(a: byte); register; assembler;
+	procedure SetOverlayPalette(a: byte); register; assembler;
 
 	procedure SetDisplayBuffer(var a: TDisplayBuffer);
 	procedure fLine(x0,y0,x1,y1: byte); assembler;
@@ -875,7 +946,39 @@ stop	ldx rX: #$00
 end;
 
 
-{$i graph2.inc}
+procedure MoveTo(x, y: smallint); assembler;
+(*
+@description:
+Move cursor to absolute position.
+*)
+asm
+	lda y+1
+	bpl _0
+
+	lda #0
+	sta y
+	sta y+1
+_0
+	lda x+1
+	bpl _1
+
+	lda #0
+	sta x
+	sta x+1
+_1
+	cpw y main.system.ScreenHeight
+	bcc _2
+
+	sbw main.system.ScreenHeight #1 y
+_2
+	cpw x main.system.ScreenWidth
+	bcc _3
+
+	sbw main.system.ScreenWidth #1 x
+_3
+	mwa x CurrentX
+	mwa y CurrentY
+end;
 
 
 function Scanline(y: smallint): PByte;
@@ -894,7 +997,6 @@ begin
  Result:=pointer(VideoRam + lineLo[i] + lineHi[i] shl 8);
 
 end;
-
 
 
 procedure LineTo(x, y: smallint);
@@ -1284,9 +1386,76 @@ end;
 end;
 
 
-{$i graph3.inc}
+procedure SetDisplayBuffer(var a: TDisplayBuffer);
+(*
+@description:
+Set video buffer which is displayed
+*)
+begin
+	sdlstl := a.dl;
+	dlistl := sdlstl;
+end;
+
+
+procedure ClrBuffer;
+var x, y: pointer;
+    l: word;
+begin
+
+ x:=Scanline(WIN_TOP);
+
+ y:=Scanline(WIN_BOTTOM + 1);
+ l:=word(y);
+
+ dec(l, word(x));
+
+ fillbyte(x, l, 0);
+
+end;
+
+
+function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
+(*
+@description:
+Initialize new graphical buffer
+*)
+begin
+
+ ramtop := bound;
+
+ InitGraph(mode);
+
+ a.dl := sdlstl;
+ a.bp := savmsc;
+
+ a.clr := @ClrBuffer;
+
+end;
+
+
+procedure SwitchDisplayBuffer(var a,b: TDisplayBuffer);
+(*
+@description:
+Switch graphical buffer between A <> B
+*)
+var tmp: TDisplayBuffer;
+begin
+
+ tmp:=b;
+
+ b:=a;
+ a:=tmp;
+
+ SetDisplayBuffer(a);
+ SetActiveBuffer(b);
+
+ b.clr;
+
+end;
+
 
 {$i vbxe.inc}
+
 {$i graph.inc}
 
 end.
