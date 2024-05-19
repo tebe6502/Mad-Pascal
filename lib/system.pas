@@ -2472,6 +2472,19 @@ asm
 	sta (P),y
 
 	adw :psptr size
+
+	cpw :psptr #$c000
+	bcc @exit
+
+	@print #$45
+	@print #$52
+	@print #$52
+	@print #$20
+	lda #147		; Insufficient RAM
+	jsr @printBYTE._a
+	@printEOL
+	lda #$02
+	jmp @halt
 end;
 
 
@@ -2489,6 +2502,19 @@ asm
 	sta Result+1
 
 	adw :psptr size
+
+	cpw :psptr #$c000
+	bcc @exit
+
+	@print #$45
+	@print #$52
+	@print #$52
+	@print #$20
+	lda #147		; Insufficient RAM
+	jsr @printBYTE._a
+	@printEOL
+	lda #$02
+	jmp @halt
 end;
 
 
