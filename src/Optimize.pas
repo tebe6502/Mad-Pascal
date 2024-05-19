@@ -579,6 +579,16 @@ var i, l, k, m, x: integer;
      Result := listing[i] = #9'lda :bp2+1'
    end;
 
+   function STA_TMP(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sta :TMP'
+   end;
+
+   function STA_TMP_1(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sta :TMP+1'
+   end;
+
    function STA_BP2(i: integer): Boolean;
    begin
      Result := listing[i] = #9'sta :bp2'
@@ -1957,14 +1967,16 @@ end;
 
   for i := 0 to l - 1 do begin
 
+
 {
-if (pos('mwy P :bp2', listing[i]) > 0) then begin
+if (pos('lda adr.XBUF1+$17', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
     if opt_FORTMP(i) = false then begin Result := false; Break end;
 

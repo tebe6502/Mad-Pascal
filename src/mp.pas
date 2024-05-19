@@ -39,6 +39,7 @@ Contributors:
 	- unit ZX2
 
 + Daniel Koźmiński :
+
 	- unit STRINGUTILS
 	- unit CIO
 
@@ -3251,6 +3252,24 @@ ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:				// record_array[index].array[i]
     end else
      asm65(#9'mwy ' + svar + ' :bp2');
 
+{
+        if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].PassMethod = VARPASSING) then begin
+
+
+  writeln(Ident[Identindex].name,',',Ident[Identindex].AllocElementType,',',Ident[Identindex].NumAllocElements,',',Ident[Identindex].kind);
+
+
+	   asm65(#9'ldy #$00') ;
+	   asm65(#9'lda (:bp2),y') ;
+	   asm65(#9'pha') ;
+	   asm65(#9'iny') ;
+	   asm65(#9'lda (:bp2),y') ;
+	   asm65(#9'sta :bp2+1') ;
+	   asm65(#9'pla') ;
+	   asm65(#9'sta :bp2') ;
+	end;
+}
+
     LoadRegisterY;
 
     case Size of
@@ -6192,6 +6211,7 @@ begin
 //	writeln('1: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].idType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,'..',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].PassMethod,',',DEREFERENCE,',',varpass,' o ',Ident[IdentIndex].isAbsolute);
 
                      if (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK, FILETOK, TEXTFILETOK]) or
+		        (VarPass and (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in AllTypes - [PROCVARTOK, RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements = 0)) or
 		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (VarPass or (Ident[IdentIndex].PassMethod = VARPASSING)) ) or
 		        (Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Value and $ff = 0) and (byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127])) or
 		        ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements_ = 0)) or
@@ -6792,8 +6812,6 @@ begin
 	     else
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> BYTETOK then		// wyjatkowo akceptujemy PBYTE jako STRING
 	       iError(i, IncompatibleTypes, 0, Ident[IdentTemp].DataType, -Ident[IdentIndex].Param[NumActualParams].AllocElementType);
-
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 {
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = PCHARTOK) then begin
@@ -10751,7 +10769,7 @@ case Tok[i].Kind of
 		ExpressionType := VarType;
 
 
-	      if ((VarType = POINTERTOK) and (ExpressionType = STRINGPOINTERTOK)) then begin
+	      if (VarType = POINTERTOK) and (ExpressionType = STRINGPOINTERTOK) then begin
 
 		if (Ident[IdentIndex].AllocElementType = CHARTOK) then begin	// +1
 		  asm65(#9'lda :STACKORIGIN,x');
@@ -10959,9 +10977,9 @@ case Tok[i].Kind of
 // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 		else
-		 if Ident[IdentIndex].AllocElementType <> 0 then begin
+		 if Ident[IdentIndex].AllocElementType <> UNTYPETOK then begin
 
-		  if (ExpressionType = STRINGPOINTERTOK) and (Ident[IdentIndex].AllocElementType = CHARTOK) then
+		  if (ExpressionType in [PCHARTOK, STRINGPOINTERTOK]) and (Ident[IdentIndex].AllocElementType = CHARTOK) then
 
 		  else
 		   Error(i + 1, 'Incompatible types: got "' + InfoAboutToken(ExpressionType) + '" expected "' + Ident[IdentIndex].Name + '"');
@@ -12821,7 +12839,7 @@ WHILETOK:
 	  i := CompileExpression(j, ExpressionType);
 
 
-	  if (ExpressionType = CHARTOK) and (Tok[i].Kind = DEREFERENCETOK) then begin
+	  if (ExpressionType = CHARTOK) and (Tok[i].Kind = DEREFERENCETOK) and (Tok[i - 1].Kind <> IDENTTOK) then begin
 
 			asm65(#9'lda :STACKORIGIN,x');
 		    	asm65(#9'sta :bp2');
