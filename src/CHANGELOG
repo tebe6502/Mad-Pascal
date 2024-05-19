@@ -1,6 +1,11 @@
+19.05.2024
+- nowe przyklady kompresja/dekompresja LZW2, UNLZW, UPKR
+
 05.05.2024
 - dodana możliwość definiowania tablic 'open array' dla rekordów
 - dodana obsługa liczb HEX, BIN dla {$eval }
+- poprawiony sposob przekazywania tablic/recordow do proc/func
+- szybsze 'mulINTEGER' dla NEO
 
 26.04.2024
 - poprawiony odczyt adresu dla 'array of type = [ ]'
