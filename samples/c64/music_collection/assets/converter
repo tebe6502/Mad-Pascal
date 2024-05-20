@@ -1,0 +1,164 @@
+#!/usr/bin/php
+
+#Ripper (PSID format) & relocator for C64 Music Assembler
+#relocation possible only by changing the memory page
+
+<?php
+
+//uncomment for daily usage, comment for development
+error_reporting(0);
+
+//---------------------------------------------------------------------------------------------------------------
+//useful constants, most for PSID format
+//---------------------------------------------------------------------------------------------------------------
+define("HEADER_LENGHT"             , 0x02);
+define("DATA_OFFSET"               , 0x07);
+define("DATA_ORIGINAL"             , 0x09);
+define("INIT_ADDRESS"              , 0x0A);
+define("PLAY_ADDRESS"              , 0x0C);
+define("SEQUENCES_TABLE_MAX_LENGHT", 0xFD);
+define("SEQUENCES_POINTER"         , 0xA7);
+define("FREQUENCY_TABLE_LENGHT"    , 0x60);
+define("FREQUENCY_TABLE_MSB"       , 0x1C5);
+define("FREQUENCY_TABLE_LSB"       , 0x437);
+
+//---------------------------------------------------------------------------------------------------------------
+//MSB data for relocation, based on fixed RAW Music Assembler data
+//---------------------------------------------------------------------------------------------------------------
+$arrReloc = array(
+  //MSB INIT procedure
+  0x003,
+
+  //MSB IRQ routine
+  0x007,
+
+  //rest of the player MSB code
+  0x01d, 0x025, 0x02a, 0x02d, 0x030, 0x038, 0x03b, 0x03e, 0x042, 0x047,
+  0x056, 0x05b, 0x063, 0x068, 0x071, 0x077, 0x07c, 0x093, 0x09a, 0x09f,
+  0x0a3, 0x0a8, 0x0ad, 0x0ba, 0x0bf, 0x0c2, 0x0c5, 0x0da, 0x0f1, 0x0fe,
+  0x108, 0x10e, 0x111, 0x114, 0x117, 0x11a, 0x11d, 0x124, 0x129, 0x137,
+  0x13d, 0x140, 0x152, 0x158, 0x161, 0x170, 0x173, 0x17b, 0x17e, 0x183,
+  0x186, 0x190, 0x195, 0x19a, 0x19f, 0x1ad, 0x1b2, 0x1b8, 0x1bd, 0x1c3,
+  0x228, 0x22d, 0x234, 0x237, 0x23c, 0x23f, 0x24a, 0x254, 0x257, 0x25a,
+  0x25d, 0x260, 0x269, 0x26e, 0x273, 0x276, 0x279, 0x27f, 0x282, 0x287,
+  0x28a, 0x28f, 0x292, 0x29b, 0x2a3, 0x2af, 0x2b2, 0x2c9, 0x2d6, 0x2db,
+  0x2de, 0x2e4, 0x2ec, 0x2ef, 0x2f2, 0x2f7, 0x2ff, 0x302, 0x305, 0x30a,
+  0x30f, 0x312, 0x317, 0x31e, 0x321, 0x326, 0x334, 0x337, 0x33c, 0x33f,
+  0x342, 0x34b, 0x351, 0x356, 0x35b, 0x361, 0x366, 0x36b, 0x36e, 0x375,
+  0x37c, 0x37f, 0x384, 0x387, 0x38a, 0x390, 0x396, 0x39c, 0x3a3, 0x3aa,
+  0x3af, 0x3b5, 0x3b8, 0x3bb, 0x3c1, 0x3c4, 0x3c7, 0x3ce, 0x3d4, 0x3e8,
+  0x3ed, 0x3f2, 0x3f7, 0x3fa, 0x403, 0x408, 0x410, 0x427, 0x42c, 0x42f,
+  0x432, 0x435,
+  
+  //arpeggios MSB table
+  0x4a9, 0x4aa, 0x4ab, 0x4ac, 0x4ad, 0x4ae, 0x4af, 0x4b0, 0x4b1, 0x4b2,
+  0x4b3, 0x4b4, 0x4b5, 0x4b6, 0x4b7, 
+
+  //track MSB sequences order
+  0x4bc, 0x4bd, 0x4be
+);
+
+//---------------------------------------------------------------------------------------------------------------
+//check existence of the parameters
+//---------------------------------------------------------------------------------------------------------------
+$options = getopt("f:r:");
+
+if (empty($options['f'])) {
+  exit("which file you want to relocate? use -f parameter\n");
+} else {
+  $tuneName = $options['f'];
+}
+
+if (empty($options['r'])) {
+  $newAddress = 'c000';
+} else {
+  $newAddress  = $options['r'];
+}
+
+//---------------------------------------------------------------------------------------------------------------
+//open *.sid file in binary mode
+//---------------------------------------------------------------------------------------------------------------
+$fp       = fopen($tuneName, 'rb') or die("Unable to open file!\n");
+$filesize = filesize($tuneName);
+$binary   = fread($fp, $filesize);
+fclose($fp);
+
+//---------------------------------------------------------------------------------------------------------------
+//checking if the relocation conditions are met
+//---------------------------------------------------------------------------------------------------------------
+$fileOriginal = bin2hex($binary[DATA_ORIGINAL] . $binary[DATA_ORIGINAL - 1]);
+if ($fileOriginal != 0) exit("unable to relocate, not original tune\n");
+
+$fileOffset = ord($binary[DATA_OFFSET]);
+if (ord($binary[$fileOffset]) != 0) exit("unable to relocate, header LSB is not 0\n");
+
+//---------------------------------------------------------------------------------------------------------------
+//some variables
+//---------------------------------------------------------------------------------------------------------------
+$oldHiByte       = ord($binary[$fileOffset + 1]);
+
+//warning: no validation for -f & -r parameters
+$newTuneName     = strtolower(substr($tuneName, 0, -4)) . '.rip';
+$newHiByte       = ord(hex2bin(substr($newAddress, 0, -2)));
+
+$fileHeader      = bin2hex($binary[$fileOffset + 1] . $binary[$fileOffset]);
+$playAddress     = bin2hex($binary[PLAY_ADDRESS] . $binary[PLAY_ADDRESS + 1]);
+$initAddress     = bin2hex($binary[INIT_ADDRESS] . $binary[INIT_ADDRESS + 1]);
+
+//---------------------------------------------------------------------------------------------------------------
+//strip off PSID data and C64 2-byte header from file
+//---------------------------------------------------------------------------------------------------------------
+$binary = substr($binary, $fileOffset + HEADER_LENGHT);
+
+//---------------------------------------------------------------------------------------------------------------
+//get sequences location
+//---------------------------------------------------------------------------------------------------------------
+$sequencesPointer = bin2hex($binary[SEQUENCES_POINTER + 1] . $binary[SEQUENCES_POINTER]);
+$sequencesTab     = bin2hex(chr(ord($binary[SEQUENCES_POINTER + 1]) - $oldHiByte) . $binary[SEQUENCES_POINTER]);
+
+//conversion for array index arithmetic operations
+$sequencesTab = hexdec($sequencesTab);
+
+//---------------------------------------------------------------------------------------------------------------
+//main relocator code
+//---------------------------------------------------------------------------------------------------------------
+foreach ($arrReloc as $value) {
+  $binary[$value] = chr(ord($binary[$value]) - $oldHiByte + $newHiByte);
+}
+
+for ($i = 0; $i < SEQUENCES_TABLE_MAX_LENGHT; $i++) {
+  $value = ord($binary[$sequencesTab + $i]);
+  if ($value == 0) break;
+
+  $binary[$sequencesTab + $i] = chr($value - $oldHiByte + $newHiByte);
+}
+
+//add C64 header to file
+//$binary = chr(0) . chr($newHiByte) . $binary;
+
+//---------------------------------------------------------------------------------------------------------------
+//write new relocated file as s.*
+//---------------------------------------------------------------------------------------------------------------
+$myfile = fopen($newTuneName, "w") or die("Unable to open file!\n");
+fwrite($myfile, $binary);
+fclose($myfile);
+
+//---------------------------------------------------------------------------------------------------------------
+//print some info
+//---------------------------------------------------------------------------------------------------------------
+echo 'file in           : '   . $tuneName           . PHP_EOL;
+echo 'load address      : 0x' . $fileHeader         . PHP_EOL;
+echo 'PSID offset       : 0x' . dechex($fileOffset) . PHP_EOL;
+
+echo PHP_EOL;
+
+echo 'player address    : 0x' . $fileHeader         . PHP_EOL;
+echo 'driver address    : 0x' . $playAddress        . PHP_EOL;
+echo 'init address      : 0x' . $initAddress        . PHP_EOL;
+echo 'patterns pointer  : 0x' . $sequencesPointer   . PHP_EOL;
+
+echo PHP_EOL;
+
+echo 'file out          : '   . $newTuneName        . PHP_EOL;
+echo 'new load address  : 0x' . $newAddress         . PHP_EOL;
+
