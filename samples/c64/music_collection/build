@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mp="$HOME/Programs/MadPascal/mp"
+mads="$HOME/Programs/mads/mads"
+base="$HOME/Programs/MadPascal/base"
+name="main"
+
+$mp $name.pas -t c64
+
+if [ -f $name.a65 ]; then
+  [ ! -d "output" ] && mkdir output
+  mv $name.a65 output/
+  $mads output/$name.a65 -x -i:$base -o:output/$name.prg
+  exomizer sfx sys -n -t 64 -o bin/collection.prg output/$name.prg
+else
+  exit 1
+fi
