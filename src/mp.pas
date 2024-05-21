@@ -1330,7 +1330,7 @@ case IndirectionLevel of
 
   ASPOINTERTOPOINTER:
     begin
-    asm65('; as Pointer to Pointer');	   	// ???
+    asm65('; as Pointer to Pointer');
     asm65;
 
     Gen;
@@ -1339,11 +1339,11 @@ case IndirectionLevel of
 
   if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
-//    writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements);
+//	writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', svar,',',ExtractName(IdentIndex, svar),',',par);
 
     if TestName(IdentIndex, svar) then begin
 
-     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
+     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
       asm65(#9'mwy ' + svar + ' :bp2')
      else
       asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
@@ -1354,7 +1354,7 @@ case IndirectionLevel of
 
     if TestName(IdentIndex, svar) then begin
 
-     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) then
+     if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
       asm65(#9'ldy #$' + IntToHex(par, 2))
      else
       asm65(#9'ldy #' + svar + '-DATAORIGIN');
@@ -6387,7 +6387,7 @@ end;	//NumActualParameters
 
 
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
-var NumActualParams, IdentTemp, ParamIndex, j, old_func: integer;
+var NumActualParams, IdentTemp, ParamIndex, j, old_i, old_func: integer;
     ActualParamType, AllocElementType: byte;
     svar, lab: string;
     yes: Boolean;
@@ -6397,7 +6397,7 @@ begin
    svar:= '';
    lab := '';
 
-   j := i;
+   old_i := i;
 
    if Ident[IdentIndex].ProcAsBlock = BlockStack[BlockStackTop] then Ident[IdentIndex].isRecursion := true;
 
@@ -7114,20 +7114,22 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
  Gen;
 
+
 (*------------------------------------------------------------------------------------------------------------*)
 
    if Ident[IdentIndex].ObjectIndex > 0 then begin
 
-    if Tok[j].Kind <> IDENTTOK then
-      iError(j, IdentifierExpected)
+    if Tok[old_i].Kind <> IDENTTOK then
+      iError(old_i, IdentifierExpected)
     else
-      IdentTemp := GetIdent(copy(Tok[j].Name^, 1, pos('.', Tok[j].Name^)-1 ));
+      IdentTemp := GetIdent(copy(Tok[old_i].Name^, 1, pos('.', Tok[old_i].Name^)-1 ));
 
      asm65(#9'lda ' + GetLocalName(IdentTemp));
      asm65(#9'ldy ' + GetLocalName(IdentTemp) + '+1');
    end;
 
 (*------------------------------------------------------------------------------------------------------------*)
+
 
  if Ident[IdentIndex].isInline then begin
 
@@ -17294,7 +17296,7 @@ begin
  INTERFACETOK_USE := FALSE;
  PublicSection := TRUE;
 
- for i := 1 to MAXUNITS do UnitName[i].Units := 0;
+ for i := 1 to High(UnitName) do UnitName[i].Units := 0;
 
  iOut:=0;
  outTmp:='';
