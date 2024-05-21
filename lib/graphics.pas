@@ -26,6 +26,7 @@ interface
 type	TBrushBitmap = array [0..7] of byte;
 
 	TPen = record
+		dummy:cardinal;
 		Color: Byte;
 		end;
 
@@ -45,7 +46,7 @@ type	TBrushBitmap = array [0..7] of byte;
 	fsize: array [0..127] of byte;
 
 	Pen: TPen;
-	
+
 	Brush: TBrush;
 
 	constructor Create;
@@ -264,7 +265,6 @@ begin
 end;
 
 
-
 procedure TCanvas.TextOut(X,Y: smallint; const Txt: string); overload;
 var lpos: word;
     i, xpos, pix: byte;
@@ -273,7 +273,6 @@ const tpix: array [0..7] of byte = ($80,$40,$20,$10,$08,$04,$02,$01);
 
 procedure DrawChar(ch: byte); assembler;
 asm
-{
 scr	= edx
 
 	txa:pha
@@ -394,8 +393,8 @@ no_inc:
 	rts
 quit
 	pla:tax
-};
 end;
+
 
 begin
 
@@ -425,7 +424,7 @@ end;
 
 function TCanvas.TextWidth(const Txt: string): word; assembler; overload;
 asm
-{	txa:pha
+	txa:pha
 
 	mwa fsize _fsiz
 
@@ -458,13 +457,12 @@ _fsiz	equ *-2
 	jmp lp
 
 stop	pla:tax
-};
 end;
 
 
 function TCanvas.TextWidth(const ch: char): byte; assembler; overload;
 asm
-{	mwa fsize ztmp
+	mwa fsize ztmp
 
 	lda ch
 
@@ -475,13 +473,11 @@ asm
 	lda (ztmp),y
 
 	sta Result
-};
 end;
 
 
 procedure TCanvas.FontInitialize; assembler;
 asm
-{
 scr	= eax
 xpos	= eax+2
 lpos	= edx
@@ -597,7 +593,6 @@ mv	pla
 	jpl loop
 
 	pla:tax
-};
 end;
 
 
@@ -655,5 +650,6 @@ end;
 
 initialization
 
+	InitGraph(8 + 16);
 
 end.
