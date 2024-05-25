@@ -73,7 +73,7 @@ BAT
     mp.exe -t neo filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
-https://github.com/paulscottrobson/neo6502-firmware/wiki/Mad%E2%80%90Pascal-for-Neo6502    
+[Mad-Pascal for Neo6502](https://github.com/paulscottrobson/neo6502-firmware/wiki/Mad%E2%80%90Pascal-for-Neo6502)
     
 ### [RAW](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/raw)
     mp.exe -t raw filename.pas -ipath:<MadPascalPath>\lib
