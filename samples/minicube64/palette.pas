@@ -41,7 +41,7 @@ end;
 
 procedure palette; assembler;
 asm
-    ;PICO-8
+    ; PICO-8
     .by $00,$00,$00
     .by $1D,$2B,$53
     .by $7E,$25,$53
