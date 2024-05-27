@@ -39,8 +39,9 @@ end;
 
 {$codealign proc = $100}
 
-procedure palette_pico8; assembler;
+procedure palette; assembler;
 asm
+    ;PICO-8
     .by $00,$00,$00
     .by $1D,$2B,$53
     .by $7E,$25,$53
@@ -56,7 +57,25 @@ asm
     .by $29,$AD,$FF
     .by $83,$76,$9C
     .by $FF,$77,$A8
-    .by $FF,$CC,$AA  
+    .by $FF,$CC,$AA 
+
+    ; DARKSEED
+    .by $00,$00,$00
+    .by $00,$14,$18
+    .by $00,$20,$24
+    .by $00,$2c,$38
+    .by $14,$34,$44
+    .by $44,$34,$44
+    .by $58,$3c,$48
+    .by $6c,$4c,$44
+    .by $80,$60,$58
+    .by $6c,$70,$6c
+    .by $88,$80,$78
+    .by $a4,$94,$84
+    .by $c4,$ac,$9c
+    .by $d8,$b0,$a8
+    .by $ec,$d4,$d0
+    .by $fc,$fc,$fc
 end;
 
 {$codealign proc = 0}
@@ -67,7 +86,7 @@ procedure init;
 begin
     asm { sei };
         vblank_irq := word(@vbi);
-        colors     := hi(word(@palette_pico8));
+        colors     := hi(word(@palette));
         video      := VIDEO_PAGE; 
     asm { cli };   
 end;
@@ -79,7 +98,7 @@ begin
     
     for j := 0 to SCREEN_SIZE + 1 do
         for i := 0 to SCREEN_SIZE + 1 do
-            poke(SCREEN + (j * SCREEN_SIZE) + i, (i and %00111111) shr 2);
+            poke(SCREEN + (j * SCREEN_SIZE) + i, (i and %00111111) shr 1);
     
     repeat until false;
 end.
