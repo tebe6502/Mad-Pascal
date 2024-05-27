@@ -96,8 +96,8 @@ end;
 begin
     init;
     
-    for j := 0 to SCREEN_SIZE + 1 do
-        for i := 0 to SCREEN_SIZE + 1 do
+    for j := 0 to SCREEN_SIZE - 1 do
+        for i := 0 to SCREEN_SIZE - 1 do
             poke(SCREEN + (j * SCREEN_SIZE) + i, (i and %00111111) shr 1);
     
     repeat until false;
