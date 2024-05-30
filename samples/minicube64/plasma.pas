@@ -1,5 +1,4 @@
 {*
-    https://aeriform.itch.io/minicube64
     https://github.com/aeriform-io/minicube64
     https://aeriform.gitbook.io/minicube64
 *}
@@ -40,6 +39,8 @@ var
     sinusTable   : array [0..PAGE - 1]    of byte absolute TABLES + PAGE * 0;
     lookupDiv16  : array [0..PAGE - 1]    of byte absolute TABLES + PAGE * 1;
     xbuf         : array [0..SCREEN_SIZE] of byte absolute TABLES + PAGE * 2;
+
+    scr          : array [0..SCREEN_SIZE, 0..SCREEN_SIZE] of byte absolute SCREEN;
 //-----------------------------------------------------------------------------
 
 procedure vbi; assembler; interrupt;
@@ -115,7 +116,8 @@ begin
         tmp := sinusTable[_c1a] + sinusTable[_c1b];
         Inc(_c1a, 4); Inc(_c1b, 9);
         for x := SCREEN_SIZE downto 0 do
-            poke(SCREEN + x + (y * (SCREEN_SIZE + 1)), lookupDiv16[xbuf[x] + tmp]);
+            //poke(SCREEN + x + (y * (SCREEN_SIZE + 1)), lookupDiv16[xbuf[x] + tmp]);
+            scr[y,x] := lookupDiv16[xbuf[x] + tmp];
     end;
 
   Inc(c1A, 3); Dec(c1B, 5);
