@@ -6,14 +6,20 @@
 
 //-----------------------------------------------------------------------------
 
-program palette;
+program plasma;
+
+//-----------------------------------------------------------------------------
+
+uses fastmath;
 
 //-----------------------------------------------------------------------------
 
 const
-    VIDEO_PAGE  = $f;
+    VIDEO_PAGE  = $e;
     SCREEN      = VIDEO_PAGE * $1000;
-    SCREEN_SIZE = 64;
+    TABLES      = VIDEO_PAGE + $1000;
+    SCREEN_SIZE = 63;
+    PAGE        = $100;
 
 //-----------------------------------------------------------------------------
 
@@ -22,18 +28,25 @@ var
     colors      : byte absolute $101;    
     nmi_irq     : byte absolute $10c;
     vblank_irq  : word absolute $10e;
+    frame_count : byte absolute $ff;
 
 //-----------------------------------------------------------------------------
 
 var
-    i, j : byte;
+    c1A          : byte = 1;
+    c1B          : byte = 5;
+    x, y, tmp    : byte;
 
+    sinusTable   : array [0..PAGE - 1]    of byte absolute TABLES + PAGE * 0;
+    lookupDiv16  : array [0..PAGE - 1]    of byte absolute TABLES + PAGE * 1;
+    xbuf         : array [0..SCREEN_SIZE] of byte absolute TABLES + PAGE * 2;
 //-----------------------------------------------------------------------------
 
 procedure vbi; assembler; interrupt;
 asm
-  phr
-  plr
+  ;phr
+  inc frame_count
+  ;plr
 end;
 
 //-----------------------------------------------------------------------------
@@ -42,24 +55,6 @@ end;
 
 procedure palette; assembler;
 asm
-    ; PICO-8
-    .by $00,$00,$00
-    .by $1D,$2B,$53
-    .by $7E,$25,$53
-    .by $00,$87,$51
-    .by $AB,$52,$36
-    .by $5F,$57,$4F
-    .by $C2,$C3,$C7
-    .by $FF,$F1,$E8
-    .by $FF,$00,$4D
-    .by $FF,$A3,$00
-    .by $FF,$EC,$27
-    .by $00,$E4,$36
-    .by $29,$AD,$FF
-    .by $83,$76,$9C
-    .by $FF,$77,$A8
-    .by $FF,$CC,$AA 
-
     ; DARKSEED
     .by $00,$00,$00
     .by $00,$14,$18
@@ -83,6 +78,15 @@ end;
 
 //-----------------------------------------------------------------------------
 
+procedure waitVBL; assembler;
+asm
+    lda frame_count
+@   cmp frame_count
+    beq @-
+end;
+
+//-----------------------------------------------------------------------------
+
 procedure init;
 begin
     asm { sei };
@@ -94,14 +98,38 @@ end;
 
 //-----------------------------------------------------------------------------
 
+procedure doPlasma;
+var
+    _c1a, _c1b : byte;
+
+begin
+    _c1a := c1A;
+    _c1b := c1B;
+
+    for x := SCREEN_SIZE downto 0 do begin
+        xbuf[x] := sinusTable[_c1a] + sinusTable[_c1b];
+        Inc(_c1a, 3); Inc(_c1b, 7);
+    end;
+
+    for y := SCREEN_SIZE downto 0 do begin
+        tmp := sinusTable[_c1a] + sinusTable[_c1b];
+        Inc(_c1a, 4); Inc(_c1b, 9);
+        for x := SCREEN_SIZE downto 0 do
+            poke(SCREEN + x + (y * (SCREEN_SIZE + 1)), lookupDiv16[xbuf[x] + tmp]);
+    end;
+
+  Inc(c1A, 3); Dec(c1B, 5);
+end;
+
+//-----------------------------------------------------------------------------
+
 begin
     init;
-    
-    for j := 0 to SCREEN_SIZE - 1 do
-        for i := 0 to SCREEN_SIZE - 1 do
-            poke(SCREEN + (j * SCREEN_SIZE) + i, (i and %00111111) shr 1);
-    
-    repeat until false;
+
+    FillSinHigh(@sinusTable);
+    for x := SizeOf(lookupDiv16) - 1 downto 0 do lookupDiv16[x] := x shr 4;
+
+    repeat waitVBL; doPlasma until false;
 end.
 
 //-----------------------------------------------------------------------------
