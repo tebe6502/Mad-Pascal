@@ -57,15 +57,15 @@ end;
 
 procedure drawLine(x0, y0, x1, y1: byte);
 var
-    x, y, dx, dy    : byte;
-    sx, sy, err, e2 : shortint;
+    x, y, dx, dy, sx, sy : byte;
+    err, e2              : shortint;
 begin
     x := x0;
     y := y0;
     dx := abs(x1 - x0);
     dy := abs(y1 - y0);
-    if x0 < x1 then sx := 1 else sx := -1;
-    if y0 < y1 then sy := 1 else sy := -1;
+    if x0 < x1 then sx := 1 else sx := $ff; // -1
+    if y0 < y1 then sy := 1 else sy := $ff; // -1
     err := dx - dy;
 
     while true do
@@ -77,17 +77,16 @@ begin
         e2 := err shl 1;
         if e2 > -dy then
         begin
-            err := err - dy;
+            dec(err, dy);
             inc(x, sx);
         end;
         if e2 < dx then
         begin
-            err := err + dx;
+            inc(err, dx);
             inc(y, sy);
         end;
     end;
 end;
-
 //-----------------------------------------------------------------------------
 
 procedure clrscr; inline;
