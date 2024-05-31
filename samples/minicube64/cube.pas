@@ -57,9 +57,8 @@ end;
 
 procedure drawLine(x0, y0, x1, y1: byte);
 var
-    dx, dy: byte;
-    sx, sy, err, e2: shortint;
-    x, y: byte;
+    x, y, dx, dy    : byte;
+    sx, sy, err, e2 : shortint;
 begin
     x := x0;
     y := y0;
