@@ -64,8 +64,8 @@ begin
     y := y0;
     dx := abs(x1 - x0);
     dy := abs(y1 - y0);
-    if x0 < x1 then sx := 1 else sx := $ff; // -1
-    if y0 < y1 then sy := 1 else sy := $ff; // -1
+    if x0 < x1 then sx := 1 else sx := -1; // $ff
+    if y0 < y1 then sy := 1 else sy := -1; // $ff
     err := dx - dy;
 
     while true do
