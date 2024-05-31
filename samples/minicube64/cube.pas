@@ -79,12 +79,12 @@ begin
         if e2 > -dy then
         begin
             err := err - dy;
-            x := x + sx;
+            inc(x, sx);
         end;
         if e2 < dx then
         begin
             err := err + dx;
-            y := y + sy;
+            inc(y, sy);
         end;
     end;
 end;
