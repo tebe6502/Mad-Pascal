@@ -622,9 +622,8 @@ Sqrt returns the square root of its argument X, which must be positive
 var sp: ^shortreal;
     c: word;
 begin
-	Result:=0.0;
 
-	if x <= 0.0 then exit;
+	if x <= 0.0 then exit(shortreal(0.0));
 
 	sp:=@c;
 
@@ -634,33 +633,24 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result+x/Result);// * 0.5;
+	Result:=(Result + x/Result);// * 0.5;
 
 	asm
-	 lda Result+1
-	 asl @
-
-	 ror Result+1
+	 lsr Result+1
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result) ;//* 0.5;
+	Result:=(Result + x/Result) ;//* 0.5;
 
 	asm
-	 lda Result+1
-	 asl @
-
-	 ror Result+1
+	 lsr Result+1
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result) ;//* 0.5;
+	Result:=(Result + x/Result) ;//* 0.5;
 
 	asm
-	 lda Result+1
-	 asl @
-
-	 ror Result+1
+	 lsr Result+1
 	 ror Result
 	end;
 
@@ -680,9 +670,8 @@ var sp: ^real;
     c: cardinal;
 
 begin
-	Result:=0.0;
 
-	if x <= 0.0 then exit;
+	if x <= 0.0 then exit(0.0);
 
 	sp:=@c;
 
@@ -692,49 +681,37 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result+x/Result); //* 0.5;
+	Result:=(Result + x/Result); //* 0.5;
 
 	asm
-	 lda Result+3
-	 asl @
-
-	 ror Result+3
+	 lsr Result+3
 	 ror Result+2
 	 ror Result+1
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result); //* 0.5;
+	Result:=(Result + x/Result); //* 0.5;
 
 	asm
-	 lda Result+3
-	 asl @
-
-	 ror Result+3
+	 lsr Result+3
 	 ror Result+2
 	 ror Result+1
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result); //* 0.5;
+	Result:=(Result + x/Result); //* 0.5;
 
 	asm
-	 lda Result+3
-	 asl @
-
-	 ror Result+3
+	 lsr Result+3
 	 ror Result+2
 	 ror Result+1
 	 ror Result
 	end;
 
-	Result:=(Result+x/Result); //* 0.5;
+	Result:=(Result + x/Result); //* 0.5;
 
 	asm
-	 lda Result+3
-	 asl @
-
-	 ror Result+3
+	 lsr Result+3
 	 ror Result+2
 	 ror Result+1
 	 ror Result
@@ -755,9 +732,8 @@ Sqrt returns the square root of its argument X, which must be positive
 var sp: ^single;
     c: cardinal;
 begin
-	Result:=0;
 
-	if integer(x) <= 0 then exit;
+	if integer(x) <= 0 then exit(single(0.0));
 
 	sp:=@c;
 
@@ -767,9 +743,9 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
-//	Result:=(Result+x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+//	Result:=(Result + x/Result) * 0.5;
 end;
 
 
@@ -785,9 +761,8 @@ Sqrt returns the square root of its argument X, which must be positive
 var sp: ^float16;
     c: word;
 begin
-	Result:=0;
 
-	if smallint(x) <= 0 then exit;
+	if smallint(x) <= 0 then exit(float16(0.0));
 
 	sp:=@c;
 
@@ -797,9 +772,9 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result+x/Result) * 0.5;
-//	Result:=(Result+x/Result) * 0.5;
-//	Result:=(Result+x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+//	Result:=(Result + x/Result) * 0.5;
+//	Result:=(Result + x/Result) * 0.5;
 end;
 
 
@@ -815,9 +790,8 @@ Sqrt returns the square root of its argument X, which must be positive
 var sp: ^single;
     c: cardinal;
 begin
-	Result:=0;
 
-	if x <= 0 then exit;
+	if x <= 0 then exit(single(0.0));
 
 	sp:=@c;
 
@@ -827,9 +801,9 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result+x/Result) * 0.5;
-	Result:=(Result+x/Result) * 0.5;
-//	Result:=(Result+x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+//	Result:=(Result + x/Result) * 0.5;
 end;
 
 
