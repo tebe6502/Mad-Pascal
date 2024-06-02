@@ -7,7 +7,7 @@ uses crt, fastmath, neo6502system, neo6502;
 //----------------------------------------------------------
 
 const
-    SCREEN_WIDTH = 260;
+    SCREEN_WIDTH  = 260;
     SCREEN_HEIGHT = 240;
     SCREEN_CENTER_X = SCREEN_WIDTH div 2;
 
@@ -21,7 +21,7 @@ var
 
 procedure DrawTwister(yOffset: byte);
 var
-    x1, x2, x3, x4, y      : byte; 
+    x1, x2, x3, x4         : byte; 
     minX, maxX, angle, row : byte;
 begin
     for row := 0 to (SCREEN_HEIGHT div 2) - 1 do
@@ -41,18 +41,18 @@ begin
         maxX := x1;
         if x2 > maxX then maxX := x2;
         if x3 > maxX then maxX := x3;
-        if x4 > maxX then maxX := x4;
+        if x4 > maxX then maxX := x4;     
 
-        y := row * 2 + yOffset;
+        inc(yOffset, 2);
 
         NeoSetColor(0);
-        NeoDrawLine(minX - 6, y, minX, y);
-        NeoDrawLine(maxX, y,  maxX + 6, y);
+        NeoDrawLine(minX - 6, yOffset, minX, yOffset);
+        NeoDrawLine(maxX, yOffset,  maxX + 6, yOffset);
 
-        NeoSetColor(1); if x1 < x2 then NeoDrawLine(x1, y, x2, y);
-        NeoSetColor(2); if x2 < x3 then NeoDrawLine(x2, y, x3, y);
-        NeoSetColor(3); if x3 < x4 then NeoDrawLine(x3, y, x4, y);
-        NeoSetColor(4); if x4 < x1 then NeoDrawLine(x4, y, x1, y);
+        NeoSetColor(1); if x1 < x2 then NeoDrawLine(x1, yOffset, x2, yOffset);
+        NeoSetColor(2); if x2 < x3 then NeoDrawLine(x2, yOffset, x3, yOffset);
+        NeoSetColor(3); if x3 < x4 then NeoDrawLine(x3, yOffset, x4, yOffset);
+        NeoSetColor(4); if x4 < x1 then NeoDrawLine(x4, yOffset, x1, yOffset);
     end;
 end;
 
