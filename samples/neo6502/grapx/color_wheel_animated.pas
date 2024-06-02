@@ -60,7 +60,7 @@ end;
 
 begin
     clrscr;
-	createPalette(j);
+    createPalette(j);
     DrawColorwheel;
 
     repeat
