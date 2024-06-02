@@ -1,0 +1,79 @@
+program twister;
+
+//----------------------------------------------------------
+
+uses crt, fastmath, neo6502system, neo6502; 
+
+//----------------------------------------------------------
+
+const
+    SCREEN_WIDTH = 260;
+    SCREEN_HEIGHT = 240;
+    SCREEN_CENTER_X = SCREEN_WIDTH div 2;
+
+//----------------------------------------------------------
+
+var
+    sine: array[0..255] of byte absolute $f000;
+    animationOffsetX, animationOffsetY: byte;
+
+//----------------------------------------------------------
+
+procedure DrawTwister(yOffset: byte);
+var
+    x1, x2, x3, x4, y      : byte; 
+    minX, maxX, angle, row : byte;
+begin
+    for row := 0 to (SCREEN_HEIGHT div 2) - 1 do
+    begin
+        angle := sine[row + animationOffsetY] + animationOffsetX;
+
+        x1 := SCREEN_CENTER_X + sine[angle] shr 1;
+        x2 := SCREEN_CENTER_X + sine[byte(angle + 64)] shr 1;
+        x3 := SCREEN_CENTER_X + sine[byte(angle + 128)] shr 1;
+        x4 := SCREEN_CENTER_X + sine[byte(angle + 192)] shr 1;
+
+        minX := x1;
+        if x2 < minX then minX := x2;
+        if x3 < minX then minX := x3;
+        if x4 < minX then minX := x4;
+
+        maxX := x1;
+        if x2 > maxX then maxX := x2;
+        if x3 > maxX then maxX := x3;
+        if x4 > maxX then maxX := x4;
+
+        y := row * 2 + yOffset;
+
+        NeoSetColor(0);
+        NeoDrawLine(minX - 6, y, minX, y);
+        NeoDrawLine(maxX, y,  maxX + 6, y);
+
+        NeoSetColor(1); if x1 < x2 then NeoDrawLine(x1, y, x2, y);
+        NeoSetColor(2); if x2 < x3 then NeoDrawLine(x2, y, x3, y);
+        NeoSetColor(3); if x3 < x4 then NeoDrawLine(x3, y, x4, y);
+        NeoSetColor(4); if x4 < x1 then NeoDrawLine(x4, y, x1, y);
+    end;
+end;
+
+//----------------------------------------------------------
+
+begin
+    FillSinLow(@sine);
+
+    animationOffsetX := 0;
+    animationOffsetY := 65;
+
+    clrscr;
+    repeat
+        NeoWaitForVblank;
+
+        DrawTwister(0);
+        Inc(animationOffsetX, 2); 
+        Dec(animationOffsetY, 3); 
+
+        DrawTwister(1);
+        Inc(animationOffsetX, 3); 
+        Dec(animationOffsetY, 2); 
+    until false;
+end.
