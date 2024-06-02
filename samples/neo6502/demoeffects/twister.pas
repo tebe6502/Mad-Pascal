@@ -7,9 +7,13 @@ uses crt, fastmath, neo6502system, neo6502;
 //----------------------------------------------------------
 
 const
-    SCREEN_WIDTH  = 260;
-    SCREEN_HEIGHT = 240;
+    SCREEN_WIDTH    = 260;
+    SCREEN_HEIGHT   = 240;
     SCREEN_CENTER_X = SCREEN_WIDTH div 2;
+    SCREEN_CENTER_Y = SCREEN_HEIGHT div 2;
+    ANGLE_90        = 64;
+    ANGLE_180       = 128;
+    ANGLE_270       = 192;    
 
 //----------------------------------------------------------
 
@@ -24,24 +28,19 @@ var
     x1, x2, x3, x4         : byte; 
     minX, maxX, angle, row : byte;
 begin
-    for row := 0 to (SCREEN_HEIGHT div 2) - 1 do
+    for row := 0 to SCREEN_CENTER_Y - 1 do
     begin
         angle := sine[row + animationOffsetY] + animationOffsetX;
 
         x1 := SCREEN_CENTER_X + sine[angle] shr 1;
-        x2 := SCREEN_CENTER_X + sine[byte(angle + 64)] shr 1;
-        x3 := SCREEN_CENTER_X + sine[byte(angle + 128)] shr 1;
-        x4 := SCREEN_CENTER_X + sine[byte(angle + 192)] shr 1;
+        x2 := SCREEN_CENTER_X + sine[byte(angle + ANGLE_90)] shr 1;
+        x3 := SCREEN_CENTER_X + sine[byte(angle + ANGLE_180)] shr 1;
+        x4 := SCREEN_CENTER_X + sine[byte(angle + ANGLE_270)] shr 1;
 
-        minX := x1;
-        if x2 < minX then minX := x2;
-        if x3 < minX then minX := x3;
-        if x4 < minX then minX := x4;
-
-        maxX := x1;
-        if x2 > maxX then maxX := x2;
-        if x3 > maxX then maxX := x3;
-        if x4 > maxX then maxX := x4;     
+        minX := x1; maxX := x1;
+        if x2 < minX then minX := x2 else if x2 > maxX then maxX := x2;
+        if x3 < minX then minX := x3 else if x3 > maxX then maxX := x3;
+        if x4 < minX then minX := x4 else if x4 > maxX then maxX := x4;  
 
         inc(yOffset, 2);
 
