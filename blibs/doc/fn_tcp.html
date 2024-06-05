@@ -10,7 +10,7 @@
 <h1>unit fn_tcp</h1>
 <h3>#FujiNet interface TCP communication library.</h3>
 <p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
-<br><p>This library provides an easy interface to estabilish TCP connection, and transfer data both directions. <br> It allows you to use SIO interrupts, to read data from SIO only on demand. <br> It uses 256 bytes circular buffer dynamicly allocated in your MadPascal DATA block. <br> <a href='https://fujinet.online/'>https://fujinet.online/</a> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+<br><p>This library provides an easy interface to estabilish TCP connection, and transfer data both directions. <br> It allows you to use SIO interrupts, to read data from SIO only on device request. <br> It uses 256 bytes circular buffer located in your MadPascal DATA block. <br> <a href='https://fujinet.online/'>https://fujinet.online/</a> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
 
 <!--********************* CONSTANTS **************************-->
 
@@ -49,13 +49,15 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>TCP_InitIRQ</td><td class='tdesc'><h4>procedure TCP_InitIRQ;</h4><br>
+<tr><td class='tname fname'>TCP_AttachIRQ</td><td class='tdesc'><h4>procedure TCP_AttachIRQ;</h4><br>
 	Attaches interrupt handler, to update TCP_dataFlag byte on incoming data connection. <br> This interrupt sets 1 into TCP_dataFlag variable. If you want to be informed on next packet, you need to reset it to zero manualy (probably after data fetch).<br><ul></ul></td></tr>
-<tr><td class='tname fname'>TCP_StopIRQ</td><td class='tdesc'><h4>procedure TCP_StopIRQ;</h4><br>
-	Removes custom SIO interrupt handler. Do not call this procedure without TCP_InitIRQ before.<br><ul></ul></td></tr>
-<tr><td class='tname fname'>TCP_Connect</td><td class='tdesc'><h4>function TCP_Connect(var tcp_uri:PChar):byte;</h4><br>
+<tr><td class='tname fname'>TCP_DetachIRQ</td><td class='tdesc'><h4>procedure TCP_DetachIRQ;</h4><br>
+	Removes custom SIO interrupt handler. Do not call this procedure without TCP_AttachIRQ before.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TCP_Connect</td><td class='tdesc'><h4>function TCP_Connect(var tcp_uri:PChar):byte;overload;</h4><br>
 	Opens #FujiNet connection to remote host, at selected port using declared protocol.<br><ul><h5>parameters:</h5><li>tcp_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/<br> <br> The N: Device spec can be found here: <br> <a href='https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec'>https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec</a></li></ul></td></tr>
-<tr><td class='tname fname'>TCP_GetStatus</td><td class='tdesc'><h4>procedure TCP_GetStatus;</h4><br>
+<tr><td class='tname fname'>TCP_Connect</td><td class='tdesc'><h4>function TCP_Connect(var tcp_uri: PChar; aux1,aux2: byte):byte;overload;</h4><br>
+	Opens #FujiNet connection to remote host, at selected port using declared protocol.<br><ul><h5>parameters:</h5><li>tcp_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/</li><li>aux1 - additional param passed to DCB</li><li>aux2 - additional param passed to DCB<br> The N: Device spec can be found here: <br> <a href='https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec'>https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec</a></li></ul></td></tr>
+<tr><td class='tname fname'>TCP_GetStatus</td><td class='tdesc'><h4>function TCP_GetStatus:byte;</h4><br>
 	Reads network device status and stores information in TCP_status variable.<br><ul></ul></td></tr>
 <tr><td class='tname fname'>TCP_SIORead</td><td class='tdesc'><h4>function TCP_SIORead:word;</h4><br>
 	Performs data fetch from SIO device (N:) to free space in local TCP buffer. <br> If amount of SIO data is bigger than available space in buffer, only part of the data is received. To fetch rest of it you need to release some buffer space, by calling TCP_ReadByte or TCP_ReadBuffer procedure. And then call TCP_SIORead again... and again...<br><ul></ul></td></tr>
@@ -71,6 +73,10 @@
 	Sends data buffer using already opened connection.<br><ul><h5>parameters:</h5><li>buf - pointer to starting address of data</li><li>len - data length (in bytes)</li></ul></td></tr>
 <tr><td class='tname fname'>TCP_Close</td><td class='tdesc'><h4>procedure TCP_Close;</h4><br>
 	Closes #FujiNet network connection.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>TCP_WaitForData</td><td class='tdesc'><h4>function TCP_WaitForData(timeout:word):byte;</h4><br>
+	Waits for declared time (in frames) for incoming data.<br><ul><h5>returns:</h5><li class='returns'>(byte) - return sioStatus for success, and $ff for timeout</li></ul></td></tr>
+<tr><td class='tname fname'>TCP_ClearBuffer</td><td class='tdesc'><h4>procedure TCP_ClearBuffer;</h4><br>
+	Clears TCP data buffer.<br><ul></ul></td></tr>
 
 </table>
 

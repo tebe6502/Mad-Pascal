@@ -1,0 +1,67 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit hsc_util - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit hsc_util</h1>
+<h3>Hi Score Cafe Library for #FujiNet interface.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of procedures to communicate with Hi Score Cafe server <a href='https://xxl.atari.pl/hsc/'>https://xxl.atari.pl/hsc/</a> using #FujiNet interface on SIO level. <a href='https://fujinet.online/'>https://fujinet.online/</a> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+
+
+
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+<h2>Global Variables:</h2>
+<table class='variables'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>boardSize</td><td class='ttype'>word</td><td class='tdesc'>Number of bytes received during last HSC_Get command</td></tr>
+
+</table>
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>HSC_MakeToken</td><td class='tdesc'><h4>procedure HSC_MakeToken(id:word;score:cardinal;var hscToken:AOC);</h4><br>
+	Creates request token consisting game id and score.<br><ul><h5>parameters:</h5><li>id - game id in Hi Score Cafe system</li><li>score - user score</li><li>hscToken - array of char where the Token is created</li></ul></td></tr>
+<tr><td class='tname fname'>HSC_Send</td><td class='tdesc'><h4>function HSC_Send(var hscToken:AOC;var hscBuffer:AOC):byte;overload;</h4><br>
+	Sends tokenized user result to Hi Score Cafe server. Function checks if fujinet is present, then checks for autorization token on SD card, and then tries to send user result to HSC.<br><ul><h5>parameters:</h5><li>hscToken - array of char where the Token is created</li><li>hscBuffer - buffer needed to create request query (80 bytes should be enough)</li><h5>returns:</h5><li class='returns'>(byte) - returns 1 when operation successful. Otherwise returns sio error code.</li></ul></td></tr>
+<tr><td class='tname fname'>HSC_Send</td><td class='tdesc'><h4>function HSC_Send(id:word;score:cardinal;var hscBuffer:AOC):byte;overload;</h4><br>
+	Sends user result to Hi Score Cafe server. Function checks if fujinet is present, then checks for autorization token on SD card, and then tries to send user result to HSC.<br><ul><h5>parameters:</h5><li>id - game id in Hi Score Cafe system</li><li>score - user score</li><li>hscBuffer - buffer needed to create request query (80 bytes should be enough)</li><h5>returns:</h5><li class='returns'>(byte) - returns 1 when operation successful. Otherwise returns sio error code.</li></ul></td></tr>
+<tr><td class='tname fname'>HSC_Get_Formated</td><td class='tdesc'><h4>function HSC_Get_Formated(id:byte;buff:pointer):byte;overload;</h4><br>
+	Receives screen formated hi score table for specified game, and stores it in buffer. Result is formated as 40 chars aligned text, in ANTIC screen codes. It can be directly written to screen memory.<br><ul><h5>parameters:</h5><li>id - game id in Hi Score Cafe system</li><li>buff - buffer needed to store result (400 bytes for 10 results)</li><h5>returns:</h5><li class='returns'>(byte) - returns 1 when operation successful. Otherwise returns sio error code.</li></ul></td></tr>
+<tr><td class='tname fname'>HSC_Get</td><td class='tdesc'><h4>function HSC_Get(id:byte;buff:pointer):byte;overload;</h4><br>
+	Receives hi score table for specified game, and stores it in buffer. Result is a text block, formated as JSON array, in clean ATASCII. It should be parsed by user before displaying.<br><ul><h5>parameters:</h5><li>id - game id in Hi Score Cafe system</li><li>buff - buffer needed to store result (much less than formated one)</li><h5>returns:</h5><li class='returns'>(byte) - returns 1 when operation successful. Otherwise returns sio error code.</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

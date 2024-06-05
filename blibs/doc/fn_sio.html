@@ -14,9 +14,14 @@
 
 <!--********************* CONSTANTS **************************-->
 
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
 
+<tr><td class='tname'>FN_MOUNT_READ</td><td class='tvalue'>0</td><td class='tdesc'></td></tr>
+<tr><td class='tname'>FN_MOUNT_WRITE</td><td class='tvalue'>1</td><td class='tdesc'></td></tr>
 
-
+</table>
 
 <!--********************* TYPES **************************-->
 
@@ -25,6 +30,10 @@
 <tr><th>name:</th><th>type:</th><th>description:</th></tr>
 
 <tr><td class='tname'>FN_StatusStruct</td><td class='ttype'>record<ul class='record'><li>dataSize: word;</li><li>connected: byte;</li><li>errorCode: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'>Structure used to store Status Command result</td></tr>
+<tr><td class='tname'>FN_HostSlot</td><td class='ttype'>array[0..31] of char</td><td class='tdesc'>Character string used to store a single host name</td></tr>
+<tr><td class='tname'>FN_HostSlots</td><td class='ttype'>array[0..7] of FN_HostSlot</td><td class='tdesc'>List of all host slots (FN_HostSlot objects)</td></tr>
+<tr><td class='tname'>FN_DeviceSlot</td><td class='ttype'>record<ul class='record'><li>hostSlot: byte;</li><li>mode: byte;</li><li>filename: array[0..35] of char;</li></ul><br clear='all'>end;</td><td class='tdesc'>Structure describing a single device slot</td></tr>
+<tr><td class='tname'>FN_DeviceSlots</td><td class='ttype'>array[0..7, 0..sizeof(FN_DeviceSlot) - 1] of char</td><td class='tdesc'>List of all device slots (FN_DeviceSlot objects)</td></tr>
 
 </table>
 
@@ -46,8 +55,10 @@
 <table class='interface'>
 <tr><th>name:</th><th>description:</th></tr>
 
-<tr><td class='tname fname'>FN_Open</td><td class='tdesc'><h4>procedure FN_Open(var fn_uri:PChar);</h4><br>
+<tr><td class='tname fname'>FN_Open</td><td class='tdesc'><h4>procedure FN_Open(var fn_uri:PChar);overload;</h4><br>
 	Opens connection to remote host at selected port using declared protocol.<br><ul><h5>parameters:</h5><li>fn_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/<br> <br> The N: Device spec can be found here: <br> <a href='https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec'>https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec</a></li></ul></td></tr>
+<tr><td class='tname fname'>FN_Open</td><td class='tdesc'><h4>procedure FN_Open(var fn_uri:PChar; aux1, aux2: byte);overload;</h4><br>
+	Opens connection to remote host at selected port using declared protocol.<br><ul><h5>parameters:</h5><li>fn_uri - #FujiNet N: device connection string: N[x]:&lt;PROTO&gt;://&lt;PATH&gt;[:PORT]/</li><li>aux1 - additional param passed to DCB</li><li>aux2 - additional param passed to DCB<br> The N: Device spec can be found here: <br> <a href='https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec'>https://github.com/FujiNetWIFI/atariwifi/wiki/Using-the-N%3A-Device#the-n-devicespec</a></li></ul></td></tr>
 <tr><td class='tname fname'>FN_WriteBuffer</td><td class='tdesc'><h4>procedure FN_WriteBuffer(buf: pointer; len: word);</h4><br>
 	Writes (sends) data from memory to network device.<br><ul><h5>parameters:</h5><li>buf - pointer to starting address of data</li><li>len - data length (in bytes)</li></ul></td></tr>
 <tr><td class='tname fname'>FN_ReadBuffer</td><td class='tdesc'><h4>procedure FN_ReadBuffer(buf: pointer;len: word);</h4><br>
@@ -56,6 +67,32 @@
 	Reads network device status and stores information in provided memory location.<br><ul><h5>parameters:</h5><li>buf - pointer of buffer to store returned status information</li></ul></td></tr>
 <tr><td class='tname fname'>FN_Close</td><td class='tdesc'><h4>procedure FN_Close;</h4><br>
 	Closes network connection.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>FN_Command</td><td class='tdesc'><h4>function FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word):byte;</h4><br>
+	Sends SIO command to #FN device<br><ul><h5>parameters:</h5><li>cmd - DCB.DCMND byte</li><li>dstats - DCB.STATS byte</li><li>dbyt - DCB.DBYT word</li><li>aux1 - DCB.DAUX1 byte</li><li>aux2 - DCB.DAUX2 byte</li><li>dbufa - DCB.DBUFA word</li><h5>returns:</h5><li class='returns'>(byte) - sio operation result (1 for success)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_GetHostSlots</td><td class='tdesc'><h4>procedure FN_GetHostSlots(buf: pointer);</h4><br>
+	Retrieves a list of hosts<br><ul><h5>parameters:</h5><li>buf - pointer to an FN_HostSlots object</li></ul></td></tr>
+<tr><td class='tname fname'>FN_GetDeviceSlots</td><td class='tdesc'><h4>procedure FN_GetDeviceSlots(buf: pointer);</h4><br>
+	Retrieves a list of device slots<br><ul><h5>parameters:</h5><li>buf - pointer to an FN_DeviceSlots object</li></ul></td></tr>
+<tr><td class='tname fname'>FN_MountHost</td><td class='tdesc'><h4>procedure FN_MountHost(hs: byte);</h4><br>
+	Mounts host with a given number<br><ul><h5>parameters:</h5><li>hs - host slot number (byte)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_UnmountHost</td><td class='tdesc'><h4>procedure FN_UnmountHost(hs: byte);</h4><br>
+	Unmounts host with a given number<br><ul><h5>parameters:</h5><li>hs - host slot number (byte)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_OpenDirectory</td><td class='tdesc'><h4>procedure FN_OpenDirectory(hs: byte; buf: pointer; diropt: byte);</h4><br>
+	Opens directory for reading<br><ul><h5>parameters:</h5><li>hs - host slot number (byte)</li><li>buf - pointer to the null-terminated path</li><li>diropt - directory options (byte)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_CloseDirectory</td><td class='tdesc'><h4>procedure FN_CloseDirectory(hs: byte);</h4><br>
+	Closes a previously opened directory<br><ul><h5>parameters:</h5><li>hs - host slot number (byte)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_ReadDirectory</td><td class='tdesc'><h4>procedure FN_ReadDirectory(maxlen: byte; hs: byte; buf: pointer);</h4><br>
+	Reads a directory entry into `buf`<br><ul><h5>parameters:</h5><li>maxlen - maximum length of retrieved data (byte)</li><li>hs - host slot number (byte)</li><li>buf - pointer to the null-terminated path</li></ul></td></tr>
+<tr><td class='tname fname'>FN_GetDirectoryPosition</td><td class='tdesc'><h4>function FN_GetDirectoryPosition : word;</h4><br>
+	Gets the current directory stream position<br><ul><h5>returns:</h5><li class='returns'>(word) - position</li></ul></td></tr>
+<tr><td class='tname fname'>FN_SetDirectoryPosition</td><td class='tdesc'><h4>procedure FN_SetDirectoryPosition(pos: word);</h4><br>
+	Sets directory stream position<br><ul><h5>parameters:</h5><li>pos - position (word)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_SetDeviceFilename</td><td class='tdesc'><h4>procedure FN_SetDeviceFilename(ds, hs, mode: byte; buf: pointer);</h4><br>
+	Sets filename for mounting<br><ul><h5>parameters:</h5><li>ds - disk slot number (byte)</li><li>hs - host slot number (byte)</li><li>mode - mounting mode: (FN_MOUNT_READ|FN_MOUNT_WRITE) (byte)</li><li>buf - pointer to the null-terminated path</li></ul></td></tr>
+<tr><td class='tname fname'>FN_MountDiskImage</td><td class='tdesc'><h4>procedure FN_MountDiskImage(slot, mode: byte);</h4><br>
+	Mounts disk image already set using FN_SetDeviceFilename<br><ul><h5>parameters:</h5><li>slot - disk slot number (byte)</li><li>mode - mounting mode: (FN_MOUNT_READ|FN_MOUNT_WRITE) (byte)</li></ul></td></tr>
+<tr><td class='tname fname'>FN_UnmountDiskImage</td><td class='tdesc'><h4>procedure FN_UnmountDiskImage(slot: byte);</h4><br>
+	Unmounts disk image specified by `slot`<br><ul><h5>parameters:</h5><li>slot - slot number (byte)</li></ul></td></tr>
 
 </table>
 

@@ -20,9 +20,13 @@
 
 <!--********************* TYPES **************************-->
 
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
 
+<tr><td class='tname'>TdateTime</td><td class='ttype'>record<ul class='record'><li>year: word;</li><li>month: byte;</li><li>day: byte; <span class='comment'>// day of month</span></li><li>hour: byte;</li><li>minute: byte;</li><li>second: byte;</li><li>dow: byte; <span class='comment'>// day of week</span></li></ul><br clear='all'>end;</td><td class='tdesc'>Record type used to store date and time.</td></tr>
 
-
+</table>
 
 <!--********************* ABSOLUTE VARIABLES **************************-->
 
@@ -54,8 +58,20 @@
 	Parses string terminated with $FF into regular pascal string variable.<br><ul><h5>parameters:</h5><li>ptr (word) - address in memory of null terminated string</li><h5>returns:</h5><li class='returns'>(string) - regular pascal string type variable</li></ul></td></tr>
 <tr><td class='tname fname'>ExpandRLE</td><td class='tdesc'><h4>procedure ExpandRLE(src: word; dest: word);</h4><br>
 	Expands RLE compressed data from source memory location and writes expanded data at destination memory address.<br><ul><h5>parameters:</h5><li>src (word) - source address of compressed data</li><li>dest (word) - destination address where data is expanded</li></ul></td></tr>
-<tr><td class='tname fname'>ExpandLZ4</td><td class='tdesc'><h4>procedure ExpandLZ4(source: word; dest: word):assembler;</h4><br>
+<tr><td class='tname fname'>ExpandLZ4</td><td class='tdesc'><h4>procedure ExpandLZ4(source: word; dest: word);assembler;</h4><br>
 	Expands LZ4 compressed data from source memory location and writes expanded data at destination memory address. <br> Based on xxl & fox routine from here: <a href='https://xxl.atari.pl/lz4-decompressor/'>https://xxl.atari.pl/lz4-decompressor/</a><br><ul><h5>parameters:</h5><li>src (word) - source address of compressed data</li><li>dest (word) - destination address where data is expanded</li></ul></td></tr>
+<tr><td class='tname fname'>UnixToDate</td><td class='tdesc'><h4>procedure UnixToDate(ux: cardinal; var date: TDateTime);</h4><br>
+	Converts unix timestamp to proper date, represented as an record of TDateTime type.<br><ul><h5>parameters:</h5><li>ux (cardinal) - unix timestamp</li><li>date (TDateTime) - record where the result of conversion is stored</li></ul></td></tr>
+<tr><td class='tname fname'>Hour24to12</td><td class='tdesc'><h4>function Hour24to12(hour: byte):byte;</h4><br>
+	Converts 24 hour clock indication into to 12 hour<br><ul><h5>parameters:</h5><li>hour (byte) - hour (0-23)</li><h5>returns:</h5><li class='returns'>(byte) - hour(0-12)</li></ul></td></tr>
+<tr><td class='tname fname'>HexChar2Dec</td><td class='tdesc'><h4>function HexChar2Dec(c:char):byte;</h4><br>
+	Converts hex char into proper value in decimal.<br><ul><h5>parameters:</h5><li>c (char) - hex char (0-9,a-f)</li><h5>returns:</h5><li class='returns'>(byte) - decimal value (0-15), on error (invalid char) returns 255</li></ul></td></tr>
+<tr><td class='tname fname'>Base64Init</td><td class='tdesc'><h4>procedure Base64Init;</h4><br>
+	Initializes base64 encoding tables. Must be started once, prior to any compression or decompression process.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>Base64Encode</td><td class='tdesc'><h4>procedure Base64Encode(var src, dest: string);</h4><br>
+	Encodes string using base64 code. Be sure that trlaslation arrays are initialized by calling Base64Init first. Once.<br><ul><h5>parameters:</h5><li>src (string) - source string</li><li>dest (string) - destination string where data is encoded</li></ul></td></tr>
+<tr><td class='tname fname'>Base64Decode</td><td class='tdesc'><h4>procedure Base64Decode(var src, dest: string);</h4><br>
+	Decodes base 64 encoded string Be sure that trlaslation arrays are initialized by calling Base64Init first. Once.<br><ul><h5>parameters:</h5><li>src (string) - encoded source string</li><li>dest (string) - destination string where data is decoded</li></ul></td></tr>
 
 </table>
 

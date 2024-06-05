@@ -1,0 +1,68 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit fn_cookies - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit fn_cookies</h1>
+<h3>#FujiNet library for using APPKEY storage build in #FujiNet device.</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>This library provides an easy interface to store so called APPKEYS or cookies on SD card of your fujinet device. <br> Those tiny data blobs can be used by applications to store some data, like configuration, keys, tokens on the device itself. <br> They are not public, and persistent on your device, until you will remove them manually from your SD card. <br> Maximum size of single cookie is 64 bytes. <br> <a href='https://fujinet.online/'>https://fujinet.online/</a> <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>MAX_COOKIE_SIZE</td><td class='tvalue'>64</td><td class='tdesc'></td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+<h2>Types:</h2>
+<table class='types'>
+<tr><th>name:</th><th>type:</th><th>description:</th></tr>
+
+<tr><td class='tname'>TCookieFrame</td><td class='ttype'>record<ul class='record'><li>len: word;</li><li>body: array [0..MAX_COOKIE_SIZE-1] of byte;</li></ul><br clear='all'>end;</td><td class='tdesc'>Structure used to retrieve cookie from storage</td></tr>
+<tr><td class='tname'>TCookieInfo</td><td class='ttype'>record<ul class='record'><li>creator: word;</li><li>app: byte;</li><li>key: byte;</li><li>mode: byte;</li><li>reserved: byte;</li></ul><br clear='all'>end;</td><td class='tdesc'>Structure used to set cookie info in Open Command</td></tr>
+
+</table>
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>InitCookie</td><td class='tdesc'><h4>procedure InitCookie(creator: word; app, key: byte);</h4><br>
+	Inits cookie storage params, and sets unique filename based on provided ID_keys. Must be called at least once, before any Set or Get command is issued.<br><ul><h5>parameters:</h5><li>(word) creator - creator ID number</li><li>(byte) app - application ID number</li><li>(byte) key - key ID number</li></ul></td></tr>
+<tr><td class='tname fname'>SetCookie</td><td class='tdesc'><h4>function SetCookie(val: pointer; vlength: word):byte;</h4><br>
+	Stores new cookie value.<br><ul><h5>parameters:</h5><li>(pointer) val - value to be stored</li><li>(word) vlength - length of data in bytes (max. 64)</li><h5>returns:</h5><li class='returns'>(byte) - sio operation result</li></ul></td></tr>
+<tr><td class='tname fname'>GetCookie</td><td class='tdesc'><h4>function GetCookie(val: pointer):byte;</h4><br>
+	Restores cookie value from device, to buffer. <br> Size of received data is returned in cookie.len field.<br><ul><h5>parameters:</h5><li>(pointer) val - pointer to receive buffer</li><h5>returns:</h5><li class='returns'>(byte) - sio operation result</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

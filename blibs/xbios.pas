@@ -665,7 +665,7 @@ asm {
     bcc @+
     stx xBiosIOerror
     mva #1 xBiosIOresult 
-@   pla:tax
+    pla:tax
 };
 end;
 
@@ -801,7 +801,7 @@ asm {
 };
 end;
 
-procedure xBiosFindEntry(var filename: TString); assembler;
+procedure xBiosFindEntry(var filename: TString): assembler;
 asm {
     txa:pha
     mva #0 xBiosIOresult
@@ -821,7 +821,7 @@ asm {
 };
 end;
 
-procedure xBiosSetBufferSize(size: byte); assembler;
+procedure xBiosSetBufferSize(size: byte): assembler;
 asm {
     txa:pha
     lda #$ff
