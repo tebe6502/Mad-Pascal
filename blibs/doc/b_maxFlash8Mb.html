@@ -1,0 +1,71 @@
+<html>
+<head>
+	<link rel='stylesheet' type='text/css' href='pasdoc.css'>
+	<title>unit b_maxflash8mb - reference</title>
+</head>
+<body>
+
+<!--********************* HEADER **************************-->
+
+<h1>unit b_maxflash8mb</h1>
+<h3>MaxFlash 8Mbit writing and erasing routines</h3>
+<p>author: bocianu <a href='mailto:bocianu@gmail.com'>bocianu@gmail.com</a></p>
+<br><p>Set of procedures to erase and write data onto MaxFlash 1Mbit cartridge. <br> Based on Steven Tucker's routines, placed into the public domain. <br> Now it works only with Am29F040 (or compatibile) modules, with sector size of 64K, but in future it might get extended for another chips. <br> Be notified that during erase and write operations all nonmaskable interrupts are disabled, so be careful, and enble them after, if they are needed. <br> This library is a part of 'blibs' - set of custom Mad-Pascal libraries. <br> <a href='https://gitlab.com/bocianu/blibs'>https://gitlab.com/bocianu/blibs</a></p>
+
+<!--********************* CONSTANTS **************************-->
+
+<h2>Constants:</h2>
+<table class='consts'>
+<tr><th>name:</th><th>value:</th><th>description:</th></tr>
+
+<tr><td class='tname'>MF_ZPLOCATION</td><td class='tvalue'>$D8</td><td class='tdesc'>starting location of reserved 4 bytes used by BurnPages routine</td></tr>
+
+</table>
+
+<!--********************* TYPES **************************-->
+
+
+
+
+
+<!--********************* ABSOLUTE VARIABLES **************************-->
+
+
+
+
+
+<!--********************* GLOBAL VARIABLES **************************-->
+
+
+
+
+
+<!--********************* INTERFACE **************************-->
+
+<h2>Interface:</h2>
+<table class='interface'>
+<tr><th>name:</th><th>description:</th></tr>
+
+<tr><td class='tname fname'>SetBank</td><td class='tdesc'><h4>procedure SetBank(bank: byte);</h4><br>
+	Switches cart to requested bank.<br><ul><h5>parameters:</h5><li>bank - cart bank number ($00-$7F)</li></ul></td></tr>
+<tr><td class='tname fname'>SetSector</td><td class='tdesc'><h4>procedure SetSector(sec: byte);</h4><br>
+	Switches to first bank of specified sector.<br><ul><h5>parameters:</h5><li>sec - cart sector number ($00-$0F);</li></ul></td></tr>
+<tr><td class='tname fname'>EraseChip</td><td class='tdesc'><h4>procedure EraseChip;</h4><br>
+	Erases whole Maxflash memory.<br><ul></ul></td></tr>
+<tr><td class='tname fname'>EraseSector</td><td class='tdesc'><h4>procedure EraseSector(sec: byte);</h4><br>
+	Erases specified sector (8 banks = 64KB) of Maxflash memory.<br><ul><h5>parameters:</h5><li>sec - cart sector number ($00-$0F);</li></ul></td></tr>
+<tr><td class='tname fname'>BurnByte</td><td class='tdesc'><h4>procedure BurnByte(bank:byte;addr:word;val:byte);</h4><br>
+	Writes one byte into Maxflash memory:<br><ul><h5>parameters:</h5><li>bank - cart bank number ($00-$7F)</li><li>addr - cart address ($A000-$BFFF)</li><li>val - byte value</li></ul></td></tr>
+<tr><td class='tname fname'>BurnBlock</td><td class='tdesc'><h4>procedure BurnBlock(bank: byte; src, dest, size: word);</h4><br>
+	Writes block of data from computer memory to Maxflash cart.<br><ul><h5>parameters:</h5><li>bank - cart bank number ($00-$7F)</li><li>src - source memory address ($0000-$FFFF)</li><li>dest - cart address ($A000-$BFFF)</li><li>size - number of bytes to write</li></ul></td></tr>
+<tr><td class='tname fname'>BurnPages</td><td class='tdesc'><h4>procedure BurnPages(sec, src, dest, pages:byte);</h4><br>
+	Fastest procedure that copies whole memory pages from RAM into MaxFlash cart.<br><ul><h5>parameters:</h5><li>sec - cart sector number ($00-$0F);</li><li>src - starting source memory page ($00-$FF)</li><li>dest - cart memory address within selected sector ($00-$FF)</li><li>pages - number of pages to be copied</li></ul></td></tr>
+
+</table>
+
+<!--********************* FOOTER **************************-->
+
+<br>
+<div class='footer'>This documentation was generated using <a href='https://gitlab.com/bocianu/pasdoc' target='_blank'>PasDoc</a>.</div>
+</body>
+</html>

@@ -3,7 +3,7 @@ unit fn_sio;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: SIO library for #FujiNet interface.
-* @version: 0.9.4
+* @version: 0.9.5
 
 * @description:
 * Set of procedures to communicate with #FujiNet interface on SIO level. <https://fujinet.online/>
@@ -24,6 +24,38 @@ type FN_StatusStruct = record
     connected: byte;  
     errorCode: byte;
 end;
+
+type FN_HostSlot = array[0..31] of char;
+(*
+* @description:
+* Character string used to store a single host name
+*)
+
+type FN_HostSlots = array[0..7] of FN_HostSlot;
+(*
+* @description:
+* List of all host slots (FN_HostSlot objects)
+*)
+
+type FN_DeviceSlot = record
+(*
+* @description:
+* Structure describing a single device slot
+*)
+    hostSlot: byte;
+    mode: byte;
+    filename: array[0..35] of char;
+end;
+
+type FN_DeviceSlots = array[0..7, 0..sizeof(FN_DeviceSlot) - 1] of char;
+(*
+* @description:
+* List of all device slots (FN_DeviceSlot objects)
+*)
+
+const
+    FN_MOUNT_READ = 0;
+    FN_MOUNT_WRITE = 1;
 
 var FN_timeout: byte = 5; // default timeout value
 
@@ -104,6 +136,110 @@ function FN_Command(cmd, dstats:byte;dbyt: word;aux1, aux2:byte; dbufa: word):by
 *
 * 
 * @returns: (byte) - sio operation result (1 for success)
+*)
+
+procedure FN_GetHostSlots(buf: pointer);
+(*
+* @description:
+* Retrieves a list of hosts
+*
+* @param: buf - pointer to an FN_HostSlots object
+*)
+
+procedure FN_GetDeviceSlots(buf: pointer);
+(*
+* @description:
+* Retrieves a list of device slots
+*
+* @param: buf - pointer to an FN_DeviceSlots object
+*)
+
+procedure FN_MountHost(hs: byte);
+(*
+* @description:
+* Mounts host with a given number
+*
+* @param: hs - host slot number (byte)
+*)
+
+procedure FN_UnmountHost(hs: byte);
+(*
+* @description:
+* Unmounts host with a given number
+*
+* @param: hs - host slot number (byte)
+*)
+
+procedure FN_OpenDirectory(hs: byte; buf: pointer; diropt: byte);
+(*
+* @description:
+* Opens directory for reading
+*
+* @param: hs - host slot number (byte)
+* @param: buf - pointer to the null-terminated path
+* @param: diropt - directory options (byte)
+*)
+
+procedure FN_CloseDirectory(hs: byte);
+(*
+* @description:
+* Closes a previously opened directory
+*
+* @param: hs - host slot number (byte)
+*)
+
+procedure FN_ReadDirectory(maxlen: byte; hs: byte; buf: pointer);
+(*
+* @description:
+* Reads a directory entry into `buf`
+*
+* @param: maxlen - maximum length of retrieved data (byte)
+* @param: hs - host slot number (byte)
+* @param: buf - pointer to the null-terminated path
+*)
+
+function FN_GetDirectoryPosition : word;
+(*
+* @description:
+* Gets the current directory stream position
+*
+* @returns: (word) - position
+*)
+
+procedure FN_SetDirectoryPosition(pos: word);
+(*
+* @description:
+* Sets directory stream position
+*
+* @param: pos - position (word)
+*)
+
+procedure FN_SetDeviceFilename(ds, hs, mode: byte; buf: pointer);
+(*
+* @description:
+* Sets filename for mounting
+*
+* @param: ds - disk slot number (byte)
+* @param: hs - host slot number (byte)
+* @param: mode - mounting mode: (FN_MOUNT_READ|FN_MOUNT_WRITE) (byte)
+* @param: buf - pointer to the null-terminated path
+*)
+
+procedure FN_MountDiskImage(slot, mode: byte);
+(*
+* @description:
+* Mounts disk image already set using FN_SetDeviceFilename
+*
+* @param: slot - disk slot number (byte)
+* @param: mode - mounting mode: (FN_MOUNT_READ|FN_MOUNT_WRITE) (byte)
+*)
+
+procedure FN_UnmountDiskImage(slot: byte);
+(*
+* @description:
+* Unmounts disk image specified by `slot`
+*
+* @param: slot - slot number (byte)
 *)
 
 implementation
@@ -224,6 +360,169 @@ begin
     DCB.DTIMLO := FN_timeout;
     DCB.DAUX1 := 0;    
     DCB.DAUX2 := 0;   
+    ExecSIO;
+end;
+
+procedure FN_GetHostSlots(buf: pointer);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f4;
+    DCB.DSTATS := _R;
+    DCB.DBUFA := word(buf);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := sizeof(FN_HostSlots);
+    ExecSIO;
+end;
+
+procedure FN_GetDeviceSlots(buf: pointer);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f2;
+    DCB.DSTATS := _R;
+    DCB.DBUFA := word(buf);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 8 * sizeof(FN_DeviceSlot);
+    DCB.DAUX1 := 0;
+    ExecSIO;
+end;
+
+procedure FN_MountHost(hs: byte);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f9;
+    DCB.DSTATS := _NO;
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 0;
+    DCB.DAUX1 := hs;
+    DCB.DAUX2 := 0;
+    ExecSIO;
+end;
+
+procedure FN_UnmountHost(hs: byte);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $e6;
+    DCB.DSTATS := _NO;
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 0;
+    DCB.DAUX1 := hs;
+    DCB.DAUX2 := 0;
+    ExecSIO;
+end;
+
+procedure FN_OpenDirectory(hs: byte; buf: pointer; diropt: byte);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f7;
+    DCB.DSTATS := _W;
+    DCB.DBUFA := word(buf);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 256;
+    DCB.DAUX1 := hs;
+    DCB.DAUX2 := diropt;
+    ExecSIO;
+end;
+
+procedure FN_ReadDirectory(maxlen: byte; hs: byte; buf: pointer);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f6;
+    DCB.DSTATS := _R;
+    DCB.DBUFA := word(buf);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := maxlen;
+    DCB.DAUX1 := maxlen;
+    DCB.DAUX2 := hs;
+    ExecSIO;
+end;
+
+function FN_GetDirectoryPosition : word;
+var pos : word;
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $e5;
+    DCB.DSTATS := _R;
+    DCB.DBUFA := word(@pos);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 2;
+    DCB.DAUX1 := 0;
+    DCB.DAUX2 := 0;
+    ExecSIO;
+    result := pos;
+end;
+
+procedure FN_SetDirectoryPosition(pos: word);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $e4;
+    DCB.DSTATS := _NO;
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 0;
+    DCB.DAUX1 := lo(pos);
+    DCB.DAUX2 := hi(pos);
+    ExecSIO;
+end;
+
+procedure FN_CloseDirectory(hs: byte);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f5;
+    DCB.DSTATS := _NO;
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 0;
+    DCB.DAUX1 := hs;
+    DCB.DAUX2 := 0;
+    ExecSIO;
+end;
+
+procedure FN_SetDeviceFilename(ds, hs, mode: byte; buf: pointer);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $e2;
+    DCB.DSTATS := _W;
+    DCB.DBUFA := word(buf);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 256;
+    DCB.DAUX1 := ds;
+    DCB.DAUX2 := mode + 16 * hs;
+    ExecSIO;
+end;
+
+procedure FN_MountDiskImage(slot: byte; mode: byte);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $f8;
+    DCB.DSTATS := _NO;
+    DCB.DBUFA := 0;
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 0;
+    DCB.DAUX1 := slot;
+    DCB.DAUX2 := mode + 1;
+    ExecSIO;
+end;
+
+procedure FN_UnmountDiskImage(slot: byte);
+begin
+    DCB.DDEVIC := $70;
+    DCB.dunit := 1;
+    DCB.DCMND := $e9;
+    DCB.DSTATS := _NO;
+    DCB.DBUFA := word(@slot);
+    DCB.DTIMLO := $0f;
+    DCB.DBYT := 0;
+    DCB.DAUX1 := $ff;
+    DCB.DAUX2 := 0;
     ExecSIO;
 end;
 

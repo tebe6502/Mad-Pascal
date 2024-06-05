@@ -163,7 +163,7 @@ START
 
 VALUE	= edx
 DIGITS	= ecx
-adr.RESULT	= DATAORIGIN+$000B
+adr.RESULT	= DATAORIGIN+$000A
 .var RESULT	= adr.RESULT .word
 
 @VarData	= RESULT
@@ -206,7 +206,7 @@ adr.RESULT	= DATAORIGIN+$000B
 ; -----------------------------------------------------------
 
 A	= edx
-RESULT	= DATAORIGIN+$002C
+RESULT	= DATAORIGIN+$002B
 
 @VarData	= RESULT
 @VarDataSize	= 1
@@ -251,7 +251,7 @@ RESULT	= DATAORIGIN+$002C
 ; -----------------------------------------------------------
 
 A	= edx
-RESULT	= DATAORIGIN+$002D
+RESULT	= DATAORIGIN+$002C
 
 @VarData	= RESULT
 @VarDataSize	= 2
@@ -311,12 +311,11 @@ FMOPENAPPEND	= $0009
 FMOPENREADWRITE	= $000C
 SCREENWIDTH	= DATAORIGIN+$0000
 SCREENHEIGHT	= DATAORIGIN+$0002
-DATESEPARATOR	= DATAORIGIN+$0004
-FILEMODE	= DATAORIGIN+$0005
-SCREENMODE	= DATAORIGIN+$0006
-IORESULT	= DATAORIGIN+$0007
-EOLN	= DATAORIGIN+$0008
-RNDSEED	= DATAORIGIN+$0009
+FILEMODE	= DATAORIGIN+$0004
+SCREENMODE	= DATAORIGIN+$0005
+IORESULT	= DATAORIGIN+$0006
+EOLN	= DATAORIGIN+$0007
+RNDSEED	= DATAORIGIN+$0008
 
 .endl							; UNIT SYSTEM
 
@@ -326,21 +325,21 @@ RNDSEED	= DATAORIGIN+$0009
 
 .local	XBIOSCHECK					; FUNCTION
 
-	ift l_0131-*>3
-	jmp l_0131
+	ift l_013A-*>3
+	jmp l_013A
 	eif
 
 ; IfThenEpilog
-l_0131
+l_013A
 
-; optimize OK (XBIOS), line = 413
+; optimize OK (XBIOS), line = 409
 
 	lda $0800
 	sta CS
 	lda $0800+1
 	sta CS+1
 
-; optimize OK (XBIOS), line = 414
+; optimize OK (XBIOS), line = 410
 
 	ldy #1
 	lda CS
@@ -357,33 +356,33 @@ l_0131
 @
 	tya
 	and :STACKORIGIN+9
-	.ifdef IFTMP_25
-	sta IFTMP_25
+	.ifdef IFTMP_21
+	sta IFTMP_21
 	eif
 	bne *+5
-	jmp l_0152
+	jmp l_015E
 
-; optimize OK (XBIOS), line = 415
+; optimize OK (XBIOS), line = 411
 
 	lda $0802
 	sta RESULT
 
 ; IfThenEpilog
-l_0152
+l_015E
 
 ; Restore conditional expression
-	lda IFTMP_25
+	lda IFTMP_21
 
 ; else condition
 	beq *+5						; je
-	jmp l_0161
+	jmp l_0170
 
-; optimize OK (XBIOS), line = 416
+; optimize OK (XBIOS), line = 412
 
 	mva #$00 RESULT
 
 ; IfThenEpilog
-l_0161
+l_0170
 
 @exit
 
@@ -401,9 +400,9 @@ l_0161
 
 ; -----------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0035
-CS	= DATAORIGIN+$0036
-IFTMP_25	= DATAORIGIN+$0038
+RESULT	= DATAORIGIN+$0034
+CS	= DATAORIGIN+$0035
+IFTMP_21	= DATAORIGIN+$0037
 
 @VarData	= RESULT
 @VarDataSize	= 4
@@ -442,7 +441,7 @@ IFTMP_25	= DATAORIGIN+$0038
 
 ; -----------------------------------------------------------
 
-FILENAME	= DATAORIGIN+$0039
+FILENAME	= DATAORIGIN+$0038
 
 @VarData	= FILENAME
 @VarDataSize	= 2
@@ -486,7 +485,7 @@ FILENAME	= DATAORIGIN+$0039
 
 ; -----------------------------------------------------------
 
-FILENAME	= DATAORIGIN+$003B
+FILENAME	= DATAORIGIN+$003A
 
 @VarData	= FILENAME
 @VarDataSize	= 2
@@ -527,7 +526,7 @@ FILENAME	= DATAORIGIN+$003B
 
 ; -----------------------------------------------------------
 
-DEST	= DATAORIGIN+$003D
+DEST	= DATAORIGIN+$003C
 
 @VarData	= DEST
 @VarDataSize	= 2
@@ -571,7 +570,7 @@ DEST	= DATAORIGIN+$003D
 
 ; -----------------------------------------------------------
 
-FILENAME	= DATAORIGIN+$003F
+FILENAME	= DATAORIGIN+$003E
 
 @VarData	= FILENAME
 @VarDataSize	= 2
@@ -586,11 +585,11 @@ FILENAME	= DATAORIGIN+$003F
 
 ; -----------------------------------------------------------
 
-XBIOSIORESULT	= DATAORIGIN+$002F
-XBIOSIOERROR	= DATAORIGIN+$0030
-XBIOSDIRENTRYINDEX	= DATAORIGIN+$0031
-XBIOSDIRENTRYSTATUS	= DATAORIGIN+$0032
-XBIOSDIRENTRYSECTOR	= DATAORIGIN+$0033
+XBIOSIORESULT	= DATAORIGIN+$002E
+XBIOSIOERROR	= DATAORIGIN+$002F
+XBIOSDIRENTRYINDEX	= DATAORIGIN+$0030
+XBIOSDIRENTRYSTATUS	= DATAORIGIN+$0031
+XBIOSDIRENTRYSECTOR	= DATAORIGIN+$0032
 XBIOS_ADDRESS	= $0800
 XBIOS_VERSION	= $0802
 XBIOS_RENAME_ENTRY	= $0803
@@ -738,12 +737,12 @@ NMIEN	= $D40E
 
 .local	CLRSCR						; PROCEDURE
 
-	ift l_0181-*>3
-	jmp l_0181
+	ift l_019F-*>3
+	jmp l_019F
 	eif
 
 ; IfThenEpilog
-l_0181
+l_019F
 
 ; -----------------------------------------------------------
 
@@ -793,7 +792,7 @@ l_0181
 
 ; -----------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0042
+RESULT	= DATAORIGIN+$0041
 
 @VarData	= RESULT
 @VarDataSize	= 1
@@ -833,7 +832,7 @@ skp	sty Result
 
 ; -----------------------------------------------------------
 
-RESULT	= DATAORIGIN+$0043
+RESULT	= DATAORIGIN+$0042
 
 @VarData	= RESULT
 @VarDataSize	= 1
@@ -843,7 +842,7 @@ RESULT	= DATAORIGIN+$0043
 
 ; -----------------------------------------------------------
 
-TEXTATTR	= DATAORIGIN+$0041
+TEXTATTR	= DATAORIGIN+$0040
 CONSOL	= $D01F
 CN_START_SELECT_OPTION	= $0000
 CN_SELECT_OPTION	= $0001
@@ -885,21 +884,21 @@ l_00F2
 
 ; optimize FAIL ('CRT.KEYPRESSED', subdir.pas), line = 9
 	jsr CRT.KEYPRESSED
-	.ifdef IFTMP_29
+	.ifdef IFTMP_25
 	lda :STACKORIGIN,x
-	sta IFTMP_29
+	sta IFTMP_25
 	eif
 	dex
 	lda :STACKORIGIN+1,x
 	bne *+5
-	jmp l_019A
+	jmp l_01B8
 
 	jsr CRT.READKEY					; call Entry
 
 	dex						; sub bx, 1
 
 ; IfThenEpilog
-l_019A
+l_01B8
 
 ; optimize FAIL ('XBIOS.XBIOSCHECK', subdir.pas), line = 11
 	jsr XBIOS.XBIOSCHECK
@@ -913,14 +912,14 @@ l_019A
 @
 	sty :STACKORIGIN-1,x
 	dex
-	.ifdef IFTMP_30
+	.ifdef IFTMP_26
 	lda :STACKORIGIN,x
-	sta IFTMP_30
+	sta IFTMP_26
 	eif
 	dex
 	lda :STACKORIGIN+1,x
 	bne *+5
-	jmp l_01AE
+	jmp l_01CC
 
 	@printSTRING #CODEORIGIN+$0000
 
@@ -958,7 +957,7 @@ l_019A
 	jmp @exit					; exit
 
 ; IfThenEpilog
-l_01AE
+l_01CC
 
 	@printSTRING #CODEORIGIN+$001F
 	@printEOL
@@ -977,12 +976,12 @@ l_01AE
 	bne @+
 	dey
 @
-	.ifdef IFTMP_31
-	sty IFTMP_31
+	.ifdef IFTMP_27
+	sty IFTMP_27
 	eif
 	tya
 	bne *+5
-	jmp l_01D4
+	jmp l_01F2
 
 	@printSTRING #CODEORIGIN+$004F
 
@@ -999,7 +998,7 @@ l_01AE
 	@printEOL
 
 ; IfThenEpilog
-l_01D4
+l_01F2
 	@move #CODEORIGIN+$005A #adr.FILENAME #12
 
 	@printSTRING #CODEORIGIN+$0067
@@ -1018,12 +1017,12 @@ l_01D4
 	bne @+
 	dey
 @
-	.ifdef IFTMP_32
-	sty IFTMP_32
+	.ifdef IFTMP_28
+	sty IFTMP_28
 	eif
 	tya
 	bne *+5
-	jmp l_01FA
+	jmp l_0218
 
 	@printSTRING #CODEORIGIN+$004F
 
@@ -1040,7 +1039,7 @@ l_01D4
 	@printEOL
 
 ; IfThenEpilog
-l_01FA
+l_0218
 
 	@printSTRING #CODEORIGIN+$0085
 	@printEOL
@@ -1103,9 +1102,9 @@ l_01FA
 
 ; -----------------------------------------------------------
 
-adr.TEXT	= DATAORIGIN+$0044
+adr.TEXT	= DATAORIGIN+$0043
 .var TEXT	= adr.TEXT .word
-adr.FILENAME	= DATAORIGIN+$0144
+adr.FILENAME	= DATAORIGIN+$0143
 .var FILENAME	= adr.FILENAME .word
 
 @exit
@@ -1168,10 +1167,10 @@ ATARI
 
 DATAORIGIN
 
-.by  $28 $00 $18 $00 $2D $0C
+.by  $28 $00 $18 $00 $0C
 
 VARINITSIZE	= *-DATAORIGIN
-VARDATASIZE	= 357
+VARDATASIZE	= 356
 
 PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
 
