@@ -170,6 +170,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Tetris neo6502](https://gitlab.com/bocianu/neo-tetris)
 * [µSoukoban](https://github.com/zbyti/pikoban)
 * [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
+* [run-fox-run](https://gitlab.com/bocianu/run-fox-run)
 
 ## Benchmarks
 
