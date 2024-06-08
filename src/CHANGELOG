@@ -1,3 +1,9 @@
+08.06.2024
+- opt_TEMP_CMP_0, dodany test dla '#asm:'
+
+02.06.2024
+- SYSTEM, poprawione SQRT
+
 21.05.2024
 - bugifx CompileActualParameters, dodana zmienna old_i 'old_i:=i' zamiast 'j:=i', j było nadpisywane
 - Push ASPOINTERTOPOINTER, dopisany warunek 'and (Ident[IdentIndex].PassMethod <> VARPASSING)', rekordy w obiektach są prawidłowo adresowane

@@ -80,6 +80,25 @@ var p, k , q: integer;
     yes: Boolean;
 
 
+  function fail(i: integer): Boolean;
+  begin
+
+        if (pos('#asm:', TemporaryBuf[p]) = 1) or
+	   (pos('ldy ', TemporaryBuf[i]) > 0) or
+           (pos('mwy ', TemporaryBuf[i]) > 0) or
+           (pos('mvy ', TemporaryBuf[i]) > 0) or
+           (pos('jsr ', TemporaryBuf[i]) > 0) or
+           (pos(#9'.if', TemporaryBuf[i]) > 0) or
+           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
+           (pos(#9'@print', TemporaryBuf[i]) > 0) or
+           (TemporaryBuf[i] = #9'iny') or
+           (TemporaryBuf[i] = #9'dey') or
+           (TemporaryBuf[i] = #9'tya') or
+           (TemporaryBuf[i] = #9'tay') then Result:=true else Result:=false;
+
+  end;
+
+
   function SKIP(i: integer): Boolean;
   begin
 
