@@ -16068,6 +16068,11 @@ while Tok[i].Kind in
 
        if Tok[i + 1].Kind = EQTOK then begin
 
+
+        if Ident[NumIdent].isStriped then
+	 Error(i + 1, 'Initialization for striped array not allowed');
+
+
 	if VarType in [RECORDTOK, OBJECTTOK] then
 	 Error(i + 1, 'Initialization for '+InfoAboutToken(VarType)+' not allowed');
 
