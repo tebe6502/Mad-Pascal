@@ -120,17 +120,7 @@ begin
 
 	 Break;
        end else
-        if (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
-           (pos(#9'@print', TemporaryBuf[p]) > 0) or
-           (TemporaryBuf[p] = #9'iny') or
-           (TemporaryBuf[p] = #9'dey') or
-           (TemporaryBuf[p] = #9'tya') or
-           (TemporaryBuf[p] = #9'tay') then yes:=false;
+        if fail(p) then yes:=false;
 
      end;
 
@@ -167,17 +157,7 @@ begin
 
 	 Break;
        end else
-        if (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
-           (pos(#9'@print', TemporaryBuf[p]) > 0) or
-           (TemporaryBuf[p] = #9'iny') or
-           (TemporaryBuf[p] = #9'dey') or
-           (TemporaryBuf[p] = #9'tya') or
-           (TemporaryBuf[p] = #9'tay') then yes:=false;
+        if fail(p) then yes:=false;
 
      end;
 

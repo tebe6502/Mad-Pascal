@@ -391,21 +391,12 @@ begin
 
 	 Break;
        end else
-        if (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
-           (pos(#9'@print', TemporaryBuf[p]) > 0) or
+        if fail(p) or
            (TemporaryBuf[p] = #9'lda ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'add ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'sub ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'adc ' + copy(TemporaryBuf[4], 6, 256)) or
-           (TemporaryBuf[p] = #9'sbc ' + copy(TemporaryBuf[4], 6, 256)) or
-           (TemporaryBuf[p] = #9'iny') or
-           (TemporaryBuf[p] = #9'dey') or
-           (TemporaryBuf[p] = #9'tay') then yes:=false;
+           (TemporaryBuf[p] = #9'sbc ' + copy(TemporaryBuf[4], 6, 256)) then yes:=false;
 
      end;
 
@@ -446,21 +437,12 @@ begin
 
 	 Break;
        end else
-        if (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
-           (pos(#9'@print', TemporaryBuf[p]) > 0) or
+        if fail(p) or
            (TemporaryBuf[p] = #9'lda ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'add ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'sub ' + copy(TemporaryBuf[4], 6, 256)) or
            (TemporaryBuf[p] = #9'adc ' + copy(TemporaryBuf[4], 6, 256)) or
-           (TemporaryBuf[p] = #9'sbc ' + copy(TemporaryBuf[4], 6, 256)) or
-           (TemporaryBuf[p] = #9'iny') or
-           (TemporaryBuf[p] = #9'dey') or
-           (TemporaryBuf[p] = #9'tay') then yes:=false;
+           (TemporaryBuf[p] = #9'sbc ' + copy(TemporaryBuf[4], 6, 256)) then yes:=false;
 
      end;
 

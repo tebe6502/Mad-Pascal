@@ -22,7 +22,8 @@ begin
 	Break;
 
        end else
-        if (pos('l_', TemporaryBuf[p]) = 1) or
+        if (pos('#asm:', TemporaryBuf[p]) = 1) or
+	   (pos('l_', TemporaryBuf[p]) = 1) or
            (pos('jsr ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
