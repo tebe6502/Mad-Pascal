@@ -29,7 +29,7 @@ INTERFACE
 
 
 { return 0, if could not compress }
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
+FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD; 
 FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
 
 IMPLEMENTATION
@@ -43,8 +43,9 @@ OFFSET_MASK  = (1 SHL (16 - MATCH_BITS)) - 1;
 LEMPEL_SIZE  = $400; { 1024 }
 
 
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
-VAR     copymask, mlen       : WORD;
+FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD; 
+VAR     mlen                 : BYTE;
+	copymask             : WORD;
         offset, copymap, cpy : WORD;
         dst_pos, src_pos     : WORD;
         hashlo, hashhi       : WORD;
@@ -93,7 +94,7 @@ BEGIN
                         mlen := MATCH_MIN;
                         WHILE (mlen < MATCH_MAX) AND (src[src_pos + mlen] = src[cpy + mlen]) DO Inc(mlen);
                         dst[dst_pos] := Chr(
-                                (WORD(mlen - MATCH_MIN) SHL (BITS_IN_BYTE - MATCH_BITS))
+                                (BYTE(mlen - MATCH_MIN) SHL (BITS_IN_BYTE - MATCH_BITS))
                                 OR (offset SHR BITS_IN_BYTE));
                         Inc(dst_pos);
                         dst[dst_pos] := Chr(offset);
@@ -110,9 +111,9 @@ END;
 
 
 FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
-VAR     copymap                       : BYTE;
+VAR     copymap, mlen                 : BYTE;
         offset, cpy, src_pos, dst_pos : WORD;
-        copymask, mlen                : WORD;
+        copymask                      : WORD;
 BEGIN
         src_pos := 0;
         dst_pos := 0;

@@ -14022,10 +14022,12 @@ end;
 
 // ----------------------------------------------------------------------------
 
-procedure SaveData;
+procedure SaveData(compile: Boolean = true);
 begin
 
-  i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
+   if compile then
+     i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
+
 
   if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then begin	// rejestrujemy CHAR jako STRING
 
@@ -14083,7 +14085,13 @@ begin
 
 end;
 
+
 // ----------------------------------------------------------------------------
+
+{$i include/doevaluate.inc}
+
+// ----------------------------------------------------------------------------
+
 
 begin
 
@@ -14121,7 +14129,7 @@ begin
   repeat
 
   inc(NumActualParams);
-  if NumActualParams > NumAllocElements then Break;
+//  if NumActualParams > NumAllocElements then Break;
 
   if NumAllocElements_ > 0 then begin
 
@@ -14143,14 +14151,22 @@ begin
 
    //inc(i);
   end else
-   SaveData;
+   //SaveData;
+    if Tok[i + 1].Kind = EVALTOK then
+      NumActualParams := doEvaluate
+    else
+      SaveData;
+
 
   inc(i);
 
  until Tok[i].Kind <> COMMATOK;
 
-
  CheckTok(i, CPARTOK);
+
+
+ if NumActualParams > NumAllocElements then
+  Error(i, 'Number of elements (' + IntToStr(NumActualParams) + ') differs from declaration (' + IntToStr(NumAllocElements) + ')');
 
  if NumActualParams < NumAllocElements then
   Error(i, 'Expected another '+IntToStr(NumAllocElements - NumActualParams)+' array elements');

@@ -1,5 +1,5 @@
 
-procedure doEvaluate;
+function doEvaluate: integer;
 var s: string;
     par1, par2, p1, p2: integer;
     k: integer;
@@ -135,8 +135,13 @@ begin
      for p2 := 0 to par2 - 1 do
       for p1 := 0 to par1 - 1 do doEvaluations(p1,p2);
 
-    end else
+     doEvaluate := par1 * par2;
+
+    end else begin
      for p1 := 0 to par1 - 1 do doEvaluations(p1,-1);
+
+     doEvaluate := par1;
+    end;
 
 
   end;	// if s <> ''

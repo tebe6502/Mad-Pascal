@@ -1,3 +1,8 @@
+09.06.2024
+- dodana obsługa {$eval } dla inicjalizacji tablic o zadeklarowanym rozmiarze, np.: 
+
+ array [0..15] of byte = ( {$eval 16,":1"} );
+ 
 08.06.2024
 - opt_TEMP_CMP_0, dodany test dla '#asm:'
 

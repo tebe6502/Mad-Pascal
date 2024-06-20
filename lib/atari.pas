@@ -105,6 +105,8 @@ var
 	colpf1: byte absolute $D017;
 	colpf2: byte absolute $D018;
 	colpf3: byte absolute $D019;
+
+	colbak: byte absolute $D01A;		// rejestr sprzetowy koloru tla
 	colbk: byte absolute $D01A;		// rejestr sprzetowy koloru tla
 
 	prior: byte absolute $D01B;		// rejestr piorytetu GTIA

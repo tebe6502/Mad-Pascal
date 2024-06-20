@@ -3,7 +3,7 @@ unit neo6502;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Neo6502 API library for Mad-Pascal.
-* @version: 0.30.0
+* @version: 0.2.0
 
 * @description:
 * Set of procedures to cover API functionality provided by:    
@@ -47,7 +47,6 @@ const
     FI_ReadDir = 18;  // @nodoc  
     FI_CloseDir = 19;  // @nodoc  
     FI_CopyFile = 20;  // @nodoc  
-    FI_SetAttr = 21;  // @nodoc  
 
     FI_PrintDirWildcard = 32;      // @nodoc  
 
@@ -65,16 +64,6 @@ const
     MEM_6502 = 0;       // 6502 ram offset 
     MEM_VRAM = $800000; // Video ram offset for blitter addresing
     MEM_GFX = $900000;  // Graphics ram (tiles/sprites) offset for blitter addresing
-
-    BLTACT_COPY = 0;     // Blitter action: copy
-    BLTACT_MASK = 1;     // Blitter action: copycopy, but only where src is not the transparent value.
-    BLTACT_SOLID = 2;    // Blitter action: set target to constant solid value, but only where src is not the transparent value.
-
-    BLTFORM_BYTE = 0;     // Blitter data format: bytes. Supported for both source and target.
-    BLTFORM_PAIRS = 1;    // Blitter data format: pairs of 4-bit values (nibbles). Source only.
-    BLTFORM_1BPP = 2;     // Blitter data format: 8 single-bit values. Source only.
-    BLTFORM_UPPER4 = 3;   // Blitter data format: high nibble. Target only.
-    BLTFORM_LOWER4 = 4;   // Blitter data format: low nibble. Target only.
 
 type TN6502Message = record
 (*
@@ -104,16 +93,6 @@ type TTileMapHeader = record
     format:byte;
     width:byte;
     height:byte;
-end;
-
-type TBlitBlock = record
-    address: cardinal;
-    stride: word;
-    format: byte;
-    transparent: byte;
-    solid: byte;
-    height: byte;
-    width: word;
 end;
 
 var 
@@ -209,20 +188,7 @@ procedure NeoReset;
 * @description:
 * System Reset. This is a full hardware reset. It resets the RP2040 using the Watchdog timer, and this also resets the 65C02.
 *)
-procedure NeoMOS(cmd:pointer);
-(*
-* @description:
-* Do a MOS command (a '* command') these are specified in the Wiki as they will be steadily expanded.
-*
-* @param: cmd (pointer) - pointer to command string
-*)
-procedure NeoWriteDebug(c:byte);
-(*
-* @description:
-* Writes a single character to the debug port (the UART on the Pico, or stderr on the emulator). This allows maximum flexibility.
-*
-* @param: c (byte) - byte to be written
-*)
+
 
 /////////////// GROUP 2 - console
 
@@ -528,23 +494,6 @@ function NeoCopyFile(fin,fout:pointer):boolean;
 *
 * @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
 *)
-function NeoSetAttr(fin:pointer;var attr:byte):boolean;
-(*
-* @description:
-* Sets file/directory attributes.
-*
-* File attributes are a bitfield as follows:
-* 0 - directory (cannot be changed)
-* 1 - system    
-* 2 - archive   
-* 3 - read only   
-* 4 - hidden   
-* 
-* @param: fin (pointer) - pointer to length-prefixed path string.
-* @param: attr (byte) - file attribute
-*
-* @returns: (boolean) - true on success. On false error code is returned in NeoMessage.error 
-*)
 procedure NeoSearchDir(var searchstring:string);
 (*
 * @description:
@@ -667,17 +616,6 @@ procedure NeoSetPalette(col,r,g,b:byte);
 * @param: b (byte) - blue component
 *
 *)
-procedure NeoGetPalette(col:byte;var r:byte;var g:byte;var b:byte);
-(*
-* @description:
-* Returns selected color rgb components from system pallette.
-* 
-* @param: col (byte) - color number to be returned
-* @param: r (byte) - reference to red component
-* @param: g (byte) - reference to green component
-* @param: b (byte) - reference to blue component
-*
-*)
 function NeoGetPixel(x,y:word):byte;
 (*
 * @description:
@@ -797,7 +735,7 @@ function NeoInRange(s0,s1,range:byte):byte;
 *
 * @returns: (byte) - not zero if collided
 *)
-procedure NeoGetSpriteXY(s0:byte; var x:word;var y:word);
+procedure GetSpriteXY(s0:byte;var x:word;var y:word);
 (*
 * @description:
 * Returns coordinates of the selected sprite. Coordinates are returned in referenced variabled.
@@ -979,35 +917,7 @@ procedure NeoBlitterCopy(src:cardinal;dst:cardinal;len:word);
 * @param: len (word) - data length in bytes
 *
 *)
-procedure NeoBlitterXCopy(action:byte;src,dest:pointer);
-(*
-* @description:
-* Copy a source rectangular area to a destination rectangular area.
-* It's oriented toward copying graphics data, but can be used as a more general-purpose memory mover.
-* The source and target areas may be different formats, and the copy will convert the data on the fly.
-*
-* The upper 8 bits of the address are : 6502 RAM ($00xxxx) VideoRAM ($8xxxxx) Graphics RAM($90xxxx).  
-*
-* @param: action (byte) - blit action 
-* @param: src (pointer) - pointer to source rectangle data block (TBlitBlock)
-* @param: dst (pointer) - pointer to target rectangle data block (TBlitBlock)
-*
-*
-* For more info check neo6502 API Reference: https://www.neo6502.com/reference/api-listing/#group-12-blitter
-*)
-procedure NeoBlitImage(action:byte;src:pointer;x,y:word;format:byte);
-(*
-* @description:
-* Blits an image from memory onto the screen. The image will be clipped, so it's safe to blit partly (or fully) offscreen-images.
-*
-* @param: action (byte) - blit action 
-* @param: src (pointer) - pointer to source rectangle data block (TBlitBlock)
-* @param: x (word) - x pixel coordinate on screen
-* @param: y (word) - y pixel coordinate on screen
-* @param: format (byte) - destination format, determines how framebuffer will be written
-*
-* For more info check neo6502 API Reference: https://www.neo6502.com/reference/api-listing/#group-12-blitter
-*)
+
 
 procedure NeoInitEditor;
 (*
@@ -1023,6 +933,7 @@ procedure NeoReenterEditor;
 * the editors sort of ’call backs’ - see editor specification
 *
 *)
+
 
 
 implementation
@@ -1049,6 +960,11 @@ begin
     NeoSendMessage(1,0);
 end;
 
+procedure NeoReset;
+begin
+    NeoSendMessage(1,7);
+end;
+
 function NeoGetTimer:cardinal;
 begin
     NeoSendMessage(1,1);
@@ -1059,6 +975,13 @@ function NeoIsKeyPressed(key:byte):byte;
 begin
     NeoMessage.params[0]:=key;
     result := NeoSendMessage(1,2);
+end;
+
+procedure NeoSetLocale(lang:string[2]);
+begin
+    NeoMessage.params[0]:=byte(lang[1]);
+    NeoMessage.params[1]:=byte(lang[2]);
+    NeoSendMessage(1,6);
 end;
 
 procedure NeoExecuteBasic;
@@ -1074,30 +997,6 @@ end;
 function NeoCheckSerial:byte;
 begin
     result := NeoSendMessage(1,5);
-end;
-
-procedure NeoSetLocale(lang:string[2]);
-begin
-    NeoMessage.params[0]:=byte(lang[1]);
-    NeoMessage.params[1]:=byte(lang[2]);
-    NeoSendMessage(1,6);
-end;
-
-procedure NeoReset;
-begin
-    NeoSendMessage(1,7);
-end;
-
-procedure NeoMOS(cmd:pointer);
-begin
-    wordParams[0] := word(cmd);
-    NeoSendMessage(1,8);
-end;
-
-procedure NeoWriteDebug(c:byte);
-begin
-    NeoMessage.params[0]:=c;
-    NeoSendMessage(1,10);
 end;
 
 //////////////////////////////////
@@ -1131,6 +1030,12 @@ begin
     width := NeoMessage.params[1];
 end;
 
+procedure NeoSetTextColor(foreground,background:byte);
+begin
+    NeoMessage.params[0] := foreground;
+    NeoMessage.params[1] := background;
+    NeoSendMessage(2,15);
+end;
 
 procedure NeoGetCursorPos(var x:byte;var y:byte);
 begin
@@ -1147,14 +1052,6 @@ begin
     NeoMessage.params[2] := x1;
     NeoMessage.params[3] := y1;
     NeoSendMessage(2,14);
-end;
-
-
-procedure NeoSetTextColor(foreground,background:byte);
-begin
-    NeoMessage.params[0] := foreground;
-    NeoMessage.params[1] := background;
-    NeoSendMessage(2,15);
 end;
 
 procedure NeoCursorInverse;
@@ -1315,14 +1212,6 @@ begin
     result := FileIO(FI_CopyFile);
 end;
 
-function NeoSetAttr(fin:pointer;var attr:byte):boolean;
-begin
-    FI_filename := word(fin);
-    NeoMessage.params[2]:=attr;
-    result := FileIO(FI_SetAttr);
-end;
-
-
 procedure NeoSearchDir(var searchstring:string);
 begin
     wordParams[0] := word(@searchstring);
@@ -1386,6 +1275,14 @@ begin
     NeoSendMessage(5,5);
 end;
 
+procedure NeoWritePixel(x0,y0:word;c:byte);
+begin
+    wordParams[0]:=x0;
+    wordParams[1]:=y0;
+    NeoMessage.params[4]:=c;
+    NeoSendMessage(5,39);
+end;
+
 procedure NeoDrawString(x0,y0:word;var s:string);
 begin
     wordParams[0]:=x0;
@@ -1447,7 +1344,6 @@ begin
     result := NeoSendMessage(5,36);
 end;
 
-
 function NeoGetVblanks:cardinal;
 begin
     NeoSendMessage(5,37);
@@ -1460,23 +1356,6 @@ begin
     NeoSendMessage(5,37);
     vbcount0 := NeoMessage.params[0];
     repeat NeoSendMessage(5,37) until vbcount0 <> NeoMessage.params[0];
-end;
-
-procedure NeoGetPalette(col:byte;var r:byte;var g:byte;var b:byte);
-begin
-    NeoMessage.params[0]:=col;
-    NeoSendMessage(5,38);
-    r:=NeoMessage.params[1];
-    g:=NeoMessage.params[2];
-    b:=NeoMessage.params[3];
-end;
-
-procedure NeoWritePixel(x0,y0:word;c:byte);
-begin
-    wordParams[0]:=x0;
-    wordParams[1]:=y0;
-    NeoMessage.params[4]:=c;
-    NeoSendMessage(5,39);
 end;
 
 procedure NeoSetColor(col:byte);
@@ -1537,10 +1416,10 @@ begin
     result := NeoSendMessage(6,4);
 end;
 
-procedure NeoGetSpriteXY(s0:byte; var x:word;var y:word);
+procedure GetSpriteXY(s0:byte; var x:word;var y:word);
 begin
     NeoMessage.params[0]:=s0;    
-    NeoSendMessage(6,5);
+    NeoSendMessage(6,4);
     x:=wordxParams[0];
     y:=wordxParams[1];
 end;
@@ -1692,24 +1571,6 @@ begin
     wordParams[2] := dst and $ffff;
     wordParams[3] := len;
     NeoSendMessage(12,2);
-end;
-
-procedure NeoBlitterXCopy(action:byte;src,dest:pointer);
-begin
-    wordxParams[0] := word(src);
-    wordxParams[1] := word(dest);
-    NeoMessage.params[0] := action;
-    NeoSendMessage(12,3);
-end;
-
-procedure NeoBlitImage(action:byte;src:pointer;x,y:word;format:byte);
-begin
-    NeoMessage.params[0] := action;
-    wordxParams[0] := word(src);
-    wordxParams[1] := x;
-    wordxParams[2] := y;
-    NeoMessage.params[7] := format;
-    NeoSendMessage(12,4);
 end;
 
 //////////////////////////////////

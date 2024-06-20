@@ -3,7 +3,7 @@ unit Neo6502Uext;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Neo6502 API library for UExt I/O Functions
-* @version: 0.30.0
+* @version: 0.1.0
 
 * @description:
 * Set of procedures to cover Neo6502 UExt communication capabilities.
@@ -338,7 +338,7 @@ end;
 
 function NeoCheckUART():byte;
 begin
-    result := NeoSendMessage(10,18);
+    result := NeoSendMessage(10,17);
 end;
 
 end.
