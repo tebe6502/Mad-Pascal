@@ -30,7 +30,6 @@ begin
 ;Used registers: X, Y.
 ;Real address: $E505.
 
-
     lda <320
     ldx >320
     ldy #200

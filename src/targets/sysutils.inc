@@ -14,7 +14,7 @@
 {$endif}
 {$ifdef neo}
   {$i sysutils_neo.inc}
-{$endif}  
+{$endif}
 {$ifdef x16}
   {$i sysutils_x16.inc}
 {$endif}

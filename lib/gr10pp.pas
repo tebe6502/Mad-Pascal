@@ -3,7 +3,7 @@ unit gr10pp;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Graphics 10 mode ++ (GTIA) library
-* @version: 0.5.3
+* @version: 0.5.4
 * @description:
 * Set of procedures to initialize, run, and use special graphics mode 10++.
 * Resolution 80x48, 9 colors, square pixel (for lineHeight = 4)
@@ -52,11 +52,15 @@ const
 
 implementation
 
+uses graph; 
+
+
 var dList : array [0..0] of byte;
     dlPtr: word;   
 
-procedure G10Dli;interrupt;assembler;
-asm {
+
+procedure G10Dli;interrupt; assembler;
+asm
 dli 
     pha 
     sta WSYNC  ;($d40a) 
@@ -66,18 +70,18 @@ dli
     lda #3
 .def :VS_Lower = *-1
     sta VSCROL ;($d405) 
-    pla 
-};
+    pla
 end;
 
-procedure SetVS(upper, lower:byte);assembler;
-asm {
+
+procedure SetVS(upper, lower:byte); assembler;
+asm
     lda upper
     sta VS_Upper
     lda lower
     sta VS_Lower
-};
 end;
+
 
 procedure SetPixelHeight(lines: byte);
 begin
@@ -133,6 +137,8 @@ end;
 
 procedure Gr10Init(DListAddress: word; VRamAddress: word; lines: byte; pixelHeight:byte; blanks: byte);
 begin
+    InitGraph(10+16);
+    
     BuildDisplayList(DListAddress, VRamAddress, lines, blanks);
     SetPixelHeight(pixelHeight);
     SDLSTL := DListAddress;

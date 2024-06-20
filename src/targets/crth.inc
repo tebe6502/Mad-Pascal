@@ -14,7 +14,7 @@
 {$endif}
 {$ifdef neo}
   {$i crth_neo.inc}
-{$endif}  
+{$endif}
 {$ifdef x16}
   {$i crth_x16.inc}
 {$endif}

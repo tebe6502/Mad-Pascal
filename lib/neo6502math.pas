@@ -3,7 +3,7 @@ unit Neo6502Math;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Neo6502 API library for RP2040 accelerated Math and other computations.
-* @version: 0.30.0
+* @version: 0.1.0
 
 * @description:
 * Set of procedures to cover Math API functionality.
@@ -39,8 +39,6 @@ const
 	MATHIDiv = 4;					// Int Divide
 	MATHMod = 5; 					// Int Modulus
     MATHCmp = 6; 					// Compare
-    MATHPow = 7;                    // Power 
-    MATHDist = 8;                   // Distance (counter-rectangle)
 
     MATHNeg = 16;                   // Unary Negate
     MATHFlr = 17;                   // Floor (integer part)
@@ -252,13 +250,13 @@ procedure SetMathStack(v:integer;i:byte);assembler;overload;register;
 asm
     lda i
     bne i1
-    mva #$00 STACK_ADDRESS
+    stz STACK_ADDRESS
     mva v    STACK_ADDRESS+2
     mva v+1  STACK_ADDRESS+4
     mva v+2  STACK_ADDRESS+6
     mva v+3  STACK_ADDRESS+8
 i1
-    mva #$00 STACK_ADDRESS+1
+    stz STACK_ADDRESS+1
     mva v    STACK_ADDRESS+3
     mva v+1  STACK_ADDRESS+5
     mva v+2  STACK_ADDRESS+7
@@ -295,7 +293,7 @@ end;
 
 procedure SetMathVar(v:integer);overload;assembler;register;
 asm
-    mva #$00 VAR_ADDRESS 
+    stz VAR_ADDRESS
     mva v VAR_ADDRESS+1
     mva v+1 VAR_ADDRESS+2
     mva v+2 VAR_ADDRESS+3
