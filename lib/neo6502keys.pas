@@ -3,7 +3,7 @@ unit neo6502keys;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Neo6502 library for reading keyboard state using hid scancodes
-* @version: 0.1.0
+* @version: 0.30.0
 
 * @description:
 * Set of constans and helpers for reading Neo6502 keyboard, using hid scancodes.
