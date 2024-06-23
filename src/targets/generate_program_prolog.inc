@@ -99,6 +99,27 @@ if Pass = CODEGENERATIONPASS then begin
 
 if (target.id = ___neo) then begin
  asm65;
+ asm65(#9'org eax');
+ asm65;
+ asm65('SFP1MAN0'#9'.ds 1');
+ asm65('SFP1MAN1'#9'.ds 1');
+ asm65('SFP1MAN2'#9'.ds 1');
+ asm65('SFP1MAN3'#9'.ds 1');
+ asm65;
+ asm65(#9'org edx');
+ asm65;
+ asm65('SFP2MAN0'#9'.ds 1');
+ asm65('SFP2MAN1'#9'.ds 1');
+ asm65('SFP2MAN2'#9'.ds 1');
+ asm65('SFP2MAN3'#9'.ds 1');
+ asm65;
+ asm65(#9'org ecx');
+ asm65;
+ asm65('SFPMAN0'#9'.ds 1');
+ asm65('SFPMAN1'#9'.ds 1');
+ asm65('SFPMAN2'#9'.ds 1');
+ asm65('SFPMAN3'#9'.ds 1');
+ asm65;
  asm65('FP1MAN0 = VAR1_B0');
  asm65('FP1MAN1 = VAR1_B1');
  asm65('FP1MAN2 = VAR1_B2');
