@@ -464,8 +464,8 @@ EXIT:
 
 .proc @FCMPL
 
-A = STACK_ADDRESS+0
-B = STACK_ADDRESS+4
+A = eax
+B = ecx
 
 FCMPG:
   CLV
