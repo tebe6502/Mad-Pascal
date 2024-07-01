@@ -661,7 +661,13 @@ case Tok[i].Kind of
 	   exit;
 
 	   end else begin
-	    ConstVal:=Ident[IdentIndex].NumAllocElements;
+
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,'/',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].AllocElementType );
+
+	    if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+	      ConstVal:=Ident[IdentIndex].NumAllocElements_
+	    else
+	      ConstVal:=Ident[IdentIndex].NumAllocElements;
 
 	    ConstValType := GetValueType(ConstVal);
 	   end;

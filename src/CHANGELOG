@@ -1,3 +1,7 @@
+30.06.2024
+- poprawione LENGTH dla tablic ze wskaźnikiem do rekordu
+- poprawione CASE, możliwe użycie funkcji zwracajacej typ ENUM
+
 09.06.2024
 - dodana obsługa {$eval } dla inicjalizacji tablic o zadeklarowanym rozmiarze, np.: 
 

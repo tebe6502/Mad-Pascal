@@ -8941,6 +8941,7 @@ case Tok[i].Kind of
 	    end;
 
 
+
 	  if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentIndex].NumAllocElements > 0) and
 	     (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET) then
 
@@ -11483,13 +11484,27 @@ case Tok[i].Kind of
 
     StartOptimization(i);
 
+    j := i + 1;
+
     i := CompileExpression(i + 1, SelectorType);
+
+
+    if (SelectorType = ENUMTOK) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = FUNCTIONTOK) then begin
+
+       IdentTemp:=GetIdent(Tok[j].Name^);
+
+       SelectorType := Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].AllocElementType;
+
+       EnumName := Types[Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].NumAllocElements].Field[0].Name;
+
+    end else
 
     if Tok[i].Kind = IDENTTOK then
       EnumName := GetEnumName(GetIdent(Tok[i].Name^));
 
+
     if SelectorType <> ENUMTYPE then
-     if DataSize[SelectorType]<>1 then
+     if DataSize[SelectorType] <> 1 then
       Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
 
     if not (SelectorType in OrdinalTypes + [ENUMTYPE]) then
@@ -11524,10 +11539,11 @@ case Tok[i].Kind of
 
 	GetCommonType(i, ConstValType, SelectorType);
 
-	if (Tok[i].Kind = IDENTTOK) then
+	if (Tok[i].Kind = IDENTTOK)  then
 	 if ((EnumName = '') and (GetEnumName(GetIdent(Tok[i].Name^)) <> '')) or
   	    ((EnumName <> '') and (GetEnumName(GetIdent(Tok[i].Name^)) <> EnumName)) then
 		Error(i, 'Constant and CASE types do not match');
+
 
 	if Tok[i + 1].Kind = RANGETOK then						// Range check
 	  begin
@@ -14882,6 +14898,8 @@ for ParamIndex := 1 to NumParams do
 if IsFunction then begin	//DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType, 0, 0, 0);
 
     tmpVarDataSize := VarDataSize;
+
+//	writeln(Ident[BlockIdentIndex].name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
 
     DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType, FunctionNumAllocElements, FunctionAllocElementType, 0);
 
