@@ -49,7 +49,7 @@ numread	.word		; pointer to variable, length of loaded data
 ; -----------------------------------------------------------------------
 
 	icl 'c4p\c4p.hea'
-	icl 'c64\putpixel.asm'		; @putpixel	
+	icl 'c4p\putpixel.asm'		; @putpixel	
 	icl 'c4p\putchar.asm'		; @putchar
 	icl 'c4p\clrscr.asm'		; @clrscr
 
