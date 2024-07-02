@@ -83,7 +83,8 @@ var p, k , q: integer;
   function fail(i: integer): Boolean;
   begin
 
-        if (pos('#asm:', TemporaryBuf[p]) = 1) or
+        if (pos('#asm:', TemporaryBuf[i]) = 1) or
+
 	   (pos('ldy ', TemporaryBuf[i]) > 0) or
            (pos('mwy ', TemporaryBuf[i]) > 0) or
            (pos('mvy ', TemporaryBuf[i]) > 0) or
