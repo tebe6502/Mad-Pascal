@@ -1423,13 +1423,17 @@ var
 
 	  tmp:=FilePos(InFile);
 
-	  repeat
+	  _line := line;
+
+	  repeat					// pomijaj puste znaki i sprawdz jaki znak zastaniesz
 	   Read(InFile, ch);
 	   if ch = LF then inc(line);
 	  until not(ch in AllowWhiteSpaces);
 
 
-	  if ch <> '{' then begin
+	  if ch <> '{' then begin			// nie znalazl znaku '{'
+
+	   line := _line;				// zaczynamy od nowa czytać po 'ASM'
 
 	   Tok[NumTok].Value := 1;
 
@@ -1437,6 +1441,10 @@ var
 
 	   Read(InFile, ch);
 
+	   AsmBlock[AsmBlockIndex] := '';
+	   Text:='';
+
+{
 	   if ch in [CR,LF] then begin			// skip EOL after 'ASM'
 
 	    if ch = LF then inc(line);
@@ -1450,7 +1458,7 @@ var
 	    AsmBlock[AsmBlockIndex] := ch;
 	    Text:=ch;
 	   end;
-
+}
 
 	   while true do begin
 	    Read(InFile, ch);
@@ -1463,7 +1471,6 @@ var
 	      SetLength(AsmBlock[AsmBlockIndex], length(AsmBlock[AsmBlockIndex])-4);
 
 //	      inc(line, AsmBlock[AsmBlockIndex].CountChar(LF));
-
 	      Break;
 	    end;
 
