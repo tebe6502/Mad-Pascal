@@ -945,15 +945,71 @@ begin
      end;
 
 
-    if lda_a(i) and (lda_im(i) = false) and						// lda					; 0
-       sub_im(i+1) and									// sub #				; 1
-       add_im(i+2) and									// add #				; 2
+    if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
+       sub_im(i+1) and 									// sub #				; 1
+       add_im(i+2) and 									// add #				; 2
        sta_a(i+3) then									// sta 					; 3
      begin
       p := -GetBYTE(i+1) + GetBYTE(i+2);
 
       listing[i+1] := '';
       listing[i+2] := #9'add #$' + IntToHex(p and $ff, 2);
+
+      exit(false);
+     end;
+
+
+    if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
+       add_im(i+1) and									// add #				; 1
+       sub_im(i+2) and									// sub #				; 2
+       sta_a(i+3) then									// sta 					; 3
+     begin
+      p := GetBYTE(i+1) - GetBYTE(i+2);
+
+      listing[i+1] := #9'add #$' + IntToHex(p and $ff, 2);
+      listing[i+2] := '';
+
+      exit(false);
+     end;
+
+
+    if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
+       add_im(i+1) and 									// add #				; 1
+       add_im(i+2) and									// add #				; 2
+       sta_a(i+3) then									// sta 					; 3
+     begin
+      p := GetBYTE(i+1) + GetBYTE(i+2);
+
+      listing[i+1] := '';
+      listing[i+2] := #9'add #$' + IntToHex(p and $ff, 2);
+
+      exit(false);
+     end;
+
+
+    if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
+       sub_im(i+1) and									// sub #				; 1
+       sub_im(i+2) and 									// sub #				; 2
+       sta_a(i+3) then									// sta 					; 3
+     begin
+      p := GetBYTE(i+1) + GetBYTE(i+2);
+
+      listing[i+1] := '';
+      listing[i+2] := #9'sub #$' + IntToHex(p and $ff, 2);
+
+      exit(false);
+     end;
+
+
+    if lda_a(i) and (lda_im(i) = false) and						// lda					; 0
+       add_sub_im(i+1) and 								// add #|sub #				; 1
+       add_sub(i+2) and (add_sub_im(i+2) = false) and					// add|sub				; 2
+       add_sub_im(i+3) then								// add #|sub #				; 3
+     begin
+      tmp:=listing[i+2];
+      
+      listing[i+2] := listing[i+1];
+      listing[i+1] := tmp;
 
       exit(false);
      end;
