@@ -1095,13 +1095,13 @@ lbmp
 	jsr vbxe_detect
 	bcc ok
 
-	@print #notVBXE
+;	@print #notVBXE
 
 	pla
 	pla
 	rts
 
-notVBXE	dta c'VBXE not detected',$9b
+;notVBXE	dta c'VBXE not detected'
 
 	eif
 
@@ -1186,7 +1186,7 @@ ln	= .filesize(%%1)-he-1024
 	rts
 	ini RESORIGIN
 
-	.print '$R XBMP    ',main.%%lab,'..',main.%%lab+ln-1," %%1"
+	.print '$R XBMP    ',main.%%lab,'..',main.%%lab+ln-1," %%1",' width: ',?bw,' height: ',?bh
 
 .endm
 
