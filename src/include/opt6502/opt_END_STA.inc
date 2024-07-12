@@ -1140,6 +1140,20 @@
       end;
 
 
+    if (l = i + 5) and
+       rol_stack(i) and									// rol :STACKORIGIN			; 0
+       add_sub(i+1) and 								// add|sub				; 1
+       tay(i+2) and									// tay					; 2
+       lda_a(i+3) and (lda_stack(i+3) = false) and					// lda					; 3
+       sta_a(i+4) and (sta_stack(i+4) = false) then					// sta TMP+1				; 4
+     if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then
+      begin
+	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (l = i + 4) and
        rol_stack(i) and									// rol :STACKORIGIN			; 0
        add_sub(i+1) and									// add|sub				; 1
