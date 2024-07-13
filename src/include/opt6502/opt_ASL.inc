@@ -1857,6 +1857,21 @@ begin
 
 
     if rol_a(i+2) and								// rol @			; 2
+       asl_stack(i+3) and							// asl :STACKORIGIN		; 3
+       asl_stack(i+4) and							// asl :STACKORIGIN		; 4
+       mwy_bp2(i+5) and								// mwy				; 5
+       ldy(i+6) and								// ldy				; 6
+       lda_a(i+7) then								// lda				; 7
+      begin
+	listing[i] := '';
+
+	listing[i+2] := '';
+
+	exit(false);
+      end;
+
+
+    if rol_a(i+2) and								// rol @			; 2
        mwy_bp2(i+3) and								// mwy				; 3
        ldy(i+4) and								// ldy				; 4
        lda_a(i+5) then								// lda				; 5
