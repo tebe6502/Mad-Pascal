@@ -171,6 +171,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [µSoukoban](https://github.com/zbyti/pikoban)
 * [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
 * [run-fox-run](https://gitlab.com/bocianu/run-fox-run)
+* [Robots Rumble](https://github.com/tebe6502/robotsrumble)
 
 ## Benchmarks
 
