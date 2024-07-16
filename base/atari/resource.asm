@@ -1095,13 +1095,21 @@ lbmp
 	jsr vbxe_detect
 	bcc ok
 
-;	@print #notVBXE
+	@print #notVBXE
+	@print #_eol
+	@print #anyKEY
+	
+keypres	lda $d20f
+	and #4
+	bne keypres
 
 	pla
 	pla
 	rts
 
-;notVBXE	dta c'VBXE not detected'
+notVBXE	dta c'VBXE not detected'
+_eol	dta $9b
+anyKEY	dta c'Press any key to continue',$9b
 
 	eif
 
