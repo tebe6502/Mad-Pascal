@@ -14645,6 +14645,86 @@ end;	//CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
+procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; out tmpVarDataSize: integer; out ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
+var tmpVarDataSize_, ParamIndex, idx: integer;
+begin
+
+//	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
+
+   if ( (VarType in Pointers) and (AllocElementType = RECORDTOK) ) then begin
+
+//	 writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
+
+	 tmpVarDataSize_ := VarDataSize;
+
+
+	 if (NumAllocElements shr 16) > 0 then begin											// array [0..x] of record
+
+	   Ident[NumIdent].NumAllocElements  := NumAllocElements and $FFFF;
+	   Ident[NumIdent].NumAllocElements_ := NumAllocElements shr 16;
+
+	   VarDataSize := tmpVarDataSize + (NumAllocElements shr 16) * DataSize[POINTERTOK];
+
+	   tmpVarDataSize := VarDataSize;
+
+	   NumAllocElements := NumAllocElements and $FFFF;
+
+	 end else
+	   if Ident[NumIdent].isAbsolute = false then inc(tmpVarDataSize, DataSize[POINTERTOK]);		// wskaznik dla ^record
+
+
+	 idx := Ident[NumIdent].Value - DATAORIGIN;
+
+//writeln(NumAllocElements);
+//!@!@
+	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do									// label: ^record
+	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
+
+//	    writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements);
+
+	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
+	    VARIABLE,
+	    Types[NumAllocElements].Field[ParamIndex].DataType,
+	    Types[NumAllocElements].Field[ParamIndex].NumAllocElements,
+	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, 0, DATAORIGINOFFSET);
+
+	    Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize_;
+	    Ident[NumIdent].PassMethod := VARPASSING;
+//	    Ident[NumIdent].AllocElementType := Ident[NumIdent].DataType;
+
+	  end;
+
+	  VarDataSize := tmpVarDataSize;
+
+   end else
+
+	if (VarType in [RECORDTOK, OBJECTTOK]) then											// label: record
+	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do
+	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
+
+//	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
+
+ 	    tmpVarDataSize_ := VarDataSize;
+
+	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
+	    VARIABLE,
+	    Types[NumAllocElements].Field[ParamIndex].DataType,
+	    Types[NumAllocElements].Field[ParamIndex].NumAllocElements,
+	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, ord(isAbsolute) * ConstVal);
+
+	    if isAbsolute then
+	      if not (Types[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then				// fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
+		inc(ConstVal, VarDataSize - tmpVarDataSize_);//    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
+
+	  end;
+
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean; FunctionResultType: Byte; FunctionNumAllocElements: cardinal = 0; FunctionAllocElementType: byte = 0): Integer;
 var
   VarOfSameType: TVariableList;
@@ -15918,9 +15998,11 @@ while Tok[i].Kind in
 
       tmpVarDataSize := VarDataSize;		// dla ABSOLUTE, RECORD
 
+
       for VarOfSameTypeIndex := 1 to NumVarOfSameType do begin
 
-// writeln(VarType,',',NumAllocElements and $FFFF,',',NumAllocElements shr 16,',',AllocElementType, ',',idType);
+
+//  writeln(VarType,',',NumAllocElements and $FFFF,',',NumAllocElements shr 16,',',AllocElementType, ',',idType,',',varPassMethod,',',isAbsolute);
 
 
 	if VarType = DEREFERENCEARRAYTOK then begin
@@ -16012,74 +16094,8 @@ while Tok[i].Kind in
 	end;
 
 
-//	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
+	CompileRecordDeclaration(VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute);
 
-	if ( (VarType in Pointers) and (AllocElementType = RECORDTOK) ) then begin
-
-//	 writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
-
-	 tmpVarDataSize_ := VarDataSize;
-
-
-	 if (NumAllocElements shr 16) > 0 then begin											// array [0..x] of record
-
-	   Ident[NumIdent].NumAllocElements  := NumAllocElements and $FFFF;
-	   Ident[NumIdent].NumAllocElements_ := NumAllocElements shr 16;
-
-	   VarDataSize := tmpVarDataSize + (NumAllocElements shr 16) * DataSize[POINTERTOK];
-
-	   tmpVarDataSize := VarDataSize;
-
-	   NumAllocElements := NumAllocElements and $FFFF;
-
-	 end else
-	   if Ident[NumIdent].isAbsolute = false then inc(tmpVarDataSize, DataSize[POINTERTOK]);		// wskaznik dla ^record
-
-
-	 idx := Ident[NumIdent].Value - DATAORIGIN;
-
-//writeln(NumAllocElements);
-//!@!@
-	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do									// label: ^record
-	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
-
-//	    writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements);
-
-	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
-	    VARIABLE,
-	    Types[NumAllocElements].Field[ParamIndex].DataType,
-	    Types[NumAllocElements].Field[ParamIndex].NumAllocElements,
-	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, 0, DATAORIGINOFFSET);
-
-	    Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize_;
-	    Ident[NumIdent].PassMethod := VARPASSING;
-//	    Ident[NumIdent].AllocElementType := Ident[NumIdent].DataType;
-
-	  end;
-
-	  VarDataSize := tmpVarDataSize;
-
-	end else
-
-	if (VarType in [RECORDTOK, OBJECTTOK]) then											// label: record
-	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do
-	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
-
-//	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
-
- 	    tmpVarDataSize_ := VarDataSize;
-
-	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
-	    VARIABLE,
-	    Types[NumAllocElements].Field[ParamIndex].DataType,
-	    Types[NumAllocElements].Field[ParamIndex].NumAllocElements,
-	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, ord(isAbsolute) * ConstVal);
-
-	    if isAbsolute then
-	      if not (Types[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then				// fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
-		inc(ConstVal, VarDataSize - tmpVarDataSize_);//    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
-
-	  end;
 
       end;
 
