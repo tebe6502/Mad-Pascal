@@ -225,6 +225,8 @@ begin
        end;
 
 
+{!#!#!#!#!#!#!#!#!#!#!#
+
     if lda(i) and (lda_im_0(i) = false) and (iy(i) = false) and				// lda					; 0
        add(i+1) and (add_im_0(i+1) = false) and (iy(i+1) = false) and			// add D				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
@@ -268,6 +270,7 @@ begin
 
 	exit(false);
        end;
+}      
 
 
     if lda(i) and (lda_im_0(i) = false) and (iy(i) = false) and				// lda					; 0
