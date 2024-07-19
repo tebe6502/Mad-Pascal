@@ -1,3 +1,6 @@
+18.07.2024
+- poprawione kompilacja deklaracji rekordów 'CompileRecordDeclaration'
+
 07.07.2024
 - opt_ADD.inc, dodatkowe optymalizacje 'add|sub # + add|sub #'
 
