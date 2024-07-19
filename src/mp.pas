@@ -6151,15 +6151,11 @@ begin
 //		 end;
 
 		 if (Ident[IdentIndex].DataType in Pointers) {and (Tok[i + 2].Kind = DEREFERENCETOK)} then
-		  if (Ident[IdentIndex].AllocElementType = RECORDTOK) and (Tok[i +3].Kind = DOTTOK) then begin		// var record^.field
-
-//	writeln(Tok[i + 2].Kind,',',Tok[i + 3].Kind,',',Tok[i + 4].Kind);
-
-		    CheckTok(i + 3, DOTTOK);
-		    CheckTok(i + 4, IDENTTOK);
+		  if (Ident[IdentIndex].AllocElementType = RECORDTOK) and (Tok[i + 3].Kind = DOTTOK) then begin		// var record^.field
 
 //		    DEREFERENCE := true;
 
+		    CheckTok(i + 4, IDENTTOK);
 	      	    IdentTemp := RecordSize(IdentIndex, Tok[i + 4].Name^);
 
  	            if IdentTemp < 0 then
@@ -7510,6 +7506,7 @@ case Tok[i].Kind of
 	    ValType := Ident[IdentIndex].AllocElementType;
 
 	    CheckTok(i + 2, DOTTOK);
+	    CheckTok(i + 3, IDENTTOK);
 
 	    IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
@@ -8490,9 +8487,7 @@ case Tok[i].Kind of
 
 		   if Tok[j+2].Kind = DOTTOK then begin					// (pointer).field :=
 
-//			CheckTok(j + 2, DOTTOK);
 			CheckTok(j + 3, IDENTTOK);
-
 	        	IdentTemp := RecordSize(IdentIndex, Tok[j + 3].Name^);
 
 	        	if IdentTemp < 0 then
@@ -8680,10 +8675,9 @@ case Tok[i].Kind of
 
 	     if (Tok[i + 2].Kind = DOTTOK) then begin
 
-
 //	writeln(Ident[IdentIndex].Name,',',Tok[i + 3].Name^,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements);
 
-
+	      CheckTok(i + 3, IDENTTOK);
 	      IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
  	      if IdentTemp < 0 then
@@ -8755,6 +8749,7 @@ case Tok[i].Kind of
 
 	     CheckTok(i + 1, CBRACKETTOK);
 
+	     CheckTok(i + 3, IDENTTOK);
 	     IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
 	     if IdentTemp < 0 then
@@ -10458,6 +10453,7 @@ case Tok[i].Kind of
 
 	      IndirectionLevel := ASPOINTERTODEREFERENCE;
 
+	      CheckTok(i + 3, IDENTTOK);
 	      IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);		// (pointer^).field :=
 
 	      if IdentTemp < 0 then
@@ -10478,6 +10474,7 @@ case Tok[i].Kind of
 
 	     if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 
+	       CheckTok(i + 3, IDENTTOK);
 	       IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);		// (pointer)^.field :=
 
 	       if IdentTemp < 0 then
@@ -10497,6 +10494,7 @@ case Tok[i].Kind of
 
 	       IndirectionLevel := ASPOINTERTODEREFERENCE;
 
+	       CheckTok(i + 3, IDENTTOK);
 	       IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);		// (pointer).field :=
 
 	       if IdentTemp < 0 then
@@ -10552,6 +10550,7 @@ case Tok[i].Kind of
 
 	    if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 
+	     CheckTok(i + 3, IDENTTOK);
 	     IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
 	     if IdentTemp < 0 then
@@ -10642,6 +10641,7 @@ case Tok[i].Kind of
 	    if (VarType in [RECORDTOK, OBJECTTOK]) and (Tok[i + 2].Kind = DOTTOK) then begin
 	       IndirectionLevel := ASPOINTERTOARRAYRECORD;
 
+	       CheckTok(i + 3, IDENTTOK);
 	       IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
 
 	       if IdentTemp < 0 then
