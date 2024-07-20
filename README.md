@@ -172,6 +172,9 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
 * [run-fox-run](https://gitlab.com/bocianu/run-fox-run)
 * [Robots Rumble](https://github.com/tebe6502/robotsrumble)
+* [neo-sandbox](https://gitlab.com/bocianu/neo-sandbox)
+* [neo-swimo](https://gitlab.com/bocianu/neo-swimo)
+* [neo-solsuite](https://gitlab.com/bocianu/neo-solsuite)
 
 ## Benchmarks
 
