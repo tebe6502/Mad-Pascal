@@ -264,11 +264,11 @@ end;
 	TemporaryBuf[2] := '~';
 	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'mwa:rpl $' + IntToHex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+	TemporaryBuf[5] := #9'mva:rpl $' + IntToHex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
        end;
 
 
-    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mwa:rne (:bp2),y			; 5
+    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rne (:bp2),y			; 5
 
        (pos('lda #', TemporaryBuf[0]) > 1) and						// lda #				; 0
        (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
@@ -283,7 +283,7 @@ end;
 	TemporaryBuf[2] := '~';
 	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'mwa:rne $' + IntToHex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+	TemporaryBuf[5] := #9'mva:rne $' + IntToHex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
        end;
 
 // -----------------------------------------------------------------------------
@@ -320,16 +320,16 @@ end;
 	 TemporaryBuf[3] := #9'sta :bp2+1';
 
      	 TemporaryBuf[4] := #9'ldy #$00';
-     	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.'+tmp+',y+';
+     	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.' + tmp + ',y+';
     	end else
     	if p <= 128 then begin
 	 TemporaryBuf[1] := #9'sta :bp2';
 	 TemporaryBuf[3] := #9'sta :bp2+1';
 
-	 TemporaryBuf[4] := #9'ldy #$'+IntToHex(p-1, 2);
-     	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.'+tmp+',y-';
+	 TemporaryBuf[4] := #9'ldy #$' + IntToHex(p-1, 2);
+     	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
     	end else begin
-     	 TemporaryBuf[4] := #9'@move '+tmp+' #adr.'+tmp+' #$'+IntToHex(p,2);
+     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #$' + IntToHex(p,2);
      	 TemporaryBuf[5] := '~';
 	end;
 
