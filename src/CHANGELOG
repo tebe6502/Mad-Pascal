@@ -1,3 +1,6 @@
+21.07.2024
+- OptimizeTemporaryBuf, 'mwa: -> mva' bugfix
+
 18.07.2024
 - poprawione kompilacja deklaracji rekordów 'CompileRecordDeclaration'
 
