@@ -25,6 +25,9 @@ var
 
 
 begin
+	fillchar(pointer(play_r+$300), $900, 0);		// clear sapr-lzss buffer
+	fillchar(pointer(play_l+$300), $900, 0);		// clear sapr-lzss buffer
+
         SizeofResource(len, 'mod_r');
 	GetResourceHandle(p, 'mod_r');
 	writeln('modul_r length: ', len, ', address: $', hexStr(word(p),4));
