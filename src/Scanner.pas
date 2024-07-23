@@ -410,16 +410,16 @@ var
   Num, Frac: TString;
   OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   Tmp: Int64;
-  AsmFound, UsesFound, ExternalFound, yes: Boolean;
+  AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2: Char;
   CurToken: Byte;
   StrParams: TArrayString;
 
 
-  procedure TokenizeUnit(a: integer); forward;
+  procedure TokenizeUnit(a: integer; testUnit: Boolean = false); forward;
 
 
-  procedure Tokenize(fnam: string);
+  procedure Tokenize(fnam: string; testUnit: Boolean = false);
   var InFile: file of char;
       _line: integer;
       _uidx: integer;
@@ -465,6 +465,7 @@ var
 
 	 s:=AnsiUpperCase(Tok[i].Name^);
 
+
 	 for j := 2 to NumUnits do		// kasujemy wczesniejsze odwolania
 	   if UnitName[j].Name = s then UnitName[j].Name := '';
 
@@ -475,13 +476,13 @@ var
 	 UnitIndex := NumUnits;
 
 	 if UnitIndex > High(UnitName) then
-	  Error(NumTok, 'Out of resources, UnitIndex: '+IntToStr(UnitIndex));
+	  Error(NumTok, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex));
 
 	 Line:=1;
   	 UnitName[UnitIndex].Name := s;
 	 UnitName[UnitIndex].Path := nam;
 
-	 TokenizeUnit( UnitIndex );
+	 TokenizeUnit( UnitIndex, true );
 
 	 Line := _line;
 	 UnitIndex := _uidx;
@@ -1516,6 +1517,11 @@ var
 
 	     if CurToken = USESTOK then UsesFound := true;
 
+	     if CurToken = UNITTOK then UnitFound := true;
+
+	     if testUnit and (UnitFound = false) then
+	      Error(NumTok, 'Syntax error, "UNIT" expected but "' + Spelling[CurToken] + '" found');
+
 	   end
 	   else begin				// Identifier found
 	     Tok[NumTok].Kind := IDENTTOK;
@@ -1764,7 +1770,7 @@ var
   end;
 
 
-procedure TokenizeUnit(a: integer);
+procedure TokenizeUnit(a: integer; testUnit: Boolean = false);
 // Read input file and get tokens
 begin
 
@@ -1777,7 +1783,9 @@ begin
 
 //  writeln('>',UnitIndex,',',UnitName[UnitIndex].Name);
 
-  Tokenize( UnitName[UnitIndex].Path );
+  UnitFound := false;
+
+  Tokenize( UnitName[UnitIndex].Path, testUnit );
 
   if UnitIndex > 1 then begin
 
@@ -1948,6 +1956,7 @@ Spelling[TEXTTOK	] := 'TEXT';
 
  AsmFound  := false;
  UsesFound := false;
+ UnitFound := false;
  ExternalFound := false;
 
  IncludeIndex := MAXUNITS;
