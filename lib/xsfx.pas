@@ -112,6 +112,16 @@ asm
 ;5. RTS                     ; koniec opisu dźwięku
 ;6. JSR nnnnn               ; wywołaj SFX nr. nn i po jego zakończeniu wróć kontynuuj odtwarzanie obecnego
 ;7. JMP nnnnn               ; skocz do SFX nr.
+;
+; Code:
+;
+; TIME = $01..$0f
+; REPF = $c0
+; REPC = $80
+; LOOP = $00,NUM
+; RTS  = $00,$ff
+; JSR  = $a0,SFX
+; JMP  = $e0,SFX
 
 
 xSFX_ENGINE     jmp xSFX_PROCEED         ; xSFX_ENGINE
