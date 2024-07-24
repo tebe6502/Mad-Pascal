@@ -1,4 +1,4 @@
-unit PMG;
+unit pmg;
 (*
   @type: unit
   @name: Player/missile graphics library

@@ -1,4 +1,4 @@
-unit RLE;
+unit rle;
 
 interface
 

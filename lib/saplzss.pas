@@ -1,4 +1,4 @@
-unit SAPLZSS;
+unit saplzss;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)

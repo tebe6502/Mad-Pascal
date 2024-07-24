@@ -1,4 +1,4 @@
-unit LZ4;
+unit lz4;
 (*
 * @type: unit
 * @author: Krzysztof Dudek, Tomasz Biela

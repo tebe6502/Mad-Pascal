@@ -1,4 +1,4 @@
-unit apLib;
+unit aplib;
 (*
 * @type: unit
 * @author: John Brandwood, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela

@@ -1,4 +1,4 @@
-unit POKEYMAXConf;
+unit pokeymaxconf;
 
 interface
 

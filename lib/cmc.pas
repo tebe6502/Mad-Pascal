@@ -1,4 +1,4 @@
-unit CMC;
+unit cmc;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)

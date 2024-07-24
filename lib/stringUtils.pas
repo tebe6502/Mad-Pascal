@@ -1,4 +1,4 @@
-unit stringUtils;
+unit stringutils;
 (*
 * @type: unit
 * @author: dely <daniel.kozminski@gmail.com>

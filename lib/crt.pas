@@ -1,4 +1,4 @@
-unit CRT;
+unit crt;
 (*
 @type: unit
 @name: Mad Pascal screen and keyboard handling units

@@ -1,4 +1,4 @@
-unit Neo6502Uext;
+unit neo6502uext;
 (*
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>

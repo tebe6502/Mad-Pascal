@@ -1,4 +1,4 @@
-unit S2;
+unit s2;
 (*
  @type: unit
  @author: Konrad Kokoszkiewicz, Tomasz Biela

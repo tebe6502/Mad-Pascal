@@ -1,4 +1,4 @@
-Unit Curves;
+Unit curves;
 
 Interface
 
