@@ -1,4 +1,4 @@
-unit ZX0;
+unit zx0;
 (*
 * @type: unit
 * @author: Einar Saukas, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela

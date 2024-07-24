@@ -1,4 +1,4 @@
-unit xSFX;
+unit xsfx;
 (*
  @type: unit
  @author: Krzysztof (XXL) Dudek, Tomasz (Tebe) Biela

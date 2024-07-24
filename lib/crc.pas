@@ -1,4 +1,4 @@
-unit CRC;
+unit crc;
 (*
 * @type: unit
 * @author: Piotr Fusik, Tomasz Biela

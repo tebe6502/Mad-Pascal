@@ -1,4 +1,4 @@
-unit SMP;
+unit smp;
 (*
  @type: unit
  @author: Chriss Hutt (Sheddy), Tomasz Biela (Tebe)

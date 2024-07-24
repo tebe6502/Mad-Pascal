@@ -1,4 +1,4 @@
-unit RMT;
+unit rmt;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)

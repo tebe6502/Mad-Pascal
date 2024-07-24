@@ -1,4 +1,4 @@
-unit MPT;
+unit mpt;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)

@@ -1,4 +1,4 @@
-unit ZX2;
+unit zx2;
 (*
 * @type: unit
 * @author: Einar Saukas, Daniel Serpell, Tomasz 'Tebe' Biela

@@ -1,4 +1,4 @@
-unit UPK;
+unit upk;
 (*
 * @type: unit
 * @author: Piotr Fusik
