@@ -338,7 +338,6 @@ asm
 end;
 
 
-
 procedure TSFX.Add(asfx: pointer); assembler; overload;
 (*
 @description:
