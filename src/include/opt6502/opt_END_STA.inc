@@ -1470,7 +1470,7 @@
        rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
        lda_stack(i+2) and								// lda :STACKORIGIN+STACKWIDTH		; 2
-       add_sub(i+3) and (add_sub_stack(i+3) = false) and				// add|sub				; 3
+       add_sub_val(i+3) and								// add|sub				; 3
        sta_a(i+4) and (sta_stack(i+4) = false) and					// sta					; 4
        lda_stack(i+5) and								// lda :STACKORIGIN			; 5
        sta_a(i+6) and (sta_stack(i+6) = false) then					// sta					; 6
@@ -1488,7 +1488,7 @@
 
     if (l = i + 9) and
        rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0		2023-01-26
-       add_sub(i+1) and (add_sub_stack(i+1) = false) and				// add|sub W				; 1
+       add_sub_val(i+1) and								// add|sub W				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda_a(i+3) and (lda_stack(i+3) = false) and					// lda					; 3
        add_sub_stack(i+4) and								// add|sub :STACKORIGIN			; 4
@@ -1508,7 +1508,7 @@
     if (l = i + 10) and
        rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0		2023-01-26
        asl_a(i+1) and									// asl @				; 1
-       add_sub(i+2) and (add_sub_stack(i+2) = false) and				// add|sub W				; 2
+       add_sub_val(i+2) and								// add|sub W				; 2
        sta_stack(i+3) and								// sta :STACKORIGIN			; 3
        lda_a(i+4) and (lda_stack(i+4) = false) and					// lda					; 4
        add_sub_stack(i+5) and								// add|sub :STACKORIGIN			; 5

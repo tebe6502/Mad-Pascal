@@ -17,9 +17,9 @@ begin
        adc_sbc(i+4) and 									// adc|sbc				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) and						// sta					; 7
+       sta_val(i+7) and										// sta ~:STACKORIGIN			; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH		; 8
-       sta_a(i+9) and (sta_stack(i+9) = false) then						// sta					; 9
+       sta_val(i+9) then									// sta ~:STACKORIGIN			; 9
      if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
         (copy(listing[i+5], 6, 256) = copy(listing[i+8], 6, 256)) then
      begin
@@ -77,9 +77,9 @@ begin
 
     if inx(i) and										// inx					; 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
-       add_sub(i+2) and (add_sub_stack(i+2) = false) and					// add|sub				; 2
+       add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
        (listing[i+3] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       sta_val(i+4) and										// sta ~:STACKORIGIN			; 4
        dex(i+5) then										// dex					; 5
      begin
        listing[i+3] := #9'ldy :STACKORIGIN,x';
@@ -94,8 +94,8 @@ begin
 
     if inx(i) and										// inx					; 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
-       add_sub(i+2) and (add_sub_stack(i+2) = false) and					// add|sub				; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
+       sta_val(i+3) and										// sta ~:STACKORIGIN			; 3
        dex(i+4) then										// dex					; 4
      begin
        listing[i]   := '';
@@ -271,7 +271,7 @@ begin
 
 
     if lda_a(i) and										// lda					; 0
-       add_sub(i+1) and	(add_sub_stack(i+1) = false) and					// add|sub				; 1
+       add_sub_val(i+1) and									// add|sub ~:STACKORIGIN		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        lda_a(i+3) and										// lda					; 3
        adc_sbc(i+4) and										// adc|sbc				; 4

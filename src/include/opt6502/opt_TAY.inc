@@ -322,9 +322,9 @@ begin
        asl_a(i+7) and										// asl @				; 7
        tay(i+8) and										// tay					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+9			; 9
-       sta_a(i+10) and (sta_stack(i+10) = false) and						// sta					; 10
+       sta_val(i+10) and									// sta ~:STACKORIGIN			; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH+9	; 11
-       sta_a(i+12) and (sta_stack(i+12) = false) then						// sta					; 12
+       sta_val(i+12) then									// sta ~:STACKORIGIN			; 12
      if	(copy(listing[i+2], 6, 256) = copy(listing[i+9], 6, 256)) and
 	(copy(listing[i+5], 6, 256) = copy(listing[i+11], 6, 256)) then
       begin
@@ -1086,7 +1086,7 @@ begin
        asl_a(i+3) and										// asl @				; 3
        add_sub_stack(i+4) and									// add|sub :STACKORIGIN			; 4
        asl_a(i+5) and										// asl @				; 5
-       add_sub(i+6) and (add_sub_stack(i+6) = false) and					// add|sub				; 6
+       add_sub_val(i+6) and									// add|sub ~:STACKORIGIN		; 6
        tay(i+7) then										// tay					; 7
      if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then
        begin

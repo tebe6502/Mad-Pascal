@@ -29,7 +29,7 @@ begin
 
     if (p > 1) and
        lda(p-2) and (lda_stack(p-2) = false) and (lda_im(p-2) = false) and		// lda					; p-2		+-BYTE
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and (add_sub_im(p-1) = false) and	// add|sub				; p-1
+       add_sub_val(p-1) and (add_sub_im(p-1) = false) and				// add|sub				; p-1
 											// sta :STACKORIGIN			; p
        lda(p+1) and									// lda 					; p+1
        adc_sbc(p+2) and									// adc|sbc				; p+2
@@ -58,7 +58,7 @@ begin
 
     if (p > 1) and
        lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-BYTE
-       add_sub(p-1) and (add_sub_stack(p-1) = false) and				// add|sub				; p-1
+       add_sub_val(p-1) and								// add|sub				; p-1
 											// sta :STACKORIGIN			; p
 //       lda(p+1) and									//~lda 					; p+1
        (adc_sbc(p+2) = false) then							//~adc|sbc				; p+2

@@ -1027,6 +1027,11 @@ var i, l, k, m, x: integer;
      Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta #$00', listing[i]) = 0);
    end;
 
+   function STA_VAL(i: integer): Boolean;
+   begin
+     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta :STACK', listing[i]) = 0) and (pos(#9'sta #$00', listing[i]) = 0);
+   end;
+
    function STA_STACK(i: integer): Boolean;
    begin
      Result := pos(#9'sta :STACK', listing[i]) = 1;
