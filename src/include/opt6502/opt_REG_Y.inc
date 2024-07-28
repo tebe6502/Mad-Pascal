@@ -69,7 +69,7 @@
      if tay(i) then begin
 
       if (i>1) and
-         ( (add_sub(i-1) and (add_sub_stack(i-1) = false) and (adc_sbc(i+2) = false) and lda_a(i-2) and (lda_stack(i-2) = false) and (iy(i-2) = false)) or
+         ( (add_sub_val(i-1) and (adc_sbc(i+2) = false) and lda_a(i-2) and (lda_stack(i-2) = false) and (iy(i-2) = false)) or
            (asl_a(i-1) and lda_a(i-2) and (lda_stack(i-2) = false) and (iy(i-2) = false)) or
 
            ((i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) and (lda_stack(i-3) = false) and (iy(i-3) = false)) or

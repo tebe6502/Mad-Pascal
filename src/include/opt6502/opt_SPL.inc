@@ -213,7 +213,7 @@ begin
        lda(i+3) and										// lda					; 3
        spl(i+4) and										// spl					; 4
        dey(i+5) and										// dey					; 5
-       add_sub(i+6) and	(add_sub_stack(i+6) = false) and					// add|sub				; 6
+       add_sub_val(i+6) and									// add|sub ~:STACKORIGIN		; 6
        add_sub_stack(i+7) and									// add|sub :STACKORIGIN			; 7
        (sta(i+8) or tay(i+8)) then								// sta|tay				; 8
      if (copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256)) then
@@ -275,7 +275,7 @@ begin
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
        spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
-       add_sub(i+4) and	(add_sub_stack(i+4) = false) and					// add|sub				; 4
+       add_sub_val(i+4) and									// add|sub ~:STACKORIGIN		; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+9			; 5
        tya(i+6) and										// tya					; 6
        ldy_stack(i+7) and									// ldy :STACKORIGIN+9			; 7
