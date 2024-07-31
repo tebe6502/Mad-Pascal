@@ -2,6 +2,7 @@
 
 ad8885c523eeea069e0db3c471dc81b7ae585224
 ce7357b79bd006c581e6479ad914092eb654a9a1
+
 FALSE
 
 27 ticks
@@ -9,10 +10,10 @@ FALSE
 }
 
 // ATARI Power without the Price
-// ad8885c523eeea069e0db3c471dc81b7ae585224
+// sha1: ad8885c523eeea069e0db3c471dc81b7ae585224
 
 // POWER WITHOUT THE PRICE
-// ce7357b79bd006c581e6479ad914092eb654a9a1
+// sha1: ce7357b79bd006c581e6479ad914092eb654a9a1
 
 // http://www.sha1-online.com/
 
@@ -22,8 +23,6 @@ var ticks: cardinal;
 
     d, e: TSHA1Digest;
 
-    s: string;
-
 begin
 
  ticks:=GetTickCount;
@@ -31,11 +30,13 @@ begin
  { ------------------------- }
 
  d:=SHA1String('ATARI Power without the Price');
+
+ GotoXY(1,1);
  writeln(SHA1Print(d));
 
- s:='POWER WITHOUT THE PRICE';
+ e:=SHA1String('POWER WITHOUT THE PRICE');
 
- e:=SHA1String(s);
+ GotoXY(1,2);
  writeln(SHA1Print(e));
 
  writeln(SHA1Match(d,e));
@@ -50,3 +51,5 @@ begin
  repeat until keypressed;
 
 end.
+
+// 5570

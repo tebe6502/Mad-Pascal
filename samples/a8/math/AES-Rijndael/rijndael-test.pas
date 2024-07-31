@@ -1,9 +1,9 @@
 // intel i5	~8 sec
 
 
-// v128		1260 ticks
-// v192		1440 ticks
-// v256		1658 ticks
+// v128		1177 ticks
+// v192		1349 ticks
+// v256		1556 ticks
 
 (**
  * Rijndael-Test.pas
@@ -36,13 +36,13 @@
  *)
 program RijndaelTest;
 
-    USES crt,sysutils,Rijndael;
+    USES crt,sysutils,rijndael;
 
     TYPE TestVectors = ARRAY [ 0..255 ] OF ARRAY [ 0..15 ] OF BYTE;
     TYPE Block       = ARRAY [ 0..31 ] OF BYTE;
 
-//{$define v128}
-//{$define v192}
+{$define v128}
+{$define v192}
 {$define v256}
 
     CONST
@@ -893,26 +893,35 @@ VAR	ticks: cardinal;
 
 BEGIN
 
- ticks:=GetTickCount;
-
  {$ifdef v128}
+    ticks:=GetTickCount;
+
     SimpleTest(128, testVectors128);
+
+    ticks:=GetTickCount - ticks;
+    writeln(ticks,' ticks');
  {$endif}
 
  {$ifdef v192}
+    ticks:=GetTickCount;
+
     SimpleTest(192, testVectors192);
+
+    ticks:=GetTickCount - ticks;
+    writeln(ticks,' ticks');
  {$endif}
 
  {$ifdef v256}
+    ticks:=GetTickCount;
+
     SimpleTest(256, testVectors256);
+
+    ticks:=GetTickCount - ticks;
+    writeln(ticks,' ticks');
  {$endif}
-
- ticks:=GetTickCount - ticks;
- writeln(ticks,' ticks');
-
 
  repeat until keypressed;
 
 END { program RijndaelTest }.
 
-// 30551
+// 37641

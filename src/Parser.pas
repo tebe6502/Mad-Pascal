@@ -578,7 +578,7 @@ case Tok[i].Kind of
 
      end else begin
 
-      i:=CompileConstExpression(i + 2, ConstVal, ConstValType);
+      i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
       if isError then Exit;
 
@@ -610,7 +610,7 @@ case Tok[i].Kind of
 
      end else begin
 
-      i:=CompileConstExpression(i + 2, ConstVal, ConstValType);
+      i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
       if isError then Exit;
 
@@ -704,7 +704,7 @@ case Tok[i].Kind of
       if Tok[i + 2].Kind <> IDENTTOK then
         iError(i + 2, IdentifierExpected);
 
-      j:=CompileConstExpression(i + 2, ConstVal, ConstValType);
+      j := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
       if isError then Exit;
 
