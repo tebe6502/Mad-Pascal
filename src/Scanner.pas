@@ -1198,7 +1198,7 @@ var
   var i, k, ln: integer;
   begin
 
-    Num:='';
+//    Num:='';
 
     if ch='%' then begin		  // binary
 
@@ -1213,6 +1213,8 @@ var
        if length(Num)=0 then
 	 iError(NumTok, OrdinalExpExpected);
 
+       Num := '%' + Num;
+{
        //remove leading zeros
        i:=1;
        while Num[i]='0' do inc(i);
@@ -1227,7 +1229,7 @@ var
 	 tmp:=tmp+(1 shl (ln-k));
 
        Num:=IntToStr(tmp);
-
+}
     end else
 
     if ch='$' then begin		  // hexadecimal
@@ -1243,9 +1245,8 @@ var
        if length(Num)=0 then
 	 iError(NumTok, OrdinalExpExpected);
 
-       val('$'+Num, tmp, err);
+       Num := '$' + Num;
 
-       Num:=IntToStr(tmp);
     end else
 
       while ch in ['0'..'9'] do		// Number suspected
@@ -2061,7 +2062,7 @@ var
   var x, k, ln: integer;
   begin
 
-    Num:='';
+//    Num:='';
 
     if ch='%' then begin		  // binary
 
@@ -2076,6 +2077,9 @@ var
        if length(Num)=0 then
 	 iError(NumTok, OrdinalExpExpected);
 
+       Num := '%' + Num;
+
+{
        //remove leading zeros
        x:=1;
        while Num[x]='0' do inc(x);
@@ -2090,6 +2094,7 @@ var
 	 tmp:=tmp+(1 shl (ln-k));
 
        Num:=IntToStr(tmp);
+}
 
     end else
 
@@ -2106,9 +2111,7 @@ var
        if length(Num)=0 then
 	 iError(NumTok, OrdinalExpExpected);
 
-       val('$'+Num, tmp, err);
-
-       Num:=IntToStr(tmp);
+       Num := '$' + Num;
 
     end else
 

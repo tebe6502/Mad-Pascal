@@ -1,4 +1,4 @@
-{**
+{*
  * Rijndael.pas
  *
  * Optimised Pascal implementation of the Rijndael cipher (now AES).
@@ -36,7 +36,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *}
-unit Rijndael;
+unit rijndael;
 
 interface
 
@@ -47,9 +47,9 @@ interface
   { TYPE  Block       = ARRAY [ 0..31 ] OF BYTE;  only needed conceptually }
     TYPE  ExpandedKey = ARRAY [ 0..MAXRK-1 ] OF cardinal;
 
-    FUNCTION KeySetupEnc (VAR rk: ExpandedKey; CONST cipherKey: PByte; keyBits: cardinal): cardinal;
+    FUNCTION KeySetupEnc (VAR rk: ExpandedKey; CONST cipherKey: PByte; keyBits: cardinal): byte;
 
-    FUNCTION KeySetupDec (VAR rk: ExpandedKey; CONST cipherKey: PByte; keyBits: cardinal): cardinal;
+    FUNCTION KeySetupDec (VAR rk: ExpandedKey; CONST cipherKey: PByte; keyBits: cardinal): byte;
 
     PROCEDURE Encrypt (CONST rk: ExpandedKey; Nr: cardinal; CONST pt: PByte; p0: cardinal; ct: PByte; c0: cardinal);
 
@@ -762,9 +762,10 @@ const rcon: ARRAY [0..9] OF cardinal = (
      * @return    the number of rounds for the given cipher key size.
                   (assuming 128-bit i/o blocks)
      *)
-    FUNCTION KeySetupEnc (VAR rk: ExpandedKey; const cipherKey: PByte; keyBits: cardinal): cardinal;
+    FUNCTION KeySetupEnc (VAR rk: ExpandedKey; const cipherKey: PByte; keyBits: cardinal): byte;
     { pre: keyBits in [128, 192, 256] }
-        VAR i, p: cardinal; temp: cardinal;
+        VAR temp: cardinal; 
+	    i, p: byte;
     BEGIN
         p := 0;
         i := 0;
@@ -857,9 +858,9 @@ const rcon: ARRAY [0..9] OF cardinal = (
      *
      * @return    the number of rounds for the given cipher key size.
      *)
-    FUNCTION KeySetupDec (VAR rk: ExpandedKey; CONST cipherKey: PByte; keyBits: cardinal): cardinal;
-    { pre: keyBits in [128, 192, 256] }
-        VAR i, j, Nr, p: cardinal; temp: cardinal;
+    FUNCTION KeySetupDec (VAR rk: ExpandedKey; CONST cipherKey: PByte; keyBits: cardinal): byte;
+        VAR temp: cardinal;
+	    i, j, Nr, p: byte;
     BEGIN
         (* expand the cipher key: *)
         Nr := KeySetupEnc(rk, cipherKey, keyBits);
@@ -908,7 +909,8 @@ const rcon: ARRAY [0..9] OF cardinal = (
      * Encrypt a block (16 bytes) from pt at index p0 onto ct at index c0.
      *)
     PROCEDURE Encrypt (CONST rk: ExpandedKey; Nr: cardinal; CONST pt: PByte; p0: cardinal; ct: PByte; c0: cardinal);
-        VAR s0, s1, s2, s3, t0, t1, t2, t3: cardinal; p, r: cardinal;
+        VAR s0, s1, s2, s3, t0, t1, t2, t3: cardinal; 
+	    p,  r: byte;
     BEGIN 
         (*
          * map byte array block to cipher state
@@ -1024,7 +1026,8 @@ const rcon: ARRAY [0..9] OF cardinal = (
      * Decrypt a block (16 bytes) from ct at index c0 onto pt at index p0.
      *)
     PROCEDURE Decrypt (CONST rk: ExpandedKey; Nr: cardinal; CONST ct: PByte; c0: cardinal; pt: PByte; p0: cardinal);
-        VAR s0, s1, s2, s3, t0, t1, t2, t3: cardinal; p, r: cardinal;
+        VAR s0, s1, s2, s3, t0, t1, t2, t3: cardinal;
+	    p, r: byte;
     BEGIN 
         (*
          * map byte array block to cipher state
@@ -1129,4 +1132,4 @@ const rcon: ARRAY [0..9] OF cardinal = (
         PutSet(pt, p0 + 12, s3);
     END { Decrypt };
 
-END { unit Rijndael }.
+END { unit rijndael }.

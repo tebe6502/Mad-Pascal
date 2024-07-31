@@ -1,4 +1,4 @@
-// 160 / 4104
+// 158 / 3938
 
 // F73654DB8A587962996923D44A99D420
 
@@ -76,11 +76,8 @@ $4A, $4A, $8D, $79, $02, $8D, $7B, $02
 var
 
  ticks: cardinal;
- i, cnt: byte;
+ i: byte;
  md: TMD5;
-
- txt:string;
-
 
 begin
 
