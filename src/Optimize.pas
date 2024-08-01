@@ -42,18 +42,20 @@ var ProcAsBlock: array [1..MAXBLOCKS] of Boolean;				// issue #125 fixed
 
   procedure MarkNotDead(IdentIndex: Integer);
   var
-    ChildIndex, ChildIdentIndex: Integer;
+    ChildIndex, ChildIdentIndex, ProcAsBlockIndex: Integer;
   begin
 
     Ident[IdentIndex].IsNotDead := TRUE;
 
-    if (Ident[IdentIndex].ProcAsBlock > 0) and (CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren > 0) and (ProcAsBlock[Ident[IdentIndex].ProcAsBlock] = FALSE) then begin
+    ProcAsBlockIndex := Ident[IdentIndex].ProcAsBlock;
 
-	ProcAsBlock[Ident[IdentIndex].ProcAsBlock] := TRUE;
+    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = FALSE) and (CallGraph[ProcAsBlockIndex].NumChildren > 0) then begin
 
-  	for ChildIndex := 1 to CallGraph[Ident[IdentIndex].ProcAsBlock].NumChildren do
+	ProcAsBlock[ProcAsBlockIndex] := TRUE;
+
+  	for ChildIndex := 1 to CallGraph[ProcAsBlockIndex].NumChildren do
 	   for ChildIdentIndex := 1 to NumIdent do
-	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[Ident[IdentIndex].ProcAsBlock].ChildBlock[ChildIndex]) then
+	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
 		MarkNotDead(ChildIdentIndex);
 
      end;
@@ -478,11 +480,13 @@ procedure OptimizeASM;
 type
     TListing = array [0..1023] of string;
 
-var i, l, k, m, x: integer;
-    a, t, {arg,} arg0{, arg1}: string;
-    inxUse, found: Boolean;
-//    t0, t1, t2, t3: string;
+var inxUse, found: Boolean;
+    i, l, k, m, x: integer;
+
     listing, listing_tmp: TListing;
+
+    a, t, arg0: string;
+
     s: array [0..15, 0..3] of string;
 
 // -----------------------------------------------------------------------------
@@ -1019,17 +1023,23 @@ var i, l, k, m, x: integer;
 
    function STA(i: integer): Boolean;
    begin
-     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0) and (pos(#9'sta #$00', listing[i]) = 0);
+     if listing[i] = #9'sta #$00' then exit(false);
+
+     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
    end;
 
    function STA_A(i: integer): Boolean;
    begin
-     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta #$00', listing[i]) = 0);
+     if listing[i] = #9'sta #$00' then exit(false);
+
+     Result := (pos(#9'sta ', listing[i]) = 1);
    end;
 
    function STA_VAL(i: integer): Boolean;
    begin
-     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta :STACK', listing[i]) = 0) and (pos(#9'sta #$00', listing[i]) = 0);
+     if listing[i] = #9'sta #$00' then exit(false);
+
+     Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta :STACK', listing[i]) = 0);
    end;
 
    function STA_STACK(i: integer): Boolean;
