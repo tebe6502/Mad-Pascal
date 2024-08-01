@@ -5216,11 +5216,11 @@ case op of
 
      case DataSize[ResultType] of
 
-      1: begin asm65(#9'jsr @expandToCARD1.SHORT'); asm65(#9'jsr shlEAX_CL.CARD') end;
+      1: begin asm65(#9'jsr @expandToCARD1.SHORT'); a65(__shlEAX_CL) end;
 
-      2: begin asm65(#9'jsr @expandToCARD1.SMALL'); asm65(#9'jsr shlEAX_CL.CARD') end;
+      2: begin asm65(#9'jsr @expandToCARD1.SMALL'); a65(__shlEAX_CL) end;
 
-      4: asm65(#9'jsr shlEAX_CL.CARD');
+      4: a65(__shlEAX_CL);
 
      end;
 
@@ -5228,7 +5228,7 @@ case op of
      case DataSize[ResultType] of
       1: a65(__shlAL_CL);
       2: a65(__shlAX_CL);
-      4: a65(__shlEAX_CL)
+      4: a65(__shlEAX_CL);
      end;
 
     end;
@@ -5241,11 +5241,11 @@ case op of
 
      case DataSize[ResultType] of
 
-      1: begin asm65(#9'jsr @expandToCARD1.SHORT'); asm65(#9'jsr shrEAX_CL') end;
+      1: begin asm65(#9'jsr @expandToCARD1.SHORT'); a65(__shrEAX_CL) end;
 
-      2: begin asm65(#9'jsr @expandToCARD1.SMALL'); asm65(#9'jsr shrEAX_CL') end;
+      2: begin asm65(#9'jsr @expandToCARD1.SMALL'); a65(__shrEAX_CL) end;
 
-      4: asm65(#9'jsr shrEAX_CL');
+      4: a65(__shrEAX_CL);
 
      end;
 
@@ -5253,7 +5253,7 @@ case op of
      case DataSize[ResultType] of
       1: a65(__shrAL_CL);
       2: a65(__shrAX_CL);
-      4: a65(__shrEAX_CL)
+      4: a65(__shrEAX_CL);
      end;
 
     end;
