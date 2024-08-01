@@ -298,14 +298,19 @@ end;
 
 
 function GetIdentProc(S: TString; ProcIdentIndex: integer; Param: TParamList; NumParams: integer): integer;
+
+type
+    TBest = record
+	      hit: cardinal;
+              IdentIndex, b: integer;
+	    end;
+
 var IdentIndex, BlockStackIndex, i, k, b: Integer;
-    df: byte;
     hits, m: cardinal;
+    df: byte;
     yes: Boolean;
-    best: array of record
-		    IdentIndex, b: integer;
-		    hit: cardinal;
-		   end;
+
+    best: array of TBest;
 
 begin
 
@@ -316,7 +321,6 @@ SetLength(best, 1);
 best[0].IdentIndex := 0;
 best[0].b := 0;
 best[0].hit := 0;
-
 
 for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
   begin
@@ -491,6 +495,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 	best[k].b	   := Ident[IdentIndex].Block;
 
 	SetLength(best, k+2);
+
       end;
 
   end;// for
@@ -542,21 +547,17 @@ var IdentIndex, BlockStackIndex: Integer;
 
 procedure addOverlay(UnitIndex, Block: integer; ovr: Boolean);
 var i: integer;
-    yes: Boolean;
 begin
-
- yes:=true;
 
  for i:=High(ov)-1 downto 0 do
   if (ov[i].u = UnitIndex) and (ov[i].b = Block) then begin
+
    inc(ov[i].i, ord(ovr));
    inc(ov[i].j);
 
-   yes:=false;
-   Break;
+   exit;
   end;
 
- if yes then begin
   i:=High(ov);
 
   ov[i].u := UnitIndex;
@@ -565,7 +566,6 @@ begin
   ov[i].j := 1;
 
   SetLength(ov, i+2);
- end;
 
 end;
 
@@ -709,10 +709,11 @@ begin
 
 	     __je: asm65(#9'beq *+5');					// =
 	    __jne: asm65(#9'bne *+5');					// <>
-	     __jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;	// >
-	    __jge: asm65(#9'bcs *+5');					// >=
-	     __jl: asm65(#9'bcc *+5');					// <
-	    __jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;	// <=
+
+//	     __jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;	// >
+//	    __jge: asm65(#9'bcs *+5');					// >=
+//	     __jl: asm65(#9'bcc *+5');					// <
+//	    __jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;	// <=
 
 	  __addBX: asm65(#9'inx');
 	  __subBX: asm65(#9'dex');
@@ -751,6 +752,7 @@ begin
 //	   __cmpINT: asm65(#9'jsr cmpINT');
 
 //      __cmpSTRING: asm65(#9'jsr cmpSTRING');
+
  __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
  __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
 
@@ -1907,7 +1909,6 @@ end;	//Push
 
 procedure SaveToSystemStack(cnt: integer);
 var i: integer;
-    yes: Boolean;
 begin
 
 // asm65;
@@ -1915,16 +1916,14 @@ begin
 
  Gen; Gen; Gen;						// push dword ptr [bx]
 
- yes:=false;
-
  if Pass = CODEGENERATIONPASS then
-  for i:=High(IFTmpPosStack)-1 downto 0 do
-   if IFTmpPosStack[i] = cnt then begin yes:=true; Break end;
+  for i in IFTmpPosStack do
+   if i = cnt then begin
+    asm65(#9'lda :STACKORIGIN,x');
+    asm65(#9'sta :STACKORIGIN,x');
 
- if yes then begin
-  asm65(#9'lda :STACKORIGIN,x');
-  asm65(#9'sta :STACKORIGIN,x');
- end;
+    Break;
+   end;
 
 end;
 
@@ -1942,12 +1941,16 @@ begin
 
  Gen; Gen; Gen;						// add bx, 4
 
- asm65(#9'lda IFTMP_'+IntToHex(cnt, 4));
+ asm65(#9'lda IFTMP_' + IntToHex(cnt, 4));
 
  if Pass = CALLDETERMPASS then begin
+
   i:=High(IFTmpPosStack);
-  IFTmpPosStack[i]:=cnt;
+
+  IFTmpPosStack[i] := cnt;
+
   SetLength(IFTmpPosStack, i+2);
+
  end;
 
 end;
@@ -3365,15 +3368,15 @@ begin
    asm65('@exit');
 
    if not isInl then begin
-   asm65(#9'.ifdef @new');			// @FreeMem
-   asm65(#9'lda <@VarData');
-   asm65(#9'sta :ztmp');
-   asm65(#9'lda >@VarData');
-   asm65(#9'ldy #@VarDataSize-1');
-   asm65(#9'jmp @FreeMem');
-   asm65(#9'els');
-   asm65(#9'rts', '; ret');
-   asm65(#9'eif');
+    asm65(#9'.ifdef @new');			// @FreeMem
+    asm65(#9'lda <@VarData');
+    asm65(#9'sta :ztmp');
+    asm65(#9'lda >@VarData');
+    asm65(#9'ldy #@VarDataSize-1');
+    asm65(#9'jmp @FreeMem');
+    asm65(#9'els');
+    asm65(#9'rts', '; ret');
+    asm65(#9'eif');
    end;
 
    yes:=false;
@@ -3882,24 +3885,22 @@ end;
 
 procedure GenerateAsmLabels(l: integer);
 var i: integer;
-//    ok: Boolean;
 begin
 
 if not OutputDisabled then
  if Pass = CODEGENERATIONPASS then begin
+{
 
-//   ok:=false;
-   for i:=0 to High(AsmLabels)-1 do
-     if AsmLabels[i]=l then exit;// begin ok:=true; Break end;
+   for i in AsmLabels do
+     if i = l then exit; end;
 
-//   if not ok then begin
-    i:=High(AsmLabels);
-    AsmLabels[i] := l;
+   i := High(AsmLabels);
 
-    SetLength(AsmLabels, i+2);
+   AsmLabels[i] := l;
 
-    asm65('l_'+IntToHex(l, 4));
-//   end;
+   SetLength(AsmLabels, i+2);
+}
+   asm65('l_' + IntToHex(l, 4));
 
  end;
 
@@ -10429,6 +10430,19 @@ case Tok[i].Kind of
 	   end;
 
 
+
+           if Ident[IdentIndex].IdType = DATAORIGINOFFSET then begin
+
+
+// testuj czy to nie tablica ze wskaznikami do rekordu
+
+//	     writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].Value,',',Ident[IdentIndex].PassMethod);
+
+
+	   end;
+
+
+
            IndirectionLevel := ASPOINTERTOPOINTER;
 
            if Tok[i + 1].Kind = OPARTOK then begin				// (pointer)
@@ -16611,7 +16625,7 @@ DataSegmentSize := 0;
 
 AsmBlockIndex := 0;
 
-SetLength(AsmLabels, 1);
+//SetLength(AsmLabels, 1);
 
 DefineIdent(1, 'MAIN', PROCEDURETOK, 0, 0, 0, 0);
 

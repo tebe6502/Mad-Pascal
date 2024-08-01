@@ -344,11 +344,12 @@ type
   code65 =
   (
 
-  __je, __jne, __jg, __jge, __jl, __jle,
+  __je, __jne,
+//  __jg, __jge, __jl, __jle,
   __putCHAR, __putEOL,
   __addBX, __subBX, __movaBX_Value,
   __imulECX,
-  __notaBX, //__negaBX, __notBOOLEAN,
+//  __notaBX, __negaBX, __notBOOLEAN,
   __addAL_CL, __addAX_CX, __addEAX_ECX,
   __shlAL_CL, __shlAX_CL, __shlEAX_CL,
   __subAL_CL, __subAX_CX, __subEAX_ECX,
@@ -575,7 +576,7 @@ var
 
   OutFile: TextFile;
 
-  asmLabels: array of integer;
+//  AsmLabels: array of integer;
 
   resArray: array of TResource;
 
