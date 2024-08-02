@@ -16,7 +16,10 @@
 
 *)
 
-case k of
+procedure opt_BYTE_DIV(k: byte);
+begin
+
+ case k of
 
      2: begin
 	  listing[l+1] := #9'sta ' + GetARG(0, x-1);
@@ -601,5 +604,7 @@ case k of
 
 	  inc(l, 7);
 	end;
+
+ end;
 
 end;
