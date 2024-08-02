@@ -30,7 +30,7 @@
 		sbc :STACKORIGIN-1+STACKWIDTH,x
 		sta :eax+3
 @
-	jmp movaBX_EAX
+	jmp @movaBX_EAX
 .endp
 
 

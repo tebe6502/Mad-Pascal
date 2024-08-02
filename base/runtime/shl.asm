@@ -1,11 +1,11 @@
 
 /*
-	shlEAX_CL.BYTE
-	shlEAX_CL.WORD
-	shlEAX_CL.CARD
+	@shlEAX_CL.BYTE
+	@shlEAX_CL.WORD
+	@shlEAX_CL.CARD
 */
 
-.proc	shlEAX_CL
+.proc	@shlEAX_CL
 
 ;SHORT	jsr @expandToCARD1.SHORT
 ;	jmp CARD

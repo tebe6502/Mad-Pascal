@@ -1,5 +1,5 @@
 
-.proc	iniEAX_ECX_WORD
+.proc	@iniEAX_ECX_WORD
 
 	mva :STACKORIGIN,x :ecx
 	mva :STACKORIGIN+STACKWIDTH,x :ecx+1
@@ -17,7 +17,7 @@
 .endp
 
 
-.proc	iniEAX_ECX_CARD
+.proc	@iniEAX_ECX_CARD
 	mva :STACKORIGIN,x :ecx
 	mva :STACKORIGIN+STACKWIDTH,x :ecx+1
 	mva :STACKORIGIN+STACKWIDTH*2,x :ecx+2
