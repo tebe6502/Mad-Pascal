@@ -2778,7 +2778,7 @@ begin				// OptimizeASM
        inc(l, 12);
       end else
 }
-      if arg0 = 'hiBYTE' then begin
+      if arg0 = '@hiBYTE' then begin
        t:='';
 
        listing[l]   := #9'lda '+GetARG(0, x);
@@ -2788,7 +2788,7 @@ begin				// OptimizeASM
        inc(l, 3);
       end else
 
-      if arg0 = 'hiWORD' then begin
+      if arg0 = '@hiWORD' then begin
        t:='';
 
        listing[l]   := #9'lda '+GetARG(1, x);
@@ -2797,7 +2797,7 @@ begin				// OptimizeASM
 
        inc(l, 2);
       end else
-      if arg0 = 'hiCARD' then begin
+      if arg0 = '@hiCARD' then begin
        t:='';
 
        s[x][0] := '';
@@ -2812,7 +2812,7 @@ begin				// OptimizeASM
        inc(l, 4);
       end else
 
-      if arg0 = 'movZTMP_aBX' then begin
+      if arg0 = '@movZTMP_aBX' then begin
 	t:='';
 
 	s[x-1, 0] := '';
@@ -2833,7 +2833,7 @@ begin				// OptimizeASM
 
       end else
 
-      if arg0 = 'movaBX_EAX' then begin
+      if arg0 = '@movaBX_EAX' then begin
 	t:='';
 
 	s[x-1, 0] := '';
@@ -3193,7 +3193,6 @@ begin				// OptimizeASM
       if (arg0 = 'imulCARD') or (arg0 = 'mulINTEGER') then begin
 	t:='';
 
-
         if (target.id = ___NEO) then begin
 
           listing[l]    := #9'lda '+GetARG(0, x);
@@ -3294,32 +3293,32 @@ begin				// OptimizeASM
 	if system_dpoke then begin x:=50; Break end;
 
       end else
-      if arg0 = 'shrAL_CL.BYTE' then begin		// SHR BYTE
+      if arg0 = '@shrAL_CL' then begin			// SHR BYTE
 
         if opt_SHR_BYTE then begin x:=50; Break end;
 
       end else
-      if arg0 = 'shrAX_CL.WORD' then begin		// SHR WORD
+      if arg0 = '@shrAX_CL' then begin			// SHR WORD
 
 	opt_SHR_WORD;
 
       end else
-      if arg0 = 'shrEAX_CL' then begin			// SHR CARDINAL
+      if arg0 = '@shrEAX_CL' then begin			// SHR CARDINAL
 
 	opt_SHR_CARD;
 
       end else
-      if arg0 = 'shlEAX_CL.BYTE' then begin		// SHL BYTE
+      if arg0 = '@shlEAX_CL.BYTE' then begin		// SHL BYTE
 
         opt_SHL_BYTE;
 
       end else
-      if arg0 = 'shlEAX_CL.WORD' then begin		// SHL WORD
+      if arg0 = '@shlEAX_CL.WORD' then begin		// SHL WORD
 
 	if opt_SHL_WORD then begin x:=50; Break end;
 
       end else
-      if arg0 = 'shlEAX_CL.CARD' then begin		// SHL CARD
+      if arg0 = '@shlEAX_CL.CARD' then begin		// SHL CARD
 
         opt_SHL_CARD;
 
@@ -3660,7 +3659,11 @@ begin				// OptimizeASM
      end;
 
 
-   if (pos(':STACKORIGIN,', t) > 7) and (pos('(:bp),', t) = 0) then begin	// kiedy odczytujemy tablice
+  if t <> '' then begin
+
+  if (pos('(:bp),', t) = 0) then begin
+
+   if (pos(':STACKORIGIN,', t) > 7) then begin	// kiedy odczytujemy tablice
     s[x][0]:=copy(a, 1, pos(' :STACK', a));
     t:='';
 
@@ -3670,9 +3673,9 @@ begin				// OptimizeASM
 
      inc(l, 2);
     end;
-   end;
+   end else
 
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) and (pos('(:bp),', t) = 0) then begin
+   if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
     s[x][1]:=copy(a, 1, pos(' :STACK', a));
     t:='';
 
@@ -3682,9 +3685,9 @@ begin				// OptimizeASM
 
      inc(l, 2);
     end;
-   end;
+   end else
 
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) and (pos('(:bp),', t) = 0) then begin
+   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
     s[x][2]:=copy(a, 1, pos(' :STACK', a));
     t:='';
 
@@ -3694,9 +3697,9 @@ begin				// OptimizeASM
 
      inc(l, 2);
     end;
-   end;
+   end else
 
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) and (pos('(:bp),', t) = 0) then begin
+   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
     s[x][3]:=copy(a, 1, pos(' :STACK', a));
     t:='';
 
@@ -3709,58 +3712,60 @@ begin				// OptimizeASM
    end;
 
 
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
+   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
+   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
 
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) and (pos('(:bp),', t) = 0)	then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
+   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
+   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+
+  end; // if (pos('(:bp),', t) = 0)
 
 
    if (pos(':STACKORIGIN,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 14);
+    //k:=pos(':STACK', t);  writeln(k);
+    delete(t, 6, 14);
 
     arg0 := GetARG(0, x);
-    insert(arg0, t, k );
+    insert(arg0, t, 6);
    end;
 
    if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 25);
+    //k:=pos(':STACK', t);
+    delete(t, 6, 25);
 
     arg0 := GetARG(1, x);
-    insert(arg0, t, k );
+    insert(arg0, t, 6);
    end;
 
    if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 27);
+    //k:=pos(':STACK', t);
+    delete(t, 6, 27);
 
     arg0 := GetARG(2, x);
-    insert(arg0, t, k );
+    insert(arg0, t, 6);
    end;
 
    if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then begin
-    k:=pos(':STACK', t);
-    delete(t, k, 27);
+    //k:=pos(':STACK', t);
+    delete(t, 6, 27);
 
     arg0 := GetARG(3, x);
-    insert(arg0, t, k );
+    insert(arg0, t, 6);
    end;
 
 
-   if (pos(':STACKORIGIN-1,', t) = 6) then		t:=copy(a, 1, pos(' :STACK', a)) + GetARG(0, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(1, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(2, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(3, x-1);
+   if (pos(':STACKORIGIN-1,', t) = 6) then		t:=copy(a, 1, 5) + GetARG(0, x-1);
+   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(1, x-1);
+   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(2, x-1);
+   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(3, x-1);
 
+   if (pos(':STACKORIGIN+1,', t) = 6) then		t:=copy(a, 1, 5) + GetARG(0, x+1);
+   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(1, x+1);
+   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(2, x+1);
+   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(3, x+1);
 
-   if (pos(':STACKORIGIN+1,', t) = 6) then		t:=copy(a, 1, pos(' :STACK', a)) + GetARG(0, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(1, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(2, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, pos(' :STACK', a)) + GetARG(3, x+1);
 
    if t <> '' then begin
     listing[l] := t;
@@ -3768,6 +3773,8 @@ begin				// OptimizeASM
    end;
 
   end;
+
+  end; // if t <> ''
 
  end;
 

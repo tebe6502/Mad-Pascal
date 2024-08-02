@@ -35,7 +35,7 @@ skp
 	ldy #$00
 	sty @move.cnt+1
 	lda (@move.src),y	; string[0]
-	
+
 	cmp len: #$00		; maximum availible destination string length
 	bcc ok
 	beq ok

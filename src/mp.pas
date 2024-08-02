@@ -699,13 +699,13 @@ begin
 	 __putEOL: asm65(#9'@printEOL');
 	__putCHAR: asm65(#9'jsr @printCHAR');
 
-      __shlAL_CL: asm65(#9'jsr shlEAX_CL.BYTE');
-      __shlAX_CL: asm65(#9'jsr shlEAX_CL.WORD');
-      __shlEAX_CL: asm65(#9'jsr shlEAX_CL.CARD');
+      __shlAL_CL: asm65(#9'jsr @shlEAX_CL.BYTE');
+      __shlAX_CL: asm65(#9'jsr @shlEAX_CL.WORD');
+      __shlEAX_CL: asm65(#9'jsr @shlEAX_CL.CARD');
 
-       __shrAL_CL: asm65(#9'jsr shrAL_CL.BYTE');
-       __shrAX_CL: asm65(#9'jsr shrAX_CL.WORD');
-      __shrEAX_CL: asm65(#9'jsr shrEAX_CL');
+       __shrAL_CL: asm65(#9'jsr @shrAL_CL');
+       __shrAX_CL: asm65(#9'jsr @shrAX_CL');
+      __shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
 
 	     __je: asm65(#9'beq *+5');					// =
 	    __jne: asm65(#9'bne *+5');					// <>
@@ -7767,9 +7767,9 @@ case Tok[i].Kind of
      asm65('; Hi(X)');
 
      case ActualParamType of
-	 SHORTINTTOK, BYTETOK: asm65(#9'jsr hiBYTE');
-	 SMALLINTTOK, WORDTOK: asm65(#9'jsr hiWORD');
-      INTEGERTOK, CARDINALTOK: asm65(#9'jsr hiCARD');
+	 SHORTINTTOK, BYTETOK: asm65(#9'jsr @hiBYTE');
+	 SMALLINTTOK, WORDTOK: asm65(#9'jsr @hiWORD');
+      INTEGERTOK, CARDINALTOK: asm65(#9'jsr @hiCARD');
      end;
 
      if ActualParamType in [INTEGERTOK, CARDINALTOK] then

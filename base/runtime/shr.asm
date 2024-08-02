@@ -1,10 +1,13 @@
 
-.proc	shrAL_CL
+/*
+	@sshrAL_CL
+	@shrAX_CL
+	@shrEAX_CL
+*/
 
-;SHORT	jsr @expandToCARD1.SHORT
-;	jmp shrEAX_CL
+.proc	@shrAL_CL
 
-BYTE	ldy :STACKORIGIN,x	; cl
+	ldy :STACKORIGIN,x	; cl
 	beq stop
 @	lsr :STACKORIGIN-1,x
 	dey
@@ -19,12 +22,9 @@ stop	lda #0
 .endp
 
 
-.proc	shrAX_CL
+.proc	@shrAX_CL
 
-;SMALL	jsr @expandToCARD1.SMALL
-;	jmp shrEAX_CL
-
-WORD	ldy :STACKORIGIN,x	; cl
+	ldy :STACKORIGIN,x	; cl
 	beq stop
 
 	lda :STACKORIGIN-1,x
@@ -44,7 +44,7 @@ stop	lda #0
 .endp
 
 
-.proc	shrEAX_CL
+.proc	@shrEAX_CL
 
 	ldy :STACKORIGIN,x	; cl
 	beq stop

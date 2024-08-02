@@ -25,7 +25,7 @@
 		sbc :STACKORIGIN-1,x
 		sta eax+1
 @
-	jmp movaBX_EAX
+	jmp @movaBX_EAX
 .endp
 
 

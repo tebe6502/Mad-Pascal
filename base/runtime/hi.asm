@@ -1,5 +1,5 @@
 
-.proc	hiBYTE
+.proc	@hiBYTE
 	lda :STACKORIGIN,x
 	:4 lsr @
 	sta :STACKORIGIN,x
@@ -7,14 +7,14 @@
 .endp
 
 
-.proc	hiWORD
+.proc	@hiWORD
 	lda :STACKORIGIN+STACKWIDTH,x
 	sta :STACKORIGIN,x
 	rts
 .endp
 
 
-.proc	hiCARD
+.proc	@hiCARD
 	lda :STACKORIGIN+STACKWIDTH*3,x
 	sta :STACKORIGIN+STACKWIDTH,x
 
