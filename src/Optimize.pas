@@ -2718,7 +2718,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-
+{
       if arg0 = 'negBYTE' then begin
        t:='';
 
@@ -2738,6 +2738,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+
       if arg0 = 'negWORD' then begin
        t:='';
 
@@ -2757,20 +2758,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
-{
-      if arg0 = 'notBOOLEAN' then begin
-       t:='';
 
-       listing[l]   := #9'ldy #1';			// !!! wymagana konwencja
-       listing[l+1] := #9'lda '+GetARG(0, x);
-       listing[l+2] := #9'beq @+';
-       listing[l+3] := #9'dey';
-       listing[l+4] := '@';
-       listing[l+5] := #9'sty '+GetARG(0, x);
-
-       inc(l, 6);
-      end else
-}
       if arg0 = 'negCARD' then begin
        t:='';
 
@@ -2789,6 +2777,7 @@ begin				// OptimizeASM
 
        inc(l, 12);
       end else
+}
       if arg0 = 'hiBYTE' then begin
        t:='';
 
@@ -2962,116 +2951,6 @@ begin				// OptimizeASM
 	end;
 
       end else
-{
-      if (arg0 = '@WORD.MOD') then begin
-	t:='';
-
-	t0 := GetArg(0, x);
-	t1 := GetArg(1, x);
-
-	t2 := GetArg(0, x-1);
-	t3 := GetArg(1, x-1);
-
-	if (pos('#$', t0) > 0) and (pos('#$', t1) > 0) and (pos('#$', t2) > 0) and (pos('#$', t3) > 0) then begin
-
-	  k:=(GetVal(t2) + GetVal(t3) shl 8) mod (GetVal(t0) + GetVal(t1) shl 8);
-
-	  listing[l]   := #9'lda #$' + IntToHex(k and $ff, 2);
-	  listing[l+1] := #9'sta :ztmp8';
-	  listing[l+2] := #9'lda #$' + IntToHex(byte(k shr 8), 2);
-	  listing[l+3] := #9'sta :ztmp9';
-
-	  s[x-1, 2] := #9'lda #$00';
-	  s[x-1, 3] := #9'lda #$00';
-
-	  inc(l, 4);
-	end else begin
-	  listing[l]   := #9'lda ' + t2;
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda ' + t3;
-	  listing[l+3] := #9'sta :eax+1';
-	  listing[l+4] := #9'lda ' + t0;
-	  listing[l+5] := #9'sta :ecx';
-	  listing[l+6] := #9'lda ' + t1;
-	  listing[l+7] := #9'sta :ecx+1';
-	  listing[l+8] := #9'jsr idivAX_CX.MOD';
-
-	  inc(l, 9);
-	end;
-
-      end else
-}
-
-{
-      if (arg0 = '@WORD.DIV') then begin
-	t:='';
-
-	t0 := GetArg(0, x);
-	t1 := GetArg(1, x);
-
-	t2 := GetArg(0, x-1);
-	t3 := GetArg(1, x-1);
-
-	if (pos('#$', t0) > 0) and (pos('#$', t1) > 0) and (pos('#$', t2) > 0) and (pos('#$', t3) > 0) then begin
-
-	  k:=(GetVal(t2) + GetVal(t3) shl 8) div (GetVal(t0) + GetVal(t1) shl 8);
-
-	  listing[l]   := #9'lda #$'+IntToHex(k and $ff, 2);
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda #$'+IntToHex(byte(k shr 8), 2);
-	  listing[l+3] := #9'sta :eax+1';
-
-	  s[x-1, 2] := #9'lda #$00';
-	  s[x-1, 3] := #9'lda #$00';
-
-	  inc(l, 4);
-	end else begin
-	  listing[l]   := #9'lda ' + t2;
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda ' + t3;
-	  listing[l+3] := #9'sta :eax+1';
-	  listing[l+4] := #9'lda ' + t0;
-	  listing[l+5] := #9'sta :ecx';
-	  listing[l+6] := #9'lda ' + t1;
-	  listing[l+7] := #9'sta :ecx+1';
-	  listing[l+8] := #9'jsr idivAX_CX';
-
-	  inc(l, 9);
-	end;
-
-      end else
-}
-
-{
-      if (arg0 = '@CARDINAL.DIV') or (arg0 = '@CARDINAL.MOD') then begin
-	t:='';
-
-	listing[l]   := #9'lda ' + GetArg(0, x-1);
-	listing[l+1] := #9'sta :eax';
-	listing[l+2] := #9'lda ' + GetArg(1, x-1);
-	listing[l+3] := #9'sta :eax+1';
-	listing[l+4] := #9'lda ' + GetArg(2, x-1);
-	listing[l+5] := #9'sta :eax+2';
-	listing[l+6] := #9'lda ' + GetArg(3, x-1);
-	listing[l+7] := #9'sta :eax+3';
-	listing[l+8] := #9'lda ' + GetArg(0, x);
-	listing[l+9] := #9'sta :ecx';
-	listing[l+10] := #9'lda ' + GetArg(1, x);
-	listing[l+11] := #9'sta :ecx+1';
-	listing[l+12] := #9'lda ' + GetArg(2, x);
-	listing[l+13] := #9'sta :ecx+2';
-	listing[l+14] := #9'lda ' + GetArg(3, x);
-	listing[l+15] := #9'sta :ecx+3';
-
-	if arg0 = '@CARDINAL.DIV' then
-	 listing[l+16] := #9'jsr idivEAX_ECX.CARD'
-	else
-	 listing[l+16] := #9'jsr idivEAX_ECX.CARD.MOD';
-
-	inc(l, 17);
-
-      end else
-}
       if (arg0 = 'imulBYTE') or (arg0 = 'mulSHORTINT') then begin
 	t:='';
 
@@ -3395,7 +3274,6 @@ begin				// OptimizeASM
 	end;
 
       end else
-
       if arg0 = 'SYSTEM.PEEK' then begin
 
 	if system_peek then begin x:=50; Break end;
@@ -3416,25 +3294,21 @@ begin				// OptimizeASM
 	if system_dpoke then begin x:=50; Break end;
 
       end else
-
       if arg0 = 'shrAL_CL.BYTE' then begin		// SHR BYTE
 
         if opt_SHR_BYTE then begin x:=50; Break end;
 
       end else
-
       if arg0 = 'shrAX_CL.WORD' then begin		// SHR WORD
 
 	opt_SHR_WORD;
 
       end else
-
       if arg0 = 'shrEAX_CL' then begin			// SHR CARDINAL
 
 	opt_SHR_CARD;
 
       end else
-
       if arg0 = 'shlEAX_CL.BYTE' then begin		// SHL BYTE
 
         opt_SHL_BYTE;
@@ -3445,153 +3319,11 @@ begin				// OptimizeASM
 	if opt_SHL_WORD then begin x:=50; Break end;
 
       end else
-
       if arg0 = 'shlEAX_CL.CARD' then begin		// SHL CARD
 
         opt_SHL_CARD;
 
       end else
-
-{
-      if arg0 = 'andAL_CL' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 3);
-      end else
-
-      if arg0 = 'andAX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'and '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0 = 'andEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'and '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'and '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'and '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9]  := #9'lda '+GetARG(3, x-1);
-       listing[l+10] := #9'and '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-}
-
-{
-      if arg0 = 'orAL_CL' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'ora '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 3);
-      end else
-
-      if arg0 = 'orAX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'ora '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'ora '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0 = 'orEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'ora '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'ora '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'ora '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'ora '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-}
-
-{
-      if arg0 = 'xorAL_CL' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'eor '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       inc(l, 3);
-      end else
-
-      if arg0 = 'xorAX_CX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'eor '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'eor '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       inc(l, 6);
-      end else
-      if arg0 = 'xorEAX_ECX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x-1);
-       listing[l+1] := #9'eor '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x-1);
-
-       listing[l+3] := #9'lda '+GetARG(1, x-1);
-       listing[l+4] := #9'eor '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x-1);
-
-       listing[l+6] := #9'lda '+GetARG(2, x-1);
-       listing[l+7] := #9'eor '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x-1);
-
-       listing[l+9] := #9'lda '+GetARG(3, x-1);
-       listing[l+10]:= #9'eor '+GetARG(3, x);
-       listing[l+11]:= #9'sta '+GetARG(3, x-1);
-
-       inc(l, 12);
-      end else
-}
 
 {
       if arg0 = 'notaBX' then begin
@@ -3616,6 +3348,7 @@ begin				// OptimizeASM
        inc(l, 12);
       end else
 }
+
       if (pos('add', arg0) > 0) or (pos('sub', arg0) > 0) then begin
 
       t:='';
