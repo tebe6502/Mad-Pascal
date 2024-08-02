@@ -4420,13 +4420,62 @@ case op of
     end else
 
     case DataSize[ValType] of
-     1: asm65(#9'jsr negBYTE');
-     2: asm65(#9'jsr negWORD');
-    else
-     asm65(#9'jsr negCARD');
+     1: begin //asm65(#9'jsr negBYTE');
+
+         asm65(#9'lda #$00');
+         asm65(#9'sub :STACKORIGIN,x');
+         asm65(#9'sta :STACKORIGIN,x');
+
+         asm65(#9'lda #$00');
+         asm65(#9'sbc #$00');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'lda #$00');
+         asm65(#9'sbc #$00');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+         asm65(#9'lda #$00');
+         asm65(#9'sbc #$00');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+        end;
+
+     2: begin //asm65(#9'jsr negWORD');
+
+         asm65(#9'lda #$00');
+         asm65(#9'sub :STACKORIGIN,x');
+         asm65(#9'sta :STACKORIGIN,x');
+         asm65(#9'lda #$00');
+         asm65(#9'sbc :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+         asm65(#9'lda #$00');
+         asm65(#9'sbc #$00');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+         asm65(#9'lda #$00');
+         asm65(#9'sbc #$00');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+        end;
+
+     4: begin //asm65(#9'jsr negCARD');
+
+         asm65(#9'lda #$00');
+         asm65(#9'sub :STACKORIGIN,x');
+         asm65(#9'sta :STACKORIGIN,x');
+         asm65(#9'lda #$00');
+         asm65(#9'sbc :STACKORIGIN+STACKWIDTH,x');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+         asm65(#9'lda #$00');
+         asm65(#9'sbc :STACKORIGIN+STACKWIDTH*2,x');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+         asm65(#9'lda #$00');
+         asm65(#9'sbc :STACKORIGIN+STACKWIDTH*3,x');
+         asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+        end;
+
     end;
 
-//    a65(__negaBX);
     end;
 
   NOTTOK:
