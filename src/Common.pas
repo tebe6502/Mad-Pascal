@@ -576,7 +576,7 @@ var
 
   OutFile: TextFile;
 
-//  AsmLabels: array of integer;
+  //AsmLabels: array of integer;
 
   resArray: array of TResource;
 

@@ -1542,9 +1542,143 @@ var inxUse, found: Boolean;
     k:=0;
     for i := 0 to l - 1 do
      if (listing[i] <> '') and (listing[i][1] <> ';') then begin
+
       listing[k] := listing[i];
+
+      if k > 0 then begin
+
+
+        if sta_stack(k) and 								// lda :STACKORIGIN	; k-1
+	   lda_stack(k-1) and								// sta :STACKORIGIN	; k
+	   lda_a(i+1) then								// lda			; i+1
+          if copy(listing[k], 6, 256) = copy(listing[k-1], 6, 256) then
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k, 2);
+	  end;
+
+
+        if lda_a(k) and 								// lda			; k-1
+	   lda_a(k-1) and								// lda			; k
+	   sta_a(i+1) then								// sta			; i+1
+	  begin
+	   listing[k-1] := listing[k];
+	   listing[k]   := '';
+	   dec(k);
+	  end;
+
+	if iny(k) and 									// lda			; k-1
+	   lda_a(k-1) and 								// iny			; k
+	   lda_a(i+1) then								// lda			; i+1
+	  begin
+	   listing[k-1] := #9'iny';
+	   listing[k]   := '';
+	   dec(k);
+	  end;
+
+
+
+	if sta_im_0(k) and 								// lda			; k-1
+	   lda_a(k-1) then begin							// sta #$00		; k
+
+
+	  if lda_a(i+1) then						// lda			; i+1
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k, 2);
+	  end;
+
+
+	  if (ldy(i+1) or iny(i+1)) and					// ldy|iny		; i+1
+	     lda_a(i+2) then						// lda			; i+2
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k, 2);
+	  end;
+
+
+	  if sta_im_0(i+1) and						// sta #$00		; i+1
+	     sta_im_0(i+2) and						// sta #$00		; i+2
+	     sta_im_0(i+3) and						// sta #$00		; i+3
+	     lda_a(i+4) then						// lda			; i+4
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+
+	   listing[i+1] := '';
+	   listing[i+2] := '';
+	   listing[i+3] := '';
+	   dec(k,2);
+	  end;
+
+
+	  if sta_im_0(i+1) and						// sta #$00		; i+1
+	     sta_im_0(i+2) and						// sta #$00		; i+2
+	     lda_a(i+3) then						// lda			; i+3
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+
+	   listing[i+1] := '';
+	   listing[i+2] := '';
+	   dec(k,2);
+	  end;
+
+
+	  if sta_im_0(i+1) and						// sta #$00		; i+1
+	     lda_a(i+2) then						// lda			; i+2
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+
+	   listing[i+1] := '';
+	   dec(k,2);
+	  end;
+
+
+        end;
+
+
+
+{
+      if (k>0) and sty_im_0(k) then begin
+
+        writeln(listing[k-2]);
+        writeln(listing[k-1]);
+        writeln(listing[k]);
+        writeln(listing[i+1]);
+        writeln(listing[i+2]);
+        writeln(listing[i+3]);
+        writeln(listing[i+4]);
+        writeln(listing[i+5]);
+        writeln(listing[i+6]);
+
+        writeln('----------------------');
+
+       end;
+}
+
+      end;
+
+
       inc(k);
      end;
+
+
+{
+if K>100 then begin
+
+ for i:=0 to k-1 do writeln(listing[i]);
+
+ halt;
+
+end;
+}
+
+
 
     listing[k]   := '';
     listing[k+1] := '';
@@ -1958,7 +2092,7 @@ end;
 
 
 {
-if (pos('lda adr.NODES+64+$01', listing[i]) > 0) then begin
+if (pos('lda TE4+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2013,11 +2147,12 @@ end;
 
 
 {
-if (pos('lda adr.XBUF1+$17', listing[i]) > 0) then begin
+if (pos('ldy #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
+ halt;
 end;
 }
 
@@ -3673,7 +3808,7 @@ begin				// OptimizeASM
 
      inc(l, 2);
     end;
-   end else
+   end;
 
    if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
     s[x][1]:=copy(a, 1, pos(' :STACK', a));
@@ -3685,7 +3820,7 @@ begin				// OptimizeASM
 
      inc(l, 2);
     end;
-   end else
+   end;
 
    if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
     s[x][2]:=copy(a, 1, pos(' :STACK', a));
@@ -3697,7 +3832,7 @@ begin				// OptimizeASM
 
      inc(l, 2);
     end;
-   end else
+   end;
 
    if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
     s[x][3]:=copy(a, 1, pos(' :STACK', a));
@@ -3712,12 +3847,12 @@ begin				// OptimizeASM
    end;
 
 
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
+   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
    if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
 
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end else
+   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
    if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
 
   end; // if (pos('(:bp),', t) = 0)
@@ -3768,9 +3903,12 @@ begin				// OptimizeASM
 
 
    if t <> '' then begin
+
     listing[l] := t;
     inc(l);
+
    end;
+
 
   end;
 

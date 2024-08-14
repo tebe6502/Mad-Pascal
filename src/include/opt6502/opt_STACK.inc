@@ -1240,7 +1240,7 @@ begin
      end;
 
 
-    if listing[i] = #9'jsr hiWORD' then								// jsr hiWORD				; 0
+    if listing[i] = #9'jsr @hiWORD' then							// jsr @hiWORD				; 0
      begin
        listing[i] := #9'mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x';
 
@@ -1922,7 +1922,7 @@ begin
 
     if mva(i) and 										// mva YY :STACKORIGIN,x		; 0
        mva(i+1) and										// mva YY+1 :STACKORIGIN+STACKWIDTH,x	; 1
-       (listing[i+2] = #9'jsr hiWORD') then							// jsr hiWORD				; 2
+       (listing[i+2] = #9'jsr @hiWORD') then							// jsr @hiWORD				; 2
      if (pos(' :STACKORIGIN,x', listing[i]) > 0) and
         (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) then
       begin

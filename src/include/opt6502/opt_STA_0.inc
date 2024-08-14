@@ -42,7 +42,7 @@ begin
       end;
 
 
-    if sty_stack(i) and										// sty :STACK			; 0
+    if sty_stack(i) and										// sty :STACKORIGIN		; 0
        sty_im_0(i+1) then									// sty #$00			; 1
      begin
        listing[i+1] := '';
@@ -68,7 +68,7 @@ begin
      end;
 
 
-    if sta_stack(i) and										// sta :STACK			; 0
+    if sta_stack(i) and										// sta :STACKORIGIN		; 0
        sta_im_0(i+1) then									// sta #$00			; 1
      begin
        listing[i+1] := '';

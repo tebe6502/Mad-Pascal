@@ -1,3 +1,6 @@
+14.07.2024
+- optymalizacja Optimize.pas -> Rebuild (50% szybsza kompilacja dla math/rijndael-test.pas)
+
 21.07.2024
 - OptimizeTemporaryBuf, 'mwa: -> mva' bugfix
 

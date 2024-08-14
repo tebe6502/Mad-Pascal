@@ -3890,9 +3890,8 @@ begin
 if not OutputDisabled then
  if Pass = CODEGENERATIONPASS then begin
 {
-
    for i in AsmLabels do
-     if i = l then exit; end;
+     if i = l then exit;
 
    i := High(AsmLabels);
 
@@ -6943,7 +6942,6 @@ begin
 		end;
 
 	      end;
-
 
 	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
