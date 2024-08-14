@@ -1234,10 +1234,9 @@ case IndirectionLevel of
     asm65('; as Value $'+IntToHex(Value, 8) + ' ('+IntToStr(Value)+')');
     asm65;
 
-    //Gen($83); Gen($C3); Gen($04);				// add bx, 4
     a65(__addBX);
 
-    Gen; //Gen($C7); Gen($07); GenDWord(Value);			// mov dword ptr [bx], Value
+    Gen;
     a65(__movaBX_Value, Value, Kind, Size, IdentIndex);
 
     end;
@@ -1910,7 +1909,6 @@ end;	//Push
 procedure SaveToSystemStack(cnt: integer);
 var i: integer;
 begin
-
 // asm65;
 // asm65('; Save conditional expression');		//at expression stack top onto the system :STACK');
 
@@ -1935,7 +1933,6 @@ end;
 procedure RestoreFromSystemStack(cnt: integer);
 var i: integer;
 begin
-
  //asm65;
  //asm65('; Restore conditional expression');
 
@@ -3403,15 +3400,15 @@ end;
 
 procedure GenerateIfThenCondition;
 begin
-asm65;
-asm65('; If Then Condition');
+//asm65;
+//asm65('; If Then Condition');
 
 Gen; Gen; Gen;								// mov :eax, [bx]
 
 a65(__subBX);
+
 asm65(#9'lda :STACKORIGIN+1,x');
 
-//Gen($75); Gen($03);							// jne +3
 a65(__jne);
 end;
 
@@ -3427,7 +3424,6 @@ begin
 
 Gen; Gen; Gen;								// mov :eax, [bx]
 
-//Gen($74); Gen($03);							// je  +3
 a65(__je);
 
 end;
@@ -3472,12 +3468,14 @@ begin
   EQTOK:
     begin
     Gen; Gen;								// je +3   =
+
     asm65(#9'beq @+');
     end;
 
   NETOK, 0:
     begin
     Gen; Gen;								// jne +3  <>
+
     asm65(#9'bne @+');
     end;
 
@@ -3700,8 +3698,8 @@ begin
  CodePosStack[CodePosStackTop] := CodeSize;
 
  Gen;								// nop   ; jump to the IF..THEN block end will be inserted here
- Gen;								// nop
- Gen;								// nop
+ Gen;								// nop   ; !!!
+ Gen;								// nop   ; !!!
 
  asm65(#9'jmp l_'+IntToHex(CodeSize, 4));
 
@@ -4187,6 +4185,7 @@ end;
 
 procedure GenerateProgramEpilog(ExitCode: byte);
 begin
+
 Gen; Gen;							// mov ah, 4Ch
 
 asm65(#9'lda #$'+IntToHex(ExitCode, 2));
@@ -4205,8 +4204,8 @@ Inc(CodePosStackTop);
 CodePosStack[CodePosStackTop] := CodeSize;
 
 Gen;								// nop   ; jump to the IF..THEN block end will be inserted here
-Gen;								// nop
-Gen;								// nop
+Gen;								// nop   ; !!!
+Gen;								// nop   ; !!!
 
 asm65(#9'jmp l_'+IntToHex(CodeSize, 4));
 
@@ -4244,10 +4243,9 @@ end;	// GenerateRead
 
 procedure GenerateWriteString(Address: Word; IndirectionLevel: byte; ValueType: byte = INTEGERTOK);
 begin
+//Gen; Gen;							// mov ah, 09h
 
 asm65;
-
-//Gen; Gen;							// mov ah, 09h
 
 case IndirectionLevel of
 
@@ -4255,7 +4253,6 @@ case IndirectionLevel of
     begin
      asm65(#9'jsr @printBOOLEAN');
 
-//     Gen; Gen; Gen;						// sub bx, 4
      a65(__subBX);
     end;
 
@@ -4263,7 +4260,6 @@ case IndirectionLevel of
     begin
      asm65(#9'@printCHAR');
 
-//     Gen; Gen; Gen;						// sub bx, 4
      a65(__subBX);
     end;
 
@@ -4271,7 +4267,6 @@ case IndirectionLevel of
     begin
      asm65(#9'jsr @printSHORTREAL');
 
-//     Gen; Gen; Gen;						// sub bx, 4
      a65(__subBX);
     end;
 
@@ -4279,7 +4274,6 @@ case IndirectionLevel of
     begin
      asm65(#9'jsr @printREAL');
 
-//     Gen; Gen; Gen;						// sub bx, 4
      a65(__subBX);
     end;
 
@@ -4294,7 +4288,6 @@ case IndirectionLevel of
       asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
       asm65(#9'sta @FTOA.I+3');
 
-//      Gen; Gen; Gen;						// sub bx, 4
       a65(__subBX);
 
       asm65(#9'jsr @FTOA');
@@ -4309,7 +4302,6 @@ case IndirectionLevel of
       asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
       asm65(#9'sta @F16_F2A.I+1');
 
-//      Gen; Gen; Gen;						// sub bx, 4
       a65(__subBX);
 
       asm65(#9'jsr @F16_F2A');
@@ -4336,44 +4328,40 @@ case IndirectionLevel of
 	  asm65(#9'jsr @printCARD');
      end;
 
-//     Gen; Gen; Gen;						// sub bx, 4
      a65(__subBX);
     end;
 
   ASPOINTER:
     begin
-//    Gen; //Gen(Lo(Address)); Gen(Hi(Address));		// mov dx, Address
 
-    asm65(#9'@printSTRING #CODEORIGIN+$'+IntToHex(Address - CODEORIGIN, 4));
+     asm65(#9'@printSTRING #CODEORIGIN+$'+IntToHex(Address - CODEORIGIN, 4));
 
 //    a65(__subBX);   !!!   bez DEX-a
     end;
 
   ASPOINTERTOPOINTER:
     begin
-//    Gen; Gen; //Gen(Lo(Address)); Gen(Hi(Address));		// mov dx, [Address]
 
-    asm65(#9'lda :STACKORIGIN,x');
-    asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
-    asm65(#9'jsr @printSTRING');
-    a65(__subBX);
+     asm65(#9'lda :STACKORIGIN,x');
+     asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
+     asm65(#9'jsr @printSTRING');
+    
+     a65(__subBX);
     end;
 
 
   ASPCHAR:
     begin
-//    Gen; Gen; //Gen(Lo(Address)); Gen(Hi(Address));		// mov dx, [Address]
 
-    asm65(#9'lda :STACKORIGIN,x');
-    asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
-    asm65(#9'jsr @printPCHAR');
-    a65(__subBX);
+     asm65(#9'lda :STACKORIGIN,x');
+     asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
+     asm65(#9'jsr @printPCHAR');
+    
+     a65(__subBX);
     end;
 
 
   end;
-
-//Gen; Gen;							// int 21h
 
 end;	//GenerateWriteString
 
@@ -4953,7 +4941,6 @@ case op of
 
     else						// Integer division
       begin
-//      Gen;
 
       if ResultType in SignedOrdinalTypes then begin
 
@@ -5508,8 +5495,8 @@ end;
 
 procedure GenerateRelation(rel: Byte; ValType: Byte);
 begin
- asm65;
- asm65('; relation');
+// asm65;
+// asm65('; relation');
 
  Gen;
 
@@ -11873,6 +11860,7 @@ WHILETOK:
       Gen; Gen; Gen;								// mov :eax, [bx]
 
       a65(__subBX);
+      
       asm65(#9'lda :STACKORIGIN+1,x');
       asm65(#9'jne l_'+IntToHex(CodePosStack[CodePosStackTop+1], 4));
 
