@@ -223,7 +223,7 @@ end;
 
 function TCP_GetStatus:byte;
 begin
-    FN_ReadStatus(TCP_status);
+    FN_ReadStatus(@TCP_status);
     result := sioStatus;
     if sioStatus = 1 then 
         TCP_bytesWaiting := TCP_status.dataSize;  
