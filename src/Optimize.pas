@@ -1642,7 +1642,6 @@ var inxUse, found: Boolean;
         end;
 
 
-
 {
       if (k>0) and sty_im_0(k) then begin
 
@@ -2692,7 +2691,7 @@ begin				// OptimizeASM
  for i := 0 to High(s) do
   for k := 0 to 3 do s[i][k] := '';
 
- for i := 0 to High(listing) do listing[i]:='';
+//, for i := 0 to High(listing) do listing[i]:='';
 
 
  for i := 0 to High(OptimizeBuf) - 1 do begin
@@ -2716,7 +2715,7 @@ begin				// OptimizeASM
        arg0 := copy(a, 2, 256);
 
 
-      if arg0='@expandSHORT2SMALL1' then begin
+      if arg0='@expandSHORT2SMALL1' then begin		// $08D58F81
        t:='';
 
        listing[l]   := #9'ldy #$00';
@@ -2728,7 +2727,7 @@ begin				// OptimizeASM
 
        inc(l, 6);
       end else
-      if arg0='@expandSHORT2SMALL' then begin
+      if arg0='@expandSHORT2SMALL' then begin		// $078D58FC
        t:='';
 
        listing[l]   := #9'ldy #$00';
@@ -2740,7 +2739,7 @@ begin				// OptimizeASM
 
        inc(l, 6);
       end else
-      if arg0 = '@expandToCARD.SHORT' then begin
+      if arg0 = '@expandToCARD.SHORT' then begin	// $0A4BEA14
 	t:='';
 
 	if (s[x][1]='') and (s[x][2]='') and (s[x][3]='') then begin
@@ -2758,7 +2757,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToCARD1.SHORT' then begin
+      if arg0 = '@expandToCARD1.SHORT' then begin	// $05F632F4
 	t:='';
 
 	if (s[x-1][1]='') and (s[x-1][2]='') and (s[x-1][3]='') then begin
@@ -2776,7 +2775,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToCARD.SMALL' then begin
+      if arg0 = '@expandToCARD.SMALL' then begin	// $0A4C0C6C
 	t:='';
 
 	if (s[x][2]='') and (s[x][3]='') then begin
@@ -2795,7 +2794,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToCARD1.SMALL' then begin
+      if arg0 = '@expandToCARD1.SMALL' then begin	// $05F7F48C
 	t:='';
 
 	if (s[x-1][2]='') and (s[x-1][3]='') then begin
@@ -2814,8 +2813,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-
-      if arg0 = '@expandToREAL' then begin
+      if arg0 = '@expandToREAL' then begin		// $0F7B015C
 	t:='';
 
 	s[x][3] := '';					// -> :STACKORIGIN+STACKWIDTH*3
@@ -2834,7 +2832,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-      if arg0 = '@expandToREAL1' then begin
+      if arg0 = '@expandToREAL1' then begin		// $07B01501
 	t:='';
 
 	s[x-1][3] := '';				// -> :STACKORIGIN-1+STACKWIDTH*3
@@ -2853,67 +2851,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-{
-      if arg0 = 'negBYTE' then begin
-       t:='';
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc #$00';
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-
-      if arg0 = 'negWORD' then begin
-       t:='';
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc #$00';
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc #$00';
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-
-      if arg0 = 'negCARD' then begin
-       t:='';
-
-       listing[l]   := #9'lda #$00';
-       listing[l+1] := #9'sub '+GetARG(0, x);
-       listing[l+2] := #9'sta '+GetARG(0, x);
-       listing[l+3] := #9'lda #$00';
-       listing[l+4] := #9'sbc '+GetARG(1, x);
-       listing[l+5] := #9'sta '+GetARG(1, x);
-       listing[l+6] := #9'lda #$00';
-       listing[l+7] := #9'sbc '+GetARG(2, x);
-       listing[l+8] := #9'sta '+GetARG(2, x);
-       listing[l+9] := #9'lda #$00';
-       listing[l+10] := #9'sbc '+GetARG(3, x);
-       listing[l+11] := #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-}
-      if arg0 = '@hiBYTE' then begin
+      if arg0 = '@hiBYTE' then begin			// $06ED7EC5
        t:='';
 
        listing[l]   := #9'lda '+GetARG(0, x);
@@ -2923,7 +2861,7 @@ begin				// OptimizeASM
        inc(l, 3);
       end else
 
-      if arg0 = '@hiWORD' then begin
+      if arg0 = '@hiWORD' then begin			// $06EEC424
        t:='';
 
        listing[l]   := #9'lda '+GetARG(1, x);
@@ -2932,7 +2870,7 @@ begin				// OptimizeASM
 
        inc(l, 2);
       end else
-      if arg0 = '@hiCARD' then begin
+      if arg0 = '@hiCARD' then begin			// $06ED7624
        t:='';
 
        s[x][0] := '';
@@ -2947,7 +2885,7 @@ begin				// OptimizeASM
        inc(l, 4);
       end else
 
-      if arg0 = '@movZTMP_aBX' then begin
+      if arg0 = '@movZTMP_aBX' then begin		// $0D523E88
 	t:='';
 
 	s[x-1, 0] := '';
@@ -2968,7 +2906,7 @@ begin				// OptimizeASM
 
       end else
 
-      if arg0 = '@movaBX_EAX' then begin
+      if arg0 = '@movaBX_EAX' then begin		// $053B7FA8
 	t:='';
 
 	s[x-1, 0] := '';
@@ -2989,7 +2927,7 @@ begin				// OptimizeASM
 
       end else
 
-      if (arg0 = '@BYTE.MOD') then begin
+      if (arg0 = '@BYTE.MOD') then begin		// $0E887644
 	t:='';
 
 	if (l > 3) and lda_im(l-4) then
@@ -3053,8 +2991,7 @@ begin				// OptimizeASM
 }
       end else
 
-
-      if (arg0 = '@BYTE.DIV') then begin
+      if (arg0 = '@BYTE.DIV') then begin		// $0E886C96
 	t:='';
 
 	if (l > 3) and lda_im(l-4) then
@@ -3086,7 +3023,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if (arg0 = 'imulBYTE') or (arg0 = 'mulSHORTINT') then begin
+      if (arg0 = 'imulBYTE') or (arg0 = 'mulSHORTINT') then begin	// $04C07985 ; $0D334D44
 	t:='';
 
 	s[x, 1] := '';
@@ -3141,7 +3078,7 @@ begin				// OptimizeASM
 	 if imulCL_opt then inc(l, 9);
 
 
-	if arg0 = 'mulSHORTINT' then begin
+	if arg0 = 'mulSHORTINT' then begin		// $0D334D44
 
 	 listing[l]   := #9'lda :ztmp10';
 	 listing[l+1] := #9'bpl @+';
@@ -3459,29 +3396,6 @@ begin				// OptimizeASM
 
       end else
 
-{
-      if arg0 = 'notaBX' then begin
-       t:='';
-
-       listing[l]   := #9'lda '+GetARG(0, x);
-       listing[l+1] := #9'eor #$ff';
-       listing[l+2] := #9'sta '+GetARG(0, x);
-
-       listing[l+3] := #9'lda '+GetARG(1, x);
-       listing[l+4] := #9'eor #$ff';
-       listing[l+5] := #9'sta '+GetARG(1, x);
-
-       listing[l+6] := #9'lda '+GetARG(2, x);
-       listing[l+7] := #9'eor #$ff';
-       listing[l+8] := #9'sta '+GetARG(2, x);
-
-       listing[l+9] := #9'lda '+GetARG(3, x);
-       listing[l+10]:= #9'eor #$ff';
-       listing[l+11]:= #9'sta '+GetARG(3, x);
-
-       inc(l, 12);
-      end else
-}
 
       if (pos('add', arg0) > 0) or (pos('sub', arg0) > 0) then begin
 

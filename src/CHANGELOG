@@ -1,4 +1,7 @@
-14.07.2024
+19.08.2024
+- nowy unit FP, float-point OS
+
+14.08.2024
 - optymalizacja Optimize.pas -> Rebuild (50% szybsza kompilacja dla math/rijndael-test.pas)
 
 21.07.2024
