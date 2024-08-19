@@ -1548,11 +1548,11 @@ case IndirectionLevel of
 
 	    asm65(#9'lda ' + svara + ',y');
 	    asm65(#9'sta' + GetStackVariable(0));
-	    asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	    asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements)) + ',y');
 	    asm65(#9'sta' + GetStackVariable(1));
-	    asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+	    asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements*2)) + ',y');
 	    asm65(#9'sta' + GetStackVariable(2));
- 	    asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+ 	    asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements*3)) + ',y');
 	    asm65(#9'sta' + GetStackVariable(3));
 
 	  end else begin
@@ -1604,11 +1604,11 @@ case IndirectionLevel of
 
 	   if Ident[IdentIndex].isStriped then begin
 
-	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	     asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements)) + ',y');
              asm65(#9'sta' + GetStackVariable(1));
-	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+	     asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements*2)) + ',y');
              asm65(#9'sta' + GetStackVariable(2));
-	     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+	     asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements*3)) + ',y');
              asm65(#9'sta' + GetStackVariable(3));
 
 	   end else begin
@@ -2758,11 +2758,11 @@ case IndirectionLevel of
 	     asm65(#9'lda :STACKORIGIN,x');
 	     asm65(#9'sta ' + svara + ',y');
 	     asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-  	     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+  	     asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements)) + ',y');
 	     asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-  	     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+  	     asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements*2)) + ',y');
 	     asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-  	     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+  	     asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements*3)) + ',y');
 
 	   end else begin
 
@@ -2822,11 +2822,11 @@ case IndirectionLevel of
 
 	  if Ident[IdentIndex].isStriped then begin
 
-	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+	    asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements)) + ',y');
 	    asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*2) + ',y');
+	    asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements*2)) + ',y');
 	    asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	    asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements*3) + ',y');
+	    asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements*3)) + ',y');
 
 	  end else begin
 
@@ -3882,7 +3882,7 @@ end;
 
 
 procedure GenerateAsmLabels(l: integer);
-var i: integer;
+//var i: integer;
 begin
 
 if not OutputDisabled then
@@ -4345,7 +4345,7 @@ case IndirectionLevel of
      asm65(#9'lda :STACKORIGIN,x');
      asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
      asm65(#9'jsr @printSTRING');
-    
+
      a65(__subBX);
     end;
 
@@ -4356,7 +4356,7 @@ case IndirectionLevel of
      asm65(#9'lda :STACKORIGIN,x');
      asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
      asm65(#9'jsr @printPCHAR');
-    
+
      a65(__subBX);
     end;
 
@@ -11860,7 +11860,7 @@ WHILETOK:
       Gen; Gen; Gen;								// mov :eax, [bx]
 
       a65(__subBX);
-      
+
       asm65(#9'lda :STACKORIGIN+1,x');
       asm65(#9'jne l_'+IntToHex(CodePosStack[CodePosStackTop+1], 4));
 
