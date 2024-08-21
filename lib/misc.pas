@@ -327,7 +327,7 @@ author: Konrad Kokoszkiewicz
 
 @returns: speed (REAL Q24.8)
 *)
-var clkm, fr0: word;
+var clkm: cardinal;
 begin
 
 asm
@@ -361,7 +361,7 @@ bogo2	lda	vcount
 	sty	vvblki+1
 
 	lda	#$00
-	sta	fr0+1
+	sta	clkm+3
 	tax
 	tay
 
@@ -381,8 +381,7 @@ stop2
 	pla
 	sta	clkm+1
 	pla
-;	sta	clkm+2
-	sta	fr0
+	sta	clkm+2
 
 	ldx	#0
 stk	equ *-1
@@ -407,7 +406,7 @@ oldp	equ *-1
 
 end;
 
-	Result := ((fr0 shl 16 + clkm) / 487) * 1.7734;
+	Result := (clkm / 487) * 1.7734;
 end;
 
 

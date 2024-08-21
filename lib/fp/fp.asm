@@ -42,7 +42,7 @@ ptr1	= $D2		; temporary bytes
 fr0	= $D4		; float reg 0
 fr1	= $E0		; float reg 1
 flptr	= $FC		; pointer to a fp num
-cix	= $F2		; index          
+cix	= $F2		; index
 inbuff	= $F3		; pointer to ascii num
 lbuff	= $580
 
@@ -171,7 +171,7 @@ _fptoi	.proc	(.word flptr) .var
 	txa:pha
 
 	ldx flptr
-	ldy flptr+1	
+	ldy flptr+1
 
 	jsr	fld0r
 
@@ -279,49 +279,118 @@ _fpdiv	.proc	(.word loadfr0.adr, loadfr1.adr, flptr) .var
 	.endp
 
 ;------------------------------------
-       .globl _fpgrt, _fples, _fpneq, _fpleq, _fpgeq, _fpequ
+
+_fpgt.loadfr0.adr = loadfr0.adr
+_fpgt.loadfr1.adr = loadfr1.adr
+_fpgt.result = flptr
+
+       .globl _fpgt, _fpgt.loadfr0.adr, _fpgt.loadfr1.adr, _fpgt.result
 ;
-_fpgrt	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+_fpgt	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+
+	txa:pha
+
 	jsr	_cmpvar
 	bmi	false	; >
 	beq	false
 	bpl	true
 	.endp
 
-_fples	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+;------------------------------------
+
+_fplt.loadfr0.adr = loadfr0.adr
+_fplt.loadfr1.adr = loadfr1.adr
+_fplt.result = flptr
+
+       .globl _fplt, _fplt.loadfr0.adr, _fplt.loadfr1.adr, _fplt.result
+;
+_fplt	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+
+	txa:pha
+
 	jsr	_cmpvar
 	bmi	true	; <
 	bpl	false
 	.endp
 
-_fpneq	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+;------------------------------------
+
+_fpne.loadfr0.adr = loadfr0.adr
+_fpne.loadfr1.adr = loadfr1.adr
+_fpne.result = flptr
+
+       .globl _fpne, _fpne.loadfr0.adr, _fpne.loadfr1.adr, _fpne.result
+;
+_fpne	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+
+	txa:pha
+
 	jsr	_cmpvar
 	beq	false	; <>
 	bne	true
 	.endp
 
-_fpleq	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+;------------------------------------
+
+_fplteq.loadfr0.adr = loadfr0.adr
+_fplteq.loadfr1.adr = loadfr1.adr
+_fplteq.result = flptr
+
+       .globl _fplteq, _fplteq.loadfr0.adr, _fplteq.loadfr1.adr, _fplteq.result
+;
+_fplteq	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+
+	txa:pha
+
 	jsr	_cmpvar
 	bmi	true	; <=
 	beq	true
 	bpl	false
 	.endp
 
-_fpgeq	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+;------------------------------------
+
+_fpgteq.loadfr0.adr = loadfr0.adr
+_fpgteq.loadfr1.adr = loadfr1.adr
+_fpgteq.result = flptr
+
+       .globl _fpgteq, _fpgteq.loadfr0.adr, _fpgteq.loadfr1.adr, _fpgteq.result
+;
+_fpgteq	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+
+	txa:pha
+
 	jsr	_cmpvar
 	bmi	false	; >=
 	bpl	true
 	.endp
 
-_fpequ	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+;------------------------------------
+
+_fpeq.loadfr0.adr = loadfr0.adr
+_fpeq.loadfr1.adr = loadfr1.adr
+_fpeq.result = flptr
+
+       .globl _fpeq, _fpeq.loadfr0.adr, _fpeq.loadfr1.adr, _fpeq.result
+;
+_fpeq	.proc	(.word loadfr0.adr, loadfr1.adr) .var
+
+	txa:pha
+
 	jsr	_cmpvar
 	beq	true	; =
 	.endp
 
-false	lda	#0
+false	pla:tax
+
+	lda	#0
+	sta	flptr
 	rts
 
-true	lda	#1
+true	pla:tax
+
+	lda	#1
+	sta	flptr
 	rts
 
 _cmpvar	jsr	loadfr0
