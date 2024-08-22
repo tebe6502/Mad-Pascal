@@ -10467,11 +10467,12 @@ case Tok[i].Kind of
 
            if Ident[IdentIndex].IdType = DATAORIGINOFFSET then begin
 
+	     IdentTemp:=GetIdent( ExtractName(IdentIndex, Ident[IdentIndex].Name) );
 
-// testuj czy to nie tablica ze wskaznikami do rekordu
+	     if (Ident[IdentTemp].NumAllocElements_ > 0) and (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+	       iError(i, IllegalQualifier);
 
-//	     writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].Value,',',Ident[IdentIndex].PassMethod);
-
+//	     writeln(Ident[IdentTemp].name,',',Ident[IdentTemp].DataType,',',Ident[IdentTemp].AllocElementType,',',Ident[IdentTemp].NumAllocElements_);
 
 	   end;
 
