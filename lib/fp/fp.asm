@@ -41,9 +41,12 @@ ptr1	= $D2		; temporary bytes
 
 fr0	= $D4		; float reg 0
 fr1	= $E0		; float reg 1
-flptr	= $FC		; pointer to a fp num
+
 cix	= $F2		; index
 inbuff	= $F3		; pointer to ascii num
+
+flptr	= $FC		; pointer to a fp num
+
 lbuff	= $580
 
 zfr0	= $DA44		; fr0 = 0
@@ -83,7 +86,7 @@ _atofp	.proc	(.word inbuff, flptr) .var
 
 	txa:pha
 
-	inw inbuff
+	inw	inbuff
 
 	lda     #0
 	sta     cix
@@ -113,27 +116,24 @@ _fptoa	.proc	(.word loadfr0.adr, ptr1) .var
 	lda     #0
 	sta     cix
 
-	;mwa	#lbuff	inbuff	; COPY ADDRESS OF LBUFF INTO INBUFF
+	mwa	#lbuff	inbuff	; COPY ADDRESS OF LBUFF INTO INBUFF
 
 	jsr     fasc
-	ldy     #0
-	ldx	#0
-lp:	lda	lbuff,x
-	cmp	#'0'
-	bne	loop
-	inx
-	bne lp
+
+	ldy     #$FF
+
+	mwa	ptr1 len
+	inw 	ptr1
 
 loop:	iny
-	inx
-	lda     lbuff-1,x
+	lda     (inbuff),y
 	sta     (ptr1),y
 	bpl     loop
 	and     #$7F
 	sta     (ptr1),y
+	iny
 	tya
-	ldy	#0
-	sta     (ptr1),y
+	sta     len: $FFFF
 
 	pla:tax
 	rts
@@ -147,12 +147,32 @@ _itofp.flptr = flptr
 
        .globl _itofp, _itofp.fr0, _itofp.flptr
 ;          itofp(int,float)
-_itofp	.proc	(.word fr0, flptr) .var
+_itofp	.proc	(.dword fr0 .word flptr) .var
 
 	txa:pha
+	
+	lda fr0+3
+	and #$80
+	pha
+	bpl plus
 
-	jsr     ifp
-	jsr	fst0p
+	lda #$00
+	sub fr0
+	sta fr0
+	lda #$00
+	sbc fr0+1
+	sta fr0+1
+
+plus	jsr     ifp
+
+	pla
+	bpl @+
+
+	lda fr0
+	ora #$80
+	sta fr0
+
+@	jsr	fst0p
 
 	pla:tax
 	rts
@@ -161,6 +181,54 @@ _itofp	.proc	(.word fr0, flptr) .var
 
 ;------------------------------------
 
+_fptoi.flptr = flptr
+_fptoi.result = fr0
+
+       .globl _fptoi, _fptoi.flptr, _fptoi.result
+;      int=fptoi(float)
+_fptoi .proc	(.word flptr) .var
+
+	txa:pha
+
+	ldx flptr
+	ldy flptr+1
+
+	jsr	fld0r
+
+	lda	fr0
+	pha
+	bpl	plus
+
+	and	#$7f
+	sta	fr0
+
+plus	jsr	fpi
+
+	pla
+	and	#$80
+	bpl @+
+
+	lda #$00
+	sub _fptoi.result
+	sta _fptoi.result
+
+	lda #$00
+	sbc _fptoi.result+1
+	sta _fptoi.result+1
+
+	lda #$00
+	sbc #$00
+
+@	sta _fptoi.result+2
+	sta _fptoi.result+3
+
+	pla:tax
+	rts
+
+	.endp
+
+;------------------------------------
+/*
 _fptoi.flptr = flptr
 _fptoi.result = fr0
 
@@ -181,7 +249,7 @@ _fptoi	.proc	(.word flptr) .var
 	rts
 
 	.endp
-
+*/
 ;------------------------------------
 
 _fpadd.loadfr0.adr = loadfr0.adr
@@ -424,7 +492,7 @@ loadfr1	.proc	(.word loadfr1.adr) .var
 	.endp
 
 ;------------------------------------
-	.globl	_fst0r
+;	.globl	_fst0r
 ;	fr0 -> fp
 _fst0r	.proc	(.word yx) .reg
 
@@ -433,7 +501,7 @@ _fst0r	.proc	(.word yx) .reg
 	.endp
 
 ;------------------------------------
-	.globl	_fld0r
+;	.globl	_fld0r
 ;	fp -> fr1
 _fld0r	.proc	(.word yx) .reg
 
@@ -442,7 +510,7 @@ _fld0r	.proc	(.word yx) .reg
 	.endp
 
 ;------------------------------------
-	.globl	_fld1r
+;	.globl	_fld1r
 ;	fp -> fr1
 _fld1r	.proc	(.word yx) .reg
 
