@@ -1543,12 +1543,10 @@ var inxUse, found: Boolean;
     for i := 0 to l - 1 do
      if (listing[i] <> '') and (listing[i][1] <> ';') then begin
 
-      listing[k] := listing[i];
+        listing[k] := listing[i];
 
-      if k > 0 then begin
-
-
-        if sta_stack(k) and 								// lda :STACKORIGIN	; k-1
+        if (k > 0) and
+	   sta_stack(k) and 								// lda :STACKORIGIN	; k-1
 	   lda_stack(k-1) and								// sta :STACKORIGIN	; k
 	   lda_a(i+1) then								// lda			; i+1
           if copy(listing[k], 6, 256) = copy(listing[k-1], 6, 256) then
@@ -1559,7 +1557,8 @@ var inxUse, found: Boolean;
 	  end;
 
 
-        if lda_a(k) and 								// lda			; k-1
+        if (k > 0) and
+	   lda_a(k) and 								// lda			; k-1
 	   lda_a(k-1) and								// lda			; k
 	   sta_a(i+1) then								// sta			; i+1
 	  begin
@@ -1568,7 +1567,9 @@ var inxUse, found: Boolean;
 	   dec(k);
 	  end;
 
-	if iny(k) and 									// lda			; k-1
+
+	if (k > 0) and
+	   iny(k) and 									// lda			; k-1
 	   lda_a(k-1) and 								// iny			; k
 	   lda_a(i+1) then								// lda			; i+1
 	  begin
@@ -1579,7 +1580,8 @@ var inxUse, found: Boolean;
 
 
 
-	if sta_im_0(k) and 								// lda			; k-1
+	if (k > 0) and
+	   sta_im_0(k) and 								// lda			; k-1
 	   lda_a(k-1) then begin							// sta #$00		; k
 
 
@@ -1642,41 +1644,8 @@ var inxUse, found: Boolean;
         end;
 
 
-{
-      if (k>0) and sty_im_0(k) then begin
-
-        writeln(listing[k-2]);
-        writeln(listing[k-1]);
-        writeln(listing[k]);
-        writeln(listing[i+1]);
-        writeln(listing[i+2]);
-        writeln(listing[i+3]);
-        writeln(listing[i+4]);
-        writeln(listing[i+5]);
-        writeln(listing[i+6]);
-
-        writeln('----------------------');
-
-       end;
-}
-
-      end;
-
-
       inc(k);
      end;
-
-
-{
-if K>100 then begin
-
- for i:=0 to k-1 do writeln(listing[i]);
-
- halt;
-
-end;
-}
-
 
 
     listing[k]   := '';
@@ -2691,7 +2660,7 @@ begin				// OptimizeASM
  for i := 0 to High(s) do
   for k := 0 to 3 do s[i][k] := '';
 
-//, for i := 0 to High(listing) do listing[i]:='';
+// for i := 0 to High(listing) do listing[i]:='';
 
 
  for i := 0 to High(OptimizeBuf) - 1 do begin
