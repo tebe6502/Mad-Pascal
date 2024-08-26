@@ -14,7 +14,7 @@
 
 // writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
 
-	    if not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK, STRINGLITERALTOK]) then
+	    if (ActualParamType <> STRINGPOINTERTOK) and not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK, STRINGLITERALTOK]) then
 	      Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
 
 	    if (VarType in [RECORDTOK]) and (Ident[IdentIndex].DataType = POINTERTOK) then
@@ -46,9 +46,10 @@
 	     if ActualParamType = STRINGPOINTERTOK then begin
 
 	      asm65(#9'ldy #$00');
+	      asm65(#9'cpy adr.' + GetLocalName(IdentTemp) );
+	      asm65(#9'jeq l_' + IntToHex(CodePosStack[CodePosStackTop]+3, 4));
 
  	      asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+1,y' );
-	      asm65(#9'jeq l_' + IntToHex(CodePosStack[CodePosStackTop], 4));
 	      asm65(#9'sta ' + GetLocalName(IdentIndex));
 
 	     end else begin
