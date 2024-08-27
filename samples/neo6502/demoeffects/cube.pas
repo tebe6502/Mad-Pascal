@@ -16,7 +16,7 @@ const
 var
     angle               : shortreal = 0.0;
 
-    pts                 : array[0..7, 0..3] of shortint;
+    pts                 : array[0..7, 0..2] of shortint;
     rzp                 : array[0..7, 0..3] of shortreal;
     ryp                 : array[0..7, 0..3] of shortreal;
     rxp                 : array[0..7, 0..3] of shortreal;
@@ -66,14 +66,12 @@ begin
     Y1 := Trunc(rxp[0,1] * sz + cy);
     X2 := Trunc(rxp[1,0] * sz + cx);
     Y2 := Trunc(rxp[1,1] * sz + cy);
-
     NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(rxp[1,0] * sz + cx);
     Y1 := Trunc(rxp[1,1] * sz + cy);
     X2 := Trunc(rxp[2,0] * sz + cx);
     Y2 := Trunc(rxp[2,1] * sz + cy);
-
     NeoDrawLine(X1,Y1,X2,Y2);
 
     X1 := Trunc(rxp[2,0] * sz + cx);
