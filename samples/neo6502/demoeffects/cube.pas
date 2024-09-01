@@ -67,11 +67,10 @@ begin
     initPoints;
 
     repeat
-        NeoWaitForVblank;
-        clrscr;
-
         rotatePoints;
+        angle := angle + 0.02;
 
+        NeoWaitForVblank; clrscr;
         NeoDrawLine(cube[0,0],cube[0,1],cube[1,0],cube[1,1]);
         NeoDrawLine(cube[1,0],cube[1,1],cube[2,0],cube[2,1]);
         NeoDrawLine(cube[2,0],cube[2,1],cube[3,0],cube[3,1]);
@@ -83,8 +82,6 @@ begin
         NeoDrawLine(cube[0,0],cube[0,1],cube[4,0],cube[4,1]);
         NeoDrawLine(cube[1,0],cube[1,1],cube[5,0],cube[5,1]);
         NeoDrawLine(cube[2,0],cube[2,1],cube[6,0],cube[6,1]);
-        NeoDrawLine(cube[3,0],cube[3,1],cube[7,0],cube[7,1]);
-
-        angle := angle + 0.02;        
+        NeoDrawLine(cube[3,0],cube[3,1],cube[7,0],cube[7,1]);       
     until false;
 end.
