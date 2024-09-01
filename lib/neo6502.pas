@@ -3,7 +3,7 @@ unit neo6502;
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>
 * @name: Neo6502 API library for Mad-Pascal.
-* @version: 0.30.0
+* @version: 0.40.0
 
 * @description:
 * Set of procedures to cover API functionality provided by:    
@@ -98,6 +98,7 @@ type TSound = record
     len:word;
     slide:word;
     stype:byte;
+    vol:byte;
 end;
 
 type TTileMapHeader = record
@@ -868,6 +869,25 @@ procedure NeoQueueNote(channel:byte;freq,len,slide:word;stype:byte);
 * @param: slide (word) - slide change per cs
 * @param: stype (byte) - sound type (beeper=0 - nothing else currently supported)
 *)
+procedure NeoQueueNoteX(channel:byte;freq,len,slide:word;wave:byte;vol:byte);
+(*
+* @description:
+* Queues a sound to be played.
+*
+* @param: channel (byte) - channel number
+* @param: freq (word) - tone frequency
+* @param: len (word) - not length (in cs)
+* @param: slide (word) - slide change per cs
+* @param: wave (byte) - sound wave type (0 - square, 1 - white noise)
+* @param: vol (byte) - sound volume 
+*)
+function NeoGetChannels:byte;
+(*
+* @description:
+* Returns the number of available sound channels
+*
+* @returns: (byte) - number of channels
+*)
 procedure NeoSoundFx(channel,num:byte);
 (*
 * @description:
@@ -1607,6 +1627,23 @@ begin
     NeoMessage.params[0] := channel;
     result := NeoSendMessage(8,6);
 end;
+
+procedure NeoQueueNoteX(channel:byte;freq,len,slide:word;wave:byte;vol:byte);
+begin
+    soundParams.channel := channel;
+    soundParams.freq := freq;
+    soundParams.len := len;
+    soundParams.slide := slide;
+    soundParams.stype := wave;
+    soundParams.vol := vol;
+    NeoSendMessage(8,7);
+end;
+
+function NeoGetChannels:byte;
+begin
+    result := NeoSendMessage(8,8);
+end;
+
 
 //////////////////////////////////
 ////////////////////////////////////////     9 - TURTLE
