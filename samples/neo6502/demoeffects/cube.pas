@@ -44,14 +44,18 @@ var
     n          : byte;
     s, c       : single;
     tmp1, tmp2 : single;
+    v0, v1, v2 : shortint;
 begin
     s := sin(angle);
     c := cos(angle);
 
     for n := 0 To 7 do begin
-        tmp1 := s * vertecs[n,0] + c * vertecs[n,1];
-        tmp2 := s * c * vertecs[n,0] - s * s * vertecs[n,1] + c * vertecs[n,2];
-        cube[n,0] := Trunc((- c * c * vertecs[n,0] + c * s * vertecs[n,1] + s * vertecs[n,2]) * scale + originX);
+        v0 := vertecs[n,0];
+        v1 := vertecs[n,1];
+        v2 := vertecs[n,2];
+        tmp1 := s * v0 + c * v1;
+        tmp2 := s * (c * v0 - s * v1) + c * v2;
+        cube[n,0] := Trunc((- c * c * v0 + c * s * v1 + s * v2) * scale + originX);
         cube[n,1] := Trunc((c * tmp1 - s * tmp2) * scale + originY);
         cube[n,2] := Trunc((s * tmp1 + c * tmp2) * scale);        
     end;
