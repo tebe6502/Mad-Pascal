@@ -16,7 +16,7 @@
 
 .proc	imulCARD
 
-	jsr iniEAX_ECX_CARD
+	jsr @iniEAX_ECX_CARD
 
 	jmp imulECX
 .endp

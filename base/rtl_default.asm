@@ -16,7 +16,7 @@
 					; @expandToCARD1.SHORT, @expandToCARD1.SMALL, @expandToCARD1.BYTE, @expandToCARD1.WORD
 
 	icl 'runtime\ini.asm'		; iniEAX_ECX_WORD, iniEAX_ECX_CARD
-	icl 'runtime\mov.asm'		; movBX_EAX, movZTMP_aBX
+	icl 'runtime\mov.asm'		; @movaBX_EAX, @movZTMP_aBX
 
 	icl 'runtime\hi.asm'		; hiBYTE, hiWORD, hiCARD
 

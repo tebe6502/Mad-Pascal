@@ -8,7 +8,7 @@
 
 	jsr imulCARD
 
-	jmp movaBX_EAX
+	jmp @movaBX_EAX
 .endp
 
 
