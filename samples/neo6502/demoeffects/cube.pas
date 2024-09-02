@@ -11,30 +11,24 @@ const
     originX : byte = 160;
     originY : byte = 120;
 
+    vertecs : array[0..7, 0..2] of shortint = (
+        (-1,-1,-1),
+        ( 1,-1,-1),
+        ( 1, 1,-1),
+        (-1, 1,-1),
+        (-1,-1, 1),
+        ( 1,-1, 1),
+        ( 1, 1, 1),
+        (-1, 1, 1)
+    );
+
 //------------------------------------------------------------------------------
 
 var
-    vertecs          : array[0..7, 0..2] of shortint;
     cube             : array[0..7, 0..2] of word;
     angle            : single = 0.0;
 
 //------------------------------------------------------------------------------
-
-procedure initPoints;
-begin
-    //      v,x                 v,y                 v,z  bottom
-    vertecs[0,0] := -1; vertecs[0,1] := -1; vertecs[0,2] := -1;
-    vertecs[1,0] :=  1; vertecs[1,1] := -1; vertecs[1,2] := -1; 
-    vertecs[2,0] :=  1; vertecs[2,1] :=  1; vertecs[2,2] := -1; 
-    vertecs[3,0] := -1; vertecs[3,1] :=  1; vertecs[3,2] := -1; 
-    //      v,x                 v,y                 v,z  top
-    vertecs[4,0] := -1; vertecs[4,1] := -1; vertecs[4,2] :=  1; 
-    vertecs[5,0] :=  1; vertecs[5,1] := -1; vertecs[5,2] :=  1; 
-    vertecs[6,0] :=  1; vertecs[6,1] :=  1; vertecs[6,2] :=  1; 
-    vertecs[7,0] := -1; vertecs[7,1] :=  1; vertecs[7,2] :=  1;
-end;
-
-//--------------------------------------
 
 {*
     RotationMatrix (Gimbal Lock effect)
@@ -57,16 +51,13 @@ begin
         tmp2 := s * (c * v0 - s * v1) + c * v2;
         cube[n,0] := Trunc((c * (-c * v0 + s * v1) + s * v2) * scale + originX);
         cube[n,1] := Trunc((c * tmp1 - s * tmp2) * scale + originY);
-        cube[n,2] := Trunc((s * tmp1 + c * tmp2) * scale);        
+        cube[n,2] := Trunc((s * tmp1 + c * tmp2) * scale);       
     end;
-
 end;
 
 //------------------------------------------------------------------------------
 
 begin
-    initPoints;
-
     repeat
         rotatePoints;
         angle := angle + 0.02;
