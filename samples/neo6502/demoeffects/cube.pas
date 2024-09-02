@@ -59,6 +59,7 @@ begin
         cube[n,1] := Trunc((c * tmp1 - s * tmp2) * scale + originY);
         cube[n,2] := Trunc((s * tmp1 + c * tmp2) * scale);        
     end;
+
 end;
 
 //------------------------------------------------------------------------------
