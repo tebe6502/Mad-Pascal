@@ -870,6 +870,7 @@ begin
 
  i:=DataSize[Dest] - DataSize[Source];
 
+
  if i>0 then
   case i of
    1: if (Source in SignedOrdinalTypes) then	// to WORD
@@ -9549,8 +9550,6 @@ begin
 
   If ((ValType = SINGLETOK) or (Kind = SINGLETOK)) and (RightValType in IntegerTypes) then begin
 
-//   writeln(ValType,',',RightValType);
-
    ExpandParam(INTEGERTOK, RightValType);
 
 //   asm65(#9'jsr @I2F');
@@ -9926,7 +9925,7 @@ while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
 
   if Tok[j + 1].Kind in [PLUSTOK, MINUSTOK] then begin				// dla PLUSTOK, MINUSTOK rozszerz typ wyniku
 
-    if (Tok[j + 1].Kind = MINUSTOK) and (RightValType in UnsignedOrdinalTypes) and (VarType in SignedOrdinalTypes + [BOOLEANTOK]) then begin
+    if (Tok[j + 1].Kind = MINUSTOK) and (RightValType in UnsignedOrdinalTypes) and (VarType in SignedOrdinalTypes + [BOOLEANTOK, REALTOK, HALFSINGLETOK, SINGLETOK]) then begin
 
 	if (ValType = VarType) and (RightValType = VarType) then
 // do nothing, all types are with sign

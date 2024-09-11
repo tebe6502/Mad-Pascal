@@ -1,3 +1,6 @@
+12.09.2024
+- CompileSimplesExpression -> (VarType in SignedOrdinalTypes + [BOOLEANTOK, REALTOK, HALFSINGLETOK, SINGLETOK])
+
 27.08.2024
 - Optimize.pas (Rebuild) bugfixes
 - 'for in' bugfixes
