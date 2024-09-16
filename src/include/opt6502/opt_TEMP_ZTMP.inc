@@ -23,14 +23,14 @@ begin
 //     TemporaryBuf[0] := #9'lda :eax+1';
 
      TemporaryBuf[0] := '~';
-     TemporaryBuf[1] := #9'sec';
+     TemporaryBuf[1] := '~';
      TemporaryBuf[2] := #9'bit :ztmp10';
      TemporaryBuf[3] := #9'bpl @+';
-     TemporaryBuf[4] := #9'sbc :ztmp8';
+     TemporaryBuf[4] := #9'sub :ztmp8';
      TemporaryBuf[5] := '@';
      TemporaryBuf[6] := #9'bit :ztmp8';
      TemporaryBuf[7] := #9'bpl @+';
-     TemporaryBuf[8] := #9'sbc :ztmp10';
+     TemporaryBuf[8] := #9'sub :ztmp10';
      TemporaryBuf[9] := '@';
 
      TemporaryBuf[11] := '~';
