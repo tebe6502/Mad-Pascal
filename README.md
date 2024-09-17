@@ -175,6 +175,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [neo-sandbox](https://gitlab.com/bocianu/neo-sandbox)
 * [neo-swimo](https://gitlab.com/bocianu/neo-swimo)
 * [neo-solsuite](https://gitlab.com/bocianu/neo-solsuite)
+* [neo-mplib](https://gitlab.com/bocianu/neo-mplibs)
 * [Mafia](https://github.com/drunkeneye/MAFIA.A8)
 
 ## Benchmarks
