@@ -472,6 +472,23 @@ end;
 // ----------------------------------------------------------------------------
 
 
+function ElfHash(const Value: string): cardinal;
+var
+  x: cardinal;
+  i: byte;
+begin
+  Result := 0;
+  for i := 1 to Length(Value) do
+  begin
+    Result := (Result shl 4) + Ord(Value[i]);
+    x := Result and $F0000000;
+    if (x <> 0) then
+      Result := Result xor (x shr 24);
+    Result := Result and (not x);
+  end;
+end;
+
+
 procedure OptimizeASM;
 (* -------------------------------------------------------------------------- *)
 (* optymalizacja powiodla sie jesli na wyjsciu X=0
@@ -482,6 +499,8 @@ type
 
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
+
+    elf: cardinal;
 
     listing, listing_tmp: TListing;
 
@@ -2684,7 +2703,13 @@ begin				// OptimizeASM
        arg0 := copy(a, 2, 256);
 
 
-      if arg0='@expandSHORT2SMALL1' then begin		// $08D58F81
+      if length(arg0) > 20 then begin x:=51; resetOpty; Break end;
+
+
+      elf:=ElfHash(arg0);
+
+
+      if elf = $08D58F81 then begin		// @expandSHORT2SMALL1
        t:='';
 
        listing[l]   := #9'ldy #$00';
@@ -2696,7 +2721,7 @@ begin				// OptimizeASM
 
        inc(l, 6);
       end else
-      if arg0='@expandSHORT2SMALL' then begin		// $078D58FC
+      if elf = $078D58FC then begin		// @expandSHORT2SMALL
        t:='';
 
        listing[l]   := #9'ldy #$00';
@@ -2708,7 +2733,7 @@ begin				// OptimizeASM
 
        inc(l, 6);
       end else
-      if arg0 = '@expandToCARD.SHORT' then begin	// $0A4BEA14
+      if elf = $0A4BEA14 then begin		// @expandToCARD.SHORT
 	t:='';
 
 	if (s[x][1]='') and (s[x][2]='') and (s[x][3]='') then begin
@@ -2726,7 +2751,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToCARD1.SHORT' then begin	// $05F632F4
+      if elf = $05F632F4 then begin		// @expandToCARD1.SHORT
 	t:='';
 
 	if (s[x-1][1]='') and (s[x-1][2]='') and (s[x-1][3]='') then begin
@@ -2744,7 +2769,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToCARD.SMALL' then begin	// $0A4C0C6C
+      if elf = $0A4C0C6C then begin		// @expandToCARD.SMALL
 	t:='';
 
 	if (s[x][2]='') and (s[x][3]='') then begin
@@ -2763,7 +2788,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToCARD1.SMALL' then begin	// $05F7F48C
+      if elf = $05F7F48C then begin		// @expandToCARD1.SMALL
 	t:='';
 
 	if (s[x-1][2]='') and (s[x-1][3]='') then begin
@@ -2782,7 +2807,7 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = '@expandToREAL' then begin		// $0F7B015C
+      if elf = $0F7B015C then begin		// @expandToREAL
 	t:='';
 
 	s[x][3] := '';					// -> :STACKORIGIN+STACKWIDTH*3
@@ -2801,7 +2826,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-      if arg0 = '@expandToREAL1' then begin		// $07B01501
+      if elf = $07B01501 then begin		// @expandToREAL1
 	t:='';
 
 	s[x-1][3] := '';				// -> :STACKORIGIN-1+STACKWIDTH*3
@@ -2820,7 +2845,7 @@ begin				// OptimizeASM
 	inc(l,8);
 
       end else
-      if arg0 = '@hiBYTE' then begin			// $06ED7EC5
+      if elf = $06ED7EC5 then begin		// @hiBYTE
        t:='';
 
        listing[l]   := #9'lda '+GetARG(0, x);
@@ -2830,7 +2855,7 @@ begin				// OptimizeASM
        inc(l, 3);
       end else
 
-      if arg0 = '@hiWORD' then begin			// $06EEC424
+      if elf = $06EEC424 then begin		// @hiWORD
        t:='';
 
        listing[l]   := #9'lda '+GetARG(1, x);
@@ -2839,7 +2864,7 @@ begin				// OptimizeASM
 
        inc(l, 2);
       end else
-      if arg0 = '@hiCARD' then begin			// $06ED7624
+      if elf = $06ED7624 then begin		// @hiCARD
        t:='';
 
        s[x][0] := '';
@@ -2854,7 +2879,7 @@ begin				// OptimizeASM
        inc(l, 4);
       end else
 
-      if arg0 = '@movZTMP_aBX' then begin		// $0D523E88
+      if elf = $0D523E88 then begin		// @movZTMP_aBX
 	t:='';
 
 	s[x-1, 0] := '';
@@ -2875,7 +2900,7 @@ begin				// OptimizeASM
 
       end else
 
-      if arg0 = '@movaBX_EAX' then begin		// $053B7FA8
+      if elf = $053B7FA8 then begin		// @movaBX_EAX
 	t:='';
 
 	s[x-1, 0] := '';
@@ -2896,7 +2921,7 @@ begin				// OptimizeASM
 
       end else
 
-      if (arg0 = '@BYTE.MOD') then begin		// $0E887644
+      if (elf = $0E887644) then begin		// @BYTE.MOD
 	t:='';
 
 	if (l > 3) and lda_im(l-4) then
@@ -2932,35 +2957,9 @@ begin				// OptimizeASM
 
 	end;
 
-{
-	t0 := GetArg(0, x);
-	t1 := GetArg(0, x-1);
-
-	if (pos('#$', t0) > 0) and (pos('#$', t1) > 0) then begin
-
-	  k:=GetVal(t1) mod GetVal(t0);
-
-	  listing[l]   := #9'lda #$'+IntToHex(k and $ff, 2);
-	  listing[l+1] := #9'sta :ztmp8';
-
-	  s[x-1, 1] := #9'lda #$00';
-	  s[x-1, 2] := #9'lda #$00';
-	  s[x-1, 3] := #9'lda #$00';
-
-	  inc(l, 2);
-	end else begin
-	  listing[l]   := #9'lda ' + t1;
-	  listing[l+1] := #9'sta :eax';
-	  listing[l+2] := #9'lda ' + t0;
-	  listing[l+3] := #9'sta :ecx';
-	  listing[l+4] := #9'jsr idivAL_CL.MOD';
-
-	  inc(l, 5);
-	end;
-}
       end else
 
-      if (arg0 = '@BYTE.DIV') then begin		// $0E886C96
+      if (elf = $0E886C96) then begin		// @BYTE.DIV
 	t:='';
 
 	if (l > 3) and lda_im(l-4) then
@@ -2992,7 +2991,8 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if (arg0 = 'imulBYTE') or (arg0 = 'mulSHORTINT') then begin	// $04C07985 ; $0D334D44
+
+      if (elf = $04C07985) or (elf = $0D334D44) then begin	// imulBYTE, mulSHORTINT
 	t:='';
 
 	s[x, 1] := '';
@@ -3008,7 +3008,7 @@ begin				// OptimizeASM
 	listing[l]   := #9'lda '+GetARG(0, x);
 	listing[l+1] := #9'sta :ecx';
 
-	if arg0 = 'mulSHORTINT' then begin
+	if elf = $0D334D44 then begin		// mulSHORTINT
 	 listing[l+2] := #9'sta :ztmp8';
 	 inc(l);
 	end;
@@ -3016,7 +3016,7 @@ begin				// OptimizeASM
 	listing[l+2]  := #9'lda '+GetARG(0, x-1);
 	listing[l+3]  := #9'sta :eax';
 
-	if arg0 = 'mulSHORTINT' then begin
+	if elf = $0D334D44 then begin		// mulSHORTINT
 	 listing[l+4] := #9'sta :ztmp10';
 	 inc(l);
 	end;
@@ -3047,7 +3047,7 @@ begin				// OptimizeASM
 	 if imulCL_opt then inc(l, 9);
 
 
-	if arg0 = 'mulSHORTINT' then begin		// $0D334D44
+	if elf = $0D334D44 then begin		// mulSHORTINT
 
 	 listing[l]   := #9'lda :ztmp10';
 	 listing[l+1] := #9'bpl @+';
@@ -3081,7 +3081,7 @@ begin				// OptimizeASM
 
       end else
 
-      if (arg0 = 'imulWORD') or (arg0 = 'mulSMALLINT') then begin
+      if (elf = $04C1C364) or (elf = $0135CDB4) then begin	// imulWORD, mulSMALLINT
 	t:='';
 
 	s[x, 2] := '';
@@ -3092,34 +3092,34 @@ begin				// OptimizeASM
 
 	m:=l;
 
-	listing[l]   := #9'lda '+GetARG(0, x);		//t0 := listing[l];
+	listing[l]   := #9'lda '+GetARG(0, x);
 	listing[l+1] := #9'sta :ecx';
 
-	if arg0 = 'mulSMALLINT' then begin
+	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+2] := #9'sta :ztmp8';
 	 inc(l);
 	end;
 
-	listing[l+2]  := #9'lda '+GetARG(1, x);		//t1 := listing[l+2];
+	listing[l+2]  := #9'lda '+GetARG(1, x);
 	listing[l+3]  := #9'sta :ecx+1';
 
-	if arg0 = 'mulSMALLINT' then begin
+	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+4] := #9'sta :ztmp9';
 	 inc(l);
 	end;
 
-	listing[l+4]  := #9'lda '+GetARG(0, x-1);	//t2 := listing[l+4];
+	listing[l+4]  := #9'lda '+GetARG(0, x-1);
 	listing[l+5]  := #9'sta :eax';
 
-	if arg0 = 'mulSMALLINT' then begin
+	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+6] := #9'sta :ztmp10';
 	 inc(l);
 	end;
 
-	listing[l+6]  := #9'lda '+GetARG(1, x-1);	//t3 :=listing[l+6];
+	listing[l+6]  := #9'lda '+GetARG(1, x-1);
 	listing[l+7]  := #9'sta :eax+1';
 
-	if arg0 = 'mulSMALLINT' then begin
+	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+8] := #9'sta :ztmp11';
 	 inc(l);
 	end;
@@ -3163,7 +3163,7 @@ begin				// OptimizeASM
 
 	inc(l, 13);
 
-	if arg0 = 'mulSMALLINT' then begin
+	if elf = $0135CDB4 then begin		// mulSMALLINT
 
 	listing[l]   := #9'lda :ztmp11';
 	listing[l+1] := #9'bpl @+';
@@ -3231,7 +3231,7 @@ begin				// OptimizeASM
 
       end else
 
-      if (arg0 = 'imulCARD') or (arg0 = 'mulINTEGER') then begin
+      if (elf = $04C07164) or (elf = $0E3FD7A2) then begin	// imulCARD, mulINTEGER
 	t:='';
 
         if (target.id = ___NEO) then begin
@@ -3280,7 +3280,7 @@ begin				// OptimizeASM
 
 	inc(l, 17);
 
-	if arg0 = 'mulINTEGER' then begin
+	if elf = $0E3FD7A2 then begin		// mulINTEGER
 	listing[l]   := #9'lda :eax';
 	listing[l+1] := #9'sta '+GetARG(0, x-1);
 	listing[l+2] := #9'lda :eax+1';
@@ -3314,52 +3314,52 @@ begin				// OptimizeASM
 	end;
 
       end else
-      if arg0 = 'SYSTEM.PEEK' then begin
+      if elf = $09BBA11B then begin		// SYSTEM.PEEK
 
 	if system_peek then begin x:=50; Break end;
 
       end else
-      if arg0 = 'SYSTEM.POKE' then begin
+      if elf = $09BBBB75 then begin		// SYSTEM.POKE
 
 	if system_poke then begin x:=50; Break end;
 
       end else
-      if arg0 = 'SYSTEM.DPEEK' then begin
+      if elf = $0BA7C10B then begin		// SYSTEM.DPEEK
 
 	if system_dpeek then begin x:=50; Break end;
 
       end else
-      if arg0 = 'SYSTEM.DPOKE' then begin
+      if elf = $0BA7DB65 then begin		// SYSTEM.DPOKE
 
 	if system_dpoke then begin x:=50; Break end;
 
       end else
-      if arg0 = '@shrAL_CL' then begin			// SHR BYTE
+      if elf = $0F6664EC then begin		// @shrAL_CL
 
         if opt_SHR_BYTE then begin x:=50; Break end;
 
       end else
-      if arg0 = '@shrAX_CL' then begin			// SHR WORD
+      if elf = $0F66A4EC then begin		// @shrAX_CL
 
 	opt_SHR_WORD;
 
       end else
-      if arg0 = '@shrEAX_CL' then begin			// SHR CARDINAL
+      if elf = $0692BA8C then begin		// @shrEAX_CL
 
 	opt_SHR_CARD;
 
       end else
-      if arg0 = '@shlEAX_CL.BYTE' then begin		// SHL BYTE
+      if elf = $08FB5525 then begin		// @shlEAX_CL.BYTE
 
         opt_SHL_BYTE;
 
       end else
-      if arg0 = '@shlEAX_CL.WORD' then begin		// SHL WORD
+      if elf = $08FAAFC4 then begin		// @shlEAX_CL.WORD
 
 	if opt_SHL_WORD then begin x:=50; Break end;
 
       end else
-      if arg0 = '@shlEAX_CL.CARD' then begin		// SHL CARD
+      if elf = $08FB5DC4 then begin		// @shlEAX_CL.CARD
 
         opt_SHL_CARD;
 
@@ -3370,7 +3370,7 @@ begin				// OptimizeASM
 
       t:='';
 
-      if (arg0 = 'subAL_CL') then begin
+      if (elf = $0B6624DC) then begin		// subAL_CL
 
        s[x][1] := '';
        s[x][2] := '';
@@ -3409,7 +3409,7 @@ begin				// OptimizeASM
        inc(l, 3);
       end;
 
-      if (arg0 = 'subAX_CX') then begin
+      if (elf = $0B66E428) then begin		// subAX_CX
 
        s[x][2] := '';
        s[x][3] := '';
@@ -3443,7 +3443,7 @@ begin				// OptimizeASM
        inc(l, 6);
       end;
 
-      if (arg0 = 'subEAX_ECX') then begin
+      if (elf = $096B92E8) then begin		// subEAX_ECX
 
        listing[l]   := #9'lda '+GetARG(0, x-1);
        listing[l+1] := #9'sub '+GetARG(0, x);
@@ -3464,7 +3464,7 @@ begin				// OptimizeASM
        inc(l, 12);
       end;
 
-      if arg0 = 'addAL_CL' then begin
+      if elf = $0A86250C then begin		// addAL_CL
 
        if (pos(',y', s[x-1][0]) >0 ) or (pos(',y', s[x][0]) >0 ) then begin x:=30; Break end;
 
@@ -3505,7 +3505,7 @@ begin				// OptimizeASM
        inc(l, 3);
       end;
 
-      if arg0 = 'addAX_CX' then begin
+      if elf = $0A86E5F8 then begin		// addAX_CX
 
        s[x][2] := '';
        s[x][3] := '';
@@ -3539,7 +3539,7 @@ begin				// OptimizeASM
        inc(l, 6);
       end;
 
-      if (arg0 = 'addEAX_ECX') then begin
+      if (elf = $096C4308) then begin		// addEAX_ECX
 
        listing[l]   := #9'lda '+GetARG(0, x-1);
        listing[l+1] := #9'add '+GetARG(0, x);
@@ -3564,102 +3564,102 @@ begin				// OptimizeASM
     end else
 
 
-      if arg0 = '@move' then			// @move		accepted
+      if elf = $004746C5 then		// @move		accepted
       else
 
-      if arg0 = '@cmpSTRING' then		// @cmpSTRING		accepted
+      if elf = $058D0867 then		// @cmpSTRING		accepted
       else
 
-      if arg0 = '@FCMPL' then			// @FCMPL		accepted
+      if elf = $044A824C then		// @FCMPL		accepted
       else
 
-      if arg0 = '@FTOA' then			// @FTOA		accepted
+      if elf = $0044B931 then		// @FTOA		accepted
       else
 
-      if arg0 = '@SHORTINT.DIV' then		// @SHORTINT.DIV	accepted
+      if elf = $094C6F26 then		// @SHORTINT.DIV	accepted
       else
-      if arg0 = '@SMALLINT.DIV' then		// @SMALLINT.DIV	accepted
+      if elf = $09B849A6 then		// @SMALLINT.DIV	accepted
       else
-      if arg0 = '@INTEGER.DIV' then		// @INTEGER.DIV		accepted
+      if elf = $0FEB1076 then		// @INTEGER.DIV		accepted
       else
-      if arg0 = '@SHORTINT.MOD' then		// @SHORTINT.MOD	accepted
+      if elf = $094C77F4 then		// @SHORTINT.MOD	accepted
       else
-      if arg0 = '@SMALLINT.MOD' then		// @SMALLINT.MOD	accepted
+      if elf = $09B85174 then		// @SMALLINT.MOD	accepted
       else
-      if arg0 = '@INTEGER.MOD' then		// @INTEGER.MOD		accepted
-      else
-
-      if arg0 = '@BYTE.DIV' then		// @BYTE.DIV		accepted
-      else
-      if arg0 = '@WORD.DIV' then		// @WORD.DIV		accepted
-      else
-      if arg0 = '@CARDINAL.DIV' then		// @CARDINAL.DIV	accepted
-      else
-      if arg0 = '@BYTE.MOD' then		// @BYTE.MOD		accepted
-      else
-      if arg0 = '@WORD.MOD' then		// @WORD.MOD		accepted
-      else
-      if arg0 = '@CARDINAL.MOD' then		// @CARDINAL.MOD	accepted
+      if elf = $0FEB2AA4 then		// @INTEGER.MOD		accepted
       else
 
-      if arg0 = '@SHORTREAL_MUL' then		// @SHORTREAL_MUL	accepted
+      if elf = $0E886C96 then		// @BYTE.DIV		accepted
       else
-      if arg0 = '@REAL_MUL' then		// @REAL_MUL		accepted
+      if elf = $04676D26 then		// @WORD.DIV		accepted
       else
-      if arg0 = '@SHORTREAL_DIV' then		// @SHORTREAL_DIV	accepted
+      if elf = $06294046 then		// @CARDINAL.DIV	accepted
       else
-      if arg0 = '@REAL_DIV' then		// @REAL_DIV		accepted
+      if elf = $0E887644 then		// @BYTE.MOD		accepted
       else
-
-      if arg0 = '@REAL_ROUND' then		// @REAL_ROUND		accepted
+      if elf = $046775F4 then		// @WORD.MOD		accepted
       else
-      if arg0 = '@SHORTREAL_TRUNC' then		// @SHORTREAL_TRUNC	accepted
-      else
-      if arg0 = '@REAL_TRUNC' then		// @REAL_TRUNC		accepted
-      else
-      if arg0 = '@REAL_FRAC' then		// @REAL_FRAC		accepted
+      if elf = $06295A94 then		// @CARDINAL.MOD	accepted
       else
 
-      if arg0 = '@FMUL' then			// @FMUL		accepted
+      if elf = $0E965FAC then		// @SHORTREAL_MUL	accepted
       else
-      if arg0 = '@FDIV' then			// @FDIV		accepted
+      if elf = $096287FC then		// @REAL_MUL		accepted
       else
-      if arg0 = '@FADD' then			// @FADD		accepted
+      if elf = $0E9645D6 then		// @SHORTREAL_DIV	accepted
       else
-      if arg0 = '@FSUB' then			// @FSUB		accepted
-      else
-      if arg0 = '@I2F' then			// @I2F			accepted
-      else
-      if arg0 = '@F2I' then			// @F2I			accepted
-      else
-      if arg0 = '@FFRAC' then			// @FFRAC		accepted
-      else
-      if arg0 = '@FROUND' then			// @FROUND		accepted
+      if elf = $09627D86 then		// @REAL_DIV		accepted
       else
 
-      if arg0 = '@F16_F2A' then			// @F16_F2A		accepted
+      if elf = $02042144 then		// @REAL_ROUND		accepted
       else
-      if arg0 = '@F16_ADD' then			// @F16_ADD		accepted
+      if elf = $063448B3 then		// @SHORTREAL_TRUNC	accepted
       else
-      if arg0 = '@F16_SUB' then 		// @F16_SUB		accepted
+      if elf = $020C1143 then		// @REAL_TRUNC		accepted
       else
-      if arg0 = '@F16_MUL' then			// @F16_MUL		accepted
+      if elf = $0627E0C3 then		// @REAL_FRAC		accepted
       else
-      if arg0 = '@F16_DIV' then			// @F16_DIV		accepted
+
+      if elf = $0044B29C then		// @FMUL		accepted
       else
-      if arg0 = '@F16_INT' then			// @F16_INT		accepted
+      if elf = $0044A8E6 then		// @FDIV		accepted
       else
-      if arg0 = '@F16_ROUND' then		// @F16_ROUND		accepted
+      if elf = $0044A584 then		// @FADD		accepted
       else
-      if arg0 = '@F16_FRAC' then		// @F16_FRAC		accepted
+      if elf = $0044B892 then		// @FSUB		accepted
       else
-      if arg0 = '@F16_I2F' then			// @F16_I2F		accepted
+      if elf = $00044C66 then		// @I2F			accepted
       else
-      if arg0 = '@F16_EQ' then			// @F16_EQ		accepted
+      if elf = $00044969 then		// @F2I			accepted
       else
-      if arg0 = '@F16_GT' then			// @F16_GT		accepted
+      if elf = $044AB653 then		// @FFRAC		accepted
       else
-      if arg0 = '@F16_GTE' then			// @F16_GTE		accepted
+      if elf = $04B74A64 then		// @FROUND		accepted
+      else
+
+      if elf = $094C3D21 then		// @F16_F2A		accepted
+      else
+      if elf = $094C31C4 then		// @F16_ADD		accepted
+      else
+      if elf = $094C4CD2 then 		// @F16_SUB		accepted
+      else
+      if elf = $094C46DC then		// @F16_MUL		accepted
+      else
+      if elf = $094C3CA6 then		// @F16_DIV		accepted
+      else
+      if elf = $094C3A74 then		// @F16_INT		accepted
+      else
+      if elf = $0C430164 then		// @F16_ROUND		accepted
+      else
+      if elf = $04C3F2C3 then		// @F16_FRAC		accepted
+      else
+      if elf = $094C3826 then		// @F16_I2F		accepted
+      else
+      if elf = $0494C3E1 then		// @F16_EQ		accepted
+      else
+      if elf = $0494C384 then		// @F16_GT		accepted
+      else
+      if elf = $094C38C5 then		// @F16_GTE		accepted
 
 
       else begin
