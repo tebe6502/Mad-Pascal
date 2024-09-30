@@ -1,5 +1,8 @@
+30.10.2024
+- Optimize.pas (ElfHash), szybsze porównania stringów
+
 12.09.2024
-- CompileSimpleExpression -> (VarType in SignedOrdinalTypes + [BOOLEANTOK, REALTOK, HALFSINGLETOK, SINGLETOK])
+- CompileSimplesExpression -> (VarType in SignedOrdinalTypes + [BOOLEANTOK, REALTOK, HALFSINGLETOK, SINGLETOK])
 
 27.08.2024
 - Optimize.pas (Rebuild) bugfixes
