@@ -1262,7 +1262,7 @@ begin
        cmp_stack(i+7) and									// cmp :STACKORIGIN+9			; 7
        seq(i+8) and										// seq					; 8
        ((listing[i+9] = #9'bpl @+') or (listing[i+9] = #9'bcs @+')) and				// bpl|bcs @+				; 9
-       (pos('jmp l_', listing[i+10]) > 0) then							// jmp l_				; 10
+       jmp(i+10) then										// jmp l_				; 10
      if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) then
       begin
 	listing[i+3] := '';

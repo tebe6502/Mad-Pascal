@@ -63,7 +63,7 @@
           cmp(1) and (cmp_im(1) = false) and
 	  (listing[2] = #9'bcc *+7') and
 	  (listing[3] = #9'beq *+5') and
-	  (pos('jmp l_', listing[4]) > 0 ) then
+	  jmp(4) then
         begin
 	 listing[2] := #9'lda ' + copy(listing[1], 6, 256);
 	 listing[3] := #9'cmp ' + copy(listing[0], 6, 256);
@@ -79,7 +79,7 @@
           cmp_im(1) and
 	  (listing[2] = #9'bcc *+7') and
 	  (listing[3] = #9'beq *+5') and
-	  (pos('jmp l_', listing[4]) > 0 ) then
+	  jmp(4) then
         begin
         k := GetBYTE(1) + 1;
 
@@ -134,7 +134,7 @@
           (listing[3] = #9'eor #$80') and
           (listing[4] = #9'bmi *+7') and
           (listing[5] = #9'beq *+5') and
-	  (pos('jmp l_', listing[6]) > 0 ) then
+	  jmp(6) then
 	begin
         k := GetBYTE(1) + 1;
 
@@ -155,7 +155,7 @@
 	  (listing[2] = #9'svc') and
           (listing[3] = #9'eor #$80') and
           (listing[4] = #9'bpl *+5') and
-	  (pos('jmp l_', listing[5]) > 0 ) then
+	  jmp(5) then
 	begin
 	 listing[4] := #9'jmi ' + copy(listing[5], 6, 256);
 	 listing[5] := '';
@@ -171,7 +171,7 @@
           lab_a(5) and
 	  (listing[6] = #9'bcc *+7') and
 	  (listing[7] = #9'beq *+5') and
-	  (pos('jmp l_', listing[8]) > 0 ) then
+	  jmp(8) then
         begin
 
         k := GetBYTE(1) shl 8 + GetBYTE(4);
@@ -209,7 +209,7 @@
           lab_a(5) and
 	  (listing[6] = #9'bcc *+7') and
 	  (listing[7] = #9'beq *+5') and
-	  (pos('jmp l_', listing[8]) > 0 ) then
+	  jmp(8) then
         begin
 	 listing[7] := '@';
 	 listing[8] := #9'jcc ' + copy(listing[8], 6, 256);
@@ -242,7 +242,7 @@
           lab_a(11) and
 	  (listing[12] = #9'bcc *+7') and
 	  (listing[13] = #9'beq *+5') and
-	  (pos('jmp l_', listing[14]) > 0 ) then
+	  jmp(14) then
 	begin
 	 listing[13] := '@';
 	 listing[14] := #9'jcc ' + copy(listing[14], 6, 256);
@@ -313,7 +313,7 @@
           lab_a(11) and
 	  (listing[12] = #9'bcc *+7') and
 	  (listing[13] = #9'beq *+5') and
-	  (pos('jmp l_', listing[14]) > 0 ) then
+	  jmp(14) then
 	begin
 	 listing[0] := '';
 	 listing[1] := '';
@@ -353,7 +353,7 @@
           (listing[16] = #9'.ENDL') and
           (listing[17] = #9'bmi *+7') and
           (listing[18] = #9'beq *+5') and
-	  (pos('jmp l_', listing[19]) > 0 ) then
+	  jmp(19) then
 	begin
          k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
 
@@ -402,7 +402,7 @@
           (listing[15] = 'L5') and
           (listing[16] = #9'.ENDL') and
           (listing[17] = #9'bpl *+5') and
-	  (pos('jmp l_', listing[18]) > 0 ) then
+	  jmp(18) then
 	begin
          k := GetBYTE(2) shl 8 + GetBYTE(5);
 

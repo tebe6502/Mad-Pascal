@@ -1564,6 +1564,17 @@ var inxUse, found: Boolean;
 
         listing[k] := listing[i];
 
+
+        if (k > 0) and
+	   inx(k) and 									// dex			; k-1
+	   dex(k-1) then								// inx			; k
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k, 2);
+	  end;
+
+
         if (k > 0) and
 	   sta_stack(k) and 								// lda :STACKORIGIN	; k-1
 	   lda_stack(k-1) and								// sta :STACKORIGIN	; k
