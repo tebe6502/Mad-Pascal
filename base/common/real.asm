@@ -2,7 +2,7 @@
 ; REAL	fixed-point Q24.8, 32bit
 ; https://en.wikipedia.org/wiki/Q_(number_format)
 ;
-; changes: 2023-04-22
+; changes: 2024-10-01
 ;
 
 /*
@@ -30,13 +30,13 @@ B	= :ECX
 
 	jsr @negA
 @
-	bit B+3
+	lda B+3
 	bpl @+
 
 	jsr @negB
 @
-	lda A+3
-	ora B+3
+	ora A+3
+;	ora B+3
 	ora A+2
 	ora B+2
 	bne m32
@@ -282,9 +282,8 @@ UDIV321
 	JMP UDIV321
 stop
 	lda sign: #0
-	bpl @+
-	
+	spl	
 	jmp @negA
-@
+
 	rts
 .endp
