@@ -130,6 +130,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [zilch](https://gitlab.com/bocianu/zilch)
 * [justpong](https://gitlab.com/bocianu/justpong)
 * [hoppe](https://gitlab.com/bocianu/hoppe)
+* [Betty's Issues](https://www.mikej.de/game21.php)
 * [PacMad](https://gitlab.com/bocianu/PacMad)
 * [PacMad neo6502](https://gitlab.com/bocianu/neo-pacmad)
 * [k12trailer](https://gitlab.com/bocianu/k12trailer)
