@@ -1562,56 +1562,79 @@ var inxUse, found: Boolean;
     for i := 0 to l - 1 do
      if (listing[i] <> '') and (listing[i][1] <> ';') then begin
 
-        listing[k] := listing[i];
+       listing[k] := listing[i];
 
+       if k > 0 then begin
 
-        if (k > 0) and
-	   inx(k) and 									// dex			; k-1
+        if inx(k) and 									// dex			; k-1
 	   dex(k-1) then								// inx			; k
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   dec(k, 2);
+	   dec(k);
+	   continue;
 	  end;
 
 
-        if (k > 0) and
-	   sta_stack(k) and 								// lda :STACKORIGIN	; k-1
-	   lda_stack(k-1) and								// sta :STACKORIGIN	; k
-	   lda_a(i+1) then								// lda			; i+1
-          if copy(listing[k], 6, 256) = copy(listing[k-1], 6, 256) then
+        if lda_stack(k) and 								// sta :STACKORIGIN	; k-1
+	   sta_stack(k-1) and								// lda :STACKORIGIN	; k
+	   sta_a(i+1) then								// sta			; i+1
+         if copy(listing[k], 6, 256) = copy(listing[k-1], 6, 256) then
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   dec(k, 2);
+	   dec(k);
+	   continue;
 	  end;
 
 
-        if (k > 0) and
-	   lda_a(k) and 								// lda			; k-1
+        if sta_stack(k) and 								// lda :STACKORIGIN	; k-1
+	   lda_stack(k-1) and								// sta :STACKORIGIN	; k
+	   lda_a(i+1) then								// lda			; i+1
+         if copy(listing[k], 6, 256) = copy(listing[k-1], 6, 256) then
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k);
+	   continue;
+	  end;
+
+
+        if sta_stack(k) and 								// lda #		; k-1
+	   lda_im(k-1) and								// sta :STACKORIGIN	; k
+	   lda_a(i+1) and								// lda			; i+1
+	   sta_stack(i+2) then								// sta :STACKORIGIN	; i+2
+         if listing[k] = listing[i+2] then
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k);
+	   continue;
+	  end;
+
+
+        if lda_a(k) and 								// lda			; k-1
 	   lda_a(k-1) and								// lda			; k
 	   sta_a(i+1) then								// sta			; i+1
 	  begin
 	   listing[k-1] := listing[k];
 	   listing[k]   := '';
-	   dec(k);
+	   continue;
 	  end;
 
 
-	if (k > 0) and
-	   iny(k) and 									// lda			; k-1
+	if iny(k) and 									// lda			; k-1
 	   lda_a(k-1) and 								// iny			; k
 	   lda_a(i+1) then								// lda			; i+1
 	  begin
 	   listing[k-1] := #9'iny';
 	   listing[k]   := '';
-	   dec(k);
+	   continue;
 	  end;
 
 
 
-	if (k > 0) and
-	   sta_im_0(k) and 								// lda			; k-1
+	if sta_im_0(k) and 								// lda			; k-1
 	   lda_a(k-1) then begin							// sta #$00		; k
 
 
@@ -1619,7 +1642,8 @@ var inxUse, found: Boolean;
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   dec(k, 2);
+	   dec(k);
+	   continue;
 	  end;
 
 
@@ -1628,7 +1652,8 @@ var inxUse, found: Boolean;
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   dec(k, 2);
+	   dec(k);
+	   continue;
 	  end;
 
 
@@ -1643,7 +1668,8 @@ var inxUse, found: Boolean;
 	   listing[i+1] := '';
 	   listing[i+2] := '';
 	   listing[i+3] := '';
-	   dec(k,2);
+	   dec(k);
+	   continue;
 	  end;
 
 
@@ -1656,7 +1682,8 @@ var inxUse, found: Boolean;
 
 	   listing[i+1] := '';
 	   listing[i+2] := '';
-	   dec(k,2);
+	   dec(k);
+	   continue;
 	  end;
 
 
@@ -1667,11 +1694,14 @@ var inxUse, found: Boolean;
 	   listing[k]   := '';
 
 	   listing[i+1] := '';
-	   dec(k,2);
+	   dec(k);
+	   continue;
 	  end;
 
-
         end;
+
+
+	end;	// if k > 0
 
 
       inc(k);
@@ -1683,6 +1713,7 @@ var inxUse, found: Boolean;
     listing[k+2] := '';
 
     l := k;
+
    end;
 
 // -----------------------------------------------------------------------------
