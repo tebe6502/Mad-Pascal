@@ -2247,13 +2247,15 @@ begin
     s2len := Length(s2);
 
     result := 0;
+    
+    if s1len > s2len then exit;
 
-    for i := 1 to s2len - s1len do // 1 to 14
+    for i := 1 to s2len - s1len + 1 do
     begin
 
-        for j := 0 to s1len - 1 do // 0 to 17
+        for j := 0 to s1len - 1 do
         begin
-            if s2[i+j] <> s1[j+1] then // 1 <> 1
+            if s2[i+j] <> s1[j+1] then
             begin
                 break;
             end;
