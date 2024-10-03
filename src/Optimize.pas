@@ -997,8 +997,10 @@ var inxUse, found: Boolean;
 
    function LDA_ADR_Y(i: integer): Boolean;
    begin
-     Result := (pos(#9'lda adr.', listing[i]) = 1) or ((pos(#9'lda ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
-     Result := Result and (pos(',y', listing[i]) > 0);
+     if (pos(',y', listing[i]) > 0) then
+      Result := (pos(#9'lda adr.', listing[i]) = 1) or ((pos(#9'lda ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0))
+     else
+      Result := false;
    end;
 
    function LDA_ADR(i: integer): Boolean;
@@ -1039,6 +1041,14 @@ var inxUse, found: Boolean;
    function SBC_ADR(i: integer): Boolean;
    begin
      Result := (pos(#9'sbc adr.', listing[i]) = 1) or ((pos(#9'sbc ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0));
+   end;
+
+   function STA_ADR_Y(i: integer): Boolean;
+   begin
+     if (pos(',y', listing[i]) > 0) then
+      Result := (pos(#9'sta adr.', listing[i]) = 1) or ((pos(#9'sta ', listing[i]) = 1) and (pos('.adr.', listing[i]) > 0))
+     else
+      Result := false;
    end;
 
    function STA_ADR(i: integer): Boolean;
@@ -1608,7 +1618,7 @@ var inxUse, found: Boolean;
 
         if sta_stack(k) and 								// lda #		; k-1
 	   lda_im(k-1) and								// sta :STACKORIGIN	; k
-	   lda_a(i+1) and (lda_stack(i+1) = false) and					// lda			; i+1
+	   (lda_stack(i+1) = false) and lda_a(i+1) and					// lda			; i+1
 	   sta_stack(i+2) then								// sta :STACKORIGIN	; i+2
          if listing[k] = listing[i+2] then
 	  begin
