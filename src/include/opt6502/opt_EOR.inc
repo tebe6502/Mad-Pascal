@@ -325,10 +325,10 @@ begin
        and_ora_eor(i+1) and								// and|ora|eor				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda_a(i+3) and									// lda					; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and					// sta					; 4
+       sta_val(i+4) and									// sta					; 4	~sta :STACKORIGN
        lda_stack(i+5) and								// lda :STACKORIGIN			; 5
        and_ora_eor(i+6) and								// and|ora|eor				; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) then					// sta					; 7
+       sta_val(i+7) then								// sta					; 7	~sta :STACKORIGN
      if copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256) then
        begin
 	listing[i+2] := listing[i+6];

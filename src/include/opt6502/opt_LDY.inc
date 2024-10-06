@@ -84,7 +84,7 @@ begin
 
     if lda_a(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda I			; 0
        add_sub(i+1) and										// add|sub			; 1
-       sta_a(i+2) and (sta_stack(i+2) = false) and						// sta				; 2
+       sta_val(i+2) and										// sta				; 2	~sta :STACKORIGN
        ldy(i+3) then										// ldy I			; 3
     if copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256) then
      begin
@@ -191,7 +191,7 @@ begin
        lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
        add_sub_val(i+3) and									// add|sub				; 3
        ldy_stack(i+4) and									// ldy :STACKORIGIN			; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) then						// sta					; 5
+       sta_val(i+5) then									// sta					; 5	~sta :STACKORIGN
       if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) then
        begin
 	listing[i] := '';

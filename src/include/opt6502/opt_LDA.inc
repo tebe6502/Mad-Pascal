@@ -278,10 +278,10 @@ begin
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+10		; 3
        lda_stack(i+4) and									// lda :STACKORIGIN+9				; 4
        AND_ORA_EOR_STACK(i+5) and		 						// and|ora|eor :STACKORIGIN+10			; 5
-       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta						; 6
+       sta_val(i+6) and										// sta						; 6	~sta :STACKORIGN
        lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH+9		; 7
        AND_ORA_EOR_STACK(i+8) and								// and|ora|eor :STACKORIGIN+STACKWIDTH+10	; 8
-       sta_a(i+9) and (sta_stack(i+9) = false) then						// sta						; 9
+       sta_val(i+9) then									// sta						; 9	~sta :STACKORIGN
      if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
         (copy(listing[i+3], 6, 256) = copy(listing[i+8], 6, 256)) and
         (copy(listing[i], 6, 256) <> copy(listing[i+4], 6, 256)) and
@@ -308,10 +308,10 @@ begin
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
        AND_ORA_EOR_STACK(i+5) and		 						// and|ora|eor :STACKORIGIN		; 5
-       sta_a(i+6) and (sta_stack(i+6) = false) and						// sta					; 6
+       sta_val(i+6) and										// sta					; 6	~sta :STACKORIGN
        lda_a(i+7) and (lda_stack(i+7) = false) and						// lda					; 7
        AND_ORA_EOR_STACK(i+8) and								// and|ora|eor :STACKORIGIN+STACKWIDTH	; 8
-       sta_a(i+9) and (sta_stack(i+9) = false) then						// sta					; 9
+       sta_val(i+9) then									// sta					; 9	~sta :STACKORIGN
      if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
         (copy(listing[i+3], 6, 256) = copy(listing[i+8], 6, 256)) then
       begin
@@ -768,9 +768,9 @@ begin
     if lda_stack(i) and										// lda :STACKORIGIN		; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH	; 1
        lda_a(i+2) and (lda_stack(i+2) = false) and						// lda				; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta A			; 3
+       sta_val(i+3) and										// sta A			; 3	~sta :STACKORIGN
        lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH	; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) then						// sta A+1			; 5
+       sta_val(i+5) then									// sta A+1			; 5	~sta :STACKORIGN
      if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then
       begin
 	listing[i+4] := listing[i];
@@ -1042,13 +1042,13 @@ begin
 
 
     if (lda_a(i) = false) and									//~lda					; 0
-       sta_a(i+1) and (sta_stack(i+1) = false) and						// sta A				; 1
+       sta_val(i+1) and										// sta A				; 1	~sta :STACKORIGN
        lda_stack(i+2) and									// lda :STACKORIGIN			; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta A+1				; 3
+       sta_val(i+3) and										// sta A+1				; 3	~sta :STACKORIGN
        lda_a(i+4) and										// lda A				; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
+       sta_val(i+5) and										// sta					; 5	~sta :STACKORIGN
        lda_a(i+6) and										// lda A+1				; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) then						// sta					; 7
+       sta_val(i+7) then									// sta					; 7	~sta :STACKORIGN
      if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
         (copy(listing[i+3], 6, 256) = copy(listing[i+6], 6, 256)) then
        begin
@@ -1066,9 +1066,9 @@ begin
        lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5	5 <> 2	!!!
+       sta_val(i+5) and										// sta					; 5	5 <> 2	!!!	~sta :STACKORIGN
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) then						// sta					; 7
+       sta_val(i+7) then									// sta					; 7			~sta :STACKORIGN
      if (copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256)) and
         (copy(listing[i+1], 6, 256) <> copy(listing[i+3], 6, 256)) and
         (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
@@ -1087,9 +1087,9 @@ begin
     if lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta					; 3
+       sta_val(i+3) and										// sta					; 3	~sta :STACKORIGN
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) then						// sta					; 5
+       sta_val(i+5) then									// sta					; 5	~sta :STACKORIGN
      if (copy(listing[i], 6, 256) <> copy(listing[i+3], 6, 256)) and
         (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then
        begin
@@ -1120,9 +1120,9 @@ begin
 
 
     if //(lda_a(i) = false) and									//~lda					; 0
-       sta_a(i+1) and (sta_stack(i+1) = false) and						// sta A				; 1
+       sta_val(i+1) and										// sta A				; 1	~sta :STACKORIGN
        lda_stack(i+2) and									// lda :STACKORIGIN+STACKWIDTH		; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and						// sta A+1				; 3
+       sta_val(i+3) and										// sta A+1				; 3	~sta :STACKORIGN
        lda_a(i+4) and (lda_stack(i+4) = false) and						// lda A				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN			; 5
        lda_a(i+6) and (lda_stack(i+6) = false) and						// lda A+1				; 6
