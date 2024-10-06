@@ -222,9 +222,9 @@ begin
        lda_a(i+2) and										// lda					; 2
        asl_stack(i+3) and									// asl :STACKORIGIN			; 3
        rol_a(i+4) and										// rol @				; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
+       sta_val(i+5) and										// sta					; 5	~sta :STACKORIGN
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) and (iy(i+7) = false) then			// sta					; 7
+       sta_val(i+7) and (iy(i+7) = false) then							// sta					; 7	~sta :STACKORIGN
      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
 	(copy(listing[i+3], 6, 256) = copy(listing[i+6], 6, 256)) then
        begin
@@ -568,9 +568,9 @@ begin
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and (EAX(i+5) = false) and			// sta					; 5
+       sta_val(i+5) and (EAX(i+5) = false) and							// sta					; 5	~sta :STACKORIGN
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) and (EAX(i+7) = false) and			// sta					; 7
+       sta_val(i+7) and (EAX(i+7) = false) and							// sta					; 7	~sta :STACKORIGN
        (lda_stack(i+8) = false)  then								//~lda :STACKORIGIN+STACKWIDTH*2	; 8
      if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) and
 	(copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) then begin
@@ -595,9 +595,9 @@ begin
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        lda_stack(i+3) and									// lda :STACKORIGIN+STACKWIDTH		; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and (EAX(i+4) = false) and			// sta					; 4
+       sta_val(i+4) and (EAX(i+4) = false) and							// sta					; 4	~sta :STACKORIGN
        lda_stack(i+5) and									// lda :STACKORIGIN+STACKWIDTH*2	; 5
-       sta_a(i+6) and (sta_stack(i+6) = false) and (EAX(i+6) = false) and			// sta					; 6
+       sta_val(i+6) and (EAX(i+6) = false) and							// sta					; 6	~sta :STACKORIGN
        (lda_stack(i+7) = false)  then								//~lda :STACKORIGIN			; 7
      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
 	(copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) then begin
@@ -639,9 +639,9 @@ begin
     if asl_stack(i) and										// asl :STACKORIGIN			; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        lda_stack(i+2) and									// lda :STACKORIGIN			; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and (EAX(i+3) = false) and			// sta					; 3
+       sta_val(i+3) and (EAX(i+3) = false) and							// sta					; 3	~sta :STACKORIGN
        lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH		; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and (EAX(i+5) = false) and			// sta					; 5
+       sta_val(i+5) and (EAX(i+5) = false) and							// sta					; 5	~sta :STACKORIGN
        (lda_stack(i+6) = false)  then								//~lda :STACK				; 6
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
 	(copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then begin
@@ -705,7 +705,7 @@ begin
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and (EAX(i+5) = false) and			// sta					; 5
+       sta_val(i+5) and (EAX(i+5) = false) and							// sta					; 5	~sta :STACKORIGN
        (lda_stack(i+6) = false)  then								//~lda :STACKORIGIN+STACKWIDTH*2	; 8
      if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) then begin
 
@@ -756,7 +756,7 @@ begin
        asl_stack(i+1) and									// asl :STACKORIGN			; 1
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH		; 2
        lda_stack(i+3) and									// lda :STACKORIGIN+STACKWIDTH		; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and						// sta					; 4
+       sta_val(i+4) and										// sta					; 4	~sta :STACKORIGN
        (lda_stack(i+5) = false) then								//~lda :STACKORIGIN+			; 5
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
         (copy(listing[i+2], 6, 256) = copy(listing[i+3], 6, 256)) then
@@ -773,7 +773,7 @@ begin
     if asl_stack(i) and										// asl :STACKORIGN			; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        lda_stack(i+2) and									// lda :STACKORIGIN			; 2
-       sta_a(i+3) and (sta_stack(i+3) = false) and (EAX(i+3) = false) and			// sta					; 3
+       sta_val(i+3) and (EAX(i+3) = false) and							// sta					; 3	~sta :STACKORIGN
        (lda_stack(i+4) = false) then								//~lda :STACKORIGIN+STACKWIDTH		; 4
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
        begin
@@ -1108,7 +1108,7 @@ begin
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH		; 2
        lda_a(i+3) and (lda_stack(i+3) = false) and						// lda 					; 3
        add_stack(i+4) and									// add :STACKORIGIN+STACKWIDTH		; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) then						// sta 					; 5
+       sta_val(i+5) then									// sta 					; 5	~sta :STACKORIGN
      if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
 	(copy(listing[i+2], 6, 256) = copy(listing[i+4], 6, 256)) then
       begin
@@ -1301,10 +1301,10 @@ begin
 
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
        add_sub_val(i+7) and									// add|sub				; 7
-       sta_a(i+8) and (sta_stack(i+8) = false) and						// sta					; 8
+       sta_val(i+8) and										// sta					; 8	~sta :STACKORIGN
        lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
        adc_sbc_val(i+10) and									// adc|sbc				; 10
-       sta_a(i+11) and (sta_stack(i+11) = false) then						// sta					; 11
+       sta_val(i+11) then									// sta					; 11	~sta :STACKORIGN
      if ((copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256))) and
         ((copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256))) and
         ((copy(listing[i+4], 6, 256) = copy(listing[i+6], 6, 256))) and

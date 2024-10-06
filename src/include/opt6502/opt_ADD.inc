@@ -458,10 +458,10 @@ begin
 
 
     if add_sub(i) and									// add|sub				; 0
-       sta_a(i+1) and (sta_stack(i+1) = false) and					// sta S				; 1
+       sta_val(i+1) and									// sta S				; 1	~sta :STACKORIGN
        lda_a(i+2) and									// lda 					; 2
        adc_sbc(i+3) and									// adc|sbc				; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and					// sta S+1				; 4
+       sta_val(i+4) and									// sta S+1				; 4	~sta :STACKORIGN
        lda_a(i+5) and									// lda					; 5
        adc_sbc(i+6) and									// adc|sbc				; 6
        sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH*2	; 7
@@ -481,7 +481,7 @@ begin
 
 
     if add_sub(i) and									// add|sub				; 0
-       sta_a(i+1) and (sta_stack(i+1) = false) and					// sta S				; 1
+       sta_val(i+1) and									// sta S				; 1	~sta :STACKORIGN
        lda_a(i+2) and									// lda 					; 2
        adc_sbc(i+3) and									// adc|sbc				; 3
        sta_stack(i+4) and								// sta :STACKORIGIN+STACKWIDTH		; 4
@@ -611,13 +611,13 @@ begin
        adc_sbc(i+4) and									// adc|sbc				; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
        lda_a(i+6) and (lda_stack(i+6) = false) and					// lda 					; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) and					// sta					; 7
+       sta_val(i+7) and									// sta					; 7	~sta :STACKORIGN
        lda_a(i+8) and (lda_stack(i+8) = false) and					// lda					; 8
-       sta_a(i+9) and (sta_stack(i+9) = false) and					// sta					; 9
+       sta_val(i+9) and									// sta					; 9	~sta :STACKORIGN
        lda_stack(i+10) and								// lda :STACKORIGIN+10			; 10
-       sta_a(i+11) and (sta_stack(i+11) = false) and					// sta					; 11
+       sta_val(i+11) and								// sta					; 11	~sta :STACKORIGN
        lda_stack(i+12) and								// lda :STACKORIGIN+STACKWIDTH+10	; 12
-       sta_a(i+13) and (sta_stack(i+13) = false) then					// sta					; 13
+       sta_val(i+13) then								// sta					; 13	~sta :STACKORIGN
      if (copy(listing[i+2], 6, 256) = copy(listing[i+10], 6, 256)) and
         (copy(listing[i+5], 6, 256) = copy(listing[i+12], 6, 256)) then
       begin
@@ -832,10 +832,10 @@ begin
 
 
     if add_sub_val(i) and								// add|sub				; 0		2023-01-26
-       sta_a(i+1) and (sta_stack(i+1) = false) and					// sta A				; 1
+       sta_val(i+1) and									// sta A				; 1	~sta :STACKORIGN
        lda_a(i+2) and									// lda 					; 2
        adc_sbc_val(i+3) and								// adc|sbc				; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and					// sta A+1				; 4
+       sta_val(i+4) and									// sta A+1				; 4	~sta :STACKORIGN
        lda_a(i+5) and									// lda A				; 5
        sta_stack(i+6) and								// sta :STACKORIGIN			; 6
        lda_a(i+7) and									// lda A+1				; 7

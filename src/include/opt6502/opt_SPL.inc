@@ -709,9 +709,9 @@ begin
 
 
     if sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta					; 5
+       sta_val(i+5) and										// sta					; 5	~sta :STACKORIGN
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) and						// sta 					; 7
+       sta_val(i+7) and										// sta 					; 7	~sta :STACKORIGN
        (sta_a(i+8) = false) then								//~sta					; 8
      if (copy(listing[i+4], 6, 256) = copy(listing[i+6], 6, 256)) then
        begin

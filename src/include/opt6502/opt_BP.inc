@@ -64,7 +64,7 @@ begin
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH	; 2
        ldy_im(i+3) and										// ldy #			; 3
        LDA_BP2_Y(i+4) and									// lda (:bp2),y			; 4
-       sta_a(i+5) and (sta_stack(i+5) = false) and						// sta				; 5
+       sta_val(i+5) and										// sta				; 5	~sta :STACKORIGN
        lda_stack(i+6) then									// lda :STACKORIGIN+STACKWIDTH	; 6
      if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
        begin
