@@ -82,7 +82,7 @@ begin
        end;
 
 
-    if lda_a(i) and (lda_stack(i) = false) and (lda_im(i) = false) and				// lda I			; 0
+    if lda_val(i) and (lda_im(i) = false) and							// lda I			; 0	~lda :STACKORIGIN
        add_sub(i+1) and										// add|sub			; 1
        sta_val(i+2) and										// sta				; 2	~sta :STACKORIGN
        ldy(i+3) then										// ldy I			; 3
@@ -188,7 +188,7 @@ begin
 
     if sta_stack(i) and										// sta :STACKORIGIN			; 0
        tay(i+1) and										// tay					; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       lda_val(i+2) and										// lda					; 2	~lda :STACKORIGIN
        add_sub_val(i+3) and									// add|sub				; 3
        ldy_stack(i+4) and									// ldy :STACKORIGIN			; 4
        sta_val(i+5) then									// sta					; 5	~sta :STACKORIGN
@@ -274,13 +274,13 @@ begin
       end;
 
 
-    if lda_a(i) and (lda_stack(i) = false) and							// lda I				; 0
+    if lda_val(i) and										// lda I				; 0	~lda :STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
        asl_a(i+2) and										// asl @				; 2
        tay(i+3) and										// tay					; 3
-       lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
+       lda_val(i+4) and										// lda					; 4	~lda :STACKORIGIN
        sta_a(i+5) and										// sta					; 5
-       lda_a(i+6) and (lda_stack(i+6) = false) and						// lda					; 6
+       lda_val(i+6) and										// lda					; 6	~lda :STACKORIGIN
        sta_a(i+7) and										// sta					; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+9			; 8
        asl_a(i+9) and										// asl @				; 9
