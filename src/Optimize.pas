@@ -1013,6 +1013,11 @@ var inxUse, found: Boolean;
      Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
    end;
 
+   function LDA_VAL(i: integer): Boolean;
+   begin
+     Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda :STACK', listing[i]) = 0);
+   end;
+
    function LDA_A(i: integer): Boolean;
    begin
      Result := (pos(#9'lda ', listing[i]) = 1);
