@@ -207,7 +207,7 @@
       if (pos('? '+copy(listing[i], 6, 256)+' ', optyBP2) > 0) or (pos(';'+copy(listing[i], 6, 256)+';', optyBP2) > 0) then optyBP2:='';
 
      if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or
-        (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) then optyBP2:='';
+        lab_l(i) or lab_b(i) or lab_c(i) then optyBP2:='';
 
      inc(i);
 

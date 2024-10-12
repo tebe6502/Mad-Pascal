@@ -1112,6 +1112,21 @@ var inxUse, found: Boolean;
      Result := (pos(#9'jmp l_', listing[i]) = 1);
    end;
 
+   function LAB_L(i: integer): Boolean;
+   begin
+     Result := (pos('l_', listing[i]) = 1);
+   end;
+
+   function LAB_B(i: integer): Boolean;
+   begin
+     Result := (pos('b_', listing[i]) = 1);
+   end;
+
+   function LAB_C(i: integer): Boolean;
+   begin
+     Result := (pos('c_', listing[i]) = 1);
+   end;
+
 
    function ADD(i: integer): Boolean;
    begin
@@ -2269,7 +2284,7 @@ end;
     if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
        sta_stack(i) and
        (jne(i+1) or jeq(i+1)) and
-       ((pos('l_', listing[i+2]) = 1) or (pos('b_', listing[i+2]) = 1)) then
+       (lab_l(i+2) or lab_b(i+2)) then
      begin
 	listing[i] := '';
 
