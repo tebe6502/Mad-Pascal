@@ -59,6 +59,6 @@
      end else
      if ((optyA <> '') and sty(i) and (listing[i] = #9'sty ' + optyA)) or
         lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
-        (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or //SKIP(i) or
+        lab_l(i) or lab_b(i) or lab_c(i) or //SKIP(i) or
 	(pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
 

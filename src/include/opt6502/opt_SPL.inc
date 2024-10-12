@@ -252,12 +252,12 @@ begin
 	(copy(listing[i+3], 6, 256) = copy(listing[i+11], 6, 256)) then
        begin
 
-	if pos('add :STACK', listing[i+8]) > 0 then
+	if add_stack(i+8) then
 	 listing[i+8] := #9'add ' + copy(listing[i], 6, 256)
 	else
 	 listing[i+8] := #9'sub ' + copy(listing[i], 6, 256);
 
-	if pos('adc :STACK', listing[i+11]) > 0 then
+	if adc_stack(i+11) then
 	 listing[i+11] := #9'adc ' + copy(listing[i+2], 6, 256)
 	else
 	 listing[i+11] := #9'sbc ' + copy(listing[i+2], 6, 256);

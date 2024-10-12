@@ -217,5 +217,5 @@
 
      if LabelIsUsed(i) or iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or jsr(i) or
         (pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) or ((optyA <> '') and (optyA = optyY)) or
-        {(listing[i] = '@') or} (pos('l_', listing[i]) = 1) or (pos('b_', listing[i]) = 1) or (pos('c_', listing[i]) = 1) or
+        {(listing[i] = '@') or} lab_l(i) or lab_b(i) or lab_c(i) or
 	(pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyY := '' end;
