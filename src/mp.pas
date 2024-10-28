@@ -15394,7 +15394,7 @@ while Tok[i].Kind in
   end;
 
 
-  if Tok[i].Kind = INITIALIZATIONTOK then begin
+  if (Tok[i].Kind = INITIALIZATIONTOK) or (Tok[i].Kind = BEGINTOK) then begin
 
    if not ImplementationUse then
     CheckTok(i, IMPLEMENTATIONTOK);
