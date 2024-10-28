@@ -1233,62 +1233,8 @@ case Tok[i].Kind of
 
     end;
 
-{
-  SHORTREALTOK:					// SHORTREAL	fixed-point	Q8.8
-    begin
 
-    CheckTok(i + 1, OPARTOK);
-
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then exit;
-
-    if ConstValType = SINGLETOK then begin
-     isError := false;
-     isConst := false;
-
-     iError(i, IncompatibleTypes, 0, ConstValType, SHORTREALTOK);
-
-    end else
-    if not(ConstValType in RealTypes) then
-      ConstVal := ConstVal * TWOPOWERFRACBITS;
-
-    CheckTok(j + 1, CPARTOK);
-
-    ConstValType := SHORTREALTOK;
-
-    Result := j + 1;
-    end;
-
-
-  REALTOK:					// REAL		fixed-point	Q24.8
-    begin
-
-    CheckTok(i + 1, OPARTOK);
-
-    j := CompileConstExpression(i + 2, ConstVal, ConstValType);
-
-    if isError then exit;
-
-    if ConstValType = SINGLETOK then begin
-     isError := false;
-     isConst := false;
-
-     iError(i, IncompatibleTypes, 0, ConstValType, REALTOK);
-
-    end else
-    if not(ConstValType in RealTypes) then
-      ConstVal := ConstVal * TWOPOWERFRACBITS;
-
-    CheckTok(j + 1, CPARTOK);
-
-    ConstValType := REALTOK;
-
-    Result := j + 1;
-    end;
-}
-
-  SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK:			// Q8.8 ; Q16.16 ; SINGLE 32bit ; FLOAT16
+  SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK:			// Q8.8 ; Q24.8 ; SINGLE 32bit ; FLOAT16
     begin
 
     CheckTok(i + 1, OPARTOK);

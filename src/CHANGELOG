@@ -1,3 +1,6 @@
+28.10.2024
+- unit: dodana możliwość użycia bloku begin-end alternatywnie do initialization-end
+
 03.10.2024
 - Optimize.pas (rebuild) bugfixes
 
