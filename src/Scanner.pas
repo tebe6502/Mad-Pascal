@@ -1795,7 +1795,7 @@ begin
 
     dec(NumTok, 2);
 
-    AddToken(UNITENDTOK, UnitIndex, Line, 0, 0);
+    AddToken(UNITENDTOK, UnitIndex, Tok[NumTok+1].Line - 1, 0, 0);
   end else
    AddToken(EOFTOK, UnitIndex, Line, 0, 0);
 
