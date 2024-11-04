@@ -178,6 +178,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [neo-solsuite](https://gitlab.com/bocianu/neo-solsuite)
 * [neo-mplib](https://gitlab.com/bocianu/neo-mplibs)
 * [Mafia](https://github.com/drunkeneye/MAFIA.A8)
+* [PokeyMAX](https://github.com/MADRAFi/PokeyMAX)
 * [PokeyMAX update tool](https://github.com/MADRAFi/PMAX_Update)
 
 ## Benchmarks
