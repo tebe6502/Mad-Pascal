@@ -169,8 +169,6 @@ begin
     result[0]:=#8;
     for i := 0 to 7 do
     begin
-        // config[CONFIG_VERSION]:= i;
-        // result[1 + i]:= chr(config[CONFIG_VERSION]);
         core_version:= i;
         result[1 + i]:= chr(core_version);
         

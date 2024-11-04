@@ -3,7 +3,7 @@ unit pm_config;
 * @type: unit
 * @author: MADRAFi <madrafi@gmail.com>
 * @name: PokeyMAX config library.
-* @version: 0.2.0
+* @version: 0.3.0
 
 * @description:
 * Set of useful constants, and structures to work with ATARI PokeyMAX. 
@@ -37,12 +37,12 @@ const
     CONFIG_OUT_CH1 = $2;
     CONFIG_OUT_CH2 = $4;
     CONFIG_OUT_CH3 = $8;
-    CONFIG_OUT_CH4 = $16;
+    CONFIG_OUT_CH4 = $10;
 
     CONFIG_RESTRICT_POKEY = $3;
     CONFIG_RESTRICT_SID = $4;
     CONFIG_RESTRICT_PSG = $8;
-    CONFIG_RESTRICT_COVOX = $16; 
+    CONFIG_RESTRICT_COVOX = $10; 
 
     CONFIG_PSGMODE_FREQ = $3;
     CONFIG_PSGMODE_STEREO = $c;
@@ -87,6 +87,8 @@ type
         psg_volume: Byte;       // 1 = AY Log           2 = YM2149 Log 1    3 = YM2149 Log 2        4 = Linear
         sid_1: Byte;            // 1 = 6581             2 = 8580            3 = 8580 Digi
         sid_2: Byte;            // 1 = 6581             2 = 8580            3 = 8580 Digi
+        pagesize: Word;         // 1024                 512
+        max_address: LongWord;  // $d600                $e600               $19800
     end;
 
 var 
@@ -105,13 +107,19 @@ procedure PMAX_WriteConfig;
 * Reads pmax_config record and updates PokeyMAX config settings.
 *)
 
+procedure PMAX_ReadFlashType;
+(*
+* @description:
+* Reads PokeyMAX flash type and saves data in pmax_config record.
+*)
+
 implementation
 
 procedure PMAX_ReadConfig;
 begin
-    case (config[CONFIG_MODE] and CONFIG_MODE_PHI) of
-        0: pmax_config.mode_phi:= 1;
-        32: pmax_config.mode_phi:= 2;
+    case (config[CONFIG_MODE] and CONFIG_MODE_MIXING) of
+        0: pmax_config.pokey_mixing:= 1;
+        1: pmax_config.pokey_mixing:= 2;
     end;
     case (config[CONFIG_MODE] and CONFIG_MODE_CHANNEL) of
         0: pmax_config.pokey_channel:= 1;
@@ -125,9 +133,9 @@ begin
         0: pmax_config.mode_mono:= 1;
         16: pmax_config.mode_mono:= 2;
     end;
-    case (config[CONFIG_MODE] and CONFIG_MODE_MIXING) of
-        0: pmax_config.pokey_mixing:= 1;
-        32: pmax_config.pokey_mixing:= 2;
+    case (config[CONFIG_MODE] and CONFIG_MODE_PHI) of
+        0: pmax_config.mode_phi:= 1;
+        32: pmax_config.mode_phi:= 2;
     end;
     case (config[CONFIG_RESTRICT] and CONFIG_RESTRICT_POKEY) of
         0: pmax_config.mode_pokey:= 1;
@@ -235,13 +243,14 @@ begin
     if (config[CONFIG_SIDMODE] and CONFIG_SIDMODE_SID2TYPE) = 1 then pmax_config.sid_2:= 1
     else if (config[CONFIG_SIDMODE] and CONFIG_SIDMODE_SID1DIGI) = 0 then pmax_config.sid_2:= 2
     else pmax_config.sid_2:= 3;
+
 end;
 
 procedure PMAX_WriteConfig;
 begin
-    case pmax_config.mode_phi of
-        1: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_PHI) or 0;
-        2: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_PHI) or 32;
+    case pmax_config.pokey_mixing of
+        1: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_MIXING) or 0;
+        2: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_MIXING) or 1;
     end;
     case pmax_config.pokey_channel of
         1: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_CHANNEL) or 0;
@@ -255,9 +264,9 @@ begin
         1: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_MONO) or 0;
         2: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_MONO) or 16;
     end;
-    case pmax_config.pokey_mixing of
-        1: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_MIXING) or 0;
-        2: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_MIXING) or 32;
+    case pmax_config.mode_phi of
+        1: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_PHI) or 0;
+        2: config[CONFIG_MODE]:=(config[CONFIG_MODE] and not CONFIG_MODE_PHI) or 32;
     end;
     case pmax_config.mode_pokey of
         1: config[CONFIG_RESTRICT]:=(config[CONFIG_RESTRICT] and not CONFIG_RESTRICT_POKEY) or 0;
@@ -387,7 +396,29 @@ begin
         config[CONFIG_SIDMODE]:=(config[CONFIG_SIDMODE] and not CONFIG_SIDMODE_SID2TYPE) or 0;
         config[CONFIG_SIDMODE]:=(config[CONFIG_SIDMODE] and not CONFIG_SIDMODE_SID2DIGI) or 1;
     end;
+end;
 
+procedure PMAX_ReadFlashType;
+begin
+    core_version := 5;
+    case char(core_version) of
+        '8':    begin   // flash M04
+                    pmax_config.pagesize:= 512;
+                    pmax_config.max_address:= $e600;
+                end;
+        '6':    begin   // flash M16
+                    pmax_config.pagesize:= 1024;
+                    pmax_config.max_address:= $19800;
+                end;
+        '4':    begin   // flash M04
+                    pmax_config.pagesize:= 512;
+                    pmax_config.max_address:= $d600;
+                end;
+        // else begin
+        //         pmax_config.pagesize:= 512;
+        //         pmax_config.max_address:= $e600;
+        // end;
+    end;
 end;
 
 end. 
