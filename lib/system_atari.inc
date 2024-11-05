@@ -5,7 +5,10 @@ procedure Pause; assembler; overload;
 Delay program execution (1/50 second).
 *)
 asm
-	lda:cmp:req :rtclok+2
+	bit VCOUNT
+	bmi *-3
+	bit VCOUNT
+	bpl *-3
 end;
 
 
@@ -22,7 +25,10 @@ loop	lda n
 	ora n+1
 	beq stop
 
-	lda:cmp:req :rtclok+2
+	bit VCOUNT
+	bmi *-3
+	bit VCOUNT
+	bpl *-3
 
 	dew n
 
