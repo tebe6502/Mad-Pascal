@@ -254,7 +254,7 @@ begin
 function GetLocalName(IdentIndex: integer; a: string =''): string;
 begin
 
- if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section then
+ if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section and (Ident[IdentIndex].isExternal = false) then
    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
  else
    Result := a + Ident[IdentIndex].Name;
