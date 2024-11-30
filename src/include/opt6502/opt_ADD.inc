@@ -2668,10 +2668,10 @@ begin
        sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda_a(i+2) and									// lda :STACKORIGIN			; 2
        add_sub_val(i+3) and								// add|sub				; 3
-       sta_a(i+4) and (sta_stack(i+4) = false) and					// sta A				; 4
+       sta_val(i+4) and									// sta A				; 4
        lda_a(i+5) and									// lda 					; 5
        (adc_eax_1(i+6) or sbc_eax_1(i+6)) and						// adc|sbc :eax+1			; 6
-       sta_a(i+7) and (sta_stack(i+7) = false) then					// sta A+1				; 7
+       sta_val(i+7) then								// sta A+1				; 7
     if (copy(listing[i], 6, 256) <> copy(listing[i+2], 6, 256)) and
        (copy(listing[i], 6, 256) <> copy(listing[i+5], 6, 256)) then
       begin

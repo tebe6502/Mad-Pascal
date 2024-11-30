@@ -1,10 +1,10 @@
 // -----------------------------------------------------------------------------
-// ===				      BOOL AND.
+// ===				      BOOL OR.
 // -----------------------------------------------------------------------------
 
-    if lab_a(i) and										//@					; 0	AND :STACK -> STA
+    if lab_a(i) and										//@					; 0	ORA :STACK -> STA
        tya(i+1) and										// tya					; 1
-       and_stack(i+2) and									// and :STACKORIGIN			; 2
+       ora_stack(i+2) and									// ora :STACKORIGIN			; 2
        sta_val(i+3) then									// sta 					; 3
      begin
 
@@ -12,13 +12,18 @@
       yes := true;
 
       for p:=i-1 downto 1 do
-       if ora_stack(p) or
-          (sty_stack(p) and lab_a(p-1) and lda(p+1) and and_stack(p+2)) or
+       if and_stack(p) or
+          (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
           (sty_stack(p) and lab_a(p-1) and (copy(listing[p], 6, 256) <> copy(listing[i+2], 6, 256))) or
-          (tya(p) and (lab_a(p-1) = false) and (and_stack(p+1) = false)) then begin yes:=false; Break end;
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
 
       if yes then begin
+
+
+      for p:=0 to l-1 do writeln(listing[p]);
+      writeln('-------');
+
 
        for p:=i-1 downto 0 do begin
 
@@ -27,7 +32,7 @@
 	if (listing[p] = #9'sty ' + tmp) then listing[p] := '';			// sty :STACKORIGIN
 
 	if (tya(p) = false) and							//~tya			; 0
-	   (listing[p+1] = listing[i+2]) and					// and :STACKORIGIN	; 1
+	   (listing[p+1] = listing[i+2]) and					// ora :STACKORIGIN	; 1
 	   (listing[p+2] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; 2
 	 begin
 	   listing[p+1]   := #9'jeq l_' + IntToHex(CodeSize, 4) + 's';
@@ -36,7 +41,7 @@
 
 	if lab_a(p) and								//@			; p
 	   tya(p+1) and								// tya			; p+1
-   	   and_(p+2) and							// and			; p+2
+   	   ora(p+2) and								// ora			; p+2
 	   (listing[p+3] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; p+3
 	 begin
 
@@ -54,14 +59,23 @@
 
 	if dey(p) and								// dey
 	   lab_a(p+1) 								//@
-	then
+	then begin
 	  listing[p] := #9'jmp l_' + IntToHex(CodeSize, 4) + 's';
+
+	end;
 
        end;
 
-       listing[i+1] := #9'mva:sne #$01 ' + copy(listing[i+3], 6, 256);
+       listing[i+1] := #9'mva:sne #$00 ' + copy(listing[i+3], 6, 256);
        listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's';
-       listing[i+3] := #9'mva #$00 ' + copy(listing[i+3], 6, 256);
+       listing[i+3] := #9'mva #$01 ' + copy(listing[i+3], 6, 256);
+
+
+
+      for p:=0 to l-1 do writeln(listing[p]);
+      writeln('-------');
+
+
 
        Result:=false; Break;
       end;

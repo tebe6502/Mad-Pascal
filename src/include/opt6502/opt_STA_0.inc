@@ -23,7 +23,7 @@ begin
      end;
 
 
-    if (listing[i] = '@') and									//@				; 0
+    if lab_a(i) and										//@				; 0
        sty_im_0(i+1) then									// sty #$00			; 1
       begin
        listing[i+1] := '';
@@ -416,7 +416,7 @@ begin
        lda(i+2) and										// lda  			; 2
        sub(i+3) and										// sub 				; 3
        sta_im_0(i+4) and									// sta #$00			; 4
-       (listing[i+5] = '@') then								//@				; 5
+       lab_a(i+5) then										//@				; 5
      begin
         listing[i]   := '';
         listing[i+1] := '';
