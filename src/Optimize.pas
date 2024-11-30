@@ -835,7 +835,7 @@ var inxUse, found: Boolean;
 
    function LAB_a(i: integer): Boolean;
    begin
-     Result := listing[i] = '@'
+     Result := (listing[i] = '@')
    end;
 
 
@@ -2677,6 +2677,7 @@ end;
 {$i include/opt6502/opt_WHILE_AND.inc}
 {$i include/opt6502/opt_WHILE_OR.inc}
 {$i include/opt6502/opt_BOOLEAN_AND.inc}
+//{$i include/opt6502/opt_BOOLEAN_OR.inc}
 
 // -----------------------------------------------------------------------------
 
