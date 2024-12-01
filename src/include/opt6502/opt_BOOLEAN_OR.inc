@@ -66,15 +66,12 @@
 
        end;
 
-       listing[i+1] := #9'mva:sne #$00 ' + copy(listing[i+3], 6, 256);
-       listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's';
-       listing[i+3] := #9'mva #$01 ' + copy(listing[i+3], 6, 256);
-
+       listing[i+1] := #9'lda:seq #$00';
+       listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$01';
 
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
-
 
 
        Result:=false; Break;

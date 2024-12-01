@@ -198,7 +198,7 @@ begin
 // 				     SHORTINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        (bpl(i+9) or bmi(i+9)) and								// bpl|bmi		; 9
        dey(i+10) and										// dey			; 10
        lab_a(i+11) and										//@			; 11
@@ -253,7 +253,7 @@ begin
       end;
 
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        (bpl(i+9) or bmi(i+9)) and								// bpl|bmi		; 9
        dey(i+10) and										// dey			; 10
        lab_a(i+11) and										//@			; 11
@@ -308,7 +308,7 @@ begin
      end;
 
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        bmi(i+16) and										// bmi			; 16
        dey(i+17) and										// dey			; 17
        lab_a(i+18) and										//@			; 18
@@ -372,7 +372,7 @@ begin
       end;
 
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        bpl(i+16) and										// bmi			; 16
        dey(i+17) and										// dey			; 17
        lab_a(i+18) and										//@			; 18
@@ -427,7 +427,7 @@ begin
       end;
 
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        (bpl(i+16) or bmi(i+16)) and								// bpl|bmi		; 16
        dey(i+17) and										// dey			; 17
        lab_a(i+18) and										//@			; 18
@@ -475,7 +475,7 @@ begin
 // 				     INTEGER
 // -----------------------------------------------------------------------------
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        (bpl(i+23) or bmi(i+23)) and								// bmi|bpl		; 23
        dey(i+24) and										// dey			; 24
        lab_a(i+25) and										//@			; 25
@@ -598,7 +598,7 @@ begin
       end;
 
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        (bpl(i+23) or bmi(i+23)) and								// bmi|bpl		; 23
        dey(i+24) and										// dey			; 24
        lab_a(i+25) and										//@			; 25

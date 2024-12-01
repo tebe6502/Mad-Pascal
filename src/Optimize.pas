@@ -204,6 +204,7 @@ var p, k , q: integer;
 {$i include/opt6502/opt_TEMP_JMP.inc}
 {$i include/opt6502/opt_TEMP_ZTMP.inc}
 {$i include/opt6502/opt_TEMP_UNROLL.inc}
+{$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
 
 
 begin
@@ -217,6 +218,7 @@ if (pos('lda #$29', TemporaryBuf[3]) > 0) then begin
 end;
 }
 
+    opt_TEMP_BOOLEAN_OR;
     opt_TEMP_ORD;
     opt_TEMP_CMP;
     opt_TEMP_CMP_0;

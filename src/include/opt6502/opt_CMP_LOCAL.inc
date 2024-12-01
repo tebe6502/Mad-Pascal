@@ -1029,7 +1029,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL				; 22	smallint -> shortint
+    if ENDL(i+22) and										// .ENDL				; 22	smallint -> shortint
 
        ldy_im_0(i) and										// ldy #$00				; 0
        lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
@@ -1083,7 +1083,7 @@ begin
       end;
 
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL				; 22
+    if ENDL(i+22) and										// .ENDL				; 22
 
        (listing[i] = #9'.LOCAL') and								// .LOCAL				; 0	integer -> smallint
        lda_im_0(i+1) and									// lda #$00				; 1
