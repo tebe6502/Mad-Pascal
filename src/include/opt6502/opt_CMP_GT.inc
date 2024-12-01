@@ -490,7 +490,7 @@ begin
 // 				     SHORTINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        seq(i+9) and										// seq			; 9
        (listing[i+10] = #9'bpl @+') and								// bpl @+		; 10
        dey(i+11) and										// dey			; 11
@@ -542,7 +542,7 @@ begin
       end;
 
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        seq(i+9) and										// seq			; 9
        (listing[i+10] = #9'bpl @+') and								// bpl @+		; 10
        dey(i+11) and										// dey			; 11
@@ -574,7 +574,7 @@ begin
 // 				     SMALLINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        seq(i+16) and										// seq			; 16
        (listing[i+17] = #9'bpl @+') and								// bpl @+		; 17
        dey(i+18)  and										// dey			; 18
@@ -646,7 +646,7 @@ begin
       end;
 
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        seq(i+16) and										// seq			; 16
        (listing[i+17] = #9'bpl @+') and								// bpl @+		; 17
        dey(i+18)  and										// dey			; 18
@@ -688,7 +688,7 @@ begin
 // 				     INTEGER
 // -----------------------------------------------------------------------------
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        seq(i+23) and										// seq			; 23
        bpl(i+24) and										// bpl @+		; 24
        dey(i+25) and										// dey			; 25
@@ -819,7 +819,7 @@ begin
       end;
 
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        seq(i+23) and										// seq			; 23
        bpl(i+24) and										// bpl @+		; 24
        dey(i+25) and										// dey			; 25

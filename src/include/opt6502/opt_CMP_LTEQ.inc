@@ -339,7 +339,7 @@ begin
        beq(i+3) and										// beq @+		; 3
        dey(i+4) and										// dey			; 4
        lab_a(i+5) and										//@			; 5
-       tya(i+6) then										// tya			; 6
+       (sty(i+6) or tya(i+6)) then								// sty|tya		; 6
       begin
        listing[i+2] := #9'cmp ' + copy(listing[i], 6, 256);
        listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
@@ -355,7 +355,7 @@ begin
 // 				     SHORTINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        bmi(i+9) and										// bmi @+		; 9
        beq(i+10) and										// beq @+		; 10
        dey(i+11) and										// dey			; 11
@@ -411,7 +411,7 @@ begin
       end;
 
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        bmi(i+9) and										// bmi @+		; 9
        beq(i+10) and										// beq @+		; 10
        dey(i+11) and										// dey			; 11
@@ -443,7 +443,7 @@ begin
 // 				     SMALLINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        (listing[i+16] = #9'bmi @+') and								// bmi @+		; 16
        (listing[i+17] = #9'beq @+') and								// beq @+		; 17
        dey(i+18) and										// dey			; 18
@@ -516,7 +516,7 @@ begin
       end;
 
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        (listing[i+16] = #9'bmi @+') and								// bmi @+		; 16
        (listing[i+17] = #9'beq @+') and								// beq @+		; 17
        dey(i+18) and										// dey			; 18
@@ -567,7 +567,7 @@ begin
 // 				     INTEGER
 // -----------------------------------------------------------------------------
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        (listing[i+23] = #9'bmi @+') and								// bmi @+		; 23
        (listing[i+24] = #9'beq @+') and								// beq @+		; 24
        dey(i+25) and										// dey			; 25
@@ -656,7 +656,7 @@ begin
       end;
 
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        (listing[i+23] = #9'bmi @+') and								// bmi @+		; 23
        (listing[i+24] = #9'beq @+') and								// beq @+		; 24
        dey(i+25) and										// dey			; 25

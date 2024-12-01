@@ -5,8 +5,8 @@
     if lab_a(i) and										//@					; 0	AND :STACK -> STA
        tya(i+1) and										// tya					; 1
        and_stack(i+2) and									// and :STACKORIGIN			; 2
-       sta_val(i+3) then									// sta 					; 3
-     begin
+       (sta_val(i+3) or (ldy(i+3) and sta_adr(i+4))) then					// sta|ldy				; 3
+     begin											//    |sta adr.				; 4
 
       tmp := copy(listing[i+2], 6, 256);
       yes := true;
@@ -59,9 +59,8 @@
 
        end;
 
-       listing[i+1] := #9'mva:sne #$01 ' + copy(listing[i+3], 6, 256);
-       listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's';
-       listing[i+3] := #9'mva #$00 ' + copy(listing[i+3], 6, 256);
+       listing[i+1] := #9'lda:sne #$01';
+       listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$00';
 
        Result:=false; Break;
       end;

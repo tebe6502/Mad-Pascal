@@ -4483,6 +4483,7 @@ case op of
        asm65(#9'beq @+');
        asm65(#9'dey');
        asm65('@');
+//       asm65(#9'tya');		!!! ~
        asm65(#9'sty :STACKORIGIN,x');
 
     end else begin
@@ -5485,9 +5486,9 @@ begin
 
  Gen;
 
- asm65(#9'dey', '; false');
+ asm65(#9'dey');
  asm65('@');
-
+// asm65(#9'tya');			!!! ~
  asm65(#9'sty :STACKORIGIN-1,x');
 
  a65(__subBX);
@@ -5756,7 +5757,7 @@ begin
 
  asm65(#9'dey');
  asm65('@');
-
+ //asm65(#9'tya');			!!! ~
  asm65(#9'sty :STACKORIGIN-1,x');
 
  a65(__subBX);

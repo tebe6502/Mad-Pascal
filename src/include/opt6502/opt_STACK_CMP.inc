@@ -1282,7 +1282,7 @@ begin
      end;
 
 
-    if (listing[i+23] = #9'.ENDL') and								// .ENDL		; 23
+    if ENDL(i+23) and										// .ENDL		; 23
 
        ldy_1(i) and										// ldy #1		; 0
        (listing[i+1] = #9'.LOCAL') and								// .LOCAL		; 1
@@ -1431,7 +1431,7 @@ begin
      end;
 
 
-    if (listing[i+16] = #9'.ENDL') and								// .ENDL				; 16
+    if ENDL(i+16) and										// .ENDL				; 16
 
        ldy_1(i) and										// ldy #1				; 0
        (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
@@ -1570,7 +1570,7 @@ begin
      end;
 
 
-    if (listing[i+9] = #9'.ENDL') and								// .ENDL				; 9
+    if ENDL(i+9) and										// .ENDL				; 9
 
        ldy_1(i) and										// ldy #1				; 0
        (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1

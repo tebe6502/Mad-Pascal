@@ -207,7 +207,7 @@ begin
 // 				     SHORTINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+8] = #9'.ENDL') and								// .ENDL		; 8
+    if ENDL(i+8) and										// .ENDL		; 8
        (beq(i+9) or bne(i+9)) and								// beq|bne		; 9
        dey(i+10) and										// dey			; 10
        lab_a(i+11) and										//@			; 11
@@ -248,7 +248,7 @@ begin
 // 				     SMALLINT
 // -----------------------------------------------------------------------------
 
-    if (listing[i+15] = #9'.ENDL') and								// .ENDL		; 15
+    if ENDL(i+15) and										// .ENDL		; 15
        (beq(i+16) or bne(i+16)) and								// beq|bne		; 16
        dey(i+17) and										// dey			; 17
        lab_a(i+18) and										//@			; 18
@@ -306,7 +306,7 @@ begin
 // 				     INTEGER
 // -----------------------------------------------------------------------------
 
-    if (listing[i+22] = #9'.ENDL') and								// .ENDL		; 22
+    if ENDL(i+22) and										// .ENDL		; 22
        (beq(i+23) or bne(i+23)) and								// beq|bne		; 23
        dey(i+24) and										// dey			; 24
        lab_a(i+25) and										//@			; 25
