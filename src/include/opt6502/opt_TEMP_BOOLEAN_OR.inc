@@ -44,6 +44,8 @@ begin
   p:=7;
   yes:=false;
 
+  tmp := #9'ora ' + copy(TemporaryBuf[6], 6, 256);
+
   while (p < 512) and
         (TemporaryBuf[p] = #9'ldy #1') and						// ldy #1
         (pos('lda ', TemporaryBuf[p+1]) > 0) and					// lda
@@ -52,7 +54,8 @@ begin
         (TemporaryBuf[p+4] = #9'dey') and						// dey
         (TemporaryBuf[p+5] = '@') and							//@
         (TemporaryBuf[p+6] = #9'tya') and						// tya
-        (pos('ora :STACK', TemporaryBuf[p+7]) > 0) and					// ora :STACKORIGIN
+//        (pos('ora :STACK', TemporaryBuf[p+7]) > 0) and				// ora :STACKORIGIN
+        (TemporaryBuf[p+7] = tmp) and
         (pos('sta ', TemporaryBuf[p+8]) > 0) do						// sta
      begin
 

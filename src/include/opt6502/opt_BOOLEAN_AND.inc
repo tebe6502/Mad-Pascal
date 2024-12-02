@@ -6,7 +6,7 @@
        tya(i+1) and										// tya					; 1
        and_stack(i+2) and									// and :STACKORIGIN			; 2
        (sta_val(i+3) or (ldy(i+3) and sta_adr(i+4))) then					// sta|ldy				; 3
-     begin											//    |sta adr.				; 4
+     begin   											//    |sta adr.				; 4
 
       tmp := copy(listing[i+2], 6, 256);
       yes := true;
