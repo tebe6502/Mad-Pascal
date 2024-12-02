@@ -2645,6 +2645,28 @@ begin
 // -----------------------------------------------------------------------------
 
 
+    if lda_a(i) and									// lda					; 0
+       add_eax(i+1) and									// add :eax				; 1
+       sta_a(i+2) and									// sta					; 2
+       lda_a(i+3) and									// lda					; 3
+       adc_eax_1(i+4) and								// adc :eax+1				; 4
+       sta_a(i+5) and									// sta					; 5
+											//					; 6
+       (adc(i+7) = false) then								//~adc					; 7
+       begin
+
+        listing[i+1] := #9'add ' + copy(listing[i], 6, 256);
+
+	listing[i+4] := #9'adc ' + copy(listing[i+3], 6, 256);
+
+	listing[i]   := #9'lda :eax';
+
+	listing[i+3] := #9'lda :eax+1';
+
+	exit(false);
+       end;
+
+
     if lda_stack(i) and									// lda :STACKORIGIN+STACKWIDTH		; 0
        sta_eax_1(i+1) and								// sta :eax+1				; 1
        lda_eax(i+2) and									// lda :eax				; 2
