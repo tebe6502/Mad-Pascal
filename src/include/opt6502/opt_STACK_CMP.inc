@@ -53,6 +53,19 @@ begin
 
 
     if lab_a(i) and										//@					; 0
+       tya(i+1) and										// tya					; 1
+       sta_val(i+2) and										// sta					; 2
+       dex(i+3) then										// dex					; 3
+     begin
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if lab_a(i) and										//@					; 0
        (listing[i+1] = #9'sty :STACKORIGIN-1,x') and						// sty :STACKORIGIN-1,x			; 1
        dex(i+2) then										// dex					; 2
      begin
