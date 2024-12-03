@@ -24,6 +24,15 @@ begin
 
 	writeln('Pascal RMT player example');
 
+
+	asm
+
+	lda #$c0		; $00 max volume ; $f0 silenc
+	sta RMTGLOBALVOLUMEFADE
+
+	end;
+	
+
 	repeat
 		pause;
 
