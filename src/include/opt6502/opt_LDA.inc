@@ -591,10 +591,10 @@ begin
      end;
 
 
-    if lda(i) and 										// lda #$00		; 0
+    if lda_a(i) and (iy(i) = false) and								// lda #$00		; 0
        STA_BP2_Y(i+1) and 									// sta (:bp2),y		; 1
        iny(i+2) and										// iny			; 2 5 8
-       lda(i+3) and 										// lda #$00		; 3 6 9
+       lda_a(i+3) and (iy(i+3) = false) and							// lda #$00		; 3 6 9
        STA_BP2_Y(i+4) then									// sta (:bp2),y 	; 4 7 10
       if listing[i] = listing[i+3] then begin
 
