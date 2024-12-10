@@ -725,6 +725,8 @@ function Sqrt(x: Single): Single; overload;
 @description
 Sqrt returns the square root of its argument X, which must be positive
 
+https://suraj.sh/fast-square-root-approximation
+
 @param: x - Single
 
 @returns: Single
@@ -739,13 +741,29 @@ begin
 
 	c:=cardinal(x);
 
+	// Solved equation for square roots
+	c := $1fbd3f7d + (c shr 1);		// c := 0.00000000000000000008014964607000 + c/2
+
+	Result := sp^;
+
+	// Newton-Rapson iteration
+	Result := (((Result * Result) + x) / Result) * 0.5;
+
+{
+	if integer(x) <= 0 then exit(single(0.0));
+
+	sp:=@c;
+
+	c:=cardinal(x);
+
 	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;	// 1 = f32($3f800000)
 
 	Result := sp^;
 
 	Result:=(Result + x/Result) * 0.5;
 	Result:=(Result + x/Result) * 0.5;
-//	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+}
 end;
 
 
@@ -753,6 +771,8 @@ function Sqrt(x: float16): float16; overload;
 (*
 @description
 Sqrt returns the square root of its argument X, which must be positive
+
+https://suraj.sh/fast-square-root-approximation
 
 @param: x - float16
 
@@ -768,13 +788,31 @@ begin
 
 	c:=word(x);
 
+	// Solved equation for square roots
+	c :=  $1e00 + (c shr 1);
+
+	Result := sp^;
+
+	// Newton-Rapson iteration
+	Result := (((Result * Result) + x) / Result) * 0.5;
+
+{
+	if smallint(x) <= 0 then exit(float16(0.0));
+
+	sp:=@c;
+
+	c:=word(x);
+
 	if c > $3c00 then c := (c - $3c00) shr 1 + $3c00;
 
 	Result := sp^;
 
 	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+//	Result:=(Result + x/Result) * 0.5;		wymagane dla malych wartosci np. 1/64
 //	Result:=(Result + x/Result) * 0.5;
 //	Result:=(Result + x/Result) * 0.5;
+}
 end;
 
 
@@ -803,7 +841,7 @@ begin
 
 	Result:=(Result + x/Result) * 0.5;
 	Result:=(Result + x/Result) * 0.5;
-//	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
 end;
 
 
