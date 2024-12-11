@@ -1,3 +1,6 @@
+11.12.2024
+- SYSTEM.PAS: SQRT(single), SQRT(float16) szybsza i większa precyzja obliczeń
+
 01.12.2024
 - opt_TEMP_BOOLEAN_OR.inc
 
