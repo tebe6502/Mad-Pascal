@@ -747,7 +747,9 @@ begin
 	Result := sp^;
 
 	// Newton-Rapson iteration
-	Result := (((Result * Result) + x) / Result) * 0.5;
+//	Result := (((Result * Result) + x) / Result) * 0.5;
+
+	Result:=(Result + x/Result) * 0.5;
 
 {
 	if integer(x) <= 0 then exit(single(0.0));
@@ -794,7 +796,9 @@ begin
 	Result := sp^;
 
 	// Newton-Rapson iteration
-	Result := (((Result * Result) + x) / Result) * 0.5;
+//	Result := (((Result * Result) + x) / Result) * 0.5;
+
+	Result:=(Result + x/Result) * 0.5;
 
 {
 	if smallint(x) <= 0 then exit(float16(0.0));
@@ -809,9 +813,9 @@ begin
 
 	Result:=(Result + x/Result) * 0.5;
 	Result:=(Result + x/Result) * 0.5;
-//	Result:=(Result + x/Result) * 0.5;		wymagane dla malych wartosci np. 1/64
-//	Result:=(Result + x/Result) * 0.5;
-//	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x/Result) * 0.5;
 }
 end;
 
