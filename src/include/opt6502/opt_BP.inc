@@ -628,7 +628,6 @@ begin
 	exit(false);
        end;
 
-// xxxxxxxxxxxxxxx
 
     if //ldy_im(i) and										// ldy #				; 0	cardinal
        LDA_BP2_Y(i+1) and									// lda (:bp2),y				; 1
@@ -688,6 +687,67 @@ begin
        end;
 
 
+(* xxxxxxxxxxxxxxxxxxxxxxxxx
+    if //ldy_im(i) and										// ldy #				; 0	word
+       LDA_BP2_Y(i+1) and									// lda (:bp2),y				; 1
+       add_sub(i+2) and										// add|sub				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN			; 3
+       iny(i+4) and										// iny					; 4
+       LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
+       adc_sbc(i+6) and										// adc|sbc				; 6
+       sta_stack(i+7) {and									// sta :STACKORIGIN+STACKWIDTH		; 7
+
+       ldy(i+8)
+
+       lda_stack(i+6) and									// lda :STACKORIGIN			; 6
+       (add_sub(i+7) or and_ora_eor(i+7)) and (iy(i+7) = false) and				// add|sub|and|ora|eor A		; 7
+       sta(i+8) and										// sta 					; 8
+       lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
+       (adc_sbc(i+10) or and_ora_eor(i+10)) and							// adc|sbc|and|ora|eor A+1	 	; 10
+       sta(i+11) then										// sta 					; 11
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
+	(copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256))} then
+       begin
+
+      for p:=0 to l-1 do writeln(listing[p]);
+      writeln('-------');
+{
+	listing[i+1] := #9'lda (:bp2),y';
+	listing[i+2] := listing[i+7];
+	listing[i+3] := listing[i+8];
+	listing[i+4] := #9'iny';
+	listing[i+5] := #9'lda (:bp2),y';
+	listing[i+6] := listing[i+10];
+	listing[i+7] := listing[i+11];
+
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10]:= '';
+	listing[i+11]:= '';
+
+	exit(false);}
+       end;
+
+{
+	ldy #CONTEXT.BUFCNT-DATAORIGIN
+	lda (:bp2),y
+	add NUM
+	sta :STACKORIGIN+9
+	iny
+	lda (:bp2),y
+	adc NUM+1
+	sta :STACKORIGIN+STACKWIDTH+9
+
+	ldy #CONTEXT.BUFCNT-DATAORIGIN
+	lda :STACKORIGIN+9
+	sta (:bp2),y
+	iny
+	lda :STACKORIGIN+STACKWIDTH+9
+	sta (:bp2),y
+}
+*)
+
+
     if //ldy_im(i) and										// ldy #				; 0	word
        LDA_BP2_Y(i+1) and									// lda (:bp2),y				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
@@ -726,10 +786,10 @@ begin
        iny(i+3) and										// iny					; 3
        LDA_BP2_Y(i+4) and									// lda (:bp2),y				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
-       lda_stack(i+6) and									// lda					; 6
+       lda_a(i+6) and (iy(i+6) = false) and							// lda					; 6
        (add_sub_stack(i+7) or and_ora_eor_stack(i+7)) and					// add|sub|and|ora|eor :STACKORIGIN	; 7
        sta(i+8) and										// sta 					; 8
-       lda_stack(i+9) and									// lda					; 9
+       lda_a(i+9) and (iy(i+9) = false) and							// lda					; 9
        (adc_sbc_stack(i+10) or and_ora_eor_stack(i+10)) and					// adc|sbc|and|ora|eor :STACKORIGIN+ 	; 10
        sta(i+11) then										// sta 					; 11
      if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and
@@ -998,7 +1058,6 @@ begin
 	exit(false);
        end;
 
-// xxxxxxxxxxxxxxxxxxxx
 
     if sta_bp2(i) and										// sta :bp2				; 0
        lda_a(i+1) and										// lda					; 1
@@ -1177,7 +1236,7 @@ begin
        end;
 
 
-    if ldy_im_0(i) and										// ldy #$00				; 0
+    if ldy(i) and (listing[i] = listing[i+18]) and						// ldy XXX				; 0
        LDA_BP2_Y(i+1) and									// lda (:bp2),y				; 1
        sta(i+2) and										// sta :STACKORIGIN+10			; 2
        iny(i+3) and										// iny					; 3
@@ -1195,7 +1254,7 @@ begin
        lda(i+15) and										// lda OFFSET+1				; 15
        adc_sbc(i+16) and									// add|sub				; 16
        sta_bp2_1(i+17) and									// sta :bp2+1				; 17
-       ldy_im_0(i+18) and									// ldy #$00				; 18
+//       ldy(i+18) and										// ldy XXX				; 18
        lda(i+19) and										// lda :STACKORIGIN+10			; 19
        STA_BP2_Y(i+20) and									// sta (:bp2),y				; 20
        iny(i+21) and										// iny					; 21
@@ -1864,7 +1923,7 @@ begin
        lda(i+1) and										// lda P+1			; 1
        sta_bp_1(i+2) and									// sta :bp+1			; 2
        lda_bp_y(i+3) and									// lda (:bp),y			; 3
-       mwy_bp2(i+4) then									// mwy ... :bp2			; 4	!!!
+       mwy_bp2(i+4) then									// mwy  :bp2			; 4	!!!
      if (copy(listing[i], 6, 256) = GetString(i+4)) and
         (#9'lda ' + copy(listing[i], 6, 256) + '+1' = listing[i+1]) then
       begin
@@ -1877,7 +1936,7 @@ begin
       end;
 
 
-    if mwy_bp2(i) and										// mwy ... :bp2			; 0	!!!
+    if mwy_bp2(i) and										// mwy  :bp2			; 0	!!!
        ldy(i+1) and										// ldy				; 1
        lda_bp2_y(i+2) and									// lda (:bp2),y			; 2
        sta_stack(i+3) and									// sta :STACKORIGIN		; 3
@@ -2144,7 +2203,7 @@ begin
 
     if lda_a(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN		; 1
-       mwy_bp2(i+2) and										// mwy   :bp2			; 2
+       mwy_bp2(i+2) and										// mwy  :bp2			; 2
        ldy(i+3) and										// ldy X			; 3
        lda_bp2_y(i+4) and									// lda (:bp2),y			; 4
        ldy_stack(i+5) then									// ldy :STACKORIGIN		; 5
