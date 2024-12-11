@@ -874,7 +874,9 @@ var inxUse, found: Boolean;
 
    function STY(i: integer): Boolean;
    begin
-     Result := (pos(#9'sty ', listing[i]) = 1) and (pos(#9'sty #$00', listing[i]) = 0);
+     if listing[i] = #9'sty #$00' then exit(false);
+
+     Result := pos(#9'sty ', listing[i]) = 1;
    end;
 
    function STY_STACK(i: integer): Boolean;
@@ -2212,7 +2214,7 @@ end;
 
 
 {
-if (pos('lda #$00', listing[i]) > 0) then begin
+if (pos('sta :bp2+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
