@@ -675,9 +675,9 @@ begin
 
 	sp:=@c;
 
-	c:=cardinal(x);
+	//c:=cardinal(x);
 
-	c:=(c shr 8) + $100;
+	c := cardinal(x) shr 8 + $100;
 
 	Result := sp^;
 
@@ -734,38 +734,21 @@ https://suraj.sh/fast-square-root-approximation
 var sp: ^single;
     c: cardinal;
 begin
-
 	if integer(x) <= 0 then exit(single(0.0));
 
 	sp:=@c;
 
-	c:=cardinal(x);
+	//c:=cardinal(x) shr 1;
 
 	// Solved equation for square roots
-	c := $1fbd3f7d + (c shr 1);		// c := 0.00000000000000000008014964607000 + c/2
+	//c := (c + $3f800000) shr 1;
+	c := (cardinal(x) shr 1) + $1fc00000;
 
 	Result := sp^;
 
 	// Newton-Rapson iteration
-//	Result := (((Result * Result) + x) / Result) * 0.5;
-
 	Result:=(Result + x/Result) * 0.5;
-
-{
-	if integer(x) <= 0 then exit(single(0.0));
-
-	sp:=@c;
-
-	c:=cardinal(x);
-
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;	// 1 = f32($3f800000)
-
-	Result := sp^;
-
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-}
+//	Result:=(Result + x/Result) * 0.5;	// x < 1 -> higher precision
 end;
 
 
@@ -783,40 +766,20 @@ https://suraj.sh/fast-square-root-approximation
 var sp: ^float16;
     c: word;
 begin
-
 	if smallint(x) <= 0 then exit(float16(0.0));
 
 	sp:=@c;
 
-	c:=word(x);
+	//c:=word(x) shr 1;
 
 	// Solved equation for square roots
-	c :=  $1e00 + (c shr 1);
+	//c := (c + $3c00) shr 1;
+	c := (word(x) shr 1) + $1e00;
 
 	Result := sp^;
 
 	// Newton-Rapson iteration
-//	Result := (((Result * Result) + x) / Result) * 0.5;
-
 	Result:=(Result + x/Result) * 0.5;
-
-{
-	if smallint(x) <= 0 then exit(float16(0.0));
-
-	sp:=@c;
-
-	c:=word(x);
-
-	if c > $3c00 then c := (c - $3c00) shr 1 + $3c00;
-
-	Result := sp^;
-
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-}
 end;
 
 
