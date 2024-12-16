@@ -11,7 +11,7 @@ begin
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
       (TemporaryBuf[3] = '') and							//			; 3
-      (pos('; optimize OK', TemporaryBuf[4]) > 0) and					//; optimize OK		; 4
+      (pos('; optimize ', TemporaryBuf[4]) > 0) and					//; optimize 		; 4
       (TemporaryBuf[5] = '') and							//			; 5
       (TemporaryBuf[6] = TemporaryBuf[0]) and						// lda I		; 6
       (SKIP(7) = false) then
@@ -69,9 +69,9 @@ begin
    if (pos('lda ', TemporaryBuf[0]) > 0) and						// lda W		; 0
       (pos('cmp ', TemporaryBuf[1]) > 0) and						// cmp			; 1
       SKIP(2) and									// SKIP			; 2
-											//			; 3
-      (pos('; optimize OK', TemporaryBuf[4]) > 0) and					//; optimize OK		; 4
-											//			; 5
+      (TemporaryBuf[3] = '') and							//			; 3
+      (pos('; optimize ', TemporaryBuf[4]) > 0) and					//; optimize 		; 4
+      (TemporaryBuf[5] = '') and							//			; 5
       (pos('ldy ', TemporaryBuf[6]) > 0) and						// ldy W		; 6
       (pos('lda ', TemporaryBuf[7]) > 0) then						// lda 			; 7
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then

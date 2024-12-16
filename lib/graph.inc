@@ -22,6 +22,7 @@ FillPoly
 FillRect
 FloodFill
 FloodFillH
+MoveTo
 MoveRel
 NewBuffer
 PieSlice

@@ -267,7 +267,7 @@ sk1
 
 	ldy y
 	lda adr.lineLo,y
-	add lfb:#0
+	adc lfb:#0
 	sta :bp2
 
 	lda adr.lineHi,y
@@ -344,7 +344,7 @@ sk1
 
 	ldy y
 	lda adr.lineLo,y
-	add lfb:#0
+	adc lfb:#0
 	sta :bp2
 
 	lda adr.lineHi,y
@@ -605,11 +605,11 @@ sk2
 	bcc ok2
 
 	mwa MAIN.SYSTEM.ScreenWidth x1
-
+	clc
 ok2
 	ldy y
 	lda adr.lineLo,y
-	add lfb:#0
+	adc lfb:#0
 	sta :bp2
 
 	lda adr.lineHi,y
@@ -969,12 +969,24 @@ _1
 	cpw y main.system.ScreenHeight
 	bcc _2
 
-	sbw main.system.ScreenHeight #1 y
+	lda main.system.ScreenHeight
+	ldy main.system.ScreenHeight+1
+	sbc #1
+	scs
+	dey
+	sta y
+	sty y+1
 _2
 	cpw x main.system.ScreenWidth
 	bcc _3
 
-	sbw main.system.ScreenWidth #1 x
+	lda main.system.ScreenWidth
+	ldy main.system.ScreenWidth+1
+	sbc #1
+	scs
+	dey
+	sta x
+	sty x+1	
 _3
 	mwa x CurrentX
 	mwa y CurrentY

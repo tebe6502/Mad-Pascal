@@ -13,7 +13,7 @@ begin
       (pos('jmp l_', TemporaryBuf[2]) > 0) and						// jmp l_xxxx		; 2
       (pos('l_', TemporaryBuf[3]) = 1) and						//l_xxxx		; 3
       (TemporaryBuf[4] = '') and							//			; 4
-      (pos('; optimize OK', TemporaryBuf[5]) > 0) and					//; optimize OK		; 5
+      (pos('; optimize ', TemporaryBuf[5]) > 0) and					//; optimize 		; 5
       (TemporaryBuf[6] = '') and							//			; 6
       (pos('lda ', TemporaryBuf[7]) > 0) then						// lda A		; 7
     if (TemporaryBuf[3] = copy(TemporaryBuf[2], 6, 256)) and
