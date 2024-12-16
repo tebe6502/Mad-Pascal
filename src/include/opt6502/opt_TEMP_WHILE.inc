@@ -7,6 +7,7 @@ procedure opt_TEMP_WHILE;
 var p: integer;
 begin
 
+
    if (TemporaryBuf[2] = '; --- WhileProlog') and					//; --- WhileProlog	; 2
       (pos('sta ', TemporaryBuf[0]) > 0) and						// sta K+1		; 0
 											//			; 1
