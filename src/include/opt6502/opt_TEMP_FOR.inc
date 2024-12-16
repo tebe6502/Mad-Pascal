@@ -7,6 +7,7 @@ procedure opt_TEMP_FOR;
 var p: integer;
 begin
 
+
     if //(TemporaryBuf[0] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 0
        (pos('inc ', TemporaryBuf[1]) > 0) and 						// inc W		; 1
        (TemporaryBuf[2] = #9'sne') and							// sne			; 2

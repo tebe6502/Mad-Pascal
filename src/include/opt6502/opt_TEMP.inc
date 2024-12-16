@@ -7,7 +7,38 @@ var p: integer;
 begin
 
 
-   if (pos('jcs ', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+   if (pos('lda ', TemporaryBuf[10]) > 0) and						// inc			; 11
+      (pos('cmp ', TemporaryBuf[11]) > 0) and						// inc			; 11
+      (pos('jcc l_', TemporaryBuf[12]) > 0) and						// jcc			; 10	branch if C=0
+      (pos('lda ', TemporaryBuf[13]) > 0) and						// lda			; 11	C=1
+      (pos('sub ', TemporaryBuf[14]) > 0) then						// sub			; 11
+    begin
+	TemporaryBuf[14] := #9'sbc ' + copy(TemporaryBuf[14], 6, 256);
+    end;
+
+
+   if (pos('jcc l_', TemporaryBuf[10]) > 0) and						// jcc			; 10	branch if C=0
+      (TemporaryBuf[11] = '') and							//			; 11
+      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
+      (TemporaryBuf[13] = '') and							//			; 13	C=1
+      (pos('sub ', TemporaryBuf[14]) > 0) then						// sub			; 14
+    begin
+	TemporaryBuf[14] := #9'sbc ' + copy(TemporaryBuf[14], 6, 256);
+    end;
+
+
+   if (pos('jcc l_', TemporaryBuf[10]) > 0) and						// jcc			; 10	branch if C=0
+      (TemporaryBuf[11] = '') and							//			; 11
+      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
+      (TemporaryBuf[13] = '') and							//			; 13	C=1
+      (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
+      (pos('sub ', TemporaryBuf[15]) > 0) then						// sub			; 15
+    begin
+	TemporaryBuf[15] := #9'sbc ' + copy(TemporaryBuf[15], 6, 256);
+    end;
+
+
+   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=0
@@ -17,7 +48,18 @@ begin
     end;
 
 
-   if (pos('jcs ', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+      (TemporaryBuf[11] = '') and							//			; 11
+      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
+      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
+      (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
+    begin
+	TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
+    end;
+
+
+   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=0
@@ -28,7 +70,7 @@ begin
     end;
 
 
-   if (pos('jcs ', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=0
@@ -61,7 +103,7 @@ begin
       (TemporaryBuf[12] = '') and							//			; 12
       (pos('; optimize ', TemporaryBuf[13]) > 0) and					//; optimize 		; 13
       (TemporaryBuf[14] = '') and							//			; 14	C=1
-      (pos('sub ', TemporaryBuf[15]) > 0) then						// add			; 15
+      (pos('sub ', TemporaryBuf[15]) > 0) then						// sub			; 15
     begin
 	TemporaryBuf[10] := #9'bcs @+';
 
