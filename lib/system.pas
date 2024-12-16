@@ -2369,7 +2369,7 @@ asm
 	bcs stop
 
 	sta Index
-	add Count
+	adc Count
 	sta ln
 	lda #$00
 	adc #$00
@@ -2383,8 +2383,8 @@ ln	equ *-1
 	bcc ok
 
 	lda (:bp2),y
-	sub Index
-	add #1
+	sbc Index
+	adc #$00
 	sta Count
 
 ok	lda Count

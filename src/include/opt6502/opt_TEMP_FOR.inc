@@ -309,7 +309,7 @@ begin
       (pos('cmp ', TemporaryBuf[5]) > 0) and						// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      											//; optimize OK		; 8
+      (pos('; optimize ', TemporaryBuf[8]) > 0) and					//; optimize 		; 8
       (TemporaryBuf[9] = '') and							//			; 9
       (pos('lda ', TemporaryBuf[10]) > 0) then						// lda			; 10
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
@@ -349,7 +349,7 @@ begin
       (pos('cmp ', TemporaryBuf[5]) > 0) and						// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      											//; optimize OK		; 8
+      (pos('; optimize ', TemporaryBuf[8]) > 0) and					//; optimize 		; 8
       (TemporaryBuf[9] = '') and							//			; 9
       (TemporaryBuf[10] = #9'ldy ' + copy(TemporaryBuf[4], 6, 256)) then		// ldy C		; 10
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
@@ -466,7 +466,7 @@ begin
 	     (pos('sta ',TemporaryBuf[p-7]) > 0) and
 
 	     (TemporaryBuf[p+2] = '') and
-	     (pos('; optimize OK', TemporaryBuf[p+3]) > 0) and
+	     (pos('; optimize ', TemporaryBuf[p+3]) > 0) and
 	     (TemporaryBuf[p+4] = '') and
 	     (pos('lda ',TemporaryBuf[p+5]) > 0) and
 	     ((pos('add ',TemporaryBuf[p+6]) > 0) or (pos('sub ',TemporaryBuf[p+6]) > 0)) and
@@ -501,7 +501,7 @@ begin
       (TemporaryBuf[3] = #9'cmp #$40') and						// cmp #$40		; 3
       (pos('jcs l_', TemporaryBuf[4]) > 0) and						// jcs l_		; 4
       (TemporaryBuf[5] ='') and								//			; 5
-      											//; optimize		; 6
+      (pos('; optimize ', TemporaryBuf[6]) > 0) and					//; optimize		; 6
       (TemporaryBuf[7] ='') and								//			; 7
       (pos('lda ', TemporaryBuf[8]) > 0) then						// lda			; 8
      begin
@@ -509,5 +509,27 @@ begin
       TemporaryBuf[3] := '~';
       TemporaryBuf[4] := #9'jvs ' + copy(TemporaryBuf[4], 6, 256);
      end;
+
+
+   if (pos('l_', TemporaryBuf[0]) = 1) and						//l_2092		; 0
+      (TemporaryBuf[1] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 1
+      (pos('lda ', TemporaryBuf[2]) > 0) and						// lda			; 2
+      (pos('cmp ', TemporaryBuf[3]) > 0) and						// cmp			; 3
+      (TemporaryBuf[4] = #9'bcc @+') and						// bcc @+		; 4
+      (pos('jne l_', TemporaryBuf[5]) > 0) and						// jne l_		; 5
+      (pos('lda ', TemporaryBuf[6]) > 0) and						// lda			; 6
+      (pos('cmp ', TemporaryBuf[7]) > 0) and						// cmp			; 7
+      (TemporaryBuf[8] = #9'bcc @+') and						// bcc @+		; 8
+      (pos('jne l_', TemporaryBuf[9]) > 0) and						// jne l_		; 9
+      (TemporaryBuf[10] = '@') and							//@			; 10
+      (TemporaryBuf[11] ='') and							//			; 11
+      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize		; 12
+      (TemporaryBuf[13] ='') and							//			; 13
+      (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
+      (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
+     begin
+      TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
+     end;
+
 
 end;	// procedure

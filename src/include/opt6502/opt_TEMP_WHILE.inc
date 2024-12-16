@@ -42,8 +42,8 @@ begin
       if (SKIP(p-1) = false) and							//~SKIP			; p-1
          ((pos('inc ', TemporaryBuf[p]) > 0) or (pos('dec ', TemporaryBuf[p]) > 0)) and	// inc|dec K		; p
          (TemporaryBuf[p+1] = copy(TemporaryBuf[3], 6, 256)) and			//l_00FA		; p+1
-	 										//			; p+2
-         (pos('; optimize OK', TemporaryBuf[p+3]) > 0) and				// optimize OK		; p+3
+											//			; p+2
+         (pos('; optimize ', TemporaryBuf[p+3]) > 0) and				// optimize 		; p+3
          (tmp = copy(TemporaryBuf[p], 6, 256)) and					//			; p+4
          (TemporaryBuf[p+5] = #9'lda ' + tmp) and					// lda K		; p+5
          (TemporaryBuf[p+6] = #9'jne ' + TemporaryBuf[4]) then				// jne l_00FB		; p+6
@@ -72,7 +72,7 @@ begin
 	   (TemporaryBuf[p-1] = #9'dec ' + copy(TemporaryBuf[1], 6, 256)) and	// dec K		; p-1
 										//			; p
 	   (TemporaryBuf[p+1] = '') and						//			; p+1
-           (pos('; optimize OK', TemporaryBuf[p+2]) > 0) and			//; optimize OK		; p+2
+           (pos('; optimize ', TemporaryBuf[p+2]) > 0) and			//; optimize 		; p+2
 	   (TemporaryBuf[p+3] = '') and						//			; p+3
 	   (TemporaryBuf[p+4] = #9'lda ' + copy(TemporaryBuf[p-1], 6, 256)) and	// lda K		; p+4
 	   (TemporaryBuf[p+5] = #9'cmp #$FF') and				// cmp #$FF		; p+5
@@ -94,7 +94,7 @@ begin
       (pos('jmp l_', TemporaryBuf[3]) > 0) and						// jmp l_00FA		; 3
       (pos('l_', TemporaryBuf[4]) = 1) and						//l_00FB		; 4
       (TemporaryBuf[5] = '') and							//			; 5
-      (pos('; optimize OK', TemporaryBuf[6]) > 0) and					//; optimize OK		; 6
+      (pos('; optimize ', TemporaryBuf[6]) > 0) and					//; optimize 		; 6
       (TemporaryBuf[7] = '') and							//			; 7
       (pos('ldy #', TemporaryBuf[8]) > 0) then						// ldy #		; 8
     begin
@@ -130,7 +130,7 @@ begin
       (pos('jmp l_', TemporaryBuf[3]) > 0) and						// jmp l_00FA		; 3
       (pos('l_', TemporaryBuf[4]) = 1) and						//l_00FB		; 4
       (TemporaryBuf[5] = '') and							//			; 5
-      (pos('; optimize OK', TemporaryBuf[6]) > 0) and					//; optimize OK		; 6
+      (pos('; optimize ', TemporaryBuf[6]) > 0) and					//; optimize 		; 6
       (TemporaryBuf[7] = '') and							//			; 7
       (pos('ldy #', TemporaryBuf[8]) = 0) then						//~ldy #		; 8
     begin
@@ -142,7 +142,7 @@ begin
        if (TemporaryBuf[p-1] = #9'dec ' + copy(TemporaryBuf[p+4], 6, 256)) and
           (TemporaryBuf[p] = tmp) and				//l_00FA		; +0
           (TemporaryBuf[p+1] = '') and				//			; +1
-          (pos('; optimize OK', TemporaryBuf[p+2]) > 0) and	//; optimize OK		; +2
+          (pos('; optimize ', TemporaryBuf[p+2]) > 0) and	//; optimize 		; +2
           (TemporaryBuf[p+3] = '') and				//			; +3
           (pos('lda ', TemporaryBuf[p+4]) > 0) and		// lda X		; +4
           (TemporaryBuf[p+5] = #9'jne ' + TemporaryBuf[4]) then	// jne l_		; +5
