@@ -1033,10 +1033,169 @@ begin
        end;
 
 
+// xxxxxxxxxxxxxxxxxxxx
+
     if sta_bp2(i) and										// sta :bp2				; 0
        lda_a(i+1) and										// lda					; 1
        adc_sbc(i+2) and										// adc|sbc				; 2
        sta_bp2_1(i+3) and									// sta :bp2+1 				; 3
+
+       ldy(i+4) and (listing[i+4] = listing[i+26]) and						// ldy XXX				; 4
+       LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
+       (add_sub(i+6) or and_ora_eor(i+6)) and							// add|sub|and|ora|eor			; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN			; 7
+       iny(i+8) and										// iny					; 8
+       LDA_BP2_Y(i+9) and									// lda (:bp2),y				; 9
+       (adc_sbc(i+10) or and_ora_eor(i+10)) and							// adc|sbc|and|ora|eor			; 10
+       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH		; 11
+       iny(i+12) and										// iny					; 12
+       LDA_BP2_Y(i+13) and									// lda (:bp2),y				; 13
+       (adc_sbc(i+14) or and_ora_eor(i+14)) and							// adc|sbc|and|ora|eor			; 14
+       sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*2	; 15
+       iny(i+16) and										// iny					; 16
+       LDA_BP2_Y(i+17) and									// lda (:bp2),y				; 17
+       (adc_sbc(i+18) or and_ora_eor(i+18)) and							// adc|sbc|and|ora|eor			; 18
+       sta_stack(i+19) and									// sta :STACKORIGIN+STACKWIDTH*3	; 19
+
+       lda(i+20) and										// lda OFFSET				; 20
+       add_sub(i+21) and									// add|sub				; 21
+       sta_bp2(i+22) and									// sta :bp2				; 22
+       lda(i+23) and										// lda OFFSET+1				; 23
+       adc_sbc(i+24) and									// adc|sbc				; 24
+       sta_bp2_1(i+25) and									// sta :bp2+1				; 25
+
+//       ldy(i+26) and										// ldy XXX				; 26
+       lda_stack(i+27) and									// lda :STACKORIGIN			; 27
+       STA_BP2_Y(i+28) and									// sta (:bp2),y				; 28
+       iny(i+29) and										// iny					; 29
+       lda_stack(i+30) and									// lda :STACKORIGIN+STACKWIDTH		; 30
+       STA_BP2_Y(i+31) and									// sta (:bp2),y				; 31
+       iny(i+32) and										// iny					; 32
+       lda_stack(i+33) and									// lda :STACKORIGIN+STACKWIDTH*2	; 33
+       STA_BP2_Y(i+34) and									// sta (:bp2),y				; 34
+       iny(i+35) and										// iny					; 35
+       lda_stack(i+36) and									// lda :STACKORIGIN+STACKWIDTH*3	; 36
+       STA_BP2_Y(i+37) then									// sta (:bp2),y				; 37
+     if (copy(listing[i+7], 6, 256) = copy(listing[i+27], 6, 256)) and
+	(copy(listing[i+11], 6, 256) = copy(listing[i+30], 6, 256)) and
+	(copy(listing[i+15], 6, 256) = copy(listing[i+33], 6, 256)) and
+	(copy(listing[i+19], 6, 256) = copy(listing[i+36], 6, 256)) then
+       begin
+        listing[i+22]:= #9'sta :TMP';
+
+	listing[i+25]:= #9'sta :TMP+1';
+
+	listing_tmp[0] := listing[i+20];
+	listing_tmp[1] := listing[i+21];
+	listing_tmp[2] := listing[i+22];
+	listing_tmp[3] := listing[i+23];
+	listing_tmp[4] := listing[i+24];
+	listing_tmp[5] := listing[i+25];
+
+	listing_tmp[6] := listing[i+4];
+	listing_tmp[7] := listing[i+5];
+	listing_tmp[8] := listing[i+6];
+	listing_tmp[9] := #9'sta (:TMP),y';
+	listing_tmp[10]:= #9'iny';
+	listing_tmp[11]:= listing[i+9];
+	listing_tmp[12]:= listing[i+10];
+	listing_tmp[13]:= #9'sta (:TMP),y';
+	listing_tmp[14]:= #9'iny';
+	listing_tmp[15]:= listing[i+13];
+	listing_tmp[16]:= listing[i+14];
+	listing_tmp[17]:= #9'sta (:TMP),y';
+	listing_tmp[18]:= #9'iny';
+	listing_tmp[19]:= listing[i+17];
+	listing_tmp[20]:= listing[i+18];
+	listing_tmp[21]:= #9'sta (:TMP),y';
+
+	for p:=0 to 21 do listing[i+p+4] := listing_tmp[p];
+
+	listing[i+26] := '';
+	listing[i+27] := '';
+	listing[i+28] := '';
+	listing[i+29] := '';
+	listing[i+30] := '';
+	listing[i+31] := '';
+	listing[i+32] := '';
+	listing[i+33] := '';
+	listing[i+34] := '';
+	listing[i+35] := '';
+	listing[i+36] := '';
+	listing[i+37] := '';
+
+	exit(false);
+       end;
+
+
+    if sta_bp2(i) and										// sta :bp2				; 0
+       lda_a(i+1) and										// lda					; 1
+       adc_sbc(i+2) and										// adc|sbc				; 2
+       sta_bp2_1(i+3) and									// sta :bp2+1 				; 3
+
+       ldy(i+4) and (listing[i+4] = listing[i+18]) and						// ldy XXX				; 4
+       LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
+       (add_sub(i+6) or and_ora_eor(i+6)) and							// add|sub|and|ora|eor			; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+10			; 7
+       iny(i+8) and										// iny					; 8
+       LDA_BP2_Y(i+9) and									// lda (:bp2),y				; 9
+       (adc_sbc(i+10) or and_ora_eor(i+10)) and							// adc|sbc|and|ora|eor			; 10
+       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH+10	; 11
+
+       lda(i+12) and										// lda OFFSET				; 12
+       add_sub(i+13) and									// add|sub				; 13
+       sta_bp2(i+14) and									// sta :bp2				; 14
+       lda(i+15) and										// lda OFFSET+1				; 15
+       adc_sbc(i+16) and									// adc|sbc				; 16
+       sta_bp2_1(i+17) and									// sta :bp2+1				; 17
+
+//       ldy(i+18) and										// ldy XXX				; 18
+       lda_stack(i+19) and									// lda :STACKORIGIN+10			; 19
+       STA_BP2_Y(i+20) and									// sta (:bp2),y				; 20
+       iny(i+21) and										// iny					; 21
+       lda_stack(i+22) and									// lda :STACKORIGIN+STACKWIDTH+10	; 22
+       STA_BP2_Y(i+23) then									// sta (:bp2),y				; 23
+     if (copy(listing[i+7], 6, 256) = copy(listing[i+19], 6, 256)) and
+	(copy(listing[i+11], 6, 256) = copy(listing[i+22], 6, 256)) then
+       begin
+        listing[i+14]:= #9'sta :TMP';
+
+	listing[i+17]:= #9'sta :TMP+1';
+
+	listing_tmp[0] := listing[i+12];
+	listing_tmp[1] := listing[i+13];
+	listing_tmp[2] := listing[i+14];
+	listing_tmp[3] := listing[i+15];
+	listing_tmp[4] := listing[i+16];
+	listing_tmp[5] := listing[i+17];
+
+	listing_tmp[6] := listing[i+4];
+	listing_tmp[7] := listing[i+5];
+	listing_tmp[8] := listing[i+6];
+	listing_tmp[9] := #9'sta (:TMP),y';
+	listing_tmp[10]:= #9'iny';
+	listing_tmp[11]:= listing[i+9];
+	listing_tmp[12]:= listing[i+10];
+	listing_tmp[13]:= #9'sta (:TMP),y';
+
+	for p:=0 to 13 do listing[i+p+4] := listing_tmp[p];
+
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+	listing[i+23] := '';
+
+	exit(false);
+       end;
+
+
+    if sta_bp2(i) and										// sta :bp2				; 0
+       lda_a(i+1) and										// lda					; 1
+       adc_sbc(i+2) and										// adc|sbc				; 2
+       sta_bp2_1(i+3) and									// sta :bp2+1 				; 3
+
        ldy(i+4) and (listing[i+4] = listing[i+16]) and						// ldy XXX				; 4
        LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
        sta_stack(i+6) and									// sta :STACKORIGIN+10			; 6
