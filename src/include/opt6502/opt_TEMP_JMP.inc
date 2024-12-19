@@ -54,6 +54,13 @@ begin
      end;
 
 
+    if (TemporaryBuf[0] = #9'jmp @exit') and						// jmp @exit		; 0
+       (pos('jmp a_', TemporaryBuf[1]) > 0) then					// jmp a_		; 1
+      begin
+	TemporaryBuf[1] := '~';
+      end;
+
+
     if (TemporaryBuf[0] = #9'jmp @+') and						// jmp @+		; 0
        (pos('jmp l_', TemporaryBuf[1]) > 0) and						// jmp l_		; 1
        (TemporaryBuf[2] = '@') then							//@			; 2
