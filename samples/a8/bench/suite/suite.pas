@@ -60,5 +60,3 @@ begin
 
   repeat until false;
 end.
-
-// 12495
