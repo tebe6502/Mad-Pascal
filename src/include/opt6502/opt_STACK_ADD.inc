@@ -55,7 +55,7 @@ begin
      end;
 
 
-    if lda(i) and (lda_stack(i) = false) and (iy(i) = false) and				// lda					; 0
+    if lda_val(i) and (iy(i) = false) and							// lda ~:STACKORIGIN			; 0
        ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01')) and			// add|sub #$01				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        (inx(i+3) or dex(i+3)) and								// inx|dex				; 3
@@ -76,7 +76,7 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
        add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
        (listing[i+3] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 3
        sta_val(i+4) and										// sta ~:STACKORIGIN			; 4
@@ -93,7 +93,7 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
        add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
        sta_val(i+3) and										// sta ~:STACKORIGIN			; 3
        dex(i+4) then										// dex					; 4
@@ -106,7 +106,7 @@ begin
 
 
     if //inx(i) and										// inx					; 0
-       lda(i+1) and (iy(i+1) = false) and							// lda IMAGES				; 1
+       lda_val(i+1) and (iy(i+1) = false) and							// lda IMAGES				; 1
        (listing[i+2] = #9'add #$01') and							// add #$01				; 2
        tay(i+3) then										// tay					; 3
      begin

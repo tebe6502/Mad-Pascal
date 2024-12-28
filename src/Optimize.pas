@@ -872,6 +872,11 @@ var inxUse, found: Boolean;
      Result := pos(#9'ldy :STACK', listing[i]) = 1;
    end;
 
+   function LDY_VAL(i: integer): Boolean;
+   begin
+     Result := (pos(#9'ldy ', listing[i]) = 1) and (pos(#9'ldy :STACK', listing[i]) = 0);
+   end;
+
    function STY(i: integer): Boolean;
    begin
      if listing[i] = #9'sty #$00' then exit(false);
@@ -932,6 +937,11 @@ var inxUse, found: Boolean;
    function CMP_STACK(i: integer): Boolean;
    begin
      Result := pos(#9'cmp :STACK', listing[i]) = 1;
+   end;
+
+   function CMP_VAL(i: integer): Boolean;
+   begin
+     Result := (pos(#9'cmp ', listing[i]) = 1) and (pos(#9'cmp :STACK', listing[i]) = 0);
    end;
 
    function MWA(i: integer): Boolean;
@@ -2034,7 +2044,7 @@ var inxUse, found: Boolean;
 
 
 {
-if (pos('sta CONTROL.FALL.USE', listing[i]) > 0) then begin
+if (pos('mva ISICETAIL.RESULT :STACKORIGIN,x', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2214,7 +2224,7 @@ end;
 
 
 {
-if (pos('sta :bp2+1', listing[i]) > 0) then begin
+if (pos('add #$01', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
