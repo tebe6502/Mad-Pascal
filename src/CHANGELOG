@@ -1,3 +1,6 @@
+28.12.2024
+- optymalizacja szybkości dostepu do duzych tablic ABSOLUTE z liczbą elementów przekraczajaca 255 elementow
+
 16.12.2024
 - C flag optimization
 
