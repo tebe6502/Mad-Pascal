@@ -1420,10 +1420,10 @@ case IndirectionLevel of
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-	    asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	    asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	    asm65(#9'add' + GetStackVariable(0));
 	    asm65(#9'tay');
-	    asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	    asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
 	    asm65(#9'adc' + GetStackVariable(1));
 	    asm65(#9'sta :bp+1');
 
@@ -1499,10 +1499,10 @@ case IndirectionLevel of
 
 	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	      asm65(#9'add' + GetStackVariable(0));
 	      asm65(#9'sta :bp2');
-	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
 	      asm65(#9'adc' + GetStackVariable(1));
 	      asm65(#9'sta :bp2+1');
 
@@ -1596,10 +1596,10 @@ case IndirectionLevel of
 
 	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	      asm65(#9'add' + GetStackVariable(0));
 	      asm65(#9'sta :bp2');
-	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
 	      asm65(#9'adc' + GetStackVariable(1));
 	      asm65(#9'sta :bp2+1');
 
@@ -2027,7 +2027,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateFileOpen(IdentIndex: Integer; Code: ioCode; NumParams: integer = 0);
+procedure GenerateFileOpen(IdentIndex: Integer; Code: ioCode);
 begin
 
  ResetOpty;
@@ -2679,10 +2679,10 @@ case IndirectionLevel of
 
 	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	      asm65(#9'add :STACKORIGIN-1,x');
 	      asm65(#9'tay');
-	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
 	      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 	      asm65(#9'sta :bp+1');
 
@@ -2757,10 +2757,10 @@ case IndirectionLevel of
 
 	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+		asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 		asm65(#9'add :STACKORIGIN-1,x');
 		asm65(#9'sta :bp2');
-		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+		asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
 		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 		asm65(#9'sta :bp2+1');
 
@@ -2853,10 +2853,10 @@ case IndirectionLevel of
 
 	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+		asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 		asm65(#9'add :STACKORIGIN-1,x');
 		asm65(#9'sta :bp2');
-		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+		asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
 		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 		asm65(#9'sta :bp2+1');
 
@@ -10463,7 +10463,8 @@ begin
 
 Result:=i;
 
-FillChar(Param, sizeof(Param), 0);
+//FillChar(Param, sizeof(Param), 0);
+Param:=Default(TParamList);
 
 IdentIndex := 0;
 ExpressionType := 0;
@@ -13823,7 +13824,7 @@ var IdentIndex, size: integer;
 
       case byte((Ident[IdentIndex].Value shr 24) and $7f) of
        1..3 : Result := #9'= ' + reg[(Ident[IdentIndex].Value shr 24) and $7f];
-       4..19: Result := #9'= :STACKORIGIN-' + IntToStr(byte((Ident[IdentIndex].Value shr 24) and $7f)-3);
+       4..19: Result := #9'= :STACKORIGIN-' + IntToStr(byte((Ident[IdentIndex].Value shr 24) and $7f) - 3);
       else
        Result := #9'= ''out of resource'''
       end;
@@ -14556,7 +14557,8 @@ var ListPassMethod, NumVarOfSameType, VarTYpe, AllocElementType: byte;
     VarOfSameType: TVariableList;
 begin
 
-      FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+      //FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+      VarOfSameType := Default(TVariableList);
 
       NumParams := 0;
 
@@ -14792,8 +14794,8 @@ end;	//CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; out tmpVarDataSize: integer; out ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
-var tmpVarDataSize_, ParamIndex, idx: integer;
+procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
+var tmpVarDataSize_, ParamIndex{, idx}: integer;
 begin
 
 //	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
@@ -14820,7 +14822,7 @@ begin
 	   if Ident[NumIdent].isAbsolute = false then inc(tmpVarDataSize, DataSize[POINTERTOK]);		// wskaznik dla ^record
 
 
-	 idx := Ident[NumIdent].Value - DATAORIGIN;
+	 //idx := Ident[NumIdent].Value - DATAORIGIN;
 
 //writeln(NumAllocElements);
 //!@!@
@@ -14876,16 +14878,15 @@ function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; 
 var
   VarOfSameType: TVariableList;
   Param: TParamList;
-  j, idx, NumVarOfSameType, VarOfSameTypeIndex, tmpVarDataSize, tmpVarDataSize_, ParamIndex, ForwardIdentIndex, IdentIndex: integer;
+  j, idx, NumVarOfSameType, VarOfSameTypeIndex, tmpVarDataSize, ParamIndex, ForwardIdentIndex, IdentIndex, external_libr: integer;
   NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   ConstVal: Int64;
-  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, Assignment, pack, IsNestedFunction,
+  ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, Assignment, {pack,} IsNestedFunction,
   isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm, isReg, isInt, isInl, isOvr: Boolean;
   VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType, varPassMethod: Byte;
   Tmp, TmpResult: word;
 
-  external_libr : integer;
   external_name: TString;
 
   UnitList: array of TString;
@@ -14894,11 +14895,15 @@ begin
 
 ResetOpty;
 
-FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+//FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+VarOfSameType:=Default(TVariableList);
 
 j := 0;
 ConstVal := 0;
 VarRegister := 0;
+
+external_libr := 0;
+external_name := '';
 
 NestedDataType := 0;
 NestedAllocElementType := 0;
@@ -15975,14 +15980,14 @@ while Tok[i].Kind in
 
       CheckTok(i, COLONTOK);
 
-      pack:=false;
+     // pack:=false;
 
 
       if Tok[i + 1].Kind = PACKEDTOK then begin
 
        if (Tok[i + 2].Kind in [ARRAYTOK, RECORDTOK]) then begin
         inc(i);
-        pack := true;
+       // pack := true;
        end else
         CheckTok(i + 2, RECORDTOK);
 
@@ -16035,10 +16040,7 @@ while Tok[i].Kind in
 
         if IdType = ARRAYTOK then i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
-	if (NumAllocElements = 1) or (NumAllocElements = $10001) then begin
-	 ConstVal := 1;
-	 isAbsolute := true;
-	end;
+	if (NumAllocElements = 1) or (NumAllocElements = $10001) then ConstVal := 1;
 
       end;
 
@@ -16092,6 +16094,7 @@ while Tok[i].Kind in
 
 
        ConstVal := 1;
+
 
       end else
 
