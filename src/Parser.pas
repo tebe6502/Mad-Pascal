@@ -1722,13 +1722,16 @@ else
        else
        if (DataType in [FILETOK, TEXTFILETOK]) and (NumAllocElements > 0) then
 	VarDataSize := VarDataSize + 12
-       else
-	VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
+       else begin
+
+        if (Ident[NumIdent].idType = ARRAYTOK) and (Ident[NumIdent].isAbsolute = false) and (Elements(NumIdent) = 1) then	// [0..0] ; [0..0, 0..0]
+
+	else
+	 VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
+
+       end;
 
 
-//       if (DataType = POINTERTOK) and (AllocElementType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements_ > 0) then
-//	dec(VarDataSize, DataSize[DataType])
-//       else
 
        if NumAllocElements > 0 then dec(VarDataSize, DataSize[DataType]);
 
