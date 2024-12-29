@@ -496,18 +496,6 @@ begin
       exit(false);
      end;
 
-{
-	mva ISICETAIL.RESULT :STACKORIGIN+1,x
-
-	ldy #1
-	lda R
-	cmp #$0E
-	beq @+
-	dey
-@
-	tya
-	ora :STACKORIGIN+1,x
-}
 
     if ldy_1(i) and										// ldy #1				; 0
        (listing[i+1] = #9'lda :STACKORIGIN-1,x') and						// lda :STACKORIGIN-1,x			; 1
@@ -727,9 +715,9 @@ begin
      end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda					; 0
+    if lda_val(i) and										// lda ~:STACKORIGIN			; 0
        ldy_1(i+1) and										// ldy #1				; 1
-       and_ora_eor(i+2) and (and_ora_eor_stack(i+2) = false) and				// and|ora|eor				; 2
+       and_ora_eor_val(i+2) and									// and|ora|eor ~:STACKORIGIN		; 2
        cmp_val(i+3) and										// cmp ~:STACKORIGIN			; 3
        SKIP(i+4) and										// SKIP					; 4
        dey(i+5) and										// dey					; 5

@@ -188,12 +188,12 @@ begin
        end;
 
 
-    if lda_a(i) and (lda_stack(i) = false) and						// lda					; 0
+    if lda_val(i) and									// lda					; 0	~:STACKORIGIN
        sta_stack(i+1) and								// sta :STACKORIGIN+STACKWIDTH*2	; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and					// lda					; 2
+       lda_val(i+2) and									// lda					; 2	~:STACKORIGIN
        sta_stack(i+3) and								// sta :STACKORIGIN+STACKWIDTH*3	; 3
        lda_a(i+4) and									// lda :STACKORIGIN			; 4
-       and_ora_eor(i+5) and (and_ora_eor_stack(i+5) = false) and			// and|ora|eor				; 5
+       and_ora_eor_val(i+5) and								// and|ora|eor				; 5	~:STACKORIGIN
        sta_a(i+6) and									// sta :STACKORIGIN			; 6
        lda_stack(i+7) and								// lda :STACKORIGIN+STACKWIDTH*2	; 7
        sta_stack(i+8) then								// sta :STACKORIGIN+STACKWIDTH*3	; 8

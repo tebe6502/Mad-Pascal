@@ -529,6 +529,9 @@ begin
       (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
       (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
      begin
+      TemporaryBuf[10] := #9'clc';
+      TemporaryBuf[11] := '@';
+
       TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
      end;
 

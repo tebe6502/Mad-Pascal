@@ -28,7 +28,7 @@ begin
 
     if (listing[i+2] = #9'jsr @printPCHAR') and							// jsr @printPCHAR			; 2
 
-       lda_a(i) and (lda_stack(i) = false) and							// lda 					; 0
+       lda_val(i) and										// lda ~:STACKORIGIN			; 0
        ldy(i+1) then										// ldy					; 1
       begin
         tmp := copy(listing[i], 6, 256);
@@ -63,7 +63,7 @@ begin
 
     if (listing[i+2] = #9'jsr @printSTRING') and						// jsr @printSTRING			; 2
 
-       lda_a(i) and (lda_stack(i) = false) and							// lda 					; 0
+       lda_val(i) and										// lda ~:STACKORIGIN			; 0
        ldy(i+1) then										// ldy					; 1
       begin
         tmp := copy(listing[i], 6, 256);
@@ -112,7 +112,7 @@ begin
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       lda_val(i+2) and										// lda ~:STACKORIGIN			; 2
        ldy_stack(i+3) then									// ldy :STACKORIGIN+STACKWIDTH		; 3
      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
       begin

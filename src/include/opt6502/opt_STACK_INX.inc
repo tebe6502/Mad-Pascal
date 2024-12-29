@@ -1,5 +1,6 @@
 
 function opt_STACK_INX(i: integer): Boolean;
+var p: integer;
 begin
 
     Result := true;
@@ -30,7 +31,7 @@ begin
 
     if inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
-       and_ora_eor(i+2) and (and_ora_eor_stack(i+2) = false) and				// and|ora|eor ~:STACKORIGIN		; 2
+       and_ora_eor_val(i+2) and									// and|ora|eor ~:STACKORIGIN		; 2
        sta_val(i+3) and										// sta ~:STACKORIGIN			; 3
        dex(i+4) then										// dex					; 4
      begin
@@ -91,16 +92,16 @@ begin
 
     if inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
-       and_ora_eor(i+2) and (and_ora_eor_stack(i+2) = false) and				// and|ora|eor				; 2
+       and_ora_eor_val(i+2) and									// and|ora|eor ~:STACKORIGIN		; 2
        sta_val(i+3) and										// sta ~:STACKORIGIN			; 3
        lda_val(i+4) and										// lda ~:STACKORIGIN			; 4
-       and_ora_eor(i+5) and (and_ora_eor_stack(i+5) = false) and				// and|ora|eor				; 5
+       and_ora_eor_val(i+5) and									// and|ora|eor ~:STACKORIGIN		; 5
        sta_val(i+6) and										// sta ~:STACKORIGIN			; 6
        lda_val(i+7) and										// lda ~:STACKORIGIN			; 7
-       and_ora_eor(i+8) and (and_ora_eor_stack(i+8) = false) and				// and|ora|eor				; 8
+       and_ora_eor_val(i+8) and									// and|ora|eor ~:STACKORIGIN		; 8
        sta_val(i+9) and										// sta ~:STACKORIGIN			; 9
        lda_val(i+10) and									// lda ~:STACKORIGIN			; 10
-       and_ora_eor(i+11) and (and_ora_eor_stack(i+11) = false) and				// and|ora|eor				; 11
+       and_ora_eor_val(i+11) and								// and|ora|eor ~:STACKORIGIN		; 11
        sta_val(i+12) and									// sta ~:STACKORIGIN			; 12
        dex(i+13) then										// dex					; 13
      begin
@@ -306,12 +307,12 @@ begin
     if inx(i) and										// inx					; 0
        mva(i+1) and										// mva ... :STACKORIGIN,x		; 1
        dex(i+2) and										// dex					; 2
-       (lda_stack(i+3) = false) then								//~lda :STACKORIGIN			; 3
+       ldy_1(i+3) then										// ldy #1				; 3
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
      begin
 	listing[i]   := '';
 	listing[i+1] := #9'mva ' + GetString(i+1) + ' :STACKORIGIN+1,x';
-	listing[i+2] := '';//#9'sta :STACKORIGIN+1,x';
+	listing[i+2] := '';
 
        exit(false);
      end;

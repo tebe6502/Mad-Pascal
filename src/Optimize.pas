@@ -1284,6 +1284,13 @@ var inxUse, found: Boolean;
      Result := (pos(#9'and ', listing[i]) = 1) or (pos(#9'ora ', listing[i]) = 1) or (pos(#9'eor ', listing[i]) = 1);
    end;
 
+   function AND_ORA_EOR_VAL(i: integer): Boolean;
+   begin
+     Result := ((pos(#9'and ', listing[i]) = 1) and (pos(#9'and :STACK', listing[i]) = 0)) or
+               ((pos(#9'ora ', listing[i]) = 1) and (pos(#9'ora :STACK', listing[i]) = 0)) or
+	       ((pos(#9'eor ', listing[i]) = 1) and (pos(#9'eor :STACK', listing[i]) = 0));
+   end;
+
    function AND_ORA_EOR_BP2_Y(i: integer): Boolean;
    begin
      Result := (listing[i] = #9'and (:bp2),y') or (listing[i] = #9'ora (:bp2),y') or (listing[i] = #9'eor (:bp2),y');
@@ -2224,7 +2231,7 @@ end;
 
 
 {
-if (pos('add #$01', listing[i]) > 0) then begin
+if (pos('asl :STACK', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2281,7 +2288,7 @@ end;
 
 
     if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
-       ((lda_a(i+1) and (lda_stack(i+1) = false)) or tya(i+1)) and
+       (lda_val(i+1) or tya(i+1)) and
        sta_a(i+2) and
 
        (lda_a(i) or and_ora_eor(i) or
@@ -2317,7 +2324,7 @@ end;
 
 
     if (i = l - 4) and										// "samotna" instrukcja na koncu bloku
-       lda_a(i+1) and (lda_stack(i+1) = false) and
+       lda_val(i+1) and
        sta_a(i+2) and
        sta_a(i+3) and
 
@@ -2334,7 +2341,7 @@ end;
     if (i = l - 4) and
        lda_stack(i) and										// lda :STACKORIGIN			; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       ((lda_a(i+2) and (lda_stack(i+2) = false)) or tya(i+2)) and				// lda|tya				; 2
+       (lda_val(i+2) or tya(i+2)) and								// lda|tya				; 2
        sta_a(i+3) then										// sta					; 3
      begin
 	listing[i]   := '';
@@ -2356,7 +2363,7 @@ end;
      end;
 
 
-    if lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
+    if lda_val(i) and										// lda					; 0
        and_im(i+1) and										// and #				; 1
        (listing[i+2] = #9'jsr #$00') and							// jsr #$00				; 2
        lda_im_0(i+3) and									// lda #$00				; 3

@@ -90,16 +90,16 @@ begin
        and_ora_eor(i+10) and								// and|ora|eor					; 10
        sta_stack(i+11) and								// sta :STACKORIGIN+STACKWIDTH*3+10		; 11
 
-       lda(i+12) and (lda_stack(i+12) = false) and					// lda 						; 12
+       lda_val(i+12) and 								// lda ~:STACKORIGIN				; 12
        and_ora_eor_stack(i+13) and							// and_ora_eor :STACKORIGIN+10			; 13
        sta(i+14) and									// sta						; 14
-       lda(i+15) and (lda_stack(i+12) = false) and					// lda 						; 15
+       lda_val(i+15) and								// lda ~:STACKORIGIN				; 15
        and_ora_eor_stack(i+16) and							// and_ora_eor :STACKORIGIN+STACKWIDTH+10	; 16
        sta(i+17) and									// sta						; 17
-       lda(i+18) and (lda_stack(i+12) = false) and					// lda 						; 18
+       lda_val(i+18) and								// lda ~:STACKORIGIN				; 18
        and_ora_eor_stack(i+19) and							// and_ora_eor :STACKORIGIN+STACKWIDTH*2+10	; 19
        sta(i+20) and									// sta						; 20
-       lda(i+21) and (lda_stack(i+12) = false) and					// lda 						; 21
+       lda_val(i+21) and								// lda ~:STACKORIGIN				; 21
        and_ora_eor_stack(i+22) and							// and_ora_eor :STACKORIGIN+STACKWIDTH*3+10	; 22
        sta(i+23) then									// sta						; 23
      if (copy(listing[i+2], 6, 256) = copy(listing[i+13], 6, 256)) and

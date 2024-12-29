@@ -177,9 +177,9 @@ begin
      end;
 
 
-    if lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
+    if lda_val(i) and										// lda ~:STACKORIGIN			; 0
        (listing[i+1] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
+       lda_val(i+2) and										// lda ~:STACKORIGIN			; 2
        (listing[i+3] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
        dex(i+4) and										// dex					; 4
        inx(i+5) and										// inx					; 5
@@ -435,9 +435,9 @@ begin
 
 
     if (inx(i) = false) and									//~inx					; 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
        (listing[i+2] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 2
-       lda_a(i+3) and (lda_stack(i+3) = false) and						// lda 					; 3
+       lda_val(i+3) and										// lda ~:STACKORIGIN			; 3
        (listing[i+4] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 4
        mva(i+5) and 										// mva  :STACKORIGIN,x			; 5
        mva(i+6) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 6

@@ -408,7 +408,7 @@ begin
        lda_val(i+2) and (iy(i+2) = false) and							// lda				; 2	~lda :STACKORIGIN
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH	; 3
        mwy_bp2(i+4) and										// mwy				; 4
-       ldy(i+5) and (ldy_stack(i+5) = false) and						// ldy				; 5
+       ldy_val(i+5) and										// ldy				; 5	~:STACKORIGIN
        lda_stack(i+6) then									// lda :STACKORIGIN		; 6
      if copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256) then
       begin

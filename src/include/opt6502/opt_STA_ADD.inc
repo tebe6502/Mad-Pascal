@@ -161,7 +161,7 @@ begin
 
 // add !!!
 
-    if (lda(i) = false) and (lda_adr(i) = false) and					//~lda					; 0
+    if (lda_a(i) = false) and								//~lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda_a(i+3) and									// lda					; 3

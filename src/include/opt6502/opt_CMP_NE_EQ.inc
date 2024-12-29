@@ -13,7 +13,7 @@ begin
 
     if sta_stack(i) and										// sta :STACKORIGIN	; 0
        ldy_1(i+1) and										// ldy #1		; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda W		; 2
+       lda_val(i+2) and										// lda W		; 2
        cmp_stack(i+3) and									// cmp :STACKORIGIN	; 3
        ((listing[i+4] = #9'beq @+') or (listing[i+4] = #9'bne @+')) and				// beq|bne @+		; 4
        dey(i+5) and										// dey			; 5
@@ -48,7 +48,7 @@ begin
 
 
     if ldy_1(i) and										// ldy #1		; 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda W+1		; 1
+       lda_val(i+1) and										// lda W+1		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
        (listing[i+3] = #9'bne @+') and								// bne @+		; 3
        lda_a(i+4) and										// lda W		; 4

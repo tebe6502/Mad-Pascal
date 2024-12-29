@@ -400,8 +400,8 @@ begin
     if add_sub_AL_CL(i) and									// jsr addAL_CL|subAL_CL		; 0
        dex(i+1) and										// dex					; 1
        (listing[i+2] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 2
-       sta(i+3) and (sta_stack(i+3) = false) and						// sta I				; 3
-       (lda(i+4) = false) then
+       sta_val(i+3) and										// sta I				; 3
+       (lda(i+4) = false) then									//~lda					; 4
      begin
 
        if listing[i] = #9'jsr addAL_CL' then begin

@@ -319,7 +319,7 @@ begin
        ADD_SUB_EAX_ECX(i+12) and								// jsr addEAX_ECX|subEAX_ECX		; 12
 
        (listing[i+14] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 14
-       sta(i+15) and (sta_stack(i+15) = false) and						// sta A				; 15
+       sta_val(i+15) and									// sta A				; 15
        (listing[i+16] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 16
        sta(i+17) and										// sta A+1				; 17
        (listing[i+18] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and				// lda :STACKORIGIN+STACKWIDTH*2,x	; 18
@@ -400,7 +400,7 @@ begin
        ADD_SUB_EAX_ECX(i+9) and									// jsr addEAX_ECX|subEAX_ECX		; 9
        dex(i+10) and										// dex					; 10
        (listing[i+11] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 11
-       sta(i+12) and (sta_stack(i+12) = false) and						// sta A				; 12
+       sta_val(i+12) and									// sta A				; 12
        (listing[i+13] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 13
        sta(i+14) and										// sta A+1				; 14
        (listing[i+15] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and				// lda :STACKORIGIN+STACKWIDTH*2,x	; 15

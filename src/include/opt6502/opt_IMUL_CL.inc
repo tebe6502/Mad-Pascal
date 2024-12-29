@@ -55,7 +55,7 @@ function imulCL_opt: Boolean;
    if (m > 1) and lda_stack(m) then			// we are trying to get rid of the parameter on the stack
 
     if sta_stack(m-1) and (copy(listing[m], 6, 256) = copy(listing[m-1], 6, 256)) and
-       lda_a(m-2) and (lda_stack(m-2) = false) and (lda_im(m-2) = false) then
+       lda_val(m-2) and (lda_im(m-2) = false) then
 
       begin
        listing[m] := listing[m-2];
@@ -88,7 +88,7 @@ function imulCL_opt: Boolean;
 
        	l := m;				// restore L
 
-	if lda_a(l) and (lda_stack(l) = false) then
+	if lda_val(l) then
 	 s[x-1][0] := listing[l]
 	else begin
 	 s[x-1][0] := '';
@@ -153,7 +153,7 @@ function imulCL_opt: Boolean;
 
 	s[x-1][1] := #9'lda #$00';
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 s[x-1][0] := #9'lda #$00'
 	else
 	 s[x-1][0] := '';
@@ -163,7 +163,7 @@ function imulCL_opt: Boolean;
 	listing[m+2] := #9'lda ' + GetARG(1, x-1);
 	listing[m+3] := #9'sta ' + GetARG(1, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+4] := listing[m]
 	else
 	 listing[m+4] := #9'lda ' + GetARG(0, x-1);
@@ -171,7 +171,7 @@ function imulCL_opt: Boolean;
 	listing[m+5] := #9'asl @';
 	listing[m+6] := #9'rol ' + GetARG(1, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+7] := #9'add ' + copy(listing[m], 6, 256)
 	else
 	 listing[m+7] := #9'add ' + GetARG(0, x-1);
@@ -196,7 +196,7 @@ function imulCL_opt: Boolean;
 
        	s[x-1][1] := #9'lda #$00';
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 s[x-1][0] := #9'lda #$00'
 	else
 	 s[x-1][0] := '';
@@ -206,7 +206,7 @@ function imulCL_opt: Boolean;
 	listing[m+2] := #9'lda ' + GetARG(1, x-1);
 	listing[m+3] := #9'sta ' + GetARG(1, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+4] := listing[m]
 	else
 	 listing[m+4] := #9'lda ' + GetARG(0, x-1);
@@ -216,7 +216,7 @@ function imulCL_opt: Boolean;
 	listing[m+7] := #9'asl @';
 	listing[m+8] := #9'rol ' + GetARG(1, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+9] := #9'add ' + copy(listing[m], 6, 256)
 	else
 	 listing[m+9] := #9'add ' + GetARG(0, x-1);
@@ -241,7 +241,7 @@ function imulCL_opt: Boolean;
 
 	s[x-1][1] := #9'lda #$00';
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 s[x-1][0] := #9'lda #$00'
 	else
 	 s[x-1][0] := '';
@@ -251,7 +251,7 @@ function imulCL_opt: Boolean;
 	listing[m+2] := #9'lda ' + GetARG(1, x-1);
 	listing[m+3] := #9'sta ' + GetARG(1, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+4] := listing[m]
 	else
 	 listing[m+4] := #9'lda ' + GetARG(0, x-1);
@@ -263,7 +263,7 @@ function imulCL_opt: Boolean;
 	listing[m+9] := #9'asl @';
 	listing[m+10]:= #9'rol ' + GetARG(1, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+11] := #9'sub ' + copy(listing[m], 6, 256)
 	else
 	 listing[m+11] := #9'sub ' + GetARG(0, x-1);
@@ -397,7 +397,7 @@ function imulCL_opt: Boolean;
 	s[x-1][0] := '';
 	s[x-1][1] := '';
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 s[x-1][0] := #9'lda #$00'
 	else
 	 s[x-1][0] := '';
@@ -406,14 +406,14 @@ function imulCL_opt: Boolean;
 
 	listing[m+2] := #9'lda #$00';
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+3] := #9'sub ' + copy(listing[m], 6, 256)
 	else
 	 listing[m+3] := #9'sub ' + GetARG(0, x-1);
 
 	listing[m+4] := #9'sta ' + GetARG(0, x-1);
 
-	if lda_a(m) and (lda_stack(m) = false) then
+	if lda_val(m) then
 	 listing[m+5] := #9'lda ' + copy(listing[m], 6, 256)
 	else
 	 listing[m+5] := #9'lda ' + GetARG(0, x-1);
