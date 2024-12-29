@@ -325,6 +325,8 @@ const
 implementation
 
 var
+	mem: array [0..0] of byte absolute $0000;
+
 	RndSeed: smallint;
 
 procedure RunError(a: byte);

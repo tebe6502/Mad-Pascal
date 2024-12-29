@@ -1046,6 +1046,142 @@ begin
 
 
     if lda_im(i) and									// lda #				; 0
+       add(i+1) and (add_stack(i+1) = false) and					// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_im(i+3) and									// lda #				; 3
+       adc(i+4) and (adc_stack(i+1) = false) and					// adc					; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       rol_a(i+6) and									// rol @				; 6
+       asl_stack(i+7) and								// asl :STACKORIGIN			; 7
+       rol_a(i+8) and									// rol @				; 8
+       sta_stack(i+9) and								// sta :STACKORIGIN+STACKWIDTH		; 9
+       lda_im(i+10) and									// lda #				; 10
+       add_stack(i+11) and								// add :STACKORIGIN			; 11
+       sta_a(i+12) and									// sta P				; 12
+       lda_im(i+13) and									// lda #				; 13
+       adc_stack(i+14) and								// adc :STACKORIGIN+STACKWIDTH		; 14
+       sta_a(i+15) then									// sta P+1				; 15
+      if (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) and
+	 (copy(listing[i+5], 6, 256) = copy(listing[i+11], 6, 256)) and
+	 (copy(listing[i+9], 6, 256) = copy(listing[i+14], 6, 256)) then
+     begin
+      p := GetWORD(i, i+3) * 4 + GetWORD(i+10, i+13);
+
+      listing[i+10] := #9'lda #$' + IntToHex(p and $ff, 2);
+
+      listing[i+13] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+
+      listing[i]   := '';
+      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+
+      listing[i+3] := '';
+      listing[i+4] := #9'lda ' + copy(listing[i+4], 6, 256);
+
+      exit(false);
+     end;
+
+
+    if lda_val(i) and									// lda					; 0
+       add_im(i+1) and									// add #				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_val(i+3) and									// lda					; 3
+       adc_im(i+4) and									// adc #				; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       rol_a(i+6) and									// rol @				; 6
+       asl_stack(i+7) and								// asl :STACKORIGIN			; 7
+       rol_a(i+8) and									// rol @				; 8
+       sta_stack(i+9) and								// sta :STACKORIGIN+STACKWIDTH		; 9
+       lda_im(i+10) and									// lda #				; 10
+       add_stack(i+11) and								// add :STACKORIGIN			; 11
+       sta_a(i+12) and									// sta P				; 12
+       lda_im(i+13) and									// lda #				; 13
+       adc_stack(i+14) and								// adc :STACKORIGIN+STACKWIDTH		; 14
+       sta_a(i+15) then									// sta P+1				; 15
+      if (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) and
+	 (copy(listing[i+5], 6, 256) = copy(listing[i+11], 6, 256)) and
+	 (copy(listing[i+9], 6, 256) = copy(listing[i+14], 6, 256)) then
+     begin
+      p := GetWORD(i+1, i+4) * 4 + GetWORD(i+10, i+13);
+
+      listing[i+10] := #9'lda #$' + IntToHex(p and $ff, 2);
+
+      listing[i+13] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+
+      listing[i+1]   := '';
+
+      listing[i+4] := '';
+
+      exit(false);
+     end;
+
+
+    if lda_im(i) and									// lda #				; 0
+       add(i+1) and (add_stack(i+1) = false) and					// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_im(i+3) and									// lda #				; 3
+       adc(i+4) and (adc_stack(i+1) = false) and					// adc					; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       rol_a(i+6) and									// rol @				; 6
+       sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH		; 7
+       lda_im(i+8) and									// lda #				; 8
+       add_stack(i+9) and								// add :STACKORIGIN			; 9
+       sta_a(i+10) and									// sta P				; 10
+       lda_im(i+11) and									// lda #				; 11
+       adc_stack(i+12) and								// adc :STACKORIGIN+STACKWIDTH		; 12
+       sta_a(i+13) then									// sta P+1				; 13
+      if (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) and
+	 (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) and
+	 (copy(listing[i+7], 6, 256) = copy(listing[i+12], 6, 256)) then
+     begin
+      p := GetWORD(i, i+3) * 2 + GetWORD(i+8, i+11);
+
+      listing[i+8]  := #9'lda #$' + IntToHex(p and $ff, 2);
+
+      listing[i+11] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+
+      listing[i]   := '';
+      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+
+      listing[i+3] := '';
+      listing[i+4] := #9'lda ' + copy(listing[i+4], 6, 256);
+
+      exit(false);
+     end;
+
+
+    if lda_val(i) and									// lda					; 0
+       add_im(i+1) and									// add #				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_val(i+3) and									// lda					; 3
+       adc_im(i+4) and									// adc #				; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       rol_a(i+6) and									// rol @				; 6
+       sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH		; 7
+       lda_im(i+8) and									// lda #				; 8
+       add_stack(i+9) and								// add :STACKORIGIN			; 9
+       sta_a(i+10) and									// sta P				; 10
+       lda_im(i+11) and									// lda #				; 11
+       adc_stack(i+12) and								// adc :STACKORIGIN+STACKWIDTH		; 12
+       sta_a(i+13) then									// sta P+1				; 13
+      if (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) and
+	 (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) and
+	 (copy(listing[i+7], 6, 256) = copy(listing[i+12], 6, 256)) then
+     begin
+      p := GetWORD(i+1, i+4) * 2 + GetWORD(i+8, i+11);
+
+      listing[i+8]  := #9'lda #$' + IntToHex(p and $ff, 2);
+
+      listing[i+11] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+
+      listing[i+1]   := '';
+
+      listing[i+4] := '';
+
+      exit(false);
+     end;
+
+
+    if lda_im(i) and									// lda #				; 0
        add(i+1) and									// add					; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
        lda_im(i+3) and									// lda #				; 3
@@ -2715,7 +2851,7 @@ begin
        tay(i+2) and 									// tay					; 2
        lda_a(i+3) and									// lda					; 3
        adc(i+4) and (adc_im(i+4) = false) and						// adc 					; 4	~adc #$00	!!!
-       sta_a(i+5) then									// sta					; 5
+       sta_a(i+5) and (sta_bp_1(i+5) = false) then					// sta					; 5	~sta :bp+1	!!!
      begin
       listing[i]   := '';
       listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
