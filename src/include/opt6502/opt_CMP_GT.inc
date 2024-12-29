@@ -48,7 +48,7 @@ begin
        jcc(i+12) and										// jcc l_		; 12
        jeq(i+13) and										// jeq l_		; 13
 
-       lda_a(i) and (lda_stack(i) = false) and							// lda W+3		; 0	opt_092 | CARDINAL > 0
+       lda_val(i) and										// lda W+3		; 0	opt_092 | CARDINAL > 0
        cmp_im(i+1) and										// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W+2		; 3
@@ -122,7 +122,7 @@ begin
 // -----------------------------------------------------------------------------
 
     if ldy_1(i) and										// ldy #1		; 0	BOOL := WORD >
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda W+1		; 1
+       lda_val(i+1) and										// lda W+1		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
        (listing[i+3] = #9'bne @+') and								// bne @+		; 3
        lda_a(i+4) and										// lda W		; 4

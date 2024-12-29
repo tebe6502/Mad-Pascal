@@ -13,8 +13,8 @@ begin
 
        lda_im(i) and 										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
-       and_ora_eor(i+3) and (and_ora_eor_stack(i+3) = false) and				// and|ora|eor				; 3
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
        sta_a(i+4) and										// sta					; 4
        ldy_1(i+5) and										// ldy #1				; 5
        (listing[i+6] = #9'.LOCAL') and								// .LOCAL				; 6
@@ -39,8 +39,8 @@ begin
 
        lda_im(i) and 										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       lda_a(i+2) and (lda_stack(i+2) = false) and						// lda					; 2
-       and_ora_eor(i+3) and (and_ora_eor_stack(i+3) = false) and				// and|ora|eor				; 3
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH*2	; 4
        ldy_1(i+5) and										// ldy #1				; 5
        (listing[i+6] = #9'.LOCAL') and								// .LOCAL				; 6
@@ -1032,7 +1032,7 @@ begin
     if ENDL(i+22) and										// .ENDL				; 22	smallint -> shortint
 
        ldy_im_0(i) and										// ldy #$00				; 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda					; 1
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
        spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4

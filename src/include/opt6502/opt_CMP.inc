@@ -249,7 +249,7 @@ begin
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda(i+2) and 										// lda					; 2
        and_ora_eor(i+3) and									// and|ora|eor				; 3
-       cmp(i+4) and (cmp_stack(i+4) = false) and						// cmp					; 4
+       cmp_val(i+4) and										// cmp					; 4	~:STACKORIGIN
        bne(i+5) and										// bne					; 5
        lda_stack(i+6) then									// lda :STACKORIGIN			; 6
      if copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256) then
@@ -305,7 +305,7 @@ begin
     if sta_stack(i) and										// sta :STACKORIGIN			; 0
        lda(i+1) and 										// lda					; 1		~lda adr.
        sub_stack(i+2) and	 								// sub :STACKORIGIN			; 2
-       cmp(i+3) and (cmp_stack(i+3) = false) and						// cmp					; 3
+       cmp_val(i+3) and										// cmp					; 3	~:STACKORIGIN
        SKIP(i+4) then										// SKIP					; 4
      if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
       begin

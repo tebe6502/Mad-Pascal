@@ -1412,18 +1412,32 @@ case IndirectionLevel of
     Gen;
 
     case Size of
-      1: begin
+      1: begin										// PUSH BYTE
 
 	 if (NumAllocElements > 256) or (NumAllocElements in [0,1]) then begin
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
-	  asm65(#9'lda '+svar);					// pushBYTE
-	  asm65(#9'add' + GetStackVariable(0));
-	  asm65(#9'tay');
-	  asm65(#9'lda '+svar+'+1');
-	  asm65(#9'adc' + GetStackVariable(1));
-	  asm65(#9'sta :bp+1');
+	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+
+	    asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	    asm65(#9'add' + GetStackVariable(0));
+	    asm65(#9'tay');
+	    asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	    asm65(#9'adc' + GetStackVariable(1));
+	    asm65(#9'sta :bp+1');
+
+	  end else begin
+
+	    asm65(#9'lda '+svar);
+	    asm65(#9'add' + GetStackVariable(0));
+	    asm65(#9'tay');
+	    asm65(#9'lda '+svar+'+1');
+	    asm65(#9'adc' + GetStackVariable(1));
+	    asm65(#9'sta :bp+1');
+
+	  end;
+
 	  asm65(#9'lda (:bp),y');
 	  asm65(#9'sta' + GetStackVariable(0));
 
@@ -1458,7 +1472,7 @@ case IndirectionLevel of
 	 ExpandByte;
 	 end;
 
-      2: begin
+      2: begin										// PUSH WORD
 
 	 if IndirectionLevel = ASPOINTERTOARRAYORIGIN  then
 	 GenerateIndexShift(WORDTOK);
@@ -1483,17 +1497,32 @@ case IndirectionLevel of
 
 	  end else begin
 
-	   asm65(#9'lda '+svar);
-	   asm65(#9'add' + GetStackVariable(0));
-	   asm65(#9'sta :bp2');
-	   asm65(#9'lda '+svar+'+1');
-	   asm65(#9'adc' + GetStackVariable(1));
-	   asm65(#9'sta :bp2+1');
+	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
 
-	   asm65(#9'ldy #$00');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(0));
-	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(1));
+	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	      asm65(#9'add' + GetStackVariable(0));
+	      asm65(#9'sta :bp2');
+	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	      asm65(#9'adc' + GetStackVariable(1));
+	      asm65(#9'sta :bp2+1');
+
+	    end else begin
+
+	      asm65(#9'lda '+svar);
+	      asm65(#9'add' + GetStackVariable(0));
+	      asm65(#9'sta :bp2');
+	      asm65(#9'lda '+svar+'+1');
+	      asm65(#9'adc' + GetStackVariable(1));
+	      asm65(#9'sta :bp2+1');
+
+	    end;
+
+	    asm65(#9'ldy #$00');
+	    asm65(#9'lda (:bp2),y');
+	    asm65(#9'sta' + GetStackVariable(0));
+	    asm65(#9'iny');
+	    asm65(#9'lda (:bp2),y');
+	    asm65(#9'sta' + GetStackVariable(1));
 
 	  end;
 
@@ -1504,9 +1533,11 @@ case IndirectionLevel of
 	   LoadBP2(IdentIndex, svar);
 
 	   asm65(#9'ldy :STACKORIGIN,x');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(0));
+	   asm65(#9'lda (:bp2),y');
+	   asm65(#9'sta' + GetStackVariable(0));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(1));
+	   asm65(#9'lda (:bp2),y');
+	   asm65(#9'sta' + GetStackVariable(1));
 
 	  end else begin
 
@@ -1534,7 +1565,7 @@ case IndirectionLevel of
 	 ExpandWord;
 	 end;
 
-      4: begin
+      4: begin											// PUSH CARDINAL
 
 	 if IndirectionLevel = ASPOINTERTOARRAYORIGIN  then
 	 GenerateIndexShift(CARDINALTOK);
@@ -1563,21 +1594,38 @@ case IndirectionLevel of
 
 	  end else begin
 
-	    asm65(#9'lda '+svar);
-	    asm65(#9'add' + GetStackVariable(0));
-	    asm65(#9'sta :bp2');
-	    asm65(#9'lda '+svar+'+1');
-	    asm65(#9'adc' + GetStackVariable(1));
-	    asm65(#9'sta :bp2+1');
+	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+
+	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	      asm65(#9'add' + GetStackVariable(0));
+	      asm65(#9'sta :bp2');
+	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	      asm65(#9'adc' + GetStackVariable(1));
+	      asm65(#9'sta :bp2+1');
+
+	    end else begin
+
+	      asm65(#9'lda '+svar);
+	      asm65(#9'add' + GetStackVariable(0));
+	      asm65(#9'sta :bp2');
+	      asm65(#9'lda '+svar+'+1');
+	      asm65(#9'adc' + GetStackVariable(1));
+	      asm65(#9'sta :bp2+1');
+
+	    end;
 
 	    asm65(#9'ldy #$00');
-	    asm65(#9'mva (:bp2),y' + GetStackVariable(0));
+	    asm65(#9'lda (:bp2),y');
+	    asm65(#9'sta' + GetStackVariable(0));
 	    asm65(#9'iny');
-	    asm65(#9'mva (:bp2),y' + GetStackVariable(1));
+	    asm65(#9'lda (:bp2),y');
+	    asm65(#9'sta' + GetStackVariable(1));
 	    asm65(#9'iny');
-	    asm65(#9'mva (:bp2),y' + GetStackVariable(2));
+	    asm65(#9'lda (:bp2),y');
+	    asm65(#9'sta' + GetStackVariable(2));
 	    asm65(#9'iny');
-	    asm65(#9'mva (:bp2),y' + GetStackVariable(3));
+	    asm65(#9'lda (:bp2),y');
+	    asm65(#9'sta' + GetStackVariable(3));
 
 	  end;
 
@@ -1588,13 +1636,17 @@ case IndirectionLevel of
 	   LoadBP2(IdentIndex, svar);
 
 	   asm65(#9'ldy :STACKORIGIN,x');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(0));
+	   asm65(#9'lda (:bp2),y');
+	   asm65(#9'sta' + GetStackVariable(0));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(1));
+	   asm65(#9'lda (:bp2),y');
+	   asm65(#9'sta' + GetStackVariable(1));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(2));
+	   asm65(#9'lda (:bp2),y');
+	   asm65(#9'sta' + GetStackVariable(2));
 	   asm65(#9'iny');
-	   asm65(#9'mva (:bp2),y' + GetStackVariable(3));
+	   asm65(#9'lda (:bp2),y');
+	   asm65(#9'sta' + GetStackVariable(3));
 
 	  end else begin
 
@@ -2625,14 +2677,28 @@ case IndirectionLevel of
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
 
-	  asm65(#9'lda ' + svar);
-	  asm65(#9'add :STACKORIGIN-1,x');
-	  asm65(#9'tay');
-	  asm65(#9'lda ' + svar + '+1');
-	  asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-	  asm65(#9'sta :bp+1');
-	  asm65(#9'lda :STACKORIGIN,x');
-	  asm65(#9'sta (:bp),y');
+	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+
+	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+	      asm65(#9'add :STACKORIGIN-1,x');
+	      asm65(#9'tay');
+	      asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+	      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	      asm65(#9'sta :bp+1');
+
+	    end else begin
+
+	      asm65(#9'lda ' + svar);
+	      asm65(#9'add :STACKORIGIN-1,x');
+	      asm65(#9'tay');
+	      asm65(#9'lda ' + svar + '+1');
+	      asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	      asm65(#9'sta :bp+1');
+
+	    end;
+
+	    asm65(#9'lda :STACKORIGIN,x');
+	    asm65(#9'sta (:bp),y');
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');	// -sta
 
@@ -2689,6 +2755,17 @@ case IndirectionLevel of
 
 	   end else begin
 
+	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+
+		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+		asm65(#9'add :STACKORIGIN-1,x');
+		asm65(#9'sta :bp2');
+		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		asm65(#9'sta :bp2+1');
+
+	     end else begin
+
 		asm65(#9'lda ' + svar);
 		asm65(#9'add :STACKORIGIN-1,x');
 		asm65(#9'sta :bp2');
@@ -2696,12 +2773,14 @@ case IndirectionLevel of
 		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 		asm65(#9'sta :bp2+1');
 
-	 	asm65(#9'ldy #$00');
-		asm65(#9'lda :STACKORIGIN,x');
-		asm65(#9'sta (:bp2),y');
-		asm65(#9'iny');
-		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		asm65(#9'sta (:bp2),y');
+	     end;
+
+	     asm65(#9'ldy #$00');
+	     asm65(#9'lda :STACKORIGIN,x');
+	     asm65(#9'sta (:bp2),y');
+	     asm65(#9'iny');
+	     asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	     asm65(#9'sta (:bp2),y');
 
 	   end;
 
@@ -2772,12 +2851,25 @@ case IndirectionLevel of
 
 	   end else begin
 
-	     asm65(#9'lda '+svar);
-	     asm65(#9'add :STACKORIGIN-1,x');
-	     asm65(#9'sta :bp2');
-	     asm65(#9'lda '+svar+'+1');
-	     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-	     asm65(#9'sta :bp2+1');
+	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+
+		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value), 2));
+		asm65(#9'add :STACKORIGIN-1,x');
+		asm65(#9'sta :bp2');
+		asm65(#9'lda #$' + hexStr(byte(Ident[IdentIndex].Value shr 8), 2));
+		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		asm65(#9'sta :bp2+1');
+
+	     end else begin
+
+		asm65(#9'lda '+svar);
+		asm65(#9'add :STACKORIGIN-1,x');
+		asm65(#9'sta :bp2');
+		asm65(#9'lda '+svar+'+1');
+		asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		asm65(#9'sta :bp2+1');
+
+	     end;
 
 	     asm65(#9'ldy #$00');
 	     asm65(#9'lda :STACKORIGIN,x');

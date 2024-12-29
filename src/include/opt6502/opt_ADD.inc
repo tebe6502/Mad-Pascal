@@ -2170,114 +2170,6 @@ begin
      end;
 
 
-    if lda(i) and (iy(i) = false) and							// lda 					; 0
-       add_sub_im(i+1) and								// add|sub #				; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
-       lda_im_0(i+3) and								// lda #$00				; 3
-       adc_sbc_im(i+4) and								// adc|sbc #				; 4
-       sta_bp_1(i+5) and								// sta :bp+1				; 5
-       ldy_stack(i+6) and								// ldy :STACKORIGIN			; 6
-       ((lda(i+7) and sta_bp_y(i+8)) or							// lda        |lda (:bp),y		; 7
-        (lda_adr(i+7) and sta_bp_y(i+8)) or						// lda adr.   				; 7
-        (lda_bp_y(i+7) )) then		 						// sta (:bp),y|sta			; 8
-     if copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256) then
-      begin
-        p := GetWORD(i+1, i+4);
-
-	if sub_im(i+1) then p := word(-p);
-
-	listing[i+6] := #9'ldy ' + copy(listing[i], 6, 256);
-
-	if lda_bp_y(i+7) then listing[i+7] := #9'lda $' + IntToHex(p, 4) + ',y';
-	if sta_bp_y(i+8) then listing[i+8] := #9'sta $' + IntToHex(p, 4) + ',y';
-
-	listing[i] := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	exit(false);
-      end;
-
-
-    if add_im(i) and									// add #				; 0
-       sta_stack(i+1) and								// sta :STACKORIGIN+10			; 1
-       lda_im(i+2) and									// lda #				; 2
-       adc_im_0(i+3) and								// adc #$00				; 3
-       sta_bp_1(i+4) and								// sta :bp+1				; 4
-       ldy_stack(i+5) and								// ldy :STACKORIGIN+10			; 5
-       ((lda(i+6) and sta_bp_y(i+7)) or							// lda        |lda (:bp),y		; 6
-        (lda_adr(i+6) and sta_bp_y(i+7)) or						// lda adr.  				; 6
-        (lda_bp_y(i+6) )) then 								// sta (:bp),y|sta			; 7
-     if copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256) then
-      begin
-        p := GetWORD(i, i+2);
-
-	listing[i] := #9'tay';
-
-	if lda_bp_y(i+6) then listing[i+6] := #9'lda $' + IntToHex(p, 4) + ',y';
-	if sta_bp_y(i+7) then listing[i+7] := #9'sta $' + IntToHex(p, 4) + ',y';
-
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	exit(false);
-      end;
-
-
-    if lda_im(i) and									// lda #				; 0
-       add(i+1) and (iy(i+1) = false) and						// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
-       lda_im(i+3) and 									// lda #				; 3
-       adc_im_0(i+4) and								// adc #$00				; 4
-       sta_bp_1(i+5) and								// sta :bp+1				; 5
-       ldy_stack(i+6) and								// ldy :STACKORIGIN+10			; 6
-       ((lda(i+7) and sta_bp_y(i+8)) or							// lda        |lda (:bp),y		; 7
-        (lda_adr(i+7) and sta_bp_y(i+8)) or						// lda adr.   				; 7
-        (lda_bp_y(i+7) )) then 								// sta (:bp),y|sta			; 8
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
-       begin
-	 p := GetWORD(i, i+3);
-
-	 listing[i+6] := #9'ldy ' + copy(listing[i+1], 6, 256);
-
-	 if lda_bp_y(i+7) then listing[i+7] := #9'lda $' + IntToHex(p, 4) + ',y';
-	 if sta_bp_y(i+8) then listing[i+8] := #9'sta $' + IntToHex(p, 4) + ',y';
-
-	 listing[i]   := '';
-	 listing[i+1] := '';
-	 listing[i+2] := '';
-	 listing[i+3] := '';
-	 listing[i+4] := '';
-	 listing[i+5] := '';
-
-	exit(false);
-       end;
-
-
-    if add_sub(i) and (iy(i) = false) and (add_sub_im(i) = false) and			// add|sub				; 0
-       sta_stack(i+1) and								// sta :STACKORIGIN+10			; 1
-       lda(i+2) and (iy(i+2) = false) and						// lda					; 2
-       adc_sbc(i+3) and									// adc|sbc				; 3
-       sta_bp_1(i+4) and								// sta :bp+1				; 4
-       ldy_stack(i+5) and 								// ldy :STACKORIGIN+10			; 5
-       ((lda(i+6) and sta_bp_y(i+7)) or							// lda        |lda (:bp),y		; 6
-        (lda_adr(i+6) and sta_bp_y(i+7)) or						// lda adr. 				; 6
-        (lda_bp_y(i+6) and sta(i+7))) then 						// sta (:bp),y|sta			; 7
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) then
-       begin
-	listing[i+1]  := #9'tay';
-	listing[i+5]  := '';
-
-	exit(false);
-       end;
-
-
     if tya(i) and									// tya	 				; 0
        (listing[i+1] = #9'add #$01') and						// add #$01				; 1
        tay(i+2) and 									// tay					; 2
@@ -2307,92 +2199,6 @@ begin
 
 	exit(false);
       end;
-
-
-    if lda_im(i) and									// lda #				; 0
-       add(i+1) and (iy(i+1) = false) and						// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
-       lda_im(i+3) and 									// lda #				; 3
-       adc_im_0(i+4) and								// adc #$00				; 4
-       sta_bp_1(i+5) and								// sta :bp+1				; 5
-       mwy_bp2(i+6) and									// mwy .. :bp2				; 6
-       ldy(i+7) and									// ldy 					; 7
-       lda_bp2_y(i+8) and								// lda (:bp2),y				; 8
-       ldy_stack(i+9) and								// ldy :STACKORIGIN+10			; 9
-       sta_bp_y(i+10) then								// sta (:bp),y				; 10
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+9], 6, 256)) then
-       begin
-	p := GetWORD(i, i+3);
-
-	listing[i+9] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	listing[i+10] := #9'sta $' + IntToHex(p, 4) + ',y';
-
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	exit(false);
-       end;
-
-
-    if lda_im(i) and									// lda #				; 0
-       add(i+1) and (iy(i+1) = false) and						// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
-       lda_im(i+3) and 									// lda #				; 3
-       adc_im_0(i+4) and								// adc #$00				; 4
-       sta_bp_1(i+5) and								// sta :bp+1				; 5
-       ldy(i+6) and									// ldy					; 6
-       lda_a(i+7) and									// lda 					; 7
-       ldy_stack(i+8) and 								// ldy :STACKORIGIN+10			; 8
-       sta_bp_y(i+9) then 								// sta (:bp),y				; 9
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+8], 6, 256)) then
-       begin
-	 p := GetWORD(i, i+3);
-
-	 listing[i+8] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	 listing[i+9] := #9'sta $' + IntToHex(p, 4) + ',y';
-
-	 listing[i]   := '';
-	 listing[i+1] := '';
-	 listing[i+2] := '';
-	 listing[i+3] := '';
-	 listing[i+4] := '';
-	 listing[i+5] := '';
-
-	exit(false);
-       end;
-
-
-    if lda_im(i) and									// lda #				; 0
-       add(i+1) and (iy(i+1) = false) and						// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
-       lda_im(i+3) and 									// lda #				; 3
-       adc_im_0(i+4) and								// adc #$00				; 4
-       sta_bp_1(i+5) and								// sta :bp+1				; 5
-       ldy(i+6) and									// ldy					; 6
-       lda_a(i+7) and									// lda 					; 7
-       (add_sub(i+8) or and_ora_eor(i+8)) and						// add|sub|and|ora|eor			; 8
-       ldy_stack(i+9) and 								// ldy :STACKORIGIN+10			; 9
-       sta_bp_y(i+10) then 								// sta (:bp),y				; 10
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+9], 6, 256)) then
-       begin
-	 p := GetWORD(i, i+3);
-
-	 listing[i+9] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	 listing[i+10] := #9'sta $' + IntToHex(p, 4) + ',y';
-
-	 listing[i]   := '';
-	 listing[i+1] := '';
-	 listing[i+2] := '';
-	 listing[i+3] := '';
-	 listing[i+4] := '';
-	 listing[i+5] := '';
-
-	exit(false);
-       end;
 
 
     if lda(i) and (lda_im(i) = false) and (lda_stack(i) = false) and			// lda A				; 0
@@ -2922,7 +2728,7 @@ begin
 
     if lda_im_0(i) and									// lda #$00				; 0	!!! zadziala tylko dla ADD|ADC !!!
        add(i+1) and (add_im(i+1) = false) and						// add					; 1
-       sta(i+2) and									// sta					; 2	!!! ~sta.adr
+       sta(i+2) and (sta_bp2(i+2) = false) and						// sta					; 2	!!! ~sta.adr|~sta :bp2
        lda(i+3) and 									// lda 					; 3	!!! ~lda.adr
        adc(i+4) then									// adc					; 4
      begin

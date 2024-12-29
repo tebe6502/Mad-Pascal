@@ -300,7 +300,7 @@ begin
 {
      if
        lda_stack(i+4) and							// lda :STACKORIGIN			; 4
-       and_ora_eor(i+5) and (and_ora_eor_stack(i+5) = false) and		// and|ora|eor				; 5
+       and_ora_eor_val(i+5) and							// and|ora|eor				; 5	~:STACKORIGIN
        sta_val(i+6) and								// sta					; 6
        lda_stack(i+7) then							// lda :STACKORIGIN+STACKWIDTH		; 7
      if (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) and
@@ -326,7 +326,7 @@ begin
 
      if
        lda_stack(i+4) and							// lda :STACKORIGIN			; 4
-       and_ora_eor(i+5) and (and_ora_eor_stack(i+5) = false) and		// and|ora|eor				; 5
+       and_ora_eor_val(i+5) and							// and|ora|eor				; 5	~:STACKORIGIN
        sta_val(i+6) and								// sta					; 6
        (lda_stack(i+7) = false) and						//~lda :STACKORIGIN+STACKWIDTH		; 7
        (and_ora_eor(i+8) = false) then						//~and|ora|eor				; 8

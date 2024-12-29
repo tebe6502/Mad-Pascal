@@ -109,7 +109,7 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       lda_a(i) and (lda_stack(i) = false) and							// lda W+1		; 0	opt_081 | WORD < 0 ; >= 0
+       lda_val(i) and										// lda W+1		; 0	opt_081 | WORD < 0 ; >= 0
        cmp_im_0(i+1) and									// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
@@ -288,7 +288,7 @@ begin
 // -----------------------------------------------------------------------------
 
     if ldy_1(i) and 										// ldy #1		; 0	BOOL := SHORTINT < 0
-       lda_a(i+1) and (lda_stack(i+1) = false) and						// lda			; 1	BOOL := SMALLINT < 0
+       lda_val(i+1) and										// lda			; 1	BOOL := SMALLINT < 0
        (listing[i+2] = #9'bmi @+') and								// bmi @+		; 2	BOOL := INTEGER < 0
        dey(i+3) and										// dey			; 3
        lab_a(i+4) and										//@			; 4

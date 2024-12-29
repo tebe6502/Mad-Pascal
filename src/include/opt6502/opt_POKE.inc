@@ -139,7 +139,7 @@ begin
 
     if lda_bp_y(i+6) and									// lda (:bp),y			; 6
        and_ora_eor(i+7) and									// and|ora|eor			; 7
-       ((sta(i+8) and (sta_stack(i+8) = false)) or cmp(i+8)) then				// cmp|sta|sta (:bp),y		; 8
+       (sta_val(i+8) or cmp(i+8)) then								// cmp|sta|sta (:bp),y		; 8
       begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
@@ -226,7 +226,7 @@ begin
 
 
     if lda(i+6) and 										// lda 				; 6
-       sta(i+7) and (sta_stack(i+7) = false) then 						// sta|sta (:bp),y		; 7
+       sta_val(i+7) then			 						// sta|sta (:bp),y		; 7
       begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'

@@ -414,7 +414,7 @@ begin
        lda_adr(i+1) and										// lda adr.				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
 //       ldy(i+3) and										// ldy I				; 3
-       lda_a(i+4) and (lda_stack(i+4) = false) and						// lda					; 4
+       lda_val(i+4) and										// lda					; 4	~:STACKORIGIN
        add_sub_stack(i+5) then									// add|sub :STACKORIGIN			; 5
      if (copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256)) then
       begin
@@ -432,10 +432,10 @@ begin
       end;
 
 
-    if ldy(i) and (ldy_stack(i) = false) and							// ldy					; 0
+    if ldy_val(i) and										// ldy					; 0	~:STACKORIGIN
        lda_adr(i+1) and										// lda adr.				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+10			; 2
-       ldy(i+3) and (ldy_stack(i+3) = false) and						// ldy					; 3
+       ldy_val(i+3) and										// ldy					; 3	~:STACKORIGIN
        lda_adr(i+4) and										// lda adr.				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+11			; 5
        lda_stack(i+6) and									// lda :STACKORIGIN+10			; 6

@@ -346,7 +346,7 @@ begin
     if (lda_adr(i+10) or sta_adr(i+11)) and							// lda adr.|				; 10		WORD
        												//         |sta adr.			; 11
 
-       lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
+       lda_val(i) and										// lda ~:STACKORIGIN			; 0
        (listing[i+1] = #9'asl :STACKORIGIN,x') and						// asl :STACKORIGIN,x			; 1
        rol_a(i+2) and										// rol @				; 2
        (listing[i+3] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x	; 3
@@ -375,7 +375,7 @@ begin
     if (lda_adr(i+12) or sta_adr(i+13)) and							// lda adr.|				; 12		CARDINAL
        												//         |sta adr.			; 13
 
-       lda_a(i) and (lda_stack(i) = false) and							// lda					; 0
+       lda_val(i) and										// lda ~:STACKORIGIN			; 0
        (listing[i+1] = #9'asl :STACKORIGIN,x') and						// asl :STACKORIGIN,x			; 1
        rol_a(i+2) and										// rol @				; 2
        (listing[i+3] = #9'asl :STACKORIGIN,x') and						// asl :STACKORIGIN,x			; 3
