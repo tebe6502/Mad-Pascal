@@ -1670,4 +1670,18 @@ begin
      end;
 
 
+    if mva_(i) and										// mva   :STACKORIGIN-1+STACKWIDTH,x	; 0
+       ldy_1(i+1) and										// ldy #1				; 1
+       (listing[i+2] = #9'.LOCAL') and								// .LOCAL				; 2
+       (listing[i+3] = #9'lda :STACKORIGIN-1+STACKWIDTH,x') then 				// lda :STACKORIGIN-1+STACKWIDTH,x	; 3
+     if (pos(':STACKORIGIN-1+STACKWIDTH,x', listing[i]) > 0) then
+     begin
+      listing[i+3] := #9'lda ' + GetString(i);
+
+      listing[i] := '';
+
+      exit(false);
+     end;
+
+
 end;		// function

@@ -132,6 +132,7 @@ begin
        tmp:=listing[i+3];
 
        listing[i]   := #9'lda ' + GetString(i);
+
        listing[i+3] := #9'lda ' + GetString(i+1);
 
        listing[i+2] := #9'sta :STACKORIGIN,x';
@@ -146,6 +147,40 @@ begin
 
        listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
        listing[i+6] :='';
+
+       exit(false);
+     end;
+
+
+    if (mva(i) = false) and									//~mva					; 0
+       mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
+       inx(i+2) and  										// inx					; 2
+       mva(i+3) and 										// mva  :STACKORIGIN,x			; 3
+       mva(i+4) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 4
+       add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
+       dex(i+6) then										// dex					; 6
+     if	(pos(':STACKORIGIN,x', listing[i+3]) > 0) and
+     	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+4]) > 0) then
+     begin
+
+       tmp:=listing[i+4];
+
+       listing[i+4] := #9'lda ' + GetString(i+1);
+
+       listing[i+1] := #9'lda :STACKORIGIN,x';
+
+       if listing[i+5] = #9'jsr addAX_CX' then begin
+	listing[i+2] := #9'add ' + GetString(i+3);
+	listing[i+5] := #9'adc ' + GetString(tmp);
+       end else begin
+	listing[i+2] := #9'sub ' + GetString(i+3);
+	listing[i+5] := #9'sbc ' + GetString(tmp);
+       end;
+
+       listing[i+3] := #9'sta :STACKORIGIN,x';
+
+       listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
 
        exit(false);
      end;
@@ -177,39 +212,132 @@ begin
      end;
 
 
-    if lda_val(i) and										// lda ~:STACKORIGIN			; 0
+{
+    if lda_val(i) and										// lda					; 0	~:STACKORIGIN
        (listing[i+1] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 1
-       lda_val(i+2) and										// lda ~:STACKORIGIN			; 2
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        (listing[i+3] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
-       dex(i+4) and										// dex					; 4
-       inx(i+5) and										// inx					; 5
-       mva(i+6) and										// mva  :STACKORIGIN,x			; 6
-       mva(i+7) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 7
-       add_sub_AX_CX(i+8) and									// jsr addAX_CX|subAX_CX		; 8
-       dex(i+9) then										// dex					; 9
-     if (pos(':STACKORIGIN,x', listing[i+6]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) then
+       lda_val(i+4) and										// lda					; 4	~:STACKORIGIN
+       (listing[i+5] = #9'sta :STACKORIGIN-1+STACKWIDTH*2,x') and				// sta :STACKORIGIN-1+STACKWIDTH*2,x	; 5
+       lda_val(i+6) and										// lda					; 6	~:STACKORIGIN
+       (listing[i+7] = #9'sta :STACKORIGIN-1+STACKWIDTH*3,x') and				// sta :STACKORIGIN-1+STACKWIDTH*3,x	; 7
+       dex(i+8) and										// dex					; 8
+       mva(i+9) and										// mva  :STACKORIGIN-1+STACKWIDTH*2,x	; 9
+       mva(i+10) and 										// mva  :STACKORIGIN-1+STACKWIDTH*3,x	; 10
+       add_sub_AX_CX(i+11) then									// jsr addAX_CX|subAX_CX		; 11
+     if (pos(':STACKORIGIN-1+STACKWIDTH*2,x', listing[i+9]) > 0) and
+	(pos(':STACKORIGIN-1+STACKWIDTH*3,x', listing[i+10]) > 0) then
+     begin
+
+       listing[i+4] := #9'lda :STACKORIGIN-1,x';
+
+       if listing[i+11] = #9'jsr addAX_CX' then
+        listing[i+5] := #9'add ' + GetString(i)
+       else
+        listing[i+5] := #9'sub ' + GetString(i);
+
+       listing[i+6] := #9'sta :STACKORIGIN-1,x';
+       listing[i+7] := #9'lda :STACKORIGIN-1+STACKWIDTH,x';
+
+       if listing[i+11] = #9'jsr addAX_CX' then
+        listing[i+8] := #9'adc ' + GetString(i+2)
+       else
+        listing[i+8] := #9'sbc ' + GetString(i+2);
+
+       listing[i+9] := #9'sta :STACKORIGIN-1+STACKWIDTH,x';
+
+       listing[i+10] := '';
+       listing[i+11] := '';
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := #9'dex';
+
+       exit(false);
+     end;
+}
+
+{
+    if inx(i) and										// inx					; 0
+       mva(i+1) and										// mva  :STACKORIGIN,x			; 1
+       mva(i+2) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 2
+       inx(i+3) and										// inx					; 3
+       mva(i+4) and										// mva  :STACKORIGIN,x			; 4
+       mva(i+5) and										// mva  :STACKORIGIN+STACKWIDTH,x	; 5
+       add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
+       (dex(i+7) = flase) then									//~dex					; 7
+     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
+     	(pos(':STACKORIGIN,x', listing[i+4]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+5]) > 0) then
+     begin
+
+       listing[i+1] := #9'lda ' + GetString(i+1);
+
+       if listing[i+6] = #9'jsr addAX_CX' then
+        listing[i+2] := #9'add ' + GetString(i+4)
+       else
+        listing[i+2] := #9'sub ' + GetString(i+4);
+
+       listing[i+3] := #9'sta :STACKORIGIN,x';
+
+       tmp:=GetString(i+5);
+
+       listing[i+4] := #9'lda ' + GetString(i+5);
+
+       if listing[i+6] = #9'jsr addAX_CX' then
+        listing[i+5] := #9'adc ' + tmp
+       else
+        listing[i+5] := #9'sbc ' + tmp;
+
+       listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+
+       exit(false);
+     end;
+
+
+
+	inx
+	mva FINDERX :STACKORIGIN,x
+	mva #$00 :STACKORIGIN+STACKWIDTH,x
+	inx
+	mva #$01 :STACKORIGIN,x
+	mva #$00 :STACKORIGIN+STACKWIDTH,x
+	jsr addAX_CX
+
+}
+
+
+    if lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       (listing[i+1] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (listing[i+3] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
+       mva(i+4) and										// mva  :STACKORIGIN,x			; 4
+       mva(i+5) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 5
+       add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
+       dex(i+7) then										// dex					; 7
+     if (pos(':STACKORIGIN,x', listing[i+4]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+5]) > 0) then
      begin
 
        listing[i+3] := listing[i+2];
 
-       if listing[i+8] = #9'jsr addAX_CX' then
-        listing[i+1] := #9'add ' + GetString(i+6)
+       if listing[i+6] = #9'jsr addAX_CX' then
+        listing[i+1] := #9'add ' + GetString(i+4)
        else
-        listing[i+1] := #9'sub ' + GetString(i+6);
+        listing[i+1] := #9'sub ' + GetString(i+4);
 
        listing[i+2] := #9'sta :STACKORIGIN-1,x';
 
-       if listing[i+8] = #9'jsr addAX_CX' then
-        listing[i+4] := #9'adc ' + GetString(i+7)
+       if listing[i+6] = #9'jsr addAX_CX' then
+        listing[i+4] := #9'adc ' + GetString(i+5)
        else
-        listing[i+4] := #9'sbc ' + GetString(i+7);
+        listing[i+4] := #9'sbc ' + GetString(i+5);
 
        listing[i+5] := #9'sta :STACKORIGIN-1+STACKWIDTH,x';
 
        listing[i+6] := '';
-       listing[i+7] := '';
-       listing[i+8] := '';
 
        exit(false);
      end;
@@ -485,6 +613,48 @@ begin
 
 // -----------------------------------------------------------------------------
 
+    if //dex(i) and										// dex					; 0
+       lda_a(i+1) and										// lda					; 1
+       (listing[i+2] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 2
+       lda_a(i+3) and										// lda					; 3
+       (listing[i+4] = #9'sta :STACKORIGIN-1+STACKWIDTH,x') and					// sta :STACKORIGIN-1+STACKWIDTH,x	; 4
+       lda_a(i+5) and										// lda					; 5
+       (listing[i+6] = #9'sta :STACKORIGIN-1+STACKWIDTH*2,x') and				// sta :STACKORIGIN-1+STACKWIDTH*2,x	; 6
+       lda_a(i+7) and										// lda					; 7
+       (listing[i+8] = #9'sta :STACKORIGIN-1+STACKWIDTH*3,x') and				// sta :STACKORIGIN-1+STACKWIDTH*3,x	; 8
+       mva(i+9) and 										// mva   :STACKORIGIN,x			; 9
+       mva(i+10) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 10
+       add_sub_AX_CX(i+11) and									// jsr addAX_CX|subAX_CX		; 11
+       dex(i+12) then										// dex					; 12
+     if (pos(':STACKORIGIN,x', listing[i+9]) > 0) and
+	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+10]) > 0) then
+     begin
+
+       listing[i+4] := listing[i+3];
+
+       if listing[i+11] = #9'jsr addAX_CX' then
+         listing[i+2] := #9'add ' + GetString(i+9)
+       else
+         listing[i+2] := #9'sub ' + GetString(i+9);
+
+       listing[i+3] := #9'sta :STACKORIGIN,x';
+
+       if listing[i+11] = #9'jsr addAX_CX' then
+         listing[i+5] := #9'adc ' + GetString(i+10)
+       else
+         listing[i+5] := #9'sbc ' + GetString(i+10);
+
+       listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+       listing[i+10]:= '';
+       listing[i+11]:= '';
+
+       exit(false);
+     end;
+
 
     if //dex(i) and										// dex					; 0
        lda_a(i+1) and										// lda					; 1
@@ -668,5 +838,7 @@ begin
 
 
     end;
+
+
 
 end;		// function
