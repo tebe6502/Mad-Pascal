@@ -595,6 +595,7 @@ begin
 
 // -----------------------------------------------------------------------------
 
+
     if //dex(i) and										// dex					; 0
        lda_a(i+1) and										// lda					; 1
        (listing[i+2] = #9'sta :STACKORIGIN-1,x') and						// sta :STACKORIGIN-1,x			; 2
@@ -614,19 +615,17 @@ begin
 
        listing[i+4] := listing[i+3];
 
-       if listing[i+11] = #9'jsr addAX_CX' then
-         listing[i+2] := #9'add ' + GetString(i+9)
-       else
+       if listing[i+11] = #9'jsr addAX_CX' then begin
+         listing[i+2] := #9'add ' + GetString(i+9);
+         listing[i+5] := #9'adc ' + GetString(i+10);
+       end else begin
          listing[i+2] := #9'sub ' + GetString(i+9);
-
-       listing[i+3] := #9'sta :STACKORIGIN,x';
-
-       if listing[i+11] = #9'jsr addAX_CX' then
-         listing[i+5] := #9'adc ' + GetString(i+10)
-       else
          listing[i+5] := #9'sbc ' + GetString(i+10);
+       end;
 
-       listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+       listing[i+3] := #9'sta :STACKORIGIN-1,x';
+
+       listing[i+6] := #9'sta :STACKORIGIN-1+STACKWIDTH,x';
 
        listing[i+7] := '';
        listing[i+8] := '';
@@ -658,17 +657,15 @@ begin
 
        listing[i+4] := listing[i+3];
 
-       if listing[i+12] = #9'jsr addAX_CX' then
-         listing[i+2] := #9'add ' + GetString(i+10)
-       else
+       if listing[i+12] = #9'jsr addAX_CX' then begin
+         listing[i+2] := #9'add ' + GetString(i+10);
+         listing[i+5] := #9'adc ' + GetString(i+11);
+       end else begin
          listing[i+2] := #9'sub ' + GetString(i+10);
+         listing[i+5] := #9'sbc ' + GetString(i+11);
+       end;
 
        listing[i+3] := #9'sta :STACKORIGIN,x';
-
-       if listing[i+12] = #9'jsr addAX_CX' then
-         listing[i+5] := #9'adc ' + GetString(i+11)
-       else
-         listing[i+5] := #9'sbc ' + GetString(i+11);
 
        listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
 

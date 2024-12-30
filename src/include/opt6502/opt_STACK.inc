@@ -114,7 +114,20 @@ begin
     if (l = i + 4) and
        (lda_a(i) or sta_stack(i)) and								// lda|sta :STACKORIGIN+STACKWIDTH	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN			; 1
-       sta_val(i+2) and										// sta ~:STACKORIGIN			; 2
+       sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
+       dex(i+3) then										// dex					; 3
+     if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then
+     begin
+       listing[i] := '';
+
+       exit(false);
+     end;
+
+
+    if (l = i + 4) and
+       (and_ora_eor_val(i) or add_sub_val(i) or adc_sbc_val(i)) and				// and|ora|eor|add|sdc|sub|sbc		; 0	~:STACKORIGIN
+       lda_stack(i+1) and									// lda :STACKORIGIN			; 1
+       sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
        dex(i+3) then										// dex					; 3
      if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then
      begin
