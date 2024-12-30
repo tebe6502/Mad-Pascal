@@ -263,19 +263,6 @@ begin
      end;
 
 
-    if (i>1) and										// mva A		; -2
-       mva(i) and										// inx			; -1
-       inx(i-1) and										// mva A		; 0
-       mva(i-2) then										// inx			; 1
-     if listing[i] = listing[i-2] then begin							// mva A		; 2
-       listing[i] := #9'sta ' + copy(listing[i], pos(':STACK', listing[i]), 256);
-       if inx(i+1) and (listing[i-2] = listing[i+2]) then
-	listing[i+2] := #9'sta ' + copy(listing[i+2], pos(':STACK', listing[i+2]), 256);
-
-       exit(false);
-     end;
-
-
     if (listing[i] = #9'mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x') and			// mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x	; 0
        (listing[i+1] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x				; 1
        (listing[i+2] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x				; 2
@@ -344,6 +331,36 @@ begin
        listing[i+2] := #9'sta :STACKORIGIN+1,x';
        listing[i+1] := #9'tya';
        listing[i]   := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if (inx(i) = false) and									// inx					; 0	~inx
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (listing[i+3] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+4] := #9'sta :STACKORIGIN+1,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if (inx(i) = false) and									// inx					; 0	~inx
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (listing[i+3] = #9'sta :STACKORIGIN+1,x') and						// sta :STACKORIGIN+1,x			; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+4] := #9'sta :STACKORIGIN+2,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
 
        exit(false);
      end;
