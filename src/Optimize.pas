@@ -1611,6 +1611,22 @@ var inxUse, found: Boolean;
 
 // -----------------------------------------------------------------------------
 
+   procedure Expand(i, e: integer);
+   var k: integer;
+   begin
+
+    for k := l - 1 downto i do begin
+
+       listing[k+e] := listing[k];
+
+    end;
+
+    inc(l, e);
+
+   end;
+
+// -----------------------------------------------------------------------------
+
    procedure Rebuild;
    var k, i: integer;
    begin
@@ -2051,7 +2067,7 @@ var inxUse, found: Boolean;
 
 
 {
-if (pos('mva ISICETAIL.RESULT :STACKORIGIN,x', listing[i]) > 0) then begin
+if (pos('mva FINDERX :STACKORIGIN,x', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2231,7 +2247,7 @@ end;
 
 
 {
-if (pos('asl :STACK', listing[i]) > 0) then begin
+if (pos('sta :bp+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

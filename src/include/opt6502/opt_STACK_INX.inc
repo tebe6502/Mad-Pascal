@@ -114,10 +114,10 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       ldy_val(i+1) and										// ldy ~:STACKORIGIN			; 1
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
        iny(i+2) and										// iny					; 2
-       lda_val(i+3) and										// lda ~:STACKORIGIN			; 3
-       sta_val(i+4) and										// sta ~:STACKORIGIN			; 4
+       lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
+       sta_val(i+4) and										// sta					; 4	~:STACKORIGIN
        dex(i+5) then										// dex					; 5
      begin
        listing[i]   := '';
@@ -129,12 +129,42 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       ldy_val(i+1) and										// ldy ~:STACKORIGIN			; 1
-       lda_val(i+2) and										// lda ~:STACKORIGIN			; 2
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        dex(i+3) then										// dex					; 3
      begin
        listing[i]   := '';
        listing[i+3] := '';
+
+       exit(false);
+     end;
+
+
+    if (inx(i) = false) and									// inx					; 0	~inx
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (listing[i+3] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+4] := #9'sta :STACKORIGIN+1,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if (inx(i) = false) and									// inx					; 0	~inx
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (listing[i+3] = #9'sta :STACKORIGIN+1,x') and						// sta :STACKORIGIN+1,x			; 3
+       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+4] := #9'sta :STACKORIGIN+2,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
 
        exit(false);
      end;
