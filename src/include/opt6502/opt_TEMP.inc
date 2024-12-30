@@ -7,6 +7,24 @@ var p: integer;
 begin
 
 
+
+{ !!! tylko w ostatnim etapie optymalizaowac mva !!!
+
+    if (i>1) and										// mva A		; -2
+       mva(i) and										// inx			; -1
+       inx(i-1) and										// mva A		; 0
+       mva(i-2) then										// inx			; 1
+     if listing[i] = listing[i-2] then begin							// mva A		; 2
+       listing[i] := #9'sta ' + copy(listing[i], pos(':STACK', listing[i]), 256);
+       if inx(i+1) and (listing[i-2] = listing[i+2]) then
+	listing[i+2] := #9'sta ' + copy(listing[i+2], pos(':STACK', listing[i+2]), 256);
+
+       exit(false);
+     end;
+}
+
+
+
    if (pos('lda ', TemporaryBuf[10]) > 0) and						// inc			; 11
       (pos('cmp ', TemporaryBuf[11]) > 0) and						// inc			; 11
       (pos('jcc l_', TemporaryBuf[12]) > 0) and						// jcc			; 10	branch if C=0
