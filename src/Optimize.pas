@@ -2807,13 +2807,14 @@ begin				// OptimizeASM
 
    t:=a;
 
-   if pos(#9'inx', a) > 0 then begin inc(x); inxUse:=true; t:='' end;
-   if pos(#9'dex', a) > 0 then begin dec(x); t:='' end;
+   if (a = #9'inx') then begin inc(x); inxUse:=true; t:=''; continue end;
+   if (a = #9'dex') then begin dec(x); t:=''; continue end;
 
 
    if (pos('@print', a) > 0) then begin x:=51; arg0:='@print'; resetOpty; Break end;		// zakoncz optymalizacje niepowodzeniem
 
      if (pos(#9'jsr ', a) > 0) or (pos('m@', a) > 0) then begin
+
 
       if (pos(#9'jsr ', a) > 0) then
        arg0 := copy(a, 6, 256)
