@@ -9928,6 +9928,9 @@ var
   fl: single;
 begin
 
+ftmp:=Default(TFloat);
+fl:=0;
+
 if Tok[i].Kind in [PLUSTOK, MINUSTOK] then j := i + 1 else j := i;
 
 if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
@@ -12371,7 +12374,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; AssignFile');
+//	asm65('; AssignFile');
 
 	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK]) ) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -12422,7 +12425,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; Reset');
+//	asm65('; Reset');
 
 	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK]) ) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -12472,7 +12475,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; Rewrite');
+//	asm65('; Rewrite');
 
 	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK]) ) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -12524,7 +12527,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; Append');
+//	asm65('; Append');
 
 	if not( (Ident[IdentIndex].DataType in [TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [TEXTFILETOK]) ) then
 	 Error(i, 'Call by var for arg no. 1 has to match exactly: Got "' + InfoAboutToken(Ident[IdentIndex].DataType) + '" expected "Text"');
@@ -12575,8 +12578,8 @@ WHILETOK:
 
 	CheckTok(i + 5, CPARTOK);
 
-	asm65;
-	asm65('; GetResourceHandle');
+//	asm65;
+//	asm65('; GetResourceHandle');
 
 	asm65(#9'lda <MAIN.@RESOURCE.' + svar);
 	asm65(#9'sta ' + Tok[i + 2].Name^);
@@ -12616,8 +12619,8 @@ WHILETOK:
 
 	CheckTok(i + 5, CPARTOK);
 
-	asm65;
-	asm65('; GetResourceHandle');
+//	asm65;
+//	asm65('; GetResourceHandle');
 
 	asm65(#9'lda <MAIN.@RESOURCE.' + svar + '.end-MAIN.@RESOURCE.' + svar);
 	asm65(#9'sta ' + Tok[i + 2].Name^);
@@ -12644,7 +12647,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; BlockRead');
+//	asm65('; BlockRead');
 
 	if not((Ident[IdentIndex].DataType = FILETOK) or (Ident[IdentIndex].AllocElementType = FILETOK)) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -12674,7 +12677,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; BlockWrite');
+//	asm65('; BlockWrite');
 
 	if not((Ident[IdentIndex].DataType = FILETOK) or (Ident[IdentIndex].AllocElementType = FILETOK)) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -12703,7 +12706,7 @@ WHILETOK:
 	if IdentIndex = 0 then
 	 iError(i + 2, UnknownIdentifier);
 
-	asm65('; CloseFile');
+//	asm65('; CloseFile');
 
 	if not( (Ident[IdentIndex].DataType in [FILETOK, TEXTFILETOK]) or (Ident[IdentIndex].AllocElementType in [FILETOK, TEXTFILETOK])) then
 	 iError(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -13800,6 +13803,8 @@ var IdentIndex, size: integer;
    var ftmp: TFloat;
        v: Int64;
    begin
+
+    ftmp:=Default(TFloat);
 
     move(Ident[IdentIndex].Value, ftmp, sizeof(ftmp));
 
@@ -16028,7 +16033,7 @@ while Tok[i].Kind in
 	  VarType := POINTERTOK;
 	end;
 
-	if Tok[i + 1].Kind <> EQTOK then isAbsolute := true;
+	//if Tok[i + 1].Kind <> EQTOK then isAbsolute := true;				// !!!!
 
 	ConstVal := 1;
 

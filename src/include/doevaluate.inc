@@ -11,6 +11,8 @@ var s: string;
       Err, IdentTemp: integer;
   begin
 
+     Result:=0;
+
      tmp := get_digit(k, s);
      if tmp <> '' then begin
 
@@ -88,6 +90,8 @@ begin
 
 
 begin
+
+  doEvaluate:=0;
 
   par1 := -1;
   par2 := -1;

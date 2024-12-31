@@ -2293,7 +2293,7 @@ begin
     if (lda_a(i) = false) and								//~lda					; 0
        sta_stack(i+1) and								// sta :STACKORIGIN+9			; 1
        ldy(i+2) and (ldy_stack(i+2) = false) and					// ldy					; 2
-       lda_val(i+3) and									// lda					; 3	~lda :STACKORIGIN
+       lda_val(i+3) and									// lda					; 3	~:STACKORIGIN
        add_stack(i+4) then								// add :STACKORIGIN+9			; 4
      if copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256) then
      begin

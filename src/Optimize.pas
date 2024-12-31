@@ -38,7 +38,10 @@ end;
 
 
 procedure OptimizeProgram(MainIndex: Integer);
-var ProcAsBlock: array [1..MAXBLOCKS] of Boolean;				// issue #125 fixed
+type
+    TBoolean = array [1..MAXBLOCKS] of Boolean;
+
+var ProcAsBlock: TBoolean;					// issue #125 fixed
 
   procedure MarkNotDead(IdentIndex: Integer);
   var
@@ -64,7 +67,8 @@ var ProcAsBlock: array [1..MAXBLOCKS] of Boolean;				// issue #125 fixed
 
 begin
 
- fillbyte(ProcAsBlock, sizeof(ProcAsBlock), 0);
+ //fillbyte(ProcAsBlock, sizeof(ProcAsBlock), 0);
+ ProcAsBlock:=Default(TBoolean);
 
 // Perform dead code elimination
  MarkNotDead(MainIndex);
@@ -2072,7 +2076,7 @@ var inxUse, found: Boolean;
 
 
 {
-if (pos('sta CANSTEPTOVIS', listing[i]) > 0) then begin
+if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2793,6 +2797,9 @@ begin				// OptimizeASM
  //arg1 := '';
 
  inxUse := false;
+
+ listing:=Default(TListing);
+ listing_tmp:=Default(TListing);
 
  for i := 0 to High(s) do
   for k := 0 to 3 do s[i][k] := '';

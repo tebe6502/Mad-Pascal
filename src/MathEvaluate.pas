@@ -175,6 +175,8 @@ begin
   skip_blanks;
 
   op:=0;
+  v1:=0;
+  v2:=0;
 
   for i:=1 to High(fop) do
     if (op=0) then

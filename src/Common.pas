@@ -674,16 +674,18 @@ uses SysUtils, Messages;
 // ----------------------------------------------------------------------------
 
 
-procedure NormalizePath(var Name: string);
+function NormalizePath(var Name: string): string;
 begin
+
+   Result := Name;
 
   {$IFDEF UNIX}
    if Pos('\', Name) > 0 then
-    Name := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
+    Result := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
   {$ENDIF}
 
   {$IFDEF LINUX}
-    Name := LowerCase(Name);
+    Result := LowerCase(Name);
   {$ENDIF}
 
 end;
@@ -697,7 +699,7 @@ function FindFile(Name: string; ftyp: TString): string; overload;
 var i: integer;
 begin
 
-  NormalizePath(Name);
+  Name := NormalizePath(Name);
 
   i:=0;
 
@@ -736,7 +738,7 @@ var i: integer;
     fnm: string;
 begin
 
-  NormalizePath(Name);
+  Name := NormalizePath(Name);
 
   i:=0;
 
@@ -1307,21 +1309,15 @@ end;	//GetCommonType
 
 procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
 var i: integer;
-    yes: Boolean;
 begin
 
-  yes := true;
+  for i := 0 to High(linkObj) - 1 do
+   if linkObj[i] = StrValue then begin Tok[StrTokenIndex].Value := i; exit end;
 
-  for i:=0 to High(linkObj)-1 do
-   if linkObj[i] = StrValue then begin yes := false; Break end;
+  i := High(linkObj);
+  linkObj[i] := StrValue;
 
-  if yes then begin
-
-    i := High(linkObj);
-    linkObj[i] := StrValue;
-
-    SetLength(linkObj, i+2);
-  end;
+  SetLength(linkObj, i+2);
 
   Tok[StrTokenIndex].Value := i;
 
@@ -1334,7 +1330,6 @@ end;
 procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 var
   i, len: Integer;
-  yes: Boolean;
 begin
 
 len := Length(StrValue);
@@ -1348,18 +1343,16 @@ if (NumStaticStrChars + len > $FFFF) then begin writeln('DefineStaticString: ', 
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
 
-yes := FALSE;
-
 for i:=0 to NumStaticStrChars-len-1 do
- if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then begin yes := TRUE; Break end;
+ if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then begin
+
+  Tok[StrTokenIndex].StrLength := len;
+  Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
+
+  exit;
+ end;
 
 Tok[StrTokenIndex].StrLength := len;
-
-if yes then begin
- Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
- exit;
-end;
-
 Tok[StrTokenIndex].StrAddress := CODEORIGIN + NumStaticStrChars;
 
 StaticStringData[NumStaticStrChars] := Data[0];//length(StrValue);
