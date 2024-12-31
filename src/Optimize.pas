@@ -1386,6 +1386,11 @@ var inxUse, found: Boolean;
    end;
 
 
+   function SVC(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'svc'
+   end;
+
    function BNE_A(i: integer): Boolean;
    begin
      Result := listing[i] = #9'bne @+'
@@ -2067,7 +2072,7 @@ var inxUse, found: Boolean;
 
 
 {
-if (pos('mva FINDERX :STACKORIGIN,x', listing[i]) > 0) then begin
+if (pos('sta CANSTEPTOVIS', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
