@@ -249,25 +249,6 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure NormalizePath(var Name: string);
-begin
-
-  {$IFDEF UNIX}
-   if Pos('\', Name) > 0 then
-    Name := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-    Name := LowerCase(Name);
-  {$ENDIF}
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
 procedure AddResource(fnam: string);
 var i, j: integer;
     t: textfile;
@@ -595,6 +576,9 @@ var
 
 	  yes:=false;
 
+	  tmp:=0;
+	  NumRead:=0;
+
 	  AssignFile(bin, fn); FileMode:=0; Reset(bin, 1);
 
   	  Repeat
@@ -643,6 +627,8 @@ var
 	end;
 
   begin
+
+    Param:=Default(TDefinesParam);
 
     if UpCase(d[1]) in AllowLabelFirstChars then begin
 
@@ -1195,7 +1181,6 @@ var
 
 
   procedure ReadNumber;
-  var i, k, ln: integer;
   begin
 
 //    Num:='';
@@ -1214,22 +1199,7 @@ var
 	 iError(NumTok, OrdinalExpExpected);
 
        Num := '%' + Num;
-{
-       //remove leading zeros
-       i:=1;
-       while Num[i]='0' do inc(i);
 
-       tmp:=0;
-
-       ln:=length(Num);
-
-       //do the conversion
-       for k:=ln downto i do
-	if Num[k]='1' then
-	 tmp:=tmp+(1 shl (ln-k));
-
-       Num:=IntToStr(tmp);
-}
     end else
 
     if ch='$' then begin		  // hexadecimal
@@ -1982,7 +1952,6 @@ var
   Text: string;
   Num, Frac: TString;
   Err, Line2, TextPos, im: Integer;
-  Tmp: Int64;
   yes: Boolean;
   ch, ch2: Char;
   CurToken: Byte;
@@ -2059,7 +2028,6 @@ var
 
 
   procedure ReadNumber;
-  var x, k, ln: integer;
   begin
 
 //    Num:='';
@@ -2078,23 +2046,6 @@ var
 	 iError(NumTok, OrdinalExpExpected);
 
        Num := '%' + Num;
-
-{
-       //remove leading zeros
-       x:=1;
-       while Num[x]='0' do inc(x);
-
-       tmp:=0;
-
-       ln:=length(Num);
-
-       //do the conversion
-       for k:=ln downto x do
-	if Num[k]='1' then
-	 tmp:=tmp+(1 shl (ln-k));
-
-       Num:=IntToStr(tmp);
-}
 
     end else
 

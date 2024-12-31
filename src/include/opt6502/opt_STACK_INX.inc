@@ -10,6 +10,7 @@ begin
 // -----------------------------------------------------------------------------
 
     if dex(i) and 										// dex
+
        inx(i+1) then										// inx
      begin
        listing[i]   := '';
@@ -19,8 +20,9 @@ begin
      end;
 
 
-    if inx(i) and										// inx
-       dex(i+1) then										// dex
+    if dex(i+1) and										// dex
+
+       inx(i) then										// inx
      begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -29,24 +31,11 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if dex(i+3) and										// dex					; 3
+
+       inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
-       and_ora_eor_val(i+2) and									// and|ora|eor ~:STACKORIGIN		; 2
-       sta_val(i+3) and										// sta ~:STACKORIGIN			; 3
-       dex(i+4) then										// dex					; 4
-     begin
-       listing[i]   := '';
-
-       listing[i+4] := '';
-
-       exit(false);
-     end;
-
-
-    if inx(i) and										// inx					; 0
-       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
-       sta_val(i+2) and										// sta ~:STACKORIGIN			; 2
-       dex(i+3) then										// dex					; 3
+       sta_val(i+2) then									// sta ~:STACKORIGIN			; 2
      begin
        listing[i]   := '';
 
@@ -56,12 +45,28 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if dex(i+4) and										// dex					; 4
+
+       inx(i) and										// inx					; 0
+       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
+       and_ora_eor_val(i+2) and									// and|ora|eor ~:STACKORIGIN		; 2
+       sta_val(i+3) then									// sta ~:STACKORIGIN			; 3
+     begin
+       listing[i]   := '';
+
+       listing[i+4] := '';
+
+       exit(false);
+     end;
+
+
+    if dex(i+5) and										// dex					; 5
+
+       inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
        sta_val(i+2) and										// sta ~:STACKORIGIN			; 2
        lda_val(i+3) and										// lda ~:STACKORIGIN			; 3
-       sta_val(i+4) and										// sta ~:STACKORIGIN			; 4
-       dex(i+5) then										// dex					; 5
+       sta_val(i+4) then									// sta ~:STACKORIGIN			; 4
      begin
        listing[i]   := '';
 
@@ -71,7 +76,9 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if dex(i+9) and										// dex					; 9
+
+       inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
        sta_val(i+2) and										// sta ~:STACKORIGIN			; 2
        lda_val(i+3) and										// lda ~:STACKORIGIN			; 3
@@ -79,8 +86,7 @@ begin
        lda_val(i+5) and										// lda ~:STACKORIGIN			; 5
        sta_val(i+6) and										// sta ~:STACKORIGIN			; 6
        lda_val(i+7) and										// lda ~:STACKORIGIN			; 7
-       sta_val(i+8) and										// sta ~:STACKORIGIN			; 8
-       dex(i+9) then										// dex					; 9
+       sta_val(i+8) then									// sta ~:STACKORIGIN			; 8
      begin
        listing[i]   := '';
 
@@ -90,20 +96,21 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if dex(i+13) and										// dex					; 13
+
+       inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
-       and_ora_eor_val(i+2) and									// and|ora|eor				; 2	~:STACKORIGIN
+       (and_ora_eor_val(i+2) or add_sub_val(i+2)) and						// and|ora|eor|add|sub			; 2	~:STACKORIGIN
        sta_val(i+3) and										// sta					; 3	~:STACKORIGIN
        lda_val(i+4) and										// lda					; 4	~:STACKORIGIN
-       and_ora_eor_val(i+5) and									// and|ora|eor				; 5	~:STACKORIGIN
+       (and_ora_eor_val(i+5) or adc_sbc_val(i+5)) and						// and|ora|eor|adc|sbc			; 5	~:STACKORIGIN
        sta_val(i+6) and										// sta					; 6	~:STACKORIGIN
        lda_val(i+7) and										// lda					; 7	~:STACKORIGIN
-       and_ora_eor_val(i+8) and									// and|ora|eor				; 8	~:STACKORIGIN
+       (and_ora_eor_val(i+8) or adc_sbc_val(i+8)) and						// and|ora|eor|adc|sbc			; 8	~:STACKORIGIN
        sta_val(i+9) and										// sta					; 9	~:STACKORIGIN
        lda_val(i+10) and									// lda					; 10	~:STACKORIGIN
-       and_ora_eor_val(i+11) and								// and|ora|eor				; 11	~:STACKORIGIN
-       sta_val(i+12) and									// sta					; 12	~:STACKORIGIN
-       dex(i+13) then										// dex					; 13
+       (and_ora_eor_val(i+11) or adc_sbc_val(i+11)) and						// and|ora|eor|adc|sbc			; 11	~:STACKORIGIN
+       sta_val(i+12) then									// sta					; 12	~:STACKORIGIN
      begin
        listing[i]   := '';
 
@@ -113,12 +120,31 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if dex(i+7) and										// dex					; 7
+
+       inx(i) and										// inx					; 0
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+       (and_ora_eor_val(i+2) or add_sub_val(i+2)) and						// and|ora|eor|add|sub			; 2	~:STACKORIGIN
+       sta_val(i+3) and										// sta					; 3	~:STACKORIGIN
+       lda_val(i+4) and										// lda					; 4	~:STACKORIGIN
+       (and_ora_eor_val(i+5) or adc_sbc_val(i+5)) and						// and|ora|eor|adc|sbc			; 5	~:STACKORIGIN
+       sta_val(i+6) then									// sta					; 6	~:STACKORIGIN
+     begin
+       listing[i]   := '';
+
+       listing[i+7]:= '';
+
+       exit(false);
+     end;
+
+
+    if dex(i+5) and										// dex					; 5
+
+       inx(i) and										// inx					; 0
        ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
        iny(i+2) and										// iny					; 2
        lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
-       sta_val(i+4) and										// sta					; 4	~:STACKORIGIN
-       dex(i+5) then										// dex					; 5
+       sta_val(i+4) then									// sta					; 4	~:STACKORIGIN
      begin
        listing[i]   := '';
 

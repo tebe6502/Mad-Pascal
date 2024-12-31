@@ -561,6 +561,7 @@ begin
  ftmp[1]:=0;
 
  fl:=0;
+ j:=0;
 
 // WRITELN(tok[i].line, ',', tok[i].kind);
 
@@ -1786,7 +1787,8 @@ var  VarOfSameType: TVariableList;
 
 begin
 
-      FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+      //FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+      VarOfSameType:=Default(TVariableList);
 
       inc(NumProc);
 
@@ -1934,14 +1936,13 @@ end;	//DeclareFunction
 
 function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
-     NumVarOfSameType, VarOfSameTypeIndex, x, id: Integer;
+     NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
      ListPassMethod, VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
 begin
 
-    id := i + 1;
-
-    FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+    //FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
+    VarOfSameType:=Default(TVariableList);
 
     if ForwardIdentIndex = 0 then begin
 
