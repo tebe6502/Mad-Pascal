@@ -1464,6 +1464,36 @@ begin
      end;
 
 
+    if dex(i+10) and										// dex					; 10
+
+       ldy_1(i) and										// ldy #1				; 0
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+       cmp_val(i+2) and										// cmp					; 2	~:STACKORIGIN
+       lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
+       sbc_im_0(i+4) and									// sbc #$00				; 4
+       svc(i+5) and										// svc					; 5
+       (listing[i+6] = #9'eor #$80') and							// eor #$80				; 6
+       (bpl(i+7) or bmi(i+7)) and								// bpl|bmi @+				; 7
+       dey(i+8) and										// dey					; 8
+       lab_a(i+9) then										//@					; 9
+//       dex(i+10) then										// dex					; 10
+     begin
+       listing[i+10]:= listing[i+9];
+       listing[i+9] := listing[i+8];
+       listing[i+8] := listing[i+7];
+       listing[i+7] := listing[i+6];
+       listing[i+6] := listing[i+5];
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := listing[i];
+       listing[i]   := #9'dex';
+
+       exit(false);
+     end;
+
+
     if ENDL(i+16) and										// .ENDL				; 16
 
        ldy_1(i) and										// ldy #1				; 0
@@ -1578,15 +1608,17 @@ begin
      end;
 
 
-    if ldy_1(i) and										// ldy #1				; 0
-       lda_val(i+1) and										// lda E				; 1
+    if dex(i+8) and										// dex					; 8
+
+       ldy_1(i) and										// ldy #1				; 0
+       lda_val(i+1) and										// lda					; 1
        sub(i+2) and (sub_stack(i+2) = false) and						// sub					; 2
-       (listing[i+3] = #9'svc') and								// svc					; 3
+       svc(i+3) and										// svc					; 3
        (listing[i+4] = #9'eor #$80') and							// eor #$80				; 4
        (bpl(i+5) or bmi(i+5)) and								// bpl|bmi				; 5
        dey(i+6) and										// dey					; 6
-       lab_a(i+7) and										//@					; 7
-       dex(i+8) then										// dex					; 8
+       lab_a(i+7) then										//@					; 7
+//       dex(i+8) then										// dex					; 8
      begin
 	listing[i+8] := listing[i+7];
 	listing[i+7] := listing[i+6];

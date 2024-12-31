@@ -9,12 +9,12 @@ begin
 // ===				      ZTMP.
 // -----------------------------------------------------------------------------
 
-  if lda(i) and										// lda :ztmp9		; 0
+  if lda_a(i) and									// lda :ztmp9		; 0
      (listing[i+1] = #9'bpl @+') and							// bpl @+		; 1
-     lda(i+2) and									// lda 			; 2
+     lda_a(i+2) and									// lda 			; 2
      sub(i+3) and									// sub 			; 3
      (listing[i+4] = #9'sta :eax+2') and						// sta :eax+2		; 4
-     lda(i+5) and									// lda 			; 5
+     lda_a(i+5) and									// lda 			; 5
      sbc(i+6) and									// sbc			; 6
      (listing[i+7] = #9'sta :eax+3') and 						// sta :eax+3		; 7
      lab_a(i+8) then									//@			; 8
@@ -25,7 +25,7 @@ begin
        sta_a(i+10) and 								// sta 			; 10
        lda_eax_1(i+11) and 							// lda :eax+1		; 11
        sta_a(i+12) and 								// sta 			; 12
-       (EAX(i+13) = false) then							// ~lda			; 13
+       (EAX(i+13) = false) then							//~lda			; 13
      begin
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -50,7 +50,7 @@ begin
        lda_eax_1(i+15) and 							// lda :eax+1		; 15
        adc_sbc(i+16) and (pos(' (:bp2),y', listing[i+16]) > 0) and 		// adc (:bp2),y		; 16
        sta_a(i+17) and 								// sta			; 17
-       (lda_a(i+18) = false) then						// ~lda			; 18
+       (lda_a(i+18) = false) then						//~lda			; 18
      begin
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -72,7 +72,8 @@ begin
        lda_a(i+12) and 								// lda			; 12
        (adc_eax_1(i+13) or sbc_eax_1(i+13)) and					// adc|sbc :eax+1	; 13
        sta_a(i+14) and 								// sta			; 14
-       (lda_a(i+15) = false) then 						// ~lda			; 15
+       (EAX(i+15) = false) and							//			; 15
+       (adc_sbc(i+16) = false) then 						//~adc|sbc		; 16
      begin
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -415,10 +416,11 @@ begin
        sub(i+3) and									// sub 					; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
        lab_a(i+5) and									//@					; 5
-       lda_stack(i+6) and 								// lda :STACK				; 6
+       lda_stack(i+6) and 								// lda :STACKORIGIN			; 6
        (add_eax(i+7) or sub_eax(i+7)) and						// add|sub :eax				; 7
-       sta_stack(i+8) and 								// sta :STACK				; 8
-       (lda_a(i+9) = false) then							//~lda					; 9
+       sta_stack(i+8) and 								// sta :STACKORIGIN			; 8
+       (EAX(i+9) = false) and								//					; 9
+       (adc_sbc(i+10) = false) then							//~adc|sbc				; 10
      if (copy(listing[i+4], 6, 256) <> copy(listing[i+7], 6, 256)) then
      begin
 	listing[i]  := '';
