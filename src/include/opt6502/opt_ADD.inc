@@ -272,7 +272,7 @@ begin
        sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        lda_a(i+3) and 									// lda					; 3
        adc_im_0(i+4) and								// adc #$00				; 4
-       sta_bp_1(i+5) then								// sta :bp+1				; 5
+       sta_bp_1(i+5) then								// sta :bp+1				; 5	!!! sta :bp+1
       begin
 	tmp := listing[i];
 
@@ -288,7 +288,7 @@ begin
        (sta_stack(i+2) or tay(i+2))  and						// sta :STACKORIGIN|tay			; 2
        lda_stack(i+3) and 								// lda :STACKORIGIN+STACKWIDTH		; 3
        adc(i+4) and (adc_stack(i+4) = false) and					// adc					; 4	~:STACKWIDTH
-       sta_bp_1(i+5) then								// sta :bp+1				; 5
+       sta_bp_1(i+5) then								// sta :bp+1				; 5	!!! sta :bp+1
       begin
 	tmp := listing[i];
 

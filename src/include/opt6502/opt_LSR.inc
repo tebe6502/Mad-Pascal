@@ -20,13 +20,13 @@ begin
         (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) then
        begin
 
-       	if lsr_stack(i+6) and							// lsr :STACKORIGIN+STACKWIDTH		; 6
-           ror_stack(i+7) and							// ror :STACKORIGIN			; 7
-           lsr_stack(i+8) and							// lsr :STACKORIGIN+STACKWIDTH		; 8
-           ror_stack(i+9) and							// ror :STACKORIGIN			; 9
-           lsr_stack(i+10) and							// lsr :STACKORIGIN+STACKWIDTH		; 10
-           ror_stack(i+11) and							// ror :STACKORIGIN			; 11
-	   lda_stack(i+12) then							// lda :STACKORIGIN			; 12
+       	if lsr_stack(i+6) and							/// lsr :STACKORIGIN+STACKWIDTH		; 6
+           ror_stack(i+7) and							/// ror :STACKORIGIN			; 7
+           lsr_stack(i+8) and							/// lsr :STACKORIGIN+STACKWIDTH		; 8
+           ror_stack(i+9) and							/// ror :STACKORIGIN			; 9
+           lsr_stack(i+10) and							/// lsr :STACKORIGIN+STACKWIDTH		; 10
+           ror_stack(i+11) and							/// ror :STACKORIGIN			; 11
+	   lda_stack(i+12) then							/// lda :STACKORIGIN			; 12
          if (copy(listing[i+11], 6, 256) = copy(listing[i+12], 6, 256)) then
 	   begin
 	    listing[i+1] := listing[i+2];
@@ -48,11 +48,11 @@ begin
 	   end;
 
 
-       	if lsr_stack(i+6) and							// lsr :STACKORIGIN+STACKWIDTH		; 6
-           ror_stack(i+7) and							// ror :STACKORIGIN			; 7
+       	if lsr_stack(i+6) and							/// lsr :STACKORIGIN+STACKWIDTH		; 6
+           ror_stack(i+7) and							/// ror :STACKORIGIN			; 7
            lsr_stack(i+8) and							// lsr :STACKORIGIN+STACKWIDTH		; 8
-           ror_stack(i+9) and							// ror :STACKORIGIN			; 9
-	   lda_stack(i+10) then							// lda :STACKORIGIN			; 10
+           ror_stack(i+9) and							/// ror :STACKORIGIN			; 9
+	   lda_stack(i+10) then							/// lda :STACKORIGIN			; 10
          if (copy(listing[i+9], 6, 256) = copy(listing[i+10], 6, 256)) then
 	   begin
 	    listing[i+1] := listing[i+2];
@@ -72,9 +72,9 @@ begin
 	   end;
 
 
-       	if lsr_stack(i+6) and							// lsr :STACKORIGIN+STACKWIDTH		; 6
-           ror_stack(i+7) and							// ror :STACKORIGIN			; 7
-	   lda_stack(i+8) then							// lda :STACKORIGIN			; 8
+       	if lsr_stack(i+6) and							/// lsr :STACKORIGIN+STACKWIDTH		; 6
+           ror_stack(i+7) and							/// ror :STACKORIGIN			; 7
+	   lda_stack(i+8) then							/// lda :STACKORIGIN			; 8
          if (copy(listing[i+7], 6, 256) = copy(listing[i+8], 6, 256)) then
 	   begin
 	    listing[i+1] := listing[i+2];
@@ -92,7 +92,7 @@ begin
 	   end;
 
 
-       	if lda_stack(i+6) then							// lda :STACKORIGIN			; 6
+       	if lda_stack(i+6) then							/// lda :STACKORIGIN			; 6
          if (copy(listing[i+5], 6, 256) = copy(listing[i+6], 6, 256)) then
 	   begin
 	    listing[i+1] := listing[i+2];
@@ -125,13 +125,13 @@ begin
         (copy(listing[i+5], 6, 256) = copy(listing[i+6], 6, 256)) then
        begin
 
-       	if lsr_stack(i+8) and							// lsr :STACKORIGIN+STACKWIDTH		; 8
-           ror_stack(i+9) and							// ror :STACKORIGIN			; 9
-           lsr_stack(i+10) and							// lsr :STACKORIGIN+STACKWIDTH		; 10
-           ror_stack(i+11) and							// ror :STACKORIGIN			; 11
-           lsr_stack(i+12) and							// lsr :STACKORIGIN+STACKWIDTH		; 12
-           ror_stack(i+13) and							// ror :STACKORIGIN			; 13
-	   lda_stack(i+14) then							// lda :STACKORIGIN			; 14
+       	if lsr_stack(i+8) and							/// lsr :STACKORIGIN+STACKWIDTH		; 8
+           ror_stack(i+9) and							/// ror :STACKORIGIN			; 9
+           lsr_stack(i+10) and							/// lsr :STACKORIGIN+STACKWIDTH		; 10
+           ror_stack(i+11) and							/// ror :STACKORIGIN			; 11
+           lsr_stack(i+12) and							/// lsr :STACKORIGIN+STACKWIDTH		; 12
+           ror_stack(i+13) and							/// ror :STACKORIGIN			; 13
+	   lda_stack(i+14) then							/// lda :STACKORIGIN			; 14
          if (copy(listing[i+13], 6, 256) = copy(listing[i+14], 6, 256)) then
 	   begin
             p:=GetBYTE(i);
@@ -156,11 +156,11 @@ begin
 	   end;
 
 
-       	if lsr_stack(i+8) and							// lsr :STACKORIGIN+STACKWIDTH		; 8
-           ror_stack(i+9) and							// ror :STACKORIGIN			; 9
-           lsr_stack(i+10) and							// lsr :STACKORIGIN+STACKWIDTH		; 10
-           ror_stack(i+11) and							// ror :STACKORIGIN			; 11
-	   lda_stack(i+12) then							// lda :STACKORIGIN			; 12
+       	if lsr_stack(i+8) and							/// lsr :STACKORIGIN+STACKWIDTH		; 8
+           ror_stack(i+9) and							/// ror :STACKORIGIN			; 9
+           lsr_stack(i+10) and							/// lsr :STACKORIGIN+STACKWIDTH		; 10
+           ror_stack(i+11) and							/// ror :STACKORIGIN			; 11
+	   lda_stack(i+12) then							/// lda :STACKORIGIN			; 12
          if (copy(listing[i+11], 6, 256) = copy(listing[i+12], 6, 256)) then
 	   begin
             p:=GetBYTE(i);
@@ -183,9 +183,9 @@ begin
 	   end;
 
 
-       	if lsr_stack(i+8) and							// lsr :STACKORIGIN+STACKWIDTH		; 8
-           ror_stack(i+9) and							// ror :STACKORIGIN			; 9
-	   lda_stack(i+10) then							// lda :STACKORIGIN			; 10
+       	if lsr_stack(i+8) and							/// lsr :STACKORIGIN+STACKWIDTH		; 8
+           ror_stack(i+9) and							/// ror :STACKORIGIN			; 9
+	   lda_stack(i+10) then							/// lda :STACKORIGIN			; 10
          if (copy(listing[i+9], 6, 256) = copy(listing[i+10], 6, 256)) then
 	   begin
             p:=GetBYTE(i);
@@ -206,7 +206,7 @@ begin
 	   end;
 
 
-       	if lda_stack(i+8) then							// lda :STACKORIGIN			; 8
+       	if lda_stack(i+8) then							/// lda :STACKORIGIN			; 8
          if (copy(listing[i+7], 6, 256) = copy(listing[i+8], 6, 256)) then
 	   begin
             p:=GetBYTE(i);
@@ -728,6 +728,34 @@ begin
 	listing[i+12] := '';
 	listing[i+13] := '';
 	listing[i+14] := '';
+
+	exit(false);
+     end;
+
+
+    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH*2	; 0
+       lda_a(i+1) and										// lda					; 1
+       adc_sbc(i+2) and										// adc|sbc				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*3	; 3
+       lsr_stack(i+4) and									// lsr :STACKORIGIN+STACKWIDTH*3	; 4
+       ror_stack(i+5) and									// ror :STACKORIGIN+STACKWIDTH*2	; 5
+       ror_stack(i+6) and									// ror :STACKORIGIN+STACKWIDTH		; 6
+       ror_stack(i+7) and									// ror :STACKORIGIN			; 7
+       lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH		; 8
+       asl_stack(i+9) and									// asl :STACKORIGIN			; 9
+       rol_a(i+10) and										// rol @				; 10
+       asl_stack(i+11) and									// asl :STACKORIGIN			; 11
+       rol_a(i+12) and										// rol @				; 12
+       sta_stack(i+13) then									// sta :STACKORIGIN+STACKWIDTH		; 13
+     if (copy(listing[i], 6, 256) = copy(listing[i+5], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) and
+	(copy(listing[i+6], 6, 256) = copy(listing[i+8], 6, 256)) and
+	(copy(listing[i+7], 6, 256) = copy(listing[i+9], 6, 256)) then
+     begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
 
 	exit(false);
      end;

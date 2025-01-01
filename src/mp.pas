@@ -11127,8 +11127,6 @@ case Tok[i].Kind of
 
 		if (Ident[IdentIndex].AllocElementType in {IntegerTypes}OrdinalTypes) and (ExpressionType in {IntegerTypes}OrdinalTypes) then
 
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 		else
 		 if Ident[IdentIndex].AllocElementType <> UNTYPETOK then begin
 
