@@ -349,10 +349,10 @@ begin
       end;
 
 
-    if (lda_a(i) or AND_ORA_EOR(i)) and								// lda|and|ora|eor	; 0
-       mwy_bp2(i+1) and	(pos('mwy #', listing[i+1]) = 0) and					// mwy P0 :bp2		; 1
-       ldy_im_0(i+2) and 									// ldy #$00		; 2
-       STA_BP2_Y(i+3) and  									// sta (:bp2),y		; 3
+    if (lda_a(i) or AND_ORA_EOR(i)) and								// lda|and|ora|eor		; 0
+       mwy_bp2(i+1) and	(pos('mwy #', listing[i+1]) = 0) and					// mwy P0 :bp2			; 1
+       ldy_im_0(i+2) and 									// ldy #$00			; 2
+       STA_BP2_Y(i+3) and  									// sta (:bp2),y			; 3
        (listing[i+4] = '') then									//~
       begin
 
@@ -373,10 +373,10 @@ begin
       end;
 
 
-    if ((pos('asl ', listing[i]) > 0) or (pos('lsr ', listing[i]) > 0)) and			// asl|lsr		; 0
-       mwy_bp2(i+1) and (pos('mwy #', listing[i+1]) = 0) and					// mwy P0 :bp2		; 1
-       ldy_im_0(i+2) and 									// ldy #$00		; 2
-       STA_BP2_Y(i+3) and  									// sta (:bp2),y		; 3
+    if (asl(i) or lsr(i)) and									// asl|lsr			; 0
+       mwy_bp2(i+1) and (pos('mwy #', listing[i+1]) = 0) and					// mwy P0 :bp2			; 1
+       ldy_im_0(i+2) and 									// ldy #$00			; 2
+       STA_BP2_Y(i+3) and  									// sta (:bp2),y			; 3
        (listing[i+4] = '') then									//~
        begin
 
@@ -613,7 +613,7 @@ begin
 	listing[i+10] := '';
 	listing[i+11] := '';
 
-	if pos('add ', listing[i+13]) > 0 then begin
+	if add(i+13) then begin
 	 listing[i+13] := #9'add (:bp2),y+';
 	 listing[i+16] := #9'adc (:bp2),y+';
 	 listing[i+19] := #9'adc (:bp2),y+';
