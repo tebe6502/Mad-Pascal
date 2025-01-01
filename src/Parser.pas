@@ -1728,10 +1728,9 @@ else
         if (Ident[NumIdent].idType = ARRAYTOK) and (Ident[NumIdent].isAbsolute = false) and (Elements(NumIdent) = 1) then	// [0..0] ; [0..0, 0..0]
 
 	else
-	 VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
+ 	  VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
 
        end;
-
 
 
        if NumAllocElements > 0 then dec(VarDataSize, DataSize[DataType]);
