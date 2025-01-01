@@ -1,3 +1,6 @@
+01.01.2025
+- poprawiona alokocja pamieci dla tablic bez podanego rozmiaru (open array)
+
 28.12.2024
 - dla tablic [0..0] nie jest wymuszany wstępnie 'ABSOLUTE $0000', taka tablica nie jest alokowana w pamięci, zostaje zapisany tylko wskaźnik do takiej tablicy
 - optymalizacja szybkości dostepu do duzych tablic ABSOLUTE z liczbą elementów przekraczajaca 255 elementow
