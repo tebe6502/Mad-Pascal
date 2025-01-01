@@ -1567,6 +1567,14 @@ var inxUse, found: Boolean;
    end;
 
 
+   function LDA_STA_BP(i: integer): Boolean;
+   begin
+
+    Result := (lda_bp_y(i) and sta(i+1)) or (lda(i) and sta_bp_y(i+1))
+
+   end;
+
+
    procedure LDA_STA_ADR(i, q: integer; op: char);
    begin
 
@@ -2256,7 +2264,7 @@ end;
 
 
 {
-if (pos('sta :bp+1', listing[i]) > 0) then begin
+if (pos('mul40', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
