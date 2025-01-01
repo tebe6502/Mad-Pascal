@@ -16409,7 +16409,7 @@ while Tok[i].Kind in
 
 	       Ident[NumIdent].isAbsolute := true;
 
-	       NumAllocElements := 1;
+	       NumAllocElements := 0;
 
 	     end else begin
 	       i := ReadDataOpenArray(i, idx, Ident[NumIdent].AllocElementType, NumAllocElements, false, Tok[i-2].Kind = PCHARTOK);
@@ -16417,7 +16417,7 @@ while Tok[i].Kind in
 	       Ident[NumIdent].NumAllocElements := NumAllocElements;
 	     end;
 
-	     inc(VarDataSize, (NumAllocElements-1) * DataSize[Ident[NumIdent].AllocElementType]);
+	     inc(VarDataSize, NumAllocElements * DataSize[Ident[NumIdent].AllocElementType]);
 
 	    end else begin										// array [] of type = ( )
 
