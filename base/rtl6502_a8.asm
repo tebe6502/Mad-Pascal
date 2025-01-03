@@ -1,4 +1,4 @@
-	opt l-
+;	opt l-
 
 /* -----------------------------------------------------------------------
 /*                   CPU 6502 runtime library - Atari XE/XL
@@ -65,6 +65,7 @@ numread	.word		; pointer to variable, length of loaded data
 
 	icl 'atari\vbxedetect.asm'	; @vbxe_detect
 	icl 'atari\vbxeinit.asm'	; @vbxe_init
+	icl 'atari\vbxecmap.asm'	; @vbxe_cmap
 	icl 'atari\vbxexdl.asm'		; @set_xdl
 	icl 'atari\vbxeput.asm'		; @vbxe_put
 	icl 'atari\vbxeansi.asm'	; @ansi

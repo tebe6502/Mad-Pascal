@@ -189,10 +189,10 @@ asm
 	dey
 
 @	tya
-test	cmp #24
+test	cmp  MAIN.SYSTEM.SCREENHEIGHT
 	bcc @+
 
-	sbc #24
+	sbc MAIN.SYSTEM.SCREENHEIGHT
 	jmp test
 @
 	sta rowcrs

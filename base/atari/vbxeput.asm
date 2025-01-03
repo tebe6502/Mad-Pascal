@@ -1,5 +1,7 @@
 
-; VBXE put char
+; !!! do uzytku tylko razem z @putchar !!!
+
+; VBXE put (screen 40x24)
 ; input:
 ;	A - char
 
@@ -16,39 +18,20 @@
 	jsr @vbxe_init.cmapini
 	jmp stop
 
-skp	lda rowcrs
-	pha
-	:4 lsr @
-	add #$80+MAIN.SYSTEM.VBXE_MAPADR/$1000
-	fxsa FX_MEMS
+skp
+	jsr @vbxe_cmap
 
-	pla
-	and #$0f
-	add >MAIN.SYSTEM.VBXE_WINDOW
-	sta :bp+1
 
-	lda colcrs
-	asl @
-	asl @
-	tay
-	mva colpf0s (:bp),y
-	iny
-	mva colpf1s (:bp),y
-	iny
-	mva colpf2s (:bp),y
-
-	fxs FX_MEMS #$00	
-
-stop	pla
+stop		pla
 
 		tay
-	
+
 		cmp #eol
 		bne skp_
-		
+
 		lda #39
 		sta colcrs
-		
+
 skp_		lda	#38
 		cmp	colcrs
 		bcs	no_new_line		; if 38 >= col, no new line is needed
@@ -59,9 +42,9 @@ skp_		lda	#38
 no_new_line	tya
 		rts
 
-scroll	
+scroll
 		jsr put
-	
+
 bcb_start						; start of blitter lists
 
 		fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
@@ -80,8 +63,9 @@ wait		fxla FX_BLITTER_BUSY
 
 		fxs FX_MEMS #$00
 
+		pla					; zdejmujemy adres @putchar, stamtad został wywołany @vbxe_put
 		pla
-		pla
+
 		rts
 
 put

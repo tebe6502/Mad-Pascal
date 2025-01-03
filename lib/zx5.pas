@@ -38,7 +38,7 @@ ZX0 I/O stream decompressor (Einar Saukas, Krzysztof 'XXL' Dudek)
 @param: outputPointer - destination data address
 *)
 var f: file;
-    buf: array [0..255] of byte absolute $0400;
+    buf: array [0..255] of byte absolute __buffer;
 
 
 procedure READ_BUF;
