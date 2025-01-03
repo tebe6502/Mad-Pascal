@@ -192,7 +192,9 @@ var
 
 	scrollback_fill: Boolean absolute $63;				// (LOGCOL = $63) TRUE -> row #0 was copied to the scrollback_buffer
 
-        scrollback_buffer: array [0..255] of byte absolute $0400;	// ROW #0 buffer, filled if 'row_slide_status = true'
+	ColorMapControl: byte external 'vbxe';				// value for the fourth byte of the color map 'lib\vbxe.hea'
+
+        scrollback_buffer: array [0..255] of byte absolute __buffer;	// ROW #0 buffer, filled if 'row_slide_status = true'
 
 	procedure AnsiChar(a: char); assembler;
 	procedure AnsiString(s: string); assembler;
@@ -232,6 +234,7 @@ var
 //	procedure Position(x,y: byte); assembler;
 
 	procedure SetColorMapEntry; overload; assembler;
+	procedure SetColorMapEntry(a,b,c, i: byte); overload; assembler;
 	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
 	procedure SetColorMapDimensions(w,h: byte); register; assembler;
 	procedure SetCurrentPaletteEntry(nr: word); register;

@@ -1,6 +1,6 @@
 
 ; unit: VBXE
-; @VBXE_PutByte
+; @VBXE_PutByte (80 columns)
 
 .proc	@vbxe_putbyte				; put the byte on the screen
 

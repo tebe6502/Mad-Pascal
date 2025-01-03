@@ -52,11 +52,17 @@ loop	fxs FX_MEMS ztmp
 
 	ldx #16
 	ldy #0
+lop
+	mva colpf0s (:bp),y
+	iny
+	mva colpf1s (:bp),y
+	iny
+	mva colpf2s (:bp),y
+	iny
+	lda #%00010000		; playfield palette #0 ; overlay palette #1
+	sta (:bp),y
 
-lop	mva #$00	(:bp),y+
-	mva colpf1s	(:bp),y+
-	mva colpf2s	(:bp),y+
-	mva #%00010000	(:bp),y+	; overlay palette #1
+	iny
 	bne lop
 
 	inc :bp+1

@@ -95,6 +95,7 @@ var	WIN_LEFT: smallint = 0;
 
 	procedure SetColorMapEntry; overload; assembler;
 	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
+	procedure SetColorMapEntry(a,b,c, i: byte); overload; assembler;
 	procedure SetColorMapDimensions(w,h: byte); register; assembler;
 	procedure SetCurrentPaletteEntry(nr: word); register;
 	procedure SetPaletteEntry(nr: word; r,g,b: byte); register; overload;

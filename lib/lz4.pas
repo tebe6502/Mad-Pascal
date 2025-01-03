@@ -38,7 +38,7 @@ LZ4 I/O stream decompressor
 @param: outputPointer - destination data address
 *)
 var f: file;
-    buf: array [0..255] of byte absolute $0400;
+    buf: array [0..255] of byte absolute __buffer;
 
 
 procedure read_buf;
