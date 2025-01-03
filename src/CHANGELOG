@@ -1,3 +1,7 @@
+03.01.2025
+- base/atari/@vbxe_cmap.asm
+- VBXE: SetColorMapEntry
+
 01.01.2025
 - poprawiona alokocja pamieci dla tablic bez podanego rozmiaru (open array)
 
