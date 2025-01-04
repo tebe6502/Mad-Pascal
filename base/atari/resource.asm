@@ -1067,7 +1067,7 @@ data	cmc_relocator %%1,main.%%lab
 /* XBMP
 /* ----------------------------------------------------------------------- */
 
-.macro	XBMP (nam, lab, idx)
+.macro	XBMP (nam, lab, idx, pal)
 
 he	= .sizeof(s@bmp)
 
@@ -1117,7 +1117,7 @@ anyKEY	dta c'Press any key to continue',$9b
 
 ok	fxs FX_MEMC #%1000+$b0
 
-	fxs FX_PSEL, #1
+	fxs FX_PSEL, #%%pal
 	fxs FX_CSEL, #%%idx
 
 	ldx #%%idx
@@ -1194,7 +1194,7 @@ ln	= .filesize(%%1)-he-1024
 	rts
 	ini RESORIGIN
 
-	.print '$R XBMP    ',main.%%lab,'..',main.%%lab+ln-1," %%1",' width: ',?bw,' height: ',?bh
+	.print '$R XBMP    ',main.%%lab,'..',main.%%lab+ln-1," %%1",' width: ',?bw,' height: ',?bh,' palsel: ',%%pal,' colsel: ',%%idx
 
 .endm
 

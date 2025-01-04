@@ -94,4 +94,3 @@ blt_mask	dta 0xff				; and mask (and mask equal to 0, memory will be filled with
 		dta 0x00				; control
 
 .endp
-

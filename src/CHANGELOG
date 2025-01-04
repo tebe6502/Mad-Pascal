@@ -1,4 +1,8 @@
+04.01.2025
+- zasób XBMP wymaga teraz podania numeru palety (wcześniej domyślnie była wybierana paleta #1)
+
 03.01.2025
+- poprawiony odczyt pliku HEA dla etykiet EXTERNAL
 - base/atari/@vbxe_cmap.asm
 - VBXE: SetColorMapEntry
 
@@ -60,10 +64,10 @@
 - poprawione CASE, możliwe użycie funkcji zwracajacej typ ENUM
 
 09.06.2024
-- dodana obsługa {$eval } dla inicjalizacji tablic o zadeklarowanym rozmiarze, np.: 
+- dodana obsługa {$eval } dla inicjalizacji tablic o zadeklarowanym rozmiarze, np.:
 
  array [0..15] of byte = ( {$eval 16,":1"} );
- 
+
 08.06.2024
 - opt_TEMP_CMP_0, dodany test dla '#asm:'
 
