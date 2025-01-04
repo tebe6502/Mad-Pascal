@@ -110,6 +110,11 @@ Abel Carrasco (ascrnet)
 
 @returns: 0		FIRE2 Button not pressed
 	  $8f..$0e	FIRE2 Button pressed
+
+example:
+
+ pause;       //                    !!! wait for VBL
+ if fire2 > 30 then fire2_pressed;  !!! then read FIRE2
 *)
 begin
 

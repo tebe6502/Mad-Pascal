@@ -540,8 +540,8 @@ procedure FloodFillH(x,y: smallint; color: byte);
 @description:
 Horizontal flood fill
 *)
-var xStack: array [0..255] of word absolute $400;
-    yStack: array [0..255] of byte absolute $600;
+var xStack: array [0..255] of word;
+    yStack: array [0..255] of byte;
     stackEntry, sx: word;
     oldColor: byte;
     spanAbove: Boolean register;
@@ -1075,9 +1075,9 @@ begin
 
  pc:=@vertices;
  p0:=PPoint(pc^);
- 
+
  p2:=p0;
- 
+
  for i:=amount-2 downto 0 do begin
 
   inc(pc);
@@ -1088,7 +1088,7 @@ begin
 
   p0:=p1;
  end;
- 
+
  ClipLine(p0.x, p0.y, p2.x, p2.y);
 
 end;
@@ -1113,15 +1113,15 @@ var
 
     miny: byte register;
     maxy: byte register;
-    
+
     swap: word register;
 
     i, j, k, y, count: byte;
 
     x0, x1: word;
-    
+
     y0, y1: byte;
-    
+
     [striped] nodes: array [0..63] of word;
 
 begin
@@ -1132,13 +1132,13 @@ begin
  maxy := 0;
 
  k := amount - 1;
-	
+
  pc:=@vertices;
- p0:=PPoint(pc^); 
+ p0:=PPoint(pc^);
 
 
  for i := k downto 0 do begin
- 
+
    swap := p0.y;
 
    if (miny > swap) then miny := swap;
@@ -1148,7 +1148,7 @@ begin
    inc(p0);
 
  end;
- 
+
 	p2:=p0;
 	dec(p2);
 
@@ -1160,9 +1160,9 @@ begin
 
 	pc:=@vertices;
 	p0:=PPoint(pc^);
-	
+
 	p1:=p2;
-	
+
         for i := k downto 0 do begin
 
             x0 := p0.x;
@@ -1185,12 +1185,12 @@ begin
 
 
  // Sort the nodes, via a simple 'Bubble' sort.
- 
+
      if count > 0 then begin
-     
+
 	j := count - 1;
         //i := 0;
-	
+
         while (i < j) do begin
 
             if (nodes[i] > nodes[i + 1]) then begin
@@ -1205,7 +1205,7 @@ begin
              inc(i);
 
         end;
-	
+
      end;
 
 
