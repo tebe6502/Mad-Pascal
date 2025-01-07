@@ -1,3 +1,6 @@
+07.01.2025
+- array ABSOLUTE bugfixes
+
 04.01.2025
 - zasób XBMP wymaga teraz podania numeru palety (wcześniej domyślnie była wybierana paleta #1)
 

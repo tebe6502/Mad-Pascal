@@ -1418,7 +1418,7 @@ case IndirectionLevel of
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+'+svar);	// +lda
 
-	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
 
 	    asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	    asm65(#9'add' + GetStackVariable(0));
@@ -1497,7 +1497,7 @@ case IndirectionLevel of
 
 	  end else begin
 
-	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
 
 	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	      asm65(#9'add' + GetStackVariable(0));
@@ -1594,7 +1594,7 @@ case IndirectionLevel of
 
 	  end else begin
 
-	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
 
 	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	      asm65(#9'add' + GetStackVariable(0));
@@ -2677,7 +2677,7 @@ case IndirectionLevel of
 
 	  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-'+svar);	// -sta
 
-	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+	    if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
 
 	      asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 	      asm65(#9'add :STACKORIGIN-1,x');
@@ -2755,7 +2755,7 @@ case IndirectionLevel of
 
 	   end else begin
 
-	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
 
 		asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 		asm65(#9'add :STACKORIGIN-1,x');
@@ -2851,7 +2851,7 @@ case IndirectionLevel of
 
 	   end else begin
 
-	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) then begin
+	     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
 
 		asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
 		asm65(#9'add :STACKORIGIN-1,x');
@@ -16123,6 +16123,7 @@ while Tok[i].Kind in
 
  	 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
 	  Error(i, 'Range check error while evaluating constants ('+IntToStr(ConstVal)+' must be between 0 and '+IntToStr($FFFFFF)+')');
+
 
 	 ConstVal := -ConstVal;
 
