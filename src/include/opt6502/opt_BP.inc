@@ -956,13 +956,13 @@ begin
        end;
 
 
-    if lda_im(i) and										// lda #$00				; 0
+    if lda_im(i) and										// lda #				; 0
        sta(i+1) and										// sta 					; 1
-       lda_im(i+2) and										// lda #$18				; 2
+       lda_im(i+2) and										// lda #				; 2
        sta(i+3) and										// sta 					; 3
-       lda_im(i+4) and										// lda #$00				; 4
+       lda_im(i+4) and										// lda #				; 4
        sta(i+5) and										// sta 					; 5
-       lda_im(i+6) and										// lda #$00				; 6
+       lda_im(i+6) and										// lda #				; 6
        sta(i+7) and										// sta 					; 7
        lda(i+8) and										// lda SINSCROL				; 8
        add_sub(i+9) and										// add|sub :STACKORIGIN+9		; 9
@@ -2361,10 +2361,10 @@ begin
 
 
     if lda_a(i) and (lda_im(i) = false) and (iy(i) = false) and					// lda 					; 0
-       add_im(i+1) and										// add #				; 1
+       (add_im(i+1) or sub(i+1)) and								// add #|sub #				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_im_0(i+3) and									// lda #$00				; 3
-       adc_im(i+4) and										// adc #				; 4
+       (adc_im(i+4) or sbc_im(i+4)) and								// adc #|sbc #				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_im(i+6) and										// lda #				; 6
        add_stack(i+7) and									// add :STACKORIGIN			; 7
@@ -2377,7 +2377,11 @@ begin
     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and
        (copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) then
       begin
-        p := GetWORD(i+1, i+4) + GetWORD(i+6, i+9);
+
+        if add_im(i+1) then
+         p := GetWORD(i+1, i+4) + GetWORD(i+6, i+9)
+	else
+         p := GetWORD(i+6, i+9) - GetWORD(i+1, i+4);
 
 	listing[i+11] := #9'ldy ' + copy(listing[i], 6, 256);
 

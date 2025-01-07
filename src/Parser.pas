@@ -1077,8 +1077,15 @@ case Tok[i].Kind of
 			isError := true;
 			exit(0);
 
-		     end else
+		     end else begin
 	   	      ConstVal := Ident[IdentIndex].Value;
+
+		      if ConstVal < 0 then begin
+			isError := true;
+			exit(0);
+		      end;
+
+		     end;
 
 
 		    end else begin
