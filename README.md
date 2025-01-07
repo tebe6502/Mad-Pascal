@@ -180,6 +180,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Mafia](https://github.com/drunkeneye/MAFIA.A8)
 * [PokeyMAX](https://github.com/MADRAFi/PokeyMAX)
 * [PokeyMAX update tool](https://github.com/MADRAFi/PMAX_Update)
+* [rogul](https://gitlab.com/bocianu/rogul)
 
 ## Benchmarks
 
