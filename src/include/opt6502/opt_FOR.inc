@@ -334,7 +334,7 @@
 
 
        if (l = 20) and				// SMALLINT - UP
-          (listing[0] = #9'.LOCAL') and
+          LOCAL(0) and
 	  lda_a(1) and (lda_im(1) = false) and
 	  sub_im(2) and
           (listing[3] = #9'bne L4') and
@@ -384,7 +384,7 @@
 
 
        if (l = 19) and				// SMALLINT - DOWN
-          (listing[0] = #9'.LOCAL') and
+          LOCAL(0) and
 	  lda_a(1) and (lda_im(1) = false) and
 	  sub_im(2) and
           (listing[3] = #9'bne L4') and
