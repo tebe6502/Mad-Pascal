@@ -147,9 +147,9 @@ begin
       end;
 
 
-    if lda(i) and (lda_stack(i) = false) and							// lda						; 0
+    if lda_val(i) and										// lda						; 0	~:STACKORIGIN
        (listing[i+1] = #9'sta :STACKORIGIN,x') and 						// sta :STACKORIGIN,x				; 1
-       lda(i+2) and (lda_stack(i+2) = false) and						// lda						; 2
+       lda_val(i+2) and										// lda						; 2	~:STACKORIGIN
        (listing[i+3] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x		; 3
        (listing[i+4] = #9'mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x') then			// mva :STACKORIGIN+STACKWIDTH,x :STACKORIGIN,x	; 4
      begin

@@ -189,10 +189,10 @@ begin
        iny(i+3) and										// iny					; 3
        lda_bp2_y(i+4) and 									// lda (:bp2),y				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+9	; 5
-       lda(i+6) and (lda_stack(i+6) = false) and						// lda A				; 6
+       lda_val(i+6) and										// lda					; 6	~:STACKORIGIN
        add_sub(i+7) and										// add|sub				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+10			; 8
-       lda(i+9) and (lda_stack(i+9) = false) and						// lda A				; 9
+       lda_val(i+9) and										// lda					; 9	~:STACKORIGIN
        adc_sbc(i+10) and									// adc|sbc				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH+10	; 11
        lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH+10	; 12

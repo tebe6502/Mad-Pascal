@@ -304,7 +304,7 @@ begin
 
     if sta_im_0(i) and										// sta #$00			; 0
        ldy(i+1) and										// ldy 				; 1
-       (listing[i+2] = #9'.LOCAL') and								// .LOCAL			; 2
+       LOCAL(i+2) and										// .LOCAL			; 2
        lda(i+3) then										// lda				; 3
      begin
 	listing[i] := '';
@@ -313,7 +313,7 @@ begin
 
 
     if sta_im_0(i) and										// sta #$00			; 0
-       (listing[i+1] = #9'.LOCAL') and								// .LOCAL			; 1
+       LOCAL(i+1) and										// .LOCAL			; 1
        lda(i+2) then										// lda				; 2
      begin
 	listing[i] := '';
