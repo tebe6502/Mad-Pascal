@@ -204,7 +204,7 @@ begin
        lab_a(i+11) and										//@			; 11
        (sty(i+12) or tya(i+12)) and								// sty|tya		; 12
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT >= $XX		BPL
+       LOCAL(i) and										// .LOCAL		; 0	SHORTINT >= $XX		BPL
        lda_a(i+1) and										// lda E		; 1	SHORTINT < $XX		BMI
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -259,7 +259,7 @@ begin
        lab_a(i+11) and										//@			; 11
        (sty(i+12) or tya(i+12)) and								// sty|tya		; 12
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT >= SHORTINT	BPL
+       LOCAL(i) and										// .LOCAL		; 0	SHORTINT >= SHORTINT	BPL
        lda_a(i+1) and										// lda E		; 1	SHORTINT < SHORTINT	BMI
        sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -314,7 +314,7 @@ begin
        lab_a(i+18) and										//@			; 18
        (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT < #		BMI
+       LOCAL(i) and										// .LOCAL		; 0	SMALLINT < #		BMI
        lda_a(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -378,7 +378,7 @@ begin
        lab_a(i+18) and										//@			; 18
        (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT >= #		BPL
+       LOCAL(i) and										// .LOCAL		; 0	SMALLINT >= #		BPL
        lda_a(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -433,7 +433,7 @@ begin
        lab_a(i+18) and										//@			; 18
        (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT < SMALLINT	BMI
+       LOCAL(i) and										// .LOCAL		; 0	SMALLINT < SMALLINT	BMI
        lda_a(i+1) and										// lda E+1		; 1	SMALLINT >= SMALLINT	BPL
        sub(i+2) and										// sub 			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -481,7 +481,7 @@ begin
        lab_a(i+25) and										//@			; 25
        (sty(i+26) or tya(i+26)) and								// sty|tya		; 26
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER < XXYYXXYY	BMI
+       LOCAL(i) and										// .LOCAL		; 0	INTEGER < XXYYXXYY	BMI
        lda_a(i+1) and										// lda E+3		; 1	INTEGER >= XXYYXXYY	BPL
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -605,7 +605,7 @@ begin
        tya(i+26) and										// tya			; 26
        (jeq(i+27) or jne(i+27)) and								// jeq|jne		; 27
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER < 		BMI
+       LOCAL(i) and										// .LOCAL		; 0	INTEGER < 		BMI
        lda_a(i+1) and										// lda E+3		; 1	INTEGER >= 		BPL
        sub(i+2) and {(sub_im(i+2) = false) and}							// sub			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3

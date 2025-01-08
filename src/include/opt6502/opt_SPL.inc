@@ -552,7 +552,7 @@ begin
 
 
     if sta_a(i+4) and										// sta				; 4
-       (listing[i+5] = #9'.LOCAL') and								// .LOCAL			; 5
+       LOCAL(i+5) and										// .LOCAL			; 5
        lda_a(i+6) then										// lda				; 6
      begin
 	listing[i] := '';

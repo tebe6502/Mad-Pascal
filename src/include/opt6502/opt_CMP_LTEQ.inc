@@ -362,7 +362,7 @@ begin
        lab_a(i+12) and										//@			; 12
        (sty(i+13) or tya(i+13)) and								// sty|tya		; 13
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT <= $XX
+       LOCAL(i) and										// .LOCAL		; 0	SHORTINT <= $XX
        lda_a(i+1) and										// lda E		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -418,7 +418,7 @@ begin
        lab_a(i+12) and										//@			; 12
        (sty(i+13) or tya(i+13)) and								// sty|tya		; 13
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT_0 <= SHORTINT_1  ->  SHORTINT_1 >= SHORTINT_0
+       LOCAL(i) and										// .LOCAL		; 0	SHORTINT_0 <= SHORTINT_1  ->  SHORTINT_1 >= SHORTINT_0
        lda_a(i+1) and										// lda A		; 1
        sub(i+2) and (sub_im(i+2) = false) and							// sub B		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -450,7 +450,7 @@ begin
        lab_a(i+19) and										//@			; 19
        (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT <= #
+       LOCAL(i) and										// .LOCAL		; 0	SMALLINT <= #
        lda_a(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -523,7 +523,7 @@ begin
        lab_a(i+19) and										//@			; 19
        (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT_0 <= SMALLINT_1 -> SMALLINT_1 >= SMALLINT_0
+       LOCAL(i) and										// .LOCAL		; 0	SMALLINT_0 <= SMALLINT_1 -> SMALLINT_1 >= SMALLINT_0
        lda(i+1) and										// lda E+1		; 1
        sub(i+2) and 										// sub 			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -574,7 +574,7 @@ begin
        lab_a(i+26) and										//@			; 26
        (sty(i+27) or tya(i+27)) and								// sty|tya		; 27
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER <= #
+       LOCAL(i) and										// .LOCAL		; 0	INTEGER <= #
        lda_a(i+1) and										// lda E+3		; 1
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -664,7 +664,7 @@ begin
        tya(i+27) and										// tya			; 27
        (jeq(i+28) or jne(i+28)) and								// jeq|jne		; 28
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER <=
+       LOCAL(i) and										// .LOCAL		; 0	INTEGER <=
        lda_a(i+1) and										// lda E+3		; 1
        sub(i+2) and {(sub_im(i+2) = false) and}							// sub			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3

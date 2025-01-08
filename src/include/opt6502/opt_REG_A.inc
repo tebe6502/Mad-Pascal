@@ -13,7 +13,7 @@
      arg0:=GetString(i);
 
      if SKIP(i+1) or
-        ((i>0) and ((listing[i-1] = #9'.LOCAL') or (SKIP(i-1) and lda_im(i)))) then
+        ((i>0) and (LOCAL(i-1) or (SKIP(i-1) and lda_im(i)))) then
 
 //     else					// !!! nie zadziala poprawnie gdy jednoczesnie A i Y wystapia w tym samym bloku kodu
 //     if (arg0 = optyY) and sta_a(i+1) then

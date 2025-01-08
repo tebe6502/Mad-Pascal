@@ -213,7 +213,7 @@ begin
        lab_a(i+11) and										//@			; 11
        (sty(i+12) or tya(i+12)) and								// sty|tya		; 12
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SHORTINT <>	BNE
+       LOCAL(i) and										// .LOCAL		; 0	SHORTINT <>	BNE
        lda_a(i+1) and										// lda E		; 1	SHORTINT = 	BEQ
        sub(i+2) and										// sub			; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
@@ -254,7 +254,7 @@ begin
        lab_a(i+18) and										//@			; 18
        (sty(i+19) or tya(i+19)) and								// sty|tya		; 19
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	SMALLINT <>	BNE
+       LOCAL(i) and										// .LOCAL		; 0	SMALLINT <>	BNE
        lda_a(i+1) and										// lda E+1		; 1	SMALLINT =	BEQ
        sub(i+2) and {(sub_stack(i+2) = false) and}						// sub 			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
@@ -312,7 +312,7 @@ begin
        lab_a(i+25) and										//@			; 25
        (sty(i+26) or tya(i+26)) and								// sty|tya		; 26
 
-       (listing[i] = #9'.LOCAL') and								// .LOCAL		; 0	INTEGER <>	BNE
+       LOCAL(i) and										// .LOCAL		; 0	INTEGER <>	BNE
        lda_a(i+1) and										// lda E+3		; 1	INTEGER =	BEQ
        sub(i+2) and {(sub_stack(i+2) = false) and}						// sub			; 2
        (listing[i+3] = #9'bne L4') and								// bne L4		; 3
