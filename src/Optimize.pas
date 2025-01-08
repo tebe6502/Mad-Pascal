@@ -1470,7 +1470,13 @@ var inxUse, found: Boolean;
    end;
 
 
-  function ENDL(i: integer): Boolean;
+   function LOCAL(i: integer): Boolean;
+   begin
+      Result :=	(listing[i] = #9'.LOCAL');
+   end;
+
+
+   function ENDL(i: integer): Boolean;
    begin
 
      if (i < 0) or (listing[i] = '') then
@@ -2264,7 +2270,7 @@ end;
 
 
 {
-if (pos('mul40', listing[i]) > 0) then begin
+if (pos('TBL+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

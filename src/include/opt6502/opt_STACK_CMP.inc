@@ -204,7 +204,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
        lab_a(i+12) and										//@					; 12
        sty_stack(i+13) and									// sty :STACKORIGIN			; 13
@@ -246,7 +246,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
        lab_a(i+13) and										//@					; 13
        sty_stack(i+14) and									// sty :STACKORIGIN			; 14
@@ -288,7 +288,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
        lab_a(i+19) and										//@					; 19
        sty_stack(i+20) and									// sty :STACKORIGIN			; 20
@@ -330,7 +330,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
        lab_a(i+20) and										//@					; 20
        sty_stack(i+21) and									// sty :STACKORIGIN			; 21
@@ -372,7 +372,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
        lab_a(i+26) and										//@					; 26
        sty_stack(i+27) and									// sty :STACKORIGIN			; 27
@@ -414,7 +414,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
        lab_a(i+27) and										//@					; 27
        sty_stack(i+28) and									// sty :STACKORIGIN			; 28
@@ -1281,7 +1281,7 @@ begin
        mva_(i+8) and										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 8
        mva_(i+9) and										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 9
        ldy_1(i+10) and										// ldy #1				; 10
-       (listing[i+11] = #9'.LOCAL') and								// .LOCAL				; 11
+       LOCAL(i+11) and										// .LOCAL				; 11
        (listing[i+12] = #9'lda :STACKORIGIN-1+STACKWIDTH*3,x') and 				// lda :STACKORIGIN-1+STACKWIDTH*3,x	; 12
        (listing[i+13] = #9'sub :STACKORIGIN+STACKWIDTH*3,x') and				// sub :STACKORIGIN+STACKWIDTH*3,x	; 13
        (listing[i+14] = #9'bne L4') and								// bne L4				; 14
@@ -1333,7 +1333,7 @@ begin
     if ENDL(i+23) and										// .ENDL		; 23
 
        ldy_1(i) and										// ldy #1		; 0
-       (listing[i+1] = #9'.LOCAL') and								// .LOCAL		; 1
+       LOCAL(i+1) and										// .LOCAL		; 1
        lda_val(i+2) and										// lda E+3		; 2
        sub(i+3) and (sub_stack(i+3) = false) and						// sub			; 3
        (listing[i+4] = #9'bne L4') and								// bne L4		; 4
@@ -1450,7 +1450,7 @@ begin
        mva_(i+4) and										// mva   :STACKORIGIN,x			; 4
        mva_(i+5) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 5
        ldy_1(i+6) and										// ldy #1				; 6
-       (listing[i+7] = #9'.LOCAL') and								// .LOCAL				; 7
+       LOCAL(i+7) and										// .LOCAL				; 7
        (listing[i+8] = #9'lda :STACKORIGIN-1+STACKWIDTH,x') and 				// lda :STACKORIGIN-1+STACKWIDTH,x	; 8
        (listing[i+9] = #9'sub :STACKORIGIN+STACKWIDTH,x') and					// sub :STACKORIGIN+STACKWIDTH,x	; 9
        (listing[i+10] = #9'bne L4') and								// bne L4				; 10
@@ -1512,7 +1512,7 @@ begin
     if ENDL(i+16) and										// .ENDL				; 16
 
        ldy_1(i) and										// ldy #1				; 0
-       (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+       LOCAL(i+1) and										// .LOCAL				; 1
        lda_val(i+2) and										// lda E+1				; 2
        sub(i+3) and (sub_stack(i+3) = false) and						// sub					; 3
        (listing[i+4] = #9'bne L4') and								// bne L4				; 4
@@ -1606,7 +1606,7 @@ begin
        inx(i+2) and										// inx					; 2
        mva_(i+3) and										// mva   :STACKORIGIN,x			; 3
        ldy_1(i+4) and										// ldy #1				; 4
-       (listing[i+5] = #9'.LOCAL') and								// .LOCAL				; 5
+       LOCAL(i+5) and										// .LOCAL				; 5
        (listing[i+6] = #9'lda :STACKORIGIN-1,x') and 						// lda :STACKORIGIN-1,x			; 6
        (listing[i+7] = #9'sub :STACKORIGIN,x') then 						// sub :STACKORIGIN,x			; 7
      if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
@@ -1653,7 +1653,7 @@ begin
     if ENDL(i+9) and										// .ENDL				; 9
 
        ldy_1(i) and										// ldy #1				; 0
-       (listing[i+1] = #9'.LOCAL') and								// .LOCAL				; 1
+       LOCAL(i+1) and										// .LOCAL				; 1
        lda_val(i+2) and										// lda E				; 2
        sub(i+3) and (sub_stack(i+3) = false) and						// sub					; 3
        (listing[i+4] = #9'beq L5') and								// beq L5				; 4
@@ -1719,7 +1719,7 @@ begin
 
     if mva_(i) and										// mva   :STACKORIGIN-1+STACKWIDTH,x	; 0
        ldy_1(i+1) and										// ldy #1				; 1
-       (listing[i+2] = #9'.LOCAL') and								// .LOCAL				; 2
+       LOCAL(i+2) and										// .LOCAL				; 2
        (listing[i+3] = #9'lda :STACKORIGIN-1+STACKWIDTH,x') then 				// lda :STACKORIGIN-1+STACKWIDTH,x	; 3
      if (pos(':STACKORIGIN-1+STACKWIDTH,x', listing[i]) > 0) then
      begin

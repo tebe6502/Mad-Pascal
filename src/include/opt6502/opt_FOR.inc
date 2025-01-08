@@ -350,7 +350,7 @@
           (listing[13] = #9'eor #$FF') and
           (listing[14] = #9'ora #$01') and
           (listing[15] = 'L5') and
-          (listing[16] = #9'.ENDL') and
+          ENDL(16) and
           (listing[17] = #9'bmi *+7') and
           (listing[18] = #9'beq *+5') and
 	  jmp(19) then
@@ -400,7 +400,7 @@
           (listing[13] = #9'eor #$FF') and
           (listing[14] = #9'ora #$01') and
           (listing[15] = 'L5') and
-          (listing[16] = #9'.ENDL') and
+          ENDL(16) and
           (listing[17] = #9'bpl *+5') and
 	  jmp(18) then
 	begin
