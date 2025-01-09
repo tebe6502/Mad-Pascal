@@ -254,18 +254,20 @@ begin
 function GetLocalName(IdentIndex: integer; a: string =''): string;
 begin
 
- if ((Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section) then begin
-
+ if ((Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and Ident[IdentIndex].Section) then
+{
    if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Alias <> '') then
     Result := a + Ident[IdentIndex].Alias
    else
-   {if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Alias = '') then
-    Result := a + Ident[IdentIndex].Name
-   else}
-    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name;
 
- end else
-   Result := a + Ident[IdentIndex].Name;
+   if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Alias = '') then
+    Result := a + Ident[IdentIndex].Name
+   else
+}
+
+    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
+  else
+    Result := a + Ident[IdentIndex].Name;
 
 end;
 
