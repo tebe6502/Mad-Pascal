@@ -1667,6 +1667,16 @@ var inxUse, found: Boolean;
 
        if k > 0 then begin
 
+        if dex(k) and 									// inx			; k-1
+	   inx(k-1) then								// dex			; k
+	  begin
+	   listing[k-1] := '';
+	   listing[k]   := '';
+	   dec(k);
+	   continue;
+	  end;
+
+
         if inx(k) and 									// dex			; k-1
 	   dex(k-1) then								// inx			; k
 	  begin
@@ -1703,7 +1713,7 @@ var inxUse, found: Boolean;
 
         if sta_stack(k) and 								// lda #		; k-1
 	   lda_im(k-1) and								// sta :STACKORIGIN	; k
-	   (lda_stack(i+1) = false) and lda_a(i+1) and					// lda			; i+1
+	   lda_val(i+1) and								// lda			; i+1		~:STACKORIGIN
 	   sta_stack(i+2) then								// sta :STACKORIGIN	; i+2
          if listing[k] = listing[i+2] then
 	  begin
@@ -1737,7 +1747,8 @@ var inxUse, found: Boolean;
 	if sta_im_0(k) and 								// lda			; k-1
 	   lda_a(k-1) then begin							// sta #$00		; k
 
-	  if lda_a(i+1) then						// lda			; i+1
+
+	  if lda_a(i+1) then						/// lda			; i+1
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
@@ -1746,8 +1757,8 @@ var inxUse, found: Boolean;
 	  end;
 
 
-	  if (ldy(i+1) or iny(i+1)) and					// ldy|iny		; i+1
-	     lda_a(i+2) then						// lda			; i+2
+	  if (ldy(i+1) or iny(i+1)) and					/// ldy|iny		; i+1
+	     lda_a(i+2) then						/// lda			; i+2
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
@@ -1756,10 +1767,10 @@ var inxUse, found: Boolean;
 	  end;
 
 
-	  if sta_im_0(i+1) and						// sta #$00		; i+1
-	     sta_im_0(i+2) and						// sta #$00		; i+2
-	     sta_im_0(i+3) and						// sta #$00		; i+3
-	     lda_a(i+4) then						// lda			; i+4
+	  if sta_im_0(i+1) and						/// sta #$00		; i+1
+	     sta_im_0(i+2) and						/// sta #$00		; i+2
+	     sta_im_0(i+3) and						/// sta #$00		; i+3
+	     lda_a(i+4) then						/// lda			; i+4
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
@@ -1772,9 +1783,9 @@ var inxUse, found: Boolean;
 	  end;
 
 
-	  if sta_im_0(i+1) and						// sta #$00		; i+1
-	     sta_im_0(i+2) and						// sta #$00		; i+2
-	     lda_a(i+3) then						// lda			; i+3
+	  if sta_im_0(i+1) and						/// sta #$00		; i+1
+	     sta_im_0(i+2) and						/// sta #$00		; i+2
+	     lda_a(i+3) then						/// lda			; i+3
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
@@ -1786,8 +1797,8 @@ var inxUse, found: Boolean;
 	  end;
 
 
-	  if sta_im_0(i+1) and						// sta #$00		; i+1
-	     lda_a(i+2) then						// lda			; i+2
+	  if sta_im_0(i+1) and						/// sta #$00		; i+1
+	     lda_a(i+2) then						/// lda			; i+2
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
@@ -1796,6 +1807,7 @@ var inxUse, found: Boolean;
 	   dec(k);
 	   continue;
 	  end;
+
 
         end;
 
