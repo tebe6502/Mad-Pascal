@@ -1916,10 +1916,6 @@ begin
        end;
 
 
-
-
-
-
     if lda(i) and										// lda 					; 0
        sta_stack(i+1) and 									// sta :STACKORIGIN+STACKWIDTH		; 1
        lda(i+2) and										// lda TB+1				; 2
@@ -3449,6 +3445,7 @@ begin
 
 // -----------------------------------------------------------------------------
 
+
     if lda_im(i) and										// lda #				; 0
        sta_bp2(i+1) and										// sta :bp2				; 1
        lda_im(i+2) and										// lda #				; 2
@@ -3457,14 +3454,14 @@ begin
        LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
        sta(i+6) and (iy(i+6) = false) and							// sta					; 6
        iny(i+7) and 										// iny					; 7
-       LDA_BP2_Y(i+8) and									// lda 					; 8
-       sta(i+9) and (iy(i+9) = false) and							// sta (:bp2),y				; 9
+       LDA_BP2_Y(i+8) and									// lda (:bp2),y				; 8
+       sta(i+9) and (iy(i+9) = false) and							// sta					; 9
        iny(i+10) and 										// iny					; 10
-       LDA_BP2_Y(i+11) and									// lda					; 11
-       sta(i+12) and (iy(i+12) = false) and							// sta (:bp2),y				; 12
+       LDA_BP2_Y(i+11) and									// lda (:bp2),y				; 11
+       sta(i+12) and (iy(i+12) = false) and							// sta					; 12
        iny(i+13) and 										// iny					; 13
-       LDA_BP2_Y(i+14) and									// lda 					; 14
-       sta(i+15) and (iy(i+15) = false) then							// sta (:bp2),y				; 15
+       LDA_BP2_Y(i+14) and									// lda (:bp2),y				; 14
+       sta(i+15) and (iy(i+15) = false) then							// sta					; 15
        begin
 	p:=GetWORD(i, i+2);
 
