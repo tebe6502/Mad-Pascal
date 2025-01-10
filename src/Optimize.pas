@@ -1472,7 +1472,12 @@ var inxUse, found: Boolean;
 
    function LOCAL(i: integer): Boolean;
    begin
+
+     if (i < 0) or (listing[i] = '') then
+      Result := False
+     else
       Result :=	(listing[i] = #9'.LOCAL');
+
    end;
 
 
