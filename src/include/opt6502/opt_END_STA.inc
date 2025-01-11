@@ -459,14 +459,14 @@
 	for p:=i-1 downto 0 do
 	 if listing[p] = tmp then begin
 
-	  if (p>1) and									// ldy #$00			; 4
+	  if (p > 1) and								// ldy #$00			; 4
 	     ldy_im_0(i+4) and
-	     lda(p-2) and						// lda TB 			; -2
-	     add_im(p-1) and						// add #			; -1
-//	     sta(p) and							// sta :STACKORIGIN+9		; 0
-	     lda(p+1) and						// lda TB+1			; 1
-	     adc_im_0(p+2) and						// adc #$00			; 2
-	     sta_stack(p+3) then					// :STACKORIGIN+STACKWIDTH+9	; 3
+	     lda_val(p-2) and (lda_im(p-2) = false) and			/// lda TB 				; -2
+	     add_im(p-1) and						/// add #				; -1
+//	     sta(p) and							/// sta :STACKORIGIN+9			; 0
+	     (listing[p+1] = listing[p-2] + '+1') and			/// lda TB+1				; 1
+	     adc_im_0(p+2) and						/// adc #$00				; 2
+	     sta_stack(p+3) then					/// :STACKORIGIN+STACKWIDTH+9		; 3
 	   if pos(listing[p-2], listing[p+1]) > 0 then
 	  begin
 	   listing[i] := #9'mwy ' + copy(listing[p-2], 6, 256) + ' :bp2';
@@ -486,16 +486,16 @@
 	  end;
 
 
-	  if sta_stack(p) and						// sta :STACKORIGIN+9			; 0
-	     lda(p+1) and						// lda :STACKORIGIN+STACKWIDTH+9	; 1
-	     adc_sbc(p+2) and						// adc|sbc :STACKORIGIN+STACKWIDTH+11	; 2
-	     sta_stack(p+3) and						// sta :STACKORIGIN+STACKWIDTH+9	; 3
-	     lda(p+4) and						// lda :STACKORIGIN+STACKWIDTH*2+9	; 4
-	     adc_sbc(p+5) and						// adc|sbc #$00				; 5
-	     sta_stack(p+6) and						// sta :STACKORIGIN+STACKWIDTH*2+9	; 6
-	     lda(p+7) and						// lda :STACKORIGIN+STACKWIDTH*3+9	; 7
-	     adc_sbc(p+8) and						// adc|sbc #$00				; 8
-	     sta_stack(p+9) then 					// sta :STACKORIGIN+STACKWIDTH*3+9	; 9
+	  if sta_stack(p) and						/// sta :STACKORIGIN+9			; 0
+	     lda(p+1) and						/// lda :STACKORIGIN+STACKWIDTH+9	; 1
+	     adc_sbc(p+2) and						/// adc|sbc :STACKORIGIN+STACKWIDTH+11	; 2
+	     sta_stack(p+3) and						/// sta :STACKORIGIN+STACKWIDTH+9	; 3
+	     lda(p+4) and						/// lda :STACKORIGIN+STACKWIDTH*2+9	; 4
+	     adc_sbc(p+5) and						/// adc|sbc #$00			; 5
+	     sta_stack(p+6) and						/// sta :STACKORIGIN+STACKWIDTH*2+9	; 6
+	     lda(p+7) and						/// lda :STACKORIGIN+STACKWIDTH*3+9	; 7
+	     adc_sbc(p+8) and						/// adc|sbc #$00			; 8
+	     sta_stack(p+9) then 					/// sta :STACKORIGIN+STACKWIDTH*3+9	; 9
 	  if copy(listing[i+2], 6, 256) = copy(listing[p+3], 6, 256) then
 	  begin
 

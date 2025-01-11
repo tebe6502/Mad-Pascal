@@ -12,10 +12,10 @@ begin
 // -----------------------------------------------------------------------------
 
   if ((pos(listing[i], listing[i+3]) > 0) or ((pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0))) and
-     lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and					// lda T			; 0
+     lda_val(i) and (lda_im(i) = false) and								// lda T			; 0	~#
      add(i+1) and											// add				; 1
      tay(i+2) and											// tay				; 2
-     lda(i+3) and											// lda T+1			; 3
+     lda_val(i+3) and (lda_im(i+3) = false) and								// lda T+1			; 3	~#
      adc_im_0(i+4) and											// adc #$00			; 4
      sta_bp_1(i+5) then											// sta :bp+1			; 5
    begin
@@ -254,7 +254,7 @@ begin
 
 {
   if ((pos(listing[i], listing[i+4]) > 0) or ((pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+4]) > 0))) and
-     lda(i) and (lda_stack(i) = false) and (lda_im(i) = false) and					// lda T			; 0
+     lda_val(i) and (lda_im(i) = false) and								// lda T			; 0
      add(i+1) and											// add				; 1
      sta_stack(i+2) and											// sta :STACKORIGIN		; 2
      tay(i+3) and											// tay				; 3
@@ -373,8 +373,8 @@ begin
 
 
   if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
-     ldy(i+1) and											// ldy P				; 1
-     lda(i+2) and (#9'lda '+copy(listing[i+1], 6, 256)+'+1' = listing[i+2]) and				// lda P+1				; 2
+     ldy_val(i+1) and											// ldy P				; 1
+     lda_val(i+2) and (#9'lda ' + copy(listing[i+1], 6, 256) + '+1' = listing[i+2]) and			// lda P+1				; 2
      sta_bp_1(i+3) then begin										// sta :bp+1				; 3
 
 
@@ -438,10 +438,10 @@ begin
 
 
   if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
-     lda(i+1) and											// lda P				; 1
+     lda_val(i+1) and (lda_im(i+1) = false) and								// lda P				; 1
      add(i+2) and											// add					; 2
      tay(i+3) and											// tay					; 3
-     lda(i+4) and (listing[i+1]+'+1' = listing[i+4]) and						// lda P+1				; 4
+     lda_val(i+4) and (listing[i+1] + '+1' = listing[i+4]) and						// lda P+1				; 4
      adc_im_0(i+5) and											// adc #$00				; 5
      sta_bp_1(i+6) then begin										// sta :bp+1				; 6
 

@@ -1201,9 +1201,9 @@ begin
      end;
 
 
-    if lda(i) and										// lda                                  ; 0
+    if lda_val(i) and (lda_im(i) = false) and							// lda TB				; 0
        sta_bp2(i+1) and										// sta :bp2				; 1
-       lda(i+2) and										// lda					; 2
+       (listing[i+2] = listing[i] + '+1') and							// lda TB+1				; 2
        sta_bp2_1(i+3) and									// sta :bp2+1                  		; 3
        ldy(i+4) then										// ldy					; 4
      if pos(listing[i], listing[i+2]) > 0 then
