@@ -167,10 +167,10 @@ begin
     if //inx(i) and										// inx					; 0
        mva(i+1) and 										// mva aa :STACKORIGIN			; 1
        mva(i+2) and										// mva bb|#$00 :STACKORIGIN+STACKWIDTH	; 2
-       lda(i+3) and										// lda					; 3
+       lda_val(i+3) and (lda_im(i+3) = false) and						// lda TB				; 3	~#
        add_stack(i+4) and									// add :STACKORIGIN			; 4
        tay(i+5) and										// tay					; 5
-       lda(i+6) and										// lda					; 6
+       (listing[i+6] = listing[i+3] + '+1') and							// lda TB+1				; 6	~#
        adc_stack(i+7) and									// adc :STACKORIGIN+STACKWIDTH		; 7
        sta_bp_1(i+8) and									// sta :bp+1				; 8
        lda_bp_y(i+9) and									// lda (:bp),y				; 9
