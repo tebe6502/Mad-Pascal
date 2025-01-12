@@ -1667,6 +1667,7 @@ var inxUse, found: Boolean;
 
        if k > 0 then begin
 
+
         if dex(k) and 									// inx			; k-1
 	   inx(k-1) then								// dex			; k
 	  begin
@@ -1744,6 +1745,7 @@ var inxUse, found: Boolean;
 	  end;
 
 
+
 	if sta_im_0(k) and 								// lda			; k-1
 	   lda_a(k-1) then begin							// sta #$00		; k
 
@@ -1807,7 +1809,6 @@ var inxUse, found: Boolean;
 	   dec(k);
 	   continue;
 	  end;
-
 
         end;
 
