@@ -130,8 +130,10 @@ begin
       end;
 
 
-    if mva_im(i) and										// mva #  :STACKORIGIN			; 0
-       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
+    if (listing[i+1] = #9'@printCHAR') and							// @printCHAR				; 1
+
+       mva_im(i) then										// mva #  :STACKORIGIN			; 0
+//       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
       begin
 	listing[i+1] := #9'@print ' + GetString(i);
@@ -142,8 +144,10 @@ begin
       end;
 
 
-    if (pos('mva adr.', listing[i]) > 0) and iy(i) and						// mva adr. ,y  :STACKORIGIN		; 0
-       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
+    if (listing[i+1] = #9'@printCHAR') and							// @printCHAR				; 1
+
+       (pos(#9'mva adr.', listing[i]) > 0) and iy(i) then					// mva adr. ,y  :STACKORIGIN		; 0
+//       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
       begin
 	listing[i]   := #9'lda ' + GetString(i);
@@ -175,9 +179,11 @@ begin
       end;
 
 
-    if add_sub_AL_CL(i) and									// jsr addAL_CL|subAL_CL		; 0
+    if (listing[i+2] = #9'@printCHAR') and							// @printCHAR				; 2
+
+       add_sub_AL_CL(i) and									// jsr addAL_CL|subAL_CL		; 0
        dex(i+1) and										// dex					; 1
-       (listing[i+2] = #9'@printCHAR') and							// @printCHAR				; 2
+//       (listing[i+2] = #9'@printCHAR') and							// @printCHAR				; 2
        dex(i+3) then										// dex					; 3
      begin
 
@@ -190,8 +196,10 @@ begin
      end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN,x			; 0
-       (listing[i+1] = #9'jsr @printBYTE') then							// jsr @printBYTE			; 1
+    if (listing[i+1] = #9'jsr @printBYTE') and							// jsr @printBYTE			; 1
+
+       sta_stack(i) then									// sta :STACKORIGIN,x			; 0
+//       (listing[i+1] = #9'jsr @printBYTE') then						// jsr @printBYTE			; 1
       begin
 
         listing[i]   := '';
@@ -206,8 +214,10 @@ begin
       end;
 
 
-    if mva(i) and (iy(i) = false) and								// mva I :STACKORIGIN,x			; 0
-       (listing[i+1] = #9'jsr @printBYTE') then							// jsr @printBYTE			; 1
+    if (listing[i+1] = #9'jsr @printBYTE') and							// jsr @printBYTE			; 1
+
+       mva(i) and (iy(i) = false) then								// mva I :STACKORIGIN,x			; 0
+//       (listing[i+1] = #9'jsr @printBYTE') then						// jsr @printBYTE			; 1
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
       begin
 
@@ -223,9 +233,11 @@ begin
       end;
 
 
-    if mva(i) and (iy(i) = false) and								// mva ... :STACKORIGIN,x		; 0
-       mva(i+1) and (iy(i+1) = false) and							// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
-       (listing[i+2] = #9'jsr @printWORD') then							// jsr @printWORD			; 2
+    if (listing[i+2] = #9'jsr @printWORD') and							// jsr @printWORD			; 2
+
+       mva(i) and (iy(i) = false) and								// mva ... :STACKORIGIN,x		; 0
+       mva(i+1) and (iy(i+1) = false) then							// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
+//       (listing[i+2] = #9'jsr @printWORD') then						// jsr @printWORD			; 2
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) and
         (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0 ) then
       begin
@@ -243,11 +255,13 @@ begin
       end;
 
 
-    if mva(i) and										// mva ... :STACKORIGIN,x		; 0
+    if (listing[i+4] = #9'jsr @printCARD') and							// jsr @printCARD			; 4
+
+       mva(i) and										// mva ... :STACKORIGIN,x		; 0
        mva(i+1) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
-       mva(i+3) and										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
-       (listing[i+4] = #9'jsr @printCARD') then							// jsr @printCARD			; 4
+       mva(i+3) then										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
+//       (listing[i+4] = #9'jsr @printCARD') then						// jsr @printCARD			; 4
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) and
         (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0 ) and
         (pos(' :STACKORIGIN+STACKWIDTH*2,x', listing[i+2]) > 0 ) and

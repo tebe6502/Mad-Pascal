@@ -816,12 +816,7 @@ begin
      end;
 
 
-//      for p:=0 to l-1 do writeln(listing[p]);
-//      writeln('-------');
-
-
     end;
-
 
 
 end;		// function

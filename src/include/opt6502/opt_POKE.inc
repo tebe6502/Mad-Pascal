@@ -11,7 +11,8 @@ begin
 // ===				     POKE.
 // -----------------------------------------------------------------------------
 
-  if ((pos(listing[i], listing[i+3]) > 0) or ((pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0))) and
+  if ((pos(listing[i], listing[i+3]) > 0) or
+      ((pos(#9'lda <', listing[i]) > 0) and (pos(#9'lda >', listing[i+3]) > 0))) and
      lda_val(i) and (lda_im(i) = false) and								// lda T			; 0	~#
      add(i+1) and											// add				; 1
      tay(i+2) and											// tay				; 2
@@ -23,7 +24,7 @@ begin
     if LDA_BP_Y(i+6) and									// lda (:bp),y			; 6
        (sta(i+7) or lsr_a(i+7) or asl_a(i+7)) and (pos(' :STACK', listing[i+7]) = 0) then	// lsr @|asl @|sta|sta (:bp),y	; 7
        begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -48,7 +49,7 @@ begin
        sta_bp_1(i+9) then									// sta :bp+1			; 9
     if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
        begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -71,7 +72,7 @@ begin
        sta(i+9) then										// sta 				; 9
     if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
        begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -96,7 +97,7 @@ begin
        sta(i+8) then										// sta 				; 8
     if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
        begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -119,7 +120,7 @@ begin
        (and_ora_eor(i+7) or add_sub(i+7)) and ((pos(' (:bp),y', listing[i+7]) > 0)) and		// and|ora|eor|add|sub (:bp),y	; 7
        sta(i+8) and (sta_bp_y(i+8) = false) and (sta_stack(i+8) = false) then			// sta				; 8
       begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -141,7 +142,7 @@ begin
        and_ora_eor(i+7) and									// and|ora|eor			; 7
        (sta_val(i+8) or cmp(i+8)) then								// cmp|sta|sta (:bp),y		; 8
       begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -164,7 +165,7 @@ begin
     if lda_bp_y(i+6) and									// lda (:bp),y			; 6
        sta_stack(i+7) then									// sta :STACKORIGIN		; 7
       begin
-	if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+	if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -184,7 +185,7 @@ begin
     if lda_bp_y(i+6) and									// lda (:bp),y			; 6
        cmp(i+7) then										// cmp				; 7
       begin
-	if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+	if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -208,7 +209,7 @@ begin
        sta_stack(i+8) and									// sta :STACKORIGIN		; 8
        (mwy_bp2(i+9) or ldy(i+9)) then								// mwy ... :bp2			; 9
       begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
@@ -228,7 +229,7 @@ begin
     if lda(i+6) and 										// lda 				; 6
        sta_val(i+7) then			 						// sta|sta (:bp),y		; 7
       begin
-        if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
+        if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
 	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';

@@ -1221,7 +1221,7 @@ begin
 
 
     if ldy_1(i) and										// ldy #1			; 0
-       (pos('jne l_', listing[i+1]) > 0) then							// jne l_			; 1
+       (pos(#9'jne l_', listing[i+1]) > 0) then							// jne l_			; 1
      begin
        listing[i]   := #9'jmp ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';

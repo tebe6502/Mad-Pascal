@@ -175,7 +175,7 @@ begin
      end;
 
 
-    if (lda_a(i) or adc(i) or sbc(i)) and							// lda|adc|sbc			; 0
+    if (lda_a(i) or adc_sbc(i)) and								// lda|adc|sbc			; 0
        mwy(i+1) and										// mwy				; 1
        ldy(i+2) and										// ldy				; 2
        lda_a(i+3) then										// lda				; 3
