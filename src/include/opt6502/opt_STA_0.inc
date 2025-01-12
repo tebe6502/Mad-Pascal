@@ -92,17 +92,17 @@ begin
        listing[i+1] := '';
        listing[i+2] := '';
 
-       if lda_im_0(i+3) and						// lda #$00			; 3
-          adc_sbc_im_0(i+4) and						// adc|sbc #$00			; 4
-          sta_im_0(i+5) then						// sta #$00			; 5
+       if lda_im_0(i+3) and						/// lda #$00			; 3
+          adc_sbc_im_0(i+4) and						/// adc|sbc #$00		; 4
+          sta_im_0(i+5) then						/// sta #$00			; 5
 	begin
          listing[i+3] := '';
          listing[i+4] := '';
          listing[i+5] := '';
 
-         if lda_im_0(i+6) and						// lda #$00			; 6
-            adc_sbc_im_0(i+7) and					// adc|sbc #$00			; 7
-            sta_im_0(i+8) then						// sta #$00			; 8
+         if lda_im_0(i+6) and						/// lda #$00			; 6
+            adc_sbc_im_0(i+7) and					/// adc|sbc #$00		; 7
+            sta_im_0(i+8) then						/// sta #$00			; 8
 	  begin
            listing[i+6] := '';
            listing[i+7] := '';
@@ -206,8 +206,8 @@ begin
      begin
 	listing[i+1] := '';
 
-	if lda_a(i+2) or (ldy(i+2) and lda_a(i+3)) then listing[i] := '';		// lda | ldy	; 2
-											//     | lda	; 3
+	if lda_a(i+2) or (ldy(i+2) and lda_a(i+3)) then listing[i] := '';		/// lda | ldy	; 2
+											///     | lda	; 3
 	exit(false);
      end;
 
@@ -370,8 +370,8 @@ begin
      end;
 
 
-    if sta(i) and										// sta :STACKORIGIN+9		; 0
-       asl(i+1) and										// asl :STACKORIGIN+9		; 1
+    if sta_stack(i) and										// sta :STACKORIGIN		; 0
+       asl_stack(i+1) and									// asl :STACKORIGIN		; 1
        sta_im_0(i+2) then									// sta #$00			; 2
       if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
        begin
@@ -383,9 +383,9 @@ begin
        end;
 
 
-     if sta(i) and										// sta :STACKORIGIN+9		; 0
-	asl(i+1) and										// asl :STACKORIGIN+9		; 1
-	asl(i+2) and										// asl :STACKORIGIN+9		; 2
+     if sta_stack(i) and									// sta :STACKORIGIN		; 0
+	asl_stack(i+1) and									// asl :STACKORIGIN		; 1
+	asl_stack(i+2) and									// asl :STACKORIGIN		; 2
         sta_im_0(i+3) then									// sta #$00			; 3
       if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
 	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
@@ -399,14 +399,13 @@ begin
        end;
 
 
-    if (SKIP(i-1) = false) and
+    if (SKIP(i-1) = false) and									//~SKIP
        lda_a(i) and										// lda :STACKORIGIN+9		; 0
        sta_a(i+1) then										// sta :STACKORIGIN+9		; 1
      if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then
      begin
-       if sta_im_0(i+1) = false then listing[i] := '';
-
-       listing[i+1] := '';
+       listing[i]  := '';
+       listing[i+1]:= '';
        exit(false);
      end;
 
