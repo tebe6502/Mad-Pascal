@@ -50,7 +50,7 @@
        if (l = 3) and					// BYTE
           lda_a(0) and
           cmp_im_0(1) and
-	  (pos('jcc l_', listing[2]) > 0 ) then
+	  (pos(#9'jcc l_', listing[2]) > 0 ) then
 	begin
 	 listing[0] := #9'#for:dec ' + copy(listing[0], 6, 256);
 	 listing[1] := #9'#for';
@@ -115,7 +115,7 @@
           lda_a(3) and
           cmp_im_0(4) and
           lab_a(5) and
-	  (pos('jcc l_', listing[6]) > 0 ) then
+	  (pos(#9'jcc l_', listing[6]) > 0 ) then
 	begin
 	 listing[0] := '';
 	 listing[1] := '';
@@ -280,7 +280,7 @@
           lda_a(9) and
           cmp_im_0(10) and
           lab_a(11) and
-	  (pos('jcc l_', listing[12]) > 0 ) then
+	  (pos(#9'jcc l_', listing[12]) > 0 ) then
 	begin
 	 listing[0] := '';
 	 listing[1] := '';

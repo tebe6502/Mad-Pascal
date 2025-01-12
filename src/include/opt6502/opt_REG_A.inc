@@ -6,8 +6,8 @@
 
    for i := 0 to l - 1 do
     if mva_im(i) or
-       (mva(i) and (pos('mva adr.', listing[i]) = 0) and (pos(':STACK', listing[i]) = 0) and (iy(i) = false)) or
-       (lda_a(i) and (lda_stack(i) = false) and (iy(i) = false) {and (SKIP(i+1) = false)}) then
+       (mva(i) and (pos(#9'mva adr.', listing[i]) = 0) and (pos(':STACK', listing[i]) = 0) and (iy(i) = false)) or
+       (lda_val(i) and (iy(i) = false) {and (SKIP(i+1) = false)}) then
     begin
 
      arg0:=GetString(i);

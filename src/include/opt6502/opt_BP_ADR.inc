@@ -10,10 +10,10 @@ begin
 // ===				    BP -> ADR.
 // -----------------------------------------------------------------------------
 
-    if (pos('lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0
+    if (pos(#9'lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0
        add_stack(i+1) and								// add :STACKORIGIN			; 1
        tay(i+2) and									// tay					; 2
-       (pos('lda >adr.', listing[i+3]) > 0) and						// lda >adr.				; 3
+       (pos(#9'lda >adr.', listing[i+3]) > 0) and					// lda >adr.				; 3
        adc_stack(i+4) and								// adc :STACKORIGIN+STACKWIDTH		; 4
        sta_bp_1(i+5) and								// sta :bp+1				; 5
        lda_bp_y(i+6) and								// lda (:bp),y				; 6
@@ -237,10 +237,10 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (pos('lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0		#BYTE
+    if (pos(#9'lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0		#BYTE
        add_im(i+1) and									// add #				; 1
        tay(i+2) and									// tay					; 2
-       (pos('lda >adr.', listing[i+3]) > 0) and						// lda >adr.				; 3
+       (pos(#9'lda >adr.', listing[i+3]) > 0) and					// lda >adr.				; 3
        adc_im(i+4) and									// adc #				; 4
        sta_bp_1(i+5) and								// sta :bp+1				; 5
        lda_bp_y(i+6) and								// lda (:bp),y				; 6
@@ -263,10 +263,10 @@ begin
     end;
 
 
-    if (pos('lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0		BYTE
+    if (pos(#9'lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0		BYTE
        add(i+1) and (add_stack(i+1) = false) and (add_im(i+1) = false) and		// add 					; 1
        tay(i+2) and									// tay					; 2
-       (pos('lda >adr.', listing[i+3]) > 0) and						// lda >adr.				; 3
+       (pos(#9'lda >adr.', listing[i+3]) > 0) and					// lda >adr.				; 3
        adc_im(i+4) and									// adc					; 4
        sta_bp_1(i+5) and								// sta :bp+1				; 5
        lda_bp_y(i+6) and								// lda (:bp),y				; 6

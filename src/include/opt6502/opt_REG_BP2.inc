@@ -33,7 +33,7 @@
 
        or
 
-       ( lda_a(i) and (lda_stack(i) = false) and			// lda P+1				; 0
+       ( lda_val(i) and							// lda P+1				; 0	~:STACKORIGIN
          sta_stack(i+1) and 						// sta :STACKORIGIN+STACKWIDTH		; 1
 	 lda_a(i+2) and (listing[i] = listing[i+2] + '+1') and		// lda P				; 2
 	 asl_a(i+3) and							// asl @				; 3
@@ -49,7 +49,7 @@
 
        or
 
-       ( lda_a(i) and (lda_stack(i) = false) and			// lda P				; 0
+       ( lda_val(i) and							// lda P				; 0	~:STACKORIGIN
          sta_stack(i+1) and 						// sta :STACKORIGIN			; 1
 	 lda_a(i+2) and (listing[i+2] = listing[i] + '+1') and		// lda P+1				; 2
 	 asl_stack(i+3) and						// asl :STACKORIGIN			; 3
@@ -68,7 +68,7 @@
 
 	or
 
-       ( lda_a(i) and (lda_stack(i) = false) and			// lda P				; 0
+       ( lda_val(i) and							// lda P				; 0	~:STACKORIGIN
          sta_stack(i+1) and 						// sta :STACKORIGIN			; 1
 	 lda_a(i+2) and (listing[i+2] = listing[i] + '+1') and		// lda P+1				; 2
 	 asl_stack(i+3) and						// asl :STACKORIGIN			; 3

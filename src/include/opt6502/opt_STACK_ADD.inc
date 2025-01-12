@@ -9,7 +9,6 @@ begin
 // ===				      STACK ADD.
 // -----------------------------------------------------------------------------
 
-
     if lda_a(i) and										// lda					; 0
        add_sub(i+1) and 									// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
