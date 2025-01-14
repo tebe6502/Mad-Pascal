@@ -813,13 +813,14 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxx
       end;
 
 
-    if ldy(i) and (listing[i] = listing[i+3]) and						// ldy B				; 0
+    if tay(i+5) and										// tay					; 5
 
+       ldy(i) and (listing[i] = listing[i+3]) and						// ldy B				; 0
        lda_adr(i+1) and ((listing[i+1] = listing[i+4])) and					// lda adr.				; 1
-       sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
+       sta_stack(i+2) then									// sta :STACKORIGIN+9			; 2
 //       ldy(i+3) and										// ldy B				; 3
 //       lda_adr(i+4) and									// lda adr.				; 4
-       tay(i+5) then										// tay					; 5
+//       tay(i+5) then										// tay					; 5
       begin
 	listing[i+3] := '';
 	listing[i+4] := '';

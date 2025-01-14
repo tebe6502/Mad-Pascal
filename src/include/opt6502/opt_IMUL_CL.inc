@@ -31,8 +31,8 @@ function imulCL_opt: Boolean;
    begin
 
 
-     if (listing[m+1] = #9'sta :eax') and		// establishing the correct order of the registers 1: ECX, 2: EAX
-        (listing[m+3] = #9'sta :ecx') then
+     if sta_eax(m+1) and				// establishing the correct order of the registers 1: ECX, 2: EAX
+        sta_ecx(m+3) then
      begin
 	listing[m+1] := #9'sta :ecx';
 
@@ -77,9 +77,9 @@ function imulCL_opt: Boolean;
     if (k in [0, 1, 2, 4, 8, 16, 32]) and						// lda #				; 2
 
        (lda_im(m) = false) and								// lda var				; 0
-       (listing[m+1] = #9'sta :ecx') and						// sta :ecx				; 1
+       sta_ecx(m+1) and									// sta :ecx				; 1
 
-       (listing[m+3] = #9'sta :eax') then						// sta :eax				; 3
+       sta_eax(m+3) then								// sta :eax				; 3
      begin
 
        	s[x-1][1] := #9'lda #$00';
@@ -141,9 +141,9 @@ function imulCL_opt: Boolean;
   if (k in [3, 5, 7, 10, 40, 64, 96, 128, 255]) and					// lda #				; 2
 
      (lda_im(m) = false) and								// lda var				; 0
-     (listing[m+1] = #9'sta :ecx') and							// sta :ecx				; 1
+     sta_ecx(m+1) and									// sta :ecx				; 1
 
-     (listing[m+3] = #9'sta :eax') then							// sta :eax				; 3
+     sta_eax(m+3) then									// sta :eax				; 3
   begin
 
 
