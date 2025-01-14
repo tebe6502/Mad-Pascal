@@ -788,6 +788,16 @@ var inxUse, found: Boolean;
      Result := listing[i] = #9'sta :eax+1'
    end;
 
+   function STA_ECX(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sta :ecx'
+   end;
+
+   function STA_ECX_1(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sta :ecx+1'
+   end;
+
    function ADD_EAX(i: integer): Boolean;
    begin
      Result := listing[i] = #9'add :eax'
@@ -3189,7 +3199,7 @@ begin				// OptimizeASM
 	if lda_im(l) and					// #const
 	   (listing[l+1] = #9'sta :ecx') and
 	   lda_im(l+2) and	   				// #const
-	   (listing[l+3] = #9'sta :eax') then
+	   sta_eax(l+3) then
 	begin
 
 	  k := GetBYTE(l) * GetBYTE(l+2);
@@ -3288,9 +3298,9 @@ begin				// OptimizeASM
 	   lda_im(l+2) and
 	   (listing[l+3] = #9'sta :ecx+1') and
 	   lda_im(l+4) and
-	   (listing[l+5] = #9'sta :eax') and
+	   sta_eax(l+5) and
 	   lda_im(l+6) and
-	   (listing[l+7] = #9'sta :eax+1') then
+	   sta_eax_1(l+7) then
 	begin
 
 	 k := GetWORD(l, l+2) * GetWORD(l+4, l+6);
@@ -3365,9 +3375,9 @@ begin				// OptimizeASM
        lda_im_0(m+2) and								// lda #$00				; 2
        (listing[m+3] = #9'sta :ecx+1') and 						// sta :ecx+1				; 3
        lda_a(m+4) and {(lda_stack(m+4) = false) and}					// lda 					; 4
-       (listing[m+5] = #9'sta :eax') and						// sta :eax				; 5
+       sta_eax(m+5) and									// sta :eax				; 5
        lda_im_0(m+6) and								// lda #$00				; 6
-       (listing[m+7] = #9'sta :eax+1') and						// sta :eax+1				; 7
+       sta_eax_1(m+7) and								// sta :eax+1				; 7
 
        IFDEF_MUL16(m+8) then								// .ifdef fmulinit			; 8
        											// fmulu_16				; 9

@@ -34,9 +34,9 @@ begin
        lda_im_0(i+2) and								// lda #$00		; 2
        (listing[i+3] = #9'sta :eax+3') and						// sta :eax+3		; 3
        lda_a(i+4) and									// lda #$80		; 4
-       (listing[i+5] = #9'sta :ecx') and						// sta :ecx		; 5
+       sta_ecx(i+5) and									// sta :ecx		; 5
        lda_a(i+6) and									// lda #$01		; 6
-       (listing[i+7] = #9'sta :ecx+1') and						// sta :ecx+1		; 7
+       sta_ecx_1(i+7) and								// sta :ecx+1		; 7
        lda_im_0(i+8) and								// lda #$00		; 8
        (listing[i+9] = #9'sta :ecx+2') and						// sta :ecx+2		; 9
        lda_im_0(i+10) and								// lda #$00		; 10
@@ -74,9 +74,9 @@ begin
        adc_sbc_im_0(i+8) and								// adc|sbc #$00		; 8
        (listing[i+9] = #9'sta :eax+3') and						// sta :eax+3		; 9
        lda(i+10) and									// lda 			; 10
-       (listing[i+11] = #9'sta :ecx') and						// sta :ecx		; 11
+       sta_ecx(i+11) and								// sta :ecx		; 11
        lda_im_0(i+12) and								// lda #$00		; 12
-       (listing[i+13] = #9'sta :ecx+1') and						// sta :ecx+1		; 13
+       sta_ecx_1(i+13) and								// sta :ecx+1		; 13
        (listing[i+14] = #9'sta :ecx+2') and						// sta :ecx+2		; 14
        (listing[i+15] = #9'sta :ecx+3') and						// sta :ecx+3		; 15
        (listing[i+16] = #9'jsr imulECX') then						// jsr imulECX		; 16
