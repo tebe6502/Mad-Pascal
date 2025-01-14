@@ -14936,11 +14936,23 @@ if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIn
 
  if not isInl then begin
   asm65(#9'.ifdef @VarData');
+
+  if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
+   asm65(#9'sta :ecx');
+   asm65(#9'sty :ecx+1');
+  end;
+
   asm65('@new'#9'lda <@VarData');			// @AllocMem
   asm65(#9'sta :ztmp');
   asm65(#9'lda >@VarData');
   asm65(#9'ldy #@VarDataSize-1');
   asm65(#9'jsr @AllocMem');
+
+  if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
+   asm65(#9'lda :ecx');
+   asm65(#9'ldy :ecx+1');
+  end;
+
   asm65(#9'eif');
  end;
 

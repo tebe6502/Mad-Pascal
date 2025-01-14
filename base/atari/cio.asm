@@ -71,14 +71,24 @@ code	equ *-1
 
 	m@call	ciov
 
-error	tya
-	sta MAIN.SYSTEM.IOResult
+	bmi error
+
+	sty MAIN.SYSTEM.IOResult
+
+	ldy #s@file.status
+	lda (bp2),y
+	ora #e@file.open
+	sta (bp2),y
+
+ok	rts
+
+error	sty MAIN.SYSTEM.IOResult
 
 	bpl ok
 
 msg	lda #true
 iocheck	equ *-1
-	beq ok	;skp
+	beq ok
 
 	sty dx
 ;	sty FX_CORE_RESET
@@ -97,26 +107,6 @@ iocheck	equ *-1
 	jsr @printVALUE
 
 	jmp MAIN.@halt
-/*
-skp	ldy #s@file.status
-	lda (bp2),y
-	ora #e@file.eof
-	sta (bp2),y
-
-	ldy #s@file.record
-	lda #$00
-	sta (bp2),y
-	iny
-	sta (bp2),y
-
-	rts
-*/
-ok	ldy #s@file.status
-	lda (bp2),y
-	ora #e@file.open
-	sta (bp2),y
-
-	rts
 
 _error	dta 6,c'ERROR '
 
@@ -160,7 +150,7 @@ found	rts
 	bne	ok_open
 
 	ldy	#-123		; kod bledu "DEVICE OR FILE NOT OPEN"
-	jmp	@openfile.error
+err	jmp	@openfile.error
 
 ok_open	lda	(bp2),y
 	ora	#e@file.eof
@@ -175,11 +165,15 @@ ok_open	lda	(bp2),y
 
 	m@call	ciov
 
-;	lda	#0		; iocheck off
-;	sta	@openfile.iocheck
+	bmi err
 
-	jmp	@openfile.error
+	sty MAIN.SYSTEM.IOResult
 
+	ldy #s@file.status
+	lda #$00
+	sta (bp2),y
+
+	rts
 .endp
 
 

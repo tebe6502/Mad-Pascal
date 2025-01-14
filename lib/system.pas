@@ -1243,7 +1243,7 @@ Check for end of file
 @return: FALSE in all other cases
 *)
 var i: cardinal;
-    bf: array [0..255] of byte;
+    bf: array [0..255] of byte absolute __buffer;
 begin
 	i:=FilePos(f);
 
