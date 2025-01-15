@@ -24,12 +24,21 @@ BEGIN
 //  WriteLn('Compressing ',InputFile,' into OUTPUT.DAT');
 
   LZW.Init;
+  
+  {$IFDEF ATARI}
   LZW.CompressFile('D:WINS.MIC','D:OUTPUT.DAT');
+  {$ELSE}
+  LZW.CompressFile('WINS.MIC','OUTPUT.DAT');  
+  {$ENDIF} 
   LZW.CompressDone;
 
   ClrScr;
   WriteLn('UnCompressing OUTPUT.DAT into RESTORED.DAT');
   LZW.Init;
+  {$IFDEF ATARI}  
   LZW.UnCompressFile('D:OUTPUT.DAT','D:RESTORED.DAT');
+  {$ELSE}
+  LZW.UnCompressFile('OUTPUT.DAT','RESTORED.DAT');  
+  {$ENDIF}  
   LZW.CompressDone;
 END.
