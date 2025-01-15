@@ -423,7 +423,7 @@ The result of the function has the same type as its argument, which can be any n
 asm
 	lda :edx+3
 	spl
-	jsr negEDX
+	jsr @negEDX
 
 	mva :edx Result
 	mva :edx+1 Result+1
@@ -538,7 +538,7 @@ The result of the function has the same type as its argument, which can be any n
 asm
 	lda :edx+3
 	spl
-	jsr negEDX
+	jsr @negEDX
 
 	sta Result+3
 

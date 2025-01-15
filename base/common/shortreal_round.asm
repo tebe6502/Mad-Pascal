@@ -8,7 +8,7 @@
 
 	ldy :STACKORIGIN+STACKWIDTH,x
 	spl
-	jsr negSHORT
+	jsr @negSHORT
 
 	lda :STACKORIGIN,x
 //	add #$80
@@ -21,7 +21,7 @@
 
 	tya
 	spl
-	jsr negSHORT
+	jmp @negSHORT
 
 	rts
 .endp

@@ -85,7 +85,7 @@ _ay
 	ldy #'-'
 	jsr @printVALUE.pout
 
-	jmp negCARD
+	jmp @negCARD
 .endp
 
 

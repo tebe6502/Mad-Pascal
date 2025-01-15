@@ -67,7 +67,7 @@ len	equ *-1
 	lda ecx
 	beq stop
 
-	jsr negEDX
+	jsr @negEDX
 	
 stop	iny		; reg Y = 0 conversion successful
 	rts

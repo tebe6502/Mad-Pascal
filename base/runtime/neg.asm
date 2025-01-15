@@ -1,16 +1,17 @@
 
 /*
-	negBYTE
-	negWORD
-	negCARD
-	negBYTE1
-	negWORD1
-	negCARD1
-	negEDX
-	negSHORT
+	@negBYTE
+	@negWORD
+	@negCARD
+	@negBYTE1
+	@negWORD1
+	@negCARD1
+	@negEAX
+	@negEDX
+	@negSHORT
 */
 
-.proc	negBYTE
+.proc	@negBYTE
 	lda #$00
 	sub :STACKORIGIN,x
 	sta :STACKORIGIN,x
@@ -31,7 +32,7 @@
 .endp
 
 
-.proc	negWORD
+.proc	@negWORD
 	lda #$00
 	sub :STACKORIGIN,x
 	sta :STACKORIGIN,x
@@ -52,7 +53,7 @@
 .endp
 
 
-.proc	negCARD
+.proc	@negCARD
 	lda #$00
 	sub :STACKORIGIN,x
 	sta :STACKORIGIN,x
@@ -73,7 +74,7 @@
 .endp
 
 
-.proc	negBYTE1
+.proc	@negBYTE1
 	lda #$00
 	sub :STACKORIGIN-1,x
 	sta :STACKORIGIN-1,x
@@ -94,7 +95,7 @@
 .endp
 
 
-.proc	negWORD1
+.proc	@negWORD1
 	lda #$00
 	sub :STACKORIGIN-1,x
 	sta :STACKORIGIN-1,x
@@ -115,7 +116,7 @@
 .endp
 
 
-.proc	negCARD1
+.proc	@negCARD1
 	lda #$00
 	sub :STACKORIGIN-1,x
 	sta :STACKORIGIN-1,x
@@ -136,28 +137,96 @@
 .endp
 
 
-.proc	negEDX
+.proc	@negAX
 	lda #$00	; minus
-	sub edx
-	sta edx
+	sub :eax
+	sta :eax
 
 	lda #$00
-	sbc edx+1
-	sta edx+1
-
-	lda #$00
-	sbc edx+2
-	sta edx+2
-
-	lda #$00
-	sbc edx+3
-	sta edx+3
+	sbc :eax+1
+	sta :eax+1
 
 	rts
 .endp
 
 
-.proc	negSHORT
+.proc	@negCX
+	lda #$00	; minus
+	sub :ecx
+	sta :ecx
+
+	lda #$00
+	sbc :ecx+1
+	sta :ecx+1
+
+	rts
+.endp
+
+
+.proc	@negEAX
+	lda #$00	; minus
+	sub :eax
+	sta :eax
+
+	lda #$00
+	sbc :eax+1
+	sta :eax+1
+
+	lda #$00
+	sbc :eax+2
+	sta :eax+2
+
+	lda #$00
+	sbc :eax+3
+	sta :eax+3
+
+	rts
+.endp
+
+
+.proc	@negECX
+	lda #$00	; minus
+	sub :ecx
+	sta :ecx
+
+	lda #$00
+	sbc :ecx+1
+	sta :ecx+1
+
+	lda #$00
+	sbc :ecx+2
+	sta :ecx+2
+
+	lda #$00
+	sbc :ecx+3
+	sta :ecx+3
+
+	rts
+.endp
+
+
+.proc	@negEDX
+	lda #$00	; minus
+	sub :edx
+	sta :edx
+
+	lda #$00
+	sbc :edx+1
+	sta :edx+1
+
+	lda #$00
+	sbc :edx+2
+	sta :edx+2
+
+	lda #$00
+	sbc :edx+3
+	sta :edx+3
+
+	rts
+.endp
+
+
+.proc	@negSHORT
 	lda #$00
 	sub :STACKORIGIN,x
 	sta :STACKORIGIN,x
@@ -168,5 +237,3 @@
 
 	rts
 .endp
-
-
