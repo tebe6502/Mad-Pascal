@@ -25,64 +25,51 @@ B	= :ECX
 	php	
 
 	lda A+3				; dividend sign
-	bpl @+
-	
-	lda #$00
-	sub A
-	sta A
+	spl
+	jsr @negEAX
 
-	lda #$00
-	sbc A+1
-	sta A+1
+;	lda #$00
+;	sub A
+;	sta A
+;
+;	lda #$00
+;	sbc A+1
+;	sta A+1
+;
+;	lda #$00
+;	sbc A+2
+;	sta A+2
+;
+;	lda #$00
+;	sbc A+3
+;	sta A+3
 
-	lda #$00
-	sbc A+2
-	sta A+2
-
-	lda #$00
-	sbc A+3
-	sta A+3
-@
 	lda B+3				; divisor sign
-	bpl @+
+	spl
+	jsr @negECX
 
-	lda #$00
-	sub B
-	sta B
+;	lda #$00
+;	sub B
+;	sta B
+;
+;	lda #$00
+;	sbc B+1
+;	sta B+1
+;
+;	lda #$00
+;	sbc B+2
+;	sta B+2
+;
+;	lda #$00
+;	sbc B+3
+;	sta B+3
 
-	lda #$00
-	sbc B+1
-	sta B+1
-
-	lda #$00
-	sbc B+2
-	sta B+2
-
-	lda #$00
-	sbc B+3
-	sta B+3
-@
 	jsr @CARDINAL.DIV
 
 	plp
-	bpl @+
+	spl
+	jmp @negEAX
 
-	lda #$00
-	sub :eax
-	sta :eax
-
-	lda #$00
-	sbc :eax+1
-	sta :eax+1
-
-	lda #$00
-	sbc :eax+2
-	sta :eax+2
-
-	lda #$00
-	sbc :eax+3
-	sta :eax+3
-@
 	rts
 .endp
 
@@ -99,43 +86,45 @@ RESULT	= :EAX+4
 
 	lda A+3				; dividend sign
 	php
-	bpl @+
-	
-	lda #$00
-	sub A
-	sta A
+	spl
+	jsr @negEAX
 
-	lda #$00
-	sbc A+1
-	sta A+1
+;	lda #$00
+;	sub A
+;	sta A
+;
+;	lda #$00
+;	sbc A+1
+;	sta A+1
+;
+;	lda #$00
+;	sbc A+2
+;	sta A+2
+;
+;	lda #$00
+;	sbc A+3
+;	sta A+3
 
-	lda #$00
-	sbc A+2
-	sta A+2
-
-	lda #$00
-	sbc A+3
-	sta A+3
-@
 	lda B+3				; divisor sign
-	bpl @+
+	spl
+	jsr @negECX
 
-	lda #$00
-	sub B
-	sta B
+;	lda #$00
+;	sub B
+;	sta B
+;
+;	lda #$00
+;	sbc B+1
+;	sta B+1
+;
+;	lda #$00
+;	sbc B+2
+;	sta B+2
+;
+;	lda #$00
+;	sbc B+3
+;	sta B+3
 
-	lda #$00
-	sbc B+1
-	sta B+1
-
-	lda #$00
-	sbc B+2
-	sta B+2
-
-	lda #$00
-	sbc B+3
-	sta B+3
-@
 	jsr @CARDINAL.DIV
 
 	plp

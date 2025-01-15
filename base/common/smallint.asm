@@ -48,39 +48,36 @@ B	= :ECX
 
 	lda A+1				; dividend sign
 	bpl @+
-	
-	lda #$00
-	sub A
-	sta A
 
-	lda #$00
-	sbc A+1
-	sta A+1
+	jsr @negAX
+
+;	lda #$00
+;	sub A
+;	sta A
+;
+;	lda #$00
+;	sbc A+1
+;	sta A+1
 @
 	lda B+1				; divisor sign
 	bpl @+
 
-	lda #$00
-	sub B
-	sta B
+	jsr @negCX
 
-	lda #$00
-	sbc B+1
-	sta B+1
+;	lda #$00
+;	sub B
+;	sta B
+;
+;	lda #$00
+;	sbc B+1
+;	sta B+1
 @
 	jsr @WORD.DIV
 
 	plp
-	bpl @+
+	spl
+	jmp @negAX
 
-	lda #$00
-	sub :eax
-	sta :eax
-
-	lda #$00
-	sbc :eax+1
-	sta :eax+1
-@
 	rts
 .endp
 
@@ -98,25 +95,29 @@ RESULT	= :ZTMP
 	lda A+1				; dividend sign
 	php
 	bpl @+
-	
-	lda #$00
-	sub A
-	sta A
 
-	lda #$00
-	sbc A+1
-	sta A+1
+	jsr @negAX
+
+;	lda #$00
+;	sub A
+;	sta A
+;
+;	lda #$00
+;	sbc A+1
+;	sta A+1
 @
 	lda B+1				; divisor sign
 	bpl @+
 
-	lda #$00
-	sub B
-	sta B
+	jsr @negCX
 
-	lda #$00
-	sbc B+1
-	sta B+1
+;	lda #$00
+;	sub B
+;	sta B
+;
+;	lda #$00
+;	sbc B+1
+;	sta B+1
 @
 	jsr @WORD.DIV
 

@@ -8,14 +8,14 @@
 
 	ldy :STACKORIGIN+STACKWIDTH,x
 	spl
-	jsr negSHORT
+	jsr @negSHORT
 
 	lda #$00
 	sta :STACKORIGIN+STACKWIDTH,x
 
 	tya
 	spl
-	jsr negSHORT
+	jmp @negSHORT
 
 	rts
 .endp

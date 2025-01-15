@@ -8,14 +8,14 @@
 
 	ldy :STACKORIGIN+STACKWIDTH*3,x
 	spl
-	jsr negCARD
+	jsr @negCARD
 
 	lda #$00
 	sta :STACKORIGIN,x
 
 	tya
 	spl
-	jsr negCARD
+	jmp @negCARD
 
 	rts
 .endp
@@ -25,14 +25,14 @@
 
 	ldy :STACKORIGIN+STACKWIDTH,x
 	spl
-	jsr negSHORT
+	jsr @negSHORT
 
 	lda #$00
 	sta :STACKORIGIN,x
 
 	tya
 	spl
-	jsr negSHORT
+	jmp @negSHORT
 
 	rts
 .endp
