@@ -14938,8 +14938,8 @@ if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIn
   asm65(#9'.ifdef @VarData');
 
   if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
-   asm65(#9'sta :ecx');
-   asm65(#9'sty :ecx+1');
+   asm65(#9'sta :bp2');
+   asm65(#9'sty :bp2+1');
   end;
 
   asm65('@new'#9'lda <@VarData');			// @AllocMem
@@ -14949,8 +14949,8 @@ if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and Ident[BlockIdentIn
   asm65(#9'jsr @AllocMem');
 
   if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
-   asm65(#9'lda :ecx');
-   asm65(#9'ldy :ecx+1');
+   asm65(#9'lda :bp2');
+   asm65(#9'ldy :bp2+1');
   end;
 
   asm65(#9'eif');
@@ -14975,6 +14975,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
  for ParamIndex := 1 to Types[Ident[BlockIdentIndex].ObjectIndex].NumFields do
   if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = 0 then begin
 
+
     if NumAllocElements > 0 then
      if NumAllocElements > 255 then begin
        asm65(#9'add <'+IntToStr(NumAllocElements));
@@ -14989,8 +14990,9 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
        asm65(#9'iny');
       end;
 
-  asm65(#9'sta ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name);
-  asm65(#9'sty ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name+'+1');
+    asm65(#9'sta ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name);
+    asm65(#9'sty ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name+'+1');
+
 
   if ParamIndex <> Types[Ident[BlockIdentIndex].ObjectIndex].NumFields then begin
 
