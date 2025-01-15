@@ -4544,7 +4544,6 @@ case op of
          asm65(#9'lda #$00');
          asm65(#9'sbc :STACKORIGIN+STACKWIDTH,x');
          asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
          asm65(#9'lda #$00');
          asm65(#9'sbc :STACKORIGIN+STACKWIDTH*2,x');
          asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
@@ -4707,22 +4706,22 @@ case op of
 //      asm65(#9'jsr @FSUB')
 
 	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta FP2MAN0');
+	asm65(#9'sta :FP2MAN0');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta FP2MAN1');
+	asm65(#9'sta :FP2MAN1');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-	asm65(#9'sta FP2MAN2');
+	asm65(#9'sta :FP2MAN2');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-	asm65(#9'sta FP2MAN3');
+	asm65(#9'sta :FP2MAN3');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta FP1MAN0');
+	asm65(#9'sta :FP1MAN0');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta FP1MAN1');
+	asm65(#9'sta :FP1MAN1');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-	asm65(#9'sta FP1MAN2');
+	asm65(#9'sta :FP1MAN2');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-	asm65(#9'sta FP1MAN3');
+	asm65(#9'sta :FP1MAN3');
 
 	asm65(#9'jsr @FSUB');
 
