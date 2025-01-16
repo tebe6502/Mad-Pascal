@@ -392,7 +392,7 @@ var
   OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   Tmp: Int64;
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
-  ch, ch2: Char;
+  ch, ch2, ch_: Char;
   CurToken: Byte;
   StrParams: TArrayString;
 
@@ -1675,8 +1675,13 @@ var
 
       if ch in [':', '>', '<', '.'] then					// Double-character token suspected
 	begin
+	ch_:=ch;
+
 	Line2:=Line;
 	SafeReadChar(ch2);
+
+	ch:=ch_;
+
 	if (ch2 = '=') or
 	   ((ch = '<') and (ch2 = '>')) or
 	   ((ch = '.') and (ch2 = '.')) then begin				// Double-character token found

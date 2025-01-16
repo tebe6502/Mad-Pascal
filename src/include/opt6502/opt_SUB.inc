@@ -402,21 +402,49 @@ begin
 
     if adc_sbc(i+8) and									// adc|sbc				; 8
 
-       lda(i) and									// lda					; 0
+       lda(i) and									// lda					; 0		~lda adr.
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
-       lda(i+2) and									// lda					; 2
+       lda(i+2) and									// lda					; 2		~lda adr.
        sta_stack(i+3) and								// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_stack(i+4) and								// lda :STACKORIGIN			; 4
        add_sub(i+5) and									// add|sub				; 5
-       sta(i+6) and									// sta					; 6
-       lda_stack(i+7) and								// lda :STACKORIGIN+STACKWIDTH		; 7
+       sta_a(i+6) and									// sta					; 6
+       lda_stack(i+7) then								// lda :STACKORIGIN+STACKWIDTH		; 7
 //       adc_sbc(i+8) and								// adc|sbc				; 8
-       sta(i+9) then									// sta					; 9
+//       sta(i+9) then									// sta					; 9
      if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
 	(copy(listing[i+3], 6, 256) = copy(listing[i+7], 6, 256)) then
       begin
 	listing[i+4] := listing[i];
 	listing[i+7] := listing[i+2];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	exit(false);
+      end;
+
+
+    if sbc_stack(i+8) and								// sbc :STACKORIGIN+STACKWIDTH		; 8
+
+       lda(i) and									// lda					; 0		~lda adr.
+       sta_stack(i+1) and								// sta :STACKORIGIN			; 1
+       lda(i+2) and									// lda					; 2		~lda.adr
+       sta_stack(i+3) and								// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda(i+4) and									// lda					; 4		~lda.adr
+       sub_stack(i+5) and								// sub :STACKORIGIN			; 5
+       sta_a(i+6) and									// sta					; 6
+       lda(i+7) then									// lda					; 7		~lda.adr
+//       sbc_stack(i+8) and								// sbc :STACKORIGIN+STACKWIDTH		; 8
+//       sta_a(i+9) then								// sta					; 9
+     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
+	(copy(listing[i+3], 6, 256) = copy(listing[i+8], 6, 256)) then
+      begin
+	listing[i+5] := #9'sub ' + copy(listing[i], 6, 256);
+
+	listing[i+8] := #9'sbc ' + copy(listing[i+2], 6, 256);
 
 	listing[i]   := '';
 	listing[i+1] := '';

@@ -506,7 +506,9 @@ type
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
 
+    {$IFDEF PROFILE}
     mx, tick: QWord;
+    {$ENDIF}
 
     elf: cardinal;
 
@@ -2325,7 +2327,7 @@ end;
 
 
 {
-if (pos('add #$10', listing[i]) > 0) then begin
+if (pos('lda #$04', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -3257,32 +3259,30 @@ begin				// OptimizeASM
 
 	 listing[l]   := #9'lda :ztmp10';
 	 listing[l+1] := #9'bpl @+';
-	 listing[l+2] := #9'sec';
-	 listing[l+3] := #9'lda :eax+1';
-	 listing[l+4] := #9'sbc :ztmp8';
-  	 listing[l+5] := #9'sta :eax+1';
+	 listing[l+2] := #9'lda :eax+1';
+	 listing[l+3] := #9'sub :ztmp8';
+  	 listing[l+4] := #9'sta :eax+1';
 
-	 listing[l+6] := '@';
+	 listing[l+5] := '@';
 
-	 listing[l+7]  := #9'lda :ztmp8';
-	 listing[l+8]  := #9'bpl @+';
-	 listing[l+9]  := #9'sec';
-	 listing[l+10] := #9'lda :eax+1';
-	 listing[l+11] := #9'sbc :ztmp10';
-	 listing[l+12] := #9'sta :eax+1';
+	 listing[l+6] := #9'lda :ztmp8';
+	 listing[l+7] := #9'bpl @+';
+	 listing[l+8] := #9'lda :eax+1';
+	 listing[l+9] := #9'sub :ztmp10';
+	 listing[l+10]:= #9'sta :eax+1';
 
-	 listing[l+13] := '@';
+	 listing[l+11] := '@';
 
-	 listing[l+14] := #9'lda :eax';
-	 listing[l+15] := #9'sta '+GetARG(0, x-1);
-	 listing[l+16] := #9'lda :eax+1';
-	 listing[l+17] := #9'sta '+GetARG(1, x-1);
+	 listing[l+12] := #9'lda :eax';
+	 listing[l+13] := #9'sta '+GetARG(0, x-1);
+	 listing[l+14] := #9'lda :eax+1';
+	 listing[l+15] := #9'sta '+GetARG(1, x-1);
+	 listing[l+16] := #9'lda #$00';
+	 listing[l+17] := #9'sta '+GetARG(2, x-1);
 	 listing[l+18] := #9'lda #$00';
-	 listing[l+19] := #9'sta '+GetARG(2, x-1);
-	 listing[l+20] := #9'lda #$00';
-	 listing[l+21] := #9'sta '+GetARG(3, x-1);
+	 listing[l+19] := #9'sta '+GetARG(3, x-1);
 
-	 inc(l, 22);
+	 inc(l, 20);
 	end;
 
       end else
@@ -3373,38 +3373,36 @@ begin				// OptimizeASM
 
 	listing[l]   := #9'lda :ztmp11';
 	listing[l+1] := #9'bpl @+';
-	listing[l+2] := #9'sec';
-	listing[l+3] := #9'lda :eax+2';
-	listing[l+4] := #9'sbc :ztmp8';
-  	listing[l+5] := #9'sta :eax+2';
-	listing[l+6] := #9'lda :eax+3';
-	listing[l+7] := #9'sbc :ztmp9';
-	listing[l+8] := #9'sta :eax+3';
+	listing[l+2] := #9'lda :eax+2';
+	listing[l+3] := #9'sub :ztmp8';
+  	listing[l+4] := #9'sta :eax+2';
+	listing[l+5] := #9'lda :eax+3';
+	listing[l+6] := #9'sbc :ztmp9';
+	listing[l+7] := #9'sta :eax+3';
 
-	listing[l+9] := '@';
+	listing[l+8] := '@';
 
-	listing[l+10] := #9'lda :ztmp9';
-	listing[l+11] := #9'bpl @+';
-	listing[l+12] := #9'sec';
-	listing[l+13] := #9'lda :eax+2';
-	listing[l+14] := #9'sbc :ztmp10';
-	listing[l+15] := #9'sta :eax+2';
-	listing[l+16] := #9'lda :eax+3';
-	listing[l+17] := #9'sbc :ztmp11';
-	listing[l+18] := #9'sta :eax+3';
+	listing[l+9]  := #9'lda :ztmp9';
+	listing[l+10] := #9'bpl @+';
+	listing[l+11] := #9'lda :eax+2';
+	listing[l+12] := #9'sub :ztmp10';
+	listing[l+13] := #9'sta :eax+2';
+	listing[l+14] := #9'lda :eax+3';
+	listing[l+15] := #9'sbc :ztmp11';
+	listing[l+16] := #9'sta :eax+3';
 
-	listing[l+19] := '@';
+	listing[l+17] := '@';
 
-	listing[l+20] := #9'lda :eax';
-	listing[l+21] := #9'sta '+GetARG(0, x-1);
-	listing[l+22] := #9'lda :eax+1';
-	listing[l+23] := #9'sta '+GetARG(1, x-1);
-	listing[l+24] := #9'lda :eax+2';
-	listing[l+25] := #9'sta '+GetARG(2, x-1);
-	listing[l+26] := #9'lda :eax+3';
-	listing[l+27] := #9'sta '+GetARG(3, x-1);
+	listing[l+18] := #9'lda :eax';
+	listing[l+19] := #9'sta '+GetARG(0, x-1);
+	listing[l+20] := #9'lda :eax+1';
+	listing[l+21] := #9'sta '+GetARG(1, x-1);
+	listing[l+22] := #9'lda :eax+2';
+	listing[l+23] := #9'sta '+GetARG(2, x-1);
+	listing[l+24] := #9'lda :eax+3';
+	listing[l+25] := #9'sta '+GetARG(3, x-1);
 
-	inc(l, 28);
+	inc(l, 26);
 	end;
 
 

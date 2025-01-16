@@ -666,7 +666,9 @@ begin
       end;
 
 
-    if ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
+    if rol_a(i+10) and										// rol @				; 10
+
+       ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
        lda_adr(i+1) and										// lda adr.				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
 //       ldy(i+3) and										// ldy I				; 3
@@ -676,7 +678,7 @@ begin
        asl_stack(i+7) and									// asl :STACKORIGIN+10			; 7
        rol_a(i+8) and										// rol @				; 8
        asl_stack(i+9) and									// asl :STACKORIGIN+10			; 9
-       rol_a(i+10) and										// rol @				; 10
+//       rol_a(i+10) and									// rol @				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+:STACKWIDTH+10	; 11
        lda_stack(i+12) then									// lda :STACKORIGIN+9			; 12
      if (copy(listing[i+2], 6, 256) <> copy(listing[i+5], 6, 256)) and
@@ -694,7 +696,9 @@ begin
 
 
 
-    if ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
+    if rol_a(i+10) and										// rol @				; 10
+
+       ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
        lda_adr(i+1) and										// lda adr.				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH+9	; 2
 //       ldy(i+3) and										// ldy I				; 3
@@ -704,7 +708,7 @@ begin
        asl_stack(i+7) and									// asl :STACKORIGIN+10			; 7
        rol_a(i+8) and										// rol @				; 8
        asl_stack(i+9) and									// asl :STACKORIGIN+10			; 9
-       rol_a(i+10) and										// rol @				; 10
+//       rol_a(i+10) and									// rol @				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+:STACKWIDTH+10	; 11
        lda_stack(i+12) and									// lda :STACKORIGIN+9			; 12
        add_stack(i+13) and									// add|sub :STACKORIGIN+10		; 13
