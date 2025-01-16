@@ -10,7 +10,7 @@ begin
 // -----------------------------------------------------------------------------
 
   if lda_a(i) and									// lda :ztmp9		; 0
-     (listing[i+1] = #9'bpl @+') and							// bpl @+		; 1
+     bpl_a(i+1) and									// bpl @+		; 1
      lda_a(i+2) and									// lda 			; 2
      sub(i+3) and									// sub 			; 3
      (listing[i+4] = #9'sta :eax+2') and						// sta :eax+2		; 4
@@ -279,7 +279,7 @@ begin
     if lda_eax_1(i+9) and 								// lda :eax+1				; 9
 
        lda_a(i) and									// lda :ztmp11				; 0
-       (listing[i+1] = #9'bpl @+') and							// bpl @+				; 1
+       bpl_a(i+1) and									// bpl @+				; 1
        (listing[i+2] = #9'lda :eax+2') and						// lda :eax+2 				; 2
        sub(i+3) and									// sub 					; 3
        (listing[i+4] = #9'sta :eax+2') and						// sta :eax+2				; 4
@@ -309,7 +309,7 @@ begin
 
     if (l = i + 8) and
        lda_a(i) and									// lda :ztmp				; 0
-       (listing[i+1] = #9'bpl @+') and							// bpl @+				; 1
+       bpl_a(i+1) and									// bpl @+				; 1
        lda_eax_1(i+2) and								// lda :eax+1 				; 2
        (pos(#9'sub :ztmp', listing[i+3]) = 1) and					// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
@@ -330,7 +330,7 @@ begin
 
     if (l = i + 10) and
        lda_a(i) and									// lda :ztmp				; 0
-       (listing[i+1] = #9'bpl @+') and							// bpl @+				; 1
+       bpl_a(i+1) and									// bpl @+				; 1
        lda_eax_1(i+2) and								// lda :eax+1 				; 2
        (pos(#9'sub :ztmp', listing[i+3]) = 1) and					// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
@@ -353,7 +353,7 @@ begin
 
     if (l = i + 10) and
        lda_a(i) and									// lda :ztmp				; 0
-       (listing[i+1] = #9'bpl @+') and							// bpl @+				; 1
+       bpl_a(i+1) and									// bpl @+				; 1
        lda_eax_1(i+2) and								// lda :eax+1 				; 2
        (pos(#9'sub :ztmp', listing[i+3]) = 1) and					// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
@@ -417,7 +417,7 @@ begin
     if sta_eax_1(i+4) and								// sta :eax+1				; 4
 
        lda_a(i) and									// lda :ztmp8				; 0
-       (listing[i+1] = #9'bpl @+') and							// bpl @+				; 1
+       bpl_a(i+1) and									// bpl @+				; 1
        lda_a(i+2) and									// lda  				; 2
        sub(i+3) and									// sub 					; 3
 //       sta_eax_1(i+4) and								// sta :eax+1				; 4

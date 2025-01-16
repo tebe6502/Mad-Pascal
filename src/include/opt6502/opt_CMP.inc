@@ -319,17 +319,17 @@ begin
 
 
     if (cmp(i) or lda(i) or and_ora_eor(i)) and							// cmp|lda|and|ora|eor			; 0
-       (beq(i+1) or bne(i+1) or bcc(i+1)) and							// beq|bne|bcc @+			; 1
+       (beq_a(i+1) or bne_a(i+1) or bcc_a(i+1)) and						// beq|bne|bcc @+			; 1
        dey(i+2) and										// dey					; 2
        lab_a(i+3) and	 									//@					; 3
        tya(i+4) and										// tya					; 4
        jeq(i+5) then										// jeq					; 5
      begin
 
-       if listing[i+1] = #9'bcc @+' then
+       if bcc_a(i+1) then
         listing[i+1] := #9'jcs ' + copy(listing[i+5], 6, 256)
        else
-       if listing[i+1] = #9'bne @+' then
+       if bne_a(i+1) then
         listing[i+1] := #9'jeq ' + copy(listing[i+5], 6, 256)
        else
         listing[i+1] := #9'jne ' + copy(listing[i+5], 6, 256);
@@ -1287,7 +1287,7 @@ begin
        lda(i+6) and										// lda 					; 6
 //       cmp_stack(i+7) and									// cmp :STACKORIGIN+9			; 7
        seq(i+8) and										// seq					; 8
-       ((listing[i+9] = #9'bpl @+') or (listing[i+9] = #9'bcs @+')) and				// bpl|bcs @+				; 9
+       (bpl_a(i+9) or bcs_a(i+9)) and								// bpl|bcs @+				; 9
        jmp(i+10) then										// jmp l_				; 10
      if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) then
       begin

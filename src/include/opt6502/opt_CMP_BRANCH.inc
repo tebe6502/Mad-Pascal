@@ -11,7 +11,7 @@ begin
 
     if lda(i) and										// lda			; 0	>= 128
        (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
-       (listing[i+2] = #9'bcs @+') and								// bcs @+		; 2
+       bcs_a(i+2) and										// bcs @+		; 2
        dey(i+3) then										// dey			; 3
      begin
 	listing[i+1] := #9'bmi @+';
@@ -23,7 +23,7 @@ begin
 
     if lda(i) and										// lda			; 0	< 128
        (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
-       (listing[i+2] = #9'bcc @+') and								// bcc @+		; 2
+       bcc_a(i+2) and										// bcc @+		; 2
        dey(i+3) then										// dey			; 3
      begin
 	listing[i+1] := #9'bpl @+';
@@ -36,7 +36,7 @@ begin
     if lda(i) and										// lda			; 0	> 127
        (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
        seq(i+2) and										// seq			; 2
-       (listing[i+3] = #9'bcs @+') and								// bcs @+		; 3
+       bcs_a(i+3) and										// bcs @+		; 3
        dey(i+4) then										// dey			; 4
      begin
 	listing[i+1] := #9'bmi @+';
@@ -49,7 +49,7 @@ begin
 
     if lda(i) and										// lda			; 0	<= 127
        (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
-       (listing[i+2] = #9'bcc @+') and								// bcc @+		; 2
+       bcc_a(i+2) and										// bcc @+		; 2
        beq(i+3) and										// beq @+		; 3
        dey(i+4) then										// dey			; 4
      begin
@@ -289,7 +289,7 @@ begin
 
     if (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
-       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -311,7 +311,7 @@ begin
 
     if (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
-       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -332,7 +332,7 @@ begin
 
 
     if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
-       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -352,7 +352,7 @@ begin
 
 
     if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -372,7 +372,7 @@ begin
 
 
     if (SKIP(i) = false) and 									//~SKIP			; 0		integer <= 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        ora(i+3) and										// ora			; 3
        ora(i+4) and										// ora			; 4
@@ -398,7 +398,7 @@ begin
 
 
     if (SKIP(i) = false) and 									//~SKIP			; 0		while integer > 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        ora(i+3) and										// ora			; 3
        ora(i+4) and										// ora			; 4
@@ -425,7 +425,7 @@ begin
 
 
     if (SKIP(i) = false) and 									//~SKIP			; 0		integer > 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        ora(i+3) and										// ora			; 3
        ora(i+4) and										// ora			; 4
@@ -455,7 +455,7 @@ begin
 
 
     if (SKIP(i) = false) and 									//~SKIP			; 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        seq(i+3) and										// seq			; 3
        dey(i+4) and										// dey			; 4
@@ -523,7 +523,7 @@ begin
 
 
     if (ENDL(i) = false) and									//~.ENDL		; 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        beq(i+2) and										// beq @+		; 2
        dey(i+3) and										// dey			; 3
        lab_a(i+4) and										//@			; 4
@@ -545,7 +545,7 @@ begin
 
 
     if (ENDL(i) = false) and									//~.ENDL		; 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        beq(i+2) and										// beq @+		; 2
        dey(i+3) and										// dey			; 3
        lab_a(i+4) and										//@			; 4
@@ -566,7 +566,7 @@ begin
 
 
     if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -586,7 +586,7 @@ begin
 
 
     if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
-       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -606,7 +606,7 @@ begin
 
 
     if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
-       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -627,7 +627,7 @@ begin
 
     if (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
-       (listing[i+1] = #9'bcs @+') and								// bcs @+		; 1
+       bcs_a(i+1) and										// bcs @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -649,7 +649,7 @@ begin
 
     if (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
-       (listing[i+1] = #9'bcs @+') and								// bcs @+		; 1
+       bcs_a(i+1) and										// bcs @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
@@ -670,7 +670,7 @@ begin
 
 
     if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
-       (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       bcc_a(i) and										// bcc @+		; 0
        dey(i+1) and										// dey			; 1
        lab_a(i+2) and										//@			; 2
        tya(i+3) and										// tya			; 3
@@ -690,7 +690,7 @@ begin
 
 
     if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
-       (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       bcc_a(i) and										// bcc @+		; 0
        dey(i+1) and										// dey			; 1
        lab_a(i+2) and										//@			; 2
        tya(i+3) and										// tya			; 3
@@ -710,7 +710,7 @@ begin
 
 
     if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
-       (listing[i] = #9'bcs @+') and								// bcs @+		; 0
+       bcs_a(i) and										// bcs @+		; 0
        dey(i+1) and										// dey			; 1
        lab_a(i+2) and										//@			; 2
        tya(i+3) and										// tya			; 3
@@ -730,7 +730,7 @@ begin
 
 
     if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
-       (listing[i] = #9'bcs @+') and								// bcs @+		; 0
+       bcs_a(i) and										// bcs @+		; 0
        dey(i+1) and										// dey			; 1
        lab_a(i+2) and										//@			; 2
        tya(i+3) and										// tya			; 3
@@ -750,7 +750,7 @@ begin
 
 
     if (ENDL(i-1) = false) and
-       (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       bcc_a(i) and										// bcc @+		; 0
        beq(i+1) and										// beq @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
@@ -773,7 +773,7 @@ begin
 
 
     if (ENDL(i-1) = false) and
-       (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       bcc_a(i) and										// bcc @+		; 0
        beq(i+1) and										// beq @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
@@ -814,7 +814,7 @@ begin
 
     if (SKIP(i-1) = false) and
        cmp(i) and										// cmp			; 0
-       (listing[i+1] = #9'bcc @+') and								// bcc @+		; 1
+       bcc_a(i+1) and										// bcc @+		; 1
        jmp(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										// @			; 3
      begin
@@ -827,7 +827,7 @@ begin
 
 
     if //(listing[i] = #9'.ENDL') and								//
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        beq(i+2) and										// beq @+		; 2
        jmp(i+3) and										// jmp l_		; 3
        lab_a(i+4) then										//@			; 4
@@ -841,7 +841,7 @@ begin
 
     if //(listing[i] = #9'.ENDL') and								//
        seq(i+1) and										// seq			; 1
-       (listing[i+2] = #9'bpl @+') and								// bpl @+		; 2
+       bpl_a(i+2) and										// bpl @+		; 2
        jmp(i+3) and										// jmp l_		; 3
        lab_a(i+4) then										//@			; 4
       begin
@@ -855,7 +855,7 @@ begin
 
 
     if (SKIP(i) = false) and									//
-       (listing[i+1] = #9'bpl @+') and								// bpl @+		; 1
+       bpl_a(i+1) and										// bpl @+		; 1
        jmp(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
       begin
@@ -868,7 +868,7 @@ begin
 
 
     if (SKIP(i) = false) and									//
-       (listing[i+1] = #9'bmi @+') and								// bmi @+		; 1
+       bmi_a(i+1) and										// bmi @+		; 1
        jmp(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
       begin
@@ -880,7 +880,7 @@ begin
       end;
 
 
-    if (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+    if bcc_a(i) and										// bcc @+		; 0
        beq(i+1) and										// beq @+		; 1
        jmp(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
@@ -906,7 +906,7 @@ begin
 
 
     if seq(i) and										// seq			; 0
-       (listing[i+1] = #9'bcs @+') and								// bcs @+		; 1
+       bcs_a(i+1) and										// bcs @+		; 1
        jmp(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
      begin
@@ -920,7 +920,7 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       (listing[i] = #9'bcs @+') and								// bcs @+		; 0
+       bcs_a(i) and										// bcs @+		; 0
        jmp(i+1) and										// jmp l_		; 1
        lab_a(i+2) then										//@			; 2
      begin
@@ -933,7 +933,7 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       (listing[i] = #9'bcc @+') and								// bcc @+		; 0
+       bcc_a(i) and										// bcc @+		; 0
        jmp(i+1) and										// jmp l_		; 1
        lab_a(i+2) then										//@			; 2
      begin
@@ -1185,12 +1185,12 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       ((listing[i] = #9'bcs @+') or (listing[i] = #9'bcc @+')) and				// bcs|bcc @+			; 0
+       (bcs_a(i) or bcc_a(i)) and								// bcs|bcc @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (jmp(i+3) = false) then									//~jmp l_			; 3
       begin
-        if (listing[i] = #9'bcs @+') then
+        if bcs_a(i) then
 	 listing[i]   := #9'jcs ' + copy(listing[i+2], 7, 256)
         else
 	 listing[i]   := #9'jcc ' + copy(listing[i+2], 7, 256);
@@ -1203,12 +1203,12 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       ((listing[i] = #9'bpl @+') or (listing[i] = #9'bmi @+')) and				// bpl|bmi @+			; 0
+       (bpl_a(i) or bmi(i)) and									// bpl|bmi @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (jmp(i+3) = false) then									//~jmp l_			; 3
       begin
-        if (listing[i] = #9'bpl @+') then
+        if bpl_a(i) then
 	 listing[i]   := #9'jpl ' + copy(listing[i+2], 7, 256)
         else
 	 listing[i]   := #9'jmi ' + copy(listing[i+2], 7, 256);
