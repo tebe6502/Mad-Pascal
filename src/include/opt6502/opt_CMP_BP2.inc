@@ -37,13 +37,13 @@ begin
        iny(i+9) and										// iny					; 9
        lda_bp2_y(i+10) and 									// lda (:bp2),y				; 10
        cmp(i+11) and										// cmp					; 11
-       (listing[i+12] = #9'bne @+') and								// bne @+				; 12
+       bne_a(i+12) and										// bne @+				; 12
        lda_stack(i+13) and									// lda :STACKORIGIN+STACKWIDTH*2	; 13
        cmp(i+14) and										// cmp					; 14
-       (listing[i+15] = #9'bne @+') and								// bne @+				; 15
+       bne_a(i+15) and										// bne @+				; 15
        lda_stack(i+16) and									// lda :STACKORIGIN+STACKWIDTH		; 16
        cmp(i+17) and										// cmp					; 17
-       (listing[i+18] = #9'bne @+') and								// bne @+				; 18
+       bne_a(i+18) and										// bne @+				; 18
        lda_stack(i+19) and									// lda :STACKORIGIN			; 19
        cmp(i+20) then										// cmp					; 20
 
@@ -197,7 +197,7 @@ begin
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH+10	; 11
        lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH+10	; 12
        cmp_stack(i+13) and									// cmp :STACKORIGIN+STACKWIDTH+9	; 13
-       (listing[i+14] = #9'bne @+') and								// bne @+				; 14
+       bne_a(i+14) and										// bne @+				; 14
        lda_stack(i+15) and									// lda :STACKORIGIN+10			; 15
        cmp_stack(i+16) then									// cmp :STACKORIGIN+9			; 16
     if (copy(listing[i+2], 6, 256) = copy(listing[i+16], 6, 256)) and
@@ -237,7 +237,7 @@ begin
        iny(i+3) and										// iny					; 3
        lda_bp2_y(i+4) and 									// lda (:bp2),y				; 4
        cmp(i+5) and										// cmp					; 5
-       (listing[i+6] = #9'bne @+') and								// bne @+				; 6
+       bne_a(i+6) and										// bne @+				; 6
        lda_stack(i+7) and									// lda :STACKORIGIN			; 7
        cmp(i+8) then										// cmp					; 8
 //       lab_a(i+9) then									//@					; 9
@@ -271,7 +271,7 @@ begin
        iny(i+3) and										// iny					; 3
        lda_a(i+4) and 										// lda					; 4
        cmp_bp2_y(i+5) and									// cmp (:bp2),y				; 5
-       (listing[i+6] = #9'bne @+') and								// bne @+				; 6
+       bne_a(i+6) and										// bne @+				; 6
        lda_a(i+7) and										// lda					; 7
        cmp_stack(i+8) then									// cmp :STACKORIGIN			; 8
 //       lab_a(i+9) then									//@					; 9

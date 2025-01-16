@@ -15,7 +15,7 @@ begin
        ldy_1(i+1) and										// ldy #1		; 1
        lda_val(i+2) and										// lda W		; 2
        cmp_stack(i+3) and									// cmp :STACKORIGIN	; 3
-       ((listing[i+4] = #9'beq @+') or (listing[i+4] = #9'bne @+')) and				// beq|bne @+		; 4
+       (beq_a(i+4) or bne_a(i+4)) and								// beq|bne @+		; 4
        dey(i+5) and										// dey			; 5
        lab_a(i+6) and										//@			; 6
        (tya(i+7) or sty(i+7)) then								// tya|sty		; 7
@@ -35,7 +35,7 @@ begin
        ldy_1(i+1) and										// ldy #1		; 1
        lda_stack(i+2) and									// lda :STACKORIGIN	; 2
        and_ora_eor(i+3) and									// ora:and:eor		; 3
-       ((listing[i+4] = #9'beq @+') or (listing[i+4] = #9'bne @+')) and				// beq|bne @+		; 4
+       (beq_a(i+4) or bne_a(i+4)) and								// beq|bne @+		; 4
        dey(i+5) and										// dey			; 5
        lab_a(i+6) and										//@			; 6
        (tya(i+7) or sty(i+7)) then								// tya|sty		; 7
@@ -50,11 +50,11 @@ begin
     if ldy_1(i) and										// ldy #1		; 0
        lda_val(i+1) and										// lda W+1		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
-       (listing[i+3] = #9'bne @+') and								// bne @+		; 3
+       bne_a(i+3) and										// bne @+		; 3
        lda_a(i+4) and										// lda W		; 4
        cmp_im_0(i+5) and									// cmp #$00		; 5
        lab_a(i+6) and										//@			; 6
-       ((listing[i+7] = #9'beq @+') or (listing[i+7] = #9'bne @+')) and				// beq|bne @+		; 7
+       (beq_a(i+7) or bne_a(i+7)) and								// beq|bne @+		; 7
        dey(i+8) and										// dey			; 8
        lab_a(i+9) and										//@			; 9
        (tya(i+10) or sty(i+10)) and								// tya|sty		; 10

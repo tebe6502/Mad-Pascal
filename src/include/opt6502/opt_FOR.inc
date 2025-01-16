@@ -111,7 +111,7 @@
        if (l = 7) and
           lda_a(0) and
           cmp_im_0(1) and
-	  (listing[2] = #9'bne @+') and
+	  bne_a(2) and
           lda_a(3) and
           cmp_im_0(4) and
           lab_a(5) and
@@ -130,7 +130,7 @@
        if (l = 7) and					// SHORTINT - UP
           lda_a(0) and (lda_im(0) = false) and
           sub_im(1) and
-	  (listing[2] = #9'svc') and
+	  svc(2) and
           (listing[3] = #9'eor #$80') and
           (listing[4] = #9'bmi *+7') and
           (listing[5] = #9'beq *+5') and
@@ -152,7 +152,7 @@
        if (l = 6) and					// SHORTINT - DOWN
           lda_a(0) and (lda_im(0) = false) and
           sub_im(1) and
-	  (listing[2] = #9'svc') and
+	  svc(2) and
           (listing[3] = #9'eor #$80') and
           (listing[4] = #9'bpl *+5') and
 	  jmp(5) then
@@ -165,7 +165,7 @@
        if (l = 9) and					// WORD #
           lda_a(0) and
           cmp_im(1) and
-	  (listing[2] = #9'bne @+') and
+	  bne_a(2) and
           lda_a(3) and
           cmp_im(4) and
           lab_a(5) and
@@ -203,7 +203,7 @@
        if (l = 9) and					// WORD zamien miejscami
           lda_a(0) and
           cmp(1) and (cmp_im(1) = false) and
-	  (listing[2] = #9'bne @+') and
+	  bne_a(2) and
           lda_a(3) and
           cmp(4) and (cmp_im(4) = false) and
           lab_a(5) and
@@ -230,13 +230,13 @@
        if (l = 15) and					// CARDINAL zamien miejscami
           lda_a(0) and
           cmp(1) and (cmp_im(1) = false) and
-	  (listing[2] = #9'bne @+') and
+	  bne_a(2) and
           lda_a(3) and
           cmp(4) and (cmp_im(4) = false) and
-	  (listing[5] = #9'bne @+') and
+	  bne_a(5) and
           lda_a(6) and
           cmp(7) and (cmp_im(7) = false) and
-	  (listing[8] = #9'bne @+') and
+	  bne_a(8) and
           lda_a(9) and
           cmp(10) and (cmp_im(10) = false) and
           lab_a(11) and
@@ -270,13 +270,13 @@
        if (l = 13) and
           lda_a(0) and
           cmp_im_0(1) and
-	  (listing[2] = #9'bne @+') and
+	  bne_a(2) and
           lda_a(3) and
           cmp_im_0(4) and
-	  (listing[5] = #9'bne @+') and
+	  bne_a(5) and
           lda_a(6) and
           cmp_im_0(7) and
-	  (listing[8] = #9'bne @+') and
+	  bne_a(8) and
           lda_a(9) and
           cmp_im_0(10) and
           lab_a(11) and
@@ -301,13 +301,13 @@
        if (l = 15) and
           lda_a(0) and
           (listing[1] = #9'cmp #$FF') and
-	  (listing[2] = #9'bne @+') and
+	  bne_a(2) and
           lda_a(3) and
           (listing[4] = #9'cmp #$FF') and
-	  (listing[5] = #9'bne @+') and
+	  bne_a(5) and
           lda_a(6) and
           (listing[7] = #9'cmp #$FF') and
-	  (listing[8] = #9'bne @+') and
+	  bne_a(8) and
           lda_a(9) and
           (listing[10] = #9'cmp #$FF') and
           lab_a(11) and
