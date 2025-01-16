@@ -411,7 +411,7 @@ begin
 
 
     if lda(i) and										// lda :ztmp8			; 0
-       (listing[i+1] = #9'bpl @+') and								// bpl @+			; 1
+       bpl_a(i+1) and										// bpl @+			; 1
        lda(i+2) and										// lda  			; 2
        sub(i+3) and										// sub 				; 3
        sta_im_0(i+4) and									// sta #$00			; 4

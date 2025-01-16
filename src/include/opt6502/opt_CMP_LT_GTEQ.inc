@@ -289,7 +289,7 @@ begin
 
     if ldy_1(i) and 										// ldy #1		; 0	BOOL := SHORTINT < 0
        lda_val(i+1) and										// lda			; 1	BOOL := SMALLINT < 0
-       (listing[i+2] = #9'bmi @+') and								// bmi @+		; 2	BOOL := INTEGER < 0
+       bmi_a(i+2) and										// bmi @+		; 2	BOOL := INTEGER < 0
        dey(i+3) and										// dey			; 3
        lab_a(i+4) and										//@			; 4
        tya(i+5) and										// tya			; 5
@@ -373,7 +373,7 @@ begin
 
 
     if ENDL(i+15) and										// .ENDL		; 15
-       bpl(i+16) and										// bmi			; 16
+       bpl(i+16) and										// bpl			; 16
        dey(i+17) and										// dey			; 17
        lab_a(i+18) and										//@			; 18
        (sty(i+19) or tya(i+19)) and								// sty|tya		; 19

@@ -1415,6 +1415,26 @@ var inxUse, found: Boolean;
      Result := listing[i] = #9'beq @+'
    end;
 
+   function BCC_A(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'bcc @+'
+   end;
+
+   function BCS_A(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'bcs @+'
+   end;
+
+   function BPL_A(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'bpl @+'
+   end;
+
+   function BMI_A(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'bmi @+'
+   end;
+
    function SEQ(i: integer): Boolean;
    begin
      Result := listing[i] = #9'seq'
