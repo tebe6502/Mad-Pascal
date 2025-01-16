@@ -224,14 +224,16 @@ begin
      end;
 
 
-    if mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
+    if ldy_stack(i+7) and 									// ldy :STACKORIGIN,x			; 7
+
+       mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
        lda_bp2(i+1) and										// lda :bp2				; 1
        add_im(i+2) and (pos('-DATAORIGIN', listing[i+2]) > 0) and				// add #CONTEXT.STATE-DATAORIGIN	; 2
        sta_bp2(i+3) and										// sta :bp2				; 3
        lda_bp2_1(i+4) and									// lda :bp2+1				; 4
        adc_im_0(i+5) and									// adc #$00				; 5
-       sta_bp2_1(i+6) and									// sta :bp2+1				; 6
-       ldy_stack(i+7) then 									// ldy :STACKORIGIN,x			; 7
+       sta_bp2_1(i+6) then									// sta :bp2+1				; 6
+//       ldy_stack(i+7) then 									// ldy :STACKORIGIN,x			; 7
      begin
 
       for p:=i-1 downto 0 do
@@ -269,13 +271,15 @@ begin
      end;
 
 
-    if lda_a(i) and										// lda					; 0
+    if ldy_stack(i+6) and									// ldy :STACKORIGIN,x			; 6
+
+       lda_a(i) and										// lda					; 0
        add_sub_val(i+1) and									// add|sub ~:STACKORIGIN		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        lda_a(i+3) and										// lda					; 3
        adc_sbc(i+4) and										// adc|sbc				; 4
        sta_a(i+5) and										// sta :STACKORIGIN+STACKWIDTH,x	; 5
-       ldy_stack(i+6) and									// ldy :STACKORIGIN,x			; 6
+//       ldy_stack(i+6) and									// ldy :STACKORIGIN,x			; 6
        (SKIP(i+7) = false) then									//~SKIP					; 7
      if copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256) then
      begin
