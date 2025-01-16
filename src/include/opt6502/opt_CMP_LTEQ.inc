@@ -197,7 +197,7 @@ begin
        cmp(i+4) and (cmp_im(i+4) = false) and							// cmp W		; 4
        lab_a(i+5) and										//@			; 5
        (listing[i+6] = #9'bcc @+') and								// bcc @+		; 6
-       (listing[i+7] = #9'beq @+') and								// beq @+		; 7
+       beq_a(i+7) and								// beq @+		; 7
        dey(i+8) and										// dey			; 8
        lab_a(i+9) then 										//@			; 9
       begin
@@ -244,7 +244,7 @@ begin
        cmp_im(i+4) and										// cmp #		; 4
        lab_a(i+5) and										//@			; 5
        (listing[i+6] = #9'bcc @+') and								// bcc @+		; 6
-       (listing[i+7] = #9'beq @+') and								// beq @+		; 7
+       beq_a(i+7) and										// beq @+		; 7
        dey(i+8) and										// dey			; 8
        lab_a(i+9) and 										//@			; 9
        tya(i+10) and										// tya			; 10
@@ -445,7 +445,7 @@ begin
 
     if ENDL(i+15) and										// .ENDL		; 15
        (listing[i+16] = #9'bmi @+') and								// bmi @+		; 16
-       (listing[i+17] = #9'beq @+') and								// beq @+		; 17
+       beq_a(i+17) and										// beq @+		; 17
        dey(i+18) and										// dey			; 18
        lab_a(i+19) and										//@			; 19
        (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
@@ -518,7 +518,7 @@ begin
 
     if ENDL(i+15) and										// .ENDL		; 15
        (listing[i+16] = #9'bmi @+') and								// bmi @+		; 16
-       (listing[i+17] = #9'beq @+') and								// beq @+		; 17
+       beq_a(i+17) and										// beq @+		; 17
        dey(i+18) and										// dey			; 18
        lab_a(i+19) and										//@			; 19
        (sty(i+20) or tya(i+20)) and								// sty|tya		; 20
@@ -569,7 +569,7 @@ begin
 
     if ENDL(i+22) and										// .ENDL		; 22
        (listing[i+23] = #9'bmi @+') and								// bmi @+		; 23
-       (listing[i+24] = #9'beq @+') and								// beq @+		; 24
+       beq_a(i+24) and										// beq @+		; 24
        dey(i+25) and										// dey			; 25
        lab_a(i+26) and										//@			; 26
        (sty(i+27) or tya(i+27)) and								// sty|tya		; 27
@@ -658,7 +658,7 @@ begin
 
     if ENDL(i+22) and										// .ENDL		; 22
        (listing[i+23] = #9'bmi @+') and								// bmi @+		; 23
-       (listing[i+24] = #9'beq @+') and								// beq @+		; 24
+       beq_a(i+24) and										// beq @+		; 24
        dey(i+25) and										// dey			; 25
        lab_a(i+26) and										//@			; 26
        tya(i+27) and										// tya			; 27

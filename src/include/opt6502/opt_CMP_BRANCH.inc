@@ -248,7 +248,7 @@ begin
      end;
 
 
-    if (listing[i] = #9'bne @+') and								// bne @+		; 0
+    if bne_a(i) and										// bne @+		; 0
        lda_a(i+1) and										// lda			; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
        lab_a(i+3) and										//@			; 3
@@ -267,7 +267,7 @@ begin
 
     if (ENDL(i-1) = false) and
        smi(i) and										// smi			; 0
-       (listing[i+1] = #9'bne @+') and								// bne @+		; 1
+       bne_a(i+1) and										// bne @+		; 1
        dey(i+2) and										// dey			; 2
        lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4

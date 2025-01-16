@@ -16,13 +16,13 @@ begin
        jeq(i+13) and										// jeq l_		; 13
 
        lda_a(i) and										// lda			; 0	CARDINAL > 0
-       (listing[i+1] = #9'bne @+') and								// bne @+		; 1
+       bne_a(i+1) and										// bne @+		; 1
        dey(i+2) and										// dey			; 2
        lda_a(i+3) and										// lda			; 3
-       (listing[i+4] = #9'bne @+') and								// bne @+		; 4
+       bne_a(i+4) and										// bne @+		; 4
        dey(i+5) and										// dey			; 5
        lda_a(i+6) and										// lda			; 6
-       (listing[i+7] = #9'bne @+') and								// bne @+		; 7
+       bne_a(i+7) and										// bne @+		; 7
        dey(i+8) and										// dey			; 8
        lda_a(i+9) and										// lda			; 9
        cmp_im_0(i+10) then									// cmp #$00		; 10
@@ -124,7 +124,7 @@ begin
     if ldy_1(i) and										// ldy #1		; 0	BOOL := WORD >
        lda_val(i+1) and										// lda W+1		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
-       (listing[i+3] = #9'bne @+') and								// bne @+		; 3
+       bne_a(i+3) and										// bne @+		; 3
        lda_a(i+4) and										// lda W		; 4
        cmp(i+5) and (cmp_im_0(i+5) = false) and							// cmp			; 5
        lab_a(i+6) and										//@			; 6

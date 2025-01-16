@@ -1410,6 +1410,11 @@ var inxUse, found: Boolean;
      Result := listing[i] = #9'bne @+'
    end;
 
+   function BEQ_A(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'beq @+'
+   end;
+
    function SEQ(i: integer): Boolean;
    begin
      Result := listing[i] = #9'seq'

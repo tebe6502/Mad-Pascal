@@ -167,7 +167,6 @@ Contributors:
 
 *)
 
-
 program MADPASCAL;
 
 {$i define.inc}
@@ -181,37 +180,6 @@ uses
 
 	Common, Messages, Scanner, Parser, Optimize, Diagnostic, MathEvaluate;
 
-{
-function Tab2Space(a: string; spc: byte = 8): string;
-var column, nextTabStop: integer;
-    ch: char;
-begin
-
- Result := '';
- column:=0;
-
- for ch in a do
-  case ch of
-
-   #9:
-	begin
-		nextTabStop := (column + spc) div spc * spc;
-		while column <> nextTabStop do begin Result := Result + ' '; inc(column) end;
-	end;
-
-   CR, LF:
-	begin
-		Result := Result + ch;
-		column:=0;
-        end;
-
-  else
-		Result := Result + ch;
-		inc(column);
-  end;
-
-end;
-}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -224,7 +192,7 @@ begin
 Result := 0;
 
   for IdentIndex := 1 to NumIdent do
-    if (Ident[IdentIndex].Name = 'RESULT') and (Ident[IdentIndex].Block = ProcAsBlock) then exit(IdentIndex);
+    if (Ident[IdentIndex].Block = ProcAsBlock)  and (Ident[IdentIndex].Name = 'RESULT') then exit(IdentIndex);
 
 end;
 
