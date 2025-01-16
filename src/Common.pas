@@ -557,12 +557,16 @@ var
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt, debug_cnt,
+  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   iOut: integer = -1;
 
   start_time: QWord;
+
+  {$IFDEF PROFILE}
+  mxTick: QWord;
+  {$ENDIF}
 
   CODEORIGIN_BASE: integer = -1;
 

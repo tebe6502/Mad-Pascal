@@ -506,6 +506,8 @@ type
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
 
+    mx, tick: QWord;
+
     elf: cardinal;
 
     listing, listing_tmp: TListing;
@@ -2323,7 +2325,7 @@ end;
 
 
 {
-if (pos('TBL+1', listing[i]) > 0) then begin
+if (pos('add #$10', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -2527,9 +2529,20 @@ end;
 
  begin			// OptimizeAssignment
 
+
+  {$IFDEF PROFILE}
+  mx:=0;
+  tick:=GetTickCount64;
+  {$ENDIF}
+
   repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+
+  {$IFDEF PROFILE}
+  tick:=GetTickCount64-tick;
+  if tick > mxTick then begin mxTick:=tick; if mxTick>0 then writeln(mxTick) end;
+  {$ENDIF}
 
  end;
 
