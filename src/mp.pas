@@ -15221,8 +15221,7 @@ if yes then begin
 
  end;
 
-
-asm65('@main');
+ asm65('@main');
 end;
 
 
@@ -16620,9 +16619,10 @@ while Tok[i].Kind in
 OutputDisabled := (Pass = CODEGENERATIONPASS) and (BlockStack[BlockStackTop] <> 1) and (not Ident[BlockIdentIndex].IsNotDead);
 
 
-if not isAsm then begin
- GenerateDeclarationEpilog;  // Make jump to block entry point
+// asm65('@main');
 
+if not isAsm then begin
+  GenerateDeclarationEpilog;  // Make jump to block entry point
 
   if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
    if LIBRARYTOK_USE and (Tok[i].Kind <> BEGINTOK) then
