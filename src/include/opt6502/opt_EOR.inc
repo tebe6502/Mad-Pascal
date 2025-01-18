@@ -364,11 +364,23 @@ begin
        end;
 
 
-    if lda_a(i) and									// lda 					; 0
-       (listing[i+1] = #9'eor #$00') and						// eor #$00				; 1
-       sta_a(i+2) then									// sta					; 2
+    if (iny(i) = false) and								// iny					; 0
+       lda_a(i+1) and									// lda 					; 1
+       (listing[i+2] = #9'eor #$00') and						// eor #$00				; 2
+       sta_a(i+3) then									// sta					; 3
      begin
-	listing[i+1] := '';
+	listing[i+2] := '';
+	exit(false);
+     end;
+
+
+    if (iny(i) = false) and								// iny					; 0
+       lda_im_0(i+1) and								// lda #$00				; 1
+       eor(i+2) and									// eor					; 2
+       sta_a(i+3) then									// sta					; 3
+     begin
+	listing[i+1] := #9'lda ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := '';
 	exit(false);
      end;
 

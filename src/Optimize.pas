@@ -502,6 +502,7 @@ procedure OptimizeASM;
 (* -------------------------------------------------------------------------- *)
 type
     TListing = array [0..1023] of string;
+    TListing_tmp = array [0..127] of string;
 
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
@@ -512,7 +513,8 @@ var inxUse, found: Boolean;
 
     elf: cardinal;
 
-    listing, listing_tmp: TListing;
+    listing: TListing;
+    listing_tmp: TListing_tmp;
 
     a, t, arg0: string;
 
@@ -2881,7 +2883,7 @@ begin				// OptimizeASM
  inxUse := false;
 
  listing:=Default(TListing);
- listing_tmp:=Default(TListing);
+ listing_tmp:=Default(TListing_tmp);
 
  for i := 0 to High(s) do
   for k := 0 to 3 do s[i][k] := '';
