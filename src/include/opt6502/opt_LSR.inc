@@ -831,7 +831,7 @@ begin
 
     if (pos('lsr :STACKORIGIN+STACKWIDTH*2', listing[i]) > 0) and				// lsr :STACKORIGIN+STACKWIDTH*2	; 0
        (pos('ror :STACKORIGIN+STACKWIDTH', listing[i+1]) > 0 ) and				// ror :STACKORIGIN+STACKWIDTH		; 1
-       (listing[i+2] = #9'ror @') and								// ror @				; 2
+       ror_a(i+2) and										// ror @				; 2
        ora(i+3) and										// ora					; 3
        sta(i+4) and										// sta 					; 4
        (lda_a(i+5) = false) then								//~lda 					; 5
@@ -845,9 +845,9 @@ begin
 
     if (pos('lsr :STACKORIGIN+STACKWIDTH*2', listing[i]) > 0) and				// lsr :STACKORIGIN+STACKWIDTH*2	; 0
        (pos('ror :STACKORIGIN+STACKWIDTH', listing[i+1]) > 0 ) and				// ror :STACKORIGIN+STACKWIDTH		; 1
-       (listing[i+2] = #9'ror @') and								// ror @				; 2
+       ror_a(i+2) and										// ror @				; 2
        (pos('lsr :STACKORIGIN+STACKWIDTH', listing[i+3]) > 0 ) and				// lsr :STACKORIGIN+STACKWIDTH		; 3
-       (listing[i+4] = #9'ror @') then								// ror @				; 4
+       ror_a(i+4) then										// ror @				; 4
      if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) then
      begin
         listing[i]   := '';

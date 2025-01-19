@@ -39,7 +39,7 @@
 
 	if lab_a(p) and								//@			; p
 	   tya(p+1) and								// tya			; p+1
-   	   (pos('ora ', listing[p+2]) > 0) and					// ora			; p+2
+   	   ora(p+2) and								// ora			; p+2
 	   (listing[p+3] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; p+3
 	 begin
 

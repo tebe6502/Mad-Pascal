@@ -366,7 +366,7 @@ begin
 
     if (iny(i) = false) and								// iny					; 0
        lda_a(i+1) and									// lda 					; 1
-       (listing[i+2] = #9'eor #$00') and						// eor #$00				; 2
+       eor_im_0(i+2) and								// eor #$00				; 2
        sta_a(i+3) then									// sta					; 3
      begin
 	listing[i+2] := '';

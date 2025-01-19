@@ -1139,7 +1139,7 @@ begin
     if (listing[i] = #9'jmp *+6') and								// jmp *+6			; 0
        (pos('@'#9'jmp l_', listing[i+1]) > 0) and						//@ jmp l_			; 1
        jmp(i+2) and										// jmp l_			; 2
-       (pos('l_', listing[i+3]) = 1) then							//l_				; 3
+       lab_l(i+3) then										//l_				; 3
      if (pos(listing[i+3], listing[i+1]) > 0) then
       begin
 	listing[i]   := listing[i+2];

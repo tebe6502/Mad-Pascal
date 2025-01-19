@@ -621,7 +621,7 @@ begin
 
 	listing[p-2] := '';
 
-	if (listing[p+1] = #9'lda :eax+1') and (listing[p-1] = #9'add :eax')  then begin
+	if lda_eax_1(p+1) and add_eax(p-1) then begin
 	 listing[p-1] := #9'add ' + copy(listing[p-3], 6, 256);
 
 	 listing[p-3] := #9'lda :eax';
@@ -652,7 +652,7 @@ begin
 
 	listing[p-2] := '';
 
-	if (listing[p+1] = #9'lda :eax+1') and (listing[p-1] = #9'add :eax')  then begin
+	if lda_eax_1(p+1) and add_eax(p-1) then begin
 	 listing[p-1] := #9'add ' + copy(listing[p-3], 6, 256);
 
 	 listing[p-3] := #9'lda :eax';
