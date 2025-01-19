@@ -400,6 +400,7 @@ begin
       end;
 
 
+{
     if (i > 0) and
        (ldy(i-1) = false) and (tay(i-1) = false) and						// sta :STACKORIGIN+9			; 0
        sta(i) and										// clc|sec				; 1
@@ -411,6 +412,7 @@ begin
 	listing[i+2] := '';
 	exit(false);
       end;
+}
 
 
     if ldy_val(i+5) and										// ldy					; 5	~:STACKORIGIN

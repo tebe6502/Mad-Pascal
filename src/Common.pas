@@ -533,8 +533,6 @@ var
 
   AsmBlock: array [0..4095] of string;
 
-  TemporaryBuf: array [0..511] of string;
-
   Data, DataSegment, StaticStringData: array [0..$FFFF] of word;
 
   Types: array [1..MAXTYPES] of TType;
@@ -563,10 +561,6 @@ var
   iOut: integer = -1;
 
   start_time: QWord;
-
-  {$IFDEF PROFILE}
-  mxTick: QWord;
-  {$ENDIF}
 
   CODEORIGIN_BASE: integer = -1;
 

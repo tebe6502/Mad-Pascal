@@ -6,6 +6,10 @@ interface
 
 // ----------------------------------------------------------------------------
 
+var
+	TemporaryBuf: array [0..511] of string;
+
+
 	procedure asm65(a: string = ''; comment : string ='');			// OptimizeASM
 
 	procedure OptimizeProgram(MainIndex: Integer);
@@ -106,6 +110,73 @@ var p, k , q: integer;
   end;
 
 
+  function IFTMP(i: integer): Boolean;
+  begin
+    Result := (pos(#9'lda IFTMP_', TemporaryBuf[i]) = 1);
+  end;
+
+  function JMP(i: integer): Boolean;
+  begin
+    Result := (pos(#9'jmp l_', TemporaryBuf[i]) = 1);
+  end;
+
+  function LAB_L(i: integer): Boolean;
+  begin
+    Result := (pos('l_', TemporaryBuf[i]) = 1);
+  end;
+
+  function JSR(i: integer): Boolean;
+  begin
+    Result := (pos(#9'jsr ', TemporaryBuf[i]) = 1)
+  end;
+
+  function LDY_IM(i: integer): Boolean;
+  begin
+    Result := (pos(#9'ldy #', TemporaryBuf[i]) = 1)
+  end;
+
+  function LDA(i: integer): Boolean;
+  begin
+    Result := (pos(#9'lda ', TemporaryBuf[i]) = 1)
+  end;
+
+  function LDA_IM(i: integer): Boolean;
+  begin
+    Result := (pos(#9'lda #', TemporaryBuf[i]) = 1)
+  end;
+
+  function LDA_STACK(i: integer): Boolean;
+  begin
+    Result := pos(#9'lda :STACK', TemporaryBuf[i]) = 1;
+  end;
+
+  function STA(i: integer): Boolean;
+  begin
+    Result := (pos(#9'sta ', TemporaryBuf[i]) = 1)
+  end;
+
+  function STA_STACK(i: integer): Boolean;
+  begin
+    Result := (pos(#9'sta :STACK', TemporaryBuf[i]) = 1)
+  end;
+
+
+  function DEX(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'dex'
+  end;
+
+  function STA_BP2(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'sta :bp2'
+  end;
+
+  function STA_BP2_1(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'sta :bp2+1'
+  end;
+
+
   function SKIP(i: integer): Boolean;
   begin
 
@@ -114,13 +185,13 @@ var p, k , q: integer;
 		(TemporaryBuf[i] = #9'scc') or (TemporaryBuf[i] = #9'scs') or
 		(TemporaryBuf[i] = #9'svc') or (TemporaryBuf[i] = #9'svs') or
 
-		(pos('jne ', TemporaryBuf[i]) > 0) or (pos('jeq ', TemporaryBuf[i]) > 0) or
-		(pos('jcc ', TemporaryBuf[i]) > 0) or (pos('jcs ', TemporaryBuf[i]) > 0) or
-		(pos('jmi ', TemporaryBuf[i]) > 0) or (pos('jpl ', TemporaryBuf[i]) > 0) or
+		(pos(#9'jne ', TemporaryBuf[i]) = 1) or (pos(#9'jeq ', TemporaryBuf[i]) = 1) or
+		(pos(#9'jcc ', TemporaryBuf[i]) = 1) or (pos(#9'jcs ', TemporaryBuf[i]) = 1) or
+		(pos(#9'jmi ', TemporaryBuf[i]) = 1) or (pos(#9'jpl ', TemporaryBuf[i]) = 1) or
 
-		(pos('bne ', TemporaryBuf[i]) > 0) or (pos('beq ', TemporaryBuf[i]) > 0) or
-		(pos('bcc ', TemporaryBuf[i]) > 0) or (pos('bcs ', TemporaryBuf[i]) > 0) or
-		(pos('bmi ', TemporaryBuf[i]) > 0) or (pos('bpl ', TemporaryBuf[i]) > 0);
+		(pos(#9'bne ', TemporaryBuf[i]) = 1) or (pos(#9'beq ', TemporaryBuf[i]) = 1) or
+		(pos(#9'bcc ', TemporaryBuf[i]) = 1) or (pos(#9'bcs ', TemporaryBuf[i]) = 1) or
+		(pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
   end;
 
 
@@ -242,11 +313,10 @@ end;
 
     if (pos('@move ":bp2" ', TemporaryBuf[4]) > 1) and					// @move ":bp2"				; 4
 
-       (pos('lda ', TemporaryBuf[0]) > 1) and						// lda A				; 0
-       (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
-       (pos('lda ', TemporaryBuf[2]) > 1) and 						// lda A+1				; 2
-       (TemporaryBuf[2] = TemporaryBuf[0] + '+1') and					//
-       (TemporaryBuf[3] = #9'sta :bp2+1') then						// sta :bp2+1				; 3
+       lda(0) and									// lda A				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       (TemporaryBuf[2] = TemporaryBuf[0] + '+1') and					// lda A+1				; 2
+       sta_bp2_1(3) then								// sta :bp2+1				; 3
        begin
 	TemporaryBuf[4] := #9'@move ' + GetSTRING(0) + ' ' +  copy(TemporaryBuf[4], 15, 256);
 
@@ -259,11 +329,11 @@ end;
 
     if (pos('mva:rpl (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rpl (:bp2),y			; 5
 
-       (pos('lda #', TemporaryBuf[0]) > 1) and						// lda #				; 0
-       (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
-       (pos('lda #', TemporaryBuf[2]) > 1) and						// lda #				; 2
-       (TemporaryBuf[3] = #9'sta :bp2+1') and						// sta :bp2+1				; 3
-       (pos('ldy #', TemporaryBuf[4]) > 1) then						// ldy #				; 4
+       lda_im(0) and									// lda #				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       lda_im(2) and									// lda #				; 2
+       sta_bp2_1(3) and									// sta :bp2+1				; 3
+       ldy_im(4) then									// ldy #				; 4
        begin
 	p := GetWORD(0, 2);
 
@@ -278,11 +348,11 @@ end;
 
     if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rne (:bp2),y			; 5
 
-       (pos('lda #', TemporaryBuf[0]) > 1) and						// lda #				; 0
-       (TemporaryBuf[1] = #9'sta :bp2') and						// sta :bp2				; 1
-       (pos('lda #', TemporaryBuf[2]) > 1) and						// lda #				; 2
-       (TemporaryBuf[3] = #9'sta :bp2+1') and						// sta :bp2+1				; 3
-       (pos('ldy #', TemporaryBuf[4]) > 1) then						// ldy #				; 4
+       lda_im(0) and									// lda #				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       lda_im(2) and									// lda #				; 2
+       sta_bp2_1(3) and									// sta :bp2+1				; 3
+       ldy_im(4) then									// ldy #				; 4
        begin
 	p := GetWORD(0, 2);
 
@@ -313,10 +383,10 @@ end;
 // -----------------------------------------------------------------------------
 
     if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
-       (pos('sta ', TemporaryBuf[1]) > 0) and						// sta F				; 1
+       sta(1) and									// sta F				; 1
        (TemporaryBuf[2] = #9'lda :STACKORIGIN+STACKWIDTH,x') and			// lda :STACKORIGIN+STACKWIDTH,x	; 2
-       (pos('sta ', TemporaryBuf[3]) > 0) and						// sta F+1				; 3
-       (TemporaryBuf[4] = #9'dex') and							// dex					; 2
+       sta(3) and									// sta F+1				; 3
+       dex(4) and									// dex					; 2
        (TemporaryBuf[5] = ':move') then							//:move					; 3
        begin
 
@@ -506,10 +576,6 @@ type
 
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
-
-    {$IFDEF PROFILE}
-    mx, tick: QWord;
-    {$ENDIF}
 
     elf: cardinal;
 
@@ -2533,20 +2599,9 @@ end;
 
  begin			// OptimizeAssignment
 
-
-  {$IFDEF PROFILE}
-  mx:=0;
-  tick:=GetTickCount64;
-  {$ENDIF}
-
   repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
-
-  {$IFDEF PROFILE}
-  tick:=GetTickCount64-tick;
-  if tick > mxTick then begin mxTick:=tick; if mxTick>0 then writeln(mxTick) end;
-  {$ENDIF}
 
  end;
 

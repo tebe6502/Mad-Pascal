@@ -1936,14 +1936,14 @@
     if (l = i + 11) and
        ldy(i) and									// ldy					; 0
        beq(i+1) and									// beq l_				; 1
-       (pos('l_', listing[i+2]) = 1) and						//l_					; 2
+       lab_l(i+2) and									//l_					; 2
        asl_a(i+3) and									// asl @				; 3
        rol_stack(i+4) and								// rol :STACKORIGIN+STACKWIDTH		; 4
        rol_stack(i+5) and								// rol :STACKORIGIN+STACKWIDTH*2	; 5
        rol_stack(i+6) and								// rol :STACKORIGIN+STACKWIDTH*3	; 6
        dey(i+7) and									// dey					; 7
        bne(i+8) and									// bne l_				; 8
-       (pos('l_', listing[i+9]) = 1) and						//l_					; 9
+       lab_l(i+9) and									//l_					; 9
        sta_a(i+10) then									// sta 					; 10
        begin
 	listing[i+4] := '';
@@ -1968,14 +1968,14 @@
     if (l = i + 13) and
        ldy(i) and									// ldy					; 0
        beq(i+1) and									// beq l_				; 1
-       (pos('l_', listing[i+2]) = 1) and						//l_					; 2
+       lab_l(i+2) and									//l_					; 2
        asl_a(i+3) and									// asl @				; 3
        rol_stack(i+4) and								// rol :STACKORIGIN+STACKWIDTH		; 4
        rol_stack(i+5) and								// rol :STACKORIGIN+STACKWIDTH*2	; 5
        rol_stack(i+6) and								// rol :STACKORIGIN+STACKWIDTH*3	; 6
        dey(i+7) and									// dey					; 7
        bne(i+8) and									// bne l_				; 8
-       (pos('l_', listing[i+9]) = 1) and						//l_					; 9
+       lab_l(i+9) and									//l_					; 9
        sta_val(i+10) and								// sta ~:STACKORIGIN			; 10
        lda_stack(i+11) and								// lda :STACKORIGIN+STACKWIDTH		; 11
        sta_a(i+12) then									// sta 					; 12
