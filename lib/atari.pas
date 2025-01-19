@@ -25,6 +25,28 @@ type	TDMACtl = (blank = %00, narrow = %01, normal = %10, wide = %11, missiles= %
 
 	*)
 
+const
+    DL_BLANK1 = 0; // 1 blank line
+    DL_BLANK2 = %00010000; // 2 blank lines
+    DL_BLANK3 = %00100000; // 3 blank lines
+    DL_BLANK4 = %00110000; // 4 blank lines
+    DL_BLANK5 = %01000000; // 5 blank lines
+    DL_BLANK6 = %01010000; // 6 blank lines
+    DL_BLANK7 = %01100000; // 7 blank lines
+    DL_BLANK8 = %01110000; // 8 blank lines
+
+    DL_DLI = %10000000; // Order to run DLI
+    DL_LMS = %01000000; // Order to set new memory address
+    DL_VSCROLL = %00100000; // Turn on vertical scroll on this line
+    DL_HSCROLL = %00010000; // Turn on horizontal scroll on this line
+
+    DL_JMP = %00000001; // Order to jump
+    DL_JVB = %01000001; // Jump to begining
+
+			// Antic Modes
+    DL_MODE_GR15 = $E;
+    DL_MODE_GR8 = $F;
+
 var
 	[volatile] irqens: byte absolute $10;		// rejestr cien IRQEN
 

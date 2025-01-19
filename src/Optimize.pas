@@ -18,6 +18,8 @@ var
 
 	procedure WriteOut(a: string);						// OptimizeTemporaryBuf
 
+	procedure FlushTempBuf;
+
 // ----------------------------------------------------------------------------
 
 implementation
@@ -540,6 +542,18 @@ begin
   TemporaryBuf[iOut] := a;
 
  end;
+
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+procedure FlushTempBuf;
+var i: integer;
+begin
+
+  for i:=0 to High(TemporaryBuf) do WriteOut('');		// flush TemporaryBuf
 
 end;
 
