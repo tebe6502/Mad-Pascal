@@ -132,9 +132,19 @@ var p, k , q: integer;
     Result := (pos(#9'jsr ', TemporaryBuf[i]) = 1)
   end;
 
+  function LDY(i: integer): Boolean;
+  begin
+    Result := (pos(#9'ldy ', TemporaryBuf[i]) = 1)
+  end;
+
   function LDY_IM(i: integer): Boolean;
   begin
     Result := (pos(#9'ldy #', TemporaryBuf[i]) = 1)
+  end;
+
+  function CMP(i: integer): Boolean;
+  begin
+    Result := (pos(#9'cmp ', TemporaryBuf[i]) = 1)
   end;
 
   function LDA(i: integer): Boolean;
@@ -160,6 +170,27 @@ var p, k , q: integer;
   function STA_STACK(i: integer): Boolean;
   begin
     Result := (pos(#9'sta :STACK', TemporaryBuf[i]) = 1)
+  end;
+
+
+  function ADD(i: integer): Boolean;
+  begin
+    Result := (pos(#9'add ', TemporaryBuf[i]) = 1)
+  end;
+
+  function SUB(i: integer): Boolean;
+  begin
+    Result := (pos(#9'sub ', TemporaryBuf[i]) = 1)
+  end;
+
+  function ADD_SUB(i: integer): Boolean;
+  begin
+    Result := (pos(#9'add ', TemporaryBuf[i]) = 1) or (pos(#9'sub ', TemporaryBuf[i]) = 1)
+  end;
+
+  function ADC_SBC(i: integer): Boolean;
+  begin
+    Result := (pos(#9'adc ', TemporaryBuf[i]) = 1) or (pos(#9'sbc ', TemporaryBuf[i]) = 1)
   end;
 
 

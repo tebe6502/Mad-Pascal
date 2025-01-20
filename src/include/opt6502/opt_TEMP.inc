@@ -1,3 +1,4 @@
+
 // -----------------------------------------------------------------------------
 // ===		     		      TEMP.
 // -----------------------------------------------------------------------------
@@ -7,11 +8,11 @@ var p: integer;
 begin
 
 
-   if (pos('lda ', TemporaryBuf[10]) > 0) and						// inc			; 11
-      (pos('cmp ', TemporaryBuf[11]) > 0) and						// inc			; 11
-      (pos('jcc l_', TemporaryBuf[12]) > 0) and						// jcc			; 10	branch if C=0
-      (pos('lda ', TemporaryBuf[13]) > 0) and						// lda			; 11	C=1
-      (pos('sub ', TemporaryBuf[14]) > 0) then						// sub			; 11
+   if lda(10) and									// lda			; 10
+      cmp(11) and									// cmp			; 11
+      (pos('jcc l_', TemporaryBuf[12]) > 0) and						// jcc			; 12	branch if C=0
+      lda(13) and									// lda			; 13	C=1
+      sub(14) then									// sub			; 14
     begin
 	TemporaryBuf[14] := #9'sbc ' + copy(TemporaryBuf[14], 6, 256);
     end;
@@ -21,7 +22,7 @@ begin
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=1
-      (pos('sub ', TemporaryBuf[14]) > 0) then						// sub			; 14
+      sub(14) then									// sub			; 14
     begin
 	TemporaryBuf[14] := #9'sbc ' + copy(TemporaryBuf[14], 6, 256);
     end;
@@ -31,10 +32,22 @@ begin
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=1
-      (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
-      (pos('sub ', TemporaryBuf[15]) > 0) then						// sub			; 15
+      lda(14) and									// lda			; 14
+      sub(15) then									// sub			; 15
     begin
 	TemporaryBuf[15] := #9'sbc ' + copy(TemporaryBuf[15], 6, 256);
+    end;
+
+
+   if (pos('jcc l_', TemporaryBuf[10]) > 0) and						// jcc			; 10	branch if C=0
+      (TemporaryBuf[11] = '') and							//			; 11
+      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
+      (TemporaryBuf[13] = '') and							//			; 13	C=1
+      ldy(14) and									// ldy			; 14
+      lda(15) and									// lda			; 15
+      sub(16) then									// sub			; 16
+    begin
+	TemporaryBuf[16] := #9'sbc ' + copy(TemporaryBuf[16], 6, 256);
     end;
 
 
@@ -42,7 +55,7 @@ begin
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=0
-      (pos('add ', TemporaryBuf[14]) > 0) then						// add			; 14
+      add(14) then									// add			; 14
     begin
 	TemporaryBuf[14] := #9'adc ' + copy(TemporaryBuf[14], 6, 256);
     end;
@@ -52,11 +65,24 @@ begin
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
       (TemporaryBuf[13] = '') and							//			; 13	C=0
-      (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
-      (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
+      lda(14) and									// lda			; 14
+      add(15) then									// add			; 15
     begin
 	TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
     end;
+
+
+   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+      (TemporaryBuf[11] = '') and							//			; 11
+      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12
+      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      ldy(14) and									// ldy			; 14
+      lda(15) and									// lda			; 15
+      add(16) then									// add			; 16
+    begin
+	TemporaryBuf[16] := #9'adc ' + copy(TemporaryBuf[16], 6, 256);
+    end;
+
 
 {
    if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
@@ -82,12 +108,13 @@ begin
     end;
 }
 
+
    if (TemporaryBuf[10] = #9'scc') and							// scc			; 10	branch if C=0
       (pos('inc ', TemporaryBuf[11]) > 0) and						// inc			; 11
       (TemporaryBuf[12] = '') and							//			; 12
       (pos('; optimize ', TemporaryBuf[13]) > 0) and					//; optimize 		; 13
       (TemporaryBuf[14] = '') and							//			; 14	C=0
-      (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
+      add(15) then									// add			; 15
     begin
 	TemporaryBuf[10] := #9'bcc @+';
 
@@ -103,7 +130,7 @@ begin
       (TemporaryBuf[12] = '') and							//			; 12
       (pos('; optimize ', TemporaryBuf[13]) > 0) and					//; optimize 		; 13
       (TemporaryBuf[14] = '') and							//			; 14	C=1
-      (pos('sub ', TemporaryBuf[15]) > 0) then						// sub			; 15
+      sub(15) then									// sub			; 15
     begin
 	TemporaryBuf[10] := #9'bcs @+';
 

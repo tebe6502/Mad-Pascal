@@ -119,7 +119,7 @@ begin
       (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
       (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy C		; 4
       (pos('lda ', TemporaryBuf[5]) > 0) and						// lda Result		; 5
-      ((pos('add ', TemporaryBuf[6]) > 0) or (pos('sub ', TemporaryBuf[6]) > 0)) and	// add|sub		; 6
+      add_sub(6) and									// add|sub		; 6
       (pos('sta ', TemporaryBuf[7]) > 0) and						// sta Result		; 7
       ((TemporaryBuf[8] = #9'scc') or (TemporaryBuf[8] = #9'scs')) and			// scc|scs		; 8
       ((pos('inc ', TemporaryBuf[9]) > 0) or (pos('dec ', TemporaryBuf[9]) > 0)) and	// inc|dec Result+1	; 9
@@ -176,7 +176,7 @@ begin
       (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
       (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy C		; 4
       (pos('lda ', TemporaryBuf[5]) > 0) and						// lda			; 5
-      ((pos('add ', TemporaryBuf[6]) > 0) or (pos('sub ', TemporaryBuf[6]) > 0)) and	// add|sub		; 6
+      add_sub(6) and									// add|sub		; 6
       (TemporaryBuf[7] = #9'sta :bp+1') and						// sta :bp+1		; 7
       (pos('lda ', TemporaryBuf[8]) > 0) and						// lda			; 8
       (TemporaryBuf[9] = #9'sta (:bp),y') and						// sta (:bp),y		; 9
@@ -210,7 +210,7 @@ begin
       (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 2
       (TemporaryBuf[3] = #9'ldy #$00') and						// ldy #$00		; 3
       (pos('lda ', TemporaryBuf[4]) > 0) and						// lda Result		; 4
-      ((pos('add (', TemporaryBuf[5]) > 0) or (pos('sub (', TemporaryBuf[5]) > 0)) and	// add|sub (P),y	; 5
+      add_sub(5) and									// add|sub (P),y	; 5
       (pos('sta ', TemporaryBuf[6]) > 0) and						// sta Result		; 6
       ((TemporaryBuf[7] = #9'scc') or (TemporaryBuf[7] = #9'scs')) and			// scc|scs		; 7
       ((pos('inc ', TemporaryBuf[8]) > 0) or (pos('dec ', TemporaryBuf[8]) > 0)) and	// inc|dec Result+1	; 8
@@ -470,7 +470,7 @@ begin
 	     (pos('; optimize ', TemporaryBuf[p+3]) > 0) and
 	     (TemporaryBuf[p+4] = '') and
 	     (pos('lda ',TemporaryBuf[p+5]) > 0) and
-	     ((pos('add ',TemporaryBuf[p+6]) > 0) or (pos('sub ',TemporaryBuf[p+6]) > 0)) and
+	     add_sub(p+6) and
 
 	     (copy(TemporaryBuf[p+5], 6, 256) = copy(TemporaryBuf[p-7], 6, 256)) then
 	   begin
@@ -526,8 +526,8 @@ begin
       (TemporaryBuf[11] ='') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize		; 12
       (TemporaryBuf[13] ='') and							//			; 13
-      (pos('lda ', TemporaryBuf[14]) > 0) and						// lda			; 14
-      (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
+      lda(14) and									// lda			; 14
+      add(15) then									// add			; 15
      begin
       TemporaryBuf[10] := #9'clc';
       TemporaryBuf[11] := '@';
