@@ -3902,6 +3902,9 @@ begin
 
  asm65(#9'jmp a_'+IntToHex(cnt,4));
 
+// asm65('l_' + IntToHex(CodeSize, 4));
+
+
  StoredCodeSize := CodeSize;
 
  Gen;								// nop   ; jump to the CASE block end will be inserted here
