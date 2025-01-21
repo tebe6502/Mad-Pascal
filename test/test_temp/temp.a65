@@ -1,0 +1,313 @@
+; ------------------------------------------------------------
+; Mad Pascal Compiler version 1.7.2 [2025/01/21] for MOS 6502 CPU
+; ------------------------------------------------------------
+
+STACKWIDTH	= 16
+
+TRUE		= 1
+FALSE		= 0
+EOL		= $0D
+__BUFFER	= $0200
+@BUF		= __BUFFER
+
+; ------------------------------------------------------------
+
+	org $00
+
+zpage
+
+.if .def(@AllocMem)||.def(MAIN.SYSTEM.GETMEM)||.def(MAIN.SYSTEM.FREEMEM)
+psptr	.ds 2						; PROGRAMSTACK Pointer
+.fi
+
+bp	.ds 2
+bp2	.ds 2
+bp3	= bp+1
+
+eax	.ds 4						;8 bytes (aex + edx) -> divREAL
+edx	.ds 4
+ecx	.ds 4
+
+TMP
+ztmp
+ztmp8	.ds 1
+ztmp9	.ds 1
+ztmp10	.ds 1
+ztmp11	.ds 1
+
+STACKORIGIN	.ds STACKWIDTH*4
+zpend
+
+; ------------------------------------------------------------
+
+ax	= eax
+al	= eax
+ah	= eax+1
+
+cx	= ecx
+cl	= ecx
+ch	= ecx+1
+
+dx	= edx
+dl	= edx
+dh	= edx+1
+
+	org eax
+
+FP1MAN0	.ds 1
+FP1MAN1	.ds 1
+FP1MAN2	.ds 1
+FP1MAN3	.ds 1
+
+	org edx
+
+FP2MAN0	.ds 1
+FP2MAN1	.ds 1
+FP2MAN2	.ds 1
+FP2MAN3	.ds 1
+
+	org ecx
+
+FPMAN0	.ds 1
+FPMAN1	.ds 1
+FPMAN2	.ds 1
+FPMAN3	.ds 1
+
+	org ztmp8
+
+FP1SGN	.ds 1
+FP1EXP	.ds 1
+
+	org ztmp10
+
+FP2SGN	.ds 1
+FP2EXP	.ds 1
+
+	org bp2
+
+FPSGN	.ds 1
+FPEXP	.ds 1
+
+; ------------------------------------------------------------
+
+	opt h-f+
+
+	org $1000
+	jmp START
+
+CODEORIGIN
+
+	STATICDATA
+
+; ------------------------------------------------------------
+
+RTLIB
+	icl 'rtl6502_raw.asm'
+
+.print 'ZPAGE: ',zpage,'..',zpend-1
+
+.print 'RTBUF: ',@buf,'..',@buf+255
+
+.print 'RTLIB: ',RTLIB,'..',*-1
+
+; ------------------------------------------------------------
+
+START
+	tsx
+	stx MAIN.@halt+1
+
+VLEN	= VARDATASIZE-VARINITSIZE
+VADR	= DATAORIGIN+VARINITSIZE
+
+	ift (VLEN > 0) && (VLEN <= 256)
+	ldx #256-VLEN
+	lda #$00
+	sta:rne VADR+VLEN-256,x+
+	eli VLEN>256
+	m@init
+	eif
+
+.ifdef psptr
+	mwa #PROGRAMSTACK psptr
+.fi
+
+	ldx #$00
+	stx bp						; BP = 0
+
+	dex						; X = 255
+
+	UNITINITIALIZATION
+
+.local	MAIN						; PROCEDURE
+
+	jmp l_0004
+
+; ------------------------------------------------------------
+
+.local	SYSTEM						; UNIT
+
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+@UnitInit
+
+	rts
+
+; ------------------------------------------------------------
+
+M_PI_2	= $0648
+D_PI_2	= $0192
+D_PI_180	= $04
+DATESEPARATOR	= DATAORIGIN+$0000
+SCREENWIDTH	= DATAORIGIN+$0001
+SCREENHEIGHT	= DATAORIGIN+$0003
+adr.MEM	= $00
+.var MEM	= adr.MEM .word
+RNDSEED	= DATAORIGIN+$0005
+
+.endl							; UNIT SYSTEM
+
+.local	F_1						; FUNCTION
+
+; optimize OK (./test_temp/temp.pas), line = 7
+
+	lda #$01
+	sta RESULT
+@exit
+
+; ------------------------------------------------------------
+
+A	= DATAORIGIN+$000C
+B	= DATAORIGIN+$000E
+RESULT	= DATAORIGIN+$0010
+
+@VarData	= A
+@VarDataSize	= 4
+
+	rts						; ret
+.endl
+l_0004
+
+; optimize OK (./test_temp/temp.pas), line = 11
+
+	lda #$05
+	sta X
+	lda #$00
+	sta X+1
+
+; optimize OK (./test_temp/temp.pas), line = 12
+
+	lda #$01
+	sta I
+
+; --- WhileProlog
+	jmp l_0091
+l_0092
+
+; optimize FAIL (0, ./test_temp/temp.pas), line = 13
+
+	lda X
+	bne @+
+	dec X+1
+@
+	dec X
+l_0091
+	inx
+	ldy #1
+	lda X+1
+	bmi @+
+	ora X
+	sne
+@
+	dey
+@
+	sty :STACKORIGIN,x
+	lda X
+	sub #$01
+	sta F_1.A
+	lda X+1
+	sbc #$00
+	sta F_1.A+1
+	lda Y
+	sta F_1.B
+	lda Y+1
+	sta F_1.B+1
+	jsr F_1
+	dex
+	ldy #1
+	lda F_1.RESULT
+	cmp I
+	beq @+
+	dey
+@
+	tya
+	and :STACKORIGIN+1,x
+	jne l_0092
+
+; ------------------------------------------------------------
+
+X	= DATAORIGIN+$0007
+Y	= DATAORIGIN+$0009
+I	= DATAORIGIN+$000B
+@exit
+
+@halt	ldx #$00
+	txs
+
+	rts
+
+; ------------------------------------------------------------
+
+.local	@DEFINES
+RAW
+CPU_6502
+.endl
+
+.local	@RESOURCE
+.endl
+
+.endl							; MAIN
+
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+
+.macro	UNITINITIALIZATION
+
+	.ifdef MAIN.SYSTEM.@UnitInit
+	jsr MAIN.SYSTEM.@UnitInit
+	.fi
+.endm
+
+; ------------------------------------------------------------
+
+	ift .SIZEOF(MAIN.SYSTEM) > 0
+	.print 'SYSTEM: ',MAIN.SYSTEM,'..',MAIN.SYSTEM+.SIZEOF(MAIN.SYSTEM)-1
+	eif
+
+.nowarn	.print 'CODE: ',CODEORIGIN,'..',MAIN.@RESOURCE-1
+
+; ------------------------------------------------------------
+
+	?adr = *
+	ift (?adr < ?old_adr) && (?old_adr - ?adr < $120)
+	?adr = ?old_adr
+	eif
+
+	org ?adr
+	?old_adr = *
+
+DATAORIGIN
+.by  $2D $28 $00 $18
+
+VARINITSIZE	= *-DATAORIGIN
+VARDATASIZE	= 17
+
+PROGRAMSTACK	= DATAORIGIN+VARDATASIZE
+
+	.print 'DATA: ',DATAORIGIN,'..',PROGRAMSTACK
+
+; ------------------------------------------------------------
+
+.macro	STATICDATA
+.endm
+
+	end
