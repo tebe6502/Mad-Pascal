@@ -33,9 +33,9 @@ jobs:
       - name: install prereq.
         run:
           sudo apt-get update &&
-          sudo apt-get install -y fpchttps://github.com/tebe6502/Mad-Assembler.git
+          sudo apt-get install -y fpc
       - name: get sources
-        run: git clone 
+        run: git clone https://github.com/tebe6502/Mad-Assembler.git
       - name: build
         run: cd Mad-Assembler ; fpc -Mdelphi -vh -O3 mads.pas
       - uses: actions/upload-artifact@v4
