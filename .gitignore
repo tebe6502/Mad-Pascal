@@ -8,3 +8,12 @@ makeMP.bat
 *.ppu
 .vscode
 *.pyc
+mads/
+test/.venv/
+test/blibs
+test/config.ini
+test/dlibs
+test/lib
+test/mp
+test/wlibs
+test/test_temp/
