@@ -33,18 +33,16 @@ jobs:
       - name: install prereq.
         run:
           sudo apt-get update &&
-          sudo apt-get install -y fpc
+          sudo apt-get install -y fpchttps://github.com/tebe6502/Mad-Assembler.git
       - name: get sources
-        run: wget https://github.com/tebe6502/Mad-Assembler/archive/refs/tags/2.1.5.tar.gz
-      - name: extract sources
-        run: tar xvf 2.1.5.tar.gz
+        run: git clone 
       - name: build
-        run: cd Mad-Assembler-2.1.5 ; fpc -Mdelphi -vh -O3 mads.pas
+        run: cd Mad-Assembler ; fpc -Mdelphi -vh -O3 mads.pas
       - uses: actions/upload-artifact@v4
         with:
           name: mads-bin-ubuntu
           path: |
-            Mad-Assembler-2.1.5/mads
+            Mad-Assembler/mads
 
   test:
     needs: [ build, build-mads ]
