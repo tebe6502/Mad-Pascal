@@ -5,22 +5,14 @@
 
 procedure opt_TEMP_UNROLL;
 var p: integer;
-
-
-   function STA_ADR(i: integer): Boolean;
-   begin
-     Result :=  (pos(',y', TemporaryBuf[i]) > 0) and (pos(#9'sta adr.', TemporaryBuf[i]) = 1) or ((pos(#9'sta ', TemporaryBuf[i]) = 1) and (pos('.adr.', TemporaryBuf[i]) > 0));
-   end;
-
-
 begin
 
   if ((TemporaryBuf[3] = '+++unroll+++') or (TemporaryBuf[3] = '---unroll---'))	and	//+++unroll+++|---unroll---		; 3
      (pos('ldy #', TemporaryBuf[4]) > 0) and						// ldy #				; 4
-     (pos('sty ', TemporaryBuf[5]) > 0) and						// sty I				; 5
+     sty(5) and										// sty I				; 5
 
-     (pos('ldy ', TemporaryBuf[0]) > 0) and						// ldy I				; 0
-     (pos('lda ', TemporaryBuf[1]) > 0) and						// lda					; 1
+     ldy(0) and										// ldy I				; 0
+     lda(1) and										// lda					; 1
      sta_adr(2) then									// sta adr.TAB,y			; 2
    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[5], 6, 256)) then
    begin
@@ -38,10 +30,10 @@ begin
 
   if ((TemporaryBuf[3] = '+++unroll+++') or (TemporaryBuf[3] = '---unroll---'))	and	//+++unroll+++|---unroll---		; 3
      (pos('ldy #', TemporaryBuf[4]) > 0) and						// ldy #				; 4
-     (pos('sty ', TemporaryBuf[5]) > 0) and						// sty I				; 5
+     sty(5) and										// sty I				; 5
 
-     (pos('lda ', TemporaryBuf[0]) > 0) and						// lda					; 0
-     (pos('ldy ', TemporaryBuf[1]) > 0) and						// ldy I				; 1
+     lda(0) and										// lda					; 0
+     ldy(1) and										// ldy I				; 1
      sta_adr(2) then									// sta adr.TAB,y			; 2
    if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[5], 6, 256)) then
    begin
@@ -59,12 +51,12 @@ begin
 
   if ((TemporaryBuf[5] = '+++unroll+++') or (TemporaryBuf[5] = '---unroll---'))	and	//+++unroll+++|---unroll---		; 5
      (pos('ldy #', TemporaryBuf[6]) > 0) and						// ldy #				; 6
-     (pos('sty ', TemporaryBuf[7]) > 0) and						// sty I				; 7
+     sty(7) and										// sty I				; 7
 
-     (pos('lda ', TemporaryBuf[0]) > 0) and						// lda					; 0
-     ((pos('add ', TemporaryBuf[1]) > 0) or (pos('sub ', TemporaryBuf[1]) > 0)) and	// add|sub I				; 1
+     lda(0) and										// lda					; 0
+     add_sub(1) and									// add|sub I				; 1
      (TemporaryBuf[2] = #9'tay') and							// tay					; 2
-     (pos('lda ', TemporaryBuf[3]) > 0) and						// lda					; 3
+     lda(3) and										// lda					; 3
      sta_adr(4) then									// sta adr.TAB,y			; 4
    if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[7], 6, 256)) then
    begin
@@ -92,9 +84,9 @@ begin
     TemporaryBuf[0] := '~';
 
     if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
-       (pos('sty ', TemporaryBuf[2]) > 0) and						// sty I				; 2
-       (pos('ldy ', TemporaryBuf[3]) > 0) and						// ldy I				; 3
-       (pos('lda ', TemporaryBuf[4]) > 0) and						// lda					; 4
+       sty(2) and									// sty I				; 2
+       ldy(3) and									// ldy I				; 3
+       lda(4) and									// lda					; 4
        sta_adr(5) and									// sta adr.TAB,y			; 5
        (TemporaryBuf[6] = '===unroll===') then						//===unroll===				; 6
      if (copy(TemporaryBuf[2], 6, 256) = copy(TemporaryBuf[3], 6, 256)) then
@@ -112,9 +104,9 @@ begin
 
 
     if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
-       (pos('sty ', TemporaryBuf[2]) > 0) and						// sty I				; 2
-       (pos('lda ', TemporaryBuf[3]) > 0) and						// lda					; 3
-       (pos('ldy ', TemporaryBuf[4]) > 0) and						// ldy I				; 4
+       sty(2) and									// sty I				; 2
+       lda(3) and									// lda					; 3
+       ldy(4) and									// ldy I				; 4
        sta_adr(5) and									// sta adr.TAB,y			; 5
        (TemporaryBuf[6] = '===unroll===') then						//===unroll===			; 6
      if (copy(TemporaryBuf[2], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
@@ -132,11 +124,11 @@ begin
 
 
     if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
-       (pos('sty ', TemporaryBuf[2]) > 0) and						// sty I				; 2
-       (pos('lda ', TemporaryBuf[3]) > 0) and						// lda					; 3
-       ((pos('add ', TemporaryBuf[4]) > 0) or (pos('sub ', TemporaryBuf[4]) > 0)) and	// add|sub I				; 4
+       sty(2) and									// sty I				; 2
+       lda(3) and									// lda					; 3
+       add_sub(4) and									// add|sub I				; 4
        (TemporaryBuf[5] = #9'tay') and							// tay					; 5
-       (pos('lda ', TemporaryBuf[6]) > 0) and						// lda					; 6
+       lda(6) and									// lda					; 6
        sta_adr(7) and									// sta adr.TAB,y			; 7
        (TemporaryBuf[8] = '===unroll===') then						//===unroll===				; 8
      if (copy(TemporaryBuf[2], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
@@ -157,14 +149,14 @@ begin
 {
 
     if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
-       (pos('sty ', TemporaryBuf[2]) > 0) and						// sty I				; 2
-       (pos('lda ', TemporaryBuf[3]) > 0) and						// lda A				; 3
+       sty(2) and									// sty I				; 2
+       lda(3) and									// lda A				; 3
        (pos('add ', TemporaryBuf[4]) > 0) and						// add I				; 4
        (TemporaryBuf[5] = #9'tay') and							// tay					; 5
-       (pos('lda ', TemporaryBuf[6]) > 0) and						// lda A+1				; 6
+       lda(6) and									// lda A+1				; 6
        (pos('adc ', TemporaryBuf[7]) > 0) and						// adc I+1				; 7
        (TemporaryBuf[8] = #9'sta :bp+1') and						// sta :bp+1				; 8
-       (pos('lda ', TemporaryBuf[9]) > 0) and						// lda					; 9
+       lda(9) and									// lda					; 9
        (TemporaryBuf[10] = #9'sta (:bp),y') and						// sta (:bp),y				; 10
        (TemporaryBuf[11] = '===unroll===') then						//===unroll===-				; 11
      if (copy(TemporaryBuf[2], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
