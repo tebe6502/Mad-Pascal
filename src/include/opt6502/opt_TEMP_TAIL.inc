@@ -31,7 +31,7 @@ begin
        (sta(19) or jsr(19)) and								// sta|jsr		; 19
        lab_l(20) and									//l_xxxx		; 20
        IFTMP(21) and									// lda IFTMP_xxxx	; 21
-       (pos('beq *+5', TemporaryBuf[22]) > 0) and					// beq *+5		; 22
+       (TemporaryBuf[22] = #9'beq *+5') and						// beq *+5		; 22
        jmp(23)										// jmp l_xxxx		; 23
        ) then
     begin
@@ -56,7 +56,7 @@ begin
        end;
 
 
-       if (pos('beq *+5', TemporaryBuf[22]) > 0) then
+       if (TemporaryBuf[22] = #9'beq *+5') then
          i:=19
        else
          i:=20;

@@ -320,7 +320,7 @@
      Result := listing[i] = #9'sty #$00'
    end;
 
-   function LAB_a(i: integer): Boolean;
+   function LAB_A(i: integer): Boolean;
    begin
      Result := (listing[i] = '@')
    end;
