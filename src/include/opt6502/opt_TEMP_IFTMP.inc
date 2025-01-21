@@ -9,7 +9,7 @@ begin
 
    if lab_l(0) and									//l_xxxx		; 0
       IFTMP(1) and									// lda IFTMP_xxxx	; 1
-      (pos('jne l_', TemporaryBuf[2]) > 0) then						// jne l_xxxx		; 2
+      jne_l(2) then									// jne l_xxxx		; 2
     begin
      TemporaryBuf[1] := TemporaryBuf[0];
      TemporaryBuf[0] := #9'jmp ' + copy(TemporaryBuf[2], 6, 256);

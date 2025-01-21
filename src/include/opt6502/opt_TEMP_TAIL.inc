@@ -22,7 +22,7 @@ begin
        (sta(20) or jsr(20)) and								// sta|jsr		; 20
        lab_l(21) and									//l_xxxx		; 21
        IFTMP(22) and									// lda IFTMP_xxxx	; 22
-       (pos('jne l_', TemporaryBuf[23]) > 0)						// jne l_xxxx		; 23
+       jne_l(23)									// jne l_xxxx		; 23
        )
 
       or

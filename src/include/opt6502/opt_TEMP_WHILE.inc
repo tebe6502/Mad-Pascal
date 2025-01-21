@@ -57,7 +57,7 @@ begin
 
 
    if (TemporaryBuf[3] = '; --- WhileProlog') and					//; --- WhileProlog	; 3
-      (pos('lda #', TemporaryBuf[0]) > 0) and (GetBYTE(0) < 128) and			// lda #		; 0
+      lda_im(0) and (GetBYTE(0) < 128) and						// lda #		; 0
       sta(1) and									// sta K		; 1
       (TemporaryBuf[2] = '') and							//			; 2
       jmp(4) and									// jmp l_00FA		; 4
@@ -97,7 +97,7 @@ begin
       (TemporaryBuf[5] = '') and							//			; 5
       (pos('; optimize ', TemporaryBuf[6]) > 0) and					//; optimize 		; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      (pos('ldy #', TemporaryBuf[8]) > 0) then						// ldy #		; 8
+      ldy_im(8) then									// ldy #		; 8
     begin
       yes:=true;
 
@@ -133,7 +133,7 @@ begin
       (TemporaryBuf[5] = '') and							//			; 5
       (pos('; optimize ', TemporaryBuf[6]) > 0) and					//; optimize 		; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      (pos('ldy #', TemporaryBuf[8]) = 0) then						//~ldy #		; 8
+      (ldy_im(8) = false) then								//~ldy #		; 8
     begin
       yes:=true;
 

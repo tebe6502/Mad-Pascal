@@ -84,7 +84,8 @@ begin
     end;
 
 
-{
+{ !!!
+
    if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
       (TemporaryBuf[11] = '') and							//			; 11
       (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize 		; 12

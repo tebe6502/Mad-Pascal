@@ -19,11 +19,11 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[7]) = 1) and (pos('.COUNT+1', TemporaryBuf[7]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[5]) = 1) and (pos('.COUNT', TemporaryBuf[5]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
-       (pos(#9'lda ', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[0]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[2]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) then
+       lda(8) and
+       lda_im(0) and
+       lda_im(2) and
+       lda_im(4) and
+       lda_im(6) then
        begin
 {
 	lda #					; 0		***
@@ -124,9 +124,9 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[8]) = 1) and (pos('.COUNT+1', TemporaryBuf[8]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[6]) = 1) and (pos('.COUNT', TemporaryBuf[6]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[1]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[3]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[5]) = 1) and
+       lda_im(1) and
+       lda_im(3) and
+       lda_im(5) and
        (TemporaryBuf[7] = #9'lda #$00') then
        begin
 {						; 0		***
@@ -225,9 +225,9 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[6]) = 1) and (pos('.COUNT', TemporaryBuf[6]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
        (TemporaryBuf[7] = #9'lda #$00') and
-       (pos(#9'lda #', TemporaryBuf[5]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[1]) = 1) and (pos(#9'lda #', TemporaryBuf[1]) = 0) and
-       (pos(#9'lda ', TemporaryBuf[3]) = 1) then
+       lda_im(5) and
+       lda(1) and (lda_im(1) = false) and
+       lda(3) then
        begin
 {						; 0		***
 	lda QBOARD				; 1
@@ -286,11 +286,11 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[7]) = 1) and (pos('.COUNT+1', TemporaryBuf[7]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[5]) = 1) and (pos('.COUNT', TemporaryBuf[5]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[0]) = 1) and (pos(#9'lda #', TemporaryBuf[0]) = 0) and
-       (pos(#9'lda ', TemporaryBuf[2]) = 1) then
+       lda_im(6) and
+       lda_im(4) and
+       lda(8) and
+       lda(0) and (lda_im(0) = false) and
+       lda(2) then
        begin
 {
 	lda					; 0		***
@@ -352,11 +352,11 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.COUNT+1', TemporaryBuf[9]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[7]) = 1) and (pos('.COUNT', TemporaryBuf[7]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[1]) = 1) and (pos('.VALUE', TemporaryBuf[1]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[0]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[2]) = 1) and (pos(#9'lda #', TemporaryBuf[2]) = 0) and
-       (pos(#9'lda ', TemporaryBuf[4]) = 1) then
+       lda_im(8) and
+       lda_im(6) and
+       lda(0) and
+       lda(2) and (lda_im(2) = false) and
+       lda(4) then
        begin
 {
 	lda					; 0		***
@@ -420,9 +420,9 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[8]) = 1) and (pos('.COUNT+1', TemporaryBuf[8]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[6]) = 1) and (pos('.COUNT', TemporaryBuf[6]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[7]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[5]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[3]) = 1) and (pos(#9'lda #', TemporaryBuf[3]) = 0) then
+       lda_im(7) and
+       lda_im(5) and
+       lda(3) and (lda_im(3) = false) then
        begin
 {						; 0		***
 						; 1
@@ -481,10 +481,10 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[4]) = 1) and (pos('.A+1', TemporaryBuf[4]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[1]) = 1) and (pos('.A', TemporaryBuf[1]) > 0) and
-       (pos(#9'lda ', TemporaryBuf[2]) = 1) and
-       ((pos(#9'adc ', TemporaryBuf[3]) = 1) or (pos(#9'sbc ', TemporaryBuf[3]) = 1) or (pos(#9'add ', TemporaryBuf[3]) = 1) or (pos(#9'sub ', TemporaryBuf[3]) = 1)) and
+       lda(2) and
+       (adc_sbc(3) or add_sub(3)) and
        (TemporaryBuf[7] = #9'lda #$00') and
-       (pos(#9'lda #', TemporaryBuf[5]) = 1) then
+       lda_im(5) then
        begin
 {						; 0		***
 	sta SYSTEM.FILLCHAR.009E.A		; 1
@@ -526,11 +526,11 @@ begin
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[9]) = 1) and (pos('.VALUE', TemporaryBuf[9]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[3]) = 1) and (pos('.A+1', TemporaryBuf[3]) > 0) and
        (pos(#9'sta SYSTEM.FILL', TemporaryBuf[0]) = 1) and (pos('.A', TemporaryBuf[0]) > 0) and
-       (pos(#9'lda ', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda ', TemporaryBuf[1]) = 1) and
-       ((pos(#9'adc ', TemporaryBuf[2]) = 1) or (pos(#9'sbc ', TemporaryBuf[2]) = 1) or (pos(#9'add ', TemporaryBuf[2]) = 1) or (pos(#9'sub ', TemporaryBuf[2]) = 1)) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) then
+       lda(8) and
+       lda(1) and
+       (adc_sbc(2) or add_sub(2)) and
+       lda_im(4) and
+       lda_im(6) then
        begin
 {
 	sta SYSTEM.FILLCHAR.009E.A		; 0		***
