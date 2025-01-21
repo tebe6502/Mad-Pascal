@@ -8,7 +8,7 @@ var p: integer;
 begin
 
   if ((TemporaryBuf[3] = '+++unroll+++') or (TemporaryBuf[3] = '---unroll---'))	and	//+++unroll+++|---unroll---		; 3
-     (pos('ldy #', TemporaryBuf[4]) > 0) and						// ldy #				; 4
+     ldy_im(4) and									// ldy #				; 4
      sty(5) and										// sty I				; 5
 
      ldy(0) and										// ldy I				; 0
@@ -29,7 +29,7 @@ begin
 
 
   if ((TemporaryBuf[3] = '+++unroll+++') or (TemporaryBuf[3] = '---unroll---'))	and	//+++unroll+++|---unroll---		; 3
-     (pos('ldy #', TemporaryBuf[4]) > 0) and						// ldy #				; 4
+     ldy_im(4) and									// ldy #				; 4
      sty(5) and										// sty I				; 5
 
      lda(0) and										// lda					; 0
@@ -50,7 +50,7 @@ begin
 
 
   if ((TemporaryBuf[5] = '+++unroll+++') or (TemporaryBuf[5] = '---unroll---'))	and	//+++unroll+++|---unroll---		; 5
-     (pos('ldy #', TemporaryBuf[6]) > 0) and						// ldy #				; 6
+     ldy_im(6) and									// ldy #				; 6
      sty(7) and										// sty I				; 7
 
      lda(0) and										// lda					; 0
@@ -83,7 +83,7 @@ begin
 
     TemporaryBuf[0] := '~';
 
-    if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
+    if ldy_im(1) and									// ldy #				; 1
        sty(2) and									// sty I				; 2
        ldy(3) and									// ldy I				; 3
        lda(4) and									// lda					; 4
@@ -103,7 +103,7 @@ begin
 	end;
 
 
-    if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
+    if ldy_im(1) and									// ldy #				; 1
        sty(2) and									// sty I				; 2
        lda(3) and									// lda					; 3
        ldy(4) and									// ldy I				; 4
@@ -123,7 +123,7 @@ begin
 	end;
 
 
-    if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
+    if ldy_im(1) and									// ldy #				; 1
        sty(2) and									// sty I				; 2
        lda(3) and									// lda					; 3
        add_sub(4) and									// add|sub I				; 4
@@ -147,7 +147,6 @@ begin
 	end;
 
 {
-
     if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
        sty(2) and									// sty I				; 2
        lda(3) and									// lda A				; 3

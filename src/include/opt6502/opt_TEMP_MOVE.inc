@@ -19,11 +19,11 @@ if (pos(#9'jsr SYSTEM.MOVE.', TemporaryBuf[11]) = 1) or
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[4]) = 1) and (pos('.DEST', TemporaryBuf[4]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[10]) = 1) and (pos('.COUNT+1', TemporaryBuf[10]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[8]) = 1) and (pos('.COUNT', TemporaryBuf[8]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[0]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[3]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[5]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[7]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[9]) = 1) then
+       lda_im(0) and
+       lda_im(3) and
+       lda_im(5) and
+       lda_im(7) and
+       lda_im(9) then
        begin
 {
 	lda #$80			; 0		***
@@ -98,12 +98,12 @@ end;
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[5]) = 1) and (pos('.DEST', TemporaryBuf[5]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[11]) = 1) and (pos('.COUNT+1', TemporaryBuf[11]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[9]) = 1) and (pos('.COUNT', TemporaryBuf[9]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[0]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[2]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       lda_im(0) and
+       lda_im(2) and
+       lda_im(4) and
+       lda_im(6) and
+       lda_im(8) and
+       lda_im(10) then
        begin
 {
 	lda #$43			; 0		***
@@ -171,12 +171,12 @@ end;
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[5]) = 1) and (pos('.DEST', TemporaryBuf[5]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[11]) = 1) and (pos('.COUNT+1', TemporaryBuf[11]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[9]) = 1) and (pos('.COUNT', TemporaryBuf[9]) > 0) and
-       (pos(#9'lda ', TemporaryBuf[0]) = 1) and (pos(#9'lda #', TemporaryBuf[0]) = 0) and
-       (pos(#9'lda ', TemporaryBuf[2]) = 1) and (pos(#9'lda #', TemporaryBuf[2]) = 0) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       (pos(#9'lda ', TemporaryBuf[0]) = 1) and (lda_im(0) = false) and
+       (pos(#9'lda ', TemporaryBuf[2]) = 1) and (lda_im(2) = false) and
+       lda_im(4) and
+       lda_im(6) and
+       lda_im(8) and
+       lda_im(10) then
        begin
 {
 	lda DL_TITLE			; 0		***
@@ -229,10 +229,10 @@ end;
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[0]) = 1) and (pos('.SOURCE', TemporaryBuf[0]) > 0) and
        (TemporaryBuf[1] = #9'iny') and
        (TemporaryBuf[2] = #9'lda (:bp2),y') and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       lda_im(4) and
+       lda_im(6) and
+       lda_im(8) and
+       lda_im(10) then
        begin
 {
 	sta SYSTEM.MOVE.00A0.SOURCE	; 0		***
@@ -282,10 +282,10 @@ end;
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[9]) = 1) and (pos('.COUNT', TemporaryBuf[9]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[3]) = 1) and (pos('.DEST+1', TemporaryBuf[3]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[0]) = 1) and (pos('.DEST', TemporaryBuf[0]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       lda_im(4) and
+       lda_im(6) and
+       lda_im(8) and
+       lda_im(10) then
        begin
 {
 	sta SYSTEM.MOVE.00A0.DEST	; 0		***
@@ -335,10 +335,10 @@ end;
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[9]) = 1) and (pos('.COUNT', TemporaryBuf[9]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[3]) = 1) and (pos('.SOURCE+1', TemporaryBuf[3]) > 0) and
        (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[0]) = 1) and (pos('.SOURCE', TemporaryBuf[0]) > 0) and
-       (pos(#9'lda #', TemporaryBuf[4]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[6]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[8]) = 1) and
-       (pos(#9'lda #', TemporaryBuf[10]) = 1) then
+       lda_im(4) and
+       lda_im(6) and
+       lda_im(8) and
+       lda_im(10) then
        begin
 {
 	sta SYSTEM.MOVE.00A0.SOURCE	; 0		***
