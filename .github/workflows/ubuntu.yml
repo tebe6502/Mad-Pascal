@@ -78,7 +78,7 @@ jobs:
         if [[ $(git status --porcelain) ]]; then
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@noreply.github.com"
-          git commit -am "Automatic commit from GitHub Actions"
+          git commit -m "Automatic commit from GitHub Actions"
           git push origin master
         else
           echo "No changes to commit."
