@@ -868,8 +868,8 @@ var inxUse, found: Boolean;
 
 
 
-	if sta_im_0(k) and 								// lda			; k-1
-	   lda_a(k-1) then begin							// sta #$00		; k
+	if sta_im_0(k) and 								// lda|rol @|asl @	; k-1
+	   (lda_a(k-1) or rol_a(k-1) or asl_a(k-1)) then begin				// sta #$00		; k
 
 
 	  if lda_a(i+1) then						/// lda			; i+1
@@ -881,7 +881,7 @@ var inxUse, found: Boolean;
 	  end;
 
 
-	  if (ldy(i+1) or iny(i+1)) and					/// ldy|iny		; i+1
+	  if (ldy(i+1) or mwy(i+1) or iny(i+1)) and			/// ldy|mwy|iny		; i+1
 	     lda_a(i+2) then						/// lda			; i+2
 	  begin
 	   listing[k-1] := '';
@@ -935,6 +935,15 @@ var inxUse, found: Boolean;
         end;
 
 
+
+        if sta_im_0(k) and 								// sta :STACKORIGIN	; k-1
+	   sta_stack(k-1) then								// sta #$00		; k
+	  begin
+	   listing[k] := '';
+	   continue;
+	  end;
+
+
 	end;	// if k > 0
 
 
@@ -945,6 +954,7 @@ var inxUse, found: Boolean;
     listing[k]   := '';
     listing[k+1] := '';
     listing[k+2] := '';
+    listing[k+3] := '';
 
     l := k;
 
