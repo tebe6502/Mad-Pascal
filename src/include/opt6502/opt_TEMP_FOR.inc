@@ -310,7 +310,7 @@ begin
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      (pos('; optimize ', TemporaryBuf[8]) > 0) and					//; optimize 		; 8
+      opti(8) and									//; optimize 		; 8
       (TemporaryBuf[9] = '') and							//			; 9
       lda(10) then									// lda			; 10
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
@@ -350,7 +350,7 @@ begin
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
       (TemporaryBuf[7] = '') and							//			; 7
-      (pos('; optimize ', TemporaryBuf[8]) > 0) and					//; optimize 		; 8
+      opti(8) and									//; optimize 		; 8
       (TemporaryBuf[9] = '') and							//			; 9
       (TemporaryBuf[10] = #9'ldy ' + copy(TemporaryBuf[4], 6, 256)) then		// ldy C		; 10
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
@@ -467,7 +467,7 @@ begin
 	     sta(p-7) and
 
 	     (TemporaryBuf[p+2] = '') and
-	     (pos('; optimize ', TemporaryBuf[p+3]) > 0) and
+	     opti(p+3) and
 	     (TemporaryBuf[p+4] = '') and
 	     lda(p+5) and
 	     add_sub(p+6) and
@@ -502,7 +502,7 @@ begin
       (TemporaryBuf[3] = #9'cmp #$40') and						// cmp #$40		; 3
       jcs_l(4) and									// jcs l_		; 4
       (TemporaryBuf[5] ='') and								//			; 5
-      (pos('; optimize ', TemporaryBuf[6]) > 0) and					//; optimize		; 6
+      opti(6) and									//; optimize		; 6
       (TemporaryBuf[7] ='') and								//			; 7
       lda(8) then									// lda			; 8
      begin
@@ -524,7 +524,7 @@ begin
       jne_l(9) and									// jne l_		; 9
       (TemporaryBuf[10] = '@') and							//@			; 10
       (TemporaryBuf[11] ='') and							//			; 11
-      (pos('; optimize ', TemporaryBuf[12]) > 0) and					//; optimize		; 12
+      opti(12) and									//; optimize		; 12
       (TemporaryBuf[13] ='') and							//			; 13
       lda(14) and									// lda			; 14
       add(15) then									// add			; 15

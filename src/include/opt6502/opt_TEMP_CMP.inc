@@ -11,7 +11,7 @@ begin
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
       (TemporaryBuf[3] = '') and							//			; 3
-      (pos('; optimize ', TemporaryBuf[4]) > 0) and					//; optimize 		; 4
+      opti(4) and									//; optimize 		; 4
       (TemporaryBuf[5] = '') and							//			; 5
       (TemporaryBuf[6] = TemporaryBuf[0]) and						// lda I		; 6
       (SKIP(7) = false) then
@@ -70,7 +70,7 @@ begin
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
       (TemporaryBuf[3] = '') and							//			; 3
-      (pos('; optimize ', TemporaryBuf[4]) > 0) and					//; optimize 		; 4
+      opti(4) and									//; optimize 		; 4
       (TemporaryBuf[5] = '') and							//			; 5
       ldy(6) and									// ldy W		; 6
       lda(7) then									// lda 			; 7

@@ -12,7 +12,7 @@ begin
       jmp(2) and									// jmp l_xxxx		; 2
       lab_l(3) and									//l_xxxx		; 3
       (TemporaryBuf[4] = '') and							//			; 4
-      (pos('; optimize ', TemporaryBuf[5]) > 0) and					//; optimize 		; 5
+      opti(5) and									//; optimize 		; 5
       (TemporaryBuf[6] = '') and							//			; 6
       lda(7) then									// lda A		; 7
     if (TemporaryBuf[3] = copy(TemporaryBuf[2], 6, 256)) and
