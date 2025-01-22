@@ -86,10 +86,10 @@ begin
 	 Break;
        end else
         if ( (p-3 >= 8) and (copy(TemporaryBuf[p-3], 6, 256) = copy(TemporaryBuf[0], 6, 256))) or
-	   (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
+	   (pos(#9'ldy ', TemporaryBuf[p]) > 0) or
+           (pos(#9'jsr ', TemporaryBuf[p]) > 0) or
+           (pos(#9'mwy ', TemporaryBuf[p]) > 0) or
+           (pos(#9'mvy ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) or
@@ -130,10 +130,10 @@ begin
 	 Break;
        end else
         if ( (p-3 >= 7) and (copy(TemporaryBuf[p-3], 6, 256) = copy(TemporaryBuf[0], 6, 256))) or
-	   (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
+	   (pos(#9'ldy ', TemporaryBuf[p]) > 0) or
+           (pos(#9'jsr ', TemporaryBuf[p]) > 0) or
+           (pos(#9'mwy ', TemporaryBuf[p]) > 0) or
+           (pos(#9'mvy ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) or
@@ -181,10 +181,10 @@ begin
 	 Break;
        end else
         if ( (p-3 >= 9) and (copy(TemporaryBuf[p-3], 6, 256) = copy(TemporaryBuf[0], 6, 256))) or
-	   (pos('ldy ', TemporaryBuf[p]) > 0) or
-           (pos('mwy ', TemporaryBuf[p]) > 0) or
-           (pos('mvy ', TemporaryBuf[p]) > 0) or
-           (pos('jsr ', TemporaryBuf[p]) > 0) or
+	   (pos(#9'ldy ', TemporaryBuf[p]) > 0) or
+           (pos(#9'jsr ', TemporaryBuf[p]) > 0) or
+           (pos(#9'mwy ', TemporaryBuf[p]) > 0) or
+           (pos(#9'mvy ', TemporaryBuf[p]) > 0) or
            (pos(#9'.if', TemporaryBuf[p]) > 0) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) or
