@@ -206,8 +206,10 @@ begin
      begin
 	listing[i+1] := '';
 
-	if lda_a(i+2) or (ldy(i+2) and lda_a(i+3)) then listing[i] := '';		/// lda | ldy	; 2
-											///     | lda	; 3
+	if lda_a(i+2) or						/// lda | ldy | mwy	; 2
+	   (ldy(i+2) and lda_a(i+3)) or					///     | lda | lda	; 3
+	   (mwy(i+2) and lda_a(i+3)) then listing[i] := '';
+
 	exit(false);
      end;
 
