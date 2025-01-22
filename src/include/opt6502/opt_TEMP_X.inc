@@ -12,7 +12,7 @@ begin
        (pos('mva :STACKORIGIN+STACKWIDTH*3,x', TemporaryBuf[3]) > 0) and			// mva :STACKORIGIN+STACKWIDTH*3	; 3
        (TemporaryBuf[4] = #9'dex') and								// dex					; 4
        (TemporaryBuf[5] = '') and								// 					; 5
-       (pos('; optimize ', TemporaryBuf[6]) > 0) and						//; optimize				; 6
+       opti(6) and										//; optimize				; 6
        (TemporaryBuf[7] = '') and								// 					; 7
        (TemporaryBuf[8] = #9'inx') and								// inx					; 8
        ((pos('mva ', TemporaryBuf[9]) > 0) and (pos('mva :STACK', TemporaryBuf[9]) = 0)) and	// mva ... :STACKORIGIN			; 9
@@ -47,7 +47,7 @@ begin
        (pos('lda ', TemporaryBuf[6]) > 0) and							// lda B+3				; 6
        (pos('sta ', TemporaryBuf[7]) > 0) and							// sta					; 7
        (TemporaryBuf[8] = '') and								// 					; 8
-       (pos('; optimize ', TemporaryBuf[9]) > 0) and						//; optimize				; 9
+       opti(9) and										//; optimize				; 9
        (TemporaryBuf[10] = '') and								// 					; 10
        (TemporaryBuf[11] = #9'inx') and								// inx					; 11
        (TemporaryBuf[12] = #9'mva ' + GetString(0) + ' :STACKORIGIN,x') and			// mva B :STACKORIGIN,x			; 12
@@ -86,7 +86,7 @@ begin
        (pos('mva :STACKORIGIN+STACKWIDTH,x', TemporaryBuf[1]) > 0) and				// mva :STACKORIGIN+STACKWIDTH		; 1
        (TemporaryBuf[2] = #9'dex') and								// dex					; 2
        (TemporaryBuf[3] = '') and								// 					; 3
-       (pos('; optimize ', TemporaryBuf[4]) > 0) and						//; optimize				; 4
+       opti(4) and										//; optimize				; 4
        (TemporaryBuf[5] = '') and								// 					; 5
        (TemporaryBuf[6] = #9'inx') and								// inx					; 6
        ((pos('mva ', TemporaryBuf[7]) > 0) and (pos('mva :STACK', TemporaryBuf[7]) = 0)) and	// mva ... :STACKORIGIN			; 7
@@ -107,7 +107,7 @@ begin
     if (TemporaryBuf[0] = #9'dex') and							// dex			; 0
        (TemporaryBuf[1] = #9'dex') and							// dex			; 1
        (TemporaryBuf[2] = '') and							// 			; 2
-       (pos('; optimize ', TemporaryBuf[3]) > 0) and					//; optimize		; 3
+       opti(3) and									//; optimize		; 3
        (TemporaryBuf[4] = '') and							// 			; 4
        (TemporaryBuf[5] = #9'inx') and							// inx			; 5
        (TemporaryBuf[6] = #9'inx') and							// inx			; 6
@@ -123,7 +123,7 @@ begin
 
     if (TemporaryBuf[0] = #9'dex') and							// dex			; 0
        (TemporaryBuf[1] = '') and							// 			; 1
-       (pos('; optimize ', TemporaryBuf[2]) > 0) and					//; optimize		; 2
+       opti(2) and									//; optimize		; 2
        (TemporaryBuf[3] = '') and							// 			; 3
        (TemporaryBuf[4] = #9'inx') and							// inx			; 4
        (TemporaryBuf[5] <> #9'inx') then						//~inx			; 5

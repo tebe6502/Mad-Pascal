@@ -147,7 +147,7 @@ begin
        if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if yes and
-           (pos('lda ', TemporaryBuf[6]) > 0) and					// lda		; 6
+           lda(6) and									// lda		; 6
            ((pos('and #', TemporaryBuf[7]) > 0) or					// and		; 7
             (pos('ora #', TemporaryBuf[7]) > 0) or					// ora
             (pos('eor #', TemporaryBuf[7]) > 0)) and					// eor
