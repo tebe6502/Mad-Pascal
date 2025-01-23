@@ -1,4 +1,15 @@
 
+  function MVA(i: integer): Boolean;
+  begin
+    Result := pos(#9'mva ', TemporaryBuf[i]) = 1
+  end;
+
+  function MVA_IM(i: integer): Boolean;
+  begin
+    Result := pos(#9'mva #', TemporaryBuf[i]) = 1
+  end;
+
+
   function IFTMP(i: integer): Boolean;
   begin
     Result := pos(#9'lda IFTMP_', TemporaryBuf[i]) = 1
@@ -14,11 +25,21 @@
     Result := pos('l_', TemporaryBuf[i]) = 1
   end;
 
+  function LAB_A(i: integer): Boolean;
+  begin
+    Result := (TemporaryBuf[i] = '@')
+  end;
+
   function LAB_B(i: integer): Boolean;
   begin
     Result := pos('b_', TemporaryBuf[i]) = 1
   end;
 
+  function LAB_C(i: integer): Boolean;
+  begin
+    Result := pos('c_', TemporaryBuf[i]) = 1
+  end;
+ 
   function LAB_S(i: integer): Boolean;
   begin
     Result := pos('s_', TemporaryBuf[i]) = 1
@@ -107,6 +128,11 @@
   function ADC_SBC(i: integer): Boolean;
   begin
     Result := (pos(#9'adc ', TemporaryBuf[i]) = 1) or (pos(#9'sbc ', TemporaryBuf[i]) = 1)
+  end;
+
+  function SBC(i: integer): Boolean;
+  begin
+    Result := pos(#9'sbc ', TemporaryBuf[i]) = 1
   end;
 
 

@@ -18,14 +18,14 @@ begin
 
       if lab_s(i+1) then TemporaryBuf[i+1]:= '~';
 
-      tmp:=TemporaryBuf[i];			// jmp a_xxxx
-      lab:=copy(tmp, 6, 256);			// a_xxxx
+      tmp:=TemporaryBuf[i];				// jmp a_xxxx
+      lab:=copy(tmp, 6, 256);				// a_xxxx
 
       yes:=false;
 
       for p:=i+1 to High(TemporaryBuf) do
-       if (TemporaryBuf[p] = tmp) and		// jmp a_xxxx
-          lab_s(p+1) then			//s_xxxx
+       if (TemporaryBuf[p] = tmp) and			// jmp a_xxxx
+          lab_s(p+1) then				//s_xxxx
 	begin
 	  yes:=true;
 	  Break;
@@ -33,9 +33,12 @@ begin
 
 
       if yes then
-       if (TemporaryBuf[i-1] = TemporaryBuf[p-1]) and (sta(p-1) or jsr(p-1)) then begin
+      if (TemporaryBuf[i-2] = TemporaryBuf[p-2]) and
+         (TemporaryBuf[i-1] = TemporaryBuf[p-1]) and
+         (sta(p-1) or jsr(p-1)) then
+      begin
 
-	lab:=TemporaryBuf[p+1];			//s_xxxx
+	lab:=TemporaryBuf[p+1];				//s_xxxx
 
 	TemporaryBuf[i] := #9'jmp ' + lab;
 
@@ -47,6 +50,9 @@ begin
 	    (lab_l(i-k) and lab_l(p-k)) or
 	    (opti(i-k) and opti(p-k)) then
 	 begin
+
+	  if lab_a(i-k) then
+	   if (TemporaryBuf[i-k-1] <> TemporaryBuf[p-k-1]) or (TemporaryBuf[i-k-2] <> TemporaryBuf[p-k-2]) then exit;
 
 	  if (TemporaryBuf[i-k] = TemporaryBuf[p-k]) then TemporaryBuf[i-k] := '~';
 

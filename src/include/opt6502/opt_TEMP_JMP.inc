@@ -101,4 +101,14 @@ begin
       end;
 
 
+    if (SKIP(0) = false) and								//~SKIP			; 0
+       (pos('jmp a_', TemporaryBuf[1]) > 0) and						// jmp a_xxxx		; 1
+       (TemporaryBuf[2] = '~') and							//~			; 2
+       lab_l(3) and									//l_yyyy		; 3
+       (TemporaryBuf[4] = copy(TemporaryBuf[1], 6, 256)) then				//a_xxxx		; 4
+      begin
+	TemporaryBuf[1] := '~';
+      end;
+
+
 end;	// procedure
