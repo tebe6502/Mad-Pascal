@@ -72,7 +72,7 @@ writeln('-------');
 	    (opti(i-k) and opti(p-1-k)) then
 	 begin
 
- 	  TemporaryBuf[i-k] := '~';
+ 	  if (TemporaryBuf[i-k] = TemporaryBuf[p-1-k]) then TemporaryBuf[i-k] := '~';
 
 	  TemporaryBuf[p-k] := TemporaryBuf[p-1-k];
 	  TemporaryBuf[p-1-k] := lab;
