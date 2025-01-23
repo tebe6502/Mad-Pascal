@@ -233,7 +233,7 @@ begin
       while (TemporaryBuf[p] <> tmp) and (p < High(TemporaryBuf)) do inc(p);
 
       if (TemporaryBuf[p] = tmp) and
-         (pos('mva ', TemporaryBuf[p-1]) > 0) and							// mva ... I
+         mva(p-1) and											// mva ... I
          (TemporaryBuf[p-1] = #9'mva ' + GetString(p-1) + ' ' + copy(TemporaryBuf[6], 6, 256)) and	//l_
          (TemporaryBuf[p+1] = '') then
   	begin
@@ -530,14 +530,14 @@ begin
     end;
 
 
-   if (pos('mva #', TemporaryBuf[0]) > 0) and						// mva #$xx		; 0
-      (pos('mva #', TemporaryBuf[1]) > 0) and						// mva #$xx		; 1
-      (pos('mva #', TemporaryBuf[2]) > 0) then						// mva #$xx		; 2
+   if mva_im(0) and									// mva #$xx		; 0
+      mva_im(1) and									// mva #$xx		; 1
+      mva_im(2) then									// mva #$xx		; 2
     if (copy(TemporaryBuf[0], 6, 4) = copy(TemporaryBuf[1], 6, 4)) and
        (copy(TemporaryBuf[1], 6, 4) = copy(TemporaryBuf[2], 6, 4)) then
      begin
 
-      if (pos('mva #', TemporaryBuf[3]) > 0) then begin					// mva #$yy		; 3
+      if mva_im(3) then begin								// mva #$yy		; 3
 
        if (copy(TemporaryBuf[1], 6, 4) = copy(TemporaryBuf[3], 6, 4)) then
          TemporaryBuf[3] := #9'sta' + copy(TemporaryBuf[3], 10, 256);
@@ -550,12 +550,12 @@ begin
      end;
 
 
-   if (pos('mva #', TemporaryBuf[0]) > 0) and						// mva #$xx		; 0
-      (pos('mva #', TemporaryBuf[1]) > 0) then						// mva #$xx		; 1
+   if mva_im(0) and									// mva #$xx		; 0
+      mva_im(1) then									// mva #$xx		; 1
     if (copy(TemporaryBuf[0], 6, 4) = copy(TemporaryBuf[1], 6, 4)) then
      begin
 
-      if (pos('mva #', TemporaryBuf[2]) > 0) then begin					// mva #$yy		; 2
+      if mva_im(2) then begin								// mva #$yy		; 2
 
        if (copy(TemporaryBuf[1], 6, 4) = copy(TemporaryBuf[2], 6, 4)) then
          TemporaryBuf[2] := #9'sta' + copy(TemporaryBuf[2], 10, 256);
@@ -567,8 +567,8 @@ begin
      end;
 
 
-   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva RNDNUMBER N	; 0
-      (pos('mva ', TemporaryBuf[1]) > 0) and						// mva RNDNUMBER N+1	; 1
+   if mva(0) and									// mva RNDNUMBER N	; 0
+      mva(1) and									// mva RNDNUMBER N+1	; 1
       (TemporaryBuf[2] = '') and							//			; 2
       opti(3) and									//; optimize 		; 3
       (TemporaryBuf[4] = '') and							//			; 4
@@ -593,7 +593,7 @@ begin
     end;
 
 
-   if (pos('mva ', TemporaryBuf[0]) > 0) and						// mva RNDNUMBER N	; 0
+   if mva(0) and									// mva RNDNUMBER N	; 0
       (TemporaryBuf[1] = '') and							//			; 1
       opti(2) and									//; optimize 		; 2
       (TemporaryBuf[3] = '') and							//			; 3

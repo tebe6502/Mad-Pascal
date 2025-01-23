@@ -223,14 +223,16 @@ var p, k , q: integer;
 
 begin
 
+
 {
-if (pos('lda #$29', TemporaryBuf[3]) > 0) then begin
+if (pos('jmp a_0004', TemporaryBuf[3]) > 0) then begin
 
       for p:=0 to 11 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
 }
+
 
     opt_TEMP_BOOLEAN_OR;
     opt_TEMP_ORD;
@@ -392,33 +394,33 @@ end;
 
    if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
-    if (pos('lda ', TemporaryBuf[0]) > 0) then begin
+    if lda(0) then begin
 
      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
-    if (pos('cmp ', TemporaryBuf[0]) > 0) then begin
+    if cmp(0) then begin
 
      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
-    if (pos('sub ', TemporaryBuf[0]) > 0) then begin
+    if sub(0) then begin
 
      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
-    if (pos('sbc ', TemporaryBuf[0]) > 0) then begin
+    if sbc(0) then begin
 
      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
-    if (pos('sta ', TemporaryBuf[0]) > 0) then
+    if sta(0) then
       TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
     else
-    if (pos('sty ', TemporaryBuf[0]) > 0) then
+    if sty(0) then
       TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
     else
-    if (pos('mva ', TemporaryBuf[0]) > 0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
+    if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
      tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
 
      TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + fortmp(tmp);
@@ -869,6 +871,14 @@ var inxUse, found: Boolean;
 	  end;
 
 
+        if sta_im_0(k) and 								// sta :STACKORIGIN	; k-1
+	   sta_stack(k-1) then								// sta #$00		; k
+	  begin
+	   listing[k] := '';
+	   continue;
+	  end;
+
+
 
 	if sta_im_0(k) and 								// lda|rol @|asl @	; k-1
 	   (lda_a(k-1) or rol_a(k-1) or asl_a(k-1)) then begin				// sta #$00		; k
@@ -936,14 +946,6 @@ var inxUse, found: Boolean;
 
         end;
 
-
-
-        if sta_im_0(k) and 								// sta :STACKORIGIN	; k-1
-	   sta_stack(k-1) then								// sta #$00		; k
-	  begin
-	   listing[k] := '';
-	   continue;
-	  end;
 
 
 	end;	// if k > 0
