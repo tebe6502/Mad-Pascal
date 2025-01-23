@@ -202,7 +202,8 @@ var p, k , q: integer;
 
 {$i include/opt6502/opt_TEMP_MOVE.inc}
 {$i include/opt6502/opt_TEMP_FILL.inc}
-{$i include/opt6502/opt_TEMP_TAIL.inc}
+{$i include/opt6502/opt_TEMP_TAIL_IF.inc}
+{$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
 {$i include/opt6502/opt_TEMP.inc}
 {$i include/opt6502/opt_TEMP_CMP.inc}
 {$i include/opt6502/opt_TEMP_CMP_0.inc}
@@ -359,7 +360,8 @@ end;
    opt_TEMP_FILL;
 
    opt_TEMP_IFTMP;
-   opt_TEMP_TAIL;
+   opt_TEMP_TAIL_IF;
+   opt_TEMP_TAIL_CASE;
 
 
 // #asm

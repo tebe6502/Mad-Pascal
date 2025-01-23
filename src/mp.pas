@@ -3725,9 +3725,9 @@ if Down then
   begin
 
   if ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK] then
-   asm65(#9'bpl *+5', '; >=')
+   asm65(#9'bpl *+5')
   else
-   asm65(#9'bcs *+5', '; >=');
+   asm65(#9'bcs *+5');
 
   end
 
@@ -3735,10 +3735,10 @@ else
   begin
 
   if ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK] then begin
-   asm65(#9'bmi *+7', '; <=');
+   asm65(#9'bmi *+7');
    asm65(#9'beq *+5');
   end else begin
-   asm65(#9'bcc *+7', '; <=');
+   asm65(#9'bcc *+7');
    asm65(#9'beq *+5');
   end;
 
@@ -3902,7 +3902,7 @@ begin
 
  asm65(#9'jmp a_'+IntToHex(cnt,4));
 
-// asm65('l_' + IntToHex(CodeSize, 4));
+ asm65('s_'+IntToHex(CodeSize, 4));				// opt_TEMP_TAIL_CASE
 
 
  StoredCodeSize := CodeSize;
@@ -5513,7 +5513,7 @@ begin
 
  Gen;
 
- asm65(#9'ldy #1', '; true');
+ asm65(#9'ldy #1');
 
  Gen;
 
@@ -13419,7 +13419,7 @@ WHILETOK:
       Error(i, 'BREAK not allowed');
 
 //     asm65;
-     asm65(#9'jmp b_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4), '; break');
+     asm65(#9'jmp b_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
 
      BreakPosStack[BreakPosStackTop].brk := true;
 
@@ -13435,7 +13435,7 @@ WHILETOK:
       Error(i, 'CONTINUE not allowed');
 
 //     asm65;
-     asm65(#9'jmp c_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4), '; continue');
+     asm65(#9'jmp c_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
 
      BreakPosStack[BreakPosStackTop].cnt := true;
 
