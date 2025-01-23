@@ -16,7 +16,7 @@ begin
    if (pos(#9'jmp a_', TemporaryBuf[i]) > 0) then			// jmp a_xxxx
     begin
 
-      //if lab_s(i+1) then TemporaryBuf[i+1]:= '~';
+      if lab_s(i+1) then TemporaryBuf[i+1]:= '~';
 
       tmp:=TemporaryBuf[i];			// jmp a_xxxx
       lab:=copy(tmp, 6, 256);			// a_xxxx
@@ -32,18 +32,15 @@ begin
 	end;
 
 
-      if yes then begin
+      if yes then
+       if (TemporaryBuf[i-1] = TemporaryBuf[p-1]) and (sta(p-1) or jsr(p-1)) then begin
 
 	lab:=TemporaryBuf[p+1];			//s_xxxx
 
 	TemporaryBuf[i] := #9'jmp ' + lab;
 
 	TemporaryBuf[p] := lab;
-	TemporaryBuf[p+1] := tmp;		  
-	  
-	writeln(p-i);
-
-     // writeln(TemporaryBuf[i] ,',', TemporaryBuf[p]) ;
+	TemporaryBuf[p+1] := tmp;
 
         for k:=1 to i-1 do
          if (TemporaryBuf[i-k] = TemporaryBuf[p-k]) or
@@ -51,7 +48,7 @@ begin
 	    (opti(i-k) and opti(p-k)) then
 	 begin
 
- 	  TemporaryBuf[i-k] := '~';
+	  if (TemporaryBuf[i-k] = TemporaryBuf[p-k]) then TemporaryBuf[i-k] := '~';
 
 	  tmp := TemporaryBuf[p-k];
 
