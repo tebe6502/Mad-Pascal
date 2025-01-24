@@ -665,7 +665,7 @@ asm {
     bcc @+
     stx xBiosIOerror
     mva #1 xBiosIOresult 
-    pla:tax
+@   pla:tax
 };
 end;
 
