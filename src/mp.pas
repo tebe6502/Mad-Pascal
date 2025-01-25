@@ -16918,16 +16918,31 @@ for j := NumUnits downto 2 do
   asm65(#9'eif');
  end;
 
+
 asm65;
 asm65('.nowarn'#9'.print ''CODE: '',CODEORIGIN,''..'',MAIN.@RESOURCE-1');
+
+asm65;
+asm65(#9'ift .SIZEOF(MAIN.@RESOURCE)>0');
+asm65(#9'.print ''RESOURCE: '',MAIN.@RESOURCE,''..'',MAIN.@RESOURCE+.SIZEOF(MAIN.@RESOURCE)-1');
+asm65(#9'eif');
+asm65;
+
 
 for i:=0 to High(resArray)-1 do
  if resArray[i].resStream then
    asm65(#9'.print ''$R '+resArray[i].resName+''','+''' '''+','+'"'''+resArray[i].resFile+'''"'+','+''' '''+',MAIN.@RESOURCE.'+resArray[i].resName+','+'''..'''+',MAIN.@RESOURCE.'+resArray[i].resName+'.end-1');
 
+asm65;
+asm65(#9'.print ''VARS: '',MAIN.@RESOURCE+.SIZEOF(MAIN.@RESOURCE),''..'',@end-1');
+
 asm65separator;
 
 asm65;
+asm65('@end');
+
+asm65;
+
 
 if DATA_BASE > 0 then
  asm65(#9'org $'+IntToHex(DATA_BASE, 4))
@@ -16942,7 +16957,6 @@ else begin
  asm65(#9'?old_adr = *');
 
 end;
-
 
 asm65;
 asm65('DATAORIGIN');
@@ -17017,6 +17031,8 @@ end;
 asm65;
 asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
 
+asm65;
+asm65(#9'ert DATAORIGIN<@end,''DATA memory overlap''');
 
 if FastMul > 0  then begin
 
