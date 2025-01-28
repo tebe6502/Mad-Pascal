@@ -1,12 +1,12 @@
 // RMT PLAYER
 
-
+{$define romoff}
 
 uses crt, rmt;
 
 const
-	rmt_player = $a000;
-	rmt_modul = $4000;
+	rmt_player = $e000;
+	rmt_modul = $c000;
 
 var
 	msx: TRMT;
@@ -29,7 +29,7 @@ begin
 
 	asm
 
-	lda #$c0		; $00 max volume ; $f0 silenc
+	lda #$00		; $00 max volume ; $f0 silenc
 	sta RMTGLOBALVOLUMEFADE
 
 	end;
