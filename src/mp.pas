@@ -54,6 +54,7 @@ Contributors:
 
 + Jerzy Kut :
 	- {$DEFINE ROMOFF}
+	- RMTPLAY2 (base/atari/players/rmt_player_reloc.asm)
 
 + Joseph Zatarski (https://forums.atariage.com/topic/225063-full-color-ansi-vbxe-terminal-in-the-works/) :
 	- base\atari\vbxeansi.asm
