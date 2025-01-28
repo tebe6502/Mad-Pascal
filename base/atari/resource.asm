@@ -15,6 +15,7 @@
 	RELOC		RAM
 	RMT		RAM / ROM
 	RMTPLAY		RAM
+	RMTPLAY2	RAM / ROM
 	XBMP
 	SAPR		RAM / ROM
 	SAPRPLAY	RAM / ROM
@@ -396,7 +397,7 @@ data
 
 len	= .sizeof(_%%2)
 
-	ert <main.%%lab <> 0,'SAP-R LZSS PLAYER routine MUST be compiled from the begin of the memory page'
+	ert <main.%%lab <> 0,'SAP-R LZSS PLAYER must start from the beginning of the memory page'	                                        
 
 mcpy	ift (main.%%lab<$bc20) && (main.%%lab+len >= $bc20)
 	mva #0 sdmctl
@@ -428,10 +429,10 @@ data
 
 
 /* ----------------------------------------------------------------------- */
-/* RMTPLAY
+/* RMTPLAY2
 /* ----------------------------------------------------------------------- */
 
-.macro	RMTPLAY (nam, lab, mode, zp)
+.macro	RMTPLAY2 (nam, lab, mode, zp)
 
 	org RESORIGIN
 
@@ -440,7 +441,7 @@ PLAYER		= main.%%lab
 
 len	= .sizeof(_%%2)
 
-	ert <PLAYER <> 0,'RMT player routine MUST be compiled from the begin of the memory page'
+	ert <PLAYER <> 0,'RMT PLAYER must start from the beginning of the memory page'
 
 mcpy	jsr sys.off
 
@@ -468,7 +469,7 @@ data
 	.endif
 	eif
 
-	.echo '$R RMTPLAY ',data.p_tis,'..',.zpvar-1,', ',PLAYER,'..',data+.sizeof(_%%lab)-1," %%nam"
+	.echo '$R RMTPLAY ',_%%lab.p_tis,'..',.zpvar-1,', ',PLAYER,'..',_%%lab+.sizeof(_%%lab)-1," %%nam"
 .endm
 
 
@@ -476,7 +477,7 @@ data
 /* RMTPLAY
 /* ----------------------------------------------------------------------- */
 
-/*
+
 .macro	RMTPLAY (nam, lab, mode, zp)
 
 STEREOMODE	= %%mode
@@ -488,21 +489,21 @@ PLAYER		= main.%%lab
 	org %%zp
 	eif	
 
-	ert <PLAYER <> 0,'RMT player routine MUST be compiled from the begin of the memory page'
+	ert <PLAYER <> 0,'RMT PLAYER must start from the beginning of the memory page'
 
 	icl 'atari\players\rmt_player.asm'
 
 	icl %%1
 
-	ert *>=$c000
+	ert *>=$c000,'player address >= $c000, use RMTPLAY2'
 
-	.echo '$R RMTPLAY ',p_tis,'..',zp_end,', ',track_variables,'..',RMTPLAYEREND," %%nam"
+	.echo '$R RMTPLAY ',p_tis,'..',zp_end-1,', ',track_variables,'..',RMTPLAYEREND-1," %%nam"
 	
 	ert (track_variables > CODEORIGIN) && (track_variables < PROGRAMSTACK), 'Memory overlap'
 
 	ert (RMTPLAYEREND > CODEORIGIN) && (RMTPLAYEREND < PROGRAMSTACK), 'Memory overlap'
 .endm
-*/
+
 
 /* ----------------------------------------------------------------------- */
 /* RCASM
