@@ -1,7 +1,9 @@
 uses crt, cmc;
 
+{$define romoff}
+
 const
-	cmc_player = $a000;
+	cmc_player = $e000;
 	cmc_modul = $4000;
 
 var

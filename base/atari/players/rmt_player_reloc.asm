@@ -1,28 +1,22 @@
-// Mono:
-// Ja tam robi³em jakieœ modyfikacje do patchowanej tabeli basów 0a i do
-// playera analmuxa (sa dwa rozne).
-// Odpowiada za to zmienna patch (bajt).
-// 0=standard RMT 1.28
-// 1=0A patch
-// 2=Analmux 3 (instrumentarium)
-// 3=Analmux 3R1 (instrumentarium remix 1)
-
 ;*
 ;* Raster Music Tracker, RMT Atari routine version 1.20090108
 ;* (c) Radek Sterba, Raster/C.P.U., 2002 - 2009
 ;* http://raster.atari.org
 ;
-; Modified by Mono for relocation with SDX.
+;* Modifications:
+;* (c) Jerzy Kut, Mono/Tristss, 2011-2025
+;* 2011/08/15: player can be placed on any address in memory
+;* 2011/08/16: RMT4 plays the same on both channels
+;* 2015/12/16: RMTPATCH variable introduced to configure: 0-standard RMT 1.28, 1-Miker's 0A patch
+;* 2025/01/26: self-modify code removed; on-the-fly addresses recalculation; optimizations
+
 ;*
 ;* Warnings:
 ;*
-;* 1. RMT player routine needs 19 itself reserved bytes in zero page (no accessed
-;*    from any other routines) as well as cca 1KB of memory before the "PLAYER"
-;*    address for frequency tables and functionary variables. It's:
-;*	  a) from PLAYER-$03c0 to PLAYER for stereo RMTplayer
-;*    b) from PLAYER-$0320 to PLAYER for mono RMTplayer
+;* 1. RMT player routine needs 19+6 itself reserved bytes in zero page (no accessed
+;*    from any other routines) as well as cca 1KB of memory for functionary variables.
 ;*
-;* 2. RMT player routine MUST (!!!) be compiled from the begin of the memory page.
+;* 2. RMT player routine do not need to be compiled from the begin of the memory page.
 ;*    i.e. "PLAYER" address can be $..00 only!
 ;*
 ;* 3. Because of RMTplayer provides a lot of effects, it spent a lot of CPU time.
@@ -32,50 +26,105 @@
 ;*									;2 => compile RMTplayer for 4 tracks stereo L1 R2 R3 L4
 ;*									;3 => compile RMTplayer for 4 tracks stereo L1 L2 R3 R4
 ;*
+;* Recommended usage example in own code:
+;*
+;* STEREOMODE = 1
+;* 	icl "rmt_feat.a65"
+;* FEAT_RECALCADDR = 1
+;* FEAT_PATCH = 1
+;*
+;* 	icl "rmt_constants.icl"
+;*
+;*	org $80
+;*
+;*	icl "rmt_zeropage.icl"
+;*
+;*	org $400
+;*
+;*	icl "rmt_variables.icl"
+;*
+;*	org $A000
+;*
+;* start:
+;*	IFT FEAT_PATCH
+;*	lda #RMT_STANDARD
+;*	sta RMTPATCH
+;*	EIF
+;*	IFT FEAT_RECALCADDR
+;*	ldx #<original_module_address
+;*	ldy #>original_module_address
+;*	stx RMTORIGINALADDR
+;*	sty RMTORIGINALADDR+1
+;*	EIF
+;*
+;*	lda #$00
+;*	sta RMTGLOBALVOLUMEFADE
+;*	lda #$F0
+;*	sta RMTSFXVOLUME
+;*
+;*	ldx #<music
+;*	ldy #>music
+;*	lda #0
+;*	jsr RASTERMUSICTRACKER		;init
+;*
+;* ?loop
+;*	jsr waitvblk
+;*	jsr RASTERMUSICTRACKER+3	;play
+;*	jsr keyprssed
+;*	bne ?loop
+;*
+;*	jmp RASTERMUSICTRACKER+9	;silence
+;*
+;* music
+;*	ins "music.rmt",6
+;*
+
+;*
+;* Set of RMT main vectors:
+;*
+
+
+// ---------------------------------------------------
+
 	IFT STEREOMODE==1
 TRACKS		equ 8
 	ELS
 TRACKS		equ 4
 	EIF
-;*
-;PLAYER		equ $3400
-;*
-;* RMT FEATures definitions file
-;* For optimizations of RMT player routine to concrete RMT modul only!
-;	icl "rmt_feat.a65"
-;*
-;* RMT ZeroPage addresses
-	org $e0
-p_tis
-p_instrstable		org *+2
-p_trackslbstable	org *+2
-p_trackshbstable	org *+2
-p_song			org *+2
-ns			org *+2
-nr			org *+2
-nt			org *+2
-reg1			org *+1
-reg2			org *+1
-reg3			org *+1
-tmp			org *+1
+INSTRPAR	equ 12
 
-;	IFT FEAT_COMMAND2
-;frqaddcmd2		org *+1
-;	EIF
+FEAT_EFFECTS equ FEAT_EFFECTVIBRATO||FEAT_EFFECTFSHIFT
 
+FEAT_RECALCADDR = 0
+FEAT_PATCH = 0
 
+RMT_STANDARD = 0	;standard RMT 1.28
+RMT_PATCH0A = 1		;16-bit bass 0a patch
 
-	org PLAYER
-;*
-;* Set of RMT main vectors:
-;*
-rmt_player:
-RASTERMUSICTRACKER
-	jmp rmt_init
+// ---------------------------------------------------
+
+p_tis = .ZPVAR
+
+.ZPVAR .word p_instrstable, p_trackslbstable, p_trackshbstable, p_song, ns, nr, nt
+.ZPVAR .byte reg1, reg2, reg3, tmp
+
+	IFT FEAT_COMMAND2
+	.ZPVAR .byte frqaddcmd2
+	EIF
+
+	IFT FEAT_PATCH
+	.ZPVAR .word rmtdistad, rmtfrqload, rmtfrqhiad
+	EIF
+
+// ---------------------------------------------------
+
 	jmp rmt_play
+
+	jmp rmt_init
 	jmp rmt_p3
 	jmp rmt_silence
 	jmp SetPokey
+
 	IFT FEAT_SFX
 	jmp rmt_sfx			;* A=note(0,..,60),X=channel(0,..,3 or 0,..,7),Y=instrument*2(0,2,4,..,126)
 	EIF
@@ -100,97 +149,32 @@ ri0	sta track_variables-1,y
 	bne ri0
 	EIF
 
-  lda patch
-  asl
-  tay
-  lda basslotabad,y
-  sta rmtfrqload
-  lda basslotabad+1,y
-  sta rmtfrqload+1
-  lda basshitabad,y
-  sta rmtfrqhiad
-  lda basshitabad+1,y
-  sta rmtfrqhiad+1
-  lda tabdistortabad,y
-  sta rmtdistad
-  lda tabdistortabad+1,y
-  sta rmtdistad+1
-  lda tabbegtabad,y
-  sta rmtbegad
-  lda tabbegtabad+1,y
-  sta rmtbegad+1
-  lda skctltabad,y
-  sta patchroutineaddr
-  lda skctltabad+1,y
-  sta patchroutineaddr+1
-  lda patch
-  cmp #2	;analmux instrumentarium patch
-  bcc ?skipanalmux
-  lda #$d0
-  sta rmtaudctl1mask
-  lda #$a8
-  sta rmtaudctl2mask
-  lda addr11
-  sne
-  dec addr11+1
-  dec addr11
-  lda addr12
-  sne
-  dec addr12+1
-  dec addr12
-  lda addr13
-  sne
-  dec addr13+1
-  dec addr13
-  lda addr21
-  sne
-  dec addr21+1
-  dec addr21
-  lda addr22
-  sne
-  dec addr22+1
-  dec addr22
-  lda addr23
-  sne
-  dec addr23+1
-  dec addr23
+	IFT FEAT_PATCH
+	lda RMTPATCH
+	asl
+	tay
+	lda basslotabad,y
+	sta rmtfrqload
+	lda basslotabad+1,y
+	sta rmtfrqload+1
+	lda basshitabad,y
+	sta rmtfrqhiad
+	lda basshitabad+1,y
+	sta rmtfrqhiad+1
+	lda tabdistortabad,y
+	sta rmtdistad
+	lda tabdistortabad+1,y
+	sta rmtdistad+1
+	EIF
 
-;calc analmux instrumentarium tabs
-  ldy #0
-?loop:
-  clc
-  tya
-  adc rmtoffset
-  ldx patch
-  cpx #3
-  ldx #%00000011	;3
-  bcs ?remix1
+	ldy #3
+	lda (ns),y	;RMTx
+	and #%00001111
+	sta v_channel_number
+	sta v_channel_number_less1
+	dec v_channel_number_less1
 
-  ;analmux instrumentarium
-  and #$fb
-  eor #$88
-  bne ?next
-  beq ?sync
-
-?remix1:
-  ;analmux instrumentarium remix 1
-  ora #0
-  beq ?sync
-  cmp #$fc
-  bne ?next
-
-?sync:
-  ldx #%10001011	;$8b
-
-?next:
-  txa
-  sta analmux_instrumentarium_tab,y
-  iny
-  bne ?loop
-
-?skipanalmux:
-
-	ldy #4
+	iny
 	lda (ns),y
 	sta v_maxtracklen
 	iny
@@ -207,63 +191,48 @@ ri0	sta track_variables-1,y
 	lda #FEAT_INSTRSPEED
 	sta v_ainstrspeed
 	EIF
+
+	IFT FEAT_RECALCADDR
+	lda ns
+	sec
+	sbc RMTORIGINALADDR
+	sta v_addr_delta
+	lda ns+1
+	sbc RMTORIGINALADDR+1
+	sta v_addr_delta+1
+	EIF
 	ldy #8
 ri1	lda (ns),y
+	IFT FEAT_RECALCADDR
+	clc
+	adc v_addr_delta
+	sta p_tis-8,y
+	iny
+	lda (ns),y
+	adc v_addr_delta+1
+	EIF
 	sta p_tis-8,y
 	iny
 	cpy #8+8
 	bne ri1
+
 	IFT FEAT_NOSTARTINGSONGLINE==0
-	
-;modified by mono
 	lda #0
-	sta rmttmp
-	lda moduletype
+	sta tmp
+	lda v_channel_number
 	cmp #8
 	pla
 	bcc ?x4
 	asl @
-	rol rmttmp
-?x4:
+	rol tmp
+?x4	asl @
+	rol tmp
 	asl @
-	rol rmttmp
-	asl @
-	rol rmttmp
-	;clc
+	rol tmp
+;	clc
 	adc p_song
 	sta p_song
-	lda rmttmp
-	
-;	pla
-;	pha
-;	IFT TRACKS>4
-;	asl @
-;	asl @
-;	asl @
-;	clc
-;	adc p_song
-;	sta p_song
-;	pla
-;	php
-;	and #$e0
-;	asl @
-;	rol @
-;	rol @
-;	rol @
-;	ELS
-;	asl @
-;	asl @
-;	clc
-;	adc p_song
-;	sta p_song
-;	pla
-;	php
-;	and #$c0
-;	asl @
-;	rol @
-;	rol @
-;	EIF
-;	plp
+	lda tmp
 	adc p_song+1
 	sta p_song+1
 	EIF
@@ -309,8 +278,15 @@ nn1	txa
 	bcs nn2
 	tay
 	lda (p_trackslbstable),y
+	IFT FEAT_RECALCADDR
+;	clc
+	adc v_addr_delta
+	EIF
 	sta trackn_db,x
 	lda (p_trackshbstable),y
+	IFT FEAT_RECALCADDR
+	adc v_addr_delta+1
+	EIF
 nn1a sta trackn_hb,x
 	lda #0
 	sta trackn_idx,x
@@ -319,13 +295,16 @@ nn1a2 sta trackn_pause,x
 	lda #$80
 	sta trackn_instrx2,x
 	inx
-;modified by mono
-xtracks01	cpx moduletype	;#TRACKS
+xtracks01
+	IFT STEREOMODE==1		;* L1 L2 L3 L4 R1 R2 R3 R4
+	cpx v_channel_number
+	ELS
+	cpx #TRACKS
+	EIF
 	bne nn1
 	lda p_song
 	clc
-;modified by mono
-xtracks02	adc moduletype	;#TRACKS
+xtracks02	adc v_channel_number	;#TRACKS
 	sta p_song
 	bcc GetTrackLine
 	inc p_song+1
@@ -339,9 +318,16 @@ nn2a
 nn3
 	ldy #2
 	lda (p_song),y
+	IFT FEAT_RECALCADDR
+	clc
+	adc v_addr_delta
+	EIF
 	tax
 	iny
 	lda (p_song),y
+	IFT FEAT_RECALCADDR
+	adc v_addr_delta+1
+	EIF
 	sta p_song+1
 	stx p_song
 	ldx #0
@@ -350,17 +336,12 @@ GetTrackLine
 oo0
 oo0a
 	IFT FEAT_CONSTANTSPEED==0
-	lda #$ff
-v_speed equ *-1
+	lda v_speed
 	sta v_bspeed
 	EIF
-;;mono - optimize
-;	ldx #0
-;oo1
 	ldx #-1
 oo1
 	inx
-
 	dec trackn_pause,x
 	bne oo1x
 oo1b
@@ -399,8 +380,7 @@ oo1a
 	lda reg1
 	IFT FEAT_GLOBALVOLUMEFADE
 	sec
-	sbc #$00
-RMTGLOBALVOLUMEFADE equ *-1
+	sbc RMTGLOBALVOLUMEFADE:: #$00
 	bcs voig
 	lda #0
 voig
@@ -408,18 +388,15 @@ voig
 	and #$f0
 	sta trackn_volume,x
 oo1x
-;modified by mono
-xtracks03sub1:
-  inx
-  cpx moduletype
-  php
-  dex
-  plp
-;xtracks03sub1	cpx #TRACKS-1
+xtracks03sub1
+	IFT STEREOMODE==1		;* L1 L2 L3 L4 R1 R2 R3 R4
+	cpx v_channel_number_less1
+	ELS
+	cpx #TRACKS-1
+	EIF
 	bne oo1
 	IFT FEAT_CONSTANTSPEED==0
-	lda #$ff
-v_bspeed equ *-1
+	lda v_bspeed
 	sta v_speed
 	ELS
 	lda #FEAT_CONSTANTSPEED
@@ -476,16 +453,24 @@ rmt_sfx
 	IFT FEAT_BASS16
 	sta trackn_outnote,x
 	EIF
-	lda #$f0				;* sfx note volume*16
-RMTSFXVOLUME equ *-1		;* label for sfx note volume parameter overwriting
+	lda RMTSFXVOLUME:: #$00
+;	lda #$f0			;* sfx note volume*16
+;RMTSFXVOLUME equ *-1			;* label for sfx note volume parameter overwriting
 	sta trackn_volume,x
 	EIF
 SetUpInstrumentY2
 	lda (p_instrstable),y
+	IFT FEAT_RECALCADDR
+	clc
+	adc v_addr_delta
+	EIF
 	sta trackn_instrdb,x
 	sta nt
 	iny
 	lda (p_instrstable),y
+	IFT FEAT_RECALCADDR
+	adc v_addr_delta+1
+	EIF
 	sta trackn_instrhb,x
 	sta nt+1
 	IFT FEAT_FILTER
@@ -552,7 +537,6 @@ SetUpInstrumentY2
 	tay
 	lda vibtabbeg,y
 	sta trackn_effvibratoa,x
-
 	EIF
 	IFT FEAT_EFFECTFSHIFT
 	ldy #10
@@ -584,13 +568,6 @@ xata_rtshere
 	EIF
 rmt_play
 rmt_p0
-
-;added by mono - analmux patch 3 - only for instrumentarium.rmt
-patchroutineaddr = *+1
-  jsr $ffff
-  stx $d21f
-  stx $d20f
-
 	jsr SetPokey
 rmt_p1
 	IFT FEAT_INSTRSPEED==0||FEAT_INSTRSPEED>1
@@ -598,8 +575,7 @@ rmt_p1
 	bne rmt_p3
 	EIF
 	IFT FEAT_INSTRSPEED==0
-	lda #$ff
-v_instrspeed	equ *-1
+	lda v_instrspeed
 	sta v_ainstrspeed
 	ELI FEAT_INSTRSPEED>1
 	lda #FEAT_INSTRSPEED
@@ -609,24 +585,23 @@ rmt_p2
 	dec v_aspeed
 	bne rmt_p3
 	inc v_abeat
-	lda #$ff
-v_abeat equ *-1
-	cmp #$ff
-v_maxtracklen equ *-1
+	lda v_abeat
+	cmp v_maxtracklen
 	beq p2o3
 	jmp GetTrackLine
 p2o3
 	jmp GetSongLineTrackLineInitOfNewSetInstrumentsOnlyRmtp3
 go_ppnext	jmp ppnext
 rmt_p3
-  ;moved below by mono for sdx relocation
-	;lda #>frqtab
-	;sta nr+1
-	
-;modified by mono
-xtracks05sub1	ldx moduletype
-  dex
-;xtracks05sub1	ldx #TRACKS-1
+; moved below
+;	lda #>frqtab
+;	sta nr+1
+xtracks05sub1
+	IFT STEREOMODE==1		;* L1 L2 L3 L4 R1 R2 R3 R4
+	ldx v_channel_number_less1
+	ELS
+	ldx #TRACKS-1
+	EIF
 pp1
 	lda trackn_instrhb,x
 	beq go_ppnext
@@ -653,28 +628,23 @@ pp1b
 	lda trackn_instrlop,x
 pp2	sta trackn_instridx,x
 	lda reg1
-	
-;modified by mono
-	ldy moduletype
+
+	IFT STEREOMODE==1		;* L1 L2 L3 L4 R1 R2 R3 R4
+	ldy v_channel_number
 	cpy #8
-	bcc ?pp2s
-	cpx #4
-	bcc ?pp2s
-	lsr @
-	lsr @
-	lsr @
-	lsr @
-?pp2s:
+	bcc pp2s
+
 ;	IFT TRACKS>4
-;	cpx #4
-;	bcc pp2s
-;	lsr @
-;	lsr @
-;	lsr @
-;	lsr @
-;pp2s
+	cpx #4
+	bcc pp2s
+	lsr @
+	lsr @
+	lsr @
+	lsr @
+pp2s
 ;	EIF
-	
+	EIF
+
 	and #$0f
 	ora trackn_volume,x
 	tay
@@ -683,19 +653,16 @@ pp2	sta trackn_instridx,x
 	lda reg2
 	and #$0e
 	tay
-	
-	;modified by Mono for SDX relocation
-	lda (rmtbegad),y	;tabbegad,y
+	lda tabbegad,y		;lda tabbeganddistor,y
 	sta nr
-	iny
-	lda (rmtbegad),y	;tabbegad+1,y
+	lda tabbegad+1,y
 	sta nr+1
-	dey
-	;lda tabbeganddistor,y
-	;sta nr
-	
 	lda tmp
-	ora (rmtdistad),y ;tabbeganddistor+1,y
+	IFT FEAT_PATCH
+	ora (rmtdistad),y	;tabbeganddistor+1,y
+	ELS
+	ora tabdistor,y
+	EIF
 	sta trackn_audc,x
 InstrumentsEffects
 	IFT FEAT_EFFECTS
@@ -715,10 +682,8 @@ InstrumentsEffects
 	EIF
 	sta trackn_shiftfrq,x
 	IFT FEAT_EFFECTVIBRATO
-	
 	lda vibtabnext,y
 	sta trackn_effvibratoa,x
-	
 	EIF
 	jmp ei2
 ei1
@@ -799,35 +764,32 @@ ei4
 	IFT 1==[FEAT_COMMAND1+FEAT_COMMAND2+FEAT_COMMAND3+FEAT_COMMAND4+FEAT_COMMAND5+FEAT_COMMAND6+[FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY]]
 	beq cmd0
 	ELS
-	lsr @
-	lsr @
-	sta jmx+1
-jmx	bcc *
-	jmp cmd0
-	nop
-	jmp cmd1
-	IFT FEAT_COMMAND2||FEAT_COMMAND3||FEAT_COMMAND4||FEAT_COMMAND5||FEAT_COMMAND6||FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY
-	nop
-	jmp cmd2
+	jeq cmd0
+	IFT FEAT_COMMAND1
+	cmp #$10
+	jeq cmd1
 	EIF
-	IFT FEAT_COMMAND3||FEAT_COMMAND4||FEAT_COMMAND5||FEAT_COMMAND6||FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY
-	nop
-	jmp cmd3
+	IFT FEAT_COMMAND2
+	cmp #$20
+	jeq cmd2
 	EIF
-	IFT FEAT_COMMAND4||FEAT_COMMAND5||FEAT_COMMAND6||FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY
-	nop
-	jmp cmd4
+	IFT FEAT_COMMAND3
+	cmp #$30
+	jeq cmd3
 	EIF
-	IFT FEAT_COMMAND5||FEAT_COMMAND6||FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY
-	nop
-	jmp cmd5
+	IFT FEAT_COMMAND4
+	cmp #$40
+	jeq cmd4
 	EIF
-	IFT FEAT_COMMAND6||FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY
-	nop
-	jmp cmd6
+	IFT FEAT_COMMAND5
+	cmp #$50
+	jeq cmd5
+	EIF
+	IFT FEAT_COMMAND6
+	cmp #$60
+	jeq cmd6
 	EIF
 	IFT FEAT_COMMAND7SETNOTE||FEAT_COMMAND7VOLUMEONLY
-	nop
 	jmp cmd7
 	EIF
 	EIF
@@ -1058,8 +1020,9 @@ qq1
 	lda trackn_audc+2
 	and #$10
 	bne qq1a
-	EIF
+	ELS
 	lda #0
+	EIF
 	sta trackn_audc+2
 qq1a
 	txa
@@ -1081,8 +1044,9 @@ qq2
 	lda trackn_audc+3
 	and #$10
 	bne qq2a
-	EIF
+	ELS
 	lda #0
+	EIF
 	sta trackn_audc+3
 qq2a
 	txa
@@ -1097,245 +1061,236 @@ qq3
 	EIF
 	IFT FEAT_BASS16
 	IFT FEAT_BASS16G1L
-addr11 = *+1
 	lda trackn_command+1
 	and #$0e
 	cmp #6
 	bne qq4
-addr12 = *+1
 	lda trackn_audc+1
 	and #$0f
 	beq qq4
-addr13 = *+1
 	ldy trackn_outnote+1
-	lda (rmtfrqload),y	;frqtabbasslo,y
+	IFT FEAT_PATCH
+	lda (rmtfrqload),y
+	ELS
+	lda frqtabbasslo,y
+	EIF
 	sta trackn_audf+0
-	lda (rmtfrqhiad),y	;frqtabbasshi,y
+	IFT FEAT_PATCH
+	lda (rmtfrqhiad),y
+	ELS
+	lda frqtabbasshi,y
+	EIF
 	sta trackn_audf+1
 	IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG0L
 	lda trackn_audc+0
 	and #$10
 	bne qq3a
 	EIF
-
-;mono - analmux instrumentarium patch
-  lda patch
-  cmp #2
-  bcs qq3a
-
 	lda #0
 	sta trackn_audc+0
 qq3a
 	txa
-rmtaudctl1mask = *+1
-      ora #$50	;$d0 u analmuxa
+	ora #$50	;$d0 u analmuxa
 	tax
 	EIF
 qq4
 	IFT FEAT_BASS16G3L
-addr21 = *+1
 	lda trackn_command+3
 	and #$0e
 	cmp #6
 	bne qq5
-addr22 = *+1
 	lda trackn_audc+3
 	and #$0f
 	beq qq5
-addr23 = *+1
 	ldy trackn_outnote+3
-	lda (rmtfrqload),y	;frqtabbasslo,y
+	IFT FEAT_PATCH
+	lda (rmtfrqload),y
+	ELS
+	lda frqtabbasslo,y
+	EIF
 	sta trackn_audf+2
-	lda (rmtfrqhiad),y	;frqtabbasshi,y
+	IFT FEAT_PATCH
+	lda (rmtfrqhiad),y
+	ELS
+	lda frqtabbasshi,y
+	EIF
 	sta trackn_audf+3
 	IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG2L
 	lda trackn_audc+2
 	and #$10
 	bne qq4a
 	EIF
-
-;mono - analmux instrumentarium patch
-  lda patch
-  cmp #2
-  bcs qq4a
-
 	lda #0
 	sta trackn_audc+2
 qq4a
 	txa
-rmtaudctl2mask = *+1
-      ora #$28	;$a8 u analmuxa
+	ora #$28	;$a8 u analmuxa
 	tax
 	EIF
 	EIF
 qq5
 	stx v_audctl
-	
-	;modified by mono
-	lda moduletype
+
+	IFT STEREOMODE==1		;* L1 L2 L3 L4 R1 R2 R3 R4
+	lda v_channel_number
 	cmp #8
 	jcc rmt_p5
+
 	;IFT TRACKS>4
-    IFT FEAT_AUDCTLMANUALSET
-    lda trackn_audctl+4
-    ora trackn_audctl+5
-    ora trackn_audctl+6
-    ora trackn_audctl+7
-    tax
-    ELS
-    ldx #0
-    EIF ;FEAT_AUDCTLMANUALSET
-    stx v_audctl2
-    IFT FEAT_FILTER
-      IFT FEAT_FILTERG0R
-      lda trackn_command+0+4
-      bpl qs2
-      lda trackn_audc+0+4
-      and #$0f
-      beq qs2
-      lda trackn_audf+0+4
-      clc
-      adc trackn_filter+0+4
-      sta trackn_audf+2+4
-        IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG2R
-        lda trackn_audc+2+4
-        and #$10
-        bne qs1a
-        EIF ;FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG2R
-      lda #0
-      sta trackn_audc+2+4
+	IFT FEAT_AUDCTLMANUALSET
+	lda trackn_audctl+4
+	ora trackn_audctl+5
+	ora trackn_audctl+6
+	ora trackn_audctl+7
+	tax
+	ELS
+	ldx #0
+	EIF
+	stx v_audctl2
+	IFT FEAT_FILTER
+	IFT FEAT_FILTERG0R
+	lda trackn_command+0+4
+	bpl qs2
+	lda trackn_audc+0+4
+	and #$0f
+	beq qs2
+	lda trackn_audf+0+4
+	clc
+	adc trackn_filter+0+4
+	sta trackn_audf+2+4
+	IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG2R
+	lda trackn_audc+2+4
+	and #$10
+	bne qs1a
+	ELS
+	lda #0
+	EIF
+	sta trackn_audc+2+4
 qs1a
-      txa
-      ora #4
-      tax
-      EIF ;FEAT_FILTERG0R
+	txa
+	ora #4
+	tax
+	EIF
 qs2
-      IFT FEAT_FILTERG1R
-      lda trackn_command+1+4
-      bpl qs3
-      lda trackn_audc+1+4
-      and #$0f
-      beq qs3
-      lda trackn_audf+1+4
-      clc
-      adc trackn_filter+1+4
-      sta trackn_audf+3+4
-        IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG3R
-        lda trackn_audc+3+4
-        and #$10
-        bne qs2a
-        EIF ;FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG3R
-      lda #0
-      sta trackn_audc+3+4
+	IFT FEAT_FILTERG1R
+	lda trackn_command+1+4
+	bpl qs3
+	lda trackn_audc+1+4
+	and #$0f
+	beq qs3
+	lda trackn_audf+1+4
+	clc
+	adc trackn_filter+1+4
+	sta trackn_audf+3+4
+	IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG3R
+	lda trackn_audc+3+4
+	and #$10
+	bne qs2a
+	ELS
+	lda #0
+	EIF
+	sta trackn_audc+3+4
 qs2a
-      txa
-      ora #2
-      tax
-      EIF ;FEAT_FILTERG1R
+	txa
+	ora #2
+	tax
+	EIF
 qs3
-      IFT FEAT_FILTERG0R||FEAT_FILTERG1R
-      cpx v_audctl2
-      bne qs5
-      EIF ;FEAT_FILTERG0R||FEAT_FILTERG1R
-    EIF ;FEAT_FILTER
-    
-    IFT FEAT_BASS16
-      IFT FEAT_BASS16G1R
-;addr11 = *+1
-      lda trackn_command+1+4	;+0+4 u analmuxa
-      and #$0e
-      cmp #6
-      bne qs4
-;addr12 = *+1
-      lda trackn_audc+1+4	;+0+4 u analmuxa
-      and #$0f
-      beq qs4
-;addr13 = *+1
-      ldy trackn_outnote+1+4	;+0+4 u analmuxa
-      lda (rmtfrqload),y	;frqtabbasslo,y
-      sta trackn_audf+0+4
-      lda (rmtfrqhiad),y	;frqtabbasshi,y
-      sta trackn_audf+1+4
-        IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG0R
-        lda trackn_audc+0+4
-        and #$10
-        bne qs3a
-        EIF
-
-;;mono - analmux instrumentarium patch
-;  lda patch
-;  cmp #2
-;  bcs qs3a
-
-      lda #0
-      sta trackn_audc+0+4
+	IFT FEAT_FILTERG0R||FEAT_FILTERG1R
+	cpx v_audctl2
+	bne qs5
+	EIF
+	EIF
+	IFT FEAT_BASS16
+	IFT FEAT_BASS16G1R
+	lda trackn_command+1+4	;+0+4 u analmuxa
+	and #$0e
+	cmp #6
+	bne qs4
+	lda trackn_audc+1+4	;+0+4 u analmuxa
+	and #$0f
+	beq qs4
+	ldy trackn_outnote+1+4	;+0+4 u analmuxa
+	IFT FEAT_PATCH
+	lda (rmtfrqload),y
+	ELS
+	lda frqtabbasslo,y
+	EIF
+	sta trackn_audf+0+4
+	IFT FEAT_PATCH
+	lda (rmtfrqhiad),y
+	ELS
+	lda frqtabbasshi,y
+	EIF
+	sta trackn_audf+1+4
+	IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG0R
+	lda trackn_audc+0+4
+	and #$10
+	bne qs3a
+	EIF
+	lda #0
+	sta trackn_audc+0+4
 qs3a
-      txa
-;rmtaudctl1mask = *+1
-      ora #$50	;$d0 u analmuxa
-      tax
-      EIF
+	txa
+	ora #$50	;$d0 u analmuxa
+	tax
+	EIF
 qs4
-      IFT FEAT_BASS16G3R
-;addr21 = *+1
-      lda trackn_command+3+4	;+2+4 u analmuxa
-      and #$0e
-      cmp #6
-      bne qs5
-;addr22 = *+1
-      lda trackn_audc+3+4	;+2+4 u analmuxa
-      and #$0f
-      beq qs5
-;addr23 = *+1
-      ldy trackn_outnote+3+4	;+2+4 u analmuxa
-      lda (rmtfrqload),y	;frqtabbasslo,y
-      sta trackn_audf+2+4
-      lda (rmtfrqhiad),y	;frqtabbasshi,y
-      sta trackn_audf+3+4
-        IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG2R
-        lda trackn_audc+2+4
-        and #$10
-        bne qs4a
-        EIF
-
-;;mono - analmux instrumentarium patch
-;  lda patch
-;  cmp #2
-;  bcs qs4a
-
-      lda #0
-      sta trackn_audc+2+4
+	IFT FEAT_BASS16G3R
+	lda trackn_command+3+4	;+2+4 u analmuxa
+	and #$0e
+	cmp #6
+	bne qs5
+	lda trackn_audc+3+4	;+2+4 u analmuxa
+	and #$0f
+	beq qs5
+	ldy trackn_outnote+3+4	;+2+4 u analmuxa
+	IFT FEAT_PATCH
+	lda (rmtfrqload),y
+	ELS
+	lda frqtabbasslo,y
+	EIF
+	sta trackn_audf+2+4
+	IFT FEAT_PATCH
+	lda (rmtfrqhiad),y
+	ELS
+	lda frqtabbasshi,y
+	EIF
+	sta trackn_audf+3+4
+	IFT FEAT_COMMAND7VOLUMEONLY&&FEAT_VOLUMEONLYG2R
+	lda trackn_audc+2+4
+	and #$10
+	bne qs4a
+	EIF
+	lda #0
+	sta trackn_audc+2+4
 qs4a
-      txa
-;rmtaudctl2mask = *+1
-      ora #$28	;$a8 u analmuxa
-      tax
-      EIF
-    EIF
+	txa
+	ora #$28	;$a8 u analmuxa
+	tax
+	EIF
+	EIF
 qs5
 	stx v_audctl2
 	;EIF
+	EIF
 rmt_p5
 	IFT FEAT_INSTRSPEED==0||FEAT_INSTRSPEED>1
-	lda #$ff
-v_ainstrspeed equ *-1
+	lda v_ainstrspeed
 	ELS
 	lda #1
 	EIF
 	rts
 SetPokey
-
 	IFT STEREOMODE==1		;* L1 L2 L3 L4 R1 R2 R3 R4
-	
-	lda #$ff
-v_audctl equ *-1
-	ldy #$ff
-v_audctl2 equ *-1
-  ;added by mono
-  ldx moduletype
+
+	lda v_audctl
+	ldy v_audctl2
+
+	ldx v_channel_number
 	cpx #8
 	jcc ?playthesame
-	
+
 	pha
 	lda trackn_audf+0+4
 	ldx trackn_audf+0
@@ -1372,9 +1327,9 @@ v_audctl2 equ *-1
 	pla
 	sty $d218
 	sta $d208
-	
+
 	bcs ?done
-	
+
 ?playthesame:
 	ldy trackn_audf+0
 	sty $d210
@@ -1402,12 +1357,11 @@ v_audctl2 equ *-1
 	sty $d207
 	sta $d218
 	sta $d208
-	
+
 ?done:
-	
+
 	ELI STEREOMODE==0		;* L1 L2 L3 L4
-	ldy #$ff
-v_audctl equ *-1
+	ldy v_audctl
 	lda trackn_audf+0
 	ldx trackn_audc+0
 	sta $d200
@@ -1426,8 +1380,7 @@ v_audctl equ *-1
 	stx $d201+6
 	sty $d208
 	ELI STEREOMODE==2		;* L1 R2 R3 L4
-	ldy #$ff
-v_audctl equ *-1
+	ldy v_audctl
 	lda trackn_audf+0
 	ldx trackn_audc+0
 	sta $d200
@@ -1450,8 +1403,7 @@ v_audctl equ *-1
 	sty $d218
 	sty $d208
 	ELI STEREOMODE==3		;* L1 L2 R3 R4
-	ldy #$ff
-v_audctl equ *-1
+	ldy v_audctl
 	lda trackn_audf+0
 	ldx trackn_audc+0
 	sta $d200
@@ -1477,44 +1429,45 @@ v_audctl equ *-1
 RMTPLAYEREND
 
 
+	IFT FEAT_PATCH
+tabdistortabad:
+	.word tabdistor
+	.word miker_tabdistor
+
+	IFT FEAT_BASS16
+basslotabad:
+	.word frqtabbasslo
+	.word miker_frqtabbasslo
+
+basshitabad:
+	.word frqtabbasshi
+	.word miker_frqtabbasshi
+	EIF
+	EIF
 
 
-;dodatkowe procedury dla instrumentarium i instrumentarium remix1 analmuxa
-
-standard_skctl:
-  ldx #%00000011
-  rts
-
-analmux_instrumentarium_skctl:
-  ldy p_song	;$d1
-  ldx analmux_instrumentarium_tab,y
-  rts
-
-
-
-
-		;org PLAYER-$100-$140-$40+2
-;INSTRPAR	equ 12
-;modified by Mono for SDX relocation
+;for SDX relocation
 tabbegad:
- .word frqtabpure
- .word frqtabpure
- .word frqtabpure
- .word frqtabbass1
- .word frqtabpure
- .word frqtabpure
- .word frqtabbass1
- .word frqtabbass2
+	.word frqtabpure
+	.word frqtabpure
+	.word frqtabpure
+	.word frqtabbass1
+	.word frqtabpure
+	.word frqtabpure
+	.word frqtabbass1
+	.word frqtabbass2
 
 tabdistor:
- .byte $00,$ff
- .byte $20,$ff
- .byte $40,$ff
- .byte $c0,$ff
- .byte $80,$ff
- .byte $a0,$ff
- .byte $c0,$ff
- .byte $c0,$ff
+;tablice mikera do patcha 0a (16-bit bass A0)
+miker_tabdistor = *+1
+	.byte $00,$00
+	.byte $20,$20
+	.byte $40,$40
+	.byte $c0,$a0	;!
+	.byte $80,$80
+	.byte $a0,$a0
+	.byte $c0,$c0
+	.byte $c0,$c0
 
 ;tabbeganddistor:
 ; .byte frqtabpure-frqtab,$00
@@ -1532,7 +1485,7 @@ vib1	.byte 1,-1,-1,1
 vib2	.byte 1,0,-1,-1,0,1
 vib3	.byte 1,1,0,-1,-1,-1,-1,0,1,1
 
-;modified by mono for sdx relocation
+;for sdx relocation
 
 ;vibtabbeg	.byte <(vib0-vib0),<(vib1-vib0),<(vib2-vib0),<(vib3-vib0)
 ;vibtabnext	.byte <(vib0-vib0+0)
@@ -1550,17 +1503,36 @@ vibtabnext:
 	.byte	$0C,$0D,$0E,$0F,$10,$11,$12,$13,$14,$0B
 
 		EIF
-		;org PLAYER-$100-$140
+
 	IFT FEAT_BASS16
 frqtabbasslo
 	.byte $F2,$33,$96,$E2,$38,$8C,$00,$6A,$E8,$6A,$EF,$80,$08,$AE,$46,$E6
 	.byte $95,$41,$F6,$B0,$6E,$30,$F6,$BB,$84,$52,$22,$F4,$C8,$A0,$7A,$55
 	.byte $34,$14,$F5,$D8,$BD,$A4,$8D,$77,$60,$4E,$38,$27,$15,$06,$F7,$E8
 	.byte $DB,$CF,$C3,$B8,$AC,$A2,$9A,$90,$88,$7F,$78,$70,$6A,$64,$5E,$00
+
+frqtabbasshi
+	.byte $0D,$0D,$0C,$0B,$0B,$0A,$0A,$09,$08,$08,$07,$07,$07,$06,$06,$05
+	.byte $05,$05,$04,$04,$04,$04,$03,$03,$03,$03,$03,$02,$02,$02,$02,$02
+	.byte $02,$02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00
+	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+	IFT FEAT_PATCH
+miker_frqtabbasslo; A0 distorsion based.
+        .byte $DD,$DD,$34,$DB,$D0,$0D,$8E,$50,$4F,$88,$F7,$99,$6B,$6B,$96,$EA
+        .byte $64,$03,$C4,$A5,$A4,$C0,$F8,$49,$B2,$32,$C8,$72,$2F,$FE,$DE,$CF
+        .byte $CF,$DD,$F8,$21,$56,$96,$E0,$35,$94,$FB,$6C,$E4,$64,$EB,$79,$0D
+        .byte $A7,$47,$ED,$97,$46,$FA,$B2,$6E,$2E,$F2,$B9,$83,$50,$20,$F3,$C8
+
+miker_frqtabbasshi; A0 distorsion based.
+        .byte $6A,$64,$5F,$59,$54,$50,$4B,$47,$43,$3F,$3B,$38,$35,$32,$2F,$2C
+        .byte $2A,$28,$25,$23,$21,$1F,$1D,$1C,$1A,$19,$17,$16,$15,$13,$12,$11
+        .byte $10,$0F,$0E,$0E,$0D,$0C,$0B,$0B,$0A,$09,$09,$08,$08,$07,$07,$07
+        .byte $06,$06,$05,$05,$05,$04,$04,$04,$04,$03,$03,$03,$03,$03,$02,$02
 	EIF
-		;org PLAYER-$100-$100
+	EIF
+
 frqtab
-	;ERT [<frqtab]!=0	;* frqtab must begin at the memory page bound! (i.e. $..00 address)
 frqtabbass1
 	.byte $BF,$B6,$AA,$A1,$98,$8F,$89,$80,$F2,$E6,$DA,$CE,$BF,$B6,$AA,$A1
 	.byte $98,$8F,$89,$80,$7A,$71,$6B,$65,$5F,$5C,$56,$50,$4D,$47,$44,$3E
@@ -1576,151 +1548,8 @@ frqtabpure
 	.byte $60,$5B,$55,$51,$4C,$48,$44,$40,$3C,$39,$35,$32,$2F,$2D,$2A,$28
 	.byte $25,$23,$21,$1F,$1D,$1C,$1A,$18,$17,$16,$14,$13,$12,$11,$10,$0F
 	.byte $0E,$0D,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00,$00
-	IFT FEAT_BASS16
-frqtabbasshi
-	.byte $0D,$0D,$0C,$0B,$0B,$0A,$0A,$09,$08,$08,$07,$07,$07,$06,$06,$05
-	.byte $05,$05,$04,$04,$04,$04,$03,$03,$03,$03,$03,$02,$02,$02,$02,$02
-	.byte $02,$02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-	EIF
 
 
-;tablice do instrumentarium analmuxa (patch3)
-;$80,$00
-;$00,$20
-;$40,$A0
-;$00,$80
-;$80,$80
-;$80,$A0
-;$00,$C0
-;$40,$C0
-
-analmux_tabbegad:
- .word frqtabpure
- .word analmux_frqtabbass1
- .word analmux_frqtabbass2
- .word analmux_frqtabbass1
- .word frqtabpure
- .word frqtabpure
- .word analmux_frqtabbass1
- .word analmux_frqtabbass2
-
-analmux_tabdistor:
-	.byte   $00,$ff
-	.byte   $20,$ff
-	.byte	$A0,$ff
-	.byte	$80,$ff
-        .byte   $80,$ff
-	.byte	$A0,$ff
-	.byte	$C0,$ff
-	.byte	$C0,$ff
-
-	IFT FEAT_BASS16
-analmux_frqtabbasslo:
-	.byte   $8D,$93,$99,$9E,$A3,$A8,$AD,$B1
-        .byte   $B5,$B9,$BD,$C0,$C3,$C7,$C9,$CC
-        .byte   $CF,$D1,$D3,$D6,$D8,$DA,$DB,$DD
-        .byte   $DF,$E0,$E2,$E3,$E4,$E6,$E7,$E8
-        .byte   $E9,$EA,$EB,$EC,$EC,$ED,$EE,$EF
-        .byte   $EF,$F0,$F0,$F1,$F1,$F2,$F2,$F3
-        .byte   $F3,$F4,$F4,$F4,$F5,$F5,$F5,$F5
-        .byte   $F6,$F6,$F6,$F6,$F7,$F7,$F7,$F7
-	EIF
-
-analmux_frqtabbass1:
-        .byte   $DC,$CF,$C4,$B8,$AE,$A4,$9A,$92
-        .byte   $89,$81,$7A,$73,$6C,$66,$60,$5A
-        .byte   $55,$50,$4B,$47,$43,$3F,$3B,$37
-        .byte   $34,$31,$2E,$2B,$28,$26,$24,$21
-        .byte   $1F,$1D,$1C,$1A,$18,$16,$15,$14
-        .byte   $12,$11,$10,$0F,$0E,$0D,$0C,$0B
-        .byte   $0A,$09,$08,$08,$07,$06,$06,$05
-        .byte   $05,$04,$04,$03,$03,$03,$02,$02
-
-analmux_frqtabbass2:
-        .byte   $71,$6E,$6B,$68,$65,$62,$5F,$5C
-        .byte   $59,$56,$54,$51,$4F,$4D,$4A,$48
-        .byte   $46,$44,$42,$40,$3E,$3C,$3A,$38
-        .byte   $36,$35,$33,$32,$30,$2F,$2D,$2C
-        .byte   $2A,$29,$28,$26,$25,$24,$23,$22
-        .byte   $21,$20,$1F,$1E,$1D,$1C,$1B,$1A
-        .byte   $19,$18,$17,$17,$16,$15,$14,$14
-        .byte   $13,$12,$12,$11,$10,$10,$0F,$0F
-
-	IFT FEAT_BASS16
-analmux_frqtabbasshi:
-	.byte   $D9,$CD,$C1,$B7,$AD,$A3,$99,$91
-        .byte   $89,$81,$79,$73,$6B,$65,$61,$5B
-        .byte   $55,$51,$4D,$47,$43,$3F,$3D,$39
-        .byte   $35,$33,$2F,$2D,$2B,$27,$25,$23
-        .byte   $21,$1F,$1D,$1B,$1B,$19,$17,$15
-        .byte   $15,$13,$13,$11,$11,$0F,$0F,$0D
-        .byte   $0D,$0B,$0B,$0B,$09,$09,$09,$09
-        .byte   $07,$07,$07,$07,$05,$05,$05,$05
-	EIF
-
-
-
-;tablice mikera do patcha 0a (16-bit bass A0)
-miker_tabdistor:
-	.byte $00,$ff
-	.byte $20,$ff
-	.byte $40,$ff
-	.byte $a0,$ff
-	.byte $80,$ff
-	.byte $a0,$ff
-	.byte $c0,$ff
-	.byte $c0,$ff
-
-	IFT FEAT_BASS16
-miker_frqtabbasslo; A0 distorsion based.
-        .byte $DD,$DD,$34,$DB,$D0,$0D,$8E,$50,$4F,$88,$F7,$99,$6B,$6B,$96,$EA
-        .byte $64,$03,$C4,$A5,$A4,$C0,$F8,$49,$B2,$32,$C8,$72,$2F,$FE,$DE,$CF
-        .byte $CF,$DD,$F8,$21,$56,$96,$E0,$35,$94,$FB,$6C,$E4,$64,$EB,$79,$0D
-        .byte $A7,$47,$ED,$97,$46,$FA,$B2,$6E,$2E,$F2,$B9,$83,$50,$20,$F3,$C8
-
-miker_frqtabbasshi; A0 distorsion based.
-        .byte $6A,$64,$5F,$59,$54,$50,$4B,$47,$43,$3F,$3B,$38,$35,$32,$2F,$2C
-        .byte $2A,$28,$25,$23,$21,$1F,$1D,$1C,$1A,$19,$17,$16,$15,$13,$12,$11
-        .byte $10,$0F,$0E,$0E,$0D,$0C,$0B,$0B,$0A,$09,$09,$08,$08,$07,$07,$07
-        .byte $06,$06,$05,$05,$05,$04,$04,$04,$04,$03,$03,$03,$03,$03,$02,$02 
-	EIF
-
-
-skctltabad:
-	.word standard_skctl
-	.word standard_skctl
-	.word analmux_instrumentarium_skctl
-	.word analmux_instrumentarium_skctl
-
-tabbegtabad:
-	.word tabbegad
-	.word tabbegad
-	.word analmux_tabbegad
-	.word analmux_tabbegad
-
-tabdistortabad:
-	.word tabdistor
-	.word miker_tabdistor
-	.word analmux_tabdistor
-	.word analmux_tabdistor
-
-	IFT FEAT_BASS16
-basslotabad:
-	.word frqtabbasslo
-	.word miker_frqtabbasslo
-	.word analmux_frqtabbasslo
-	.word analmux_frqtabbasslo
-
-basshitabad:
-	.word frqtabbasshi
-	.word miker_frqtabbasshi
-	.word analmux_frqtabbasshi
-	.word analmux_frqtabbasshi
-	EIF
-
-
-		;org PLAYER-$0100
 volumetab
 	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01
@@ -1738,79 +1567,131 @@ volumetab
 	.byte $00,$01,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0A,$0B,$0C,$0D
 	.byte $00,$01,$02,$03,$04,$05,$06,$07,$07,$08,$09,$0A,$0B,$0C,$0D,$0E
 	.byte $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F
-	
 
-	;IFT TRACKS>4
-	;org PLAYER-$400+$40
-	;ELS
-	;org PLAYER-$400+$e0
-	;EIF
+
 track_variables
-trackn_db	.ds TRACKS
-trackn_hb	.ds TRACKS
-trackn_idx	.ds TRACKS
-trackn_pause	.ds TRACKS
-trackn_note	.ds TRACKS
-trackn_volume	.ds TRACKS
-trackn_distor 	.ds TRACKS
-trackn_shiftfrq	.ds TRACKS
+
+.var trackn_db		:TRACKS .byte
+.var trackn_hb		:TRACKS .byte
+.var trackn_idx		:TRACKS .byte
+.var trackn_pause	:TRACKS .byte
+.var trackn_note	:TRACKS .byte
+.var trackn_volume	:TRACKS .byte
+.var trackn_distor 	:TRACKS .byte
+.var trackn_shiftfrq	:TRACKS .byte
+
 	IFT FEAT_PORTAMENTO
-trackn_portafrqc .ds TRACKS
-trackn_portafrqa .ds TRACKS
-trackn_portaspeed .ds TRACKS
-trackn_portaspeeda .ds TRACKS
-trackn_portadepth .ds TRACKS
+	.var trackn_portafrqc	:TRACKS .byte
+	.var trackn_portafrqa	:TRACKS .byte
+	.var trackn_portaspeed	:TRACKS .byte
+	.var trackn_portaspeeda	:TRACKS .byte
+	.var trackn_portadepth	:TRACKS .byte
 	EIF
-trackn_instrx2	.ds TRACKS
-trackn_instrdb	.ds TRACKS
-trackn_instrhb	.ds TRACKS
-trackn_instridx	.ds TRACKS
-trackn_instrlen	.ds TRACKS
-trackn_instrlop	.ds TRACKS
-trackn_instrreachend	.ds TRACKS
-trackn_volumeslidedepth .ds TRACKS
-trackn_volumeslidevalue .ds TRACKS
+
+.var trackn_instrx2	:TRACKS .byte
+.var trackn_instrdb	:TRACKS .byte
+.var trackn_instrhb	:TRACKS .byte
+.var trackn_instridx	:TRACKS .byte
+.var trackn_instrlen	:TRACKS .byte
+.var trackn_instrlop	:TRACKS .byte
+.var trackn_instrreachend	:TRACKS .byte
+.var trackn_volumeslidedepth	:TRACKS .byte
+.var trackn_volumeslidevalue	:TRACKS .byte
+
 	IFT FEAT_VOLUMEMIN
-trackn_volumemin		.ds TRACKS
+	.var trackn_volumemin	:TRACKS .byte
 	EIF
+
 ;FEAT_EFFECTS equ FEAT_EFFECTVIBRATO||FEAT_EFFECTFSHIFT
 	IFT FEAT_EFFECTS
-trackn_effdelay			.ds TRACKS
+	.var trackn_effdelay	:TRACKS .byte
 	EIF
+
 	IFT FEAT_EFFECTVIBRATO
-trackn_effvibratoa		.ds TRACKS
+	.var trackn_effvibratoa	:TRACKS .byte
 	EIF
+
 	IFT FEAT_EFFECTFSHIFT
-trackn_effshift		.ds TRACKS
+	.var trackn_effshift	:TRACKS .byte
 	EIF
-trackn_tabletypespeed .ds TRACKS
+
+.var trackn_tabletypespeed	:TRACKS .byte
+
 	IFT FEAT_TABLEMODE
-trackn_tablemode	.ds TRACKS
+	.var trackn_tablemode	:TRACKS .byte
 	EIF
-trackn_tablenote	.ds TRACKS
-trackn_tablea		.ds TRACKS
-trackn_tableend		.ds TRACKS
+
+.var trackn_tablenote	:TRACKS .byte
+.var trackn_tablea	:TRACKS .byte
+.var trackn_tableend	:TRACKS .byte
+
 	IFT FEAT_TABLEGO
-trackn_tablelop		.ds TRACKS
+	.var trackn_tablelop	:TRACKS .byte
 	EIF
-trackn_tablespeeda	.ds TRACKS
+
+.var trackn_tablespeeda	:TRACKS .byte
+
 	IFT FEAT_FILTER||FEAT_BASS16
-trackn_command		.ds TRACKS
+	.var trackn_command	:TRACKS .byte
 	EIF
+
 	IFT FEAT_BASS16
-trackn_outnote		.ds TRACKS
+	.var trackn_outnote	:TRACKS .byte
 	EIF
+
 	IFT FEAT_FILTER
-trackn_filter		.ds TRACKS
+	.var trackn_filter	:TRACKS .byte
 	EIF
-trackn_audf	.ds TRACKS
-trackn_audc	.ds TRACKS
+
+.var trackn_audf	:TRACKS .byte
+.var trackn_audc	:TRACKS .byte
+
 	IFT FEAT_AUDCTLMANUALSET
-trackn_audctl	.ds TRACKS
+	.var trackn_audctl	:TRACKS .byte
 	EIF
-v_aspeed		.ds 1
+
+.var .byte v_aspeed
+
+	IFT FEAT_CONSTANTSPEED==0
+	.var .byte v_speed
+	.var .byte v_bspeed
+	EIF
+
+.var .byte v_audctl
+.var .byte v_audctl2
+
+	IFT FEAT_INSTRSPEED==0
+	.var .byte v_instrspeed
+	EIF
+
+.var .byte v_abeat
+.var .byte v_maxtracklen
+
+	IFT FEAT_INSTRSPEED==0||FEAT_INSTRSPEED>1
+	.var .byte v_ainstrspeed
+	EIF
+
+.var .byte v_channel_number
+.var .byte v_channel_number_less1
+
+	IFT FEAT_RECALCADDR
+	.var .word v_addr_delta
+	EIF
+
 track_endvariables
 
-;tablica wartosci SKCTL dla instrumentarium analmuxa
-analmux_instrumentarium_tab .ds $100
+;	IFT FEAT_GLOBALVOLUMEFADE
+;	.var .byte RMTGLOBALVOLUMEFADE
+;	EIF
 
+;	IFT FEAT_SFX
+;	.var .byte RMTSFXVOLUME
+;	EIF
+
+	IFT FEAT_PATCH
+	.var .byte RMTPATCH
+	EIF
+
+	IFT FEAT_RECALCADDR
+	.var .word RMTORIGINALADDR
+	EIF

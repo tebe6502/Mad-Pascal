@@ -1,8 +1,10 @@
 uses crt, mpt;
 
+{$define romoff}
+
 const
-	mpt_player = $a000;
-	mpt_modul = $4000;
+	mpt_player = $e000;
+	mpt_modul = $9000;
 
 var
 	msx: TMPT;
