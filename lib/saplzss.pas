@@ -3,10 +3,13 @@ unit saplzss;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: SAP-R LZSS Player
- @version: 1.1
+ @version: 1.2
 
    Version 1.1:
 	- function Decode: Boolean; (TRUE = end of song)
+
+   Version 1.2:
+	- TLZSSPlay.Init, add clear buffers
 
  @description:
  <https://github.com/dmsc/lzss-sap>
@@ -52,6 +55,8 @@ procedure TLZSSPlay.Init(a: byte); assembler;
 (*
 @description:
 Initialize SAP-R LZSS player
+
+player: lsb = $00 ; msb = $xx
 *)
 asm
 	txa:pha
@@ -62,14 +67,25 @@ asm
 	lda #$4c	; JMP
 	sta (:bp2),y
 
+	ldy #2
+	lda (:bp2),y	; msb player address
+	sta adr+2
+
+
+	add #3		; clr = player+$300
+	sta clr+2
+
+	ldx #8		; clear buffers player+$0300..$bff ($900)
+	ldy #0
+	tya
+clr	sta $ff00,y
 	iny
-	lda (:bp2),y
-	add #6		; jsr player+6
-	sta adr
-	iny
-	lda (:bp2),y
-	adc #0
-	sta adr+1
+	bne clr
+
+	inc clr+2
+	dex
+	bpl clr
+
 
 	ldy #4
 	lda (:bp2),y
@@ -79,8 +95,7 @@ asm
 
 	ldy a		; POKEY: $00 | $10 | ...
 
-	jsr $ffff
-adr	equ *-2
+adr	jsr $ff06	; jsr player+6
 
 	pla:tax
 end;

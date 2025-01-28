@@ -49,20 +49,17 @@ procedure TRMT.Init(a: byte); assembler;
 Initialize RMT player
 
 @param: a - song number
+
+player: lsb = $00 ; msb = $xx
 *)
 asm
 	txa:pha
 
 	mwa TRMT :bp2
 
-	ldy #0
+	ldy #1
 	lda (:bp2),y
-	add #3		; jsr player+3
-	sta adr
-	iny
-	lda (:bp2),y
-	adc #0
-	sta adr+1
+	sta adr+2
 
 	iny
 	lda (:bp2),y
@@ -72,7 +69,7 @@ asm
 	tay		; hi byte of RMT module to Y reg
 
 	lda a		; starting song line 0-255 to A reg
-	jsr adr: $ffff
+adr	jsr $ff03	; jsr player+3
 
 	pla:tax
 end;
@@ -90,16 +87,11 @@ Play sound effect
 asm
 	txa:pha
 
-	mwa TRMT :bp2
+	mwa TRMT adr+1
 
-	ldy #0
-	lda (:bp2),y
-	add #15		; jsr player+15
-	sta adr
-	iny
-	lda (:bp2),y
-	adc #0
-	sta adr+1
+	ldy #1
+adr	lda $ffff,y
+	sta ptr+2
 
 	lda effect
 	asl @
@@ -108,7 +100,7 @@ asm
 	ldx channel
 	lda note
 
-	jsr adr: $ffff
+ptr	jsr $ff0f	; jsr player+15
 
 	pla:tax
 end;
@@ -130,16 +122,13 @@ asm
 
 	bne quit
 skp
-	mwa TRMT adr
+	mwa TRMT adr+1
 
 	ldy #1
-mov	lda $ff00,y
-adr	equ *-2
-	sta ptr,y
-	dey
-	bpl mov
+adr	lda $ffff,y
+	sta ptr+2
 
-	jsr ptr: $ff00		; jmp (TRMT)	6502 buggy indirect jump
+ptr	jsr $ff00		; jmp (TRMT)	6502 buggy indirect jump
 
 quit	pla:tax
 end;
@@ -155,16 +144,11 @@ asm
 
 	mwa TRMT :bp2
 
-	ldy #0
+	ldy #1
 	lda (:bp2),y
-	add #9			; jsr player+9
-	sta adr
-	iny
-	lda (:bp2),y
-	adc #0
-	sta adr+1
+	sta adr+2
 
-	jsr adr: $ffff
+adr	jsr $ff09	; jsr player+9
 
 	pla:tax
 end;
