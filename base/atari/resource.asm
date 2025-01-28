@@ -335,10 +335,9 @@ data
 	.link 'atari\players\cmc_player_reloc.obx'
 
 .endl
-
-	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+$0755
-
 	ini mcpy
+
+	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+$0755	
 .endm
 
 
@@ -369,9 +368,9 @@ data
 	.link 'atari\players\mpt_player_reloc.obx'
 
 .endl
-	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+$049e
-
 	ini mcpy
+
+	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+$049e
 .endm
 
 
@@ -404,9 +403,9 @@ data
 	.link 'atari\players\playlzs16_reloc.obx'
 
 .endl
-	.print '$R SAPRPLAY ',main.%%lab,'..',main.%%lab+$c00-1
-
 	ini mcpy
+
+	.print '$R SAPRPLAY ',main.%%lab,'..',main.%%lab+$c00-1
 .endm
 
 
@@ -468,9 +467,9 @@ data
 	icl %%1
 
 .endl
-	.print '$R RCASM   ',main.%%lab,'..',main.%%lab+len-1," %%1"
-
 	ini mcpy
+
+	.print '$R RCASM   ',main.%%lab,'..',main.%%lab+len-1," %%1"
 .endm
 
 
@@ -512,6 +511,7 @@ data	ins %%1,%%ofs
 
 	.print '$R RCDATA  ',main.%%lab,'..',*-1," %%1"
  eif
+ 
 .endm
 
 
@@ -525,7 +525,7 @@ data	ins %%1,%%ofs
 ?len = .filesize(%%1)
 
  ift .wget[2]+?len-6 >= $c000
-
+ 
 	org RESORIGIN
 
 _stop	jmp stop
@@ -592,7 +592,9 @@ len	.word
 data	ins %%1
 data_end
 
-	.print '$R DOSFILE ',.wget[2],'..',.wget[4]," %%1"
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
 
 	ini mcpy
  els
@@ -600,8 +602,8 @@ data_end
 	ins %%1
 	opt h+
 
-	.print '$R DOSFILE ',.wget[2],'..',.wget[4]," %%1"
  eif
+	.print '$R DOSFILE ',.wget[2],'..',.wget[4]," %%1"
 .endm
 
 
@@ -621,6 +623,7 @@ len = .filesize(%%1)
 
 	.print '$R RELOC   ',main.%%lab,'..',*-1," %%1"
  eif
+ 
 .endm
 
 
@@ -729,7 +732,9 @@ mcpy	jsr sys.off
 
 data	rmt_relocator %%1,main.%%lab
 
-	.print '$R RMT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
 
 	ini mcpy
  els
@@ -746,9 +751,9 @@ data	rmt_relocator %%1,main.%%lab
 
 	rmt_relocator %%1,main.%%lab
 _end
-	.print '$R RMT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
 
  eif
+ 	.print '$R RMT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
 .endm
 
 /* ----------------------------------------------------------------------- */
@@ -865,6 +870,10 @@ mcpy	jsr sys.off
 
 data	mpt_relocator %%1,main.%%lab
 
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
+
 	ini mcpy
  els
 	org main.%%lab
@@ -926,7 +935,6 @@ unp = .get[len-2]+.get[len-3]*256
 
 	.sav [0] len
  eif
- 
 	.print '$R PP    ',main.%%lab,'..',main.%%lab+len+2," %%1"
 .endm
 
@@ -972,7 +980,6 @@ data	dta a(len)
 .def :MAIN.@RESOURCE.%%lab.end = *
 	
  eif
- 
 	.print '$R SAPR    ',main.%%lab,'..',main.%%lab+len+2," %%1"
 .endm
 
@@ -1044,7 +1051,7 @@ len = .filesize(%%1)
 	ert main.%%lab+len-6>$FFFF,'Memory overrun ',main.%%lab+len-6
 
  ift main.%%lab+len-6 >= $c000
-	org RESORIGIN
+ 	org RESORIGIN
 
 mcpy	jsr sys.off
 
@@ -1054,7 +1061,12 @@ mcpy	jsr sys.off
 
 data	cmc_relocator %%1,main.%%lab
 
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	eif
+
 	ini mcpy
+
  els
 	org main.%%lab
 	cmc_relocator %%1,main.%%lab	
@@ -1195,7 +1207,6 @@ ln	= .filesize(%%1)-he-1024
 	ini RESORIGIN
 
 	.print '$R XBMP    ',main.%%lab,'..',main.%%lab+ln-1," %%1",' width: ',?bw,' height: ',?bh,' palsel: ',%%pal,' colsel: ',%%idx
-
 .endm
 
 
