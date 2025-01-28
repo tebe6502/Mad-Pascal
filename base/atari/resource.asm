@@ -318,7 +318,7 @@ RESORIGIN	= *
 
 len = .sizeof(_%%2)
 
-mcpy	ift main.%%lab+len >= $bc20
+mcpy	ift (main.%%lab < $bc20)&&(main.%%lab+len >= $bc20)
 	mva #0 sdmctl
 	sta dmactl
 	eif
@@ -337,7 +337,13 @@ data
 .endl
 	ini mcpy
 
-	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+$0755	
+	ift main.%%lab+len >= $c000
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	.endif
+	eif
+
+	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+len-1	
 .endm
 
 
@@ -351,7 +357,7 @@ data
 
 len = .sizeof(_%%2)
 
-mcpy	ift main.%%lab+len >= $bc20
+mcpy	ift (main.%%lab < $bc20)&&(main.%%lab+len >= $bc20)
 	mva #0 sdmctl
 	sta dmactl
 	eif
@@ -370,7 +376,13 @@ data
 .endl
 	ini mcpy
 
-	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+$049e
+	ift main.%%lab+len >= $c000
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	.endif
+	eif
+
+	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+len-1
 .endm
 
 
@@ -405,6 +417,12 @@ data
 .endl
 	ini mcpy
 
+	ift main.%%lab+len >= $c000
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	.endif
+	eif
+
 	.print '$R SAPRPLAY ',main.%%lab,'..',main.%%lab+$c00-1
 .endm
 
@@ -413,6 +431,52 @@ data
 /* RMTPLAY
 /* ----------------------------------------------------------------------- */
 
+.macro	RMTPLAY (nam, lab, mode, zp)
+
+	org RESORIGIN
+
+STEREOMODE	= %%mode
+PLAYER		= main.%%lab
+
+len	= .sizeof(_%%2)
+
+	ert <PLAYER <> 0,'RMT player routine MUST be compiled from the begin of the memory page'
+
+mcpy	jsr sys.off
+
+	memcpy #data #PLAYER #.sizeof(_%%lab)
+
+	jmp sys.on
+
+	ift %%zp=0
+	.ZPVAR = $e0
+	els
+	.ZPVAR = %%zp
+	eif	
+data
+
+.local	_%%lab, PLAYER
+	icl %%1
+	
+	icl 'atari\players\rmt_player_reloc.asm'
+.endl
+	ini mcpy
+
+	ift main.%%lab+len >= $c000
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	.endif
+	eif
+
+	.echo '$R RMTPLAY ',data.p_tis,'..',.zpvar-1,', ',PLAYER,'..',data+.sizeof(_%%lab)-1," %%nam"
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+/* RMTPLAY
+/* ----------------------------------------------------------------------- */
+
+/*
 .macro	RMTPLAY (nam, lab, mode, zp)
 
 STEREOMODE	= %%mode
@@ -438,7 +502,7 @@ PLAYER		= main.%%lab
 
 	ert (RMTPLAYEREND > CODEORIGIN) && (RMTPLAYEREND < PROGRAMSTACK), 'Memory overlap'
 .endm
-
+*/
 
 /* ----------------------------------------------------------------------- */
 /* RCASM

@@ -1,5 +1,7 @@
 // RMT PLAYER
 
+
+
 uses crt, rmt;
 
 const
@@ -31,7 +33,7 @@ begin
 	sta RMTGLOBALVOLUMEFADE
 
 	end;
-	
+
 
 	repeat
 		pause;
