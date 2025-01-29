@@ -1,3 +1,10 @@
+; Mad Pascal version
+;
+; rmt_play vector at first
+;
+; RMTGLOBALVOLUMEFADE, RMTSFXVOLUME automodification code
+;
+
 ;*
 ;* Raster Music Tracker, RMT Atari routine version 1.20090108
 ;* (c) Radek Sterba, Raster/C.P.U., 2002 - 2009
@@ -118,7 +125,7 @@ p_tis = .ZPVAR
 
 // ---------------------------------------------------
 
-	jmp rmt_play
+	jmp rmt_play			; rmt_play at first
 
 	jmp rmt_init
 	jmp rmt_p3
