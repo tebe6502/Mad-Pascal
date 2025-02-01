@@ -71,16 +71,7 @@ code	equ *-1
 
 	m@call	ciov
 
-	bmi error
-
-	sty MAIN.SYSTEM.IOResult
-
-	ldy #s@file.status
-	lda (bp2),y
-	ora #e@file.open
-	sta (bp2),y
-
-ok	rts
+	bpl ok
 
 error	sty MAIN.SYSTEM.IOResult
 
@@ -107,6 +98,16 @@ iocheck	equ *-1
 	jsr @printVALUE
 
 	jmp MAIN.@halt
+
+ok	ldy #s@file.status
+	lda (bp2),y
+sts	ora #e@file.open
+	sta (bp2),y
+
+	lda	#{ora #}	;set bit
+	sta	@openfile.sts
+
+	rts
 
 _error	dta 6,c'ERROR '
 
@@ -160,20 +161,15 @@ ok_open	lda	(bp2),y
 	lda	(bp2),y
 	tax
 
+	lda	#{eor #}	;clr bit
+	sta	@openfile.sts
+
 	lda	#$0c		;komenda: CLOSE
 	sta	iccmd,x
 
 	m@call	ciov
 
-	bmi err
-
-	sty MAIN.SYSTEM.IOResult
-
-	ldy #s@file.status
-	lda #$00
-	sta (bp2),y
-
-	rts
+	jmp @openfile.error
 .endp
 
 
