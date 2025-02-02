@@ -280,6 +280,7 @@ begin
        (AnsiUpperCase(res.resType) = 'CMC') or
        (AnsiUpperCase(res.resType) = 'RMTPLAY') or
        (AnsiUpperCase(res.resType) = 'RMTPLAY2') or
+       (AnsiUpperCase(res.resType) = 'RMTPLAYV') or
        (AnsiUpperCase(res.resType) = 'MPTPLAY') or
        (AnsiUpperCase(res.resType) = 'CMCPLAY') or
        (AnsiUpperCase(res.resType) = 'EXTMEM') or

@@ -16,6 +16,7 @@
 	RMT		RAM / ROM
 	RMTPLAY		RAM
 	RMTPLAY2	RAM / ROM
+	RMTPLAYV	RAM / ROM	VinsCool Patch16-3.2
 	XBMP
 	SAPR		RAM / ROM
 	SAPRPLAY	RAM / ROM
@@ -425,6 +426,51 @@ data
 	eif
 
 	.print '$R SAPRPLAY ',main.%%lab,'..',main.%%lab+$c00-1
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+/* RMTPLAYV
+/* ----------------------------------------------------------------------- */
+
+.macro	RMTPLAYV (nam, lab, mode, zp)
+
+	org RESORIGIN
+
+STEREOMODE	= %%mode
+PLAYER		= main.%%lab
+
+len	= .sizeof(_%%2)
+
+	ert <PLAYER <> 0,'RMT PLAYER must start from the beginning of the memory page'
+
+mcpy	jsr sys.off
+
+	memcpy #data #PLAYER #.sizeof(_%%lab)
+
+	jmp sys.on
+
+	ift %%zp=0
+	.ZPVAR = $e0
+	els
+	.ZPVAR = %%zp
+	eif	
+data
+
+.local	_%%lab, PLAYER
+	icl 'atari\players\rmt_playerv_reloc.feat'
+	
+	icl 'atari\players\rmt_playerv_reloc.asm'
+.endl
+	ini mcpy
+
+	ift main.%%lab+len >= $c000
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	.endif
+	eif
+
+	.echo '$R RMTPLAY ',_%%lab.p_tis,'..',.zpvar-1,', ',PLAYER,'..',_%%lab+.sizeof(_%%lab)-1 //," %%nam"
 .endm
 
 

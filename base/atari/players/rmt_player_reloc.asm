@@ -1,4 +1,4 @@
-; Mad Pascal version
+; Mad Pascal version -> resource RMTPLAY2
 ;
 ; rmt_play vector at first
 ;
