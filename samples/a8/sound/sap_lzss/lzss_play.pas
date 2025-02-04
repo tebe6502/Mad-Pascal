@@ -20,10 +20,13 @@ var
 
 
 begin
-	while true do begin
-
 	msx.modul:=pointer(sapr_modul);
 	msx.player:=pointer(sapr_player);
+
+	msx.clear;	// clear buffers
+
+
+	while true do begin
 
 	msx.init(0);
 
