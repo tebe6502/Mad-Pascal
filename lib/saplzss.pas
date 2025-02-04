@@ -3,13 +3,17 @@ unit saplzss;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: SAP-R LZSS Player
- @version: 1.2
+ @version: 1.3
 
    Version 1.1:
 	- function Decode: Boolean; (TRUE = end of song)
 
    Version 1.2:
-	- TLZSSPlay.Init, add clear buffers
+	- TLZSSPlay.Init(a: byte), add clear buffers
+
+   Version 1.3:
+	- TLZSSPlay.Init(a: byte), remove clear buffers
+	- TLZSSPlay.Clear
 
  @description:
  <https://github.com/dmsc/lzss-sap>
@@ -39,7 +43,8 @@ object for controling SAP-R LZSS Player
 
 	// A = POKEY address (low byte), $00 -> $d200, $10 -> $d210
 
-	procedure Init(a: byte); assembler;	// initializes
+	procedure Init(a: byte); assembler;	// initialization
+	procedure Clear; assembler;		// clear buffers
 	function Decode: Boolean; assembler;	// decode stream
 	procedure Play; assembler;		// play
 	procedure Stop(a: byte); assembler;	// stops music
@@ -48,7 +53,6 @@ object for controling SAP-R LZSS Player
 
 
 implementation
-
 
 
 procedure TLZSSPlay.Init(a: byte); assembler;
@@ -71,6 +75,33 @@ asm
 	lda (:bp2),y	; msb player address
 	sta adr+2
 
+	ldy #4
+	lda (:bp2),y
+	tax		; hi byte of MPT module to Y reg
+	dey
+	lda (:bp2),y	; low byte of MPT module to X reg
+
+	ldy a		; POKEY: $00 | $10 | ...
+
+adr	jsr $ff06	; jsr player+6
+
+	pla:tax
+end;
+
+
+procedure TLZSSPlay.Clear; assembler;
+(*
+@description:
+Clear buffers, player + $0300..$BFF ($900 bytes)
+
+*)
+asm
+	txa:pha
+
+	mwa TLZSSPlay :bp2
+
+	ldy #2
+	lda (:bp2),y	; msb player address
 
 	add #3		; clr = player+$300
 	sta clr+2
@@ -85,17 +116,6 @@ clr	sta $ff00,y
 	inc clr+2
 	dex
 	bpl clr
-
-
-	ldy #4
-	lda (:bp2),y
-	tax		; hi byte of MPT module to Y reg
-	dey
-	lda (:bp2),y	; low byte of MPT module to X reg
-
-	ldy a		; POKEY: $00 | $10 | ...
-
-adr	jsr $ff06	; jsr player+6
 
 	pla:tax
 end;
