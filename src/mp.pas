@@ -2315,12 +2315,25 @@ begin
 
 		   end else begin
 
-		     asm65(#9'lda ' + svar);
-		     asm65(#9'add :STACKORIGIN-1,x');
-		     asm65(#9'sta :bp2');
-		     asm65(#9'lda ' + svar + '+1');
-		     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-		     asm65(#9'sta :bp2+1');
+		     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
+
+		       asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
+		       asm65(#9'add :STACKORIGIN-1,x');
+		       asm65(#9'sta :bp2');
+		       asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
+		       asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		       asm65(#9'sta :bp2+1');
+
+		     end else begin
+
+		       asm65(#9'lda ' + svar);
+		       asm65(#9'add :STACKORIGIN-1,x');
+		       asm65(#9'sta :bp2');
+		       asm65(#9'lda ' + svar + '+1');
+		       asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		       asm65(#9'sta :bp2+1');
+
+		     end;
 
 		     asm65(#9'ldy #$00');
 		     asm65(#9'lda (:bp2),y');
@@ -2403,12 +2416,25 @@ begin
 
 		   end else begin
 
-		     asm65(#9'lda ' + svar);
-		     asm65(#9'add :STACKORIGIN-1,x');
-		     asm65(#9'sta :bp2');
-		     asm65(#9'lda ' + svar + '+1');
-		     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-		     asm65(#9'sta :bp2+1');
+		     if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then begin
+
+		       asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value), 2));
+		       asm65(#9'add :STACKORIGIN-1,x');
+		       asm65(#9'sta :bp2');
+		       asm65(#9'lda #$' + IntToHex(byte(Ident[IdentIndex].Value shr 8), 2));
+		       asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		       asm65(#9'sta :bp2+1');
+
+		     end else begin
+
+		       asm65(#9'lda ' + svar);
+		       asm65(#9'add :STACKORIGIN-1,x');
+		       asm65(#9'sta :bp2');
+		       asm65(#9'lda ' + svar + '+1');
+		       asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		       asm65(#9'sta :bp2+1');
+
+		     end;
 
 		     asm65(#9'ldy #$00');
 		     asm65(#9'lda (:bp2),y');
