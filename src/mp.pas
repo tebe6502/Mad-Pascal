@@ -2297,21 +2297,41 @@ begin
 
 	 	  if (NumAllocElements * 2 > 256) or (NumAllocElements in [0,1]) then begin
 
-		   asm65(#9'lda ' + svar);
-		   asm65(#9'add :STACKORIGIN-1,x');
-		   asm65(#9'sta :bp2');
-		   asm65(#9'lda ' + svar + '+1');
-		   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-		   asm65(#9'sta :bp2+1');
+		   if Ident[IdentIndex].isStriped  then begin
 
-		   asm65(#9'ldy #$00');
-		   asm65(#9'lda (:bp2),y');
-		   asm65(#9 + b + ' :STACKORIGIN,x');
-		   asm65(#9'sta (:bp2),y');
-		   asm65(#9'iny');
-		   asm65(#9'lda (:bp2),y');
-		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
-		   asm65(#9'sta (:bp2),y');
+		     asm65(#9'lda :STACKORIGIN-1,x');
+		     asm65(#9'add #$00');
+		     asm65(#9'tay');
+		     asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+		     asm65(#9'adc #$00');
+		     asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+		     asm65(#9'lda ' + svara + ',y');
+		     asm65(#9 + b + ' :STACKORIGIN,x');
+		     asm65(#9'sta ' + svara + ',y');
+		     asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		     asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+
+		   end else begin
+
+		     asm65(#9'lda ' + svar);
+		     asm65(#9'add :STACKORIGIN-1,x');
+		     asm65(#9'sta :bp2');
+		     asm65(#9'lda ' + svar + '+1');
+		     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		     asm65(#9'sta :bp2+1');
+
+		     asm65(#9'ldy #$00');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9 + b + ' :STACKORIGIN,x');
+		     asm65(#9'sta (:bp2),y');
+		     asm65(#9'iny');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		     asm65(#9'sta (:bp2),y');
+
+		   end;
 
 		  end else begin
 
@@ -2359,29 +2379,55 @@ begin
 
 	 	  if (NumAllocElements * 4 > 256) or (NumAllocElements in [0,1]) then begin
 
-		   asm65(#9'lda ' + svar);
-		   asm65(#9'add :STACKORIGIN-1,x');
-		   asm65(#9'sta :bp2');
-		   asm65(#9'lda ' + svar + '+1');
-		   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-		   asm65(#9'sta :bp2+1');
+	   	   if Ident[IdentIndex].isStriped then begin
 
-		   asm65(#9'ldy #$00');
-		   asm65(#9'lda (:bp2),y');
-		   asm65(#9 + b + ' :STACKORIGIN,x');
-		   asm65(#9'sta (:bp2),y');
-		   asm65(#9'iny');
-		   asm65(#9'lda (:bp2),y');
-		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
-		   asm65(#9'sta (:bp2),y');
-		   asm65(#9'iny');
-		   asm65(#9'lda (:bp2),y');
-		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
-		   asm65(#9'sta (:bp2),y');
-		   asm65(#9'iny');
-		   asm65(#9'lda (:bp2),y');
-		   asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
-		   asm65(#9'sta (:bp2),y');
+	     	     asm65(#9'lda :STACKORIGIN-1,x');
+	     	     asm65(#9'add #$00');
+	     	     asm65(#9'tay');
+	     	     asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	     	     asm65(#9'adc #$00');
+	     	     asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+		     asm65(#9'lda ' + svara + ',y');
+		     asm65(#9 + b + ' :STACKORIGIN,x');
+		     asm65(#9'sta ' + svara + ',y');
+		     asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements)) + ',y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		     asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements)) + ',y');
+		     asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements*2)) + ',y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
+		     asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements*2)) + ',y');
+		     asm65(#9'lda ' + svara + '+' + IntToStr(integer(NumAllocElements*3)) + ',y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
+		     asm65(#9'sta ' + svara + '+' + IntToStr(integer(NumAllocElements*3)) + ',y');
+
+		   end else begin
+
+		     asm65(#9'lda ' + svar);
+		     asm65(#9'add :STACKORIGIN-1,x');
+		     asm65(#9'sta :bp2');
+		     asm65(#9'lda ' + svar + '+1');
+		     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+		     asm65(#9'sta :bp2+1');
+
+		     asm65(#9'ldy #$00');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9 + b + ' :STACKORIGIN,x');
+		     asm65(#9'sta (:bp2),y');
+		     asm65(#9'iny');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+		     asm65(#9'sta (:bp2),y');
+		     asm65(#9'iny');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
+		     asm65(#9'sta (:bp2),y');
+		     asm65(#9'iny');
+		     asm65(#9'lda (:bp2),y');
+		     asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
+		     asm65(#9'sta (:bp2),y');
+
+		   end;
 
 		  end else begin
 
