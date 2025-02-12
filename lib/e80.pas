@@ -3,7 +3,7 @@ unit e80;
  @type: unit
  @author: Simon Trew, Tomasz Biela (Tebe)
  @name: 80: device
- @version: 1.0
+ @version: 1.1
 
  @description:
  80: device by SIMON TREW, 1989
@@ -782,11 +782,6 @@ GETCMD
 NOTPLT
 	LDY #$A       ;handlers can use
 SKIPPL
-
-;	.ifdef MAIN.@DEFINES.ROMOFF
-;		inc portb
-;	.endif
-
 	CLC           ;this routine for
 	LDA DRAWV,Y   ;their graphics,
 	ADC #1        ;as well as the
@@ -797,10 +792,6 @@ SKIPPL
 	PLA
 
 GODRAW	JSR $FFFF
-
-;	.ifdef MAIN.@DEFINES.ROMOFF
-;		dec portb
-;	.endif
 
 	CPY #128      ;If an error occ-
 	BCC NOTDER    ;urred then set the
@@ -1383,15 +1374,7 @@ AGAIN
 	JSR INVERT   ;to turn cursor on.
 NOCURS
 
-;	.ifdef MAIN.@DEFINES.ROMOFF
-;		inc portb
-;	.endif
-
 GOKEY	JSR $FFFF    ;Keyboard Get Subr.
-
-;	.ifdef MAIN.@DEFINES.ROMOFF
-;		dec portb
-;	.endif
 
 	CPY #$80     ;Is "error" < 128?
 	BCC KEYOK    ;Yes, Key is OK
