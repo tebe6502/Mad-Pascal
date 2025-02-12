@@ -37,8 +37,7 @@
 	ldx #TRUE
 	stx MAIN.SYSTEM.EoLn
 skp
-	ldx #0
-@sp	equ *-1
+	ldx @sp: #0
 
 	rts
 .endp
