@@ -35,8 +35,6 @@ begin
 
  while true do begin
 
- //readln(s);
-
  ch:=readkey;
  write(ch);
 

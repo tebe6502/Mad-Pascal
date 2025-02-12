@@ -1,4 +1,4 @@
-uses crt, graph, e80;
+uses crt, graph, e80, cio;
 
 {$define romoff}
 
@@ -17,6 +17,7 @@ begin
 
  for i:=0 to 3 do
    writeln(i);
+
 
  while true do begin
 

@@ -190,13 +190,14 @@ GR8SET
 	TXA
 	PHA          ;Save regs.
 
-	CLC          ;Get (address-1) of
-	LDA GRAVEC   ;CIO's screen setting
-	ADC #1       ;Up routine, and add
-	STA GOCIO+1  ;1 to it for a JSR
-	LDA GRAVEC+1 ;through the S: OPEN
-	ADC #0       ;vector.
-	STA GOCIO+2
+;	CLC          ;Get (address-1) of
+;	LDA GRAVEC   ;CIO's screen setting
+;	ADC #1       ;Up routine, and add
+;	STA GOCIO+1  ;1 to it for a JSR
+;	LDA GRAVEC+1 ;through the S: OPEN
+;	ADC #0       ;vector.
+;	STA GOCIO+2
+
 	LDA #$0C     ;Screen Read/Write
 	STA ZIOCB+10
 	LDA #$08     ;Screen mode (8)
@@ -781,9 +782,10 @@ GETCMD
 NOTPLT
 	LDY #$A       ;handlers can use
 SKIPPL
-	.ifdef MAIN.@DEFINES.ROMOFF
-		inc portb
-	.endif
+
+;	.ifdef MAIN.@DEFINES.ROMOFF
+;		inc portb
+;	.endif
 
 	CLC           ;this routine for
 	LDA DRAWV,Y   ;their graphics,
@@ -796,9 +798,9 @@ SKIPPL
 
 GODRAW	JSR $FFFF
 
-	.ifdef MAIN.@DEFINES.ROMOFF
-		dec portb
-	.endif
+;	.ifdef MAIN.@DEFINES.ROMOFF
+;		dec portb
+;	.endif
 
 	CPY #128      ;If an error occ-
 	BCC NOTDER    ;urred then set the
@@ -1362,21 +1364,13 @@ NEWBUF
 	CMP #13      ;Return-key mode?
 	BEQ LOOPGT
 
-	.ifdef MAIN.@DEFINES.ROMOFF
-		inc portb
-	.endif
-
-	CLC          ;Get a character
-	LDA KEYVEC   ;from the keyboard
-	ADC #1       ;GETCH routine
-	STA GOKEY+1
-	LDA KEYVEC+1
-	ADC #0
-	STA GOKEY+2
-
-	.ifdef MAIN.@DEFINES.ROMOFF
-		dec portb
-	.endif
+;	CLC          ;Get a character
+;	LDA KEYVEC   ;from the keyboard
+;	ADC #1       ;GETCH routine
+;	STA GOKEY+1
+;	LDA KEYVEC+1
+;	ADC #0
+;	STA GOKEY+2
 
 	LDA ICAX1,X  ;Get 1 key without
 	CMP #14      ;printing it, or if
@@ -1389,15 +1383,15 @@ AGAIN
 	JSR INVERT   ;to turn cursor on.
 NOCURS
 
-	.ifdef MAIN.@DEFINES.ROMOFF
-		inc portb
-	.endif
+;	.ifdef MAIN.@DEFINES.ROMOFF
+;		inc portb
+;	.endif
 
 GOKEY	JSR $FFFF    ;Keyboard Get Subr.
 
-	.ifdef MAIN.@DEFINES.ROMOFF
-		dec portb
-	.endif
+;	.ifdef MAIN.@DEFINES.ROMOFF
+;		dec portb
+;	.endif
 
 	CPY #$80     ;Is "error" < 128?
 	BCC KEYOK    ;Yes, Key is OK
@@ -1502,7 +1496,27 @@ BUFFER	;.ds 81
 
 CIOHND	.LOCAL
 
+	.ifdef MAIN.@DEFINES.ROMOFF
+		inc portb
+	.endif
+
 	TXA:PHA
+
+	CLC          ;Get a character
+	LDA KEYVEC   ;from the keyboard
+	ADC #1       ;GETCH routine
+	STA GOKEY+1
+	LDA KEYVEC+1
+	ADC #0
+	STA GOKEY+2
+
+	CLC          ;Get (address-1) of
+	LDA GRAVEC   ;CIO's screen setting
+	ADC #1       ;Up routine, and add
+	STA GOCIO+1  ;1 to it for a JSR
+	LDA GRAVEC+1 ;through the S: OPEN
+	ADC #0       ;vector.
+	STA GOCIO+2
 
 	LDX #$0        ;vector first.
 CIOLOOP
@@ -1521,12 +1535,10 @@ INS8
 	STA HATABS+1,X
 	LDA >NEWTAB
 	STA HATABS+2,X
-
 	LDX #0          ;and re-open it
 	LDA #$C         ;to the new E:.
 	STA ICCOM,X
-
-	m@call	CIOV
+	JSR CIOV
 
 	LDA <DEVNAM     ;Open E:
 	STA IOCB+4,X
@@ -1537,13 +1549,16 @@ INS8
 	STA ICAX2,X
 	LDA #3          ;OPEN command
 	STA ICCOM,X
-
-	m@call	CIOV
+	JSR CIOV
 
 	PLA:TAX
 
+	.ifdef MAIN.@DEFINES.ROMOFF
+		dec portb
+	.endif
+
 	RTS
-			; 81 bytes = BUFFER
+			; minimum 81 bytes -> BUFFER
 	.ENDL
 
 	.PRINT .SIZEOF(CIOHND)
