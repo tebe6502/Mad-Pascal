@@ -46,7 +46,6 @@ afnt1	sta $e000,y
 	jmp skp
 
 
-
 nmiint  bit NMIST        ;$D40F
         spl
         jmp (VDSLST)     ;$0200
@@ -92,4 +91,3 @@ iret	pla
 skp
 
 .endl
-
