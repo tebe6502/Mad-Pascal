@@ -1,0 +1,366 @@
+YET ANOTHER 80-COLUMN PROGRAM
+
+This program is yet another machine code utility that sets up an 80-column screen. Unlike the myriad of other 80-column devices, however, this one was designed with the specific intention of being a replacement for the E: device, rather than just as a mystified USR call. To that extent it operates a slightly "warts-and-all" approach, so some of the bad points of E: are included, purely for compatability. On the other hand, some slight differences are apparent, and these will be explained later.
+
+You will find that the 80: device is much faster than many 80-column handlers, and also a bit easier to read. This is because its 80-column character set is more rounded, and uses a 7x3 (8x4 for graphics) rather than a 6x3 character set.
+
+THE 8: DEVICE -  ITS FUNCTIONS, ITS HOTELS, ITS BEACHES
+
+The supplied program sets up a device called 8:, which links into the CIO and enables the 80-column operation. Because CIO accepts a device "number" as well as a "letter" before the colon, I recommend you use device number 0 and thus call the device "80:". It is possible to name the device anything, calling it E: will allow it to replace the 40-column screen editor.
+
+If the device is named E:, whenever Reset is pressed then the old blue screen will be replaced by the 80: screen, as will any OPEN to the "E:" device. This, however, does disable the ability to use the DOS menu (DUP.SYS), as the menu uses the same area of memory as the 80: device. The rest of the manual assumes you have called the device 80:.
+
+Most aspects of the device can be accessed in the usual way. Control-key and inverse are supported, and every code except Return can be printed by preceeding it with Esc (ASCII 27). The standard editor will not accept a printable Return key, so neither does this one.
+
+All control-key actions are supported, including clear-screen, shift-delete, buzzer and so on. The Control-1 key is checked so the display can be halted, and Control-3 can be used to signify End Of File. The DISPFLG flag at 766 ($2FE) is also checked: this is used by Basic and other cartridges to signify that control characters are to be printed and not acted on, this is used by the LIST command, for example.
+
+Left and Right margins are supported. The right margin, set by POKEing location 83 ($53), is set to 79 when the device is opened. The left margin can be set by a POKE to location 82 ($52).
+
+Tabbing IS different to the E: device. Since physical lines are longer, you may use the Tab key for advancing 10 characters, without wraparound. You may use the Shift-Tab to move back ten characters, and you may use Control-Tab to place the cursor at the left margin.
+
+Standard CIO Graphics commands can be issued using a procedure described below. The 80: device uses a standard Graphics 8 screen (with the colours changed on an OPEN to what I consider to be the most readable, black on white). This means that any Graphics 8 utilities such as fast DRAWTOs and PLOTs and FILLs, such as those listed some time ago in Monitor magazine, should work OK, providing any reference to the "S:" device is replaced by references to the "80:" device. The Turbo-Basic TEXT command can also be used, but the TEXT command will use the 40-column char set, useful for creating headings and so on. Alternatively, if doing a lot of graphics work, you may wish to have a separate channel for text and one for graphics. To do this use GRAPHICS 8+32 and OPEN the 80: device on a channel other than 6. Then all DRAWTOs, PLOTs etc. will work on channel 6 and you can still use all the text functions of the 80: device without having to switch between the two.
+
+The 80: device also uses the standard keyboard handler, so any keyboard buffer or softkey handler that links into the standard keyboard handler should still work.
+
+CIO COMMANDS
+
+The following CIO commands are supported:
+
+OPEN #chan,mode,0,"80:"
+
+Opens channel chan for the 80-column screen, sets colours and right margin. The value after mode is shown as 0 but can be any value or variable in the range 0..255. The mode can be any integer in the range 12..14. If it falls outside this range, 12 is assumed.
+
+The modes supported are as follows:
+
+12: Standard as for E: device. Input is buffered until Return is pressed and then the whole line is returned. The cursor can be moved freely around the screen and the Break, Ctrl-1 and Ctrl-3 keys act as normal.
+
+13: "Return-Key" mode, as for the E: device. Whenever input is requested, say by the BASIC editor, no key input is taken but instead the handler generates its own "Return". This is sometimes used by programs to modify themselves (see "Notes on the Return-Key Mode", below).
+
+14: All keyboard input is passed directly to the user as for the K: device, and not buffered like the E: device. This is useful if you have your own, more program-dependant key input routines.
+
+Any other value for Mode will be treated as for mode 12. Note that you cannot have a "split-screen" setup as you can with the E: device.
+
+CLOSE #chan
+
+No special actions.
+
+PUT #chan, PRINT #chan
+(Also Turbo-Basic BPUT #chan)
+
+As for the E: device. The character is put or its control-key action executed. In the case of the former, the cursor is advanced. If the cursor is past the right margin, it will wrap to the left margin, and possibly the screen will scroll. This means that, as for the E: device, it is difficult to print a character on the bottom line at the right margin: one way to do it, as for the E: device, is to generate the text on the line above and push it down 1 line with a Shift-insert command.
+
+Like the E: device, a POSITION command can be used to print text before the left margin, it cannot, however, be used to print text after the right margin, since the cursor will be wrapped after the first character has been printed.
+
+Unlike the E: device, the cursor is only enabled on an INPUT (or BGET) command (and only if PEEK(752)=0). The cursor takes extra time to print, which is fine if you're typing as the device is limited to the speed you type, but on a PRINT command it is just a waste of time, especially since most of the time the cursor is unwanted anyway. The cursor as usual is an inverse block, and acts as normal, however most cursor flashing routines will not work as intended with the 80: device. (They probably won't do it any harm, though).
+
+GET #chan,A
+
+The actions of the GET command depend on the input mode you are in. They differ from the INPUT command, as they only occur when a single byte is requested.
+
+The GET command is actually the way CIO interprets a LOCATE. This command, then, returns the character at the cursor into the variable A. If the cursor is placed over a "character" that is not part of the character set, that is to say a graphics command has written through the square, then an error 144 (device done/bad sector) will be generated. The value of A is indeterminate if this happens. You may find that it always returns the same number under these conditions, but different versions may change this, so watch out.
+
+If you OPEN or change the device for mode 14, however, a LOCATE is not performed, but instead the first key pressed is returned to the user. It is not printed on the screen, neither is the cursor, and so it acts like the K: device.
+
+Of course, if you are in graphics mode, the normal graphics actions occur.
+
+INPUT #chan,A
+(also Turbo-Basic BGET #chan)
+
+This places a visible cursor on screen (depending on the state of location 752 ($2F0), as for the E: device) and allows free-form editing on the screen as for the "E:" device. When Return is pressed, the line is returned, minus any trailing blanks and any non-characters, which will be treated as the end of the line.
+
+If the line you press Return on is the same as the line the cursor was on when the INPUT command was issued, only the characters from the original X cursor position to the end will be returned. This is useful for printing a prompt (like Basic prints "?").
+
+Note that there is no such thing as a logical line. Each line is a maximum of 80 characters long, and any more just spills over on to the next line. This is for 3 reasons: firstly, logical lines take lots more processing and thus lots more memory. With the E: device this is a necessity since many lines are going to be longer than 40 characters, but with an 80-column screen most things can be accomodated. Secondly, many cartridges and Basic have a maximum of 120 or so characters per line, and this would mean a 1.5 physical line to 1 logical line ratio, which is difficult more for the user than the programmer. Thirdly, I prefer to have 1 physical line for each line of code, so I never bothered with logical lines. And that's good enough for me.
+
+POSITION x,y
+
+As normal. x may be in the range 0..79 and y in the range 0..23. See the notes on the PRINT statement about POSITIONing outside the margins. This command does not do a CIO call, but just changes the contents of memory locations 84, 85 and 86 ($54, $55 and $56); therefore any out-of-range values will not be detectd until another CIO command is issued.
+
+DRAWTO x,y
+
+When set up for GRAPHICS mode, the line is plotted between x and y in the current colour. See XIO 43 for setting up GRAPHICS mode. Note that this only works for channel 6: this is a limitation of Basic, and not the CIO or 80: device. If the 80: device is set up for a channel other than 6, then the command XIO 17,#chan,x,y,"80:" has the same effect (see the XIOs section, below.)
+
+PLOT x,y
+
+When set up for GRAPHICS mode, the point is plotted in the current colour. Otherwise this is the same as POSITION x,y: PUT #6,colour (which is actually how BASIC handles it.) If using a channel other than 6, use this method but changing the channel number.
+
+NOTE #chan,x,y
+
+Gets the cursor position. Note this will ONLY work with the 80: device, but it WILL return the graphics cursor if the screen is set up for graphics. It will NOT work for any other mode, since it is a command explicit to the 80: device. The NOTE and POINT commands are extremely useful in that they are the only way to pass integers (in the range 0..65535) between BASIC and a device.
+
+This command can be bypassed by PEEKs to the cursor locations at 84 ($54) (Y axis) and 85 & 86 ($55 & $56) (X axis), but from Basic this is both more difficult and less intelligable.
+
+STATUS #chan,x
+
+Returns 0 into x if the screen is in TEXT mode, 1 otherwise.
+
+MIXING TEXT WITH GRAPHICS
+
+Text may be mixed with graphics by using the XIO 43 command (see below.) When an OPEN command is performed, the screen is opened if possible and the device is placed in TEXT mode. When in TEXT mode, all PUTs, GETs, PRINTs etc. function similarly to the E: device, and DRAWTO and XIO 18 (FILLTO) are not available: this is because a very few programs use DRAWTO on a text screen, and this would probably be worse on the 80: screen than reporting back with an error, since you cannot DRAWTO with text characters on the 80-column screen. The Turbo-Basic command CIRCLE can work with text characters, but the PAINT command will always work on a bit-mapped (graphics) level. The TEXT command will work, but will use the 40-column character set on a 320x192 coordinate system. This is very useful for plotting double-width headings, and so on.
+
+In GRAPHICS mode, PLOT, DRAWTO and XIO 18 are used as for GRAPHICS 8. The cursor position can be found using the NOTE command. The PRINT command can be used as in other graphics modes to do a quick PLOT of a large area (see the SUNPLOTTER program in Page 6 issue 37 for a good example of this).
+
+XIO COMMANDS (or: HOW TO MAKE LIFE DIFFICULT)
+
+Atari made the CIO a wonderful open system, however the XIO command is one of the most obscure commands around, as well as the only command in any Basic I know that begins with X.
+
+The general format of an XIO command is:
+
+XIO cmd,#chan,x,y,"80:"
+
+This sends the command (cmd) that is specified to the channel (chan) that is specified, with x and y as parameters if necessary, using the device name supplied. The device name is included for this reason: If the channel is not open, and the command is greater than 12, signifying a SPECIAL function, or a STATUS command, then the channel is automatically opened, the command performed, and the channel closed.
+
+In any case, the XIO command is used mainly for operations that are device-specific, such as disk RENAME, DELETE and FORMAT, screen DRAWTO and so on (although some languages have special commands that can be used as alternatives to XIOs, for example BASIC has DRAWTO and Turbo-Basic has FILLTO, RENAME and DELETE).
+
+The 80: device supports the following XIO commands:
+
+XIO 17,#chan,x,y,"80:"
+
+This is the XIO equivalent of a DRAWTO, and enables you to use channels other than 6 for graphics.
+
+XIO 18,#chan,x,y,"80:"
+
+This is the much-maligned FILLTO command. Its operation is so empirical that I shall refer you to the Atari OS Users Manual, Computer Animation Primer or any good Atari beginner's guide.
+
+XIO 38,#chan,0,0,"80:"
+
+This is the equivalent of the NOTE x,y command. The x value can be found in ICAX3 and ICAX4 of the IOCB, or PEEK(852+chan*16) and PEEK(853+chan*16), and the y command at ICAX5 or PEEK(854+chan*16). This method is not recommended from Basic.
+
+XIO 39,#chan,x,y,"80:"
+
+Moves the whole of line x to line y, very quickly. This does not affect the cursor position. This command moves the line byte-by-byte, and so any graphics will be moved as well. This command uses the same subroutine to move a line as the scrolling / shift-insert / shift-delete routines. If you want to fill a whole area with one character, use this command, it is a lot faster than a PRINT.
+
+XIO 40,#chan,x,0,"80:"
+
+This command clears line x very quickly. It does not affect the cursor position.
+
+XIO 41,#chan,x,0,"80:"
+
+This command scrolls line x and all lines below it up one line, and clears the bottom line. This is similar to Shift-Delete, but doesn't affect the cursor position.
+
+XIO 42,#chan,x,0,"80:"
+
+XIO 42 is the counterpart to the above command. It scrolls down all lines from x onwards, and clears line x. It does not affect the cursor position.
+
+The above 4 XIO commands are not inhibited by Ctrl-1 or Break, therefore they are slightly different to equivalent control codes.
+
+XIO 43,#chan,0,0,"80:"
+
+This command changes which mode the screen is in. Whenever the mode is changed, the cursor values are swapped with internal values, so that it is possible to switch at will between graphics and text modes and still retain cursor positions for both of them. To find the current mode, use STATUS.
+
+XIO 44,#chan,x,y,"80:"
+
+This command inverts the character at x,y. The "character" can actually be any graphics data. This is therefore a good way of creating your own cursor or inverting an area of the screen (albeit slowly from Basic, due to the comatose maths!). It is also a lot quicker than LOCATE and PUT since LOCATE needs to do quite an extensive search for characters through the character set, as well as double the overhead of CIO time.
+
+If you really like to be awkward, you can get a printable Return key by printing an escape character and inverting it. Note that any line input on the line will be terminated at that "Return", though, and then another line containing the remaining characters will be returned.
+
+XIO 45,#chan,mode,0,"80:"
+
+This is used to change the input mode from that specified in an OPEN command, and is most notably used to toggle on/off Return-Key mode. You can use POKE, but since any XIO corrupts this value, this method is recommended as the value is updated after each XIO. The value of Mode is as for the Return statement.
+
+Note that if you do opt for the POKE, the address to poke is not 842 (which handles channel 0, the screen editor) but 842+16*chan, where chan is the channel of the 80: device. See the notes on the Return-Key mode, below.
+
+ERRORS: HOW TO GET THEM, HOW TO GET RID OF THEM
+
+Errors are extremely simple to get. However they are more difficult to decipher. If you have Turbo-Basic then you might be lucky enough to get a tiny error message such as ?CURSOR. See below for errors that are generated by the 80: device (as opposed to other general CIO errors).
+
+Note that if you try using the 80: device when you are not using a GRAPHICS 8 screen, the screen will be re-opened (like the E: screen does).
+
+If you get an error, the mode is changed to TEXT. This ensures that data input integrity is maintained. However, if the Break key is pressed whilst in GRAPHICS mode, and an 80: command is not being executed, Basic or another language may get there first, and thus try printing the "STOPPED" message and requesting input from graphics. If this happens, the computer seems to be having a rest. Pressing the Break key should solve this (you may get an additional ERROR 141 depending on where the graphics cursor was).
+
+ERROR 128 Break key abort. Occurs during PUT and GET operations. Manifests itself in Basic as "STOPPED".
+
+ERROR 136 End of File. Control-3 was pressed while input was occuring. This is not really an error, but Basic stops if an ERROR 136 is generated anyway.
+
+ERROR 141 Cursor is out of range. The GRAPHICS X-axis range is 0..319 and the Y-axis 0..191; the TEXT X-axis range is 0..79 and the Y-axis 0..23.
+
+ERROR 144 Device done/bad sector. With reference to the screen, this means the attempted LOCATE tried to read a character that is not part of the character set, that is, has been PLOTted or DRAWTOed over.
+
+ERROR 145 Bad screen mode. You attempted a DRAWTO or FILL operation whilst in text mode, or a MOVE LINE, DELETE LINE, SCROLL or INVERT operation whilst in ttGRAPHICS mode.
+
+ERROR 158 Not enough memory to open the screen in this mode.
+
+NOTES ON THE "RETURN-KEY" MODE.
+
+The Return-key mode works in a similar fashion to the E: device. Essentially what happens is that whenever an input command is issued, the device automatically "Presses Return" on the line that the cursor is on.
+
+Some Basic programs use this to create other Basic programs or modify themselves. Their general format is:
+
+10 REM ***EXAMPLE****
+20 PRINT "RETURN KEY MODE"
+30 PRINT "THIS ADDS A COUPLE OF LINES TO THE PROGRAM"
+40 PRINT "100 REM  ÖĎÉĚÁ "
+50 PRINT "110 REM  ¸°ĂĎĚ "
+60 PRINT "GOTO 90"
+70 POSITION 0,2
+80 POKE 842,13:STOP
+90 POKE 842,12:LIST
+
+What this does is to print the two new lines on the screen.  Then it prints the immediate mode instruction GOTO 80 so that BASIC will continue from line 80 when the E: device reaches that line, and position the cursor. It then POKES 842 with 13, and stops the program so that Basic expects input. Location 842 contains the mode that channel 0 (the editor) was opened with: normally set to 12 on a Reset. Setting this to 13 induces Return-key mode, and setting it to 12 again in line 80 reverts back to a normal input facility. The input that Basic expects is automatically provided, until the CONT statement is encountered, whereupon the program recommences operation.
+
+However, the 80: device cannot use POKE 842 unless you have opened it in channel 0, that is you have it configured as E:. Either use POKE 842+16*chan, or the preffered method, especially if you are using XIOS afterwards, XIO 44,#chan,Mode,0,"80:" where Mode is either 12, 13 or 14 (see the OPEN command). This latter method preserves the input mode even if you use XIO: otherwise, expect some strange results if you use any XIOs.
+
+MEMORY USAGE
+
+When dormant, ie in memory but not with the screen open, the device takes approximately 2740 bytes (this will depend on the configuration). When opened, the device takes approximately 9880 bytes (compared to 7200 extra for a standard Graphics 8 screen). This is significantly less than, say, the X: device on Page 6 PD disk 62. Incidentally, if you want a speed test, when compared to that device, a disk-to-screen copy of 15000 characters (approx.) took 1 minute 14 seconds on the 80: device, and 6 minutes 54 seconds on the X: device! Unfortunately I have not been able to test it against the XEP80, and any speed data would be greatly appreciated.
+
+MAKING YOUR OWN CUSTOM 80: DEVICE
+
+The program can be configured to suit your own application; this is done via a Basic program. You should note that all above information assumes the standard configuration, created by loading the Basic program and running it without changing any options.
+
+Firstly load "80CONFIG.BAS" from the source disk. This is the Basic code that creates the machine code 80-column device. You may use this as many times as you wish to create custom 80: devices.
+
+The 80: device is not self-relocatable, that is, it cannot move itself around in memory depending on the size of your system. CIO handlers are a lot of hassle in this way, because the CIO needs to know about 10 addresses of where it can find various bits of the program, so relocation becomes heavy work for handlers of any size. However, when you run the Basic program, you can alter the page to start the code at. The page at which you want the program to load will vary depending on your system.
+
+If you know which page, then select option 1 and type the page number, in hex (2 digits). If not, the program will automatically choose the lowest possible page depending on your system. If you have missed all that "page" talk, just follow this advice: Load all the software into memory that you would normally want while using the 80: screen, then load the "80CONFIG.BAS" program and run.
+
+Option 2 allows you to change the machine code file name, this is the file you will run each time you want to use the 80: device. The default is D:AUTORUN.SYS. DOS 2.x (that is, any DOS 2 derivative) users should note that the DUP.SYS package uses the same memory as the 80: device, and for this reason it cannot be loaded from DOS with the L command, nor can it be in use when DUP is used (this will only happen if the device is called E:). Therefore the best bet is to call it D:AUTORUN.SYS.
+
+The third option will allow you to change the device name. I recommend 8: but you may want to call it something else, notably E: which will mean as soon as you load it, all normal editor operations will be replaced by the new 80-column operations. Note that if you do this, however, you will never be able to use the old E: device while the 80-column driver is in memory. A special case exists when calling the device E:, and that is that on a Reset channel 0 is closed and re-opened to E:, this is because the normal Reset process first inserts the old E: handler and opens the screen before allowing other Reset processes to proceed. Some things may insist on using 40 columns, by calling the OS ROM routines directly, so if you encounter problems, you may not want to call the device E:.
+
+Option 4 allows you to adjust the default right margin, set originally to 79. This means that whenever the device is OPENed, the right margin is changed to 79. You may want to change this to, say, 77 or 39.
+
+Options 5, 6 and 7 allow you to change the default colours for foreground, background and border, respectively. Whenever you type these numbers, the colours change on-screen. To change the brightnesses, use Shift-6 (&) and Shift-7 (') respectively. Only the brightness can be changed on option 5.
+
+Option 8, for DOS 2.x users, allows you to specify a binary filename to load after the 80: device, if left blank, then no file is loaded. This is very useful if you call the device AUTORUN.SYS, since you can have another binary file also run automatically at bootup. (It is also possible to append the 80: device program to an existing AUTORUN.SYS file.) Note that this feature does not remain resident and so does not take up any more memory.
+
+(Note that for typing filenames, you must include the drive specifier eg D:, D2:, D8:.)
+
+Once configured, press G and the binary file will be created. When done, you can boot the disk with your AUTORUN.SYS file on, or if you are not using DOS 2.x then you can go to your DOS command line and type the program name. Presto!
+
+USING 80: WITH TURBO-BASIC
+
+The 80: device works well with Turbo-Basic, however there are a few caveats.
+I suggest you call the device D:AUTORUN.SYS and have it automatically load a file called D:TURBO.COM, and rename your Turbo-Basic file to TURBO.COM.
+
+Since Turbo-Basic also modifies the Low Memory pointer, this must be changed after loading to above the 80: device, otherwise your Turbo-Basic program will overwrite the 80: device.
+
+There are two ways to do this. The first is to create an 80: device with a start page of $38 (the default under Turbo-Basic is $37) and, when first loading, type:
+
+DPOKE $2E7,$4300:DPOKE $80,$4300
+
+You cannot do this within a program. The start page has to be bumped up by one, else when you type the above line, you will be overwriting the lower end of the 80: character set.
+
+The second, and to my mind better, way to achieve this is to remove the low memory pointer from the Turbo-Basic binary file. The Turbo-Basic program 80MODITB.TUR will do this for you, and write a custom Turbo-Basic file D:TURBO.COM to disk. You can then use this as you would with Turbo-Basic.
+
+Another useful feature with Turbo-Basic is that you can access the DOS menu in 80 columns. Do not try to do a Copy or Duplicate option, though, as this will use the memory reserved by Turbo-Basic and the 80: device! You can return to Turbo by typing 2080 at option M (this works on my 130XE but I have been informed that it does not work on an 800XL).
+
+PROGRAM DESIGN
+
+The resultant 80.COM (or AUTORUN.SYS) file is made by appending four separate .OBJ files using the COPY /A command. These files are 80CHAR.OBJ, 80BASICS.OBJ, 80XIOS.OBJ and 80CIO.OBJ.
+
+80CHAR.OBJ has 512 bytes of code and contains the character set. This character set has been designed using a standard font editor that produces nine-sector (1024 byte) fonts. A small program called 80FONT.BAS, written in BASIC, takes the font called 80CHAR.FNT and writes the 80CHAR.OBJ file. If you want to change the font permanently, then load the 80CHAR.FNT font into your font editor. You will see that only half the width of each character is used: the other must be blank for 80FONT.BAS to work properly. 80FONT.BAS is a very noddy program since it is only used once or twice.
+
+The assembler source file is split into three parts: 80BASICS, 80XIOS and 80CIO. These are "linked" by a set of equates at the top of each file which refer to addresses in the other source files. This is for two reasons: firstly, because one source file would be absolutely huge and take aeons to load, save and assemble; and secondly the files can be assembled separately thus if an error in 80CIO occurs the others need not be re-assembled. Since the files were developed in the three distinct stages this meant that after 80BASICS was working satisfactorily then its innards could be forgotten. This is a very primitive form of "linking": using procedures from an external file without actually knowing the code they contain.
+
+Even though assembler is a low-level language, it still needs to be structured and the software was developed using a procedural approach. The A,X, and Y registers would not be changed by a subroutine, neither would any memory location, unless this was explicitly stated in the module spec (a spec written and updated by me throughout the project). Any local variable space that only the one subroutine uses is declared at the top of the subroutine. In many subroutines you will see at each end instructions saving and restoring the registers from the stack.
+
+The 80BASICS file contains all the basic routines used by the driver, such as putting a character on screen, inverting characters, getting characters from the screen, scrolling etc. If you are writing a program that uses 80 columns but do not wish to access it through CIO systems, then this file is probably all you need. This provides you with basic screen control but has no checking for things like scrolling at ends of lines, margins, keyboard input etc. It also does not provide any graphics functions.
+
+The 80XIOS file contains CIO handling code that handle the XIOs functions. This includes instructions to save the input mode which is destroyed by an XIO command, and control all the CIO commands that do not vary. That is, the PUT and GET commands vary a lot depending on the input mode, the TEXT/GRAPHICS mode, and so on. But all other commands, even though they may only be valid in either TEXT or GRAPHICS mode, always have the same function. This is handled by 80XIOS and includes OPEN, CLOSE, STATUS, and SPECIAL. It also has a special procedure called CHECK8. This checks whether a Graphics 8 screen is being displayed and if not opens it. If it cannot be opened, then the CHECK8 procedure does not return to the caller but returns to the caller's caller, which is always the CIO. This means that by placing a JSR CHECK8 instruction in the code it can be assured that the next instruction will only be executed if the screen is open.
+
+The 80CIO file contains the PUT and GET functions, including all the control code processing and text buffering. It also controls the 8: entry into the CIO Handler Table (HATABS) and a small amount of transient code.
+
+Most of the code is resident, that is to say it remains in memory after the program has run. The transient code is executed only when the program is first loaded and then is erased from memory and thus does not take any memory. This is used to print the 80: message:
+
+80: device by S.Trew 1989.
+
+and it also sets MEMLO, reroutes the DOS loader for Reset, and generally tidies. This then calls the resident code.
+
+BUGS!
+
+The program has been heavily tested, but if you find a bug in the program or a whopper in the documentation, please send full details to me. If you have any problems, please also get in touch. It is quite difficult writing a manual for something you know all about, and inevitably some things will need changing.
+
+DISCLAIMER (MY MUM TOLD ME TO PUT THIS IN)
+
+These programs and their accompanying documentation are in the public domain and may be freely copied, distributed, disassembled or changed in any other manner for any non-profit-making reason. They may not be used on any commercial basis without written permission from the author, who will be happy to oblige. Whilst it is hoped that the programs and documentation are free from errors, the author cannot be held responsible for any actions arising either directly or indirectly from the use of the software, nor from his sense of humour.
+
+BIBLIOGRAPHY
+
+Books I could not do without:
+
+Compute!'s "Revised Mapping the Atari"
+Atari "OS User's Manual"
+Atari "OS Source Listing"
+Freud "Insomnia and the Low-Level Programmer".
+
+Simon Trew.
+December 1989.
+
+QUESTIONAIRE / REGISTRATION FORM
+
+If you use the 80: device regularly, please show your appreciation by filling in this short questionaire and returning it to me. If you would like to register for the next release of 80:, please send an SAE, and when I complete the next revision (including some of the features below), I will drop you a line. Please mention anything else you feel would be handy too. Be honest! There are no high cliffs around here to jump off.
+
+1. How do you rate the program?
+
+[ ] Very highly  [ ] Highly  [ ] Average
+
+2. How often do you use it?
+
+[ ] Most sessions  [ ] Some sessions  [ ] Occasionally
+
+3. The following features may be included in a future revision of the program. Please indicate those you would find worth the estimated extra memory usage (in brackets).
+
+a) ST Mouse Control.  (70 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+b) Windowing (The ability to set top, bottom, left, right margins and have more than one 8: window on screen at once). (300 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+c) The ability to redefine characters using an XIO command. (50 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+d) Fast, more versatile PLOTs and DRAWTOs. (300 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+e) A "flood" graphics fill (needs PLOTS and DRAWTOs+150 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+f) Auto Wordwrapping (120 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+g) Logical lines (300 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not Useful
+
+h) A "last line recall" (50 bytes)
+
+[ ] Very   [ ] Slightly   [ ] Not useful
+
+i) Keyboard macros (300 bytes).
+
+[ ] Very   [ ] Slightly   [ ] Not useful
+
+4. What other features would you enjoy?
+
+
+
+
+
+
+
+(please use more sheets if you would like to).
+
+
+5. How did you find the documentation?
+
+[ ] Good  [ ] Average  [ ] Poor  [ ] I just opened the envelope, and there it was.
+
+If you have any questions about the program, I will do my best to answer them. If you wish to suggest other improvements or need a custom version of the program, please feel free to write, and I will see what I can do. I've got nothing better to do in the evenings.
+
+Please send to:
+
+Simon Trew
+322 York Road
+STEVENAGE
+Herts.
+SG1 4HW.
+ENGLAND.
+
+Thankyou for taking the time to fill in this questionaire.
