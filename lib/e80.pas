@@ -3,10 +3,133 @@ unit e80;
  @type: unit
  @author: Simon Trew, Tomasz Biela (Tebe)
  @name: 80: device
- @version: 1.1
+ @version: 1.2
+
+   Version 1.2:
+	- information about CIO, XIO command
 
  @description:
  80: device by SIMON TREW, 1989
+*)
+
+(*
+
+CIO COMMANDS
+
+The following CIO commands are supported:
+
+OPEN #chan,mode,0,"80:"
+
+Opens channel chan for the 80-column screen, sets colours and right margin.
+The value after mode is shown as 0 but can be any value or variable in the range 0..255.
+The mode can be any integer in the range 12..14. If it falls outside this range, 12 is assumed.
+
+The modes supported are as follows:
+
+12: Standard as for E: device. Input is buffered until Return is pressed and then the whole line is returned.
+    The cursor can be moved freely around the screen and the Break, Ctrl-1 and Ctrl-3 keys act as normal.
+
+13: "Return-Key" mode, as for the E: device. Whenever input is requested, say by the BASIC editor, no key input
+    is taken but instead the handler generates its own "Return". This is sometimes used by programs to modify
+    themselves (see "Notes on the Return-Key Mode", below).
+
+14: All keyboard input is passed directly to the user as for the K: device, and not buffered like the E: device.
+    This is useful if you have your own, more program-dependant key input routines.
+
+
+XIO COMMANDS
+
+The general format of an XIO command is:
+
+XIO cmd,#chan,x,y,"80:"
+
+This sends the command (cmd) that is specified to the channel (chan) that is specified, with x and y as parameters if necessary,
+using the device name supplied. The device name is included for this reason: If the channel is not open, and the command is greater than 12,
+signifying a SPECIAL function, or a STATUS command, then the channel is automatically opened, the command performed, and the channel closed.
+
+In any case, the XIO command is used mainly for operations that are device-specific, such as disk RENAME, DELETE and FORMAT,
+screen DRAWTO and so on.
+
+The 80: device supports the following XIO commands:
+
+XIO 17,#chan,x,y,"80:"
+
+This is the XIO equivalent of a DRAWTO, and enables you to use channels other than 6 for graphics.
+
+--------------------------------
+
+XIO 18,#chan,x,y,"80:"
+
+This is the much-maligned FILLTO command. Its operation is so empirical that I shall refer you to the Atari OS Users Manual,
+Computer Animation Primer or any good Atari beginner's guide.
+
+--------------------------------
+
+XIO 38,#chan,0,0,"80:"
+
+This is the equivalent of the NOTE x,y command. The x value can be found in ICAX3 and ICAX4 of the IOCB, or PEEK(852+chan*16) and PEEK(853+chan*16),
+and the y command at ICAX5 or PEEK(854+chan*16). This method is not recommended from Basic.
+
+--------------------------------
+
+XIO 39,#chan,x,y,"80:"
+
+Moves the whole of line x to line y, very quickly. This does not affect the cursor position.
+This command moves the line byte-by-byte, and so any graphics will be moved as well.
+This command uses the same subroutine to move a line as the scrolling / shift-insert / shift-delete routines.
+If you want to fill a whole area with one character, use this command, it is a lot faster than a PRINT.
+
+--------------------------------
+
+XIO 40,#chan,x,0,"80:"
+
+This command clears line x very quickly. It does not affect the cursor position.
+
+--------------------------------
+
+XIO 41,#chan,x,0,"80:"
+
+This command scrolls line x and all lines below it up one line, and clears the bottom line.
+This is similar to Shift-Delete, but doesn't affect the cursor position.
+
+--------------------------------
+
+XIO 42,#chan,x,0,"80:"
+
+XIO 42 is the counterpart to the above command. It scrolls down all lines from x onwards, and clears line x.
+It does not affect the cursor position.
+
+
+The above 4 XIO commands are not inhibited by Ctrl-1 or Break, therefore they are slightly different to equivalent control codes.
+
+XIO 43,#chan,0,0,"80:"
+
+This command changes which mode the screen is in. Whenever the mode is changed, the cursor values are swapped with internal values,
+so that it is possible to switch at will between graphics and text modes and still retain cursor positions for both of them.
+To find the current mode, use STATUS.
+
+--------------------------------
+
+XIO 44,#chan,x,y,"80:"
+
+This command inverts the character at x,y. The "character" can actually be any graphics data.
+This is therefore a good way of creating your own cursor or inverting an area of the screen.
+It is also a lot quicker than LOCATE and PUT since LOCATE needs to do quite an extensive search for characters through the character set,
+as well as double the overhead of CIO time.
+
+If you really like to be awkward, you can get a printable Return key by printing an escape character and inverting it.
+Note that any line input on the line will be terminated at that "Return", though, and then another line containing the remaining characters will be returned.
+
+--------------------------------
+
+XIO 45,#chan,mode,0,"80:"
+
+This is used to change the input mode from that specified in an OPEN command, and is most notably used to toggle on/off Return-Key mode.
+You can use POKE, but since any XIO corrupts this value, this method is recommended as the value is updated after each XIO.
+The value of Mode is as for the Return statement.
+
+Note that if you do opt for the POKE, the address to poke is not 842 (which handles channel 0, the screen editor) but 842+16*chan,
+where chan is the channel of the 80: device. See the notes on the Return-Key mode, below.
 
 *)
 
@@ -1543,8 +1666,6 @@ INS8
 	RTS
 			; minimum 81 bytes -> BUFFER
 	.ENDL
-
-	.PRINT .SIZEOF(CIOHND)
 end;
 
 
