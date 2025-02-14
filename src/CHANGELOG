@@ -1,3 +1,7 @@
+12.02.2025
+- nowu unit E80
+- poprawki dla GRAPH_ATARI.INC (LineTo), wartość RMARGN zostaje zachowana
+
 06.02.2025
 - INC/DEC striped array, absolute array optimization
 
