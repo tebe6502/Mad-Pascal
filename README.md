@@ -1,6 +1,6 @@
 # Mad-Pascal
 
-[English Documentation](http://mads.atari8.info/doc/en/index.html) / [Polska Dokumentacja](http://mads.atari8.info/doc/pl/index.html)
+[English Documentation](https://tebe6502.github.io/mad-pascal-en-mkdocs/) / [Polska Dokumentacja](https://tebe6502.github.io/mad-pascal-mkdocs/)
 
 ## Introduction
 
