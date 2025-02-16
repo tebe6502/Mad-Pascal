@@ -50,10 +50,26 @@ type
     Buffer  : array [0..63] of byte;
   end;
 
-	procedure MD5Buffer(var Buffer; BufLen: word; var MD5: TMD5);
-	procedure MD5String(var txt: String; var MD5: TMD5);
-	procedure MD5File(const Filename: TString; var MD5: TMD5);
-	function MD5Print(var MD5: TMD5): TString;
+procedure MD5Buffer(var Buffer; BufLen: word; var MD5: TMD5);
+(*
+@description:
+*)
+
+procedure MD5String(var txt: String; var MD5: TMD5);
+(*
+@description:
+*)
+
+procedure MD5File(const Filename: TString; var MD5: TMD5);
+(*
+@description:
+*)
+
+function MD5Print(var MD5: TMD5): TString;
+(*
+@description:
+*)
+
 
 implementation
 

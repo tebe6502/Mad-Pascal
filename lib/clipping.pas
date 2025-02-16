@@ -23,18 +23,30 @@ interface
 uses types;
 
 
-	procedure CheckLineClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint);
-	procedure CheckRectClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint); overload;
-	procedure CheckRectClipping (ClipRect:TRect; var Rect:Trect); overload;
+procedure CheckLineClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint);
+(*
+@description:
 
-implementation
-
+*)
 
 procedure CheckRectClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint); overload;
 (*
 @description:
 
 *)
+
+procedure CheckRectClipping (ClipRect:TRect; var Rect:Trect); overload;
+(*
+@description:
+
+*)
+
+
+implementation
+
+
+procedure CheckRectClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint); overload;
+
   procedure ClearRect;
   begin
     x1 := -1;
@@ -42,6 +54,7 @@ procedure CheckRectClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint); overl
     y1 := -1;
     y2 := -1;
   end;
+
 begin
   NormalizeRect (ClipRect);
   NormalizeRect (x1,y1, x2,y2);
@@ -61,20 +74,12 @@ end;
 
 
 procedure CheckRectClipping (ClipRect:TRect; var Rect:Trect); overload;
-(*
-@description:
-
-*)
 begin
     CheckRectClipping (ClipRect, ClipRect.left, ClipRect.top, ClipRect.right, ClipRect.bottom);
 end;
 
 
 procedure CheckLineClipping (ClipRect:TRect; var x1,y1, x2,y2 : smallint);
-(*
-@description:
-
-*)
 var a,b : real;
     Calculated : boolean;
     xdiff,n : smallint;
@@ -198,4 +203,3 @@ begin
 end;
 
 end.
-

@@ -1,9 +1,27 @@
 unit rle;
+(*
+ @type: unit
+ @author: Tomasz 'Tebe' Biela
+ @name: RLE (Run Length Encoder)
+
+ @version: 1.0
+
+ @description:
+
+*)
 
 interface
 
 function RLECompress(src,dst:PByte; srcSize:Word):Word; Register;
+(*
+@description:
+*)
+
 function RLEDecompress(src,dst:PByte; srcSize:Word):Word; Register;
+(*
+@description:
+*)
+
 
 implementation
 

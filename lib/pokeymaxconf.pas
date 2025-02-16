@@ -1,4 +1,13 @@
 unit pokeymaxconf;
+(*
+ @type: unit
+ @author: MADRAFi <madrafi@gmail.com>
+ @name: Pokey MAX Configuration
+
+ @version: 1.0
+
+ @description:
+*)
 
 interface
 

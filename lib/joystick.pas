@@ -83,6 +83,9 @@ implementation
 
 
 function paddle0: byte; assembler;
+(*
+@description:
+*)
 asm
 	ldy pot0
 

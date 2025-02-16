@@ -48,17 +48,41 @@ type
 
 { core }
 procedure SHA1Init(var ctx: TSHA1Context);
+(*
+@description:
+*)
 procedure SHA1Update(var ctx: TSHA1Context; var Buf; BufLen: PtrUInt);
+(*
+@description:
+*)
 procedure SHA1Final(var ctx: TSHA1Context; var Digest: TSHA1Digest);
+(*
+@description:
+*)
 
 { auxiliary }
 function SHA1String(const S: String): TSHA1Digest;
+(*
+@description:
+*)
 function SHA1Buffer(var Buf; BufLen: PtrUInt): TSHA1Digest;
+(*
+@description:
+*)
 function SHA1File(const Filename: TString): TSHA1Digest;
+(*
+@description:
+*)
 
 { helpers }
 function SHA1Print(const Digest: TSHA1Digest): TSHAString;
+(*
+@description:
+*)
 function SHA1Match(const Digest1, Digest2: TSHA1Digest): Boolean;
+(*
+@description:
+*)
 
 implementation
 

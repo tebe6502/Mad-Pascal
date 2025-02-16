@@ -35,6 +35,9 @@ implementation
 
 
 procedure PlaySample; interrupt; assembler;
+(*
+@description:
+*)
 asm
 	pha				; save A
 	lda #0

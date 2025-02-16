@@ -1,5 +1,11 @@
+unit vimage;
+(*
+@type: unit
+@name: A unit to load a variety of image formats for VBXE
+@author: Steven Henk Don (https://www.shdon.com/), Tomasz Biela (Tebe)
 
-{****************************************************************************
+@description:
+*****************************************************************************
 ** VIMAGE unit (14.01.2018) VBXE					   **
 **   by Steven Henk Don, Tomasz Biela					   **
 *****************************************************************************
@@ -23,16 +29,7 @@
 ** All functions are boolean. If they return false, check IMGERROR to find **
 ** out what happened.                                                      **
 **                                                                         **
-****************************************************************************}
-
-unit vimage;
-(*
-@type: unit
-@name: A unit to load a variety of image formats for VBXE
-@author: Steven Henk Don (https://www.shdon.com/), Tomasz Biela (Tebe)
-
-@description:
-VBXE Image
+*****************************************************************************
 *)
 
 {

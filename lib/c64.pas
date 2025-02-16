@@ -1,4 +1,13 @@
 unit c64;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: C64
+ @version: 1.0
+
+ @description:
+
+*)
 
 interface
 

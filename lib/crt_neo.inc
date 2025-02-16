@@ -229,10 +229,6 @@ procedure Sound(Chan,Freq,Dist,Vol: byte); assembler;
 (*
 @description: Plays sound
 
-@param: Chan - channel (0..3) primary POKEY, (4..7) secondary POKEY
-@param: Freq - frequency (0..255)
-@param: Dist - distortion (0,2,4,6,8,10,12,14)
-@param: Vol - volume (0..15)
 *)
 asm
 

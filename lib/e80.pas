@@ -150,7 +150,9 @@ uses graph;
 
 
 procedure inite80; assembler;
-
+(*
+@description:
+*)
 asm
 
 TEMP1  = $F5
