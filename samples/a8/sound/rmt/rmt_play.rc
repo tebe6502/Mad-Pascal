@@ -1,2 +1,4 @@
-rmt_player	RMTPLAY	'smells.feat' 1
-rmt_modul	RMT	'smells.rmt'
+rmt_player_4    RMTPLAY 'delta.feat' 1
+rmt_module_4    RMT     'delta.rmt'
+rmt_player_8	RMTPLAY	'smells.feat' 1
+rmt_module_8	RMT	'smells.rmt'

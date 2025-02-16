@@ -4,7 +4,7 @@ uses crt, saplzss;
 
 const
 
-sapr_player = $6000;	// ..$9BFF
+sapr_player = $6000;	// ..$02FF player, $0300..$0BFF buffers
 sapr_modul  = $6c00;
 
 var
