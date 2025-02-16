@@ -1,5 +1,4 @@
 unit shanti;
-
 (*
  @type: unit
  @author: Janusz Chabowski (Shanti77), Tomasz Biela (Tebe)
@@ -33,8 +32,14 @@ var
 	chrts: array [0..29] of byte external charsets;
 
 
-	procedure doInitEngine(vbl: pointer; DListAddress: word; VRamAddress: word; lines: byte);
-	procedure doInitCharsets(a: word);
+procedure doInitEngine(vbl: pointer; DListAddress: word; VRamAddress: word; lines: byte);
+(*
+@description:
+*)
+procedure doInitCharsets(a: word);
+(*
+@description:
+*)
 
 
 implementation

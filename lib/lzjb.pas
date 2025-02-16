@@ -1,6 +1,17 @@
-{ https://en.wikipedia.org/wiki/LZJB }
+unit lzjb;
+(*
+ @type: unit
+ @author: Krzysztof Dudek, Tomasz Biela
+ @name: LZ4
 
-{ MIT License
+ @version: 1.0
+
+ @description:
+ https://en.wikipedia.org/wiki/LZJB 
+*)
+
+{
+MIT License
 
 Copyright (c) 2022 Viacheslav Komenda
 
@@ -20,17 +31,24 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. }
+SOFTWARE.
+}
 
 
-UNIT lzjb;
 
 INTERFACE
 
 
 { return 0, if could not compress }
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD; 
+FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
+(*
+@description:
+*)
+
 FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
+(*
+@description:
+*)
 
 IMPLEMENTATION
 

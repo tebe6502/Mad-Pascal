@@ -1,6 +1,6 @@
 unit strutils;
 (*
- @type: strutils
+ @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Various string handling routines
  @version: 1.0

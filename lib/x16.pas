@@ -1,11 +1,16 @@
 unit x16;
+(*
+ @type: unit
+ @author: MADRAFi <madrafi@gmail.com>
+ @name: X16
+
+ @version: 0.1.0
+
+ @description:
+ Documentation https://github.com/X16Community/x16-docs/blob/master/X16%20Reference%20-%2005%20-%20KERNAL.md 
+*)
 
 interface
-
-
-(*
-  Documentation https://github.com/X16Community/x16-docs/blob/master/X16%20Reference%20-%2005%20-%20KERNAL.md
-*)
 
 var
 

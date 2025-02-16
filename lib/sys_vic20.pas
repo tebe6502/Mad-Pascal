@@ -1,4 +1,12 @@
 unit sys_vic20;
+(*
+ @type: unit
+ @author: Bartosz Zbytniewski (Zbyti)
+ @name: VI20 System
+ @version: 1.0
+
+ @description:
+*)
 
 //o-------------------------------------------------------------o
 

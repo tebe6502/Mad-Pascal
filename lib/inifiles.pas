@@ -2,7 +2,7 @@ unit inifiles;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)
- @name:
+ @name: INI Files
  @version: 1.0
 
  @description:
@@ -62,6 +62,9 @@ end;
 
 
 function Search(var FileName, Section, Ident: TString): TString;
+(*
+@description:
+*)
 var t: text;
     yes: Boolean;
     s: string;

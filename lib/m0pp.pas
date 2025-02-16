@@ -1,5 +1,4 @@
 unit m0pp;
-
 (*
 * @type: unit
 * @author: bocianu <bocianu@gmail.com>, Karolj Nadj, Daniel Serpell, tebe <tebe6502@gmail.com>
@@ -10,6 +9,7 @@ unit m0pp;
 * Resolution 40x39 chars, 2 colors
 *
 *)
+
 interface
 uses atari;
 

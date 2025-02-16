@@ -23,7 +23,11 @@ unPP
 
 interface
 
-	procedure unPP(src, dst: pointer); external 'pp\unpp';
+procedure unPP(src, dst: pointer); external 'pp\unpp';
+(*
+@description:
+*)
+
 
 implementation
 

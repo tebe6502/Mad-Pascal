@@ -89,6 +89,9 @@ const
 
 
 procedure TCanvas.MoveTo(x,y: smallint);
+(*
+@description:
+*)
 begin
 
  SetColor(Pen.Color);
@@ -99,6 +102,9 @@ end;
 
 
 procedure TCanvas.LineTo(x,y: smallint);
+(*
+@description:
+*)
 begin
 
  SetColor(Pen.Color);
@@ -109,6 +115,9 @@ end;
 
 
 procedure TCanvas.FillRect(R: TRect);
+(*
+@description:
+*)
 var lpos: word;
     i: smallint;
 
@@ -266,6 +275,9 @@ end;
 
 
 procedure TCanvas.TextOut(X,Y: smallint; const Txt: string); overload;
+(*
+@description:
+*)
 var lpos: word;
     i, xpos, pix: byte;
 
@@ -413,6 +425,9 @@ end;
 
 
 procedure TCanvas.TextOut(X,Y: smallint; const ch: char); overload;
+(*
+@description:
+*)
 var s: string[1];
 begin
 
@@ -423,6 +438,9 @@ end;
 
 
 function TCanvas.TextWidth(const Txt: string): word; assembler; overload;
+(*
+@description:
+*)
 asm
 	txa:pha
 
@@ -461,6 +479,9 @@ end;
 
 
 function TCanvas.TextWidth(const ch: char): byte; assembler; overload;
+(*
+@description:
+*)
 asm
 	mwa fsize ztmp
 
@@ -477,6 +498,9 @@ end;
 
 
 procedure TCanvas.FontInitialize; assembler;
+(*
+@description:
+*)
 asm
 scr	= eax
 xpos	= eax+2
@@ -598,6 +622,9 @@ end;
 
 
 constructor TCanvas.Create;
+(*
+@description:
+*)
 var br: TBrushBitmap = ($ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);
 begin
 
@@ -613,6 +640,9 @@ end;
 
 
 procedure TCanvas.Font(Charset: pointer); overload;
+(*
+@description:
+*)
 begin
 
  move(charset, fdata, 1024);
@@ -623,6 +653,9 @@ end;
 
 
 function TCanvas.Font(const Charset: TString): Boolean; overload;
+(*
+@description:
+*)
 var s: TString;
     f: file;
 begin
@@ -650,6 +683,6 @@ end;
 
 initialization
 
-	InitGraph(8 + 16);
+  InitGraph(8 + 16);
 
 end.

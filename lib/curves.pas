@@ -1,4 +1,13 @@
 Unit curves;
+(*
+ @type: unit
+ @author: Tomasz Biela (Tebe)
+ @name: Curves
+ @version: 1.0
+
+ @description:
+ various procedures gathered into one module
+*)
 
 Interface
 

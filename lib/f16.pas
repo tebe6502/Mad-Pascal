@@ -69,6 +69,9 @@ type
 
 
 function f16_sub(a, b: word): word;
+(*
+@description:
+*)
 var sign, x, res, ax, bx, exp_diff, exp_part, r, am, new_m: word;
     shift: byte;
 begin
@@ -231,6 +234,9 @@ end;
 
 
 function f16_add(a,b: word): word;
+(*
+@description:
+*)
 var sign, x, ax, bx, exp_diff, exp_part, r, am, new_m: word;
     shift: byte;
 begin
@@ -348,6 +354,9 @@ end;
 
 
 function f16_mul(a, b: word): word;
+(*
+@description:
+*)
 var sign, m1, m2: word;
     ax, bx: byte;
     new_exp: shortint;
@@ -460,6 +469,9 @@ end;
 
 
 function f16_div(a,b: word): word;
+(*
+@description:
+*)
 var sign, m1, m2, rem, v: word;
     ax, bx: byte;
     m1_shifted: cardinal;
@@ -594,12 +606,18 @@ end;
 
 
 function f16_neg(v: word): word;
+(*
+@description:
+*)
 begin
  Result := $8000 xor v;
 end;
 
 
 function f16_from_int(sv: integer): float16;
+(*
+@description:
+*)
 var v: cardinal;
     sig: word;
     e: integer;
@@ -645,6 +663,9 @@ end;
 
 
 function f16_int(a: word): integer;
+(*
+@description:
+*)
 var value: word;
     shift: smallint;
 begin
@@ -674,7 +695,10 @@ end;
 
 
 function f32Tof16(f: single): word;
-//https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
+(*
+@description:
+ https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
+*)
 var
 	fltInt32: ^cardinal;
 	fltInt16, tmp: word;
@@ -716,6 +740,9 @@ end;
 
 
 function FloatToHalf(f: Single): word;
+(*
+@description:
+*)
 var
   Src: LongWord;
   Mantissa: LongInt;
@@ -805,6 +832,9 @@ end;
 
 
 function HalfToFloat(Half: float16): Single;
+(*
+@description:
+*)
 var
   Dst, Mantissa, Sign: LongWord;
   Exp: byte;
@@ -860,6 +890,9 @@ end;
 
 
 function f16_gte(a,b: word): Boolean;
+(*
+@description:
+*)
 begin
 
 //    if(IS_ZERO(a) && IS_ZERO(b))
@@ -899,6 +932,9 @@ end;
 
 
 function f16_gt(a, b: word): Boolean;
+(*
+@description:
+*)
 begin
 
 //    if(IS_NAN(a) || IS_NAN(b))
@@ -939,6 +975,9 @@ end;
 
 
 function f16_eq(a, b: word): Boolean;
+(*
+@description:
+*)
 begin
 
 //    if(IS_NAN(a) || IS_NAN(b))
@@ -958,6 +997,9 @@ end;
 
 
 function f16_lte(a, b: word): Boolean;
+(*
+@description:
+*)
 begin
 
  Result := f16_gte(b, a);
@@ -966,6 +1008,9 @@ end;
 
 
 function f16_lt(a, b: word): Boolean;
+(*
+@description:
+*)
 begin
 
  Result := f16_gt(b, a);
@@ -974,6 +1019,9 @@ end;
 
 
 function f16_neq(a, b: word): Boolean;
+(*
+@description:
+*)
 begin
 
     Result := Boolean(ord(f16_eq(a,b)) xor ord(true));

@@ -25,7 +25,8 @@ unUPK
 
 interface
 
-	procedure unUPK(inputPointer, outputPointer: pointer); assembler; register;
+procedure unUPK(inputPointer, outputPointer: pointer); assembler; register;
+
 
 implementation
 
@@ -33,7 +34,7 @@ implementation
 procedure unUPK(inputPointer, outputPointer: pointer); assembler; register;
 (*
 @description:
-LZ4 decompressor
+UPK decompressor
 
 @param: inputPointer - source data address
 @param: outputPointer - destination data address

@@ -20,7 +20,8 @@ unZX2
 
 interface
 
-	procedure unZX2(inputPointer, outputPointer: pointer); register; assembler; overload;
+procedure unZX2(inputPointer, outputPointer: pointer); register; assembler; overload;
+
 
 implementation
 
@@ -28,7 +29,7 @@ implementation
 procedure unZX2(inputPointer, outputPointer: pointer); register; assembler; overload;
 (*
 @description:
-ZX0 decompressor (Daniel Serpell)
+ZX2 decompressor (Daniel Serpell)
 
 @param: inputPointer - source data address
 @param: outputPointer - destination data address
