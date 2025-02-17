@@ -47,6 +47,14 @@ portb		= $d301
 .dword	biClrImportant
 .ends
 
+.macro	m@romfont(a,b)
+	ift !((%%b < $e000)||($e3ff < %%a))
+	.ifndef :MAIN.@DEFINES.NOROMFONT
+	.def :MAIN.@DEFINES.NOROMFONT
+	.endif
+	eif
+.endm
+
 
 	icl 'vbxe.hea'
 
@@ -339,11 +347,7 @@ data
 .endl
 	ini mcpy
 
-	ift main.%%lab+len >= $c000
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	.endif
-	eif
+	m@romfont main.%%lab, main.%%lab+len-1
 
 	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+len-1	
 .endm
@@ -378,11 +382,7 @@ data
 .endl
 	ini mcpy
 
-	ift main.%%lab+len >= $c000
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	.endif
-	eif
+	m@romfont main.%%lab, main.%%lab+len-1
 
 	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+len-1
 .endm
@@ -419,11 +419,7 @@ data
 .endl
 	ini mcpy
 
-	ift main.%%lab+len >= $c000
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	.endif
-	eif
+	m@romfont main.%%lab, main.%%lab+$c00-1
 
 	.print '$R SAPRPLAY ',main.%%lab,'..',main.%%lab+$c00-1
 .endm
@@ -464,11 +460,7 @@ data
 .endl
 	ini mcpy
 
-	ift main.%%lab+len >= $c000
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	.endif
-	eif
+	m@romfont PLAYER, _%%lab+.sizeof(_%%lab)-1
 
 	.echo '$R RMTPLAY ',_%%lab.p_tis,'..',.zpvar-1,', ',PLAYER,'..',_%%lab+.sizeof(_%%lab)-1 //," %%nam"
 .endm
@@ -509,11 +501,7 @@ data
 .endl
 	ini mcpy
 
-	ift main.%%lab+len >= $c000
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	.endif
-	eif
+	m@romfont PLAYER, _%%lab+.sizeof(_%%lab)-1
 
 	.echo '$R RMTPLAY ',_%%lab.p_tis,'..',.zpvar-1,', ',PLAYER,'..',_%%lab+.sizeof(_%%lab)-1," %%nam"
 .endm
@@ -522,7 +510,6 @@ data
 /* ----------------------------------------------------------------------- */
 /* RMTPLAY
 /* ----------------------------------------------------------------------- */
-
 
 .macro	RMTPLAY (nam, lab, mode, zp)
 
@@ -606,9 +593,7 @@ mcpy	jsr sys.off
 
 data	ins %%1,%%ofs
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont main.%%lab, main.%%lab+len-1
 
 	.print '$R RCDATA  ',main.%%lab,'..',main.%%lab+len-1," %%1"
 
@@ -703,9 +688,7 @@ len	.word
 data	ins %%1
 data_end
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont .wget[2], .wget[4]
 
 	ini mcpy
  els
@@ -843,9 +826,7 @@ mcpy	jsr sys.off
 
 data	rmt_relocator %%1,main.%%lab
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont main.%%lab, main.%%lab+len-6
 
 	ini mcpy
  els
@@ -981,9 +962,7 @@ mcpy	jsr sys.off
 
 data	mpt_relocator %%1,main.%%lab
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont main.%%lab, main.%%lab+len-6
 
 	ini mcpy
  els
@@ -1026,9 +1005,7 @@ unp = .get[len-2]+.get[len-3]*256
 
 	.sav [0] len
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont main.%%lab, main.%%lab+len+2
 
 	ini mcpy
  els
@@ -1075,9 +1052,7 @@ mcpy	jsr sys.off
 data	dta a(len)
 	ins %%1
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont main.%%lab, main.%%lab+len+2
 
 	ini mcpy
  els
@@ -1172,12 +1147,9 @@ mcpy	jsr sys.off
 
 data	cmc_relocator %%1,main.%%lab
 
-	.ifndef :MAIN.@DEFINES.NOROMFONT
-	.def :MAIN.@DEFINES.NOROMFONT
-	eif
+	m@romfont main.%%lab, main.%%lab+len-6
 
 	ini mcpy
-
  els
 	org main.%%lab
 	cmc_relocator %%1,main.%%lab	
