@@ -4,6 +4,8 @@
 
 ## Introduction
 
+[source]: # Section is copied from original https://mads.atari8.info/doc/en/introduction/
+
 **Mad-Pascal** (MP) is a 32-bit **Turbo Pascal** compiler for **Atari 8-Bit** and other **MOS 6502 CPU**-based computers. By design, it is compatible with the **Free Pascal Compiler** (FPC) (the `-MDelphi` switch should be active). This means the possibility of obtaining executable code for **Atari 8-bit**, **Windows**, and every other platform for which **FPC** exists. **Mad-Pascal** is not a port of **FPC**. It has been written based on **SUB-Pascal** (2009) and **XD-Pascal** (2010), the author of which is [Vasiliy Tereshkov](mailto:vtereshkov@mail.ru).
 
 **MP** uses 64KB of primary memory. The class `TMemoryStream` provides access to extended memory. A program that works on **Atari 8-Bit** might have problems on **Windows** and other platforms if, for example, the pointers have not been initialized with the address of a variable. Writing via an uninitialized pointer results in an attempt to write to the address `0x0` and causes a memory protection fault.
