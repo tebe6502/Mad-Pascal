@@ -4,6 +4,8 @@ build.sh
 /mp
 mp.exe
 makeMP.bat
+*.lst
+*.a65
 *.o
 *.ppu
 .vscode
