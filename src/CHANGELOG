@@ -9,6 +9,7 @@
 - poprawione moduły RMT, SAPLZSS
 - poprawiony plik base/atari/RESOURCE.ASM
 - dodany zasób RMTPLAY2, umożliwia ładowanie playera RMT pod ROM
+- dodany zasób RMTPLAYV, wersja VinsCool, umożliwia ładowanie playera RMT pod ROM, posiada path16, nie wymaga pliku .FEAT
 
 23.01.2025
 - optymalizacje, opt_TEMP_TAIL_IF, opt_TEMP_TAIL_CASE

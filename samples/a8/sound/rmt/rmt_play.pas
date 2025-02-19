@@ -20,8 +20,10 @@ uses crt, rmt;
 const
         rmt_player_4 = $8000;  // RMTPLAY resource, can be used in memory area $0000-$bfff
                                // Beware, the player uses also $400 byte before this address
+
         rmt_player_8 = $f000;  // RMTPLAY2 resource, can also be used in memory area $c000-ffff
-                               // Beware, the player uses also $400 byte before this address
+                               // RMTPLAY2 differs from RMTPLAY in that it allows player_rmt
+			       // to be placed under ROM and from a specific address in memory
 
         rmt_module_4 = $6000;  
         rmt_module_8 = $c000;
