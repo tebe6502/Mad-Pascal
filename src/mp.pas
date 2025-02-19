@@ -89,6 +89,9 @@ Contributors:
 + Rafal Czemko :
 	- system X16 (-t x16)
 
++ Samuel Vin :
+	- RMTPLAYV (base/atari/players/rmt_playerv_reloc.asm)
+
 + Sebastian Igielski :
 	- unit MISC: DetectStereo
 
