@@ -3,7 +3,11 @@ unit e80;
  @type: unit
  @author: Simon Trew, Tomasz Biela (Tebe)
  @name: 80: device
- @version: 1.2
+ @version: 1.3
+
+   Version 1.3:
+	- CALCXY optimization, fast *320 multiplication
+	- GETCHR optimization
 
    Version 1.2:
 	- information about CIO, XIO command
@@ -222,11 +226,11 @@ BUFP    dta c'XXXXXXXX'
 ;
 ; MULTIPLY TEMP1 BY TWO
 ;
-MULT
-	CLC
-	ASL TEMP1
-	ROL TEMP1+1
-	RTS
+;MULT
+;	CLC
+;	ASL TEMP1
+;	ROL TEMP1+1
+;	RTS
 ;
 ; MAKE TEMP1=TEMP1+TEMP2
 ;
@@ -267,9 +271,15 @@ EVEN
 	STA TEMP1    ;and round down odds
 	LDA #0       ;Temp1 holds the
 	STA TEMP1+1  ;offset into chset.
-	JSR MULT     ;Multiplied by 2
-	JSR MULT     ;Multiplied by 4
-	CLC
+
+	ASL TEMP1    ;Multiplied by 2
+	ROL TEMP1+1
+	ASL TEMP1    ;Multiplied by 4
+	ROL TEMP1+1
+
+;	JSR MULT     ;Multiplied by 2
+;	JSR MULT     ;Multiplied by 4
+;	CLC
 	LDA <CHSET   ;Get the offset
 	STA TEMP2    ;into the charset
 	LDA >CHSET   ;and then add to
@@ -345,9 +355,34 @@ CALCXY
 	TXA
 	PHA
 	TYA
-	STA TEMP1
-	LDA #0
+	STA TEMP2	;Total= Y*320
+
+	LDY #$00
+	STY TEMP1
+
+	LSR @
+	ROR TEMP1
+
+	LSR @
+	ROR TEMP1
+
+	CLC
+	ADC TEMP2
 	STA TEMP1+1
+
+	TXA
+	LSR @
+	STA TEMP2	;Add on X
+	LDA #0
+	STA TEMP2+1
+	JSR ADD
+	LDA SCRADR	;Add to address of
+	STA TEMP2	;first byte of screen
+	LDA SCRADR+1
+	STA TEMP2+1
+	JSR ADD
+
+/*
 	JSR MULT    ;Multiply Y by 2
 	LDA TEMP1
 	STA TEMP2
@@ -373,6 +408,8 @@ LOOP2
 	LDA SCRADR+1
 	STA TEMP2+1
 	JSR ADD
+*/
+
 	PLA
 	TAX
 	PLA
@@ -464,12 +501,12 @@ LOOP5A
 	BNE LOOP5A
 	INC TEMP3+1	;Move up one page to
 	INC TEMP1+1	;move the next lot of
+	LDY #320-256-1
 LOOP5B
 	LDA (TEMP3),Y	;(320-256) bytes
 	STA (TEMP1),Y
-	INY
-	CPY #320-256	;Done all of that?
-	BNE LOOP5B
+	DEY
+	BPL LOOP5B
 	PLA		;Finished!
 	TAX
 	PLA
@@ -494,11 +531,11 @@ LOOP6A
 	INY
 	BNE LOOP6A
 	INC TEMP1+1    ;Next page
+	LDY #320-256-1
 LOOP6B
 	STA (TEMP1),Y  ;Clear bytes 256 to
-	INY            ;319 then done
-	CPY #320-256
-	BNE LOOP6B
+	DEY            ;319 then done
+	BPL LOOP6B
 	PLA            ;Finished!
 	TAY
 	PLA
