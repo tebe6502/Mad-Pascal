@@ -5,10 +5,10 @@
 .proc   @mul320
 
 	lda :eax
-	sta :ecx+1
+	sta :ecx
 
 	ldy :eax+1
-	sty :ecx+2
+	sty :ecx+1
 	sty :eax+2
 
 	ldy #$00
@@ -21,10 +21,10 @@
 	ror @
 	ror :eax
 
-	add :ecx+1
+	add :ecx
 	sta :eax+1
 	lda :eax+2
-	adc :ecx+2
+	adc :ecx+1
 	sta :eax+2
 	lda #$00
 	adc #$00
