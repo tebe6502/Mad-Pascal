@@ -150,9 +150,7 @@ uses graph;
 
 
 procedure inite80; assembler;
-(*
-@description:
-*)
+
 asm
 
 TEMP1  = $F5
@@ -592,9 +590,13 @@ STORVAL
 	LDA #40       ;So add 40 on
 	ADC TEMP1
 	STA TEMP1
-	LDA #0        ;(with carry)
-	ADC TEMP1+1
-	STA TEMP1+1
+	SCC
+	INC TEMP1+1
+
+;	LDA #0        ;(with carry)
+;	ADC TEMP1+1
+;	STA TEMP1+1
+
 	INY           ;Increment number
 	STY VALGET    ;of bytes done
 	CPY #8        ;8=finished
