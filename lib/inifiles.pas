@@ -7,7 +7,7 @@ unit inifiles;
 
  @description:
 
- https://github.com/graemeg/freepascal/blob/master/packages/fcl-base/src/inifiles.pp
+ <https://wiki.freepascal.org/Using_INI_Files>
 
  *)
 

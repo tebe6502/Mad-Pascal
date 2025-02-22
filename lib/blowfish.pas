@@ -1,13 +1,14 @@
 unit blowfish;
 (*
  @type: unit
- @author: Free Pascal development team, Tomasz Biela
- @name: Blowfish
+ @author: Free Pascal development team, Tomasz Biela (Tebe)
+ @name: Blowfish cipher unit
  @version: 1.1
 
  @description:
- Unit implementing simple blowfish algorithm
+ Unit implementing simple blowfish algorithm.
 
+ <https://en.wikipedia.org/wiki/Blowfish_(cipher)>
 *)
 
 {
@@ -50,7 +51,7 @@ function EncryptString(aString: string): string;
 @description:
 
 *)
-	
+
 
 implementation
 

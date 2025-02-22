@@ -6,15 +6,15 @@ unit x16_vera;
 * @version: 0.1.0
 
 * @description:
-* Set of procedures to cover functionality provided by:    
+* Set of procedures to cover functionality provided by:
 *
-* 
-* https://github.com/X16Community/x16-docs/blob/master/X16%20Reference%20-%2009%20-%20VERA%20Programmer%27s%20Reference.md#chapter-9-vera-programmers-reference
-*  
 *
-*   
-* It's work in progress, please report any bugs you find.   
-*   
+* <https://github.com/X16Community/x16-docs/blob/master/X16%20Reference%20-%2009%20-%20VERA%20Programmer%27s%20Reference.md#chapter-9-vera-programmers-reference>
+*
+*
+*
+* It's work in progress, please report any bugs you find.
+*
 *)
 
 interface
@@ -79,10 +79,10 @@ var
 procedure veraInit; assembler;
 (*
 * @description:
-* Initialize graphics mode 320x240@256c. 
+* Initialize graphics mode 320x240@256c.
 *
-* 
-* 
+*
+*
 *)
 
 procedure veraClear; assembler;
@@ -90,8 +90,8 @@ procedure veraClear; assembler;
 * @description:
 * Clear the current window with the current background color.
 *
-* 
-* 
+*
+*
 *)
 
 procedure veraDrawImage(x, y: word; ptr: pointer; width, height: word); assembler;
@@ -99,8 +99,8 @@ procedure veraDrawImage(x, y: word; ptr: pointer; width, height: word); assemble
 * @description:
 * Draw a rectangular image from data in memory
 * using zero page register r12
-* 
-* 
+*
+*
 * @param: x - horizontal position x to place image to
 * @param: y - vertical position y to place image to
 * @param: ptr - pointer to image data in memory
@@ -112,10 +112,10 @@ procedure veraDrawImage(x, y: word; ptr: pointer; width, height: word); assemble
 procedure veraDirectLoadImage(filename: String); assembler;
 (*
 * @description:
-* Loads a named file from storage directly to video memory. 
+* Loads a named file from storage directly to video memory.
 *
-* 
-* 
+*
+*
 * @param: name (TString) - name of the file with extension
 *
 *)
@@ -123,10 +123,10 @@ procedure veraDirectLoadImage(filename: String); assembler;
 procedure veraDirectLoadPalette(filename: String); assembler;
 (*
 * @description:
-* Loads a palette file from storage directly to video memory. 
+* Loads a palette file from storage directly to video memory.
 *
-* 
-* 
+*
+*
 * @param: name (TString) - name of the file with extension
 *
 *)
@@ -134,10 +134,10 @@ procedure veraDirectLoadPalette(filename: String); assembler;
 procedure veraFade(FadeDirection: byte); assembler;
 (*
 * @description:
-* Performs fade Out and fade In of screen. 
-* oryginal procedure code by unartic 
-* 
-* 
+* Performs fade Out and fade In of screen.
+* oryginal procedure code by unartic
+*
+*
 * @param: inout (byte) - if set to 0, performs fade out. If set to 1, performs fade in.
 *
 *)
@@ -145,15 +145,15 @@ function Petscii2Scr(input: Byte): Byte; assembler;
 (*
 * @description:
 * Convert PETSCII to screencode
-* 
+*
 * @param: input (Char) - character to convert
 *)
 
 function Scr2Petscii(input: Byte): Byte; assembler;
 (*
 * @description:
-* Convert screencode to PETSCII 
-* 
+* Convert screencode to PETSCII
+*
 * @param: input (Char) - character to convert
 *)
 
@@ -199,7 +199,7 @@ asm
 	sta r4L
 	lda height+1
 	sta r4H
-	
+
 	jsr GRAPH_draw_image
 	plx
 end;
@@ -260,7 +260,7 @@ end;
 function Petscii2Scr(input: Byte): Byte; assembler;
 asm
         lda input
-        
+
         cmp	#$20
         bcc	nonprintable	; .A < $20
         cmp	#$40
@@ -315,12 +315,12 @@ asm
 
 
     FadeOneStep:
-        ; // prepare pointer to check max palette color values 
+        ; // prepare pointer to check max palette color values
         lda #$00
         sta PTR
         lda #$a0
         sta PTR+1
-        
+
         lda $00  ; // save current rambank and restore when done
         pha
             ; // set rambank to RambankForPaletteData
@@ -335,7 +335,7 @@ asm
             sta VERA_addr_high
             lda #$01
             sta VERA_addr_bank
-            
+
             ldy #0
 
             NextY:
@@ -344,11 +344,11 @@ asm
             NextX:
                 phy
                     lda VERA_data0          ; // get byte from p
-                    
+
                     ldy FadeDirection
                     cpy #0
                     bne FadeIn
-                    
+
                         ; // FadeOut
                         pha
                             ; // decrement the right nibble
@@ -356,18 +356,18 @@ asm
                             sbc #$01
                             AND #$0F ; // discard the left nibble
                             sta tmp
-                        pla   
-                        
+                        pla
+
                         ;decrement the left nible
                         sec
                         sbc #$10
                         AND #$F0    ; // discard the right nible
                         ora tmp     ; // merge the new left and right nibble
-                        
+
                         jsr CheckNegative ; // check if any of the nibbles has become negarive, if so set nibble to 0
                         jmp StoreNewColorData
-                    
-                    FadeIn:                    
+
+                    FadeIn:
                         ; // FadeIn
                         pha
                             ; // increment the right nibble
@@ -375,20 +375,20 @@ asm
                             adc #$01
                             AND #$0F ; // discard the left nibble
                             sta tmp
-                        pla   
-                        
+                        pla
+
                         ; // increment the left nible
                         clc
                         adc #$10
                         AND #$F0    ; // discard the right nible
                         ora tmp     ; // merge the new left and right nibble
                         jsr CheckWithOriginalPalette
-                        
-                    StoreNewColorData:                    
+
+                    StoreNewColorData:
                         sta VERA_data0 ; // store new palette color values
                         ; // Increment VERA address
                         inc VERA_addr_low       ; //increase low byte
-                        bne DoNotIncHighByte    
+                        bne DoNotIncHighByte
                         inc VERA_addr_high   ; // inc high byte if low byte became zero, we do not care about the 3rd byte
 
                     DoNotIncHighByte:
@@ -398,8 +398,8 @@ asm
                         inc PTR+1
                         DoNotIncHighBytePtr:
                 ply
-                    
-                    
+
+
                 inx
                 cpx #0      ; // 256 times
                 bne NextX
@@ -407,28 +407,28 @@ asm
                 cpy #2      ; // times 2 = the full pallete
                 bne NextY
 
-            plx      
+            plx
         pla
         sta $00
     rts
-    
+
     CheckNegative:
         ; //check if a nibble has become negative,  then force zero
         sta tmp2
-        
+
         AND #$F0
         cmp #$F0
         bne NotNegativeLeft
         lda tmp2
         AND #$0F ;negative, so set left nibble to zero
         sta tmp2
-        
+
         NotNegativeLeft:
         ; // check right nible
         lda tmp2
         AND #$0F
         cmp #$0F
-        bne NotNegativeRight      
+        bne NotNegativeRight
         lda tmp2
         AND #$F0
         sta tmp2
@@ -438,25 +438,25 @@ asm
 
 
 
-    CheckWithOriginalPalette: 
-        ; // check the new palette color values against the original palette in highram, 
+    CheckWithOriginalPalette:
+        ; // check the new palette color values against the original palette in highram,
         ; // and cap the max value per nibblw
-    
+
         sta tmp
         AND #$F0
         sta NibbleLeftNew
         lda tmp
         AND #$0F
-        sta NibbleRightNew  
+        sta NibbleRightNew
 
-        lda (PTR)   
+        lda (PTR)
         sta tmp
         AND #$F0
         sta NibbleLeftOrig
         lda tmp
         AND #$0F
         sta NibbleRightOrig
-        
+
         lda NibbleLeftNew
         cmp NibbleLeftOrig
         bcc DoNotCapLeft
@@ -470,7 +470,7 @@ asm
             lda NibbleRightOrig
             sta NibbleRightNew
         DoNotCapRight:
-        
+
         lda NibbleLeftNew
         ora NibbleRightNew
     rts
@@ -478,38 +478,38 @@ asm
 
 
     CopyPaletteToHighmem:
-    
+
         lda $00
         pha
             lda #RambankForPaletteData
             sta $00  ; // set rambank #1
-            
+
             ; // set vera address to pallette offset, auto increment by 1
             lda #$00
             sta VERA_addr_low
             lda #$FA
             sta VERA_addr_high
             lda #$11
-            sta VERA_addr_bank  
-            
+            sta VERA_addr_bank
+
             ; // set from address
             lda #<VERA_data0
             sta r0
             lda #>VERA_data0
             sta r0+1
-            
+
             ; // set destination
             lda #$00
             sta r1
             lda #$a0
             sta r1+1
-            
+
             ; // set number of bytes $200 = 521
             lda #$00
             sta r2
             lda #$02
             sta r2+1
-            
+
             jsr MEMORY_COPY   ; // kernal function memory_copy
         pla
         sta $00

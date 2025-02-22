@@ -1,7 +1,7 @@
 unit crt;
 (*
 @type: unit
-@name: Mad Pascal screen and keyboard handling units
+@name: screen and keyboard handling unit
 @author: Tomasz Biela (Tebe)
 
 @description:

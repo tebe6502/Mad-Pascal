@@ -2,12 +2,12 @@ unit lzjb;
 (*
  @type: unit
  @author: Viacheslav Komenda
- @name: LZJB
+ @name: LZJB compression/decompression unit
 
  @version: 1.0
 
  @description:
- https://en.wikipedia.org/wiki/LZJB
+ <https://en.wikipedia.org/wiki/LZJB>
 *)
 
 {

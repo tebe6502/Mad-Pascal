@@ -2,7 +2,7 @@ unit aplib;
 (*
 * @type: unit
 * @author: John Brandwood, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
-* @name: APL
+* @name: APL decompression unit
 *
 * @version: 1.0
 *

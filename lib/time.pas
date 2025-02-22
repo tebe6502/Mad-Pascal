@@ -6,8 +6,6 @@ unit time;
  @version: 1.0
 
  @description:
-
- <https://github.com/graemeg/freepascal/blob/master/packages/fv/src/time.pas>
 *)
 
 

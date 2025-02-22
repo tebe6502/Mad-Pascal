@@ -2,11 +2,12 @@ unit rc4;
 (*
  @type: unit
  @author: Viacheslav Komenda
- @name: RC4
+ @name: RC4 decompression unit
  @version: 1.0
 
  @description:
  <https://pl.wikipedia.org/wiki/RC4>
+
  <https://en.wikipedia.org/wiki/RC4>
 *)
 
