@@ -6,15 +6,15 @@ unit x16_vtui;
 * @version: 0.1.0
 
 * @description:
-* Set of procedures to cover functionality provided by:    
+* Set of procedures to cover functionality provided by:
 *
-* 
-* https://github.com/JimmyDansbo/VTUIlib
-*  
 *
-*   
-* It's work in progress, please report any bugs you find.   
-*   
+* <https://github.com/JimmyDansbo/VTUIlib>
+*
+*
+*
+* It's work in progress, please report any bugs you find.
+*
 *)
 
 interface
@@ -52,10 +52,10 @@ type
 procedure vtuiInit; assembler;
 (*
 * @description:
-* Initialize library. 
+* Initialize library.
 *
-* 
-* 
+*
+*
 *)
 
 procedure vtuiSetScreen(mode: Byte); assembler;
@@ -72,16 +72,16 @@ procedure vtuiSetScreen(mode: Byte); assembler;
 * $05	20x30 text
 * $06	20x15 text
 * $FF	Swap 0 & 3
-* 
+*
 * @param: mode (byte) - Screen mode
 *)
 
 procedure vtuiSetBank(bank: Byte); assembler;
 (*
 * @description:
-* Set the VERA bank to 0 or 1 
+* Set the VERA bank to 0 or 1
 *
-* 
+*
 * @param: bank (byte) - bank number 0 or 1
 *)
 
@@ -89,8 +89,8 @@ procedure vtuiSetStride(stride: Byte); assembler;
 (*
 * @description:
 * Set the VERA stride value. It is auto increment step used in VERA address register.
-* 
-* 
+*
+*
 * @param: stride (byte) - stride value between 0-15
 *)
 
@@ -98,15 +98,15 @@ function vtuiPetscii2Scr(input: Byte): Byte;
 (*
 * @description:
 * Convert PETSCII to screencode
-* 
+*
 * @param: input (Char) - character to convert
 *)
 
 function vtuiScr2Petscii(input: Byte): Byte;
 (*
 * @description:
-* Convert screencode to PETSCII 
-* 
+* Convert screencode to PETSCII
+*
 * @param: input (Char) - character to convert
 *)
 
@@ -116,7 +116,7 @@ procedure vtuiClrScr(background: Byte; color: Byte); assembler; overload;
 * @description:
 * Clear the entire screen with specific character and color.
 * The routine is only designed to function with VERA decrement set to 0 and stride set to 1.
-* 
+*
 * @param: background (char) - Background character
 * @param: color (byte) - Color value 0-15
 *)
@@ -147,8 +147,8 @@ procedure vtuiGotoXY(x,y: Byte); assembler;
 (*
 * @description:
 * Set VERA address to point to specific coordinates on screen.
-* 
-* 
+*
+*
 * @param: x (byte) - Coordinates on screen x=0-79 (80 columns) or x=0-39 (40 columns) depending on screen mode
 * @param: y (byte) - Coordinates on screen y=0-59 (60 lines) or y=0-29 (30 lines) depending on screen mode
 *)
@@ -157,8 +157,8 @@ procedure vtuiPrint(s: String; color, convertpetscii: Byte); assembler; overload
 (*
 * @description:
 * Print a string to screen.
-* 
-* 
+*
+*
 * @param: s (String) - Text to print
 * @param: color (Byte) - Color value 0-15
 * @param: convertpetscii (Byte) - Convert PETSCII to screen code, PETSCII_TRUE / PETSICII_FALSE
@@ -168,8 +168,8 @@ procedure vtuiPrint(c: Byte; color: Byte); assembler; overload;
 (*
 * @description:
 * Print a char to screen.
-* 
-* 
+*
+*
 * @param: c (Byte) - Char to print
 * @param: color (Byte) - Color value 0-15
 *)
@@ -178,8 +178,8 @@ procedure vtuiHLine(c: Byte; len: Byte; color: Byte); assembler; overload;
 (*
 * @description:
 * Draw a horizontal line from left to right, starting at current position.
-* 
-* 
+*
+*
 * @param: c (Byte) - Char to print
 * @param: len (Byte) - Length of line
 * @param: color (Byte) - Color value 0-15
@@ -189,8 +189,8 @@ procedure vtuiVLine(c: Byte; hgt: Byte; color: Byte); assembler; overload;
 (*
 * @description:
 * Draw a vertical line from top to bottom, starting at current position.
-* 
-* 
+*
+*
 * @param: c (Byte) - Char to print
 * @param: hgt (Byte) - Height of line
 * @param: color (Byte) - Color value 0-15
@@ -200,9 +200,9 @@ procedure vtuiBorder(mode: Byte; len, hgt: Byte; color: Byte); assembler; overlo
 (*
 * @description:
 * Create a box with a specific border.
-* 
-* 
-* @param: mode (Byte) - Type of border 
+*
+*
+* @param: mode (Byte) - Type of border
 * @param: len (Byte) - Length of box
 * @param: hgt (Byte) - Height of box
 * @param: color (Byte) - Color value 0-15
@@ -214,8 +214,8 @@ procedure vtuiBorder(border: TBorder; hor, ver:Byte; color: Byte); assembler; ov
 (*
 * @description:
 * Create a box with a custom border.
-* 
-* 
+*
+*
 * @param: topLeft (Byte) - Top Left character
 * @param: topRight (Byte) - Top Right character
 * @param: bottomLeft (Byte) - Bottom Left character
@@ -231,8 +231,8 @@ procedure vtuiFillBox(c: Byte; len, hgt: Byte; color: Byte);assembler; overload;
 (*
 * @description:
 * Draw a filled box starting at current position.
-* 
-* 
+*
+*
 * @param: c (Byte) - Char to fill with
 * @param: len (Byte) - Length of box
 * @param: hgt (Byte) - Height of box
@@ -243,8 +243,8 @@ procedure vtuiFillBox(c: Char; len, hgt: Byte; color: Byte); overload;
 (*
 * @description:
 * Draw a filled box starting at current position.
-* 
-* 
+*
+*
 * @param: c (Char) - Char to fill with
 * @param: len (Byte) - Length of box
 * @param: hgt (Byte) - Height of box
@@ -256,7 +256,7 @@ procedure vtuiSaveRect(len, hgt: Byte; addr: Word; memtype: Byte); assembler;
 * @description:
 * Save an area from screen to memory. Notice that each character on screen takes up 2 bytes of memory because a byte is used for color information.
 * It saves from current position.
-* 
+*
 * @param: len (Byte) - Length of rectangle to save
 * @param: hgt (Byte) - Height of rectangle to save
 * @param: addr (Word) - Memory address to save screen to
@@ -268,7 +268,7 @@ procedure vtuiRestoreRect(len, hgt: Byte; addr: Word; memtype: Byte); assembler;
 * @description:
 * Restore an area from memory to screen.
 * It restores to current position.
-* 
+*
 * @param: len (Byte) - Length of rectangle to save
 * @param: hgt (Byte) - Height of rectangle to save
 * @param: addr (Word) - Memory address to save screen to
@@ -395,7 +395,7 @@ asm
     sta r0L
     lda #>(adr.s+1)
     sta r0H
-    
+
     // read string size
     ldy adr.s
     ldx color
@@ -471,7 +471,7 @@ asm
     sta r1L
     lda ver
     sta r2L
-    
+
     lda border.topLeft
     sta r3H
     lda border.topRight
@@ -544,7 +544,7 @@ asm
 	sta	r1l		    ; Width
     lda hgt
     sta	r2l		    ; Height
-	
+
     lda addr
     sta r0L
     lda addr+1
@@ -552,7 +552,7 @@ asm
 
     lda	memtype		; Save to VRAM
 
-	clc			    ; Bank 0    
+	clc			    ; Bank 0
 	jsr	VTUI_save_rect
     ply
     plx
@@ -568,7 +568,7 @@ asm
 	sta	r1l		    ; Width
     lda hgt
     sta	r2l		    ; Height
-	
+
     lda addr
     sta r0L
     lda addr+1
@@ -576,7 +576,7 @@ asm
 
     lda	memtype		; Save to VRAM
 
-	clc			    ; Bank 0    
+	clc			    ; Bank 0
 	jsr	VTUI_rest_rect
     ply
     plx

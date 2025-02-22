@@ -11,16 +11,16 @@ unit neo6502keys;
 *
 * <https://www.olimex.com/Products/Retro-Computers/Neo6502/open-source-hardware>
 *
-* <https://www.neo6502.com/>     
+* <https://www.neo6502.com/>
 
-*    
-* API documentation can be found here:   
 *
-*   <https://github.com/paulscottrobson/neo6502-firmware/wiki>
+* API documentation can be found here:
+*
+* <https://github.com/paulscottrobson/neo6502-firmware/wiki>
 
-*   
-* It's work in progress, so please report any bugs you will find.   
-*   
+*
+* It's work in progress, so please report any bugs you will find.
+*
 *)
 interface
 uses neo6502;
@@ -28,7 +28,7 @@ uses neo6502;
 
 type TKey = record
 (*
-* @description: 
+* @description:
 * Structure used to store information about last pressed key
 *)
     code:byte;
@@ -42,19 +42,19 @@ procedure ReadKeyboard(var ukey:TKey);
 (*
 * @description:
 * It reads status of all keys and returns code of last key pressed and state of modifier keys (Shift, Alt, Ctrl)
-* 
+*
 * @param: ukey (TKey) - key data structure to which the result will be written
-* 
+*
 *)
 function IsKeyDown(ukey:TKey):boolean;
 (*
 * @description:
 * Returns the state of the particular key with required modifiers.
 *
-* Example:  IsKeyDown(KEY_S,MOD_CTRL or MOD_SHIFT); 
-* 
+* Example:  IsKeyDown(KEY_S,MOD_CTRL or MOD_SHIFT);
+*
 * @param: ukey (TKey) - key data structure containing keycode and expected modifiers.
-* 
+*
 * @returns: (boolean) - returns true if key is down with required modifier keys
 *)
 implementation

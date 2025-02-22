@@ -6,15 +6,15 @@ unit x16_zsmkit;
 * @version: 0.1.0
 
 * @description:
-* Set of procedures to cover functionality provided by:    
+* Set of procedures to cover functionality provided by:
 *
-* https://github.com/mooinglemur/zsmkit/
-* 
-*  
+* <https://github.com/mooinglemur/zsmkit/>
 *
-*   
-* It's work in progress, please report any bugs you find.   
-*   
+*
+*
+*
+* It's work in progress, please report any bugs you find.
+*
 *)
 
 interface
@@ -34,8 +34,8 @@ procedure zsmInit; assembler;
 * @description:
 * Initialize engine. It sets Interrupts to trigger every 1/50th of a second to call zsm_tick().
 *
-* 
-* 
+*
+*
 *)
 
 procedure zsmSetISR; assembler;
@@ -43,8 +43,8 @@ procedure zsmSetISR; assembler;
 * @description:
 * This sets up a default interrupt service routine that calls zsm_tick on every interrupt. The existing IRQ handler is called afterwards.
 *
-* 
-* 
+*
+*
 *)
 
 procedure zsmClearISR; assembler;
@@ -52,8 +52,8 @@ procedure zsmClearISR; assembler;
 * @description:
 * This routine removes the interrupt service routine.
 *
-* 
-* 
+*
+*
 *)
 
 procedure zsmDirectLoad(filename: String; bank: Byte; addr: Word); assembler;
@@ -64,7 +64,7 @@ procedure zsmDirectLoad(filename: String; bank: Byte; addr: Word); assembler;
 * @param (String) - Filename to load
 * @param (Byte) - RAM bank to load to
 * @param (Word) - Address in Memory to load to
-* 
+*
 *)
 
 procedure zsmSetMem(priority: Byte; bank: Byte; addr: Word); assembler;
@@ -75,7 +75,7 @@ procedure zsmSetMem(priority: Byte; bank: Byte; addr: Word); assembler;
 * @param: (Byte) - Sets the priority for the music
 * @param: (Byte) - Switches to chosen bank 1-63 (512kb) or 1-255 (2048kb)
 * @param: (Word) - Address in memory to switch to
-* 
+*
 *)
 
 procedure zsmPlay(priority: Byte); assembler;
@@ -84,7 +84,7 @@ procedure zsmPlay(priority: Byte); assembler;
 * Starts playback of a song. If zsm_stop was called, this function continues playback from the point that it was stopped.
 *
 * @param: (Byte) - Priority for playback 0-255
-* 
+*
 *)
 
 procedure zsmStop(priority: Byte); assembler;
@@ -93,7 +93,7 @@ procedure zsmStop(priority: Byte); assembler;
 * Pauses playback of a song. Playback can optionally be resumed from that point later with zsm_play.
 *
 * @param: (Byte) - Priority for playback 0-255
-* 
+*
 *)
 
 procedure zsmRewind(priority: Byte); assembler;
@@ -102,7 +102,7 @@ procedure zsmRewind(priority: Byte); assembler;
 * Stops playback of a song (if it is already playing) and resets its pointer to the beginning of the song. Playback can then be started again with zsm_play.
 *
 * @param: (Byte) - Priority for playback 0-255
-* 
+*
 *)
 
 procedure zsmSetAtten(priority, volume: Byte); assembler;
@@ -111,7 +111,7 @@ procedure zsmSetAtten(priority, volume: Byte); assembler;
 * Changes the master volume of a priority slot by setting an attenuation value. A value of $00 implies no attenuation (full volume) and a value of $3F is full mute.
 *
 * @param: (Byte) - Priority for playback 0-255
-* 
+*
 *)
 
 
@@ -120,7 +120,7 @@ implementation
 
 procedure zsmInit; assembler;
 asm
-    
+
     lda #1
     jsr zsm_init_engine
 
@@ -201,13 +201,13 @@ asm
 
     lda bank
     sta RAMBank
-    
+
     ldx priority
     lda addr
     ldy addr+1
     jsr zsm_setmem
 
-    ply  
+    ply
     plx
     pla
 end;

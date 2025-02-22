@@ -2,7 +2,7 @@ unit zx2;
 (*
 * @type: unit
 * @author: Einar Saukas, Daniel Serpell, Tomasz 'Tebe' Biela
-* @name: ZX2
+* @name: ZX2 decompression unit
 *
 * @version: 1.0
 *

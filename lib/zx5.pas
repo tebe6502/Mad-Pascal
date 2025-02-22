@@ -2,7 +2,7 @@ unit zx5;
 (*
 * @type: unit
 * @author: Einar Saukas, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
-* @name: ZX5
+* @name: ZX5 decompression unit
 *
 * @version: 1.0
 *

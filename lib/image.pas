@@ -2,10 +2,13 @@ unit image;
 (*
 @type: unit
 @name: A unit to load a variety of image formats for ANTIC/GTIA
-@author: Steven Henk Don (https://www.shdon.com/), Tomasz Biela (Tebe)
+@author: Steven Henk Don <https://www.shdon.com/>, Tomasz Biela (Tebe)
 
 @description:
-*****************************************************************************
+Load BMP, GIF, PCX, MIC, PIC.
+*)
+
+(****************************************************************************
 ** IMAGE unit, ANTIC/GTIA						   **
 **  by Steven Henk Don, Tomasz Biela					   **
 *****************************************************************************
@@ -31,8 +34,7 @@ unit image;
 ** All functions are boolean. If they return false, check IMGERROR to find **
 ** out what happened.                                                      **
 **                                                                         **
-*****************************************************************************
-*)
+****************************************************************************)
 
 
 {

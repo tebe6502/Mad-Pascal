@@ -5,15 +5,15 @@ unit e80;
  @name: 80: device
  @version: 1.3
 
-   Version 1.3:
-	- CALCXY optimization, fast *320 multiplication
-	- GETCHR optimization
-
-   Version 1.2:
-	- information about CIO, XIO command
-
  @description:
  80: device by SIMON TREW, 1989
+
+ Version 1.2:
+	- information about CIO, XIO command
+
+ Version 1.3:
+	- CALCXY optimization, fast *320 multiplication
+	- GETCHR optimization
 *)
 
 (*

@@ -3,8 +3,9 @@ unit zxlib;
  @type: unit
  @author: Bostjan Gorisek (Gury)
  @name: ZX Spectrum library
- @version: 1.0
+ @version: 1.4
 
+ @description:
  Initial release date: 26.3.2016
 
  Supporting routines are copies of Mad Pascal library routines

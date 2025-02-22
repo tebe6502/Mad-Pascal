@@ -2,7 +2,7 @@ unit deflate;
 (*
 * @type: unit
 * @author: Piotr Fusik
-* @name: Deflate
+* @name: Deflate decompression unit
 *
 * @version: 1.0
 *
