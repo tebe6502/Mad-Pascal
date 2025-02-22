@@ -33,7 +33,7 @@ The available features are:
 * `Type` aliases
 * `Records`
 * `Objects`
-* Separate program modules
+* Separate program modules (`PROGRAM`, `UNIT`, `LIBRARY`)
 * Recursion
 
 ## Compile
@@ -120,6 +120,8 @@ CutAs, FiDL, SprED, Sprite XL
 ### [A8 Mad-Pascal Window Library](https://github.com/Ripjetski6502/A8MadPascalLibrary)
 
 This text-mode windowing library has window controls and modern gadgets (widgets). The gadgets allow you to build input forms that use buttons, radio buttons, input strings (with scrolled lengths and type restrictions), check boxes, progress bars, etc. This allows you to build applications with "modern" interfaces.
+
+### [Mad-Pascal libraries](https://mads.atari8.info/library/doc/index.html)
 
 ## Projects in Mad-Pascal
 
