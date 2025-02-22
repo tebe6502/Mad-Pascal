@@ -42,6 +42,17 @@ begin
      end;
 
 
+    if and_im_0(i) and										// and #$00				; 0
+       mwy(i+1) and										// mwy					; 1
+       ldy(i+2) and										// ldy					; 2
+       lda_a(i+3) then										// lda					; 3
+     begin
+	listing[i]   := '';
+
+	exit(false);
+     end;
+
+
     if lda_a(i) and										// lda 					; 0
        (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
        sta_a(i+2) then										// sta 					; 2

@@ -112,6 +112,7 @@ Contributors:
 
 + Viacheslav Komenda :
 	- unit LZJB
+	- unit RC4
 
 + Wojciech Bociański (http://bocianu.atari.pl/) :
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
