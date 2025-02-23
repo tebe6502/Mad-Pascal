@@ -409,16 +409,16 @@ type
   TToken = record
     UnitIndex, Column: Smallint;
     Line: Integer;
-    case Kind: Byte of
-      IDENTTOK:
-	(Name: ^TString);
-      INTNUMBERTOK:
-	(Value: Int64);
-      FRACNUMBERTOK:
-	(FracValue: Single);
-      STRINGLITERALTOK:
-	(StrAddress: Word;
-	 StrLength: Word);
+    Kind: Byte;
+    // For IDENTTOK:
+	Name: ^TString;
+    // For INTNUMBERTOK:
+	Value: Int64;
+    // For FRACNUMBERTOK:
+	FracValue: Single;
+    // For  STRINGLITERALTOK:
+	StrAddress: Word;
+	StrLength: Word;
     end;
 
   TIdentifier = record
@@ -448,9 +448,9 @@ type
     isInitialized,
     Section: Boolean;
 
-    case Kind: Byte of
-      PROCEDURETOK, FUNCTIONTOK:
-	(NumParams: Word;
+    Kind: Byte;
+    // For  PROCEDURETOK, FUNCTIONTOK:
+	 NumParams: Word;
 	 Param: TParamList;
 	 ProcAsBlock: Integer;
 	 ObjectIndex: Integer;
@@ -469,11 +469,11 @@ type
 	 isKeep,
 	 isVolatile,
 	 isStriped,
-	 IsNotDead: Boolean;);
+	 IsNotDead: Boolean;
 
-      VARIABLE, USERTYPE:
-	(NumAllocElements, NumAllocElements_: Cardinal;
-	 AllocElementType: Byte);
+      // For VARIABLE, USERTYPE:
+	 NumAllocElements, NumAllocElements_: Cardinal;
+	 AllocElementType: Byte;
     end;
 
 
