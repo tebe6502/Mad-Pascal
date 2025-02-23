@@ -2,7 +2,7 @@ unit lz4;
 (*
 * @type: unit
 * @author: Krzysztof Dudek, Tomasz Biela
-* @name: LZ4
+* @name: LZ4 decompression unit
 *
 * @version: 1.0
 *
@@ -10,7 +10,9 @@ unit lz4;
 * LZ4 decompressor (memory and stream)
 *
 * <https://lz4.github.io/lz4/>
+*
 * <https://github.com/emmanuel-marty/lz4ultra>
+*
 * <https://xxl.atari.pl/lz4-decompressor/>
 *)
 

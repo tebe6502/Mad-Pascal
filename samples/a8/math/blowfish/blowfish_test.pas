@@ -21,5 +21,3 @@ writeln(mydecryptedstring);
 repeat until keypressed;
 
 end.
-
-// 7768

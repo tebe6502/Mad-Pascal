@@ -4,11 +4,10 @@ unit joystick;
  @author: Tomasz Biela (Tebe)
  @name: Joystick memory registers (Atari XE/XL)
 
- @version: 1.2
+ @version: 1.2 (22-08-2022)
 
  @description:
 
- changes: 22-08-2022
  *)
 
 

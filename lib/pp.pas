@@ -2,7 +2,7 @@ unit pp;
 (*
 * @type: unit
 * @author: Krzysztof 'Swiety/Zelax' Swiecicki, Tomasz 'Tebe' Biela
-* @name: Power Packer
+* @name: 'Power Packer' decompression unit
 *
 * @version: 1.0
 *

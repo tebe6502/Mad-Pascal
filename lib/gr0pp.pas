@@ -6,6 +6,7 @@ unit gr0pp;
 * @version: 1.0
 * @description:
 * Set of procedures to initialize, run, and use special graphics mode 0++.
+*
 * Resolution 40x60 chars, 2 colors
 *
 *)

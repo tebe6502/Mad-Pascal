@@ -6,6 +6,7 @@ unit gr4pp;
 * @version: 1.0
 * @description:
 * Set of procedures to initialize, run, and use special graphics mode 4++.
+*
 * Resolution 160x240 / 80x60, 5 colors
 *
 *)
@@ -18,23 +19,23 @@ procedure Gr4Init(DListAddress: word; VRamAddress: word; lines: byte; pixelHeigh
 * Turns on 4++ mode.
 *
 * @param: DListAddress - memory address of Display list
-* 
+*
 * @param: VRamAddress - video memory address
-* 
+*
 * @param: lines - number of horizontal lines (vertical resolution)
 *
 * @param: pixelHeight - height of a pixel in scanlines (between 2 and 6)
 *
 * @param: blanks - number of blanklines (8 x scanline) at top of the screen
-* 
+*
 *)
 procedure SetPixelHeight(lines: byte);
 (*
 * @description:
 * Sets height of a pixel in a scan lines.
-* 
+*
 * @param: lines -  height of a pixel in scanlines (between 2 and 16)
-* 
+*
 *)
 
 
@@ -52,8 +53,8 @@ var dList : PByteArray;
 
 procedure G4Dli;interrupt;assembler;
 asm {
-dli 
-    pha 
+dli
+    pha
     sta WSYNC
     lda #4
 .def :VS_Upper = *-1
@@ -61,7 +62,7 @@ dli
     lda #3
 .def :VS_Lower = *-1
     sta VSCROL
-    pla 
+    pla
 };
 end;
 
@@ -104,12 +105,12 @@ begin
     end;
     DLPoke($e4);
     DLPokeW(VRamAddress);
-    
+
     lines:=lines shr 1 - 1;
     while (lines > 0) do begin
         DLPokeW($2484);
         dec(lines);
-    end;   
+    end;
     DLPoke($04);
     DLPoke(DL_JVB);
     DLPokeW(DListAddress);

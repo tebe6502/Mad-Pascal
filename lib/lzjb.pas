@@ -1,13 +1,13 @@
 unit lzjb;
 (*
  @type: unit
- @author: Krzysztof Dudek, Tomasz Biela
- @name: LZ4
+ @author: Viacheslav Komenda
+ @name: LZJB compression/decompression unit
 
  @version: 1.0
 
  @description:
- https://en.wikipedia.org/wiki/LZJB 
+ <https://en.wikipedia.org/wiki/LZJB>
 *)
 
 {
@@ -35,9 +35,7 @@ SOFTWARE.
 }
 
 
-
 INTERFACE
-
 
 { return 0, if could not compress }
 FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
@@ -61,7 +59,7 @@ OFFSET_MASK  = (1 SHL (16 - MATCH_BITS)) - 1;
 LEMPEL_SIZE  = $400; { 1024 }
 
 
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD; 
+FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
 VAR     mlen                 : BYTE;
 	copymask             : WORD;
         offset, copymap, cpy : WORD;
@@ -163,6 +161,5 @@ BEGIN
         END;
         lzjb_decompress_mem := dst_pos;
 END;
-
 
 END.

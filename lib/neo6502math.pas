@@ -7,7 +7,7 @@ unit neo6502math;
 
 * @description:
 * Set of procedures to cover Math API functionality.
-* 
+*
 * WARNING!
 *
 * This library uses 15 bytes on ZP ($F0-$FE)
@@ -16,21 +16,21 @@ unit neo6502math;
 *
 * <https://www.olimex.com/Products/Retro-Computers/Neo6502/open-source-hardware>
 *
-* <https://www.neo6502.com/>     
+* <https://www.neo6502.com/>
 
-*    
-* API documentation can be found here:   
 *
-*   <https://github.com/paulscottrobson/neo6502-firmware/wiki>
+* API documentation can be found here:
+*
+* <https://github.com/paulscottrobson/neo6502-firmware/wiki>
 
-*   
-* It's work in progress, so please report any bugs you will find.   
-*   
+*
+* It's work in progress, so please report any bugs you will find.
+*
 *)
 interface
 uses neo6502;
 
-const   
+const
     N6502MSG_ADDRESS = $ff00;
 	MATHAdd = 0; 					// Add
 	MATHSub = 1; 					// Subtract
@@ -39,7 +39,7 @@ const
 	MATHIDiv = 4;					// Int Divide
 	MATHMod = 5; 					// Int Modulus
     MATHCmp = 6; 					// Compare
-    MATHPow = 7;                    // Power 
+    MATHPow = 7;                    // Power
     MATHDist = 8;                   // Distance (counter-rectangle)
 
     MATHNeg = 16;                   // Unary Negate
@@ -61,148 +61,148 @@ const
 	MATHConvertNumberToString = 34; // int/float to string
     MATHSetDegRad = 35;             // Sets the use of degrees (the default) when non zero, radians when zero.
 
-    STACK_SIZE = 2;      // binary operations stack size 
+    STACK_SIZE = 2;      // binary operations stack size
     VAR_ADDRESS = $F0;   // unary operations variable address (5 bytes)
     STACK_ADDRESS = $F5; // binary operations stack address (STACK_SIZE * 5 bytes)
 
-var 
+var
     m_integer: integer absolute VAR_ADDRESS+1; // integer value returned from unary operations
     m_float: float absolute VAR_ADDRESS+1; // float value returned from unary operations
 
 procedure SetMathStack(v:float;i:byte);assembler;overload;register;
 (*
-* @description: 
+* @description:
 * Inserts float value to the Math stack at the specified position.
-* 
+*
 * @param: v (float) - value to be inserted
 * @param: i (byte) - stack position
-* 
+*
 *)
 procedure SetMathStack(v:integer;i:byte);assembler;overload;register;
 (*
-* @description: 
+* @description:
 * Inserts integer value to the Math stack at the specified position.
-* 
+*
 * @param: v (integer) - value to be inserted
 * @param: i (byte) - stack position
-* 
+*
 *)
 function GetMathStackFloat:float;assembler;
 (*
 * @description:
 * Returns float value from Math stack at position 0
-* 
+*
 * @returns: (float) - value at position ptr represented as an float
 *)
 function GetMathStackInt:integer;assembler;
 (*
 * @description:
 * Returns integer value from Math stack at position 0
-* 
+*
 * @returns: (integer) - value at position ptr represented as an float
 *)
 function IsFloatOnStack(i:byte):boolean;
 (*
-* @description: 
+* @description:
 * Returns true if at desired position on the Math Stack float value is found.
-* 
+*
 * @param: i (byte) - stack position
-* 
+*
 * @returns: (boolean) - returns true if float
 *)
 function IsFloatVal:boolean;
 (*
-* @description: 
+* @description:
 * Returns true if float value is located at MathVar.
-* 
+*
 * @returns: (boolean) - returns true if float
 *)
 procedure SetMathVar(v:integer);overload;assembler;register;
 (*
-* @description: 
+* @description:
 * Sets integer value as the MathVar (operation register for unary)
-* 
+*
 * @param: v (integer) - value to be inserted
 *)
 procedure SetMathVar(v:float);overload;assembler;register;
 (*
-* @description: 
+* @description:
 * Sets float value as the MathVar (operation register for unary)
-* 
+*
 * @param: v (integer) - value to be inserted
 *)
 procedure DoMathOnStack(cmd:byte);register;
 (*
-* @description: 
+* @description:
 * Perform selected operation on the MathStack
-* 
+*
 * @param: cmd (byte) - operation id
 *)
 procedure DoMathOnVar(cmd:byte);register;
 (*
-* @description: 
+* @description:
 * Perform selected operation on the MathVar
-* 
+*
 * @param: cmd (byte) - operation id
 *)
-function AddFractionalBCD(v0:float;bcd:pointer):float; 
+function AddFractionalBCD(v0:float;bcd:pointer):float;
 (*
-* @description: 
+* @description:
 * Adds fractional part to the float variable
-* 
+*
 * @param: v0 (float) - initial number
 * @param: bcd (pointer) - pointer to the array containg BCD nibbles. Must be terminated with $F.
-* 
+*
 * @returns: (float) - returns float value
 *)
 function NeoIntRandom(range:integer):integer;
 (*
-* @description: 
+* @description:
 * Returns an random integer value in the specified range.
-* 
-* @param: range (integer) - upper limit 
-* 
+*
+* @param: range (integer) - upper limit
+*
 * @returns: (integer) - random value (0..range-1)
 *)
 function NeoFloatRandom():float;
 (*
-* @description: 
+* @description:
 * Returns a random floating point value in the range 0..1
-* 
+*
 * @returns: (float) - random float value (0..1)
 *)
 procedure NeoStr(i:integer;var s:string);overload;
 (*
-* @description: 
+* @description:
 * Converts integer value into string variable (size is returned in the first byte)
-* 
+*
 * @param: i (integer) - value to be converted
 * @param: s (string) - pointer to the string to be filled with the result.
 *)
 procedure NeoStr(i:float;var s:string);overload;
 (*
-* @description: 
+* @description:
 * Converts float value into string variable (size is returned in the first byte)
-* 
+*
 * @param: i (float) - value to be converted
 * @param: s (string) - pointer to the string to be filled with the result.
 *)
 function NeoParseInt(var s:string):integer;
 (*
-* @description: 
+* @description:
 * Parses string into integer value.
-* 
+*
 * @param: s (string) - string to be converted.
-* 
+*
 * @returns: (integer) - parsed value
 *)
 function NeoParseFloat(var s:string):float;
 (*
-* @description: 
+* @description:
 * Parses string into float value.
-* 
+*
 * @param: s (string) - string to be converted.
-* 
+*
 * @returns: (float) - parsed value
 *)
 procedure SetDegreeMode;assembler;inline;
@@ -266,7 +266,7 @@ i1
 end;
 
 function GetMathStackFloat:float;assembler;
-//var src:array [0..3] of byte absolute result; // @nodoc 
+//var src:array [0..3] of byte absolute result; // @nodoc
 asm
     mva STACK_ADDRESS+2 result
     mva STACK_ADDRESS+4 result+1
@@ -275,7 +275,7 @@ asm
 end;
 
 function GetMathStackInt:integer;assembler;
-//var src:array [0..3] of byte absolute result; // @nodoc 
+//var src:array [0..3] of byte absolute result; // @nodoc
 asm
     mva STACK_ADDRESS+2 result
     mva STACK_ADDRESS+4 result+1
@@ -295,7 +295,7 @@ end;
 
 procedure SetMathVar(v:integer);overload;assembler;register;
 asm
-    mva #$00 VAR_ADDRESS 
+    mva #$00 VAR_ADDRESS
     mva v VAR_ADDRESS+1
     mva v+1 VAR_ADDRESS+2
     mva v+2 VAR_ADDRESS+3
@@ -340,13 +340,13 @@ end;
 function NeoIntRandom(range:integer):integer;
 begin
     SetMathVar(range);
-    DoMathOnVar(MATHIRnd);    
+    DoMathOnVar(MATHIRnd);
     result := m_integer;
 end;
 
 function NeoFloatRandom():float;
 begin
-    DoMathOnVar(MATHFRnd);    
+    DoMathOnVar(MATHFRnd);
     result := m_float;
 end;
 
@@ -378,7 +378,7 @@ begin
     b:=$0f;
     wordParams[2] := word(@s);
     DoMathOnVar(MATHConvertStringToNumber);
-    if not IsFloatVal then begin    
+    if not IsFloatVal then begin
         wordParams[2] := word(@b);
         DoMathOnVar(MATHProcessDecimal);
     end;

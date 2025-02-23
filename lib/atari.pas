@@ -3,9 +3,7 @@ unit atari;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Common used memory registers (Atari XE/XL)
- @version: 1.0
-
- changes: 03.11.2016
+ @version: 1.3
 
  @description:
  <https://www.atariarchives.org/mapping/memorymap.php>

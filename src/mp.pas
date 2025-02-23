@@ -1,11 +1,12 @@
 (*
 
 Sub-Pascal 32-bit real mode compiler for 80386+ processors v. 2.0 by Vasiliy Tereshkov, 2009
+https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
+
+https://github.com/tebe6502/Mad-Pascal
 
 https://atariage.com/forums/topic/240919-mad-pascal/
 http://atarionline.pl/forum/comments.php?DiscussionID=4825&page=1
-
-https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
 
 WUDSN IDE
 https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
@@ -28,9 +29,6 @@ Contributors:
 + Chriss Hutt :
 	- unit SMP
 
-+ David Schmenk :
-	- IEEE-754 (32bit) Single[Float]
-
 + Daniel Serpell (https://github.com/dmsc) :
 	- conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
 	- unit SYSTEM: fsincos, fast SIN/COS (IEEE754-32 precision)
@@ -38,8 +36,10 @@ Contributors:
 	- unit EFAST
 	- unit ZX2
 
-+ Daniel Koźmiński :
++ David Schmenk :
+	- IEEE-754 (32bit) Single[Float]
 
++ Daniel Koźmiński :
 	- unit STRINGUTILS
 	- unit CIO
 
@@ -70,7 +70,7 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
-+ Krszysztof Swiecicki :
++ Krzysztof Święcicki :
 	- unit PP
 
 + Marcin Żukowski :
@@ -89,8 +89,14 @@ Contributors:
 + Rafal Czemko :
 	- system X16 (-t x16)
 
++ Samuel Vin :
+	- RMTPLAYV (base/atari/players/rmt_playerv_reloc.asm)
+
 + Sebastian Igielski :
 	- unit MISC: DetectStereo
+
++ Simon Trew :
+	- unit E80
 
 + Steven Don (https://www.shdon.com/) :
 	- unit IMAGE, VIMAGE: BMP, GIF, PCX
@@ -106,6 +112,7 @@ Contributors:
 
 + Viacheslav Komenda :
 	- unit LZJB
+	- unit RC4
 
 + Wojciech Bociański (http://bocianu.atari.pl/) :
 	- library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS

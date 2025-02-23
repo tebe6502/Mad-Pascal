@@ -2,7 +2,7 @@ unit upk;
 (*
 * @type: unit
 * @author: Piotr Fusik
-* @name: UPK
+* @name: UPK decompression unit
 *
 * @version: 1.0
 *
@@ -11,9 +11,9 @@ unit upk;
 *
 * upkr -9 --big-endian-bitstream --invert-new-offset-bit --invert-continue-value-bit --simplified-prob-update INPUT_FILE OUTPUT_FILE
 *
-* https://github.com/exoticorn/upkr
+* <https://github.com/exoticorn/upkr>
 *
-* https://github.com/pfusik/upkr6502
+* <https://github.com/pfusik/upkr6502>
 *)
 
 

@@ -6,6 +6,7 @@ unit gr10pp;
 * @version: 0.5.4
 * @description:
 * Set of procedures to initialize, run, and use special graphics mode 10++.
+*
 * Resolution 80x48, 9 colors, square pixel (for lineHeight = 4)
 *
 * This library is nota a part of 'blibs' - set of custom Mad-Pascal libraries.
@@ -21,23 +22,23 @@ procedure Gr10Init(DListAddress: word; VRamAddress: word; lines: byte; pixelHeig
 * Turns on 10++ mode.
 *
 * @param: DListAddress - memory address of Display list
-* 
+*
 * @param: VRamAddress - video memory address
-* 
+*
 * @param: lines - number of horizontal lines (vertical resolution)
 *
 * @param: pixelHeight - height of a pixel in scanlines (between 2 and 16)
 *
 * @param: blanks - number of blanklines (8 x scanline) at top of the screen
-* 
+*
 *)
 procedure SetPixelHeight(lines: byte);
 (*
 * @description:
 * Sets height of a pixel in a scan lines.
-* 
+*
 * @param: lines -  height of a pixel in scanlines (between 2 and 16)
-* 
+*
 *)
 
 
@@ -52,24 +53,24 @@ const
 
 implementation
 
-uses graph; 
+uses graph;
 
 
 var dList : array [0..0] of byte;
-    dlPtr: word;   
+    dlPtr: word;
 
 
 procedure G10Dli;interrupt; assembler;
 asm
-dli 
-    pha 
-    sta WSYNC  ;($d40a) 
-    lda #13 
+dli
+    pha
+    sta WSYNC  ;($d40a)
+    lda #13
 .def :VS_Upper = *-1
-    sta VSCROL ;($d405) 
+    sta VSCROL ;($d405)
     lda #3
 .def :VS_Lower = *-1
-    sta VSCROL ;($d405) 
+    sta VSCROL ;($d405)
     pla
 end;
 
@@ -138,7 +139,7 @@ end;
 procedure Gr10Init(DListAddress: word; VRamAddress: word; lines: byte; pixelHeight:byte; blanks: byte);
 begin
     InitGraph(10+16);
-    
+
     BuildDisplayList(DListAddress, VRamAddress, lines, blanks);
     SetPixelHeight(pixelHeight);
     SDLSTL := DListAddress;
