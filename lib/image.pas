@@ -249,13 +249,13 @@ begin
   assign(f, FileName);
   reset(f, 1);
 
-  blockread(f, Location, 192*40);
+  blockread(f, Location^, 192*40);
 
   Location:=pointer(712);
-  blockread(f, Location, 1);
+  blockread(f, Location^, 1);
 
   Location:=pointer(708);
-  blockread(f, Location, 3);
+  blockread(f, Location^, 3);
 
   {Close the file}
   Close (f);
