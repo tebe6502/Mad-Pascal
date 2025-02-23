@@ -441,12 +441,12 @@ var
 
 	   CheckTok(i, IDENTTOK);
 
-	   nam := FindFile(Tok[i].Name^ + '.pas', 'unit');
+	   nam := FindFile(Tok[i].Name + '.pas', 'unit');
 
 	  end;
 
 
-	 s:=AnsiUpperCase(Tok[i].Name^);
+	 s:=AnsiUpperCase(Tok[i].Name);
 
 
 	 for j := 2 to NumUnits do		// kasujemy wczesniejsze odwolania
@@ -1498,8 +1498,7 @@ var
 	   end
 	   else begin				// Identifier found
 	     Tok[NumTok].Kind := IDENTTOK;
-	     New(Tok[NumTok].Name);
-	     Tok[NumTok].Name^ := Text;
+	     Tok[NumTok].Name := Text;
 	   end;
 
 	 end;
@@ -2199,8 +2198,7 @@ begin
 	 end
 	 else begin				// Identifier found
 	     Tok[NumTok].Kind := IDENTTOK;
-	     New(Tok[NumTok].Name);
-	     Tok[NumTok].Name^ := Text;
+	     Tok[NumTok].Name := Text;
 	   end;
 
 	 end;

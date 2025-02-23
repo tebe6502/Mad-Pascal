@@ -411,7 +411,7 @@ type
     Line: Integer;
     Kind: Byte;
     // For IDENTTOK:
-	Name: ^TString;
+	Name: TString;
     // For INTNUMBERTOK:
 	Value: Int64;
     // For FRACNUMBERTOK:
@@ -905,11 +905,7 @@ end;
 
 
 procedure FreeTokens;
-var i: Integer;
 begin
-
- for i := 1 to NumTok do
-  if (Tok[i].Kind = IDENTTOK) and (Tok[i].Name <> nil) then Dispose(Tok[i].Name);
 
  SetLength(Tok, 0);
  SetLength(IFTmpPosStack, 0);
@@ -963,7 +959,7 @@ end;
 procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
 begin
 
-//writeln(tok[ErrTokenIndex].Name^,',', op,',',DataType);
+//writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
 
  if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
    ((DataType in RealTypes) and
