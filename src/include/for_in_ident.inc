@@ -6,7 +6,7 @@
   	    if Tok[j].Kind <> IDENTTOK then
 	      iError(j, IdentifierExpected);
 
-	    IdentTemp := GetIdent(Tok[j].Name^);
+	    IdentTemp := GetIdent(Tok[j].Name);
 
 	    ActualParamType := Ident[IdentTemp].DataType;
 	    VarType := Ident[IdentTemp].AllocElementType;

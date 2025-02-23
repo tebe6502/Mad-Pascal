@@ -79,7 +79,7 @@ begin
   UnknownIdentifier: if IdentIndex > 0 then
 			Result := 'Identifier not found ''' + Ident[IdentIndex].Alias + ''''
 		     else
-  			Result := 'Identifier not found ''' + Tok[ErrTokenIndex].Name^ + '''';
+  			Result := 'Identifier not found ''' + Tok[ErrTokenIndex].Name + '''';
 
  IncompatibleTypeOf: Result := 'Incompatible type of ' + Ident[IdentIndex].Name;
    IncompatibleEnum: if DstType < 0 then
