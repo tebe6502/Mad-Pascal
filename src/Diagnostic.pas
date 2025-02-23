@@ -39,7 +39,7 @@ begin
     else if Tok[i].Kind = FRACNUMBERTOK then
       WriteLn(DiagFile, ' = ', Tok[i].FracValue: 8: 4)
     else if Tok[i].Kind = IDENTTOK then
-      WriteLn(DiagFile, ' = ', Tok[i].Name^)
+      WriteLn(DiagFile, ' = ', Tok[i].Name)
     else if Tok[i].Kind = CHARLITERALTOK then
       WriteLn(DiagFile, ' = ', Chr(Tok[i].Value))
     else if Tok[i].Kind = STRINGLITERALTOK then
