@@ -27,7 +27,7 @@ jobs:
       with:
         name: mp-bin-ubuntu
         path: |
-          bin/
+          build/
 
   build-mads:
     runs-on: ubuntu-latest
