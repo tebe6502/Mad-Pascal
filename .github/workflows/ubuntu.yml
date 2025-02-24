@@ -18,9 +18,11 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y fpc
     - name: build
-      run: make
+      run:
+        mkdir build
+        make
     - name: list build binaries
-      run: ls -l bin/
+      run: ls -l build/
     - uses: actions/upload-artifact@v4
       with:
         name: mp-bin-ubuntu
@@ -52,7 +54,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: mp-bin-ubuntu
-        path: bin
+        path: build
     - uses: actions/download-artifact@v4
       with:
         name: mads-bin-ubuntu
@@ -60,9 +62,9 @@ jobs:
     - name: install mads
       run: sudo cp -v mads/mads /usr/local/bin/mads
     - name: set permissions
-      run: sudo chmod a+x bin/mp /usr/local/bin/mads
+      run: sudo chmod a+x build/mp /usr/local/bin/mads
     - name: list binaries from the artifacts
-      run: ls -l bin/ mads/ /usr/local/bin/mads
+      run: ls -l build/ mads/ /usr/local/bin/mads
     - name: setup test environment
       run: make test-setup
     - name: run tests
