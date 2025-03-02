@@ -23,6 +23,6 @@ $(BIN): $(SRC)
 	fpc -Mdelphi -v -O3 $< -o$(BIN)
 
 clean:
-	rm -fv $(BIN) $(BINDIR)/*.o $(BINDIR)/*.ppu
+	rm -fv  *.o *.ppu $(BIN) $(BINDIR)/*.o $(BINDIR)/*.ppu
 
 .PHONY: clean
