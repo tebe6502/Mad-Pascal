@@ -2349,10 +2349,10 @@ begin
        begin
 	 p := GetWORD(i, i+3) + GetWORD(i+6, i+9);
 
-	 listing[i+6] := #9'lda #$' + IntToHex(byte(p));
+	 listing[i+6] := #9'lda #$' + IntToHex(byte(p),2);
 	 listing[i+7] := listing[i+1];
 
-	 listing[i+9] := #9'lda #$' + IntToHex(byte(p shr 8));
+	 listing[i+9] := #9'lda #$' + IntToHex(byte(p shr 8),2);
 	 listing[i+10]:= listing[i+4];
 
 	 listing[i]   := '';
@@ -2385,10 +2385,10 @@ begin
        begin
 	 p := GetWORD(i+1, i+4) + GetWORD(i+6, i+9);
 
-	 listing[i+6] := #9'lda #$' + IntToHex(byte(p));
+	 listing[i+6] := #9'lda #$' + IntToHex(byte(p),2);
 	 listing[i+7] := #9'add ' + copy(listing[i], 6, 256);
 
-	 listing[i+9] := #9'lda #$' + IntToHex(byte(p shr 8));
+	 listing[i+9] := #9'lda #$' + IntToHex(byte(p shr 8),2);
 	 listing[i+10]:= #9'adc ' + copy(listing[i+3], 6, 256);
 
 	 listing[i]   := '';

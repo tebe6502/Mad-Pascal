@@ -1,0 +1,5 @@
+*.bak
+*.exe
+*.log
+backup/
+lib/
