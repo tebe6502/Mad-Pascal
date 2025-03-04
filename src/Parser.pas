@@ -5,6 +5,7 @@ interface
 uses Common;
 
 {$i define.inc}
+{$i Types.inc}
 
 // -----------------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ uses Common;
 
 implementation
 
-uses SysUtils, Messages;
+uses SysUtils, Messages, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -413,12 +414,15 @@ procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValTyp
 var ftmp: TFloat;
 begin
 
-	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then begin writeln('SaveToDataSegment: ', ConstDataSize); halt end;
+	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
+	begin writeln('SaveToDataSegment: ', ConstDataSize);
+	      RaiseHaltException(2);
+	end;
 
-ftmp[0]:=0;
-ftmp[1]:=0;
+    ftmp[0]:=0;
+    ftmp[1]:=0;
 
-	 case ConstValType of
+    case ConstValType of
 
 	  SHORTINTTOK, BYTETOK, CHARTOK, BOOLEANTOK:
 		       DataSegment[ConstDataSize] := byte(ConstVal);
@@ -468,9 +472,9 @@ ftmp[1]:=0;
 			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
 		       end;
 
-	 end;
+    end;
 
- DataSegmentUse := true;
+    DataSegmentUse := true;
 
 end;	//SaveToDataSegment
 

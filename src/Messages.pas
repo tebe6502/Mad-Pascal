@@ -41,7 +41,7 @@ type
 
 implementation
 
-uses Crt;
+   uses Console, FileIO, Utilities;
 
 // -----------------------------------------------------------------------------
 
@@ -241,7 +241,7 @@ begin
  CloseFile(OutFile);
  Erase(OutFile);
 
- Halt(2);
+ RaiseHaltException(2);
 
  end;
 
@@ -276,7 +276,7 @@ begin
  CloseFile(OutFile);
  Erase(OutFile);
 
- Halt(2);
+ RaiseHaltException(2);
 
  end;
 
