@@ -190,7 +190,7 @@
 
 		      	if Tok[i+3].Kind = DEREFERENCETOK then begin
 
-		          asm65(#9'mwy ' + GetLocalName(GetIdent(Tok[i + 2].Name^)) + ' :bp2');
+		          asm65(#9'mwy ' + GetLocalName(GetIdent(Tok[i + 2].Name)) + ' :bp2');
 		          asm65(#9'ldy #$00');
 		          asm65(#9'lda (:bp2),y');
 			  asm65(#9'sta @move.src');
