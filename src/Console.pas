@@ -28,12 +28,16 @@ procedure NormVideo;
 
 implementation
 
-procedure TextColor(Color: Byte);
+uses Crt;
+
+procedure TextColor(color: Byte);
 begin
+ Crt.TextColor(color);
 end;
 
 procedure NormVideo();
 begin
+ Crt.Normvideo;
 end;
 
 
