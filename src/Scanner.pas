@@ -24,17 +24,22 @@ interface
 
 implementation
 
-uses SysUtils, Common, Messages, SplitString;
+uses SysUtils, Common, Messages, SplitString, FileIO, Utilities;
 
 // ----------------------------------------------------------------------------
 
 
 procedure TokenizeProgramInitialization;
+var i: Integer;
 begin
 
- fillchar(Ident, sizeof(Ident), 0);
- fillchar(DataSegment, sizeof(DataSegment), 0);
- fillchar(StaticStringData, sizeof(StaticStringData), 0);
+ for i := Low(Ident) to High(Ident) do
+ begin
+ 	Ident[i].Name := '';
+ 	// TODO: Clear more fields
+ end;
+ ClearWordMemory(DataSegment);
+ ClearWordMemory(StaticStringData);
 
  PublicSection := true;
  UnitNameIndex := 1;
@@ -501,6 +506,7 @@ var
    Result := '';
 
    repeat
+    c := ' ';
     Read(InFile, c);
 
     if c = LF then Inc(Line);
@@ -584,7 +590,7 @@ var
 	  AssignFile(bin, fn); FileMode:=0; Reset(bin, 1);
 
   	  Repeat
-    		BlockRead (bin, tmp, 1, NumRead);
+    	BlockRead (bin, tmp, 1, NumRead);
 
 		if NumRead = 1 then begin
 
@@ -1006,6 +1012,7 @@ var
   Read(InFile, c);
 
    if c = '(' then begin
+    c2:=' ';
     Read(InFile, c2);
 
     if c2='*' then begin				// Skip comments (*   *)
@@ -1477,8 +1484,7 @@ var
 
 	  if AsmBlockIndex > High(AsmBlock) then begin
 	   Error(NumTok, 'Out of resources, ASMBLOCK');
-
-	   halt(2);
+	   RaiseHaltException(2);
 	  end;
 
 	 end else begin
@@ -1732,16 +1738,20 @@ var
       end;// while
 
   except
-
+     on e: THaltException do raise e;
+     else // EOF reached
    if Text <> '' then
-    if Text='END.' then begin
+     begin
+       if Text='END.' then
+         begin
      AddToken(ENDTOK, UnitIndex, Line, 3, 0);
      AddToken(DOTTOK, UnitIndex, Line, 1, 0);
-    end else begin
+         end
+       else
+         begin
      AddToken(GetStandardToken(Text), UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
     end;
-
-    CloseFile(InFile);
+     end;
   end;// try
 
   end;
