@@ -70,7 +70,7 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
-+ Krzysztof Święcicki :
++  Krzysztof Święcicki :
 	- unit PP
 
 + Marcin Żukowski :
@@ -180,13 +180,14 @@ program MADPASCAL;
 {$i define.inc}
 
 uses
-	Crt, SysUtils,
-
+    SysUtils,
 {$IFDEF WINDOWS}
 	Windows,
 {$ENDIF}
-
-	Common, Messages, Scanner, Parser, Optimize, Diagnostic, MathEvaluate;
+{$IFDEF PAS2JS}
+         browserconsole,
+{$ENDIF}
+	Common, Console, Messages, Scanner, Parser, Optimize, Diagnostic, MathEvaluate, FileIO, Utilities;
 
 
 // ----------------------------------------------------------------------------
@@ -506,19 +507,23 @@ end;	//GetIdentProc
 
 
 procedure TestIdentProc(x: integer; S: TString);
+type TOV = record
+             i,j,u,b: integer;
+           end;
+
+type TL = record
+		    u,b: integer;
+		    Param: TParamList;
+		    NumParams: word;
+          end;
+
 var IdentIndex, BlockStackIndex: Integer;
     k, m: integer;
     ok: Boolean;
 
-    ov: array of record
-		  i,j,u,b: integer;
-	end;
+    ov: array of TOV;
 
-    l: array of record
-		  u,b: integer;
-		  Param: TParamList;
-		  NumParams: word;
-       end;
+    l: array of TL;
 
 
 procedure addOverlay(UnitIndex, Block: integer; ovr: Boolean);
@@ -14006,7 +14011,7 @@ begin
 
 	yes := TRUE;
 
-        AssignFile(HeaFile, fnam); FileMode:=0; Reset(HeaFile);
+    AssignFile(HeaFile, fnam); FileMode:=0; Reset(HeaFile);
 
 	while not eof(HeaFile) do begin
 	  readln(HeaFile, txt);
@@ -14033,7 +14038,7 @@ begin
 
 	CloseFile(HeaFile);
 
-        if RCLIBRARY then begin asm65(''); asm65(#9'rmb'); asm65('') end;				// reset bank -> #0
+    if RCLIBRARY then begin asm65(''); asm65(#9'rmb'); asm65('') end;				// reset bank -> #0
 
     end else
 
@@ -14146,10 +14151,13 @@ procedure SaveToStaticDataSegment(ConstDataSize: integer; ConstVal: Int64; Const
 var ftmp: TFloat;
 begin
 
-	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then begin writeln('SaveToStaticDataSegment: ', ConstDataSize); halt end;
+	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
+        begin writeln('SaveToStaticDataSegment: ' + IntToStr(ConstDataSize));
+              RaiseHaltException(2);
+        end;
 
-ftmp[0]:=0;
-ftmp[1]:=0;
+	ftmp[0]:=0;
+	ftmp[1]:=0;
 
 	 case ConstValType of
 
@@ -17249,10 +17257,10 @@ end;	//CompileProgram
 procedure ParseParam;
 var i, err: integer;
     s: string;
-    t, c: string[32];
+    t, c: string;
 begin
 
-  t := 'A8';		// target
+  t := 'A8';	// target
   c := '';		// cpu
 
  i:=1;
@@ -17389,7 +17397,7 @@ begin
     if not FileExists(UnitName[1].Name) then begin
      writeln('Error: Can''t open file ''' + UnitName[1].Name + '''');
      FreeTokens;
-     Halt(3);
+     RaiseHaltException(3);
     end;
 
    end;
@@ -17437,6 +17445,8 @@ end;	//ParseParam
 //                                 Main program
 // ----------------------------------------------------------------------------
 
+procedure Main;
+var seconds: ValReal;
 begin
 
 {$IFDEF WINDOWS}
@@ -17499,10 +17509,9 @@ begin
 
  TextColor(WHITE);
 
- Writeln('Compiling ', UnitName[1].Name);
+ Writeln('Compiling ' + UnitName[1].Name);
 
  start_time:=GetTickCount64;
-
 
 // ----------------------------------------------------------------------------
 // Set defines for first pass;
@@ -17513,7 +17522,6 @@ begin
  inc(NumUnits);
  UnitName[NumUnits].Name := 'SYSTEM';		// default UNIT 'system.pas'
  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
-
 
  TokenizeProgram(false);
 
@@ -17557,7 +17565,7 @@ begin
 // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
  NumIdent := NumPredefIdent;
 
- fillchar(DataSegment, sizeof(DataSegment), 0);
+ ClearWordMemory(DataSegment);
 
  NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; VarDataSize := 0;
  CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
@@ -17605,6 +17613,7 @@ begin
  WritelnMsg;
 
  TextColor(WHITE);
+ seconds := (GetTickCount64 - start_time + 500)/1000;
 
  Writeln(Tok[NumTok].Line, ' lines compiled, ', ((GetTickCount64 - start_time + 500)/1000):2:2,' sec, ',
 	 NumTok, ' tokens, ',NumIdent, ' idents, ',  NumBlocks, ' blocks, ', NumTypes, ' types');
@@ -17613,9 +17622,30 @@ begin
 
  TextColor(LIGHTGRAY);
 
- if High(msgWarning) > 0 then Writeln(High(msgWarning), ' warning(s) issued');
- if High(msgNote) > 0 then Writeln(High(msgNote), ' note(s) issued');
+ if High(msgWarning) > 0 then Writeln(IntToStr(High(msgWarning)) + ' warning(s) issued');
+ if High(msgNote) > 0 then Writeln(IntToStr(High(msgNote)) + ' note(s) issued');
 
  NormVideo;
+end;
 
+var exitCode: LongInt;
+begin
+
+  exitCode :=0;
+  try
+    Main;
+  except on e: THaltException do
+    begin
+    	exitCode := e.GetExitCode();
+    end;
+  end;
+
+  if (exitCode <> 0) then
+  begin
+  	WriteLn('Program ended with exit code ' + IntToStr(exitCode));
+  end;
+ 
+  {$IFNDEF PAS2JS}
+  Halt(exitCode);
+  {$ENDIF}
 end.
