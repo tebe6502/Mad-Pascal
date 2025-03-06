@@ -5,7 +5,7 @@ type
   tComputer = (___c64, ___c4p, ___a8, ___raw, ___neo, ___x16);
 
   TTarget = Record
-    name : string[32];
+    name : string;
     id: tComputer;
     cpu: tCPU;
     eol: byte;

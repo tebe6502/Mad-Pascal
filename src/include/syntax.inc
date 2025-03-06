@@ -15,6 +15,6 @@ begin
   Writeln('-o:<outputfile>    Specify the output file path (default <inputfile>.a65)');
   WriteLn('-diag              Activate diagnostics mode');
 
-  Halt(ExitCode);
+  RaiseHaltException(ExitCode);
 
 end;

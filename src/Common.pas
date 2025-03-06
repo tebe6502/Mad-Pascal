@@ -2,7 +2,10 @@ unit Common;
 
 interface
 
+uses FileIO;
+
 {$i define.inc}
+{$i Types.inc}
 
 // ----------------------------------------------------------------------------
 
@@ -383,8 +386,9 @@ type
     PassMethod: Byte;
     i, i_: integer;
    end;
-
-  TFloat = array [0..1] of integer;
+  // General number type. Union of 32-bit REAL in [0] and 32-bit INTEGER in [1]
+  // Depending on the token, either [0] or [1] is used.
+  TFloat = array [0..1] of Longword;
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
@@ -410,15 +414,15 @@ type
     UnitIndex, Column: Smallint;
     Line: Integer;
     Kind: Byte;
-    // For IDENTTOK:
-	Name: TString;
-    // For INTNUMBERTOK:
-	Value: Int64;
-    // For FRACNUMBERTOK:
-	FracValue: Single;
-    // For  STRINGLITERALTOK:
-	StrAddress: Word;
-	StrLength: Word;
+    // For Kind=IDENTTOK:
+    Name: TString;
+    // For Kind=INTNUMBERTOK:
+    Value: Int64;
+    // For Kind=FRACNUMBERTOK:
+    FracValue: Single;
+    // For Kind=STRINGLITERALTOK:
+    StrAddress: Word;
+    StrLength: Word;
     end;
 
   TIdentifier = record
@@ -449,31 +453,32 @@ type
     Section: Boolean;
 
     Kind: Byte;
-    // For  PROCEDURETOK, FUNCTIONTOK:
-	 NumParams: Word;
-	 Param: TParamList;
-	 ProcAsBlock: Integer;
-	 ObjectIndex: Integer;
 
-	 IsUnresolvedForward,
-	 updateResolvedForward,
-	 isOverload,
-	 isRegister,
-	 isInterrupt,
-	 isRecursion,
-	 isStdCall,
-	 isPascal,
-	 isInline,
-	 isAsm,
-	 isExternal,
-	 isKeep,
-	 isVolatile,
-	 isStriped,
-	 IsNotDead: Boolean;
+//  For kind=PROCEDURETOK, FUNCTIONTOK:
+	NumParams: Word;
+	Param: TParamList;
+	ProcAsBlock: Integer;
+	ObjectIndex: Integer;
 
-      // For VARIABLE, USERTYPE:
-	 NumAllocElements, NumAllocElements_: Cardinal;
-	 AllocElementType: Byte;
+	IsUnresolvedForward,
+	updateResolvedForward,
+	isOverload,
+	isRegister,
+	isInterrupt,
+	isRecursion,
+	isStdCall,
+	isPascal,
+	isInline,
+	isAsm,
+	isExternal,
+	isKeep,
+	isVolatile,
+	isStriped,
+	IsNotDead: Boolean;
+
+//  For kind=VARIABLE, USERTYPE:
+    NumAllocElements, NumAllocElements_: Cardinal;
+    AllocElementType: Byte
     end;
 
 
@@ -525,7 +530,11 @@ type
 
 {$i targets/var.inc}
 
-
+  const MIN_MEMORY_ADDRESS=$0000;
+  const MAX_MEMORY_ADDRESS=$FFFF;
+  
+  type TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
+  
 var
 
   PROGRAM_NAME: string = 'Program';
@@ -533,7 +542,7 @@ var
 
   AsmBlock: array [0..4095] of string;
 
-  Data, DataSegment, StaticStringData: array [0..$FFFF] of word;
+  Data, DataSegment, StaticStringData: TWordMemory;
 
   Types: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
@@ -613,6 +622,8 @@ var
 
 // ----------------------------------------------------------------------------
 
+	procedure ClearWordMemory(anArray: TWordMemory);
+
 	procedure AddDefine(X: string);
 
 	procedure AddPath(s: string);
@@ -667,7 +678,7 @@ var
 
 implementation
 
-uses SysUtils, Messages;
+uses SysUtils, Messages, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -867,9 +878,11 @@ end;	//GetEnumName
 function StrToInt(const a: string): Int64;
 (*----------------------------------------------------------------------------*)
 (*----------------------------------------------------------------------------*)
+var value: integer;
 var i: integer;
 begin
- val(a,Result, i);
+ val(a,value, i);
+ Result := value;
 end;
 
 
@@ -1333,7 +1346,10 @@ if len > 255 then
 else
  Data[0] := len;
 
-if (NumStaticStrChars + len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
+if (NumStaticStrChars + len > $FFFF) then
+   begin writeln('DefineStaticString: ' + IntToStr(len));
+         RaiseHaltException(2);
+   end;
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
 
@@ -1367,5 +1383,12 @@ end;	//DefineStaticString
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure ClearWordMemory(anArray: TWordMemory);
+begin
+  for i := Low(Ident) to High(Ident) do
+  begin
+  	anArray[i]:=0;
+  end;
+end;
 
 end.

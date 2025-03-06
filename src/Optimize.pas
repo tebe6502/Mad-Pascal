@@ -24,7 +24,7 @@ var
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses SysUtils, Common, Console, FileIO, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -527,6 +527,8 @@ procedure OptimizeASM;
 type
     TListing = array [0..1023] of string;
     TListing_tmp = array [0..127] of string;
+    TString0_3_Array = array [0..3] of string;
+    
 
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
@@ -538,7 +540,7 @@ var inxUse, found: Boolean;
 
     a, t, arg0: string;
 
-    s: array [0..15, 0..3] of string;
+    s: array [0..15] of TString0_3_Array;
 
 // -----------------------------------------------------------------------------
 
@@ -1062,14 +1064,18 @@ var inxUse, found: Boolean;
 
 
   function RemoveUnusedSTACK: Boolean;
-  var j: byte;
-      i: integer;
-      cnt_l,					// licznik odczytow stosu
-      cnt_s: array [0..7+1, 0..3] of Boolean;	// licznik zapisow stosu
+  const last_i = 7;
+  const last_i_plus_one = last_i + 1;
+  const min_j=0;
+  const last_j=3;
+  type TArray0_3Boolean = array[min_j..last_j] of Boolean;
+  var i, j: integer;
+      cnt_l,					                                // load stack pointer
+      cnt_s: array [0..last_i_plus_one] of TArray0_3Boolean;	// store stack pointer
 
 
    procedure Clear;
-   var i: byte;
+   var i, j: byte;
    begin
 
     for i := 0 to 15 do begin
@@ -1079,8 +1085,14 @@ var inxUse, found: Boolean;
      s[i][3] := '';
     end;
 
-    fillchar(cnt_l, sizeof(cnt_l), false);
-    fillchar(cnt_s, sizeof(cnt_s), false);
+    for i := Low(cnt_l) to High(cnt_l) do
+    begin
+        for j := min_j to last_j do
+        begin
+    		cnt_l[i][j]:=false;
+    		cnt_s[i][j]:=false;
+    	end;
+    end;   
 
    end;
 
@@ -3147,7 +3159,10 @@ begin				// OptimizeASM
 
   l := High(OptimizeBuf);
 
-  if l > High(listing) then begin writeln('Out of resources, LISTING'); halt end;
+  if l > High(listing) then 
+  begin WriteLn('Out of resources, LISTING');
+        RaiseHaltException(2);
+  end;
 
   for i := 0 to l-1 do
    listing[i] := OptimizeBuf[i];
