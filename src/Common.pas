@@ -2,10 +2,7 @@ unit Common;
 
 interface
 
-uses FileIO;
-
 {$i define.inc}
-{$i Types.inc}
 
 // ----------------------------------------------------------------------------
 
@@ -386,9 +383,8 @@ type
     PassMethod: Byte;
     i, i_: integer;
    end;
-  // General number type. Union of 32-bit REAL in [0] and 32-bit INTEGER in [1]
-  // Depending on the token, either [0] or [1] is used.
-  TFloat = array [0..1] of Longword;
+
+  TFloat = array [0..1] of integer;
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
@@ -413,16 +409,16 @@ type
   TToken = record
     UnitIndex, Column: Smallint;
     Line: Integer;
-    Kind: Byte;
-    // For Kind=IDENTTOK:
-    Name: TString;
-    // For Kind=INTNUMBERTOK:
-    Value: Int64;
-    // For Kind=FRACNUMBERTOK:
-    FracValue: Single;
-    // For Kind=STRINGLITERALTOK:
-    StrAddress: Word;
-    StrLength: Word;
+    case Kind: Byte of
+      IDENTTOK:
+	(Name: ^TString);
+      INTNUMBERTOK:
+	(Value: Int64);
+      FRACNUMBERTOK:
+	(FracValue: Single);
+      STRINGLITERALTOK:
+	(StrAddress: Word;
+	 StrLength: Word);
     end;
 
   TIdentifier = record
@@ -452,33 +448,32 @@ type
     isInitialized,
     Section: Boolean;
 
-    Kind: Byte;
+    case Kind: Byte of
+      PROCEDURETOK, FUNCTIONTOK:
+	(NumParams: Word;
+	 Param: TParamList;
+	 ProcAsBlock: Integer;
+	 ObjectIndex: Integer;
 
-//  For kind=PROCEDURETOK, FUNCTIONTOK:
-	NumParams: Word;
-	Param: TParamList;
-	ProcAsBlock: Integer;
-	ObjectIndex: Integer;
+	 IsUnresolvedForward,
+	 updateResolvedForward,
+	 isOverload,
+	 isRegister,
+	 isInterrupt,
+	 isRecursion,
+	 isStdCall,
+	 isPascal,
+	 isInline,
+	 isAsm,
+	 isExternal,
+	 isKeep,
+	 isVolatile,
+	 isStriped,
+	 IsNotDead: Boolean;);
 
-	IsUnresolvedForward,
-	updateResolvedForward,
-	isOverload,
-	isRegister,
-	isInterrupt,
-	isRecursion,
-	isStdCall,
-	isPascal,
-	isInline,
-	isAsm,
-	isExternal,
-	isKeep,
-	isVolatile,
-	isStriped,
-	IsNotDead: Boolean;
-
-//  For kind=VARIABLE, USERTYPE:
-    NumAllocElements, NumAllocElements_: Cardinal;
-    AllocElementType: Byte
+      VARIABLE, USERTYPE:
+	(NumAllocElements, NumAllocElements_: Cardinal;
+	 AllocElementType: Byte);
     end;
 
 
@@ -530,11 +525,7 @@ type
 
 {$i targets/var.inc}
 
-  const MIN_MEMORY_ADDRESS=$0000;
-  const MAX_MEMORY_ADDRESS=$FFFF;
-  
-  type TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
-  
+
 var
 
   PROGRAM_NAME: string = 'Program';
@@ -542,7 +533,7 @@ var
 
   AsmBlock: array [0..4095] of string;
 
-  Data, DataSegment, StaticStringData: TWordMemory;
+  Data, DataSegment, StaticStringData: array [0..$FFFF] of word;
 
   Types: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
@@ -622,8 +613,6 @@ var
 
 // ----------------------------------------------------------------------------
 
-	procedure ClearWordMemory(anArray: TWordMemory);
-
 	procedure AddDefine(X: string);
 
 	procedure AddPath(s: string);
@@ -678,7 +667,7 @@ var
 
 implementation
 
-uses SysUtils, Messages, Utilities;
+uses SysUtils, Messages;
 
 // ----------------------------------------------------------------------------
 
@@ -878,11 +867,9 @@ end;	//GetEnumName
 function StrToInt(const a: string): Int64;
 (*----------------------------------------------------------------------------*)
 (*----------------------------------------------------------------------------*)
-var value: integer;
 var i: integer;
 begin
- val(a,value, i);
- Result := value;
+ val(a,Result, i);
 end;
 
 
@@ -918,7 +905,11 @@ end;
 
 
 procedure FreeTokens;
+var i: Integer;
 begin
+
+ for i := 1 to NumTok do
+  if (Tok[i].Kind = IDENTTOK) and (Tok[i].Name <> nil) then Dispose(Tok[i].Name);
 
  SetLength(Tok, 0);
  SetLength(IFTmpPosStack, 0);
@@ -972,7 +963,7 @@ end;
 procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
 begin
 
-//writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
+//writeln(tok[ErrTokenIndex].Name^,',', op,',',DataType);
 
  if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
    ((DataType in RealTypes) and
@@ -1346,10 +1337,7 @@ if len > 255 then
 else
  Data[0] := len;
 
-if (NumStaticStrChars + len > $FFFF) then
-   begin writeln('DefineStaticString: ' + IntToStr(len));
-         RaiseHaltException(2);
-   end;
+if (NumStaticStrChars + len > $FFFF) then begin writeln('DefineStaticString: ', len); halt end;
 
 for i:=1 to len do Data[i] := ord(StrValue[i]);
 
@@ -1383,12 +1371,5 @@ end;	//DefineStaticString
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure ClearWordMemory(anArray: TWordMemory);
-begin
-  for i := Low(Ident) to High(Ident) do
-  begin
-  	anArray[i]:=0;
-  end;
-end;
 
 end.
