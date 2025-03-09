@@ -9,7 +9,7 @@ interface
 	procedure TokenizeProgram(UsesOn: Boolean = true);
 
 	procedure TokenizeMacro(a: string; Line, Spaces: integer);
-
+	
 	function get_digit(var i:integer; var a:string): string;
 
 	function get_constant(var i:integer; var a:string): string;
@@ -36,7 +36,7 @@ begin
  for i := Low(Ident) to High(Ident) do
  begin
  	Ident[i].Name := '';
- 	// TODO: Clear more fields
+ 	// TODO: Clear more
  end;
  ClearWordMemory(DataSegment);
  ClearWordMemory(StaticStringData);
@@ -256,16 +256,17 @@ end;
 
 procedure AddResource(fnam: string);
 var i, j: integer;
-    t: textfile;
+    t: ITextFile;
     res: TResource;
     s, tmp: string;
 begin
 
- AssignFile(t, fnam); FileMode:=0; Reset(t);
+  t := TFileSystem.CreateTextFile;
+  t.Assign(fnam); t.Reset;
 
-  while not eof(t) do begin
-
-    readln(t, s);
+  while not t.EOF do begin
+    s := '';
+    t.ReadLn(s);
 
     i:=1;
     omin_spacje(i, s);
@@ -331,7 +332,7 @@ begin
 
   end;
 
- CloseFile(t);
+  t.Close;
 
 end;	//AddResource
 
@@ -408,7 +409,7 @@ var
 
 
   procedure Tokenize(fnam: string; testUnit: Boolean = false);
-  var InFile: file of char;
+  var InFile: IBinaryFile;
       _line: integer;
       _uidx: integer;
 
@@ -507,7 +508,7 @@ var
 
    repeat
     c := ' ';
-    Read(InFile, c);
+    InFile.Read(c);
 
     if c = LF then Inc(Line);
     case i of
@@ -576,7 +577,7 @@ var
 
 
 	procedure bin2csv(fn: string);
-	var bin: file;
+	var bin: IBinaryFile;
 	    tmp: byte;
 	    NumRead: integer;
 	    yes: Boolean;
@@ -586,11 +587,11 @@ var
 
 	  tmp:=0;
 	  NumRead:=0;
-
-	  AssignFile(bin, fn); FileMode:=0; Reset(bin, 1);
+          bin:=TFileSystem.CreateBinaryFile;
+          bin.Assign(fn); bin.Reset(1);
 
   	  Repeat
-    	BlockRead (bin, tmp, 1, NumRead);
+    	bin.BlockRead(tmp, 1, NumRead);
 
 		if NumRead = 1 then begin
 
@@ -603,7 +604,7 @@ var
 
   	  Until (NumRead = 0);
 
-	  CloseFile(bin);
+	  bin.Close();
 
 	end;
 
@@ -997,7 +998,7 @@ var
   begin
 
    while (ch <> LF) do
-     Read(InFile, ch);
+     InFile.Read(ch);
 
   end;
 
@@ -1009,25 +1010,25 @@ var
       _line: integer;
   begin
 
-  Read(InFile, c);
+  InFile.Read(c);
 
    if c = '(' then begin
     c2:=' ';
-    Read(InFile, c2);
+    InFile.Read(c2);
 
     if c2='*' then begin				// Skip comments (*   *)
 
      repeat
       c2:=c;
-      Read(InFile, c);
+      InFile.Read(c);
 
       if c = LF then Inc(Line);
      until (c2 = '*') and (c = ')');
 
-     Read(InFile, c);
+     InFile.Read(c);
 
     end else
-     Seek(InFile, FilePos(InFile) - 1);
+     InFile.Seek2(InFile.FilePos() - 1);
 
    end;
 
@@ -1039,15 +1040,15 @@ var
 
     _line := Line;
 
-    Read(InFile, c2);
+    InFile.Read(c2);
 
     if c2='$' then
      dir:=true
     else
-     Seek(InFile, FilePos(InFile) - 1);
+     InFile.Seek2(InFile.FilePos() - 1);
 
     repeat						// Skip comments
-      Read(InFile, c);
+      InFile.Read(c);
 
       if dir then directive := directive + c;
 
@@ -1059,16 +1060,16 @@ var
 
     if dir then ReadDirective(directive, _line);
 
-    Read(InFile, c);
+    InFile.Read(c);
 
    end else
     if c = '/' then begin
-     Read(InFile, c2);
+     InFile.Read(c2);
 
      if c2 = '/' then
       ReadSingleLineComment
      else
-      Seek(InFile, FilePos(InFile) - 1);
+      InFile.Seek2(InFile.FilePos() - 1);
 
     end;
 
@@ -1113,7 +1114,7 @@ var
 
   if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_', '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
     begin
-    CloseFile(InFile);
+    // InFile.Close();
     Error(NumTok, 'Unknown character: ' + c);
     end;
   end;
@@ -1239,9 +1240,9 @@ var
 
   begin
 
-  AssignFile(InFile, fnam );		// UnitIndex = 1 main program
-  FileMode:=0;
-  Reset(InFile);
+  inFile:=TFileSystem.CreateBinaryFile;
+  inFile.Assign(fnam);		// UnitIndex = 1 main program
+  inFile.Reset(1);
 
   Text := '';
 
@@ -1272,7 +1273,7 @@ var
 	  begin
 	  SafeReadChar(ch);
 	  if ch = '.' then
-	    Seek(InFile, FilePos(InFile) - 1)	// Range ('..') token
+	    InFile.Seek2(InFile.FilePos() - 1)	// Range ('..') token
 	  else
 	    begin				// Fractional part found
 	    Frac := '.';
@@ -1316,7 +1317,7 @@ var
 
 	if Text[length(Text)] = '.' then begin
 	 SetLength(Text, length(Text)-1);
-	 Seek(InFile, FilePos(InFile) - 2);
+	 InFile.Seek2(InFile.FilePos() - 2);
 	 dec(err);
 	end;
 
@@ -1332,7 +1333,7 @@ var
 
 	 if (im > 0) and (Defines[im].Macro <> '') then begin
 
-	  tmp:=FilePos(InFile);
+	  tmp:=InFile.FilePos();
 	  ch2:=ch;
 	  Num:='';			// read parameters, max 255 chars
 
@@ -1347,7 +1348,7 @@ var
 	  Tok[NumTok].Line := Line;
 
 	  if Num = '' then begin
-	   Seek(InFile, tmp);
+	   InFile.Seek2( tmp);
 	   ch:=ch2;
 	  end else begin
 	   StrParams := SplitStr(copy(Num, 2, length(Num)-2), ',');
@@ -1402,12 +1403,12 @@ var
 	  Tok[NumTok].Kind := CurToken;
 	  Tok[NumTok].Value:= 0;
 
-	  tmp:=FilePos(InFile);
+	  tmp:=InFile.FilePos();
 
 	  _line := line;
 
 	  repeat					// pomijaj puste znaki i sprawdz jaki znak zastaniesz
-	   Read(InFile, ch);
+	   InFile.Read(ch);
 	   if ch = LF then inc(line);
 	  until not(ch in AllowWhiteSpaces);
 
@@ -1418,9 +1419,9 @@ var
 
 	   Tok[NumTok].Value := 1;
 
-	   Seek(InFile, tmp - 1);
+	   InFile.Seek2(tmp - 1);
 
-	   Read(InFile, ch);
+	   InFile.Read(ch);
 
 	   AsmBlock[AsmBlockIndex] := '';
 	   Text:='';
@@ -1430,7 +1431,7 @@ var
 
 	    if ch = LF then inc(line);
 
-	    if ch = CR then Read(InFile, ch);		// CR LF
+	    if ch = CR then InFile.Read(ch);		// CR LF
 
 	    AsmBlock[AsmBlockIndex] := '';
 	    Text:='';
@@ -1442,7 +1443,7 @@ var
 }
 
 	   while true do begin
-	    Read(InFile, ch);
+	    InFile.Read(ch);
 
 	    SaveAsmBlock(ch);
 
@@ -1465,7 +1466,7 @@ var
 
 	  end else begin
 
-	  Seek(InFile, FilePos(InFile) - 1);
+	  InFile.Seek2(InFile.FilePos() - 1);
 
 	  AsmFound:=true;
 
@@ -1484,7 +1485,7 @@ var
 
 	  if AsmBlockIndex > High(AsmBlock) then begin
 	   Error(NumTok, 'Out of resources, ASMBLOCK');
-	   RaiseHaltException(2);
+	   RaiseHaltException(THaltException.COMPILING_ABORTED);
 	  end;
 
 	 end else begin
@@ -1534,7 +1535,7 @@ var
 		 inc(Spaces);
 
 		 repeat
-		  Read(InFile, ch);
+		  InFile.Read(ch);
 
 		  if ch = LF then	//Inc(Line);
 		   Error(NumTok, 'String exceeds line');
@@ -1543,13 +1544,13 @@ var
 		   Text := Text + ch
 		  else begin
 
-		   Read(InFile, ch2);
+		   InFile.Read(ch2);
 
 		   if ch2='''' then begin
 		    Text := Text + '''';
 		    ch:=#0;
 		   end else
-		    Seek(InFile, FilePos(InFile) - 1);
+		    InFile.Seek2( InFile.FilePos() - 1);
 
 		  end;
 
@@ -1561,13 +1562,13 @@ var
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;
-			Err:=FilePos(InFile);
-			while ch2 in [' ',TAB] do Read(InFile, ch2);
+			Err:=InFile.FilePos();
+			while ch2 in [' ',TAB] do InFile.Read(ch2);
 
 			if ch2 in ['*','~','+'] then
 			 ch:=ch2
 			else
-			 Seek(InFile, Err);
+			 InFile.Seek2( Err);
 		 end;
 
 
@@ -1593,13 +1594,13 @@ var
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;
-			Err:=FilePos(InFile);
-			while ch2 in [' ',TAB] do Read(InFile, ch2);
+			Err:=InFile.FilePos();
+			while ch2 in [' ',TAB] do InFile.Read(ch2);
 
 			if ch2 in ['''','+'] then
 			 ch:=ch2
 			else
-			 Seek(InFile, Err);
+			 InFile.Seek2( Err);
 		 end;
 
 
@@ -1624,13 +1625,13 @@ var
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;
-			Err:=FilePos(InFile);
-			while ch2 in [' ',TAB] do Read(InFile, ch2);
+			Err:=InFile.FilePos();
+			while ch2 in [' ',TAB] do InFile.Read(ch2);
 
 			if ch2 in ['''','+'] then
 			 ch:=ch2
 			else
-			 Seek(InFile, Err);
+			 InFile.Seek2( Err);
 		 end;
 
 		 if ch='+' then begin
@@ -1711,18 +1712,17 @@ var
 
 	   Frac := '';
 
-	   Seek(InFile, FilePos(InFile) - 1);
+	   InFile.Seek2( InFile.FilePos() - 1);
 
 	 end else
 	  begin
-	  Seek(InFile, FilePos(InFile) - 1);
+	  InFile.Seek2( InFile.FilePos() - 1);
 	  Line:=Line2;
 
 	  if ch in [':','>', '<', '.'] then begin				// Single-character token found
 	    AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
 	  end else
 	    begin
-	    CloseFile(InFile);
 	    Error(NumTok, 'Unknown character: ' + ch);
 	    end;
 	  end;
@@ -1731,7 +1731,6 @@ var
 
       if NumTok = OldNumTok then	 // No token found
 	begin
-	CloseFile(InFile);
 	Error(NumTok, 'Illegal character '''+ch+''' ($'+IntToHex(ord(ch),2)+')');
 	end;
 
@@ -1740,21 +1739,21 @@ var
   except
      on e: THaltException do raise e;
      else // EOF reached
-   if Text <> '' then
+     if Text <> '' then
      begin
        if Text='END.' then
          begin
-     AddToken(ENDTOK, UnitIndex, Line, 3, 0);
-     AddToken(DOTTOK, UnitIndex, Line, 1, 0);
+           AddToken(ENDTOK, UnitIndex, Line, 3, 0);
+           AddToken(DOTTOK, UnitIndex, Line, 1, 0);
          end
        else
          begin
-     AddToken(GetStandardToken(Text), UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
-    end;
+           AddToken(GetStandardToken(Text), UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
+         end;
      end;
   end;// try
-
-  end;
+  InFile.Close;
+end;
 
 
 procedure TokenizeUnit(a: integer; testUnit: Boolean = false);
