@@ -1,7 +1,7 @@
 // Barnsley fern
 // https://rosettacode.org/wiki/Barnsley_fern
 
-uses graph, crt, f16;
+uses graph, crt;
 
 var
   gd, gm: smallint;
@@ -42,7 +42,7 @@ begin
         x := tmpx;
         y := tmpy;
 
-        PutPixel(round(float16(w) *0.5 + x * w * 0.090909090), round(h - y * h * 0.090909090), 15);
+        PutPixel(round(float16(w) * 0.5 + x * w * 0.090909090), round(h - y * h * 0.090909090));
     end;
 
     repeat until keypressed;
@@ -57,6 +57,8 @@ begin
  gm := m640x400;
 
  InitGraph(gd,gm,'');
+
+ SetColor(15);
 
  fern(320, 192);
 

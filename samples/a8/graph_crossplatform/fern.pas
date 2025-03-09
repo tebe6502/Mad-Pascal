@@ -8,9 +8,10 @@ var
 
 
 procedure fern(w: word; h: byte);
-var r, x, y: real;
+var r, x, y,
     tmpx, tmpy: real;
     i: word;
+
 begin
 
     x := 0;
@@ -38,11 +39,13 @@ begin
             tmpx := 0.85 * x + 0.04 * y;
             tmpy := -0.04 * x + 0.85 * y + 1.6;
         end;
+
         x := tmpx;
         y := tmpy;
 
-        PutPixel(round(w / 2 + x * w / 11), round(h - y * h / 11), 15);
+        PutPixel(round(w / 2.0 + x * w / 11.0), round(h - y * h / 11.0));
     end;
+
 end;
 
 
@@ -53,6 +56,8 @@ begin
  gm := m640x400;
 
  InitGraph(gd,gm,'');
+
+ SetColor(15);
 
  fern(320, 192);
 

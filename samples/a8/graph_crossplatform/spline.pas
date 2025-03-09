@@ -7,7 +7,7 @@ program SplineDemo;
 ** For questions, feel free to e-mail me.                                  **
 **                                                                         **
 **    shd@earthling.net                                                    **
-**    http://shd.cjb.net                                                   **
+**    https://www.shdon.com/                                               **
 **                                                                         **
 ****************************************************************************}
 
@@ -19,8 +19,10 @@ const
 
 type
 
+TFloat = real;
+
 PointType = record
-             x,y: single;
+             x,y: TFloat;
 	    end;
 
 
@@ -28,14 +30,14 @@ var
   {Catmull-rom coefficients}
   A, B, C, D : PointType;
   {Control points}
-  Px, Py : Array [0..NumPts + 1] of single;
+  Px, Py : Array [0..NumPts + 1] of TFloat;
 
   GraphDriver,GraphMode : smallint;
 
 
-procedure SplinePoint (t : single; var Point : PointType);
+procedure SplinePoint (t : TFloat; var Point : PointType);
 var
-  t2, t3 : single;
+  t2, t3 : TFloat;
 
 begin
 
@@ -43,8 +45,8 @@ begin
   t2 := t * t;
   t3 := t2 * t;
   {Calculate coordinates}
-  Point.x := ((A.x * t3) + (B.x * t2) + (C.x * t) + D.x) / 2;
-  Point.y := ((A.y * t3) + (B.y * t2) + (C.y * t) + D.y) / 2;
+  Point.x := ((A.x * t3) + (B.x * t2) + (C.x * t) + D.x) * 0.5;
+  Point.y := ((A.y * t3) + (B.y * t2) + (C.y * t) + D.y) * 0.5;
 end;
 
 {Computes coefficients for point n.
@@ -73,7 +75,7 @@ procedure DrawSpline (Points : byte; Colour : Byte);
 var
   Point, Segment: Byte;
   Current, Next : PointType;
-  a,b: single;
+  a,b: TFloat;
 
 begin
   Px [0]          := Px [1];
@@ -95,7 +97,7 @@ begin
       {Calculate end point}
       SplinePoint (Segment / Resolution, Next);
       {Draw segment}
-      Line (round (Current.x), Round (Current.y), Round (Next.x), Round (Next.y) );
+      Line (smallint(round (Current.x)), smallint(Round (Current.y)), smallint(Round (Next.x)), smallint(Round (Next.y)) );
       {Next part}
       Current := Next;
     end;

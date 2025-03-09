@@ -1,7 +1,12 @@
 // Koch Snowflake
 // https://en.wikipedia.org/wiki/Koch_snowflake
 
-uses crt, graph;
+// float16	186
+// real		197
+// single	237
+
+
+uses crt, graph, sysutils;
 
 type
 	TFloat = real;
@@ -15,9 +20,11 @@ type
 var
 	gd, gm: smallint;
 
+	ticks: cardinal;
+
 const
 	cx = 160;
-	cy = 100;
+	cy = 115;
 
 	ray0 = TFloat(70.0);
 	ray1 = TFloat(ray0 / 2);
@@ -31,7 +38,7 @@ const
 procedure LineTo2D(ax, ay: TFloat);
 begin
 
- LineTo(round(ax)+cx, round(ay)+cy);
+ LineTo(trunc(ax) + cx, trunc(ay) + cy);
 
 end;
 
@@ -39,14 +46,14 @@ end;
 procedure MoveTo2D(ax, ay: TFloat);
 begin
 
- MoveTo(round(ax)+cx, round(ay)+cy);
+ MoveTo(trunc(ax)+cx, trunc(ay)+cy);
 
 end;
 
 
     PROCEDURE NextSegments (ax,ay,bx,by: TFloat; n:  byte);
       CONST
-        factor =  0.288675135;  { SQRT(3) / 6 }
+        factor: TFloat =  0.288675135;  { SQRT(3) / 6 }
       VAR
         middle:  FPoint;
         xDelta:  TFloat;
@@ -56,11 +63,11 @@ end;
 
       IF   n > 0
       THEN BEGIN
-        r.x := (ax + ax + bx) / 3.0;
-        r.y := (ay + ay + by) / 3.0;
+        r.x := (ax + ax + bx) * (1/3);
+        r.y := (ay + ay + by) * (1/3);
 
-        t.x := (ax + bx + bx) / 3.0;
-        t.y := (ay + by + by) / 3.0;
+        t.x := (ax + bx + bx) * (1/3);
+        t.y := (ay + by + by) * (1/3);
 
         middle.x := (ax + bx) * 0.5;
         middle.y := (ay + by) * 0.5;
@@ -138,8 +145,16 @@ BEGIN
 
  InitGraph(gd,gm,'');
 
+ ticks:=GetTickCount;
+
  CreateKochSnowflake;
 
+ ticks:=GetTickCount - ticks;
+
  repeat until keypressed;
+
+ writeln('ticks: ',ticks);
+
+ while true do;
 
 END.

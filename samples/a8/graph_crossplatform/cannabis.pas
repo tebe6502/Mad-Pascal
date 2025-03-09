@@ -2,16 +2,19 @@
 
 uses crt, graph;
 
+type
+	TFloat = real;
+
 const
-  dt : single = 0.01;
+  dt : TFloat = 0.01;
 
-  scale: single = 48;
+  scale: TFloat = 48;
 
-  pi2: single = 2*pi;
+  pi2: TFloat = 2*pi;
 
 
 var
-  r, t, x, y: single;
+  r, t, x, y: TFloat;
 
   gd, gm: smallint;
 
@@ -39,6 +42,3 @@ begin
  repeat until keypressed;
 
 end.
-
-
-
