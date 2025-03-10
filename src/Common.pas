@@ -290,11 +290,6 @@ const
   OBJECTVARIABLE	= 1;
   RECORDVARIABLE	= 2;
 
-  // Fixed-point 32-bit real number storage
-
-  FRACBITS		= 8;	// Float Fixed Point
-  TWOPOWERFRACBITS	= 256;
-
   // Parameter passing
   VALPASSING		= 1; // By value, modifiable
   CONSTPASSING		= 2; // By const, unodifiable
@@ -395,10 +390,6 @@ type
     PassMethod: Byte;
     i, i_: integer;
    end;
-
-  // General number type. Union of 32-bit REAL in [0] and 32-bit INTEGER in [1]
-  // Depending on the token, either [0] or [1] is used.
-  TFloat = array [0..1] of integer;
 
   TParamList = array [1..MAXPARAMS] of TParam;
 

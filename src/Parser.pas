@@ -2,14 +2,12 @@ unit Parser;
 
 interface
 
-uses Common;
+uses Common, Numbers;
 
 {$i define.inc}
 {$i Types.inc}
 
 // -----------------------------------------------------------------------------
-
-	function CardToHalf(Src: uint32): word;
 
 	function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer;
 
@@ -26,8 +24,6 @@ uses Common;
 	function GetIdent(S: TString): Integer;
 
 	function GetSizeof(i: integer; ValType: byte): Int64;
-
-	procedure Int2Float(var ConstVal: Int64);
 
 	function ObjectRecordSize(i: cardinal): integer;
 
@@ -173,6 +169,8 @@ begin
    for j := 1 to Types[i].NumFields do begin
 
     FieldType := Types[i].Field[j].DataType;
+    
+    // TODO: The two variables below are unused.
     NumAllocElements := Types[i].Field[j].NumAllocElements;
     AllocElementType := Types[i].Field[j].AllocElementType;
 
@@ -269,149 +267,11 @@ begin
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function CardToHalf(Src: uint32): word;
-var
-  Sign, Exp, Mantissa: LongInt;
-  s: single;
-
-
-function f32Tof16(fltInt32: uint32): word;
-//https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
-var
-//	fltInt32: uint32;
-	fltInt16, tmp: uint16;
-
-begin
-//	fltInt32 := PLongWord(@Float)^;
-	fltInt16 := (fltInt32 shr 31) shl 5;
-	tmp := (fltInt32 shr 23) and $ff;
-	tmp := (tmp - $70) and (LongWord(SarLongint(($70 - tmp), 4)) shr 27);
-	fltInt16 := (fltInt16 or tmp) shl 10;
-	result := fltInt16 or ((fltInt32 shr 13) and $3ff) + 1;
-end;
-
-
-begin
-
-  s := PSingle(@Src)^;
-
-  if (frac(s) <> 0) and (abs(s) >= 0.000060975552) then
-
-   Result := f32Tof16(Src)
-
-  else begin
-
-  // Extract sign, exponent, and mantissa from Single number
-  Sign := Src shr 31;
-  Exp := LongInt((Src and $7F800000) shr 23) - 127 + 15;
-  Mantissa := Src and $007FFFFF;
-
-  if (Exp > 0) and (Exp < 30) then
-  begin
-    // Simple case - round the significand and combine it with the sign and exponent
-    Result := (Sign shl 15) or (Exp shl 10) or ((Mantissa + $00001000) shr 13);
-  end
-  else if Src = 0 then
-  begin
-    // Input float is zero - return zero
-    Result := 0;
-  end
-  else
-  begin
-    // Difficult case - lengthy conversion
-    if Exp <= 0 then
-    begin
-      if Exp < -10 then
-      begin
-        // Input float's value is less than HalfMin, return zero
-         Result := 0;
-      end
-      else
-      begin
-        // Float is a normalized Single whose magnitude is less than HalfNormMin.
-        // We convert it to denormalized half.
-        Mantissa := (Mantissa or $00800000) shr (1 - Exp);
-        // Round to nearest
-        if (Mantissa and $00001000) > 0 then
-          Mantissa := Mantissa + $00002000;
-        // Assemble Sign and Mantissa (Exp is zero to get denormalized number)
-        Result := (Sign shl 15) or (Mantissa shr 13);
-      end;
-    end
-    else if Exp = 255 - 127 + 15 then
-    begin
-      if Mantissa = 0 then
-      begin
-        // Input float is infinity, create infinity half with original sign
-        Result := (Sign shl 15) or $7C00;
-      end
-      else
-      begin
-        // Input float is NaN, create half NaN with original sign and mantissa
-        Result := (Sign shl 15) or $7C00 or (Mantissa shr 13);
-      end;
-    end
-    else
-    begin
-      // Exp is > 0 so input float is normalized Single
-
-      // Round to nearest
-      if (Mantissa and $00001000) > 0 then
-      begin
-        Mantissa := Mantissa + $00002000;
-        if (Mantissa and $00800000) > 0 then
-        begin
-          Mantissa := 0;
-          Exp := Exp + 1;
-        end;
-      end;
-
-      if Exp > 30 then
-      begin
-        // Exponent overflow - return infinity half
-        Result := (Sign shl 15) or $7C00;
-      end
-      else
-        // Assemble normalized half
-        Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
-    end;
-  end;
-
-  end;
-
-end;	//CardToHalf
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure Int2Float(var ConstVal: Int64);
-var ftmp: TFloat;
-    fl: single;
-begin
-
-   fl := integer(ConstVal);
-
-   ftmp[0] := round(fl * TWOPOWERFRACBITS);
-   ftmp[1] := integer(fl);
-
-   move(ftmp, ConstVal, sizeof(ftmp));
-
-end;
-
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
 procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValType: Byte);
-var ftmp: TFloat;
 begin
 
 	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
@@ -419,10 +279,7 @@ begin
 	      RaiseHaltException(THaltException.COMPILING_ABORTED);
 	end;
 
-    ftmp[0]:=0;
-    ftmp[1]:=0;
-
-    case ConstValType of
+	 case ConstValType of
 
 	  SHORTINTTOK, BYTETOK, CHARTOK, BOOLEANTOK:
 		       DataSegment[ConstDataSize] := byte(ConstVal);
@@ -454,9 +311,7 @@ begin
 		       end;
 
 	    SINGLETOK: begin
-			move(ConstVal, ftmp, sizeof(ftmp));
-
-			ConstVal := ftmp[1];
+			ConstVal:=CastToSingle(ConstVal);
 
 			DataSegment[ConstDataSize]   := byte(ConstVal);
 			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
@@ -465,16 +320,15 @@ begin
 		       end;
 
 	HALFSINGLETOK: begin
-			move(ConstVal, ftmp, sizeof(ftmp));
-			ConstVal := CardToHalf( ftmp[1] );
+			ConstVal:=CastToHalfSingle(ConstVal);
 
 			DataSegment[ConstDataSize]   := byte(ConstVal);
 			DataSegment[ConstDataSize+1] := byte(ConstVal shr 8);
 		       end;
 
-    end;
+	 end;
 
-    DataSegmentUse := true;
+ DataSegmentUse := true;
 
 end;	//SaveToDataSegment
 
@@ -544,8 +398,6 @@ function CompileConstFactor(i: Integer; out ConstVal: Int64; out ConstValType: B
 var IdentIndex, j: Integer;
     Kind, ArrayIndexType: Byte;
     ArrayIndex: Int64;
-    ftmp: TFloat;
-    fl: single;
 
     function GetStaticValue(x: byte): Int64;
     begin
@@ -561,10 +413,6 @@ begin
  ConstVal:=0;
  ConstValType:=0;
 
- ftmp[0]:=0;
- ftmp[1]:=0;
-
- fl:=0;
  j:=0;
 
 // WRITELN(tok[i].line, ',', tok[i].kind);
@@ -798,34 +646,10 @@ case Tok[i].Kind of
 
       CheckTok(i + 1, CPARTOK);
 
-      if ConstValType in [HALFSINGLETOK, SINGLETOK] then begin
-
-    	move(ConstVal, ftmp, sizeof(ftmp));
-	move(ftmp[1], fl, sizeof(fl));
-
-	case Kind of
-	  INTTOK: fl:=int(fl);
-	 FRACTOK: fl:=frac(fl);
+      	case Kind of
+	  INTTOK: ConstVal:=Trunc(ConstValType, ConstVal);
+	 FRACTOK: ConstVal:=Frac(ConstValType, ConstVal);
 	end;
-
-	ftmp[0] := round(fl * TWOPOWERFRACBITS);
-	ftmp[1] := integer(fl);
-
-	move(ftmp, ConstVal, sizeof(ftmp));
-
-      end else
-
-      case Kind of
-	INTTOK: if ConstVal < 0 then
-		  ConstVal := -(abs(ConstVal) and $ffffffffffffff00)
-		else
-		  ConstVal := ConstVal and $ffffffffffffff00;
-
-       FRACTOK: if ConstVal < 0 then
-		  ConstVal := -(abs(ConstVal) and $ff)
-		else
-		  ConstVal := ConstVal and $ff;
-      end;
 
  //     ConstValType := REALTOK;
       Result:=i + 1;
@@ -1188,11 +1012,7 @@ case Tok[i].Kind of
 
   FRACNUMBERTOK:
     begin
-     ftmp[0] := round( Tok[i].FracValue * TWOPOWERFRACBITS );
-     ftmp[1] := integer( Tok[i].FracValue );
-
-     move(ftmp, ConstVal, sizeof(ftmp));
-
+     ConstVal := FromSingle(Tok[i].FracValue);
      ConstValType := REALTOK;
 
      Result := i;
@@ -1255,7 +1075,7 @@ case Tok[i].Kind of
 
     if isError then exit;
 
-    if not(ConstValType in RealTypes) then Int2Float(ConstVal);
+    if not(ConstValType in RealTypes) then ConstVal:=FromInt64(ConstVal);
 
     CheckTok(j + 1, CPARTOK);
 
@@ -1321,8 +1141,6 @@ var
   j, k: Integer;
   RightConstVal: Int64;
   RightConstValType: Byte;
-  ftmp, ftmp_: TFloat;
-  fl, fl_: single;
 begin
 
 Result:=i;
@@ -1330,15 +1148,6 @@ Result:=i;
 j := CompileConstFactor(i, ConstVal, ConstValType);
 
 if isError then Exit;
-
-ftmp[0]:=0;
-ftmp[1]:=0;
-
-ftmp_[0]:=0;
-ftmp_[1]:=0;
-
-fl:=0;
-fl_:=0;
 
 while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTOK] do
   begin
@@ -1349,23 +1158,23 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
 
 
   if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then begin
-   Int2Float(RightConstVal);
+  RightConstVal:=FromInt64(RightConstVal);
    RightConstValType := ConstValType;
   end;
 
   if (ConstValType in IntegerTypes) and (RightConstValType in RealTypes) then begin
-   Int2Float(ConstVal);
+   ConstVal:=FromInt64(ConstVal);
    ConstValType := RightConstValType;
   end;
 
 
   if (Tok[j + 1].Kind = DIVTOK) and (ConstValType in IntegerTypes) then begin
-   Int2Float(ConstVal);
+   ConstVal:=FromInt64(ConstVal);
    ConstValType := REALTOK;
   end;
 
   if (Tok[j + 1].Kind = DIVTOK) and (RightConstValType in IntegerTypes) then begin
-   Int2Float(RightConstVal);
+   RightConstVal:=FromInt64(RightConstVal);
    RightConstValType := REALTOK;
   end;
 
@@ -1379,42 +1188,19 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
 
   case Tok[j + 1].Kind of
 
-    MULTOK:  if ConstValType in RealTypes then begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		fl := fl * fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-    	      end else
-    		ConstVal := ConstVal * RightConstVal;
+    MULTOK:  ConstVal:=Multiply(ConstValType, ConstVal,RightConstVal);
 
     DIVTOK:  begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		if fl_ = 0 then begin
-		  isError := false;
-		  isConst := false;
-		  Error(i, 'Division by zero');
-		end;
-
-		fl := fl / fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-    	     end;
+               try
+                 ConstVal:=Divide(ConstValType, ConstVal,RightConstVal);
+               except On EDivByZero do
+                 begin
+                   isError := false;
+		   isConst := false;
+		   Error(i, 'Division by zero');
+                 end;
+               end;
+             end;
 
     MODTOK:  ConstVal := ConstVal mod RightConstVal;
    IDIVTOK:  ConstVal := ConstVal div RightConstVal;
@@ -1446,8 +1232,6 @@ var
   j, k: Integer;
   RightConstVal: Int64;
   RightConstValType: Byte;
-  ftmp, ftmp_: TFloat;
-  fl, fl_: single;
 
 begin
 
@@ -1458,36 +1242,10 @@ j := CompileConstTerm(j, ConstVal, ConstValType);
 
 if isError then exit;
 
-ftmp[0]:=0;
-ftmp[1]:=0;
-
-ftmp_[0]:=0;
-ftmp_[1]:=0;
-
-fl:=0;
-fl_:=0;
 
 if Tok[i].Kind = MINUSTOK then begin
 
- if ConstValType in RealTypes then begin	// Unary minus (RealTypes)
-
-  move(ConstVal, ftmp, sizeof(ftmp));
-  move(ftmp[1], fl, sizeof(fl));
-
-  fl := -fl;
-
-  ftmp[0] := round(fl * TWOPOWERFRACBITS);
-  ftmp[1] := integer(fl);
-
-  move(ftmp, ConstVal, sizeof(ftmp));
-
- end else begin
-  ConstVal := -ConstVal;     			// Unary minus (IntegerTypes)
-
-  if ConstValType in IntegerTypes then
-    ConstValType := GetValueType(ConstVal);
-
- end;
+ ConstVal:=Negate(ConstValType, ConstVal);
 
 end;
 
@@ -1503,12 +1261,12 @@ end;
 
 
   if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then begin
-   Int2Float(RightConstVal);
+   RightConstVal:=FromInt64(RightConstVal);
    RightConstValType := ConstValType;
   end;
 
   if (ConstValType in IntegerTypes) and (RightConstValType in RealTypes) then begin
-   Int2Float(ConstVal);
+   ConstVal:=FromInt64(ConstVal);
    ConstValType := RightConstValType;
   end;
 
@@ -1520,38 +1278,9 @@ end;
 
 
   case Tok[j + 1].Kind of
-    PLUSTOK:  if ConstValType in RealTypes then begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
+    PLUSTOK:  ConstVal := Add( ConstValType, ConstVal, RightConstVal);
 
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		fl := fl + fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-    	      end else
-    		ConstVal := ConstVal + RightConstVal;
-
-    MINUSTOK: if ConstValType in RealTypes then begin
-    		move(ConstVal, ftmp, sizeof(ftmp));
-    		move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-		move(ftmp[1], fl, sizeof(fl));
-		move(ftmp_[1], fl_, sizeof(fl_));
-
-		fl := fl - fl_;
-
-		ftmp[0] := round(fl * TWOPOWERFRACBITS);
-		ftmp[1] := integer(fl);
-
-		move(ftmp, ConstVal, sizeof(ftmp));
-
-    	      end else
-    		ConstVal := ConstVal - RightConstVal;
+    MINUSTOK: ConstVal := Subtract( ConstValType, ConstVal, RightConstVal);
 
     ORTOK:    ConstVal := ConstVal or RightConstVal;
     XORTOK:   ConstVal := ConstVal xor RightConstVal;
