@@ -70,7 +70,7 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
-+  Krzysztof Święcicki :
++ Krzysztof Święcicki :
 	- unit PP
 
 + Marcin Żukowski :
@@ -17392,10 +17392,12 @@ begin
    end else
      Syntax(3);
 
-  end else
+  end
+  // No minus, so this must be the file name.
+  else
 
    begin
-    UnitName[1].Name := ParamStr(i);	//ChangeFileExt(ParamStr(i), '.pas');
+    UnitName[1].Name := ParamStr(i);
     UnitName[1].Path := UnitName[1].Name;
 
     if not TFileSystem.FileExists_(UnitName[1].Name) then begin
@@ -17496,12 +17498,10 @@ begin
  Tok[NumTok].Line := 0;
  UnitName[1].Name := '';
 
+ unitPathList:=TPathList.Create;
  MainPath := ExtractFilePath(ParamStr(0));
-
- SetLength(UnitPath, 2);
-
  MainPath := IncludeTrailingPathDelimiter( MainPath );
- UnitPath[0] := IncludeTrailingPathDelimiter( MainPath + 'lib' );
+ unitPathList.AddFolder( MainPath + 'lib' );
 
  if (ParamCount = 0) then Syntax(3);
 

@@ -106,7 +106,6 @@ uses
     ;
     StartTest('TestUnitCommon');
 
-(* Until next pull request
     // Unit Scanner
     Program_NAME := 'TestProgram';
     NumTok := 0;
@@ -126,7 +125,7 @@ uses
       end;
     end;
     Assert(filePath <> '', 'Non-existing TestUnit found');
-*)
+
     EndTest('TestUnitCommon');
   end;
 
