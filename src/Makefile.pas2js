@@ -1,0 +1,45 @@
+# Experimental: JAC!
+# Example usage: FPC installed in "C:\jac\system\Windows\Tools\PAS\PAS2JS\pas2js-win64-x86_64-3.0.1"
+#
+# Start Bash Shell
+#   cd /c/jac/system/Atari800/Programming/Repositories/Mad-Pascal/src 
+#   export PATH=/c/jac/system/Windows/Tools/PAS/PAS2JS/pas2js-win64-x86_64-3.0.1/bin/:$PATH
+#   make -f Makefile.pas2js
+# 
+
+SRC = mp.pas \
+  Common.pas \
+  Diagnostic.pas \
+  Messages.pas \
+  Optimize.pas \
+  Parser.pas \
+  Scanner.pas \
+  SplitString.pas \
+  include/*.inc \
+  include/opt6502/*.inc \
+  include/opt65c02/*.inc \
+  targets/*.inc \
+  FileIO.pas \
+  Utilities.pas
+
+BINDIR = ../bin/javascript
+BIN = $(BINDIR)/mp.js
+
+TEST_SRC = Test-0.pas
+TEST_BIN = $(BINDIR)/Test-0.js
+
+PAS2JS = pas2js.exe -Jc -Jirtl.js -Tbrowser
+
+$(BIN): clean $(SRC)
+	echo "Compiling $(SRC)"
+	$(PAS2JS) -Mdelphi -v mp.pas -o$(BIN)
+
+
+test:	clean $(TEST_SRC)
+	echo "Compiling $(TEST_SRC)"
+	$(PAS2JS) -Mdelphi -v $(TEST_SRC) -o$(TEST_BIN)
+
+clean:
+	rm -fv *.o *.ppu *.js $(BIN) $(BINDIR)/*.o $(BINDIR)/*.ppu $(BINDIR)/*.js
+
+.PHONY: clean

@@ -30,7 +30,7 @@ const
 
   UNTYPETOK		= 0;
 
-  CONSTTOK		= 1;     // !!! nie zmieniac
+  CONSTTOK		= 1;     // !!! Don't change
   TYPETOK		= 2;     // !!!
   VARTOK		= 3;     // !!!
   PROCEDURETOK		= 4;     // !!!
@@ -172,20 +172,20 @@ const
   OBJECTTOK		= 140;	// Size = 2/???
   SHORTREALTOK		= 141;	// Size = 2 SHORTREAL			Fixed-Point Q8.8
   REALTOK		= 142;	// Size = 4 REAL			Fixed-Point Q24.8
-  SINGLETOK		= 143;	// Size = 4 SINGLE / FLOAT		IEEE-754 32bit
-  HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16bit
+  SINGLETOK		= 143;	// Size = 4 SINGLE / FLOAT		IEEE-754 32-bit
+  HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16-bit
   PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
   ENUMTOK		= 146;	// Size = 1 BYTE
   PROCVARTOK		= 147;	// Size = 2
   TEXTFILETOK		= 148;	// Size = 2/12 TEXTFILE
   FORWARDTYPE		= 149;	// Size = 2
 
-  SHORTSTRINGTOK	= 150;	// zamieniamy na STRINGTOK
-  FLOATTOK		= 151;	// zamieniamy na SINGLETOK
-  FLOAT16TOK		= 152;	// zamieniamy na HALFSINGLETOK
-  TEXTTOK		= 153;	// zamieniamy na TEXTFILETOK
+  SHORTSTRINGTOK	= 150;	// We change into STRINGTOK
+  FLOATTOK		= 151;	// We change into SINGLETOK
+  FLOAT16TOK		= 152;	// We change into HALFSINGLETOK
+  TEXTTOK		= 153;	// We change into TEXTFILETOK
 
-  DEREFERENCEARRAYTOK	= 154;	// dla wskaznika do tablicy
+  DEREFERENCEARRAYTOK	= 154;	// For ARRAY pointers
 
 
   DATAORIGINOFFSET	= 160;
@@ -249,16 +249,17 @@ const
 //  MAXTOKENS		= 32768;
   MAXPOSSTACK		= 512;
   MAXIDENTS		= 16384;
-  MAXBLOCKS		= 16384;	// maksymalna liczba blokow
-  MAXPARAMS		= 8;		// maksymalna liczba parametrow dla PROC, FUNC
-  MAXVARS		= 256;		// maksymalna liczba parametrow dla VAR
+  MAXBLOCKS		= 16384;	// Maximum number of blocks
+  MAXPARAMS		= 8;		// Maximum number of parameters for PROC, FUNC
+  MAXVARS		= 256;		// Maximum number of parameters for VAR
   MAXUNITS		= 2048;
   MAXALLOWEDUNITS	= 256;
-  MAXDEFINES		= 256;		// maksymalna liczba $DEFINE
+  MAXDEFINES		= 256;		// Max number of $DEFINEs
 
   CODEORIGIN		= $100;
   DATAORIGIN		= $8000;
 
+  // Passes
   CALLDETERMPASS	= 1;
   CODEGENERATIONPASS	= 2;
 
@@ -289,16 +290,10 @@ const
   OBJECTVARIABLE	= 1;
   RECORDVARIABLE	= 2;
 
-  // Fixed-point 32-bit real number storage
-
-  FRACBITS		= 8;	// Float Fixed Point
-  TWOPOWERFRACBITS	= 256;
-
   // Parameter passing
-
-  VALPASSING		= 1;
-  CONSTPASSING		= 2;
-  VARPASSING		= 3;
+  VALPASSING		= 1; // By value, modifiable
+  CONSTPASSING		= 2; // By const, unodifiable
+  VARPASSING		= 3; // By reference, modifiable
 
 
   // Data sizes
@@ -336,11 +331,21 @@ const
 
 type
 
+  // Current limitation in PAS2JS. Have to find a different way, because the const values are sigificant.
+  // Error: not yet implemented: mKeep:TPasEnumValue [20180126202434] "enum const"
+  {$IFNDEF PAS2JS}
   ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
+  {$ELSE}
+  ModifierCode = (mKeep, mOverload, mInterrupt, mRegister, mAssembler, mForward, mPascal, mStdCall, mInline);
+  {$ENDIF}
 
   irCode = (iDLI, iVBLD, iVBLI, iTIM1, iTIM2, iTIM4);
 
+  {$IFNDEF PAS2JS}
   ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
+  {$ELSE}
+  ioCode = (ioOpenRead, ioReadRecord, ioRead, ioOpenWrite, ioAppend, ioWriteRecord, ioWrite, ioOpenReadWrite, ioFileMode, ioClose);
+  {$ENDIF}
 
 
   code65 =
@@ -385,10 +390,6 @@ type
     PassMethod: Byte;
     i, i_: integer;
    end;
-
-  // General number type. Union of 32-bit REAL in [0] and 32-bit INTEGER in [1]
-  // Depending on the token, either [0] or [1] is used.
-  TFloat = array [0..1] of integer;
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
@@ -590,7 +591,8 @@ var
   MainPath, FilePath, optyA, optyY, optyBP2,
   optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
-  msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
+  msgWarning, msgNote, msgUser, OptimizeBuf, LinkObj: TArrayString;
+  unitPathList: TPathList;
 
 
   optimize : record
@@ -644,8 +646,6 @@ var
 
 	function FindFile(Name: string; ftyp: TString): string; overload;
 
-	function FindFile(Name: string): Boolean; overload;
-
 	procedure FreeTokens;
 
 	function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = true): Boolean;
@@ -681,97 +681,19 @@ implementation
 uses SysUtils, Messages, Utilities;
 
 // ----------------------------------------------------------------------------
-
-
-function NormalizePath(var Name: string): string;
-begin
-
-   Result := Name;
-
-  {$IFDEF UNIX}
-   if Pos('\', Name) > 0 then
-    Result := LowerCase(StringReplace(Name, '\', '/', [rfReplaceAll]));
-  {$ENDIF}
-
-  {$IFDEF LINUX}
-    Result := LowerCase(Name);
-  {$ENDIF}
-
-end;
-
-
-// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function FindFile(Name: string; ftyp: TString): string; overload;
-var i: integer;
+function FindFile(name: string; ftyp: TString): string; overload;
 begin
-
-  Name := NormalizePath(Name);
-
-  i:=0;
-
-  repeat
-
-   Result :=  Name;
-
-   if not FileExists( Result ) then begin
-    Result := UnitPath[i] + Name;
-
-     if not FileExists( Result ) and (i > 0) then begin
-      Result := FilePath + UnitPath[i] + Name;
-     end;
-
-   end;
-
-   inc(i);
-
-  until (i > High(UnitPath)) or FileExists( Result );
-
-  if not FileExists( Result ) then
+  result:=unitPathList.FindFile( name);
+  if result = '' then
    if ftyp = 'unit' then
-    Error(NumTok, 'Can''t find unit '+ChangeFileExt(Name,'')+' used by '+PROGRAM_NAME)
+    Error(NumTok, 'Can''t find unit '''+ChangeFileExt(name,'')+''' used by program '''+PROGRAM_NAME+''' in unit path '''+unitPathList.ToString+'''.')
    else
-    Error(NumTok, 'Can''t open '+ftyp+' file '''+Result+'''');
+    Error(NumTok, 'Can''t find '+ftyp+' file '''+name+''' used by program '''+PROGRAM_NAME+''' in unit path '''+unitPathList.ToString+'''.');
 
 end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function FindFile(Name: string): Boolean; overload;
-var i: integer;
-    fnm: string;
-begin
-
-  Name := NormalizePath(Name);
-
-  i:=0;
-
-  repeat
-
-   fnm :=  Name;
-
-   if not FileExists( fnm ) then begin
-    fnm := UnitPath[i] + Name;
-
-     if not FileExists( fnm ) and (i > 0) then begin
-      fnm := FilePath + UnitPath[i] + Name;
-     end;
-
-   end;
-
-   inc(i);
-
-  until (i > High(UnitPath)) or FileExists( fnm );
-
-  Result := FileExists( fnm );
-
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -812,21 +734,8 @@ end;
 
 
 procedure AddPath(s: string);
-var k: integer;
 begin
-
-  for k:=1 to High(UnitPath)-1 do
-    if UnitPath[k] = s then exit;
-							// https://github.com/tebe6502/Mad-Pascal/issues/113
-  {$IFDEF UNIX}
-   if Pos('\', s) > 0 then
-    s := LowerCase(StringReplace(s, '\', '/', [rfReplaceAll]));
-  {$ENDIF}
-
-  k:=High(UnitPath);
-  UnitPath[k] := IncludeTrailingPathDelimiter ( s );
-
-  SetLength(UnitPath, k + 2);
+  unitPathList.AddFolder(s);
 end;
 
 
@@ -844,7 +753,8 @@ var IdentTtemp: integer;
 
     Result := 0;
 
-    for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
+    // Search all nesting levels from the current one to the most outer one
+    for BlockStackIndex := BlockStackTop downto 0 do
     for IdentIndex := 1 to NumIdent do
       if (Ident[IdentIndex].DataType = ENUMTYPE) and (Ident[IdentIndex].NumAllocElements = Num) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
 	exit(IdentIndex);
@@ -878,12 +788,20 @@ end;	//GetEnumName
 function StrToInt(const a: string): Int64;
 (*----------------------------------------------------------------------------*)
 (*----------------------------------------------------------------------------*)
+{$IFNDEF PAS2JS}
 var i: integer;
 begin
  val(a,Result, i);
 end;
-
-
+{$ELSE}
+// This code below should work the same in FPC, but this needs to be tested first.
+var value: integer;
+var i: integer;
+begin
+ val(a,value, i);
+ Result := value;
+end;
+{$ENDIF}
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -920,7 +838,7 @@ begin
 
  SetLength(Tok, 0);
  SetLength(IFTmpPosStack, 0);
- SetLength(UnitPath, 0);
+ unitPathList.Free;
 end;
 
 

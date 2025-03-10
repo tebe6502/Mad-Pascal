@@ -70,7 +70,7 @@ Contributors:
 	- unit LZ4: unLZ4
 	- unit aPLib: unAPL
 
-+  Krzysztof Święcicki :
++ Krzysztof Święcicki :
 	- unit PP
 
 + Marcin Żukowski :
@@ -122,6 +122,8 @@ Contributors:
 
 + Zlatko Bleha (https://atariwiki.org/wiki/Wiki.jsp?page=Super%20fast%20circle%20routine) :
 	- GRAPH.INC Circle
+
+
 
 
 # rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
@@ -187,7 +189,7 @@ uses
 {$IFDEF PAS2JS}
          browserconsole,
 {$ENDIF}
-	Common, Console, Messages, Scanner, Parser, Optimize, Diagnostic, MathEvaluate, FileIO, Utilities;
+	Common, Console, Messages, Numbers, Scanner, Parser, Optimize, Diagnostic, MathEvaluate, FileIO, Utilities;
 
 
 // ----------------------------------------------------------------------------
@@ -7436,8 +7438,6 @@ var IdentTemp, IdentIndex, oldCodeSize, j: Integer;
     Value, ConstVal: Int64;
     svar, lab: string;
     Param: TParamList;
-    ftmp: TFloat;
-    fl: single;
 begin
 
  isZero:=false;
@@ -7447,11 +7447,6 @@ begin
  ValType := 0;
  ConstVal := 0;
  IdentIndex := 0;
-
- ftmp[0]:=0;
- ftmp[1]:=0;
-
- fl:=0;
 
 // WRITELN(tok[i].line, ',', tok[i].kind);
 
@@ -9105,17 +9100,15 @@ case Tok[i].Kind of
 	   ConstVal := Ident[IdentIndex].Value;
 
 
-	    if (ValType in IntegerTypes) and (VarType in [SINGLETOK, HALFSINGLETOK]) then Int2Float(ConstVal);
-
-	    move(ConstVal, ftmp, sizeof(ftmp));
+	    if (ValType in IntegerTypes) and (VarType in [SINGLETOK, HALFSINGLETOK]) then ConstVal:=FromInt64(ConstVal);
 
 	    if (VarType = HALFSINGLETOK) {or (ValType = HALFSINGLETOK)} then begin
-	      ConstVal := CardToHalf( ftmp[1] );
+	      ConstVal:=CastToHalfSingle(ConstVal);
 	      //ValType := HALFSINGLETOK;
 	    end;
 
 	    if (VarType = SINGLETOK) then begin
-	      ConstVal := ftmp[1];
+	      ConstVal:=CastToSingle(ConstVal);
 	      //ValType := SINGLETOK;
 	    end;
 
@@ -9143,15 +9136,13 @@ case Tok[i].Kind of
 
 	   if (ValType in [SINGLETOK, HALFSINGLETOK]) or (VarType in [SINGLETOK, HALFSINGLETOK]) then begin	// constants
 
-	    if ValType in IntegerTypes then Int2Float(ConstVal);
-
-	    move(ConstVal, ftmp, sizeof(ftmp));
+	    if ValType in IntegerTypes then ConstVal:=FromInt64(ConstVal);
 
 	    if (VarType = HALFSINGLETOK) or (ValType = HALFSINGLETOK) then begin
-	      ConstVal := CardToHalf( ftmp[1] );
+	      ConstVal := CastToHalfSingle(ConstVal);
 	      ValType := HALFSINGLETOK;
 	    end else begin
-	      ConstVal := ftmp[1];
+	      ConstVal := CastToSingle(ConstVal);
 	      ValType := SINGLETOK;
 	    end;
 
@@ -9184,16 +9175,13 @@ case Tok[i].Kind of
     ValType := GetValueType(ConstVal);
 
     if VarType in RealTypes then begin
-     Int2Float(ConstVal);
-
-
-     move(ConstVal, ftmp, sizeof(ftmp));
+     ConstVal:=FromInt64(ConstVal);
 
      if VarType = HALFSINGLETOK then
-      ConstVal := CardToHalf( ftmp[1] )
+      ConstVal := CastToHalfSingle(ConstVal)
      else
      if VarType = SINGLETOK then
-      ConstVal := ftmp[1];
+      ConstVal := CastToSingle(ConstVal);
 
      ValType := VarType;
     end;
@@ -9209,22 +9197,17 @@ case Tok[i].Kind of
   FRACNUMBERTOK:
     begin
 
-    fl := Tok[i].FracValue;
-
-    ftmp[0] := round(fl * TWOPOWERFRACBITS);
-    ftmp[1] := integer(fl);
-
-    move(ftmp, ConstVal, sizeof(ftmp));
+    constVal:=FromSingle(Tok[i].FracValue);
 
     ValType := REALTOK;
 
     if VarType in RealTypes then begin
 
      case VarType of
-   	    SINGLETOK: ConstVal := ftmp[1];
-	HALFSINGLETOK: ConstVal := CardToHalf( ftmp[1] );
+   	    SINGLETOK: ConstVal := CastToSingle(ConstVal);
+	HALFSINGLETOK: ConstVal := CastToHalfSingle(ConstVal);
      else
-       ConstVal := ftmp[0]
+       ConstVal := CastToReal(ConstVal);
      end;
 
      ValType := VarType;
@@ -9484,10 +9467,9 @@ case Tok[i].Kind of
 
 	if SafeCompileConstExpression(j, ConstVal, ValType, SINGLETOK) then begin
 
-	  if not(ValType in RealTypes) then Int2Float(ConstVal);
+	  if not(ValType in RealTypes) then ConstVal:=FromInt64(ConstVal);
 
-	  move(ConstVal, ftmp, sizeof(ftmp));
-	  ConstVal := ftmp[1];
+	  ConstVal:=CastToSingle(ConstVal);
 
 	  ValType := SINGLETOK;
 
@@ -9974,52 +9956,31 @@ var
   j, k: Integer;
   ConstVal: Int64;
   RightValType: Byte;
-  ftmp: TFloat;
-  fl: single;
+
 begin
 
-ftmp:=Default(TFloat);
-fl:=0;
 
 if Tok[i].Kind in [PLUSTOK, MINUSTOK] then j := i + 1 else j := i;
 
 if SafeCompileConstExpression(j, ConstVal, ValType, VarType) then begin
 
- if (ValType in IntegerTypes) and (VarType in RealTypes) then begin Int2Float(ConstVal); ValType := VarType end;
+ if (ValType in IntegerTypes) and (VarType in RealTypes) then
+   begin ConstVal:=FromInt64(ConstVal);
+         ValType := VarType
+   end;
 
  if VarType in RealTypes then ValType := VarType;
 
 
  if Tok[i].Kind = MINUSTOK then
-   if ValType in RealTypes then begin		// Unary minus (RealTypes)
-
-     move(ConstVal, ftmp, sizeof(ftmp));
-     move(ftmp[1], fl, sizeof(fl));
-
-     fl := -fl;
-
-     ftmp[0] := round(fl * TWOPOWERFRACBITS);
-     ftmp[1] := integer(fl);
-
-     move(ftmp, ConstVal, sizeof(ftmp));
-
-   end else begin
-     ConstVal := -ConstVal;     		// Unary minus (IntegerTypes)
-
-     if ValType in IntegerTypes then
-       ValType := GetValueType(ConstVal);
-
-   end;
-
+   ConstVal:=Negate( ValType, ConstVal);
 
  if ValType = SINGLETOK then begin
-  move(ConstVal, ftmp, sizeof(ftmp));
-  ConstVal := ftmp[1];
+  ConstVal := CastToSingle(ConstVal);
  end;
 
  if ValType = HALFSINGLETOK then begin
-  move(ConstVal, ftmp, sizeof(ftmp));
-  ConstVal := CardToHalf( ftmp[1] );
+  ConstVal := CastToHalfSingle(ConstVal);
  end;
 
 
@@ -10112,13 +10073,10 @@ var
   RightValType, ConstValType, isZero: Byte;
   sLeft, sRight, cRight, yes: Boolean;
   ConstVal, ConstValRight: Int64;
-  ftmp: TFloat;
+
 begin
 
  ConstVal:=0;
-
- ftmp[0]:=0;
- ftmp[1]:=0;
 
  isZero := INTEGERTOK;
 
@@ -10126,23 +10084,19 @@ begin
 
  if SafeCompileConstExpression(i, ConstVal, ValType, VarType, False) then begin
 
-   if (ValType in IntegerTypes) and (VarType in RealTypes) then begin Int2Float(ConstVal); ValType := VarType end;
+   if (ValType in IntegerTypes) and (VarType in RealTypes) then begin ConstVal:=FromInt64(ConstVal); ValType := VarType end;
 
    if VarType in RealTypes then ValType := VarType;
 
 
    if (ValType = HALFSINGLETOK) {or ((VarType = HALFSINGLETOK) and (ValType in RealTypes))} then begin
-     move(ConstVal, ftmp, sizeof(ftmp));
-     ConstVal := CardToHalf( ftmp[1] );
-     ValType := HALFSINGLETOK;
-     VarType := HALFSINGLETOK;
+     ConstVal := CastToHalfSingle(ConstVal);
+     ValType := HALFSINGLETOK;  // Currently redundant
    end;
 
    if (ValType = SINGLETOK) {or ((VarType = SINGLETOK) and (ValType in RealTypes))} then begin
-     move(ConstVal, ftmp, sizeof(ftmp));
-     ConstVal := ftmp[1];
-     ValType := SINGLETOK;
-     VarType := SINGLETOK;
+     ConstVal:=CastToSingle(ConstVal);
+     ValType := SINGLETOK; // Currently redundant
    end;
 
    Push(ConstVal, ASVALUE, DataSize[ValType]);
@@ -13849,18 +13803,15 @@ var IdentIndex, size: integer;
 
    function Value(dorig: Boolean = false; brackets: Boolean = false): string;
    const reg: array [1..3] of string = (':EDX', ':ECX', ':EAX');			// !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
-   var ftmp: TFloat;
-       v: Int64;
+   var v: Int64;
    begin
 
-    ftmp:=Default(TFloat);
-
-    move(Ident[IdentIndex].Value, ftmp, sizeof(ftmp));
+    v:=Ident[IdentIndex].Value;
 
     case Ident[IdentIndex].DataType of
-     SHORTREALTOK, REALTOK: v := ftmp[0];
-                 SINGLETOK: v := ftmp[1];
-             HALFSINGLETOK: v := CardToHalf( ftmp[1] );
+     SHORTREALTOK, REALTOK: v := CastToReal(v);
+                 SINGLETOK: v := CastToSingle(v);
+             HALFSINGLETOK: v := CastToHalfSingle(v);
     else
       v := Ident[IdentIndex].Value;
     end;
@@ -14151,16 +14102,12 @@ end;	//GenerateProcFuncAsmLabels
 
 
 procedure SaveToStaticDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValType: Byte);
-var ftmp: TFloat;
 begin
 
 	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
         begin writeln('SaveToStaticDataSegment: ' + IntToStr(ConstDataSize));
               RaiseHaltException(THaltException.COMPILING_ABORTED);
         end;
-
-	ftmp[0]:=0;
-	ftmp[1]:=0;
 
 	 case ConstValType of
 
@@ -14194,9 +14141,7 @@ begin
 		       end;
 
 	    SINGLETOK: begin
-			move(ConstVal, ftmp, sizeof(ftmp));
-
-			ConstVal := ftmp[1];
+			ConstVal:=CastToSingle(ConstVal);
 
 			StaticStringData[ConstDataSize]   := byte(ConstVal);
 			StaticStringData[ConstDataSize+1] := byte(ConstVal shr 8);
@@ -14205,8 +14150,7 @@ begin
 		       end;
 
 	HALFSINGLETOK: begin
-			move(ConstVal, ftmp, sizeof(ftmp));
-			ConstVal := CardToHalf( ftmp[1] );
+			ConstVal:=CastToHalfSingle(ConstVal);
 
 			StaticStringData[ConstDataSize]   := byte(ConstVal);
 			StaticStringData[ConstDataSize+1] := byte(ConstVal shr 8);
@@ -14280,7 +14224,7 @@ begin
    ActualParamType := ConstValType;
 
   if (ConstValType in RealTypes) and (ActualParamType in IntegerTypes) then begin
-   Int2Float(ConstVal);
+   ConstVal:=FromInt64(ConstVal);
    ActualParamType := ConstValType;
   end;
 
@@ -14469,7 +14413,7 @@ begin
    ActualParamType := ConstValType;
 
   if (ConstValType in RealTypes) and (ActualParamType in IntegerTypes) then begin
-   Int2Float(ConstVal);
+   ConstVal:=FromInt64(ConstVal);
    ActualParamType := ConstValType;
   end;
 
@@ -15947,7 +15891,7 @@ while Tok[i].Kind in
 
 
 	   if (VarType in RealTypes) and (ConstValType in IntegerTypes) then begin
-	     Int2Float(ConstVal);
+	     ConstVal:=FromInt64(ConstVal);
 	     ConstValType := VarType;
 	   end;
 
@@ -17259,7 +17203,8 @@ end;	//CompileProgram
 
 
 procedure ParseParam;
-var i, err: integer;
+var i: Integer;
+    parameter, parameterUpperCase,parameterValue: string;
     s: string;
     t, c: string;
 begin
@@ -17268,134 +17213,135 @@ begin
   c := '';		// cpu
 
  i:=1;
- while i <= ParamCount do begin
+ while i <= TEnvironment.GetParameterCount() do begin
+  parameter:=TEnvironment.GetParameterString(i);
+  parameterUpperCase:=AnsiUpperCase(parameter);
+  // Options start with a minus.
+  if parameter[1] = '-' then begin
 
-  if ParamStr(i)[1] = '-' then begin
+   if parameterUpperCase = '-O' then begin
 
-   if AnsiUpperCase(ParamStr(i)) = '-O' then begin
-
-     outputFile := ParamStr(i+1);
      inc(i);
-     if outputFile = '' then Syntax(3);
+     outputFile := parameter;
+     if outputFile = '' then ParameterError(i, 'Output file path is empty');
 
    end else
-   if pos('-O:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+   if pos('-O:',parameterUpperCase) = 1 then
+   begin
 
-     outputFile := copy(ParamStr(i), 4, 255);
-
-     if outputFile = '' then Syntax(3);
+     outputFile := copy(parameter, 4, 255);
+     if outputFile = '' then ParameterError(i, 'Output file path is empty');
 
    end else
-   if AnsiUpperCase(ParamStr(i)) = '-DIAG' then
+   if parameterUpperCase = '-DIAG' then
     DiagMode := TRUE
    else
 
-   if (AnsiUpperCase(ParamStr(i)) = '-IPATH') or (AnsiUpperCase(ParamStr(i)) = '-I') then begin
-
-     AddPath(ParamStr(i+1));
-     inc(i);
+   if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
+   begin
+       inc(i);
+       AddPath(TEnvironment.GetParameterString(i));
 
    end else
-   if pos('-IPATH:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+   if pos('-IPATH:',parameterUpperCase) = 1 then begin
 
-     s:=copy(ParamStr(i), 8, 255);
+     s:=copy(parameter, 8, 255);
      AddPath(s);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-CPU') then begin
+   if (parameterUpperCase = '-CPU') then begin
 
-     c := AnsiUpperCase(ParamStr(i+1));
      inc(i);
+     c := TEnvironment.GetParameterStringUpperCase(i);
 
    end else
-   if pos('-CPU:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+   if pos('-CPU:',parameterUpperCase) = 1 then begin
 
-     c := copy(ParamStr(i), 6, 255);
+     c := copy(parameter, 6, 255);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then begin
+   if (parameterUpperCase = '-DEFINE') or (parameterUpperCase = '-DEF') then begin
 
-     AddDefine(AnsiUpperCase(ParamStr(i+1)));
      inc(i);
+     AddDefine(TEnvironment.GetParameterStringUpperCase(i));
      AddDefines := NumDefines;
 
    end else
-   if pos('-DEFINE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+   if pos('-DEFINE:',parameterUpperCase) = 1 then begin
 
-     s:=copy(ParamStr(i), 9, 255);
+     s:=copy(parameter, 9, 255);
      AddDefine(AnsiUpperCase(s));
      AddDefines := NumDefines;
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-CODE') or (AnsiUpperCase(ParamStr(i)) = '-C') then begin
+   if (parameterUpperCase = '-CODE') or (parameterUpperCase = '-C') then begin
 
-     val('$'+ParamStr(i+1), CODEORIGIN_BASE, err);
      inc(i);
-     if err <> 0 then Syntax(3);
+     parameterValue:=TEnvironment.GetParameterString(i);
+     CODEORIGIN_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
-
-     val('$'+copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
-     if err <> 0 then Syntax(3);
+   if pos('-CODE:',parameterUpperCase) = 1 then begin
+      parameterValue:=copy(parameter, 7, 255);
+      CODEORIGIN_BASE:=ParseHexParameter( i,  parameterValue)
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then begin
+   if (parameterUpperCase = '-DATA') or (parameterUpperCase = '-D') then begin
 
-     val('$'+ParamStr(i+1), DATA_BASE, err);
      inc(i);
-     if err<>0 then Syntax(3);
+     parameterValue:=TEnvironment.GetParameterString(i);
+     DATA_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if pos('-DATA:', AnsiUpperCase(ParamStr(i))) = 1 then begin
-
-     val('$'+copy(ParamStr(i), 7, 255), DATA_BASE, err);
-     if err<>0 then Syntax(3);
+   if pos('-DATA:',parameterUpperCase) = 1 then begin
+     parameterValue:=copy(parameter, 7, 255);
+     DATA_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-STACK') or (AnsiUpperCase(ParamStr(i)) = '-S') then begin
+   if (parameterUpperCase = '-STACK') or (parameterUpperCase = '-S') then begin
 
-     val('$'+ParamStr(i+1), STACK_BASE, err);
      inc(i);
-     if err<>0 then Syntax(3);
+     parameterValue:=TEnvironment.GetParameterString(i);
+     STACK_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if pos('-STACK:', AnsiUpperCase(ParamStr(i))) = 1 then begin
-
-     val('$'+copy(ParamStr(i), 8, 255), STACK_BASE, err);
-     if err<>0 then Syntax(3);
+   if pos('-STACK:',parameterUpperCase) = 1 then
+   begin
+     parameterValue:= copy(parameter, 8, 255);
+     STACK_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-ZPAGE') or (AnsiUpperCase(ParamStr(i)) = '-Z') then begin
+   if (parameterUpperCase = '-ZPAGE') or (parameterUpperCase = '-Z') then begin
 
-     val('$'+ParamStr(i+1), ZPAGE_BASE, err);
      inc(i);
-     if err<>0 then Syntax(3);
+     parameterValue:=TEnvironment.GetParameterString(i);
+     ZPAGE_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if pos('-ZPAGE:', AnsiUpperCase(ParamStr(i))) = 1 then begin
-
-     val('$'+copy(ParamStr(i), 8, 255), ZPAGE_BASE, err);
-     if err<>0 then Syntax(3);
+   if pos('-ZPAGE:',parameterUpperCase) = 1 then begin
+     parameterValue:= copy(parameter, 8, 255);
+     ZPAGE_BASE:=ParseHexParameter( i,  parameterValue);
 
    end else
-   if (AnsiUpperCase(ParamStr(i)) = '-TARGET') or (AnsiUpperCase(ParamStr(i)) = '-T') then begin
+   if (parameterUpperCase = '-TARGET') or (parameterUpperCase = '-T') then begin
 
-     t:=AnsiUpperCase(ParamStr(i+1));
      inc(i);
+     t:=TEnvironment.GetParameterStringUpperCase(i);
 
    end else
-   if pos('-TARGET:', AnsiUpperCase(ParamStr(i))) = 1 then begin
+   if pos('-TARGET:',parameterUpperCase) = 1 then begin
 
-     t:=AnsiUpperCase(copy(ParamStr(i), 9, 255));
+     t:=AnsiUpperCase(copy(parameter, 9, 255));
 
    end else
-     Syntax(3);
+     ParameterError(i, 'Unkown option '''+parameter+'''.');
 
-  end else
+  end
+  // No minus, so this must be the file name.
+  else
 
    begin
-    UnitName[1].Name := ParamStr(i);	//ChangeFileExt(ParamStr(i), '.pas');
+    UnitName[1].Name := TEnvironment.GetParameterString(i);
     UnitName[1].Path := UnitName[1].Name;
 
     if not TFileSystem.FileExists_(UnitName[1].Name) then begin
@@ -17450,6 +17396,22 @@ end;	//ParseParam
 // ----------------------------------------------------------------------------
 
 procedure Main;
+
+{$IFNDEF PAS2JS}
+const PI_VALUE: TNumber = $40490FDB00000324; // does not fit into 53 bits Javascript double  mantissa
+const NAN_VALUE: TNumber =$FFC00000FFC00000;
+const INFINITY_VALUE: TNumber = $7F8000007F800000;
+const NEGINFINITY_VALUE: TNumber = $FF800000FF800000;
+{$ELSE}
+const PI_VALUE: Int64 = 3; // does not fit into 53 bits Javascript double  mantissa
+const NAN_VALUE: Int64 = $11111111;
+const INFINITY_VALUE: Int64 = $22222222;
+const NEGINFINITY_VALUE: Int64 = $33333333;
+
+var fileMap: TFileMap;
+var fileMapEntry: TFileMapEntry;
+{$ENDIF}
+
 var seconds: ValReal;
 begin
 
@@ -17457,6 +17419,17 @@ begin
  if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then begin
   System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
  end;
+{$ENDIF}
+
+{$IFDEF PAS2JS}
+ fileMap := TFileMap.Create;
+ fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
+ fileMapEntry.content := 'Program program; end.';
+ fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
+ fileMapEntry.content := 'SubFolder1;SubFolder2';
+ fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
+ fileMapEntry.content := '01010110101';
+ TFileSystem.Init(fileMap);
 {$ENDIF}
 
 //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
@@ -17469,14 +17442,12 @@ begin
  Tok[NumTok].Line := 0;
  UnitName[1].Name := '';
 
+ unitPathList:=TPathList.Create;
  MainPath := ExtractFilePath(ParamStr(0));
-
- SetLength(UnitPath, 2);
-
  MainPath := IncludeTrailingPathDelimiter( MainPath );
- UnitPath[0] := IncludeTrailingPathDelimiter( MainPath + 'lib' );
+ unitPathList.AddFolder( MainPath + 'lib' );
 
- if (ParamCount = 0) then Syntax(3);
+ if (TEnvironment.GetParameterCount = 0) then Syntax(3);
 
  NumUnits:=1;			     // !!! 1 !!!
 
@@ -17550,10 +17521,10 @@ begin
  DefineIdent(1, 'MAXINT',      CONSTANT, INTEGERTOK, 0, 0, MAXINT);
  DefineIdent(1, 'MAXSMALLINT', CONSTANT, INTEGERTOK, 0, 0, MAXSMALLINT);
 
- DefineIdent(1, 'PI',       CONSTANT, REALTOK, 0, 0, $40490FDB00000324);
- DefineIdent(1, 'NAN',      CONSTANT, SINGLETOK, 0, 0, $FFC00000FFC00000);
- DefineIdent(1, 'INFINITY', CONSTANT, SINGLETOK, 0, 0, $7F8000007F800000);
- DefineIdent(1, 'NEGINFINITY', CONSTANT, SINGLETOK, 0, 0, $FF800000FF800000);
+ DefineIdent(1, 'PI',       CONSTANT, REALTOK, 0, 0, PI_VALUE );
+ DefineIdent(1, 'NAN',      CONSTANT, SINGLETOK, 0, 0, NAN_VALUE);
+ DefineIdent(1, 'INFINITY', CONSTANT, SINGLETOK, 0, 0, INFINITY_VALUE);
+ DefineIdent(1, 'NEGINFINITY', CONSTANT, SINGLETOK, 0, 0, NEGINFINITY_VALUE);
 
 // First pass: compile the program and build call graph
  NumPredefIdent := NumIdent;
@@ -17636,7 +17607,7 @@ begin
  NormVideo;
 end;
 
-var exitCode: LongInt;
+var exitCode: TExitCode;
 begin
 
   exitCode :=0;

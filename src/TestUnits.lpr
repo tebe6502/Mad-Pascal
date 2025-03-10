@@ -2,6 +2,8 @@ program TestUnits;
 
 {$i define.inc}
 
+{$DEFINE SIMULATED_FILE_IO}
+
 uses
   Console,
   Common,
@@ -9,7 +11,7 @@ uses
   Scanner,
   Utilities {$IFDEF PAS2JS}
      ,browserconsole
- {$ENDIF};
+    {$ENDIF};
 
   procedure StartTest(Name: String);
   begin
@@ -83,17 +85,36 @@ uses
   var
     pathList: TPathList;
 
+  var
+    fileMap: TFileMap;
+  var
+    fileMapEntry: TFileMapEntry;
+
   begin
     StartTest('TestUnitFile');
+
+    fileMap := TFileMap.Create;
+    fileMapEntry := fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
+    fileMapEntry.content := 'Program program; end.';
+
+    fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
+    fileMapEntry.content := '01010110101';
+
+    fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
+    fileMapEntry.content := 'SubFolder1;SubFolder2';
+
+    TFileSystem.Init(fileMap);
+
     TestNative(TEST_MP_FILE_PATH);
     TestFileIO(TEST_MP_FILE_PATH);
 
     pathList := TPathList.Create;
     pathList.AddFolder('Folder1');
     pathList.AddFolder('Folder2');
-    pathList.AddFolder('Folder2'+TFileSystem.PathDelim);
+    pathList.AddFolder('Folder2' + TFileSystem.PathDelim);
     Assert(pathList.GetSize() = 2);
-    Assert(pathList.ToString() = 'Folder1'+TFileSystem.PathDelim +';Folder2'+TFileSystem.PathDelim );
+    Assert(pathList.ToString() = 'Folder1' + TFileSystem.PathDelim +
+      ';Folder2' + TFileSystem.PathDelim);
     pathList.Free;
 
     EndTest('TestUnitFile');
@@ -103,7 +124,7 @@ uses
   var
     filePath: String;
   begin
-    ;
+
     StartTest('TestUnitCommon');
 
     // Unit Scanner
@@ -113,7 +134,7 @@ uses
     AddToken(PROGRAMTOK, 1, 1, 1, 0);
 
     // Unit Common
-    unitPathList:=TPathList.Create;
+    unitPathList := TPathList.Create;
     unitPathList.AddFolder('libnone');
     filePath := '';
     try
