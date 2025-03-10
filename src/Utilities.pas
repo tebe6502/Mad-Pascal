@@ -5,6 +5,8 @@ interface
 {$i define.inc}
 {$i Types.inc}
 
+type TExitCode = Longint;
+
 type
   TEnvironment = class
     class function GetParameterCount(): Longint;
@@ -14,7 +16,6 @@ type
 
 type
   THaltException = class
-  type TExitCode = Longint;
 
   const
     OK: TExitCode = 0;
@@ -26,11 +27,11 @@ type
     // Wrong parameters were specified, and compiling was not started
 
   private
-    exitCode: Longint;
+    exitCode: TExitCode;
 
   public
-    constructor Create(exitCode: Longint);
-    function GetExitCode: Longint;
+    constructor Create(exitCode: TExitCode);
+    function GetExitCode: TExitCode;
   end;
 
 // Replaces https://www.freepascal.org/docs-html/rtl/system/halt.html
