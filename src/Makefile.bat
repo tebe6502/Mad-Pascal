@@ -13,7 +13,7 @@ set PATH=%WUDSN_TOOLS_FOLDER%\PAS\FPC.jac;%WUDSN_TOOLS_FOLDER%\ASM\MADS\bin\wind
 set MP_FOLDER=%~dp0..
 set MP_SRC_FOLDER=%MP_FOLDER%\src
 
-rem set TEST_EXE=%MP_SRC_FOLDER%\Test-0.exe
+set TEST_EXE=%MP_SRC_FOLDER%\Test-0.exe
 set MP_EXE=%MP_SRC_FOLDER%\mp.exe
 
 set WUDSN_MP_EXE=%WUDSN_TOOLS_FOLDER%\PAS%\MP\bin\windows\mp.exe

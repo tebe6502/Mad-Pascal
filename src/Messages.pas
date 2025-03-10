@@ -238,8 +238,8 @@ begin
 
  FreeTokens;
 
- CloseFile(OutFile);
- Erase(OutFile);
+ OutFile.Close();
+ OutFile.Erase();
 
  RaiseHaltException(2);
 
@@ -273,8 +273,11 @@ begin
 
  FreeTokens;
 
- CloseFile(OutFile);
- Erase(OutFile);
+ if Outfile<>nil then
+ begin
+   OutFile.Close;
+   OutFile.Erase;
+ end;
 
  RaiseHaltException(2);
 

@@ -293,11 +293,9 @@ begin
 
 Result := 0;
 
+best := nil;
 SetLength(best, 1);
-
-best[0].IdentIndex := 0;
-best[0].b := 0;
-best[0].hit := 0;
+best[0] := Default(TBest);
 
 for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels from the current one to the most outer one
   begin
@@ -553,7 +551,9 @@ end;
 
 begin
 
+ov:=nil;
 SetLength(ov, 1);
+l:=nil;
 SetLength(l, 1);
 
 for BlockStackIndex := BlockStackTop downto 0 do       // search all nesting levels from the current one to the most outer one
@@ -11723,6 +11723,7 @@ case Tok[i].Kind of
 
     inc(i, 2);
 
+    CaseLabelArray:=nil;
     SetLength(CaseLabelArray, 1);
 
     repeat	// Loop over all cases
@@ -13842,7 +13843,7 @@ var IdentIndex, size: integer;
     emptyLine, yes: Boolean;
     fnam, txt, svar: string;
     varbegin: TString;
-    HeaFile: TextFile;
+    HeaFile: ITextFile;
 
 // ----------------------------------------------------------------------------
 
@@ -14011,15 +14012,17 @@ begin
 
 	yes := TRUE;
 
-    AssignFile(HeaFile, fnam); FileMode:=0; Reset(HeaFile);
+    HeaFile:=TFileSystem.CreateTextFile;
+    HeaFile.Assign(fnam); HeaFile.Reset;
 
-	while not eof(HeaFile) do begin
-	  readln(HeaFile, txt);
+    txt:='';
+	while not HeaFile.EOF do begin
+	  HeaFile.ReadLn(txt);
 
 	  txt:=AnsiUpperCase(txt);
 
 	  if (length(txt) > 255) or (pos(#0, txt) > 0) then begin
-	   CloseFile(HeaFile);
+	   HeaFile.Close;
 
 	   Error(Ident[IdentIndex].Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
 	  end;
@@ -14036,7 +14039,7 @@ begin
 	if yes then
 	  iError(Ident[IdentIndex].Libraries, UnknownIdentifier, IdentIndex);
 
-	CloseFile(HeaFile);
+	HeaFile.Close;
 
     if RCLIBRARY then begin asm65(''); asm65(#9'rmb'); asm65('') end;				// reset bank -> #0
 
@@ -14153,7 +14156,7 @@ begin
 
 	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
         begin writeln('SaveToStaticDataSegment: ' + IntToStr(ConstDataSize));
-              RaiseHaltException(2);
+              RaiseHaltException(THaltException.COMPILING_ABORTED);
         end;
 
 	ftmp[0]:=0;
@@ -15698,7 +15701,8 @@ while Tok[i].Kind in
 
   idx:=i;
 
-  SetLength(UnitList, 1);		// wstepny odczyt USES, sprawdzamy czy nie powtarzaja sie wpisy
+  UnitList:=nil;
+  SetLength(UnitList, 1);		// preliminary USES reading, we check if there are any duplicate entries
 
   repeat
 
@@ -15731,7 +15735,7 @@ while Tok[i].Kind in
 
   i:=idx;
 
-  SetLength(UnitList, 0);		//  wlasciwy odczyt USES
+  SetLength(UnitList, 0);		//  proper reading USES
 
   repeat
 
@@ -17394,10 +17398,10 @@ begin
     UnitName[1].Name := ParamStr(i);	//ChangeFileExt(ParamStr(i), '.pas');
     UnitName[1].Path := UnitName[1].Name;
 
-    if not FileExists(UnitName[1].Name) then begin
-     writeln('Error: Can''t open file ''' + UnitName[1].Name + '''');
+    if not TFileSystem.FileExists_(UnitName[1].Name) then begin
+     writeln('Error: Can''t open file ''' + UnitName[1].Name + '''.');
      FreeTokens;
-     RaiseHaltException(3);
+     RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
     end;
 
    end;
@@ -17450,8 +17454,8 @@ var seconds: ValReal;
 begin
 
 {$IFDEF WINDOWS}
- if GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) = 3 then begin
-  Assign(Output, ''); FileMode:=1; Rewrite(Output);
+ if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then begin
+  System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
  end;
 {$ENDIF}
 
@@ -17494,18 +17498,17 @@ begin
 
  {$IFDEF USEOPTFILE}
 
- AssignFile(OptFile, ChangeFileExt(UnitName[1].Name, '.opt') ); FileMode:=1; rewrite(OptFile);
+ OptFile.AssignFile(ChangeFileExt(UnitName[1].Name, '.opt') ); OptFile.Rewrite();
 
  {$ENDIF}
 
-
+ OutFile:=TFileSystem.CreateTextFile;
  if ExtractFileName(outputFile) <> '' then
-  AssignFile(OutFile, outputFile)
+  OutFile.Assign(outputFile)
  else
-  AssignFile(OutFile, ChangeFileExt(UnitName[1].Name, '.a65') );
+  OutFile.Assign( ChangeFileExt(UnitName[1].Name, '.a65') );
 
- FileMode:=1;
- rewrite(OutFile);
+ OutFile.Rewrite;
 
  TextColor(WHITE);
 
@@ -17596,12 +17599,12 @@ begin
  Pass := CODEGENERATIONPASS;
  CompileProgram;
 
- Flush(OutFile);
- CloseFile(OutFile);
+ OutFile.Flush;
+ OutFile.Close;
 
 {$IFDEF USEOPTFILE}
 
- CloseFile(OptFile);
+ OptFile.Close;
 
 {$ENDIF}
 
@@ -17614,9 +17617,14 @@ begin
 
  TextColor(WHITE);
  seconds := (GetTickCount64 - start_time + 500)/1000;
-
- Writeln(Tok[NumTok].Line, ' lines compiled, ', ((GetTickCount64 - start_time + 500)/1000):2:2,' sec, ',
+{$IFNDEF PAS2JS}
+ Writeln(Tok[NumTok].Line, ' lines compiled, ', seconds:2:2,' sec, ',
 	 NumTok, ' tokens, ',NumIdent, ' idents, ',  NumBlocks, ' blocks, ', NumTypes, ' types');
+{$ELSE}
+ Writeln(IntToStr(Tok[NumTok].Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
+ 	 + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
+	 + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
+{$ENDIF}
 
  FreeTokens;
 

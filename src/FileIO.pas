@@ -1,334 +1,628 @@
-// Working version. Only used currently to satisfy the USES already.
 unit FileIO;
+// Interfaced objects are implicitly reference counted and freed.
+// Therefore there are no explicit Free method on the files.  
 
 interface
 
 {$i define.inc}
 {$i Types.inc}
+{$SCOPEDENUMS ON}
 
-type TFilePath = string;
-type TFilePosition = LongInt;
-
-
-type TFile = class
-  protected filePath: TFilePath;
-  public
-        constructor Create;
-	procedure Assign2(filePath: TFilePath); Virtual; Abstract; 
-	procedure Close2; Virtual; Abstract; 
-	procedure Erase2(); Virtual; Abstract;
-        function EOF2():Boolean; Virtual; Abstract;
-	procedure Reset2(); Virtual; Abstract;  // Open for reading
-	procedure Rewrite2(); Virtual; Abstract;  // Open for writing
-end;
-
-type TTextFile2 = class(TFile)
-{$IFNDEF PAS2JS}
-  private
-        type TTextFile = TextFile;
-  private
-        f    : TTextFile;
+{$IFDEF PAS2JS}
+ {$DEFINE SIMULATED_FILE_IO}
 {$ENDIF}
+
+uses SysUtils;
+
+type
+  TFilePath = String;
+
+
+  TPathList = class
   public
-        constructor Create;
-  	procedure Assign2(filePath: TFilePath); override; 
-	procedure Close2; override; 
-	procedure Erase2(); override; 
-        function EOF2():Boolean; override; 
-
-	procedure Flush2;
-	// https://www.freepascal.org/docs-html/rtl/system/read.html
-	procedure Read2( var Args: Char);
-	procedure ReadLn2( var Args: String);
-	procedure Reset2(); override;
-	procedure Rewrite2(); override;
-
-        function Write2(s:string): TTextFile2; overload;
-        function Write2(s:string; w: Integer): TTextFile2; overload;
-        function Write2(i:Integer; w: Integer): TTextFile2; overload;
-
-	procedure WriteLn2; overload;
-        procedure WriteLn2(s:string); overload;
-        procedure WriteLn2(s1:string; s2:string); overload;
-        procedure WriteLn2(s1:string; s2:string; s3: string); overload;
-end;
-
-type TBinaryFile2 = class(TFile)
-{$IFNDEF PAS2JS}
+    constructor Create;
+    procedure AddFolder(folderPath: TFilePath);
+    function FindFile(filePath: TFilePath): TFilePath;
+    function GetSize: Integer;
+    function ToString: String; override;
   private
-        type TBinaryFile = file of char;
-  private
-        f: TBinaryFile;
-{$ENDIF}
+  var
+    paths: array of TFilePath;
+  end;
+
+
+type
+  TFilePosition = Longint;
+// https://www.freepascal.org/docs-html/rtl/system/filemode.html
+type
+  IFile = interface
+    procedure Assign(filePath: TFilePath);
+    procedure Close;
+    procedure Erase();
+    function EOF(): Boolean;
+    procedure Reset(); // Open for reading
+    procedure Rewrite(); // Open for writing
+  end;
+
+type
+  IBinaryFile = interface(IFile)
+    // https://www.freepascal.org/docs-html/rtl/system/blockread.html
+    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
+    // https://www.freepascal.org/docs-html/rtl/system/filepos.html
+    function FilePos(): Int64;
+    procedure Read(var c: Char);
+    procedure Reset(l: Longint); overload;
+    procedure Seek2(Pos: Int64);
+  end;
+
+type
+  ITextFile = interface(IFile)
+    procedure Flush;
+    // https://www.freepascal.org/docs-html/rtl/system/read.html
+    procedure Read(var c: Char);
+    procedure ReadLn(var s: String);
+
+    function Write(s: String): ITextFile; overload;
+    function Write(s: String; w: Integer): ITextFile; overload;
+    function Write(i: Integer; w: Integer): ITextFile; overload;
+
+    procedure WriteLn; overload;
+    procedure WriteLn(s: String); overload;
+    procedure WriteLn(s1: String; s2: String); overload;
+    procedure WriteLn(s1: String; s2: String; s3: String); overload;
+  end;
+
+type
+  TFileMapEntry = class
   public
-        constructor Create;
-  	procedure Assign2(filePath: TFilePath); override; 
-  	// https://www.freepascal.org/docs-html/rtl/system/blockread.html
-	procedure BlockRead2(var Buf; count: LongInt; var Result: LongInt );
-	procedure Close2; override;
-	procedure Erase2(); override; 
-        function EOF2():Boolean; override;
-	// https://www.freepascal.org/docs-html/rtl/system/filepos.html
-	function FilePos2( ):Int64;
-        procedure Read2(var Args: Char); 
-	procedure Reset2(); override; overload;
-	procedure Reset2(l: LongInt); overload;
-	procedure Rewrite2(); override;
-	procedure Seek2(Pos: Int64 );
-	
-end;
+  type TFileType=(TextFile, BinaryFile, Folder);
+
+  public
+    filePath: TFilePath;
+    fileType: TFileType;
+    content: String;
+  end;
+
+type
+  TFileMap = class
+  public
+    constructor Create;
+    function AddEntry(const filePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
+    function GetEntry(const filePath: TFilePath): TFileMapEntry;
+
+  private
+    entries: array of TFileMapEntry;
+
+
+  end;
+
+type
+  TFileSystem = class
+  public
+  const
+  {$IFNDEF SIMULATED_FILE_IO}
+    PathDelim = DirectorySeparator;
+  {$ELSE}
+    PathDelim = '/';
+  {$ENDIF}
+    class procedure Init(fileMap: TFileMap);
+    class function CreateBinaryFile: IBinaryFile; static;
+    class function CreateTextFile: ITextFile; static;
+    class function FileExists_(filePath: TFilePath): Boolean;
+    class function NormalizePath(filePath: TFilePath): String;
+  protected
+    class function GetFileMapEntry(const filePath: TFilePath): TFileMapEntry;
+  end;
 
 implementation
 
-{$IFDEF PAS2JS}
-//  {$I 'include\pas2js\FileIO-PAS2JS-Implementation.inc'}
+
+var
+  fileMap: TFileMap;
+
+class procedure TFileSystem.Init(fileMap: TFileMap);
+begin
+  FileIO.fileMap := fileMap;
+end;
+
+type
+  TFile = class(TInterfacedObject, IFile)
+  protected
+    filePath: TFilePath;
+  public
+    constructor Create;
+    procedure Assign(filePath: TFilePath); virtual; abstract;
+    procedure Close; virtual; abstract;
+    procedure Erase(); virtual; abstract;
+    function EOF(): Boolean; virtual; abstract;
+    procedure Reset(); virtual; abstract;  // Open for reading
+    procedure Rewrite(); virtual; abstract;  // Open for writing
+  end;
+
+type
+  TTextFile = class(TFile, ITextFile)
+{$IFNDEF SIMULATED_FILE_IO}
+  private
+  type TSystemTextFile = System.TextFile;
+  private
+    f: TSystemTextFile;
+{$ELSE}
+  private
+    fileMapEntry: TFileMapEntry;
+  private
+    fileMode: Integer;
+  private
+    filePos: TFilePosition;
+{$ENDIF}
+  public
+    constructor Create;
+    procedure Assign(filePath: TFilePath); override;
+    procedure Close; override;
+    procedure Erase(); override;
+    function EOF(): Boolean; override;
+
+    procedure Flush;
+    // https://www.freepascal.org/docs-html/rtl/system/read.html
+    procedure Read(var c: Char);
+    procedure ReadLn(var s: String);
+    procedure Reset(); override;
+    procedure Rewrite(); override;
+
+    function Write(s: String): ITextFile; overload;
+    function Write(s: String; w: Integer): ITextFile; overload;
+    function Write(i: Integer; w: Integer): ITextFile; overload;
+
+    procedure WriteLn; overload;
+    procedure WriteLn(s: String); overload;
+    procedure WriteLn(s1: String; s2: String); overload;
+    procedure WriteLn(s1: String; s2: String; s3: String); overload;
+  end;
+
+type
+  TBinaryFile = class(TFile, IBinaryFile)
+{$IFNDEF SIMULATED_FILE_IO}
+  private
+  type TSystemBinaryFile = file of Char;
+  private
+    f: TSystemBinaryFile;
+{$ENDIF}
+  public
+    constructor Create;
+    procedure Assign(filePath: TFilePath); override;
+    // https://www.freepascal.org/docs-html/rtl/system/blockread.html
+    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
+    procedure Close; override;
+    procedure Erase(); override;
+    function EOF(): Boolean; override;
+    // https://www.freepascal.org/docs-html/rtl/system/filepos.html
+    function FilePos(): Int64;
+    procedure Read(var c: Char);
+    procedure Reset(); override; overload;
+    procedure Reset(l: Longint); overload;
+    procedure Rewrite(); override;
+    procedure Seek2(Pos: Int64);
+
+  end;
+
+{$IFDEF SIMULATED_FILE_IO}
+//  {$I 'include\SIMULATED_FILE_IO\FileIO-SIMULATED_FILE_IO-Implementation.inc'}
 {$ENDIF}
 
-//
+
+constructor TPathList.Create;
+begin
+  paths := nil;
+  SetLength(paths, 0);
+end;
+
+procedure TPathList.AddFolder(folderPath: TFilePath);
+var
+  i, size: Integer;
+begin
+
+  folderPath := IncludeTrailingPathDelimiter(folderPath);
+
+  // Do not add duplicates.
+  for i := Low(paths) to High(paths) do
+  begin
+    if paths[i] = folderPath then exit;
+  end;
+
+  size := GetSize;
+  Inc(size);
+  SetLength(paths, size);
+  paths[size - 1] := IncludeTrailingPathDelimiter(folderPath);
+end;
+
+function TPathList.FindFile(filePath: TFilePath): TFilePath;
+var
+  i: Integer;
+begin
+  Result := TFileSystem.NormalizePath(filePath);
+  if TFileSystem.FileExists_(Result) then Exit;
+
+  for i := Low(paths) to High(paths) do
+  begin
+    Result := paths[i] + filePath;
+    if TFileSystem.FileExists_(Result) then Exit;
+  end;
+  Result := '';
+
+end;
+
+function TPathList.GetSize: Integer;
+begin
+  // If the argument is an array type or an array type variable then High returns
+  // the highest possible value of it's index. For dynamic arrays, it returns the
+  // ame as Length -1, meaning that it reports -1 for empty arrays.
+  Result := High(paths) + 1;
+end;
+
+function TPathList.ToString: String;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := Low(paths) to High(paths) do
+  begin
+    if Result = '' then Result := paths[i]
+    else
+      Result := Result + ';' + paths[i];
+  end;
+end;
+
+// ----------------------------------------------------------------------------
 // TFile
-//
+// ----------------------------------------------------------------------------
+
 constructor TFile.Create;
 begin
-  filePath:='';
+  filePath := '';
 end;
 
 
-//
+// ----------------------------------------------------------------------------
 // TTextFile
-//
-constructor TTextFile2.Create;
+// ----------------------------------------------------------------------------
+
+constructor TTextFile.Create;
 begin
-  Inherited;
+  inherited;
 end;
-        
-procedure TTextFile2.Assign2(filePath: TFilePath); 
+
+procedure TTextFile.Assign(filePath: TFilePath);
 begin
-  Self.filePath:=filePath;
-  WriteLn('TODO: Assignining TTextFile2 '+filePath);
-{$IFNDEF PAS2JS}
+  Self.filePath := filePath;
+{$IFNDEF SIMULATED_FILE_IO}
   AssignFile(f, filePath);
 {$ENDIF}
 end;
 
-procedure TTextFile2.Close2(); 
+procedure TTextFile.Close();
 begin
-  WriteLn('TODO: Closing TTextFile2 '+filePath);
-{$IFNDEF PAS2JS}
+{$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
 {$ENDIF}
 
 end;
 
-procedure TTextFile2.Erase2();
+procedure TTextFile.Erase();
 begin
-{$IFNDEF PAS2JS}
-  Erase(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Erase(f);
 {$ENDIF}
 
 end;
 
-function TTextFile2.EOF2():Boolean;
+function TTextFile.EOF(): Boolean;
 begin
-{$IFNDEF PAS2JS}
-  Result:=EOF(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  Result := System.EOF(f);
+{$ELSE}
+  Result := (fileMapEntry.content.length = filePos);
 {$ENDIF}
 
 end;
 
 
-procedure TTextFile2.Flush2(); 
+procedure TTextFile.Flush();
 begin
-{$IFNDEF PAS2JS}
-  Flush(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Flush(f);
 {$ENDIF}
 
 end;
 
-procedure TTextFile2.Read2(var Args: Char);
+procedure TTextFile.Read(var c: Char);
 begin
-{$IFNDEF PAS2JS}
-  Read(f, Args);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Read(f, c);
+{$ELSE}
+  Assert(fileMode = 0);
+  // if Eof then raise E...
+  c := fileMapEntry.content[filePos];
+  Inc(filePos);
 {$ENDIF}
 
 end;
 
-procedure TTextFile2.ReadLn2(var Args: String);
+procedure TTextFile.ReadLn(var s: String);
 begin
-{$IFNDEF PAS2JS}
-  ReadLn(f, Args);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.ReadLn(f, s);
 {$ENDIF}
 
 end;
 
-procedure TTextFile2.Reset2();
+procedure TTextFile.Reset();
 begin
-{$IFNDEF PAS2JS}
-  Reset(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.FileMode := 0;
+  System.Reset(f);
+{$ELSE}
+  fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
+  fileMode := 0;
+  filePos := 0;
 {$ENDIF}
 
 end;
 
-procedure TTextFile2.Rewrite2();
+procedure TTextFile.Rewrite();
 begin
-{$IFNDEF PAS2JS}
-  Rewrite(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.FileMode := 1;
+  System.Rewrite(f);
+{$ELSE}
+  fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
+  fileMode := 1;
+  filePos := 0;
+{$ENDIF}
+end;
+
+function TTextFile.Write(s: String): ITextFile;
+begin
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Write(f, s);
+{$ELSE}
+  Assert(fileMode = 1);
+  fileMapEntry.content := fileMapEntry.content + s;
+  filePos := filePos + length(s);
+{$ENDIF}
+  Result := Self;
+end;
+
+function TTextFile.Write(s: String; w: Integer): ITextFile;
+var
+  sFormatted: String;
+begin
+  // TODO: Implemente width padding using w
+  sFormatted := s;
+  Write(sFormatted);
+  Result := Self;
+end;
+
+function TTextFile.Write(i: Integer; w: Integer): ITextFile;
+var
+  sFormatted: String;
+begin
+  sFormatted := IntToStr(i);
+  Write(sFormatted, w);
+  Result := Self;
+end;
+
+procedure TTextFile.WriteLn();
+const
+  CR = ^M;    // Char for a CR
+begin
+{$IFNDEF SIMULATED_FILE_IO}
+  System.WriteLn(f, '');
+{$ELSE}
+  Write(CR);
 {$ENDIF}
 
 end;
 
-function TTextFile2.Write2(s:string): TTextFile2;
+procedure TTextFile.WriteLn(s: String); overload;
 begin
-{$IFNDEF PAS2JS}
-  Write(f, s);
-{$ENDIF}
+  Write(s);
+  WriteLn;
 end;
 
-function TTextFile2.Write2(s:string; w: Integer): TTextFile2;
-begin
-{$IFNDEF PAS2JS}
-  Write(f, s);
-{$ENDIF}
-end;
 
-function TTextFile2.Write2(i:Integer; w: Integer): TTextFile2;
+procedure TTextFile.WriteLn(s1: String; s2: String); overload;
 begin
-{$IFNDEF PAS2JS}
-  Write(f, i);
-{$ENDIF}
+  Write(s1);
+  Write(s2);
+  WriteLn;
 
 end;
 
-procedure TTextFile2.WriteLn2();
+procedure TTextFile.WriteLn(s1: String; s2: String; s3: String); overload;
 begin
-{$IFNDEF PAS2JS}
- WriteLn(f, '');
-{$ENDIF}
+  Write(s1);
+  Write(s2);
+  Write(s3);
+  WriteLn;
 
 end;
 
-procedure TTextFile2.WriteLn2(s:string); overload;
-begin
-{$IFNDEF PAS2JS}
- WriteLn(f, s);
-{$ENDIF}
-
-end;
-
-procedure TTextFile2.WriteLn2( s1:string; s2:string); overload;
-begin
-{$IFNDEF PAS2JS}
- WriteLn(f, s1, s2);
-{$ENDIF}
-
-end;
-
-procedure TTextFile2.WriteLn2(s1:string; s2:string; s3: string); overload;
-begin
-{$IFNDEF PAS2JS}
- WriteLn(f, s1, s2, s3);
-{$ENDIF}
-
-end;
-
-//
+// ----------------------------------------------------------------------------
 // TBinaryFile
-//
-constructor TBinaryFile2.Create;
+// ----------------------------------------------------------------------------
+
+constructor TBinaryFile.Create;
 begin
-  Inherited;
+  inherited;
 end;
 
-procedure TBinaryFile2.Assign2(filePath: TFilePath); 
+procedure TBinaryFile.Assign(filePath: TFilePath);
 begin
-  Self.filePath:=filePath;
-{$IFNDEF PAS2JS}
-
-  // WriteLn('TODO: Assignining TBinaryFile2 '+filePath);
+  Self.filePath := filePath;
+{$IFNDEF SIMULATED_FILE_IO}
   AssignFile(f, filePath);
 {$ENDIF}
 end;
 
-procedure TBinaryFile2.BlockRead2(var Buf; Count: LongInt; var Result: LongInt );
+procedure TBinaryFile.BlockRead(var Buf; Count: Longint; var Result: Longint);
 begin
-{$IFNDEF PAS2JS}
-  BlockRead( f, Buf, Count,  Result );
+{$IFNDEF SIMULATED_FILE_IO}
+  System.BlockRead(f, Buf, Count, Result);
 {$ENDIF}
 end;
 
-procedure TBinaryFile2.Close2(); 
+procedure TBinaryFile.Close();
 begin
-{$IFNDEF PAS2JS}
-
-  // WriteLn('TODO: Closing TBinaryFile2 '+filePath);
+{$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
 {$ENDIF}
 
 end;
 
-function TBinaryFile2.EOF2():Boolean; 
+function TBinaryFile.EOF(): Boolean;
 begin
-{$IFNDEF PAS2JS}
-  Result := EOF(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  Result := System.EOF(f);
 {$ENDIF}
 end;
 
-procedure TBinaryFile2.Erase2(); 
+procedure TBinaryFile.Erase();
 begin
-{$IFNDEF PAS2JS}
-  Erase(f);
-{$ENDIF}
-
-end;
-
-function TBinaryFile2.FilePos2( ):Int64;
-begin
-{$IFNDEF PAS2JS}
-  Result :=  FilePos(f);
-{$ENDIF}
-end;
-
-procedure TBinaryFile2.Read2(var Args: Char);
-begin
-{$IFNDEF PAS2JS}
-
-  Read(f, Args);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Erase(f);
 {$ENDIF}
 
 end;
 
-
-procedure TBinaryFile2.Reset2(); overload;
+function TBinaryFile.FilePos(): Int64;
 begin
-{$IFNDEF PAS2JS}
-
-  // WriteLn('TODO: Reset2 TBinaryFile2 '+filePath);
-  Reset(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  Result := System.FilePos(f);
 {$ENDIF}
 end;
 
-procedure TBinaryFile2.Reset2(l: LongInt); overload;
+procedure TBinaryFile.Read(var c: Char);
 begin
-{$IFNDEF PAS2JS}
+{$IFNDEF SIMULATED_FILE_IO}
 
-  // WriteLn('TODO: Reset2 TBinaryFile2 '+filePath);
-  Reset(f,l);
+  System.Read(f, c);
 {$ENDIF}
- 
+
 end;
 
-procedure TBinaryFile2.Rewrite2();
+
+procedure TBinaryFile.Reset(); overload;
 begin
-{$IFNDEF PAS2JS}
-  Rewrite(f);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.FileMode := 0;
+  System.Reset(f);
 {$ENDIF}
- 
 end;
 
-procedure TBinaryFile2.Seek2(Pos: Int64 );
+procedure TBinaryFile.Reset(l: Longint); overload;
 begin
-{$IFNDEF PAS2JS}
-  Seek(f, pos);
+{$IFNDEF SIMULATED_FILE_IO}
+  System.FileMode := 0;
+  System.Reset(f, l);
 {$ENDIF}
+
+end;
+
+procedure TBinaryFile.Rewrite();
+begin
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Rewrite(f);
+{$ENDIF}
+
+end;
+
+procedure TBinaryFile.Seek2(Pos: Int64);
+begin
+{$IFNDEF SIMULATED_FILE_IO}
+  System.Seek(f, pos);
+{$ENDIF}
+end;
+
+
+// ----------------------------------------------------------------------------
+// TFileMap
+// ----------------------------------------------------------------------------
+
+constructor TFileMap.Create;
+begin
+  self.entries := nil;
+end;
+
+function TFileMap.AddEntry(const filePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
+var
+  entry: TFileMapEntry;
+begin
+  entry := GetEntry(filePath);
+  Assert(entry = nil, 'Entry with file path ''' + filePath + ''' is already in the file map.');
+  entry := TFileMapEntry.Create;
+  entry.filePath := filePath;
+  entry.fileType:=fileType;
+  SetLength(entries, Length(entries) + 1);
+  entries[High(entries)] := entry;
+  Result := entry;
+end;
+
+function TFileMap.GetEntry(const filePath: TFilePath): TFileMapEntry;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := Low(entries) to High(entries) do
+  begin
+    if entries[i].filePath = filePath then
+    begin
+      Result := entries[i];
+      exit;
+    end;
+  end;
+end;
+
+// ----------------------------------------------------------------------------
+// TFileSystem
+// ----------------------------------------------------------------------------
+class function TFileSystem.CreateBinaryFile: IBinaryFile;
+begin
+  Result := TBinaryFile.Create;
+end;
+
+class function TFileSystem.CreateTextFile: ITextFile;
+begin
+  Result := TTextFile.Create;
+end;
+
+class function TFileSystem.FileExists_(filePath: TFilePath): Boolean;
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
+  Result := FileExists(filePath);
+  {$ELSE}
+  Result := GetFileMapEntry(filePath) <> nil;
+  {$ENDIF}
+end;
+
+class function TFileSystem.NormalizePath(filePath: TFilePath): TFilePath;
+begin
+
+  Result := filePath;
+
+  // https://github.com/tebe6502/Mad-Pascal/issues/113
+  {$IFDEF UNIX}
+   if Pos('\', filePath) > 0 then
+    Result := LowerCase(StringReplace(filePath, '\', '/', [rfReplaceAll]));
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+    Result := LowerCase(filePath);
+  {$ENDIF}
+
+end;
+
+class function TFileSystem.GetFileMapEntry(const filePath: TFilePath): TFileMapEntry;
+begin
+  Result := fileMap.GetEntry(filePath);
 end;
 
 end.

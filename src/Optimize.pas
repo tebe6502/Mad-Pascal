@@ -370,7 +370,7 @@ end;
 
    if TemporaryBuf[0].IndexOf('#asm:') = 0 then begin
 
-    writeln(OutFile, AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )]);
+    OutFile.WriteLn( AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )] );
 
     TemporaryBuf[0] := '~';
 
@@ -472,7 +472,7 @@ begin
     end;
 
   if TemporaryBuf[0] <> '~' then begin
-   if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+   if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then OutFile.WriteLn(TemporaryBuf[0]);
 
    outTmp := TemporaryBuf[0];
   end;

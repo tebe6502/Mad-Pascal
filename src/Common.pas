@@ -365,8 +365,8 @@ type
 
   );
 
-  TString = string [MAXSTRLENGTH];
-  TName   = string [MAXNAMELENGTH];
+  TString = string;
+  TName   = string;
 
   TDefinesParam = array [1..MAXPARAMS] of TString;
 
@@ -581,7 +581,7 @@ var
 
   FastMul: Integer = -1;
 
-  OutFile: TextFile;
+  OutFile: ITextFile;
 
   //AsmLabels: array of integer;
 
@@ -616,7 +616,7 @@ var
 
 {$IFDEF USEOPTFILE}
 
-  OptFile: TextFile;
+  OptFile: ITextFile;
 
 {$ENDIF}
 
