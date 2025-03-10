@@ -48,7 +48,6 @@ var s: string;
   procedure doEvaluations(_0,_1: integer);
   var p: integer;
       _s: string;
-      ftmp: TFloat;
       fl: single;
 begin
 
@@ -72,15 +71,7 @@ begin
 
    fl := Evaluate(_s, i);
 
-   if ConstValType in RealTypes then begin
-     ftmp[0] := round(fl * TWOPOWERFRACBITS);
-     ftmp[1] := integer(fl);
-   end else begin
-     ftmp[0] := round(fl);
-     ftmp[1] := 0;
-   end;
-
-   move(ftmp, ConstVal, sizeof(ftmp));
+   ConstVal:=Assign(ConstValType, fl);
 
    SaveData(false);
 
