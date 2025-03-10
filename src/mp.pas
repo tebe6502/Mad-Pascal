@@ -17450,6 +17450,22 @@ end;	//ParseParam
 // ----------------------------------------------------------------------------
 
 procedure Main;
+
+{$IFNDEF PAS2JS}
+const PI_VALUE: TNumber = $40490FDB00000324; // does not fit into 53 bits Javascript double  mantissa
+const NAN_VALUE: TNumber =$FFC00000FFC00000;
+const INFINITY_VALUE: TNumber = $7F8000007F800000;
+const NEGINFINITY_VALUE: TNumber = $FF800000FF800000;
+{$ELSE}
+const PI_VALUE: Int64 = 3; // does not fit into 53 bits Javascript double  mantissa
+const NAN_VALUE: Int64 = $11111111;
+const INFINITY_VALUE: Int64 = $22222222;
+const NEGINFINITY_VALUE: Int64 = $33333333;
+
+var fileMap: TFileMap;
+var fileMapEntry: TFileMapEntry;
+{$ENDIF}
+
 var seconds: ValReal;
 begin
 
@@ -17457,6 +17473,17 @@ begin
  if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then begin
   System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
  end;
+{$ENDIF}
+
+{$IFDEF PAS2JS}
+ fileMap := TFileMap.Create;
+ fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
+ fileMapEntry.content := 'Program program; end.';
+ fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
+ fileMapEntry.content := 'SubFolder1;SubFolder2';
+ fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
+ fileMapEntry.content := '01010110101';
+ TFileSystem.Init(fileMap);
 {$ENDIF}
 
 //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
@@ -17550,10 +17577,10 @@ begin
  DefineIdent(1, 'MAXINT',      CONSTANT, INTEGERTOK, 0, 0, MAXINT);
  DefineIdent(1, 'MAXSMALLINT', CONSTANT, INTEGERTOK, 0, 0, MAXSMALLINT);
 
- DefineIdent(1, 'PI',       CONSTANT, REALTOK, 0, 0, $40490FDB00000324);
- DefineIdent(1, 'NAN',      CONSTANT, SINGLETOK, 0, 0, $FFC00000FFC00000);
- DefineIdent(1, 'INFINITY', CONSTANT, SINGLETOK, 0, 0, $7F8000007F800000);
- DefineIdent(1, 'NEGINFINITY', CONSTANT, SINGLETOK, 0, 0, $FF800000FF800000);
+ DefineIdent(1, 'PI',       CONSTANT, REALTOK, 0, 0, PI_VALUE );
+ DefineIdent(1, 'NAN',      CONSTANT, SINGLETOK, 0, 0, NAN_VALUE);
+ DefineIdent(1, 'INFINITY', CONSTANT, SINGLETOK, 0, 0, INFINITY_VALUE);
+ DefineIdent(1, 'NEGINFINITY', CONSTANT, SINGLETOK, 0, 0, NEGINFINITY_VALUE);
 
 // First pass: compile the program and build call graph
  NumPredefIdent := NumIdent;
@@ -17636,7 +17663,7 @@ begin
  NormVideo;
 end;
 
-var exitCode: LongInt;
+var exitCode: TExitCode;
 begin
 
   exitCode :=0;
