@@ -1,5 +1,6 @@
 *.bak
 *.exe
 *.log
+*.lps
 backup/
 lib/
