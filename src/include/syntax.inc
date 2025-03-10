@@ -18,3 +18,47 @@ begin
   RaiseHaltException(ExitCode);
 
 end;
+
+procedure ParameterError(const index: Longint; const message: String) ;
+var i: Longint;
+begin
+
+  Write('Options: ');
+  For i:=1 to TEnvironment.GetParameterCount do
+  begin
+
+    if i = index then
+      begin
+      Console.TextColor(Console.LightRed);
+
+      end
+    else
+begin
+      Console.NormVideo;
+    end;
+
+
+    Write(TEnvironment.GetParameterString(i));
+    Write(' ');
+  end;
+  Writeln;
+
+
+  Console.TextColor(Console.LightRed);
+  WriteLn('ERROR: '+message + ' Check option number '+IntToStr(index)+'.');
+  Console.NormVideo;
+  Syntax(3);
+end;
+
+procedure ParameterValueError(index: Longint; parameterValue: String; message:String) ;
+begin
+     ParameterError(index,'Invalid parameter value '''+parameterValue+'''. '+message);
+end;
+
+function ParseHexParameter( const index:LongInt; const parameterValue: String): Integer;
+var err: Integer;
+begin
+  val('$'+parameterValue, result, err);
+  if (err<>0) then ParameterValueError(index, parameterValue, 'Value is no hexadeciment number.');
+  if (result<0) or (result >$10000) then ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
+end;
