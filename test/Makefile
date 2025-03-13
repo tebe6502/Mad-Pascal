@@ -48,7 +48,7 @@ $(PYTEST):
 $(PY65EMU): $(PIP3)
 	@echo "Building py65emu"
 	# $(PIP3) install setuptools
-	$(PIP3) install "setuptools==76.0.0 --hash=sha256:1e489ad2169ac53dd0109eab1c14b85c090feae5b3f14772194c4e9df1208a56"
+	$(PIP3) install setuptools==76.0.0
 	cd py65emu/ ; ../$(VENV)/bin/python setup.py install
 
 $(PIP3):
