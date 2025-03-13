@@ -79,6 +79,9 @@ Contributors:
 + Michael Jaskula :
 	- {$DEFINE BASICOFF} (base\atari\basicoff.asm)
 
++ Peter Dell :
+	- improved sources to make compilation compatible with pas2js (https://github.com/fpc/pas2js)
+
 + Piotr Fusik (https://github.com/pfusik) :
 	- base\common\shortreal.asm (div24by15)
 	- base\runtime\icmp.asm
