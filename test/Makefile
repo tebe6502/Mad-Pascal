@@ -47,7 +47,7 @@ $(PYTEST):
 
 $(PY65EMU): $(PIP3)
 	@echo "Building py65emu"
-	$(PIP3) install setuptools
+	# $(PIP3) install setuptools
 	cd py65emu/ ; ../$(VENV)/bin/python setup.py install
 
 $(PIP3):
