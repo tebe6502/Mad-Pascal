@@ -1,5 +1,7 @@
 *.bak
 *.exe
+*.exe
+*.tmp
 *.log
 *.lps
 backup/
