@@ -1,6 +1,18 @@
 case target.id of
 
-TComputer.___C64: begin
+TComputer.A8: begin
+
+// Atari 8-bit target
+target.cpu        := TCPU.cpu_6502;
+target.name       := 'ATARI';
+target.buf        := $0400;
+target.zpage      := $0080;
+target.eol        := $0000009B;
+target.codeorigin := $2000;
+
+end;
+
+TComputer.C64: begin
 
 // Commodore C64 target
 target.cpu        := TCPU.cpu_6502;
@@ -20,7 +32,7 @@ target.header[7]  := 'END';
 
 end;
 
-TComputer.___C4P: begin
+TComputer.C4P: begin
 
 // Commodore Plus/4 target
 target.cpu        := TCPU.cpu_6502;
@@ -40,19 +52,7 @@ target.header[7]  := 'END';
 
 end;
 
-TComputer.___A8: begin
-
-// Atari 8-bit target
-target.cpu        := TCPU.cpu_6502;
-target.name       := 'ATARI';
-target.buf        := $0400;
-target.zpage      := $0080;
-target.eol        := $0000009B;
-target.codeorigin := $2000;
-
-end;
-
-TComputer.___RAW: begin
+TComputer.RAW: begin
 
 // RAW binary target
 target.cpu        := TCPU.cpu_6502;
@@ -65,7 +65,7 @@ target.header[0]  := 'END';
 
 end;
 
-TComputer.___NEO: begin
+TComputer.NEO: begin
 
 // NEO6502 binary target
 target.cpu        := TCPU.cpu_65c02;
@@ -78,7 +78,7 @@ target.header[0]  := 'END';
 
 end;
 
-TComputer.___X16: begin
+TComputer.X16: begin
 
 // Commander X16 target
 target.cpu        := TCPU.cpu_65c02;

@@ -1177,7 +1177,7 @@ var
 
   begin
 
-   if target.id = TComputer.___a8 then begin
+   if target.id = TComputer.A8 then begin
 
      for i := p to length(Text) do
       Text[i] := chr(ata2int(ord(Text[i])));
@@ -2029,7 +2029,7 @@ var
 
   begin
 
-   if target.id = TComputer.___a8 then begin
+   if target.id = TComputer.A8 then begin
 
      for i := p to length(Text) do
       Text[i] := chr(ata2int(ord(Text[i])));

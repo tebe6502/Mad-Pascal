@@ -2,7 +2,7 @@ type
 
   TCPU = (CPU_6502, CPU_65C02, CPU_65816);
 
-  TComputer = (___c64, ___c4p, ___a8, ___raw, ___neo, ___x16);
+  TComputer = (A8, C4P, C64, NEO, RAW, X16);
 
   TTarget = Record
     name : string;

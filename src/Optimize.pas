@@ -2536,7 +2536,7 @@ begin				// OptimizeASM
       if (elf = $04C07164) or (elf = $0E3FD7A2) then begin	// imulCARD, mulINTEGER
 	t:='';
 
-        if (target.id = TComputer.___NEO) then begin
+        if (target.id = TComputer.NEO) then begin
 
           listing[l]    := #9'lda '+GetARG(0, x);
           listing[l+1]  := #9'sta VAR1_B0';

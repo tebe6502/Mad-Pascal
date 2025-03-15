@@ -16864,7 +16864,7 @@ asm65(#9'txs');
 
 if LIBRARY_USE then asm65('@regX'#9'ldx #$00');
 
-if target.id = TComputer.___a8 then begin
+if target.id = TComputer.A8 then begin
 
  if LIBRARY_USE = FALSE then begin
   asm65;
@@ -16886,7 +16886,7 @@ if LIBRARY_USE = FALSE then begin
 
   asm65separator;
 
-  if target.id = ___a8 then begin
+  if target.id = A8 then begin
     asm65;
     asm65('IOCB@COPY'#9':16 brk');
   end;
@@ -17140,7 +17140,7 @@ if FastMul > 0  then begin
 
 end;
 
-if target.id = TComputer.___a8 then begin
+if target.id = TComputer.A8 then begin
  asm65;
  asm65(#9'run START');
 end;
@@ -17183,7 +17183,7 @@ asm65('.macro'#9'STATICDATA');
  asm65('.endm');
 
 
- if (High(resArray) > 0) and (target.id <> TComputer.___a8) then begin
+ if (High(resArray) > 0) and (target.id <> TComputer.A8) then begin
 
   asm65;
   asm65('.local'#9'RESOURCE');
