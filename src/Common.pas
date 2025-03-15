@@ -631,31 +631,31 @@ procedure AddDefine(X: String);
 
 procedure AddPath(s: String);
 
-	procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
 
-	procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
 
-	procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
 
 procedure CheckTok(i: Integer; ExpectedTok: Byte);
 
-	procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 
-	procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
 
 function ErrTokenFound(ErrTokenIndex: Integer): String;
 
 function FindFile(Name: String; ftyp: TString): String; overload;
 
-	procedure FreeTokens;
+procedure FreeTokens;
 
 function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 
-	function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
 
 function GetEnumName(IdentIndex: Integer): TString;
 
-	function GetSpelling(i: Integer): TString;
+function GetSpelling(i: Integer): TString;
 
 function GetVAL(a: String): Integer;
 
@@ -685,7 +685,7 @@ implementation
 uses SysUtils, Messages, Utilities;
 
 // ----------------------------------------------------------------------------
-// Map modifier codes to the bits in the I/O status.
+// Map modifier codes to the bits in the method status.
 // ----------------------------------------------------------------------------
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
@@ -693,6 +693,9 @@ begin
   bits := bits or (Word(1) shl Ord(modifierCode));
 end;
 
+// ----------------------------------------------------------------------------
+// Map I/O codes to the bits in the CIO block.
+//
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 begin
   case ioCode of
