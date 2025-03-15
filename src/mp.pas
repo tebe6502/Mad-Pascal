@@ -14360,7 +14360,7 @@ begin
   end else
    //SaveData;
     if Tok[i + 1].Kind = EVALTOK then
-      NumActualParams := doEvaluate
+      NumActualParams := doEvaluate(evaluationContext)
     else
       SaveData;
 
@@ -14527,7 +14527,7 @@ begin
   repeat
 
     if Tok[i + 1].Kind = EVALTOK then
-      doEvaluate
+      doEvaluate(evaluationContext)
     else
       SaveData;
 
