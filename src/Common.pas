@@ -635,23 +635,23 @@ procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; Ar
 
 procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
 
-procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 
 procedure CheckTok(i: Integer; ExpectedTok: Byte);
 
-procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
-procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
-function ErrTokenFound(ErrTokenIndex: Integer): String;
+function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
 
 function FindFile(Name: String; ftyp: TString): String; overload;
 
 procedure FreeTokens;
 
-function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 
-function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
 
 function GetEnumName(IdentIndex: Integer): TString;
 
@@ -918,7 +918,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function ErrTokenFound(ErrTokenIndex: Integer): String;
+function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
 begin
 
  Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
@@ -930,7 +930,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 begin
 
 //writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
@@ -1176,16 +1176,16 @@ begin
     else
     if Value >= Low(Smallint) then Result := SMALLINTTOK
     else
-       Result := INTEGERTOK;
+      Result := INTEGERTOK;
 
   end
   else
 
     case Value of
-           0..255: Result := BYTETOK;
-       256..$FFFF: Result := WORDTOK;
+      0..255: Result := BYTETOK;
+      256..$FFFF: Result := WORDTOK;
       else
-       Result := CARDINALTOK
+        Result := CARDINALTOK
     end;
 
 end;
@@ -1195,35 +1195,35 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: Integer; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTok: Byte);
 var
   s: String;
 begin
 
- if ExpectedTok < IDENTTOK then
-  s := Spelling[ExpectedTok]
- else if ExpectedTok = IDENTTOK then
-  s := 'identifier'
- else if (ExpectedTok = INTNUMBERTOK) then
-  s := 'number'
- else if (ExpectedTok = CHARLITERALTOK) then
-  s := 'literal'
- else if (ExpectedTok = STRINGLITERALTOK) then
-  s := 'string'
- else
-  s := 'unknown token';
+  if ExpectedTok < IDENTTOK then
+    s := Spelling[ExpectedTok]
+  else if ExpectedTok = IDENTTOK then
+    s := 'identifier'
+  else if (ExpectedTok = INTNUMBERTOK) then
+    s := 'number'
+  else if (ExpectedTok = CHARLITERALTOK) then
+    s := 'literal'
+  else if (ExpectedTok = STRINGLITERALTOK) then
+    s := 'string'
+  else
+    s := 'unknown token';
 
- if Tok[i].Kind <> ExpectedTok then
-   Error(i, 'Syntax error, ' + ''''+ s +'''' + ' expected but ''' + GetSpelling(i) + ''' found');
+  if Tok[i].Kind <> ExpectedTok then
+    Error(i, 'Syntax error, ' + '''' + s + '''' + ' expected but ''' + GetSpelling(i) + ''' found');
 
-end;	//CheckTok
+end;
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 begin
 
   Result := False;
@@ -1244,42 +1244,42 @@ begin
      else
       Result := True;
 
-end;	//GetCommonConstType
+end;
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
 begin
 
- Result := 0;
+  Result := 0;
 
- if LeftType = RightType then		 // General rule
+  if LeftType = RightType then     // General rule
 
-  Result := LeftType
+    Result := LeftType
 
- else
+  else
   if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
     Result := LeftType;
 
   if (LeftType in Pointers) and (RightType in Pointers) then
     Result := LeftType;
 
- if LeftType = UNTYPETOK then Result := RightType;
+  if LeftType = UNTYPETOK then Result := RightType;
 
- if Result = 0 then
+  if Result = 0 then
     Error(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
 
-end;	//GetCommonType
+end;
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i: Integer;
 begin
@@ -1304,7 +1304,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i, len: Integer;
 begin
@@ -1349,7 +1349,7 @@ for i := 1 to len do
 //StaticStringData[NumStaticStrChars] := 0;
 //Inc(NumStaticStrChars);
 
-end;	//DefineStaticString
+end;
 
 
 // ----------------------------------------------------------------------------
