@@ -158,7 +158,6 @@ rem
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fedorahat
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform cannabis
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform snowflake
-  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform snowflake_float16
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform spline
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fern
   goto :eof
