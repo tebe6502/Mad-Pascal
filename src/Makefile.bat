@@ -7,8 +7,11 @@ rem The script will use the FPC, MP and MADS version from there as reference.
 rem
 rem The script compiles "Test-0.pas" with FPC vs. the new MP.
 rem The script compiles a set of reference examples with the released and the new MP an validates that there are no differences in the binary output.
+rem The optional first argument to the scrip is "FAST" to only compile the first test.
 
 setlocal
+set TEST_MODE=%1
+
 set PATH=%WUDSN_TOOLS_FOLDER%\PAS\FPC.jac;%WUDSN_TOOLS_FOLDER%\ASM\MADS\bin\windows_x86_64;%PATH%
 set MP_FOLDER=%~dp0..
 set MP_SRC_FOLDER=%MP_FOLDER%\src
@@ -64,48 +67,79 @@ goto :eof
   set TEST_MP=%3
   
   set MP_INPUT_PAS=%TEST_MP%.pas
-  set MP_OUTPUT_ASM=%TEST_MP%.a65
+
+  set MP_OUTPUT_ASM_REF=%TEST_MP%-Reference.a65
   set MADS_OUTPUT_XEX_REF=%TEST_MP%-Reference.xex
-  echo %MADS_OUTPUT_XEX_REF%
+
   if %MP%==%WUDSN_MP_EXE% (
+    set MP_OUTPUT_ASM=%MP_OUTPUT_ASM_REF%
     set MADS_OUTPUT_XEX=%MADS_OUTPUT_XEX_REF%
   ) else (
+    set MP_OUTPUT_ASM=%TEST_MP%.a65
     set MADS_OUTPUT_XEX=%TEST_MP%.xex
   )
   pushd %TEST_FOLDER%
-  echo INFO: Compiling "%MP_INPUT_PAS%" in "%TEST_FOLDER%" with "%MP%".
+  echo INFO: Compiling "%MP_INPUT_PAS%" in "%TEST_FOLDER%" with "%MP%" to "%MP_OUTPUT_ASM%" and "%MADS_OUTPUT_XEX%".
   if exist %MP_OUTPUT_ASM% del %MP_OUTPUT_ASM%
-  %MP% -ipath:%MP_FOLDER%\lib %MP_INPUT_PAS%
+  %MP% -ipath:%MP_FOLDER%\lib %MP_INPUT_PAS% -o:%MP_OUTPUT_ASM%
   if errorlevel 1 goto :mp_error
   if exist %MP_OUTPUT_ASM% (
      if exist %MADS_OUTPUT_XEX% del %MADS_OUTPUT_XEX%
      mads %MP_OUTPUT_ASM% -x -i:%MP_FOLDER%\base -o:%MADS_OUTPUT_XEX%
      if exist %MADS_OUTPUT_XEX% (
        echo Starting test program "%MADS_OUTPUT_XEX%".
-       rem %MADS_OUTPUT_XEX%
+       %MADS_OUTPUT_XEX%	
      ) else (
        echo ERROR: MADS output file %MADS_OUTPUT_XEX% not created.
        pause
      ) 
   ) else (
     echo ERROR: MP output file %MP_OUTPUT_ASM% not created.
+    dir *.a65
     pause
   )
   
-  REM TODO Compare file if both files reference exists
-  if not "%MADS_OUTPUT_XEX%" == "%MADS_OUTPUT_XEX_REF%" (
-    if exist %MADS_OUTPUT_XEX% (
+  REM Compare file if both files reference exists
+  call :compare_files %MP_OUTPUT_ASM%   %MP_OUTPUT_ASM_REF%   TEXT
+  call :compare_files %MADS_OUTPUT_XEX% %MADS_OUTPUT_XEX_REF% BINARY
+  popd
+goto :eof
 
-      if exist %MADS_OUTPUT_XEX_REF% (
-        fc /b %MADS_OUTPUT_XEX%  %MADS_OUTPUT_XEX_REF%
-        if errorlevel 1 goto :fc_error
+rem Compare file if both files and reference file exist
+rem call :compare_files actual_file reference_file mode (TEXT or BINARY)
+:compare_files
+  set COMPARE_CURRENT_FILE=%1
+  set COMPARE_REFERENCE_FILE=%2
+  set COMPARE_MODE=%3
+  if not "%COMPARE_CURRENT_FILE%" == "%COMPARE_REFERENCE_FILE%" (
+    if exist %COMPARE_CURRENT_FILE% (
+
+      if exist %COMPARE_CURRENT_FILE% (
+        rem echo INFO: Comparing "%COMPARE_CURRENT_FILE%" with "%COMPARE_REFERENCE_FILE%" in mode %COMPARE_MODE%.
+        if "%COMPARE_MODE%"=="TEXT" (
+          rem Strip the compiler version difference.
+          more +2 "%COMPARE_CURRENT_FILE%"   > "%COMPARE_CURRENT_FILE%.tmp"
+          more +2 "%COMPARE_REFERENCE_FILE%" > "%COMPARE_REFERENCE_FILE%.tmp"
+          fc /L %COMPARE_CURRENT_FILE%.tmp %COMPARE_REFERENCE_FILE%.tmp
+          if errorlevel 1 (
+            echo ERROR: "%COMPARE_CURRENT_FILE%" and "%COMPARE_REFERENCE_FILE%" are different.
+            pause
+          )
+          del %COMPARE_CURRENT_FILE%.tmp %COMPARE_REFERENCE_FILE%.tmp
+        ) else (
+          fc /B %COMPARE_CURRENT_FILE% %COMPARE_REFERENCE_FILE%
+          if errorlevel 1 ( 
+            echo ERROR: "%COMPARE_CURRENT_FILE%" and "%COMPARE_REFERENCE_FILE%" are binary different.
+            pause
+          )
+        )
       ) else (
-        echo WARNING: Reference file "%MADS_OUTPUT_XEX_REF%" does not exist, no comparsion possible.
+        echo WARNING: Reference file "%COMPARE_REFERENCE_FILE%" does not exist, no comparsion possible.
       )
     )
   )
-  popd
-goto :eof
+  goto :eof
+
 
 :mp_error
   popd
@@ -114,22 +148,18 @@ goto :eof
   goto :eof
  
 
-:fc_error
-  popd
-  echo ERROR: %MADS_OUTPUT_XEX%  and %MADS_OUTPUT_XEX_REF% are binary different.
-  pause
-  goto :eof
-
- rem Run all tests with a given mp.exe.
- rem IN: Path to mp.exe
- rem
+rem Run all tests with a given mp.exe.
+rem IN: Path to mp.exe
+rem
 :run_tests
-rem    call :run_mp % %MP_SRC_FOLDER% Test-MPP
-rem    call :run_mp %1=%MP_FOLDER%\samples\a8\games\PacMad pacmadd
-    call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fedorahat
-    call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform cannabis
-    call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform snowflake
-    call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform spline
-    call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fern
-    goto :eof
+  call :run_mp %1 %MP_SRC_FOLDER% Test-MP
+  if "%TEST_MODE%"=="FAST" goto :eof
+  call :run_mp %1 %MP_FOLDER%\samples\a8\games\PacMad pacmad
+  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fedorahat
+  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform cannabis
+  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform snowflake
+  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform snowflake_float16
+  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform spline
+  call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fern
+  goto :eof
  

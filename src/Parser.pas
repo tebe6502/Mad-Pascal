@@ -11,7 +11,7 @@ uses Common, Numbers;
 
 	function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer;
 
-	function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; VarType: Byte = INTEGERTOK; Err: Boolean = false; War: Boolean = true): Integer;
+	function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; const VarType: Byte = INTEGERTOK; const Err: Boolean = false; const War: Boolean = true): Integer;
 
 	function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
 
@@ -408,10 +408,9 @@ var IdentIndex, j: Integer;
 
 begin
 
- Result := i;
-
  ConstVal:=0;
  ConstValType:=0;
+ Result := i;
 
  j:=0;
 
@@ -1143,6 +1142,8 @@ var
   RightConstValType: Byte;
 begin
 
+ConstVal:=0;
+ConstValType:=0;
 Result:=i;
 
 j := CompileConstFactor(i, ConstVal, ConstValType);
@@ -1227,7 +1228,7 @@ end;	//CompileConstTerm
 // ----------------------------------------------------------------------------
 
 
-function CompileSimpleConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
+function CompileSimpleConstExpression(const i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
 var
   j, k: Integer;
   RightConstVal: Int64;
@@ -1235,6 +1236,8 @@ var
 
 begin
 
+ConstVal:=0;
+ConstValType:=0;
 Result:=i;
 
 if Tok[i].Kind in [PLUSTOK, MINUSTOK] then j := i + 1 else j := i;
@@ -1304,7 +1307,7 @@ end;	//CompileSimpleConstExpression
 // ----------------------------------------------------------------------------
 
 
-function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; VarType: Byte = INTEGERTOK; Err: Boolean = false; War: Boolean = True): Integer;
+function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; const VarType: Byte = INTEGERTOK; const Err: Boolean = false; const War: Boolean = True): Integer;
 var
   j: Integer;
   RightConstVal: Int64;
@@ -1312,6 +1315,8 @@ var
   Yes: Boolean;
 begin
 
+ConstVal:=0;
+ConstValType:=0;
 Result:=i;
 
 i := CompileSimpleConstExpression(i, ConstVal, ConstValType);
@@ -1391,7 +1396,9 @@ else
 
   Inc(NumIdent);
 
+  // For debugging
   // Writeln('NumIdent='+IntToStr(NumIdent)+' ErrTokenIndex='+IntToStr(ErrTokenIndex)+' Name='+name+' Kind='+IntToStr( Kind)+' DataType='+IntToStr( DataType)+' NumAllocElements='+IntToStr( NumAllocElements)+' AllocElementType='+IntToStr( AllocElementType));
+
   if NumIdent > High(Ident) then
     Error(NumTok, 'Out of resources, IDENT');
 
