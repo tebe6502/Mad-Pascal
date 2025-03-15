@@ -234,7 +234,7 @@
 
 
 		end else
-		 iError(i, IncompatibleTypes, 0, ExpressionType, VarType);
+		 Error(i, IncompatibleTypes, 0, ExpressionType, VarType);
 
 		end;
 

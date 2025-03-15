@@ -27,16 +27,18 @@ begin
   For i:=1 to TEnvironment.GetParameterCount do
   begin
 
-    if i = index then
+     if i < index then
       begin
-      Console.TextColor(Console.LightRed);
-
+        Console.TextColor(Console.LightGreen);
+      end
+    else if i = index then
+      begin
+        Console.TextColor(Console.LightRed);
       end
     else
-begin
-      Console.NormVideo;
-    end;
-
+      begin
+        Console.NormVideo;
+      end;
 
     Write(TEnvironment.GetParameterString(i));
     Write(' ');
@@ -45,9 +47,9 @@ begin
 
 
   Console.TextColor(Console.LightRed);
-  WriteLn('ERROR: '+message + ' Check option number '+IntToStr(index)+'.');
+  WriteLn('ERROR: Check option number '+IntToStr(index)+'. '+message );
   Console.NormVideo;
-  Syntax(3);
+  Syntax(THaltException.COMPILING_NOT_STARTED);
 end;
 
 procedure ParameterValueError(index: Longint; parameterValue: String; message:String) ;

@@ -8,10 +8,6 @@ interface
 {$i Types.inc}
 {$SCOPEDENUMS ON}
 
-{$IFDEF PAS2JS}
- {$DEFINE SIMULATED_FILE_IO}
-{$ENDIF}
-
 uses SysUtils;
 
 type

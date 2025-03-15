@@ -501,7 +501,7 @@ case Tok[i].Kind of
 	IdentIndex := GetIdent(Tok[i + 2].Name);
 
 	if IdentIndex = 0 then
-	 iError(i + 2, UnknownIdentifier);
+	 Error(i + 2, UnknownIdentifier);
 
 	if Ident[IdentIndex].Kind in [VARIABLE, CONSTANT] then begin
 
@@ -525,14 +525,14 @@ case Tok[i].Kind of
 	   end;
 
 	  end else
-	   iError(i+2, TypeMismatch);
+	   Error(i+2, TypeMismatch);
 
 	end else
-	 iError(i + 2, IdentifierExpected);
+	 Error(i + 2, IdentifierExpected);
 
 	inc(i, 2);
       end else
-       iError(i + 2, IdentifierExpected);
+       Error(i + 2, IdentifierExpected);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -554,7 +554,7 @@ case Tok[i].Kind of
      end else begin
 
       if Tok[i + 2].Kind <> IDENTTOK then
-        iError(i + 2, IdentifierExpected);
+        Error(i + 2, IdentifierExpected);
 
       j := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -641,7 +641,7 @@ case Tok[i].Kind of
       if isError then Exit;
 
       if not (ConstValType in RealTypes) then
-	iError(i, IncompatibleTypes, 0, ConstValType, REALTOK);
+	Error(i, IncompatibleTypes, 0, ConstValType, REALTOK);
 
       CheckTok(i + 1, CPARTOK);
 
@@ -740,7 +740,7 @@ case Tok[i].Kind of
       i := CompileConstExpression(i + 2, ConstVal, ConstValType, BYTETOK);
 
       if not(ConstValType in OrdinalTypes + [ENUMTYPE]) then
-	iError(i, OrdinalExpExpected);
+	Error(i, OrdinalExpExpected);
 
       if isError then Exit;
 
@@ -762,7 +762,7 @@ case Tok[i].Kind of
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
       if not(ConstValType in OrdinalTypes) then
-	iError(i, OrdinalExpExpected);
+	Error(i, OrdinalExpExpected);
 
       if isError then Exit;
 
@@ -795,7 +795,7 @@ case Tok[i].Kind of
 		if isError then Exit;
 
 		if not(ConstValType in AllTypes) then
-		  iError(i, TypeMismatch);
+		  Error(i, TypeMismatch);
 
 
 		if (Ident[GetIdent(Tok[i].Name)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
@@ -817,7 +817,7 @@ case Tok[i].Kind of
       else
 	if Tok[i + 1].Kind = OBRACKETTOK then					// Array element access
 	  if  not (Ident[IdentIndex].DataType in Pointers) then
-	    iError(i, IncompatibleTypeOf, IdentIndex)
+	    Error(i, IncompatibleTypeOf, IdentIndex)
 	  else
 	    begin
 
@@ -827,7 +827,7 @@ case Tok[i].Kind of
 
 	    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then begin
 	     isConst := false;
-	     iError(i, SubrangeBounds);
+	     Error(i, SubrangeBounds);
 	    end;
 
 	    CheckTok(j + 1, CBRACKETTOK);
@@ -875,7 +875,7 @@ case Tok[i].Kind of
 
 	end
     else
-      iError(i, UnknownIdentifier);
+      Error(i, UnknownIdentifier);
 
     Result := i;
     end;
@@ -883,7 +883,7 @@ case Tok[i].Kind of
 
   ADDRESSTOK:
     if Tok[i + 1].Kind <> IDENTTOK then
-      iError(i + 1, IdentifierExpected)
+      Error(i + 1, IdentifierExpected)
     else begin
       IdentIndex := GetIdent(Tok[i + 1].Name);
 
@@ -891,7 +891,7 @@ case Tok[i].Kind of
 
 	case Ident[IdentIndex].Kind of
 	  CONSTANT: if not( (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) ) then
-	   	      iError(i + 1, CantAdrConstantExp)
+	   	      Error(i + 1, CantAdrConstantExp)
 		    else
 		      ConstVal := Ident[IdentIndex].Value - CODEORIGIN;
 
@@ -994,7 +994,7 @@ case Tok[i].Kind of
 	ConstValType := POINTERTOK;
 
        end else
-	iError(i + 1, UnknownIdentifier);
+	Error(i + 1, UnknownIdentifier);
 
     Result := i + 1;
     end;
@@ -1108,7 +1108,7 @@ case Tok[i].Kind of
        if ((Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0,1])) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then begin
 
        end else
-	iError(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
+	Error(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
 
     end;
 
@@ -1124,7 +1124,7 @@ case Tok[i].Kind of
 
 
 else
-  iError(i, IdNumExpExpected);
+  Error(i, IdNumExpExpected);
 
 end;// case
 
@@ -1366,7 +1366,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   if Err then begin
    isConst := false;
    isError := false;
-   iError(i, RangeCheckError, 0, ConstVal, VarType);
+   Error(i, RangeCheckError, 0, ConstVal, VarType);
   end else
    if War then
    if VarType <> BOOLEANTOK then
@@ -1630,7 +1630,7 @@ begin
 
 	    Inc(Ident[NumIdent].NumParams);
 	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      iError(i, TooManyParameters, NumIdent)
+	      Error(i, TooManyParameters, NumIdent)
 	    else
 	      begin
 	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
@@ -1785,7 +1785,7 @@ begin
 
 	    Inc(Ident[NumIdent].NumParams);
 	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      iError(i, TooManyParameters, NumIdent)
+	      Error(i, TooManyParameters, NumIdent)
 	    else
 	      begin
 	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
@@ -2157,7 +2157,7 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
  end else begin
 
   if not (Tok[i + 1].Kind in OrdinalTypes + RealTypes + [POINTERTOK]) then
-   iError(i + 1, IdentifierExpected);
+   Error(i + 1, IdentifierExpected);
 
   NumAllocElements := 0;
   AllocElementType := Tok[i + 1].Kind;
@@ -2604,7 +2604,7 @@ if Tok[i].Kind = PCHARTOK then						// PChar
   NumAllocElements := UpperBound + 1;
 
   if UpperBound>255 then
-   iError(i, SubrangeBounds);
+   Error(i, SubrangeBounds);
 
   end// if STRINGTOK
 else
@@ -2675,10 +2675,10 @@ if Tok[i].Kind in AllTypes then
     Error(i, 'Array upper bound must be integer');
 
   if UpperBound < 0 then
-    iError(i, UpperBoundOfRange);
+    Error(i, UpperBoundOfRange);
 
   if UpperBound > High(word) then
-    iError(i, HighLimit);
+    Error(i, HighLimit);
 
   NumAllocElements := UpperBound - LowerBound + 1;
 
@@ -2698,10 +2698,10 @@ if Tok[i].Kind in AllTypes then
       Error(i, 'Array upper bound must be integer');
 
     if UpperBound < 0 then
-      iError(i, UpperBoundOfRange);
+      Error(i, UpperBoundOfRange);
 
     if UpperBound > High(word) then
-      iError(i, HighLimit);
+      Error(i, HighLimit);
 
     NumAllocElements := NumAllocElements or (UpperBound - LowerBound + 1) shl 16;
 
@@ -2791,7 +2791,7 @@ else
   IdentIndex := GetIdent(Tok[i].Name);
 
   if IdentIndex = 0 then
-    iError(i, UnknownIdentifier);
+    Error(i, UnknownIdentifier);
 
   if Ident[IdentIndex].Kind <> USERTYPE then
     Error(i, 'Type expected but ' + Tok[i].Name + ' found');
@@ -2815,7 +2815,7 @@ else begin
    UpperBound:=ConstVal;
 
    if UpperBound < LowerBound then
-     iError(i, UpperBoundOfRange);
+     Error(i, UpperBoundOfRange);
 
  // Error(i, 'Error in type definition');
 

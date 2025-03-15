@@ -88,12 +88,7 @@ end;
 
 procedure RaiseHaltException(errnum: Longint);
 begin
-{$IFDEF PAS2JS}
   raise THaltException.Create(errnum);
-{$ELSE}
-  halt(errnum);
-{$ENDIF}
-
 end;
 
 {$IFDEF PAS2JS}

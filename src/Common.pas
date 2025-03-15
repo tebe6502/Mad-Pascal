@@ -16,14 +16,14 @@ const
   CR  = ^M;		// Char for a CR
   LF  = ^J;		// Char for a LF
 
-  AllowDirectorySeparators : set of char = ['/','\'];
+  AllowDirectorySeparators: set of Char = ['/', '\'];
 
-  AllowWhiteSpaces	: set of char = [' ',TAB,CR,LF];
-  AllowQuotes		: set of char = ['''','"'];
-  AllowLabelFirstChars	: set of char = ['A'..'Z','_'];
-  AllowLabelChars	: set of char = ['A'..'Z','0'..'9','_','.'];
-  AllowDigitFirstChars	: set of char = ['0'..'9','%','$'];
-  AllowDigitChars	: set of char = ['0'..'9','A'..'F'];
+  AllowWhiteSpaces: set of Char = [' ', TAB, CR, LF];
+  AllowQuotes: set of Char = ['''', '"'];
+  AllowLabelFirstChars: set of Char = ['A'..'Z', '_'];
+  AllowLabelChars: set of Char = ['A'..'Z', '0'..'9', '_', '.'];
+  AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
+  AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
 
 
   // Token codes
@@ -438,11 +438,11 @@ type
     PassMethod: Byte;
     Pass: Byte;
 
-    NestedNumAllocElements: cardinal;
+    NestedNumAllocElements: Cardinal;
     NestedAllocElementType: Byte;
     NestedDataType: Byte;
 
-    NestedFunctionNumAllocElements: cardinal;
+    NestedFunctionNumAllocElements: Cardinal;
     NestedFunctionAllocElementType: Byte;
     isNestedFunction: Boolean;
 
@@ -489,59 +489,61 @@ type
      NumChildren: Word;
     end;
 
-  TUnit =
-    record
+  TUnit = record
      Name: TString;
      Path: String;
-     Units: integer;
+     Units: Integer;
      Allow: array [1..MAXALLOWEDUNITS] of TString;
     end;
 
-  TResource =
-    record
+  TResource = record
      resStream: Boolean;
      resName, resType, resFile: TString;
-     resValue: integer;
-     resFullName: string;
+    resValue: Integer;
+    resFullName: String;
      resPar: array [1..MAXPARAMS] of TString;
     end;
 
-  TCaseLabel =
-    record
+  TCaseLabel = record
      left, right: Int64;
      equality: Boolean;
     end;
 
-  TPosStack =
-    record
-     ptr: word;
+  TPosStack = record
+    ptr: Word;
      brk, cnt: Boolean;
     end;
 
-  TForLoop =
-     record
+  TForLoop = record
       begin_value, end_value: Int64;
       begin_const, end_const: Boolean;
      end;
 
   TCaseLabelArray = array of TCaseLabel;
 
-  TArrayString = array of string;
+  TArrayString = array of String;
 
 
 {$i targets/var.inc}
 
-  const MIN_MEMORY_ADDRESS=$0000;
-  const MAX_MEMORY_ADDRESS=$FFFF;
+const
+  MIN_MEMORY_ADDRESS = $0000;
   
-  type TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
+const
+  MAX_MEMORY_ADDRESS = $FFFF;
+
+type
+  TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
   
+type
+  TTokenIndex = Integer;
+
 var
 
-  PROGRAM_NAME: string = 'Program';
-  LIBRARY_NAME: string;
+  PROGRAM_NAME: String = 'Program';
+  LIBRARY_NAME: String;
 
-  AsmBlock: array [0..4095] of string;
+  AsmBlock: array [0..4095] of String;
 
   Data, DataSegment, StaticStringData: TWordMemory;
 
@@ -551,32 +553,32 @@ var
   Spelling: array [1..MAXTOKENNAMES] of TString;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefines;
-  IFTmpPosStack: array of integer;
+  IFTmpPosStack: array of Integer;
   BreakPosStack: array [0..MAXPOSSTACK] of TPosStack;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;	// For dead code elimination
 
-  OldConstValType: byte;
+  OldConstValType: Byte;
 
-  NumTok: integer = 0;
+  NumTok: Integer = 0;
 
-  AddDefines: integer = 1;
-  NumDefines: integer = 1;	// NumDefines = AddDefines
+  AddDefines: Integer = 1;
+  NumDefines: Integer = 1;  // NumDefines = AddDefines
 
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
 
-  iOut: integer = -1;
+  iOut: Integer = -1;
 
   start_time: QWord;
 
-  CODEORIGIN_BASE: integer = -1;
+  CODEORIGIN_BASE: Integer = -1;
 
-   DATA_BASE: integer = -1;
-  ZPAGE_BASE: integer = -1;
-  STACK_BASE: integer = -1;
+  DATA_BASE: Integer = -1;
+  ZPAGE_BASE: Integer = -1;
+  STACK_BASE: Integer = -1;
 
   UnitNameIndex: Integer = 1;
 
@@ -597,23 +599,23 @@ var
 
   optimize : record
 	      use: Boolean;
-	      unitIndex, line, old: integer;
+    unitIndex, line, old: Integer;
 	     end;
 
   codealign : record
-		proc, loop, link : integer;
+    proc, loop, link: Integer;
 	      end;
 
 
-  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY,
-  OutputDisabled, isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
+  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
+  isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
-  DiagMode: Boolean = false;
-  DataSegmentUse: Boolean = false;
+  DiagMode: Boolean = False;
+  DataSegmentUse: Boolean = False;
 
-  LoopUnroll : Boolean = false;
+  LoopUnroll: Boolean = False;
 
-  PublicSection : Boolean = true;
+  PublicSection: Boolean = True;
 
 
 {$IFDEF USEOPTFILE}
@@ -626,9 +628,9 @@ var
 
 	procedure ClearWordMemory(anArray: TWordMemory);
 
-	procedure AddDefine(X: string);
+procedure AddDefine(X: String);
 
-	procedure AddPath(s: string);
+procedure AddPath(s: String);
 
 	procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
 
@@ -636,43 +638,43 @@ var
 
 	procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
 
-	procedure CheckTok(i: integer; ExpectedTok: Byte);
+procedure CheckTok(i: Integer; ExpectedTok: Byte);
 
 	procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 
 	procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
 
-	function ErrTokenFound(ErrTokenIndex: Integer): string;
+function ErrTokenFound(ErrTokenIndex: Integer): String;
 
-	function FindFile(Name: string; ftyp: TString): string; overload;
+function FindFile(Name: String; ftyp: TString): String; overload;
 
 	procedure FreeTokens;
 
-	function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = true): Boolean;
+function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 
 	function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
 
-	function GetEnumName(IdentIndex: integer): TString;
+function GetEnumName(IdentIndex: Integer): TString;
 
 	function GetSpelling(i: Integer): TString;
 
-	function GetVAL(a: string): integer;
+function GetVAL(a: String): Integer;
 
-	function GetValueType(Value: Int64): byte;
+function GetValueType(Value: Int64): Byte;
 
-	function HighBound(i: integer; DataType: Byte): Int64;
+function HighBound(i: Integer; DataType: Byte): Int64;
 
-	function InfoAboutToken(t: Byte): string;
+function InfoAboutToken(t: Byte): String;
 
-	function IntToStr(const a: Int64): string;
+function IntToStr(const a: Int64): String;
 
-	function LowBound(i: integer; DataType: Byte): Int64;
+function LowBound(i: Integer; DataType: Byte): Int64;
 
-	function Min(a,b: integer): integer;
+function Min(a, b: Integer): Integer;
 
-	function SearchDefine(X: string): integer;
+function SearchDefine(X: String): Integer;
 
-	function StrToInt(const a: string): Int64;
+function StrToInt(const a: String): Int64;
 
 // ----------------------------------------------------------------------------
 
@@ -684,26 +686,29 @@ uses SysUtils, Messages, Utilities;
 // ----------------------------------------------------------------------------
 
 
-function FindFile(name: string; ftyp: TString): string; overload;
+function FindFile(Name: String; ftyp: TString): String; overload;
 begin
-  result:=unitPathList.FindFile( name);
-  if result = '' then
+  Result := unitPathList.FindFile(Name);
+  if Result = '' then
    if ftyp = 'unit' then
-    Error(NumTok, 'Can''t find unit '''+ChangeFileExt(name,'')+''' used by program '''+PROGRAM_NAME+''' in unit path '''+unitPathList.ToString+'''.')
+      Error(NumTok, 'Can''t find unit ''' + ChangeFileExt(Name, '') + ''' used by program ''' +
+        PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.')
    else
-    Error(NumTok, 'Can''t find '+ftyp+' file '''+name+''' used by program '''+PROGRAM_NAME+''' in unit path '''+unitPathList.ToString+'''.');
-
+      Error(NumTok, 'Can''t find ' + ftyp + ' file ''' + Name + ''' used by program ''' + PROGRAM_NAME +
+        ''' in unit path ''' + unitPathList.ToString + '''.');
 end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function SearchDefine(X: string): integer;
-var i: integer;
+function SearchDefine(X: String): Integer;
+var
+  i: Integer;
 begin
    for i:=1 to NumDefines do
-    if X = Defines[i].Name then begin
+    if X = Defines[i].Name then
+    begin
      Exit(i);
     end;
    Result := 0;
@@ -714,8 +719,9 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure AddDefine(X: string);
-var S: TName;
+procedure AddDefine(X: String);
+var
+  S: TName;
 begin
    S := X;
    if SearchDefine(S) = 0 then
@@ -733,7 +739,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure AddPath(s: string);
+procedure AddPath(s: String);
 begin
   unitPathList.AddFolder(s);
 end;
@@ -743,12 +749,14 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetEnumName(IdentIndex: integer): TString;
-var IdentTtemp: integer;
+function GetEnumName(IdentIndex: Integer): TString;
+var
+  IdentTtemp: Integer;
 
 
-  function Search(Num: cardinal): integer;
-  var IdentIndex, BlockStackIndex: Integer;
+  function Search(Num: Cardinal): Integer;
+  var
+    IdentIndex, BlockStackIndex: Integer;
   begin
 
     Result := 0;
@@ -756,7 +764,8 @@ var IdentTtemp: integer;
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
     for IdentIndex := 1 to NumIdent do
-      if (Ident[IdentIndex].DataType = ENUMTYPE) and (Ident[IdentIndex].NumAllocElements = Num) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
+        if (Ident[IdentIndex].DataType = ENUMTYPE) and (Ident[IdentIndex].NumAllocElements = Num) and
+          (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
 	exit(IdentIndex);
   end;
 
@@ -765,13 +774,16 @@ begin
 
  Result := '';
 
- if Ident[IdentIndex].NumAllocElements > 0 then begin
+  if Ident[IdentIndex].NumAllocElements > 0 then
+  begin
   IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
 
   if IdentTtemp > 0 then
    Result := Ident[IdentTtemp].Name;
- end else
-  if Ident[IdentIndex].DataType = ENUMTYPE then begin
+  end
+  else
+  if Ident[IdentIndex].DataType = ENUMTYPE then
+  begin
    IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
 
    if IdentTtemp > 0 then
@@ -785,11 +797,12 @@ end;	//GetEnumName
 // ----------------------------------------------------------------------------
 
 
-function StrToInt(const a: string): Int64;
+function StrToInt(const a: String): Int64;
 (*----------------------------------------------------------------------------*)
 (*----------------------------------------------------------------------------*)
 {$IFNDEF PAS2JS}
-var i: integer;
+var
+  i: Integer;
 begin
  val(a,Result, i);
 end;
@@ -806,7 +819,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function IntToStr(const a: Int64): string;
+function IntToStr(const a: Int64): String;
 (*----------------------------------------------------------------------------*)
 (*----------------------------------------------------------------------------*)
 begin
@@ -818,7 +831,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function Min(a,b: integer): integer;
+function Min(a, b: Integer): Integer;
 begin
 
  if a < b then
@@ -873,7 +886,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function ErrTokenFound(ErrTokenIndex: Integer): string;
+function ErrTokenFound(ErrTokenIndex: Integer): String;
 begin
 
  Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
@@ -891,21 +904,20 @@ begin
 //writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
 
  if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
-   ((DataType in RealTypes) and
-       not (op in [MULTOK, DIVTOK, PLUSTOK, MINUSTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK])) or
-   ((DataType in IntegerTypes) and
-       not (op in [MULTOK, IDIVTOK, MODTOK, SHLTOK, SHRTOK, ANDTOK, PLUSTOK, MINUSTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or
-   ((DataType = CHARTOK) and
+  ((DataType in RealTypes) and not (op in [MULTOK, DIVTOK, PLUSTOK, MINUSTOK, GTTOK,
+    GETOK, EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in IntegerTypes) and not
+    (op in [MULTOK, IDIVTOK, MODTOK, SHLTOK, SHRTOK, ANDTOK, PLUSTOK, MINUSTOK, ORTOK, XORTOK,
+    NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or ((DataType = CHARTOK) and
        not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or
-   ((DataType = BOOLEANTOK) and
-       not (op in [ANDTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK])) or
-   ((DataType in Pointers) and
-       not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK]))
-then
+    ((DataType = BOOLEANTOK) and not (op in [ANDTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK,
+    EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in Pointers) and not
+    (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK])) then
  if DataType = RightType then
-  Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' + InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
+      Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
+        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
  else
-  Error(ErrTokenIndex, 'Operation "' + InfoAboutToken(op) + '" not supported for types "' +  InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"');
+      Error(ErrTokenIndex, 'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
+        InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"');
 
 end;
 
@@ -918,7 +930,8 @@ procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; Ar
 begin
 
 if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) then
- if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
+    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
+      Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
   if Ident[IdentIndex].NumAllocElements <> 1 then warning(i, RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
@@ -932,8 +945,10 @@ procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; A
 begin
 
 if Ident[IdentIndex].NumAllocElements_ > 0 then
- if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-  if Ident[IdentIndex].NumAllocElements_ <> 1 then warning(i, RangeCheckError_, IdentIndex, ArrayIndex, ArrayIndexType);
+    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
+      Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
+      if Ident[IdentIndex].NumAllocElements_ <> 1 then
+        warning(i, RangeCheckError_, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -942,7 +957,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function InfoAboutToken(t: Byte): string;
+function InfoAboutToken(t: Byte): String;
 begin
 
    case t of
@@ -1039,26 +1054,26 @@ end;	//InfoAboutToken
 // ----------------------------------------------------------------------------
 
 
-function LowBound(i: integer; DataType: Byte): Int64;
+function LowBound(i: Integer; DataType: Byte): Int64;
 begin
 
  Result := 0;
 
  case DataType of
 
-    UNTYPETOK: iError(i, CantReadWrite);
+    UNTYPETOK: Error(i, CantReadWrite);
    INTEGERTOK: Result := Low(Integer);
-  SMALLINTTOK: Result := Low(SmallInt);
-  SHORTINTTOK: Result := Low(ShortInt);
+    SMALLINTTOK: Result := Low(Smallint);
+    SHORTINTTOK: Result := Low(Shortint);
       CHARTOK: Result := 0;
-   BOOLEANTOK: Result := ord(Low(Boolean));
+    BOOLEANTOK: Result := Ord(Low(Boolean));
       BYTETOK: Result := Low(Byte);
       WORDTOK: Result := Low(Word);
   CARDINALTOK: Result := Low(Cardinal);
     STRINGTOK: Result := 1;
 
  else
-  iError(i, TypeMismatch);
+      Error(i, TypeMismatch);
  end;// case
 
 end;
@@ -1068,26 +1083,26 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function HighBound(i: integer; DataType: Byte): Int64;
+function HighBound(i: Integer; DataType: Byte): Int64;
 begin
 
  Result := 0;
 
  case DataType of
 
-    UNTYPETOK: iError(i, CantReadWrite);
+    UNTYPETOK: Error(i, CantReadWrite);
    INTEGERTOK: Result := High(Integer);
-  SMALLINTTOK: Result := High(SmallInt);
-  SHORTINTTOK: Result := High(ShortInt);
+    SMALLINTTOK: Result := High(Smallint);
+    SHORTINTTOK: Result := High(Shortint);
       CHARTOK: Result := 255;
-   BOOLEANTOK: Result := ord(High(Boolean));
+    BOOLEANTOK: Result := Ord(High(Boolean));
       BYTETOK: Result := High(Byte);
       WORDTOK: Result := High(Word);
   CARDINALTOK: Result := High(Cardinal);
     STRINGTOK: Result := 255;
 
  else
-  iError(i, TypeMismatch);
+      Error(i, TypeMismatch);
  end;// case
 
 end;
@@ -1097,14 +1112,16 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetVAL(a: string): integer;
-var err: integer;
+function GetVAL(a: String): Integer;
+var
+  err: Integer;
 begin
 
  Result := -1;
 
  if a <> '' then
-  if a[1] = '#' then begin
+    if a[1] = '#' then
+    begin
    val(copy(a, 2, length(a)), Result, err);
 
    if err > 0 then Result := -1;
@@ -1117,16 +1134,20 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetValueType(Value: Int64): byte;
+function GetValueType(Value: Int64): Byte;
 begin
 
-    if Value < 0 then begin
+  if Value < 0 then
+  begin
 
-     if Value >= Low(shortint) then Result := SHORTINTTOK else
-      if Value >= Low(smallint) then Result := SMALLINTTOK else
+    if Value >= Low(Shortint) then Result := SHORTINTTOK
+    else
+    if Value >= Low(Smallint) then Result := SMALLINTTOK
+    else
        Result := INTEGERTOK;
 
-    end else
+  end
+  else
 
     case Value of
            0..255: Result := BYTETOK;
@@ -1142,8 +1163,9 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: integer; ExpectedTok: Byte);
-var s: string;
+procedure CheckTok(i: Integer; ExpectedTok: Byte);
+var
+  s: String;
 begin
 
  if ExpectedTok < IDENTTOK then
@@ -1169,31 +1191,26 @@ end;	//CheckTok
 // ----------------------------------------------------------------------------
 
 
-function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = true): Boolean;
+function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 begin
 
-  Result := false;
+  Result := False;
 
-  if (DataSize[DstType] < DataSize[SrcType]) or
-     ( (DstType = REALTOK) and (SrcType <> REALTOK) ) or
-     ( (DstType <> REALTOK) and (SrcType = REALTOK) ) or
-
-     ( (DstType = SINGLETOK) and (SrcType <> SINGLETOK) ) or
-     ( (DstType <> SINGLETOK) and (SrcType = SINGLETOK) ) or
-
-     ( (DstType = HALFSINGLETOK) and (SrcType <> HALFSINGLETOK) ) or
-     ( (DstType <> HALFSINGLETOK) and (SrcType = HALFSINGLETOK) ) or
+  if (DataSize[DstType] < DataSize[SrcType]) or ((DstType = REALTOK) and (SrcType <> REALTOK)) or
+    ((DstType <> REALTOK) and (SrcType = REALTOK)) or ((DstType = SINGLETOK) and (SrcType <> SINGLETOK)) or
+    ((DstType <> SINGLETOK) and (SrcType = SINGLETOK)) or ((DstType = HALFSINGLETOK) and
+    (SrcType <> HALFSINGLETOK)) or ((DstType <> HALFSINGLETOK) and (SrcType = HALFSINGLETOK)) or
 
      ( (DstType = SHORTREALTOK) and (SrcType <> SHORTREALTOK) ) or
      ( (DstType <> SHORTREALTOK) and (SrcType = SHORTREALTOK) ) or
-
-     ( (DstType in IntegerTypes) and (SrcType in [CHARTOK, BOOLEANTOK, POINTERTOK, DATAORIGINOFFSET, CODEORIGINOFFSET, STRINGPOINTERTOK]) ) or
-     ( (SrcType in IntegerTypes) and (DstType in [CHARTOK, BOOLEANTOK]) ) then
+    ((DstType in IntegerTypes) and (SrcType in [CHARTOK, BOOLEANTOK, POINTERTOK, DATAORIGINOFFSET,
+    CODEORIGINOFFSET, STRINGPOINTERTOK])) or ((SrcType in IntegerTypes) and
+    (DstType in [CHARTOK, BOOLEANTOK])) then
 
      if err then
-      iError(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
+      Error(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
      else
-      Result := true;
+      Result := True;
 
 end;	//GetCommonConstType
 
@@ -1221,7 +1238,7 @@ begin
  if LeftType = UNTYPETOK then Result := RightType;
 
  if Result = 0 then
-   iError(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
+    Error(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
 
 end;	//GetCommonType
 
@@ -1231,11 +1248,16 @@ end;	//GetCommonType
 
 
 procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
-var i: integer;
+var
+  i: Integer;
 begin
 
   for i := 0 to High(linkObj) - 1 do
-   if linkObj[i] = StrValue then begin Tok[StrTokenIndex].Value := i; exit end;
+    if linkObj[i] = StrValue then
+    begin
+      Tok[StrTokenIndex].Value := i;
+      exit;
+    end;
 
   i := High(linkObj);
   linkObj[i] := StrValue;
@@ -1263,14 +1285,16 @@ else
  Data[0] := len;
 
 if (NumStaticStrChars + len > $FFFF) then
-   begin writeln('DefineStaticString: ' + IntToStr(len));
+  begin
+    writeln('DefineStaticString: ' + IntToStr(len));
          RaiseHaltException(2);
    end;
 
-for i:=1 to len do Data[i] := ord(StrValue[i]);
+  for i := 1 to len do Data[i] := Ord(StrValue[i]);
 
 for i:=0 to NumStaticStrChars-len-1 do
- if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then begin
+    if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then
+    begin
 
   Tok[StrTokenIndex].StrLength := len;
   Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
@@ -1286,7 +1310,7 @@ Inc(NumStaticStrChars);
 
 for i := 1 to len do
   begin
-  StaticStringData[NumStaticStrChars] := ord(StrValue[i]);
+    StaticStringData[NumStaticStrChars] := Ord(StrValue[i]);
   Inc(NumStaticStrChars);
   end;
 
