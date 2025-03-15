@@ -1,4 +1,8 @@
-1. create config.ini based on config_example.ini, update with your paths
-2. enter to py65emu dir and install (python setup.py install)
-3. install pytest (pip install -U pytest)
-4. run all tests from this directory (pytest)
+1. Open a command shell 
+2. Enter "pip install setuptools" to install the Pytho setup tools.
+1. Copy the template "config_example.ini" to "config.ini" and it update with your actual paths.
+2. Open a command shell in the "py65emu" folder and enter"python setup.py install"
+   Note: This won't work when using Python installed for all users on Windows
+   There enter "python setup.py install --user" instead to install for you user only.
+3. Enter "pip install -U pytest" to install the Physon test suite for your user only.
+4. Enter "pytest" to un all tests from in directory.

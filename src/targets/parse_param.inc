@@ -4,4 +4,4 @@ if t = 'A8' then target.id := ___a8 else
       if t = 'RAW' then target.id := ___raw else
         if t = 'NEO' then target.id := ___neo else
           if t = 'X16' then target.id := ___x16 else
-          Syntax(3);
+          Syntax(THaltException.COMPILING_NOT_STARTED);
