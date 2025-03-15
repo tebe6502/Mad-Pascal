@@ -695,7 +695,7 @@ end;
 
 // ----------------------------------------------------------------------------
 // Map I/O codes to the bits in the CIO block.
-//
+
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 begin
   case ioCode of
@@ -1079,7 +1079,7 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
   Result := 'UNTYPED'
  end;
 
-end;	//InfoAboutToken
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -1115,7 +1115,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function HighBound(i: Integer; DataType: Byte): Int64;
+function HighBound(i: TTokenIndex; DataType: Byte): Int64;
 begin
 
  Result := 0;
