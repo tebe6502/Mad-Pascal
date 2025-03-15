@@ -217,8 +217,8 @@ begin
 
 begin
   try
-  TestUnitFile;
-  TestUnitCommon;
+    TestUnitFile;
+    TestUnitCommon;
     TestUnitMathEvaluate;
   except
     on e: Exception do

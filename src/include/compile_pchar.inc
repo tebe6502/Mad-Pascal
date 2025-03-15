@@ -160,7 +160,7 @@
 		       asm65(#9'iny');
 		       asm65(#9'sta (:bp2),y');
 
-		      a65(__subBX);
+		      a65(TCode65.subBX);
 		     end;
 {
 		   ASPOINTERTOPOINTER:
@@ -172,7 +172,7 @@
 		       asm65(#9'iny');
 		       asm65(#9'mva :STACKORIGIN,x (:bp2),y');
 
-		       a65(__subBX);
+		       a65(TCode65.subBX);
 		     end;
 
 		   ASPOINTERTOARRAYORIGIN:
@@ -183,8 +183,8 @@
 		      asm65(#9'lda :STACKORIGIN,x');
 		      asm65(#9'sta (:bp2),y');
 
-		      a65(__subBX);
-		      a65(__subBX);
+		      a65(TCode65.subBX);
+		      a65(TCode65.subBX);
 		     end;
 }
 		 else
@@ -222,7 +222,7 @@
 			 asm65(#9'@moveSTRING ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1));
 
 
-			a65(__subBX);
+			a65(TCode65.subBX);
 
 			StopOptimization;
 
