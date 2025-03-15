@@ -103,6 +103,43 @@ begin
      end;
 
 
+    if lda_val(i) and (iy(i) = false) and						// lda					; 0
+       ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01'))  and		// add #$01|sub #$01			; 1
+       sta_val(i+2) and (iy(i+2) = false) and						// sta					; 2
+       lda_a(i+3) and									// lda					; 3
+       (add_sub(i+4) or sta_a(i+4)) then						// add|sub|sta				; 4
+     begin
+	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+
+        if listing[i+1] = #9'add #$01' then
+	 listing[i+1] := #9'iny'
+	else
+	 listing[i+1] := #9'dey';
+
+	listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
+
+	exit(false);
+     end;
+
+
+    if lda_val(i) and (iy(i) = false) and						// lda					; 0
+       ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01'))  and		// add #$01|sub #$01			; 1
+       sta_val(i+2) and (iy(i+2) = false) and						// sta					; 2
+       ldy(i+3) then									// ldy					; 3
+     begin
+	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+
+        if listing[i+1] = #9'add #$01' then
+	 listing[i+1] := #9'iny'
+	else
+	 listing[i+1] := #9'dey';
+
+	listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
+
+	exit(false);
+     end;
+
+
     if lda_a(i) and (iy(i) = false) and							// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
