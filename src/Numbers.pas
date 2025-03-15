@@ -80,22 +80,19 @@ end;
 
 
 // ----------------------------------------------------------------------------
+// The https://www.freepascal.org/docs-html/rtl/system/sarlongint.html is currently
+// missing from the Javascript RTL. The native arithemtic shift right works the same
+// for 32-bit operands.
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Right_shift
 // ----------------------------------------------------------------------------
 
-// https://www.freepascal.org/docs-html/rtl/system/sarlongint.html
-function SarLongint(const Value: Longint; const Shift: Byte = 1): Longint;
+{$IFDEF PAS2JS}
+function SarLongint(const AValue: Longint; const Shift: Byte = 1): Longint;
 begin
-
-  if Value > 0 then
-  begin
-    Result := Value shr Shift;
-  end
-  else
-  begin
-    Result := -(-Value shr Shift);
-  end;
+asm
+  return (AValue>>Shift);
 end;
-
+{$ENDIF}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -279,7 +276,6 @@ begin
 
   MoveTFloat(a, ftmp);
   Result := CardToHalf(ftmp);
-
 end;
 
 function Assign(const valType: Byte; const s: Single): TNumber;
