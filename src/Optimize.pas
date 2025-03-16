@@ -1627,7 +1627,7 @@ end;
      if opt_BP2_ADR(i) = false then begin Result := false; Break end;
      if opt_POKE(i) = false then begin Result := false; Break end;
 
-     if target.cpu <> CPU_6502 then begin
+     if target.cpu <> TCPU.CPU_6502 then begin
 
        if opt_STZ(i) = false then begin Result := false; Break end;
 
@@ -2536,7 +2536,7 @@ begin				// OptimizeASM
       if (elf = $04C07164) or (elf = $0E3FD7A2) then begin	// imulCARD, mulINTEGER
 	t:='';
 
-        if (target.id = ___NEO) then begin
+        if (target.id = TComputer.NEO) then begin
 
           listing[l]    := #9'lda '+GetARG(0, x);
           listing[l+1]  := #9'sta VAR1_B0';
@@ -3275,7 +3275,7 @@ begin
 
  if not OutputDisabled then
 
- if Pass = CODEGENERATIONPASS then begin
+ if pass = TPass.CODE_GENERATION then begin
 
   if optimize_code and common.optimize.use then begin
 

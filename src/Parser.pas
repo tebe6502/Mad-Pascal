@@ -365,7 +365,7 @@ begin
 			Result := Ident[IdentIndex].NumAllocElements_ * 2
 
 		     end else
-		      if Ident[IdentIndex].PassMethod = VARPASSING then
+		      if Ident[IdentIndex].PassMethod = TParameterPassingMethod.VARPASSING then
 		       Result := RecordSize(IdentIndex)
 		      else
 		       Result := DataSize[POINTERTOK];
@@ -1408,7 +1408,7 @@ else
   Ident[NumIdent].Block := BlockStack[BlockStackTop];
   Ident[NumIdent].NumParams := 0;
   Ident[NumIdent].isAbsolute := false;
-  Ident[NumIdent].PassMethod := VALPASSING;
+  Ident[NumIdent].PassMethod := TParameterPassingMethod.VALPASSING;
   Ident[NumIdent].IsUnresolvedForward := false;
 
   Ident[NumIdent].Section := PublicSection;
@@ -1429,8 +1429,8 @@ else
 //   if name = 'CH_EOL' then writeln( Ident[NumIdent].Block ,',', Ident[NumIdent].unitindex, ',',  Ident[NumIdent].Section,',', Ident[NumIdent].idType);
 
   if Name <> 'RESULT' then
-   if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = CODEGENERATIONPASS) then
-     if not ( (Ident[NumIdent].Pass in [CALLDETERMPASS , CODEGENERATIONPASS]) or (Ident[NumIdent].IsNotDead) ) then
+   if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (pass = TPass.CODE_GENERATION) then
+     if not ( (Ident[NumIdent].Pass in [ TPass.CALL_DETERMINATION , TPass.CODE_GENERATION]) or (Ident[NumIdent].IsNotDead) ) then
       Note(ErrTokenIndex, NumIdent);
 
   case Kind of
@@ -1530,7 +1530,8 @@ end;	//DefineIdent
 function DeclareFunction(i: integer; out ProcVarIndex: cardinal): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType: Byte;
+     ListPassMethod: TParameterPassingMethod;
+     VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
      IsNestedFunction: Boolean;
 //     ConstVal: Int64;
@@ -1566,16 +1567,16 @@ begin
 	repeat
 	  NumVarOfSameType := 0;
 
-	  ListPassMethod := VALPASSING;
+	  ListPassMethod := TParameterPassingMethod.VALPASSING;
 
 	  if Tok[i + 1].Kind = CONSTTOK then
 	    begin
-	    ListPassMethod := CONSTPASSING;
+	    ListPassMethod := TParameterPassingMethod.CONSTPASSING;
 	    inc(i);
 	    end
 	  else if Tok[i + 1].Kind = VARTOK then
 	    begin
-	    ListPassMethod := VARPASSING;
+	    ListPassMethod := TParameterPassingMethod.VARPASSING;
 	    inc(i);
 	    end;
 
@@ -1602,9 +1603,9 @@ begin
 	  NumAllocElements := 0;
 	  AllocElementType := 0;
 
-	  if (ListPassMethod in [CONSTPASSING, VARPASSING])  and (Tok[i].Kind <> COLONTOK) then begin
+	  if (ListPassMethod in [TParameterPassingMethod.CONSTPASSING, TParameterPassingMethod.VARPASSING])  and (Tok[i].Kind <> COLONTOK) then begin
 
-	   ListPassMethod := VARPASSING;
+	   ListPassMethod := TParameterPassingMethod.VARPASSING;
 	   dec(i);
 
 	  end else begin
@@ -1616,7 +1617,7 @@ begin
 
 	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-	   if (VarType = FILETOK) and (ListPassMethod <> VARPASSING) then
+	   if (VarType = FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
 	     Error(i, 'File types must be var parameters');
 
 	  end;
@@ -1687,7 +1688,8 @@ end;	//DeclareFunction
 function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType: Byte;
+     ListPassMethod: TParameterPassingMethod;
+     VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
 begin
 
@@ -1721,16 +1723,16 @@ begin
 	repeat
 	  NumVarOfSameType := 0;
 
-	  ListPassMethod := VALPASSING;
+	  ListPassMethod := TParameterPassingMethod.VALPASSING;
 
 	  if Tok[i + 1].Kind = CONSTTOK then
 	    begin
-	    ListPassMethod := CONSTPASSING;
+	    ListPassMethod := TParameterPassingMethod.CONSTPASSING;
 	    inc(i);
 	    end
 	  else if Tok[i + 1].Kind = VARTOK then
 	    begin
-	    ListPassMethod := VARPASSING;
+	    ListPassMethod := TParameterPassingMethod.VARPASSING;
 	    inc(i);
 	    end;
 
@@ -1757,9 +1759,9 @@ begin
 	  NumAllocElements := 0;
 	  AllocElementType := 0;
 
-	  if (ListPassMethod in [CONSTPASSING, VARPASSING])  and (Tok[i].Kind <> COLONTOK) then begin
+	  if (ListPassMethod in [TParameterPassingMethod.CONSTPASSING, TParameterPassingMethod.VARPASSING])  and (Tok[i].Kind <> COLONTOK) then begin
 
-	   ListPassMethod := VARPASSING;
+	   ListPassMethod := TParameterPassingMethod.VARPASSING;
 	   dec(i);
 
 	  end else begin
@@ -1771,7 +1773,7 @@ begin
 
 	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-	   if (VarType = FILETOK) and (ListPassMethod <> VARPASSING) then
+	   if (VarType = FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
 	     Error(i, 'File types must be var parameters');
 
 	  end;
@@ -2246,7 +2248,7 @@ if Tok[i].Kind = OPARTOK then begin					// enumerated
       inc(NumStaticStrChars, length(FieldInListName[FieldInListIndex].Name) + 1);
 }
       Ident[NumIdent].NumAllocElements := RecType;
-      Ident[NumIdent].Pass := CALLDETERMPASS;
+      Ident[NumIdent].Pass :=  TPass.CALL_DETERMINATION;
 
       DeclareField(FieldInListName[FieldInListIndex].Name, DataType, 0, 0, FieldInListName[FieldInListIndex].Value);
     end;

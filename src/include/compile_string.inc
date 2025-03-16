@@ -31,7 +31,7 @@
 		       asm65(#9'ldy :STACKORIGIN,x');
 		       asm65(#9'mva #$' + IntToHex(Tok[i + 2].Value , 2) + ' (:bp2),y');
 
-		       a65(__subBX);
+		       a65(TCode65.subBX);
 		     end;
 
 		     ASPOINTER:
@@ -145,7 +145,7 @@
 		      asm65(#9'mva :STACKORIGIN,x '+GetLocalName(IdentIndex, 'adr.')+'+1');
 		      asm65(#9'mva #$01 '+GetLocalName(IdentIndex, 'adr.'));
 
-		      a65(__subBX);
+		      a65(TCode65.subBX);
 		     end;
 
 		   ASPOINTERTOPOINTER:
@@ -157,7 +157,7 @@
 		       asm65(#9'iny');
 		       asm65(#9'mva :STACKORIGIN,x (:bp2),y');
 
-		       a65(__subBX);
+		       a65(TCode65.subBX);
 		     end;
 
 		   ASPOINTERTOARRAYORIGIN:
@@ -168,8 +168,8 @@
 		      asm65(#9'lda :STACKORIGIN,x');
 		      asm65(#9'sta (:bp2),y');
 
-		      a65(__subBX);
-		      a65(__subBX);
+		      a65(TCode65.subBX);
+		      a65(TCode65.subBX);
 		     end;
 
 		 else
@@ -219,7 +219,7 @@
 			 asm65(#9'@moveSTRING ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1));
 
 
-			a65(__subBX);
+			a65(TCode65.subBX);
 
 			StopOptimization;
 

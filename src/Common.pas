@@ -8,6 +8,22 @@ uses FileIO;
 
 // ----------------------------------------------------------------------------
 
+
+// Passes
+  {$SCOPEDENUMS ON}
+type
+  TPass = (NONE, CALL_DETERMINATION, CODE_GENERATION);
+
+
+// Parameter passing
+type
+  TParameterPassingMethod = (
+    UNDEFINED = 0,
+    VALPASSING = 1, // By value, modifiable
+    CONSTPASSING = 2, // By const, unodifiable
+    VARPASSING = 3 // By reference, modifiable
+    );
+
 const
 
   title = '1.7.2';
@@ -259,9 +275,6 @@ const
   CODEORIGIN		= $100;
   DATAORIGIN		= $8000;
 
-  // Passes
-  CALLDETERMPASS	= 1;
-  CODEGENERATIONPASS	= 2;
 
   // Indirection levels
 
@@ -289,11 +302,6 @@ const
 
   OBJECTVARIABLE	= 1;
   RECORDVARIABLE	= 2;
-
-  // Parameter passing
-  VALPASSING		= 1; // By value, modifiable
-  CONSTPASSING		= 2; // By const, unodifiable
-  VARPASSING		= 3; // By reference, modifiable
 
 
   // Data sizes
@@ -323,7 +331,7 @@ const
 	2	// Size = 2 FORWARD
 	);
 
-  fBlockRead_ParamType : array [1..3] of byte = (UNTYPETOK, WORDTOK, POINTERTOK);
+  fBlockRead_ParamType: array [1..3] of Byte = (UNTYPETOK, WORDTOK, POINTERTOK);
 
 
 {$i targets/type.inc}
@@ -331,54 +339,46 @@ const
 
 type
 
-  // Current limitation in PAS2JS. Have to find a different way, because the const values are sigificant.
-  // Error: not yet implemented: mKeep:TPasEnumValue [20180126202434] "enum const"
-  {$IFNDEF PAS2JS}
-  ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
-  {$ELSE}
-  ModifierCode = (mKeep, mOverload, mInterrupt, mRegister, mAssembler, mForward, mPascal, mStdCall, mInline);
-  {$ENDIF}
+  // Here the prefixes are kept because otherwise the identifiers collide with the Pascal keywords.
+  TModifierCode = (mInline, mStdCall, mPascal, mForward, mAssembler, mRegister, mInterrupt, mOverload, mKeep);
+  TModifierBits = Word;
 
-  irCode = (iDLI, iVBLD, iVBLI, iTIM1, iTIM2, iTIM4);
+  TInterruptCode = (DLI, VBLD, VBLI, TIM1, TIM2, TIM4);
 
-  {$IFNDEF PAS2JS}
-  ioCode = (ioOpenRead = 4, ioReadRecord = 5, ioRead = 7, ioOpenWrite = 8, ioAppend = 9, ioWriteRecord = 9, ioWrite = $0b, ioOpenReadWrite = $0c, ioFileMode = $f0, ioClose = $ff);
-  {$ELSE}
-  ioCode = (ioOpenRead, ioReadRecord, ioRead, ioOpenWrite, ioAppend, ioWriteRecord, ioWrite, ioOpenReadWrite, ioFileMode, ioClose);
-  {$ENDIF}
+  TIOCode = (OpenRead, ReadRecord, Read, OpenWrite, Append, WriteRecord, Write, OpenReadWrite, FileMode, Close);
+  TIOBits = Byte;
 
-
-  code65 =
+  TCode65 =
   (
 
-  __je, __jne,
-//  __jg, __jge, __jl, __jle,
-  __putCHAR, __putEOL,
-  __addBX, __subBX, __movaBX_Value,
-  __imulECX,
-//  __notaBX, __negaBX, __notBOOLEAN,
-  __addAL_CL, __addAX_CX, __addEAX_ECX,
-  __shlAL_CL, __shlAX_CL, __shlEAX_CL,
-  __subAL_CL, __subAX_CX, __subEAX_ECX,
-  __cmpSTRING, __cmpSTRING2CHAR, __cmpCHAR2STRING,
-  __shrAL_CL, __shrAX_CL, __shrEAX_CL
+    je, jne,
+    //  jg, jge, jl, jle,
+    putCHAR, putEOL,
+    addBX, subBX, movaBX_Value,
+    imulECX,
+    //  notaBX, negaBX, notBOOLEAN,
+    addAL_CL, addAX_CX, addEAX_ECX,
+    shlAL_CL, shlAX_CL, shlEAX_CL,
+    subAL_CL, subAX_CX, subEAX_ECX,
+    cmpSTRING, cmpSTRING2CHAR, cmpCHAR2STRING,
+    shrAL_CL, shrAX_CL, shrEAX_CL
 
-//  __cmpINT, __cmpEAX_ECX, __cmpAX_CX, __cmpSMALLINT, __cmpSHORTINT,
-//  __andEAX_ECX, __andAX_CX, __andAL_CL,
-//  __orEAX_ECX, __orAX_CX, __orAL_CL,
-//  __xorEAX_ECX, __xorAX_CX __xorAL_CL
+    //  cmpINT, cmpEAX_ECX, cmpAX_CX, cmpSMALLINT, cmpSHORTINT,
+    //  andEAX_ECX, andAX_CX, andAL_CL,
+    //  orEAX_ECX, orAX_CX, orAL_CL,
+    //  xorEAX_ECX, xorAX_CX xorAL_CL
 
   );
 
-  TString = string;
-  TName   = string;
+  TString = String;
+  TName = String;
 
   TDefinesParam = array [1..MAXPARAMS] of TString;
 
   TDefines = record
     Name: TName;
-    Macro: string;
-    Line: integer;
+    Macro: String;
+    Line: Integer;
     Param: TDefinesParam;
   end;
 
@@ -387,8 +387,8 @@ type
     DataType: Byte;
     NumAllocElements: Cardinal;
     AllocElementType: Byte;
-    PassMethod: Byte;
-    i, i_: integer;
+    PassMethod: TParameterPassingMethod;
+    i, i_: Integer;
    end;
 
   TParamList = array [1..MAXPARAMS] of TParam;
@@ -435,8 +435,8 @@ type
     Libraries : Integer;		// EXTERNAL alias 'libraries'
     DataType: Byte;
     IdType: Byte;
-    PassMethod: Byte;
-    Pass: Byte;
+    PassMethod: TParameterPassingMethod;
+    Pass: TPass;
 
     NestedNumAllocElements: Cardinal;
     NestedAllocElementType: Byte;
@@ -483,8 +483,7 @@ type
     end;
 
 
-  TCallGraphNode =
-    record
+  TCallGraphNode = record
      ChildBlock: array [1..MAXBLOCKS] of Integer;
      NumChildren: Word;
     end;
@@ -566,9 +565,10 @@ var
   AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
 
-  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
+  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func,
+  NumProc, BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+  pass: TPass;
 
   iOut: Integer = -1;
 
@@ -590,8 +590,7 @@ var
 
   resArray: array of TResource;
 
-  MainPath, FilePath, optyA, optyY, optyBP2,
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
+  MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
   msgWarning, msgNote, msgUser, OptimizeBuf, LinkObj: TArrayString;
   unitPathList: TPathList;
@@ -632,31 +631,31 @@ procedure AddDefine(X: String);
 
 procedure AddPath(s: String);
 
-	procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
 
-	procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
 
-	procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 
 procedure CheckTok(i: Integer; ExpectedTok: Byte);
 
-	procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
-	procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
-function ErrTokenFound(ErrTokenIndex: Integer): String;
+function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
 
 function FindFile(Name: String; ftyp: TString): String; overload;
 
-	procedure FreeTokens;
+procedure FreeTokens;
 
-function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 
-	function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
 
 function GetEnumName(IdentIndex: Integer): TString;
 
-	function GetSpelling(i: Integer): TString;
+function GetSpelling(i: Integer): TString;
 
 function GetVAL(a: String): Integer;
 
@@ -676,11 +675,44 @@ function SearchDefine(X: String): Integer;
 
 function StrToInt(const a: String): Int64;
 
+procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
+function GetIOBits(const ioCode: TIOCode): TIOBits;
+
 // ----------------------------------------------------------------------------
 
 implementation
 
 uses SysUtils, Messages, Utilities;
+
+// ----------------------------------------------------------------------------
+// Map modifier codes to the bits in the method status.
+// ----------------------------------------------------------------------------
+
+procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
+begin
+  bits := bits or (Word(1) shl Ord(modifierCode));
+end;
+
+// ----------------------------------------------------------------------------
+// Map I/O codes to the bits in the CIO block.
+
+function GetIOBits(const ioCode: TIOCode): TIOBits;
+begin
+  case ioCode of
+    TIOCode.OpenRead: Result := $04;
+    TIOCode.ReadRecord: Result := $05;
+    TIOCode.Read: Result := $07;
+    TIOCode.OpenWrite: Result := $08;
+    TIOCode.Append: Result := $09;
+    TIOCode.WriteRecord: Result := $09;
+    TIOCode.Write: Result := $0b;
+    TIOCode.OpenReadWrite: Result := $0c;
+    TIOCode.FileMode: Result := $f0;
+    TIOCode.Close: Result := $ff;
+    else
+      Assert(False, 'Invalid ioCode.');
+  end;
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -886,7 +918,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function ErrTokenFound(ErrTokenIndex: Integer): String;
+function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
 begin
 
  Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
@@ -898,7 +930,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckOperator(ErrTokenIndex: Integer; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 begin
 
 //writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
@@ -1047,7 +1079,7 @@ CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
   Result := 'UNTYPED'
  end;
 
-end;	//InfoAboutToken
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -1083,7 +1115,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function HighBound(i: Integer; DataType: Byte): Int64;
+function HighBound(i: TTokenIndex; DataType: Byte): Int64;
 begin
 
  Result := 0;
@@ -1144,16 +1176,16 @@ begin
     else
     if Value >= Low(Smallint) then Result := SMALLINTTOK
     else
-       Result := INTEGERTOK;
+      Result := INTEGERTOK;
 
   end
   else
 
     case Value of
-           0..255: Result := BYTETOK;
-       256..$FFFF: Result := WORDTOK;
+      0..255: Result := BYTETOK;
+      256..$FFFF: Result := WORDTOK;
       else
-       Result := CARDINALTOK
+        Result := CARDINALTOK
     end;
 
 end;
@@ -1163,35 +1195,35 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: Integer; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTok: Byte);
 var
   s: String;
 begin
 
- if ExpectedTok < IDENTTOK then
-  s := Spelling[ExpectedTok]
- else if ExpectedTok = IDENTTOK then
-  s := 'identifier'
- else if (ExpectedTok = INTNUMBERTOK) then
-  s := 'number'
- else if (ExpectedTok = CHARLITERALTOK) then
-  s := 'literal'
- else if (ExpectedTok = STRINGLITERALTOK) then
-  s := 'string'
- else
-  s := 'unknown token';
+  if ExpectedTok < IDENTTOK then
+    s := Spelling[ExpectedTok]
+  else if ExpectedTok = IDENTTOK then
+    s := 'identifier'
+  else if (ExpectedTok = INTNUMBERTOK) then
+    s := 'number'
+  else if (ExpectedTok = CHARLITERALTOK) then
+    s := 'literal'
+  else if (ExpectedTok = STRINGLITERALTOK) then
+    s := 'string'
+  else
+    s := 'unknown token';
 
- if Tok[i].Kind <> ExpectedTok then
-   Error(i, 'Syntax error, ' + ''''+ s +'''' + ' expected but ''' + GetSpelling(i) + ''' found');
+  if Tok[i].Kind <> ExpectedTok then
+    Error(i, 'Syntax error, ' + '''' + s + '''' + ' expected but ''' + GetSpelling(i) + ''' found');
 
-end;	//CheckTok
+end;
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: Byte; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; err: Boolean = True): Boolean;
 begin
 
   Result := False;
@@ -1212,42 +1244,42 @@ begin
      else
       Result := True;
 
-end;	//GetCommonConstType
+end;
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
 begin
 
- Result := 0;
+  Result := 0;
 
- if LeftType = RightType then		 // General rule
+  if LeftType = RightType then     // General rule
 
-  Result := LeftType
+    Result := LeftType
 
- else
+  else
   if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
     Result := LeftType;
 
   if (LeftType in Pointers) and (RightType in Pointers) then
     Result := LeftType;
 
- if LeftType = UNTYPETOK then Result := RightType;
+  if LeftType = UNTYPETOK then Result := RightType;
 
- if Result = 0 then
+  if Result = 0 then
     Error(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
 
-end;	//GetCommonType
+end;
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure DefineFilename(StrTokenIndex: Integer; StrValue: String);
+procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i: Integer;
 begin
@@ -1272,7 +1304,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
+procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i, len: Integer;
 begin
@@ -1317,7 +1349,7 @@ for i := 1 to len do
 //StaticStringData[NumStaticStrChars] := 0;
 //Inc(NumStaticStrChars);
 
-end;	//DefineStaticString
+end;
 
 
 // ----------------------------------------------------------------------------
