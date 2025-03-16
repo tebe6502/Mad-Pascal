@@ -15,25 +15,27 @@ set TEST_MODE=%1
 set PATH=%WUDSN_TOOLS_FOLDER%\PAS\FPC.jac;%WUDSN_TOOLS_FOLDER%\ASM\MADS\bin\windows_x86_64;%PATH%
 set MP_FOLDER=%~dp0..
 set MP_SRC_FOLDER=%MP_FOLDER%\src
-
-set TEST_EXE=%MP_SRC_FOLDER%\Test-0.exe
 set MP_EXE=%MP_SRC_FOLDER%\mp.exe
-
 set WUDSN_MP_EXE=%WUDSN_TOOLS_FOLDER%\PAS%\MP\bin\windows\mp.exe
+
+set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
+set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
+
+set MP_TESTS_FOLDER=%MP_SRC_FOLDER%\tests
 
 cd /d %MP_SRC_FOLDER%
 
 if not "%TEST_EXE%"=="" (
   if exist "%TEST_EXE%" del "%TEST_EXE%"
-  call fpc.bat %MP_SRC_FOLDER%\Test-0.pas
+  call fpc.bat %TEST_PAS%
   if errorlevel 1 goto :eof
-  if exist "%TEST_EXE%" (
-     echo Starting test program "%TEST_EXE%".
-     %TEST_EXE%
-  )
 )
 
 if not "%MP_EXE%"=="" (
+
+   if exist "%MP_EXE%" del "%MP_EXE%"
+   call fpc.bat mp.pas
+   if errorlevel 1 goto :eof
 
 rem Regression test with standard MP.
    if 1==1 (
@@ -50,9 +52,6 @@ rem Regression test with standard MP.
    echo INFO: Comiling with new version.
    echo ================================
    echo.
-   if exist "%MP_EXE%" del "%MP_EXE%"
-   call fpc.bat %MP_SRC_FOLDER%\mp.pas
-   if errorlevel 1 goto :eof
    if exist "%MP_EXE%" (
      call :run_tests %MP_EXE%
    )
@@ -152,7 +151,7 @@ rem Run all tests with a given mp.exe.
 rem IN: Path to mp.exe
 rem
 :run_tests
-  call :run_mp %1 %MP_SRC_FOLDER% Test-MP
+  call :run_mp %1 %MP_TESTS_FOLDER% Test-MP
   if "%TEST_MODE%"=="FAST" goto :eof
   call :run_mp %1 %MP_FOLDER%\samples\a8\games\PacMad pacmad
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fedorahat
