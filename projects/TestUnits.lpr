@@ -1,18 +1,9 @@
 program TestUnits;
 
-{$i define.inc}
+{$i Define.inc}
 
 uses
-  Crt,
-  Console,
-  Common,
-  FileIO,
-  MathEvaluate,
-  Scanner,
-  Utilities
-  {$IFDEF PAS2JS}
-     ,browserconsole
-  {$ENDIF},
+  Crt, Common, FileIO, MathEvaluate, Parser, Scanner, Utilities,
   SysUtils;
 
   procedure StartTest(Name: String);
@@ -83,7 +74,7 @@ uses
 
   procedure TestUnitFile;
   const
-    TEST_MP_FILE_PATH = 'Test-MP.pas';
+    TEST_MP_FILE_PATH = '..\src\tests\Test-MP.pas';
   var
     pathList: TPathList;
 
