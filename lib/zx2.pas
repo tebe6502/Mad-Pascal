@@ -31,8 +31,8 @@ procedure unZX2(inputPointer, outputPointer: pointer); register; assembler; over
 @description:
 ZX2 decompressor (Daniel Serpell)
 
-@param: inputPointer - source data address
-@param: outputPointer - destination data address
+@param: inputPointer - source data address :edx
+@param: outputPointer - destination data address :ecx
 *)
 
 asm
@@ -57,7 +57,7 @@ ZX0_dst         equ :ecx
 bitr            equ :ecx+2
 pntr            equ :TMP
 
-            ; Initial values for offset, source, destination and bitr
+; Initial values for offset, source, destination and bitr
 ;zx0_ini_block
 ;            .by $00, $00, <comp_data, >comp_data, <out_addr, >out_addr, $80
 
@@ -72,10 +72,8 @@ full_decomp
 	sty offset
 	sty offset+1
 
-
-              ; Get initialization block
+; Get initialization block
 ;              ldy #7
-
 ;copy_init     lda zx0_ini_block-1, y
 ;              sta offset-1, y
 ;              dey
@@ -119,7 +117,6 @@ cop0          lda   (ZX0_src), y
 
 ; Copy from last offset (repeat N bytes from last offset)
 ;    Elias(length)
-
               jsr   get_elias
               dex
 dzx0s_copy
@@ -163,8 +160,7 @@ cop1          lda   (pntr), y
 dzx0s_new_offset
               ; Read elias code for high part of offset
               jsr   get_elias
-              beq   toEnd  ; Read a 0, signals theend
-
+              beq   toEnd  ; Read a 0, signals the end
               ; Decrease and divide by 2
               dex
               txa
