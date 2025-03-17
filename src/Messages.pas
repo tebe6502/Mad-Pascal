@@ -36,7 +36,7 @@ procedure WritelnMsg;
 
 implementation
 
-uses Console, FileIO, Utilities;
+uses SysUtils, Console, FileIO, Utilities;
 
 // -----------------------------------------------------------------------------
 

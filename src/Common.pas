@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses FileIO, Types, StringUtilities;
+uses SysUtils, FileIO, Types, StringUtilities;
 
 // ----------------------------------------------------------------------------
 
@@ -666,7 +666,7 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
-uses SysUtils, Messages, Utilities;
+uses Messages, Utilities;
 
 // ----------------------------------------------------------------------------
 // Map modifier codes to the bits in the method status.

@@ -1,14 +1,11 @@
 unit StringUtilities;
 
-
-
 interface
+
+uses SysUtils;
 
 type
   TStringIndex = Integer;
-
-type
-  TStringArray = array of String;
 
 const
   TAB = ^I;   // Char for a TAB

@@ -1,3 +1,5 @@
+(* General Number Implementation                                              *)
+(* See https://weitz.de/ieee/ for IEEE representation details and tests.      *)
 unit Numbers;
 
 {$I Defines.inc}
@@ -17,7 +19,7 @@ function CastToSingle(const a: TNumber): TNumber;
 function CastToHalfSingle(const a: TNumber): TNumber;
 
 function Assign(const valType: Byte; const s: Single): TNumber;
-function Negate(var valType: Byte; const a: TNumber): TNumber;  // valType not const!
+function Negate(var valType: Byte; const a: TNumber): TNumber;  // valType it not const!
 function Add(const valType: Byte; const a: TNumber; const b: TNumber): TNumber;
 function Subtract(const valType: Byte; const a: TNumber; const b: TNumber): TNumber;
 function Multiply(const valType: Byte; const a: TNumber; const b: TNumber): TNumber;
@@ -27,7 +29,6 @@ function Divide(const valType: Byte; const a: TNumber; const b: TNumber): TNumbe
 // High Level - Only for RealNumbers
 function Frac(const valType: Byte; const a: TNumber): TNumber;
 function Trunc(const valType: Byte; const a: TNumber): TNumber;
-
 
 
 implementation
