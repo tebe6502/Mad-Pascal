@@ -611,7 +611,7 @@ var
 
 // ----------------------------------------------------------------------------
 
-	procedure ClearWordMemory(anArray: TWordMemory);
+procedure ClearWordMemory(anArray: TWordMemory);
 
 procedure AddDefine(X: String);
 
@@ -654,8 +654,6 @@ function InfoAboutToken(t: Byte): String;
 function IntToStr(const a: Int64): String;
 
 function LowBound(i: Integer; DataType: Byte): Int64;
-
-function Min(a, b: Integer): Integer;
 
 function SearchDefine(X: String): Integer;
 
@@ -842,21 +840,6 @@ function IntToStr(const a: Int64): String;
 (*----------------------------------------------------------------------------*)
 begin
  str(a, Result);
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function Min(a, b: Integer): Integer;
-begin
-
- if a < b then
-  Result := a
- else
-  Result := b;
-
 end;
 
 
@@ -1305,7 +1288,7 @@ else
 if (NumStaticStrChars + len > $FFFF) then
   begin
     writeln('DefineStaticString: ' + IntToStr(len));
-         RaiseHaltException(2);
+         RaiseHaltException(THaltException.COMPILING_ABORTED);
    end;
 
   for i := 1 to len do Data[i] := Ord(StrValue[i]);

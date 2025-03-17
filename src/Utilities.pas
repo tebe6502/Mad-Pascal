@@ -34,7 +34,7 @@ type
   end;
 
 // Replaces https://www.freepascal.org/docs-html/rtl/system/halt.html
-procedure RaiseHaltException(errnum: Longint = 0);
+procedure RaiseHaltException(errnum: Longint);
 
 {$IFDEF PAS2JS}
   {$I 'include\pas2js\Utilities-PAS2JS-Interface.inc'}

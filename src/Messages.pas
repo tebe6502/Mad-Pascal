@@ -382,7 +382,7 @@ begin
       OutFile.Erase;
     end;
 
-    RaiseHaltException(2);
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
 
   end;
 

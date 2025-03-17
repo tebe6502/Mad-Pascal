@@ -3161,7 +3161,7 @@ begin				// OptimizeASM
 
   if l > High(listing) then 
   begin WriteLn('Out of resources, LISTING');
-        RaiseHaltException(2);
+        RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
   for i := 0 to l-1 do
