@@ -10,4 +10,4 @@ type TInteger = Int64;
 type TInteger = Integer;
 {$ENDIF}
 
-type TStringIndex = Integer;
+

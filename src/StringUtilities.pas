@@ -4,6 +4,9 @@ unit StringUtilities;
 interface
 
 type
+  TStringIndex = Integer;
+
+type
   TStringArray = array of String;
 
 const
