@@ -7,9 +7,10 @@ unit MathEvaluate;
 
 interface
 
-{$i define.inc}
-
 uses SysUtils;
+
+{$i define.inc}
+{$i Types.inc}
 
 type
   TEvaluationResult = Single;
@@ -28,7 +29,7 @@ type
 type
   IEvaluationContext = interface
     function GetConstantName(const expression: String; var index: Integer): String;
-    function GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 
 

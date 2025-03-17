@@ -202,7 +202,7 @@ type
   public
     constructor Create;
     function GetConstantName(const expression: String; var index: Integer): String;
-    function GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 
   constructor TEvaluationContext.Create;
@@ -214,7 +214,7 @@ type
        Result:= Scanner.get_constant(index, expression);
   end;
 
-  function TEvaluationContext.GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+  function TEvaluationContext.GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   var identTemp: Integer;
   begin
 
