@@ -535,7 +535,7 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  Spelling: array [1..MAXTOKENNAMES] of TString;
+  TokenSpelling: array [1..MAXTOKENNAMES] of TString;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefines;
   IFTmpPosStack: array of Integer;
@@ -866,7 +866,7 @@ begin
 if i > NumTok then
   Result := 'no token'
 else if (Tok[i].Kind > 0) and (Tok[i].Kind < IDENTTOK) then
-  Result := Spelling[Tok[i].Kind]
+  Result := TokenSpelling[Tok[i].Kind]
 else if Tok[i].Kind = IDENTTOK then
   Result := 'identifier'
 else if (Tok[i].Kind = INTNUMBERTOK) or (Tok[i].Kind = FRACNUMBERTOK) then
@@ -1170,7 +1170,7 @@ var
 begin
 
   if ExpectedTok < IDENTTOK then
-    s := Spelling[ExpectedTok]
+    s := TokenSpelling[ExpectedTok]
   else if ExpectedTok = IDENTTOK then
     s := 'identifier'
   else if (ExpectedTok = INTNUMBERTOK) then

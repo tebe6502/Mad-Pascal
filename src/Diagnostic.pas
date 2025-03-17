@@ -67,8 +67,8 @@ begin
 
   for i := 1 to NumIdent do
     begin
-    DiagFile.Write( i, 6).Write( Ident[i].Block, 6).Write( Ident[i].Name, 30).Write( Spelling[Ident[i].Kind], 15);
-    if Ident[i].DataType <> 0 then DiagFile.Write( Spelling[Ident[i].DataType], 15) else DiagFile.Write( 'N/A', 15);
+    DiagFile.Write( i, 6).Write( Ident[i].Block, 6).Write( Ident[i].Name, 30).Write( TokenSpelling[Ident[i].Kind], 15);
+    if Ident[i].DataType <> 0 then DiagFile.Write( TokenSpelling[Ident[i].DataType], 15) else DiagFile.Write( 'N/A', 15);
     DiagFile.Write( Ident[i].NumAllocElements, 15).Write( IntToHex(Ident[i].Value, 8), 15);
     if (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) and not Ident[i].IsNotDead
     then DiagFile.Write( 'Yes', 5) else DiagFile.Write('', 5);
