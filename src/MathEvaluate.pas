@@ -9,7 +9,7 @@ interface
 
 {$I Defines.inc}
 
-uses SysUtils, Types;
+uses SysUtils, Types, StringUtilities;
 
 type
   TEvaluationResult = Single;
@@ -27,7 +27,7 @@ type
 
 type
   IEvaluationContext = interface
-    function GetConstantName(const expression: String; var index: Integer): String;
+    function GetConstantName(const expression: String; var index: TStringIndex): String;
     function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 

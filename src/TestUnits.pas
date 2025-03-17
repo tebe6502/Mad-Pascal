@@ -96,7 +96,7 @@ uses
 
   procedure TestUnitCommon;
   var
-    filePath: String;
+    filePath: TFilePath;
   begin
 
     StartTest('TestUnitCommon');

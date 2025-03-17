@@ -16,7 +16,7 @@ var
 
     Result := 0;
 
-    tmp := get_digit(k, s);
+    tmp := GetNumber(s, k);
     if tmp <> '' then
     begin
 
@@ -104,37 +104,37 @@ begin
   begin
 
     k := 1;
-    omin_spacje(k, s);
+    SkipWhitespaces(s,k);
 
     if s[k] <> '"' then
     begin
 
       par1 := GetParameter;
 
-      omin_spacje(k, s);
+      SkipWhitespaces(s,k);
       if s[k] <> ',' then Error(i, 'Syntax error, '','' expected but ''' + s[k] + ''' found');
 
       Inc(k);
     end;
 
-    omin_spacje(k, s);
+    SkipWhitespaces(s,k);
 
     if s[k] <> '"' then
     begin
 
       par2 := GetParameter;
 
-      omin_spacje(k, s);
+      SkipWhitespaces(s,k);
       if s[k] <> ',' then Error(i, 'Syntax error, '','' expected but ''' + s[k] + ''' found');
 
       Inc(k);
     end;
 
-    omin_spacje(k, s);
+    SkipWhitespaces(s,k);
 
     if s[k] <> '"' then Error(i, 'Syntax error, ''"'' expected but ''' + s[k] + ''' found');
 
-    s := get_string(k, s, True);
+    s := GetStringUpperCase(s, k);
 
     ActualParamType := ConstValType;
 

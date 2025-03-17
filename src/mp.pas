@@ -192,7 +192,7 @@ uses
 {$IFDEF PAS2JS}
          browserconsole,
 {$ENDIF}
-	Common, Console, Messages, Numbers, Scanner, Parser, Optimize, Diagnostic, MathEvaluate, FileIO, Types, Utilities;
+	Common, Console,  Diagnostic, FileIO, MathEvaluate, Messages, Numbers, Scanner, Optimize, Parser, StringUtilities, Types, Utilities;
 
 // Temporarily own variable, because main program is no class yet.
 var evaluationContext: IEvaluationContext;
@@ -201,7 +201,7 @@ type
   TEvaluationContext = class(TInterfacedObject, IEvaluationContext)
   public
     constructor Create;
-    function GetConstantName(const expression: String; var index: Integer): String;
+    function GetConstantName(const expression: String; var index: TStringIndex): String;
     function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 
@@ -209,9 +209,9 @@ type
   begin
   end;
 
-  function TEvaluationContext.GetConstantName(const expression: String; var index: Integer): String;
+  function TEvaluationContext.GetConstantName(const expression: String; var index: TStringIndex): String;
   begin
-       Result:= Scanner.get_constant(index, expression);
+       Result:= GetConstantUpperCase(expression, index);
   end;
 
   function TEvaluationContext.GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;

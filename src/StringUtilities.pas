@@ -11,7 +11,7 @@ type
   TStringArray = array of String;
 
 const
-  TAB = ^I;    // Char for a TAB
+  TAB = ^I;   // Char for a TAB
   CR = ^M;    // Char for a CR
   LF = ^J;    // Char for a LF
 
@@ -19,6 +19,7 @@ const
 
   AllowWhiteSpaces: set of Char = [' ', TAB, CR, LF];
   AllowQuotes: set of Char = ['''', '"'];
+  // TODO: Include '.'?
   AllowLabelFirstChars: set of Char = ['A'..'Z', '_'];
   AllowLabelChars: set of Char = ['A'..'Z', '0'..'9', '_', '.'];
   AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
@@ -27,7 +28,20 @@ const
 
 // ----------------------------------------------------------------------------
 
-function SplitStr(a: String; const Sep: Char): TStringArray;
+procedure SkipWhitespaces(const a: String; var i: TStringIndex);
+
+function GetNumber(const a: String; var i: TStringIndex): String;
+
+function GetConstantUpperCase(const a: String; var i: TStringIndex): String;
+
+function GetLabel(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
+function GetLabelUpperCase(const a: String; var i: TStringIndex): String;
+
+function GetString(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
+function GetStringUpperCase(const a: String; var i: TStringIndex): String;
+function GetFilePath(const a: String; var i: TStringIndex): String;
+
+function SplitStr(const a: String; const separatorCharacter: Char): TStringArray;
 
 // ----------------------------------------------------------------------------
 
@@ -37,59 +51,159 @@ implementation
 
 
 (*----------------------------------------------------------------------------*)
-(*  wczytaj dowolne znaki rozdzielone 'Sep'                          *)
-(*  jesli wystepuja znaki otwierajace ciag, czytaj taki ciag                  *)
+(* Skip whitespace characters until the next non-whitespace character.        *)
 (*----------------------------------------------------------------------------*)
-function SplitStr(a: String; const Sep: Char): TStringArray;
+procedure SkipWhitespaces(const a: String; var i: TStringIndex);
+begin
 
-var
-  znak: Char;
-  i, len: Integer;
-  txt, s: String;
+  if a <> '' then
+    while (i <= length(a)) and (a[i] in AllowWhiteSpaces) do Inc(i);
 
+end;
 
-  procedure omin_spacje(var i: Integer; var a: String);
-  (*----------------------------------------------------------------------------*)
-  (*  omijamy tzw. "biale spacje" czyli spacje, tabulatory          *)
-  (*----------------------------------------------------------------------------*)
+(*----------------------------------------------------------------------------*)
+(*  Get numeric string starting with characters '0'..'9','%','$'.             *)
+(*----------------------------------------------------------------------------*)
+function GetNumber(const a: String; var i: TStringIndex): String;
+begin
+  Result := '';
+
+  if a <> '' then
   begin
 
-    if a <> '' then
-      while (i <= length(a)) and (a[i] in AllowWhiteSpaces) do Inc(i);
+    SkipWhitespaces(a, i);
+
+    if UpCase(a[i]) in AllowDigitFirstChars then
+    begin
+
+      Result := UpCase(a[i]);
+      Inc(i);
+
+      while UpCase(a[i]) in AllowDigitChars do
+      begin
+        Result := Result + UpCase(a[i]);
+        Inc(i);
+      end;
+
+    end;
 
   end;
 
+end;
 
-  function get_string(var i: Integer; var a: String): String;
-    (*----------------------------------------------------------------------------*)
-    (*  pobiera ciag znakow, ograniczony znakami '' lub ""                        *)
-    (*  podwojny '' oznacza literalne '                                           *)
-    (*  podwojny "" oznacza literalne "                                           *)
-    (*----------------------------------------------------------------------------*)
-  var
-    len: Integer;
-    znak, gchr: Char;
+(*----------------------------------------------------------------------------*)
+(*  Get label starting with characters 'A'..'Z','_', '.'                      *)
+(*----------------------------------------------------------------------------*)
+function GetConstantUpperCase(const a: String; var i: TStringIndex): String;
+begin
+
+  Result := '';
+
+  if a <> '' then
   begin
-    Result := '';
 
-    omin_spacje(i, a);
-    if not (a[i] in AllowQuotes) then exit;
+    SkipWhitespaces(a, i);
+
+    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
+      while UpCase(a[i]) in AllowLabelChars do
+      begin
+
+        Result := Result + UpCase(a[i]);
+
+        Inc(i);
+      end;
+
+  end;
+
+end;
+
+
+(*----------------------------------------------------------------------------*)
+(* Get label starting with characters 'A'..'Z','_', '.', '/', '\'.            *)
+(*----------------------------------------------------------------------------*)
+function GetLabel(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
+begin
+
+  Result := '';
+
+  if a <> '' then
+  begin
+
+    SkipWhitespaces(a, i);
+
+    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
+      while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do
+      begin
+
+        if upperCase then
+          Result := Result + UpCase(a[i])
+        else
+          Result := Result + a[i];
+
+        Inc(i);
+      end;
+
+  end;
+
+end;
+
+
+(*----------------------------------------------------------------------------*)
+(* Get upper-case label starting with characters 'A'..'Z','_', '.', '/', '\'. *)
+(*----------------------------------------------------------------------------*)
+function GetLabelUpperCase(const a: String; var i: TStringIndex): String;
+begin
+  Result := GetLabel(a, True, i);
+end;
+
+
+(*----------------------------------------------------------------------------*)
+(*  Geta string, delimited by the characters '' or ""                         *)
+(*  Double '' means literal '                                                 *)
+(*  Double "" means literal "                                                 *)
+(*----------------------------------------------------------------------------*)
+function GetString(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
+var
+  len: Integer;
+  znak, gchr: Char;
+begin
+  Result := '';
+
+  SkipWhitespaces(a, i);
+
+  if a[i] = '%' then
+  begin
+
+    while UpCase(a[i]) in ['A'..'Z', '%'] do
+    begin
+      Result := Result + Upcase(a[i]);
+      Inc(i);
+    end;
+
+  end
+  else
+  if not (a[i] in AllowQuotes) then
+  begin
+
+    Result := GetLabel(a, upperCase, i);
+
+  end
+  else
+  begin
 
     gchr := a[i];
     len := length(a);
 
     while i <= len do
     begin
-      Inc(i);         // omijamy pierwszy znak ' lub "
+      Inc(i);   // we skip the first character ' or "
 
       znak := a[i];
 
       if znak = gchr then
       begin
         Inc(i);
-        if a[i] = gchr then znak := gchr
-        else
-          exit;
+        Break;
       end;
 
       Result := Result + znak;
@@ -97,12 +211,35 @@ var
 
   end;
 
+end;
 
-  function ciag_ograniczony(var i: Integer; var a: String): String;
-    (*----------------------------------------------------------------------------*)
-    (*  pobiera ciag ograniczony dwoma znakami 'LEWA' i 'PRAWA'                   *)
-    (*  znaki 'LEWA' i 'PRAWA' moga byc zagniezdzone                              *)
-    (*----------------------------------------------------------------------------*)
+function GetStringUpperCase(const a: String; var i: TStringIndex): String;
+begin
+  Result := GetString(a, True, i);
+end;
+
+function GetFilePath(const a: String; var i: TStringIndex): String;
+begin
+  Result := GetString(a, False, i);
+end;
+
+
+(*----------------------------------------------------------------------------*)
+(* Read sequence of characters separated by 'separatorCharacter'.             *)
+(* If there are characters opening the string, read such a string             *)
+(*----------------------------------------------------------------------------*)
+function SplitStr(const a: String; const separatorCharacter: Char): TStringArray;
+
+var
+  znak: Char;
+  i, len: Integer;
+  txt, s: String;
+
+  function GetParenthesizedString(const a: String; var i: TStringIndex): String;
+    (*------------------------------------------------------------------------*)
+    (* Takes a sequence bounded by two characters '(' and ')'                 *)
+    (* The characters '(' and ')' can be nested                               *)
+    (*------------------------------------------------------------------------*)
   var
     nawias, len: Integer;
     znak, lewa, prawa: Char;
@@ -140,7 +277,7 @@ var
       if znak in AllowQuotes then
       begin
 
-        txt := get_string(i, a);
+        txt := GetStringUpperCase(a, i);
 
         Result := Result + znak + txt + znak;
 
@@ -182,7 +319,7 @@ begin
 
   while i <= len do
 
-    if a[i] = Sep then
+    if a[i] = separatorCharacter then
     begin
 
       AddString;
@@ -193,13 +330,13 @@ begin
     else
 
       case UpCase(a[i]) of
-        '(': s := s + ciag_ograniczony(i, a);
+        '(': s := s + GetParenthesizedString(a, i);
 
         '''', '"':
         begin
           znak := a[i];
 
-          txt := get_string(i, a);
+          txt := GetStringUpperCase(a, i);
 
           s := s + znak + txt + znak;
 
