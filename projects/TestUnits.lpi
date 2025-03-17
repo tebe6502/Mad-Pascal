@@ -38,10 +38,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\define.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\src\Diagnostic.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -78,10 +74,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\Types.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\src\Utilities.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -91,6 +83,14 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\TestUnits.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Defines.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Types.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

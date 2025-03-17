@@ -2,13 +2,12 @@ unit FileIO;
 // Interfaced objects are implicitly reference counted and freed.
 // Therefore there are no explicit Free method on the files.  
 
+{$I Defines.inc}
+
 interface
 
-uses SysUtils;
+uses SysUtils, Types;
 
-{$i define.inc}
-
-{$i Types.inc}
 {$SCOPEDENUMS ON}
 
 type

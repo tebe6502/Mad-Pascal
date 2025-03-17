@@ -182,7 +182,7 @@ Contributors:
 
 program MADPASCAL;
 
-{$i define.inc}
+{$I Defines.inc}
 
 uses
     SysUtils,
@@ -192,7 +192,7 @@ uses
 {$IFDEF PAS2JS}
          browserconsole,
 {$ENDIF}
-	Common, Console, Messages, Numbers, Scanner, Parser, Optimize, Diagnostic, MathEvaluate, FileIO, Utilities;
+	Common, Console, Messages, Numbers, Scanner, Parser, Optimize, Diagnostic, MathEvaluate, FileIO, Types, Utilities;
 
 // Temporarily own variable, because main program is no class yet.
 var evaluationContext: IEvaluationContext;
@@ -6864,7 +6864,7 @@ begin
 	    if Ident[IdentTemp].PassMethod <> TParameterPassingMethod.VARPASSING then
 
 	      if Ident[IdentIndex].Param[NumActualParams].DataType in [RECORDTOK, OBJECTTOK] then
-	        Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name + '"')
+	        Error(i, 'Incompatible types: got "' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + TypeArray[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name + '"')
 	      else
 	        GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, Ident[IdentTemp].DataType);
 
@@ -6913,7 +6913,7 @@ begin
 	      if Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK] then
 
 	      else
-	        Error(i, IncompatibleTypesArray, IdentTemp, Ident[IdentIndex].Param[NumActualParams].DataType);
+	        Error(i, IncompatibleTypes, IdentTemp, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	     end else
 	      Error(i, IncompatibleTypes, 0, Ident[IdentTemp].AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
@@ -7016,7 +7016,7 @@ begin
 	   if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> AllocElementType then begin
 
 	     if (Ident[IdentIndex].Param[NumActualParams].AllocElementType = UNTYPETOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) and ({Ident[IdentIndex].Param[NumActualParams]} Ident[IdentTemp].NumAllocElements > 0) then
-	      Error(i, IncompatibleTypesArray, IdentTemp, POINTERTOK)
+	      Error(i, IncompatibleTypes, IdentTemp, POINTERTOK)
 	     else
 	      if (Ident[IdentIndex].Param[NumActualParams].AllocElementType <> PROCVARTOK) and (Ident[IdentIndex].Param[NumActualParams].NumAllocElements > 0) then
 	       Error(i, IncompatibleTypes, 0, AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
@@ -7149,7 +7149,7 @@ begin
 	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
 	  asm65(#9'sta :bp2+1');
 
-	  j := RecordSize(GetIdent(Types[Ident[IdentIndex].Param[NumActualParams].Numallocelements].Field[0].Name ) );
+	  j := RecordSize(GetIdent(TypeArray[Ident[IdentIndex].Param[NumActualParams].Numallocelements].Field[0].Name ) );
 
 //	writeln('1: ',Ident[IdentIndex].Name,',',Ident[IdentIndex].Kind ,',',  Ident[IdentIndex].Param[NumActualParams].name,',',Ident[IdentIndex].Param[NumActualParams].DataType,',',j);
 
@@ -7528,7 +7528,7 @@ case Tok[i].Kind of
 
        if IdentIndex = 0 then Error(i, TypeMismatch);
 
-       IdentTemp := GetIdent(Types[Ident[IdentIndex].NumAllocElements].Field[Types[Ident[IdentIndex].NumAllocElements].NumFields].Name);
+       IdentTemp := GetIdent(TypeArray[Ident[IdentIndex].NumAllocElements].Field[TypeArray[Ident[IdentIndex].NumAllocElements].NumFields].Name);
 
        if Ident[IdentTemp].NumAllocElements = 0 then Error(i, TypeMismatch);
 
@@ -7597,7 +7597,7 @@ case Tok[i].Kind of
 
        if IdentIndex = 0 then Error(i, TypeMismatch);
 
-       IdentTemp := GetIdent(Types[Ident[IdentIndex].NumAllocElements].Field[1].Name);
+       IdentTemp := GetIdent(TypeArray[Ident[IdentIndex].NumAllocElements].Field[1].Name);
 
        if Ident[IdentTemp].NumAllocElements = 0 then Error(i, TypeMismatch);
 
@@ -11052,10 +11052,10 @@ case Tok[i].Kind of
 		      IdentTemp := GetIdentResult(Ident[IdentTemp].ProcAsBlock);
 
 		    {if (Tok[i + 3].Kind <> OBRACKETTOK) and ((Elements(IdentTemp) <> Elements(IdentIndex)) or (Ident[IdentTemp].AllocElementType <> Ident[IdentIndex].AllocElementType)) then
-		     Error(k, IncompatibleTypesArray, GetIdent(Tok[k].Name), ExpressionType )
+		     Error(k, IncompatibleTypes, GetIdent(Tok[k].Name), ExpressionType )
 		    else
 		     if (Elements(IdentTemp) > 0) and (Tok[i + 3].Kind <> OBRACKETTOK) then
-		      Error(k, IncompatibleTypesArray, IdentTemp, ExpressionType )
+		      Error(k, IncompatibleTypes, IdentTemp, ExpressionType )
 		    else}
 
 		    if Ident[IdentTemp].AllocElementType = RECORDTOK then
@@ -11066,7 +11066,7 @@ case Tok[i].Kind of
 
 		      if ((Ident[IdentTemp].NumAllocElements > 0) {and (Ident[IdentTemp].AllocElementType <> RECORDTOK)}) and ((Ident[IdentIndex].NumAllocElements > 0) {and (Ident[IdentIndex].AllocElementType <> RECORDTOK)}) then
 
-		        Error(k, IncompatibleTypesArray, IdentTemp, -IdentIndex)
+		        Error(k, IncompatibleTypes, IdentTemp, -IdentIndex)
 
 		      else begin
 
@@ -11076,7 +11076,7 @@ case Tok[i].Kind of
 		           (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].NumAllocElements = 0) then
 			  Error(k, 'Incompatible types: got "^'+InfoAboutToken(Ident[IdentTemp].AllocElementType)+'" expected "^' + InfoAboutToken(Ident[IdentIndex].AllocElementType) + '"')
 			else
-			  Error(k, IncompatibleTypesArray, IdentTemp, ExpressionType);
+			  Error(k, IncompatibleTypes, IdentTemp, ExpressionType);
 
 		     end;
 
@@ -11091,11 +11091,11 @@ case Tok[i].Kind of
 			case IndirectionLevel of
 			           ASPOINTER:
 				   if (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] ) then
-				    Error(k, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+				    Error(k, 'Incompatible types: got "' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 
 			  ASPOINTERTOPOINTER:
 				   if (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK] ) then
-				    Error(k, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+				    Error(k, 'Incompatible types: got "' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "^' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 			else
 			  GetCommonType(i + 1, VarType, ExpressionType);
 
@@ -11110,7 +11110,7 @@ case Tok[i].Kind of
 
 		      else
 		      if (VarType in [RECORDTOK, OBJECTTOK]) then
-                        Error(i, 'Incompatible types: got "' + InfoAboutToken(ExpressionType) +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"')
+                        Error(i, 'Incompatible types: got "' + InfoAboutToken(ExpressionType) +'" expected "' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"')
 		      else
 		        GetCommonType(i + 1, VarType, ExpressionType);
 
@@ -11209,11 +11209,11 @@ case Tok[i].Kind of
 		  case IndirectionLevel of
 		    ASPOINTER:
 			   if (Tok[k + 1].Kind <> DEREFERENCETOK) and (Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentTemp].DataType in [RECORDTOK, OBJECTTOK] ) then
-			    Error(k, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+			    Error(k, 'Incompatible types: got "^' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 
  		    ASPOINTERTOPOINTER:
 //			   if {(Tok[i + 1].Kind <> DEREFERENCETOK) and }(Ident[IdentIndex].AllocElementType <> Ident[IdentTemp].AllocElementType) and not ( Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] ) then
-//			    Error(k, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+//			    Error(k, 'Incompatible types: got "^' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 		  else
   		    GetCommonType(i + 1, VarType, ExpressionType);
 
@@ -11232,9 +11232,9 @@ case Tok[i].Kind of
 
 		   if yes and (ADDRESS = false) and (ExpressionType in [RECORDTOK, OBJECTTOK]) then
 	  	      if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then
-                        Error(i, 'Incompatible types: got "^' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"')
+                        Error(i, 'Incompatible types: got "^' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"')
 		      else
-                        Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+                        Error(i, 'Incompatible types: got "' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "^' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 
 	       end;
 
@@ -11279,16 +11279,16 @@ case Tok[i].Kind of
 //writeln( Ident[IdentIndex].Name,',', Ident[IdentIndex].NumAllocElements, ',', Ident[IdentIndex].AllocElementType  ,' / ', Ident[IdentTemp].Name,',', Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].AllocElementType );
 //writeln( '>', Ident[IdentIndex].Name,',', Ident[IdentIndex].DataType, ',', Ident[IdentIndex].AllocElementTYpe );
 //writeln( '>', Ident[IdentTemp].Name,',', Ident[IdentTemp].DataType, ',', Ident[IdentTemp].AllocElementTYpe );
-//writeln(Types[5].Field[0].Name);
+//writeln(TypeArray[5].Field[0].Name);
 
 		if IdentTemp > 0 then
 
 		if Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements then		// porownanie indeksow do tablicy TYPES
 //		  Error(i, IncompatibleTypeOf, IdentTemp);
 		  if (Ident[IdentIndex].NumAllocElements = 0) then
-                    Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "' + InfoAboutToken(Ident[IdentIndex].DataType) + '"')
+                    Error(i, 'Incompatible types: got "' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "' + InfoAboutToken(Ident[IdentIndex].DataType) + '"')
 	          else
-                    Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "' + Types[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
+                    Error(i, 'Incompatible types: got "' + TypeArray[Ident[IdentTemp].NumAllocElements].Field[0].Name  +'" expected "' + TypeArray[Ident[IdentIndex].NumAllocElements].Field[0].Name + '"');
 
 
 		a65(TCode65.subBX);
@@ -11473,7 +11473,7 @@ case Tok[i].Kind of
 
 		    if Ident[IdentTemp].AllocElementType <> RECORDTOK then
 		     if (j <> integer(Ident[IdentTemp].NumAllocElements * DataSize[Ident[IdentTemp].AllocElementType])) then
-		       Error(i, IncompatibleTypesArray, IdentTemp, -IdentIndex);
+		       Error(i, IncompatibleTypes, IdentTemp, -IdentIndex);
 
 	   	    a65(TCode65.subBX);
 		    StopOptimization;
@@ -11692,7 +11692,7 @@ case Tok[i].Kind of
 
        SelectorType := Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].AllocElementType;
 
-       EnumName := Types[Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].NumAllocElements].Field[0].Name;
+       EnumName := TypeArray[Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].NumAllocElements].Field[0].Name;
 
     end else
 
@@ -14847,7 +14847,7 @@ procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarD
 var tmpVarDataSize_, ParamIndex{, idx}: integer;
 begin
 
-//	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
+//	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',TypeArray[NumAllocElements].Block,' | ', AllocElementType);
 
    if ( (VarType in Pointers) and (AllocElementType = RECORDTOK) ) then begin
 
@@ -14875,16 +14875,16 @@ begin
 
 //writeln(NumAllocElements);
 //!@!@
-	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do									// label: ^record
-	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
+	 for ParamIndex := 1 to TypeArray[NumAllocElements].NumFields do									// label: ^record
+	  if (TypeArray[NumAllocElements].Block = 1) or (TypeArray[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
 
-//	    writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements);
+//	    writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + TypeArray[NumAllocElements].Field[ParamIndex].Name,',',TypeArray[NumAllocElements].Field[ParamIndex].DataType,',',TypeArray[NumAllocElements].Field[ParamIndex].AllocElementType,',',TypeArray[NumAllocElements].Field[ParamIndex].NumAllocElements);
 
-	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
+	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + TypeArray[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
-	    Types[NumAllocElements].Field[ParamIndex].DataType,
-	    Types[NumAllocElements].Field[ParamIndex].NumAllocElements,
-	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, 0, DATAORIGINOFFSET);
+	    TypeArray[NumAllocElements].Field[ParamIndex].DataType,
+	    TypeArray[NumAllocElements].Field[ParamIndex].NumAllocElements,
+	    TypeArray[NumAllocElements].Field[ParamIndex].AllocElementType, 0, DATAORIGINOFFSET);
 
 	    Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize_;
 	    Ident[NumIdent].PassMethod := TParameterPassingMethod.VARPASSING;
@@ -14897,22 +14897,22 @@ begin
    end else
 
 	if (VarType in [RECORDTOK, OBJECTTOK]) then											// label: record
-	 for ParamIndex := 1 to Types[NumAllocElements].NumFields do
-	  if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
+	 for ParamIndex := 1 to TypeArray[NumAllocElements].NumFields do
+	  if (TypeArray[NumAllocElements].Block = 1) or (TypeArray[NumAllocElements].Block = BlockStack[BlockStackTop]) then begin
 
-//	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
+//	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + TypeArray[NumAllocElements].Field[ParamIndex].Name,',',TypeArray[NumAllocElements].Field[ParamIndex].DataType,',',TypeArray[NumAllocElements].Field[ParamIndex].AllocElementType,',',TypeArray[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
 
  	    tmpVarDataSize_ := VarDataSize;
 
-	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
+	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + TypeArray[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
-	    Types[NumAllocElements].Field[ParamIndex].DataType,
-	    Types[NumAllocElements].Field[ParamIndex].NumAllocElements,
-	    Types[NumAllocElements].Field[ParamIndex].AllocElementType, ord(isAbsolute) * ConstVal);
+	    TypeArray[NumAllocElements].Field[ParamIndex].DataType,
+	    TypeArray[NumAllocElements].Field[ParamIndex].NumAllocElements,
+	    TypeArray[NumAllocElements].Field[ParamIndex].AllocElementType, ord(isAbsolute) * ConstVal);
 
 	    if isAbsolute then
-	      if not (Types[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then				// fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
-		inc(ConstVal, VarDataSize - tmpVarDataSize_);//    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
+	      if not (TypeArray[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then				// fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
+		inc(ConstVal, VarDataSize - tmpVarDataSize_);//    DataSize[TypeArray[NumAllocElements].Field[ParamIndex].DataType]);
 
 	  end;
 
@@ -15014,18 +15014,18 @@ end;
 if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
 
 //  if ParamIndex = 1 then begin
-   asm65(#9'sta ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name);
-   asm65(#9'sty ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name + '+1');
+   asm65(#9'sta ' + TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name);
+   asm65(#9'sty ' + TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name + '+1');
 
-   DefineIdent(i, Types[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name, VARIABLE,  WORDTOK, 0 , 0, 0);
+   DefineIdent(i, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name, VARIABLE,  WORDTOK, 0 , 0, 0);
    Ident[NumIdent].PassMethod := TParameterPassingMethod.VARPASSING;
    Ident[NumIdent].AllocElementType := WORDTOK;
 //  end;
 
  NumAllocElements := 0;
 
- for ParamIndex := 1 to Types[Ident[BlockIdentIndex].ObjectIndex].NumFields do
-  if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = 0 then begin
+ for ParamIndex := 1 to TypeArray[Ident[BlockIdentIndex].ObjectIndex].NumFields do
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = 0 then begin
 
 
     if NumAllocElements > 0 then
@@ -15042,29 +15042,29 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
        asm65(#9'iny');
       end;
 
-    asm65(#9'sta ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name);
-    asm65(#9'sty ' + Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name+'+1');
+    asm65(#9'sta ' + TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name);
+    asm65(#9'sty ' + TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name+'+1');
 
 
-  if ParamIndex <> Types[Ident[BlockIdentIndex].ObjectIndex].NumFields then begin
+  if ParamIndex <> TypeArray[Ident[BlockIdentIndex].ObjectIndex].NumFields then begin
 
-   if (Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = POINTERTOK) and
-      (Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements > 0) then begin
+   if (TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = POINTERTOK) and
+      (TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements > 0) then begin
 
-      NumAllocElements := Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements and $ffff;
+      NumAllocElements := TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements and $ffff;
 
-      if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements shr 16 > 0 then
-       NumAllocElements:=(NumAllocElements * (Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements shr 16));
+      if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements shr 16 > 0 then
+       NumAllocElements:=(NumAllocElements * (TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements shr 16));
 
-      NumAllocElements := NumAllocElements * DataSize[ Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType ];
+      NumAllocElements := NumAllocElements * DataSize[ TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType ];
 
    end else
-    case Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType of
+    case TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType of
 	      FILETOK: NumAllocElements := 12;
-     STRINGPOINTERTOK: NumAllocElements := Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements;
-	    RECORDTOK: NumAllocElements := ObjectRecordSize(Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements);
+     STRINGPOINTERTOK: NumAllocElements := TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements;
+	    RECORDTOK: NumAllocElements := ObjectRecordSize(TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements);
     else
-      NumAllocElements := DataSize[ Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType ];
+      NumAllocElements := DataSize[ TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType ];
     end;
 
   end;
@@ -15104,13 +15104,13 @@ for ParamIndex := 1 to NumParams do
 
       tmpVarDataSize := VarDataSize;
 
-      for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin
+      for j := 1 to TypeArray[Param[ParamIndex].NumAllocElements].NumFields do begin
 
-       DefineIdent(i, Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,
+       DefineIdent(i, Param[ParamIndex].Name + '.' + TypeArray[Param[ParamIndex].NumAllocElements].Field[j].Name,
 		   VARIABLE,
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0, DATAORIGINOFFSET);
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].DataType,
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0, DATAORIGINOFFSET);
 
        Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize;
        Ident[NumIdent].PassMethod := Param[ParamIndex].PassMethod;
@@ -15151,13 +15151,13 @@ for ParamIndex := 1 to NumParams do
 																	//
       tmpVarDataSize := VarDataSize;													//
 																	//
-      for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin							//
+      for j := 1 to TypeArray[Param[ParamIndex].NumAllocElements].NumFields do begin							//
 																	//
-       DefineIdent(i, Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,				//
+       DefineIdent(i, Param[ParamIndex].Name + '.' + TypeArray[Param[ParamIndex].NumAllocElements].Field[j].Name,				//
 		   VARIABLE,														//
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,								//
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,							//
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0, DATAORIGINOFFSET);				//
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].DataType,								//
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,							//
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0, DATAORIGINOFFSET);				//
 																	//
        Ident[NumIdent].Value := Ident[NumIdent].Value - tmpVarDataSize;									//
        Ident[NumIdent].PassMethod := Param[ParamIndex].PassMethod;									//
@@ -15171,15 +15171,15 @@ for ParamIndex := 1 to NumParams do
      end else
 
      if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then
-      for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin
+      for j := 1 to TypeArray[Param[ParamIndex].NumAllocElements].NumFields do begin
 
-// writeln(Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,',',Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,',',Types[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,',',Types[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType);
+// writeln(Param[ParamIndex].Name + '.' + TypeArray[Param[ParamIndex].NumAllocElements].Field[j].Name,',',TypeArray[Param[ParamIndex].NumAllocElements].Field[j].DataType,',',TypeArray[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,',',TypeArray[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType);
 
-	 DefineIdent(i, Param[ParamIndex].Name + '.' + Types[Param[ParamIndex].NumAllocElements].Field[j].Name,
+	 DefineIdent(i, Param[ParamIndex].Name + '.' + TypeArray[Param[ParamIndex].NumAllocElements].Field[j].Name,
 		   VARIABLE,
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].DataType,
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,
-		   Types[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0);
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].DataType,
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].NumAllocElements,
+		   TypeArray[Param[ParamIndex].NumAllocElements].Field[j].AllocElementType, 0);
 
        Ident[NumIdent].PassMethod := Param[ParamIndex].PassMethod;
       end;
@@ -15207,13 +15207,13 @@ if IsFunction then begin	//DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType
     end;
 
     if FunctionResultType in [RECORDTOK, OBJECTTOK] then
-     for j := 1 to Types[FunctionNumAllocElements].NumFields do begin
+     for j := 1 to TypeArray[FunctionNumAllocElements].NumFields do begin
 
-       DefineIdent(i, 'RESULT.'+Types[FunctionNumAllocElements].Field[j].Name,
+       DefineIdent(i, 'RESULT.'+TypeArray[FunctionNumAllocElements].Field[j].Name,
 		   VARIABLE,
-		   Types[FunctionNumAllocElements].Field[j].DataType,
-		   Types[FunctionNumAllocElements].Field[j].NumAllocElements,
-		   Types[FunctionNumAllocElements].Field[j].AllocElementType, 0);
+		   TypeArray[FunctionNumAllocElements].Field[j].DataType,
+		   TypeArray[FunctionNumAllocElements].Field[j].NumAllocElements,
+		   TypeArray[FunctionNumAllocElements].Field[j].AllocElementType, 0);
 
 //       Ident[GetIdent(iname)].PassMethod := VALPASSING;
      end;
@@ -15312,42 +15312,42 @@ end;
 
 // Object variable definitions
 if Ident[BlockIdentIndex].ObjectIndex > 0 then
- for ParamIndex := 1 to Types[Ident[BlockIdentIndex].ObjectIndex].NumFields do begin
+ for ParamIndex := 1 to TypeArray[Ident[BlockIdentIndex].ObjectIndex].NumFields do begin
 
   tmpVarDataSize := VarDataSize;
 
 {
-  writeln(Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,',',
-          Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType,',',
-          Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,',',
-          Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType);
+  writeln(TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,',',
+          TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType,',',
+          TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,',',
+          TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType);
 }
 
-  if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = OBJECTTOK then Error(i, '-- under construction --');
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = OBJECTTOK then Error(i, '-- under construction --');
 
-  if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = RECORDTOK then ConstVal:=0;
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = RECORDTOK then ConstVal:=0;
 
-  if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType in [POINTERTOK, STRINGPOINTERTOK] then
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType in [POINTERTOK, STRINGPOINTERTOK] then
 
-  DefineIdent(i, Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,
-	      VARIABLE, Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType,
-	      Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,
-	      Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType, 0)
+  DefineIdent(i, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,
+	      VARIABLE, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType,
+	      TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,
+	      TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType, 0)
   else
 
-  DefineIdent(i, Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,
+  DefineIdent(i, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,
   	      VARIABLE, POINTERTOK,
-	      Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,
-	      Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType, 0);
+	      TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements,
+	      TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType, 0);
 
   Ident[NumIdent].PassMethod := TParameterPassingMethod.VARPASSING;
 
   VarDataSize := tmpVarDataSize + DataSize[POINTERTOK];
 
-  if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = OBJECTVARIABLE then begin
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = OBJECTVARIABLE then begin
    Ident[NumIdent].Value := ConstVal + DATAORIGIN;
 
-   inc(ConstVal, DataSize[Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType]);
+   inc(ConstVal, DataSize[TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType]);
 
    VarDataSize := tmpVarDataSize;
   end;

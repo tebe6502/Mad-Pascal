@@ -1,31 +1,29 @@
 unit Scanner;
 
+{$I Defines.inc}
+
 interface
 
-{$I define.inc}
-
-uses StringUtilities;
-
-{$I Types.inc}
+uses StringUtilities, Types;
 
 // ----------------------------------------------------------------------------
 
-	procedure TokenizeProgram(UsesOn: Boolean = true);
+procedure TokenizeProgram(UsesOn: Boolean = True);
 
-	procedure TokenizeMacro(a: string; Line, Spaces: integer);
-	
-	// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-	procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
-	
-	function get_digit(var i:TStringIndex; const a:string): string;
+procedure TokenizeMacro(a: String; Line, Spaces: Integer);
 
-	function get_constant(var i:TStringIndex; const a:string): string;
+// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
+procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
 
-	function get_label(var i:TStringIndex; const a:string; up: Boolean = true): string;
+function get_digit(var i: TStringIndex; const a: String): String;
 
-	function get_string(var i:TStringIndex; const a:string; up: Boolean = true): string;
+function get_constant(var i: TStringIndex; const a: String): String;
 
-	procedure omin_spacje (var i:TStringIndex; const a:string);
+function get_label(var i: TStringIndex; const a: String; up: Boolean = True): String;
+
+function get_string(var i: TStringIndex; const a: String; up: Boolean = True): String;
+
+procedure omin_spacje(var i: TStringIndex; const a: String);
 
 // ----------------------------------------------------------------------------
 

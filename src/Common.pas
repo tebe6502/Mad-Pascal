@@ -1,10 +1,10 @@
 unit Common;
 
+{$I Defines.inc}
+
 interface
 
-uses FileIO, StringUtilities;
-{$i define.inc}
-{$i Types.inc}
+uses FileIO, Types, StringUtilities;
 
 // ----------------------------------------------------------------------------
 
@@ -532,7 +532,7 @@ var
 
   Data, DataSegment, StaticStringData: TWordMemory;
 
-  Types: array [1..MAXTYPES] of TType;
+  TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
   Spelling: array [1..MAXTOKENNAMES] of TString;

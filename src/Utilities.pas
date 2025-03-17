@@ -1,9 +1,8 @@
 unit Utilities;
 
-interface
+{$I defines.inc}
 
-{$i define.inc}
-{$i Types.inc}
+interface
 
 type TExitCode = Longint;
 

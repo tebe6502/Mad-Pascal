@@ -1,9 +1,10 @@
 unit Numbers;
 
+{$I Defines.inc}
+
 interface
 
-{$i define.inc}
-{$i Types.inc}
+uses Types;
 
 type
   TNumber = Int64;
@@ -454,7 +455,7 @@ begin
 
     MoveTFloat(a, ftmp);
 
-    fl:=ToSingle(ftmp);
+    fl := ToSingle(ftmp);
 
     fl := int(fl);
 
@@ -485,7 +486,7 @@ begin
 
     MoveTFloat(a, ftmp);
 
-    fl:=ToSingle(ftmp);
+    fl := ToSingle(ftmp);
 
     fl := System.frac(fl);
 

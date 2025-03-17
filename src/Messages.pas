@@ -2,9 +2,9 @@ unit Messages;
 
 interface
 
-{$i define.inc}
+{$I Defines.inc}
 
-uses Common, StringUtilities;
+uses Common, StringUtilities, Types;
 
 type
   TErrorCode =
@@ -207,12 +207,12 @@ begin
             InfoAboutToken(Ident[identIndex].AllocElementType) + '"'
         else
         if Ident[abs(srcType)].AllocElementType in [RECORDTOK, OBJECTTOK] then
-          Result := Result + '"^' + Types[Ident[abs(srcType)].NumAllocElements].Field[0].Name + '"'
+          Result := Result + '"^' + TypeArray[Ident[abs(srcType)].NumAllocElements].Field[0].Name + '"'
         else
         begin
 
           if Ident[abs(srcType)].DataType in [RECORDTOK, OBJECTTOK] then
-            Result := Result + '"' + Types[Ident[abs(srcType)].NumAllocElements].Field[0].Name + '"'
+            Result := Result + '"' + TypeArray[Ident[abs(srcType)].NumAllocElements].Field[0].Name + '"'
           else
             Result := Result + '"Array[0..' + IntToStr(Ident[abs(srcType)].NumAllocElements - 1) +
               '] Of ' + InfoAboutToken(Ident[abs(srcType)].AllocElementType) + '"';

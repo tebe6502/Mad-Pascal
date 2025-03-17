@@ -1,9 +1,9 @@
 program TestUnits;
 
-{$i Define.inc}
+{$I Defines.inc}
 
 uses
-  Crt, Common, FileIO, MathEvaluate, Parser, Scanner, Optimize, Utilities,
+  Crt, Common, Console, Diagnostic, FileIO, MathEvaluate, Parser, Scanner, Optimize, Types, Utilities,
   SysUtils;
 
   procedure StartTest(Name: String);

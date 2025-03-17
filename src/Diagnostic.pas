@@ -1,12 +1,13 @@
 Unit Diagnostic;
 
+{$I Defines.inc}
+
 interface
 
-{$i define.inc}
 
 // ----------------------------------------------------------------------------
 
-	procedure Diagnostics;
+procedure Diagnostics;
 
 // ----------------------------------------------------------------------------
 

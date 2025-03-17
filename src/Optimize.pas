@@ -1,8 +1,8 @@
 unit Optimize;
 
-interface
+{$I Defines.inc}
 
-{$i define.inc}
+interface
 
 // ----------------------------------------------------------------------------
 

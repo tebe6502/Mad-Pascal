@@ -1,9 +1,9 @@
 unit Console;
 
+{$i Defines.inc}
+
 interface
 
-{$i define.inc}
-{$i Types.inc}
 
 // https://www.freepascal.org/docs-html/rtl/crt/lightgray.html
 const LightGray = 7;

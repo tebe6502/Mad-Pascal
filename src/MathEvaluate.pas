@@ -7,10 +7,9 @@ unit MathEvaluate;
 
 interface
 
-uses SysUtils;
+{$I Defines.inc}
 
-{$i define.inc}
-{$i Types.inc}
+uses SysUtils, Types;
 
 type
   TEvaluationResult = Single;
@@ -85,7 +84,7 @@ var
 {$IFNDEF PAS2JS}
   v1: TEvaluationResult;
 {$ELSE}
-    v1: ValReal; // For PAS2JS, should also work for FPC and be used a return value there,  see Test-70287.pas
+  v1: ValReal; // For PAS2JS, should also work for FPC and be used a return value there,  see Test-70287.pas
 {$ENDIF}
   p: Integer;
   pflg: Boolean;
