@@ -101,6 +101,13 @@ uses
 
     StartTest('TestUnitCommon');
 
+    // Test Enums
+    Assert(Ord(TParameterPassingMethod.UNDEFINED) = 0);
+    Assert(Ord(TParameterPassingMethod.VALPASSING) = 1);
+    Assert(Ord(TParameterPassingMethod.CONSTPASSING) = 2);
+    Assert(Ord(TParameterPassingMethod.VARPASSING) = 3);
+
+
     // Unit Scanner
     Program_NAME := 'TestProgram';
     NumTok := 0;
