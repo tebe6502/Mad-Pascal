@@ -1,160 +1,74 @@
 // Koch Snowflake
-// https://en.wikipedia.org/wiki/Koch_snowflake
+//
+// See https://en.wikipedia.org/wiki/Koch_snowflake
 
-// float16	186
-// real		197
-// single	237
+// Float16  186 ticks
+// Real     197 ticks
+// Single   237 ticks
 
+program snowflake;
 
-uses crt, graph, sysutils;
+uses
+  Crt,
+  graph,
+  SysUtils;
 
-type
-	TFloat = real;
-
-	FPoint =
-	RECORD
-	  x: TFloat;
-	  y: TFloat;
-	END;
+const FLOAT_TYPES : array of String = [
+{$IFDEF Float16}
+'Float16',
+{$ENDIF}
+'Real',
+'Single' ];
 
 var
-	gd, gm: smallint;
+  gd, gm: Smallint;
 
-	ticks: cardinal;
+  ticks: Cardinal;
 
-const
-	cx = 160;
-	cy = 115;
+{$IFDEF Float16}
+procedure CreateKochSnowflake_Float16;
+type
+  TFloat = Float16;
+{$I snowflake.inc}
+{$ENDIF}
 
-	ray0 = TFloat(70.0);
-	ray1 = TFloat(ray0 / 2);
+procedure CreateKochSnowflake_Real;
+type
+  TFloat = Real;
+{$I snowflake.inc}
 
-	sqrt3 = TFloat(1.7320580756);		// SQRT(3.0)
+procedure CreateKochSnowflake_Single;
+type
+  TFloat = Single;
+{$I snowflake.inc}
 
-	iteration = 3;
-
-
-
-procedure LineTo2D(ax, ay: TFloat);
+var floatType: String;
 begin
 
- LineTo(trunc(ax) + cx, trunc(ay) + cy);
+  for floatType in FLOAT_TYPES do
+  begin
 
-end;
+  gd := D8bit;
+  gm := m640x480;
 
+  InitGraph(gd, gm, '');
 
-procedure MoveTo2D(ax, ay: TFloat);
-begin
+  ticks := GetTickCount;
 
- MoveTo(trunc(ax)+cx, trunc(ay)+cy);
+  {$IFDEF Float16}
+  if floatType = 'Float16' then CreateKochSnowflake_Float16;
+  {$ENDIF}
+  if floatType = 'Real'    then CreateKochSnowflake_Real;
+  if floatType = 'Single'  then CreateKochSnowflake_Single;
 
-end;
+  ticks := GetTickCount - ticks;
 
+  repeat
+  until keypressed;
 
-    PROCEDURE NextSegments (ax,ay,bx,by: TFloat; n:  byte);
-      CONST
-        factor: TFloat =  0.288675135;  { SQRT(3) / 6 }
-      VAR
-        middle:  FPoint;
-        xDelta:  TFloat;
-        yDelta:  TFloat;
-        r,s,t:  FPoint;
-    BEGIN
+  WriteLn('Koch Snowflake with type ''',floatType,''' required ', ticks,' ticks.');
+  end;
 
-      IF   n > 0
-      THEN BEGIN
-        r.x := (ax + ax + bx) * (1/3);
-        r.y := (ay + ay + by) * (1/3);
+  while True do ;
 
-        t.x := (ax + bx + bx) * (1/3);
-        t.y := (ay + by + by) * (1/3);
-
-        middle.x := (ax + bx) * 0.5;
-        middle.y := (ay + by) * 0.5;
-
-        xDelta := bx - ax;
-        yDelta := by - ay;
-
-        s.x := middle.x + factor*yDelta;
-        s.y := middle.y - factor*xDelta;
-
-        SetColor (0);
-        MoveTo2D (ax, ay);	{blank this line}
-        LineTo2D (bx, by);
-
-        SetColor (15);		{white color Atari/PC}
-        MoveTo2D (ax, ay);	{add new lines}
-        LineTo2D (r.x, r.y);
-        LineTo2D (s.x, s.y);
-        LineTo2D (t.x, t.y);
-        LineTo2D (bx, by);
-
-        NextSegments (ax,ay,r.x,r.y, n-1);
-        NextSegments (r.x,r.y,s.x,s.y, n-1);
-        NextSegments (s.x,s.y,t.x,t.y, n-1);
-        NextSegments (t.x,t.y,bx,by, n-1);
-      END
-
-    END {NextSegments};
-
-
-
-    PROCEDURE KochSnowflake (a,b,c:  FPoint; n:  byte);
-    BEGIN
-
-      SetColor (1);
-      MoveTo2D (a.x, a.y);
-      LineTo2D (b.x, b.y);
-      NextSegments (a.x, a.y, b.x, b.y, n);
-
-      MoveTo2D (b.x, b.y);
-      LineTo2D (c.x, c.y);
-      NextSegments (b.x, b.y, c.x, c.y, n);
-
-      MoveTo2D (c.x, c.y);
-      LineTo2D (a.x, a.y);
-      NextSegments (c.x, c.y, a.x, a.y, n);
-
-    END {KochSnowflake};
-
-
-  PROCEDURE CreateKochSnowflake;
-    VAR
-      a,b,c :  FPoint;
-
-  BEGIN
-
-    a.x := -ray0;
-    a.y := -ray1*SQRT3;
-
-    b.x := ray0;
-    b.y := -ray1*SQRT3;
-
-    c.x :=  0;
-    c.y :=  ray1*SQRT3;
-
-    KochSnowflake (a,b,c, iteration);
-
-  END {CreateKochSnowflake};
-
-
-BEGIN
-
- gd := D8bit;
- gm := m640x480;
-
- InitGraph(gd,gm,'');
-
- ticks:=GetTickCount;
-
- CreateKochSnowflake;
-
- ticks:=GetTickCount - ticks;
-
- repeat until keypressed;
-
- writeln('ticks: ',ticks);
-
- while true do;
-
-END.
+end.
