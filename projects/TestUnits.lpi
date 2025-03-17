@@ -78,15 +78,15 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\SplitString.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\src\Types.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="..\src\Utilities.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\StringUtilities.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

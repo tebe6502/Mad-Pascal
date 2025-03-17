@@ -4,7 +4,7 @@ interface
 
 {$i define.inc}
 
-uses Common;
+uses Common, StringUtilities;
 
 type
   TErrorCode =
@@ -426,7 +426,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure newMsg(var msg: TArrayString; var a: String);
+procedure newMsg(var msg: TStringArray; var a: String);
 var
   i: Integer;
 begin

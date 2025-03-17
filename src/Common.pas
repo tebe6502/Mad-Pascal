@@ -2,7 +2,7 @@ unit Common;
 
 interface
 
-uses FileIO;
+uses FileIO, StringUtilities;
 {$i define.inc}
 {$i Types.inc}
 
@@ -18,28 +18,16 @@ type
 // Parameter passing
 type
   TParameterPassingMethod = (
-    UNDEFINED = 0,
-    VALPASSING = 1, // By value, modifiable
-    CONSTPASSING = 2, // By const, unodifiable
-    VARPASSING = 3 // By reference, modifiable
+    UNDEFINED,
+    VALPASSING, // By value, modifiable
+    CONSTPASSING , // By const, unodifiable
+    VARPASSING // By reference, modifiable
     );
 
 const
 
   title = '1.7.2';
 
-  TAB = ^I;		// Char for a TAB
-  CR  = ^M;		// Char for a CR
-  LF  = ^J;		// Char for a LF
-
-  AllowDirectorySeparators: set of Char = ['/', '\'];
-
-  AllowWhiteSpaces: set of Char = [' ', TAB, CR, LF];
-  AllowQuotes: set of Char = ['''', '"'];
-  AllowLabelFirstChars: set of Char = ['A'..'Z', '_'];
-  AllowLabelChars: set of Char = ['A'..'Z', '0'..'9', '_', '.'];
-  AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
-  AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
 
 
   // Token codes
@@ -520,8 +508,6 @@ type
 
   TCaseLabelArray = array of TCaseLabel;
 
-  TArrayString = array of String;
-
 
 {$i targets/var.inc}
 
@@ -592,7 +578,7 @@ var
 
   MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
-  msgWarning, msgNote, msgUser, OptimizeBuf, LinkObj: TArrayString;
+  msgWarning, msgNote, msgUser, OptimizeBuf, LinkObj: TStringArray;
   unitPathList: TPathList;
 
 

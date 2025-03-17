@@ -2,7 +2,11 @@ unit Scanner;
 
 interface
 
-{$i define.inc}
+{$I define.inc}
+
+uses StringUtilities;
+
+{$I Types.inc}
 
 // ----------------------------------------------------------------------------
 
@@ -11,23 +15,23 @@ interface
 	procedure TokenizeMacro(a: string; Line, Spaces: integer);
 	
 	// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-	procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
+	procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
 	
-	function get_digit(var i:integer; var a:string): string;
+	function get_digit(var i:TStringIndex; const a:string): string;
 
-	function get_constant(var i:integer; const a:string): string;
+	function get_constant(var i:TStringIndex; const a:string): string;
 
-	function get_label(var i:integer; var a:string; up: Boolean = true): string;
+	function get_label(var i:TStringIndex; const a:string; up: Boolean = true): string;
 
-	function get_string(var i:integer; var a:string; up: Boolean = true): string;
+	function get_string(var i:TStringIndex; const a:string; up: Boolean = true): string;
 
-	procedure omin_spacje (var i:integer; const a:string);
+	procedure omin_spacje (var i:TStringIndex; const a:string);
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Common, Messages, SplitString, FileIO, Utilities;
+uses SysUtils, Common, Messages, FileIO, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -81,7 +85,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure omin_spacje (var i:integer; const a:string);
+procedure omin_spacje (var i:TStringIndex; const a:string);
 (*----------------------------------------------------------------------------*)
 (*  Skip whitespace characters until the next non-whitespace character       *)
 (*----------------------------------------------------------------------------*)
@@ -97,7 +101,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function get_digit(var i:integer; var a:string): string;
+function get_digit(var i:TStringIndex; const a:string): string;
 (*----------------------------------------------------------------------------*)
 (*  pobierz ciag zaczynajaca sie znakami '0'..'9','%','$'		      *)
 (*----------------------------------------------------------------------------*)
@@ -126,7 +130,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function get_constant(var i:integer; const a:string): string;
+function get_constant(var i:TStringIndex; const a:string): string;
 (*----------------------------------------------------------------------------*)
 (*  Get label starting with characters 'A'..'Z','_'		              *)
 (*----------------------------------------------------------------------------*)
@@ -155,7 +159,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function get_label(var i:integer; var a:string; up: Boolean = true): string;
+function get_label(var i:TStringIndex; const a:string; up: Boolean = true): string;
 (*----------------------------------------------------------------------------*)
 (*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'		      *)
 (*----------------------------------------------------------------------------*)
@@ -187,7 +191,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function get_string(var i:integer; var a:string; up: Boolean = true): string;
+function get_string(var i:TStringIndex; const a:string; up: Boolean = true): string;
 (*----------------------------------------------------------------------------*)
 (*  pobiera ciag znakow, ograniczony znakami '' lub ""			      *)
 (*  podwojny '' oznacza literalne '					      *)
@@ -215,7 +219,7 @@ begin
   len:=length(a);
 
   while i <= len do begin
-   inc(i);	 // omijamy pierwszy znak ' lub "
+   inc(i);	 // we skip the first character ' or "
 
    znak:=a[i];
 
@@ -404,7 +408,7 @@ var
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2, ch_: Char;
   CurToken: Byte;
-  StrParams: TArrayString;
+  StrParams: TStringArray;
 
 
   procedure TokenizeUnit(a: integer; testUnit: Boolean = false); forward;
@@ -2416,10 +2420,6 @@ begin
 end;
 
 end;	//TokenizeMacro
-
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 
 
 end.
