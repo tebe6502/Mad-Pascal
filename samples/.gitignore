@@ -1,4 +1,6 @@
 *memory.dump
+*.a65
 *.lab
 *.lst
-*.a65
+*.obx
+*.xex
