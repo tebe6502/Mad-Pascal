@@ -578,7 +578,8 @@ var
 
   MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
-  msgWarning, msgNote, msgUser, OptimizeBuf, LinkObj: TStringArray;
+  msgWarning, msgNote, msgUser: TStringArray;
+  OptimizeBuf, LinkObj: TStringArray;
   unitPathList: TPathList;
 
 
@@ -623,7 +624,7 @@ procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; A
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 
-procedure CheckTok(i: Integer; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTok: Byte);
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
@@ -703,15 +704,25 @@ end;
 
 
 function FindFile(Name: String; ftyp: TString): String; overload;
+var
+  msg: IMessage;
 begin
   Result := unitPathList.FindFile(Name);
   if Result = '' then
-   if ftyp = 'unit' then
-      Error(NumTok, 'Can''t find unit ''' + ChangeFileExt(Name, '') + ''' used by program ''' +
-        PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.')
-   else
-      Error(NumTok, 'Can''t find ' + ftyp + ' file ''' + Name + ''' used by program ''' + PROGRAM_NAME +
-        ''' in unit path ''' + unitPathList.ToString + '''.');
+  begin
+    if ftyp = 'unit' then
+    begin
+      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find unit ''' + ChangeFileExt(Name, '') +
+        ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+
+    end
+    else
+    begin
+      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find ' + ftyp + ' file ''' + Name +
+        ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+    end;
+    Error(NumTok, msg);
+  end;
 end;
 
 // ----------------------------------------------------------------------------
@@ -914,11 +925,11 @@ begin
     EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in Pointers) and not
     (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK])) then
  if DataType = RightType then
-      Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
-        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
+      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
+        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"') )
  else
-      Error(ErrTokenIndex, 'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
-        InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"');
+      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperationNotSupportedForTypes,'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
+        InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"') );
 
 end;
 
@@ -933,7 +944,7 @@ begin
 if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
       Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-  if Ident[IdentIndex].NumAllocElements <> 1 then warning(i, RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
+  if Ident[IdentIndex].NumAllocElements <> 1 then WarningForRangeCheckError(i, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -949,7 +960,7 @@ if Ident[IdentIndex].NumAllocElements_ > 0 then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
       Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
       if Ident[IdentIndex].NumAllocElements_ <> 1 then
-        warning(i, RangeCheckError_, IdentIndex, ArrayIndex, ArrayIndexType);
+        WarningForRangeCheckError(i, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -1062,7 +1073,7 @@ begin
 
  case DataType of
 
-    UNTYPETOK: Error(i, CantReadWrite);
+    UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,'Can''t read or write variables of this type'));
    INTEGERTOK: Result := Low(Integer);
     SMALLINTTOK: Result := Low(Smallint);
     SHORTINTTOK: Result := Low(Shortint);
@@ -1074,7 +1085,7 @@ begin
     STRINGTOK: Result := 1;
 
  else
-      Error(i, TypeMismatch);
+      Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch' ));
  end;// case
 
 end;
@@ -1091,7 +1102,7 @@ begin
 
  case DataType of
 
-    UNTYPETOK: Error(i, CantReadWrite);
+    UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,'Can''t read or write variables of this type'));
    INTEGERTOK: Result := High(Integer);
     SMALLINTTOK: Result := High(Smallint);
     SHORTINTTOK: Result := High(Shortint);
@@ -1103,7 +1114,7 @@ begin
     STRINGTOK: Result := 255;
 
  else
-      Error(i, TypeMismatch);
+      Error(i, TMessage.Create(TErrorCode.TypeMismatch,'Type mismatch'));
  end;// case
 
 end;
@@ -1183,7 +1194,8 @@ begin
     s := 'unknown token';
 
   if Tok[i].Kind <> ExpectedTok then
-    Error(i, 'Syntax error, ' + '''' + s + '''' + ' expected but ''' + GetSpelling(i) + ''' found');
+    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + s + '''' +
+      ' expected but ''' + GetSpelling(i) + ''' found'));
 
 end;
 

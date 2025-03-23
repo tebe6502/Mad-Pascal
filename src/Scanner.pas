@@ -23,6 +23,10 @@ uses SysUtils, Common, Messages, FileIO, Utilities;
 
 // ----------------------------------------------------------------------------
 
+procedure ErrorOrdinalExpExpected(i: TTokenIndex);
+begin
+  Error(i, TMessage.Create(TErrorCode.OrdinalExpExpected, 'Ordinal expression expected.'));
+end;
 
 procedure TokenizeProgramInitialization;
 var i: Integer;
@@ -139,12 +143,13 @@ begin
       then
 
       else
-        Error(NumTok, 'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + '''');
+        Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType, 'Undefined resource type: Type = ''' +
+          res.resType + ''', Name = ''' + res.resName + ''''));
 
 
-     if (res.resFile <> '') and ( unitPathList.FindFile(res.resFile) = '') then
-       Error(NumTok, 'Resource file not found: Type = ' + res.resType + ', Name = ''' + res.resName + ''' in unit path '''+unitPathList.ToString+'''');
-
+      if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
+        Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound, 'Resource file not found: Type = ' +
+          res.resType + ', Name = ''' + res.resName + ''' in unit path ''' + unitPathList.ToString + ''''));
 
      for j := 1 to MAXPARAMS do begin
 
@@ -162,7 +167,7 @@ begin
 
      for j := High(resArray)-1 downto 0 do
       if resArray[j].resName = res.resName then
-       Error(NumTok, 'Duplicate resource: Type = ' + res.resType + ', Name = ''' + res.resName + '''');
+       Error(NumTok,  TMessage.Create(TErrorCode.DuplicateResource,'Duplicate resource: Type = ' + res.resType + ', Name = ''' + res.resName + ''''));
 
      j:=High(resArray);
      resArray[j] := res;
@@ -306,7 +311,7 @@ var
 	 UnitIndex := NumUnits;
 
 	 if UnitIndex > High(UnitName) then
-	  Error(NumTok, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex));
+	Error(NumTok,  TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex)));
 
 	 Line:=1;
   	 UnitName[UnitIndex].Name := s;
@@ -500,7 +505,7 @@ var
 
       if s='ON' then macros:=true else
        if s='OFF' then macros:=false else
-        Error(NumTok, 'Wrong switch toggle, use ON/OFF or +/-');
+        Error(NumTok,  TMessage.Create(TErrorCode.WrongSwitchToggle, 'Wrong switch toggle, use ON/OFF or +/-'));
 
      end else
 
@@ -542,7 +547,8 @@ var
 	  inc(IncludeIndex);
 
 	  if IncludeIndex > High(UnitName) then
-	    Error(NumTok, 'Out of resources, IncludeIndex: '+IntToStr(IncludeIndex));
+                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IncludeIndex: ' +
+                  IntToStr(IncludeIndex)));
 
 	  Tokenize( nam );
 
@@ -557,12 +563,14 @@ var
 
       if (cmd = 'EVAL') then begin
 
-       if  d.LastIndexOf('}') < 0 then Error(NumTok, 'Syntax error');
+          if d.LastIndexOf('}') < 0 then
+            Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Character ''}'' expected'));
 
        s := copy(d, i, d.LastIndexOf('}') - i + 1);
        s := TrimRight(s);
 
-       if s[length(s)] <> '"' then Error(NumTok, 'Missing ''"''');
+          if s[length(s)] <> '"' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+              'Syntax error. Missing ''"'''));
 
        AddToken(EVALTOK, UnitIndex, Line, 1, 0);
 
@@ -586,7 +594,8 @@ var
 
        if s = 'LOOPUNROLL' then AddToken(LOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
         if s= 'NOLOOPUNROLL' then AddToken(NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
-	  Error(NumTok, 'Illegal optimization specified "' + s + '"');
+            Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
+              'Illegal optimization specified "' + s + '"'));
 
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
 
@@ -599,11 +608,11 @@ var
        if s = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
         if s = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
          if s = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0) else
-	  Error(NumTok, 'Illegal alignment directive');
+            Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective, 'Illegal alignment directive ''' + s + '''.'));
 
        SkipWhitespaces(d, i);
 
-       if d[i] <> '=' then Error(NumTok, 'Illegal alignment directive');
+          if d[i] <> '=' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
        inc(i);
        SkipWhitespaces(d, i);
 
@@ -612,7 +621,7 @@ var
 	val(s, v, Err);
 
 	if Err > 0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
 	GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
 
@@ -630,7 +639,7 @@ var
        s := GetFilePath(d, i);
 
        if s = '' then
-       	 Error(NumTok, 'An empty path cannot be used');
+              Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
 
        AddPath(s);
 
@@ -652,7 +661,7 @@ var
        s := GetFilePath(d, i);
 
        if s = '' then
-       	 Error(NumTok, 'An empty path cannot be used');
+       	 Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
 
        AddPath(s);
 
@@ -712,7 +721,7 @@ var
 	val(s, FastMul, Err);
 
 	if Err <> 0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
 	AddDefine('FASTMUL');
         AddDefines := NumDefines;
@@ -737,13 +746,13 @@ var
        end else
        if cmd = 'ELSE' then begin
 	if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
-	 Error(NumTok, 'Found $ELSE without $IFXXX');
+        Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf, 'Found $ELSE without $IFXXX'));
 	if IfdefLevel > 0 then
 	 Dec(IfdefLevel)
        end else
        if cmd = 'ENDIF' then begin
 	if IfdefLevel = 0 then
-	 Error(NumTok, 'Found $ENDIF without $IFXXX')
+	 Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf, 'Found $ENDIF without $IFXXX'))
 	else
 	 Dec(IfdefLevel)
        end else
@@ -771,20 +780,20 @@ var
 	 Tok[NumTok].Line := line;
 
 	 if not(UpCase(d[i]) in AllowLabelFirstChars) then
-	  Error(NumTok, 'Syntax error, ''identifier'' expected');
+              Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ''identifier'' expected'));
 
 	 repeat
 
 	  inc(Err);
 
           if Err > MAXPARAMS then
-	   Error(NumTok, 'Too many formal parameters in ' + nam);
+                Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters, 'Too many formal parameters in ' + nam));
 
 	  Param[Err] := GetLabelUpperCase(d, i);
 
 	  for x := 1 to Err - 1 do
 	   if Param[x] = Param[Err] then
-	    Error(NumTok, 'Duplicate identifier ''' + Param[Err] + '''');
+                  Error(NumTok, TMessage.Create(TErrorCode.DuplicateIdentifier, 'Duplicate identifier ''' + Param[Err] + ''''));
 
 	  skip_spaces;
 
@@ -793,7 +802,7 @@ var
 	   skip_spaces;
 
 	   if not(UpCase(d[i]) in AllowLabelFirstChars) then
-	    Error(NumTok, 'Syntax error, ''identifier'' expected');
+                  Error(NumTok, TMessage.Create(TErrorCode.IdentifierExpected, 'Syntax error, ''identifier'' expected'));
 	  end;
 
 	 until d[i] = ')';
@@ -827,7 +836,7 @@ var
 	nam := GetLabelUpperCase(d, i);
 	RemoveDefine(nam);
        end else
-	Error(NumTok, 'Illegal compiler directive $' + cmd + d[i]);
+          Error(NumTok, TMessage.Create(TErrorCode.IllegalCompilerDirective, 'Illegal compiler directive $' + cmd + d[i]));
 
     end;
 
@@ -955,7 +964,7 @@ var
   if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_', '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
     begin
     // InFile.Close();
-    Error(NumTok, 'Unknown character: ' + c);
+        Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected unknown character: ' + c));
     end;
   end;
 
@@ -966,7 +975,8 @@ var
 
     while ch in AllowWhiteSpaces do SafeReadChar(ch);
 
-    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
+      if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+          'Syntax error, ''string'' expected but ''' + ch + ''' found'));
   end;
 
 
@@ -1046,7 +1056,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '%' + Num;
 
@@ -1063,7 +1073,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '$' + Num;
 
@@ -1162,7 +1172,7 @@ var
 	end;
 
 	if err > 255 then
-	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
+            Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong, 'Constant strings can''t be longer than 255 chars'));
 
 	if Length(Text) > 0 then
 	  begin
@@ -1194,12 +1204,12 @@ var
 	   StrParams := SplitStr(copy(Num, 2, length(Num)-2), ',');
 
 	  if High(StrParams) > MAXPARAMS then
-	   Error(NumTok, 'Too many formal parameters in ' + Text);
+	   Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters, 'Too many formal parameters in ' + Text));
 
 	  end;
 
 	  if (StrParams[0] <> '') and (Defines[im].Param[1] = '') then
-	   Error(NumTok, 'Wrong number of parameters');
+                Error(NumTok, TMessage.Create(TErrorCode.WrongNumberOfParameters, 'Wrong number of parameters'));
 
 
 	  OldNumDefines := NumDefines;
@@ -1209,7 +1219,7 @@ var
 	  while (Defines[im].Param[Err] <> '') and (Err <= MAXPARAMS) do begin
 
 	   if StrParams[Err - 1] = '' then
-	     Error(NumTok, 'Missing parameter');
+	     Error(NumTok, TMessage.Create(TErrorCode.ParameterMissing, 'Parameter missing'));
 
 	   AddDefine(Defines[im].Param[Err]);
 	   Defines[NumDefines].Macro := StrParams[Err - 1];
@@ -1324,7 +1334,7 @@ var
 	  inc(AsmBlockIndex);
 
 	  if AsmBlockIndex > High(AsmBlock) then begin
-	   Error(NumTok, 'Out of resources, ASMBLOCK');
+	   Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ASMBLOCK'));
 	   RaiseHaltException(THaltException.COMPILING_ABORTED);
 	  end;
 
@@ -1340,7 +1350,7 @@ var
 	     if CurToken = UNITTOK then UnitFound := true;
 
 	     if testUnit and (UnitFound = false) then
-	      Error(NumTok, 'Syntax error, "UNIT" expected but "' + TokenSpelling[CurToken] + '" found');
+	      Error(NumTok, TMessage.Create(TErrorCode.UnitExpected, '"UNIT" expected but "' + TokenSpelling[CurToken] + '" found'));
 
 	   end
 	   else begin				// Identifier found
@@ -1378,7 +1388,7 @@ var
 		  InFile.Read(ch);
 
 		  if ch = LF then	//Inc(Line);
-		   Error(NumTok, 'String exceeds line');
+		   Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
 
 		  if not(ch in ['''',CR,LF]) then
 		   Text := Text + ch
@@ -1461,7 +1471,7 @@ var
 		 if Length(Num)>0 then
 		  Text := Text + chr(StrToInt(Num))
 		 else
-		  Error(NumTok, 'Constant expression expected');
+                  Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;
@@ -1563,7 +1573,8 @@ var
 	    AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
 	  end else
 	    begin
-	    Error(NumTok, 'Unknown character: ' + ch);
+              Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected character ''' +
+                ch + ''' found. Expected one of '':><.''.'));
 	    end;
 	  end;
 	end;
@@ -1571,7 +1582,7 @@ var
 
       if NumTok = OldNumTok then	 // No token found
 	begin
-	Error(NumTok, 'Illegal character '''+ch+''' ($'+IntToHex(ord(ch),2)+')');
+	Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Illegal character '''+ch+''' ($'+IntToHex(ord(ch),2)+')'));
 	end;
 
       end;// while
@@ -1818,7 +1829,8 @@ var
 
     while ch in AllowWhiteSpaces do begin ch:=a[i]; inc(i) end;
 
-    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
+    if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
+        'Syntax error, ''string'' expected but ''' + ch + ''' found'));
   end;
 
 
@@ -1898,7 +1910,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '%' + Num;
 
@@ -1915,7 +1927,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '$' + Num;
 
@@ -2004,7 +2016,8 @@ begin
 
 
 	if err > 255 then
-	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
+        Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
+          'Constant strings can''t be longer than 255 chars'));
 
 	if Length(Text) > 0 then
 	  begin
@@ -2020,7 +2033,7 @@ begin
 	  i:=TextPos;
 
           if Defines[im].Macro = copy(a,i,length(text)) then
-	   Error(NumTok, 'Recursion in macros is not allowed');
+	   Error(NumTok, TMessage.Create(TErrorCode.RecursionInMacro,'Recursion in macros is not allowed'));
 
 	  delete(a, i, length(Text));
 	  insert(Defines[im].Macro, a, i);
@@ -2078,7 +2091,7 @@ begin
 		  ch:=a[i]; inc(i);
 
 		  if ch = LF then	//Inc(Line);
-		   Error(NumTok, 'String exceeds line');
+		   Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine,'String exceeds line'));
 
 		  if not(ch in ['''',CR,LF]) then
 		   Text := Text + ch
@@ -2160,7 +2173,7 @@ begin
 		 if Length(Num)>0 then
 		  Text := Text + chr(StrToInt(Num))
 		 else
-		  Error(NumTok, 'Constant expression expected');
+		  Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;

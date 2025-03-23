@@ -134,6 +134,10 @@
         <Filename Value="..\src\include\pas2js\Utilities-PAS2JS-Interface.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\src\TestUnits.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

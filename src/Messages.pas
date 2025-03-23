@@ -11,24 +11,74 @@ type
     (
     UnknownIdentifier, OParExpected, IdentifierExpected, IncompatibleTypeOf, UserDefined,
     IdNumExpExpected, IncompatibleTypes, IncompatibleEnum, OrdinalExpectedFOR, CantAdrConstantExp,
-    VariableExpected, WrongNumParameters, OrdinalExpExpected, RangeCheckError, RangeCheckError_,
+    VariableExpected, WrongNumberOfParameters, OrdinalExpExpected, RangeCheckError,
     VariableNotInit, ShortStringLength, StringTruncated, TypeMismatch, CantReadWrite,
     SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
     IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
-    UnreachableCode, IllegalQualifier, LoHi, StripedAllowed
+    UnreachableCode, IllegalQualifier, LoHi, StripedAllowed, FileNotFound, WrongParameterList,
+    OperatorNotOverloaded, OperationNotSupportedForTypes, NotAllDeclarationsOverloaded, SyntaxError,
+    CantAsignValuesToAnAddress, UndefinedResourceType, ResourceFileNotFound, DuplicateResource,
+    OutOfResources, WrongSwitchToggle, IllegalOptimizationSpecified, IllegalAlignmentDirective,
+    FilePathNotSpecified, ElseWithoutIf,
+    EndifWithoutIf, TooManyFormalParameters, DuplicateIdentifier, IllegalCompilerDirective,
+    UnexpectedCharacter, ConstantStringTooLong, ParameterMissing, UnitExpected, StringExceedsLine,
+    ConstantExpressionExpected, RecursionInMacro, InvalidVariableAddress,
+    ConstantExpected, CantTakeAddressOfIdentifier, DivisionByZero, IdentifierAlreadyDefined,
+    FormalParameterNameExpected, TypeIdentifierExpected, FileParameterMustBeVAR, ReservedWordUserAsIdentifier,
+    FunctionDirectiveForwardNotAllowedInInterfaceSection, ProcedureDirectiveForwardNotAllowedInInterfaceSection,
+    CannotCombineRegisterWithPascal, CannotCombineInlineWithPascal, CannotCombineInlineWithInterrupt,
+    CannotCombineInlineWithExternal, IllegalTypeDeclarationOfSetElements, FieldAfterMethodOrProperty,
+    RecordSizeExceedsLimit,
+    StringLengthNotInRange, InvalidTypeDefinition, ArrayLowerBoundNotInteger, ArrayLowerBoundNotZero,
+    ArrayUpperBoundNotInteger, InvalidArrayOfPointers, ArraySizeExceedsRAMSize,MultiDimensionalArrayOfTypeNotSupported,
+ArrayOfTypeNotSupported  ,OnlyArrayOfTypeSupported ,IdentifierIdentsNoMember,Unassigned,
+VariableConstantOrFunctionExpectedButProcedureFound,UnderConstruction,TypeIdentifierNotAllowed
     );
+
+  // TODO Test for structured text constants
+  type
+ TMessageDefinition = record
+  text: String;
+ end;
+
+ const UnderConstruction2: TMessageDefinition = ( text: 'Under Construction' );
+
+type
+  IMessage = interface
+    function GetErrorCode: TErrorCode;
+    function GetText: String;
+  end;
+
+type
+  TMessage = class(TInterfacedObject, IMessage)
+    constructor Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
+      const variable1: String = '');
+    function GetErrorCode: TErrorCode;
+    function GetText: String;
+  private
+  var
+    ErrorCode: TErrorCode;
+    Text: String;
+  end;
 
 // ----------------------------------------------------------------------------
 
+//
 procedure Error(errorTokenIndex: TTokenIndex; msg: String); overload;
-procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex = 0;
-  srcType: Int64 = 0; DstType: Int64 = 0); overload;
+procedure Error(errorTokenIndex: TTokenIndex; msg: IMessage); overload;
+procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode); overload;
+procedure ErrorForIdentifier(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex );
+procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex ;
+  srcType: Int64 ; DstType: Int64); overload;
 
-procedure Note(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex); overload;
-procedure Note(NoteTokenIndex: TTokenIndex; msg: String); overload;
+procedure Note(NoteTokenIndex: TTokenIndex; msg: String);
+procedure NoteForIdentifier(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
 
-procedure Warning(warningTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex = 0;
-  srcType: Int64 = 0; DstType: Int64 = 0);
+procedure Warning(warningTokenIndex: TTokenIndex; errorCode: TErrorCode); overload;
+
+procedure WarningForIdentifier(warningTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex);
+procedure WarningForRangeCheckError(warningTokenIndex: TTokenIndex; identIndex: TTokenIndex;
+  srcType: Int64; DstType: Int64); overload;
 
 procedure WritelnMsg;
 
@@ -39,7 +89,26 @@ implementation
 uses SysUtils, Console, FileIO, Utilities;
 
 // -----------------------------------------------------------------------------
+constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
+  const variable1: String = '');
+var
+  temp: String;
+begin
+  Self.errorCode := errorCode;
+  temp := Text.Replace('{0}', variable0);
+  temp := Text.Replace('{1}', variable1);
+  Self.Text := temp;
+end;
 
+function TMessage.GetErrorCode: TErrorCode;
+begin
+  Result := ErrorCode;
+end;
+
+function TMessage.GetText: String;
+begin
+  Result := Text;
+end;
 
 procedure WritelnMsg;
 var
@@ -60,6 +129,7 @@ end;
 
 
 // ----------------------------------------------------------------------------
+// Private Method
 // ----------------------------------------------------------------------------
 
 
@@ -102,7 +172,7 @@ begin
         Result := 'Incompatible types: got "' + GetEnumName(srcType) + '" expected "' + GetEnumName(DstType) + '"';
     end;
 
-    WrongNumParameters:
+    WrongNumberOfParameters:
     begin
       Result := 'Wrong number of parameters specified for call to "' + Ident[identIndex].Name + '"';
     end;
@@ -247,16 +317,6 @@ begin
 
     end;
 
-    RangeCheckError_: begin
-      Result := 'Range check error while evaluating constants (' + IntToStr(srcType) +
-        ' must be between ' + IntToStr(LowBound(errorTokenIndex, DstType)) + ' and ';
-
-      if identIndex > 0 then
-        Result := Result + IntToStr(Ident[identIndex].NumAllocElements_ - 1) + ')'
-      else
-        Result := Result + IntToStr(HighBound(errorTokenIndex, DstType)) + ')';
-    end;
-
     VariableNotInit:
     begin
       Result := 'Variable ''' + Ident[identIndex].Name + ''' does not seem to be initialized';
@@ -320,23 +380,6 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex = 0;
-  srcType: Int64 = 0; DstType: Int64 = 0);
-var
-  msg: String;
-begin
-
-  if not isConst then
-  begin
-    msg := ErrorMessage(errorTokenIndex, errorCode, identIndex, srcType, DstType);
-    Error(errorTokenIndex, msg);
-  end;
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -390,13 +433,52 @@ begin
 
 end;
 
+procedure Error(errorTokenIndex: TTokenIndex; msg: IMessage);
+begin
+  Error(errorTokenIndex, msg.GetText());
+end;
+
+
+procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode);
+begin
+     ErrorForIdentifier(errorTokenIndex, errorCode,0);
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+procedure ErrorForIdentifier(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex);
+var
+  msg: String;
+begin
+
+  if not isConst then
+  begin
+    msg := ErrorMessage(errorTokenIndex, errorCode, identIndex, 0, 0);
+    Error(errorTokenIndex, msg);
+  end;
+end;
+
+
+procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex;
+  srcType: Int64; DstType: Int64);
+var
+  msg: String;
+begin
+
+  if not isConst then
+  begin
+    msg := ErrorMessage(errorTokenIndex, errorCode, identIndex, srcType, DstType);
+    Error(errorTokenIndex, msg);
+  end;
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure Warning(warningTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex = 0;
-  srcType: Int64 = 0; DstType: Int64 = 0);
+procedure WarningInternal(warningTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex;
+  srcType: Int64; DstType: Int64);
 var
   i: Integer;
   msg, a: String;
@@ -421,12 +503,28 @@ begin
 
 end;
 
+procedure Warning(warningTokenIndex: TTokenIndex; errorCode: TErrorCode); overload;
+begin
+  WarningInternal(warningTokenIndex, errorCode, 0, 0, 0);
+end;
+
+procedure WarningForIdentifier(warningTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex);
+begin
+  WarningInternal(warningTokenIndex, errorCode, identIndex, 0, 0);
+end;
+
+procedure WarningForRangeCheckError(warningTokenIndex: TTokenIndex; identIndex: TTokenIndex;
+  srcType: Int64; dstType: Int64);
+begin
+  WarningInternal(warningTokenIndex, TErrorCode.RangeCheckError, identIndex, srcType, dstType);
+end;
+
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure newMsg(var msg: TStringArray; var a: String);
+procedure AddMessage(var msg: TStringArray; var a: String);
 var
   i: Integer;
 begin
@@ -443,7 +541,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Note(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex); overload;
+procedure NoteForIdentifier(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
 var
   a: String;
 begin
@@ -477,7 +575,7 @@ begin
         if pos('@FN', Ident[identIndex].Name) = 1 then
 
         else
-          newMsg(msgNote, a);
+          AddMessage(msgNote, a);
 
       end;
 
@@ -490,7 +588,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Note(NoteTokenIndex: TTokenIndex; msg: String); overload;
+procedure Note(NoteTokenIndex: TTokenIndex; msg: String);
 var
   a: String;
 begin
@@ -502,7 +600,7 @@ begin
 
     a := a + msg;
 
-    newMsg(msgNote, a);
+    AddMessage(msgNote, a);
 
   end;
 

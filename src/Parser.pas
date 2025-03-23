@@ -582,7 +582,8 @@ case Tok[i].Kind of
 
     if isError then Exit;
 
-    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
+    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then
+        Error(i, TMessage.Create(TErrorCode.InvalidVariableAddress, 'Can''t take the address of variable'));
 
     GetCommonConstType(i, INTEGERTOK, ConstValType);
 
@@ -611,7 +612,8 @@ case Tok[i].Kind of
 
     if isError then Exit;
 
-    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
+    if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then
+        Error(i, TMessage.Create(TErrorCode.InvalidVariableAddress, 'Can''t take the address of variable'));
 
     GetCommonConstType(i, INTEGERTOK, ConstValType);
 
@@ -800,8 +802,11 @@ case Tok[i].Kind of
 		if (Ident[GetIdent(Tok[i].Name)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
 		// ok
 		end else
-		if Ident[GetIdent(Tok[i].Name)].DataType in Pointers then
-		  Error(j, 'Illegal type conversion: "'+InfoAboutToken(ConstValType)+'" to "'+Tok[i].Name+'"');
+          if Ident[GetIdent(Tok[i].Name)].DataType in Pointers then
+          begin
+            Error(j, TMessage.Create(TErrorCode.IllegalTypeConversion, 'Illegal type conversion: "' +
+              InfoAboutToken(ConstValType) + '" to "' + Tok[i].Name + '"'));
+          end;
 
 		ConstValType := Ident[GetIdent(Tok[i].Name)].DataType;
 
@@ -812,11 +817,13 @@ case Tok[i].Kind of
 	  end else
 
       if not (Ident[IdentIndex].Kind in [CONSTANT, USERTYPE, ENUMTYPE]) then
-	Error(i, 'Constant expected but ' + Ident[IdentIndex].Name + ' found')
+      begin
+          Error(i, TMessage.Create(TErrorCode.ConstantExpected, 'Constant expected but {0} found', Ident[IdentIndex].Name));
+      end
       else
 	if Tok[i + 1].Kind = OBRACKETTOK then					// Array element access
 	  if  not (Ident[IdentIndex].DataType in Pointers) then
-	    Error(i, IncompatibleTypeOf, IdentIndex)
+	    ErrorForIdentifier(i, IncompatibleTypeOf, IdentIndex)
 	  else
 	    begin
 
@@ -958,7 +965,8 @@ case Tok[i].Kind of
 		    end;
 	else
 
-	  Error(i + 1, 'Can''t take the address of ' + InfoAboutToken(Ident[IdentIndex].Kind) );
+              Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier, 'Can''t take the address of ' +
+                InfoAboutToken(Ident[IdentIndex].Kind)));
 
 	end;
 
@@ -1107,7 +1115,7 @@ case Tok[i].Kind of
        if ((Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0,1])) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then begin
 
        end else
-	Error(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
+	Error(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind,0);
 
     end;
 
@@ -1197,7 +1205,7 @@ while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTO
                  begin
                    isError := false;
 		   isConst := false;
-		   Error(i, 'Division by zero');
+		   Error(i, TMessage.Create(TErrorCode.DivisionByZero, 'Division by zero'));
                  end;
                end;
              end;
@@ -1369,7 +1377,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   end else
    if War then
    if VarType <> BOOLEANTOK then
-    warning(i, RangeCheckError, 0, ConstVal, VarType);
+    WarningForRangeCheckError(i, 0, ConstVal, VarType);
 
  end;
 
@@ -1389,7 +1397,8 @@ begin
 i := GetIdent(Name);
 
 if (i > 0) and (not (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK])) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
-  Error(ErrTokenIndex, 'Identifier ' + Name + ' is already defined')
+    Error(ErrTokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier ' +
+      Name + ' is already defined'))
 else
   begin
 
@@ -1399,7 +1408,7 @@ else
   // Writeln('NumIdent='+IntToStr(NumIdent)+' ErrTokenIndex='+IntToStr(ErrTokenIndex)+' Name='+name+' Kind='+IntToStr( Kind)+' DataType='+IntToStr( DataType)+' NumAllocElements='+IntToStr( NumAllocElements)+' AllocElementType='+IntToStr( AllocElementType));
 
   if NumIdent > High(Ident) then
-    Error(NumTok, 'Out of resources, IDENT');
+    Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,'Out of resources, IDENT'));
 
   Ident[NumIdent].Name := Name;
   Ident[NumIdent].Kind := Kind;
@@ -1430,7 +1439,7 @@ else
   if Name <> 'RESULT' then
    if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (pass = TPass.CODE_GENERATION) then
      if not ( (Ident[NumIdent].Pass in [ TPass.CALL_DETERMINATION , TPass.CODE_GENERATION]) or (Ident[NumIdent].IsNotDead) ) then
-      Note(ErrTokenIndex, NumIdent);
+      NoteForIdentifier(ErrTokenIndex, NumIdent);
 
   case Kind of
 
@@ -1582,13 +1591,15 @@ begin
 	    repeat
 
 	    if Tok[i + 1].Kind <> IDENTTOK then
-	      Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
+          Error(i + 1, TMessage.Create(TErrorCode.FormalParameterNameExpected,
+            'Formal parameter name expected but {0} found.', GetSpelling(i + 1)))
 	    else
 	      begin
 
 		for x := 1 to NumVarOfSameType do
 		 if VarOfSameType[x].Name = Tok[i + 1].Name then
-		   Error(i + 1, 'Identifier ' + Tok[i + 1].Name + ' is already defined');
+              Error(i + 1, TMessage.Create(TErrorCode.IdentifierAlreadyDefined,
+                'Identifier {0}is already defined.', Tok[i + 1].Name));
 
 	        Inc(NumVarOfSameType);
 	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name;
@@ -1612,12 +1623,12 @@ begin
 	   CheckTok(i, COLONTOK);
 
 	   if Tok[i + 1].Kind = DEREFERENCETOK then				// ^type
-	     Error(i + 1, 'Type identifier expected');
+          Error(i + 1, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected'));
 
 	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
 	   if (VarType = FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
-	     Error(i, 'File types must be var parameters');
+	     Error(i, TMessage.Create(TErrorCode.FileParameterMustBeVAR, 'File parameters must be var parameters'));
 
 	  end;
 
@@ -1630,7 +1641,7 @@ begin
 
 	    Inc(Ident[NumIdent].NumParams);
 	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      Error(i, TooManyParameters, NumIdent)
+	      ErrorForIdentifier(i, TooManyParameters, NumIdent)
 	    else
 	      begin
 	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
@@ -1660,7 +1671,7 @@ begin
 	CheckTok(i, COLONTOK);
 
 	if Tok[i + 1].Kind = ARRAYTOK then
-	 Error(i + 1, 'Type identifier expected');
+      Error(i + 1, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected'));
 
 	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
@@ -1698,7 +1709,7 @@ begin
     if ForwardIdentIndex = 0 then begin
 
       if Tok[i + 1].Kind <> IDENTTOK then
-	Error(i + 1, 'Reserved word used as identifier');
+	Error(i + 1, TMessage.Create(TErrorCode.ReservedWordUserAsIdentifier, 'Reserved word used as identifier'));
 
       if Tok[i].Kind in [PROCEDURETOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
 	begin
@@ -1738,13 +1749,14 @@ begin
 	    repeat
 
 	    if Tok[i + 1].Kind <> IDENTTOK then
-	      Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
+            Error(i + 1, TMessage.Create(TErrorCode.FormalParameterNameExpected,
+              'Formal parameter name expected but {0} found.', GetSpelling(i + 1)))
 	    else
 	      begin
 
 		for x := 1 to NumVarOfSameType do
 		 if VarOfSameType[x].Name = Tok[i + 1].Name then
-		   Error(i + 1, 'Identifier ' + Tok[i + 1].Name + ' is already defined');
+		   Error(i + 1, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined.',Tok[i + 1].Name));
 
 	        Inc(NumVarOfSameType);
 	        VarOfSameType[NumVarOfSameType].Name := Tok[i + 1].Name;
@@ -1768,12 +1780,12 @@ begin
 	   CheckTok(i, COLONTOK);
 
 	   if Tok[i + 1].Kind = DEREFERENCETOK then				// ^type
-	     Error(i + 1, 'Type identifier expected');
+	     Error(i + 1, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected'));
 
 	   i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
 	   if (VarType = FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
-	     Error(i, 'File types must be var parameters');
+            Error(i, TMessage.Create(TErrorCode.FileParameterMustBeVar, 'File parameters must be var parameters'));
 
 	  end;
 
@@ -1786,7 +1798,7 @@ begin
 
 	    Inc(Ident[NumIdent].NumParams);
 	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      Error(i, TooManyParameters, NumIdent)
+	      ErrorForIdentifier(i, TooManyParameters, NumIdent)
 	    else
 	      begin
 	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
@@ -1820,7 +1832,7 @@ begin
 	CheckTok(i, COLONTOK);
 
 	if Tok[i + 1].Kind = ARRAYTOK then
-	 Error(i + 1, 'Type identifier expected');
+	 Error(i + 1, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected'));
 
 	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
@@ -1872,9 +1884,9 @@ begin
 
 			   if INTERFACETOK_USE then
 			    if IsNestedFunction then
-			     Error(i, 'Function directive ''FORWARD'' not allowed in interface section')
+			     Error(i, TMessage.Create(TErrorCode.FunctionDirectiveForwardNotAllowedInInterfaceSection, 'Function directive ''FORWARD'' not allowed in interface section'))
 			    else
-			     Error(i, 'Procedure directive ''FORWARD'' not allowed in interface section');
+			     Error(i, TMessage.Create(TErrorCode.ProcedureDirectiveForwardNotAllowedInInterfaceSection, 'Procedure directive ''FORWARD'' not allowed in interface section'));
 
 			   isForward := true;
 			   inc(i);
@@ -1961,16 +1973,16 @@ begin
 
 
   if Ident[NumIdent].isRegister and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion) then
-   Error(i, 'Calling convention directive "REGISTER" not applicable with "PASCAL"');
+   Error(i, TMessage.Create(TErrorCode.CannotCombineRegisterWithPascal, 'Calling convention directive "REGISTER" not applicable with "PASCAL"'));
 
   if Ident[NumIdent].isInline and (Ident[NumIdent].isPascal or Ident[NumIdent].isRecursion)  then
-   Error(i, 'Calling convention directive "INLINE" not applicable with "PASCAL"');
+   Error(i, TMessage.Create(TErrorCode.CannotCombineInlineWithPascal, 'Calling convention directive "INLINE" not applicable with "PASCAL"'));
 
   if Ident[NumIdent].isInline and (Ident[NumIdent].isInterrupt) then
-   Error(i, 'Procedure directive "INTERRUPT" cannot be used with "INLINE"');
+   Error(i, TMessage.Create(TErrorCode.CannotCombineInlineWithInterrupt, 'Procedure directive "INLINE" cannot be used with "INTERRUPT"'));
 
   if Ident[NumIdent].isInline and (Ident[NumIdent].isExternal) then
-   Error(i, 'Procedure directive "EXTERNAL" cannot be used with "INLINE"');
+   Error(i, TMessage.Create(TErrorCode.CannotCombineInlineWithExternal,'Procedure directive "INLINE" cannot be used with "EXTERNAL"'));
 
 //  if Ident[NumIdent].isInterrupt and (Ident[NumIdent].isAsm = false) then
 //    Note(i, 'Use assembler block instead pascal');
@@ -2021,7 +2033,7 @@ var
 
    for x := 1 to TypeArray[RecType].NumFields do
      if TypeArray[RecType].Field[x].Name = Name then
-       Error(i, 'Duplicate identifier '''+Name+'''');
+       Error(i, TMessage.Create(TErrorCode.DuplicateIdentifier, 'Duplicate identifier ''{0}''.', Name ));
 
    // Add new field
    Inc(TypeArray[RecType].NumFields);
@@ -2029,7 +2041,7 @@ var
    x:=TypeArray[RecType].NumFields;
 
    if x >= MAXFIELDS then
-     Error(i, 'Out of resources, MAXFIELDS');
+      Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXFIELDS'));
 
 
    if FieldType = DEREFERENCEARRAYTOK then begin
@@ -2181,7 +2193,7 @@ if Tok[i].Kind = OPARTOK then begin					// enumerated
     RecType := NumTypes;
 
     if NumTypes > MAXTYPES then
-     Error(i, 'Out of resources, MAXTYPES');
+      Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
     inc(i);
 
@@ -2306,7 +2318,8 @@ if Tok[i].Kind = SETTOK then begin					// Set Of
  CheckTok(i + 1, OFTOK);
 
  if not (Tok[i + 2].Kind in [CHARTOK, BYTETOK]) then
-  Error(i + 2, 'Illegal type declaration of set elements');
+      Error(i + 2, TMessage.Create(TErrorCode.IllegalTypeDeclarationOfSetElements,
+        'Illegal type declaration of set elements'));
 
  DataType := POINTERTOK;
  NumAllocElements := 32;
@@ -2329,7 +2342,7 @@ end else
   RecType := NumTypes;
 
   if NumTypes > MAXTYPES then
-   Error(i, 'Out of resources, MAXTYPES');
+      Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
   inc(i);
 
@@ -2360,7 +2373,8 @@ end else
     	end;
 
       if (Tok[i].Kind in [IDENTTOK]) then
-	Error(i, 'Fields cannot appear after a method or property definition');
+        Error(i, TMessage.Create(TErrorCode.FieldAfterMethodOrProperty,
+          'Fields cannot appear after a method or property definition'));
 
     end else
 
@@ -2370,7 +2384,8 @@ end else
     repeat
 
       if (Tok[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) then
-	Error(i, 'Fields cannot appear after a method or property definition');
+            Error(i, TMessage.Create(TErrorCode.FieldAfterMethodOrProperty,
+              'Fields cannot appear after a method or property definition'));
 
       CheckTok(i, IDENTTOK);
 
@@ -2482,7 +2497,7 @@ end else// if OBJECTTOK
   RecType := NumTypes;
 
   if NumTypes > MAXTYPES then
-   Error(i, 'Out of resources, MAXTYPES');
+      Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
   inc(i);
 
@@ -2553,8 +2568,9 @@ end else// if OBJECTTOK
   NumAllocElements := RecType;			// indeks do tablicy Types
   AllocElementType := 0;
 
-  if TypeArray[RecType].Size > 255 then
-   Error(i, 'Record size (' + inttostr(TypeArray[RecType].Size) + ') beyond the 256 bytes limit');
+  if TypeArray[RecType].Size >= 256 then
+      Error(i, TMessage.Create(TErrorCode.RecordSizeExceedsLimit, 'Record size {0} exceeds the 256 bytes limit.',
+        IntToStr(TypeArray[RecType].Size)));
 
   Result := i;
 end else// if RECORDTOK
@@ -2595,7 +2611,7 @@ if Tok[i].Kind = PCHARTOK then						// PChar
   i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
 
   if (UpperBound < 1) or (UpperBound > 255) then
-    Error(i, 'string length must be a value from 1 to 255');
+        Error(i, TMessage.Create(TErrorCode.StringLengthNotInRange, 'String length must be a value from 1 to 255'));
 
   CheckTok(i + 1, CBRACKETTOK);
 
@@ -2656,7 +2672,7 @@ if Tok[i].Kind in AllTypes then
 
     NumAllocElements := 256;
    end else
-    Error(i, 'Error in type definition');
+    Error(i, TMessage.Create(TErrorCode.InvalidTypeDefinition, 'Invalid type definition.'));
 
    inc(i, 2);
 
@@ -2664,16 +2680,16 @@ if Tok[i].Kind in AllTypes then
 
   i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
   if not(ExpressionType in IntegerTypes) then
-    Error(i, 'Array lower bound must be integer');
+    Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger, 'Array lower bound must be an integer value'));
 
   if LowerBound <> 0 then
-    Error(i, 'Array lower bound is not zero');
+    Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero'));
 
   CheckTok(i + 1, RANGETOK);
 
   i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
   if not(ExpressionType in IntegerTypes) then
-    Error(i, 'Array upper bound must be integer');
+    Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be integer'));
 
   if UpperBound < 0 then
     Error(i, UpperBoundOfRange);
@@ -2687,16 +2703,16 @@ if Tok[i].Kind in AllTypes then
 
     i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
     if not(ExpressionType in IntegerTypes) then
-      Error(i, 'Array lower bound must be integer');
+      Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,'Array lower bound must be integer'));
 
     if LowerBound <> 0 then
-      Error(i, 'Array lower bound is not zero');
+      Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,'Array lower bound is not zero'));
 
     CheckTok(i + 1, RANGETOK);
 
     i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
     if not(ExpressionType in IntegerTypes) then
-      Error(i, 'Array upper bound must be integer');
+      Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be integer'));
 
     if UpperBound < 0 then
       Error(i, UpperBoundOfRange);
@@ -2715,7 +2731,8 @@ if Tok[i].Kind in AllTypes then
 
 
   if Tok[i + 3].Kind in [RECORDTOK, OBJECTTOK] then
-     Error(i, 'Only arrays of ^'+InfoAboutToken(Tok[i + 3].Kind)+' are supported');
+      Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers,
+        'Only arrays of ^{0} are supported.', InfoAboutToken(Tok[i + 3].Kind)));
 
 
   if Tok[i + 3].Kind = ARRAYTOK then begin
@@ -2726,9 +2743,9 @@ if Tok[i].Kind in AllTypes then
     i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
   end;
 
-
+  // TODO: Have Constant for 40960
   if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) * DataSize[NestedDataType] > 40960-1 then
-    Error(i, 'Array [0..' + IntToStr(NumAllocElements and $FFFF-1)+', 0..' + IntToStr(NumAllocElements shr 16-1)+'] size exceeds available RAM');
+    Error(i, TMessage.Create(TErrorCode.ArraySizeExceedsRAMSize, 'Array [0..{0}, 0..{1} size exceeds the available RAM', IntToStr((NumAllocElements and $FFFF)-1), IntToStr((NumAllocElements shr 16)-1)));
 
 
 // sick3
@@ -2743,14 +2760,17 @@ if Tok[i].Kind in AllTypes then
    if NestedDataType in [RECORDTOK, OBJECTTOK, ENUMTOK] then begin			// !!! dla RECORD, OBJECT tablice nie zadzialaja !!!
 
     if NumAllocElements shr 16 > 0 then
-      Error(i, 'Multidimensional ' + InfoAboutToken(NestedDataType) + ' arrays are not supported');
+          Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
+            'Multidimensional arrays of element type {0} are not supported.', InfoAboutToken(NestedDataType)));
 
 //    if NestedDataType = RECORDTOK then
 //    else
     if NestedDataType in [RECORDTOK, OBJECTTOK] then
-     Error(i, 'Only Array [0..'+IntToStr(NumAllocElements-1)+'] of ^'+InfoAboutToken(NestedDataType)+' supported')
+          Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported, 'Only Array [0..{0}] of ^{1} supported',
+            IntToStr(NumAllocElements - 1), InfoAboutToken(NestedDataType)))
     else
-     Error(i, InfoAboutToken(NestedDataType)+' arrays are not supported');
+          Error(i, TMessage.Create(TErrorCode.ArrayOfTypeNotSupported, 'Arrays of type {0} are not supported.',
+            InfoAboutToken(NestedDataType)));
 
 //    NumAllocElements := NestedNumAllocElements;
 //    NestedAllocElementType := NestedDataType;
@@ -2763,7 +2783,8 @@ if Tok[i].Kind in AllTypes then
    if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].Kind <> PCHARTOK) then begin
 
      if (NestedAllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
-       Error(i, 'Multidimensional arrays type ' +  InfoAboutToken(NestedAllocElementType) + ' are not supported');
+          Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
+            'Multidimensional arrays of element type {0} are not supported.', InfoAboutToken(NestedAllocElementType)));
 
      NestedDataType := NestedAllocElementType;
 
@@ -2795,7 +2816,8 @@ else
     Error(i, UnknownIdentifier);
 
   if Ident[IdentIndex].Kind <> USERTYPE then
-    Error(i, 'Type expected but ' + Tok[i].Name + ' found');
+      Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected but {0} found',
+        Tok[i].Name));
 
   DataType := Ident[IdentIndex].DataType;
   NumAllocElements := Ident[IdentIndex].NumAllocElements or (Ident[IdentIndex].NumAllocElements_ shl 16);
