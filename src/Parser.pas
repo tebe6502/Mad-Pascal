@@ -8,25 +8,25 @@ uses Common, Numbers, Types;
 
 // -----------------------------------------------------------------------------
 
-	function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer;
+	function CompileType(i: TTokenIndex; out DataType: TDatatype; out NumAllocElements: cardinal; out AllocElementType: TDatatype): TTokenIndex;
 
-	function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: Byte; const VarType: Byte = INTEGERTOK; const Err: Boolean = false; const War: Boolean = true): Integer;
+	function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype; const VarType: TDatatype = INTEGERTOK; const Err: Boolean = false; const War: Boolean = true): TTokenIndex;
 
-	function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
+	function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype): TTokenIndex;
 
-	procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: Byte; DataType: Byte; NumAllocElements: Cardinal; AllocElementType: Byte; Data: Int64; IdType: Byte = IDENTTOK);
+	procedure DefineIdent(ErrTokenIndex: TTokenIndex; Name: TString; Kind: Byte; DataType: Byte; NumAllocElements: Cardinal; AllocElementType: Byte; Data: Int64; IdType: Byte = IDENTTOK);
 
-	function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
+	function DefineFunction(i: TTokenIndex; ForwardIdentIndex: TIdentIndex; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: TDatatype; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 
-	function Elements(IdentIndex: integer): cardinal;
+	function Elements(IdentIndex: TIdentIndex): cardinal;
 
-	function GetIdent(S: TString): Integer;
+	function GetIdent(S: TString): TIdentIndex;
 
 	function GetSizeof(i: integer; ValType: byte): Int64;
 
 	function ObjectRecordSize(i: cardinal): integer;
 
-	function RecordSize(IdentIndex: integer; field: string =''): integer;
+	function RecordSize(IdentIndex: TIdentIndex; field: string =''): integer;
 
 	procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValType: Byte);
 
@@ -393,9 +393,10 @@ end;	//GetSizeof
 // ----------------------------------------------------------------------------
 
 
-function CompileConstFactor(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
+function CompileConstFactor(i: Integer; out ConstVal: Int64; out ConstValType: TDatatype): Integer;
 var IdentIndex, j: Integer;
-    Kind, ArrayIndexType: Byte;
+    Kind: TTokenKind;
+    ArrayIndexType: TDatatype;
     ArrayIndex: Int64;
 
     function GetStaticValue(x: byte): Int64;
@@ -1142,7 +1143,7 @@ end;	//CompileConstFactor
 // ----------------------------------------------------------------------------
 
 
-function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: Byte): Integer;
+function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: TDatatype): Integer;
 var
   j, k: Integer;
   RightConstVal: Int64;
@@ -1996,7 +1997,7 @@ end;	//DefineFunction
 // ----------------------------------------------------------------------------
 
 
-function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: cardinal; out AllocElementType: Byte): Integer;
+function CompileType(i: TTokenIndex; out DataType: TDatatype; out NumAllocElements: cardinal; out AllocElementType: Byte): TTokenIndex;
 var
   NestedNumAllocElements, NestedFunctionNumAllocElements: cardinal;
   LowerBound, UpperBound, ConstVal, IdentIndex: Int64;
