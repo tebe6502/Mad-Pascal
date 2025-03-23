@@ -1588,7 +1588,10 @@ var
       end;// while
 
   except
-     on e: THaltException do raise e;
+     on e: THaltException do
+     begin
+          RaiseHaltException(e.GetExitCode());
+     end
      else // EOF reached
      if Text <> '' then
      begin
