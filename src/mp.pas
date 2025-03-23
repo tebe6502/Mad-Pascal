@@ -6892,7 +6892,7 @@ begin
 
 	   if (Ident[IdentTemp].AllocElementType = UNTYPETOK) then
 	     if (Ident[IdentIndex].Param[NumActualParams].DataType <> UNTYPETOK) and (Ident[IdentIndex].Param[NumActualParams].DataType <> Ident[IdentTemp].DataType) then
-	       ErrorForIncompatibleTypes(i,Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	       ErrorIncompatibleTypes(i,Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	 end else
 	  if Ident[IdentIndex].Param[NumActualParams].DataType in Pointers then begin
@@ -6917,10 +6917,10 @@ begin
 	      if Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK] then
 
 	      else
-	        ErrorForIdentifierIncompatibleTypesArray(i, IdentTemp, Ident[IdentIndex].Param[NumActualParams].DataType);
+	        ErrorIdentifierIncompatibleTypesArray(i, IdentTemp, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	     end else
-	      ErrorForIncompatibleTypes(i, Ident[IdentTemp].AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
+	      ErrorIncompatibleTypes(i, Ident[IdentTemp].AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
 
 	   end;
 
@@ -6936,10 +6936,10 @@ begin
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> UNTYPETOK then begin
 
 	       if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> AllocElementType then
-	         ErrorForIncompatibleTypes(i, AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	         ErrorIncompatibleTypes(i, AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	     end else
-	       ErrorForIncompatibleTypes(i,  AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	       ErrorIncompatibleTypes(i,  AllocElementType, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	   end;
 
@@ -6990,7 +6990,7 @@ begin
 	    AllocElementType := Ident[IdentTemp].AllocElementType;
 
 	   if AllocElementType = UNTYPETOK then
-	      ErrorForIncompatibleTypes(i, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	      ErrorIncompatibleTypes(i, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);
 {
  writeln('--- ',Ident[IdentIndex].Name,',',ActualParamType,',',AllocElementType);
  writeln(Ident[IdentIndex].Param[NumActualParams].DataType,',', Ident[IdentTemp].DataType);
@@ -6999,7 +6999,7 @@ begin
  writeln(Ident[IdentIndex].Param[NumActualParams].PassMethod,',', Ident[IdentTemp].PassMethod);
 }
 	 end else
-	   ErrorForIncompatibleTypes(i, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);
+	   ErrorIncompatibleTypes(i, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);
 
 	end
 
@@ -7020,10 +7020,10 @@ begin
 	   if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> AllocElementType then begin
 
 	     if (Ident[IdentIndex].Param[NumActualParams].AllocElementType = UNTYPETOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) and ({Ident[IdentIndex].Param[NumActualParams]} Ident[IdentTemp].NumAllocElements > 0) then
-	      ErrorForIdentifierIncompatibleTypesArray(i, IdentTemp, POINTERTOK)
+	      ErrorIdentifierIncompatibleTypesArray(i, IdentTemp, POINTERTOK)
 	     else
 	      if (Ident[IdentIndex].Param[NumActualParams].AllocElementType <> PROCVARTOK) and (Ident[IdentIndex].Param[NumActualParams].NumAllocElements > 0) then
-	       ErrorForIncompatibleTypes(i, AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
+	       ErrorIncompatibleTypes(i, AllocElementType, Ident[IdentIndex].Param[NumActualParams].AllocElementType);
 
            end;
 
@@ -7036,10 +7036,10 @@ begin
             if (Ident[IdentTemp].DataType = STRINGPOINTERTOK) and (Ident[IdentTemp].NumAllocElements <> 0)
             and (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].NumAllocElements = 0) then
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType = UNTYPETOK then
-	       ErrorForIncompatibleTypes(i, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType)
+	       ErrorIncompatibleTypes(i, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType)
 	     else
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> BYTETOK then		// Exceptionally we accept PBYTE as STRING
-	       ErrorForIncompatibleTypes(i, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].AllocElementType, true);
+	       ErrorIncompatibleTypes(i, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].AllocElementType, true);
 
 {
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = PCHARTOK) then begin
@@ -7063,7 +7063,7 @@ begin
 //	writeln('2 > ',Ident[IdentIndex].Name,',',ActualParamType,',',AllocElementType,',',Tok[i].Kind,',',Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements);
 
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
-              ErrorForIncompatibleTypes(i, ActualParamType, STRINGPOINTERTOK, true);
+              ErrorIncompatibleTypes(i, ActualParamType, STRINGPOINTERTOK, true);
 
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then begin		// CHAR -> STRING
 
@@ -7905,7 +7905,7 @@ case Tok[i].Kind of
      i := CompileExpression(i + 2, ActualParamType);
      GetCommonConstType(i, INTEGERTOK, ActualParamType);
 
-     if DataSize[ActualParamType] > 2 then warning(i, TErrorCode.LoHi);
+     if DataSize[ActualParamType] > 2 then WarningLoHi(i);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -7938,7 +7938,7 @@ case Tok[i].Kind of
      i := CompileExpression(i + 2, ActualParamType);
      GetCommonConstType(i, INTEGERTOK, ActualParamType);
 
-     if DataSize[ActualParamType] > 2 then warning(i, TErrorCode.LoHi);
+     if DataSize[ActualParamType] > 2 then WarningLoHi(i);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -7983,7 +7983,7 @@ case Tok[i].Kind of
      i := CompileExpression(i + 2, ActualParamType);
 
      if not (ActualParamType in RealTypes) then
-       ErrorForIncompatibleTypes(i + 2, ActualParamType, REALTOK);
+       ErrorIncompatibleTypes(i + 2, ActualParamType, REALTOK);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -8047,7 +8047,7 @@ case Tok[i].Kind of
      i := CompileExpression(i + 2, ActualParamType);
 
      if not (ActualParamType in RealTypes) then
-       ErrorForIncompatibleTypes(i + 2, ActualParamType, REALTOK);
+       ErrorIncompatibleTypes(i + 2, ActualParamType, REALTOK);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -9190,7 +9190,7 @@ case Tok[i].Kind of
 
 	  if (BLOCKSTACKTOP = 1) then
 	    if not (Ident[IdentIndex].isInit or Ident[IdentIndex].isInitialized or Ident[IdentIndex].LoopVariable) then
-	      WarningForIdentifier(i, TErrorCode.VariableNotInit, IdentIndex);
+	      WarningVariableNotInitialized(i, IdentIndex);
 
 	  end else begin	// isError
 
@@ -9636,7 +9636,7 @@ case Tok[i].Kind of
        if ((Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0,1])) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then
 
        else
-	ErrorForIdentifierIllegalTypeConversion(i + 2, IdentIndex, Tok[i].Kind);
+	ErrorIdentifierIllegalTypeConversion(i + 2, IdentIndex, Tok[i].Kind);
 
     end;
 
@@ -10273,8 +10273,8 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
     end;
 
    if yes then begin
-     warning(i + 2, TErrorCode.AlwaysFalse);
-     warning(i + 2, TErrorCode.UnreachableCode);
+     WarningAlwaysFalse(i + 2);
+     WarningUnreachableCode(i + 2);
    end;
 
   end;
@@ -10282,8 +10282,8 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   if (isZero = BYTETOK) and (ValType in UnsignedOrdinalTypes) then
    case Tok[i + 1].Kind of
-//    LTTOK: warning(i + 2, AlwaysFalse);		// BYTE, WORD, CARDINAL '<' 0
-    GETOK: warning(i + 2, TErrorCode.AlwaysTrue);			// BYTE, WORD, CARDINAL '>', '>=' 0
+//  LTTOK: WarningAlwaysFalse(i + 2);		         // BYTE, WORD, CARDINAL '<' 0
+    GETOK: WarningAlwaysTrue(i + 2);			// BYTE, WORD, CARDINAL '>', '>=' 0
    end;
 
 
@@ -10291,11 +10291,11 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
    case Tok[i + 1].Kind of
 
     EQTOK, LTTOK, LETOK: begin				// BYTE, WORD, CARDINAL '=', '<'. '<=' -X
-			  warning(i + 2, TErrorCode.AlwaysFalse);
-			  warning(i + 2, TErrorCode.UnreachableCode);
+			  WarningAlwaysFalse(i + 2);
+			  WarningUnreachableCode(i + 2);
 			 end;
 
-	   GTTOK, GETOK: warning(i + 2, TErrorCode.AlwaysTrue);	// BYTE, WORD, CARDINAL '>', '>=' -X
+	   GTTOK, GETOK: WarningAlwaysTrue(i + 2);	// BYTE, WORD, CARDINAL '>', '>=' -X
    end;
 
 
@@ -11001,7 +11001,7 @@ case Tok[i].Kind of
 		  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 		end else
 		 if Ident[IdentIndex].AllocElementType = UNTYPETOK then
-		  ErrorForIncompatibleTypes(i + 1, STRINGPOINTERTOK, POINTERTOK)
+		  ErrorIncompatibleTypes(i + 1, STRINGPOINTERTOK, POINTERTOK)
 		 else
 		  GetCommonType(i + 1, Ident[IdentIndex].AllocElementType, STRINGPOINTERTOK);
 
@@ -11084,7 +11084,7 @@ case Tok[i].Kind of
 		    if (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].AllocElementType <> Ident[IdentIndex].AllocElementType) and (Tok[k + 1].Kind <> OBRACKETTOK) then begin
 
 		      if ((Ident[IdentTemp].NumAllocElements > 0) {and (Ident[IdentTemp].AllocElementType <> RECORDTOK)}) and ((Ident[IdentIndex].NumAllocElements > 0) {and (Ident[IdentIndex].AllocElementType <> RECORDTOK)}) then
-		        ErrorForIdentifierIncompatibleTypesArrayIdentifier(k, IdentTemp, IdentIndex)
+		        ErrorIdentifierIncompatibleTypesArrayIdentifier(k, IdentTemp, IdentIndex)
 
 		      else begin
 
@@ -11094,7 +11094,7 @@ case Tok[i].Kind of
 		           (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType <> UNTYPETOK) and (Ident[IdentTemp].NumAllocElements = 0) then
 			  Error(k, 'Incompatible types: got "^'+InfoAboutToken(Ident[IdentTemp].AllocElementType)+'" expected "^' + InfoAboutToken(Ident[IdentIndex].AllocElementType) + '"')
 			else
-			  ErrorForIdentifierIncompatibleTypesArray(k, IdentTemp, ExpressionType);
+			  ErrorIdentifierIncompatibleTypesArray(k, IdentTemp, ExpressionType);
 
 		     end;
 
@@ -11148,22 +11148,22 @@ case Tok[i].Kind of
 				  if (IdentTemp > 0) and (Ident[IdentTemp].Kind = USERTYPE) and (Ident[IdentTemp].DataType = ENUMTYPE) then begin
 
 				    if Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements then
-				      ErrorForIncompatibleEnumIdentifiers(i,  IdentTemp, IdentIndex);
+				      ErrorIncompatibleEnumIdentifiers(i,  IdentTemp, IdentIndex);
 
 				  end else
 				  if (IdentTemp > 0) and (Ident[IdentTemp].Kind = ENUMTYPE) then begin
 
 				    if Ident[IdentTemp].NumAllocElements <> Ident[IdentIndex].NumAllocElements then
-				      ErrorForIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
+				      ErrorIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
 				  end else
 				  if (IdentTemp > 0) and (Ident[IdentTemp].DataType = ENUMTYPE) then begin
 
 				    if Ident[IdentTemp].NumAllocElements <> Ident[IdentIndex].NumAllocElements then
-				      ErrorForIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
+				      ErrorIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
 				  end else
- 				   ErrorForIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
+ 				   ErrorIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
 
 				 end else begin
 
@@ -11173,7 +11173,7 @@ case Tok[i].Kind of
 				    IdentTemp := 0;
 
 				  if (IdentTemp > 0) and ((Ident[IdentTemp].Kind = ENUMTYPE) or (Ident[IdentTemp].DataType = ENUMTYPE)) then
- 				   ErrorForIncompatibleEnumIdentifierType(i, IdentTemp, ExpressionType)
+ 				   ErrorIncompatibleEnumIdentifierType(i, IdentTemp, ExpressionType)
 				  else
 				   GetCommonType(i + 1, Ident[IdentIndex].DataType, ExpressionType);
 
@@ -11492,7 +11492,7 @@ case Tok[i].Kind of
 		    if Ident[IdentTemp].AllocElementType <> RECORDTOK then
 		     if (j <> integer(Ident[IdentTemp].NumAllocElements * DataSize[Ident[IdentTemp].AllocElementType])) then
 
-                       ErrorForIdentifierIncompatibleTypesArrayIdentifier(i, IdentTemp, IdentIndex);
+                       ErrorIdentifierIncompatibleTypesArrayIdentifier(i, IdentTemp, IdentIndex);
 
 	   	    a65(TCode65.subBX);
 		    StopOptimization;
@@ -11583,7 +11583,7 @@ case Tok[i].Kind of
   WARNINGTOK:
     begin
 
-      Warning(i, TErrorCode.UserDefined);
+      WarningUserDefined(i);
 
       Result := i;
     end;
@@ -13325,7 +13325,7 @@ WHILETOK:
 	       if Tok[i + 1].Kind = DEREFERENCETOK then
 		Error(i + 1, TErrorCode.IllegalQualifier)
 	       else
-		ErrorForIncompatibleTypes(i + 1, Ident[IdentIndex].DataType, ExpressionType);
+		ErrorIncompatibleTypes(i + 1, Ident[IdentIndex].DataType, ExpressionType);
 
 	  end else
 
@@ -13501,7 +13501,7 @@ WHILETOK:
 	Error(i, 'Procedures cannot return a value');
 
       if (ActualParamType = STRINGPOINTERTOK) and ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].NumAllocElements = 0)) then
-       ErrorForIncompatibleTypes(i, ActualParamType, PCHARTOK)
+       ErrorIncompatibleTypes(i, ActualParamType, PCHARTOK)
       else
        GetCommonConstType(i, Ident[IdentIndex].DataType, ActualParamType);
 
@@ -13586,7 +13586,7 @@ WHILETOK:
       Error(i + 2, TErrorCode.UnknownIdentifier);
 
     if not (Ident[IdentIndex].DataType in Pointers) then
-      ErrorForIncompatibleTypes(i + 2, Ident[IdentIndex].DataType , POINTERTOK);
+      ErrorIncompatibleTypes(i + 2, Ident[IdentIndex].DataType , POINTERTOK);
 
     svar := GetLocalName(IdentIndex);
 
@@ -14281,7 +14281,7 @@ begin
 
 
   if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = CHARTOK) then
-   ErrorForIncompatibleTypes(i, ActualParamType, ConstValType);
+   ErrorIncompatibleTypes(i, ActualParamType, ConstValType);
 
 
   if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (ActualParamType = REALTOK) then
@@ -14470,7 +14470,7 @@ begin
 
 
   if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = CHARTOK) then
-   ErrorForIncompatibleTypes(i, ActualParamType, ConstValType);
+   ErrorIncompatibleTypes(i, ActualParamType, ConstValType);
 
 
   if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (ActualParamType = REALTOK) then
@@ -15436,7 +15436,7 @@ while Tok[i].Kind in
 
 
   if Tok[i].Kind = WARNINGTOK then begin
-   Warning(i, TErrorCode.UserDefined);
+   WarningUserDefined(i);
    inc(i, 2);
   end;
 
@@ -16283,7 +16283,7 @@ while Tok[i].Kind in
 	    if yes then
   	      Ident[NumIdent].isStriped := TRUE
 	    else
-	      warning(i, TErrorCode.StripedAllowed);
+	      WarningStripedAllowed(i);
 
 	  end;
 

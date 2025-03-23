@@ -109,7 +109,7 @@
 //move_1
 
 		     if Succ(Tok[i + 2].StrLength) > Ident[IdentIndex].NumAllocElements then begin
-		      Warning(i + 2, TErrorCode.ShortStringLength);
+		      WarningShortStringLength(i + 2);
 		      asm65(#9'mva #$'+IntToHex(NumCharacters,2)+' '+GetLocalName(IdentIndex, 'adr.'));    //adr.'+Ident[IdentIndex].Name);
 		     end;
 
@@ -234,7 +234,7 @@
 
 
 		end else
-		 ErrorForIncompatibleTypes(i, ExpressionType, VarType);
+		 ErrorIncompatibleTypes(i, ExpressionType, VarType);
 
 		end;
 

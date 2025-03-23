@@ -1213,7 +1213,7 @@ begin
     (DstType in [CHARTOK, BOOLEANTOK])) then
 
      if err then
-      ErrorForIncompatibleTypes(ErrTokenIndex, SrcType, DstType)
+      ErrorIncompatibleTypes(ErrTokenIndex, SrcType, DstType)
      else
       Result := True;
 
@@ -1243,7 +1243,7 @@ begin
   if LeftType = UNTYPETOK then Result := RightType;
 
   if Result = 0 then
-    ErrorForIncompatibleTypes(ErrTokenIndex, RightType, LeftType);
+    ErrorIncompatibleTypes(ErrTokenIndex, RightType, LeftType);
 
 end;
 
