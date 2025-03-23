@@ -522,6 +522,7 @@ type
   
 type
   TTokenIndex = Integer;
+  TIdentIndex = Integer;
 
 var
 
@@ -618,9 +619,9 @@ procedure AddDefine(X: String);
 
 procedure AddPath(s: String);
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: Integer; IdentIndex: TIdentIndex; ArrayIndex: Int64; ArrayIndexType: Byte);
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: Integer; IdentIndex: TIdentIndex; ArrayIndex: Int64; ArrayIndexType: Byte);
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 
@@ -638,7 +639,7 @@ function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; 
 
 function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
 
-function GetEnumName(IdentIndex: Integer): TString;
+function GetEnumName(IdentIndex: TIdentIndex): TString;
 
 function GetSpelling(i: Integer): TString;
 
@@ -652,7 +653,7 @@ function InfoAboutToken(t: Byte): String;
 
 function IntToStr(const a: Int64): String;
 
-function LowBound(i: Integer; DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
 
 function SearchDefine(X: String): Integer;
 
@@ -939,7 +940,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: Integer; IdentIndex: TIdentIndex; ArrayIndex: Int64; ArrayIndexType: Byte);
 begin
 
 if Ident[IdentIndex].NumAllocElements_ > 0 then
@@ -1052,7 +1053,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function LowBound(i: Integer; DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
 begin
 
  Result := 0;
@@ -1207,7 +1208,7 @@ begin
     (DstType in [CHARTOK, BOOLEANTOK])) then
 
      if err then
-      ErrorForIdentifierDatatypes(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
+      ErrorForIncompatibleTypes(ErrTokenIndex, SrcType, DstType)
      else
       Result := True;
 
@@ -1237,7 +1238,7 @@ begin
   if LeftType = UNTYPETOK then Result := RightType;
 
   if Result = 0 then
-    ErrorForIdentifierDatatypes(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
+    ErrorForIdentifierIncompatibleTypes(ErrTokenIndex, 0, RightType, LeftType);
 
 end;
 

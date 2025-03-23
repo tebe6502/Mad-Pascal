@@ -237,7 +237,7 @@
 
 
 		end else
-		 ErrorForIdentifierDatatypes(i, IncompatibleTypes, 0, ExpressionType, VarType);
+		 ErrorForIncompatibleTypes(i, ExpressionType, VarType);
 
 		end;
 
