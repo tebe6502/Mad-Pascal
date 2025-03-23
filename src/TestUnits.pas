@@ -137,7 +137,7 @@ type
   public
     constructor Create;
     function GetConstantName(const expression: String; var index: Integer): String;
-    function GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 
   constructor TTestEvaluationContext.Create;
@@ -149,7 +149,7 @@ type
     Result := 'EXAMPLE';
   end;
 
-  function TTestEvaluationContext.GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+  function TTestEvaluationContext.GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   begin
     if constantName = 'EXAMPLE' then
     begin

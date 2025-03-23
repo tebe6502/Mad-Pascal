@@ -41,11 +41,11 @@ procedure Reset(var f: TBinaryFile; l: LongInt); overload;
 begin
 end;
 
-function FilePos( var f: TBinaryFile ):Int64;
+function FilePos( var f: TBinaryFile ):TInteger;
 begin
 end;
 
-procedure Seek(var f: TBinaryFile; Pos: Int64 );
+procedure Seek(var f: TBinaryFile; Pos: TInteger );
 begin
 end;
 
