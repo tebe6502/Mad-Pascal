@@ -419,7 +419,7 @@ var
   var i, v, x: integer;
       cmd, s, nam: string;
       found: Boolean;
-      Param: TDefinesParam;
+      Param: TDefineParams;
 
 
 	procedure bin2csv(fn: string);
@@ -483,7 +483,7 @@ var
 
   begin
 
-    Param:=Default(TDefinesParam);
+    Param:=Default(TDefineParams);
 
     if UpCase(d[1]) in AllowLabelFirstChars then begin
 
