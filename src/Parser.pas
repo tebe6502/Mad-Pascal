@@ -8,27 +8,33 @@ uses Common, Numbers, Types;
 
 // -----------------------------------------------------------------------------
 
-	function CompileType(i: TTokenIndex; out DataType: TDatatype; out NumAllocElements: cardinal; out AllocElementType: TDatatype): TTokenIndex;
+function CompileType(i: TTokenIndex; out DataType: TDatatype; out NumAllocElements: Cardinal;
+  out AllocElementType: TDatatype): TTokenIndex;
 
-	function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype; const VarType: TDatatype = INTEGERTOK; const Err: Boolean = false; const War: Boolean = true): TTokenIndex;
+function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype;
+  const VarType: TDatatype = INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): TTokenIndex;
 
-	function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype): TTokenIndex;
+function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype): TTokenIndex;
 
-	procedure DefineIdent(ErrTokenIndex: TTokenIndex; Name: TString; Kind: Byte; DataType: Byte; NumAllocElements: Cardinal; AllocElementType: Byte; Data: Int64; IdType: Byte = IDENTTOK);
+procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind; DataType: TDataType;
+  NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64; IdType: TDataType = IDENTTOK);
 
-	function DefineFunction(i: TTokenIndex; ForwardIdentIndex: TIdentIndex; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: TDatatype; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
+function DefineFunction(i: TTokenIndex; ForwardIdentIndex: TIdentIndex;
+  out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean;
+  out NestedFunctionResultType: TDatatype; out NestedFunctionNumAllocElements: Cardinal;
+  out NestedFunctionAllocElementType: Byte): Integer;
 
-	function Elements(IdentIndex: TIdentIndex): cardinal;
+function Elements(IdentIndex: TIdentIndex): Cardinal;
 
-	function GetIdent(S: TString): TIdentIndex;
+function GetIdentIndex(S: TIdentifierName): TIdentIndex;
 
-	function GetSizeof(i: integer; ValType: byte): Int64;
+function GetSizeOf(i: TTokenIndex; ValType: TDatatype): Int64;
 
-	function ObjectRecordSize(i: cardinal): integer;
+function ObjectRecordSize(i: Cardinal): Integer;
 
-	function RecordSize(IdentIndex: TIdentIndex; field: string =''): integer;
+function RecordSize(IdentIndex: TIdentIndex; field: String = ''): Integer;
 
-	procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValType: Byte);
+procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: Byte);
 
 // -----------------------------------------------------------------------------
 
@@ -61,7 +67,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetIdent(S: TString): Integer;
+function GetIdentIndex(S: TString): Integer;
 var TempIndex: integer;
 
   function UnitAllowedAccess(IdentIndex, Index: integer): Boolean;
@@ -90,7 +96,7 @@ var TempIndex: integer;
 	  Result := IdentIndex;
 	  Ident[IdentIndex].Pass := Pass;
 
-	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
+	  if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X)-1));
 
 	  if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1){ or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM')} then exit;
 	end
@@ -111,7 +117,7 @@ var TempIndex: integer;
 	  Result := IdentIndex;
 	  Ident[IdentIndex].Pass := Pass;
 
-	  if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X)-1));
+	  if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X)-1));
 
 	  if (Ident[IdentIndex].UnitIndex = UnitIndex) then exit;
 	end
@@ -235,7 +241,7 @@ begin
 
   base:=copy(name, 1, pos('.', name)-1);
 
-  IdentIndex := GetIdent(base);
+  IdentIndex := GetIdentIndex(base);
 
   for i := 1 to TypeArray[Ident[IdentIndex].NumAllocElements].NumFields do
    if pos(name, base+'.'+TypeArray[Ident[IdentIndex].NumAllocElements].Field[i].Name) > 0 then
@@ -336,11 +342,11 @@ end;	//SaveToDataSegment
 // ----------------------------------------------------------------------------
 
 
-function GetSizeof(i: integer; ValType: byte): Int64;
+function GetSizeOf(i: TTokenIndex; ValType: TDatatype): Int64;
 var IdentIndex: integer;
 begin
 
-     IdentIndex := GetIdent(Tok[i + 2].Name);
+     IdentIndex := GetIdentIndex(Tok[i + 2].Name);
 
      case ValType of
 
@@ -393,7 +399,7 @@ end;	//GetSizeof
 // ----------------------------------------------------------------------------
 
 
-function CompileConstFactor(i: Integer; out ConstVal: Int64; out ConstValType: TDatatype): Integer;
+function CompileConstFactor(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDatatype): TTokenIndex;
 var IdentIndex, j: Integer;
     Kind: TTokenKind;
     ArrayIndexType: TDatatype;
@@ -469,7 +475,7 @@ case Tok[i].Kind of
      end;
 
      if ConstValType in Pointers then begin
-      IdentIndex := GetIdent(Tok[i].Name);
+      IdentIndex := GetIdentIndex(Tok[i].Name);
 
       if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then
        ConstVal := Ident[IdentIndex].NumAllocElements_ - 1
@@ -498,7 +504,7 @@ case Tok[i].Kind of
 
       if Tok[i + 2].Kind = IDENTTOK then begin
 
-	IdentIndex := GetIdent(Tok[i + 2].Name);
+	IdentIndex := GetIdentIndex(Tok[i + 2].Name);
 
 	if IdentIndex = 0 then
 	 Error(i + 2, TErrorCode.UnknownIdentifier);
@@ -784,7 +790,7 @@ case Tok[i].Kind of
 
   IDENTTOK:
     begin
-    IdentIndex := GetIdent(Tok[i].Name);
+    IdentIndex := GetIdentIndex(Tok[i].Name);
 
     if IdentIndex > 0 then
 
@@ -800,16 +806,16 @@ case Tok[i].Kind of
 		  Error(i, TErrorCode.TypeMismatch);
 
 
-		if (Ident[GetIdent(Tok[i].Name)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
+		if (Ident[GetIdentIndex(Tok[i].Name)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
 		// ok
 		end else
-          if Ident[GetIdent(Tok[i].Name)].DataType in Pointers then
+          if Ident[GetIdentIndex(Tok[i].Name)].DataType in Pointers then
           begin
             Error(j, TMessage.Create(TErrorCode.IllegalTypeConversion, 'Illegal type conversion: "' +
               InfoAboutToken(ConstValType) + '" to "' + Tok[i].Name + '"'));
           end;
 
-		ConstValType := Ident[GetIdent(Tok[i].Name)].DataType;
+		ConstValType := Ident[GetIdentIndex(Tok[i].Name)].DataType;
 
 		CheckTok(j + 1, CPARTOK);
 
@@ -892,7 +898,7 @@ case Tok[i].Kind of
     if Tok[i + 1].Kind <> IDENTTOK then
       Error(i + 1, TErrorCode.IdentifierExpected)
     else begin
-      IdentIndex := GetIdent(Tok[i + 1].Name);
+      IdentIndex := GetIdentIndex(Tok[i + 1].Name);
 
       if IdentIndex > 0 then begin
 
@@ -1099,7 +1105,7 @@ case Tok[i].Kind of
     CheckTok(i + 1, OPARTOK);
 
 
-    if (Tok[i + 2].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i + 2].Name)].Kind = FUNCTIONTOK) then
+    if (Tok[i + 2].Kind = IDENTTOK) and (Ident[GetIdentIndex(Tok[i + 2].Name)].Kind = FUNCTIONTOK) then
      isError := TRUE
     else
      j := CompileConstExpression(i + 2, ConstVal, ConstValType);
@@ -1110,7 +1116,7 @@ case Tok[i].Kind of
 
     if (ConstValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) and (Tok[i + 3].Kind <> OBRACKETTOK) then begin
 
-      IdentIndex := GetIdent(Tok[i + 2].Name);
+      IdentIndex := GetIdentIndex(Tok[i + 2].Name);
 
       if (Ident[IdentIndex].DataType in Pointers) and ( (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) ) then
        if ((Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0,1])) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then begin
@@ -1389,16 +1395,20 @@ end;	//CompileConstExpression
 // ----------------------------------------------------------------------------
 
 
-procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: Byte; DataType: Byte; NumAllocElements: Cardinal; AllocElementType: Byte; Data: Int64; IdType: Byte = IDENTTOK);
+procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind; DataType: TDataType;
+  NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64; IdType: TDataType = IDENTTOK);
 var
-  i: Integer;
+  identIndex: Integer;
   NumAllocElements_ : Cardinal;
 begin
 
-i := GetIdent(Name);
+identIndex := GetIdentIndex(Name);
 
-if (i > 0) and (not (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK])) and (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = false) and (Ident[i].UnitIndex = UnitNameIndex) then
-    Error(ErrTokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier ' +
+if (i > 0) and (not (Ident[identIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]))
+           and (Ident[identIndex].Block = BlockStack[BlockStackTop])
+           and (Ident[identIndex].isOverload = false)
+           and (Ident[i].UnitIndex = UnitNameIndex) then
+    Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier ' +
       Name + ' is already defined'))
 else
   begin
@@ -1440,7 +1450,7 @@ else
   if Name <> 'RESULT' then
    if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (pass = TPass.CODE_GENERATION) then
      if not ( (Ident[NumIdent].Pass in [ TPass.CALL_DETERMINATION , TPass.CODE_GENERATION]) or (Ident[NumIdent].IsNotDead) ) then
-      NoteForIdentifierNotUsed(ErrTokenIndex, NumIdent);
+      NoteForIdentifierNotUsed(tokenIndex, NumIdent);
 
   case Kind of
 
@@ -2122,7 +2132,7 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
  end else
  if Tok[i + 1].Kind = IDENTTOK then begin
 
-  IdentIndex := GetIdent(Tok[i + 1].Name);
+  IdentIndex := GetIdentIndex(Tok[i + 1].Name);
 
   if IdentIndex = 0 then begin
 
@@ -2809,9 +2819,9 @@ else
 //				   USERTYPE
 // -----------------------------------------------------------------------------
 
- if (Tok[i].Kind = IDENTTOK) and (Ident[GetIdent(Tok[i].Name)].Kind = USERTYPE) then
+ if (Tok[i].Kind = IDENTTOK) and (Ident[GetIdentIndex(Tok[i].Name)].Kind = USERTYPE) then
   begin
-  IdentIndex := GetIdent(Tok[i].Name);
+  IdentIndex := GetIdentIndex(Tok[i].Name);
 
   if IdentIndex = 0 then
     Error(i, TErrorCode.UnknownIdentifier);
