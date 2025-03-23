@@ -418,8 +418,10 @@ type
     StrLength: Word;
     end;
 
+  TIdentifierName = String;
+
   TIdentifier = record
-    Name: TString;
+    Name: TIdentifierName;
     Value: Int64;			// Value for a constant, address for a variable, procedure or function
     Block: Integer;			// Index of a block in which the identifier is defined
     UnitIndex : Integer;
