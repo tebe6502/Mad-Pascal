@@ -30,18 +30,20 @@ type
     CannotCombineInlineWithExternal, IllegalTypeDeclarationOfSetElements, FieldAfterMethodOrProperty,
     RecordSizeExceedsLimit,
     StringLengthNotInRange, InvalidTypeDefinition, ArrayLowerBoundNotInteger, ArrayLowerBoundNotZero,
-    ArrayUpperBoundNotInteger, InvalidArrayOfPointers, ArraySizeExceedsRAMSize,MultiDimensionalArrayOfTypeNotSupported,
-ArrayOfTypeNotSupported  ,OnlyArrayOfTypeSupported ,IdentifierIdentsNoMember,Unassigned,
-VariableConstantOrFunctionExpectedButProcedureFound,UnderConstruction,TypeIdentifierNotAllowed
+    ArrayUpperBoundNotInteger, InvalidArrayOfPointers, ArraySizeExceedsRAMSize,
+    MultiDimensionalArrayOfTypeNotSupported,
+    ArrayOfTypeNotSupported, OnlyArrayOfTypeSupported, IdentifierIdentsNoMember, Unassigned,
+    VariableConstantOrFunctionExpectedButProcedureFound, UnderConstruction, TypeIdentifierNotAllowed
     );
 
-  // TODO Test for structured text constants
-  type
- TMessageDefinition = record
-  text: String;
- end;
+// TODO Test for structured text constants
+type
+  TMessageDefinition = record
+    Text: String;
+  end;
 
- const UnderConstruction2: TMessageDefinition = ( text: 'Under Construction' );
+const
+  UnderConstruction2: TMessageDefinition = (Text: 'Under Construction');
 
 type
   IMessage = interface
@@ -63,13 +65,17 @@ type
 
 // ----------------------------------------------------------------------------
 
-//
+
 procedure Error(errorTokenIndex: TTokenIndex; msg: String); overload;
 procedure Error(errorTokenIndex: TTokenIndex; msg: IMessage); overload;
 procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode); overload;
-procedure ErrorForIdentifier(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex );
-procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex ;
-  srcType: Int64 ; DstType: Int64); overload;
+procedure ErrorForIdentifier(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex);
+procedure ErrorForIdentifierDatatype(errorTokenIndex: TTokenIndex; errorCode: TErrorCode;
+  identIndex: TTokenIndex; srcType: Int64);
+procedure ErrorForIdentifierDatatypes(errorTokenIndex: TTokenIndex; errorCode: TErrorCode;
+  identIndex: TTokenIndex; srcType: Int64; DstType: Int64);
+//procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex ;
+//  srcType: Int64 ; DstType: Int64); overload;
 
 procedure Note(NoteTokenIndex: TTokenIndex; msg: String);
 procedure NoteForIdentifierNotUsed(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
@@ -134,7 +140,7 @@ end;
 function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
 begin
 
- Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
+  Result := ' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
 
 end;
 
@@ -390,6 +396,18 @@ begin
 
 end;
 
+procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex;
+  srcType: Int64; DstType: Int64);
+var
+  msg: String;
+begin
+
+  if not isConst then
+  begin
+    msg := ErrorMessage(errorTokenIndex, errorCode, identIndex, srcType, DstType);
+    Error(errorTokenIndex, msg);
+  end;
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -401,8 +419,6 @@ var
   token, previousToken: TToken;
 begin
 
-  Assert(NumTok > 0, 'No token in token list');
-
   if not isConst then
   begin
 
@@ -413,17 +429,25 @@ begin
     if errorTokenIndex > NumTok then errorTokenIndex := NumTok;
 
     TextColor(LIGHTRED);
-    token := Tok[errorTokenIndex];
-    if (errorTokenIndex > 1) then
+    if errorTokenIndex > 0 then
     begin
-      previousToken := Tok[errorTokenIndex - 1];
-      WriteLn(UnitName[token.UnitIndex].Path + ' (' + IntToStr(token.Line) + ',' +
-        IntToStr(Succ(previousToken.Column)) + ')' + ' Error: ' + msg);
+      token := Tok[errorTokenIndex];
+      if (errorTokenIndex > 1) then
+      begin
+        previousToken := Tok[errorTokenIndex - 1];
+        WriteLn(UnitName[token.UnitIndex].Path + ' (' + IntToStr(token.Line) + ',' +
+          IntToStr(Succ(previousToken.Column)) + ')' + ' Error: ' + msg);
+      end
+      else
+      begin
+        WriteLn(UnitName[token.UnitIndex].Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
+      end;
     end
     else
     begin
-      WriteLn(UnitName[token.UnitIndex].Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
+      WriteLn('Error: ' + msg);
     end;
+
 
 
     NormVideo;
@@ -452,7 +476,19 @@ end;
 
 procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode);
 begin
-     ErrorForIdentifier(errorTokenIndex, errorCode,0);
+  ErrorForIdentifier(errorTokenIndex, errorCode, 0);
+end;
+
+procedure ErrorForIdentifierDatatype(errorTokenIndex: TTokenIndex; errorCode: TErrorCode;
+  identIndex: TTokenIndex; srcType: Int64);
+begin
+  Error(errorTokenIndex, errorCode, identIndex, srcType, 0);
+end;
+
+procedure ErrorForIdentifierDatatypes(errorTokenIndex: TTokenIndex; errorCode: TErrorCode;
+  identIndex: TTokenIndex; srcType: Int64; DstType: Int64);
+begin
+  Error(errorTokenIndex, errorCode, identIndex, srcType, dstType);
 end;
 
 // ----------------------------------------------------------------------------
@@ -470,19 +506,6 @@ begin
   end;
 end;
 
-
-procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex;
-  srcType: Int64; DstType: Int64);
-var
-  msg: String;
-begin
-
-  if not isConst then
-  begin
-    msg := ErrorMessage(errorTokenIndex, errorCode, identIndex, srcType, DstType);
-    Error(errorTokenIndex, msg);
-  end;
-end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

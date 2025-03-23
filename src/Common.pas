@@ -1207,7 +1207,7 @@ begin
     (DstType in [CHARTOK, BOOLEANTOK])) then
 
      if err then
-      Error(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
+      ErrorForIdentifierDatatypes(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
      else
       Result := True;
 
@@ -1237,7 +1237,7 @@ begin
   if LeftType = UNTYPETOK then Result := RightType;
 
   if Result = 0 then
-    Error(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
+    ErrorForIdentifierDatatypes(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
 
 end;
 
@@ -1326,7 +1326,7 @@ procedure ClearWordMemory(anArray: TWordMemory);
 begin
   for i := Low(anArray) to High(anArray) do
   begin
-  	anArray[i]:=0;
+    anArray[i]:=0;
   end;
 end;
 

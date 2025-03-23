@@ -642,7 +642,7 @@ case Tok[i].Kind of
       if isError then Exit;
 
       if not (ConstValType in RealTypes) then
-	Error(i, IncompatibleTypes, 0, ConstValType, REALTOK);
+	ErrorForIdentifierDatatypes(i, IncompatibleTypes, 0, ConstValType, REALTOK);
 
       CheckTok(i + 1, CPARTOK);
 
@@ -1115,7 +1115,7 @@ case Tok[i].Kind of
        if ((Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0,1])) or (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then begin
 
        end else
-	Error(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind,0);
+	ErrorForIdentifierDatatype(i + 2, IllegalTypeConversion, IdentIndex, Tok[i].Kind);
 
     end;
 
@@ -1373,7 +1373,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   if Err then begin
    isConst := false;
    isError := false;
-   Error(i, RangeCheckError, 0, ConstVal, VarType);
+   ErrorForIdentifierDatatypes(i, RangeCheckError, 0, ConstVal, VarType);
   end else
    if War then
    if VarType <> BOOLEANTOK then
