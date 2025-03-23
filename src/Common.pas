@@ -630,8 +630,6 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
-function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
-
 function FindFile(Name: String; ftyp: TString): String; overload;
 
 procedure FreeTokens;
@@ -890,18 +888,6 @@ else if (Tok[i].Kind = EOFTOK) then
   Result := 'end of file'
 else
   Result := 'unknown token';
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
-begin
-
- Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
 
 end;
 

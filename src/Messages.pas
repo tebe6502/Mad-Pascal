@@ -72,7 +72,7 @@ procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex:
   srcType: Int64 ; DstType: Int64); overload;
 
 procedure Note(NoteTokenIndex: TTokenIndex; msg: String);
-procedure NoteForIdentifier(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
+procedure NoteForIdentifierNotUsed(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
 
 procedure Warning(warningTokenIndex: TTokenIndex; errorCode: TErrorCode); overload;
 
@@ -124,6 +124,17 @@ begin
   for i := 0 to High(msgNote) - 1 do writeln(msgNote[i]);
 
   NormVideo;
+
+end;
+
+
+
+// ----------------------------------------------------------------------------
+
+function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
+begin
+
+ Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
 
 end;
 
@@ -541,7 +552,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure NoteForIdentifier(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
+procedure NoteForIdentifierNotUsed(NoteTokenIndex: TTokenIndex; identIndex: TTokenIndex);
 var
   a: String;
 begin

@@ -1439,7 +1439,7 @@ else
   if Name <> 'RESULT' then
    if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (pass = TPass.CODE_GENERATION) then
      if not ( (Ident[NumIdent].Pass in [ TPass.CALL_DETERMINATION , TPass.CODE_GENERATION]) or (Ident[NumIdent].IsNotDead) ) then
-      NoteForIdentifier(ErrTokenIndex, NumIdent);
+      NoteForIdentifierNotUsed(ErrTokenIndex, NumIdent);
 
   case Kind of
 
