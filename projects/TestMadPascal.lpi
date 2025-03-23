@@ -165,12 +165,21 @@
         <StackChecks Value="True"/>
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
         <DebugInfoType Value="dsDwarf2Set"/>
       </Debugging>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dDEBUG"/>
+      <OtherDefines Count="1">
+        <Define0 Value="DEBUG"/>
+      </OtherDefines>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>
@@ -194,6 +203,12 @@
       </Item>
       <Item>
         <Name Value="EEValuationException"/>
+      </Item>
+      <Item>
+        <Name Value="RunError(100)"/>
+      </Item>
+      <Item>
+        <Name Value="EInOutError"/>
       </Item>
     </Exceptions>
   </Debugging>
