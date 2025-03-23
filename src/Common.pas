@@ -655,7 +655,7 @@ function GetValueType(Value: Int64): Byte;
 function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
 function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
 
-function InfoAboutToken(t: Byte): String;
+function InfoAboutToken(t: TTokenCode): String;
 
 function IntToStr(const a: Int64): String;
 

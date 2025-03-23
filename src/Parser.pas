@@ -500,7 +500,7 @@ case Tok[i].Kind of
 	IdentIndex := GetIdent(Tok[i + 2].Name);
 
 	if IdentIndex = 0 then
-	 Error(i + 2, UnknownIdentifier);
+	 Error(i + 2, TErrorCode.UnknownIdentifier);
 
 	if Ident[IdentIndex].Kind in [VARIABLE, CONSTANT] then begin
 
@@ -524,14 +524,14 @@ case Tok[i].Kind of
 	   end;
 
 	  end else
-	   Error(i+2, TypeMismatch);
+	   Error(i+2, TErrorCode.TypeMismatch);
 
 	end else
-	 Error(i + 2, IdentifierExpected);
+	 Error(i + 2, TErrorCode.IdentifierExpected);
 
 	inc(i, 2);
       end else
-       Error(i + 2, IdentifierExpected);
+       Error(i + 2, TErrorCode.IdentifierExpected);
 
      CheckTok(i + 1, CPARTOK);
 
@@ -553,7 +553,7 @@ case Tok[i].Kind of
      end else begin
 
       if Tok[i + 2].Kind <> IDENTTOK then
-        Error(i + 2, IdentifierExpected);
+        Error(i + 2, TErrorCode.IdentifierExpected);
 
       j := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -741,7 +741,7 @@ case Tok[i].Kind of
       i := CompileConstExpression(i + 2, ConstVal, ConstValType, BYTETOK);
 
       if not(ConstValType in OrdinalTypes + [ENUMTYPE]) then
-	Error(i, OrdinalExpExpected);
+	Error(i, TErrorCode.OrdinalExpExpected);
 
       if isError then Exit;
 
@@ -763,7 +763,7 @@ case Tok[i].Kind of
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
       if not(ConstValType in OrdinalTypes) then
-	Error(i, OrdinalExpExpected);
+	Error(i, TErrorCode.OrdinalExpExpected);
 
       if isError then Exit;
 
@@ -796,7 +796,7 @@ case Tok[i].Kind of
 		if isError then Exit;
 
 		if not(ConstValType in AllTypes) then
-		  Error(i, TypeMismatch);
+		  Error(i, TErrorCode.TypeMismatch);
 
 
 		if (Ident[GetIdent(Tok[i].Name)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
@@ -823,7 +823,7 @@ case Tok[i].Kind of
       else
 	if Tok[i + 1].Kind = OBRACKETTOK then					// Array element access
 	  if  not (Ident[IdentIndex].DataType in Pointers) then
-	    ErrorForIdentifier(i, IncompatibleTypeOf, IdentIndex)
+	    ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, IdentIndex)
 	  else
 	    begin
 
@@ -833,7 +833,7 @@ case Tok[i].Kind of
 
 	    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements-1 + ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then begin
 	     isConst := false;
-	     Error(i, SubrangeBounds);
+	     Error(i, TErrorCode.SubrangeBounds);
 	    end;
 
 	    CheckTok(j + 1, CBRACKETTOK);
@@ -881,7 +881,7 @@ case Tok[i].Kind of
 
 	end
     else
-      Error(i, UnknownIdentifier);
+      Error(i, TErrorCode.UnknownIdentifier);
 
     Result := i;
     end;
@@ -889,7 +889,7 @@ case Tok[i].Kind of
 
   ADDRESSTOK:
     if Tok[i + 1].Kind <> IDENTTOK then
-      Error(i + 1, IdentifierExpected)
+      Error(i + 1, TErrorCode.IdentifierExpected)
     else begin
       IdentIndex := GetIdent(Tok[i + 1].Name);
 
@@ -897,7 +897,7 @@ case Tok[i].Kind of
 
 	case Ident[IdentIndex].Kind of
 	  CONSTANT: if not( (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) ) then
-	   	      Error(i + 1, CantAdrConstantExp)
+	   	      Error(i + 1, TErrorCode.CantAdrConstantExp)
 		    else
 		      ConstVal := Ident[IdentIndex].Value - CODEORIGIN;
 
@@ -1001,7 +1001,7 @@ case Tok[i].Kind of
 	ConstValType := POINTERTOK;
 
        end else
-	Error(i + 1, UnknownIdentifier);
+	Error(i + 1, TErrorCode.UnknownIdentifier);
 
     Result := i + 1;
     end;
@@ -1131,7 +1131,7 @@ case Tok[i].Kind of
 
 
 else
-  Error(i, IdNumExpExpected);
+  Error(i, TErrorCode.IdNumExpExpected);
 
 end;// case
 
@@ -1641,7 +1641,7 @@ begin
 
 	    Inc(Ident[NumIdent].NumParams);
 	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      ErrorForIdentifier(i, TooManyParameters, NumIdent)
+	      ErrorForIdentifier(i, TErrorCode.TooManyParameters, NumIdent)
 	    else
 	      begin
 	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
@@ -1798,7 +1798,7 @@ begin
 
 	    Inc(Ident[NumIdent].NumParams);
 	    if Ident[NumIdent].NumParams > MAXPARAMS then
-	      ErrorForIdentifier(i, TooManyParameters, NumIdent)
+	      ErrorForIdentifier(i, TErrorCode.TooManyParameters, NumIdent)
 	    else
 	      begin
 	      VarOfSameType[VarOfSameTypeIndex].DataType			:= VarType;
@@ -2170,7 +2170,7 @@ if Tok[i].Kind = DEREFERENCETOK then begin				// ^type
  end else begin
 
   if not (Tok[i + 1].Kind in OrdinalTypes + RealTypes + [POINTERTOK]) then
-   Error(i + 1, IdentifierExpected);
+   Error(i + 1, TErrorCode.IdentifierExpected);
 
   NumAllocElements := 0;
   AllocElementType := Tok[i + 1].Kind;
@@ -2621,7 +2621,7 @@ if Tok[i].Kind = PCHARTOK then						// PChar
   NumAllocElements := UpperBound + 1;
 
   if UpperBound>255 then
-   Error(i, SubrangeBounds);
+   Error(i, TErrorCode.SubrangeBounds);
 
   end// if STRINGTOK
 else
@@ -2692,10 +2692,10 @@ if Tok[i].Kind in AllTypes then
     Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be integer'));
 
   if UpperBound < 0 then
-    Error(i, UpperBoundOfRange);
+    Error(i, TErrorCode.UpperBoundOfRange);
 
   if UpperBound > High(word) then
-    Error(i, HighLimit);
+    Error(i, TErrorCode.HighLimit);
 
   NumAllocElements := UpperBound - LowerBound + 1;
 
@@ -2715,10 +2715,10 @@ if Tok[i].Kind in AllTypes then
       Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be integer'));
 
     if UpperBound < 0 then
-      Error(i, UpperBoundOfRange);
+      Error(i, TErrorCode.UpperBoundOfRange);
 
     if UpperBound > High(word) then
-      Error(i, HighLimit);
+      Error(i, TErrorCode.HighLimit);
 
     NumAllocElements := NumAllocElements or (UpperBound - LowerBound + 1) shl 16;
 
@@ -2813,7 +2813,7 @@ else
   IdentIndex := GetIdent(Tok[i].Name);
 
   if IdentIndex = 0 then
-    Error(i, UnknownIdentifier);
+    Error(i, TErrorCode.UnknownIdentifier);
 
   if Ident[IdentIndex].Kind <> USERTYPE then
       Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected but {0} found',
@@ -2838,7 +2838,7 @@ else begin
    UpperBound:=ConstVal;
 
    if UpperBound < LowerBound then
-     Error(i, UpperBoundOfRange);
+     Error(i, TErrorCode.UpperBoundOfRange);
 
  // Error(i, 'Error in type definition');
 
