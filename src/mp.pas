@@ -7039,7 +7039,7 @@ begin
 	       ErrorForIncompatibleTypes(i, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].DataType)
 	     else
 	     if Ident[IdentIndex].Param[NumActualParams].AllocElementType <> BYTETOK then		// Exceptionally we accept PBYTE as STRING
-	       ErrorForIncompatibleTypes(i, Ident[IdentTemp].DataType, -Ident[IdentIndex].Param[NumActualParams].AllocElementType);
+	       ErrorForIncompatibleTypes(i, Ident[IdentTemp].DataType, Ident[IdentIndex].Param[NumActualParams].AllocElementType, true);
 
 {
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = PCHARTOK) then begin
@@ -7063,7 +7063,7 @@ begin
 //	writeln('2 > ',Ident[IdentIndex].Name,',',ActualParamType,',',AllocElementType,',',Tok[i].Kind,',',Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements);
 
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
-              ErrorForIncompatibleTypes(i, ActualParamType, -STRINGPOINTERTOK);
+              ErrorForIncompatibleTypes(i, ActualParamType, STRINGPOINTERTOK, true);
 
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then begin		// CHAR -> STRING
 
@@ -11001,7 +11001,7 @@ case Tok[i].Kind of
 		  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 		end else
 		 if Ident[IdentIndex].AllocElementType = UNTYPETOK then
-		  ErrorForIdentifierIncompatibleTypes(i + 1, STRINGPOINTERTOK, POINTERTOK)
+		  ErrorForIncompatibleTypes(i + 1, STRINGPOINTERTOK, POINTERTOK)
 		 else
 		  GetCommonType(i + 1, Ident[IdentIndex].AllocElementType, STRINGPOINTERTOK);
 
@@ -11148,22 +11148,22 @@ case Tok[i].Kind of
 				  if (IdentTemp > 0) and (Ident[IdentTemp].Kind = USERTYPE) and (Ident[IdentTemp].DataType = ENUMTYPE) then begin
 
 				    if Ident[IdentIndex].NumAllocElements <> Ident[IdentTemp].NumAllocElements then
-				      ErrorForIncompatibleEnum(i,  IdentTemp, IdentIndex);
+				      ErrorForIncompatibleEnumIdentifiers(i,  IdentTemp, IdentIndex);
 
 				  end else
 				  if (IdentTemp > 0) and (Ident[IdentTemp].Kind = ENUMTYPE) then begin
 
 				    if Ident[IdentTemp].NumAllocElements <> Ident[IdentIndex].NumAllocElements then
-				      ErrorForIncompatibleEnum(i, IdentTemp, IdentIndex);
+				      ErrorForIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
 				  end else
 				  if (IdentTemp > 0) and (Ident[IdentTemp].DataType = ENUMTYPE) then begin
 
 				    if Ident[IdentTemp].NumAllocElements <> Ident[IdentIndex].NumAllocElements then
-				      ErrorForIncompatibleEnum(i, IdentTemp, IdentIndex);
+				      ErrorForIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
 				  end else
- 				   ErrorForIncompatibleEnum(i, -ExpressionType, IdentIndex);
+ 				   ErrorForIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
 
 				 end else begin
 
@@ -11173,7 +11173,7 @@ case Tok[i].Kind of
 				    IdentTemp := 0;
 
 				  if (IdentTemp > 0) and ((Ident[IdentTemp].Kind = ENUMTYPE) or (Ident[IdentTemp].DataType = ENUMTYPE)) then
- 				   ErrorForIncompatibleEnum(i, IdentTemp, -ExpressionType)
+ 				   ErrorForIncompatibleEnumIdentifierType(i, IdentTemp, ExpressionType)
 				  else
 				   GetCommonType(i + 1, Ident[IdentIndex].DataType, ExpressionType);
 
@@ -11752,7 +11752,7 @@ case Tok[i].Kind of
 	i := CompileConstExpression(i, ConstVal, ConstValType, SelectorType);
 
 //	 ConstVal:=ConstVal and $ff;
-	//warning(i, RangeCheckError, 0, ConstValType, SelectorType);
+	// Warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
 	GetCommonType(i, ConstValType, SelectorType);
 
@@ -11767,7 +11767,7 @@ case Tok[i].Kind of
 	  i := CompileConstExpression(i + 2, ConstVal2, ConstValType, SelectorType);
 
 //	  ConstVal2:=ConstVal2 and $ff;
-	  //warning(i, RangeCheckError, 0, ConstValType, SelectorType);
+	  // Warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
 	  GetCommonType(i, ConstValType, SelectorType);
 
@@ -13325,7 +13325,7 @@ WHILETOK:
 	       if Tok[i + 1].Kind = DEREFERENCETOK then
 		Error(i + 1, IllegalQualifier)
 	       else
-		ErrorForIdentifierIncompatibleTypes(i + 1, IdentIndex, Ident[IdentIndex].DataType, ExpressionType);
+		ErrorForIncompatibleTypes(i + 1, Ident[IdentIndex].DataType, ExpressionType);
 
 	  end else
 

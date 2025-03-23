@@ -399,10 +399,14 @@ type
     Field: array [0..MAXFIELDS] of TField;
   end;
 
+  TDatatype = Byte;
+  TTokenCode = Byte;
+  TTokenKind = Byte;
+
   TToken = record
     UnitIndex, Column: Smallint;
     Line: Integer;
-    Kind: Byte;
+    Kind: TTokenKind;
     // For Kind=IDENTTOK:
     Name: TString;
     // For Kind=INTNUMBERTOK:
@@ -421,7 +425,7 @@ type
     UnitIndex : Integer;
     Alias : TString;			// EXTERNAL alias 'libraries'
     Libraries : Integer;		// EXTERNAL alias 'libraries'
-    DataType: Byte;
+    DataType: TDatatype;
     IdType: Byte;
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
@@ -523,6 +527,7 @@ type
 type
   TTokenIndex = Integer;
   TIdentIndex = Integer;
+  TArrayIndex = Integer;
 
 var
 
@@ -619,9 +624,9 @@ procedure AddDefine(X: String);
 
 procedure AddPath(s: String);
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: TIdentIndex; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: TIdentIndex; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 
@@ -641,19 +646,19 @@ function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): B
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
-function GetSpelling(i: Integer): TString;
+function GetSpelling(i: TTokenIndex): TString;
 
 function GetVAL(a: String): Integer;
 
 function GetValueType(Value: Int64): Byte;
 
-function HighBound(i: Integer; DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
+function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
 
 function InfoAboutToken(t: Byte): String;
 
 function IntToStr(const a: Int64): String;
 
-function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
 
 function SearchDefine(X: String): Integer;
 
@@ -870,7 +875,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetSpelling(i: Integer): TString;
+function GetSpelling(i: TTokenIndex): TString;
 begin
 
 if i > NumTok then
@@ -925,7 +930,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
 begin
 
 if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) then
@@ -940,7 +945,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: TIdentIndex; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
 begin
 
 if Ident[IdentIndex].NumAllocElements_ > 0 then
@@ -1073,7 +1078,7 @@ begin
 
  else
       Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch' ));
- end;// case
+ end;
 
 end;
 
@@ -1082,7 +1087,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function HighBound(i: TTokenIndex; DataType: Byte): Int64;
+function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
 begin
 
  Result := 0;
@@ -1102,7 +1107,7 @@ begin
 
  else
       Error(i, TMessage.Create(TErrorCode.TypeMismatch,'Type mismatch'));
- end;// case
+ end;
 
 end;
 
@@ -1238,7 +1243,7 @@ begin
   if LeftType = UNTYPETOK then Result := RightType;
 
   if Result = 0 then
-    ErrorForIdentifierIncompatibleTypes(ErrTokenIndex, 0, RightType, LeftType);
+    ErrorForIncompatibleTypes(ErrTokenIndex, RightType, LeftType);
 
 end;
 

@@ -71,17 +71,18 @@ procedure Error(errorTokenIndex: TTokenIndex; msg: IMessage); overload;
 procedure Error(errorTokenIndex: TTokenIndex; errorCode: TErrorCode); overload;
 procedure ErrorForIdentifier(errorTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TTokenIndex);
 
+procedure ErrorForIncompatibleTypes(errorTokenIndex: TTokenIndex; srcType: TDatatype;
+  dstType: TDatatype; dstPointer: Boolean = False);
 
-procedure ErrorForIdentifierIncompatibleTypes(errorTokenIndex: TTokenIndex; identIndex: TTokenIndex;
-  srcType: Int64); overload;
-procedure ErrorForIdentifierIncompatibleTypes(errorTokenIndex: TTokenIndex; identIndex: TIdentIndex;
-  srcType: Int64; dstType: Int64); overload;
-procedure ErrorForIncompatibleTypes(errorTokenIndex: TTokenIndex; srcType: Int64; dstType: Int64);
-
-procedure ErrorForIncompatibleEnum(errorTokenIndex: TTokenIndex; srcType: Int64; dstType: Int64);
+procedure ErrorForIncompatibleEnumIdentifiers(errorTokenIndex: TTokenIndex; srcEnumIdent: TIdentIndex;
+  destEnumIdent: TIdentIndex);
+procedure ErrorForIncompatibleEnumTypeIdentifier(errorTokenIndex: TTokenIndex; srcType: TDatatype;
+  dstEnumIndex: TIdentIndex);
+procedure ErrorForIncompatibleEnumIdentifierType(errorTokenIndex: TTokenIndex; srcEnumIndex: TIdentIndex;
+  dstType: TDatatype);
 
 procedure ErrorForIdentifierIllegalTypeConversion(errorTokenIndex: TTokenIndex;
-  identIndex: TIdentIndex; srcType: Int64);
+  identIndex: TIdentIndex; tokenKind: TTokenKind);
 
 procedure ErrorForIdentifierIncompatibleTypesArray(errorTokenIndex: TTokenIndex; identIndex: TIdentIndex;
   srcType: Int64);
@@ -90,7 +91,7 @@ procedure ErrorForIdentifierIncompatibleTypesArrayIdentifier(errorTokenIndex: TT
   identIndex: TIdentIndex; arrayIdentIndex: TIdentIndex);
 
 procedure ErrorForRangeCheckError(warningTokenIndex: TTokenIndex; identIndex: TIdentIndex;
-  srcType: Int64; dstType: Int64);
+  srcType: TDatatype; dstType: TDatatype);
 
 procedure Note(NoteTokenIndex: TTokenIndex; msg: String);
 procedure NoteForIdentifierNotUsed(NoteTokenIndex: TTokenIndex; identIndex: TIdentIndex);
@@ -100,7 +101,7 @@ procedure Warning(warningTokenIndex: TTokenIndex; errorCode: TErrorCode); overlo
 
 procedure WarningForIdentifier(warningTokenIndex: TTokenIndex; errorCode: TErrorCode; identIndex: TIdentIndex);
 procedure WarningForRangeCheckError(warningTokenIndex: TTokenIndex; identIndex: TIdentIndex;
-  srcType: Int64; DstType: Int64); overload;
+  srcType: TDatatype; DstType: TDatatype); overload;
 
 procedure WritelnMsg;
 
@@ -161,7 +162,8 @@ begin
 end;
 
 
-function GetRangeCheckText(tokenIndex: TTokenIndex; identIndex: TIdentIndex; srcType: Int64; dstType: Int64): String;
+function GetRangeCheckText(tokenIndex: TTokenIndex; identIndex: TIdentIndex; srcType: TDatatype;
+  dstType: TDatatype): String;
 var
   msg: String;
 begin
@@ -393,48 +395,52 @@ begin
   ErrorForIdentifier(errorTokenIndex, errorCode, 0);
 end;
 
-procedure ErrorForIdentifierIncompatibleTypes(errorTokenIndex: TTokenIndex; identIndex: TIdentIndex;
-  srcType: Int64; dstType: Int64);
+procedure ErrorForIncompatibleTypes(errorTokenIndex: TTokenIndex; srcType: TDatatype;
+  dstType: TDatatype; dstPointer: Boolean);
 var
   msg: String;
 begin
 
   msg := 'Incompatible types: got "';
 
-  if srcType < 0 then msg := msg + '^';
+  msg := msg + InfoAboutToken(srcType) + '" expected "';
 
-  msg := msg + InfoAboutToken(abs(srcType)) + '" expected "';
+  if dstPointer then msg := msg + '^';
 
-  if DstType < 0 then msg := msg + '^';
-
-  msg := msg + InfoAboutToken(abs(DstType)) + '"';
+  msg := msg + InfoAboutToken(DstType) + '"';
 
   Error(errorTokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
 end;
 
-procedure ErrorForIdentifierIncompatibleTypes(errorTokenIndex: TTokenIndex; identIndex: TIdentIndex; srcType: Int64);
-begin
-  ErrorForIdentifierIncompatibleTypes(errorTokenIndex, identIndex, srcType, 0);
-end;
 
-procedure ErrorForIncompatibleTypes(errorTokenIndex: TTokenIndex; srcType: Int64; dstType: Int64);
-begin
-  ErrorForIdentifierIncompatibleTypes(errorTokenIndex, 0, srcType, 0);
-end;
-
-procedure ErrorForIncompatibleEnum(errorTokenIndex: TTokenIndex; srcType: Int64; dstType: Int64);
+procedure ErrorForIncompatibleEnumIdentifiers(errorTokenIndex: TTokenIndex; srcEnumIdent: TIdentIndex;
+  destEnumIdent: TIdentIndex);
 var
   msg: String;
 begin
-  if DstType < 0 then
-    msg := 'Incompatible types: got "' + GetEnumName(srcType) + '" expected "' +
-      InfoAboutToken(abs(DstType)) + '"'
-  else
-  if srcType < 0 then
-    msg := 'Incompatible types: got "' + InfoAboutToken(abs(srcType)) + '" expected "' +
-      GetEnumName(DstType) + '"'
-  else
-    msg := 'Incompatible types: got "' + GetEnumName(srcType) + '" expected "' + GetEnumName(DstType) + '"';
+  msg := 'Incompatible types: got "' + GetEnumName(srcEnumIdent) + '" expected "' + GetEnumName(destEnumIdent) + '"';
+  Error(errorTokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
+end;
+
+procedure ErrorForIncompatibleEnumTypeIdentifier(errorTokenIndex: TTokenIndex; srcType: TDatatype;
+  dstEnumIndex: TIdentIndex);
+var
+  msg: String;
+begin
+
+  msg := 'Incompatible types: got "' + InfoAboutToken(srcType) + '" expected "' + GetEnumName(dstEnumIndex) + '"';
+
+  Error(errorTokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
+end;
+
+procedure ErrorForIncompatibleEnumIdentifierType(errorTokenIndex: TTokenIndex; srcEnumIndex: TIdentIndex;
+  dstType: TDatatype);
+var
+  msg: String;
+begin
+
+  msg := 'Incompatible types: got "' + GetEnumName(srcEnumIndex) + '" expected "' + InfoAboutToken(DstType) + '"';
+
   Error(errorTokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
 end;
 
@@ -512,10 +518,10 @@ begin
 end;
 
 procedure ErrorForIdentifierIllegalTypeConversion(errorTokenIndex: TTokenIndex;
-  identIndex: TIdentIndex; srcType: Int64);
+  identIndex: TIdentIndex; tokenKind: TTokenKind);
 begin
   ErrorForIdentifierIllegalTypeConversionOrIncompatibleTypesArray(errorTokenIndex,
-    TErrorCode.IllegalTypeConversion, IdentIndex, srcType, 0);
+    TErrorCode.IllegalTypeConversion, IdentIndex, tokenKind, 0);
 end;
 
 procedure ErrorForIdentifierIncompatibleTypesArray(errorTokenIndex: TTokenIndex; identIndex: TIdentIndex;
@@ -549,7 +555,7 @@ end;
 
 
 procedure ErrorForRangeCheckError(warningTokenIndex: TTokenIndex; identIndex: TIdentIndex;
-  srcType: Int64; dstType: Int64);
+  srcType: TDatatype; dstType: TDatatype);
 begin
   Warning(warningTokenIndex, TMessage.Create(TErrorCode.RangeCheckError,
     GetRangeCheckText(warningTokenIndex, identIndex, srcType, dstType)));
@@ -623,7 +629,7 @@ end;
 
 
 procedure WarningForRangeCheckError(warningTokenIndex: TTokenIndex; identIndex: TIdentIndex;
-  srcType: Int64; dstType: Int64);
+  srcType: TDatatype; dstType: TDatatype);
 begin
   Warning(warningTokenIndex, TMessage.Create(TErrorCode.RangeCheckError,
     GetRangeCheckText(warningTokenIndex, identIndex, srcType, dstType)));
@@ -715,10 +721,6 @@ begin
   end;
 
 end;
-
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 
 
 end.
