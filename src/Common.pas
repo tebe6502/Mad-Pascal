@@ -432,7 +432,7 @@ type
     Alias : TString;			// EXTERNAL alias 'libraries'
     Libraries : Integer;		// EXTERNAL alias 'libraries'
     DataType: TDataType;
-    IdType: TTokenKind;
+    IdType: TTokenKind; // TODO Have TIdentierType
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
 
