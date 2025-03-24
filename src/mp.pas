@@ -7256,7 +7256,7 @@ begin
   svar := GetLocalName(IdentIndex);
 
 
- if Ident[IdentIndex].isExternal and RCLIBRARY and (Ident[IdentIndex].isStdCall = false) then begin
+ if RCLIBRARY and Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) and (Ident[IdentIndex].isStdCall = false) then begin
 
    asm65('#lib:' + svar);
 
@@ -7415,7 +7415,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
     asm65(#9'jsr :TMP');
 
   end else
-   if Ident[IdentIndex].isExternal and RCLIBRARY and Ident[IdentIndex].isStdCall then begin
+   if RCLIBRARY and Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) and Ident[IdentIndex].isStdCall then begin
 
     asm65(#9'ldy <' + svar + '.@INITLIBRARY');
     asm65(#9'sty @xmsProc.ini');
@@ -7463,7 +7463,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 	end;
 
 
- if Ident[IdentIndex].isExternal and RCLIBRARY and (Ident[IdentIndex].isStdCall = false) then begin
+ if RCLIBRARY and Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) and (Ident[IdentIndex].isStdCall = false) then begin
 
      asm65(#9'pla');
      asm65(#9'sta portb');
