@@ -632,7 +632,7 @@ var
 
 procedure ClearWordMemory(anArray: TWordMemory);
 
-function GetDataSize(datatype: TDataType): Byte;
+function GetDataSize(const dataType: TDataType): Byte;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -686,9 +686,9 @@ implementation
 
 uses Messages, Utilities;
 
-function GetDataSize(datatype: TDataType): Byte;
+function GetDataSize(const dataType: TDataType): Byte;
 begin
- Result:=_DataSize[Ord(datatype)];
+ Result:=_DataSize[Ord(dataType)];
 end;
 
 

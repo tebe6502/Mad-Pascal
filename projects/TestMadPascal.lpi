@@ -182,6 +182,9 @@
       </Debugging>
     </Linking>
     <Other>
+      <ConfigFile>
+        <StopAfterErrCount Value="100"/>
+      </ConfigFile>
       <CustomOptions Value="-dDEBUG"/>
       <OtherDefines Count="1">
         <Define0 Value="DEBUG"/>
