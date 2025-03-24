@@ -68,7 +68,7 @@ begin
   for i := 1 to NumIdent do
     begin
     DiagFile.Write( i, 6).Write( Ident[i].Block, 6).Write( Ident[i].Name, 30).Write( GetTokenSpelling(Ident[i].Kind), 15);
-    if Ident[i].DataType <> TDatatype.UNTYPETOK then DiagFile.Write( GetTokenSpelling(Ident[i].DataType), 15) else DiagFile.Write( 'N/A', 15);
+    if Ident[i].DataType <> TDataType.UNTYPETOK then DiagFile.Write( GetTokenSpelling(Ident[i].DataType), 15) else DiagFile.Write( 'N/A', 15);
     DiagFile.Write( Ident[i].NumAllocElements, 15).Write( IntToHex(Ident[i].Value, 8), 15);
     if (Ident[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and not Ident[i].IsNotDead
     then DiagFile.Write( 'Yes', 5) else DiagFile.Write('', 5);

@@ -75,15 +75,15 @@ procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); ove
 procedure ErrorForIdentifier(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
   const identIndex: TTokenIndex);
 
-procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDatatype;
-  const dstType: TDatatype; const dstPointer: Boolean = False);
+procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
+  const dstType: TDataType; const dstPointer: Boolean = False);
 
 procedure ErrorIncompatibleEnumIdentifiers(const tokenIndex: TTokenIndex; const srcEnumIdent: TIdentIndex;
   destEnumIdent: TIdentIndex);
-procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDatatype;
+procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDataType;
   dstEnumIndex: TIdentIndex);
 procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; const srcEnumIndex: TIdentIndex;
-  const dstType: TDatatype);
+  const dstType: TDataType);
 
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
   const tokenKind: TTokenKind);
@@ -94,7 +94,7 @@ procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
 procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
 
-procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDatatype);
+procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
 procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
 
@@ -107,7 +107,7 @@ procedure WarningStripedAllowed(const tokenIndex: TTokenIndex);
 procedure WarningUserDefined(const tokenIndex: TTokenIndex);
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger;
-  const dstType: TDatatype);
+  const dstType: TDataType);
 
 procedure Note(tokenIndex: TTokenIndex; const msg: String);
 procedure NoteForIdentifierNotUsed(tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
@@ -186,7 +186,7 @@ begin
 end;
 
 
-function GetRangeCheckText(const tokenIndex: TTokenIndex; Value: TInteger; dstType: TDatatype): String;
+function GetRangeCheckText(const tokenIndex: TTokenIndex; Value: TInteger; dstType: TDataType): String;
 var
   msg: String;
 begin
@@ -409,8 +409,8 @@ begin
   ErrorForIdentifier(tokenIndex, errorCode, 0);
 end;
 
-procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDatatype;
-  const dstType: TDatatype; const dstPointer: Boolean);
+procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
+  const dstType: TDataType; const dstPointer: Boolean);
 var
   msg: String;
 begin
@@ -437,7 +437,7 @@ begin
   Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
 end;
 
-procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDatatype;
+procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDataType;
   dstEnumIndex: TIdentIndex);
 var
   msg: String;
@@ -450,7 +450,7 @@ begin
 end;
 
 procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; const srcEnumIndex: TIdentIndex;
-  const dstType: TDatatype);
+  const dstType: TDataType);
 var
   msg: String;
 begin
@@ -487,10 +487,10 @@ begin
   if Ident[identIndex].NumAllocElements = 0 then
   begin
 
-    if Ident[identIndex].AllocElementType <> TTokenCode.UNTYPETOK then
+    if Ident[identIndex].AllocElementType <> TTokenKind.UNTYPETOK then
       msg := msg + '"^' + InfoAboutToken(Ident[identIndex].AllocElementType) + '" '
     else
-      msg := msg + '"' + InfoAboutToken(TTokenCode.POINTERTOK) + '" ';
+      msg := msg + '"' + InfoAboutToken(TTokenKind.POINTERTOK) + '" ';
 
   end
   else
@@ -512,12 +512,12 @@ begin
         '] Of Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements_ - 1) + '] Of ' +
         InfoAboutToken(Ident[identIndex].AllocElementType) + '"'
     else
-    if Ident[arrayIdentIndex].AllocElementType in [TTokenCode.RECORDTOK, TTokenCode.OBJECTTOK] then
+    if Ident[arrayIdentIndex].AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
       msg := msg + '"^' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
     else
     begin
 
-      if Ident[arrayIdentIndex].DataType in [TTokenCode.RECORDTOK, TTokenCode.OBJECTTOK] then
+      if Ident[arrayIdentIndex].DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
         msg := msg + '"' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
       else
         msg := msg + '"Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements - 1) +
@@ -552,7 +552,7 @@ procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTok
   const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
 begin
   ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
-    TErrorCode.IncompatibleTypesArray, identIndex, TTokenCode.UNTYPETOK, arrayIdentIndex);
+    TErrorCode.IncompatibleTypesArray, identIndex, TTokenKind.UNTYPETOK, arrayIdentIndex);
 end;
 
 // ----------------------------------------------------------------------------
@@ -572,7 +572,7 @@ begin
 end;
 
 
-procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDatatype);
+procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 begin
   Warning(tokenIndex, TMessage.Create(TErrorCode.RangeCheckError, GetRangeCheckText(tokenIndex, Value, dstType)));
 end;
@@ -653,7 +653,7 @@ end;
 
 
 procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger;
-  const dstType: TDatatype);
+  const dstType: TDataType);
 begin
   Warning(tokenIndex, TMessage.Create(TErrorCode.RangeCheckError, GetRangeCheckText(tokenIndex, Value, dstType)));
 end;
@@ -688,8 +688,8 @@ begin
             else
               a := a + 'variable';
 
-          TTokenCode.PROCEDURETOK: a := a + 'proc';
-          TTokenCode.FUNCTIONTOK: a := a + 'func';
+          TTokenKind.PROCEDURETOK: a := a + 'proc';
+          TTokenKind.FUNCTIONTOK: a := a + 'func';
         end;
 
         a := a + ' ''' + Ident[identIndex].Name + '''' + ' not used';

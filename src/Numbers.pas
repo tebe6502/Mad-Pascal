@@ -18,17 +18,17 @@ function CastToReal(const a: TNumber): TNumber;
 function CastToSingle(const a: TNumber): TNumber;
 function CastToHalfSingle(const a: TNumber): TNumber;
 
-function Assign(const valType: TDatatype; const s: Single): TNumber;
-function Negate(var valType: TDatatype; const a: TNumber): TNumber;  // valType it not const!
-function Add(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
-function Subtract(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
-function Multiply(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
-function Divide(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
+function Assign(const valType: TDataType; const s: Single): TNumber;
+function Negate(var valType: TDataType; const a: TNumber): TNumber;  // valType it not const!
+function Add(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
+function Subtract(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
+function Multiply(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
+function Divide(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
 
 
 // High Level - Only for RealNumbers
-function Frac(const valType: TDatatype; const a: TNumber): TNumber;
-function Trunc(const valType: TDatatype; const a: TNumber): TNumber;
+function Frac(const valType: TDataType; const a: TNumber): TNumber;
+function Trunc(const valType: TDataType; const a: TNumber): TNumber;
 
 
 implementation
@@ -281,7 +281,7 @@ begin
   Result := CardToHalf(ftmp);
 end;
 
-function Assign(const valType: TDatatype; const s: Single): TNumber;
+function Assign(const valType: TDataType; const s: Single): TNumber;
 var
   ftmp: TFloat;
 begin
@@ -299,7 +299,7 @@ begin
   MoveTFloat(ftmp, Result);
 end;
 
-function Negate(var valType: TDatatype; const a: TNumber): TNumber;
+function Negate(var valType: TDataType; const a: TNumber): TNumber;
 var
   ftmp: TFloat;
   fl: Single;
@@ -329,7 +329,7 @@ begin
   end;
 end;
 
-function Add(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
+function Add(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
 var
   ftmp, ftmp_: TFloat;
   fl, fl_: Single;
@@ -360,7 +360,7 @@ begin
 
 end;
 
-function Subtract(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
+function Subtract(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
 var
   ftmp, ftmp_: TFloat;
   fl, fl_: Single;
@@ -391,7 +391,7 @@ begin
 
 end;
 
-function Multiply(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
+function Multiply(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
 var
   ftmp, ftmp_: TFloat;
   fl, fl_: Single;
@@ -420,7 +420,7 @@ begin
   end;
 end;
 
-function Divide(const valType: TDatatype; const a: TNumber; const b: TNumber): TNumber;
+function Divide(const valType: TDataType; const a: TNumber; const b: TNumber): TNumber;
 var
   ftmp, ftmp_: TFloat;
   fl, fl_: Single;
@@ -444,14 +444,14 @@ begin
   MoveTFloat(ftmp, Result);
 end;
 
-function Trunc(const valType: TDatatype; const a: TNumber): TNumber;
+function Trunc(const valType: TDataType; const a: TNumber): TNumber;
 
 var
   ftmp: TFloat;
   fl: Single;
 begin
   Assert(valType in RealTypes);
-  if valType in [TDatatype.HALFSINGLETOK, TDatatype.SINGLETOK] then
+  if valType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then
   begin
     ftmp := Zero;
 
@@ -475,14 +475,14 @@ begin
 end;
 
 
-function Frac(const valType: TDatatype; const a: TNumber): TNumber;
+function Frac(const valType: TDataType; const a: TNumber): TNumber;
 
 var
   ftmp: TFloat;
   fl: Single;
 begin
   Assert(valType in RealTypes);
-  if valType in [TDatatype.HALFSINGLETOK, TDatatype.SINGLETOK] then
+  if valType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then
   begin
     ftmp := Zero;
 

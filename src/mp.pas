@@ -157,8 +157,8 @@ Contributors:
 # :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia sie tylko :BP+1
 # :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
-# indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
-# indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * DataSize[AllocElementType]) + b * DataSize[AllocElementType]
+# indeks dla jednowymiarowej tablicy [0..x] = a * GetDataSize(AllocElementType)
+# indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * GetDataSize(AllocElementType)) + b * GetDataSize(AllocElementType)
 
 # dla typu OBJECT przekazywany jest poczatkowy adres alokacji danych pamieci (HI = regY, LO = regA), potem sa obliczane kolejne adresy w naglowku procedury/funkcji
 
@@ -264,8 +264,8 @@ begin
  if Ident[IdentIndex].NumParams > 0 then
   for ParamIndex := Ident[IdentIndex].NumParams downto 1 do
    Result := Result + IntToHex(Ord(Ident[IdentIndex].Param[ParamIndex].PassMethod), 2) +
-		      IntToHex(Ident[IdentIndex].Param[ParamIndex].DataType, 2) +
-		      IntToHex(Ident[IdentIndex].Param[ParamIndex].AllocElementType, 2) +
+		      IntToHex(Ord(Ident[IdentIndex].Param[ParamIndex].DataType), 2) +
+		      IntToHex(Ord(Ident[IdentIndex].Param[ParamIndex].AllocElementType), 2) +
 		      IntToHex(Ident[IdentIndex].Param[ParamIndex].NumAllocElements, 8 * ord(Ident[IdentIndex].Param[ParamIndex].NumAllocElements <> 0));
 
  end;
@@ -344,7 +344,7 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
   begin
   for IdentIndex := NumIdent downto 1 do
     if
-       (Ident[IdentIndex].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) and
+       (Ident[IdentIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and
        (Ident[IdentIndex].UnitIndex = Ident[ProcIdentIndex].UnitIndex) and
        (S = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) and
        (Ident[IdentIndex].NumParams = NumParams) then
@@ -356,13 +356,13 @@ for BlockStackIndex := BlockStackTop downto 0 do	// search all nesting levels fr
       for i := 1 to NumParams do
        if (
 	  ( ((Ident[IdentIndex].Param[i].DataType in UnsignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes) ) and
-	  (DataSize[Ident[IdentIndex].Param[i].DataType] >= DataSize[Param[i].DataType]) ) or
+	  (GetDataSize(Ident[IdentIndex].Param[i].DataType)) >= GetDataSize(Param[i].DataType)) ) or
 
 	  ( ((Ident[IdentIndex].Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in SignedOrdinalTypes) ) and
-	  (DataSize[Ident[IdentIndex].Param[i].DataType] >= DataSize[Param[i].DataType]) ) or
+	  (GetDataSize(Ident[IdentIndex].Param[i].DataType) >= GetDataSize(Param[i].DataType)) ) or
 
 	  ( ((Ident[IdentIndex].Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes) ) and	// smallint > byte
-	  (DataSize[Ident[IdentIndex].Param[i].DataType] >= DataSize[Param[i].DataType]) ) or
+	  (GetDataSize(Ident[IdentIndex].Param[i].DataType) >= GetDataSize(Param[i].DataType)) ) or
 
 	  ( (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) {and (Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType)} ) ) or
 
@@ -428,8 +428,8 @@ writeln('_A: ', Ident[IdentIndex].Name);
 
 	    if Ident[IdentIndex].Param[i].DataType in UnsignedOrdinalTypes then begin
 
-	     b := DataSize[Ident[IdentIndex].Param[i].DataType];	// required parameter type
-	     k := DataSize[Param[i].DataType];				// type of parameter passed
+	     b := GetDataSize(Ident[IdentIndex].Param[i].DataType];	// required parameter type
+	     k := GetDataSize(Param[i].DataType];				// type of parameter passed
 
 //	     writeln('+ ',Ident[IdentIndex].Name,' - ',b,',',k,',',4 - abs(b-k),' / ',Param[i].DataType,' | ',Ident[IdentIndex].Param[i].DataType);
 
@@ -444,8 +444,8 @@ writeln('_A: ', Ident[IdentIndex].Name);
 
 	    end else begin						// signed
 
-	     b := DataSize[Ident[IdentIndex].Param[i].DataType];	// required parameter type
-	     k := DataSize[Param[i].DataType];				// type of parameter passed
+	     b := GetDataSize(Ident[IdentIndex].Param[i].DataType];	// required parameter type
+	     k := GetDataSize(Param[i].DataType];				// type of parameter passed
 
 	     if Param[i].DataType in [BYTETOK, WORDTOK] then inc(k);	// -> signed
 
@@ -846,7 +846,7 @@ begin
 
  if (Source in IntegerTypes) and (Dest in IntegerTypes) then begin
 
- i:=DataSize[Dest] - DataSize[Source];
+ i:=GetDataSize(Dest] - GetDataSize(Source];
 
  if i > 0 then
   case i of
@@ -894,7 +894,7 @@ begin
 
  if (Source in IntegerTypes) and (Dest in IntegerTypes) then begin
 
- i:=DataSize[Dest] - DataSize[Source];
+ i:=GetDataSize(Dest] - GetDataSize(Source];
 
 
  if i>0 then
@@ -941,23 +941,23 @@ begin
 
  if (ValType in IntegerTypes) and (RightValType in IntegerTypes) then begin
 
-    if (DataSize[ValType] < DataSize[RightValType]) and ((VarType = 0) or (DataSize[RightValType] >= DataSize[VarType])) then begin
+    if (GetDataSize(ValType] < GetDataSize(RightValType]) and ((VarType = 0) or (GetDataSize(RightValType] >= GetDataSize(VarType])) then begin
       ExpandParam_m1(RightValType, ValType);		// -1
       ValType:=RightValType;				// przyjmij najwiekszy typ dla operacji
     end else begin
 
       if VarType in Pointers then VarType := WORDTOK;
 
-      m := DataSize[ValType];
-      if DataSize[RightValType] > m then m := DataSize[RightValType];
+      m := GetDataSize(ValType];
+      if GetDataSize(RightValType] > m then m := GetDataSize(RightValType];
 
       if VarType = BOOLEANTOK then
         inc(m)						// dla sytuacji np.: boolean := (shortint + shorint > 0)
       else
 
       if VarType <> 0 then
-       if DataSize[VarType] > m then inc(m);		// okreslamy najwiekszy wspolny typ
-       //m:=DataSize[VarType];
+       if GetDataSize(VarType] > m then inc(m);		// okreslamy najwiekszy wspolny typ
+       //m:=GetDataSize(VarType];
 
 
       if (ValType in SignedOrdinalTypes) or (RightValType in SignedOrdinalTypes) or ForceMinusSign then
@@ -1035,7 +1035,7 @@ end;
 procedure GenerateIndexShift(ElementType: Byte; Ofset: Byte = 0);
 begin
 
-  case DataSize[ElementType] of
+  case GetDataSize(ElementType] of
 
     2: if Ofset = 0 then begin
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
@@ -1230,7 +1230,7 @@ begin
   Kind := Ident[IdentIndex].Kind;
 
   if Ident[IdentIndex].DataType = ENUMTYPE then begin
-   Size := DataSize[Ident[IdentIndex].AllocElementType];
+   Size := GetDataSize(Ident[IdentIndex].AllocElementType];
    NumAllocElements := 0;
   end else
    NumAllocElements := Elements(IdentIndex);	//Ident[IdentIndex].NumAllocElements;
@@ -2180,7 +2180,7 @@ begin
              asm65('; as Pointer');
              asm65;
 
-	     case DataSize[ExpressionType] of
+	     case GetDataSize(ExpressionType] of
 	      1: begin
 		  asm65(#9'lda ' + svar);
 		  asm65(#9 + b + ' :STACKORIGIN,x');
@@ -2230,7 +2230,7 @@ begin
 
 	   asm65(#9'ldy #$00');
 
-	     case DataSize[ExpressionType] of
+	     case GetDataSize(ExpressionType] of
 	      1: begin
 		  asm65(#9'lda (:bp2),y');
 		  asm65(#9 + b + ' :STACKORIGIN,x');
@@ -2276,7 +2276,7 @@ begin
 	     asm65('; as Pointer To Array Origin');
 	     asm65;
 
-	     case DataSize[ExpressionType] of
+	     case GetDataSize(ExpressionType] of
 	      1: begin
 
 		  if (NumAllocElements > 256) or (NumAllocElements in [0,1]) then begin
@@ -2574,7 +2574,7 @@ begin
  if IdentIndex > 0 then begin
 
   if Ident[IdentIndex].DataType = ENUMTYPE then begin
-   Size := DataSize[Ident[IdentIndex].AllocElementType];
+   Size := GetDataSize(Ident[IdentIndex].AllocElementType];
    NumAllocElements := 0;
   end else
    NumAllocElements := Elements(IdentIndex);
