@@ -1,6 +1,6 @@
 unit Utilities;
 
-{$I defines.inc}
+{$I Defines.inc}
 
 interface
 
