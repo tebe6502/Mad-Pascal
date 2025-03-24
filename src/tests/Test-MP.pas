@@ -1,3 +1,7 @@
+// Mad-Pascal Test Program
+//
+// Ensure that the new Mad-Pascal Version compiles correctly to .a65
+
 program test;
 
 uses

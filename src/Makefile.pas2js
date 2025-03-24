@@ -10,17 +10,20 @@
 SRC = mp.pas \
   Common.pas \
   Diagnostic.pas \
+  FileIO.pas \
+  MathEvaluate.pas \
   Messages.pas \
+  Numbers.pas \
   Optimize.pas \
   Parser.pas \
   Scanner.pas \
-  SplitString.pas \
+  StringUtilities.pas \
+  TestUnits.pas \
+  Utilities.pas \
   include/*.inc \
   include/opt6502/*.inc \
   include/opt65c02/*.inc \
-  targets/*.inc \
-  FileIO.pas \
-  Utilities.pas
+  targets/*.inc
 
 BINDIR = ../bin/javascript
 BIN = $(BINDIR)/mp.js
@@ -32,7 +35,7 @@ PAS2JS = pas2js.exe -Jc -Jirtl.js -Tbrowser
 
 $(BIN): clean $(SRC)
 	echo "Compiling $(SRC)"
-	$(PAS2JS) -Mdelphi -v mp.pas -o$(BIN)
+	$(PAS2JS) -Mdelphi -va mp.pas -o$(BIN)
 
 
 test:	clean $(TEST_SRC)

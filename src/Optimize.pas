@@ -1,30 +1,30 @@
 unit Optimize;
 
-interface
+{$I Defines.inc}
 
-{$i define.inc}
+interface
 
 // ----------------------------------------------------------------------------
 
 var
-	TemporaryBuf: array [0..511] of string;
+  TemporaryBuf: array [0..511] of String;
 
 
-	procedure asm65(a: string = ''; comment : string ='');			// OptimizeASM
+procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
-	procedure OptimizeProgram(MainIndex: Integer);
+procedure OptimizeProgram(MainIndex: Integer);
 
-	procedure ResetOpty;
+procedure ResetOpty;
 
-	procedure WriteOut(a: string);						// OptimizeTemporaryBuf
+procedure WriteOut(a: String);            // OptimizeTemporaryBuf
 
-	procedure FlushTempBuf;
+procedure FlushTempBuf;
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Common, Console, FileIO, Utilities;
+uses SysUtils, Common, Console, StringUtilities, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -3161,7 +3161,7 @@ begin				// OptimizeASM
 
   if l > High(listing) then 
   begin WriteLn('Out of resources, LISTING');
-        RaiseHaltException(2);
+        RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
   for i := 0 to l-1 do

@@ -1,18 +1,9 @@
 program TestUnits;
 
-{$i define.inc}
+{$I Defines.inc}
 
 uses
-  Crt,
-  Console,
-  Common,
-  FileIO,
-  MathEvaluate,
-  Scanner,
-  Utilities
-  {$IFDEF PAS2JS}
-     ,browserconsole
-  {$ENDIF},
+  Crt, Common, Console, Diagnostic, FileIO, MathEvaluate, Parser, Scanner, Optimize, Types, Utilities,
   SysUtils;
 
   procedure StartTest(Name: String);
@@ -83,7 +74,7 @@ uses
 
   procedure TestUnitFile;
   const
-    TEST_MP_FILE_PATH = 'Test-MP.pas';
+    TEST_MP_FILE_PATH = '..\src\tests\Test-MP.pas';
   var
     pathList: TPathList;
 
@@ -105,10 +96,17 @@ uses
 
   procedure TestUnitCommon;
   var
-    filePath: String;
+    filePath: TFilePath;
   begin
 
     StartTest('TestUnitCommon');
+
+    // Test Enums
+    Assert(Ord(TParameterPassingMethod.UNDEFINED) = 0);
+    Assert(Ord(TParameterPassingMethod.VALPASSING) = 1);
+    Assert(Ord(TParameterPassingMethod.CONSTPASSING) = 2);
+    Assert(Ord(TParameterPassingMethod.VARPASSING) = 3);
+
 
     // Unit Scanner
     Program_NAME := 'TestProgram';
@@ -139,7 +137,7 @@ type
   public
     constructor Create;
     function GetConstantName(const expression: String; var index: Integer): String;
-    function GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 
   constructor TTestEvaluationContext.Create;
@@ -151,7 +149,7 @@ type
     Result := 'EXAMPLE';
   end;
 
-  function TTestEvaluationContext.GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+  function TTestEvaluationContext.GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   begin
     if constantName = 'EXAMPLE' then
     begin

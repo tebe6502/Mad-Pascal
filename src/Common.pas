@@ -1,10 +1,10 @@
 unit Common;
 
+{$I Defines.inc}
+
 interface
 
-uses FileIO;
-{$i define.inc}
-{$i Types.inc}
+uses SysUtils, CommonTypes, FileIO, StringUtilities;
 
 // ----------------------------------------------------------------------------
 
@@ -18,28 +18,16 @@ type
 // Parameter passing
 type
   TParameterPassingMethod = (
-    UNDEFINED = 0,
-    VALPASSING = 1, // By value, modifiable
-    CONSTPASSING = 2, // By const, unodifiable
-    VARPASSING = 3 // By reference, modifiable
+    UNDEFINED,
+    VALPASSING, // By value, modifiable
+    CONSTPASSING , // By const, unodifiable
+    VARPASSING // By reference, modifiable
     );
 
 const
 
   title = '1.7.2';
 
-  TAB = ^I;		// Char for a TAB
-  CR  = ^M;		// Char for a CR
-  LF  = ^J;		// Char for a LF
-
-  AllowDirectorySeparators: set of Char = ['/', '\'];
-
-  AllowWhiteSpaces: set of Char = [' ', TAB, CR, LF];
-  AllowQuotes: set of Char = ['''', '"'];
-  AllowLabelFirstChars: set of Char = ['A'..'Z', '_'];
-  AllowLabelChars: set of Char = ['A'..'Z', '0'..'9', '_', '.'];
-  AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
-  AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
 
 
   // Token codes
@@ -372,21 +360,25 @@ type
 
   TString = String;
   TName = String;
+  TDatatype = Byte;
 
-  TDefinesParam = array [1..MAXPARAMS] of TString;
+  TDefineIndex = TInteger; // 0 means not found
+  TDefineParams = array [1..MAXPARAMS] of TString;
 
-  TDefines = record
-    Name: TName;
+  TDefineName = TName;
+  TDefine = record
+    Name: TDefineName;
     Macro: String;
     Line: Integer;
-    Param: TDefinesParam;
+    Param: TDefineParams;
   end;
 
+  TParameterName = TName;
   TParam = record
-    Name: TString;
-    DataType: Byte;
+    Name: TParameterName;
+    DataType: TDatatype;
     NumAllocElements: Cardinal;
-    AllocElementType: Byte;
+    AllocElementType: TDatatype;
     PassMethod: TParameterPassingMethod;
     i, i_: Integer;
    end;
@@ -394,9 +386,9 @@ type
   TParamList = array [1..MAXPARAMS] of TParam;
 
   TVariableList = array [1..MAXVARS] of TParam;
-
+  TFieldName = TName;
   TField = record
-    Name: TName;
+    Name: TFieldName;
     Value: Int64;
     DataType: Byte;
     NumAllocElements: Cardinal;
@@ -411,14 +403,19 @@ type
     Field: array [0..MAXFIELDS] of TField;
   end;
 
+  TTokenCode = Byte;
+  TTokenKind = Byte;
+  TIdentifierName = String;
+  TIntegerNumber = Int64;
+
   TToken = record
     UnitIndex, Column: Smallint;
     Line: Integer;
-    Kind: Byte;
+    Kind: TTokenKind;
     // For Kind=IDENTTOK:
-    Name: TString;
+    Name: TIdentifierName;
     // For Kind=INTNUMBERTOK:
-    Value: Int64;
+    Value: TIntegerNumber;
     // For Kind=FRACNUMBERTOK:
     FracValue: Single;
     // For Kind=STRINGLITERALTOK:
@@ -426,14 +423,15 @@ type
     StrLength: Word;
     end;
 
+
   TIdentifier = record
-    Name: TString;
+    Name: TIdentifierName;
     Value: Int64;			// Value for a constant, address for a variable, procedure or function
     Block: Integer;			// Index of a block in which the identifier is defined
     UnitIndex : Integer;
     Alias : TString;			// EXTERNAL alias 'libraries'
     Libraries : Integer;		// EXTERNAL alias 'libraries'
-    DataType: Byte;
+    DataType: TDatatype;
     IdType: Byte;
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
@@ -453,7 +451,7 @@ type
     isInitialized,
     Section: Boolean;
 
-    Kind: Byte;
+    Kind: TTokenCode;
 
 //  For kind=PROCEDURETOK, FUNCTIONTOK:
 	NumParams: Word;
@@ -488,8 +486,9 @@ type
      NumChildren: Word;
     end;
 
+  TUnitName = TName;
   TUnit = record
-     Name: TString;
+     Name: TUnitName;
      Path: String;
      Units: Integer;
      Allow: array [1..MAXALLOWEDUNITS] of TString;
@@ -498,8 +497,8 @@ type
   TResource = record
      resStream: Boolean;
      resName, resType, resFile: TString;
-    resValue: Integer;
-    resFullName: String;
+     resValue: Integer;
+     resFullName: String;
      resPar: array [1..MAXPARAMS] of TString;
     end;
 
@@ -520,8 +519,6 @@ type
 
   TCaseLabelArray = array of TCaseLabel;
 
-  TArrayString = array of String;
-
 
 {$i targets/var.inc}
 
@@ -536,6 +533,8 @@ type
   
 type
   TTokenIndex = Integer;
+  TIdentIndex = Integer;
+  TArrayIndex = Integer;
 
 var
 
@@ -546,12 +545,12 @@ var
 
   Data, DataSegment, StaticStringData: TWordMemory;
 
-  Types: array [1..MAXTYPES] of TType;
+  TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  Spelling: array [1..MAXTOKENNAMES] of TString;
+  TokenSpelling: array [1..MAXTOKENNAMES] of TString;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
-  Defines: array [1..MAXDEFINES] of TDefines;
+  Defines: array [1..MAXDEFINES] of TDefine;
   IFTmpPosStack: array of Integer;
   BreakPosStack: array [0..MAXPOSSTACK] of TPosStack;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
@@ -592,18 +591,19 @@ var
 
   MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
-  msgWarning, msgNote, msgUser, OptimizeBuf, LinkObj: TArrayString;
+  msgWarning, msgNote, msgUser: TStringArray;
+  OptimizeBuf, LinkObj: TStringArray;
   unitPathList: TPathList;
 
 
-  optimize : record
-	      use: Boolean;
+  optimize: record
+    use: Boolean;
     unitIndex, line, old: Integer;
-	     end;
+    end;
 
-  codealign : record
+  codealign: record
     proc, loop, link: Integer;
-	      end;
+    end;
 
 
   PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
@@ -625,25 +625,23 @@ var
 
 // ----------------------------------------------------------------------------
 
-	procedure ClearWordMemory(anArray: TWordMemory);
+procedure ClearWordMemory(anArray: TWordMemory);
 
-procedure AddDefine(X: String);
+procedure AddDefine(const defineName: TDefineName);
 
 procedure AddPath(s: String);
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: Byte);
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: Byte);
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
 
-procedure CheckTok(i: Integer; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTOkenCode);
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
-
-function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
 
 function FindFile(Name: String; ftyp: TString): String; overload;
 
@@ -653,27 +651,25 @@ function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; 
 
 function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
 
-function GetEnumName(IdentIndex: Integer): TString;
+function GetEnumName(IdentIndex: TIdentIndex): TString;
 
-function GetSpelling(i: Integer): TString;
+function GetSpelling(i: TTokenIndex): TString;
 
 function GetVAL(a: String): Integer;
 
-function GetValueType(Value: Int64): Byte;
+function GetValueType(Value: TIntegerNumber): Byte;
 
-function HighBound(i: Integer; DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
+function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
 
-function InfoAboutToken(t: Byte): String;
+function InfoAboutToken(t: TTokenCode): String;
 
 function IntToStr(const a: Int64): String;
 
-function LowBound(i: Integer; DataType: Byte): Int64;
 
-function Min(a, b: Integer): Integer;
+function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
-function SearchDefine(X: String): Integer;
-
-function StrToInt(const a: String): Int64;
+function StrToInt(const a: String): TIntegerNumber;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
 function GetIOBits(const ioCode: TIOCode): TIOBits;
@@ -682,7 +678,7 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
-uses SysUtils, Messages, Utilities;
+uses Messages, Utilities;
 
 // ----------------------------------------------------------------------------
 // Map modifier codes to the bits in the method status.
@@ -719,27 +715,37 @@ end;
 
 
 function FindFile(Name: String; ftyp: TString): String; overload;
+var
+  msg: IMessage;
 begin
   Result := unitPathList.FindFile(Name);
   if Result = '' then
-   if ftyp = 'unit' then
-      Error(NumTok, 'Can''t find unit ''' + ChangeFileExt(Name, '') + ''' used by program ''' +
-        PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.')
-   else
-      Error(NumTok, 'Can''t find ' + ftyp + ' file ''' + Name + ''' used by program ''' + PROGRAM_NAME +
-        ''' in unit path ''' + unitPathList.ToString + '''.');
+  begin
+    if ftyp = 'unit' then
+    begin
+      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find unit ''' + ChangeFileExt(Name, '') +
+        ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+
+    end
+    else
+    begin
+      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find ' + ftyp + ' file ''' + Name +
+        ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+    end;
+    Error(NumTok, msg);
+  end;
 end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-function SearchDefine(X: String): Integer;
+function SearchDefine(const defineName: TDefineName): TDefineIndex;
 var
   i: Integer;
 begin
    for i:=1 to NumDefines do
-    if X = Defines[i].Name then
+    if Defines[i].Name = defineName then
     begin
      Exit(i);
     end;
@@ -751,19 +757,16 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure AddDefine(X: String);
-var
-  S: TName;
+procedure AddDefine(const defineName: TDefineName);
 begin
-   S := X;
-   if SearchDefine(S) = 0 then
-   begin
+  if SearchDefine(defineName) = 0 then
+  begin
     Inc(NumDefines);
-    Defines[NumDefines].Name := S;
+    Defines[NumDefines].Name := defineName;
 
     Defines[NumDefines].Macro := '';
     Defines[NumDefines].Line := 0;
-   end;
+  end;
 end;
 
 
@@ -829,7 +832,7 @@ end;	//GetEnumName
 // ----------------------------------------------------------------------------
 
 
-function StrToInt(const a: String): Int64;
+function StrToInt(const a: String): TIntegerNumber;
 (*----------------------------------------------------------------------------*)
 (*----------------------------------------------------------------------------*)
 {$IFNDEF PAS2JS}
@@ -863,21 +866,6 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function Min(a, b: Integer): Integer;
-begin
-
- if a < b then
-  Result := a
- else
-  Result := b;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
 procedure FreeTokens;
 begin
 
@@ -891,13 +879,13 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetSpelling(i: Integer): TString;
+function GetSpelling(i: TTokenIndex): TString;
 begin
 
 if i > NumTok then
   Result := 'no token'
 else if (Tok[i].Kind > 0) and (Tok[i].Kind < IDENTTOK) then
-  Result := Spelling[Tok[i].Kind]
+  Result := TokenSpelling[Tok[i].Kind]
 else if Tok[i].Kind = IDENTTOK then
   Result := 'identifier'
 else if (Tok[i].Kind = INTNUMBERTOK) or (Tok[i].Kind = FRACNUMBERTOK) then
@@ -910,18 +898,6 @@ else if (Tok[i].Kind = EOFTOK) then
   Result := 'end of file'
 else
   Result := 'unknown token';
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function ErrTokenFound(ErrTokenIndex: TTokenIndex): String;
-begin
-
- Result:=' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
 
 end;
 
@@ -945,11 +921,11 @@ begin
     EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in Pointers) and not
     (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK])) then
  if DataType = RightType then
-      Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
-        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
+      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
+        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"') )
  else
-      Error(ErrTokenIndex, 'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
-        InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"');
+      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperationNotSupportedForTypes,'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
+        InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"') );
 
 end;
 
@@ -958,13 +934,13 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
 begin
 
 if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
       Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-  if Ident[IdentIndex].NumAllocElements <> 1 then warning(i, RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
+  if Ident[IdentIndex].NumAllocElements <> 1 then WarningForRangeCheckError(i, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -973,14 +949,14 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
 begin
 
 if Ident[IdentIndex].NumAllocElements_ > 0 then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
       Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
       if Ident[IdentIndex].NumAllocElements_ <> 1 then
-        warning(i, RangeCheckError_, IdentIndex, ArrayIndex, ArrayIndexType);
+        WarningForRangeCheckError(i, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -1086,14 +1062,14 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function LowBound(i: Integer; DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
 begin
 
  Result := 0;
 
  case DataType of
 
-    UNTYPETOK: Error(i, CantReadWrite);
+    UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,'Can''t read or write variables of this type'));
    INTEGERTOK: Result := Low(Integer);
     SMALLINTTOK: Result := Low(Smallint);
     SHORTINTTOK: Result := Low(Shortint);
@@ -1105,8 +1081,8 @@ begin
     STRINGTOK: Result := 1;
 
  else
-      Error(i, TypeMismatch);
- end;// case
+      Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch' ));
+ end;
 
 end;
 
@@ -1115,14 +1091,14 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function HighBound(i: TTokenIndex; DataType: Byte): Int64;
+function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
 begin
 
  Result := 0;
 
  case DataType of
 
-    UNTYPETOK: Error(i, CantReadWrite);
+    UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,'Can''t read or write variables of this type'));
    INTEGERTOK: Result := High(Integer);
     SMALLINTTOK: Result := High(Smallint);
     SHORTINTTOK: Result := High(Shortint);
@@ -1134,8 +1110,8 @@ begin
     STRINGTOK: Result := 255;
 
  else
-      Error(i, TypeMismatch);
- end;// case
+      Error(i, TMessage.Create(TErrorCode.TypeMismatch,'Type mismatch'));
+ end;
 
 end;
 
@@ -1166,7 +1142,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetValueType(Value: Int64): Byte;
+function GetValueType(Value: TIntegerNumber): TDatatype;
 begin
 
   if Value < 0 then
@@ -1195,26 +1171,27 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: TTokenIndex; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenCode);
 var
   s: String;
 begin
 
-  if ExpectedTok < IDENTTOK then
-    s := Spelling[ExpectedTok]
-  else if ExpectedTok = IDENTTOK then
+  if ExpectedTokenCode < IDENTTOK then
+    s := TokenSpelling[ExpectedTokenCode]
+  else if ExpectedTokenCode = IDENTTOK then
     s := 'identifier'
-  else if (ExpectedTok = INTNUMBERTOK) then
+  else if (ExpectedTokenCode = INTNUMBERTOK) then
     s := 'number'
-  else if (ExpectedTok = CHARLITERALTOK) then
+  else if (ExpectedTokenCode = CHARLITERALTOK) then
     s := 'literal'
-  else if (ExpectedTok = STRINGLITERALTOK) then
+  else if (ExpectedTokenCode = STRINGLITERALTOK) then
     s := 'string'
   else
     s := 'unknown token';
 
-  if Tok[i].Kind <> ExpectedTok then
-    Error(i, 'Syntax error, ' + '''' + s + '''' + ' expected but ''' + GetSpelling(i) + ''' found');
+  if Tok[i].Kind <> ExpectedTokenCode then
+    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + s + '''' +
+      ' expected but ''' + GetSpelling(i) + ''' found'));
 
 end;
 
@@ -1223,7 +1200,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDatatype; err: Boolean = True): Boolean;
 begin
 
   Result := False;
@@ -1240,7 +1217,7 @@ begin
     (DstType in [CHARTOK, BOOLEANTOK])) then
 
      if err then
-      Error(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
+      ErrorIncompatibleTypes(ErrTokenIndex, SrcType, DstType)
      else
       Result := True;
 
@@ -1251,7 +1228,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDatatype): TDatatype;
 begin
 
   Result := 0;
@@ -1270,7 +1247,7 @@ begin
   if LeftType = UNTYPETOK then Result := RightType;
 
   if Result = 0 then
-    Error(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
+    ErrorIncompatibleTypes(ErrTokenIndex, RightType, LeftType);
 
 end;
 
@@ -1319,7 +1296,7 @@ else
 if (NumStaticStrChars + len > $FFFF) then
   begin
     writeln('DefineStaticString: ' + IntToStr(len));
-         RaiseHaltException(2);
+         RaiseHaltException(THaltException.COMPILING_ABORTED);
    end;
 
   for i := 1 to len do Data[i] := Ord(StrValue[i]);
@@ -1359,7 +1336,7 @@ procedure ClearWordMemory(anArray: TWordMemory);
 begin
   for i := Low(anArray) to High(anArray) do
   begin
-  	anArray[i]:=0;
+    anArray[i]:=0;
   end;
 end;
 

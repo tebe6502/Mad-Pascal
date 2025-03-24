@@ -1,9 +1,9 @@
 unit Console;
 
+{$i Defines.inc}
+
 interface
 
-{$i define.inc}
-{$i Types.inc}
 
 // https://www.freepascal.org/docs-html/rtl/crt/lightgray.html
 const LightGray = 7;
@@ -26,6 +26,8 @@ procedure TextColor(Color: Byte);
 // https://www.freepascal.org/docs-html/rtl/crt/normvideo.html
 procedure NormVideo;
 
+procedure WaitForKeyPressed;
+
 implementation
 
 {$IFNDEF PAS2JS}
@@ -40,12 +42,19 @@ begin
  {$ENDIF}
 end;
 
-procedure NormVideo();
+procedure NormVideo;
 begin
  {$IFNDEF PAS2JS}
  Crt.Normvideo;
  {$ENDIF}
 end;
 
+procedure WaitForKeyPressed;
+begin
+ {$IFNDEF PAS2JS}
+ Repeat
+ Until KeyPressed;
+ {$ENDIF}
+end;
 
 end.

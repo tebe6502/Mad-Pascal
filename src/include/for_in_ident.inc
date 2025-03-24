@@ -4,9 +4,9 @@
 // -----------------------------------------------------------------------------
 
   	    if Tok[j].Kind <> IDENTTOK then
-	      Error(j, IdentifierExpected);
+	      Error(j, TErrorCode.IdentifierExpected);
 
-	    IdentTemp := GetIdent(Tok[j].Name);
+	    IdentTemp := GetIdentIndex(Tok[j].Name);
 
 	    ActualParamType := Ident[IdentTemp].DataType;
 	    VarType := Ident[IdentTemp].AllocElementType;

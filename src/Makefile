@@ -2,11 +2,16 @@
 SRC = mp.pas \
   Common.pas \
   Diagnostic.pas \
+  FileIO.pas \
+  MathEvaluate.pas \
   Messages.pas \
+  Numbers.pas \
   Optimize.pas \
   Parser.pas \
   Scanner.pas \
-  SplitString.pas \
+  StringUtilities.pas \
+  TestUnits.pas \
+  Utilities.pas \
   include/*.inc \
   include/opt6502/*.inc \
   include/opt65c02/*.inc \

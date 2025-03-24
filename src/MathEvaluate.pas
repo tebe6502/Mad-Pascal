@@ -7,9 +7,9 @@ unit MathEvaluate;
 
 interface
 
-{$i define.inc}
+{$I Defines.inc}
 
-uses SysUtils;
+uses SysUtils, CommonTypes, StringUtilities;
 
 type
   TEvaluationResult = Single;
@@ -27,8 +27,8 @@ type
 
 type
   IEvaluationContext = interface
-    function GetConstantName(const expression: String; var index: Integer): String;
-    function GetConstantValue(const constantName: String; var constantValue: Int64): Boolean;
+    function GetConstantName(const expression: String; var index: TStringIndex): String;
+    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
   end;
 
 
@@ -84,11 +84,11 @@ var
 {$IFNDEF PAS2JS}
   v1: TEvaluationResult;
 {$ELSE}
-    v1: ValReal; // For PAS2JS, should also work for FPC and be used a return value there,  see Test-70287.pas
+  v1: ValReal; // For PAS2JS, should also work for FPC and be used a return value there,  see Test-70287.pas
 {$ENDIF}
   p: Integer;
   pflg: Boolean;
-  constantValue: Int64;
+  constantValue: TInteger;
 begin
   n := '';
   pflg := False;

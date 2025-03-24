@@ -1,36 +1,32 @@
 unit Scanner;
 
+{$I Defines.inc}
+
 interface
 
-{$i define.inc}
+uses StringUtilities, CommonTypes;
 
 // ----------------------------------------------------------------------------
 
-	procedure TokenizeProgram(UsesOn: Boolean = true);
+procedure TokenizeProgram(UsesOn: Boolean = True);
 
-	procedure TokenizeMacro(a: string; Line, Spaces: integer);
-	
-	// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-	procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
-	
-	function get_digit(var i:integer; var a:string): string;
+procedure TokenizeMacro(a: String; Line, Spaces: Integer);
 
-	function get_constant(var i:integer; const a:string): string;
-
-	function get_label(var i:integer; var a:string; up: Boolean = true): string;
-
-	function get_string(var i:integer; var a:string; up: Boolean = true): string;
-
-	procedure omin_spacje (var i:integer; const a:string);
+// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
+procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Common, Messages, SplitString, FileIO, Utilities;
+uses SysUtils, Common, Messages, FileIO, Utilities;
 
 // ----------------------------------------------------------------------------
 
+procedure ErrorOrdinalExpExpected(i: TTokenIndex);
+begin
+  Error(i, TMessage.Create(TErrorCode.OrdinalExpExpected, 'Ordinal expression expected.'));
+end;
 
 procedure TokenizeProgramInitialization;
 var i: Integer;
@@ -76,159 +72,6 @@ begin
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure omin_spacje (var i:integer; const a:string);
-(*----------------------------------------------------------------------------*)
-(*  Skip whitespace characters until the next non-whitespace character       *)
-(*----------------------------------------------------------------------------*)
-begin
-
- if a<>'' then
-  while (i<=length(a)) and (a[i] in AllowWhiteSpaces) do inc(i);
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_digit(var i:integer; var a:string): string;
-(*----------------------------------------------------------------------------*)
-(*  pobierz ciag zaczynajaca sie znakami '0'..'9','%','$'		      *)
-(*----------------------------------------------------------------------------*)
-begin
- Result:='';
-
- if a<>'' then begin
-
-  omin_spacje(i,a);
-
-  if UpCase(a[i]) in AllowDigitFirstChars then begin
-
-   Result:=UpCase(a[i]);
-   inc(i);
-
-   while UpCase(a[i]) in AllowDigitChars do begin Result:=Result+UpCase(a[i]); inc(i) end;
-
-  end;
-
- end;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_constant(var i:integer; const a:string): string;
-(*----------------------------------------------------------------------------*)
-(*  Get label starting with characters 'A'..'Z','_'		              *)
-(*----------------------------------------------------------------------------*)
-begin
-
- Result := '';
-
- if a <> '' then begin
-
-  omin_spacje(i,a);
-
-  if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
-   while UpCase(a[i]) in AllowLabelChars do begin
-
-    Result := Result + UpCase(a[i]);
-
-    inc(i);
-   end;
-
- end;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_label(var i:integer; var a:string; up: Boolean = true): string;
-(*----------------------------------------------------------------------------*)
-(*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'		      *)
-(*----------------------------------------------------------------------------*)
-begin
-
- Result := '';
-
- if a <> '' then begin
-
-  omin_spacje(i,a);
-
-  if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
-   while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do begin
-
-    if up then
-     Result := Result + UpCase(a[i])
-    else
-     Result := Result + a[i];
-
-    inc(i);
-   end;
-
- end;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_string(var i:integer; var a:string; up: Boolean = true): string;
-(*----------------------------------------------------------------------------*)
-(*  pobiera ciag znakow, ograniczony znakami '' lub ""			      *)
-(*  podwojny '' oznacza literalne '					      *)
-(*  podwojny "" oznacza literalne "					      *)
-(*----------------------------------------------------------------------------*)
-var len: integer;
-    znak, gchr: char;
-begin
- Result:='';
-
- omin_spacje(i, a);
-
- if a[i] = '%' then begin
-
-   while UpCase(a[i]) in ['A'..'Z','%'] do begin Result:=Result + Upcase(a[i]); inc(i) end;
-
- end else
- if not(a[i] in AllowQuotes) then begin
-
-  Result := get_label(i, a, up);
-
- end else begin
-
-  gchr:=a[i];
-  len:=length(a);
-
-  while i <= len do begin
-   inc(i);	 // omijamy pierwszy znak ' lub "
-
-   znak:=a[i];
-
-   if znak=gchr then begin inc(i); Break end;
-
-   Result := Result + znak;
-  end;
-
- end;
-
-end;
-
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -244,7 +87,7 @@ if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL' else
   if (S = 'LONGINT') then S := 'INTEGER';
 
 for i := 1 to MAXTOKENNAMES do
-  if S = Spelling[i] then
+  if S = TokenSpelling[i] then
     begin
     Result := i;
     Break;
@@ -271,48 +114,49 @@ begin
     t.ReadLn(s);
 
     i:=1;
-    omin_spacje(i, s);
+    SkipWhitespaces(s, i);
 
     if (length(s) > i-1) and (not (s[i] in ['#',';'])) then begin
 
-     res.resName := get_label(i, s);
-     res.resType := get_label(i, s);
-     res.resFile := get_string(i, s, false);			// don't change the case
+     res.resName := GetLabelUpperCase(s, i);
+     res.resType := GetLabelUpperCase(s, i);
+     res.resFile := GetFilePath(s, i );
 
-    if (AnsiUpperCase(res.resType) = 'RCDATA') or
-       (AnsiUpperCase(res.resType) = 'RCASM') or
-       (AnsiUpperCase(res.resType) = 'DOSFILE') or
-       (AnsiUpperCase(res.resType) = 'RELOC') or
-       (AnsiUpperCase(res.resType) = 'RMT') or
-       (AnsiUpperCase(res.resType) = 'MPT') or
-       (AnsiUpperCase(res.resType) = 'CMC') or
-       (AnsiUpperCase(res.resType) = 'RMTPLAY') or
-       (AnsiUpperCase(res.resType) = 'RMTPLAY2') or
-       (AnsiUpperCase(res.resType) = 'RMTPLAYV') or
-       (AnsiUpperCase(res.resType) = 'MPTPLAY') or
-       (AnsiUpperCase(res.resType) = 'CMCPLAY') or
-       (AnsiUpperCase(res.resType) = 'EXTMEM') or
-       (AnsiUpperCase(res.resType) = 'XBMP') or
-       (AnsiUpperCase(res.resType) = 'SAPR') or
-       (AnsiUpperCase(res.resType) = 'SAPRPLAY') or
-       (AnsiUpperCase(res.resType) = 'PP') or
-       (AnsiUpperCase(res.resType) = 'LIBRARY')
+    if (res.resType = 'RCDATA') or
+       (res.resType = 'RCASM') or
+       (res.resType = 'DOSFILE') or
+       (res.resType = 'RELOC') or
+       (res.resType = 'RMT') or
+       (res.resType = 'MPT') or
+       (res.resType = 'CMC') or
+       (res.resType = 'RMTPLAY') or
+       (res.resType = 'RMTPLAY2') or
+       (res.resType = 'RMTPLAYV') or
+       (res.resType = 'MPTPLAY') or
+       (res.resType = 'CMCPLAY') or
+       (res.resType = 'EXTMEM') or
+       (res.resType = 'XBMP') or
+       (res.resType = 'SAPR') or
+       (res.resType = 'SAPRPLAY') or
+       (res.resType = 'PP') or
+       (res.resType = 'LIBRARY')
       then
 
       else
-        Error(NumTok, 'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + '''');
+        Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType, 'Undefined resource type: Type = ''' +
+          res.resType + ''', Name = ''' + res.resName + ''''));
 
 
-     if (res.resFile <> '') and ( unitPathList.FindFile(res.resFile) = '') then
-       Error(NumTok, 'Resource file not found: Type = ' + res.resType + ', Name = ''' + res.resName + ''' in unit path '''+unitPathList.ToString+'''');
-
+      if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
+        Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound, 'Resource file not found: Type = ' +
+          res.resType + ', Name = ''' + res.resName + ''' in unit path ''' + unitPathList.ToString + ''''));
 
      for j := 1 to MAXPARAMS do begin
 
       if s[i] in ['''','"'] then
-       tmp := get_string(i, s)
+       tmp := GetStringUpperCase(s,i)
       else
-       tmp := get_digit(i, s);
+       tmp := GetNumber(s,i);
 
       if tmp = '' then tmp:='0';
 
@@ -323,7 +167,7 @@ begin
 
      for j := High(resArray)-1 downto 0 do
       if resArray[j].resName = res.resName then
-       Error(NumTok, 'Duplicate resource: Type = ' + res.resType + ', Name = ''' + res.resName + '''');
+       Error(NumTok,  TMessage.Create(TErrorCode.DuplicateResource,'Duplicate resource: Type = ' + res.resType + ', Name = ''' + res.resName + ''''));
 
      j:=High(resArray);
      resArray[j] := res;
@@ -343,7 +187,7 @@ end;	//AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
+procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
 
  Inc(NumTok);
@@ -404,7 +248,7 @@ var
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2, ch_: Char;
   CurToken: Byte;
-  StrParams: TArrayString;
+  StrParams: TStringArray;
 
 
   procedure TokenizeUnit(a: integer; testUnit: Boolean = false); forward;
@@ -467,7 +311,7 @@ var
 	 UnitIndex := NumUnits;
 
 	 if UnitIndex > High(UnitName) then
-	  Error(NumTok, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex));
+	Error(NumTok,  TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex)));
 
 	 Line:=1;
   	 UnitName[UnitIndex].Name := s;
@@ -575,7 +419,7 @@ var
   var i, v, x: integer;
       cmd, s, nam: string;
       found: Boolean;
-      Param: TDefinesParam;
+      Param: TDefineParams;
 
 
 	procedure bin2csv(fn: string);
@@ -630,7 +474,7 @@ var
 
 		AddToken(Kind, UnitIndex, Line, 1, k); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-		omin_spacje(i, d);
+		SkipWhitespaces(d, i);
 
 		msgUser[k] := copy(d, i, length(d)-i);
 		SetLength(msgUser, k+2);
@@ -639,12 +483,12 @@ var
 
   begin
 
-    Param:=Default(TDefinesParam);
+    Param:=Default(TDefineParams);
 
     if UpCase(d[1]) in AllowLabelFirstChars then begin
 
      i:=1;
-     cmd := get_label(i, d);
+     cmd := GetLabelUpperCase(d, i);
 
      if cmd='INCLUDE' then cmd:='I';
      if cmd='RESOURCE' then cmd:='R';
@@ -657,11 +501,11 @@ var
      if cmd = 'MACRO-' then macros:=false else
      if cmd = 'MACRO' then begin
 
-      s := get_string(i, d);
+      s := GetStringUpperCase(d,i);
 
       if s='ON' then macros:=true else
        if s='OFF' then macros:=false else
-        Error(NumTok, 'Wrong switch toggle, use ON/OFF or +/-');
+        Error(NumTok,  TMessage.Create(TErrorCode.WrongSwitchToggle, 'Wrong switch toggle, use ON/OFF or +/-'));
 
      end else
 
@@ -672,7 +516,7 @@ var
 	begin
 //	 AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-	 s := get_string(i, d, false);				// don't change the case
+            s := GetString(d, False, i);        // don't change the case, it could be a file path
 
 	 if AnsiUpperCase(s) = '%TIME%' then begin
 
@@ -703,7 +547,8 @@ var
 	  inc(IncludeIndex);
 
 	  if IncludeIndex > High(UnitName) then
-	    Error(NumTok, 'Out of resources, IncludeIndex: '+IntToStr(IncludeIndex));
+                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IncludeIndex: ' +
+                  IntToStr(IncludeIndex)));
 
 	  Tokenize( nam );
 
@@ -718,12 +563,14 @@ var
 
       if (cmd = 'EVAL') then begin
 
-       if  d.LastIndexOf('}') < 0 then Error(NumTok, 'Syntax error');
+          if d.LastIndexOf('}') < 0 then
+            Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Character ''}'' expected'));
 
        s := copy(d, i, d.LastIndexOf('}') - i + 1);
        s := TrimRight(s);
 
-       if s[length(s)] <> '"' then Error(NumTok, 'Missing ''"''');
+          if s[length(s)] <> '"' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+              'Syntax error. Missing ''"'''));
 
        AddToken(EVALTOK, UnitIndex, Line, 1, 0);
 
@@ -733,7 +580,7 @@ var
 
       if (cmd = 'BIN2CSV') then begin
 
-       s := get_string(i, d, false);
+       s := GetFilePath(d, i);
 
        s := FindFile(s, 'BIN2CSV');
 
@@ -743,11 +590,12 @@ var
 
       if (cmd = 'OPTIMIZATION') then begin
 
-       s := get_string(i, d);
+       s := GetStringUpperCase(d, i);
 
-       if AnsiUpperCase(s) = 'LOOPUNROLL' then AddToken(LOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
-        if AnsiUpperCase(s) = 'NOLOOPUNROLL' then AddToken(NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
-	  Error(NumTok, 'Illegal optimization specified "' + AnsiUpperCase(s) + '"');
+       if s = 'LOOPUNROLL' then AddToken(LOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
+        if s= 'NOLOOPUNROLL' then AddToken(NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
+            Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
+              'Illegal optimization specified "' + s + '"'));
 
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
 
@@ -755,25 +603,25 @@ var
 
       if (cmd = 'CODEALIGN') then begin
 
-       s := get_string(i, d);
+       s := GetStringUpperCase(d, i);
 
-       if AnsiUpperCase(s) = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
-        if AnsiUpperCase(s) = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
-         if AnsiUpperCase(s) = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0) else
-	  Error(NumTok, 'Illegal alignment directive');
+       if s = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
+        if s = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
+         if s = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0) else
+            Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective, 'Illegal alignment directive ''' + s + '''.'));
 
-       omin_spacje(i, d);
+       SkipWhitespaces(d, i);
 
-       if d[i] <> '=' then Error(NumTok, 'Illegal alignment directive');
+          if d[i] <> '=' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
        inc(i);
-       omin_spacje(i, d);
+       SkipWhitespaces(d, i);
 
-	s := get_digit(i, d);
+	s := GetNumber(d,i);
 
 	val(s, v, Err);
 
 	if Err > 0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
 	GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
 
@@ -788,10 +636,10 @@ var
 
        repeat
 
-       s := get_string(i, d, false);				// don't change the case
+       s := GetFilePath(d, i);
 
        if s = '' then
-       	 Error(NumTok, 'An empty path cannot be used');
+              Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
 
        AddPath(s);
 
@@ -810,10 +658,10 @@ var
 
        repeat
 
-       s := get_string(i, d, false);				// don't change the case
+       s := GetFilePath(d, i);
 
        if s = '' then
-       	 Error(NumTok, 'An empty path cannot be used');
+       	 Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
 
        AddPath(s);
 
@@ -830,7 +678,7 @@ var
       if (cmd = 'R') and not (d[i] in ['+','-']) then begin	// {$R filename}
        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-       s := get_string(i, d, false);				// don't change the case
+       s := GetFilePath(d, i);
        AddResource( FindFile(s, 'resource') );
 
        dec(NumTok);
@@ -839,7 +687,7 @@ var
        if cmd = 'C' then begin					// {$c 6502|65816}
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-	s := get_digit(i, d);
+	s := GetNumber(i, d);
 
 	val(s,CPUMode, Err);
 
@@ -855,8 +703,7 @@ var
       if (cmd = 'L') or (cmd = 'LINK') then begin		// {$L filename} | {$LINK filename}
        AddToken(LINKTOK, UnitIndex, Line, 1, 0);
 
-       s := get_string(i, d, false);				// don't change the case
-
+       s := GetFilePath(d, i);
        s := FindFile(s, 'link object');
 
        DefineFilename(NumTok, s);
@@ -869,12 +716,12 @@ var
        if (cmd = 'F') or (cmd = 'FASTMUL') then begin		// {$F [page address]}
 	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-	s := get_digit(i, d);
+	s := GetNumber(d,i);
 
 	val(s, FastMul, Err);
 
 	if Err <> 0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
 	AddDefine('FASTMUL');
         AddDefines := NumDefines;
@@ -886,7 +733,7 @@ var
 
        if (cmd = 'IFDEF') or (cmd = 'IFNDEF') then begin
 
-	found := 0 <> SearchDefine( get_label(i, d) );
+	found := 0 <> SearchDefine( GetLabelUpperCase(d, i) );
 
 	if cmd = 'IFNDEF' then found := not found;
 
@@ -899,18 +746,18 @@ var
        end else
        if cmd = 'ELSE' then begin
 	if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
-	 Error(NumTok, 'Found $ELSE without $IFXXX');
+        Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf, 'Found $ELSE without $IFXXX'));
 	if IfdefLevel > 0 then
 	 Dec(IfdefLevel)
        end else
        if cmd = 'ENDIF' then begin
 	if IfdefLevel = 0 then
-	 Error(NumTok, 'Found $ENDIF without $IFXXX')
+	 Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf, 'Found $ENDIF without $IFXXX'))
 	else
 	 Dec(IfdefLevel)
        end else
        if cmd = 'DEFINE' then begin
-	nam := get_label(i, d);
+	nam := GetLabelUpperCase(d, i);
 
 	Err := 0;
 
@@ -933,20 +780,20 @@ var
 	 Tok[NumTok].Line := line;
 
 	 if not(UpCase(d[i]) in AllowLabelFirstChars) then
-	  Error(NumTok, 'Syntax error, ''identifier'' expected');
+              Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ''identifier'' expected'));
 
 	 repeat
 
 	  inc(Err);
 
           if Err > MAXPARAMS then
-	   Error(NumTok, 'Too many formal parameters in ' + nam);
+                Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters, 'Too many formal parameters in ' + nam));
 
-	  Param[Err] := get_label(i, d);
+	  Param[Err] := GetLabelUpperCase(d, i);
 
 	  for x := 1 to Err - 1 do
 	   if Param[x] = Param[Err] then
-	    Error(NumTok, 'Duplicate identifier ''' + Param[Err] + '''');
+                  Error(NumTok, TMessage.Create(TErrorCode.DuplicateIdentifier, 'Duplicate identifier ''' + Param[Err] + ''''));
 
 	  skip_spaces;
 
@@ -955,7 +802,7 @@ var
 	   skip_spaces;
 
 	   if not(UpCase(d[i]) in AllowLabelFirstChars) then
-	    Error(NumTok, 'Syntax error, ''identifier'' expected');
+                  Error(NumTok, TMessage.Create(TErrorCode.IdentifierExpected, 'Syntax error, ''identifier'' expected'));
 	  end;
 
 	 until d[i] = ')';
@@ -986,10 +833,10 @@ var
 
        end else
        if cmd = 'UNDEF' then begin
-	nam := get_label(i, d);
+	nam := GetLabelUpperCase(d, i);
 	RemoveDefine(nam);
        end else
-	Error(NumTok, 'Illegal compiler directive $' + cmd + d[i]);
+          Error(NumTok, TMessage.Create(TErrorCode.IllegalCompilerDirective, 'Illegal compiler directive $' + cmd + d[i]));
 
     end;
 
@@ -1117,7 +964,7 @@ var
   if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_', '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
     begin
     // InFile.Close();
-    Error(NumTok, 'Unknown character: ' + c);
+        Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected unknown character: ' + c));
     end;
   end;
 
@@ -1128,7 +975,8 @@ var
 
     while ch in AllowWhiteSpaces do SafeReadChar(ch);
 
-    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
+      if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+          'Syntax error, ''string'' expected but ''' + ch + ''' found'));
   end;
 
 
@@ -1208,7 +1056,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '%' + Num;
 
@@ -1225,7 +1073,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '$' + Num;
 
@@ -1324,7 +1172,7 @@ var
 	end;
 
 	if err > 255 then
-	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
+            Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong, 'Constant strings can''t be longer than 255 chars'));
 
 	if Length(Text) > 0 then
 	  begin
@@ -1356,12 +1204,12 @@ var
 	   StrParams := SplitStr(copy(Num, 2, length(Num)-2), ',');
 
 	  if High(StrParams) > MAXPARAMS then
-	   Error(NumTok, 'Too many formal parameters in ' + Text);
+	   Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters, 'Too many formal parameters in ' + Text));
 
 	  end;
 
 	  if (StrParams[0] <> '') and (Defines[im].Param[1] = '') then
-	   Error(NumTok, 'Wrong number of parameters');
+                Error(NumTok, TMessage.Create(TErrorCode.WrongNumberOfParameters, 'Wrong number of parameters'));
 
 
 	  OldNumDefines := NumDefines;
@@ -1371,7 +1219,7 @@ var
 	  while (Defines[im].Param[Err] <> '') and (Err <= MAXPARAMS) do begin
 
 	   if StrParams[Err - 1] = '' then
-	     Error(NumTok, 'Missing parameter');
+	     Error(NumTok, TMessage.Create(TErrorCode.ParameterMissing, 'Parameter missing'));
 
 	   AddDefine(Defines[im].Param[Err]);
 	   Defines[NumDefines].Macro := StrParams[Err - 1];
@@ -1486,7 +1334,7 @@ var
 	  inc(AsmBlockIndex);
 
 	  if AsmBlockIndex > High(AsmBlock) then begin
-	   Error(NumTok, 'Out of resources, ASMBLOCK');
+	   Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ASMBLOCK'));
 	   RaiseHaltException(THaltException.COMPILING_ABORTED);
 	  end;
 
@@ -1502,7 +1350,7 @@ var
 	     if CurToken = UNITTOK then UnitFound := true;
 
 	     if testUnit and (UnitFound = false) then
-	      Error(NumTok, 'Syntax error, "UNIT" expected but "' + Spelling[CurToken] + '" found');
+	      Error(NumTok, TMessage.Create(TErrorCode.UnitExpected, '"UNIT" expected but "' + TokenSpelling[CurToken] + '" found'));
 
 	   end
 	   else begin				// Identifier found
@@ -1540,7 +1388,7 @@ var
 		  InFile.Read(ch);
 
 		  if ch = LF then	//Inc(Line);
-		   Error(NumTok, 'String exceeds line');
+		   Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
 
 		  if not(ch in ['''',CR,LF]) then
 		   Text := Text + ch
@@ -1623,7 +1471,7 @@ var
 		 if Length(Num)>0 then
 		  Text := Text + chr(StrToInt(Num))
 		 else
-		  Error(NumTok, 'Constant expression expected');
+                  Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;
@@ -1725,7 +1573,8 @@ var
 	    AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0); Spaces:=0;
 	  end else
 	    begin
-	    Error(NumTok, 'Unknown character: ' + ch);
+              Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected character ''' +
+                ch + ''' found. Expected one of '':><.''.'));
 	    end;
 	  end;
 	end;
@@ -1733,13 +1582,16 @@ var
 
       if NumTok = OldNumTok then	 // No token found
 	begin
-	Error(NumTok, 'Illegal character '''+ch+''' ($'+IntToHex(ord(ch),2)+')');
+	Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Illegal character '''+ch+''' ($'+IntToHex(ord(ch),2)+')'));
 	end;
 
       end;// while
 
   except
-     on e: THaltException do raise e;
+     on e: THaltException do
+     begin
+          RaiseHaltException(e.GetExitCode());
+     end
      else // EOF reached
      if Text <> '' then
      begin
@@ -1792,155 +1644,155 @@ end;
 begin
 // Token spelling definition
 
-Spelling[CONSTTOK	] := 'CONST';
-Spelling[TYPETOK	] := 'TYPE';
-Spelling[VARTOK		] := 'VAR';
-Spelling[PROCEDURETOK	] := 'PROCEDURE';
-Spelling[FUNCTIONTOK	] := 'FUNCTION';
-Spelling[OBJECTTOK	] := 'OBJECT';
-Spelling[PROGRAMTOK	] := 'PROGRAM';
-Spelling[LIBRARYTOK	] := 'LIBRARY';
-Spelling[EXPORTSTOK	] := 'EXPORTS';
-Spelling[EXTERNALTOK	] := 'EXTERNAL';
-Spelling[UNITTOK	] := 'UNIT';
-Spelling[INTERFACETOK	] := 'INTERFACE';
-Spelling[IMPLEMENTATIONTOK] := 'IMPLEMENTATION';
-Spelling[INITIALIZATIONTOK] := 'INITIALIZATION';
-Spelling[CONSTRUCTORTOK ] := 'CONSTRUCTOR';
-Spelling[DESTRUCTORTOK  ] := 'DESTRUCTOR';
-Spelling[OVERLOADTOK	] := 'OVERLOAD';
-Spelling[ASSEMBLERTOK	] := 'ASSEMBLER';
-Spelling[FORWARDTOK	] := 'FORWARD';
-Spelling[REGISTERTOK	] := 'REGISTER';
-Spelling[INTERRUPTTOK	] := 'INTERRUPT';
-Spelling[PASCALTOK	] := 'PASCAL';
-Spelling[STDCALLTOK	] := 'STDCALL';
-Spelling[INLINETOK      ] := 'INLINE';
-Spelling[KEEPTOK        ] := 'KEEP';
+TokenSpelling[CONSTTOK	] := 'CONST';
+TokenSpelling[TYPETOK	] := 'TYPE';
+TokenSpelling[VARTOK		] := 'VAR';
+TokenSpelling[PROCEDURETOK	] := 'PROCEDURE';
+TokenSpelling[FUNCTIONTOK	] := 'FUNCTION';
+TokenSpelling[OBJECTTOK	] := 'OBJECT';
+TokenSpelling[PROGRAMTOK	] := 'PROGRAM';
+TokenSpelling[LIBRARYTOK	] := 'LIBRARY';
+TokenSpelling[EXPORTSTOK	] := 'EXPORTS';
+TokenSpelling[EXTERNALTOK	] := 'EXTERNAL';
+TokenSpelling[UNITTOK	] := 'UNIT';
+TokenSpelling[INTERFACETOK	] := 'INTERFACE';
+TokenSpelling[IMPLEMENTATIONTOK] := 'IMPLEMENTATION';
+TokenSpelling[INITIALIZATIONTOK] := 'INITIALIZATION';
+TokenSpelling[CONSTRUCTORTOK ] := 'CONSTRUCTOR';
+TokenSpelling[DESTRUCTORTOK  ] := 'DESTRUCTOR';
+TokenSpelling[OVERLOADTOK	] := 'OVERLOAD';
+TokenSpelling[ASSEMBLERTOK	] := 'ASSEMBLER';
+TokenSpelling[FORWARDTOK	] := 'FORWARD';
+TokenSpelling[REGISTERTOK	] := 'REGISTER';
+TokenSpelling[INTERRUPTTOK	] := 'INTERRUPT';
+TokenSpelling[PASCALTOK	] := 'PASCAL';
+TokenSpelling[STDCALLTOK	] := 'STDCALL';
+TokenSpelling[INLINETOK      ] := 'INLINE';
+TokenSpelling[KEEPTOK        ] := 'KEEP';
 
-Spelling[ASSIGNFILETOK	] := 'ASSIGN';
-Spelling[RESETTOK	] := 'RESET';
-Spelling[REWRITETOK	] := 'REWRITE';
-Spelling[APPENDTOK	] := 'APPEND';
-Spelling[BLOCKREADTOK	] := 'BLOCKREAD';
-Spelling[BLOCKWRITETOK	] := 'BLOCKWRITE';
-Spelling[CLOSEFILETOK	] := 'CLOSE';
+TokenSpelling[ASSIGNFILETOK	] := 'ASSIGN';
+TokenSpelling[RESETTOK	] := 'RESET';
+TokenSpelling[REWRITETOK	] := 'REWRITE';
+TokenSpelling[APPENDTOK	] := 'APPEND';
+TokenSpelling[BLOCKREADTOK	] := 'BLOCKREAD';
+TokenSpelling[BLOCKWRITETOK	] := 'BLOCKWRITE';
+TokenSpelling[CLOSEFILETOK	] := 'CLOSE';
 
-Spelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
-Spelling[SIZEOFRESOURCETOK] := 'SIZEOFRESOURCE';
+TokenSpelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
+TokenSpelling[SIZEOFRESOURCETOK] := 'SIZEOFRESOURCE';
 
 
-Spelling[FILETOK	] := 'FILE';
-Spelling[TEXTFILETOK	] := 'TEXTFILE';
-Spelling[SETTOK		] := 'SET';
-Spelling[PACKEDTOK	] := 'PACKED';
-Spelling[VOLATILETOK	] := 'VOLATILE';
-Spelling[STRIPEDTOK	] := 'STRIPED';
-Spelling[LABELTOK	] := 'LABEL';
-Spelling[GOTOTOK	] := 'GOTO';
-Spelling[INTOK		] := 'IN';
-Spelling[RECORDTOK	] := 'RECORD';
-Spelling[CASETOK	] := 'CASE';
-Spelling[BEGINTOK	] := 'BEGIN';
-Spelling[ENDTOK		] := 'END';
-Spelling[IFTOK		] := 'IF';
-Spelling[THENTOK	] := 'THEN';
-Spelling[ELSETOK	] := 'ELSE';
-Spelling[WHILETOK	] := 'WHILE';
-Spelling[DOTOK		] := 'DO';
-Spelling[REPEATTOK	] := 'REPEAT';
-Spelling[UNTILTOK	] := 'UNTIL';
-Spelling[FORTOK		] := 'FOR';
-Spelling[TOTOK		] := 'TO';
-Spelling[DOWNTOTOK	] := 'DOWNTO';
-Spelling[ASSIGNTOK	] := ':=';
-Spelling[WRITETOK	] := 'WRITE';
-Spelling[WRITELNTOK	] := 'WRITELN';
-Spelling[SIZEOFTOK	] := 'SIZEOF';
-Spelling[LENGTHTOK	] := 'LENGTH';
-Spelling[HIGHTOK	] := 'HIGH';
-Spelling[LOWTOK		] := 'LOW';
-Spelling[INTTOK		] := 'INT';
-Spelling[FRACTOK	] := 'FRAC';
-Spelling[TRUNCTOK	] := 'TRUNC';
-Spelling[ROUNDTOK	] := 'ROUND';
-Spelling[ODDTOK		] := 'ODD';
+TokenSpelling[FILETOK	] := 'FILE';
+TokenSpelling[TEXTFILETOK	] := 'TEXTFILE';
+TokenSpelling[SETTOK		] := 'SET';
+TokenSpelling[PACKEDTOK	] := 'PACKED';
+TokenSpelling[VOLATILETOK	] := 'VOLATILE';
+TokenSpelling[STRIPEDTOK	] := 'STRIPED';
+TokenSpelling[LABELTOK	] := 'LABEL';
+TokenSpelling[GOTOTOK	] := 'GOTO';
+TokenSpelling[INTOK		] := 'IN';
+TokenSpelling[RECORDTOK	] := 'RECORD';
+TokenSpelling[CASETOK	] := 'CASE';
+TokenSpelling[BEGINTOK	] := 'BEGIN';
+TokenSpelling[ENDTOK		] := 'END';
+TokenSpelling[IFTOK		] := 'IF';
+TokenSpelling[THENTOK	] := 'THEN';
+TokenSpelling[ELSETOK	] := 'ELSE';
+TokenSpelling[WHILETOK	] := 'WHILE';
+TokenSpelling[DOTOK		] := 'DO';
+TokenSpelling[REPEATTOK	] := 'REPEAT';
+TokenSpelling[UNTILTOK	] := 'UNTIL';
+TokenSpelling[FORTOK		] := 'FOR';
+TokenSpelling[TOTOK		] := 'TO';
+TokenSpelling[DOWNTOTOK	] := 'DOWNTO';
+TokenSpelling[ASSIGNTOK	] := ':=';
+TokenSpelling[WRITETOK	] := 'WRITE';
+TokenSpelling[WRITELNTOK	] := 'WRITELN';
+TokenSpelling[SIZEOFTOK	] := 'SIZEOF';
+TokenSpelling[LENGTHTOK	] := 'LENGTH';
+TokenSpelling[HIGHTOK	] := 'HIGH';
+TokenSpelling[LOWTOK		] := 'LOW';
+TokenSpelling[INTTOK		] := 'INT';
+TokenSpelling[FRACTOK	] := 'FRAC';
+TokenSpelling[TRUNCTOK	] := 'TRUNC';
+TokenSpelling[ROUNDTOK	] := 'ROUND';
+TokenSpelling[ODDTOK		] := 'ODD';
 
-Spelling[READLNTOK	] := 'READLN';
-Spelling[HALTTOK	] := 'HALT';
-Spelling[BREAKTOK	] := 'BREAK';
-Spelling[CONTINUETOK	] := 'CONTINUE';
-Spelling[EXITTOK	] := 'EXIT';
+TokenSpelling[READLNTOK	] := 'READLN';
+TokenSpelling[HALTTOK	] := 'HALT';
+TokenSpelling[BREAKTOK	] := 'BREAK';
+TokenSpelling[CONTINUETOK	] := 'CONTINUE';
+TokenSpelling[EXITTOK	] := 'EXIT';
 
-Spelling[SUCCTOK	] := 'SUCC';
-Spelling[PREDTOK	] := 'PRED';
+TokenSpelling[SUCCTOK	] := 'SUCC';
+TokenSpelling[PREDTOK	] := 'PRED';
 
-Spelling[INCTOK		] := 'INC';
-Spelling[DECTOK		] := 'DEC';
-Spelling[ORDTOK		] := 'ORD';
-Spelling[CHRTOK		] := 'CHR';
-Spelling[ASMTOK		] := 'ASM';
-Spelling[ABSOLUTETOK	] := 'ABSOLUTE';
-Spelling[USESTOK	] := 'USES';
-Spelling[LOTOK		] := 'LO';
-Spelling[HITOK		] := 'HI';
-Spelling[GETINTVECTOK	] := 'GETINTVEC';
-Spelling[SETINTVECTOK	] := 'SETINTVEC';
-Spelling[ARRAYTOK	] := 'ARRAY';
-Spelling[OFTOK		] := 'OF';
-Spelling[STRINGTOK	] := 'STRING';
+TokenSpelling[INCTOK		] := 'INC';
+TokenSpelling[DECTOK		] := 'DEC';
+TokenSpelling[ORDTOK		] := 'ORD';
+TokenSpelling[CHRTOK		] := 'CHR';
+TokenSpelling[ASMTOK		] := 'ASM';
+TokenSpelling[ABSOLUTETOK	] := 'ABSOLUTE';
+TokenSpelling[USESTOK	] := 'USES';
+TokenSpelling[LOTOK		] := 'LO';
+TokenSpelling[HITOK		] := 'HI';
+TokenSpelling[GETINTVECTOK	] := 'GETINTVEC';
+TokenSpelling[SETINTVECTOK	] := 'SETINTVEC';
+TokenSpelling[ARRAYTOK	] := 'ARRAY';
+TokenSpelling[OFTOK		] := 'OF';
+TokenSpelling[STRINGTOK	] := 'STRING';
 
-Spelling[RANGETOK	] := '..';
+TokenSpelling[RANGETOK	] := '..';
 
-Spelling[EQTOK		] := '=';
-Spelling[NETOK		] := '<>';
-Spelling[LTTOK		] := '<';
-Spelling[LETOK		] := '<=';
-Spelling[GTTOK		] := '>';
-Spelling[GETOK		] := '>=';
+TokenSpelling[EQTOK		] := '=';
+TokenSpelling[NETOK		] := '<>';
+TokenSpelling[LTTOK		] := '<';
+TokenSpelling[LETOK		] := '<=';
+TokenSpelling[GTTOK		] := '>';
+TokenSpelling[GETOK		] := '>=';
 
-Spelling[DOTTOK		] := '.';
-Spelling[COMMATOK	] := ',';
-Spelling[SEMICOLONTOK	] := ';';
-Spelling[OPARTOK	] := '(';
-Spelling[CPARTOK	] := ')';
-Spelling[DEREFERENCETOK	] := '^';
-Spelling[ADDRESSTOK	] := '@';
-Spelling[OBRACKETTOK	] := '[';
-Spelling[CBRACKETTOK	] := ']';
-Spelling[COLONTOK	] := ':';
+TokenSpelling[DOTTOK		] := '.';
+TokenSpelling[COMMATOK	] := ',';
+TokenSpelling[SEMICOLONTOK	] := ';';
+TokenSpelling[OPARTOK	] := '(';
+TokenSpelling[CPARTOK	] := ')';
+TokenSpelling[DEREFERENCETOK	] := '^';
+TokenSpelling[ADDRESSTOK	] := '@';
+TokenSpelling[OBRACKETTOK	] := '[';
+TokenSpelling[CBRACKETTOK	] := ']';
+TokenSpelling[COLONTOK	] := ':';
 
-Spelling[PLUSTOK	] := '+';
-Spelling[MINUSTOK	] := '-';
-Spelling[MULTOK		] := '*';
-Spelling[DIVTOK		] := '/';
-Spelling[IDIVTOK	] := 'DIV';
-Spelling[MODTOK		] := 'MOD';
-Spelling[SHLTOK		] := 'SHL';
-Spelling[SHRTOK		] := 'SHR';
-Spelling[ORTOK		] := 'OR';
-Spelling[XORTOK		] := 'XOR';
-Spelling[ANDTOK		] := 'AND';
-Spelling[NOTTOK		] := 'NOT';
+TokenSpelling[PLUSTOK	] := '+';
+TokenSpelling[MINUSTOK	] := '-';
+TokenSpelling[MULTOK		] := '*';
+TokenSpelling[DIVTOK		] := '/';
+TokenSpelling[IDIVTOK	] := 'DIV';
+TokenSpelling[MODTOK		] := 'MOD';
+TokenSpelling[SHLTOK		] := 'SHL';
+TokenSpelling[SHRTOK		] := 'SHR';
+TokenSpelling[ORTOK		] := 'OR';
+TokenSpelling[XORTOK		] := 'XOR';
+TokenSpelling[ANDTOK		] := 'AND';
+TokenSpelling[NOTTOK		] := 'NOT';
 
-Spelling[INTEGERTOK	] := 'INTEGER';
-Spelling[CARDINALTOK	] := 'CARDINAL';
-Spelling[SMALLINTTOK	] := 'SMALLINT';
-Spelling[SHORTINTTOK	] := 'SHORTINT';
-Spelling[WORDTOK	] := 'WORD';
-Spelling[BYTETOK	] := 'BYTE';
-Spelling[CHARTOK	] := 'CHAR';
-Spelling[BOOLEANTOK	] := 'BOOLEAN';
-Spelling[POINTERTOK	] := 'POINTER';
-Spelling[SHORTREALTOK	] := 'SHORTREAL';
-Spelling[REALTOK	] := 'REAL';
-Spelling[SINGLETOK	] := 'SINGLE';
-Spelling[HALFSINGLETOK	] := 'FLOAT16';
-Spelling[PCHARTOK	] := 'PCHAR';
+TokenSpelling[INTEGERTOK	] := 'INTEGER';
+TokenSpelling[CARDINALTOK	] := 'CARDINAL';
+TokenSpelling[SMALLINTTOK	] := 'SMALLINT';
+TokenSpelling[SHORTINTTOK	] := 'SHORTINT';
+TokenSpelling[WORDTOK	] := 'WORD';
+TokenSpelling[BYTETOK	] := 'BYTE';
+TokenSpelling[CHARTOK	] := 'CHAR';
+TokenSpelling[BOOLEANTOK	] := 'BOOLEAN';
+TokenSpelling[POINTERTOK	] := 'POINTER';
+TokenSpelling[SHORTREALTOK	] := 'SHORTREAL';
+TokenSpelling[REALTOK	] := 'REAL';
+TokenSpelling[SINGLETOK	] := 'SINGLE';
+TokenSpelling[HALFSINGLETOK	] := 'FLOAT16';
+TokenSpelling[PCHARTOK	] := 'PCHAR';
 
-Spelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
-Spelling[FLOATTOK	] := 'FLOAT';
-Spelling[TEXTTOK	] := 'TEXT';
+TokenSpelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
+TokenSpelling[FLOATTOK	] := 'FLOAT';
+TokenSpelling[TEXTTOK	] := 'TEXT';
 
  AsmFound  := false;
  UsesFound := false;
@@ -1980,7 +1832,8 @@ var
 
     while ch in AllowWhiteSpaces do begin ch:=a[i]; inc(i) end;
 
-    if not(ch in ['''','#']) then Error(NumTok, 'Syntax error, ''string'' expected but '''+ ch +''' found');
+    if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
+        'Syntax error, ''string'' expected but ''' + ch + ''' found'));
   end;
 
 
@@ -2060,7 +1913,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '%' + Num;
 
@@ -2077,7 +1930,7 @@ var
        end;
 
        if length(Num)=0 then
-	 Error(NumTok, OrdinalExpExpected);
+	 ErrorOrdinalExpExpected(NumTok);
 
        Num := '$' + Num;
 
@@ -2166,7 +2019,8 @@ begin
 
 
 	if err > 255 then
-	 Error(NumTok, 'Constant strings can''t be longer than 255 chars');
+        Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
+          'Constant strings can''t be longer than 255 chars'));
 
 	if Length(Text) > 0 then
 	  begin
@@ -2182,7 +2036,7 @@ begin
 	  i:=TextPos;
 
           if Defines[im].Macro = copy(a,i,length(text)) then
-	   Error(NumTok, 'Recursion in macros is not allowed');
+	   Error(NumTok, TMessage.Create(TErrorCode.RecursionInMacro,'Recursion in macros is not allowed'));
 
 	  delete(a, i, length(Text));
 	  insert(Defines[im].Macro, a, i);
@@ -2240,7 +2094,7 @@ begin
 		  ch:=a[i]; inc(i);
 
 		  if ch = LF then	//Inc(Line);
-		   Error(NumTok, 'String exceeds line');
+		   Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine,'String exceeds line'));
 
 		  if not(ch in ['''',CR,LF]) then
 		   Text := Text + ch
@@ -2322,7 +2176,7 @@ begin
 		 if Length(Num)>0 then
 		  Text := Text + chr(StrToInt(Num))
 		 else
-		  Error(NumTok, 'Constant expression expected');
+		  Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
 
 		 if ch in [' ',TAB] then begin
 			ch2:=ch;
@@ -2416,10 +2270,6 @@ begin
 end;
 
 end;	//TokenizeMacro
-
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 
 
 end.

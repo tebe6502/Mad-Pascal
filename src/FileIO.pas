@@ -2,13 +2,13 @@ unit FileIO;
 // Interfaced objects are implicitly reference counted and freed.
 // Therefore there are no explicit Free method on the files.  
 
+{$I Defines.inc}
+
 interface
 
-{$i define.inc}
-{$i Types.inc}
-{$SCOPEDENUMS ON}
+uses SysUtils, CommonTypes;
 
-uses SysUtils;
+{$SCOPEDENUMS ON}
 
 type
   TFilePath = String;
@@ -45,10 +45,10 @@ type
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
     procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
-    function FilePos(): Int64;
+    function FilePos(): TInteger;
     procedure Read(var c: Char);
     procedure Reset(l: Longint); overload;
-    procedure Seek2(Pos: Int64);
+    procedure Seek2(Pos: TInteger);
   end;
 
 type
@@ -191,12 +191,12 @@ type
     procedure Erase(); override;
     function EOF(): Boolean; override;
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
-    function FilePos(): Int64;
+    function FilePos(): TInteger;
     procedure Read(var c: Char);
     procedure Reset(); override; overload;
     procedure Reset(l: Longint); overload;
     procedure Rewrite(); override;
-    procedure Seek2(Pos: Int64);
+    procedure Seek2(Pos: TInteger);
 
   end;
 
@@ -489,7 +489,7 @@ begin
 
 end;
 
-function TBinaryFile.FilePos(): Int64;
+function TBinaryFile.FilePos(): TInteger;
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   Result := System.FilePos(f);
@@ -531,7 +531,7 @@ begin
 
 end;
 
-procedure TBinaryFile.Seek2(Pos: Int64);
+procedure TBinaryFile.Seek2(Pos: TInteger);
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Seek(f, pos);
