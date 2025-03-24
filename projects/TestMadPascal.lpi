@@ -23,6 +23,13 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
+      <Modes>
+        <Mode Name="default">
+          <local>
+            <CommandLineParams Value="-iPath:..\lib ..\src\tests\Test-MP.pas"/>
+          </local>
+        </Mode>
+      </Modes>
     </RunParams>
     <Units>
       <Unit>

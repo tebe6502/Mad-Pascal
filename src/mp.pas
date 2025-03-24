@@ -186,6 +186,7 @@ program MADPASCAL;
 
 uses
     SysUtils,
+    Math, // Required for Min(), do not remove
 {$IFDEF WINDOWS}
 	Windows,
 {$ENDIF}
