@@ -131,6 +131,7 @@ var
 
 	prior: byte absolute $D01B;		// rejestr piorytetu GTIA
 	gractl: byte absolute $D01D;		// rejestr kontroli PMG
+	pmcntl: byte absolute $D01D;
 	hitclr: byte absolute $D01E;		// rejestr zerujacy kolizje PMG
 	consol: byte absolute $D01F;		// console keys status
 

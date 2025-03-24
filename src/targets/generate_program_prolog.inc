@@ -181,8 +181,8 @@ end;
  end;
 
 
- if (High(resArray) > 0) and (target.id = TComputer.A8) and LIBRARY_USE then
- asm65(#9'ert ''Resources in LIBRARY not allowed''');
+// if (High(resArray) > 0) and (target.id = TComputer.A8) and LIBRARY_USE then
+// asm65(#9'ert ''Resources in LIBRARY not allowed''');
 
 
  if (High(resArray) > 0) and (target.id = TComputer.A8) and (LIBRARY_USE = FALSE) then begin
