@@ -11,7 +11,7 @@ var
   var
     tmp: String;
     err: Integer;
-    constantValue: Int64;
+    constantValue: TInteger;
   begin
 
     Result := 0;

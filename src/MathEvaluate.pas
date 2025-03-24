@@ -9,7 +9,7 @@ interface
 
 {$I Defines.inc}
 
-uses SysUtils, Types, StringUtilities;
+uses SysUtils, CommonTypes, StringUtilities;
 
 type
   TEvaluationResult = Single;
@@ -88,7 +88,7 @@ var
 {$ENDIF}
   p: Integer;
   pflg: Boolean;
-  constantValue: Int64;
+  constantValue: TInteger;
 begin
   n := '';
   pflg := False;

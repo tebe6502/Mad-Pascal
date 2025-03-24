@@ -326,7 +326,7 @@ begin
 
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex);
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex); overload;
 var
   msg: String;
 begin

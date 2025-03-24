@@ -6,6 +6,7 @@ uses SysUtils;
 
 type
   TStringIndex = Integer;
+  TStringArray = array of String;
 
 const
   TAB = ^I;   // Char for a TAB

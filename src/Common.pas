@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, FileIO, Types, StringUtilities;
+uses SysUtils, CommonTypes, FileIO, StringUtilities;
 
 // ----------------------------------------------------------------------------
 

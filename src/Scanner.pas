@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses StringUtilities, Types;
+uses StringUtilities, CommonTypes;
 
 // ----------------------------------------------------------------------------
 
@@ -187,7 +187,7 @@ end;	//AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
+procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
 
  Inc(NumTok);

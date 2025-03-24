@@ -1,4 +1,6 @@
-unit Types;
+// The unit is caled "CommonTypes" to prevent conflicts with the general system unit "Types".
+
+unit CommonTypes;
 
 interface
 
@@ -7,7 +9,7 @@ interface
 // type QWord = Int64;
 // type Single = Double;
 
-// TInteger is intended as the largest type fo signed integer values that can represent numbers without gaps.
+// TInteger is intended as the largest type of signed integer values that can represent numbers without gaps.
 {$IFNDEF PAS2JS}
 type
   TInteger = Int64;

@@ -94,10 +94,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\Types.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\src\include\doevaluate.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -143,6 +139,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\TestUnits.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\CommonTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

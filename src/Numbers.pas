@@ -94,12 +94,13 @@ begin
 asm
   return (AValue>>Shift);
 end;
+end;
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-function CardToHalf32(const src: Uint32): Word; overload;
+function CardToHalf32(const src: Uint32): Word;
 var
   Sign, Exp, Mantissa: Longint;
   s: Single;

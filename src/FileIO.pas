@@ -6,7 +6,7 @@ unit FileIO;
 
 interface
 
-uses SysUtils, Types;
+uses SysUtils, CommonTypes;
 
 {$SCOPEDENUMS ON}
 

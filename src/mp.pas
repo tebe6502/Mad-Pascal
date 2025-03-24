@@ -193,7 +193,7 @@ uses
 {$IFDEF PAS2JS}
          browserconsole,
 {$ENDIF}
-	Common, Console,  Diagnostic, FileIO, MathEvaluate, Messages, Numbers, Scanner, Optimize, Parser, StringUtilities, Types, Utilities;
+	Common, CommonTypes, Console,  Diagnostic, FileIO, MathEvaluate, Messages, Numbers, Scanner, Optimize, Parser, StringUtilities, Utilities;
 
 // Temporarily own variable, because main program is no class yet.
 var evaluationContext: IEvaluationContext;
