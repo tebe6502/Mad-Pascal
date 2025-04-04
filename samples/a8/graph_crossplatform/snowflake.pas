@@ -1,74 +1,70 @@
 // Koch Snowflake
-//
-// See https://en.wikipedia.org/wiki/Koch_snowflake
+// https://en.wikipedia.org/wiki/Koch_snowflake
 
-// Float16  186 ticks
-// Real     197 ticks
-// Single   237 ticks
+// float16	186
+// real		197
+// single	237
 
-program snowflake;
 
-uses
-  Crt,
-  graph,
-  SysUtils;
+uses crt, graph, sysutils,
+     snowflake_unit_real in 'snowflake_unit_real.pas',
+     snowflake_unit_single in 'snowflake_unit_single.pas';
+
+procedure WaitForKey;
+begin
+  repeat 
+  until KeyPressed;
+  ReadKey;
+  repeat 
+  until not KeyPressed;
+end;
+
+procedure Snowflake;
 
 const FLOAT_TYPES : array of String = [
-{$IFDEF Float16}
+{$IFDEF FLOAT16} // TODO does not work yet
 'Float16',
 {$ENDIF}
 'Real',
 'Single' ];
 
-var
-  gd, gm: Smallint;
-
-  ticks: Cardinal;
-
-{$IFDEF Float16}
-procedure CreateKochSnowflake_Float16;
-type
-  TFloat = Float16;
-{$I snowflake.inc}
-{$ENDIF}
-
-procedure CreateKochSnowflake_Real;
-type
-  TFloat = Real;
-{$I snowflake.inc}
-
-procedure CreateKochSnowflake_Single;
-type
-  TFloat = Single;
-{$I snowflake.inc}
-
+var gd, gm: SmallInt;
+var ticks: Cardinal;
+var i: Byte;
 var floatType: String;
 begin
 
-  for floatType in FLOAT_TYPES do
+  for i:=Low(FLOAT_TYPES) to High(FLOAT_TYPES) do
   begin
 
-  gd := D8bit;
-  gm := m640x480;
+    gd := D8bit;
+    gm := m640x480;
+  
+    InitGraph(gd, gm, '');
+  
+    ticks := GetTickCount;
+    
+    floatType:=FLOAT_TYPES[i];
+    {$IFDEF Float16}
+    if floatType = 'Float16' then snowflake_unit_float16.CreateKochSnowflake;
+    {$ENDIF}
+    if floatType = 'Real'    then snowflake_unit_real.CreateKochSnowflake;
+    if floatType = 'Single'  then snowflake_unit_single.CreateKochSnowflake;
+  
+    ticks := GetTickCount - ticks;
+  
+    WaitForKey;
+  
+    WriteLn('Koch Snowflake with type ''',floatType,'''.');
+    Writeln('Time required: ', ticks,' ticks');
+    WriteLn('Press any key to continue.');
+    WaitForKey;
 
-  InitGraph(gd, gm, '');
-
-  ticks := GetTickCount;
-
-  {$IFDEF Float16}
-  if floatType = 'Float16' then CreateKochSnowflake_Float16;
-  {$ENDIF}
-  if floatType = 'Real'    then CreateKochSnowflake_Real;
-  if floatType = 'Single'  then CreateKochSnowflake_Single;
-
-  ticks := GetTickCount - ticks;
-
-  repeat
-  until keypressed;
-
-  WriteLn('Koch Snowflake with type ''',floatType,''' required ', ticks,' ticks.');
   end;
+  
+ end;
 
-  while True do ;
-
+begin
+Snowflake;
 end.
+

@@ -1,45 +1,48 @@
-(* Generic Koch Snowflake Include                *)
-(* Defined TFloat as required before using this. *)
+
+(* Generic Koch Snowflake Include               *)
+(* Define TFloat as required before using this. *)
+
+const
+  center_x = 160;
+  center_y = 115;
+
+  iterations = 3;
 
 type
-  FPoint = record
+  TFloatPoint = record
     x: TFloat;
     y: TFloat;
   end;
 
 const
-  cx = 160;
-  cy = 115;
-
   ray0 = TFloat(70.0);
   ray1 = TFloat(ray0 / 2);
 
   sqrt3 = TFloat(1.7320580756);    // SQRT(3.0)
 
-  iterations = 3;
 
-  procedure LineTo2D(ax, ay: TFloat);
-  begin
+procedure LineTo2D(ax, ay: TFloat);
+begin
 
-    LineTo(trunc(ax) + cx, trunc(ay) + cy);
+    LineTo(trunc(ax) + center_x, trunc(ay) + center_y);
 
-  end;
+end;
 
-  procedure MoveTo2D(ax, ay: TFloat);
-  begin
+procedure MoveTo2D(ax, ay: TFloat);
+begin
 
-    MoveTo(trunc(ax) + cx, trunc(ay) + cy);
+    MoveTo(trunc(ax) + center_x, trunc(ay) + center_y);
 
-  end;
+end;
 
-  procedure NextSegments(ax, ay, bx, by: TFloat; n: Byte);
+procedure NextSegments(ax, ay, bx, by: TFloat; n: Byte);
   const
     factor: TFloat = 0.288675135;  { SQRT(3) / 6 }
   var
-    middle: FPoint;
+    middle: TFloatPoint;
     xDelta: TFloat;
     yDelta: TFloat;
-    r, s, t: FPoint;
+    r, s, t: TFloatPoint;
   begin
 
     if n > 0 then
@@ -78,7 +81,7 @@ const
 
   end;
 
-  procedure KochSnowflake(a, b, c: FPoint; n: Byte);
+procedure KochSnowflake(a, b, c: TFloatPoint; n: Byte);
   begin
 
     SetColor(1);
@@ -94,11 +97,11 @@ const
     LineTo2D(a.x, a.y);
     NextSegments(c.x, c.y, a.x, a.y, n);
 
-  end {KochSnowflake};
+end;
 
-
+procedure CreateKochSnowflake;
 var
-  a, b, c: FPoint;
+  a, b, c: TFloatPoint;
 
 begin
 
@@ -112,7 +115,5 @@ begin
   c.y := ray1 * SQRT3;
 
   KochSnowflake(a, b, c, iterations);
-
 end;
-
 
