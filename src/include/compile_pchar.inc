@@ -7,7 +7,7 @@
 
  // Character assignment to pointer  f:='a'
 
-	CHARLITERALTOK:
+	 TTokenKind.CHARLITERALTOK:
 		begin
 
 		 Ident[IdentIndex].isInit := true;
@@ -50,11 +50,11 @@
 		 end;		// case IndirectionLevel
 
 		Result := i + 2;
-		end;		// case CHARLITERALTOK
+		end;		// case TTokenKind.CHARLITERALTOK
 
  // String assignment to pointer  f:='string'
 
-	STRINGLITERALTOK:
+	TTokenKind.STRINGLITERALTOK:
 		begin
 
 		Ident[IdentIndex].isInit := true;
@@ -90,7 +90,7 @@
 		     asm65(#9'@move #CODEORIGIN+$'+IntToHex(Tok[i + 2].StrAddress - CODEORIGIN, 4)+' '+Ident[IdentIndex].Name+' #'+IntToStr(Succ(NumCharacters)));
 
 		   ASPOINTERTOARRAYORIGIN:
-		   GetCommonType(i + 1, CHARTOK, POINTERTOK);
+		   GetCommonType(i + 1, CHARTOK, TTokenKind.POINTERTOK);
 }
 		   ASPOINTER:
 		   begin
@@ -107,7 +107,7 @@
 
 		      asm65(#9'mwy ' + svar + ' :bp2');
 
-		      if Ident[IdentIndex].DataType = POINTERTOK then
+		      if Ident[IdentIndex].DataType = TTokenKind.POINTERTOK then
 		       k := Tok[i + 2].StrAddress - CODEORIGIN + 1
 		      else
 		       k := Tok[i + 2].StrAddress - CODEORIGIN;
@@ -126,10 +126,10 @@
 		 end;		// case IndirectionLevel
 
 		Result := i + 2;
-		end;		// case STRINGLITERALTOK
+		end;		// case TTokenKind.STRINGLITERALTOK
 
 
-	IDENTTOK:
+	TTokenKind.IDENTTOK:
 		begin
 
 		 Ident[IdentIndex].isInit := true;
@@ -145,7 +145,7 @@
 
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
 
-		if ExpressionType = CHARTOK then begin
+		if ExpressionType = TTokenKind.CHARTOK then begin
 
 		 case IndirectionLevel of
 
@@ -216,7 +216,7 @@
 		        if (ExpressionType = PCHARTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then
 			 asm65(#9'@movePCHAR ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1))
 			else
-			if Ident[IdentIndex].DataType = POINTERTOK then
+			if Ident[IdentIndex].DataType = TTokenKind.POINTERTOK then
 			 asm65(#9'@moveSTRING_P ' + svar)
 			else
 			 asm65(#9'@moveSTRING ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1));
@@ -231,7 +231,7 @@
 		      end;
 
 		  else
-		   GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		   GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		  end;// case IndirectionLevel
 
