@@ -14261,8 +14261,9 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function ReadDataArray(i: integer; ConstDataSize: integer; const ConstValType: Byte; NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
-var ActualParamType, ch: byte;
+function ReadDataArray(i: integer; ConstDataSize: integer; const ConstValType: TDataType; NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
+var ActualParamType: TDataType;
+    ch: byte;
     NumActualParams, NumActualParams_, NumAllocElements_: cardinal;
     ConstVal: Int64;
 
@@ -14309,11 +14310,11 @@ begin
   end;
 
 
-  if (ConstValType in StringTypes + [CHARTOK, TTokenKind.STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
+  if (ConstValType in StringTypes + [TDataType.CHARTOK, TDataType.STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
     Error(i, TErrorCode.IllegalExpression);
 
 
-  if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = TDataType.CHARTOK) then
+  if (ConstValType in StringTypes + [TDataType.STRINGPOINTERTOK]) and (ActualParamType = TDataType.CHARTOK) then
    ErrorIncompatibleTypes(i, ActualParamType, ConstValType);
 
 
@@ -14331,14 +14332,14 @@ begin
 
   if ActualParamType = TTokenKind.DATAORIGINOFFSET then
 
-   SaveDataSegment(DATAORIGINOFFSET)
+   SaveDataSegment(TTokenKind.DATAORIGINOFFSET)
 
   else begin
 
    if ConstValType in IntegerTypes then begin
 
     if GetCommonConstType(i, ConstValType, ActualParamType, (ActualParamType in RealTypes + Pointers)) then
-     WarningForRangeCheckError(i, 0, ConstVal, ConstValType);
+     WarningForRangeCheckError(i, ConstVal, ConstValType);
 
    end else
     GetCommonConstType(i, ConstValType, ActualParamType);
@@ -14416,7 +14417,7 @@ begin
    //inc(i);
   end else
    //SaveData;
-    if Tok[i + 1].Kind = EVALTOK then
+    if Tok[i + 1].Kind = TTokenKind.EVALTOK then
       NumActualParams := doEvaluate(evaluationContext)
     else
       SaveData;
@@ -14447,8 +14448,9 @@ end;	//ReadDataArray
 // ----------------------------------------------------------------------------
 
 
-function ReadDataOpenArray(i: integer; ConstDataSize: integer; const ConstValType: Byte; out NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
-var ActualParamType, ch: byte;
+function ReadDataOpenArray(i: integer; ConstDataSize: integer; const ConstValType: TDataType; out NumAllocElements: cardinal; StaticData: Boolean; Add: Boolean = false): integer;
+var ActualParamType: TDataType;
+    ch: byte;
     NumActualParams: cardinal;
     ConstVal: Int64;
 
@@ -14456,7 +14458,7 @@ var ActualParamType, ch: byte;
 // ----------------------------------------------------------------------------
 
 
-procedure SaveDataSegment(DataType: Byte);
+procedure SaveDataSegment(DataType: TDataType);
 begin
 
    if StaticData then
@@ -14464,10 +14466,10 @@ begin
    else
     SaveToDataSegment(ConstDataSize, ConstVal + ord(Add), DataType);
 
-   if DataType = TTokenKind.DATAORIGINOFFSET then
+   if DataType = TDataType.DATAORIGINOFFSET then
     inc(ConstDataSize, GetDataSize(TDataType.POINTERTOK) )
    else
-    inc(ConstDataSize, GetDataSize( TDataType.DataType] );
+    inc(ConstDataSize, GetDataSize( DataType ) );
 
 end;
 
@@ -14498,11 +14500,11 @@ begin
   end;
 
 
-  if (ConstValType in StringTypes + [CHARTOK, TTokenKind.STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
+  if (ConstValType in StringTypes + [TDataType.CHARTOK, TDataType.STRINGPOINTERTOK]) and (ActualParamType in IntegerTypes + RealTypes) then
     Error(i, TErrorCode.IllegalExpression);
 
 
-  if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = TDataType.CHARTOK) then
+  if (ConstValType in StringTypes + [TDataType.STRINGPOINTERTOK]) and (ActualParamType = TDataType.CHARTOK) then
    ErrorIncompatibleTypes(i, ActualParamType, ConstValType);
 
 
@@ -14520,14 +14522,14 @@ begin
 
   if ActualParamType = TTokenKind.DATAORIGINOFFSET then
 
-   SaveDataSegment(DATAORIGINOFFSET)
+   SaveDataSegment(TTokenKind.DATAORIGINOFFSET)
 
   else begin
 
    if ConstValType in IntegerTypes then begin
 
     if GetCommonConstType(i, ConstValType, ActualParamType, (ActualParamType in RealTypes + Pointers)) then
-     WarningForRangeCheckError(i, 0, ConstVal, ConstValType);
+     WarningForRangeCheckError(i, ConstVal, ConstValType);
 
    end else
     GetCommonConstType(i, ConstValType, ActualParamType);
@@ -14583,7 +14585,7 @@ begin
   else
   repeat
 
-    if Tok[i + 1].Kind = EVALTOK then
+    if Tok[i + 1].Kind = TTokenKind.EVALTOK then
       doEvaluate(evaluationContext)
     else
       SaveData;
@@ -14650,9 +14652,10 @@ end;	//GenerateLocal
 // ----------------------------------------------------------------------------
 
 
-procedure FormalParameterList(var i: integer; var NumParams: integer; var Param: TParamList; out Status: word; IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte);
+procedure FormalParameterList(var i: integer; var NumParams: integer; var Param: TParamList; out Status: word; IsNestedFunction: Boolean; out NestedFunctionResultType: TDataType; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: TDataType);
 var ListPassMethod: TParameterPassingMethod;
-    NumVarOfSameType, VarTYpe, AllocElementType: byte;
+    NumVarOfSameType: byte;
+    VarTYpe, AllocElementType: TDataType;
     NumAllocElements: cardinal;
     VarOfSameTypeIndex: integer;
     VarOfSameType: TVariableList;
@@ -14675,12 +14678,12 @@ begin
 
 	  ListPassMethod := TParameterPassingMethod.VALPASSING;
 
-	  if Tok[i + 1].Kind = CONSTTOK then
+	  if Tok[i + 1].Kind = TTokenKind.CONSTTOK then
 	    begin
 	    ListPassMethod := TParameterPassingMethod.CONSTPASSING;
 	    inc(i);
 	    end
-	  else if Tok[i + 1].Kind = VARTOK then
+	  else if Tok[i + 1].Kind = TTokenKind.VARTOK then
 	    begin
 	    ListPassMethod := TParameterPassingMethod.VARPASSING;
 	    inc(i);
@@ -14699,9 +14702,9 @@ begin
 	    until Tok[i].Kind <> TTokenKind.COMMATOK;
 
 
-	  VarType := 0;							// UNTYPED
+	  VarType := TDataType.UNTYPETOK;
 	  NumAllocElements := 0;
-	  AllocElementType := 0;
+	  AllocElementType := TDataType.UNTYPETOK;
 
 	  if (ListPassMethod in [TParameterPassingMethod.CONSTPASSING, TParameterPassingMethod.VARPASSING])  and (Tok[i].Kind <> TTokenKind.COLONTOK) then begin
 
@@ -14781,59 +14784,59 @@ begin
 	CheckTok(i, TTokenKind.SEMICOLONTOK);
 
 
-	while Tok[i + 1].Kind in [OVERLOADTOK, ASSEMBLERTOK, FORWARDTOK, REGISTERTOK, INTERRUPTTOK, PASCALTOK, STDCALLTOK, INLINETOK, KEEPTOK] do begin
+	while Tok[i + 1].Kind in [TTokenKind.OVERLOADTOK, TTokenKind.ASSEMBLERTOK, TTokenKind.FORWARDTOK, TTokenKind.REGISTERTOK, TTokenKind.INTERRUPTTOK, TTokenKind.PASCALTOK, TTokenKind.STDCALLTOK, TTokenKind.INLINETOK, TTokenKind.KEEPTOK] do begin
 
 	  case Tok[i + 1].Kind of
 
-	    OVERLOADTOK: begin
+	    TTokenKind.OVERLOADTOK: begin
 			   SetModifierBit(TModifierCode.mOverload, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-	   ASSEMBLERTOK: begin
+	   TTokenKind.ASSEMBLERTOK: begin
 			   SetModifierBit(TModifierCode.mAssembler, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-{	     FORWARDTOK: begin
+{	     TTokenKind.FORWARDTOK: begin
 			   SetModifierBit(TModifierCode.mForward, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
  }
-	    REGISTERTOK: begin
+	    TTokenKind.REGISTERTOK: begin
 			   SetModifierBit(TModifierCode.mRegister, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-	      STDCALLTOK: begin
+	      TTokenKind.STDCALLTOK: begin
 			   SetModifierBit(TModifierCode.mStdCall, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-	      INLINETOK: begin
+	      TTokenKind.INLINETOK: begin
 			   SetModifierBit(TModifierCode.mInline, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-	   INTERRUPTTOK: begin
+	   TTokenKind.INTERRUPTTOK: begin
 			   SetModifierBit(TModifierCode.mInterrupt, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-	      PASCALTOK: begin
+	      TTokenKind.PASCALTOK: begin
 			   SetModifierBit(TModifierCode.mPascal, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 			 end;
 
-             KEEPTOK: begin
+             TTokenKind.KEEPTOK: begin
 			   SetModifierBit(TModifierCode.mKeep, Status);
 			   inc(i);
 			   CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
@@ -14857,7 +14860,7 @@ begin
 
 // Search for unresolved forward references
 for TypeIndex := 1 to NumIdent do
-  if (Ident[TypeIndex].AllocElementType = FORWARDTYPE) and
+  if (Ident[TypeIndex].AllocElementType = TDataType.FORWARDTYPE) and
      (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then begin
 
      Name := Ident[GetIdentIndex(Tok[Ident[TypeIndex].NumAllocElements].Name)].Name;
@@ -14880,7 +14883,7 @@ for TypeIndex := 1 to NumIdent do
 
 // Search for unresolved forward references
 for TypeIndex := 1 to NumIdent do
-  if (Ident[TypeIndex].AllocElementType = FORWARDTYPE) and
+  if (Ident[TypeIndex].AllocElementType = TDataType.FORWARDTYPE) and
      (Ident[TypeIndex].Block = BlockStack[BlockStackTop]) then
 
       if typ then
@@ -14895,7 +14898,7 @@ end;	//CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
+procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: TDataType; NumAllocElements: cardinal; isAbsolute: Boolean);
 var tmpVarDataSize_, ParamIndex{, idx}: integer;
 begin
 
@@ -14975,7 +14978,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean; FunctionResultType: Byte; FunctionNumAllocElements: cardinal = 0; FunctionAllocElementType: byte = 0): Integer;
+function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean; FunctionResultType: TDataType; FunctionNumAllocElements: cardinal = 0; FunctionAllocElementType: TDataType = TDataType.UNTYPETOK): Integer;
 var
   VarOfSameType: TVariableList;
   Param: TParamList;
@@ -15069,7 +15072,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
    asm65(#9'sta ' + TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name);
    asm65(#9'sty ' + TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name + '+1');
 
-   DefineIdent(i, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name, VARIABLE,  TTokenKind.WORDTOK, 0 , 0, 0);
+   DefineIdent(i, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[0].Name, VARIABLE,  TTokenKind.WORDTOK, 0 , TDataType.UNTYPETOK, 0);
    Ident[NumIdent].PassMethod := TParameterPassingMethod.VARPASSING;
    Ident[NumIdent].AllocElementType := TTokenKind.WORDTOK;
 //  end;
@@ -15077,7 +15080,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
  NumAllocElements := 0;
 
  for ParamIndex := 1 to TypeArray[Ident[BlockIdentIndex].ObjectIndex].NumFields do
-  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = 0 then begin
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = TFieldKind.UNTYPETOK then begin
 
 
     if NumAllocElements > 0 then
@@ -15108,7 +15111,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
       if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements shr 16 > 0 then
        NumAllocElements:=(NumAllocElements * (TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements shr 16));
 
-      NumAllocElements := NumAllocElements * GetDataSize( TDataType. TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType ];
+      NumAllocElements := NumAllocElements * GetDataSize( TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].AllocElementType );
 
    end else
     case TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType of
@@ -15116,7 +15119,8 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then begin
      TDataType.STRINGPOINTERTOK: NumAllocElements := TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements;
 	    TDataType.RECORDTOK: NumAllocElements := ObjectRecordSize(TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].NumAllocElements);
     else
-      NumAllocElements := GetDataSize( TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex).DataType ];
+      NumAllocElements := GetDataSize( TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType );
+
     end;
 
   end;
@@ -15288,7 +15292,7 @@ for ParamIndex := NumParams downto 1 do
 
 // Load ONE parameters from the stack
 if (Ident[BlockIdentIndex].ObjectIndex = 0) then
- if (yes = false) and (NumParams = 1) and (GetDataSize( TDataType.Param[1].DataType] = 1) and (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then asm65(#9'sta ' + Param[1].Name);
+ if (yes = false) and (NumParams = 1) and (GetDataSize( Param[1].DataType) = 1) and (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then asm65(#9'sta ' + Param[1].Name);
 
 
 // Load parameters from the stack
@@ -15300,7 +15304,7 @@ if yes then begin
 	if Param[ParamIndex].PassMethod = TParameterPassingMethod.VARPASSING then
 	  GenerateAssignment(ASPOINTER, GetDataSize(TDataType.POINTERTOK), 0, Param[ParamIndex].Name)
 	else
-	  GenerateAssignment(ASPOINTER, GetDataSize( TDataType.Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	  GenerateAssignment(ASPOINTER, GetDataSize( Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
 
 
   	if (Param[ParamIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
@@ -15323,7 +15327,7 @@ if yes then begin
 
     	   asm65(':move');
     	   asm65(Param[ParamIndex].Name);
-    	   asm65(IntToStr(integer(NumAllocElements * GetDataSize( TDataType.Param[ParamIndex].AllocElementType])));
+    	   asm65(IntToStr(integer(NumAllocElements * GetDataSize( Param[ParamIndex].AllocElementType))));
    	end;
 
   end else begin
@@ -15351,7 +15355,7 @@ if yes then begin
 	  if Param[ParamIndex].PassMethod = TParameterPassingMethod.VARPASSING then
 	    GenerateAssignment(ASPOINTER, GetDataSize(TDataType.POINTERTOK), 0, Param[ParamIndex].Name)
 	  else
-	    GenerateAssignment(ASPOINTER, GetDataSize( TDataType.Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	    GenerateAssignment(ASPOINTER, GetDataSize( Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
   end;
 
   if (Paramindex <> NumParams) then asm65(#9'jmi @main');
@@ -15379,7 +15383,7 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
 
   if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType = TDataType.RECORDTOK then ConstVal:=0;
 
-  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType in [POINTERTOK, TTokenKind.STRINGPOINTERTOK] then
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType in [TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK] then
 
   DefineIdent(i, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,
 	      VARIABLE, TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType,
@@ -15396,10 +15400,10 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
 
   VarDataSize := tmpVarDataSize + GetDataSize(TDataType.POINTERTOK);
 
-  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = OBJECTVARIABLE then begin
+  if TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Kind = TFieldKind.OBJECTVARIABLE then begin
    Ident[NumIdent].Value := ConstVal + DATAORIGIN;
 
-   inc(ConstVal, GetDataSize( TDataType.TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType]);
+   inc(ConstVal, GetDataSize( TypeArray[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType));
 
    VarDataSize := tmpVarDataSize;
   end;
@@ -15414,7 +15418,7 @@ if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezd
 
 
 while Tok[i].Kind in
- [CONSTTOK, TTokenKind.TYPETOK, VARTOK, LABELTOK, TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, PROGRAMTOK, USESTOK, LIBRARYTOK, EXPORTSTOK,
+ [TTokenKind.CONSTTOK, TTokenKind.TYPETOK, TTokenKind.VARTOK, TTokenKind.LABELTOK, TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.PROGRAMTOK, TTokenKind.USESTOK, TTokenKind.LIBRARYTOK, TTokenKind.EXPORTSTOK,
   CONSTRUCTORTOK, DESTRUCTORTOK, LINKTOK,
   UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF, LOOPUNROLLTOK, NOLOOPUNROLLTOK,
   PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
@@ -15570,7 +15574,7 @@ while Tok[i].Kind in
   end;
 
 
-  if Tok[i].Kind = EXPORTSTOK then begin
+  if Tok[i].Kind = TTokenKind.EXPORTSTOK then begin
 
    inc(i);
 
@@ -15633,9 +15637,9 @@ while Tok[i].Kind in
 
 
 
-  if Tok[i].Kind = LIBRARYTOK then begin       // na samym poczatku listingu
+  if Tok[i].Kind = TTokenKind.LIBRARYTOK then begin       // na samym poczatku listingu
 
-   if LIBRARYTOK_USE then CheckTok(i, BEGINTOK);
+   if TTokenKind.LIBRARYTOK_USE then CheckTok(i, BEGINTOK);
 
    CheckTok(i + 1, TTokenKind.IDENTTOK);
 
@@ -15656,14 +15660,14 @@ while Tok[i].Kind in
 
    inc(i, 2);
 
-   LIBRARYTOK_USE := true;
+   TTokenKind.LIBRARYTOK_USE := true;
   end;
 
 
 
-  if Tok[i].Kind = PROGRAMTOK then begin       // na samym poczatku listingu
+  if Tok[i].Kind = TTokenKind.PROGRAMTOK then begin       // na samym poczatku listingu
 
-   if PROGRAMTOK_USE then CheckTok(i, BEGINTOK);
+   if TTokenKind.PROGRAMTOK_USE then CheckTok(i, BEGINTOK);
 
    CheckTok(i + 1, TTokenKind.IDENTTOK);
 
@@ -15704,30 +15708,30 @@ while Tok[i].Kind in
 
    inc(i, 2);
 
-   PROGRAMTOK_USE := true;
+   TTokenKind.PROGRAMTOK_USE := true;
   end;
 
 
-  if Tok[i].Kind = USESTOK then begin	  // co najwyzej po PROGRAM
+  if Tok[i].Kind = TTokenKind.USESTOK then begin	  // co najwyzej po PROGRAM
 
-  if LIBRARYTOK_USE then begin
+  if TTokenKind.LIBRARYTOK_USE then begin
 
    j:=i-1;
 
    while Tok[j].Kind in [SEMICOLONTOK, TTokenKind.IDENTTOK, TTokenKind.COLONTOK, TTokenKind.INTNUMBERTOK] do dec(j);
 
-   if Tok[j].Kind <> LIBRARYTOK then
+   if Tok[j].Kind <> TTokenKind.LIBRARYTOK then
     CheckTok(i, BEGINTOK);
 
   end;
 
-  if PROGRAMTOK_USE then begin
+  if TTokenKind.PROGRAMTOK_USE then begin
 
    j:=i-1;
 
    while Tok[j].Kind in [SEMICOLONTOK, TTokenKind.CPARTOK, TTokenKind.OPARTOK, TTokenKind.IDENTTOK, TTokenKind.COMMATOK, TTokenKind.COLONTOK, TTokenKind.INTNUMBERTOK] do dec(j);
 
-   if Tok[j].Kind <> PROGRAMTOK then
+   if Tok[j].Kind <> TTokenKind.PROGRAMTOK then
     CheckTok(i, BEGINTOK);
 
   end;
@@ -15823,7 +15827,7 @@ while Tok[i].Kind in
 //				   LABEL
 // -----------------------------------------------------------------------------
 
-  if Tok[i].Kind = LABELTOK then begin
+  if Tok[i].Kind = TTokenKind.LABELTOK then begin
 
    inc(i);
 
@@ -15840,13 +15844,13 @@ while Tok[i].Kind in
    until Tok[i].Kind <> TTokenKind.IDENTTOK;
 
    i := i + 1;
-  end;	// if LABELTOK
+  end;	// if TTokenKind.LABELTOK
 
 // -----------------------------------------------------------------------------
 //				   CONST
 // -----------------------------------------------------------------------------
 
-  if Tok[i].Kind = CONSTTOK then
+  if Tok[i].Kind = TTokenKind.CONSTTOK then
     begin
     repeat
 
@@ -16009,7 +16013,7 @@ while Tok[i].Kind in
     until Tok[i + 1].Kind <> TTokenKind.IDENTTOK;
 
     inc(i);
-    end;	// if CONSTTOK
+    end;	// if TTokenKind.CONSTTOK
 
 // -----------------------------------------------------------------------------
 //				TYPE
@@ -16056,7 +16060,7 @@ while Tok[i].Kind in
 //				  VAR
 // -----------------------------------------------------------------------------
 
-  if Tok[i].Kind = VARTOK then
+  if Tok[i].Kind = TTokenKind.VARTOK then
     begin
 
     isVolatile := FALSE;
@@ -16161,7 +16165,7 @@ while Tok[i].Kind in
       end;
 
 
-      if Tok[i + 1].Kind = REGISTERTOK then begin
+      if Tok[i + 1].Kind = TTokenKind.REGISTERTOK then begin
 
 	if NumVarOfSameType > 1 then
 	 Error(i + 1, 'REGISTER can only be associated to one variable');
@@ -16229,7 +16233,7 @@ while Tok[i].Kind in
 
 	varPassMethod := TParameterPassingMethod.UNDEFINED;
 
-	if (Tok[i+1].Kind = TTokenKind.IDENTTOK) and (Ident[GetIdentIndex(Tok[i+1].Name)].Kind = VARTOK) then begin
+	if (Tok[i+1].Kind = TTokenKind.IDENTTOK) and (Ident[GetIdentIndex(Tok[i+1].Name)].Kind = TTokenKind.VARTOK) then begin
 	 ConstVal := Ident[GetIdentIndex(Tok[i+1].Name)].Value - DATAORIGIN;
 
 	 varPassMethod := Ident[GetIdentIndex(Tok[i+1].Name)].PassMethod;
@@ -16579,7 +16583,7 @@ while Tok[i].Kind in
     CheckForwardResolutions(false);								// issue #126 fixed
 
     i := i + 1;
-    end;// if VARTOK
+    end;// if TTokenKind.VARTOK
 
 
   if Tok[i].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
@@ -16764,7 +16768,7 @@ if not isAsm then begin
   GenerateDeclarationEpilog;  // Make jump to block entry point
 
   if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
-   if LIBRARYTOK_USE and (Tok[i].Kind <> BEGINTOK) then
+   if TTokenKind.LIBRARYTOK_USE and (Tok[i].Kind <> BEGINTOK) then
 
      inc(i)
 
@@ -17102,7 +17106,7 @@ if DataSegmentUse then begin
 
   DataSegmentSize := VarDataSize;
 
-  if LIBRARYTOK_USE = FALSE then
+  if TTokenKind.LIBRARYTOK_USE = FALSE then
    for j := VarDataSize - 1 downto 0 do
     if DataSegment[j] <> 0 then begin DataSegmentSize := j+1; Break end;
 
@@ -17146,7 +17150,7 @@ end;{ else
 }
 
 
-if LIBRARYTOK_USE then begin
+if TTokenKind.LIBRARYTOK_USE then begin
 
   asm65;
   asm65('PROGRAMSTACK');
@@ -17651,10 +17655,10 @@ begin
  optyFOR2 := '';
  optyFOR3 := '';
 
- LIBRARY_USE := LIBRARYTOK_USE;
+ LIBRARY_USE := TTokenKind.LIBRARYTOK_USE;
 
- LIBRARYTOK_USE := FALSE;
- PROGRAMTOK_USE := FALSE;
+ TTokenKind.LIBRARYTOK_USE := FALSE;
+ TTokenKind.PROGRAMTOK_USE := FALSE;
  INTERFACETOK_USE := FALSE;
  PublicSection := TRUE;
 
