@@ -36,7 +36,7 @@
 	      asm65(#9'jmp l_' + IntToHex(CodePosStack[CodePosStackTop]+3, 4));
 
 
-	      CheckTok(j + 1, DOTOK);
+	      CheckTok(j + 1, TTokenKind.DOTOK);
 
 	      Inc(CodePosStackTop);
 	      CodePosStack[CodePosStackTop] := CodeSize;

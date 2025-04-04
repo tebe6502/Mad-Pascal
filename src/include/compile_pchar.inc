@@ -188,7 +188,7 @@
 		     end;
 }
 		 else
-		    GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		    GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		 end;// case IndirectionLevel
 
@@ -213,7 +213,7 @@
 			asm65(#9'sta @move.src+1');
 
 
-		        if (ExpressionType = PCHARTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then
+		        if (ExpressionType = TDataType.PCHARTOK) and (Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK) then
 			 asm65(#9'@movePCHAR ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1))
 			else
 			if Ident[IdentIndex].DataType = TTokenKind.POINTERTOK then

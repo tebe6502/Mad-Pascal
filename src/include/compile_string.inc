@@ -7,7 +7,7 @@
 
  // Character assignment to pointer  f:='a'
 
-	CHARLITERALTOK:
+	TTokenKind.CHARLITERALTOK:
 		begin
 
 		 Ident[IdentIndex].isInit := true;
@@ -47,7 +47,7 @@
 
  // String assignment to pointer  f:='string'
 
-	STRINGLITERALTOK:
+	TTokenKind.STRINGLITERALTOK:
 		begin
 
 		Ident[IdentIndex].isInit := true;
@@ -81,7 +81,7 @@
 		     asm65(#9'@move #CODEORIGIN+$'+IntToHex(Tok[i + 2].StrAddress - CODEORIGIN, 4)+' '+Ident[IdentIndex].Name+' #'+IntToStr(Succ(NumCharacters)));
 
 		   ASPOINTERTOARRAYORIGIN:
-		   GetCommonType(i + 1, CHARTOK, POINTERTOK);
+		   GetCommonType(i + 1, TDataType.CHARTOK, TDataType.POINTERTOK);
 
 		   ASPOINTER:
 		   begin
@@ -90,7 +90,7 @@
 		      asm65(#9'mva #$00 '+GetLocalName(IdentIndex, 'adr.'))
 		     else begin
 
-		      if Ident[IdentIndex].DataType = POINTERTOK then
+		      if Ident[IdentIndex].DataType = TDataType.POINTERTOK then
 //		       asm65(#9'@move #CODEORIGIN+$'+IntToHex(Tok[i + 2].StrAddress - CODEORIGIN + 1, 4)+' #'+GetLocalName(IdentIndex, 'adr.'){  Ident[IdentIndex].Name}+' #'+IntToStr(vlen))
 		       k := Tok[i + 2].StrAddress - CODEORIGIN + 1
 		      else
@@ -121,7 +121,7 @@
 		end;		// case STRINGLITERALTOK
 
 
-	IDENTTOK:
+	TTokenKind.IDENTTOK:
 		begin
 
 		 Ident[IdentIndex].isInit := true;
@@ -135,7 +135,7 @@
 
 //	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
 
-		if ExpressionType = CHARTOK then begin
+		if ExpressionType = TDataType.CHARTOK then begin
 
 		 case IndirectionLevel of
 
@@ -173,7 +173,7 @@
 		     end;
 
 		 else
-		    GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		    GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		 end;// case IndirectionLevel
 
@@ -188,7 +188,7 @@
 		    ASPOINTER, ASPOINTERTOPOINTER:
 		      begin
 
-		      	if Tok[i+3].Kind = DEREFERENCETOK then begin
+		      	if Tok[i+3].Kind = TTokenKind.DEREFERENCETOK then begin
 
 		          asm65(#9'mwy ' + GetLocalName(GetIdentIndex(Tok[i + 2].Name)) + ' :bp2');
 		          asm65(#9'ldy #$00');
@@ -210,10 +210,10 @@
 			end;
 
 
-		        if (ExpressionType = PCHARTOK) and (Ident[IdentIndex].DataType = STRINGPOINTERTOK) then
+		        if (ExpressionType = TDataType.PCHARTOK) and (Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK) then
 			 asm65(#9'@movePCHAR ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1))
 			else
-			if Ident[IdentIndex].DataType = POINTERTOK then
+			if Ident[IdentIndex].DataType = TDataType.POINTERTOK then
 			 asm65(#9'@moveSTRING_P ' + svar)
 			else
 			 asm65(#9'@moveSTRING ' + svar + ' #' + IntToStr(Ident[IdentIndex].NumAllocElements-1));
@@ -228,7 +228,7 @@
 		      end;
 
 		  else
-		   GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		   GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		  end;// case IndirectionLevel
 
