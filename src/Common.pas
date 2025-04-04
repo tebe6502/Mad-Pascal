@@ -632,6 +632,8 @@ var
 
 procedure ClearWordMemory(anArray: TWordMemory);
 
+function GetTokenKindName(tokenKind: TTokenKind): String;
+
 function GetDataSize(const dataType: TDataType): Byte;
 
 procedure AddDefine(const defineName: TDefineName);
@@ -685,6 +687,11 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 implementation
 
 uses Messages, Utilities;
+
+function GetTokenKindName(tokenKind: TTokenKind): String;
+begin
+  WriteStr(Result, tokenKind);
+end;
 
 function GetDataSize(const dataType: TDataType): Byte;
 begin
