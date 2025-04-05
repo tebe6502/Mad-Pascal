@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses StringUtilities, CommonTypes;
+uses StringUtilities, CommonTypes, Common; // TODO: Only use tokens and type
 
 // ----------------------------------------------------------------------------
 
@@ -13,13 +13,13 @@ procedure TokenizeProgram(UsesOn: Boolean = True);
 procedure TokenizeMacro(a: String; Line, Spaces: Integer);
 
 // For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
+procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Common, Messages, FileIO, Utilities;
+uses SysUtils, Messages, FileIO, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -76,20 +76,20 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetStandardToken(S: TString): Integer;
+function GetStandardToken(S: TString): TTokenKind;
 var
   i: Integer;
 begin
-Result := 0;
+Result := TTokenKind.UNTYPETOK;
 
 if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL' else
  if (S = 'UINT16') then S := 'WORD' else
   if (S = 'LONGINT') then S := 'INTEGER';
 
 for i := 1 to MAXTOKENNAMES do
-  if S = TokenSpelling[i] then
+  if S = TokenSpellings[i].spelling then
     begin
-    Result := i;
+    Result := TokenSpellings[i].TokenKind;
     Break;
     end;
 end;
@@ -187,7 +187,7 @@ end;	//AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: TInteger);
+procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
 
  Inc(NumTok);
@@ -247,7 +247,7 @@ var
   Tmp: Int64;
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2, ch_: Char;
-  CurToken: Byte;
+  CurToken: TTokenKind;
   StrParams: TStringArray;
 
 
@@ -272,13 +272,13 @@ var
 	 i := NumTok - 1;
 
 
-	 while Tok[i].Kind <> USESTOK do begin
+	 while Tok[i].Kind <> TTokenKind.USESTOK do begin
 
 
-	  if Tok[i].Kind = STRINGLITERALTOK then begin
+	  if Tok[i].Kind = TTokenKind.STRINGLITERALTOK then begin
 
-	   CheckTok(i - 1, INTOK);
-	   CheckTok(i - 2, IDENTTOK);
+	   CheckTok(i - 1, TTokenKind.INTOK);
+	   CheckTok(i - 2, TTokenKind.IDENTTOK);
 
 	   nam := '';
 
@@ -291,7 +291,7 @@ var
 
 	  end else begin
 
-	   CheckTok(i, IDENTTOK);
+	   CheckTok(i, TTokenKind.IDENTTOK);
 
 	   nam := FindFile(Tok[i].Name + '.pas', 'unit');
 
@@ -322,7 +322,7 @@ var
 	 Line := _line;
 	 UnitIndex := _uidx;
 
-	 if Tok[i - 1].Kind = COMMATOK then
+	 if Tok[i - 1].Kind = TTokenKind.COMMATOK then
 	  dec(i, 2)
 	 else
 	  dec(i);
@@ -443,7 +443,7 @@ var
 
 	    		if yes then AddToken(GetStandardToken(','), UnitIndex, Line, 1, 0);
 
-	    		AddToken(INTNUMBERTOK, UnitIndex, Line, 1, tmp);
+	    		AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, 1, tmp);
 
 	    		yes:=true;
 	   	end;
@@ -466,13 +466,13 @@ var
 	end;
 
 
-	procedure newMsgUser(Kind: Byte);
+	procedure newMsgUser(Kind: TTokenKind);
 	var k: integer;
 	begin
 
 		k:=High(msgUser);
 
-		AddToken(Kind, UnitIndex, Line, 1, k); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+		AddToken(Kind, UnitIndex, Line, 1, k); AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
 		SkipWhitespaces(d, i);
 
@@ -493,9 +493,9 @@ var
      if cmd='INCLUDE' then cmd:='I';
      if cmd='RESOURCE' then cmd:='R';
 
-     if cmd = 'WARNING' then newMsgUser(WARNINGTOK) else
-     if cmd = 'ERROR' then newMsgUser(ERRORTOK) else
-     if cmd = 'INFO' then newMsgUser(INFOTOK) else
+     if cmd = 'WARNING' then newMsgUser(TTokenKind.WARNINGTOK) else
+     if cmd = 'ERROR' then newMsgUser(TTokenKind.ERRORTOK) else
+     if cmd = 'INFO' then newMsgUser(TTokenKind.INFOTOK) else
 
      if cmd = 'MACRO+' then macros:=true else
      if cmd = 'MACRO-' then macros:=false else
@@ -511,8 +511,18 @@ var
 
      if cmd = 'I' then begin					// {$i filename}
 								// {$i+-} iocheck
-      if d[i]='+' then begin AddToken(IOCHECKON, UnitIndex, Line, 1, 0); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0) end else
-       if d[i]='-' then begin AddToken(IOCHECKOFF, UnitIndex, Line, 1, 0); AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0) end else
+          if d[i] = '+' then
+          begin
+            AddToken(TTokenKind.IOCHECKON, UnitIndex, Line, 1, 0);
+            AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+          end
+          else
+          if d[i] = '-' then
+          begin
+            AddToken(TTokenKind.IOCHECKOFF, UnitIndex, Line, 1, 0);
+            AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+          end
+          else
 	begin
 //	 AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
@@ -522,7 +532,7 @@ var
 
 	   s:=TimeToStr(Now);
 
-	   AddToken(STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0); Spaces:=0;
+	   AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0); Spaces:=0;
 	   DefineStaticString(NumTok, s);
 
 	 end else
@@ -530,7 +540,7 @@ var
 
 	   s:=DateToStr(Now);
 
-	   AddToken(STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0); Spaces:=0;
+	   AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0); Spaces:=0;
 	   DefineStaticString(NumTok, s);
 
 	 end else begin
@@ -572,7 +582,7 @@ var
           if s[length(s)] <> '"' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
               'Syntax error. Missing ''"'''));
 
-       AddToken(EVALTOK, UnitIndex, Line, 1, 0);
+       AddToken(TTokenKind.EVALTOK, UnitIndex, Line, 1, 0);
 
        DefineFilename(NumTok, s);
 
@@ -592,12 +602,12 @@ var
 
        s := GetStringUpperCase(d, i);
 
-       if s = 'LOOPUNROLL' then AddToken(LOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
-        if s= 'NOLOOPUNROLL' then AddToken(NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
+       if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
+        if s= 'NOLOOPUNROLL' then AddToken(TTokenKind.NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0) else
             Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
               'Illegal optimization specified "' + s + '"'));
 
-	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
+	AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0)
 
       end else
 
@@ -605,9 +615,9 @@ var
 
        s := GetStringUpperCase(d, i);
 
-       if s = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0) else
-        if s = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
-         if s = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0) else
+       if s = 'PROC' then AddToken(TTokenKind.PROCALIGNTOK, UnitIndex, Line, 1, 0) else
+        if s = 'LOOP' then AddToken(TTokenKind.LOOPALIGNTOK, UnitIndex, Line, 1, 0) else
+         if s = 'LINK' then AddToken(TTokenKind.LINKALIGNTOK, UnitIndex, Line, 1, 0) else
             Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective, 'Illegal alignment directive ''' + s + '''.'));
 
        SkipWhitespaces(d, i);
@@ -623,16 +633,16 @@ var
 	if Err > 0 then
 	 ErrorOrdinalExpExpected(NumTok);
 
-	GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
+	GetCommonConstType(NumTok, TTokenKind.WORDTOK, GetValueType(v));
 
 	Tok[NumTok].Value := v;
 
-	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0)
+	AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0)
 
       end else
 
       if (cmd = 'UNITPATH') then begin			// {$unitpath path1;path2;...}
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+       AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        repeat
 
@@ -654,7 +664,7 @@ var
       end else
 
       if (cmd = 'LIBRARYPATH') then begin			// {$librarypath path1;path2;...}
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+       AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        repeat
 
@@ -676,7 +686,7 @@ var
       end else
 
       if (cmd = 'R') and not (d[i] in ['+','-']) then begin	// {$R filename}
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+       AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        s := GetFilePath(d, i);
        AddResource( FindFile(s, 'resource') );
@@ -701,20 +711,20 @@ var
 *)
 
       if (cmd = 'L') or (cmd = 'LINK') then begin		// {$L filename} | {$LINK filename}
-       AddToken(LINKTOK, UnitIndex, Line, 1, 0);
+       AddToken(TTokenKind.LINKTOK, UnitIndex, Line, 1, 0);
 
        s := GetFilePath(d, i);
        s := FindFile(s, 'link object');
 
        DefineFilename(NumTok, s);
 
-       AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+       AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
        //dec(NumTok);
       end else
 
        if (cmd = 'F') or (cmd = 'FASTMUL') then begin		// {$F [page address]}
-	AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+	AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
 	s := GetNumber(d,i);
 
@@ -726,7 +736,7 @@ var
 	AddDefine('FASTMUL');
         AddDefines := NumDefines;
 
-	GetCommonConstType(NumTok, BYTETOK, GetValueType(FastMul));
+	GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
 
 	dec(NumTok);
        end else
@@ -1117,7 +1127,7 @@ var
 
       if Length(Num) > 0 then			// Number found
 	begin
-	AddToken(INTNUMBERTOK, UnitIndex, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
+	AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
 
 	if ch = '.' then			// Fractional part suspected
 	  begin
@@ -1134,7 +1144,7 @@ var
 	      SafeReadChar(ch);
 	      end;
 
-	    Tok[NumTok].Kind := FRACNUMBERTOK;
+	    Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
 
 	    if length(Num) > 17 then
 	      Tok[NumTok].FracValue := 0
@@ -1233,22 +1243,22 @@ var
 
 	  NumDefines := OldNumDefines;
 
-	  CurToken := MACRORELEASE;
+	  CurToken := TTokenKind.MACRORELEASE;
 	 end else begin
 
-	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
-	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
-	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
-	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
+	  if CurToken = TTokenKind.TEXTTOK then CurToken := TTokenKind.TEXTFILETOK;
+	  if CurToken = TTokenKind.FLOATTOK then CurToken := TTokenKind.SINGLETOK;
+	  if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
+	  if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
 
-	  if CurToken = EXTERNALTOK then ExternalFound := TRUE;
+	  if CurToken = TTokenKind.EXTERNALTOK then ExternalFound := TRUE;
 
-	  AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
+	  AddToken(TTokenKind.UNTYPETOK, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
 
 	 end;
 
 
-	 if CurToken = ASMTOK then begin
+	 if CurToken = TTokenKind.ASMTOK then begin
 
 	  Tok[NumTok].Kind := CurToken;
 	  Tok[NumTok].Value:= 0;
@@ -1340,21 +1350,21 @@ var
 
 	 end else begin
 
-	  if CurToken <> MACRORELEASE then
+	  if CurToken <> TTokenKind.MACRORELEASE then
 
-	   if CurToken <> 0 then begin		// Keyword found
+	   if CurToken <> TTokenKind.UNTYPETOK then begin		// Keyword found
 	     Tok[NumTok].Kind := CurToken;
 
-	     if CurToken = USESTOK then UsesFound := true;
+	     if CurToken = TTokenKind.USESTOK then UsesFound := true;
 
-	     if CurToken = UNITTOK then UnitFound := true;
+	     if CurToken = TTokenKind.UNITTOK then UnitFound := true;
 
 	     if testUnit and (UnitFound = false) then
-	      Error(NumTok, TMessage.Create(TErrorCode.UnitExpected, '"UNIT" expected but "' + TokenSpelling[CurToken] + '" found'));
+	      Error(NumTok, TMessage.Create(TErrorCode.UnitExpected, '"UNIT" expected but "' + GetTokenSpelling(CurToken) + '" found'));
 
 	   end
 	   else begin				// Identifier found
-	     Tok[NumTok].Kind := IDENTTOK;
+	     Tok[NumTok].Kind := TTokenKind.IDENTTOK;
 	     Tok[NumTok].Name := Text;
 	   end;
 
@@ -1501,9 +1511,9 @@ var
 
 	// if Length(Text) > 0 then
 	  if Length(Text) = 1 then begin
-	    AddToken(CHARLITERALTOK, UnitIndex, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
+	    AddToken(TTokenKind.CHARLITERALTOK, UnitIndex, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
 	  end else begin
-	    AddToken(STRINGLITERALTOK, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
+	    AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(Text) + Spaces, 0); Spaces:=0;
 
 	    if ExternalFound then
 	      DefineFilename(NumTok, Text)
@@ -1547,7 +1557,7 @@ var
 	end else
 	 if (ch='.') and (ch2 in ['0'..'9']) then begin
 
-	   AddToken(INTNUMBERTOK, UnitIndex, Line, 0, 0);
+	   AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, 0, 0);
 
 	   Frac := '0.';		  // Fractional part found
 
@@ -1556,7 +1566,7 @@ var
 	    SafeReadChar(ch2);
 	   end;
 
-	   Tok[NumTok].Kind := FRACNUMBERTOK;
+	   Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
 	   Tok[NumTok].FracValue := StrToFloat(Frac);
 	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
 
@@ -1597,8 +1607,8 @@ var
      begin
        if Text='END.' then
          begin
-           AddToken(ENDTOK, UnitIndex, Line, 3, 0);
-           AddToken(DOTTOK, UnitIndex, Line, 1, 0);
+           AddToken(TTokenKind.ENDTOK, UnitIndex, Line, 3, 0);
+           AddToken(TTokenKind.DOTTOK, UnitIndex, Line, 1, 0);
          end
        else
          begin
@@ -1619,7 +1629,7 @@ begin
   Line := 1;
   Spaces := 0;
 
-  if UnitIndex > 1 then AddToken(UNITBEGINTOK, UnitIndex, Line, 0, 0);
+  if UnitIndex > 1 then AddToken(TTokenKind.UNITBEGINTOK, UnitIndex, Line, 0, 0);
 
 //  writeln('>',UnitIndex,',',UnitName[UnitIndex].Name);
 
@@ -1629,170 +1639,178 @@ begin
 
   if UnitIndex > 1 then begin
 
-    CheckTok(NumTok, DOTTOK);
-    CheckTok(NumTok - 1, ENDTOK);
+    CheckTok(NumTok, TTokenKind.DOTTOK);
+    CheckTok(NumTok - 1, TTokenKind.ENDTOK);
 
     dec(NumTok, 2);
 
-    AddToken(UNITENDTOK, UnitIndex, Tok[NumTok+1].Line - 1, 0, 0);
+    AddToken(TTokenKind.UNITENDTOK, UnitIndex, Tok[NumTok+1].Line - 1, 0, 0);
   end else
-   AddToken(EOFTOK, UnitIndex, Line, 0, 0);
+   AddToken(TTokenKind.EOFTOK, UnitIndex, Line, 0, 0);
 
 end;
 
+  procedure AddTokenSpelling(t: TTokenKind; s: String);
+  var
+    tokenSpelling: TTokenSpelling;
+   begin
+    tokenSpelling.TokenKind := t;
+    tokenSpelling.Spelling := s;
+
+    TokenSpellings[Ord(tokenSpelling.TokenKind)]:=tokenSpelling;
+  end;
 
 begin
-// Token spelling definition
+  // Token spelling definition
+  AddTokenSpelling(TTokenKind.CONSTTOK, 'CONST');
+  AddTokenSpelling(TTokenKind.TYPETOK, 'TYPE');
+  AddTokenSpelling(TTokenKind.VARTOK, 'VAR');
+  AddTokenSpelling(TTokenKind.PROCEDURETOK, 'PROCEDURE');
+  AddTokenSpelling(TTokenKind.FUNCTIONTOK, 'FUNCTION');
+  AddTokenSpelling(TTokenKind.OBJECTTOK, 'OBJECT');
+  AddTokenSpelling(TTokenKind.PROGRAMTOK, 'PROGRAM');
+  AddTokenSpelling(TTokenKind.LIBRARYTOK, 'LIBRARY');
+  AddTokenSpelling(TTokenKind.EXPORTSTOK, 'EXPORTS');
+  AddTokenSpelling(TTokenKind.EXTERNALTOK, 'EXTERNAL');
+  AddTokenSpelling(TTokenKind.UNITTOK, 'UNIT');
+  AddTokenSpelling(TTokenKind.INTERFACETOK, 'INTERFACE');
+  AddTokenSpelling(TTokenKind.IMPLEMENTATIONTOK, 'IMPLEMENTATION');
+  AddTokenSpelling(TTokenKind.INITIALIZATIONTOK, 'INITIALIZATION');
+  AddTokenSpelling(TTokenKind.CONSTRUCTORTOK, 'CONSTRUCTOR');
+  AddTokenSpelling(TTokenKind.DESTRUCTORTOK, 'DESTRUCTOR');
+  AddTokenSpelling(TTokenKind.OVERLOADTOK, 'OVERLOAD');
+  AddTokenSpelling(TTokenKind.ASSEMBLERTOK, 'ASSEMBLER');
+  AddTokenSpelling(TTokenKind.FORWARDTOK, 'FORWARD');
+  AddTokenSpelling(TTokenKind.REGISTERTOK, 'REGISTER');
+  AddTokenSpelling(TTokenKind.INTERRUPTTOK, 'INTERRUPT');
+  AddTokenSpelling(TTokenKind.PASCALTOK, 'PASCAL');
+  AddTokenSpelling(TTokenKind.STDCALLTOK, 'STDCALL');
+  AddTokenSpelling(TTokenKind.INLINETOK, 'INLINE');
+  AddTokenSpelling(TTokenKind.KEEPTOK, 'KEEP');
 
-TokenSpelling[CONSTTOK	] := 'CONST';
-TokenSpelling[TYPETOK	] := 'TYPE';
-TokenSpelling[VARTOK		] := 'VAR';
-TokenSpelling[PROCEDURETOK	] := 'PROCEDURE';
-TokenSpelling[FUNCTIONTOK	] := 'FUNCTION';
-TokenSpelling[OBJECTTOK	] := 'OBJECT';
-TokenSpelling[PROGRAMTOK	] := 'PROGRAM';
-TokenSpelling[LIBRARYTOK	] := 'LIBRARY';
-TokenSpelling[EXPORTSTOK	] := 'EXPORTS';
-TokenSpelling[EXTERNALTOK	] := 'EXTERNAL';
-TokenSpelling[UNITTOK	] := 'UNIT';
-TokenSpelling[INTERFACETOK	] := 'INTERFACE';
-TokenSpelling[IMPLEMENTATIONTOK] := 'IMPLEMENTATION';
-TokenSpelling[INITIALIZATIONTOK] := 'INITIALIZATION';
-TokenSpelling[CONSTRUCTORTOK ] := 'CONSTRUCTOR';
-TokenSpelling[DESTRUCTORTOK  ] := 'DESTRUCTOR';
-TokenSpelling[OVERLOADTOK	] := 'OVERLOAD';
-TokenSpelling[ASSEMBLERTOK	] := 'ASSEMBLER';
-TokenSpelling[FORWARDTOK	] := 'FORWARD';
-TokenSpelling[REGISTERTOK	] := 'REGISTER';
-TokenSpelling[INTERRUPTTOK	] := 'INTERRUPT';
-TokenSpelling[PASCALTOK	] := 'PASCAL';
-TokenSpelling[STDCALLTOK	] := 'STDCALL';
-TokenSpelling[INLINETOK      ] := 'INLINE';
-TokenSpelling[KEEPTOK        ] := 'KEEP';
+  AddTokenSpelling(TTokenKind.ASSIGNFILETOK, 'ASSIGN');
+  AddTokenSpelling(TTokenKind.RESETTOK, 'RESET');
+  AddTokenSpelling(TTokenKind.REWRITETOK, 'REWRITE');
+  AddTokenSpelling(TTokenKind.APPENDTOK, 'APPEND');
+  AddTokenSpelling(TTokenKind.BLOCKREADTOK, 'BLOCKREAD');
+  AddTokenSpelling(TTokenKind.BLOCKWRITETOK, 'BLOCKWRITE');
+  AddTokenSpelling(TTokenKind.CLOSEFILETOK, 'CLOSE');
 
-TokenSpelling[ASSIGNFILETOK	] := 'ASSIGN';
-TokenSpelling[RESETTOK	] := 'RESET';
-TokenSpelling[REWRITETOK	] := 'REWRITE';
-TokenSpelling[APPENDTOK	] := 'APPEND';
-TokenSpelling[BLOCKREADTOK	] := 'BLOCKREAD';
-TokenSpelling[BLOCKWRITETOK	] := 'BLOCKWRITE';
-TokenSpelling[CLOSEFILETOK	] := 'CLOSE';
-
-TokenSpelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
-TokenSpelling[SIZEOFRESOURCETOK] := 'SIZEOFRESOURCE';
+  AddTokenSpelling(TTokenKind.GETRESOURCEHANDLETOK, 'GETRESOURCEHANDLE');
+  AddTokenSpelling(TTokenKind.SIZEOFRESOURCETOK, 'SIZEOFRESOURCE');
 
 
-TokenSpelling[FILETOK	] := 'FILE';
-TokenSpelling[TEXTFILETOK	] := 'TEXTFILE';
-TokenSpelling[SETTOK		] := 'SET';
-TokenSpelling[PACKEDTOK	] := 'PACKED';
-TokenSpelling[VOLATILETOK	] := 'VOLATILE';
-TokenSpelling[STRIPEDTOK	] := 'STRIPED';
-TokenSpelling[LABELTOK	] := 'LABEL';
-TokenSpelling[GOTOTOK	] := 'GOTO';
-TokenSpelling[INTOK		] := 'IN';
-TokenSpelling[RECORDTOK	] := 'RECORD';
-TokenSpelling[CASETOK	] := 'CASE';
-TokenSpelling[BEGINTOK	] := 'BEGIN';
-TokenSpelling[ENDTOK		] := 'END';
-TokenSpelling[IFTOK		] := 'IF';
-TokenSpelling[THENTOK	] := 'THEN';
-TokenSpelling[ELSETOK	] := 'ELSE';
-TokenSpelling[WHILETOK	] := 'WHILE';
-TokenSpelling[DOTOK		] := 'DO';
-TokenSpelling[REPEATTOK	] := 'REPEAT';
-TokenSpelling[UNTILTOK	] := 'UNTIL';
-TokenSpelling[FORTOK		] := 'FOR';
-TokenSpelling[TOTOK		] := 'TO';
-TokenSpelling[DOWNTOTOK	] := 'DOWNTO';
-TokenSpelling[ASSIGNTOK	] := ':=';
-TokenSpelling[WRITETOK	] := 'WRITE';
-TokenSpelling[WRITELNTOK	] := 'WRITELN';
-TokenSpelling[SIZEOFTOK	] := 'SIZEOF';
-TokenSpelling[LENGTHTOK	] := 'LENGTH';
-TokenSpelling[HIGHTOK	] := 'HIGH';
-TokenSpelling[LOWTOK		] := 'LOW';
-TokenSpelling[INTTOK		] := 'INT';
-TokenSpelling[FRACTOK	] := 'FRAC';
-TokenSpelling[TRUNCTOK	] := 'TRUNC';
-TokenSpelling[ROUNDTOK	] := 'ROUND';
-TokenSpelling[ODDTOK		] := 'ODD';
+  AddTokenSpelling(TTokenKind.FILETOK, 'FILE');
+  AddTokenSpelling(TTokenKind.TEXTFILETOK, 'TEXTFILE');
+  AddTokenSpelling(TTokenKind.SETTOK, 'SET');
+  AddTokenSpelling(TTokenKind.PACKEDTOK, 'PACKED');
+  AddTokenSpelling(TTokenKind.VOLATILETOK, 'VOLATILE');
+  AddTokenSpelling(TTokenKind.STRIPEDTOK, 'STRIPED');
+  AddTokenSpelling(TTokenKind.LABELTOK, 'LABEL');
+  AddTokenSpelling(TTokenKind.GOTOTOK, 'GOTO');
+  AddTokenSpelling(TTokenKind.INTOK, 'IN');
+  AddTokenSpelling(TTokenKind.RECORDTOK, 'RECORD');
+  AddTokenSpelling(TTokenKind.CASETOK, 'CASE');
+  AddTokenSpelling(TTokenKind.BEGINTOK, 'BEGIN');
+  AddTokenSpelling(TTokenKind.ENDTOK, 'END');
+  AddTokenSpelling(TTokenKind.IFTOK, 'IF');
+  AddTokenSpelling(TTokenKind.THENTOK, 'THEN');
+  AddTokenSpelling(TTokenKind.ELSETOK, 'ELSE');
+  AddTokenSpelling(TTokenKind.WHILETOK, 'WHILE');
+  AddTokenSpelling(TTokenKind.DOTOK, 'DO');
+  AddTokenSpelling(TTokenKind.REPEATTOK, 'REPEAT');
+  AddTokenSpelling(TTokenKind.UNTILTOK, 'UNTIL');
+  AddTokenSpelling(TTokenKind.FORTOK, 'FOR');
+  AddTokenSpelling(TTokenKind.TOTOK, 'TO');
+  AddTokenSpelling(TTokenKind.DOWNTOTOK, 'DOWNTO');
+  AddTokenSpelling(TTokenKind.ASSIGNTOK, ':=');
+  AddTokenSpelling(TTokenKind.WRITETOK, 'WRITE');
+  AddTokenSpelling(TTokenKind.WRITELNTOK, 'WRITELN');
+  AddTokenSpelling(TTokenKind.SIZEOFTOK, 'SIZEOF');
+  AddTokenSpelling(TTokenKind.LENGTHTOK, 'LENGTH');
+  AddTokenSpelling(TTokenKind.HIGHTOK, 'HIGH');
+  AddTokenSpelling(TTokenKind.LOWTOK, 'LOW');
+  AddTokenSpelling(TTokenKind.INTTOK, 'INT');
+  AddTokenSpelling(TTokenKind.FRACTOK, 'FRAC');
+  AddTokenSpelling(TTokenKind.TRUNCTOK, 'TRUNC');
+  AddTokenSpelling(TTokenKind.ROUNDTOK, 'ROUND');
+  AddTokenSpelling(TTokenKind.ODDTOK, 'ODD');
 
-TokenSpelling[READLNTOK	] := 'READLN';
-TokenSpelling[HALTTOK	] := 'HALT';
-TokenSpelling[BREAKTOK	] := 'BREAK';
-TokenSpelling[CONTINUETOK	] := 'CONTINUE';
-TokenSpelling[EXITTOK	] := 'EXIT';
+  AddTokenSpelling(TTokenKind.READLNTOK, 'READLN');
+  AddTokenSpelling(TTokenKind.HALTTOK, 'HALT');
+  AddTokenSpelling(TTokenKind.BREAKTOK, 'BREAK');
+  AddTokenSpelling(TTokenKind.CONTINUETOK, 'CONTINUE');
+  AddTokenSpelling(TTokenKind.EXITTOK, 'EXIT');
 
-TokenSpelling[SUCCTOK	] := 'SUCC';
-TokenSpelling[PREDTOK	] := 'PRED';
+  AddTokenSpelling(TTokenKind.SUCCTOK, 'SUCC');
+  AddTokenSpelling(TTokenKind.PREDTOK, 'PRED');
 
-TokenSpelling[INCTOK		] := 'INC';
-TokenSpelling[DECTOK		] := 'DEC';
-TokenSpelling[ORDTOK		] := 'ORD';
-TokenSpelling[CHRTOK		] := 'CHR';
-TokenSpelling[ASMTOK		] := 'ASM';
-TokenSpelling[ABSOLUTETOK	] := 'ABSOLUTE';
-TokenSpelling[USESTOK	] := 'USES';
-TokenSpelling[LOTOK		] := 'LO';
-TokenSpelling[HITOK		] := 'HI';
-TokenSpelling[GETINTVECTOK	] := 'GETINTVEC';
-TokenSpelling[SETINTVECTOK	] := 'SETINTVEC';
-TokenSpelling[ARRAYTOK	] := 'ARRAY';
-TokenSpelling[OFTOK		] := 'OF';
-TokenSpelling[STRINGTOK	] := 'STRING';
+  AddTokenSpelling(TTokenKind.INCTOK, 'INC');
+  AddTokenSpelling(TTokenKind.DECTOK, 'DEC');
+  AddTokenSpelling(TTokenKind.ORDTOK, 'ORD');
+  AddTokenSpelling(TTokenKind.CHRTOK, 'CHR');
+  AddTokenSpelling(TTokenKind.ASMTOK, 'ASM');
+  AddTokenSpelling(TTokenKind.ABSOLUTETOK, 'ABSOLUTE');
+  AddTokenSpelling(TTokenKind.USESTOK, 'USES');
+  AddTokenSpelling(TTokenKind.LOTOK, 'LO');
+  AddTokenSpelling(TTokenKind.HITOK, 'HI');
+  AddTokenSpelling(TTokenKind.GETINTVECTOK, 'GETINTVEC');
+  AddTokenSpelling(TTokenKind.SETINTVECTOK, 'SETINTVEC');
+  AddTokenSpelling(TTokenKind.ARRAYTOK, 'ARRAY');
+  AddTokenSpelling(TTokenKind.OFTOK, 'OF');
+  AddTokenSpelling(TTokenKind.STRINGTOK, 'STRING');
 
-TokenSpelling[RANGETOK	] := '..';
+  AddTokenSpelling(TTokenKind.RANGETOK, '..');
 
-TokenSpelling[EQTOK		] := '=';
-TokenSpelling[NETOK		] := '<>';
-TokenSpelling[LTTOK		] := '<';
-TokenSpelling[LETOK		] := '<=';
-TokenSpelling[GTTOK		] := '>';
-TokenSpelling[GETOK		] := '>=';
+  AddTokenSpelling(TTokenKind.EQTOK, '=');
+  AddTokenSpelling(TTokenKind.NETOK, '<>');
+  AddTokenSpelling(TTokenKind.LTTOK, '<');
+  AddTokenSpelling(TTokenKind.LETOK, '<=');
+  AddTokenSpelling(TTokenKind.GTTOK, '>');
+  AddTokenSpelling(TTokenKind.GETOK, '>=');
 
-TokenSpelling[DOTTOK		] := '.';
-TokenSpelling[COMMATOK	] := ',';
-TokenSpelling[SEMICOLONTOK	] := ';';
-TokenSpelling[OPARTOK	] := '(';
-TokenSpelling[CPARTOK	] := ')';
-TokenSpelling[DEREFERENCETOK	] := '^';
-TokenSpelling[ADDRESSTOK	] := '@';
-TokenSpelling[OBRACKETTOK	] := '[';
-TokenSpelling[CBRACKETTOK	] := ']';
-TokenSpelling[COLONTOK	] := ':';
+  AddTokenSpelling(TTokenKind.DOTTOK, '.');
+  AddTokenSpelling(TTokenKind.COMMATOK, ',');
+  AddTokenSpelling(TTokenKind.SEMICOLONTOK, ';');
+  AddTokenSpelling(TTokenKind.OPARTOK, '(');
+  AddTokenSpelling(TTokenKind.CPARTOK, ')');
+  AddTokenSpelling(TTokenKind.DEREFERENCETOK, '^');
+  AddTokenSpelling(TTokenKind.ADDRESSTOK, '@');
+  AddTokenSpelling(TTokenKind.OBRACKETTOK, '[');
+  AddTokenSpelling(TTokenKind.CBRACKETTOK, ']');
+  AddTokenSpelling(TTokenKind.COLONTOK, ':');
 
-TokenSpelling[PLUSTOK	] := '+';
-TokenSpelling[MINUSTOK	] := '-';
-TokenSpelling[MULTOK		] := '*';
-TokenSpelling[DIVTOK		] := '/';
-TokenSpelling[IDIVTOK	] := 'DIV';
-TokenSpelling[MODTOK		] := 'MOD';
-TokenSpelling[SHLTOK		] := 'SHL';
-TokenSpelling[SHRTOK		] := 'SHR';
-TokenSpelling[ORTOK		] := 'OR';
-TokenSpelling[XORTOK		] := 'XOR';
-TokenSpelling[ANDTOK		] := 'AND';
-TokenSpelling[NOTTOK		] := 'NOT';
+  AddTokenSpelling(TTokenKind.PLUSTOK, '+');
+  AddTokenSpelling(TTokenKind.MINUSTOK, '-');
+  AddTokenSpelling(TTokenKind.MULTOK, '*');
+  AddTokenSpelling(TTokenKind.DIVTOK, '/');
+  AddTokenSpelling(TTokenKind.IDIVTOK, 'DIV');
+  AddTokenSpelling(TTokenKind.MODTOK, 'MOD');
+  AddTokenSpelling(TTokenKind.SHLTOK, 'SHL');
+  AddTokenSpelling(TTokenKind.SHRTOK, 'SHR');
+  AddTokenSpelling(TTokenKind.ORTOK, 'OR');
+  AddTokenSpelling(TTokenKind.XORTOK, 'XOR');
+  AddTokenSpelling(TTokenKind.ANDTOK, 'AND');
+  AddTokenSpelling(TTokenKind.NOTTOK, 'NOT');
 
-TokenSpelling[INTEGERTOK	] := 'INTEGER';
-TokenSpelling[CARDINALTOK	] := 'CARDINAL';
-TokenSpelling[SMALLINTTOK	] := 'SMALLINT';
-TokenSpelling[SHORTINTTOK	] := 'SHORTINT';
-TokenSpelling[WORDTOK	] := 'WORD';
-TokenSpelling[BYTETOK	] := 'BYTE';
-TokenSpelling[CHARTOK	] := 'CHAR';
-TokenSpelling[BOOLEANTOK	] := 'BOOLEAN';
-TokenSpelling[POINTERTOK	] := 'POINTER';
-TokenSpelling[SHORTREALTOK	] := 'SHORTREAL';
-TokenSpelling[REALTOK	] := 'REAL';
-TokenSpelling[SINGLETOK	] := 'SINGLE';
-TokenSpelling[HALFSINGLETOK	] := 'FLOAT16';
-TokenSpelling[PCHARTOK	] := 'PCHAR';
+  AddTokenSpelling(TTokenKind.INTEGERTOK, 'INTEGER');
+  AddTokenSpelling(TTokenKind.CARDINALTOK, 'CARDINAL');
+  AddTokenSpelling(TTokenKind.SMALLINTTOK, 'SMALLINT');
+  AddTokenSpelling(TTokenKind.SHORTINTTOK, 'SHORTINT');
+  AddTokenSpelling(TTokenKind.WORDTOK, 'WORD');
+  AddTokenSpelling(TTokenKind.BYTETOK, 'BYTE');
+  AddTokenSpelling(TTokenKind.CHARTOK, 'CHAR');
+  AddTokenSpelling(TTokenKind.BOOLEANTOK, 'BOOLEAN');
+  AddTokenSpelling(TTokenKind.POINTERTOK, 'POINTER');
+  AddTokenSpelling(TTokenKind.SHORTREALTOK, 'SHORTREAL');
+  AddTokenSpelling(TTokenKind.REALTOK, 'REAL');
+  AddTokenSpelling(TTokenKind.SINGLETOK, 'SINGLE');
+  AddTokenSpelling(TTokenKind.HALFSINGLETOK, 'FLOAT16');
+  AddTokenSpelling(TTokenKind.PCHARTOK, 'PCHAR');
 
-TokenSpelling[SHORTSTRINGTOK	] := 'SHORTSTRING';
-TokenSpelling[FLOATTOK	] := 'FLOAT';
-TokenSpelling[TEXTTOK	] := 'TEXT';
+  AddTokenSpelling(TTokenKind.SHORTSTRINGTOK, 'SHORTSTRING');
+  AddTokenSpelling(TTokenKind.FLOATTOK, 'FLOAT');
+  AddTokenSpelling(TTokenKind.TEXTTOK, 'TEXT');
 
  AsmFound  := false;
  UsesFound := false;
@@ -1823,7 +1841,7 @@ var
   Err, Line2, TextPos, im: Integer;
   yes: Boolean;
   ch, ch2: Char;
-  CurToken: Byte;
+  CurToken: TTokenKind;
 
 
   procedure SkipWhiteSpace;				// 'string' + #xx + 'string'
@@ -1970,7 +1988,7 @@ begin
 
       if Length(Num) > 0 then			// Number found
 	begin
-	AddToken(INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
+	AddToken(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num)); Spaces:=0;
 
 	if ch = '.' then			// Fractional part suspected
 	  begin
@@ -1990,7 +2008,7 @@ begin
 	      ch:=a[i]; inc(i);
 	      end;
 
-	    Tok[NumTok].Kind := FRACNUMBERTOK;
+	    Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
 	    Tok[NumTok].FracValue := StrToFloat(Num + Frac);
 	    Tok[NumTok].Column := Tok[NumTok-1].Column + length(Num) + length(Frac) + Spaces; Spaces:=0;
 	    end;
@@ -2041,28 +2059,28 @@ begin
 	  delete(a, i, length(Text));
 	  insert(Defines[im].Macro, a, i);
 
-	  CurToken := MACRORELEASE;
+	  CurToken := TTokenKind.MACRORELEASE;
 
 	 end else begin
 
-	  if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
-	  if CurToken = FLOATTOK then CurToken := SINGLETOK;
-	  if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
-	  if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
+	  if CurToken = TTokenKind.TEXTTOK then CurToken := TTokenKind.TEXTFILETOK;
+	  if CurToken = TTokenKind.FLOATTOK then CurToken := TTokenKind.SINGLETOK;
+	  if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
+	  if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
 
-	  AddToken(0, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
+	  AddToken(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
 
 	 end;
 
-	 if CurToken <> MACRORELEASE then
+	 if CurToken <> TTokenKind.MACRORELEASE then
 
-	 if CurToken <> 0 then begin		// Keyword found
+	 if CurToken <> TTokenKind.UNTYPETOK then begin		// Keyword found
 
 	     Tok[NumTok].Kind := CurToken;
 
 	 end
 	 else begin				// Identifier found
-	     Tok[NumTok].Kind := IDENTTOK;
+	     Tok[NumTok].Kind := TTokenKind.IDENTTOK;
 	     Tok[NumTok].Name := Text;
 	   end;
 
@@ -2206,9 +2224,9 @@ begin
 
 	// if Length(Text) > 0 then
 	  if Length(Text) = 1 then begin
-	    AddToken(CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
+	    AddToken(TTokenKind.CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1])); Spaces:=0;
 	  end else begin
-	    AddToken(STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
+	    AddToken(TTokenKind.STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0); Spaces:=0;
 	    DefineStaticString(NumTok, Text);
 	  end;
 
@@ -2236,7 +2254,7 @@ begin
 	end else
 	 if (ch='.') and (ch2 in ['0'..'9']) then begin
 
-	   AddToken(INTNUMBERTOK, 1, Line, 0, 0);
+	   AddToken(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
 
 	   Frac := '0.';		  // Fractional part found
 
@@ -2246,7 +2264,7 @@ begin
 	    ch2:=a[i]; inc(i);
 	   end;
 
-	   Tok[NumTok].Kind := FRACNUMBERTOK;
+	   Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
 	   Tok[NumTok].FracValue := StrToFloat(Frac);
 	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
 

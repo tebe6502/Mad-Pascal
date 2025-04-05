@@ -39,16 +39,16 @@ begin
     begin
     // DiagFile.Write(i: 6, UnitName[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
     DiagFile.Write(i,6).Write( UnitName[Tok[i].UnitIndex].Name, 30).Write(Tok[i].Line, 6).Write(GetSpelling(i), 30).WriteLn;
-    if Tok[i].Kind = INTNUMBERTOK then
+    if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
       DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))
-    else if Tok[i].Kind = FRACNUMBERTOK then
+    else if Tok[i].Kind = TTokenKind.FRACNUMBERTOK then
 //    DiagFile.WriteLn(' = ', Tok[i].FracValue: 8: 4)
       DiagFile.WriteLn(' = ', FloatToStr(Tok[i].FracValue))
-    else if Tok[i].Kind = IDENTTOK then
+    else if Tok[i].Kind = TTokenKind.IDENTTOK then
       DiagFile.WriteLn(' = ', Tok[i].Name)
-    else if Tok[i].Kind = CHARLITERALTOK then
+    else if Tok[i].Kind = TTokenKind.CHARLITERALTOK then
       DiagFile.WriteLn(' = ', Chr(Tok[i].Value))
-    else if Tok[i].Kind = STRINGLITERALTOK then
+    else if Tok[i].Kind = TTokenKind.STRINGLITERALTOK then
       begin
       DiagFile.Write(' = ');
       for CharIndex := 1 to Tok[i].StrLength do
@@ -67,10 +67,10 @@ begin
 
   for i := 1 to NumIdent do
     begin
-    DiagFile.Write( i, 6).Write( Ident[i].Block, 6).Write( Ident[i].Name, 30).Write( TokenSpelling[Ident[i].Kind], 15);
-    if Ident[i].DataType <> 0 then DiagFile.Write( TokenSpelling[Ident[i].DataType], 15) else DiagFile.Write( 'N/A', 15);
+    DiagFile.Write( i, 6).Write( Ident[i].Block, 6).Write( Ident[i].Name, 30).Write( GetTokenSpelling(Ident[i].Kind), 15);
+    if Ident[i].DataType <> TDataType.UNTYPETOK then DiagFile.Write( GetTokenSpelling(Ident[i].DataType), 15) else DiagFile.Write( 'N/A', 15);
     DiagFile.Write( Ident[i].NumAllocElements, 15).Write( IntToHex(Ident[i].Value, 8), 15);
-    if (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK]) and not Ident[i].IsNotDead
+    if (Ident[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and not Ident[i].IsNotDead
     then DiagFile.Write( 'Yes', 5) else DiagFile.Write('', 5);
     end;
 

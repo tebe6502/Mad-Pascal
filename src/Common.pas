@@ -28,220 +28,219 @@ const
 
   title = '1.7.2';
 
+type TTokenKind = (
+  UNTYPETOK,
+
+  CONSTTOK		= 1,     // !!! Don't change
+  TYPETOK		= 2,     // !!!
+  VARTOK		= 3,     // !!!
+  PROCEDURETOK		= 4,     // !!!
+  FUNCTIONTOK		= 5,     // !!!
+  LABELTOK		= 6,	 // !!!
+  UNITTOK		= 7,	 // !!!
 
 
-  // Token codes
+  GETINTVECTOK		= 10,
+  SETINTVECTOK		= 11,
+  CASETOK		= 12,
+  BEGINTOK		= 13,
+  ENDTOK		= 14,
+  IFTOK			= 15,
+  THENTOK		= 16,
+  ELSETOK		= 17,
+  WHILETOK		= 18,
+  DOTOK			= 19,
+  REPEATTOK		= 20,
+  UNTILTOK		= 21,
+  FORTOK		= 22,
+  TOTOK			= 23,
+  DOWNTOTOK		= 24,
+  ASSIGNTOK		= 25,
+  WRITETOK		= 26,
+  READLNTOK		= 27,
+  HALTTOK		= 28,
+  USESTOK		= 29,
+  ARRAYTOK		= 30,
+  OFTOK			= 31,
+  STRINGTOK		= 32,
+  INCTOK		= 33,
+  DECTOK		= 34,
+  ORDTOK		= 35,
+  CHRTOK		= 36,
+  ASMTOK		= 37,
+  ABSOLUTETOK		= 38,
+  BREAKTOK		= 39,
+  CONTINUETOK		= 40,
+  EXITTOK		= 41,
+  RANGETOK		= 42,
 
-  UNTYPETOK		= 0;
+  EQTOK			= 43,
+  NETOK			= 44,
+  LTTOK			= 45,
+  LETOK			= 46,
+  GTTOK			= 47,
+  GETOK			= 48,
+  LOTOK			= 49,
+  HITOK			= 50,
 
-  CONSTTOK		= 1;     // !!! Don't change
-  TYPETOK		= 2;     // !!!
-  VARTOK		= 3;     // !!!
-  PROCEDURETOK		= 4;     // !!!
-  FUNCTIONTOK		= 5;     // !!!
-  LABELTOK		= 6;	 // !!!
-  UNITTOK		= 7;	 // !!!
+  DOTTOK		= 51,
+  COMMATOK		= 52,
+  SEMICOLONTOK		= 53,
+  OPARTOK		= 54,
+  CPARTOK		= 55,
+  DEREFERENCETOK	= 56,
+  ADDRESSTOK		= 57,
+  OBRACKETTOK		= 58,
+  CBRACKETTOK		= 59,
+  COLONTOK		= 60,
 
+  PLUSTOK		= 61,
+  MINUSTOK		= 62,
+  MULTOK		= 63,
+  DIVTOK		= 64,
+  IDIVTOK		= 65,
+  MODTOK		= 66,
+  SHLTOK		= 67,
+  SHRTOK		= 68,
+  ORTOK			= 69,
+  XORTOK		= 70,
+  ANDTOK		= 71,
+  NOTTOK		= 72,
 
-  GETINTVECTOK		= 10;
-  SETINTVECTOK		= 11;
-  CASETOK		= 12;
-  BEGINTOK		= 13;
-  ENDTOK		= 14;
-  IFTOK			= 15;
-  THENTOK		= 16;
-  ELSETOK		= 17;
-  WHILETOK		= 18;
-  DOTOK			= 19;
-  REPEATTOK		= 20;
-  UNTILTOK		= 21;
-  FORTOK		= 22;
-  TOTOK			= 23;
-  DOWNTOTOK		= 24;
-  ASSIGNTOK		= 25;
-  WRITETOK		= 26;
-  READLNTOK		= 27;
-  HALTTOK		= 28;
-  USESTOK		= 29;
-  ARRAYTOK		= 30;
-  OFTOK			= 31;
-  STRINGTOK		= 32;
-  INCTOK		= 33;
-  DECTOK		= 34;
-  ORDTOK		= 35;
-  CHRTOK		= 36;
-  ASMTOK		= 37;
-  ABSOLUTETOK		= 38;
-  BREAKTOK		= 39;
-  CONTINUETOK		= 40;
-  EXITTOK		= 41;
-  RANGETOK		= 42;
+  ASSIGNFILETOK		= 73,
+  RESETTOK		= 74,
+  REWRITETOK		= 75,
+  APPENDTOK		= 76,
+  BLOCKREADTOK		= 77,
+  BLOCKWRITETOK		= 78,
+  CLOSEFILETOK		= 79,
+  GETRESOURCEHANDLETOK	= 80,
+  SIZEOFRESOURCETOK     = 81,
 
-  EQTOK			= 43;
-  NETOK			= 44;
-  LTTOK			= 45;
-  LETOK			= 46;
-  GTTOK			= 47;
-  GETOK			= 48;
-  LOTOK			= 49;
-  HITOK			= 50;
+  WRITELNTOK		= 82,
+  SIZEOFTOK		= 83,
+  LENGTHTOK		= 84,
+  HIGHTOK		= 85,
+  LOWTOK		= 86,
+  INTTOK		= 87,
+  FRACTOK		= 88,
+  TRUNCTOK		= 89,
+  ROUNDTOK		= 90,
+  ODDTOK		= 91,
 
-  DOTTOK		= 51;
-  COMMATOK		= 52;
-  SEMICOLONTOK		= 53;
-  OPARTOK		= 54;
-  CPARTOK		= 55;
-  DEREFERENCETOK	= 56;
-  ADDRESSTOK		= 57;
-  OBRACKETTOK		= 58;
-  CBRACKETTOK		= 59;
-  COLONTOK		= 60;
+  PROGRAMTOK		= 92,
+  LIBRARYTOK		= 93,
+  EXPORTSTOK		= 94,
+  EXTERNALTOK		= 95,
+  INTERFACETOK		= 96,
+  IMPLEMENTATIONTOK     = 97,
+  INITIALIZATIONTOK     = 98,
+  CONSTRUCTORTOK	= 99,
+  DESTRUCTORTOK		= 100,
+  OVERLOADTOK		= 101,
+  ASSEMBLERTOK		= 102,
+  FORWARDTOK		= 103,
+  REGISTERTOK		= 104,
+  INTERRUPTTOK		= 105,
+  PASCALTOK		= 106,
+  STDCALLTOK		= 107,
+  INLINETOK		= 108,
+  KEEPTOK		= 109,
 
-  PLUSTOK		= 61;
-  MINUSTOK		= 62;
-  MULTOK		= 63;
-  DIVTOK		= 64;
-  IDIVTOK		= 65;
-  MODTOK		= 66;
-  SHLTOK		= 67;
-  SHRTOK		= 68;
-  ORTOK			= 69;
-  XORTOK		= 70;
-  ANDTOK		= 71;
-  NOTTOK		= 72;
-
-  ASSIGNFILETOK		= 73;
-  RESETTOK		= 74;
-  REWRITETOK		= 75;
-  APPENDTOK		= 76;
-  BLOCKREADTOK		= 77;
-  BLOCKWRITETOK		= 78;
-  CLOSEFILETOK		= 79;
-  GETRESOURCEHANDLETOK	= 80;
-  SIZEOFRESOURCETOK     = 81;
-
-  WRITELNTOK		= 82;
-  SIZEOFTOK		= 83;
-  LENGTHTOK		= 84;
-  HIGHTOK		= 85;
-  LOWTOK		= 86;
-  INTTOK		= 87;
-  FRACTOK		= 88;
-  TRUNCTOK		= 89;
-  ROUNDTOK		= 90;
-  ODDTOK		= 91;
-
-  PROGRAMTOK		= 92;
-  LIBRARYTOK		= 93;
-  EXPORTSTOK		= 94;
-  EXTERNALTOK		= 95;
-  INTERFACETOK		= 96;
-  IMPLEMENTATIONTOK     = 97;
-  INITIALIZATIONTOK     = 98;
-  CONSTRUCTORTOK	= 99;
-  DESTRUCTORTOK		= 100;
-  OVERLOADTOK		= 101;
-  ASSEMBLERTOK		= 102;
-  FORWARDTOK		= 103;
-  REGISTERTOK		= 104;
-  INTERRUPTTOK		= 105;
-  PASCALTOK		= 106;
-  STDCALLTOK		= 107;
-  INLINETOK		= 108;
-  KEEPTOK		= 109;
-
-  SUCCTOK		= 110;
-  PREDTOK		= 111;
-  PACKEDTOK		= 112;
-  GOTOTOK		= 113;
-  INTOK			= 114;
-  VOLATILETOK		= 115;
-  STRIPEDTOK		= 116;
+  SUCCTOK		= 110,
+  PREDTOK		= 111,
+  PACKEDTOK		= 112,
+  GOTOTOK		= 113,
+  INTOK			= 114,
+  VOLATILETOK		= 115,
+  STRIPEDTOK		= 116,
 
 
-  SETTOK		= 127;	// Size = 32 SET OF
+  SETTOK		= 127,	// Size = 32 SET OF
 
-  BYTETOK		= 128;	// Size = 1 BYTE
-  WORDTOK		= 129;	// Size = 2 WORD
-  CARDINALTOK		= 130;	// Size = 4 CARDINAL
-  SHORTINTTOK		= 131;	// Size = 1 SHORTINT
-  SMALLINTTOK		= 132;	// Size = 2 SMALLINT
-  INTEGERTOK		= 133;	// Size = 4 INTEGER
-  CHARTOK		= 134;	// Size = 1 CHAR
-  BOOLEANTOK		= 135;	// Size = 1 BOOLEAN
-  POINTERTOK		= 136;	// Size = 2 POINTER
-  STRINGPOINTERTOK	= 137;	// Size = 2 POINTER to STRING
-  FILETOK		= 138;	// Size = 2/12 FILE
-  RECORDTOK		= 139;	// Size = 2/???
-  OBJECTTOK		= 140;	// Size = 2/???
-  SHORTREALTOK		= 141;	// Size = 2 SHORTREAL			Fixed-Point Q8.8
-  REALTOK		= 142;	// Size = 4 REAL			Fixed-Point Q24.8
-  SINGLETOK		= 143;	// Size = 4 SINGLE / FLOAT		IEEE-754 32-bit
-  HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16-bit
-  PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
-  ENUMTOK		= 146;	// Size = 1 BYTE
-  PROCVARTOK		= 147;	// Size = 2
-  TEXTFILETOK		= 148;	// Size = 2/12 TEXTFILE
-  FORWARDTYPE		= 149;	// Size = 2
+  BYTETOK		= 128,	// Size = 1 BYTE
+  WORDTOK		= 129,	// Size = 2 WORD
+  CARDINALTOK		= 130,	// Size = 4 CARDINAL
+  SHORTINTTOK		= 131,	// Size = 1 SHORTINT
+  SMALLINTTOK		= 132,	// Size = 2 SMALLINT
+  INTEGERTOK		= 133,	// Size = 4 INTEGER
+  CHARTOK		= 134,	// Size = 1 CHAR
+  BOOLEANTOK		= 135,	// Size = 1 BOOLEAN
+  POINTERTOK		= 136,	// Size = 2 POINTER
+  STRINGPOINTERTOK	= 137,	// Size = 2 POINTER to STRING
+  FILETOK		= 138,	// Size = 2/12 FILE
+  RECORDTOK		= 139,	// Size = 2/???
+  OBJECTTOK		= 140,	// Size = 2/???
+  SHORTREALTOK		= 141,	// Size = 2 SHORTREAL			Fixed-Point Q8.8
+  REALTOK		= 142,	// Size = 4 REAL			Fixed-Point Q24.8
+  SINGLETOK		= 143,	// Size = 4 SINGLE / FLOAT		IEEE-754 32-bit
+  HALFSINGLETOK		= 144,	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16-bit
+  PCHARTOK		= 145,	// Size = 2 POINTER TO ARRAY OF CHAR
+  ENUMTOK		= 146,	// Size = 1 BYTE
+  PROCVARTOK		= 147,	// Size = 2
+  TEXTFILETOK		= 148,	// Size = 2/12 TEXTFILE
+  FORWARDTYPE		= 149,	// Size = 2
 
-  SHORTSTRINGTOK	= 150;	// We change into STRINGTOK
-  FLOATTOK		= 151;	// We change into SINGLETOK
-  FLOAT16TOK		= 152;	// We change into HALFSINGLETOK
-  TEXTTOK		= 153;	// We change into TEXTFILETOK
+  SHORTSTRINGTOK	= 150,	// We change into STRINGTOK
+  FLOATTOK		= 151,	// We change into SINGLETOK
+  FLOAT16TOK		= 152,	// We change into HALFSINGLETOK
+  TEXTTOK		= 153,	// We change into TEXTFILETOK
 
-  DEREFERENCEARRAYTOK	= 154;	// For ARRAY pointers
+  DEREFERENCEARRAYTOK	= 154,	// For ARRAY pointers
 
 
-  DATAORIGINOFFSET	= 160;
-  CODEORIGINOFFSET	= 161;
+  DATAORIGINOFFSET	= 160,
+  CODEORIGINOFFSET	= 161,
 
-  IDENTTOK		= 170;
-  INTNUMBERTOK		= 171;
-  FRACNUMBERTOK		= 172;
-  CHARLITERALTOK	= 173;
-  STRINGLITERALTOK	= 174;
+  IDENTTOK		= 170,
+  INTNUMBERTOK		= 171,
+  FRACNUMBERTOK		= 172,
+  CHARLITERALTOK	= 173,
+  STRINGLITERALTOK	= 174,
 
-  EVALTOK		= 184;
-  LOOPUNROLLTOK		= 185;
-  NOLOOPUNROLLTOK	= 186;
-  LINKTOK		= 187;
-  MACRORELEASE		= 188;
-  PROCALIGNTOK		= 189;
-  LOOPALIGNTOK		= 190;
-  LINKALIGNTOK		= 191;
-  INFOTOK		= 192;
-  WARNINGTOK		= 193;
-  ERRORTOK		= 194;
-  UNITBEGINTOK		= 195;
-  UNITENDTOK		= 196;
-  IOCHECKON		= 197;
-  IOCHECKOFF		= 198;
-  EOFTOK		= 199;     // MAXTOKENNAMES = 200
+  EVALTOK		= 184,
+  LOOPUNROLLTOK		= 185,
+  NOLOOPUNROLLTOK	= 186,
+  LINKTOK		= 187,
+  MACRORELEASE		= 188,
+  PROCALIGNTOK		= 189,
+  LOOPALIGNTOK		= 190,
+  LINKALIGNTOK		= 191,
+  INFOTOK		= 192,
+  WARNINGTOK		= 193,
+  ERRORTOK		= 194,
+  UNITBEGINTOK		= 195,
+  UNITENDTOK		= 196,
+  IOCHECKON		= 197,
+  IOCHECKOFF		= 198,
+  EOFTOK		= 199     // MAXTOKENNAMES = 200
+);
 
-  UnsignedOrdinalTypes	= [BYTETOK, WORDTOK, CARDINALTOK];
-  SignedOrdinalTypes	= [SHORTINTTOK, SMALLINTTOK, INTEGERTOK];
-  RealTypes		= [SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK];
+const
+  UnsignedOrdinalTypes	= [TTokenKind.BYTETOK, TTokenKind.WORDTOK, TTokenKind.CARDINALTOK];
+  SignedOrdinalTypes	= [TTokenKind.SHORTINTTOK, TTokenKind.SMALLINTTOK, TTokenKind.INTEGERTOK];
+  RealTypes		= [TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK];
 
   IntegerTypes		= UnsignedOrdinalTypes + SignedOrdinalTypes;
-  OrdinalTypes		= IntegerTypes + [CHARTOK, BOOLEANTOK, ENUMTOK];
+  OrdinalTypes		= IntegerTypes + [TTokenKind.CHARTOK, TTokenKind.BOOLEANTOK, TTokenKind.ENUMTOK];
 
-  Pointers		= [POINTERTOK, PROCVARTOK, STRINGPOINTERTOK, PCHARTOK];
+  Pointers		= [TTokenKind.POINTERTOK, TTokenKind.PROCVARTOK, TTokenKind.STRINGPOINTERTOK, TTokenKind.PCHARTOK];
 
   AllTypes		= OrdinalTypes + RealTypes + Pointers;
 
-  StringTypes		= [STRINGPOINTERTOK, STRINGLITERALTOK, PCHARTOK];
+  StringTypes		= [TTokenKind.STRINGPOINTERTOK, TTokenKind.STRINGLITERALTOK, TTokenKind.PCHARTOK];
 
   // Identifier kind codes
 
-  CONSTANT		= CONSTTOK;
-  USERTYPE		= TYPETOK;
-  VARIABLE		= VARTOK;
-//  PROC			= PROCEDURETOK;
-//  FUNC			= FUNCTIONTOK;
-  LABELTYPE		= LABELTOK;
-  UNITTYPE		= UNITTOK;
+  CONSTANT		= TTokenKind.CONSTTOK;
+  USERTYPE		= TTokenKind.TYPETOK;
+  VARIABLE		= TTokenKind.VARTOK;
+//  PROC			= TTokenKind.PROCEDURETOK;
+//  FUNC			= TTokenKind.FUNCTIONTOK;
+  LABELTYPE		= TTokenKind.LABELTOK;
+  UNITTYPE		= TTokenKind.UNITTOK;
 
-  ENUMTYPE		= ENUMTOK;
+  ENUMTYPE		= TTokenKind.ENUMTOK;
 
   // Compiler parameters
 
@@ -288,13 +287,10 @@ const
   ASSINGLE		= 11;
   ASPCHAR		= 12;
 
-  OBJECTVARIABLE	= 1;
-  RECORDVARIABLE	= 2;
-
 
   // Data sizes
 
-  DataSize: array [BYTETOK..FORWARDTYPE] of Byte = (
+  _DataSize: array [Ord(TTokenKind.BYTETOK)..Ord(TTokenKind.FORWARDTYPE)] of Byte = (
   	1,	// Size = 1 BYTE
   	2,	// Size = 2 WORD
   	4,	// Size = 4 CARDINAL
@@ -319,7 +315,7 @@ const
 	2	// Size = 2 FORWARD
 	);
 
-  fBlockRead_ParamType: array [1..3] of Byte = (UNTYPETOK, WORDTOK, POINTERTOK);
+  fBlockRead_ParamType: array [1..3] of TTokenKind = (TTokenKind.UNTYPETOK, TTokenKind.WORDTOK, TTokenKind.POINTERTOK);
 
 
 {$i targets/type.inc}
@@ -360,7 +356,7 @@ type
 
   TString = String;
   TName = String;
-  TDatatype = Byte;
+  TDataType = TTokenKind;
 
   TDefineIndex = TInteger; // 0 means not found
   TDefineParams = array [1..MAXPARAMS] of TString;
@@ -376,37 +372,41 @@ type
   TParameterName = TName;
   TParam = record
     Name: TParameterName;
-    DataType: TDatatype;
+    DataType: TDataType;
     NumAllocElements: Cardinal;
-    AllocElementType: TDatatype;
+    AllocElementType: TDataType;
     PassMethod: TParameterPassingMethod;
     i, i_: Integer;
    end;
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
+
+  TIdentifierName = String;
+  TIntegerNumber = Int64;
+
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;
+
+  TFieldKind = ( UNTYPETOK,   OBJECTVARIABLE	= 1,
+  RECORDVARIABLE	= 2);
+
   TField = record
     Name: TFieldName;
     Value: Int64;
-    DataType: Byte;
+    DataType: TDataType;
     NumAllocElements: Cardinal;
-    AllocElementType: Byte;
-    Kind: Byte;
+    AllocElementType: TDataType;
+    Kind: TFieldKind;
   end;
 
-  TType = record
-    Block: Integer;
-    NumFields: Integer;
-    Size: Integer;
-    Field: array [0..MAXFIELDS] of TField;
-  end;
 
-  TTokenCode = Byte;
-  TTokenKind = Byte;
-  TIdentifierName = String;
-  TIntegerNumber = Int64;
+    TType = record
+      Block: Integer;
+      NumFields: Integer;
+      Size: Integer;
+      Field: array [0..MAXFIELDS] of TField;
+    end;
 
   TToken = record
     UnitIndex, Column: Smallint;
@@ -431,17 +431,17 @@ type
     UnitIndex : Integer;
     Alias : TString;			// EXTERNAL alias 'libraries'
     Libraries : Integer;		// EXTERNAL alias 'libraries'
-    DataType: TDatatype;
-    IdType: Byte;
+    DataType: TDataType;
+    IdType: TTokenKind; // TODO Have TIdentierType
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
 
     NestedNumAllocElements: Cardinal;
-    NestedAllocElementType: Byte;
-    NestedDataType: Byte;
+    NestedAllocElementType: TDataType;
+    NestedDataType: TDataType;
 
     NestedFunctionNumAllocElements: Cardinal;
-    NestedFunctionAllocElementType: Byte;
+    NestedFunctionAllocElementType: TDataType;
     isNestedFunction: Boolean;
 
     LoopVariable,
@@ -451,7 +451,7 @@ type
     isInitialized,
     Section: Boolean;
 
-    Kind: TTokenCode;
+    Kind: TTokenKind;
 
 //  For kind=PROCEDURETOK, FUNCTIONTOK:
 	NumParams: Word;
@@ -477,7 +477,7 @@ type
 
 //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;
-    AllocElementType: Byte
+    AllocElementType: TDataType
     end;
 
 
@@ -536,6 +536,11 @@ type
   TIdentIndex = Integer;
   TArrayIndex = Integer;
 
+  type TTokenSpelling = record
+      tokenKind: TTokenKind;
+      spelling: String;
+  end;
+
 var
 
   PROGRAM_NAME: String = 'Program';
@@ -548,7 +553,7 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  TokenSpelling: array [1..MAXTOKENNAMES] of TString;
+  TokenSpellings: array [1..MAXTOKENNAMES] of TTokenSpelling;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefine;
   IFTmpPosStack: array of Integer;
@@ -557,7 +562,7 @@ var
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;	// For dead code elimination
 
-  OldConstValType: Byte;
+  OldConstValType: TDataType;
 
   NumTok: Integer = 0;
 
@@ -627,17 +632,22 @@ var
 
 procedure ClearWordMemory(anArray: TWordMemory);
 
+function GetTokenKindName(tokenKind: TTokenKind): String;
+
+function GetDataSize(const dataType: TDataType): Byte;
+
 procedure AddDefine(const defineName: TDefineName);
+function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(s: String);
 
-procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
-procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
-procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TDataType; RightType: TDataType = TTokenKind.UNTYPETOK);
 
-procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTOkenCode);
+procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
@@ -647,28 +657,26 @@ function FindFile(Name: String; ftyp: TString): String; overload;
 
 procedure FreeTokens;
 
-function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: Byte; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 
-function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: Byte): Byte;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataType): TDataType;
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
+function GetTokenSpelling(t: TTokenKind): TString;
 function GetSpelling(i: TTokenIndex): TString;
+
 
 function GetVAL(a: String): Integer;
 
-function GetValueType(Value: TIntegerNumber): Byte;
+function GetValueType(Value: TIntegerNumber): TDataType;
 
-function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
-function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
+function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
-function InfoAboutToken(t: TTokenCode): String;
+function InfoAboutToken(t: TTokenKind): String;
 
 function IntToStr(const a: Int64): String;
-
-
-function SearchDefine(const defineName: TDefineName): TDefineIndex;
-
 function StrToInt(const a: String): TIntegerNumber;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
@@ -679,6 +687,32 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 implementation
 
 uses Messages, Utilities;
+
+function GetTokenKindName(tokenKind: TTokenKind): String;
+begin
+  WriteStr(Result, tokenKind);
+end;
+
+function GetDataSize(const dataType: TDataType): Byte;
+var
+  index: Byte;
+begin
+  index := Ord(dataType);
+  if dataType = TDataType.UNTYPETOK then
+  begin
+    Result := 0;
+  end
+  else if ((index >= Low(_DataSize)) and (index <= High(_DataSize))) then
+  begin
+    Result := _DataSize[index];
+  end
+  else
+  begin
+    Assert(False);
+  end;
+
+end;
+
 
 // ----------------------------------------------------------------------------
 // Map modifier codes to the bits in the method status.
@@ -738,21 +772,6 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-
-
-function SearchDefine(const defineName: TDefineName): TDefineIndex;
-var
-  i: Integer;
-begin
-   for i:=1 to NumDefines do
-    if Defines[i].Name = defineName then
-    begin
-     Exit(i);
-    end;
-   Result := 0;
-end;
-
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -767,6 +786,19 @@ begin
     Defines[NumDefines].Macro := '';
     Defines[NumDefines].Line := 0;
   end;
+end;
+
+
+function SearchDefine(const defineName: TDefineName): TDefineIndex;
+var
+  i: Integer;
+begin
+   for i:=1 to NumDefines do
+    if Defines[i].Name = defineName then
+    begin
+     Exit(i);
+    end;
+   Result := 0;
 end;
 
 
@@ -878,26 +910,82 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+function GetTokenSpelling(t: TTokenKind): TString;
+begin
+Result := TokenSpellings[Ord(t)].Spelling;
+end;
 
 function GetSpelling(i: TTokenIndex): TString;
+var kind: TTokenKind;
+var index: Byte;
 begin
 
-if i > NumTok then
-  Result := 'no token'
-else if (Tok[i].Kind > 0) and (Tok[i].Kind < IDENTTOK) then
-  Result := TokenSpelling[Tok[i].Kind]
-else if Tok[i].Kind = IDENTTOK then
-  Result := 'identifier'
-else if (Tok[i].Kind = INTNUMBERTOK) or (Tok[i].Kind = FRACNUMBERTOK) then
-  Result := 'number'
-else if (Tok[i].Kind = CHARLITERALTOK) or (Tok[i].Kind = STRINGLITERALTOK) then
-  Result := 'literal'
-else if (Tok[i].Kind = UNITENDTOK) then
-  Result := 'END'
-else if (Tok[i].Kind = EOFTOK) then
-  Result := 'end of file'
-else
-  Result := 'unknown token';
+  if i > NumTok then
+    Result := 'no token'
+  else
+  begin
+   kind:=   Tok[i].Kind;
+   index:=Ord( kind);
+    if (index > 0) and (index< Ord(TTokenKind.IDENTTOK)) then
+      Result :=GetTokenSpelling(kind)
+    else if Kind = TTokenKind.IDENTTOK then
+      Result := 'identifier'
+    else if (Kind = TTokenKind.INTNUMBERTOK)
+         or (Kind = TTokenKind.FRACNUMBERTOK) then
+      Result := 'number'
+    else if (Kind = TTokenKind.CHARLITERALTOK)
+         or (Kind = TTokenKind.STRINGLITERALTOK) then
+      Result := 'literal'
+    else if Kind = TTokenKind.UNITENDTOK then
+      Result := 'END'
+    else if Kind = TTokenKind.EOFTOK then
+      Result := 'end of file'
+    else
+      Result := 'unknown token';
+  end;
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TDataType;
+  RightType: TDataType = TTokenKind.UNTYPETOK);
+begin
+
+  //writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
+
+  if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
+  // Operators for RealTypes
+  ((DataType in RealTypes) and not (op in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.PLUSTOK,
+    TTokenKind.MINUSTOK, TTokenKind.GTTOK, TTokenKind.GETOK, TTokenKind.EQTOK, TTokenKind.NETOK,
+    TTokenKind.LETOK, TTokenKind.LTTOK]))
+    // Operators for IntegerTypes
+    or ((DataType in IntegerTypes) and not (op in [TTokenKind.MULTOK, TTokenKind.IDIVTOK,
+    TTokenKind.MODTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK, TTokenKind.PLUSTOK,
+    TTokenKind.MINUSTOK, TTokenKind.ORTOK, TTokenKind.XORTOK, TTokenKind.NOTTOK, TTokenKind.GTTOK,
+    TTokenKind.GETOK, TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK, TTokenKind.INTOK]))
+    // Operators for Char
+    or ((DataType = TTokenKind.CHARTOK) and not (op in [TTokenKind.GTTOK, TTokenKind.GETOK,
+    TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK, TTokenKind.INTOK]))
+    // Operators for Boolean
+    or ((DataType = TTokenKind.BOOLEANTOK) and not
+    (op in [TTokenKind.ANDTOK, TTokenKind.ORTOK, TTokenKind.XORTOK, TTokenKind.NOTTOK,
+    TTokenKind.GTTOK, TTokenKind.GETOK, TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK]))
+    // Operators for Pointers
+    or ((DataType in Pointers) and not (op in [TTokenKind.GTTOK, TTokenKind.GETOK,
+    TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK, TTokenKind.PLUSTOK,
+    TTokenKind.MINUSTOK])) then
+  begin
+    if DataType = RightType then
+      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' +
+        '"' + InfoAboutToken(DataType) + '" ' + InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"'))
+    else
+      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperationNotSupportedForTypes,
+        'Operation "' + InfoAboutToken(op) + '" not supported for types "' + InfoAboutToken(DataType) +
+        '" and "' + InfoAboutToken(RightType) + '"'));
+  end;
 
 end;
 
@@ -906,41 +994,13 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: Byte; DataType: Byte; RightType: Byte = 0);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 begin
 
-//writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
-
- if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
-  ((DataType in RealTypes) and not (op in [MULTOK, DIVTOK, PLUSTOK, MINUSTOK, GTTOK,
-    GETOK, EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in IntegerTypes) and not
-    (op in [MULTOK, IDIVTOK, MODTOK, SHLTOK, SHRTOK, ANDTOK, PLUSTOK, MINUSTOK, ORTOK, XORTOK,
-    NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or ((DataType = CHARTOK) and
-       not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or
-    ((DataType = BOOLEANTOK) and not (op in [ANDTOK, ORTOK, XORTOK, NOTTOK, GTTOK, GETOK,
-    EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in Pointers) and not
-    (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK])) then
- if DataType = RightType then
-      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
-        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"') )
- else
-      Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperationNotSupportedForTypes,'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
-        InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"') );
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
-begin
-
-if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) then
+if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <>  TTokenKind.RECORDTOK) then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
-      Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-  if Ident[IdentIndex].NumAllocElements <> 1 then WarningForRangeCheckError(i, IdentIndex, ArrayIndex, ArrayIndexType);
+      Ord(Ident[IdentIndex].DataType =  TTokenKind.STRINGPOINTERTOK)) then
+  if Ident[IdentIndex].NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -949,14 +1009,14 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 begin
 
 if Ident[IdentIndex].NumAllocElements_ > 0 then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
-      Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
+      Ord(Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK)) then
       if Ident[IdentIndex].NumAllocElements_ <> 1 then
-        WarningForRangeCheckError(i, IdentIndex, ArrayIndex, ArrayIndexType);
+        WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -965,95 +1025,94 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function InfoAboutToken(t: Byte): String;
+function InfoAboutToken(t: TTokenKind): String;
 begin
 
-   case t of
+  case t of
 
-	 EQTOK: Result := '=';
-	 NETOK: Result := '<>';
-	 LTTOK: Result := '<';
-	 LETOK: Result := '<=';
-	 GTTOK: Result := '>';
-	 GETOK: Result := '>=';
+    TTokenKind.EQTOK: Result := '=';
+    TTokenKind.NETOK: Result := '<>';
+    TTokenKind.LTTOK: Result := '<';
+    TTokenKind.LETOK: Result := '<=';
+    TTokenKind.GTTOK: Result := '>';
+    TTokenKind.GETOK: Result := '>=';
 
-	 INTOK: Result := 'IN';
+    TTokenKind.INTOK: Result := 'IN';
 
-	DOTTOK: Result := '.';
-      COMMATOK: Result := ',';
-  SEMICOLONTOK: Result := ';';
-       OPARTOK: Result := '(';
-       CPARTOK: Result := ')';
-DEREFERENCETOK: Result := '^';
-    ADDRESSTOK: Result := '@';
-   OBRACKETTOK: Result := '[';
-   CBRACKETTOK: Result := ']';
-      COLONTOK: Result := ':';
-       PLUSTOK: Result := '+';
-      MINUSTOK: Result := '-';
-	MULTOK: Result := '*';
-	DIVTOK: Result := '/';
+    TTokenKind.DOTTOK: Result := '.';
+    TTokenKind.COMMATOK: Result := ',';
+    TTokenKind.SEMICOLONTOK: Result := ';';
+    TTokenKind.OPARTOK: Result := '(';
+    TTokenKind.CPARTOK: Result := ')';
+    TTokenKind.DEREFERENCETOK: Result := '^';
+    TTokenKind.ADDRESSTOK: Result := '@';
+    TTokenKind.OBRACKETTOK: Result := '[';
+    TTokenKind.CBRACKETTOK: Result := ']';
+    TTokenKind.COLONTOK: Result := ':';
+    TTokenKind.PLUSTOK: Result := '+';
+    TTokenKind.MINUSTOK: Result := '-';
+    TTokenKind.MULTOK: Result := '*';
+    TTokenKind.DIVTOK: Result := '/';
 
-       IDIVTOK: Result := 'DIV';
-	MODTOK: Result := 'MOD';
-	SHLTOK: Result := 'SHL';
-	SHRTOK: Result:= 'SHR';
-	 ORTOK: Result := 'OR';
-	XORTOK: Result := 'XOR';
-	ANDTOK: Result := 'AND';
-	NOTTOK: Result := 'NOT';
+    TTokenKind.IDIVTOK: Result := 'DIV';
+    TTokenKind.MODTOK: Result := 'MOD';
+    TTokenKind.SHLTOK: Result := 'SHL';
+    TTokenKind.SHRTOK: Result := 'SHR';
+    TTokenKind.ORTOK: Result := 'OR';
+    TTokenKind.XORTOK: Result := 'XOR';
+    TTokenKind.ANDTOK: Result := 'AND';
+    TTokenKind.NOTTOK: Result := 'NOT';
+    TTokenKind.CONSTTOK: Result := 'CONST';
+    TTokenKind.TYPETOK: Result := 'TYPE';
+    TTokenKind.VARTOK: Result := 'VARIABLE';
+    TTokenKind.PROCEDURETOK: Result := 'PROCEDURE';
+    TTokenKind.FUNCTIONTOK: Result := 'FUNCTION';
+    TTokenKind.CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
+    TTokenKind.DESTRUCTORTOK: Result := 'DESTRUCTOR';
 
-      CONSTTOK: Result := 'CONST';
-       TYPETOK: Result := 'TYPE';
-	VARTOK: Result := 'VARIABLE';
-  PROCEDURETOK: Result := 'PROCEDURE';
-   FUNCTIONTOK: Result := 'FUNCTION';
-CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
- DESTRUCTORTOK: Result := 'DESTRUCTOR';
+    TTokenKind.LABELTOK: Result := 'LABEL';
+    TTokenKind.UNITTOK: Result := 'UNIT';
+    TTokenKind.ENUMTOK: Result := 'ENUM';
 
-      LABELTOK: Result := 'LABEL';
-       UNITTOK: Result := 'UNIT';
-      ENUMTYPE: Result := 'ENUM';
+    TTokenKind.RECORDTOK: Result := 'RECORD';
+    TTokenKind.OBJECTTOK: Result := 'OBJECT';
+    TTokenKind.BYTETOK: Result := 'BYTE';
+    TTokenKind.SHORTINTTOK: Result := 'SHORTINT';
+    TTokenKind.CHARTOK: Result := 'CHAR';
+    TTokenKind.BOOLEANTOK: Result := 'BOOLEAN';
+    TTokenKind.WORDTOK: Result := 'WORD';
+    TTokenKind.SMALLINTTOK: Result := 'SMALLINT';
+    TTokenKind.CARDINALTOK: Result := 'CARDINAL';
+    TTokenKind.INTEGERTOK: Result := 'INTEGER';
+    TTokenKind.POINTERTOK,
+    TTokenKind.DATAORIGINOFFSET,
+    TTokenKind.CODEORIGINOFFSET: Result := 'POINTER';
 
-     RECORDTOK: Result := 'RECORD';
-     OBJECTTOK: Result := 'OBJECT';
-       BYTETOK: Result := 'BYTE';
-   SHORTINTTOK: Result := 'SHORTINT';
-       CHARTOK: Result := 'CHAR';
-    BOOLEANTOK: Result := 'BOOLEAN';
-       WORDTOK: Result := 'WORD';
-   SMALLINTTOK: Result := 'SMALLINT';
-   CARDINALTOK: Result := 'CARDINAL';
-    INTEGERTOK: Result := 'INTEGER';
-    POINTERTOK,
-    DATAORIGINOFFSET,
-    CODEORIGINOFFSET: Result := 'POINTER';
+    TTokenKind.PROCVARTOK: Result := '<Procedure Variable>';
 
-    PROCVARTOK: Result := '<Procedure Variable>';
+    TTokenKind.STRINGPOINTERTOK: Result := 'STRING';
 
- STRINGPOINTERTOK: Result := 'STRING';
+    TTokenKind.STRINGLITERALTOK: Result := 'literal';
 
- STRINGLITERALTOK: Result := 'literal';
+    TTokenKind.SHORTREALTOK: Result := 'SHORTREAL';
+    TTokenKind.REALTOK: Result := 'REAL';
+    TTokenKind.SINGLETOK: Result := 'SINGLE';
+    TTokenKind.HALFSINGLETOK: Result := 'FLOAT16';
+    TTokenKind.SETTOK: Result := 'SET';
+    TTokenKind.FILETOK: Result := 'FILE';
+    TTokenKind.TEXTFILETOK: Result := 'TEXTFILE';
+    TTokenKind.PCHARTOK: Result := 'PCHAR';
 
-  SHORTREALTOK: Result := 'SHORTREAL';
-       REALTOK: Result := 'REAL';
-     SINGLETOK: Result := 'SINGLE';
- HALFSINGLETOK: Result := 'FLOAT16';
-	SETTOK: Result := 'SET';
-       FILETOK: Result := 'FILE';
-   TEXTFILETOK: Result := 'TEXTFILE';
-      PCHARTOK: Result := 'PCHAR';
+    TTokenKind.REGISTERTOK: Result := 'REGISTER';
+    TTokenKind.PASCALTOK: Result := 'PASCAL';
+    TTokenKind.STDCALLTOK: Result := 'STDCALL';
+    TTokenKind.INLINETOK: Result := 'INLINE';
+    TTokenKind.ASMTOK: Result := 'ASM';
+    TTokenKind.INTERRUPTTOK: Result := 'INTERRUPT';
 
-   REGISTERTOK: Result := 'REGISTER';
-     PASCALTOK: Result := 'PASCAL';
-    STDCALLTOK: Result := 'STDCALL';
-     INLINETOK: Result := 'INLINE';
-        ASMTOK: Result := 'ASM';
-  INTERRUPTTOK: Result := 'INTERRUPT';
-
- else
-  Result := 'UNTYPED'
- end;
+    else
+      Result := 'UNTYPED'
+  end;
 
 end;
 
@@ -1062,27 +1121,28 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function LowBound(const i: TTokenIndex; const DataType: Byte): Int64;
+function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 begin
 
- Result := 0;
+  Result := 0;
 
- case DataType of
+  case DataType of
 
-    UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,'Can''t read or write variables of this type'));
-   INTEGERTOK: Result := Low(Integer);
-    SMALLINTTOK: Result := Low(Smallint);
-    SHORTINTTOK: Result := Low(Shortint);
-      CHARTOK: Result := 0;
-    BOOLEANTOK: Result := Ord(Low(Boolean));
-      BYTETOK: Result := Low(Byte);
-      WORDTOK: Result := Low(Word);
-  CARDINALTOK: Result := Low(Cardinal);
-    STRINGTOK: Result := 1;
+    TDataType.UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,
+        'Can''t read or write variables of this type'));
+    TDataType.INTEGERTOK: Result := Low(Integer);
+    TDataType.SMALLINTTOK: Result := Low(Smallint);
+    TDataType.SHORTINTTOK: Result := Low(Shortint);
+    TDataType.CHARTOK: Result := 0;
+    TDataType.BOOLEANTOK: Result := Ord(Low(Boolean));
+    TDataType.BYTETOK: Result := Low(Byte);
+    TDataType.WORDTOK: Result := Low(Word);
+    TDataType.CARDINALTOK: Result := Low(Cardinal);
+    TDataType.STRINGTOK: Result := 1;
 
- else
-      Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch' ));
- end;
+    else
+      Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch'));
+  end;
 
 end;
 
@@ -1091,27 +1151,28 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function HighBound(const i: TTokenIndex; const DataType: Byte): Int64;
+function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 begin
 
- Result := 0;
+  Result := 0;
 
- case DataType of
+  case DataType of
 
-    UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,'Can''t read or write variables of this type'));
-   INTEGERTOK: Result := High(Integer);
-    SMALLINTTOK: Result := High(Smallint);
-    SHORTINTTOK: Result := High(Shortint);
-      CHARTOK: Result := 255;
-    BOOLEANTOK: Result := Ord(High(Boolean));
-      BYTETOK: Result := High(Byte);
-      WORDTOK: Result := High(Word);
-  CARDINALTOK: Result := High(Cardinal);
-    STRINGTOK: Result := 255;
+    TDataType.UNTYPETOK: Error(i, TMessage.Create(TErrorCode.CantReadWrite,
+        'Can''t read or write variables of this type'));
+    TDataType.INTEGERTOK: Result := High(Integer);
+    TDataType.SMALLINTTOK: Result := High(Smallint);
+    TDataType.SHORTINTTOK: Result := High(Shortint);
+    TDataType.CHARTOK: Result := 255;
+    TDataType.BOOLEANTOK: Result := Ord(High(Boolean));
+    TDataType.BYTETOK: Result := High(Byte);
+    TDataType.WORDTOK: Result := High(Word);
+    TDataType.CARDINALTOK: Result := High(Cardinal);
+    TDataType.STRINGTOK: Result := 255;
 
- else
-      Error(i, TMessage.Create(TErrorCode.TypeMismatch,'Type mismatch'));
- end;
+    else
+      Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch'));
+  end;
 
 end;
 
@@ -1142,26 +1203,26 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetValueType(Value: TIntegerNumber): TDatatype;
+function GetValueType(Value: TIntegerNumber): TDataType;
 begin
 
   if Value < 0 then
   begin
 
-    if Value >= Low(Shortint) then Result := SHORTINTTOK
+    if Value >= Low(Shortint) then Result := TDataType.SHORTINTTOK
     else
-    if Value >= Low(Smallint) then Result := SMALLINTTOK
+    if Value >= Low(Smallint) then Result := TDataType.SMALLINTTOK
     else
-      Result := INTEGERTOK;
+      Result := TDataType.INTEGERTOK;
 
   end
   else
 
     case Value of
-      0..255: Result := BYTETOK;
-      256..$FFFF: Result := WORDTOK;
+      0..255: Result := TDataType.BYTETOK;
+      256..$FFFF: Result := TDataType.WORDTOK;
       else
-        Result := CARDINALTOK
+        Result := TDataType.CARDINALTOK
     end;
 
 end;
@@ -1171,27 +1232,33 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenCode);
+procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 var
-  s: String;
+  found, expected: String;
 begin
 
-  if ExpectedTokenCode < IDENTTOK then
-    s := TokenSpelling[ExpectedTokenCode]
-  else if ExpectedTokenCode = IDENTTOK then
-    s := 'identifier'
-  else if (ExpectedTokenCode = INTNUMBERTOK) then
-    s := 'number'
-  else if (ExpectedTokenCode = CHARLITERALTOK) then
-    s := 'literal'
-  else if (ExpectedTokenCode = STRINGLITERALTOK) then
-    s := 'string'
-  else
-    s := 'unknown token';
-
   if Tok[i].Kind <> ExpectedTokenCode then
-    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + s + '''' +
-      ' expected but ''' + GetSpelling(i) + ''' found'));
+  begin
+
+    found := GetSpelling(i);
+
+    if Ord(ExpectedTokenCode) < Ord(TTokenKind.IDENTTOK) then
+      expected := GetTokenSpelling(ExpectedTokenCode)
+    else if ExpectedTokenCode = TTokenKind.IDENTTOK then
+      expected := 'identifier'
+    else if (ExpectedTokenCode = TTokenKind.INTNUMBERTOK) then
+      expected := 'number'
+    else if (ExpectedTokenCode = TTokenKind.CHARLITERALTOK) then
+      expected := 'literal'
+    else if (ExpectedTokenCode = TTokenKind.STRINGLITERALTOK) then
+      expected := 'string'
+    else
+      expected := 'unknown token';
+
+    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected + '''' +
+      ' expected but ''' + found + ''' found'));
+
+  end;
 
 end;
 
@@ -1200,25 +1267,37 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDatatype; err: Boolean = True): Boolean;
+function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 begin
 
   Result := False;
 
-  if (DataSize[DstType] < DataSize[SrcType]) or ((DstType = REALTOK) and (SrcType <> REALTOK)) or
-    ((DstType <> REALTOK) and (SrcType = REALTOK)) or ((DstType = SINGLETOK) and (SrcType <> SINGLETOK)) or
-    ((DstType <> SINGLETOK) and (SrcType = SINGLETOK)) or ((DstType = HALFSINGLETOK) and
-    (SrcType <> HALFSINGLETOK)) or ((DstType <> HALFSINGLETOK) and (SrcType = HALFSINGLETOK)) or
+  if (GetDataSize(DstType) < GetDataSize(SrcType))
+    // .
+    or ((DstType = TDataType.REALTOK) and (SrcType <> TDataType.REALTOK))
+    // .
+    or ((DstType <> TDataType.REALTOK) and (SrcType = TDataType.REALTOK))
+    // .
+    or ((DstType = TDataType.SINGLETOK) and (SrcType <> TDataType.SINGLETOK))
+    // .
+    or ((DstType <> TDataType.SINGLETOK) and (SrcType = TDataType.SINGLETOK))
+    // .
+    or ((DstType = TDataType.HALFSINGLETOK) and (SrcType <> TDataType.HALFSINGLETOK))
+    // .
+    or ((DstType <> TDataType.HALFSINGLETOK) and (SrcType = TDataType.HALFSINGLETOK))
+    // .
+    or ((DstType = TDataType.SHORTREALTOK) and (SrcType <> TDataType.SHORTREALTOK))
+    // .
+    or ((DstType <> TDataType.SHORTREALTOK) and (SrcType = TDataType.SHORTREALTOK))
+    // .
+    or ((DstType in IntegerTypes) and (SrcType in [TDataType.CHARTOK, TDataType.BOOLEANTOK,
+    TDataType.POINTERTOK, TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET, TDataType.STRINGPOINTERTOK]))
+    // .
+    or ((SrcType in IntegerTypes) and (DstType in [TDataType.CHARTOK, TDataType.BOOLEANTOK])) then
 
-     ( (DstType = SHORTREALTOK) and (SrcType <> SHORTREALTOK) ) or
-     ( (DstType <> SHORTREALTOK) and (SrcType = SHORTREALTOK) ) or
-    ((DstType in IntegerTypes) and (SrcType in [CHARTOK, BOOLEANTOK, POINTERTOK, DATAORIGINOFFSET,
-    CODEORIGINOFFSET, STRINGPOINTERTOK])) or ((SrcType in IntegerTypes) and
-    (DstType in [CHARTOK, BOOLEANTOK])) then
-
-     if err then
+    if err then
       ErrorIncompatibleTypes(ErrTokenIndex, SrcType, DstType)
-     else
+    else
       Result := True;
 
 end;
@@ -1228,10 +1307,10 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDatatype): TDatatype;
+function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataType): TDataType;
 begin
 
-  Result := 0;
+  Result := TDataType.UNTYPETOK;
 
   if LeftType = RightType then     // General rule
 
@@ -1244,9 +1323,9 @@ begin
   if (LeftType in Pointers) and (RightType in Pointers) then
     Result := LeftType;
 
-  if LeftType = UNTYPETOK then Result := RightType;
+  if LeftType =  TDataType.UNTYPETOK then Result := RightType;
 
-  if Result = 0 then
+  if Result =  TDataType.UNTYPETOK  then
     ErrorIncompatibleTypes(ErrTokenIndex, RightType, LeftType);
 
 end;

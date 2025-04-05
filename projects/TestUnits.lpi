@@ -90,7 +90,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\Types.pas"/>
+        <Filename Value="..\src\CommonTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
