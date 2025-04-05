@@ -1,4 +1,3 @@
-
 function DoEvaluate(const evaluationContext: IEvaluationContext): Integer;
 var
   s: String;
@@ -80,7 +79,8 @@ var
       fl := MathEvaluate.Evaluate(_s, evaluationContext);
     except
       on e: EEvaluationException do
-        Error(i, 'Evaluation error at position ' + IntToStr(e.Index) + ' of expression ''' + e.expression + '''. ' + e.message);
+        Error(i, 'Evaluation error at position ' + IntToStr(e.Index) + ' of expression ''' +
+          e.expression + '''. ' + e.message);
     end;
 
     ConstVal := Assign(ConstValType, fl);
@@ -104,33 +104,33 @@ begin
   begin
 
     k := 1;
-    SkipWhitespaces(s,k);
+    SkipWhitespaces(s, k);
 
     if s[k] <> '"' then
     begin
 
       par1 := GetParameter;
 
-      SkipWhitespaces(s,k);
+      SkipWhitespaces(s, k);
       if s[k] <> ',' then Error(i, 'Syntax error, '','' expected but ''' + s[k] + ''' found');
 
       Inc(k);
     end;
 
-    SkipWhitespaces(s,k);
+    SkipWhitespaces(s, k);
 
     if s[k] <> '"' then
     begin
 
       par2 := GetParameter;
 
-      SkipWhitespaces(s,k);
+      SkipWhitespaces(s, k);
       if s[k] <> ',' then Error(i, 'Syntax error, '','' expected but ''' + s[k] + ''' found');
 
       Inc(k);
     end;
 
-    SkipWhitespaces(s,k);
+    SkipWhitespaces(s, k);
 
     if s[k] <> '"' then Error(i, 'Syntax error, ''"'' expected but ''' + s[k] + ''' found');
 

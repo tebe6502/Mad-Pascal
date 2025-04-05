@@ -1,4 +1,4 @@
-procedure Syntax(ExitCode: byte);
+procedure Syntax(ExitCode: Byte);
 begin
   (* Keep in sync with https://mads.atari8.info/doc/en/usage/ *)
   WriteLn('');
@@ -19,26 +19,27 @@ begin
 
 end;
 
-procedure ParameterError(const index: Longint; const message: String) ;
-var i: Longint;
+procedure ParameterError(const index: Longint; const message: String);
+var
+  i: Longint;
 begin
 
   Write('Options: ');
-  For i:=1 to TEnvironment.GetParameterCount do
+  for i := 1 to TEnvironment.GetParameterCount do
   begin
 
-     if i < index then
-      begin
-        Console.TextColor(Console.LightGreen);
-      end
+    if i < index then
+    begin
+      Console.TextColor(Console.LightGreen);
+    end
     else if i = index then
-      begin
-        Console.TextColor(Console.LightRed);
-      end
+    begin
+      Console.TextColor(Console.LightRed);
+    end
     else
-      begin
-        Console.NormVideo;
-      end;
+    begin
+      Console.NormVideo;
+    end;
 
     Write(TEnvironment.GetParameterString(i));
     Write(' ');
@@ -47,20 +48,22 @@ begin
 
 
   Console.TextColor(Console.LightRed);
-  WriteLn('ERROR: Check option number '+IntToStr(index)+'. '+message );
+  WriteLn('ERROR: Check option number ' + IntToStr(index) + '. ' + message);
   Console.NormVideo;
   Syntax(THaltException.COMPILING_NOT_STARTED);
 end;
 
-procedure ParameterValueError(index: Longint; parameterValue: String; message:String) ;
+procedure ParameterValueError(index: Longint; parameterValue: String; message: String);
 begin
-     ParameterError(index,'Invalid parameter value '''+parameterValue+'''. '+message);
+  ParameterError(index, 'Invalid parameter value ''' + parameterValue + '''. ' + message);
 end;
 
-function ParseHexParameter( const index:LongInt; const parameterValue: String): Integer;
-var err: Integer;
+function ParseHexParameter(const index: Longint; const parameterValue: String): Integer;
+var
+  err: Integer;
 begin
-  val('$'+parameterValue, result, err);
-  if (err<>0) then ParameterValueError(index, parameterValue, 'Value is no hexadeciment number.');
-  if (result<0) or (result >$10000) then ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
+  val('$' + parameterValue, Result, err);
+  if (err <> 0) then ParameterValueError(index, parameterValue, 'Value is no hexadeciment number.');
+  if (Result < 0) or (Result > $10000) then
+    ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
 end;
