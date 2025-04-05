@@ -19,9 +19,9 @@ type
 type
   TParameterPassingMethod = (
     UNDEFINED,
-    VALPASSING, // By value, modifiable
+    VALPASSING,   // By value, modifiable
     CONSTPASSING, // By const, unodifiable
-    VARPASSING // By reference, modifiable
+    VARPASSING    // By reference, modifiable
     );
 
 const
@@ -32,189 +32,190 @@ type
   TTokenKind = (
     UNTYPETOK,
 
-    CONSTTOK = 1,     // !!! Don't change
-    TYPETOK = 2,     // !!!
-    VARTOK = 3,     // !!!
-    PROCEDURETOK = 4,     // !!!
-    FUNCTIONTOK = 5,     // !!!
-    LABELTOK = 6,   // !!!
-    UNITTOK = 7,   // !!!
+    CONSTTOK,
+    TYPETOK,
+    VARTOK,
+    PROCEDURETOK,
+    FUNCTIONTOK,
+    LABELTOK,
+    UNITTOK,
 
 
-    GETINTVECTOK = 10,
-    SETINTVECTOK = 11,
-    CASETOK = 12,
-    BEGINTOK = 13,
-    ENDTOK = 14,
-    IFTOK = 15,
-    THENTOK = 16,
-    ELSETOK = 17,
-    WHILETOK = 18,
-    DOTOK = 19,
-    REPEATTOK = 20,
-    UNTILTOK = 21,
-    FORTOK = 22,
-    TOTOK = 23,
-    DOWNTOTOK = 24,
-    ASSIGNTOK = 25,
-    WRITETOK = 26,
-    READLNTOK = 27,
-    HALTTOK = 28,
-    USESTOK = 29,
-    ARRAYTOK = 30,
-    OFTOK = 31,
-    STRINGTOK = 32,
-    INCTOK = 33,
-    DECTOK = 34,
-    ORDTOK = 35,
-    CHRTOK = 36,
-    ASMTOK = 37,
-    ABSOLUTETOK = 38,
-    BREAKTOK = 39,
-    CONTINUETOK = 40,
-    EXITTOK = 41,
-    RANGETOK = 42,
+    GETINTVECTOK,
+    SETINTVECTOK,
+    CASETOK,
+    BEGINTOK,
+    ENDTOK,
+    IFTOK,
+    THENTOK,
+    ELSETOK,
+    WHILETOK,
+    DOTOK,
+    REPEATTOK,
+    UNTILTOK,
+    FORTOK,
+    TOTOK,
+    DOWNTOTOK,
+    ASSIGNTOK,
+    WRITETOK,
+    READLNTOK,
+    HALTTOK,
+    USESTOK,
+    ARRAYTOK,
+    OFTOK,
+    STRINGTOK,
+    INCTOK,
+    DECTOK,
+    ORDTOK,
+    CHRTOK,
+    ASMTOK,
+    ABSOLUTETOK,
+    BREAKTOK,
+    CONTINUETOK,
+    EXITTOK,
+    RANGETOK,
 
-    EQTOK = 43,
-    NETOK = 44,
-    LTTOK = 45,
-    LETOK = 46,
-    GTTOK = 47,
-    GETOK = 48,
-    LOTOK = 49,
-    HITOK = 50,
+    EQTOK,
+    NETOK,
+    LTTOK,
+    LETOK,
+    GTTOK,
+    GETOK,
+    LOTOK,
+    HITOK,
 
-    DOTTOK = 51,
-    COMMATOK = 52,
-    SEMICOLONTOK = 53,
-    OPARTOK = 54,
-    CPARTOK = 55,
-    DEREFERENCETOK = 56,
-    ADDRESSTOK = 57,
-    OBRACKETTOK = 58,
-    CBRACKETTOK = 59,
-    COLONTOK = 60,
+    DOTTOK,
+    COMMATOK,
+    SEMICOLONTOK,
+    OPARTOK,
+    CPARTOK,
+    DEREFERENCETOK,
+    ADDRESSTOK,
+    OBRACKETTOK,
+    CBRACKETTOK,
+    COLONTOK,
 
-    PLUSTOK = 61,
-    MINUSTOK = 62,
-    MULTOK = 63,
-    DIVTOK = 64,
-    IDIVTOK = 65,
-    MODTOK = 66,
-    SHLTOK = 67,
-    SHRTOK = 68,
-    ORTOK = 69,
-    XORTOK = 70,
-    ANDTOK = 71,
-    NOTTOK = 72,
+    PLUSTOK,
+    MINUSTOK,
+    MULTOK,
+    DIVTOK,
+    IDIVTOK,
+    MODTOK,
+    SHLTOK,
+    SHRTOK,
+    ORTOK,
+    XORTOK,
+    ANDTOK,
+    NOTTOK,
 
-    ASSIGNFILETOK = 73,
-    RESETTOK = 74,
-    REWRITETOK = 75,
-    APPENDTOK = 76,
-    BLOCKREADTOK = 77,
-    BLOCKWRITETOK = 78,
-    CLOSEFILETOK = 79,
-    GETRESOURCEHANDLETOK = 80,
-    SIZEOFRESOURCETOK = 81,
+    ASSIGNFILETOK,
+    RESETTOK,
+    REWRITETOK,
+    APPENDTOK,
+    BLOCKREADTOK,
+    BLOCKWRITETOK,
+    CLOSEFILETOK,
+    GETRESOURCEHANDLETOK,
+    SIZEOFRESOURCETOK,
 
-    WRITELNTOK = 82,
-    SIZEOFTOK = 83,
-    LENGTHTOK = 84,
-    HIGHTOK = 85,
-    LOWTOK = 86,
-    INTTOK = 87,
-    FRACTOK = 88,
-    TRUNCTOK = 89,
-    ROUNDTOK = 90,
-    ODDTOK = 91,
+    WRITELNTOK,
+    SIZEOFTOK,
+    LENGTHTOK,
+    HIGHTOK,
+    LOWTOK,
+    INTTOK,
+    FRACTOK,
+    TRUNCTOK,
+    ROUNDTOK,
+    ODDTOK,
 
-    PROGRAMTOK = 92,
-    LIBRARYTOK = 93,
-    EXPORTSTOK = 94,
-    EXTERNALTOK = 95,
-    INTERFACETOK = 96,
-    IMPLEMENTATIONTOK = 97,
-    INITIALIZATIONTOK = 98,
-    CONSTRUCTORTOK = 99,
-    DESTRUCTORTOK = 100,
-    OVERLOADTOK = 101,
-    ASSEMBLERTOK = 102,
-    FORWARDTOK = 103,
-    REGISTERTOK = 104,
-    INTERRUPTTOK = 105,
-    PASCALTOK = 106,
-    STDCALLTOK = 107,
-    INLINETOK = 108,
-    KEEPTOK = 109,
+    PROGRAMTOK,
+    LIBRARYTOK,
+    EXPORTSTOK,
+    EXTERNALTOK,
+    INTERFACETOK,
+    IMPLEMENTATIONTOK,
+    INITIALIZATIONTOK,
+    CONSTRUCTORTOK,
+    DESTRUCTORTOK,
+    OVERLOADTOK,
+    ASSEMBLERTOK,
+    FORWARDTOK,
+    REGISTERTOK,
+    INTERRUPTTOK,
+    PASCALTOK,
+    STDCALLTOK,
+    INLINETOK,
+    KEEPTOK,
 
-    SUCCTOK = 110,
-    PREDTOK = 111,
-    PACKEDTOK = 112,
-    GOTOTOK = 113,
-    INTOK = 114,
-    VOLATILETOK = 115,
-    STRIPEDTOK = 116,
-
-
-    SETTOK = 127,  // Size = 32 SET OF
-
-    BYTETOK = 128,  // Size = 1 BYTE
-    WORDTOK = 129,  // Size = 2 WORD
-    CARDINALTOK = 130,  // Size = 4 CARDINAL
-    SHORTINTTOK = 131,  // Size = 1 SHORTINT
-    SMALLINTTOK = 132,  // Size = 2 SMALLINT
-    INTEGERTOK = 133,  // Size = 4 INTEGER
-    CHARTOK = 134,  // Size = 1 CHAR
-    BOOLEANTOK = 135,  // Size = 1 BOOLEAN
-    POINTERTOK = 136,  // Size = 2 POINTER
-    STRINGPOINTERTOK = 137,  // Size = 2 POINTER to STRING
-    FILETOK = 138,  // Size = 2/12 FILE
-    RECORDTOK = 139,  // Size = 2/???
-    OBJECTTOK = 140,  // Size = 2/???
-    SHORTREALTOK = 141,  // Size = 2 SHORTREAL      Fixed-Point Q8.8
-    REALTOK = 142,  // Size = 4 REAL      Fixed-Point Q24.8
-    SINGLETOK = 143,  // Size = 4 SINGLE / FLOAT    IEEE-754 32-bit
-    HALFSINGLETOK = 144,  // Size = 2 HALFSINGLE / FLOAT16  IEEE-754 16-bit
-    PCHARTOK = 145,  // Size = 2 POINTER TO ARRAY OF CHAR
-    ENUMTOK = 146,  // Size = 1 BYTE
-    PROCVARTOK = 147,  // Size = 2
-    TEXTFILETOK = 148,  // Size = 2/12 TEXTFILE
-    FORWARDTYPE = 149,  // Size = 2
-
-    SHORTSTRINGTOK = 150,  // We change into STRINGTOK
-    FLOATTOK = 151,  // We change into SINGLETOK
-    FLOAT16TOK = 152,  // We change into HALFSINGLETOK
-    TEXTTOK = 153,  // We change into TEXTFILETOK
-
-    DEREFERENCEARRAYTOK = 154,  // For ARRAY pointers
+    SUCCTOK,
+    PREDTOK,
+    PACKEDTOK,
+    GOTOTOK,
+    INTOK,
+    VOLATILETOK,
+    STRIPEDTOK,
 
 
-    DATAORIGINOFFSET = 160,
-    CODEORIGINOFFSET = 161,
+    SETTOK,            // Size = 32 SET OF
 
-    IDENTTOK = 170,
-    INTNUMBERTOK = 171,
-    FRACNUMBERTOK = 172,
-    CHARLITERALTOK = 173,
-    STRINGLITERALTOK = 174,
+    BYTETOK,           // Size = 1 BYTE
+    WORDTOK,           // Size = 2 WORD
+    CARDINALTOK,       // Size = 4 CARDINAL
+    SHORTINTTOK,       // Size = 1 SHORTINT
+    SMALLINTTOK,       // Size = 2 SMALLINT
+    INTEGERTOK,        // Size = 4 INTEGER
+    CHARTOK,           // Size = 1 CHAR
+    BOOLEANTOK,        // Size = 1 BOOLEAN
+    POINTERTOK,        // Size = 2 POINTER
+    STRINGPOINTERTOK,  // Size = 2 POINTER to STRING
+    FILETOK,           // Size = 2/12 FILE
+    RECORDTOK,         // Size = 2/???
+    OBJECTTOK,         // Size = 2/???
+    SHORTREALTOK,      // Size = 2 SHORTREAL      Fixed-Point Q8.8
+    REALTOK,           // Size = 4 REAL      Fixed-Point Q24.8
+    SINGLETOK,         // Size = 4 SINGLE / FLOAT    IEEE-754 32-bit
+    HALFSINGLETOK,     // Size = 2 HALFSINGLE / FLOAT16  IEEE-754 16-bit
+    PCHARTOK,          // Size = 2 POINTER TO ARRAY OF CHAR
+    ENUMTOK,           // Size = 1 BYTE
+    PROCVARTOK,        // Size = 2
+    TEXTFILETOK,       // Size = 2/12 TEXTFILE
+    FORWARDTYPE,       // Size = 2
 
-    EVALTOK = 184,
-    LOOPUNROLLTOK = 185,
-    NOLOOPUNROLLTOK = 186,
-    LINKTOK = 187,
-    MACRORELEASE = 188,
-    PROCALIGNTOK = 189,
-    LOOPALIGNTOK = 190,
-    LINKALIGNTOK = 191,
-    INFOTOK = 192,
-    WARNINGTOK = 193,
-    ERRORTOK = 194,
-    UNITBEGINTOK = 195,
-    UNITENDTOK = 196,
-    IOCHECKON = 197,
-    IOCHECKOFF = 198,
-    EOFTOK = 199     // MAXTOKENNAMES = 200
+    SHORTSTRINGTOK,    // We change into STRINGTOK
+    FLOATTOK,          // We change into SINGLETOK
+    FLOAT16TOK,        // We change into HALFSINGLETOK
+    TEXTTOK,           // We change into TEXTFILETOK
+
+    DEREFERENCEARRAYTOK, // For ARRAY pointers
+
+
+    DATAORIGINOFFSET,
+    CODEORIGINOFFSET,
+
+    IDENTTOK,
+    INTNUMBERTOK,
+    FRACNUMBERTOK,
+    CHARLITERALTOK,
+    STRINGLITERALTOK,
+
+    EVALTOK,
+    LOOPUNROLLTOK,
+    NOLOOPUNROLLTOK,
+    LINKTOK,
+    MACRORELEASE,
+    PROCALIGNTOK,
+    LOOPALIGNTOK,
+    LINKALIGNTOK,
+    INFOTOK,
+    WARNINGTOK,
+    ERRORTOK,
+    UNITBEGINTOK,
+    UNITENDTOK,
+    IOCHECKON,
+    IOCHECKOFF,
+    EOFTOK,
+    MAXTOKENNAMES
     );
 
 const
@@ -1427,4 +1428,26 @@ begin
   end;
 end;
 
+procedure AssertTokenOrd(const tokenKind: TTokenKind; Value: Byte);
+begin
+  Assert(Ord(tokenKind) = Value, 'Token kind does not have expected value ' + IntToStr(Value) + '.');
+end;
+
+
+initialization
+
+  begin
+    // Assert order of constants that were marked as "Don't change".
+    // TODO: Why? Where is this used?
+    AssertTokenOrd(TTokenKind.UNTYPETOK, 0);
+    AssertTokenOrd(TTokenKind.CONSTTOK, 1);
+    AssertTokenOrd(TTokenKind.TYPETOK, 2);
+    AssertTokenOrd(TTokenKind.VARTOK, 3);
+    AssertTokenOrd(TTokenKind.PROCEDURETOK, 4);
+    AssertTokenOrd(TTokenKind.FUNCTIONTOK, 5);
+    AssertTokenOrd(TTokenKind.LABELTOK, 6);
+    AssertTokenOrd(TTokenKind.UNITTOK, 7);
+
+    assert(Ord(TTokenKind.MAXTOKENNAMES) = MAXTOKENNAMES);
+  end;
 end.
