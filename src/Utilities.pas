@@ -4,7 +4,8 @@ unit Utilities;
 
 interface
 
-type TExitCode = Longint;
+type
+  TExitCode = Longint;
 
 type
   TEnvironment = class
@@ -49,7 +50,7 @@ uses SysUtils;
 class function TEnvironment.GetParameterCount(): Longint;
 begin
 {$IFNDEF PAS2JS}
-   Result:=ParamCount;
+  Result := ParamCount;
 {$ELSE}
   Result := 3;
 {$ENDIF}
@@ -58,7 +59,7 @@ end;
 class function TEnvironment.GetParameterString(const i: Longint): String;
 begin
    {$IFNDEF PAS2JS}
-      Result:=ParamStr(i);
+  Result := ParamStr(i);
    {$ELSE}
   case i of
     1: Result := 'Input.pas';

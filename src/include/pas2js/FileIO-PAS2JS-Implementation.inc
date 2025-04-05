@@ -1,18 +1,19 @@
 uses SysUtils, Messages;
 
-function FileExists( const FileName: TFilePath; FollowLink: Boolean = True ):Boolean;
+function FileExists(const FileName: TFilePath; FollowLink: Boolean = True): Boolean;
 begin
 end;
 
 procedure AssignFile(f: TTextFile; fName: TFilePath); overload;
-begin;
+begin
+  ;
 end;
 
 procedure AssignFile(f: TBinaryFile; fName: TFilePath); overload;
 begin
 end;
 
-procedure BlockRead(var f: TBinaryFile; var Buf; count: LongInt; var Result: LongInt );
+procedure BlockRead(var f: TBinaryFile; var Buf; Count: Longint; var Result: Longint);
 begin
 end;
 
@@ -37,27 +38,27 @@ procedure Reset(f: TBinaryFile); overload;
 begin
 end;
 
-procedure Reset(var f: TBinaryFile; l: LongInt); overload;
+procedure Reset(var f: TBinaryFile; l: Longint); overload;
 begin
 end;
 
-function FilePos( var f: TBinaryFile ):TInteger;
+function FilePos(var f: TBinaryFile): TInteger;
 begin
 end;
 
-procedure Seek(var f: TBinaryFile; Pos: TInteger );
+procedure Seek(var f: TBinaryFile; Pos: TInteger);
 begin
 end;
 
-procedure ReadLn( var F: TTextFile; Args: String);
+procedure ReadLn(var F: TTextFile; Args: String);
 begin
 end;
 
-procedure Read( var F: TTextFile; Args: Char);
+procedure Read(var F: TTextFile; Args: Char);
 begin
 end;
 
-procedure Read( var F: TBinaryFile; Args: Char);
+procedure Read(var F: TBinaryFile; Args: Char);
 begin
 end;
 
@@ -70,22 +71,24 @@ begin
 end;
 
 procedure Erase(var f: TTextFile); overload;
-begin;
+begin
+  ;
 end;
 
 procedure Erase(var f: TBinaryFile); overload;
-begin;
+begin
+  ;
 end;
 
-function EOF(f: TTextFile):Boolean; overload;
+function EOF(f: TTextFile): Boolean; overload;
 begin
 end;
 
-function EOF(f: TBinaryFile):Boolean; overload;
+function EOF(f: TBinaryFile): Boolean; overload;
 begin
 end;
 
-procedure WriteLn(s:string); overload;
+procedure WriteLn(s: String); overload;
 begin
   System.WriteLn(s);
 end;
@@ -95,15 +98,15 @@ procedure WriteLn(f: TTextFile); overload;
 begin
 end;
 
-procedure WriteLn(f: TTextFile; s:string); overload;
+procedure WriteLn(f: TTextFile; s: String); overload;
 begin
 
 end;
 
-procedure WriteLn(f: TTextFile; s1:string; s2:string); overload;
+procedure WriteLn(f: TTextFile; s1: String; s2: String); overload;
 begin
 end;
 
-procedure WriteLn(f: TTextFile; s1:string; s2:string; s3: string); overload;
+procedure WriteLn(f: TTextFile; s1: String; s2: String; s3: String); overload;
 begin
 end;
