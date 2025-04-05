@@ -537,7 +537,7 @@ type
   TArrayIndex = Integer;
 
   type TTokenSpelling = record
-      tokenCode: TTokenKind;
+      tokenKind: TTokenKind;
       spelling: String;
   end;
 
@@ -553,7 +553,7 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  TokenSpelling: array [1..MAXTOKENNAMES] of TTokenSpelling;
+  TokenSpellings: array [1..MAXTOKENNAMES] of TTokenSpelling;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;	// {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefine;
   IFTmpPosStack: array of Integer;
@@ -897,7 +897,7 @@ end;
 
 function GetTokenSpelling(t: TTokenKind): TString;
 begin
-Result := TokenSpelling[Ord(t)].Spelling;
+Result := TokenSpellings[Ord(t)].Spelling;
 end;
 
 function GetSpelling(i: TTokenIndex): TString;
@@ -1219,25 +1219,31 @@ end;
 
 procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 var
-  s: String;
+  found, expected: String;
 begin
 
-  if Ord(ExpectedTokenCode) < Ord(TTokenKind.IDENTTOK) then
-    s := GetTokenSpelling(ExpectedTokenCode)
-  else if ExpectedTokenCode = TTokenKind.IDENTTOK then
-    s := 'identifier'
-  else if (ExpectedTokenCode = TTokenKind.INTNUMBERTOK) then
-    s := 'number'
-  else if (ExpectedTokenCode = TTokenKind.CHARLITERALTOK) then
-    s := 'literal'
-  else if (ExpectedTokenCode = TTokenKind.STRINGLITERALTOK) then
-    s := 'string'
-  else
-    s := 'unknown token';
-
   if Tok[i].Kind <> ExpectedTokenCode then
-    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + s + '''' +
-      ' expected but ''' + GetSpelling(i) + ''' found'));
+  begin
+
+    found := GetSpelling(i);
+
+    if Ord(ExpectedTokenCode) < Ord(TTokenKind.IDENTTOK) then
+      expected := GetTokenSpelling(ExpectedTokenCode)
+    else if ExpectedTokenCode = TTokenKind.IDENTTOK then
+      expected := 'identifier'
+    else if (ExpectedTokenCode = TTokenKind.INTNUMBERTOK) then
+      expected := 'number'
+    else if (ExpectedTokenCode = TTokenKind.CHARLITERALTOK) then
+      expected := 'literal'
+    else if (ExpectedTokenCode = TTokenKind.STRINGLITERALTOK) then
+      expected := 'string'
+    else
+      expected := 'unknown token';
+
+    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected + '''' +
+      ' expected but ''' + found + ''' found'));
+
+  end;
 
 end;
 

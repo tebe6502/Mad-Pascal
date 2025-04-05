@@ -4,7 +4,7 @@ unit Parser;
 
 interface
 
-uses Common, Numbers, Types;
+uses Common, Numbers;
 
 // -----------------------------------------------------------------------------
 

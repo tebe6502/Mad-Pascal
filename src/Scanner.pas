@@ -87,9 +87,9 @@ if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL' else
   if (S = 'LONGINT') then S := 'INTEGER';
 
 for i := 1 to MAXTOKENNAMES do
-  if S = TokenSpelling[i].spelling then
+  if S = TokenSpellings[i].spelling then
     begin
-    Result := TokenSpelling[i].tokenCode;
+    Result := TokenSpellings[i].TokenKind;
     Break;
     end;
 end;
@@ -1653,11 +1653,11 @@ end;
   procedure AddTokenSpelling(t: TTokenKind; s: String);
   var
     tokenSpelling: TTokenSpelling;
-  begin
-    tokenSpelling.TokenCode := t;
+   begin
+    tokenSpelling.TokenKind := t;
     tokenSpelling.Spelling := s;
-    // TODO Add to TokenSpelling
-    Assert(False);
+
+    TokenSpellings[Ord(tokenSpelling.TokenKind)]:=tokenSpelling;
   end;
 
 begin
@@ -1771,7 +1771,7 @@ begin
 
   AddTokenSpelling(TTokenKind.DOTTOK, '.');
   AddTokenSpelling(TTokenKind.COMMATOK, ',');
-  AddTokenSpelling(TTokenKind.SEMICOLONTOK, ');');
+  AddTokenSpelling(TTokenKind.SEMICOLONTOK, ';');
   AddTokenSpelling(TTokenKind.OPARTOK, '(');
   AddTokenSpelling(TTokenKind.CPARTOK, ')');
   AddTokenSpelling(TTokenKind.DEREFERENCETOK, '^');
