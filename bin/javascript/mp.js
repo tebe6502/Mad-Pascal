@@ -3922,7 +3922,7 @@ rtl.module("Utilities",["System"],function () {
       if ($tmp === 1) {
         Result = "Input.pas"}
        else if ($tmp === 2) {
-        Result = "-i:lib"}
+        Result = "-ipath:lib"}
        else if ($tmp === 3) Result = "-o:Output.a65";
       return Result;
     };
@@ -3965,10 +3965,12 @@ rtl.module("Utilities",["System"],function () {
   this.DefaultFormatSettings = this.TFormatSettings.$clone({CurrencyFormat: 1, NegCurrFormat: 5, ThousandSeparator: ",", DecimalSeparator: ".", CurrencyDecimals: 2, DateSeparator: "-", TimeSeparator: ":", ListSeparator: ",", CurrencyString: "$", ShortDateFormat: "d/m/y", LongDateFormat: 'dd" "mmmm" "yyyy', TimeAMString: "AM", TimePMString: "PM", ShortTimeFormat: "hh:nn", LongTimeFormat: "hh:nn:ss", ShortMonthNames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], LongMonthNames: ["January","February","March","April","May","June","July","August","September","October","November","December"], ShortDayNames: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], LongDayNames: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], TwoDigitYearCenturyWindow: 50});
   this.AnsiLowerCase = function (s) {
     var Result = "";
+    Result = pas.SysUtils.LowerCase(s);
     return Result;
   };
   this.AnsiUpperCase = function (s) {
     var Result = "";
+    Result = pas.SysUtils.UpperCase(s);
     return Result;
   };
   this.CompareWord = function (buf1, buf2, len) {
@@ -32968,16 +32970,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var Result = 0;
     var j = 0;
     var FieldType = 0;
-    var AllocElementType = 0;
-    var NumAllocElements = 0;
     Result = 0;
-    FieldType = pas.Common.TTokenKind.UNTYPETOK;
     if (i > 0) {
       for (var $l = 1, $end = pas.Common.TypeArray[i - 1].NumFields; $l <= $end; $l++) {
         j = $l;
         FieldType = pas.Common.TypeArray[i - 1].Field[j].DataType;
-        NumAllocElements = pas.Common.TypeArray[i - 1].Field[j].NumAllocElements;
-        AllocElementType = pas.Common.TypeArray[i - 1].Field[j].AllocElementType;
         if (FieldType !== pas.Common.TTokenKind.RECORDTOK) Result += pas.Common.GetDataSize(FieldType);
       };
     };
@@ -44727,7 +44724,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.System.Write(pas.Utilities.TEnvironment.GetParameterString(i));
       pas.System.Write(" ");
     };
-    pas.System.Writeln();
+    pas.System.Writeln("");
     pas.Console.TextColor(12);
     pas.System.Writeln("ERROR: Check option number " + pas.Common.IntToStr(index) + ". " + message);
     pas.Console.NormVideo();
@@ -44767,6 +44764,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       parameter = pas.Utilities.TEnvironment.GetParameterString(i);
       parameterUpperCase = pas.Utilities.AnsiUpperCase(parameter);
       if (parameter.charAt(0) === "-") {
+        pas.System.Writeln("JAC!",parameter," Upper Case:",parameterUpperCase);
         if (parameterUpperCase === "-O") {
           i += 1;
           pas.Common.outputFile = parameter;
