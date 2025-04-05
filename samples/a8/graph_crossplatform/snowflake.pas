@@ -1,28 +1,27 @@
 // Koch Snowflake
 // https://en.wikipedia.org/wiki/Koch_snowflake
 
-// float16	186
-// real		197
-// single	237
+// For every supported data type, a separate unit with the same code is used.
+// Float16	186 ticks
+// Real		197 ticks
+// Single	237 ticks
 
+//FPC does not have Float16
+{$IFNDEF FPC}
+{$DEFINE HAS_FLOAT16}
+{$ENDIF}
 
 uses crt, graph, sysutils,
+     {$IFDEF HAS_FLOAT16}
+     snowflake_unit_float16 in 'snowflake_unit_float16.pas',
+     {$ENDIF}
      snowflake_unit_real in 'snowflake_unit_real.pas',
      snowflake_unit_single in 'snowflake_unit_single.pas';
-
-procedure WaitForKey;
-begin
-  repeat 
-  until KeyPressed;
-  ReadKey;
-  repeat 
-  until not KeyPressed;
-end;
 
 procedure Snowflake;
 
 const FLOAT_TYPES : array of String = [
-{$IFDEF FLOAT16} // TODO does not work yet
+{$IFDEF HAS_FLOAT16}
 'Float16',
 {$ENDIF}
 'Real',
@@ -45,7 +44,7 @@ begin
     ticks := GetTickCount;
     
     floatType:=FLOAT_TYPES[i];
-    {$IFDEF Float16}
+    {$IFDEF HAS_FLOAT16}
     if floatType = 'Float16' then snowflake_unit_float16.CreateKochSnowflake;
     {$ENDIF}
     if floatType = 'Real'    then snowflake_unit_real.CreateKochSnowflake;
@@ -53,12 +52,12 @@ begin
   
     ticks := GetTickCount - ticks;
   
-    WaitForKey;
+    ReadKey;
   
     WriteLn('Koch Snowflake with type ''',floatType,'''.');
     Writeln('Time required: ', ticks,' ticks');
     WriteLn('Press any key to continue.');
-    WaitForKey;
+    ReadKey;
 
   end;
   
