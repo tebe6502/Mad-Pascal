@@ -3,7 +3,7 @@ program TestUnits;
 {$I Defines.inc}
 
 uses
-  Crt, Common, Console, Diagnostic, FileIO, MathEvaluate, Parser, Scanner, Optimize, Types, Utilities,
+  Crt, Common, CommonTypes, Console, Diagnostic, FileIO, MathEvaluate, Parser, Scanner, Optimize, Types, Utilities,
   SysUtils;
 
   procedure StartTest(Name: String);
