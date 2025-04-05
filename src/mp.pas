@@ -15419,12 +15419,12 @@ if not isAsm then				// skaczemy do poczatku bloku procedury, wazne dla zagniezd
 
 while Tok[i].Kind in
  [TTokenKind.CONSTTOK, TTokenKind.TYPETOK, TTokenKind.VARTOK, TTokenKind.LABELTOK, TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.PROGRAMTOK, TTokenKind.USESTOK, TTokenKind.LIBRARYTOK, TTokenKind.EXPORTSTOK,
-  CONSTRUCTORTOK, DESTRUCTORTOK, LINKTOK,
-  UNITBEGINTOK, UNITENDTOK, IMPLEMENTATIONTOK, INITIALIZATIONTOK, IOCHECKON, IOCHECKOFF, LOOPUNROLLTOK, NOLOOPUNROLLTOK,
-  PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK, INFOTOK, WARNINGTOK, ERRORTOK] do
+  TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK, TTokenKind.LINKTOK,
+  TTokenKind.UNITBEGINTOK, TTokenKind.UNITENDTOK, TTokenKind.IMPLEMENTATIONTOK, TTokenKind.INITIALIZATIONTOK, TTokenKind.IOCHECKON, TTokenKind.IOCHECKOFF, TTokenKind.LOOPUNROLLTOK, TTokenKind.NOLOOPUNROLLTOK,
+  TTokenKind.PROCALIGNTOK, TTokenKind.LOOPALIGNTOK, TTokenKind.LINKALIGNTOK, TTokenKind.INFOTOK, TTokenKind.WARNINGTOK, TTokenKind.ERRORTOK] do
   begin
 
-  if Tok[i].Kind = LINKTOK then begin
+  if Tok[i].Kind = TTokenKind.LINKTOK then begin
 
    if codealign.link > 0 then begin
     asm65(#9'.align $' + IntToHex(codealign.link,4));
@@ -15436,70 +15436,70 @@ while Tok[i].Kind in
   end;
 
 
-  if Tok[i].Kind = LOOPUNROLLTOK then begin
+  if Tok[i].Kind = TTokenKind.LOOPUNROLLTOK then begin
    if Pass = TPass.CODE_GENERATION then loopunroll := true;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = NOLOOPUNROLLTOK then begin
+  if Tok[i].Kind = TTokenKind.NOLOOPUNROLLTOK then begin
    if Pass = TPass.CODE_GENERATION then loopunroll := false;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = PROCALIGNTOK then begin
+  if Tok[i].Kind = TTokenKind.PROCALIGNTOK then begin
    if Pass = TPass.CODE_GENERATION then codealign.proc := Tok[i].Value;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = LOOPALIGNTOK then begin
+  if Tok[i].Kind = TTokenKind.LOOPALIGNTOK then begin
    if Pass = TPass.CODE_GENERATION then codealign.loop := Tok[i].Value;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = LINKALIGNTOK then begin
+  if Tok[i].Kind = TTokenKind.LINKALIGNTOK then begin
    if Pass = TPass.CODE_GENERATION then codealign.link := Tok[i].Value;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = INFOTOK then begin
+  if Tok[i].Kind = TTokenKind.INFOTOK then begin
    if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgUser[Tok[i].Value]);
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = WARNINGTOK then begin
+  if Tok[i].Kind = TTokenKind.WARNINGTOK then begin
    WarningUserDefined(i);
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = ERRORTOK then begin
+  if Tok[i].Kind = TTokenKind.ERRORTOK then begin
    if Pass = TPass.CODE_GENERATION then Error(i, TErrorCode.UserDefined);
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = IOCHECKON then begin
+  if Tok[i].Kind = TTokenKind.IOCHECKON then begin
    IOCheck := true;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = IOCHECKOFF then begin
+  if Tok[i].Kind = TTokenKind.IOCHECKOFF then begin
    IOCheck := false;
    inc(i, 2);
   end;
 
 
-  if Tok[i].Kind = UNITBEGINTOK then begin
+  if Tok[i].Kind = TTokenKind.UNITBEGINTOK then begin
    asm65separator;
 
-   DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, 0, 0, 0, 0);
+   DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, 0, 0, TDataType.UNTYPETOK, 0);
    Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
 
 //   writeln(UnitName[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
@@ -15517,7 +15517,7 @@ while Tok[i].Kind in
 
    CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
 
-   while Tok[i + 4].Kind in [WARNINGTOK, ERRORTOK, INFOTOK] do inc(i,2);
+   while Tok[i + 4].Kind in [WARNINGTOK, TTokenKind.ERRORTOK, TTokenKind.INFOTOK] do inc(i,2);
 
    CheckTok(i + 4, INTERFACETOK);
 
@@ -15530,10 +15530,10 @@ while Tok[i].Kind in
   end;
 
 
-  if Tok[i].Kind = UNITENDTOK then begin
+  if Tok[i].Kind = TTokenKind.UNITENDTOK then begin
 
    if not ImplementationUse then
-    CheckTok(i, IMPLEMENTATIONTOK);
+    CheckTok(i, TTokenKind.IMPLEMENTATIONTOK);
 
    GenerateProcFuncAsmLabels(BlockIdentIndex);
 
@@ -15547,7 +15547,7 @@ while Tok[i].Kind in
    while (j > 0) and (Ident[j].UnitIndex = UnitNameIndex) do
      begin
   // If procedure or function, delete parameters first
-      if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+      if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
        if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
 	 Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -15563,7 +15563,7 @@ while Tok[i].Kind in
   end;
 
 
-  if Tok[i].Kind = IMPLEMENTATIONTOK then begin
+  if Tok[i].Kind = TTokenKind.IMPLEMENTATIONTOK then begin
 
    INTERFACETOK_USE := false;
 
@@ -15616,10 +15616,10 @@ while Tok[i].Kind in
   end;
 
 
-  if (Tok[i].Kind = INITIALIZATIONTOK) or ((PublicSection = FALSE) and (Tok[i].Kind = BEGINTOK))  then begin
+  if (Tok[i].Kind = TTokenKind.INITIALIZATIONTOK) or ((PublicSection = FALSE) and (Tok[i].Kind = BEGINTOK))  then begin
 
    if not ImplementationUse then
-    CheckTok(i, IMPLEMENTATIONTOK);
+    CheckTok(i, TTokenKind.IMPLEMENTATIONTOK);
 
    asm65separator;
    asm65separator(false);
@@ -15738,10 +15738,10 @@ while Tok[i].Kind in
 
   if INTERFACETOK_USE then
    if Tok[i - 1].Kind <> INTERFACETOK then
-    CheckTok(i, IMPLEMENTATIONTOK);
+    CheckTok(i, TTokenKind.IMPLEMENTATIONTOK);
 
   if ImplementationUse then
-   if Tok[i - 1].Kind <> IMPLEMENTATIONTOK then
+   if Tok[i - 1].Kind <> TTokenKind.IMPLEMENTATIONTOK then
     CheckTok(i, BEGINTOK);
 
   inc(i);
@@ -16586,7 +16586,7 @@ while Tok[i].Kind in
     end;// if TTokenKind.VARTOK
 
 
-  if Tok[i].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+  if Tok[i].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
     if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
       Error(i + 1, 'Procedure name expected but ' + GetSpelling(i + 1) + ' found')
     else
@@ -16621,13 +16621,13 @@ while Tok[i].Kind in
        if not Ident[ForwardIdentIndex].IsUnresolvedForward or
 	 (Ident[ForwardIdentIndex].Block <> BlockStack[BlockStackTop]) or
 	 ((Tok[i].Kind = TTokenKind.PROCEDURETOK) and (Ident[ForwardIdentIndex].Kind <> TTokenKind.PROCEDURETOK)) or
-//	 ((Tok[i].Kind = CONSTRUCTORTOK) and (Ident[ForwardIdentIndex].Kind <> CONSTRUCTORTOK)) or
-//	 ((Tok[i].Kind = DESTRUCTORTOK) and (Ident[ForwardIdentIndex].Kind <> DESTRUCTORTOK)) or
+//	 ((Tok[i].Kind = TTokenKind.CONSTRUCTORTOK) and (Ident[ForwardIdentIndex].Kind <> TTokenKind.CONSTRUCTORTOK)) or
+//	 ((Tok[i].Kind = TTokenKind.DESTRUCTORTOK) and (Ident[ForwardIdentIndex].Kind <> TTokenKind.DESTRUCTORTOK)) or
 	 ((Tok[i].Kind = TTokenKind.FUNCTIONTOK) and (Ident[ForwardIdentIndex].Kind <> TTokenKind.FUNCTIONTOK)) then
 	ForwardIdentIndex := 0;     // Found an identifier of another kind or scope, or it is already resolved
 
 
-      if (Tok[i].Kind in [CONSTRUCTORTOK, DESTRUCTORTOK]) and (ForwardIdentIndex = 0) then
+      if (Tok[i].Kind in [CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (ForwardIdentIndex = 0) then
         Error(i, 'constructors, destructors operators must be methods');
 
 
@@ -16767,7 +16767,7 @@ OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStack[BlockStackTop] 
 if not isAsm then begin
   GenerateDeclarationEpilog;  // Make jump to block entry point
 
-  if not(Tok[i-1].Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
+  if not(Tok[i-1].Kind in [PROCALIGNTOK, TTokenKind.LOOPALIGNTOK, TTokenKind.LINKALIGNTOK]) then
    if TTokenKind.LIBRARYTOK_USE and (Tok[i].Kind <> BEGINTOK) then
 
      inc(i)
@@ -16803,7 +16803,7 @@ j := NumIdent;
 while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
-  if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+  if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
     if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -16840,7 +16840,7 @@ if IsFunction then begin
 
 end;
 
-if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then begin
+if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then begin
 
  if Ident[BlockIdentIndex].isInline then asm65(#9'.ENDM');
 
@@ -16903,7 +16903,7 @@ j := NumIdent;
    while (j > 0) and (Ident[j].UnitIndex = 1) do
      begin
   // If procedure or function, delete parameters first
-      if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+      if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
        if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
 	 Error(j, 'Unresolved forward declaration of ' + Ident[j].Name);
 

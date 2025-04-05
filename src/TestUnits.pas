@@ -3,7 +3,7 @@ program TestUnits;
 {$I Defines.inc}
 
 uses
-  Crt, Common, CommonTypes, Console, Diagnostic, FileIO, MathEvaluate, Parser, Scanner, Optimize, Types, Utilities,
+  Crt, Common, CommonTypes, Console, Diagnostic, FileIO, MathEvaluate, Parser, Scanner, Optimize, Utilities,
   SysUtils;
 
   procedure StartTest(Name: String);
@@ -112,7 +112,7 @@ uses
     Program_NAME := 'TestProgram';
     NumTok := 0;
     // Kind, UnitIndex, Line, Column, Value
-    AddToken(PROGRAMTOK, 1, 1, 1, 0);
+    AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
 
     // Unit Common
     unitPathList := TPathList.Create;
