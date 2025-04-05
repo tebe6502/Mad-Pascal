@@ -10596,10 +10596,11 @@ end;
 
 
   procedure ResizeType(var ValType: TDataType);
-  // dla operacji SHL, MUL rozszerzamy typ dla wyniku operacji
+  // For SHL, MUL operations we extend the type for the operation result
   begin
 
-    if ValType in [TDataType.BYTETOK, TDataType.WORDTOK, TDataType.SHORTINTTOK, TDataType.SMALLINTTOK] then Inc(ValType);
+    if ValType in [TDataType.BYTETOK, TDataType.WORDTOK, TDataType.SHORTINTTOK, TDataType.SMALLINTTOK]
+    then ValType:=Succ(ValType);
 
   end;
 

@@ -89,7 +89,7 @@ end;
 
 function GetStandardToken(S: TString): TTokenKind;
 var
-  i: Integer;
+  i: TTokenKind;
 begin
   Result := TTokenKind.UNTYPETOK;
 
@@ -99,7 +99,7 @@ begin
   else
   if (S = 'LONGINT') then S := 'INTEGER';
 
-  for i := 1 to MAXTOKENNAMES do
+  for i := Low(TTokenKind) to High(TTokenKind) do
     if S = TokenSpellings[i].spelling then
     begin
       Result := TokenSpellings[i].TokenKind;
@@ -1841,7 +1841,7 @@ var
     tokenSpelling.TokenKind := t;
     tokenSpelling.Spelling := s;
 
-    TokenSpellings[Ord(tokenSpelling.TokenKind)] := tokenSpelling;
+    TokenSpellings[tokenSpelling.TokenKind] := tokenSpelling;
   end;
 
 begin

@@ -214,8 +214,7 @@ type
     UNITENDTOK,
     IOCHECKON,
     IOCHECKOFF,
-    EOFTOK,
-    MAXTOKENNAMES
+    EOFTOK
     );
 
 const
@@ -392,8 +391,7 @@ type
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;
 
-  TFieldKind = (UNTYPETOK, OBJECTVARIABLE = 1,
-    RECORDVARIABLE = 2);
+  TFieldKind = (UNTYPETOK, OBJECTVARIABLE, RECORDVARIABLE);
 
   TField = record
     Name: TFieldName;
@@ -559,7 +557,7 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  TokenSpellings: array [1..MAXTOKENNAMES] of TTokenSpelling;
+  TokenSpellings: array [Low(TTokenKind)..High(TTokenKind)] of TTokenSpelling;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefine;
   IFTmpPosStack: array of Integer;
@@ -920,7 +918,7 @@ end;
 
 function GetTokenSpelling(t: TTokenKind): TString;
 begin
-  Result := TokenSpellings[Ord(t)].Spelling;
+  Result := TokenSpellings[t].Spelling;
 end;
 
 function GetSpelling(i: TTokenIndex): TString;
@@ -1433,21 +1431,24 @@ begin
   Assert(Ord(tokenKind) = Value, 'Token kind does not have expected value ' + IntToStr(Value) + '.');
 end;
 
+procedure AssertTokensOrd;
+var value: byte;
+begin
+  // Assert order of constants that were marked as "Don't change".
+  // TODO: Why? Where is this used?
+  AssertTokenOrd(TTokenKind.UNTYPETOK, 0);
+  AssertTokenOrd(TTokenKind.CONSTTOK, 1);
+  AssertTokenOrd(TTokenKind.TYPETOK, 2);
+  AssertTokenOrd(TTokenKind.VARTOK, 3);
+  AssertTokenOrd(TTokenKind.PROCEDURETOK, 4);
+  AssertTokenOrd(TTokenKind.FUNCTIONTOK, 5);
+  AssertTokenOrd(TTokenKind.LABELTOK, 6);
+  AssertTokenOrd(TTokenKind.UNITTOK, 7);
+
+end;
 
 initialization
-
   begin
-    // Assert order of constants that were marked as "Don't change".
-    // TODO: Why? Where is this used?
-    AssertTokenOrd(TTokenKind.UNTYPETOK, 0);
-    AssertTokenOrd(TTokenKind.CONSTTOK, 1);
-    AssertTokenOrd(TTokenKind.TYPETOK, 2);
-    AssertTokenOrd(TTokenKind.VARTOK, 3);
-    AssertTokenOrd(TTokenKind.PROCEDURETOK, 4);
-    AssertTokenOrd(TTokenKind.FUNCTIONTOK, 5);
-    AssertTokenOrd(TTokenKind.LABELTOK, 6);
-    AssertTokenOrd(TTokenKind.UNITTOK, 7);
-
-    assert(Ord(TTokenKind.MAXTOKENNAMES) = MAXTOKENNAMES);
+   AssertTokensOrd;
   end;
 end.
