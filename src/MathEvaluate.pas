@@ -315,7 +315,7 @@ begin
       '+': v1 := factor;
       '-': v1 := -factor;
       'N': v1 := xnot(factor);
-       else
+      else
         Assert(False, 'Invalid case');
     end;
   end
@@ -410,7 +410,8 @@ end;
 
 function Evaluate(const expression: String; const evaluationContext: IEvaluationContext): TEvaluationResult;
 {$IFNDEF UPCASE_STRING}
-var i: Integer;
+var
+  i: Integer;
 {$ENDIF}
 begin
 
@@ -426,7 +427,7 @@ begin
     {$ELSE}
     // Currently there is only UpCase(Char) in PAS2JS
     MathEvaluate.s := expression;
-    for i:=1 to Length(MathEvaluate.s) do  MathEvaluate.s[i]:=UpCase( MathEvaluate.s[i] );
+    for i := 1 to Length(MathEvaluate.s) do MathEvaluate.s[i] := UpCase(MathEvaluate.s[i]);
     {$ENDIF}
     MathEvaluate.cix := 1;
     Result := SimpleExpression;

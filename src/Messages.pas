@@ -106,8 +106,7 @@ procedure WarningShortStringLength(const tokenIndex: TTokenIndex);
 procedure WarningStripedAllowed(const tokenIndex: TTokenIndex);
 procedure WarningUserDefined(const tokenIndex: TTokenIndex);
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
-procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger;
-  const dstType: TDataType);
+procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
 procedure Note(tokenIndex: TTokenIndex; const msg: String);
 procedure NoteForIdentifierNotUsed(tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
@@ -652,8 +651,7 @@ begin
 end;
 
 
-procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger;
-  const dstType: TDataType);
+procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 begin
   Warning(tokenIndex, TMessage.Create(TErrorCode.RangeCheckError, GetRangeCheckText(tokenIndex, Value, dstType)));
 end;

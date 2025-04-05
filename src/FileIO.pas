@@ -71,7 +71,7 @@ type
 type
   TFileMapEntry = class
   public
-  type TFileType=(TextFile, BinaryFile, Folder);
+  type TFileType = (TextFile, BinaryFile, Folder);
 
   public
     filePath: TFilePath;
@@ -556,7 +556,7 @@ begin
   Assert(entry = nil, 'Entry with file path ''' + filePath + ''' is already in the file map.');
   entry := TFileMapEntry.Create;
   entry.filePath := filePath;
-  entry.fileType:=fileType;
+  entry.fileType := fileType;
   SetLength(entries, Length(entries) + 1);
   entries[High(entries)] := entry;
   Result := entry;
