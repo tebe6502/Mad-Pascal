@@ -173,13 +173,10 @@ end;  //GetIdent
 function ObjectRecordSize(i: Cardinal): Integer;
 var
   j: Integer;
-  FieldType, AllocElementType: TDataType;
-  NumAllocElements: Cardinal;
+  FieldType: TDataType;
 begin
 
   Result := 0;
-
-  FieldType := TDataType.UNTYPETOK;
 
   if i > 0 then
   begin
@@ -188,10 +185,6 @@ begin
     begin
 
       FieldType := TypeArray[i].Field[j].DataType;
-
-      // TODO: The two variables below are unused.
-      NumAllocElements := TypeArray[i].Field[j].NumAllocElements;
-      AllocElementType := TypeArray[i].Field[j].AllocElementType;
 
       if FieldType <> TDataType.RECORDTOK then
         Inc(Result, GetDataSize(FieldType));
