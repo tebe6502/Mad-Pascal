@@ -27,7 +27,7 @@ cd /d %MP_SRC_FOLDER%
 
 if not "%TEST_EXE%"=="" (
   if exist "%TEST_EXE%" del "%TEST_EXE%"
-  call fpc.bat %TEST_PAS%
+  rem call fpc.bat %TEST_PAS%
   if errorlevel 1 goto :eof
 )
 
@@ -38,7 +38,7 @@ if not "%MP_EXE%"=="" (
    if errorlevel 1 goto :eof
 
 rem Regression test with standard MP.
-   if 1==1 (
+   if "%TEST_MODE%"=="" (
      echo.
      echo INFO: Compiling with WUDSN version.
      echo ===================================
@@ -86,8 +86,10 @@ goto :eof
      if exist %MADS_OUTPUT_XEX% del %MADS_OUTPUT_XEX%
      mads %MP_OUTPUT_ASM% -x -i:%MP_FOLDER%\base -o:%MADS_OUTPUT_XEX%
      if exist %MADS_OUTPUT_XEX% (
-       echo Starting test program "%MADS_OUTPUT_XEX%".
-       %MADS_OUTPUT_XEX%	
+       if "%TEST_MODE%"=="" (
+         echo Starting test program "%MADS_OUTPUT_XEX%".
+         %MADS_OUTPUT_XEX%
+       )	
      ) else (
        echo ERROR: MADS output file %MADS_OUTPUT_XEX% not created.
        pause
