@@ -14987,8 +14987,9 @@ var
   ConstVal: Int64;
   ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, Assignment, {pack,} IsNestedFunction,
   isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm, isReg, isInt, isInl, isOvr: Boolean;
-  VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
-  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: Byte;
+  VarRegister: Byte;
+  VarType,NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
+  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
   varPassMethod: TParameterPassingMethod;
   Tmp, TmpResult: word;
 
@@ -15010,8 +15011,8 @@ VarRegister := 0;
 external_libr := 0;
 external_name := '';
 
-NestedDataType := 0;
-NestedAllocElementType := 0;
+NestedDataType := TDataType.UNTYPETOK;
+NestedAllocElementType := TDataType.UNTYPETOK;
 NestedNumAllocElements := 0;
 ParamIndex := 0;
 
@@ -15499,7 +15500,7 @@ while Tok[i].Kind in
   if Tok[i].Kind = TTokenKind.UNITBEGINTOK then begin
    asm65separator;
 
-   DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, 0, 0, TDataType.UNTYPETOK, 0);
+   DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
    Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
 
 //   writeln(UnitName[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
@@ -15509,7 +15510,7 @@ while Tok[i].Kind in
 
    UnitNameIndex := Tok[i].UnitIndex;
 
-   CheckTok(i + 1, UNITTOK);
+   CheckTok(i + 1, TTokenKind.UNITTOK);
    CheckTok(i + 2, TTokenKind.IDENTTOK);
 
    if Tok[i + 2].Name <> UnitName[Tok[i].UnitIndex].Name then
@@ -15517,9 +15518,9 @@ while Tok[i].Kind in
 
    CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
 
-   while Tok[i + 4].Kind in [WARNINGTOK, TTokenKind.ERRORTOK, TTokenKind.INFOTOK] do inc(i,2);
+   while Tok[i + 4].Kind in [TTokenKind.WARNINGTOK, TTokenKind.ERRORTOK, TTokenKind.INFOTOK] do inc(i,2);
 
-   CheckTok(i + 4, INTERFACETOK);
+   CheckTok(i + 4, TTokenKind.INTERFACETOK);
 
    INTERFACETOK_USE := true;
 
@@ -15547,7 +15548,7 @@ while Tok[i].Kind in
    while (j > 0) and (Ident[j].UnitIndex = UnitNameIndex) do
      begin
   // If procedure or function, delete parameters first
-      if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+      if Ident[j].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
        if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
 	 Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -15605,7 +15606,7 @@ while Tok[i].Kind in
 
     inc(i);
 
-    if not (Tok[i].Kind in [COMMATOK, TTokenKind.SEMICOLONTOK]) then CheckTok(i, TTokenKind.SEMICOLONTOK);
+    if not (Tok[i].Kind in [TTokenKind.COMMATOK, TTokenKind.SEMICOLONTOK]) then CheckTok(i, TTokenKind.SEMICOLONTOK);
 
     if Tok[i].Kind = TTokenKind.COMMATOK then inc(i);
 
@@ -15616,7 +15617,7 @@ while Tok[i].Kind in
   end;
 
 
-  if (Tok[i].Kind = TTokenKind.INITIALIZATIONTOK) or ((PublicSection = FALSE) and (Tok[i].Kind = BEGINTOK))  then begin
+  if (Tok[i].Kind = TTokenKind.INITIALIZATIONTOK) or ((PublicSection = FALSE) and (Tok[i].Kind = TTokenKind.BEGINTOK))  then begin
 
    if not ImplementationUse then
     CheckTok(i, TTokenKind.IMPLEMENTATIONTOK);
@@ -15639,7 +15640,7 @@ while Tok[i].Kind in
 
   if Tok[i].Kind = TTokenKind.LIBRARYTOK then begin       // na samym poczatku listingu
 
-   if TTokenKind.LIBRARYTOK_USE then CheckTok(i, BEGINTOK);
+   if LIBRARYTOK_USE then CheckTok(i, TTokenKind.BEGINTOK);
 
    CheckTok(i + 1, TTokenKind.IDENTTOK);
 
@@ -15660,14 +15661,14 @@ while Tok[i].Kind in
 
    inc(i, 2);
 
-   TTokenKind.LIBRARYTOK_USE := true;
+   LIBRARYTOK_USE := true;
   end;
 
 
 
   if Tok[i].Kind = TTokenKind.PROGRAMTOK then begin       // na samym poczatku listingu
 
-   if TTokenKind.PROGRAMTOK_USE then CheckTok(i, BEGINTOK);
+   if PROGRAMTOK_USE then CheckTok(i, TTokenKind.BEGINTOK);
 
    CheckTok(i + 1, TTokenKind.IDENTTOK);
 
@@ -15708,41 +15709,41 @@ while Tok[i].Kind in
 
    inc(i, 2);
 
-   TTokenKind.PROGRAMTOK_USE := true;
+   PROGRAMTOK_USE := true;
   end;
 
 
   if Tok[i].Kind = TTokenKind.USESTOK then begin	  // co najwyzej po PROGRAM
 
-  if TTokenKind.LIBRARYTOK_USE then begin
+  if LIBRARYTOK_USE then begin
 
    j:=i-1;
 
-   while Tok[j].Kind in [SEMICOLONTOK, TTokenKind.IDENTTOK, TTokenKind.COLONTOK, TTokenKind.INTNUMBERTOK] do dec(j);
+   while Tok[j].Kind in [TTokenKind.SEMICOLONTOK, TTokenKind.IDENTTOK, TTokenKind.COLONTOK, TTokenKind.INTNUMBERTOK] do dec(j);
 
    if Tok[j].Kind <> TTokenKind.LIBRARYTOK then
-    CheckTok(i, BEGINTOK);
+    CheckTok(i, TTokenKind.BEGINTOK);
 
   end;
 
-  if TTokenKind.PROGRAMTOK_USE then begin
+  if PROGRAMTOK_USE then begin
 
    j:=i-1;
 
-   while Tok[j].Kind in [SEMICOLONTOK, TTokenKind.CPARTOK, TTokenKind.OPARTOK, TTokenKind.IDENTTOK, TTokenKind.COMMATOK, TTokenKind.COLONTOK, TTokenKind.INTNUMBERTOK] do dec(j);
+   while Tok[j].Kind in [TTokenKind.SEMICOLONTOK, TTokenKind.CPARTOK, TTokenKind.OPARTOK, TTokenKind.IDENTTOK, TTokenKind.COMMATOK, TTokenKind.COLONTOK, TTokenKind.INTNUMBERTOK] do dec(j);
 
    if Tok[j].Kind <> TTokenKind.PROGRAMTOK then
-    CheckTok(i, BEGINTOK);
+    CheckTok(i, TTokenKind.BEGINTOK);
 
   end;
 
   if INTERFACETOK_USE then
-   if Tok[i - 1].Kind <> INTERFACETOK then
+   if Tok[i - 1].Kind <> TTokenKind.INTERFACETOK then
     CheckTok(i, TTokenKind.IMPLEMENTATIONTOK);
 
   if ImplementationUse then
    if Tok[i - 1].Kind <> TTokenKind.IMPLEMENTATIONTOK then
-    CheckTok(i, BEGINTOK);
+    CheckTok(i, TTokenKind.BEGINTOK);
 
   inc(i);
 
@@ -15771,7 +15772,7 @@ while Tok[i].Kind in
     inc(i,2);
    end;
 
-   if not (Tok[i].Kind in [COMMATOK, TTokenKind.SEMICOLONTOK]) then CheckTok(i, TTokenKind.SEMICOLONTOK);
+   if not (Tok[i].Kind in [TTokenKind.COMMATOK, TTokenKind.SEMICOLONTOK]) then CheckTok(i, TTokenKind.SEMICOLONTOK);
 
    if Tok[i].Kind = TTokenKind.COMMATOK then inc(i);
 
@@ -15811,7 +15812,7 @@ while Tok[i].Kind in
     inc(i,2);
    end;
 
-   if not (Tok[i].Kind in [COMMATOK, TTokenKind.SEMICOLONTOK]) then CheckTok(i, TTokenKind.SEMICOLONTOK);
+   if not (Tok[i].Kind in [TTokenKind.COMMATOK, TTokenKind.SEMICOLONTOK]) then CheckTok(i, TTokenKind.SEMICOLONTOK);
 
    if Tok[i].Kind = TTokenKind.COMMATOK then inc(i);
 
@@ -15835,7 +15836,7 @@ while Tok[i].Kind in
 
     CheckTok(i , TTokenKind.IDENTTOK);
 
-    DefineIdent(i, Tok[i].Name, LABELTYPE, 0, 0, 0, 0);
+    DefineIdent(i, Tok[i].Name, LABELTYPE, TTokenKind.UNTYPETOK, 0, TTokenKind.UNTYPETOK, 0);
 
     inc(i);
 
@@ -15872,7 +15873,7 @@ while Tok[i].Kind in
    	   if (ConstValType in Pointers) then
 	     Error(j, TErrorCode.IllegalExpression)
 	   else
-	     DefineIdent(i + 1, Tok[i + 1].Name, CONSTANT, ConstValType, 0, 0, ConstVal, Tok[j].Kind);
+	     DefineIdent(i + 1, Tok[i + 1].Name, CONSTANT, ConstValType, 0, TDataType.UNTYPETOK, ConstVal, Tok[j].Kind);
 
 	  i := j;
 	end else
@@ -15981,7 +15982,7 @@ while Tok[i].Kind in
 
 
 	   if NumAllocElements shr 16 > 0 then
-	     inc(NumStaticStrChars, ((NumAllocElements and $ffff) * (NumAllocElements shr 16)) * GetDataSize( TDataType.AllocElementType])
+	     inc(NumStaticStrChars, ((NumAllocElements and $ffff) * (NumAllocElements shr 16)) * GetDataSize( AllocElementType ))
 	   else
 	     inc(NumStaticStrChars, NumAllocElements * GetDataSize(AllocElementType));
 
@@ -16000,7 +16001,7 @@ while Tok[i].Kind in
 
 	   GetCommonType(i + 1, VarType, ConstValType);
 
-	   DefineIdent(i + 1, Tok[i + 1].Name, CONSTANT, VarType, 0, 0, ConstVal, Tok[j].Kind);
+	   DefineIdent(i + 1, Tok[i + 1].Name, CONSTANT, VarType, 0, TDataType.UNTYPETOK, ConstVal, Tok[j].Kind);
 	  end;
 
 	  i := j;
@@ -16066,14 +16067,14 @@ while Tok[i].Kind in
     isVolatile := FALSE;
     isStriped  := FALSE;
 
-    NestedDataType := 0;
-    NestedAllocElementType := 0;
+    NestedDataType := TDataType.UNTYPETOK;
+    NestedAllocElementType := TDataType.UNTYPETOK;
     NestedNumAllocElements := 0;
 
-    if (Tok[i + 1].Kind = TTokenKind.OBRACKETTOK) and (Tok[i + 2].Kind in [VOLATILETOK, STRIPEDTOK]) then begin
+    if (Tok[i + 1].Kind = TTokenKind.OBRACKETTOK) and (Tok[i + 2].Kind in [TDataType.VOLATILETOK, TDataType.STRIPEDTOK]) then begin
        CheckTok(i + 3, TTokenKind.CBRACKETTOK);
 
-       if Tok[i + 2].Kind = VOLATILETOK then
+       if Tok[i + 2].Kind = TDataType.VOLATILETOK then
          isVolatile := TRUE
        else
          isStriped  := TRUE;
@@ -16103,9 +16104,9 @@ while Tok[i].Kind in
      // pack:=false;
 
 
-      if Tok[i + 1].Kind = PACKEDTOK then begin
+      if Tok[i + 1].Kind = TTokenKind.PACKEDTOK then begin
 
-       if (Tok[i + 2].Kind in [ARRAYTOK, TTokenKind.RECORDTOK]) then begin
+       if (Tok[i + 2].Kind in [TTokenKind.ARRAYTOK, TTokenKind.RECORDTOK]) then begin
         inc(i);
        // pack := true;
        end else
@@ -16172,7 +16173,7 @@ while Tok[i].Kind in
 
 	isAbsolute := true;
 
-	inc(VarRegister, GetDataSize( TDataType.VarType]);
+	inc(VarRegister, GetDataSize( VarType));
 
 	ConstVal := (VarRegister+3) shl 24 + 1 ;
 
@@ -16180,7 +16181,7 @@ while Tok[i].Kind in
 
       end else
 
-      if Tok[i + 1].Kind = EXTERNALTOK then begin
+      if Tok[i + 1].Kind = TTokenKind.EXTERNALTOK then begin
 
        if NumVarOfSameType > 1 then
 	 Error(i + 1, 'Only one variable can be initialized');
@@ -16218,7 +16219,7 @@ while Tok[i].Kind in
 
       end else
 
-      if Tok[i + 1].Kind = ABSOLUTETOK then begin
+      if Tok[i + 1].Kind = TTokenKind.ABSOLUTETOK then begin
 
 	isAbsolute := true;
 
@@ -16276,13 +16277,13 @@ while Tok[i].Kind in
 //  writeln(VarType,',',NumAllocElements and $FFFF,',',NumAllocElements shr 16,',',AllocElementType, ',',idType,',',varPassMethod,',',isAbsolute);
 
 
-	if VarType = DEREFERENCEARRAYTOK then begin
+	if VarType = TDataType.DEREFERENCEARRAYTOK then begin
 
-	  VarType := TTokenKind.POINTERTOK;
+	  VarType := TDataType.POINTERTOK;
 
 	  NestedNumAllocElements := NumAllocElements;
 
-	  IdType := DEREFERENCEARRAYTOK;
+	  IdType := TDataType.DEREFERENCEARRAYTOK;
 
           NumAllocElements := 1;
 
@@ -16291,7 +16292,7 @@ while Tok[i].Kind in
 
 	if VarType = ENUMTYPE then begin
 
-	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, AllocElementType, 0, 0, 0, IdType);
+	  DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, AllocElementType, 0, TDataType.UNTYPETOK, 0, IdType);
 
 	  Ident[NumIdent].DataType := ENUMTYPE;
 	  Ident[NumIdent].AllocElementType := AllocElementType;
@@ -16533,7 +16534,7 @@ while Tok[i].Kind in
 	       Ident[NumIdent].NumAllocElements := NumAllocElements;
 	     end;
 
-	     inc(VarDataSize, NumAllocElements * GetDataSize( TDataType.Ident[NumIdent].AllocElementType]);
+	     inc(VarDataSize, NumAllocElements * GetDataSize( Ident[NumIdent].AllocElementType));
 
 	    end else begin										// array [] of type = ( )
 
@@ -16565,10 +16566,10 @@ while Tok[i].Kind in
       isVolatile := FALSE;
       isStriped  := FALSE;
 
-      if (Tok[i + 2].Kind = TTokenKind.OBRACKETTOK) and (Tok[i + 3].Kind in [VOLATILETOK, STRIPEDTOK]) then begin
+      if (Tok[i + 2].Kind = TTokenKind.OBRACKETTOK) and (Tok[i + 3].Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then begin
        CheckTok(i + 4, TTokenKind.CBRACKETTOK);
 
-       if Tok[i + 3].Kind = VOLATILETOK then
+       if Tok[i + 3].Kind = TTokenKind.VOLATILETOK then
          isVolatile := TRUE
        else
          isStriped  := TRUE;
@@ -16586,7 +16587,7 @@ while Tok[i].Kind in
     end;// if TTokenKind.VARTOK
 
 
-  if Tok[i].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+  if Tok[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
     if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
       Error(i + 1, 'Procedure name expected but ' + GetSpelling(i + 1) + ' found')
     else
@@ -16627,7 +16628,7 @@ while Tok[i].Kind in
 	ForwardIdentIndex := 0;     // Found an identifier of another kind or scope, or it is already resolved
 
 
-      if (Tok[i].Kind in [CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (ForwardIdentIndex = 0) then
+      if (Tok[i].Kind in [TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (ForwardIdentIndex = 0) then
         Error(i, 'constructors, destructors operators must be methods');
 
 
@@ -16767,13 +16768,13 @@ OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStack[BlockStackTop] 
 if not isAsm then begin
   GenerateDeclarationEpilog;  // Make jump to block entry point
 
-  if not(Tok[i-1].Kind in [PROCALIGNTOK, TTokenKind.LOOPALIGNTOK, TTokenKind.LINKALIGNTOK]) then
-   if TTokenKind.LIBRARYTOK_USE and (Tok[i].Kind <> BEGINTOK) then
+  if not(Tok[i-1].Kind in [TTokenKind.PROCALIGNTOK, TTokenKind.LOOPALIGNTOK, TTokenKind.LINKALIGNTOK]) then
+   if LIBRARYTOK_USE and (Tok[i].Kind <> TTokenKind.BEGINTOK) then
 
      inc(i)
 
    else
-    CheckTok(i, BEGINTOK);
+    CheckTok(i, TTokenKind.BEGINTOK);
 
 end;
 
@@ -16803,7 +16804,7 @@ j := NumIdent;
 while (j > 0) and (Ident[j].Block = BlockStack[BlockStackTop]) do
   begin
   // If procedure or function, delete parameters first
-  if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+  if Ident[j].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
     if Ident[j].IsUnresolvedForward and (Ident[j].isExternal = false) then
       Error(i, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -16822,7 +16823,7 @@ if IsFunction then begin
 
   if Ident[BlockIdentIndex].isStdCall or Ident[BlockIdentIndex].isRecursion then begin
 
-    Push(Ident[GetIdentIndex('RESULT')].Value, ASPOINTER, GetDataSize( TDataType.FunctionResultType), GetIdentIndex('RESULT'));
+    Push(Ident[GetIdentIndex('RESULT')].Value, ASPOINTER, GetDataSize( FunctionResultType), GetIdentIndex('RESULT'));
 
     asm65;
 
@@ -16840,7 +16841,7 @@ if IsFunction then begin
 
 end;
 
-if Ident[BlockIdentIndex].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then begin
+if Ident[BlockIdentIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then begin
 
  if Ident[BlockIdentIndex].isInline then asm65(#9'.ENDM');
 
@@ -16886,16 +16887,16 @@ AsmBlockIndex := 0;
 
 //SetLength(AsmLabels, 1);
 
-DefineIdent(1, 'MAIN', TTokenKind.PROCEDURETOK, 0, 0, 0, 0);
+DefineIdent(1, 'MAIN', TTokenKind.PROCEDURETOK, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
 
 
 GenerateProgramProlog;
 
-j := CompileBlock(1, NumIdent, 0, FALSE, 0);
+j := CompileBlock(1, NumIdent, 0, FALSE, TDataType.UNTYPETOK);
 
 
 if Tok[j].Kind = TTokenKind.ENDTOK then CheckTok(j + 1, TTokenKind.DOTTOK) else
- if Tok[NumTok].Kind = EOFTOK then
+ if Tok[NumTok].Kind = TTokenKind.EOFTOK then
    Error(NumTok, 'Unexpected end of file');
 
 j := NumIdent;

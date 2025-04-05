@@ -437,7 +437,7 @@ type
     Pass: TPass;
 
     NestedNumAllocElements: Cardinal;
-    NestedAllocElementType: Byte;
+    NestedAllocElementType: TDataType;
     NestedDataType: TDataType;
 
     NestedFunctionNumAllocElements: Cardinal;
