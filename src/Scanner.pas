@@ -1656,7 +1656,7 @@ end;
   begin
     tokenSpelling.TokenCode := t;
     tokenSpelling.Spelling := s;
-    // TODO Add
+    // TODO Add to TokenSpelling
     Assert(False);
   end;
 

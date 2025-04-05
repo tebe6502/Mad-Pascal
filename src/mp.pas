@@ -16904,7 +16904,7 @@ j := NumIdent;
    while (j > 0) and (Ident[j].UnitIndex = 1) do
      begin
   // If procedure or function, delete parameters first
-      if Ident[j].Kind in [PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+      if Ident[j].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
        if (Ident[j].IsUnresolvedForward) and (Ident[j].isExternal = false) then
 	 Error(j, 'Unresolved forward declaration of ' + Ident[j].Name);
 
@@ -17107,7 +17107,7 @@ if DataSegmentUse then begin
 
   DataSegmentSize := VarDataSize;
 
-  if TTokenKind.LIBRARYTOK_USE = FALSE then
+  if LIBRARYTOK_USE = FALSE then
    for j := VarDataSize - 1 downto 0 do
     if DataSegment[j] <> 0 then begin DataSegmentSize := j+1; Break end;
 
@@ -17151,7 +17151,7 @@ end;{ else
 }
 
 
-if TTokenKind.LIBRARYTOK_USE then begin
+if LIBRARYTOK_USE then begin
 
   asm65;
   asm65('PROGRAMSTACK');
@@ -17607,27 +17607,27 @@ begin
  NumStaticStrCharsTmp := NumStaticStrChars;
 
 // Predefined constants
- DefineIdent(1, 'BLOCKREAD',      TTokenKind.FUNCTIONTOK, TTokenKind.INTEGERTOK, 0, 0, $00000000);
- DefineIdent(1, 'BLOCKWRITE',     TTokenKind.FUNCTIONTOK, TTokenKind.INTEGERTOK, 0, 0, $00000000);
+ DefineIdent(1, 'BLOCKREAD',      TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
+ DefineIdent(1, 'BLOCKWRITE',     TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
- DefineIdent(1, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TTokenKind.INTEGERTOK, 0, 0, $00000000);
+ DefineIdent(1, 'GETRESOURCEHANDLE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
- DefineIdent(1, 'NIL',      CONSTANT, TTokenKind.POINTERTOK, 0, 0, CODEORIGIN);
+ DefineIdent(1, 'NIL',      CONSTANT, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
 
- DefineIdent(1, 'EOL',      CONSTANT, TTokenKind.CHARTOK, 0, 0, target.eol);
+ DefineIdent(1, 'EOL',      CONSTANT, TDataType.CHARTOK, 0, TDataType.UNTYPETOK, target.eol);
 
- DefineIdent(1, '__BUFFER', CONSTANT, TTokenKind.WORDTOK, 0, 0, target.buf);
+ DefineIdent(1, '__BUFFER', CONSTANT, TDataType.WORDTOK, 0, TDataType.UNTYPETOK, target.buf);
 
- DefineIdent(1, 'TRUE',     CONSTANT, TTokenKind.BOOLEANTOK, 0, 0, $00000001);
- DefineIdent(1, 'FALSE',    CONSTANT, TTokenKind.BOOLEANTOK, 0, 0, $00000000);
+ DefineIdent(1, 'TRUE',     CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000001);
+ DefineIdent(1, 'FALSE',    CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000000);
 
- DefineIdent(1, 'MAXINT',      CONSTANT, TTokenKind.INTEGERTOK, 0, 0, MAXINT);
- DefineIdent(1, 'MAXSMALLINT', CONSTANT, TTokenKind.INTEGERTOK, 0, 0, MAXSMALLINT);
+ DefineIdent(1, 'MAXINT',      CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXINT);
+ DefineIdent(1, 'MAXSMALLINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXSMALLINT);
 
- DefineIdent(1, 'PI',       CONSTANT, TTokenKind.REALTOK, 0, 0, PI_VALUE );
- DefineIdent(1, 'NAN',      CONSTANT, TTokenKind.SINGLETOK, 0, 0, NAN_VALUE);
- DefineIdent(1, 'INFINITY', CONSTANT, TTokenKind.SINGLETOK, 0, 0, INFINITY_VALUE);
- DefineIdent(1, 'NEGINFINITY', CONSTANT, TTokenKind.SINGLETOK, 0, 0, NEGINFINITY_VALUE);
+ DefineIdent(1, 'PI',       CONSTANT, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE );
+ DefineIdent(1, 'NAN',      CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
+ DefineIdent(1, 'INFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
+ DefineIdent(1, 'NEGINFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
 
 // First pass: compile the program and build call graph
  NumPredefIdent := NumIdent;
@@ -17656,10 +17656,10 @@ begin
  optyFOR2 := '';
  optyFOR3 := '';
 
- LIBRARY_USE := TTokenKind.LIBRARYTOK_USE;
+ LIBRARY_USE := LIBRARYTOK_USE;
 
- TTokenKind.LIBRARYTOK_USE := FALSE;
- TTokenKind.PROGRAMTOK_USE := FALSE;
+ LIBRARYTOK_USE := FALSE;
+ PROGRAMTOK_USE := FALSE;
  INTERFACETOK_USE := FALSE;
  PublicSection := TRUE;
 
