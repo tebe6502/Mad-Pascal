@@ -318,7 +318,7 @@ begin
 
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex);
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex); overload;
 var
   msg: String;
 begin
@@ -335,7 +335,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Error(const tokenIndex: TTokenIndex; const msg: String);
+procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
 var
   effectiveTokenIndex: TTokenIndex;
   token, previousToken: TToken;
@@ -392,7 +392,7 @@ begin
 
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage);
+procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
 var
   enumValue: Integer;
   enumName: String;
@@ -403,7 +403,7 @@ begin
 end;
 
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode);
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
 begin
   ErrorForIdentifier(tokenIndex, errorCode, 0);
 end;
