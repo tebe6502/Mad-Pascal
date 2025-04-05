@@ -13895,6 +13895,9 @@ var IdentIndex, size: integer;
     fnam, txt, svar: string;
     varbegin: TString;
     HeaFile: ITextFile;
+    // Debugging
+    traceSize: Boolean;
+    varDataSizeString: String;
 
 // ----------------------------------------------------------------------------
 
@@ -14017,6 +14020,20 @@ var IdentIndex, size: integer;
 
   end;
 
+  function GetIdentifierFullName(const identifier: TIdentifier): String;
+  begin
+    result:=UnitName[identifier.UnitIndex].Name+'.'+ identifier.Name;
+  end;
+
+  function GetIdentifierDataSize(const identifier: TIdentifier): Integer;
+  var dataSize: Byte;
+  begin
+   dataSize:=GetDataSize( identifier.AllocElementType);
+   result:=identifier.NumAllocElements * dataSize;
+   if (traceSize) then Writeln('Identifier ', GetIdentifierFullName(identifier), ' has ', identifier.NumAllocElements, ' elements of size ', dataSize, ' = ', result, ' bytes.' );
+  end;
+
+
 // ----------------------------------------------------------------------------
 
 begin
@@ -14028,16 +14045,28 @@ begin
   emptyLine:=true;
   size:=0;
   varbegin := '';
+  traceSize:=FALSE;
 
-  for IdentIndex := 1 to NumIdent do
-   if (Ident[IdentIndex].Block = Ident[BlockIdentIndex].ProcAsBlock) and (Ident[IdentIndex].UnitIndex = UnitNameIndex) then begin
+  // For debugging
+  (*
+      if Ident[BlockIdentIndex].Name = 'DRAWSPLINE' then
+      begin
+        traceSize := True;
+        Writeln('Tracing ', GetIdentifierFullName(Ident[BlockIdentIndex]), '.');
+      end; *)
 
-    if emptyLine then begin
-     asm65separator;
-     asm65;
+      for IdentIndex := 1 to NumIdent do
+        if (Ident[IdentIndex].Block = Ident[BlockIdentIndex].ProcAsBlock) and
+          (Ident[IdentIndex].UnitIndex = UnitNameIndex) then
+        begin
 
-     emptyLine:=false;
-    end;
+          if emptyLine then
+          begin
+            asm65separator;
+            asm65;
+
+            emptyLine := False;
+          end;
 
 
     if Ident[IdentIndex].isExternal and (Ident[IdentIndex].Libraries > 0) then begin			// read file header libraryname.hea
@@ -14104,7 +14133,7 @@ begin
 		  asm65('.var '+Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
-		  inc(size, Ident[IdentIndex].NumAllocElements * GetDataSize( Ident[IdentIndex].AllocElementType) );
+		  inc(size, GetIdentifierDataSize(Ident[IdentIndex] ));
 
 		 end else
 		  if Ident[IdentIndex].DataType = TDataType.FILETOK then
@@ -14145,7 +14174,7 @@ begin
 		  end;
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
-		  inc(size, Ident[IdentIndex].NumAllocElements * GetDataSize( Ident[IdentIndex].AllocElementType) );
+		  inc(size, GetIdentifierDataSize(Ident[IdentIndex] ) );
 
 		 end else
 		  if (Ident[IdentIndex].DataType = TDataType.FILETOK) {and (Ident[IdentIndex].Block = 1)} then
@@ -14183,7 +14212,13 @@ begin
 
     if VarSize and (size > 0) then begin
       asm65('@VarData'#9'= '+varbegin);
-      asm65('@VarDataSize'#9'= '+IntToStr(size));
+      varDataSizeString:=IntToStr(size);
+      if traceSize then
+      begin
+        Writeln( GetIdentifierFullName( Ident[BlockIdentIndex]), ' has VarDataSize=', varDataSizeString, ' bytes.'); // TODO
+      end;
+
+      asm65('@VarDataSize'#9'= '+varDataSizeString);
       asm65;
     end;
 

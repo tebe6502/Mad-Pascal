@@ -694,8 +694,23 @@ begin
 end;
 
 function GetDataSize(const dataType: TDataType): Byte;
+var
+  index: Byte;
 begin
- Result:=_DataSize[Ord(dataType)];
+  index := Ord(dataType);
+  if dataType = TDataType.UNTYPETOK then
+  begin
+    Result := 0;
+  end
+  else if ((index >= Low(_DataSize)) and (index <= High(_DataSize))) then
+  begin
+    Result := _DataSize[index];
+  end
+  else
+  begin
+    Assert(False);
+  end;
+
 end;
 
 
