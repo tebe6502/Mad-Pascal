@@ -491,7 +491,7 @@ dzx5s_elias_loop
 		asl   @
 		bne   dzx5s_elias_skip
 		jsr   _GET_BYTE
-		sec	; można usunąć jeśli dekompresja z pamięci a nie pliku
+//		sec	; można usunąć jeśli dekompresja z pamięci a nie pliku
 		rol   @
 dzx5s_elias_skip
 		bcc   dzx5s_elias_backtrack
