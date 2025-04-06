@@ -2889,16 +2889,6 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
        else Result = Result - 1;
       return Result;
     };
-    this.Replace$2 = function (OldValue, NewValue) {
-      var Result = "";
-      Result = $mod.TStringHelper.Replace$3.call(this,OldValue,NewValue,rtl.createSet($mod.TStringReplaceFlag.rfReplaceAll));
-      return Result;
-    };
-    this.Replace$3 = function (OldValue, NewValue, ReplaceFlags) {
-      var Result = "";
-      Result = $mod.StringReplace(this.get(),OldValue,NewValue,rtl.refSet(ReplaceFlags));
-      return Result;
-    };
   });
   $mod.$implcode = function () {
     $impl.DefaultShortMonthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -3923,7 +3913,9 @@ rtl.module("Utilities",["System"],function () {
         Result = "Input.pas"}
        else if ($tmp === 2) {
         Result = "-ipath:lib"}
-       else if ($tmp === 3) Result = "-o:Output.a65";
+       else if ($tmp === 3) {
+        Result = "-o:Output.a65"}
+       else if ($tmp === 4) Result = "-diag";
       return Result;
     };
     this.GetParameterStringUpperCase = function (i) {
@@ -3997,16 +3989,8 @@ rtl.module("Messages",["System","Common","CommonTypes"],function () {
     this.Create$1 = function (errorCode, Text, variable0, variable1) {
       var temp = "";
       this.ErrorCode = errorCode;
-      temp = pas.SysUtils.TStringHelper.Replace$2.call({get: function () {
-          return Text;
-        }, set: function (v) {
-          rtl.raiseE("EPropReadOnly");
-        }},"{0}",variable0);
-      temp = pas.SysUtils.TStringHelper.Replace$2.call({get: function () {
-          return Text;
-        }, set: function (v) {
-          rtl.raiseE("EPropReadOnly");
-        }},"{1}",variable1);
+      temp = pas.SysUtils.StringReplace(Text,"{0}",variable0,rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
+      temp = pas.SysUtils.StringReplace(temp,"{1}",variable1,rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
       this.Text = temp;
       return this;
     };
@@ -44764,7 +44748,6 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       parameter = pas.Utilities.TEnvironment.GetParameterString(i);
       parameterUpperCase = pas.Utilities.AnsiUpperCase(parameter);
       if (parameter.charAt(0) === "-") {
-        pas.System.Writeln("JAC!",parameter," Upper Case:",parameterUpperCase);
         if (parameterUpperCase === "-O") {
           i += 1;
           pas.Common.outputFile = parameter;

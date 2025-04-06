@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, FileIO, StringUtilities;
+uses SysUtils, CommonTypes, FileIO, StringUtilities, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -28,194 +28,6 @@ const
 
   title = '1.7.2';
 
-type
-  TTokenKind = (
-    UNTYPETOK,
-
-    CONSTTOK,
-    TYPETOK,
-    VARTOK,
-    PROCEDURETOK,
-    FUNCTIONTOK,
-    LABELTOK,
-    UNITTOK,
-
-
-    GETINTVECTOK,
-    SETINTVECTOK,
-    CASETOK,
-    BEGINTOK,
-    ENDTOK,
-    IFTOK,
-    THENTOK,
-    ELSETOK,
-    WHILETOK,
-    DOTOK,
-    REPEATTOK,
-    UNTILTOK,
-    FORTOK,
-    TOTOK,
-    DOWNTOTOK,
-    ASSIGNTOK,
-    WRITETOK,
-    READLNTOK,
-    HALTTOK,
-    USESTOK,
-    ARRAYTOK,
-    OFTOK,
-    STRINGTOK,
-    INCTOK,
-    DECTOK,
-    ORDTOK,
-    CHRTOK,
-    ASMTOK,
-    ABSOLUTETOK,
-    BREAKTOK,
-    CONTINUETOK,
-    EXITTOK,
-    RANGETOK,
-
-    EQTOK,
-    NETOK,
-    LTTOK,
-    LETOK,
-    GTTOK,
-    GETOK,
-    LOTOK,
-    HITOK,
-
-    DOTTOK,
-    COMMATOK,
-    SEMICOLONTOK,
-    OPARTOK,
-    CPARTOK,
-    DEREFERENCETOK,
-    ADDRESSTOK,
-    OBRACKETTOK,
-    CBRACKETTOK,
-    COLONTOK,
-
-    PLUSTOK,
-    MINUSTOK,
-    MULTOK,
-    DIVTOK,
-    IDIVTOK,
-    MODTOK,
-    SHLTOK,
-    SHRTOK,
-    ORTOK,
-    XORTOK,
-    ANDTOK,
-    NOTTOK,
-
-    ASSIGNFILETOK,
-    RESETTOK,
-    REWRITETOK,
-    APPENDTOK,
-    BLOCKREADTOK,
-    BLOCKWRITETOK,
-    CLOSEFILETOK,
-    GETRESOURCEHANDLETOK,
-    SIZEOFRESOURCETOK,
-
-    WRITELNTOK,
-    SIZEOFTOK,
-    LENGTHTOK,
-    HIGHTOK,
-    LOWTOK,
-    INTTOK,
-    FRACTOK,
-    TRUNCTOK,
-    ROUNDTOK,
-    ODDTOK,
-
-    PROGRAMTOK,
-    LIBRARYTOK,
-    EXPORTSTOK,
-    EXTERNALTOK,
-    INTERFACETOK,
-    IMPLEMENTATIONTOK,
-    INITIALIZATIONTOK,
-    CONSTRUCTORTOK,
-    DESTRUCTORTOK,
-    OVERLOADTOK,
-    ASSEMBLERTOK,
-    FORWARDTOK,
-    REGISTERTOK,
-    INTERRUPTTOK,
-    PASCALTOK,
-    STDCALLTOK,
-    INLINETOK,
-    KEEPTOK,
-
-    SUCCTOK,
-    PREDTOK,
-    PACKEDTOK,
-    GOTOTOK,
-    INTOK,
-    VOLATILETOK,
-    STRIPEDTOK,
-
-
-    SETTOK,            // Size = 32 SET OF
-
-    BYTETOK,           // Size = 1 BYTE
-    WORDTOK,           // Size = 2 WORD
-    CARDINALTOK,       // Size = 4 CARDINAL
-    SHORTINTTOK,       // Size = 1 SHORTINT
-    SMALLINTTOK,       // Size = 2 SMALLINT
-    INTEGERTOK,        // Size = 4 INTEGER
-    CHARTOK,           // Size = 1 CHAR
-    BOOLEANTOK,        // Size = 1 BOOLEAN
-    POINTERTOK,        // Size = 2 POINTER
-    STRINGPOINTERTOK,  // Size = 2 POINTER to STRING
-    FILETOK,           // Size = 2/12 FILE
-    RECORDTOK,         // Size = 2/???
-    OBJECTTOK,         // Size = 2/???
-    SHORTREALTOK,      // Size = 2 SHORTREAL      Fixed-Point Q8.8
-    REALTOK,           // Size = 4 REAL      Fixed-Point Q24.8
-    SINGLETOK,         // Size = 4 SINGLE / FLOAT    IEEE-754 32-bit
-    HALFSINGLETOK,     // Size = 2 HALFSINGLE / FLOAT16  IEEE-754 16-bit
-    PCHARTOK,          // Size = 2 POINTER TO ARRAY OF CHAR
-    ENUMTOK,           // Size = 1 BYTE
-    PROCVARTOK,        // Size = 2
-    TEXTFILETOK,       // Size = 2/12 TEXTFILE
-    FORWARDTYPE,       // Size = 2
-
-    SHORTSTRINGTOK,    // We change into STRINGTOK
-    FLOATTOK,          // We change into SINGLETOK
-    FLOAT16TOK,        // We change into HALFSINGLETOK
-    TEXTTOK,           // We change into TEXTFILETOK
-
-    DEREFERENCEARRAYTOK, // For ARRAY pointers
-
-
-    DATAORIGINOFFSET,
-    CODEORIGINOFFSET,
-
-    IDENTTOK,
-    INTNUMBERTOK,
-    FRACNUMBERTOK,
-    CHARLITERALTOK,
-    STRINGLITERALTOK,
-
-    EVALTOK,
-    LOOPUNROLLTOK,
-    NOLOOPUNROLLTOK,
-    LINKTOK,
-    MACRORELEASE,
-    PROCALIGNTOK,
-    LOOPALIGNTOK,
-    LINKALIGNTOK,
-    INFOTOK,
-    WARNINGTOK,
-    ERRORTOK,
-    UNITBEGINTOK,
-    UNITENDTOK,
-    IOCHECKON,
-    IOCHECKOFF,
-    EOFTOK
-    );
 
 const
   UnsignedOrdinalTypes = [TTokenKind.BYTETOK, TTokenKind.WORDTOK, TTokenKind.CARDINALTOK];
@@ -539,12 +351,6 @@ type
   TIdentIndex = Integer;
   TArrayIndex = Integer;
 
-type
-  TTokenSpelling = record
-    tokenKind: TTokenKind;
-    spelling: String;
-  end;
-
 var
 
   PROGRAM_NAME: String = 'Program';
@@ -557,7 +363,6 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  TokenSpellings: array [Low(TTokenKind)..High(TTokenKind)] of TTokenSpelling;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefine;
   IFTmpPosStack: array of Integer;
@@ -636,8 +441,6 @@ var
 
 procedure ClearWordMemory(anArray: TWordMemory);
 
-function GetTokenKindName(tokenKind: TTokenKind): String;
-
 function GetDataSize(const dataType: TDataType): Byte;
 
 procedure AddDefine(const defineName: TDefineName);
@@ -669,8 +472,7 @@ function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataTyp
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
-function GetTokenSpelling(t: TTokenKind): TString;
-function GetSpelling(i: TTokenIndex): TString;
+function GetTokenSpellingAtIndex(i: TTokenIndex): String;
 
 
 function GetVAL(a: String): Integer;
@@ -693,11 +495,6 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 implementation
 
 uses Messages, Utilities;
-
-function GetTokenKindName(tokenKind: TTokenKind): String;
-begin
-  WriteStr(Result, tokenKind);
-end;
 
 function GetDataSize(const dataType: TDataType): Byte;
 var
@@ -916,12 +713,8 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-function GetTokenSpelling(t: TTokenKind): TString;
-begin
-  Result := TokenSpellings[t].Spelling;
-end;
 
-function GetSpelling(i: TTokenIndex): TString;
+function GetTokenSpellingAtIndex(i: TTokenIndex): TString;
 var
   kind: TTokenKind;
 var
@@ -934,20 +727,7 @@ begin
   begin
     kind := Tok[i].Kind;
     index := Ord(kind);
-    if (index > 0) and (index < Ord(TTokenKind.IDENTTOK)) then
-      Result := GetTokenSpelling(kind)
-    else if Kind = TTokenKind.IDENTTOK then
-      Result := 'identifier'
-    else if (Kind = TTokenKind.INTNUMBERTOK) or (Kind = TTokenKind.FRACNUMBERTOK) then
-      Result := 'number'
-    else if (Kind = TTokenKind.CHARLITERALTOK) or (Kind = TTokenKind.STRINGLITERALTOK) then
-      Result := 'literal'
-    else if Kind = TTokenKind.UNITENDTOK then
-      Result := 'END'
-    else if Kind = TTokenKind.EOFTOK then
-      Result := 'end of file'
-    else
-      Result := 'unknown token';
+    GetHumanReadbleTokenSpelling(kind);
   end;
 end;
 
@@ -1247,20 +1027,8 @@ begin
   if Tok[i].Kind <> ExpectedTokenCode then
   begin
 
-    found := GetSpelling(i);
-
-    if Ord(ExpectedTokenCode) < Ord(TTokenKind.IDENTTOK) then
-      expected := GetTokenSpelling(ExpectedTokenCode)
-    else if ExpectedTokenCode = TTokenKind.IDENTTOK then
-      expected := 'identifier'
-    else if (ExpectedTokenCode = TTokenKind.INTNUMBERTOK) then
-      expected := 'number'
-    else if (ExpectedTokenCode = TTokenKind.CHARLITERALTOK) then
-      expected := 'literal'
-    else if (ExpectedTokenCode = TTokenKind.STRINGLITERALTOK) then
-      expected := 'string'
-    else
-      expected := 'unknown token';
+    found := GetTokenSpellingAtIndex(i);
+    expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
     Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected +
       '''' + ' expected but ''' + found + ''' found'));
@@ -1426,29 +1194,4 @@ begin
   end;
 end;
 
-procedure AssertTokenOrd(const tokenKind: TTokenKind; Value: Byte);
-begin
-  Assert(Ord(tokenKind) = Value, 'Token kind does not have expected value ' + IntToStr(Value) + '.');
-end;
-
-procedure AssertTokensOrd;
-var value: byte;
-begin
-  // Assert order of constants that were marked as "Don't change".
-  // TODO: Why? Where is this used?
-  AssertTokenOrd(TTokenKind.UNTYPETOK, 0);
-  AssertTokenOrd(TTokenKind.CONSTTOK, 1);
-  AssertTokenOrd(TTokenKind.TYPETOK, 2);
-  AssertTokenOrd(TTokenKind.VARTOK, 3);
-  AssertTokenOrd(TTokenKind.PROCEDURETOK, 4);
-  AssertTokenOrd(TTokenKind.FUNCTIONTOK, 5);
-  AssertTokenOrd(TTokenKind.LABELTOK, 6);
-  AssertTokenOrd(TTokenKind.UNITTOK, 7);
-
-end;
-
-initialization
-  begin
-   AssertTokensOrd;
-  end;
 end.

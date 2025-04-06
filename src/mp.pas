@@ -204,6 +204,7 @@ uses
   Optimize,
   Parser,
   StringUtilities,
+  Tokens,
   Utilities;
 
 // Temporarily own variable, because main program is no class yet.
@@ -13331,7 +13332,7 @@ WHILETOK:
                 GenerateAssignment(ASPOINTER, GetDataSize(Ident[IdentIndex].DataType), IdentIndex);  //!!!!!
 
                 if not (Tok[j + 1].Kind in [TTokenKind.TOTOK, TTokenKind.DOWNTOTOK]) then
-                  Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' + GetSpelling(j + 1) + ' found')
+                  Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' + GetTokenSpellingAtIndex(j + 1) + ' found')
                 else
                 begin
                   Down := Tok[j + 1].Kind = TTokenKind.DOWNTOTOK;
@@ -16053,7 +16054,7 @@ WHILETOK:
         repeat
 
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Formal parameter name expected but ' + GetSpelling(i + 1) + ' found')
+            Error(i + 1, 'Formal parameter name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           begin
             Inc(NumVarOfSameType);
@@ -17340,7 +17341,7 @@ WHILETOK:
         repeat
 
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Constant name expected but ' + GetSpelling(i + 1) + ' found')
+            Error(i + 1, 'Constant name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           if Tok[i + 2].Kind = TTokenKind.EQTOK then
           begin
@@ -17546,7 +17547,7 @@ WHILETOK:
       begin
         repeat
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Type name expected but ' + GetSpelling(i + 1) + ' found')
+            Error(i + 1, 'Type name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           begin
 
@@ -17614,7 +17615,7 @@ WHILETOK:
           NumVarOfSameType := 0;
           repeat
             if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-              Error(i + 1, 'Variable name expected but ' + GetSpelling(i + 1) + ' found')
+              Error(i + 1, 'Variable name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
             else
             begin
               Inc(NumVarOfSameType);
@@ -18182,7 +18183,7 @@ WHILETOK:
       if Tok[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
         TTokenKind.DESTRUCTORTOK] then
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-          Error(i + 1, 'Procedure name expected but ' + GetSpelling(i + 1) + ' found')
+          Error(i + 1, 'Procedure name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
         else
         begin
 

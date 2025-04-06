@@ -13,7 +13,7 @@ procedure Diagnostics;
 
 implementation
 
-uses SysUtils, Common, FileIO;
+uses SysUtils, Common, FileIO, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ begin
   begin
     // DiagFile.Write(i: 6, UnitName[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
     DiagFile.Write(i, 6).Write(UnitName[Tok[i].UnitIndex].Name, 30).Write(Tok[i].Line,
-      6).Write(GetSpelling(i), 30).WriteLn;
+      6).Write(GetTokenSpellingAtIndex(i), 30).WriteLn;
     if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
       DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))
     else if Tok[i].Kind = TTokenKind.FRACNUMBERTOK then
