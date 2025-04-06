@@ -86,7 +86,7 @@ goto :eof
      if exist %MADS_OUTPUT_XEX% del %MADS_OUTPUT_XEX%
      mads %MP_OUTPUT_ASM% -x -i:%MP_FOLDER%\base -o:%MADS_OUTPUT_XEX%
      if exist %MADS_OUTPUT_XEX% (
-       if "%TEST_MODE%"=="" (
+       if "%TEST_MODE%"=="FULL" (
          echo Starting test program "%MADS_OUTPUT_XEX%".
          %MADS_OUTPUT_XEX%
        )	
