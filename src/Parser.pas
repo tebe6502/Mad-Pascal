@@ -4,7 +4,7 @@ unit Parser;
 
 interface
 
-uses Common, Numbers;
+uses Common, Numbers, Tokens;
 
 // -----------------------------------------------------------------------------
 
@@ -173,13 +173,10 @@ end;  //GetIdent
 function ObjectRecordSize(i: Cardinal): Integer;
 var
   j: Integer;
-  FieldType, AllocElementType: TDataType;
-  NumAllocElements: Cardinal;
+  FieldType: TDataType;
 begin
 
   Result := 0;
-
-  FieldType := TDataType.UNTYPETOK;
 
   if i > 0 then
   begin
@@ -188,10 +185,6 @@ begin
     begin
 
       FieldType := TypeArray[i].Field[j].DataType;
-
-      // TODO: The two variables below are unused.
-      NumAllocElements := TypeArray[i].Field[j].NumAllocElements;
-      AllocElementType := TypeArray[i].Field[j].AllocElementType;
 
       if FieldType <> TDataType.RECORDTOK then
         Inc(Result, GetDataSize(FieldType));
@@ -1741,7 +1734,7 @@ begin
 
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
           Error(i + 1, TMessage.Create(TErrorCode.FormalParameterNameExpected,
-            'Formal parameter name expected but {0} found.', GetSpelling(i + 1)))
+            'Formal parameter name expected but {0} found.', GetTokenSpellingAtIndex(i + 1)))
         else
         begin
 
@@ -1907,7 +1900,7 @@ begin
 
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
             Error(i + 1, TMessage.Create(TErrorCode.FormalParameterNameExpected,
-              'Formal parameter name expected but {0} found.', GetSpelling(i + 1)))
+              'Formal parameter name expected but {0} found.', GetTokenSpellingAtIndex(i + 1)))
           else
           begin
 

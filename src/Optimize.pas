@@ -1328,7 +1328,7 @@ var
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i, p: Integer;
+    i: Integer;
     tmp: String;
   begin
 
@@ -1544,7 +1544,7 @@ end;
 
     function PeepholeOptimization_STA: Boolean;
     var
-      i, p: Integer;
+      i: Integer;
     begin
 
       Result := True;
@@ -1628,7 +1628,7 @@ end;
 
     function PeepholeOptimization: Boolean;
     var
-      p, i: Integer;
+      i: Integer;
     begin
 
       Result := True;

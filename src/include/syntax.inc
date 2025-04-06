@@ -44,7 +44,7 @@ begin
     Write(TEnvironment.GetParameterString(i));
     Write(' ');
   end;
-  Writeln;
+  Writeln('');
 
 
   Console.TextColor(Console.LightRed);

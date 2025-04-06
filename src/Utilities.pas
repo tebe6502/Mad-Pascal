@@ -63,8 +63,9 @@ begin
    {$ELSE}
   case i of
     1: Result := 'Input.pas';
-    2: Result := '-i:lib';
+    2: Result := '-ipath:lib';
     3: Result := '-o:Output.a65';
+    4: Result := '-diag';
   end;
    {$ENDIF}
 end;

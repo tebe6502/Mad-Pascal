@@ -1868,7 +1868,7 @@ rtl.module("System",[],function () {
 rtl.module("RTLConsts",["System"],function () {
   "use strict";
   var $mod = this;
-  $mod.$resourcestrings = {SArgumentMissing: {org: 'Missing argument in format "%s"'}, SInvalidFormat: {org: 'Invalid format specifier : "%s"'}, SInvalidArgIndex: {org: 'Invalid argument index in format: "%s"'}, SErrInvalidFloat: {org: 'Invalid floating-point value: "%s"'}};
+  $mod.$resourcestrings = {SArgumentMissing: {org: 'Missing argument in format "%s"'}, SInvalidFormat: {org: 'Invalid format specifier : "%s"'}, SInvalidArgIndex: {org: 'Invalid argument index in format: "%s"'}, SErrInvalidInteger: {org: 'Invalid integer value: "%s"'}, SErrInvalidFloat: {org: 'Invalid floating-point value: "%s"'}};
 });
 rtl.module("JS",["System"],function () {
   "use strict";
@@ -1997,6 +1997,9 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
   };
   this.UpperCase = function (s) {
     return s.toUpperCase();
+  };
+  this.LowerCase = function (s) {
+    return s.toLowerCase();
   };
   this.CompareText = function (s1, s2) {
     var l1 = s1.toLowerCase();
@@ -2235,6 +2238,22 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
   this.IntToStr = function (Value) {
     var Result = "";
     Result = "" + Value;
+    return Result;
+  };
+  this.TryStrToInt$2 = function (S, res) {
+    var Result = false;
+    Result = $impl.IntTryStrToInt(S,res,$mod.FormatSettings.DecimalSeparator);
+    return Result;
+  };
+  this.StrToInt = function (S) {
+    var Result = 0;
+    var R = 0;
+    if (!$mod.TryStrToInt$2(S,{get: function () {
+        return R;
+      }, set: function (v) {
+        R = v;
+      }})) throw $mod.EConvertError.$create("CreateFmt",[rtl.getResStr(pas.RTLConsts,"SErrInvalidInteger"),pas.System.VarRecs(18,S)]);
+    Result = R;
     return Result;
   };
   this.IntToHex = function (Value, Digits) {
@@ -2870,16 +2889,6 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
        else Result = Result - 1;
       return Result;
     };
-    this.Replace$2 = function (OldValue, NewValue) {
-      var Result = "";
-      Result = $mod.TStringHelper.Replace$3.call(this,OldValue,NewValue,rtl.createSet($mod.TStringReplaceFlag.rfReplaceAll));
-      return Result;
-    };
-    this.Replace$3 = function (OldValue, NewValue, ReplaceFlags) {
-      var Result = "";
-      Result = $mod.StringReplace(this.get(),OldValue,NewValue,rtl.refSet(ReplaceFlags));
-      return Result;
-    };
   });
   $mod.$implcode = function () {
     $impl.DefaultShortMonthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -3186,6 +3195,30 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
       return Result;
     };
     $impl.RESpecials = "([\\$\\+\\[\\]\\(\\)\\\\\\.\\*\\^\\?\\|])";
+    $impl.IntTryStrToInt = function (S, res, aSep) {
+      var Result = false;
+      var Radix = 10;
+      var N = "";
+      var J = undefined;
+      N = S;
+      if ((pas.System.Pos(aSep,N) !== 0) || (pas.System.Pos(".",N) !== 0)) return false;
+      var $tmp = pas.System.Copy(N,1,1);
+      if ($tmp === "$") {
+        Radix = 16}
+       else if ($tmp === "&") {
+        Radix = 8}
+       else if ($tmp === "%") Radix = 2;
+      if ((Radix !== 16) && (pas.System.Pos("e",$mod.LowerCase(N)) !== 0)) return false;
+      if (Radix !== 10) pas.System.Delete({get: function () {
+          return N;
+        }, set: function (v) {
+          N = v;
+        }},1,1);
+      J = parseInt(N,Radix);
+      Result = !isNaN(J);
+      if (Result) res.set(rtl.trunc(J));
+      return Result;
+    };
     $impl.InitGlobalFormatSettings = function () {
       $mod.FormatSettings.$assign($mod.TFormatSettings.Create());
       $mod.TimeSeparator = $mod.FormatSettings.TimeSeparator;
@@ -3851,6 +3884,222 @@ rtl.module("StringUtilities",["System","SysUtils"],function () {
     return Result;
   };
 });
+rtl.module("Tokens",["System"],function () {
+  "use strict";
+  var $mod = this;
+  var $impl = $mod.$impl;
+  this.TTokenKind = {"0": "UNTYPETOK", UNTYPETOK: 0, "1": "CONSTTOK", CONSTTOK: 1, "2": "TYPETOK", TYPETOK: 2, "3": "VARTOK", VARTOK: 3, "4": "PROCEDURETOK", PROCEDURETOK: 4, "5": "FUNCTIONTOK", FUNCTIONTOK: 5, "6": "LABELTOK", LABELTOK: 6, "7": "UNITTOK", UNITTOK: 7, "8": "GETINTVECTOK", GETINTVECTOK: 8, "9": "SETINTVECTOK", SETINTVECTOK: 9, "10": "CASETOK", CASETOK: 10, "11": "BEGINTOK", BEGINTOK: 11, "12": "ENDTOK", ENDTOK: 12, "13": "IFTOK", IFTOK: 13, "14": "THENTOK", THENTOK: 14, "15": "ELSETOK", ELSETOK: 15, "16": "WHILETOK", WHILETOK: 16, "17": "DOTOK", DOTOK: 17, "18": "REPEATTOK", REPEATTOK: 18, "19": "UNTILTOK", UNTILTOK: 19, "20": "FORTOK", FORTOK: 20, "21": "TOTOK", TOTOK: 21, "22": "DOWNTOTOK", DOWNTOTOK: 22, "23": "ASSIGNTOK", ASSIGNTOK: 23, "24": "WRITETOK", WRITETOK: 24, "25": "READLNTOK", READLNTOK: 25, "26": "HALTTOK", HALTTOK: 26, "27": "USESTOK", USESTOK: 27, "28": "ARRAYTOK", ARRAYTOK: 28, "29": "OFTOK", OFTOK: 29, "30": "STRINGTOK", STRINGTOK: 30, "31": "INCTOK", INCTOK: 31, "32": "DECTOK", DECTOK: 32, "33": "ORDTOK", ORDTOK: 33, "34": "CHRTOK", CHRTOK: 34, "35": "ASMTOK", ASMTOK: 35, "36": "ABSOLUTETOK", ABSOLUTETOK: 36, "37": "BREAKTOK", BREAKTOK: 37, "38": "CONTINUETOK", CONTINUETOK: 38, "39": "EXITTOK", EXITTOK: 39, "40": "RANGETOK", RANGETOK: 40, "41": "EQTOK", EQTOK: 41, "42": "NETOK", NETOK: 42, "43": "LTTOK", LTTOK: 43, "44": "LETOK", LETOK: 44, "45": "GTTOK", GTTOK: 45, "46": "GETOK", GETOK: 46, "47": "LOTOK", LOTOK: 47, "48": "HITOK", HITOK: 48, "49": "DOTTOK", DOTTOK: 49, "50": "COMMATOK", COMMATOK: 50, "51": "SEMICOLONTOK", SEMICOLONTOK: 51, "52": "OPARTOK", OPARTOK: 52, "53": "CPARTOK", CPARTOK: 53, "54": "DEREFERENCETOK", DEREFERENCETOK: 54, "55": "ADDRESSTOK", ADDRESSTOK: 55, "56": "OBRACKETTOK", OBRACKETTOK: 56, "57": "CBRACKETTOK", CBRACKETTOK: 57, "58": "COLONTOK", COLONTOK: 58, "59": "PLUSTOK", PLUSTOK: 59, "60": "MINUSTOK", MINUSTOK: 60, "61": "MULTOK", MULTOK: 61, "62": "DIVTOK", DIVTOK: 62, "63": "IDIVTOK", IDIVTOK: 63, "64": "MODTOK", MODTOK: 64, "65": "SHLTOK", SHLTOK: 65, "66": "SHRTOK", SHRTOK: 66, "67": "ORTOK", ORTOK: 67, "68": "XORTOK", XORTOK: 68, "69": "ANDTOK", ANDTOK: 69, "70": "NOTTOK", NOTTOK: 70, "71": "ASSIGNFILETOK", ASSIGNFILETOK: 71, "72": "RESETTOK", RESETTOK: 72, "73": "REWRITETOK", REWRITETOK: 73, "74": "APPENDTOK", APPENDTOK: 74, "75": "BLOCKREADTOK", BLOCKREADTOK: 75, "76": "BLOCKWRITETOK", BLOCKWRITETOK: 76, "77": "CLOSEFILETOK", CLOSEFILETOK: 77, "78": "GETRESOURCEHANDLETOK", GETRESOURCEHANDLETOK: 78, "79": "SIZEOFRESOURCETOK", SIZEOFRESOURCETOK: 79, "80": "WRITELNTOK", WRITELNTOK: 80, "81": "SIZEOFTOK", SIZEOFTOK: 81, "82": "LENGTHTOK", LENGTHTOK: 82, "83": "HIGHTOK", HIGHTOK: 83, "84": "LOWTOK", LOWTOK: 84, "85": "INTTOK", INTTOK: 85, "86": "FRACTOK", FRACTOK: 86, "87": "TRUNCTOK", TRUNCTOK: 87, "88": "ROUNDTOK", ROUNDTOK: 88, "89": "ODDTOK", ODDTOK: 89, "90": "PROGRAMTOK", PROGRAMTOK: 90, "91": "LIBRARYTOK", LIBRARYTOK: 91, "92": "EXPORTSTOK", EXPORTSTOK: 92, "93": "EXTERNALTOK", EXTERNALTOK: 93, "94": "INTERFACETOK", INTERFACETOK: 94, "95": "IMPLEMENTATIONTOK", IMPLEMENTATIONTOK: 95, "96": "INITIALIZATIONTOK", INITIALIZATIONTOK: 96, "97": "CONSTRUCTORTOK", CONSTRUCTORTOK: 97, "98": "DESTRUCTORTOK", DESTRUCTORTOK: 98, "99": "OVERLOADTOK", OVERLOADTOK: 99, "100": "ASSEMBLERTOK", ASSEMBLERTOK: 100, "101": "FORWARDTOK", FORWARDTOK: 101, "102": "REGISTERTOK", REGISTERTOK: 102, "103": "INTERRUPTTOK", INTERRUPTTOK: 103, "104": "PASCALTOK", PASCALTOK: 104, "105": "STDCALLTOK", STDCALLTOK: 105, "106": "INLINETOK", INLINETOK: 106, "107": "KEEPTOK", KEEPTOK: 107, "108": "SUCCTOK", SUCCTOK: 108, "109": "PREDTOK", PREDTOK: 109, "110": "PACKEDTOK", PACKEDTOK: 110, "111": "GOTOTOK", GOTOTOK: 111, "112": "INTOK", INTOK: 112, "113": "VOLATILETOK", VOLATILETOK: 113, "114": "STRIPEDTOK", STRIPEDTOK: 114, "115": "SETTOK", SETTOK: 115, "116": "BYTETOK", BYTETOK: 116, "117": "WORDTOK", WORDTOK: 117, "118": "CARDINALTOK", CARDINALTOK: 118, "119": "SHORTINTTOK", SHORTINTTOK: 119, "120": "SMALLINTTOK", SMALLINTTOK: 120, "121": "INTEGERTOK", INTEGERTOK: 121, "122": "CHARTOK", CHARTOK: 122, "123": "BOOLEANTOK", BOOLEANTOK: 123, "124": "POINTERTOK", POINTERTOK: 124, "125": "STRINGPOINTERTOK", STRINGPOINTERTOK: 125, "126": "FILETOK", FILETOK: 126, "127": "RECORDTOK", RECORDTOK: 127, "128": "OBJECTTOK", OBJECTTOK: 128, "129": "SHORTREALTOK", SHORTREALTOK: 129, "130": "REALTOK", REALTOK: 130, "131": "SINGLETOK", SINGLETOK: 131, "132": "HALFSINGLETOK", HALFSINGLETOK: 132, "133": "PCHARTOK", PCHARTOK: 133, "134": "ENUMTOK", ENUMTOK: 134, "135": "PROCVARTOK", PROCVARTOK: 135, "136": "TEXTFILETOK", TEXTFILETOK: 136, "137": "FORWARDTYPE", FORWARDTYPE: 137, "138": "SHORTSTRINGTOK", SHORTSTRINGTOK: 138, "139": "FLOATTOK", FLOATTOK: 139, "140": "FLOAT16TOK", FLOAT16TOK: 140, "141": "TEXTTOK", TEXTTOK: 141, "142": "DEREFERENCEARRAYTOK", DEREFERENCEARRAYTOK: 142, "143": "DATAORIGINOFFSET", DATAORIGINOFFSET: 143, "144": "CODEORIGINOFFSET", CODEORIGINOFFSET: 144, "145": "IDENTTOK", IDENTTOK: 145, "146": "INTNUMBERTOK", INTNUMBERTOK: 146, "147": "FRACNUMBERTOK", FRACNUMBERTOK: 147, "148": "CHARLITERALTOK", CHARLITERALTOK: 148, "149": "STRINGLITERALTOK", STRINGLITERALTOK: 149, "150": "EVALTOK", EVALTOK: 150, "151": "LOOPUNROLLTOK", LOOPUNROLLTOK: 151, "152": "NOLOOPUNROLLTOK", NOLOOPUNROLLTOK: 152, "153": "LINKTOK", LINKTOK: 153, "154": "MACRORELEASE", MACRORELEASE: 154, "155": "PROCALIGNTOK", PROCALIGNTOK: 155, "156": "LOOPALIGNTOK", LOOPALIGNTOK: 156, "157": "LINKALIGNTOK", LINKALIGNTOK: 157, "158": "INFOTOK", INFOTOK: 158, "159": "WARNINGTOK", WARNINGTOK: 159, "160": "ERRORTOK", ERRORTOK: 160, "161": "UNITBEGINTOK", UNITBEGINTOK: 161, "162": "UNITENDTOK", UNITENDTOK: 162, "163": "IOCHECKON", IOCHECKON: 163, "164": "IOCHECKOFF", IOCHECKOFF: 164, "165": "EOFTOK", EOFTOK: 165};
+  this.GetTokenKindName = function (tokenKind) {
+    var Result = "";
+    Result = $mod.TTokenKind[tokenKind];
+    return Result;
+  };
+  this.GetTokenSpelling = function (tokenKind) {
+    var Result = "";
+    Result = $impl.TokenSpellings[tokenKind].spelling;
+    return Result;
+  };
+  this.GetHumanReadbleTokenSpelling = function (tokenKind) {
+    var Result = "";
+    if ((tokenKind > $mod.TTokenKind.UNTYPETOK) && (tokenKind < $mod.TTokenKind.IDENTTOK)) {
+      Result = $mod.GetTokenSpelling(tokenKind)}
+     else if (tokenKind === $mod.TTokenKind.IDENTTOK) {
+      Result = "identifier"}
+     else if ((tokenKind === $mod.TTokenKind.INTNUMBERTOK) || (tokenKind === $mod.TTokenKind.FRACNUMBERTOK)) {
+      Result = "number"}
+     else if ((tokenKind === $mod.TTokenKind.CHARLITERALTOK) || (tokenKind === $mod.TTokenKind.STRINGLITERALTOK)) {
+      Result = "literal"}
+     else if (tokenKind === $mod.TTokenKind.UNITENDTOK) {
+      Result = "END"}
+     else if (tokenKind === $mod.TTokenKind.EOFTOK) {
+      Result = "end of file"}
+     else Result = "unknown token";
+    return Result;
+  };
+  this.GetStandardToken = function (S) {
+    var Result = 0;
+    var i = 0;
+    Result = $mod.TTokenKind.UNTYPETOK;
+    if ((S === "LONGWORD") || (S === "DWORD") || (S === "UINT32")) {
+      S = "CARDINAL"}
+     else if (S === "UINT16") {
+      S = "WORD"}
+     else if (S === "LONGINT") S = "INTEGER";
+    for (i = 0; i <= 165; i++) if (S === $impl.TokenSpellings[i].spelling) {
+      Result = $impl.TokenSpellings[i].tokenKind;
+      break;
+    };
+    return Result;
+  };
+  $mod.$implcode = function () {
+    rtl.recNewT($impl,"TTokenSpelling",function () {
+      this.tokenKind = 0;
+      this.spelling = "";
+      this.$eq = function (b) {
+        return (this.tokenKind === b.tokenKind) && (this.spelling === b.spelling);
+      };
+      this.$assign = function (s) {
+        this.tokenKind = s.tokenKind;
+        this.spelling = s.spelling;
+        return this;
+      };
+    });
+    $impl.TokenSpellings$a$clone = function (a) {
+      var b = [];
+      b.length = 166;
+      for (var c = 0; c < 166; c++) b[c] = $impl.TTokenSpelling.$clone(a[c]);
+      return b;
+    };
+    $impl.TokenSpellings = rtl.arraySetLength(null,$impl.TTokenSpelling,166);
+    $impl.AddTokenSpelling = function (t, s) {
+      var tokenSpelling = $impl.TTokenSpelling.$new();
+      tokenSpelling.tokenKind = t;
+      tokenSpelling.spelling = s;
+      $impl.TokenSpellings[tokenSpelling.tokenKind].$assign(tokenSpelling);
+    };
+    $impl.InitializeTokenSpellings = function () {
+      $impl.AddTokenSpelling($mod.TTokenKind.CONSTTOK,"CONST");
+      $impl.AddTokenSpelling($mod.TTokenKind.TYPETOK,"TYPE");
+      $impl.AddTokenSpelling($mod.TTokenKind.VARTOK,"VAR");
+      $impl.AddTokenSpelling($mod.TTokenKind.PROCEDURETOK,"PROCEDURE");
+      $impl.AddTokenSpelling($mod.TTokenKind.FUNCTIONTOK,"FUNCTION");
+      $impl.AddTokenSpelling($mod.TTokenKind.OBJECTTOK,"OBJECT");
+      $impl.AddTokenSpelling($mod.TTokenKind.PROGRAMTOK,"PROGRAM");
+      $impl.AddTokenSpelling($mod.TTokenKind.LIBRARYTOK,"LIBRARY");
+      $impl.AddTokenSpelling($mod.TTokenKind.EXPORTSTOK,"EXPORTS");
+      $impl.AddTokenSpelling($mod.TTokenKind.EXTERNALTOK,"EXTERNAL");
+      $impl.AddTokenSpelling($mod.TTokenKind.UNITTOK,"UNIT");
+      $impl.AddTokenSpelling($mod.TTokenKind.INTERFACETOK,"INTERFACE");
+      $impl.AddTokenSpelling($mod.TTokenKind.IMPLEMENTATIONTOK,"IMPLEMENTATION");
+      $impl.AddTokenSpelling($mod.TTokenKind.INITIALIZATIONTOK,"INITIALIZATION");
+      $impl.AddTokenSpelling($mod.TTokenKind.CONSTRUCTORTOK,"CONSTRUCTOR");
+      $impl.AddTokenSpelling($mod.TTokenKind.DESTRUCTORTOK,"DESTRUCTOR");
+      $impl.AddTokenSpelling($mod.TTokenKind.OVERLOADTOK,"OVERLOAD");
+      $impl.AddTokenSpelling($mod.TTokenKind.ASSEMBLERTOK,"ASSEMBLER");
+      $impl.AddTokenSpelling($mod.TTokenKind.FORWARDTOK,"FORWARD");
+      $impl.AddTokenSpelling($mod.TTokenKind.REGISTERTOK,"REGISTER");
+      $impl.AddTokenSpelling($mod.TTokenKind.INTERRUPTTOK,"INTERRUPT");
+      $impl.AddTokenSpelling($mod.TTokenKind.PASCALTOK,"PASCAL");
+      $impl.AddTokenSpelling($mod.TTokenKind.STDCALLTOK,"STDCALL");
+      $impl.AddTokenSpelling($mod.TTokenKind.INLINETOK,"INLINE");
+      $impl.AddTokenSpelling($mod.TTokenKind.KEEPTOK,"KEEP");
+      $impl.AddTokenSpelling($mod.TTokenKind.ASSIGNFILETOK,"ASSIGN");
+      $impl.AddTokenSpelling($mod.TTokenKind.RESETTOK,"RESET");
+      $impl.AddTokenSpelling($mod.TTokenKind.REWRITETOK,"REWRITE");
+      $impl.AddTokenSpelling($mod.TTokenKind.APPENDTOK,"APPEND");
+      $impl.AddTokenSpelling($mod.TTokenKind.BLOCKREADTOK,"BLOCKREAD");
+      $impl.AddTokenSpelling($mod.TTokenKind.BLOCKWRITETOK,"BLOCKWRITE");
+      $impl.AddTokenSpelling($mod.TTokenKind.CLOSEFILETOK,"CLOSE");
+      $impl.AddTokenSpelling($mod.TTokenKind.GETRESOURCEHANDLETOK,"GETRESOURCEHANDLE");
+      $impl.AddTokenSpelling($mod.TTokenKind.SIZEOFRESOURCETOK,"SIZEOFRESOURCE");
+      $impl.AddTokenSpelling($mod.TTokenKind.FILETOK,"FILE");
+      $impl.AddTokenSpelling($mod.TTokenKind.TEXTFILETOK,"TEXTFILE");
+      $impl.AddTokenSpelling($mod.TTokenKind.SETTOK,"SET");
+      $impl.AddTokenSpelling($mod.TTokenKind.PACKEDTOK,"PACKED");
+      $impl.AddTokenSpelling($mod.TTokenKind.VOLATILETOK,"VOLATILE");
+      $impl.AddTokenSpelling($mod.TTokenKind.STRIPEDTOK,"STRIPED");
+      $impl.AddTokenSpelling($mod.TTokenKind.LABELTOK,"LABEL");
+      $impl.AddTokenSpelling($mod.TTokenKind.GOTOTOK,"GOTO");
+      $impl.AddTokenSpelling($mod.TTokenKind.INTOK,"IN");
+      $impl.AddTokenSpelling($mod.TTokenKind.RECORDTOK,"RECORD");
+      $impl.AddTokenSpelling($mod.TTokenKind.CASETOK,"CASE");
+      $impl.AddTokenSpelling($mod.TTokenKind.BEGINTOK,"BEGIN");
+      $impl.AddTokenSpelling($mod.TTokenKind.ENDTOK,"END");
+      $impl.AddTokenSpelling($mod.TTokenKind.IFTOK,"IF");
+      $impl.AddTokenSpelling($mod.TTokenKind.THENTOK,"THEN");
+      $impl.AddTokenSpelling($mod.TTokenKind.ELSETOK,"ELSE");
+      $impl.AddTokenSpelling($mod.TTokenKind.WHILETOK,"WHILE");
+      $impl.AddTokenSpelling($mod.TTokenKind.DOTOK,"DO");
+      $impl.AddTokenSpelling($mod.TTokenKind.REPEATTOK,"REPEAT");
+      $impl.AddTokenSpelling($mod.TTokenKind.UNTILTOK,"UNTIL");
+      $impl.AddTokenSpelling($mod.TTokenKind.FORTOK,"FOR");
+      $impl.AddTokenSpelling($mod.TTokenKind.TOTOK,"TO");
+      $impl.AddTokenSpelling($mod.TTokenKind.DOWNTOTOK,"DOWNTO");
+      $impl.AddTokenSpelling($mod.TTokenKind.ASSIGNTOK,":=");
+      $impl.AddTokenSpelling($mod.TTokenKind.WRITETOK,"WRITE");
+      $impl.AddTokenSpelling($mod.TTokenKind.WRITELNTOK,"WRITELN");
+      $impl.AddTokenSpelling($mod.TTokenKind.SIZEOFTOK,"SIZEOF");
+      $impl.AddTokenSpelling($mod.TTokenKind.LENGTHTOK,"LENGTH");
+      $impl.AddTokenSpelling($mod.TTokenKind.HIGHTOK,"HIGH");
+      $impl.AddTokenSpelling($mod.TTokenKind.LOWTOK,"LOW");
+      $impl.AddTokenSpelling($mod.TTokenKind.INTTOK,"INT");
+      $impl.AddTokenSpelling($mod.TTokenKind.FRACTOK,"FRAC");
+      $impl.AddTokenSpelling($mod.TTokenKind.TRUNCTOK,"TRUNC");
+      $impl.AddTokenSpelling($mod.TTokenKind.ROUNDTOK,"ROUND");
+      $impl.AddTokenSpelling($mod.TTokenKind.ODDTOK,"ODD");
+      $impl.AddTokenSpelling($mod.TTokenKind.READLNTOK,"READLN");
+      $impl.AddTokenSpelling($mod.TTokenKind.HALTTOK,"HALT");
+      $impl.AddTokenSpelling($mod.TTokenKind.BREAKTOK,"BREAK");
+      $impl.AddTokenSpelling($mod.TTokenKind.CONTINUETOK,"CONTINUE");
+      $impl.AddTokenSpelling($mod.TTokenKind.EXITTOK,"EXIT");
+      $impl.AddTokenSpelling($mod.TTokenKind.SUCCTOK,"SUCC");
+      $impl.AddTokenSpelling($mod.TTokenKind.PREDTOK,"PRED");
+      $impl.AddTokenSpelling($mod.TTokenKind.INCTOK,"INC");
+      $impl.AddTokenSpelling($mod.TTokenKind.DECTOK,"DEC");
+      $impl.AddTokenSpelling($mod.TTokenKind.ORDTOK,"ORD");
+      $impl.AddTokenSpelling($mod.TTokenKind.CHRTOK,"CHR");
+      $impl.AddTokenSpelling($mod.TTokenKind.ASMTOK,"ASM");
+      $impl.AddTokenSpelling($mod.TTokenKind.ABSOLUTETOK,"ABSOLUTE");
+      $impl.AddTokenSpelling($mod.TTokenKind.USESTOK,"USES");
+      $impl.AddTokenSpelling($mod.TTokenKind.LOTOK,"LO");
+      $impl.AddTokenSpelling($mod.TTokenKind.HITOK,"HI");
+      $impl.AddTokenSpelling($mod.TTokenKind.GETINTVECTOK,"GETINTVEC");
+      $impl.AddTokenSpelling($mod.TTokenKind.SETINTVECTOK,"SETINTVEC");
+      $impl.AddTokenSpelling($mod.TTokenKind.ARRAYTOK,"ARRAY");
+      $impl.AddTokenSpelling($mod.TTokenKind.OFTOK,"OF");
+      $impl.AddTokenSpelling($mod.TTokenKind.STRINGTOK,"STRING");
+      $impl.AddTokenSpelling($mod.TTokenKind.RANGETOK,"..");
+      $impl.AddTokenSpelling($mod.TTokenKind.EQTOK,"=");
+      $impl.AddTokenSpelling($mod.TTokenKind.NETOK,"<>");
+      $impl.AddTokenSpelling($mod.TTokenKind.LTTOK,"<");
+      $impl.AddTokenSpelling($mod.TTokenKind.LETOK,"<=");
+      $impl.AddTokenSpelling($mod.TTokenKind.GTTOK,">");
+      $impl.AddTokenSpelling($mod.TTokenKind.GETOK,">=");
+      $impl.AddTokenSpelling($mod.TTokenKind.DOTTOK,".");
+      $impl.AddTokenSpelling($mod.TTokenKind.COMMATOK,",");
+      $impl.AddTokenSpelling($mod.TTokenKind.SEMICOLONTOK,";");
+      $impl.AddTokenSpelling($mod.TTokenKind.OPARTOK,"(");
+      $impl.AddTokenSpelling($mod.TTokenKind.CPARTOK,")");
+      $impl.AddTokenSpelling($mod.TTokenKind.DEREFERENCETOK,"^");
+      $impl.AddTokenSpelling($mod.TTokenKind.ADDRESSTOK,"@");
+      $impl.AddTokenSpelling($mod.TTokenKind.OBRACKETTOK,"[");
+      $impl.AddTokenSpelling($mod.TTokenKind.CBRACKETTOK,"]");
+      $impl.AddTokenSpelling($mod.TTokenKind.COLONTOK,":");
+      $impl.AddTokenSpelling($mod.TTokenKind.PLUSTOK,"+");
+      $impl.AddTokenSpelling($mod.TTokenKind.MINUSTOK,"-");
+      $impl.AddTokenSpelling($mod.TTokenKind.MULTOK,"*");
+      $impl.AddTokenSpelling($mod.TTokenKind.DIVTOK,"/");
+      $impl.AddTokenSpelling($mod.TTokenKind.IDIVTOK,"DIV");
+      $impl.AddTokenSpelling($mod.TTokenKind.MODTOK,"MOD");
+      $impl.AddTokenSpelling($mod.TTokenKind.SHLTOK,"SHL");
+      $impl.AddTokenSpelling($mod.TTokenKind.SHRTOK,"SHR");
+      $impl.AddTokenSpelling($mod.TTokenKind.ORTOK,"OR");
+      $impl.AddTokenSpelling($mod.TTokenKind.XORTOK,"XOR");
+      $impl.AddTokenSpelling($mod.TTokenKind.ANDTOK,"AND");
+      $impl.AddTokenSpelling($mod.TTokenKind.NOTTOK,"NOT");
+      $impl.AddTokenSpelling($mod.TTokenKind.INTEGERTOK,"INTEGER");
+      $impl.AddTokenSpelling($mod.TTokenKind.CARDINALTOK,"CARDINAL");
+      $impl.AddTokenSpelling($mod.TTokenKind.SMALLINTTOK,"SMALLINT");
+      $impl.AddTokenSpelling($mod.TTokenKind.SHORTINTTOK,"SHORTINT");
+      $impl.AddTokenSpelling($mod.TTokenKind.WORDTOK,"WORD");
+      $impl.AddTokenSpelling($mod.TTokenKind.BYTETOK,"BYTE");
+      $impl.AddTokenSpelling($mod.TTokenKind.CHARTOK,"CHAR");
+      $impl.AddTokenSpelling($mod.TTokenKind.BOOLEANTOK,"BOOLEAN");
+      $impl.AddTokenSpelling($mod.TTokenKind.POINTERTOK,"POINTER");
+      $impl.AddTokenSpelling($mod.TTokenKind.SHORTREALTOK,"SHORTREAL");
+      $impl.AddTokenSpelling($mod.TTokenKind.REALTOK,"REAL");
+      $impl.AddTokenSpelling($mod.TTokenKind.SINGLETOK,"SINGLE");
+      $impl.AddTokenSpelling($mod.TTokenKind.HALFSINGLETOK,"FLOAT16");
+      $impl.AddTokenSpelling($mod.TTokenKind.PCHARTOK,"PCHAR");
+      $impl.AddTokenSpelling($mod.TTokenKind.SHORTSTRINGTOK,"SHORTSTRING");
+      $impl.AddTokenSpelling($mod.TTokenKind.FLOATTOK,"FLOAT");
+      $impl.AddTokenSpelling($mod.TTokenKind.TEXTTOK,"TEXT");
+    };
+  };
+  $mod.$init = function () {
+    $impl.InitializeTokenSpellings();
+  };
+},["SysUtils"]);
 rtl.module("Console",["System"],function () {
   "use strict";
   var $mod = this;
@@ -3879,8 +4128,10 @@ rtl.module("Utilities",["System"],function () {
       if ($tmp === 1) {
         Result = "Input.pas"}
        else if ($tmp === 2) {
-        Result = "-i:lib"}
-       else if ($tmp === 3) Result = "-o:Output.a65";
+        Result = "-ipath:lib"}
+       else if ($tmp === 3) {
+        Result = "-o:Output.a65"}
+       else if ($tmp === 4) Result = "-diag";
       return Result;
     };
     this.GetParameterStringUpperCase = function (i) {
@@ -3922,10 +4173,12 @@ rtl.module("Utilities",["System"],function () {
   this.DefaultFormatSettings = this.TFormatSettings.$clone({CurrencyFormat: 1, NegCurrFormat: 5, ThousandSeparator: ",", DecimalSeparator: ".", CurrencyDecimals: 2, DateSeparator: "-", TimeSeparator: ":", ListSeparator: ",", CurrencyString: "$", ShortDateFormat: "d/m/y", LongDateFormat: 'dd" "mmmm" "yyyy', TimeAMString: "AM", TimePMString: "PM", ShortTimeFormat: "hh:nn", LongTimeFormat: "hh:nn:ss", ShortMonthNames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], LongMonthNames: ["January","February","March","April","May","June","July","August","September","October","November","December"], ShortDayNames: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], LongDayNames: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], TwoDigitYearCenturyWindow: 50});
   this.AnsiLowerCase = function (s) {
     var Result = "";
+    Result = pas.SysUtils.LowerCase(s);
     return Result;
   };
   this.AnsiUpperCase = function (s) {
     var Result = "";
+    Result = pas.SysUtils.UpperCase(s);
     return Result;
   };
   this.CompareWord = function (buf1, buf2, len) {
@@ -3937,7 +4190,7 @@ rtl.module("Utilities",["System"],function () {
     return Result;
   };
 },["SysUtils"]);
-rtl.module("Messages",["System","Common"],function () {
+rtl.module("Messages",["System","Common","CommonTypes","Tokens"],function () {
   "use strict";
   var $mod = this;
   var $impl = $mod.$impl;
@@ -3950,19 +4203,27 @@ rtl.module("Messages",["System","Common"],function () {
       this.Text = "";
     };
     this.Create$1 = function (errorCode, Text, variable0, variable1) {
-      var temp = "";
+      var l = 0;
+      var i = 0;
+      var c = "\x00";
       this.ErrorCode = errorCode;
-      temp = pas.SysUtils.TStringHelper.Replace$2.call({get: function () {
-          return Text;
-        }, set: function (v) {
-          rtl.raiseE("EPropReadOnly");
-        }},"{0}",variable0);
-      temp = pas.SysUtils.TStringHelper.Replace$2.call({get: function () {
-          return Text;
-        }, set: function (v) {
-          rtl.raiseE("EPropReadOnly");
-        }},"{1}",variable1);
-      this.Text = temp;
+      this.Text = "";
+      l = Text.length;
+      i = 1;
+      do {
+        c = Text.charAt(i - 1);
+        if (c === "{") {
+          if (!(i < (l - 2))) throw pas.SysUtils.EAssertionFailed.$create("Create$1",["Invalid string pattern, too short '" + Text + "'"]);
+          if (!(Text.charCodeAt((i + 1) - 1) in rtl.createSet(48,57))) throw pas.SysUtils.EAssertionFailed.$create("Create$1",["Invalid string pattern, placeholder must be {0}..{9} '" + Text + "'"]);
+          if (!(Text.charAt((i + 2) - 1) === "}")) throw pas.SysUtils.EAssertionFailed.$create("Create$1",["Invalid string pattern, missing } '" + Text + "'"]);
+          var $tmp = Text.charAt(i - 1);
+          if ($tmp === "0") {
+            this.Text = this.Text + variable0}
+           else if ($tmp === "1") this.Text = this.Text + variable1;
+          i = i + 2;
+        };
+        i += 1;
+      } while (!(i >= l));
       return this;
     };
     this.GetErrorCode = function () {
@@ -4076,12 +4337,12 @@ rtl.module("Messages",["System","Common"],function () {
     $impl.ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,$mod.TErrorCode.IncompatibleTypesArray,identIndex,tokenKind,0);
   };
   this.ErrorIdentifierIncompatibleTypesArrayIdentifier = function (tokenIndex, identIndex, arrayIdentIndex) {
-    $impl.ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,$mod.TErrorCode.IncompatibleTypesArray,identIndex,0,arrayIdentIndex);
+    $impl.ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,$mod.TErrorCode.IncompatibleTypesArray,identIndex,pas.Tokens.TTokenKind.UNTYPETOK,arrayIdentIndex);
   };
-  this.ErrorRangeCheckError = function (tokenIndex, identIndex, srcType, dstType) {
+  this.ErrorRangeCheckError = function (tokenIndex, Value, dstType) {
     var $ir = rtl.createIntfRefs();
     try {
-      $mod.Warning(tokenIndex,$ir.ref(1,rtl.queryIntfT($mod.TMessage.$create("Create$1",[$mod.TErrorCode.RangeCheckError,$impl.GetRangeCheckText(tokenIndex,identIndex,srcType,dstType),"",""]),$mod.IMessage)));
+      $mod.Warning(tokenIndex,$ir.ref(1,rtl.queryIntfT($mod.TMessage.$create("Create$1",[$mod.TErrorCode.RangeCheckError,$impl.GetRangeCheckText(tokenIndex,Value,dstType),"",""]),$mod.IMessage)));
     } finally {
       $ir.free();
     };
@@ -4164,10 +4425,10 @@ rtl.module("Messages",["System","Common"],function () {
       $ir.free();
     };
   };
-  this.WarningForRangeCheckError = function (tokenIndex, identIndex, srcType, DstType) {
+  this.WarningForRangeCheckError = function (tokenIndex, Value, dstType) {
     var $ir = rtl.createIntfRefs();
     try {
-      $mod.Warning(tokenIndex,$ir.ref(1,rtl.queryIntfT($mod.TMessage.$create("Create$1",[$mod.TErrorCode.RangeCheckError,$impl.GetRangeCheckText(tokenIndex,identIndex,srcType,DstType),"",""]),$mod.IMessage)));
+      $mod.Warning(tokenIndex,$ir.ref(1,rtl.queryIntfT($mod.TMessage.$create("Create$1",[$mod.TErrorCode.RangeCheckError,$impl.GetRangeCheckText(tokenIndex,Value,dstType),"",""]),$mod.IMessage)));
     } finally {
       $ir.free();
     };
@@ -4188,21 +4449,21 @@ rtl.module("Messages",["System","Common"],function () {
     var a = "";
     if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) if (pas.System.Pos(".",pas.Common.Ident[identIndex - 1].Name) === 0) {
       a = pas.Common.UnitName[pas.Common.Tok[tokenIndex].UnitIndex - 1].Path + " (" + pas.SysUtils.IntToStr(pas.Common.Tok[tokenIndex].Line) + ")" + " Note: Local ";
-      if (pas.Common.Ident[identIndex - 1].Kind !== 7) {
+      if (pas.Common.Ident[identIndex - 1].Kind !== pas.Tokens.TTokenKind.UNITTOK) {
         var $tmp = pas.Common.Ident[identIndex - 1].Kind;
-        if ($tmp === 1) {
+        if ($tmp === pas.Tokens.TTokenKind.CONSTTOK) {
           a = a + "const"}
-         else if ($tmp === 2) {
+         else if ($tmp === pas.Tokens.TTokenKind.TYPETOK) {
           a = a + "type"}
-         else if ($tmp === 6) {
+         else if ($tmp === pas.Tokens.TTokenKind.LABELTOK) {
           a = a + "label"}
-         else if ($tmp === 3) {
+         else if ($tmp === pas.Tokens.TTokenKind.VARTOK) {
           if (pas.Common.Ident[identIndex - 1].isAbsolute) {
             a = a + "absolutevar"}
            else a = a + "variable"}
-         else if ($tmp === 4) {
+         else if ($tmp === pas.Tokens.TTokenKind.PROCEDURETOK) {
           a = a + "proc"}
-         else if ($tmp === 5) a = a + "func";
+         else if ($tmp === pas.Tokens.TTokenKind.FUNCTIONTOK) a = a + "func";
         a = a + " '" + pas.Common.Ident[identIndex - 1].Name + "'" + " not used";
         if (pas.System.Pos("@FN",pas.Common.Ident[identIndex - 1].Name) === 1) {}
         else $impl.AddMessage({p: pas.Common, get: function () {
@@ -4236,16 +4497,13 @@ rtl.module("Messages",["System","Common"],function () {
     };
     $impl.GetExpectedButTokenFound = function (tokenIndex) {
       var Result = "";
-      Result = " expected but '" + pas.Common.GetSpelling(tokenIndex) + "' found";
+      Result = " expected but '" + pas.Common.GetTokenSpellingAtIndex(tokenIndex) + "' found";
       return Result;
     };
-    $impl.GetRangeCheckText = function (tokenIndex, identIndex, srcType, dstType) {
+    $impl.GetRangeCheckText = function (tokenIndex, Value, dstType) {
       var Result = "";
       var msg = "";
-      msg = "Range check error while evaluating constants (" + pas.SysUtils.IntToStr(srcType) + " must be between " + pas.SysUtils.IntToStr(pas.Common.LowBound(tokenIndex,dstType)) + " and ";
-      if (identIndex > 0) {
-        msg = msg + pas.SysUtils.IntToStr(pas.Common.Ident[identIndex - 1].NumAllocElements - 1) + ")"}
-       else msg = msg + pas.SysUtils.IntToStr(pas.Common.HighBound(tokenIndex,dstType)) + ")";
+      msg = "Range check error while evaluating constants. " + pas.SysUtils.IntToStr(Value) + " must be between " + pas.SysUtils.IntToStr(pas.Common.LowBound(tokenIndex,dstType)) + " and " + pas.SysUtils.IntToStr(pas.Common.HighBound(tokenIndex,dstType)) + ")";
       Result = msg;
       return Result;
     };
@@ -4319,9 +4577,9 @@ rtl.module("Messages",["System","Common"],function () {
         if (pas.Common.Ident[identIndex - 1].NumAllocElements_ > 0) {
           msg = msg + pas.SysUtils.IntToStr(pas.Common.Ident[identIndex - 1].NumAllocElements - 1) + "] Of Array[0.." + pas.SysUtils.IntToStr(pas.Common.Ident[identIndex - 1].NumAllocElements_ - 1) + "] Of " + pas.Common.InfoAboutToken(pas.Common.Ident[identIndex - 1].AllocElementType) + '" '}
          else if (pas.Common.Ident[identIndex - 1].NumAllocElements === 0) {
-          if (pas.Common.Ident[identIndex - 1].AllocElementType !== 0) {
+          if (pas.Common.Ident[identIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) {
             msg = msg + '"^' + pas.Common.InfoAboutToken(pas.Common.Ident[identIndex - 1].AllocElementType) + '" '}
-           else msg = msg + '"' + pas.Common.InfoAboutToken(136) + '" ';
+           else msg = msg + '"' + pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.POINTERTOK) + '" ';
         } else {
           msg = msg + pas.SysUtils.IntToStr(pas.Common.Ident[identIndex - 1].NumAllocElements - 1) + "] Of " + pas.Common.InfoAboutToken(pas.Common.Ident[identIndex - 1].AllocElementType) + '" ';
         };
@@ -4331,10 +4589,10 @@ rtl.module("Messages",["System","Common"],function () {
           msg = msg + "expected ";
           if (pas.Common.Ident[arrayIdentIndex - 1].NumAllocElements_ > 0) {
             msg = msg + '"Array[0..' + pas.SysUtils.IntToStr(pas.Common.Ident[arrayIdentIndex - 1].NumAllocElements - 1) + "] Of Array[0.." + pas.SysUtils.IntToStr(pas.Common.Ident[arrayIdentIndex - 1].NumAllocElements_ - 1) + "] Of " + pas.Common.InfoAboutToken(pas.Common.Ident[identIndex - 1].AllocElementType) + '"'}
-           else if (pas.Common.Ident[arrayIdentIndex - 1].AllocElementType in rtl.createSet(139,140)) {
+           else if (pas.Common.Ident[arrayIdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             msg = msg + '"^' + pas.Common.TypeArray[pas.Common.Ident[arrayIdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"'}
            else {
-            if (pas.Common.Ident[arrayIdentIndex - 1].DataType in rtl.createSet(139,140)) {
+            if (pas.Common.Ident[arrayIdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
               msg = msg + '"' + pas.Common.TypeArray[pas.Common.Ident[arrayIdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"'}
              else msg = msg + '"Array[0..' + pas.SysUtils.IntToStr(pas.Common.Ident[arrayIdentIndex - 1].NumAllocElements - 1) + "] Of " + pas.Common.InfoAboutToken(pas.Common.Ident[arrayIdentIndex - 1].AllocElementType) + '"';
           };
@@ -4348,193 +4606,26 @@ rtl.module("Messages",["System","Common"],function () {
     };
   };
 },["SysUtils","Console","FileIO","Utilities"]);
-rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities"],function () {
+rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities","Tokens"],function () {
   "use strict";
   var $mod = this;
   this.TPass = {"0": "NONE", NONE: 0, "1": "CALL_DETERMINATION", CALL_DETERMINATION: 1, "2": "CODE_GENERATION", CODE_GENERATION: 2};
   this.TParameterPassingMethod = {"0": "UNDEFINED", UNDEFINED: 0, "1": "VALPASSING", VALPASSING: 1, "2": "CONSTPASSING", CONSTPASSING: 2, "3": "VARPASSING", VARPASSING: 3};
   this.title = "1.7.2";
-  this.UNTYPETOK = 0;
-  this.CONSTTOK = 1;
-  this.TYPETOK = 2;
-  this.VARTOK = 3;
-  this.PROCEDURETOK = 4;
-  this.FUNCTIONTOK = 5;
-  this.LABELTOK = 6;
-  this.UNITTOK = 7;
-  this.GETINTVECTOK = 10;
-  this.SETINTVECTOK = 11;
-  this.CASETOK = 12;
-  this.BEGINTOK = 13;
-  this.ENDTOK = 14;
-  this.IFTOK = 15;
-  this.THENTOK = 16;
-  this.ELSETOK = 17;
-  this.WHILETOK = 18;
-  this.DOTOK = 19;
-  this.REPEATTOK = 20;
-  this.UNTILTOK = 21;
-  this.FORTOK = 22;
-  this.TOTOK = 23;
-  this.DOWNTOTOK = 24;
-  this.ASSIGNTOK = 25;
-  this.WRITETOK = 26;
-  this.READLNTOK = 27;
-  this.HALTTOK = 28;
-  this.USESTOK = 29;
-  this.ARRAYTOK = 30;
-  this.OFTOK = 31;
-  this.STRINGTOK = 32;
-  this.INCTOK = 33;
-  this.DECTOK = 34;
-  this.ORDTOK = 35;
-  this.CHRTOK = 36;
-  this.ASMTOK = 37;
-  this.ABSOLUTETOK = 38;
-  this.BREAKTOK = 39;
-  this.CONTINUETOK = 40;
-  this.EXITTOK = 41;
-  this.RANGETOK = 42;
-  this.EQTOK = 43;
-  this.NETOK = 44;
-  this.LTTOK = 45;
-  this.LETOK = 46;
-  this.GTTOK = 47;
-  this.GETOK = 48;
-  this.LOTOK = 49;
-  this.HITOK = 50;
-  this.DOTTOK = 51;
-  this.COMMATOK = 52;
-  this.SEMICOLONTOK = 53;
-  this.OPARTOK = 54;
-  this.CPARTOK = 55;
-  this.DEREFERENCETOK = 56;
-  this.ADDRESSTOK = 57;
-  this.OBRACKETTOK = 58;
-  this.CBRACKETTOK = 59;
-  this.COLONTOK = 60;
-  this.PLUSTOK = 61;
-  this.MINUSTOK = 62;
-  this.MULTOK = 63;
-  this.DIVTOK = 64;
-  this.IDIVTOK = 65;
-  this.MODTOK = 66;
-  this.SHLTOK = 67;
-  this.SHRTOK = 68;
-  this.ORTOK = 69;
-  this.XORTOK = 70;
-  this.ANDTOK = 71;
-  this.NOTTOK = 72;
-  this.ASSIGNFILETOK = 73;
-  this.RESETTOK = 74;
-  this.REWRITETOK = 75;
-  this.APPENDTOK = 76;
-  this.BLOCKREADTOK = 77;
-  this.BLOCKWRITETOK = 78;
-  this.CLOSEFILETOK = 79;
-  this.GETRESOURCEHANDLETOK = 80;
-  this.SIZEOFRESOURCETOK = 81;
-  this.WRITELNTOK = 82;
-  this.SIZEOFTOK = 83;
-  this.LENGTHTOK = 84;
-  this.HIGHTOK = 85;
-  this.LOWTOK = 86;
-  this.INTTOK = 87;
-  this.FRACTOK = 88;
-  this.TRUNCTOK = 89;
-  this.ROUNDTOK = 90;
-  this.ODDTOK = 91;
-  this.PROGRAMTOK = 92;
-  this.LIBRARYTOK = 93;
-  this.EXPORTSTOK = 94;
-  this.EXTERNALTOK = 95;
-  this.INTERFACETOK = 96;
-  this.IMPLEMENTATIONTOK = 97;
-  this.INITIALIZATIONTOK = 98;
-  this.CONSTRUCTORTOK = 99;
-  this.DESTRUCTORTOK = 100;
-  this.OVERLOADTOK = 101;
-  this.ASSEMBLERTOK = 102;
-  this.FORWARDTOK = 103;
-  this.REGISTERTOK = 104;
-  this.INTERRUPTTOK = 105;
-  this.PASCALTOK = 106;
-  this.STDCALLTOK = 107;
-  this.INLINETOK = 108;
-  this.KEEPTOK = 109;
-  this.SUCCTOK = 110;
-  this.PREDTOK = 111;
-  this.PACKEDTOK = 112;
-  this.GOTOTOK = 113;
-  this.INTOK = 114;
-  this.VOLATILETOK = 115;
-  this.STRIPEDTOK = 116;
-  this.SETTOK = 127;
-  this.BYTETOK = 128;
-  this.WORDTOK = 129;
-  this.CARDINALTOK = 130;
-  this.SHORTINTTOK = 131;
-  this.SMALLINTTOK = 132;
-  this.INTEGERTOK = 133;
-  this.CHARTOK = 134;
-  this.BOOLEANTOK = 135;
-  this.POINTERTOK = 136;
-  this.STRINGPOINTERTOK = 137;
-  this.FILETOK = 138;
-  this.RECORDTOK = 139;
-  this.OBJECTTOK = 140;
-  this.SHORTREALTOK = 141;
-  this.REALTOK = 142;
-  this.SINGLETOK = 143;
-  this.HALFSINGLETOK = 144;
-  this.PCHARTOK = 145;
-  this.ENUMTOK = 146;
-  this.PROCVARTOK = 147;
-  this.TEXTFILETOK = 148;
-  this.FORWARDTYPE = 149;
-  this.SHORTSTRINGTOK = 150;
-  this.FLOATTOK = 151;
-  this.FLOAT16TOK = 152;
-  this.TEXTTOK = 153;
-  this.DEREFERENCEARRAYTOK = 154;
-  this.DATAORIGINOFFSET = 160;
-  this.CODEORIGINOFFSET = 161;
-  this.IDENTTOK = 170;
-  this.INTNUMBERTOK = 171;
-  this.FRACNUMBERTOK = 172;
-  this.CHARLITERALTOK = 173;
-  this.STRINGLITERALTOK = 174;
-  this.EVALTOK = 184;
-  this.LOOPUNROLLTOK = 185;
-  this.NOLOOPUNROLLTOK = 186;
-  this.LINKTOK = 187;
-  this.MACRORELEASE = 188;
-  this.PROCALIGNTOK = 189;
-  this.LOOPALIGNTOK = 190;
-  this.LINKALIGNTOK = 191;
-  this.INFOTOK = 192;
-  this.WARNINGTOK = 193;
-  this.ERRORTOK = 194;
-  this.UNITBEGINTOK = 195;
-  this.UNITENDTOK = 196;
-  this.IOCHECKON = 197;
-  this.IOCHECKOFF = 198;
-  this.EOFTOK = 199;
-  this.UnsignedOrdinalTypes = rtl.createSet(128,129,130);
-  this.SignedOrdinalTypes = rtl.createSet(131,132,133);
-  this.RealTypes = rtl.createSet(141,142,143,144);
+  this.UnsignedOrdinalTypes = rtl.createSet(pas.Tokens.TTokenKind.BYTETOK,pas.Tokens.TTokenKind.WORDTOK,pas.Tokens.TTokenKind.CARDINALTOK);
+  this.SignedOrdinalTypes = rtl.createSet(pas.Tokens.TTokenKind.SHORTINTTOK,pas.Tokens.TTokenKind.SMALLINTTOK,pas.Tokens.TTokenKind.INTEGERTOK);
+  this.RealTypes = rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK);
   this.IntegerTypes = rtl.unionSet(this.UnsignedOrdinalTypes,this.SignedOrdinalTypes);
-  this.OrdinalTypes = rtl.unionSet(this.IntegerTypes,rtl.createSet(134,135,146));
-  this.Pointers = rtl.createSet(136,147,137,145);
+  this.OrdinalTypes = rtl.unionSet(this.IntegerTypes,rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BOOLEANTOK,pas.Tokens.TTokenKind.ENUMTOK));
+  this.Pointers = rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.PROCVARTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.PCHARTOK);
   this.AllTypes = rtl.unionSet(rtl.unionSet(this.OrdinalTypes,this.RealTypes),this.Pointers);
-  this.StringTypes = rtl.createSet(137,174,145);
-  this.CONSTANT = 1;
-  this.USERTYPE = 2;
-  this.VARIABLE = 3;
-  this.LABELTYPE = 6;
-  this.UNITTYPE = 7;
-  this.ENUMTYPE = 146;
-  this.MAXTOKENNAMES = 200;
+  this.StringTypes = rtl.createSet(pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.STRINGLITERALTOK,pas.Tokens.TTokenKind.PCHARTOK);
+  this.CONSTANT = pas.Tokens.TTokenKind.CONSTTOK;
+  this.USERTYPE = pas.Tokens.TTokenKind.TYPETOK;
+  this.VARIABLE = pas.Tokens.TTokenKind.VARTOK;
+  this.LABELTYPE = pas.Tokens.TTokenKind.LABELTOK;
+  this.UNITTYPE = pas.Tokens.TTokenKind.UNITTOK;
+  this.ENUMTYPE = pas.Tokens.TTokenKind.ENUMTOK;
   this.MAXFIELDS = 256;
   this.MAXTYPES = 1024;
   this.MAXPOSSTACK = 512;
@@ -4561,15 +4652,14 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
   this.ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN = 11;
   this.ASPOINTERTOARRAYRECORDTOSTRING = 12;
   this.ASCHAR = 6;
-  this.ASBOOLEAN = 7;
+  this.ASBOOLEAN_ = 7;
   this.ASREAL = 8;
   this.ASSHORTREAL = 9;
   this.ASHALFSINGLE = 10;
   this.ASSINGLE = 11;
   this.ASPCHAR = 12;
-  this.OBJECTVARIABLE = 1;
-  this.DataSize = [1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,2,1,2,2,2];
-  this.fBlockRead_ParamType = [0,129,136];
+  this._DataSize = [1,2,4,1,2,4,1,1,2,2,2,2,2,2,4,4,2,2,1,2,2,2];
+  this.fBlockRead_ParamType = [pas.Tokens.TTokenKind.UNTYPETOK,pas.Tokens.TTokenKind.WORDTOK,pas.Tokens.TTokenKind.POINTERTOK];
   this.TCPU = {"0": "CPU_6502", CPU_6502: 0, "1": "CPU_65C02", CPU_65C02: 1, "2": "CPU_65816", CPU_65816: 2};
   this.TComputer = {"0": "A8", A8: 0, "1": "C4P", C4P: 1, "2": "C64", C64: 2, "3": "NEO", NEO: 3, "4": "RAW", RAW: 4, "5": "X16", X16: 5};
   rtl.recNewT(this,"TTarget",function () {
@@ -4658,6 +4748,7 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
     for (var c = 0; c < 256; c++) b[c] = $mod.TParam.$clone(a[c]);
     return b;
   };
+  this.TFieldKind = {"0": "UNTYPETOK", UNTYPETOK: 0, "1": "OBJECTVARIABLE", OBJECTVARIABLE: 1, "2": "RECORDVARIABLE", RECORDVARIABLE: 2};
   rtl.recNewT(this,"TField",function () {
     this.Name = "";
     this.Value = 0;
@@ -4958,7 +5049,6 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
     return b;
   };
   this.Ident = rtl.arraySetLength(null,this.TIdentifier,16384);
-  this.TokenSpelling = rtl.arraySetLength(null,"",200);
   this.UnitName$a$clone = function (a) {
     var b = [];
     b.length = 4096;
@@ -5094,6 +5184,19 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
       anArray[$mod.i] = 0;
     };
   };
+  this.GetDataSize = function (dataType) {
+    var Result = 0;
+    var index = 0;
+    index = dataType;
+    if (dataType === pas.Tokens.TTokenKind.UNTYPETOK) {
+      Result = 0;
+    } else if ((index >= 116) && (index <= 137)) {
+      Result = $mod._DataSize[index - 116];
+    } else {
+      if (!false) throw pas.SysUtils.EAssertionFailed.$create("Create");
+    };
+    return Result;
+  };
   this.AddDefine = function (defineName) {
     if ($mod.SearchDefine(defineName) === 0) {
       $mod.NumDefines += 1;
@@ -5102,41 +5205,49 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
       $mod.Defines[$mod.NumDefines - 1].Line = 0;
     };
   };
+  this.SearchDefine = function (defineName) {
+    var Result = 0;
+    var i = 0;
+    for (var $l = 1, $end = $mod.NumDefines; $l <= $end; $l++) {
+      i = $l;
+      if ($mod.Defines[i - 1].Name === defineName) {
+        return i;
+      };
+    };
+    Result = 0;
+    return Result;
+  };
   this.AddPath = function (s) {
     $mod.unitPathList.AddFolder(s);
   };
   this.CheckArrayIndex = function (i, IdentIndex, ArrayIndex, ArrayIndexType) {
-    if (($mod.Ident[IdentIndex - 1].NumAllocElements > 0) && ($mod.Ident[IdentIndex - 1].AllocElementType !== 139)) if ((ArrayIndex < 0) || (ArrayIndex > (($mod.Ident[IdentIndex - 1].NumAllocElements - 1) + (($mod.Ident[IdentIndex - 1].DataType === 137) + 0)))) if ($mod.Ident[IdentIndex - 1].NumAllocElements !== 1) pas.Messages.WarningForRangeCheckError(i,IdentIndex,ArrayIndex,ArrayIndexType);
+    if (($mod.Ident[IdentIndex - 1].NumAllocElements > 0) && ($mod.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.RECORDTOK)) if ((ArrayIndex < 0) || (ArrayIndex > (($mod.Ident[IdentIndex - 1].NumAllocElements - 1) + (($mod.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) + 0)))) if ($mod.Ident[IdentIndex - 1].NumAllocElements !== 1) pas.Messages.WarningForRangeCheckError(i,ArrayIndex,ArrayIndexType);
   };
   this.CheckArrayIndex_ = function (i, IdentIndex, ArrayIndex, ArrayIndexType) {
-    if ($mod.Ident[IdentIndex - 1].NumAllocElements_ > 0) if ((ArrayIndex < 0) || (ArrayIndex > (($mod.Ident[IdentIndex - 1].NumAllocElements_ - 1) + (($mod.Ident[IdentIndex - 1].DataType === 137) + 0)))) if ($mod.Ident[IdentIndex - 1].NumAllocElements_ !== 1) pas.Messages.WarningForRangeCheckError(i,IdentIndex,ArrayIndex,ArrayIndexType);
+    if ($mod.Ident[IdentIndex - 1].NumAllocElements_ > 0) if ((ArrayIndex < 0) || (ArrayIndex > (($mod.Ident[IdentIndex - 1].NumAllocElements_ - 1) + (($mod.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) + 0)))) if ($mod.Ident[IdentIndex - 1].NumAllocElements_ !== 1) pas.Messages.WarningForRangeCheckError(i,ArrayIndex,ArrayIndexType);
   };
   this.CheckOperator = function (ErrTokenIndex, op, DataType, RightType) {
     var $ir = rtl.createIntfRefs();
     try {
-      if (((DataType in $mod.RealTypes) && !(op in rtl.createSet(63,64,61,62,47,48,43,44,46,45))) || ((DataType in $mod.IntegerTypes) && !(op in rtl.createSet(63,65,66,67,68,71,61,62,69,70,72,47,48,43,44,46,45,114))) || ((DataType === 134) && !(op in rtl.createSet(47,48,43,44,46,45,114))) || ((DataType === 135) && !(op in rtl.createSet(71,69,70,72,47,48,43,44,46,45))) || ((DataType in $mod.Pointers) && !(op in rtl.createSet(47,48,43,44,46,45,61,62)))) if (DataType === RightType) {
-        pas.Messages.Error$1(ErrTokenIndex,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OperatorNotOverloaded,"Operator is not overloaded: " + '"' + $mod.InfoAboutToken(DataType) + '" ' + $mod.InfoAboutToken(op) + ' "' + $mod.InfoAboutToken(RightType) + '"',"",""]),pas.Messages.IMessage)))}
-       else pas.Messages.Error$1(ErrTokenIndex,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OperationNotSupportedForTypes,'Operation "' + $mod.InfoAboutToken(op) + '" not supported for types "' + $mod.InfoAboutToken(DataType) + '" and "' + $mod.InfoAboutToken(RightType) + '"',"",""]),pas.Messages.IMessage)));
+      if (((DataType in $mod.RealTypes) && !(op in rtl.createSet(pas.Tokens.TTokenKind.MULTOK,pas.Tokens.TTokenKind.DIVTOK,pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK,pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK,pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.LTTOK))) || ((DataType in $mod.IntegerTypes) && !(op in rtl.createSet(pas.Tokens.TTokenKind.MULTOK,pas.Tokens.TTokenKind.IDIVTOK,pas.Tokens.TTokenKind.MODTOK,pas.Tokens.TTokenKind.SHLTOK,pas.Tokens.TTokenKind.SHRTOK,pas.Tokens.TTokenKind.ANDTOK,pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK,pas.Tokens.TTokenKind.ORTOK,pas.Tokens.TTokenKind.XORTOK,pas.Tokens.TTokenKind.NOTTOK,pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK,pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.LTTOK,pas.Tokens.TTokenKind.INTOK))) || ((DataType === pas.Tokens.TTokenKind.CHARTOK) && !(op in rtl.createSet(pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK,pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.LTTOK,pas.Tokens.TTokenKind.INTOK))) || ((DataType === pas.Tokens.TTokenKind.BOOLEANTOK) && !(op in rtl.createSet(pas.Tokens.TTokenKind.ANDTOK,pas.Tokens.TTokenKind.ORTOK,pas.Tokens.TTokenKind.XORTOK,pas.Tokens.TTokenKind.NOTTOK,pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK,pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.LTTOK))) || ((DataType in $mod.Pointers) && !(op in rtl.createSet(pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK,pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.LTTOK,pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK)))) {
+        if (DataType === RightType) {
+          pas.Messages.Error$1(ErrTokenIndex,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OperatorNotOverloaded,"Operator is not overloaded: " + '"' + $mod.InfoAboutToken(DataType) + '" ' + $mod.InfoAboutToken(op) + ' "' + $mod.InfoAboutToken(RightType) + '"',"",""]),pas.Messages.IMessage)))}
+         else pas.Messages.Error$1(ErrTokenIndex,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OperationNotSupportedForTypes,'Operation "' + $mod.InfoAboutToken(op) + '" not supported for types "' + $mod.InfoAboutToken(DataType) + '" and "' + $mod.InfoAboutToken(RightType) + '"',"",""]),pas.Messages.IMessage)));
+      };
     } finally {
       $ir.free();
     };
   };
   this.CheckTok = function (i, ExpectedTokenCode) {
-    var s = "";
+    var found = "";
+    var expected = "";
     var $ir = rtl.createIntfRefs();
     try {
-      if (ExpectedTokenCode < 170) {
-        s = $mod.TokenSpelling[ExpectedTokenCode - 1]}
-       else if (ExpectedTokenCode === 170) {
-        s = "identifier"}
-       else if (ExpectedTokenCode === 171) {
-        s = "number"}
-       else if (ExpectedTokenCode === 173) {
-        s = "literal"}
-       else if (ExpectedTokenCode === 174) {
-        s = "string"}
-       else s = "unknown token";
-      if ($mod.Tok[i].Kind !== ExpectedTokenCode) pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.SyntaxError,"Syntax error, " + "'" + s + "'" + " expected but '" + $mod.GetSpelling(i) + "' found","",""]),pas.Messages.IMessage)));
+      if ($mod.Tok[i].Kind !== ExpectedTokenCode) {
+        found = $mod.GetTokenSpellingAtIndex(i);
+        expected = pas.Tokens.GetHumanReadbleTokenSpelling(ExpectedTokenCode);
+        pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.SyntaxError,"Syntax error, " + "'" + expected + "'" + " expected but '" + found + "' found","",""]),pas.Messages.IMessage)));
+      };
     } finally {
       $ir.free();
     };
@@ -5214,20 +5325,20 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
   this.GetCommonConstType = function (ErrTokenIndex, DstType, SrcType, err) {
     var Result = false;
     Result = false;
-    if (($mod.DataSize[DstType - 128] < $mod.DataSize[SrcType - 128]) || ((DstType === 142) && (SrcType !== 142)) || ((DstType !== 142) && (SrcType === 142)) || ((DstType === 143) && (SrcType !== 143)) || ((DstType !== 143) && (SrcType === 143)) || ((DstType === 144) && (SrcType !== 144)) || ((DstType !== 144) && (SrcType === 144)) || ((DstType === 141) && (SrcType !== 141)) || ((DstType !== 141) && (SrcType === 141)) || ((DstType in $mod.IntegerTypes) && (SrcType in rtl.createSet(134,135,136,160,161,137))) || ((SrcType in $mod.IntegerTypes) && (DstType in rtl.createSet(134,135)))) if (err) {
+    if (($mod.GetDataSize(DstType) < $mod.GetDataSize(SrcType)) || ((DstType === pas.Tokens.TTokenKind.REALTOK) && (SrcType !== pas.Tokens.TTokenKind.REALTOK)) || ((DstType !== pas.Tokens.TTokenKind.REALTOK) && (SrcType === pas.Tokens.TTokenKind.REALTOK)) || ((DstType === pas.Tokens.TTokenKind.SINGLETOK) && (SrcType !== pas.Tokens.TTokenKind.SINGLETOK)) || ((DstType !== pas.Tokens.TTokenKind.SINGLETOK) && (SrcType === pas.Tokens.TTokenKind.SINGLETOK)) || ((DstType === pas.Tokens.TTokenKind.HALFSINGLETOK) && (SrcType !== pas.Tokens.TTokenKind.HALFSINGLETOK)) || ((DstType !== pas.Tokens.TTokenKind.HALFSINGLETOK) && (SrcType === pas.Tokens.TTokenKind.HALFSINGLETOK)) || ((DstType === pas.Tokens.TTokenKind.SHORTREALTOK) && (SrcType !== pas.Tokens.TTokenKind.SHORTREALTOK)) || ((DstType !== pas.Tokens.TTokenKind.SHORTREALTOK) && (SrcType === pas.Tokens.TTokenKind.SHORTREALTOK)) || ((DstType in $mod.IntegerTypes) && (SrcType in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BOOLEANTOK,pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.DATAORIGINOFFSET,pas.Tokens.TTokenKind.CODEORIGINOFFSET,pas.Tokens.TTokenKind.STRINGPOINTERTOK))) || ((SrcType in $mod.IntegerTypes) && (DstType in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BOOLEANTOK)))) if (err) {
       pas.Messages.ErrorIncompatibleTypes(ErrTokenIndex,SrcType,DstType,false)}
      else Result = true;
     return Result;
   };
   this.GetCommonType = function (ErrTokenIndex, LeftType, RightType) {
     var Result = 0;
-    Result = 0;
+    Result = pas.Tokens.TTokenKind.UNTYPETOK;
     if (LeftType === RightType) {
       Result = LeftType}
      else if ((LeftType in $mod.IntegerTypes) && (RightType in $mod.IntegerTypes)) Result = LeftType;
     if ((LeftType in $mod.Pointers) && (RightType in $mod.Pointers)) Result = LeftType;
-    if (LeftType === 0) Result = RightType;
-    if (Result === 0) pas.Messages.ErrorIncompatibleTypes(ErrTokenIndex,RightType,LeftType,false);
+    if (LeftType === pas.Tokens.TTokenKind.UNTYPETOK) Result = RightType;
+    if (Result === pas.Tokens.TTokenKind.UNTYPETOK) pas.Messages.ErrorIncompatibleTypes(ErrTokenIndex,RightType,LeftType,false);
     return Result;
   };
   this.GetEnumName = function (IdentIndex) {
@@ -5242,7 +5353,7 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
         BlockStackIndex = $l;
         for (var $l1 = 1, $end = $mod.NumIdent; $l1 <= $end; $l1++) {
           IdentIndex = $l1;
-          if (($mod.Ident[IdentIndex - 1].DataType === 146) && ($mod.Ident[IdentIndex - 1].NumAllocElements === Num) && ($mod.BlockStack[BlockStackIndex] === $mod.Ident[IdentIndex - 1].Block)) return IdentIndex;
+          if (($mod.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) && ($mod.Ident[IdentIndex - 1].NumAllocElements === Num) && ($mod.BlockStack[BlockStackIndex] === $mod.Ident[IdentIndex - 1].Block)) return IdentIndex;
         };
       };
       return Result;
@@ -5251,29 +5362,23 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
     if ($mod.Ident[IdentIndex - 1].NumAllocElements > 0) {
       IdentTtemp = Search($mod.Ident[IdentIndex - 1].NumAllocElements);
       if (IdentTtemp > 0) Result = $mod.Ident[IdentTtemp - 1].Name;
-    } else if ($mod.Ident[IdentIndex - 1].DataType === 146) {
+    } else if ($mod.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) {
       IdentTtemp = Search($mod.Ident[IdentIndex - 1].NumAllocElements);
       if (IdentTtemp > 0) Result = $mod.Ident[IdentTtemp - 1].Name;
     };
     return Result;
   };
-  this.GetSpelling = function (i) {
+  this.GetTokenSpellingAtIndex = function (i) {
     var Result = "";
+    var kind = 0;
+    var index = 0;
     if (i > $mod.NumTok) {
       Result = "no token"}
-     else if (($mod.Tok[i].Kind > 0) && ($mod.Tok[i].Kind < 170)) {
-      Result = $mod.TokenSpelling[$mod.Tok[i].Kind - 1]}
-     else if ($mod.Tok[i].Kind === 170) {
-      Result = "identifier"}
-     else if (($mod.Tok[i].Kind === 171) || ($mod.Tok[i].Kind === 172)) {
-      Result = "number"}
-     else if (($mod.Tok[i].Kind === 173) || ($mod.Tok[i].Kind === 174)) {
-      Result = "literal"}
-     else if ($mod.Tok[i].Kind === 196) {
-      Result = "END"}
-     else if ($mod.Tok[i].Kind === 199) {
-      Result = "end of file"}
-     else Result = "unknown token";
+     else {
+      kind = $mod.Tok[i].Kind;
+      index = kind;
+      pas.Tokens.GetHumanReadbleTokenSpelling(kind);
+    };
     return Result;
   };
   this.GetVAL = function (a) {
@@ -5298,18 +5403,18 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
     var Result = 0;
     if (Value < 0) {
       if (Value >= -128) {
-        Result = 131}
+        Result = pas.Tokens.TTokenKind.SHORTINTTOK}
        else if (Value >= -32768) {
-        Result = 132}
-       else Result = 133;
+        Result = pas.Tokens.TTokenKind.SMALLINTTOK}
+       else Result = pas.Tokens.TTokenKind.INTEGERTOK;
     } else {
       var $tmp = Value;
       if (($tmp >= 0) && ($tmp <= 255)) {
-        Result = 128}
+        Result = pas.Tokens.TTokenKind.BYTETOK}
        else if (($tmp >= 256) && ($tmp <= 0xFFFF)) {
-        Result = 129}
+        Result = pas.Tokens.TTokenKind.WORDTOK}
        else {
-        Result = 130;
+        Result = pas.Tokens.TTokenKind.CARDINALTOK;
       };
     };
     return Result;
@@ -5320,25 +5425,25 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
     try {
       Result = 0;
       var $tmp = DataType;
-      if ($tmp === 0) {
+      if ($tmp === pas.Tokens.TTokenKind.UNTYPETOK) {
         pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.CantReadWrite,"Can't read or write variables of this type","",""]),pas.Messages.IMessage)))}
-       else if ($tmp === 133) {
+       else if ($tmp === pas.Tokens.TTokenKind.INTEGERTOK) {
         Result = -2147483648}
-       else if ($tmp === 132) {
+       else if ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) {
         Result = -32768}
-       else if ($tmp === 131) {
+       else if ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) {
         Result = -128}
-       else if ($tmp === 134) {
+       else if ($tmp === pas.Tokens.TTokenKind.CHARTOK) {
         Result = 0}
-       else if ($tmp === 135) {
+       else if ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) {
         Result = 0}
-       else if ($tmp === 128) {
+       else if ($tmp === pas.Tokens.TTokenKind.BYTETOK) {
         Result = 0}
-       else if ($tmp === 129) {
+       else if ($tmp === pas.Tokens.TTokenKind.WORDTOK) {
         Result = 0}
-       else if ($tmp === 130) {
+       else if ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) {
         Result = 0}
-       else if ($tmp === 32) {
+       else if ($tmp === pas.Tokens.TTokenKind.STRINGTOK) {
         Result = 1}
        else {
         pas.Messages.Error$1(i,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeMismatch,"Type mismatch","",""]),pas.Messages.IMessage)));
@@ -5354,25 +5459,25 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
     try {
       Result = 0;
       var $tmp = DataType;
-      if ($tmp === 0) {
+      if ($tmp === pas.Tokens.TTokenKind.UNTYPETOK) {
         pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.CantReadWrite,"Can't read or write variables of this type","",""]),pas.Messages.IMessage)))}
-       else if ($tmp === 133) {
+       else if ($tmp === pas.Tokens.TTokenKind.INTEGERTOK) {
         Result = 2147483647}
-       else if ($tmp === 132) {
+       else if ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) {
         Result = 32767}
-       else if ($tmp === 131) {
+       else if ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) {
         Result = 127}
-       else if ($tmp === 134) {
+       else if ($tmp === pas.Tokens.TTokenKind.CHARTOK) {
         Result = 255}
-       else if ($tmp === 135) {
+       else if ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) {
         Result = 1}
-       else if ($tmp === 128) {
+       else if ($tmp === pas.Tokens.TTokenKind.BYTETOK) {
         Result = 255}
-       else if ($tmp === 129) {
+       else if ($tmp === pas.Tokens.TTokenKind.WORDTOK) {
         Result = 65535}
-       else if ($tmp === 130) {
-        Result = 4294967295}
-       else if ($tmp === 32) {
+       else if ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) {
+        Result = -1}
+       else if ($tmp === pas.Tokens.TTokenKind.STRINGTOK) {
         Result = 255}
        else {
         pas.Messages.Error$1(i,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeMismatch,"Type mismatch","",""]),pas.Messages.IMessage)));
@@ -5385,139 +5490,139 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
   this.InfoAboutToken = function (t) {
     var Result = "";
     var $tmp = t;
-    if ($tmp === 43) {
+    if ($tmp === pas.Tokens.TTokenKind.EQTOK) {
       Result = "="}
-     else if ($tmp === 44) {
+     else if ($tmp === pas.Tokens.TTokenKind.NETOK) {
       Result = "<>"}
-     else if ($tmp === 45) {
+     else if ($tmp === pas.Tokens.TTokenKind.LTTOK) {
       Result = "<"}
-     else if ($tmp === 46) {
+     else if ($tmp === pas.Tokens.TTokenKind.LETOK) {
       Result = "<="}
-     else if ($tmp === 47) {
+     else if ($tmp === pas.Tokens.TTokenKind.GTTOK) {
       Result = ">"}
-     else if ($tmp === 48) {
+     else if ($tmp === pas.Tokens.TTokenKind.GETOK) {
       Result = ">="}
-     else if ($tmp === 114) {
+     else if ($tmp === pas.Tokens.TTokenKind.INTOK) {
       Result = "IN"}
-     else if ($tmp === 51) {
+     else if ($tmp === pas.Tokens.TTokenKind.DOTTOK) {
       Result = "."}
-     else if ($tmp === 52) {
+     else if ($tmp === pas.Tokens.TTokenKind.COMMATOK) {
       Result = ","}
-     else if ($tmp === 53) {
+     else if ($tmp === pas.Tokens.TTokenKind.SEMICOLONTOK) {
       Result = ";"}
-     else if ($tmp === 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.OPARTOK) {
       Result = "("}
-     else if ($tmp === 55) {
+     else if ($tmp === pas.Tokens.TTokenKind.CPARTOK) {
       Result = ")"}
-     else if ($tmp === 56) {
+     else if ($tmp === pas.Tokens.TTokenKind.DEREFERENCETOK) {
       Result = "^"}
-     else if ($tmp === 57) {
+     else if ($tmp === pas.Tokens.TTokenKind.ADDRESSTOK) {
       Result = "@"}
-     else if ($tmp === 58) {
+     else if ($tmp === pas.Tokens.TTokenKind.OBRACKETTOK) {
       Result = "["}
-     else if ($tmp === 59) {
+     else if ($tmp === pas.Tokens.TTokenKind.CBRACKETTOK) {
       Result = "]"}
-     else if ($tmp === 60) {
+     else if ($tmp === pas.Tokens.TTokenKind.COLONTOK) {
       Result = ":"}
-     else if ($tmp === 61) {
+     else if ($tmp === pas.Tokens.TTokenKind.PLUSTOK) {
       Result = "+"}
-     else if ($tmp === 62) {
+     else if ($tmp === pas.Tokens.TTokenKind.MINUSTOK) {
       Result = "-"}
-     else if ($tmp === 63) {
+     else if ($tmp === pas.Tokens.TTokenKind.MULTOK) {
       Result = "*"}
-     else if ($tmp === 64) {
+     else if ($tmp === pas.Tokens.TTokenKind.DIVTOK) {
       Result = "/"}
-     else if ($tmp === 65) {
+     else if ($tmp === pas.Tokens.TTokenKind.IDIVTOK) {
       Result = "DIV"}
-     else if ($tmp === 66) {
+     else if ($tmp === pas.Tokens.TTokenKind.MODTOK) {
       Result = "MOD"}
-     else if ($tmp === 67) {
+     else if ($tmp === pas.Tokens.TTokenKind.SHLTOK) {
       Result = "SHL"}
-     else if ($tmp === 68) {
+     else if ($tmp === pas.Tokens.TTokenKind.SHRTOK) {
       Result = "SHR"}
-     else if ($tmp === 69) {
+     else if ($tmp === pas.Tokens.TTokenKind.ORTOK) {
       Result = "OR"}
-     else if ($tmp === 70) {
+     else if ($tmp === pas.Tokens.TTokenKind.XORTOK) {
       Result = "XOR"}
-     else if ($tmp === 71) {
+     else if ($tmp === pas.Tokens.TTokenKind.ANDTOK) {
       Result = "AND"}
-     else if ($tmp === 72) {
+     else if ($tmp === pas.Tokens.TTokenKind.NOTTOK) {
       Result = "NOT"}
-     else if ($tmp === 1) {
+     else if ($tmp === pas.Tokens.TTokenKind.CONSTTOK) {
       Result = "CONST"}
-     else if ($tmp === 2) {
+     else if ($tmp === pas.Tokens.TTokenKind.TYPETOK) {
       Result = "TYPE"}
-     else if ($tmp === 3) {
+     else if ($tmp === pas.Tokens.TTokenKind.VARTOK) {
       Result = "VARIABLE"}
-     else if ($tmp === 4) {
+     else if ($tmp === pas.Tokens.TTokenKind.PROCEDURETOK) {
       Result = "PROCEDURE"}
-     else if ($tmp === 5) {
+     else if ($tmp === pas.Tokens.TTokenKind.FUNCTIONTOK) {
       Result = "FUNCTION"}
-     else if ($tmp === 99) {
+     else if ($tmp === pas.Tokens.TTokenKind.CONSTRUCTORTOK) {
       Result = "CONSTRUCTOR"}
-     else if ($tmp === 100) {
+     else if ($tmp === pas.Tokens.TTokenKind.DESTRUCTORTOK) {
       Result = "DESTRUCTOR"}
-     else if ($tmp === 6) {
+     else if ($tmp === pas.Tokens.TTokenKind.LABELTOK) {
       Result = "LABEL"}
-     else if ($tmp === 7) {
+     else if ($tmp === pas.Tokens.TTokenKind.UNITTOK) {
       Result = "UNIT"}
-     else if ($tmp === 146) {
+     else if ($tmp === pas.Tokens.TTokenKind.ENUMTOK) {
       Result = "ENUM"}
-     else if ($tmp === 139) {
+     else if ($tmp === pas.Tokens.TTokenKind.RECORDTOK) {
       Result = "RECORD"}
-     else if ($tmp === 140) {
+     else if ($tmp === pas.Tokens.TTokenKind.OBJECTTOK) {
       Result = "OBJECT"}
-     else if ($tmp === 128) {
+     else if ($tmp === pas.Tokens.TTokenKind.BYTETOK) {
       Result = "BYTE"}
-     else if ($tmp === 131) {
+     else if ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) {
       Result = "SHORTINT"}
-     else if ($tmp === 134) {
+     else if ($tmp === pas.Tokens.TTokenKind.CHARTOK) {
       Result = "CHAR"}
-     else if ($tmp === 135) {
+     else if ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) {
       Result = "BOOLEAN"}
-     else if ($tmp === 129) {
+     else if ($tmp === pas.Tokens.TTokenKind.WORDTOK) {
       Result = "WORD"}
-     else if ($tmp === 132) {
+     else if ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) {
       Result = "SMALLINT"}
-     else if ($tmp === 130) {
+     else if ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) {
       Result = "CARDINAL"}
-     else if ($tmp === 133) {
+     else if ($tmp === pas.Tokens.TTokenKind.INTEGERTOK) {
       Result = "INTEGER"}
-     else if (($tmp === 136) || ($tmp === 160) || ($tmp === 161)) {
+     else if (($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.DATAORIGINOFFSET) || ($tmp === pas.Tokens.TTokenKind.CODEORIGINOFFSET)) {
       Result = "POINTER"}
-     else if ($tmp === 147) {
+     else if ($tmp === pas.Tokens.TTokenKind.PROCVARTOK) {
       Result = "<Procedure Variable>"}
-     else if ($tmp === 137) {
+     else if ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
       Result = "STRING"}
-     else if ($tmp === 174) {
+     else if ($tmp === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
       Result = "literal"}
-     else if ($tmp === 141) {
+     else if ($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) {
       Result = "SHORTREAL"}
-     else if ($tmp === 142) {
+     else if ($tmp === pas.Tokens.TTokenKind.REALTOK) {
       Result = "REAL"}
-     else if ($tmp === 143) {
+     else if ($tmp === pas.Tokens.TTokenKind.SINGLETOK) {
       Result = "SINGLE"}
-     else if ($tmp === 144) {
+     else if ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK) {
       Result = "FLOAT16"}
-     else if ($tmp === 127) {
+     else if ($tmp === pas.Tokens.TTokenKind.SETTOK) {
       Result = "SET"}
-     else if ($tmp === 138) {
+     else if ($tmp === pas.Tokens.TTokenKind.FILETOK) {
       Result = "FILE"}
-     else if ($tmp === 148) {
+     else if ($tmp === pas.Tokens.TTokenKind.TEXTFILETOK) {
       Result = "TEXTFILE"}
-     else if ($tmp === 145) {
+     else if ($tmp === pas.Tokens.TTokenKind.PCHARTOK) {
       Result = "PCHAR"}
-     else if ($tmp === 104) {
+     else if ($tmp === pas.Tokens.TTokenKind.REGISTERTOK) {
       Result = "REGISTER"}
-     else if ($tmp === 106) {
+     else if ($tmp === pas.Tokens.TTokenKind.PASCALTOK) {
       Result = "PASCAL"}
-     else if ($tmp === 107) {
+     else if ($tmp === pas.Tokens.TTokenKind.STDCALLTOK) {
       Result = "STDCALL"}
-     else if ($tmp === 108) {
+     else if ($tmp === pas.Tokens.TTokenKind.INLINETOK) {
       Result = "INLINE"}
-     else if ($tmp === 37) {
+     else if ($tmp === pas.Tokens.TTokenKind.ASMTOK) {
       Result = "ASM"}
-     else if ($tmp === 105) {
+     else if ($tmp === pas.Tokens.TTokenKind.INTERRUPTTOK) {
       Result = "INTERRUPT"}
      else {
       Result = "UNTYPED";
@@ -5527,18 +5632,6 @@ rtl.module("Common",["System","SysUtils","CommonTypes","FileIO","StringUtilities
   this.IntToStr = function (a) {
     var Result = "";
     Result = "" + a;
-    return Result;
-  };
-  this.SearchDefine = function (defineName) {
-    var Result = 0;
-    var i = 0;
-    for (var $l = 1, $end = $mod.NumDefines; $l <= $end; $l++) {
-      i = $l;
-      if ($mod.Defines[i - 1].Name === defineName) {
-        return i;
-      };
-    };
-    Result = 0;
     return Result;
   };
   this.StrToInt = function (a) {
@@ -5609,16 +5702,16 @@ rtl.module("Diagnostic",["System"],function () {
       DiagFile.WriteLn();
       for (var $l = 1, $end = pas.Common.NumTok; $l <= $end; $l++) {
         i = $l;
-        $ir.ref(8,$ir.ref(7,$ir.ref(6,$ir.ref(5,DiagFile.Write$2(i,6)).Write$1(pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name,30)).Write$2(pas.Common.Tok[i].Line,6)).Write$1(pas.Common.GetSpelling(i),30)).WriteLn();
-        if (pas.Common.Tok[i].Kind === 171) {
+        $ir.ref(8,$ir.ref(7,$ir.ref(6,$ir.ref(5,DiagFile.Write$2(i,6)).Write$1(pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name,30)).Write$2(pas.Common.Tok[i].Line,6)).Write$1(pas.Common.GetTokenSpellingAtIndex(i),30)).WriteLn();
+        if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.INTNUMBERTOK) {
           DiagFile.WriteLn$2(" = ",pas.Common.IntToStr(pas.Common.Tok[i].Value))}
-         else if (pas.Common.Tok[i].Kind === 172) {
+         else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.FRACNUMBERTOK) {
           DiagFile.WriteLn$2(" = ",pas.SysUtils.FloatToStr(pas.Common.Tok[i].FracValue))}
-         else if (pas.Common.Tok[i].Kind === 170) {
+         else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
           DiagFile.WriteLn$2(" = ",pas.Common.Tok[i].Name)}
-         else if (pas.Common.Tok[i].Kind === 173) {
+         else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.CHARLITERALTOK) {
           DiagFile.WriteLn$2(" = ",String.fromCharCode(pas.Common.Tok[i].Value))}
-         else if (pas.Common.Tok[i].Kind === 174) {
+         else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
           $ir.ref(9,DiagFile.Write(" = "));
           for (var $l1 = 1, $end1 = pas.Common.Tok[i].StrLength; $l1 <= $end1; $l1++) {
             CharIndex = $l1;
@@ -5634,12 +5727,12 @@ rtl.module("Diagnostic",["System"],function () {
       DiagFile.WriteLn();
       for (var $l2 = 1, $end2 = pas.Common.NumIdent; $l2 <= $end2; $l2++) {
         i = $l2;
-        $ir.ref(22,$ir.ref(21,$ir.ref(20,$ir.ref(19,DiagFile.Write$2(i,6)).Write$2(pas.Common.Ident[i - 1].Block,6)).Write$1(pas.Common.Ident[i - 1].Name,30)).Write$1(pas.Common.TokenSpelling[pas.Common.Ident[i - 1].Kind - 1],15));
-        if (pas.Common.Ident[i - 1].DataType !== 0) {
-          $ir.ref(23,DiagFile.Write$1(pas.Common.TokenSpelling[pas.Common.Ident[i - 1].DataType - 1],15))}
+        $ir.ref(22,$ir.ref(21,$ir.ref(20,$ir.ref(19,DiagFile.Write$2(i,6)).Write$2(pas.Common.Ident[i - 1].Block,6)).Write$1(pas.Common.Ident[i - 1].Name,30)).Write$1(pas.Tokens.GetTokenSpelling(pas.Common.Ident[i - 1].Kind),15));
+        if (pas.Common.Ident[i - 1].DataType !== pas.Tokens.TTokenKind.UNTYPETOK) {
+          $ir.ref(23,DiagFile.Write$1(pas.Tokens.GetTokenSpelling(pas.Common.Ident[i - 1].DataType),15))}
          else $ir.ref(24,DiagFile.Write$1("N/A",15));
         $ir.ref(26,$ir.ref(25,DiagFile.Write$2(pas.Common.Ident[i - 1].NumAllocElements,15)).Write$1(pas.SysUtils.IntToHex(pas.Common.Ident[i - 1].Value,8),15));
-        if ((pas.Common.Ident[i - 1].Kind in rtl.createSet(4,5,99,100)) && !pas.Common.Ident[i - 1].IsNotDead) {
+        if ((pas.Common.Ident[i - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && !pas.Common.Ident[i - 1].IsNotDead) {
           $ir.ref(27,DiagFile.Write$1("Yes",5))}
          else $ir.ref(28,DiagFile.Write$1("",5));
       };
@@ -5663,7 +5756,7 @@ rtl.module("Diagnostic",["System"],function () {
       rtl._Release(DiagFile);
     };
   };
-},["SysUtils","Common","FileIO"]);
+},["SysUtils","Common","FileIO","Tokens"]);
 rtl.module("MathEvaluate",["System","SysUtils","CommonTypes","StringUtilities"],function () {
   "use strict";
   var $mod = this;
@@ -5956,7 +6049,7 @@ rtl.module("MathEvaluate",["System","SysUtils","CommonTypes","StringUtilities"],
     };
   };
 },["Math"]);
-rtl.module("Numbers",["System"],function () {
+rtl.module("Numbers",["System","Common"],function () {
   "use strict";
   var $mod = this;
   var $impl = $mod.$impl;
@@ -6203,7 +6296,7 @@ rtl.module("Numbers",["System"],function () {
     var ftmp = rtl.arraySetLength(null,0,2);
     var fl = 0.0;
     if (!(valType in pas.Common.RealTypes)) throw pas.SysUtils.EAssertionFailed.$create("Create");
-    if (valType in rtl.createSet(144,143)) {
+    if (valType in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)) {
       ftmp = $impl.Zero();
       $impl.MoveTFloat(a,{get: function () {
           return ftmp;
@@ -6231,7 +6324,7 @@ rtl.module("Numbers",["System"],function () {
     var ftmp = rtl.arraySetLength(null,0,2);
     var fl = 0.0;
     if (!(valType in pas.Common.RealTypes)) throw pas.SysUtils.EAssertionFailed.$create("Create");
-    if (valType in rtl.createSet(144,143)) {
+    if (valType in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)) {
       ftmp = $impl.Zero();
       $impl.MoveTFloat(a,{get: function () {
           return ftmp;
@@ -6287,8 +6380,8 @@ rtl.module("Numbers",["System"],function () {
       return Result;
     };
   };
-},["Common","SysUtils"]);
-rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
+},["SysUtils"]);
+rtl.module("Scanner",["System","StringUtilities","CommonTypes","Common","Tokens"],function () {
   "use strict";
   var $mod = this;
   var $impl = $mod.$impl;
@@ -6334,10 +6427,10 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
         try {
           UsesFound = false;
           i = pas.Common.NumTok - 1;
-          while (pas.Common.Tok[i].Kind !== 29) {
-            if (pas.Common.Tok[i].Kind === 174) {
-              pas.Common.CheckTok(i - 1,114);
-              pas.Common.CheckTok(i - 2,170);
+          while (pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.USESTOK) {
+            if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
+              pas.Common.CheckTok(i - 1,pas.Tokens.TTokenKind.INTOK);
+              pas.Common.CheckTok(i - 2,pas.Tokens.TTokenKind.IDENTTOK);
               nam = "";
               for (var $l = 1, $end = pas.Common.Tok[i].StrLength; $l <= $end; $l++) {
                 k = $l;
@@ -6346,7 +6439,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               nam = pas.Common.FindFile(nam,"unit");
               i -= 2;
             } else {
-              pas.Common.CheckTok(i,170);
+              pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
               nam = pas.Common.FindFile(pas.Common.Tok[i].Name + ".pas","unit");
             };
             s = pas.Utilities.AnsiUpperCase(pas.Common.Tok[i].Name);
@@ -6358,14 +6451,14 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
             _uidx = UnitIndex;
             pas.Common.NumUnits += 1;
             UnitIndex = pas.Common.NumUnits;
-            if (UnitIndex > 4096) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OutOfResources,"Out of resources, UnitIndex: " + pas.Common.IntToStr(UnitIndex),"",""]),pas.Messages.IMessage)));
+            if (UnitIndex > 4096) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OutOfResources,"Out of resources, UnitIndex: " + pas.SysUtils.IntToStr(UnitIndex),"",""]),pas.Messages.IMessage)));
             Line = 1;
             pas.Common.UnitName[UnitIndex - 1].Name = s;
             pas.Common.UnitName[UnitIndex - 1].Path = nam;
             TokenizeUnit(UnitIndex,true);
             Line = _line;
             UnitIndex = _uidx;
-            if (pas.Common.Tok[i - 1].Kind === 52) {
+            if (pas.Common.Tok[i - 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
               i -= 2}
              else i -= 1;
           };
@@ -6489,8 +6582,8 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   NumRead = v;
                 }});
               if (NumRead === 1) {
-                if (yes) $mod.AddToken($impl.GetStandardToken(","),UnitIndex,Line,1,0);
-                $mod.AddToken(171,UnitIndex,Line,1,tmp);
+                if (yes) $mod.AddToken(pas.Tokens.GetStandardToken(","),UnitIndex,Line,1,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.INTNUMBERTOK,UnitIndex,Line,1,tmp);
                 yes = true;
               };
             } while (!(NumRead === 0));
@@ -6509,7 +6602,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
           var k = 0;
           k = rtl.length(pas.Common.msgUser) - 1;
           $mod.AddToken(Kind,UnitIndex,Line,1,k);
-          $mod.AddToken(53,UnitIndex,Line,1,0);
+          $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
           pas.StringUtilities.SkipWhitespaces(d,{get: function () {
               return i;
             }, set: function (v) {
@@ -6531,11 +6624,11 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
             if (cmd === "INCLUDE") cmd = "I";
             if (cmd === "RESOURCE") cmd = "R";
             if (cmd === "WARNING") {
-              newMsgUser(193)}
+              newMsgUser(pas.Tokens.TTokenKind.WARNINGTOK)}
              else if (cmd === "ERROR") {
-              newMsgUser(194)}
+              newMsgUser(pas.Tokens.TTokenKind.ERRORTOK)}
              else if (cmd === "INFO") {
-              newMsgUser(192)}
+              newMsgUser(pas.Tokens.TTokenKind.INFOTOK)}
              else if (cmd === "MACRO+") {
               pas.Common.Macros = true}
              else if (cmd === "MACRO-") {
@@ -6553,11 +6646,11 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.WrongSwitchToggle,"Wrong switch toggle, use ON/OFF or +/-","",""]),pas.Messages.IMessage)));
             } else if (cmd === "I") {
               if (d.charAt(i - 1) === "+") {
-                $mod.AddToken(197,UnitIndex,Line,1,0);
-                $mod.AddToken(53,UnitIndex,Line,1,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.IOCHECKON,UnitIndex,Line,1,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
               } else if (d.charAt(i - 1) === "-") {
-                $mod.AddToken(198,UnitIndex,Line,1,0);
-                $mod.AddToken(53,UnitIndex,Line,1,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.IOCHECKOFF,UnitIndex,Line,1,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
               } else {
                 s = pas.StringUtilities.GetString(d,false,{get: function () {
                     return i;
@@ -6566,12 +6659,12 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   }});
                 if (pas.Utilities.AnsiUpperCase(s) === "%TIME%") {
                   s = pas.SysUtils.TimeToStr(pas.SysUtils.Now());
-                  $mod.AddToken(174,UnitIndex,Line,s.length + Spaces,0);
+                  $mod.AddToken(pas.Tokens.TTokenKind.STRINGLITERALTOK,UnitIndex,Line,s.length + Spaces,0);
                   Spaces = 0;
                   pas.Common.DefineStaticString(pas.Common.NumTok,s);
                 } else if (pas.Utilities.AnsiUpperCase(s) === "%DATE%") {
                   s = pas.SysUtils.DateToStr(pas.SysUtils.Now());
-                  $mod.AddToken(174,UnitIndex,Line,s.length + Spaces,0);
+                  $mod.AddToken(pas.Tokens.TTokenKind.STRINGLITERALTOK,UnitIndex,Line,s.length + Spaces,0);
                   Spaces = 0;
                   pas.Common.DefineStaticString(pas.Common.NumTok,s);
                 } else {
@@ -6583,7 +6676,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   pas.Common.UnitName[IncludeIndex - 1].Path = nam;
                   UnitIndex = IncludeIndex;
                   IncludeIndex += 1;
-                  if (IncludeIndex > 4096) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OutOfResources,"Out of resources, IncludeIndex: " + pas.Common.IntToStr(IncludeIndex),"",""]),pas.Messages.IMessage)));
+                  if (IncludeIndex > 4096) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OutOfResources,"Out of resources, IncludeIndex: " + pas.SysUtils.IntToStr(IncludeIndex),"",""]),pas.Messages.IMessage)));
                   Tokenize(nam,false);
                   Line = _line;
                   UnitIndex = _uidx;
@@ -6602,7 +6695,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                 }},"}") - i) + 1);
               s = pas.SysUtils.TrimRight(s);
               if (s.charAt(s.length - 1) !== '"') pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.SyntaxError,'Syntax error. Missing \'"\'',"",""]),pas.Messages.IMessage)));
-              $mod.AddToken(184,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.EVALTOK,UnitIndex,Line,1,0);
               pas.Common.DefineFilename(pas.Common.NumTok,s);
             } else if (cmd === "BIN2CSV") {
               s = pas.StringUtilities.GetFilePath(d,{get: function () {
@@ -6619,11 +6712,11 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   i = v;
                 }});
               if (s === "LOOPUNROLL") {
-                $mod.AddToken(185,UnitIndex,Line,1,0)}
+                $mod.AddToken(pas.Tokens.TTokenKind.LOOPUNROLLTOK,UnitIndex,Line,1,0)}
                else if (s === "NOLOOPUNROLL") {
-                $mod.AddToken(186,UnitIndex,Line,1,0)}
+                $mod.AddToken(pas.Tokens.TTokenKind.NOLOOPUNROLLTOK,UnitIndex,Line,1,0)}
                else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalOptimizationSpecified,'Illegal optimization specified "' + s + '"',"",""]),pas.Messages.IMessage)));
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
             } else if (cmd === "CODEALIGN") {
               s = pas.StringUtilities.GetStringUpperCase(d,{get: function () {
                   return i;
@@ -6631,11 +6724,11 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   i = v;
                 }});
               if (s === "PROC") {
-                $mod.AddToken(189,UnitIndex,Line,1,0)}
+                $mod.AddToken(pas.Tokens.TTokenKind.PROCALIGNTOK,UnitIndex,Line,1,0)}
                else if (s === "LOOP") {
-                $mod.AddToken(190,UnitIndex,Line,1,0)}
+                $mod.AddToken(pas.Tokens.TTokenKind.LOOPALIGNTOK,UnitIndex,Line,1,0)}
                else if (s === "LINK") {
-                $mod.AddToken(191,UnitIndex,Line,1,0)}
+                $mod.AddToken(pas.Tokens.TTokenKind.LINKALIGNTOK,UnitIndex,Line,1,0)}
                else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(6,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalAlignmentDirective,"Illegal alignment directive '" + s + "'.","",""]),pas.Messages.IMessage)));
               pas.StringUtilities.SkipWhitespaces(d,{get: function () {
                   return i;
@@ -6664,11 +6757,11 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   Err = v;
                 }});
               if (Err > 0) $impl.ErrorOrdinalExpExpected(pas.Common.NumTok);
-              pas.Common.GetCommonConstType(pas.Common.NumTok,129,pas.Common.GetValueType(v),true);
+              pas.Common.GetCommonConstType(pas.Common.NumTok,pas.Tokens.TTokenKind.WORDTOK,pas.Common.GetValueType(v),true);
               pas.Common.Tok[pas.Common.NumTok].Value = v;
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
             } else if (cmd === "UNITPATH") {
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
               do {
                 s = pas.StringUtilities.GetFilePath(d,{get: function () {
                     return i;
@@ -6683,7 +6776,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               } while (!(d.charAt(i - 1) === ";"));
               pas.Common.NumTok -= 1;
             } else if (cmd === "LIBRARYPATH") {
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
               do {
                 s = pas.StringUtilities.GetFilePath(d,{get: function () {
                     return i;
@@ -6698,7 +6791,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               } while (!(d.charAt(i - 1) === ";"));
               pas.Common.NumTok -= 1;
             } else if ((cmd === "R") && !(d.charCodeAt(i - 1) in rtl.createSet(43,45))) {
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
               s = pas.StringUtilities.GetFilePath(d,{get: function () {
                   return i;
                 }, set: function (v) {
@@ -6707,7 +6800,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               $impl.AddResource(pas.Common.FindFile(s,"resource"));
               pas.Common.NumTok -= 1;
             } else if ((cmd === "L") || (cmd === "LINK")) {
-              $mod.AddToken(187,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.LINKTOK,UnitIndex,Line,1,0);
               s = pas.StringUtilities.GetFilePath(d,{get: function () {
                   return i;
                 }, set: function (v) {
@@ -6715,9 +6808,9 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                 }});
               s = pas.Common.FindFile(s,"link object");
               pas.Common.DefineFilename(pas.Common.NumTok,s);
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
             } else if ((cmd === "F") || (cmd === "FASTMUL")) {
-              $mod.AddToken(53,UnitIndex,Line,1,0);
+              $mod.AddToken(pas.Tokens.TTokenKind.SEMICOLONTOK,UnitIndex,Line,1,0);
               s = pas.StringUtilities.GetNumber(d,{get: function () {
                   return i;
                 }, set: function (v) {
@@ -6735,7 +6828,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               if (Err !== 0) $impl.ErrorOrdinalExpExpected(pas.Common.NumTok);
               pas.Common.AddDefine("FASTMUL");
               pas.Common.AddDefines = pas.Common.NumDefines;
-              pas.Common.GetCommonConstType(pas.Common.NumTok,128,pas.Common.GetValueType(pas.Common.FastMul),true);
+              pas.Common.GetCommonConstType(pas.Common.NumTok,pas.Tokens.TTokenKind.BYTETOK,pas.Common.GetValueType(pas.Common.FastMul),true);
               pas.Common.NumTok -= 1;
             } else if ((cmd === "IFDEF") || (cmd === "IFNDEF")) {
               found = 0 !== pas.Common.SearchDefine(pas.StringUtilities.GetLabelUpperCase(d,{get: function () {
@@ -7042,7 +7135,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
             Num = "";
             if (ch.charCodeAt() in rtl.createSet(null,48,57,36,37)) ReadNumber();
             if (Num.length > 0) {
-              $mod.AddToken(171,UnitIndex,Line,Num.length + Spaces,pas.Common.StrToInt(Num));
+              $mod.AddToken(pas.Tokens.TTokenKind.INTNUMBERTOK,UnitIndex,Line,Num.length + Spaces,pas.SysUtils.StrToInt(Num));
               Spaces = 0;
               if (ch === ".") {
                 SafeReadChar({get: function () {
@@ -7062,7 +7155,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                         ch = v;
                       }});
                   };
-                  pas.Common.Tok[pas.Common.NumTok].Kind = 172;
+                  pas.Common.Tok[pas.Common.NumTok].Kind = pas.Tokens.TTokenKind.FRACNUMBERTOK;
                   if (Num.length > 17) {
                     pas.Common.Tok[pas.Common.NumTok].FracValue = 0}
                    else pas.Common.Tok[pas.Common.NumTok].FracValue = pas.SysUtils.StrToFloat(Num + Frac);
@@ -7097,7 +7190,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               };
               if (Err > 255) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ConstantStringTooLong,"Constant strings can't be longer than 255 chars","",""]),pas.Messages.IMessage)));
               if (Text.length > 0) {
-                CurToken = $impl.GetStandardToken(Text);
+                CurToken = pas.Tokens.GetStandardToken(Text);
                 im = pas.Common.SearchDefine(Text);
                 if ((im > 0) && (pas.Common.Defines[im - 1].Macro !== "")) {
                   Tmp = InFile.FilePos();
@@ -7133,17 +7226,17 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   };
                   $mod.TokenizeMacro(pas.Common.Defines[im - 1].Macro,pas.Common.Defines[im - 1].Line,0);
                   pas.Common.NumDefines = OldNumDefines;
-                  CurToken = 188;
+                  CurToken = pas.Tokens.TTokenKind.MACRORELEASE;
                 } else {
-                  if (CurToken === 153) CurToken = 148;
-                  if (CurToken === 151) CurToken = 143;
-                  if (CurToken === 152) CurToken = 144;
-                  if (CurToken === 150) CurToken = 32;
-                  if (CurToken === 95) ExternalFound = true;
-                  $mod.AddToken(0,UnitIndex,Line,Text.length + Spaces,0);
+                  if (CurToken === pas.Tokens.TTokenKind.TEXTTOK) CurToken = pas.Tokens.TTokenKind.TEXTFILETOK;
+                  if (CurToken === pas.Tokens.TTokenKind.FLOATTOK) CurToken = pas.Tokens.TTokenKind.SINGLETOK;
+                  if (CurToken === pas.Tokens.TTokenKind.FLOAT16TOK) CurToken = pas.Tokens.TTokenKind.HALFSINGLETOK;
+                  if (CurToken === pas.Tokens.TTokenKind.SHORTSTRINGTOK) CurToken = pas.Tokens.TTokenKind.STRINGTOK;
+                  if (CurToken === pas.Tokens.TTokenKind.EXTERNALTOK) ExternalFound = true;
+                  $mod.AddToken(pas.Tokens.TTokenKind.UNTYPETOK,UnitIndex,Line,Text.length + Spaces,0);
                   Spaces = 0;
                 };
-                if (CurToken === 37) {
+                if (CurToken === pas.Tokens.TTokenKind.ASMTOK) {
                   pas.Common.Tok[pas.Common.NumTok].Kind = CurToken;
                   pas.Common.Tok[pas.Common.NumTok].Value = 0;
                   Tmp = InFile.FilePos();
@@ -7203,13 +7296,13 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                     pas.Utilities.RaiseHaltException(pas.Utilities.THaltException.COMPILING_ABORTED);
                   };
                 } else {
-                  if (CurToken !== 188) if (CurToken !== 0) {
+                  if (CurToken !== pas.Tokens.TTokenKind.MACRORELEASE) if (CurToken !== pas.Tokens.TTokenKind.UNTYPETOK) {
                     pas.Common.Tok[pas.Common.NumTok].Kind = CurToken;
-                    if (CurToken === 29) UsesFound = true;
-                    if (CurToken === 7) UnitFound = true;
-                    if (testUnit && (UnitFound === false)) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(6,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.UnitExpected,'"UNIT" expected but "' + pas.Common.TokenSpelling[CurToken - 1] + '" found',"",""]),pas.Messages.IMessage)));
+                    if (CurToken === pas.Tokens.TTokenKind.USESTOK) UsesFound = true;
+                    if (CurToken === pas.Tokens.TTokenKind.UNITTOK) UnitFound = true;
+                    if (testUnit && (UnitFound === false)) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(6,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.UnitExpected,'"UNIT" expected but "' + pas.Tokens.GetTokenSpelling(CurToken) + '" found',"",""]),pas.Messages.IMessage)));
                   } else {
-                    pas.Common.Tok[pas.Common.NumTok].Kind = 170;
+                    pas.Common.Tok[pas.Common.NumTok].Kind = pas.Tokens.TTokenKind.IDENTTOK;
                     pas.Common.Tok[pas.Common.NumTok].Name = Text;
                   };
                 };
@@ -7319,7 +7412,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   Num = "";
                   ReadNumber();
                   if (Num.length > 0) {
-                    Text = Text + String.fromCharCode(pas.Common.StrToInt(Num))}
+                    Text = Text + String.fromCharCode(pas.SysUtils.StrToInt(Num))}
                    else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(8,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ConstantExpressionExpected,"Constant expression expected","",""]),pas.Messages.IMessage)));
                   if (ch.charCodeAt() in rtl.createSet(32,pas.StringUtilities.TAB.charCodeAt())) {
                     ch2 = ch;
@@ -7356,10 +7449,10 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                   }});
               };
               if (Text.length === 1) {
-                $mod.AddToken(173,UnitIndex,Line,1 + Spaces,Text.charCodeAt(1 - 1));
+                $mod.AddToken(pas.Tokens.TTokenKind.CHARLITERALTOK,UnitIndex,Line,1 + Spaces,Text.charCodeAt(1 - 1));
                 Spaces = 0;
               } else {
-                $mod.AddToken(174,UnitIndex,Line,Text.length + Spaces,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.STRINGLITERALTOK,UnitIndex,Line,Text.length + Spaces,0);
                 Spaces = 0;
                 if (ExternalFound) {
                   pas.Common.DefineFilename(pas.Common.NumTok,Text)}
@@ -7368,7 +7461,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               Text = "";
             };
             if (ch.charCodeAt() in rtl.createSet(61,44,59,40,41,42,47,43,45,94,64,91,93)) {
-              $mod.AddToken($impl.GetStandardToken(ch),UnitIndex,Line,1 + Spaces,0);
+              $mod.AddToken(pas.Tokens.GetStandardToken(ch),UnitIndex,Line,1 + Spaces,0);
               Spaces = 0;
               ExternalFound = false;
               if (UsesFound && (ch === ";")) if (UsesOn) ReadUses();
@@ -7383,10 +7476,10 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                 }});
               ch = ch_;
               if ((ch2 === "=") || ((ch === "<") && (ch2 === ">")) || ((ch === ".") && (ch2 === "."))) {
-                $mod.AddToken($impl.GetStandardToken(ch + ch2),UnitIndex,Line,2 + Spaces,0);
+                $mod.AddToken(pas.Tokens.GetStandardToken(ch + ch2),UnitIndex,Line,2 + Spaces,0);
                 Spaces = 0;
               } else if ((ch === ".") && (ch2.charCodeAt() in rtl.createSet(null,48,57))) {
-                $mod.AddToken(171,UnitIndex,Line,0,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.INTNUMBERTOK,UnitIndex,Line,0,0);
                 Frac = "0.";
                 while (ch2.charCodeAt() in rtl.createSet(null,48,57)) {
                   Frac = Frac + ch2;
@@ -7396,7 +7489,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                       ch2 = v;
                     }});
                 };
-                pas.Common.Tok[pas.Common.NumTok].Kind = 172;
+                pas.Common.Tok[pas.Common.NumTok].Kind = pas.Tokens.TTokenKind.FRACNUMBERTOK;
                 pas.Common.Tok[pas.Common.NumTok].FracValue = pas.SysUtils.StrToFloat(Frac);
                 pas.Common.Tok[pas.Common.NumTok].Column = pas.Common.Tok[pas.Common.NumTok - 1].Column + Frac.length + Spaces;
                 Spaces = 0;
@@ -7406,7 +7499,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                 InFile.Seek2(InFile.FilePos() - 1);
                 Line = Line2;
                 if (ch.charCodeAt() in rtl.createSet(58,62,60,46)) {
-                  $mod.AddToken($impl.GetStandardToken(ch),UnitIndex,Line,1 + Spaces,0);
+                  $mod.AddToken(pas.Tokens.GetStandardToken(ch),UnitIndex,Line,1 + Spaces,0);
                   Spaces = 0;
                 } else {
                   pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(9,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.UnexpectedCharacter,"Unexpected character '" + ch + "' found. Expected one of ':><.'.","",""]),pas.Messages.IMessage)));
@@ -7424,10 +7517,10 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
           } else {
             if (Text !== "") {
               if (Text === "END.") {
-                $mod.AddToken(14,UnitIndex,Line,3,0);
-                $mod.AddToken(51,UnitIndex,Line,1,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.ENDTOK,UnitIndex,Line,3,0);
+                $mod.AddToken(pas.Tokens.TTokenKind.DOTTOK,UnitIndex,Line,1,0);
               } else {
-                $mod.AddToken($impl.GetStandardToken(Text),UnitIndex,Line,Text.length + Spaces,0);
+                $mod.AddToken(pas.Tokens.GetStandardToken(Text),UnitIndex,Line,Text.length + Spaces,0);
                 Spaces = 0;
               };
             };
@@ -7443,152 +7536,16 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
       UnitIndex = a;
       Line = 1;
       Spaces = 0;
-      if (UnitIndex > 1) $mod.AddToken(195,UnitIndex,Line,0,0);
+      if (UnitIndex > 1) $mod.AddToken(pas.Tokens.TTokenKind.UNITBEGINTOK,UnitIndex,Line,0,0);
       UnitFound = false;
       Tokenize(pas.Common.UnitName[UnitIndex - 1].Path,testUnit);
       if (UnitIndex > 1) {
-        pas.Common.CheckTok(pas.Common.NumTok,51);
-        pas.Common.CheckTok(pas.Common.NumTok - 1,14);
+        pas.Common.CheckTok(pas.Common.NumTok,pas.Tokens.TTokenKind.DOTTOK);
+        pas.Common.CheckTok(pas.Common.NumTok - 1,pas.Tokens.TTokenKind.ENDTOK);
         pas.Common.NumTok -= 2;
-        $mod.AddToken(196,UnitIndex,pas.Common.Tok[pas.Common.NumTok + 1].Line - 1,0,0);
-      } else $mod.AddToken(199,UnitIndex,Line,0,0);
+        $mod.AddToken(pas.Tokens.TTokenKind.UNITENDTOK,UnitIndex,pas.Common.Tok[pas.Common.NumTok + 1].Line - 1,0,0);
+      } else $mod.AddToken(pas.Tokens.TTokenKind.EOFTOK,UnitIndex,Line,0,0);
     };
-    pas.Common.TokenSpelling[0] = "CONST";
-    pas.Common.TokenSpelling[1] = "TYPE";
-    pas.Common.TokenSpelling[2] = "VAR";
-    pas.Common.TokenSpelling[3] = "PROCEDURE";
-    pas.Common.TokenSpelling[4] = "FUNCTION";
-    pas.Common.TokenSpelling[139] = "OBJECT";
-    pas.Common.TokenSpelling[91] = "PROGRAM";
-    pas.Common.TokenSpelling[92] = "LIBRARY";
-    pas.Common.TokenSpelling[93] = "EXPORTS";
-    pas.Common.TokenSpelling[94] = "EXTERNAL";
-    pas.Common.TokenSpelling[6] = "UNIT";
-    pas.Common.TokenSpelling[95] = "INTERFACE";
-    pas.Common.TokenSpelling[96] = "IMPLEMENTATION";
-    pas.Common.TokenSpelling[97] = "INITIALIZATION";
-    pas.Common.TokenSpelling[98] = "CONSTRUCTOR";
-    pas.Common.TokenSpelling[99] = "DESTRUCTOR";
-    pas.Common.TokenSpelling[100] = "OVERLOAD";
-    pas.Common.TokenSpelling[101] = "ASSEMBLER";
-    pas.Common.TokenSpelling[102] = "FORWARD";
-    pas.Common.TokenSpelling[103] = "REGISTER";
-    pas.Common.TokenSpelling[104] = "INTERRUPT";
-    pas.Common.TokenSpelling[105] = "PASCAL";
-    pas.Common.TokenSpelling[106] = "STDCALL";
-    pas.Common.TokenSpelling[107] = "INLINE";
-    pas.Common.TokenSpelling[108] = "KEEP";
-    pas.Common.TokenSpelling[72] = "ASSIGN";
-    pas.Common.TokenSpelling[73] = "RESET";
-    pas.Common.TokenSpelling[74] = "REWRITE";
-    pas.Common.TokenSpelling[75] = "APPEND";
-    pas.Common.TokenSpelling[76] = "BLOCKREAD";
-    pas.Common.TokenSpelling[77] = "BLOCKWRITE";
-    pas.Common.TokenSpelling[78] = "CLOSE";
-    pas.Common.TokenSpelling[79] = "GETRESOURCEHANDLE";
-    pas.Common.TokenSpelling[80] = "SIZEOFRESOURCE";
-    pas.Common.TokenSpelling[137] = "FILE";
-    pas.Common.TokenSpelling[147] = "TEXTFILE";
-    pas.Common.TokenSpelling[126] = "SET";
-    pas.Common.TokenSpelling[111] = "PACKED";
-    pas.Common.TokenSpelling[114] = "VOLATILE";
-    pas.Common.TokenSpelling[115] = "STRIPED";
-    pas.Common.TokenSpelling[5] = "LABEL";
-    pas.Common.TokenSpelling[112] = "GOTO";
-    pas.Common.TokenSpelling[113] = "IN";
-    pas.Common.TokenSpelling[138] = "RECORD";
-    pas.Common.TokenSpelling[11] = "CASE";
-    pas.Common.TokenSpelling[12] = "BEGIN";
-    pas.Common.TokenSpelling[13] = "END";
-    pas.Common.TokenSpelling[14] = "IF";
-    pas.Common.TokenSpelling[15] = "THEN";
-    pas.Common.TokenSpelling[16] = "ELSE";
-    pas.Common.TokenSpelling[17] = "WHILE";
-    pas.Common.TokenSpelling[18] = "DO";
-    pas.Common.TokenSpelling[19] = "REPEAT";
-    pas.Common.TokenSpelling[20] = "UNTIL";
-    pas.Common.TokenSpelling[21] = "FOR";
-    pas.Common.TokenSpelling[22] = "TO";
-    pas.Common.TokenSpelling[23] = "DOWNTO";
-    pas.Common.TokenSpelling[24] = ":=";
-    pas.Common.TokenSpelling[25] = "WRITE";
-    pas.Common.TokenSpelling[81] = "WRITELN";
-    pas.Common.TokenSpelling[82] = "SIZEOF";
-    pas.Common.TokenSpelling[83] = "LENGTH";
-    pas.Common.TokenSpelling[84] = "HIGH";
-    pas.Common.TokenSpelling[85] = "LOW";
-    pas.Common.TokenSpelling[86] = "INT";
-    pas.Common.TokenSpelling[87] = "FRAC";
-    pas.Common.TokenSpelling[88] = "TRUNC";
-    pas.Common.TokenSpelling[89] = "ROUND";
-    pas.Common.TokenSpelling[90] = "ODD";
-    pas.Common.TokenSpelling[26] = "READLN";
-    pas.Common.TokenSpelling[27] = "HALT";
-    pas.Common.TokenSpelling[38] = "BREAK";
-    pas.Common.TokenSpelling[39] = "CONTINUE";
-    pas.Common.TokenSpelling[40] = "EXIT";
-    pas.Common.TokenSpelling[109] = "SUCC";
-    pas.Common.TokenSpelling[110] = "PRED";
-    pas.Common.TokenSpelling[32] = "INC";
-    pas.Common.TokenSpelling[33] = "DEC";
-    pas.Common.TokenSpelling[34] = "ORD";
-    pas.Common.TokenSpelling[35] = "CHR";
-    pas.Common.TokenSpelling[36] = "ASM";
-    pas.Common.TokenSpelling[37] = "ABSOLUTE";
-    pas.Common.TokenSpelling[28] = "USES";
-    pas.Common.TokenSpelling[48] = "LO";
-    pas.Common.TokenSpelling[49] = "HI";
-    pas.Common.TokenSpelling[9] = "GETINTVEC";
-    pas.Common.TokenSpelling[10] = "SETINTVEC";
-    pas.Common.TokenSpelling[29] = "ARRAY";
-    pas.Common.TokenSpelling[30] = "OF";
-    pas.Common.TokenSpelling[31] = "STRING";
-    pas.Common.TokenSpelling[41] = "..";
-    pas.Common.TokenSpelling[42] = "=";
-    pas.Common.TokenSpelling[43] = "<>";
-    pas.Common.TokenSpelling[44] = "<";
-    pas.Common.TokenSpelling[45] = "<=";
-    pas.Common.TokenSpelling[46] = ">";
-    pas.Common.TokenSpelling[47] = ">=";
-    pas.Common.TokenSpelling[50] = ".";
-    pas.Common.TokenSpelling[51] = ",";
-    pas.Common.TokenSpelling[52] = ";";
-    pas.Common.TokenSpelling[53] = "(";
-    pas.Common.TokenSpelling[54] = ")";
-    pas.Common.TokenSpelling[55] = "^";
-    pas.Common.TokenSpelling[56] = "@";
-    pas.Common.TokenSpelling[57] = "[";
-    pas.Common.TokenSpelling[58] = "]";
-    pas.Common.TokenSpelling[59] = ":";
-    pas.Common.TokenSpelling[60] = "+";
-    pas.Common.TokenSpelling[61] = "-";
-    pas.Common.TokenSpelling[62] = "*";
-    pas.Common.TokenSpelling[63] = "/";
-    pas.Common.TokenSpelling[64] = "DIV";
-    pas.Common.TokenSpelling[65] = "MOD";
-    pas.Common.TokenSpelling[66] = "SHL";
-    pas.Common.TokenSpelling[67] = "SHR";
-    pas.Common.TokenSpelling[68] = "OR";
-    pas.Common.TokenSpelling[69] = "XOR";
-    pas.Common.TokenSpelling[70] = "AND";
-    pas.Common.TokenSpelling[71] = "NOT";
-    pas.Common.TokenSpelling[132] = "INTEGER";
-    pas.Common.TokenSpelling[129] = "CARDINAL";
-    pas.Common.TokenSpelling[131] = "SMALLINT";
-    pas.Common.TokenSpelling[130] = "SHORTINT";
-    pas.Common.TokenSpelling[128] = "WORD";
-    pas.Common.TokenSpelling[127] = "BYTE";
-    pas.Common.TokenSpelling[133] = "CHAR";
-    pas.Common.TokenSpelling[134] = "BOOLEAN";
-    pas.Common.TokenSpelling[135] = "POINTER";
-    pas.Common.TokenSpelling[140] = "SHORTREAL";
-    pas.Common.TokenSpelling[141] = "REAL";
-    pas.Common.TokenSpelling[142] = "SINGLE";
-    pas.Common.TokenSpelling[143] = "FLOAT16";
-    pas.Common.TokenSpelling[144] = "PCHAR";
-    pas.Common.TokenSpelling[149] = "SHORTSTRING";
-    pas.Common.TokenSpelling[150] = "FLOAT";
-    pas.Common.TokenSpelling[152] = "TEXT";
     AsmFound = false;
     UsesFound = false;
     UnitFound = false;
@@ -7715,7 +7672,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
         Num = "";
         if (ch.charCodeAt() in rtl.createSet(null,48,57,36,37)) ReadNumber();
         if (Num.length > 0) {
-          $mod.AddToken(171,1,Line,Num.length + Spaces,pas.Common.StrToInt(Num));
+          $mod.AddToken(pas.Tokens.TTokenKind.INTNUMBERTOK,1,Line,Num.length + Spaces,pas.SysUtils.StrToInt(Num));
           Spaces = 0;
           if (ch === ".") {
             ch = a.charAt(pas.Common.i - 1);
@@ -7729,7 +7686,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                 ch = a.charAt(pas.Common.i - 1);
                 pas.Common.i += 1;
               };
-              pas.Common.Tok[pas.Common.NumTok].Kind = 172;
+              pas.Common.Tok[pas.Common.NumTok].Kind = pas.Tokens.TTokenKind.FRACNUMBERTOK;
               pas.Common.Tok[pas.Common.NumTok].FracValue = pas.SysUtils.StrToFloat(Num + Frac);
               pas.Common.Tok[pas.Common.NumTok].Column = pas.Common.Tok[pas.Common.NumTok - 1].Column + Num.length + Frac.length + Spaces;
               Spaces = 0;
@@ -7750,7 +7707,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
           };
           if (Err > 255) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ConstantStringTooLong,"Constant strings can't be longer than 255 chars","",""]),pas.Messages.IMessage)));
           if (Text.length > 0) {
-            CurToken = $impl.GetStandardToken(Text);
+            CurToken = pas.Tokens.GetStandardToken(Text);
             im = pas.Common.SearchDefine(Text);
             if ((im > 0) && (pas.Common.Defines[im - 1].Macro !== "")) {
               ch = "\x00";
@@ -7766,19 +7723,19 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
                 }, set: function (v) {
                   a = v;
                 }},pas.Common.i);
-              CurToken = 188;
+              CurToken = pas.Tokens.TTokenKind.MACRORELEASE;
             } else {
-              if (CurToken === 153) CurToken = 148;
-              if (CurToken === 151) CurToken = 143;
-              if (CurToken === 152) CurToken = 144;
-              if (CurToken === 150) CurToken = 32;
-              $mod.AddToken(0,1,Line,Text.length + Spaces,0);
+              if (CurToken === pas.Tokens.TTokenKind.TEXTTOK) CurToken = pas.Tokens.TTokenKind.TEXTFILETOK;
+              if (CurToken === pas.Tokens.TTokenKind.FLOATTOK) CurToken = pas.Tokens.TTokenKind.SINGLETOK;
+              if (CurToken === pas.Tokens.TTokenKind.FLOAT16TOK) CurToken = pas.Tokens.TTokenKind.HALFSINGLETOK;
+              if (CurToken === pas.Tokens.TTokenKind.SHORTSTRINGTOK) CurToken = pas.Tokens.TTokenKind.STRINGTOK;
+              $mod.AddToken(pas.Tokens.TTokenKind.UNTYPETOK,1,Line,Text.length + Spaces,0);
               Spaces = 0;
             };
-            if (CurToken !== 188) if (CurToken !== 0) {
+            if (CurToken !== pas.Tokens.TTokenKind.MACRORELEASE) if (CurToken !== pas.Tokens.TTokenKind.UNTYPETOK) {
               pas.Common.Tok[pas.Common.NumTok].Kind = CurToken;
             } else {
-              pas.Common.Tok[pas.Common.NumTok].Kind = 170;
+              pas.Common.Tok[pas.Common.NumTok].Kind = pas.Tokens.TTokenKind.IDENTTOK;
               pas.Common.Tok[pas.Common.NumTok].Name = Text;
             };
           };
@@ -7864,7 +7821,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
               Num = "";
               ReadNumber();
               if (Num.length > 0) {
-                Text = Text + String.fromCharCode(pas.Common.StrToInt(Num))}
+                Text = Text + String.fromCharCode(pas.SysUtils.StrToInt(Num))}
                else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ConstantExpressionExpected,"Constant expression expected","",""]),pas.Messages.IMessage)));
               if (ch.charCodeAt() in rtl.createSet(32,pas.StringUtilities.TAB.charCodeAt())) {
                 ch2 = ch;
@@ -7894,17 +7851,17 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
             pas.Common.i += 1;
           };
           if (Text.length === 1) {
-            $mod.AddToken(173,1,Line,1 + Spaces,Text.charCodeAt(1 - 1));
+            $mod.AddToken(pas.Tokens.TTokenKind.CHARLITERALTOK,1,Line,1 + Spaces,Text.charCodeAt(1 - 1));
             Spaces = 0;
           } else {
-            $mod.AddToken(174,1,Line,Text.length + Spaces,0);
+            $mod.AddToken(pas.Tokens.TTokenKind.STRINGLITERALTOK,1,Line,Text.length + Spaces,0);
             Spaces = 0;
             pas.Common.DefineStaticString(pas.Common.NumTok,Text);
           };
           Text = "";
         };
         if (ch.charCodeAt() in rtl.createSet(61,44,59,40,41,42,47,43,45,94,64,91,93)) {
-          $mod.AddToken($impl.GetStandardToken(ch),1,Line,1 + Spaces,0);
+          $mod.AddToken(pas.Tokens.GetStandardToken(ch),1,Line,1 + Spaces,0);
           Spaces = 0;
         };
         if (ch.charCodeAt() in rtl.createSet(58,62,60,46)) {
@@ -7912,17 +7869,17 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
           ch2 = a.charAt(pas.Common.i - 1);
           pas.Common.i += 1;
           if ((ch2 === "=") || ((ch === "<") && (ch2 === ">")) || ((ch === ".") && (ch2 === "."))) {
-            $mod.AddToken($impl.GetStandardToken(ch + ch2),1,Line,2 + Spaces,0);
+            $mod.AddToken(pas.Tokens.GetStandardToken(ch + ch2),1,Line,2 + Spaces,0);
             Spaces = 0;
           } else if ((ch === ".") && (ch2.charCodeAt() in rtl.createSet(null,48,57))) {
-            $mod.AddToken(171,1,Line,0,0);
+            $mod.AddToken(pas.Tokens.TTokenKind.INTNUMBERTOK,1,Line,0,0);
             Frac = "0.";
             while (ch2.charCodeAt() in rtl.createSet(null,48,57)) {
               Frac = Frac + ch2;
               ch2 = a.charAt(pas.Common.i - 1);
               pas.Common.i += 1;
             };
-            pas.Common.Tok[pas.Common.NumTok].Kind = 172;
+            pas.Common.Tok[pas.Common.NumTok].Kind = pas.Tokens.TTokenKind.FRACNUMBERTOK;
             pas.Common.Tok[pas.Common.NumTok].FracValue = pas.SysUtils.StrToFloat(Frac);
             pas.Common.Tok[pas.Common.NumTok].Column = pas.Common.Tok[pas.Common.NumTok - 1].Column + Frac.length + Spaces;
             Spaces = 0;
@@ -7932,7 +7889,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
             pas.Common.i -= 1;
             Line = Line2;
             if (ch.charCodeAt() in rtl.createSet(58,62,60,46)) {
-              $mod.AddToken($impl.GetStandardToken(ch),1,Line,1 + Spaces,0);
+              $mod.AddToken(pas.Tokens.GetStandardToken(ch),1,Line,1 + Spaces,0);
               Spaces = 0;
             };
           };
@@ -8005,21 +7962,6 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
       pas.Common.optyFOR2 = "";
       pas.Common.optyFOR3 = "";
       for (i = 0; i <= 4095; i++) pas.Common.AsmBlock[i] = "";
-    };
-    $impl.GetStandardToken = function (S) {
-      var Result = 0;
-      var i = 0;
-      Result = 0;
-      if ((S === "LONGWORD") || (S === "DWORD") || (S === "UINT32")) {
-        S = "CARDINAL"}
-       else if (S === "UINT16") {
-        S = "WORD"}
-       else if (S === "LONGINT") S = "INTEGER";
-      for (i = 1; i <= 200; i++) if (S === pas.Common.TokenSpelling[i - 1]) {
-        Result = i;
-        break;
-      };
-      return Result;
     };
     $impl.AddResource = function (fnam) {
       var i = 0;
@@ -8099,7 +8041,7 @@ rtl.module("Scanner",["System","StringUtilities","CommonTypes"],function () {
       pas.Common.AsmBlock[pas.Common.AsmBlockIndex] = pas.Common.AsmBlock[pas.Common.AsmBlockIndex] + a;
     };
   };
-},["SysUtils","Common","Messages","FileIO","Utilities"]);
+},["SysUtils","Messages","FileIO","Utilities"]);
 rtl.module("Optimize",["System"],function () {
   "use strict";
   var $mod = this;
@@ -31874,7 +31816,7 @@ rtl.module("Optimize",["System"],function () {
     };
   };
 },["SysUtils","Common","Console","StringUtilities","Utilities"]);
-rtl.module("Parser",["System","Common","Numbers"],function () {
+rtl.module("Parser",["System","Common","Numbers","Tokens"],function () {
   "use strict";
   var $mod = this;
   var $impl = $mod.$impl;
@@ -31914,16 +31856,16 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       var Result = 0;
       if ((LowerBound < 0) || (UpperBound < 0)) {
         if ((LowerBound >= -128) && (UpperBound <= 127)) {
-          Result = 131}
+          Result = pas.Tokens.TTokenKind.SHORTINTTOK}
          else if ((LowerBound >= -32768) && (UpperBound <= 32767)) {
-          Result = 132}
-         else Result = 133;
+          Result = pas.Tokens.TTokenKind.SMALLINTTOK}
+         else Result = pas.Tokens.TTokenKind.INTEGERTOK;
       } else {
         if ((LowerBound >= 0) && (UpperBound <= 255)) {
-          Result = 128}
+          Result = pas.Tokens.TTokenKind.BYTETOK}
          else if ((LowerBound >= 0) && (UpperBound <= 65535)) {
-          Result = 129}
-         else Result = 130;
+          Result = pas.Tokens.TTokenKind.WORDTOK}
+         else Result = pas.Tokens.TTokenKind.CARDINALTOK;
       };
       return Result;
     };
@@ -31938,9 +31880,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         pas.Common.TypeArray[RecType - 1].NumFields += 1;
         x = pas.Common.TypeArray[RecType - 1].NumFields;
         if (x >= 256) pas.Messages.Error$1(i,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OutOfResources,"Out of resources, MAXFIELDS","",""]),pas.Messages.IMessage)));
-        if (FieldType === 154) {
-          FieldType = 136;
-          AllocElementType = 0;
+        if (FieldType === pas.Tokens.TTokenKind.DEREFERENCEARRAYTOK) {
+          FieldType = pas.Tokens.TTokenKind.POINTERTOK;
+          AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
           NumAllocElements = 0;
         };
         pas.Common.TypeArray[RecType - 1].Field[x].Name = Name;
@@ -31948,16 +31890,16 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         pas.Common.TypeArray[RecType - 1].Field[x].Value = Data;
         pas.Common.TypeArray[RecType - 1].Field[x].AllocElementType = AllocElementType;
         pas.Common.TypeArray[RecType - 1].Field[x].NumAllocElements = NumAllocElements;
-        if (!(FieldType in rtl.createSet(139,140))) {
+        if (!(FieldType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
           if (FieldType in pas.Common.Pointers) {
-            if ((FieldType === 136) && (AllocElementType === 149)) {
-              pas.Common.TypeArray[RecType - 1].Size += pas.Common.DataSize[8]}
+            if ((FieldType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType === pas.Tokens.TTokenKind.FORWARDTYPE)) {
+              pas.Common.TypeArray[RecType - 1].Size += pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK)}
              else if (rtl.lw(NumAllocElements >>> 16) > 0) {
-              pas.Common.TypeArray[RecType - 1].Size += rtl.lw(NumAllocElements >>> 16) * (NumAllocElements & 0xFFFF) * pas.Common.DataSize[AllocElementType - 128]}
-             else pas.Common.TypeArray[RecType - 1].Size += NumAllocElements * pas.Common.DataSize[AllocElementType - 128];
-          } else pas.Common.TypeArray[RecType - 1].Size += pas.Common.DataSize[FieldType - 128];
-        } else pas.Common.TypeArray[RecType - 1].Size += pas.Common.DataSize[FieldType - 128];
-        pas.Common.TypeArray[RecType - 1].Field[x].Kind = 0;
+              pas.Common.TypeArray[RecType - 1].Size += rtl.lw(NumAllocElements >>> 16) * (NumAllocElements & 0xFFFF) * pas.Common.GetDataSize(AllocElementType)}
+             else pas.Common.TypeArray[RecType - 1].Size += NumAllocElements * pas.Common.GetDataSize(AllocElementType);
+          } else pas.Common.TypeArray[RecType - 1].Size += pas.Common.GetDataSize(FieldType);
+        } else pas.Common.TypeArray[RecType - 1].Size += pas.Common.GetDataSize(FieldType);
+        pas.Common.TypeArray[RecType - 1].Field[x].Kind = pas.Common.TFieldKind.UNTYPETOK;
       } finally {
         $ir.free();
       };
@@ -31965,9 +31907,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var $ir = rtl.createIntfRefs();
     try {
       NumAllocElements.set(0);
-      if (pas.Common.Tok[i].Kind in rtl.createSet(4,5)) {
-        DataType.set(136);
-        AllocElementType.set(147);
+      if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK)) {
+        DataType.set(pas.Tokens.TTokenKind.POINTERTOK);
+        AllocElementType.set(pas.Tokens.TTokenKind.PROCVARTOK);
         i = $impl.DeclareFunction(i,{get: function () {
             return NestedNumAllocElements;
           }, set: function (v) {
@@ -31975,28 +31917,28 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           }});
         NumAllocElements.set(rtl.lw(NestedNumAllocElements << 16));
         Result = i - 1;
-      } else if (pas.Common.Tok[i].Kind === 56) {
-        DataType.set(136);
-        if (pas.Common.Tok[i + 1].Kind === 32) {
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+        DataType.set(pas.Tokens.TTokenKind.POINTERTOK);
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.STRINGTOK) {
           NumAllocElements.set(0);
-          AllocElementType.set(134);
-          DataType.set(137);
-        } else if (pas.Common.Tok[i + 1].Kind === 170) {
+          AllocElementType.set(pas.Tokens.TTokenKind.CHARTOK);
+          DataType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK);
+        } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
           IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i + 1].Name);
           if (IdentIndex === 0) {
             NumAllocElements.set(i + 1);
-            AllocElementType.set(149);
-          } else if ((IdentIndex > 0) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers))) {
+            AllocElementType.set(pas.Tokens.TTokenKind.FORWARDTYPE);
+          } else if ((IdentIndex > 0) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers))) {
             NumAllocElements.set(pas.Common.Ident[IdentIndex - 1].NumAllocElements);
             if (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) {
-              if (pas.Common.Ident[IdentIndex - 1].DataType === 137) {
+              if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
                 NumAllocElements.set(0);
-                AllocElementType.set(134);
-                DataType.set(137);
+                AllocElementType.set(pas.Tokens.TTokenKind.CHARTOK);
+                DataType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK);
               } else {
                 NumAllocElements.set(rtl.lw(pas.Common.Ident[IdentIndex - 1].NumAllocElements | rtl.lw(pas.Common.Ident[IdentIndex - 1].NumAllocElements_ << 16)));
                 AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                DataType.set(154);
+                DataType.set(pas.Tokens.TTokenKind.DEREFERENCEARRAYTOK);
               };
             } else {
               NumAllocElements.set(rtl.lw(pas.Common.Ident[IdentIndex - 1].NumAllocElements | rtl.lw(pas.Common.Ident[IdentIndex - 1].NumAllocElements_ << 16)));
@@ -32004,12 +31946,12 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             };
           };
         } else {
-          if (!(pas.Common.Tok[i + 1].Kind in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(136)))) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IdentifierExpected);
+          if (!(pas.Common.Tok[i + 1].Kind in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK)))) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IdentifierExpected);
           NumAllocElements.set(0);
           AllocElementType.set(pas.Common.Tok[i + 1].Kind);
         };
         Result = i + 1;
-      } else if (pas.Common.Tok[i].Kind === 54) {
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.OPARTOK) {
         Name = pas.Common.Tok[i - 2].Name;
         pas.Common.NumTypes += 1;
         RecType = pas.Common.NumTypes;
@@ -32022,11 +31964,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         UpperBound = 0;
         NumFieldsInList = 0;
         do {
-          pas.Common.CheckTok(i,170);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
           NumFieldsInList += 1;
           FieldInListName[NumFieldsInList - 1].Name = pas.Common.Tok[i].Name;
           i += 1;
-          if (pas.Common.Tok[i].Kind in rtl.createSet(25,43)) {
+          if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.ASSIGNTOK,pas.Tokens.TTokenKind.EQTOK)) {
             i = $mod.CompileConstExpression(i + 1,{get: function () {
                 return ConstVal;
               }, set: function (v) {
@@ -32035,7 +31977,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},133,false,true);
+              }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
             i += 1;
           };
           FieldInListName[NumFieldsInList - 1].Value = ConstVal;
@@ -32048,43 +31990,43 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             if (FieldInListName[NumFieldsInList - 1].Value < FieldInListName[NumFieldsInList - 1 - 1].Value) pas.Messages.Note(i,"Values in enumeration types have to be ascending");
           };
           ConstVal += 1;
-          if (pas.Common.Tok[i].Kind === 52) i += 1;
-        } while (!(pas.Common.Tok[i].Kind === 55));
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) i += 1;
+        } while (!(pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.CPARTOK));
         DataType.set(BoundaryType());
         for (var $l = 1, $end = NumFieldsInList; $l <= $end; $l++) {
           FieldInListIndex = $l;
-          $mod.DefineIdent(i,FieldInListName[FieldInListIndex - 1].Name,146,DataType.get(),0,0,FieldInListName[FieldInListIndex - 1].Value,170);
+          $mod.DefineIdent(i,FieldInListName[FieldInListIndex - 1].Name,pas.Tokens.TTokenKind.ENUMTOK,DataType.get(),0,pas.Tokens.TTokenKind.UNTYPETOK,FieldInListName[FieldInListIndex - 1].Value,pas.Tokens.TTokenKind.IDENTTOK);
           pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = RecType;
           pas.Common.Ident[pas.Common.NumIdent - 1].Pass = pas.Common.TPass.CALL_DETERMINATION;
-          DeclareField(FieldInListName[FieldInListIndex - 1].Name,DataType.get(),0,0,FieldInListName[FieldInListIndex - 1].Value);
+          DeclareField(FieldInListName[FieldInListIndex - 1].Name,DataType.get(),0,pas.Tokens.TTokenKind.UNTYPETOK,FieldInListName[FieldInListIndex - 1].Value);
         };
         pas.Common.TypeArray[RecType - 1].Block = pas.Common.BlockStack[pas.Common.BlockStackTop];
         AllocElementType.set(DataType.get());
-        DataType.set(146);
+        DataType.set(pas.Tokens.TTokenKind.ENUMTOK);
         NumAllocElements.set(RecType);
         Result = i;
-      } else if (pas.Common.Tok[i].Kind === 148) {
-        AllocElementType.set(128);
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.TEXTFILETOK) {
+        AllocElementType.set(pas.Tokens.TTokenKind.BYTETOK);
         NumAllocElements.set(1);
-        DataType.set(148);
+        DataType.set(pas.Tokens.TTokenKind.TEXTFILETOK);
         Result = i;
-      } else if (pas.Common.Tok[i].Kind === 138) {
-        if (pas.Common.Tok[i + 1].Kind === 31) {
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.FILETOK) {
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OFTOK) {
           i = $mod.CompileType(i + 2,DataType,NumAllocElements,AllocElementType)}
          else {
-          AllocElementType.set(0);
+          AllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
           NumAllocElements.set(128);
         };
-        DataType.set(138);
+        DataType.set(pas.Tokens.TTokenKind.FILETOK);
         Result = i;
-      } else if (pas.Common.Tok[i].Kind === 127) {
-        pas.Common.CheckTok(i + 1,31);
-        if (!(pas.Common.Tok[i + 2].Kind in rtl.createSet(134,128))) pas.Messages.Error$1(i + 2,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeDeclarationOfSetElements,"Illegal type declaration of set elements","",""]),pas.Messages.IMessage)));
-        DataType.set(136);
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.SETTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OFTOK);
+        if (!(pas.Common.Tok[i + 2].Kind in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BYTETOK))) pas.Messages.Error$1(i + 2,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeDeclarationOfSetElements,"Illegal type declaration of set elements","",""]),pas.Messages.IMessage)));
+        DataType.set(pas.Tokens.TTokenKind.POINTERTOK);
         NumAllocElements.set(32);
         AllocElementType.set(pas.Common.Tok[i + 2].Kind);
         Result = i + 2;
-      } else if (pas.Common.Tok[i].Kind === 140) {
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.OBJECTTOK) {
         Name = pas.Common.Tok[i - 2].Name;
         pas.Common.NumTypes += 1;
         RecType = pas.Common.NumTypes;
@@ -32092,9 +32034,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         i += 1;
         pas.Common.TypeArray[RecType - 1].NumFields = 0;
         pas.Common.TypeArray[RecType - 1].Field[0].Name = Name;
-        if (pas.Common.Tok[i].Kind in rtl.createSet(4,5,99,100)) {
-          while (pas.Common.Tok[i].Kind in rtl.createSet(4,5,99,100)) {
-            IsNestedFunction = pas.Common.Tok[i].Kind === 5;
+        if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
+          while (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
+            IsNestedFunction = pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK;
             k = i;
             i = $mod.DefineFunction(i,0,{get: function () {
                 return isForward;
@@ -32134,27 +32076,27 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             pas.Common.Ident[pas.Common.NumIdent - 1].IsUnresolvedForward = true;
             pas.Common.Ident[pas.Common.NumIdent - 1].ObjectIndex = RecType;
             pas.Common.Ident[pas.Common.NumIdent - 1].Name = Name + "." + pas.Common.Tok[k + 1].Name;
-            pas.Common.CheckTok(i,53);
+            pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
             i += 1;
           };
-          if (pas.Common.Tok[i].Kind in rtl.createSet(170)) pas.Messages.Error$1(i,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FieldAfterMethodOrProperty,"Fields cannot appear after a method or property definition","",""]),pas.Messages.IMessage)));
+          if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.IDENTTOK)) pas.Messages.Error$1(i,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FieldAfterMethodOrProperty,"Fields cannot appear after a method or property definition","",""]),pas.Messages.IMessage)));
         } else do {
           NumFieldsInList = 0;
           do {
-            if (pas.Common.Tok[i].Kind in rtl.createSet(4,5,99,100)) pas.Messages.Error$1(i,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FieldAfterMethodOrProperty,"Fields cannot appear after a method or property definition","",""]),pas.Messages.IMessage)));
-            pas.Common.CheckTok(i,170);
+            if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) pas.Messages.Error$1(i,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FieldAfterMethodOrProperty,"Fields cannot appear after a method or property definition","",""]),pas.Messages.IMessage)));
+            pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
             NumFieldsInList += 1;
             FieldInListName[NumFieldsInList - 1].Name = pas.Common.Tok[i].Name;
             i += 1;
             ExitLoop = false;
-            if (pas.Common.Tok[i].Kind === 52) {
+            if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) {
               i += 1}
              else ExitLoop = true;
           } while (!ExitLoop);
-          pas.Common.CheckTok(i,60);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
           j = i + 1;
           i = $mod.CompileType(i + 1,DataType,NumAllocElements,AllocElementType);
-          if (pas.Common.Tok[j].Kind === 30) i = $mod.CompileType(i + 3,{get: function () {
+          if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.ARRAYTOK) i = $mod.CompileType(i + 3,{get: function () {
               return NestedDataType;
             }, set: function (v) {
               NestedDataType = v;
@@ -32170,23 +32112,23 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           for (var $l1 = 1, $end1 = NumFieldsInList; $l1 <= $end1; $l1++) {
             FieldInListIndex = $l1;
             DeclareField(FieldInListName[FieldInListIndex - 1].Name,DataType.get(),NumAllocElements.get(),AllocElementType.get(),0);
-            if (DataType.get() in rtl.createSet(139,140)) for (var $l2 = 1, $end2 = pas.Common.TypeArray[NumAllocElements.get() - 1].NumFields; $l2 <= $end2; $l2++) {
+            if (DataType.get() in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) for (var $l2 = 1, $end2 = pas.Common.TypeArray[NumAllocElements.get() - 1].NumFields; $l2 <= $end2; $l2++) {
               k = $l2;
               DeclareField(FieldInListName[FieldInListIndex - 1].Name + "." + pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].Name,pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].DataType,pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].NumAllocElements,pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].AllocElementType,0);
-              pas.Common.TypeArray[RecType - 1].Field[pas.Common.TypeArray[RecType - 1].NumFields].Kind = 1;
+              pas.Common.TypeArray[RecType - 1].Field[pas.Common.TypeArray[RecType - 1].NumFields].Kind = pas.Common.TFieldKind.OBJECTVARIABLE;
             };
           };
           ExitLoop = false;
-          if (pas.Common.Tok[i + 1].Kind !== 53) {
+          if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.SEMICOLONTOK) {
             i += 1;
             ExitLoop = true;
           } else {
             i += 2;
-            if (pas.Common.Tok[i].Kind === 14) {
+            if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ENDTOK) {
               ExitLoop = true}
-             else if (pas.Common.Tok[i].Kind in rtl.createSet(4,5,99,100)) {
-              while (pas.Common.Tok[i].Kind in rtl.createSet(4,5,99,100)) {
-                IsNestedFunction = pas.Common.Tok[i].Kind === 5;
+             else if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
+              while (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
+                IsNestedFunction = pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK;
                 k = i;
                 i = $mod.DefineFunction(i,0,{get: function () {
                     return isForward;
@@ -32226,22 +32168,22 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 pas.Common.Ident[pas.Common.NumIdent - 1].IsUnresolvedForward = true;
                 pas.Common.Ident[pas.Common.NumIdent - 1].ObjectIndex = RecType;
                 pas.Common.Ident[pas.Common.NumIdent - 1].Name = Name + "." + pas.Common.Tok[k + 1].Name;
-                pas.Common.CheckTok(i,53);
+                pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
                 i += 1;
               };
               ExitLoop = true;
             };
           };
         } while (!ExitLoop);
-        pas.Common.CheckTok(i,14);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.ENDTOK);
         pas.Common.TypeArray[RecType - 1].Block = pas.Common.BlockStack[pas.Common.BlockStackTop];
-        DataType.set(140);
+        DataType.set(pas.Tokens.TTokenKind.OBJECTTOK);
         NumAllocElements.set(RecType);
-        AllocElementType.set(0);
+        AllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         Result = i;
-      } else if ((pas.Common.Tok[i].Kind === 139) || ((pas.Common.Tok[i].Kind === 112) && (pas.Common.Tok[i + 1].Kind === 139))) {
+      } else if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.RECORDTOK) || ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PACKEDTOK) && (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.RECORDTOK))) {
         Name = pas.Common.Tok[i - 2].Name;
-        if (pas.Common.Tok[i].Kind === 112) i += 1;
+        if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PACKEDTOK) i += 1;
         pas.Common.NumTypes += 1;
         RecType = pas.Common.NumTypes;
         if (pas.Common.NumTypes > 1024) pas.Messages.Error$1(i,$ir.ref(6,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OutOfResources,"Out of resources, MAXTYPES","",""]),pas.Messages.IMessage)));
@@ -32252,19 +32194,19 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         do {
           NumFieldsInList = 0;
           do {
-            pas.Common.CheckTok(i,170);
+            pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
             NumFieldsInList += 1;
             FieldInListName[NumFieldsInList - 1].Name = pas.Common.Tok[i].Name;
             i += 1;
             ExitLoop = false;
-            if (pas.Common.Tok[i].Kind === 52) {
+            if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) {
               i += 1}
              else ExitLoop = true;
           } while (!ExitLoop);
-          pas.Common.CheckTok(i,60);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
           j = i + 1;
           i = $mod.CompileType(i + 1,DataType,NumAllocElements,AllocElementType);
-          if (pas.Common.Tok[j].Kind === 30) i = $mod.CompileType(i + 3,{get: function () {
+          if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.ARRAYTOK) i = $mod.CompileType(i + 3,{get: function () {
               return NestedDataType;
             }, set: function (v) {
               NestedDataType = v;
@@ -32280,36 +32222,36 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           for (var $l3 = 1, $end3 = NumFieldsInList; $l3 <= $end3; $l3++) {
             FieldInListIndex = $l3;
             DeclareField(FieldInListName[FieldInListIndex - 1].Name,DataType.get(),NumAllocElements.get(),AllocElementType.get(),0);
-            if (DataType.get() === 139) for (var $l4 = 1, $end4 = pas.Common.TypeArray[NumAllocElements.get() - 1].NumFields; $l4 <= $end4; $l4++) {
+            if (DataType.get() === pas.Tokens.TTokenKind.RECORDTOK) for (var $l4 = 1, $end4 = pas.Common.TypeArray[NumAllocElements.get() - 1].NumFields; $l4 <= $end4; $l4++) {
               k = $l4;
               DeclareField(FieldInListName[FieldInListIndex - 1].Name + "." + pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].Name,pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].DataType,pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].NumAllocElements,pas.Common.TypeArray[NumAllocElements.get() - 1].Field[k].AllocElementType,0);
             };
           };
           ExitLoop = false;
-          if (pas.Common.Tok[i + 1].Kind !== 53) {
+          if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.SEMICOLONTOK) {
             i += 1;
             ExitLoop = true;
           } else {
             i += 2;
-            if (pas.Common.Tok[i].Kind === 14) ExitLoop = true;
+            if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ENDTOK) ExitLoop = true;
           };
         } while (!ExitLoop);
-        pas.Common.CheckTok(i,14);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.ENDTOK);
         pas.Common.TypeArray[RecType - 1].Block = pas.Common.BlockStack[pas.Common.BlockStackTop];
-        DataType.set(139);
+        DataType.set(pas.Tokens.TTokenKind.RECORDTOK);
         NumAllocElements.set(RecType);
-        AllocElementType.set(0);
+        AllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         if (pas.Common.TypeArray[RecType - 1].Size >= 256) pas.Messages.Error$1(i,$ir.ref(7,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.RecordSizeExceedsLimit,"Record size {0} exceeds the 256 bytes limit.",pas.SysUtils.IntToStr(pas.Common.TypeArray[RecType - 1].Size),""]),pas.Messages.IMessage)));
         Result = i;
-      } else if (pas.Common.Tok[i].Kind === 145) {
-        DataType.set(136);
-        AllocElementType.set(134);
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PCHARTOK) {
+        DataType.set(pas.Tokens.TTokenKind.POINTERTOK);
+        AllocElementType.set(pas.Tokens.TTokenKind.CHARTOK);
         NumAllocElements.set(0);
         Result = i;
-      } else if (pas.Common.Tok[i].Kind === 32) {
-        DataType.set(137);
-        AllocElementType.set(134);
-        if (pas.Common.Tok[i + 1].Kind !== 58) {
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGTOK) {
+        DataType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK);
+        AllocElementType.set(pas.Tokens.TTokenKind.CHARTOK);
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OBRACKETTOK) {
           UpperBound = 255;
           Result = i;
         } else {
@@ -32321,9 +32263,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               return ExpressionType;
             }, set: function (v) {
               ExpressionType = v;
-            }},133,false,true);
+            }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if ((UpperBound < 1) || (UpperBound > 255)) pas.Messages.Error$1(i,$ir.ref(8,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.StringLengthNotInRange,"String length must be a value from 1 to 255","",""]),pas.Messages.IMessage)));
-          pas.Common.CheckTok(i + 1,59);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
           Result = i + 1;
         };
         NumAllocElements.set(UpperBound + 1);
@@ -32331,14 +32273,14 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       } else if (pas.Common.Tok[i].Kind in pas.Common.AllTypes) {
         DataType.set(pas.Common.Tok[i].Kind);
         NumAllocElements.set(0);
-        AllocElementType.set(0);
+        AllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         Result = i;
-      } else if ((pas.Common.Tok[i].Kind === 30) || ((pas.Common.Tok[i].Kind === 112) && (pas.Common.Tok[i + 1].Kind === 30))) {
-        DataType.set(136);
-        if (pas.Common.Tok[i].Kind === 112) i += 1;
-        pas.Common.CheckTok(i + 1,58);
+      } else if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ARRAYTOK) || ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PACKEDTOK) && (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.ARRAYTOK))) {
+        DataType.set(pas.Tokens.TTokenKind.POINTERTOK);
+        if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PACKEDTOK) i += 1;
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OBRACKETTOK);
         if (pas.Common.Tok[i + 2].Kind in rtl.unionSet(pas.Common.AllTypes,pas.Common.StringTypes)) {
-          if (pas.Common.Tok[i + 2].Kind === 128) {
+          if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.BYTETOK) {
             LowerBound = 0;
             UpperBound = 255;
             NumAllocElements.set(256);
@@ -32353,10 +32295,10 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               return ExpressionType;
             }, set: function (v) {
               ExpressionType = v;
-            }},133,false,true);
+            }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (!(ExpressionType in pas.Common.IntegerTypes)) pas.Messages.Error$1(i,$ir.ref(10,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayLowerBoundNotInteger,"Array lower bound must be an integer value","",""]),pas.Messages.IMessage)));
           if (LowerBound !== 0) pas.Messages.Error$1(i,$ir.ref(11,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayLowerBoundNotZero,"Array lower bound is not zero","",""]),pas.Messages.IMessage)));
-          pas.Common.CheckTok(i + 1,42);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.RANGETOK);
           i = $mod.CompileConstExpression(i + 2,{get: function () {
               return UpperBound;
             }, set: function (v) {
@@ -32365,12 +32307,12 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               return ExpressionType;
             }, set: function (v) {
               ExpressionType = v;
-            }},133,false,true);
+            }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (!(ExpressionType in pas.Common.IntegerTypes)) pas.Messages.Error$1(i,$ir.ref(12,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayUpperBoundNotInteger,"Array upper bound must be integer","",""]),pas.Messages.IMessage)));
           if (UpperBound < 0) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UpperBoundOfRange);
           if (UpperBound > 65535) pas.Messages.Error$2(i,pas.Messages.TErrorCode.HighLimit);
           NumAllocElements.set((UpperBound - LowerBound) + 1);
-          if (pas.Common.Tok[i + 1].Kind === 52) {
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
             i = $mod.CompileConstExpression(i + 2,{get: function () {
                 return LowerBound;
               }, set: function (v) {
@@ -32379,10 +32321,10 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},133,false,true);
+              }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
             if (!(ExpressionType in pas.Common.IntegerTypes)) pas.Messages.Error$1(i,$ir.ref(13,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayLowerBoundNotInteger,"Array lower bound must be integer","",""]),pas.Messages.IMessage)));
             if (LowerBound !== 0) pas.Messages.Error$1(i,$ir.ref(14,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayLowerBoundNotZero,"Array lower bound is not zero","",""]),pas.Messages.IMessage)));
-            pas.Common.CheckTok(i + 1,42);
+            pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.RANGETOK);
             i = $mod.CompileConstExpression(i + 2,{get: function () {
                 return UpperBound;
               }, set: function (v) {
@@ -32391,17 +32333,17 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},133,false,true);
+              }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
             if (!(ExpressionType in pas.Common.IntegerTypes)) pas.Messages.Error$1(i,$ir.ref(15,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayUpperBoundNotInteger,"Array upper bound must be integer","",""]),pas.Messages.IMessage)));
             if (UpperBound < 0) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UpperBoundOfRange);
             if (UpperBound > 65535) pas.Messages.Error$2(i,pas.Messages.TErrorCode.HighLimit);
             NumAllocElements.set(rtl.or(NumAllocElements.get(),rtl.shl((UpperBound - LowerBound) + 1,16)));
           };
         };
-        pas.Common.CheckTok(i + 1,59);
-        pas.Common.CheckTok(i + 2,31);
-        if (pas.Common.Tok[i + 3].Kind in rtl.createSet(139,140)) pas.Messages.Error$1(i,$ir.ref(16,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.InvalidArrayOfPointers,"Only arrays of ^{0} are supported.",pas.Common.InfoAboutToken(pas.Common.Tok[i + 3].Kind),""]),pas.Messages.IMessage)));
-        if (pas.Common.Tok[i + 3].Kind === 30) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
+        pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.OFTOK);
+        if (pas.Common.Tok[i + 3].Kind in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) pas.Messages.Error$1(i,$ir.ref(16,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.InvalidArrayOfPointers,"Only arrays of ^{0} are supported.",pas.Common.InfoAboutToken(pas.Common.Tok[i + 3].Kind),""]),pas.Messages.IMessage)));
+        if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.ARRAYTOK) {
           i = $mod.CompileType(i + 3,{get: function () {
               return NestedDataType;
             }, set: function (v) {
@@ -32432,27 +32374,27 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               NestedAllocElementType = v;
             }});
         };
-        if ((rtl.lw(NumAllocElements.get() >>> 16) * (NumAllocElements.get() & 0xFFFF) * pas.Common.DataSize[NestedDataType - 128]) > (40960 - 1)) pas.Messages.Error$1(i,$ir.ref(17,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArraySizeExceedsRAMSize,"Array [0..{0}, 0..{1} size exceeds the available RAM",pas.SysUtils.IntToStr((NumAllocElements.get() & 0xFFFF) - 1),pas.SysUtils.IntToStr(rtl.lw(NumAllocElements.get() >>> 16) - 1)]),pas.Messages.IMessage)));
-        if (NestedNumAllocElements > 0) if (NestedDataType in rtl.createSet(139,140,146)) {
+        if ((rtl.lw(NumAllocElements.get() >>> 16) * (NumAllocElements.get() & 0xFFFF) * pas.Common.GetDataSize(NestedDataType)) > (40960 - 1)) pas.Messages.Error$1(i,$ir.ref(17,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArraySizeExceedsRAMSize,"Array [0..{0}, 0..{1} size exceeds the available RAM",pas.SysUtils.IntToStr((NumAllocElements.get() & 0xFFFF) - 1),pas.SysUtils.IntToStr(rtl.lw(NumAllocElements.get() >>> 16) - 1)]),pas.Messages.IMessage)));
+        if (NestedNumAllocElements > 0) if (NestedDataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK,pas.Tokens.TTokenKind.ENUMTOK)) {
           if (rtl.lw(NumAllocElements.get() >>> 16) > 0) pas.Messages.Error$1(i,$ir.ref(18,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.MultiDimensionalArrayOfTypeNotSupported,"Multidimensional arrays of element type {0} are not supported.",pas.Common.InfoAboutToken(NestedDataType),""]),pas.Messages.IMessage)));
-          if (NestedDataType in rtl.createSet(139,140)) {
+          if (NestedDataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             pas.Messages.Error$1(i,$ir.ref(19,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.OnlyArrayOfTypeSupported,"Only Array [0..{0}] of ^{1} supported",pas.SysUtils.IntToStr(NumAllocElements.get() - 1),pas.Common.InfoAboutToken(NestedDataType)]),pas.Messages.IMessage)))}
            else pas.Messages.Error$1(i,$ir.ref(20,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ArrayOfTypeNotSupported,"Arrays of type {0} are not supported.",pas.Common.InfoAboutToken(NestedDataType),""]),pas.Messages.IMessage)));
           NumAllocElements.set(rtl.lw(NumAllocElements.get() | rtl.lw(NestedNumAllocElements << 16)));
-        } else if (!(NestedDataType in rtl.createSet(137,139,140)) && (pas.Common.Tok[i].Kind !== 145)) {
-          if ((NestedAllocElementType in rtl.createSet(139,140,147)) && (rtl.lw(NumAllocElements.get() >>> 16) > 0)) pas.Messages.Error$1(i,$ir.ref(21,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.MultiDimensionalArrayOfTypeNotSupported,"Multidimensional arrays of element type {0} are not supported.",pas.Common.InfoAboutToken(NestedAllocElementType),""]),pas.Messages.IMessage)));
+        } else if (!(NestedDataType in rtl.createSet(pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.PCHARTOK)) {
+          if ((NestedAllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK,pas.Tokens.TTokenKind.PROCVARTOK)) && (rtl.lw(NumAllocElements.get() >>> 16) > 0)) pas.Messages.Error$1(i,$ir.ref(21,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.MultiDimensionalArrayOfTypeNotSupported,"Multidimensional arrays of element type {0} are not supported.",pas.Common.InfoAboutToken(NestedAllocElementType),""]),pas.Messages.IMessage)));
           NestedDataType = NestedAllocElementType;
-          if (NestedAllocElementType === 147) {
+          if (NestedAllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) {
             NumAllocElements.set(rtl.lw(NumAllocElements.get() | NestedNumAllocElements))}
-           else if (NestedAllocElementType in rtl.createSet(139,140)) {
+           else if (NestedAllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             NumAllocElements.set(rtl.lw(NestedNumAllocElements | rtl.lw(NumAllocElements.get() << 16)))}
            else NumAllocElements.set(rtl.lw(NumAllocElements.get() | rtl.lw(NestedNumAllocElements << 16)));
         };
         AllocElementType.set(NestedDataType);
-      } else if ((pas.Common.Tok[i].Kind === 170) && (pas.Common.Ident[$mod.GetIdentIndex(pas.Common.Tok[i].Name) - 1].Kind === 2)) {
+      } else if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Ident[$mod.GetIdentIndex(pas.Common.Tok[i].Name) - 1].Kind === pas.Tokens.TTokenKind.TYPETOK)) {
         IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (pas.Common.Ident[IdentIndex - 1].Kind !== 2) pas.Messages.Error$1(i,$ir.ref(22,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected but {0} found",pas.Common.Tok[i].Name,""]),pas.Messages.IMessage)));
+        if (pas.Common.Ident[IdentIndex - 1].Kind !== pas.Tokens.TTokenKind.TYPETOK) pas.Messages.Error$1(i,$ir.ref(22,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected but {0} found",pas.Common.Tok[i].Name,""]),pas.Messages.IMessage)));
         DataType.set(pas.Common.Ident[IdentIndex - 1].DataType);
         NumAllocElements.set(rtl.lw(pas.Common.Ident[IdentIndex - 1].NumAllocElements | rtl.lw(pas.Common.Ident[IdentIndex - 1].NumAllocElements_ << 16)));
         AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
@@ -32466,9 +32408,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             return ExpressionType;
           }, set: function (v) {
             ExpressionType = v;
-          }},133,false,true);
+          }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
         LowerBound = ConstVal;
-        pas.Common.CheckTok(i + 1,42);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.RANGETOK);
         i = $mod.CompileConstExpression(i + 2,{get: function () {
             return ConstVal;
           }, set: function (v) {
@@ -32477,12 +32419,12 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             return ExpressionType;
           }, set: function (v) {
             ExpressionType = v;
-          }},133,false,true);
+          }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
         UpperBound = ConstVal;
         if (UpperBound < LowerBound) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UpperBoundOfRange);
         DataType.set(BoundaryType());
         NumAllocElements.set(0);
-        AllocElementType.set(0);
+        AllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         Result = i;
       };
     } finally {
@@ -32497,11 +32439,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var RightConstValType = 0;
     var Yes = false;
     ConstVal.set(0);
-    ConstValType.set(0);
+    ConstValType.set(pas.Tokens.TTokenKind.UNTYPETOK);
     Result = i;
     i = $impl.CompileSimpleConstExpression(i,ConstVal,ConstValType);
     if (pas.Common.isError) return Result;
-    if (pas.Common.Tok[i + 1].Kind in rtl.createSet(43,44,45,46,47,48)) {
+    if (pas.Common.Tok[i + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LTTOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK)) {
       j = $impl.CompileSimpleConstExpression(i + 2,{get: function () {
           return RightConstVal;
         }, set: function (v) {
@@ -32512,17 +32454,17 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           RightConstValType = v;
         }});
       var $tmp = pas.Common.Tok[i + 1].Kind;
-      if ($tmp === 43) {
+      if ($tmp === pas.Tokens.TTokenKind.EQTOK) {
         Yes = ConstVal.get() === RightConstVal}
-       else if ($tmp === 44) {
+       else if ($tmp === pas.Tokens.TTokenKind.NETOK) {
         Yes = ConstVal.get() !== RightConstVal}
-       else if ($tmp === 45) {
+       else if ($tmp === pas.Tokens.TTokenKind.LTTOK) {
         Yes = ConstVal.get() < RightConstVal}
-       else if ($tmp === 46) {
+       else if ($tmp === pas.Tokens.TTokenKind.LETOK) {
         Yes = ConstVal.get() <= RightConstVal}
-       else if ($tmp === 47) {
+       else if ($tmp === pas.Tokens.TTokenKind.GTTOK) {
         Yes = ConstVal.get() > RightConstVal}
-       else if ($tmp === 48) {
+       else if ($tmp === pas.Tokens.TTokenKind.GETOK) {
         Yes = ConstVal.get() >= RightConstVal}
        else {
         Yes = false;
@@ -32530,26 +32472,26 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       if (Yes) {
         ConstVal.set(0xff)}
        else ConstVal.set(0);
-      ConstValType.set(135);
+      ConstValType.set(pas.Tokens.TTokenKind.BOOLEANTOK);
       i = j;
     };
     Result = i;
     if (ConstValType.get() in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.Pointers)) if (VarType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.Pointers)) {
       var $tmp1 = VarType;
-      if ($tmp1 === 131) {
+      if ($tmp1 === pas.Tokens.TTokenKind.SHORTINTTOK) {
         Yes = (ConstVal.get() < -128) || (ConstVal.get() > 127)}
-       else if ($tmp1 === 132) {
+       else if ($tmp1 === pas.Tokens.TTokenKind.SMALLINTTOK) {
         Yes = (ConstVal.get() < -32768) || (ConstVal.get() > 32767)}
-       else if ($tmp1 === 133) {
+       else if ($tmp1 === pas.Tokens.TTokenKind.INTEGERTOK) {
         Yes = (ConstVal.get() < -2147483648) || (ConstVal.get() > 2147483647)}
        else {
-        Yes = (Math.abs(ConstVal.get()) > 0xFFFFFFFF) || (pas.Common.DataSize[ConstValType.get() - 128] > pas.Common.DataSize[VarType - 128]) || ((ConstValType.get() in pas.Common.SignedOrdinalTypes) && (VarType in pas.Common.UnsignedOrdinalTypes));
+        Yes = (Math.abs(ConstVal.get()) > 0xFFFFFFFF) || (pas.Common.GetDataSize(ConstValType.get()) > pas.Common.GetDataSize(VarType)) || ((ConstValType.get() in pas.Common.SignedOrdinalTypes) && (VarType in pas.Common.UnsignedOrdinalTypes));
       };
       if (Yes) if (Err) {
         pas.Common.isConst = false;
         pas.Common.isError = false;
-        pas.Messages.ErrorRangeCheckError(i,0,ConstVal.get(),VarType);
-      } else if (War) if (VarType !== 135) pas.Messages.WarningForRangeCheckError(i,0,ConstVal.get(),VarType);
+        pas.Messages.ErrorRangeCheckError(i,ConstVal.get(),VarType);
+      } else if (War) if (VarType !== pas.Tokens.TTokenKind.BOOLEANTOK) pas.Messages.WarningForRangeCheckError(i,ConstVal.get(),VarType);
     };
     return Result;
   };
@@ -32562,11 +32504,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var $ir = rtl.createIntfRefs();
     try {
       ConstVal.set(0);
-      ConstValType.set(0);
+      ConstValType.set(pas.Tokens.TTokenKind.UNTILTOK);
       Result = i;
       j = $impl.CompileConstFactor(i,ConstVal,ConstValType);
       if (pas.Common.isError) return Result;
-      while (pas.Common.Tok[j + 1].Kind in rtl.createSet(63,64,66,65,67,68,71)) {
+      while (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.MULTOK,pas.Tokens.TTokenKind.DIVTOK,pas.Tokens.TTokenKind.MODTOK,pas.Tokens.TTokenKind.IDIVTOK,pas.Tokens.TTokenKind.SHLTOK,pas.Tokens.TTokenKind.SHRTOK,pas.Tokens.TTokenKind.ANDTOK)) {
         k = $impl.CompileConstFactor(j + 2,{get: function () {
             return RightConstVal;
           }, set: function (v) {
@@ -32585,20 +32527,20 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           ConstVal.set(pas.Numbers.FromInt64(ConstVal.get()));
           ConstValType.set(RightConstValType);
         };
-        if ((pas.Common.Tok[j + 1].Kind === 64) && (ConstValType.get() in pas.Common.IntegerTypes)) {
+        if ((pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DIVTOK) && (ConstValType.get() in pas.Common.IntegerTypes)) {
           ConstVal.set(pas.Numbers.FromInt64(ConstVal.get()));
-          ConstValType.set(142);
+          ConstValType.set(pas.Tokens.TTokenKind.REALTOK);
         };
-        if ((pas.Common.Tok[j + 1].Kind === 64) && (RightConstValType in pas.Common.IntegerTypes)) {
+        if ((pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DIVTOK) && (RightConstValType in pas.Common.IntegerTypes)) {
           RightConstVal = pas.Numbers.FromInt64(RightConstVal);
-          RightConstValType = 142;
+          RightConstValType = pas.Tokens.TTokenKind.REALTOK;
         };
-        if ((ConstValType.get() in rtl.createSet(143,144)) && (RightConstValType in rtl.createSet(141,142))) RightConstValType = ConstValType.get();
-        if ((RightConstValType in rtl.createSet(143,144)) && (ConstValType.get() in rtl.createSet(141,142))) ConstValType.set(RightConstValType);
+        if ((ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (RightConstValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) RightConstValType = ConstValType.get();
+        if ((RightConstValType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) ConstValType.set(RightConstValType);
         var $tmp = pas.Common.Tok[j + 1].Kind;
-        if ($tmp === 63) {
+        if ($tmp === pas.Tokens.TTokenKind.MULTOK) {
           ConstVal.set(pas.Numbers.Multiply(ConstValType.get(),ConstVal.get(),RightConstVal))}
-         else if ($tmp === 64) {
+         else if ($tmp === pas.Tokens.TTokenKind.DIVTOK) {
           try {
             ConstVal.set(pas.Numbers.Divide(ConstValType.get(),ConstVal.get(),RightConstVal));
           } catch ($e) {
@@ -32608,17 +32550,17 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.DivisionByZero,"Division by zero","",""]),pas.Messages.IMessage)));
             } else throw $e
           };
-        } else if ($tmp === 66) {
+        } else if ($tmp === pas.Tokens.TTokenKind.MODTOK) {
           ConstVal.set(ConstVal.get() % RightConstVal)}
-         else if ($tmp === 65) {
+         else if ($tmp === pas.Tokens.TTokenKind.IDIVTOK) {
           ConstVal.set(rtl.trunc(ConstVal.get() / RightConstVal))}
-         else if ($tmp === 67) {
+         else if ($tmp === pas.Tokens.TTokenKind.SHLTOK) {
           ConstVal.set(rtl.shl(ConstVal.get(),RightConstVal))}
-         else if ($tmp === 68) {
+         else if ($tmp === pas.Tokens.TTokenKind.SHRTOK) {
           ConstVal.set(rtl.shr(ConstVal.get(),RightConstVal))}
-         else if ($tmp === 71) ConstVal.set(rtl.and(ConstVal.get(),RightConstVal));
+         else if ($tmp === pas.Tokens.TTokenKind.ANDTOK) ConstVal.set(rtl.and(ConstVal.get(),RightConstVal));
         ConstValType.set(pas.Common.GetCommonType(j + 1,ConstValType.get(),RightConstValType));
-        if (!(ConstValType.get() in rtl.unionSet(pas.Common.RealTypes,rtl.createSet(135)))) ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
+        if (!(ConstValType.get() in rtl.unionSet(pas.Common.RealTypes,rtl.createSet(pas.Tokens.TTokenKind.BOOLEANTOK)))) ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
         pas.Common.CheckOperator(i,pas.Common.Tok[j + 1].Kind,ConstValType.get(),RightConstValType);
         j = k;
       };
@@ -32634,7 +32576,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var $ir = rtl.createIntfRefs();
     try {
       identIndex = $mod.GetIdentIndex(Name);
-      if ((pas.Common.i > 0) && !(pas.Common.Ident[identIndex - 1].Kind in rtl.createSet(4,5,99,100)) && (pas.Common.Ident[identIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop]) && (pas.Common.Ident[identIndex - 1].isOverload === false) && (pas.Common.Ident[pas.Common.i - 1].UnitIndex === pas.Common.UnitNameIndex)) {
+      if ((pas.Common.i > 0) && !(pas.Common.Ident[identIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && (pas.Common.Ident[identIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop]) && (pas.Common.Ident[identIndex - 1].isOverload === false) && (pas.Common.Ident[pas.Common.i - 1].UnitIndex === pas.Common.UnitNameIndex)) {
         pas.Messages.Error$1(tokenIndex,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierAlreadyDefined,"Identifier " + Name + " is already defined","",""]),pas.Messages.IMessage)))}
        else {
         pas.Common.NumIdent += 1;
@@ -32650,7 +32592,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         pas.Common.Ident[pas.Common.NumIdent - 1].Section = pas.Common.PublicSection;
         pas.Common.Ident[pas.Common.NumIdent - 1].UnitIndex = pas.Common.UnitNameIndex;
         pas.Common.Ident[pas.Common.NumIdent - 1].IdType = IdType;
-        if ((Kind === 3) && (Data !== 0)) {
+        if ((Kind === pas.Tokens.TTokenKind.VARTOK) && (Data !== 0)) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute = true;
           pas.Common.Ident[pas.Common.NumIdent - 1].isInit = true;
         };
@@ -32658,46 +32600,46 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         NumAllocElements = NumAllocElements & 0xFFFF;
         if (Name !== "RESULT") if ((pas.Common.NumIdent > (pas.Common.NumPredefIdent + 1)) && (pas.Common.UnitNameIndex === 1) && (pas.Common.pass === pas.Common.TPass.CODE_GENERATION)) if (!((pas.Common.Ident[pas.Common.NumIdent - 1].Pass in rtl.createSet(pas.Common.TPass.CALL_DETERMINATION,pas.Common.TPass.CODE_GENERATION)) || pas.Common.Ident[pas.Common.NumIdent - 1].IsNotDead)) pas.Messages.NoteForIdentifierNotUsed(tokenIndex,pas.Common.NumIdent);
         var $tmp = Kind;
-        if (($tmp === 4) || ($tmp === 5) || ($tmp === 7) || ($tmp === 99) || ($tmp === 100)) {
+        if (($tmp === pas.Tokens.TTokenKind.PROCEDURETOK) || ($tmp === pas.Tokens.TTokenKind.FUNCTIONTOK) || ($tmp === pas.Tokens.TTokenKind.UNITTOK) || ($tmp === pas.Tokens.TTokenKind.CONSTRUCTORTOK) || ($tmp === pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
           pas.Common.Ident[pas.Common.NumIdent - 1].Value = pas.Common.CodeSize;
-        } else if ($tmp === 3) {
+        } else if ($tmp === pas.Tokens.TTokenKind.VARTOK) {
           if (pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute) {
             pas.Common.Ident[pas.Common.NumIdent - 1].Value = Data - 1}
            else pas.Common.Ident[pas.Common.NumIdent - 1].Value = 32768 + pas.Common.VarDataSize;
-          if (!pas.Common.OutputDisabled) pas.Common.VarDataSize = pas.Common.VarDataSize + pas.Common.DataSize[DataType - 128];
+          if (!pas.Common.OutputDisabled) pas.Common.VarDataSize = pas.Common.VarDataSize + pas.Common.GetDataSize(DataType);
           pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements;
           pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements_ = NumAllocElements_;
           pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = AllocElementType;
           if (!pas.Common.OutputDisabled) {
-            if ((DataType === 136) && (AllocElementType in rtl.createSet(139,140)) && (NumAllocElements_ === 0)) {
-              pas.Common.VarDataSize += pas.Common.DataSize[8]}
-             else if (DataType in rtl.createSet(146)) {
+            if ((DataType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (NumAllocElements_ === 0)) {
+              pas.Common.VarDataSize += pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK)}
+             else if (DataType in rtl.createSet(pas.Tokens.TTokenKind.ENUMTOK)) {
               pas.Common.VarDataSize += 1}
-             else if ((DataType in rtl.createSet(139,140)) && (NumAllocElements > 0)) {
+             else if ((DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (NumAllocElements > 0)) {
               pas.Common.VarDataSize = pas.Common.VarDataSize + 0}
-             else if ((DataType in rtl.createSet(138,148)) && (NumAllocElements > 0)) {
+             else if ((DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)) && (NumAllocElements > 0)) {
               pas.Common.VarDataSize = pas.Common.VarDataSize + 12}
              else {
-              if ((pas.Common.Ident[pas.Common.NumIdent - 1].IdType === 30) && (pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute === false) && ($mod.Elements(pas.Common.NumIdent) === 1)) {}
-              else if ((128 <= AllocElementType) && (AllocElementType <= 149)) {
-                pas.Common.VarDataSize = pas.Common.VarDataSize + (($mod.Elements(pas.Common.NumIdent) * pas.Common.DataSize[AllocElementType - 128]) & 0xFFFFFFFF);
+              if ((pas.Common.Ident[pas.Common.NumIdent - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute === false) && ($mod.Elements(pas.Common.NumIdent) === 1)) {}
+              else if ((116 <= AllocElementType) && (AllocElementType <= 137)) {
+                pas.Common.VarDataSize = pas.Common.VarDataSize + (($mod.Elements(pas.Common.NumIdent) * pas.Common.GetDataSize(AllocElementType)) & 0xFFFFFFFF);
               };
             };
-            if (NumAllocElements > 0) pas.Common.VarDataSize -= pas.Common.DataSize[DataType - 128];
+            if (NumAllocElements > 0) pas.Common.VarDataSize -= pas.Common.GetDataSize(DataType);
           };
-        } else if (($tmp === 1) || ($tmp === 146)) {
+        } else if (($tmp === pas.Tokens.TTokenKind.CONSTTOK) || ($tmp === pas.Tokens.TTokenKind.ENUMTOK)) {
           pas.Common.Ident[pas.Common.NumIdent - 1].Value = Data;
-          if (DataType in rtl.unionSet(pas.Common.Pointers,rtl.createSet(146))) {
+          if (DataType in rtl.unionSet(pas.Common.Pointers,rtl.createSet(pas.Tokens.TTokenKind.ENUMTOK))) {
             pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements;
             pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements_ = NumAllocElements_;
             pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = AllocElementType;
           };
           pas.Common.Ident[pas.Common.NumIdent - 1].isInit = true;
-        } else if ($tmp === 2) {
+        } else if ($tmp === pas.Tokens.TTokenKind.TYPETOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements;
           pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements_ = NumAllocElements_;
           pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = AllocElementType;
-        } else if ($tmp === 6) {
+        } else if ($tmp === pas.Tokens.TTokenKind.LABELTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isInit = false;
         };
       };
@@ -32719,31 +32661,31 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     try {
       VarOfSameType = rtl.arraySetLength(null,pas.Common.TParam,256);
       if (ForwardIdentIndex === 0) {
-        if (pas.Common.Tok[i + 1].Kind !== 170) pas.Messages.Error$1(i + 1,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ReservedWordUserAsIdentifier,"Reserved word used as identifier","",""]),pas.Messages.IMessage)));
-        if (pas.Common.Tok[i].Kind in rtl.createSet(4,99,100)) {
-          $mod.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Common.Tok[i].Kind,0,0,0,0,170);
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) pas.Messages.Error$1(i + 1,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ReservedWordUserAsIdentifier,"Reserved word used as identifier","",""]),pas.Messages.IMessage)));
+        if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
+          $mod.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Common.Tok[i].Kind,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
           IsNestedFunction.set(false);
         } else {
-          $mod.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,5,0,0,0,0,170);
+          $mod.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
           IsNestedFunction.set(true);
         };
         NumVarOfSameType = 0;
-        if ((pas.Common.Tok[i + 2].Kind === 54) && (pas.Common.Tok[i + 3].Kind === 55)) i += 2;
-        if (pas.Common.Tok[i + 2].Kind === 54) {
+        if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OPARTOK) && (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.CPARTOK)) i += 2;
+        if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OPARTOK) {
           i = i + 2;
           do {
             NumVarOfSameType = 0;
             ListPassMethod = pas.Common.TParameterPassingMethod.VALPASSING;
-            if (pas.Common.Tok[i + 1].Kind === 1) {
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) {
               ListPassMethod = pas.Common.TParameterPassingMethod.CONSTPASSING;
               i += 1;
-            } else if (pas.Common.Tok[i + 1].Kind === 3) {
+            } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.VARTOK) {
               ListPassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
               i += 1;
             };
             do {
-              if (pas.Common.Tok[i + 1].Kind !== 170) {
-                pas.Messages.Error$1(i + 1,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FormalParameterNameExpected,"Formal parameter name expected but {0} found.",pas.Common.GetSpelling(i + 1),""]),pas.Messages.IMessage)))}
+              if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+                pas.Messages.Error$1(i + 1,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FormalParameterNameExpected,"Formal parameter name expected but {0} found.",pas.Common.GetTokenSpellingAtIndex(i + 1),""]),pas.Messages.IMessage)))}
                else {
                 for (var $l = 1, $end = NumVarOfSameType; $l <= $end; $l++) {
                   x = $l;
@@ -32753,16 +32695,16 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 VarOfSameType[NumVarOfSameType - 1].Name = pas.Common.Tok[i + 1].Name;
               };
               i = i + 2;
-            } while (!(pas.Common.Tok[i].Kind !== 52));
-            VarType = 0;
+            } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+            VarType = pas.Tokens.TTokenKind.UNTYPETOK;
             NumAllocElements = 0;
-            AllocElementType = 0;
-            if ((ListPassMethod in rtl.createSet(pas.Common.TParameterPassingMethod.CONSTPASSING,pas.Common.TParameterPassingMethod.VARPASSING)) && (pas.Common.Tok[i].Kind !== 60)) {
+            AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
+            if ((ListPassMethod in rtl.createSet(pas.Common.TParameterPassingMethod.CONSTPASSING,pas.Common.TParameterPassingMethod.VARPASSING)) && (pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COLONTOK)) {
               ListPassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
               i -= 1;
             } else {
-              pas.Common.CheckTok(i,60);
-              if (pas.Common.Tok[i + 1].Kind === 56) pas.Messages.Error$1(i + 1,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
+              pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
+              if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) pas.Messages.Error$1(i + 1,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
               i = $mod.CompileType(i + 1,{get: function () {
                   return VarType;
                 }, set: function (v) {
@@ -32776,7 +32718,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 }, set: function (v) {
                   AllocElementType = v;
                 }});
-              if ((VarType === 138) && (ListPassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Messages.Error$1(i,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FileParameterMustBeVAR,"File parameters must be var parameters","",""]),pas.Messages.IMessage)));
+              if ((VarType === pas.Tokens.TTokenKind.FILETOK) && (ListPassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Messages.Error$1(i,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FileParameterMustBeVAR,"File parameters must be var parameters","",""]),pas.Messages.IMessage)));
             };
             for (var $l1 = 1, $end1 = NumVarOfSameType; $l1 <= $end1; $l1++) {
               VarOfSameTypeIndex = $l1;
@@ -32793,16 +32735,16 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               };
             };
             i = i + 1;
-          } while (!(pas.Common.Tok[i].Kind !== 53));
-          pas.Common.CheckTok(i,55);
+          } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.SEMICOLONTOK));
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
           i = i + 1;
         } else i = i + 2;
-        NestedFunctionResultType.set(0);
+        NestedFunctionResultType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         NestedFunctionNumAllocElements.set(0);
-        NestedFunctionAllocElementType.set(0);
+        NestedFunctionAllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         if (IsNestedFunction.get()) {
-          pas.Common.CheckTok(i,60);
-          if (pas.Common.Tok[i + 1].Kind === 30) pas.Messages.Error$1(i + 1,$ir.ref(6,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.ARRAYTOK) pas.Messages.Error$1(i + 1,$ir.ref(6,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
           i = $mod.CompileType(i + 1,{get: function () {
               return VarType;
             }, set: function (v) {
@@ -32825,78 +32767,78 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           pas.Common.Ident[pas.Common.NumIdent - 1].isNestedFunction = true;
           i = i + 1;
         };
-        pas.Common.CheckTok(i,53);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
       };
       isForward.set(false);
       isInt.set(false);
       isInl.set(false);
       isOvr.set(false);
-      while (pas.Common.Tok[i + 1].Kind in rtl.createSet(101,102,103,104,105,106,107,108,95,109)) {
+      while (pas.Common.Tok[i + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.OVERLOADTOK,pas.Tokens.TTokenKind.ASSEMBLERTOK,pas.Tokens.TTokenKind.FORWARDTOK,pas.Tokens.TTokenKind.REGISTERTOK,pas.Tokens.TTokenKind.INTERRUPTTOK,pas.Tokens.TTokenKind.PASCALTOK,pas.Tokens.TTokenKind.STDCALLTOK,pas.Tokens.TTokenKind.INLINETOK,pas.Tokens.TTokenKind.EXTERNALTOK,pas.Tokens.TTokenKind.KEEPTOK)) {
         var $tmp = pas.Common.Tok[i + 1].Kind;
-        if ($tmp === 101) {
+        if ($tmp === pas.Tokens.TTokenKind.OVERLOADTOK) {
           isOvr.set(true);
           pas.Common.Ident[pas.Common.NumIdent - 1].isOverload = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 102) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.ASSEMBLERTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isAsm = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 103) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.FORWARDTOK) {
           if (pas.Common.INTERFACETOK_USE) if (IsNestedFunction.get()) {
             pas.Messages.Error$1(i,$ir.ref(7,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FunctionDirectiveForwardNotAllowedInInterfaceSection,"Function directive 'FORWARD' not allowed in interface section","",""]),pas.Messages.IMessage)))}
            else pas.Messages.Error$1(i,$ir.ref(8,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ProcedureDirectiveForwardNotAllowedInInterfaceSection,"Procedure directive 'FORWARD' not allowed in interface section","",""]),pas.Messages.IMessage)));
           isForward.set(true);
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 104) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.REGISTERTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isRegister = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 107) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.STDCALLTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isStdCall = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 108) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.INLINETOK) {
           isInl.set(true);
           pas.Common.Ident[pas.Common.NumIdent - 1].isInline = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 105) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.INTERRUPTTOK) {
           isInt.set(true);
           pas.Common.Ident[pas.Common.NumIdent - 1].isInterrupt = true;
           pas.Common.Ident[pas.Common.NumIdent - 1].IsNotDead = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 106) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.PASCALTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isRecursion = true;
           pas.Common.Ident[pas.Common.NumIdent - 1].isPascal = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 95) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.EXTERNALTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isExternal = true;
           isForward.set(true);
           i += 1;
           pas.Common.Ident[pas.Common.NumIdent - 1].Alias = "";
           pas.Common.Ident[pas.Common.NumIdent - 1].Libraries = 0;
-          if (pas.Common.Tok[i + 1].Kind === 170) {
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
             pas.Common.Ident[pas.Common.NumIdent - 1].Alias = pas.Common.Tok[i + 1].Name;
-            if (pas.Common.Tok[i + 2].Kind === 174) {
+            if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
               pas.Common.Ident[pas.Common.NumIdent - 1].Libraries = i + 2;
               i += 1;
             };
             i += 1;
-          } else if (pas.Common.Tok[i + 1].Kind === 174) {
+          } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
             pas.Common.Ident[pas.Common.NumIdent - 1].Alias = pas.Common.Ident[pas.Common.NumIdent - 1].Name;
             pas.Common.Ident[pas.Common.NumIdent - 1].Libraries = i + 1;
             i += 1;
           };
-          pas.Common.CheckTok(i + 1,53);
-        } else if ($tmp === 109) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        } else if ($tmp === pas.Tokens.TTokenKind.KEEPTOK) {
           pas.Common.Ident[pas.Common.NumIdent - 1].isKeep = true;
           pas.Common.Ident[pas.Common.NumIdent - 1].IsNotDead = true;
           i += 1;
-          pas.Common.CheckTok(i + 1,53);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
         };
         i += 1;
       };
@@ -32912,11 +32854,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
   };
   this.Elements = function (IdentIndex) {
     var Result = 0;
-    if (pas.Common.Ident[IdentIndex - 1].DataType === 146) {
+    if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) {
       Result = 0}
-     else if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) {
+     else if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
       Result = pas.Common.Ident[IdentIndex - 1].NumAllocElements_}
-     else if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements_ === 0) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(147))) {
+     else if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements_ === 0) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.PROCVARTOK))) {
       Result = pas.Common.Ident[IdentIndex - 1].NumAllocElements}
      else Result = pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.Ident[IdentIndex - 1].NumAllocElements_;
     return Result;
@@ -32976,9 +32918,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     Result = Search(S,pas.Common.UnitNameIndex);
     if ((Result === 0) && (pas.System.Pos(".",S) > 0)) {
       TempIndex = Search(pas.System.Copy(S,1,pas.System.Pos(".",S) - 1),pas.Common.UnitNameIndex);
-      if (TempIndex > 0) if ((pas.Common.Ident[TempIndex - 1].Kind === 7) || (pas.Common.Ident[TempIndex - 1].DataType === 146)) {
+      if (TempIndex > 0) if ((pas.Common.Ident[TempIndex - 1].Kind === pas.Tokens.TTokenKind.UNITTOK) || (pas.Common.Ident[TempIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK)) {
         Result = SearchCurrentUnit(pas.System.Copy(S,pas.System.Pos(".",S) + 1,S.length),pas.Common.Ident[TempIndex - 1].UnitIndex)}
-       else if (pas.Common.Ident[TempIndex - 1].DataType === 140) Result = SearchCurrentUnit(pas.Common.TypeArray[pas.Common.Ident[TempIndex - 1].NumAllocElements - 1].Field[0].Name + pas.System.Copy(S,pas.System.Pos(".",S),S.length),pas.Common.Ident[TempIndex - 1].UnitIndex);
+       else if (pas.Common.Ident[TempIndex - 1].DataType === pas.Tokens.TTokenKind.OBJECTTOK) Result = SearchCurrentUnit(pas.Common.TypeArray[pas.Common.Ident[TempIndex - 1].NumAllocElements - 1].Field[0].Name + pas.System.Copy(S,pas.System.Pos(".",S),S.length),pas.Common.Ident[TempIndex - 1].UnitIndex);
     };
     return Result;
   };
@@ -32987,28 +32929,28 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var IdentIndex = 0;
     IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i + 2].Name);
     var $tmp = ValType;
-    if ($tmp === 146) {
-      Result = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]}
-     else if ($tmp === 139) {
-      if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Tok[i + 3].Kind === 55)) {
-        Result = pas.Common.DataSize[8]}
+    if ($tmp === pas.Tokens.TTokenKind.ENUMTOK) {
+      Result = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)}
+     else if ($tmp === pas.Tokens.TTokenKind.RECORDTOK) {
+      if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.CPARTOK)) {
+        Result = pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK)}
        else Result = $mod.RecordSize(IdentIndex,"")}
-     else if (($tmp === 136) || ($tmp === 137)) {
-      if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 139) {
+     else if (($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
+      if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) {
         if (pas.Common.Ident[IdentIndex - 1].NumAllocElements_ > 0) {
-          if (pas.Common.Tok[i + 3].Kind === 58) {
-            Result = pas.Common.DataSize[8]}
+          if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
+            Result = pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK)}
            else Result = pas.Common.Ident[IdentIndex - 1].NumAllocElements_ * 2;
         } else if (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) {
           Result = $mod.RecordSize(IdentIndex,"")}
-         else Result = pas.Common.DataSize[8];
+         else Result = pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK);
       } else if ($mod.Elements(IdentIndex) > 0) {
-        Result = ($mod.Elements(IdentIndex) * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]) & 0xFFFFFFFF}
-       else Result = pas.Common.DataSize[8];
+        Result = ($mod.Elements(IdentIndex) * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)) & 0xFFFFFFFF}
+       else Result = pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK);
     } else {
-      if (ValType === 0) {
+      if (ValType === pas.Tokens.TTokenKind.UNTYPETOK) {
         Result = 0}
-       else Result = pas.Common.DataSize[ValType - 128];
+       else Result = pas.Common.GetDataSize(ValType);
     };
     return Result;
   };
@@ -33016,17 +32958,12 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var Result = 0;
     var j = 0;
     var FieldType = 0;
-    var AllocElementType = 0;
-    var NumAllocElements = 0;
     Result = 0;
-    FieldType = 0;
     if (i > 0) {
       for (var $l = 1, $end = pas.Common.TypeArray[i - 1].NumFields; $l <= $end; $l++) {
         j = $l;
         FieldType = pas.Common.TypeArray[i - 1].Field[j].DataType;
-        NumAllocElements = pas.Common.TypeArray[i - 1].Field[j].NumAllocElements;
-        AllocElementType = pas.Common.TypeArray[i - 1].Field[j].AllocElementType;
-        if (FieldType !== 139) Result += pas.Common.DataSize[FieldType - 128];
+        if (FieldType !== pas.Tokens.TTokenKind.RECORDTOK) Result += pas.Common.GetDataSize(FieldType);
       };
     };
     return Result;
@@ -33035,7 +32972,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var Result = 0;
     var i = 0;
     var j = 0;
-    var name = "";
+    var Name = "";
     var base = "";
     var FieldType = 0;
     var AllocElementType = 0;
@@ -33043,7 +32980,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     var yes = false;
     i = pas.Common.Ident[IdentIndex - 1].NumAllocElements;
     Result = 0;
-    FieldType = 0;
+    FieldType = pas.Tokens.TTokenKind.UNTYPETOK;
     yes = false;
     if (i > 0) {
       for (var $l = 1, $end = pas.Common.TypeArray[i - 1].NumFields; $l <= $end; $l++) {
@@ -33051,25 +32988,25 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
         FieldType = pas.Common.TypeArray[i - 1].Field[j].DataType;
         NumAllocElements = pas.Common.TypeArray[i - 1].Field[j].NumAllocElements;
         AllocElementType = pas.Common.TypeArray[i - 1].Field[j].AllocElementType;
-        if (AllocElementType in rtl.createSet(149,147)) {
-          AllocElementType = 136;
+        if (AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.FORWARDTYPE,pas.Tokens.TTokenKind.PROCVARTOK)) {
+          AllocElementType = pas.Tokens.TTokenKind.POINTERTOK;
           NumAllocElements = 0;
         };
         if (pas.Common.TypeArray[i - 1].Field[j].Name === field) {
           yes = true;
           break;
         };
-        if (FieldType !== 139) if ((FieldType in pas.Common.Pointers) && (NumAllocElements > 0)) {
-          Result += NumAllocElements * pas.Common.DataSize[AllocElementType - 128]}
-         else Result += pas.Common.DataSize[FieldType - 128];
+        if (FieldType !== pas.Tokens.TTokenKind.RECORDTOK) if ((FieldType in pas.Common.Pointers) && (NumAllocElements > 0)) {
+          Result += NumAllocElements * pas.Common.GetDataSize(AllocElementType)}
+         else Result += pas.Common.GetDataSize(FieldType);
       };
     } else {
-      name = pas.Common.Ident[IdentIndex - 1].Name;
-      base = pas.System.Copy(name,1,pas.System.Pos(".",name) - 1);
+      Name = pas.Common.Ident[IdentIndex - 1].Name;
+      base = pas.System.Copy(Name,1,pas.System.Pos(".",Name) - 1);
       IdentIndex = $mod.GetIdentIndex(base);
       for (var $l1 = 1, $end1 = pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].NumFields; $l1 <= $end1; $l1++) {
         i = $l1;
-        if (pas.System.Pos(name,base + "." + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].Name) > 0) if (pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].DataType !== 139) {
+        if (pas.System.Pos(Name,base + "." + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].Name) > 0) if (pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].DataType !== pas.Tokens.TTokenKind.RECORDTOK) {
           FieldType = pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].DataType;
           NumAllocElements = pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].NumAllocElements;
           AllocElementType = pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[i].AllocElementType;
@@ -33077,9 +33014,9 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             yes = true;
             break;
           };
-          if (FieldType !== 139) if ((FieldType in pas.Common.Pointers) && (NumAllocElements > 0)) {
-            Result += NumAllocElements * pas.Common.DataSize[AllocElementType - 128]}
-           else Result += pas.Common.DataSize[FieldType - 128];
+          if (FieldType !== pas.Tokens.TTokenKind.RECORDTOK) if ((FieldType in pas.Common.Pointers) && (NumAllocElements > 0)) {
+            Result += NumAllocElements * pas.Common.GetDataSize(AllocElementType)}
+           else Result += pas.Common.GetDataSize(FieldType);
         };
       };
     };
@@ -33094,29 +33031,29 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       pas.Utilities.RaiseHaltException(pas.Utilities.THaltException.COMPILING_ABORTED);
     };
     var $tmp = ConstValType;
-    if (($tmp === 131) || ($tmp === 128) || ($tmp === 134) || ($tmp === 135)) {
+    if (($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp === pas.Tokens.TTokenKind.BYTETOK) || ($tmp === pas.Tokens.TTokenKind.CHARTOK) || ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK)) {
       pas.Common.DataSegment[ConstDataSize] = ConstVal & 255}
-     else if (($tmp === 132) || ($tmp === 129) || ($tmp === 141) || ($tmp === 136) || ($tmp === 137) || ($tmp === 145)) {
+     else if (($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp === pas.Tokens.TTokenKind.WORDTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) || ($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || ($tmp === pas.Tokens.TTokenKind.PCHARTOK)) {
       pas.Common.DataSegment[ConstDataSize] = ConstVal & 255;
       pas.Common.DataSegment[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
-    } else if ($tmp === 160) {
+    } else if ($tmp === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
       pas.Common.DataSegment[ConstDataSize] = (ConstVal & 255) | 0x8000;
       pas.Common.DataSegment[ConstDataSize + 1] = (Math.floor(ConstVal / 256) & 255) | 0x4000;
-    } else if ($tmp === 161) {
+    } else if ($tmp === pas.Tokens.TTokenKind.CODEORIGINOFFSET) {
       pas.Common.DataSegment[ConstDataSize] = (ConstVal & 255) | 0x2000;
       pas.Common.DataSegment[ConstDataSize + 1] = (Math.floor(ConstVal / 256) & 255) | 0x1000;
-    } else if (($tmp === 133) || ($tmp === 130) || ($tmp === 142)) {
+    } else if (($tmp === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) || ($tmp === pas.Tokens.TTokenKind.REALTOK)) {
       pas.Common.DataSegment[ConstDataSize] = ConstVal & 255;
       pas.Common.DataSegment[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
       pas.Common.DataSegment[ConstDataSize + 2] = Math.floor(ConstVal / 65536) & 255;
       pas.Common.DataSegment[ConstDataSize + 3] = Math.floor(ConstVal / 16777216) & 255;
-    } else if ($tmp === 143) {
+    } else if ($tmp === pas.Tokens.TTokenKind.SINGLETOK) {
       ConstVal = pas.Numbers.CastToSingle(ConstVal);
       pas.Common.DataSegment[ConstDataSize] = ConstVal & 255;
       pas.Common.DataSegment[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
       pas.Common.DataSegment[ConstDataSize + 2] = Math.floor(ConstVal / 65536) & 255;
       pas.Common.DataSegment[ConstDataSize + 3] = Math.floor(ConstVal / 16777216) & 255;
-    } else if ($tmp === 144) {
+    } else if ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK) {
       ConstVal = pas.Numbers.CastToHalfSingle(ConstVal);
       pas.Common.DataSegment[ConstDataSize] = ConstVal & 255;
       pas.Common.DataSegment[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
@@ -33133,64 +33070,64 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       var ArrayIndex = 0;
       function GetStaticValue(x) {
         var Result = 0;
-        Result = pas.Common.StaticStringData[(pas.Common.Ident[IdentIndex - 1].Value - 256 - pas.Common.CODEORIGIN_BASE) + (ArrayIndex * pas.Common.DataSize[ConstValType.get() - 128]) + x];
+        Result = pas.Common.StaticStringData[(pas.Common.Ident[IdentIndex - 1].Value - 256 - pas.Common.CODEORIGIN_BASE) + (ArrayIndex * pas.Common.GetDataSize(ConstValType.get())) + x];
         return Result;
       };
       var $ir = rtl.createIntfRefs();
       try {
         ConstVal.set(0);
-        ConstValType.set(0);
+        ConstValType.set(pas.Tokens.TTokenKind.UNTYPETOK);
         Result = i;
         j = 0;
         var $tmp = pas.Common.Tok[i].Kind;
-        if ($tmp === 86) {
-          pas.Common.CheckTok(i + 1,54);
+        if ($tmp === pas.Tokens.TTokenKind.LOWTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
           if (pas.Common.Tok[i + 2].Kind in pas.Common.AllTypes) {
             ConstValType.set(pas.Common.Tok[i + 2].Kind);
             i += 2;
           } else {
-            i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+            i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
             if (pas.Common.isError) return Result;
           };
           if (ConstValType.get() in pas.Common.Pointers) {
             ConstVal.set(0)}
            else ConstVal.set(pas.Common.LowBound(i,ConstValType.get()));
           ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
-          pas.Common.CheckTok(i + 1,55);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           Result = i + 1;
-        } else if ($tmp === 85) {
-          pas.Common.CheckTok(i + 1,54);
+        } else if ($tmp === pas.Tokens.TTokenKind.HIGHTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
           if (pas.Common.Tok[i + 2].Kind in pas.Common.AllTypes) {
             ConstValType.set(pas.Common.Tok[i + 2].Kind);
             i += 2;
           } else {
-            i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+            i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
             if (pas.Common.isError) return Result;
           };
           if (ConstValType.get() in pas.Common.Pointers) {
             IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i].Name);
-            if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) {
+            if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
               ConstVal.set(pas.Common.Ident[IdentIndex - 1].NumAllocElements_ - 1)}
              else if (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) {
               ConstVal.set(pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1)}
              else ConstVal.set(0);
           } else ConstVal.set(pas.Common.HighBound(i,ConstValType.get()));
           ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
-          pas.Common.CheckTok(i + 1,55);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           Result = i + 1;
-        } else if ($tmp === 84) {
-          pas.Common.CheckTok(i + 1,54);
+        } else if ($tmp === pas.Tokens.TTokenKind.LENGTHTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
           ConstVal.set(0);
-          if (pas.Common.Tok[i + 2].Kind === 170) {
+          if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
             IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i + 2].Name);
             if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-            if (pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(3,1)) {
-              if ((pas.Common.Ident[IdentIndex - 1].DataType === 137) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) {
-                if ((pas.Common.Ident[IdentIndex - 1].DataType === 137) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 134)) {
+            if (pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.CONSTTOK)) {
+              if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) {
+                if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
                   pas.Common.isError = true;
                   return Result;
                 } else {
-                  if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+                  if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
                     ConstVal.set(pas.Common.Ident[IdentIndex - 1].NumAllocElements_)}
                    else ConstVal.set(pas.Common.Ident[IdentIndex - 1].NumAllocElements);
                   ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
@@ -33199,129 +33136,129 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
             } else pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
             i += 2;
           } else pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
-          pas.Common.CheckTok(i + 1,55);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           Result = i + 1;
-        } else if ($tmp === 83) {
-          pas.Common.CheckTok(i + 1,54);
-          if (pas.Common.Tok[i + 2].Kind in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(136))) {
-            ConstVal.set(pas.Common.DataSize[pas.Common.Tok[i + 2].Kind - 128]);
-            ConstValType.set(128);
+        } else if ($tmp === pas.Tokens.TTokenKind.SIZEOFTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          if (pas.Common.Tok[i + 2].Kind in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK))) {
+            ConstVal.set(pas.Common.GetDataSize(pas.Common.Tok[i + 2].Kind));
+            ConstValType.set(pas.Tokens.TTokenKind.BYTETOK);
             j = i + 2;
           } else {
-            if (pas.Common.Tok[i + 2].Kind !== 170) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
-            j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+            if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
+            j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
             if (pas.Common.isError) return Result;
             ConstVal.set($mod.GetSizeOf(i,ConstValType.get()));
             ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           };
-          pas.Common.CheckTok(j + 1,55);
+          pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
           Result = j + 1;
-        } else if ($tmp === 49) {
-          pas.Common.CheckTok(i + 1,54);
-          pas.Common.OldConstValType = 0;
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+        } else if ($tmp === pas.Tokens.TTokenKind.LOTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          pas.Common.OldConstValType = pas.Tokens.TTokenKind.UNTYPETOK;
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          if (pas.Common.OldConstValType in rtl.createSet(160,161)) pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.InvalidVariableAddress,"Can't take the address of variable","",""]),pas.Messages.IMessage)));
-          pas.Common.GetCommonConstType(i,133,ConstValType.get(),true);
-          pas.Common.CheckTok(i + 1,55);
+          if (pas.Common.OldConstValType in rtl.createSet(pas.Tokens.TTokenKind.DATAORIGINOFFSET,pas.Tokens.TTokenKind.CODEORIGINOFFSET)) pas.Messages.Error$1(i,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.InvalidVariableAddress,"Can't take the address of variable","",""]),pas.Messages.IMessage)));
+          pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.INTEGERTOK,ConstValType.get(),true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           var $tmp1 = ConstValType.get();
-          if (($tmp1 === 133) || ($tmp1 === 130)) {
+          if (($tmp1 === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp1 === pas.Tokens.TTokenKind.CARDINALTOK)) {
             ConstVal.set(ConstVal.get() & 0xFFFF)}
-           else if (($tmp1 === 132) || ($tmp1 === 129)) {
+           else if (($tmp1 === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp1 === pas.Tokens.TTokenKind.WORDTOK)) {
             ConstVal.set(ConstVal.get() & 0xFF)}
-           else if (($tmp1 === 131) || ($tmp1 === 128)) ConstVal.set(ConstVal.get() & 0xF);
+           else if (($tmp1 === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp1 === pas.Tokens.TTokenKind.BYTETOK)) ConstVal.set(ConstVal.get() & 0xF);
           ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           Result = i + 1;
-        } else if ($tmp === 50) {
-          pas.Common.CheckTok(i + 1,54);
-          pas.Common.OldConstValType = 0;
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+        } else if ($tmp === pas.Tokens.TTokenKind.HITOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          pas.Common.OldConstValType = pas.Tokens.TTokenKind.UNTYPETOK;
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          if (pas.Common.OldConstValType in rtl.createSet(160,161)) pas.Messages.Error$1(i,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.InvalidVariableAddress,"Can't take the address of variable","",""]),pas.Messages.IMessage)));
-          pas.Common.GetCommonConstType(i,133,ConstValType.get(),true);
-          pas.Common.CheckTok(i + 1,55);
+          if (pas.Common.OldConstValType in rtl.createSet(pas.Tokens.TTokenKind.DATAORIGINOFFSET,pas.Tokens.TTokenKind.CODEORIGINOFFSET)) pas.Messages.Error$1(i,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.InvalidVariableAddress,"Can't take the address of variable","",""]),pas.Messages.IMessage)));
+          pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.INTEGERTOK,ConstValType.get(),true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           var $tmp2 = ConstValType.get();
-          if (($tmp2 === 133) || ($tmp2 === 130)) {
+          if (($tmp2 === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp2 === pas.Tokens.TTokenKind.CARDINALTOK)) {
             ConstVal.set(Math.floor(ConstVal.get() / 65536))}
-           else if (($tmp2 === 132) || ($tmp2 === 129)) {
+           else if (($tmp2 === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp2 === pas.Tokens.TTokenKind.WORDTOK)) {
             ConstVal.set(Math.floor(ConstVal.get() / 256))}
-           else if (($tmp2 === 131) || ($tmp2 === 128)) ConstVal.set(Math.floor(ConstVal.get() / 16));
+           else if (($tmp2 === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp2 === pas.Tokens.TTokenKind.BYTETOK)) ConstVal.set(Math.floor(ConstVal.get() / 16));
           ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           Result = i + 1;
-        } else if (($tmp === 87) || ($tmp === 88)) {
+        } else if (($tmp === pas.Tokens.TTokenKind.INTTOK) || ($tmp === pas.Tokens.TTokenKind.FRACTOK)) {
           Kind = pas.Common.Tok[i].Kind;
-          pas.Common.CheckTok(i + 1,54);
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          if (!(ConstValType.get() in pas.Common.RealTypes)) pas.Messages.ErrorIncompatibleTypes(i,ConstValType.get(),142,false);
-          pas.Common.CheckTok(i + 1,55);
+          if (!(ConstValType.get() in pas.Common.RealTypes)) pas.Messages.ErrorIncompatibleTypes(i,ConstValType.get(),pas.Tokens.TTokenKind.REALTOK,false);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           var $tmp3 = Kind;
-          if ($tmp3 === 87) {
+          if ($tmp3 === pas.Tokens.TTokenKind.INTTOK) {
             ConstVal.set(pas.Numbers.Trunc(ConstValType.get(),ConstVal.get()))}
-           else if ($tmp3 === 88) ConstVal.set(pas.Numbers.Frac(ConstValType.get(),ConstVal.get()));
+           else if ($tmp3 === pas.Tokens.TTokenKind.FRACTOK) ConstVal.set(pas.Numbers.Frac(ConstValType.get(),ConstVal.get()));
           Result = i + 1;
-        } else if (($tmp === 90) || ($tmp === 89)) {
+        } else if (($tmp === pas.Tokens.TTokenKind.ROUNDTOK) || ($tmp === pas.Tokens.TTokenKind.TRUNCTOK)) {
           Kind = pas.Common.Tok[i].Kind;
-          pas.Common.CheckTok(i + 1,54);
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          pas.Common.GetCommonConstType(i,142,ConstValType.get(),true);
-          pas.Common.CheckTok(i + 1,55);
+          pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.REALTOK,ConstValType.get(),true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           ConstVal.set(ConstVal.get() & 0xFFFFFFFF);
           var $tmp4 = Kind;
-          if ($tmp4 === 90) {
+          if ($tmp4 === pas.Tokens.TTokenKind.ROUNDTOK) {
             if (ConstVal.get() < 0) {
               ConstVal.set(-((Math.abs(ConstVal.get()) >>> 8) + (((Math.abs(ConstVal.get()) & 0xff) > 127) + 0)))}
              else ConstVal.set(Math.floor(ConstVal.get() / 256) + (((Math.abs(ConstVal.get()) & 0xff) > 127) + 0))}
-           else if ($tmp4 === 89) if (ConstVal.get() < 0) {
+           else if ($tmp4 === pas.Tokens.TTokenKind.TRUNCTOK) if (ConstVal.get() < 0) {
             ConstVal.set(-(Math.abs(ConstVal.get()) >>> 8))}
            else ConstVal.set(Math.floor(ConstVal.get() / 256));
           ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           Result = i + 1;
-        } else if ($tmp === 91) {
-          pas.Common.CheckTok(i + 1,54);
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+        } else if ($tmp === pas.Tokens.TTokenKind.ODDTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          pas.Common.GetCommonConstType(i,130,ConstValType.get(),true);
-          pas.Common.CheckTok(i + 1,55);
+          pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.CARDINALTOK,ConstValType.get(),true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           ConstVal.set(pas.System.Odd(ConstVal.get()) + 0);
-          ConstValType.set(135);
+          ConstValType.set(pas.Tokens.TTokenKind.BOOLEANTOK);
           Result = i + 1;
-        } else if ($tmp === 36) {
-          pas.Common.CheckTok(i + 1,54);
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,128,false,true);
+        } else if ($tmp === pas.Tokens.TTokenKind.CHRTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.BYTETOK,false,true);
           if (pas.Common.isError) return Result;
-          pas.Common.GetCommonConstType(i,133,ConstValType.get(),true);
-          pas.Common.CheckTok(i + 1,55);
-          ConstValType.set(134);
+          pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.INTEGERTOK,ConstValType.get(),true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+          ConstValType.set(pas.Tokens.TTokenKind.CHARTOK);
           Result = i + 1;
-        } else if ($tmp === 35) {
-          pas.Common.CheckTok(i + 1,54);
+        } else if ($tmp === pas.Tokens.TTokenKind.ORDTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
           j = i + 2;
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,128,false,true);
-          if (!(ConstValType.get() in rtl.unionSet(pas.Common.OrdinalTypes,rtl.createSet(146)))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.BYTETOK,false,true);
+          if (!(ConstValType.get() in rtl.unionSet(pas.Common.OrdinalTypes,rtl.createSet(pas.Tokens.TTokenKind.ENUMTOK)))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
           if (pas.Common.isError) return Result;
-          pas.Common.CheckTok(i + 1,55);
-          if (ConstValType.get() in rtl.createSet(134,135,146)) ConstValType.set(128);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+          if (ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BOOLEANTOK,pas.Tokens.TTokenKind.ENUMTOK)) ConstValType.set(pas.Tokens.TTokenKind.BYTETOK);
           Result = i + 1;
-        } else if (($tmp === 111) || ($tmp === 110)) {
+        } else if (($tmp === pas.Tokens.TTokenKind.PREDTOK) || ($tmp === pas.Tokens.TTokenKind.SUCCTOK)) {
           Kind = pas.Common.Tok[i].Kind;
-          pas.Common.CheckTok(i + 1,54);
-          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          i = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (!(ConstValType.get() in pas.Common.OrdinalTypes)) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
           if (pas.Common.isError) return Result;
-          pas.Common.CheckTok(i + 1,55);
-          if (Kind === 111) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+          if (Kind === pas.Tokens.TTokenKind.PREDTOK) {
             ConstVal.set(ConstVal.get() - 1)}
            else ConstVal.set(ConstVal.get() + 1);
-          if (!(ConstValType.get() in rtl.createSet(134,135))) ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
+          if (!(ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BOOLEANTOK))) ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           Result = i + 1;
-        } else if ($tmp === 170) {
+        } else if ($tmp === pas.Tokens.TTokenKind.IDENTTOK) {
           IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i].Name);
           if (IdentIndex > 0) {
-            if ((pas.Common.Ident[IdentIndex - 1].Kind === 2) && (pas.Common.Tok[i + 1].Kind === 54)) {
-              pas.Common.CheckTok(i + 1,54);
-              j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+            if ((pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.TYPETOK) && (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK)) {
+              pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+              j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
               if (pas.Common.isError) return Result;
               if (!(ConstValType.get() in pas.Common.AllTypes)) pas.Messages.Error$2(i,pas.Messages.TErrorCode.TypeMismatch);
               if ((pas.Common.Ident[$mod.GetIdentIndex(pas.Common.Tok[i].Name) - 1].DataType in pas.Common.RealTypes) && (ConstValType.get() in pas.Common.RealTypes)) {}
@@ -33329,11 +33266,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 pas.Messages.Error$1(j,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ConstValType.get()) + '" to "' + pas.Common.Tok[i].Name + '"',"",""]),pas.Messages.IMessage)));
               };
               ConstValType.set(pas.Common.Ident[$mod.GetIdentIndex(pas.Common.Tok[i].Name) - 1].DataType);
-              pas.Common.CheckTok(j + 1,55);
+              pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
               i = j + 1;
-            } else if (!(pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(1,2,146))) {
+            } else if (!(pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.TYPETOK,pas.Tokens.TTokenKind.ENUMTOK))) {
               pas.Messages.Error$1(i,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ConstantExpected,"Constant expected but {0} found",pas.Common.Ident[IdentIndex - 1].Name,""]),pas.Messages.IMessage)));
-            } else if (pas.Common.Tok[i + 1].Kind === 58) {
+            } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
               if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) {
                 pas.Messages.ErrorForIdentifier(i,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex)}
                else {
@@ -33345,57 +33282,57 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                     return ArrayIndexType;
                   }, set: function (v) {
                     ArrayIndexType = v;
-                  }},133,false,true);
+                  }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
                 if (pas.Common.isError) return Result;
-                if ((ArrayIndex < 0) || (ArrayIndex > ((pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1) + ((pas.Common.Ident[IdentIndex - 1].DataType === 137) + 0)))) {
+                if ((ArrayIndex < 0) || (ArrayIndex > ((pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1) + ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) + 0)))) {
                   pas.Common.isConst = false;
                   pas.Messages.Error$2(i,pas.Messages.TErrorCode.SubrangeBounds);
                 };
-                pas.Common.CheckTok(j + 1,59);
-                if (pas.Common.Tok[j + 2].Kind === 58) {
+                pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
+                if (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
                   pas.Common.isError = true;
                   return Result;
                 };
                 ConstValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                var $tmp5 = pas.Common.DataSize[ConstValType.get() - 128];
+                var $tmp5 = pas.Common.GetDataSize(ConstValType.get());
                 if ($tmp5 === 1) {
-                  ConstVal.set(GetStaticValue(0 + ((pas.Common.Ident[IdentIndex - 1].IdType === 145) + 0)))}
+                  ConstVal.set(GetStaticValue(0 + ((pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.PCHARTOK) + 0)))}
                  else if ($tmp5 === 2) {
                   ConstVal.set(GetStaticValue(0) + rtl.shl(GetStaticValue(1),8))}
                  else if ($tmp5 === 4) ConstVal.set(GetStaticValue(0) + rtl.shl(GetStaticValue(1),8) + rtl.shl(GetStaticValue(2),16) + rtl.shl(GetStaticValue(3),24));
-                if (ConstValType.get() in rtl.createSet(144,143)) ConstVal.set(rtl.shl(ConstVal.get(),32));
+                if (ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)) ConstVal.set(rtl.shl(ConstVal.get(),32));
                 i = j + 1;
               }}
              else {
               ConstValType.set(pas.Common.Ident[IdentIndex - 1].DataType);
-              if ((ConstValType.get() in pas.Common.Pointers) || (pas.Common.Ident[IdentIndex - 1].DataType === 137)) {
+              if ((ConstValType.get() in pas.Common.Pointers) || (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
                 ConstVal.set(pas.Common.Ident[IdentIndex - 1].Value - 256)}
                else ConstVal.set(pas.Common.Ident[IdentIndex - 1].Value);
-              if (ConstValType.get() === 146) {
-                pas.Common.CheckTok(i + 1,54);
-                j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+              if (ConstValType.get() === pas.Tokens.TTokenKind.ENUMTOK) {
+                pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+                j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
                 if (pas.Common.isError) return Result;
-                pas.Common.CheckTok(j + 1,55);
+                pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
                 ConstValType.set(pas.Common.Tok[i].Kind);
                 i = j + 1;
               };
             }}
            else pas.Messages.Error$2(i,pas.Messages.TErrorCode.UnknownIdentifier);
           Result = i;
-        } else if ($tmp === 57) {
-          if (pas.Common.Tok[i + 1].Kind !== 170) {
+        } else if ($tmp === pas.Tokens.TTokenKind.ADDRESSTOK) {
+          if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
             pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IdentifierExpected)}
            else {
             IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i + 1].Name);
             if (IdentIndex > 0) {
               var $tmp6 = pas.Common.Ident[IdentIndex - 1].Kind;
-              if ($tmp6 === 1) {
+              if ($tmp6 === pas.Tokens.TTokenKind.CONSTTOK) {
                 if (!((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) {
                   pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.CantAdrConstantExp)}
                  else ConstVal.set(pas.Common.Ident[IdentIndex - 1].Value - 256)}
-               else if ($tmp6 === 3) {
+               else if ($tmp6 === pas.Tokens.TTokenKind.VARTOK) {
                 if (pas.Common.Ident[IdentIndex - 1].isAbsolute) {
-                  if ((((pas.Common.Ident[IdentIndex - 1].Value & 0xff) === 0) && ((Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255) in rtl.createSet(null,1,127))) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(null,0,1)))) {
+                  if ((((pas.Common.Ident[IdentIndex - 1].Value & 0xff) === 0) && ((Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255) in rtl.createSet(null,1,127))) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(null,0,1)))) {
                     pas.Common.isError = true;
                     return 0;
                   } else {
@@ -33411,8 +33348,8 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                     return Result;
                   };
                   ConstVal.set(pas.Common.Ident[IdentIndex - 1].Value - 32768);
-                  ConstValType.set(160);
-                  if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Tok[i + 2].Kind === 58)) {
+                  ConstValType.set(pas.Tokens.TTokenKind.DATAORIGINOFFSET);
+                  if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK)) {
                     j = $mod.CompileConstExpression(i + 3,{get: function () {
                         return ArrayIndex;
                       }, set: function (v) {
@@ -33421,11 +33358,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                         return ArrayIndexType;
                       }, set: function (v) {
                         ArrayIndexType = v;
-                      }},133,false,true);
+                      }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
                     if (pas.Common.isError) return Result;
                     pas.Common.CheckArrayIndex(j,IdentIndex,ArrayIndex,ArrayIndexType);
-                    if (pas.Common.Tok[j + 1].Kind === 52) {
-                      ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128] * pas.Common.Ident[IdentIndex - 1].NumAllocElements_));
+                    if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
+                      ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType) * pas.Common.Ident[IdentIndex - 1].NumAllocElements_));
                       j = $mod.CompileConstExpression(j + 2,{get: function () {
                           return ArrayIndex;
                         }, set: function (v) {
@@ -33434,13 +33371,13 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                           return ArrayIndexType;
                         }, set: function (v) {
                           ArrayIndexType = v;
-                        }},133,false,true);
+                        }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
                       if (pas.Common.isError) return Result;
                       pas.Common.CheckArrayIndex(j,IdentIndex,ArrayIndex,ArrayIndexType);
-                      ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]));
-                    } else ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]));
+                      ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)));
+                    } else ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)));
                     i = j;
-                    pas.Common.CheckTok(i + 1,59);
+                    pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
                   };
                   Result = i + 1;
                   return Result;
@@ -33448,7 +33385,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                else {
                 pas.Messages.Error$1(i + 1,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.CantTakeAddressOfIdentifier,"Can't take the address of " + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].Kind),"",""]),pas.Messages.IMessage)));
               };
-              if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Tok[i + 2].Kind === 58)) {
+              if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK)) {
                 j = $mod.CompileConstExpression(i + 3,{get: function () {
                     return ArrayIndex;
                   }, set: function (v) {
@@ -33457,11 +33394,11 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                     return ArrayIndexType;
                   }, set: function (v) {
                     ArrayIndexType = v;
-                  }},133,false,true);
+                  }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
                 if (pas.Common.isError) return Result;
                 pas.Common.CheckArrayIndex(j,IdentIndex,ArrayIndex,ArrayIndexType);
-                if (pas.Common.Tok[j + 1].Kind === 52) {
-                  ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128] * pas.Common.Ident[IdentIndex - 1].NumAllocElements_));
+                if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
+                  ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType) * pas.Common.Ident[IdentIndex - 1].NumAllocElements_));
                   j = $mod.CompileConstExpression(j + 2,{get: function () {
                       return ArrayIndex;
                     }, set: function (v) {
@@ -33470,69 +33407,69 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                       return ArrayIndexType;
                     }, set: function (v) {
                       ArrayIndexType = v;
-                    }},133,false,true);
+                    }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
                   if (pas.Common.isError) return Result;
                   pas.Common.CheckArrayIndex(j,IdentIndex,ArrayIndex,ArrayIndexType);
-                  ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]));
-                } else ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]));
+                  ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)));
+                } else ConstVal.set(ConstVal.get() + (ArrayIndex * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)));
                 i = j;
-                pas.Common.CheckTok(i + 1,59);
+                pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
               };
-              ConstValType.set(136);
+              ConstValType.set(pas.Tokens.TTokenKind.POINTERTOK);
             } else pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.UnknownIdentifier);
             Result = i + 1;
           }}
-         else if ($tmp === 171) {
+         else if ($tmp === pas.Tokens.TTokenKind.INTNUMBERTOK) {
           ConstVal.set(pas.Common.Tok[i].Value);
           ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           Result = i;
-        } else if ($tmp === 172) {
+        } else if ($tmp === pas.Tokens.TTokenKind.FRACNUMBERTOK) {
           ConstVal.set(pas.Numbers.FromSingle(pas.Common.Tok[i].FracValue));
-          ConstValType.set(142);
+          ConstValType.set(pas.Tokens.TTokenKind.REALTOK);
           Result = i;
-        } else if ($tmp === 174) {
+        } else if ($tmp === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
           ConstVal.set((pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE);
-          ConstValType.set(137);
+          ConstValType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK);
           Result = i;
-        } else if ($tmp === 173) {
+        } else if ($tmp === pas.Tokens.TTokenKind.CHARLITERALTOK) {
           ConstVal.set(pas.Common.Tok[i].Value);
-          ConstValType.set(134);
+          ConstValType.set(pas.Tokens.TTokenKind.CHARTOK);
           Result = i;
-        } else if ($tmp === 54) {
-          j = $mod.CompileConstExpression(i + 1,ConstVal,ConstValType,133,false,true);
+        } else if ($tmp === pas.Tokens.TTokenKind.OPARTOK) {
+          j = $mod.CompileConstExpression(i + 1,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          pas.Common.CheckTok(j + 1,55);
+          pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
           Result = j + 1;
-        } else if ($tmp === 72) {
+        } else if ($tmp === pas.Tokens.TTokenKind.NOTTOK) {
           Result = $impl.CompileConstFactor(i + 1,ConstVal,ConstValType);
           if (pas.Common.isError) return Result;
-          if (ConstValType.get() === 135) {
+          if (ConstValType.get() === pas.Tokens.TTokenKind.BOOLEANTOK) {
             ConstVal.set(!(ConstVal.get() !== 0) + 0)}
            else {
             ConstVal.set(~ConstVal.get());
             ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
           };
-        } else if (($tmp === 141) || ($tmp === 142) || ($tmp === 143) || ($tmp === 144)) {
-          pas.Common.CheckTok(i + 1,54);
-          j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+        } else if (($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) || ($tmp === pas.Tokens.TTokenKind.REALTOK) || ($tmp === pas.Tokens.TTokenKind.SINGLETOK) || ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK)) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
           if (!(ConstValType.get() in pas.Common.RealTypes)) ConstVal.set(pas.Numbers.FromInt64(ConstVal.get()));
-          pas.Common.CheckTok(j + 1,55);
+          pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
           ConstValType.set(pas.Common.Tok[i].Kind);
           Result = j + 1;
-        } else if (($tmp === 133) || ($tmp === 130) || ($tmp === 132) || ($tmp === 129) || ($tmp === 134) || ($tmp === 145) || ($tmp === 131) || ($tmp === 128) || ($tmp === 135) || ($tmp === 136) || ($tmp === 137)) {
-          pas.Common.CheckTok(i + 1,54);
-          if ((pas.Common.Tok[i + 2].Kind === 170) && (pas.Common.Ident[$mod.GetIdentIndex(pas.Common.Tok[i + 2].Name) - 1].Kind === 5)) {
+        } else if (($tmp === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) || ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp === pas.Tokens.TTokenKind.WORDTOK) || ($tmp === pas.Tokens.TTokenKind.CHARTOK) || ($tmp === pas.Tokens.TTokenKind.PCHARTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp === pas.Tokens.TTokenKind.BYTETOK) || ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) || ($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+          if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Ident[$mod.GetIdentIndex(pas.Common.Tok[i + 2].Name) - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) {
             pas.Common.isError = true}
-           else j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,133,false,true);
+           else j = $mod.CompileConstExpression(i + 2,ConstVal,ConstValType,pas.Tokens.TTokenKind.INTEGERTOK,false,true);
           if (pas.Common.isError) return Result;
-          if ((ConstValType.get() in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === 170) && (pas.Common.Tok[i + 3].Kind !== 58)) {
+          if ((ConstValType.get() in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Tok[i + 3].Kind !== pas.Tokens.TTokenKind.OBRACKETTOK)) {
             IdentIndex = $mod.GetIdentIndex(pas.Common.Tok[i + 2].Name);
-            if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 139)) if (((pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(0,1))) || (pas.Common.Ident[IdentIndex - 1].DataType === 137)) {}
+            if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.RECORDTOK)) if (((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(0,1))) || (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {}
             else pas.Messages.ErrorIdentifierIllegalTypeConversion(i + 2,IdentIndex,pas.Common.Tok[i].Kind);
           };
-          pas.Common.CheckTok(j + 1,55);
-          if (ConstValType.get() in rtl.createSet(160,161)) pas.Common.OldConstValType = ConstValType.get();
+          pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+          if (ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.DATAORIGINOFFSET,pas.Tokens.TTokenKind.CODEORIGINOFFSET)) pas.Common.OldConstValType = ConstValType.get();
           ConstValType.set(pas.Common.Tok[i].Kind);
           Result = j + 1;
         } else {
@@ -33550,17 +33487,17 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       var RightConstVal = 0;
       var RightConstValType = 0;
       ConstVal.set(0);
-      ConstValType.set(0);
+      ConstValType.set(pas.Tokens.TTokenKind.UNTYPETOK);
       Result = i;
-      if (pas.Common.Tok[i].Kind in rtl.createSet(61,62)) {
+      if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK)) {
         j = i + 1}
        else j = i;
       j = $mod.CompileConstTerm(j,ConstVal,ConstValType);
       if (pas.Common.isError) return Result;
-      if (pas.Common.Tok[i].Kind === 62) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.MINUSTOK) {
         ConstVal.set(pas.Numbers.Negate(ConstValType,ConstVal.get()));
       };
-      while (pas.Common.Tok[j + 1].Kind in rtl.createSet(61,62,69,70)) {
+      while (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK,pas.Tokens.TTokenKind.ORTOK,pas.Tokens.TTokenKind.XORTOK)) {
         k = $mod.CompileConstTerm(j + 2,{get: function () {
             return RightConstVal;
           }, set: function (v) {
@@ -33579,18 +33516,18 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
           ConstVal.set(pas.Numbers.FromInt64(ConstVal.get()));
           ConstValType.set(RightConstValType);
         };
-        if ((ConstValType.get() in rtl.createSet(143,144)) && (RightConstValType in rtl.createSet(141,142))) RightConstValType = ConstValType.get();
-        if ((RightConstValType in rtl.createSet(143,144)) && (ConstValType.get() in rtl.createSet(141,142))) ConstValType.set(RightConstValType);
+        if ((ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (RightConstValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) RightConstValType = ConstValType.get();
+        if ((RightConstValType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (ConstValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) ConstValType.set(RightConstValType);
         var $tmp = pas.Common.Tok[j + 1].Kind;
-        if ($tmp === 61) {
+        if ($tmp === pas.Tokens.TTokenKind.PLUSTOK) {
           ConstVal.set(pas.Numbers.Add(ConstValType.get(),ConstVal.get(),RightConstVal))}
-         else if ($tmp === 62) {
+         else if ($tmp === pas.Tokens.TTokenKind.MINUSTOK) {
           ConstVal.set(pas.Numbers.Subtract(ConstValType.get(),ConstVal.get(),RightConstVal))}
-         else if ($tmp === 69) {
+         else if ($tmp === pas.Tokens.TTokenKind.ORTOK) {
           ConstVal.set(rtl.or(ConstVal.get(),RightConstVal))}
-         else if ($tmp === 70) ConstVal.set(rtl.xor(ConstVal.get(),RightConstVal));
+         else if ($tmp === pas.Tokens.TTokenKind.XORTOK) ConstVal.set(rtl.xor(ConstVal.get(),RightConstVal));
         ConstValType.set(pas.Common.GetCommonType(j + 1,ConstValType.get(),RightConstValType));
-        if (!(ConstValType.get() in rtl.unionSet(pas.Common.RealTypes,rtl.createSet(135)))) ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
+        if (!(ConstValType.get() in rtl.unionSet(pas.Common.RealTypes,rtl.createSet(pas.Tokens.TTokenKind.BOOLEANTOK)))) ConstValType.set(pas.Common.GetValueType(ConstVal.get()));
         pas.Common.CheckOperator(i,pas.Common.Tok[j + 1].Kind,ConstValType.get(),RightConstValType);
         j = k;
       };
@@ -33612,32 +33549,32 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
       try {
         VarOfSameType = rtl.arraySetLength(null,pas.Common.TParam,256);
         pas.Common.NumProc += 1;
-        if (pas.Common.Tok[i].Kind in rtl.createSet(4,99,100)) {
-          $mod.DefineIdent(i,"@FN" + pas.SysUtils.IntToHex(pas.Common.NumProc,4),pas.Common.Tok[i].Kind,0,0,0,0,170);
+        if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
+          $mod.DefineIdent(i,"@FN" + pas.SysUtils.IntToHex(pas.Common.NumProc,4),pas.Common.Tok[i].Kind,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
           IsNestedFunction = false;
         } else {
-          $mod.DefineIdent(i,"@FN" + pas.SysUtils.IntToHex(pas.Common.NumProc,4),5,0,0,0,0,170);
+          $mod.DefineIdent(i,"@FN" + pas.SysUtils.IntToHex(pas.Common.NumProc,4),pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
           IsNestedFunction = true;
         };
         NumVarOfSameType = 0;
         ProcVarIndex.set(pas.Common.NumProc);
         i -= 1;
-        if ((pas.Common.Tok[i + 2].Kind === 54) && (pas.Common.Tok[i + 3].Kind === 55)) i += 2;
-        if (pas.Common.Tok[i + 2].Kind === 54) {
+        if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OPARTOK) && (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.CPARTOK)) i += 2;
+        if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OPARTOK) {
           i = i + 2;
           do {
             NumVarOfSameType = 0;
             ListPassMethod = pas.Common.TParameterPassingMethod.VALPASSING;
-            if (pas.Common.Tok[i + 1].Kind === 1) {
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) {
               ListPassMethod = pas.Common.TParameterPassingMethod.CONSTPASSING;
               i += 1;
-            } else if (pas.Common.Tok[i + 1].Kind === 3) {
+            } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.VARTOK) {
               ListPassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
               i += 1;
             };
             do {
-              if (pas.Common.Tok[i + 1].Kind !== 170) {
-                pas.Messages.Error$1(i + 1,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FormalParameterNameExpected,"Formal parameter name expected but {0} found.",pas.Common.GetSpelling(i + 1),""]),pas.Messages.IMessage)))}
+              if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+                pas.Messages.Error$1(i + 1,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FormalParameterNameExpected,"Formal parameter name expected but {0} found.",pas.Common.GetTokenSpellingAtIndex(i + 1),""]),pas.Messages.IMessage)))}
                else {
                 for (var $l = 1, $end = NumVarOfSameType; $l <= $end; $l++) {
                   x = $l;
@@ -33647,16 +33584,16 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 VarOfSameType[NumVarOfSameType - 1].Name = pas.Common.Tok[i + 1].Name;
               };
               i = i + 2;
-            } while (!(pas.Common.Tok[i].Kind !== 52));
-            VarType = 0;
+            } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+            VarType = pas.Tokens.TTokenKind.UNTYPETOK;
             NumAllocElements = 0;
-            AllocElementType = 0;
-            if ((ListPassMethod in rtl.createSet(pas.Common.TParameterPassingMethod.CONSTPASSING,pas.Common.TParameterPassingMethod.VARPASSING)) && (pas.Common.Tok[i].Kind !== 60)) {
+            AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
+            if ((ListPassMethod in rtl.createSet(pas.Common.TParameterPassingMethod.CONSTPASSING,pas.Common.TParameterPassingMethod.VARPASSING)) && (pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COLONTOK)) {
               ListPassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
               i -= 1;
             } else {
-              pas.Common.CheckTok(i,60);
-              if (pas.Common.Tok[i + 1].Kind === 56) pas.Messages.Error$1(i + 1,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
+              pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
+              if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) pas.Messages.Error$1(i + 1,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
               i = $mod.CompileType(i + 1,{get: function () {
                   return VarType;
                 }, set: function (v) {
@@ -33670,7 +33607,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
                 }, set: function (v) {
                   AllocElementType = v;
                 }});
-              if ((VarType === 138) && (ListPassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Messages.Error$1(i,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FileParameterMustBeVAR,"File parameters must be var parameters","",""]),pas.Messages.IMessage)));
+              if ((VarType === pas.Tokens.TTokenKind.FILETOK) && (ListPassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Messages.Error$1(i,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.FileParameterMustBeVAR,"File parameters must be var parameters","",""]),pas.Messages.IMessage)));
             };
             for (var $l1 = 1, $end1 = NumVarOfSameType; $l1 <= $end1; $l1++) {
               VarOfSameTypeIndex = $l1;
@@ -33687,13 +33624,13 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
               };
             };
             i = i + 1;
-          } while (!(pas.Common.Tok[i].Kind !== 53));
-          pas.Common.CheckTok(i,55);
+          } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.SEMICOLONTOK));
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
           i = i + 1;
         } else i = i + 2;
         if (IsNestedFunction) {
-          pas.Common.CheckTok(i,60);
-          if (pas.Common.Tok[i + 1].Kind === 30) pas.Messages.Error$1(i + 1,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.ARRAYTOK) pas.Messages.Error$1(i + 1,$ir.ref(5,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierExpected,"Type identifier expected","",""]),pas.Messages.IMessage)));
           i = $mod.CompileType(i + 1,{get: function () {
               return VarType;
             }, set: function (v) {
@@ -33722,7 +33659,7 @@ rtl.module("Parser",["System","Common","Numbers"],function () {
     };
   };
 },["SysUtils","Messages","Utilities"]);
-rtl.module("program",["System","SysUtils","Math","browserconsole","Common","CommonTypes","Console","Diagnostic","FileIO","MathEvaluate","Messages","Numbers","Scanner","Optimize","Parser","StringUtilities","Utilities"],function () {
+rtl.module("program",["System","SysUtils","Math","browserconsole","Common","CommonTypes","Console","Diagnostic","FileIO","MathEvaluate","Messages","Numbers","Scanner","Optimize","Parser","StringUtilities","Tokens","Utilities"],function () {
   "use strict";
   var $mod = this;
   this.evaluationContext = null;
@@ -33821,38 +33758,38 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       BlockStackIndex = $l;
       for (var $l1 = pas.Common.NumIdent; $l1 >= 1; $l1--) {
         IdentIndex = $l1;
-        if ((pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(4,5,99,100)) && (pas.Common.Ident[IdentIndex - 1].UnitIndex === pas.Common.Ident[ProcIdentIndex - 1].UnitIndex) && (S === pas.Common.Ident[IdentIndex - 1].Name) && (pas.Common.BlockStack[BlockStackIndex] === pas.Common.Ident[IdentIndex - 1].Block) && (pas.Common.Ident[IdentIndex - 1].NumParams === NumParams)) {
+        if ((pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && (pas.Common.Ident[IdentIndex - 1].UnitIndex === pas.Common.Ident[ProcIdentIndex - 1].UnitIndex) && (S === pas.Common.Ident[IdentIndex - 1].Name) && (pas.Common.BlockStack[BlockStackIndex] === pas.Common.Ident[IdentIndex - 1].Block) && (pas.Common.Ident[IdentIndex - 1].NumParams === NumParams)) {
           hits = 0;
           for (var $l2 = 1, $end = NumParams; $l2 <= $end; $l2++) {
             i = $l2;
-            if (((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) && (Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) && (pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType - 128] >= pas.Common.DataSize[Param[i - 1].DataType - 128])) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) && (Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) && (pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType - 128] >= pas.Common.DataSize[Param[i - 1].DataType - 128])) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) && (Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) && (pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType - 128] >= pas.Common.DataSize[Param[i - 1].DataType - 128])) || (pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].DataType) || ((Param[i - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].AllocElementType)) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === 0) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) {
-              if (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === 147) {
+            if (((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) && (Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) && (pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType) >= pas.Common.GetDataSize(Param[i - 1].DataType))) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) && (Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) && (pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType) >= pas.Common.GetDataSize(Param[i - 1].DataType))) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) && (Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) && (pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType) >= pas.Common.GetDataSize(Param[i - 1].DataType))) || (pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].DataType) || ((Param[i - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].AllocElementType)) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) {
+              if (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) {
                 var $tmp = Param[i - 1].AllocElementType;
-                if (($tmp === 4) || ($tmp === 5)) {
+                if (($tmp === pas.Tokens.TTokenKind.PROCEDURETOK) || ($tmp === pas.Tokens.TTokenKind.FUNCTIONTOK)) {
                   yes = pas.Common.Ident[pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(rtl.lw(pas.Common.Ident[IdentIndex - 1].Param[i - 1].NumAllocElements >>> 16),4)) - 1].NumParams === pas.Common.Ident[pas.Parser.GetIdentIndex(Param[i - 1].Name) - 1].NumParams}
-                 else if ($tmp === 147) {
+                 else if ($tmp === pas.Tokens.TTokenKind.PROCVARTOK) {
                   yes = pas.Common.Ident[pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(rtl.lw(pas.Common.Ident[IdentIndex - 1].Param[i - 1].NumAllocElements >>> 16),4)) - 1].NumParams === pas.Common.Ident[pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(rtl.lw(Param[i - 1].NumAllocElements >>> 16),4)) - 1].NumParams}
                  else {
                   yes = false;
                 };
                 if (yes) hits += 1;
               } else hits += 1;
-              if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === 0) && (Param[i - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === 0) && (Param[i - 1].AllocElementType !== 0) && (Param[i - 1].NumAllocElements > 0)) {
+              if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === pas.Tokens.TTokenKind.UNTYPETOK) && (Param[i - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) && (Param[i - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (Param[i - 1].NumAllocElements > 0)) {
                 hits += 1;
               };
               if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.IntegerTypes) && (Param[i - 1].DataType in pas.Common.IntegerTypes)) {
                 if (pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) {
-                  b = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType - 128];
-                  k = pas.Common.DataSize[Param[i - 1].DataType - 128];
+                  b = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType);
+                  k = pas.Common.GetDataSize(Param[i - 1].DataType);
                   if (b >= k) {
                     df = 4 - Math.abs(b - k);
                     if (Param[i - 1].DataType in pas.Common.UnsignedOrdinalTypes) df += 2;
                     hits += df;
                   };
                 } else {
-                  b = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType - 128];
-                  k = pas.Common.DataSize[Param[i - 1].DataType - 128];
-                  if (Param[i - 1].DataType in rtl.createSet(128,129)) k += 1;
+                  b = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType);
+                  k = pas.Common.GetDataSize(Param[i - 1].DataType);
+                  if (Param[i - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.BYTETOK,pas.Tokens.TTokenKind.WORDTOK)) k += 1;
                   if (b >= k) {
                     df = 4 - Math.abs(b - k);
                     if (Param[i - 1].DataType in pas.Common.SignedOrdinalTypes) df += 2;
@@ -33860,10 +33797,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   };
                 };
               };
-              if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].DataType) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === Param[i - 1].AllocElementType)) {
+              if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].DataType) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === Param[i - 1].AllocElementType)) {
                 hits += 1;
               };
-              if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].DataType) && ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === Param[i - 1].AllocElementType) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === 0) && (Param[i - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].NumAllocElements === Param[i - 1].NumAllocElements)) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType !== 0) && (Param[i - 1].AllocElementType === 0) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].NumAllocElements === Param[i - 1].NumAllocElements)))) {
+              if ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].DataType === Param[i - 1].DataType) && ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === Param[i - 1].AllocElementType) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) && (Param[i - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].NumAllocElements === Param[i - 1].NumAllocElements)) || ((pas.Common.Ident[IdentIndex - 1].Param[i - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (Param[i - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[i - 1].NumAllocElements === Param[i - 1].NumAllocElements)))) {
                 hits += 1;
               };
             };
@@ -33972,7 +33909,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         BlockStackIndex = $l;
         for (var $l1 = pas.Common.NumIdent; $l1 >= 1; $l1--) {
           IdentIndex = $l1;
-          if ((pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(4,5,99,100)) && (S === pas.Common.Ident[IdentIndex - 1].Name) && (pas.Common.BlockStack[BlockStackIndex] === pas.Common.Ident[IdentIndex - 1].Block)) {
+          if ((pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && (S === pas.Common.Ident[IdentIndex - 1].Name) && (pas.Common.BlockStack[BlockStackIndex] === pas.Common.Ident[IdentIndex - 1].Block)) {
             for (var $l2 = 0, $end = rtl.length(l) - 1 - 1; $l2 <= $end; $l2++) {
               k = $l2;
               if ((pas.Common.Ident[IdentIndex - 1].NumParams === l[k].NumParams) && (pas.Common.Ident[IdentIndex - 1].UnitIndex === l[k].u) && (pas.Common.Ident[IdentIndex - 1].Block === l[k].b)) {
@@ -33983,7 +33920,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     ok = false;
                     break;
                   };
-                  if ((pas.Common.Ident[IdentIndex - 1].Param[m - 1].DataType === l[k].Param[m - 1].DataType) && (pas.Common.Ident[IdentIndex - 1].Param[m - 1].AllocElementType === 147) && (l[k].Param[m - 1].AllocElementType === 147) && (rtl.lw(pas.Common.Ident[IdentIndex - 1].Param[m - 1].NumAllocElements >>> 16) !== rtl.lw(l[k].Param[m - 1].NumAllocElements >>> 16))) {
+                  if ((pas.Common.Ident[IdentIndex - 1].Param[m - 1].DataType === l[k].Param[m - 1].DataType) && (pas.Common.Ident[IdentIndex - 1].Param[m - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) && (l[k].Param[m - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) && (rtl.lw(pas.Common.Ident[IdentIndex - 1].Param[m - 1].NumAllocElements >>> 16) !== rtl.lw(l[k].Param[m - 1].NumAllocElements >>> 16))) {
                     ok = false;
                     break;
                   };
@@ -34084,7 +34021,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
      else if ($tmp === pas.Common.TCode65.cmpCHAR2STRING) {
       pas.Optimize.asm65("\tjsr cmpCHAR2STRING","")}
      else if ($tmp === pas.Common.TCode65.movaBX_Value) {
-      if (Kind === 3) {
+      if (Kind === pas.Tokens.TTokenKind.VARTOK) {
         svar = $mod.GetLocalName(IdentIndex,"");
         pas.Optimize.asm65("\tmva <" + svar + $mod.GetStackVariable(0),"");
         pas.Optimize.asm65("\tmva >" + svar + $mod.GetStackVariable(1),"");
@@ -34110,7 +34047,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
   this.ExpandParam = function (Dest, Source) {
     var i = 0;
     if ((Source in pas.Common.IntegerTypes) && (Dest in pas.Common.IntegerTypes)) {
-      i = pas.Common.DataSize[Dest - 128] - pas.Common.DataSize[Source - 128];
+      i = pas.Common.GetDataSize(Dest) - pas.Common.GetDataSize(Source);
       if (i > 0) {
         var $tmp = i;
         if ($tmp === 1) {
@@ -34137,7 +34074,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
   this.ExpandParam_m1 = function (Dest, Source) {
     var i = 0;
     if ((Source in pas.Common.IntegerTypes) && (Dest in pas.Common.IntegerTypes)) {
-      i = pas.Common.DataSize[Dest - 128] - pas.Common.DataSize[Source - 128];
+      i = pas.Common.GetDataSize(Dest) - pas.Common.GetDataSize(Source);
       if (i > 0) {
         var $tmp = i;
         if ($tmp === 1) {
@@ -34165,32 +34102,32 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var m = 0;
     var sign = false;
     if ((ValType.get() in pas.Common.IntegerTypes) && (RightValType in pas.Common.IntegerTypes)) {
-      if ((pas.Common.DataSize[ValType.get() - 128] < pas.Common.DataSize[RightValType - 128]) && ((VarType === 0) || (pas.Common.DataSize[RightValType - 128] >= pas.Common.DataSize[VarType - 128]))) {
+      if ((pas.Common.GetDataSize(ValType.get()) < pas.Common.GetDataSize(RightValType)) && ((VarType === pas.Tokens.TTokenKind.UNTYPETOK) || (pas.Common.GetDataSize(RightValType) >= pas.Common.GetDataSize(VarType)))) {
         $mod.ExpandParam_m1(RightValType,ValType.get());
         ValType.set(RightValType);
       } else {
-        if (VarType in pas.Common.Pointers) VarType = 129;
-        m = pas.Common.DataSize[ValType.get() - 128];
-        if (pas.Common.DataSize[RightValType - 128] > m) m = pas.Common.DataSize[RightValType - 128];
-        if (VarType === 135) {
+        if (VarType in pas.Common.Pointers) VarType = pas.Tokens.TTokenKind.WORDTOK;
+        m = pas.Common.GetDataSize(ValType.get());
+        if (pas.Common.GetDataSize(RightValType) > m) m = pas.Common.GetDataSize(RightValType);
+        if (VarType === pas.Tokens.TTokenKind.BOOLEANTOK) {
           m += 1}
-         else if (VarType !== 0) if (pas.Common.DataSize[VarType - 128] > m) m += 1;
+         else if (VarType !== pas.Tokens.TTokenKind.UNTYPETOK) if (pas.Common.GetDataSize(VarType) > m) m += 1;
         if ((ValType.get() in pas.Common.SignedOrdinalTypes) || (RightValType in pas.Common.SignedOrdinalTypes) || ForceMinusSign) {
           sign = true}
          else sign = false;
         var $tmp = m;
         if ($tmp === 1) {
           if (sign) {
-            VarType = 131}
-           else VarType = 128}
+            VarType = pas.Tokens.TTokenKind.SHORTINTTOK}
+           else VarType = pas.Tokens.TTokenKind.BYTETOK}
          else if ($tmp === 2) {
           if (sign) {
-            VarType = 132}
-           else VarType = 129}
+            VarType = pas.Tokens.TTokenKind.SMALLINTTOK}
+           else VarType = pas.Tokens.TTokenKind.WORDTOK}
          else {
           if (sign) {
-            VarType = 133}
-           else VarType = 130;
+            VarType = pas.Tokens.TTokenKind.INTEGERTOK}
+           else VarType = pas.Tokens.TTokenKind.CARDINALTOK;
         };
         $mod.ExpandParam_m1(VarType,ValType.get());
         $mod.ExpandParam(VarType,RightValType);
@@ -34220,7 +34157,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     return Result;
   };
   this.GenerateIndexShift = function (ElementType, Ofset) {
-    var $tmp = pas.Common.DataSize[ElementType - 128];
+    var $tmp = pas.Common.GetDataSize(ElementType);
     if ($tmp === 2) {
       if (Ofset === 0) {
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
@@ -34297,7 +34234,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var lab = "";
     if (pas.System.Pos(".",svar) > 0) {
       lab = $mod.ExtractName(IdentIndex,svar);
-      if (pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === 139) {
+      if (pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) {
         pas.Optimize.asm65("\tmwy " + lab + " :bp2","");
         pas.Optimize.asm65("\tlda :bp2","");
         pas.Optimize.asm65("\tadd #" + svar + "-DATAORIGIN","");
@@ -34316,13 +34253,13 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var lab = "";
     if (IdentIndex > 0) {
       Kind = pas.Common.Ident[IdentIndex - 1].Kind;
-      if (pas.Common.Ident[IdentIndex - 1].DataType === 146) {
-        Size = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
+      if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) {
+        Size = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType);
         NumAllocElements = 0;
       } else NumAllocElements = pas.Parser.Elements(IdentIndex);
       svar = $mod.GetLocalName(IdentIndex,"");
     } else {
-      Kind = 1;
+      Kind = pas.Tokens.TTokenKind.CONSTTOK;
       NumAllocElements = 0;
       svar = "";
     };
@@ -34337,14 +34274,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     if ($tmp === 0) {
       pas.Optimize.asm65("; as Value $" + pas.SysUtils.IntToHex(Value,8) + " (" + pas.Common.IntToStr(Value) + ")","");
       pas.Optimize.asm65("","");
-      $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       $mod.Gen();
       $mod.a65(pas.Common.TCode65.movaBX_Value,Value,Kind,Size,IdentIndex);
     } else if ($tmp === 1) {
       pas.Optimize.asm65("; as Pointer","");
       pas.Optimize.asm65("","");
       $mod.Gen();
-      $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       var $tmp1 = Size;
       if ($tmp1 === 1) {
         pas.Optimize.asm65("\tmva " + svar + $mod.GetStackVariable(0),"");
@@ -34352,7 +34289,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       } else if ($tmp1 === 2) {
         if ($mod.TestName(IdentIndex,svar)) {
           lab = $mod.ExtractName(IdentIndex,svar);
-          if (pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === 139) {
+          if (pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) {
             pas.Optimize.asm65("\tlda " + lab,"");
             pas.Optimize.asm65("\tldy " + lab + "+1","");
             pas.Optimize.asm65("\tadd #" + svar + "-DATAORIGIN","");
@@ -34379,7 +34316,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("; as Pointer to Record","");
       pas.Optimize.asm65("","");
       $mod.Gen();
-      $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       if ($mod.TestName(IdentIndex,svar)) {
         pas.Optimize.asm65("\tlda #" + svar + "-DATAORIGIN","")}
        else pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(par,2),"");
@@ -34400,15 +34337,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("; as Pointer to Pointer","");
       pas.Optimize.asm65("","");
       $mod.Gen();
-      $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (NumAllocElements === 0)) pas.Optimize.asm65("+" + svar,"");
       if ($mod.TestName(IdentIndex,svar)) {
-        if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) {
+        if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) {
           pas.Optimize.asm65("\tmwy " + svar + " :bp2","")}
          else pas.Optimize.asm65("\tmwy " + $mod.ExtractName(IdentIndex,svar) + " :bp2","");
       } else pas.Optimize.asm65("\tmwy " + svar + " :bp2","");
       if ($mod.TestName(IdentIndex,svar)) {
-        if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) {
+        if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) {
           pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(par,2),"")}
          else pas.Optimize.asm65("\tldy #" + svar + "-DATAORIGIN","");
       } else pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(par,2),"");
@@ -34439,7 +34376,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if ($tmp3 === 1) {
         if ((NumAllocElements > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (NumAllocElements === 0)) pas.Optimize.asm65("+" + svar,"");
-          if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+          if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
             pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
             pas.Optimize.asm65("\tadd" + $mod.GetStackVariable(0),"");
             pas.Optimize.asm65("\ttay","");
@@ -34476,7 +34413,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         };
         $mod.ExpandByte();
       } else if ($tmp3 === 2) {
-        if (IndirectionLevel === 3) $mod.GenerateIndexShift(129,0);
+        if (IndirectionLevel === 3) $mod.GenerateIndexShift(pas.Tokens.TTokenKind.WORDTOK,0);
         pas.Optimize.asm65("","");
         if (((NumAllocElements * 2) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           if (pas.Common.Ident[IdentIndex - 1].isStriped) {
@@ -34491,7 +34428,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tlda " + svara + "+" + pas.Common.IntToStr(NumAllocElements) + ",y","");
             pas.Optimize.asm65("\tsta" + $mod.GetStackVariable(1),"");
           } else {
-            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
               pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
               pas.Optimize.asm65("\tadd" + $mod.GetStackVariable(0),"");
               pas.Optimize.asm65("\tsta :bp2","");
@@ -34539,7 +34476,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         };
         $mod.ExpandWord();
       } else if ($tmp3 === 4) {
-        if (IndirectionLevel === 3) $mod.GenerateIndexShift(130,0);
+        if (IndirectionLevel === 3) $mod.GenerateIndexShift(pas.Tokens.TTokenKind.CARDINALTOK,0);
         pas.Optimize.asm65("","");
         if (((NumAllocElements * 4) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           if (pas.Common.Ident[IdentIndex - 1].isStriped) {
@@ -34558,7 +34495,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tlda " + svara + "+" + pas.Common.IntToStr((NumAllocElements * 3) & 0xFFFFFFFF) + ",y","");
             pas.Optimize.asm65("\tsta" + $mod.GetStackVariable(3),"");
           } else {
-            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
               pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
               pas.Optimize.asm65("\tadd" + $mod.GetStackVariable(0),"");
               pas.Optimize.asm65("\tsta :bp2","");
@@ -34807,7 +34744,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda (:bp2),y","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     };
   };
   this.SaveToSystemStack = function (cnt) {
@@ -34877,7 +34814,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var svara = "";
     var NumAllocElements = 0;
     if (IdentIndex > 0) {
-      if (pas.Common.Ident[IdentIndex - 1].DataType === 146) {
+      if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) {
         NumAllocElements = 0;
       } else NumAllocElements = pas.Parser.Elements(IdentIndex);
       svar = $mod.GetLocalName(IdentIndex,"");
@@ -34904,7 +34841,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     if ($tmp === 1) {
       pas.Optimize.asm65("; as Pointer","");
       pas.Optimize.asm65("","");
-      var $tmp1 = pas.Common.DataSize[ExpressionType - 128];
+      var $tmp1 = pas.Common.GetDataSize(ExpressionType);
       if ($tmp1 === 1) {
         pas.Optimize.asm65("\tlda " + svar,"");
         pas.Optimize.asm65("\t" + b + " :STACKORIGIN,x","");
@@ -34935,7 +34872,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("","");
       $mod.LoadBP2(IdentIndex,svar);
       pas.Optimize.asm65("\tldy #$00","");
-      var $tmp2 = pas.Common.DataSize[ExpressionType - 128];
+      var $tmp2 = pas.Common.GetDataSize(ExpressionType);
       if ($tmp2 === 1) {
         pas.Optimize.asm65("\tlda (:bp2),y","");
         pas.Optimize.asm65("\t" + b + " :STACKORIGIN,x","");
@@ -34968,7 +34905,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     } else if (($tmp === 3) || ($tmp === 4)) {
       pas.Optimize.asm65("; as Pointer To Array Origin","");
       pas.Optimize.asm65("","");
-      var $tmp3 = pas.Common.DataSize[ExpressionType - 128];
+      var $tmp3 = pas.Common.GetDataSize(ExpressionType);
       if ($tmp3 === 1) {
         if ((NumAllocElements > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           pas.Optimize.asm65("\tlda " + svar,"");
@@ -35033,7 +34970,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\t" + c + " :STACKORIGIN+STACKWIDTH,x","");
               pas.Optimize.asm65("\tsta " + svara + "+" + pas.Common.IntToStr(NumAllocElements) + ",y","");
             } else {
-              if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+              if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
                 pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
                 pas.Optimize.asm65("\tadd :STACKORIGIN-1,x","");
                 pas.Optimize.asm65("\tsta :bp2","");
@@ -35113,7 +35050,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\t" + c + " :STACKORIGIN+STACKWIDTH*3,x","");
             pas.Optimize.asm65("\tsta " + svara + "+" + pas.Common.IntToStr((NumAllocElements * 3) & 0xFFFFFFFF) + ",y","");
           } else {
-            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
               pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
               pas.Optimize.asm65("\tadd :STACKORIGIN-1,x","");
               pas.Optimize.asm65("\tsta :bp2","");
@@ -35161,9 +35098,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta " + svara + "+3,y","");
         };
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     };
-    $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
   };
   this.GenerateAssignment = function (IndirectionLevel, Size, IdentIndex, Param, ParamY) {
     var NumAllocElements = 0;
@@ -35174,14 +35111,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if (ParamY !== "") {
         pas.Optimize.asm65("\tldy #" + ParamY,"")}
        else if (pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) > 0) {
-        if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(0,147))) {
+        if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.UNTYPETOK,pas.Tokens.TTokenKind.PROCVARTOK))) {
           pas.Optimize.asm65("\tldy #$00","")}
          else pas.Optimize.asm65("\tldy #" + svar + "-DATAORIGIN","");
       } else pas.Optimize.asm65("\tldy #$00","");
     };
     if (IdentIndex > 0) {
-      if (pas.Common.Ident[IdentIndex - 1].DataType === 146) {
-        Size = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
+      if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) {
+        Size = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType);
         NumAllocElements = 0;
       } else NumAllocElements = pas.Parser.Elements(IdentIndex);
       svar = $mod.GetLocalName(IdentIndex,"");
@@ -35205,7 +35142,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if (((NumAllocElements * 2) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
         if ($mod.TestName(IdentIndex,svar)) {
           IdentTemp = pas.Parser.GetIdentIndex($mod.ExtractName(IdentIndex,svar));
-          if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType === 139) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements_ > 1) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements_ <= 128)) {
+          if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements_ > 1) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements_ <= 128)) {
             pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
             pas.Optimize.asm65("\tadd #$00","");
             pas.Optimize.asm65("\ttay","");
@@ -35271,8 +35208,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta (:bp2),y","");
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 9) {
       pas.Optimize.asm65("; as Pointer to Dereference","");
       pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
@@ -35303,15 +35240,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta (:bp2),y","");
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if (($tmp === 3) || ($tmp === 4)) {
       pas.Optimize.asm65("; as Pointer to Array Origin","");
       var $tmp3 = Size;
       if ($tmp3 === 1) {
         if ((NumAllocElements > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (NumAllocElements === 0)) pas.Optimize.asm65("-" + svar,"");
-          if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+          if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
             pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
             pas.Optimize.asm65("\tadd :STACKORIGIN-1,x","");
             pas.Optimize.asm65("\ttay","");
@@ -35346,10 +35283,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta " + svara + ",y","");
           };
         };
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else if ($tmp3 === 2) {
-        if (IndirectionLevel === 3) $mod.GenerateIndexShift(129,1);
+        if (IndirectionLevel === 3) $mod.GenerateIndexShift(pas.Tokens.TTokenKind.WORDTOK,1);
         if (((NumAllocElements * 2) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           if (pas.Common.Ident[IdentIndex - 1].isStriped) {
             pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
@@ -35363,7 +35300,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
             pas.Optimize.asm65("\tsta " + svara + "+" + pas.Common.IntToStr(NumAllocElements) + ",y","");
           } else {
-            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
               pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
               pas.Optimize.asm65("\tadd :STACKORIGIN-1,x","");
               pas.Optimize.asm65("\tsta :bp2","");
@@ -35409,10 +35346,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
              else pas.Optimize.asm65("\tsta " + svara + "+1,y","");
           };
         };
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else if ($tmp3 === 4) {
-        if (IndirectionLevel === 3) $mod.GenerateIndexShift(130,1);
+        if (IndirectionLevel === 3) $mod.GenerateIndexShift(pas.Tokens.TTokenKind.CARDINALTOK,1);
         if (((NumAllocElements * 4) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
           if (pas.Common.Ident[IdentIndex - 1].isStriped) {
             pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
@@ -35430,7 +35367,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
             pas.Optimize.asm65("\tsta " + svara + "+" + pas.Common.IntToStr((NumAllocElements * 3) & 0xFFFFFFFF) + ",y","");
           } else {
-            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === 30) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
+            if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].Value >= 0)) {
               pas.Optimize.asm65("\tlda #$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value & 255,2),"");
               pas.Optimize.asm65("\tadd :STACKORIGIN-1,x","");
               pas.Optimize.asm65("\tsta :bp2","");
@@ -35498,8 +35435,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             };
           };
         };
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
     } else if ($tmp === 8) {
       pas.Optimize.asm65("; as StringPointer to Array Origin","");
@@ -35550,8 +35487,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tiny","");
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta (:bp2),y","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
     } else if ($tmp === 7) {
       pas.Optimize.asm65("; as StringPointer to Array Origin","");
@@ -35619,8 +35556,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsty @move.cnt+1","");
           pas.Optimize.asm65("\tjsr @move","");
         };
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
     } else if ($tmp === 12) {
       $mod.Gen();
@@ -35657,8 +35594,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tlda >" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements),"");
       pas.Optimize.asm65("\tsta @move.cnt+1","");
       pas.Optimize.asm65("\tjsr @move","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 10) {
       pas.Optimize.asm65("; as Pointer to Record^ Array Origin","");
       pas.Optimize.asm65("","");
@@ -35698,8 +35635,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta (:bp2),y","");
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 11) {
       pas.Optimize.asm65("\tdex","");
       if (((NumAllocElements * 2) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
@@ -35762,14 +35699,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta (:bp2),y","");
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 2) {
       pas.Optimize.asm65("; as Pointer to Pointer","");
       if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (NumAllocElements === 0)) pas.Optimize.asm65("-" + svar,"");
       if ($mod.TestName(IdentIndex,svar)) {
-        if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(0,147))) {
+        if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.UNTYPETOK,pas.Tokens.TTokenKind.PROCVARTOK))) {
           pas.Optimize.asm65("\tmwy " + svar + " :bp2","")}
          else pas.Optimize.asm65("\tmwy " + $mod.ExtractName(IdentIndex,svar) + " :bp2","");
       } else pas.Optimize.asm65("\tmwy " + svar + " :bp2","");
@@ -35798,7 +35735,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta (:bp2),y","");
       };
       if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (NumAllocElements === 0)) pas.Optimize.asm65("-","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 1) {
       pas.Optimize.asm65("; as Pointer","");
       var $tmp9 = Size;
@@ -35820,7 +35757,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta " + svar + "+3","");
       };
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     };
     $mod.StopOptimization();
   };
@@ -35855,49 +35792,49 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     $mod.Gen();
     $mod.Gen();
     $mod.Gen();
-    $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     pas.Optimize.asm65("\tlda :STACKORIGIN+1,x","");
-    $mod.a65(pas.Common.TCode65.jne,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.jne,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
   };
   this.GenerateElseCondition = function () {
     $mod.Gen();
     $mod.Gen();
     $mod.Gen();
-    $mod.a65(pas.Common.TCode65.je,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.je,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
   };
   this.GenerateRepeatUntilCondition = function () {
     $mod.GenerateIfThenCondition();
   };
   this.GenerateRelationOperation = function (rel, ValType) {
     var $tmp = rel;
-    if ($tmp === 43) {
+    if ($tmp === pas.Tokens.TTokenKind.EQTOK) {
       $mod.Gen();
       $mod.Gen();
       pas.Optimize.asm65("\tbeq @+","");
-    } else if (($tmp === 44) || ($tmp === 0)) {
+    } else if (($tmp === pas.Tokens.TTokenKind.NETOK) || ($tmp === pas.Tokens.TTokenKind.UNTYPETOK)) {
       $mod.Gen();
       $mod.Gen();
       pas.Optimize.asm65("\tbne @+","");
-    } else if ($tmp === 47) {
+    } else if ($tmp === pas.Tokens.TTokenKind.GTTOK) {
       $mod.Gen();
       $mod.Gen();
       pas.Optimize.asm65("\tseq","");
       if (ValType in rtl.unionSet(pas.Common.RealTypes,pas.Common.SignedOrdinalTypes)) {
         pas.Optimize.asm65("\tbpl @+","")}
        else pas.Optimize.asm65("\tbcs @+","");
-    } else if ($tmp === 48) {
+    } else if ($tmp === pas.Tokens.TTokenKind.GETOK) {
       $mod.Gen();
       $mod.Gen();
       if (ValType in rtl.unionSet(pas.Common.RealTypes,pas.Common.SignedOrdinalTypes)) {
         pas.Optimize.asm65("\tbpl @+","")}
        else pas.Optimize.asm65("\tbcs @+","");
-    } else if ($tmp === 45) {
+    } else if ($tmp === pas.Tokens.TTokenKind.LTTOK) {
       $mod.Gen();
       $mod.Gen();
       if (ValType in rtl.unionSet(pas.Common.RealTypes,pas.Common.SignedOrdinalTypes)) {
         pas.Optimize.asm65("\tbmi @+","")}
        else pas.Optimize.asm65("\tbcc @+","");
-    } else if ($tmp === 46) {
+    } else if ($tmp === pas.Tokens.TTokenKind.LETOK) {
       $mod.Gen();
       $mod.Gen();
       if (ValType in rtl.unionSet(pas.Common.RealTypes,pas.Common.SignedOrdinalTypes)) {
@@ -35913,16 +35850,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var svar = "";
     var CounterSize = 0;
     svar = $mod.GetLocalName(IdentIndex,"");
-    CounterSize = pas.Common.DataSize[ValType - 128];
+    CounterSize = pas.Common.GetDataSize(ValType);
     pas.Optimize.asm65(";" + $mod.InfoAboutSize(CounterSize),"");
     $mod.Gen();
     $mod.Gen();
     $mod.Gen();
-    $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     var $tmp = CounterSize;
     if ($tmp === 1) {
       $mod.ExpandByte();
-      if (ValType === 131) {
+      if (ValType === pas.Tokens.TTokenKind.SHORTINTTOK) {
         pas.Optimize.asm65("\tlda " + svar,"");
         pas.Optimize.asm65("\tsub :STACKORIGIN+1,x","");
         pas.Optimize.asm65("\tsvc","");
@@ -35933,7 +35870,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       };
     } else if ($tmp === 2) {
       $mod.ExpandWord();
-      if (ValType === 132) {
+      if (ValType === pas.Tokens.TTokenKind.SMALLINTTOK) {
         pas.Optimize.asm65("\t.LOCAL","");
         pas.Optimize.asm65("\tlda " + svar + "+1","");
         pas.Optimize.asm65("\tsub :STACKORIGIN+1+STACKWIDTH,x","");
@@ -35960,7 +35897,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("@","");
       };
     } else if ($tmp === 4) {
-      if (ValType === 133) {
+      if (ValType === pas.Tokens.TTokenKind.INTEGERTOK) {
         pas.Optimize.asm65("\t.LOCAL","");
         pas.Optimize.asm65("\tlda " + svar + "+3","");
         pas.Optimize.asm65("\tsub :STACKORIGIN+1+STACKWIDTH*3,x","");
@@ -36003,11 +35940,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     $mod.Gen();
     $mod.Gen();
     if (Down) {
-      if (ValType in rtl.createSet(131,132,133)) {
+      if (ValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTINTTOK,pas.Tokens.TTokenKind.SMALLINTTOK,pas.Tokens.TTokenKind.INTEGERTOK)) {
         pas.Optimize.asm65("\tbpl *+5","")}
        else pas.Optimize.asm65("\tbcs *+5","");
     } else {
-      if (ValType in rtl.createSet(131,132,133)) {
+      if (ValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTINTTOK,pas.Tokens.TTokenKind.SMALLINTTOK,pas.Tokens.TTokenKind.INTEGERTOK)) {
         pas.Optimize.asm65("\tbmi *+7","");
         pas.Optimize.asm65("\tbeq *+5","");
       } else {
@@ -36027,7 +35964,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
   this.GenerateCaseEqualityCheck = function (Value, SelectorType, Join, CaseLocalCnt) {
     $mod.Gen();
     $mod.Gen();
-    var $tmp = pas.Common.DataSize[SelectorType - 128];
+    var $tmp = pas.Common.GetDataSize(SelectorType);
     if ($tmp === 1) if (Join === false) {
       pas.Optimize.asm65("\tlda @CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4),"");
       if (Value !== 0) pas.Optimize.asm65("\tcmp #$" + pas.SysUtils.IntToHex(Value & 255,2),"");
@@ -36037,7 +35974,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
   this.GenerateCaseRangeCheck = function (Value1, Value2, SelectorType, Join, CaseLocalCnt) {
     $mod.Gen();
     $mod.Gen();
-    if ((SelectorType in rtl.createSet(128,134,146)) && (Value1 >= 0) && (Value2 >= 0)) {
+    if ((SelectorType in rtl.createSet(pas.Tokens.TTokenKind.BYTETOK,pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.ENUMTOK)) && (Value1 >= 0) && (Value2 >= 0)) {
       if ((Value1 === 0) && (Value2 === 255)) {
         pas.Optimize.asm65("\tjmp @+","");
       } else if (Value1 === 0) {
@@ -36070,17 +36007,17 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tbcs @+","");
       };
     } else {
-      var $tmp = pas.Common.DataSize[SelectorType - 128];
+      var $tmp = pas.Common.GetDataSize(SelectorType);
       if ($tmp === 1) {
         if (Join === false) pas.Optimize.asm65("\tlda @CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4),"");
         pas.Optimize.asm65("\tcmp #" + pas.Common.IntToStr(Value1 & 255),"");
       };
-      $mod.GenerateRelationOperation(45,SelectorType);
-      var $tmp1 = pas.Common.DataSize[SelectorType - 128];
+      $mod.GenerateRelationOperation(pas.Tokens.TTokenKind.LTTOK,SelectorType);
+      var $tmp1 = pas.Common.GetDataSize(SelectorType);
       if ($tmp1 === 1) {
         pas.Optimize.asm65("\tcmp #" + pas.Common.IntToStr(Value2 & 255),"");
       };
-      $mod.GenerateRelationOperation(47,SelectorType);
+      $mod.GenerateRelationOperation(pas.Tokens.TTokenKind.GTTOK,SelectorType);
       pas.Optimize.asm65("\tjmp *+6","");
       pas.Optimize.asm65("@","");
     };
@@ -36151,7 +36088,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var svar = "";
     var CounterSize = 0;
     svar = $mod.GetLocalName(IdentIndex,"");
-    CounterSize = pas.Common.DataSize[ValType - 128];
+    CounterSize = pas.Common.GetDataSize(ValType);
     var $tmp = CounterSize;
     if ($tmp === 1) {
       $mod.Gen();
@@ -36209,7 +36146,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     $mod.Gen();
     $mod.Gen();
     if (Epilog) {
-      if (ValType in rtl.createSet(131,132,133)) {
+      if (ValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTINTTOK,pas.Tokens.TTokenKind.SMALLINTTOK,pas.Tokens.TTokenKind.INTEGERTOK)) {
         var $tmp3 = CounterSize;
         if ($tmp3 === 1) {
           if (Down) {
@@ -36251,7 +36188,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
   };
   this.CompilerTitle = function () {
     var Result = "";
-    Result = "Mad Pascal Compiler version " + pas.Common.title + " [" + "2025/3/24" + "] for MOS 6502 CPU";
+    Result = "Mad Pascal Compiler version " + pas.Common.title + " [" + "2025/4/6" + "] for MOS 6502 CPU";
     return Result;
   };
   this.GenerateProgramProlog = function () {
@@ -36399,7 +36336,6 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\topt h+","");
         pas.Optimize.asm65("\t.fi","");
       };
-      if (((rtl.length(pas.Common.resArray) - 1) > 0) && (pas.Common.target.id === pas.Common.TComputer.A8) && pas.Common.LIBRARY_USE) pas.Optimize.asm65("\tert 'Resources in LIBRARY not allowed'","");
       if (((rtl.length(pas.Common.resArray) - 1) > 0) && (pas.Common.target.id === pas.Common.TComputer.A8) && (pas.Common.LIBRARY_USE === false)) {
         pas.Optimize.asm65("","");
         pas.Optimize.asm65("\torg CODEORIGIN","");
@@ -36573,16 +36509,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var $tmp = IndirectionLevel;
     if ($tmp === 7) {
       pas.Optimize.asm65("\tjsr @printBOOLEAN","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 6) {
       pas.Optimize.asm65("\t@printCHAR","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 9) {
       pas.Optimize.asm65("\tjsr @printSHORTREAL","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 8) {
       pas.Optimize.asm65("\tjsr @printREAL","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 11) {
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tsta @FTOA.I","");
@@ -36592,57 +36528,57 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tsta @FTOA.I+2","");
       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
       pas.Optimize.asm65("\tsta @FTOA.I+3","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       pas.Optimize.asm65("\tjsr @FTOA","");
     } else if ($tmp === 10) {
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tsta @F16_F2A.I","");
       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
       pas.Optimize.asm65("\tsta @F16_F2A.I+1","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       pas.Optimize.asm65("\tjsr @F16_F2A","");
     } else if ($tmp === 0) {
-      var $tmp1 = pas.Common.DataSize[ValueType - 128];
+      var $tmp1 = pas.Common.GetDataSize(ValueType);
       if ($tmp1 === 1) {
-        if (ValueType === 131) {
+        if (ValueType === pas.Tokens.TTokenKind.SHORTINTTOK) {
           pas.Optimize.asm65("\tjsr @printSHORTINT","")}
          else pas.Optimize.asm65("\tjsr @printBYTE","")}
        else if ($tmp1 === 2) {
-        if (ValueType === 132) {
+        if (ValueType === pas.Tokens.TTokenKind.SMALLINTTOK) {
           pas.Optimize.asm65("\tjsr @printSMALLINT","")}
          else pas.Optimize.asm65("\tjsr @printWORD","")}
-       else if ($tmp1 === 4) if (ValueType === 133) {
+       else if ($tmp1 === 4) if (ValueType === pas.Tokens.TTokenKind.INTEGERTOK) {
         pas.Optimize.asm65("\tjsr @printINT","")}
        else pas.Optimize.asm65("\tjsr @printCARD","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 1) {
       pas.Optimize.asm65("\t@printSTRING #CODEORIGIN+$" + pas.SysUtils.IntToHex(Address - 256,4),"");
     } else if ($tmp === 2) {
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tldy :STACKORIGIN+STACKWIDTH,x","");
       pas.Optimize.asm65("\tjsr @printSTRING","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     } else if ($tmp === 12) {
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tldy :STACKORIGIN+STACKWIDTH,x","");
       pas.Optimize.asm65("\tjsr @printPCHAR","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     };
   };
   this.GenerateUnaryOperation = function (op, ValType) {
     var $tmp = op;
-    if ($tmp === 61) {}
-    else if ($tmp === 62) {
+    if ($tmp === pas.Tokens.TTokenKind.PLUSTOK) {}
+    else if ($tmp === pas.Tokens.TTokenKind.MINUSTOK) {
       $mod.Gen();
       $mod.Gen();
       $mod.Gen();
-      if (ValType === 144) {
+      if (ValType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
         pas.Optimize.asm65("\teor #$80","");
         pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-      } else if (ValType === 143) {
+      } else if (ValType === pas.Tokens.TTokenKind.SINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36653,7 +36589,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\teor #$80","");
         pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
       } else {
-        var $tmp1 = pas.Common.DataSize[ValType - 128];
+        var $tmp1 = pas.Common.GetDataSize(ValType);
         if ($tmp1 === 1) {
           pas.Optimize.asm65("\tlda #$00","");
           pas.Optimize.asm65("\tsub :STACKORIGIN,x","");
@@ -36695,11 +36631,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
         };
       };
-    } else if ($tmp === 72) {
+    } else if ($tmp === pas.Tokens.TTokenKind.NOTTOK) {
       $mod.Gen();
       $mod.Gen();
       $mod.Gen();
-      if (ValType === 135) {
+      if (ValType === pas.Tokens.TTokenKind.BOOLEANTOK) {
         pas.Optimize.asm65("\tldy #1","");
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tbeq @+","");
@@ -36707,7 +36643,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("@","");
         pas.Optimize.asm65("\tsty :STACKORIGIN,x","");
       } else {
-        $mod.ExpandParam(133,ValType);
+        $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType);
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\teor #$FF","");
         pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
@@ -36730,8 +36666,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     $mod.Gen();
     $mod.Gen();
     var $tmp = op;
-    if ($tmp === 61) {
-      if (ResultType === 144) {
+    if ($tmp === pas.Tokens.TTokenKind.PLUSTOK) {
+      if (ResultType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @F16_ADD.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36745,7 +36681,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tlda :eax+1","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
-      } else if (ResultType === 143) {
+      } else if (ResultType === pas.Tokens.TTokenKind.SINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta :FP2MAN0","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36772,15 +36708,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :FPMAN3","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
       } else {
-        var $tmp1 = pas.Common.DataSize[ResultType - 128];
+        var $tmp1 = pas.Common.GetDataSize(ResultType);
         if ($tmp1 === 1) {
-          $mod.a65(pas.Common.TCode65.addAL_CL,0,1,4,0)}
+          $mod.a65(pas.Common.TCode65.addAL_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
          else if ($tmp1 === 2) {
-          $mod.a65(pas.Common.TCode65.addAX_CX,0,1,4,0)}
-         else if ($tmp1 === 4) $mod.a65(pas.Common.TCode65.addEAX_ECX,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.addAX_CX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
+         else if ($tmp1 === 4) $mod.a65(pas.Common.TCode65.addEAX_ECX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
-    } else if ($tmp === 62) {
-      if (ResultType === 144) {
+    } else if ($tmp === pas.Tokens.TTokenKind.MINUSTOK) {
+      if (ResultType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @F16_SUB.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36794,7 +36730,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tlda :eax+1","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
-      } else if (ResultType === 143) {
+      } else if (ResultType === pas.Tokens.TTokenKind.SINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta :FP2MAN0","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36821,17 +36757,17 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda :FPMAN3","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
       } else {
-        var $tmp2 = pas.Common.DataSize[ResultType - 128];
+        var $tmp2 = pas.Common.GetDataSize(ResultType);
         if ($tmp2 === 1) {
-          $mod.a65(pas.Common.TCode65.subAL_CL,0,1,4,0)}
+          $mod.a65(pas.Common.TCode65.subAL_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
          else if ($tmp2 === 2) {
-          $mod.a65(pas.Common.TCode65.subAX_CX,0,1,4,0)}
-         else if ($tmp2 === 4) $mod.a65(pas.Common.TCode65.subEAX_ECX,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.subAX_CX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
+         else if ($tmp2 === 4) $mod.a65(pas.Common.TCode65.subEAX_ECX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
-    } else if ($tmp === 63) {
+    } else if ($tmp === pas.Tokens.TTokenKind.MULTOK) {
       if (ResultType in pas.Common.RealTypes) {
         var $tmp3 = ResultType;
-        if ($tmp3 === 141) {
+        if ($tmp3 === pas.Tokens.TTokenKind.SHORTREALTOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @SHORTREAL_MUL.B","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36845,7 +36781,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
           pas.Optimize.asm65("\tlda :eax+1","");
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
-        } else if ($tmp3 === 142) {
+        } else if ($tmp3 === pas.Tokens.TTokenKind.REALTOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @REAL_MUL.B","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36871,7 +36807,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tlda :eax+3","");
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
-        } else if ($tmp3 === 143) {
+        } else if ($tmp3 === pas.Tokens.TTokenKind.SINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta :FP2MAN0","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36897,7 +36833,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tlda :FPMAN3","");
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
-        } else if ($tmp3 === 144) {
+        } else if ($tmp3 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @F16_MUL.B","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36915,19 +36851,19 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       } else {
         if (ResultType in pas.Common.SignedOrdinalTypes) {
           var $tmp4 = ResultType;
-          if ($tmp4 === 131) {
+          if ($tmp4 === pas.Tokens.TTokenKind.SHORTINTTOK) {
             pas.Optimize.asm65("\tjsr mulSHORTINT","")}
-           else if ($tmp4 === 132) {
+           else if ($tmp4 === pas.Tokens.TTokenKind.SMALLINTTOK) {
             pas.Optimize.asm65("\tjsr mulSMALLINT","")}
-           else if ($tmp4 === 133) pas.Optimize.asm65("\tjsr mulINTEGER","");
+           else if ($tmp4 === pas.Tokens.TTokenKind.INTEGERTOK) pas.Optimize.asm65("\tjsr mulINTEGER","");
         } else {
-          var $tmp5 = pas.Common.DataSize[ResultType - 128];
+          var $tmp5 = pas.Common.GetDataSize(ResultType);
           if ($tmp5 === 1) {
             pas.Optimize.asm65("\tjsr imulBYTE","")}
            else if ($tmp5 === 2) {
             pas.Optimize.asm65("\tjsr imulWORD","")}
            else if ($tmp5 === 4) pas.Optimize.asm65("\tjsr imulCARD","");
-          if (pas.Common.DataSize[ResultType - 128] === 1) {
+          if (pas.Common.GetDataSize(ResultType) === 1) {
             pas.Optimize.asm65("\tlda :eax","");
             pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
             pas.Optimize.asm65("\tlda :eax+1","");
@@ -36944,10 +36880,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           };
         };
       };
-    } else if (($tmp === 64) || ($tmp === 65) || ($tmp === 66)) {
+    } else if (($tmp === pas.Tokens.TTokenKind.DIVTOK) || ($tmp === pas.Tokens.TTokenKind.IDIVTOK) || ($tmp === pas.Tokens.TTokenKind.MODTOK)) {
       if (ResultType in pas.Common.RealTypes) {
         var $tmp6 = ResultType;
-        if ($tmp6 === 141) {
+        if ($tmp6 === pas.Tokens.TTokenKind.SHORTREALTOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @SHORTREAL_DIV.B","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36961,7 +36897,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
           pas.Optimize.asm65("\tlda :eax+1","");
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
-        } else if ($tmp6 === 142) {
+        } else if ($tmp6 === pas.Tokens.TTokenKind.REALTOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @REAL_DIV.B","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -36987,7 +36923,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tlda :eax+3","");
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
-        } else if ($tmp6 === 143) {
+        } else if ($tmp6 === pas.Tokens.TTokenKind.SINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta :FP2MAN0","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37013,7 +36949,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tlda :FPMAN3","");
           pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
-        } else if ($tmp6 === 144) {
+        } else if ($tmp6 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @F16_DIV.B","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37031,8 +36967,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       } else {
         if (ResultType in pas.Common.SignedOrdinalTypes) {
           var $tmp7 = ResultType;
-          if ($tmp7 === 131) {
-            if (op === 66) {
+          if ($tmp7 === pas.Tokens.TTokenKind.SHORTINTTOK) {
+            if (op === pas.Tokens.TTokenKind.MODTOK) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta @SHORTINT.MOD.B","");
               pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
@@ -37049,8 +36985,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tlda :eax","");
               pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
             }}
-           else if ($tmp7 === 132) {
-            if (op === 66) {
+           else if ($tmp7 === pas.Tokens.TTokenKind.SMALLINTTOK) {
+            if (op === pas.Tokens.TTokenKind.MODTOK) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta @SMALLINT.MOD.B","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37079,7 +37015,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tlda :eax+1","");
               pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
             }}
-           else if ($tmp7 === 133) if (op === 66) {
+           else if ($tmp7 === pas.Tokens.TTokenKind.INTEGERTOK) if (op === pas.Tokens.TTokenKind.MODTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @INTEGER.MOD.B","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37134,8 +37070,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           };
         } else {
           var $tmp8 = ResultType;
-          if ($tmp8 === 128) {
-            if (op === 66) {
+          if ($tmp8 === pas.Tokens.TTokenKind.BYTETOK) {
+            if (op === pas.Tokens.TTokenKind.MODTOK) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta @BYTE.MOD.B","");
               pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
@@ -37152,8 +37088,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tlda :eax","");
               pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
             }}
-           else if ($tmp8 === 129) {
-            if (op === 66) {
+           else if ($tmp8 === pas.Tokens.TTokenKind.WORDTOK) {
+            if (op === pas.Tokens.TTokenKind.MODTOK) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta @WORD.MOD.B","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37182,7 +37118,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tlda :eax+1","");
               pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
             }}
-           else if ($tmp8 === 130) if (op === 66) {
+           else if ($tmp8 === pas.Tokens.TTokenKind.CARDINALTOK) if (op === pas.Tokens.TTokenKind.MODTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @CARDINAL.MOD.B","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37237,44 +37173,44 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           };
         };
       };
-    } else if ($tmp === 67) {
+    } else if ($tmp === pas.Tokens.TTokenKind.SHLTOK) {
       if (ResultType in pas.Common.SignedOrdinalTypes) {
-        var $tmp9 = pas.Common.DataSize[ResultType - 128];
+        var $tmp9 = pas.Common.GetDataSize(ResultType);
         if ($tmp9 === 1) {
           pas.Optimize.asm65("\tjsr @expandToCARD1.SHORT","");
-          $mod.a65(pas.Common.TCode65.shlEAX_CL,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.shlEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
         } else if ($tmp9 === 2) {
           pas.Optimize.asm65("\tjsr @expandToCARD1.SMALL","");
-          $mod.a65(pas.Common.TCode65.shlEAX_CL,0,1,4,0);
-        } else if ($tmp9 === 4) $mod.a65(pas.Common.TCode65.shlEAX_CL,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.shlEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        } else if ($tmp9 === 4) $mod.a65(pas.Common.TCode65.shlEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else {
-        var $tmp10 = pas.Common.DataSize[ResultType - 128];
+        var $tmp10 = pas.Common.GetDataSize(ResultType);
         if ($tmp10 === 1) {
-          $mod.a65(pas.Common.TCode65.shlAL_CL,0,1,4,0)}
+          $mod.a65(pas.Common.TCode65.shlAL_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
          else if ($tmp10 === 2) {
-          $mod.a65(pas.Common.TCode65.shlAX_CL,0,1,4,0)}
-         else if ($tmp10 === 4) $mod.a65(pas.Common.TCode65.shlEAX_CL,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.shlAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
+         else if ($tmp10 === 4) $mod.a65(pas.Common.TCode65.shlEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
-    } else if ($tmp === 68) {
+    } else if ($tmp === pas.Tokens.TTokenKind.SHRTOK) {
       if (ResultType in pas.Common.SignedOrdinalTypes) {
-        var $tmp11 = pas.Common.DataSize[ResultType - 128];
+        var $tmp11 = pas.Common.GetDataSize(ResultType);
         if ($tmp11 === 1) {
           pas.Optimize.asm65("\tjsr @expandToCARD1.SHORT","");
-          $mod.a65(pas.Common.TCode65.shrEAX_CL,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.shrEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
         } else if ($tmp11 === 2) {
           pas.Optimize.asm65("\tjsr @expandToCARD1.SMALL","");
-          $mod.a65(pas.Common.TCode65.shrEAX_CL,0,1,4,0);
-        } else if ($tmp11 === 4) $mod.a65(pas.Common.TCode65.shrEAX_CL,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.shrEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        } else if ($tmp11 === 4) $mod.a65(pas.Common.TCode65.shrEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else {
-        var $tmp12 = pas.Common.DataSize[ResultType - 128];
+        var $tmp12 = pas.Common.GetDataSize(ResultType);
         if ($tmp12 === 1) {
-          $mod.a65(pas.Common.TCode65.shrAL_CL,0,1,4,0)}
+          $mod.a65(pas.Common.TCode65.shrAL_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
          else if ($tmp12 === 2) {
-          $mod.a65(pas.Common.TCode65.shrAX_CL,0,1,4,0)}
-         else if ($tmp12 === 4) $mod.a65(pas.Common.TCode65.shrEAX_CL,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.shrAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
+         else if ($tmp12 === 4) $mod.a65(pas.Common.TCode65.shrEAX_CL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       };
-    } else if ($tmp === 71) {
-      var $tmp13 = pas.Common.DataSize[ResultType - 128];
+    } else if ($tmp === pas.Tokens.TTokenKind.ANDTOK) {
+      var $tmp13 = pas.Common.GetDataSize(ResultType);
       if ($tmp13 === 1) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tand :STACKORIGIN,x","");
@@ -37300,8 +37236,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tand :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
       };
-    } else if ($tmp === 69) {
-      var $tmp14 = pas.Common.DataSize[ResultType - 128];
+    } else if ($tmp === pas.Tokens.TTokenKind.ORTOK) {
+      var $tmp14 = pas.Common.GetDataSize(ResultType);
       if ($tmp14 === 1) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tora :STACKORIGIN,x","");
@@ -37327,8 +37263,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tora :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
       };
-    } else if ($tmp === 70) {
-      var $tmp15 = pas.Common.DataSize[ResultType - 128];
+    } else if ($tmp === pas.Tokens.TTokenKind.XORTOK) {
+      var $tmp15 = pas.Common.GetDataSize(ResultType);
       if ($tmp15 === 1) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\teor :STACKORIGIN,x","");
@@ -37355,7 +37291,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
       };
     };
-    $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
   };
   this.GenerateRelationString = function (rel, LeftValType, RightValType) {
     pas.Optimize.asm65("","");
@@ -37363,7 +37299,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     $mod.Gen();
     pas.Optimize.asm65("\tldy #1","");
     $mod.Gen();
-    if ((LeftValType === 137) && (RightValType === 137)) {
+    if ((LeftValType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (RightValType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tsta @cmpSTRING.B","");
       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37373,21 +37309,21 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
       pas.Optimize.asm65("\tsta @cmpSTRING.A+1","");
       pas.Optimize.asm65("\tjsr @cmpSTRING","");
-    } else if (LeftValType === 134) {
-      $mod.a65(pas.Common.TCode65.cmpCHAR2STRING,0,1,4,0)}
-     else if (RightValType === 134) $mod.a65(pas.Common.TCode65.cmpSTRING2CHAR,0,1,4,0);
-    $mod.GenerateRelationOperation(rel,128);
+    } else if (LeftValType === pas.Tokens.TTokenKind.CHARTOK) {
+      $mod.a65(pas.Common.TCode65.cmpCHAR2STRING,0,pas.Tokens.TTokenKind.CONSTTOK,4,0)}
+     else if (RightValType === pas.Tokens.TTokenKind.CHARTOK) $mod.a65(pas.Common.TCode65.cmpSTRING2CHAR,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+    $mod.GenerateRelationOperation(rel,pas.Tokens.TTokenKind.BYTETOK);
     $mod.Gen();
     pas.Optimize.asm65("\tdey","");
     pas.Optimize.asm65("@","");
     pas.Optimize.asm65("\tsty :STACKORIGIN-1,x","");
-    $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+    $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
   };
   this.GenerateRelation = function (rel, ValType) {
     $mod.Gen();
-    if (ValType === 144) {
+    if (ValType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
       var $tmp = rel;
-      if ($tmp === 43) {
+      if ($tmp === pas.Tokens.TTokenKind.EQTOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @F16_EQ.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37398,7 +37334,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta @F16_EQ.A+1","");
         pas.Optimize.asm65("\tjsr @F16_EQ","");
         pas.Optimize.asm65("\tdex","");
-      } else if (($tmp === 44) || ($tmp === 0)) {
+      } else if (($tmp === pas.Tokens.TTokenKind.NETOK) || ($tmp === pas.Tokens.TTokenKind.UNTYPETOK)) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @F16_EQ.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37410,7 +37346,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tjsr @F16_EQ","");
         pas.Optimize.asm65("\tdex","");
         pas.Optimize.asm65("\teor #$01","");
-      } else if ($tmp === 47) {
+      } else if ($tmp === pas.Tokens.TTokenKind.GTTOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @F16_GT.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37421,7 +37357,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta @F16_GT.A+1","");
         pas.Optimize.asm65("\tjsr @F16_GT","");
         pas.Optimize.asm65("\tdex","");
-      } else if ($tmp === 45) {
+      } else if ($tmp === pas.Tokens.TTokenKind.LTTOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tsta @F16_GT.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
@@ -37432,7 +37368,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta @F16_GT.A+1","");
         pas.Optimize.asm65("\tjsr @F16_GT","");
         pas.Optimize.asm65("\tdex","");
-      } else if ($tmp === 48) {
+      } else if ($tmp === pas.Tokens.TTokenKind.GETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @F16_GTE.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37443,7 +37379,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta @F16_GTE.A+1","");
         pas.Optimize.asm65("\tjsr @F16_GTE","");
         pas.Optimize.asm65("\tdex","");
-      } else if ($tmp === 46) {
+      } else if ($tmp === pas.Tokens.TTokenKind.LETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tsta @F16_GTE.B","");
         pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
@@ -37457,7 +37393,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       };
       pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
     } else {
-      if (ValType === 143) {
+      if (ValType === pas.Tokens.TTokenKind.SINGLETOK) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tsta @FCMPL.A","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -37478,10 +37414,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tldy #1","");
       $mod.Gen();
       var $tmp1 = ValType;
-      if (($tmp1 === 128) || ($tmp1 === 134) || ($tmp1 === 135)) {
+      if (($tmp1 === pas.Tokens.TTokenKind.BYTETOK) || ($tmp1 === pas.Tokens.TTokenKind.CHARTOK) || ($tmp1 === pas.Tokens.TTokenKind.BOOLEANTOK)) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tcmp :STACKORIGIN,x","");
-      } else if ($tmp1 === 131) {
+      } else if ($tmp1 === pas.Tokens.TTokenKind.SHORTINTTOK) {
         pas.Optimize.asm65("\t.LOCAL","");
         pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
         pas.Optimize.asm65("\tsub :STACKORIGIN,x","");
@@ -37491,7 +37427,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tora #$01","");
         pas.Optimize.asm65("L5","");
         pas.Optimize.asm65("\t.ENDL","");
-      } else if (($tmp1 === 132) || ($tmp1 === 141)) {
+      } else if (($tmp1 === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp1 === pas.Tokens.TTokenKind.SHORTREALTOK)) {
         pas.Optimize.asm65("\t.LOCAL","");
         pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
         pas.Optimize.asm65("\tsub :STACKORIGIN+STACKWIDTH,x","");
@@ -37508,9 +37444,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tora #$01","");
         pas.Optimize.asm65("L5","");
         pas.Optimize.asm65("\t.ENDL","");
-      } else if ($tmp1 === 143) {
+      } else if ($tmp1 === pas.Tokens.TTokenKind.SINGLETOK) {
         pas.Optimize.asm65("\tjsr @FCMPL","")}
-       else if (($tmp1 === 142) || ($tmp1 === 133)) {
+       else if (($tmp1 === pas.Tokens.TTokenKind.REALTOK) || ($tmp1 === pas.Tokens.TTokenKind.INTEGERTOK)) {
         pas.Optimize.asm65("\t.LOCAL","");
         pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsub :STACKORIGIN+STACKWIDTH*3,x","");
@@ -37534,7 +37470,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tora #$01","");
         pas.Optimize.asm65("L5","");
         pas.Optimize.asm65("\t.ENDL","");
-      } else if (($tmp1 === 129) || ($tmp1 === 136) || ($tmp1 === 137)) {
+      } else if (($tmp1 === pas.Tokens.TTokenKind.WORDTOK) || ($tmp1 === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp1 === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
         pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
         pas.Optimize.asm65("\tcmp :STACKORIGIN+STACKWIDTH,x","");
         pas.Optimize.asm65("\tbne @+","");
@@ -37560,7 +37496,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tdey","");
       pas.Optimize.asm65("@","");
       pas.Optimize.asm65("\tsty :STACKORIGIN-1,x","");
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
     };
   };
   this.SafeCompileConstExpression = function (i, ConstVal, ValType, VarType, Err, War) {
@@ -37590,9 +37526,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     if (pas.Common.optimize.use === false) $mod.StartOptimization(i);
     if (pas.Common.Ident[IdentIndex - 1].isStriped) {
       Size = 1}
-     else Size = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
+     else Size = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType);
     ShortArrayIndex = false;
-    if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].IdType === 154)) {
+    if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.DEREFERENCEARRAYTOK)) {
       NumAllocElements = pas.Common.Ident[IdentIndex - 1].NestedNumAllocElements & 0xFFFF;
       NumAllocElements_ = rtl.lw(pas.Common.Ident[IdentIndex - 1].NestedNumAllocElements >>> 16);
       if (NumAllocElements_ > 0) {
@@ -37602,8 +37538,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       NumAllocElements = pas.Common.Ident[IdentIndex - 1].NumAllocElements;
       NumAllocElements_ = pas.Common.Ident[IdentIndex - 1].NumAllocElements_;
     };
-    if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140,147)) NumAllocElements_ = 0;
-    ActualParamType = 129;
+    if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK,pas.Tokens.TTokenKind.PROCVARTOK)) NumAllocElements_ = 0;
+    ActualParamType = pas.Tokens.TTokenKind.WORDTOK;
     j = i + 2;
     if ($mod.SafeCompileConstExpression({get: function () {
         return j;
@@ -37620,11 +37556,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       }},ActualParamType,false,true)) {
       i = j;
       pas.Common.CheckArrayIndex(i,IdentIndex,ConstVal,ArrayIndexType);
-      ArrayIndexType = 129;
+      ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK;
       ShortArrayIndex = false;
       if (NumAllocElements_ > 0) {
-        $mod.Push(ConstVal * NumAllocElements_ * Size,0,pas.Common.DataSize[ArrayIndexType - 128],0,0)}
-       else $mod.Push(ConstVal * Size,0,pas.Common.DataSize[ArrayIndexType - 128],0,0);
+        $mod.Push(ConstVal * NumAllocElements_ * Size,0,pas.Common.GetDataSize(ArrayIndexType),0,0)}
+       else $mod.Push(ConstVal * Size,0,pas.Common.GetDataSize(ArrayIndexType),0,0);
     } else {
       i = $mod.CompileExpression(i + 2,{get: function () {
           return ArrayIndexType;
@@ -37633,39 +37569,39 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         }},ActualParamType);
       pas.Common.GetCommonType(i,ActualParamType,ArrayIndexType);
       var $tmp = ArrayIndexType;
-      if ($tmp === 131) {
-        ArrayIndexType = 128}
-       else if ($tmp === 132) {
-        ArrayIndexType = 129}
-       else if ($tmp === 133) ArrayIndexType = 130;
-      if (pas.Common.DataSize[ArrayIndexType - 128] === 4) {
+      if ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) {
+        ArrayIndexType = pas.Tokens.TTokenKind.BYTETOK}
+       else if ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) {
+        ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK}
+       else if ($tmp === pas.Tokens.TTokenKind.INTEGERTOK) ArrayIndexType = pas.Tokens.TTokenKind.CARDINALTOK;
+      if (pas.Common.GetDataSize(ArrayIndexType) === 4) {
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*2,x","");
         pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
         pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
         pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
       };
-      if (pas.Common.DataSize[ArrayIndexType - 128] === 1) {
-        $mod.ExpandParam(129,ArrayIndexType);
-      } else ArrayIndexType = 129;
+      if (pas.Common.GetDataSize(ArrayIndexType) === 1) {
+        $mod.ExpandParam(pas.Tokens.TTokenKind.WORDTOK,ArrayIndexType);
+      } else ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK;
       if ((Size > 1) || (pas.Parser.Elements(IdentIndex) > 256) || (pas.Parser.Elements(IdentIndex) in rtl.createSet(0,1))) {
-        ArrayIndexType = 129;
+        ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK;
       };
       if (NumAllocElements_ > 0) {
-        $mod.Push((NumAllocElements_ * Size) & 0xFFFFFFFF,0,pas.Common.DataSize[ArrayIndexType - 128],0,0);
-        $mod.GenerateBinaryOperation(63,ArrayIndexType);
+        $mod.Push((NumAllocElements_ * Size) & 0xFFFFFFFF,0,pas.Common.GetDataSize(ArrayIndexType),0,0);
+        $mod.GenerateBinaryOperation(pas.Tokens.TTokenKind.MULTOK,ArrayIndexType);
       } else if (pas.Common.Ident[IdentIndex - 1].isStriped === false) $mod.GenerateIndexShift(pas.Common.Ident[IdentIndex - 1].AllocElementType,0);
     };
     yes = false;
     if (NumAllocElements_ > 0) {
-      if (pas.Common.Tok[i + 1].Kind === 59) {
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.CBRACKETTOK) {
         i += 1;
-        pas.Common.CheckTok(i + 1,58);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OBRACKETTOK);
         yes = true;
       } else {
-        pas.Common.CheckTok(i + 1,52);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
         yes = true;
       };
-    } else pas.Common.CheckTok(i + 1,59);
+    } else pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
     if (yes) {
       j = i + 2;
       if ($mod.SafeCompileConstExpression({get: function () {
@@ -37683,9 +37619,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         }},ActualParamType,false,true)) {
         i = j;
         pas.Common.CheckArrayIndex_(i,IdentIndex,ConstVal,ArrayIndexType);
-        ArrayIndexType = 129;
+        ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK;
         ShortArrayIndex = false;
-        $mod.Push(ConstVal * Size,0,pas.Common.DataSize[ArrayIndexType - 128],0,0);
+        $mod.Push(ConstVal * Size,0,pas.Common.GetDataSize(ArrayIndexType),0,0);
       } else {
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ArrayIndexType;
@@ -37694,24 +37630,24 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           }},ActualParamType);
         pas.Common.GetCommonType(i,ActualParamType,ArrayIndexType);
         var $tmp1 = ArrayIndexType;
-        if ($tmp1 === 131) {
-          ArrayIndexType = 128}
-         else if ($tmp1 === 132) {
-          ArrayIndexType = 129}
-         else if ($tmp1 === 133) ArrayIndexType = 130;
-        if (pas.Common.DataSize[ArrayIndexType - 128] === 4) {
+        if ($tmp1 === pas.Tokens.TTokenKind.SHORTINTTOK) {
+          ArrayIndexType = pas.Tokens.TTokenKind.BYTETOK}
+         else if ($tmp1 === pas.Tokens.TTokenKind.SMALLINTTOK) {
+          ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK}
+         else if ($tmp1 === pas.Tokens.TTokenKind.INTEGERTOK) ArrayIndexType = pas.Tokens.TTokenKind.CARDINALTOK;
+        if (pas.Common.GetDataSize(ArrayIndexType) === 4) {
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
         };
-        if (pas.Common.DataSize[ArrayIndexType - 128] === 1) {
-          $mod.ExpandParam(129,ArrayIndexType);
-          ArrayIndexType = 129;
-        } else ArrayIndexType = 129;
+        if (pas.Common.GetDataSize(ArrayIndexType) === 1) {
+          $mod.ExpandParam(pas.Tokens.TTokenKind.WORDTOK,ArrayIndexType);
+          ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK;
+        } else ArrayIndexType = pas.Tokens.TTokenKind.WORDTOK;
         if (pas.Common.Ident[IdentIndex - 1].isStriped === false) $mod.GenerateIndexShift(pas.Common.Ident[IdentIndex - 1].AllocElementType,0);
       };
-      $mod.GenerateBinaryOperation(61,129);
+      $mod.GenerateBinaryOperation(pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.WORDTOK);
     };
     if (ShortArrayIndex) {
       pas.Optimize.asm65("\tlda #$00","");
@@ -37739,43 +37675,43 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       rec = false;
       dereference = false;
       address = false;
-      AllocElementType.set(0);
-      if (pas.Common.Tok[i + 1].Kind === 57) {
+      AllocElementType.set(pas.Tokens.TTokenKind.UNTYPETOK);
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) {
         if (VarPass) pas.Messages.Error$1(i + 1,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.CantAsignValuesToAnAddress,"Can't assign values to an address","",""]),pas.Messages.IMessage)));
         address = true;
         i += 1;
       };
-      if ((pas.Common.Tok[i + 1].Kind === 145) && (pas.Common.Tok[i + 2].Kind === 54)) {
-        j = $mod.CompileExpression(i + 3,ValType,136);
-        pas.Common.CheckTok(j + 1,55);
-        if (pas.Common.Tok[j + 2].Kind !== 56) pas.Messages.Error$1(i + 3,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.CantAsignValuesToAnAddress,"Can't assign values to an address","",""]),pas.Messages.IMessage)));
+      if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.PCHARTOK) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OPARTOK)) {
+        j = $mod.CompileExpression(i + 3,ValType,pas.Tokens.TTokenKind.POINTERTOK);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+        if (pas.Common.Tok[j + 2].Kind !== pas.Tokens.TTokenKind.DEREFERENCETOK) pas.Messages.Error$1(i + 3,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.CantAsignValuesToAnAddress,"Can't assign values to an address","",""]),pas.Messages.IMessage)));
         i = j + 1;
-      } else if (pas.Common.Tok[i + 1].Kind !== 170) {
+      } else if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
         if (IdentIndex > 0) {
-          if (!(pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(1,3,4,5,99,100,57))) {
+          if (!(pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK,pas.Tokens.TTokenKind.ADDRESSTOK))) {
             pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.VariableExpected)}
            else {
-            if (pas.Common.Ident[IdentIndex - 1].Kind === 1) if (!((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.CantAdrConstantExp);
-            if (pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(4,5,99,100)) {
+            if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) if (!((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.CantAdrConstantExp);
+            if (pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
               Name = $mod.GetLocalName(IdentIndex,"");
               if (pas.Common.Ident[IdentIndex - 1].isOverload) Name = Name + "." + $mod.GetOverloadName(IdentIndex);
-              $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+              $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
               pas.Optimize.asm65("\tmva <" + Name + " :STACKORIGIN,x","");
               pas.Optimize.asm65("\tmva >" + Name + " :STACKORIGIN+STACKWIDTH,x","");
               if (pas.Common.pass === pas.Common.TPass.CALL_DETERMINATION) $mod.AddCallGraphChild(pas.Common.BlockStack[pas.Common.BlockStackTop],pas.Common.Ident[IdentIndex - 1].ProcAsBlock);
-            } else if ((pas.Common.Tok[i + 2].Kind === 58) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && ((pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) || ((pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0)))) {
+            } else if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && ((pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) || ((pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK)))) {
               i += 1;
               i = $mod.CompileArrayIndex(i,IdentIndex);
-              if (pas.Common.Ident[IdentIndex - 1].DataType === 146) {
+              if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK) {
                 NumAllocElements = 0;
               } else NumAllocElements = pas.Parser.Elements(IdentIndex);
               svar = $mod.GetLocalName(IdentIndex,"");
               if (pas.System.Pos(".",svar) > 0) {
                 lab = $mod.ExtractName(IdentIndex,svar);
-                rec = pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === 139;
+                rec = pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK;
               };
               AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
               if (rec) {
@@ -37791,7 +37727,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
                 pas.Optimize.asm65("\tadc #$00","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-              } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((NumAllocElements * pas.Common.DataSize[AllocElementType.get() - 128]) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
+              } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((NumAllocElements * pas.Common.GetDataSize(AllocElementType.get())) > 256) || (NumAllocElements in rtl.createSet(0,1))) {
                 pas.Optimize.asm65("\tlda " + svar,"");
                 pas.Optimize.asm65("\tadd :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
@@ -37806,52 +37742,52 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tadc :STACKORIGIN+STACKWIDTH,x","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
               };
-              pas.Common.CheckTok(i + 1,59);
-            } else if ((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(138,148,139,140)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) || (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || (VarPass && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers))) {
-              dereference = pas.Common.Tok[i + 2].Kind === 56;
-              if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].IdType === 160)) {
-                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,5,pas.Common.DataSize[8],IdentIndex,0);
+              pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
+            } else if ((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK,pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) || (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || (VarPass && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers))) {
+              dereference = pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK;
+              if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.DATAORIGINOFFSET)) {
+                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,5,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
               } else if (dereference) {
                 svar = $mod.GetLocalName(IdentIndex,"");
-                if (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) if ((pas.Common.Ident[IdentIndex - 1].AllocElementType === 139) && (pas.Common.Tok[i + 3].Kind === 51)) {
-                  pas.Common.CheckTok(i + 4,170);
+                if (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) if ((pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.DOTTOK)) {
+                  pas.Common.CheckTok(i + 4,pas.Tokens.TTokenKind.IDENTTOK);
                   IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 4].Name);
                   if (IdentTemp < 0) pas.Messages.Error$1(i + 4,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierIdentsNoMember,"Identifier idents no member '{0}'.",pas.Common.Tok[i + 4].Name,""]),pas.Messages.IMessage)));
                   AllocElementType.set(IdentTemp >>> 16);
                   IdentTemp = pas.Parser.GetIdentIndex(svar + "." + pas.Common.Tok[i + 4].Name);
                   if (IdentTemp === 0) pas.Messages.Error$2(i + 4,pas.Messages.TErrorCode.UnknownIdentifier);
-                  $mod.Push(pas.Common.Ident[IdentTemp - 1].Value,1,pas.Common.DataSize[8],IdentTemp,0);
+                  $mod.Push(pas.Common.Ident[IdentTemp - 1].Value,1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentTemp,0);
                   i += 3;
                 } else {
                   AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                  if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
-                    if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) {
+                  if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
+                    if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                       if (pas.Common.Ident[IdentIndex - 1].NumAllocElements_ === 0) {}
                       else pas.Messages.Error$2(i + 4,pas.Messages.TErrorCode.IllegalQualifier);
                     } else pas.Messages.Error$2(i + 4,pas.Messages.TErrorCode.IllegalQualifier);
                   };
-                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[8],IdentIndex,0);
+                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
                   i += 1;
                 };
               } else if (address || VarPass) {
-                if ((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(139,140,138,148)) || (VarPass && (pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.diffSet(pas.Common.AllTypes,rtl.createSet(147,139,140))) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) && (VarPass || (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) || (pas.Common.Ident[IdentIndex - 1].isAbsolute && ((pas.Common.Ident[IdentIndex - 1].Value & 0xff) === 0) && ((Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255) in rtl.createSet(null,1,127))) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements_ === 0)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].IdType === 160)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(0,139,140,147)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) {
-                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[8],IdentIndex,0)}
-                 else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,0,pas.Common.DataSize[8],IdentIndex,0);
+                if ((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK,pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)) || (VarPass && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.diffSet(pas.Common.AllTypes,rtl.createSet(pas.Tokens.TTokenKind.PROCVARTOK,pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (VarPass || (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) || (pas.Common.Ident[IdentIndex - 1].isAbsolute && ((pas.Common.Ident[IdentIndex - 1].Value & 0xff) === 0) && ((Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255) in rtl.createSet(null,1,127))) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements_ === 0)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.DATAORIGINOFFSET)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.UNTYPETOK,pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK,pas.Tokens.TTokenKind.PROCVARTOK)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) {
+                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0)}
+                 else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,0,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
                 AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
               } else {
-                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[8],IdentIndex,0);
+                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
                 AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
               };
             } else {
-              if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === 56)) {
+              if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK)) {
                 AllocElementType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
                 i += 1;
-                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[8],IdentIndex,0);
+                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
               } else {
-                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,0,pas.Common.DataSize[8],IdentIndex,0);
+                $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,0,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
               };
             };
-            ValType.set(136);
+            ValType.set(pas.Tokens.TTokenKind.POINTERTOK);
             Result = i + 1;
           };
         } else pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.UnknownIdentifier);
@@ -37873,9 +37809,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     oldCodeSize = pas.Common.CodeSize;
     pas.Common.pass = pas.Common.TPass.CALL_DETERMINATION;
     NumActualParams.set(0);
-    ActualParamType = 0;
+    ActualParamType = pas.Tokens.TTokenKind.UNTYPETOK;
     Result[0].i_ = i + 1;
-    if ((pas.Common.Tok[i + 1].Kind === 54) && (pas.Common.Tok[i + 2].Kind !== 55)) {
+    if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) && (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.CPARTOK)) {
       do {
         NumActualParams.set(NumActualParams.get() + 1);
         if (NumActualParams.get() > 8) pas.Messages.ErrorForIdentifier(i,pas.Messages.TErrorCode.TooManyParameters,IdentIndex);
@@ -37884,32 +37820,32 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        AllocElementType = 0;
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
         NumAllocElements = 0;
-        if ((ActualParamType in rtl.createSet(136,137)) && (pas.Common.Tok[i].Kind === 170)) {
+        if ((ActualParamType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK)) && (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK)) {
           IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name);
-          if ((pas.Common.Tok[i - 1].Kind === 57) && !(pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(139,140))) {}
+          if ((pas.Common.Tok[i - 1].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) && !(pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {}
           else {
             AllocElementType = pas.Common.Ident[IdentTemp - 1].AllocElementType;
             NumAllocElements = pas.Common.Ident[IdentTemp - 1].NumAllocElements;
           };
-          if (pas.Common.Ident[IdentTemp - 1].Kind in rtl.createSet(4,5)) {
+          if (pas.Common.Ident[IdentTemp - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK)) {
             Result[NumActualParams.get() - 1].Name = pas.Common.Ident[IdentTemp - 1].Name;
             AllocElementType = pas.Common.Ident[IdentTemp - 1].Kind;
           };
         } else {
-          if (pas.Common.Tok[i].Kind === 170) {
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
             IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name);
             AllocElementType = pas.Common.Ident[IdentTemp - 1].AllocElementType;
             NumAllocElements = pas.Common.Ident[IdentTemp - 1].NumAllocElements;
-          } else AllocElementType = 0;
+          } else AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
         };
         Result[NumActualParams.get() - 1].DataType = ActualParamType;
         Result[NumActualParams.get() - 1].AllocElementType = AllocElementType;
         Result[NumActualParams.get() - 1].NumAllocElements = NumAllocElements;
-      } while (!(pas.Common.Tok[i + 1].Kind !== 52));
-      pas.Common.CheckTok(i + 1,55);
+      } while (!(pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
       Result[0].i_ = i;
     };
     pas.Common.pass = oldPass;
@@ -37938,16 +37874,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       yes = pas.Common.Ident[IdentIndex - 1].isRecursion || pas.Common.Ident[IdentIndex - 1].isStdCall;
       for (var $l = pas.Common.Ident[IdentIndex - 1].NumParams; $l >= 1; $l--) {
         ParamIndex = $l;
-        if (!((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType in pas.Common.Pointers) && ((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].NumAllocElements & 0xFFFF) in rtl.createSet(0,1))) || ((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].AllocElementType in rtl.createSet(139,140))) || (pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes)))) {
+        if (!((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType in pas.Common.Pointers) && ((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].NumAllocElements & 0xFFFF) in rtl.createSet(0,1))) || ((pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) || (pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes)))) {
           yes = true;
           break;
         };
       };
       if (ProcVarIndex > 0) {
         svar = $mod.GetLocalName(ProcVarIndex,"");
-        if (pas.Common.Tok[i.get() + 1].Kind === 58) {
+        if (pas.Common.Tok[i.get() + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
           i.set($mod.CompileArrayIndex(i.get(),ProcVarIndex));
-          pas.Common.CheckTok(i.get() + 1,59);
+          pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
           i.set(i.get() + 1);
           if (((pas.Common.Ident[ProcVarIndex - 1].NumAllocElements * 2) > 256) || (pas.Common.Ident[ProcVarIndex - 1].NumAllocElements in rtl.createSet(0,1))) {
             pas.Optimize.asm65("\tlda " + svar,"");
@@ -38043,10 +37979,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Messages.Error$1(i.get(),$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.WrongNumberOfParameters,"Wrong number of parameters specified for {0}.",pas.Common.Ident[ProcVarIndex - 1].Name,""]),pas.Messages.IMessage)))}
        else pas.Messages.Error$1(i.get(),$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.WrongNumberOfParameters,"Wrong number of parameters specified for {0}.",pas.Common.Ident[IdentIndex - 1].Name,""]),pas.Messages.IMessage)));
       ParamIndex = NumActualParams;
-      AllocElementType = 0;
+      AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
       IdentTemp = 0;
-      if (pas.Common.Tok[i.get() + 1].Kind === 54) {
-        if (pas.Common.Tok[i.get() + 2].Kind === 55) {
+      if (pas.Common.Tok[i.get() + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) {
+        if (pas.Common.Tok[i.get() + 2].Kind === pas.Tokens.TTokenKind.CPARTOK) {
           i.set(i.get() + 1)}
          else while (NumActualParams > 0) {
           i.set(Param[NumActualParams - 1].i);
@@ -38060,7 +37996,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               }, set: function (v) {
                 AllocElementType = v;
               }},true));
-            if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== 0) && (ActualParamType === 136) && (AllocElementType in rtl.createSet(136,137,145))) {
+            if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== pas.Tokens.TTokenKind.UNTYPETOK) && (ActualParamType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.PCHARTOK))) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta :bp2","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38072,40 +38008,40 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tlda (:bp2),y","");
               pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
             };
-            if (pas.Common.Tok[i.get()].Kind === 170) {
+            if (pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
               IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name)}
              else IdentTemp = 0;
             if (IdentTemp > 0) {
-              if (pas.Common.Ident[IdentTemp - 1].Kind === 5) pas.Messages.Error$2(i.get(),pas.Messages.TErrorCode.CantAdrConstantExp);
-              if (pas.Common.Ident[IdentTemp - 1].DataType in pas.Common.Pointers) if (!(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(138,148))) {
-                if (pas.Common.Ident[IdentTemp - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(139,140)) {
+              if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) pas.Messages.Error$2(i.get(),pas.Messages.TErrorCode.CantAdrConstantExp);
+              if (pas.Common.Ident[IdentTemp - 1].DataType in pas.Common.Pointers) if (!(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK))) {
+                if (pas.Common.Ident[IdentTemp - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                   pas.Messages.Error$1(i.get(),$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IncompatibleTypes,'Incompatible types: got "{0}" expected "^{1}".',pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name,pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements - 1].Field[0].Name]),pas.Messages.IMessage)))}
                  else pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,pas.Common.Ident[IdentTemp - 1].DataType);
               };
-              if (pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(139,140)) if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements !== pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements)) {
+              if (pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements !== pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements)) {
                 if (pas.Common.Ident[IdentTemp - 1].PassMethod !== pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].PassMethod) {
                   pas.Messages.Error$2(i.get(),pas.Messages.TErrorCode.CantAdrConstantExp)}
                  else pas.Messages.ErrorForIdentifier(i.get(),pas.Messages.TErrorCode.IncompatibleTypeOf,IdentTemp);
               };
-              if (pas.Common.Ident[IdentTemp - 1].AllocElementType === 0) {
+              if (pas.Common.Ident[IdentTemp - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
                 pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,pas.Common.Ident[IdentTemp - 1].DataType);
-                if (pas.Common.Ident[IdentTemp - 1].AllocElementType === 0) if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== 0) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== pas.Common.Ident[IdentTemp - 1].DataType)) pas.Messages.ErrorIncompatibleTypes(i.get(),pas.Common.Ident[IdentTemp - 1].DataType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
+                if (pas.Common.Ident[IdentTemp - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== pas.Common.Ident[IdentTemp - 1].DataType)) pas.Messages.ErrorIncompatibleTypes(i.get(),pas.Common.Ident[IdentTemp - 1].DataType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
               } else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in pas.Common.Pointers) {
                 if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements === 0) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements === 0)) {}
                 else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) {
-                  if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType === 0) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(136,145))) {
-                    if (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(139,140)) {}
+                  if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.PCHARTOK))) {
+                    if (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {}
                     else pas.Messages.ErrorIdentifierIncompatibleTypesArray(i.get(),IdentTemp,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType);
                   } else pas.Messages.ErrorIncompatibleTypes(i.get(),pas.Common.Ident[IdentTemp - 1].AllocElementType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType,false);
                 };
               } else pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,pas.Common.Ident[IdentTemp - 1].AllocElementType);
-            } else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== 0) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== AllocElementType) {
-              if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== 0) {
+            } else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== pas.Tokens.TTokenKind.UNTYPETOK) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType !== AllocElementType) {
+              if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) {
                 if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== AllocElementType) pas.Messages.ErrorIncompatibleTypes(i.get(),AllocElementType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
               } else pas.Messages.ErrorIncompatibleTypes(i.get(),AllocElementType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
             };
-            if (IdentTemp === 0) if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === 139) && (ActualParamType === 136) && (AllocElementType === 139)) {}
-            else if ((ActualParamType === 136) && (AllocElementType !== 0)) {
+            if (IdentTemp === 0) if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (ActualParamType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType === pas.Tokens.TTokenKind.RECORDTOK)) {}
+            else if ((ActualParamType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK)) {
               pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,AllocElementType)}
              else pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,ActualParamType);
           } else {
@@ -38114,44 +38050,44 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               }, set: function (v) {
                 ActualParamType = v;
               }},pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType));
-            if ((pas.Common.Tok[i.get()].Kind === 170) && (ActualParamType in rtl.createSet(139,140)) && !(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in pas.Common.Pointers)) if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name) - 1].isNestedFunction) {
+            if ((pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (ActualParamType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && !(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in pas.Common.Pointers)) if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name) - 1].isNestedFunction) {
               if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name) - 1].NestedFunctionNumAllocElements !== pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements) pas.Messages.ErrorForIdentifier(i.get(),pas.Messages.TErrorCode.IncompatibleTypeOf,pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name));
             } else if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name) - 1].NumAllocElements !== pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements) pas.Messages.ErrorForIdentifier(i.get(),pas.Messages.TErrorCode.IncompatibleTypeOf,pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name));
-            if (((ActualParamType in rtl.createSet(139,140)) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in pas.Common.Pointers)) || ((ActualParamType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(139,140)))) {
-              if ((ActualParamType === 136) && (pas.Common.Tok[i.get()].Kind === 170)) {
+            if (((ActualParamType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in pas.Common.Pointers)) || ((ActualParamType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)))) {
+              if ((ActualParamType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.IDENTTOK)) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name);
-                if (pas.Common.Tok[i.get() - 1].Kind === 57) {
-                  AllocElementType = 0}
+                if (pas.Common.Tok[i.get() - 1].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) {
+                  AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK}
                  else AllocElementType = pas.Common.Ident[IdentTemp - 1].AllocElementType;
-                if (AllocElementType === 0) pas.Messages.ErrorIncompatibleTypes(i.get(),ActualParamType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
+                if (AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) pas.Messages.ErrorIncompatibleTypes(i.get(),ActualParamType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
               } else pas.Messages.ErrorIncompatibleTypes(i.get(),ActualParamType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false);
             } else {
-              if ((ActualParamType === 136) && (pas.Common.Tok[i.get()].Kind === 170)) {
+              if ((ActualParamType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.IDENTTOK)) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name);
-                if (pas.Common.Tok[i.get() - 1].Kind === 57) {
-                  AllocElementType = 0}
+                if (pas.Common.Tok[i.get() - 1].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) {
+                  AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK}
                  else AllocElementType = pas.Common.Ident[IdentTemp - 1].AllocElementType;
-                if (pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(139,140)) {
+                if (pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                   pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,ActualParamType)}
                  else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== AllocElementType) {
-                  if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType === 0) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements > 0)) {
-                    pas.Messages.ErrorIdentifierIncompatibleTypesArray(i.get(),IdentTemp,136)}
-                   else if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== 147) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements > 0)) pas.Messages.ErrorIncompatibleTypes(i.get(),AllocElementType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType,false);
+                  if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements > 0)) {
+                    pas.Messages.ErrorIdentifierIncompatibleTypesArray(i.get(),IdentTemp,pas.Tokens.TTokenKind.POINTERTOK)}
+                   else if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== pas.Tokens.TTokenKind.PROCVARTOK) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements > 0)) pas.Messages.ErrorIncompatibleTypes(i.get(),AllocElementType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType,false);
                 };
-              } else if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(136,137)) && (pas.Common.Tok[i.get()].Kind === 170)) {
+              } else if ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK)) && (pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.IDENTTOK)) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[i.get()].Name);
-                if ((pas.Common.Ident[IdentTemp - 1].DataType === 137) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements !== 0) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements === 0)) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType === 0) {
+                if ((pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements !== 0) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements === 0)) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
                   pas.Messages.ErrorIncompatibleTypes(i.get(),pas.Common.Ident[IdentTemp - 1].DataType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,false)}
-                 else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== 128) pas.Messages.ErrorIncompatibleTypes(i.get(),pas.Common.Ident[IdentTemp - 1].DataType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType,true);
+                 else if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType !== pas.Tokens.TTokenKind.BYTETOK) pas.Messages.ErrorIncompatibleTypes(i.get(),pas.Common.Ident[IdentTemp - 1].DataType,pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType,true);
                 pas.Common.GetCommonType(i.get(),pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,pas.Common.Ident[IdentTemp - 1].DataType);
               } else {
-                if ((ActualParamType === 136) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === 137)) pas.Messages.ErrorIncompatibleTypes(i.get(),ActualParamType,137,true);
-                if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === 137) {
-                  if ((ActualParamType === 134) && (pas.Common.Tok[i.get()].Kind === 173)) {
-                    ActualParamType = 137;
+                if ((ActualParamType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) pas.Messages.ErrorIncompatibleTypes(i.get(),ActualParamType,pas.Tokens.TTokenKind.STRINGPOINTERTOK,true);
+                if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
+                  if ((ActualParamType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.CHARLITERALTOK)) {
+                    ActualParamType = pas.Tokens.TTokenKind.STRINGPOINTERTOK;
                     if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) {
                       pas.Common.DefineStaticString(i.get(),String.fromCharCode(pas.Common.Tok[i.get()].Value));
-                      pas.Common.Tok[i.get()].Kind = 174;
+                      pas.Common.Tok[i.get()].Kind = pas.Tokens.TTokenKind.STRINGLITERALTOK;
                       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                       pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
                       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38163,8 +38099,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     };
                   };
                 };
-                if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === 145) {
-                  if (ActualParamType === 137) {
+                if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType === pas.Tokens.TTokenKind.PCHARTOK) {
+                  if (ActualParamType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
                     pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                     pas.Optimize.asm65("\tadd #$01","");
                     pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
@@ -38172,11 +38108,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     pas.Optimize.asm65("\tadc #$00","");
                     pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
                   };
-                  if ((ActualParamType === 134) && (pas.Common.Tok[i.get()].Kind === 173)) {
-                    ActualParamType = 145;
+                  if ((ActualParamType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Common.Tok[i.get()].Kind === pas.Tokens.TTokenKind.CHARLITERALTOK)) {
+                    ActualParamType = pas.Tokens.TTokenKind.PCHARTOK;
                     if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) {
                       pas.Common.DefineStaticString(i.get(),String.fromCharCode(pas.Common.Tok[i.get()].Value));
-                      pas.Common.Tok[i.get()].Kind = 174;
+                      pas.Common.Tok[i.get()].Kind = pas.Tokens.TTokenKind.STRINGLITERALTOK;
                       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                       pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
                       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38193,7 +38129,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             };
             $mod.ExpandParam(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType,ActualParamType);
           };
-          if ((pas.Common.Ident[IdentIndex - 1].isRecursion === false) && (pas.Common.Ident[IdentIndex - 1].isStdCall === false) && (ParamIndex > 1) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers)) && ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements & 0xFFFF) > 1)) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(139,140)) {
+          if ((pas.Common.Ident[IdentIndex - 1].isRecursion === false) && (pas.Common.Ident[IdentIndex - 1].isStdCall === false) && (ParamIndex > 1) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers)) && ((pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements & 0xFFFF) > 1)) if (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             if (pas.Common.Ident[IdentIndex - 1].isOverload) {
               svar = $mod.GetLocalName(IdentIndex,"") + "." + $mod.GetOverloadName(IdentIndex)}
              else svar = $mod.GetLocalName(IdentIndex,"");
@@ -38209,7 +38145,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(j - 1,2),"");
               pas.Optimize.asm65("\tmva:rpl (:bp2),y " + svar + ".adr." + pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].Name + ",y-","");
             } else pas.Optimize.asm65('\t@move ":bp2" #' + svar + ".adr." + pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].Name + " #" + pas.Common.IntToStr(j),"");
-          } else if (!(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType in rtl.createSet(139,140))) {
+          } else if (!(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
             if (pas.Common.Ident[IdentIndex - 1].isOverload) {
               svar = $mod.GetLocalName(IdentIndex,"") + "." + $mod.GetOverloadName(IdentIndex)}
              else svar = $mod.GetLocalName(IdentIndex,"");
@@ -38220,7 +38156,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             if (rtl.lw(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements >>> 16) !== 0) {
               j = (pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements & 0xFFFF) * rtl.lw(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements >>> 16)}
              else j = pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].NumAllocElements;
-            j = j * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType - 128];
+            j = j * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].AllocElementType);
             if (j === 256) {
               pas.Optimize.asm65("\tldy #$00","");
               pas.Optimize.asm65("\tmva:rne (:bp2),y " + svar + ".adr." + pas.Common.Ident[IdentIndex - 1].Param[NumActualParams - 1].Name + ",y+","");
@@ -38232,7 +38168,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           NumActualParams -= 1;
         };
         i.set(Param[0].i_);
-        pas.Common.CheckTok(i.get() + 1,55);
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.CPARTOK);
         i.set(i.get() + 1);
       };
       NumActualParams = ParamIndex;
@@ -38253,30 +38189,30 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name,"");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
             pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name + "+1","");
-            $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-          } else if ((NumActualParams === 1) && (pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType - 128] === 1)) {
+            $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+          } else if ((NumActualParams === 1) && (pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType) === 1)) {
             if (pas.Common.Ident[IdentIndex - 1].ObjectIndex > 0) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name,"");
-              $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+              $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
             } else {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta @PARAM?","");
-              $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+              $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
             };
           } else {
             var $tmp = pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType;
-            if (($tmp === 128) || ($tmp === 134) || ($tmp === 135) || ($tmp === 131)) {
+            if (($tmp === pas.Tokens.TTokenKind.BYTETOK) || ($tmp === pas.Tokens.TTokenKind.CHARTOK) || ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK)) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name,"");
-              $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-            } else if (($tmp === 129) || ($tmp === 132) || ($tmp === 141) || ($tmp === 144) || ($tmp === 136) || ($tmp === 137) || ($tmp === 145)) {
+              $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+            } else if (($tmp === pas.Tokens.TTokenKind.WORDTOK) || ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) || ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK) || ($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || ($tmp === pas.Tokens.TTokenKind.PCHARTOK)) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name,"");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name + "+1","");
-              $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-            } else if (($tmp === 130) || ($tmp === 133) || ($tmp === 142) || ($tmp === 143)) {
+              $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+            } else if (($tmp === pas.Tokens.TTokenKind.CARDINALTOK) || ($tmp === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp === pas.Tokens.TTokenKind.REALTOK) || ($tmp === pas.Tokens.TTokenKind.SINGLETOK)) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name,"");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38285,22 +38221,22 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name + "+2","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*3,x","");
               pas.Optimize.asm65("\tsta " + svar + "." + pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].Name + "+3","");
-              $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+              $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
             } else {
-              pas.Messages.Error$1(i.get(),$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.Unassigned,"Unassigned: {0}",pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType),""]),pas.Messages.IMessage)));
+              pas.Messages.Error$1(i.get(),$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.Unassigned,"Unassigned: {0}",pas.Tokens.GetTokenKindName(pas.Common.Ident[IdentIndex - 1].Param[ParamIndex - 1].DataType),""]),pas.Messages.IMessage)));
             };
           };
         };
         old_func = pas.Common.run_func;
         pas.Common.run_func = 0;
-        if (pas.Common.Ident[IdentIndex - 1].isStdCall === false) if (pas.Common.Ident[IdentIndex - 1].Kind === 5) {
+        if (pas.Common.Ident[IdentIndex - 1].isStdCall === false) if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
           $mod.StartOptimization(i.get())}
          else $mod.StopOptimization();
         pas.Common.run_func = old_func;
       };
       $mod.Gen();
       if (pas.Common.Ident[IdentIndex - 1].ObjectIndex > 0) {
-        if (pas.Common.Tok[old_i].Kind !== 170) {
+        if (pas.Common.Tok[old_i].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
           pas.Messages.Error$2(old_i,pas.Messages.TErrorCode.IdentifierExpected)}
          else IdentTemp = pas.Parser.GetIdentIndex(pas.System.Copy(pas.Common.Tok[old_i].Name,1,pas.System.Pos(".",pas.Common.Tok[old_i].Name) - 1));
         pas.Optimize.asm65("\tlda " + $mod.GetLocalName(IdentTemp,""),"");
@@ -38309,7 +38245,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if (pas.Common.Ident[IdentIndex - 1].isInline) {
         if ((pas.Common.Ident[IdentIndex - 1].Block > 1) && (pas.Common.Ident[IdentIndex - 1].Block !== pas.Common.BlockStack[pas.Common.BlockStackTop])) for (var $l2 = pas.Common.NumIdent; $l2 >= 1; $l2--) {
           IdentTemp = $l2;
-          if ((pas.Common.Ident[IdentTemp - 1].Kind in rtl.createSet(4,5)) && (pas.Common.Ident[IdentTemp - 1].ProcAsBlock === pas.Common.Ident[IdentIndex - 1].Block)) {
+          if ((pas.Common.Ident[IdentTemp - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK)) && (pas.Common.Ident[IdentTemp - 1].ProcAsBlock === pas.Common.Ident[IdentIndex - 1].Block)) {
             svar = pas.Common.Ident[IdentTemp - 1].Name + "." + svar;
             break;
           };
@@ -38344,9 +38280,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tjsr @xmsProc","");
         } else pas.Optimize.asm65("\tjsr " + svar,"");
       };
-      if ((pas.Common.Ident[IdentIndex - 1].Kind === 5) && (pas.Common.Ident[IdentIndex - 1].isStdCall === false) && (pas.Common.Ident[IdentIndex - 1].isRecursion === false)) {
+      if ((pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) && (pas.Common.Ident[IdentIndex - 1].isStdCall === false) && (pas.Common.Ident[IdentIndex - 1].isRecursion === false)) {
         pas.Optimize.asm65("\tinx","");
-        var $tmp1 = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128];
+        var $tmp1 = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType);
         if ($tmp1 === 1) {
           pas.Optimize.asm65("\tmva " + svar + ".RESULT :STACKORIGIN,x","");
         } else if ($tmp1 === 2) {
@@ -38388,12 +38324,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     try {
       isZero.set(false);
       Result = i;
-      ValType.set(0);
+      ValType.set(pas.Tokens.TTokenKind.UNTYPETOK);
       ConstVal = 0;
       IdentIndex = 0;
       var $tmp = pas.Common.Tok[i].Kind;
-      if ($tmp === 85) {
-        pas.Common.CheckTok(i + 1,54);
+      if ($tmp === pas.Tokens.TTokenKind.HIGHTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         if (pas.Common.Tok[i + 2].Kind in pas.Common.AllTypes) {
           ValType.set(pas.Common.Tok[i + 2].Kind);
           j = i + 2;
@@ -38401,104 +38337,104 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           oldPass = pas.Common.pass;
           oldCodeSize = pas.Common.CodeSize;
           pas.Common.pass = pas.Common.TPass.CALL_DETERMINATION;
-          j = $mod.CompileExpression(i + 2,ValType,133);
+          j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
           pas.Common.pass = oldPass;
           pas.Common.CodeSize = oldCodeSize;
         };
         if (ValType.get() in pas.Common.Pointers) {
           IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
-          if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) {
+          if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             Value = pas.Common.Ident[IdentIndex - 1].NumAllocElements_ - 1}
            else if (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) {
             Value = pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1}
            else Value = pas.Common.HighBound(j,pas.Common.Ident[IdentIndex - 1].AllocElementType);
         } else Value = pas.Common.HighBound(j,ValType.get());
         ValType.set(pas.Common.GetValueType(Value));
-        if (pas.Common.Ident[IdentIndex - 1].DataType === 137) {
-          $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+        if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
+          $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
           pas.Optimize.asm65("\tlda adr." + $mod.GetLocalName(IdentIndex,""),"");
           pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-          ValType.set(128);
-        } else $mod.Push(Value,0,pas.Common.DataSize[ValType.get() - 128],0,0);
-        pas.Common.CheckTok(j + 1,55);
+          ValType.set(pas.Tokens.TTokenKind.BYTETOK);
+        } else $mod.Push(Value,0,pas.Common.GetDataSize(ValType.get()),0,0);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
         Result = j + 1;
-      } else if ($tmp === 86) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.LOWTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         oldPass = pas.Common.pass;
         oldCodeSize = pas.Common.CodeSize;
         pas.Common.pass = pas.Common.TPass.CALL_DETERMINATION;
-        i = $mod.CompileExpression(i + 2,ValType,133);
+        i = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
         pas.Common.pass = oldPass;
         pas.Common.CodeSize = oldCodeSize;
         if (ValType.get() in pas.Common.Pointers) {
           Value = 0;
-          if (ValType.get() === 137) Value = 1;
+          if (ValType.get() === pas.Tokens.TTokenKind.STRINGPOINTERTOK) Value = 1;
         } else Value = pas.Common.LowBound(i,ValType.get());
         ValType.set(pas.Common.GetValueType(Value));
-        $mod.Push(Value,0,pas.Common.DataSize[ValType.get() - 128],0,0);
-        pas.Common.CheckTok(i + 1,55);
+        $mod.Push(Value,0,pas.Common.GetDataSize(ValType.get()),0,0);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         Result = i + 1;
-      } else if ($tmp === 83) {
+      } else if ($tmp === pas.Tokens.TTokenKind.SIZEOFTOK) {
         Value = 0;
-        pas.Common.CheckTok(i + 1,54);
-        if (pas.Common.Tok[i + 2].Kind in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(136))) {
-          Value = pas.Common.DataSize[pas.Common.Tok[i + 2].Kind - 128];
-          ValType.set(128);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+        if (pas.Common.Tok[i + 2].Kind in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK))) {
+          Value = pas.Common.GetDataSize(pas.Common.Tok[i + 2].Kind);
+          ValType.set(pas.Tokens.TTokenKind.BYTETOK);
           j = i + 2;
         } else {
-          if (pas.Common.Tok[i + 2].Kind !== 170) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
+          if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
           oldPass = pas.Common.pass;
           oldCodeSize = pas.Common.CodeSize;
           pas.Common.pass = pas.Common.TPass.CALL_DETERMINATION;
-          j = $mod.CompileExpression(i + 2,ValType,133);
+          j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
           pas.Common.pass = oldPass;
           pas.Common.CodeSize = oldCodeSize;
           Value = pas.Parser.GetSizeOf(i,ValType.get());
           ValType.set(pas.Common.GetValueType(Value));
         };
-        $mod.Push(Value,0,pas.Common.DataSize[ValType.get() - 128],0,0);
-        pas.Common.CheckTok(j + 1,55);
+        $mod.Push(Value,0,pas.Common.GetDataSize(ValType.get()),0,0);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
         Result = j + 1;
-      } else if ($tmp === 84) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.LENGTHTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         Value = 0;
-        if (pas.Common.Tok[i + 2].Kind === 173) {
+        if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.CHARLITERALTOK) {
           $mod.Push(1,0,1,0,0);
-          ValType.set(128);
+          ValType.set(pas.Tokens.TTokenKind.BYTETOK);
           i += 2;
-        } else if (pas.Common.Tok[i + 2].Kind === 174) {
+        } else if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
           $mod.Push(pas.Common.Tok[i + 2].StrLength,0,1,0,0);
-          ValType.set(128);
+          ValType.set(pas.Tokens.TTokenKind.BYTETOK);
           i += 2;
-        } else if (pas.Common.Tok[i + 2].Kind === 170) {
+        } else if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
           IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
           if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-          if (pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(3,1)) {
-            if (pas.Common.Ident[IdentIndex - 1].DataType === 134) {
+          if (pas.Common.Ident[IdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.CONSTTOK)) {
+            if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.CHARTOK) {
               $mod.Push(1,0,1,0,0);
-              ValType.set(128);
-            } else if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+              ValType.set(pas.Tokens.TTokenKind.BYTETOK);
+            } else if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
               i = $mod.CompileArrayIndex(i + 2,IdentIndex);
               ValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-              pas.Common.CheckTok(i + 2,51);
-              pas.Common.CheckTok(i + 3,170);
+              pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.DOTTOK);
+              pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
               IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
               if (IdentTemp < 0) pas.Messages.Error$1(i + 3,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierIdentsNoMember,"Identifier idents no member '{0}'.",pas.Common.Tok[i + 3].Name,""]),pas.Messages.IMessage)));
-              if ((IdentTemp >>> 16) === 134) {
-                $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+              if ((IdentTemp >>> 16) === pas.Tokens.TTokenKind.CHARTOK) {
+                $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                 $mod.Push(1,0,1,0,0);
               } else {
-                if ((IdentTemp >>> 16) !== 137) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.TypeMismatch);
+                if ((IdentTemp >>> 16) !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.TypeMismatch);
                 $mod.Push(0,0,1,0,0);
                 $mod.Push(1,11,1,IdentIndex,IdentTemp & 0xffff);
               };
-              ValType.set(128);
+              ValType.set(pas.Tokens.TTokenKind.BYTETOK);
               i += 1;
-            } else if ((pas.Common.Ident[IdentIndex - 1].DataType === 137) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) {
-              if ((pas.Common.Ident[IdentIndex - 1].DataType === 137) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 134) || ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 137))) {
-                if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 137) {
+            } else if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) {
+              if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK) || ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.STRINGPOINTERTOK))) {
+                if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
                   i = $mod.CompileArrayIndex(i + 2,IdentIndex);
-                  $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   svar = $mod.GetLocalName(IdentIndex,"");
                   if (((pas.Common.Ident[IdentIndex - 1].NumAllocElements * 2) > 256) || (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(0,1)) || (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING)) {
                     pas.Optimize.asm65("\tlda " + svar,"");
@@ -38521,20 +38457,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     pas.Optimize.asm65("\tlda " + svar + ",y","");
                     pas.Optimize.asm65("\ttay","");
                   };
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   pas.Optimize.asm65("\tlda (:bp),y","");
                   pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-                  pas.Common.CheckTok(i + 1,59);
-                  pas.Common.CheckTok(i + 2,55);
-                  ValType.set(128);
+                  pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
+                  pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.CPARTOK);
+                  ValType.set(pas.Tokens.TTokenKind.BYTETOK);
                   Result = i + 2;
                   return Result;
                 } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
-                  $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   svar = $mod.GetLocalName(IdentIndex,"");
                   if ($mod.TestName(IdentIndex,svar)) {
                     lab = $mod.ExtractName(IdentIndex,svar);
-                    if (pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === 139) {
+                    if (pas.Common.Ident[pas.Parser.GetIdentIndex(lab) - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) {
                       pas.Optimize.asm65("\tlda " + lab,"");
                       pas.Optimize.asm65("\tldy " + lab + "+1","");
                       pas.Optimize.asm65("\tadd #" + svar + "-DATAORIGIN","");
@@ -38553,96 +38489,96 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\tlda (:bp),y","");
                   pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
                 } else {
-                  $mod.a65(pas.Common.TCode65.addBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.addBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   pas.Optimize.asm65("\tlda " + $mod.GetLocalName(IdentIndex,"adr."),"");
                   pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
                 };
-                ValType.set(128);
+                ValType.set(pas.Tokens.TTokenKind.BYTETOK);
               } else {
-                if (pas.Common.Tok[i + 3].Kind === 58) {
+                if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
                   pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.TypeMismatch)}
                  else {
                   Value = pas.Common.Ident[IdentIndex - 1].NumAllocElements;
                   ValType.set(pas.Common.GetValueType(Value));
-                  $mod.Push(Value,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+                  $mod.Push(Value,0,pas.Common.GetDataSize(ValType.get()),0,0);
                 };
               };
             } else pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.TypeMismatch);
           } else pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
           i += 2;
         } else pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected);
-        pas.Common.CheckTok(i + 1,55);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         Result = i + 1;
-      } else if ($tmp === 49) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.LOTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.GetCommonConstType(i,133,ActualParamType,true);
-        if (pas.Common.DataSize[ActualParamType - 128] > 2) pas.Messages.WarningLoHi(i);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.INTEGERTOK,ActualParamType,true);
+        if (pas.Common.GetDataSize(ActualParamType) > 2) pas.Messages.WarningLoHi(i);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         pas.Optimize.asm65("","");
         pas.Optimize.asm65("; Lo(X)","");
         var $tmp1 = ActualParamType;
-        if (($tmp1 === 131) || ($tmp1 === 128)) {
+        if (($tmp1 === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp1 === pas.Tokens.TTokenKind.BYTETOK)) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tand #$0F","");
           pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
         };
-        if (ActualParamType in rtl.createSet(133,130)) {
-          ValType.set(129)}
-         else ValType.set(128);
+        if (ActualParamType in rtl.createSet(pas.Tokens.TTokenKind.INTEGERTOK,pas.Tokens.TTokenKind.CARDINALTOK)) {
+          ValType.set(pas.Tokens.TTokenKind.WORDTOK)}
+         else ValType.set(pas.Tokens.TTokenKind.BYTETOK);
         Result = i + 1;
-      } else if ($tmp === 50) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.HITOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.GetCommonConstType(i,133,ActualParamType,true);
-        if (pas.Common.DataSize[ActualParamType - 128] > 2) pas.Messages.WarningLoHi(i);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.INTEGERTOK,ActualParamType,true);
+        if (pas.Common.GetDataSize(ActualParamType) > 2) pas.Messages.WarningLoHi(i);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         pas.Optimize.asm65("","");
         pas.Optimize.asm65("; Hi(X)","");
         var $tmp2 = ActualParamType;
-        if (($tmp2 === 131) || ($tmp2 === 128)) {
+        if (($tmp2 === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp2 === pas.Tokens.TTokenKind.BYTETOK)) {
           pas.Optimize.asm65("\tjsr @hiBYTE","")}
-         else if (($tmp2 === 132) || ($tmp2 === 129)) {
+         else if (($tmp2 === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp2 === pas.Tokens.TTokenKind.WORDTOK)) {
           pas.Optimize.asm65("\tjsr @hiWORD","")}
-         else if (($tmp2 === 133) || ($tmp2 === 130)) pas.Optimize.asm65("\tjsr @hiCARD","");
-        if (ActualParamType in rtl.createSet(133,130)) {
-          ValType.set(129)}
-         else ValType.set(128);
+         else if (($tmp2 === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp2 === pas.Tokens.TTokenKind.CARDINALTOK)) pas.Optimize.asm65("\tjsr @hiCARD","");
+        if (ActualParamType in rtl.createSet(pas.Tokens.TTokenKind.INTEGERTOK,pas.Tokens.TTokenKind.CARDINALTOK)) {
+          ValType.set(pas.Tokens.TTokenKind.WORDTOK)}
+         else ValType.set(pas.Tokens.TTokenKind.BYTETOK);
         Result = i + 1;
-      } else if ($tmp === 36) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.CHRTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},128);
-        pas.Common.GetCommonConstType(i,133,ActualParamType,true);
-        pas.Common.CheckTok(i + 1,55);
-        ValType.set(134);
+          }},pas.Tokens.TTokenKind.BYTETOK);
+        pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.INTEGERTOK,ActualParamType,true);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+        ValType.set(pas.Tokens.TTokenKind.CHARTOK);
         Result = i + 1;
-      } else if ($tmp === 87) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.INTTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        if (!(ActualParamType in pas.Common.RealTypes)) pas.Messages.ErrorIncompatibleTypes(i + 2,ActualParamType,142,false);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        if (!(ActualParamType in pas.Common.RealTypes)) pas.Messages.ErrorIncompatibleTypes(i + 2,ActualParamType,pas.Tokens.TTokenKind.REALTOK,false);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         var $tmp3 = ActualParamType;
-        if ($tmp3 === 141) {
+        if ($tmp3 === pas.Tokens.TTokenKind.SHORTREALTOK) {
           pas.Optimize.asm65("\tjsr @INT_SHORT","")}
-         else if ($tmp3 === 142) {
+         else if ($tmp3 === pas.Tokens.TTokenKind.REALTOK) {
           pas.Optimize.asm65("\tjsr @INT","")}
-         else if ($tmp3 === 144) {
+         else if ($tmp3 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @F16_INT.A","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38653,7 +38589,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
           pas.Optimize.asm65("\tlda :eax+1","");
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-        } else if ($tmp3 === 143) {
+        } else if ($tmp3 === pas.Tokens.TTokenKind.SINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta :FPMAN0","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38675,19 +38611,19 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         };
         ValType.set(ActualParamType);
         Result = i + 1;
-      } else if ($tmp === 88) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.FRACTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        if (!(ActualParamType in pas.Common.RealTypes)) pas.Messages.ErrorIncompatibleTypes(i + 2,ActualParamType,142,false);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        if (!(ActualParamType in pas.Common.RealTypes)) pas.Messages.ErrorIncompatibleTypes(i + 2,ActualParamType,pas.Tokens.TTokenKind.REALTOK,false);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         var $tmp4 = ActualParamType;
-        if ($tmp4 === 141) {
+        if ($tmp4 === pas.Tokens.TTokenKind.SHORTREALTOK) {
           pas.Optimize.asm65("\tjsr @SHORTREAL_FRAC","")}
-         else if ($tmp4 === 142) {
+         else if ($tmp4 === pas.Tokens.TTokenKind.REALTOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @REAL_FRAC.A","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38705,7 +38641,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
           pas.Optimize.asm65("\tlda :eax+3","");
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-        } else if ($tmp4 === 144) {
+        } else if ($tmp4 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta @F16_FRAC.A","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38715,7 +38651,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
           pas.Optimize.asm65("\tlda :eax+1","");
           pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-        } else if ($tmp4 === 143) {
+        } else if ($tmp4 === pas.Tokens.TTokenKind.SINGLETOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta :FPMAN0","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38736,20 +38672,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         };
         ValType.set(ActualParamType);
         Result = i + 1;
-      } else if ($tmp === 89) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.TRUNCTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         if (ActualParamType in pas.Common.IntegerTypes) {
           ValType.set(ActualParamType)}
          else if (ActualParamType in pas.Common.RealTypes) {
-          ValType.set(133);
+          ValType.set(pas.Tokens.TTokenKind.INTEGERTOK);
           var $tmp5 = ActualParamType;
-          if ($tmp5 === 141) {
+          if ($tmp5 === pas.Tokens.TTokenKind.SHORTREALTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @SHORTREAL_TRUNC.A","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38757,8 +38693,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tjsr @SHORTREAL_TRUNC","");
             pas.Optimize.asm65("\tlda :eax","");
             pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-            ValType.set(131);
-          } else if ($tmp5 === 142) {
+            ValType.set(pas.Tokens.TTokenKind.SHORTINTTOK);
+          } else if ($tmp5 === pas.Tokens.TTokenKind.REALTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @REAL_TRUNC.A","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38776,7 +38712,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
             pas.Optimize.asm65("\tlda :eax+3","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-          } else if ($tmp5 === 144) {
+          } else if ($tmp5 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @F16_INT.A","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38790,7 +38726,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
             pas.Optimize.asm65("\tlda :eax+3","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-          } else if ($tmp5 === 143) {
+          } else if ($tmp5 === pas.Tokens.TTokenKind.SINGLETOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta :FPMAN0","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38809,25 +38745,25 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tlda :FPMAN3","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
           };
-        } else pas.Common.GetCommonConstType(i,142,ActualParamType,true);
+        } else pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.REALTOK,ActualParamType,true);
         Result = i + 1;
-      } else if ($tmp === 90) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.ROUNDTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         if (ActualParamType in pas.Common.IntegerTypes) {
           ValType.set(ActualParamType)}
          else if (ActualParamType in pas.Common.RealTypes) {
-          ValType.set(133);
+          ValType.set(pas.Tokens.TTokenKind.INTEGERTOK);
           var $tmp6 = ActualParamType;
-          if ($tmp6 === 141) {
+          if ($tmp6 === pas.Tokens.TTokenKind.SHORTREALTOK) {
             pas.Optimize.asm65("\tjsr @SHORTREAL_ROUND","");
-            ValType.set(131);
-          } else if ($tmp6 === 142) {
+            ValType.set(pas.Tokens.TTokenKind.SHORTINTTOK);
+          } else if ($tmp6 === pas.Tokens.TTokenKind.REALTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @REAL_ROUND.A","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38845,7 +38781,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
             pas.Optimize.asm65("\tlda :eax+3","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-          } else if ($tmp6 === 144) {
+          } else if ($tmp6 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @F16_ROUND.A","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38859,7 +38795,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
             pas.Optimize.asm65("\tlda :eax+3","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-          } else if ($tmp6 === 143) {
+          } else if ($tmp6 === pas.Tokens.TTokenKind.SINGLETOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta :FP2MAN0","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38878,60 +38814,60 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tlda :FPMAN3","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
           };
-        } else pas.Common.GetCommonConstType(i,142,ActualParamType,true);
+        } else pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.REALTOK,ActualParamType,true);
         Result = i + 1;
-      } else if ($tmp === 91) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.ODDTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.GetCommonConstType(i,130,ActualParamType,true);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.CARDINALTOK,ActualParamType,true);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tand #$01","");
         pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-        ValType.set(135);
+        ValType.set(pas.Tokens.TTokenKind.BOOLEANTOK);
         Result = i + 1;
-      } else if ($tmp === 35) {
-        pas.Common.CheckTok(i + 1,54);
+      } else if ($tmp === pas.Tokens.TTokenKind.ORDTOK) {
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         j = i + 2;
-        i = $mod.CompileExpression(i + 2,ValType,128);
-        if (!(ValType.get() in rtl.unionSet(pas.Common.OrdinalTypes,rtl.createSet(146)))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
-        pas.Common.CheckTok(i + 1,55);
-        if (ValType.get() in rtl.createSet(134,135,146)) ValType.set(128);
+        i = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.BYTETOK);
+        if (!(ValType.get() in rtl.unionSet(pas.Common.OrdinalTypes,rtl.createSet(pas.Tokens.TTokenKind.ENUMTOK)))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+        if (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.BOOLEANTOK,pas.Tokens.TTokenKind.ENUMTOK)) ValType.set(pas.Tokens.TTokenKind.BYTETOK);
         Result = i + 1;
-      } else if (($tmp === 111) || ($tmp === 110)) {
+      } else if (($tmp === pas.Tokens.TTokenKind.PREDTOK) || ($tmp === pas.Tokens.TTokenKind.SUCCTOK)) {
         Kind = pas.Common.Tok[i].Kind;
-        pas.Common.CheckTok(i + 1,54);
-        i = $mod.CompileExpression(i + 2,ValType,133);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
+        i = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
         if (!(ValType.get() in pas.Common.OrdinalTypes)) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
-        pas.Common.CheckTok(i + 1,55);
-        $mod.Push(1,0,pas.Common.DataSize[ValType.get() - 128],0,0);
-        if (Kind === 111) {
-          $mod.GenerateBinaryOperation(62,ValType.get())}
-         else $mod.GenerateBinaryOperation(61,ValType.get());
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+        $mod.Push(1,0,pas.Common.GetDataSize(ValType.get()),0,0);
+        if (Kind === pas.Tokens.TTokenKind.PREDTOK) {
+          $mod.GenerateBinaryOperation(pas.Tokens.TTokenKind.MINUSTOK,ValType.get())}
+         else $mod.GenerateBinaryOperation(pas.Tokens.TTokenKind.PLUSTOK,ValType.get());
         Result = i + 1;
-      } else if ($tmp === 114) {
+      } else if ($tmp === pas.Tokens.TTokenKind.INTOK) {
         pas.System.Writeln("IN");
         Result = i;
-      } else if ($tmp === 170) {
+      } else if ($tmp === pas.Tokens.TTokenKind.IDENTTOK) {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name);
         if (IdentIndex > 0) {
-          if ((pas.Common.Ident[IdentIndex - 1].Kind === 2) && (pas.Common.Tok[i + 1].Kind === 54)) {
-            j = $mod.CompileExpression(i + 2,ValType,133);
+          if ((pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.TYPETOK) && (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK)) {
+            j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
             if (!(ValType.get() in pas.Common.AllTypes)) pas.Messages.Error$2(i,pas.Messages.TErrorCode.TypeMismatch);
-            if ((ValType.get() === 136) && !(pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(136,139,140))) {
+            if ((ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) && !(pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
               ValType.set(pas.Common.Ident[IdentIndex - 1].DataType);
-              if (pas.Common.Tok[i + 4].Kind === 56) return j + 2;
+              if (pas.Common.Tok[i + 4].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) return j + 2;
             };
             if (ValType.get() in pas.Common.IntegerTypes) {
               var $tmp7 = pas.Common.Ident[IdentIndex - 1].DataType;
-              if ($tmp7 === 146) {
-                ValType.set(146);
-              } else if ($tmp7 === 141) {
-                $mod.ExpandParam(132,ValType.get());
+              if ($tmp7 === pas.Tokens.TTokenKind.ENUMTOK) {
+                ValType.set(pas.Tokens.TTokenKind.ENUMTOK);
+              } else if ($tmp7 === pas.Tokens.TTokenKind.SHORTREALTOK) {
+                $mod.ExpandParam(pas.Tokens.TTokenKind.SMALLINTTOK,ValType.get());
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*2,x","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38940,9 +38876,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
                 pas.Optimize.asm65("\tlda #$00","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-                ValType.set(141);
-              } else if ($tmp7 === 142) {
-                $mod.ExpandParam(133,ValType.get());
+                ValType.set(pas.Tokens.TTokenKind.SHORTREALTOK);
+              } else if ($tmp7 === pas.Tokens.TTokenKind.REALTOK) {
+                $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*2,x","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38951,9 +38887,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
                 pas.Optimize.asm65("\tlda #$00","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-                ValType.set(142);
-              } else if ($tmp7 === 144) {
-                $mod.ExpandParam(133,ValType.get());
+                ValType.set(pas.Tokens.TTokenKind.REALTOK);
+              } else if ($tmp7 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
+                $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
                 pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tsta @F16_I2F.SV","");
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38967,9 +38903,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tlda :eax+1","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-                ValType.set(144);
-              } else if ($tmp7 === 143) {
-                $mod.ExpandParam(133,ValType.get());
+                ValType.set(pas.Tokens.TTokenKind.HALFSINGLETOK);
+              } else if ($tmp7 === pas.Tokens.TTokenKind.SINGLETOK) {
+                $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
                 pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tsta :FPMAN0","");
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -38987,14 +38923,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
                 pas.Optimize.asm65("\tlda :FPMAN3","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-                ValType.set(143);
+                ValType.set(pas.Tokens.TTokenKind.SINGLETOK);
               };
             };
-            pas.Common.CheckTok(j + 1,55);
-            if ((ValType.get() === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 147)) {
+            pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+            if ((ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK)) {
               IdentTemp = pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].NumAllocElements_,4));
               if (pas.Common.Ident[IdentTemp - 1].isNestedFunction === false) pas.Messages.Error$1(j,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.VariableConstantOrFunctionExpectedButProcedureFound,"Variable, constant or function name expected but procedure {0} found.",pas.Common.Ident[IdentIndex - 1].Name,""]),pas.Messages.IMessage)));
-              if (pas.Common.Tok[j].Kind !== 170) pas.Messages.Error$2(j,pas.Messages.TErrorCode.VariableExpected);
+              if (pas.Common.Tok[j].Kind !== pas.Tokens.TTokenKind.IDENTTOK) pas.Messages.Error$2(j,pas.Messages.TErrorCode.VariableExpected);
               svar = $mod.GetLocalName(pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name),"");
               pas.Optimize.asm65("\tlda " + svar,"");
               pas.Optimize.asm65("\tsta :TMP+1","");
@@ -39004,16 +38940,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tsta :TMP","");
               pas.Optimize.asm65("\tjsr :TMP","");
               ValType.set(pas.Common.Ident[IdentTemp - 1].DataType);
-            } else if (((ValType.get() === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(139,140)))) || ((ValType.get() === 136) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(139,140)))) {
+            } else if (((ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes),rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)))) || ((ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)))) {
               yes = false;
-              if ((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(139,140)) && (pas.Common.Tok[j].Kind === 56)) yes = true;
-              if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Tok[j + 2].Kind === 56)) yes = true;
-              if ((pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) || (pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(139,140))) {
-                if (pas.Common.Tok[j + 2].Kind === 56) j += 1;
-                if (pas.Common.Tok[j + 2].Kind !== 51) {
+              if ((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK)) yes = true;
+              if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK)) yes = true;
+              if ((pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) || (pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
+                if (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) j += 1;
+                if (pas.Common.Tok[j + 2].Kind !== pas.Tokens.TTokenKind.DOTTOK) {
                   yes = false}
-                 else if (pas.Common.Tok[j + 2].Kind === 51) {
-                  pas.Common.CheckTok(j + 3,170);
+                 else if (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.DOTTOK) {
+                  pas.Common.CheckTok(j + 3,pas.Tokens.TTokenKind.IDENTTOK);
                   IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[j + 3].Name);
                   if (IdentTemp < 0) pas.Messages.Error$1(j + 3,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierIdentsNoMember,"Identifier idents no member '{0}'.",pas.Common.Tok[j + 3].Name,""]),pas.Messages.IMessage)));
                   ValType.set(IdentTemp >>> 16);
@@ -39024,7 +38960,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2),"");
                   j += 2;
                 };
-              } else if (pas.Common.Tok[j + 2].Kind === 56) if (ValType.get() === 136) {
+              } else if (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) if (ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) {
                 pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tsta :bp2","");
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39034,7 +38970,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 j += 1;
               } else pas.Messages.Error$2(j + 2,pas.Messages.TErrorCode.IllegalQualifier);
               if (yes) {
-                var $tmp8 = pas.Common.DataSize[ValType.get() - 128];
+                var $tmp8 = pas.Common.GetDataSize(ValType.get());
                 if ($tmp8 === 1) {
                   pas.Optimize.asm65("\tlda (:bp2),y","");
                   pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
@@ -39061,14 +38997,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             };
             $mod.ExpandParam(pas.Common.Ident[IdentIndex - 1].DataType,ValType.get());
             Result = j + 1;
-          } else if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 147)) {
+          } else if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK)) {
             IdentTemp = pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].NumAllocElements_,4));
-            if (pas.Common.Tok[i + 1].Kind === 58) {
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
               i = $mod.CompileArrayIndex(i,IdentIndex);
-              pas.Common.CheckTok(i + 1,59);
+              pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
               i += 1;
             };
-            if (pas.Common.Tok[i + 1].Kind === 54) {
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) {
               $mod.CompileActualParameters({get: function () {
                   return i;
                 }, set: function (v) {
@@ -39076,14 +39012,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }},IdentTemp,IdentIndex)}
              else {
               if (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) {
-                $mod.Push(0,4,pas.Common.DataSize[8],IdentIndex,0)}
-               else $mod.Push(0,1,pas.Common.DataSize[8],IdentIndex,0);
+                $mod.Push(0,4,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0)}
+               else $mod.Push(0,1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),IdentIndex,0);
             };
-            ValType.set(136);
+            ValType.set(pas.Tokens.TTokenKind.POINTERTOK);
             Result = i;
-          } else if (pas.Common.Ident[IdentIndex - 1].Kind === 4) {
+          } else if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.PROCEDURETOK) {
             pas.Messages.Error$1(i,$ir.ref(4,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.VariableConstantOrFunctionExpectedButProcedureFound,"Variable, constant or function name expected but procedure {0} found.",pas.Common.Ident[IdentIndex - 1].Name,""]),pas.Messages.IMessage)))}
-           else if (pas.Common.Ident[IdentIndex - 1].Kind === 5) {
+           else if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
             Param = $mod.NumActualParameters(i,IdentIndex,{get: function () {
                 return j;
               }, set: function (v) {
@@ -39108,76 +39044,76 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Common.run_func -= 1;
             Result = i;
           } else {
-            if (pas.Common.Tok[i + 1].Kind === 56) {
-              if ((pas.Common.Ident[IdentIndex - 1].Kind !== 3) || !(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) {
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+              if ((pas.Common.Ident[IdentIndex - 1].Kind !== pas.Tokens.TTokenKind.VARTOK) || !(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) {
                 pas.Messages.ErrorForIdentifier(i,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex)}
                else {
-                if ((pas.Common.Ident[IdentIndex - 1].DataType === 137) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
-                  ValType.set(137)}
+                if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
+                  ValType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK)}
                  else ValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                if ((ValType.get() === 0) && (pas.Common.Ident[IdentIndex - 1].DataType === 136)) {
-                  ValType.set(136);
-                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0);
-                } else if (ValType.get() in rtl.createSet(139,140)) {
-                  if (pas.Common.Tok[i + 2].Kind === 51) {
-                    pas.Common.CheckTok(i + 3,170);
+                if ((ValType.get() === pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK)) {
+                  ValType.set(pas.Tokens.TTokenKind.POINTERTOK);
+                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(ValType.get()),IdentIndex,0);
+                } else if (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
+                  if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK) {
+                    pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
                     IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
                     if (IdentTemp < 0) pas.Messages.Error$1(i + 3,$ir.ref(7,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierIdentsNoMember,"Identifier idents no member '{0}'.",pas.Common.Tok[i + 3].Name,""]),pas.Messages.IMessage)));
                     ValType.set(IdentTemp >>> 16);
                     i += 2;
-                    if ((pas.Common.Tok[i + 1].Kind === 170) && (pas.Common.Tok[i + 2].Kind === 58)) {
+                    if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK)) {
                       i += 1;
                       ValType.set(pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i].Name) - 1].AllocElementType);
                       i = $mod.CompileArrayIndex(i,pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i].Name));
-                      $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,10,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff);
-                    } else if (ValType.get() === 137) {
-                      $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,5,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff)}
-                     else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,2,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff);
-                  } else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0);
-                } else if (pas.Common.Ident[IdentIndex - 1].DataType === 137) {
-                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0)}
-                 else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,2,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0);
+                      $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,10,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff);
+                    } else if (ValType.get() === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
+                      $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,5,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff)}
+                     else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,2,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff);
+                  } else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(ValType.get()),IdentIndex,0);
+                } else if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
+                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,1,pas.Common.GetDataSize(ValType.get()),IdentIndex,0)}
+                 else $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,2,pas.Common.GetDataSize(ValType.get()),IdentIndex,0);
                 Result = i + 1;
               }}
-             else if (pas.Common.Tok[i + 1].Kind === 58) {
+             else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
               if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) {
                 pas.Messages.ErrorForIdentifier(i,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex)}
                else {
                 i = $mod.CompileArrayIndex(i,IdentIndex);
                 ValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                if (pas.Common.Tok[i + 2].Kind === 56) {
-                  $mod.Push(0,10,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0);
+                if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+                  $mod.Push(0,10,pas.Common.GetDataSize(ValType.get()),IdentIndex,0);
                   i += 1;
-                } else if ((pas.Common.Tok[i + 2].Kind === 51) && (ValType.get() in rtl.createSet(139,140))) {
-                  pas.Common.CheckTok(i + 1,59);
-                  pas.Common.CheckTok(i + 3,170);
+                } else if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK) && (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
+                  pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
+                  pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
                   IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
                   if (IdentTemp < 0) pas.Messages.Error$1(i + 3,$ir.ref(8,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierIdentsNoMember,"Identifier idents no member '{0}'.",pas.Common.Tok[i + 3].Name,""]),pas.Messages.IMessage)));
                   ValType.set(IdentTemp >>> 16);
                   i += 2;
-                  if ((pas.Common.Tok[i + 1].Kind === 170) && (pas.Common.Tok[i + 2].Kind === 58)) {
+                  if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK)) {
                     i += 1;
                     ValType.set(pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i].Name) - 1].AllocElementType);
                     IndirectionLevel = 10;
-                    if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+                    if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
                       IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i].Name);
                       if (IdentTemp < 0) pas.Messages.Error$1(i,$ir.ref(9,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierIdentsNoMember,"Identifier idents no member '{0}'.",pas.Common.Tok[i].Name,""]),pas.Messages.IMessage)));
                       ValType.set(pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i].Name) - 1].AllocElementType);
                       IndirectionLevel = 11;
                     };
                     i = $mod.CompileArrayIndex(i,pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i].Name));
-                    $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,IndirectionLevel,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff);
-                  } else if (ValType.get() === 137) {
-                    $mod.Push(0,12,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff)}
-                   else $mod.Push(0,6,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff);
-                } else if ((pas.Common.Tok[i + 2].Kind === 58) && (ValType.get() === 137)) {
+                    $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,IndirectionLevel,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff);
+                  } else if (ValType.get() === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
+                    $mod.Push(0,12,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff)}
+                   else $mod.Push(0,6,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff);
+                } else if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) && (ValType.get() === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
                   pas.Messages.Error$1(i,$ir.ref(10,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.UnderConstruction,"Under construction","",""]),pas.Messages.IMessage)));
                 } else {
                   IdentTemp = 0;
                   IndirectionLevel = 4;
                   if (pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) > 0) {
                     IdentTemp = pas.Parser.GetIdentIndex(pas.System.Copy(pas.Common.Ident[IdentIndex - 1].Name,1,pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) - 1));
-                    if ((pas.Common.Ident[IdentTemp - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(139,140))) {
+                    if ((pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
                       svar = pas.System.Copy(pas.Common.Ident[IdentIndex - 1].Name,pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) + 1,pas.Common.Ident[IdentIndex - 1].Name.length);
                       IdentIndex = IdentTemp;
                       IdentTemp = pas.Parser.RecordSize(IdentIndex,svar);
@@ -39185,9 +39121,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                       IndirectionLevel = 10;
                     };
                   };
-                  if (ValType.get() in rtl.createSet(139,140)) ValType.set(136);
-                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,IndirectionLevel,pas.Common.DataSize[ValType.get() - 128],IdentIndex,IdentTemp & 0xffff);
-                  pas.Common.CheckTok(i + 1,59);
+                  if (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) ValType.set(pas.Tokens.TTokenKind.POINTERTOK);
+                  $mod.Push(pas.Common.Ident[IdentIndex - 1].Value,IndirectionLevel,pas.Common.GetDataSize(ValType.get()),IdentIndex,IdentTemp & 0xffff);
+                  pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
                 };
                 Result = i + 1;
               }}
@@ -39208,43 +39144,43 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 i = j;
                 if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
                   ValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                  if (ValType.get() === 134) {
+                  if (ValType.get() === pas.Tokens.TTokenKind.CHARTOK) {
                     var $tmp9 = pas.Common.Ident[IdentIndex - 1].DataType;
-                    if ($tmp9 === 136) {
-                      ValType.set(145)}
-                     else if ($tmp9 === 137) ValType.set(137);
+                    if ($tmp9 === pas.Tokens.TTokenKind.POINTERTOK) {
+                      ValType.set(pas.Tokens.TTokenKind.PCHARTOK)}
+                     else if ($tmp9 === pas.Tokens.TTokenKind.STRINGPOINTERTOK) ValType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK);
                   };
-                  if (ValType.get() === 0) ValType.set(pas.Common.Ident[IdentIndex - 1].DataType);
+                  if (ValType.get() === pas.Tokens.TTokenKind.UNTYPETOK) ValType.set(pas.Common.Ident[IdentIndex - 1].DataType);
                 } else ValType.set(pas.Common.Ident[IdentIndex - 1].DataType);
-                if ((ValType.get() === 146) && (pas.Common.Ident[IdentIndex - 1].DataType === 146)) ValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
-                if ((pas.Common.Ident[IdentIndex - 1].Kind === 1) && (ValType.get() in pas.Common.Pointers)) {
+                if ((ValType.get() === pas.Tokens.TTokenKind.ENUMTOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK)) ValType.set(pas.Common.Ident[IdentIndex - 1].AllocElementType);
+                if ((pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) && (ValType.get() in pas.Common.Pointers)) {
                   ConstVal = pas.Common.Ident[IdentIndex - 1].Value - 256}
                  else ConstVal = pas.Common.Ident[IdentIndex - 1].Value;
-                if ((ValType.get() in pas.Common.IntegerTypes) && (VarType in rtl.createSet(143,144))) ConstVal = pas.Numbers.FromInt64(ConstVal);
-                if (VarType === 144) {
+                if ((ValType.get() in pas.Common.IntegerTypes) && (VarType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK))) ConstVal = pas.Numbers.FromInt64(ConstVal);
+                if (VarType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
                   ConstVal = pas.Numbers.CastToHalfSingle(ConstVal);
                 };
-                if (VarType === 143) {
+                if (VarType === pas.Tokens.TTokenKind.SINGLETOK) {
                   ConstVal = pas.Numbers.CastToSingle(ConstVal);
                 };
-                if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].IdType === 160)) {
-                  $mod.Push(ConstVal,5,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0)}
+                if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.DATAORIGINOFFSET)) {
+                  $mod.Push(ConstVal,5,pas.Common.GetDataSize(ValType.get()),IdentIndex,0)}
                  else if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
-                  $mod.Push(ConstVal,2,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0)}
-                 else $mod.Push(ConstVal,(pas.Common.Ident[IdentIndex - 1].Kind === 3) + 0,pas.Common.DataSize[ValType.get() - 128],IdentIndex,0);
+                  $mod.Push(ConstVal,2,pas.Common.GetDataSize(ValType.get()),IdentIndex,0)}
+                 else $mod.Push(ConstVal,(pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.VARTOK) + 0,pas.Common.GetDataSize(ValType.get()),IdentIndex,0);
                 if (pas.Common.BlockStackTop === 1) if (!(pas.Common.Ident[IdentIndex - 1].isInit || pas.Common.Ident[IdentIndex - 1].isInitialized || pas.Common.Ident[IdentIndex - 1].LoopVariable)) pas.Messages.WarningVariableNotInitialized(i,IdentIndex);
               } else {
-                if ((ValType.get() in rtl.createSet(143,144)) || (VarType in rtl.createSet(143,144))) {
+                if ((ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) || (VarType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK))) {
                   if (ValType.get() in pas.Common.IntegerTypes) ConstVal = pas.Numbers.FromInt64(ConstVal);
-                  if ((VarType === 144) || (ValType.get() === 144)) {
+                  if ((VarType === pas.Tokens.TTokenKind.HALFSINGLETOK) || (ValType.get() === pas.Tokens.TTokenKind.HALFSINGLETOK)) {
                     ConstVal = pas.Numbers.CastToHalfSingle(ConstVal);
-                    ValType.set(144);
+                    ValType.set(pas.Tokens.TTokenKind.HALFSINGLETOK);
                   } else {
                     ConstVal = pas.Numbers.CastToSingle(ConstVal);
-                    ValType.set(143);
+                    ValType.set(pas.Tokens.TTokenKind.SINGLETOK);
                   };
                 };
-                $mod.Push(ConstVal,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+                $mod.Push(ConstVal,0,pas.Common.GetDataSize(ValType.get()),0,0);
               };
               pas.Common.isConst = false;
               pas.Common.isError = false;
@@ -39252,63 +39188,63 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             };
           }}
          else pas.Messages.Error$2(i,pas.Messages.TErrorCode.UnknownIdentifier);
-      } else if ($tmp === 57) {
+      } else if ($tmp === pas.Tokens.TTokenKind.ADDRESSTOK) {
         Result = $mod.CompileAddress(i - 1,ValType,{get: function () {
             return AllocElementType;
           }, set: function (v) {
             AllocElementType = v;
           }},false)}
-       else if ($tmp === 171) {
+       else if ($tmp === pas.Tokens.TTokenKind.INTNUMBERTOK) {
         ConstVal = pas.Common.Tok[i].Value;
         ValType.set(pas.Common.GetValueType(ConstVal));
         if (VarType in pas.Common.RealTypes) {
           ConstVal = pas.Numbers.FromInt64(ConstVal);
-          if (VarType === 144) {
+          if (VarType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
             ConstVal = pas.Numbers.CastToHalfSingle(ConstVal)}
-           else if (VarType === 143) ConstVal = pas.Numbers.CastToSingle(ConstVal);
+           else if (VarType === pas.Tokens.TTokenKind.SINGLETOK) ConstVal = pas.Numbers.CastToSingle(ConstVal);
           ValType.set(VarType);
         };
-        $mod.Push(ConstVal,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+        $mod.Push(ConstVal,0,pas.Common.GetDataSize(ValType.get()),0,0);
         isZero.set(ConstVal === 0);
         Result = i;
-      } else if ($tmp === 172) {
+      } else if ($tmp === pas.Tokens.TTokenKind.FRACNUMBERTOK) {
         ConstVal = pas.Numbers.FromSingle(pas.Common.Tok[i].FracValue);
-        ValType.set(142);
+        ValType.set(pas.Tokens.TTokenKind.REALTOK);
         if (VarType in pas.Common.RealTypes) {
           var $tmp10 = VarType;
-          if ($tmp10 === 143) {
+          if ($tmp10 === pas.Tokens.TTokenKind.SINGLETOK) {
             ConstVal = pas.Numbers.CastToSingle(ConstVal)}
-           else if ($tmp10 === 144) {
+           else if ($tmp10 === pas.Tokens.TTokenKind.HALFSINGLETOK) {
             ConstVal = pas.Numbers.CastToHalfSingle(ConstVal)}
            else {
             ConstVal = pas.Numbers.CastToReal(ConstVal);
           };
           ValType.set(VarType);
         };
-        $mod.Push(ConstVal,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+        $mod.Push(ConstVal,0,pas.Common.GetDataSize(ValType.get()),0,0);
         isZero.set(ConstVal === 0);
         Result = i;
-      } else if ($tmp === 174) {
-        $mod.Push((pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE,0,pas.Common.DataSize[9],0,0);
-        ValType.set(137);
+      } else if ($tmp === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
+        $mod.Push((pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE,0,pas.Common.GetDataSize(pas.Tokens.TTokenKind.STRINGPOINTERTOK),0,0);
+        ValType.set(pas.Tokens.TTokenKind.STRINGPOINTERTOK);
         Result = i;
-      } else if ($tmp === 173) {
-        $mod.Push(pas.Common.Tok[i].Value,0,pas.Common.DataSize[6],0,0);
-        ValType.set(134);
+      } else if ($tmp === pas.Tokens.TTokenKind.CHARLITERALTOK) {
+        $mod.Push(pas.Common.Tok[i].Value,0,pas.Common.GetDataSize(pas.Tokens.TTokenKind.CHARTOK),0,0);
+        ValType.set(pas.Tokens.TTokenKind.CHARTOK);
         Result = i;
-      } else if ($tmp === 54) {
+      } else if ($tmp === pas.Tokens.TTokenKind.OPARTOK) {
         j = $mod.CompileExpression(i + 1,ValType,VarType);
-        pas.Common.CheckTok(j + 1,55);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
         Result = j + 1;
-      } else if ($tmp === 72) {
-        Result = $mod.CompileFactor(i + 1,isZero,ValType,133);
-        pas.Common.CheckOperator(i,72,ValType.get(),0);
-        $mod.GenerateUnaryOperation(72,ValType.get());
-      } else if ($tmp === 141) {
-        if (pas.Common.Tok[i + 1].Kind !== 54) pas.Messages.Error$1(i,$ir.ref(12,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierNotAllowed,"Type identifier not allowed here","",""]),pas.Messages.IMessage)));
-        j = $mod.CompileExpression(i + 2,ValType,133);
-        if (pas.Common.Tok[j + 1].Kind === 56) {
-          if (ValType.get() === 136) {
+      } else if ($tmp === pas.Tokens.TTokenKind.NOTTOK) {
+        Result = $mod.CompileFactor(i + 1,isZero,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.CheckOperator(i,pas.Tokens.TTokenKind.NOTTOK,ValType.get(),pas.Tokens.TTokenKind.UNTYPETOK);
+        $mod.GenerateUnaryOperation(pas.Tokens.TTokenKind.NOTTOK,ValType.get());
+      } else if ($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) {
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) pas.Messages.Error$1(i,$ir.ref(12,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierNotAllowed,"Type identifier not allowed here","",""]),pas.Messages.IMessage)));
+        j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
+        if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+          if (ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta :bp2","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39323,7 +39259,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           } else pas.Messages.Error$2(j + 1,pas.Messages.TErrorCode.IllegalQualifier);
         } else {
           if (ValType.get() in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes)) {
-            $mod.ExpandParam(132,ValType.get());
+            $mod.ExpandParam(pas.Tokens.TTokenKind.SMALLINTTOK,ValType.get());
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*2,x","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39332,16 +39268,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
             pas.Optimize.asm65("\tlda #$00","");
             pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-          } else pas.Messages.Error$1(i + 2,$ir.ref(13,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "{0}" to "{1}".',pas.Common.InfoAboutToken(ValType.get()),pas.Common.InfoAboutToken(141)]),pas.Messages.IMessage)));
+          } else pas.Messages.Error$1(i + 2,$ir.ref(13,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "{0}" to "{1}".',pas.Common.InfoAboutToken(ValType.get()),pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.SHORTREALTOK)]),pas.Messages.IMessage)));
         };
-        pas.Common.CheckTok(j + 1,55);
-        ValType.set(141);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+        ValType.set(pas.Tokens.TTokenKind.SHORTREALTOK);
         Result = j + 1;
-      } else if ($tmp === 142) {
-        if (pas.Common.Tok[i + 1].Kind !== 54) pas.Messages.Error$1(i,$ir.ref(14,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierNotAllowed,"Type identifier not allowed here.","",""]),pas.Messages.IMessage)));
-        j = $mod.CompileExpression(i + 2,ValType,133);
-        if (pas.Common.Tok[j + 1].Kind === 56) {
-          if (ValType.get() === 136) {
+      } else if ($tmp === pas.Tokens.TTokenKind.REALTOK) {
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) pas.Messages.Error$1(i,$ir.ref(14,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierNotAllowed,"Type identifier not allowed here.","",""]),pas.Messages.IMessage)));
+        j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
+        if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+          if (ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta :bp2","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39362,7 +39298,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           } else pas.Messages.Error$2(j + 1,pas.Messages.TErrorCode.IllegalQualifier);
         } else {
           if (ValType.get() in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes)) {
-            $mod.ExpandParam(133,ValType.get());
+            $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH*2,x","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39371,16 +39307,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
             pas.Optimize.asm65("\tlda #$00","");
             pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
-          } else pas.Messages.Error$1(i + 2,$ir.ref(15,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "{0}" to "{1}".',pas.Common.InfoAboutToken(ValType.get()),pas.Common.InfoAboutToken(142)]),pas.Messages.IMessage)));
+          } else pas.Messages.Error$1(i + 2,$ir.ref(15,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "{0}" to "{1}".',pas.Common.InfoAboutToken(ValType.get()),pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.REALTOK)]),pas.Messages.IMessage)));
         };
-        pas.Common.CheckTok(j + 1,55);
-        ValType.set(142);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+        ValType.set(pas.Tokens.TTokenKind.REALTOK);
         Result = j + 1;
-      } else if ($tmp === 144) {
-        if (pas.Common.Tok[i + 1].Kind !== 54) pas.Messages.Error$1(i,$ir.ref(16,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierNotAllowed,"Type identifier not allowed here","",""]),pas.Messages.IMessage)));
-        j = $mod.CompileExpression(i + 2,ValType,133);
-        if (pas.Common.Tok[j + 1].Kind === 56) {
-          if (ValType.get() === 136) {
+      } else if ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK) {
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) pas.Messages.Error$1(i,$ir.ref(16,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.TypeIdentifierNotAllowed,"Type identifier not allowed here","",""]),pas.Messages.IMessage)));
+        j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
+        if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+          if (ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) {
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta :bp2","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39394,9 +39330,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             j += 1;
           } else pas.Messages.Error$2(j + 1,pas.Messages.TErrorCode.IllegalQualifier);
         } else {
-          if (ValType.get() in rtl.createSet(141,142)) pas.Messages.Error$1(i + 2,$ir.ref(17,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "{0}" to "{1}".',pas.Common.InfoAboutToken(ValType.get()),pas.Common.InfoAboutToken(144)]),pas.Messages.IMessage)));
+          if (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK)) pas.Messages.Error$1(i + 2,$ir.ref(17,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IllegalTypeConversion,'Illegal type conversion: "{0}" to "{1}".',pas.Common.InfoAboutToken(ValType.get()),pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.HALFSINGLETOK)]),pas.Messages.IMessage)));
           if (ValType.get() in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes)) {
-            $mod.ExpandParam(133,ValType.get());
+            $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
             pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
             pas.Optimize.asm65("\tsta @F16_I2F.SV","");
             pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39410,13 +39346,13 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
             pas.Optimize.asm65("\tlda :eax+1","");
             pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-          } else pas.Messages.Error(i + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(144) + '"');
+          } else pas.Messages.Error(i + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.HALFSINGLETOK) + '"');
         };
-        pas.Common.CheckTok(j + 1,55);
-        ValType.set(144);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+        ValType.set(pas.Tokens.TTokenKind.HALFSINGLETOK);
         Result = j + 1;
-      } else if ($tmp === 143) {
-        if (pas.Common.Tok[i + 1].Kind !== 54) pas.Messages.Error(i,"type identifier not allowed here");
+      } else if ($tmp === pas.Tokens.TTokenKind.SINGLETOK) {
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) pas.Messages.Error(i,"type identifier not allowed here");
         j = i + 2;
         if ($mod.SafeCompileConstExpression({get: function () {
             return j;
@@ -39426,15 +39362,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             return ConstVal;
           }, set: function (v) {
             ConstVal = v;
-          }},ValType,143,false,true)) {
+          }},ValType,pas.Tokens.TTokenKind.SINGLETOK,false,true)) {
           if (!(ValType.get() in pas.Common.RealTypes)) ConstVal = pas.Numbers.FromInt64(ConstVal);
           ConstVal = pas.Numbers.CastToSingle(ConstVal);
-          ValType.set(143);
-          $mod.Push(ConstVal,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+          ValType.set(pas.Tokens.TTokenKind.SINGLETOK);
+          $mod.Push(ConstVal,0,pas.Common.GetDataSize(ValType.get()),0,0);
         } else {
-          j = $mod.CompileExpression(i + 2,ValType,133);
-          if (pas.Common.Tok[j + 1].Kind === 56) {
-            if (ValType.get() === 136) {
+          j = $mod.CompileExpression(i + 2,ValType,pas.Tokens.TTokenKind.INTEGERTOK);
+          if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
+            if (ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta :bp2","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39454,9 +39390,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               j += 1;
             } else pas.Messages.Error$2(j + 1,pas.Messages.TErrorCode.IllegalQualifier);
           } else {
-            if (ValType.get() in rtl.createSet(141,142)) pas.Messages.Error(i + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(143) + '"');
+            if (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK)) pas.Messages.Error(i + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.SINGLETOK) + '"');
             if (ValType.get() in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes)) {
-              $mod.ExpandParam(133,ValType.get());
+              $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta :FPMAN0","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39474,27 +39410,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
               pas.Optimize.asm65("\tlda :FPMAN3","");
               pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-            } else pas.Messages.Error(i + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(143) + '"');
+            } else pas.Messages.Error(i + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(pas.Tokens.TTokenKind.SINGLETOK) + '"');
           };
         };
-        pas.Common.CheckTok(j + 1,55);
-        ValType.set(143);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
+        ValType.set(pas.Tokens.TTokenKind.SINGLETOK);
         Result = j + 1;
-      } else if (($tmp === 133) || ($tmp === 130) || ($tmp === 132) || ($tmp === 129) || ($tmp === 134) || ($tmp === 145) || ($tmp === 131) || ($tmp === 128) || ($tmp === 135) || ($tmp === 136) || ($tmp === 137)) {
-        if (pas.Common.Tok[i + 1].Kind !== 54) pas.Messages.Error(i,"type identifier not allowed here");
+      } else if (($tmp === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) || ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp === pas.Tokens.TTokenKind.WORDTOK) || ($tmp === pas.Tokens.TTokenKind.CHARTOK) || ($tmp === pas.Tokens.TTokenKind.PCHARTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp === pas.Tokens.TTokenKind.BYTETOK) || ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) || ($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
+        if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) pas.Messages.Error(i,"type identifier not allowed here");
         j = $mod.CompileExpression(i + 2,ValType,pas.Common.Tok[i].Kind);
-        if ((ValType.get() in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === 170) && (pas.Common.Tok[i + 3].Kind !== 58)) {
+        if ((ValType.get() in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Tok[i + 3].Kind !== pas.Tokens.TTokenKind.OBRACKETTOK)) {
           IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
-          if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 139)) if (((pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(0,1))) || (pas.Common.Ident[IdentIndex - 1].DataType === 137)) {}
+          if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.RECORDTOK)) if (((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements in rtl.createSet(0,1))) || (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {}
           else pas.Messages.ErrorIdentifierIllegalTypeConversion(i + 2,IdentIndex,pas.Common.Tok[i].Kind);
         };
-        if (pas.Common.Tok[j + 1].Kind === 56) if (ValType.get() === 136) {
+        if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) if (ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) {
           pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
           pas.Optimize.asm65("\tsta :bp2","");
           pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
           pas.Optimize.asm65("\tsta :bp2+1","");
           pas.Optimize.asm65("\tldy #$00","");
-          var $tmp11 = pas.Common.DataSize[pas.Common.Tok[i].Kind - 128];
+          var $tmp11 = pas.Common.GetDataSize(pas.Common.Tok[i].Kind);
           if ($tmp11 === 1) {
             pas.Optimize.asm65("\tlda (:bp2),y","");
             pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
@@ -39521,10 +39457,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         } else pas.Messages.Error$2(j + 1,pas.Messages.TErrorCode.IllegalQualifier);
         if (!(ValType.get() in pas.Common.AllTypes)) pas.Messages.Error$2(i,pas.Messages.TErrorCode.TypeMismatch);
         $mod.ExpandParam(pas.Common.Tok[i].Kind,ValType.get());
-        pas.Common.CheckTok(j + 1,55);
+        pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.CPARTOK);
         ValType.set(pas.Common.Tok[i].Kind);
-        if (pas.Common.Tok[j + 2].Kind === 56) if (ValType.get() === 145) {
-          ValType.set(134);
+        if (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) if (ValType.get() === pas.Tokens.TTokenKind.PCHARTOK) {
+          ValType.set(pas.Tokens.TTokenKind.CHARTOK);
           j += 1;
         } else pas.Messages.Error$2(j + 1,pas.Messages.TErrorCode.IllegalQualifier);
         Result = j + 1;
@@ -39537,11 +39473,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     return Result;
   };
   this.ResizeType = function (ValType) {
-    if (ValType.get() in rtl.createSet(128,129,131,132)) ValType.set(ValType.get() + 1);
+    if (ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.BYTETOK,pas.Tokens.TTokenKind.WORDTOK,pas.Tokens.TTokenKind.SHORTINTTOK,pas.Tokens.TTokenKind.SMALLINTTOK)) ValType.set(ValType.get() + 1);
   };
   this.RealTypeConversion = function (ValType, RightValType, Kind) {
-    if (((ValType.get() === 143) || (Kind === 143)) && (RightValType.get() in pas.Common.IntegerTypes)) {
-      $mod.ExpandParam(133,RightValType.get());
+    if (((ValType.get() === pas.Tokens.TTokenKind.SINGLETOK) || (Kind === pas.Tokens.TTokenKind.SINGLETOK)) && (RightValType.get() in pas.Common.IntegerTypes)) {
+      $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,RightValType.get());
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tsta :FPMAN0","");
       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39559,12 +39495,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*2,x","");
       pas.Optimize.asm65("\tlda :FPMAN3","");
       pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH*3,x","");
-      if ((ValType.get() !== 143) && (Kind === 143)) {
+      if ((ValType.get() !== pas.Tokens.TTokenKind.SINGLETOK) && (Kind === pas.Tokens.TTokenKind.SINGLETOK)) {
         RightValType.set(Kind)}
        else RightValType.set(ValType.get());
     };
-    if ((ValType.get() in pas.Common.IntegerTypes) && ((RightValType.get() === 143) || (Kind === 143))) {
-      $mod.ExpandParam_m1(133,ValType.get());
+    if ((ValType.get() in pas.Common.IntegerTypes) && ((RightValType.get() === pas.Tokens.TTokenKind.SINGLETOK) || (Kind === pas.Tokens.TTokenKind.SINGLETOK))) {
+      $mod.ExpandParam_m1(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
       pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
       pas.Optimize.asm65("\tsta :FPMAN0","");
       pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
@@ -39582,12 +39518,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*2,x","");
       pas.Optimize.asm65("\tlda :FPMAN3","");
       pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH*3,x","");
-      if ((RightValType.get() !== 143) && (Kind === 143)) {
+      if ((RightValType.get() !== pas.Tokens.TTokenKind.SINGLETOK) && (Kind === pas.Tokens.TTokenKind.SINGLETOK)) {
         ValType.set(Kind)}
        else ValType.set(RightValType.get());
     };
-    if (((ValType.get() === 144) || (Kind === 144)) && (RightValType.get() in pas.Common.IntegerTypes)) {
-      $mod.ExpandParam(133,RightValType.get());
+    if (((ValType.get() === pas.Tokens.TTokenKind.HALFSINGLETOK) || (Kind === pas.Tokens.TTokenKind.HALFSINGLETOK)) && (RightValType.get() in pas.Common.IntegerTypes)) {
+      $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,RightValType.get());
       pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
       pas.Optimize.asm65("\tsta @F16_I2F.SV","");
       pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -39601,12 +39537,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
       pas.Optimize.asm65("\tlda :eax+1","");
       pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-      if ((ValType.get() !== 144) && (Kind === 144)) {
+      if ((ValType.get() !== pas.Tokens.TTokenKind.HALFSINGLETOK) && (Kind === pas.Tokens.TTokenKind.HALFSINGLETOK)) {
         RightValType.set(Kind)}
        else RightValType.set(ValType.get());
     };
-    if ((ValType.get() in pas.Common.IntegerTypes) && ((RightValType.get() === 144) || (Kind === 144))) {
-      $mod.ExpandParam_m1(133,ValType.get());
+    if ((ValType.get() in pas.Common.IntegerTypes) && ((RightValType.get() === pas.Tokens.TTokenKind.HALFSINGLETOK) || (Kind === pas.Tokens.TTokenKind.HALFSINGLETOK))) {
+      $mod.ExpandParam_m1(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
       pas.Optimize.asm65("\tlda :STACKORIGIN-1,x","");
       pas.Optimize.asm65("\tsta @F16_I2F.SV","");
       pas.Optimize.asm65("\tlda :STACKORIGIN-1+STACKWIDTH,x","");
@@ -39620,21 +39556,21 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("\tsta :STACKORIGIN-1,x","");
       pas.Optimize.asm65("\tlda :eax+1","");
       pas.Optimize.asm65("\tsta :STACKORIGIN-1+STACKWIDTH,x","");
-      if ((RightValType.get() !== 144) && (Kind === 144)) {
+      if ((RightValType.get() !== pas.Tokens.TTokenKind.HALFSINGLETOK) && (Kind === pas.Tokens.TTokenKind.HALFSINGLETOK)) {
         ValType.set(Kind)}
        else ValType.set(RightValType.get());
     };
-    if (((ValType.get() in rtl.createSet(142,141)) || (Kind in rtl.createSet(142,141))) && (RightValType.get() in pas.Common.IntegerTypes)) {
-      $mod.ExpandParam(133,RightValType.get());
+    if (((ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK)) || (Kind in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK))) && (RightValType.get() in pas.Common.IntegerTypes)) {
+      $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,RightValType.get());
       pas.Optimize.asm65("\tjsr @expandToREAL","");
-      if (!(ValType.get() in rtl.createSet(142,141)) && (Kind in rtl.createSet(142,141))) {
+      if (!(ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK)) && (Kind in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK))) {
         RightValType.set(Kind)}
        else RightValType.set(ValType.get());
     };
-    if ((ValType.get() in pas.Common.IntegerTypes) && ((RightValType.get() in rtl.createSet(142,141)) || (Kind in rtl.createSet(142,141)))) {
-      $mod.ExpandParam_m1(133,ValType.get());
+    if ((ValType.get() in pas.Common.IntegerTypes) && ((RightValType.get() in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK)) || (Kind in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK)))) {
+      $mod.ExpandParam_m1(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
       pas.Optimize.asm65("\tjsr @expandToREAL1","");
-      if (!(RightValType.get() in rtl.createSet(142,141)) && (Kind in rtl.createSet(142,141))) {
+      if (!(RightValType.get() in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK)) && (Kind in rtl.createSet(pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.SHORTREALTOK))) {
         ValType.set(Kind)}
        else ValType.set(RightValType.get());
     };
@@ -39658,12 +39594,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       }},ValType,VarType);
     pas.Common.pass = oldPass;
     pas.Common.CodeSize = oldCodeSize;
-    if (pas.Common.Tok[j + 1].Kind in rtl.createSet(66,65,67,68,71)) {
+    if (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.MODTOK,pas.Tokens.TTokenKind.IDIVTOK,pas.Tokens.TTokenKind.SHLTOK,pas.Tokens.TTokenKind.SHRTOK,pas.Tokens.TTokenKind.ANDTOK)) {
       j = $mod.CompileFactor(i,{get: function () {
           return isZero;
         }, set: function (v) {
           isZero = v;
-        }},ValType,133)}
+        }},ValType,pas.Tokens.TTokenKind.INTEGERTOK)}
      else {
       if (ValType.get() in pas.Common.RealTypes) VarType = ValType.get();
       j = $mod.CompileFactor(i,{get: function () {
@@ -39672,9 +39608,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           isZero = v;
         }},ValType,VarType);
     };
-    while (pas.Common.Tok[j + 1].Kind in rtl.createSet(63,64,66,65,67,68,71)) {
+    while (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.MULTOK,pas.Tokens.TTokenKind.DIVTOK,pas.Tokens.TTokenKind.MODTOK,pas.Tokens.TTokenKind.IDIVTOK,pas.Tokens.TTokenKind.SHLTOK,pas.Tokens.TTokenKind.SHRTOK,pas.Tokens.TTokenKind.ANDTOK)) {
       if (ValType.get() in pas.Common.RealTypes) VarType = ValType.get();
-      if (pas.Common.Tok[j + 1].Kind in rtl.createSet(63,64)) {
+      if (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.MULTOK,pas.Tokens.TTokenKind.DIVTOK)) {
         k = $mod.CompileFactor(j + 2,{get: function () {
             return isZero;
           }, set: function (v) {
@@ -39692,40 +39628,46 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return RightValType;
         }, set: function (v) {
           RightValType = v;
-        }},133);
-      if ((pas.Common.Tok[j + 1].Kind in rtl.createSet(66,65)) && isZero) pas.Messages.Error(j + 1,"Division by zero");
-      if (((ValType.get() in rtl.createSet(144,143)) && (RightValType in rtl.createSet(141,142))) || ((ValType.get() in rtl.createSet(141,142)) && (RightValType in rtl.createSet(144,143)))) pas.Messages.Error(j + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(RightValType) + '"');
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
+      if ((pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.MODTOK,pas.Tokens.TTokenKind.IDIVTOK)) && isZero) pas.Messages.Error(j + 1,"Division by zero");
+      if (((ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)) && (RightValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) || ((ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK)) && (RightValType in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)))) pas.Messages.Error(j + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(RightValType) + '"');
       if (VarType in pas.Common.RealTypes) {
         if ((ValType.get() === VarType) && (RightValType in pas.Common.RealTypes)) RightValType = VarType;
         if ((ValType.get() in pas.Common.RealTypes) && (RightValType === VarType)) ValType.set(VarType);
       };
-      if (VarType in pas.Common.RealTypes) {
-        CastRealType = VarType}
-       else CastRealType = 142;
+      if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DIVTOK) {
+        if (VarType in pas.Common.RealTypes) {
+          CastRealType = VarType;
+        } else {
+          CastRealType = pas.Tokens.TTokenKind.REALTOK;
+        };
+      } else {
+        CastRealType = pas.Tokens.TTokenKind.UNTYPETOK;
+      };
       $mod.RealTypeConversion(ValType,{get: function () {
           return RightValType;
         }, set: function (v) {
           RightValType = v;
-        }},((pas.Common.Tok[j + 1].Kind === 64) + 0) * CastRealType);
+        }},CastRealType);
       ValType.set(pas.Common.GetCommonType(j + 1,ValType.get(),RightValType));
       pas.Common.CheckOperator(i,pas.Common.Tok[j + 1].Kind,ValType.get(),RightValType);
-      if (!(pas.Common.Tok[j + 1].Kind in rtl.createSet(67,68))) $mod.ExpandExpression(ValType,RightValType,0,false);
-      if (pas.Common.Tok[j + 1].Kind === 63) if ((ValType.get() in pas.Common.IntegerTypes) && (VarType in pas.Common.IntegerTypes)) if (pas.Common.DataSize[ValType.get() - 128] > pas.Common.DataSize[VarType - 128]) ValType.set(VarType);
+      if (!(pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.SHLTOK,pas.Tokens.TTokenKind.SHRTOK))) $mod.ExpandExpression(ValType,RightValType,pas.Tokens.TTokenKind.UNTYPETOK,false);
+      if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.MULTOK) if ((ValType.get() in pas.Common.IntegerTypes) && (VarType in pas.Common.IntegerTypes)) if (pas.Common.GetDataSize(ValType.get()) > pas.Common.GetDataSize(VarType)) ValType.set(VarType);
       $mod.GenerateBinaryOperation(pas.Common.Tok[j + 1].Kind,ValType.get());
       var $tmp = pas.Common.Tok[j + 1].Kind;
-      if ($tmp === 63) {
+      if ($tmp === pas.Tokens.TTokenKind.MULTOK) {
         $mod.ResizeType(ValType);
         $mod.ExpandExpression({get: function () {
             return VarType;
           }, set: function (v) {
             VarType = v;
-          }},0,0,false);
-      } else if ($tmp === 68) {
-        if ((ValType.get() in pas.Common.SignedOrdinalTypes) && (pas.Common.DataSize[ValType.get() - 128] > 1)) {
+          }},pas.Tokens.TTokenKind.UNTYPETOK,pas.Tokens.TTokenKind.UNTYPETOK,false);
+      } else if ($tmp === pas.Tokens.TTokenKind.SHRTOK) {
+        if ((ValType.get() in pas.Common.SignedOrdinalTypes) && (pas.Common.GetDataSize(ValType.get()) > 1)) {
           $mod.ResizeType(ValType);
           $mod.ResizeType(ValType);
         }}
-       else if ($tmp === 67) {
+       else if ($tmp === pas.Tokens.TTokenKind.SHLTOK) {
         $mod.ResizeType(ValType);
         $mod.ResizeType(ValType);
       };
@@ -39740,7 +39682,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var k = 0;
     var ConstVal = 0;
     var RightValType = 0;
-    if (pas.Common.Tok[i].Kind in rtl.createSet(61,62)) {
+    if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK)) {
       j = i + 1}
      else j = i;
     if ($mod.SafeCompileConstExpression({get: function () {
@@ -39757,31 +39699,31 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         ValType.set(VarType);
       };
       if (VarType in pas.Common.RealTypes) ValType.set(VarType);
-      if (pas.Common.Tok[i].Kind === 62) ConstVal = pas.Numbers.Negate(ValType,ConstVal);
-      if (ValType.get() === 143) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.MINUSTOK) ConstVal = pas.Numbers.Negate(ValType,ConstVal);
+      if (ValType.get() === pas.Tokens.TTokenKind.SINGLETOK) {
         ConstVal = pas.Numbers.CastToSingle(ConstVal);
       };
-      if (ValType.get() === 144) {
+      if (ValType.get() === pas.Tokens.TTokenKind.HALFSINGLETOK) {
         ConstVal = pas.Numbers.CastToHalfSingle(ConstVal);
       };
-      $mod.Push(ConstVal,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+      $mod.Push(ConstVal,0,pas.Common.GetDataSize(ValType.get()),0,0);
     } else {
       j = $mod.CompileTerm(j,ValType,VarType);
-      if (pas.Common.Tok[i].Kind === 62) {
-        $mod.GenerateUnaryOperation(62,ValType.get());
-        if (ValType.get() in pas.Common.UnsignedOrdinalTypes) if (ValType.get() === 128) {
-          ValType.set(132)}
-         else ValType.set(133);
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.MINUSTOK) {
+        $mod.GenerateUnaryOperation(pas.Tokens.TTokenKind.MINUSTOK,ValType.get());
+        if (ValType.get() in pas.Common.UnsignedOrdinalTypes) if (ValType.get() === pas.Tokens.TTokenKind.BYTETOK) {
+          ValType.set(pas.Tokens.TTokenKind.SMALLINTTOK)}
+         else ValType.set(pas.Tokens.TTokenKind.INTEGERTOK);
       };
     };
-    while (pas.Common.Tok[j + 1].Kind in rtl.createSet(61,62,69,70)) {
+    while (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK,pas.Tokens.TTokenKind.ORTOK,pas.Tokens.TTokenKind.XORTOK)) {
       if (ValType.get() in pas.Common.RealTypes) VarType = ValType.get();
       k = $mod.CompileTerm(j + 2,{get: function () {
           return RightValType;
         }, set: function (v) {
           RightValType = v;
         }},VarType);
-      if (((ValType.get() in rtl.createSet(144,143)) && (RightValType in rtl.createSet(141,142))) || ((ValType.get() in rtl.createSet(141,142)) && (RightValType in rtl.createSet(144,143)))) pas.Messages.Error(j + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(RightValType) + '"');
+      if (((ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)) && (RightValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) || ((ValType.get() in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK)) && (RightValType in rtl.createSet(pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)))) pas.Messages.Error(j + 2,'Illegal type conversion: "' + pas.Common.InfoAboutToken(ValType.get()) + '" to "' + pas.Common.InfoAboutToken(RightValType) + '"');
       if (VarType in pas.Common.RealTypes) {
         if ((ValType.get() === VarType) && (RightValType in pas.Common.RealTypes)) RightValType = VarType;
         if ((ValType.get() in pas.Common.RealTypes) && (RightValType === VarType)) ValType.set(VarType);
@@ -39790,24 +39732,24 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return RightValType;
         }, set: function (v) {
           RightValType = v;
-        }},0);
-      if ((ValType.get() === 136) && (RightValType in pas.Common.IntegerTypes)) {
-        $mod.ExpandParam(129,RightValType);
-        RightValType = 136;
+        }},pas.Tokens.TTokenKind.UNTYPETOK);
+      if ((ValType.get() === pas.Tokens.TTokenKind.POINTERTOK) && (RightValType in pas.Common.IntegerTypes)) {
+        $mod.ExpandParam(pas.Tokens.TTokenKind.WORDTOK,RightValType);
+        RightValType = pas.Tokens.TTokenKind.POINTERTOK;
       };
-      if ((RightValType === 136) && (ValType.get() in pas.Common.IntegerTypes)) {
-        $mod.ExpandParam_m1(129,ValType.get());
-        ValType.set(136);
+      if ((RightValType === pas.Tokens.TTokenKind.POINTERTOK) && (ValType.get() in pas.Common.IntegerTypes)) {
+        $mod.ExpandParam_m1(pas.Tokens.TTokenKind.WORDTOK,ValType.get());
+        ValType.set(pas.Tokens.TTokenKind.POINTERTOK);
       };
       ValType.set(pas.Common.GetCommonType(j + 1,ValType.get(),RightValType));
       pas.Common.CheckOperator(i,pas.Common.Tok[j + 1].Kind,ValType.get(),RightValType);
-      if (pas.Common.Tok[j + 1].Kind in rtl.createSet(61,62)) {
-        if ((pas.Common.Tok[j + 1].Kind === 62) && (RightValType in pas.Common.UnsignedOrdinalTypes) && (VarType in rtl.unionSet(pas.Common.SignedOrdinalTypes,rtl.createSet(135,142,144,143)))) {
+      if (pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PLUSTOK,pas.Tokens.TTokenKind.MINUSTOK)) {
+        if ((pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.MINUSTOK) && (RightValType in pas.Common.UnsignedOrdinalTypes) && (VarType in rtl.unionSet(pas.Common.SignedOrdinalTypes,rtl.createSet(pas.Tokens.TTokenKind.BOOLEANTOK,pas.Tokens.TTokenKind.REALTOK,pas.Tokens.TTokenKind.HALFSINGLETOK,pas.Tokens.TTokenKind.SINGLETOK)))) {
           if ((ValType.get() === VarType) && (RightValType === VarType)) {}
           else $mod.ExpandExpression(ValType,RightValType,VarType,true);
         } else $mod.ExpandExpression(ValType,RightValType,VarType,false);
-      } else $mod.ExpandExpression(ValType,RightValType,0,false);
-      if ((ValType.get() in pas.Common.IntegerTypes) && (VarType in pas.Common.IntegerTypes)) if (pas.Common.DataSize[ValType.get() - 128] > pas.Common.DataSize[VarType - 128]) ValType.set(VarType);
+      } else $mod.ExpandExpression(ValType,RightValType,pas.Tokens.TTokenKind.UNTYPETOK,false);
+      if ((ValType.get() in pas.Common.IntegerTypes) && (VarType in pas.Common.IntegerTypes)) if (pas.Common.GetDataSize(ValType.get()) > pas.Common.GetDataSize(VarType)) ValType.set(VarType);
       $mod.GenerateBinaryOperation(pas.Common.Tok[j + 1].Kind,ValType.get());
       j = k;
     };
@@ -39828,7 +39770,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var ConstVal = 0;
     var ConstValRight = 0;
     ConstVal = 0;
-    isZero = 133;
+    isZero = pas.Tokens.TTokenKind.INTEGERTOK;
     cRight = false;
     if ($mod.SafeCompileConstExpression({get: function () {
         return i;
@@ -39844,15 +39786,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         ValType.set(VarType);
       };
       if (VarType in pas.Common.RealTypes) ValType.set(VarType);
-      if (ValType.get() === 144) {
+      if (ValType.get() === pas.Tokens.TTokenKind.HALFSINGLETOK) {
         ConstVal = pas.Numbers.CastToHalfSingle(ConstVal);
-        ValType.set(144);
+        ValType.set(pas.Tokens.TTokenKind.HALFSINGLETOK);
       };
-      if (ValType.get() === 143) {
+      if (ValType.get() === pas.Tokens.TTokenKind.SINGLETOK) {
         ConstVal = pas.Numbers.CastToSingle(ConstVal);
-        ValType.set(143);
+        ValType.set(pas.Tokens.TTokenKind.SINGLETOK);
       };
-      $mod.Push(ConstVal,0,pas.Common.DataSize[ValType.get() - 128],0,0);
+      $mod.Push(ConstVal,0,pas.Common.GetDataSize(ValType.get()),0,0);
       Result = i;
       return Result;
     };
@@ -39860,11 +39802,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     sLeft = false;
     sRight = false;
     i = $mod.CompileSimpleExpression(i,ValType,VarType);
-    if ((pas.Common.Tok[i].Kind === 174) || (ValType.get() === 137)) {
+    if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) || (ValType.get() === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
       sLeft = true}
-     else if ((ValType.get() in pas.Common.Pointers) && (pas.Common.Tok[i].Kind === 170)) if ((pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name) - 1].AllocElementType === 134) && (pas.Parser.Elements(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name)) > 0)) sLeft = true;
-    if (pas.Common.Tok[i + 1].Kind === 114) pas.System.Writeln("IN");
-    if (pas.Common.Tok[i + 1].Kind in rtl.createSet(43,44,45,46,47,48)) {
+     else if ((ValType.get() in pas.Common.Pointers) && (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK)) if ((pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name) - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Parser.Elements(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name)) > 0)) sLeft = true;
+    if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.INTOK) pas.System.Writeln("IN");
+    if (pas.Common.Tok[i + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK,pas.Tokens.TTokenKind.LTTOK,pas.Tokens.TTokenKind.LETOK,pas.Tokens.TTokenKind.GTTOK,pas.Tokens.TTokenKind.GETOK)) {
       if (ValType.get() in pas.Common.RealTypes) VarType = ValType.get();
       j = $mod.CompileSimpleExpression(i + 2,{get: function () {
           return RightValType;
@@ -39884,26 +39826,26 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ConstValType;
         }, set: function (v) {
           ConstValType = v;
-        }},VarType,false,true)) if ((ConstValType in pas.Common.IntegerTypes) && (VarType in rtl.unionSet(pas.Common.IntegerTypes,rtl.createSet(135)))) {
+        }},VarType,false,true)) if ((ConstValType in pas.Common.IntegerTypes) && (VarType in rtl.unionSet(pas.Common.IntegerTypes,rtl.createSet(pas.Tokens.TTokenKind.BOOLEANTOK)))) {
         if (ConstVal === 0) {
-          isZero = 128;
-          if ((ValType.get() in pas.Common.SignedOrdinalTypes) && (pas.Common.Tok[i + 1].Kind in rtl.createSet(43,44))) {
+          isZero = pas.Tokens.TTokenKind.BYTETOK;
+          if ((ValType.get() in pas.Common.SignedOrdinalTypes) && (pas.Common.Tok[i + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.EQTOK,pas.Tokens.TTokenKind.NETOK))) {
             var $tmp = ValType.get();
-            if ($tmp === 131) {
-              ValType.set(128)}
-             else if ($tmp === 132) {
-              ValType.set(129)}
-             else if ($tmp === 133) ValType.set(130);
+            if ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) {
+              ValType.set(pas.Tokens.TTokenKind.BYTETOK)}
+             else if ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) {
+              ValType.set(pas.Tokens.TTokenKind.WORDTOK)}
+             else if ($tmp === pas.Tokens.TTokenKind.INTEGERTOK) ValType.set(pas.Tokens.TTokenKind.CARDINALTOK);
           };
         };
-        if (ConstValType in pas.Common.SignedOrdinalTypes) if (ConstVal < 0) isZero = 131;
+        if (ConstValType in pas.Common.SignedOrdinalTypes) if (ConstVal < 0) isZero = pas.Tokens.TTokenKind.SHORTINTTOK;
         cRight = true;
         ConstValRight = ConstVal;
         RightValType = ConstValType;
       };
-      if ((pas.Common.Tok[i + 2].Kind === 174) || (RightValType === 137)) {
+      if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) || (RightValType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
         sRight = true}
-       else if ((RightValType in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === 170)) if ((pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name) - 1].AllocElementType === 134) && (pas.Parser.Elements(pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name)) > 0)) sRight = true;
+       else if ((RightValType in pas.Common.Pointers) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.IDENTTOK)) if ((pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name) - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Parser.Elements(pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name)) > 0)) sRight = true;
       if (VarType in pas.Common.RealTypes) {
         if ((ValType.get() === VarType) && (RightValType in pas.Common.RealTypes)) RightValType = VarType;
         if ((ValType.get() in pas.Common.RealTypes) && (RightValType === VarType)) ValType.set(VarType);
@@ -39912,47 +39854,47 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return RightValType;
         }, set: function (v) {
           RightValType = v;
-        }},0);
-      if (cRight && (pas.Common.Tok[i + 1].Kind in rtl.createSet(45,47)) && (ValType.get() in pas.Common.IntegerTypes)) {
+        }},pas.Tokens.TTokenKind.UNTYPETOK);
+      if (cRight && (pas.Common.Tok[i + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.LTTOK,pas.Tokens.TTokenKind.GTTOK)) && (ValType.get() in pas.Common.IntegerTypes)) {
         yes = false;
-        if (pas.Common.Tok[i + 1].Kind === 45) {
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.LTTOK) {
           var $tmp1 = ValType.get();
-          if (($tmp1 === 128) || ($tmp1 === 129) || ($tmp1 === 130)) {
-            yes = isZero === 128}
-           else if ($tmp1 === 131) {
+          if (($tmp1 === pas.Tokens.TTokenKind.BYTETOK) || ($tmp1 === pas.Tokens.TTokenKind.WORDTOK) || ($tmp1 === pas.Tokens.TTokenKind.CARDINALTOK)) {
+            yes = isZero === pas.Tokens.TTokenKind.BYTETOK}
+           else if ($tmp1 === pas.Tokens.TTokenKind.SHORTINTTOK) {
             yes = ConstVal === -128}
-           else if ($tmp1 === 132) {
+           else if ($tmp1 === pas.Tokens.TTokenKind.SMALLINTTOK) {
             yes = ConstVal === -32768}
-           else if ($tmp1 === 133) yes = ConstVal === -2147483648;
+           else if ($tmp1 === pas.Tokens.TTokenKind.INTEGERTOK) yes = ConstVal === -2147483648;
         } else {
           var $tmp2 = ValType.get();
-          if ($tmp2 === 128) {
+          if ($tmp2 === pas.Tokens.TTokenKind.BYTETOK) {
             yes = ConstVal === 255}
-           else if ($tmp2 === 129) {
+           else if ($tmp2 === pas.Tokens.TTokenKind.WORDTOK) {
             yes = ConstVal === 65535}
-           else if ($tmp2 === 130) {
+           else if ($tmp2 === pas.Tokens.TTokenKind.CARDINALTOK) {
             yes = ConstVal === 4294967295}
-           else if ($tmp2 === 131) {
+           else if ($tmp2 === pas.Tokens.TTokenKind.SHORTINTTOK) {
             yes = ConstVal === 127}
-           else if ($tmp2 === 132) {
+           else if ($tmp2 === pas.Tokens.TTokenKind.SMALLINTTOK) {
             yes = ConstVal === 32767}
-           else if ($tmp2 === 133) yes = ConstVal === 2147483647;
+           else if ($tmp2 === pas.Tokens.TTokenKind.INTEGERTOK) yes = ConstVal === 2147483647;
         };
         if (yes) {
           pas.Messages.WarningAlwaysFalse(i + 2);
           pas.Messages.WarningUnreachableCode(i + 2);
         };
       };
-      if ((isZero === 128) && (ValType.get() in pas.Common.UnsignedOrdinalTypes)) {
+      if ((isZero === pas.Tokens.TTokenKind.BYTETOK) && (ValType.get() in pas.Common.UnsignedOrdinalTypes)) {
         var $tmp3 = pas.Common.Tok[i + 1].Kind;
-        if ($tmp3 === 48) pas.Messages.WarningAlwaysTrue(i + 2);
+        if ($tmp3 === pas.Tokens.TTokenKind.GETOK) pas.Messages.WarningAlwaysTrue(i + 2);
       };
-      if ((isZero === 131) && (ValType.get() in pas.Common.UnsignedOrdinalTypes)) {
+      if ((isZero === pas.Tokens.TTokenKind.SHORTINTTOK) && (ValType.get() in pas.Common.UnsignedOrdinalTypes)) {
         var $tmp4 = pas.Common.Tok[i + 1].Kind;
-        if (($tmp4 === 43) || ($tmp4 === 45) || ($tmp4 === 46)) {
+        if (($tmp4 === pas.Tokens.TTokenKind.EQTOK) || ($tmp4 === pas.Tokens.TTokenKind.LTTOK) || ($tmp4 === pas.Tokens.TTokenKind.LETOK)) {
           pas.Messages.WarningAlwaysFalse(i + 2);
           pas.Messages.WarningUnreachableCode(i + 2);
-        } else if (($tmp4 === 47) || ($tmp4 === 48)) pas.Messages.WarningAlwaysTrue(i + 2);
+        } else if (($tmp4 === pas.Tokens.TTokenKind.GTTOK) || ($tmp4 === pas.Tokens.TTokenKind.GETOK)) pas.Messages.WarningAlwaysTrue(i + 2);
       };
       if (sLeft || sRight) {}
       else pas.Common.GetCommonType(j,ValType.get(),RightValType);
@@ -39960,40 +39902,40 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         if ((ValType.get() === VarType) && (RightValType in pas.Common.RealTypes)) RightValType = VarType;
         if ((ValType.get() in pas.Common.RealTypes) && (RightValType === VarType)) ValType.set(VarType);
       };
-      if (((ValType.get() in pas.Common.SignedOrdinalTypes) && (RightValType in pas.Common.UnsignedOrdinalTypes)) || ((ValType.get() in pas.Common.UnsignedOrdinalTypes) && (RightValType in pas.Common.SignedOrdinalTypes))) if (pas.Common.DataSize[ValType.get() - 128] === pas.Common.DataSize[RightValType - 128]) {
-        var $tmp5 = pas.Common.DataSize[ValType.get() - 128];
+      if (((ValType.get() in pas.Common.SignedOrdinalTypes) && (RightValType in pas.Common.UnsignedOrdinalTypes)) || ((ValType.get() in pas.Common.UnsignedOrdinalTypes) && (RightValType in pas.Common.SignedOrdinalTypes))) if (pas.Common.GetDataSize(ValType.get()) === pas.Common.GetDataSize(RightValType)) {
+        var $tmp5 = pas.Common.GetDataSize(ValType.get());
         if ($tmp5 === 1) {
           if (cRight && (ConstValRight >= -128) && (ConstValRight <= 127)) {
             RightValType = ValType.get()}
            else {
-            $mod.ExpandParam_m1(132,ValType.get());
-            $mod.ExpandParam(132,RightValType);
-            ValType.set(132);
-            RightValType = 132;
+            $mod.ExpandParam_m1(pas.Tokens.TTokenKind.SMALLINTTOK,ValType.get());
+            $mod.ExpandParam(pas.Tokens.TTokenKind.SMALLINTTOK,RightValType);
+            ValType.set(pas.Tokens.TTokenKind.SMALLINTTOK);
+            RightValType = pas.Tokens.TTokenKind.SMALLINTTOK;
           };
         } else if ($tmp5 === 2) {
           if (cRight && (ConstValRight >= -32768) && (ConstValRight <= 32767)) {
             RightValType = ValType.get()}
            else {
-            $mod.ExpandParam_m1(133,ValType.get());
-            $mod.ExpandParam(133,RightValType);
-            ValType.set(133);
-            RightValType = 133;
+            $mod.ExpandParam_m1(pas.Tokens.TTokenKind.INTEGERTOK,ValType.get());
+            $mod.ExpandParam(pas.Tokens.TTokenKind.INTEGERTOK,RightValType);
+            ValType.set(pas.Tokens.TTokenKind.INTEGERTOK);
+            RightValType = pas.Tokens.TTokenKind.INTEGERTOK;
           };
         };
       };
-      $mod.ExpandExpression(ValType,RightValType,0,false);
+      $mod.ExpandExpression(ValType,RightValType,pas.Tokens.TTokenKind.UNTYPETOK,false);
       if (sLeft || sRight) {
         if (sLeft && sRight) {
-          $mod.GenerateRelationString(pas.Common.Tok[i + 1].Kind,137,137)}
-         else if (ValType.get() === 134) {
-          $mod.GenerateRelationString(pas.Common.Tok[i + 1].Kind,134,137)}
-         else if (RightValType === 134) {
-          $mod.GenerateRelationString(pas.Common.Tok[i + 1].Kind,137,134)}
+          $mod.GenerateRelationString(pas.Common.Tok[i + 1].Kind,pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK)}
+         else if (ValType.get() === pas.Tokens.TTokenKind.CHARTOK) {
+          $mod.GenerateRelationString(pas.Common.Tok[i + 1].Kind,pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK)}
+         else if (RightValType === pas.Tokens.TTokenKind.CHARTOK) {
+          $mod.GenerateRelationString(pas.Common.Tok[i + 1].Kind,pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.CHARTOK)}
          else pas.Common.GetCommonType(j,ValType.get(),RightValType);
       } else $mod.GenerateRelation(pas.Common.Tok[i + 1].Kind,ValType.get());
       i = j;
-      ValType.set(135);
+      ValType.set(pas.Tokens.TTokenKind.BOOLEANTOK);
     };
     Result = i;
     return Result;
@@ -40016,19 +39958,19 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var ActualParamType = 0;
     var AllocElementType = 0;
     NumActualParams = 0;
-    AllocElementType = 0;
+    AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
     do {
       NumActualParams += 1;
       $mod.StartOptimization(i.get());
       if (NumActualParams > 3) pas.Messages.ErrorForIdentifier(i.get(),pas.Messages.TErrorCode.WrongNumberOfParameters,IdentBlock);
-      if (pas.Common.fBlockRead_ParamType[NumActualParams - 1] in rtl.unionSet(pas.Common.Pointers,rtl.createSet(0))) {
-        if (pas.Common.Tok[i.get() + 2].Kind !== 170) {
+      if (pas.Common.fBlockRead_ParamType[NumActualParams - 1] in rtl.unionSet(pas.Common.Pointers,rtl.createSet(pas.Tokens.TTokenKind.UNTYPETOK))) {
+        if (pas.Common.Tok[i.get() + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
           pas.Messages.Error$2(i.get() + 2,pas.Messages.TErrorCode.VariableExpected)}
          else {
           idx = pas.Parser.GetIdentIndex(pas.Common.Tok[i.get() + 2].Name);
-          if (pas.Common.Ident[idx - 1].Kind === 1) {
+          if (pas.Common.Ident[idx - 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) {
             if (!(pas.Common.Ident[idx - 1].DataType in pas.Common.Pointers) || (pas.Parser.Elements(idx) === 0)) pas.Messages.Error$2(i.get() + 2,pas.Messages.TErrorCode.VariableExpected);
-          } else if (pas.Common.Ident[idx - 1].Kind !== 3) pas.Messages.Error$2(i.get() + 2,pas.Messages.TErrorCode.VariableExpected);
+          } else if (pas.Common.Ident[idx - 1].Kind !== pas.Tokens.TTokenKind.VARTOK) pas.Messages.Error$2(i.get() + 2,pas.Messages.TErrorCode.VariableExpected);
         };
         i.set($mod.CompileAddress(i.get() + 1,{get: function () {
             return ActualParamType;
@@ -40043,7 +39985,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ActualParamType;
         }, set: function (v) {
           ActualParamType = v;
-        }},133));
+        }},pas.Tokens.TTokenKind.INTEGERTOK));
       pas.Common.GetCommonType(i.get(),pas.Common.fBlockRead_ParamType[NumActualParams - 1],ActualParamType);
       $mod.ExpandParam(pas.Common.fBlockRead_ParamType[NumActualParams - 1],ActualParamType);
       var $tmp = NumActualParams;
@@ -40052,9 +39994,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
        else if ($tmp === 2) {
         $mod.GenerateAssignment(2,2,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.nrecord")}
        else if ($tmp === 3) $mod.GenerateAssignment(2,2,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.numread");
-    } while (!(pas.Common.Tok[i.get() + 1].Kind !== 52));
+    } while (!(pas.Common.Tok[i.get() + 1].Kind !== pas.Tokens.TTokenKind.COMMATOK));
     if (NumActualParams < 2) pas.Messages.ErrorForIdentifier(i.get(),pas.Messages.TErrorCode.WrongNumberOfParameters,IdentBlock);
-    pas.Common.CheckTok(i.get() + 1,55);
+    pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.CPARTOK);
     i.set(i.get() + 1);
     Result = NumActualParams;
     return Result;
@@ -40088,8 +40030,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var oldPass = 0;
     var oldCodeSize = 0;
     var Param = rtl.arraySetLength(null,pas.Common.TParam,8);
-    var ExpressionType = 0;
     var IndirectionLevel = 0;
+    var ExpressionType = 0;
     var ActualParamType = 0;
     var ConstValType = 0;
     var VarType = 0;
@@ -40114,49 +40056,49 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     Result = i;
     Param = rtl.arraySetLength(null,pas.Common.TParam,8);
     IdentIndex = 0;
-    ExpressionType = 0;
+    ExpressionType = pas.Tokens.TTokenKind.UNTYPETOK;
     par1 = "";
     par2 = "";
     $mod.StopOptimization();
     var $tmp = pas.Common.Tok[i].Kind;
-    if (($tmp === 133) || ($tmp === 130) || ($tmp === 132) || ($tmp === 129) || ($tmp === 134) || ($tmp === 131) || ($tmp === 128) || ($tmp === 135) || ($tmp === 136) || ($tmp === 137) || ($tmp === 141) || ($tmp === 142) || ($tmp === 143) || ($tmp === 144)) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) pas.Messages.Error(i,"type identifier not allowed here");
+    if (($tmp === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) || ($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp === pas.Tokens.TTokenKind.WORDTOK) || ($tmp === pas.Tokens.TTokenKind.CHARTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp === pas.Tokens.TTokenKind.BYTETOK) || ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK) || ($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) || ($tmp === pas.Tokens.TTokenKind.REALTOK) || ($tmp === pas.Tokens.TTokenKind.SINGLETOK) || ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK)) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) pas.Messages.Error(i,"type identifier not allowed here");
       $mod.StartOptimization(i + 1);
-      if (pas.Common.Tok[i + 2].Kind !== 170) {
+      if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.VariableExpected)}
        else IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
       VarType = pas.Common.Ident[IdentIndex - 1].DataType;
       if (VarType !== pas.Common.Tok[i].Kind) pas.Messages.Error(i,"Argument cannot be assigned to");
-      pas.Common.CheckTok(i + 3,55);
-      if (pas.Common.Tok[i + 4].Kind !== 25) pas.Messages.Error$2(i + 4,pas.Messages.TErrorCode.IllegalExpression);
+      pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.CPARTOK);
+      if (pas.Common.Tok[i + 4].Kind !== pas.Tokens.TTokenKind.ASSIGNTOK) pas.Messages.Error$2(i + 4,pas.Messages.TErrorCode.IllegalExpression);
       i = $mod.CompileExpression(i + 5,{get: function () {
           return ExpressionType;
         }, set: function (v) {
           ExpressionType = v;
         }},VarType);
-      $mod.GenerateAssignment(1,pas.Common.DataSize[VarType - 128],IdentIndex,"","");
+      $mod.GenerateAssignment(1,pas.Common.GetDataSize(VarType),IdentIndex,"","");
       Result = i;
-    } else if ($tmp === 170) {
+    } else if ($tmp === pas.Tokens.TTokenKind.IDENTTOK) {
       IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name);
-      if ((IdentIndex > 0) && (pas.Common.Ident[IdentIndex - 1].Kind === 5) && (pas.Common.BlockStackTop > 1) && (pas.Common.Tok[i + 1].Kind !== 54)) for (var $l = pas.Common.NumIdent; $l >= 1; $l--) {
+      if ((IdentIndex > 0) && (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) && (pas.Common.BlockStackTop > 1) && (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK)) for (var $l = pas.Common.NumIdent; $l >= 1; $l--) {
         j = $l;
-        if ((pas.Common.Ident[j - 1].ProcAsBlock === pas.Common.NumBlocks) && (pas.Common.Ident[j - 1].Kind === 5)) {
+        if ((pas.Common.Ident[j - 1].ProcAsBlock === pas.Common.NumBlocks) && (pas.Common.Ident[j - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) {
           if ((pas.Common.Ident[j - 1].Name === pas.Common.Ident[IdentIndex - 1].Name) && (pas.Common.Ident[j - 1].UnitIndex === pas.Common.Ident[IdentIndex - 1].UnitIndex)) IdentIndex = $mod.GetIdentResult(pas.Common.NumBlocks);
           break;
         };
       };
       if (IdentIndex > 0) {
         var $tmp1 = pas.Common.Ident[IdentIndex - 1].Kind;
-        if ($tmp1 === 6) {
-          pas.Common.CheckTok(i + 1,60);
+        if ($tmp1 === pas.Tokens.TTokenKind.LABELTOK) {
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COLONTOK);
           if (pas.Common.Ident[IdentIndex - 1].isInit) pas.Messages.Error(i,"Label already defined");
           pas.Common.Ident[IdentIndex - 1].isInit = true;
           pas.Optimize.asm65(pas.Common.Ident[IdentIndex - 1].Name,"");
           Result = i;
-        } else if (($tmp1 === 3) || ($tmp1 === 2)) {
-          VarType = 0;
+        } else if (($tmp1 === pas.Tokens.TTokenKind.VARTOK) || ($tmp1 === pas.Tokens.TTokenKind.TYPETOK)) {
+          VarType = pas.Tokens.TTokenKind.UNTYPETOK;
           $mod.StartOptimization(i + 1);
-          if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 147) && !(pas.Common.Tok[i + 1].Kind in rtl.createSet(25,58))) {
+          if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) && !(pas.Common.Tok[i + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.ASSIGNTOK,pas.Tokens.TTokenKind.OBRACKETTOK))) {
             IdentTemp = pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].NumAllocElements_,4));
             $mod.CompileActualParameters({get: function () {
                 return i;
@@ -40166,35 +40108,35 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             Result = i;
             return Result;
           };
-          if (pas.Common.Ident[IdentIndex - 1].IdType === 160) {
+          if (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
             IdentTemp = pas.Parser.GetIdentIndex($mod.ExtractName(IdentIndex,pas.Common.Ident[IdentIndex - 1].Name));
-            if ((pas.Common.Ident[IdentTemp - 1].NumAllocElements_ > 0) && (pas.Common.Ident[IdentTemp - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(139,140))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalQualifier);
+            if ((pas.Common.Ident[IdentTemp - 1].NumAllocElements_ > 0) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalQualifier);
           };
           IndirectionLevel = 2;
-          if (pas.Common.Tok[i + 1].Kind === 54) {
-            if (!(pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(136,139,140))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression);
-            if (pas.Common.Ident[IdentIndex - 1].DataType === 136) {
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) {
+            if (!(pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression);
+            if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) {
               VarType = pas.Common.Ident[IdentIndex - 1].AllocElementType}
              else VarType = pas.Common.Ident[IdentIndex - 1].DataType;
             i = $mod.CompileExpression(i + 2,{get: function () {
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},136);
-            pas.Common.CheckTok(i + 1,55);
-            if ((VarType in rtl.createSet(139,140)) && (pas.Common.Tok[i + 2].Kind === 51)) {
+              }},pas.Tokens.TTokenKind.POINTERTOK);
+            pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
+            if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK)) {
               IndirectionLevel = 9;
-              pas.Common.CheckTok(i + 3,170);
+              pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
               IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
               if (IdentTemp < 0) pas.Messages.Error(i + 3,"identifier idents no member '" + pas.Common.Tok[i + 3].Name + "'");
               VarType = IdentTemp >>> 16;
               par2 = "$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2);
               i += 2;
-            } else if (pas.Common.Tok[i + 2].Kind === 56) {
+            } else if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
               IndirectionLevel = 9;
               i += 1;
-              if ((VarType in rtl.createSet(139,140)) && (pas.Common.Tok[i + 2].Kind === 51)) {
-                pas.Common.CheckTok(i + 3,170);
+              if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK)) {
+                pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
                 IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
                 if (IdentTemp < 0) pas.Messages.Error(i + 3,"identifier idents no member '" + pas.Common.Tok[i + 3].Name + "'");
                 VarType = IdentTemp >>> 16;
@@ -40202,9 +40144,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 i += 2;
               };
             } else {
-              if ((VarType in rtl.createSet(139,140)) && (pas.Common.Tok[i + 2].Kind === 51)) {
+              if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK)) {
                 IndirectionLevel = 9;
-                pas.Common.CheckTok(i + 3,170);
+                pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
                 IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
                 if (IdentTemp < 0) pas.Messages.Error(i + 3,"identifier idents no member '" + pas.Common.Tok[i + 3].Name + "'");
                 VarType = IdentTemp >>> 16;
@@ -40213,29 +40155,29 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               };
             };
             i += 1;
-          } else if (pas.Common.Tok[i + 1].Kind === 56) {
+          } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
             if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorForIdentifier(i + 1,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-            if ((pas.Common.Ident[IdentIndex - 1].DataType === 137) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
-              VarType = 137}
+            if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
+              VarType = pas.Tokens.TTokenKind.STRINGPOINTERTOK}
              else VarType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
             IndirectionLevel = 2;
-            if (pas.Common.Tok[i + 2].Kind === 58) {
+            if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
               i += 1;
               if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorForIdentifier(i + 1,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
               IndirectionLevel = 4;
               i = $mod.CompileArrayIndex(i,IdentIndex);
-              pas.Common.CheckTok(i + 1,59);
-            } else if ((VarType in rtl.createSet(139,140)) && (pas.Common.Tok[i + 2].Kind === 51)) {
-              pas.Common.CheckTok(i + 3,170);
+              pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
+            } else if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK)) {
+              pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
               IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
               if (IdentTemp < 0) pas.Messages.Error(i + 3,"identifier idents no member '" + pas.Common.Tok[i + 3].Name + "'");
-              if (pas.Common.Tok[i + 4].Kind === 58) {
+              if (pas.Common.Tok[i + 4].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
                 if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
                 VarType = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i + 3].Name) - 1].AllocElementType;
                 par2 = "$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2);
                 IndirectionLevel = 10;
                 i = $mod.CompileArrayIndex(i + 3,pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i + 3].Name));
-                pas.Common.CheckTok(i + 1,59);
+                pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
               } else {
                 VarType = IdentTemp >>> 16;
                 par2 = "$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2);
@@ -40244,19 +40186,19 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               };
             };
             i = i + 1;
-          } else if (pas.Common.Tok[i + 1].Kind === 58) {
+          } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
             if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorForIdentifier(i + 1,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
             IndirectionLevel = 4;
             j = i;
             i = $mod.CompileArrayIndex(i,IdentIndex);
             VarType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
-            if (pas.Common.Tok[i + 2].Kind === 56) {
+            if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
               i += 1;
-              $mod.Push(0,4,pas.Common.DataSize[VarType - 128],IdentIndex,0);
+              $mod.Push(0,4,pas.Common.GetDataSize(VarType),IdentIndex,0);
             };
             if (pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) > 0) {
               IdentTemp = pas.Parser.GetIdentIndex(pas.System.Copy(pas.Common.Ident[IdentIndex - 1].Name,1,pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) - 1));
-              if ((pas.Common.Ident[IdentTemp - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(139,140))) {
+              if ((pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
                 IndirectionLevel = 10;
                 par2 = pas.System.Copy(pas.Common.Ident[IdentIndex - 1].Name,pas.System.Pos(".",pas.Common.Ident[IdentIndex - 1].Name) + 1,pas.Common.Ident[IdentIndex - 1].Name.length);
                 IdentIndex = IdentTemp;
@@ -40265,31 +40207,31 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 par2 = "$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2);
               };
             };
-            if ((VarType in rtl.createSet(139,140)) && (pas.Common.Tok[i + 2].Kind === 51)) {
+            if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.DOTTOK)) {
               IndirectionLevel = 6;
-              pas.Common.CheckTok(i + 3,170);
+              pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.IDENTTOK);
               IdentTemp = pas.Parser.RecordSize(IdentIndex,pas.Common.Tok[i + 3].Name);
               if (IdentTemp < 0) pas.Messages.Error(i + 3,"identifier idents no member '" + pas.Common.Tok[i + 3].Name + "'");
-              if (pas.Common.Tok[i + 4].Kind === 58) {
+              if (pas.Common.Tok[i + 4].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
                 if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
                 VarType = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i + 3].Name) - 1].AllocElementType;
                 par2 = "$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2);
                 IndirectionLevel = 11;
                 i = $mod.CompileArrayIndex(i + 3,pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i + 3].Name));
-                pas.Common.CheckTok(i + 1,59);
+                pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
               } else {
                 VarType = IdentTemp >>> 16;
                 par2 = "$" + pas.SysUtils.IntToHex(IdentTemp & 0xffff,2);
                 if (pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i + 3].Name) > 0) IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Ident[IdentIndex - 1].Name + "." + pas.Common.Tok[i + 3].Name);
-                if (VarType === 137) IndirectionLevel = 12;
+                if (VarType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) IndirectionLevel = 12;
                 i += 2;
               };
-            } else if (VarType in rtl.createSet(139,140,147)) VarType = 136;
+            } else if (VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK,pas.Tokens.TTokenKind.PROCVARTOK)) VarType = pas.Tokens.TTokenKind.POINTERTOK;
             i += 1;
           } else {
             if (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) {
               IndirectionLevel = 2;
-              if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 0) {
+              if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
                 VarType = pas.Common.Ident[IdentIndex - 1].DataType}
                else VarType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
             } else {
@@ -40297,20 +40239,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               VarType = pas.Common.Ident[IdentIndex - 1].DataType;
             };
           };
-          if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 147) && (pas.Common.Tok[i + 1].Kind !== 25)) {
+          if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) && (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.ASSIGNTOK)) {
             IdentTemp = pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].NumAllocElements_,4));
             $mod.CompileActualParameters({get: function () {
                 return i;
               }, set: function (v) {
                 i = v;
               }},IdentTemp,IdentIndex);
-            if (pas.Common.Ident[IdentTemp - 1].Kind === 5) $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+            if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
             Result = i;
             return Result;
-          } else pas.Common.CheckTok(i + 1,25);
-          if ((pas.Common.Ident[IdentIndex - 1].DataType === 145) && (IndirectionLevel === 1) && (pas.Common.Tok[i + 2].Kind in rtl.createSet(174,173,170))) {
+          } else pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.ASSIGNTOK);
+          if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.PCHARTOK) && (IndirectionLevel === 1) && (pas.Common.Tok[i + 2].Kind in rtl.createSet(pas.Tokens.TTokenKind.STRINGLITERALTOK,pas.Tokens.TTokenKind.CHARLITERALTOK,pas.Tokens.TTokenKind.IDENTTOK))) {
             var $tmp2 = pas.Common.Tok[i + 2].Kind;
-            if ($tmp2 === 173) {
+            if ($tmp2 === pas.Tokens.TTokenKind.CHARLITERALTOK) {
               pas.Common.Ident[IdentIndex - 1].isInit = true;
               $mod.StopOptimization();
               var $tmp3 = IndirectionLevel;
@@ -40324,7 +40266,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tsta (:bp2),y","");
               };
               Result = i + 2;
-            } else if ($tmp2 === 174) {
+            } else if ($tmp2 === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
               pas.Common.Ident[IdentIndex - 1].isInit = true;
               $mod.StopOptimization();
               pas.Optimize.ResetOpty();
@@ -40342,7 +40284,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\tsta (:bp),y","");
                 } else {
                   pas.Optimize.asm65("\tmwy " + svar + " :bp2","");
-                  if (pas.Common.Ident[IdentIndex - 1].DataType === 136) {
+                  if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) {
                     k = (pas.Common.Tok[i + 2].StrAddress - 256) + 1}
                    else k = pas.Common.Tok[i + 2].StrAddress - 256;
                   pas.Optimize.asm65("\tlda <CODEORIGIN+$" + pas.SysUtils.IntToHex(k,4),"");
@@ -40353,14 +40295,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 };
               };
               Result = i + 2;
-            } else if ($tmp2 === 170) {
+            } else if ($tmp2 === pas.Tokens.TTokenKind.IDENTTOK) {
               pas.Common.Ident[IdentIndex - 1].isInit = true;
               Result = $mod.CompileExpression(i + 2,{get: function () {
                   return ExpressionType;
                 }, set: function (v) {
                   ExpressionType = v;
                 }},VarType);
-              if (ExpressionType === 134) {
+              if (ExpressionType === pas.Tokens.TTokenKind.CHARTOK) {
                 var $tmp5 = IndirectionLevel;
                 if ($tmp5 === 1) {
                   pas.Optimize.asm65("\tmwy " + $mod.GetLocalName(IdentIndex,"") + " :bp2","");
@@ -40370,9 +40312,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\ttya","");
                   pas.Optimize.asm65("\tiny","");
                   pas.Optimize.asm65("\tsta (:bp2),y","");
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                 } else {
-                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,"","");
+                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,"","");
                 };
               } else if (ExpressionType in pas.Common.Pointers) {
                 pas.Common.Ident[IdentIndex - 1].isInit = true;
@@ -40383,22 +40325,22 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\tsta @move.src","");
                   pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
                   pas.Optimize.asm65("\tsta @move.src+1","");
-                  if ((ExpressionType === 145) && (pas.Common.Ident[IdentIndex - 1].DataType === 137)) {
+                  if ((ExpressionType === pas.Tokens.TTokenKind.PCHARTOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
                     pas.Optimize.asm65("\t@movePCHAR " + svar + " #" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1),"")}
-                   else if (pas.Common.Ident[IdentIndex - 1].DataType === 136) {
+                   else if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) {
                     pas.Optimize.asm65("\t@moveSTRING_P " + svar,"")}
                    else pas.Optimize.asm65("\t@moveSTRING " + svar + " #" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1),"");
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   $mod.StopOptimization();
                   pas.Optimize.ResetOpty();
                 } else {
-                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,"","");
+                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,"","");
                 };
               } else pas.Messages.ErrorIncompatibleTypes(i,ExpressionType,VarType,false);
             };
-          } else if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 134) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && ((IndirectionLevel in rtl.createSet(1,2)) || ((IndirectionLevel === 3) && (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) && (pas.Common.Tok[i + 2].Kind in rtl.createSet(174,173,170))) {
+          } else if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && ((IndirectionLevel in rtl.createSet(1,2)) || ((IndirectionLevel === 3) && (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING))) && (pas.Common.Tok[i + 2].Kind in rtl.createSet(pas.Tokens.TTokenKind.STRINGLITERALTOK,pas.Tokens.TTokenKind.CHARLITERALTOK,pas.Tokens.TTokenKind.IDENTTOK))) {
             var $tmp7 = pas.Common.Tok[i + 2].Kind;
-            if ($tmp7 === 173) {
+            if ($tmp7 === pas.Tokens.TTokenKind.CHARLITERALTOK) {
               pas.Common.Ident[IdentIndex - 1].isInit = true;
               $mod.StopOptimization();
               var $tmp8 = IndirectionLevel;
@@ -40412,13 +40354,13 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tmwy " + pas.Common.Ident[IdentIndex - 1].Name + " :bp2","");
                 pas.Optimize.asm65("\tldy :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tmva #$" + pas.SysUtils.IntToHex(pas.Common.Tok[i + 2].Value,2) + " (:bp2),y","");
-                $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
               } else if ($tmp8 === 1) {
                 pas.Optimize.asm65("\tmva #$01 " + $mod.GetLocalName(IdentIndex,"adr."),"");
                 pas.Optimize.asm65("\tmva #$" + pas.SysUtils.IntToHex(pas.Common.Tok[i + 2].Value,2) + " " + $mod.GetLocalName(IdentIndex,"adr.") + "+1","");
               };
               Result = i + 2;
-            } else if ($tmp7 === 174) {
+            } else if ($tmp7 === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
               pas.Common.Ident[IdentIndex - 1].isInit = true;
               $mod.StopOptimization();
               pas.Optimize.ResetOpty();
@@ -40438,12 +40380,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\tjsr @move","");
                 } else pas.Optimize.asm65("\t@move #CODEORIGIN+$" + pas.SysUtils.IntToHex(pas.Common.Tok[i + 2].StrAddress - 256,4) + " " + pas.Common.Ident[IdentIndex - 1].Name + " #" + pas.Common.IntToStr(NumCharacters + 1),"")}
                else if ($tmp9 === 3) {
-                pas.Common.GetCommonType(i + 1,134,136)}
+                pas.Common.GetCommonType(i + 1,pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.POINTERTOK)}
                else if ($tmp9 === 1) {
                 if (pas.Common.Tok[i + 2].StrLength === 0) {
                   pas.Optimize.asm65("\tmva #$00 " + $mod.GetLocalName(IdentIndex,"adr."),"")}
                  else {
-                  if (pas.Common.Ident[IdentIndex - 1].DataType === 136) {
+                  if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) {
                     k = (pas.Common.Tok[i + 2].StrAddress - 256) + 1}
                    else k = pas.Common.Tok[i + 2].StrAddress - 256;
                   vlen = NumCharacters + 1;
@@ -40458,7 +40400,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 };
               };
               Result = i + 2;
-            } else if ($tmp7 === 170) {
+            } else if ($tmp7 === pas.Tokens.TTokenKind.IDENTTOK) {
               pas.Common.Ident[IdentIndex - 1].isInit = true;
               Result = $mod.CompileExpression(i + 2,{get: function () {
                   return ExpressionType;
@@ -40466,33 +40408,33 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   ExpressionType = v;
                 }},VarType);
               svar = $mod.GetLocalName(IdentIndex,"");
-              if (ExpressionType === 134) {
+              if (ExpressionType === pas.Tokens.TTokenKind.CHARTOK) {
                 var $tmp10 = IndirectionLevel;
                 if ($tmp10 === 1) {
                   pas.Optimize.asm65("\tmva :STACKORIGIN,x " + $mod.GetLocalName(IdentIndex,"adr.") + "+1","");
                   pas.Optimize.asm65("\tmva #$01 " + $mod.GetLocalName(IdentIndex,"adr."),"");
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                 } else if ($tmp10 === 2) {
                   pas.Optimize.asm65("\tmwy " + svar + " :bp2","");
                   pas.Optimize.asm65("\tldy #$00","");
                   pas.Optimize.asm65("\tmva #$01 (:bp2),y","");
                   pas.Optimize.asm65("\tiny","");
                   pas.Optimize.asm65("\tmva :STACKORIGIN,x (:bp2),y","");
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                 } else if ($tmp10 === 3) {
                   pas.Optimize.asm65("\tmwy " + svar + " :bp2","");
                   pas.Optimize.asm65("\tldy :STACKORIGIN-1,x","");
                   pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                   pas.Optimize.asm65("\tsta (:bp2),y","");
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                 } else {
-                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,"","");
+                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,"","");
                 };
               } else if (ExpressionType in pas.Common.Pointers) {
                 var $tmp11 = IndirectionLevel;
                 if (($tmp11 === 1) || ($tmp11 === 2)) {
-                  if (pas.Common.Tok[i + 3].Kind === 56) {
+                  if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
                     pas.Optimize.asm65("\tmwy " + $mod.GetLocalName(pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name),"") + " :bp2","");
                     pas.Optimize.asm65("\tldy #$00","");
                     pas.Optimize.asm65("\tlda (:bp2),y","");
@@ -40507,21 +40449,21 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
                     pas.Optimize.asm65("\tsta @move.src+1","");
                   };
-                  if ((ExpressionType === 145) && (pas.Common.Ident[IdentIndex - 1].DataType === 137)) {
+                  if ((ExpressionType === pas.Tokens.TTokenKind.PCHARTOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
                     pas.Optimize.asm65("\t@movePCHAR " + svar + " #" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1),"")}
-                   else if (pas.Common.Ident[IdentIndex - 1].DataType === 136) {
+                   else if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) {
                     pas.Optimize.asm65("\t@moveSTRING_P " + svar,"")}
                    else pas.Optimize.asm65("\t@moveSTRING " + svar + " #" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1),"");
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   $mod.StopOptimization();
                   pas.Optimize.ResetOpty();
                 } else {
-                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,"","");
+                  $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,"","");
                 };
               } else pas.Messages.ErrorIncompatibleTypes(i,ExpressionType,VarType,false);
             };
           } else {
-            if (VarType === 0) pas.Messages.Error(i,"Assignments to formal parameters and open arrays are not possible");
+            if (VarType === pas.Tokens.TTokenKind.UNTYPETOK) pas.Messages.Error(i,"Assignments to formal parameters and open arrays are not possible");
             Result = $mod.CompileExpression(i + 2,{get: function () {
                 return ExpressionType;
               }, set: function (v) {
@@ -40536,148 +40478,148 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},0);
-            if ((VarType in rtl.createSet(141,142)) && (ExpressionType in rtl.createSet(141,142))) ExpressionType = VarType;
-            if ((VarType === 136) && (ExpressionType === 137)) {
-              if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 134) {
+              }},pas.Tokens.TTokenKind.UNTYPETOK);
+            if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK)) && (ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) ExpressionType = VarType;
+            if ((VarType === pas.Tokens.TTokenKind.POINTERTOK) && (ExpressionType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
+              if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK) {
                 pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tadd #$01","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN,x","");
                 pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
                 pas.Optimize.asm65("\tadc #$00","");
                 pas.Optimize.asm65("\tsta :STACKORIGIN+STACKWIDTH,x","");
-              } else if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 0) {
-                pas.Messages.ErrorIncompatibleTypes(i + 1,137,136,false)}
-               else pas.Common.GetCommonType(i + 1,pas.Common.Ident[IdentIndex - 1].AllocElementType,137);
+              } else if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
+                pas.Messages.ErrorIncompatibleTypes(i + 1,pas.Tokens.TTokenKind.STRINGPOINTERTOK,pas.Tokens.TTokenKind.POINTERTOK,false)}
+               else pas.Common.GetCommonType(i + 1,pas.Common.Ident[IdentIndex - 1].AllocElementType,pas.Tokens.TTokenKind.STRINGPOINTERTOK);
             };
-            if ((pas.Common.Tok[i].Kind === 56) && (VarType === 136) && (ExpressionType === 139)) {
-              ExpressionType = 139;
-              VarType = 139;
+            if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) && (VarType === pas.Tokens.TTokenKind.POINTERTOK) && (ExpressionType === pas.Tokens.TTokenKind.RECORDTOK)) {
+              ExpressionType = pas.Tokens.TTokenKind.RECORDTOK;
+              VarType = pas.Tokens.TTokenKind.RECORDTOK;
             };
-            if (VarType !== ExpressionType) if ((ExpressionType === 136) && (pas.Common.Tok[k].Kind === 170)) if ((pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].DataType === 136) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].AllocElementType === 147)) {
+            if (VarType !== ExpressionType) if ((ExpressionType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.IDENTTOK)) if ((pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK)) {
               IdentTemp = pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].NumAllocElements_,4));
-              if (pas.Common.Ident[IdentTemp - 1].Kind === 5) ExpressionType = pas.Common.Ident[IdentTemp - 1].DataType;
+              if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) ExpressionType = pas.Common.Ident[IdentTemp - 1].DataType;
             };
             $mod.CheckAssignment(i + 1,IdentIndex);
             if (IndirectionLevel in rtl.createSet(3,4)) {
-              if ((ExpressionType === 134) && (pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 137)) {
+              if ((ExpressionType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
                 IndirectionLevel = 8}
-               else if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) {
-                if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (ExpressionType in rtl.createSet(139,140))) {}
+               else if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
+                if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {}
                 else pas.Common.GetCommonType(i + 1,pas.Common.Ident[IdentIndex - 1].DataType,ExpressionType);
               } else pas.Common.GetCommonType(i + 1,pas.Common.Ident[IdentIndex - 1].AllocElementType,ExpressionType);
-            } else if (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers)) {
-              if ((ExpressionType in rtl.diffSet(pas.Common.Pointers,rtl.createSet(137))) && (pas.Common.Tok[k].Kind === 170)) {
+            } else if (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers)) {
+              if ((ExpressionType in rtl.diffSet(pas.Common.Pointers,rtl.createSet(pas.Tokens.TTokenKind.STRINGPOINTERTOK))) && (pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.IDENTTOK)) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name);
-                if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === 5)) IdentTemp = $mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock);
-                if (pas.Common.Ident[IdentTemp - 1].AllocElementType === 139) {}
-                else if ((pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Common.Ident[IdentIndex - 1].AllocElementType) && (pas.Common.Tok[k + 1].Kind !== 58)) {
+                if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) IdentTemp = $mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock);
+                if (pas.Common.Ident[IdentTemp - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK) {}
+                else if ((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Common.Ident[IdentIndex - 1].AllocElementType) && (pas.Common.Tok[k + 1].Kind !== pas.Tokens.TTokenKind.OBRACKETTOK)) {
                   if ((pas.Common.Ident[IdentTemp - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
                     pas.Messages.ErrorIdentifierIncompatibleTypesArrayIdentifier(k,IdentTemp,IdentIndex)}
                    else {
-                    if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (pas.Common.Ident[IdentTemp - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== 0) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements === 0)) {
+                    if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements === 0)) {
                       pas.Messages.Error(k,'Incompatible types: got "^' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentTemp - 1].AllocElementType) + '" expected "^' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].AllocElementType) + '"')}
                      else pas.Messages.ErrorIdentifierIncompatibleTypesArray(k,IdentTemp,ExpressionType);
                   };
                 };
-              } else if (ExpressionType in rtl.createSet(139,140)) {
+              } else if (ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name);
                 var $tmp12 = IndirectionLevel;
                 if ($tmp12 === 1) {
-                  if ((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) && !(pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(139,140))) pas.Messages.Error(k,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "^' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
+                  if ((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) && !(pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) pas.Messages.Error(k,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "^' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
                  else if ($tmp12 === 2) {
-                  if ((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) && !(pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(139,140))) pas.Messages.Error(k,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "^' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
+                  if ((pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) && !(pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) pas.Messages.Error(k,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "^' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
                  else {
                   pas.Common.GetCommonType(i + 1,VarType,ExpressionType);
                 };
               } else {
-                if (((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) || ((VarType === 137) && (ExpressionType === 145))) {}
-                else if (VarType in rtl.createSet(139,140)) {
+                if (((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) || ((VarType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (ExpressionType === pas.Tokens.TTokenKind.PCHARTOK))) {}
+                else if (VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                   pas.Messages.Error(i,'Incompatible types: got "' + pas.Common.InfoAboutToken(ExpressionType) + '" expected "' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
                  else pas.Common.GetCommonType(i + 1,VarType,ExpressionType);
               };
-            } else if (VarType === 146) {
-              if (pas.Common.Tok[k].Kind === 170) {
+            } else if (VarType === pas.Tokens.TTokenKind.ENUMTOK) {
+              if (pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name)}
                else IdentTemp = 0;
-              if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === 5)) IdentTemp = $mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock);
-              if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === 2) && (pas.Common.Ident[IdentTemp - 1].DataType === 146)) {
+              if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) IdentTemp = $mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock);
+              if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.TYPETOK) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK)) {
                 if (pas.Common.Ident[IdentIndex - 1].NumAllocElements !== pas.Common.Ident[IdentTemp - 1].NumAllocElements) pas.Messages.ErrorIncompatibleEnumIdentifiers(i,IdentTemp,IdentIndex);
-              } else if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === 146)) {
+              } else if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.ENUMTOK)) {
                 if (pas.Common.Ident[IdentTemp - 1].NumAllocElements !== pas.Common.Ident[IdentIndex - 1].NumAllocElements) pas.Messages.ErrorIncompatibleEnumIdentifiers(i,IdentTemp,IdentIndex);
-              } else if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].DataType === 146)) {
+              } else if ((IdentTemp > 0) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK)) {
                 if (pas.Common.Ident[IdentTemp - 1].NumAllocElements !== pas.Common.Ident[IdentIndex - 1].NumAllocElements) pas.Messages.ErrorIncompatibleEnumIdentifiers(i,IdentTemp,IdentIndex);
               } else pas.Messages.ErrorIncompatibleEnumTypeIdentifier(i,ExpressionType,IdentIndex);
             } else {
-              if (pas.Common.Tok[k].Kind === 170) {
+              if (pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name)}
                else IdentTemp = 0;
-              if ((IdentTemp > 0) && ((pas.Common.Ident[IdentTemp - 1].Kind === 146) || (pas.Common.Ident[IdentTemp - 1].DataType === 146))) {
+              if ((IdentTemp > 0) && ((pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.ENUMTOK) || (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.ENUMTOK))) {
                 pas.Messages.ErrorIncompatibleEnumIdentifierType(i,IdentTemp,ExpressionType)}
                else pas.Common.GetCommonType(i + 1,pas.Common.Ident[IdentIndex - 1].DataType,ExpressionType);
             };
             $mod.ExpandParam(VarType,ExpressionType);
             pas.Common.Ident[IdentIndex - 1].isInit = true;
-            if ((pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (IndirectionLevel !== 9) && (pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (ExpressionType !== 136)) {
+            if ((pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (IndirectionLevel !== 9) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (ExpressionType !== pas.Tokens.TTokenKind.POINTERTOK)) {
               if ((pas.Common.Ident[IdentIndex - 1].AllocElementType in pas.Common.OrdinalTypes) && (ExpressionType in pas.Common.OrdinalTypes)) {}
-              else if (pas.Common.Ident[IdentIndex - 1].AllocElementType !== 0) {
-                if ((ExpressionType in rtl.createSet(145,137)) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 134)) {}
+              else if (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK) {
+                if ((ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.PCHARTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK)) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {}
                 else pas.Messages.Error(i + 1,'Incompatible types: got "' + pas.Common.InfoAboutToken(ExpressionType) + '" expected "' + pas.Common.Ident[IdentIndex - 1].Name + '"');
               } else pas.Common.GetCommonType(i + 1,pas.Common.Ident[IdentIndex - 1].DataType,ExpressionType);
             };
-            if ((VarType in rtl.createSet(139,140)) || ((VarType === 136) && (ExpressionType in rtl.createSet(139,140)))) {
+            if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) || ((VarType === pas.Tokens.TTokenKind.POINTERTOK) && (ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)))) {
               ADDRESS = false;
-              if (pas.Common.Tok[k].Kind === 57) {
+              if (pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) {
                 k += 1;
                 ADDRESS = true;
               };
-              if (pas.Common.Tok[k].Kind !== 170) pas.Messages.Error$2(k,pas.Messages.TErrorCode.IdentifierExpected);
+              if (pas.Common.Tok[k].Kind !== pas.Tokens.TTokenKind.IDENTTOK) pas.Messages.Error$2(k,pas.Messages.TErrorCode.IdentifierExpected);
               IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name);
               if (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.Ident[IdentTemp - 1].PassMethod) {
                 var $tmp13 = IndirectionLevel;
                 if ($tmp13 === 1) {
-                  if ((pas.Common.Tok[k + 1].Kind !== 56) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) && !(pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(139,140))) pas.Messages.Error(k,'Incompatible types: got "^' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
+                  if ((pas.Common.Tok[k + 1].Kind !== pas.Tokens.TTokenKind.DEREFERENCETOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType !== pas.Common.Ident[IdentTemp - 1].AllocElementType) && !(pas.Common.Ident[IdentTemp - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) pas.Messages.Error(k,'Incompatible types: got "^' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
                  else if ($tmp13 === 2) {}
                 else {
                   pas.Common.GetCommonType(i + 1,VarType,ExpressionType);
                 };
               };
-              if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140)) && (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.Ident[IdentTemp - 1].PassMethod)) {
-                if (pas.Common.Ident[IdentTemp - 1].Kind === 5) {
+              if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.Ident[IdentTemp - 1].PassMethod)) {
+                if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
                   yes = pas.Common.Ident[IdentIndex - 1].NumAllocElements !== pas.Common.Ident[$mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock) - 1].NumAllocElements}
                  else yes = pas.Common.Ident[IdentIndex - 1].NumAllocElements !== pas.Common.Ident[IdentTemp - 1].NumAllocElements;
-                if (yes && (ADDRESS === false) && (ExpressionType in rtl.createSet(139,140))) if ((pas.Common.Ident[IdentTemp - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(139,140))) {
+                if (yes && (ADDRESS === false) && (ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) if ((pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
                   pas.Messages.Error(i,'Incompatible types: got "^' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "^' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"')}
                  else pas.Messages.Error(i,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "^' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"');
               };
-              if ((ExpressionType in rtl.createSet(139,140)) || ((ExpressionType === 136) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(139,140)))) {
+              if ((ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) || ((ExpressionType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)))) {
                 svar = pas.Common.Tok[k].Name;
-                if ((pas.Common.Ident[IdentTemp - 1].DataType === 139) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== 139)) {
+                if ((pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Tokens.TTokenKind.RECORDTOK)) {
                   Name = "adr." + svar}
                  else Name = svar;
-                if (pas.Common.Ident[IdentTemp - 1].Kind === 5) {
+                if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
                   svar = $mod.GetLocalName(IdentTemp,"");
                   IdentTemp = $mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock);
                   Name = svar + ".adr.result";
                   svar = svar + ".result";
                 };
                 DEREFERENCE = false;
-                if (pas.Common.Tok[k + 1].Kind === 56) {
+                if (pas.Common.Tok[k + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
                   k += 1;
                   DEREFERENCE = true;
                 };
-                if (pas.Common.Tok[k + 1].Kind === 51) {
-                  pas.Common.CheckTok(k + 2,170);
+                if (pas.Common.Tok[k + 1].Kind === pas.Tokens.TTokenKind.DOTTOK) {
+                  pas.Common.CheckTok(k + 2,pas.Tokens.TTokenKind.IDENTTOK);
                   Name = svar + "." + pas.Common.Tok[k + 2].Name;
                   IdentTemp = pas.Parser.GetIdentIndex(Name);
                 };
                 if (IdentTemp > 0) if (pas.Common.Ident[IdentIndex - 1].NumAllocElements !== pas.Common.Ident[IdentTemp - 1].NumAllocElements) if (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) {
                   pas.Messages.Error(i,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '"')}
                  else pas.Messages.Error(i,'Incompatible types: got "' + pas.Common.TypeArray[pas.Common.Ident[IdentTemp - 1].NumAllocElements - 1].Field[0].Name + '" expected "' + pas.Common.TypeArray[pas.Common.Ident[IdentIndex - 1].NumAllocElements - 1].Field[0].Name + '"');
-                $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                 $mod.StopOptimization();
                 pas.Optimize.ResetOpty();
-                if ((pas.Common.Ident[IdentIndex - 1].DataType === 139) && (pas.Common.Ident[IdentTemp - 1].DataType === 139) && (pas.Common.Ident[IdentTemp - 1].AllocElementType === 139)) {
+                if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Ident[IdentTemp - 1].AllocElementType === pas.Tokens.TTokenKind.RECORDTOK)) {
                   if (DEREFERENCE) {
                     pas.Optimize.asm65("\tlda :bp2","");
                     pas.Optimize.asm65("\tadd #" + Name + "-DATAORIGIN","");
@@ -40693,13 +40635,13 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(pas.Parser.RecordSize(IdentIndex,"") - 1,2),"");
                     pas.Optimize.asm65("\tmva:rpl (:bp2),y " + $mod.GetLocalName(IdentIndex,"adr.") + ",y-","");
                   } else pas.Optimize.asm65('\t@move ":bp2" ' + $mod.GetLocalName(IdentIndex,"") + " #" + pas.Common.IntToStr(pas.Parser.RecordSize(IdentIndex,"")),"");
-                } else if ((pas.Common.Ident[IdentIndex - 1].DataType === 139) && (pas.Common.Ident[IdentTemp - 1].DataType === 139) && (pas.Parser.RecordSize(IdentIndex,"") <= 8)) {
+                } else if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Parser.RecordSize(IdentIndex,"") <= 8)) {
                   if (pas.Parser.RecordSize(IdentIndex,"") === 1) {
                     pas.Optimize.asm65("\t mva " + Name + " " + $mod.GetLocalName(IdentIndex,"adr."),"")}
                    else pas.Optimize.asm65("\t:" + pas.Common.IntToStr(pas.Parser.RecordSize(IdentIndex,"")) + " mva " + Name + "+# " + $mod.GetLocalName(IdentIndex,"adr.") + "+#","");
-                } else if ((pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentTemp - 1].DataType === 136)) {
+                } else if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK)) {
                   pas.Optimize.asm65("\t@move " + Name + " " + $mod.GetLocalName(IdentIndex,"") + " #" + pas.Common.IntToStr(pas.Parser.RecordSize(IdentIndex,"")),"");
-                } else if ((pas.Common.Ident[IdentIndex - 1].DataType === 139) && (pas.Common.Ident[IdentTemp - 1].DataType === 136)) {
+                } else if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.RECORDTOK) && (pas.Common.Ident[IdentTemp - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK)) {
                   if (pas.Common.Ident[IdentTemp - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) {
                     pas.Optimize.asm65("\tmwy " + $mod.GetLocalName(IdentTemp,"") + " :bp2","");
                     if (pas.Parser.RecordSize(IdentIndex,"") <= 128) {
@@ -40723,39 +40665,39 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     pas.Optimize.asm65("\tmva:rpl " + Name + ",y (:bp2),y-","");
                   } else pas.Optimize.asm65("\t@move #" + Name + " " + $mod.GetLocalName(IdentIndex,"") + " #" + pas.Common.IntToStr(pas.Parser.RecordSize(IdentIndex,"")),"");
                 };
-              } else pas.Common.GetCommonType(i + 1,ExpressionType,139);
-            } else if ((VarType === 137) && (ExpressionType in pas.Common.Pointers)) {
-              if ((pas.Common.Tok[k].Kind !== 57) && (IndirectionLevel in rtl.createSet(3,4)) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 137)) {
-                if ((pas.Common.Tok[k].Kind === 170) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].AllocElementType !== 0)) IndirectionLevel = 7;
-                $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,"","");
+              } else pas.Common.GetCommonType(i + 1,ExpressionType,pas.Tokens.TTokenKind.RECORDTOK);
+            } else if ((VarType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (ExpressionType in pas.Common.Pointers)) {
+              if ((pas.Common.Tok[k].Kind !== pas.Tokens.TTokenKind.ADDRESSTOK) && (IndirectionLevel in rtl.createSet(3,4)) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
+                if ((pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].AllocElementType !== pas.Tokens.TTokenKind.UNTYPETOK)) IndirectionLevel = 7;
+                $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,"","");
                 $mod.StopOptimization();
                 pas.Optimize.ResetOpty();
-              } else $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,par1,par2);
-            } else if ((VarType in pas.Common.Pointers) && (ExpressionType in pas.Common.Pointers) && (pas.Common.Tok[k].Kind === 170) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.unionSet(pas.Common.Pointers,rtl.createSet(139,140))) && !(pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].AllocElementType in rtl.unionSet(pas.Common.Pointers,rtl.createSet(139,140)))) {
-              j = pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
+              } else $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,par1,par2);
+            } else if ((VarType in pas.Common.Pointers) && (ExpressionType in pas.Common.Pointers) && (pas.Common.Tok[k].Kind === pas.Tokens.TTokenKind.IDENTTOK) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.unionSet(pas.Common.Pointers,rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) && !(pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name) - 1].AllocElementType in rtl.unionSet(pas.Common.Pointers,rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)))) {
+              j = pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType);
               IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[k].Name);
               Name = "adr." + pas.Common.Tok[k].Name;
               svar = pas.Common.Tok[k].Name;
               if (IdentTemp > 0) {
-                if (pas.Common.Ident[IdentTemp - 1].Kind === 5) {
+                if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
                   svar = $mod.GetLocalName(IdentTemp,"");
                   IdentTemp = $mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock);
                   Name = svar + ".adr.result";
                   svar = svar + ".result";
                 };
                 if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements > 1) && (pas.Common.Ident[IdentTemp - 1].NumAllocElements > 1)) {
-                  if (pas.Common.Ident[IdentTemp - 1].AllocElementType !== 139) if (j !== ((pas.Common.Ident[IdentTemp - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentTemp - 1].AllocElementType - 128]) & 0xFFFFFFFF)) pas.Messages.ErrorIdentifierIncompatibleTypesArrayIdentifier(i,IdentTemp,IdentIndex);
-                  $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+                  if (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Tokens.TTokenKind.RECORDTOK) if (j !== ((pas.Common.Ident[IdentTemp - 1].NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[IdentTemp - 1].AllocElementType)) & 0xFFFFFFFF)) pas.Messages.ErrorIdentifierIncompatibleTypesArrayIdentifier(i,IdentTemp,IdentIndex);
+                  $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
                   $mod.StopOptimization();
                   pas.Optimize.ResetOpty();
-                  if ((j <= 4) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== 139)) {
+                  if ((j <= 4) && (pas.Common.Ident[IdentTemp - 1].AllocElementType !== pas.Tokens.TTokenKind.RECORDTOK)) {
                     pas.Optimize.asm65("\t:" + pas.Common.IntToStr(j) + " mva " + Name + "+# " + $mod.GetLocalName(IdentIndex,"adr.") + "+#","")}
                    else pas.Optimize.asm65("\t@move " + svar + " " + $mod.GetLocalName(IdentIndex,"") + " #" + pas.Common.IntToStr(j),"");
-                } else $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,par1,par2);
+                } else $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,par1,par2);
               } else pas.Messages.Error$2(k,pas.Messages.TErrorCode.UnknownIdentifier);
-            } else $mod.GenerateAssignment(IndirectionLevel,pas.Common.DataSize[VarType - 128],IdentIndex,par1,par2);
+            } else $mod.GenerateAssignment(IndirectionLevel,pas.Common.GetDataSize(VarType),IdentIndex,par1,par2);
           };
-        } else if (($tmp1 === 4) || ($tmp1 === 5) || ($tmp1 === 99) || ($tmp1 === 100)) {
+        } else if (($tmp1 === pas.Tokens.TTokenKind.PROCEDURETOK) || ($tmp1 === pas.Tokens.TTokenKind.FUNCTIONTOK) || ($tmp1 === pas.Tokens.TTokenKind.CONSTRUCTORTOK) || ($tmp1 === pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
           Param = $mod.NumActualParameters(i,IdentIndex,{get: function () {
               return j;
             }, set: function (v) {
@@ -40777,8 +40719,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               i = v;
             }},IdentIndex,0);
           pas.Common.run_func -= 1;
-          if (pas.Common.Ident[IdentIndex - 1].Kind === 5) {
-            $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+          if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
+            $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
             $mod.StartOptimization(i);
           };
           Result = i;
@@ -40786,51 +40728,51 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Messages.Error(i,"Assignment or procedure call expected but " + pas.Common.Ident[IdentIndex - 1].Name + " found");
         };
       } else pas.Messages.Error$2(i,pas.Messages.TErrorCode.UnknownIdentifier);
-    } else if ($tmp === 192) {
+    } else if ($tmp === pas.Tokens.TTokenKind.INFOTOK) {
       if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.System.Writeln("User defined: " + pas.Common.msgUser[pas.Common.Tok[i].Value]);
       Result = i;
-    } else if ($tmp === 193) {
+    } else if ($tmp === pas.Tokens.TTokenKind.WARNINGTOK) {
       pas.Messages.WarningUserDefined(i);
       Result = i;
-    } else if ($tmp === 194) {
+    } else if ($tmp === pas.Tokens.TTokenKind.ERRORTOK) {
       if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UserDefined);
       Result = i;
-    } else if ($tmp === 197) {
+    } else if ($tmp === pas.Tokens.TTokenKind.IOCHECKON) {
       pas.Common.IOCheck = true;
       Result = i;
-    } else if ($tmp === 198) {
+    } else if ($tmp === pas.Tokens.TTokenKind.IOCHECKOFF) {
       pas.Common.IOCheck = false;
       Result = i;
-    } else if ($tmp === 185) {
+    } else if ($tmp === pas.Tokens.TTokenKind.LOOPUNROLLTOK) {
       pas.Common.LoopUnroll = true;
       Result = i;
-    } else if ($tmp === 186) {
+    } else if ($tmp === pas.Tokens.TTokenKind.NOLOOPUNROLLTOK) {
       pas.Common.LoopUnroll = false;
       Result = i;
-    } else if ($tmp === 189) {
+    } else if ($tmp === pas.Tokens.TTokenKind.PROCALIGNTOK) {
       pas.Common.codealign.proc = pas.Common.Tok[i].Value;
       Result = i;
-    } else if ($tmp === 190) {
+    } else if ($tmp === pas.Tokens.TTokenKind.LOOPALIGNTOK) {
       pas.Common.codealign.loop = pas.Common.Tok[i].Value;
       Result = i;
-    } else if ($tmp === 191) {
+    } else if ($tmp === pas.Tokens.TTokenKind.LINKALIGNTOK) {
       pas.Common.codealign.link = pas.Common.Tok[i].Value;
       Result = i;
-    } else if ($tmp === 113) {
-      pas.Common.CheckTok(i + 1,170);
+    } else if ($tmp === pas.Tokens.TTokenKind.GOTOTOK) {
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.IDENTTOK);
       IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
       if (IdentIndex > 0) {
-        if (pas.Common.Ident[IdentIndex - 1].Kind !== 6) pas.Messages.Error(i + 1,"Identifier isn't a label");
+        if (pas.Common.Ident[IdentIndex - 1].Kind !== pas.Tokens.TTokenKind.LABELTOK) pas.Messages.Error(i + 1,"Identifier isn't a label");
         pas.Optimize.asm65("\tjmp " + pas.Common.Ident[IdentIndex - 1].Name,"");
       } else pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.UnknownIdentifier);
       Result = i + 1;
-    } else if ($tmp === 13) {
-      if (isAsm) pas.Common.CheckTok(i,37);
+    } else if ($tmp === pas.Tokens.TTokenKind.BEGINTOK) {
+      if (isAsm) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.ASMTOK);
       j = $mod.CompileStatement(i + 1,false);
-      while ((pas.Common.Tok[j + 1].Kind === 53) || ((pas.Common.Tok[j + 1].Kind === 60) && (pas.Common.Tok[j].Kind === 170))) j = $mod.CompileStatement(j + 2,false);
-      pas.Common.CheckTok(j + 1,14);
+      while ((pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) || ((pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.COLONTOK) && (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.IDENTTOK))) j = $mod.CompileStatement(j + 2,false);
+      pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.ENDTOK);
       Result = j + 1;
-    } else if ($tmp === 12) {
+    } else if ($tmp === pas.Tokens.TTokenKind.CASETOK) {
       CaseLocalCnt = pas.Common.CaseCnt;
       pas.Common.CaseCnt += 1;
       pas.Optimize.ResetOpty();
@@ -40841,17 +40783,17 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return SelectorType;
         }, set: function (v) {
           SelectorType = v;
-        }},133);
-      if ((SelectorType === 146) && (pas.Common.Tok[j].Kind === 170) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name) - 1].Kind === 5)) {
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
+      if ((SelectorType === pas.Tokens.TTokenKind.ENUMTOK) && (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name) - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) {
         IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name);
         SelectorType = pas.Common.Ident[$mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock) - 1].AllocElementType;
         EnumName = pas.Common.TypeArray[pas.Common.Ident[$mod.GetIdentResult(pas.Common.Ident[IdentTemp - 1].ProcAsBlock) - 1].NumAllocElements - 1].Field[0].Name;
-      } else if (pas.Common.Tok[i].Kind === 170) EnumName = pas.Common.GetEnumName(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name));
-      if (SelectorType !== 146) if (pas.Common.DataSize[SelectorType - 128] !== 1) pas.Messages.Error(i,"Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector");
-      if (!(SelectorType in rtl.unionSet(pas.Common.OrdinalTypes,rtl.createSet(146)))) pas.Messages.Error(i,"Ordinal variable expected as 'CASE' selector");
-      pas.Common.CheckTok(i + 1,31);
-      $mod.GenerateAssignment(1,pas.Common.DataSize[SelectorType - 128],0,"@CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4),"");
-      pas.Parser.DefineIdent(i,"@CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4),3,SelectorType,0,0,0,170);
+      } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK) EnumName = pas.Common.GetEnumName(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name));
+      if (SelectorType !== pas.Tokens.TTokenKind.ENUMTOK) if (pas.Common.GetDataSize(SelectorType) !== 1) pas.Messages.Error(i,"Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector");
+      if (!(SelectorType in rtl.unionSet(pas.Common.OrdinalTypes,rtl.createSet(pas.Tokens.TTokenKind.ENUMTOK)))) pas.Messages.Error(i,"Ordinal variable expected as 'CASE' selector");
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OFTOK);
+      $mod.GenerateAssignment(1,pas.Common.GetDataSize(SelectorType),0,"@CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4),"");
+      pas.Parser.DefineIdent(i,"@CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4),pas.Tokens.TTokenKind.VARTOK,SelectorType,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
       pas.Parser.GetIdentIndex("@CASETMP_" + pas.SysUtils.IntToHex(CaseLocalCnt,4));
       yes = true;
       NumCaseStatements = 0;
@@ -40870,8 +40812,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               ConstValType = v;
             }},SelectorType,false,true);
           pas.Common.GetCommonType(i,ConstValType,SelectorType);
-          if (pas.Common.Tok[i].Kind === 170) if (((EnumName === "") && (pas.Common.GetEnumName(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name)) !== "")) || ((EnumName !== "") && (pas.Common.GetEnumName(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name)) !== EnumName))) pas.Messages.Error(i,"Constant and CASE types do not match");
-          if (pas.Common.Tok[i + 1].Kind === 42) {
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK) if (((EnumName === "") && (pas.Common.GetEnumName(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name)) !== "")) || ((EnumName !== "") && (pas.Common.GetEnumName(pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name)) !== EnumName))) pas.Messages.Error(i,"Constant and CASE types do not match");
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.RANGETOK) {
             i = pas.Parser.CompileConstExpression(i + 2,{get: function () {
                 return ConstVal2;
               }, set: function (v) {
@@ -40900,11 +40842,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             }},pas.Common.TCaseLabel.$clone(CaseLabel));
           i += 1;
           ExitLoop = false;
-          if (pas.Common.Tok[i].Kind === 52) {
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) {
             i += 1}
            else ExitLoop = true;
         } while (!ExitLoop);
-        pas.Common.CheckTok(i,60);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
         $mod.GenerateCaseStatementProlog();
         pas.Optimize.ResetOpty();
         pas.Optimize.asm65("@","");
@@ -40913,27 +40855,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         $mod.GenerateCaseStatementEpilog(CaseLocalCnt);
         NumCaseStatements += 1;
         ExitLoop = false;
-        if (pas.Common.Tok[i].Kind !== 53) {
-          if (pas.Common.Tok[i].Kind === 17) {
+        if (pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.SEMICOLONTOK) {
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ELSETOK) {
             j = $mod.CompileStatement(i + 1,false);
-            while (pas.Common.Tok[j + 1].Kind === 53) j = $mod.CompileStatement(j + 2,false);
+            while (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) j = $mod.CompileStatement(j + 2,false);
             i = j + 1;
           };
           ExitLoop = true;
         } else {
           i += 1;
-          if (pas.Common.Tok[i].Kind === 17) {
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ELSETOK) {
             j = $mod.CompileStatement(i + 1,false);
-            while (pas.Common.Tok[j + 1].Kind === 53) j = $mod.CompileStatement(j + 2,false);
+            while (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) j = $mod.CompileStatement(j + 2,false);
             i = j + 1;
           };
-          if (pas.Common.Tok[i].Kind === 14) ExitLoop = true;
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ENDTOK) ExitLoop = true;
         };
       } while (!ExitLoop);
-      pas.Common.CheckTok(i,14);
+      pas.Common.CheckTok(i,pas.Tokens.TTokenKind.ENDTOK);
       $mod.GenerateCaseEpilog(NumCaseStatements,CaseLocalCnt);
       Result = i;
-    } else if ($tmp === 15) {
+    } else if ($tmp === pas.Tokens.TTokenKind.IFTOK) {
       IfLocalCnt = pas.Common.IfCnt;
       pas.Common.IfCnt += 1;
       $mod.StartOptimization(i + 1);
@@ -40941,9 +40883,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ExpressionType;
         }, set: function (v) {
           ExpressionType = v;
-        }},133);
-      pas.Common.GetCommonType(j,135,ExpressionType);
-      pas.Common.CheckTok(j + 1,16);
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
+      pas.Common.GetCommonType(j,pas.Tokens.TTokenKind.BOOLEANTOK,ExpressionType);
+      pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.THENTOK);
       $mod.SaveToSystemStack(IfLocalCnt);
       $mod.GenerateIfThenCondition();
       $mod.GenerateIfThenProlog();
@@ -40951,7 +40893,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       j = $mod.CompileStatement(j + 2,false);
       $mod.GenerateIfThenEpilog();
       Result = j;
-      if (pas.Common.Tok[j + 1].Kind === 17) {
+      if (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.ELSETOK) {
         $mod.RestoreFromSystemStack(IfLocalCnt);
         $mod.GenerateElseCondition();
         $mod.GenerateIfThenProlog();
@@ -40960,7 +40902,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         $mod.GenerateIfThenEpilog();
         Result = j;
       } else $mod.RemoveFromSystemStack();
-    } else if ($tmp === 18) {
+    } else if ($tmp === pas.Tokens.TTokenKind.WHILETOK) {
       pas.Common.CodeSize += 1;
       if (pas.Common.codealign.loop > 0) {
         pas.Optimize.asm65("","");
@@ -40988,9 +40930,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ExpressionType;
         }, set: function (v) {
           ExpressionType = v;
-        }},133);
-      pas.Common.GetCommonType(j,135,ExpressionType);
-      pas.Common.CheckTok(j + 1,19);
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
+      pas.Common.GetCommonType(j,pas.Tokens.TTokenKind.BOOLEANTOK,ExpressionType);
+      pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.DOTOK);
       pas.Common.pass = oldPass;
       pas.Common.CodeSize = oldCodeSize;
       pas.Common.CodePosStackTop += 1;
@@ -41005,19 +40947,19 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ExpressionType;
         }, set: function (v) {
           ExpressionType = v;
-        }},133);
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
       pas.Optimize.asm65("; --- WhileDoCondition","");
       $mod.Gen();
       $mod.Gen();
       $mod.Gen();
-      $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+      $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       pas.Optimize.asm65("\tlda :STACKORIGIN+1,x","");
       pas.Optimize.asm65("\tjne l_" + pas.SysUtils.IntToHex(pas.Common.CodePosStack[pas.Common.CodePosStackTop + 1],4),"");
       pas.Common.CodePosStackTop -= 1;
       pas.Optimize.asm65("; --- WhileDoEpilog","");
       $mod.RestoreBreakAddress();
       Result = j;
-    } else if ($tmp === 20) {
+    } else if ($tmp === pas.Tokens.TTokenKind.REPEATTOK) {
       pas.Common.CodeSize += 1;
       if (pas.Common.codealign.loop > 0) {
         pas.Optimize.asm65("","");
@@ -41032,15 +40974,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       $mod.GenerateRepeatUntilProlog();
       $mod.SaveBreakAddress();
       j = $mod.CompileStatement(i + 1,false);
-      while (pas.Common.Tok[j + 1].Kind === 53) j = $mod.CompileStatement(j + 2,false);
-      pas.Common.CheckTok(j + 1,21);
+      while (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) j = $mod.CompileStatement(j + 2,false);
+      pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.UNTILTOK);
       $mod.StartOptimization(j + 2);
       j = $mod.CompileExpression(j + 2,{get: function () {
           return ExpressionType;
         }, set: function (v) {
           ExpressionType = v;
-        }},133);
-      pas.Common.GetCommonType(j,135,ExpressionType);
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
+      pas.Common.GetCommonType(j,pas.Tokens.TTokenKind.BOOLEANTOK,ExpressionType);
       pas.Optimize.asm65("","");
       pas.Optimize.asm65("; --- RepeatUntilCondition","");
       $mod.GenerateRepeatUntilCondition();
@@ -41050,14 +40992,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       $mod.GenerateRepeatUntilEpilog();
       $mod.RestoreBreakAddress();
       Result = j;
-    } else if ($tmp === 22) {
-      if (pas.Common.Tok[i + 1].Kind !== 170) {
+    } else if ($tmp === pas.Tokens.TTokenKind.FORTOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
         pas.Common.CodeSize += 1;
         if (IdentIndex > 0) {
-          if (!((pas.Common.Ident[IdentIndex - 1].Kind === 3) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.Pointers)))) {
+          if (!((pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.VARTOK) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.Pointers)))) {
             pas.Messages.Error(i + 1,"Ordinal variable expected as 'FOR' loop counter")}
            else if (pas.Common.Ident[IdentIndex - 1].isInitialized || (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VALPASSING)) {
             pas.Messages.Error(i + 1,"Simple local variable expected as FOR loop counter")}
@@ -41070,9 +41012,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               pas.Optimize.asm65("@","");
               pas.Optimize.asm65("","");
             };
-            if (pas.Common.Tok[i + 2].Kind === 114) {
+            if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.INTOK) {
               j = i + 3;
-              if (pas.Common.Tok[j].Kind === 174) {
+              if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
                 $mod.StartOptimization(j);
                 k = pas.Common.Tok[j].StrLength;
                 if (k !== 0) {
@@ -41089,7 +41031,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   pas.Optimize.asm65("\tlda $" + pas.SysUtils.IntToHex((pas.Common.Tok[j].StrAddress - 256) + pas.Common.CODEORIGIN_BASE + 1,4) + "+" + pas.Common.IntToStr(k) + "-256,y","");
                   pas.Optimize.asm65("\tsta " + $mod.GetLocalName(IdentIndex,""),"");
                 } else pas.Optimize.asm65("\tjmp l_" + pas.SysUtils.IntToHex(pas.Common.CodePosStack[pas.Common.CodePosStackTop] + 3,4),"");
-                pas.Common.CheckTok(j + 1,19);
+                pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.DOTOK);
                 pas.Common.CodePosStackTop += 1;
                 pas.Common.CodePosStack[pas.Common.CodePosStackTop] = pas.Common.CodeSize;
                 j = $mod.CompileStatement(j + 2,false);
@@ -41102,19 +41044,18 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 };
                 $mod.GenerateWhileDoEpilog();
                 $mod.RestoreBreakAddress();
-                Result = j;
               } else {
-                if (pas.Common.Tok[j].Kind !== 170) pas.Messages.Error$2(j,pas.Messages.TErrorCode.IdentifierExpected);
+                if (pas.Common.Tok[j].Kind !== pas.Tokens.TTokenKind.IDENTTOK) pas.Messages.Error$2(j,pas.Messages.TErrorCode.IdentifierExpected);
                 IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name);
                 ActualParamType = pas.Common.Ident[IdentTemp - 1].DataType;
                 VarType = pas.Common.Ident[IdentTemp - 1].AllocElementType;
                 k = pas.Parser.Elements(IdentTemp);
-                if ((k * pas.Common.DataSize[VarType - 128]) > 256) pas.Messages.Error(j,"only arrays with a maximum of 256 bytes");
-                if ((ActualParamType !== 137) && !(pas.Common.Ident[IdentTemp - 1].IdType in rtl.createSet(30,32,174))) pas.Messages.Error(j,"for-in statement cannot operate on collection type '" + pas.Common.InfoAboutToken(ActualParamType) + "'");
-                if ((VarType in rtl.createSet(139)) && (pas.Common.Ident[IdentIndex - 1].DataType === 136)) {}
+                if ((k * pas.Common.GetDataSize(VarType)) > 256) pas.Messages.Error(j,"only arrays with a maximum of 256 bytes");
+                if ((ActualParamType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) && !(pas.Common.Ident[IdentTemp - 1].IdType in rtl.createSet(pas.Tokens.TTokenKind.ARRAYTOK,pas.Tokens.TTokenKind.STRINGTOK,pas.Tokens.TTokenKind.STRINGLITERALTOK))) pas.Messages.Error(j,"for-in statement cannot operate on collection type '" + pas.Common.InfoAboutToken(ActualParamType) + "'");
+                if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK)) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK)) {}
                 else pas.Common.GetCommonType(i,pas.Common.Ident[IdentIndex - 1].DataType,VarType);
                 $mod.StartOptimization(j);
-                if (ActualParamType === 137) {
+                if (ActualParamType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
                   pas.Optimize.asm65("\tlda #$00","")}
                  else pas.Optimize.asm65("\tlda #-" + pas.Common.IntToStr(k),"");
                 pas.Optimize.asm65("\tsta l_" + pas.SysUtils.IntToHex(pas.Common.CodeSize,4) + "+1","");
@@ -41123,14 +41064,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("; --- ForToDoCondition","");
                 $mod.StartOptimization(j);
                 pas.Optimize.ResetOpty();
-                if (ActualParamType === 137) {
+                if (ActualParamType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
                   pas.Optimize.asm65("\tldy #$00","");
                   pas.Optimize.asm65("\tcpy adr." + $mod.GetLocalName(IdentTemp,""),"");
                   pas.Optimize.asm65("\tjeq l_" + pas.SysUtils.IntToHex(pas.Common.CodePosStack[pas.Common.CodePosStackTop] + 3,4),"");
                   pas.Optimize.asm65("\tlda adr." + $mod.GetLocalName(IdentTemp,"") + "+1,y","");
                   pas.Optimize.asm65("\tsta " + $mod.GetLocalName(IdentIndex,""),"");
                 } else {
-                  var $tmp14 = pas.Common.DataSize[VarType - 128];
+                  var $tmp14 = pas.Common.GetDataSize(VarType);
                   if ($tmp14 === 1) {
                     pas.Optimize.asm65("\tldy #$00","");
                     pas.Optimize.asm65("\tlda adr." + $mod.GetLocalName(IdentTemp,"") + "+" + pas.Common.IntToStr(k) + "-256,y","");
@@ -41160,7 +41101,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     pas.Optimize.asm65("\tsta " + $mod.GetLocalName(IdentIndex,"") + "+3","");
                   };
                 };
-                pas.Common.CheckTok(j + 1,19);
+                pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.DOTOK);
                 pas.Common.CodePosStackTop += 1;
                 pas.Common.CodePosStack[pas.Common.CodePosStackTop] = pas.Common.CodeSize;
                 j = $mod.CompileStatement(j + 2,false);
@@ -41174,7 +41115,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 Result = j;
               };
             } else {
-              pas.Common.CheckTok(i + 2,25);
+              pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.ASSIGNTOK);
               j = i + 3;
               $mod.StartOptimization(j);
               forLoop.begin_const = false;
@@ -41193,7 +41134,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   ExpressionType = v;
                 }},pas.Common.Ident[IdentIndex - 1].DataType,true,true)) {
-                $mod.Push(ConstVal,0,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,0);
+                $mod.Push(ConstVal,0,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,0);
                 forLoop.begin_value = ConstVal;
                 forLoop.begin_const = true;
                 forBPL = (ConstVal < 128) + 0;
@@ -41207,11 +41148,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               };
               if (!(ExpressionType in pas.Common.OrdinalTypes)) pas.Messages.Error$2(j,pas.Messages.TErrorCode.OrdinalExpectedFOR);
               ActualParamType = ExpressionType;
-              $mod.GenerateAssignment(1,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],IdentIndex,"","");
-              if (!(pas.Common.Tok[j + 1].Kind in rtl.createSet(23,24))) {
-                pas.Messages.Error(j + 1,"'TO' or 'DOWNTO' expected but " + pas.Common.GetSpelling(j + 1) + " found")}
+              $mod.GenerateAssignment(1,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),IdentIndex,"","");
+              if (!(pas.Common.Tok[j + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.TOTOK,pas.Tokens.TTokenKind.DOWNTOTOK))) {
+                pas.Messages.Error(j + 1,"'TO' or 'DOWNTO' expected but " + pas.Common.GetTokenSpellingAtIndex(j + 1) + " found")}
                else {
-                Down = pas.Common.Tok[j + 1].Kind === 24;
+                Down = pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DOWNTOTOK;
                 j += 2;
                 $mod.StartOptimization(j);
                 IdentTemp = -1;
@@ -41228,14 +41169,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   }, set: function (v) {
                     ExpressionType = v;
                   }},pas.Common.Ident[IdentIndex - 1].DataType,true,true)) {
-                  $mod.Push(ConstVal,0,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,0);
-                  pas.Parser.DefineIdent(j,"@FORTMP_" + pas.SysUtils.IntToHex(pas.Common.CodeSize,4),1,pas.Common.Ident[IdentIndex - 1].DataType,pas.Common.Ident[IdentIndex - 1].NumAllocElements,pas.Common.Ident[IdentIndex - 1].AllocElementType,ConstVal,pas.Common.Tok[j].Kind);
+                  $mod.Push(ConstVal,0,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,0);
+                  pas.Parser.DefineIdent(j,"@FORTMP_" + pas.SysUtils.IntToHex(pas.Common.CodeSize,4),pas.Tokens.TTokenKind.CONSTTOK,pas.Common.Ident[IdentIndex - 1].DataType,pas.Common.Ident[IdentIndex - 1].NumAllocElements,pas.Common.Ident[IdentIndex - 1].AllocElementType,ConstVal,pas.Common.Tok[j].Kind);
                   forLoop.end_value = ConstVal;
                   forLoop.end_const = true;
                   if (ConstVal > 0) forBPL = forBPL | 2;
                 } else {
-                  if (((pas.Common.Tok[j].Kind === 170) && (pas.Common.Tok[j + 1].Kind === 19)) || ((pas.Common.Tok[j].Kind === 54) && (pas.Common.Tok[j + 1].Kind === 170) && (pas.Common.Tok[j + 2].Kind === 55) && (pas.Common.Tok[j + 3].Kind === 19))) {
-                    if (pas.Common.Tok[j].Kind === 170) {
+                  if (((pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.DOTOK)) || ((pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.OPARTOK) && (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.CPARTOK) && (pas.Common.Tok[j + 3].Kind === pas.Tokens.TTokenKind.DOTOK))) {
+                    if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
                       IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name)}
                      else IdentTemp = pas.Parser.GetIdentIndex(pas.Common.Tok[j + 1].Name);
                     j = $mod.CompileExpression(j,{get: function () {
@@ -41251,27 +41192,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                         ExpressionType = v;
                       }},pas.Common.Ident[IdentIndex - 1].DataType);
                     $mod.ExpandParam(pas.Common.Ident[IdentIndex - 1].DataType,ExpressionType);
-                    pas.Parser.DefineIdent(j,"@FORTMP_" + pas.SysUtils.IntToHex(pas.Common.CodeSize,4),3,pas.Common.Ident[IdentIndex - 1].DataType,pas.Common.Ident[IdentIndex - 1].NumAllocElements,pas.Common.Ident[IdentIndex - 1].AllocElementType,1,170);
+                    pas.Parser.DefineIdent(j,"@FORTMP_" + pas.SysUtils.IntToHex(pas.Common.CodeSize,4),pas.Tokens.TTokenKind.VARTOK,pas.Common.Ident[IdentIndex - 1].DataType,pas.Common.Ident[IdentIndex - 1].NumAllocElements,pas.Common.Ident[IdentIndex - 1].AllocElementType,1,pas.Tokens.TTokenKind.IDENTTOK);
                   };
                 };
                 if (!(ExpressionType in pas.Common.OrdinalTypes)) pas.Messages.Error$2(j,pas.Messages.TErrorCode.OrdinalExpectedFOR);
                 if (((ActualParamType in pas.Common.UnsignedOrdinalTypes) && (ExpressionType in pas.Common.UnsignedOrdinalTypes)) || ((ActualParamType in pas.Common.SignedOrdinalTypes) && (ExpressionType in pas.Common.SignedOrdinalTypes))) {
-                  if (pas.Common.DataSize[ExpressionType - 128] > pas.Common.DataSize[ActualParamType - 128]) ActualParamType = ExpressionType;
-                  if (pas.Common.DataSize[ActualParamType - 128] > pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128]) ActualParamType = pas.Common.Ident[IdentIndex - 1].DataType;
+                  if (pas.Common.GetDataSize(ExpressionType) > pas.Common.GetDataSize(ActualParamType)) ActualParamType = ExpressionType;
+                  if (pas.Common.GetDataSize(ActualParamType) > pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType)) ActualParamType = pas.Common.Ident[IdentIndex - 1].DataType;
                 } else ActualParamType = pas.Common.Ident[IdentIndex - 1].DataType;
                 if (IdentTemp < 0) IdentTemp = pas.Parser.GetIdentIndex("@FORTMP_" + pas.SysUtils.IntToHex(pas.Common.CodeSize,4));
-                $mod.GenerateAssignment(1,pas.Common.DataSize[ActualParamType - 128],IdentTemp,"","");
+                $mod.GenerateAssignment(1,pas.Common.GetDataSize(ActualParamType),IdentTemp,"","");
                 pas.Optimize.asm65("","");
                 if (pas.Common.LoopUnroll && forLoop.begin_const && forLoop.end_const) {}
                 else $mod.GenerateRepeatUntilProlog();
                 $mod.SaveBreakAddress();
                 pas.Optimize.asm65("; --- ForToDoCondition","");
-                if ((ActualParamType === ExpressionType) && (pas.Common.DataSize[pas.Common.Ident[IdentTemp - 1].DataType - 128] > pas.Common.DataSize[ActualParamType - 128])) pas.Messages.Note(j,"FOR loop counter variable type is of larger size than required");
+                if ((ActualParamType === ExpressionType) && (pas.Common.GetDataSize(pas.Common.Ident[IdentTemp - 1].DataType) > pas.Common.GetDataSize(ActualParamType))) pas.Messages.Note(j,"FOR loop counter variable type is of larger size than required");
                 $mod.StartOptimization(j);
                 pas.Optimize.ResetOpty();
                 yes = true;
                 if (pas.Common.LoopUnroll && forLoop.begin_const && forLoop.end_const) {
-                  pas.Common.CheckTok(j + 1,19);
+                  pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.DOTOK);
                   ConstVal = forLoop.begin_value;
                   if (((Down === false) && (forLoop.end_value >= forLoop.begin_value)) || (Down && (forLoop.end_value <= forLoop.begin_value))) {
                     while (ConstVal !== forLoop.end_value) {
@@ -41286,7 +41227,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                       if (Down) {
                         ConstVal -= 1}
                        else ConstVal += 1;
-                      var $tmp15 = pas.Common.DataSize[ActualParamType - 128];
+                      var $tmp15 = pas.Common.GetDataSize(ActualParamType);
                       if ($tmp15 === 1) {
                         pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(ConstVal & 255,2),"");
                         pas.Optimize.asm65("\tsty " + $mod.GetLocalName(IdentIndex,""),"");
@@ -41310,7 +41251,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     j = $mod.CompileStatement(j + 2,false);
                     pas.Optimize.asm65("===unroll===","");
                     pas.Common.optyY = "";
-                    var $tmp16 = pas.Common.DataSize[ActualParamType - 128];
+                    var $tmp16 = pas.Common.GetDataSize(ActualParamType);
                     if ($tmp16 === 1) {
                       pas.Optimize.asm65("\tldy #$" + pas.SysUtils.IntToHex(ConstVal & 255,2),"");
                       pas.Optimize.asm65("\tsty " + $mod.GetLocalName(IdentIndex,""),"");
@@ -41331,9 +41272,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                     };
                   } else pas.Messages.Error(j,"for loop with invalid range");
                 } else {
-                  $mod.Push(pas.Common.Ident[IdentTemp - 1].Value,1,pas.Common.DataSize[ActualParamType - 128],IdentTemp,0);
+                  $mod.Push(pas.Common.Ident[IdentTemp - 1].Value,1,pas.Common.GetDataSize(ActualParamType),IdentTemp,0);
                   $mod.GenerateForToDoCondition(ActualParamType,Down,IdentIndex);
-                  pas.Common.CheckTok(j + 1,19);
+                  pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.DOTOK);
                   $mod.GenerateForToDoProlog();
                   j = $mod.CompileStatement(j + 2,false);
                 };
@@ -41350,29 +41291,29 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           }}
          else pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.UnknownIdentifier);
       };
-    } else if ($tmp === 73) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+    } else if ($tmp === pas.Tokens.TTokenKind.ASSIGNFILETOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(138,148)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(138,148)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-        pas.Common.CheckTok(i + 3,52);
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.COMMATOK);
         $mod.StartOptimization(i + 4);
-        if (pas.Common.Tok[i + 4].Kind === 174) pas.Messages.Note(i + 4,"Only uppercase letters preceded by the drive symbol, like 'D:FILENAME.EXT' or 'S:'");
+        if (pas.Common.Tok[i + 4].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) pas.Messages.Note(i + 4,"Only uppercase letters preceded by the drive symbol, like 'D:FILENAME.EXT' or 'S:'");
         i = $mod.CompileExpression(i + 4,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.GetCommonType(i,136,ActualParamType);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.POINTERTOK,ActualParamType);
         $mod.GenerateAssignment(2,2,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.pfname");
         $mod.StartOptimization(i);
-        $mod.Push(0,0,pas.Common.DataSize[0],0,0);
+        $mod.Push(0,0,pas.Common.GetDataSize(pas.Tokens.TTokenKind.BYTETOK),0,0);
         $mod.GenerateAssignment(2,1,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.status");
-        if ((pas.Common.Ident[IdentIndex - 1].DataType === 148) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 148)) {
+        if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.TEXTFILETOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.TEXTFILETOK)) {
           pas.Optimize.asm65("\tldy #s@file.buffer","");
           pas.Optimize.asm65("\tlda <@buf","");
           pas.Optimize.asm65("\tsta (:bp2),y","");
@@ -41382,102 +41323,102 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         };
         Result = i + 1;
       }}
-     else if ($tmp === 74) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.RESETTOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(138,148)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(138,148)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
         $mod.StartOptimization(i + 3);
-        if (pas.Common.Tok[i + 3].Kind !== 52) {
-          if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]) === 0) {
+        if (pas.Common.Tok[i + 3].Kind !== pas.Tokens.TTokenKind.COMMATOK) {
+          if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)) === 0) {
             $mod.Push(128,0,2,0,0)}
-           else $mod.Push((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]) & 0xFFFFFFFF,0,2,0,0);
+           else $mod.Push((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)) & 0xFFFFFFFF,0,2,0,0);
           i += 3;
         } else {
-          if ((pas.Common.Ident[IdentIndex - 1].DataType === 148) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 148)) pas.Messages.Error(i,'Call by var for arg no. 1 has to match exactly: Got "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '" expected "File"');
+          if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.TEXTFILETOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.TEXTFILETOK)) pas.Messages.Error(i,'Call by var for arg no. 1 has to match exactly: Got "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '" expected "File"');
           i = $mod.CompileExpression(i + 4,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,129,ActualParamType);
-          $mod.ExpandParam(129,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.WORDTOK,ActualParamType);
+          $mod.ExpandParam(pas.Tokens.TTokenKind.WORDTOK,ActualParamType);
           i += 1;
         };
-        pas.Common.CheckTok(i,55);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
         $mod.GenerateAssignment(2,2,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.record");
         $mod.GenerateFileOpen(IdentIndex,pas.Common.TIOCode.FileMode);
         Result = i;
       }}
-     else if ($tmp === 75) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.REWRITETOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(138,148)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(138,148)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
         $mod.StartOptimization(i + 3);
-        if (pas.Common.Tok[i + 3].Kind !== 52) {
-          if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]) === 0) {
+        if (pas.Common.Tok[i + 3].Kind !== pas.Tokens.TTokenKind.COMMATOK) {
+          if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)) === 0) {
             $mod.Push(128,0,2,0,0)}
-           else $mod.Push((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128]) & 0xFFFFFFFF,0,2,0,0);
+           else $mod.Push((pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType)) & 0xFFFFFFFF,0,2,0,0);
           i += 3;
         } else {
-          if ((pas.Common.Ident[IdentIndex - 1].DataType === 148) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 148)) pas.Messages.Error(i,'Call by var for arg no. 1 has to match exactly: Got "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '" expected "File"');
+          if ((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.TEXTFILETOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.TEXTFILETOK)) pas.Messages.Error(i,'Call by var for arg no. 1 has to match exactly: Got "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '" expected "File"');
           i = $mod.CompileExpression(i + 4,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,129,ActualParamType);
-          $mod.ExpandParam(129,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.WORDTOK,ActualParamType);
+          $mod.ExpandParam(pas.Tokens.TTokenKind.WORDTOK,ActualParamType);
           i += 1;
         };
-        pas.Common.CheckTok(i,55);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
         $mod.GenerateAssignment(2,2,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.record");
         $mod.GenerateFileOpen(IdentIndex,pas.Common.TIOCode.OpenWrite);
         Result = i;
       }}
-     else if ($tmp === 76) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.APPENDTOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(148)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(148)))) pas.Messages.Error(i,'Call by var for arg no. 1 has to match exactly: Got "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '" expected "Text"');
-        if (pas.Common.Tok[i + 3].Kind === 52) pas.Messages.Error(i,"Wrong number of parameters specified for call to Append");
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.TEXTFILETOK)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.TEXTFILETOK)))) pas.Messages.Error(i,'Call by var for arg no. 1 has to match exactly: Got "' + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType) + '" expected "Text"');
+        if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.COMMATOK) pas.Messages.Error(i,"Wrong number of parameters specified for call to Append");
         $mod.StartOptimization(i + 3);
-        pas.Common.CheckTok(i + 3,55);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.CPARTOK);
         $mod.Push(1,0,2,0,0);
         $mod.GenerateAssignment(2,2,0,pas.Common.Ident[IdentIndex - 1].Name,"s@file.record");
         $mod.GenerateFileOpen(IdentIndex,pas.Common.TIOCode.Append);
         Result = i + 3;
       }}
-     else if ($tmp === 80) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.GETRESOURCEHANDLETOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (pas.Common.Ident[IdentIndex - 1].DataType !== 136) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-        pas.Common.CheckTok(i + 3,52);
-        pas.Common.CheckTok(i + 4,174);
+        if (pas.Common.Ident[IdentIndex - 1].DataType !== pas.Tokens.TTokenKind.POINTERTOK) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.COMMATOK);
+        pas.Common.CheckTok(i + 4,pas.Tokens.TTokenKind.STRINGLITERALTOK);
         svar = "";
         for (var $l1 = 1, $end = pas.Common.Tok[i + 4].StrLength; $l1 <= $end; $l1++) {
           k = $l1;
           svar = svar + String.fromCharCode(pas.Common.StaticStringData[(pas.Common.Tok[i + 4].StrAddress - 256) + k]);
         };
-        pas.Common.CheckTok(i + 5,55);
+        pas.Common.CheckTok(i + 5,pas.Tokens.TTokenKind.CPARTOK);
         pas.Optimize.asm65("\tlda <MAIN.@RESOURCE." + svar,"");
         pas.Optimize.asm65("\tsta " + pas.Common.Tok[i + 2].Name,"");
         pas.Optimize.asm65("\tlda >MAIN.@RESOURCE." + svar,"");
@@ -41485,23 +41426,23 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         i += 5;
         Result = i;
       }}
-     else if ($tmp === 81) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.SIZEOFRESOURCETOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
         if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.IntegerTypes)) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-        pas.Common.CheckTok(i + 3,52);
-        pas.Common.CheckTok(i + 4,174);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.COMMATOK);
+        pas.Common.CheckTok(i + 4,pas.Tokens.TTokenKind.STRINGLITERALTOK);
         svar = "";
         for (var $l2 = 1, $end1 = pas.Common.Tok[i + 4].StrLength; $l2 <= $end1; $l2++) {
           k = $l2;
           svar = svar + String.fromCharCode(pas.Common.StaticStringData[(pas.Common.Tok[i + 4].StrAddress - 256) + k]);
         };
-        pas.Common.CheckTok(i + 5,55);
+        pas.Common.CheckTok(i + 5,pas.Tokens.TTokenKind.CPARTOK);
         pas.Optimize.asm65("\tlda <MAIN.@RESOURCE." + svar + ".end-MAIN.@RESOURCE." + svar,"");
         pas.Optimize.asm65("\tsta " + pas.Common.Tok[i + 2].Name,"");
         pas.Optimize.asm65("\tlda >MAIN.@RESOURCE." + svar + ".end-MAIN.@RESOURCE." + svar,"");
@@ -41509,16 +41450,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         i += 5;
         Result = i;
       }}
-     else if ($tmp === 77) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.BLOCKREADTOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType === 138) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 138))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-        pas.Common.CheckTok(i + 3,52);
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.FILETOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.FILETOK))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.COMMATOK);
         i += 2;
         NumActualParams = $mod.CompileBlockRead({get: function () {
             return i;
@@ -41528,16 +41469,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         $mod.GenerateFileRead(IdentIndex,pas.Common.TIOCode.Read,NumActualParams);
         Result = i;
       }}
-     else if ($tmp === 78) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.BLOCKWRITETOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType === 138) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === 138))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-        pas.Common.CheckTok(i + 3,52);
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.FILETOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.FILETOK))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.COMMATOK);
         i += 2;
         NumActualParams = $mod.CompileBlockRead({get: function () {
             return i;
@@ -41547,54 +41488,54 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         $mod.GenerateFileRead(IdentIndex,pas.Common.TIOCode.Write,NumActualParams);
         Result = i;
       }}
-     else if ($tmp === 79) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
+     else if ($tmp === pas.Tokens.TTokenKind.CLOSEFILETOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected)}
-       else if (pas.Common.Tok[i + 2].Kind !== 170) {
+       else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
         if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(138,148)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(138,148)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-        pas.Common.CheckTok(i + 3,55);
+        if (!((pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.FILETOK,pas.Tokens.TTokenKind.TEXTFILETOK)))) pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.CPARTOK);
         $mod.GenerateFileOpen(IdentIndex,pas.Common.TIOCode.Close);
         Result = i + 3;
       }}
-     else if ($tmp === 27) {
-      if (pas.Common.Tok[i + 1].Kind !== 54) {
-        if (pas.Common.Tok[i + 1].Kind === 53) {
+     else if ($tmp === pas.Tokens.TTokenKind.READLNTOK) {
+      if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.OPARTOK) {
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) {
           $mod.GenerateRead();
           Result = i;
         } else pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.OParExpected);
-      } else if (pas.Common.Tok[i + 2].Kind !== 170) {
+      } else if (pas.Common.Tok[i + 2].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
         pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.IdentifierExpected)}
        else {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
-        if ((IdentIndex > 0) && (pas.Common.Ident[IdentIndex - 1].DataType === 148)) {
+        if ((IdentIndex > 0) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.TEXTFILETOK)) {
           pas.Optimize.asm65("\tlda #eol","");
           pas.Optimize.asm65("\tsta @buf","");
           $mod.GenerateFileRead(IdentIndex,pas.Common.TIOCode.ReadRecord,0);
           i += 3;
-          pas.Common.CheckTok(i,52);
-          pas.Common.CheckTok(i + 1,170);
-          if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].DataType !== 137) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.VariableExpected);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COMMATOK);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.IDENTTOK);
+          if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].DataType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.VariableExpected);
           IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
           pas.Optimize.asm65("\t@moveRECORD " + $mod.GetLocalName(IdentIndex,""),"");
-          pas.Common.CheckTok(i + 2,55);
+          pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.CPARTOK);
           Result = i + 2;
         } else if (IdentIndex > 0) {
-          if (pas.Common.Ident[IdentIndex - 1].Kind !== 3) {
+          if (pas.Common.Ident[IdentIndex - 1].Kind !== pas.Tokens.TTokenKind.VARTOK) {
             pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex)}
            else {
             $mod.GenerateRead();
             pas.Optimize.ResetOpty();
-            if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === 134)) {
+            if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
               pas.Optimize.asm65("\t@move #@buf #" + $mod.GetLocalName(IdentIndex,"adr.") + " #" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements),"");
-            } else if (pas.Common.Ident[IdentIndex - 1].DataType === 134) {
+            } else if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.CHARTOK) {
               pas.Optimize.asm65("\tmva @buf+1 " + pas.Common.Ident[IdentIndex - 1].Name,"")}
              else if (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.IntegerTypes) {
               pas.Optimize.asm65("\t@StrToInt #@buf","");
-              var $tmp17 = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128];
+              var $tmp17 = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType);
               if ($tmp17 === 1) {
                 pas.Optimize.asm65("\tmva :edx " + pas.Common.Ident[IdentIndex - 1].Name,"")}
                else if ($tmp17 === 2) {
@@ -41607,27 +41548,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 pas.Optimize.asm65("\tmva :edx+3 " + pas.Common.Ident[IdentIndex - 1].Name + "+3","");
               };
             } else pas.Messages.ErrorForIdentifier(i + 2,pas.Messages.TErrorCode.IncompatibleTypeOf,IdentIndex);
-            pas.Common.CheckTok(i + 3,55);
+            pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.CPARTOK);
             Result = i + 3;
           }}
          else pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
       }}
-     else if (($tmp === 26) || ($tmp === 82)) {
+     else if (($tmp === pas.Tokens.TTokenKind.WRITETOK) || ($tmp === pas.Tokens.TTokenKind.WRITELNTOK)) {
       $mod.StartOptimization(i);
-      yes = pas.Common.Tok[i].Kind === 82;
-      if ((pas.Common.Tok[i + 1].Kind === 54) && (pas.Common.Tok[i + 2].Kind === 55)) i += 2;
-      if (pas.Common.Tok[i + 1].Kind === 53) {}
+      yes = pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.WRITELNTOK;
+      if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.CPARTOK)) i += 2;
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) {}
       else {
-        pas.Common.CheckTok(i + 1,54);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i += 1;
-        if ((pas.Common.Tok[i + 1].Kind === 170) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].DataType === 148)) {
+        if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].DataType === pas.Tokens.TTokenKind.TEXTFILETOK)) {
           IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
           i += 1;
-          pas.Common.CheckTok(i + 1,52);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
           i += 1;
           var $tmp18 = pas.Common.Tok[i + 1].Kind;
-          if ($tmp18 === 170) {
-            if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].DataType !== 137) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.VariableExpected);
+          if ($tmp18 === pas.Tokens.TTokenKind.IDENTTOK) {
+            if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].DataType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.VariableExpected);
             pas.Optimize.asm65("\tmwy " + $mod.GetLocalName(pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name),"") + " :bp2","");
             pas.Optimize.asm65("\tldy #$01","");
             pas.Optimize.asm65("\tmva:rne (:bp2),y @buf-1,y+","");
@@ -41654,7 +41595,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               $mod.GenerateFileRead(IdentIndex,pas.Common.TIOCode.Write,0);
             };
             i += 2;
-          } else if ($tmp18 === 174) {
+          } else if ($tmp18 === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
             pas.Optimize.asm65("\tldy #$00","");
             pas.Optimize.asm65("\tmva:rne CODEORIGIN+$" + pas.SysUtils.IntToHex((pas.Common.Tok[i + 1].StrAddress - 256) + 1,4) + ",y @buf,y+","");
             if (yes) {
@@ -41680,9 +41621,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               $mod.GenerateFileRead(IdentIndex,pas.Common.TIOCode.Write,0);
             };
             i += 2;
-          } else if ($tmp18 === 171) {
+          } else if ($tmp18 === pas.Tokens.TTokenKind.INTNUMBERTOK) {
             pas.Optimize.asm65("\ttxa:pha","");
-            $mod.Push(pas.Common.Tok[i + 1].Value,0,pas.Common.DataSize[2],0,0);
+            $mod.Push(pas.Common.Tok[i + 1].Value,0,pas.Common.GetDataSize(pas.Tokens.TTokenKind.CARDINALTOK),0,0);
             pas.Optimize.asm65("\t@ValueToRec #@printINT","");
             pas.Optimize.asm65("\tpla:tax","");
             if (yes) {
@@ -41709,25 +41650,25 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           yes = false;
         } else do {
           var $tmp19 = pas.Common.Tok[i + 1].Kind;
-          if ($tmp19 === 173) {
+          if ($tmp19 === pas.Tokens.TTokenKind.CHARLITERALTOK) {
             i += 1;
             do {
               pas.Optimize.asm65("\t@print #$" + pas.SysUtils.IntToHex(pas.Common.Tok[i].Value,2),"");
               i += 1;
-            } while (!(pas.Common.Tok[i].Kind !== 173));
-          } else if ($tmp19 === 174) {
+            } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.CHARLITERALTOK));
+          } else if ($tmp19 === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
             do {
-              $mod.GenerateWriteString(pas.Common.Tok[i + 1].StrAddress,1,133);
+              $mod.GenerateWriteString(pas.Common.Tok[i + 1].StrAddress,1,pas.Tokens.TTokenKind.INTEGERTOK);
               i += 2;
-            } while (!(pas.Common.Tok[i + 1].Kind !== 174))}
+            } while (!(pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.STRINGLITERALTOK))}
            else {
             j = i + 1;
             i = $mod.CompileExpression(j,{get: function () {
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},133);
-            if ((ExpressionType === 134) && (pas.Common.Tok[i].Kind === 56) && (pas.Common.Tok[i - 1].Kind !== 170)) {
+              }},pas.Tokens.TTokenKind.INTEGERTOK);
+            if ((ExpressionType === pas.Tokens.TTokenKind.CHARTOK) && (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) && (pas.Common.Tok[i - 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK)) {
               pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
               pas.Optimize.asm65("\tsta :bp2","");
               pas.Optimize.asm65("\tlda :STACKORIGIN+STACKWIDTH,x","");
@@ -41738,49 +41679,49 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             };
             if (ExpressionType in pas.Common.IntegerTypes) {
               $mod.GenerateWriteString(pas.Common.Tok[i].Value,0,ExpressionType)}
-             else if (ExpressionType === 135) {
-              $mod.GenerateWriteString(pas.Common.Tok[i].Value,7,133)}
-             else if (ExpressionType === 134) {
-              $mod.GenerateWriteString(pas.Common.Tok[i].Value,6,133)}
-             else if (ExpressionType === 142) {
-              $mod.GenerateWriteString(pas.Common.Tok[i].Value,8,133)}
-             else if (ExpressionType === 141) {
-              $mod.GenerateWriteString(pas.Common.Tok[i].Value,9,133)}
-             else if (ExpressionType === 144) {
-              $mod.GenerateWriteString(pas.Common.Tok[i].Value,10,133)}
-             else if (ExpressionType === 143) {
-              $mod.GenerateWriteString(pas.Common.Tok[i].Value,11,133)}
+             else if (ExpressionType === pas.Tokens.TTokenKind.BOOLEANTOK) {
+              $mod.GenerateWriteString(pas.Common.Tok[i].Value,7,pas.Tokens.TTokenKind.INTEGERTOK)}
+             else if (ExpressionType === pas.Tokens.TTokenKind.CHARTOK) {
+              $mod.GenerateWriteString(pas.Common.Tok[i].Value,6,pas.Tokens.TTokenKind.INTEGERTOK)}
+             else if (ExpressionType === pas.Tokens.TTokenKind.REALTOK) {
+              $mod.GenerateWriteString(pas.Common.Tok[i].Value,8,pas.Tokens.TTokenKind.INTEGERTOK)}
+             else if (ExpressionType === pas.Tokens.TTokenKind.SHORTREALTOK) {
+              $mod.GenerateWriteString(pas.Common.Tok[i].Value,9,pas.Tokens.TTokenKind.INTEGERTOK)}
+             else if (ExpressionType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
+              $mod.GenerateWriteString(pas.Common.Tok[i].Value,10,pas.Tokens.TTokenKind.INTEGERTOK)}
+             else if (ExpressionType === pas.Tokens.TTokenKind.SINGLETOK) {
+              $mod.GenerateWriteString(pas.Common.Tok[i].Value,11,pas.Tokens.TTokenKind.INTEGERTOK)}
              else if (ExpressionType in pas.Common.Pointers) {
-              if (pas.Common.Tok[j].Kind === 57) {
+              if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) {
                 IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[j + 1].Name)}
-               else if (pas.Common.Tok[j].Kind === 170) {
+               else if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
                 IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[j].Name)}
                else pas.Messages.Error$2(i,pas.Messages.TErrorCode.CantReadWrite);
-              if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 147) {
+              if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.PROCVARTOK) {
                 IdentTemp = pas.Parser.GetIdentIndex("@FN" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].NumAllocElements_,4));
-                if (pas.Common.Ident[IdentTemp - 1].Kind === 5) {
+                if (pas.Common.Ident[IdentTemp - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) {
                   ExpressionType = pas.Common.Ident[IdentTemp - 1].DataType}
-                 else ExpressionType = 0;
-                if (ExpressionType === 137) {
-                  $mod.GenerateWriteString(pas.Common.Ident[IdentIndex - 1].Value,2,136)}
+                 else ExpressionType = pas.Tokens.TTokenKind.UNTYPETOK;
+                if (ExpressionType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
+                  $mod.GenerateWriteString(pas.Common.Ident[IdentIndex - 1].Value,2,pas.Tokens.TTokenKind.POINTERTOK)}
                  else if (ExpressionType in pas.Common.IntegerTypes) {
                   $mod.GenerateWriteString(pas.Common.Tok[i].Value,0,ExpressionType)}
-                 else if (ExpressionType === 135) {
-                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,7,133)}
-                 else if (ExpressionType === 134) {
-                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,6,133)}
-                 else if (ExpressionType === 142) {
-                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,8,133)}
-                 else if (ExpressionType === 141) {
-                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,9,133)}
-                 else if (ExpressionType === 144) {
-                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,10,133)}
-                 else if (ExpressionType === 143) {
-                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,11,133)}
+                 else if (ExpressionType === pas.Tokens.TTokenKind.BOOLEANTOK) {
+                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,7,pas.Tokens.TTokenKind.INTEGERTOK)}
+                 else if (ExpressionType === pas.Tokens.TTokenKind.CHARTOK) {
+                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,6,pas.Tokens.TTokenKind.INTEGERTOK)}
+                 else if (ExpressionType === pas.Tokens.TTokenKind.REALTOK) {
+                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,8,pas.Tokens.TTokenKind.INTEGERTOK)}
+                 else if (ExpressionType === pas.Tokens.TTokenKind.SHORTREALTOK) {
+                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,9,pas.Tokens.TTokenKind.INTEGERTOK)}
+                 else if (ExpressionType === pas.Tokens.TTokenKind.HALFSINGLETOK) {
+                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,10,pas.Tokens.TTokenKind.INTEGERTOK)}
+                 else if (ExpressionType === pas.Tokens.TTokenKind.SINGLETOK) {
+                  $mod.GenerateWriteString(pas.Common.Tok[i].Value,11,pas.Tokens.TTokenKind.INTEGERTOK)}
                  else pas.Messages.Error$2(i,pas.Messages.TErrorCode.CantReadWrite);
-              } else if ((ExpressionType === 137) || (pas.Common.Ident[IdentIndex - 1].Kind === 5) || ((ExpressionType === 136) && (pas.Common.Ident[IdentIndex - 1].DataType === 137))) {
+              } else if ((ExpressionType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) || ((ExpressionType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.STRINGPOINTERTOK))) {
                 $mod.GenerateWriteString(pas.Common.Ident[IdentIndex - 1].Value,2,pas.Common.Ident[IdentIndex - 1].DataType)}
-               else if ((ExpressionType === 145) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(134,136))) {
+               else if ((ExpressionType === pas.Tokens.TTokenKind.PCHARTOK) || (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.POINTERTOK))) {
                 $mod.GenerateWriteString(pas.Common.Ident[IdentIndex - 1].Value,12,pas.Common.Ident[IdentIndex - 1].DataType)}
                else pas.Messages.Error$2(i,pas.Messages.TErrorCode.CantReadWrite);
             } else pas.Messages.Error$2(i,pas.Messages.TErrorCode.CantReadWrite);
@@ -41788,24 +41729,24 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           };
           j = 0;
           ActualParamType = ExpressionType;
-          if (pas.Common.Tok[i].Kind === 60) do {
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COLONTOK) do {
             i = $mod.CompileExpression(i + 1,{get: function () {
                 return ExpressionType;
               }, set: function (v) {
                 ExpressionType = v;
-              }},133);
-            $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+              }},pas.Tokens.TTokenKind.INTEGERTOK);
+            $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
             i += 1;
             j += 1;
             if (j > (2 - ((ActualParamType in pas.Common.OrdinalTypes) + 0))) pas.Messages.Error(i + 1,"Illegal use of ':'");
-          } while (!(pas.Common.Tok[i].Kind !== 60));
-        } while (!(pas.Common.Tok[i].Kind !== 52));
-        pas.Common.CheckTok(i,55);
+          } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COLONTOK));
+        } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
       };
-      if (yes) $mod.a65(pas.Common.TCode65.putEOL,0,1,4,0);
+      if (yes) $mod.a65(pas.Common.TCode65.putEOL,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       $mod.StopOptimization();
       Result = i;
-    } else if ($tmp === 37) {
+    } else if ($tmp === pas.Tokens.TTokenKind.ASMTOK) {
       pas.Optimize.ResetOpty();
       $mod.StopOptimization();
       pas.Optimize.asm65("","");
@@ -41818,32 +41759,32 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Optimize.asm65("#asm:" + pas.Common.IntToStr(pas.Common.AsmBlockIndex),"");
       pas.Common.AsmBlockIndex += 1;
       if (isAsm && (pas.Common.Tok[i].Value === 0)) {
-        pas.Common.CheckTok(i + 1,53);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
         i += 1;
-        pas.Common.CheckTok(i + 1,14);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.ENDTOK);
         i += 1;
       };
       Result = i;
-    } else if (($tmp === 33) || ($tmp === 34)) {
+    } else if (($tmp === pas.Tokens.TTokenKind.INCTOK) || ($tmp === pas.Tokens.TTokenKind.DECTOK)) {
       Value = 0;
-      ExpressionType = 0;
+      ExpressionType = pas.Tokens.TTokenKind.UNTYPETOK;
       NumActualParams = 0;
-      Down = pas.Common.Tok[i].Kind === 34;
-      pas.Common.CheckTok(i + 1,54);
+      Down = pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.DECTOK;
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
       i += 2;
-      if (pas.Common.Tok[i].Kind === 170) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
         IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name);
         $mod.CheckAssignment(i,IdentIndex);
         if (IdentIndex === 0) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UnknownIdentifier);
-        if (pas.Common.Ident[IdentIndex - 1].Kind === 3) {
+        if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.VARTOK) {
           ExpressionType = pas.Common.Ident[IdentIndex - 1].DataType;
-          if (ExpressionType === 134) ExpressionType = 128;
-          if (pas.Common.Ident[IdentIndex - 1].DataType === 142) {
+          if (ExpressionType === pas.Tokens.TTokenKind.CHARTOK) ExpressionType = pas.Tokens.TTokenKind.BYTETOK;
+          if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.REALTOK) {
             pas.Messages.Error(i,"Left side cannot be assigned to")}
            else {
             Value = pas.Common.Ident[IdentIndex - 1].Value;
             if (ExpressionType in pas.Common.Pointers) {
-              ExpressionType = 129;
+              ExpressionType = pas.Tokens.TTokenKind.WORDTOK;
               if (pas.System.Pos("mw? " + pas.Common.Tok[i].Name,pas.Common.optyBP2) > 0) pas.Common.optyBP2 = "";
             };
           };
@@ -41852,33 +41793,33 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       $mod.StartOptimization(i);
       IndirectionLevel = 1;
       if (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) {
-        ExpressionType = 129}
+        ExpressionType = pas.Tokens.TTokenKind.WORDTOK}
        else ExpressionType = pas.Common.Ident[IdentIndex - 1].DataType;
-      if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 142) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
-      if (!(pas.Common.Ident[IdentIndex - 1].IdType in rtl.createSet(145)) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) {
-        if (pas.Common.Tok[i + 1].Kind === 58) {
+      if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.REALTOK) pas.Messages.Error$2(i,pas.Messages.TErrorCode.OrdinalExpExpected);
+      if (!(pas.Common.Ident[IdentIndex - 1].IdType in rtl.createSet(pas.Tokens.TTokenKind.PCHARTOK)) && (pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
           ExpressionType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
           IndirectionLevel = 3;
           i = $mod.CompileArrayIndex(i,IdentIndex);
-          pas.Common.CheckTok(i + 1,59);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
           i += 1;
-        } else if (pas.Common.Tok[i + 1].Kind === 56) {
+        } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) {
           pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IllegalQualifier)}
          else pas.Messages.ErrorIncompatibleTypes(i + 1,pas.Common.Ident[IdentIndex - 1].DataType,ExpressionType,false);
-      } else if (pas.Common.Tok[i + 1].Kind === 58) {
+      } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) {
         ExpressionType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
         IndirectionLevel = 3;
         i = $mod.CompileArrayIndex(i,IdentIndex);
-        pas.Common.CheckTok(i + 1,59);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CBRACKETTOK);
         i += 1;
-      } else if (pas.Common.Tok[i + 1].Kind === 56) if (pas.Common.Ident[IdentIndex - 1].AllocElementType === 0) {
+      } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) if (pas.Common.Ident[IdentIndex - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.CantAdrConstantExp)}
        else {
         ExpressionType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
         IndirectionLevel = 2;
         i += 1;
       };
-      if (pas.Common.Tok[i + 1].Kind === 52) {
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
         j = i + 2;
         yes = false;
         if ($mod.SafeCompileConstExpression({get: function () {
@@ -41899,43 +41840,43 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
         i = j;
         pas.Common.GetCommonType(i,ExpressionType,ActualParamType);
         NumActualParams += 1;
         if (pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) {
           if (yes === false) $mod.ExpandParam(ExpressionType,ActualParamType);
-          if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+          if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
             if (yes) {
               $mod.Push(ConstVal * pas.Parser.RecordSize(IdentIndex,""),0,2,0,0)}
              else pas.Messages.Error(i,"-- under construction --");
           } else if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in pas.Common.OrdinalTypes) && (IndirectionLevel !== 2)) {
             if (yes) {
               if (IndirectionLevel === 3) {
-                $mod.Push(ConstVal,0,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,0)}
-               else $mod.Push(ConstVal * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128],0,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,0);
+                $mod.Push(ConstVal,0,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,0)}
+               else $mod.Push(ConstVal * pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType),0,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,0);
             } else $mod.GenerateIndexShift(pas.Common.Ident[IdentIndex - 1].AllocElementType,0);
-          } else if (yes) $mod.Push(ConstVal,0,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,0);
+          } else if (yes) $mod.Push(ConstVal,0,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,0);
         } else {
-          if (yes) $mod.Push(ConstVal,0,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,0);
+          if (yes) $mod.Push(ConstVal,0,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,0);
           ExpressionType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
-          if (ExpressionType === 0) ExpressionType = pas.Common.Ident[IdentIndex - 1].DataType;
+          if (ExpressionType === pas.Tokens.TTokenKind.UNTYPETOK) ExpressionType = pas.Common.Ident[IdentIndex - 1].DataType;
           $mod.ExpandParam(ExpressionType,ActualParamType);
         };
-      } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.Pointers),rtl.createSet(139,140))))) if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) || (IndirectionLevel === 2) || ((pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (IndirectionLevel === 3))) {
+      } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.unionSet(rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.Pointers),rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))))) if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0) || (IndirectionLevel === 2) || ((pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0) && (IndirectionLevel === 3))) {
         ExpressionType = pas.Common.Ident[IdentIndex - 1].AllocElementType;
-        if (ExpressionType === 0) ExpressionType = pas.Common.Ident[IdentIndex - 1].DataType;
-        if (ExpressionType in rtl.createSet(139,140)) {
+        if (ExpressionType === pas.Tokens.TTokenKind.UNTYPETOK) ExpressionType = pas.Common.Ident[IdentIndex - 1].DataType;
+        if (ExpressionType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
           $mod.Push(pas.Parser.RecordSize(IdentIndex,""),0,2,0,0)}
-         else $mod.Push(1,0,pas.Common.DataSize[ExpressionType - 128],0,0);
+         else $mod.Push(1,0,pas.Common.GetDataSize(ExpressionType),0,0);
         NumActualParams += 1;
-      } else if (!(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(128,131))) {
-        $mod.Push(pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128],0,1,0,0);
-        $mod.ExpandParam(ExpressionType,128);
+      } else if (!(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.BYTETOK,pas.Tokens.TTokenKind.SHORTINTTOK))) {
+        $mod.Push(pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType),0,1,0,0);
+        $mod.ExpandParam(ExpressionType,pas.Tokens.TTokenKind.BYTETOK);
         NumActualParams += 1;
       };
       if ((pas.Common.Ident[IdentIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) && (IndirectionLevel !== 3)) IndirectionLevel = 2;
-      if (ExpressionType === 0) pas.Messages.Error(i,"Assignments to formal parameters and open arrays are not possible");
+      if (ExpressionType === pas.Tokens.TTokenKind.UNTYPETOK) pas.Messages.Error(i,"Assignments to formal parameters and open arrays are not possible");
       if (NumActualParams === 0) {
         pas.Optimize.asm65("","");
         if (Down) {
@@ -41946,49 +41887,49 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       } else $mod.GenerateIncDec(IndirectionLevel,ExpressionType,Down,IdentIndex);
       $mod.StopOptimization();
       i += 1;
-      pas.Common.CheckTok(i,55);
+      pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
       Result = i;
-    } else if ($tmp === 41) {
-      if (pas.Common.Tok[i + 1].Kind === 54) {
+    } else if ($tmp === pas.Tokens.TTokenKind.EXITTOK) {
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) {
         $mod.StartOptimization(i);
         i = $mod.CompileExpression(i + 2,{get: function () {
             return ActualParamType;
           }, set: function (v) {
             ActualParamType = v;
-          }},133);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         i += 1;
         yes = false;
         for (var $l3 = 1, $end2 = pas.Common.NumIdent; $l3 <= $end2; $l3++) {
           j = $l3;
-          if ((pas.Common.Ident[j - 1].ProcAsBlock === pas.Common.BlockStack[pas.Common.BlockStackTop]) && (pas.Common.Ident[j - 1].Kind === 5)) {
+          if ((pas.Common.Ident[j - 1].ProcAsBlock === pas.Common.BlockStack[pas.Common.BlockStackTop]) && (pas.Common.Ident[j - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) {
             IdentIndex = $mod.GetIdentResult(pas.Common.BlockStack[pas.Common.BlockStackTop]);
             yes = true;
             break;
           };
         };
         if (!yes) pas.Messages.Error(i,"Procedures cannot return a value");
-        if ((ActualParamType === 137) && (pas.Common.Ident[IdentIndex - 1].DataType === 136) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
-          pas.Messages.ErrorIncompatibleTypes(i,ActualParamType,145,false)}
+        if ((ActualParamType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements === 0)) {
+          pas.Messages.ErrorIncompatibleTypes(i,ActualParamType,pas.Tokens.TTokenKind.PCHARTOK,false)}
          else pas.Common.GetCommonConstType(i,pas.Common.Ident[IdentIndex - 1].DataType,ActualParamType,true);
-        $mod.GenerateAssignment(1,pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128],0,"RESULT","");
+        $mod.GenerateAssignment(1,pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType),0,"RESULT","");
       };
       pas.Optimize.asm65("\tjmp @exit","");
       pas.Optimize.ResetOpty();
       Result = i;
-    } else if ($tmp === 39) {
+    } else if ($tmp === pas.Tokens.TTokenKind.BREAKTOK) {
       if (pas.Common.BreakPosStackTop === 0) pas.Messages.Error(i,"BREAK not allowed");
       pas.Optimize.asm65("\tjmp b_" + pas.SysUtils.IntToHex(pas.Common.BreakPosStack[pas.Common.BreakPosStackTop].ptr,4),"");
       pas.Common.BreakPosStack[pas.Common.BreakPosStackTop].brk = true;
       pas.Optimize.ResetOpty();
       Result = i;
-    } else if ($tmp === 40) {
+    } else if ($tmp === pas.Tokens.TTokenKind.CONTINUETOK) {
       if (pas.Common.BreakPosStackTop === 0) pas.Messages.Error(i,"CONTINUE not allowed");
       pas.Optimize.asm65("\tjmp c_" + pas.SysUtils.IntToHex(pas.Common.BreakPosStack[pas.Common.BreakPosStackTop].ptr,4),"");
       pas.Common.BreakPosStack[pas.Common.BreakPosStackTop].cnt = true;
       Result = i;
-    } else if ($tmp === 28) {
-      if (pas.Common.Tok[i + 1].Kind === 54) {
+    } else if ($tmp === pas.Tokens.TTokenKind.HALTTOK) {
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) {
         i = pas.Parser.CompileConstExpression(i + 2,{get: function () {
             return Value;
           }, set: function (v) {
@@ -41997,15 +41938,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             return ExpressionType;
           }, set: function (v) {
             ExpressionType = v;
-          }},133,false,true);
-        pas.Common.GetCommonConstType(i,128,ExpressionType,true);
-        pas.Common.CheckTok(i + 1,55);
+          }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
+        pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.BYTETOK,ExpressionType,true);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
         i += 1;
         $mod.GenerateProgramEpilog(Value);
       } else $mod.GenerateProgramEpilog(0);
       Result = i;
-    } else if ($tmp === 10) {
-      pas.Common.CheckTok(i + 1,54);
+    } else if ($tmp === pas.Tokens.TTokenKind.GETINTVECTOK) {
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
       i = pas.Parser.CompileConstExpression(i + 2,{get: function () {
           return ConstVal;
         }, set: function (v) {
@@ -42014,14 +41955,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ActualParamType;
         }, set: function (v) {
           ActualParamType = v;
-        }},133,false,true);
-      pas.Common.GetCommonType(i,133,ActualParamType);
-      pas.Common.CheckTok(i + 1,52);
+        }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
+      pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.INTEGERTOK,ActualParamType);
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
       if (!((ConstVal & 255) in rtl.createSet(null,0,4))) pas.Messages.Error(i,"Interrupt Number in [0..4]");
-      pas.Common.CheckTok(i + 2,170);
+      pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.IDENTTOK);
       IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 2].Name);
       if (IdentIndex === 0) pas.Messages.Error$2(i + 2,pas.Messages.TErrorCode.UnknownIdentifier);
-      if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorIncompatibleTypes(i + 2,pas.Common.Ident[IdentIndex - 1].DataType,136,false);
+      if (!(pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers)) pas.Messages.ErrorIncompatibleTypes(i + 2,pas.Common.Ident[IdentIndex - 1].DataType,pas.Tokens.TTokenKind.POINTERTOK,false);
       svar = $mod.GetLocalName(IdentIndex,"");
       i += 2;
       var $tmp20 = ConstVal;
@@ -42062,10 +42003,10 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tlda VTIMR4+1","");
         pas.Optimize.asm65("\tsta " + svar + "+1","");
       };
-      pas.Common.CheckTok(i + 1,55);
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
       Result = i + 1;
-    } else if ($tmp === 11) {
-      pas.Common.CheckTok(i + 1,54);
+    } else if ($tmp === pas.Tokens.TTokenKind.SETINTVECTOK) {
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
       i = pas.Parser.CompileConstExpression(i + 2,{get: function () {
           return ConstVal;
         }, set: function (v) {
@@ -42074,22 +42015,22 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           return ActualParamType;
         }, set: function (v) {
           ActualParamType = v;
-        }},133,false,true);
-      pas.Common.GetCommonType(i,133,ActualParamType);
-      pas.Common.CheckTok(i + 1,52);
+        }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
+      pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.INTEGERTOK,ActualParamType);
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
       $mod.StartOptimization(i + 1);
       if (!((ConstVal & 255) in rtl.createSet(null,0,4))) pas.Messages.Error(i,"Interrupt Number in [0..4]");
       i = $mod.CompileExpression(i + 2,{get: function () {
           return ActualParamType;
         }, set: function (v) {
           ActualParamType = v;
-        }},133);
-      pas.Common.GetCommonType(i,136,ActualParamType);
+        }},pas.Tokens.TTokenKind.INTEGERTOK);
+      pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.POINTERTOK,ActualParamType);
       var $tmp21 = ConstVal;
       if ($tmp21 === pas.Common.TInterruptCode.DLI) {
         pas.Optimize.asm65("\tmva :STACKORIGIN,x VDSLST","");
         pas.Optimize.asm65("\tmva :STACKORIGIN+STACKWIDTH,x VDSLST+1","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else if ($tmp21 === pas.Common.TInterruptCode.VBLI) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tldy #5","");
@@ -42099,7 +42040,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta VVBLKI","");
         pas.Optimize.asm65("\tldy :STACKORIGIN+STACKWIDTH,x","");
         pas.Optimize.asm65("\tsty VVBLKI+1","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else if ($tmp21 === pas.Common.TInterruptCode.VBLD) {
         pas.Optimize.asm65("\tlda :STACKORIGIN,x","");
         pas.Optimize.asm65("\tldy #5","");
@@ -42109,35 +42050,35 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsta VVBLKD","");
         pas.Optimize.asm65("\tldy :STACKORIGIN+STACKWIDTH,x","");
         pas.Optimize.asm65("\tsty VVBLKD+1","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
       } else if ($tmp21 === pas.Common.TInterruptCode.TIM1) {
         pas.Optimize.asm65("\tsei","");
         pas.Optimize.asm65("\tmva :STACKORIGIN,x VTIMR1","");
         pas.Optimize.asm65("\tmva :STACKORIGIN+STACKWIDTH,x VTIMR1+1","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        if (pas.Common.Tok[i + 1].Kind === 52) {
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
           i = $mod.CompileExpression(i + 2,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,128,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.BYTETOK,ActualParamType);
           pas.Optimize.asm65("\tlda #$00","");
           pas.Optimize.asm65("\tldy #$03","");
           pas.Optimize.asm65("\tsta AUDCTL","");
           pas.Optimize.asm65("\tsta AUDC1","");
           pas.Optimize.asm65("\tsty SKCTL","");
           pas.Optimize.asm65("\tmva :STACKORIGIN,x AUDCTL","");
-          $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-          pas.Common.CheckTok(i + 1,52);
+          $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
           i = $mod.CompileExpression(i + 2,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,128,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.BYTETOK,ActualParamType);
           pas.Optimize.asm65("\tmva :STACKORIGIN,x AUDF1","");
-          $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
           pas.Optimize.asm65("\tlda irqens","");
           pas.Optimize.asm65("\tora #$01","");
           pas.Optimize.asm65("\tsta irqens","");
@@ -42154,30 +42095,30 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsei","");
         pas.Optimize.asm65("\tmva :STACKORIGIN,x VTIMR2","");
         pas.Optimize.asm65("\tmva :STACKORIGIN+STACKWIDTH,x VTIMR2+1","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        if (pas.Common.Tok[i + 1].Kind === 52) {
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
           i = $mod.CompileExpression(i + 2,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,128,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.BYTETOK,ActualParamType);
           pas.Optimize.asm65("\tlda #$00","");
           pas.Optimize.asm65("\tldy #$03","");
           pas.Optimize.asm65("\tsta AUDCTL","");
           pas.Optimize.asm65("\tsta AUDC2","");
           pas.Optimize.asm65("\tsty SKCTL","");
           pas.Optimize.asm65("\tmva :STACKORIGIN,x AUDCTL","");
-          $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-          pas.Common.CheckTok(i + 1,52);
+          $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
           i = $mod.CompileExpression(i + 2,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,128,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.BYTETOK,ActualParamType);
           pas.Optimize.asm65("\tmva :STACKORIGIN,x AUDF2","");
-          $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
           pas.Optimize.asm65("\tlda irqens","");
           pas.Optimize.asm65("\tora #$02","");
           pas.Optimize.asm65("\tsta irqens","");
@@ -42194,30 +42135,30 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tsei","");
         pas.Optimize.asm65("\tmva :STACKORIGIN,x VTIMR4","");
         pas.Optimize.asm65("\tmva :STACKORIGIN+STACKWIDTH,x VTIMR4+1","");
-        $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-        if (pas.Common.Tok[i + 1].Kind === 52) {
+        $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) {
           i = $mod.CompileExpression(i + 2,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,128,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.BYTETOK,ActualParamType);
           pas.Optimize.asm65("\tlda #$00","");
           pas.Optimize.asm65("\tldy #$03","");
           pas.Optimize.asm65("\tsta AUDCTL","");
           pas.Optimize.asm65("\tsta AUDC4","");
           pas.Optimize.asm65("\tsty SKCTL","");
           pas.Optimize.asm65("\tmva :STACKORIGIN,x AUDCTL","");
-          $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
-          pas.Common.CheckTok(i + 1,52);
+          $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.COMMATOK);
           i = $mod.CompileExpression(i + 2,{get: function () {
               return ActualParamType;
             }, set: function (v) {
               ActualParamType = v;
-            }},133);
-          pas.Common.GetCommonType(i,128,ActualParamType);
+            }},pas.Tokens.TTokenKind.INTEGERTOK);
+          pas.Common.GetCommonType(i,pas.Tokens.TTokenKind.BYTETOK,ActualParamType);
           pas.Optimize.asm65("\tmva :STACKORIGIN,x AUDF4","");
-          $mod.a65(pas.Common.TCode65.subBX,0,1,4,0);
+          $mod.a65(pas.Common.TCode65.subBX,0,pas.Tokens.TTokenKind.CONSTTOK,4,0);
           pas.Optimize.asm65("\tlda irqens","");
           pas.Optimize.asm65("\tora #$04","");
           pas.Optimize.asm65("\tsta irqens","");
@@ -42232,7 +42173,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\tcli","");
       };
       $mod.StopOptimization();
-      pas.Common.CheckTok(i + 1,55);
+      pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
       Result = i + 1;
     } else {
       Result = i - 1;
@@ -42250,16 +42191,18 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var svar = "";
     var varbegin = "";
     var HeaFile = null;
+    var traceSize = false;
+    var varDataSizeString = "";
     function Value(dorig, brackets) {
       var Result = "";
       var v = 0;
       v = pas.Common.Ident[IdentIndex - 1].Value;
       var $tmp = pas.Common.Ident[IdentIndex - 1].DataType;
-      if (($tmp === 141) || ($tmp === 142)) {
+      if (($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) || ($tmp === pas.Tokens.TTokenKind.REALTOK)) {
         v = pas.Numbers.CastToReal(v)}
-       else if ($tmp === 143) {
+       else if ($tmp === pas.Tokens.TTokenKind.SINGLETOK) {
         v = pas.Numbers.CastToSingle(v)}
-       else if ($tmp === 144) {
+       else if ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK) {
         v = pas.Numbers.CastToHalfSingle(v)}
        else {
         v = pas.Common.Ident[IdentIndex - 1].Value;
@@ -42268,7 +42211,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         if (brackets) {
           Result = "\t= [DATAORIGIN+$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value - 32768,4) + "]"}
          else Result = "\t= DATAORIGIN+$" + pas.SysUtils.IntToHex(pas.Common.Ident[IdentIndex - 1].Value - 32768,4);
-      } else if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].Kind === 3) && ((pas.Common.Ident[IdentIndex - 1].Value & 0xff) === 0) && ((Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255) in rtl.createSet(null,1,127))) {
+      } else if (pas.Common.Ident[IdentIndex - 1].isAbsolute && (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.VARTOK) && ((pas.Common.Ident[IdentIndex - 1].Value & 0xff) === 0) && ((Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255) in rtl.createSet(null,1,127))) {
         var $tmp1 = Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f & 255;
         if (($tmp1 >= 1) && ($tmp1 <= 3)) {
           Result = "\t= " + reg[(Math.floor(pas.Common.Ident[IdentIndex - 1].Value / 16777216) & 0x7f) - 1]}
@@ -42296,8 +42239,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     function mads_data_size() {
       var Result = "";
       Result = "";
-      if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(null,128,149)) {
-        var $tmp = pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
+      if (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(null,pas.Tokens.TTokenKind.BYTETOK,pas.Tokens.TTokenKind.FORWARDTYPE)) {
+        var $tmp = pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].AllocElementType);
         if ($tmp === 2) {
           Result = " .word"}
          else if ($tmp === 4) Result = " .dword";
@@ -42330,12 +42273,26 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       };
       return Result;
     };
+    function GetIdentifierFullName(identifier) {
+      var Result = "";
+      Result = pas.Common.UnitName[identifier.UnitIndex - 1].Name + "." + identifier.Name;
+      return Result;
+    };
+    function GetIdentifierDataSize(identifier) {
+      var Result = 0;
+      var dataSize = 0;
+      dataSize = pas.Common.GetDataSize(identifier.AllocElementType);
+      Result = identifier.NumAllocElements * dataSize;
+      if (traceSize) pas.System.Writeln("Identifier ",GetIdentifierFullName(identifier)," has ",identifier.NumAllocElements," elements of size ",dataSize," = ",Result," bytes.");
+      return Result;
+    };
     try {
       if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) {
         $mod.StopOptimization();
         emptyLine = true;
         size = 0;
         varbegin = "";
+        traceSize = false;
         for (var $l = 1, $end = pas.Common.NumIdent; $l <= $end; $l++) {
           IdentIndex = $l;
           if ((pas.Common.Ident[IdentIndex - 1].Block === pas.Common.Ident[BlockIdentIndex - 1].ProcAsBlock) && (pas.Common.Ident[IdentIndex - 1].UnitIndex === pas.Common.UnitNameIndex)) {
@@ -42390,40 +42347,40 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               };
             } else {
               var $tmp = pas.Common.Ident[IdentIndex - 1].Kind;
-              if ($tmp === 3) {
+              if ($tmp === pas.Tokens.TTokenKind.VARTOK) {
                 if (pas.Common.Ident[IdentIndex - 1].isAbsolute) {
-                  if ((pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
+                  if ((pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
                     pas.Optimize.asm65("adr." + pas.Common.Ident[IdentIndex - 1].Name + Value(false,false),"");
                     pas.Optimize.asm65(".var " + pas.Common.Ident[IdentIndex - 1].Name + "\t= adr." + pas.Common.Ident[IdentIndex - 1].Name + " .word","");
                     if (size === 0) varbegin = pas.Common.Ident[IdentIndex - 1].Name;
-                    size += pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
-                  } else if (pas.Common.Ident[IdentIndex - 1].DataType === 138) {
+                    size += GetIdentifierDataSize(pas.Common.Ident[IdentIndex - 1]);
+                  } else if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.FILETOK) {
                     pas.Optimize.asm65(".var " + pas.Common.Ident[IdentIndex - 1].Name + Value(false,false) + " .word","")}
                    else if (pas.System.Pos("@FORTMP_",pas.Common.Ident[IdentIndex - 1].Name) === 0) pas.Optimize.asm65(pas.Common.Ident[IdentIndex - 1].Name + Value(false,false),"");
-                } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
-                  if (((pas.Common.Ident[IdentIndex - 1].IdType !== 30) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) || (pas.Common.Ident[IdentIndex - 1].IdType === 160)) {
+                } else if ((pas.Common.Ident[IdentIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (pas.Common.Ident[IdentIndex - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers)) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
+                  if (((pas.Common.Ident[IdentIndex - 1].IdType !== pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) || (pas.Common.Ident[IdentIndex - 1].IdType === pas.Tokens.TTokenKind.DATAORIGINOFFSET)) {
                     pas.Optimize.asm65(pas.Common.Ident[IdentIndex - 1].Name + Value(true,false),"")}
                    else {
-                    if (pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(139,140)) {
+                    if (pas.Common.Ident[IdentIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                       pas.Optimize.asm65("adr." + pas.Common.Ident[IdentIndex - 1].Name + Value(true,false) + "\t; [" + pas.Common.IntToStr(pas.Parser.RecordSize(IdentIndex,"")) + "] " + pas.Common.InfoAboutToken(pas.Common.Ident[IdentIndex - 1].DataType),"")}
                      else if (pas.Parser.Elements(IdentIndex) > 0) {
-                      if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements_ > 0) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+                      if ((pas.Common.Ident[IdentIndex - 1].NumAllocElements_ > 0) && !(pas.Common.Ident[IdentIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
                         pas.Optimize.asm65("adr." + pas.Common.Ident[IdentIndex - 1].Name + Value(true,true) + " .array [" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements) + "] [" + pas.Common.IntToStr(pas.Common.Ident[IdentIndex - 1].NumAllocElements_) + "]" + mads_data_size(),"")}
                        else pas.Optimize.asm65("adr." + pas.Common.Ident[IdentIndex - 1].Name + Value(true,true) + " .array [" + pas.Common.IntToStr(pas.Parser.Elements(IdentIndex)) + "]" + mads_data_size(),"");
                     } else pas.Optimize.asm65("adr." + pas.Common.Ident[IdentIndex - 1].Name + Value(true,false),"");
                     pas.Optimize.asm65(".var " + pas.Common.Ident[IdentIndex - 1].Name + "\t= adr." + pas.Common.Ident[IdentIndex - 1].Name + " .word","");
                   };
                   if (size === 0) varbegin = pas.Common.Ident[IdentIndex - 1].Name;
-                  size += pas.Common.Ident[IdentIndex - 1].NumAllocElements * pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].AllocElementType - 128];
-                } else if (pas.Common.Ident[IdentIndex - 1].DataType === 138) {
+                  size += GetIdentifierDataSize(pas.Common.Ident[IdentIndex - 1]);
+                } else if (pas.Common.Ident[IdentIndex - 1].DataType === pas.Tokens.TTokenKind.FILETOK) {
                   pas.Optimize.asm65(".var " + pas.Common.Ident[IdentIndex - 1].Name + Value(true,false) + " .word","")}
                  else {
                   pas.Optimize.asm65(pas.Common.Ident[IdentIndex - 1].Name + Value(true,false),"");
                   if (size === 0) varbegin = pas.Common.Ident[IdentIndex - 1].Name;
-                  if (pas.Common.Ident[IdentIndex - 1].IdType !== 160) if ((pas.Common.Ident[IdentIndex - 1].Name === "RESULT") && (pas.Common.Ident[BlockIdentIndex - 1].Kind === 5)) {}
-                  else size += pas.Common.DataSize[pas.Common.Ident[IdentIndex - 1].DataType - 128];
+                  if (pas.Common.Ident[IdentIndex - 1].IdType !== pas.Tokens.TTokenKind.DATAORIGINOFFSET) if ((pas.Common.Ident[IdentIndex - 1].Name === "RESULT") && (pas.Common.Ident[BlockIdentIndex - 1].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK)) {}
+                  else size += pas.Common.GetDataSize(pas.Common.Ident[IdentIndex - 1].DataType);
                 }}
-               else if ($tmp === 1) if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
+               else if ($tmp === pas.Tokens.TTokenKind.CONSTTOK) if ((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0)) {
                 pas.Optimize.asm65("adr." + pas.Common.Ident[IdentIndex - 1].Name + Value(false,false),"");
                 pas.Optimize.asm65(".var " + pas.Common.Ident[IdentIndex - 1].Name + "\t= adr." + pas.Common.Ident[IdentIndex - 1].Name + " .word","");
               } else if (pas.System.Pos("@FORTMP_",pas.Common.Ident[IdentIndex - 1].Name) === 0) pas.Optimize.asm65(pas.Common.Ident[IdentIndex - 1].Name + Value(false,false),"");
@@ -42435,7 +42392,11 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           if (pas.Common.LIBRARY_USE) pas.Optimize.asm65("@InitLibrary\t= :START","");
           if (VarSize && (size > 0)) {
             pas.Optimize.asm65("@VarData\t= " + varbegin,"");
-            pas.Optimize.asm65("@VarDataSize\t= " + pas.Common.IntToStr(size),"");
+            varDataSizeString = pas.Common.IntToStr(size);
+            if (traceSize) {
+              pas.System.Writeln(GetIdentifierFullName(pas.Common.Ident[BlockIdentIndex - 1])," has VarDataSize=",varDataSizeString," bytes.");
+            };
+            pas.Optimize.asm65("@VarDataSize\t= " + varDataSizeString,"");
             pas.Optimize.asm65("","");
           };
         };
@@ -42450,29 +42411,29 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.Utilities.RaiseHaltException(pas.Utilities.THaltException.COMPILING_ABORTED);
     };
     var $tmp = ConstValType;
-    if (($tmp === 131) || ($tmp === 128) || ($tmp === 134) || ($tmp === 135)) {
+    if (($tmp === pas.Tokens.TTokenKind.SHORTINTTOK) || ($tmp === pas.Tokens.TTokenKind.BYTETOK) || ($tmp === pas.Tokens.TTokenKind.CHARTOK) || ($tmp === pas.Tokens.TTokenKind.BOOLEANTOK)) {
       pas.Common.StaticStringData[ConstDataSize] = ConstVal & 255}
-     else if (($tmp === 132) || ($tmp === 129) || ($tmp === 141) || ($tmp === 136) || ($tmp === 137) || ($tmp === 145)) {
+     else if (($tmp === pas.Tokens.TTokenKind.SMALLINTTOK) || ($tmp === pas.Tokens.TTokenKind.WORDTOK) || ($tmp === pas.Tokens.TTokenKind.SHORTREALTOK) || ($tmp === pas.Tokens.TTokenKind.POINTERTOK) || ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK) || ($tmp === pas.Tokens.TTokenKind.PCHARTOK)) {
       pas.Common.StaticStringData[ConstDataSize] = ConstVal & 255;
       pas.Common.StaticStringData[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
-    } else if ($tmp === 160) {
+    } else if ($tmp === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
       pas.Common.StaticStringData[ConstDataSize] = (ConstVal & 255) | 0x8000;
       pas.Common.StaticStringData[ConstDataSize + 1] = (Math.floor(ConstVal / 256) & 255) | 0x4000;
-    } else if ($tmp === 161) {
+    } else if ($tmp === pas.Tokens.TTokenKind.CODEORIGINOFFSET) {
       pas.Common.StaticStringData[ConstDataSize] = (ConstVal & 255) | 0x2000;
       pas.Common.StaticStringData[ConstDataSize + 1] = (Math.floor(ConstVal / 256) & 255) | 0x1000;
-    } else if (($tmp === 133) || ($tmp === 130) || ($tmp === 142)) {
+    } else if (($tmp === pas.Tokens.TTokenKind.INTEGERTOK) || ($tmp === pas.Tokens.TTokenKind.CARDINALTOK) || ($tmp === pas.Tokens.TTokenKind.REALTOK)) {
       pas.Common.StaticStringData[ConstDataSize] = ConstVal & 255;
       pas.Common.StaticStringData[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
       pas.Common.StaticStringData[ConstDataSize + 2] = Math.floor(ConstVal / 65536) & 255;
       pas.Common.StaticStringData[ConstDataSize + 3] = Math.floor(ConstVal / 16777216) & 255;
-    } else if ($tmp === 143) {
+    } else if ($tmp === pas.Tokens.TTokenKind.SINGLETOK) {
       ConstVal = pas.Numbers.CastToSingle(ConstVal);
       pas.Common.StaticStringData[ConstDataSize] = ConstVal & 255;
       pas.Common.StaticStringData[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
       pas.Common.StaticStringData[ConstDataSize + 2] = Math.floor(ConstVal / 65536) & 255;
       pas.Common.StaticStringData[ConstDataSize + 3] = Math.floor(ConstVal / 16777216) & 255;
-    } else if ($tmp === 144) {
+    } else if ($tmp === pas.Tokens.TTokenKind.HALFSINGLETOK) {
       ConstVal = pas.Numbers.CastToHalfSingle(ConstVal);
       pas.Common.StaticStringData[ConstDataSize] = ConstVal & 255;
       pas.Common.StaticStringData[ConstDataSize + 1] = Math.floor(ConstVal / 256) & 255;
@@ -42490,9 +42451,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if (StaticData) {
         $mod.SaveToStaticDataSegment(ConstDataSize,ConstVal + (Add + 0),DataType)}
        else pas.Parser.SaveToDataSegment(ConstDataSize,ConstVal + (Add + 0),DataType);
-      if (DataType === 160) {
-        ConstDataSize += pas.Common.DataSize[8]}
-       else ConstDataSize += pas.Common.DataSize[DataType - 128];
+      if (DataType === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
+        ConstDataSize += pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK)}
+       else ConstDataSize += pas.Common.GetDataSize(DataType);
     };
     function SaveData(compile) {
       if (compile) i = pas.Parser.CompileConstExpression(i + 1,{get: function () {
@@ -42504,27 +42465,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         }, set: function (v) {
           ActualParamType = v;
         }},ConstValType,false,true);
-      if ((ConstValType === 137) && (ActualParamType === 134)) {
+      if ((ConstValType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (ActualParamType === pas.Tokens.TTokenKind.CHARTOK)) {
         if (StaticData) pas.Messages.Error(i,"Memory overlap due conversion CHAR to STRING, use VAR instead CONST");
         ch = pas.Common.Tok[i].Value;
         pas.Common.DefineStaticString(i,String.fromCharCode(ch));
         ConstVal = (pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE;
         pas.Common.Tok[i].Value = ch;
-        ActualParamType = 137;
+        ActualParamType = pas.Tokens.TTokenKind.STRINGPOINTERTOK;
       };
-      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(134,137))) && (ActualParamType in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression);
-      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(137))) && (ActualParamType === 134)) pas.Messages.ErrorIncompatibleTypes(i,ActualParamType,ConstValType,false);
-      if ((ConstValType in rtl.createSet(143,144)) && (ActualParamType === 142)) ActualParamType = ConstValType;
+      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK))) && (ActualParamType in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression);
+      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(pas.Tokens.TTokenKind.STRINGPOINTERTOK))) && (ActualParamType === pas.Tokens.TTokenKind.CHARTOK)) pas.Messages.ErrorIncompatibleTypes(i,ActualParamType,ConstValType,false);
+      if ((ConstValType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (ActualParamType === pas.Tokens.TTokenKind.REALTOK)) ActualParamType = ConstValType;
       if ((ConstValType in pas.Common.RealTypes) && (ActualParamType in pas.Common.IntegerTypes)) {
         ConstVal = pas.Numbers.FromInt64(ConstVal);
         ActualParamType = ConstValType;
       };
-      if ((ConstValType === 141) && (ActualParamType === 142)) ActualParamType = 141;
-      if (ActualParamType === 160) {
-        SaveDataSegment(160)}
+      if ((ConstValType === pas.Tokens.TTokenKind.SHORTREALTOK) && (ActualParamType === pas.Tokens.TTokenKind.REALTOK)) ActualParamType = pas.Tokens.TTokenKind.SHORTREALTOK;
+      if (ActualParamType === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
+        SaveDataSegment(pas.Tokens.TTokenKind.DATAORIGINOFFSET)}
        else {
         if (ConstValType in pas.Common.IntegerTypes) {
-          if (pas.Common.GetCommonConstType(i,ConstValType,ActualParamType,ActualParamType in rtl.unionSet(pas.Common.RealTypes,pas.Common.Pointers))) pas.Messages.WarningForRangeCheckError(i,0,ConstVal,ConstValType);
+          if (pas.Common.GetCommonConstType(i,ConstValType,ActualParamType,ActualParamType in rtl.unionSet(pas.Common.RealTypes,pas.Common.Pointers))) pas.Messages.WarningForRangeCheckError(i,ConstVal,ConstValType);
         } else pas.Common.GetCommonConstType(i,ConstValType,ActualParamType,true);
         SaveDataSegment(ConstValType);
       };
@@ -42708,7 +42669,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       i += 1;
       return Result;
     };
-    pas.Common.CheckTok(i,54);
+    pas.Common.CheckTok(i,pas.Tokens.TTokenKind.OPARTOK);
     NumActualParams = 0;
     NumActualParams_ = 0;
     NumAllocElements_ = rtl.lw(NumAllocElements >>> 16);
@@ -42717,21 +42678,21 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       NumActualParams += 1;
       if (NumAllocElements_ > 0) {
         NumActualParams_ = 0;
-        pas.Common.CheckTok(i + 1,54);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.OPARTOK);
         i += 1;
         do {
           NumActualParams_ += 1;
           if (NumActualParams_ > NumAllocElements_) break;
           SaveData(true);
           i += 1;
-        } while (!(pas.Common.Tok[i].Kind !== 52));
-        pas.Common.CheckTok(i,55);
-      } else if (pas.Common.Tok[i + 1].Kind === 184) {
+        } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
+      } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.EVALTOK) {
         NumActualParams = DoEvaluate($mod.evaluationContext)}
        else SaveData(true);
       i += 1;
-    } while (!(pas.Common.Tok[i].Kind !== 52));
-    pas.Common.CheckTok(i,55);
+    } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+    pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CPARTOK);
     if (NumActualParams > NumAllocElements) pas.Messages.Error(i,"Number of elements (" + pas.Common.IntToStr(NumActualParams) + ") differs from declaration (" + pas.Common.IntToStr(NumAllocElements) + ")");
     if (NumActualParams < NumAllocElements) pas.Messages.Error(i,"Expected another " + pas.Common.IntToStr(NumAllocElements - NumActualParams) + " array elements");
     if (NumActualParams_ < NumAllocElements_) pas.Messages.Error(i,"Expected another " + pas.Common.IntToStr(NumAllocElements_ - NumActualParams_) + " array elements");
@@ -42748,9 +42709,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if (StaticData) {
         $mod.SaveToStaticDataSegment(ConstDataSize,ConstVal + (Add + 0),DataType)}
        else pas.Parser.SaveToDataSegment(ConstDataSize,ConstVal + (Add + 0),DataType);
-      if (DataType === 160) {
-        ConstDataSize += pas.Common.DataSize[8]}
-       else ConstDataSize += pas.Common.DataSize[DataType - 128];
+      if (DataType === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
+        ConstDataSize += pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK)}
+       else ConstDataSize += pas.Common.GetDataSize(DataType);
     };
     function SaveData(compile) {
       if (compile) i = pas.Parser.CompileConstExpression(i + 1,{get: function () {
@@ -42762,27 +42723,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         }, set: function (v) {
           ActualParamType = v;
         }},ConstValType,false,true);
-      if ((ConstValType === 137) && (ActualParamType === 134)) {
+      if ((ConstValType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (ActualParamType === pas.Tokens.TTokenKind.CHARTOK)) {
         if (StaticData) pas.Messages.Error(i,"Memory overlap due conversion CHAR to STRING, use VAR instead CONST");
         ch = pas.Common.Tok[i].Value;
         pas.Common.DefineStaticString(i,String.fromCharCode(ch));
         ConstVal = (pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE;
         pas.Common.Tok[i].Value = ch;
-        ActualParamType = 137;
+        ActualParamType = pas.Tokens.TTokenKind.STRINGPOINTERTOK;
       };
-      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(134,137))) && (ActualParamType in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression);
-      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(137))) && (ActualParamType === 134)) pas.Messages.ErrorIncompatibleTypes(i,ActualParamType,ConstValType,false);
-      if ((ConstValType in rtl.createSet(143,144)) && (ActualParamType === 142)) ActualParamType = ConstValType;
+      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(pas.Tokens.TTokenKind.CHARTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK))) && (ActualParamType in rtl.unionSet(pas.Common.IntegerTypes,pas.Common.RealTypes))) pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression);
+      if ((ConstValType in rtl.unionSet(pas.Common.StringTypes,rtl.createSet(pas.Tokens.TTokenKind.STRINGPOINTERTOK))) && (ActualParamType === pas.Tokens.TTokenKind.CHARTOK)) pas.Messages.ErrorIncompatibleTypes(i,ActualParamType,ConstValType,false);
+      if ((ConstValType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (ActualParamType === pas.Tokens.TTokenKind.REALTOK)) ActualParamType = ConstValType;
       if ((ConstValType in pas.Common.RealTypes) && (ActualParamType in pas.Common.IntegerTypes)) {
         ConstVal = pas.Numbers.FromInt64(ConstVal);
         ActualParamType = ConstValType;
       };
-      if ((ConstValType === 141) && (ActualParamType === 142)) ActualParamType = 141;
-      if (ActualParamType === 160) {
-        SaveDataSegment(160)}
+      if ((ConstValType === pas.Tokens.TTokenKind.SHORTREALTOK) && (ActualParamType === pas.Tokens.TTokenKind.REALTOK)) ActualParamType = pas.Tokens.TTokenKind.SHORTREALTOK;
+      if (ActualParamType === pas.Tokens.TTokenKind.DATAORIGINOFFSET) {
+        SaveDataSegment(pas.Tokens.TTokenKind.DATAORIGINOFFSET)}
        else {
         if (ConstValType in pas.Common.IntegerTypes) {
-          if (pas.Common.GetCommonConstType(i,ConstValType,ActualParamType,ActualParamType in rtl.unionSet(pas.Common.RealTypes,pas.Common.Pointers))) pas.Messages.WarningForRangeCheckError(i,0,ConstVal,ConstValType);
+          if (pas.Common.GetCommonConstType(i,ConstValType,ActualParamType,ActualParamType in rtl.unionSet(pas.Common.RealTypes,pas.Common.Pointers))) pas.Messages.WarningForRangeCheckError(i,ConstVal,ConstValType);
         } else pas.Common.GetCommonConstType(i,ConstValType,ActualParamType,true);
         SaveDataSegment(ConstValType);
       };
@@ -42967,18 +42928,18 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       i += 1;
       return Result;
     };
-    pas.Common.CheckTok(i,58);
+    pas.Common.CheckTok(i,pas.Tokens.TTokenKind.OBRACKETTOK);
     NumActualParams = 0;
     NumAllocElements.set(0);
-    if (pas.Common.Tok[i + 1].Kind === 59) {
+    if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.CBRACKETTOK) {
       i += 1}
      else do {
-      if (pas.Common.Tok[i + 1].Kind === 184) {
+      if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.EVALTOK) {
         DoEvaluate($mod.evaluationContext)}
        else SaveData(true);
       i += 1;
-    } while (!(pas.Common.Tok[i].Kind !== 52));
-    pas.Common.CheckTok(i,59);
+    } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+    pas.Common.CheckTok(i,pas.Tokens.TTokenKind.CBRACKETTOK);
     NumAllocElements.set(NumActualParams);
     Result = i;
     return Result;
@@ -43014,38 +42975,38 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var VarOfSameType = rtl.arraySetLength(null,pas.Common.TParam,256);
     VarOfSameType = rtl.arraySetLength(null,pas.Common.TParam,256);
     NumParams.set(0);
-    if ((pas.Common.Tok[i.get() + 3].Kind === 55) && (pas.Common.Tok[i.get() + 2].Kind === 54)) {
+    if ((pas.Common.Tok[i.get() + 3].Kind === pas.Tokens.TTokenKind.CPARTOK) && (pas.Common.Tok[i.get() + 2].Kind === pas.Tokens.TTokenKind.OPARTOK)) {
       i.set(i.get() + 4)}
-     else if (pas.Common.Tok[i.get() + 2].Kind === 54) {
+     else if (pas.Common.Tok[i.get() + 2].Kind === pas.Tokens.TTokenKind.OPARTOK) {
       i.set(i.get() + 2);
       do {
         NumVarOfSameType = 0;
         ListPassMethod = pas.Common.TParameterPassingMethod.VALPASSING;
-        if (pas.Common.Tok[i.get() + 1].Kind === 1) {
+        if (pas.Common.Tok[i.get() + 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) {
           ListPassMethod = pas.Common.TParameterPassingMethod.CONSTPASSING;
           i.set(i.get() + 1);
-        } else if (pas.Common.Tok[i.get() + 1].Kind === 3) {
+        } else if (pas.Common.Tok[i.get() + 1].Kind === pas.Tokens.TTokenKind.VARTOK) {
           ListPassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
           i.set(i.get() + 1);
         };
         do {
-          if (pas.Common.Tok[i.get() + 1].Kind !== 170) {
-            pas.Messages.Error(i.get() + 1,"Formal parameter name expected but " + pas.Common.GetSpelling(i.get() + 1) + " found")}
+          if (pas.Common.Tok[i.get() + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+            pas.Messages.Error(i.get() + 1,"Formal parameter name expected but " + pas.Common.GetTokenSpellingAtIndex(i.get() + 1) + " found")}
            else {
             NumVarOfSameType += 1;
             VarOfSameType[NumVarOfSameType - 1].Name = pas.Common.Tok[i.get() + 1].Name;
           };
           i.set(i.get() + 2);
-        } while (!(pas.Common.Tok[i.get()].Kind !== 52));
-        VarTYpe = 0;
+        } while (!(pas.Common.Tok[i.get()].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+        VarTYpe = pas.Tokens.TTokenKind.UNTYPETOK;
         NumAllocElements = 0;
-        AllocElementType = 0;
-        if ((ListPassMethod in rtl.createSet(pas.Common.TParameterPassingMethod.CONSTPASSING,pas.Common.TParameterPassingMethod.VARPASSING)) && (pas.Common.Tok[i.get()].Kind !== 60)) {
+        AllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
+        if ((ListPassMethod in rtl.createSet(pas.Common.TParameterPassingMethod.CONSTPASSING,pas.Common.TParameterPassingMethod.VARPASSING)) && (pas.Common.Tok[i.get()].Kind !== pas.Tokens.TTokenKind.COLONTOK)) {
           ListPassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
           i.set(i.get() - 1);
         } else {
-          pas.Common.CheckTok(i.get(),60);
-          if (pas.Common.Tok[i.get() + 1].Kind === 56) pas.Messages.Error(i.get() + 1,"Type identifier expected");
+          pas.Common.CheckTok(i.get(),pas.Tokens.TTokenKind.COLONTOK);
+          if (pas.Common.Tok[i.get() + 1].Kind === pas.Tokens.TTokenKind.DEREFERENCETOK) pas.Messages.Error(i.get() + 1,"Type identifier expected");
           i.set(pas.Parser.CompileType(i.get() + 1,{get: function () {
               return VarTYpe;
             }, set: function (v) {
@@ -43059,7 +43020,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             }, set: function (v) {
               AllocElementType = v;
             }}));
-          if ((VarTYpe === 138) && (ListPassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Messages.Error(i.get(),"File types must be var parameters");
+          if ((VarTYpe === pas.Tokens.TTokenKind.FILETOK) && (ListPassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Messages.Error(i.get(),"File types must be var parameters");
         };
         for (var $l = 1, $end = NumVarOfSameType; $l <= $end; $l++) {
           VarOfSameTypeIndex = $l;
@@ -43075,14 +43036,14 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           };
         };
         i.set(i.get() + 1);
-      } while (!(pas.Common.Tok[i.get()].Kind !== 53));
-      pas.Common.CheckTok(i.get(),55);
+      } while (!(pas.Common.Tok[i.get()].Kind !== pas.Tokens.TTokenKind.SEMICOLONTOK));
+      pas.Common.CheckTok(i.get(),pas.Tokens.TTokenKind.CPARTOK);
       i.set(i.get() + 1);
     } else i.set(i.get() + 2);
     Status.set(0);
     if (IsNestedFunction) {
-      pas.Common.CheckTok(i.get(),60);
-      if (pas.Common.Tok[i.get() + 1].Kind === 30) pas.Messages.Error(i.get() + 1,"Type identifier expected");
+      pas.Common.CheckTok(i.get(),pas.Tokens.TTokenKind.COLONTOK);
+      if (pas.Common.Tok[i.get() + 1].Kind === pas.Tokens.TTokenKind.ARRAYTOK) pas.Messages.Error(i.get() + 1,"Type identifier expected");
       i.set(pas.Parser.CompileType(i.get() + 1,{get: function () {
           return VarTYpe;
         }, set: function (v) {
@@ -43101,41 +43062,41 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       NestedFunctionAllocElementType.set(AllocElementType);
       i.set(i.get() + 1);
     };
-    pas.Common.CheckTok(i.get(),53);
-    while (pas.Common.Tok[i.get() + 1].Kind in rtl.createSet(101,102,103,104,105,106,107,108,109)) {
+    pas.Common.CheckTok(i.get(),pas.Tokens.TTokenKind.SEMICOLONTOK);
+    while (pas.Common.Tok[i.get() + 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.OVERLOADTOK,pas.Tokens.TTokenKind.ASSEMBLERTOK,pas.Tokens.TTokenKind.FORWARDTOK,pas.Tokens.TTokenKind.REGISTERTOK,pas.Tokens.TTokenKind.INTERRUPTTOK,pas.Tokens.TTokenKind.PASCALTOK,pas.Tokens.TTokenKind.STDCALLTOK,pas.Tokens.TTokenKind.INLINETOK,pas.Tokens.TTokenKind.KEEPTOK)) {
       var $tmp = pas.Common.Tok[i.get() + 1].Kind;
-      if ($tmp === 101) {
+      if ($tmp === pas.Tokens.TTokenKind.OVERLOADTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mOverload,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 102) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.ASSEMBLERTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mAssembler,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 104) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.REGISTERTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mRegister,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 107) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.STDCALLTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mStdCall,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 108) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.INLINETOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mInline,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 105) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.INTERRUPTTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mInterrupt,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 106) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.PASCALTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mPascal,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
-      } else if ($tmp === 109) {
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
+      } else if ($tmp === pas.Tokens.TTokenKind.KEEPTOK) {
         pas.Common.SetModifierBit(pas.Common.TModifierCode.mKeep,Status);
         i.set(i.get() + 1);
-        pas.Common.CheckTok(i.get() + 1,53);
+        pas.Common.CheckTok(i.get() + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
       };
       i.set(i.get() + 1);
     };
@@ -43146,9 +43107,9 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var Name = "";
     for (var $l = 1, $end = pas.Common.NumIdent; $l <= $end; $l++) {
       TypeIndex = $l;
-      if ((pas.Common.Ident[TypeIndex - 1].AllocElementType === 149) && (pas.Common.Ident[TypeIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) {
+      if ((pas.Common.Ident[TypeIndex - 1].AllocElementType === pas.Tokens.TTokenKind.FORWARDTYPE) && (pas.Common.Ident[TypeIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) {
         Name = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[pas.Common.Ident[TypeIndex - 1].NumAllocElements].Name) - 1].Name;
-        if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[pas.Common.Ident[TypeIndex - 1].NumAllocElements].Name) - 1].Kind === 2) for (var $l1 = 1, $end1 = pas.Common.NumIdent; $l1 <= $end1; $l1++) {
+        if (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[pas.Common.Ident[TypeIndex - 1].NumAllocElements].Name) - 1].Kind === pas.Tokens.TTokenKind.TYPETOK) for (var $l1 = 1, $end1 = pas.Common.NumIdent; $l1 <= $end1; $l1++) {
           IdentIndex = $l1;
           if ((pas.Common.Ident[IdentIndex - 1].Name === Name) && (pas.Common.Ident[IdentIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) {
             pas.Common.Ident[TypeIndex - 1].NumAllocElements = pas.Common.Ident[IdentIndex - 1].NumAllocElements;
@@ -43161,7 +43122,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     };
     for (var $l2 = 1, $end2 = pas.Common.NumIdent; $l2 <= $end2; $l2++) {
       TypeIndex = $l2;
-      if ((pas.Common.Ident[TypeIndex - 1].AllocElementType === 149) && (pas.Common.Ident[TypeIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) if (typ) {
+      if ((pas.Common.Ident[TypeIndex - 1].AllocElementType === pas.Tokens.TTokenKind.FORWARDTYPE) && (pas.Common.Ident[TypeIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) if (typ) {
         pas.Messages.Error(TypeIndex,"Unresolved forward reference to type " + pas.Common.Ident[TypeIndex - 1].Name)}
        else pas.Messages.Error(TypeIndex,'Identifier not found "' + pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[pas.Common.Ident[TypeIndex - 1].NumAllocElements].Name) - 1].Name + '"');
     };
@@ -43169,30 +43130,30 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
   this.CompileRecordDeclaration = function (VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute) {
     var tmpVarDataSize_ = 0;
     var ParamIndex = 0;
-    if ((VarType in pas.Common.Pointers) && (AllocElementType === 139)) {
+    if ((VarType in pas.Common.Pointers) && (AllocElementType === pas.Tokens.TTokenKind.RECORDTOK)) {
       tmpVarDataSize_ = pas.Common.VarDataSize;
       if (rtl.lw(NumAllocElements >>> 16) > 0) {
         pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements & 0xFFFF;
         pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements_ = rtl.lw(NumAllocElements >>> 16);
-        pas.Common.VarDataSize = tmpVarDataSize.get() + (rtl.lw(NumAllocElements >>> 16) * pas.Common.DataSize[8]);
+        pas.Common.VarDataSize = tmpVarDataSize.get() + (rtl.lw(NumAllocElements >>> 16) * pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK));
         tmpVarDataSize.set(pas.Common.VarDataSize);
         NumAllocElements = NumAllocElements & 0xFFFF;
-      } else if (pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute === false) tmpVarDataSize.set(tmpVarDataSize.get() + pas.Common.DataSize[8]);
+      } else if (pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute === false) tmpVarDataSize.set(tmpVarDataSize.get() + pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK));
       for (var $l = 1, $end = pas.Common.TypeArray[NumAllocElements - 1].NumFields; $l <= $end; $l++) {
         ParamIndex = $l;
         if ((pas.Common.TypeArray[NumAllocElements - 1].Block === 1) || (pas.Common.TypeArray[NumAllocElements - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) {
-          pas.Parser.DefineIdent(pas.Common.i,VarOfSameType.get()[VarOfSameTypeIndex - 1].Name + "." + pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].Name,3,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].DataType,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].AllocElementType,0,160);
+          pas.Parser.DefineIdent(pas.Common.i,VarOfSameType.get()[VarOfSameTypeIndex - 1].Name + "." + pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].DataType,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].AllocElementType,0,pas.Tokens.TTokenKind.DATAORIGINOFFSET);
           pas.Common.Ident[pas.Common.NumIdent - 1].Value = pas.Common.Ident[pas.Common.NumIdent - 1].Value - tmpVarDataSize_;
           pas.Common.Ident[pas.Common.NumIdent - 1].PassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
         };
       };
       pas.Common.VarDataSize = tmpVarDataSize.get();
-    } else if (VarType in rtl.createSet(139,140)) for (var $l1 = 1, $end1 = pas.Common.TypeArray[NumAllocElements - 1].NumFields; $l1 <= $end1; $l1++) {
+    } else if (VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) for (var $l1 = 1, $end1 = pas.Common.TypeArray[NumAllocElements - 1].NumFields; $l1 <= $end1; $l1++) {
       ParamIndex = $l1;
       if ((pas.Common.TypeArray[NumAllocElements - 1].Block === 1) || (pas.Common.TypeArray[NumAllocElements - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) {
         tmpVarDataSize_ = pas.Common.VarDataSize;
-        pas.Parser.DefineIdent(pas.Common.i,VarOfSameType.get()[VarOfSameTypeIndex - 1].Name + "." + pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].Name,3,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].DataType,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].AllocElementType,(isAbsolute + 0) * ConstVal.get(),170);
-        if (isAbsolute) if (!(pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].DataType in rtl.createSet(139,140))) ConstVal.set(ConstVal.get() + (pas.Common.VarDataSize - tmpVarDataSize_));
+        pas.Parser.DefineIdent(pas.Common.i,VarOfSameType.get()[VarOfSameTypeIndex - 1].Name + "." + pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].DataType,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].AllocElementType,(isAbsolute + 0) * ConstVal.get(),pas.Tokens.TTokenKind.IDENTTOK);
+        if (isAbsolute) if (!(pas.Common.TypeArray[NumAllocElements - 1].Field[ParamIndex].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) ConstVal.set(ConstVal.get() + (pas.Common.VarDataSize - tmpVarDataSize_));
       };
     };
   };
@@ -43230,8 +43191,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     var isInt = false;
     var isInl = false;
     var isOvr = false;
-    var VarType = 0;
     var VarRegister = 0;
+    var VarType = 0;
     var NestedFunctionResultType = 0;
     var ConstValType = 0;
     var AllocElementType = 0;
@@ -43252,8 +43213,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     VarRegister = 0;
     external_libr = 0;
     external_name = "";
-    NestedDataType = 0;
-    NestedAllocElementType = 0;
+    NestedDataType = pas.Tokens.TTokenKind.UNTYPETOK;
+    NestedAllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
     NestedNumAllocElements = 0;
     ParamIndex = 0;
     varPassMethod = pas.Common.TParameterPassingMethod.UNDEFINED;
@@ -43293,13 +43254,13 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     if (pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex > 0) {
       pas.Optimize.asm65("\tsta " + pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[0].Name,"");
       pas.Optimize.asm65("\tsty " + pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[0].Name + "+1","");
-      pas.Parser.DefineIdent(i,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[0].Name,3,129,0,0,0,170);
+      pas.Parser.DefineIdent(i,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[0].Name,pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.WORDTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
       pas.Common.Ident[pas.Common.NumIdent - 1].PassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
-      pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = 129;
+      pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = pas.Tokens.TTokenKind.WORDTOK;
       NumAllocElements = 0;
       for (var $l = 1, $end = pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].NumFields; $l <= $end; $l++) {
         ParamIndex = $l;
-        if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Kind === 0) {
+        if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Kind === pas.Common.TFieldKind.UNTYPETOK) {
           if (NumAllocElements > 0) if (NumAllocElements > 255) {
             pas.Optimize.asm65("\tadd <" + pas.Common.IntToStr(NumAllocElements),"");
             pas.Optimize.asm65("\tpha","");
@@ -43315,20 +43276,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           pas.Optimize.asm65("\tsta " + pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Name,"");
           pas.Optimize.asm65("\tsty " + pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Name + "+1","");
           if (ParamIndex !== pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].NumFields) {
-            if ((pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType === 136) && (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements > 0)) {
+            if ((pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements > 0)) {
               NumAllocElements = pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements & 0xffff;
               if (rtl.lw(pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements >>> 16) > 0) NumAllocElements = NumAllocElements * rtl.lw(pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements >>> 16);
-              NumAllocElements = NumAllocElements * pas.Common.DataSize[pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].AllocElementType - 128];
+              NumAllocElements = NumAllocElements * pas.Common.GetDataSize(pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].AllocElementType);
             } else {
               var $tmp = pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType;
-              if ($tmp === 138) {
+              if ($tmp === pas.Tokens.TTokenKind.FILETOK) {
                 NumAllocElements = 12}
-               else if ($tmp === 137) {
+               else if ($tmp === pas.Tokens.TTokenKind.STRINGPOINTERTOK) {
                 NumAllocElements = pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements}
-               else if ($tmp === 139) {
+               else if ($tmp === pas.Tokens.TTokenKind.RECORDTOK) {
                 NumAllocElements = pas.Parser.ObjectRecordSize(pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements)}
                else {
-                NumAllocElements = pas.Common.DataSize[pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType - 128];
+                NumAllocElements = pas.Common.GetDataSize(pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType);
               };
             };
           };
@@ -43340,21 +43301,21 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       if (Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) {
         if (isReg && (ParamIndex in rtl.createSet(null,1,3))) {
           tmpVarDataSize = pas.Common.VarDataSize;
-          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,3,Param[ParamIndex - 1].DataType,Param[ParamIndex - 1].NumAllocElements,Param[ParamIndex - 1].AllocElementType,0,170);
+          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,Param[ParamIndex - 1].DataType,Param[ParamIndex - 1].NumAllocElements,Param[ParamIndex - 1].AllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK);
           pas.Common.Ident[pas.Parser.GetIdentIndex(Param[ParamIndex - 1].Name) - 1].isAbsolute = true;
           pas.Common.Ident[pas.Parser.GetIdentIndex(Param[ParamIndex - 1].Name) - 1].Value = rtl.lw(((ParamIndex & 255) << 24) | 0x80000000);
           pas.Common.VarDataSize = tmpVarDataSize;
         } else if (Param[ParamIndex - 1].DataType in pas.Common.Pointers) {
-          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,3,Param[ParamIndex - 1].DataType,0,Param[ParamIndex - 1].DataType,0,170)}
-         else pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,3,136,0,Param[ParamIndex - 1].DataType,0,170);
-        if (Param[ParamIndex - 1].DataType in rtl.createSet(139,140)) {
+          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,Param[ParamIndex - 1].DataType,0,Param[ParamIndex - 1].DataType,0,pas.Tokens.TTokenKind.IDENTTOK)}
+         else pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.POINTERTOK,0,Param[ParamIndex - 1].DataType,0,pas.Tokens.TTokenKind.IDENTTOK);
+        if (Param[ParamIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
           tmpVarDataSize = pas.Common.VarDataSize;
           for (var $l2 = 1, $end2 = pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].NumFields; $l2 <= $end2; $l2++) {
             j = $l2;
-            pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name + "." + pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].Name,3,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].AllocElementType,0,160);
+            pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name + "." + pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].AllocElementType,0,pas.Tokens.TTokenKind.DATAORIGINOFFSET);
             pas.Common.Ident[pas.Common.NumIdent - 1].Value = pas.Common.Ident[pas.Common.NumIdent - 1].Value - tmpVarDataSize;
             pas.Common.Ident[pas.Common.NumIdent - 1].PassMethod = Param[ParamIndex - 1].PassMethod;
-            if (pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType === 0) pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = pas.Common.Ident[pas.Common.NumIdent - 1].DataType;
+            if (pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = pas.Common.Ident[pas.Common.NumIdent - 1].DataType;
           };
           pas.Common.VarDataSize = tmpVarDataSize;
         } else if (Param[ParamIndex - 1].DataType in pas.Common.Pointers) {
@@ -43365,24 +43326,24 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       } else {
         if (isReg && (ParamIndex in rtl.createSet(null,1,3))) {
           tmpVarDataSize = pas.Common.VarDataSize;
-          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,3,Param[ParamIndex - 1].DataType,Param[ParamIndex - 1].NumAllocElements,Param[ParamIndex - 1].AllocElementType,0,170);
+          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,Param[ParamIndex - 1].DataType,Param[ParamIndex - 1].NumAllocElements,Param[ParamIndex - 1].AllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK);
           pas.Common.Ident[pas.Parser.GetIdentIndex(Param[ParamIndex - 1].Name) - 1].isAbsolute = true;
           pas.Common.Ident[pas.Parser.GetIdentIndex(Param[ParamIndex - 1].Name) - 1].Value = rtl.lw(((ParamIndex & 255) << 24) | 0x80000000);
           pas.Common.VarDataSize = tmpVarDataSize;
-        } else pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,3,Param[ParamIndex - 1].DataType,Param[ParamIndex - 1].NumAllocElements,Param[ParamIndex - 1].AllocElementType,0,170);
-        if ((Param[ParamIndex - 1].DataType === 136) && (Param[ParamIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+        } else pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,Param[ParamIndex - 1].DataType,Param[ParamIndex - 1].NumAllocElements,Param[ParamIndex - 1].AllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK);
+        if ((Param[ParamIndex - 1].DataType === pas.Tokens.TTokenKind.POINTERTOK) && (Param[ParamIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
           tmpVarDataSize = pas.Common.VarDataSize;
           for (var $l3 = 1, $end3 = pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].NumFields; $l3 <= $end3; $l3++) {
             j = $l3;
-            pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name + "." + pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].Name,3,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].AllocElementType,0,160);
+            pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name + "." + pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].AllocElementType,0,pas.Tokens.TTokenKind.DATAORIGINOFFSET);
             pas.Common.Ident[pas.Common.NumIdent - 1].Value = pas.Common.Ident[pas.Common.NumIdent - 1].Value - tmpVarDataSize;
             pas.Common.Ident[pas.Common.NumIdent - 1].PassMethod = Param[ParamIndex - 1].PassMethod;
-            if (pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType === 0) pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = pas.Common.Ident[pas.Common.NumIdent - 1].DataType;
+            if (pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = pas.Common.Ident[pas.Common.NumIdent - 1].DataType;
           };
           pas.Common.VarDataSize = tmpVarDataSize;
-        } else if (Param[ParamIndex - 1].DataType in rtl.createSet(139,140)) for (var $l4 = 1, $end4 = pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].NumFields; $l4 <= $end4; $l4++) {
+        } else if (Param[ParamIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) for (var $l4 = 1, $end4 = pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].NumFields; $l4 <= $end4; $l4++) {
           j = $l4;
-          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name + "." + pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].Name,3,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].AllocElementType,0,170);
+          pas.Parser.DefineIdent(i,Param[ParamIndex - 1].Name + "." + pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[Param[ParamIndex - 1].NumAllocElements - 1].Field[j].AllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK);
           pas.Common.Ident[pas.Common.NumIdent - 1].PassMethod = Param[ParamIndex - 1].PassMethod;
         };
       };
@@ -43390,57 +43351,57 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     };
     if (IsFunction) {
       tmpVarDataSize = pas.Common.VarDataSize;
-      pas.Parser.DefineIdent(i,"RESULT",3,FunctionResultType,FunctionNumAllocElements,FunctionAllocElementType,0,170);
+      pas.Parser.DefineIdent(i,"RESULT",pas.Tokens.TTokenKind.VARTOK,FunctionResultType,FunctionNumAllocElements,FunctionAllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK);
       if (isReg && (FunctionResultType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes))) {
         pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute = true;
         pas.Common.Ident[pas.Common.NumIdent - 1].Value = 0x87000000;
         pas.Common.VarDataSize = tmpVarDataSize;
       };
-      if (FunctionResultType in rtl.createSet(139,140)) for (var $l5 = 1, $end5 = pas.Common.TypeArray[FunctionNumAllocElements - 1].NumFields; $l5 <= $end5; $l5++) {
+      if (FunctionResultType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) for (var $l5 = 1, $end5 = pas.Common.TypeArray[FunctionNumAllocElements - 1].NumFields; $l5 <= $end5; $l5++) {
         j = $l5;
-        pas.Parser.DefineIdent(i,"RESULT." + pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].Name,3,pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].AllocElementType,0,170);
+        pas.Parser.DefineIdent(i,"RESULT." + pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].DataType,pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].NumAllocElements,pas.Common.TypeArray[FunctionNumAllocElements - 1].Field[j].AllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK);
       };
     };
     yes = pas.Common.Ident[BlockIdentIndex - 1].isRecursion || pas.Common.Ident[BlockIdentIndex - 1].isStdCall;
     for (var $l6 = NumParams; $l6 >= 1; $l6--) {
       ParamIndex = $l6;
-      if (!((Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((Param[ParamIndex - 1].DataType in pas.Common.Pointers) && ((Param[ParamIndex - 1].NumAllocElements & 0xFFFF) in rtl.createSet(0,1))) || ((Param[ParamIndex - 1].DataType in pas.Common.Pointers) && (Param[ParamIndex - 1].AllocElementType in rtl.createSet(139,140))) || (Param[ParamIndex - 1].DataType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes)))) {
+      if (!((Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) || ((Param[ParamIndex - 1].DataType in pas.Common.Pointers) && ((Param[ParamIndex - 1].NumAllocElements & 0xFFFF) in rtl.createSet(0,1))) || ((Param[ParamIndex - 1].DataType in pas.Common.Pointers) && (Param[ParamIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) || (Param[ParamIndex - 1].DataType in rtl.unionSet(pas.Common.OrdinalTypes,pas.Common.RealTypes)))) {
         yes = true;
         break;
       };
     };
-    if (pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex === 0) if ((yes === false) && (NumParams === 1) && (pas.Common.DataSize[Param[0].DataType - 128] === 1) && (Param[0].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Optimize.asm65("\tsta " + Param[0].Name,"");
+    if (pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex === 0) if ((yes === false) && (NumParams === 1) && (pas.Common.GetDataSize(Param[0].DataType) === 1) && (Param[0].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING)) pas.Optimize.asm65("\tsta " + Param[0].Name,"");
     if (yes) {
       for (var $l7 = 1, $end6 = NumParams; $l7 <= $end6; $l7++) {
         ParamIndex = $l7;
         if (pas.Common.Ident[BlockIdentIndex - 1].isRecursion || pas.Common.Ident[BlockIdentIndex - 1].isStdCall || (NumParams === 1)) {
           if (Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) {
-            $mod.GenerateAssignment(1,pas.Common.DataSize[8],0,Param[ParamIndex - 1].Name,"")}
-           else $mod.GenerateAssignment(1,pas.Common.DataSize[Param[ParamIndex - 1].DataType - 128],0,Param[ParamIndex - 1].Name,"");
-          if ((Param[ParamIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (Param[ParamIndex - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers)) && ((Param[ParamIndex - 1].NumAllocElements & 0xFFFF) > 1)) if (Param[ParamIndex - 1].DataType in rtl.createSet(139,140)) {
+            $mod.GenerateAssignment(1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),0,Param[ParamIndex - 1].Name,"")}
+           else $mod.GenerateAssignment(1,pas.Common.GetDataSize(Param[ParamIndex - 1].DataType),0,Param[ParamIndex - 1].Name,"");
+          if ((Param[ParamIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (Param[ParamIndex - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers)) && ((Param[ParamIndex - 1].NumAllocElements & 0xFFFF) > 1)) if (Param[ParamIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             pas.Optimize.asm65(":move","");
             pas.Optimize.asm65(Param[ParamIndex - 1].Name,"");
             pas.Optimize.asm65(pas.Common.IntToStr(pas.Parser.RecordSize(pas.Parser.GetIdentIndex(Param[ParamIndex - 1].Name),"")),"");
-          } else if (!(Param[ParamIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+          } else if (!(Param[ParamIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
             if (rtl.lw(Param[ParamIndex - 1].NumAllocElements >>> 16) !== 0) {
               NumAllocElements = (Param[ParamIndex - 1].NumAllocElements & 0xFFFF) * rtl.lw(Param[ParamIndex - 1].NumAllocElements >>> 16)}
              else NumAllocElements = Param[ParamIndex - 1].NumAllocElements;
             pas.Optimize.asm65(":move","");
             pas.Optimize.asm65(Param[ParamIndex - 1].Name,"");
-            pas.Optimize.asm65(pas.Common.IntToStr((NumAllocElements * pas.Common.DataSize[Param[ParamIndex - 1].AllocElementType - 128]) & 0xFFFFFFFF),"");
+            pas.Optimize.asm65(pas.Common.IntToStr((NumAllocElements * pas.Common.GetDataSize(Param[ParamIndex - 1].AllocElementType)) & 0xFFFFFFFF),"");
           };
         } else {
           Assignment = true;
-          if ((Param[ParamIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (Param[ParamIndex - 1].DataType in rtl.unionSet(rtl.createSet(139,140),pas.Common.Pointers)) && ((Param[ParamIndex - 1].NumAllocElements & 0xFFFF) > 1)) if (Param[ParamIndex - 1].DataType in rtl.createSet(139,140)) {
+          if ((Param[ParamIndex - 1].PassMethod !== pas.Common.TParameterPassingMethod.VARPASSING) && (Param[ParamIndex - 1].DataType in rtl.unionSet(rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK),pas.Common.Pointers)) && ((Param[ParamIndex - 1].NumAllocElements & 0xFFFF) > 1)) if (Param[ParamIndex - 1].DataType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
             Assignment = false;
             pas.Optimize.asm65("\tdex","");
-          } else if (!(Param[ParamIndex - 1].AllocElementType in rtl.createSet(139,140))) {
+          } else if (!(Param[ParamIndex - 1].AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {
             Assignment = false;
             pas.Optimize.asm65("\tdex","");
           };
           if (Assignment) if (Param[ParamIndex - 1].PassMethod === pas.Common.TParameterPassingMethod.VARPASSING) {
-            $mod.GenerateAssignment(1,pas.Common.DataSize[8],0,Param[ParamIndex - 1].Name,"")}
-           else $mod.GenerateAssignment(1,pas.Common.DataSize[Param[ParamIndex - 1].DataType - 128],0,Param[ParamIndex - 1].Name,"");
+            $mod.GenerateAssignment(1,pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK),0,Param[ParamIndex - 1].Name,"")}
+           else $mod.GenerateAssignment(1,pas.Common.GetDataSize(Param[ParamIndex - 1].DataType),0,Param[ParamIndex - 1].Name,"");
         };
         if (ParamIndex !== NumParams) pas.Optimize.asm65("\tjmi @main","");
       };
@@ -43449,23 +43410,23 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     if (pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex > 0) for (var $l8 = 1, $end7 = pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].NumFields; $l8 <= $end7; $l8++) {
       ParamIndex = $l8;
       tmpVarDataSize = pas.Common.VarDataSize;
-      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType === 140) pas.Messages.Error(i,"-- under construction --");
-      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType === 139) ConstVal = 0;
-      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType in rtl.createSet(136,137)) {
-        pas.Parser.DefineIdent(i,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Name,3,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].AllocElementType,0,170)}
-       else pas.Parser.DefineIdent(i,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Name,3,136,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType,0,170);
+      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType === pas.Tokens.TTokenKind.OBJECTTOK) pas.Messages.Error(i,"-- under construction --");
+      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType === pas.Tokens.TTokenKind.RECORDTOK) ConstVal = 0;
+      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType in rtl.createSet(pas.Tokens.TTokenKind.POINTERTOK,pas.Tokens.TTokenKind.STRINGPOINTERTOK)) {
+        pas.Parser.DefineIdent(i,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Name,pas.Tokens.TTokenKind.VARTOK,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].AllocElementType,0,pas.Tokens.TTokenKind.IDENTTOK)}
+       else pas.Parser.DefineIdent(i,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Name,pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.POINTERTOK,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].NumAllocElements,pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType,0,pas.Tokens.TTokenKind.IDENTTOK);
       pas.Common.Ident[pas.Common.NumIdent - 1].PassMethod = pas.Common.TParameterPassingMethod.VARPASSING;
-      pas.Common.VarDataSize = tmpVarDataSize + pas.Common.DataSize[8];
-      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Kind === 1) {
+      pas.Common.VarDataSize = tmpVarDataSize + pas.Common.GetDataSize(pas.Tokens.TTokenKind.POINTERTOK);
+      if (pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].Kind === pas.Common.TFieldKind.OBJECTVARIABLE) {
         pas.Common.Ident[pas.Common.NumIdent - 1].Value = ConstVal + 32768;
-        ConstVal += pas.Common.DataSize[pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType - 128];
+        ConstVal += pas.Common.GetDataSize(pas.Common.TypeArray[pas.Common.Ident[BlockIdentIndex - 1].ObjectIndex - 1].Field[ParamIndex].DataType);
         pas.Common.VarDataSize = tmpVarDataSize;
       };
     };
     pas.Optimize.asm65("","");
     if (!isAsm) $mod.GenerateDeclarationProlog();
-    while (pas.Common.Tok[i].Kind in rtl.createSet(1,2,3,6,4,5,92,29,93,94,99,100,187,195,196,97,98,197,198,185,186,189,190,191,192,193,194)) {
-      if (pas.Common.Tok[i].Kind === 187) {
+    while (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.TYPETOK,pas.Tokens.TTokenKind.VARTOK,pas.Tokens.TTokenKind.LABELTOK,pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.PROGRAMTOK,pas.Tokens.TTokenKind.USESTOK,pas.Tokens.TTokenKind.LIBRARYTOK,pas.Tokens.TTokenKind.EXPORTSTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK,pas.Tokens.TTokenKind.LINKTOK,pas.Tokens.TTokenKind.UNITBEGINTOK,pas.Tokens.TTokenKind.UNITENDTOK,pas.Tokens.TTokenKind.IMPLEMENTATIONTOK,pas.Tokens.TTokenKind.INITIALIZATIONTOK,pas.Tokens.TTokenKind.IOCHECKON,pas.Tokens.TTokenKind.IOCHECKOFF,pas.Tokens.TTokenKind.LOOPUNROLLTOK,pas.Tokens.TTokenKind.NOLOOPUNROLLTOK,pas.Tokens.TTokenKind.PROCALIGNTOK,pas.Tokens.TTokenKind.LOOPALIGNTOK,pas.Tokens.TTokenKind.LINKALIGNTOK,pas.Tokens.TTokenKind.INFOTOK,pas.Tokens.TTokenKind.WARNINGTOK,pas.Tokens.TTokenKind.ERRORTOK)) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.LINKTOK) {
         if (pas.Common.codealign.link > 0) {
           pas.Optimize.asm65("\t.align $" + pas.SysUtils.IntToHex(pas.Common.codealign.link,4),"");
           pas.Optimize.asm65("","");
@@ -43473,73 +43434,73 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         pas.Optimize.asm65("\t.link '" + pas.Common.LinkObj[pas.Common.Tok[i].Value] + "'","");
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 185) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.LOOPUNROLLTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Common.LoopUnroll = true;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 186) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.NOLOOPUNROLLTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Common.LoopUnroll = false;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 189) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PROCALIGNTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Common.codealign.proc = pas.Common.Tok[i].Value;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 190) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.LOOPALIGNTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Common.codealign.loop = pas.Common.Tok[i].Value;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 191) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.LINKALIGNTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Common.codealign.link = pas.Common.Tok[i].Value;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 192) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.INFOTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.System.Writeln("User defined: " + pas.Common.msgUser[pas.Common.Tok[i].Value]);
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 193) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.WARNINGTOK) {
         pas.Messages.WarningUserDefined(i);
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 194) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ERRORTOK) {
         if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UserDefined);
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 197) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IOCHECKON) {
         pas.Common.IOCheck = true;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 198) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IOCHECKOFF) {
         pas.Common.IOCheck = false;
         i += 2;
       };
-      if (pas.Common.Tok[i].Kind === 195) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.UNITBEGINTOK) {
         $mod.asm65separator(true);
-        pas.Parser.DefineIdent(i,pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name,7,0,0,0,0,170);
+        pas.Parser.DefineIdent(i,pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name,pas.Tokens.TTokenKind.UNITTOK,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
         pas.Common.Ident[pas.Common.NumIdent - 1].UnitIndex = pas.Common.Tok[i].UnitIndex;
         pas.Optimize.asm65("","");
         pas.Optimize.asm65(".local\t" + pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name,"; UNIT");
         pas.Common.UnitNameIndex = pas.Common.Tok[i].UnitIndex;
-        pas.Common.CheckTok(i + 1,7);
-        pas.Common.CheckTok(i + 2,170);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.UNITTOK);
+        pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.IDENTTOK);
         if (pas.Common.Tok[i + 2].Name !== pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name) pas.Messages.Error(i + 2,"Illegal unit name: " + pas.Common.Tok[i + 2].Name);
-        pas.Common.CheckTok(i + 3,53);
-        while (pas.Common.Tok[i + 4].Kind in rtl.createSet(193,194,192)) i += 2;
-        pas.Common.CheckTok(i + 4,96);
+        pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.SEMICOLONTOK);
+        while (pas.Common.Tok[i + 4].Kind in rtl.createSet(pas.Tokens.TTokenKind.WARNINGTOK,pas.Tokens.TTokenKind.ERRORTOK,pas.Tokens.TTokenKind.INFOTOK)) i += 2;
+        pas.Common.CheckTok(i + 4,pas.Tokens.TTokenKind.INTERFACETOK);
         pas.Common.INTERFACETOK_USE = true;
         pas.Common.PublicSection = true;
         ImplementationUse = false;
         i += 5;
       };
-      if (pas.Common.Tok[i].Kind === 196) {
-        if (!ImplementationUse) pas.Common.CheckTok(i,97);
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.UNITENDTOK) {
+        if (!ImplementationUse) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IMPLEMENTATIONTOK);
         $mod.GenerateProcFuncAsmLabels(BlockIdentIndex,false);
         VarRegister = 0;
         pas.Optimize.asm65("","");
         pas.Optimize.asm65(".endl","; UNIT " + pas.Common.UnitName[pas.Common.Tok[i].UnitIndex - 1].Name);
         j = pas.Common.NumIdent;
         while ((j > 0) && (pas.Common.Ident[j - 1].UnitIndex === pas.Common.UnitNameIndex)) {
-          if (pas.Common.Ident[j - 1].Kind in rtl.createSet(4,5,99,100)) if (pas.Common.Ident[j - 1].IsUnresolvedForward && (pas.Common.Ident[j - 1].isExternal === false)) pas.Messages.Error(i,"Unresolved forward declaration of " + pas.Common.Ident[j - 1].Name);
+          if (pas.Common.Ident[j - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) if (pas.Common.Ident[j - 1].IsUnresolvedForward && (pas.Common.Ident[j - 1].isExternal === false)) pas.Messages.Error(i,"Unresolved forward declaration of " + pas.Common.Ident[j - 1].Name);
           j -= 1;
         };
         pas.Common.UnitNameIndex = 1;
@@ -43547,16 +43508,16 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         ImplementationUse = false;
         i += 1;
       };
-      if (pas.Common.Tok[i].Kind === 97) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.IMPLEMENTATIONTOK) {
         pas.Common.INTERFACETOK_USE = false;
         pas.Common.PublicSection = false;
         ImplementationUse = true;
         i += 1;
       };
-      if (pas.Common.Tok[i].Kind === 94) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.EXPORTSTOK) {
         i += 1;
         do {
-          pas.Common.CheckTok(i,170);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
           if (pas.Common.pass === pas.Common.TPass.CALL_DETERMINATION) {
             IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i].Name);
             if (IdentIndex === 0) pas.Messages.Error$2(i,pas.Messages.TErrorCode.UnknownIdentifier);
@@ -43569,79 +43530,79 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             } else $mod.AddCallGraphChild(pas.Common.BlockStack[pas.Common.BlockStackTop],pas.Common.Ident[IdentIndex - 1].ProcAsBlock);
           };
           i += 1;
-          if (!(pas.Common.Tok[i].Kind in rtl.createSet(52,53))) pas.Common.CheckTok(i,53);
-          if (pas.Common.Tok[i].Kind === 52) i += 1;
-        } while (!(pas.Common.Tok[i].Kind === 53));
+          if (!(pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.COMMATOK,pas.Tokens.TTokenKind.SEMICOLONTOK))) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) i += 1;
+        } while (!(pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK));
         i += 1;
       };
-      if ((pas.Common.Tok[i].Kind === 98) || ((pas.Common.PublicSection === false) && (pas.Common.Tok[i].Kind === 13))) {
-        if (!ImplementationUse) pas.Common.CheckTok(i,97);
+      if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.INITIALIZATIONTOK) || ((pas.Common.PublicSection === false) && (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.BEGINTOK))) {
+        if (!ImplementationUse) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IMPLEMENTATIONTOK);
         $mod.asm65separator(true);
         $mod.asm65separator(false);
         pas.Optimize.asm65("@UnitInit","");
         j = $mod.CompileStatement(i + 1,false);
-        while (pas.Common.Tok[j + 1].Kind === 53) j = $mod.CompileStatement(j + 2,false);
+        while (pas.Common.Tok[j + 1].Kind === pas.Tokens.TTokenKind.SEMICOLONTOK) j = $mod.CompileStatement(j + 2,false);
         pas.Optimize.asm65("","");
         pas.Optimize.asm65("\trts","");
         i = j + 1;
       };
-      if (pas.Common.Tok[i].Kind === 93) {
-        if (pas.Common.LIBRARYTOK_USE) pas.Common.CheckTok(i,13);
-        pas.Common.CheckTok(i + 1,170);
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.LIBRARYTOK) {
+        if (pas.Common.LIBRARYTOK_USE) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.BEGINTOK);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.IDENTTOK);
         pas.Common.LIBRARY_NAME = pas.Common.Tok[i + 1].Name;
-        if ((pas.Common.Tok[i + 2].Kind === 60) && (pas.Common.Tok[i + 3].Kind === 171)) {
+        if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.COLONTOK) && (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.INTNUMBERTOK)) {
           pas.Common.CODEORIGIN_BASE = pas.Common.Tok[i + 3].Value;
           pas.Common.target.codeorigin = pas.Common.CODEORIGIN_BASE;
           i += 2;
         };
         i += 1;
-        pas.Common.CheckTok(i + 1,53);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
         i += 2;
         pas.Common.LIBRARYTOK_USE = true;
       };
-      if (pas.Common.Tok[i].Kind === 92) {
-        if (pas.Common.PROGRAMTOK_USE) pas.Common.CheckTok(i,13);
-        pas.Common.CheckTok(i + 1,170);
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PROGRAMTOK) {
+        if (pas.Common.PROGRAMTOK_USE) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.BEGINTOK);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.IDENTTOK);
         pas.Common.PROGRAM_NAME = pas.Common.Tok[i + 1].Name;
         i += 1;
-        if (pas.Common.Tok[i + 1].Kind === 54) {
+        if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OPARTOK) {
           i += 1;
           do {
             i += 1;
-            pas.Common.CheckTok(i,170);
-            if (pas.Common.Tok[i + 1].Kind === 52) i += 1;
-          } while (!(pas.Common.Tok[i + 1].Kind !== 170));
-          pas.Common.CheckTok(i + 1,55);
+            pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COMMATOK) i += 1;
+          } while (!(pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.CPARTOK);
           i += 1;
         };
-        if ((pas.Common.Tok[i + 1].Kind === 60) && (pas.Common.Tok[i + 2].Kind === 171)) {
+        if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.COLONTOK) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.INTNUMBERTOK)) {
           pas.Common.CODEORIGIN_BASE = pas.Common.Tok[i + 2].Value;
           pas.Common.target.codeorigin = pas.Common.CODEORIGIN_BASE;
           i += 2;
         };
-        pas.Common.CheckTok(i + 1,53);
+        pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
         i += 2;
         pas.Common.PROGRAMTOK_USE = true;
       };
-      if (pas.Common.Tok[i].Kind === 29) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.USESTOK) {
         if (pas.Common.LIBRARYTOK_USE) {
           j = i - 1;
-          while (pas.Common.Tok[j].Kind in rtl.createSet(53,170,60,171)) j -= 1;
-          if (pas.Common.Tok[j].Kind !== 93) pas.Common.CheckTok(i,13);
+          while (pas.Common.Tok[j].Kind in rtl.createSet(pas.Tokens.TTokenKind.SEMICOLONTOK,pas.Tokens.TTokenKind.IDENTTOK,pas.Tokens.TTokenKind.COLONTOK,pas.Tokens.TTokenKind.INTNUMBERTOK)) j -= 1;
+          if (pas.Common.Tok[j].Kind !== pas.Tokens.TTokenKind.LIBRARYTOK) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.BEGINTOK);
         };
         if (pas.Common.PROGRAMTOK_USE) {
           j = i - 1;
-          while (pas.Common.Tok[j].Kind in rtl.createSet(53,55,54,170,52,60,171)) j -= 1;
-          if (pas.Common.Tok[j].Kind !== 92) pas.Common.CheckTok(i,13);
+          while (pas.Common.Tok[j].Kind in rtl.createSet(pas.Tokens.TTokenKind.SEMICOLONTOK,pas.Tokens.TTokenKind.CPARTOK,pas.Tokens.TTokenKind.OPARTOK,pas.Tokens.TTokenKind.IDENTTOK,pas.Tokens.TTokenKind.COMMATOK,pas.Tokens.TTokenKind.COLONTOK,pas.Tokens.TTokenKind.INTNUMBERTOK)) j -= 1;
+          if (pas.Common.Tok[j].Kind !== pas.Tokens.TTokenKind.PROGRAMTOK) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.BEGINTOK);
         };
-        if (pas.Common.INTERFACETOK_USE) if (pas.Common.Tok[i - 1].Kind !== 96) pas.Common.CheckTok(i,97);
-        if (ImplementationUse) if (pas.Common.Tok[i - 1].Kind !== 97) pas.Common.CheckTok(i,13);
+        if (pas.Common.INTERFACETOK_USE) if (pas.Common.Tok[i - 1].Kind !== pas.Tokens.TTokenKind.INTERFACETOK) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IMPLEMENTATIONTOK);
+        if (ImplementationUse) if (pas.Common.Tok[i - 1].Kind !== pas.Tokens.TTokenKind.IMPLEMENTATIONTOK) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.BEGINTOK);
         i += 1;
         idx = i;
         UnitList = [];
         UnitList = rtl.arraySetLength(UnitList,"",1);
         do {
-          pas.Common.CheckTok(i,170);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
           for (var $l10 = 0, $end9 = rtl.length(UnitList) - 1 - 1; $l10 <= $end9; $l10++) {
             j = $l10;
             if (UnitList[j] === pas.Common.Tok[i].Name) pas.Messages.Error(i,"Duplicate identifier '" + pas.Common.Tok[i].Name + "'");
@@ -43650,18 +43611,18 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           UnitList[j] = pas.Common.Tok[i].Name;
           UnitList = rtl.arraySetLength(UnitList,"",j + 2);
           i += 1;
-          if (pas.Common.Tok[i].Kind === 114) {
-            pas.Common.CheckTok(i + 1,174);
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.INTOK) {
+            pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.STRINGLITERALTOK);
             i += 2;
           };
-          if (!(pas.Common.Tok[i].Kind in rtl.createSet(52,53))) pas.Common.CheckTok(i,53);
-          if (pas.Common.Tok[i].Kind === 52) i += 1;
-        } while (!(pas.Common.Tok[i].Kind !== 170));
-        pas.Common.CheckTok(i,53);
+          if (!(pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.COMMATOK,pas.Tokens.TTokenKind.SEMICOLONTOK))) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) i += 1;
+        } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
         i = idx;
         UnitList = rtl.arraySetLength(UnitList,"",0);
         do {
-          pas.Common.CheckTok(i,170);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
           yes = true;
           for (var $l11 = 1, $end10 = pas.Common.UnitName[pas.Common.UnitNameIndex - 1].Units; $l11 <= $end10; $l11++) {
             j = $l11;
@@ -43673,31 +43634,31 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Common.UnitName[pas.Common.UnitNameIndex - 1].Allow[pas.Common.UnitName[pas.Common.UnitNameIndex - 1].Units - 1] = pas.Common.Tok[i].Name;
           };
           i += 1;
-          if (pas.Common.Tok[i].Kind === 114) {
-            pas.Common.CheckTok(i + 1,174);
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.INTOK) {
+            pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.STRINGLITERALTOK);
             i += 2;
           };
-          if (!(pas.Common.Tok[i].Kind in rtl.createSet(52,53))) pas.Common.CheckTok(i,53);
-          if (pas.Common.Tok[i].Kind === 52) i += 1;
-        } while (!(pas.Common.Tok[i].Kind !== 170));
-        pas.Common.CheckTok(i,53);
+          if (!(pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.COMMATOK,pas.Tokens.TTokenKind.SEMICOLONTOK))) pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) i += 1;
+        } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
         i += 1;
       };
-      if (pas.Common.Tok[i].Kind === 6) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.LABELTOK) {
         i += 1;
         do {
-          pas.Common.CheckTok(i,170);
-          pas.Parser.DefineIdent(i,pas.Common.Tok[i].Name,6,0,0,0,0,170);
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.IDENTTOK);
+          pas.Parser.DefineIdent(i,pas.Common.Tok[i].Name,pas.Tokens.TTokenKind.LABELTOK,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
           i += 1;
-          if (pas.Common.Tok[i].Kind === 52) i += 1;
-        } while (!(pas.Common.Tok[i].Kind !== 170));
+          if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.COMMATOK) i += 1;
+        } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
         i = i + 1;
       };
-      if (pas.Common.Tok[i].Kind === 1) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.CONSTTOK) {
         do {
-          if (pas.Common.Tok[i + 1].Kind !== 170) {
-            pas.Messages.Error(i + 1,"Constant name expected but " + pas.Common.GetSpelling(i + 1) + " found")}
-           else if (pas.Common.Tok[i + 2].Kind === 43) {
+          if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+            pas.Messages.Error(i + 1,"Constant name expected but " + pas.Common.GetTokenSpellingAtIndex(i + 1) + " found")}
+           else if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.EQTOK) {
             j = pas.Parser.CompileConstExpression(i + 3,{get: function () {
                 return ConstVal;
               }, set: function (v) {
@@ -43706,18 +43667,18 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 return ConstValType;
               }, set: function (v) {
                 ConstValType = v;
-              }},133,false,false);
+              }},pas.Tokens.TTokenKind.INTEGERTOK,false,false);
             if (pas.Common.Tok[j].Kind in pas.Common.StringTypes) {
               if (pas.Common.Tok[j].StrLength > 255) {
-                pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,136,0,134,ConstVal + 256,145)}
-               else pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,ConstValType,pas.Common.Tok[j].StrLength,134,ConstVal + 256,pas.Common.Tok[j].Kind);
+                pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.POINTERTOK,0,pas.Tokens.TTokenKind.CHARTOK,ConstVal + 256,pas.Tokens.TTokenKind.PCHARTOK)}
+               else pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,ConstValType,pas.Common.Tok[j].StrLength,pas.Tokens.TTokenKind.CHARTOK,ConstVal + 256,pas.Common.Tok[j].Kind);
             } else if (ConstValType in pas.Common.Pointers) {
               pas.Messages.Error$2(j,pas.Messages.TErrorCode.IllegalExpression)}
-             else pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,ConstValType,0,0,ConstVal,pas.Common.Tok[j].Kind);
+             else pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,ConstValType,0,pas.Tokens.TTokenKind.UNTYPETOK,ConstVal,pas.Common.Tok[j].Kind);
             i = j;
-          } else if (pas.Common.Tok[i + 2].Kind === 60) {
+          } else if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.COLONTOK) {
             open_array = false;
-            if ((pas.Common.Tok[i + 3].Kind === 30) && (pas.Common.Tok[i + 4].Kind === 31)) {
+            if ((pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Tok[i + 4].Kind === pas.Tokens.TTokenKind.OFTOK)) {
               j = pas.Parser.CompileType(i + 5,{get: function () {
                   return VarType;
                 }, set: function (v) {
@@ -43731,20 +43692,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   AllocElementType = v;
                 }});
-              if (VarType in rtl.createSet(139,140)) {
+              if (VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
                 pas.Messages.Error(i,"Only Array of ^" + pas.Common.InfoAboutToken(VarType) + " supported")}
-               else if (VarType === 146) pas.Messages.Error(i,pas.Common.InfoAboutToken(VarType) + " arrays are not supported");
-              if (VarType === 136) {
-                if (AllocElementType === 0) {
+               else if (VarType === pas.Tokens.TTokenKind.ENUMTOK) pas.Messages.Error(i,pas.Common.InfoAboutToken(VarType) + " arrays are not supported");
+              if (VarType === pas.Tokens.TTokenKind.POINTERTOK) {
+                if (AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
                   NumAllocElements = 1;
                   AllocElementType = VarType;
                 };
               } else {
                 NumAllocElements = 1;
                 AllocElementType = VarType;
-                VarType = 136;
+                VarType = pas.Tokens.TTokenKind.POINTERTOK;
               };
-              if (!(AllocElementType in rtl.createSet(139,140))) open_array = true;
+              if (!(AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) open_array = true;
             } else {
               j = pas.Parser.CompileType(i + 3,{get: function () {
                   return VarType;
@@ -43759,7 +43720,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   AllocElementType = v;
                 }});
-              if (pas.Common.Tok[i + 3].Kind === 30) j = pas.Parser.CompileType(j + 3,{get: function () {
+              if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.ARRAYTOK) j = pas.Parser.CompileType(j + 3,{get: function () {
                   return NestedDataType;
                 }, set: function (v) {
                   NestedDataType = v;
@@ -43773,8 +43734,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   NestedAllocElementType = v;
                 }});
             };
-            if ((VarType in pas.Common.Pointers) && (NumAllocElements === 0)) if (AllocElementType !== 134) pas.Messages.Error$2(j,pas.Messages.TErrorCode.IllegalExpression);
-            pas.Common.CheckTok(j + 1,43);
+            if ((VarType in pas.Common.Pointers) && (NumAllocElements === 0)) if (AllocElementType !== pas.Tokens.TTokenKind.CHARTOK) pas.Messages.Error$2(j,pas.Messages.TErrorCode.IllegalExpression);
+            pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.EQTOK);
             if (pas.Common.Tok[i + 3].Kind in pas.Common.StringTypes) {
               j = pas.Parser.CompileConstExpression(j + 2,{get: function () {
                   return ConstVal;
@@ -43784,18 +43745,18 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   return ConstValType;
                 }, set: function (v) {
                   ConstValType = v;
-                }},133,false,true);
-              if (pas.Common.Tok[i + 3].Kind === 145) {
-                pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,136,0,134,ConstVal + 256 + 1,145)}
-               else pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,ConstValType,pas.Common.Tok[j].StrLength,134,ConstVal + 256,pas.Common.Tok[j].Kind);
+                }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
+              if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.PCHARTOK) {
+                pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.POINTERTOK,0,pas.Tokens.TTokenKind.CHARTOK,ConstVal + 256 + 1,pas.Tokens.TTokenKind.PCHARTOK)}
+               else pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,ConstValType,pas.Common.Tok[j].StrLength,pas.Tokens.TTokenKind.CHARTOK,ConstVal + 256,pas.Common.Tok[j].Kind);
             } else if (NumAllocElements > 0) {
-              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,VarType,NumAllocElements,AllocElementType,pas.Common.NumStaticStrChars + 256 + pas.Common.CODEORIGIN_BASE,170);
+              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,VarType,NumAllocElements,AllocElementType,pas.Common.NumStaticStrChars + 256 + pas.Common.CODEORIGIN_BASE,pas.Tokens.TTokenKind.IDENTTOK);
               if ((pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements in rtl.createSet(0,1)) && (open_array === false)) {
                 pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression)}
                else if (open_array) {
-                if ((pas.Common.Tok[j + 2].Kind === 174) && (AllocElementType === 134)) {
+                if ((pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) && (AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
                   pas.Common.Ident[pas.Common.NumIdent - 1].Value = pas.Common.Tok[j + 2].StrAddress + pas.Common.CODEORIGIN_BASE;
-                  if (VarType !== 137) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
+                  if (VarType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
                   pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = pas.Common.Tok[j + 2].StrLength;
                   j = j + 2;
                   NumAllocElements = 0;
@@ -43804,22 +43765,22 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                       return NumAllocElements;
                     }, set: function (v) {
                       NumAllocElements = v;
-                    }},true,pas.Common.Tok[j].Kind === 145);
+                    }},true,pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.PCHARTOK);
                   pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements;
                 };
               } else {
-                if ((pas.Common.Tok[j + 2].Kind === 174) && (AllocElementType === 134)) {
+                if ((pas.Common.Tok[j + 2].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) && (AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
                   if (pas.Common.Tok[j + 2].StrLength > NumAllocElements) pas.Messages.Error(j + 2,"String length is larger than array of char length");
                   pas.Common.Ident[pas.Common.NumIdent - 1].Value = pas.Common.Tok[j + 2].StrAddress + pas.Common.CODEORIGIN_BASE;
-                  if (VarType !== 137) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
+                  if (VarType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
                   pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = pas.Common.Tok[j + 2].StrLength;
                   j = j + 2;
                   NumAllocElements = 0;
-                } else j = $mod.ReadDataArray(j + 2,pas.Common.NumStaticStrChars,AllocElementType,NumAllocElements,true,pas.Common.Tok[j].Kind === 145);
+                } else j = $mod.ReadDataArray(j + 2,pas.Common.NumStaticStrChars,AllocElementType,NumAllocElements,true,pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.PCHARTOK);
               };
               if (rtl.lw(NumAllocElements >>> 16) > 0) {
-                pas.Common.NumStaticStrChars += (NumAllocElements & 0xffff) * rtl.lw(NumAllocElements >>> 16) * pas.Common.DataSize[AllocElementType - 128]}
-               else pas.Common.NumStaticStrChars += NumAllocElements * pas.Common.DataSize[AllocElementType - 128];
+                pas.Common.NumStaticStrChars += (NumAllocElements & 0xffff) * rtl.lw(NumAllocElements >>> 16) * pas.Common.GetDataSize(AllocElementType)}
+               else pas.Common.NumStaticStrChars += NumAllocElements * pas.Common.GetDataSize(AllocElementType);
             } else {
               j = pas.Parser.CompileConstExpression(j + 2,{get: function () {
                   return ConstVal;
@@ -43830,29 +43791,29 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   ConstValType = v;
                 }},VarType,false,true);
-              if ((VarType in rtl.createSet(143,144)) && (ConstValType in rtl.createSet(141,142))) ConstValType = VarType;
-              if ((VarType === 141) && (ConstValType === 142)) ConstValType = 141;
+              if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.SINGLETOK,pas.Tokens.TTokenKind.HALFSINGLETOK)) && (ConstValType in rtl.createSet(pas.Tokens.TTokenKind.SHORTREALTOK,pas.Tokens.TTokenKind.REALTOK))) ConstValType = VarType;
+              if ((VarType === pas.Tokens.TTokenKind.SHORTREALTOK) && (ConstValType === pas.Tokens.TTokenKind.REALTOK)) ConstValType = pas.Tokens.TTokenKind.SHORTREALTOK;
               if ((VarType in pas.Common.RealTypes) && (ConstValType in pas.Common.IntegerTypes)) {
                 ConstVal = pas.Numbers.FromInt64(ConstVal);
                 ConstValType = VarType;
               };
               pas.Common.GetCommonType(i + 1,VarType,ConstValType);
-              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,1,VarType,0,0,ConstVal,pas.Common.Tok[j].Kind);
+              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.CONSTTOK,VarType,0,pas.Tokens.TTokenKind.UNTYPETOK,ConstVal,pas.Common.Tok[j].Kind);
             };
             i = j;
-          } else pas.Common.CheckTok(i + 2,43);
-          pas.Common.CheckTok(i + 1,53);
+          } else pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.EQTOK);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
           i += 1;
-        } while (!(pas.Common.Tok[i + 1].Kind !== 170));
+        } while (!(pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
         i += 1;
       };
-      if (pas.Common.Tok[i].Kind === 2) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.TYPETOK) {
         do {
-          if (pas.Common.Tok[i + 1].Kind !== 170) {
-            pas.Messages.Error(i + 1,"Type name expected but " + pas.Common.GetSpelling(i + 1) + " found")}
+          if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+            pas.Messages.Error(i + 1,"Type name expected but " + pas.Common.GetTokenSpellingAtIndex(i + 1) + " found")}
            else {
-            pas.Common.CheckTok(i + 2,43);
-            if ((pas.Common.Tok[i + 3].Kind === 30) && (pas.Common.Tok[i + 4].Kind !== 58)) {
+            pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.EQTOK);
+            if ((pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Tok[i + 4].Kind !== pas.Tokens.TTokenKind.OBRACKETTOK)) {
               j = pas.Parser.CompileType(i + 5,{get: function () {
                   return VarType;
                 }, set: function (v) {
@@ -43866,7 +43827,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   AllocElementType = v;
                 }});
-              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,2,VarType,NumAllocElements,AllocElementType,0,pas.Common.Tok[i + 3].Kind);
+              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.TYPETOK,VarType,NumAllocElements,AllocElementType,0,pas.Common.Tok[i + 3].Kind);
               pas.Common.Ident[pas.Common.NumIdent - 1].Pass = pas.Common.TPass.CALL_DETERMINATION;
             } else {
               j = pas.Parser.CompileType(i + 3,{get: function () {
@@ -43882,7 +43843,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   AllocElementType = v;
                 }});
-              if (pas.Common.Tok[i + 3].Kind === 30) j = pas.Parser.CompileType(j + 3,{get: function () {
+              if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.ARRAYTOK) j = pas.Parser.CompileType(j + 3,{get: function () {
                   return NestedDataType;
                 }, set: function (v) {
                   NestedDataType = v;
@@ -43895,25 +43856,25 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                 }, set: function (v) {
                   NestedAllocElementType = v;
                 }});
-              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,2,VarType,NumAllocElements,AllocElementType,0,pas.Common.Tok[i + 3].Kind);
+              pas.Parser.DefineIdent(i + 1,pas.Common.Tok[i + 1].Name,pas.Tokens.TTokenKind.TYPETOK,VarType,NumAllocElements,AllocElementType,0,pas.Common.Tok[i + 3].Kind);
               pas.Common.Ident[pas.Common.NumIdent - 1].Pass = pas.Common.TPass.CALL_DETERMINATION;
             };
           };
-          pas.Common.CheckTok(j + 1,53);
+          pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
           i = j + 1;
-        } while (!(pas.Common.Tok[i + 1].Kind !== 170));
+        } while (!(pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
         $mod.CheckForwardResolutions(true);
         i = i + 1;
       };
-      if (pas.Common.Tok[i].Kind === 3) {
+      if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.VARTOK) {
         isVolatile = false;
         isStriped = false;
-        NestedDataType = 0;
-        NestedAllocElementType = 0;
+        NestedDataType = pas.Tokens.TTokenKind.UNTYPETOK;
+        NestedAllocElementType = pas.Tokens.TTokenKind.UNTYPETOK;
         NestedNumAllocElements = 0;
-        if ((pas.Common.Tok[i + 1].Kind === 58) && (pas.Common.Tok[i + 2].Kind in rtl.createSet(115,116))) {
-          pas.Common.CheckTok(i + 3,59);
-          if (pas.Common.Tok[i + 2].Kind === 115) {
+        if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) && (pas.Common.Tok[i + 2].Kind in rtl.createSet(pas.Tokens.TTokenKind.VOLATILETOK,pas.Tokens.TTokenKind.STRIPEDTOK))) {
+          pas.Common.CheckTok(i + 3,pas.Tokens.TTokenKind.CBRACKETTOK);
+          if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.VOLATILETOK) {
             isVolatile = true}
            else isStriped = true;
           i += 3;
@@ -43921,27 +43882,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         do {
           NumVarOfSameType = 0;
           do {
-            if (pas.Common.Tok[i + 1].Kind !== 170) {
-              pas.Messages.Error(i + 1,"Variable name expected but " + pas.Common.GetSpelling(i + 1) + " found")}
+            if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+              pas.Messages.Error(i + 1,"Variable name expected but " + pas.Common.GetTokenSpellingAtIndex(i + 1) + " found")}
              else {
               NumVarOfSameType += 1;
               if (NumVarOfSameType > 256) pas.Messages.Error(i,"Too many formal parameters");
               VarOfSameType[NumVarOfSameType - 1].Name = pas.Common.Tok[i + 1].Name;
             };
             i = i + 2;
-          } while (!(pas.Common.Tok[i].Kind !== 52));
-          pas.Common.CheckTok(i,60);
-          if (pas.Common.Tok[i + 1].Kind === 112) {
-            if (pas.Common.Tok[i + 2].Kind in rtl.createSet(30,139)) {
+          } while (!(pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.COMMATOK));
+          pas.Common.CheckTok(i,pas.Tokens.TTokenKind.COLONTOK);
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.PACKEDTOK) {
+            if (pas.Common.Tok[i + 2].Kind in rtl.createSet(pas.Tokens.TTokenKind.ARRAYTOK,pas.Tokens.TTokenKind.RECORDTOK)) {
               i += 1;
-            } else pas.Common.CheckTok(i + 2,139);
+            } else pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.RECORDTOK);
           };
           IdType = pas.Common.Tok[i + 1].Kind;
           idx = i + 1;
           open_array = false;
           isAbsolute = false;
           isExternal = false;
-          if ((IdType === 30) && (pas.Common.Tok[i + 2].Kind === 31)) {
+          if ((IdType === pas.Tokens.TTokenKind.ARRAYTOK) && (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OFTOK)) {
             i = pas.Parser.CompileType(i + 3,{get: function () {
                 return VarType;
               }, set: function (v) {
@@ -43955,21 +43916,21 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               }, set: function (v) {
                 AllocElementType = v;
               }});
-            if (VarType in rtl.createSet(139,140)) {
+            if (VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) {
               pas.Messages.Error(i,"Only Array of ^" + pas.Common.InfoAboutToken(VarType) + " supported")}
-             else if (VarType === 146) pas.Messages.Error(i,pas.Common.InfoAboutToken(VarType) + " arrays are not supported");
-            if (VarType === 136) {
-              if (AllocElementType === 0) {
+             else if (VarType === pas.Tokens.TTokenKind.ENUMTOK) pas.Messages.Error(i,pas.Common.InfoAboutToken(VarType) + " arrays are not supported");
+            if (VarType === pas.Tokens.TTokenKind.POINTERTOK) {
+              if (AllocElementType === pas.Tokens.TTokenKind.UNTYPETOK) {
                 NumAllocElements = 1;
                 AllocElementType = VarType;
               };
             } else {
               NumAllocElements = 1;
               AllocElementType = VarType;
-              VarType = 136;
+              VarType = pas.Tokens.TTokenKind.POINTERTOK;
             };
             ConstVal = 1;
-            if (!(AllocElementType in rtl.createSet(139,140))) open_array = true;
+            if (!(AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) open_array = true;
           } else {
             i = pas.Parser.CompileType(i + 1,{get: function () {
                 return VarType;
@@ -43984,7 +43945,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               }, set: function (v) {
                 AllocElementType = v;
               }});
-            if (IdType === 30) i = pas.Parser.CompileType(i + 3,{get: function () {
+            if (IdType === pas.Tokens.TTokenKind.ARRAYTOK) i = pas.Parser.CompileType(i + 3,{get: function () {
                 return NestedDataType;
               }, set: function (v) {
                 NestedDataType = v;
@@ -43999,38 +43960,38 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               }});
             if ((NumAllocElements === 1) || (NumAllocElements === 0x10001)) ConstVal = 1;
           };
-          if (pas.Common.Tok[i + 1].Kind === 104) {
+          if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.REGISTERTOK) {
             if (NumVarOfSameType > 1) pas.Messages.Error(i + 1,"REGISTER can only be associated to one variable");
             isAbsolute = true;
-            VarRegister += pas.Common.DataSize[VarType - 128];
+            VarRegister += pas.Common.GetDataSize(VarType);
             ConstVal = ((VarRegister + 3) << 24) + 1;
             i += 1;
-          } else if (pas.Common.Tok[i + 1].Kind === 95) {
+          } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.EXTERNALTOK) {
             if (NumVarOfSameType > 1) pas.Messages.Error(i + 1,"Only one variable can be initialized");
             isAbsolute = true;
             isExternal = true;
             i += 1;
             external_libr = 0;
-            if (pas.Common.Tok[i + 1].Kind === 170) {
+            if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) {
               external_name = pas.Common.Tok[i + 1].Name;
-              if (pas.Common.Tok[i + 2].Kind === 174) {
+              if (pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
                 external_libr = i + 2;
                 i += 1;
               };
               i += 1;
-            } else if (pas.Common.Tok[i + 1].Kind === 174) {
+            } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) {
               external_name = VarOfSameType[0].Name;
               external_libr = i + 1;
               i += 1;
             };
             ConstVal = 1;
-          } else if (pas.Common.Tok[i + 1].Kind === 38) {
+          } else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.ABSOLUTETOK) {
             isAbsolute = true;
             if (NumVarOfSameType > 1) pas.Messages.Error(i + 1,"ABSOLUTE can only be associated to one variable");
-            if ((VarType in rtl.createSet(139,140)) && (NumAllocElements === 0)) pas.Messages.Error(i + 1,"not possible in this case");
+            if ((VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) && (NumAllocElements === 0)) pas.Messages.Error(i + 1,"not possible in this case");
             i += 1;
             varPassMethod = pas.Common.TParameterPassingMethod.UNDEFINED;
-            if ((pas.Common.Tok[i + 1].Kind === 170) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].Kind === 3)) {
+            if ((pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.IDENTTOK) && (pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].Kind === pas.Tokens.TTokenKind.VARTOK)) {
               ConstVal = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].Value - 32768;
               varPassMethod = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name) - 1].PassMethod;
               if ((ConstVal < 0) || (ConstVal > 0xFFFFFF)) pas.Messages.Error(i,"Range check error while evaluating constants (" + pas.Common.IntToStr(ConstVal) + " must be between 0 and " + pas.Common.IntToStr(0xFFFFFF) + ")");
@@ -44045,31 +44006,31 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   return ActualParamType;
                 }, set: function (v) {
                   ActualParamType = v;
-                }},133,false,true);
+                }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
               if (VarType in pas.Common.Pointers) {
-                pas.Common.GetCommonConstType(i,129,ActualParamType,true)}
-               else pas.Common.GetCommonConstType(i,130,ActualParamType,true);
+                pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.WORDTOK,ActualParamType,true)}
+               else pas.Common.GetCommonConstType(i,pas.Tokens.TTokenKind.CARDINALTOK,ActualParamType,true);
               if ((ConstVal < 0) || (ConstVal > 0xFFFFFF)) pas.Messages.Error(i,"Range check error while evaluating constants (" + pas.Common.IntToStr(ConstVal) + " must be between 0 and " + pas.Common.IntToStr(0xFFFFFF) + ")");
             };
             ConstVal += 1;
           };
-          if (IdType === 170) IdType = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[idx].Name) - 1].IdType;
+          if (IdType === pas.Tokens.TTokenKind.IDENTTOK) IdType = pas.Common.Ident[pas.Parser.GetIdentIndex(pas.Common.Tok[idx].Name) - 1].IdType;
           tmpVarDataSize = pas.Common.VarDataSize;
           for (var $l12 = 1, $end11 = NumVarOfSameType; $l12 <= $end11; $l12++) {
             VarOfSameTypeIndex = $l12;
-            if (VarType === 154) {
-              VarType = 136;
+            if (VarType === pas.Tokens.TTokenKind.DEREFERENCEARRAYTOK) {
+              VarType = pas.Tokens.TTokenKind.POINTERTOK;
               NestedNumAllocElements = NumAllocElements;
-              IdType = 154;
+              IdType = pas.Tokens.TTokenKind.DEREFERENCEARRAYTOK;
               NumAllocElements = 1;
             };
-            if (VarType === 146) {
-              pas.Parser.DefineIdent(i,VarOfSameType[VarOfSameTypeIndex - 1].Name,3,AllocElementType,0,0,0,IdType);
-              pas.Common.Ident[pas.Common.NumIdent - 1].DataType = 146;
+            if (VarType === pas.Tokens.TTokenKind.ENUMTOK) {
+              pas.Parser.DefineIdent(i,VarOfSameType[VarOfSameTypeIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,AllocElementType,0,pas.Tokens.TTokenKind.UNTYPETOK,0,IdType);
+              pas.Common.Ident[pas.Common.NumIdent - 1].DataType = pas.Tokens.TTokenKind.ENUMTOK;
               pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType = AllocElementType;
               pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements;
             } else {
-              pas.Parser.DefineIdent(i,VarOfSameType[VarOfSameTypeIndex - 1].Name,3,VarType,NumAllocElements,AllocElementType,(isAbsolute + 0) * ConstVal,IdType);
+              pas.Parser.DefineIdent(i,VarOfSameType[VarOfSameTypeIndex - 1].Name,pas.Tokens.TTokenKind.VARTOK,VarType,NumAllocElements,AllocElementType,(isAbsolute + 0) * ConstVal,IdType);
               pas.Common.Ident[pas.Common.NumIdent - 1].NestedDataType = NestedDataType;
               pas.Common.Ident[pas.Common.NumIdent - 1].NestedAllocElementType = NestedAllocElementType;
               pas.Common.Ident[pas.Common.NumIdent - 1].NestedNumAllocElements = NestedNumAllocElements;
@@ -44084,20 +44045,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                  else pas.Messages.WarningStripedAllowed(i);
               };
               varPassMethod = pas.Common.TParameterPassingMethod.UNDEFINED;
-              if ((VarType === 136) && (AllocElementType === 137) && (NestedNumAllocElements > 0) && (NumAllocElements > 1)) {
+              if ((VarType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType === pas.Tokens.TTokenKind.STRINGPOINTERTOK) && (NestedNumAllocElements > 0) && (NumAllocElements > 1)) {
                 if (pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute) pas.Messages.Error(i,"ABSOLUTE modifier is not available for this type of array");
                 idx = pas.Common.Ident[pas.Common.NumIdent - 1].Value - 32768;
                 if (rtl.lw(NumAllocElements >>> 16) > 0) {
                   for (var $l13 = 0, $end12 = ((NumAllocElements & 0xFFFF) * rtl.lw(NumAllocElements >>> 16)) - 1; $l13 <= $end12; $l13++) {
                     j = $l13;
-                    pas.Parser.SaveToDataSegment(idx,pas.Common.VarDataSize,160);
+                    pas.Parser.SaveToDataSegment(idx,pas.Common.VarDataSize,pas.Tokens.TTokenKind.DATAORIGINOFFSET);
                     idx += 2;
                     pas.Common.VarDataSize += NestedNumAllocElements;
                   };
                 } else {
                   for (var $l14 = 0, $end13 = NumAllocElements - 1; $l14 <= $end13; $l14++) {
                     j = $l14;
-                    pas.Parser.SaveToDataSegment(idx,pas.Common.VarDataSize,160);
+                    pas.Parser.SaveToDataSegment(idx,pas.Common.VarDataSize,pas.Tokens.TTokenKind.DATAORIGINOFFSET);
                     idx += 2;
                     pas.Common.VarDataSize += NestedNumAllocElements;
                   };
@@ -44125,12 +44086,12 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           };
           if (isAbsolute && (open_array === false)) {
             pas.Common.VarDataSize = tmpVarDataSize}
-           else if (pas.Common.Tok[i + 1].Kind === 43) {
+           else if (pas.Common.Tok[i + 1].Kind === pas.Tokens.TTokenKind.EQTOK) {
             if (pas.Common.Ident[pas.Common.NumIdent - 1].isStriped) pas.Messages.Error(i + 1,"Initialization for striped array not allowed");
-            if (VarType in rtl.createSet(139,140)) pas.Messages.Error(i + 1,"Initialization for " + pas.Common.InfoAboutToken(VarType) + " not allowed");
+            if (VarType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK)) pas.Messages.Error(i + 1,"Initialization for " + pas.Common.InfoAboutToken(VarType) + " not allowed");
             if (NumVarOfSameType > 1) pas.Messages.Error(i + 1,"Only one variable can be initialized");
             i += 1;
-            if ((VarType === 136) && (AllocElementType in rtl.createSet(139,140))) {}
+            if ((VarType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType in rtl.createSet(pas.Tokens.TTokenKind.RECORDTOK,pas.Tokens.TTokenKind.OBJECTTOK))) {}
             else idx = pas.Common.Ident[pas.Common.NumIdent - 1].Value - 32768;
             if (!(VarType in pas.Common.Pointers)) {
               pas.Common.Ident[pas.Common.NumIdent - 1].isInitialized = true;
@@ -44142,40 +44103,40 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                   return ActualParamType;
                 }, set: function (v) {
                   ActualParamType = v;
-                }},133,false,true);
-              if ((VarType in pas.Common.RealTypes) && (ActualParamType === 142)) ActualParamType = VarType;
+                }},pas.Tokens.TTokenKind.INTEGERTOK,false,true);
+              if ((VarType in pas.Common.RealTypes) && (ActualParamType === pas.Tokens.TTokenKind.REALTOK)) ActualParamType = VarType;
               pas.Common.GetCommonConstType(i,VarType,ActualParamType,true);
               pas.Parser.SaveToDataSegment(idx,ConstVal,VarType);
             } else {
               pas.Common.Ident[pas.Common.NumIdent - 1].isInit = true;
               i += 1;
-              if (pas.Common.Tok[i].Kind === 57) {
-                if (pas.Common.Tok[i + 1].Kind !== 170) {
+              if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.ADDRESSTOK) {
+                if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
                   pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.IdentifierExpected)}
                  else {
                   IdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
                   if (IdentIndex > 0) {
-                    if (pas.Common.Ident[IdentIndex - 1].Kind === 1) {
+                    if (pas.Common.Ident[IdentIndex - 1].Kind === pas.Tokens.TTokenKind.CONSTTOK) {
                       if (!((pas.Common.Ident[IdentIndex - 1].DataType in pas.Common.Pointers) && (pas.Common.Ident[IdentIndex - 1].NumAllocElements > 0))) {
                         pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.CantAdrConstantExp)}
-                       else pas.Parser.SaveToDataSegment(idx,pas.Common.Ident[IdentIndex - 1].Value - 256 - pas.Common.CODEORIGIN_BASE,161);
-                    } else pas.Parser.SaveToDataSegment(idx,pas.Common.Ident[IdentIndex - 1].Value - 32768,160);
-                    VarType = 136;
+                       else pas.Parser.SaveToDataSegment(idx,pas.Common.Ident[IdentIndex - 1].Value - 256 - pas.Common.CODEORIGIN_BASE,pas.Tokens.TTokenKind.CODEORIGINOFFSET);
+                    } else pas.Parser.SaveToDataSegment(idx,pas.Common.Ident[IdentIndex - 1].Value - 32768,pas.Tokens.TTokenKind.DATAORIGINOFFSET);
+                    VarType = pas.Tokens.TTokenKind.POINTERTOK;
                   } else pas.Messages.Error$2(i + 1,pas.Messages.TErrorCode.UnknownIdentifier);
                 };
                 i += 1;
-              } else if (pas.Common.Tok[i].Kind === 173) {
-                pas.Parser.SaveToDataSegment(idx,1,128);
-                pas.Parser.SaveToDataSegment(idx + 1,pas.Common.Tok[i].Value,128);
-                VarType = 136;
-              } else if ((pas.Common.Tok[i].Kind === 174) && (open_array === false) && (VarType === 136) && (AllocElementType === 134)) {
-                pas.Parser.SaveToDataSegment(idx,(pas.Common.Tok[i].StrAddress - 256) + 1,161)}
+              } else if (pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.CHARLITERALTOK) {
+                pas.Parser.SaveToDataSegment(idx,1,pas.Tokens.TTokenKind.BYTETOK);
+                pas.Parser.SaveToDataSegment(idx + 1,pas.Common.Tok[i].Value,pas.Tokens.TTokenKind.BYTETOK);
+                VarType = pas.Tokens.TTokenKind.POINTERTOK;
+              } else if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) && (open_array === false) && (VarType === pas.Tokens.TTokenKind.POINTERTOK) && (AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
+                pas.Parser.SaveToDataSegment(idx,(pas.Common.Tok[i].StrAddress - 256) + 1,pas.Tokens.TTokenKind.CODEORIGINOFFSET)}
                else if ((pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements in rtl.createSet(0,1)) && (open_array === false)) {
                 pas.Messages.Error$2(i,pas.Messages.TErrorCode.IllegalExpression)}
                else if (open_array) {
-                if ((pas.Common.Tok[i].Kind === 174) && (AllocElementType === 134)) {
+                if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) && (AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
                   pas.Common.Ident[pas.Common.NumIdent - 1].Value = (pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE;
-                  if (VarType !== 137) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
+                  if (VarType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
                   pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = pas.Common.Tok[i].StrLength;
                   pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute = true;
                   NumAllocElements = 0;
@@ -44184,40 +44145,40 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
                       return NumAllocElements;
                     }, set: function (v) {
                       NumAllocElements = v;
-                    }},false,pas.Common.Tok[i - 2].Kind === 145);
+                    }},false,pas.Common.Tok[i - 2].Kind === pas.Tokens.TTokenKind.PCHARTOK);
                   pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = NumAllocElements;
                 };
-                pas.Common.VarDataSize += NumAllocElements * pas.Common.DataSize[pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType - 128];
+                pas.Common.VarDataSize += NumAllocElements * pas.Common.GetDataSize(pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType);
               } else {
-                if ((pas.Common.Tok[i].Kind === 174) && (AllocElementType === 134)) {
+                if ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.STRINGLITERALTOK) && (AllocElementType === pas.Tokens.TTokenKind.CHARTOK)) {
                   if (pas.Common.Tok[i].StrLength > NumAllocElements) pas.Messages.Error(i,"string length is larger than array of char length");
                   pas.Common.Ident[pas.Common.NumIdent - 1].Value = (pas.Common.Tok[i].StrAddress - 256) + pas.Common.CODEORIGIN_BASE;
-                  if (VarType !== 137) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
+                  if (VarType !== pas.Tokens.TTokenKind.STRINGPOINTERTOK) pas.Common.Ident[pas.Common.NumIdent - 1].Value += 1;
                   pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements = pas.Common.Tok[i].StrLength;
                   pas.Common.Ident[pas.Common.NumIdent - 1].isAbsolute = true;
-                } else i = $mod.ReadDataArray(i,idx,pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType,rtl.lw(pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements | rtl.lw(pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements_ << 16)),false,pas.Common.Tok[i - 2].Kind === 145);
+                } else i = $mod.ReadDataArray(i,idx,pas.Common.Ident[pas.Common.NumIdent - 1].AllocElementType,rtl.lw(pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements | rtl.lw(pas.Common.Ident[pas.Common.NumIdent - 1].NumAllocElements_ << 16)),false,pas.Common.Tok[i - 2].Kind === pas.Tokens.TTokenKind.PCHARTOK);
               };
             };
           };
-          pas.Common.CheckTok(i + 1,53);
+          pas.Common.CheckTok(i + 1,pas.Tokens.TTokenKind.SEMICOLONTOK);
           isVolatile = false;
           isStriped = false;
-          if ((pas.Common.Tok[i + 2].Kind === 58) && (pas.Common.Tok[i + 3].Kind in rtl.createSet(115,116))) {
-            pas.Common.CheckTok(i + 4,59);
-            if (pas.Common.Tok[i + 3].Kind === 115) {
+          if ((pas.Common.Tok[i + 2].Kind === pas.Tokens.TTokenKind.OBRACKETTOK) && (pas.Common.Tok[i + 3].Kind in rtl.createSet(pas.Tokens.TTokenKind.VOLATILETOK,pas.Tokens.TTokenKind.STRIPEDTOK))) {
+            pas.Common.CheckTok(i + 4,pas.Tokens.TTokenKind.CBRACKETTOK);
+            if (pas.Common.Tok[i + 3].Kind === pas.Tokens.TTokenKind.VOLATILETOK) {
               isVolatile = true}
              else isStriped = true;
             i += 3;
           };
           i = i + 1;
-        } while (!(pas.Common.Tok[i + 1].Kind !== 170));
+        } while (!(pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK));
         $mod.CheckForwardResolutions(false);
         i = i + 1;
       };
-      if (pas.Common.Tok[i].Kind in rtl.createSet(4,5,99,100)) if (pas.Common.Tok[i + 1].Kind !== 170) {
-        pas.Messages.Error(i + 1,"Procedure name expected but " + pas.Common.GetSpelling(i + 1) + " found")}
+      if (pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) if (pas.Common.Tok[i + 1].Kind !== pas.Tokens.TTokenKind.IDENTTOK) {
+        pas.Messages.Error(i + 1,"Procedure name expected but " + pas.Common.GetTokenSpellingAtIndex(i + 1) + " found")}
        else {
-        IsNestedFunction = pas.Common.Tok[i].Kind === 5;
+        IsNestedFunction = pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK;
         if (pas.Common.INTERFACETOK_USE) {
           ForwardIdentIndex = 0}
          else ForwardIdentIndex = pas.Parser.GetIdentIndex(pas.Common.Tok[i + 1].Name);
@@ -44255,8 +44216,8 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
           ForwardIdentIndex = $mod.GetIdentProc(pas.Common.Ident[ForwardIdentIndex - 1].Name,ForwardIdentIndex,pas.Common.TParamList$clone(Param),ParamIndex);
         };
         if (ForwardIdentIndex !== 0) if (pas.Common.Ident[ForwardIdentIndex - 1].IsUnresolvedForward && (pas.Common.Ident[ForwardIdentIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) if (pas.Common.Tok[i].Kind !== pas.Common.Ident[ForwardIdentIndex - 1].Kind) pas.Messages.Error(i,"Unresolved forward declaration of " + pas.Common.Ident[ForwardIdentIndex - 1].Name);
-        if (ForwardIdentIndex !== 0) if (!pas.Common.Ident[ForwardIdentIndex - 1].IsUnresolvedForward || (pas.Common.Ident[ForwardIdentIndex - 1].Block !== pas.Common.BlockStack[pas.Common.BlockStackTop]) || ((pas.Common.Tok[i].Kind === 4) && (pas.Common.Ident[ForwardIdentIndex - 1].Kind !== 4)) || ((pas.Common.Tok[i].Kind === 5) && (pas.Common.Ident[ForwardIdentIndex - 1].Kind !== 5))) ForwardIdentIndex = 0;
-        if ((pas.Common.Tok[i].Kind in rtl.createSet(99,100)) && (ForwardIdentIndex === 0)) pas.Messages.Error(i,"constructors, destructors operators must be methods");
+        if (ForwardIdentIndex !== 0) if (!pas.Common.Ident[ForwardIdentIndex - 1].IsUnresolvedForward || (pas.Common.Ident[ForwardIdentIndex - 1].Block !== pas.Common.BlockStack[pas.Common.BlockStackTop]) || ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.PROCEDURETOK) && (pas.Common.Ident[ForwardIdentIndex - 1].Kind !== pas.Tokens.TTokenKind.PROCEDURETOK)) || ((pas.Common.Tok[i].Kind === pas.Tokens.TTokenKind.FUNCTIONTOK) && (pas.Common.Ident[ForwardIdentIndex - 1].Kind !== pas.Tokens.TTokenKind.FUNCTIONTOK))) ForwardIdentIndex = 0;
+        if ((pas.Common.Tok[i].Kind in rtl.createSet(pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && (ForwardIdentIndex === 0)) pas.Messages.Error(i,"constructors, destructors operators must be methods");
         i = pas.Parser.DefineFunction(i,ForwardIdentIndex,{get: function () {
             return isForward;
           }, set: function (v) {
@@ -44395,7 +44356,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
               }});
             if (Tmp !== TmpResult) pas.Messages.Error(i,"Function header doesn't match the previous declaration '" + pas.Common.Ident[ForwardIdentIndex - 1].Name + "'. Different modifiers.");
             if (IsNestedFunction) if ((pas.Common.Ident[ForwardIdentIndex - 1].DataType !== NestedFunctionResultType) || (pas.Common.Ident[ForwardIdentIndex - 1].NestedFunctionNumAllocElements !== NestedFunctionNumAllocElements) || (pas.Common.Ident[ForwardIdentIndex - 1].NestedFunctionAllocElementType !== NestedFunctionAllocElementType)) pas.Messages.Error(i,"Function header doesn't match the previous declaration '" + pas.Common.Ident[ForwardIdentIndex - 1].Name + "'");
-            pas.Common.CheckTok(i + 2,53);
+            pas.Common.CheckTok(i + 2,pas.Tokens.TTokenKind.SEMICOLONTOK);
             iocheck_old = pas.Common.IOCheck;
             isInterrupt_old = pas.Common.isInterrupt;
             j = $mod.CompileBlock(i + 3,ForwardIdentIndex,pas.Common.Ident[ForwardIdentIndex - 1].NumParams,IsNestedFunction,pas.Common.Ident[ForwardIdentIndex - 1].DataType,pas.Common.Ident[ForwardIdentIndex - 1].NestedFunctionNumAllocElements,pas.Common.Ident[ForwardIdentIndex - 1].NestedFunctionAllocElementType);
@@ -44407,27 +44368,27 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
             pas.Common.Ident[ForwardIdentIndex - 1].IsUnresolvedForward = false;
           };
         };
-        pas.Common.CheckTok(i,53);
+        pas.Common.CheckTok(i,pas.Tokens.TTokenKind.SEMICOLONTOK);
         i += 1;
       };
     };
     pas.Common.OutputDisabled = (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) && (pas.Common.BlockStack[pas.Common.BlockStackTop] !== 1) && !pas.Common.Ident[BlockIdentIndex - 1].IsNotDead;
     if (!isAsm) {
       $mod.GenerateDeclarationEpilog();
-      if (!(pas.Common.Tok[i - 1].Kind in rtl.createSet(189,190,191))) if (pas.Common.LIBRARYTOK_USE && (pas.Common.Tok[i].Kind !== 13)) {
+      if (!(pas.Common.Tok[i - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCALIGNTOK,pas.Tokens.TTokenKind.LOOPALIGNTOK,pas.Tokens.TTokenKind.LINKALIGNTOK))) if (pas.Common.LIBRARYTOK_USE && (pas.Common.Tok[i].Kind !== pas.Tokens.TTokenKind.BEGINTOK)) {
         i += 1}
-       else pas.Common.CheckTok(i,13);
+       else pas.Common.CheckTok(i,pas.Tokens.TTokenKind.BEGINTOK);
     };
     Result = $mod.CompileStatement(i,isAsm);
     j = pas.Common.NumIdent;
     while ((j > 0) && (pas.Common.Ident[j - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop])) {
-      if (pas.Common.Ident[j - 1].Kind in rtl.createSet(4,5,99,100)) if (pas.Common.Ident[j - 1].IsUnresolvedForward && (pas.Common.Ident[j - 1].isExternal === false)) pas.Messages.Error(i,"Unresolved forward declaration of " + pas.Common.Ident[j - 1].Name);
+      if (pas.Common.Ident[j - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) if (pas.Common.Ident[j - 1].IsUnresolvedForward && (pas.Common.Ident[j - 1].isExternal === false)) pas.Messages.Error(i,"Unresolved forward declaration of " + pas.Common.Ident[j - 1].Name);
       j -= 1;
     };
     if (IsFunction) {
       pas.Optimize.asm65("@exit","");
       if (pas.Common.Ident[BlockIdentIndex - 1].isStdCall || pas.Common.Ident[BlockIdentIndex - 1].isRecursion) {
-        $mod.Push(pas.Common.Ident[pas.Parser.GetIdentIndex("RESULT") - 1].Value,1,pas.Common.DataSize[FunctionResultType - 128],pas.Parser.GetIdentIndex("RESULT"),0);
+        $mod.Push(pas.Common.Ident[pas.Parser.GetIdentIndex("RESULT") - 1].Value,1,pas.Common.GetDataSize(FunctionResultType),pas.Parser.GetIdentIndex("RESULT"),0);
         pas.Optimize.asm65("","");
         if (!isInl) {
           pas.Optimize.asm65("\t.ifdef @new","");
@@ -44440,7 +44401,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
         };
       };
     };
-    if (pas.Common.Ident[BlockIdentIndex - 1].Kind in rtl.createSet(4,5,99,100)) {
+    if (pas.Common.Ident[BlockIdentIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) {
       if (pas.Common.Ident[BlockIdentIndex - 1].isInline) pas.Optimize.asm65("\t.ENDM","");
       $mod.GenerateProcFuncAsmLabels(BlockIdentIndex,true);
     };
@@ -44463,15 +44424,15 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     pas.Common.IOCheck = true;
     DataSegmentSize = 0;
     pas.Common.AsmBlockIndex = 0;
-    pas.Parser.DefineIdent(1,"MAIN",4,0,0,0,0,170);
+    pas.Parser.DefineIdent(1,"MAIN",pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.IDENTTOK);
     $mod.GenerateProgramProlog();
-    j = $mod.CompileBlock(1,pas.Common.NumIdent,0,false,0,0,0);
-    if (pas.Common.Tok[j].Kind === 14) {
-      pas.Common.CheckTok(j + 1,51)}
-     else if (pas.Common.Tok[pas.Common.NumTok].Kind === 199) pas.Messages.Error(pas.Common.NumTok,"Unexpected end of file");
+    j = $mod.CompileBlock(1,pas.Common.NumIdent,0,false,pas.Tokens.TTokenKind.UNTYPETOK,0,pas.Tokens.TTokenKind.UNTYPETOK);
+    if (pas.Common.Tok[j].Kind === pas.Tokens.TTokenKind.ENDTOK) {
+      pas.Common.CheckTok(j + 1,pas.Tokens.TTokenKind.DOTTOK)}
+     else if (pas.Common.Tok[pas.Common.NumTok].Kind === pas.Tokens.TTokenKind.EOFTOK) pas.Messages.Error(pas.Common.NumTok,"Unexpected end of file");
     j = pas.Common.NumIdent;
     while ((j > 0) && (pas.Common.Ident[j - 1].UnitIndex === 1)) {
-      if (pas.Common.Ident[j - 1].Kind in rtl.createSet(4,5,99,100)) if (pas.Common.Ident[j - 1].IsUnresolvedForward && (pas.Common.Ident[j - 1].isExternal === false)) pas.Messages.Error(j,"Unresolved forward declaration of " + pas.Common.Ident[j - 1].Name);
+      if (pas.Common.Ident[j - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) if (pas.Common.Ident[j - 1].IsUnresolvedForward && (pas.Common.Ident[j - 1].isExternal === false)) pas.Messages.Error(j,"Unresolved forward declaration of " + pas.Common.Ident[j - 1].Name);
       j -= 1;
     };
     $mod.StopOptimization();
@@ -44751,7 +44712,7 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
       pas.System.Write(pas.Utilities.TEnvironment.GetParameterString(i));
       pas.System.Write(" ");
     };
-    pas.System.Writeln();
+    pas.System.Writeln("");
     pas.Console.TextColor(12);
     pas.System.Writeln("ERROR: Check option number " + pas.Common.IntToStr(index) + ". " + message);
     pas.Console.NormVideo();
@@ -45017,20 +44978,20 @@ rtl.module("program",["System","SysUtils","Math","browserconsole","Common","Comm
     pas.Common.UnitName[pas.Common.NumUnits - 1].Path = pas.Common.FindFile("system.pas","unit");
     pas.Scanner.TokenizeProgram(false);
     pas.Common.NumStaticStrCharsTmp = pas.Common.NumStaticStrChars;
-    pas.Parser.DefineIdent(1,"BLOCKREAD",5,133,0,0,0x0,170);
-    pas.Parser.DefineIdent(1,"BLOCKWRITE",5,133,0,0,0x0,170);
-    pas.Parser.DefineIdent(1,"GETRESOURCEHANDLE",5,133,0,0,0x0,170);
-    pas.Parser.DefineIdent(1,"NIL",1,136,0,0,256,170);
-    pas.Parser.DefineIdent(1,"EOL",1,134,0,0,pas.Common.target.eol,170);
-    pas.Parser.DefineIdent(1,"__BUFFER",1,129,0,0,pas.Common.target.buf,170);
-    pas.Parser.DefineIdent(1,"TRUE",1,135,0,0,0x1,170);
-    pas.Parser.DefineIdent(1,"FALSE",1,135,0,0,0x0,170);
-    pas.Parser.DefineIdent(1,"MAXINT",1,133,0,0,2147483647,170);
-    pas.Parser.DefineIdent(1,"MAXSMALLINT",1,133,0,0,32767,170);
-    pas.Parser.DefineIdent(1,"PI",1,142,0,0,PI_VALUE,170);
-    pas.Parser.DefineIdent(1,"NAN",1,143,0,0,NAN_VALUE,170);
-    pas.Parser.DefineIdent(1,"INFINITY",1,143,0,0,INFINITY_VALUE,170);
-    pas.Parser.DefineIdent(1,"NEGINFINITY",1,143,0,0,NEGINFINITY_VALUE,170);
+    pas.Parser.DefineIdent(1,"BLOCKREAD",pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.INTEGERTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0x0,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"BLOCKWRITE",pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.INTEGERTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0x0,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"GETRESOURCEHANDLE",pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.INTEGERTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0x0,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"NIL",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.POINTERTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,256,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"EOL",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.CHARTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,pas.Common.target.eol,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"__BUFFER",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.WORDTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,pas.Common.target.buf,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"TRUE",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.BOOLEANTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0x1,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"FALSE",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.BOOLEANTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,0x0,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"MAXINT",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.INTEGERTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,2147483647,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"MAXSMALLINT",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.INTEGERTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,32767,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"PI",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.REALTOK,0,pas.Tokens.TTokenKind.UNTYPETOK,PI_VALUE,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"NAN",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.SINGLETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,NAN_VALUE,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"INFINITY",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.SINGLETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,INFINITY_VALUE,pas.Tokens.TTokenKind.IDENTTOK);
+    pas.Parser.DefineIdent(1,"NEGINFINITY",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.SINGLETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,NEGINFINITY_VALUE,pas.Tokens.TTokenKind.IDENTTOK);
     pas.Common.NumPredefIdent = pas.Common.NumIdent;
     pas.Common.pass = pas.Common.TPass.CALL_DETERMINATION;
     $mod.CompileProgram();

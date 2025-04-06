@@ -4,7 +4,7 @@ interface
 
 {$I Defines.inc}
 
-uses Common, CommonTypes;
+uses Common, CommonTypes, Tokens;
 
 {$SCOPEDENUMS ON}
 type
@@ -123,12 +123,33 @@ uses SysUtils, TypInfo, Console, FileIO, Utilities;
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
   const variable1: String = '');
 var
-  temp: String;
+  l: Integer;
+  i: Integer;
+  c: Char;
 begin
   Self.errorCode := errorCode;
-  temp := Text.Replace('{0}', variable0);
-  temp := Text.Replace('{1}', variable1);
-  Self.Text := temp;
+  Self.Text := '';
+  l := Length(Text);
+  i := 1;
+  repeat
+
+    c := Text[i];
+    if c = '{' then
+    begin
+      assert(i < l - 2, 'Invalid string pattern, too short ''' + Text + '''');
+      assert(Text[i + 1] in ['0', '9'], 'Invalid string pattern, placeholder must be {0}..{9} ''' + Text + '''');
+      assert(Text[i + 2] = '}', 'Invalid string pattern, missing } ''' + Text + '''');
+      begin
+        case Text[i] of
+          '0': Self.Text := Self.Text + variable0;
+          '1': Self.Text := Self.Text + variable1;
+        end;
+        i := i + 2;
+      end;
+    end;
+    Inc(i);
+  until i >= l;
+
 end;
 
 function TMessage.GetErrorCode: TErrorCode;
@@ -180,7 +201,7 @@ end;
 function GetExpectedButTokenFound(const tokenIndex: TTokenIndex): String;
 begin
 
-  Result := ' expected but ''' + GetSpelling(tokenIndex) + ''' found';
+  Result := ' expected but ''' + GetTokenSpellingAtIndex(tokenIndex) + ''' found';
 
 end;
 
@@ -318,7 +339,7 @@ begin
 
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex);
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex); overload;
 var
   msg: String;
 begin
@@ -335,7 +356,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Error(const tokenIndex: TTokenIndex; const msg: String);
+procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
 var
   effectiveTokenIndex: TTokenIndex;
   token, previousToken: TToken;
@@ -392,7 +413,7 @@ begin
 
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage);
+procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
 var
   enumValue: Integer;
   enumName: String;
@@ -403,7 +424,7 @@ begin
 end;
 
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode);
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
 begin
   ErrorForIdentifier(tokenIndex, errorCode, 0);
 end;

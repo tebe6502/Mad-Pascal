@@ -4,7 +4,6 @@
 // -----------------------------------------------------------------------------
 
 procedure opt_TEMP_JMP;
-var p: integer;
 begin
 
    if sta(0) and									// sta A		; 0

@@ -1,6 +1,5 @@
 
 function opt_STA_ADD(i: integer): Boolean;
-var p: integer;
 begin
 
     Result := true;
