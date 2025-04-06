@@ -57,7 +57,9 @@ type
 type
   TMessage = class(TInterfacedObject, IMessage)
     constructor Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
-      const variable1: String = ''; const variable2: String = ''; const variable3: String = '');
+      const variable1: String = ''; const variable2: String = ''; const variable3: String = '';
+      const variable4: String = ''; const variable5: String = ''; const variable6: String = '';
+      const variable7: String = ''; const variable8: String = ''; const variable9: String = '');
     function GetErrorCode: TErrorCode;
     function GetText: String;
   private
@@ -121,7 +123,10 @@ uses SysUtils, TypInfo, Console, FileIO, Utilities;
 
 // -----------------------------------------------------------------------------
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
-  const variable1: String = ''; const variable2: String = ''; const variable3: String = '');
+  const variable1: String = ''; const variable2: String = ''; const variable3: String = '';
+  const variable4: String = ''; const variable5: String = ''; const variable6: String = '';
+  const variable7: String = ''; const variable8: String = '';
+  const variable9: String = '');
 var
   l: Integer;
   i: Integer;
@@ -136,20 +141,28 @@ begin
     c := Text[i];
     if c = '{' then
     begin
-      assert(i < l - 2, 'Invalid string pattern, too short ''' + Text + '''');
-      c := Text[i + 1];
-      assert(c in ['0' .. '9'], 'Invalid string pattern, placeholder must be {0}..{9} ''' + Text + '''');
-      assert(Text[i + 2] = '}', 'Invalid string pattern, missing } ''' + Text + '''');
+      assert(i <= l - 2, 'Invalid string pattern, pattern ''' + Text + ''' is too short.');
+      Inc(i);
+      c := Text[i];
+      assert(c in ['0' .. '9'], 'Invalid string pattern, placeholder ''' + c + ''' at index ' +
+        IntToStr(i + 1) + ' of ''' + Text + ''' must be must a digit 0..9.');
+      Inc(i);
+      assert(Text[i] = '}', 'Invalid string pattern, missing } at index ' + IntToStr(i) + ' of ''' + Text + '''');
       begin
         case c of
           '0': Self.Text := Self.Text + variable0;
           '1': Self.Text := Self.Text + variable1;
           '2': Self.Text := Self.Text + variable2;
           '3': Self.Text := Self.Text + variable3;
+          '4': Self.Text := Self.Text + variable4;
+          '5': Self.Text := Self.Text + variable5;
+          '6': Self.Text := Self.Text + variable6;
+          '7': Self.Text := Self.Text + variable7;
+          '8': Self.Text := Self.Text + variable8;
+          '9': Self.Text := Self.Text + variable9;
           else
             Assert(False, 'Support for ' + c + ' not implemented yet');
         end;
-        i := i + 2;
       end;
     end
     else
@@ -757,3 +770,4 @@ end;
 
 
 end.
+
