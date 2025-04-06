@@ -1,7 +1,6 @@
 
 function opt_LDA(i: integer): Boolean;
 var tmp: string;
-    p: integer;
 begin
 
     Result := true;

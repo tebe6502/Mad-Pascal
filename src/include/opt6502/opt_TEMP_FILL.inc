@@ -4,7 +4,6 @@
 // -----------------------------------------------------------------------------
 
 procedure opt_TEMP_FILL;
-var p: integer;
 begin
 
  if (pos(#9'jsr SYSTEM.FILL', TemporaryBuf[10]) = 1) or
