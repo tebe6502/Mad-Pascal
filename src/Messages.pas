@@ -57,7 +57,7 @@ type
 type
   TMessage = class(TInterfacedObject, IMessage)
     constructor Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
-      const variable1: String = '');
+      const variable1: String = ''; const variable2: String = ''; const variable3: String = '');
     function GetErrorCode: TErrorCode;
     function GetText: String;
   private
@@ -121,7 +121,7 @@ uses SysUtils, TypInfo, Console, FileIO, Utilities;
 
 // -----------------------------------------------------------------------------
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
-  const variable1: String = '');
+  const variable1: String = ''; const variable2: String = ''; const variable3: String = '');
 var
   l: Integer;
   i: Integer;
@@ -137,18 +137,24 @@ begin
     if c = '{' then
     begin
       assert(i < l - 2, 'Invalid string pattern, too short ''' + Text + '''');
-      assert(Text[i + 1] in ['0', '9'], 'Invalid string pattern, placeholder must be {0}..{9} ''' + Text + '''');
+      c := Text[i + 1];
+      assert(c in ['0' .. '9'], 'Invalid string pattern, placeholder must be {0}..{9} ''' + Text + '''');
       assert(Text[i + 2] = '}', 'Invalid string pattern, missing } ''' + Text + '''');
       begin
-        case Text[i] of
+        case c of
           '0': Self.Text := Self.Text + variable0;
           '1': Self.Text := Self.Text + variable1;
+          '2': Self.Text := Self.Text + variable2;
+          '3': Self.Text := Self.Text + variable3;
+          else
+            Assert(False, 'Support for ' + c + ' not implemented yet');
         end;
         i := i + 2;
       end;
-    end else
+    end
+    else
     begin
-       Self.Text := Self.Text + c;
+      Self.Text := Self.Text + c;
     end;
     Inc(i);
   until i >= l;

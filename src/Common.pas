@@ -560,14 +560,16 @@ begin
   begin
     if ftyp = 'unit' then
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find unit ''' + ChangeFileExt(Name, '') +
-        ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+      msg := TMessage.Create(TErrorCode.FileNotFound,
+        'Can''t find unit ''{0}'' used by program ''{1}'' in unit path ''{2}''.',
+        ChangeFileExt(Name, ''), PROGRAM_NAME, unitPathList.ToString);
 
     end
     else
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find ' + ftyp + ' file ''' +
-        Name + ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+      msg := TMessage.Create(TErrorCode.FileNotFound,
+        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.',
+        ftyp, Name, PROGRAM_NAME, unitPathList.ToString);
     end;
     Error(NumTok, msg);
   end;
