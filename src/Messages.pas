@@ -161,7 +161,7 @@ begin
           '8': Self.Text := Self.Text + variable8;
           '9': Self.Text := Self.Text + variable9;
           else
-            Assert(False, 'Support for ' + c + ' not implemented yet');
+            Assert(False, 'Internal program error.');
         end;
       end;
     end

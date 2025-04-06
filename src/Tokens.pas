@@ -464,8 +464,6 @@ end;
 procedure AssertTokensOrd;
 var
   tokenKind: TTokenKind;
-var
-  Value: Byte;
 begin
   for tokenKind := Low(TTokenKind) to High(TTokenKind) do
   begin

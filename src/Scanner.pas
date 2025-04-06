@@ -1196,6 +1196,7 @@ var
     inFile.Reset(1);
 
     Text := '';
+    ch:=' ';
 
     try
       while True do
