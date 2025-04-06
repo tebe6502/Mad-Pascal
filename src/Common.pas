@@ -474,7 +474,6 @@ function GetEnumName(IdentIndex: TIdentIndex): TString;
 
 function GetTokenSpellingAtIndex(i: TTokenIndex): String;
 
-
 function GetVAL(a: String): Integer;
 
 function GetValueType(Value: TIntegerNumber): TDataType;
@@ -673,7 +672,7 @@ function StrToInt(const a: String): TIntegerNumber;
   (*----------------------------------------------------------------------------*)
 {$IFNDEF PAS2JS}
 var
-  i: Integer;
+  i: Integer; // ##NEEDED
 begin
   val(a, Result, i);
 end;
@@ -719,16 +718,12 @@ end;
 function GetTokenSpellingAtIndex(i: TTokenIndex): TString;
 var
   kind: TTokenKind;
-var
-  index: Byte;
 begin
-
   if i > NumTok then
     Result := 'no token'
   else
   begin
     kind := Tok[i].Kind;
-    index := Ord(kind);
     GetHumanReadbleTokenSpelling(kind);
   end;
 end;
