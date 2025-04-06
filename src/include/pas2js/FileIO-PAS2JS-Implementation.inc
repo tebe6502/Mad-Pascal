@@ -2,11 +2,12 @@ uses SysUtils, Messages;
 
 function FileExists(const FileName: TFilePath; FollowLink: Boolean = True): Boolean;
 begin
+  Assert(False);
 end;
 
 procedure AssignFile(f: TTextFile; fName: TFilePath); overload;
 begin
-  ;
+  Assert(False);
 end;
 
 procedure AssignFile(f: TBinaryFile; fName: TFilePath); overload;
@@ -15,18 +16,22 @@ end;
 
 procedure BlockRead(var f: TBinaryFile; var Buf; Count: Longint; var Result: Longint);
 begin
+  Assert(False);
 end;
 
 procedure CloseFile(f: TTextFile); overload;
 begin
+  Assert(False);
 end;
 
 procedure CloseFile(f: TBinaryFile); overload;
 begin
+  Assert(False);
 end;
 
 procedure Flush(f: TTextFile);
 begin
+  Assert(False);
 end;
 
 
@@ -40,10 +45,12 @@ end;
 
 procedure Reset(var f: TBinaryFile; l: Longint); overload;
 begin
+  Assert(False);
 end;
 
 function FilePos(var f: TBinaryFile): TInteger;
 begin
+  Assert(False);
 end;
 
 procedure Seek(var f: TBinaryFile; Pos: TInteger);
@@ -60,6 +67,7 @@ end;
 
 procedure Read(var F: TBinaryFile; Args: Char);
 begin
+  Assert(False);
 end;
 
 procedure Rewrite(f: TTextFile); overload;
@@ -68,11 +76,12 @@ end;
 
 procedure Rewrite(f: TBinaryFile); overload;
 begin
+  Assert(False);
 end;
 
 procedure Erase(var f: TTextFile); overload;
 begin
-  ;
+  Assert(False);
 end;
 
 procedure Erase(var f: TBinaryFile); overload;
@@ -100,7 +109,7 @@ end;
 
 procedure WriteLn(f: TTextFile; s: String); overload;
 begin
-
+  Assert(False);
 end;
 
 procedure WriteLn(f: TTextFile; s1: String; s2: String); overload;
@@ -109,4 +118,5 @@ end;
 
 procedure WriteLn(f: TTextFile; s1: String; s2: String; s3: String); overload;
 begin
+  Assert(False);
 end;
