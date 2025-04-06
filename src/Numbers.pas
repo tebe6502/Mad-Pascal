@@ -6,7 +6,7 @@ unit Numbers;
 
 interface
 
-uses Types, Common;    // TODO Remove Common and have only Tokens
+uses Common;    // TODO Remove Common and have only TDataType
 
 type
   TNumber = Int64;

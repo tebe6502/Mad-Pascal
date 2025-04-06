@@ -10,12 +10,20 @@ uses
   Diagnostic,
   FileIO,
   MathEvaluate,
+  Messages,
   Parser,
   Scanner,
   Optimize,
   Types,
+  Tokens,
   Utilities,
   SysUtils;
+
+  procedure AssertEquals(actual, expected: String; message: String);
+  begin
+    Assert(actual = expected, 'The actual string ''' + actual + ''' is not equal to the expected string ''' +
+      expected + '''.');
+  end;
 
   procedure StartTest(Name: String);
   begin
@@ -123,7 +131,7 @@ uses
     Program_NAME := 'TestProgram';
     NumTok := 0;
     // Kind, UnitIndex, Line, Column, Value
-    AddToken(PROGRAMTOK, 1, 1, 1, 0);
+    AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
 
     // Unit Common
     unitPathList := TPathList.Create;
@@ -174,6 +182,9 @@ type
     end;
   end;
 
+  // ----------------------------------------------------------------------------
+  // Unit MathEvaluate
+  // ----------------------------------------------------------------------------
   procedure TestUnitMathEvaluate;
 
     procedure AssertValue(const expression: String; expectedValue: TEvaluationResult);
@@ -213,7 +224,7 @@ type
 
   begin
 
-    StartTest('TestUnitCommon');
+    StartTest('TestUnitMathEvaluate');
 
     AssertValue('', 0);
     AssertValue('(1+2)*3+1+100/10', 20);
@@ -224,11 +235,27 @@ type
     EndTest('TestUnitMathEvaluate');
   end;
 
+  // ----------------------------------------------------------------------------
+  // Unit Messages
+  // ----------------------------------------------------------------------------
+  procedure TestUnitMessages;
+  var
+    message: TMessage;
+  begin
+
+    StartTest('TestUnitMessages');
+    message := TMessage.Create(TErrorCode.IllegalExpression,
+      'A={0} B={1} C={2} D={3} E={4} F={5} G={6} H={7} I={8} J={9}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
+    AssertEquals(message.GetText(), 'A=A B=B C=C D=D E=E F=F G=G H=H I=I J=J', 'Formatted message not equal.');
+    EndTest('TestUnitMessages');
+  end;
+
 begin
   try
     TestUnitFile;
     TestUnitCommon;
     TestUnitMathEvaluate;
+    TestUnitMessages;
   except
     on e: Exception do
     begin

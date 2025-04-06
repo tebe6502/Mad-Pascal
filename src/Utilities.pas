@@ -49,16 +49,16 @@ uses SysUtils;
 
 class function TEnvironment.GetParameterCount(): Longint;
 begin
-{$IFNDEF PAS2JS}
+{$IFNDEF SIMULATED_COMMAND_LINE}
   Result := ParamCount;
 {$ELSE}
-  Result := 3;
+  Result := 4;
 {$ENDIF}
 end;
 
 class function TEnvironment.GetParameterString(const i: Longint): String;
 begin
-   {$IFNDEF PAS2JS}
+   {$IFNDEF SIMULATED_COMMAND_LINE}
   Result := ParamStr(i);
    {$ELSE}
   case i of

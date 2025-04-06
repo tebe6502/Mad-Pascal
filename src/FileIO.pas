@@ -47,7 +47,7 @@ type
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
     function FilePos(): TInteger;
     procedure Read(var c: Char);
-    procedure Reset(l: Longint); overload;
+    procedure Reset(l: Longint); overload; // l = record size
     procedure Seek2(Pos: TInteger);
   end;
 
@@ -501,6 +501,8 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
 
   System.Read(f, c);
+{$ELSE}
+ Assert(False, 'Not implemented yet');
 {$ENDIF}
 
 end;
@@ -620,5 +622,27 @@ class function TFileSystem.GetFileMapEntry(const filePath: TFilePath): TFileMapE
 begin
   Result := fileMap.GetEntry(filePath);
 end;
+
+
+procedure InitializeFileMap;
+var
+  fileMap: TFileMap;
+  fileMapEntry: TFileMapEntry;
+begin
+{$IFDEF SIMULATED_FILE_IO}
+ fileMap := TFileMap.Create;
+ fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
+ fileMapEntry.content := 'Program program; end.';
+ fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
+ fileMapEntry.content := 'SubFolder1;SubFolder2';
+ fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
+ fileMapEntry.content := '01010110101';
+ TFileSystem.Init(fileMap);
+{$ENDIF}
+end;
+
+initialization
+
+  InitializeFileMap;
 
 end.

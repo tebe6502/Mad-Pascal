@@ -297,7 +297,8 @@ var
         UnitIndex := NumUnits;
 
         if UnitIndex > High(UnitName) then
-          Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex)));
+          Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' +
+            IntToStr(UnitIndex)));
 
         Line := 1;
         UnitName[UnitIndex].Name := s;
@@ -1053,8 +1054,8 @@ var
 
       if c in [' ', TAB] then Inc(Spaces);
 
-      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_', '0'..'9',
-        '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
+      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_',
+        '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
       begin
         // InFile.Close();
         Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected unknown character: ' + c));
@@ -1195,6 +1196,7 @@ var
     inFile.Reset(1);
 
     Text := '';
+    ch:=' ';
 
     try
       while True do
@@ -1206,7 +1208,8 @@ var
 
           if ch in [' ', TAB] then Inc(Spaces);
 
-        until not (ch in [' ', TAB, LF, CR, '{'(*, '}'*)]);    // Skip space, tab, line feed, carriage return, comment braces
+        until not (ch in [' ', TAB, LF, CR, '{'(*, '}'*)]);
+        // Skip space, tab, line feed, carriage return, comment braces
 
 
         ch := UpCase(ch);
@@ -1317,7 +1320,8 @@ var
                 StrParams := SplitStr(copy(Num, 2, length(Num) - 2), ',');
 
                 if High(StrParams) > MAXPARAMS then
-                  Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters, 'Too many formal parameters in ' + Text));
+                  Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters,
+                    'Too many formal parameters in ' + Text));
 
               end;
 
@@ -1448,7 +1452,8 @@ var
 
                   if ch in [' ', TAB] then Inc(Spaces);
 
-                until not (ch in [' ', TAB, LF, CR, '{', '}']);    // Skip space, tab, line feed, carriage return, comment braces
+                until not (ch in [' ', TAB, LF, CR, '{', '}']);
+                // Skip space, tab, line feed, carriage return, comment braces
 
                 AsmFound := False;
 
@@ -1737,8 +1742,8 @@ var
             end
             else
             begin
-              Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected character ''' +
-                ch + ''' found. Expected one of '':><.''.'));
+              Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
+                'Unexpected character ''{0}'' found. Expected one of ''{1}.''', ch, ':><.'));
             end;
           end;
         end;
@@ -1746,8 +1751,8 @@ var
 
         if NumTok = OldNumTok then   // No token found
         begin
-          Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Illegal character ''' + ch +
-            ''' ($' + IntToHex(Ord(ch), 2) + ')'));
+          Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
+            'Illegal character ''{0}'' (${1}) found.', ch, IntToHex(Ord(ch), 2)));
         end;
 
       end;// while

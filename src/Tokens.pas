@@ -3,11 +3,14 @@ unit Tokens;
 
 interface
 
+// The RESERVED_... values are placeholder for compatibility with previous versions.
+// This ensures the existing values are stable when new constants are defined for the existing logical blocks.
+// This is important to have 100% the same output in the A65 files.
 type
   TTokenKind = (
     UNTYPETOK,
 
-    CONSTTOK,
+    CONSTTOK, // 1
     TYPETOK,
     VARTOK,
     PROCEDURETOK,
@@ -15,8 +18,10 @@ type
     LABELTOK,
     UNITTOK,
 
+    RESERVED_8,
+    RESERVED_9,
 
-    GETINTVECTOK,
+    GETINTVECTOK, // 10
     SETINTVECTOK,
     CASETOK,
     BEGINTOK,
@@ -50,7 +55,7 @@ type
     EXITTOK,
     RANGETOK,
 
-    EQTOK,
+    EQTOK, // 43
     NETOK,
     LTTOK,
     LETOK,
@@ -59,7 +64,7 @@ type
     LOTOK,
     HITOK,
 
-    DOTTOK,
+    DOTTOK, // 51
     COMMATOK,
     SEMICOLONTOK,
     OPARTOK,
@@ -70,7 +75,7 @@ type
     CBRACKETTOK,
     COLONTOK,
 
-    PLUSTOK,
+    PLUSTOK,  // 61
     MINUSTOK,
     MULTOK,
     DIVTOK,
@@ -83,7 +88,7 @@ type
     ANDTOK,
     NOTTOK,
 
-    ASSIGNFILETOK,
+    ASSIGNFILETOK, // 73
     RESETTOK,
     REWRITETOK,
     APPENDTOK,
@@ -93,7 +98,7 @@ type
     GETRESOURCEHANDLETOK,
     SIZEOFRESOURCETOK,
 
-    WRITELNTOK,
+    WRITELNTOK, // 82
     SIZEOFTOK,
     LENGTHTOK,
     HIGHTOK,
@@ -104,7 +109,7 @@ type
     ROUNDTOK,
     ODDTOK,
 
-    PROGRAMTOK,
+    PROGRAMTOK, // 92
     LIBRARYTOK,
     EXPORTSTOK,
     EXTERNALTOK,
@@ -123,7 +128,7 @@ type
     INLINETOK,
     KEEPTOK,
 
-    SUCCTOK,
+    SUCCTOK, // 110
     PREDTOK,
     PACKEDTOK,
     GOTOTOK,
@@ -131,8 +136,18 @@ type
     VOLATILETOK,
     STRIPEDTOK,
 
+    RESERVED_117,
+    RESERVED_118,
+    RESERVED_119,
+    RESERVED_120,
+    RESERVED_121,
+    RESERVED_122,
+    RESERVED_123,
+    RESERVED_124,
+    RESERVED_125,
+    RESERVED_126,
 
-    SETTOK,            // Size = 32 SET OF
+    SETTOK,            // 127 Size = 32 SET OF
 
     BYTETOK,           // Size = 1 BYTE
     WORDTOK,           // Size = 2 WORD
@@ -164,17 +179,32 @@ type
 
     DEREFERENCEARRAYTOK, // For ARRAY pointers
 
+    RESERVED_155,
+    RESERVED_156,
+    RESERVED_157,
+    RESERVED_158,
+    RESERVED_159,
 
-    DATAORIGINOFFSET,
+    DATAORIGINOFFSET, // 160
     CODEORIGINOFFSET,
 
-    IDENTTOK,
+    IDENTTOK, // 170
     INTNUMBERTOK,
     FRACNUMBERTOK,
     CHARLITERALTOK,
     STRINGLITERALTOK,
 
-    EVALTOK,
+    RESERVED_175,
+    RESERVED_176,
+    RESERVED_177,
+    RESERVED_178,
+    RESERVED_179,
+    RESERVED_180,
+    RESERVED_181,
+    RESERVED_182,
+    RESERVED_183,
+
+    EVALTOK, // 184
     LOOPUNROLLTOK,
     NOLOOPUNROLLTOK,
     LINKTOK,
@@ -434,8 +464,6 @@ end;
 procedure AssertTokensOrd;
 var
   tokenKind: TTokenKind;
-var
-  Value: Byte;
 begin
   for tokenKind := Low(TTokenKind) to High(TTokenKind) do
   begin

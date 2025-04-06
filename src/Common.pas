@@ -474,7 +474,6 @@ function GetEnumName(IdentIndex: TIdentIndex): TString;
 
 function GetTokenSpellingAtIndex(i: TTokenIndex): String;
 
-
 function GetVAL(a: String): Integer;
 
 function GetValueType(Value: TIntegerNumber): TDataType;
@@ -560,14 +559,16 @@ begin
   begin
     if ftyp = 'unit' then
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find unit ''' + ChangeFileExt(Name, '') +
-        ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+      msg := TMessage.Create(TErrorCode.FileNotFound,
+        'Can''t find unit ''{0}'' used by program ''{1}'' in unit path ''{2}''.',
+        ChangeFileExt(Name, ''), PROGRAM_NAME, unitPathList.ToString);
 
     end
     else
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Can''t find ' + ftyp + ' file ''' +
-        Name + ''' used by program ''' + PROGRAM_NAME + ''' in unit path ''' + unitPathList.ToString + '''.');
+      msg := TMessage.Create(TErrorCode.FileNotFound,
+        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.',
+        ftyp, Name, PROGRAM_NAME, unitPathList.ToString);
     end;
     Error(NumTok, msg);
   end;
@@ -671,7 +672,7 @@ function StrToInt(const a: String): TIntegerNumber;
   (*----------------------------------------------------------------------------*)
 {$IFNDEF PAS2JS}
 var
-  i: Integer;
+  i: Integer; // ##NEEDED
 begin
   val(a, Result, i);
 end;
@@ -717,16 +718,12 @@ end;
 function GetTokenSpellingAtIndex(i: TTokenIndex): TString;
 var
   kind: TTokenKind;
-var
-  index: Byte;
 begin
-
   if i > NumTok then
     Result := 'no token'
   else
   begin
     kind := Tok[i].Kind;
-    index := Ord(kind);
     GetHumanReadbleTokenSpelling(kind);
   end;
 end;
