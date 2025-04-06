@@ -12,3 +12,4 @@ build.bat
 buildrun.bat
 build.sh
 __pycache__
+src/test.bat

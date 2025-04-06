@@ -146,6 +146,9 @@ begin
         end;
         i := i + 2;
       end;
+    end else
+    begin
+       Self.Text := Self.Text + c;
     end;
     Inc(i);
   until i >= l;
