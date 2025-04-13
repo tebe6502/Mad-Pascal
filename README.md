@@ -229,6 +229,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Turbo Pascal vintage collection](https://github.com/torstenroeder/turbopascal)
 * [Nero 5 Chess program](https://github.com/JulStrat/nero5)
 * [KC Chess](https://github.com/JulStrat/kcchess)
+* [FreePascal meets SDL](https://www.freepascal-meets-sdl.net/)
 
 ## YouTube
 
