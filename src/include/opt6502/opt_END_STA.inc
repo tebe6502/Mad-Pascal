@@ -1772,6 +1772,27 @@
        end;
 
 
+    if (l = i + 3) and
+       sta_a(i) and									// sta					; 0
+       iny(i+1) and									// iny					; 1
+       iny(i+2) then									// iny					; 2
+      begin
+	listing[i+2] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if (l = i + 2) and
+       sta_a(i) and									// sta					; 0
+       iny(i+1) then									// iny					; 1
+      begin
+	listing[i+1] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (l = i + 5) and
        UNUSED_A(i) and									// UNUSED_A				; 0
        lda_a(i+1) and									// lda					; 1
