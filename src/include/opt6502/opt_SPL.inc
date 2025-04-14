@@ -1,6 +1,7 @@
 
 function opt_SPL(i: integer): Boolean;
-var p, err: integer;
+var p: integer;
+var err: integer;
 begin
 
     Result := true;

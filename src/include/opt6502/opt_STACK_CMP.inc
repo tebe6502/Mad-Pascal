@@ -1,6 +1,5 @@
 
 function opt_STACK_CMP(i: integer): Boolean;
-var p: integer;
 begin
 
     Result := true;

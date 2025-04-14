@@ -222,6 +222,15 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Programowanie w Mad-Pascal dla C+4](https://c64portal.pl/2021/02/22/programowanie-w-mad-pascal-dla-c4/)
 * [Commodore Plus/4, Mad-Pascal i bitmapy](https://c64portal.pl/2021/04/10/commodore-plus-4-mad-pascal-i-bitmapy/)
 
+## Pascal related
+
+* [Awesome Pascal](https://github.com/Fr0sT-Brutal/awesome-pascal)
+* [Demoscene samples](https://github.com/jdelauney/BZScene-Demoscene-samples)
+* [Turbo Pascal vintage collection](https://github.com/torstenroeder/turbopascal)
+* [Nero 5 Chess program](https://github.com/JulStrat/nero5)
+* [KC Chess](https://github.com/JulStrat/kcchess)
+* [FreePascal meets SDL](https://www.freepascal-meets-sdl.net/)
+
 ## YouTube
 
 * [Arcadia](https://youtu.be/cJXRhfvKeH4)
