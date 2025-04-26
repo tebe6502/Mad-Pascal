@@ -1,9 +1,10 @@
 (* define your types here *)
 
-(* example type 
+// example type 
 type Tplayer = record
-   name: TString;
-   level: byte;
-   score: cardinal; 
+   //name: TString;
+   x,y:byte;
+   angle: byte;
+   //score: cardinal; 
 end;
-*)
+//
