@@ -1,188 +1,12 @@
-(*
+unit Compiler;
 
-Sub-Pascal 32-bit real mode compiler for 80386+ processors v. 2.0 by Vasiliy Tereshkov, 2009
-https://habr.com/en/post/440372/?fbclid=IwAR3SdW_HAqt6psraDj41UtNxFEXIgynOUKvS2d2cwPsJiF0kO_kDTNfYZg4
-
-https://github.com/tebe6502/Mad-Pascal
-
-https://atariage.com/forums/topic/240919-mad-pascal/
-http://atarionline.pl/forum/comments.php?DiscussionID=4825&page=1
-
-WUDSN IDE
-https://atariage.com/forums/topic/145386-wudsn-ide-the-free-integrated-atari-8-bit-development-plugin-for-eclipse/page/25/?tab=comments#comment-4340150
-
-
-Mad-Pascal cross-compiler for MOS 6502 CPU (Atari 8-bit, C64, ... ) by Tomasz Biela, 2015-2025
-
-Contributors:
-
-+ Artyom Beilis, Marek Mauder (https://github.com/artyom-beilis/float16) :
-  - Float16 (half-single)
-
-+ Bartosz Zbytniewski :
-  - Bug Hunter
-  - Commodore C4+/C64 minimal unit SYSTEM setup
-
-+ Bostjan Gorisek :
-  - unit PMG, ZXLIB
-
-+ Chriss Hutt :
-  - unit SMP
-
-+ Daniel Serpell (https://github.com/dmsc) :
-  - conditional directives {$IFDEF}, {$ELSE}, {$DEFINE} ...
-  - unit SYSTEM: fsincos, fast SIN/COS (IEEE754-32 precision)
-  - unit GRAPHICS: TextOut
-  - unit EFAST
-  - unit ZX2
-
-+ David Schmenk :
-  - IEEE-754 (32bit) Single[Float]
-
-+ Daniel Kozminski :
-  - unit STRINGUTILS
-  - unit CIO
-
-+ Guillermo Fuenzalida :
-  - unit MISC: DetectANTIC
-
-+ Janusz Chabowski :
-  - unit SHANTI
-
-+ Jeff Johnson :
-  - opt_BYTE_DIV.inc (Unsigned Integer Division Routines)
-
-+ Jerzy Kut :
-  - {$DEFINE ROMOFF}
-  - RMTPLAY2 (base/atari/players/rmt_player_reloc.asm)
-
-+ Joseph Zatarski (https://forums.atariage.com/topic/225063-full-color-ansi-vbxe-terminal-in-the-works/) :
-  - base\atari\vbxeansi.asm
-
-+ Konrad Kokoszkiewicz :
-  - base\atari\cmdline.asm
-  - base\atari\vbxedetect.asm
-  - unit MISC: DetectCPU, DetectCPUSpeed, DetectMem, DetectHighMem, DetectStereo
-  - unit S2 (VBXE handler)
-
-+ Krzysztof Dudek (http://xxl.atari.pl/) :
-  - unit XBIOS: BLIBS library
-  - unit LZ4: unLZ4
-  - unit aPLib: unAPL
-
-+ Krzysztof Swiecicki :
-  - unit PP
-
-+ Marcin Zukowski :
-  - unit FASTGRAPH: fLine
-
-+ Michael Jaskula :
-  - {$DEFINE BASICOFF} (base\atari\basicoff.asm)
-
-+ Peter Dell :
-  - improved sources to make compilation compatible with pas2js (https://github.com/fpc/pas2js)
-
-+ Piotr Fusik (https://github.com/pfusik) :
-  - base\common\shortreal.asm (div24by15)
-  - base\runtime\icmp.asm
-  - unit GRAPH: detect X:Y graphics resolution (OS mode)
-  - unit CRC
-  - unit DEFLATE: unDEF
-
-+ Rafal Czemko :
-  - system X16 (-t x16)
-
-+ Samuel Vin :
-  - RMTPLAYV (base/atari/players/rmt_playerv_reloc.asm)
-
-+ Sebastian Igielski :
-  - unit MISC: DetectStereo
-
-+ Simon Trew :
-  - unit E80
-
-+ Steven Don (https://www.shdon.com/) :
-  - unit IMAGE, VIMAGE: BMP, GIF, PCX
-
-+ Ullrich von Bassewitz, Christian Krueger (https://github.com/cc65/cc65/libsrc/common/) :
-  - base\common\memmove.asm
-  - base\common\memset.asm
-
-+ Ullrich von Bassewitz (https://github.com/cc65/cc65/libsrc/runtime/) :
-  - 8x8 => 16 multiplication routine (base\common\byte.asm)
-  - 16x8 => 24 multiplication routine (base\common\word.asm)
-  - 16x16 => 32 multiplication routine (base\common\word.asm)
-
-+ Viacheslav Komenda :
-  - unit LZJB
-  - unit RC4
-
-+ Wojciech Bocianski (http://bocianu.atari.pl/) :
-  - library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
-  - MADSTRAP
-  - PASDOC
-  - system NEO6502 (-t neo)
-
-+ Zlatko Bleha (https://atariwiki.org/wiki/Wiki.jsp?page=Super%20fast%20circle%20routine) :
-  - GRAPH.INC Circle
-
-
-
-
-# rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
-# stos programowy sluzy tez do tymczasowego przechowywania wyrazen, wynikow operacji itp.
-
-# typ REAL Fixed-Point Q16.16 przekracza 32 bity dla MUL i DIV, czesty OVERFLOW
-
-# uzywaj asm65('') zamiast #13#10, POS bedzie wlasciwie zwracalo indeks
-
-# parametry dla imulCL, imulCX w konkretnej kolejnosci 1: ECX, 2: EAX
-
-# wystepuja tylko skoki w przod @+ (@- nie wystepuja)
-
-# s[x][0..3] := '';            -> lda :STACKORIGIN+...
-# s[x][0..3] := #9'mva #$00';  -> lda #$00
-
-# :edx+2, :edx+3 nie wystepuje
-
-# 'register' dla procedury/funkcji alokuje parametry na stronie zerowej 1: EDX, 2: ECX, 3: EAX
-# 'register' dla zmiennych alokuje maksymalnie 16 bajtow zmniejszajac licznik 1: :TMP, 2: :ECX, 3: :EDX, 4: :EAX
-
-# jeq, jne, jcc, jcs, jmi, jpl l_xxxx
-
-# wartosc dla typu POINTER zwiekszana jest o CODEORIGIN
-
-# indeks do tablicy zawsze promowany jest do typu WORD
-
-# :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia sie tylko :BP+1
-# :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
-
-# indeks dla jednowymiarowej tablicy [0..x] = a * GetDataSize(AllocElementType)
-# indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * GetDataSize(AllocElementType)) + b * GetDataSize(AllocElementType)
-
-# dla typu OBJECT przekazywany jest poczatkowy adres alokacji danych pamieci (HI = regY, LO = regA), potem sa obliczane kolejne adresy w naglowku procedury/funkcji
-
-# podczas wartosciowania wyrazen typy sa roszerzane, w przypadku operacji '-' promowane do SIGNEDORDINALTYPES (BYTE -> TTokenKind.SMALLINTTOK ; WORD -> TTokenKind.INTEGERTOK)
-
-# (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 0) wersja z { }
-# (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 1) wersja bez { }
-
-# --------------------------------------------------------------------------------------------------------------
-#                          |      DataType      |  AllocElementType  |  NumAllocElements  |  NumAllocElements_ |
-# --------------------------------------------------------------------------------------------------------------
-# VAR RECORD               | TTokenKind.RECORDTOK          | 0                  | RecType            | 0                  |
-# VAR ^RECORD              | TTokenKind.POINTERTOK         | TTokenKind.RECORDTOK          | RecType            | 0                  |
-# ARRAY [0..X]             | TTokenKind.POINTERTOK         | Type               | X Array Size       | 0                  |
-# ARRAY [0..X, 0..Y]       | TTokenKind.POINTERTOK         | Type               | X Array Size       | Y Array Size       |
-# ARRAY [0..X] OF ^RECORD  | TTokenKind.POINTERTOK         | TTokenKind.RECORDTOK          | RecType            | X Array Size       |
-# ARRAY [0..X] OF ^OBJECT  | TTokenKind.POINTERTOK         | TTokenKind.OBJECTTOK          | RecType            | X Array Size       |
-# --------------------------------------------------------------------------------------------------------------
-
-*)
-
-program MADPASCAL;
+interface
 
 {$I Defines.inc}
+
+procedure Main;
+
+implementation
 
 uses
   SysUtils,
@@ -194,7 +18,6 @@ uses
   {$ENDIF}
   Common,
   CommonTypes,
-  Compiler,
   Console,
   Diagnostic,
   FileIO,
@@ -19554,35 +19377,4 @@ end;
     NormVideo;
   end;
 
-var
-  exitCode: TExitCode;
-  fileMap: TFileMap;
-begin
-
-  exitCode := 0;
-  try
-    Compiler.Main;
-  except
-    on e: THaltException do
-    begin
-      exitCode := e.GetExitCode();
-    end;
-  end;
-
-  if (exitCode <> 0) then
-  begin
-    WriteLn('Program ended with exit code ' + IntToStr(exitCode));
-  end;
-
-  {$IFDEF DEBUG}
-  {$IFDEF SIMULATED_FILE_IO}
-  fileMap:=TFileSystem.GetFileMap();
-  WriteLn(fileMap.GetEntry('Output.a65').content);
-  {$ENDIF}
-  Console.WaitForKeyPressed;
-  {$ENDIF}
-
-  {$IFNDEF PAS2JS}
-  Halt(exitCode);
-  {$ENDIF}
 end.
