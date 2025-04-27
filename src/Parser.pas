@@ -1624,10 +1624,7 @@ begin
               (Elements(NumIdent) = 1) then  // [0..0] ; [0..0, 0..0]
 
             else
-            if (Low(_DataSize) <= Ord(AllocElementType)) and (Ord(AllocElementType) <= High(_DataSize)) then
-            begin
               VarDataSize := VarDataSize + Integer(Elements(NumIdent) * GetDataSize(AllocElementType));
-            end;
 
           end;
 
