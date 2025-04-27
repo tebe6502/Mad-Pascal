@@ -228,6 +228,7 @@ var
 begin
 
   folderPath := IncludeTrailingPathDelimiter(folderPath);
+  folderPath := TFileSystem.NormalizePath(folderPath);
 
   // Do not add duplicates.
   for i := Low(paths) to High(paths) do
@@ -686,11 +687,20 @@ begin
   // https://github.com/tebe6502/Mad-Pascal/issues/113
   {$IFDEF UNIX}
    if Pos('\', filePath) > 0 then
-    Result := LowerCase(StringReplace(filePath, '\', '/', [rfReplaceAll]));
+   begin
+    Result := StringReplace(filePath, '\', '/', [rfReplaceAll]);
+   end;
+
+  Result := LowerCase(Result);
   {$ENDIF}
 
-  {$IFDEF LINUX}
-    Result := LowerCase(filePath);
+  {$IFDEF SIMULATED_FILE_IO}
+   if Pos('\', filePath) > 0 then
+   begin
+    Result := StringReplace(filePath, '\', '/', [rfReplaceAll]);
+   end;
+
+  Result := LowerCase(Result);
   {$ENDIF}
 
 end;
@@ -703,13 +713,14 @@ begin
 end;
 
 procedure InitializeFileMap;
+
 var
   fileMapEntry: TFileMapEntry;
 begin
   fileMap := TFileMap.Create;
   fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
   fileMapEntry.content := 'Program TestProgram; begin end.';
-  fileMapEntry:=fileMap.AddEntry('lib\system.pas', TFileMapEntry.TFileType.TextFile);
+  fileMapEntry:=fileMap.AddEntry('lib'+TFileSystem.PathDelim+'system.pas', TFileMapEntry.TFileType.TextFile);
   fileMapEntry.content :=
     'unit System;' + LineEnding  +
     'interface'     + LineEnding  +
