@@ -170,7 +170,7 @@ begin
       Self.Text := Self.Text + c;
     end;
     Inc(i);
-  until i >= l;
+  until i > l;
 
 end;
 

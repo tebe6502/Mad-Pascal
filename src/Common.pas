@@ -1028,7 +1028,7 @@ begin
     expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
     Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected +
-      '''' + ' expected but ''' + found + ''' found'));
+      '''' + ' expected but ''' + found + ''' found.'));
 
   end;
 
