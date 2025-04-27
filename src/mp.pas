@@ -186,25 +186,18 @@ program MADPASCAL;
 
 uses
   SysUtils,
-  Math, // Required for Min(), do not remove
- {$IFDEF WINDOWS}
-	Windows,
-   {$ENDIF} {$IFDEF PAS2JS}
-         browserconsole,
-   {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows,
+  {$ENDIF}
+  {$IFDEF PAS2JS}
+  browserconsole,
+  {$ENDIF}
   Common,
-  CommonTypes,
   Compiler,
   Console,
   Diagnostic,
   FileIO,
-  MathEvaluate,
   Messages,
-  Numbers,
-  Scanner,
-  Optimize,
-  Parser,
-  StringUtilities,
   Tokens,
   Utilities;
 
@@ -454,30 +447,15 @@ uses
 
   procedure Main;
 
-{$IFNDEF PAS2JS}
-  const
-    PI_VALUE: TNumber = $40490FDB00000324; // does not fit into 53 bits Javascript double  mantissa
-  const
-    NAN_VALUE: TNumber = $FFC00000FFC00000;
-  const
-    INFINITY_VALUE: TNumber = $7F8000007F800000;
-  const
-    NEGINFINITY_VALUE: TNumber = $FF800000FF800000;
-{$ELSE}
-  const PI_VALUE: Int64 = 3; // does not fit into 53 bits Javascript double  mantissa
-  const NAN_VALUE: Int64 = $11111111;
-  const INFINITY_VALUE: Int64 = $22222222;
-  const NEGINFINITY_VALUE: Int64 = $33333333;
-{$ENDIF}
-
   var
+    start_time: QWord;
     seconds: ValReal;
   begin
 
 {$IFDEF WINDOWS}
- if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then begin
-  System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
- end;
+   if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then begin
+    System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
+   end;
 {$ENDIF}
 
     // WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
@@ -517,6 +495,8 @@ uses
 
     OutFile.Rewrite;
 
+
+    start_time := GetTickCount64;
     Compiler.Main;
 
     OutFile.Flush;

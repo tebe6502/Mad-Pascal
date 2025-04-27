@@ -12,15 +12,9 @@ implementation
 uses
   SysUtils,
   Math, // Required for Min(), do not remove
- {$IFDEF WINDOWS}
-	Windows,
-  {$ENDIF} {$IFDEF PAS2JS}
-         browserconsole,
-  {$ENDIF}
   Common,
   CommonTypes,
   Console,
-  Diagnostic,
   FileIO,
   MathEvaluate,
   Messages,
@@ -18945,8 +18939,6 @@ end;
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
 
-  var
-    seconds: ValReal;
   begin
 
     SetLength(Tok, 1);
@@ -18961,8 +18953,6 @@ end;
     TextColor(WHITE);
 
     Writeln('Compiling ' + UnitName[1].Name);
-
-    start_time := GetTickCount64;
 
     // ----------------------------------------------------------------------------
     // Set defines for first pass;

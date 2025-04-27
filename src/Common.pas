@@ -385,8 +385,6 @@ var
 
   iOut: Integer = -1;
 
-  start_time: QWord;
-
   CODEORIGIN_BASE: Integer = -1;
 
   DATA_BASE: Integer = -1;
