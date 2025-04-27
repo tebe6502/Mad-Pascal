@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses StringUtilities, CommonTypes, Common, Memory, Tokens; // TODO: Only use tokens and type
+uses CommonTypes,Tokens; // TODO: Only use tokens and type
 
 // ----------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TI
 
 implementation
 
-uses SysUtils, Messages, FileIO, Utilities;
+uses SysUtils,  Common,  Messages, FileIO, Memory, StringUtilities, Targets, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -1120,7 +1120,7 @@ var
 
     begin
 
-      if target.id = TComputer.A8 then
+      if target.id = TTargetID.A8 then
       begin
 
         for i := p to length(Text) do
@@ -1838,6 +1838,7 @@ end;  //TokenizeProgram
 
 procedure TokenizeMacro(a: String; Line, Spaces: Integer);
 var
+  i: Integer;
   Text: String;
   Num, Frac: TString;
   Err, Line2, TextPos, im: Integer;
@@ -1908,7 +1909,7 @@ var
 
   begin
 
-    if target.id = TComputer.A8 then
+    if target.id = TTargetID.A8 then
     begin
 
       for i := p to length(Text) do

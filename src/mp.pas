@@ -197,6 +197,7 @@ uses
   Diagnostic,
   FileIO,
   Messages,
+  Targets,
   Tokens,
   Utilities;
 
@@ -223,6 +224,7 @@ uses
     // Command line parameters
     unitPathList: TPathList;
     DiagMode: Boolean;
+    targetID: TTargetID;
 
     StartTime: QWord;
     seconds: ValReal;
@@ -235,7 +237,7 @@ uses
       c: String;
     begin
 
-      target.id := TComputer.A8;
+      targetID := TTargetID.A8;
       c := '';    // cpu
 
       i := 1;
@@ -385,13 +387,13 @@ uses
 
                                               Inc(i);
                                               parameterValue := TEnvironment.GetParameterStringUpperCase(i);
-                                              target.id := ParseTargetParameter(i, parameterValue);
+                                              targetID := ParseTargetParameter(i, parameterValue);
                                             end
                                             else
                                               if pos('-TARGET:', parameterUpperCase) = 1 then
                                               begin
                                                 parameterValue := AnsiUpperCase(copy(parameter, 9, 255));
-                                                target.id := ParseTargetParameter(i, parameterValue);
+                                                targetID := ParseTargetParameter(i, parameterValue);
                                               end
                                               else
                                                 ParameterError(i, 'Unknown option ''' + parameter + '''.');
@@ -415,7 +417,7 @@ uses
         Inc(i);
       end;
 
-{$i targets/init.inc}
+      Init(targetId, target);
 
 
       if CODEORIGIN_BASE < 0 then

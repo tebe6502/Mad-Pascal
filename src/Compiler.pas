@@ -27,6 +27,7 @@ uses
   Optimize,
   Parser,
   StringUtilities,
+  Targets,
   Tokens,
   Utilities;
 
@@ -18497,7 +18498,7 @@ end;
 
     if LIBRARY_USE then asm65('@regX'#9'ldx #$00');
 
-    if target.id = TComputer.A8 then
+    if target.id = TTargetID.A8 then
     begin
 
       if LIBRARY_USE = False then
@@ -18805,7 +18806,7 @@ end;
 
     end;
 
-    if target.id = TComputer.A8 then
+    if target.id = TTargetID.A8 then
     begin
       asm65;
       asm65(#9'run START');
@@ -18856,7 +18857,7 @@ end;
     asm65('.endm');
 
 
-    if (High(resArray) > 0) and (target.id <> TComputer.A8) then
+    if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
     begin
 
       asm65;

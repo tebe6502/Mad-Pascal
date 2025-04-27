@@ -68,15 +68,15 @@ begin
     ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
 end;
 
-function ParseTargetParameter(const index: Longint; const parameterValue: String): TComputer;
+function ParseTargetParameter(const index: Longint; const parameterValue: String): TTargetID;
 begin
 
-if parameterValue = 'A8' then target.id := TComputer.A8
-else if parameterValue = 'C64' then target.id := TComputer.C64
-  else if parameterValue = 'C4P' then target.id := TComputer.C4P
-    else if parameterValue = 'NEO' then target.id := TComputer.NEO
-      else if parameterValue = 'RAW' then target.id := TComputer.RAW
-        else if parameterValue = 'X16' then target.id := TComputer.X16
+if parameterValue = 'A8' then Result := TTargetID.A8
+else if parameterValue = 'C64' then Result := TTargetID.C64
+  else if parameterValue = 'C4P' then Result := TTargetID.C4P
+    else if parameterValue = 'NEO' then Result := TTargetID.NEO
+      else if parameterValue = 'RAW' then Result := TTargetID.RAW
+        else if parameterValue = 'X16' then Result := TTargetID.X16
           else
             ParameterError(index, 'Invalid target ''' +
               parameterValue + '''. Use on of ''A8, C64, C4P, NEO, RAW, X16''.');

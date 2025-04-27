@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, FileIO, Memory, StringUtilities, Tokens;
+uses SysUtils, CommonTypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -129,9 +129,6 @@ const
     );
 
   fBlockRead_ParamType: array [1..3] of TTokenKind = (TTokenKind.UNTYPETOK, TTokenKind.WORDTOK, TTokenKind.POINTERTOK);
-
-
-{$i targets/type.inc}
 
 
 type
@@ -334,8 +331,8 @@ type
 
   TCaseLabelArray = array of TCaseLabel;
 
-
-{$i targets/var.inc}
+var
+  target: TTarget;
 
 
 type
@@ -373,6 +370,7 @@ var
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func,
   NumProc, BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+
   pass: TPass;
 
   iOut: Integer = -1;
@@ -490,13 +488,13 @@ begin
     Result := 0;
   end
   else if ((index >= Low(_DataSize)) and (index <= High(_DataSize))) then
-  begin
-    Result := _DataSize[index];
-  end
-  else
-  begin
-    Assert(False);
-  end;
+    begin
+      Result := _DataSize[index];
+    end
+    else
+    begin
+      Assert(False);
+    end;
 
 end;
 
@@ -552,8 +550,8 @@ begin
     else
     begin
       msg := TMessage.Create(TErrorCode.FileNotFound,
-        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.',
-        ftyp, Name, PROGRAM_NAME, unitPathList.ToString);
+        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.', ftyp,
+        Name, PROGRAM_NAME, unitPathList.ToString);
     end;
     Error(NumTok, msg);
   end;
@@ -637,13 +635,13 @@ begin
       Result := Ident[IdentTtemp].Name;
   end
   else
-  if Ident[IdentIndex].DataType = ENUMTYPE then
-  begin
-    IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
+    if Ident[IdentIndex].DataType = ENUMTYPE then
+    begin
+      IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
 
-    if IdentTtemp > 0 then
-      Result := Ident[IdentTtemp].Name;
-  end;
+      if IdentTtemp > 0 then
+        Result := Ident[IdentTtemp].Name;
+    end;
 
 end;  //GetEnumName
 
@@ -967,9 +965,9 @@ begin
 
     if Value >= Low(Shortint) then Result := TDataType.SHORTINTTOK
     else
-    if Value >= Low(Smallint) then Result := TDataType.SMALLINTTOK
-    else
-      Result := TDataType.INTEGERTOK;
+      if Value >= Low(Smallint) then Result := TDataType.SMALLINTTOK
+      else
+        Result := TDataType.INTEGERTOK;
 
   end
   else
@@ -1061,8 +1059,8 @@ begin
     Result := LeftType
 
   else
-  if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
-    Result := LeftType;
+    if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
+      Result := LeftType;
 
   if (LeftType in Pointers) and (RightType in Pointers) then
     Result := LeftType;
