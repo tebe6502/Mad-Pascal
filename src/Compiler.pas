@@ -20,6 +20,7 @@ uses
   CommonTypes,
   Console,
   MathEvaluate,
+  Memory,
   Messages,
   Numbers,
   Scanner,

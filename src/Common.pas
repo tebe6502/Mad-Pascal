@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, FileIO, StringUtilities, Tokens;
+uses SysUtils, CommonTypes, FileIO, Memory, StringUtilities, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -337,14 +337,6 @@ type
 
 {$i targets/var.inc}
 
-const
-  MIN_MEMORY_ADDRESS = $0000;
-
-const
-  MAX_MEMORY_ADDRESS = $FFFF;
-
-type
-  TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
 
 type
   TTokenIndex = Integer;
@@ -435,8 +427,6 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
-
-procedure ClearWordMemory(anArray: TWordMemory);
 
 function GetDataSize(const dataType: TDataType): Byte;
 
@@ -1161,16 +1151,5 @@ begin
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-procedure ClearWordMemory(anArray: TWordMemory);
-begin
-  for i := Low(anArray) to High(anArray) do
-  begin
-    anArray[i] := 0;
-  end;
-end;
 
 end.

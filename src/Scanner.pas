@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses StringUtilities, CommonTypes, Common, Tokens; // TODO: Only use tokens and type
+uses StringUtilities, CommonTypes, Common, Memory, Tokens; // TODO: Only use tokens and type
 
 // ----------------------------------------------------------------------------
 
