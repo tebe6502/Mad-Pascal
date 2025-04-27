@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-      {$ENDIF} {$IFDEF PAS2JS}
+                {$ENDIF} {$IFDEF PAS2JS}
   browserconsole,
-      {$ENDIF}
+                {$ENDIF}
   Common,
   Compiler,
   Console,
@@ -232,10 +232,10 @@ uses
       i: Integer;
       parameter, parameterUpperCase, parameterValue: String;
       s: String;
-      t, c: String;
+      c: String;
     begin
 
-      t := 'A8';  // target
+      target.id := TComputer.A8;
       c := '';    // cpu
 
       i := 1;
@@ -384,18 +384,17 @@ uses
                                             begin
 
                                               Inc(i);
-                                              t := TEnvironment.GetParameterStringUpperCase(i);
-
+                                              parameterValue := TEnvironment.GetParameterStringUpperCase(i);
+                                              target.id := ParseTargetParameter(i, parameterValue);
                                             end
                                             else
                                               if pos('-TARGET:', parameterUpperCase) = 1 then
                                               begin
-
-                                                t := AnsiUpperCase(copy(parameter, 9, 255));
-
+                                                parameterValue := AnsiUpperCase(copy(parameter, 9, 255));
+                                                target.id := ParseTargetParameter(i, parameterValue);
                                               end
                                               else
-                                                ParameterError(i, 'Unkown option ''' + parameter + '''.');
+                                                ParameterError(i, 'Unknown option ''' + parameter + '''.');
 
         end
         // No minus, so this must be the file name.
@@ -415,9 +414,6 @@ uses
 
         Inc(i);
       end;
-
-
-{$i targets/parse_param.inc}
 
 {$i targets/init.inc}
 
@@ -479,7 +475,15 @@ uses
 
     NumUnits := 1;           // !!! 1 !!!
     UnitName[1].Name := '';
-    ParseParam();
+    try
+      ParseParam();
+    except
+      on e: THaltException do
+      begin
+        Result := e.GetExitCode();
+        Exit;
+      end;
+    end;
 
     if (UnitName[1].Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
 

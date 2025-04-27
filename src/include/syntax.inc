@@ -67,3 +67,17 @@ begin
   if (Result < 0) or (Result > $10000) then
     ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
 end;
+
+function ParseTargetParameter(const index: Longint; const parameterValue: String): TComputer;
+begin
+
+if parameterValue = 'A8' then target.id := TComputer.A8
+else if parameterValue = 'C64' then target.id := TComputer.C64
+  else if parameterValue = 'C4P' then target.id := TComputer.C4P
+    else if parameterValue = 'NEO' then target.id := TComputer.NEO
+      else if parameterValue = 'RAW' then target.id := TComputer.RAW
+        else if parameterValue = 'X16' then target.id := TComputer.X16
+          else
+            ParameterError(index, 'Invalid target ''' +
+              parameterValue + '''. Use on of ''A8, C64, C4P, NEO, RAW, X16''.');
+end;
