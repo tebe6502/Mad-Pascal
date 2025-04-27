@@ -119,7 +119,7 @@ procedure WritelnMsg;
 
 implementation
 
-uses SysUtils, TypInfo, Console, FileIO, Utilities;
+uses SysUtils, TypInfo, Console, Utilities;
 
 // -----------------------------------------------------------------------------
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
@@ -389,7 +389,7 @@ begin
 
     //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
 
-    WritelnMsg;
+    WritelnMsg;  // TODO: Required?
 
     if tokenIndex <= NumTok then effectiveTokenIndex := tokenIndex
     else
