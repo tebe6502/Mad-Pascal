@@ -24,8 +24,11 @@ const
 function GetDataSize(const dataType: TDataType): Byte;
 function GetValueType(Value: TInteger): TDataType;
 
-// Data type sizes
 
+implementation
+
+
+// Data type sizes
 const
   _DataSize: array [Ord(TTokenKind.BYTETOK)..Ord(TTokenKind.FORWARDTYPE)] of Byte = (
     1,  // Size = 1 BYTE
@@ -51,9 +54,6 @@ const
     2,  // Size = 2 TEXTFILE
     2  // Size = 2 FORWARD
     );
-
-
-implementation
 
 
 function GetDataSize(const dataType: TDataType): Byte;
