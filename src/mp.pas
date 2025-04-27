@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                {$ENDIF} {$IFDEF PAS2JS}
+                 {$ENDIF} {$IFDEF PAS2JS}
   browserconsole,
-                {$ENDIF}
+                 {$ENDIF}
   Common,
   Compiler,
   Console,
@@ -225,6 +225,8 @@ uses
     unitPathList: TPathList;
     DiagMode: Boolean;
     targetID: TTargetID;
+    useDefaultCPU: Boolean;
+    cpu: TCPU;
 
     StartTime: QWord;
     seconds: ValReal;
@@ -238,7 +240,7 @@ uses
     begin
 
       targetID := TTargetID.A8;
-      c := '';    // cpu
+      useDefaultCPU := True;
 
       i := 1;
       while i <= TEnvironment.GetParameterCount() do
@@ -289,14 +291,16 @@ uses
                     begin
 
                       Inc(i);
-                      c := TEnvironment.GetParameterStringUpperCase(i);
+                      parameterValue := TEnvironment.GetParameterStringUpperCase(i);
+                      cpu := ParseCPUParameter(i, parameterValue);
 
                     end
                     else
                       if pos('-CPU:', parameterUpperCase) = 1 then
                       begin
 
-                        c := copy(parameter, 6, 255);
+                        parameterValue := copy(parameter, 6, 255);
+                        cpu := ParseCPUParameter(i, parameterValue);
 
                       end
                       else
@@ -432,15 +436,7 @@ uses
         target.zpage := ZPAGE_BASE;
 
 
-      if c <> '' then
-        if AnsiUpperCase(c) = '6502' then target.cpu := TCPU.CPU_6502
-        else
-          if AnsiUpperCase(c) = '65C02' then target.cpu := TCPU.CPU_65C02
-          else
-            if AnsiUpperCase(c) = '65816' then target.cpu := TCPU.CPU_65816
-            else
-              Syntax(THaltException.COMPILING_NOT_STARTED);
-
+      if not useDefaultCPU then target.cpu := cpu;
 
       case target.cpu of
         TCPU.CPU_6502: AddDefine('CPU_6502');
