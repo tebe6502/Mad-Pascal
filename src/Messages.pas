@@ -419,14 +419,6 @@ begin
 
     NormVideo;
 
-    FreeTokens;
-
-    if Outfile <> nil then
-    begin
-      OutFile.Close;
-      OutFile.Erase;
-    end;
-
     RaiseHaltException(THaltException.COMPILING_ABORTED);
 
   end;

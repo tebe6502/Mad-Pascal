@@ -186,12 +186,11 @@ program MADPASCAL;
 
 uses
   SysUtils,
-  {$IFDEF WINDOWS}
+ {$IFDEF WINDOWS}
   Windows,
-  {$ENDIF}
-  {$IFDEF PAS2JS}
+      {$ENDIF} {$IFDEF PAS2JS}
   browserconsole,
-  {$ENDIF}
+      {$ENDIF}
   Common,
   Compiler,
   Console,
@@ -208,199 +207,214 @@ uses
 {$i include/syntax.inc}
 
 
-  // ----------------------------------------------------------------------------
-  // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
-  procedure ParseParam;
+// ----------------------------------------------------------------------------
+//                                 Main program
+// ----------------------------------------------------------------------------
+
+  function Main: TExitCode;
+
   var
-    i: Integer;
-    parameter, parameterUpperCase, parameterValue: String;
-    s: String;
-    t, c: String;
-  begin
+    MainPath: String;
 
-    t := 'A8';  // target
-    c := '';    // cpu
+    // Command line parameters
+    unitPathList: TPathList;
+    DiagMode: Boolean;
 
-    i := 1;
-    while i <= TEnvironment.GetParameterCount() do
+    StartTime: QWord;
+    seconds: ValReal;
+
+    procedure ParseParam;
+    var
+      i: Integer;
+      parameter, parameterUpperCase, parameterValue: String;
+      s: String;
+      t, c: String;
     begin
-      parameter := TEnvironment.GetParameterString(i);
-      parameterUpperCase := AnsiUpperCase(parameter);
-      // Options start with a minus.
-      if parameter[1] = '-' then
-      begin
 
-        if parameterUpperCase = '-O' then
+      t := 'A8';  // target
+      c := '';    // cpu
+
+      i := 1;
+      while i <= TEnvironment.GetParameterCount() do
+      begin
+        parameter := TEnvironment.GetParameterString(i);
+        parameterUpperCase := AnsiUpperCase(parameter);
+        // Options start with a minus.
+        if parameter[1] = '-' then
         begin
 
-          Inc(i);
-          outputFile := parameter;
-          if outputFile = '' then ParameterError(i, 'Output file path is empty');
-
-        end
-        else
-          if pos('-O:', parameterUpperCase) = 1 then
+          if parameterUpperCase = '-O' then
           begin
 
-            outputFile := copy(parameter, 4, 255);
+            Inc(i);
+            outputFile := parameter;
             if outputFile = '' then ParameterError(i, 'Output file path is empty');
 
           end
           else
-            if parameterUpperCase = '-DIAG' then
-              DiagMode := True
+            if pos('-O:', parameterUpperCase) = 1 then
+            begin
+
+              outputFile := copy(parameter, 4, 255);
+              if outputFile = '' then ParameterError(i, 'Output file path is empty');
+
+            end
             else
-
-              if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
-              begin
-                Inc(i);
-                AddPath(TEnvironment.GetParameterString(i));
-
-              end
+              if parameterUpperCase = '-DIAG' then
+                DiagMode := True
               else
-                if pos('-IPATH:', parameterUpperCase) = 1 then
-                begin
 
-                  s := copy(parameter, 8, 255);
-                  AddPath(s);
+                if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
+                begin
+                  Inc(i);
+                  AddPath(TEnvironment.GetParameterString(i));
 
                 end
                 else
-                  if (parameterUpperCase = '-CPU') then
+                  if pos('-IPATH:', parameterUpperCase) = 1 then
                   begin
 
-                    Inc(i);
-                    c := TEnvironment.GetParameterStringUpperCase(i);
+                    s := copy(parameter, 8, 255);
+                    unitPathList.AddFolder(s);
 
                   end
                   else
-                    if pos('-CPU:', parameterUpperCase) = 1 then
+                    if (parameterUpperCase = '-CPU') then
                     begin
 
-                      c := copy(parameter, 6, 255);
+                      Inc(i);
+                      c := TEnvironment.GetParameterStringUpperCase(i);
 
                     end
                     else
-                      if (parameterUpperCase = '-DEFINE') or (parameterUpperCase = '-DEF') then
+                      if pos('-CPU:', parameterUpperCase) = 1 then
                       begin
 
-                        Inc(i);
-                        AddDefine(TEnvironment.GetParameterStringUpperCase(i));
-                        AddDefines := NumDefines;
+                        c := copy(parameter, 6, 255);
 
                       end
                       else
-                        if pos('-DEFINE:', parameterUpperCase) = 1 then
+                        if (parameterUpperCase = '-DEFINE') or (parameterUpperCase = '-DEF') then
                         begin
 
-                          s := copy(parameter, 9, 255);
-                          AddDefine(AnsiUpperCase(s));
+                          Inc(i);
+                          AddDefine(TEnvironment.GetParameterStringUpperCase(i));
                           AddDefines := NumDefines;
 
                         end
                         else
-                          if (parameterUpperCase = '-CODE') or (parameterUpperCase = '-C') then
+                          if pos('-DEFINE:', parameterUpperCase) = 1 then
                           begin
 
-                            Inc(i);
-                            parameterValue := TEnvironment.GetParameterString(i);
-                            CODEORIGIN_BASE := ParseHexParameter(i, parameterValue);
+                            s := copy(parameter, 9, 255);
+                            AddDefine(AnsiUpperCase(s));
+                            AddDefines := NumDefines;
 
                           end
                           else
-                            if pos('-CODE:', parameterUpperCase) = 1 then
+                            if (parameterUpperCase = '-CODE') or (parameterUpperCase = '-C') then
                             begin
-                              parameterValue := copy(parameter, 7, 255);
+
+                              Inc(i);
+                              parameterValue := TEnvironment.GetParameterString(i);
                               CODEORIGIN_BASE := ParseHexParameter(i, parameterValue);
 
                             end
                             else
-                              if (parameterUpperCase = '-DATA') or (parameterUpperCase = '-D') then
+                              if pos('-CODE:', parameterUpperCase) = 1 then
                               begin
-
-                                Inc(i);
-                                parameterValue := TEnvironment.GetParameterString(i);
-                                DATA_BASE := ParseHexParameter(i, parameterValue);
+                                parameterValue := copy(parameter, 7, 255);
+                                CODEORIGIN_BASE := ParseHexParameter(i, parameterValue);
 
                               end
                               else
-                                if pos('-DATA:', parameterUpperCase) = 1 then
+                                if (parameterUpperCase = '-DATA') or (parameterUpperCase = '-D') then
                                 begin
-                                  parameterValue := copy(parameter, 7, 255);
+
+                                  Inc(i);
+                                  parameterValue := TEnvironment.GetParameterString(i);
                                   DATA_BASE := ParseHexParameter(i, parameterValue);
 
                                 end
                                 else
-                                  if (parameterUpperCase = '-STACK') or (parameterUpperCase = '-S') then
+                                  if pos('-DATA:', parameterUpperCase) = 1 then
                                   begin
-
-                                    Inc(i);
-                                    parameterValue := TEnvironment.GetParameterString(i);
-                                    STACK_BASE := ParseHexParameter(i, parameterValue);
+                                    parameterValue := copy(parameter, 7, 255);
+                                    DATA_BASE := ParseHexParameter(i, parameterValue);
 
                                   end
                                   else
-                                    if pos('-STACK:', parameterUpperCase) = 1 then
+                                    if (parameterUpperCase = '-STACK') or (parameterUpperCase = '-S') then
                                     begin
-                                      parameterValue := copy(parameter, 8, 255);
+
+                                      Inc(i);
+                                      parameterValue := TEnvironment.GetParameterString(i);
                                       STACK_BASE := ParseHexParameter(i, parameterValue);
 
                                     end
                                     else
-                                      if (parameterUpperCase = '-ZPAGE') or (parameterUpperCase = '-Z') then
+                                      if pos('-STACK:', parameterUpperCase) = 1 then
                                       begin
-
-                                        Inc(i);
-                                        parameterValue := TEnvironment.GetParameterString(i);
-                                        ZPAGE_BASE := ParseHexParameter(i, parameterValue);
+                                        parameterValue := copy(parameter, 8, 255);
+                                        STACK_BASE := ParseHexParameter(i, parameterValue);
 
                                       end
                                       else
-                                        if pos('-ZPAGE:', parameterUpperCase) = 1 then
+                                        if (parameterUpperCase = '-ZPAGE') or (parameterUpperCase = '-Z') then
                                         begin
-                                          parameterValue := copy(parameter, 8, 255);
+
+                                          Inc(i);
+                                          parameterValue := TEnvironment.GetParameterString(i);
                                           ZPAGE_BASE := ParseHexParameter(i, parameterValue);
 
                                         end
                                         else
-                                          if (parameterUpperCase = '-TARGET') or (parameterUpperCase = '-T') then
+                                          if pos('-ZPAGE:', parameterUpperCase) = 1 then
                                           begin
-
-                                            Inc(i);
-                                            t := TEnvironment.GetParameterStringUpperCase(i);
+                                            parameterValue := copy(parameter, 8, 255);
+                                            ZPAGE_BASE := ParseHexParameter(i, parameterValue);
 
                                           end
                                           else
-                                            if pos('-TARGET:', parameterUpperCase) = 1 then
+                                            if (parameterUpperCase = '-TARGET') or (parameterUpperCase = '-T') then
                                             begin
 
-                                              t := AnsiUpperCase(copy(parameter, 9, 255));
+                                              Inc(i);
+                                              t := TEnvironment.GetParameterStringUpperCase(i);
 
                                             end
                                             else
-                                              ParameterError(i, 'Unkown option ''' + parameter + '''.');
+                                              if pos('-TARGET:', parameterUpperCase) = 1 then
+                                              begin
 
-      end
-      // No minus, so this must be the file name.
-      else
+                                                t := AnsiUpperCase(copy(parameter, 9, 255));
 
-      begin
-        UnitName[1].Name := TEnvironment.GetParameterString(i);
-        UnitName[1].Path := UnitName[1].Name;
+                                              end
+                                              else
+                                                ParameterError(i, 'Unkown option ''' + parameter + '''.');
 
-        if not TFileSystem.FileExists_(UnitName[1].Name) then
+        end
+        // No minus, so this must be the file name.
+        else
+
         begin
-          writeln('Error: Can''t open file ''' + UnitName[1].Name + '''.');
-          FreeTokens;
-          RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
+          UnitName[1].Name := TEnvironment.GetParameterString(i);
+          UnitName[1].Path := UnitName[1].Name;
+
+          if not TFileSystem.FileExists_(UnitName[1].Name) then
+          begin
+            writeln('Error: Can''t open file ''' + UnitName[1].Name + '''.');
+            RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
+          end;
+
         end;
 
+        Inc(i);
       end;
-
-      Inc(i);
-    end;
 
 
 {$i targets/parse_param.inc}
@@ -408,52 +422,45 @@ uses
 {$i targets/init.inc}
 
 
-    if CODEORIGIN_BASE < 0 then
-      CODEORIGIN_BASE := target.codeorigin
-    else
-      target.codeorigin := CODEORIGIN_BASE;
-
-
-    if ZPAGE_BASE < 0 then
-      ZPAGE_BASE := target.zpage
-    else
-      target.zpage := ZPAGE_BASE;
-
-
-    if c <> '' then
-      if AnsiUpperCase(c) = '6502' then target.cpu := TCPU.CPU_6502
+      if CODEORIGIN_BASE < 0 then
+        CODEORIGIN_BASE := target.codeorigin
       else
-        if AnsiUpperCase(c) = '65C02' then target.cpu := TCPU.CPU_65C02
+        target.codeorigin := CODEORIGIN_BASE;
+
+
+      if ZPAGE_BASE < 0 then
+        ZPAGE_BASE := target.zpage
+      else
+        target.zpage := ZPAGE_BASE;
+
+
+      if c <> '' then
+        if AnsiUpperCase(c) = '6502' then target.cpu := TCPU.CPU_6502
         else
-          if AnsiUpperCase(c) = '65816' then target.cpu := TCPU.CPU_65816
+          if AnsiUpperCase(c) = '65C02' then target.cpu := TCPU.CPU_65C02
           else
-            Syntax(THaltException.COMPILING_NOT_STARTED);
+            if AnsiUpperCase(c) = '65816' then target.cpu := TCPU.CPU_65816
+            else
+              Syntax(THaltException.COMPILING_NOT_STARTED);
 
 
-    case target.cpu of
-      TCPU.CPU_6502: AddDefine('CPU_6502');
-      TCPU.CPU_65C02: AddDefine('CPU_65C02');
-      TCPU.CPU_65816: AddDefine('CPU_65816');
-    end;
+      case target.cpu of
+        TCPU.CPU_6502: AddDefine('CPU_6502');
+        TCPU.CPU_65C02: AddDefine('CPU_65C02');
+        TCPU.CPU_65816: AddDefine('CPU_65816');
+      end;
 
-    AddDefines := NumDefines;
+      AddDefines := NumDefines;
 
-  end;  //ParseParam
+    end;  //ParseParam
 
-
-  // ----------------------------------------------------------------------------
-  //                                 Main program
-  // ----------------------------------------------------------------------------
-
-  procedure Main;
-
-  var
-    start_time: QWord;
-    seconds: ValReal;
+    // Main
   begin
 
+    Result := 0;
 {$IFDEF WINDOWS}
-   if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then begin
+   if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then
+   begin
     System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
    end;
 {$ENDIF}
@@ -462,18 +469,19 @@ uses
 
     WriteLn(Compiler.CompilerTitle);
 
-    unitPathList := TPathList.Create;
+
     MainPath := ExtractFilePath(ParamStr(0));
     MainPath := IncludeTrailingPathDelimiter(MainPath);
+    unitPathList := TPathList.Create;
     unitPathList.AddFolder(MainPath + 'lib');
 
-    if (TEnvironment.GetParameterCount = 0) then Syntax(3);
+    if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
     NumUnits := 1;           // !!! 1 !!!
     UnitName[1].Name := '';
-    ParseParam;
+    ParseParam();
 
-    if (UnitName[1].Name = '') then Syntax(3);
+    if (UnitName[1].Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
 
     if pos(MainPath, ExtractFilePath(UnitName[1].Name)) > 0 then
       FilePath := ExtractFilePath(UnitName[1].Name)
@@ -496,11 +504,20 @@ uses
     OutFile.Rewrite;
 
 
-    start_time := GetTickCount64;
-    Compiler.Main;
+    StartTime := GetTickCount64;
 
-    OutFile.Flush;
-    OutFile.Close;
+    try
+      Compiler.Main(unitPathList);
+      OutFile.Flush;
+      OutFile.Close;
+    except
+      on e: THaltException do
+      begin
+        Result := e.GetExitCode();
+        OutFile.Close;
+        OutFile.Erase;
+      end;
+    end;
 
 {$IFDEF USEOPTFILE}
 
@@ -516,7 +533,7 @@ uses
     WritelnMsg;
 
     TextColor(WHITE);
-    seconds := (GetTickCount64 - start_time + 500) / 1000;
+    seconds := (GetTickCount64 - StartTime + 500) / 1000;
 {$IFNDEF PAS2JS}
     Writeln(Tok[NumTok].Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
       NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
@@ -526,7 +543,7 @@ uses
 	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
 {$ENDIF}
 
-    FreeTokens;
+    Compiler.Free;
 
     TextColor(LIGHTGRAY);
 
@@ -541,16 +558,7 @@ var
   fileMap: TFileMap;
 begin
 
-  exitCode := 0;
-  try
-    Main;
-  except
-    on e: THaltException do
-    begin
-      exitCode := e.GetExitCode();
-    end;
-  end;
-
+  exitCode := Main();
   if (exitCode <> 0) then
   begin
     WriteLn('Program ended with exit code ' + IntToStr(exitCode));
