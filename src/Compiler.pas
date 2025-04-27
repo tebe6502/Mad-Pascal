@@ -4,8 +4,12 @@ interface
 
 {$I Defines.inc}
 
+uses FileIO;
+
 function CompilerTitle: String;
-procedure Main;
+
+procedure Main(const unitPathList: TPathList);
+procedure Free;
 
 implementation
 
@@ -15,7 +19,6 @@ uses
   Common,
   CommonTypes,
   Console,
-  FileIO,
   MathEvaluate,
   Messages,
   Numbers,
@@ -18918,10 +18921,10 @@ end;
 
 
   // ----------------------------------------------------------------------------
-  //                                 Main program
+  //                                 Compiler Main
   // ----------------------------------------------------------------------------
 
-  procedure Main;
+  procedure Main(const unitPathList: TPathList);
 
 {$IFNDEF PAS2JS}
   const
@@ -18941,6 +18944,7 @@ end;
 
   begin
 
+    Common.unitPathList := unitPathList;
     SetLength(Tok, 1);
     SetLength(IFTmpPosStack, 1);
 
@@ -19046,6 +19050,15 @@ end;
     Pass := TPass.CODE_GENERATION;
     CompileProgram;
 
+  end;
+
+  procedure Free;
+  begin
+
+    SetLength(Tok, 0);
+    SetLength(IFTmpPosStack, 0);
+    unitPathList.Free;
+    unitPathList:=nil;
   end;
 
 end.

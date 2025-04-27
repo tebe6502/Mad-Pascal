@@ -401,7 +401,7 @@ var
 
   resArray: array of TResource;
 
-  MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
+  FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
   msgWarning, msgNote, msgUser: TStringArray;
   OptimizeBuf, LinkObj: TStringArray;
@@ -421,7 +421,6 @@ var
   PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
   isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
-  DiagMode: Boolean = False;
   DataSegmentUse: Boolean = False;
 
   LoopUnroll: Boolean = False;
@@ -461,8 +460,6 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
 function FindFile(Name: String; ftyp: TString): String; overload;
-
-procedure FreeTokens;
 
 function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 
@@ -693,19 +690,6 @@ function IntToStr(const a: Int64): String;
   (*----------------------------------------------------------------------------*)
 begin
   str(a, Result);
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure FreeTokens;
-begin
-
-  SetLength(Tok, 0);
-  SetLength(IFTmpPosStack, 0);
-  unitPathList.Free;
 end;
 
 
