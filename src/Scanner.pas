@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses CommonTypes,Tokens; // TODO: Only use tokens and type
+uses CommonTypes, Tokens; // TODO: Only use tokens and type
 
 // ----------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TI
 
 implementation
 
-uses SysUtils,  Common,  Messages, FileIO, Memory, StringUtilities, Targets, Utilities;
+uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, StringUtilities, Targets, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -384,9 +384,9 @@ var
             if UpCase(c) in AllowLabelChars then
               Result := Result + UpCase(c)
             else if c = '}' then
-              i := 9
-            else
-              i := 8;
+                i := 9
+              else
+                i := 8;
           8:
             if c = '}' then i := 9;
         end;
@@ -411,11 +411,11 @@ var
             Exit(False);
         end
         else if (lvl = 0) and (dir = 'ELSE') then
-          Exit(True)
-        else if dir = 'IFDEF' then
-          Inc(lvl)
-        else if dir = 'IFNDEF' then
-          Inc(lvl);
+            Exit(True)
+          else if dir = 'IFDEF' then
+              Inc(lvl)
+            else if dir = 'IFNDEF' then
+                Inc(lvl);
       until False;
     end;
 
@@ -508,242 +508,242 @@ var
 
         if cmd = 'WARNING' then newMsgUser(TTokenKind.WARNINGTOK)
         else
-        if cmd = 'ERROR' then newMsgUser(TTokenKind.ERRORTOK)
-        else
-        if cmd = 'INFO' then newMsgUser(TTokenKind.INFOTOK)
-        else
-
-        if cmd = 'MACRO+' then macros := True
-        else
-        if cmd = 'MACRO-' then macros := False
-        else
-        if cmd = 'MACRO' then
-        begin
-
-          s := GetStringUpperCase(d, i);
-
-          if s = 'ON' then macros := True
+          if cmd = 'ERROR' then newMsgUser(TTokenKind.ERRORTOK)
           else
-          if s = 'OFF' then macros := False
-          else
-            Error(NumTok, TMessage.Create(TErrorCode.WrongSwitchToggle, 'Wrong switch toggle, use ON/OFF or +/-'));
-
-        end
-        else
-
-        if cmd = 'I' then
-        begin          // {$i filename}
-          // {$i+-} iocheck
-          if d[i] = '+' then
-          begin
-            AddToken(TTokenKind.IOCHECKON, UnitIndex, Line, 1, 0);
-            AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
-          end
-          else
-          if d[i] = '-' then
-          begin
-            AddToken(TTokenKind.IOCHECKOFF, UnitIndex, Line, 1, 0);
-            AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
-          end
-          else
-          begin
-            //   AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
-
-            s := GetString(d, False, i);        // don't change the case, it could be a file path
-
-            if AnsiUpperCase(s) = '%TIME%' then
-            begin
-
-              s := TimeToStr(Now);
-
-              AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
-              Spaces := 0;
-              DefineStaticString(NumTok, s);
-
-            end
+            if cmd = 'INFO' then newMsgUser(TTokenKind.INFOTOK)
             else
-            if AnsiUpperCase(s) = '%DATE%' then
-            begin
 
-              s := DateToStr(Now);
+              if cmd = 'MACRO+' then macros := True
+              else
+                if cmd = 'MACRO-' then macros := False
+                else
+                  if cmd = 'MACRO' then
+                  begin
 
-              AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
-              Spaces := 0;
-              DefineStaticString(NumTok, s);
+                    s := GetStringUpperCase(d, i);
 
-            end
-            else
-            begin
+                    if s = 'ON' then macros := True
+                    else
+                      if s = 'OFF' then macros := False
+                      else
+                        Error(NumTok, TMessage.Create(TErrorCode.WrongSwitchToggle, 'Wrong switch toggle, use ON/OFF or +/-'));
 
-              nam := FindFile(s, 'include');
+                  end
+                  else
 
-              _line := Line;
-              _uidx := UnitIndex;
+                    if cmd = 'I' then
+                    begin          // {$i filename}
+                      // {$i+-} iocheck
+                      if d[i] = '+' then
+                      begin
+                        AddToken(TTokenKind.IOCHECKON, UnitIndex, Line, 1, 0);
+                        AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                      end
+                      else
+                        if d[i] = '-' then
+                        begin
+                          AddToken(TTokenKind.IOCHECKOFF, UnitIndex, Line, 1, 0);
+                          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                        end
+                        else
+                        begin
+                          //   AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-              Line := 1;
-              UnitName[IncludeIndex].Name := ExtractFileName(nam);
-              UnitName[IncludeIndex].Path := nam;
-              UnitIndex := IncludeIndex;
-              Inc(IncludeIndex);
+                          s := GetString(d, False, i);        // don't change the case, it could be a file path
 
-              if IncludeIndex > High(UnitName) then
-                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IncludeIndex: ' +
-                  IntToStr(IncludeIndex)));
+                          if AnsiUpperCase(s) = '%TIME%' then
+                          begin
 
-              Tokenize(nam);
+                            s := TimeToStr(Now);
 
-              Line := _line;
-              UnitIndex := _uidx;
+                            AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
+                            Spaces := 0;
+                            DefineStaticString(NumTok, s);
 
-            end;
+                          end
+                          else
+                            if AnsiUpperCase(s) = '%DATE%' then
+                            begin
 
-          end;
+                              s := DateToStr(Now);
 
-        end
-        else
+                              AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
+                              Spaces := 0;
+                              DefineStaticString(NumTok, s);
 
-        if (cmd = 'EVAL') then
-        begin
+                            end
+                            else
+                            begin
 
-          if d.LastIndexOf('}') < 0 then
-            Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Character ''}'' expected'));
+                              nam := FindFile(s, 'include');
 
-          s := copy(d, i, d.LastIndexOf('}') - i + 1);
-          s := TrimRight(s);
+                              _line := Line;
+                              _uidx := UnitIndex;
 
-          if s[length(s)] <> '"' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
-              'Syntax error. Missing ''"'''));
+                              Line := 1;
+                              UnitName[IncludeIndex].Name := ExtractFileName(nam);
+                              UnitName[IncludeIndex].Path := nam;
+                              UnitIndex := IncludeIndex;
+                              Inc(IncludeIndex);
 
-          AddToken(TTokenKind.EVALTOK, UnitIndex, Line, 1, 0);
+                              if IncludeIndex > High(UnitName) then
+                                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IncludeIndex: ' +
+                                  IntToStr(IncludeIndex)));
 
-          DefineFilename(NumTok, s);
+                              Tokenize(nam);
 
-        end
-        else
+                              Line := _line;
+                              UnitIndex := _uidx;
 
-        if (cmd = 'BIN2CSV') then
-        begin
+                            end;
 
-          s := GetFilePath(d, i);
+                        end;
 
-          s := FindFile(s, 'BIN2CSV');
+                    end
+                    else
 
-          bin2csv(s);
+                      if (cmd = 'EVAL') then
+                      begin
 
-        end
-        else
+                        if d.LastIndexOf('}') < 0 then
+                          Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Character ''}'' expected'));
 
-        if (cmd = 'OPTIMIZATION') then
-        begin
+                        s := copy(d, i, d.LastIndexOf('}') - i + 1);
+                        s := TrimRight(s);
 
-          s := GetStringUpperCase(d, i);
+                        if s[length(s)] <> '"' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+                            'Syntax error. Missing ''"'''));
 
-          if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, UnitIndex, Line, 1, 0)
-          else
-          if s = 'NOLOOPUNROLL' then AddToken(TTokenKind.NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0)
-          else
-            Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
-              'Illegal optimization specified "' + s + '"'));
+                        AddToken(TTokenKind.EVALTOK, UnitIndex, Line, 1, 0);
 
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                        DefineFilename(NumTok, s);
 
-        end
-        else
+                      end
+                      else
 
-        if (cmd = 'CODEALIGN') then
-        begin
+                        if (cmd = 'BIN2CSV') then
+                        begin
 
-          s := GetStringUpperCase(d, i);
+                          s := GetFilePath(d, i);
 
-          if s = 'PROC' then AddToken(TTokenKind.PROCALIGNTOK, UnitIndex, Line, 1, 0)
-          else
-          if s = 'LOOP' then AddToken(TTokenKind.LOOPALIGNTOK, UnitIndex, Line, 1, 0)
-          else
-          if s = 'LINK' then AddToken(TTokenKind.LINKALIGNTOK, UnitIndex, Line, 1, 0)
-          else
-            Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective,
-              'Illegal alignment directive ''' + s + '''.'));
+                          s := FindFile(s, 'BIN2CSV');
 
-          SkipWhitespaces(d, i);
+                          bin2csv(s);
 
-          if d[i] <> '=' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
-          Inc(i);
-          SkipWhitespaces(d, i);
+                        end
+                        else
 
-          s := GetNumber(d, i);
+                          if (cmd = 'OPTIMIZATION') then
+                          begin
 
-          val(s, v, Err);
+                            s := GetStringUpperCase(d, i);
 
-          if Err > 0 then
-            ErrorOrdinalExpExpected(NumTok);
+                            if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, UnitIndex, Line, 1, 0)
+                            else
+                              if s = 'NOLOOPUNROLL' then AddToken(TTokenKind.NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0)
+                              else
+                                Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
+                                  'Illegal optimization specified "' + s + '"'));
 
-          GetCommonConstType(NumTok, TTokenKind.WORDTOK, GetValueType(v));
+                            AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-          Tok[NumTok].Value := v;
+                          end
+                          else
 
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                            if (cmd = 'CODEALIGN') then
+                            begin
 
-        end
-        else
+                              s := GetStringUpperCase(d, i);
 
-        if (cmd = 'UNITPATH') then
-        begin      // {$unitpath path1;path2;...}
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                              if s = 'PROC' then AddToken(TTokenKind.PROCALIGNTOK, UnitIndex, Line, 1, 0)
+                              else
+                                if s = 'LOOP' then AddToken(TTokenKind.LOOPALIGNTOK, UnitIndex, Line, 1, 0)
+                                else
+                                  if s = 'LINK' then AddToken(TTokenKind.LINKALIGNTOK, UnitIndex, Line, 1, 0)
+                                  else
+                                    Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective,
+                                      'Illegal alignment directive ''' + s + '''.'));
 
-          repeat
+                              SkipWhitespaces(d, i);
 
-            s := GetFilePath(d, i);
+                              if d[i] <> '=' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
+                              Inc(i);
+                              SkipWhitespaces(d, i);
 
-            if s = '' then
-              Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
+                              s := GetNumber(d, i);
 
-            AddPath(s);
+                              val(s, v, Err);
 
-            if d[i] = ';' then
-              Inc(i)
-            else
-              Break;
+                              if Err > 0 then
+                                ErrorOrdinalExpExpected(NumTok);
 
-          until d[i] = ';';
+                              GetCommonConstType(NumTok, TTokenKind.WORDTOK, GetValueType(v));
 
-          Dec(NumTok);
-        end
-        else
+                              Tok[NumTok].Value := v;
 
-        if (cmd = 'LIBRARYPATH') then
-        begin      // {$librarypath path1;path2;...}
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                              AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-          repeat
+                            end
+                            else
 
-            s := GetFilePath(d, i);
+                              if (cmd = 'UNITPATH') then
+                              begin      // {$unitpath path1;path2;...}
+                                AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-            if s = '' then
-              Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
+                                repeat
 
-            AddPath(s);
+                                  s := GetFilePath(d, i);
 
-            if d[i] = ';' then
-              Inc(i)
-            else
-              Break;
+                                  if s = '' then
+                                    Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
 
-          until d[i] = ';';
+                                  AddPath(s);
 
-          Dec(NumTok);
-        end
-        else
+                                  if d[i] = ';' then
+                                    Inc(i)
+                                  else
+                                    Break;
 
-        if (cmd = 'R') and not (d[i] in ['+', '-']) then
-        begin  // {$R filename}
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                until d[i] = ';';
 
-          s := GetFilePath(d, i);
-          AddResource(FindFile(s, 'resource'));
+                                Dec(NumTok);
+                              end
+                              else
 
-          Dec(NumTok);
-        end
-        else
+                                if (cmd = 'LIBRARYPATH') then
+                                begin      // {$librarypath path1;path2;...}
+                                  AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+
+                                  repeat
+
+                                    s := GetFilePath(d, i);
+
+                                    if s = '' then
+                                      Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
+
+                                    AddPath(s);
+
+                                    if d[i] = ';' then
+                                      Inc(i)
+                                    else
+                                      Break;
+
+                                  until d[i] = ';';
+
+                                  Dec(NumTok);
+                                end
+                                else
+
+                                  if (cmd = 'R') and not (d[i] in ['+', '-']) then
+                                  begin  // {$R filename}
+                                    AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+
+                                    s := GetFilePath(d, i);
+                                    AddResource(FindFile(s, 'resource'));
+
+                                    Dec(NumTok);
+                                  end
+                                  else
 (*
        if cmd = 'C' then begin          // {$c 6502|65816}
   AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
@@ -761,166 +761,166 @@ var
        end else
 *)
 
-        if (cmd = 'L') or (cmd = 'LINK') then
-        begin    // {$L filename} | {$LINK filename}
-          AddToken(TTokenKind.LINKTOK, UnitIndex, Line, 1, 0);
+                                    if (cmd = 'L') or (cmd = 'LINK') then
+                                    begin    // {$L filename} | {$LINK filename}
+                                      AddToken(TTokenKind.LINKTOK, UnitIndex, Line, 1, 0);
 
-          s := GetFilePath(d, i);
-          s := FindFile(s, 'link object');
+                                      s := GetFilePath(d, i);
+                                      s := FindFile(s, 'link object');
 
-          DefineFilename(NumTok, s);
+                                      DefineFilename(NumTok, s);
 
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                      AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-          //dec(NumTok);
-        end
-        else
+                                      //dec(NumTok);
+                                    end
+                                    else
 
-        if (cmd = 'F') or (cmd = 'FASTMUL') then
-        begin    // {$F [page address]}
-          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                      if (cmd = 'F') or (cmd = 'FASTMUL') then
+                                      begin    // {$F [page address]}
+                                        AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-          s := GetNumber(d, i);
+                                        s := GetNumber(d, i);
 
-          val(s, FastMul, Err);
+                                        val(s, FastMul, Err);
 
-          if Err <> 0 then
-            ErrorOrdinalExpExpected(NumTok);
+                                        if Err <> 0 then
+                                          ErrorOrdinalExpExpected(NumTok);
 
-          AddDefine('FASTMUL');
-          AddDefines := NumDefines;
+                                        AddDefine('FASTMUL');
+                                        AddDefines := NumDefines;
 
-          GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
+                                        GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
 
-          Dec(NumTok);
-        end
-        else
+                                        Dec(NumTok);
+                                      end
+                                      else
 
-        if (cmd = 'IFDEF') or (cmd = 'IFNDEF') then
-        begin
+                                        if (cmd = 'IFDEF') or (cmd = 'IFNDEF') then
+                                        begin
 
-          found := 0 <> SearchDefine(GetLabelUpperCase(d, i));
+                                          found := 0 <> SearchDefine(GetLabelUpperCase(d, i));
 
-          if cmd = 'IFNDEF' then found := not found;
+                                          if cmd = 'IFNDEF' then found := not found;
 
-          if not found then
-          begin
-            if SkipCodeUntilElseEndif then
-              Inc(IfdefLevel);
-          end
-          else
-            Inc(IfdefLevel);
-        end
-        else
-        if cmd = 'ELSE' then
-        begin
-          if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
-            Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf, 'Found $ELSE without $IFXXX'));
-          if IfdefLevel > 0 then
-            Dec(IfdefLevel);
-        end
-        else
-        if cmd = 'ENDIF' then
-        begin
-          if IfdefLevel = 0 then
-            Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf, 'Found $ENDIF without $IFXXX'))
-          else
-            Dec(IfdefLevel);
-        end
-        else
-        if cmd = 'DEFINE' then
-        begin
-          nam := GetLabelUpperCase(d, i);
+                                          if not found then
+                                          begin
+                                            if SkipCodeUntilElseEndif then
+                                              Inc(IfdefLevel);
+                                          end
+                                          else
+                                            Inc(IfdefLevel);
+                                        end
+                                        else
+                                          if cmd = 'ELSE' then
+                                          begin
+                                            if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
+                                              Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf, 'Found $ELSE without $IFXXX'));
+                                            if IfdefLevel > 0 then
+                                              Dec(IfdefLevel);
+                                          end
+                                          else
+                                            if cmd = 'ENDIF' then
+                                            begin
+                                              if IfdefLevel = 0 then
+                                                Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf, 'Found $ENDIF without $IFXXX'))
+                                              else
+                                                Dec(IfdefLevel);
+                                            end
+                                            else
+                                              if cmd = 'DEFINE' then
+                                              begin
+                                                nam := GetLabelUpperCase(d, i);
 
-          Err := 0;
+                                                Err := 0;
 
-          skip_spaces;
+                                                skip_spaces;
 
-          if d[i] = '(' then
-          begin  // macro parameters
+                                                if d[i] = '(' then
+                                                begin  // macro parameters
 
-            Param[1] := '';
-            Param[2] := '';
-            Param[3] := '';
-            Param[4] := '';
-            Param[5] := '';
-            Param[6] := '';
-            Param[7] := '';
-            Param[8] := '';
+                                                  Param[1] := '';
+                                                  Param[2] := '';
+                                                  Param[3] := '';
+                                                  Param[4] := '';
+                                                  Param[5] := '';
+                                                  Param[6] := '';
+                                                  Param[7] := '';
+                                                  Param[8] := '';
 
-            Inc(i);
-            skip_spaces;
+                                                  Inc(i);
+                                                  skip_spaces;
 
-            Tok[NumTok].Line := line;
+                                                  Tok[NumTok].Line := line;
 
-            if not (UpCase(d[i]) in AllowLabelFirstChars) then
-              Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ''identifier'' expected'));
+                                                  if not (UpCase(d[i]) in AllowLabelFirstChars) then
+                                                    Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ''identifier'' expected'));
 
-            repeat
+                                                  repeat
 
-              Inc(Err);
+                                                    Inc(Err);
 
-              if Err > MAXPARAMS then
-                Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters,
-                  'Too many formal parameters in ' + nam));
+                                                    if Err > MAXPARAMS then
+                                                      Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters,
+                                                        'Too many formal parameters in ' + nam));
 
-              Param[Err] := GetLabelUpperCase(d, i);
+                                                    Param[Err] := GetLabelUpperCase(d, i);
 
-              for x := 1 to Err - 1 do
-                if Param[x] = Param[Err] then
-                  Error(NumTok, TMessage.Create(TErrorCode.DuplicateIdentifier,
-                    'Duplicate identifier ''' + Param[Err] + ''''));
+                                                    for x := 1 to Err - 1 do
+                                                      if Param[x] = Param[Err] then
+                                                        Error(NumTok, TMessage.Create(TErrorCode.DuplicateIdentifier,
+                                                          'Duplicate identifier ''' + Param[Err] + ''''));
 
-              skip_spaces;
+                                                    skip_spaces;
 
-              if d[i] = ',' then
-              begin
-                Inc(i);
-                skip_spaces;
+                                                    if d[i] = ',' then
+                                                    begin
+                                                      Inc(i);
+                                                      skip_spaces;
 
-                if not (UpCase(d[i]) in AllowLabelFirstChars) then
-                  Error(NumTok, TMessage.Create(TErrorCode.IdentifierExpected,
-                    'Syntax error, ''identifier'' expected'));
-              end;
+                                                      if not (UpCase(d[i]) in AllowLabelFirstChars) then
+                                                        Error(NumTok, TMessage.Create(TErrorCode.IdentifierExpected,
+                                                          'Syntax error, ''identifier'' expected'));
+                                                    end;
 
-            until d[i] = ')';
+                                                  until d[i] = ')';
 
-            Inc(i);
-            skip_spaces;
+                                                  Inc(i);
+                                                  skip_spaces;
 
-          end;
+                                                end;
 
 
-          if (d[i] = ':') and (d[i + 1] = '=') then
-          begin
-            Inc(i, 2);
+                                                if (d[i] = ':') and (d[i + 1] = '=') then
+                                                begin
+                                                  Inc(i, 2);
 
-            skip_spaces;
+                                                  skip_spaces;
 
-            AddDefine(nam);    // define macro
+                                                  AddDefine(nam);    // define macro
 
-            s := copy(d, i, length(d));
-            SetLength(s, length(s) - 1);
+                                                  s := copy(d, i, length(d));
+                                                  SetLength(s, length(s) - 1);
 
-            Defines[NumDefines].Macro := s;
-            Defines[NumDefines].Line := DefineLine;
+                                                  Defines[NumDefines].Macro := s;
+                                                  Defines[NumDefines].Line := DefineLine;
 
-            if Err > 0 then Defines[NumDefines].Param := Param;
+                                                  if Err > 0 then Defines[NumDefines].Param := Param;
 
-          end
-          else
-            AddDefine(nam);
+                                                end
+                                                else
+                                                  AddDefine(nam);
 
-        end
-        else
-        if cmd = 'UNDEF' then
-        begin
-          nam := GetLabelUpperCase(d, i);
-          RemoveDefine(nam);
-        end
-        else
-          Error(NumTok, TMessage.Create(TErrorCode.IllegalCompilerDirective, 'Illegal compiler directive $' +
-            cmd + d[i]));
+                                              end
+                                              else
+                                                if cmd = 'UNDEF' then
+                                                begin
+                                                  nam := GetLabelUpperCase(d, i);
+                                                  RemoveDefine(nam);
+                                                end
+                                                else
+                                                  Error(NumTok, TMessage.Create(TErrorCode.IllegalCompilerDirective, 'Illegal compiler directive $' +
+                                                    cmd + d[i]));
 
       end;
 
@@ -1002,16 +1002,16 @@ var
 
       end
       else
-      if c = '/' then
-      begin
-        InFile.Read(c2);
+        if c = '/' then
+        begin
+          InFile.Read(c2);
 
-        if c2 = '/' then
-          ReadSingleLineComment
-        else
-          InFile.Seek2(InFile.FilePos() - 1);
+          if c2 = '/' then
+            ReadSingleLineComment
+          else
+            InFile.Seek2(InFile.FilePos() - 1);
 
-      end;
+        end;
 
       if c = LF then Inc(Line);        // Increment current line number
     end;
@@ -1162,30 +1162,30 @@ var
       end
       else
 
-      if ch = '$' then
-      begin      // hexadecimal
+        if ch = '$' then
+        begin      // hexadecimal
 
-        SafeReadChar(ch);
-
-        while ch in AllowDigitChars do
-        begin
-          Num := Num + ch;
           SafeReadChar(ch);
-        end;
 
-        if length(Num) = 0 then
-          ErrorOrdinalExpExpected(NumTok);
+          while ch in AllowDigitChars do
+          begin
+            Num := Num + ch;
+            SafeReadChar(ch);
+          end;
 
-        Num := '$' + Num;
+          if length(Num) = 0 then
+            ErrorOrdinalExpExpected(NumTok);
 
-      end
-      else
+          Num := '$' + Num;
 
-        while ch in ['0'..'9'] do    // Number suspected
-        begin
-          Num := Num + ch;
-          SafeReadChar(ch);
-        end;
+        end
+        else
+
+          while ch in ['0'..'9'] do    // Number suspected
+          begin
+            Num := Num + ch;
+            SafeReadChar(ch);
+          end;
 
     end;
 
@@ -1707,45 +1707,45 @@ var
             Spaces := 0;
           end
           else
-          if (ch = '.') and (ch2 in ['0'..'9']) then
-          begin
-
-            AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, 0, 0);
-
-            Frac := '0.';      // Fractional part found
-
-            while ch2 in ['0'..'9'] do
+            if (ch = '.') and (ch2 in ['0'..'9']) then
             begin
-              Frac := Frac + ch2;
-              SafeReadChar(ch2);
-            end;
 
-            Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
-            Tok[NumTok].FracValue := StrToFloat(Frac);
-            Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
-            Spaces := 0;
+              AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, 0, 0);
 
-            Frac := '';
+              Frac := '0.';      // Fractional part found
 
-            InFile.Seek2(InFile.FilePos() - 1);
+              while ch2 in ['0'..'9'] do
+              begin
+                Frac := Frac + ch2;
+                SafeReadChar(ch2);
+              end;
 
-          end
-          else
-          begin
-            InFile.Seek2(InFile.FilePos() - 1);
-            Line := Line2;
-
-            if ch in [':', '>', '<', '.'] then
-            begin        // Single-character token found
-              AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0);
+              Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
+              Tok[NumTok].FracValue := StrToFloat(Frac);
+              Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
               Spaces := 0;
+
+              Frac := '';
+
+              InFile.Seek2(InFile.FilePos() - 1);
+
             end
             else
             begin
-              Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
-                'Unexpected character ''{0}'' found. Expected one of ''{1}.''', ch, ':><.'));
+              InFile.Seek2(InFile.FilePos() - 1);
+              Line := Line2;
+
+              if ch in [':', '>', '<', '.'] then
+              begin        // Single-character token found
+                AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0);
+                Spaces := 0;
+              end
+              else
+              begin
+                Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
+                  'Unexpected character ''{0}'' found. Expected one of ''{1}.''', ch, ':><.'));
+              end;
             end;
-          end;
         end;
 
 
@@ -1953,33 +1953,33 @@ var
     end
     else
 
-    if ch = '$' then
-    begin      // hexadecimal
+      if ch = '$' then
+      begin      // hexadecimal
 
-      ch := a[i];
-      Inc(i);
-
-      while UpCase(ch) in AllowDigitChars do
-      begin
-        Num := Num + ch;
         ch := a[i];
         Inc(i);
-      end;
 
-      if length(Num) = 0 then
-        ErrorOrdinalExpExpected(NumTok);
+        while UpCase(ch) in AllowDigitChars do
+        begin
+          Num := Num + ch;
+          ch := a[i];
+          Inc(i);
+        end;
 
-      Num := '$' + Num;
+        if length(Num) = 0 then
+          ErrorOrdinalExpExpected(NumTok);
 
-    end
-    else
+        Num := '$' + Num;
 
-      while ch in ['0'..'9'] do    // Number suspected
-      begin
-        Num := Num + ch;
-        ch := a[i];
-        Inc(i);
-      end;
+      end
+      else
+
+        while ch in ['0'..'9'] do    // Number suspected
+        begin
+          Num := Num + ch;
+          ch := a[i];
+          Inc(i);
+        end;
 
   end;
 
@@ -2339,43 +2339,43 @@ begin
         Spaces := 0;
       end
       else
-      if (ch = '.') and (ch2 in ['0'..'9']) then
-      begin
-
-        AddToken(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
-
-        Frac := '0.';      // Fractional part found
-
-        while ch2 in ['0'..'9'] do
+        if (ch = '.') and (ch2 in ['0'..'9']) then
         begin
-          Frac := Frac + ch2;
 
-          ch2 := a[i];
-          Inc(i);
-        end;
+          AddToken(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
 
-        Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
-        Tok[NumTok].FracValue := StrToFloat(Frac);
-        Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
-        Spaces := 0;
+          Frac := '0.';      // Fractional part found
 
-        Frac := '';
+          while ch2 in ['0'..'9'] do
+          begin
+            Frac := Frac + ch2;
 
-        Dec(i);
+            ch2 := a[i];
+            Inc(i);
+          end;
 
-      end
-      else
-      begin
-        Dec(i);
-        Line := Line2;
-
-        if ch in [':', '>', '<', '.'] then
-        begin        // Single-character token found
-          AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+          Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
+          Tok[NumTok].FracValue := StrToFloat(Frac);
+          Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
           Spaces := 0;
-        end;
 
-      end;
+          Frac := '';
+
+          Dec(i);
+
+        end
+        else
+        begin
+          Dec(i);
+          Line := Line2;
+
+          if ch in [':', '>', '<', '.'] then
+          begin        // Single-character token found
+            AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+            Spaces := 0;
+          end;
+
+        end;
 
     end;
 

@@ -26,7 +26,7 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:..\lib ..\src\tests\Test-MP.pas -cpu A81"/>
+            <CommandLineParams Value="-iPath:..\lib ..\src\tests\Test-MP.pas"/>
           </local>
         </Mode>
       </Modes>
@@ -527,6 +527,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\Targets.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Datatypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

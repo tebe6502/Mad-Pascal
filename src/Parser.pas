@@ -4,7 +4,7 @@ unit Parser;
 
 interface
 
-uses Common, Numbers, Tokens;
+uses Common, Datatypes, Numbers, Tokens;
 
 // -----------------------------------------------------------------------------
 

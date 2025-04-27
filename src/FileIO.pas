@@ -12,12 +12,13 @@ uses SysUtils, CommonTypes;
 
 type
   TFilePath = String;
+  TFolderPath = TFilePath;
 
 
   TPathList = class
   public
     constructor Create;
-    procedure AddFolder(folderPath: TFilePath);
+    procedure AddFolder(folderPath: TFolderPath);
     function FindFile(filePath: TFilePath): TFilePath;
     function GetSize: Integer;
     function ToString: String; override;
@@ -221,7 +222,7 @@ begin
   SetLength(paths, 0);
 end;
 
-procedure TPathList.AddFolder(folderPath: TFilePath);
+procedure TPathList.AddFolder(folderPath: TFolderPath);
 var
   i, size: Integer;
 begin

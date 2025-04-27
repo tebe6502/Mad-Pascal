@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, FileIO, Memory, StringUtilities, Targets, Tokens;
+uses SysUtils, CommonTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -30,18 +30,6 @@ const
 
 
 const
-  UnsignedOrdinalTypes = [TTokenKind.BYTETOK, TTokenKind.WORDTOK, TTokenKind.CARDINALTOK];
-  SignedOrdinalTypes = [TTokenKind.SHORTINTTOK, TTokenKind.SMALLINTTOK, TTokenKind.INTEGERTOK];
-  RealTypes = [TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK];
-
-  IntegerTypes = UnsignedOrdinalTypes + SignedOrdinalTypes;
-  OrdinalTypes = IntegerTypes + [TTokenKind.CHARTOK, TTokenKind.BOOLEANTOK, TTokenKind.ENUMTOK];
-
-  Pointers = [TTokenKind.POINTERTOK, TTokenKind.PROCVARTOK, TTokenKind.STRINGPOINTERTOK, TTokenKind.PCHARTOK];
-
-  AllTypes = OrdinalTypes + RealTypes + Pointers;
-
-  StringTypes = [TTokenKind.STRINGPOINTERTOK, TTokenKind.STRINGLITERALTOK, TTokenKind.PCHARTOK];
 
   // Identifier kind codes
 
@@ -100,34 +88,6 @@ const
   ASSINGLE = 11;
   ASPCHAR = 12;
 
-
-  // Data sizes
-
-  _DataSize: array [Ord(TTokenKind.BYTETOK)..Ord(TTokenKind.FORWARDTYPE)] of Byte = (
-    1,  // Size = 1 BYTE
-    2,  // Size = 2 WORD
-    4,  // Size = 4 CARDINAL
-    1,  // Size = 1 SHORTINT
-    2,  // Size = 2 SMALLINT
-    4,  // Size = 4 INTEGER
-    1,  // Size = 1 CHAR
-    1,  // Size = 1 BOOLEAN
-    2,  // Size = 2 POINTER
-    2,  // Size = 2 POINTER to STRING
-    2,  // Size = 2 FILE
-    2,  // Size = 2 RECORD
-    2,  // Size = 2 OBJECT
-    2,  // Size = 2 SHORTREAL
-    4,  // Size = 4 REAL
-    4,  // Size = 4 SINGLE / FLOAT
-    2,  // Size = 2 HALFSINGLE / FLOAT16
-    2,  // Size = 2 PCHAR
-    1,  // Size = 1 BYTE
-    2,  // Size = 2 PROCVAR
-    2,  // Size = 2 TEXTFILE
-    2  // Size = 2 FORWARD
-    );
-
   fBlockRead_ParamType: array [1..3] of TTokenKind = (TTokenKind.UNTYPETOK, TTokenKind.WORDTOK, TTokenKind.POINTERTOK);
 
 
@@ -166,7 +126,7 @@ type
 
   TString = String;
   TName = String;
-  TDataType = TTokenKind;
+
 
   TDefineIndex = TInteger; // 0 means not found
   TDefineParams = array [1..MAXPARAMS] of TString;
@@ -195,7 +155,6 @@ type
 
 
   TIdentifierName = String;
-  TIntegerNumber = Int64;
 
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;
@@ -226,7 +185,7 @@ type
     // For Kind=IDENTTOK:
     Name: TIdentifierName;
     // For Kind=INTNUMBERTOK:
-    Value: TIntegerNumber;
+    Value: TInteger;
     // For Kind=FRACNUMBERTOK:
     FracValue: Single;
     // For Kind=STRINGLITERALTOK:
@@ -426,12 +385,10 @@ var
 
 // ----------------------------------------------------------------------------
 
-function GetDataSize(const dataType: TDataType): Byte;
-
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
-procedure AddPath(s: String);
+procedure AddPath(folderPath: TFolderPath);
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -459,15 +416,13 @@ function GetTokenSpellingAtIndex(i: TTokenIndex): String;
 
 function GetVAL(a: String): Integer;
 
-function GetValueType(Value: TIntegerNumber): TDataType;
-
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
 function InfoAboutToken(t: TTokenKind): String;
 
 function IntToStr(const a: Int64): String;
-function StrToInt(const a: String): TIntegerNumber;
+function StrToInt(const a: String): TInteger;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
 function GetIOBits(const ioCode: TIOCode): TIOBits;
@@ -477,26 +432,6 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 implementation
 
 uses Messages, Utilities;
-
-function GetDataSize(const dataType: TDataType): Byte;
-var
-  index: Byte;
-begin
-  index := Ord(dataType);
-  if dataType = TDataType.UNTYPETOK then
-  begin
-    Result := 0;
-  end
-  else if ((index >= Low(_DataSize)) and (index <= High(_DataSize))) then
-    begin
-      Result := _DataSize[index];
-    end
-    else
-    begin
-      Assert(False);
-    end;
-
-end;
 
 
 // ----------------------------------------------------------------------------
@@ -510,6 +445,7 @@ end;
 
 // ----------------------------------------------------------------------------
 // Map I/O codes to the bits in the CIO block.
+// ----------------------------------------------------------------------------
 
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 begin
@@ -593,9 +529,9 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure AddPath(s: String);
+procedure AddPath(folderPath: TFolderPath);
 begin
-  unitPathList.AddFolder(s);
+  unitPathList.AddFolder(folderPath);
 end;
 
 
@@ -650,7 +586,7 @@ end;  //GetEnumName
 // ----------------------------------------------------------------------------
 
 
-function StrToInt(const a: String): TIntegerNumber;
+function StrToInt(const a: String): TInteger;
   (*----------------------------------------------------------------------------*)
   (*----------------------------------------------------------------------------*)
 {$IFNDEF PAS2JS}
@@ -949,34 +885,6 @@ begin
 
       if err > 0 then Result := -1;
 
-    end;
-
-end;
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetValueType(Value: TIntegerNumber): TDataType;
-begin
-
-  if Value < 0 then
-  begin
-
-    if Value >= Low(Shortint) then Result := TDataType.SHORTINTTOK
-    else
-      if Value >= Low(Smallint) then Result := TDataType.SMALLINTTOK
-      else
-        Result := TDataType.INTEGERTOK;
-
-  end
-  else
-
-    case Value of
-      0..255: Result := TDataType.BYTETOK;
-      256..$FFFF: Result := TDataType.WORDTOK;
-      else
-        Result := TDataType.CARDINALTOK
     end;
 
 end;
