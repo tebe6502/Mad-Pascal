@@ -29,7 +29,7 @@ type
 
 type
   TFilePosition = Longint;
-// https://www.freepascal.org/docs-html/rtl/system/filemode.html
+// https://www.freepascal.org/docs-html/rtl/system/filepos.html
 type
   IFile = interface
     procedure Assign(filePath: TFilePath);
@@ -140,6 +140,9 @@ type
 
 type
   TTextFile = class(TFile, ITextFile)
+
+  const
+    CR = ^M;    // Char for a CR
 {$IFNDEF SIMULATED_FILE_IO}
   private
   type TSystemTextFile = System.TextFile;
@@ -149,7 +152,7 @@ type
   private
     fileMapEntry: TFileMapEntry;
   private
-    fileMode: Integer;
+    fileMode: TFileMode;
   private
     filePosition: TFilePosition;
 {$ENDIF}
@@ -188,7 +191,7 @@ type
 private
   fileMapEntry: TFileMapEntry;
 private
-  fileMode: Integer;
+  fileMode: TFileMode;
 private
   filePosition: TFilePosition;
 {$ENDIF}
@@ -309,11 +312,11 @@ procedure TTextFile.Close();
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
-{$ENDIF}
+{$ELSE}
   fileMapEntry := nil;
-  fileMode := -1;
+  fileMode := TFileMode.Read;
   filePosition := -1;
-
+{$ENDIF}
 end;
 
 procedure TTextFile.Erase();
@@ -350,7 +353,7 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Read(f, c);
 {$ELSE}
-  Assert(fileMode = 0);
+  Assert(fileMode = TFileMode.Read);
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
   c := fileMapEntry.content[filePosition];
   Inc(filePosition);
@@ -375,7 +378,7 @@ begin
   System.Reset(f);
 {$ELSE}
   fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
-  fileMode := 0;
+  fileMode := TFileMode.Read;
   filePosition := 0;
 {$ENDIF}
 
@@ -388,7 +391,7 @@ begin
   System.Rewrite(f);
 {$ELSE}
   fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
-  fileMode := 1;
+  fileMode := TFileMode.Write;
   filePosition := 0;
 {$ENDIF}
 end;
@@ -398,7 +401,7 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Write(f, s);
 {$ELSE}
-  Assert(fileMode = 1);
+  Assert(fileMode = TFileMode.Write);
   fileMapEntry.content := fileMapEntry.content + s;
   filePosition := filePosition + length(s);
 {$ENDIF}
@@ -409,7 +412,7 @@ function TTextFile.Write(s: String; w: Integer): ITextFile;
 var
   sFormatted: String;
 begin
-  // TODO: Implemente width padding using w
+  // TODO: Implement width padding using w
   sFormatted := s;
   Write(sFormatted);
   Result := Self;
@@ -425,8 +428,7 @@ begin
 end;
 
 procedure TTextFile.WriteLn();
-const
-  CR = ^M;    // Char for a CR
+
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.WriteLn(f, '');
@@ -467,7 +469,9 @@ end;
 constructor TBinaryFile.Create;
 begin
   inherited;
+  {$IFDEF SIMULATED_FILE_IO}
   Close;
+  {$ENDIF}
 end;
 
 procedure TBinaryFile.Assign(filePath: TFilePath);
@@ -495,7 +499,7 @@ begin
   CloseFile(f);
 {$ELSE}
   fileMapEntry :=nil;
-fileMode :=-1;
+  fileMode :=TFileMode.Read;
   filePosition := -1;
 {$ENDIF}
 
@@ -535,9 +539,10 @@ begin
 
   System.Read(f, c);
 {$ELSE}
-  Assert(fileMode = 0);
+  Assert(fileMode = TFileMode.Read);
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
-  c := fileMapEntry.content[filePosition];
+  c := fileMapEntry.content[filePosition+1];
+  Writeln('Reading character '''+c+''' ($'+IntToHex(ord(c))+') at file position '+IntToStr(filePosition)+' of '''+filePath+'''.');
   Inc(filePosition);
 {$ENDIF}
 
@@ -557,7 +562,7 @@ begin
 {$ELSE}
   if l <>1 then raise EInOutError.create('Unsupported record size '+IntToStr(l)+' specified. Only record size 1 is supported.');
 fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
-fileMode := 0;
+fileMode := TFileMode.Read;
 filePosition := 0;
 {$ENDIF}
 
@@ -569,7 +574,7 @@ begin
   System.Rewrite(f);
 {$ELSE}
 fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
-fileMode := 1;
+fileMode := TFileMode.Write;
 filePosition := 0;
 {$ENDIF}
 
@@ -695,7 +700,15 @@ begin
 {$IFDEF SIMULATED_FILE_IO}
  fileMap := TFileMap.Create;
  fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
- fileMapEntry.content := 'Program program; end.';
+ fileMapEntry.content := 'Program TestProgram; begin end.';
+ fileMapEntry:=fileMap.AddEntry('lib\system.pas', TFileMapEntry.TFileType.TextFile);
+ fileMapEntry.content :=
+   'unit System;' + LineEnding  +
+   'interface'     + LineEnding  +
+   'const M_PI_2	= pi*2;' + LineEnding  +
+   'implementation' + LineEnding  +
+   'initialization' + LineEnding  +
+   'end.';
  fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
  fileMapEntry.content := 'SubFolder1;SubFolder2';
  fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
