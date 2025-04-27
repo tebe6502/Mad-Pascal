@@ -19555,6 +19555,7 @@ end;
 
 var
   exitCode: TExitCode;
+  fileMap: TFileMap;
 begin
 
   exitCode := 0;
@@ -19573,6 +19574,10 @@ begin
   end;
 
   {$IFDEF DEBUG}
+  {$IFDEF SIMULATED_FILE_IO}
+  fileMap:=TFileSystem.GetFileMap();
+  WriteLn(fileMap.GetEntry('Output.a65').content);
+  {$ENDIF}
   Console.WaitForKeyPressed;
   {$ENDIF}
 

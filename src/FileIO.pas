@@ -102,26 +102,23 @@ type
   {$ELSE}
     PathDelim = '/';
   {$ENDIF}
-    class procedure Init(fileMap: TFileMap);
     class function CreateBinaryFile: IBinaryFile; static;
     class function CreateTextFile: ITextFile; static;
     class function FileExists_(filePath: TFilePath): Boolean;
     class function NormalizePath(filePath: TFilePath): String;
-  protected
-    class function GetFileMapEntry(const filePath: TFilePath): TFileMapEntry;
-    class procedure RemoveFileMapEntry(const filePath: TFilePath);
+
+  {$IFDEF SIMULATED_FILE_IO}
+    class function GetFileMap: TFileMap;
+  {$ENDIF}
+
   end;
 
 implementation
 
-
+{$IFDEF SIMULATED_FILE_IO}
 var
   fileMap: TFileMap;
-
-class procedure TFileSystem.Init(fileMap: TFileMap);
-begin
-  FileIO.fileMap := fileMap;
-end;
+{$ENDIF}
 
 type
   TFile = class(TInterfacedObject, IFile)
@@ -324,7 +321,7 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Erase(f);
 {$ELSE}
-  TFileSystem.RemoveFileMapEntry(filePath);
+  FileIO.fileMap.RemoveEntry(filePath);
 {$ENDIF}
 
 end;
@@ -353,7 +350,8 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Read(f, c);
 {$ELSE}
-  Assert(fileMode = TFileMode.Read);
+  Assert(fileMapEntry <> nil, 'File '''+filePath+''' has no file map entry assigned.');
+  Assert(fileMode = TFileMode.Read, 'File '''+filePath+''' is not opened for reading.');
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
   c := fileMapEntry.content[filePosition];
   Inc(filePosition);
@@ -377,7 +375,7 @@ begin
   System.FileMode := 0;
   System.Reset(f);
 {$ELSE}
-  fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
+  fileMapEntry := fileMap.GetEntry(filePath);
   fileMode := TFileMode.Read;
   filePosition := 0;
 {$ENDIF}
@@ -390,7 +388,11 @@ begin
   System.FileMode := 1;
   System.Rewrite(f);
 {$ELSE}
-  fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
+  fileMapEntry := fileMap.GetEntry(filePath);
+  if (fileMapEntry=nil) then
+  begin
+     fileMapEntry := fileMap.AddEntry(filePath, TFileMapEntry.TFileType.TextFile);
+  end;
   fileMode := TFileMode.Write;
   filePosition := 0;
 {$ENDIF}
@@ -401,7 +403,8 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Write(f, s);
 {$ELSE}
-  Assert(fileMode = TFileMode.Write);
+  Assert(fileMapEntry <> nil, 'File '''+filePath+''' has no file map entry assigned.');
+  Assert(fileMode = TFileMode.Write, 'File '''+filePath+''' is not opened for writing.');
   fileMapEntry.content := fileMapEntry.content + s;
   filePosition := filePosition + length(s);
 {$ENDIF}
@@ -539,7 +542,8 @@ begin
 
   System.Read(f, c);
 {$ELSE}
-  Assert(fileMode = TFileMode.Read);
+  Assert(fileMapEntry <> nil, 'File '''+filePath+''' has no file map entry assigned.');
+  Assert(fileMode = TFileMode.Read, 'File '''+filePath+''' is not opened for reading.');
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
   c := fileMapEntry.content[filePosition+1];
   Writeln('Reading character '''+c+''' ($'+IntToHex(ord(c))+') at file position '+IntToStr(filePosition)+' of '''+filePath+'''.');
@@ -561,9 +565,9 @@ begin
   System.Reset(f, l);
 {$ELSE}
   if l <>1 then raise EInOutError.create('Unsupported record size '+IntToStr(l)+' specified. Only record size 1 is supported.');
-fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
-fileMode := TFileMode.Read;
-filePosition := 0;
+  fileMapEntry := fileMap.GetEntry(filePath);
+  fileMode := TFileMode.Read;
+  filePosition := 0;
 {$ENDIF}
 
 end;
@@ -573,9 +577,13 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Rewrite(f);
 {$ELSE}
-fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
-fileMode := TFileMode.Write;
-filePosition := 0;
+  fileMapEntry := fileMap.GetEntry(filePath);
+  if (fileMapEntry=nil) then
+  begin
+    fileMapEntry := fileMap.AddEntry(filePath, TFileMapEntry.TFileType.BinaryFile);
+  end;
+  fileMode := TFileMode.Write;
+  filePosition := 0;
 {$ENDIF}
 
 end;
@@ -596,7 +604,7 @@ end;
 
 constructor TFileMap.Create;
 begin
-  self.entries := nil;
+  SetLength(entries, 0);
 end;
 
 function TFileMap.AddEntry(const filePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
@@ -618,12 +626,15 @@ var
   i: Integer;
 begin
   Result := nil;
-  for i := Low(entries) to High(entries) do
+  if (entries <> nil) then
   begin
-    if entries[i].filePath = filePath then
+    for i := Low(entries) to High(entries) do
     begin
-      Result := entries[i];
-      exit;
+      if entries[i].filePath = filePath then
+      begin
+        Result := entries[i];
+        exit;
+      end;
     end;
   end;
 end;
@@ -660,7 +671,7 @@ begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
   {$ELSE}
-  Result := GetFileMapEntry(filePath) <> nil;
+  Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}
 end;
 
@@ -681,44 +692,41 @@ begin
 
 end;
 
-class function TFileSystem.GetFileMapEntry(const filePath: TFilePath): TFileMapEntry;
-begin
-  Result := fileMap.GetEntry(filePath);
-end;
+{$IFDEF SIMULATED_FILE_IO}
 
-
-class procedure TFileSystem.RemoveFileMapEntry(const filePath: TFilePath);
+class function TFileSystem.GetFileMap:  TFileMap;
 begin
-  fileMap.RemoveEntry(filePath);
+  Result:=FileIO.fileMap;
 end;
 
 procedure InitializeFileMap;
 var
-  fileMap: TFileMap;
   fileMapEntry: TFileMapEntry;
 begin
-{$IFDEF SIMULATED_FILE_IO}
- fileMap := TFileMap.Create;
- fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
- fileMapEntry.content := 'Program TestProgram; begin end.';
- fileMapEntry:=fileMap.AddEntry('lib\system.pas', TFileMapEntry.TFileType.TextFile);
- fileMapEntry.content :=
-   'unit System;' + LineEnding  +
-   'interface'     + LineEnding  +
-   'const M_PI_2	= pi*2;' + LineEnding  +
-   'implementation' + LineEnding  +
-   'initialization' + LineEnding  +
-   'end.';
- fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
- fileMapEntry.content := 'SubFolder1;SubFolder2';
- fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
- fileMapEntry.content := '01010110101';
- TFileSystem.Init(fileMap);
-{$ENDIF}
+  fileMap := TFileMap.Create;
+  fileMapEntry:=fileMap.AddEntry('Input.pas', TFileMapEntry.TFileType.TextFile);
+  fileMapEntry.content := 'Program TestProgram; begin end.';
+  fileMapEntry:=fileMap.AddEntry('lib\system.pas', TFileMapEntry.TFileType.TextFile);
+  fileMapEntry.content :=
+    'unit System;' + LineEnding  +
+    'interface'     + LineEnding  +
+    'const M_PI_2	= pi*2;' + LineEnding  +
+    'implementation' + LineEnding  +
+    'initialization' + LineEnding  +
+    'end.';
+  fileMapEntry := fileMap.AddEntry('lib', TFileMapEntry.TFileType.Folder);
+  fileMapEntry.content := 'SubFolder1;SubFolder2';
+  fileMapEntry := fileMap.AddEntry('Input.bin', TFileMapEntry.TFileType.BinaryFile);
+  fileMapEntry.content := '01010110101';
+
 end;
+
+{$ENDIF}
 
 initialization
 
+{$IFDEF SIMULATED_FILE_IO}
   InitializeFileMap;
+{$ENDIF}
 
 end.

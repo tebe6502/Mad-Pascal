@@ -35,7 +35,7 @@
       <Unit>
         <Filename Value="TestMadPascal.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="madpascal"/>
+        <UnitName Value="MADPASCAL"/>
       </Unit>
       <Unit>
         <Filename Value="..\src\Common.pas"/>
