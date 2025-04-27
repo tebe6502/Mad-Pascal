@@ -67,11 +67,11 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetIdentIndex(S: TString): Integer;
+function GetIdentIndex(S: TString): TIdentIndex;
 var
-  TempIndex: Integer;
+  TempIndex: TIdentIndex;
 
-  function UnitAllowedAccess(IdentIndex, Index: Integer): Boolean;
+  function UnitAllowedAccess(IdentIndex:TIdentIndex; Index: Integer): Boolean;
   var
     i: Integer;
   begin
