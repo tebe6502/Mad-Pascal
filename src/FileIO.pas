@@ -294,7 +294,9 @@ end;
 constructor TTextFile.Create;
 begin
   inherited;
+  {$IFDEF SIMULATED_FILE_IO}
   Close;
+  {$ENDIF}
 end;
 
 procedure TTextFile.Assign(filePath: TFilePath);
