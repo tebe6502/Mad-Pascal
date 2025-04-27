@@ -85,6 +85,7 @@ type
     constructor Create;
     function AddEntry(const filePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
     function GetEntry(const filePath: TFilePath): TFileMapEntry;
+    procedure RemoveEntry(const filePath: TFilePath);
 
   private
     entries: array of TFileMapEntry;
@@ -108,6 +109,7 @@ type
     class function NormalizePath(filePath: TFilePath): String;
   protected
     class function GetFileMapEntry(const filePath: TFilePath): TFileMapEntry;
+    class procedure RemoveFileMapEntry(const filePath: TFilePath);
   end;
 
 implementation
@@ -126,6 +128,7 @@ type
   protected
     filePath: TFilePath;
   public
+  type TFileMode = (Read, Write);
     constructor Create;
     procedure Assign(filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
@@ -148,7 +151,7 @@ type
   private
     fileMode: Integer;
   private
-    filePos: TFilePosition;
+    filePosition: TFilePosition;
 {$ENDIF}
   public
     constructor Create;
@@ -181,6 +184,13 @@ type
   type TSystemBinaryFile = file of Char;
   private
     f: TSystemBinaryFile;
+{$ELSE}
+private
+  fileMapEntry: TFileMapEntry;
+private
+  fileMode: Integer;
+private
+  filePosition: TFilePosition;
 {$ENDIF}
   public
     constructor Create;
@@ -284,6 +294,7 @@ end;
 constructor TTextFile.Create;
 begin
   inherited;
+  Close;
 end;
 
 procedure TTextFile.Assign(filePath: TFilePath);
@@ -299,6 +310,9 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
 {$ENDIF}
+  fileMapEntry := nil;
+  fileMode := -1;
+  filePosition := -1;
 
 end;
 
@@ -306,6 +320,8 @@ procedure TTextFile.Erase();
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Erase(f);
+{$ELSE}
+  TFileSystem.RemoveFileMapEntry(filePath);
 {$ENDIF}
 
 end;
@@ -315,7 +331,7 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   Result := System.EOF(f);
 {$ELSE}
-  Result := (fileMapEntry.content.length = filePos);
+  Result := (fileMapEntry.content.length = filePosition);
 {$ENDIF}
 
 end;
@@ -335,9 +351,9 @@ begin
   System.Read(f, c);
 {$ELSE}
   Assert(fileMode = 0);
-  // if Eof then raise E...
-  c := fileMapEntry.content[filePos];
-  Inc(filePos);
+  if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
+  c := fileMapEntry.content[filePosition];
+  Inc(filePosition);
 {$ENDIF}
 
 end;
@@ -346,6 +362,8 @@ procedure TTextFile.ReadLn(var s: String);
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.ReadLn(f, s);
+{$ELSE}
+  Assert(false, 'Not Implemented yet');
 {$ENDIF}
 
 end;
@@ -358,7 +376,7 @@ begin
 {$ELSE}
   fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
   fileMode := 0;
-  filePos := 0;
+  filePosition := 0;
 {$ENDIF}
 
 end;
@@ -371,7 +389,7 @@ begin
 {$ELSE}
   fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
   fileMode := 1;
-  filePos := 0;
+  filePosition := 0;
 {$ENDIF}
 end;
 
@@ -382,7 +400,7 @@ begin
 {$ELSE}
   Assert(fileMode = 1);
   fileMapEntry.content := fileMapEntry.content + s;
-  filePos := filePos + length(s);
+  filePosition := filePosition + length(s);
 {$ENDIF}
   Result := Self;
 end;
@@ -449,6 +467,7 @@ end;
 constructor TBinaryFile.Create;
 begin
   inherited;
+  Close;
 end;
 
 procedure TBinaryFile.Assign(filePath: TFilePath);
@@ -456,6 +475,8 @@ begin
   Self.filePath := filePath;
 {$IFNDEF SIMULATED_FILE_IO}
   AssignFile(f, filePath);
+{$ELSE}
+  Close;
 {$ENDIF}
 end;
 
@@ -463,6 +484,8 @@ procedure TBinaryFile.BlockRead(var Buf; Count: Longint; var Result: Longint);
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.BlockRead(f, Buf, Count, Result);
+{$ELSE}
+  Assert(False, 'Not implemented yet');
 {$ENDIF}
 end;
 
@@ -470,6 +493,10 @@ procedure TBinaryFile.Close();
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
+{$ELSE}
+  fileMapEntry :=nil;
+fileMode :=-1;
+  filePosition := -1;
 {$ENDIF}
 
 end;
@@ -478,6 +505,8 @@ function TBinaryFile.EOF(): Boolean;
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   Result := System.EOF(f);
+{$ELSE}
+  Result := (fileMapEntry.content.length = filePos);
 {$ENDIF}
 end;
 
@@ -485,6 +514,8 @@ procedure TBinaryFile.Erase();
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Erase(f);
+{$ELSE}
+  Assert(false, 'Not implemented yet.');
 {$ENDIF}
 
 end;
@@ -493,6 +524,8 @@ function TBinaryFile.FilePos(): TInteger;
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   Result := System.FilePos(f);
+{$ELSE}
+  Result := filePosition;
 {$ENDIF}
 end;
 
@@ -502,7 +535,10 @@ begin
 
   System.Read(f, c);
 {$ELSE}
- Assert(False, 'Not implemented yet');
+  Assert(fileMode = 0);
+  if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
+  c := fileMapEntry.content[filePosition];
+  Inc(filePosition);
 {$ENDIF}
 
 end;
@@ -510,10 +546,7 @@ end;
 
 procedure TBinaryFile.Reset(); overload;
 begin
-{$IFNDEF SIMULATED_FILE_IO}
-  System.FileMode := 0;
-  System.Reset(f);
-{$ENDIF}
+  Reset(128);
 end;
 
 procedure TBinaryFile.Reset(l: Longint); overload;
@@ -521,6 +554,11 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.FileMode := 0;
   System.Reset(f, l);
+{$ELSE}
+  if l <>1 then raise EInOutError.create('Unsupported record size '+IntToStr(l)+' specified. Only record size 1 is supported.');
+fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
+fileMode := 0;
+filePosition := 0;
 {$ENDIF}
 
 end;
@@ -529,6 +567,10 @@ procedure TBinaryFile.Rewrite();
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Rewrite(f);
+{$ELSE}
+fileMapEntry := TFileSystem.GetFileMapEntry(filePath);
+fileMode := 1;
+filePosition := 0;
 {$ENDIF}
 
 end;
@@ -537,6 +579,8 @@ procedure TBinaryFile.Seek2(Pos: TInteger);
 begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.Seek(f, pos);
+{$ELSE}
+  filePosition:=Pos;
 {$ENDIF}
 end;
 
@@ -574,6 +618,20 @@ begin
     if entries[i].filePath = filePath then
     begin
       Result := entries[i];
+      exit;
+    end;
+  end;
+end;
+
+procedure TFileMap.RemoveEntry(const filePath: TFilePath);
+var
+  i: Integer;
+begin
+  for i := Low(entries) to High(entries) do
+  begin
+    if entries[i].filePath = filePath then
+    begin
+      Delete(entries, i, 1);
       exit;
     end;
   end;
@@ -623,6 +681,11 @@ begin
   Result := fileMap.GetEntry(filePath);
 end;
 
+
+class procedure TFileSystem.RemoveFileMapEntry(const filePath: TFilePath);
+begin
+  fileMap.RemoveEntry(filePath);
+end;
 
 procedure InitializeFileMap;
 var
