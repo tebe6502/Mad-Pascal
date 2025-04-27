@@ -1526,7 +1526,7 @@ begin
 
   identIndex := GetIdentIndex(Name);
 
-  if (i > 0) and (not (Ident[identIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
+  if (identIndex > 0) and (not (Ident[identIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
     TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and (Ident[identIndex].Block =
     BlockStack[BlockStackTop]) and (Ident[identIndex].isOverload = False) and
     (Ident[i].UnitIndex = UnitNameIndex) then
