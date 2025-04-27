@@ -32655,7 +32655,7 @@ rtl.module("Parser",["System","Common","Datatypes","Numbers","Tokens"],function 
     var $ir = rtl.createIntfRefs();
     try {
       identIndex = $mod.GetIdentIndex(Name);
-      if ((pas.Common.i > 0) && !(pas.Common.Ident[identIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && (pas.Common.Ident[identIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop]) && (pas.Common.Ident[identIndex - 1].isOverload === false) && (pas.Common.Ident[pas.Common.i - 1].UnitIndex === pas.Common.UnitNameIndex)) {
+      if ((identIndex > 0) && !(pas.Common.Ident[identIndex - 1].Kind in rtl.createSet(pas.Tokens.TTokenKind.PROCEDURETOK,pas.Tokens.TTokenKind.FUNCTIONTOK,pas.Tokens.TTokenKind.CONSTRUCTORTOK,pas.Tokens.TTokenKind.DESTRUCTORTOK)) && (pas.Common.Ident[identIndex - 1].Block === pas.Common.BlockStack[pas.Common.BlockStackTop]) && (pas.Common.Ident[identIndex - 1].isOverload === false) && (pas.Common.Ident[pas.Common.i - 1].UnitIndex === pas.Common.UnitNameIndex)) {
         pas.Messages.Error$1(tokenIndex,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.IdentifierAlreadyDefined,"Identifier " + Name + " is already defined","","","","","","","","","",""]),pas.Messages.IMessage)))}
        else {
         pas.Common.NumIdent += 1;
