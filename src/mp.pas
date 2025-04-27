@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                 {$ENDIF} {$IFDEF PAS2JS}
+                  {$ENDIF} {$IFDEF PAS2JS}
   browserconsole,
-                 {$ENDIF}
+                  {$ENDIF}
   Common,
   Compiler,
   Console,
@@ -235,8 +235,6 @@ uses
     var
       i: Integer;
       parameter, parameterUpperCase, parameterValue: String;
-      s: String;
-      c: String;
     begin
 
       targetID := TTargetID.A8;
@@ -275,15 +273,15 @@ uses
                 if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
                 begin
                   Inc(i);
-                  AddPath(TEnvironment.GetParameterString(i));
+                  TEnvironment.GetParameterString(i);
+                  unitPathList.AddFolder(parameterValue);
 
                 end
                 else
                   if pos('-IPATH:', parameterUpperCase) = 1 then
                   begin
-
-                    s := copy(parameter, 8, 255);
-                    unitPathList.AddFolder(s);
+                    parameterValue := copy(parameter, 8, 255);
+                    unitPathList.AddFolder(parameterValue);
 
                   end
                   else
@@ -308,18 +306,18 @@ uses
                         begin
 
                           Inc(i);
-                          AddDefine(TEnvironment.GetParameterStringUpperCase(i));
+                          parameterValue := TEnvironment.GetParameterStringUpperCase(i);
+                          AddDefine(parameterValue);
+                          AddDefines := NumDefines;
                           AddDefines := NumDefines;
 
                         end
                         else
                           if pos('-DEFINE:', parameterUpperCase) = 1 then
                           begin
-
-                            s := copy(parameter, 9, 255);
-                            AddDefine(AnsiUpperCase(s));
+                            parameterValue := copy(parameterUpperCase, 9, 255);
+                            AddDefine(parameterValue);
                             AddDefines := NumDefines;
-
                           end
                           else
                             if (parameterUpperCase = '-CODE') or (parameterUpperCase = '-C') then
