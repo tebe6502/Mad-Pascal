@@ -4,7 +4,7 @@ unit Parser;
 
 interface
 
-uses Common, Numbers, Tokens;
+uses Common, Datatypes, Numbers, Tokens;
 
 // -----------------------------------------------------------------------------
 
@@ -67,11 +67,11 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetIdentIndex(S: TString): Integer;
+function GetIdentIndex(S: TString): TIdentIndex;
 var
-  TempIndex: Integer;
+  TempIndex: TIdentIndex;
 
-  function UnitAllowedAccess(IdentIndex, Index: Integer): Boolean;
+  function UnitAllowedAccess(IdentIndex:TIdentIndex; Index: Integer): Boolean;
   var
     i: Integer;
   begin
@@ -1526,7 +1526,7 @@ begin
 
   identIndex := GetIdentIndex(Name);
 
-  if (i > 0) and (not (Ident[identIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
+  if (identIndex > 0) and (not (Ident[identIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
     TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and (Ident[identIndex].Block =
     BlockStack[BlockStackTop]) and (Ident[identIndex].isOverload = False) and
     (Ident[i].UnitIndex = UnitNameIndex) then
@@ -1624,10 +1624,7 @@ begin
               (Elements(NumIdent) = 1) then  // [0..0] ; [0..0, 0..0]
 
             else
-            if (Low(_DataSize) <= Ord(AllocElementType)) and (Ord(AllocElementType) <= High(_DataSize)) then
-            begin
               VarDataSize := VarDataSize + Integer(Elements(NumIdent) * GetDataSize(AllocElementType));
-            end;
 
           end;
 

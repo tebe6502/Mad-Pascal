@@ -6,24 +6,35 @@ uses
   Crt,
   Common,
   CommonTypes,
-  Console,
-  Diagnostic,
+  Datatypes,
   FileIO,
   MathEvaluate,
   Messages,
-  Parser,
   Scanner,
   Optimize,
-  Types,
   Tokens,
   Utilities,
   SysUtils;
 
-  procedure AssertEquals(actual, expected: String; message: String);
+  procedure AssertEquals(actual, expected: String); overload;
   begin
     Assert(actual = expected, 'The actual string ''' + actual + ''' is not equal to the expected string ''' +
       expected + '''.');
   end;
+
+
+  procedure AssertEquals(actual, expected: Longint); overload;
+  begin
+    Assert(actual = expected, 'The actual value ''' + IntToStr(actual) +
+      ''' is not equal to the expected value ''' + IntToStr(expected) + '''.');
+  end;
+
+  procedure AssertEquals(actual, expected: TDatatype); overload;
+  begin
+    Assert(actual = expected, 'The actual value ''' + GetTokenKindName(actual) +
+      ''' is not equal to the expected value ''' + GetTokenKindName(expected) + '''.');
+  end;
+
 
   procedure StartTest(Name: String);
   begin
@@ -164,8 +175,14 @@ type
   end;
 
   function TTestEvaluationContext.GetConstantName(const expression: String; var index: Integer): String;
+  const
+    EXAMPLE = 'EXAMPLE';
   begin
-    Result := 'EXAMPLE';
+    if (Copy(expression, index, Length(EXAMPLE)) = EXAMPLE) then
+    begin
+      Result := EXAMPLE;
+      Inc(index, Length(EXAMPLE));
+    end;
   end;
 
   function TTestEvaluationContext.GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
@@ -180,6 +197,21 @@ type
       constantValue := 0;
       Result := False;
     end;
+  end;
+
+  // ----------------------------------------------------------------------------
+  // Unit Datatypes
+  // ----------------------------------------------------------------------------
+  procedure TestUnitDatatypes;
+  begin
+    AssertEquals(Datatypes.GetDataSize(TDataType.UNTYPETOK), 0);
+    AssertEquals(Datatypes.GetDataSize(TDataType.BYTETOK), 1);
+    AssertEquals(Datatypes.GetDataSize(TDataType.WORDTOK), 2);
+
+    AssertEquals(Datatypes.GetValueType(0), TDataType.BYTETOK);
+    AssertEquals(Datatypes.GetValueType(255), TDataType.BYTETOK);
+    AssertEquals(Datatypes.GetValueType($ffff), TDataType.WORDTOK);
+    AssertEquals(Datatypes.GetValueType(-1), TDataType.SHORTINTTOK);
   end;
 
   // ----------------------------------------------------------------------------
@@ -246,7 +278,7 @@ type
     StartTest('TestUnitMessages');
     message := TMessage.Create(TErrorCode.IllegalExpression,
       'A={0} B={1} C={2} D={3} E={4} F={5} G={6} H={7} I={8} J={9}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
-    AssertEquals(message.GetText(), 'A=A B=B C=C D=D E=E F=F G=G H=H I=I J=J', 'Formatted message not equal.');
+    AssertEquals(message.GetText(), 'A=A B=B C=C D=D E=E F=F G=G H=H I=I J=J');
     EndTest('TestUnitMessages');
   end;
 
@@ -254,6 +286,7 @@ begin
   try
     TestUnitFile;
     TestUnitCommon;
+    TestUnitDatatypes;
     TestUnitMathEvaluate;
     TestUnitMessages;
   except

@@ -6,9 +6,6 @@ interface
 
 // ----------------------------------------------------------------------------
 
-var
-  TemporaryBuf: array [0..511] of String;
-
 
 procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
@@ -24,7 +21,10 @@ procedure FlushTempBuf;
 
 implementation
 
-uses SysUtils, Common, Console, StringUtilities, Utilities;
+uses SysUtils, Common, Console, StringUtilities, Targets, Utilities;
+
+var
+  TemporaryBuf: array [0..511] of String;
 
 // ----------------------------------------------------------------------------
 
@@ -609,12 +609,7 @@ var
 
       NormVideo;
 
-      //       FreeTokens;
-
-      //       CloseFile(OutFile);
-      //       Erase(OutFile);
-
-      //       Halt(2);
+      // RaiseHaltException(THaltException.COMPILING_ABORTED);
     end;
 
     WriteOut(listing[i]);
@@ -2957,7 +2952,7 @@ begin        // OptimizeASM
         begin  // imulCARD, mulINTEGER
           t := '';
 
-          if (target.id = TComputer.NEO) then
+          if (target.id = TTargetID.NEO) then
           begin
 
             listing[l] := #9'lda ' + GetARG(0, x);

@@ -6,7 +6,7 @@ unit Numbers;
 
 interface
 
-uses Common;    // TODO Remove Common and have only TDataType
+uses Datatypes;
 
 type
   TNumber = Int64;
@@ -145,70 +145,70 @@ begin
       Result := (Sign shl 15) or (Exp shl 10) or ((Mantissa + $00001000) shr 13);
     end
     else if Src = 0 then
-    begin
-      // Input float is zero - return zero
-      Result := 0;
-    end
-    else
-    begin
-      // Difficult case - lengthy conversion
-      if Exp <= 0 then
       begin
-        if Exp < -10 then
-        begin
-          // Input float's value is less than HalfMin, return zero
-          Result := 0;
-        end
-        else
-        begin
-          // Float is a normalized Single whose magnitude is less than HalfNormMin.
-          // We convert it to denormalized half.
-          Mantissa := (Mantissa or $00800000) shr (1 - Exp);
-          // Round to nearest
-          if (Mantissa and $00001000) > 0 then
-            Mantissa := Mantissa + $00002000;
-          // Assemble Sign and Mantissa (Exp is zero to get denormalized number)
-          Result := (Sign shl 15) or (Mantissa shr 13);
-        end;
-      end
-      else if Exp = 255 - 127 + 15 then
-      begin
-        if Mantissa = 0 then
-        begin
-          // Input float is infinity, create infinity half with original sign
-          Result := (Sign shl 15) or $7C00;
-        end
-        else
-        begin
-          // Input float is NaN, create half NaN with original sign and mantissa
-          Result := (Sign shl 15) or $7C00 or (Mantissa shr 13);
-        end;
+        // Input float is zero - return zero
+        Result := 0;
       end
       else
       begin
-        // Exp is > 0 so input float is normalized Single
-
-        // Round to nearest
-        if (Mantissa and $00001000) > 0 then
+        // Difficult case - lengthy conversion
+        if Exp <= 0 then
         begin
-          Mantissa := Mantissa + $00002000;
-          if (Mantissa and $00800000) > 0 then
+          if Exp < -10 then
           begin
-            Mantissa := 0;
-            Exp := Exp + 1;
+            // Input float's value is less than HalfMin, return zero
+            Result := 0;
+          end
+          else
+          begin
+            // Float is a normalized Single whose magnitude is less than HalfNormMin.
+            // We convert it to denormalized half.
+            Mantissa := (Mantissa or $00800000) shr (1 - Exp);
+            // Round to nearest
+            if (Mantissa and $00001000) > 0 then
+              Mantissa := Mantissa + $00002000;
+            // Assemble Sign and Mantissa (Exp is zero to get denormalized number)
+            Result := (Sign shl 15) or (Mantissa shr 13);
           end;
-        end;
-
-        if Exp > 30 then
-        begin
-          // Exponent overflow - return infinity half
-          Result := (Sign shl 15) or $7C00;
         end
-        else
-          // Assemble normalized half
-          Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
+        else if Exp = 255 - 127 + 15 then
+          begin
+            if Mantissa = 0 then
+            begin
+              // Input float is infinity, create infinity half with original sign
+              Result := (Sign shl 15) or $7C00;
+            end
+            else
+            begin
+              // Input float is NaN, create half NaN with original sign and mantissa
+              Result := (Sign shl 15) or $7C00 or (Mantissa shr 13);
+            end;
+          end
+          else
+          begin
+            // Exp is > 0 so input float is normalized Single
+
+            // Round to nearest
+            if (Mantissa and $00001000) > 0 then
+            begin
+              Mantissa := Mantissa + $00002000;
+              if (Mantissa and $00800000) > 0 then
+              begin
+                Mantissa := 0;
+                Exp := Exp + 1;
+              end;
+            end;
+
+            if Exp > 30 then
+            begin
+              // Exponent overflow - return infinity half
+              Result := (Sign shl 15) or $7C00;
+            end
+            else
+              // Assemble normalized half
+              Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
+          end;
       end;
-    end;
 
   end;
 

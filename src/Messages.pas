@@ -4,7 +4,8 @@ interface
 
 {$I Defines.inc}
 
-uses Common, CommonTypes, Tokens;
+uses Common , // For Tok and TTokenIndex
+    Datatypes, CommonTypes, Tokens;
 
 {$SCOPEDENUMS ON}
 type
@@ -119,7 +120,7 @@ procedure WritelnMsg;
 
 implementation
 
-uses SysUtils, TypInfo, Console, FileIO, Utilities;
+uses SysUtils, TypInfo, Console, Utilities;
 
 // -----------------------------------------------------------------------------
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
@@ -170,7 +171,7 @@ begin
       Self.Text := Self.Text + c;
     end;
     Inc(i);
-  until i >= l;
+  until i > l;
 
 end;
 
@@ -389,7 +390,7 @@ begin
 
     //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
 
-    WritelnMsg;
+    WritelnMsg;  // TODO: Required?
 
     if tokenIndex <= NumTok then effectiveTokenIndex := tokenIndex
     else
@@ -418,14 +419,6 @@ begin
 
 
     NormVideo;
-
-    FreeTokens;
-
-    if Outfile <> nil then
-    begin
-      OutFile.Close;
-      OutFile.Erase;
-    end;
 
     RaiseHaltException(THaltException.COMPILING_ABORTED);
 

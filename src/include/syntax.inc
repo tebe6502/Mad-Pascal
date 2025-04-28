@@ -67,3 +67,30 @@ begin
   if (Result < 0) or (Result > $10000) then
     ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
 end;
+
+function ParseCPUParameter(const index: Longint; const parameterValue: String): TCPU;
+begin
+if parameterValue <> '' then
+  if parameterValue = '6502' then Result:= TCPU.CPU_6502
+  else
+    if parameterValue = '65C02' then Result:= TCPU.CPU_65C02
+    else
+      if parameterValue = '65816' then Result:= TCPU.CPU_65816
+      else
+            ParameterError(index, 'Invalid CPU ''' +
+              parameterValue + '''. Use on of ''6502, 65C02, 65816''.');
+end;
+
+function ParseTargetParameter(const index: Longint; const parameterValue: String): TTargetID;
+begin
+
+if parameterValue = 'A8' then Result := TTargetID.A8
+else if parameterValue = 'C64' then Result := TTargetID.C64
+  else if parameterValue = 'C4P' then Result := TTargetID.C4P
+    else if parameterValue = 'NEO' then Result := TTargetID.NEO
+      else if parameterValue = 'RAW' then Result := TTargetID.RAW
+        else if parameterValue = 'X16' then Result := TTargetID.X16
+          else
+            ParameterError(index, 'Invalid target ''' +
+              parameterValue + '''. Use on of ''A8, C64, C4P, NEO, RAW, X16''.');
+end;

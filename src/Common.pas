@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, FileIO, StringUtilities, Tokens;
+uses SysUtils, CommonTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -30,18 +30,6 @@ const
 
 
 const
-  UnsignedOrdinalTypes = [TTokenKind.BYTETOK, TTokenKind.WORDTOK, TTokenKind.CARDINALTOK];
-  SignedOrdinalTypes = [TTokenKind.SHORTINTTOK, TTokenKind.SMALLINTTOK, TTokenKind.INTEGERTOK];
-  RealTypes = [TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK];
-
-  IntegerTypes = UnsignedOrdinalTypes + SignedOrdinalTypes;
-  OrdinalTypes = IntegerTypes + [TTokenKind.CHARTOK, TTokenKind.BOOLEANTOK, TTokenKind.ENUMTOK];
-
-  Pointers = [TTokenKind.POINTERTOK, TTokenKind.PROCVARTOK, TTokenKind.STRINGPOINTERTOK, TTokenKind.PCHARTOK];
-
-  AllTypes = OrdinalTypes + RealTypes + Pointers;
-
-  StringTypes = [TTokenKind.STRINGPOINTERTOK, TTokenKind.STRINGLITERALTOK, TTokenKind.PCHARTOK];
 
   // Identifier kind codes
 
@@ -100,38 +88,7 @@ const
   ASSINGLE = 11;
   ASPCHAR = 12;
 
-
-  // Data sizes
-
-  _DataSize: array [Ord(TTokenKind.BYTETOK)..Ord(TTokenKind.FORWARDTYPE)] of Byte = (
-    1,  // Size = 1 BYTE
-    2,  // Size = 2 WORD
-    4,  // Size = 4 CARDINAL
-    1,  // Size = 1 SHORTINT
-    2,  // Size = 2 SMALLINT
-    4,  // Size = 4 INTEGER
-    1,  // Size = 1 CHAR
-    1,  // Size = 1 BOOLEAN
-    2,  // Size = 2 POINTER
-    2,  // Size = 2 POINTER to STRING
-    2,  // Size = 2 FILE
-    2,  // Size = 2 RECORD
-    2,  // Size = 2 OBJECT
-    2,  // Size = 2 SHORTREAL
-    4,  // Size = 4 REAL
-    4,  // Size = 4 SINGLE / FLOAT
-    2,  // Size = 2 HALFSINGLE / FLOAT16
-    2,  // Size = 2 PCHAR
-    1,  // Size = 1 BYTE
-    2,  // Size = 2 PROCVAR
-    2,  // Size = 2 TEXTFILE
-    2  // Size = 2 FORWARD
-    );
-
   fBlockRead_ParamType: array [1..3] of TTokenKind = (TTokenKind.UNTYPETOK, TTokenKind.WORDTOK, TTokenKind.POINTERTOK);
-
-
-{$i targets/type.inc}
 
 
 type
@@ -169,7 +126,7 @@ type
 
   TString = String;
   TName = String;
-  TDataType = TTokenKind;
+
 
   TDefineIndex = TInteger; // 0 means not found
   TDefineParams = array [1..MAXPARAMS] of TString;
@@ -198,7 +155,6 @@ type
 
 
   TIdentifierName = String;
-  TIntegerNumber = Int64;
 
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;
@@ -229,7 +185,7 @@ type
     // For Kind=IDENTTOK:
     Name: TIdentifierName;
     // For Kind=INTNUMBERTOK:
-    Value: TIntegerNumber;
+    Value: TInteger;
     // For Kind=FRACNUMBERTOK:
     FracValue: Single;
     // For Kind=STRINGLITERALTOK:
@@ -334,17 +290,9 @@ type
 
   TCaseLabelArray = array of TCaseLabel;
 
+var
+  target: TTarget;
 
-{$i targets/var.inc}
-
-const
-  MIN_MEMORY_ADDRESS = $0000;
-
-const
-  MAX_MEMORY_ADDRESS = $FFFF;
-
-type
-  TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
 
 type
   TTokenIndex = Integer;
@@ -381,11 +329,10 @@ var
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func,
   NumProc, BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+
   pass: TPass;
 
   iOut: Integer = -1;
-
-  start_time: QWord;
 
   CODEORIGIN_BASE: Integer = -1;
 
@@ -403,7 +350,7 @@ var
 
   resArray: array of TResource;
 
-  MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
+  FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
   msgWarning, msgNote, msgUser: TStringArray;
   OptimizeBuf, LinkObj: TStringArray;
@@ -423,7 +370,6 @@ var
   PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
   isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
-  DiagMode: Boolean = False;
   DataSegmentUse: Boolean = False;
 
   LoopUnroll: Boolean = False;
@@ -439,14 +385,10 @@ var
 
 // ----------------------------------------------------------------------------
 
-procedure ClearWordMemory(anArray: TWordMemory);
-
-function GetDataSize(const dataType: TDataType): Byte;
-
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
-procedure AddPath(s: String);
+procedure AddPath(folderPath: TFolderPath);
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -464,8 +406,6 @@ procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
 function FindFile(Name: String; ftyp: TString): String; overload;
 
-procedure FreeTokens;
-
 function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 
 function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataType): TDataType;
@@ -476,15 +416,13 @@ function GetTokenSpellingAtIndex(i: TTokenIndex): String;
 
 function GetVAL(a: String): Integer;
 
-function GetValueType(Value: TIntegerNumber): TDataType;
-
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
 function InfoAboutToken(t: TTokenKind): String;
 
 function IntToStr(const a: Int64): String;
-function StrToInt(const a: String): TIntegerNumber;
+function StrToInt(const a: String): TInteger;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
 function GetIOBits(const ioCode: TIOCode): TIOBits;
@@ -494,26 +432,6 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 implementation
 
 uses Messages, Utilities;
-
-function GetDataSize(const dataType: TDataType): Byte;
-var
-  index: Byte;
-begin
-  index := Ord(dataType);
-  if dataType = TDataType.UNTYPETOK then
-  begin
-    Result := 0;
-  end
-  else if ((index >= Low(_DataSize)) and (index <= High(_DataSize))) then
-  begin
-    Result := _DataSize[index];
-  end
-  else
-  begin
-    Assert(False);
-  end;
-
-end;
 
 
 // ----------------------------------------------------------------------------
@@ -527,6 +445,7 @@ end;
 
 // ----------------------------------------------------------------------------
 // Map I/O codes to the bits in the CIO block.
+// ----------------------------------------------------------------------------
 
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 begin
@@ -567,8 +486,8 @@ begin
     else
     begin
       msg := TMessage.Create(TErrorCode.FileNotFound,
-        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.',
-        ftyp, Name, PROGRAM_NAME, unitPathList.ToString);
+        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.', ftyp,
+        Name, PROGRAM_NAME, unitPathList.ToString);
     end;
     Error(NumTok, msg);
   end;
@@ -610,9 +529,9 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure AddPath(s: String);
+procedure AddPath(folderPath: TFolderPath);
 begin
-  unitPathList.AddFolder(s);
+  unitPathList.AddFolder(folderPath);
 end;
 
 
@@ -652,13 +571,13 @@ begin
       Result := Ident[IdentTtemp].Name;
   end
   else
-  if Ident[IdentIndex].DataType = ENUMTYPE then
-  begin
-    IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
+    if Ident[IdentIndex].DataType = ENUMTYPE then
+    begin
+      IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
 
-    if IdentTtemp > 0 then
-      Result := Ident[IdentTtemp].Name;
-  end;
+      if IdentTtemp > 0 then
+        Result := Ident[IdentTtemp].Name;
+    end;
 
 end;  //GetEnumName
 
@@ -667,7 +586,7 @@ end;  //GetEnumName
 // ----------------------------------------------------------------------------
 
 
-function StrToInt(const a: String): TIntegerNumber;
+function StrToInt(const a: String): TInteger;
   (*----------------------------------------------------------------------------*)
   (*----------------------------------------------------------------------------*)
 {$IFNDEF PAS2JS}
@@ -695,19 +614,6 @@ function IntToStr(const a: Int64): String;
   (*----------------------------------------------------------------------------*)
 begin
   str(a, Result);
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure FreeTokens;
-begin
-
-  SetLength(Tok, 0);
-  SetLength(IFTmpPosStack, 0);
-  unitPathList.Free;
 end;
 
 
@@ -983,34 +889,6 @@ begin
 
 end;
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetValueType(Value: TIntegerNumber): TDataType;
-begin
-
-  if Value < 0 then
-  begin
-
-    if Value >= Low(Shortint) then Result := TDataType.SHORTINTTOK
-    else
-    if Value >= Low(Smallint) then Result := TDataType.SMALLINTTOK
-    else
-      Result := TDataType.INTEGERTOK;
-
-  end
-  else
-
-    case Value of
-      0..255: Result := TDataType.BYTETOK;
-      256..$FFFF: Result := TDataType.WORDTOK;
-      else
-        Result := TDataType.CARDINALTOK
-    end;
-
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -1028,7 +906,7 @@ begin
     expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
     Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected +
-      '''' + ' expected but ''' + found + ''' found'));
+      '''' + ' expected but ''' + found + ''' found.'));
 
   end;
 
@@ -1089,8 +967,8 @@ begin
     Result := LeftType
 
   else
-  if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
-    Result := LeftType;
+    if (LeftType in IntegerTypes) and (RightType in IntegerTypes) then
+      Result := LeftType;
 
   if (LeftType in Pointers) and (RightType in Pointers) then
     Result := LeftType;
@@ -1179,16 +1057,5 @@ begin
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-procedure ClearWordMemory(anArray: TWordMemory);
-begin
-  for i := Low(anArray) to High(anArray) do
-  begin
-    anArray[i] := 0;
-  end;
-end;
 
 end.

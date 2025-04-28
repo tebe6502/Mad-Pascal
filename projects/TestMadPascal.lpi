@@ -35,7 +35,7 @@
       <Unit>
         <Filename Value="TestMadPascal.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="madpascal"/>
+        <UnitName Value="MADPASCAL"/>
       </Unit>
       <Unit>
         <Filename Value="..\src\Common.pas"/>
@@ -483,6 +483,54 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\Tokens.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Compiler.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\generate_program_prolog.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Memory.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\crt.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\crth.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\graph.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\graphh.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\system.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\systemh.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\targets\sysutils.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Targets.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Datatypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

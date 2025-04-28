@@ -13,7 +13,7 @@ procedure Diagnostics;
 
 implementation
 
-uses SysUtils, Common, FileIO, Tokens;
+uses SysUtils, Common, Datatypes, FileIO, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -99,10 +99,6 @@ begin
   DiagFile.Close;
 
 end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 
 end.

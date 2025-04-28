@@ -467,7 +467,7 @@ var
 begin
   for tokenKind := Low(TTokenKind) to High(TTokenKind) do
   begin
-    writeln('Token kind ', GetTokenKindName(tokenKind), ' = ', Ord(tokenKind), ' // ', GetTokenSpelling(tokenKind));
+    // writeln('Token kind ', GetTokenKindName(tokenKind), ' = ', Ord(tokenKind), ' // ', GetTokenSpelling(tokenKind));
   end;
   // Assert order of constants that were marked as "Don't change".
   // TODO: Why? Where is this used?
@@ -485,5 +485,6 @@ end;
 initialization
 
   InitializeTokenSpellings;
+  AssertTokensOrd;
 
 end.
