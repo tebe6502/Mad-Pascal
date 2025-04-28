@@ -6,9 +6,6 @@ interface
 
 // ----------------------------------------------------------------------------
 
-var
-  TemporaryBuf: array [0..511] of String;
-
 
 procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
@@ -25,6 +22,9 @@ procedure FlushTempBuf;
 implementation
 
 uses SysUtils, Common, Console, StringUtilities, Targets, Utilities;
+
+var
+  TemporaryBuf: array [0..511] of String;
 
 // ----------------------------------------------------------------------------
 
