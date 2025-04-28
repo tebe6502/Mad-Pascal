@@ -3783,6 +3783,11 @@ rtl.module("FileIO",["System","SysUtils","CommonTypes"],function () {
       Result = pas.SysUtils.LowerCase(Result);
       return Result;
     };
+    this.GetFileMap = function () {
+      var Result = null;
+      Result = $impl.fileMap;
+      return Result;
+    };
   });
   $mod.$implcode = function () {
     $impl.fileMap = null;
@@ -3800,7 +3805,6 @@ rtl.module("FileIO",["System","SysUtils","CommonTypes"],function () {
       rtl.addIntf(this,pas.System.IUnknown);
     });
     rtl.createClass($impl,"TTextFile",$impl.TFile,function () {
-      this.CR = "\r";
       this.$init = function () {
         $impl.TFile.$init.call(this);
         this.fileMapEntry = null;
@@ -3904,7 +3908,7 @@ rtl.module("FileIO",["System","SysUtils","CommonTypes"],function () {
       this.WriteLn = function () {
         var $ir = rtl.createIntfRefs();
         try {
-          $ir.ref(1,this.Write(this.CR));
+          $ir.ref(1,this.Write(pas.System.LineEnding));
         } finally {
           $ir.free();
         };
@@ -3982,7 +3986,6 @@ rtl.module("FileIO",["System","SysUtils","CommonTypes"],function () {
         if (!(this.fileMode === $impl.TFile.TFileMode.Read)) throw pas.SysUtils.EAssertionFailed.$create("Create$1",["File '" + this.filePath + "' is not opened for reading."]);
         if (this.EOF()) throw pas.SysUtils.EInOutError.$create("Create$1",["End of file '" + this.filePath + "' reached. Cannot read position " + pas.SysUtils.IntToStr(this.filePosition) + "."]);
         c.set(this.fileMapEntry.content.charAt((this.filePosition + 1) - 1));
-        pas.System.Writeln("Reading character '" + c.get() + "' ($" + pas.SysUtils.IntToHex(c.get().charCodeAt(),2) + ") at file position " + pas.SysUtils.IntToStr(this.filePosition) + " of '" + this.filePath + "'.");
         this.filePosition += 1;
       };
       this.Reset = function () {
@@ -8125,7 +8128,6 @@ rtl.module("Optimize",["System"],function () {
   "use strict";
   var $mod = this;
   var $impl = $mod.$impl;
-  this.TemporaryBuf = rtl.arraySetLength(null,"",512);
   this.asm65 = function (a, comment) {
     var len = 0;
     var i = 0;
@@ -8192,27 +8194,27 @@ rtl.module("Optimize",["System"],function () {
     var i = 0;
     if ((pas.System.Pos("\tjsr ",a) === 1) || (a === "#asm")) $mod.ResetOpty();
     if (pas.Common.iOut < 511) {
-      if ((pas.Common.iOut >= 0) && ($mod.TemporaryBuf[pas.Common.iOut] !== "")) {
-        if ($mod.TemporaryBuf[pas.Common.iOut] === "; --- ForToDoCondition") if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
-        if (pas.System.Pos("\t#for",$mod.TemporaryBuf[pas.Common.iOut]) > 0) if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
+      if ((pas.Common.iOut >= 0) && ($impl.TemporaryBuf[pas.Common.iOut] !== "")) {
+        if ($impl.TemporaryBuf[pas.Common.iOut] === "; --- ForToDoCondition") if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
+        if (pas.System.Pos("\t#for",$impl.TemporaryBuf[pas.Common.iOut]) > 0) if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
       };
       pas.Common.iOut += 1;
-      $mod.TemporaryBuf[pas.Common.iOut] = a;
+      $impl.TemporaryBuf[pas.Common.iOut] = a;
     } else {
       $impl.OptimizeTemporaryBuf();
-      if ($mod.TemporaryBuf[pas.Common.iOut] !== "") {
-        if ($mod.TemporaryBuf[pas.Common.iOut] === "; --- ForToDoCondition") if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
-        if (pas.System.Pos("\t#for",$mod.TemporaryBuf[pas.Common.iOut]) > 0) if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
+      if ($impl.TemporaryBuf[pas.Common.iOut] !== "") {
+        if ($impl.TemporaryBuf[pas.Common.iOut] === "; --- ForToDoCondition") if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
+        if (pas.System.Pos("\t#for",$impl.TemporaryBuf[pas.Common.iOut]) > 0) if ((a === "") || (pas.System.Pos("; optimize ",a) > 0)) return;
       };
-      if ($mod.TemporaryBuf[0] !== "~") {
-        if (($mod.TemporaryBuf[0] !== "") || (pas.Common.outTmp !== $mod.TemporaryBuf[0])) pas.Common.OutFile.WriteLn$1($mod.TemporaryBuf[0]);
-        pas.Common.outTmp = $mod.TemporaryBuf[0];
+      if ($impl.TemporaryBuf[0] !== "~") {
+        if (($impl.TemporaryBuf[0] !== "") || (pas.Common.outTmp !== $impl.TemporaryBuf[0])) pas.Common.OutFile.WriteLn$1($impl.TemporaryBuf[0]);
+        pas.Common.outTmp = $impl.TemporaryBuf[0];
       };
       for (var $l = 1, $end = pas.Common.iOut; $l <= $end; $l++) {
         i = $l;
-        $mod.TemporaryBuf[i - 1] = $mod.TemporaryBuf[i];
+        $impl.TemporaryBuf[i - 1] = $impl.TemporaryBuf[i];
       };
-      $mod.TemporaryBuf[pas.Common.iOut] = a;
+      $impl.TemporaryBuf[pas.Common.iOut] = a;
     };
   };
   this.FlushTempBuf = function () {
@@ -8220,6 +8222,7 @@ rtl.module("Optimize",["System"],function () {
     for (i = 0; i <= 511; i++) $mod.WriteOut("");
   };
   $mod.$implcode = function () {
+    $impl.TemporaryBuf = rtl.arraySetLength(null,"",512);
     var ofs = 80;
     $impl.OptimizeTemporaryBuf = function () {
       var p = 0;
@@ -8229,219 +8232,219 @@ rtl.module("Optimize",["System"],function () {
       var yes = false;
       function fail(i) {
         var Result = false;
-        if ((pas.System.Pos("#asm:",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("ldy ",$mod.TemporaryBuf[i]) > 0) || (pas.System.Pos("mwy ",$mod.TemporaryBuf[i]) > 0) || (pas.System.Pos("mvy ",$mod.TemporaryBuf[i]) > 0) || (pas.System.Pos("jsr ",$mod.TemporaryBuf[i]) > 0) || (pas.System.Pos("\t.if",$mod.TemporaryBuf[i]) > 0) || (pas.System.Pos("\t.LOCAL ",$mod.TemporaryBuf[i]) > 0) || (pas.System.Pos("\t@print",$mod.TemporaryBuf[i]) > 0) || ($mod.TemporaryBuf[i] === "\tiny") || ($mod.TemporaryBuf[i] === "\tdey") || ($mod.TemporaryBuf[i] === "\ttya") || ($mod.TemporaryBuf[i] === "\ttay")) {
+        if ((pas.System.Pos("#asm:",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("ldy ",$impl.TemporaryBuf[i]) > 0) || (pas.System.Pos("mwy ",$impl.TemporaryBuf[i]) > 0) || (pas.System.Pos("mvy ",$impl.TemporaryBuf[i]) > 0) || (pas.System.Pos("jsr ",$impl.TemporaryBuf[i]) > 0) || (pas.System.Pos("\t.if",$impl.TemporaryBuf[i]) > 0) || (pas.System.Pos("\t.LOCAL ",$impl.TemporaryBuf[i]) > 0) || (pas.System.Pos("\t@print",$impl.TemporaryBuf[i]) > 0) || ($impl.TemporaryBuf[i] === "\tiny") || ($impl.TemporaryBuf[i] === "\tdey") || ($impl.TemporaryBuf[i] === "\ttya") || ($impl.TemporaryBuf[i] === "\ttay")) {
           Result = true}
          else Result = false;
         return Result;
       };
       function MVA(i) {
         var Result = false;
-        Result = pas.System.Pos("\tmva ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tmva ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function MVA_IM(i) {
         var Result = false;
-        Result = pas.System.Pos("\tmva #",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tmva #",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function IFTMP(i) {
         var Result = false;
-        Result = pas.System.Pos("\tlda IFTMP_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tlda IFTMP_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JMP(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjmp l_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjmp l_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LAB_L(i) {
         var Result = false;
-        Result = pas.System.Pos("l_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("l_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LAB_A(i) {
         var Result = false;
-        Result = $mod.TemporaryBuf[i] === "@";
+        Result = $impl.TemporaryBuf[i] === "@";
         return Result;
       };
       function LAB_B(i) {
         var Result = false;
-        Result = pas.System.Pos("b_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("b_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LAB_S(i) {
         var Result = false;
-        Result = pas.System.Pos("s_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("s_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function INC_(i) {
         var Result = false;
-        Result = pas.System.Pos("\tinc ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tinc ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function DEC_(i) {
         var Result = false;
-        Result = pas.System.Pos("\tdec ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tdec ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JSR(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjsr ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjsr ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LDY(i) {
         var Result = false;
-        Result = pas.System.Pos("\tldy ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tldy ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LDY_IM(i) {
         var Result = false;
-        Result = pas.System.Pos("\tldy #",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tldy #",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function CMP(i) {
         var Result = false;
-        Result = pas.System.Pos("\tcmp ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tcmp ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LDA(i) {
         var Result = false;
-        Result = pas.System.Pos("\tlda ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tlda ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LDA_IM(i) {
         var Result = false;
-        Result = pas.System.Pos("\tlda #",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tlda #",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function LDA_STACK(i) {
         var Result = false;
-        Result = pas.System.Pos("\tlda :STACK",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tlda :STACK",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function STA(i) {
         var Result = false;
-        Result = pas.System.Pos("\tsta ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tsta ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function STA_STACK(i) {
         var Result = false;
-        Result = pas.System.Pos("\tsta :STACK",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tsta :STACK",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function STY(i) {
         var Result = false;
-        Result = pas.System.Pos("\tsty ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tsty ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function STY_STACK(i) {
         var Result = false;
-        Result = pas.System.Pos("\tsty :STACK",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tsty :STACK",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function ADD(i) {
         var Result = false;
-        Result = pas.System.Pos("\tadd ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tadd ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function SUB(i) {
         var Result = false;
-        Result = pas.System.Pos("\tsub ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tsub ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function ADD_SUB(i) {
         var Result = false;
-        Result = (pas.System.Pos("\tadd ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tsub ",$mod.TemporaryBuf[i]) === 1);
+        Result = (pas.System.Pos("\tadd ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tsub ",$impl.TemporaryBuf[i]) === 1);
         return Result;
       };
       function ADC_SBC(i) {
         var Result = false;
-        Result = (pas.System.Pos("\tadc ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tsbc ",$mod.TemporaryBuf[i]) === 1);
+        Result = (pas.System.Pos("\tadc ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tsbc ",$impl.TemporaryBuf[i]) === 1);
         return Result;
       };
       function SBC(i) {
         var Result = false;
-        Result = pas.System.Pos("\tsbc ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tsbc ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function DEX(i) {
         var Result = false;
-        Result = $mod.TemporaryBuf[i] === "\tdex";
+        Result = $impl.TemporaryBuf[i] === "\tdex";
         return Result;
       };
       function STA_BP2(i) {
         var Result = false;
-        Result = $mod.TemporaryBuf[i] === "\tsta :bp2";
+        Result = $impl.TemporaryBuf[i] === "\tsta :bp2";
         return Result;
       };
       function STA_BP2_1(i) {
         var Result = false;
-        Result = $mod.TemporaryBuf[i] === "\tsta :bp2+1";
+        Result = $impl.TemporaryBuf[i] === "\tsta :bp2+1";
         return Result;
       };
       function AND_ORA_EOR(i) {
         var Result = false;
-        Result = (pas.System.Pos("\tand ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tora ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\teor ",$mod.TemporaryBuf[i]) === 1);
+        Result = (pas.System.Pos("\tand ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tora ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\teor ",$impl.TemporaryBuf[i]) === 1);
         return Result;
       };
       function IY(i) {
         var Result = false;
-        Result = pas.System.Pos(",y",$mod.TemporaryBuf[i]) > 0;
+        Result = pas.System.Pos(",y",$impl.TemporaryBuf[i]) > 0;
         return Result;
       };
       function STA_ADR(i) {
         var Result = false;
-        Result = (IY(i) && (pas.System.Pos("\tsta adr.",$mod.TemporaryBuf[i]) === 1)) || ((pas.System.Pos("\tsta ",$mod.TemporaryBuf[i]) === 1) && (pas.System.Pos(".adr.",$mod.TemporaryBuf[i]) > 0));
+        Result = (IY(i) && (pas.System.Pos("\tsta adr.",$impl.TemporaryBuf[i]) === 1)) || ((pas.System.Pos("\tsta ",$impl.TemporaryBuf[i]) === 1) && (pas.System.Pos(".adr.",$impl.TemporaryBuf[i]) > 0));
         return Result;
       };
       function JEQ(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjeq ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjeq ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JNE(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjne ",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjne ",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JEQ_L(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjeq l_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjeq l_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JNE_L(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjne l_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjne l_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JCC_L(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjcc l_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjcc l_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function JCS_L(i) {
         var Result = false;
-        Result = pas.System.Pos("\tjcs l_",$mod.TemporaryBuf[i]) === 1;
+        Result = pas.System.Pos("\tjcs l_",$impl.TemporaryBuf[i]) === 1;
         return Result;
       };
       function OPTI(i) {
         var Result = false;
-        Result = pas.System.Pos("; optimize ",$mod.TemporaryBuf[i]) > 0;
+        Result = pas.System.Pos("; optimize ",$impl.TemporaryBuf[i]) > 0;
         return Result;
       };
       function SKIP(i) {
         var Result = false;
-        Result = ($mod.TemporaryBuf[i] === "\tseq") || ($mod.TemporaryBuf[i] === "\tsne") || ($mod.TemporaryBuf[i] === "\tspl") || ($mod.TemporaryBuf[i] === "\tsmi") || ($mod.TemporaryBuf[i] === "\tscc") || ($mod.TemporaryBuf[i] === "\tscs") || ($mod.TemporaryBuf[i] === "\tsvc") || ($mod.TemporaryBuf[i] === "\tsvs") || (pas.System.Pos("\tjne ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjeq ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjcc ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjcs ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjmi ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjpl ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbne ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbeq ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbcc ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbcs ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbmi ",$mod.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbpl ",$mod.TemporaryBuf[i]) === 1);
+        Result = ($impl.TemporaryBuf[i] === "\tseq") || ($impl.TemporaryBuf[i] === "\tsne") || ($impl.TemporaryBuf[i] === "\tspl") || ($impl.TemporaryBuf[i] === "\tsmi") || ($impl.TemporaryBuf[i] === "\tscc") || ($impl.TemporaryBuf[i] === "\tscs") || ($impl.TemporaryBuf[i] === "\tsvc") || ($impl.TemporaryBuf[i] === "\tsvs") || (pas.System.Pos("\tjne ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjeq ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjcc ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjcs ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjmi ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tjpl ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbne ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbeq ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbcc ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbcs ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbmi ",$impl.TemporaryBuf[i]) === 1) || (pas.System.Pos("\tbpl ",$impl.TemporaryBuf[i]) === 1);
         return Result;
       };
       function IFDEF_MUL8(i) {
         var Result = false;
-        Result = ($mod.TemporaryBuf[i + 1] === "\tfmulu_8") && ($mod.TemporaryBuf[i] === "\t.ifdef fmulinit");
+        Result = ($impl.TemporaryBuf[i + 1] === "\tfmulu_8") && ($impl.TemporaryBuf[i] === "\t.ifdef fmulinit");
         return Result;
       };
       function IFDEF_MUL16(i) {
         var Result = false;
-        Result = ($mod.TemporaryBuf[i + 1] === "\tfmulu_16") && ($mod.TemporaryBuf[i] === "\t.ifdef fmulinit");
+        Result = ($impl.TemporaryBuf[i + 1] === "\tfmulu_16") && ($impl.TemporaryBuf[i] === "\t.ifdef fmulinit");
         return Result;
       };
       function fortmp(a) {
@@ -8454,12 +8457,12 @@ rtl.module("Optimize",["System"],function () {
       };
       function GetBYTE(i) {
         var Result = 0;
-        Result = pas.Common.GetVAL(pas.System.Copy($mod.TemporaryBuf[i],6,4));
+        Result = pas.Common.GetVAL(pas.System.Copy($impl.TemporaryBuf[i],6,4));
         return Result;
       };
       function GetWORD(i, j) {
         var Result = 0;
-        Result = pas.Common.GetVAL(pas.System.Copy($mod.TemporaryBuf[i],6,4)) + (pas.Common.GetVAL(pas.System.Copy($mod.TemporaryBuf[j],6,4)) * 256);
+        Result = pas.Common.GetVAL(pas.System.Copy($impl.TemporaryBuf[i],6,4)) + (pas.Common.GetVAL(pas.System.Copy($impl.TemporaryBuf[j],6,4)) * 256);
         return Result;
       };
       function GetSTRING(j) {
@@ -8468,7 +8471,7 @@ rtl.module("Optimize",["System"],function () {
         var a = "";
         Result = "";
         i = 6;
-        a = $mod.TemporaryBuf[j];
+        a = $impl.TemporaryBuf[j];
         if (a !== "") while (!(a.charCodeAt(i - 1) in rtl.createSet(32,9)) && (i <= a.length)) {
           Result = Result + a.charAt(i - 1);
           i += 1;
@@ -8476,433 +8479,433 @@ rtl.module("Optimize",["System"],function () {
         return Result;
       };
       function opt_TEMP_MOVE() {
-        if ((pas.System.Pos("\tjsr SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) || ((pas.System.Pos("\t.LOCAL +MAIN.SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) && ($mod.TemporaryBuf[12] === "\tm@INLINE") && ($mod.TemporaryBuf[13] === "\t.ENDL"))) {
-          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[2]) === 1) && (pas.System.Pos(".SOURCE+1",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".SOURCE",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[6]) === 1) && (pas.System.Pos(".DEST+1",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[4]) === 1) && (pas.System.Pos(".DEST",$mod.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[10]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[10]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[8]) > 0) && LDA_IM(0) && LDA_IM(3) && LDA_IM(5) && LDA_IM(7) && LDA_IM(9)) {
+        if ((pas.System.Pos("\tjsr SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) || ((pas.System.Pos("\t.LOCAL +MAIN.SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) && ($impl.TemporaryBuf[12] === "\tm@INLINE") && ($impl.TemporaryBuf[13] === "\t.ENDL"))) {
+          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[2]) === 1) && (pas.System.Pos(".SOURCE+1",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".SOURCE",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[6]) === 1) && (pas.System.Pos(".DEST+1",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[4]) === 1) && (pas.System.Pos(".DEST",$impl.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[10]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[10]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[8]) > 0) && LDA_IM(0) && LDA_IM(3) && LDA_IM(5) && LDA_IM(7) && LDA_IM(9)) {
             p = GetWORD(0,0);
             q = GetWORD(3,5);
             k = GetWORD(7,9);
             if ((k > 0) && (k <= 256) && !(((p >= q) && (p < (q + k))) || (((p + k) > q) && ((p + k) <= (q + k))))) {
               if (k <= 16) {
-                $mod.TemporaryBuf[10] = "\t:" + pas.Common.IntToStr(k) + " mva $" + pas.SysUtils.IntToHex(p,4) + "+# $" + pas.SysUtils.IntToHex(q,4) + "+#";
-                $mod.TemporaryBuf[11] = "";
+                $impl.TemporaryBuf[10] = "\t:" + pas.Common.IntToStr(k) + " mva $" + pas.SysUtils.IntToHex(p,4) + "+# $" + pas.SysUtils.IntToHex(q,4) + "+#";
+                $impl.TemporaryBuf[11] = "";
               } else if (k <= 128) {
-                $mod.TemporaryBuf[10] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-                $mod.TemporaryBuf[11] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+                $impl.TemporaryBuf[10] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+                $impl.TemporaryBuf[11] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
               } else {
-                $mod.TemporaryBuf[10] = "\tldy #256-" + pas.Common.IntToStr(k);
-                $mod.TemporaryBuf[11] = "\tmva:rne $" + pas.SysUtils.IntToHex(p,4) + "+" + pas.Common.IntToStr(k) + "-256,y $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
+                $impl.TemporaryBuf[10] = "\tldy #256-" + pas.Common.IntToStr(k);
+                $impl.TemporaryBuf[11] = "\tmva:rne $" + pas.SysUtils.IntToHex(p,4) + "+" + pas.Common.IntToStr(k) + "-256,y $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
               };
-              $mod.TemporaryBuf[0] = "~";
-              $mod.TemporaryBuf[1] = "~";
-              $mod.TemporaryBuf[2] = "~";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              if ($mod.TemporaryBuf[12] === "\tm@INLINE") {
-                $mod.TemporaryBuf[12] = "~";
-                $mod.TemporaryBuf[13] = "~";
+              $impl.TemporaryBuf[0] = "~";
+              $impl.TemporaryBuf[1] = "~";
+              $impl.TemporaryBuf[2] = "~";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              if ($impl.TemporaryBuf[12] === "\tm@INLINE") {
+                $impl.TemporaryBuf[12] = "~";
+                $impl.TemporaryBuf[13] = "~";
               };
             };
           };
         };
-        if ((pas.System.Pos("\tjsr SYSTEM.MOVE.",$mod.TemporaryBuf[12]) === 1) || ((pas.System.Pos("\t.LOCAL +MAIN.SYSTEM.MOVE.",$mod.TemporaryBuf[12]) === 1) && ($mod.TemporaryBuf[13] === "\tm@INLINE") && ($mod.TemporaryBuf[14] === "\t.ENDL"))) {
-          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".SOURCE",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[9]) > 0) && LDA_IM(0) && LDA_IM(2) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
+        if ((pas.System.Pos("\tjsr SYSTEM.MOVE.",$impl.TemporaryBuf[12]) === 1) || ((pas.System.Pos("\t.LOCAL +MAIN.SYSTEM.MOVE.",$impl.TemporaryBuf[12]) === 1) && ($impl.TemporaryBuf[13] === "\tm@INLINE") && ($impl.TemporaryBuf[14] === "\t.ENDL"))) {
+          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".SOURCE",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[9]) > 0) && LDA_IM(0) && LDA_IM(2) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
             p = GetWORD(0,2);
             q = GetWORD(4,6);
             k = GetWORD(8,10);
             if ((k > 0) && (k <= 256) && !(((p >= q) && (p < (q + k))) || (((p + k) > q) && ((p + k) <= (q + k))))) {
               if (k <= 16) {
-                $mod.TemporaryBuf[11] = "\t:" + pas.Common.IntToStr(k) + " mva $" + pas.SysUtils.IntToHex(p,4) + "+# $" + pas.SysUtils.IntToHex(q,4) + "+#";
-                $mod.TemporaryBuf[12] = "";
+                $impl.TemporaryBuf[11] = "\t:" + pas.Common.IntToStr(k) + " mva $" + pas.SysUtils.IntToHex(p,4) + "+# $" + pas.SysUtils.IntToHex(q,4) + "+#";
+                $impl.TemporaryBuf[12] = "";
               } else if (k <= 128) {
-                $mod.TemporaryBuf[11] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-                $mod.TemporaryBuf[12] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+                $impl.TemporaryBuf[11] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+                $impl.TemporaryBuf[12] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
               } else {
-                $mod.TemporaryBuf[11] = "\tldy #256-" + pas.Common.IntToStr(k);
-                $mod.TemporaryBuf[12] = "\tmva:rne $" + pas.SysUtils.IntToHex(p,4) + "+" + pas.Common.IntToStr(k) + "-256,y $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
+                $impl.TemporaryBuf[11] = "\tldy #256-" + pas.Common.IntToStr(k);
+                $impl.TemporaryBuf[12] = "\tmva:rne $" + pas.SysUtils.IntToHex(p,4) + "+" + pas.Common.IntToStr(k) + "-256,y $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
               };
-              $mod.TemporaryBuf[0] = "~";
-              $mod.TemporaryBuf[1] = "~";
-              $mod.TemporaryBuf[2] = "~";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              if ($mod.TemporaryBuf[13] === "\tm@INLINE") {
-                $mod.TemporaryBuf[13] = "~";
-                $mod.TemporaryBuf[14] = "~";
+              $impl.TemporaryBuf[0] = "~";
+              $impl.TemporaryBuf[1] = "~";
+              $impl.TemporaryBuf[2] = "~";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              if ($impl.TemporaryBuf[13] === "\tm@INLINE") {
+                $impl.TemporaryBuf[13] = "~";
+                $impl.TemporaryBuf[14] = "~";
               };
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".SOURCE",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tlda ",$mod.TemporaryBuf[0]) === 1) && (LDA_IM(0) === false) && (pas.System.Pos("\tlda ",$mod.TemporaryBuf[2]) === 1) && (LDA_IM(2) === false) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
+          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".SOURCE",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tlda ",$impl.TemporaryBuf[0]) === 1) && (LDA_IM(0) === false) && (pas.System.Pos("\tlda ",$impl.TemporaryBuf[2]) === 1) && (LDA_IM(2) === false) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
             q = GetWORD(4,6);
             k = GetWORD(8,10);
             if (k <= 128) {
-              $mod.TemporaryBuf[1] = "\tsta :bp2";
-              $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[5] = "\tmva:rpl (:bp2),y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
-              if ($mod.TemporaryBuf[13] === "\tm@INLINE") {
-                $mod.TemporaryBuf[13] = "~";
-                $mod.TemporaryBuf[14] = "~";
+              $impl.TemporaryBuf[1] = "\tsta :bp2";
+              $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[5] = "\tmva:rpl (:bp2),y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
+              if ($impl.TemporaryBuf[13] === "\tm@INLINE") {
+                $impl.TemporaryBuf[13] = "~";
+                $impl.TemporaryBuf[14] = "~";
               };
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[0]) === 1) && (pas.System.Pos(".SOURCE",$mod.TemporaryBuf[0]) > 0) && ($mod.TemporaryBuf[1] === "\tiny") && ($mod.TemporaryBuf[2] === "\tlda (:bp2),y") && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
+          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[0]) === 1) && (pas.System.Pos(".SOURCE",$impl.TemporaryBuf[0]) > 0) && ($impl.TemporaryBuf[1] === "\tiny") && ($impl.TemporaryBuf[2] === "\tlda (:bp2),y") && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
             q = GetWORD(4,6);
             k = GetWORD(8,10);
             if (k <= 128) {
-              $mod.TemporaryBuf[0] = "\tsta :TMP";
-              $mod.TemporaryBuf[3] = "\tsta :TMP+1";
-              $mod.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[5] = "\tmva:rpl (:TMP),y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
-              if ($mod.TemporaryBuf[13] === "\tm@INLINE") {
-                $mod.TemporaryBuf[13] = "~";
-                $mod.TemporaryBuf[14] = "~";
+              $impl.TemporaryBuf[0] = "\tsta :TMP";
+              $impl.TemporaryBuf[3] = "\tsta :TMP+1";
+              $impl.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[5] = "\tmva:rpl (:TMP),y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
+              if ($impl.TemporaryBuf[13] === "\tm@INLINE") {
+                $impl.TemporaryBuf[13] = "~";
+                $impl.TemporaryBuf[14] = "~";
               };
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".SOURCE+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".SOURCE",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".DEST+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[0]) === 1) && (pas.System.Pos(".DEST",$mod.TemporaryBuf[0]) > 0) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
+          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".SOURCE+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".SOURCE",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".DEST+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[0]) === 1) && (pas.System.Pos(".DEST",$impl.TemporaryBuf[0]) > 0) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
             p = GetWORD(4,6);
             k = GetWORD(8,10);
             if (k <= 128) {
-              $mod.TemporaryBuf[0] = "\tsta :bp2";
-              $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[5] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y (:bp2),y-";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
-              if ($mod.TemporaryBuf[13] === "\tm@INLINE") {
-                $mod.TemporaryBuf[13] = "~";
-                $mod.TemporaryBuf[14] = "~";
+              $impl.TemporaryBuf[0] = "\tsta :bp2";
+              $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[5] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y (:bp2),y-";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
+              if ($impl.TemporaryBuf[13] === "\tm@INLINE") {
+                $impl.TemporaryBuf[13] = "~";
+                $impl.TemporaryBuf[14] = "~";
               };
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$mod.TemporaryBuf[0]) === 1) && (pas.System.Pos(".SOURCE",$mod.TemporaryBuf[0]) > 0) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
+          if ((pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".DEST+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".DEST",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[11]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".SOURCE+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.MOVE.",$impl.TemporaryBuf[0]) === 1) && (pas.System.Pos(".SOURCE",$impl.TemporaryBuf[0]) > 0) && LDA_IM(4) && LDA_IM(6) && LDA_IM(8) && LDA_IM(10)) {
             q = GetWORD(4,6);
             k = GetWORD(8,10);
             if (k <= 128) {
-              $mod.TemporaryBuf[0] = "\tsta :bp2";
-              $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[5] = "\tmva:rpl (:bp2),y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
-              if ($mod.TemporaryBuf[13] === "\tm@INLINE") {
-                $mod.TemporaryBuf[13] = "~";
-                $mod.TemporaryBuf[14] = "~";
+              $impl.TemporaryBuf[0] = "\tsta :bp2";
+              $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[5] = "\tmva:rpl (:bp2),y $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
+              if ($impl.TemporaryBuf[13] === "\tm@INLINE") {
+                $impl.TemporaryBuf[13] = "~";
+                $impl.TemporaryBuf[14] = "~";
               };
             };
           };
         };
       };
       function opt_TEMP_FILL() {
-        if ((pas.System.Pos("\tjsr SYSTEM.FILL",$mod.TemporaryBuf[10]) === 1) || ((pas.System.Pos("\t.LOCAL +MAIN.SYSTEM.FILL",$mod.TemporaryBuf[10]) === 1) && ($mod.TemporaryBuf[11] === "\tm@INLINE") && ($mod.TemporaryBuf[12] === "\t.ENDL"))) {
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && LDA(8) && LDA_IM(0) && LDA_IM(2) && LDA_IM(4) && LDA_IM(6)) {
+        if ((pas.System.Pos("\tjsr SYSTEM.FILL",$impl.TemporaryBuf[10]) === 1) || ((pas.System.Pos("\t.LOCAL +MAIN.SYSTEM.FILL",$impl.TemporaryBuf[10]) === 1) && ($impl.TemporaryBuf[11] === "\tm@INLINE") && ($impl.TemporaryBuf[12] === "\t.ENDL"))) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && LDA(8) && LDA_IM(0) && LDA_IM(2) && LDA_IM(4) && LDA_IM(6)) {
             q = GetWORD(0,2);
             k = GetWORD(4,6);
             yes = false;
             if ((k === 0x200) || (k === 0x300) || (k === 0x400) || (k === 0x500) || (k === 0x600) || (k === 0x700) || (k === 0x800)) {
-              $mod.TemporaryBuf[0] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[1] = "\tm@fill $" + pas.SysUtils.IntToHex(q,4) + " " + pas.Common.IntToStr(rtl.trunc(k / 0x80));
-              $mod.TemporaryBuf[2] = "~";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[1] = "\tm@fill $" + pas.SysUtils.IntToHex(q,4) + " " + pas.Common.IntToStr(rtl.trunc(k / 0x80));
+              $impl.TemporaryBuf[2] = "~";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 8) {
-              $mod.TemporaryBuf[0] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[1] = "\t:" + pas.Common.IntToStr(k) + " sta $" + pas.SysUtils.IntToHex(q,4) + "+#";
-              $mod.TemporaryBuf[2] = "~";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[1] = "\t:" + pas.Common.IntToStr(k) + " sta $" + pas.SysUtils.IntToHex(q,4) + "+#";
+              $impl.TemporaryBuf[2] = "~";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 128) {
-              $mod.TemporaryBuf[0] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[1] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[2] = "\tsta:rpl $" + pas.SysUtils.IntToHex(q,4) + ",y-";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[1] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[2] = "\tsta:rpl $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 256) {
-              $mod.TemporaryBuf[0] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[1] = "\tldy #256-" + pas.Common.IntToStr(k);
-              $mod.TemporaryBuf[2] = "\tsta:rne $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[1] = "\tldy #256-" + pas.Common.IntToStr(k);
+              $impl.TemporaryBuf[2] = "\tsta:rne $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             };
-            if (yes && ($mod.TemporaryBuf[11] === "\tm@INLINE")) {
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
+            if (yes && ($impl.TemporaryBuf[11] === "\tm@INLINE")) {
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[2]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && LDA_IM(1) && LDA_IM(3) && LDA_IM(5) && ($mod.TemporaryBuf[7] === "\tlda #$00")) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[2]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && LDA_IM(1) && LDA_IM(3) && LDA_IM(5) && ($impl.TemporaryBuf[7] === "\tlda #$00")) {
             q = GetWORD(1,3);
             k = GetWORD(5,7);
             yes = false;
             if ((k === 0x200) || (k === 0x300) || (k === 0x400) || (k === 0x500) || (k === 0x600) || (k === 0x700) || (k === 0x800)) {
-              $mod.TemporaryBuf[0] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[1] = "\tm@fill $" + pas.SysUtils.IntToHex(q,4) + " " + pas.Common.IntToStr(rtl.trunc(k / 0x80));
-              $mod.TemporaryBuf[2] = "~";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[1] = "\tm@fill $" + pas.SysUtils.IntToHex(q,4) + " " + pas.Common.IntToStr(rtl.trunc(k / 0x80));
+              $impl.TemporaryBuf[2] = "~";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 8) {
-              $mod.TemporaryBuf[1] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[2] = "\t:" + pas.Common.IntToStr(k) + " sta $" + pas.SysUtils.IntToHex(q,4) + "+#";
-              $mod.TemporaryBuf[3] = "~";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[1] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[2] = "\t:" + pas.Common.IntToStr(k) + " sta $" + pas.SysUtils.IntToHex(q,4) + "+#";
+              $impl.TemporaryBuf[3] = "~";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 128) {
-              $mod.TemporaryBuf[1] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[2] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[3] = "\tsta:rpl $" + pas.SysUtils.IntToHex(q,4) + ",y-";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[1] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[2] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[3] = "\tsta:rpl $" + pas.SysUtils.IntToHex(q,4) + ",y-";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 256) {
-              $mod.TemporaryBuf[1] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[2] = "\tldy #256-" + pas.Common.IntToStr(k);
-              $mod.TemporaryBuf[3] = "\tsta:rne $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
-              $mod.TemporaryBuf[4] = "~";
-              $mod.TemporaryBuf[5] = "~";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[1] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[2] = "\tldy #256-" + pas.Common.IntToStr(k);
+              $impl.TemporaryBuf[3] = "\tsta:rne $" + pas.SysUtils.IntToHex(q,4) + "+" + pas.Common.IntToStr(k) + "-256,y+";
+              $impl.TemporaryBuf[4] = "~";
+              $impl.TemporaryBuf[5] = "~";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             };
-            if (yes && ($mod.TemporaryBuf[11] === "\tm@INLINE")) {
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
+            if (yes && ($impl.TemporaryBuf[11] === "\tm@INLINE")) {
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[2]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && ($mod.TemporaryBuf[7] === "\tlda #$00") && LDA_IM(5) && LDA(1) && (LDA_IM(1) === false) && LDA(3)) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[2]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && ($impl.TemporaryBuf[7] === "\tlda #$00") && LDA_IM(5) && LDA(1) && (LDA_IM(1) === false) && LDA(3)) {
             k = GetWORD(5,7);
             yes = false;
             if (k === 256) {
-              $mod.TemporaryBuf[2] = "\tsta :bp2";
-              $mod.TemporaryBuf[4] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[5] = "\tldy #$00";
-              $mod.TemporaryBuf[6] = "\ttya";
-              $mod.TemporaryBuf[7] = "\tsta:rne (:bp2),y+";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[2] = "\tsta :bp2";
+              $impl.TemporaryBuf[4] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[5] = "\tldy #$00";
+              $impl.TemporaryBuf[6] = "\ttya";
+              $impl.TemporaryBuf[7] = "\tsta:rne (:bp2),y+";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 128) {
-              $mod.TemporaryBuf[2] = "\tsta :bp2";
-              $mod.TemporaryBuf[4] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[5] = "\tlda #$00";
-              $mod.TemporaryBuf[6] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[7] = "\tsta:rpl (:bp2),y-";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[2] = "\tsta :bp2";
+              $impl.TemporaryBuf[4] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[5] = "\tlda #$00";
+              $impl.TemporaryBuf[6] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[7] = "\tsta:rpl (:bp2),y-";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             };
-            if (yes && ($mod.TemporaryBuf[11] === "\tm@INLINE")) {
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
+            if (yes && ($impl.TemporaryBuf[11] === "\tm@INLINE")) {
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && LDA_IM(6) && LDA_IM(4) && LDA(8) && LDA(0) && (LDA_IM(0) === false) && LDA(2)) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && LDA_IM(6) && LDA_IM(4) && LDA(8) && LDA(0) && (LDA_IM(0) === false) && LDA(2)) {
             k = GetWORD(4,6);
             yes = false;
             if (k === 256) {
-              $mod.TemporaryBuf[1] = "\tsta :bp2";
-              $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[5] = "\tldy #$00";
-              $mod.TemporaryBuf[6] = "\tsta:rne (:bp2),y+";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[1] = "\tsta :bp2";
+              $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[5] = "\tldy #$00";
+              $impl.TemporaryBuf[6] = "\tsta:rne (:bp2),y+";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 128) {
-              $mod.TemporaryBuf[1] = "\tsta :bp2";
-              $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[5] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[6] = "\tsta:rpl (:bp2),y-";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[1] = "\tsta :bp2";
+              $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[5] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[6] = "\tsta:rpl (:bp2),y-";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             };
-            if (yes && ($mod.TemporaryBuf[11] === "\tm@INLINE")) {
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
+            if (yes && ($impl.TemporaryBuf[11] === "\tm@INLINE")) {
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[1]) > 0) && LDA_IM(8) && LDA_IM(6) && LDA(0) && LDA(2) && (LDA_IM(2) === false) && LDA(4)) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[1]) > 0) && LDA_IM(8) && LDA_IM(6) && LDA(0) && LDA(2) && (LDA_IM(2) === false) && LDA(4)) {
             k = GetWORD(6,8);
             yes = false;
             if (k === 256) {
-              $mod.TemporaryBuf[3] = "\tsta :bp2";
-              $mod.TemporaryBuf[5] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[6] = $mod.TemporaryBuf[0];
-              $mod.TemporaryBuf[7] = "\tldy #$00";
-              $mod.TemporaryBuf[8] = "\tsta:rne (:bp2),y+";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              $mod.TemporaryBuf[0] = "~";
-              $mod.TemporaryBuf[1] = "~";
+              $impl.TemporaryBuf[3] = "\tsta :bp2";
+              $impl.TemporaryBuf[5] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[6] = $impl.TemporaryBuf[0];
+              $impl.TemporaryBuf[7] = "\tldy #$00";
+              $impl.TemporaryBuf[8] = "\tsta:rne (:bp2),y+";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = "~";
+              $impl.TemporaryBuf[1] = "~";
               yes = true;
             } else if (k <= 128) {
-              $mod.TemporaryBuf[3] = "\tsta :bp2";
-              $mod.TemporaryBuf[5] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[6] = $mod.TemporaryBuf[0];
-              $mod.TemporaryBuf[7] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[8] = "\tsta:rpl (:bp2),y-";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              $mod.TemporaryBuf[0] = "~";
-              $mod.TemporaryBuf[1] = "~";
+              $impl.TemporaryBuf[3] = "\tsta :bp2";
+              $impl.TemporaryBuf[5] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[6] = $impl.TemporaryBuf[0];
+              $impl.TemporaryBuf[7] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[8] = "\tsta:rpl (:bp2),y-";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[0] = "~";
+              $impl.TemporaryBuf[1] = "~";
               yes = true;
             };
-            if (yes && ($mod.TemporaryBuf[11] === "\tm@INLINE")) {
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
+            if (yes && ($impl.TemporaryBuf[11] === "\tm@INLINE")) {
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[2]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && LDA_IM(7) && LDA_IM(5) && LDA(3) && (LDA_IM(3) === false)) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[2]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && LDA_IM(7) && LDA_IM(5) && LDA(3) && (LDA_IM(3) === false)) {
             k = GetWORD(5,7);
             yes = false;
             if (k === 256) {
-              $mod.TemporaryBuf[2] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = "\tsta :bp2";
-              $mod.TemporaryBuf[5] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[6] = "\tldy #$00";
-              $mod.TemporaryBuf[7] = "\tsta:rne (:bp2),y+";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[2] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = "\tsta :bp2";
+              $impl.TemporaryBuf[5] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[6] = "\tldy #$00";
+              $impl.TemporaryBuf[7] = "\tsta:rne (:bp2),y+";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             } else if (k <= 128) {
-              $mod.TemporaryBuf[2] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = "\tsta :bp2";
-              $mod.TemporaryBuf[5] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[6] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[7] = "\tsta:rpl (:bp2),y-";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
+              $impl.TemporaryBuf[2] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = "\tsta :bp2";
+              $impl.TemporaryBuf[5] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[6] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[7] = "\tsta:rpl (:bp2),y-";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
               yes = true;
             };
-            if (yes && ($mod.TemporaryBuf[11] === "\tm@INLINE")) {
-              $mod.TemporaryBuf[11] = "~";
-              $mod.TemporaryBuf[12] = "~";
+            if (yes && ($impl.TemporaryBuf[11] === "\tm@INLINE")) {
+              $impl.TemporaryBuf[11] = "~";
+              $impl.TemporaryBuf[12] = "~";
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[1]) > 0) && LDA(2) && (ADC_SBC(3) || ADD_SUB(3)) && ($mod.TemporaryBuf[7] === "\tlda #$00") && LDA_IM(5)) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[8]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[8]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[6]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[4]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[4]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[1]) > 0) && LDA(2) && (ADC_SBC(3) || ADD_SUB(3)) && ($impl.TemporaryBuf[7] === "\tlda #$00") && LDA_IM(5)) {
             k = GetWORD(5,7);
             if (k <= 128) {
-              $mod.TemporaryBuf[1] = "\tsta :bp2";
-              $mod.TemporaryBuf[4] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[5] = "\tlda #$00";
-              $mod.TemporaryBuf[6] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[7] = "\tsta:rpl (:bp2),y-";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              if ($mod.TemporaryBuf[11] === "\tm@INLINE") {
-                $mod.TemporaryBuf[11] = "~";
-                $mod.TemporaryBuf[12] = "~";
+              $impl.TemporaryBuf[1] = "\tsta :bp2";
+              $impl.TemporaryBuf[4] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[5] = "\tlda #$00";
+              $impl.TemporaryBuf[6] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[7] = "\tsta:rpl (:bp2),y-";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              if ($impl.TemporaryBuf[11] === "\tm@INLINE") {
+                $impl.TemporaryBuf[11] = "~";
+                $impl.TemporaryBuf[12] = "~";
               };
             };
           };
-          if ((pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT+1",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[5]) === 1) && (pas.System.Pos(".COUNT",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A+1",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$mod.TemporaryBuf[0]) === 1) && (pas.System.Pos(".A",$mod.TemporaryBuf[0]) > 0) && LDA(8) && LDA(1) && (ADC_SBC(2) || ADD_SUB(2)) && LDA_IM(4) && LDA_IM(6)) {
+          if ((pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[7]) === 1) && (pas.System.Pos(".COUNT+1",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[5]) === 1) && (pas.System.Pos(".COUNT",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[9]) === 1) && (pas.System.Pos(".VALUE",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[3]) === 1) && (pas.System.Pos(".A+1",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("\tsta SYSTEM.FILL",$impl.TemporaryBuf[0]) === 1) && (pas.System.Pos(".A",$impl.TemporaryBuf[0]) > 0) && LDA(8) && LDA(1) && (ADC_SBC(2) || ADD_SUB(2)) && LDA_IM(4) && LDA_IM(6)) {
             k = GetWORD(4,6);
             if (k <= 128) {
-              $mod.TemporaryBuf[0] = "\tsta :bp2";
-              $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-              $mod.TemporaryBuf[4] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[5] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
-              $mod.TemporaryBuf[6] = "\tsta:rpl (:bp2),y-";
-              $mod.TemporaryBuf[7] = "~";
-              $mod.TemporaryBuf[8] = "~";
-              $mod.TemporaryBuf[9] = "~";
-              $mod.TemporaryBuf[10] = "~";
-              if ($mod.TemporaryBuf[11] === "\tm@INLINE") {
-                $mod.TemporaryBuf[11] = "~";
-                $mod.TemporaryBuf[12] = "~";
+              $impl.TemporaryBuf[0] = "\tsta :bp2";
+              $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+              $impl.TemporaryBuf[4] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[5] = "\tldy #$" + pas.SysUtils.IntToHex(k - 1,2);
+              $impl.TemporaryBuf[6] = "\tsta:rpl (:bp2),y-";
+              $impl.TemporaryBuf[7] = "~";
+              $impl.TemporaryBuf[8] = "~";
+              $impl.TemporaryBuf[9] = "~";
+              $impl.TemporaryBuf[10] = "~";
+              if ($impl.TemporaryBuf[11] === "\tm@INLINE") {
+                $impl.TemporaryBuf[11] = "~";
+                $impl.TemporaryBuf[12] = "~";
               };
             };
           };
@@ -8915,29 +8918,29 @@ rtl.module("Optimize",["System"],function () {
         var yes = false;
         var lab = "";
         var tmp = "";
-        if (((STA(80 + 20) || JSR(80 + 20)) && LAB_L(80 + 21) && IFTMP(80 + 22) && JNE_L(80 + 23)) || ((STA(80 + 19) || JSR(80 + 19)) && LAB_L(80 + 20) && IFTMP(80 + 21) && ($mod.TemporaryBuf[80 + 22] === "\tbeq *+5") && JMP(80 + 23))) {
-          lab = pas.System.Copy($mod.TemporaryBuf[80 + 23],6,256);
+        if (((STA(80 + 20) || JSR(80 + 20)) && LAB_L(80 + 21) && IFTMP(80 + 22) && JNE_L(80 + 23)) || ((STA(80 + 19) || JSR(80 + 19)) && LAB_L(80 + 20) && IFTMP(80 + 21) && ($impl.TemporaryBuf[80 + 22] === "\tbeq *+5") && JMP(80 + 23))) {
+          lab = pas.System.Copy($impl.TemporaryBuf[80 + 23],6,256);
           yes = false;
-          for (p = 104; p <= 511; p++) if ($mod.TemporaryBuf[p] === lab) {
+          for (p = 104; p <= 511; p++) if ($impl.TemporaryBuf[p] === lab) {
             yes = true;
             break;
           };
           if (yes) {
             while (LAB_L(p - 1)) {
-              tmp = $mod.TemporaryBuf[p - 1];
-              $mod.TemporaryBuf[p - 1] = $mod.TemporaryBuf[p];
-              $mod.TemporaryBuf[p] = tmp;
+              tmp = $impl.TemporaryBuf[p - 1];
+              $impl.TemporaryBuf[p - 1] = $impl.TemporaryBuf[p];
+              $impl.TemporaryBuf[p] = tmp;
               p -= 1;
             };
-            if ($mod.TemporaryBuf[80 + 22] === "\tbeq *+5") {
+            if ($impl.TemporaryBuf[80 + 22] === "\tbeq *+5") {
               i = 80 + 19}
              else i = 80 + 20;
             if (STA(i) || JSR(i)) {
-              for (k = 0; k <= 99; k++) if (($mod.TemporaryBuf[i - k] === $mod.TemporaryBuf[p - k - 1]) || (LAB_L(i - k) && LAB_L(p - k - 1)) || (OPTI(i - k) && OPTI(p - k - 1))) {
-                if (LAB_A(i - k)) if (($mod.TemporaryBuf[i - k - 1] !== $mod.TemporaryBuf[p - k - 2]) || ($mod.TemporaryBuf[i - k - 2] !== $mod.TemporaryBuf[p - k - 3])) return;
-                if ($mod.TemporaryBuf[i - k] === $mod.TemporaryBuf[p - k - 1]) $mod.TemporaryBuf[i - k] = "~";
-                $mod.TemporaryBuf[p - k] = $mod.TemporaryBuf[p - k - 1];
-                $mod.TemporaryBuf[p - k - 1] = lab;
+              for (k = 0; k <= 99; k++) if (($impl.TemporaryBuf[i - k] === $impl.TemporaryBuf[p - k - 1]) || (LAB_L(i - k) && LAB_L(p - k - 1)) || (OPTI(i - k) && OPTI(p - k - 1))) {
+                if (LAB_A(i - k)) if (($impl.TemporaryBuf[i - k - 1] !== $impl.TemporaryBuf[p - k - 2]) || ($impl.TemporaryBuf[i - k - 2] !== $impl.TemporaryBuf[p - k - 3])) return;
+                if ($impl.TemporaryBuf[i - k] === $impl.TemporaryBuf[p - k - 1]) $impl.TemporaryBuf[i - k] = "~";
+                $impl.TemporaryBuf[p - k] = $impl.TemporaryBuf[p - k - 1];
+                $impl.TemporaryBuf[p - k - 1] = lab;
               } else return;
             };
           };
@@ -8951,31 +8954,31 @@ rtl.module("Optimize",["System"],function () {
         var lab = "";
         var tmp = "";
         i = 100;
-        if (pas.System.Pos("\tjmp a_",$mod.TemporaryBuf[i]) > 0) {
-          if (LAB_S(i + 1)) $mod.TemporaryBuf[i + 1] = "~";
-          tmp = $mod.TemporaryBuf[i];
+        if (pas.System.Pos("\tjmp a_",$impl.TemporaryBuf[i]) > 0) {
+          if (LAB_S(i + 1)) $impl.TemporaryBuf[i + 1] = "~";
+          tmp = $impl.TemporaryBuf[i];
           lab = pas.System.Copy(tmp,6,256);
           yes = false;
           for (var $l = i + 1; $l <= 511; $l++) {
             p = $l;
-            if (($mod.TemporaryBuf[p] === tmp) && LAB_S(p + 1)) {
+            if (($impl.TemporaryBuf[p] === tmp) && LAB_S(p + 1)) {
               yes = true;
               break;
             };
           };
-          if (yes) if (($mod.TemporaryBuf[i - 2] === $mod.TemporaryBuf[p - 2]) && ($mod.TemporaryBuf[i - 1] === $mod.TemporaryBuf[p - 1]) && (STA(p - 1) || JSR(p - 1))) {
-            lab = $mod.TemporaryBuf[p + 1];
-            $mod.TemporaryBuf[i] = "\tjmp " + lab;
-            $mod.TemporaryBuf[p] = lab;
-            $mod.TemporaryBuf[p + 1] = tmp;
+          if (yes) if (($impl.TemporaryBuf[i - 2] === $impl.TemporaryBuf[p - 2]) && ($impl.TemporaryBuf[i - 1] === $impl.TemporaryBuf[p - 1]) && (STA(p - 1) || JSR(p - 1))) {
+            lab = $impl.TemporaryBuf[p + 1];
+            $impl.TemporaryBuf[i] = "\tjmp " + lab;
+            $impl.TemporaryBuf[p] = lab;
+            $impl.TemporaryBuf[p + 1] = tmp;
             for (var $l1 = 1, $end = i - 1; $l1 <= $end; $l1++) {
               k = $l1;
-              if (($mod.TemporaryBuf[i - k] === $mod.TemporaryBuf[p - k]) || (LAB_L(i - k) && LAB_L(p - k)) || (OPTI(i - k) && OPTI(p - k))) {
-                if (LAB_A(i - k)) if (($mod.TemporaryBuf[i - k - 1] !== $mod.TemporaryBuf[p - k - 1]) || ($mod.TemporaryBuf[i - k - 2] !== $mod.TemporaryBuf[p - k - 2])) return;
-                if ($mod.TemporaryBuf[i - k] === $mod.TemporaryBuf[p - k]) $mod.TemporaryBuf[i - k] = "~";
-                tmp = $mod.TemporaryBuf[p - k];
-                $mod.TemporaryBuf[p - k] = $mod.TemporaryBuf[(p - k) + 1];
-                $mod.TemporaryBuf[(p - k) + 1] = tmp;
+              if (($impl.TemporaryBuf[i - k] === $impl.TemporaryBuf[p - k]) || (LAB_L(i - k) && LAB_L(p - k)) || (OPTI(i - k) && OPTI(p - k))) {
+                if (LAB_A(i - k)) if (($impl.TemporaryBuf[i - k - 1] !== $impl.TemporaryBuf[p - k - 1]) || ($impl.TemporaryBuf[i - k - 2] !== $impl.TemporaryBuf[p - k - 2])) return;
+                if ($impl.TemporaryBuf[i - k] === $impl.TemporaryBuf[p - k]) $impl.TemporaryBuf[i - k] = "~";
+                tmp = $impl.TemporaryBuf[p - k];
+                $impl.TemporaryBuf[p - k] = $impl.TemporaryBuf[(p - k) + 1];
+                $impl.TemporaryBuf[(p - k) + 1] = tmp;
               } else return;
             };
           };
@@ -8984,445 +8987,445 @@ rtl.module("Optimize",["System"],function () {
       function opt_TEMP() {
         var p = 0;
         if (LDA(10) && CMP(11) && JCC_L(12) && LDA(13) && SUB(14)) {
-          $mod.TemporaryBuf[14] = "\tsbc " + pas.System.Copy($mod.TemporaryBuf[14],6,256);
+          $impl.TemporaryBuf[14] = "\tsbc " + pas.System.Copy($impl.TemporaryBuf[14],6,256);
         };
-        if (JCC_L(10) && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && SUB(14)) {
-          $mod.TemporaryBuf[14] = "\tsbc " + pas.System.Copy($mod.TemporaryBuf[14],6,256);
+        if (JCC_L(10) && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && SUB(14)) {
+          $impl.TemporaryBuf[14] = "\tsbc " + pas.System.Copy($impl.TemporaryBuf[14],6,256);
         };
-        if (JCC_L(10) && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && LDA(14) && SUB(15)) {
-          $mod.TemporaryBuf[15] = "\tsbc " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
+        if (JCC_L(10) && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && LDA(14) && SUB(15)) {
+          $impl.TemporaryBuf[15] = "\tsbc " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
         };
-        if (JCC_L(10) && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && LDY(14) && LDA(15) && SUB(16)) {
-          $mod.TemporaryBuf[16] = "\tsbc " + pas.System.Copy($mod.TemporaryBuf[16],6,256);
+        if (JCC_L(10) && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && LDY(14) && LDA(15) && SUB(16)) {
+          $impl.TemporaryBuf[16] = "\tsbc " + pas.System.Copy($impl.TemporaryBuf[16],6,256);
         };
-        if (JCS_L(10) && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && ADD(14)) {
-          $mod.TemporaryBuf[14] = "\tadc " + pas.System.Copy($mod.TemporaryBuf[14],6,256);
+        if (JCS_L(10) && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && ADD(14)) {
+          $impl.TemporaryBuf[14] = "\tadc " + pas.System.Copy($impl.TemporaryBuf[14],6,256);
         };
-        if (JCS_L(10) && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && LDA(14) && ADD(15)) {
-          $mod.TemporaryBuf[15] = "\tadc " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
+        if (JCS_L(10) && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && LDA(14) && ADD(15)) {
+          $impl.TemporaryBuf[15] = "\tadc " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
         };
-        if (JCS_L(10) && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && LDY(14) && LDA(15) && ADD(16)) {
-          $mod.TemporaryBuf[16] = "\tadc " + pas.System.Copy($mod.TemporaryBuf[16],6,256);
+        if (JCS_L(10) && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && LDY(14) && LDA(15) && ADD(16)) {
+          $impl.TemporaryBuf[16] = "\tadc " + pas.System.Copy($impl.TemporaryBuf[16],6,256);
         };
-        if (($mod.TemporaryBuf[10] === "\tscc") && INC_(11) && ($mod.TemporaryBuf[12] === "") && OPTI(13) && ($mod.TemporaryBuf[14] === "") && ADD(15)) {
-          $mod.TemporaryBuf[10] = "\tbcc @+";
-          $mod.TemporaryBuf[12] = "\tclc";
-          $mod.TemporaryBuf[13] = "@";
-          $mod.TemporaryBuf[15] = "\tadc " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
+        if (($impl.TemporaryBuf[10] === "\tscc") && INC_(11) && ($impl.TemporaryBuf[12] === "") && OPTI(13) && ($impl.TemporaryBuf[14] === "") && ADD(15)) {
+          $impl.TemporaryBuf[10] = "\tbcc @+";
+          $impl.TemporaryBuf[12] = "\tclc";
+          $impl.TemporaryBuf[13] = "@";
+          $impl.TemporaryBuf[15] = "\tadc " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
         };
-        if (($mod.TemporaryBuf[10] === "\tscs") && DEC_(11) && ($mod.TemporaryBuf[12] === "") && OPTI(13) && ($mod.TemporaryBuf[14] === "") && SUB(15)) {
-          $mod.TemporaryBuf[10] = "\tbcs @+";
-          $mod.TemporaryBuf[12] = "\tsec";
-          $mod.TemporaryBuf[13] = "@";
-          $mod.TemporaryBuf[15] = "\tsbc " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
+        if (($impl.TemporaryBuf[10] === "\tscs") && DEC_(11) && ($impl.TemporaryBuf[12] === "") && OPTI(13) && ($impl.TemporaryBuf[14] === "") && SUB(15)) {
+          $impl.TemporaryBuf[10] = "\tbcs @+";
+          $impl.TemporaryBuf[12] = "\tsec";
+          $impl.TemporaryBuf[13] = "@";
+          $impl.TemporaryBuf[15] = "\tsbc " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
         };
-        if (LDY(0) && STA(1) && ($mod.TemporaryBuf[2] === "") && OPTI(3) && ($mod.TemporaryBuf[4] === "") && LDA(5)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[5],6,256)) {
-          $mod.TemporaryBuf[5] = "\ttya";
+        if (LDY(0) && STA(1) && ($impl.TemporaryBuf[2] === "") && OPTI(3) && ($impl.TemporaryBuf[4] === "") && LDA(5)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[5],6,256)) {
+          $impl.TemporaryBuf[5] = "\ttya";
         };
-        if (LDY(0) && LDA(1) && STA(2) && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && LDA(6)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-          $mod.TemporaryBuf[6] = "\ttya";
+        if (LDY(0) && LDA(1) && STA(2) && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && LDA(6)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+          $impl.TemporaryBuf[6] = "\ttya";
         };
-        if (LDY(0) && LDA(1) && STA(2) && LDA(3)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[3],6,256)) {
-          $mod.TemporaryBuf[3] = "\ttya";
+        if (LDY(0) && LDA(1) && STA(2) && LDA(3)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[3],6,256)) {
+          $impl.TemporaryBuf[3] = "\ttya";
         };
-        if (($mod.TemporaryBuf[0] === "\tlda #$00") && STA_STACK(1) && ($mod.TemporaryBuf[2] === "\tiny") && LDA_STACK(3) && (pas.System.Pos("ora ",$mod.TemporaryBuf[4]) > 0) && STA(5)) if (pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[3],6,256)) {
-          $mod.TemporaryBuf[4] = "\tlda " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[3] = "~";
+        if (($impl.TemporaryBuf[0] === "\tlda #$00") && STA_STACK(1) && ($impl.TemporaryBuf[2] === "\tiny") && LDA_STACK(3) && (pas.System.Pos("ora ",$impl.TemporaryBuf[4]) > 0) && STA(5)) if (pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[3],6,256)) {
+          $impl.TemporaryBuf[4] = "\tlda " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[3] = "~";
         };
-        if ((pas.System.Pos("lsr ",$mod.TemporaryBuf[0]) > 0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4) && (JNE(5) || JEQ(5))) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
-          $mod.TemporaryBuf[4] = "~";
+        if ((pas.System.Pos("lsr ",$impl.TemporaryBuf[0]) > 0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4) && (JNE(5) || JEQ(5))) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (LDY(0) && STA(1) && INC_(2) && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && LDA(6) && CMP(7) && SKIP(8)) if ((pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[2],6,256)) && (pas.System.Copy($mod.TemporaryBuf[2],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256))) {
-          $mod.TemporaryBuf[2] = "\tiny";
-          $mod.TemporaryBuf[6] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[6],6,256);
-          $mod.TemporaryBuf[7] = "\tcpy " + pas.System.Copy($mod.TemporaryBuf[7],6,256);
-          if ((SKIP(9) === false) && (pas.System.Pos(" l_",$mod.TemporaryBuf[8]) > 0)) {
-            tmp = pas.System.Copy($mod.TemporaryBuf[8],6,256);
+        if (LDY(0) && STA(1) && INC_(2) && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && LDA(6) && CMP(7) && SKIP(8)) if ((pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[2],6,256)) && (pas.System.Copy($impl.TemporaryBuf[2],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256))) {
+          $impl.TemporaryBuf[2] = "\tiny";
+          $impl.TemporaryBuf[6] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[6],6,256);
+          $impl.TemporaryBuf[7] = "\tcpy " + pas.System.Copy($impl.TemporaryBuf[7],6,256);
+          if ((SKIP(9) === false) && (pas.System.Pos(" l_",$impl.TemporaryBuf[8]) > 0)) {
+            tmp = pas.System.Copy($impl.TemporaryBuf[8],6,256);
             p = 9;
-            while (($mod.TemporaryBuf[p] !== tmp) && (p < 511)) p += 1;
-            if (($mod.TemporaryBuf[p] === tmp) && MVA(p - 1) && ($mod.TemporaryBuf[p - 1] === ("\tmva " + GetSTRING(p - 1) + " " + pas.System.Copy($mod.TemporaryBuf[6],6,256))) && ($mod.TemporaryBuf[p + 1] === "")) {
-              $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[6];
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[p - 1] = "\tldy " + GetSTRING(p - 1);
+            while (($impl.TemporaryBuf[p] !== tmp) && (p < 511)) p += 1;
+            if (($impl.TemporaryBuf[p] === tmp) && MVA(p - 1) && ($impl.TemporaryBuf[p - 1] === ("\tmva " + GetSTRING(p - 1) + " " + pas.System.Copy($impl.TemporaryBuf[6],6,256))) && ($impl.TemporaryBuf[p + 1] === "")) {
+              $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[6];
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[p - 1] = "\tldy " + GetSTRING(p - 1);
             };
           };
         };
-        if (($mod.TemporaryBuf[0] === "\tand #$01") && JEQ(1) && LDY(2) && LDA(3) && ($mod.TemporaryBuf[4] === "\tadd #$01")) {
-          $mod.TemporaryBuf[3] = "\tadd " + pas.System.Copy($mod.TemporaryBuf[3],6,256);
-          $mod.TemporaryBuf[4] = "~";
+        if (($impl.TemporaryBuf[0] === "\tand #$01") && JEQ(1) && LDY(2) && LDA(3) && ($impl.TemporaryBuf[4] === "\tadd #$01")) {
+          $impl.TemporaryBuf[3] = "\tadd " + pas.System.Copy($impl.TemporaryBuf[3],6,256);
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (INC_(0) && ($mod.TemporaryBuf[1] === "\tsne") && INC_(2) && (JMP(3) || JNE(3)) && LAB_L(4)) if (pas.System.Pos($mod.TemporaryBuf[0],$mod.TemporaryBuf[2]) > 0) {
-          $mod.TemporaryBuf[1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[3],6,256);
+        if (INC_(0) && ($impl.TemporaryBuf[1] === "\tsne") && INC_(2) && (JMP(3) || JNE(3)) && LAB_L(4)) if (pas.System.Pos($impl.TemporaryBuf[0],$impl.TemporaryBuf[2]) > 0) {
+          $impl.TemporaryBuf[1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[3],6,256);
         };
-        if (LDY(0) && LDA(1) && STA(2)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[1],6,256)) {
-          $mod.TemporaryBuf[1] = "\ttya";
+        if (LDY(0) && LDA(1) && STA(2)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[1],6,256)) {
+          $impl.TemporaryBuf[1] = "\ttya";
         };
-        if (($mod.TemporaryBuf[0] !== "\tsta #$00") && STA(0) && LDA(1)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[1],6,256)) {
+        if (($impl.TemporaryBuf[0] !== "\tsta #$00") && STA(0) && LDA(1)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[1],6,256)) {
           if (STA_STACK(0)) {
-            $mod.TemporaryBuf[0] = "~";
-            $mod.TemporaryBuf[1] = "~";
-          } else $mod.TemporaryBuf[1] = "~";
+            $impl.TemporaryBuf[0] = "~";
+            $impl.TemporaryBuf[1] = "~";
+          } else $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[2] === "\tiny") && ($mod.TemporaryBuf[3] === "\tlda #$00") && (pas.System.Pos("asl :STACK",$mod.TemporaryBuf[4]) > 0)) {
-          $mod.TemporaryBuf[2] = "~";
-          if ($mod.TemporaryBuf[1] === "\tiny") {
-            $mod.TemporaryBuf[1] = "~";
-            if ($mod.TemporaryBuf[0] === "\tiny") $mod.TemporaryBuf[0] = "~";
+        if (($impl.TemporaryBuf[2] === "\tiny") && ($impl.TemporaryBuf[3] === "\tlda #$00") && (pas.System.Pos("asl :STACK",$impl.TemporaryBuf[4]) > 0)) {
+          $impl.TemporaryBuf[2] = "~";
+          if ($impl.TemporaryBuf[1] === "\tiny") {
+            $impl.TemporaryBuf[1] = "~";
+            if ($impl.TemporaryBuf[0] === "\tiny") $impl.TemporaryBuf[0] = "~";
           };
         };
-        if (STA_STACK(0) && (($mod.TemporaryBuf[1] === "\tiny") || ($mod.TemporaryBuf[1] === "\tdey")) && LDA_STACK(2) && (SKIP(3) === false)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[2],6,256)) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[2] = "~";
+        if (STA_STACK(0) && (($impl.TemporaryBuf[1] === "\tiny") || ($impl.TemporaryBuf[1] === "\tdey")) && LDA_STACK(2) && (SKIP(3) === false)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[2],6,256)) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\ttay") && ($mod.TemporaryBuf[1] === "\tiny") && ($mod.TemporaryBuf[2] === "\tiny")) {
-          if ($mod.TemporaryBuf[3] === "\tiny") {
-            $mod.TemporaryBuf[0] = "\tadd #$03";
-            $mod.TemporaryBuf[3] = "~";
-          } else $mod.TemporaryBuf[0] = "\tadd #$02";
-          $mod.TemporaryBuf[1] = "\ttay";
-          $mod.TemporaryBuf[2] = "~";
+        if (($impl.TemporaryBuf[0] === "\ttay") && ($impl.TemporaryBuf[1] === "\tiny") && ($impl.TemporaryBuf[2] === "\tiny")) {
+          if ($impl.TemporaryBuf[3] === "\tiny") {
+            $impl.TemporaryBuf[0] = "\tadd #$03";
+            $impl.TemporaryBuf[3] = "~";
+          } else $impl.TemporaryBuf[0] = "\tadd #$02";
+          $impl.TemporaryBuf[1] = "\ttay";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tbcc *+7") && ($mod.TemporaryBuf[1] === "\tbeq *+5") && JMP(2)) {
-          $mod.TemporaryBuf[0] = "\tscc";
-          $mod.TemporaryBuf[1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = "~";
+        if (($impl.TemporaryBuf[0] === "\tbcc *+7") && ($impl.TemporaryBuf[1] === "\tbeq *+5") && JMP(2)) {
+          $impl.TemporaryBuf[0] = "\tscc";
+          $impl.TemporaryBuf[1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = "~";
         };
-        if ((SKIP(0) === false) && ($mod.TemporaryBuf[1] === "\tbeq *+5") && JMP(2)) {
-          $mod.TemporaryBuf[1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = "~";
+        if ((SKIP(0) === false) && ($impl.TemporaryBuf[1] === "\tbeq *+5") && JMP(2)) {
+          $impl.TemporaryBuf[1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = "~";
         };
-        if ((SKIP(0) === false) && ($mod.TemporaryBuf[1] === "\tbmi *+5") && JMP(2)) {
-          $mod.TemporaryBuf[1] = "\tjpl " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = "~";
+        if ((SKIP(0) === false) && ($impl.TemporaryBuf[1] === "\tbmi *+5") && JMP(2)) {
+          $impl.TemporaryBuf[1] = "\tjpl " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tseq") && JMP(1)) {
-          $mod.TemporaryBuf[0] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[1],6,256);
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tseq") && JMP(1)) {
+          $impl.TemporaryBuf[0] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[1],6,256);
+          $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\t.ENDL") && ($mod.TemporaryBuf[1] === "\tbmi *+7") && ($mod.TemporaryBuf[2] === "\tbeq *+5") && JMP(3)) {
-          $mod.TemporaryBuf[1] = "\tsmi";
-          $mod.TemporaryBuf[2] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[3],6,256);
-          $mod.TemporaryBuf[3] = "~";
+        if (($impl.TemporaryBuf[0] === "\t.ENDL") && ($impl.TemporaryBuf[1] === "\tbmi *+7") && ($impl.TemporaryBuf[2] === "\tbeq *+5") && JMP(3)) {
+          $impl.TemporaryBuf[1] = "\tsmi";
+          $impl.TemporaryBuf[2] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[3],6,256);
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (LAB_L(0) && LDA(1) && CMP(2) && ($mod.TemporaryBuf[3] === "\tbeq @+") && JMP(4) && ($mod.TemporaryBuf[5] === "@")) {
-          $mod.TemporaryBuf[3] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          $mod.TemporaryBuf[4] = "~";
-          $mod.TemporaryBuf[5] = "~";
+        if (LAB_L(0) && LDA(1) && CMP(2) && ($impl.TemporaryBuf[3] === "\tbeq @+") && JMP(4) && ($impl.TemporaryBuf[5] === "@")) {
+          $impl.TemporaryBuf[3] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          $impl.TemporaryBuf[4] = "~";
+          $impl.TemporaryBuf[5] = "~";
         };
-        if (LAB_L(0) && LDA(1) && CMP(2) && JNE(3) && ($mod.TemporaryBuf[4] === "@")) {
-          $mod.TemporaryBuf[4] = "~";
+        if (LAB_L(0) && LDA(1) && CMP(2) && JNE(3) && ($impl.TemporaryBuf[4] === "@")) {
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (LAB_L(0) && CMP(1) && ($mod.TemporaryBuf[2] === "\tbeq @+") && JMP(3) && ($mod.TemporaryBuf[4] === "@")) {
-          $mod.TemporaryBuf[2] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[3],6,256);
-          $mod.TemporaryBuf[3] = "~";
-          $mod.TemporaryBuf[4] = "~";
+        if (LAB_L(0) && CMP(1) && ($impl.TemporaryBuf[2] === "\tbeq @+") && JMP(3) && ($impl.TemporaryBuf[4] === "@")) {
+          $impl.TemporaryBuf[2] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[3],6,256);
+          $impl.TemporaryBuf[3] = "~";
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (LAB_L(0) && CMP(1) && JNE(2) && ($mod.TemporaryBuf[3] === "@")) {
-          $mod.TemporaryBuf[3] = "~";
+        if (LAB_L(0) && CMP(1) && JNE(2) && ($impl.TemporaryBuf[3] === "@")) {
+          $impl.TemporaryBuf[3] = "~";
         };
-        if ((SKIP(0) === false) && ($mod.TemporaryBuf[1] === "\tbeq @+") && JMP(2) && ($mod.TemporaryBuf[3] === "@")) {
-          $mod.TemporaryBuf[1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = "~";
+        if ((SKIP(0) === false) && ($impl.TemporaryBuf[1] === "\tbeq @+") && JMP(2) && ($impl.TemporaryBuf[3] === "@")) {
+          $impl.TemporaryBuf[1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (LAB_L(0) && LDA(1) && (pas.System.Pos("\tclc",$mod.TemporaryBuf[2]) === 1) && (pas.System.Pos("adc ",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("adc ",$mod.TemporaryBuf[4]) > 0) && ($mod.TemporaryBuf[5] === "\tbcs @+") && JMP(6) && ($mod.TemporaryBuf[7] === "@")) {
-          $mod.TemporaryBuf[5] = "\tjcc " + pas.System.Copy($mod.TemporaryBuf[6],6,256);
-          $mod.TemporaryBuf[6] = "~";
-          $mod.TemporaryBuf[7] = "~";
+        if (LAB_L(0) && LDA(1) && (pas.System.Pos("\tclc",$impl.TemporaryBuf[2]) === 1) && (pas.System.Pos("adc ",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("adc ",$impl.TemporaryBuf[4]) > 0) && ($impl.TemporaryBuf[5] === "\tbcs @+") && JMP(6) && ($impl.TemporaryBuf[7] === "@")) {
+          $impl.TemporaryBuf[5] = "\tjcc " + pas.System.Copy($impl.TemporaryBuf[6],6,256);
+          $impl.TemporaryBuf[6] = "~";
+          $impl.TemporaryBuf[7] = "~";
         };
-        if (LAB_L(0) && (pas.System.Pos("\tclc",$mod.TemporaryBuf[1]) === 1) && (pas.System.Pos("adc ",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("adc ",$mod.TemporaryBuf[3]) > 0) && ($mod.TemporaryBuf[4] === "\tbcs @+") && JMP(5) && ($mod.TemporaryBuf[6] === "@")) {
-          $mod.TemporaryBuf[4] = "\tjcc " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          $mod.TemporaryBuf[5] = "~";
-          $mod.TemporaryBuf[6] = "~";
+        if (LAB_L(0) && (pas.System.Pos("\tclc",$impl.TemporaryBuf[1]) === 1) && (pas.System.Pos("adc ",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("adc ",$impl.TemporaryBuf[3]) > 0) && ($impl.TemporaryBuf[4] === "\tbcs @+") && JMP(5) && ($impl.TemporaryBuf[6] === "@")) {
+          $impl.TemporaryBuf[4] = "\tjcc " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          $impl.TemporaryBuf[5] = "~";
+          $impl.TemporaryBuf[6] = "~";
         };
-        if ((SKIP(0) === false) && ($mod.TemporaryBuf[1] === "\tbcs @+") && JMP(2) && ($mod.TemporaryBuf[3] === "@")) {
-          $mod.TemporaryBuf[1] = "\tjcc " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = "~";
+        if ((SKIP(0) === false) && ($impl.TemporaryBuf[1] === "\tbcs @+") && JMP(2) && ($impl.TemporaryBuf[3] === "@")) {
+          $impl.TemporaryBuf[1] = "\tjcc " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = "~";
         };
-        if ((SKIP(0) === false) && ($mod.TemporaryBuf[1] === "\tbcc @+") && JMP(2) && ($mod.TemporaryBuf[3] === "@")) {
-          $mod.TemporaryBuf[1] = "\tjcs " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = "~";
+        if ((SKIP(0) === false) && ($impl.TemporaryBuf[1] === "\tbcc @+") && JMP(2) && ($impl.TemporaryBuf[3] === "@")) {
+          $impl.TemporaryBuf[1] = "\tjcs " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (LDA(0) && SKIP(1) && ($mod.TemporaryBuf[2] === "") && OPTI(3) && ($mod.TemporaryBuf[4] === "") && ($mod.TemporaryBuf[5] === "\tlda #$00") && SUB(6) && STA(7)) if ((pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) && (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[7],6,256)) && (pas.System.Copy($mod.TemporaryBuf[1],6,256) === $mod.TemporaryBuf[8])) {
-          $mod.TemporaryBuf[5] = "\teor #$FF";
-          $mod.TemporaryBuf[6] = "\tadd #$01";
-          if ($mod.TemporaryBuf[12] === $mod.TemporaryBuf[0]) $mod.TemporaryBuf[12] = "~";
+        if (LDA(0) && SKIP(1) && ($impl.TemporaryBuf[2] === "") && OPTI(3) && ($impl.TemporaryBuf[4] === "") && ($impl.TemporaryBuf[5] === "\tlda #$00") && SUB(6) && STA(7)) if ((pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) && (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[7],6,256)) && (pas.System.Copy($impl.TemporaryBuf[1],6,256) === $impl.TemporaryBuf[8])) {
+          $impl.TemporaryBuf[5] = "\teor #$FF";
+          $impl.TemporaryBuf[6] = "\tadd #$01";
+          if ($impl.TemporaryBuf[12] === $impl.TemporaryBuf[0]) $impl.TemporaryBuf[12] = "~";
         };
-        if (LDA(0) && SKIP(1) && ($mod.TemporaryBuf[2] === "") && OPTI(3) && ($mod.TemporaryBuf[4] === "") && ($mod.TemporaryBuf[5] === $mod.TemporaryBuf[0])) {
-          $mod.TemporaryBuf[5] = "~";
+        if (LDA(0) && SKIP(1) && ($impl.TemporaryBuf[2] === "") && OPTI(3) && ($impl.TemporaryBuf[4] === "") && ($impl.TemporaryBuf[5] === $impl.TemporaryBuf[0])) {
+          $impl.TemporaryBuf[5] = "~";
         };
-        if (STY(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4) && ($mod.TemporaryBuf[5] === ("\tsta " + pas.System.Copy($mod.TemporaryBuf[0],6,256)))) {
-          $mod.TemporaryBuf[0] = "~";
+        if (STY(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4) && ($impl.TemporaryBuf[5] === ("\tsta " + pas.System.Copy($impl.TemporaryBuf[0],6,256)))) {
+          $impl.TemporaryBuf[0] = "~";
         };
-        if (MVA_IM(0) && MVA_IM(1) && MVA_IM(2)) if ((pas.System.Copy($mod.TemporaryBuf[0],6,4) === pas.System.Copy($mod.TemporaryBuf[1],6,4)) && (pas.System.Copy($mod.TemporaryBuf[1],6,4) === pas.System.Copy($mod.TemporaryBuf[2],6,4))) {
+        if (MVA_IM(0) && MVA_IM(1) && MVA_IM(2)) if ((pas.System.Copy($impl.TemporaryBuf[0],6,4) === pas.System.Copy($impl.TemporaryBuf[1],6,4)) && (pas.System.Copy($impl.TemporaryBuf[1],6,4) === pas.System.Copy($impl.TemporaryBuf[2],6,4))) {
           if (MVA_IM(3)) {
-            if (pas.System.Copy($mod.TemporaryBuf[1],6,4) === pas.System.Copy($mod.TemporaryBuf[3],6,4)) $mod.TemporaryBuf[3] = "\tsta" + pas.System.Copy($mod.TemporaryBuf[3],10,256);
+            if (pas.System.Copy($impl.TemporaryBuf[1],6,4) === pas.System.Copy($impl.TemporaryBuf[3],6,4)) $impl.TemporaryBuf[3] = "\tsta" + pas.System.Copy($impl.TemporaryBuf[3],10,256);
           };
-          $mod.TemporaryBuf[1] = "\tsta" + pas.System.Copy($mod.TemporaryBuf[1],10,256);
-          $mod.TemporaryBuf[2] = "\tsta" + pas.System.Copy($mod.TemporaryBuf[2],10,256);
+          $impl.TemporaryBuf[1] = "\tsta" + pas.System.Copy($impl.TemporaryBuf[1],10,256);
+          $impl.TemporaryBuf[2] = "\tsta" + pas.System.Copy($impl.TemporaryBuf[2],10,256);
         };
-        if (MVA_IM(0) && MVA_IM(1)) if (pas.System.Copy($mod.TemporaryBuf[0],6,4) === pas.System.Copy($mod.TemporaryBuf[1],6,4)) {
+        if (MVA_IM(0) && MVA_IM(1)) if (pas.System.Copy($impl.TemporaryBuf[0],6,4) === pas.System.Copy($impl.TemporaryBuf[1],6,4)) {
           if (MVA_IM(2)) {
-            if (pas.System.Copy($mod.TemporaryBuf[1],6,4) === pas.System.Copy($mod.TemporaryBuf[2],6,4)) $mod.TemporaryBuf[2] = "\tsta" + pas.System.Copy($mod.TemporaryBuf[2],10,256);
+            if (pas.System.Copy($impl.TemporaryBuf[1],6,4) === pas.System.Copy($impl.TemporaryBuf[2],6,4)) $impl.TemporaryBuf[2] = "\tsta" + pas.System.Copy($impl.TemporaryBuf[2],10,256);
           };
-          $mod.TemporaryBuf[1] = "\tsta" + pas.System.Copy($mod.TemporaryBuf[1],10,256);
+          $impl.TemporaryBuf[1] = "\tsta" + pas.System.Copy($impl.TemporaryBuf[1],10,256);
         };
-        if (MVA(0) && MVA(1) && ($mod.TemporaryBuf[2] === "") && OPTI(3) && ($mod.TemporaryBuf[4] === "") && LDA(5)) if (pas.System.Pos(pas.System.Copy($mod.TemporaryBuf[5],5,256),$mod.TemporaryBuf[0]) > 6) {
-          tmp = $mod.TemporaryBuf[0];
+        if (MVA(0) && MVA(1) && ($impl.TemporaryBuf[2] === "") && OPTI(3) && ($impl.TemporaryBuf[4] === "") && LDA(5)) if (pas.System.Pos(pas.System.Copy($impl.TemporaryBuf[5],5,256),$impl.TemporaryBuf[0]) > 6) {
+          tmp = $impl.TemporaryBuf[0];
           p = tmp.length;
           while (tmp.charAt(p - 1) !== " ") p -= 1;
           tmp = pas.System.Copy(tmp,p + 1,256);
-          if (pas.System.Copy($mod.TemporaryBuf[5],6,256) === tmp) {
-            $mod.TemporaryBuf[5] = "~";
-            tmp = $mod.TemporaryBuf[0];
-            $mod.TemporaryBuf[0] = $mod.TemporaryBuf[1];
-            $mod.TemporaryBuf[1] = tmp;
+          if (pas.System.Copy($impl.TemporaryBuf[5],6,256) === tmp) {
+            $impl.TemporaryBuf[5] = "~";
+            tmp = $impl.TemporaryBuf[0];
+            $impl.TemporaryBuf[0] = $impl.TemporaryBuf[1];
+            $impl.TemporaryBuf[1] = tmp;
           };
         };
-        if (MVA(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4)) if (pas.System.Pos(pas.System.Copy($mod.TemporaryBuf[4],5,256),$mod.TemporaryBuf[0]) > 6) {
-          tmp = $mod.TemporaryBuf[0];
+        if (MVA(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4)) if (pas.System.Pos(pas.System.Copy($impl.TemporaryBuf[4],5,256),$impl.TemporaryBuf[0]) > 6) {
+          tmp = $impl.TemporaryBuf[0];
           p = tmp.length;
           while (tmp.charAt(p - 1) !== " ") p -= 1;
           tmp = pas.System.Copy(tmp,p + 1,256);
-          if (pas.System.Copy($mod.TemporaryBuf[4],6,256) === tmp) $mod.TemporaryBuf[4] = "~";
+          if (pas.System.Copy($impl.TemporaryBuf[4],6,256) === tmp) $impl.TemporaryBuf[4] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\ttya") && ($mod.TemporaryBuf[1] === "\tadc #$00") && STA(2) && (STA_STACK(2) === false)) {
-          $mod.TemporaryBuf[0] = "\tscc";
-          $mod.TemporaryBuf[1] = "\tiny";
-          $mod.TemporaryBuf[2] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
+        if (($impl.TemporaryBuf[0] === "\ttya") && ($impl.TemporaryBuf[1] === "\tadc #$00") && STA(2) && (STA_STACK(2) === false)) {
+          $impl.TemporaryBuf[0] = "\tscc";
+          $impl.TemporaryBuf[1] = "\tiny";
+          $impl.TemporaryBuf[2] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "\tscc") && INC_(2) && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && LDA(6)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-          $mod.TemporaryBuf[6] = "~";
+        if (STA(0) && ($impl.TemporaryBuf[1] === "\tscc") && INC_(2) && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && LDA(6)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+          $impl.TemporaryBuf[6] = "~";
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
-          $mod.TemporaryBuf[4] = "~";
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDY(4)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDY(4)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
           if (STY(5)) {
-            $mod.TemporaryBuf[4] = "~";
-            $mod.TemporaryBuf[5] = "\tsta " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          } else $mod.TemporaryBuf[4] = "\ttay";
+            $impl.TemporaryBuf[4] = "~";
+            $impl.TemporaryBuf[5] = "\tsta " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          } else $impl.TemporaryBuf[4] = "\ttay";
         };
-        if (INC_(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4) && (JEQ(5) || JNE(5))) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
-          $mod.TemporaryBuf[4] = "~";
+        if (INC_(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4) && (JEQ(5) || JNE(5))) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (DEC_(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4) && JNE(5)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
-          $mod.TemporaryBuf[4] = "~";
+        if (DEC_(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4) && JNE(5)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (STA(0) && LDA(1) && STA(2) && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && (pas.System.Pos("mwy ",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos(" :bp2",$mod.TemporaryBuf[6]) > 0)) if ((pas.System.Pos($mod.TemporaryBuf[0],$mod.TemporaryBuf[2]) > 0) && (("\tmwy " + pas.System.Copy($mod.TemporaryBuf[0],6,256) + " :bp2") === $mod.TemporaryBuf[6])) {
-          $mod.TemporaryBuf[6] = "~";
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[4];
-          $mod.TemporaryBuf[4] = $mod.TemporaryBuf[3];
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = "\tsta :bp2";
-          $mod.TemporaryBuf[4] = "\tsta :bp2+1";
+        if (STA(0) && LDA(1) && STA(2) && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && (pas.System.Pos("mwy ",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos(" :bp2",$impl.TemporaryBuf[6]) > 0)) if ((pas.System.Pos($impl.TemporaryBuf[0],$impl.TemporaryBuf[2]) > 0) && (("\tmwy " + pas.System.Copy($impl.TemporaryBuf[0],6,256) + " :bp2") === $impl.TemporaryBuf[6])) {
+          $impl.TemporaryBuf[6] = "~";
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[4];
+          $impl.TemporaryBuf[4] = $impl.TemporaryBuf[3];
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = "\tsta :bp2";
+          $impl.TemporaryBuf[4] = "\tsta :bp2+1";
         };
-        if (($mod.TemporaryBuf[0] === "\timulCL") && ($mod.TemporaryBuf[1] === "\teif") && ($mod.TemporaryBuf[2] === "\tlda :eax") && STA(3) && ($mod.TemporaryBuf[4] === "\tlda :eax+1") && STA(5) && ($mod.TemporaryBuf[6] === "") && OPTI(7) && ($mod.TemporaryBuf[8] === "")) {
-          $mod.TemporaryBuf[4] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[5];
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[3];
-          $mod.TemporaryBuf[3] = "~";
-          if (LDA(9) && ADD(10) && (pas.System.Copy($mod.TemporaryBuf[5],6,256) === pas.System.Copy($mod.TemporaryBuf[10],6,256))) {
-            $mod.TemporaryBuf[10] = "~";
-            $mod.TemporaryBuf[9] = "\tadd " + pas.System.Copy($mod.TemporaryBuf[9],6,256);
+        if (($impl.TemporaryBuf[0] === "\timulCL") && ($impl.TemporaryBuf[1] === "\teif") && ($impl.TemporaryBuf[2] === "\tlda :eax") && STA(3) && ($impl.TemporaryBuf[4] === "\tlda :eax+1") && STA(5) && ($impl.TemporaryBuf[6] === "") && OPTI(7) && ($impl.TemporaryBuf[8] === "")) {
+          $impl.TemporaryBuf[4] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[5];
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[3];
+          $impl.TemporaryBuf[3] = "~";
+          if (LDA(9) && ADD(10) && (pas.System.Copy($impl.TemporaryBuf[5],6,256) === pas.System.Copy($impl.TemporaryBuf[10],6,256))) {
+            $impl.TemporaryBuf[10] = "~";
+            $impl.TemporaryBuf[9] = "\tadd " + pas.System.Copy($impl.TemporaryBuf[9],6,256);
           };
         };
-        if (LAB_L(0) && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && LDA(4) && SKIP(5) && ($mod.TemporaryBuf[6] === "") && OPTI(7) && ($mod.TemporaryBuf[8] === "") && LDA(9) && ADD_SUB(10) && STA(11) && ($mod.TemporaryBuf[12] === $mod.TemporaryBuf[4])) {
-          $mod.TemporaryBuf[4] = "\tldy " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          $mod.TemporaryBuf[12] = "\ttya";
+        if (LAB_L(0) && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && LDA(4) && SKIP(5) && ($impl.TemporaryBuf[6] === "") && OPTI(7) && ($impl.TemporaryBuf[8] === "") && LDA(9) && ADD_SUB(10) && STA(11) && ($impl.TemporaryBuf[12] === $impl.TemporaryBuf[4])) {
+          $impl.TemporaryBuf[4] = "\tldy " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          $impl.TemporaryBuf[12] = "\ttya";
         };
-        if (LDA(0) && SKIP(1) && ($mod.TemporaryBuf[2] === "") && OPTI(3) && ($mod.TemporaryBuf[4] === "") && LDA(5) && LDY(6)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-          $mod.TemporaryBuf[0] = $mod.TemporaryBuf[6];
-          $mod.TemporaryBuf[6] = "~";
+        if (LDA(0) && SKIP(1) && ($impl.TemporaryBuf[2] === "") && OPTI(3) && ($impl.TemporaryBuf[4] === "") && LDA(5) && LDY(6)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+          $impl.TemporaryBuf[0] = $impl.TemporaryBuf[6];
+          $impl.TemporaryBuf[6] = "~";
         };
-        if (LDA(0) && STA_STACK(1) && LDA(2) && ($mod.TemporaryBuf[3] === "\tasl @") && (pas.System.Pos("rol :STACK",$mod.TemporaryBuf[4]) > 0) && STA(5) && LDA_STACK(6) && STA(7) && (IY(7) === false) && ($mod.TemporaryBuf[9] !== "; --- WhileProlog")) if ((pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) && (pas.System.Copy($mod.TemporaryBuf[4],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) && (pas.System.Pos($mod.TemporaryBuf[5],$mod.TemporaryBuf[7]) > 0)) {
-          $mod.TemporaryBuf[1] = $mod.TemporaryBuf[7];
-          $mod.TemporaryBuf[4] = "\trol " + pas.System.Copy($mod.TemporaryBuf[7],6,256);
-          $mod.TemporaryBuf[6] = "~";
-          $mod.TemporaryBuf[7] = "~";
+        if (LDA(0) && STA_STACK(1) && LDA(2) && ($impl.TemporaryBuf[3] === "\tasl @") && (pas.System.Pos("rol :STACK",$impl.TemporaryBuf[4]) > 0) && STA(5) && LDA_STACK(6) && STA(7) && (IY(7) === false) && ($impl.TemporaryBuf[9] !== "; --- WhileProlog")) if ((pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) && (pas.System.Copy($impl.TemporaryBuf[4],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) && (pas.System.Pos($impl.TemporaryBuf[5],$impl.TemporaryBuf[7]) > 0)) {
+          $impl.TemporaryBuf[1] = $impl.TemporaryBuf[7];
+          $impl.TemporaryBuf[4] = "\trol " + pas.System.Copy($impl.TemporaryBuf[7],6,256);
+          $impl.TemporaryBuf[6] = "~";
+          $impl.TemporaryBuf[7] = "~";
         };
-        if (LDA(0) && ($mod.TemporaryBuf[0] === $mod.TemporaryBuf[4]) && ($mod.TemporaryBuf[1] === "\tsta :ecx") && LDA(2) && ($mod.TemporaryBuf[2] === $mod.TemporaryBuf[6]) && ($mod.TemporaryBuf[3] === "\tsta :ecx+1") && ($mod.TemporaryBuf[5] === "\tsta :eax") && ($mod.TemporaryBuf[7] === "\tsta :eax+1")) {
-          $mod.TemporaryBuf[6] = "\tsta :ecx+1";
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[4] = "\tsta :eax";
-          $mod.TemporaryBuf[3] = "\tsta :ecx";
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[0];
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[0] = "~";
+        if (LDA(0) && ($impl.TemporaryBuf[0] === $impl.TemporaryBuf[4]) && ($impl.TemporaryBuf[1] === "\tsta :ecx") && LDA(2) && ($impl.TemporaryBuf[2] === $impl.TemporaryBuf[6]) && ($impl.TemporaryBuf[3] === "\tsta :ecx+1") && ($impl.TemporaryBuf[5] === "\tsta :eax") && ($impl.TemporaryBuf[7] === "\tsta :eax+1")) {
+          $impl.TemporaryBuf[6] = "\tsta :ecx+1";
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[4] = "\tsta :eax";
+          $impl.TemporaryBuf[3] = "\tsta :ecx";
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[0];
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[0] = "~";
         };
       };
       function opt_TEMP_CMP() {
         var p = 0;
-        if (LDA(0) && CMP(1) && SKIP(2) && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && ($mod.TemporaryBuf[6] === $mod.TemporaryBuf[0]) && (SKIP(7) === false)) {
-          $mod.TemporaryBuf[6] = "~";
+        if (LDA(0) && CMP(1) && SKIP(2) && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && ($impl.TemporaryBuf[6] === $impl.TemporaryBuf[0]) && (SKIP(7) === false)) {
+          $impl.TemporaryBuf[6] = "~";
           p = 7;
-          while (CMP(p) && SKIP(p + 1) && ($mod.TemporaryBuf[p + 2] === $mod.TemporaryBuf[0]) && (SKIP(p + 3) === false)) {
-            $mod.TemporaryBuf[p + 2] = "~";
+          while (CMP(p) && SKIP(p + 1) && ($impl.TemporaryBuf[p + 2] === $impl.TemporaryBuf[0]) && (SKIP(p + 3) === false)) {
+            $impl.TemporaryBuf[p + 2] = "~";
             p += 3;
           };
         };
-        if (LDA(0) && CMP(1) && SKIP(2) && ($mod.TemporaryBuf[3] === $mod.TemporaryBuf[0]) && (SKIP(4) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (LDA(0) && CMP(1) && SKIP(2) && ($impl.TemporaryBuf[3] === $impl.TemporaryBuf[0]) && (SKIP(4) === false)) {
+          $impl.TemporaryBuf[3] = "~";
           p = 4;
-          while (CMP(p) && SKIP(p + 1) && ($mod.TemporaryBuf[p + 2] === $mod.TemporaryBuf[0]) && (SKIP(p + 3) === false)) {
-            $mod.TemporaryBuf[p + 2] = "~";
+          while (CMP(p) && SKIP(p + 1) && ($impl.TemporaryBuf[p + 2] === $impl.TemporaryBuf[0]) && (SKIP(p + 3) === false)) {
+            $impl.TemporaryBuf[p + 2] = "~";
             p += 3;
           };
         };
-        if (LDA(0) && ($mod.TemporaryBuf[0] === $mod.TemporaryBuf[3]) && CMP(1) && SKIP(2) && (JEQ(4) || JNE(4))) {
-          $mod.TemporaryBuf[3] = "\tcmp #$00";
+        if (LDA(0) && ($impl.TemporaryBuf[0] === $impl.TemporaryBuf[3]) && CMP(1) && SKIP(2) && (JEQ(4) || JNE(4))) {
+          $impl.TemporaryBuf[3] = "\tcmp #$00";
         };
-        if (LDA(0) && CMP(1) && SKIP(2) && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && LDY(6) && LDA(7)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
+        if (LDA(0) && CMP(1) && SKIP(2) && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && LDY(6) && LDA(7)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
           if ((IY(0) === false) && (IY(1) === false)) {
-            $mod.TemporaryBuf[0] = "\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
-            $mod.TemporaryBuf[1] = "\tcpy " + pas.System.Copy($mod.TemporaryBuf[1],6,256);
-            $mod.TemporaryBuf[6] = "~";
-          } else $mod.TemporaryBuf[6] = "\ttay";
+            $impl.TemporaryBuf[0] = "\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
+            $impl.TemporaryBuf[1] = "\tcpy " + pas.System.Copy($impl.TemporaryBuf[1],6,256);
+            $impl.TemporaryBuf[6] = "~";
+          } else $impl.TemporaryBuf[6] = "\ttay";
         };
-        if (LDA(0) && CMP(1) && SKIP(2) && LDY(3) && LDA(4)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[3],6,256)) {
+        if (LDA(0) && CMP(1) && SKIP(2) && LDY(3) && LDA(4)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[3],6,256)) {
           if ((IY(0) === false) && (IY(1) === false)) {
-            $mod.TemporaryBuf[0] = "\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
-            $mod.TemporaryBuf[1] = "\tcpy " + pas.System.Copy($mod.TemporaryBuf[1],6,256);
-            $mod.TemporaryBuf[3] = "~";
-          } else $mod.TemporaryBuf[3] = "\ttay";
+            $impl.TemporaryBuf[0] = "\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
+            $impl.TemporaryBuf[1] = "\tcpy " + pas.System.Copy($impl.TemporaryBuf[1],6,256);
+            $impl.TemporaryBuf[3] = "~";
+          } else $impl.TemporaryBuf[3] = "\ttay";
         };
-        if (STA_STACK(0) && ($mod.TemporaryBuf[1] === "\tldy #1") && LDA_STACK(2) && (AND_ORA_EOR(3) || CMP(3))) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[2],6,256)) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[2] = "~";
+        if (STA_STACK(0) && ($impl.TemporaryBuf[1] === "\tldy #1") && LDA_STACK(2) && (AND_ORA_EOR(3) || CMP(3))) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[2],6,256)) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && LDA(1) && CMP(2) && ($mod.TemporaryBuf[3] === "\tbcs @+") && ($mod.TemporaryBuf[4] === "\tdey") && ($mod.TemporaryBuf[5] === "@") && ($mod.TemporaryBuf[6] === "\ttya")) {
-          $mod.TemporaryBuf[0] = "";
-          $mod.TemporaryBuf[3] = "\tlda #$00";
-          $mod.TemporaryBuf[4] = "\trol @";
-          $mod.TemporaryBuf[5] = "~";
-          $mod.TemporaryBuf[6] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && LDA(1) && CMP(2) && ($impl.TemporaryBuf[3] === "\tbcs @+") && ($impl.TemporaryBuf[4] === "\tdey") && ($impl.TemporaryBuf[5] === "@") && ($impl.TemporaryBuf[6] === "\ttya")) {
+          $impl.TemporaryBuf[0] = "";
+          $impl.TemporaryBuf[3] = "\tlda #$00";
+          $impl.TemporaryBuf[4] = "\trol @";
+          $impl.TemporaryBuf[5] = "~";
+          $impl.TemporaryBuf[6] = "~";
         };
       };
       function opt_TEMP_CMP_0() {
         var p = 0;
-        if ((($mod.TemporaryBuf[2] === "\tcmp #$00") || LDA(2)) && (IFTMP(2) === false) && JNE_L(3) && (LAB_L(4) === false)) {
+        if ((($impl.TemporaryBuf[2] === "\tcmp #$00") || LDA(2)) && (IFTMP(2) === false) && JNE_L(3) && (LAB_L(4) === false)) {
           for (p = 4; p <= 511; p++) if (LDA(p)) {
-            if ($mod.TemporaryBuf[p] === "\tlda #$00") $mod.TemporaryBuf[p] = "~";
+            if ($impl.TemporaryBuf[p] === "\tlda #$00") $impl.TemporaryBuf[p] = "~";
             break;
-          } else if ((pas.System.Pos("#asm:",$mod.TemporaryBuf[p]) === 1) || LAB_L(p) || JSR(p) || (pas.System.Pos("\t.if",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$mod.TemporaryBuf[p]) > 0) || ($mod.TemporaryBuf[p] === "\ttya")) break;
+          } else if ((pas.System.Pos("#asm:",$impl.TemporaryBuf[p]) === 1) || LAB_L(p) || JSR(p) || (pas.System.Pos("\t.if",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$impl.TemporaryBuf[p]) > 0) || ($impl.TemporaryBuf[p] === "\ttya")) break;
         };
-        if (STA_STACK(0) && ($mod.TemporaryBuf[1] === "\tldy #1") && LDA_STACK(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && (($mod.TemporaryBuf[4] === "\tbeq @+") || ($mod.TemporaryBuf[4] === "\tbne @+")) && ($mod.TemporaryBuf[5] === "\tdey") && ($mod.TemporaryBuf[6] === "@") && (($mod.TemporaryBuf[7] === "\ttya") || STY(7))) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[2],6,256)) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[2] = "~";
+        if (STA_STACK(0) && ($impl.TemporaryBuf[1] === "\tldy #1") && LDA_STACK(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && (($impl.TemporaryBuf[4] === "\tbeq @+") || ($impl.TemporaryBuf[4] === "\tbne @+")) && ($impl.TemporaryBuf[5] === "\tdey") && ($impl.TemporaryBuf[6] === "@") && (($impl.TemporaryBuf[7] === "\ttya") || STY(7))) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[2],6,256)) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && LDA(1) && (LDA_STACK(1) === false) && ($mod.TemporaryBuf[2] === "\tcmp #$00") && (($mod.TemporaryBuf[3] === "\tbeq @+") || ($mod.TemporaryBuf[3] === "\tbne @+")) && ($mod.TemporaryBuf[4] === "\tdey") && ($mod.TemporaryBuf[5] === "@") && (($mod.TemporaryBuf[6] === "\ttya") || STY(6))) {
-          $mod.TemporaryBuf[2] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && LDA(1) && (LDA_STACK(1) === false) && ($impl.TemporaryBuf[2] === "\tcmp #$00") && (($impl.TemporaryBuf[3] === "\tbeq @+") || ($impl.TemporaryBuf[3] === "\tbne @+")) && ($impl.TemporaryBuf[4] === "\tdey") && ($impl.TemporaryBuf[5] === "@") && (($impl.TemporaryBuf[6] === "\ttya") || STY(6))) {
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && AND_ORA_EOR(1) && ($mod.TemporaryBuf[2] === "\tcmp #$00") && (($mod.TemporaryBuf[3] === "\tbeq @+") || ($mod.TemporaryBuf[3] === "\tbne @+")) && ($mod.TemporaryBuf[4] === "\tdey") && ($mod.TemporaryBuf[5] === "@") && (($mod.TemporaryBuf[6] === "\ttya") || STY(6))) {
-          $mod.TemporaryBuf[2] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && AND_ORA_EOR(1) && ($impl.TemporaryBuf[2] === "\tcmp #$00") && (($impl.TemporaryBuf[3] === "\tbeq @+") || ($impl.TemporaryBuf[3] === "\tbne @+")) && ($impl.TemporaryBuf[4] === "\tdey") && ($impl.TemporaryBuf[5] === "@") && (($impl.TemporaryBuf[6] === "\ttya") || STY(6))) {
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[2] === "\tldy #1") && LDA(3) && ($mod.TemporaryBuf[4] === "\tcmp #$00") && ($mod.TemporaryBuf[5] === "\tbne @+") && LDA(6) && ($mod.TemporaryBuf[7] === "\tcmp #$00") && ($mod.TemporaryBuf[8] === "@") && (($mod.TemporaryBuf[9] === "\tbeq @+") || ($mod.TemporaryBuf[9] === "\tbne @+")) && ($mod.TemporaryBuf[10] === "\tdey") && ($mod.TemporaryBuf[11] === "@") && (($mod.TemporaryBuf[12] === "\ttya") || STY(12))) {
-          $mod.TemporaryBuf[4] = "\tora " + pas.System.Copy($mod.TemporaryBuf[6],6,256);
-          $mod.TemporaryBuf[5] = "~";
-          $mod.TemporaryBuf[6] = "~";
-          $mod.TemporaryBuf[7] = "~";
-          $mod.TemporaryBuf[8] = "~";
+        if (($impl.TemporaryBuf[2] === "\tldy #1") && LDA(3) && ($impl.TemporaryBuf[4] === "\tcmp #$00") && ($impl.TemporaryBuf[5] === "\tbne @+") && LDA(6) && ($impl.TemporaryBuf[7] === "\tcmp #$00") && ($impl.TemporaryBuf[8] === "@") && (($impl.TemporaryBuf[9] === "\tbeq @+") || ($impl.TemporaryBuf[9] === "\tbne @+")) && ($impl.TemporaryBuf[10] === "\tdey") && ($impl.TemporaryBuf[11] === "@") && (($impl.TemporaryBuf[12] === "\ttya") || STY(12))) {
+          $impl.TemporaryBuf[4] = "\tora " + pas.System.Copy($impl.TemporaryBuf[6],6,256);
+          $impl.TemporaryBuf[5] = "~";
+          $impl.TemporaryBuf[6] = "~";
+          $impl.TemporaryBuf[7] = "~";
+          $impl.TemporaryBuf[8] = "~";
         };
-        if (LDA(2) && STA(3) && ($mod.TemporaryBuf[4] === "\tcmp #$00") && (($mod.TemporaryBuf[5] === "\tbeq @+") || ($mod.TemporaryBuf[5] === "\tbne @+")) && JMP(6) && ($mod.TemporaryBuf[7] === "@")) {
-          $mod.TemporaryBuf[4] = "~";
+        if (LDA(2) && STA(3) && ($impl.TemporaryBuf[4] === "\tcmp #$00") && (($impl.TemporaryBuf[5] === "\tbeq @+") || ($impl.TemporaryBuf[5] === "\tbne @+")) && JMP(6) && ($impl.TemporaryBuf[7] === "@")) {
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (($mod.TemporaryBuf[2] === "\tlda (:bp2),y") && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && ($mod.TemporaryBuf[5] === "\tdey") && ($mod.TemporaryBuf[6] === "\tlda (:bp2),y") && CMP(7) && ($mod.TemporaryBuf[8] === "\tbne @+") && ($mod.TemporaryBuf[9] === "\tdey") && ($mod.TemporaryBuf[10] === "\tlda (:bp2),y") && CMP(11) && ($mod.TemporaryBuf[12] === "\tbne @+") && ($mod.TemporaryBuf[13] === "\tdey") && ($mod.TemporaryBuf[14] === "\tlda (:bp2),y") && CMP(15) && ($mod.TemporaryBuf[16] === "@") && (JEQ(17) || JNE(17)) && (SKIP(18) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (($impl.TemporaryBuf[2] === "\tlda (:bp2),y") && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && ($impl.TemporaryBuf[5] === "\tdey") && ($impl.TemporaryBuf[6] === "\tlda (:bp2),y") && CMP(7) && ($impl.TemporaryBuf[8] === "\tbne @+") && ($impl.TemporaryBuf[9] === "\tdey") && ($impl.TemporaryBuf[10] === "\tlda (:bp2),y") && CMP(11) && ($impl.TemporaryBuf[12] === "\tbne @+") && ($impl.TemporaryBuf[13] === "\tdey") && ($impl.TemporaryBuf[14] === "\tlda (:bp2),y") && CMP(15) && ($impl.TemporaryBuf[16] === "@") && (JEQ(17) || JNE(17)) && (SKIP(18) === false)) {
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (($mod.TemporaryBuf[2] === "\tlda (:bp2),y") && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && ($mod.TemporaryBuf[5] === "\tdey") && ($mod.TemporaryBuf[6] === "\tlda (:bp2),y") && CMP(7) && ($mod.TemporaryBuf[8] === "\tbne @+") && ($mod.TemporaryBuf[9] === "\tdey") && ($mod.TemporaryBuf[10] === "\tlda (:bp2),y") && CMP(11) && ($mod.TemporaryBuf[12] === "@") && (JEQ(13) || JNE(13)) && (SKIP(14) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (($impl.TemporaryBuf[2] === "\tlda (:bp2),y") && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && ($impl.TemporaryBuf[5] === "\tdey") && ($impl.TemporaryBuf[6] === "\tlda (:bp2),y") && CMP(7) && ($impl.TemporaryBuf[8] === "\tbne @+") && ($impl.TemporaryBuf[9] === "\tdey") && ($impl.TemporaryBuf[10] === "\tlda (:bp2),y") && CMP(11) && ($impl.TemporaryBuf[12] === "@") && (JEQ(13) || JNE(13)) && (SKIP(14) === false)) {
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (($mod.TemporaryBuf[2] === "\tlda (:bp2),y") && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && ($mod.TemporaryBuf[5] === "\tdey") && ($mod.TemporaryBuf[6] === "\tlda (:bp2),y") && CMP(7) && ($mod.TemporaryBuf[8] === "@") && (JEQ(9) || JNE(9)) && (SKIP(10) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (($impl.TemporaryBuf[2] === "\tlda (:bp2),y") && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && ($impl.TemporaryBuf[5] === "\tdey") && ($impl.TemporaryBuf[6] === "\tlda (:bp2),y") && CMP(7) && ($impl.TemporaryBuf[8] === "@") && (JEQ(9) || JNE(9)) && (SKIP(10) === false)) {
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (LDA(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && LDA(5) && CMP(6) && ($mod.TemporaryBuf[7] === "\tbne @+") && LDA(8) && CMP(9) && ($mod.TemporaryBuf[10] === "\tbne @+") && LDA(11) && CMP(12) && ($mod.TemporaryBuf[13] === "@") && (JEQ(14) || JNE(14)) && (SKIP(15) === false)) {
-          $mod.TemporaryBuf[3] = "~";
-          if (($mod.TemporaryBuf[6] === "\tcmp #$00") && ($mod.TemporaryBuf[9] === "\tcmp #$00") && ($mod.TemporaryBuf[12] === "\tcmp #$00")) {
-            $mod.TemporaryBuf[6] = "~";
-            $mod.TemporaryBuf[9] = "~";
-            $mod.TemporaryBuf[12] = "~";
+        if (LDA(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && LDA(5) && CMP(6) && ($impl.TemporaryBuf[7] === "\tbne @+") && LDA(8) && CMP(9) && ($impl.TemporaryBuf[10] === "\tbne @+") && LDA(11) && CMP(12) && ($impl.TemporaryBuf[13] === "@") && (JEQ(14) || JNE(14)) && (SKIP(15) === false)) {
+          $impl.TemporaryBuf[3] = "~";
+          if (($impl.TemporaryBuf[6] === "\tcmp #$00") && ($impl.TemporaryBuf[9] === "\tcmp #$00") && ($impl.TemporaryBuf[12] === "\tcmp #$00")) {
+            $impl.TemporaryBuf[6] = "~";
+            $impl.TemporaryBuf[9] = "~";
+            $impl.TemporaryBuf[12] = "~";
             if (JEQ(14)) {
-              $mod.TemporaryBuf[13] = $mod.TemporaryBuf[14];
-              $mod.TemporaryBuf[14] = "@";
+              $impl.TemporaryBuf[13] = $impl.TemporaryBuf[14];
+              $impl.TemporaryBuf[14] = "@";
             };
           };
         };
-        if (LDA(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && LDA(5) && ($mod.TemporaryBuf[6] === "\tcmp #$00") && ($mod.TemporaryBuf[7] === "\tbne @+") && LDA(8) && ($mod.TemporaryBuf[9] === "\tcmp #$00") && ($mod.TemporaryBuf[10] === "\tbne @+") && LDA(11) && ($mod.TemporaryBuf[12] === "\tcmp #$00") && ($mod.TemporaryBuf[13] === "@") && (($mod.TemporaryBuf[14] === "\tbeq @+") || ($mod.TemporaryBuf[14] === "\tbne @+")) && ($mod.TemporaryBuf[15] === "\tdey") && ($mod.TemporaryBuf[16] === "@") && (($mod.TemporaryBuf[17] === "\ttya") || STY(17))) {
-          $mod.TemporaryBuf[3] = "~";
-          $mod.TemporaryBuf[6] = "~";
-          $mod.TemporaryBuf[9] = "~";
-          $mod.TemporaryBuf[12] = "~";
+        if (LDA(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && LDA(5) && ($impl.TemporaryBuf[6] === "\tcmp #$00") && ($impl.TemporaryBuf[7] === "\tbne @+") && LDA(8) && ($impl.TemporaryBuf[9] === "\tcmp #$00") && ($impl.TemporaryBuf[10] === "\tbne @+") && LDA(11) && ($impl.TemporaryBuf[12] === "\tcmp #$00") && ($impl.TemporaryBuf[13] === "@") && (($impl.TemporaryBuf[14] === "\tbeq @+") || ($impl.TemporaryBuf[14] === "\tbne @+")) && ($impl.TemporaryBuf[15] === "\tdey") && ($impl.TemporaryBuf[16] === "@") && (($impl.TemporaryBuf[17] === "\ttya") || STY(17))) {
+          $impl.TemporaryBuf[3] = "~";
+          $impl.TemporaryBuf[6] = "~";
+          $impl.TemporaryBuf[9] = "~";
+          $impl.TemporaryBuf[12] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && LDA(1) && ($mod.TemporaryBuf[2] === "\tcmp #$00") && ($mod.TemporaryBuf[3] === "\tbne @+") && LDA(4) && CMP(5) && ($mod.TemporaryBuf[6] === "@") && ($mod.TemporaryBuf[7] === "\tbcs @+") && ($mod.TemporaryBuf[8] === "\tdey") && ($mod.TemporaryBuf[9] === "@") && (($mod.TemporaryBuf[10] === "\ttya") || STY(10))) {
-          $mod.TemporaryBuf[2] = "~";
-          $mod.TemporaryBuf[6] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && LDA(1) && ($impl.TemporaryBuf[2] === "\tcmp #$00") && ($impl.TemporaryBuf[3] === "\tbne @+") && LDA(4) && CMP(5) && ($impl.TemporaryBuf[6] === "@") && ($impl.TemporaryBuf[7] === "\tbcs @+") && ($impl.TemporaryBuf[8] === "\tdey") && ($impl.TemporaryBuf[9] === "@") && (($impl.TemporaryBuf[10] === "\ttya") || STY(10))) {
+          $impl.TemporaryBuf[2] = "~";
+          $impl.TemporaryBuf[6] = "~";
         };
-        if (LDA(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && LDA(5) && CMP(6) && ($mod.TemporaryBuf[7] === "\tbne @+") && LDA(8) && CMP(9) && ($mod.TemporaryBuf[10] === "@") && (JEQ(11) || JNE(11)) && (SKIP(12) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (LDA(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && LDA(5) && CMP(6) && ($impl.TemporaryBuf[7] === "\tbne @+") && LDA(8) && CMP(9) && ($impl.TemporaryBuf[10] === "@") && (JEQ(11) || JNE(11)) && (SKIP(12) === false)) {
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (LDA(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbne @+") && LDA(5) && CMP(6) && ($mod.TemporaryBuf[7] === "@") && (JEQ(8) || JNE(8)) && (SKIP(9) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (LDA(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbne @+") && LDA(5) && CMP(6) && ($impl.TemporaryBuf[7] === "@") && (JEQ(8) || JNE(8)) && (SKIP(9) === false)) {
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (LDA(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "@") && (JEQ(5) || JNE(5)) && (SKIP(6) === false)) {
-          $mod.TemporaryBuf[3] = "~";
+        if (LDA(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "@") && (JEQ(5) || JNE(5)) && (SKIP(6) === false)) {
+          $impl.TemporaryBuf[3] = "~";
         };
       };
       function opt_TEMP_WHILE() {
         var p = 0;
-        if (($mod.TemporaryBuf[2] === "; --- WhileProlog") && STA(0) && JMP(3) && LAB_L(4)) {
-          for (p = 5; p <= 510; p++) if (($mod.TemporaryBuf[p] === $mod.TemporaryBuf[0]) && LAB_L(p + 1) && ($mod.TemporaryBuf[p + 1] === pas.System.Copy($mod.TemporaryBuf[3],6,256))) {
-            $mod.TemporaryBuf[p] = $mod.TemporaryBuf[p + 1];
-            $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[0];
-            $mod.TemporaryBuf[0] = "~";
+        if (($impl.TemporaryBuf[2] === "; --- WhileProlog") && STA(0) && JMP(3) && LAB_L(4)) {
+          for (p = 5; p <= 510; p++) if (($impl.TemporaryBuf[p] === $impl.TemporaryBuf[0]) && LAB_L(p + 1) && ($impl.TemporaryBuf[p + 1] === pas.System.Copy($impl.TemporaryBuf[3],6,256))) {
+            $impl.TemporaryBuf[p] = $impl.TemporaryBuf[p + 1];
+            $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[0];
+            $impl.TemporaryBuf[0] = "~";
             break;
           };
         };
-        if (($mod.TemporaryBuf[2] === "; --- WhileProlog") && STA(0) && JMP(3) && LAB_L(4)) {
-          tmp = pas.System.Copy($mod.TemporaryBuf[0],6,256);
-          for (p = 5; p <= 505; p++) if ((SKIP(p - 1) === false) && (INC_(p) || DEC_(p)) && ($mod.TemporaryBuf[p + 1] === pas.System.Copy($mod.TemporaryBuf[3],6,256)) && OPTI(p + 3) && (tmp === pas.System.Copy($mod.TemporaryBuf[p],6,256)) && ($mod.TemporaryBuf[p + 5] === ("\tlda " + tmp)) && ($mod.TemporaryBuf[p + 6] === ("\tjne " + $mod.TemporaryBuf[4]))) {
-            $mod.TemporaryBuf[p + 5] = "~";
+        if (($impl.TemporaryBuf[2] === "; --- WhileProlog") && STA(0) && JMP(3) && LAB_L(4)) {
+          tmp = pas.System.Copy($impl.TemporaryBuf[0],6,256);
+          for (p = 5; p <= 505; p++) if ((SKIP(p - 1) === false) && (INC_(p) || DEC_(p)) && ($impl.TemporaryBuf[p + 1] === pas.System.Copy($impl.TemporaryBuf[3],6,256)) && OPTI(p + 3) && (tmp === pas.System.Copy($impl.TemporaryBuf[p],6,256)) && ($impl.TemporaryBuf[p + 5] === ("\tlda " + tmp)) && ($impl.TemporaryBuf[p + 6] === ("\tjne " + $impl.TemporaryBuf[4]))) {
+            $impl.TemporaryBuf[p + 5] = "~";
             break;
           };
         };
-        if (($mod.TemporaryBuf[3] === "; --- WhileProlog") && LDA_IM(0) && (GetBYTE(0) < 128) && STA(1) && ($mod.TemporaryBuf[2] === "") && JMP(4) && LAB_L(5)) {
-          tmp = pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          for (p = 7; p <= 505; p++) if ($mod.TemporaryBuf[p] === tmp) {
-            if ((SKIP(p - 2) === false) && ($mod.TemporaryBuf[p - 1] === ("\tdec " + pas.System.Copy($mod.TemporaryBuf[1],6,256))) && ($mod.TemporaryBuf[p + 1] === "") && OPTI(p + 2) && ($mod.TemporaryBuf[p + 3] === "") && ($mod.TemporaryBuf[p + 4] === ("\tlda " + pas.System.Copy($mod.TemporaryBuf[p - 1],6,256))) && ($mod.TemporaryBuf[p + 5] === "\tcmp #$FF") && JNE(p + 6)) {
-              $mod.TemporaryBuf[p + 4] = "~";
-              $mod.TemporaryBuf[p + 5] = "~";
-              $mod.TemporaryBuf[p + 6] = "\tjpl " + pas.System.Copy($mod.TemporaryBuf[p + 6],6,256);
+        if (($impl.TemporaryBuf[3] === "; --- WhileProlog") && LDA_IM(0) && (GetBYTE(0) < 128) && STA(1) && ($impl.TemporaryBuf[2] === "") && JMP(4) && LAB_L(5)) {
+          tmp = pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          for (p = 7; p <= 505; p++) if ($impl.TemporaryBuf[p] === tmp) {
+            if ((SKIP(p - 2) === false) && ($impl.TemporaryBuf[p - 1] === ("\tdec " + pas.System.Copy($impl.TemporaryBuf[1],6,256))) && ($impl.TemporaryBuf[p + 1] === "") && OPTI(p + 2) && ($impl.TemporaryBuf[p + 3] === "") && ($impl.TemporaryBuf[p + 4] === ("\tlda " + pas.System.Copy($impl.TemporaryBuf[p - 1],6,256))) && ($impl.TemporaryBuf[p + 5] === "\tcmp #$FF") && JNE(p + 6)) {
+              $impl.TemporaryBuf[p + 4] = "~";
+              $impl.TemporaryBuf[p + 5] = "~";
+              $impl.TemporaryBuf[p + 6] = "\tjpl " + pas.System.Copy($impl.TemporaryBuf[p + 6],6,256);
             };
             break;
           };
         };
-        if (($mod.TemporaryBuf[2] === "; --- WhileProlog") && ($mod.TemporaryBuf[1] === "") && JMP(3) && LAB_L(4) && ($mod.TemporaryBuf[5] === "") && OPTI(6) && ($mod.TemporaryBuf[7] === "") && LDY_IM(8)) {
+        if (($impl.TemporaryBuf[2] === "; --- WhileProlog") && ($impl.TemporaryBuf[1] === "") && JMP(3) && LAB_L(4) && ($impl.TemporaryBuf[5] === "") && OPTI(6) && ($impl.TemporaryBuf[7] === "") && LDY_IM(8)) {
           yes = true;
-          tmp = pas.System.Copy($mod.TemporaryBuf[3],6,256);
-          for (p = 9; p <= 511; p++) if ($mod.TemporaryBuf[p] === tmp) {
+          tmp = pas.System.Copy($impl.TemporaryBuf[3],6,256);
+          for (p = 9; p <= 511; p++) if ($impl.TemporaryBuf[p] === tmp) {
             if (yes) {
-              $mod.TemporaryBuf[1] = $mod.TemporaryBuf[8];
-              $mod.TemporaryBuf[8] = $mod.TemporaryBuf[7];
-              $mod.TemporaryBuf[7] = $mod.TemporaryBuf[6];
-              $mod.TemporaryBuf[6] = $mod.TemporaryBuf[5];
-              $mod.TemporaryBuf[5] = $mod.TemporaryBuf[4];
-              $mod.TemporaryBuf[4] = $mod.TemporaryBuf[3];
-              $mod.TemporaryBuf[3] = $mod.TemporaryBuf[2];
-              $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-              $mod.TemporaryBuf[1] = "";
+              $impl.TemporaryBuf[1] = $impl.TemporaryBuf[8];
+              $impl.TemporaryBuf[8] = $impl.TemporaryBuf[7];
+              $impl.TemporaryBuf[7] = $impl.TemporaryBuf[6];
+              $impl.TemporaryBuf[6] = $impl.TemporaryBuf[5];
+              $impl.TemporaryBuf[5] = $impl.TemporaryBuf[4];
+              $impl.TemporaryBuf[4] = $impl.TemporaryBuf[3];
+              $impl.TemporaryBuf[3] = $impl.TemporaryBuf[2];
+              $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+              $impl.TemporaryBuf[1] = "";
             };
             break;
           } else if (fail(p)) yes = false;
         };
-        if (($mod.TemporaryBuf[2] === "; --- WhileProlog") && ($mod.TemporaryBuf[1] === "") && JMP(3) && LAB_L(4) && ($mod.TemporaryBuf[5] === "") && OPTI(6) && ($mod.TemporaryBuf[7] === "") && (LDY_IM(8) === false)) {
+        if (($impl.TemporaryBuf[2] === "; --- WhileProlog") && ($impl.TemporaryBuf[1] === "") && JMP(3) && LAB_L(4) && ($impl.TemporaryBuf[5] === "") && OPTI(6) && ($impl.TemporaryBuf[7] === "") && (LDY_IM(8) === false)) {
           yes = true;
-          tmp = pas.System.Copy($mod.TemporaryBuf[3],6,256);
-          for (p = 8; p <= 506; p++) if (($mod.TemporaryBuf[p - 1] === ("\tdec " + pas.System.Copy($mod.TemporaryBuf[p + 4],6,256))) && ($mod.TemporaryBuf[p] === tmp) && ($mod.TemporaryBuf[p + 1] === "") && OPTI(p + 2) && ($mod.TemporaryBuf[p + 3] === "") && LDA(p + 4) && ($mod.TemporaryBuf[p + 5] === ("\tjne " + $mod.TemporaryBuf[4]))) {
+          tmp = pas.System.Copy($impl.TemporaryBuf[3],6,256);
+          for (p = 8; p <= 506; p++) if (($impl.TemporaryBuf[p - 1] === ("\tdec " + pas.System.Copy($impl.TemporaryBuf[p + 4],6,256))) && ($impl.TemporaryBuf[p] === tmp) && ($impl.TemporaryBuf[p + 1] === "") && OPTI(p + 2) && ($impl.TemporaryBuf[p + 3] === "") && LDA(p + 4) && ($impl.TemporaryBuf[p + 5] === ("\tjne " + $impl.TemporaryBuf[4]))) {
             if (yes) {
-              $mod.TemporaryBuf[1] = $mod.TemporaryBuf[p + 4];
-              $mod.TemporaryBuf[p + 4] = $mod.TemporaryBuf[p + 5];
-              $mod.TemporaryBuf[p + 5] = "~";
+              $impl.TemporaryBuf[1] = $impl.TemporaryBuf[p + 4];
+              $impl.TemporaryBuf[p + 4] = $impl.TemporaryBuf[p + 5];
+              $impl.TemporaryBuf[p + 5] = "~";
             };
             break;
           } else if (fail(p)) yes = false;
@@ -9430,570 +9433,570 @@ rtl.module("Optimize",["System"],function () {
       };
       function opt_TEMP_FOR() {
         var p = 0;
-        if (INC_(1) && ($mod.TemporaryBuf[2] === "\tsne") && INC_(3) && ($mod.TemporaryBuf[4] === "\tseq") && JMP(5) && LAB_L(6)) if (pas.System.Pos($mod.TemporaryBuf[1],$mod.TemporaryBuf[3]) > 0) {
-          $mod.TemporaryBuf[2] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          $mod.TemporaryBuf[5] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          $mod.TemporaryBuf[4] = "~";
+        if (INC_(1) && ($impl.TemporaryBuf[2] === "\tsne") && INC_(3) && ($impl.TemporaryBuf[4] === "\tseq") && JMP(5) && LAB_L(6)) if (pas.System.Pos($impl.TemporaryBuf[1],$impl.TemporaryBuf[3]) > 0) {
+          $impl.TemporaryBuf[2] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          $impl.TemporaryBuf[5] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (DEC_(1) && LDA(2) && ($mod.TemporaryBuf[3] === "\tcmp #$FF") && ($mod.TemporaryBuf[4] === "\tseq") && JMP(5) && LAB_L(6)) if (pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[2],6,256)) {
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[2] = "\tbeq " + $mod.TemporaryBuf[6];
-          $mod.TemporaryBuf[4] = "~";
+        if (DEC_(1) && LDA(2) && ($impl.TemporaryBuf[3] === "\tcmp #$FF") && ($impl.TemporaryBuf[4] === "\tseq") && JMP(5) && LAB_L(6)) if (pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[2],6,256)) {
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[2] = "\tbeq " + $impl.TemporaryBuf[6];
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (LDA(1) && ($mod.TemporaryBuf[2] === "\tbne @+") && DEC_(3) && ($mod.TemporaryBuf[4] === "@") && DEC_(5) && LDA(6) && ($mod.TemporaryBuf[7] === "\tcmp #$FF") && ($mod.TemporaryBuf[8] === "\tseq") && JMP(9) && LAB_L(10)) if (pas.System.Copy($mod.TemporaryBuf[3],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-          $mod.TemporaryBuf[7] = $mod.TemporaryBuf[5];
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[3];
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[6];
-          $mod.TemporaryBuf[4] = "\tbeq " + $mod.TemporaryBuf[10];
-          $mod.TemporaryBuf[6] = "@";
-          $mod.TemporaryBuf[8] = "~";
+        if (LDA(1) && ($impl.TemporaryBuf[2] === "\tbne @+") && DEC_(3) && ($impl.TemporaryBuf[4] === "@") && DEC_(5) && LDA(6) && ($impl.TemporaryBuf[7] === "\tcmp #$FF") && ($impl.TemporaryBuf[8] === "\tseq") && JMP(9) && LAB_L(10)) if (pas.System.Copy($impl.TemporaryBuf[3],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+          $impl.TemporaryBuf[7] = $impl.TemporaryBuf[5];
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[3];
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[6];
+          $impl.TemporaryBuf[4] = "\tbeq " + $impl.TemporaryBuf[10];
+          $impl.TemporaryBuf[6] = "@";
+          $impl.TemporaryBuf[8] = "~";
         };
-        if (LDA(0) && STA(1) && ($mod.TemporaryBuf[2] === "") && LAB_L(3) && ($mod.TemporaryBuf[4] === "; --- ForToDoCondition") && LDY(5) && LDA(6) && STA(7) && ($mod.TemporaryBuf[9] === "; --- ForToDoEpilog") && INC_(10) && ($mod.TemporaryBuf[11] === "\tseq") && ($mod.TemporaryBuf[12] === ("\tjmp " + $mod.TemporaryBuf[3])) && LAB_L(13)) if ((pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[5],6,256)) && (pas.System.Copy($mod.TemporaryBuf[5],6,256) === pas.System.Copy($mod.TemporaryBuf[10],6,256))) {
-          $mod.TemporaryBuf[0] = "\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
-          $mod.TemporaryBuf[1] = "~";
-          if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-            $mod.TemporaryBuf[1] = "\ttya"}
-           else $mod.TemporaryBuf[1] = $mod.TemporaryBuf[6];
-          $mod.TemporaryBuf[10] = "\tiny";
-          $mod.TemporaryBuf[11] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[12],6,256);
-          $mod.TemporaryBuf[12] = $mod.TemporaryBuf[13];
+        if (LDA(0) && STA(1) && ($impl.TemporaryBuf[2] === "") && LAB_L(3) && ($impl.TemporaryBuf[4] === "; --- ForToDoCondition") && LDY(5) && LDA(6) && STA(7) && ($impl.TemporaryBuf[9] === "; --- ForToDoEpilog") && INC_(10) && ($impl.TemporaryBuf[11] === "\tseq") && ($impl.TemporaryBuf[12] === ("\tjmp " + $impl.TemporaryBuf[3])) && LAB_L(13)) if ((pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[5],6,256)) && (pas.System.Copy($impl.TemporaryBuf[5],6,256) === pas.System.Copy($impl.TemporaryBuf[10],6,256))) {
+          $impl.TemporaryBuf[0] = "\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
+          $impl.TemporaryBuf[1] = "~";
+          if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+            $impl.TemporaryBuf[1] = "\ttya"}
+           else $impl.TemporaryBuf[1] = $impl.TemporaryBuf[6];
+          $impl.TemporaryBuf[10] = "\tiny";
+          $impl.TemporaryBuf[11] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[12],6,256);
+          $impl.TemporaryBuf[12] = $impl.TemporaryBuf[13];
           if (LAB_B(14)) {
-            $mod.TemporaryBuf[13] = $mod.TemporaryBuf[14];
-            $mod.TemporaryBuf[14] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          } else $mod.TemporaryBuf[13] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          if (pas.System.Copy($mod.TemporaryBuf[5],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-            $mod.TemporaryBuf[5] = "\ttya";
-            $mod.TemporaryBuf[1] = "~";
-          } else $mod.TemporaryBuf[5] = "~";
-          $mod.TemporaryBuf[6] = "~";
+            $impl.TemporaryBuf[13] = $impl.TemporaryBuf[14];
+            $impl.TemporaryBuf[14] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          } else $impl.TemporaryBuf[13] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          if (pas.System.Copy($impl.TemporaryBuf[5],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+            $impl.TemporaryBuf[5] = "\ttya";
+            $impl.TemporaryBuf[1] = "~";
+          } else $impl.TemporaryBuf[5] = "~";
+          $impl.TemporaryBuf[6] = "~";
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition") && LDY(4) && LDA(5) && ADD_SUB(6) && STA(7) && (($mod.TemporaryBuf[8] === "\tscc") || ($mod.TemporaryBuf[8] === "\tscs")) && (INC_(9) || DEC_(9)) && ($mod.TemporaryBuf[11] === "; --- ForToDoEpilog") && INC_(12) && ($mod.TemporaryBuf[13] === "\tseq") && ($mod.TemporaryBuf[14] === ("\tjmp " + $mod.TemporaryBuf[2])) && LAB_L(15)) if ((pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) && (pas.System.Copy($mod.TemporaryBuf[4],6,256) === pas.System.Copy($mod.TemporaryBuf[12],6,256))) {
-          $mod.TemporaryBuf[0] = "\ttay";
-          $mod.TemporaryBuf[12] = "\tiny";
-          $mod.TemporaryBuf[13] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[14],6,256);
-          $mod.TemporaryBuf[14] = $mod.TemporaryBuf[15];
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition") && LDY(4) && LDA(5) && ADD_SUB(6) && STA(7) && (($impl.TemporaryBuf[8] === "\tscc") || ($impl.TemporaryBuf[8] === "\tscs")) && (INC_(9) || DEC_(9)) && ($impl.TemporaryBuf[11] === "; --- ForToDoEpilog") && INC_(12) && ($impl.TemporaryBuf[13] === "\tseq") && ($impl.TemporaryBuf[14] === ("\tjmp " + $impl.TemporaryBuf[2])) && LAB_L(15)) if ((pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) && (pas.System.Copy($impl.TemporaryBuf[4],6,256) === pas.System.Copy($impl.TemporaryBuf[12],6,256))) {
+          $impl.TemporaryBuf[0] = "\ttay";
+          $impl.TemporaryBuf[12] = "\tiny";
+          $impl.TemporaryBuf[13] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[14],6,256);
+          $impl.TemporaryBuf[14] = $impl.TemporaryBuf[15];
           if (LAB_B(16)) {
-            $mod.TemporaryBuf[15] = $mod.TemporaryBuf[16];
-            $mod.TemporaryBuf[16] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          } else $mod.TemporaryBuf[15] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          $mod.TemporaryBuf[4] = $mod.TemporaryBuf[5];
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[6];
-          $mod.TemporaryBuf[6] = $mod.TemporaryBuf[7];
-          $mod.TemporaryBuf[7] = $mod.TemporaryBuf[8];
-          $mod.TemporaryBuf[8] = $mod.TemporaryBuf[9];
-          $mod.TemporaryBuf[9] = $mod.TemporaryBuf[10];
-          $mod.TemporaryBuf[10] = $mod.TemporaryBuf[11];
-          $mod.TemporaryBuf[11] = $mod.TemporaryBuf[12];
-          $mod.TemporaryBuf[12] = $mod.TemporaryBuf[13];
-          $mod.TemporaryBuf[13] = $mod.TemporaryBuf[14];
-          $mod.TemporaryBuf[14] = $mod.TemporaryBuf[15];
-          $mod.TemporaryBuf[15] = $mod.TemporaryBuf[16];
-          if (pas.System.Copy($mod.TemporaryBuf[4],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-            $mod.TemporaryBuf[1] = $mod.TemporaryBuf[4];
-            $mod.TemporaryBuf[15] = $mod.TemporaryBuf[6];
-            $mod.TemporaryBuf[4] = "~";
-            $mod.TemporaryBuf[6] = "~";
+            $impl.TemporaryBuf[15] = $impl.TemporaryBuf[16];
+            $impl.TemporaryBuf[16] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          } else $impl.TemporaryBuf[15] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          $impl.TemporaryBuf[4] = $impl.TemporaryBuf[5];
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[6];
+          $impl.TemporaryBuf[6] = $impl.TemporaryBuf[7];
+          $impl.TemporaryBuf[7] = $impl.TemporaryBuf[8];
+          $impl.TemporaryBuf[8] = $impl.TemporaryBuf[9];
+          $impl.TemporaryBuf[9] = $impl.TemporaryBuf[10];
+          $impl.TemporaryBuf[10] = $impl.TemporaryBuf[11];
+          $impl.TemporaryBuf[11] = $impl.TemporaryBuf[12];
+          $impl.TemporaryBuf[12] = $impl.TemporaryBuf[13];
+          $impl.TemporaryBuf[13] = $impl.TemporaryBuf[14];
+          $impl.TemporaryBuf[14] = $impl.TemporaryBuf[15];
+          $impl.TemporaryBuf[15] = $impl.TemporaryBuf[16];
+          if (pas.System.Copy($impl.TemporaryBuf[4],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+            $impl.TemporaryBuf[1] = $impl.TemporaryBuf[4];
+            $impl.TemporaryBuf[15] = $impl.TemporaryBuf[6];
+            $impl.TemporaryBuf[4] = "~";
+            $impl.TemporaryBuf[6] = "~";
           };
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition") && LDY(4) && LDA(5) && ADD_SUB(6) && ($mod.TemporaryBuf[7] === "\tsta :bp+1") && LDA(8) && ($mod.TemporaryBuf[9] === "\tsta (:bp),y") && ($mod.TemporaryBuf[11] === "; --- ForToDoEpilog") && INC_(12) && ($mod.TemporaryBuf[13] === "\tseq") && ($mod.TemporaryBuf[14] === ("\tjmp " + $mod.TemporaryBuf[2])) && LAB_L(15)) if ((pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) && (pas.System.Copy($mod.TemporaryBuf[4],6,256) === pas.System.Copy($mod.TemporaryBuf[12],6,256))) {
-          $mod.TemporaryBuf[0] = "\ttay";
-          $mod.TemporaryBuf[12] = "\tiny";
-          $mod.TemporaryBuf[13] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[14],6,256);
-          $mod.TemporaryBuf[14] = $mod.TemporaryBuf[15];
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition") && LDY(4) && LDA(5) && ADD_SUB(6) && ($impl.TemporaryBuf[7] === "\tsta :bp+1") && LDA(8) && ($impl.TemporaryBuf[9] === "\tsta (:bp),y") && ($impl.TemporaryBuf[11] === "; --- ForToDoEpilog") && INC_(12) && ($impl.TemporaryBuf[13] === "\tseq") && ($impl.TemporaryBuf[14] === ("\tjmp " + $impl.TemporaryBuf[2])) && LAB_L(15)) if ((pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) && (pas.System.Copy($impl.TemporaryBuf[4],6,256) === pas.System.Copy($impl.TemporaryBuf[12],6,256))) {
+          $impl.TemporaryBuf[0] = "\ttay";
+          $impl.TemporaryBuf[12] = "\tiny";
+          $impl.TemporaryBuf[13] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[14],6,256);
+          $impl.TemporaryBuf[14] = $impl.TemporaryBuf[15];
           if (LAB_B(16)) {
-            $mod.TemporaryBuf[15] = $mod.TemporaryBuf[16];
-            $mod.TemporaryBuf[16] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          } else $mod.TemporaryBuf[15] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          $mod.TemporaryBuf[4] = "~";
+            $impl.TemporaryBuf[15] = $impl.TemporaryBuf[16];
+            $impl.TemporaryBuf[16] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          } else $impl.TemporaryBuf[15] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "") && LAB_L(1) && ($mod.TemporaryBuf[2] === "; --- ForToDoCondition") && ($mod.TemporaryBuf[3] === "\tldy #$00") && LDA(4) && ADD_SUB(5) && STA(6) && (($mod.TemporaryBuf[7] === "\tscc") || ($mod.TemporaryBuf[7] === "\tscs")) && (INC_(8) || DEC_(8)) && ($mod.TemporaryBuf[10] === "; --- ForToDoEpilog") && INC_(11) && ($mod.TemporaryBuf[12] === "\tsne") && INC_(13) && ($mod.TemporaryBuf[14] === "\tseq") && ($mod.TemporaryBuf[15] === ("\tjmp " + $mod.TemporaryBuf[1])) && LAB_L(16)) if (pas.System.Copy($mod.TemporaryBuf[5],6,256) === ("(" + pas.System.Copy($mod.TemporaryBuf[11],6,256) + "),y")) {
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = "\tldy #$00";
-          $mod.TemporaryBuf[12] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
-          $mod.TemporaryBuf[14] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
-          $mod.TemporaryBuf[15] = $mod.TemporaryBuf[16];
+        if (($impl.TemporaryBuf[0] === "") && LAB_L(1) && ($impl.TemporaryBuf[2] === "; --- ForToDoCondition") && ($impl.TemporaryBuf[3] === "\tldy #$00") && LDA(4) && ADD_SUB(5) && STA(6) && (($impl.TemporaryBuf[7] === "\tscc") || ($impl.TemporaryBuf[7] === "\tscs")) && (INC_(8) || DEC_(8)) && ($impl.TemporaryBuf[10] === "; --- ForToDoEpilog") && INC_(11) && ($impl.TemporaryBuf[12] === "\tsne") && INC_(13) && ($impl.TemporaryBuf[14] === "\tseq") && ($impl.TemporaryBuf[15] === ("\tjmp " + $impl.TemporaryBuf[1])) && LAB_L(16)) if (pas.System.Copy($impl.TemporaryBuf[5],6,256) === ("(" + pas.System.Copy($impl.TemporaryBuf[11],6,256) + "),y")) {
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = "\tldy #$00";
+          $impl.TemporaryBuf[12] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
+          $impl.TemporaryBuf[14] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
+          $impl.TemporaryBuf[15] = $impl.TemporaryBuf[16];
           if (LAB_B(17)) {
-            $mod.TemporaryBuf[16] = $mod.TemporaryBuf[17];
-            $mod.TemporaryBuf[17] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[11],6,256);
-          } else $mod.TemporaryBuf[16] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[11],6,256);
-          $mod.TemporaryBuf[11] = "\tiny";
-          if (pas.System.Copy($mod.TemporaryBuf[4],6,256) === pas.System.Copy($mod.TemporaryBuf[6],6,256)) {
-            $mod.TemporaryBuf[0] = $mod.TemporaryBuf[4];
-            $mod.TemporaryBuf[4] = $mod.TemporaryBuf[5];
-            $mod.TemporaryBuf[5] = $mod.TemporaryBuf[6];
-            $mod.TemporaryBuf[6] = $mod.TemporaryBuf[7];
-            $mod.TemporaryBuf[7] = $mod.TemporaryBuf[8];
-            $mod.TemporaryBuf[8] = $mod.TemporaryBuf[9];
-            $mod.TemporaryBuf[9] = $mod.TemporaryBuf[10];
-            $mod.TemporaryBuf[10] = $mod.TemporaryBuf[11];
-            $mod.TemporaryBuf[11] = $mod.TemporaryBuf[12];
-            $mod.TemporaryBuf[12] = $mod.TemporaryBuf[13];
-            $mod.TemporaryBuf[13] = $mod.TemporaryBuf[14];
-            $mod.TemporaryBuf[14] = $mod.TemporaryBuf[15];
-            $mod.TemporaryBuf[15] = $mod.TemporaryBuf[16];
-            $mod.TemporaryBuf[16] = $mod.TemporaryBuf[17];
-            $mod.TemporaryBuf[17] = $mod.TemporaryBuf[18];
+            $impl.TemporaryBuf[16] = $impl.TemporaryBuf[17];
+            $impl.TemporaryBuf[17] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[11],6,256);
+          } else $impl.TemporaryBuf[16] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[11],6,256);
+          $impl.TemporaryBuf[11] = "\tiny";
+          if (pas.System.Copy($impl.TemporaryBuf[4],6,256) === pas.System.Copy($impl.TemporaryBuf[6],6,256)) {
+            $impl.TemporaryBuf[0] = $impl.TemporaryBuf[4];
+            $impl.TemporaryBuf[4] = $impl.TemporaryBuf[5];
+            $impl.TemporaryBuf[5] = $impl.TemporaryBuf[6];
+            $impl.TemporaryBuf[6] = $impl.TemporaryBuf[7];
+            $impl.TemporaryBuf[7] = $impl.TemporaryBuf[8];
+            $impl.TemporaryBuf[8] = $impl.TemporaryBuf[9];
+            $impl.TemporaryBuf[9] = $impl.TemporaryBuf[10];
+            $impl.TemporaryBuf[10] = $impl.TemporaryBuf[11];
+            $impl.TemporaryBuf[11] = $impl.TemporaryBuf[12];
+            $impl.TemporaryBuf[12] = $impl.TemporaryBuf[13];
+            $impl.TemporaryBuf[13] = $impl.TemporaryBuf[14];
+            $impl.TemporaryBuf[14] = $impl.TemporaryBuf[15];
+            $impl.TemporaryBuf[15] = $impl.TemporaryBuf[16];
+            $impl.TemporaryBuf[16] = $impl.TemporaryBuf[17];
+            $impl.TemporaryBuf[17] = $impl.TemporaryBuf[18];
           };
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition") && LDA(4) && CMP(5) && SKIP(6) && LDY(7) && LDA(8) && STA(9) && ($mod.TemporaryBuf[11] === "; --- ForToDoEpilog") && INC_(12) && ($mod.TemporaryBuf[13] === "\tseq") && ($mod.TemporaryBuf[14] === ("\tjmp " + $mod.TemporaryBuf[2])) && LAB_L(15)) if ((pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) && (pas.System.Copy($mod.TemporaryBuf[4],6,256) === pas.System.Copy($mod.TemporaryBuf[7],6,256)) && (pas.System.Copy($mod.TemporaryBuf[7],6,256) === pas.System.Copy($mod.TemporaryBuf[12],6,256))) {
-          $mod.TemporaryBuf[0] = "\ttay";
-          $mod.TemporaryBuf[4] = "~";
-          $mod.TemporaryBuf[5] = "\tcpy " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-          $mod.TemporaryBuf[12] = "\tiny";
-          $mod.TemporaryBuf[13] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[14],6,256);
-          $mod.TemporaryBuf[14] = $mod.TemporaryBuf[15];
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition") && LDA(4) && CMP(5) && SKIP(6) && LDY(7) && LDA(8) && STA(9) && ($impl.TemporaryBuf[11] === "; --- ForToDoEpilog") && INC_(12) && ($impl.TemporaryBuf[13] === "\tseq") && ($impl.TemporaryBuf[14] === ("\tjmp " + $impl.TemporaryBuf[2])) && LAB_L(15)) if ((pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) && (pas.System.Copy($impl.TemporaryBuf[4],6,256) === pas.System.Copy($impl.TemporaryBuf[7],6,256)) && (pas.System.Copy($impl.TemporaryBuf[7],6,256) === pas.System.Copy($impl.TemporaryBuf[12],6,256))) {
+          $impl.TemporaryBuf[0] = "\ttay";
+          $impl.TemporaryBuf[4] = "~";
+          $impl.TemporaryBuf[5] = "\tcpy " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+          $impl.TemporaryBuf[12] = "\tiny";
+          $impl.TemporaryBuf[13] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[14],6,256);
+          $impl.TemporaryBuf[14] = $impl.TemporaryBuf[15];
           if (LAB_B(16)) {
-            $mod.TemporaryBuf[15] = $mod.TemporaryBuf[16];
-            $mod.TemporaryBuf[16] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[7],6,256);
-          } else $mod.TemporaryBuf[15] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[7],6,256);
-          $mod.TemporaryBuf[7] = "~";
+            $impl.TemporaryBuf[15] = $impl.TemporaryBuf[16];
+            $impl.TemporaryBuf[16] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[7],6,256);
+          } else $impl.TemporaryBuf[15] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[7],6,256);
+          $impl.TemporaryBuf[7] = "~";
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition") && LDA(4) && CMP(5) && SKIP(6) && ($mod.TemporaryBuf[7] === "") && OPTI(8) && ($mod.TemporaryBuf[9] === "") && LDA(10)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
-          for (p = 11; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (($mod.TemporaryBuf[p - 6] === ("\tldy " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) && STA(p - 5) && ($mod.TemporaryBuf[p - 4] === "") && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 2] === ("\tinc " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) && ($mod.TemporaryBuf[p - 1] === "\tseq") && ($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2]))) {
-              $mod.TemporaryBuf[0] = "\ttay";
-              $mod.TemporaryBuf[4] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-              $mod.TemporaryBuf[5] = "\tcpy " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
-              $mod.TemporaryBuf[p - 2] = "\tiny";
-              $mod.TemporaryBuf[p - 1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[p],6,256);
-              $mod.TemporaryBuf[p] = "~";
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition") && LDA(4) && CMP(5) && SKIP(6) && ($impl.TemporaryBuf[7] === "") && OPTI(8) && ($impl.TemporaryBuf[9] === "") && LDA(10)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
+          for (p = 11; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (($impl.TemporaryBuf[p - 6] === ("\tldy " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) && STA(p - 5) && ($impl.TemporaryBuf[p - 4] === "") && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 2] === ("\tinc " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) && ($impl.TemporaryBuf[p - 1] === "\tseq") && ($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2]))) {
+              $impl.TemporaryBuf[0] = "\ttay";
+              $impl.TemporaryBuf[4] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+              $impl.TemporaryBuf[5] = "\tcpy " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
+              $impl.TemporaryBuf[p - 2] = "\tiny";
+              $impl.TemporaryBuf[p - 1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[p],6,256);
+              $impl.TemporaryBuf[p] = "~";
             };
             break;
           };
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition") && LDA(4) && CMP(5) && SKIP(6) && ($mod.TemporaryBuf[7] === "") && OPTI(8) && ($mod.TemporaryBuf[9] === "") && ($mod.TemporaryBuf[10] === ("\tldy " + pas.System.Copy($mod.TemporaryBuf[4],6,256)))) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition") && LDA(4) && CMP(5) && SKIP(6) && ($impl.TemporaryBuf[7] === "") && OPTI(8) && ($impl.TemporaryBuf[9] === "") && ($impl.TemporaryBuf[10] === ("\tldy " + pas.System.Copy($impl.TemporaryBuf[4],6,256)))) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
           yes = true;
-          for (p = 11; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (yes && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 2] === ("\tinc " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) && ($mod.TemporaryBuf[p - 1] === "\tseq") && ($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2])) && ($mod.TemporaryBuf[p + 1] === pas.System.Copy($mod.TemporaryBuf[6],6,256))) {
-              $mod.TemporaryBuf[0] = "\ttay";
+          for (p = 11; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (yes && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 2] === ("\tinc " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) && ($impl.TemporaryBuf[p - 1] === "\tseq") && ($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2])) && ($impl.TemporaryBuf[p + 1] === pas.System.Copy($impl.TemporaryBuf[6],6,256))) {
+              $impl.TemporaryBuf[0] = "\ttay";
               if (STA(11)) {
-                $mod.TemporaryBuf[4] = "\ttya"}
+                $impl.TemporaryBuf[4] = "\ttya"}
                else {
-                $mod.TemporaryBuf[4] = "~";
-                $mod.TemporaryBuf[5] = "\tcpy " + pas.System.Copy($mod.TemporaryBuf[5],6,256);
+                $impl.TemporaryBuf[4] = "~";
+                $impl.TemporaryBuf[5] = "\tcpy " + pas.System.Copy($impl.TemporaryBuf[5],6,256);
               };
-              $mod.TemporaryBuf[p - 2] = "\tiny";
-              $mod.TemporaryBuf[p - 1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[p],6,256);
-              $mod.TemporaryBuf[p] = $mod.TemporaryBuf[p + 1];
+              $impl.TemporaryBuf[p - 2] = "\tiny";
+              $impl.TemporaryBuf[p - 1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[p],6,256);
+              $impl.TemporaryBuf[p] = $impl.TemporaryBuf[p + 1];
               if (LAB_B(p + 2)) {
-                $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[p + 2];
-                $mod.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[10],6,256);
-              } else $mod.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[10],6,256);
-              $mod.TemporaryBuf[10] = "~";
+                $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[p + 2];
+                $impl.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[10],6,256);
+              } else $impl.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[10],6,256);
+              $impl.TemporaryBuf[10] = "~";
             };
             break;
-          } else if (fail(p) || ($mod.TemporaryBuf[p] === ("\tlda " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tadd " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tsub " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tadc " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tsbc " + pas.System.Copy($mod.TemporaryBuf[4],6,256)))) yes = false;
+          } else if (fail(p) || ($impl.TemporaryBuf[p] === ("\tlda " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tadd " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tsub " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tadc " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tsbc " + pas.System.Copy($impl.TemporaryBuf[4],6,256)))) yes = false;
         };
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition") && ($mod.TemporaryBuf[4] === ("\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256)))) {
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition") && ($impl.TemporaryBuf[4] === ("\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256)))) {
           yes = true;
-          for (p = 5; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (yes && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 2] === ("\tinc " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) && ($mod.TemporaryBuf[p - 1] === "\tseq") && ($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2])) && LAB_L(p + 1)) {
-              $mod.TemporaryBuf[0] = "\ttay";
-              $mod.TemporaryBuf[p - 2] = "\tiny";
-              $mod.TemporaryBuf[p - 1] = "\tjne " + pas.System.Copy($mod.TemporaryBuf[p],6,256);
-              $mod.TemporaryBuf[p] = $mod.TemporaryBuf[p + 1];
+          for (p = 5; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (yes && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 2] === ("\tinc " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) && ($impl.TemporaryBuf[p - 1] === "\tseq") && ($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2])) && LAB_L(p + 1)) {
+              $impl.TemporaryBuf[0] = "\ttay";
+              $impl.TemporaryBuf[p - 2] = "\tiny";
+              $impl.TemporaryBuf[p - 1] = "\tjne " + pas.System.Copy($impl.TemporaryBuf[p],6,256);
+              $impl.TemporaryBuf[p] = $impl.TemporaryBuf[p + 1];
               if (LAB_B(p + 2)) {
-                $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[p + 2];
-                $mod.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-              } else $mod.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-              $mod.TemporaryBuf[4] = "~";
+                $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[p + 2];
+                $impl.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+              } else $impl.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+              $impl.TemporaryBuf[4] = "~";
             };
             break;
-          } else if (fail(p) || ($mod.TemporaryBuf[p] === ("\tlda " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tadd " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tsub " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tadc " + pas.System.Copy($mod.TemporaryBuf[4],6,256))) || ($mod.TemporaryBuf[p] === ("\tsbc " + pas.System.Copy($mod.TemporaryBuf[4],6,256)))) yes = false;
+          } else if (fail(p) || ($impl.TemporaryBuf[p] === ("\tlda " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tadd " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tsub " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tadc " + pas.System.Copy($impl.TemporaryBuf[4],6,256))) || ($impl.TemporaryBuf[p] === ("\tsbc " + pas.System.Copy($impl.TemporaryBuf[4],6,256)))) yes = false;
         };
-        if (LAB_L(0) && ($mod.TemporaryBuf[1] === "; --- ForToDoCondition") && (LDA(2) === false) && (CMP(3) === false)) {
-          for (p = 2; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[0],$mod.TemporaryBuf[p]) > 0) {
-            if (($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[0])) && ($mod.TemporaryBuf[p - 1] === "\tbmi *+5") && DEC_(p - 2) && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 4] === "") && (INC_(p - 5) || DEC_(p - 5)) && (($mod.TemporaryBuf[p - 6] === "\tscc") || ($mod.TemporaryBuf[p - 6] === "\tscs")) && STA(p - 7) && ($mod.TemporaryBuf[p + 2] === "") && OPTI(p + 3) && ($mod.TemporaryBuf[p + 4] === "") && LDA(p + 5) && ADD_SUB(p + 6) && (pas.System.Copy($mod.TemporaryBuf[p + 5],6,256) === pas.System.Copy($mod.TemporaryBuf[p - 7],6,256))) {
-              $mod.TemporaryBuf[p + 5] = "~";
+        if (LAB_L(0) && ($impl.TemporaryBuf[1] === "; --- ForToDoCondition") && (LDA(2) === false) && (CMP(3) === false)) {
+          for (p = 2; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[0],$impl.TemporaryBuf[p]) > 0) {
+            if (($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[0])) && ($impl.TemporaryBuf[p - 1] === "\tbmi *+5") && DEC_(p - 2) && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 4] === "") && (INC_(p - 5) || DEC_(p - 5)) && (($impl.TemporaryBuf[p - 6] === "\tscc") || ($impl.TemporaryBuf[p - 6] === "\tscs")) && STA(p - 7) && ($impl.TemporaryBuf[p + 2] === "") && OPTI(p + 3) && ($impl.TemporaryBuf[p + 4] === "") && LDA(p + 5) && ADD_SUB(p + 6) && (pas.System.Copy($impl.TemporaryBuf[p + 5],6,256) === pas.System.Copy($impl.TemporaryBuf[p - 7],6,256))) {
+              $impl.TemporaryBuf[p + 5] = "~";
             };
             break;
           };
         };
-        if (LAB_L(0) && ($mod.TemporaryBuf[1] === "; --- ForToDoCondition") && LDA(2) && (IY(2) === false) && ($mod.TemporaryBuf[3] === "\tcmp #$40") && JCS_L(4) && LDA(5)) {
-          $mod.TemporaryBuf[2] = "\tbit " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[3] = "~";
-          $mod.TemporaryBuf[4] = "\tjvs " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
+        if (LAB_L(0) && ($impl.TemporaryBuf[1] === "; --- ForToDoCondition") && LDA(2) && (IY(2) === false) && ($impl.TemporaryBuf[3] === "\tcmp #$40") && JCS_L(4) && LDA(5)) {
+          $impl.TemporaryBuf[2] = "\tbit " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[3] = "~";
+          $impl.TemporaryBuf[4] = "\tjvs " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
         };
-        if (LAB_L(0) && ($mod.TemporaryBuf[1] === "; --- ForToDoCondition") && LDA(2) && (IY(2) === false) && ($mod.TemporaryBuf[3] === "\tcmp #$40") && JCS_L(4) && ($mod.TemporaryBuf[5] === "") && OPTI(6) && ($mod.TemporaryBuf[7] === "") && LDA(8)) {
-          $mod.TemporaryBuf[2] = "\tbit " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[3] = "~";
-          $mod.TemporaryBuf[4] = "\tjvs " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
+        if (LAB_L(0) && ($impl.TemporaryBuf[1] === "; --- ForToDoCondition") && LDA(2) && (IY(2) === false) && ($impl.TemporaryBuf[3] === "\tcmp #$40") && JCS_L(4) && ($impl.TemporaryBuf[5] === "") && OPTI(6) && ($impl.TemporaryBuf[7] === "") && LDA(8)) {
+          $impl.TemporaryBuf[2] = "\tbit " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[3] = "~";
+          $impl.TemporaryBuf[4] = "\tjvs " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
         };
-        if (LAB_L(0) && ($mod.TemporaryBuf[1] === "; --- ForToDoCondition") && LDA(2) && CMP(3) && ($mod.TemporaryBuf[4] === "\tbcc @+") && JNE_L(5) && LDA(6) && CMP(7) && ($mod.TemporaryBuf[8] === "\tbcc @+") && JNE_L(9) && ($mod.TemporaryBuf[10] === "@") && ($mod.TemporaryBuf[11] === "") && OPTI(12) && ($mod.TemporaryBuf[13] === "") && LDA(14) && ADD(15)) {
-          $mod.TemporaryBuf[10] = "\tclc";
-          $mod.TemporaryBuf[11] = "@";
-          $mod.TemporaryBuf[15] = "\tadc " + pas.System.Copy($mod.TemporaryBuf[15],6,256);
+        if (LAB_L(0) && ($impl.TemporaryBuf[1] === "; --- ForToDoCondition") && LDA(2) && CMP(3) && ($impl.TemporaryBuf[4] === "\tbcc @+") && JNE_L(5) && LDA(6) && CMP(7) && ($impl.TemporaryBuf[8] === "\tbcc @+") && JNE_L(9) && ($impl.TemporaryBuf[10] === "@") && ($impl.TemporaryBuf[11] === "") && OPTI(12) && ($impl.TemporaryBuf[13] === "") && LDA(14) && ADD(15)) {
+          $impl.TemporaryBuf[10] = "\tclc";
+          $impl.TemporaryBuf[11] = "@";
+          $impl.TemporaryBuf[15] = "\tadc " + pas.System.Copy($impl.TemporaryBuf[15],6,256);
         };
       };
       function opt_TEMP_FORDEC() {
         var p = 0;
-        if (($mod.TemporaryBuf[5] === "\t#for") && (pas.System.Pos("#for:dec",$mod.TemporaryBuf[4]) > 0) && (STA(0) || (pas.System.Pos("stz ",$mod.TemporaryBuf[0]) > 0)) && ($mod.TemporaryBuf[1] === "") && LAB_L(2) && ($mod.TemporaryBuf[3] === "; --- ForToDoCondition")) {
+        if (($impl.TemporaryBuf[5] === "\t#for") && (pas.System.Pos("#for:dec",$impl.TemporaryBuf[4]) > 0) && (STA(0) || (pas.System.Pos("stz ",$impl.TemporaryBuf[0]) > 0)) && ($impl.TemporaryBuf[1] === "") && LAB_L(2) && ($impl.TemporaryBuf[3] === "; --- ForToDoCondition")) {
           yes = true;
-          for (p = 6; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2])) && ($mod.TemporaryBuf[p - 5] === "; --- ForToDoEpilog") && (pas.System.Pos("dec ",$mod.TemporaryBuf[p - 4]) > 0) && ($mod.TemporaryBuf[p - 1] === "\tseq") && ($mod.TemporaryBuf[p - 2] === "\tcmp #$FF")) {
-              $mod.TemporaryBuf[4] = $mod.TemporaryBuf[p - 4];
-              $mod.TemporaryBuf[p - 4] = "~";
-              $mod.TemporaryBuf[p - 2] = "~";
-              $mod.TemporaryBuf[p - 1] = "~";
-              $mod.TemporaryBuf[p] = "\tjne " + $mod.TemporaryBuf[2];
-              $mod.TemporaryBuf[1] = "\tjmp " + $mod.TemporaryBuf[2] + "f";
-              $mod.TemporaryBuf[5] = $mod.TemporaryBuf[2] + "f";
+          for (p = 6; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2])) && ($impl.TemporaryBuf[p - 5] === "; --- ForToDoEpilog") && (pas.System.Pos("dec ",$impl.TemporaryBuf[p - 4]) > 0) && ($impl.TemporaryBuf[p - 1] === "\tseq") && ($impl.TemporaryBuf[p - 2] === "\tcmp #$FF")) {
+              $impl.TemporaryBuf[4] = $impl.TemporaryBuf[p - 4];
+              $impl.TemporaryBuf[p - 4] = "~";
+              $impl.TemporaryBuf[p - 2] = "~";
+              $impl.TemporaryBuf[p - 1] = "~";
+              $impl.TemporaryBuf[p] = "\tjne " + $impl.TemporaryBuf[2];
+              $impl.TemporaryBuf[1] = "\tjmp " + $impl.TemporaryBuf[2] + "f";
+              $impl.TemporaryBuf[5] = $impl.TemporaryBuf[2] + "f";
               yes = false;
             };
             break;
           };
           if (yes) {
-            $mod.TemporaryBuf[4] = "~";
-            $mod.TemporaryBuf[5] = "~";
+            $impl.TemporaryBuf[4] = "~";
+            $impl.TemporaryBuf[5] = "~";
           };
-          if (yes && ($mod.TemporaryBuf[6] === ("\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256))) && ($mod.TemporaryBuf[7] === ("\tlda " + pas.System.Copy($mod.TemporaryBuf[0],6,256)))) for (p = 8; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (yes && ($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2])) && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 2] === ("\tdec " + pas.System.Copy($mod.TemporaryBuf[0],6,256))) && ($mod.TemporaryBuf[p - 1] === "\tbmi *+5") && LAB_L(p + 1)) {
-              $mod.TemporaryBuf[p - 2] = "\tdey";
-              $mod.TemporaryBuf[p - 1] = "\tjpl " + pas.System.Copy($mod.TemporaryBuf[p],6,256);
+          if (yes && ($impl.TemporaryBuf[6] === ("\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256))) && ($impl.TemporaryBuf[7] === ("\tlda " + pas.System.Copy($impl.TemporaryBuf[0],6,256)))) for (p = 8; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (yes && ($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2])) && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 2] === ("\tdec " + pas.System.Copy($impl.TemporaryBuf[0],6,256))) && ($impl.TemporaryBuf[p - 1] === "\tbmi *+5") && LAB_L(p + 1)) {
+              $impl.TemporaryBuf[p - 2] = "\tdey";
+              $impl.TemporaryBuf[p - 1] = "\tjpl " + pas.System.Copy($impl.TemporaryBuf[p],6,256);
               if (LAB_B(p + 2)) {
-                $mod.TemporaryBuf[p] = "~";
-                $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[p + 2];
-                $mod.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
+                $impl.TemporaryBuf[p] = "~";
+                $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[p + 2];
+                $impl.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
               } else {
-                $mod.TemporaryBuf[p] = "~";
-                $mod.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
+                $impl.TemporaryBuf[p] = "~";
+                $impl.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
               };
-              $mod.TemporaryBuf[0] = "\ttay";
-              $mod.TemporaryBuf[6] = "~";
-              $mod.TemporaryBuf[7] = "\ttya";
+              $impl.TemporaryBuf[0] = "\ttay";
+              $impl.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[7] = "\ttya";
               yes = false;
             };
             break;
-          } else if ((((p - 3) >= 8) && (pas.System.Copy($mod.TemporaryBuf[p - 3],6,256) === pas.System.Copy($mod.TemporaryBuf[0],6,256))) || (pas.System.Pos("\tldy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tjsr ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmwy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmvy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.if",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$mod.TemporaryBuf[p]) > 0) || ($mod.TemporaryBuf[p] === "\tiny") || ($mod.TemporaryBuf[p] === "\tdey") || ($mod.TemporaryBuf[p] === "\ttay")) yes = false;
-          if (yes && ($mod.TemporaryBuf[6] === ("\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256)))) for (p = 7; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (yes && ($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2])) && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 2] === ("\tdec " + pas.System.Copy($mod.TemporaryBuf[0],6,256))) && ($mod.TemporaryBuf[p - 1] === "\tbmi *+5") && LAB_L(p + 1)) {
-              $mod.TemporaryBuf[p - 2] = "\tdey";
-              $mod.TemporaryBuf[p - 1] = "\tjpl " + pas.System.Copy($mod.TemporaryBuf[p],6,256);
+          } else if ((((p - 3) >= 8) && (pas.System.Copy($impl.TemporaryBuf[p - 3],6,256) === pas.System.Copy($impl.TemporaryBuf[0],6,256))) || (pas.System.Pos("\tldy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tjsr ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmwy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmvy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.if",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$impl.TemporaryBuf[p]) > 0) || ($impl.TemporaryBuf[p] === "\tiny") || ($impl.TemporaryBuf[p] === "\tdey") || ($impl.TemporaryBuf[p] === "\ttay")) yes = false;
+          if (yes && ($impl.TemporaryBuf[6] === ("\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256)))) for (p = 7; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (yes && ($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2])) && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 2] === ("\tdec " + pas.System.Copy($impl.TemporaryBuf[0],6,256))) && ($impl.TemporaryBuf[p - 1] === "\tbmi *+5") && LAB_L(p + 1)) {
+              $impl.TemporaryBuf[p - 2] = "\tdey";
+              $impl.TemporaryBuf[p - 1] = "\tjpl " + pas.System.Copy($impl.TemporaryBuf[p],6,256);
               if (LAB_B(p + 2)) {
-                $mod.TemporaryBuf[p] = "~";
-                $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[p + 2];
-                $mod.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
+                $impl.TemporaryBuf[p] = "~";
+                $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[p + 2];
+                $impl.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
               } else {
-                $mod.TemporaryBuf[p] = "~";
-                $mod.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
+                $impl.TemporaryBuf[p] = "~";
+                $impl.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
               };
-              $mod.TemporaryBuf[0] = "\ttay";
-              $mod.TemporaryBuf[6] = "~";
+              $impl.TemporaryBuf[0] = "\ttay";
+              $impl.TemporaryBuf[6] = "~";
               yes = false;
             };
             break;
-          } else if ((((p - 3) >= 7) && (pas.System.Copy($mod.TemporaryBuf[p - 3],6,256) === pas.System.Copy($mod.TemporaryBuf[0],6,256))) || (pas.System.Pos("\tldy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tjsr ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmwy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmvy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.if",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$mod.TemporaryBuf[p]) > 0) || ($mod.TemporaryBuf[p] === "\tiny") || ($mod.TemporaryBuf[p] === "\tdey") || ($mod.TemporaryBuf[p] === "\ttay")) yes = false;
-          if (yes && ($mod.TemporaryBuf[8] === ("\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256)))) for (p = 9; p <= 511; p++) if (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[p]) > 0) {
-            if (yes && LDA(6) && ((pas.System.Pos("and #",$mod.TemporaryBuf[7]) > 0) || (pas.System.Pos("ora #",$mod.TemporaryBuf[7]) > 0) || (pas.System.Pos("eor #",$mod.TemporaryBuf[7]) > 0)) && ($mod.TemporaryBuf[p] === ("\tjmp " + $mod.TemporaryBuf[2])) && ($mod.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($mod.TemporaryBuf[p - 2] === ("\tdec " + pas.System.Copy($mod.TemporaryBuf[0],6,256))) && ($mod.TemporaryBuf[p - 1] === "\tbmi *+5") && LAB_L(p + 1)) {
-              $mod.TemporaryBuf[p - 2] = "\tdey";
-              $mod.TemporaryBuf[p - 1] = "\tjpl " + pas.System.Copy($mod.TemporaryBuf[p],6,256);
+          } else if ((((p - 3) >= 7) && (pas.System.Copy($impl.TemporaryBuf[p - 3],6,256) === pas.System.Copy($impl.TemporaryBuf[0],6,256))) || (pas.System.Pos("\tldy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tjsr ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmwy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmvy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.if",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$impl.TemporaryBuf[p]) > 0) || ($impl.TemporaryBuf[p] === "\tiny") || ($impl.TemporaryBuf[p] === "\tdey") || ($impl.TemporaryBuf[p] === "\ttay")) yes = false;
+          if (yes && ($impl.TemporaryBuf[8] === ("\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256)))) for (p = 9; p <= 511; p++) if (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[p]) > 0) {
+            if (yes && LDA(6) && ((pas.System.Pos("and #",$impl.TemporaryBuf[7]) > 0) || (pas.System.Pos("ora #",$impl.TemporaryBuf[7]) > 0) || (pas.System.Pos("eor #",$impl.TemporaryBuf[7]) > 0)) && ($impl.TemporaryBuf[p] === ("\tjmp " + $impl.TemporaryBuf[2])) && ($impl.TemporaryBuf[p - 3] === "; --- ForToDoEpilog") && ($impl.TemporaryBuf[p - 2] === ("\tdec " + pas.System.Copy($impl.TemporaryBuf[0],6,256))) && ($impl.TemporaryBuf[p - 1] === "\tbmi *+5") && LAB_L(p + 1)) {
+              $impl.TemporaryBuf[p - 2] = "\tdey";
+              $impl.TemporaryBuf[p - 1] = "\tjpl " + pas.System.Copy($impl.TemporaryBuf[p],6,256);
               if (LAB_B(p + 2)) {
-                $mod.TemporaryBuf[p] = "~";
-                $mod.TemporaryBuf[p + 1] = $mod.TemporaryBuf[p + 2];
-                $mod.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
+                $impl.TemporaryBuf[p] = "~";
+                $impl.TemporaryBuf[p + 1] = $impl.TemporaryBuf[p + 2];
+                $impl.TemporaryBuf[p + 2] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
               } else {
-                $mod.TemporaryBuf[p] = "~";
-                $mod.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
+                $impl.TemporaryBuf[p] = "~";
+                $impl.TemporaryBuf[p + 1] = "\tsty " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
               };
-              if (pas.System.Copy($mod.TemporaryBuf[6],6,256) === pas.System.Copy($mod.TemporaryBuf[0],6,256)) $mod.TemporaryBuf[6] = "\ttya";
-              $mod.TemporaryBuf[0] = "\ttay";
-              $mod.TemporaryBuf[8] = "~";
+              if (pas.System.Copy($impl.TemporaryBuf[6],6,256) === pas.System.Copy($impl.TemporaryBuf[0],6,256)) $impl.TemporaryBuf[6] = "\ttya";
+              $impl.TemporaryBuf[0] = "\ttay";
+              $impl.TemporaryBuf[8] = "~";
               yes = false;
             };
             break;
-          } else if ((((p - 3) >= 9) && (pas.System.Copy($mod.TemporaryBuf[p - 3],6,256) === pas.System.Copy($mod.TemporaryBuf[0],6,256))) || (pas.System.Pos("\tldy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tjsr ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmwy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmvy ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.if",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$mod.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$mod.TemporaryBuf[p]) > 0) || ($mod.TemporaryBuf[p] === "\tiny") || ($mod.TemporaryBuf[p] === "\tdey") || ($mod.TemporaryBuf[p] === "\ttay")) yes = false;
+          } else if ((((p - 3) >= 9) && (pas.System.Copy($impl.TemporaryBuf[p - 3],6,256) === pas.System.Copy($impl.TemporaryBuf[0],6,256))) || (pas.System.Pos("\tldy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tjsr ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmwy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\tmvy ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.if",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t.LOCAL ",$impl.TemporaryBuf[p]) > 0) || (pas.System.Pos("\t@print",$impl.TemporaryBuf[p]) > 0) || ($impl.TemporaryBuf[p] === "\tiny") || ($impl.TemporaryBuf[p] === "\tdey") || ($impl.TemporaryBuf[p] === "\ttay")) yes = false;
         };
       };
       function opt_TEMP_IMUL_CX() {
-        if (IFDEF_MUL16(8) && (pas.System.Pos("mva ",$mod.TemporaryBuf[0]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[0]) === 0) && ($mod.TemporaryBuf[1] === ("\tmva #$00 " + pas.System.Copy($mod.TemporaryBuf[5],6,256))) && LDA(2) && ($mod.TemporaryBuf[3] === "\tsta :ecx") && ($mod.TemporaryBuf[4] === "\tsta :eax") && LDA(5) && ($mod.TemporaryBuf[6] === "\tsta :ecx+1") && ($mod.TemporaryBuf[7] === "\tsta :eax+1")) {
-          $mod.TemporaryBuf[pas.Common.i + 5] = "~";
-          $mod.TemporaryBuf[pas.Common.i + 6] = "~";
-          $mod.TemporaryBuf[pas.Common.i + 7] = "~";
-          $mod.TemporaryBuf[pas.Common.i + 9] = "\tfmulu_8";
-          $mod.TemporaryBuf[pas.Common.i + 11] = "\timulCL";
+        if (IFDEF_MUL16(8) && (pas.System.Pos("mva ",$impl.TemporaryBuf[0]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[0]) === 0) && ($impl.TemporaryBuf[1] === ("\tmva #$00 " + pas.System.Copy($impl.TemporaryBuf[5],6,256))) && LDA(2) && ($impl.TemporaryBuf[3] === "\tsta :ecx") && ($impl.TemporaryBuf[4] === "\tsta :eax") && LDA(5) && ($impl.TemporaryBuf[6] === "\tsta :ecx+1") && ($impl.TemporaryBuf[7] === "\tsta :eax+1")) {
+          $impl.TemporaryBuf[pas.Common.i + 5] = "~";
+          $impl.TemporaryBuf[pas.Common.i + 6] = "~";
+          $impl.TemporaryBuf[pas.Common.i + 7] = "~";
+          $impl.TemporaryBuf[pas.Common.i + 9] = "\tfmulu_8";
+          $impl.TemporaryBuf[pas.Common.i + 11] = "\timulCL";
         };
-        if (IFDEF_MUL16(8) && ($mod.TemporaryBuf[0] === "\tlda #$00") && STA(1) && LDA(2) && ($mod.TemporaryBuf[3] === "\tsta :ecx") && ($mod.TemporaryBuf[4] === "\tsta :eax") && LDA(5) && ($mod.TemporaryBuf[6] === "\tsta :ecx+1") && ($mod.TemporaryBuf[7] === "\tsta :eax+1")) if (pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[5],6,256)) {
-          $mod.TemporaryBuf[pas.Common.i + 5] = "~";
-          $mod.TemporaryBuf[pas.Common.i + 6] = "~";
-          $mod.TemporaryBuf[pas.Common.i + 7] = "~";
-          $mod.TemporaryBuf[pas.Common.i + 9] = "\tfmulu_8";
-          $mod.TemporaryBuf[pas.Common.i + 11] = "\timulCL";
+        if (IFDEF_MUL16(8) && ($impl.TemporaryBuf[0] === "\tlda #$00") && STA(1) && LDA(2) && ($impl.TemporaryBuf[3] === "\tsta :ecx") && ($impl.TemporaryBuf[4] === "\tsta :eax") && LDA(5) && ($impl.TemporaryBuf[6] === "\tsta :ecx+1") && ($impl.TemporaryBuf[7] === "\tsta :eax+1")) if (pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[5],6,256)) {
+          $impl.TemporaryBuf[pas.Common.i + 5] = "~";
+          $impl.TemporaryBuf[pas.Common.i + 6] = "~";
+          $impl.TemporaryBuf[pas.Common.i + 7] = "~";
+          $impl.TemporaryBuf[pas.Common.i + 9] = "\tfmulu_8";
+          $impl.TemporaryBuf[pas.Common.i + 11] = "\timulCL";
         };
       };
       function opt_TEMP_IFTMP() {
         if (LAB_L(0) && IFTMP(1) && JNE_L(2)) {
-          $mod.TemporaryBuf[1] = $mod.TemporaryBuf[0];
-          $mod.TemporaryBuf[0] = "\tjmp " + pas.System.Copy($mod.TemporaryBuf[2],6,256);
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = $mod.TemporaryBuf[0];
-          $mod.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = $impl.TemporaryBuf[0];
+          $impl.TemporaryBuf[0] = "\tjmp " + pas.System.Copy($impl.TemporaryBuf[2],6,256);
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = $impl.TemporaryBuf[0];
+          $impl.TemporaryBuf[0] = "~";
         };
-        if (LAB_L(1) && IFTMP(2) && ($mod.TemporaryBuf[3] === "\tbeq *+5") && JMP(4)) {
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = "\tjmp " + pas.System.Copy($mod.TemporaryBuf[4],6,256);
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[4] = "~";
-          if ((pas.System.Pos("\tjmp ",$mod.TemporaryBuf[0]) === 1) && ($mod.TemporaryBuf[1] === "~") && (pas.System.Pos("\tjmp ",$mod.TemporaryBuf[2]) === 1)) {
-            $mod.TemporaryBuf[2] = "~";
+        if (LAB_L(1) && IFTMP(2) && ($impl.TemporaryBuf[3] === "\tbeq *+5") && JMP(4)) {
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = "\tjmp " + pas.System.Copy($impl.TemporaryBuf[4],6,256);
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[4] = "~";
+          if ((pas.System.Pos("\tjmp ",$impl.TemporaryBuf[0]) === 1) && ($impl.TemporaryBuf[1] === "~") && (pas.System.Pos("\tjmp ",$impl.TemporaryBuf[2]) === 1)) {
+            $impl.TemporaryBuf[2] = "~";
           };
         };
       };
       function opt_TEMP_ORD() {
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && (CMP(1) || LDA(1)) && SKIP(2) && ($mod.TemporaryBuf[3] === "\tdey") && ($mod.TemporaryBuf[4] === "@") && ($mod.TemporaryBuf[5] === "\ttya") && ($mod.TemporaryBuf[6] === "\tsta :ecx") && LDA(7) && ($mod.TemporaryBuf[8] === "\tsta :eax") && IFDEF_MUL8(9)) {
-          $mod.TemporaryBuf[6] = "\tseq";
-          $mod.TemporaryBuf[9] = "\tlda #$00";
-          $mod.TemporaryBuf[10] = "\tsta :eax+1";
-          $mod.TemporaryBuf[11] = "~";
-          $mod.TemporaryBuf[12] = "~";
-          $mod.TemporaryBuf[13] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && (CMP(1) || LDA(1)) && SKIP(2) && ($impl.TemporaryBuf[3] === "\tdey") && ($impl.TemporaryBuf[4] === "@") && ($impl.TemporaryBuf[5] === "\ttya") && ($impl.TemporaryBuf[6] === "\tsta :ecx") && LDA(7) && ($impl.TemporaryBuf[8] === "\tsta :eax") && IFDEF_MUL8(9)) {
+          $impl.TemporaryBuf[6] = "\tseq";
+          $impl.TemporaryBuf[9] = "\tlda #$00";
+          $impl.TemporaryBuf[10] = "\tsta :eax+1";
+          $impl.TemporaryBuf[11] = "~";
+          $impl.TemporaryBuf[12] = "~";
+          $impl.TemporaryBuf[13] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && LDA(1) && SKIP(2) && SKIP(3) && ($mod.TemporaryBuf[4] === "\tdey") && ($mod.TemporaryBuf[5] === "@") && ($mod.TemporaryBuf[6] === "\ttya") && ($mod.TemporaryBuf[7] === "\tsta :ecx") && LDA(8) && ($mod.TemporaryBuf[9] === "\tsta :eax") && IFDEF_MUL8(10)) {
-          $mod.TemporaryBuf[7] = "\tseq";
-          $mod.TemporaryBuf[10] = "\tlda #$00";
-          $mod.TemporaryBuf[11] = "\tsta :eax+1";
-          $mod.TemporaryBuf[12] = "~";
-          $mod.TemporaryBuf[13] = "~";
-          $mod.TemporaryBuf[14] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && LDA(1) && SKIP(2) && SKIP(3) && ($impl.TemporaryBuf[4] === "\tdey") && ($impl.TemporaryBuf[5] === "@") && ($impl.TemporaryBuf[6] === "\ttya") && ($impl.TemporaryBuf[7] === "\tsta :ecx") && LDA(8) && ($impl.TemporaryBuf[9] === "\tsta :eax") && IFDEF_MUL8(10)) {
+          $impl.TemporaryBuf[7] = "\tseq";
+          $impl.TemporaryBuf[10] = "\tlda #$00";
+          $impl.TemporaryBuf[11] = "\tsta :eax+1";
+          $impl.TemporaryBuf[12] = "~";
+          $impl.TemporaryBuf[13] = "~";
+          $impl.TemporaryBuf[14] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && LDA(1) && CMP(2) && SKIP(3) && ($mod.TemporaryBuf[4] === "\tdey") && ($mod.TemporaryBuf[5] === "@") && ($mod.TemporaryBuf[6] === "\ttya") && ($mod.TemporaryBuf[7] === "\tsta :ecx") && LDA(8) && ($mod.TemporaryBuf[9] === "\tsta :eax") && IFDEF_MUL8(10)) {
-          $mod.TemporaryBuf[7] = "\tseq";
-          $mod.TemporaryBuf[10] = "\tlda #$00";
-          $mod.TemporaryBuf[11] = "\tsta :eax+1";
-          $mod.TemporaryBuf[12] = "~";
-          $mod.TemporaryBuf[13] = "~";
-          $mod.TemporaryBuf[14] = "~";
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && LDA(1) && CMP(2) && SKIP(3) && ($impl.TemporaryBuf[4] === "\tdey") && ($impl.TemporaryBuf[5] === "@") && ($impl.TemporaryBuf[6] === "\ttya") && ($impl.TemporaryBuf[7] === "\tsta :ecx") && LDA(8) && ($impl.TemporaryBuf[9] === "\tsta :eax") && IFDEF_MUL8(10)) {
+          $impl.TemporaryBuf[7] = "\tseq";
+          $impl.TemporaryBuf[10] = "\tlda #$00";
+          $impl.TemporaryBuf[11] = "\tsta :eax+1";
+          $impl.TemporaryBuf[12] = "~";
+          $impl.TemporaryBuf[13] = "~";
+          $impl.TemporaryBuf[14] = "~";
         };
-        if (STA_STACK(0) && ($mod.TemporaryBuf[1] === "\tldy #1") && LDA_STACK(2) && ($mod.TemporaryBuf[3] === "\tcmp #$00") && ($mod.TemporaryBuf[4] === "\tbeq @+") && ($mod.TemporaryBuf[5] === "\tdey") && ($mod.TemporaryBuf[6] === "@") && ($mod.TemporaryBuf[7] === "\ttya") && ($mod.TemporaryBuf[8] === "\tsta :ecx") && LDA(9) && ($mod.TemporaryBuf[10] === "\tsta :eax") && IFDEF_MUL8(11)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[2],6,256)) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[2] = "~";
-          $mod.TemporaryBuf[8] = "\tseq";
-          $mod.TemporaryBuf[11] = "\tlda #$00";
-          $mod.TemporaryBuf[12] = "\tsta :eax+1";
-          $mod.TemporaryBuf[13] = "~";
-          $mod.TemporaryBuf[14] = "~";
-          $mod.TemporaryBuf[15] = "~";
+        if (STA_STACK(0) && ($impl.TemporaryBuf[1] === "\tldy #1") && LDA_STACK(2) && ($impl.TemporaryBuf[3] === "\tcmp #$00") && ($impl.TemporaryBuf[4] === "\tbeq @+") && ($impl.TemporaryBuf[5] === "\tdey") && ($impl.TemporaryBuf[6] === "@") && ($impl.TemporaryBuf[7] === "\ttya") && ($impl.TemporaryBuf[8] === "\tsta :ecx") && LDA(9) && ($impl.TemporaryBuf[10] === "\tsta :eax") && IFDEF_MUL8(11)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[2],6,256)) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[2] = "~";
+          $impl.TemporaryBuf[8] = "\tseq";
+          $impl.TemporaryBuf[11] = "\tlda #$00";
+          $impl.TemporaryBuf[12] = "\tsta :eax+1";
+          $impl.TemporaryBuf[13] = "~";
+          $impl.TemporaryBuf[14] = "~";
+          $impl.TemporaryBuf[15] = "~";
         };
       };
       function opt_TEMP_X() {
-        if ((pas.System.Pos("mva :STACKORIGIN,x",$mod.TemporaryBuf[0]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH,x",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH*2,x",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH*3,x",$mod.TemporaryBuf[3]) > 0) && ($mod.TemporaryBuf[4] === "\tdex") && ($mod.TemporaryBuf[5] === "") && OPTI(6) && ($mod.TemporaryBuf[7] === "") && ($mod.TemporaryBuf[8] === "\tinx") && (pas.System.Pos("mva ",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[9]) === 0) && (pas.System.Pos("mva ",$mod.TemporaryBuf[10]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[10]) === 0) && (pas.System.Pos("mva ",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[11]) === 0) && (pas.System.Pos("mva ",$mod.TemporaryBuf[12]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[12]) === 0)) if ((pas.System.Pos(":STACKORIGIN,x",$mod.TemporaryBuf[9]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH,x",$mod.TemporaryBuf[10]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH*2,x",$mod.TemporaryBuf[11]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH*3,x",$mod.TemporaryBuf[12]) > 0) && ($mod.TemporaryBuf[0] === ("\tmva :STACKORIGIN,x " + GetSTRING(9))) && ($mod.TemporaryBuf[1] === ("\tmva :STACKORIGIN+STACKWIDTH,x " + GetSTRING(10))) && ($mod.TemporaryBuf[2] === ("\tmva :STACKORIGIN+STACKWIDTH*2,x " + GetSTRING(11))) && ($mod.TemporaryBuf[3] === ("\tmva :STACKORIGIN+STACKWIDTH*3,x " + GetSTRING(12)))) {
-          $mod.TemporaryBuf[4] = "~";
-          $mod.TemporaryBuf[8] = "~";
-          $mod.TemporaryBuf[9] = "~";
-          $mod.TemporaryBuf[10] = "~";
-          $mod.TemporaryBuf[11] = "~";
-          $mod.TemporaryBuf[12] = "~";
+        if ((pas.System.Pos("mva :STACKORIGIN,x",$impl.TemporaryBuf[0]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH,x",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH*2,x",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH*3,x",$impl.TemporaryBuf[3]) > 0) && ($impl.TemporaryBuf[4] === "\tdex") && ($impl.TemporaryBuf[5] === "") && OPTI(6) && ($impl.TemporaryBuf[7] === "") && ($impl.TemporaryBuf[8] === "\tinx") && (pas.System.Pos("mva ",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[9]) === 0) && (pas.System.Pos("mva ",$impl.TemporaryBuf[10]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[10]) === 0) && (pas.System.Pos("mva ",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[11]) === 0) && (pas.System.Pos("mva ",$impl.TemporaryBuf[12]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[12]) === 0)) if ((pas.System.Pos(":STACKORIGIN,x",$impl.TemporaryBuf[9]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH,x",$impl.TemporaryBuf[10]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH*2,x",$impl.TemporaryBuf[11]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH*3,x",$impl.TemporaryBuf[12]) > 0) && ($impl.TemporaryBuf[0] === ("\tmva :STACKORIGIN,x " + GetSTRING(9))) && ($impl.TemporaryBuf[1] === ("\tmva :STACKORIGIN+STACKWIDTH,x " + GetSTRING(10))) && ($impl.TemporaryBuf[2] === ("\tmva :STACKORIGIN+STACKWIDTH*2,x " + GetSTRING(11))) && ($impl.TemporaryBuf[3] === ("\tmva :STACKORIGIN+STACKWIDTH*3,x " + GetSTRING(12)))) {
+          $impl.TemporaryBuf[4] = "~";
+          $impl.TemporaryBuf[8] = "~";
+          $impl.TemporaryBuf[9] = "~";
+          $impl.TemporaryBuf[10] = "~";
+          $impl.TemporaryBuf[11] = "~";
+          $impl.TemporaryBuf[12] = "~";
         };
-        if ((pas.System.Pos("lda ",$mod.TemporaryBuf[0]) > 0) && (pas.System.Pos("sta ",$mod.TemporaryBuf[1]) > 0) && (pas.System.Pos("lda ",$mod.TemporaryBuf[2]) > 0) && (pas.System.Pos("sta ",$mod.TemporaryBuf[3]) > 0) && (pas.System.Pos("lda ",$mod.TemporaryBuf[4]) > 0) && (pas.System.Pos("sta ",$mod.TemporaryBuf[5]) > 0) && (pas.System.Pos("lda ",$mod.TemporaryBuf[6]) > 0) && (pas.System.Pos("sta ",$mod.TemporaryBuf[7]) > 0) && ($mod.TemporaryBuf[8] === "") && OPTI(9) && ($mod.TemporaryBuf[10] === "") && ($mod.TemporaryBuf[11] === "\tinx") && ($mod.TemporaryBuf[12] === ("\tmva " + GetSTRING(0) + " :STACKORIGIN,x")) && ($mod.TemporaryBuf[13] === ("\tmva " + GetSTRING(2) + " :STACKORIGIN+STACKWIDTH,x")) && ($mod.TemporaryBuf[14] === ("\tmva " + GetSTRING(4) + " :STACKORIGIN+STACKWIDTH*2,x")) && ($mod.TemporaryBuf[15] === ("\tmva " + GetSTRING(6) + " :STACKORIGIN+STACKWIDTH*3,x"))) {
-          $mod.TemporaryBuf[10] = $mod.TemporaryBuf[9];
-          $mod.TemporaryBuf[9] = "";
-          $mod.TemporaryBuf[8] = $mod.TemporaryBuf[7];
-          $mod.TemporaryBuf[7] = $mod.TemporaryBuf[6];
-          $mod.TemporaryBuf[6] = $mod.TemporaryBuf[5];
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[4];
-          $mod.TemporaryBuf[4] = $mod.TemporaryBuf[3];
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[2];
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[1];
-          $mod.TemporaryBuf[1] = $mod.TemporaryBuf[0];
-          $mod.TemporaryBuf[0] = $mod.TemporaryBuf[11];
-          $mod.TemporaryBuf[1] = $mod.TemporaryBuf[12];
-          $mod.TemporaryBuf[3] = $mod.TemporaryBuf[13];
-          $mod.TemporaryBuf[5] = $mod.TemporaryBuf[14];
-          $mod.TemporaryBuf[7] = $mod.TemporaryBuf[15];
-          $mod.TemporaryBuf[11] = "";
-          $mod.TemporaryBuf[12] = "~";
-          $mod.TemporaryBuf[13] = "~";
-          $mod.TemporaryBuf[14] = "~";
-          $mod.TemporaryBuf[15] = "~";
+        if ((pas.System.Pos("lda ",$impl.TemporaryBuf[0]) > 0) && (pas.System.Pos("sta ",$impl.TemporaryBuf[1]) > 0) && (pas.System.Pos("lda ",$impl.TemporaryBuf[2]) > 0) && (pas.System.Pos("sta ",$impl.TemporaryBuf[3]) > 0) && (pas.System.Pos("lda ",$impl.TemporaryBuf[4]) > 0) && (pas.System.Pos("sta ",$impl.TemporaryBuf[5]) > 0) && (pas.System.Pos("lda ",$impl.TemporaryBuf[6]) > 0) && (pas.System.Pos("sta ",$impl.TemporaryBuf[7]) > 0) && ($impl.TemporaryBuf[8] === "") && OPTI(9) && ($impl.TemporaryBuf[10] === "") && ($impl.TemporaryBuf[11] === "\tinx") && ($impl.TemporaryBuf[12] === ("\tmva " + GetSTRING(0) + " :STACKORIGIN,x")) && ($impl.TemporaryBuf[13] === ("\tmva " + GetSTRING(2) + " :STACKORIGIN+STACKWIDTH,x")) && ($impl.TemporaryBuf[14] === ("\tmva " + GetSTRING(4) + " :STACKORIGIN+STACKWIDTH*2,x")) && ($impl.TemporaryBuf[15] === ("\tmva " + GetSTRING(6) + " :STACKORIGIN+STACKWIDTH*3,x"))) {
+          $impl.TemporaryBuf[10] = $impl.TemporaryBuf[9];
+          $impl.TemporaryBuf[9] = "";
+          $impl.TemporaryBuf[8] = $impl.TemporaryBuf[7];
+          $impl.TemporaryBuf[7] = $impl.TemporaryBuf[6];
+          $impl.TemporaryBuf[6] = $impl.TemporaryBuf[5];
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[4];
+          $impl.TemporaryBuf[4] = $impl.TemporaryBuf[3];
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[2];
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[1];
+          $impl.TemporaryBuf[1] = $impl.TemporaryBuf[0];
+          $impl.TemporaryBuf[0] = $impl.TemporaryBuf[11];
+          $impl.TemporaryBuf[1] = $impl.TemporaryBuf[12];
+          $impl.TemporaryBuf[3] = $impl.TemporaryBuf[13];
+          $impl.TemporaryBuf[5] = $impl.TemporaryBuf[14];
+          $impl.TemporaryBuf[7] = $impl.TemporaryBuf[15];
+          $impl.TemporaryBuf[11] = "";
+          $impl.TemporaryBuf[12] = "~";
+          $impl.TemporaryBuf[13] = "~";
+          $impl.TemporaryBuf[14] = "~";
+          $impl.TemporaryBuf[15] = "~";
         };
-        if ((pas.System.Pos("mva :STACKORIGIN,x",$mod.TemporaryBuf[0]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH,x",$mod.TemporaryBuf[1]) > 0) && ($mod.TemporaryBuf[2] === "\tdex") && ($mod.TemporaryBuf[3] === "") && OPTI(4) && ($mod.TemporaryBuf[5] === "") && ($mod.TemporaryBuf[6] === "\tinx") && (pas.System.Pos("mva ",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[7]) === 0) && (pas.System.Pos("mva ",$mod.TemporaryBuf[8]) > 0) && (pas.System.Pos("mva :STACK",$mod.TemporaryBuf[8]) === 0)) if ((pas.System.Pos(":STACKORIGIN,x",$mod.TemporaryBuf[7]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH,x",$mod.TemporaryBuf[8]) > 0) && ($mod.TemporaryBuf[0] === ("\tmva :STACKORIGIN,x " + GetSTRING(7))) && ($mod.TemporaryBuf[1] === ("\tmva :STACKORIGIN+STACKWIDTH,x " + GetSTRING(8)))) {
-          $mod.TemporaryBuf[2] = "~";
-          $mod.TemporaryBuf[6] = "~";
-          $mod.TemporaryBuf[7] = "~";
-          $mod.TemporaryBuf[8] = "~";
+        if ((pas.System.Pos("mva :STACKORIGIN,x",$impl.TemporaryBuf[0]) > 0) && (pas.System.Pos("mva :STACKORIGIN+STACKWIDTH,x",$impl.TemporaryBuf[1]) > 0) && ($impl.TemporaryBuf[2] === "\tdex") && ($impl.TemporaryBuf[3] === "") && OPTI(4) && ($impl.TemporaryBuf[5] === "") && ($impl.TemporaryBuf[6] === "\tinx") && (pas.System.Pos("mva ",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[7]) === 0) && (pas.System.Pos("mva ",$impl.TemporaryBuf[8]) > 0) && (pas.System.Pos("mva :STACK",$impl.TemporaryBuf[8]) === 0)) if ((pas.System.Pos(":STACKORIGIN,x",$impl.TemporaryBuf[7]) > 0) && (pas.System.Pos(":STACKORIGIN+STACKWIDTH,x",$impl.TemporaryBuf[8]) > 0) && ($impl.TemporaryBuf[0] === ("\tmva :STACKORIGIN,x " + GetSTRING(7))) && ($impl.TemporaryBuf[1] === ("\tmva :STACKORIGIN+STACKWIDTH,x " + GetSTRING(8)))) {
+          $impl.TemporaryBuf[2] = "~";
+          $impl.TemporaryBuf[6] = "~";
+          $impl.TemporaryBuf[7] = "~";
+          $impl.TemporaryBuf[8] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tdex") && ($mod.TemporaryBuf[1] === "\tdex") && ($mod.TemporaryBuf[2] === "") && OPTI(3) && ($mod.TemporaryBuf[4] === "") && ($mod.TemporaryBuf[5] === "\tinx") && ($mod.TemporaryBuf[6] === "\tinx") && ($mod.TemporaryBuf[7] !== "\tinx")) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[5] = "~";
-          $mod.TemporaryBuf[6] = "~";
+        if (($impl.TemporaryBuf[0] === "\tdex") && ($impl.TemporaryBuf[1] === "\tdex") && ($impl.TemporaryBuf[2] === "") && OPTI(3) && ($impl.TemporaryBuf[4] === "") && ($impl.TemporaryBuf[5] === "\tinx") && ($impl.TemporaryBuf[6] === "\tinx") && ($impl.TemporaryBuf[7] !== "\tinx")) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[5] = "~";
+          $impl.TemporaryBuf[6] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tdex") && ($mod.TemporaryBuf[1] === "") && OPTI(2) && ($mod.TemporaryBuf[3] === "") && ($mod.TemporaryBuf[4] === "\tinx") && ($mod.TemporaryBuf[5] !== "\tinx")) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[4] = "~";
+        if (($impl.TemporaryBuf[0] === "\tdex") && ($impl.TemporaryBuf[1] === "") && OPTI(2) && ($impl.TemporaryBuf[3] === "") && ($impl.TemporaryBuf[4] === "\tinx") && ($impl.TemporaryBuf[5] !== "\tinx")) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[4] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tdex") && ($mod.TemporaryBuf[1] === "\tinx")) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tdex") && ($impl.TemporaryBuf[1] === "\tinx")) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tinx") && ($mod.TemporaryBuf[1] === "\tdex")) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tinx") && ($impl.TemporaryBuf[1] === "\tdex")) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
         };
       };
       function opt_TEMP_EAX() {
-        if (($mod.TemporaryBuf[0] === "\tlda :eax") && (($mod.TemporaryBuf[1] === "\tsta @BYTE.MOD.A") || ($mod.TemporaryBuf[1] === "\tsta @WORD.MOD.A") || ($mod.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A") || ($mod.TemporaryBuf[1] === "\tsta @SHORTINT.MOD.A") || ($mod.TemporaryBuf[1] === "\tsta @SMALLINT.MOD.A") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A") || ($mod.TemporaryBuf[1] === "\tsta @BYTE.DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @WORD.DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @SHORTINT.DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @SMALLINT.DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @SHORTREAL_DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @REAL_DIV.A") || ($mod.TemporaryBuf[1] === "\tsta @SHORTREAL_MUL.A") || ($mod.TemporaryBuf[1] === "\tsta @REAL_MUL.A") || ($mod.TemporaryBuf[1] === "\tsta @REAL_FRAC.A") || ($mod.TemporaryBuf[1] === "\tsta @REAL_ROUND.A") || ($mod.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A") || ($mod.TemporaryBuf[1] === "\tsta @SHORTREAL_TRUNC.A") || ($mod.TemporaryBuf[1] === "\tsta @F16_I2F.SV"))) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tlda :eax") && (($impl.TemporaryBuf[1] === "\tsta @BYTE.MOD.A") || ($impl.TemporaryBuf[1] === "\tsta @WORD.MOD.A") || ($impl.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A") || ($impl.TemporaryBuf[1] === "\tsta @SHORTINT.MOD.A") || ($impl.TemporaryBuf[1] === "\tsta @SMALLINT.MOD.A") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A") || ($impl.TemporaryBuf[1] === "\tsta @BYTE.DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @WORD.DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @SHORTINT.DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @SMALLINT.DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @SHORTREAL_DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @REAL_DIV.A") || ($impl.TemporaryBuf[1] === "\tsta @SHORTREAL_MUL.A") || ($impl.TemporaryBuf[1] === "\tsta @REAL_MUL.A") || ($impl.TemporaryBuf[1] === "\tsta @REAL_FRAC.A") || ($impl.TemporaryBuf[1] === "\tsta @REAL_ROUND.A") || ($impl.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A") || ($impl.TemporaryBuf[1] === "\tsta @SHORTREAL_TRUNC.A") || ($impl.TemporaryBuf[1] === "\tsta @F16_I2F.SV"))) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tlda :eax+1") && (($mod.TemporaryBuf[1] === "\tsta @WORD.MOD.A+1") || ($mod.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A+1") || ($mod.TemporaryBuf[1] === "\tsta @SMALLINT.MOD.A+1") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A+1") || ($mod.TemporaryBuf[1] === "\tsta @WORD.DIV.A+1") || ($mod.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A+1") || ($mod.TemporaryBuf[1] === "\tsta @SMALLINT.DIV.A+1") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A+1") || ($mod.TemporaryBuf[1] === "\tsta @SHORTREAL_DIV.A+1") || ($mod.TemporaryBuf[1] === "\tsta @REAL_DIV.A+1") || ($mod.TemporaryBuf[1] === "\tsta @SHORTREAL_MUL.A+1") || ($mod.TemporaryBuf[1] === "\tsta @REAL_MUL.A+1") || ($mod.TemporaryBuf[1] === "\tsta @REAL_FRAC.A+1") || ($mod.TemporaryBuf[1] === "\tsta @REAL_ROUND.A+1") || ($mod.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A+1") || ($mod.TemporaryBuf[1] === "\tsta @SHORTREAL_TRUNC.A+1") || ($mod.TemporaryBuf[1] === "\tsta @F16_I2F.SV+1"))) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tlda :eax+1") && (($impl.TemporaryBuf[1] === "\tsta @WORD.MOD.A+1") || ($impl.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A+1") || ($impl.TemporaryBuf[1] === "\tsta @SMALLINT.MOD.A+1") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A+1") || ($impl.TemporaryBuf[1] === "\tsta @WORD.DIV.A+1") || ($impl.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A+1") || ($impl.TemporaryBuf[1] === "\tsta @SMALLINT.DIV.A+1") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A+1") || ($impl.TemporaryBuf[1] === "\tsta @SHORTREAL_DIV.A+1") || ($impl.TemporaryBuf[1] === "\tsta @REAL_DIV.A+1") || ($impl.TemporaryBuf[1] === "\tsta @SHORTREAL_MUL.A+1") || ($impl.TemporaryBuf[1] === "\tsta @REAL_MUL.A+1") || ($impl.TemporaryBuf[1] === "\tsta @REAL_FRAC.A+1") || ($impl.TemporaryBuf[1] === "\tsta @REAL_ROUND.A+1") || ($impl.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A+1") || ($impl.TemporaryBuf[1] === "\tsta @SHORTREAL_TRUNC.A+1") || ($impl.TemporaryBuf[1] === "\tsta @F16_I2F.SV+1"))) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tlda :eax+2") && (($mod.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A+2") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A+2") || ($mod.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A+2") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A+2") || ($mod.TemporaryBuf[1] === "\tsta @REAL_DIV.A+2") || ($mod.TemporaryBuf[1] === "\tsta @REAL_MUL.A+2") || ($mod.TemporaryBuf[1] === "\tsta @REAL_FRAC.A+2") || ($mod.TemporaryBuf[1] === "\tsta @REAL_ROUND.A+2") || ($mod.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A+2") || ($mod.TemporaryBuf[1] === "\tsta @F16_I2F.SV+2"))) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tlda :eax+2") && (($impl.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A+2") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A+2") || ($impl.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A+2") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A+2") || ($impl.TemporaryBuf[1] === "\tsta @REAL_DIV.A+2") || ($impl.TemporaryBuf[1] === "\tsta @REAL_MUL.A+2") || ($impl.TemporaryBuf[1] === "\tsta @REAL_FRAC.A+2") || ($impl.TemporaryBuf[1] === "\tsta @REAL_ROUND.A+2") || ($impl.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A+2") || ($impl.TemporaryBuf[1] === "\tsta @F16_I2F.SV+2"))) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tlda :eax+3") && (($mod.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A+3") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A+3") || ($mod.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A+3") || ($mod.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A+3") || ($mod.TemporaryBuf[1] === "\tsta @REAL_DIV.A+3") || ($mod.TemporaryBuf[1] === "\tsta @REAL_MUL.A+3") || ($mod.TemporaryBuf[1] === "\tsta @REAL_FRAC.A+3") || ($mod.TemporaryBuf[1] === "\tsta @REAL_ROUND.A+3") || ($mod.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A+3") || ($mod.TemporaryBuf[1] === "\tsta @F16_I2F.SV+3"))) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tlda :eax+3") && (($impl.TemporaryBuf[1] === "\tsta @CARDINAL.MOD.A+3") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.MOD.A+3") || ($impl.TemporaryBuf[1] === "\tsta @CARDINAL.DIV.A+3") || ($impl.TemporaryBuf[1] === "\tsta @INTEGER.DIV.A+3") || ($impl.TemporaryBuf[1] === "\tsta @REAL_DIV.A+3") || ($impl.TemporaryBuf[1] === "\tsta @REAL_MUL.A+3") || ($impl.TemporaryBuf[1] === "\tsta @REAL_FRAC.A+3") || ($impl.TemporaryBuf[1] === "\tsta @REAL_ROUND.A+3") || ($impl.TemporaryBuf[1] === "\tsta @REAL_TRUNC.A+3") || ($impl.TemporaryBuf[1] === "\tsta @F16_I2F.SV+3"))) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
         };
       };
       function opt_TEMP_JMP() {
-        if (STA(0) && ($mod.TemporaryBuf[1] === "") && JMP(2) && LAB_L(3) && ($mod.TemporaryBuf[4] === "") && OPTI(5) && ($mod.TemporaryBuf[6] === "") && LDA(7)) if (($mod.TemporaryBuf[3] === pas.System.Copy($mod.TemporaryBuf[2],6,256)) && (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[7],6,256))) {
-          $mod.TemporaryBuf[2] = "~";
-          $mod.TemporaryBuf[3] = "~";
-          $mod.TemporaryBuf[7] = "~";
+        if (STA(0) && ($impl.TemporaryBuf[1] === "") && JMP(2) && LAB_L(3) && ($impl.TemporaryBuf[4] === "") && OPTI(5) && ($impl.TemporaryBuf[6] === "") && LDA(7)) if (($impl.TemporaryBuf[3] === pas.System.Copy($impl.TemporaryBuf[2],6,256)) && (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[7],6,256))) {
+          $impl.TemporaryBuf[2] = "~";
+          $impl.TemporaryBuf[3] = "~";
+          $impl.TemporaryBuf[7] = "~";
         };
-        if (JNE_L(0) && ($mod.TemporaryBuf[1] === "\tjmp @exit") && (pas.System.Pos($mod.TemporaryBuf[2],$mod.TemporaryBuf[0]) > 0) && (IFTMP(3) === false)) {
-          $mod.TemporaryBuf[0] = "\tjeq @exit";
-          $mod.TemporaryBuf[1] = "~";
+        if (JNE_L(0) && ($impl.TemporaryBuf[1] === "\tjmp @exit") && (pas.System.Pos($impl.TemporaryBuf[2],$impl.TemporaryBuf[0]) > 0) && (IFTMP(3) === false)) {
+          $impl.TemporaryBuf[0] = "\tjeq @exit";
+          $impl.TemporaryBuf[1] = "~";
         };
-        if ((pas.System.Pos("lda #$",$mod.TemporaryBuf[0]) > 0) && ($mod.TemporaryBuf[0] !== "\tlda #$00") && JEQ_L(1) && JMP(2) && (pas.System.Pos($mod.TemporaryBuf[3],$mod.TemporaryBuf[1]) > 0)) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[3] = "~";
+        if ((pas.System.Pos("lda #$",$impl.TemporaryBuf[0]) > 0) && ($impl.TemporaryBuf[0] !== "\tlda #$00") && JEQ_L(1) && JMP(2) && (pas.System.Pos($impl.TemporaryBuf[3],$impl.TemporaryBuf[1]) > 0)) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[3] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tjmp @exit") && ($mod.TemporaryBuf[1] === "@exit")) {
-          $mod.TemporaryBuf[0] = "~";
+        if (($impl.TemporaryBuf[0] === "\tjmp @exit") && ($impl.TemporaryBuf[1] === "@exit")) {
+          $impl.TemporaryBuf[0] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tjmp @exit") && (pas.System.Pos("jmp a_",$mod.TemporaryBuf[1]) > 0)) {
-          $mod.TemporaryBuf[1] = "~";
+        if (($impl.TemporaryBuf[0] === "\tjmp @exit") && (pas.System.Pos("jmp a_",$impl.TemporaryBuf[1]) > 0)) {
+          $impl.TemporaryBuf[1] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "\tjmp @+") && JMP(1) && ($mod.TemporaryBuf[2] === "@")) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[2] = "~";
+        if (($impl.TemporaryBuf[0] === "\tjmp @+") && JMP(1) && ($impl.TemporaryBuf[2] === "@")) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if ((SKIP(0) === false) && JMP(1) && ($mod.TemporaryBuf[2] === pas.System.Copy($mod.TemporaryBuf[1],6,256)) && (IFTMP(3) === false)) {
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[2] = "~";
+        if ((SKIP(0) === false) && JMP(1) && ($impl.TemporaryBuf[2] === pas.System.Copy($impl.TemporaryBuf[1],6,256)) && (IFTMP(3) === false)) {
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if ((SKIP(0) === false) && JMP(1) && LAB_L(2) && ($mod.TemporaryBuf[3] === pas.System.Copy($mod.TemporaryBuf[1],6,256)) && (IFTMP(4) === false)) {
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[3] = "~";
+        if ((SKIP(0) === false) && JMP(1) && LAB_L(2) && ($impl.TemporaryBuf[3] === pas.System.Copy($impl.TemporaryBuf[1],6,256)) && (IFTMP(4) === false)) {
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[3] = "~";
         };
-        if ((SKIP(0) === false) && (pas.System.Pos("jmp a_",$mod.TemporaryBuf[1]) > 0) && LAB_L(2) && ($mod.TemporaryBuf[3] === pas.System.Copy($mod.TemporaryBuf[1],6,256))) {
-          $mod.TemporaryBuf[1] = "~";
+        if ((SKIP(0) === false) && (pas.System.Pos("jmp a_",$impl.TemporaryBuf[1]) > 0) && LAB_L(2) && ($impl.TemporaryBuf[3] === pas.System.Copy($impl.TemporaryBuf[1],6,256))) {
+          $impl.TemporaryBuf[1] = "~";
         };
-        if ((SKIP(0) === false) && (pas.System.Pos("jmp a_",$mod.TemporaryBuf[1]) > 0) && ($mod.TemporaryBuf[2] === "~") && LAB_L(3) && ($mod.TemporaryBuf[4] === pas.System.Copy($mod.TemporaryBuf[1],6,256))) {
-          $mod.TemporaryBuf[1] = "~";
+        if ((SKIP(0) === false) && (pas.System.Pos("jmp a_",$impl.TemporaryBuf[1]) > 0) && ($impl.TemporaryBuf[2] === "~") && LAB_L(3) && ($impl.TemporaryBuf[4] === pas.System.Copy($impl.TemporaryBuf[1],6,256))) {
+          $impl.TemporaryBuf[1] = "~";
         };
       };
       function opt_TEMP_ZTMP() {
-        if (($mod.TemporaryBuf[0] === "\tlda :ztmp10") && ($mod.TemporaryBuf[1] === "\tbpl @+") && ($mod.TemporaryBuf[2] === "\tlda :eax+1") && ($mod.TemporaryBuf[3] === "\tsub :ztmp8") && ($mod.TemporaryBuf[4] === "\tsta :eax+1") && ($mod.TemporaryBuf[5] === "@") && ($mod.TemporaryBuf[6] === "\tlda :ztmp8") && ($mod.TemporaryBuf[7] === "\tbpl @+") && ($mod.TemporaryBuf[8] === "\tlda :eax+1") && ($mod.TemporaryBuf[9] === "\tsub :ztmp10") && ($mod.TemporaryBuf[10] === "\tsta :eax+1") && ($mod.TemporaryBuf[11] === "@")) {
-          $mod.TemporaryBuf[0] = "~";
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[2] = "\tbit :ztmp10";
-          $mod.TemporaryBuf[3] = "\tbpl @+";
-          $mod.TemporaryBuf[4] = "\tsub :ztmp8";
-          $mod.TemporaryBuf[5] = "@";
-          $mod.TemporaryBuf[6] = "\tbit :ztmp8";
-          $mod.TemporaryBuf[7] = "\tbpl @+";
-          $mod.TemporaryBuf[8] = "\tsub :ztmp10";
-          $mod.TemporaryBuf[9] = "@";
-          $mod.TemporaryBuf[11] = "~";
-          if ($mod.TemporaryBuf[12] === "\tlda :eax+1") {
-            $mod.TemporaryBuf[10] = "~";
-            $mod.TemporaryBuf[12] = "~";
-          } else $mod.TemporaryBuf[10] = "\tsta :eax+1";
+        if (($impl.TemporaryBuf[0] === "\tlda :ztmp10") && ($impl.TemporaryBuf[1] === "\tbpl @+") && ($impl.TemporaryBuf[2] === "\tlda :eax+1") && ($impl.TemporaryBuf[3] === "\tsub :ztmp8") && ($impl.TemporaryBuf[4] === "\tsta :eax+1") && ($impl.TemporaryBuf[5] === "@") && ($impl.TemporaryBuf[6] === "\tlda :ztmp8") && ($impl.TemporaryBuf[7] === "\tbpl @+") && ($impl.TemporaryBuf[8] === "\tlda :eax+1") && ($impl.TemporaryBuf[9] === "\tsub :ztmp10") && ($impl.TemporaryBuf[10] === "\tsta :eax+1") && ($impl.TemporaryBuf[11] === "@")) {
+          $impl.TemporaryBuf[0] = "~";
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[2] = "\tbit :ztmp10";
+          $impl.TemporaryBuf[3] = "\tbpl @+";
+          $impl.TemporaryBuf[4] = "\tsub :ztmp8";
+          $impl.TemporaryBuf[5] = "@";
+          $impl.TemporaryBuf[6] = "\tbit :ztmp8";
+          $impl.TemporaryBuf[7] = "\tbpl @+";
+          $impl.TemporaryBuf[8] = "\tsub :ztmp10";
+          $impl.TemporaryBuf[9] = "@";
+          $impl.TemporaryBuf[11] = "~";
+          if ($impl.TemporaryBuf[12] === "\tlda :eax+1") {
+            $impl.TemporaryBuf[10] = "~";
+            $impl.TemporaryBuf[12] = "~";
+          } else $impl.TemporaryBuf[10] = "\tsta :eax+1";
         };
       };
       function opt_TEMP_UNROLL() {
         var p = 0;
-        if ((($mod.TemporaryBuf[3] === "+++unroll+++") || ($mod.TemporaryBuf[3] === "---unroll---")) && LDY_IM(4) && STY(5) && LDY(0) && LDA(1) && STA_ADR(2)) if (pas.System.Copy($mod.TemporaryBuf[0],6,256) === pas.System.Copy($mod.TemporaryBuf[5],6,256)) {
-          if ($mod.TemporaryBuf[3] === "+++unroll+++") {
+        if ((($impl.TemporaryBuf[3] === "+++unroll+++") || ($impl.TemporaryBuf[3] === "---unroll---")) && LDY_IM(4) && STY(5) && LDY(0) && LDA(1) && STA_ADR(2)) if (pas.System.Copy($impl.TemporaryBuf[0],6,256) === pas.System.Copy($impl.TemporaryBuf[5],6,256)) {
+          if ($impl.TemporaryBuf[3] === "+++unroll+++") {
             p = GetBYTE(4) - 1}
            else p = GetBYTE(4) + 1;
-          pas.System.Delete({a: 2, p: $mod.TemporaryBuf, get: function () {
+          pas.System.Delete({a: 2, p: $impl.TemporaryBuf, get: function () {
               return this.p[this.a];
             }, set: function (v) {
               this.p[this.a] = v;
-            }},pas.System.Pos(",y",$mod.TemporaryBuf[2]),2);
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[2] + "+$" + pas.SysUtils.IntToHex(p,2);
-          $mod.TemporaryBuf[0] = "~";
+            }},pas.System.Pos(",y",$impl.TemporaryBuf[2]),2);
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[2] + "+$" + pas.SysUtils.IntToHex(p,2);
+          $impl.TemporaryBuf[0] = "~";
         };
-        if ((($mod.TemporaryBuf[3] === "+++unroll+++") || ($mod.TemporaryBuf[3] === "---unroll---")) && LDY_IM(4) && STY(5) && LDA(0) && LDY(1) && STA_ADR(2)) if (pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[5],6,256)) {
-          if ($mod.TemporaryBuf[3] === "+++unroll+++") {
+        if ((($impl.TemporaryBuf[3] === "+++unroll+++") || ($impl.TemporaryBuf[3] === "---unroll---")) && LDY_IM(4) && STY(5) && LDA(0) && LDY(1) && STA_ADR(2)) if (pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[5],6,256)) {
+          if ($impl.TemporaryBuf[3] === "+++unroll+++") {
             p = GetBYTE(4) - 1}
            else p = GetBYTE(4) + 1;
-          pas.System.Delete({a: 2, p: $mod.TemporaryBuf, get: function () {
+          pas.System.Delete({a: 2, p: $impl.TemporaryBuf, get: function () {
               return this.p[this.a];
             }, set: function (v) {
               this.p[this.a] = v;
-            }},pas.System.Pos(",y",$mod.TemporaryBuf[2]),2);
-          $mod.TemporaryBuf[2] = $mod.TemporaryBuf[2] + "+$" + pas.SysUtils.IntToHex(p,2);
-          $mod.TemporaryBuf[1] = "~";
+            }},pas.System.Pos(",y",$impl.TemporaryBuf[2]),2);
+          $impl.TemporaryBuf[2] = $impl.TemporaryBuf[2] + "+$" + pas.SysUtils.IntToHex(p,2);
+          $impl.TemporaryBuf[1] = "~";
         };
-        if ((($mod.TemporaryBuf[5] === "+++unroll+++") || ($mod.TemporaryBuf[5] === "---unroll---")) && LDY_IM(6) && STY(7) && LDA(0) && ADD_SUB(1) && ($mod.TemporaryBuf[2] === "\ttay") && LDA(3) && STA_ADR(4)) if (pas.System.Copy($mod.TemporaryBuf[1],6,256) === pas.System.Copy($mod.TemporaryBuf[7],6,256)) {
-          if ($mod.TemporaryBuf[5] === "+++unroll+++") {
+        if ((($impl.TemporaryBuf[5] === "+++unroll+++") || ($impl.TemporaryBuf[5] === "---unroll---")) && LDY_IM(6) && STY(7) && LDA(0) && ADD_SUB(1) && ($impl.TemporaryBuf[2] === "\ttay") && LDA(3) && STA_ADR(4)) if (pas.System.Copy($impl.TemporaryBuf[1],6,256) === pas.System.Copy($impl.TemporaryBuf[7],6,256)) {
+          if ($impl.TemporaryBuf[5] === "+++unroll+++") {
             p = GetBYTE(6) - 1}
            else p = GetBYTE(6) + 1;
-          pas.System.Delete({a: 4, p: $mod.TemporaryBuf, get: function () {
+          pas.System.Delete({a: 4, p: $impl.TemporaryBuf, get: function () {
               return this.p[this.a];
             }, set: function (v) {
               this.p[this.a] = v;
-            }},pas.System.Pos(",y",$mod.TemporaryBuf[4]),2);
-          $mod.TemporaryBuf[4] = $mod.TemporaryBuf[4] + "+$" + pas.SysUtils.IntToHex(p,2) + ",y";
-          $mod.TemporaryBuf[0] = "\tldy " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
-          $mod.TemporaryBuf[1] = "~";
-          $mod.TemporaryBuf[2] = "~";
+            }},pas.System.Pos(",y",$impl.TemporaryBuf[4]),2);
+          $impl.TemporaryBuf[4] = $impl.TemporaryBuf[4] + "+$" + pas.SysUtils.IntToHex(p,2) + ",y";
+          $impl.TemporaryBuf[0] = "\tldy " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
+          $impl.TemporaryBuf[1] = "~";
+          $impl.TemporaryBuf[2] = "~";
         };
-        if (($mod.TemporaryBuf[0] === "---unroll---") || ($mod.TemporaryBuf[0] === "+++unroll+++") || ($mod.TemporaryBuf[0] === "===unroll===")) {
-          $mod.TemporaryBuf[0] = "~";
-          if (LDY_IM(1) && STY(2) && LDY(3) && LDA(4) && STA_ADR(5) && ($mod.TemporaryBuf[6] === "===unroll===")) if (pas.System.Copy($mod.TemporaryBuf[2],6,256) === pas.System.Copy($mod.TemporaryBuf[3],6,256)) {
+        if (($impl.TemporaryBuf[0] === "---unroll---") || ($impl.TemporaryBuf[0] === "+++unroll+++") || ($impl.TemporaryBuf[0] === "===unroll===")) {
+          $impl.TemporaryBuf[0] = "~";
+          if (LDY_IM(1) && STY(2) && LDY(3) && LDA(4) && STA_ADR(5) && ($impl.TemporaryBuf[6] === "===unroll===")) if (pas.System.Copy($impl.TemporaryBuf[2],6,256) === pas.System.Copy($impl.TemporaryBuf[3],6,256)) {
             p = GetBYTE(1);
-            pas.System.Delete({a: 5, p: $mod.TemporaryBuf, get: function () {
+            pas.System.Delete({a: 5, p: $impl.TemporaryBuf, get: function () {
                 return this.p[this.a];
               }, set: function (v) {
                 this.p[this.a] = v;
-              }},pas.System.Pos(",y",$mod.TemporaryBuf[5]),2);
-            $mod.TemporaryBuf[5] = $mod.TemporaryBuf[5] + "+$" + pas.SysUtils.IntToHex(p,2);
-            $mod.TemporaryBuf[1] = "~";
-            $mod.TemporaryBuf[2] = "~";
-            $mod.TemporaryBuf[3] = "~";
-            $mod.TemporaryBuf[4] = "~";
+              }},pas.System.Pos(",y",$impl.TemporaryBuf[5]),2);
+            $impl.TemporaryBuf[5] = $impl.TemporaryBuf[5] + "+$" + pas.SysUtils.IntToHex(p,2);
+            $impl.TemporaryBuf[1] = "~";
+            $impl.TemporaryBuf[2] = "~";
+            $impl.TemporaryBuf[3] = "~";
+            $impl.TemporaryBuf[4] = "~";
           };
-          if (LDY_IM(1) && STY(2) && LDA(3) && LDY(4) && STA_ADR(5) && ($mod.TemporaryBuf[6] === "===unroll===")) if (pas.System.Copy($mod.TemporaryBuf[2],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
+          if (LDY_IM(1) && STY(2) && LDA(3) && LDY(4) && STA_ADR(5) && ($impl.TemporaryBuf[6] === "===unroll===")) if (pas.System.Copy($impl.TemporaryBuf[2],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
             p = GetBYTE(1);
-            pas.System.Delete({a: 5, p: $mod.TemporaryBuf, get: function () {
+            pas.System.Delete({a: 5, p: $impl.TemporaryBuf, get: function () {
                 return this.p[this.a];
               }, set: function (v) {
                 this.p[this.a] = v;
-              }},pas.System.Pos(",y",$mod.TemporaryBuf[5]),2);
-            $mod.TemporaryBuf[5] = $mod.TemporaryBuf[5] + "+$" + pas.SysUtils.IntToHex(p,2);
-            $mod.TemporaryBuf[1] = "~";
-            $mod.TemporaryBuf[2] = "~";
-            $mod.TemporaryBuf[3] = "~";
-            $mod.TemporaryBuf[4] = "~";
+              }},pas.System.Pos(",y",$impl.TemporaryBuf[5]),2);
+            $impl.TemporaryBuf[5] = $impl.TemporaryBuf[5] + "+$" + pas.SysUtils.IntToHex(p,2);
+            $impl.TemporaryBuf[1] = "~";
+            $impl.TemporaryBuf[2] = "~";
+            $impl.TemporaryBuf[3] = "~";
+            $impl.TemporaryBuf[4] = "~";
           };
-          if (LDY_IM(1) && STY(2) && LDA(3) && ADD_SUB(4) && ($mod.TemporaryBuf[5] === "\ttay") && LDA(6) && STA_ADR(7) && ($mod.TemporaryBuf[8] === "===unroll===")) if (pas.System.Copy($mod.TemporaryBuf[2],6,256) === pas.System.Copy($mod.TemporaryBuf[4],6,256)) {
+          if (LDY_IM(1) && STY(2) && LDA(3) && ADD_SUB(4) && ($impl.TemporaryBuf[5] === "\ttay") && LDA(6) && STA_ADR(7) && ($impl.TemporaryBuf[8] === "===unroll===")) if (pas.System.Copy($impl.TemporaryBuf[2],6,256) === pas.System.Copy($impl.TemporaryBuf[4],6,256)) {
             p = GetBYTE(1);
-            pas.System.Delete({a: 7, p: $mod.TemporaryBuf, get: function () {
+            pas.System.Delete({a: 7, p: $impl.TemporaryBuf, get: function () {
                 return this.p[this.a];
               }, set: function (v) {
                 this.p[this.a] = v;
-              }},pas.System.Pos(",y",$mod.TemporaryBuf[7]),2);
-            $mod.TemporaryBuf[7] = $mod.TemporaryBuf[7] + "+$" + pas.SysUtils.IntToHex(p,2) + ",y";
-            $mod.TemporaryBuf[1] = "~";
-            $mod.TemporaryBuf[2] = "~";
-            $mod.TemporaryBuf[3] = "~";
-            $mod.TemporaryBuf[4] = "~";
-            $mod.TemporaryBuf[5] = "~";
-            $mod.TemporaryBuf[6] = "~";
+              }},pas.System.Pos(",y",$impl.TemporaryBuf[7]),2);
+            $impl.TemporaryBuf[7] = $impl.TemporaryBuf[7] + "+$" + pas.SysUtils.IntToHex(p,2) + ",y";
+            $impl.TemporaryBuf[1] = "~";
+            $impl.TemporaryBuf[2] = "~";
+            $impl.TemporaryBuf[3] = "~";
+            $impl.TemporaryBuf[4] = "~";
+            $impl.TemporaryBuf[5] = "~";
+            $impl.TemporaryBuf[6] = "~";
           };
         };
       };
@@ -10004,51 +10007,51 @@ rtl.module("Optimize",["System"],function () {
         var tmp = "";
         function branch(i) {
           var Result = false;
-          Result = ($mod.TemporaryBuf[i] === "\tbne @+") || ($mod.TemporaryBuf[i] === "\tbeq @+") || ($mod.TemporaryBuf[i] === "\tbcc @+") || ($mod.TemporaryBuf[i] === "\tbcs @+");
+          Result = ($impl.TemporaryBuf[i] === "\tbne @+") || ($impl.TemporaryBuf[i] === "\tbeq @+") || ($impl.TemporaryBuf[i] === "\tbcc @+") || ($impl.TemporaryBuf[i] === "\tbcs @+");
           return Result;
         };
         function branch_swap(i) {
           var Result = "";
           Result = "";
-          if ($mod.TemporaryBuf[i] === "\tbeq @+") {
+          if ($impl.TemporaryBuf[i] === "\tbeq @+") {
             Result = "\tsne"}
-           else if ($mod.TemporaryBuf[i] === "\tbne @+") {
+           else if ($impl.TemporaryBuf[i] === "\tbne @+") {
             Result = "\tseq"}
-           else if ($mod.TemporaryBuf[i] === "\tbcc @+") {
+           else if ($impl.TemporaryBuf[i] === "\tbcc @+") {
             Result = "\tscs"}
-           else if ($mod.TemporaryBuf[i] === "\tbcs @+") Result = "\tscc";
+           else if ($impl.TemporaryBuf[i] === "\tbcs @+") Result = "\tscc";
           return Result;
         };
-        if (($mod.TemporaryBuf[0] === "\tldy #1") && LDA(1) && CMP(2) && branch(3) && ($mod.TemporaryBuf[4] === "\tdey") && ($mod.TemporaryBuf[5] === "@") && STY_STACK(6)) {
+        if (($impl.TemporaryBuf[0] === "\tldy #1") && LDA(1) && CMP(2) && branch(3) && ($impl.TemporaryBuf[4] === "\tdey") && ($impl.TemporaryBuf[5] === "@") && STY_STACK(6)) {
           p = 7;
           yes = false;
-          tmp = "\tora " + pas.System.Copy($mod.TemporaryBuf[6],6,256);
-          while ((p < 512) && ($mod.TemporaryBuf[p] === "\tldy #1") && LDA(p + 1) && CMP(p + 2) && branch(p + 3) && ($mod.TemporaryBuf[p + 4] === "\tdey") && ($mod.TemporaryBuf[p + 5] === "@") && ($mod.TemporaryBuf[p + 6] === "\ttya") && ($mod.TemporaryBuf[p + 7] === tmp) && STA(p + 8)) {
+          tmp = "\tora " + pas.System.Copy($impl.TemporaryBuf[6],6,256);
+          while ((p < 512) && ($impl.TemporaryBuf[p] === "\tldy #1") && LDA(p + 1) && CMP(p + 2) && branch(p + 3) && ($impl.TemporaryBuf[p + 4] === "\tdey") && ($impl.TemporaryBuf[p + 5] === "@") && ($impl.TemporaryBuf[p + 6] === "\ttya") && ($impl.TemporaryBuf[p + 7] === tmp) && STA(p + 8)) {
             p += 9;
             yes = true;
           };
           if (yes) {
             i = p - 1;
-            tmp = $mod.TemporaryBuf[p - 1];
-            $mod.TemporaryBuf[0] = "~";
-            $mod.TemporaryBuf[3] = branch_swap(3);
-            $mod.TemporaryBuf[4] = "\tjmp @+";
-            $mod.TemporaryBuf[5] = "~";
-            $mod.TemporaryBuf[6] = "~";
+            tmp = $impl.TemporaryBuf[p - 1];
+            $impl.TemporaryBuf[0] = "~";
+            $impl.TemporaryBuf[3] = branch_swap(3);
+            $impl.TemporaryBuf[4] = "\tjmp @+";
+            $impl.TemporaryBuf[5] = "~";
+            $impl.TemporaryBuf[6] = "~";
             p -= 9;
             while (p >= 7) {
-              $mod.TemporaryBuf[p] = "~";
-              $mod.TemporaryBuf[p + 3] = branch_swap(p + 3);
-              $mod.TemporaryBuf[p + 4] = "\tjmp @+";
-              $mod.TemporaryBuf[p + 5] = "~";
-              $mod.TemporaryBuf[p + 6] = "~";
-              $mod.TemporaryBuf[p + 7] = "~";
-              $mod.TemporaryBuf[p + 8] = "~";
+              $impl.TemporaryBuf[p] = "~";
+              $impl.TemporaryBuf[p + 3] = branch_swap(p + 3);
+              $impl.TemporaryBuf[p + 4] = "\tjmp @+";
+              $impl.TemporaryBuf[p + 5] = "~";
+              $impl.TemporaryBuf[p + 6] = "~";
+              $impl.TemporaryBuf[p + 7] = "~";
+              $impl.TemporaryBuf[p + 8] = "~";
               p -= 9;
             };
-            $mod.TemporaryBuf[i - 2] = "\tlda:seq #$00";
-            $mod.TemporaryBuf[i - 1] = "@\tlda #$01";
-            $mod.TemporaryBuf[i] = tmp;
+            $impl.TemporaryBuf[i - 2] = "\tlda:seq #$00";
+            $impl.TemporaryBuf[i - 1] = "@\tlda #$01";
+            $impl.TemporaryBuf[i] = tmp;
           };
         };
       };
@@ -10066,93 +10069,93 @@ rtl.module("Optimize",["System"],function () {
       opt_TEMP_JMP();
       opt_TEMP_ZTMP();
       opt_TEMP_UNROLL();
-      if ((pas.System.Pos('@move ":bp2" ',$mod.TemporaryBuf[4]) > 1) && LDA(0) && STA_BP2(1) && ($mod.TemporaryBuf[2] === ($mod.TemporaryBuf[0] + "+1")) && STA_BP2_1(3)) {
-        $mod.TemporaryBuf[4] = "\t@move " + GetSTRING(0) + " " + pas.System.Copy($mod.TemporaryBuf[4],15,256);
-        $mod.TemporaryBuf[0] = "~";
-        $mod.TemporaryBuf[1] = "~";
-        $mod.TemporaryBuf[2] = "~";
-        $mod.TemporaryBuf[3] = "~";
+      if ((pas.System.Pos('@move ":bp2" ',$impl.TemporaryBuf[4]) > 1) && LDA(0) && STA_BP2(1) && ($impl.TemporaryBuf[2] === ($impl.TemporaryBuf[0] + "+1")) && STA_BP2_1(3)) {
+        $impl.TemporaryBuf[4] = "\t@move " + GetSTRING(0) + " " + pas.System.Copy($impl.TemporaryBuf[4],15,256);
+        $impl.TemporaryBuf[0] = "~";
+        $impl.TemporaryBuf[1] = "~";
+        $impl.TemporaryBuf[2] = "~";
+        $impl.TemporaryBuf[3] = "~";
       };
-      if ((pas.System.Pos("mva:rpl (:bp2),y ",$mod.TemporaryBuf[5]) > 1) && LDA_IM(0) && STA_BP2(1) && LDA_IM(2) && STA_BP2_1(3) && LDY_IM(4)) {
+      if ((pas.System.Pos("mva:rpl (:bp2),y ",$impl.TemporaryBuf[5]) > 1) && LDA_IM(0) && STA_BP2(1) && LDA_IM(2) && STA_BP2_1(3) && LDY_IM(4)) {
         p = GetWORD(0,2);
-        $mod.TemporaryBuf[0] = "~";
-        $mod.TemporaryBuf[1] = "~";
-        $mod.TemporaryBuf[2] = "~";
-        $mod.TemporaryBuf[3] = "~";
-        $mod.TemporaryBuf[5] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y " + pas.System.Copy($mod.TemporaryBuf[5],19,256);
+        $impl.TemporaryBuf[0] = "~";
+        $impl.TemporaryBuf[1] = "~";
+        $impl.TemporaryBuf[2] = "~";
+        $impl.TemporaryBuf[3] = "~";
+        $impl.TemporaryBuf[5] = "\tmva:rpl $" + pas.SysUtils.IntToHex(p,4) + ",y " + pas.System.Copy($impl.TemporaryBuf[5],19,256);
       };
-      if ((pas.System.Pos("mva:rne (:bp2),y ",$mod.TemporaryBuf[5]) > 1) && LDA_IM(0) && STA_BP2(1) && LDA_IM(2) && STA_BP2_1(3) && LDY_IM(4)) {
+      if ((pas.System.Pos("mva:rne (:bp2),y ",$impl.TemporaryBuf[5]) > 1) && LDA_IM(0) && STA_BP2(1) && LDA_IM(2) && STA_BP2_1(3) && LDY_IM(4)) {
         p = GetWORD(0,2);
-        $mod.TemporaryBuf[0] = "~";
-        $mod.TemporaryBuf[1] = "~";
-        $mod.TemporaryBuf[2] = "~";
-        $mod.TemporaryBuf[3] = "~";
-        $mod.TemporaryBuf[5] = "\tmva:rne $" + pas.SysUtils.IntToHex(p,4) + ",y " + pas.System.Copy($mod.TemporaryBuf[5],19,256);
+        $impl.TemporaryBuf[0] = "~";
+        $impl.TemporaryBuf[1] = "~";
+        $impl.TemporaryBuf[2] = "~";
+        $impl.TemporaryBuf[3] = "~";
+        $impl.TemporaryBuf[5] = "\tmva:rne $" + pas.SysUtils.IntToHex(p,4) + ",y " + pas.System.Copy($impl.TemporaryBuf[5],19,256);
       };
-      if (($mod.TemporaryBuf[0] === "\tjsr #$00") && ($mod.TemporaryBuf[1] === "\tlda @BYTE.MOD.RESULT")) {
-        $mod.TemporaryBuf[0] = "~";
-        $mod.TemporaryBuf[1] = "~";
+      if (($impl.TemporaryBuf[0] === "\tjsr #$00") && ($impl.TemporaryBuf[1] === "\tlda @BYTE.MOD.RESULT")) {
+        $impl.TemporaryBuf[0] = "~";
+        $impl.TemporaryBuf[1] = "~";
       };
-      if (($mod.TemporaryBuf[0] === "\tjsr #$00") && ($mod.TemporaryBuf[1] === "\tldy @BYTE.MOD.RESULT")) {
-        $mod.TemporaryBuf[0] = "\ttay";
-        $mod.TemporaryBuf[1] = "~";
+      if (($impl.TemporaryBuf[0] === "\tjsr #$00") && ($impl.TemporaryBuf[1] === "\tldy @BYTE.MOD.RESULT")) {
+        $impl.TemporaryBuf[0] = "\ttay";
+        $impl.TemporaryBuf[1] = "~";
       };
-      if (($mod.TemporaryBuf[0] === "\tlda :STACKORIGIN,x") && STA(1) && ($mod.TemporaryBuf[2] === "\tlda :STACKORIGIN+STACKWIDTH,x") && STA(3) && DEX(4) && ($mod.TemporaryBuf[5] === ":move")) {
-        tmp = $mod.TemporaryBuf[6];
-        p = pas.Common.StrToInt($mod.TemporaryBuf[7]);
+      if (($impl.TemporaryBuf[0] === "\tlda :STACKORIGIN,x") && STA(1) && ($impl.TemporaryBuf[2] === "\tlda :STACKORIGIN+STACKWIDTH,x") && STA(3) && DEX(4) && ($impl.TemporaryBuf[5] === ":move")) {
+        tmp = $impl.TemporaryBuf[6];
+        p = pas.Common.StrToInt($impl.TemporaryBuf[7]);
         if (p === 256) {
-          $mod.TemporaryBuf[1] = "\tsta :bp2";
-          $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-          $mod.TemporaryBuf[4] = "\tldy #$00";
-          $mod.TemporaryBuf[5] = "\tmva:rne (:bp2),y adr." + tmp + ",y+";
+          $impl.TemporaryBuf[1] = "\tsta :bp2";
+          $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+          $impl.TemporaryBuf[4] = "\tldy #$00";
+          $impl.TemporaryBuf[5] = "\tmva:rne (:bp2),y adr." + tmp + ",y+";
         } else if (p <= 128) {
-          $mod.TemporaryBuf[1] = "\tsta :bp2";
-          $mod.TemporaryBuf[3] = "\tsta :bp2+1";
-          $mod.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(p - 1,2);
-          $mod.TemporaryBuf[5] = "\tmva:rpl (:bp2),y adr." + tmp + ",y-";
+          $impl.TemporaryBuf[1] = "\tsta :bp2";
+          $impl.TemporaryBuf[3] = "\tsta :bp2+1";
+          $impl.TemporaryBuf[4] = "\tldy #$" + pas.SysUtils.IntToHex(p - 1,2);
+          $impl.TemporaryBuf[5] = "\tmva:rpl (:bp2),y adr." + tmp + ",y-";
         } else {
-          $mod.TemporaryBuf[4] = "\t@move " + tmp + " #adr." + tmp + " #$" + pas.SysUtils.IntToHex(p,2);
-          $mod.TemporaryBuf[5] = "~";
+          $impl.TemporaryBuf[4] = "\t@move " + tmp + " #adr." + tmp + " #$" + pas.SysUtils.IntToHex(p,2);
+          $impl.TemporaryBuf[5] = "~";
         };
-        $mod.TemporaryBuf[6] = "~";
-        $mod.TemporaryBuf[7] = "\tdex";
+        $impl.TemporaryBuf[6] = "~";
+        $impl.TemporaryBuf[7] = "\tdex";
       };
       opt_TEMP_MOVE();
       opt_TEMP_FILL();
       opt_TEMP_IFTMP();
       opt_TEMP_TAIL_IF();
       opt_TEMP_TAIL_CASE();
-      if (pas.SysUtils.TStringHelper.IndexOf$1.call({a: 0, p: $mod.TemporaryBuf, get: function () {
+      if (pas.SysUtils.TStringHelper.IndexOf$1.call({a: 0, p: $impl.TemporaryBuf, get: function () {
           return this.p[this.a];
         }, set: function (v) {
           this.p[this.a] = v;
         }},"#asm:") === 0) {
-        pas.Common.OutFile.WriteLn$1(pas.Common.AsmBlock[pas.Common.StrToInt(pas.System.Copy($mod.TemporaryBuf[0],6,256))]);
-        $mod.TemporaryBuf[0] = "~";
+        pas.Common.OutFile.WriteLn$1(pas.Common.AsmBlock[pas.Common.StrToInt(pas.System.Copy($impl.TemporaryBuf[0],6,256))]);
+        $impl.TemporaryBuf[0] = "~";
       };
-      if (pas.SysUtils.TStringHelper.IndexOf$1.call({a: 0, p: $mod.TemporaryBuf, get: function () {
+      if (pas.SysUtils.TStringHelper.IndexOf$1.call({a: 0, p: $impl.TemporaryBuf, get: function () {
           return this.p[this.a];
         }, set: function (v) {
           this.p[this.a] = v;
-        }},"#lib:") === 0) $mod.TemporaryBuf[0] = "\tm@lib " + pas.System.Copy($mod.TemporaryBuf[0],6,256);
-      if ($mod.TemporaryBuf[0] === "\tsta @PARAM?") $mod.TemporaryBuf[0] = "~";
-      if ($mod.TemporaryBuf[0] === "\tsty @PARAM?") $mod.TemporaryBuf[0] = "\ttya";
-      if (pas.System.Pos("@FORTMP_",$mod.TemporaryBuf[0]) > 1) if (LDA(0)) {
-        if (pas.System.Pos("::#$00",$mod.TemporaryBuf[0]) === 0) $mod.TemporaryBuf[0] = "\tlda " + fortmp(GetSTRING(0)) + "::#$00";
+        }},"#lib:") === 0) $impl.TemporaryBuf[0] = "\tm@lib " + pas.System.Copy($impl.TemporaryBuf[0],6,256);
+      if ($impl.TemporaryBuf[0] === "\tsta @PARAM?") $impl.TemporaryBuf[0] = "~";
+      if ($impl.TemporaryBuf[0] === "\tsty @PARAM?") $impl.TemporaryBuf[0] = "\ttya";
+      if (pas.System.Pos("@FORTMP_",$impl.TemporaryBuf[0]) > 1) if (LDA(0)) {
+        if (pas.System.Pos("::#$00",$impl.TemporaryBuf[0]) === 0) $impl.TemporaryBuf[0] = "\tlda " + fortmp(GetSTRING(0)) + "::#$00";
       } else if (CMP(0)) {
-        if (pas.System.Pos("::#$00",$mod.TemporaryBuf[0]) === 0) $mod.TemporaryBuf[0] = "\tcmp " + fortmp(GetSTRING(0)) + "::#$00";
+        if (pas.System.Pos("::#$00",$impl.TemporaryBuf[0]) === 0) $impl.TemporaryBuf[0] = "\tcmp " + fortmp(GetSTRING(0)) + "::#$00";
       } else if (SUB(0)) {
-        if (pas.System.Pos("::#$00",$mod.TemporaryBuf[0]) === 0) $mod.TemporaryBuf[0] = "\tsub " + fortmp(GetSTRING(0)) + "::#$00";
+        if (pas.System.Pos("::#$00",$impl.TemporaryBuf[0]) === 0) $impl.TemporaryBuf[0] = "\tsub " + fortmp(GetSTRING(0)) + "::#$00";
       } else if (SBC(0)) {
-        if (pas.System.Pos("::#$00",$mod.TemporaryBuf[0]) === 0) $mod.TemporaryBuf[0] = "\tsbc " + fortmp(GetSTRING(0)) + "::#$00";
+        if (pas.System.Pos("::#$00",$impl.TemporaryBuf[0]) === 0) $impl.TemporaryBuf[0] = "\tsbc " + fortmp(GetSTRING(0)) + "::#$00";
       } else if (STA(0)) {
-        $mod.TemporaryBuf[0] = "\tsta " + fortmp(GetSTRING(0))}
+        $impl.TemporaryBuf[0] = "\tsta " + fortmp(GetSTRING(0))}
        else if (STY(0)) {
-        $mod.TemporaryBuf[0] = "\tsty " + fortmp(GetSTRING(0))}
-       else if (MVA(0) && (pas.System.Pos("mva @FORTMP_",$mod.TemporaryBuf[0]) === 0)) {
-        tmp = pas.System.Copy($mod.TemporaryBuf[0],pas.System.Pos("@FORTMP_",$mod.TemporaryBuf[0]),256);
-        $mod.TemporaryBuf[0] = pas.System.Copy($mod.TemporaryBuf[0],1,pas.System.Pos(" @FORTMP_",$mod.TemporaryBuf[0])) + fortmp(tmp);
-      } else pas.System.Writeln("Unassigned: " + $mod.TemporaryBuf[0]);
+        $impl.TemporaryBuf[0] = "\tsty " + fortmp(GetSTRING(0))}
+       else if (MVA(0) && (pas.System.Pos("mva @FORTMP_",$impl.TemporaryBuf[0]) === 0)) {
+        tmp = pas.System.Copy($impl.TemporaryBuf[0],pas.System.Pos("@FORTMP_",$impl.TemporaryBuf[0]),256);
+        $impl.TemporaryBuf[0] = pas.System.Copy($impl.TemporaryBuf[0],1,pas.System.Pos(" @FORTMP_",$impl.TemporaryBuf[0])) + fortmp(tmp);
+      } else pas.System.Writeln("Unassigned: " + $impl.TemporaryBuf[0]);
     };
     $impl.ElfHash = function (Value) {
       var Result = 0;
@@ -45032,7 +45035,7 @@ rtl.module("program",["System","SysUtils","browserconsole","Common","Compiler","
             DiagMode = true}
            else if ((parameterUpperCase === "-IPATH") || (parameterUpperCase === "-I")) {
             i += 1;
-            pas.Utilities.TEnvironment.GetParameterString(i);
+            parameterValue = pas.Utilities.TEnvironment.GetParameterString(i);
             unitPathList.AddFolder(parameterValue);
           } else if (pas.System.Pos("-IPATH:",parameterUpperCase) === 1) {
             parameterValue = pas.System.Copy(parameter,8,255);
@@ -45169,10 +45172,19 @@ rtl.module("program",["System","SysUtils","browserconsole","Common","Compiler","
     return Result;
   };
   this.exitCode = 0;
+  this.fileMap = null;
+  this.fileMapEntry = null;
+  this.content = "";
   $mod.$main = function () {
     $mod.exitCode = $mod.Main();
     if ($mod.exitCode !== 0) {
       pas.System.Writeln("Program ended with exit code " + pas.Common.IntToStr($mod.exitCode));
+    };
+    $mod.fileMap = pas.FileIO.TFileSystem.GetFileMap();
+    $mod.fileMapEntry = $mod.fileMap.GetEntry("Output.a65");
+    if ($mod.fileMapEntry !== null) {
+      $mod.content = $mod.fileMapEntry.content;
+      pas.System.Writeln($mod.content);
     };
   };
 });

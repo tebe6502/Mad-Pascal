@@ -566,7 +566,6 @@ begin
     WriteLn('Program ended with exit code ' + IntToStr(exitCode));
   end;
 
-  {$IFDEF DEBUG}
   {$IFDEF SIMULATED_FILE_IO}
   fileMap:=TFileSystem.GetFileMap();
   fileMapEntry:=fileMap.GetEntry('Output.a65');
@@ -576,6 +575,7 @@ begin
     WriteLn(content);
   end;
   {$ENDIF}
+  {$IFDEF DEBUG}
   Console.WaitForKeyPressed;
   {$ENDIF}
 
