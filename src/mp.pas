@@ -273,7 +273,7 @@ uses
                 if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
                 begin
                   Inc(i);
-                  TEnvironment.GetParameterString(i);
+                  parameterValue:=TEnvironment.GetParameterString(i);
                   unitPathList.AddFolder(parameterValue);
 
                 end
@@ -556,6 +556,8 @@ uses
 var
   exitCode: TExitCode;
   fileMap: TFileMap;
+  fileMapEntry: TFileMapEntry;
+  content: String;
 begin
 
   exitCode := Main();
@@ -567,7 +569,12 @@ begin
   {$IFDEF DEBUG}
   {$IFDEF SIMULATED_FILE_IO}
   fileMap:=TFileSystem.GetFileMap();
-  // WriteLn(fileMap.GetEntry('Output.a65').content);
+  fileMapEntry:=fileMap.GetEntry('Output.a65');
+  if fileMapEntry<>nil then
+  begin
+    content:=fileMapEntry.content;
+    WriteLn(content);
+  end;
   {$ENDIF}
   Console.WaitForKeyPressed;
   {$ENDIF}

@@ -139,8 +139,6 @@ type
 type
   TTextFile = class(TFile, ITextFile)
 
-  const
-    CR = ^M;    // Char for a CR
 {$IFNDEF SIMULATED_FILE_IO}
   private
   type TSystemTextFile = System.TextFile;
@@ -440,7 +438,7 @@ begin
 {$IFNDEF SIMULATED_FILE_IO}
   System.WriteLn(f, '');
 {$ELSE}
-  Write(CR);
+  Write(LineEnding);
 {$ENDIF}
 
 end;
