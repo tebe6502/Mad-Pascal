@@ -4,8 +4,8 @@ interface
 
 {$I Defines.inc}
 
-uses Common , // For Tok and TTokenIndex
-    Datatypes, CommonTypes, Tokens;
+uses Common, // For Tok and TTokenIndex
+  Datatypes, CommonTypes, Tokens;
 
 {$SCOPEDENUMS ON}
 type
@@ -126,8 +126,7 @@ uses SysUtils, TypInfo, Console, Utilities;
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
   const variable1: String = ''; const variable2: String = ''; const variable3: String = '';
   const variable4: String = ''; const variable5: String = ''; const variable6: String = '';
-  const variable7: String = ''; const variable8: String = '';
-  const variable9: String = '');
+  const variable7: String = ''; const variable8: String = ''; const variable9: String = '');
 var
   l: Integer;
   i: Integer;
@@ -362,6 +361,27 @@ begin
 
 end;
 
+// ----------------------------------------------------------------------------
+// Write the previous tokens before the error position to see the tokenized context.
+// ----------------------------------------------------------------------------
+
+procedure WritePreviousTokens(const tokenIndex: TTokenIndex);
+var
+  fromTokenIndex, toTokenIndex: TTokenIndex;
+  i: TTokenIndex;
+  token: TToken;
+begin
+  fromTokenIndex := tokenIndex - 20;
+  if fromTokenIndex < 1 then fromTokenIndex := 1;
+  toTokenIndex := tokenIndex;
+  for i := fromTokenIndex to toTokenIndex do
+  begin
+    token := Tok[i];
+    WriteLn(UnitName[token.UnitIndex].Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
+      IntToStr(token.Column) + '): kind=' + GetTokenKindName(token.Kind) + ' name=' + token.Name + '.');
+  end;
+end;
+
 procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex); overload;
 var
   msg: String;
@@ -399,6 +419,10 @@ begin
     TextColor(LIGHTRED);
     if tokenIndex > 0 then
     begin
+      {$IFDEF DEBUG}
+      WritePreviousTokens(effectiveTokenIndex);
+      {$ENDIF}
+
       token := Tok[effectiveTokenIndex];
       if (effectiveTokenIndex > 1) then
       begin
@@ -519,52 +543,52 @@ begin
       IntToStr(Ident[identIndex].NumAllocElements_ - 1) + '] Of ' +
       InfoAboutToken(Ident[identIndex].AllocElementType) + '" '
   else
-  if Ident[identIndex].NumAllocElements = 0 then
-  begin
+    if Ident[identIndex].NumAllocElements = 0 then
+    begin
 
-    if Ident[identIndex].AllocElementType <> TTokenKind.UNTYPETOK then
-      msg := msg + '"^' + InfoAboutToken(Ident[identIndex].AllocElementType) + '" '
+      if Ident[identIndex].AllocElementType <> TTokenKind.UNTYPETOK then
+        msg := msg + '"^' + InfoAboutToken(Ident[identIndex].AllocElementType) + '" '
+      else
+        msg := msg + '"' + InfoAboutToken(TTokenKind.POINTERTOK) + '" ';
+
+    end
     else
-      msg := msg + '"' + InfoAboutToken(TTokenKind.POINTERTOK) + '" ';
-
-  end
-  else
-  begin
-    msg := msg + IntToStr(Ident[identIndex].NumAllocElements - 1) + '] Of ' +
-      InfoAboutToken(Ident[identIndex].AllocElementType) + '" ';
-  end;
+    begin
+      msg := msg + IntToStr(Ident[identIndex].NumAllocElements - 1) + '] Of ' +
+        InfoAboutToken(Ident[identIndex].AllocElementType) + '" ';
+    end;
 
   if errorCode = TErrorCode.IllegalTypeConversion then
     msg := msg + 'to "' + InfoAboutToken(tokenKind) + '"'
   else
-  if arrayIdentIndex > 0 then
-  begin
-
-    msg := msg + 'expected ';
-
-    if Ident[arrayIdentIndex].NumAllocElements_ > 0 then
-      msg := msg + '"Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements - 1) +
-        '] Of Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements_ - 1) + '] Of ' +
-        InfoAboutToken(Ident[identIndex].AllocElementType) + '"'
-    else
-    if Ident[arrayIdentIndex].AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-      msg := msg + '"^' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
-    else
+    if arrayIdentIndex > 0 then
     begin
 
-      if Ident[arrayIdentIndex].DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-        msg := msg + '"' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
-      else
+      msg := msg + 'expected ';
+
+      if Ident[arrayIdentIndex].NumAllocElements_ > 0 then
         msg := msg + '"Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements - 1) +
-          '] Of ' + InfoAboutToken(Ident[arrayIdentIndex].AllocElementType) + '"';
+          '] Of Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements_ - 1) + '] Of ' +
+          InfoAboutToken(Ident[identIndex].AllocElementType) + '"'
+      else
+        if Ident[arrayIdentIndex].AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+          msg := msg + '"^' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
+        else
+        begin
 
+          if Ident[arrayIdentIndex].DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+            msg := msg + '"' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
+          else
+            msg := msg + '"Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements - 1) +
+              '] Of ' + InfoAboutToken(Ident[arrayIdentIndex].AllocElementType) + '"';
+
+        end;
+
+    end
+    else
+    begin
+      msg := msg + 'expected "' + InfoAboutToken(tokenKind) + '"';
     end;
-
-  end
-  else
-  begin
-    msg := msg + 'expected "' + InfoAboutToken(tokenKind) + '"';
-  end;
 
   Error(tokenIndex, TMessage.Create(errorCode, msg));
 end;
@@ -763,4 +787,3 @@ end;
 
 
 end.
-
