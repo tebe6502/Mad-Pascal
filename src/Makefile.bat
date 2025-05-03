@@ -7,15 +7,18 @@ rem The script will use the FPC, MP and MADS version from there as reference.
 rem
 rem The script compiles "Test-0.pas" with FPC vs. the new MP.
 rem The script compiles a set of reference examples with the released and the new MP an validates that there are no differences in the binary output.
-rem The optional first argument to the scrip is "FAST" to only compile the first test.
+rem The optional first argument to the script is "FAST" to only compile the first test.
 
 setlocal
 set TEST_MODE=%1
 
 set PATH=%WUDSN_TOOLS_FOLDER%\PAS\FPC.jac;%WUDSN_TOOLS_FOLDER%\ASM\MADS\bin\windows_x86_64;%PATH%
-set MP_FOLDER=%~dp0..
+call :normalize_path %~dp0..
+set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
+set MP_PAS=%MP_SRC_FOLDER%\mp.pas
 set MP_EXE=%MP_SRC_FOLDER%\mp.exe
+
 set WUDSN_MP_EXE=%WUDSN_TOOLS_FOLDER%\PAS%\MP\bin\windows\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
@@ -27,24 +30,24 @@ cd /d %MP_SRC_FOLDER%
 
 if not "%TEST_EXE%"=="" (
   if exist "%TEST_EXE%" del "%TEST_EXE%"
-  rem call fpc.bat %TEST_PAS%
+  call fpc.bat %TEST_PAS%
   if errorlevel 1 goto :eof
 )
 
 if not "%MP_EXE%"=="" (
-
-   if exist "%MP_EXE%" del "%MP_EXE%"
-   call fpc.bat mp.pas
-   if errorlevel 1 goto :eof
+  rem echo INFO: Compiling %MP_PAS% to %MP_EXE%.
+  rem if exist "%MP_EXE%" del "%MP_EXE%"
+  rem call fpc.bat %MP_PAS%
+  rem if errorlevel 1 goto :eof
 
 rem Regression test with standard MP.
-   if "%TEST_MODE%"=="" (
-     echo.
-     echo INFO: Compiling with WUDSN version.
-     echo ===================================
-     echo.
-     call :run_tests %WUDSN_MP_EXE%
-   )
+  if "%TEST_MODE%"=="" (
+    echo.
+    echo INFO: Compiling with WUDSN version.
+    echo ===================================
+    echo.
+    call :run_tests %WUDSN_MP_EXE%
+  )
  
     
    echo.
@@ -54,11 +57,18 @@ rem Regression test with standard MP.
    echo.
    if exist "%MP_EXE%" (
      call :run_tests %MP_EXE%
+   ) else (
+     echo INFO: "%MP_EXE%" does not exist.
    )
  )
 
 goto :eof
 
+
+:normalize_path
+  set retval=%~f1
+  exit /b
+ 
  rem IN: %1=Path to mp.exe´, %2=Folder of test source %3=File name without file extension of the ".pas" file
 :run_mp
   set MP=%1
@@ -154,6 +164,7 @@ rem IN: Path to mp.exe
 rem
 :run_tests
   call :run_mp %1 %MP_TESTS_FOLDER% Test-MP
+  
   if "%TEST_MODE%"=="FAST" goto :eof
   call :run_mp %1 %MP_FOLDER%\samples\a8\games\PacMad pacmad
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fedorahat
