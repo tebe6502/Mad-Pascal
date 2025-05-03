@@ -18,13 +18,12 @@ type
   THaltException = class
 
   const
-    OK: TExitCode = 0;
     // No errors occurred, the output files were created correctly
-  const
-    COMPILING_ABORTED: TExitCode = 2;     // Errors occurred, and compiling was aborted
-  const
-    COMPILING_NOT_STARTED: TExitCode = 3;
+    OK: TExitCode = 0;
+    // Errors occurred, and compiling was aborted
+    COMPILING_ABORTED: TExitCode = 2;
     // Wrong parameters were specified, and compiling was not started
+    COMPILING_NOT_STARTED: TExitCode = 3;
 
   private
     exitCode: TExitCode;
