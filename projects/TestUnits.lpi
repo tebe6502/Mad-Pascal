@@ -128,6 +128,9 @@
         <StackChecks Value="True"/>
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
@@ -151,6 +154,7 @@
       </Item>
       <Item>
         <Name Value="ERangeError"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="RunError(201)"/>

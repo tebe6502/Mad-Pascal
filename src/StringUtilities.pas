@@ -71,16 +71,20 @@ begin
 
     SkipWhitespaces(a, i);
 
-    if UpCase(a[i]) in AllowDigitFirstChars then
+    if (i < Length(a)) then
     begin
-
-      Result := UpCase(a[i]);
-      Inc(i);
-
-      while UpCase(a[i]) in AllowDigitChars do
+      if UpCase(a[i]) in AllowDigitFirstChars then
       begin
-        Result := Result + UpCase(a[i]);
+
+        Result := UpCase(a[i]);
         Inc(i);
+
+        while UpCase(a[i]) in AllowDigitChars do
+        begin
+          Result := Result + UpCase(a[i]);
+          Inc(i);
+        end;
+
       end;
 
     end;
@@ -180,34 +184,34 @@ begin
 
   end
   else
-  if not (a[i] in AllowQuotes) then
-  begin
-
-    Result := GetLabel(a, upperCase, i);
-
-  end
-  else
-  begin
-
-    gchr := a[i];
-    len := length(a);
-
-    while i <= len do
+    if not (a[i] in AllowQuotes) then
     begin
-      Inc(i);   // we skip the first character ' or "
 
-      znak := a[i];
+      Result := GetLabel(a, upperCase, i);
 
-      if znak = gchr then
+    end
+    else
+    begin
+
+      gchr := a[i];
+      len := length(a);
+
+      while i <= len do
       begin
-        Inc(i);
-        Break;
+        Inc(i);   // we skip the first character ' or "
+
+        znak := a[i];
+
+        if znak = gchr then
+        begin
+          Inc(i);
+          Break;
+        end;
+
+        Result := Result + znak;
       end;
 
-      Result := Result + znak;
     end;
-
-  end;
 
 end;
 
@@ -264,7 +268,7 @@ var
 
       if znak = lewa then Inc(nawias)
       else
-      if znak = prawa then Dec(nawias);
+        if znak = prawa then Dec(nawias);
 
       //  if not(zag) then
       //   if nawias>1 then test_nawias(a,lewa,0);
