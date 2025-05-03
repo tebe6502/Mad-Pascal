@@ -98,67 +98,71 @@ begin
   t.Assign(fnam);
   t.Reset;
 
-  while not t.EOF do
-  begin
-    s := '';
-    t.ReadLn(s);
+  try
 
-    i := 1;
-    SkipWhitespaces(s, i);
-
-    if (length(s) > i - 1) and (not (s[i] in ['#', ';'])) then
+    while not t.EOF do
     begin
+      s := '';
+      t.ReadLn(s);
 
-      res.resName := GetLabelUpperCase(s, i);
-      res.resType := GetLabelUpperCase(s, i);
-      res.resFile := GetFilePath(s, i);
+      i := 1;
+      SkipWhitespaces(s, i);
 
-      if (res.resType = 'RCDATA') or (res.resType = 'RCASM') or (res.resType = 'DOSFILE') or
-        (res.resType = 'RELOC') or (res.resType = 'RMT') or (res.resType = 'MPT') or
-        (res.resType = 'CMC') or (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or
-        (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
-        (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
-        (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') then
-
-      else
-        Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType, 'Undefined resource type: Type = ''' +
-          res.resType + ''', Name = ''' + res.resName + ''''));
-
-
-      if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
-        Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound, 'Resource file not found: Type = ' +
-          res.resType + ', Name = ''' + res.resName + ''' in unit path ''' + unitPathList.ToString + ''''));
-
-      for j := 1 to MAXPARAMS do
+      if (length(s) > i - 1) and (not (s[i] in ['#', ';'])) then
       begin
 
-        if s[i] in ['''', '"'] then
-          tmp := GetStringUpperCase(s, i)
+        res.resName := GetLabelUpperCase(s, i);
+        res.resType := GetLabelUpperCase(s, i);
+        res.resFile := GetFilePath(s, i);
+
+        if (res.resType = 'RCDATA') or (res.resType = 'RCASM') or (res.resType = 'DOSFILE') or
+          (res.resType = 'RELOC') or (res.resType = 'RMT') or (res.resType = 'MPT') or
+          (res.resType = 'CMC') or (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or
+          (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
+          (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
+          (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') then
+
         else
-          tmp := GetNumber(s, i);
+          Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType,
+            'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + ''''));
 
-        if tmp = '' then tmp := '0';
 
-        res.resPar[j] := tmp;
+        if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
+          Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound, 'Resource file not found: Type = ' +
+            res.resType + ', Name = ''' + res.resName + ''' in unit path ''' + unitPathList.ToString + ''''));
+
+        for j := 1 to MAXPARAMS do
+        begin
+
+          if s[i] in ['''', '"'] then
+            tmp := GetStringUpperCase(s, i)
+          else
+            tmp := GetNumber(s, i);
+
+          if tmp = '' then tmp := '0';
+
+          res.resPar[j] := tmp;
+        end;
+
+        //     writeln(res.resName,',',res.resType,',',res.resFile);
+
+        for j := High(resArray) - 1 downto 0 do
+          if resArray[j].resName = res.resName then
+            Error(NumTok, TMessage.Create(TErrorCode.DuplicateResource, 'Duplicate resource: Type = ' +
+              res.resType + ', Name = ''' + res.resName + ''''));
+
+        j := High(resArray);
+        resArray[j] := res;
+
+        SetLength(resArray, j + 2);
+
       end;
-
-      //     writeln(res.resName,',',res.resType,',',res.resFile);
-
-      for j := High(resArray) - 1 downto 0 do
-        if resArray[j].resName = res.resName then
-          Error(NumTok, TMessage.Create(TErrorCode.DuplicateResource, 'Duplicate resource: Type = ' +
-            res.resType + ', Name = ''' + res.resName + ''''));
-
-      j := High(resArray);
-      resArray[j] := res;
-
-      SetLength(resArray, j + 2);
 
     end;
 
+  finally
+    t.Close;
   end;
-
-  t.Close;
 
 end;  //AddResource
 
@@ -526,7 +530,8 @@ var
                     else
                       if s = 'OFF' then macros := False
                       else
-                        Error(NumTok, TMessage.Create(TErrorCode.WrongSwitchToggle, 'Wrong switch toggle, use ON/OFF or +/-'));
+                        Error(NumTok, TMessage.Create(TErrorCode.WrongSwitchToggle,
+                          'Wrong switch toggle, use ON/OFF or +/-'));
 
                   end
                   else
@@ -587,8 +592,8 @@ var
                               Inc(IncludeIndex);
 
                               if IncludeIndex > High(UnitName) then
-                                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IncludeIndex: ' +
-                                  IntToStr(IncludeIndex)));
+                                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
+                                  'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
 
                               Tokenize(nam);
 
@@ -606,13 +611,14 @@ var
                       begin
 
                         if d.LastIndexOf('}') < 0 then
-                          Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Character ''}'' expected'));
+                          Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+                            'Syntax error. Character ''}'' expected'));
 
                         s := copy(d, i, d.LastIndexOf('}') - i + 1);
                         s := TrimRight(s);
 
-                        if s[length(s)] <> '"' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
-                            'Syntax error. Missing ''"'''));
+                        if s[length(s)] <> '"' then
+                          Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Missing ''"'''));
 
                         AddToken(TTokenKind.EVALTOK, UnitIndex, Line, 1, 0);
 
@@ -666,7 +672,8 @@ var
 
                               SkipWhitespaces(d, i);
 
-                              if d[i] <> '=' then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
+                              if d[i] <> '=' then
+                                Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
                               Inc(i);
                               SkipWhitespaces(d, i);
 
@@ -695,7 +702,8 @@ var
                                   s := GetFilePath(d, i);
 
                                   if s = '' then
-                                    Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
+                                    Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified,
+                                      'An empty path cannot be used'));
 
                                   AddPath(s);
 
@@ -719,7 +727,8 @@ var
                                     s := GetFilePath(d, i);
 
                                     if s = '' then
-                                      Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified, 'An empty path cannot be used'));
+                                      Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified,
+                                        'An empty path cannot be used'));
 
                                     AddPath(s);
 
@@ -815,7 +824,8 @@ var
                                           if cmd = 'ELSE' then
                                           begin
                                             if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
-                                              Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf, 'Found $ELSE without $IFXXX'));
+                                              Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf,
+                                                'Found $ELSE without $IFXXX'));
                                             if IfdefLevel > 0 then
                                               Dec(IfdefLevel);
                                           end
@@ -823,7 +833,8 @@ var
                                             if cmd = 'ENDIF' then
                                             begin
                                               if IfdefLevel = 0 then
-                                                Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf, 'Found $ENDIF without $IFXXX'))
+                                                Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf,
+                                                  'Found $ENDIF without $IFXXX'))
                                               else
                                                 Dec(IfdefLevel);
                                             end
@@ -854,21 +865,25 @@ var
                                                   Tok[NumTok].Line := line;
 
                                                   if not (UpCase(d[i]) in AllowLabelFirstChars) then
-                                                    Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ''identifier'' expected'));
+                                                    Error(NumTok,
+                                                      TMessage.Create(TErrorCode.SyntaxError,
+                                                      'Syntax error, ''identifier'' expected'));
 
                                                   repeat
 
                                                     Inc(Err);
 
                                                     if Err > MAXPARAMS then
-                                                      Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters,
+                                                      Error(NumTok,
+                                                        TMessage.Create(TErrorCode.TooManyFormalParameters,
                                                         'Too many formal parameters in ' + nam));
 
                                                     Param[Err] := GetLabelUpperCase(d, i);
 
                                                     for x := 1 to Err - 1 do
                                                       if Param[x] = Param[Err] then
-                                                        Error(NumTok, TMessage.Create(TErrorCode.DuplicateIdentifier,
+                                                        Error(NumTok,
+                                                          TMessage.Create(TErrorCode.DuplicateIdentifier,
                                                           'Duplicate identifier ''' + Param[Err] + ''''));
 
                                                     skip_spaces;
@@ -879,7 +894,8 @@ var
                                                       skip_spaces;
 
                                                       if not (UpCase(d[i]) in AllowLabelFirstChars) then
-                                                        Error(NumTok, TMessage.Create(TErrorCode.IdentifierExpected,
+                                                        Error(NumTok,
+                                                          TMessage.Create(TErrorCode.IdentifierExpected,
                                                           'Syntax error, ''identifier'' expected'));
                                                     end;
 
@@ -919,8 +935,9 @@ var
                                                   RemoveDefine(nam);
                                                 end
                                                 else
-                                                  Error(NumTok, TMessage.Create(TErrorCode.IllegalCompilerDirective, 'Illegal compiler directive $' +
-                                                    cmd + d[i]));
+                                                  Error(NumTok,
+                                                    TMessage.Create(TErrorCode.IllegalCompilerDirective,
+                                                    'Illegal compiler directive $' + cmd + d[i]));
 
       end;
 
@@ -1761,8 +1778,8 @@ var
       on e: THaltException do
       begin
         RaiseHaltException(e.GetExitCode());
-      end
-      else // EOF reached
+      end;
+      on e: EInOutError do    // EOF reached
         if Text <> '' then
         begin
           if Text = 'END.' then
