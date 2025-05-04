@@ -38,8 +38,14 @@ var
   Defines: array [1..MAXDEFINES] of TDefine;
 
   IFTmpPosStack: array of Integer;
+
+  BreakPosStackTop: Integer;
   BreakPosStack: array [0..MAXPOSSTACK] of TPosStack;
+
+  CodePosStackTop: Integer;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
+
+  BlockStackTop: Integer;
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
 
@@ -48,7 +54,7 @@ var
   NumTok: Integer = 0;
 
   i, NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, NumStaticStrCharsTmp,
+  CodeSize, VarDataSize, NumStaticStrCharsTmp,
   AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
@@ -58,7 +64,6 @@ var
   iOut: Integer = -1;
 
   CODEORIGIN_BASE: Integer = -1;
-
   DATA_BASE: Integer = -1;
   ZPAGE_BASE: Integer = -1;
   STACK_BASE: Integer = -1;
@@ -142,8 +147,6 @@ function GetVAL(a: String): Integer;
 
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
-
-function InfoAboutToken(t: TTokenKind): String;
 
 function IntToStr(const a: Int64): String;
 function StrToInt(const a: String): TInteger;
@@ -431,103 +434,6 @@ begin
       Ord(Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK)) then
       if Ident[IdentIndex].NumAllocElements_ <> 1 then
         WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-// TODO: Move to Tokens units
-function InfoAboutToken(t: TTokenKind): String;
-begin
-
-  case t of
-
-    TTokenKind.EQTOK: Result := '=';
-    TTokenKind.NETOK: Result := '<>';
-    TTokenKind.LTTOK: Result := '<';
-    TTokenKind.LETOK: Result := '<=';
-    TTokenKind.GTTOK: Result := '>';
-    TTokenKind.GETOK: Result := '>=';
-
-    TTokenKind.INTOK: Result := 'IN';
-
-    TTokenKind.DOTTOK: Result := '.';
-    TTokenKind.COMMATOK: Result := ',';
-    TTokenKind.SEMICOLONTOK: Result := ';';
-    TTokenKind.OPARTOK: Result := '(';
-    TTokenKind.CPARTOK: Result := ')';
-    TTokenKind.DEREFERENCETOK: Result := '^';
-    TTokenKind.ADDRESSTOK: Result := '@';
-    TTokenKind.OBRACKETTOK: Result := '[';
-    TTokenKind.CBRACKETTOK: Result := ']';
-    TTokenKind.COLONTOK: Result := ':';
-    TTokenKind.PLUSTOK: Result := '+';
-    TTokenKind.MINUSTOK: Result := '-';
-    TTokenKind.MULTOK: Result := '*';
-    TTokenKind.DIVTOK: Result := '/';
-
-    TTokenKind.IDIVTOK: Result := 'DIV';
-    TTokenKind.MODTOK: Result := 'MOD';
-    TTokenKind.SHLTOK: Result := 'SHL';
-    TTokenKind.SHRTOK: Result := 'SHR';
-    TTokenKind.ORTOK: Result := 'OR';
-    TTokenKind.XORTOK: Result := 'XOR';
-    TTokenKind.ANDTOK: Result := 'AND';
-    TTokenKind.NOTTOK: Result := 'NOT';
-    TTokenKind.CONSTTOK: Result := 'CONST';
-    TTokenKind.TYPETOK: Result := 'TYPE';
-    TTokenKind.VARTOK: Result := 'VARIABLE';
-    TTokenKind.PROCEDURETOK: Result := 'PROCEDURE';
-    TTokenKind.FUNCTIONTOK: Result := 'FUNCTION';
-    TTokenKind.CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
-    TTokenKind.DESTRUCTORTOK: Result := 'DESTRUCTOR';
-
-    TTokenKind.LABELTOK: Result := 'LABEL';
-    TTokenKind.UNITTOK: Result := 'UNIT';
-    TTokenKind.ENUMTOK: Result := 'ENUM';
-
-    TTokenKind.RECORDTOK: Result := 'RECORD';
-    TTokenKind.OBJECTTOK: Result := 'OBJECT';
-    TTokenKind.BYTETOK: Result := 'BYTE';
-    TTokenKind.SHORTINTTOK: Result := 'SHORTINT';
-    TTokenKind.CHARTOK: Result := 'CHAR';
-    TTokenKind.BOOLEANTOK: Result := 'BOOLEAN';
-    TTokenKind.WORDTOK: Result := 'WORD';
-    TTokenKind.SMALLINTTOK: Result := 'SMALLINT';
-    TTokenKind.CARDINALTOK: Result := 'CARDINAL';
-    TTokenKind.INTEGERTOK: Result := 'INTEGER';
-    TTokenKind.POINTERTOK,
-    TTokenKind.DATAORIGINOFFSET,
-    TTokenKind.CODEORIGINOFFSET: Result := 'POINTER';
-
-    TTokenKind.PROCVARTOK: Result := '<Procedure Variable>';
-
-    TTokenKind.STRINGPOINTERTOK: Result := 'STRING';
-
-    TTokenKind.STRINGLITERALTOK: Result := 'literal';
-
-    TTokenKind.SHORTREALTOK: Result := 'SHORTREAL';
-    TTokenKind.REALTOK: Result := 'REAL';
-    TTokenKind.SINGLETOK: Result := 'SINGLE';
-    TTokenKind.HALFSINGLETOK: Result := 'FLOAT16';
-    TTokenKind.SETTOK: Result := 'SET';
-    TTokenKind.FILETOK: Result := 'FILE';
-    TTokenKind.TEXTFILETOK: Result := 'TEXTFILE';
-    TTokenKind.PCHARTOK: Result := 'PCHAR';
-
-    TTokenKind.REGISTERTOK: Result := 'REGISTER';
-    TTokenKind.PASCALTOK: Result := 'PASCAL';
-    TTokenKind.STDCALLTOK: Result := 'STDCALL';
-    TTokenKind.INLINETOK: Result := 'INLINE';
-    TTokenKind.ASMTOK: Result := 'ASM';
-    TTokenKind.INTERRUPTTOK: Result := 'INTERRUPT';
-
-    else
-      Result := 'UNTYPED'
-  end;
 
 end;
 
