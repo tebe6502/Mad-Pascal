@@ -6,6 +6,7 @@ uses
   Crt,
   Common,
   CommonTypes,
+  CompilerTypes,
   Datatypes,
   FileIO,
   MathEvaluate,
