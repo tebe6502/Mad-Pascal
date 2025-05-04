@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                     {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                       {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                     {$ENDIF}
+                       {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -225,7 +225,6 @@ uses
     // Command line parameters
     unitPathList: TPathList;
     targetID: TTargetID;
-    useDefaultCPU: Boolean;
     cpu: TCPU;
 
     outputFilePath: TFilePath;
@@ -241,7 +240,13 @@ uses
     begin
 
       targetID := TTargetID.A8;
-      useDefaultCPU := True;
+      cpu := TCPU.NONE;
+
+      CODEORIGIN_BASE := -1;
+      DATA_BASE := -1;
+      ZPAGE_BASE := -1;
+      STACK_BASE := -1;
+      outputFilePath := '';
 
       i := 1;
       while i <= TEnvironment.GetParameterCount() do
@@ -437,7 +442,7 @@ uses
         target.zpage := ZPAGE_BASE;
 
 
-      if not useDefaultCPU then target.cpu := cpu;
+      if cpu <>TCPU.NONE then target.cpu := cpu;
 
       case target.cpu of
         TCPU.CPU_6502: AddDefine('CPU_6502');

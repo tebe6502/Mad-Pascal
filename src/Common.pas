@@ -15,7 +15,7 @@ var
 
 var
 
-  // Comman line parameters
+  // Command line parameters
   CODEORIGIN_BASE: Integer = -1;
   DATA_BASE: Integer = -1;
   ZPAGE_BASE: Integer = -1;
