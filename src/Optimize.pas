@@ -36,6 +36,10 @@ begin
   optyY := '';
   optyBP2 := '';
 
+  optyFOR0 := '';
+  optyFOR1 := '';
+  optyFOR2 := '';
+  optyFOR3 := '';
 end;
 
 

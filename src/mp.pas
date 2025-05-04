@@ -224,10 +224,12 @@ uses
 
     // Command line parameters
     unitPathList: TPathList;
-    DiagMode: Boolean;
     targetID: TTargetID;
     useDefaultCPU: Boolean;
     cpu: TCPU;
+
+    outputFilePath: TFilePath;
+    DiagMode: Boolean;
 
     StartTime: QWord;
     seconds: ValReal;
@@ -254,16 +256,16 @@ uses
           begin
 
             Inc(i);
-            outputFile := parameter;
-            if outputFile = '' then ParameterError(i, 'Output file path is empty');
+            outputFilePath := parameter;
+            if outputFilePath = '' then ParameterError(i, 'Output file path is empty');
 
           end
           else
             if pos('-O:', parameterUpperCase) = 1 then
             begin
 
-              outputFile := copy(parameter, 4, 255);
-              if outputFile = '' then ParameterError(i, 'Output file path is empty');
+              outputFilePath := copy(parameter, 4, 255);
+              if outputFilePath = '' then ParameterError(i, 'Output file path is empty');
 
             end
             else
@@ -491,8 +493,8 @@ uses
  {$ENDIF}
 
     OutFile := TFileSystem.CreateTextFile;
-    if ExtractFileName(outputFile) <> '' then
-      OutFile.Assign(outputFile)
+    if ExtractFileName(outputFilePath) <> '' then
+      OutFile.Assign(outputFilePath)
     else
       OutFile.Assign(ChangeFileExt(UnitName[1].Name, '.a65'));
 

@@ -15,6 +15,14 @@ var
 
 var
 
+  // Comman line parameters
+  CODEORIGIN_BASE: Integer = -1;
+  DATA_BASE: Integer = -1;
+  ZPAGE_BASE: Integer = -1;
+  STACK_BASE: Integer = -1;
+
+  OutFile: ITextFile;
+
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
 
@@ -62,22 +70,15 @@ var
 
   pass: TPass;
 
-  CODEORIGIN_BASE: Integer = -1;
-  DATA_BASE: Integer = -1;
-  ZPAGE_BASE: Integer = -1;
-  STACK_BASE: Integer = -1;
-
   UnitNameIndex: Integer; // Initialized in TokenizeProgramInitialization
 
   FastMul: Integer = -1;
-
-  OutFile: ITextFile;
 
   //AsmLabels: array of integer;
 
   resArray: array of TResource;
 
-  optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outputFile: TString;
+  optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString; // Initialized in ResetOpty
 
   msgWarning, msgNote, msgUser: TStringArray;
 

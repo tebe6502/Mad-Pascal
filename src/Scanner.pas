@@ -19,7 +19,7 @@ procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TI
 
 implementation
 
-uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, StringUtilities, Targets, Utilities;
+uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -72,14 +72,7 @@ begin
 
   NumDefines := AddDefines;
 
-  optyA := '';
-  optyY := '';
-  optyBP2 := '';
-
-  optyFOR0 := '';
-  optyFOR1 := '';
-  optyFOR2 := '';
-  optyFOR3 := '';
+  ResetOpty;
 
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
 
