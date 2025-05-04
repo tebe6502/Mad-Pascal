@@ -18989,7 +18989,9 @@ begin
 
   Defines[1].Name := AnsiUpperCase(target.Name);
 
+  {$IFNDEF PAS2JS}
   DefaultFormatSettings.DecimalSeparator := '.';
+  {$ENDIF}
 
   TextColor(WHITE);
 
