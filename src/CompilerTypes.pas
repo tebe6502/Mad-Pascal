@@ -260,7 +260,7 @@ type
     Name: TUnitName;
     Path: String;
     Units: Integer;
-    Allow: array [1..MAXALLOWEDUNITS] of TString;
+    Allow: array [1..MAXALLOWEDUNITS] of TUnitName;
   end;
 
   TResource = record
@@ -294,6 +294,40 @@ type
   TIdentIndex = Integer;
   TArrayIndex = Integer;
 
+// ----------------------------------------------------------------------------
+// Map modifier codes to the bits in the method status.
+// ----------------------------------------------------------------------------
+procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
+
+// ----------------------------------------------------------------------------
+// Map I/O codes to the bits in the CIO block.
+// ----------------------------------------------------------------------------
+function GetIOBits(const ioCode: TIOCode): TIOBits;
+
 implementation
+
+procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
+begin
+  bits := bits or (Word(1) shl Ord(modifierCode));
+end;
+
+
+function GetIOBits(const ioCode: TIOCode): TIOBits;
+begin
+  case ioCode of
+    TIOCode.OpenRead: Result := $04;
+    TIOCode.ReadRecord: Result := $05;
+    TIOCode.Read: Result := $07;
+    TIOCode.OpenWrite: Result := $08;
+    TIOCode.Append: Result := $09;
+    TIOCode.WriteRecord: Result := $09;
+    TIOCode.Write: Result := $0b;
+    TIOCode.OpenReadWrite: Result := $0c;
+    TIOCode.FileMode: Result := $f0;
+    TIOCode.Close: Result := $ff;
+    else
+      Assert(False, 'Invalid ioCode.');
+  end;
+end;
 
 end.

@@ -53,9 +53,8 @@ var
 
   NumTok: Integer = 0;
 
-  i, NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc,
-  CodeSize, VarDataSize, NumStaticStrCharsTmp,
-  AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+  i, NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
+  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
 
@@ -148,49 +147,12 @@ function GetVAL(a: String): Integer;
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
-function IntToStr(const a: Int64): String;
-function StrToInt(const a: String): TInteger;
-
-procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
-function GetIOBits(const ioCode: TIOCode): TIOBits;
-
 // ----------------------------------------------------------------------------
 
 implementation
 
 uses Messages, Utilities;
 
-
-// ----------------------------------------------------------------------------
-// Map modifier codes to the bits in the method status.
-// ----------------------------------------------------------------------------
-
-procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
-begin
-  bits := bits or (Word(1) shl Ord(modifierCode));
-end;
-
-// ----------------------------------------------------------------------------
-// Map I/O codes to the bits in the CIO block.
-// ----------------------------------------------------------------------------
-
-function GetIOBits(const ioCode: TIOCode): TIOBits;
-begin
-  case ioCode of
-    TIOCode.OpenRead: Result := $04;
-    TIOCode.ReadRecord: Result := $05;
-    TIOCode.Read: Result := $07;
-    TIOCode.OpenWrite: Result := $08;
-    TIOCode.Append: Result := $09;
-    TIOCode.WriteRecord: Result := $09;
-    TIOCode.Write: Result := $0b;
-    TIOCode.OpenReadWrite: Result := $0c;
-    TIOCode.FileMode: Result := $f0;
-    TIOCode.Close: Result := $ff;
-    else
-      Assert(False, 'Invalid ioCode.');
-  end;
-end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -307,42 +269,6 @@ begin
     end;
 
 end;  //GetEnumName
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function StrToInt(const a: String): TInteger;
-  (*----------------------------------------------------------------------------*)
-  (*----------------------------------------------------------------------------*)
-{$IFNDEF PAS2JS}
-var
-  i: Integer; // ##NEEDED
-begin
-  val(a, Result, i);
-end;
-
-{$ELSE}
-// This code below should work the same in FPC, but this needs to be tested first.
-var value: integer;
-var i: integer;
-begin
- val(a,value, i);
- Result := value;
-end;
-{$ENDIF}
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function IntToStr(const a: Int64): String;
-  (*----------------------------------------------------------------------------*)
-  (*----------------------------------------------------------------------------*)
-begin
-  str(a, Result);
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
