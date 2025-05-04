@@ -144,9 +144,9 @@ begin
           res.resPar[j] := tmp;
         end;
 
-        //     writeln(res.resName,',',res.resType,',',res.resFile);
+        // WriteLn(res.resName,',',res.resType,',',res.resFile);
 
-        for j := High(resArray) - 1 downto 0 do
+        for j := High(resArray) - 1 downto Low(resArray) do
           if resArray[j].resName = res.resName then
             Error(NumTok, TMessage.Create(TErrorCode.DuplicateResource, 'Duplicate resource: Type = ' +
               res.resType + ', Name = ''' + res.resName + ''''));

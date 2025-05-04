@@ -202,7 +202,7 @@ type
     Alias: TString;      // EXTERNAL alias 'libraries'
     Libraries: Integer;    // EXTERNAL alias 'libraries'
     DataType: TDataType;
-    IdType: TTokenKind; // TODO Have TIdentierType
+    IdType: TTokenKind; // TODO Have TIdenfierType
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
 
@@ -327,8 +327,10 @@ var
   NumDefines: Integer = 1;  // NumDefines = AddDefines
 
   i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func,
-  NumProc, BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, ShrShlCnt,
+  NumProc, BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+
+  ShrShlCnt: Integer; // Counter, used only for label generation
 
   pass: TPass;
 
@@ -715,6 +717,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
+// TODO: Move to Tokens units
 function InfoAboutToken(t: TTokenKind): String;
 begin
 
