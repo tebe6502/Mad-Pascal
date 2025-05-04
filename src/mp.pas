@@ -484,12 +484,6 @@ uses
 
     if (UnitName[1].Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    if pos(MainPath, ExtractFilePath(UnitName[1].Name)) > 0 then
-      FilePath := ExtractFilePath(UnitName[1].Name)
-    else
-      FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
-
-
  {$IFDEF USEOPTFILE}
 
    OptFile.AssignFile(ChangeFileExt(UnitName[1].Name, '.opt') ); OptFile.Rewrite();

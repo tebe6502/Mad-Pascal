@@ -18,13 +18,19 @@ var
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
 
+  AsmBlockIndex: Integer;
   AsmBlock: array [0..4095] of String;
 
   Data, DataSegment, StaticStringData: TWordMemory;
 
+  AddDefines: Integer = 1;
+  NumDefines: Integer = 1;  // NumDefines = AddDefines
+  Defines: array [1..MAXDEFINES] of TDefine;
+
   NumTypes: Integer;
   TypeArray: array [1..MAXTYPES] of TType;
 
+  NumTok: Integer = 0;
   Tok: array of TToken;
 
   NumIdent: Integer;
@@ -33,9 +39,6 @@ var
   NumUnits: Integer;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
 
-  AddDefines: Integer = 1;
-  NumDefines: Integer = 1;  // NumDefines = AddDefines
-  Defines: array [1..MAXDEFINES] of TDefine;
 
   IFTmpPosStack: array of Integer;
 
@@ -47,27 +50,24 @@ var
 
   BlockStackTop: Integer;
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
+
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
 
   OldConstValType: TDataType;
 
-  NumTok: Integer = 0;
-
   i, NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
-  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+  NumStaticStrCharsTmp, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
 
   pass: TPass;
-
-  iOut: Integer = -1;
 
   CODEORIGIN_BASE: Integer = -1;
   DATA_BASE: Integer = -1;
   ZPAGE_BASE: Integer = -1;
   STACK_BASE: Integer = -1;
 
-  UnitNameIndex: Integer = 1;
+  UnitNameIndex: Integer; // Initialized in TokenizeProgramInitialization
 
   FastMul: Integer = -1;
 
@@ -77,13 +77,17 @@ var
 
   resArray: array of TResource;
 
-  FilePath: String;
-  optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
+  optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outputFile: TString;
 
   msgWarning, msgNote, msgUser: TStringArray;
-  OptimizeBuf, LinkObj: TStringArray;
+
+  LinkObj: TStringArray;
   unitPathList: TPathList;
 
+  // Optimizer Settings
+  iOut: Integer;
+  outTmp: TString;
+  OptimizeBuf: TStringArray;
 
   optimize: record
     use: Boolean;
@@ -140,7 +144,7 @@ function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataTyp
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
-function GetTokenSpellingAtIndex(i: TTokenIndex): String;
+function GetTokenSpellingAtIndex(tokenIndex: TTokenIndex): String;
 
 function GetVAL(a: String): Integer;
 
@@ -274,11 +278,11 @@ end;  //GetEnumName
 // ----------------------------------------------------------------------------
 
 
-function GetTokenSpellingAtIndex(i: TTokenIndex): TString;
+function GetTokenSpellingAtIndex(tokenIndex: TTokenIndex): TString;
 var
   kind: TTokenKind;
 begin
-  if i > NumTok then
+  if tokenIndex > NumTok then
     Result := 'no token'
   else
   begin
