@@ -188,11 +188,12 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                  {$ENDIF} {$IFDEF PAS2JS}
+                     {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                  {$ENDIF}
+                     {$ENDIF}
   Common,
   Compiler,
+  CompilerTypes,
   Console,
   Diagnostic,
   FileIO,
@@ -273,7 +274,7 @@ uses
                 if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
                 begin
                   Inc(i);
-                  parameterValue:=TEnvironment.GetParameterString(i);
+                  parameterValue := TEnvironment.GetParameterString(i);
                   unitPathList.AddFolder(parameterValue);
 
                 end
@@ -553,18 +554,19 @@ uses
     NormVideo;
   end;
 
-var
-  exitCode: TExitCode;
-  fileMap: TFileMap;
-  fileMapEntry: TFileMapEntry;
-  content: String;
-begin
-
-  exitCode := Main();
-  if (exitCode <> 0) then
+  function CallMain: TExitCode;
+  var
+    exitCode: TExitCode;
+    fileMap: TFileMap;
+    fileMapEntry: TFileMapEntry;
+    content: String;
   begin
-    WriteLn('Program ended with exit code ' + IntToStr(exitCode));
-  end;
+
+    exitCode := Main();
+    if (exitCode <> 0) then
+    begin
+      WriteLn('Program ended with exit code ' + IntToStr(exitCode));
+    end;
 
   {$IFDEF SIMULATED_FILE_IO}
   fileMap:=TFileSystem.GetFileMap();
@@ -575,7 +577,17 @@ begin
     WriteLn(content);
   end;
   {$ENDIF}
-  {$IFDEF DEBUG}
+
+    Result := exitCode;
+  end;
+
+var
+  exitCode: TExitCode;
+begin
+  exitCode := CallMain;
+  exitCode := CallMain;
+
+    {$IFDEF DEBUG}
   Console.WaitForKeyPressed;
   {$ENDIF}
 

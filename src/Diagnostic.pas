@@ -13,7 +13,7 @@ procedure Diagnostics;
 
 implementation
 
-uses SysUtils, Common, Datatypes, FileIO, Tokens;
+uses SysUtils, Common, CompilerTypes, Datatypes, FileIO, Tokens;
 
 // ----------------------------------------------------------------------------
 

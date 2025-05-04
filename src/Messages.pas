@@ -4,8 +4,7 @@ interface
 
 {$I Defines.inc}
 
-uses Common, // For Tok and TTokenIndex
-  Datatypes, CommonTypes, Tokens;
+uses Common, CompilerTypes, Datatypes, CommonTypes, Tokens;
 
 {$SCOPEDENUMS ON}
 type

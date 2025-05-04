@@ -18,6 +18,7 @@ uses
   Math, // Required for Min(), do not remove
   Common,
   CommonTypes,
+  CompilerTypes,
   Console,
   Datatypes,
   MathEvaluate,

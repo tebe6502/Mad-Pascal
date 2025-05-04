@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses CommonTypes, Tokens; // TODO: Only use tokens and type
+uses CommonTypes, CompilerTypes, Tokens; // TODO: Only use tokens and type
 
 // ----------------------------------------------------------------------------
 
@@ -33,10 +33,12 @@ var
   i: Integer;
 begin
 
+  NumIdent := 0;
   for i := Low(Ident) to High(Ident) do
   begin
     Ident[i] := Default(TIdentifier);
   end;
+
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
 
@@ -61,7 +63,7 @@ begin
   run_func := 0;
   NumProc := 0;
   NumTok := 0;
-  NumIdent := 0;
+
 
   NumStaticStrChars := 0;
 
