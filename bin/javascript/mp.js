@@ -4062,13 +4062,27 @@ rtl.module("StringUtilities",["System","SysUtils"],function () {
     Result = "";
     if (a !== "") {
       $mod.SkipWhitespaces(a,i);
-      if (pas.System.upcase(a.charAt(i.get() - 1)).charCodeAt() in $mod.AllowDigitFirstChars) {
-        Result = pas.System.upcase(a.charAt(i.get() - 1));
-        i.set(i.get() + 1);
-        while (pas.System.upcase(a.charAt(i.get() - 1)).charCodeAt() in $mod.AllowDigitChars) {
-          Result = Result + pas.System.upcase(a.charAt(i.get() - 1));
+      if (i.get() < a.length) {
+        if (pas.System.upcase(a.charAt(i.get() - 1)).charCodeAt() in $mod.AllowDigitFirstChars) {
+          Result = pas.System.upcase(a.charAt(i.get() - 1));
           i.set(i.get() + 1);
+          while (pas.System.upcase(a.charAt(i.get() - 1)).charCodeAt() in $mod.AllowDigitChars) {
+            Result = Result + pas.System.upcase(a.charAt(i.get() - 1));
+            i.set(i.get() + 1);
+          };
         };
+      };
+    };
+    return Result;
+  };
+  this.GetConstantUpperCase = function (a, i) {
+    var Result = "";
+    Result = "";
+    if (a !== "") {
+      $mod.SkipWhitespaces(a,i);
+      if (pas.System.upcase(a.charAt(i.get() - 1)).charCodeAt() in rtl.unionSet($mod.AllowLabelFirstChars,rtl.createSet(46))) while (pas.System.upcase(a.charAt(i.get() - 1)).charCodeAt() in $mod.AllowLabelChars) {
+        Result = Result + pas.System.upcase(a.charAt(i.get() - 1));
+        i.set(i.get() + 1);
       };
     };
     return Result;
@@ -7595,7 +7609,8 @@ rtl.module("Scanner",["System","CommonTypes","Tokens"],function () {
           if (pas.Utilities.THaltException.isPrototypeOf($e)) {
             var e = $e;
             pas.Utilities.RaiseHaltException(e.GetExitCode());
-          } else {
+          } else if (pas.SysUtils.EInOutError.isPrototypeOf($e)) {
+            var e = $e;
             if (Text !== "") {
               if (Text === "END.") {
                 $mod.AddToken(pas.Tokens.TTokenKind.ENDTOK,UnitIndex,Line,3,0);
@@ -7605,7 +7620,7 @@ rtl.module("Scanner",["System","CommonTypes","Tokens"],function () {
                 Spaces = 0;
               };
             };
-          }
+          } else throw $e
         };
         InFile.Close();
       } finally {
@@ -8057,63 +8072,66 @@ rtl.module("Scanner",["System","CommonTypes","Tokens"],function () {
         t = rtl.setIntfL(t,pas.FileIO.TFileSystem.CreateTextFile(),true);
         t.Assign(fnam);
         t.Reset();
-        while (!t.EOF()) {
-          s = "";
-          t.ReadLn({get: function () {
-              return s;
-            }, set: function (v) {
-              s = v;
-            }});
-          i = 1;
-          pas.StringUtilities.SkipWhitespaces(s,{get: function () {
-              return i;
-            }, set: function (v) {
-              i = v;
-            }});
-          if ((s.length > (i - 1)) && !(s.charCodeAt(i - 1) in rtl.createSet(35,59))) {
-            res.resName = pas.StringUtilities.GetLabelUpperCase(s,{get: function () {
+        try {
+          while (!t.EOF()) {
+            s = "";
+            t.ReadLn({get: function () {
+                return s;
+              }, set: function (v) {
+                s = v;
+              }});
+            i = 1;
+            pas.StringUtilities.SkipWhitespaces(s,{get: function () {
                 return i;
               }, set: function (v) {
                 i = v;
               }});
-            res.resType = pas.StringUtilities.GetLabelUpperCase(s,{get: function () {
-                return i;
-              }, set: function (v) {
-                i = v;
-              }});
-            res.resFile = pas.StringUtilities.GetFilePath(s,{get: function () {
-                return i;
-              }, set: function (v) {
-                i = v;
-              }});
-            if ((res.resType === "RCDATA") || (res.resType === "RCASM") || (res.resType === "DOSFILE") || (res.resType === "RELOC") || (res.resType === "RMT") || (res.resType === "MPT") || (res.resType === "CMC") || (res.resType === "RMTPLAY") || (res.resType === "RMTPLAY2") || (res.resType === "RMTPLAYV") || (res.resType === "MPTPLAY") || (res.resType === "CMCPLAY") || (res.resType === "EXTMEM") || (res.resType === "XBMP") || (res.resType === "SAPR") || (res.resType === "SAPRPLAY") || (res.resType === "PP") || (res.resType === "LIBRARY")) {}
-            else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.UndefinedResourceType,"Undefined resource type: Type = '" + res.resType + "', Name = '" + res.resName + "'","","","","","","","","","",""]),pas.Messages.IMessage)));
-            if ((res.resFile !== "") && (pas.Common.unitPathList.FindFile(res.resFile) === "")) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ResourceFileNotFound,"Resource file not found: Type = " + res.resType + ", Name = '" + res.resName + "' in unit path '" + pas.Common.unitPathList.ToString() + "'","","","","","","","","","",""]),pas.Messages.IMessage)));
-            for (j = 1; j <= 8; j++) {
-              if (s.charCodeAt(i - 1) in rtl.createSet(39,34)) {
-                tmp = pas.StringUtilities.GetStringUpperCase(s,{get: function () {
-                    return i;
-                  }, set: function (v) {
-                    i = v;
-                  }})}
-               else tmp = pas.StringUtilities.GetNumber(s,{get: function () {
+            if ((s.length > (i - 1)) && !(s.charCodeAt(i - 1) in rtl.createSet(35,59))) {
+              res.resName = pas.StringUtilities.GetLabelUpperCase(s,{get: function () {
                   return i;
                 }, set: function (v) {
                   i = v;
                 }});
-              if (tmp === "") tmp = "0";
-              res.resPar[j - 1] = tmp;
+              res.resType = pas.StringUtilities.GetLabelUpperCase(s,{get: function () {
+                  return i;
+                }, set: function (v) {
+                  i = v;
+                }});
+              res.resFile = pas.StringUtilities.GetFilePath(s,{get: function () {
+                  return i;
+                }, set: function (v) {
+                  i = v;
+                }});
+              if ((res.resType === "RCDATA") || (res.resType === "RCASM") || (res.resType === "DOSFILE") || (res.resType === "RELOC") || (res.resType === "RMT") || (res.resType === "MPT") || (res.resType === "CMC") || (res.resType === "RMTPLAY") || (res.resType === "RMTPLAY2") || (res.resType === "RMTPLAYV") || (res.resType === "MPTPLAY") || (res.resType === "CMCPLAY") || (res.resType === "EXTMEM") || (res.resType === "XBMP") || (res.resType === "SAPR") || (res.resType === "SAPRPLAY") || (res.resType === "PP") || (res.resType === "LIBRARY")) {}
+              else pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(1,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.UndefinedResourceType,"Undefined resource type: Type = '" + res.resType + "', Name = '" + res.resName + "'","","","","","","","","","",""]),pas.Messages.IMessage)));
+              if ((res.resFile !== "") && (pas.Common.unitPathList.FindFile(res.resFile) === "")) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(2,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.ResourceFileNotFound,"Resource file not found: Type = " + res.resType + ", Name = '" + res.resName + "' in unit path '" + pas.Common.unitPathList.ToString() + "'","","","","","","","","","",""]),pas.Messages.IMessage)));
+              for (j = 1; j <= 8; j++) {
+                if (s.charCodeAt(i - 1) in rtl.createSet(39,34)) {
+                  tmp = pas.StringUtilities.GetStringUpperCase(s,{get: function () {
+                      return i;
+                    }, set: function (v) {
+                      i = v;
+                    }})}
+                 else tmp = pas.StringUtilities.GetNumber(s,{get: function () {
+                    return i;
+                  }, set: function (v) {
+                    i = v;
+                  }});
+                if (tmp === "") tmp = "0";
+                res.resPar[j - 1] = tmp;
+              };
+              for (var $l = rtl.length(pas.Common.resArray) - 1 - 1; $l >= 0; $l--) {
+                j = $l;
+                if (pas.Common.resArray[j].resName === res.resName) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.DuplicateResource,"Duplicate resource: Type = " + res.resType + ", Name = '" + res.resName + "'","","","","","","","","","",""]),pas.Messages.IMessage)));
+              };
+              j = rtl.length(pas.Common.resArray) - 1;
+              pas.Common.resArray[j].$assign(res);
+              pas.Common.resArray = rtl.arraySetLength(pas.Common.resArray,pas.Common.TResource,j + 2);
             };
-            for (var $l = rtl.length(pas.Common.resArray) - 1 - 1; $l >= 0; $l--) {
-              j = $l;
-              if (pas.Common.resArray[j].resName === res.resName) pas.Messages.Error$1(pas.Common.NumTok,$ir.ref(3,rtl.queryIntfT(pas.Messages.TMessage.$create("Create$1",[pas.Messages.TErrorCode.DuplicateResource,"Duplicate resource: Type = " + res.resType + ", Name = '" + res.resName + "'","","","","","","","","","",""]),pas.Messages.IMessage)));
-            };
-            j = rtl.length(pas.Common.resArray) - 1;
-            pas.Common.resArray[j].$assign(res);
-            pas.Common.resArray = rtl.arraySetLength(pas.Common.resArray,pas.Common.TResource,j + 2);
           };
+        } finally {
+          t.Close();
         };
-        t.Close();
       } finally {
         $ir.free();
         rtl._Release(t);
@@ -33745,7 +33763,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
   var $impl = $mod.$impl;
   this.CompilerTitle = function () {
     var Result = "";
-    Result = "Mad Pascal Compiler version " + pas.Common.title + " [" + "2025/4/28" + "] for MOS 6502 CPU";
+    Result = "Mad Pascal Compiler version " + pas.Common.title + " [" + "2025/5/3" + "] for MOS 6502 CPU";
     return Result;
   };
   var PI_VALUE = 3;
@@ -33754,6 +33772,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
   var NEGINFINITY_VALUE = 0x33333333;
   this.Main = function (unitPathList) {
     pas.Common.unitPathList = unitPathList;
+    rtl.setIntfP($impl,"evaluationContext",rtl.queryIntfT($impl.TEvaluationContext.$create("Create$1"),pas.MathEvaluate.IEvaluationContext),true);
     pas.Common.Tok = rtl.arraySetLength(pas.Common.Tok,pas.Common.TToken,1);
     pas.Common.IFTmpPosStack = rtl.arraySetLength(pas.Common.IFTmpPosStack,0,1);
     pas.Common.Tok[pas.Common.NumTok].Line = 0;
@@ -33783,8 +33802,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
     pas.Parser.DefineIdent(1,"INFINITY",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.SINGLETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,INFINITY_VALUE,pas.Tokens.TTokenKind.IDENTTOK);
     pas.Parser.DefineIdent(1,"NEGINFINITY",pas.Tokens.TTokenKind.CONSTTOK,pas.Tokens.TTokenKind.SINGLETOK,0,pas.Tokens.TTokenKind.UNTYPETOK,NEGINFINITY_VALUE,pas.Tokens.TTokenKind.IDENTTOK);
     pas.Common.NumPredefIdent = pas.Common.NumIdent;
-    pas.Common.pass = pas.Common.TPass.CALL_DETERMINATION;
-    $impl.CompileProgram();
+    $impl.CompileProgram(pas.Common.TPass.CALL_DETERMINATION);
     pas.Optimize.OptimizeProgram(pas.Parser.GetIdentIndex("MAIN"));
     pas.Common.NumIdent = pas.Common.NumPredefIdent;
     pas.Memory.ClearWordMemory(pas.Common.DataSegment.slice(0));
@@ -33814,17 +33832,42 @@ rtl.module("Compiler",["System","FileIO"],function () {
     pas.Common.iOut = 0;
     pas.Common.outTmp = "";
     pas.Common.OptimizeBuf = rtl.arraySetLength(pas.Common.OptimizeBuf,"",1);
-    pas.Common.pass = pas.Common.TPass.CODE_GENERATION;
-    $impl.CompileProgram();
+    $impl.CompileProgram(pas.Common.TPass.CODE_GENERATION);
   };
   this.Free = function () {
     pas.Common.Tok = rtl.arraySetLength(pas.Common.Tok,pas.Common.TToken,0);
     pas.Common.IFTmpPosStack = rtl.arraySetLength(pas.Common.IFTmpPosStack,0,0);
+    rtl.setIntfP($impl,"evaluationContext",null);
     rtl.free(pas.Common,"unitPathList");
     pas.Common.unitPathList = null;
   };
   $mod.$implcode = function () {
     $impl.evaluationContext = null;
+    rtl.createClass($impl,"TEvaluationContext",pas.System.TInterfacedObject,function () {
+      this.Create$1 = function () {
+        return this;
+      };
+      this.GetConstantName = function (expression, index) {
+        var Result = "";
+        Result = pas.StringUtilities.GetConstantUpperCase(expression,index);
+        return Result;
+      };
+      this.GetConstantValue = function (constantName, constantValue) {
+        var Result = false;
+        var identTemp = 0;
+        identTemp = pas.Parser.GetIdentIndex(constantName);
+        if (identTemp > 0) {
+          constantValue.set(pas.Common.Ident[identTemp - 1].Value);
+          Result = true;
+        } else {
+          constantValue.set(0);
+          Result = false;
+        };
+        return Result;
+      };
+      rtl.addIntf(this,pas.MathEvaluate.IEvaluationContext);
+      rtl.addIntf(this,pas.System.IUnknown);
+    });
     $impl.GetIdentResult = function (ProcAsBlock) {
       var Result = 0;
       var IdentIndex = 0;
@@ -34950,7 +34993,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
       if (($tmp === pas.Common.TIOCode.Append) || ($tmp === pas.Common.TIOCode.OpenRead) || ($tmp === pas.Common.TIOCode.OpenWrite)) {
         pas.Optimize.asm65("\t@openfile " + pas.Common.Ident[IdentIndex - 1].Name + ", #" + pas.Common.IntToStr(ioCode),"")}
        else if ($tmp === pas.Common.TIOCode.FileMode) {
-        pas.Optimize.asm65("\t@openfile " + pas.Common.Ident[IdentIndex - 1].Name + ", MAIN.SYSTEM.FileMode","")}
+        pas.Optimize.asm65("\t@openfile " + pas.Common.Ident[IdentIndex - 1].Name + ", C.SYSTEM.FileMode","")}
        else if ($tmp === pas.Common.TIOCode.Close) pas.Optimize.asm65("\t@closefile " + pas.Common.Ident[IdentIndex - 1].Name,"");
       pas.Optimize.asm65("\tpla:tax","");
       pas.Optimize.asm65("","");
@@ -44566,7 +44609,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
       if (pas.Common.pass === pas.Common.TPass.CALL_DETERMINATION) if (pas.Common.Ident[BlockIdentIndex - 1].isKeep || pas.Common.Ident[BlockIdentIndex - 1].isInterrupt || pas.Common.Ident[BlockIdentIndex - 1].updateResolvedForward) $impl.AddCallGraphChild(pas.Common.BlockStack[pas.Common.BlockStackTop],pas.Common.Ident[BlockIdentIndex - 1].ProcAsBlock);
       return Result;
     };
-    $impl.CompileProgram = function () {
+    $impl.CompileProgram = function (pass) {
       var i = 0;
       var j = 0;
       var DataSegmentSize = 0;
@@ -44575,6 +44618,8 @@ rtl.module("Compiler",["System","FileIO"],function () {
       var a = "";
       var yes = false;
       var res = pas.Common.TResource.$new();
+      pas.System.Writeln("Pass " + pas.Common.IntToStr(pass) + ".");
+      pas.Common.pass = pass;
       pas.Optimize.ResetOpty();
       pas.Common.optimize.use = false;
       tmp = "";
@@ -44628,7 +44673,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
              else tmp = $impl.GetLocalName(IdentIndex,"");
             if (pas.Common.resArray[i].resType === "LIBRARY") pas.Common.RCLIBRARY = true;
             pas.Common.resArray[i].resFullName = tmp;
-            pas.Common.Ident[IdentIndex - 1].Pass = pas.Common.pass;
+            pas.Common.Ident[IdentIndex - 1].Pass = pass;
             yes = true;
             break;
           };
@@ -44708,7 +44753,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
       pas.Optimize.asm65("","");
       pas.Optimize.asm65("DATAORIGIN","");
       if (pas.Common.DataSegmentUse) {
-        if (pas.Common.pass === pas.Common.TPass.CODE_GENERATION) {
+        if (pass === pas.Common.TPass.CODE_GENERATION) {
           DataSegmentSize = pas.Common.VarDataSize;
           if (pas.Common.LIBRARYTOK_USE === false) for (var $l5 = pas.Common.VarDataSize - 1; $l5 >= 0; $l5--) {
             j = $l5;
