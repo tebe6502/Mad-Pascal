@@ -2333,10 +2333,10 @@ begin
     if sta_bp_1(i+11) and									// sta :bp+1				; 11
 
        lda_im(i) and										// lda #				; 0
-       add(i+1) and (add_stack(i+1) = false) and						// add					; 1
+       add(i+1) and (add_stack(i+1) = false) and						// add					; 1	~:STACKORIGIN
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_im(i+3) and 										// lda #				; 3
-       adc(i+4) and (adc_stack(i+4) = false) and						// adc 					; 4
+       adc(i+4) and (adc_stack(i+4) = false) and						// adc 					; 4	~:STACKORIGIN
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_im(i+6) and										// lda #				; 6
        add_stack(i+7) and									// add :STACKORIGIN			; 7
@@ -2368,10 +2368,10 @@ begin
 
     if sta_bp_1(i+11) and									// sta :bp+1				; 11
 
-       lda_val(i) and										// lda					; 0
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
        add_im(i+1) and										// add #				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
-       lda_val(i+3) and										// lda					; 3
+       lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
        adc_im(i+4) and										// adc #				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_im(i+6) and										// lda #				; 6
@@ -3410,6 +3410,38 @@ begin
 
 	 if lda_bp_y(i+7) then listing[i+7] := #9'lda $' + IntToHex(p, 4) + ',y';
 	 if sta_bp_y(i+8) then listing[i+8] := #9'sta $' + IntToHex(p, 4) + ',y';
+
+	 listing[i]   := '';
+	 listing[i+1] := '';
+	 listing[i+2] := '';
+	 listing[i+3] := '';
+	 listing[i+4] := '';
+	 listing[i+5] := '';
+
+	exit(false);
+       end;
+
+
+    if lda_bp_y(i+7) and 									// lda (:bp),y				; 7
+
+       lda_im(i) and										// lda #				; 0
+       add(i+1) and (iy(i+1) = false) and							// add					; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
+       lda_im(i+3) and 										// lda #				; 3
+       adc_im_0(i+4) and									// adc #$00				; 4
+       sta_bp_1(i+5) and									// sta :bp+1				; 5
+       ldy_stack(i+6) and 									// ldy :STACKORIGIN			; 6
+//       lda_bp_y(i+7) and 									// lda (:bp),y				; 7
+       (add_sub_val(i+8) or and_ora_eor_val(i+8)) and						// add|sub|and|ora|eor			; 8
+       sta_a(i+9) then										// sta					; 9
+     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
+       begin   
+	 p := GetWORD(i, i+3);
+
+	 listing[i+6] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	 listing[i+7] := #9'lda $' + IntToHex(p, 4) + ',y';
+
+	 if sta_bp_y(i+9) then listing[i+9] := #9'sta $' + IntToHex(p, 4) + ',y';
 
 	 listing[i]   := '';
 	 listing[i+1] := '';

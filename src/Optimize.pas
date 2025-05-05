@@ -816,7 +816,7 @@ var inxUse, found: Boolean;
 
         if lda_stack(k) and 								// sta :STACKORIGIN	; k-1
 	   sta_stack(k-1) and								// lda :STACKORIGIN	; k
-	   sta_a(i+1) then								// sta			; i+1
+	   (sta_a(i+1) or add_sub(i+1)) then						// sta|add|sub		; i+1
          if copy(listing[k], 6, 256) = copy(listing[k-1], 6, 256) then
 	  begin
 	   listing[k-1] := '';
@@ -1424,7 +1424,7 @@ end;
 
 
 {
-if (pos('lda #$04', listing[i]) > 0) then begin
+if (pos('add #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
