@@ -72,13 +72,14 @@ begin
   for x:=0 to 255 do lookupDiv16[x] := x shr 4; // Simply store values divided by 16
 end;
 
+//-----------------------------------------------------------------------------
 
 procedure Init;
 begin
 
   asm
     sei       ; disable IRQ
-    sec \ xce ; switch to native mode
+    sec \ xce ; switch to emulation mode
     cld       ; turn off decimal mode
   end;
 
