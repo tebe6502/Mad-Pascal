@@ -80,7 +80,7 @@ var
 
     if Ident[IdentIndex].Section then
       for i := MAXALLOWEDUNITS downto 1 do
-        if UnitArray[Index].AllowedUnitNames[i] = UnitArray[Ident[IdentIndex].UnitIndex].Name then exit(True);
+        if GetUnit(Index).AllowedUnitNames[i] = GetUnit(Ident[IdentIndex].UnitIndex).Name then exit(True);
 
   end;
 
@@ -97,7 +97,7 @@ var
       for IdentIndex := 1 to NumIdent do
         if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
           if (Ident[IdentIndex].UnitIndex = UnitIndex) {or Ident[IdentIndex].Section} or
-            (Ident[IdentIndex].UnitIndex = 1) or (UnitArray[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') or
+            (Ident[IdentIndex].UnitIndex = 1) or (GetUnit(Ident[IdentIndex].UnitIndex).Name = 'SYSTEM') or
             UnitAllowedAccess(IdentIndex, UnitIndex) then
           begin
             Result := IdentIndex;

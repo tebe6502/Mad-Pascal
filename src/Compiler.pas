@@ -125,7 +125,7 @@ begin
 
   if ((Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and
     Ident[IdentIndex].Section) then
-    Result := UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
+    Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + a + Ident[IdentIndex].Name
   else
     Result := a + Ident[IdentIndex].Name;
 
@@ -137,16 +137,16 @@ var
   lab: String;
 begin
 
-  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitArray[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+  if (Ident[IdentIndex].UnitIndex > 1) and (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.', a) = 1) then
   begin
 
     lab := Ident[IdentIndex].Name;
     if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
-    if (pos(UnitArray[Ident[IdentIndex].UnitIndex].Name + '.adr.', a) = 1) then
-      Result := UnitArray[Ident[IdentIndex].UnitIndex].Name + '.adr.' + lab
+    if (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.adr.', a) = 1) then
+      Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.adr.' + lab
     else
-      Result := UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + lab;
+      Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + lab;
 
   end
   else
@@ -158,7 +158,7 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitArray[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+  if (Ident[IdentIndex].UnitIndex > 1) and (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.', a) = 1) then
     a := copy(a, a.IndexOf('.') + 2, length(a));
 
   Result := pos('.', a) > 0;
@@ -7936,7 +7936,7 @@ begin
         asm65(#9'.LOCAL +MAIN.' + svar)                  // w tym samym module poza aktualnym blokiem procedury/funkcji
       else
         if (Ident[IdentIndex].UnitIndex > 1) then
-          asm65(#9'.LOCAL +MAIN.' + UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+          asm65(#9'.LOCAL +MAIN.' + GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + svar)      // w innym module
         else
           asm65(#9'.LOCAL +MAIN.' + svar);
     // w tym samym module poza aktualnym blokiem procedury/funkcji
@@ -15234,7 +15234,7 @@ var
 
   function GetIdentifierFullName(const identifier: TIdentifier): String;
   begin
-    Result := UnitArray[identifier.UnitIndex].Name + '.' + identifier.Name;
+    Result := GetUnit(identifier.UnitIndex).Name + '.' + identifier.Name;
   end;
 
   function GetIdentifierDataSize(const identifier: TIdentifier): Integer;
@@ -16931,20 +16931,20 @@ begin
     begin
       asm65separator;
 
-      DefineIdent(i, UnitArray[Tok[i].UnitIndex].Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+      DefineIdent(i, GetUnit(Tok[i].UnitIndex).Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
       Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
 
       //   writeln(UnitArray[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
       asm65;
-      asm65('.local'#9 + UnitArray[Tok[i].UnitIndex].Name, '; UNIT');
+      asm65('.local'#9 + GetUnit(Tok[i].UnitIndex).Name, '; UNIT');
 
       UnitNameIndex := Tok[i].UnitIndex;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
 
-      if Tok[i + 2].Name <> UnitArray[Tok[i].UnitIndex].Name then
+      if Tok[i + 2].Name <> GetUnit(Tok[i].UnitIndex).Name then
         Error(i + 2, 'Illegal unit name: ' + Tok[i + 2].Name);
 
       CheckTok(i + 3, TTokenKind.SEMICOLONTOK);

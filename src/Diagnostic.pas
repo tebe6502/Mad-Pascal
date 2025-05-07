@@ -25,7 +25,7 @@ var
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
-  DiagFile.Assign(ChangeFileExt(UnitArray[1].Name, '.txt'));
+  DiagFile.Assign(ChangeFileExt(GetUnit(1).Name, '.txt'));
   DiagFile.Rewrite;
 
   DiagFile.WriteLn;
