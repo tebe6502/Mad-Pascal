@@ -8,6 +8,8 @@ uses CompilerTypes;
 
 // ----------------------------------------------------------------------------
 
+procedure Initialize;
+
 procedure ResetOpty;
 
 procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
@@ -30,6 +32,13 @@ var
 
 // ----------------------------------------------------------------------------
 
+
+procedure Initialize;
+var
+  i: Integer;
+begin
+  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
+end;
 
 procedure ResetOpty;
 begin

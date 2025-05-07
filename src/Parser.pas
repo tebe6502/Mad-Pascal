@@ -80,7 +80,7 @@ var
 
     if Ident[IdentIndex].Section then
       for i := MAXALLOWEDUNITS downto 1 do
-        if UnitName[Index].Allow[i] = UnitName[Ident[IdentIndex].UnitIndex].Name then exit(True);
+        if UnitName[Index].AllowedUnitNames[i] = UnitName[Ident[IdentIndex].UnitIndex].Name then exit(True);
 
   end;
 

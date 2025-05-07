@@ -489,6 +489,7 @@ uses
       end;
     end;
 
+    // The main program is the first unit.
     if (UnitName[1].Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
 
  {$IFDEF USEOPTFILE}
@@ -558,9 +559,11 @@ uses
   function CallMain: TExitCode;
   var
     exitCode: TExitCode;
+   {$IFDEF SIMULATED_FILE_IO}
     fileMap: TFileMap;
     fileMapEntry: TFileMapEntry;
     content: String;
+   {$ENDIF}
   begin
 
     exitCode := Main();
@@ -586,7 +589,9 @@ var
   exitCode: TExitCode;
 begin
   exitCode := CallMain;
-  exitCode := CallMain;
+  {$IFDEF DEBUG}
+  exitCode := CallMain; // TODO until 2nd call works
+  {$ENDIF}
 
     {$IFDEF DEBUG}
   Console.WaitForKeyPressed;

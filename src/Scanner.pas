@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses CommonTypes, CompilerTypes, Tokens; // TODO: Only use tokens and type
+uses CommonTypes, CompilerTypes, Tokens;
 
 // ----------------------------------------------------------------------------
 

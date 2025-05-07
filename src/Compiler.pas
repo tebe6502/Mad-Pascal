@@ -8,6 +8,7 @@ uses FileIO;
 
 function CompilerTitle: String;
 
+procedure Initialize;
 procedure Main(const unitPathList: TPathList);
 procedure Free;
 
@@ -77,6 +78,10 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure Initialize;
+begin
+
+end;
 
 function GetIdentResult(ProcAsBlock: Integer): Integer;
 var
@@ -2605,7 +2610,7 @@ begin
 end;  //GenerateIncDec
 
 
-procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: Integer;
+procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TIdentIndex;
   Param: String = ''; ParamY: String = '');
 var
   NumAllocElements: Cardinal;
@@ -6835,7 +6840,8 @@ begin
                         ((Ident[IdentIndex].DataType in Pointers) and not
                         (Ident[IdentIndex].AllocElementType in [TTokenKind.UNTYPETOK,
                         TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK, TTokenKind.PROCVARTOK]) and
-                        (Ident[IdentIndex].NumAllocElements > 0)) or ((Ident[IdentIndex].DataType in Pointers) and
+                        (Ident[IdentIndex].NumAllocElements > 0)) or
+                        ((Ident[IdentIndex].DataType in Pointers) and
                         (Ident[IdentIndex].PassMethod = TParameterPassingMethod.VARPASSING)) then
                         Push(Ident[IdentIndex].Value, ASPOINTER, GetDataSize(TTokenKind.POINTERTOK), IdentIndex)
                       else
@@ -11259,7 +11265,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function CompileBlockRead(var i: Integer; IdentIndex: Integer; IdentBlock: Integer): Integer;
+function CompileBlockRead(var i: Integer; IdentIndex: TIdentIndex; IdentBlock: Integer): Integer;
 var
   NumActualParams, idx: Integer;
   ActualParamType, AllocElementType: TDataType;
@@ -17240,7 +17246,7 @@ begin
 
         yes := True;
         for j := 1 to UnitName[UnitNameIndex].Units do
-          if (UnitName[UnitNameIndex].Allow[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then yes := False;
+          if (UnitName[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then yes := False;
 
         if yes then
         begin
@@ -17250,7 +17256,7 @@ begin
           if UnitName[UnitNameIndex].Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          UnitName[UnitNameIndex].Allow[UnitName[UnitNameIndex].Units] := Tok[i].Name;
+          UnitName[UnitNameIndex].AllowedUnitNames[UnitName[UnitNameIndex].Units] := Tok[i].Name;
 
         end;
 

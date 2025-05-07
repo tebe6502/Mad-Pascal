@@ -176,8 +176,11 @@ type
     Field: array [0..MAXFIELDS] of TField;
   end;
 
+  TUnitIndex = Smallint;
+
   TToken = record
-    UnitIndex, Column: Smallint;
+    UnitIndex: TUnitIndex;
+    Column: Smallint;
     Line: Integer;
     Kind: TTokenKind;
     // For Kind=IDENTTOK:
@@ -260,7 +263,7 @@ type
     Name: TUnitName;
     Path: String;
     Units: Integer;
-    Allow: array [1..MAXALLOWEDUNITS] of TUnitName;
+    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
   end;
 
   TResource = record
