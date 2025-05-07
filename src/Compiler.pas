@@ -12513,10 +12513,9 @@ begin
                   // dla PROC, FUNC -> Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and
-                      (not (Ident[IdentIndex].AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
+                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and (not
+                      (Ident[IdentIndex].AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+                      not (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
                       [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.Ident[IdentIndex].AllocElementType] *} Ident[IdentIndex].NumAllocElements > 1) and ({GetDataSize( TDataType.Ident[GetIdentIndex(Tok[k].Name)].AllocElementType] *} Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements > 1)) *) then
                     begin
@@ -17246,7 +17245,8 @@ begin
 
         yes := True;
         for j := 1 to UnitArray[UnitNameIndex].Units do
-          if (UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then yes := False;
+          if (UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+            yes := False;
 
         if yes then
         begin
@@ -18992,6 +18992,8 @@ begin
   evaluationContext := TEvaluationContext.Create;
 
   SetLength(Tok, 1);
+  NumTok := 0;
+  Tok[NumTok] := TToken.Create;
   SetLength(IFTmpPosStack, 1);
 
   Tok[NumTok].Line := 0;
@@ -19100,9 +19102,14 @@ begin
 end;
 
 procedure Free;
+var
+  i: Integer;
 begin
 
+  for i := Low(Tok) to High(Tok) do tok[i].Free;
   SetLength(Tok, 0);
+  NumTok := 0;
+
   SetLength(IFTmpPosStack, 0);
   evaluationContext := nil;
   unitPathList.Free;

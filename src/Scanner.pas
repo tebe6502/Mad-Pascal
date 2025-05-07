@@ -24,8 +24,8 @@ type
     procedure TokenizeProgram(UsesOn: Boolean);
     procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 
-    private
-      procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+  private
+    procedure TokenizeMacro(a: String; Line, Spaces: Integer);
   end;
 
 implementation
@@ -189,7 +189,7 @@ begin
 
   if NumTok > High(Tok) then
     SetLength(Tok, NumTok + 1);
-
+  Tok[NumTok] := TToken.Create;
   // if NumTok > MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
 

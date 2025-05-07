@@ -129,6 +129,7 @@ uses
   procedure TestUnitCommon;
   var
     filePath: TFilePath;
+    scanner: IScanner;
   begin
 
     StartTest('TestUnitCommon');
@@ -143,8 +144,10 @@ uses
     // Unit Scanner
     Program_NAME := 'TestProgram';
     NumTok := 0;
+    scanner := TScanner.Create;
     // Kind, UnitIndex, Line, Column, Value
-    AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    scanner.AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    scanner := nil;
 
     // Unit Common
     unitPathList := TPathList.Create;

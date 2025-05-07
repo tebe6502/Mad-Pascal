@@ -4,7 +4,7 @@ unit CompilerTypes;
 
 interface
 
-uses SysUtils, CommonTypes, Datatypes, Tokens;
+uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -178,7 +178,22 @@ type
 
   TUnitIndex = Smallint;
 
-  TToken = record
+
+  TUnitName = TName;
+
+  TUnit = record
+    Name: TUnitName;
+    Path: TFilePath;
+    Units: Integer;
+    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
+  end;
+
+  IUnit = interface
+    function Name: TUnitName;
+    function Path: TFilePath;
+  end;
+
+  TToken = class
     UnitIndex: TUnitIndex;
     Column: Smallint;
     Line: Integer;
@@ -257,14 +272,6 @@ type
     NumChildren: Word;
   end;
 
-  TUnitName = TName;
-
-  TUnit = record
-    Name: TUnitName;
-    Path: String;
-    Units: Integer;
-    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
-  end;
 
   TResource = record
     resStream: Boolean;
