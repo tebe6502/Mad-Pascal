@@ -494,7 +494,7 @@ uses
 
  {$IFDEF USEOPTFILE}
 
-   OptFile.AssignFile(ChangeFileExt(UnitArray[1].Name, '.opt') ); OptFile.Rewrite();
+   OptFile.AssignFile(ChangeFileExt(GetUnitName(NumUnits), '.opt') ); OptFile.Rewrite();
 
  {$ENDIF}
 
@@ -502,7 +502,7 @@ uses
     if ExtractFileName(outputFilePath) <> '' then
       OutFile.Assign(outputFilePath)
     else
-      OutFile.Assign(ChangeFileExt(UnitArray[NumUnits].Name, '.a65'));
+      OutFile.Assign(ChangeFileExt(GetUnitName(NumUnits), '.a65'));
 
     OutFile.Rewrite;
 
