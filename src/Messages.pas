@@ -376,7 +376,7 @@ begin
   for i := fromTokenIndex to toTokenIndex do
   begin
     token := Tok[i];
-    WriteLn(UnitArray[token.UnitIndex].Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
+    WriteLn(GetUnit(token.UnitIndex).Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
       IntToStr(token.Column) + '): kind=' + GetTokenKindName(token.Kind) + ' name=' + token.Name + '.');
   end;
 end;
@@ -426,12 +426,12 @@ begin
       if (effectiveTokenIndex > 1) then
       begin
         previousToken := Tok[effectiveTokenIndex - 1];
-        WriteLn(UnitArray[token.UnitIndex].Path + ' (' + IntToStr(token.Line) + ',' +
+        WriteLn(GetUnit(token.UnitIndex).Path + ' (' + IntToStr(token.Line) + ',' +
           IntToStr(Succ(previousToken.Column)) + ')' + ' Error: ' + msg);
       end
       else
       begin
-        WriteLn(UnitArray[token.UnitIndex].Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
+        WriteLn(GetUnit(token.UnitIndex).Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
       end;
     end
     else
@@ -647,7 +647,7 @@ begin
   if pass = TPass.CODE_GENERATION then
   begin
 
-    a := UnitArray[Tok[tokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+    a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
       ')' + ' Warning: ' + msg.GetText();
 
     for i := High(msgWarning) - 1 downto 0 do
@@ -729,7 +729,7 @@ begin
     if pos('.', Ident[identIndex].Name) = 0 then
     begin
 
-      a := UnitArray[Tok[tokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+      a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
         ')' + ' Note: Local ';
 
       if Ident[identIndex].Kind <> UNITTYPE then
@@ -775,7 +775,7 @@ begin
   if Pass = TPass.CODE_GENERATION then
   begin
 
-    a := UnitArray[Tok[tokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
+    a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
     a := a + msg;
 
     AddMessage(msgNote, a);

@@ -1860,7 +1860,7 @@ begin
     TokenizeUnit(1)     // main_file
   else
     for cnt := NumUnits downto 1 do
-      if UnitArray[cnt].Name <> '' then TokenizeUnit(cnt);
+      if GetUnit(cnt).Name <> '' then TokenizeUnit(cnt);
 
 end;  //TokenizeProgram
 
