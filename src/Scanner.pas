@@ -13,7 +13,7 @@ type
 
     procedure TokenizeProgram(UsesOn: Boolean);
 
-    // This is onlypublic for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
+    // This is only public for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
     procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 
   end;
@@ -55,6 +55,9 @@ begin
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
 
+  FastMul := -1;
+  DataSegmentUse := False;
+  LoopUnroll := False;
   PublicSection := True;
   UnitNameIndex := 1;
 
@@ -299,8 +302,11 @@ var
         s := AnsiUpperCase(Tok[i].Name);
 
 
-        for j := 2 to NumUnits do    // kasujemy wczesniejsze odwolania
+        // We clear earlier usage
+        for j := 2 to NumUnits do
+        begin
           if UnitArray[j].Name = s then UnitArray[j].Name := '';
+        end;
 
         _line := Line;
         _uidx := UnitIndex;

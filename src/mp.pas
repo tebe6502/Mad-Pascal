@@ -413,12 +413,12 @@ uses
         else
 
         begin
-          UnitArray[1].Name := TEnvironment.GetParameterString(i);
-          UnitArray[1].Path := UnitArray[1].Name;
+          UnitArray[NumUnits].Name := TEnvironment.GetParameterString(i);
+          UnitArray[NumUnits].Path := UnitArray[NumUnits].Name;
 
-          if not TFileSystem.FileExists_(UnitArray[1].Name) then
+          if not TFileSystem.FileExists_(GetUnit(NumUnits).Path) then
           begin
-            writeln('Error: Can''t open file ''' + UnitArray[1].Name + '''.');
+            writeln('Error: Can''t open file ''' + GetUnit(NumUnits).Path + '''.');
             RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
           end;
 
@@ -478,7 +478,7 @@ uses
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
     NumUnits := 1;           // !!! 1 !!!
-    UnitArray[1].Name := '';
+    UnitArray[NumUnits].Name := '';
     try
       ParseParam();
     except
@@ -490,7 +490,7 @@ uses
     end;
 
     // The main program is the first unit.
-    if (UnitArray[1].Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+    if (GetUnit(NumUnits).Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
 
  {$IFDEF USEOPTFILE}
 
@@ -502,7 +502,7 @@ uses
     if ExtractFileName(outputFilePath) <> '' then
       OutFile.Assign(outputFilePath)
     else
-      OutFile.Assign(ChangeFileExt(UnitArray[1].Name, '.a65'));
+      OutFile.Assign(ChangeFileExt(UnitArray[NumUnits].Name, '.a65'));
 
     OutFile.Rewrite;
 
