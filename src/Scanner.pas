@@ -184,39 +184,8 @@ end;  //AddResource
 
 procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
-
-  Inc(NumTok);
-
-  if NumTok > High(Tok) then
-    SetLength(Tok, NumTok + 1);
-  Tok[NumTok] := TToken.Create;
-  // if NumTok > MAXTOKENS then
-  //    Error(NumTok, 'Out of resources, TOK');
-
-  Tok[NumTok].UnitIndex := UnitIndex;
-  Tok[NumTok].Kind := Kind;
-  Tok[NumTok].Value := Value;
-
-  if NumTok = 1 then
-    Column := 1
-  else
-  begin
-
-    if Tok[NumTok - 1].Line <> Line then
-    //   Column := 1
-    else
-      Column := Column + Tok[NumTok - 1].Column;
-
-  end;
-
-  // if Tok[NumTok- 1].Line <> Line then writeln;
-
-  Tok[NumTok].Line := Line;
-  Tok[NumTok].Column := Column;
-
-  //if line=46 then  writeln(Kind,',',Column);
-
-end;  //AddToken
+  tokenList.AddToken(kind, UnitIndex, line, Column, value);
+end;
 
 
 // ----------------------------------------------------------------------------
