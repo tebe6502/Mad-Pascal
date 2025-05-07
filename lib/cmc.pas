@@ -32,13 +32,13 @@ object for controling CMC player
 	player: pointer;		// memory address of player
 	modul: pointer;			// memory address of a module
 
-	procedure Init; assembler;				// initialize player and selects song #0
-	procedure InitNoSong; assembler;		// initialize but does not select a song
-	procedure Song(n: byte); assembler;		// select a song to play, player must be initialized
-	procedure Play; assembler;				// play
-	procedure Pause; assembler;				// pause
-	procedure Cont; assembler;				// continue
-	procedure Stop; assembler;				// stops music
+	procedure Init; assembler;            // initialize player and select song #0
+	procedure InitNoSong; assembler;      // initialize but does not select a song
+	procedure Song(n: byte); assembler;   // select a song to play, player must be initialized
+	procedure Play; assembler;            // play
+	procedure Pause; assembler;           // pause
+	procedure Cont; assembler;            // continue
+	procedure Stop; assembler;            // stops music
 
 	end;
 
@@ -53,7 +53,7 @@ var	ntsc: byte;
 procedure TCMC.Init; assembler;
 (*
 @description:
-Initialize CMC player and selects song #0
+Initialize CMC player and select song #0
 *)
 asm
 	txa:pha
