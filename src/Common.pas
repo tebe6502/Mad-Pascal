@@ -38,8 +38,9 @@ var
   NumTypes: Integer;
   TypeArray: array [1..MAXTYPES] of TType;
 
+  TokenList: TTokenList;
   NumTok: Integer = 0;
-  Tok: array of TToken;
+  Tok: TTokenList.TTokenArray;
 
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
@@ -147,7 +148,6 @@ function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataTyp
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
-function GetTokenSpellingAtIndex(tokenIndex: TTokenIndex): String;
 
 function GetVAL(a: String): Integer;
 
@@ -289,25 +289,6 @@ end;  //GetEnumName
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-
-
-function GetTokenSpellingAtIndex(tokenIndex: TTokenIndex): TString;
-var
-  kind: TTokenKind;
-begin
-  if tokenIndex > NumTok then
-    Result := 'no token'
-  else
-  begin
-    kind := Tok[i].Kind;
-    GetHumanReadbleTokenSpelling(kind);
-  end;
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TDataType;
   RightType: TDataType = TTokenKind.UNTYPETOK);
@@ -470,13 +451,15 @@ end;
 
 procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 var
+  Token: TToken;
   found, expected: String;
 begin
 
-  if Tok[i].Kind <> ExpectedTokenCode then
+  Token := Tok[i];
+  if Token.Kind <> ExpectedTokenCode then
   begin
 
-    found := GetTokenSpellingAtIndex(i);
+    found := token.GetSpelling;
     expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
     Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected +

@@ -222,7 +222,7 @@ end;
 function GetExpectedButTokenFound(const tokenIndex: TTokenIndex): String;
 begin
 
-  Result := ' expected but ''' + GetTokenSpellingAtIndex(tokenIndex) + ''' found';
+  Result := ' expected but ''' + tokenList.GetTokenSpellingAtIndex(tokenIndex) + ''' found';
 
 end;
 

@@ -207,8 +207,31 @@ type
     // For Kind=STRINGLITERALTOK:
     StrAddress: Word;
     StrLength: Word;
+
+    function GetSpelling: TString;
   end;
 
+  // A token list owns token instances.
+  TTokenIndex = Integer;
+
+  TTokenList = class
+  public
+  type TTokenArray = array of TToken;
+  type TTokenArrayPointer = ^TTokenArray;
+    constructor Create(const tokenArrayPointer: TTokenArrayPointer);
+    destructor Free;
+
+    function Size: Integer;
+    procedure Clear;
+    function AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+
+    function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
+  private
+
+  var
+    tokenArrayPointer: TTokenArrayPointer;
+
+  end;
 
   TIdentifier = record
     Name: TIdentifierName;
@@ -300,7 +323,6 @@ type
 
 
 type
-  TTokenIndex = Integer;
   TIdentIndex = Integer;
   TArrayIndex = Integer;
 
@@ -315,6 +337,84 @@ procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierB
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
+
+function TToken.GetSpelling: TString;
+begin
+  Result := GetHumanReadbleTokenSpelling(kind);
+end;
+
+constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
+begin
+  self.tokenArrayPointer := tokenArrayPointer;
+end;
+
+destructor TTokenList.Free;
+begin
+  Clear;
+end;
+
+function TTokenList.Size: Integer;
+begin
+  Result := High(tokenArrayPointer^) + 1;
+end;
+
+procedure TTokenList.Clear;
+var
+  i: Integer;
+begin
+  for i := Low(tokenArrayPointer^) to High(tokenArrayPointer^) do tokenArrayPointer^[i].Free;
+  SetLength(tokenArrayPointer^, 0);
+end;
+
+function TTokenList.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+var
+  i: Integer;
+begin
+  Result := TToken.Create;
+
+  // if NumTok > MAXTOKENS then
+  //    Error(NumTok, 'Out of resources, TOK');
+
+  Result.UnitIndex := UnitIndex;
+  Result.Kind := Kind;
+  Result.Value := Value;
+
+  i := size;
+  if i = 1 then
+    Column := 1
+  else
+  begin
+
+    if tokenArrayPointer^[i - 1].Line <> Line then
+    //   Column := 1
+    else
+      Column := Column + tokenArrayPointer^[i - 1].Column;
+
+  end;
+
+  // if Tok[i- 1].Line <> Line then writeln;
+
+  Result.Line := Line;
+  Result.Column := Column;
+
+
+  SetLength(tokenArrayPointer^, i + 1);
+  tokenArrayPointer^[i] := Result;
+
+end;
+
+function TTokenList.GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
+var
+  kind: TTokenKind;
+begin
+  if tokenIndex > Size then
+    Result := 'no token'
+  else
+  begin
+    kind := tokenArrayPointer^[tokenIndex].Kind;
+    GetHumanReadbleTokenSpelling(kind);
+  end;
+end;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
 begin

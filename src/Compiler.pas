@@ -13270,7 +13270,8 @@ WHILETOK:
                 GenerateAssignment(ASPOINTER, GetDataSize(Ident[IdentIndex].DataType), IdentIndex);  //!!!!!
 
                 if not (Tok[j + 1].Kind in [TTokenKind.TOTOK, TTokenKind.DOWNTOTOK]) then
-                  Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' + GetTokenSpellingAtIndex(j + 1) + ' found')
+                  Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' +
+                    TokenList.GetTokenSpellingAtIndex(j + 1) + ' found')
                 else
                 begin
                   Down := Tok[j + 1].Kind = TTokenKind.DOWNTOTOK;
@@ -16010,7 +16011,7 @@ begin
         repeat
 
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Formal parameter name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+            Error(i + 1, 'Formal parameter name expected but ' + TokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           begin
             Inc(NumVarOfSameType);
@@ -17315,7 +17316,7 @@ begin
       repeat
 
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-          Error(i + 1, 'Constant name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+          Error(i + 1, 'Constant name expected but ' + TokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
         else
           if Tok[i + 2].Kind = TTokenKind.EQTOK then
           begin
@@ -17525,7 +17526,7 @@ begin
     begin
       repeat
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-          Error(i + 1, 'Type name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+          Error(i + 1, 'Type name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
         else
         begin
 
@@ -17595,7 +17596,7 @@ begin
         NumVarOfSameType := 0;
         repeat
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Variable name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+            Error(i + 1, 'Variable name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           begin
             Inc(NumVarOfSameType);
@@ -18168,7 +18169,7 @@ begin
     if Tok[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
       TTokenKind.DESTRUCTORTOK] then
       if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-        Error(i + 1, 'Procedure name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+        Error(i + 1, 'Procedure name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
       else
       begin
 
@@ -18991,12 +18992,10 @@ begin
   Common.unitPathList := unitPathList;
   evaluationContext := TEvaluationContext.Create;
 
-  SetLength(Tok, 1);
-  NumTok := 0;
-  Tok[NumTok] := TToken.Create;
-  SetLength(IFTmpPosStack, 1);
+  TokenList := TTokenList.Create(Addr(Tok));
+  TokenList.AddToken(TTokenKind.UNTYPETOK, 0, 0, 0, 0);
 
-  Tok[NumTok].Line := 0;
+  SetLength(IFTmpPosStack, 1);
 
   Defines[1].Name := AnsiUpperCase(target.Name);
 
@@ -19106,8 +19105,8 @@ var
   i: Integer;
 begin
 
-  for i := Low(Tok) to High(Tok) do tok[i].Free;
-  SetLength(Tok, 0);
+  TokenList.Free;
+
   NumTok := 0;
 
   SetLength(IFTmpPosStack, 0);

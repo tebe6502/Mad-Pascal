@@ -1731,7 +1731,7 @@ begin
 
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
           Error(i + 1, TMessage.Create(TErrorCode.FormalParameterNameExpected,
-            'Formal parameter name expected but {0} found.', GetTokenSpellingAtIndex(i + 1)))
+            'Formal parameter name expected but {0} found.', tokenList.GetTokenSpellingAtIndex(i + 1)))
         else
         begin
 
@@ -1897,7 +1897,7 @@ begin
 
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
             Error(i + 1, TMessage.Create(TErrorCode.FormalParameterNameExpected,
-              'Formal parameter name expected but {0} found.', GetTokenSpellingAtIndex(i + 1)))
+              'Formal parameter name expected but {0} found.', tokenList.GetTokenSpellingAtIndex(i + 1)))
           else
           begin
 
