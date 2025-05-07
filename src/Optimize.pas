@@ -618,7 +618,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(UnitName[common.optimize.unitIndex].Path + ' (' + IntToStr(common.optimize.line) +
+      WriteLn(UnitArray[common.optimize.unitIndex].Path + ' (' + IntToStr(common.optimize.line) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -3645,7 +3645,7 @@ begin        // OptimizeASM
     if common.optimize.line <> common.optimize.old then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + UnitName[common.optimize.unitIndex].Name + '), line = ' +
+      WriteOut('; optimize OK (' + UnitArray[common.optimize.unitIndex].Name + '), line = ' +
         IntToStr(common.optimize.line));
       WriteOut('');
 
@@ -3771,10 +3771,10 @@ begin        // OptimizeASM
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + UnitName[common.optimize.unitIndex].Name +
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + UnitArray[common.optimize.unitIndex].Name +
           '), line = ' + IntToStr(common.optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + UnitName[common.optimize.unitIndex].Name +
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + UnitArray[common.optimize.unitIndex].Name +
           '), line = ' + IntToStr(common.optimize.line));
 
       WriteOut('');
@@ -3802,7 +3802,7 @@ begin        // OptimizeASM
     Writeln(OptFile, OptimizeBuf[i]);
 
  writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitName[common.optimize.unitIndex].Name+') line = ',common.optimize.line);
+ writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitArray[common.optimize.unitIndex].Name+') line = ',common.optimize.line);
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to l - 1 do

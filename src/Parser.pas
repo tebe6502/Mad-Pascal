@@ -80,7 +80,7 @@ var
 
     if Ident[IdentIndex].Section then
       for i := MAXALLOWEDUNITS downto 1 do
-        if UnitName[Index].AllowedUnitNames[i] = UnitName[Ident[IdentIndex].UnitIndex].Name then exit(True);
+        if UnitArray[Index].AllowedUnitNames[i] = UnitArray[Ident[IdentIndex].UnitIndex].Name then exit(True);
 
   end;
 
@@ -97,7 +97,7 @@ var
       for IdentIndex := 1 to NumIdent do
         if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
           if (Ident[IdentIndex].UnitIndex = UnitIndex) {or Ident[IdentIndex].Section} or
-            (Ident[IdentIndex].UnitIndex = 1) or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') or
+            (Ident[IdentIndex].UnitIndex = 1) or (UnitArray[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM') or
             UnitAllowedAccess(IdentIndex, UnitIndex) then
           begin
             Result := IdentIndex;
@@ -106,7 +106,7 @@ var
             if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
             if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1)
-            { or (UnitName[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM')} then exit;
+            { or (UnitArray[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM')} then exit;
           end;
 
   end;
@@ -159,7 +159,7 @@ begin
        if ( (Ident[TempIndex].DataType in Pointers) and (Ident[TempIndex].AllocElementType = RECORDTOK) ) then
   Result := TempIndex;}
 
-    //    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIndex,'/',Result,' | ',Ident[TempIndex].Kind,',',UnitName[Ident[TempIndex].UnitIndex].Name);
+    //    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIndex,'/',Result,' | ',Ident[TempIndex].Kind,',',UnitArray[Ident[TempIndex].UnitIndex].Name);
 
   end;
 

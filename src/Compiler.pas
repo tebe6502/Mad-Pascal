@@ -125,7 +125,7 @@ begin
 
   if ((Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and
     Ident[IdentIndex].Section) then
-    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
+    Result := UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
   else
     Result := a + Ident[IdentIndex].Name;
 
@@ -137,16 +137,16 @@ var
   lab: String;
 begin
 
-  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitArray[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
   begin
 
     lab := Ident[IdentIndex].Name;
     if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
-    if (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.', a) = 1) then
-      Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.' + lab
+    if (pos(UnitArray[Ident[IdentIndex].UnitIndex].Name + '.adr.', a) = 1) then
+      Result := UnitArray[Ident[IdentIndex].UnitIndex].Name + '.adr.' + lab
     else
-      Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + lab;
+      Result := UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + lab;
 
   end
   else
@@ -158,7 +158,7 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitArray[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
     a := copy(a, a.IndexOf('.') + 2, length(a));
 
   Result := pos('.', a) > 0;
@@ -3586,7 +3586,7 @@ begin
       if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
         (NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
-      //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitName[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
+      //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitArray[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
 
       if TestName(IdentIndex, svar) then
       begin
@@ -7936,14 +7936,14 @@ begin
         asm65(#9'.LOCAL +MAIN.' + svar)                  // w tym samym module poza aktualnym blokiem procedury/funkcji
       else
         if (Ident[IdentIndex].UnitIndex > 1) then
-          asm65(#9'.LOCAL +MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+          asm65(#9'.LOCAL +MAIN.' + UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
         else
           asm65(#9'.LOCAL +MAIN.' + svar);
     // w tym samym module poza aktualnym blokiem procedury/funkcji
 
 {
   if Ident[IdentIndex].UnitIndex > 1 then
-   asm65(#9'.LOCAL +MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+   asm65(#9'.LOCAL +MAIN.' + UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
   else
    asm65(#9'.LOCAL +MAIN.' + svar);                  // w tym samym module poza aktualnym blokiem procedury/funkcji
 }
@@ -15234,7 +15234,7 @@ var
 
   function GetIdentifierFullName(const identifier: TIdentifier): String;
   begin
-    Result := UnitName[identifier.UnitIndex].Name + '.' + identifier.Name;
+    Result := UnitArray[identifier.UnitIndex].Name + '.' + identifier.Name;
   end;
 
   function GetIdentifierDataSize(const identifier: TIdentifier): Integer;
@@ -16931,20 +16931,20 @@ begin
     begin
       asm65separator;
 
-      DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+      DefineIdent(i, UnitArray[Tok[i].UnitIndex].Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
       Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
 
-      //   writeln(UnitName[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
+      //   writeln(UnitArray[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
       asm65;
-      asm65('.local'#9 + UnitName[Tok[i].UnitIndex].Name, '; UNIT');
+      asm65('.local'#9 + UnitArray[Tok[i].UnitIndex].Name, '; UNIT');
 
       UnitNameIndex := Tok[i].UnitIndex;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
 
-      if Tok[i + 2].Name <> UnitName[Tok[i].UnitIndex].Name then
+      if Tok[i + 2].Name <> UnitArray[Tok[i].UnitIndex].Name then
         Error(i + 2, 'Illegal unit name: ' + Tok[i + 2].Name);
 
       CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
@@ -16973,7 +16973,7 @@ begin
       VarRegister := 0;
 
       asm65;
-      asm65('.endl', '; UNIT ' + UnitName[Tok[i].UnitIndex].Name);
+      asm65('.endl', '; UNIT ' + UnitArray[Tok[i].UnitIndex].Name);
 
       j := NumIdent;
 
@@ -17245,18 +17245,18 @@ begin
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to UnitName[UnitNameIndex].Units do
-          if (UnitName[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then yes := False;
+        for j := 1 to UnitArray[UnitNameIndex].Units do
+          if (UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then yes := False;
 
         if yes then
         begin
 
-          Inc(UnitName[UnitNameIndex].Units);
+          Inc(UnitArray[UnitNameIndex].Units);
 
-          if UnitName[UnitNameIndex].Units > MAXALLOWEDUNITS then
+          if UnitArray[UnitNameIndex].Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          UnitName[UnitNameIndex].AllowedUnitNames[UnitName[UnitNameIndex].Units] := Tok[i].Name;
+          UnitArray[UnitNameIndex].AllowedUnitNames[UnitArray[UnitNameIndex].Units] := Tok[i].Name;
 
         end;
 
@@ -18667,12 +18667,12 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := NumUnits downto 2 do
-    if UnitName[j].Name <> '' then
+    if UnitArray[j].Name <> '' then
     begin
 
       asm65;
-      asm65(#9'.ifdef MAIN.' + UnitName[j].Name + '.@UnitInit');
-      asm65(#9'jsr MAIN.' + UnitName[j].Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + UnitArray[j].Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + UnitArray[j].Name + '.@UnitInit');
       asm65(#9'.fi');
 
     end;
@@ -18682,12 +18682,12 @@ end;
   asm65separator;
 
   for j := NumUnits downto 2 do
-    if UnitName[j].Name <> '' then
+    if UnitArray[j].Name <> '' then
     begin
       asm65;
-      asm65(#9'ift .SIZEOF(MAIN.' + UnitName[j].Name + ') > 0');
-      asm65(#9'.print ''' + UnitName[j].Name + ': ' + ''',MAIN.' + UnitName[j].Name + ',' +
-        '''..''' + ',' + 'MAIN.' + UnitName[j].Name + '+.SIZEOF(MAIN.' + UnitName[j].Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + UnitArray[j].Name + ') > 0');
+      asm65(#9'.print ''' + UnitArray[j].Name + ': ' + ''',MAIN.' + UnitArray[j].Name + ',' +
+        '''..''' + ',' + 'MAIN.' + UnitArray[j].Name + '+.SIZEOF(MAIN.' + UnitArray[j].Name + ')-1');
       asm65(#9'eif');
     end;
 
@@ -18984,6 +18984,8 @@ const
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
 
+var
+  scanner: IScanner;
 begin
 
   Common.unitPathList := unitPathList;
@@ -19002,19 +19004,23 @@ begin
 
   TextColor(WHITE);
 
-  Writeln('Compiling ' + UnitName[1].Name);
+  Assert(NumUnits = 1); // TODO
+  Writeln('Compiling ' + UnitArray[1].Name);
 
   // ----------------------------------------------------------------------------
   // Set defines for first pass;
-  TokenizeProgram;
+  scanner := TScanner.Create;
+
+  scanner.TokenizeProgram(True);
 
   if NumTok = 0 then Error(1, '');
 
+  // TODO: Method AddUnit
   Inc(NumUnits);
-  UnitName[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
-  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
+  UnitArray[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
+  UnitArray[NumUnits].Path := FindFile('system.pas', 'unit');
 
-  TokenizeProgram(False);
+  scanner.TokenizeProgram(False);
 
   // ----------------------------------------------------------------------------
 
@@ -19081,7 +19087,8 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  for i := 1 to High(UnitName) do UnitName[i].Units := 0;
+  // TODO Why here?
+  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
 
   iOut := 0;
   outTmp := '';

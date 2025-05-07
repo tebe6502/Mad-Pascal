@@ -25,7 +25,7 @@ var
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
-  DiagFile.Assign(ChangeFileExt(UnitName[1].Name, '.txt'));
+  DiagFile.Assign(ChangeFileExt(UnitArray[1].Name, '.txt'));
   DiagFile.Rewrite;
 
   DiagFile.WriteLn;
@@ -38,8 +38,8 @@ begin
 
   for i := 1 to NumTok do
   begin
-    // DiagFile.Write(i: 6, UnitName[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    DiagFile.Write(i, 6).Write(UnitName[Tok[i].UnitIndex].Name, 30).Write(Tok[i].Line,
+    // DiagFile.Write(i: 6, UnitArray[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
+    DiagFile.Write(i, 6).Write(UnitArray[Tok[i].UnitIndex].Name, 30).Write(Tok[i].Line,
       6).Write(GetTokenSpellingAtIndex(i), 30).WriteLn;
     if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
       DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))

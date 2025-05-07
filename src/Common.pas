@@ -45,7 +45,7 @@ var
   Ident: array [1..MAXIDENTS] of TIdentifier;
 
   NumUnits: Integer;
-  UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
+  UnitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
 
 
   IFTmpPosStack: array of Integer;
@@ -70,11 +70,10 @@ var
 
   pass: TPass;
 
-  UnitNameIndex: Integer; // Initialized in TokenizeProgramInitialization
+  UnitNameIndex: Integer; // Initialized in Scanner.TokenizeProgramInitialization
 
-  FastMul: Integer = -1;
-
-  //AsmLabels: array of integer;
+  FastMul: Integer;
+  // Initialized in Scanner.TokenizeProgramInitialization to -1, updated to page address from {$F [page address]}
 
   resArray: array of TResource;
 
@@ -103,11 +102,12 @@ var
   PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
   isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
 
-  DataSegmentUse: Boolean = False;
+  DataSegmentUse: Boolean; // Initialized in Scanner.TokenizeProgramInitialization
 
-  LoopUnroll: Boolean = False;
+  LoopUnroll: Boolean;
+  // Initialized in Scanner.TokenizeProgramInitialization, updated with {$OPTIMIZATION LOOPUNROLL|NOLOOPUNROLL }
 
-  PublicSection: Boolean = True;
+  PublicSection: Boolean;  // Initialized in Scanner.TokenizeProgramInitialization
 
 
 {$IFDEF USEOPTFILE}
@@ -122,6 +122,7 @@ procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
+function GetUnit(const UnitIndex: TUnitIndex): TUnit;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -228,6 +229,11 @@ begin
   unitPathList.AddFolder(folderPath);
 end;
 
+function GetUnit(const UnitIndex: TUnitIndex): TUnit;
+begin
+  assert(UnitIndex >= Low(UnitArray));
+  Result := UnitArray[UnitIndex];
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

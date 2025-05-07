@@ -8,19 +8,32 @@ uses CommonTypes, CompilerTypes, Tokens;
 
 // ----------------------------------------------------------------------------
 
-procedure TokenizeProgram(UsesOn: Boolean = True);
+type
+  IScanner = interface
 
-procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+    procedure TokenizeProgram(UsesOn: Boolean);
 
-// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+    // This is onlypublic for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
+    procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 
-// ----------------------------------------------------------------------------
+  end;
+
+type
+  TScanner = class(TInterfacedObject, IScanner)
+
+    procedure TokenizeProgram(UsesOn: Boolean);
+    procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+
+    private
+      procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+  end;
 
 implementation
 
 uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
+// ----------------------------------------------------------------------------
+// Class TScanner Implementation
 // ----------------------------------------------------------------------------
 
 procedure ErrorOrdinalExpExpected(i: TTokenIndex);
@@ -166,7 +179,7 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
 
   Inc(NumTok);
@@ -219,7 +232,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure TokenizeProgram(UsesOn: Boolean = True);
+procedure TScanner.TokenizeProgram(UsesOn: Boolean);
 var
   Text: String;
   Num, Frac: TString;
@@ -287,7 +300,7 @@ var
 
 
         for j := 2 to NumUnits do    // kasujemy wczesniejsze odwolania
-          if UnitName[j].Name = s then UnitName[j].Name := '';
+          if UnitArray[j].Name = s then UnitArray[j].Name := '';
 
         _line := Line;
         _uidx := UnitIndex;
@@ -295,13 +308,15 @@ var
         Inc(NumUnits);
         UnitIndex := NumUnits;
 
-        if UnitIndex > High(UnitName) then
+        if UnitIndex > High(UnitArray) then
+        begin
           Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' +
             IntToStr(UnitIndex)));
+        end;
 
         Line := 1;
-        UnitName[UnitIndex].Name := s;
-        UnitName[UnitIndex].Path := nam;
+        UnitArray[UnitIndex].Name := s;
+        UnitArray[UnitIndex].Path := nam;
 
         TokenizeUnit(UnitIndex, True);
 
@@ -581,12 +596,12 @@ var
                               _uidx := UnitIndex;
 
                               Line := 1;
-                              UnitName[IncludeIndex].Name := ExtractFileName(nam);
-                              UnitName[IncludeIndex].Path := nam;
+                              UnitArray[IncludeIndex].Name := ExtractFileName(nam);
+                              UnitArray[IncludeIndex].Path := nam;
                               UnitIndex := IncludeIndex;
                               Inc(IncludeIndex);
 
-                              if IncludeIndex > High(UnitName) then
+                              if IncludeIndex > High(UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
                                   'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
 
@@ -1804,11 +1819,11 @@ var
 
     if UnitIndex > 1 then AddToken(TTokenKind.UNITBEGINTOK, UnitIndex, Line, 0, 0);
 
-    //  writeln('>',UnitIndex,',',UnitName[UnitIndex].Name);
+    //  writeln('>',UnitIndex,',',UnitArray[UnitIndex].Name);
 
     UnitFound := False;
 
-    Tokenize(UnitName[UnitIndex].Path, testUnit);
+    Tokenize(UnitArray[UnitIndex].Path, testUnit);
 
     if UnitIndex > 1 then
     begin
@@ -1839,7 +1854,7 @@ begin
     TokenizeUnit(1)     // main_file
   else
     for cnt := NumUnits downto 1 do
-      if UnitName[cnt].Name <> '' then TokenizeUnit(cnt);
+      if UnitArray[cnt].Name <> '' then TokenizeUnit(cnt);
 
 end;  //TokenizeProgram
 
@@ -1848,7 +1863,7 @@ end;  //TokenizeProgram
 // ----------------------------------------------------------------------------
 
 
-procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+procedure TScanner.TokenizeMacro(a: String; Line, Spaces: Integer);
 var
   i: Integer;
   Text: String;
