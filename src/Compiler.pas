@@ -16973,7 +16973,7 @@ begin
       VarRegister := 0;
 
       asm65;
-      asm65('.endl', '; UNIT ' + UnitArray[Tok[i].UnitIndex].Name);
+      asm65('.endl', '; UNIT ' + GetUnit(Tok[i].UnitIndex).Name);
 
       j := NumIdent;
 
@@ -17253,7 +17253,7 @@ begin
 
           Inc(UnitArray[UnitNameIndex].Units);
 
-          if UnitArray[UnitNameIndex].Units > MAXALLOWEDUNITS then
+          if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
           UnitArray[UnitNameIndex].AllowedUnitNames[UnitArray[UnitNameIndex].Units] := Tok[i].Name;
@@ -18667,12 +18667,12 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := NumUnits downto 2 do
-    if UnitArray[j].Name <> '' then
+    if GetUnit(j).Name <> '' then
     begin
 
       asm65;
-      asm65(#9'.ifdef MAIN.' + UnitArray[j].Name + '.@UnitInit');
-      asm65(#9'jsr MAIN.' + UnitArray[j].Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + GetUnit(j).Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + GetUnit(j).Name + '.@UnitInit');
       asm65(#9'.fi');
 
     end;
@@ -18682,12 +18682,12 @@ end;
   asm65separator;
 
   for j := NumUnits downto 2 do
-    if UnitArray[j].Name <> '' then
+    if GetUnit(j).Name <> '' then
     begin
       asm65;
-      asm65(#9'ift .SIZEOF(MAIN.' + UnitArray[j].Name + ') > 0');
-      asm65(#9'.print ''' + UnitArray[j].Name + ': ' + ''',MAIN.' + UnitArray[j].Name + ',' +
-        '''..''' + ',' + 'MAIN.' + UnitArray[j].Name + '+.SIZEOF(MAIN.' + UnitArray[j].Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + GetUnit(j).Name + ') > 0');
+      asm65(#9'.print ''' + GetUnit(j).Name + ': ' + ''',MAIN.' + GetUnit(j).Name + ',' +
+        '''..''' + ',' + 'MAIN.' + GetUnit(j).Name + '+.SIZEOF(MAIN.' + GetUnit(j).Name + ')-1');
       asm65(#9'eif');
     end;
 
@@ -19005,7 +19005,7 @@ begin
   TextColor(WHITE);
 
   Assert(NumUnits = 1); // TODO
-  Writeln('Compiling ' + UnitArray[1].Name);
+  Writeln('Compiling ' + GetUnit(1).Name);
 
   // ----------------------------------------------------------------------------
   // Set defines for first pass;
