@@ -193,7 +193,10 @@ type
     function Path: TFilePath;
   end;
 
+  TTokenIndex = Integer;
+
   TToken = class
+    TokenIndex: TTokenIndex;
     UnitIndex: TUnitIndex;
     Column: Smallint;
     Line: Integer;
@@ -212,7 +215,7 @@ type
   end;
 
   // A token list owns token instances.
-  TTokenIndex = Integer;
+
 
   TTokenList = class
   public
@@ -224,6 +227,7 @@ type
     function Size: Integer;
     procedure Clear;
     function AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+    procedure RemoveToken;
 
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
   private
@@ -346,6 +350,7 @@ end;
 constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
 begin
   self.tokenArrayPointer := tokenArrayPointer;
+  Clear;
 end;
 
 destructor TTokenList.Free;
@@ -355,7 +360,7 @@ end;
 
 function TTokenList.Size: Integer;
 begin
-  Result := High(tokenArrayPointer^) + 1;
+  Result := High(tokenArrayPointer^);
 end;
 
 procedure TTokenList.Clear;
@@ -363,7 +368,10 @@ var
   i: Integer;
 begin
   for i := Low(tokenArrayPointer^) to High(tokenArrayPointer^) do tokenArrayPointer^[i].Free;
-  SetLength(tokenArrayPointer^, 0);
+
+  // Valid token indexes start at 1. The token at index 0 is kept as UNTYPED token.
+  SetLength(tokenArrayPointer^, 1);
+  tokenArrayPointer^[0] := TToken.Create;
 end;
 
 function TTokenList.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
@@ -374,12 +382,14 @@ begin
 
   // if NumTok > MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
+  i := size + 1;
 
+  Result.TokenIndex := i;
   Result.UnitIndex := UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
 
-  i := size;
+
   if i = 1 then
     Column := 1
   else
@@ -400,6 +410,18 @@ begin
 
   SetLength(tokenArrayPointer^, i + 1);
   tokenArrayPointer^[i] := Result;
+
+  // WriteLn('Added token at index ' + IntToStr(i) + ': ' + GetTokenSpelling(kind));
+end;
+
+procedure TTokenList.RemoveToken;
+var
+  i: Integer;
+begin
+  i := size;
+  tokenArrayPointer^[i].Free;
+  tokenArrayPointer^[i] := nil;
+  SetLength(tokenArrayPointer^, i);
 
 end;
 

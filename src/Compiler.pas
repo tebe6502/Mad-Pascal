@@ -18993,7 +18993,6 @@ begin
   evaluationContext := TEvaluationContext.Create;
 
   TokenList := TTokenList.Create(Addr(Tok));
-  TokenList.AddToken(TTokenKind.UNTYPETOK, 0, 0, 0, 0);
 
   SetLength(IFTmpPosStack, 1);
 
@@ -19101,13 +19100,9 @@ begin
 end;
 
 procedure Free;
-var
-  i: Integer;
 begin
 
   TokenList.Free;
-
-  NumTok := 0;
 
   SetLength(IFTmpPosStack, 0);
   evaluationContext := nil;

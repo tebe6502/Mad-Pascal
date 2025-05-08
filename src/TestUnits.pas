@@ -129,7 +129,7 @@ uses
   procedure TestUnitCommon;
   var
     filePath: TFilePath;
-    scanner: IScanner;
+    tokenList: TTokenList;
   begin
 
     StartTest('TestUnitCommon');
@@ -143,11 +143,11 @@ uses
 
     // Unit Scanner
     Program_NAME := 'TestProgram';
-    NumTok := 0;
-    scanner := TScanner.Create;
+
+    tokenList := TTokenList.Create(Addr(tok));
     // Kind, UnitIndex, Line, Column, Value
-    scanner.AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
-    scanner := nil;
+    tokenList.AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    tokenList := nil;
 
     // Unit Common
     unitPathList := TPathList.Create;

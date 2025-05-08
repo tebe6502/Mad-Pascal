@@ -39,7 +39,6 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
-  NumTok: Integer = 0;
   Tok: TTokenList.TTokenArray;
 
   NumIdent: Integer;
@@ -109,8 +108,6 @@ var
   // Initialized in Scanner.TokenizeProgramInitialization, updated with {$OPTIMIZATION LOOPUNROLL|NOLOOPUNROLL }
 
   PublicSection: Boolean;  // Initialized in Scanner.TokenizeProgramInitialization
-
-
 {$IFDEF USEOPTFILE}
 
   OptFile: ITextFile;
@@ -118,6 +115,7 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
+function NumTok: Integer;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -614,5 +612,14 @@ begin
 
 end;
 
+function NumTok: Integer;
+begin
+  if tokenList <> nil then
+  begin
+    Result := tokenList.Size;
+  end;
+  // TODO
+  //Writeln('NumTok=',Result);
+end;
 
 end.

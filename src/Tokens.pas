@@ -420,7 +420,9 @@ end;
 
 function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
 begin
-  if (tokenKind > TTokenKind.UNTYPETOK) and (tokenKind < TTokenKind.IDENTTOK) then
+  if tokenKind = TTokenKind.UNTYPETOK then
+    Result := 'untyped token'
+  else if (tokenKind > TTokenKind.UNTYPETOK) and (tokenKind < TTokenKind.IDENTTOK) then
     Result := GetTokenSpelling(tokenKind)
   else if tokenKind = TTokenKind.IDENTTOK then
     Result := 'identifier'

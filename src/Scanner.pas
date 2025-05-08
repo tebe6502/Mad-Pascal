@@ -52,6 +52,7 @@ begin
     Ident[i] := Default(TIdentifier);
   end;
 
+  tokenList.Clear;
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
 
@@ -78,8 +79,6 @@ begin
   NumTypes := 0;
   run_func := 0;
   NumProc := 0;
-  NumTok := 0;
-
 
   NumStaticStrChars := 0;
 
@@ -184,7 +183,7 @@ end;  //AddResource
 
 procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
-  tokenList.AddToken(kind, UnitIndex, line, Column, value);
+  tokenList.AddToken(kind, UnitIndex, line, Column, Value);
 end;
 
 
@@ -699,7 +698,7 @@ var
 
                                 until d[i] = ';';
 
-                                Dec(NumTok);
+                                tokenList.RemoveToken;
                               end
                               else
 
@@ -724,7 +723,7 @@ var
 
                                   until d[i] = ';';
 
-                                  Dec(NumTok);
+                                  TokenList.RemoveToken;
                                 end
                                 else
 
@@ -735,7 +734,7 @@ var
                                     s := GetFilePath(d, i);
                                     AddResource(FindFile(s, 'resource'));
 
-                                    Dec(NumTok);
+                                    tokenList.RemoveToken;
                                   end
                                   else
 (*
@@ -786,7 +785,7 @@ var
 
                                         GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
 
-                                        Dec(NumTok);
+                                        tokenList.RemoveToken;
                                       end
                                       else
 
@@ -1785,6 +1784,8 @@ var
 
   procedure TokenizeUnit(a: Integer; testUnit: Boolean = False);
   // Read input file and get tokens
+  var
+    endLine: Integer;
   begin
 
     UnitIndex := a;
@@ -1805,10 +1806,11 @@ var
 
       CheckTok(NumTok, TTokenKind.DOTTOK);
       CheckTok(NumTok - 1, TTokenKind.ENDTOK);
+      EndLine := Tok[NumTok - 1].Line;
+      tokenList.RemoveToken;
+      tokenList.RemoveToken;
 
-      Dec(NumTok, 2);
-
-      AddToken(TTokenKind.UNITENDTOK, UnitIndex, Tok[NumTok + 1].Line - 1, 0, 0);
+      AddToken(TTokenKind.UNITENDTOK, UnitIndex, EndLine - 1, 0, 0);
     end
     else
       AddToken(TTokenKind.EOFTOK, UnitIndex, Line, 0, 0);
@@ -1831,7 +1833,7 @@ begin
     for cnt := NumUnits downto 1 do
       if GetUnit(cnt).Name <> '' then TokenizeUnit(cnt);
 
-end;  //TokenizeProgram
+end;  // TokenizeProgram
 
 
 // ----------------------------------------------------------------------------
