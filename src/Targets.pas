@@ -2,11 +2,13 @@ unit Targets;
 
 interface
 
+{$SCOPEDENUMS ON}
+
 type
 
-  TTargetID = (A8, C4P, C64, NEO, RAW, X16);
+  TTargetID = (NONE, A8, C4P, C64, NEO, RAW, X16);
 
-  TCPU = (CPU_6502, CPU_65C02, CPU_65816);
+  TCPU = (NONE, CPU_6502, CPU_65C02, CPU_65816);
 
   TTarget = record
     Name: String;

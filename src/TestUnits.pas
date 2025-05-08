@@ -6,6 +6,7 @@ uses
   Crt,
   Common,
   CommonTypes,
+  CompilerTypes,
   Datatypes,
   FileIO,
   MathEvaluate,
@@ -128,6 +129,7 @@ uses
   procedure TestUnitCommon;
   var
     filePath: TFilePath;
+    tokenList: TTokenList;
   begin
 
     StartTest('TestUnitCommon');
@@ -141,9 +143,11 @@ uses
 
     // Unit Scanner
     Program_NAME := 'TestProgram';
-    NumTok := 0;
+
+    tokenList := TTokenList.Create(Addr(tok));
     // Kind, UnitIndex, Line, Column, Value
-    AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    tokenList.AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    tokenList := nil;
 
     // Unit Common
     unitPathList := TPathList.Create;

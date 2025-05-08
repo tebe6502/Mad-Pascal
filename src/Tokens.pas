@@ -225,6 +225,7 @@ type
 function GetTokenKindName(tokenKind: TTokenKind): String; // TODO Needed public?
 function GetTokenSpelling(tokenKind: TTokenKind): String; // TODO Needed public?
 function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
+function InfoAboutToken(t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
 function GetStandardToken(S: String): TTokenKind;
 
 implementation
@@ -419,7 +420,9 @@ end;
 
 function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
 begin
-  if (tokenKind > TTokenKind.UNTYPETOK) and (tokenKind < TTokenKind.IDENTTOK) then
+  if tokenKind = TTokenKind.UNTYPETOK then
+    Result := 'untyped token'
+  else if (tokenKind > TTokenKind.UNTYPETOK) and (tokenKind < TTokenKind.IDENTTOK) then
     Result := GetTokenSpelling(tokenKind)
   else if tokenKind = TTokenKind.IDENTTOK then
     Result := 'identifier'
@@ -435,6 +438,96 @@ begin
     Result := 'unknown token';
 end;
 
+function InfoAboutToken(t: TTokenKind): String;
+begin
+
+  case t of
+
+    TTokenKind.EQTOK: Result := '=';
+    TTokenKind.NETOK: Result := '<>';
+    TTokenKind.LTTOK: Result := '<';
+    TTokenKind.LETOK: Result := '<=';
+    TTokenKind.GTTOK: Result := '>';
+    TTokenKind.GETOK: Result := '>=';
+
+    TTokenKind.INTOK: Result := 'IN';
+
+    TTokenKind.DOTTOK: Result := '.';
+    TTokenKind.COMMATOK: Result := ',';
+    TTokenKind.SEMICOLONTOK: Result := ';';
+    TTokenKind.OPARTOK: Result := '(';
+    TTokenKind.CPARTOK: Result := ')';
+    TTokenKind.DEREFERENCETOK: Result := '^';
+    TTokenKind.ADDRESSTOK: Result := '@';
+    TTokenKind.OBRACKETTOK: Result := '[';
+    TTokenKind.CBRACKETTOK: Result := ']';
+    TTokenKind.COLONTOK: Result := ':';
+    TTokenKind.PLUSTOK: Result := '+';
+    TTokenKind.MINUSTOK: Result := '-';
+    TTokenKind.MULTOK: Result := '*';
+    TTokenKind.DIVTOK: Result := '/';
+
+    TTokenKind.IDIVTOK: Result := 'DIV';
+    TTokenKind.MODTOK: Result := 'MOD';
+    TTokenKind.SHLTOK: Result := 'SHL';
+    TTokenKind.SHRTOK: Result := 'SHR';
+    TTokenKind.ORTOK: Result := 'OR';
+    TTokenKind.XORTOK: Result := 'XOR';
+    TTokenKind.ANDTOK: Result := 'AND';
+    TTokenKind.NOTTOK: Result := 'NOT';
+    TTokenKind.CONSTTOK: Result := 'CONST';
+    TTokenKind.TYPETOK: Result := 'TYPE';
+    TTokenKind.VARTOK: Result := 'VARIABLE';
+    TTokenKind.PROCEDURETOK: Result := 'PROCEDURE';
+    TTokenKind.FUNCTIONTOK: Result := 'FUNCTION';
+    TTokenKind.CONSTRUCTORTOK: Result := 'CONSTRUCTOR';
+    TTokenKind.DESTRUCTORTOK: Result := 'DESTRUCTOR';
+
+    TTokenKind.LABELTOK: Result := 'LABEL';
+    TTokenKind.UNITTOK: Result := 'UNIT';
+    TTokenKind.ENUMTOK: Result := 'ENUM';
+
+    TTokenKind.RECORDTOK: Result := 'RECORD';
+    TTokenKind.OBJECTTOK: Result := 'OBJECT';
+    TTokenKind.BYTETOK: Result := 'BYTE';
+    TTokenKind.SHORTINTTOK: Result := 'SHORTINT';
+    TTokenKind.CHARTOK: Result := 'CHAR';
+    TTokenKind.BOOLEANTOK: Result := 'BOOLEAN';
+    TTokenKind.WORDTOK: Result := 'WORD';
+    TTokenKind.SMALLINTTOK: Result := 'SMALLINT';
+    TTokenKind.CARDINALTOK: Result := 'CARDINAL';
+    TTokenKind.INTEGERTOK: Result := 'INTEGER';
+    TTokenKind.POINTERTOK,
+    TTokenKind.DATAORIGINOFFSET,
+    TTokenKind.CODEORIGINOFFSET: Result := 'POINTER';
+
+    TTokenKind.PROCVARTOK: Result := '<Procedure Variable>';
+
+    TTokenKind.STRINGPOINTERTOK: Result := 'STRING';
+
+    TTokenKind.STRINGLITERALTOK: Result := 'literal';
+
+    TTokenKind.SHORTREALTOK: Result := 'SHORTREAL';
+    TTokenKind.REALTOK: Result := 'REAL';
+    TTokenKind.SINGLETOK: Result := 'SINGLE';
+    TTokenKind.HALFSINGLETOK: Result := 'FLOAT16';
+    TTokenKind.SETTOK: Result := 'SET';
+    TTokenKind.FILETOK: Result := 'FILE';
+    TTokenKind.TEXTFILETOK: Result := 'TEXTFILE';
+    TTokenKind.PCHARTOK: Result := 'PCHAR';
+
+    TTokenKind.REGISTERTOK: Result := 'REGISTER';
+    TTokenKind.PASCALTOK: Result := 'PASCAL';
+    TTokenKind.STDCALLTOK: Result := 'STDCALL';
+    TTokenKind.INLINETOK: Result := 'INLINE';
+    TTokenKind.ASMTOK: Result := 'ASM';
+    TTokenKind.INTERRUPTTOK: Result := 'INTERRUPT';
+
+    else
+      Result := 'UNTYPED'
+  end;
+
+end;
 
 function GetStandardToken(S: String): TTokenKind;
 var

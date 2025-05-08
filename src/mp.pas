@@ -188,11 +188,12 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                  {$ENDIF} {$IFDEF PAS2JS}
+                       {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                  {$ENDIF}
+                       {$ENDIF}
   Common,
   Compiler,
+  CompilerTypes,
   Console,
   Diagnostic,
   FileIO,
@@ -223,10 +224,11 @@ uses
 
     // Command line parameters
     unitPathList: TPathList;
-    DiagMode: Boolean;
     targetID: TTargetID;
-    useDefaultCPU: Boolean;
     cpu: TCPU;
+
+    outputFilePath: TFilePath;
+    DiagMode: Boolean;
 
     StartTime: QWord;
     seconds: ValReal;
@@ -238,7 +240,13 @@ uses
     begin
 
       targetID := TTargetID.A8;
-      useDefaultCPU := True;
+      cpu := TCPU.NONE;
+
+      CODEORIGIN_BASE := -1;
+      DATA_BASE := -1;
+      ZPAGE_BASE := -1;
+      STACK_BASE := -1;
+      outputFilePath := '';
 
       i := 1;
       while i <= TEnvironment.GetParameterCount() do
@@ -253,16 +261,16 @@ uses
           begin
 
             Inc(i);
-            outputFile := parameter;
-            if outputFile = '' then ParameterError(i, 'Output file path is empty');
+            outputFilePath := parameter;
+            if outputFilePath = '' then ParameterError(i, 'Output file path is empty');
 
           end
           else
             if pos('-O:', parameterUpperCase) = 1 then
             begin
 
-              outputFile := copy(parameter, 4, 255);
-              if outputFile = '' then ParameterError(i, 'Output file path is empty');
+              outputFilePath := copy(parameter, 4, 255);
+              if outputFilePath = '' then ParameterError(i, 'Output file path is empty');
 
             end
             else
@@ -273,7 +281,7 @@ uses
                 if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
                 begin
                   Inc(i);
-                  parameterValue:=TEnvironment.GetParameterString(i);
+                  parameterValue := TEnvironment.GetParameterString(i);
                   unitPathList.AddFolder(parameterValue);
 
                 end
@@ -405,12 +413,12 @@ uses
         else
 
         begin
-          UnitName[1].Name := TEnvironment.GetParameterString(i);
-          UnitName[1].Path := UnitName[1].Name;
+          UnitArray[NumUnits].Name := TEnvironment.GetParameterString(i);
+          UnitArray[NumUnits].Path := UnitArray[NumUnits].Name;
 
-          if not TFileSystem.FileExists_(UnitName[1].Name) then
+          if not TFileSystem.FileExists_(GetUnit(NumUnits).Path) then
           begin
-            writeln('Error: Can''t open file ''' + UnitName[1].Name + '''.');
+            writeln('Error: Can''t open file ''' + GetUnit(NumUnits).Path + '''.');
             RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
           end;
 
@@ -434,7 +442,7 @@ uses
         target.zpage := ZPAGE_BASE;
 
 
-      if not useDefaultCPU then target.cpu := cpu;
+      if cpu <>TCPU.NONE then target.cpu := cpu;
 
       case target.cpu of
         TCPU.CPU_6502: AddDefine('CPU_6502');
@@ -470,7 +478,7 @@ uses
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
     NumUnits := 1;           // !!! 1 !!!
-    UnitName[1].Name := '';
+    UnitArray[NumUnits].Name := '';
     try
       ParseParam();
     except
@@ -481,25 +489,20 @@ uses
       end;
     end;
 
-    if (UnitName[1].Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
-
-    if pos(MainPath, ExtractFilePath(UnitName[1].Name)) > 0 then
-      FilePath := ExtractFilePath(UnitName[1].Name)
-    else
-      FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
-
+    // The main program is the first unit.
+    if (GetUnit(NumUnits).Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
 
  {$IFDEF USEOPTFILE}
 
-   OptFile.AssignFile(ChangeFileExt(UnitName[1].Name, '.opt') ); OptFile.Rewrite();
+   OptFile.AssignFile(ChangeFileExt(GetUnitName(NumUnits), '.opt') ); OptFile.Rewrite();
 
  {$ENDIF}
 
     OutFile := TFileSystem.CreateTextFile;
-    if ExtractFileName(outputFile) <> '' then
-      OutFile.Assign(outputFile)
+    if ExtractFileName(outputFilePath) <> '' then
+      OutFile.Assign(outputFilePath)
     else
-      OutFile.Assign(ChangeFileExt(UnitName[1].Name, '.a65'));
+      OutFile.Assign(ChangeFileExt(GetUnitName(NumUnits), '.a65'));
 
     OutFile.Rewrite;
 
@@ -553,18 +556,21 @@ uses
     NormVideo;
   end;
 
-var
-  exitCode: TExitCode;
-  fileMap: TFileMap;
-  fileMapEntry: TFileMapEntry;
-  content: String;
-begin
-
-  exitCode := Main();
-  if (exitCode <> 0) then
+  function CallMain: TExitCode;
+  var
+    exitCode: TExitCode;
+   {$IFDEF SIMULATED_FILE_IO}
+    fileMap: TFileMap;
+    fileMapEntry: TFileMapEntry;
+    content: String;
+   {$ENDIF}
   begin
-    WriteLn('Program ended with exit code ' + IntToStr(exitCode));
-  end;
+
+    exitCode := Main();
+    if (exitCode <> 0) then
+    begin
+      WriteLn('Program ended with exit code ' + IntToStr(exitCode));
+    end;
 
   {$IFDEF SIMULATED_FILE_IO}
   fileMap:=TFileSystem.GetFileMap();
@@ -575,7 +581,19 @@ begin
     WriteLn(content);
   end;
   {$ENDIF}
+
+    Result := exitCode;
+  end;
+
+var
+  exitCode: TExitCode;
+begin
+  exitCode := CallMain;
   {$IFDEF DEBUG}
+  exitCode := CallMain; // TODO until 2nd call works
+  {$ENDIF}
+
+    {$IFDEF DEBUG}
   Console.WaitForKeyPressed;
   {$ENDIF}
 

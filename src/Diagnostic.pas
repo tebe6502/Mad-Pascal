@@ -13,7 +13,7 @@ procedure Diagnostics;
 
 implementation
 
-uses SysUtils, Common, Datatypes, FileIO, Tokens;
+uses SysUtils, Common, CompilerTypes, Datatypes, FileIO, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ var
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
-  DiagFile.Assign(ChangeFileExt(UnitName[1].Name, '.txt'));
+  DiagFile.Assign(ChangeFileExt(GetUnit(1).Name, '.txt'));
   DiagFile.Rewrite;
 
   DiagFile.WriteLn;
@@ -38,9 +38,9 @@ begin
 
   for i := 1 to NumTok do
   begin
-    // DiagFile.Write(i: 6, UnitName[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    DiagFile.Write(i, 6).Write(UnitName[Tok[i].UnitIndex].Name, 30).Write(Tok[i].Line,
-      6).Write(GetTokenSpellingAtIndex(i), 30).WriteLn;
+    // DiagFile.Write(i: 6, GetUnitName(Tok[i].UnitIndex) 30, Tok[i].Line: 6, GetSpelling(i): 30);
+    DiagFile.Write(i, 6).Write(GetUnitName(Tok[i].UnitIndex), 30).Write(Tok[i].Line,
+      6).Write(tokenList.GetTokenSpellingAtIndex(i), 30).WriteLn;
     if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
       DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))
     else if Tok[i].Kind = TTokenKind.FRACNUMBERTOK then

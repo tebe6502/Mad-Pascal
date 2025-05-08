@@ -35,10 +35,10 @@ if not "%TEST_EXE%"=="" (
 )
 
 if not "%MP_EXE%"=="" (
-  rem echo INFO: Compiling %MP_PAS% to %MP_EXE%.
-  rem if exist "%MP_EXE%" del "%MP_EXE%"
-  rem call fpc.bat %MP_PAS%
-  rem if errorlevel 1 goto :eof
+  echo INFO: Compiling %MP_PAS% to %MP_EXE%.
+  if exist "%MP_EXE%" del "%MP_EXE%"
+  call fpc.bat %MP_PAS%
+  if errorlevel 1 goto :eof
 
 rem Regression test with standard MP.
   if "%TEST_MODE%"=="" (

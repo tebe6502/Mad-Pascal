@@ -2,7 +2,7 @@ unit StringUtilities;
 
 interface
 
-uses SysUtils;
+uses CommonTypes, SysUtils;
 
 type
   TStringIndex = Integer;
@@ -23,6 +23,10 @@ const
   AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
   AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
 
+// ----------------------------------------------------------------------------
+
+function IntToStr(const a: Int64): String;
+function StrToInt(const a: String): TInteger;
 
 // ----------------------------------------------------------------------------
 
@@ -45,8 +49,28 @@ function SplitStr(const a: String; const separatorCharacter: Char): TStringArray
 
 implementation
 
-// ----------------------------------------------------------------------------
+function StrToInt(const a: String): TInteger;
+{$IFNDEF PAS2JS}
+var
+  i: Integer; // ##NEEDED
+begin
+  val(a, Result, i);
+end;
 
+{$ELSE}
+// This code below should work the same in FPC, but this needs to be tested first.
+var value: integer;
+var i: integer;
+begin
+ val(a,value, i);
+ Result := value;
+end;
+{$ENDIF}
+
+function IntToStr(const a: Int64): String;
+begin
+  str(a, Result);
+end;
 
 (*----------------------------------------------------------------------------*)
 (* Skip whitespace characters until the next non-whitespace character.        *)
@@ -356,6 +380,5 @@ begin
   if s <> '' then AddString;
 
 end;
-
 
 end.

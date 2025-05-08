@@ -4,23 +4,36 @@ unit Scanner;
 
 interface
 
-uses CommonTypes, Tokens; // TODO: Only use tokens and type
+uses CommonTypes, CompilerTypes, Tokens;
 
 // ----------------------------------------------------------------------------
 
-procedure TokenizeProgram(UsesOn: Boolean = True);
+type
+  IScanner = interface
 
-procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+    procedure TokenizeProgram(UsesOn: Boolean);
 
-// For testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+    // This is only public for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
+    procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 
-// ----------------------------------------------------------------------------
+  end;
+
+type
+  TScanner = class(TInterfacedObject, IScanner)
+
+    procedure TokenizeProgram(UsesOn: Boolean);
+    procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+
+  private
+    procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+  end;
 
 implementation
 
-uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, StringUtilities, Targets, Utilities;
+uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
+// ----------------------------------------------------------------------------
+// Class TScanner Implementation
 // ----------------------------------------------------------------------------
 
 procedure ErrorOrdinalExpExpected(i: TTokenIndex);
@@ -33,13 +46,19 @@ var
   i: Integer;
 begin
 
+  NumIdent := 0;
   for i := Low(Ident) to High(Ident) do
   begin
     Ident[i] := Default(TIdentifier);
   end;
+
+  tokenList.Clear;
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
 
+  FastMul := -1;
+  DataSegmentUse := False;
+  LoopUnroll := False;
   PublicSection := True;
   UnitNameIndex := 1;
 
@@ -60,8 +79,6 @@ begin
   NumTypes := 0;
   run_func := 0;
   NumProc := 0;
-  NumTok := 0;
-  NumIdent := 0;
 
   NumStaticStrChars := 0;
 
@@ -70,14 +87,7 @@ begin
 
   NumDefines := AddDefines;
 
-  optyA := '';
-  optyY := '';
-  optyBP2 := '';
-
-  optyFOR0 := '';
-  optyFOR1 := '';
-  optyFOR2 := '';
-  optyFOR3 := '';
+  ResetOpty;
 
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
 
@@ -144,9 +154,9 @@ begin
           res.resPar[j] := tmp;
         end;
 
-        //     writeln(res.resName,',',res.resType,',',res.resFile);
+        // WriteLn(res.resName,',',res.resType,',',res.resFile);
 
-        for j := High(resArray) - 1 downto 0 do
+        for j := High(resArray) - 1 downto Low(resArray) do
           if resArray[j].resName = res.resName then
             Error(NumTok, TMessage.Create(TErrorCode.DuplicateResource, 'Duplicate resource: Type = ' +
               res.resType + ', Name = ''' + res.resName + ''''));
@@ -171,41 +181,10 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
-
-  Inc(NumTok);
-
-  if NumTok > High(Tok) then
-    SetLength(Tok, NumTok + 1);
-
-  // if NumTok > MAXTOKENS then
-  //    Error(NumTok, 'Out of resources, TOK');
-
-  Tok[NumTok].UnitIndex := UnitIndex;
-  Tok[NumTok].Kind := Kind;
-  Tok[NumTok].Value := Value;
-
-  if NumTok = 1 then
-    Column := 1
-  else
-  begin
-
-    if Tok[NumTok - 1].Line <> Line then
-    //   Column := 1
-    else
-      Column := Column + Tok[NumTok - 1].Column;
-
-  end;
-
-  // if Tok[NumTok- 1].Line <> Line then writeln;
-
-  Tok[NumTok].Line := Line;
-  Tok[NumTok].Column := Column;
-
-  //if line=46 then  writeln(Kind,',',Column);
-
-end;  //AddToken
+  tokenList.AddToken(kind, UnitIndex, line, Column, Value);
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -224,7 +203,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure TokenizeProgram(UsesOn: Boolean = True);
+procedure TScanner.TokenizeProgram(UsesOn: Boolean);
 var
   Text: String;
   Num, Frac: TString;
@@ -291,8 +270,11 @@ var
         s := AnsiUpperCase(Tok[i].Name);
 
 
-        for j := 2 to NumUnits do    // kasujemy wczesniejsze odwolania
-          if UnitName[j].Name = s then UnitName[j].Name := '';
+        // We clear earlier usage
+        for j := 2 to NumUnits do
+        begin
+          if UnitArray[j].Name = s then UnitArray[j].Name := '';
+        end;
 
         _line := Line;
         _uidx := UnitIndex;
@@ -300,13 +282,15 @@ var
         Inc(NumUnits);
         UnitIndex := NumUnits;
 
-        if UnitIndex > High(UnitName) then
+        if UnitIndex > High(UnitArray) then
+        begin
           Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' +
             IntToStr(UnitIndex)));
+        end;
 
         Line := 1;
-        UnitName[UnitIndex].Name := s;
-        UnitName[UnitIndex].Path := nam;
+        UnitArray[UnitIndex].Name := s;
+        UnitArray[UnitIndex].Path := nam;
 
         TokenizeUnit(UnitIndex, True);
 
@@ -586,12 +570,12 @@ var
                               _uidx := UnitIndex;
 
                               Line := 1;
-                              UnitName[IncludeIndex].Name := ExtractFileName(nam);
-                              UnitName[IncludeIndex].Path := nam;
+                              UnitArray[IncludeIndex].Name := ExtractFileName(nam);
+                              UnitArray[IncludeIndex].Path := nam;
                               UnitIndex := IncludeIndex;
                               Inc(IncludeIndex);
 
-                              if IncludeIndex > High(UnitName) then
+                              if IncludeIndex > High(UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
                                   'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
 
@@ -714,7 +698,7 @@ var
 
                                 until d[i] = ';';
 
-                                Dec(NumTok);
+                                tokenList.RemoveToken;
                               end
                               else
 
@@ -739,7 +723,7 @@ var
 
                                   until d[i] = ';';
 
-                                  Dec(NumTok);
+                                  TokenList.RemoveToken;
                                 end
                                 else
 
@@ -750,7 +734,7 @@ var
                                     s := GetFilePath(d, i);
                                     AddResource(FindFile(s, 'resource'));
 
-                                    Dec(NumTok);
+                                    tokenList.RemoveToken;
                                   end
                                   else
 (*
@@ -801,7 +785,7 @@ var
 
                                         GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
 
-                                        Dec(NumTok);
+                                        tokenList.RemoveToken;
                                       end
                                       else
 
@@ -1800,6 +1784,8 @@ var
 
   procedure TokenizeUnit(a: Integer; testUnit: Boolean = False);
   // Read input file and get tokens
+  var
+    endLine: Integer;
   begin
 
     UnitIndex := a;
@@ -1809,21 +1795,22 @@ var
 
     if UnitIndex > 1 then AddToken(TTokenKind.UNITBEGINTOK, UnitIndex, Line, 0, 0);
 
-    //  writeln('>',UnitIndex,',',UnitName[UnitIndex].Name);
+    //  writeln('>',UnitIndex,',',UnitArray[UnitIndex].Name);
 
     UnitFound := False;
 
-    Tokenize(UnitName[UnitIndex].Path, testUnit);
+    Tokenize(UnitArray[UnitIndex].Path, testUnit);
 
     if UnitIndex > 1 then
     begin
 
       CheckTok(NumTok, TTokenKind.DOTTOK);
       CheckTok(NumTok - 1, TTokenKind.ENDTOK);
+      EndLine := Tok[NumTok - 1].Line;
+      tokenList.RemoveToken;
+      tokenList.RemoveToken;
 
-      Dec(NumTok, 2);
-
-      AddToken(TTokenKind.UNITENDTOK, UnitIndex, Tok[NumTok + 1].Line - 1, 0, 0);
+      AddToken(TTokenKind.UNITENDTOK, UnitIndex, EndLine - 1, 0, 0);
     end
     else
       AddToken(TTokenKind.EOFTOK, UnitIndex, Line, 0, 0);
@@ -1844,16 +1831,16 @@ begin
     TokenizeUnit(1)     // main_file
   else
     for cnt := NumUnits downto 1 do
-      if UnitName[cnt].Name <> '' then TokenizeUnit(cnt);
+      if GetUnit(cnt).Name <> '' then TokenizeUnit(cnt);
 
-end;  //TokenizeProgram
+end;  // TokenizeProgram
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure TokenizeMacro(a: String; Line, Spaces: Integer);
+procedure TScanner.TokenizeMacro(a: String; Line, Spaces: Integer);
 var
   i: Integer;
   Text: String;

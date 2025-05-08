@@ -8,6 +8,7 @@ uses FileIO;
 
 function CompilerTitle: String;
 
+procedure Initialize;
 procedure Main(const unitPathList: TPathList);
 procedure Free;
 
@@ -18,6 +19,7 @@ uses
   Math, // Required for Min(), do not remove
   Common,
   CommonTypes,
+  CompilerTypes,
   Console,
   Datatypes,
   MathEvaluate,
@@ -76,6 +78,10 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure Initialize;
+begin
+
+end;
 
 function GetIdentResult(ProcAsBlock: Integer): Integer;
 var
@@ -119,7 +125,7 @@ begin
 
   if ((Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and
     Ident[IdentIndex].Section) then
-    Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + a + Ident[IdentIndex].Name
+    Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + a + Ident[IdentIndex].Name
   else
     Result := a + Ident[IdentIndex].Name;
 
@@ -131,16 +137,16 @@ var
   lab: String;
 begin
 
-  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+  if (Ident[IdentIndex].UnitIndex > 1) and (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.', a) = 1) then
   begin
 
     lab := Ident[IdentIndex].Name;
     if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
-    if (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.', a) = 1) then
-      Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.' + lab
+    if (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.adr.', a) = 1) then
+      Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.adr.' + lab
     else
-      Result := UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + lab;
+      Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + lab;
 
   end
   else
@@ -152,7 +158,7 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+  if (Ident[IdentIndex].UnitIndex > 1) and (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.', a) = 1) then
     a := copy(a, a.IndexOf('.') + 2, length(a));
 
   Result := pos('.', a) > 0;
@@ -2604,7 +2610,7 @@ begin
 end;  //GenerateIncDec
 
 
-procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: Integer;
+procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TIdentIndex;
   Param: String = ''; ParamY: String = '');
 var
   NumAllocElements: Cardinal;
@@ -3580,7 +3586,7 @@ begin
       if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
         (NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
-      //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitName[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
+      //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitArray[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
 
       if TestName(IdentIndex, svar) then
       begin
@@ -6834,7 +6840,8 @@ begin
                         ((Ident[IdentIndex].DataType in Pointers) and not
                         (Ident[IdentIndex].AllocElementType in [TTokenKind.UNTYPETOK,
                         TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK, TTokenKind.PROCVARTOK]) and
-                        (Ident[IdentIndex].NumAllocElements > 0)) or ((Ident[IdentIndex].DataType in Pointers) and
+                        (Ident[IdentIndex].NumAllocElements > 0)) or
+                        ((Ident[IdentIndex].DataType in Pointers) and
                         (Ident[IdentIndex].PassMethod = TParameterPassingMethod.VARPASSING)) then
                         Push(Ident[IdentIndex].Value, ASPOINTER, GetDataSize(TTokenKind.POINTERTOK), IdentIndex)
                       else
@@ -7929,14 +7936,14 @@ begin
         asm65(#9'.LOCAL +MAIN.' + svar)                  // w tym samym module poza aktualnym blokiem procedury/funkcji
       else
         if (Ident[IdentIndex].UnitIndex > 1) then
-          asm65(#9'.LOCAL +MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+          asm65(#9'.LOCAL +MAIN.' + GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + svar)      // w innym module
         else
           asm65(#9'.LOCAL +MAIN.' + svar);
     // w tym samym module poza aktualnym blokiem procedury/funkcji
 
 {
   if Ident[IdentIndex].UnitIndex > 1 then
-   asm65(#9'.LOCAL +MAIN.' + UnitName[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+   asm65(#9'.LOCAL +MAIN.' + UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
   else
    asm65(#9'.LOCAL +MAIN.' + svar);                  // w tym samym module poza aktualnym blokiem procedury/funkcji
 }
@@ -11258,7 +11265,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function CompileBlockRead(var i: Integer; IdentIndex: Integer; IdentBlock: Integer): Integer;
+function CompileBlockRead(var i: Integer; IdentIndex: TIdentIndex; IdentBlock: Integer): Integer;
 var
   NumActualParams, idx: Integer;
   ActualParamType, AllocElementType: TDataType;
@@ -12506,10 +12513,9 @@ begin
                   // dla PROC, FUNC -> Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and
-                      (not (Ident[IdentIndex].AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
+                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and (not
+                      (Ident[IdentIndex].AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+                      not (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
                       [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.Ident[IdentIndex].AllocElementType] *} Ident[IdentIndex].NumAllocElements > 1) and ({GetDataSize( TDataType.Ident[GetIdentIndex(Tok[k].Name)].AllocElementType] *} Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements > 1)) *) then
                     begin
@@ -13264,7 +13270,8 @@ WHILETOK:
                 GenerateAssignment(ASPOINTER, GetDataSize(Ident[IdentIndex].DataType), IdentIndex);  //!!!!!
 
                 if not (Tok[j + 1].Kind in [TTokenKind.TOTOK, TTokenKind.DOWNTOTOK]) then
-                  Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' + GetTokenSpellingAtIndex(j + 1) + ' found')
+                  Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' +
+                    TokenList.GetTokenSpellingAtIndex(j + 1) + ' found')
                 else
                 begin
                   Down := Tok[j + 1].Kind = TTokenKind.DOWNTOTOK;
@@ -15227,7 +15234,7 @@ var
 
   function GetIdentifierFullName(const identifier: TIdentifier): String;
   begin
-    Result := UnitName[identifier.UnitIndex].Name + '.' + identifier.Name;
+    Result := GetUnit(identifier.UnitIndex).Name + '.' + identifier.Name;
   end;
 
   function GetIdentifierDataSize(const identifier: TIdentifier): Integer;
@@ -16004,7 +16011,7 @@ begin
         repeat
 
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Formal parameter name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+            Error(i + 1, 'Formal parameter name expected but ' + TokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           begin
             Inc(NumVarOfSameType);
@@ -16924,20 +16931,20 @@ begin
     begin
       asm65separator;
 
-      DefineIdent(i, UnitName[Tok[i].UnitIndex].Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+      DefineIdent(i, GetUnit(Tok[i].UnitIndex).Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
       Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
 
-      //   writeln(UnitName[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
+      //   writeln(UnitArray[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
       asm65;
-      asm65('.local'#9 + UnitName[Tok[i].UnitIndex].Name, '; UNIT');
+      asm65('.local'#9 + GetUnit(Tok[i].UnitIndex).Name, '; UNIT');
 
       UnitNameIndex := Tok[i].UnitIndex;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
 
-      if Tok[i + 2].Name <> UnitName[Tok[i].UnitIndex].Name then
+      if Tok[i + 2].Name <> GetUnit(Tok[i].UnitIndex).Name then
         Error(i + 2, 'Illegal unit name: ' + Tok[i + 2].Name);
 
       CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
@@ -16966,7 +16973,7 @@ begin
       VarRegister := 0;
 
       asm65;
-      asm65('.endl', '; UNIT ' + UnitName[Tok[i].UnitIndex].Name);
+      asm65('.endl', '; UNIT ' + GetUnit(Tok[i].UnitIndex).Name);
 
       j := NumIdent;
 
@@ -17238,18 +17245,19 @@ begin
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to UnitName[UnitNameIndex].Units do
-          if (UnitName[UnitNameIndex].Allow[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then yes := False;
+        for j := 1 to UnitArray[UnitNameIndex].Units do
+          if (UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+            yes := False;
 
         if yes then
         begin
 
-          Inc(UnitName[UnitNameIndex].Units);
+          Inc(UnitArray[UnitNameIndex].Units);
 
-          if UnitName[UnitNameIndex].Units > MAXALLOWEDUNITS then
+          if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          UnitName[UnitNameIndex].Allow[UnitName[UnitNameIndex].Units] := Tok[i].Name;
+          UnitArray[UnitNameIndex].AllowedUnitNames[UnitArray[UnitNameIndex].Units] := Tok[i].Name;
 
         end;
 
@@ -17308,7 +17316,7 @@ begin
       repeat
 
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-          Error(i + 1, 'Constant name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+          Error(i + 1, 'Constant name expected but ' + TokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
         else
           if Tok[i + 2].Kind = TTokenKind.EQTOK then
           begin
@@ -17518,7 +17526,7 @@ begin
     begin
       repeat
         if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-          Error(i + 1, 'Type name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+          Error(i + 1, 'Type name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
         else
         begin
 
@@ -17588,7 +17596,7 @@ begin
         NumVarOfSameType := 0;
         repeat
           if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-            Error(i + 1, 'Variable name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+            Error(i + 1, 'Variable name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
           else
           begin
             Inc(NumVarOfSameType);
@@ -18161,7 +18169,7 @@ begin
     if Tok[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
       TTokenKind.DESTRUCTORTOK] then
       if Tok[i + 1].Kind <> TTokenKind.IDENTTOK then
-        Error(i + 1, 'Procedure name expected but ' + GetTokenSpellingAtIndex(i + 1) + ' found')
+        Error(i + 1, 'Procedure name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
       else
       begin
 
@@ -18660,12 +18668,12 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := NumUnits downto 2 do
-    if UnitName[j].Name <> '' then
+    if GetUnit(j).Name <> '' then
     begin
 
       asm65;
-      asm65(#9'.ifdef MAIN.' + UnitName[j].Name + '.@UnitInit');
-      asm65(#9'jsr MAIN.' + UnitName[j].Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + GetUnit(j).Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + GetUnit(j).Name + '.@UnitInit');
       asm65(#9'.fi');
 
     end;
@@ -18675,12 +18683,12 @@ end;
   asm65separator;
 
   for j := NumUnits downto 2 do
-    if UnitName[j].Name <> '' then
+    if GetUnit(j).Name <> '' then
     begin
       asm65;
-      asm65(#9'ift .SIZEOF(MAIN.' + UnitName[j].Name + ') > 0');
-      asm65(#9'.print ''' + UnitName[j].Name + ': ' + ''',MAIN.' + UnitName[j].Name + ',' +
-        '''..''' + ',' + 'MAIN.' + UnitName[j].Name + '+.SIZEOF(MAIN.' + UnitName[j].Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + GetUnit(j).Name + ') > 0');
+      asm65(#9'.print ''' + GetUnit(j).Name + ': ' + ''',MAIN.' + GetUnit(j).Name + ',' +
+        '''..''' + ',' + 'MAIN.' + GetUnit(j).Name + '+.SIZEOF(MAIN.' + GetUnit(j).Name + ')-1');
       asm65(#9'eif');
     end;
 
@@ -18977,35 +18985,42 @@ const
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
 
+var
+  scanner: IScanner;
 begin
 
   Common.unitPathList := unitPathList;
   evaluationContext := TEvaluationContext.Create;
 
-  SetLength(Tok, 1);
-  SetLength(IFTmpPosStack, 1);
+  TokenList := TTokenList.Create(Addr(Tok));
 
-  Tok[NumTok].Line := 0;
+  SetLength(IFTmpPosStack, 1);
 
   Defines[1].Name := AnsiUpperCase(target.Name);
 
+  {$IFNDEF PAS2JS}
   DefaultFormatSettings.DecimalSeparator := '.';
+  {$ENDIF}
 
   TextColor(WHITE);
 
-  Writeln('Compiling ' + UnitName[1].Name);
+  Assert(NumUnits = 1); // TODO
+  Writeln('Compiling ' + GetUnit(1).Name);
 
   // ----------------------------------------------------------------------------
   // Set defines for first pass;
-  TokenizeProgram;
+  scanner := TScanner.Create;
+
+  scanner.TokenizeProgram(True);
 
   if NumTok = 0 then Error(1, '');
 
+  // TODO: Method AddUnit
   Inc(NumUnits);
-  UnitName[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
-  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
+  UnitArray[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
+  UnitArray[NumUnits].Path := FindFile('system.pas', 'unit');
 
-  TokenizeProgram(False);
+  scanner.TokenizeProgram(False);
 
   // ----------------------------------------------------------------------------
 
@@ -19064,10 +19079,6 @@ begin
   NumStaticStrChars := NumStaticStrCharsTmp;
 
   ResetOpty;
-  optyFOR0 := '';
-  optyFOR1 := '';
-  optyFOR2 := '';
-  optyFOR3 := '';
 
   LIBRARY_USE := LIBRARYTOK_USE;
 
@@ -19076,7 +19087,8 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  for i := 1 to High(UnitName) do UnitName[i].Units := 0;
+  // TODO Why here?
+  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
 
   iOut := 0;
   outTmp := '';
@@ -19090,7 +19102,8 @@ end;
 procedure Free;
 begin
 
-  SetLength(Tok, 0);
+  TokenList.Free;
+
   SetLength(IFTmpPosStack, 0);
   evaluationContext := nil;
   unitPathList.Free;
