@@ -471,7 +471,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
+// TOO Move core to TDataType
 function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 begin
 
@@ -512,6 +512,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
+// TOO Move core to TDataType
 function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataType): TDataType;
 begin
 
@@ -612,14 +613,13 @@ begin
 
 end;
 
+// The function is currently kept for compatibility, simulating the previous global variable.
 function NumTok: Integer;
 begin
   if tokenList <> nil then
   begin
     Result := tokenList.Size;
   end;
-  // TODO
-  //Writeln('NumTok=',Result);
 end;
 
 end.

@@ -215,8 +215,6 @@ type
   end;
 
   // A token list owns token instances.
-
-
   TTokenList = class
   public
   type TTokenArray = array of TToken;
