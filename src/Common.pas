@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
+uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 const
   title = '1.7.2';
@@ -79,7 +79,11 @@ var
 
   optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString; // Initialized in ResetOpty
 
-  msgWarning, msgNote, msgUser: TStringArray;
+  msgLists: record
+    msgWarning: TStringList;
+    msgNote: TStringList;
+    msgUser: TStringList;
+  end;
 
   LinkObj: TStringArray;
   unitPathList: TPathList;

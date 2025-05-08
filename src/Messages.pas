@@ -206,11 +206,11 @@ begin
 
   TextColor(LIGHTGREEN);
 
-  for i := 0 to High(msgWarning) - 1 do writeln(msgWarning[i]);
+  for i := 0 to msgLists.msgWarning.Count - 1 do writeln(msgLists.msgWarning[i]);
 
   TextColor(LIGHTCYAN);
 
-  for i := 0 to High(msgNote) - 1 do writeln(msgNote[i]);
+  for i := 0 to msgLists.msgNote.Count - 1 do writeln(msgLists.msgNote[i]);
 
   NormVideo;
 
@@ -243,7 +243,7 @@ end;
 
 function GetUserDefinedText(const tokenIndex: TTokenIndex): String;
 begin
-  Result := 'User defined: ' + msgUser[Tok[tokenIndex].Value];
+  Result := 'User defined: ' + msgLists.msgUser[Tok[tokenIndex].Value];
 end;
 
 function GetErrorMessage(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
@@ -650,14 +650,8 @@ begin
     a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
       ')' + ' Warning: ' + msg.GetText();
 
-    for i := High(msgWarning) - 1 downto 0 do
-    begin
-      if msgWarning[i] = a then exit;
-    end;
-
-    i := High(msgWarning);
-    msgWarning[i] := a;
-    SetLength(msgWarning, i + 2);
+    // Add warning only once.
+    if msgLists.msgWarning.IndexOf(a) < 0 then  msgLists.msgWarning.Add(a);
 
   end;
 
@@ -754,7 +748,7 @@ begin
         if pos('@FN', Ident[identIndex].Name) = 1 then
 
         else
-          AddMessage(msgNote, a);
+          msgLists.msgNote.Add(a);
 
       end;
 
@@ -778,7 +772,7 @@ begin
     a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
     a := a + msg;
 
-    AddMessage(msgNote, a);
+    msgLists.msgNote.Add(a);
 
   end;
 

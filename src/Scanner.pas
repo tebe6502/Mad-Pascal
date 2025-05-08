@@ -30,7 +30,7 @@ type
 
 implementation
 
-uses SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
+uses Classes, SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
 // ----------------------------------------------------------------------------
 // Class TScanner Implementation
@@ -60,13 +60,13 @@ begin
   DataSegmentUse := False;
   LoopUnroll := False;
   PublicSection := True;
-  UnitNameIndex := 1;
+  UnitNameIndex := 1; // TODO This is the current unit index
 
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
-  SetLength(msgUser, 1);
-  SetLength(msgWarning, 1);
-  SetLength(msgNote, 1);
+  msgLists.msgUser := TStringList.Create;
+  msgLists.msgWarning := TStringList.Create;
+  msgLists.msgNote := TStringList.Create;
 
   NumBlocks := 0;
   BlockStackTop := 0;
@@ -469,15 +469,14 @@ var
         k: Integer;
       begin
 
-        k := High(msgUser);
+        k := msgLists.msgUser.Count;
 
         AddToken(Kind, UnitIndex, Line, 1, k);
         AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
         SkipWhitespaces(d, i);
 
-        msgUser[k] := copy(d, i, length(d) - i);
-        SetLength(msgUser, k + 2);
+        msgLists.msgUser.Add( copy(d, i, length(d) - i));
 
       end;
 

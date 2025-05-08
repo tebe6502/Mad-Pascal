@@ -12638,7 +12638,7 @@ begin
     TTokenKind.INFOTOK:
     begin
 
-      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgUser[Tok[i].Value]);
+      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgLists.msgUser[Tok[i].Value]);
 
       Result := i;
     end;
@@ -16894,7 +16894,7 @@ begin
 
     if Tok[i].Kind = TTokenKind.INFOTOK then
     begin
-      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgUser[Tok[i].Value]);
+      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgLists.msgUser[Tok[i].Value]);
       Inc(i, 2);
     end;
 

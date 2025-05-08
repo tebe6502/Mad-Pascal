@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                       {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                        {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                       {$ENDIF}
+                        {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -442,7 +442,7 @@ uses
         target.zpage := ZPAGE_BASE;
 
 
-      if cpu <>TCPU.NONE then target.cpu := cpu;
+      if cpu <> TCPU.NONE then target.cpu := cpu;
 
       case target.cpu of
         TCPU.CPU_6502: AddDefine('CPU_6502');
@@ -550,8 +550,8 @@ uses
 
     TextColor(LIGHTGRAY);
 
-    if High(msgWarning) > 0 then Writeln(IntToStr(High(msgWarning)) + ' warning(s) issued');
-    if High(msgNote) > 0 then Writeln(IntToStr(High(msgNote)) + ' note(s) issued');
+    if msgLists.msgWarning.Count > 0 then Writeln(IntToStr(msgLists.msgWarning.Count) + ' warning(s) issued');
+    if msgLists.msgNote.Count > 0 then Writeln(IntToStr(msgLists.msgNote.Count) + ' note(s) issued');
 
     NormVideo;
   end;
