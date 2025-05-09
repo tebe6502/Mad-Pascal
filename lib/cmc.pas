@@ -1,7 +1,7 @@
 unit cmc;
 (*
  @type: unit
- @author: Tomasz Biela (Tebe)
+ @author: Tomasz Biela (Tebe), mgr_inz_rafal
  @name: Chaos Music Player library
  @version: 1.0
 
@@ -17,6 +17,8 @@ TCMC.Play
 TCMC.Stop
 TCMC.Pause
 TCMC.Cont
+TCMC.InitNoSong
+TCMC.Song
 
 }
 
@@ -30,11 +32,13 @@ object for controling CMC player
 	player: pointer;		// memory address of player
 	modul: pointer;			// memory address of a module
 
-	procedure Init; assembler;	// initializes
-	procedure Play; assembler;	// play
-	procedure Pause; assembler;	// pause
-	procedure Cont; assembler;	// continue
-	procedure Stop; assembler;	// stops music
+	procedure Init; assembler;            // initialize player and select song #0
+	procedure InitNoSong; assembler;      // initialize but does not select a song
+	procedure Song(n: byte); assembler;   // select a song to play, player must be initialized
+	procedure Play; assembler;            // play
+	procedure Pause; assembler;           // pause
+	procedure Cont; assembler;            // continue
+	procedure Stop; assembler;            // stops music
 
 	end;
 
@@ -47,6 +51,48 @@ var	ntsc: byte;
 
 
 procedure TCMC.Init; assembler;
+(*
+@description:
+Initialize CMC player and select song #0
+*)
+asm
+	txa:pha
+
+	mwa TCMC :bp2
+
+	ldy #0
+	lda (:bp2),y
+	add #3		; jsr player+3
+	sta adr
+	iny
+	lda (:bp2),y
+	adc #0
+	sta adr+1
+
+	iny
+	lda (:bp2),y
+	tax		; low byte of RMT module to X reg
+	iny
+	lda (:bp2),y
+	tay		; hi byte of RMT module to Y reg
+
+	lda #$70
+	jsr init
+
+	ldx #0
+	txa
+	jsr init
+
+	jmp stop
+
+init	jmp $ffff
+adr	equ *-2
+
+stop	pla:tax
+end;
+
+
+procedure TCMC.InitNoSong; assembler;
 (*
 @description:
 Initialize CMC player
@@ -75,7 +121,35 @@ asm
 	lda #$70
 	jsr init
 
-	ldx #0
+	jmp stop
+
+init	jmp $ffff
+adr	equ *-2
+
+stop	pla:tax
+end;
+
+
+procedure TCMC.Song(n: byte); assembler;
+(*
+@description:
+Select a song to play, player must be initialized
+*)
+asm
+	txa:pha
+
+	mwa TCMC :bp2
+
+	ldy #0
+	lda (:bp2),y
+	add #3		; jsr player+3
+	sta adr
+	iny
+	lda (:bp2),y
+	adc #0
+	sta adr+1
+
+	ldx n
 	txa
 	jsr init
 
