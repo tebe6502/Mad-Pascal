@@ -478,7 +478,7 @@ uses
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
     UnitList:=TUnitList.Create();
-    UnitList.AddUnit('', '');
+    UnitList.AddUnit(TSourceFileType.PROGRAM_FILE,'', '');
 
     try
       ParseParam();

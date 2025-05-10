@@ -280,7 +280,7 @@ var
         _uidx := UnitIndex;
 
         // TODO
-        UnitIndex := NumUnits+1;
+        UnitIndex := NumUnits + 1;
 
         if UnitIndex > High(UnitList.UnitArray) then
         begin
@@ -289,7 +289,7 @@ var
         end;
 
         Line := 1;
-        UnitList.AddUnit(s,nam);
+        UnitList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
 
         TokenizeUnit(UnitIndex, True);
 
@@ -475,7 +475,7 @@ var
 
         SkipWhitespaces(d, i);
 
-        msgLists.msgUser.Add( copy(d, i, length(d) - i));
+        msgLists.msgUser.Add(copy(d, i, length(d) - i));
 
       end;
 

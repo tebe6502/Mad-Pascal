@@ -12513,9 +12513,10 @@ begin
                   // dla PROC, FUNC -> Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and (not
-                      (Ident[IdentIndex].AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                      not (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
+                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and
+                      (not (Ident[IdentIndex].AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
+                      (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
                       [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.Ident[IdentIndex].AllocElementType] *} Ident[IdentIndex].NumAllocElements > 1) and ({GetDataSize( TDataType.Ident[GetIdentIndex(Tok[k].Name)].AllocElementType] *} Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements > 1)) *) then
                     begin
@@ -17246,7 +17247,8 @@ begin
 
         yes := True;
         for j := 1 to Common.UnitList.UnitArray[UnitNameIndex].Units do
-          if (Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+          if (Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or
+            (Tok[i].Name = 'SYSTEM') then
             yes := False;
 
         if yes then
@@ -17257,7 +17259,8 @@ begin
           if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[Common.UnitList.UnitArray[UnitNameIndex].Units] := Tok[i].Name;
+          Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[Common.UnitList.UnitArray[UnitNameIndex].Units] :=
+            Tok[i].Name;
 
         end;
 
@@ -19017,7 +19020,7 @@ begin
 
   // TODO: Method AddUnit
   // Add default unit 'system.pas'
-  UnitList.AddUnit( 'SYSTEM',  FindFile('system.pas', 'unit'));
+  UnitList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
   scanner.TokenizeProgram(False);
 

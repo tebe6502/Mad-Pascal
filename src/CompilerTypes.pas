@@ -179,7 +179,10 @@ type
   TUnitName = TName;
   TUnitIndex = Smallint;
 
+  TSourceFileType = (PROGRAM_FILE, UNIT_FILE, INCLUDE_FILE);
+
   TUnit = class
+    SourceFileType: TSourceFileType;
     Name: TUnitName;
     Path: TFilePath;
     Units: Integer;
@@ -194,7 +197,7 @@ type
     destructor Free;
 
     function Size: Integer;
-    function AddUnit(Name: TUnitName; Path: TFilePath): TUnit;
+    function AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
 
   var
     unitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
@@ -476,7 +479,7 @@ begin
 end;
 
 
-function TUnitList.AddUnit(Name: TUnitName; Path: TFilePath): TUnit;
+function TUnitList.AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
 var
   i: Integer;
 begin
@@ -487,6 +490,7 @@ begin
   Inc(count);
 
   // Result.UnitIndex := i;
+  Result.SourceFileType:=SourceFileType;
   Result.Name := Name;
   Result.Path := Path;
 
