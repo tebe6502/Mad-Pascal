@@ -44,8 +44,7 @@ var
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
 
-  NumUnits: Integer;
-  UnitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
+  UnitList: TUnitList;
 
 
   IFTmpPosStack: array of Integer;
@@ -83,7 +82,7 @@ var
     msgWarning: TStringList;
     msgNote: TStringList;
     msgUser: TStringList;
-  end;
+    end;
 
   LinkObj: TStringArray;
   unitPathList: TPathList;
@@ -119,6 +118,7 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
+function NumUnits: Integer;
 function NumTok: Integer;
 
 procedure AddDefine(const defineName: TDefineName);
@@ -234,8 +234,8 @@ end;
 
 function GetUnit(const UnitIndex: TUnitIndex): TUnit;
 begin
-  assert(UnitIndex >= Low(UnitArray));
-  Result := UnitArray[UnitIndex];
+  assert(UnitIndex >= Low(UnitList.UnitArray));
+  Result := UnitList.UnitArray[UnitIndex];
 end;
 
 
@@ -615,6 +615,15 @@ begin
   //StaticStringData[NumStaticStrChars] := 0;
   //Inc(NumStaticStrChars);
 
+end;
+
+// The function is currently kept for compatibility, simulating the previous global variable.
+function NumUnits: Integer;
+begin
+  if unitList <> nil then
+  begin
+    Result := UnitList.Size;
+  end;
 end;
 
 // The function is currently kept for compatibility, simulating the previous global variable.

@@ -17245,19 +17245,19 @@ begin
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to UnitArray[UnitNameIndex].Units do
-          if (UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+        for j := 1 to Common.UnitList.UnitArray[UnitNameIndex].Units do
+          if (Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
             yes := False;
 
         if yes then
         begin
 
-          Inc(UnitArray[UnitNameIndex].Units);
+          Inc(Common.UnitList.UnitArray[UnitNameIndex].Units);
 
           if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          UnitArray[UnitNameIndex].AllowedUnitNames[UnitArray[UnitNameIndex].Units] := Tok[i].Name;
+          Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[Common.UnitList.UnitArray[UnitNameIndex].Units] := Tok[i].Name;
 
         end;
 
@@ -19016,9 +19016,8 @@ begin
   if NumTok = 0 then Error(1, '');
 
   // TODO: Method AddUnit
-  Inc(NumUnits);
-  UnitArray[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
-  UnitArray[NumUnits].Path := FindFile('system.pas', 'unit');
+  // Add default unit 'system.pas'
+  UnitList.AddUnit( 'SYSTEM',  FindFile('system.pas', 'unit'));
 
   scanner.TokenizeProgram(False);
 
@@ -19088,7 +19087,7 @@ begin
   PublicSection := True;
 
   // TODO Why here?
-  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
+  for i := 1 to High(Common.UnitList.UnitArray) do Common.UnitList.UnitArray[i].Units := 0;
 
   iOut := 0;
   outTmp := '';

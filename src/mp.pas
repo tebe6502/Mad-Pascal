@@ -413,8 +413,8 @@ uses
         else
 
         begin
-          UnitArray[NumUnits].Name := TEnvironment.GetParameterString(i);
-          UnitArray[NumUnits].Path := UnitArray[NumUnits].Name;
+          UnitList.UnitArray[NumUnits].Name := TEnvironment.GetParameterString(i);
+          UnitList.UnitArray[NumUnits].Path := UnitList.UnitArray[NumUnits].Name;
 
           if not TFileSystem.FileExists_(GetUnit(NumUnits).Path) then
           begin
@@ -477,8 +477,9 @@ uses
 
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    NumUnits := 1;           // !!! 1 !!!
-    UnitArray[NumUnits].Name := '';
+    UnitList:=TUnitList.Create();
+    UnitList.AddUnit('', '');
+
     try
       ParseParam();
     except
@@ -590,7 +591,7 @@ var
 begin
   exitCode := CallMain;
   {$IFDEF DEBUG}
-  exitCode := CallMain; // TODO until 2nd call works
+  //exitCode := CallMain; // TODO until 2nd call works
   {$ENDIF}
 
     {$IFDEF DEBUG}

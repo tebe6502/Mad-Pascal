@@ -176,16 +176,32 @@ type
     Field: array [0..MAXFIELDS] of TField;
   end;
 
+  TUnitName = TName;
   TUnitIndex = Smallint;
 
-
-  TUnitName = TName;
-
-  TUnit = record
+  TUnit = class
     Name: TUnitName;
     Path: TFilePath;
     Units: Integer;
     AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
+  end;
+
+  TUnitList = class
+  public
+
+
+    constructor Create();
+    destructor Free;
+
+    function Size: Integer;
+    function AddUnit(Name: TUnitName; Path: TFilePath): TUnit;
+
+  var
+    unitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
+
+  private
+  var
+    Count: Integer;
   end;
 
   IUnit = interface
@@ -228,6 +244,7 @@ type
     procedure RemoveToken;
 
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
+
   private
 
   var
@@ -340,11 +357,6 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
-function TToken.GetSpelling: TString;
-begin
-  Result := GetHumanReadbleTokenSpelling(kind);
-end;
-
 constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
 begin
   self.tokenArrayPointer := tokenArrayPointer;
@@ -423,6 +435,12 @@ begin
 
 end;
 
+function TToken.GetSpelling: TString;
+begin
+  Result := GetHumanReadbleTokenSpelling(kind);
+end;
+
+
 function TTokenList.GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 var
   kind: TTokenKind;
@@ -434,6 +452,47 @@ begin
     kind := tokenArrayPointer^[tokenIndex].Kind;
     GetHumanReadbleTokenSpelling(kind);
   end;
+end;
+
+
+constructor TUnitList.Create();
+var
+  i: Integer;
+begin
+
+  for i := 1 to MAXUNITS + MAXUNITS do
+  begin
+    UnitArray[i] := TUnit.Create;
+  end;
+end;
+
+destructor TUnitList.Free;
+begin
+end;
+
+function TUnitList.Size: Integer;
+begin
+  Result := Count;
+end;
+
+
+function TUnitList.AddUnit(Name: TUnitName; Path: TFilePath): TUnit;
+var
+  i: Integer;
+begin
+  Result := TUnit.Create;
+
+  // if NumTok > MAXUnitS then
+  //    Error(NumTok, 'Out of resources, TOK');
+  Inc(count);
+
+  // Result.UnitIndex := i;
+  Result.Name := Name;
+  Result.Path := Path;
+
+  unitArray[count]:=Result;
+
+  // WriteLn('Added Unit at index ' + IntToStr(i) + ': ' + );
 end;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);

@@ -185,20 +185,6 @@ end;
 
 // ----------------------------------------------------------------------------
 
-procedure AddMessage(var msg: TStringArray; const a: String);
-var
-  i: Integer;
-begin
-
-  i := High(msg);
-  msg[i] := a;
-
-  SetLength(msg, i + 2);
-
-end;
-
-// ----------------------------------------------------------------------------
-
 procedure WritelnMsg;
 var
   i: Integer;
@@ -640,7 +626,6 @@ end;
 
 procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
 var
-  i: Integer;
   a: String;
 begin
 

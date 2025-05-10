@@ -273,24 +273,23 @@ var
         // We clear earlier usage
         for j := 2 to NumUnits do
         begin
-          if UnitArray[j].Name = s then UnitArray[j].Name := '';
+          if GetUnitName(j) = s then UnitList.UnitArray[j].Name := '';
         end;
 
         _line := Line;
         _uidx := UnitIndex;
 
-        Inc(NumUnits);
-        UnitIndex := NumUnits;
+        // TODO
+        UnitIndex := NumUnits+1;
 
-        if UnitIndex > High(UnitArray) then
+        if UnitIndex > High(UnitList.UnitArray) then
         begin
           Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' +
             IntToStr(UnitIndex)));
         end;
 
         Line := 1;
-        UnitArray[UnitIndex].Name := s;
-        UnitArray[UnitIndex].Path := nam;
+        UnitList.AddUnit(s,nam);
 
         TokenizeUnit(UnitIndex, True);
 
@@ -569,12 +568,12 @@ var
                               _uidx := UnitIndex;
 
                               Line := 1;
-                              UnitArray[IncludeIndex].Name := ExtractFileName(nam);
-                              UnitArray[IncludeIndex].Path := nam;
+                              UnitList.UnitArray[IncludeIndex].Name := ExtractFileName(nam);
+                              UnitList.UnitArray[IncludeIndex].Path := nam;
                               UnitIndex := IncludeIndex;
                               Inc(IncludeIndex);
 
-                              if IncludeIndex > High(UnitArray) then
+                              if IncludeIndex > High(UnitList.UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
                                   'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
 
@@ -1798,7 +1797,7 @@ var
 
     UnitFound := False;
 
-    Tokenize(UnitArray[UnitIndex].Path, testUnit);
+    Tokenize(UnitList.UnitArray[UnitIndex].Path, testUnit);
 
     if UnitIndex > 1 then
     begin
