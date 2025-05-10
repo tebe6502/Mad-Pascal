@@ -59,6 +59,9 @@ Contributors:
 + Joseph Zatarski (https://forums.atariage.com/topic/225063-full-color-ansi-vbxe-terminal-in-the-works/) :
 	- base\atari\vbxeansi.asm
 
+John Brandwood :
+	- unit APLIB
+
 + Konrad Kokoszkiewicz :
 	- base\atari\cmdline.asm
 	- base\atari\vbxedetect.asm
@@ -68,7 +71,6 @@ Contributors:
 + Krzysztof Dudek (http://xxl.atari.pl/) :
 	- unit XBIOS: BLIBS library
 	- unit LZ4: unLZ4
-	- unit aPLib: unAPL
 
 + Krzysztof Święcicki :
 	- unit PP
