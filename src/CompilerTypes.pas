@@ -191,6 +191,13 @@ type
 
     function IsRelevant: Boolean;
 
+
+  end;
+
+  TSourceLocation = record
+    SourceFile: TSourceFile;
+    Line: Integer;
+    Column: Integer;
   end;
 
   TSourceFileList = class
@@ -223,9 +230,7 @@ type
 
   TToken = class
     TokenIndex: TTokenIndex;
-    SourceFile: TSourceFile;
-    Column: Smallint;
-    Line: Integer;
+    SourceLocation: TSourceLocation;
     Kind: TTokenKind;
     // For Kind=IDENTTOK:
     Name: TIdentifierName;
@@ -238,6 +243,10 @@ type
     StrLength: Word;
 
     function GetSourceFile: TSourceFile;
+    function GetSourceFileName: TSourceFileName;
+    function GetSourceFileLineString: String;
+    function GetSourceFileLocationString: String;
+
     function GetSpelling: TString;
 
   end;
@@ -371,7 +380,23 @@ implementation
 
 function TToken.GetSourceFile: TSourceFile;
 begin
-  Result := SourceFile;
+  Result := SourceLocation.SourceFile;
+end;
+
+function TToken.GetSourceFileName: TSourceFileName;
+begin
+  Result := SourceLocation.SourceFile.Name;
+end;
+
+function TToken.GetSourceFileLineString: String;
+begin
+  Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) + ')';
+end;
+
+function TToken.GetSourceFileLocationString: String;
+begin
+  Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) +
+    ', column ' + IntToStr(SourceLocation.Column) + ')';
 end;
 
 function TToken.GetSpelling: TString;
@@ -407,7 +432,8 @@ begin
   tokenArrayPointer^[0] := TToken.Create;
 end;
 
-function TTokenList.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
+function TTokenList.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer;
+  Value: TInteger): TToken;
 var
   i: Integer;
 begin
@@ -420,7 +446,7 @@ begin
   i := size + 1;
 
   Result.TokenIndex := i;
-  Result.SourceFile := SourceFile;
+  Result.SourceLocation.SourceFile := SourceFile;
   // Result.UnitIndex:=SourceFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
@@ -431,17 +457,17 @@ begin
   else
   begin
 
-    if tokenArrayPointer^[i - 1].Line <> Line then
+    if tokenArrayPointer^[i - 1].SourceLocation.Line <> Line then
     //   Column := 1
     else
-      Column := Column + tokenArrayPointer^[i - 1].Column;
+      Column := Column + tokenArrayPointer^[i - 1].SourceLocation.Column;
 
   end;
 
   // if Tok[i- 1].Line <> Line then writeln;
 
-  Result.Line := Line;
-  Result.Column := Column;
+  Result.SourceLocation.Line := Line;
+  Result.SourceLocation.Column := Column;
 
 
   SetLength(tokenArrayPointer^, i + 1);

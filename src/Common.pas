@@ -126,7 +126,7 @@ procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
-function GeTSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
+function GetSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 

@@ -370,8 +370,9 @@ begin
   for i := fromTokenIndex to toTokenIndex do
   begin
     token := Tok[i];
-    WriteLn(token.SourceFile.Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
-      IntToStr(token.Column) + '): kind=' + GetTokenKindName(token.Kind) + ' name=' + token.Name + '.');
+    WriteLn(token.SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(token.SourceLocation.Line) +
+      ', column ' + IntToStr(token.SourceLocation.Column) + '): kind=' + GetTokenKindName(token.Kind) +
+      ' name=' + token.Name + '.');
   end;
 end;
 
@@ -418,12 +419,13 @@ begin
       if (effectiveTokenIndex > 1) then
       begin
         previousToken := Tok[effectiveTokenIndex - 1];
-        WriteLn(token.SourceFile.Path + ' (' + IntToStr(token.Line) + ',' +
-          IntToStr(Succ(previousToken.Column)) + ')' + ' Error: ' + msg);
+        WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
+          ',' + IntToStr(Succ(previousToken.SourceLocation.Column)) + ')' + ' Error: ' + msg);
       end
       else
       begin
-        WriteLn(token.SourceFile.Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
+        WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
+          ')' + ' Error: ' + msg);
       end;
     end
     else
@@ -638,7 +640,7 @@ begin
   if pass = TPass.CODE_GENERATION then
   begin
 
-    a := Tok[tokenIndex].SourceFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+    a := Tok[tokenIndex].SourceLocation.SourceFile.Path + ' (' + IntToStr(Tok[tokenIndex].SourceLocation.Line) +
       ')' + ' Warning: ' + msg.GetText();
 
     // Add warning only once.
@@ -714,8 +716,7 @@ begin
     if pos('.', Ident[identIndex].Name) = 0 then
     begin
 
-      a := Tok[tokenIndex].SourceFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
-        ')' + ' Note: Local ';
+      a := Tok[tokenIndex].GetSourceFileLineString + ' Note: Local ';
 
       if Ident[identIndex].Kind <> UNITTYPE then
       begin
@@ -760,8 +761,7 @@ begin
   if Pass = TPass.CODE_GENERATION then
   begin
 
-    a := Tok[tokenIndex].SourceFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
-    a := a + msg;
+    a := Tok[tokenIndex].GetSourceFileLineString + ' Note: ' + msg;
 
     msgLists.msgNote.Add(a);
 

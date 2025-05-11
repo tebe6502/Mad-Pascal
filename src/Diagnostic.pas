@@ -18,6 +18,7 @@ procedure Diagnostics(ProgramUnit: TSourceFile);
 var
   i, CharIndex, ChildIndex: Integer;
   DiagFile: ITextFile;
+  token: TToken;
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
@@ -34,23 +35,23 @@ begin
 
   for i := 1 to NumTok do
   begin
-    // DiagFile.Write(i: 6, Tok[i].SourceCodeFile.UnitIndex) 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    DiagFile.Write(i, 6).Write(Tok[i].SourceFile.Name, 30).Write(Tok[i].Line,
-      6).Write(tokenList.GetTokenSpellingAtIndex(i), 30).WriteLn;
+    token := Tok[i];
+    DiagFile.Write(i, 6).Write(token.GetSourceFileName, 30).Write(token.SourceLocation.Line,
+      6).Write(token.GetSpelling, 30).WriteLn;
     if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
-      DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))
-    else if Tok[i].Kind = TTokenKind.FRACNUMBERTOK then
-        //    DiagFile.WriteLn(' = ', Tok[i].FracValue: 8: 4)
-        DiagFile.WriteLn(' = ', FloatToStr(Tok[i].FracValue))
-      else if Tok[i].Kind = TTokenKind.IDENTTOK then
-          DiagFile.WriteLn(' = ', Tok[i].Name)
-        else if Tok[i].Kind = TTokenKind.CHARLITERALTOK then
-            DiagFile.WriteLn(' = ', Chr(Tok[i].Value))
-          else if Tok[i].Kind = TTokenKind.STRINGLITERALTOK then
+      DiagFile.WriteLn(' = ', IntToStr(token.Value))
+    else if token.Kind = TTokenKind.FRACNUMBERTOK then
+        //    DiagFile.WriteLn(' = ', token.FracValue: 8: 4)
+        DiagFile.WriteLn(' = ', FloatToStr(token.FracValue))
+      else if token.Kind = TTokenKind.IDENTTOK then
+          DiagFile.WriteLn(' = ', token.Name)
+        else if token.Kind = TTokenKind.CHARLITERALTOK then
+            DiagFile.WriteLn(' = ', Chr(token.Value))
+          else if token.Kind = TTokenKind.STRINGLITERALTOK then
             begin
               DiagFile.Write(' = ');
-              for CharIndex := 1 to Tok[i].StrLength do
-                DiagFile.Write(StaticStringData[Tok[i].StrAddress - CODEORIGIN + (CharIndex - 1)], -1);
+              for CharIndex := 1 to token.StrLength do
+                DiagFile.Write(StaticStringData[token.StrAddress - CODEORIGIN + (CharIndex - 1)], -1);
               DiagFile.WriteLn;
             end
             else

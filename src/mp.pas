@@ -544,7 +544,7 @@ uses
     TextColor(WHITE);
     seconds := (GetTickCount64 - StartTime + 500) / 1000;
 {$IFNDEF PAS2JS}
-    Writeln(Tok[NumTok].Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
+    Writeln(Tok[NumTok].SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
       NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
 {$ELSE}
    Writeln(IntToStr(Tok[NumTok].Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '

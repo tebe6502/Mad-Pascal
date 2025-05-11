@@ -113,7 +113,7 @@ var
   end;
 
 
-  function SearchCurrenTSourceFile(X: TString; UnitIndex: TSourceFile): Integer;
+  function SearchCurrenTSourceFile(X: TString; SourceFile: TSourceFile): Integer;
   var
     IdentIndex, BlockStackIndex: Integer;
   begin
@@ -124,14 +124,14 @@ var
       // search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
         if (X = Ident[IdentIndex].Name) and (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
-          if (Ident[IdentIndex].SourceFile = UnitIndex) or UnitAllowedAccess(IdentIndex, UnitIndex) then
+          if (Ident[IdentIndex].SourceFile = SourceFile) or UnitAllowedAccess(IdentIndex, SourceFile) then
           begin
             Result := IdentIndex;
             Ident[IdentIndex].Pass := Pass;
 
             if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
-            if (Ident[IdentIndex].SourceFile = UnitIndex) then exit;
+            if (Ident[IdentIndex].SourceFile = SourceFile) then exit;
           end;
 
   end;

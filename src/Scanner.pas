@@ -14,7 +14,7 @@ type
     procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
 
     // This is only public for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-    procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFile; Line, Column: Integer; Value: TInteger);
+    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
 
   end;
 
@@ -24,7 +24,7 @@ type
     procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
     // TODO: Remove, check why this is called with fixed UnitIndex=1
     procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger) overload;
-    procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFile; Line, Column: Integer; Value: TInteger) overload;
+    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger) overload;
 
   private
     procedure TokenizeMacro(a: String; Line, Spaces: Integer);
@@ -185,9 +185,9 @@ begin
   tokenList.AddToken(kind, GeTSourceFile(UnitIndex), line, Column, Value);
 end;
 
-procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TSourceFile; Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
 begin
-  tokenList.AddToken(kind, UnitIndex, line, Column, Value);
+  tokenList.AddToken(kind, SourceFile, line, Column, Value);
 end;
 
 
@@ -856,7 +856,7 @@ var
                                                   Inc(i);
                                                   skip_spaces;
 
-                                                  Tok[NumTok].Line := line;
+                                                  Tok[NumTok].SourceLocation.Line := line;
 
                                                   if not (UpCase(d[i]) in AllowLabelFirstChars) then
                                                     Error(NumTok,
@@ -1256,7 +1256,7 @@ var
               else
                 Tok[NumTok].FracValue := StrToFloat(Num + Frac);
 
-              Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Num) + length(Frac) + Spaces;
+              Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Num) + length(Frac) + Spaces;
               Spaces := 0;
             end;
           end;
@@ -1319,7 +1319,7 @@ var
               SetLength(StrParams, 1);
               StrParams[0] := '';
 
-              Tok[NumTok].Line := Line;
+              Tok[NumTok].SourceLocation.Line := Line;
 
               if Num = '' then
               begin
@@ -1733,7 +1733,7 @@ var
 
               Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
               Tok[NumTok].FracValue := StrToFloat(Frac);
-              Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
+              Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Frac) + Spaces;
               Spaces := 0;
 
               Frac := '';
@@ -1817,7 +1817,7 @@ var
 
       CheckTok(NumTok, TTokenKind.DOTTOK);
       CheckTok(NumTok - 1, TTokenKind.ENDTOK);
-      EndLine := Tok[NumTok - 1].Line;
+      EndLine := Tok[NumTok - 1].SourceLocation.Line;
       tokenList.RemoveToken;
       tokenList.RemoveToken;
 
@@ -2053,7 +2053,7 @@ begin
 
           Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
           Tok[NumTok].FracValue := StrToFloat(Num + Frac);
-          Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Num) + length(Frac) + Spaces;
+          Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Num) + length(Frac) + Spaces;
           Spaces := 0;
         end;
       end;
@@ -2370,7 +2370,7 @@ begin
 
           Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
           Tok[NumTok].FracValue := StrToFloat(Frac);
-          Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
+          Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Frac) + Spaces;
           Spaces := 0;
 
           Frac := '';
