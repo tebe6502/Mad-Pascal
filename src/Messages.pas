@@ -70,6 +70,7 @@ type
 
 // ----------------------------------------------------------------------------
 
+procedure Initialize;
 
 procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
 procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
@@ -119,7 +120,7 @@ procedure WritelnMsg;
 
 implementation
 
-uses SysUtils, TypInfo, Console, Utilities;
+uses Classes, SysUtils, TypInfo, Console, Utilities;
 
 // -----------------------------------------------------------------------------
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
@@ -184,6 +185,13 @@ begin
 end;
 
 // ----------------------------------------------------------------------------
+
+procedure Initialize;
+begin
+  msgLists.msgUser := TStringList.Create;
+  msgLists.msgWarning := TStringList.Create;
+  msgLists.msgNote := TStringList.Create;
+end;
 
 procedure WritelnMsg;
 var
@@ -394,8 +402,6 @@ begin
   begin
 
     //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
-
-    WritelnMsg;  // TODO: Required?
 
     if tokenIndex <= NumTok then effectiveTokenIndex := tokenIndex
     else

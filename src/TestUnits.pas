@@ -106,7 +106,7 @@ uses
 
   procedure TestUnitFile;
   const
-    TEST_MP_FILE_PATH = '..\src\tests\Test-MP.pas';
+    TEST_MP_FILE_PATH = '..\src\tests\TestMP.pas';
   var
     pathList: TPathList;
 
@@ -281,9 +281,11 @@ type
   begin
 
     StartTest('TestUnitMessages');
+    Messages.Initialize;
     message := TMessage.Create(TErrorCode.IllegalExpression,
       'A={0} B={1} C={2} D={3} E={4} F={5} G={6} H={7} I={8} J={9}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
     AssertEquals(message.GetText(), 'A=A B=B C=C D=D E=E F=F G=G H=H I=I J=J');
+    Messages.WritelnMsg;
     EndTest('TestUnitMessages');
   end;
 
