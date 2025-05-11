@@ -64,9 +64,7 @@ begin
 
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
-  msgLists.msgUser := TStringList.Create;
-  msgLists.msgWarning := TStringList.Create;
-  msgLists.msgNote := TStringList.Create;
+  Messages.Initialize;
 
   NumBlocks := 0;
   BlockStackTop := 0;
@@ -207,7 +205,10 @@ procedure TScanner.TokenizeProgram(UsesOn: Boolean);
 var
   Text: String;
   Num, Frac: TString;
-  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
+  OldNumTok: Integer;
+  UnitIndex: TUnitIndex; // Currently tokenized unit
+  Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
+  //  IncludeIndex: Integer;
   Tmp: Int64;
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2, ch_: Char;
@@ -215,10 +216,10 @@ var
   StrParams: TStringArray;
 
 
-  procedure TokenizeUnit(a: Integer; testUnit: Boolean = False); forward;
+  procedure TokenizeUnit(a: TUnitIndex; testUnit: Boolean = False); forward;
 
 
-  procedure Tokenize(fnam: String; testUnit: Boolean = False);
+  procedure Tokenize(filePath: TFilePath; testUnit: Boolean = False);
   var
     InFile: IBinaryFile;
     _line: Integer;
@@ -270,26 +271,29 @@ var
         s := AnsiUpperCase(Tok[i].Name);
 
 
-        // We clear earlier usage
+        // We clear earlier usages of the same unit.
+        // This means this entry in the unit list will not be tokenized.
         for j := 2 to NumUnits do
         begin
-          if GetUnitName(j) = s then UnitList.UnitArray[j].Name := '';
+          if GetUnitName(j) = s then UnitList.GetUnit(j).Name := '';
         end;
 
         _line := Line;
         _uidx := UnitIndex;
 
         // TODO
-        UnitIndex := NumUnits + 1;
 
+
+        // TODO Move check to TUnitList and use exceptions
+        (*
         if UnitIndex > High(UnitList.UnitArray) then
         begin
           Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' +
             IntToStr(UnitIndex)));
-        end;
+        end; *)
 
+        UnitIndex := UnitList.AddUnit(TSourceFileType.UNIT_FILE, s, nam).UnitIndex;
         Line := 1;
-        UnitList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
 
         TokenizeUnit(UnitIndex, True);
 
@@ -410,7 +414,9 @@ var
     procedure ReadDirective(d: String; DefineLine: Integer);
     var
       i, v, x: Integer;
-      cmd, s, nam: String;
+      cmd, s: String;
+      defineName: TDefineName;
+      filePath: TFilePath;
       found: Boolean;
       Param: TDefineParams;
 
@@ -562,22 +568,22 @@ var
                             else
                             begin
 
-                              nam := FindFile(s, 'include');
+                              filePath := FindFile(s, 'include');
 
                               _line := Line;
                               _uidx := UnitIndex;
 
                               Line := 1;
-                              UnitList.UnitArray[IncludeIndex].Name := ExtractFileName(nam);
-                              UnitList.UnitArray[IncludeIndex].Path := nam;
-                              UnitIndex := IncludeIndex;
-                              Inc(IncludeIndex);
 
-                              if IncludeIndex > High(UnitList.UnitArray) then
+                              // TODO Error handling with exception
+                              UnitIndex:=UnitList.AddUnit(TSourceFileType.INCLUDE_FILE,
+                                ExtractFileName(filePath), filePath).UnitIndex;
+                              (* if IncludeIndex > High(UnitList.UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
                                   'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
+                               *)
 
-                              Tokenize(nam);
+                              Tokenize(filePath);
 
                               Line := _line;
                               UnitIndex := _uidx;
@@ -823,7 +829,7 @@ var
                                             else
                                               if cmd = 'DEFINE' then
                                               begin
-                                                nam := GetLabelUpperCase(d, i);
+                                                defineName := GetLabelUpperCase(d, i);
 
                                                 Err := 0;
 
@@ -858,7 +864,7 @@ var
                                                     if Err > MAXPARAMS then
                                                       Error(NumTok,
                                                         TMessage.Create(TErrorCode.TooManyFormalParameters,
-                                                        'Too many formal parameters in ' + nam));
+                                                        'Too many formal parameters in ' + defineName));
 
                                                     Param[Err] := GetLabelUpperCase(d, i);
 
@@ -895,7 +901,7 @@ var
 
                                                   skip_spaces;
 
-                                                  AddDefine(nam);    // define macro
+                                                  AddDefine(defineName);    // define macro
 
                                                   s := copy(d, i, length(d));
                                                   SetLength(s, length(s) - 1);
@@ -907,14 +913,14 @@ var
 
                                                 end
                                                 else
-                                                  AddDefine(nam);
+                                                  AddDefine(defineName);
 
                                               end
                                               else
                                                 if cmd = 'UNDEF' then
                                                 begin
-                                                  nam := GetLabelUpperCase(d, i);
-                                                  RemoveDefine(nam);
+                                                  defineName := GetLabelUpperCase(d, i);
+                                                  RemoveDefine(defineName);
                                                 end
                                                 else
                                                   Error(NumTok,
@@ -1191,7 +1197,7 @@ var
   begin
 
     inFile := TFileSystem.CreateBinaryFile;
-    inFile.Assign(fnam);    // UnitIndex = 1 main program
+    inFile.Assign(filePath);    // UnitIndex = 1 main program
     inFile.Reset(1);
 
     Text := '';
@@ -1780,7 +1786,7 @@ var
   end;
 
 
-  procedure TokenizeUnit(a: Integer; testUnit: Boolean = False);
+  procedure TokenizeUnit(a: TUnitIndex; testUnit: Boolean = False);
   // Read input file and get tokens
   var
     endLine: Integer;
@@ -1797,7 +1803,7 @@ var
 
     UnitFound := False;
 
-    Tokenize(UnitList.UnitArray[UnitIndex].Path, testUnit);
+    Tokenize(UnitList.GetUnit(UnitIndex).Path, testUnit);
 
     if UnitIndex > 1 then
     begin
@@ -1821,7 +1827,7 @@ begin
   UnitFound := False;
   ExternalFound := False;
 
-  IncludeIndex := MAXUNITS;
+  // IncludeIndex := MAXUNITS;
 
   TokenizeProgramInitialization;
 
@@ -1829,7 +1835,8 @@ begin
     TokenizeUnit(1)     // main_file
   else
     for cnt := NumUnits downto 1 do
-      if GetUnit(cnt).Name <> '' then TokenizeUnit(cnt);
+      if GetUnit(cnt).IsRelevant then
+        TokenizeUnit(cnt);
 
 end;  // TokenizeProgram
 

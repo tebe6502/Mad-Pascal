@@ -142,7 +142,7 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
-function FindFile(Name: String; ftyp: TString): String; overload;
+function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 
 function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 
@@ -167,7 +167,7 @@ uses Messages, Utilities;
 // ----------------------------------------------------------------------------
 
 
-function FindFile(Name: String; ftyp: TString): String; overload;
+function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 var
   msg: IMessage;
 begin
@@ -234,8 +234,7 @@ end;
 
 function GetUnit(const UnitIndex: TUnitIndex): TUnit;
 begin
-  assert(UnitIndex >= Low(UnitList.UnitArray));
-  Result := UnitList.UnitArray[UnitIndex];
+  Result := UnitList.GetUnit(UnitIndex);
 end;
 
 

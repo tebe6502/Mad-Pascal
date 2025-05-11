@@ -1103,7 +1103,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure StartOptimization(i: Integer);
+procedure StartOptimization(i: TTokenIndex);
 begin
 
   StopOptimization;
@@ -17246,21 +17246,19 @@ begin
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to Common.UnitList.UnitArray[UnitNameIndex].Units do
-          if (Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or
-            (Tok[i].Name = 'SYSTEM') then
+        for j := 1 to GetUnit(UnitNameIndex).Units do
+          if (GetUnit(UnitNameIndex).AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
             yes := False;
 
         if yes then
         begin
 
-          Inc(Common.UnitList.UnitArray[UnitNameIndex].Units);
+          Inc(GetUnit(UnitNameIndex).Units);
 
           if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          Common.UnitList.UnitArray[UnitNameIndex].AllowedUnitNames[Common.UnitList.UnitArray[UnitNameIndex].Units] :=
-            Tok[i].Name;
+          GetUnit(UnitNameIndex).AllowedUnitNames[GetUnit(UnitNameIndex).Units] := Tok[i].Name;
 
         end;
 
@@ -18671,7 +18669,7 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := NumUnits downto 2 do
-    if GetUnit(j).Name <> '' then
+    if GetUnit(j).IsRelevant then
     begin
 
       asm65;
@@ -18686,7 +18684,7 @@ end;
   asm65separator;
 
   for j := NumUnits downto 2 do
-    if GetUnit(j).Name <> '' then
+    if GetUnit(j).IsRelevant then
     begin
       asm65;
       asm65(#9'ift .SIZEOF(MAIN.' + GetUnit(j).Name + ') > 0');
@@ -19018,7 +19016,6 @@ begin
 
   if NumTok = 0 then Error(1, '');
 
-  // TODO: Method AddUnit
   // Add default unit 'system.pas'
   UnitList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
@@ -19090,7 +19087,7 @@ begin
   PublicSection := True;
 
   // TODO Why here?
-  for i := 1 to High(Common.UnitList.UnitArray) do Common.UnitList.UnitArray[i].Units := 0;
+  UnitList.ClearAllowedUnitNames;
 
   iOut := 0;
   outTmp := '';

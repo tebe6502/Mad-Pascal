@@ -3818,10 +3818,10 @@ begin        // OptimizeASM
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + GetUnit(common.optimize.unitIndex).Name +
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + GetUnitName(common.optimize.unitIndex) +
           '), line = ' + IntToStr(common.optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + GetUnit(common.optimize.unitIndex).Name +
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + GetUnitName(common.optimize.unitIndex) +
           '), line = ' + IntToStr(common.optimize.line));
 
       WriteOut('');

@@ -54,7 +54,6 @@ const
   MAXBLOCKS = 16384;  // Maximum number of blocks
   MAXPARAMS = 8;    // Maximum number of parameters for PROC, FUNC
   MAXVARS = 256;    // Maximum number of parameters for VAR
-  MAXUNITS = 2048;
   MAXALLOWEDUNITS = 256;
   MAXDEFINES = 256;    // Max number of $DEFINEs
 
@@ -182,11 +181,16 @@ type
   TSourceFileType = (PROGRAM_FILE, UNIT_FILE, INCLUDE_FILE);
 
   TUnit = class
+  public
+    UnitIndex: TUnitIndex;
     SourceFileType: TSourceFileType;
     Name: TUnitName;
     Path: TFilePath;
     Units: Integer;
     AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
+
+    function IsRelevant: Boolean;
+
   end;
 
   TUnitList = class
@@ -198,13 +202,16 @@ type
 
     function Size: Integer;
     function AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
+    function GetUnit(const UnitIndex: TUnitIndex): TUnit;
 
-  var
-    unitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
+    procedure ClearAllowedUnitNames;
 
   private
+  const
+    MAXUNITS = 2048;
   var
     Count: Integer;
+    unitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;
   end;
 
   IUnit = interface
@@ -457,6 +464,10 @@ begin
   end;
 end;
 
+function TUnit.IsRelevant: Boolean;
+begin
+  Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
+end;
 
 constructor TUnitList.Create();
 var
@@ -470,7 +481,13 @@ begin
 end;
 
 destructor TUnitList.Free;
+var
+  i: Integer;
 begin
+  for i := 1 to MAXUNITS + MAXUNITS do
+  begin
+    UnitArray[i].Free;
+  end;
 end;
 
 function TUnitList.Size: Integer;
@@ -479,24 +496,66 @@ begin
 end;
 
 
-function TUnitList.AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
+function isIdentifierNameValid(const identifier: TIdentifierName): Boolean;
+const
+  ALLOWED_START_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
+const
+  ALLOWED_CHARACTERS = ALLOWED_START_CHARACTERS + '0123456789';
 var
   i: Integer;
 begin
+  if Length(identifier) > 0 then
+    if pos(identifier[1], ALLOWED_START_CHARACTERS) > 0 then
+    begin
+      Result := True;
+      for i := 2 to Length(identifier) do
+      begin
+        if pos(identifier[i], ALLOWED_CHARACTERS) > 0 then
+        begin
+          Result := False;
+          exit;
+        end;
+      end;
+
+    end;
+
+end;
+
+function TUnitList.AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
+
+begin
+  Assert(IsValidIdent(path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
+  Assert(Length(path) >= 0, 'Path not specified.');
+
+  // Writeln('Adding unit ''' + Name + ''' with path ''' + path + '''.');
+
   Result := TUnit.Create;
 
   // if NumTok > MAXUnitS then
   //    Error(NumTok, 'Out of resources, TOK');
-  Inc(count);
+  Inc(Count);
 
-  // Result.UnitIndex := i;
-  Result.SourceFileType:=SourceFileType;
+  Result.UnitIndex := Count;
+  Result.SourceFileType := SourceFileType;
   Result.Name := Name;
   Result.Path := Path;
 
-  unitArray[count]:=Result;
+  unitArray[Count] := Result;
 
   // WriteLn('Added Unit at index ' + IntToStr(i) + ': ' + );
+end;
+
+function TUnitList.GetUnit(const UnitIndex: TUnitIndex): TUnit;
+begin
+  assert(UnitIndex >= Low(UnitArray));
+  Result := UnitArray[UnitIndex];
+end;
+
+procedure TUnitList.ClearAllowedUnitNames;
+var
+  i: Integer;
+begin
+  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
 end;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
