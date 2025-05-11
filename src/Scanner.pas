@@ -23,8 +23,8 @@ type
 
     procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
     // TODO: Remove, check why this is called with fixed UnitIndex=1
-    procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger) overload;
-    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger) overload;
+    procedure AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger) ;
+    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger) ;
 
   private
     procedure TokenizeMacro(a: String; Line, Spaces: Integer);
@@ -180,7 +180,7 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
 begin
   tokenList.AddToken(kind, GetSourceFile(UnitIndex), line, Column, Value);
 end;
@@ -279,9 +279,9 @@ var
 
         // We clear earlier usages of the same unit.
         // This means this entry in the unit list will not be tokenized.
-        for j := 2 to NumUnits do
+        for j := 2 to SourceFileList.Size do
         begin
-          if UnitList.GetSourceFile(j).Name = s then UnitList.GetSourceFile(j).Name := '';
+          if SourceFileList.GetSourceFile(j).Name = s then SourceFileList.GetSourceFile(j).Name := '';
         end;
 
         _line := Line;
@@ -292,13 +292,13 @@ var
 
         // TODO Move check to TSourceFileList and use exceptions
         (*
-        if ActiveSourceFile > High(UnitList.UnitArray) then
+        if ActiveSourceFile > High(SourceFileList.UnitArray) then
         begin
           Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ActiveSourceFile: ' +
             IntToStr(ActiveSourceFile)));
         end; *)
 
-        ActiveSourceFile := UnitList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
+        ActiveSourceFile := SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
         Line := 1;
 
         TokenizeUnit(ActiveSourceFile, True);
@@ -583,8 +583,8 @@ var
 
                               // TODO Error handling with exception
                               ActiveSourceFile :=
-                                UnitList.AddUnit(TSourceFileType.INCLUDE_FILE, ExtractFileName(filePath), filePath);
-                              (* if IncludeIndex > High(UnitList.UnitArray) then
+                                SourceFileList.AddUnit(TSourceFileType.INCLUDE_FILE, ExtractFileName(filePath), filePath);
+                              (* if IncludeIndex > High(SourceFileList.UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
                                   'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
                                *)
@@ -1839,9 +1839,9 @@ begin
   if UsesOn then
     TokenizeUnit(programUnit)     // main program file
   else
-    for cnt := NumUnits downto 1 do
-      if GetSourceFile(cnt).IsRelevant then
-        TokenizeUnit(GetSourceFile(cnt));
+    for cnt := SourceFileList.Size downto 1 do
+      if SourceFileList.GetSourceFile(cnt).IsRelevant then
+        TokenizeUnit(SourceFileList.GetSourceFile(cnt));
 
 end;  // TokenizeProgram
 
@@ -2028,7 +2028,7 @@ begin
 
     if Length(Num) > 0 then      // Number found
     begin
-      AddToken(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
+      AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
       Spaces := 0;
 
       if ch = '.' then      // Fractional part suspected
@@ -2117,7 +2117,7 @@ begin
           if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
           if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
 
-          AddToken(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0);
+          AddToken_(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0);
           Spaces := 0;
 
         end;
@@ -2317,12 +2317,12 @@ begin
       // if Length(Text) > 0 then
       if Length(Text) = 1 then
       begin
-        AddToken(TTokenKind.CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1]));
+        AddToken_(TTokenKind.CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1]));
         Spaces := 0;
       end
       else
       begin
-        AddToken(TTokenKind.STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0);
+        AddToken_(TTokenKind.STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0);
         Spaces := 0;
         DefineStaticString(NumTok, Text);
       end;
@@ -2334,7 +2334,7 @@ begin
 
     if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
     begin
-      AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+      AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
       Spaces := 0;
     end;
 
@@ -2349,14 +2349,14 @@ begin
 
       if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
       begin        // Double-character token found
-        AddToken(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0);
+        AddToken_(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0);
         Spaces := 0;
       end
       else
         if (ch = '.') and (ch2 in ['0'..'9']) then
         begin
 
-          AddToken(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
+          AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
 
           Frac := '0.';      // Fractional part found
 
@@ -2385,7 +2385,7 @@ begin
 
           if ch in [':', '>', '<', '.'] then
           begin        // Single-character token found
-            AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+            AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
             Spaces := 0;
           end;
 

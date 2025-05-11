@@ -481,7 +481,7 @@ uses
 
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    UnitList := TSourceFileList.Create();
+    SourceFileList := TSourceFileList.Create();
 
     try
       ParseParam();
@@ -496,7 +496,7 @@ uses
     // The main program is the first unit.
 
     if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
-    programUnit := UnitList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
+    programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
  {$IFDEF USEOPTFILE}
 

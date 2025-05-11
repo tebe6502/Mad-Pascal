@@ -26,6 +26,8 @@ var
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
 
+  SourceFileList: TSourceFileList;
+
   AsmBlockIndex: Integer;
   AsmBlock: array [0..4095] of String;
 
@@ -43,9 +45,6 @@ var
 
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-
-  UnitList: TSourceFileList;
-
 
   IFTmpPosStack: array of Integer;
 
@@ -119,7 +118,7 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
-function NumUnits: Integer;
+
 function NumTok: Integer;
 
 procedure AddDefine(const defineName: TDefineName);
@@ -234,7 +233,7 @@ end;
 
 function GetSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
 begin
-  Result := UnitList.GetSourceFile(UnitIndex);
+  Result := SourceFileList.GetSourceFile(UnitIndex);
 end;
 
 // ----------------------------------------------------------------------------
@@ -597,7 +596,7 @@ begin
   Tok[StrTokenIndex].StrLength := len;
   Tok[StrTokenIndex].StrAddress := CODEORIGIN + NumStaticStrChars;
 
-  StaticStringData[NumStaticStrChars] := Data[0];//length(StrValue);
+  StaticStringData[NumStaticStrChars] := Data[0]; //length(StrValue);
   Inc(NumStaticStrChars);
 
   for i := 1 to len do
@@ -609,15 +608,6 @@ begin
   //StaticStringData[NumStaticStrChars] := 0;
   //Inc(NumStaticStrChars);
 
-end;
-
-// The function is currently kept for compatibility, simulating the previous global variable.
-function NumUnits: Integer;
-begin
-  if unitList <> nil then
-  begin
-    Result := UnitList.Size;
-  end;
 end;
 
 // The function is currently kept for compatibility, simulating the previous global variable.

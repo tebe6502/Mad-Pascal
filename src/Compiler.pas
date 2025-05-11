@@ -438,12 +438,12 @@ procedure TestIdentProc(x: Integer; S: TString);
 type
   TOV = record
     i, j, b: Integer;
-    u: TSourceFile;
+    SourceFile: TSourceFile;
   end;
 
 type
   TL = record
-    u: TSourceFile;
+    SourceFile: TSourceFile;
     b: Integer;
     Param: TParamList;
     NumParams: Word;
@@ -459,13 +459,13 @@ var
   l: array of TL;
 
 
-  procedure addOverlay(UnitIndex: TSourceFile; Block: Integer; ovr: Boolean);
+  procedure addOverlay(SourceFile: TSourceFile; Block: Integer; ovr: Boolean);
   var
     i: Integer;
   begin
 
     for i := High(ov) - 1 downto 0 do
-      if (ov[i].u = UnitIndex) and (ov[i].b = Block) then
+      if (ov[i].SourceFile = SourceFile) and (ov[i].b = Block) then
       begin
 
         Inc(ov[i].i, Ord(ovr));
@@ -476,7 +476,7 @@ var
 
     i := High(ov);
 
-    ov[i].u := UnitIndex;
+    ov[i].SourceFile := SourceFile;
     ov[i].b := Block;
     ov[i].i := Ord(ovr);
     ov[i].j := 1;
@@ -502,7 +502,7 @@ begin
       begin
 
         for k := 0 to High(l) - 1 do
-          if (Ident[IdentIndex].NumParams = l[k].NumParams) and (Ident[IdentIndex].SourceFile = l[k].u) and
+          if (Ident[IdentIndex].NumParams = l[k].NumParams) and (Ident[IdentIndex].SourceFile = l[k].SourceFile) and
             (Ident[IdentIndex].Block = l[k].b) then
           begin
 
@@ -543,7 +543,7 @@ begin
 
         l[k].NumParams := Ident[IdentIndex].NumParams;
         l[k].Param := Ident[IdentIndex].Param;
-        l[k].u := Ident[IdentIndex].SourceFile;
+        l[k].SourceFile := Ident[IdentIndex].SourceFile;
         l[k].b := Ident[IdentIndex].Block;
 
         SetLength(l, k + 2);
@@ -16349,7 +16349,7 @@ var
 
   external_name: TString;
 
-  UnitList: array of TString;
+  SourceFileList: array of TString;
 
 begin
 
@@ -17206,20 +17206,20 @@ begin
 
       idx := i;
 
-      UnitList := nil;
-      SetLength(UnitList, 1);    // preliminary USES reading, we check if there are any duplicate entries
+      SourceFileList := nil;
+      SetLength(SourceFileList, 1);    // preliminary USES reading, we check if there are any duplicate entries
 
       repeat
 
         CheckTok(i, TTokenKind.IDENTTOK);
 
-        for j := 0 to High(UnitList) - 1 do
-          if UnitList[j] = Tok[i].Name then
+        for j := 0 to High(SourceFileList) - 1 do
+          if SourceFileList[j] = Tok[i].Name then
             Error(i, 'Duplicate identifier ''' + Tok[i].Name + '''');
 
-        j := High(UnitList);
-        UnitList[j] := Tok[i].Name;
-        SetLength(UnitList, j + 2);
+        j := High(SourceFileList);
+        SourceFileList[j] := Tok[i].Name;
+        SetLength(SourceFileList, j + 2);
 
         Inc(i);
 
@@ -17242,7 +17242,7 @@ begin
 
       i := idx;
 
-      SetLength(UnitList, 0);    //  proper reading USES
+      SetLength(SourceFileList, 0);    //  proper reading USES
 
       repeat
 
@@ -18671,7 +18671,7 @@ end;
   asm65;
   asm65('.macro'#9'UNITINITIALIZATION');
 
-  for j := NumUnits downto 2 do
+  for j := SourceFileList.Size downto 2 do
     if GetSourceFile(j).IsRelevant then
     begin
 
@@ -18686,7 +18686,7 @@ end;
 
   asm65separator;
 
-  for j := NumUnits downto 2 do
+  for j := SourceFileList.Size downto 2 do
     if GetSourceFile(j).IsRelevant then
     begin
       asm65;
@@ -19050,7 +19050,7 @@ begin
   if NumTok = 0 then Error(1, '');
 
   // Add default unit 'system.pas'
-  UnitList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
+  SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
   scanner.TokenizeProgram(programUnit, False);
 
@@ -19098,7 +19098,7 @@ begin
   PublicSection := True;
 
   // TODO Why here?
-  UnitList.ClearAllowedUnitNames;
+  SourceFileList.ClearAllowedUnitNames;
 
   iOut := 0;
   outTmp := '';
