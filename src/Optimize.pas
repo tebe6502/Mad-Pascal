@@ -3733,7 +3733,7 @@ begin        // OptimizeASM
     if common.optimize.line <> common.optimize.old then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + common.optimize.SourceCodeFile.Name + ', line = ' +
+      WriteOut('; optimize OK (' + common.optimize.SourceCodeFile.Name + '), line = ' +
         IntToStr(common.optimize.line));
       WriteOut('');
 

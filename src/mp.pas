@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                               {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                               {$ENDIF}
+                                {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -500,7 +500,7 @@ uses
 
  {$IFDEF USEOPTFILE}
 
-   OptFile.AssignFile(ChangeFileExt(GetUnitName(NumUnits), '.opt') ); OptFile.Rewrite();
+   OptFile.AssignFile(ChangeFileExt(programUnit.Name, '.opt') ); OptFile.Rewrite();
 
  {$ENDIF}
 

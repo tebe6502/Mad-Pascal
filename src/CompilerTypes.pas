@@ -508,31 +508,6 @@ begin
 end;
 
 
-function isIdentifierNameValid(const identifier: TIdentifierName): Boolean;
-const
-  ALLOWED_START_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_';
-const
-  ALLOWED_CHARACTERS = ALLOWED_START_CHARACTERS + '0123456789';
-var
-  i: Integer;
-begin
-  if Length(identifier) > 0 then
-    if pos(identifier[1], ALLOWED_START_CHARACTERS) > 0 then
-    begin
-      Result := True;
-      for i := 2 to Length(identifier) do
-      begin
-        if pos(identifier[i], ALLOWED_CHARACTERS) > 0 then
-        begin
-          Result := False;
-          exit;
-        end;
-      end;
-
-    end;
-
-end;
-
 function TUnitList.AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
 
 begin

@@ -14,7 +14,7 @@ type
     procedure TokenizeProgram(UsesOn: Boolean);
 
     // This is only public for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-    procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+    procedure AddToken(Kind: TTokenKind; UnitIndex: TUnitIndex; Line, Column: Integer; Value: TInteger);
 
   end;
 
@@ -22,7 +22,7 @@ type
   TScanner = class(TInterfacedObject, IScanner)
 
     procedure TokenizeProgram(UsesOn: Boolean);
-    procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+    procedure AddToken(Kind: TTokenKind; UnitIndex: TUnitIndex; Line, Column: Integer; Value: TInteger);
 
   private
     procedure TokenizeMacro(a: String; Line, Spaces: Integer);
@@ -179,7 +179,7 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TUnitIndex; Line, Column: Integer; Value: TInteger);
 begin
   tokenList.AddToken(kind, unitList.GetUnit(UnitIndex), line, Column, Value);
 end;
@@ -275,7 +275,7 @@ var
         // This means this entry in the unit list will not be tokenized.
         for j := 2 to NumUnits do
         begin
-          if GetUnitName(j) = s then UnitList.GetUnit(j).Name := '';
+          if UnitList.GetUnit(j).Name = s then UnitList.GetUnit(j).Name := '';
         end;
 
         _line := Line;

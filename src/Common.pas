@@ -127,7 +127,6 @@ function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
 function GetUnit(const UnitIndex: TUnitIndex): TUnit;
-function GetUnitName(const UnitIndex: TUnitIndex): TUnitName;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -238,11 +237,6 @@ begin
   Result := UnitList.GetUnit(UnitIndex);
 end;
 
-
-function GetUnitName(const UnitIndex: TUnitIndex): TUnitName;
-begin
-  Result := GetUnit(UnitIndex).Name;
-end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
