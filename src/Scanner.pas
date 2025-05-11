@@ -212,7 +212,7 @@ var
   Text: String;
   Num, Frac: TString;
   OldNumTok: Integer;
-  UnitIndex: TSourceFile; // Currently tokenized unit
+  ActiveSourceFile: TSourceFile; // Currently tokenized source file
   Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   //  IncludeIndex: Integer;
   Tmp: Int64;
@@ -285,26 +285,26 @@ var
         end;
 
         _line := Line;
-        _uidx := UnitIndex;
+        _uidx := ActiveSourceFile;
 
         // TODO
 
 
         // TODO Move check to TSourceFileList and use exceptions
         (*
-        if UnitIndex > High(UnitList.UnitArray) then
+        if ActiveSourceFile > High(UnitList.UnitArray) then
         begin
-          Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, UnitIndex: ' +
-            IntToStr(UnitIndex)));
+          Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ActiveSourceFile: ' +
+            IntToStr(ActiveSourceFile)));
         end; *)
 
-        UnitIndex := UnitList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
+        ActiveSourceFile := UnitList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
         Line := 1;
 
-        TokenizeUnit(UnitIndex, True);
+        TokenizeUnit(ActiveSourceFile, True);
 
         Line := _line;
-        UnitIndex := _uidx;
+        ActiveSourceFile := _uidx;
 
         if Tok[i - 1].Kind = TTokenKind.COMMATOK then
           Dec(i, 2)
@@ -449,9 +449,9 @@ var
           if NumRead = 1 then
           begin
 
-            if yes then AddToken(GetStandardToken(','), UnitIndex, Line, 1, 0);
+            if yes then AddToken(GetStandardToken(','), ActiveSourceFile, Line, 1, 0);
 
-            AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, 1, tmp);
+            AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 1, tmp);
 
             yes := True;
           end;
@@ -482,8 +482,8 @@ var
 
         k := msgLists.msgUser.Count;
 
-        AddToken(Kind, UnitIndex, Line, 1, k);
-        AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+        AddToken(Kind, ActiveSourceFile, Line, 1, k);
+        AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
         SkipWhitespaces(d, i);
 
@@ -535,18 +535,18 @@ var
                       // {$i+-} iocheck
                       if d[i] = '+' then
                       begin
-                        AddToken(TTokenKind.IOCHECKON, UnitIndex, Line, 1, 0);
-                        AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                        AddToken(TTokenKind.IOCHECKON, ActiveSourceFile, Line, 1, 0);
+                        AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
                       end
                       else
                         if d[i] = '-' then
                         begin
-                          AddToken(TTokenKind.IOCHECKOFF, UnitIndex, Line, 1, 0);
-                          AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                          AddToken(TTokenKind.IOCHECKOFF, ActiveSourceFile, Line, 1, 0);
+                          AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
                         end
                         else
                         begin
-                          //   AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                          //   AddToken(SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                           s := GetString(d, False, i);        // don't change the case, it could be a file path
 
@@ -555,7 +555,7 @@ var
 
                             s := TimeToStr(Now);
 
-                            AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
+                            AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(s) + Spaces, 0);
                             Spaces := 0;
                             DefineStaticString(NumTok, s);
 
@@ -566,7 +566,7 @@ var
 
                               s := DateToStr(Now);
 
-                              AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
+                              AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(s) + Spaces, 0);
                               Spaces := 0;
                               DefineStaticString(NumTok, s);
 
@@ -577,12 +577,12 @@ var
                               filePath := FindFile(s, 'include');
 
                               _line := Line;
-                              _uidx := UnitIndex;
+                              _uidx := ActiveSourceFile;
 
                               Line := 1;
 
                               // TODO Error handling with exception
-                              UnitIndex :=
+                              ActiveSourceFile :=
                                 UnitList.AddUnit(TSourceFileType.INCLUDE_FILE, ExtractFileName(filePath), filePath);
                               (* if IncludeIndex > High(UnitList.UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
@@ -592,7 +592,7 @@ var
                               Tokenize(filePath);
 
                               Line := _line;
-                              UnitIndex := _uidx;
+                              ActiveSourceFile := _uidx;
 
                             end;
 
@@ -614,7 +614,7 @@ var
                         if s[length(s)] <> '"' then
                           Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Missing ''"'''));
 
-                        AddToken(TTokenKind.EVALTOK, UnitIndex, Line, 1, 0);
+                        AddToken(TTokenKind.EVALTOK, ActiveSourceFile, Line, 1, 0);
 
                         DefineFilename(NumTok, s);
 
@@ -638,14 +638,14 @@ var
 
                             s := GetStringUpperCase(d, i);
 
-                            if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, UnitIndex, Line, 1, 0)
+                            if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
                             else
-                              if s = 'NOLOOPUNROLL' then AddToken(TTokenKind.NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0)
+                              if s = 'NOLOOPUNROLL' then AddToken(TTokenKind.NOLOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
                               else
                                 Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
                                   'Illegal optimization specified "' + s + '"'));
 
-                            AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                            AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                           end
                           else
@@ -655,11 +655,11 @@ var
 
                               s := GetStringUpperCase(d, i);
 
-                              if s = 'PROC' then AddToken(TTokenKind.PROCALIGNTOK, UnitIndex, Line, 1, 0)
+                              if s = 'PROC' then AddToken(TTokenKind.PROCALIGNTOK, ActiveSourceFile, Line, 1, 0)
                               else
-                                if s = 'LOOP' then AddToken(TTokenKind.LOOPALIGNTOK, UnitIndex, Line, 1, 0)
+                                if s = 'LOOP' then AddToken(TTokenKind.LOOPALIGNTOK, ActiveSourceFile, Line, 1, 0)
                                 else
-                                  if s = 'LINK' then AddToken(TTokenKind.LINKALIGNTOK, UnitIndex, Line, 1, 0)
+                                  if s = 'LINK' then AddToken(TTokenKind.LINKALIGNTOK, ActiveSourceFile, Line, 1, 0)
                                   else
                                     Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective,
                                       'Illegal alignment directive ''' + s + '''.'));
@@ -682,14 +682,14 @@ var
 
                               Tok[NumTok].Value := v;
 
-                              AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                              AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                             end
                             else
 
                               if (cmd = 'UNITPATH') then
                               begin      // {$unitpath path1;path2;...}
-                                AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                                 repeat
 
@@ -714,7 +714,7 @@ var
 
                                 if (cmd = 'LIBRARYPATH') then
                                 begin      // {$librarypath path1;path2;...}
-                                  AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                  AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                                   repeat
 
@@ -739,7 +739,7 @@ var
 
                                   if (cmd = 'R') and not (d[i] in ['+', '-']) then
                                   begin  // {$R filename}
-                                    AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                    AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                                     s := GetFilePath(d, i);
                                     AddResource(FindFile(s, 'resource'));
@@ -749,7 +749,7 @@ var
                                   else
 (*
        if cmd = 'C' then begin          // {$c 6502|65816}
-  AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
+  AddToken(SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
   s := GetNumber(i, d);
 
@@ -766,14 +766,14 @@ var
 
                                     if (cmd = 'L') or (cmd = 'LINK') then
                                     begin    // {$L filename} | {$LINK filename}
-                                      AddToken(TTokenKind.LINKTOK, UnitIndex, Line, 1, 0);
+                                      AddToken(TTokenKind.LINKTOK, ActiveSourceFile, Line, 1, 0);
 
                                       s := GetFilePath(d, i);
                                       s := FindFile(s, 'link object');
 
                                       DefineFilename(NumTok, s);
 
-                                      AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                      AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                                       //dec(NumTok);
                                     end
@@ -781,7 +781,7 @@ var
 
                                       if (cmd = 'F') or (cmd = 'FASTMUL') then
                                       begin    // {$F [page address]}
-                                        AddToken(TTokenKind.SEMICOLONTOK, UnitIndex, Line, 1, 0);
+                                        AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
                                         s := GetNumber(d, i);
 
@@ -1203,7 +1203,7 @@ var
   begin
 
     inFile := TFileSystem.CreateBinaryFile;
-    inFile.Assign(filePath);    // UnitIndex = 1 main program
+    inFile.Assign(filePath);
     inFile.Reset(1);
 
     Text := '';
@@ -1231,7 +1231,7 @@ var
 
         if Length(Num) > 0 then      // Number found
         begin
-          AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, length(Num) + Spaces, StrToInt(Num));
+          AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, length(Num) + Spaces, StrToInt(Num));
           Spaces := 0;
 
           if ch = '.' then      // Fractional part suspected
@@ -1374,7 +1374,7 @@ var
 
               if CurToken = TTokenKind.EXTERNALTOK then ExternalFound := True;
 
-              AddToken(TTokenKind.UNTYPETOK, UnitIndex, Line, length(Text) + Spaces, 0);
+              AddToken(TTokenKind.UNTYPETOK, ActiveSourceFile, Line, length(Text) + Spaces, 0);
               Spaces := 0;
 
             end;
@@ -1667,12 +1667,12 @@ var
           // if Length(Text) > 0 then
           if Length(Text) = 1 then
           begin
-            AddToken(TTokenKind.CHARLITERALTOK, UnitIndex, Line, 1 + Spaces, Ord(Text[1]));
+            AddToken(TTokenKind.CHARLITERALTOK, ActiveSourceFile, Line, 1 + Spaces, Ord(Text[1]));
             Spaces := 0;
           end
           else
           begin
-            AddToken(TTokenKind.STRINGLITERALTOK, UnitIndex, Line, length(Text) + Spaces, 0);
+            AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(Text) + Spaces, 0);
             Spaces := 0;
 
             if ExternalFound then
@@ -1689,7 +1689,7 @@ var
 
         if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
         begin
-          AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0);
+          AddToken(GetStandardToken(ch), ActiveSourceFile, Line, 1 + Spaces, 0);
           Spaces := 0;
 
           ExternalFound := False;
@@ -1700,7 +1700,7 @@ var
 
 
         //      if ch in ['?','!','&','\','|','_','#'] then
-        //  AddToken(UNKNOWNIDENTTOK, UnitIndex, Line, 1, ord(ch));
+        //  AddToken(UNKNOWNIDENTTOK, ActiveSourceFile, Line, 1, ord(ch));
 
 
         if ch in [':', '>', '<', '.'] then          // Double-character token suspected
@@ -1714,14 +1714,14 @@ var
 
           if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
           begin        // Double-character token found
-            AddToken(GetStandardToken(ch + ch2), UnitIndex, Line, 2 + Spaces, 0);
+            AddToken(GetStandardToken(ch + ch2), ActiveSourceFile, Line, 2 + Spaces, 0);
             Spaces := 0;
           end
           else
             if (ch = '.') and (ch2 in ['0'..'9']) then
             begin
 
-              AddToken(TTokenKind.INTNUMBERTOK, UnitIndex, Line, 0, 0);
+              AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 0, 0);
 
               Frac := '0.';      // Fractional part found
 
@@ -1748,7 +1748,7 @@ var
 
               if ch in [':', '>', '<', '.'] then
               begin        // Single-character token found
-                AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0);
+                AddToken(GetStandardToken(ch), ActiveSourceFile, Line, 1 + Spaces, 0);
                 Spaces := 0;
               end
               else
@@ -1778,12 +1778,12 @@ var
         begin
           if Text = 'END.' then
           begin
-            AddToken(TTokenKind.ENDTOK, UnitIndex, Line, 3, 0);
-            AddToken(TTokenKind.DOTTOK, UnitIndex, Line, 1, 0);
+            AddToken(TTokenKind.ENDTOK, ActiveSourceFile, Line, 3, 0);
+            AddToken(TTokenKind.DOTTOK, ActiveSourceFile, Line, 1, 0);
           end
           else
           begin
-            AddToken(GetStandardToken(Text), UnitIndex, Line, length(Text) + Spaces, 0);
+            AddToken(GetStandardToken(Text), ActiveSourceFile, Line, length(Text) + Spaces, 0);
             Spaces := 0;
           end;
         end;
@@ -1798,21 +1798,21 @@ var
     endLine: Integer;
   begin
 
-    UnitIndex := a;
+    ActiveSourceFile := a;
 
     Line := 1;
     Spaces := 0;
 
     // TODO: Rather check unit type=UNIT_FILE?
-    if UnitIndex.UnitIndex > 1 then AddToken(TTokenKind.UNITBEGINTOK, UnitIndex, Line, 0, 0);
+    if ActiveSourceFile.UnitIndex > 1 then AddToken(TTokenKind.UNITBEGINTOK, ActiveSourceFile, Line, 0, 0);
 
-    //  writeln('>',UnitIndex,',',UnitArray[UnitIndex].Name);
+    //  writeln('>',ActiveSourceFile,',',ActiveSourceFile.Name);
 
     UnitFound := False;
 
-    Tokenize(UnitIndex.Path, tesTSourceFile);
+    Tokenize(ActiveSourceFile.Path, testSourceFile);
 
-    if UnitIndex.UnitIndex > 1 then
+    if ActiveSourceFile.UnitIndex > 1 then
     begin
 
       CheckTok(NumTok, TTokenKind.DOTTOK);
@@ -1821,10 +1821,10 @@ var
       tokenList.RemoveToken;
       tokenList.RemoveToken;
 
-      AddToken(TTokenKind.UNITENDTOK, UnitIndex, EndLine - 1, 0, 0);
+      AddToken(TTokenKind.UNITENDTOK, ActiveSourceFile, EndLine - 1, 0, 0);
     end
     else
-      AddToken(TTokenKind.EOFTOK, UnitIndex, Line, 0, 0);
+      AddToken(TTokenKind.EOFTOK, ActiveSourceFile, Line, 0, 0);
 
   end;
 
