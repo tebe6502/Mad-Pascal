@@ -424,8 +424,8 @@ begin
 
   Result := TSourceFile.Create;
 
-  // if NumTok > MAXSOURCEFILES then
-  //    Error(NumTok, 'Out of resources, TOK');
+  // if Count >= MAXSOURCEFILES then
+  //    Error(Count, 'Out of resources, TOK');
   Inc(Count);
 
   Result.UnitIndex := Count;
@@ -521,7 +521,7 @@ begin
 
   Result := TToken.Create;
 
-  // if NumTok > MAXTOKENS then
+  // if size >= MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
   i := size + 1;
 

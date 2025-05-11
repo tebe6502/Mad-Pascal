@@ -7946,8 +7946,8 @@ begin
     // w tym samym module poza aktualnym blokiem procedury/funkcji
 
 {
-  if Ident[IdentIndex].UnitIndex > 1 then
-   asm65(#9'.LOCAL +MAIN.' + UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+  if Ident[IdentIndex].SourceFile.UnitIndex > 1 then
+   asm65(#9'.LOCAL +MAIN.' + Ident[IdentIndex].SourceFile.Name + '.' + svar)      // w innym module
   else
    asm65(#9'.LOCAL +MAIN.' + svar);                  // w tym samym module poza aktualnym blokiem procedury/funkcji
 }
@@ -12517,9 +12517,10 @@ begin
                   // dla PROC, FUNC -> Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and (not
-                      (Ident[IdentIndex].AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                      not (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
+                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and
+                      (not (Ident[IdentIndex].AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
+                      (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
                       [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.Ident[IdentIndex].AllocElementType] *} Ident[IdentIndex].NumAllocElements > 1) and ({GetDataSize( TDataType.Ident[GetIdentIndex(Tok[k].Name)].AllocElementType] *} Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements > 1)) *) then
                     begin
@@ -16992,7 +16993,7 @@ begin
         Dec(j);
       end;
 
-      ActiveSourceFile := GetSourceFile(1);
+      ActiveSourceFile := Common.SourceFileList.GetSourceFile(1);
 
       PublicSection := True;
       ImplementationUse := False;
@@ -18487,6 +18488,7 @@ var
   tmp, a: String;
   yes: Boolean;
   res: TResource;
+  SourceFile: TSourceFile;
 begin
 
   WriteLn('Pass ' + IntToStr(Ord(pass)) + '.');
@@ -18672,29 +18674,35 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := SourceFileList.Size downto 2 do
-    if GetSourceFile(j).IsRelevant then
+  begin
+    SourceFile := SourceFileList.GetSourceFile(j);
+    if SourceFile.IsRelevant then
     begin
 
       asm65;
-      asm65(#9'.ifdef MAIN.' + GetSourceFile(j).Name + '.@UnitInit');
-      asm65(#9'jsr MAIN.' + GetSourceFile(j).Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + SourceFile.Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + SourceFile.Name + '.@UnitInit');
       asm65(#9'.fi');
 
     end;
+  end;
 
   asm65('.endm');
 
   asm65separator;
 
   for j := SourceFileList.Size downto 2 do
-    if GetSourceFile(j).IsRelevant then
+  begin
+    SourceFile := SourceFileList.GetSourceFile(j);
+    if SourceFile.IsRelevant then
     begin
       asm65;
-      asm65(#9'ift .SIZEOF(MAIN.' + GetSourceFile(j).Name + ') > 0');
-      asm65(#9'.print ''' + GetSourceFile(j).Name + ': ' + ''',MAIN.' + GetSourceFile(j).Name +
-        ',' + '''..''' + ',' + 'MAIN.' + GetSourceFile(j).Name + '+.SIZEOF(MAIN.' + GetSourceFile(j).Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + SourceFile.Name + ') > 0');
+      asm65(#9'.print ''' + SourceFile.Name + ': ' + ''',MAIN.' + SourceFile.Name + ',' +
+        '''..''' + ',' + 'MAIN.' + SourceFile.Name + '+.SIZEOF(MAIN.' + SourceFile.Name + ')-1');
       asm65(#9'eif');
     end;
+  end;
 
 
   asm65;
@@ -19058,7 +19066,7 @@ begin
 
   NumStaticStrCharsTmp := NumStaticStrChars;
 
-    InitializeIdentifiers;
+  InitializeIdentifiers;
 
   // First pass: compile the program and build call graph
   NumPredefIdent := NumIdent;
@@ -19113,7 +19121,7 @@ procedure Free;
 begin
 
   TokenList.Free;
-  TokenList:=nil;
+  TokenList := nil;
 
   SetLength(IFTmpPosStack, 0);
   evaluationContext := nil;

@@ -157,7 +157,7 @@ uses
     sourceFileList := TSourceFileList.Create();
     SourceFile := sourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, 'TEST_PROGRAM', 'TestProgram.pas');
     tokenList := TTokenList.Create(Addr(tok));
-    // Kind, UnitIndex, Line, Column, Value
+    // Kind, SourceFile, Line, Column, Value
     token := tokenList.AddToken(TTokenKind.PROGRAMTOK, SourceFile, 1, 1, 0);
     tokenList.Free;
     tokenList := nil;

@@ -26,8 +26,6 @@ var
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
 
-  SourceFileList: TSourceFileList;
-
   AsmBlockIndex: Integer;
   AsmBlock: array [0..4095] of String;
 
@@ -45,6 +43,8 @@ var
 
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
+
+  SourceFileList: TSourceFileList;
 
   IFTmpPosStack: array of Integer;
 
@@ -125,7 +125,6 @@ procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
-function GetSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -231,10 +230,6 @@ begin
   unitPathList.AddFolder(folderPath);
 end;
 
-function GetSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
-begin
-  Result := SourceFileList.GetSourceFile(UnitIndex);
-end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
