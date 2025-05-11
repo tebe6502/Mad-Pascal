@@ -235,7 +235,7 @@ uses
     seconds: ValReal;
 
     // Processing variables.
-    programUnit: TUnit;
+    programUnit: TSourceFile;
 
     procedure ParseParam;
     var
@@ -481,7 +481,7 @@ uses
 
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    UnitList := TUnitList.Create();
+    SourceFileList := TSourceFileList.Create();
 
     try
       ParseParam();
@@ -496,7 +496,7 @@ uses
     // The main program is the first unit.
 
     if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
-    programUnit := UnitList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
+    programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
  {$IFDEF USEOPTFILE}
 
@@ -536,7 +536,7 @@ uses
 
 
     // Diagnostics
-    if DiagMode then Diagnostics;
+    if DiagMode then Diagnostics(programUnit);
 
 
     WritelnMsg;
@@ -544,10 +544,10 @@ uses
     TextColor(WHITE);
     seconds := (GetTickCount64 - StartTime + 500) / 1000;
 {$IFNDEF PAS2JS}
-    Writeln(Tok[NumTok].Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
+    Writeln(Tok[NumTok].SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
       NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
 {$ELSE}
-   Writeln(IntToStr(Tok[NumTok].Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
+   Writeln(IntToStr(Tok[NumTok].SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
  	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
 	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
 {$ENDIF}

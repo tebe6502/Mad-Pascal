@@ -9,7 +9,7 @@ uses FileIO, CompilerTypes;
 function CompilerTitle: String;
 
 procedure Initialize;
-procedure Main(const programUnit: TUnit; const unitPathList: TPathList);
+procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 procedure Free;
 
 implementation
@@ -122,9 +122,9 @@ end;
 function GetLocalName(IdentIndex: Integer; a: String = ''): String;
 begin
 
-  if ((Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and
+  if ((Ident[IdentIndex].SourceFile.UnitIndex > 1) and (Ident[IdentIndex].SourceFile <> ActiveSourceFile) and
     Ident[IdentIndex].Section) then
-    Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + a + Ident[IdentIndex].Name
+    Result := Ident[IdentIndex].SourceFile.Name + '.' + a + Ident[IdentIndex].Name
   else
     Result := a + Ident[IdentIndex].Name;
 
@@ -136,16 +136,16 @@ var
   lab: String;
 begin
 
-  if (Ident[IdentIndex].UnitIndex > 1) and (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.', a) = 1) then
+  if (Ident[IdentIndex].SourceFile.UnitIndex > 1) and (pos(Ident[IdentIndex].SourceFile.Name + '.', a) = 1) then
   begin
 
     lab := Ident[IdentIndex].Name;
     if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
-    if (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.adr.', a) = 1) then
-      Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.adr.' + lab
+    if (pos(Ident[IdentIndex].SourceFile.Name + '.adr.', a) = 1) then
+      Result := Ident[IdentIndex].SourceFile.Name + '.adr.' + lab
     else
-      Result := GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + lab;
+      Result := Ident[IdentIndex].SourceFile.Name + '.' + lab;
 
   end
   else
@@ -157,8 +157,11 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if (Ident[IdentIndex].UnitIndex > 1) and (pos(GetUnit(Ident[IdentIndex].UnitIndex).Name + '.', a) = 1) then
+  if (IdentIndex > 0) and (Ident[IdentIndex].SourceFile.UnitIndex > 1) and
+    (pos(Ident[IdentIndex].SourceFile.Name + '.', a) = 1) then
+  begin
     a := copy(a, a.IndexOf('.') + 2, length(a));
+  end;
 
   Result := pos('.', a) > 0;
 
@@ -198,8 +201,8 @@ begin
   begin
     for IdentIndex := NumIdent downto 1 do
       if (Ident[IdentIndex].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-        TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (Ident[IdentIndex].UnitIndex =
-        Ident[ProcIdentIndex].UnitIndex) and (S = Ident[IdentIndex].Name) and
+        TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (Ident[IdentIndex].SourceFile =
+        Ident[ProcIdentIndex].SourceFile) and (S = Ident[IdentIndex].Name) and
         (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) and (Ident[IdentIndex].NumParams = NumParams) then
       begin
 
@@ -434,12 +437,14 @@ end;  //GetIdentProc
 procedure TestIdentProc(x: Integer; S: TString);
 type
   TOV = record
-    i, j, u, b: Integer;
+    i, j, b: Integer;
+    SourceFile: TSourceFile;
   end;
 
 type
   TL = record
-    u, b: Integer;
+    SourceFile: TSourceFile;
+    b: Integer;
     Param: TParamList;
     NumParams: Word;
   end;
@@ -454,13 +459,13 @@ var
   l: array of TL;
 
 
-  procedure addOverlay(UnitIndex, Block: Integer; ovr: Boolean);
+  procedure addOverlay(SourceFile: TSourceFile; Block: Integer; ovr: Boolean);
   var
     i: Integer;
   begin
 
     for i := High(ov) - 1 downto 0 do
-      if (ov[i].u = UnitIndex) and (ov[i].b = Block) then
+      if (ov[i].SourceFile = SourceFile) and (ov[i].b = Block) then
       begin
 
         Inc(ov[i].i, Ord(ovr));
@@ -471,7 +476,7 @@ var
 
     i := High(ov);
 
-    ov[i].u := UnitIndex;
+    ov[i].SourceFile := SourceFile;
     ov[i].b := Block;
     ov[i].i := Ord(ovr);
     ov[i].j := 1;
@@ -497,7 +502,7 @@ begin
       begin
 
         for k := 0 to High(l) - 1 do
-          if (Ident[IdentIndex].NumParams = l[k].NumParams) and (Ident[IdentIndex].UnitIndex = l[k].u) and
+          if (Ident[IdentIndex].NumParams = l[k].NumParams) and (Ident[IdentIndex].SourceFile = l[k].SourceFile) and
             (Ident[IdentIndex].Block = l[k].b) then
           begin
 
@@ -538,12 +543,12 @@ begin
 
         l[k].NumParams := Ident[IdentIndex].NumParams;
         l[k].Param := Ident[IdentIndex].Param;
-        l[k].u := Ident[IdentIndex].UnitIndex;
+        l[k].SourceFile := Ident[IdentIndex].SourceFile;
         l[k].b := Ident[IdentIndex].Block;
 
         SetLength(l, k + 2);
 
-        addOverlay(Ident[IdentIndex].UnitIndex, Ident[IdentIndex].Block, Ident[IdentIndex].isOverload);
+        addOverlay(Ident[IdentIndex].SourceFile, Ident[IdentIndex].Block, Ident[IdentIndex].isOverload);
       end;
 
   end;// for
@@ -1108,8 +1113,8 @@ begin
   StopOptimization;
 
   common.optimize.use := True;
-  common.optimize.SourceCodeFile := Tok[i].SourceCodeFile;
-  common.optimize.line := Tok[i].Line;
+  common.optimize.SourceFile := Tok[i].SourceLocation.SourceFile;
+  common.optimize.line := Tok[i].SourceLocation.Line;
 
 end;
 
@@ -7930,19 +7935,19 @@ begin
       asm65(#9'.LOCAL ' + svar)
     else
 
-      if (Ident[IdentIndex].UnitIndex > 1) and (Ident[IdentIndex].UnitIndex <> UnitNameIndex) and
+      if (Ident[IdentIndex].SourceFile.UnitIndex > 1) and (Ident[IdentIndex].SourceFile <> ActiveSourceFile) and
         Ident[IdentIndex].Section then
         asm65(#9'.LOCAL +MAIN.' + svar)                  // w tym samym module poza aktualnym blokiem procedury/funkcji
       else
-        if (Ident[IdentIndex].UnitIndex > 1) then
-          asm65(#9'.LOCAL +MAIN.' + GetUnit(Ident[IdentIndex].UnitIndex).Name + '.' + svar)      // w innym module
+        if (Ident[IdentIndex].SourceFile.UnitIndex > 1) then
+          asm65(#9'.LOCAL +MAIN.' + Ident[IdentIndex].SourceFile.Name + '.' + svar)      // w innym module
         else
           asm65(#9'.LOCAL +MAIN.' + svar);
     // w tym samym module poza aktualnym blokiem procedury/funkcji
 
 {
-  if Ident[IdentIndex].UnitIndex > 1 then
-   asm65(#9'.LOCAL +MAIN.' + UnitArray[Ident[IdentIndex].UnitIndex].Name + '.' + svar)      // w innym module
+  if Ident[IdentIndex].SourceFile.UnitIndex > 1 then
+   asm65(#9'.LOCAL +MAIN.' + Ident[IdentIndex].SourceFile.Name + '.' + svar)      // w innym module
   else
    asm65(#9'.LOCAL +MAIN.' + svar);                  // w tym samym module poza aktualnym blokiem procedury/funkcji
 }
@@ -11460,7 +11465,7 @@ begin
         for j := NumIdent downto 1 do
           if (Ident[j].ProcAsBlock = NumBlocks) and (Ident[j].Kind = TTokenKind.FUNCTIONTOK) then
           begin
-            if (Ident[j].Name = Ident[IdentIndex].Name) and (Ident[j].UnitIndex = Ident[IdentIndex].UnitIndex) then
+            if (Ident[j].Name = Ident[IdentIndex].Name) and (Ident[j].SourceFile = Ident[IdentIndex].SourceFile) then
               IdentIndex := GetIdentResult(NumBlocks);
             Break;
           end;
@@ -15234,7 +15239,7 @@ var
 
   function GetIdentifierFullName(const identifier: TIdentifier): String;
   begin
-    Result := GetUnit(identifier.UnitIndex).Name + '.' + identifier.Name;
+    Result := identifier.SourceFile.Name + '.' + identifier.Name;
   end;
 
   function GetIdentifierDataSize(const identifier: TIdentifier): Integer;
@@ -15272,7 +15277,7 @@ begin
 
     for IdentIndex := 1 to NumIdent do
       if (Ident[IdentIndex].Block = Ident[BlockIdentIndex].ProcAsBlock) and
-        (Ident[IdentIndex].UnitIndex = UnitNameIndex) then
+        (Ident[IdentIndex].SourceFile = ActiveSourceFile) then
       begin
 
         if emptyLine then
@@ -16345,7 +16350,7 @@ var
 
   external_name: TString;
 
-  UnitList: array of TString;
+  SourceFileList: array of TString;
 
 begin
 
@@ -16931,20 +16936,20 @@ begin
     begin
       asm65separator;
 
-      DefineIdent(i, Tok[i].SourceCodeFile.Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
-      Ident[NumIdent].UnitIndex := Tok[i].SourceCodeFile.UnitIndex;
+      DefineIdent(i, Tok[i].GetSourceFileName, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+      Ident[NumIdent].SourceFile := Tok[i].SourceLocation.SourceFile;
 
       //   writeln(UnitArray[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
       asm65;
-      asm65('.local'#9 + Tok[i].SourceCodeFile.Name, '; UNIT');
+      asm65('.local'#9 + Tok[i].GetSourceFileName, '; UNIT');
 
-      UnitNameIndex := Tok[i].SourceCodeFile.UnitIndex;
+      ActiveSourceFile := Tok[i].SourceLocation.SourceFile;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
 
-      if Tok[i + 2].Name <> Tok[i].SourceCodeFile.Name then
+      if Tok[i + 2].Name <> Tok[i].GetSourceFileName then
         Error(i + 2, 'Illegal unit name: ' + Tok[i + 2].Name);
 
       CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
@@ -16973,11 +16978,11 @@ begin
       VarRegister := 0;
 
       asm65;
-      asm65('.endl', '; UNIT ' + Tok[i].SourceCodeFile.Name);
+      asm65('.endl', '; UNIT ' + Tok[i].GetSourceFileName);
 
       j := NumIdent;
 
-      while (j > 0) and (Ident[j].UnitIndex = UnitNameIndex) do
+      while (j > 0) and (Ident[j].SourceFile = ActiveSourceFile) do
       begin
         // If procedure or function, delete parameters first
         if Ident[j].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
@@ -16988,7 +16993,7 @@ begin
         Dec(j);
       end;
 
-      UnitNameIndex := 1;
+      ActiveSourceFile := Common.SourceFileList.GetSourceFile(1);
 
       PublicSection := True;
       ImplementationUse := False;
@@ -17202,20 +17207,20 @@ begin
 
       idx := i;
 
-      UnitList := nil;
-      SetLength(UnitList, 1);    // preliminary USES reading, we check if there are any duplicate entries
+      SourceFileList := nil;
+      SetLength(SourceFileList, 1);    // preliminary USES reading, we check if there are any duplicate entries
 
       repeat
 
         CheckTok(i, TTokenKind.IDENTTOK);
 
-        for j := 0 to High(UnitList) - 1 do
-          if UnitList[j] = Tok[i].Name then
+        for j := 0 to High(SourceFileList) - 1 do
+          if SourceFileList[j] = Tok[i].Name then
             Error(i, 'Duplicate identifier ''' + Tok[i].Name + '''');
 
-        j := High(UnitList);
-        UnitList[j] := Tok[i].Name;
-        SetLength(UnitList, j + 2);
+        j := High(SourceFileList);
+        SourceFileList[j] := Tok[i].Name;
+        SetLength(SourceFileList, j + 2);
 
         Inc(i);
 
@@ -17238,26 +17243,26 @@ begin
 
       i := idx;
 
-      SetLength(UnitList, 0);    //  proper reading USES
+      SetLength(SourceFileList, 0);    //  proper reading USES
 
       repeat
 
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to GetUnit(UnitNameIndex).Units do
-          if (GetUnit(UnitNameIndex).AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+        for j := 1 to ActiveSourceFile.Units do
+          if (ActiveSourceFile.AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
             yes := False;
 
         if yes then
         begin
 
-          Inc(GetUnit(UnitNameIndex).Units);
+          Inc(ActiveSourceFile.Units);
 
-          if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
+          if ActiveSourceFile.Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          GetUnit(UnitNameIndex).AllowedUnitNames[GetUnit(UnitNameIndex).Units] := Tok[i].Name;
+          ActiveSourceFile.AllowedUnitNames[ActiveSourceFile.Units] := Tok[i].Name;
 
         end;
 
@@ -18483,6 +18488,7 @@ var
   tmp, a: String;
   yes: Boolean;
   res: TResource;
+  SourceFile: TSourceFile;
 begin
 
   WriteLn('Pass ' + IntToStr(Ord(pass)) + '.');
@@ -18516,7 +18522,7 @@ begin
 
   j := NumIdent;
 
-  while (j > 0) and (Ident[j].UnitIndex = 1) do
+  while (j > 0) and (Ident[j].SourceFile.UnitIndex = 1) do
   begin
     // If procedure or function, delete parameters first
     if Ident[j].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
@@ -18667,30 +18673,36 @@ end;
   asm65;
   asm65('.macro'#9'UNITINITIALIZATION');
 
-  for j := NumUnits downto 2 do
-    if GetUnit(j).IsRelevant then
+  for j := SourceFileList.Size downto 2 do
+  begin
+    SourceFile := SourceFileList.GetSourceFile(j);
+    if SourceFile.IsRelevant then
     begin
 
       asm65;
-      asm65(#9'.ifdef MAIN.' + GetUnit(j).Name + '.@UnitInit');
-      asm65(#9'jsr MAIN.' + GetUnit(j).Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + SourceFile.Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + SourceFile.Name + '.@UnitInit');
       asm65(#9'.fi');
 
     end;
+  end;
 
   asm65('.endm');
 
   asm65separator;
 
-  for j := NumUnits downto 2 do
-    if GetUnit(j).IsRelevant then
+  for j := SourceFileList.Size downto 2 do
+  begin
+    SourceFile := SourceFileList.GetSourceFile(j);
+    if SourceFile.IsRelevant then
     begin
       asm65;
-      asm65(#9'ift .SIZEOF(MAIN.' + GetUnit(j).Name + ') > 0');
-      asm65(#9'.print ''' + GetUnit(j).Name + ': ' + ''',MAIN.' + GetUnit(j).Name + ',' +
-        '''..''' + ',' + 'MAIN.' + GetUnit(j).Name + '+.SIZEOF(MAIN.' + GetUnit(j).Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + SourceFile.Name + ') > 0');
+      asm65(#9'.print ''' + SourceFile.Name + ': ' + ''',MAIN.' + SourceFile.Name + ',' +
+        '''..''' + ',' + 'MAIN.' + SourceFile.Name + '+.SIZEOF(MAIN.' + SourceFile.Name + ')-1');
       asm65(#9'eif');
     end;
+  end;
 
 
   asm65;
@@ -18915,7 +18927,7 @@ end;
 
         j := NumIdent;
 
-        while (j > 0) and (Ident[j].UnitIndex = 1) do
+        while (j > 0) and (Ident[j].SourceFile.UnitIndex = 1) do
         begin
           if Ident[j].Name = resArray[i].resName then
           begin
@@ -18966,8 +18978,7 @@ end;  //CompileProgram
 // ----------------------------------------------------------------------------
 //                                 Compiler Main
 // ----------------------------------------------------------------------------
-
-procedure Main(const programUnit: TUnit; const unitPathList: TPathList);
+procedure InitializeIdentifiers;
 
 {$IFNDEF PAS2JS}
 const
@@ -18985,6 +18996,38 @@ const
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
 
+begin
+
+  // Initilize identifiers for predefined constants
+  DefineIdent(1, 'BLOCKREAD', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(1, 'BLOCKWRITE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
+
+  DefineIdent(1, 'GETRESOURCEHANDLE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
+    TDataType.UNTYPETOK, $00000000);
+
+  DefineIdent(1, 'NIL', CONSTANT, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
+
+  DefineIdent(1, 'EOL', CONSTANT, TDataType.CHARTOK, 0, TDataType.UNTYPETOK, target.eol);
+
+  DefineIdent(1, '__BUFFER', CONSTANT, TDataType.WORDTOK, 0, TDataType.UNTYPETOK, target.buf);
+
+  DefineIdent(1, 'TRUE', CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000001);
+  DefineIdent(1, 'FALSE', CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000000);
+
+  DefineIdent(1, 'MAXINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXINT);
+  DefineIdent(1, 'MAXSMALLINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXSMALLINT);
+
+  DefineIdent(1, 'PI', CONSTANT, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
+  DefineIdent(1, 'NAN', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
+  DefineIdent(1, 'INFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
+  DefineIdent(1, 'NEGINFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
+end;
+
+// ----------------------------------------------------------------------------
+//                                 Compiler Main
+// ----------------------------------------------------------------------------
+
+procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 var
   scanner: IScanner;
 begin
@@ -19015,7 +19058,7 @@ begin
   if NumTok = 0 then Error(1, '');
 
   // Add default unit 'system.pas'
-  UnitList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
+  SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
   scanner.TokenizeProgram(programUnit, False);
 
@@ -19023,29 +19066,7 @@ begin
 
   NumStaticStrCharsTmp := NumStaticStrChars;
 
-  // Predefined constants
-  DefineIdent(1, 'BLOCKREAD', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
-  DefineIdent(1, 'BLOCKWRITE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
-
-  DefineIdent(1, 'GETRESOURCEHANDLE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
-
-  DefineIdent(1, 'NIL', CONSTANT, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
-
-  DefineIdent(1, 'EOL', CONSTANT, TDataType.CHARTOK, 0, TDataType.UNTYPETOK, target.eol);
-
-  DefineIdent(1, '__BUFFER', CONSTANT, TDataType.WORDTOK, 0, TDataType.UNTYPETOK, target.buf);
-
-  DefineIdent(1, 'TRUE', CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000001);
-  DefineIdent(1, 'FALSE', CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000000);
-
-  DefineIdent(1, 'MAXINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXINT);
-  DefineIdent(1, 'MAXSMALLINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXSMALLINT);
-
-  DefineIdent(1, 'PI', CONSTANT, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
-  DefineIdent(1, 'NAN', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
-  DefineIdent(1, 'INFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
-  DefineIdent(1, 'NEGINFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
+  InitializeIdentifiers;
 
   // First pass: compile the program and build call graph
   NumPredefIdent := NumIdent;
@@ -19085,7 +19106,7 @@ begin
   PublicSection := True;
 
   // TODO Why here?
-  UnitList.ClearAllowedUnitNames;
+  SourceFileList.ClearAllowedUnitNames;
 
   iOut := 0;
   outTmp := '';
@@ -19100,6 +19121,7 @@ procedure Free;
 begin
 
   TokenList.Free;
+  TokenList := nil;
 
   SetLength(IFTmpPosStack, 0);
   evaluationContext := nil;

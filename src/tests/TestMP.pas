@@ -71,7 +71,7 @@ begin
   TestExpressions;
   TestFloats;
   AssertEquals(TestUnit.TestUnitFunction, TestUnit.TestUnitString);
-  AssertEquals(TestIncludeString, TestIncludeString);
+  AssertEquals(TestIncludeFunction, TestIncludeString);
 
   Writeln('Test completed. Press any key');
   repeat

@@ -4,28 +4,25 @@ unit Diagnostic;
 
 interface
 
+uses CompilerTypes;
 
-// ----------------------------------------------------------------------------
-
-procedure Diagnostics;
+procedure Diagnostics(ProgramUnit: TSourceFile);
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Common, CompilerTypes, Datatypes, FileIO, Tokens;
+uses SysUtils, Common, Datatypes, FileIO, Tokens;
 
-// ----------------------------------------------------------------------------
-
-
-procedure Diagnostics;
+procedure Diagnostics(ProgramUnit: TSourceFile);
 var
   i, CharIndex, ChildIndex: Integer;
   DiagFile: ITextFile;
+  token: TToken;
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
-  DiagFile.Assign(ChangeFileExt(GetUnit(1).Name, '.txt'));
+  DiagFile.Assign(ChangeFileExt(ProgramUnit.Name, '.txt'));
   DiagFile.Rewrite;
 
   DiagFile.WriteLn;
@@ -38,27 +35,27 @@ begin
 
   for i := 1 to NumTok do
   begin
-    // DiagFile.Write(i: 6, Tok[i].SourceCodeFile.UnitIndex) 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    DiagFile.Write(i, 6).Write(Tok[i].SourceCodeFile.Name, 30).Write(Tok[i].Line,
-      6).Write(tokenList.GetTokenSpellingAtIndex(i), 30).WriteLn;
+    token := Tok[i];
+    DiagFile.Write(i, 6).Write(token.GetSourceFileName, 30).Write(token.SourceLocation.Line,
+      6).Write(token.GetSpelling, 30).WriteLn;
     if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
-      DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))
-    else if Tok[i].Kind = TTokenKind.FRACNUMBERTOK then
-      //    DiagFile.WriteLn(' = ', Tok[i].FracValue: 8: 4)
-      DiagFile.WriteLn(' = ', FloatToStr(Tok[i].FracValue))
-    else if Tok[i].Kind = TTokenKind.IDENTTOK then
-      DiagFile.WriteLn(' = ', Tok[i].Name)
-    else if Tok[i].Kind = TTokenKind.CHARLITERALTOK then
-      DiagFile.WriteLn(' = ', Chr(Tok[i].Value))
-    else if Tok[i].Kind = TTokenKind.STRINGLITERALTOK then
-    begin
-      DiagFile.Write(' = ');
-      for CharIndex := 1 to Tok[i].StrLength do
-        DiagFile.Write(StaticStringData[Tok[i].StrAddress - CODEORIGIN + (CharIndex - 1)], -1);
-      DiagFile.WriteLn;
-    end
-    else
-      DiagFile.WriteLn;
+      DiagFile.WriteLn(' = ', IntToStr(token.Value))
+    else if token.Kind = TTokenKind.FRACNUMBERTOK then
+        //    DiagFile.WriteLn(' = ', token.FracValue: 8: 4)
+        DiagFile.WriteLn(' = ', FloatToStr(token.FracValue))
+      else if token.Kind = TTokenKind.IDENTTOK then
+          DiagFile.WriteLn(' = ', token.Name)
+        else if token.Kind = TTokenKind.CHARLITERALTOK then
+            DiagFile.WriteLn(' = ', Chr(token.Value))
+          else if token.Kind = TTokenKind.STRINGLITERALTOK then
+            begin
+              DiagFile.Write(' = ');
+              for CharIndex := 1 to token.StrLength do
+                DiagFile.Write(StaticStringData[token.StrAddress - CODEORIGIN + (CharIndex - 1)], -1);
+              DiagFile.WriteLn;
+            end
+            else
+              DiagFile.WriteLn;
   end;// for
 
   DiagFile.WriteLn;
@@ -72,9 +69,14 @@ begin
   begin
     DiagFile.Write(i, 6).Write(Ident[i].Block, 6).Write(Ident[i].Name, 30).Write(
       GetTokenSpelling(Ident[i].Kind), 15);
-    if Ident[i].DataType <> TDataType.UNTYPETOK then DiagFile.Write(GetTokenSpelling(Ident[i].DataType), 15)
+    if Ident[i].DataType <> TDataType.UNTYPETOK then
+    begin
+      DiagFile.Write(GetTokenSpelling(Ident[i].DataType), 15);
+    end
     else
+    begin
       DiagFile.Write('N/A', 15);
+    end;
     DiagFile.Write(Ident[i].NumAllocElements, 15).Write(IntToHex(Ident[i].Value, 8), 15);
     if (Ident[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
       TTokenKind.DESTRUCTORTOK]) and not Ident[i].IsNotDead then DiagFile.Write('Yes', 5)

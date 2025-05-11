@@ -175,25 +175,32 @@ type
     Field: array [0..MAXFIELDS] of TField;
   end;
 
-  TUnitName = TName;
-  TUnitIndex = Smallint;
+  TSourceFileName = TName;
+  TSourceFileIndex = Smallint;
 
   TSourceFileType = (PROGRAM_FILE, UNIT_FILE, INCLUDE_FILE);
 
-  TUnit = class
+  TSourceFile = class
   public
-    UnitIndex: TUnitIndex;
+    UnitIndex: TSourceFileIndex;
     SourceFileType: TSourceFileType;
-    Name: TUnitName;
+    Name: TSourceFileName;
     Path: TFilePath;
     Units: Integer;
-    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
+    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
     function IsRelevant: Boolean;
 
+
   end;
 
-  TUnitList = class
+  TSourceLocation = record
+    SourceFile: TSourceFile;
+    Line: Integer;
+    Column: Integer;
+  end;
+
+  TSourceFileList = class
   public
 
 
@@ -201,32 +208,24 @@ type
     destructor Free;
 
     function Size: Integer;
-    function AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
-    function GetUnit(const UnitIndex: TUnitIndex): TUnit;
+    function AddUnit(SourceFileType: TSourceFileType; Name: TSourceFileName; Path: TFilePath): TSourceFile;
+    function GetSourceFile(const SourceFileIndex: TSourceFileIndex): TSourceFile;
 
     procedure ClearAllowedUnitNames;
 
   private
   const
-    MAXUNITS = 2048;
+    MAXUNITS = 4096;
   var
     Count: Integer;
-    unitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;
-  end;
-
-  IUnit = interface
-    function Name: TUnitName;
-    function Path: TFilePath;
+    SourceFileArray: array [1..MAXUNITS] of TSourceFile;
   end;
 
   TTokenIndex = Integer;
 
   TToken = class
     TokenIndex: TTokenIndex;
-    SourceCodeFile: TUnit;
-    // UnitIndex: TUnitIndex;
-    Column: Smallint;
-    Line: Integer;
+    SourceLocation: TSourceLocation;
     Kind: TTokenKind;
     // For Kind=IDENTTOK:
     Name: TIdentifierName;
@@ -238,7 +237,11 @@ type
     StrAddress: Word;
     StrLength: Word;
 
-    function GetSourceCodeFile: TUnit;
+    function GetSourceFile: TSourceFile;
+    function GetSourceFileName: TSourceFileName;
+    function GetSourceFileLineString: String;
+    function GetSourceFileLocationString: String;
+
     function GetSpelling: TString;
 
   end;
@@ -253,7 +256,7 @@ type
 
     function Size: Integer;
     procedure Clear;
-    function AddToken(Kind: TTokenKind; SourceCodeFile: TUnit; Line, Column: Integer; Value: TInteger): TToken;
+    function AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
     procedure RemoveToken;
 
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
@@ -265,15 +268,17 @@ type
 
   end;
 
+  TIdentifierIndex = Integer;
+
   TIdentifier = record
     Name: TIdentifierName;
-    Value: Int64;      // Value for a constant, address for a variable, procedure or function
-    Block: Integer;      // Index of a block in which the identifier is defined
-    UnitIndex: Integer;
-    Alias: TString;      // EXTERNAL alias 'libraries'
-    Libraries: Integer;    // EXTERNAL alias 'libraries'
+    Value: Int64;             // Value for a constant, address for a variable, procedure or function
+    Block: Integer;           // Index of a block in which the identifier is defined
+    SourceFile: TSourceFile;
+    Alias: TString;           // EXTERNAL alias 'libraries'
+    Libraries: Integer;       // EXTERNAL alias 'libraries'
     DataType: TDataType;
-    IdType: TTokenKind; // TODO Have TIdenfierType
+    IdType: TTokenKind;       // TODO Have TIdenfierType
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
 
@@ -370,9 +375,104 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
-function TToken.GetSourceCodeFile: TUnit;
+// ----------------------------------------------------------------------------
+// Class TSourceFile
+// ----------------------------------------------------------------------------
+function TSourceFile.IsRelevant: Boolean;
 begin
-  Result := SourceCodeFile;
+  Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
+end;
+
+// ----------------------------------------------------------------------------
+// Class TSourceFileList
+// ----------------------------------------------------------------------------
+
+constructor TSourceFileList.Create();
+var
+  i: Integer;
+begin
+
+  for i := Low(SourceFileArray) to High(SourceFileArray) do
+  begin
+    SourceFileArray[i] := TSourceFile.Create;
+  end;
+end;
+
+destructor TSourceFileList.Free;
+var
+  i: Integer;
+begin
+  for i := Low(SourceFileArray) to High(SourceFileArray) do
+  begin
+    SourceFileArray[i].Free;
+  end;
+end;
+
+function TSourceFileList.Size: Integer;
+begin
+  Result := Count;
+end;
+
+
+function TSourceFileList.AddUnit(SourceFileType: TSourceFileType; Name: TSourceFileName; Path: TFilePath): TSourceFile;
+
+begin
+  Assert(IsValidIdent(path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
+  Assert(Length(path) >= 0, 'Path not specified.');
+
+  // Writeln('Adding unit ''' + Name + ''' with path ''' + path + '''.');
+
+  Result := TSourceFile.Create;
+
+  // if Count >= MAXSOURCEFILES then
+  //    Error(Count, 'Out of resources, TOK');
+  Inc(Count);
+
+  Result.UnitIndex := Count;
+  Result.SourceFileType := SourceFileType;
+  Result.Name := Name;
+  Result.Path := Path;
+
+  SourceFileArray[Result.UnitIndex] := Result;
+end;
+
+function TSourceFileList.GetSourceFile(const SourceFileIndex: TSourceFileIndex): TSourceFile;
+begin
+  assert(SourceFileIndex >= Low(SourceFileArray));
+  Result := SourceFileArray[SourceFileIndex];
+end;
+
+procedure TSourceFileList.ClearAllowedUnitNames;
+var
+  i: Integer;
+begin
+  for i := 1 to High(SourceFileArray) do SourceFileArray[i].Units := 0;
+end;
+
+
+
+// ----------------------------------------------------------------------------
+// Class TToken
+// ----------------------------------------------------------------------------
+function TToken.GetSourceFile: TSourceFile;
+begin
+  Result := SourceLocation.SourceFile;
+end;
+
+function TToken.GetSourceFileName: TSourceFileName;
+begin
+  Result := SourceLocation.SourceFile.Name;
+end;
+
+function TToken.GetSourceFileLineString: String;
+begin
+  Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) + ')';
+end;
+
+function TToken.GetSourceFileLocationString: String;
+begin
+  Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) +
+    ', column ' + IntToStr(SourceLocation.Column) + ')';
 end;
 
 function TToken.GetSpelling: TString;
@@ -380,6 +480,10 @@ begin
   Result := GetHumanReadbleTokenSpelling(kind);
 end;
 
+
+// ----------------------------------------------------------------------------
+// Class TTokenList
+// ----------------------------------------------------------------------------
 
 constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
 begin
@@ -408,21 +512,22 @@ begin
   tokenArrayPointer^[0] := TToken.Create;
 end;
 
-function TTokenList.AddToken(Kind: TTokenKind; SourceCodeFile: TUnit; Line, Column: Integer; Value: TInteger): TToken;
+function TTokenList.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer;
+  Value: TInteger): TToken;
 var
   i: Integer;
 begin
-  assert(SourceCodeFile <> nil, 'No source code file specified');
+  assert(SourceFile <> nil, 'No source code file specified');
 
   Result := TToken.Create;
 
-  // if NumTok > MAXTOKENS then
+  // if size >= MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
   i := size + 1;
 
   Result.TokenIndex := i;
-  Result.SourceCodeFile := SourceCodeFile;
-  // Result.UnitIndex:=SourceCodeFile.UnitIndex;
+  Result.SourceLocation.SourceFile := SourceFile;
+  // Result.UnitIndex:=SourceFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
 
@@ -432,17 +537,17 @@ begin
   else
   begin
 
-    if tokenArrayPointer^[i - 1].Line <> Line then
+    if tokenArrayPointer^[i - 1].SourceLocation.Line <> Line then
     //   Column := 1
     else
-      Column := Column + tokenArrayPointer^[i - 1].Column;
+      Column := Column + tokenArrayPointer^[i - 1].SourceLocation.Column;
 
   end;
 
   // if Tok[i- 1].Line <> Line then writeln;
 
-  Result.Line := Line;
-  Result.Column := Column;
+  Result.SourceLocation.Line := Line;
+  Result.SourceLocation.Column := Column;
 
 
   SetLength(tokenArrayPointer^, i + 1);
@@ -476,74 +581,9 @@ begin
   end;
 end;
 
-function TUnit.IsRelevant: Boolean;
-begin
-  Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
-end;
-
-constructor TUnitList.Create();
-var
-  i: Integer;
-begin
-
-  for i := 1 to MAXUNITS + MAXUNITS do
-  begin
-    UnitArray[i] := TUnit.Create;
-  end;
-end;
-
-destructor TUnitList.Free;
-var
-  i: Integer;
-begin
-  for i := 1 to MAXUNITS + MAXUNITS do
-  begin
-    UnitArray[i].Free;
-  end;
-end;
-
-function TUnitList.Size: Integer;
-begin
-  Result := Count;
-end;
-
-
-function TUnitList.AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
-
-begin
-  Assert(IsValidIdent(path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
-  Assert(Length(path) >= 0, 'Path not specified.');
-
-  // Writeln('Adding unit ''' + Name + ''' with path ''' + path + '''.');
-
-  Result := TUnit.Create;
-
-  // if NumTok > MAXUnitS then
-  //    Error(NumTok, 'Out of resources, TOK');
-  Inc(Count);
-
-  Result.UnitIndex := Count;
-  Result.SourceFileType := SourceFileType;
-  Result.Name := Name;
-  Result.Path := Path;
-
-  unitArray[Count] := Result;
-
-  // WriteLn('Added Unit at index ' + IntToStr(i) + ': ' + );
-end;
-
-function TUnitList.GetUnit(const UnitIndex: TUnitIndex): TUnit;
-begin
-  assert(UnitIndex >= Low(UnitArray));
-  Result := UnitArray[UnitIndex];
-end;
-
-procedure TUnitList.ClearAllowedUnitNames;
-var
-  i: Integer;
-begin
-  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
-end;
+// ----------------------------------------------------------------------------
+// Global procedures and functions.
+// ----------------------------------------------------------------------------
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);
 begin

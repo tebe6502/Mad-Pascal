@@ -44,8 +44,7 @@ var
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
 
-  UnitList: TUnitList;
-
+  SourceFileList: TSourceFileList;
 
   IFTmpPosStack: array of Integer;
 
@@ -69,7 +68,7 @@ var
 
   pass: TPass;
 
-  UnitNameIndex: Integer; // Initialized in Scanner.TokenizeProgramInitialization
+  ActiveSourceFile: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization
 
   FastMul: Integer;
   // Initialized in Scanner.TokenizeProgramInitialization to -1, updated to page address from {$F [page address]}
@@ -94,7 +93,7 @@ var
 
   optimize: record
     use: Boolean;
-    SourceCodeFile: TUnit;
+    SourceFile: TSourceFile;
     line, old: Integer;
     end;
 
@@ -119,14 +118,13 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
-function NumUnits: Integer;
+
 function NumTok: Integer;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
-function GetUnit(const UnitIndex: TUnitIndex): TUnit;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -232,10 +230,6 @@ begin
   unitPathList.AddFolder(folderPath);
 end;
 
-function GetUnit(const UnitIndex: TUnitIndex): TUnit;
-begin
-  Result := UnitList.GetUnit(UnitIndex);
-end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -597,7 +591,7 @@ begin
   Tok[StrTokenIndex].StrLength := len;
   Tok[StrTokenIndex].StrAddress := CODEORIGIN + NumStaticStrChars;
 
-  StaticStringData[NumStaticStrChars] := Data[0];//length(StrValue);
+  StaticStringData[NumStaticStrChars] := Data[0]; //length(StrValue);
   Inc(NumStaticStrChars);
 
   for i := 1 to len do
@@ -609,15 +603,6 @@ begin
   //StaticStringData[NumStaticStrChars] := 0;
   //Inc(NumStaticStrChars);
 
-end;
-
-// The function is currently kept for compatibility, simulating the previous global variable.
-function NumUnits: Integer;
-begin
-  if unitList <> nil then
-  begin
-    Result := UnitList.Size;
-  end;
 end;
 
 // The function is currently kept for compatibility, simulating the previous global variable.
