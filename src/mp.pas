@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                        {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                           {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                        {$ENDIF}
+                           {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -223,6 +223,7 @@ uses
     MainPath: String;
 
     // Command line parameters
+    programUnit: TUnit;
     unitPathList: TPathList;
     targetID: TTargetID;
     cpu: TCPU;
@@ -239,6 +240,7 @@ uses
       parameter, parameterUpperCase, parameterValue: String;
     begin
 
+      programUnit := GetUnit(1);
       targetID := TTargetID.A8;
       cpu := TCPU.NONE;
 
@@ -413,10 +415,10 @@ uses
         else
 
         begin
-          UnitList.UnitArray[NumUnits].Name := TEnvironment.GetParameterString(i);
-          UnitList.UnitArray[NumUnits].Path := UnitList.UnitArray[NumUnits].Name;
+          programUnit.Path := TFileSystem.NormalizePath(TEnvironment.GetParameterString(i));
+          programUnit.Name := ExtractFileName(programUnit.Path);
 
-          if not TFileSystem.FileExists_(GetUnit(NumUnits).Path) then
+          if not TFileSystem.FileExists_(programUnit.Path) then
           begin
             writeln('Error: Can''t open file ''' + GetUnit(NumUnits).Path + '''.');
             RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
@@ -477,8 +479,8 @@ uses
 
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    UnitList:=TUnitList.Create();
-    UnitList.AddUnit(TSourceFileType.PROGRAM_FILE,'', '');
+    UnitList := TUnitList.Create();
+    UnitList.AddUnit(TSourceFileType.PROGRAM_FILE, '', '');
 
     try
       ParseParam();
