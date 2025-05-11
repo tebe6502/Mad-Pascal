@@ -104,14 +104,14 @@ uses
     EndTest('TestFileIO');
   end;
 
-  procedure TestUnitFile;
+  procedure TestUnitFileIO;
   const
     TEST_MP_FILE_PATH = '..\src\tests\TestMP.pas';
   var
     pathList: TPathList;
 
   begin
-    StartTest('TestUnitFile');
+    StartTest('TestUnitFileIO');
     TestNative(TEST_MP_FILE_PATH);
     TestFileIO(TEST_MP_FILE_PATH);
 
@@ -123,7 +123,14 @@ uses
     Assert(pathList.ToString() = 'Folder1' + TFileSystem.PathDelim + ';Folder2' + TFileSystem.PathDelim);
     pathList.Free;
 
-    EndTest('TestUnitFile');
+    AssertEquals(SysUtils.ExtractFileName(''), '');
+    AssertEquals(SysUtils.ExtractFileName('ABC.'), 'ABC.');
+    AssertEquals(SysUtils.ExtractFileName('ABC.xyz'), 'ABC.xyz');
+    AssertEquals(SysUtils.ExtractFileName('/a/b/ABC.xyz'), 'ABC.xyz');
+    AssertEquals(SysUtils.ExtractFileName('\a\b\ABC.xyz'), 'ABC.xyz');
+    AssertEquals(SysUtils.ExtractFileName('\a\b\c/d/ABC.xyz'), 'ABC.xyz');
+
+    EndTest('TestUnitFileIO');
   end;
 
   procedure TestUnitCommon;
@@ -308,7 +315,7 @@ type
 
 begin
   try
-    TestUnitFile;
+    TestUnitFileIO;
     TestUnitCommon;
     TestUnitDatatypes;
     TestUnitMathEvaluate;
