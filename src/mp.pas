@@ -235,7 +235,7 @@ uses
     seconds: ValReal;
 
     // Processing variables.
-    programUnit: TUnit;
+    programUnit: TSourceFile;
 
     procedure ParseParam;
     var
@@ -481,7 +481,7 @@ uses
 
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    UnitList := TUnitList.Create();
+    UnitList := TSourceFileList.Create();
 
     try
       ParseParam();
@@ -536,7 +536,7 @@ uses
 
 
     // Diagnostics
-    if DiagMode then Diagnostics;
+    if DiagMode then Diagnostics(programUnit);
 
 
     WritelnMsg;

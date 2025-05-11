@@ -11,20 +11,20 @@ uses CommonTypes, CompilerTypes, Tokens;
 type
   IScanner = interface
 
-    procedure TokenizeProgram(programUnit: TUnit; UsesOn: Boolean);
+    procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
 
     // This is only public for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-    procedure AddToken(Kind: TTokenKind; UnitIndex: TUnit; Line, Column: Integer; Value: TInteger);
+    procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFile; Line, Column: Integer; Value: TInteger);
 
   end;
 
 type
   TScanner = class(TInterfacedObject, IScanner)
 
-    procedure TokenizeProgram(programUnit: TUnit; UsesOn: Boolean);
+    procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
     // TODO: Remove, check why this is called with fixed UnitIndex=1
-    procedure AddToken(Kind: TTokenKind; UnitIndex: TUnitIndex; Line, Column: Integer; Value: TInteger) overload;
-    procedure AddToken(Kind: TTokenKind; UnitIndex: TUnit; Line, Column: Integer; Value: TInteger) overload;
+    procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger) overload;
+    procedure AddToken(Kind: TTokenKind; UnitIndex: TSourceFile; Line, Column: Integer; Value: TInteger) overload;
 
   private
     procedure TokenizeMacro(a: String; Line, Spaces: Integer);
@@ -43,7 +43,7 @@ begin
   Error(i, TMessage.Create(TErrorCode.OrdinalExpExpected, 'Ordinal expression expected.'));
 end;
 
-procedure TokenizeProgramInitialization;
+procedure TokenizeProgramInitialization(ProgramUnit: TSourceFile);
 var
   i: Integer;
 begin
@@ -62,7 +62,7 @@ begin
   DataSegmentUse := False;
   LoopUnroll := False;
   PublicSection := True;
-  UnitNameIndex := 1; // TODO This is the current unit index
+  UnitNameIndex := ProgramUnit; // TODO This is the current unit index
 
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
@@ -180,12 +180,12 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TUnitIndex; Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
 begin
-  tokenList.AddToken(kind, GetUnit(UnitIndex), line, Column, Value);
+  tokenList.AddToken(kind, GeTSourceFile(UnitIndex), line, Column, Value);
 end;
 
-procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TUnit; Line, Column: Integer; Value: TInteger);
+procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TSourceFile; Line, Column: Integer; Value: TInteger);
 begin
   tokenList.AddToken(kind, UnitIndex, line, Column, Value);
 end;
@@ -207,12 +207,12 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure TScanner.TokenizeProgram(programUnit: TUnit; UsesOn: Boolean);
+procedure TScanner.TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
 var
   Text: String;
   Num, Frac: TString;
   OldNumTok: Integer;
-  UnitIndex: TUnit; // Currently tokenized unit
+  UnitIndex: TSourceFile; // Currently tokenized unit
   Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   //  IncludeIndex: Integer;
   Tmp: Int64;
@@ -222,21 +222,21 @@ var
   StrParams: TStringArray;
 
 
-  procedure TokenizeUnit(a: TUnit; testUnit: Boolean = False); forward;
+  procedure TokenizeUnit(a: TSourceFile; tesTSourceFile: Boolean = False); forward;
 
 
-  procedure Tokenize(filePath: TFilePath; testUnit: Boolean = False);
+  procedure Tokenize(filePath: TFilePath; tesTSourceFile: Boolean = False);
   var
     InFile: IBinaryFile;
     _line: Integer;
-    _uidx: TUnit;
+    _uidx: TSourceFile;
 
 
     procedure ReadUses;
     var
       i, j, k: Integer;
       _line: Integer;
-      _uidx: TUnit;
+      _uidx: TSourceFile;
       s, nam: String;
     begin
 
@@ -281,7 +281,7 @@ var
         // This means this entry in the unit list will not be tokenized.
         for j := 2 to NumUnits do
         begin
-          if UnitList.GetUnit(j).Name = s then UnitList.GetUnit(j).Name := '';
+          if UnitList.GeTSourceFile(j).Name = s then UnitList.GeTSourceFile(j).Name := '';
         end;
 
         _line := Line;
@@ -290,7 +290,7 @@ var
         // TODO
 
 
-        // TODO Move check to TUnitList and use exceptions
+        // TODO Move check to TSourceFileList and use exceptions
         (*
         if UnitIndex > High(UnitList.UnitArray) then
         begin
@@ -1492,7 +1492,7 @@ var
 
                   if CurToken = TTokenKind.UNITTOK then UnitFound := True;
 
-                  if testUnit and (UnitFound = False) then
+                  if tesTSourceFile and (UnitFound = False) then
                     Error(NumTok, TMessage.Create(TErrorCode.UnitExpected, '"UNIT" expected but "' +
                       GetTokenSpelling(CurToken) + '" found'));
 
@@ -1792,7 +1792,7 @@ var
   end;
 
 
-  procedure TokenizeUnit(a: TUnit; testUnit: Boolean = False);
+  procedure TokenizeUnit(a: TSourceFile; tesTSourceFile: Boolean = False);
   // Read input file and get tokens
   var
     endLine: Integer;
@@ -1810,7 +1810,7 @@ var
 
     UnitFound := False;
 
-    Tokenize(UnitIndex.Path, testUnit);
+    Tokenize(UnitIndex.Path, tesTSourceFile);
 
     if UnitIndex.UnitIndex > 1 then
     begin
@@ -1834,14 +1834,14 @@ begin
   UnitFound := False;
   ExternalFound := False;
 
-  TokenizeProgramInitialization;
+  TokenizeProgramInitialization(programUnit);
 
   if UsesOn then
     TokenizeUnit(programUnit)     // main program file
   else
     for cnt := NumUnits downto 1 do
-      if GetUnit(cnt).IsRelevant then
-        TokenizeUnit(GetUnit(cnt));
+      if GeTSourceFile(cnt).IsRelevant then
+        TokenizeUnit(GeTSourceFile(cnt));
 
 end;  // TokenizeProgram
 

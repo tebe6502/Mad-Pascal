@@ -44,7 +44,7 @@ var
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
 
-  UnitList: TUnitList;
+  UnitList: TSourceFileList;
 
 
   IFTmpPosStack: array of Integer;
@@ -69,7 +69,7 @@ var
 
   pass: TPass;
 
-  UnitNameIndex: Integer; // Initialized in Scanner.TokenizeProgramInitialization
+  UnitNameIndex: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization
 
   FastMul: Integer;
   // Initialized in Scanner.TokenizeProgramInitialization to -1, updated to page address from {$F [page address]}
@@ -94,7 +94,7 @@ var
 
   optimize: record
     use: Boolean;
-    SourceCodeFile: TUnit;
+    SourceFile: TSourceFile;
     line, old: Integer;
     end;
 
@@ -126,7 +126,7 @@ procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
-function GetUnit(const UnitIndex: TUnitIndex): TUnit;
+function GeTSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -232,9 +232,9 @@ begin
   unitPathList.AddFolder(folderPath);
 end;
 
-function GetUnit(const UnitIndex: TUnitIndex): TUnit;
+function GetSourceFile(const UnitIndex: TSourceFileIndex): TSourceFile;
 begin
-  Result := UnitList.GetUnit(UnitIndex);
+  Result := UnitList.GetSourceFile(UnitIndex);
 end;
 
 // ----------------------------------------------------------------------------

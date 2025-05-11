@@ -618,7 +618,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(common.optimize.SourceCodeFile.Path + ' (' + IntToStr(common.optimize.line) +
+      WriteLn(common.optimize.SourceFile.Path + ' (' + IntToStr(common.optimize.line) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -3733,7 +3733,7 @@ begin        // OptimizeASM
     if common.optimize.line <> common.optimize.old then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + common.optimize.SourceCodeFile.Name + '), line = ' +
+      WriteOut('; optimize OK (' + common.optimize.SourceFile.Name + '), line = ' +
         IntToStr(common.optimize.line));
       WriteOut('');
 
@@ -3859,10 +3859,10 @@ begin        // OptimizeASM
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + common.optimize.SourceCodeFile.Name +
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + common.optimize.SourceFile.Name +
           '), line = ' + IntToStr(common.optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + common.optimize.SourceCodeFile.Name +
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + common.optimize.SourceFile.Name +
           '), line = ' + IntToStr(common.optimize.line));
 
       WriteOut('');
@@ -3890,7 +3890,7 @@ begin        // OptimizeASM
     Writeln(OptFile, OptimizeBuf[i]);
 
  writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+common.optimize.SourceCodeFile.Name+') line = ',common.optimize.line);
+ writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+common.optimize.SourceFile.Name+') line = ',common.optimize.line);
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
