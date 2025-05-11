@@ -122,7 +122,7 @@ end;
 function GetLocalName(IdentIndex: Integer; a: String = ''): String;
 begin
 
-  if ((Ident[IdentIndex].SourceFile.UnitIndex > 1) and (Ident[IdentIndex].SourceFile <> UnitNameIndex) and
+  if ((Ident[IdentIndex].SourceFile.UnitIndex > 1) and (Ident[IdentIndex].SourceFile <> ActiveSourceFile) and
     Ident[IdentIndex].Section) then
     Result := Ident[IdentIndex].SourceFile.Name + '.' + a + Ident[IdentIndex].Name
   else
@@ -157,8 +157,8 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-
-  if (IdentIndex>0) and (Ident[IdentIndex].SourceFile.UnitIndex > 1) and (pos(Ident[IdentIndex].SourceFile.Name + '.', a) = 1) then
+  if (IdentIndex > 0) and (Ident[IdentIndex].SourceFile.UnitIndex > 1) and
+    (pos(Ident[IdentIndex].SourceFile.Name + '.', a) = 1) then
   begin
     a := copy(a, a.IndexOf('.') + 2, length(a));
   end;
@@ -7935,7 +7935,7 @@ begin
       asm65(#9'.LOCAL ' + svar)
     else
 
-      if (Ident[IdentIndex].SourceFile.UnitIndex > 1) and (Ident[IdentIndex].SourceFile <> UnitNameIndex) and
+      if (Ident[IdentIndex].SourceFile.UnitIndex > 1) and (Ident[IdentIndex].SourceFile <> ActiveSourceFile) and
         Ident[IdentIndex].Section then
         asm65(#9'.LOCAL +MAIN.' + svar)                  // w tym samym module poza aktualnym blokiem procedury/funkcji
       else
@@ -12517,10 +12517,9 @@ begin
                   // dla PROC, FUNC -> Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and
-                      (not (Ident[IdentIndex].AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
+                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and (not
+                      (Ident[IdentIndex].AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+                      not (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
                       [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.Ident[IdentIndex].AllocElementType] *} Ident[IdentIndex].NumAllocElements > 1) and ({GetDataSize( TDataType.Ident[GetIdentIndex(Tok[k].Name)].AllocElementType] *} Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements > 1)) *) then
                     begin
@@ -15277,7 +15276,7 @@ begin
 
     for IdentIndex := 1 to NumIdent do
       if (Ident[IdentIndex].Block = Ident[BlockIdentIndex].ProcAsBlock) and
-        (Ident[IdentIndex].SourceFile = UnitNameIndex) then
+        (Ident[IdentIndex].SourceFile = ActiveSourceFile) then
       begin
 
         if emptyLine then
@@ -16944,7 +16943,7 @@ begin
       asm65;
       asm65('.local'#9 + Tok[i].GetSourceFileName, '; UNIT');
 
-      UnitNameIndex := Tok[i].SourceLocation.SourceFile;
+      ActiveSourceFile := Tok[i].SourceLocation.SourceFile;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
@@ -16982,7 +16981,7 @@ begin
 
       j := NumIdent;
 
-      while (j > 0) and (Ident[j].SourceFile = UnitNameIndex) do
+      while (j > 0) and (Ident[j].SourceFile = ActiveSourceFile) do
       begin
         // If procedure or function, delete parameters first
         if Ident[j].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
@@ -16993,7 +16992,7 @@ begin
         Dec(j);
       end;
 
-      UnitNameIndex := GeTSourceFile(1);
+      ActiveSourceFile := GetSourceFile(1);
 
       PublicSection := True;
       ImplementationUse := False;
@@ -17250,19 +17249,19 @@ begin
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to UnitNameIndex.Units do
-          if (UnitNameIndex.AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+        for j := 1 to ActiveSourceFile.Units do
+          if (ActiveSourceFile.AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
             yes := False;
 
         if yes then
         begin
 
-          Inc(UnitNameIndex.Units);
+          Inc(ActiveSourceFile.Units);
 
-          if UnitNameIndex.Units > MAXALLOWEDUNITS then
+          if ActiveSourceFile.Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          UnitNameIndex.AllowedUnitNames[UnitNameIndex.Units] := Tok[i].Name;
+          ActiveSourceFile.AllowedUnitNames[ActiveSourceFile.Units] := Tok[i].Name;
 
         end;
 
@@ -18673,12 +18672,12 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := NumUnits downto 2 do
-    if GeTSourceFile(j).IsRelevant then
+    if GetSourceFile(j).IsRelevant then
     begin
 
       asm65;
-      asm65(#9'.ifdef MAIN.' + GeTSourceFile(j).Name + '.@UnitInit');
-      asm65(#9'jsr MAIN.' + GeTSourceFile(j).Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + GetSourceFile(j).Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + GetSourceFile(j).Name + '.@UnitInit');
       asm65(#9'.fi');
 
     end;
@@ -18688,12 +18687,12 @@ end;
   asm65separator;
 
   for j := NumUnits downto 2 do
-    if GeTSourceFile(j).IsRelevant then
+    if GetSourceFile(j).IsRelevant then
     begin
       asm65;
-      asm65(#9'ift .SIZEOF(MAIN.' + GeTSourceFile(j).Name + ') > 0');
-      asm65(#9'.print ''' + GeTSourceFile(j).Name + ': ' + ''',MAIN.' + GeTSourceFile(j).Name + ',' +
-        '''..''' + ',' + 'MAIN.' + GeTSourceFile(j).Name + '+.SIZEOF(MAIN.' + GeTSourceFile(j).Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + GetSourceFile(j).Name + ') > 0');
+      asm65(#9'.print ''' + GetSourceFile(j).Name + ': ' + ''',MAIN.' + GetSourceFile(j).Name +
+        ',' + '''..''' + ',' + 'MAIN.' + GetSourceFile(j).Name + '+.SIZEOF(MAIN.' + GetSourceFile(j).Name + ')-1');
       asm65(#9'eif');
     end;
 
@@ -19105,6 +19104,7 @@ procedure Free;
 begin
 
   TokenList.Free;
+  TokenList:=nil;
 
   SetLength(IFTmpPosStack, 0);
   evaluationContext := nil;

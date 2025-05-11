@@ -54,7 +54,7 @@ begin
     Ident[i] := Default(TIdentifier);
   end;
 
-  tokenList.Clear;
+  TokenList.Clear;
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
 
@@ -62,7 +62,7 @@ begin
   DataSegmentUse := False;
   LoopUnroll := False;
   PublicSection := True;
-  UnitNameIndex := ProgramUnit; // TODO This is the current unit index
+  ActiveSourceFile := ProgramUnit;
 
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
@@ -182,7 +182,7 @@ end;  //AddResource
 
 procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
 begin
-  tokenList.AddToken(kind, GeTSourceFile(UnitIndex), line, Column, Value);
+  tokenList.AddToken(kind, GetSourceFile(UnitIndex), line, Column, Value);
 end;
 
 procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
@@ -281,7 +281,7 @@ var
         // This means this entry in the unit list will not be tokenized.
         for j := 2 to NumUnits do
         begin
-          if UnitList.GeTSourceFile(j).Name = s then UnitList.GeTSourceFile(j).Name := '';
+          if UnitList.GetSourceFile(j).Name = s then UnitList.GetSourceFile(j).Name := '';
         end;
 
         _line := Line;
@@ -1840,8 +1840,8 @@ begin
     TokenizeUnit(programUnit)     // main program file
   else
     for cnt := NumUnits downto 1 do
-      if GeTSourceFile(cnt).IsRelevant then
-        TokenizeUnit(GeTSourceFile(cnt));
+      if GetSourceFile(cnt).IsRelevant then
+        TokenizeUnit(GetSourceFile(cnt));
 
 end;  // TokenizeProgram
 

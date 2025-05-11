@@ -69,7 +69,7 @@ var
 
   pass: TPass;
 
-  UnitNameIndex: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization
+  ActiveSourceFile: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization
 
   FastMul: Integer;
   // Initialized in Scanner.TokenizeProgramInitialization to -1, updated to page address from {$F [page address]}

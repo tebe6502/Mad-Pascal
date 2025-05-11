@@ -140,12 +140,12 @@ begin
 
   if S = '' then exit(-1);
 
-  Result := Search(S, UnitNameIndex);
+  Result := Search(S, ActiveSourceFile);
 
   if (Result = 0) and (pos('.', S) > 0) then
   begin   // potencjalnie odwolanie do unitu / obiektu
 
-    TempIndex := Search(copy(S, 1, pos('.', S) - 1), UnitNameIndex);
+    TempIndex := Search(copy(S, 1, pos('.', S) - 1), ActiveSourceFile);
 
     //    writeln(S,',',Ident[TempIndex].Kind,' - ', Ident[TempIndex].DataType, ' / ',Ident[TempIndex].AllocElementType);
 
@@ -1534,7 +1534,7 @@ begin
   if (identIndex > 0) and (not (Ident[identIndex].Kind in [TTokenKind.PROCEDURETOK,
     TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
     (Ident[identIndex].Block = BlockStack[BlockStackTop]) and (Ident[identIndex].isOverload = False) and
-    (Ident[i].SourceFile = UnitNameIndex) then
+    (Ident[i].SourceFile = ActiveSourceFile) then
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier ' +
       Name + ' is already defined'))
   else
@@ -1559,8 +1559,7 @@ begin
 
     Ident[NumIdent].Section := PublicSection;
 
-    Ident[NumIdent].SourceFile := UnitNameIndex;
-    // TODO Ident[NumIdent].UnitIndex := UnitNameIndex.UnitIndex;
+    Ident[NumIdent].SourceFile := ActiveSourceFile;
 
     Ident[NumIdent].IdType := IdType;
 
@@ -1577,7 +1576,7 @@ begin
     //   if name = 'CH_EOL' then writeln( Ident[NumIdent].Block ,',', Ident[NumIdent].unitindex, ',',  Ident[NumIdent].Section,',', Ident[NumIdent].idType);
 
     if Name <> 'RESULT' then
-      if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
+      if (NumIdent > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
         if not ((Ident[NumIdent].Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
           (Ident[NumIdent].IsNotDead)) then
           NoteForIdentifierNotUsed(tokenIndex, NumIdent);

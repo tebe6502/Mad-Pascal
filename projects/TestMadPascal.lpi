@@ -612,9 +612,11 @@
     <Exceptions>
       <Item>
         <Name Value="EAbort"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="ECodetoolError"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EFOpenError"/>
@@ -628,6 +630,7 @@
       </Item>
       <Item>
         <Name Value="RunError(201)"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EEValuationException"/>

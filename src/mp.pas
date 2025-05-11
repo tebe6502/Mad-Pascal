@@ -547,7 +547,7 @@ uses
     Writeln(Tok[NumTok].SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
       NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
 {$ELSE}
-   Writeln(IntToStr(Tok[NumTok].Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
+   Writeln(IntToStr(Tok[NumTok].SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
  	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
 	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
 {$ENDIF}
