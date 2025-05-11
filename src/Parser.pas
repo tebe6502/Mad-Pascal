@@ -1545,8 +1545,10 @@ begin
     // For debugging
     // Writeln('NumIdent='+IntToStr(NumIdent)+' ErrTokenIndex='+IntToStr(ErrTokenIndex)+' Name='+name+' Kind='+IntToStr( Kind)+' DataType='+IntToStr( DataType)+' NumAllocElements='+IntToStr( NumAllocElements)+' AllocElementType='+IntToStr( AllocElementType));
 
-    if NumIdent > High(Ident) then
+    if NumIdent > MAXIDENTS then
+    begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
+    end;
 
     Ident[NumIdent].Name := Name;
     Ident[NumIdent].Kind := Kind;
@@ -3078,7 +3080,8 @@ begin
                                 else
                                   if NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                                     NumAllocElements :=
-                                      NestedNumAllocElements or (NumAllocElements shl 16)      // array [..] of ^record|^object
+                                      NestedNumAllocElements or (NumAllocElements shl 16)
+                                  // array [..] of ^record|^object
                                   else
                                     NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
 
