@@ -19010,14 +19010,14 @@ begin
   // Set defines for first pass;
   scanner := TScanner.Create;
 
-  scanner.TokenizeProgram(True);
+  scanner.TokenizeProgram(programUnit, True);
 
   if NumTok = 0 then Error(1, '');
 
   // Add default unit 'system.pas'
   UnitList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
-  scanner.TokenizeProgram(False);
+  scanner.TokenizeProgram(programUnit, False);
 
   // ----------------------------------------------------------------------------
 
