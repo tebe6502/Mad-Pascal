@@ -181,7 +181,7 @@ end;  //AddResource
 
 procedure TScanner.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger);
 begin
-  tokenList.AddToken(kind, UnitIndex, line, Column, Value);
+  tokenList.AddToken(kind, unitList.GetUnit(UnitIndex), line, Column, Value);
 end;
 
 

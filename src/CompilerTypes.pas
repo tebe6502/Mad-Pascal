@@ -223,6 +223,7 @@ type
 
   TToken = class
     TokenIndex: TTokenIndex;
+    SourceCodeFile: TUnit;
     UnitIndex: TUnitIndex;
     Column: Smallint;
     Line: Integer;
@@ -237,7 +238,9 @@ type
     StrAddress: Word;
     StrLength: Word;
 
+    function GetSourceCodeFile: TUnit;
     function GetSpelling: TString;
+
   end;
 
   // A token list owns token instances.
@@ -250,7 +253,7 @@ type
 
     function Size: Integer;
     procedure Clear;
-    function AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+    function AddToken(Kind: TTokenKind; SourceCodeFile: TUnit; Line, Column: Integer; Value: TInteger): TToken;
     procedure RemoveToken;
 
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
@@ -367,6 +370,17 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
+function TToken.GetSourceCodeFile: TUnit;
+begin
+  Result := SourceCodeFile;
+end;
+
+function TToken.GetSpelling: TString;
+begin
+  Result := GetHumanReadbleTokenSpelling(kind);
+end;
+
+
 constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
 begin
   self.tokenArrayPointer := tokenArrayPointer;
@@ -394,10 +408,12 @@ begin
   tokenArrayPointer^[0] := TToken.Create;
 end;
 
-function TTokenList.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+function TTokenList.AddToken(Kind: TTokenKind; SourceCodeFile: TUnit; Line, Column: Integer; Value: TInteger): TToken;
 var
   i: Integer;
 begin
+  assert(SourceCodeFile <> nil, 'No source code file specified');
+
   Result := TToken.Create;
 
   // if NumTok > MAXTOKENS then
@@ -405,7 +421,8 @@ begin
   i := size + 1;
 
   Result.TokenIndex := i;
-  Result.UnitIndex := UnitIndex;
+  Result.SourceCodeFile := SourceCodeFile;
+  Result.UnitIndex:=SourceCodeFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
 
@@ -443,11 +460,6 @@ begin
   tokenArrayPointer^[i] := nil;
   SetLength(tokenArrayPointer^, i);
 
-end;
-
-function TToken.GetSpelling: TString;
-begin
-  Result := GetHumanReadbleTokenSpelling(kind);
 end;
 
 
