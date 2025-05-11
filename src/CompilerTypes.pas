@@ -215,10 +215,10 @@ type
 
   private
   const
-    MAXSOURCEFILES = 4096;
+    MAXUNITS = 4096;
   var
     Count: Integer;
-    SourceFileArray: array [1..MAXSOURCEFILES] of TSourceFile;
+    SourceFileArray: array [1..MAXUNITS] of TSourceFile;
   end;
 
   TTokenIndex = Integer;
@@ -272,13 +272,13 @@ type
 
   TIdentifier = record
     Name: TIdentifierName;
-    Value: Int64;      // Value for a constant, address for a variable, procedure or function
-    Block: Integer;      // Index of a block in which the identifier is defined
+    Value: Int64;             // Value for a constant, address for a variable, procedure or function
+    Block: Integer;           // Index of a block in which the identifier is defined
     SourceFile: TSourceFile;
-    Alias: TString;      // EXTERNAL alias 'libraries'
-    Libraries: Integer;    // EXTERNAL alias 'libraries'
+    Alias: TString;           // EXTERNAL alias 'libraries'
+    Libraries: Integer;       // EXTERNAL alias 'libraries'
     DataType: TDataType;
-    IdType: TTokenKind; // TODO Have TIdenfierType
+    IdType: TTokenKind;       // TODO Have TIdenfierType
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
 
