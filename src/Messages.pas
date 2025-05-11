@@ -370,7 +370,7 @@ begin
   for i := fromTokenIndex to toTokenIndex do
   begin
     token := Tok[i];
-    WriteLn(GetUnit(token.UnitIndex).Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
+    WriteLn(token.SourceCodeFile.Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
       IntToStr(token.Column) + '): kind=' + GetTokenKindName(token.Kind) + ' name=' + token.Name + '.');
   end;
 end;
@@ -418,12 +418,12 @@ begin
       if (effectiveTokenIndex > 1) then
       begin
         previousToken := Tok[effectiveTokenIndex - 1];
-        WriteLn(GetUnit(token.UnitIndex).Path + ' (' + IntToStr(token.Line) + ',' +
+        WriteLn(token.SourceCodeFile.Path + ' (' + IntToStr(token.Line) + ',' +
           IntToStr(Succ(previousToken.Column)) + ')' + ' Error: ' + msg);
       end
       else
       begin
-        WriteLn(GetUnit(token.UnitIndex).Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
+        WriteLn(token.SourceCodeFile.Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
       end;
     end
     else
@@ -638,7 +638,7 @@ begin
   if pass = TPass.CODE_GENERATION then
   begin
 
-    a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+    a := Tok[tokenIndex].SourceCodeFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
       ')' + ' Warning: ' + msg.GetText();
 
     // Add warning only once.
@@ -714,7 +714,7 @@ begin
     if pos('.', Ident[identIndex].Name) = 0 then
     begin
 
-      a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+      a := Tok[tokenIndex].SourceCodeFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
         ')' + ' Note: Local ';
 
       if Ident[identIndex].Kind <> UNITTYPE then
@@ -760,7 +760,7 @@ begin
   if Pass = TPass.CODE_GENERATION then
   begin
 
-    a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
+    a := Tok[tokenIndex].SourceCodeFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
     a := a + msg;
 
     msgLists.msgNote.Add(a);

@@ -224,7 +224,7 @@ type
   TToken = class
     TokenIndex: TTokenIndex;
     SourceCodeFile: TUnit;
-    UnitIndex: TUnitIndex;
+    // UnitIndex: TUnitIndex;
     Column: Smallint;
     Line: Integer;
     Kind: TTokenKind;
@@ -422,7 +422,7 @@ begin
 
   Result.TokenIndex := i;
   Result.SourceCodeFile := SourceCodeFile;
-  Result.UnitIndex:=SourceCodeFile.UnitIndex;
+  // Result.UnitIndex:=SourceCodeFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
 

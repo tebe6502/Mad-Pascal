@@ -1109,7 +1109,7 @@ begin
   StopOptimization;
 
   common.optimize.use := True;
-  common.optimize.unitIndex := Tok[i].UnitIndex;
+    common.optimize.unitIndex := Tok[i].SourceCodeFile.UnitIndex;
   common.optimize.line := Tok[i].Line;
 
 end;
@@ -16932,20 +16932,20 @@ begin
     begin
       asm65separator;
 
-      DefineIdent(i, GetUnit(Tok[i].UnitIndex).Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
-      Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
+      DefineIdent(i, Tok[i].SourceCodeFile.Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+      Ident[NumIdent].UnitIndex := Tok[i].SourceCodeFile.UnitIndex;
 
       //   writeln(UnitArray[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
       asm65;
-      asm65('.local'#9 + GetUnit(Tok[i].UnitIndex).Name, '; UNIT');
+      asm65('.local'#9 + Tok[i].SourceCodeFile.Name, '; UNIT');
 
-      UnitNameIndex := Tok[i].UnitIndex;
+      UnitNameIndex := Tok[i].SourceCodeFile.UnitIndex;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
 
-      if Tok[i + 2].Name <> GetUnit(Tok[i].UnitIndex).Name then
+      if Tok[i + 2].Name <> Tok[i].SourceCodeFile.Name then
         Error(i + 2, 'Illegal unit name: ' + Tok[i + 2].Name);
 
       CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
@@ -16974,7 +16974,7 @@ begin
       VarRegister := 0;
 
       asm65;
-      asm65('.endl', '; UNIT ' + GetUnit(Tok[i].UnitIndex).Name);
+      asm65('.endl', '; UNIT ' + Tok[i].SourceCodeFile.Name);
 
       j := NumIdent;
 

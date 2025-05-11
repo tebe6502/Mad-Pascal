@@ -136,7 +136,10 @@ uses
   procedure TestUnitCommon;
   var
     filePath: TFilePath;
+    unitList: TUnitList;
+    sourceCodeFile: Tunit;
     tokenList: TTokenList;
+    token: TToken;
   begin
 
     StartTest('TestUnitCommon');
@@ -151,10 +154,15 @@ uses
     // Unit Scanner
     Program_NAME := 'TestProgram';
 
+    unitList := TUnitList.Create();
+    sourceCodeFile := unitList.AddUnit(TSourceFileType.PROGRAM_FILE, 'TEST_PROGRAM', 'TestProgram.pas');
     tokenList := TTokenList.Create(Addr(tok));
     // Kind, UnitIndex, Line, Column, Value
-    tokenList.AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    token := tokenList.AddToken(TTokenKind.PROGRAMTOK, sourceCodeFile, 1, 1, 0);
+    tokenList.Free;
     tokenList := nil;
+    unitList.Free;
+    unitList := nil;
 
     // Unit Common
     unitPathList := TPathList.Create;
