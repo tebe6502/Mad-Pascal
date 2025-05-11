@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
+uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 const
   title = '1.7.2';
@@ -44,8 +44,7 @@ var
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
 
-  NumUnits: Integer;
-  UnitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
+  UnitList: TUnitList;
 
 
   IFTmpPosStack: array of Integer;
@@ -79,7 +78,11 @@ var
 
   optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString; // Initialized in ResetOpty
 
-  msgWarning, msgNote, msgUser: TStringArray;
+  msgLists: record
+    msgWarning: TStringList;
+    msgNote: TStringList;
+    msgUser: TStringList;
+    end;
 
   LinkObj: TStringArray;
   unitPathList: TPathList;
@@ -91,7 +94,8 @@ var
 
   optimize: record
     use: Boolean;
-    unitIndex, line, old: Integer;
+    SourceCodeFile: TUnit;
+    line, old: Integer;
     end;
 
   codealign: record
@@ -115,6 +119,7 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
+function NumUnits: Integer;
 function NumTok: Integer;
 
 procedure AddDefine(const defineName: TDefineName);
@@ -122,7 +127,6 @@ function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
 procedure AddPath(folderPath: TFolderPath);
 function GetUnit(const UnitIndex: TUnitIndex): TUnit;
-function GetUnitName(const UnitIndex: TUnitIndex): TUnitName;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -138,7 +142,7 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
 
-function FindFile(Name: String; ftyp: TString): String; overload;
+function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 
 function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 
@@ -163,7 +167,7 @@ uses Messages, Utilities;
 // ----------------------------------------------------------------------------
 
 
-function FindFile(Name: String; ftyp: TString): String; overload;
+function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 var
   msg: IMessage;
 begin
@@ -230,15 +234,9 @@ end;
 
 function GetUnit(const UnitIndex: TUnitIndex): TUnit;
 begin
-  assert(UnitIndex >= Low(UnitArray));
-  Result := UnitArray[UnitIndex];
+  Result := UnitList.GetUnit(UnitIndex);
 end;
 
-
-function GetUnitName(const UnitIndex: TUnitIndex): TUnitName;
-begin
-  Result := GetUnit(UnitIndex).Name;
-end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -611,6 +609,15 @@ begin
   //StaticStringData[NumStaticStrChars] := 0;
   //Inc(NumStaticStrChars);
 
+end;
+
+// The function is currently kept for compatibility, simulating the previous global variable.
+function NumUnits: Integer;
+begin
+  if unitList <> nil then
+  begin
+    Result := UnitList.Size;
+  end;
 end;
 
 // The function is currently kept for compatibility, simulating the previous global variable.

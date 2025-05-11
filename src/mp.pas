@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                       {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                       {$ENDIF}
+                                {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -223,6 +223,7 @@ uses
     MainPath: String;
 
     // Command line parameters
+    inputFilePath: TFilePath;
     unitPathList: TPathList;
     targetID: TTargetID;
     cpu: TCPU;
@@ -233,12 +234,16 @@ uses
     StartTime: QWord;
     seconds: ValReal;
 
+    // Processing variables.
+    programUnit: TUnit;
+
     procedure ParseParam;
     var
       i: Integer;
       parameter, parameterUpperCase, parameterValue: String;
     begin
 
+      inputFilePath := '';
       targetID := TTargetID.A8;
       cpu := TCPU.NONE;
 
@@ -413,20 +418,19 @@ uses
         else
 
         begin
-          UnitArray[NumUnits].Name := TEnvironment.GetParameterString(i);
-          UnitArray[NumUnits].Path := UnitArray[NumUnits].Name;
+          inputFilePath := TFileSystem.NormalizePath(TEnvironment.GetParameterString(i));
 
-          if not TFileSystem.FileExists_(GetUnit(NumUnits).Path) then
+          if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            writeln('Error: Can''t open file ''' + GetUnit(NumUnits).Path + '''.');
-            RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
+            ParameterError(i, 'Error: Can''t open file ''' + parameterValue + '''.');
           end;
-
         end;
 
         Inc(i);
       end;
 
+
+      // All parameters parsed.
       Init(targetId, target);
 
 
@@ -442,7 +446,7 @@ uses
         target.zpage := ZPAGE_BASE;
 
 
-      if cpu <>TCPU.NONE then target.cpu := cpu;
+      if cpu <> TCPU.NONE then target.cpu := cpu;
 
       case target.cpu of
         TCPU.CPU_6502: AddDefine('CPU_6502');
@@ -477,8 +481,8 @@ uses
 
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-    NumUnits := 1;           // !!! 1 !!!
-    UnitArray[NumUnits].Name := '';
+    UnitList := TUnitList.Create();
+
     try
       ParseParam();
     except
@@ -490,11 +494,13 @@ uses
     end;
 
     // The main program is the first unit.
-    if (GetUnit(NumUnits).Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+
+    if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+    programUnit := UnitList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
  {$IFDEF USEOPTFILE}
 
-   OptFile.AssignFile(ChangeFileExt(GetUnitName(NumUnits), '.opt') ); OptFile.Rewrite();
+   OptFile.AssignFile(ChangeFileExt(programUnit.Name, '.opt') ); OptFile.Rewrite();
 
  {$ENDIF}
 
@@ -502,7 +508,7 @@ uses
     if ExtractFileName(outputFilePath) <> '' then
       OutFile.Assign(outputFilePath)
     else
-      OutFile.Assign(ChangeFileExt(GetUnitName(NumUnits), '.a65'));
+      OutFile.Assign(ChangeFileExt(programUnit.Name, '.a65'));
 
     OutFile.Rewrite;
 
@@ -510,7 +516,7 @@ uses
     StartTime := GetTickCount64;
 
     try
-      Compiler.Main(unitPathList);
+      Compiler.Main(programUnit, unitPathList);
       OutFile.Flush;
       OutFile.Close;
     except
@@ -550,8 +556,8 @@ uses
 
     TextColor(LIGHTGRAY);
 
-    if High(msgWarning) > 0 then Writeln(IntToStr(High(msgWarning)) + ' warning(s) issued');
-    if High(msgNote) > 0 then Writeln(IntToStr(High(msgNote)) + ' note(s) issued');
+    if msgLists.msgWarning.Count > 0 then Writeln(IntToStr(msgLists.msgWarning.Count) + ' warning(s) issued');
+    if msgLists.msgNote.Count > 0 then Writeln(IntToStr(msgLists.msgNote.Count) + ' note(s) issued');
 
     NormVideo;
   end;
@@ -590,7 +596,7 @@ var
 begin
   exitCode := CallMain;
   {$IFDEF DEBUG}
-  exitCode := CallMain; // TODO until 2nd call works
+  //exitCode := CallMain; // TODO until 2nd call works
   {$ENDIF}
 
     {$IFDEF DEBUG}

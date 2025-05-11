@@ -249,7 +249,7 @@ begin
 
   for i := Low(paths) to High(paths) do
   begin
-    Result := paths[i] + filePath;
+    Result := TFileSystem.NormalizePath(paths[i] + filePath);
     if TFileSystem.FileExists_(Result) then Exit;
   end;
   Result := '';

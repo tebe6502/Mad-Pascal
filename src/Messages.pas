@@ -70,6 +70,7 @@ type
 
 // ----------------------------------------------------------------------------
 
+procedure Initialize;
 
 procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
 procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
@@ -119,7 +120,7 @@ procedure WritelnMsg;
 
 implementation
 
-uses SysUtils, TypInfo, Console, Utilities;
+uses Classes, SysUtils, TypInfo, Console, Utilities;
 
 // -----------------------------------------------------------------------------
 constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
@@ -185,19 +186,12 @@ end;
 
 // ----------------------------------------------------------------------------
 
-procedure AddMessage(var msg: TStringArray; const a: String);
-var
-  i: Integer;
+procedure Initialize;
 begin
-
-  i := High(msg);
-  msg[i] := a;
-
-  SetLength(msg, i + 2);
-
+  msgLists.msgUser := TStringList.Create;
+  msgLists.msgWarning := TStringList.Create;
+  msgLists.msgNote := TStringList.Create;
 end;
-
-// ----------------------------------------------------------------------------
 
 procedure WritelnMsg;
 var
@@ -206,11 +200,11 @@ begin
 
   TextColor(LIGHTGREEN);
 
-  for i := 0 to High(msgWarning) - 1 do writeln(msgWarning[i]);
+  for i := 0 to msgLists.msgWarning.Count - 1 do writeln(msgLists.msgWarning[i]);
 
   TextColor(LIGHTCYAN);
 
-  for i := 0 to High(msgNote) - 1 do writeln(msgNote[i]);
+  for i := 0 to msgLists.msgNote.Count - 1 do writeln(msgLists.msgNote[i]);
 
   NormVideo;
 
@@ -243,7 +237,7 @@ end;
 
 function GetUserDefinedText(const tokenIndex: TTokenIndex): String;
 begin
-  Result := 'User defined: ' + msgUser[Tok[tokenIndex].Value];
+  Result := 'User defined: ' + msgLists.msgUser[Tok[tokenIndex].Value];
 end;
 
 function GetErrorMessage(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
@@ -376,7 +370,7 @@ begin
   for i := fromTokenIndex to toTokenIndex do
   begin
     token := Tok[i];
-    WriteLn(GetUnit(token.UnitIndex).Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
+    WriteLn(token.SourceCodeFile.Path + ' ( line ' + IntToStr(token.Line) + ', column ' +
       IntToStr(token.Column) + '): kind=' + GetTokenKindName(token.Kind) + ' name=' + token.Name + '.');
   end;
 end;
@@ -409,8 +403,6 @@ begin
 
     //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
 
-    WritelnMsg;  // TODO: Required?
-
     if tokenIndex <= NumTok then effectiveTokenIndex := tokenIndex
     else
       effectiveTokenIndex := NumTok;
@@ -426,12 +418,12 @@ begin
       if (effectiveTokenIndex > 1) then
       begin
         previousToken := Tok[effectiveTokenIndex - 1];
-        WriteLn(GetUnit(token.UnitIndex).Path + ' (' + IntToStr(token.Line) + ',' +
+        WriteLn(token.SourceCodeFile.Path + ' (' + IntToStr(token.Line) + ',' +
           IntToStr(Succ(previousToken.Column)) + ')' + ' Error: ' + msg);
       end
       else
       begin
-        WriteLn(GetUnit(token.UnitIndex).Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
+        WriteLn(token.SourceCodeFile.Path + ' (' + IntToStr(token.Line) + ')' + ' Error: ' + msg);
       end;
     end
     else
@@ -640,24 +632,17 @@ end;
 
 procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
 var
-  i: Integer;
   a: String;
 begin
 
   if pass = TPass.CODE_GENERATION then
   begin
 
-    a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+    a := Tok[tokenIndex].SourceCodeFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
       ')' + ' Warning: ' + msg.GetText();
 
-    for i := High(msgWarning) - 1 downto 0 do
-    begin
-      if msgWarning[i] = a then exit;
-    end;
-
-    i := High(msgWarning);
-    msgWarning[i] := a;
-    SetLength(msgWarning, i + 2);
+    // Add warning only once.
+    if msgLists.msgWarning.IndexOf(a) < 0 then  msgLists.msgWarning.Add(a);
 
   end;
 
@@ -729,7 +714,7 @@ begin
     if pos('.', Ident[identIndex].Name) = 0 then
     begin
 
-      a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+      a := Tok[tokenIndex].SourceCodeFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
         ')' + ' Note: Local ';
 
       if Ident[identIndex].Kind <> UNITTYPE then
@@ -754,7 +739,7 @@ begin
         if pos('@FN', Ident[identIndex].Name) = 1 then
 
         else
-          AddMessage(msgNote, a);
+          msgLists.msgNote.Add(a);
 
       end;
 
@@ -775,10 +760,10 @@ begin
   if Pass = TPass.CODE_GENERATION then
   begin
 
-    a := GetUnit(Tok[tokenIndex].UnitIndex).Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
+    a := Tok[tokenIndex].SourceCodeFile.Path + ' (' + IntToStr(Tok[tokenIndex].Line) + ')' + ' Note: ';
     a := a + msg;
 
-    AddMessage(msgNote, a);
+    msgLists.msgNote.Add(a);
 
   end;
 

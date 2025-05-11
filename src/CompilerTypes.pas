@@ -54,7 +54,6 @@ const
   MAXBLOCKS = 16384;  // Maximum number of blocks
   MAXPARAMS = 8;    // Maximum number of parameters for PROC, FUNC
   MAXVARS = 256;    // Maximum number of parameters for VAR
-  MAXUNITS = 2048;
   MAXALLOWEDUNITS = 256;
   MAXDEFINES = 256;    // Max number of $DEFINEs
 
@@ -176,16 +175,43 @@ type
     Field: array [0..MAXFIELDS] of TField;
   end;
 
+  TUnitName = TName;
   TUnitIndex = Smallint;
 
+  TSourceFileType = (PROGRAM_FILE, UNIT_FILE, INCLUDE_FILE);
 
-  TUnitName = TName;
-
-  TUnit = record
+  TUnit = class
+  public
+    UnitIndex: TUnitIndex;
+    SourceFileType: TSourceFileType;
     Name: TUnitName;
     Path: TFilePath;
     Units: Integer;
     AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TUnitName;
+
+    function IsRelevant: Boolean;
+
+  end;
+
+  TUnitList = class
+  public
+
+
+    constructor Create();
+    destructor Free;
+
+    function Size: Integer;
+    function AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
+    function GetUnit(const UnitIndex: TUnitIndex): TUnit;
+
+    procedure ClearAllowedUnitNames;
+
+  private
+  const
+    MAXUNITS = 2048;
+  var
+    Count: Integer;
+    unitArray: array [1..MAXUNITS + MAXUNITS] of TUnit;
   end;
 
   IUnit = interface
@@ -197,7 +223,8 @@ type
 
   TToken = class
     TokenIndex: TTokenIndex;
-    UnitIndex: TUnitIndex;
+    SourceCodeFile: TUnit;
+    // UnitIndex: TUnitIndex;
     Column: Smallint;
     Line: Integer;
     Kind: TTokenKind;
@@ -211,7 +238,9 @@ type
     StrAddress: Word;
     StrLength: Word;
 
+    function GetSourceCodeFile: TUnit;
     function GetSpelling: TString;
+
   end;
 
   // A token list owns token instances.
@@ -224,10 +253,11 @@ type
 
     function Size: Integer;
     procedure Clear;
-    function AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+    function AddToken(Kind: TTokenKind; SourceCodeFile: TUnit; Line, Column: Integer; Value: TInteger): TToken;
     procedure RemoveToken;
 
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
+
   private
 
   var
@@ -340,10 +370,16 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
+function TToken.GetSourceCodeFile: TUnit;
+begin
+  Result := SourceCodeFile;
+end;
+
 function TToken.GetSpelling: TString;
 begin
   Result := GetHumanReadbleTokenSpelling(kind);
 end;
+
 
 constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
 begin
@@ -372,10 +408,12 @@ begin
   tokenArrayPointer^[0] := TToken.Create;
 end;
 
-function TTokenList.AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: TInteger): TToken;
+function TTokenList.AddToken(Kind: TTokenKind; SourceCodeFile: TUnit; Line, Column: Integer; Value: TInteger): TToken;
 var
   i: Integer;
 begin
+  assert(SourceCodeFile <> nil, 'No source code file specified');
+
   Result := TToken.Create;
 
   // if NumTok > MAXTOKENS then
@@ -383,7 +421,8 @@ begin
   i := size + 1;
 
   Result.TokenIndex := i;
-  Result.UnitIndex := UnitIndex;
+  Result.SourceCodeFile := SourceCodeFile;
+  // Result.UnitIndex:=SourceCodeFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
 
@@ -423,6 +462,7 @@ begin
 
 end;
 
+
 function TTokenList.GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 var
   kind: TTokenKind;
@@ -434,6 +474,75 @@ begin
     kind := tokenArrayPointer^[tokenIndex].Kind;
     GetHumanReadbleTokenSpelling(kind);
   end;
+end;
+
+function TUnit.IsRelevant: Boolean;
+begin
+  Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
+end;
+
+constructor TUnitList.Create();
+var
+  i: Integer;
+begin
+
+  for i := 1 to MAXUNITS + MAXUNITS do
+  begin
+    UnitArray[i] := TUnit.Create;
+  end;
+end;
+
+destructor TUnitList.Free;
+var
+  i: Integer;
+begin
+  for i := 1 to MAXUNITS + MAXUNITS do
+  begin
+    UnitArray[i].Free;
+  end;
+end;
+
+function TUnitList.Size: Integer;
+begin
+  Result := Count;
+end;
+
+
+function TUnitList.AddUnit(SourceFileType: TSourceFileType; Name: TUnitName; Path: TFilePath): TUnit;
+
+begin
+  Assert(IsValidIdent(path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
+  Assert(Length(path) >= 0, 'Path not specified.');
+
+  // Writeln('Adding unit ''' + Name + ''' with path ''' + path + '''.');
+
+  Result := TUnit.Create;
+
+  // if NumTok > MAXUnitS then
+  //    Error(NumTok, 'Out of resources, TOK');
+  Inc(Count);
+
+  Result.UnitIndex := Count;
+  Result.SourceFileType := SourceFileType;
+  Result.Name := Name;
+  Result.Path := Path;
+
+  unitArray[Count] := Result;
+
+  // WriteLn('Added Unit at index ' + IntToStr(i) + ': ' + );
+end;
+
+function TUnitList.GetUnit(const UnitIndex: TUnitIndex): TUnit;
+begin
+  assert(UnitIndex >= Low(UnitArray));
+  Result := UnitArray[UnitIndex];
+end;
+
+procedure TUnitList.ClearAllowedUnitNames;
+var
+  i: Integer;
+begin
+  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
 end;
 
 procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierBits);

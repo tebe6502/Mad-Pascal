@@ -104,14 +104,14 @@ uses
     EndTest('TestFileIO');
   end;
 
-  procedure TestUnitFile;
+  procedure TestUnitFileIO;
   const
-    TEST_MP_FILE_PATH = '..\src\tests\Test-MP.pas';
+    TEST_MP_FILE_PATH = '..\src\tests\TestMP.pas';
   var
     pathList: TPathList;
 
   begin
-    StartTest('TestUnitFile');
+    StartTest('TestUnitFileIO');
     TestNative(TEST_MP_FILE_PATH);
     TestFileIO(TEST_MP_FILE_PATH);
 
@@ -123,13 +123,23 @@ uses
     Assert(pathList.ToString() = 'Folder1' + TFileSystem.PathDelim + ';Folder2' + TFileSystem.PathDelim);
     pathList.Free;
 
-    EndTest('TestUnitFile');
+    AssertEquals(SysUtils.ExtractFileName(''), '');
+    AssertEquals(SysUtils.ExtractFileName('ABC.'), 'ABC.');
+    AssertEquals(SysUtils.ExtractFileName('ABC.xyz'), 'ABC.xyz');
+    AssertEquals(SysUtils.ExtractFileName('/a/b/ABC.xyz'), 'ABC.xyz');
+    AssertEquals(SysUtils.ExtractFileName('\a\b\ABC.xyz'), 'ABC.xyz');
+    AssertEquals(SysUtils.ExtractFileName('\a\b\c/d/ABC.xyz'), 'ABC.xyz');
+
+    EndTest('TestUnitFileIO');
   end;
 
   procedure TestUnitCommon;
   var
     filePath: TFilePath;
+    unitList: TUnitList;
+    sourceCodeFile: Tunit;
     tokenList: TTokenList;
+    token: TToken;
   begin
 
     StartTest('TestUnitCommon');
@@ -144,10 +154,15 @@ uses
     // Unit Scanner
     Program_NAME := 'TestProgram';
 
+    unitList := TUnitList.Create();
+    sourceCodeFile := unitList.AddUnit(TSourceFileType.PROGRAM_FILE, 'TEST_PROGRAM', 'TestProgram.pas');
     tokenList := TTokenList.Create(Addr(tok));
     // Kind, UnitIndex, Line, Column, Value
-    tokenList.AddToken(TTokenKind.PROGRAMTOK, 1, 1, 1, 0);
+    token := tokenList.AddToken(TTokenKind.PROGRAMTOK, sourceCodeFile, 1, 1, 0);
+    tokenList.Free;
     tokenList := nil;
+    unitList.Free;
+    unitList := nil;
 
     // Unit Common
     unitPathList := TPathList.Create;
@@ -281,9 +296,11 @@ type
   begin
 
     StartTest('TestUnitMessages');
+    Messages.Initialize;
     message := TMessage.Create(TErrorCode.IllegalExpression,
       'A={0} B={1} C={2} D={3} E={4} F={5} G={6} H={7} I={8} J={9}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
     AssertEquals(message.GetText(), 'A=A B=B C=C D=D E=E F=F G=G H=H I=I J=J');
+    Messages.WritelnMsg;
     EndTest('TestUnitMessages');
   end;
 
@@ -306,7 +323,7 @@ type
 
 begin
   try
-    TestUnitFile;
+    TestUnitFileIO;
     TestUnitCommon;
     TestUnitDatatypes;
     TestUnitMathEvaluate;

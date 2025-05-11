@@ -1821,12 +1821,6 @@ rtl.module("System",[],function () {
       $impl.WriteBuf = "";
     };
   };
-  this.SetWriteCallBack = function (H) {
-    var Result = null;
-    Result = $impl.WriteCallBack;
-    $impl.WriteCallBack = H;
-    return Result;
-  };
   $mod.$implcode = function () {
     $impl.WriteBuf = "";
     $impl.WriteCallBack = null;
@@ -1932,7 +1926,7 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
       return this;
     };
     this.GetJSLocale = function () {
-      return Intl.DateTimeFormat().resolvedOptions().locale;
+      return "en_EN"; // Intl.DateTimeFormat().resolvedOptions().locale;
     };
     this.Create = function () {
       var Result = $mod.TFormatSettings.$new();
@@ -3210,132 +3204,6 @@ rtl.module("SysUtils",["System","RTLConsts","JS"],function () {
     $mod.LongDayNames = $impl.DefaultLongDayNames.slice(0);
   };
 },[]);
-rtl.module("weborworker",["System","JS"],function () {
-  "use strict";
-  var $mod = this;
-});
-rtl.module("Web",["System","JS","weborworker"],function () {
-  "use strict";
-  var $mod = this;
-});
-rtl.module("Classes",["System","RTLConsts","SysUtils","JS"],function () {
-  "use strict";
-  var $mod = this;
-  var $impl = $mod.$impl;
-  rtl.createClass(this,"TLoadHelper",pas.System.TObject,function () {
-  });
-  this.SetLoadHelperClass = function (aClass) {
-    var Result = null;
-    Result = $impl.GlobalLoadHelper;
-    $impl.GlobalLoadHelper = aClass;
-    return Result;
-  };
-  $mod.$implcode = function () {
-    $impl.GlobalLoadHelper = null;
-    $impl.ClassList = null;
-  };
-  $mod.$init = function () {
-    $impl.ClassList = new Object();
-  };
-},[]);
-rtl.module("Rtl.BrowserLoadHelper",["System","Classes","SysUtils","JS","Web"],function () {
-  "use strict";
-  var $mod = this;
-  rtl.createClass(this,"TBrowserLoadHelper",pas.Classes.TLoadHelper,function () {
-  });
-  $mod.$init = function () {
-    pas.Classes.SetLoadHelperClass($mod.TBrowserLoadHelper);
-  };
-});
-rtl.module("browserconsole",["System","JS","Web","Rtl.BrowserLoadHelper","SysUtils"],function () {
-  "use strict";
-  var $mod = this;
-  var $impl = $mod.$impl;
-  this.BrowserLineBreak = "\n";
-  this.DefaultMaxConsoleLines = 25;
-  this.DefaultConsoleStyle = ".pasconsole { " + this.BrowserLineBreak + "font-family: courier;" + this.BrowserLineBreak + "font-size: 14px;" + this.BrowserLineBreak + "background: #FFFFFF;" + this.BrowserLineBreak + "color: #000000;" + this.BrowserLineBreak + "display: block;" + this.BrowserLineBreak + "}";
-  this.ConsoleElementID = "";
-  this.ConsoleStyle = "";
-  this.MaxConsoleLines = 0;
-  this.ConsoleLinesToBrowserLog = false;
-  this.ResetConsole = function () {
-    if ($impl.LinesParent === null) return;
-    while ($impl.LinesParent.firstElementChild !== null) $impl.LinesParent.removeChild($impl.LinesParent.firstElementChild);
-    $impl.AppendLine();
-  };
-  this.InitConsole = function () {
-    if ($impl.ConsoleElement === null) return;
-    if ($impl.ConsoleElement.nodeName.toLowerCase() !== "body") {
-      while ($impl.ConsoleElement.firstElementChild !== null) $impl.ConsoleElement.removeChild($impl.ConsoleElement.firstElementChild);
-    };
-    $impl.StyleElement = document.createElement("style");
-    $impl.StyleElement.innerText = $mod.ConsoleStyle;
-    $impl.ConsoleElement.appendChild($impl.StyleElement);
-    $impl.LinesParent = document.createElement("div");
-    $impl.ConsoleElement.appendChild($impl.LinesParent);
-  };
-  this.HookConsole = function () {
-    $impl.ConsoleElement = null;
-    if ($mod.ConsoleElementID !== "") $impl.ConsoleElement = document.getElementById($mod.ConsoleElementID);
-    if ($impl.ConsoleElement === null) $impl.ConsoleElement = document.body;
-    if ($impl.ConsoleElement === null) return;
-    $mod.InitConsole();
-    $mod.ResetConsole();
-    pas.System.SetWriteCallBack($impl.WriteConsole);
-  };
-  $mod.$implcode = function () {
-    $impl.LastLine = null;
-    $impl.StyleElement = null;
-    $impl.LinesParent = null;
-    $impl.ConsoleElement = null;
-    $impl.AppendLine = function () {
-      var CurrentCount = 0;
-      var S = null;
-      CurrentCount = 0;
-      S = $impl.LinesParent.firstChild;
-      while (S != null) {
-        CurrentCount += 1;
-        S = S.nextSibling;
-      };
-      while (CurrentCount > $mod.MaxConsoleLines) {
-        CurrentCount -= 1;
-        $impl.LinesParent.removeChild($impl.LinesParent.firstChild);
-      };
-      $impl.LastLine = document.createElement("div");
-      $impl.LastLine.className = "pasconsole";
-      $impl.LinesParent.appendChild($impl.LastLine);
-    };
-    $impl.EscapeString = function (S) {
-      var Result = "";
-      var CL = "";
-      CL = pas.SysUtils.StringReplace(S,"<","&lt;",rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
-      CL = pas.SysUtils.StringReplace(CL,">","&gt;",rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
-      CL = pas.SysUtils.StringReplace(CL," ","&nbsp;",rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
-      CL = pas.SysUtils.StringReplace(CL,"\r\n","<br>",rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
-      CL = pas.SysUtils.StringReplace(CL,"\n","<br>",rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
-      CL = pas.SysUtils.StringReplace(CL,"\r","<br>",rtl.createSet(pas.SysUtils.TStringReplaceFlag.rfReplaceAll));
-      Result = CL;
-      return Result;
-    };
-    $impl.WriteConsole = function (S, NewLine) {
-      var CL = "";
-      CL = $impl.LastLine.innerHTML;
-      CL = CL + $impl.EscapeString("" + S);
-      $impl.LastLine.innerHTML = CL;
-      if (NewLine) {
-        if ($mod.ConsoleLinesToBrowserLog) window.console.log($impl.LastLine.innerText);
-        $impl.AppendLine();
-      };
-    };
-  };
-  $mod.$init = function () {
-    $mod.ConsoleLinesToBrowserLog = true;
-    $mod.ConsoleElementID = "pasjsconsole";
-    $mod.ConsoleStyle = $mod.DefaultConsoleStyle;
-    $mod.MaxConsoleLines = 25;
-    $mod.HookConsole();
-  };
-},[]);
 rtl.module("CommonTypes",["System"],function () {
   "use strict";
   var $mod = this;
@@ -4394,17 +4262,6 @@ rtl.module("Utilities",["System"],function () {
   this.RaiseHaltException = function (errnum) {
     throw $mod.THaltException.$create("Create$1",[errnum]);
   };
-  rtl.recNewT(this,"TFormatSettings",function () {
-    this.DecimalSeparator = "\x00";
-    this.$eq = function (b) {
-      return this.DecimalSeparator === b.DecimalSeparator;
-    };
-    this.$assign = function (s) {
-      this.DecimalSeparator = s.DecimalSeparator;
-      return this;
-    };
-  });
-  this.DefaultFormatSettings = this.TFormatSettings.$clone({CurrencyFormat: 1, NegCurrFormat: 5, ThousandSeparator: ",", DecimalSeparator: ".", CurrencyDecimals: 2, DateSeparator: "-", TimeSeparator: ":", ListSeparator: ",", CurrencyString: "$", ShortDateFormat: "d/m/y", LongDateFormat: 'dd" "mmmm" "yyyy', TimeAMString: "AM", TimePMString: "PM", ShortTimeFormat: "hh:nn", LongTimeFormat: "hh:nn:ss", ShortMonthNames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], LongMonthNames: ["January","February","March","April","May","June","July","August","September","October","November","December"], ShortDayNames: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], LongDayNames: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], TwoDigitYearCenturyWindow: 50});
   this.AnsiLowerCase = function (s) {
     var Result = "";
     Result = pas.SysUtils.LowerCase(s);
@@ -5311,12 +5168,12 @@ rtl.module("Common",["System","SysUtils","CommonTypes","Datatypes","FileIO","Mem
   this.CodePosStackTop = 0;
   this.BreakPosStackTop = 0;
   this.VarDataSize = 0;
-  this.ShrShlCnt = 0;
   this.NumStaticStrCharsTmp = 0;
   this.AsmBlockIndex = 0;
   this.IfCnt = 0;
   this.CaseCnt = 0;
   this.IfdefLevel = 0;
+  this.ShrShlCnt = 0;
   this.pass = 0;
   this.iOut = -1;
   this.CODEORIGIN_BASE = -1;
@@ -33763,7 +33620,7 @@ rtl.module("Compiler",["System","FileIO"],function () {
   var $impl = $mod.$impl;
   this.CompilerTitle = function () {
     var Result = "";
-    Result = "Mad Pascal Compiler version " + pas.Common.title + " [" + "2025/5/3" + "] for MOS 6502 CPU";
+    Result = "Mad Pascal Compiler version " + pas.Common.title + " [" + "2025/5/4" + "] for MOS 6502 CPU";
     return Result;
   };
   var PI_VALUE = 3;
@@ -33777,7 +33634,6 @@ rtl.module("Compiler",["System","FileIO"],function () {
     pas.Common.IFTmpPosStack = rtl.arraySetLength(pas.Common.IFTmpPosStack,0,1);
     pas.Common.Tok[pas.Common.NumTok].Line = 0;
     pas.Common.Defines[0].Name = pas.Utilities.AnsiUpperCase(pas.Common.target.Name);
-    pas.Utilities.DefaultFormatSettings.DecimalSeparator = ".";
     pas.Console.TextColor(15);
     pas.System.Writeln("Compiling " + pas.Common.UnitName[0].Name);
     pas.Scanner.TokenizeProgram(true);
@@ -44960,7 +44816,7 @@ rtl.module("Diagnostic",["System"],function () {
     };
   };
 },["SysUtils","Common","Datatypes","FileIO","Tokens"]);
-rtl.module("program",["System","SysUtils","browserconsole","Common","Compiler","Console","Diagnostic","FileIO","Messages","Targets","Tokens","Utilities"],function () {
+rtl.module("program",["System","SysUtils","Common","Compiler","Console","Diagnostic","FileIO","Messages","Targets","Tokens","Utilities"],function () {
   "use strict";
   var $mod = this;
   this.Syntax = function (ExitCode) {

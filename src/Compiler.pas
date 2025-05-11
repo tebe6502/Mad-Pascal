@@ -4,12 +4,12 @@ interface
 
 {$I Defines.inc}
 
-uses FileIO;
+uses FileIO, CompilerTypes;
 
 function CompilerTitle: String;
 
 procedure Initialize;
-procedure Main(const unitPathList: TPathList);
+procedure Main(const programUnit: TUnit; const unitPathList: TPathList);
 procedure Free;
 
 implementation
@@ -19,7 +19,6 @@ uses
   Math, // Required for Min(), do not remove
   Common,
   CommonTypes,
-  CompilerTypes,
   Console,
   Datatypes,
   MathEvaluate,
@@ -1103,13 +1102,13 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure StartOptimization(i: Integer);
+procedure StartOptimization(i: TTokenIndex);
 begin
 
   StopOptimization;
 
   common.optimize.use := True;
-  common.optimize.unitIndex := Tok[i].UnitIndex;
+  common.optimize.SourceCodeFile := Tok[i].SourceCodeFile;
   common.optimize.line := Tok[i].Line;
 
 end;
@@ -12513,9 +12512,10 @@ begin
                   // dla PROC, FUNC -> Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and (not
-                      (Ident[IdentIndex].AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                      not (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
+                      (Tok[k].Kind = TTokenKind.IDENTTOK)) and
+                      (not (Ident[IdentIndex].AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
+                      (Ident[GetIdentIndex(Tok[k].Name)].AllocElementType in Pointers +
                       [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.Ident[IdentIndex].AllocElementType] *} Ident[IdentIndex].NumAllocElements > 1) and ({GetDataSize( TDataType.Ident[GetIdentIndex(Tok[k].Name)].AllocElementType] *} Ident[GetIdentIndex(Tok[k].Name)].NumAllocElements > 1)) *) then
                     begin
@@ -12638,7 +12638,7 @@ begin
     TTokenKind.INFOTOK:
     begin
 
-      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgUser[Tok[i].Value]);
+      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgLists.msgUser[Tok[i].Value]);
 
       Result := i;
     end;
@@ -16894,7 +16894,7 @@ begin
 
     if Tok[i].Kind = TTokenKind.INFOTOK then
     begin
-      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgUser[Tok[i].Value]);
+      if Pass = TPass.CODE_GENERATION then writeln('User defined: ' + msgLists.msgUser[Tok[i].Value]);
       Inc(i, 2);
     end;
 
@@ -16931,20 +16931,20 @@ begin
     begin
       asm65separator;
 
-      DefineIdent(i, GetUnit(Tok[i].UnitIndex).Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
-      Ident[NumIdent].UnitIndex := Tok[i].UnitIndex;
+      DefineIdent(i, Tok[i].SourceCodeFile.Name, UNITTYPE, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+      Ident[NumIdent].UnitIndex := Tok[i].SourceCodeFile.UnitIndex;
 
       //   writeln(UnitArray[Tok[i].UnitIndex].Name,',',Ident[NumIdent].UnitIndex,',',Tok[i].UnitIndex);
 
       asm65;
-      asm65('.local'#9 + GetUnit(Tok[i].UnitIndex).Name, '; UNIT');
+      asm65('.local'#9 + Tok[i].SourceCodeFile.Name, '; UNIT');
 
-      UnitNameIndex := Tok[i].UnitIndex;
+      UnitNameIndex := Tok[i].SourceCodeFile.UnitIndex;
 
       CheckTok(i + 1, TTokenKind.UNITTOK);
       CheckTok(i + 2, TTokenKind.IDENTTOK);
 
-      if Tok[i + 2].Name <> GetUnit(Tok[i].UnitIndex).Name then
+      if Tok[i + 2].Name <> Tok[i].SourceCodeFile.Name then
         Error(i + 2, 'Illegal unit name: ' + Tok[i + 2].Name);
 
       CheckTok(i + 3, TTokenKind.SEMICOLONTOK);
@@ -16973,7 +16973,7 @@ begin
       VarRegister := 0;
 
       asm65;
-      asm65('.endl', '; UNIT ' + GetUnit(Tok[i].UnitIndex).Name);
+      asm65('.endl', '; UNIT ' + Tok[i].SourceCodeFile.Name);
 
       j := NumIdent;
 
@@ -17245,19 +17245,19 @@ begin
         CheckTok(i, TTokenKind.IDENTTOK);
 
         yes := True;
-        for j := 1 to UnitArray[UnitNameIndex].Units do
-          if (UnitArray[UnitNameIndex].AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
+        for j := 1 to GetUnit(UnitNameIndex).Units do
+          if (GetUnit(UnitNameIndex).AllowedUnitNames[j] = Tok[i].Name) or (Tok[i].Name = 'SYSTEM') then
             yes := False;
 
         if yes then
         begin
 
-          Inc(UnitArray[UnitNameIndex].Units);
+          Inc(GetUnit(UnitNameIndex).Units);
 
           if GetUnit(UnitNameIndex).Units > MAXALLOWEDUNITS then
             Error(i, 'Out of resources, MAXALLOWEDUNITS');
 
-          UnitArray[UnitNameIndex].AllowedUnitNames[UnitArray[UnitNameIndex].Units] := Tok[i].Name;
+          GetUnit(UnitNameIndex).AllowedUnitNames[GetUnit(UnitNameIndex).Units] := Tok[i].Name;
 
         end;
 
@@ -18668,7 +18668,7 @@ end;
   asm65('.macro'#9'UNITINITIALIZATION');
 
   for j := NumUnits downto 2 do
-    if GetUnit(j).Name <> '' then
+    if GetUnit(j).IsRelevant then
     begin
 
       asm65;
@@ -18683,7 +18683,7 @@ end;
   asm65separator;
 
   for j := NumUnits downto 2 do
-    if GetUnit(j).Name <> '' then
+    if GetUnit(j).IsRelevant then
     begin
       asm65;
       asm65(#9'ift .SIZEOF(MAIN.' + GetUnit(j).Name + ') > 0');
@@ -18967,7 +18967,7 @@ end;  //CompileProgram
 //                                 Compiler Main
 // ----------------------------------------------------------------------------
 
-procedure Main(const unitPathList: TPathList);
+procedure Main(const programUnit: TUnit; const unitPathList: TPathList);
 
 {$IFNDEF PAS2JS}
 const
@@ -19004,23 +19004,20 @@ begin
 
   TextColor(WHITE);
 
-  Assert(NumUnits = 1); // TODO
-  Writeln('Compiling ' + GetUnit(1).Name);
+  Writeln('Compiling ' + programUnit.Name);
 
   // ----------------------------------------------------------------------------
   // Set defines for first pass;
   scanner := TScanner.Create;
 
-  scanner.TokenizeProgram(True);
+  scanner.TokenizeProgram(programUnit, True);
 
   if NumTok = 0 then Error(1, '');
 
-  // TODO: Method AddUnit
-  Inc(NumUnits);
-  UnitArray[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
-  UnitArray[NumUnits].Path := FindFile('system.pas', 'unit');
+  // Add default unit 'system.pas'
+  UnitList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
-  scanner.TokenizeProgram(False);
+  scanner.TokenizeProgram(programUnit, False);
 
   // ----------------------------------------------------------------------------
 
@@ -19088,7 +19085,7 @@ begin
   PublicSection := True;
 
   // TODO Why here?
-  for i := 1 to High(UnitArray) do UnitArray[i].Units := 0;
+  UnitList.ClearAllowedUnitNames;
 
   iOut := 0;
   outTmp := '';

@@ -38,8 +38,8 @@ begin
 
   for i := 1 to NumTok do
   begin
-    // DiagFile.Write(i: 6, GetUnitName(Tok[i].UnitIndex) 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    DiagFile.Write(i, 6).Write(GetUnitName(Tok[i].UnitIndex), 30).Write(Tok[i].Line,
+    // DiagFile.Write(i: 6, Tok[i].SourceCodeFile.UnitIndex) 30, Tok[i].Line: 6, GetSpelling(i): 30);
+    DiagFile.Write(i, 6).Write(Tok[i].SourceCodeFile.Name, 30).Write(Tok[i].Line,
       6).Write(tokenList.GetTokenSpellingAtIndex(i), 30).WriteLn;
     if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
       DiagFile.WriteLn(' = ', IntToStr(Tok[i].Value))

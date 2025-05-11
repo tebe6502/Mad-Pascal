@@ -163,7 +163,7 @@ rem Run all tests with a given mp.exe.
 rem IN: Path to mp.exe
 rem
 :run_tests
-  call :run_mp %1 %MP_TESTS_FOLDER% Test-MP
+  call :run_mp %1 %MP_TESTS_FOLDER% TestMP
   
   if "%TEST_MODE%"=="FAST" goto :eof
   call :run_mp %1 %MP_FOLDER%\samples\a8\games\PacMad pacmad

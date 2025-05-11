@@ -106,7 +106,7 @@ var
             if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
             if (Ident[IdentIndex].UnitIndex = UnitIndex) or (Ident[IdentIndex].UnitIndex = 1)
-            { or (UnitArray[Ident[IdentIndex].UnitIndex].Name = 'SYSTEM')} then exit;
+            { or (GetUnitNane[Ident[IdentIndex].UnitIndex) = 'SYSTEM')} then exit;
           end;
 
   end;

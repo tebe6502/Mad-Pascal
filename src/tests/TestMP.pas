@@ -2,10 +2,12 @@
 //
 // Ensure that the new Mad-Pascal Version compiles correctly to .a65
 
-program test;
+program TestMP;
 
 uses
-  Crt;
+  Crt, TestUnit;
+
+{$I TestInclude.inc}
 
   procedure Assert(b: Boolean; s: String); overload;
   begin
@@ -68,6 +70,8 @@ var
 begin
   TestExpressions;
   TestFloats;
+  AssertEquals(TestUnit.TestUnitFunction, TestUnit.TestUnitString);
+  AssertEquals(TestIncludeString, TestIncludeString);
 
   Writeln('Test completed. Press any key');
   repeat
