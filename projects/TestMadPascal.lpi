@@ -26,7 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:..\lib ..\src\tests\Test-MP.pas"/>
+            <CommandLineParams Value="-iPath:..\..\lib TestMP.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\src\tests"/>
           </local>
         </Mode>
       </Modes>
@@ -535,6 +536,18 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\CompilerTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\tests\TestUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\tests\TestMP.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\tests\TestInclude.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
