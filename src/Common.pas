@@ -94,7 +94,8 @@ var
 
   optimize: record
     use: Boolean;
-    unitIndex, line, old: Integer;
+    SourceCodeFile: TUnit;
+    line, old: Integer;
     end;
 
   codealign: record

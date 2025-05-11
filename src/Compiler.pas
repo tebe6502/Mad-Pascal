@@ -4,12 +4,12 @@ interface
 
 {$I Defines.inc}
 
-uses FileIO;
+uses FileIO, CompilerTypes;
 
 function CompilerTitle: String;
 
 procedure Initialize;
-procedure Main(const unitPathList: TPathList);
+procedure Main(const programUnit: TUnit; const unitPathList: TPathList);
 procedure Free;
 
 implementation
@@ -19,7 +19,6 @@ uses
   Math, // Required for Min(), do not remove
   Common,
   CommonTypes,
-  CompilerTypes,
   Console,
   Datatypes,
   MathEvaluate,
@@ -1109,7 +1108,7 @@ begin
   StopOptimization;
 
   common.optimize.use := True;
-    common.optimize.unitIndex := Tok[i].SourceCodeFile.UnitIndex;
+  common.optimize.SourceCodeFile := Tok[i].SourceCodeFile;
   common.optimize.line := Tok[i].Line;
 
 end;
@@ -18968,7 +18967,7 @@ end;  //CompileProgram
 //                                 Compiler Main
 // ----------------------------------------------------------------------------
 
-procedure Main(const unitPathList: TPathList);
+procedure Main(const programUnit: TUnit; const unitPathList: TPathList);
 
 {$IFNDEF PAS2JS}
 const
@@ -19005,8 +19004,7 @@ begin
 
   TextColor(WHITE);
 
-  Assert(NumUnits = 1); // TODO
-  Writeln('Compiling ' + GetUnit(1).Name);
+  Writeln('Compiling ' + programUnit.Name);
 
   // ----------------------------------------------------------------------------
   // Set defines for first pass;

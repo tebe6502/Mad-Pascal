@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                           {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                               {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                           {$ENDIF}
+                               {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -223,7 +223,7 @@ uses
     MainPath: String;
 
     // Command line parameters
-    programUnit: TUnit;
+    inputFilePath: TFilePath;
     unitPathList: TPathList;
     targetID: TTargetID;
     cpu: TCPU;
@@ -234,13 +234,16 @@ uses
     StartTime: QWord;
     seconds: ValReal;
 
+    // Processing variables.
+    programUnit: TUnit;
+
     procedure ParseParam;
     var
       i: Integer;
       parameter, parameterUpperCase, parameterValue: String;
     begin
 
-      programUnit := GetUnit(1);
+      inputFilePath := '';
       targetID := TTargetID.A8;
       cpu := TCPU.NONE;
 
@@ -415,20 +418,19 @@ uses
         else
 
         begin
-          programUnit.Path := TFileSystem.NormalizePath(TEnvironment.GetParameterString(i));
-          programUnit.Name := ExtractFileName(programUnit.Path);
+          inputFilePath := TFileSystem.NormalizePath(TEnvironment.GetParameterString(i));
 
-          if not TFileSystem.FileExists_(programUnit.Path) then
+          if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            writeln('Error: Can''t open file ''' + GetUnit(NumUnits).Path + '''.');
-            RaiseHaltException(THaltException.COMPILING_NOT_STARTED);
+            ParameterError(i, 'Error: Can''t open file ''' + parameterValue + '''.');
           end;
-
         end;
 
         Inc(i);
       end;
 
+
+      // All parameters parsed.
       Init(targetId, target);
 
 
@@ -480,7 +482,6 @@ uses
     if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
     UnitList := TUnitList.Create();
-    UnitList.AddUnit(TSourceFileType.PROGRAM_FILE, '', '');
 
     try
       ParseParam();
@@ -493,7 +494,9 @@ uses
     end;
 
     // The main program is the first unit.
-    if (GetUnit(NumUnits).Name = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+
+    if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+    programUnit := UnitList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
  {$IFDEF USEOPTFILE}
 
@@ -505,7 +508,7 @@ uses
     if ExtractFileName(outputFilePath) <> '' then
       OutFile.Assign(outputFilePath)
     else
-      OutFile.Assign(ChangeFileExt(GetUnitName(NumUnits), '.a65'));
+      OutFile.Assign(ChangeFileExt(programUnit.Name, '.a65'));
 
     OutFile.Rewrite;
 
@@ -513,7 +516,7 @@ uses
     StartTime := GetTickCount64;
 
     try
-      Compiler.Main(unitPathList);
+      Compiler.Main(programUnit, unitPathList);
       OutFile.Flush;
       OutFile.Close;
     except
