@@ -1,0 +1,10 @@
+msx1	SAPR	'msx01.lzss'
+msx2	SAPR	'msx02.lzss'
+msx3	SAPR	'msx03.lzss'
+msx4	SAPR	'msx04.lzss'
+msx5	SAPR	'msx05.lzss'
+msx6	SAPR	'msx06.lzss'
+
+play_r  SAPRPLAY
+
+FONT    rcdata  'krystian-font_vumeter.fnt'
