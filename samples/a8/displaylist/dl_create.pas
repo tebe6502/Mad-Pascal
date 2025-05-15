@@ -1,4 +1,4 @@
-uses crt, atari, graph;
+uses crt, atari;
 
 
 {$r mic.rc}
