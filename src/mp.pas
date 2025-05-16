@@ -11335,6 +11335,16 @@ case Tok[i].Kind of
 		end else
 		if (Ident[IdentIndex].DataType = RECORDTOK) and (Ident[IdentTemp].DataType = RECORDTOK) and (RecordSize(IdentIndex) <= 8) then begin
 
+
+		if Ident[IdentIndex].PassMethod = VARPASSING then begin
+
+        	  svar:=GetLocalName(IdentIndex);
+		  LoadBP2(IdentIndex, svar);
+
+		  asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+  		  asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
+
+		end else
 			if RecordSize(IdentIndex) = 1 then
 			  asm65(#9' mva ' + Name + ' ' + GetLocalName(IdentIndex, 'adr.'))
 			else
@@ -11384,6 +11394,21 @@ case Tok[i].Kind of
 
  		  end else begin
 
+		  	if Ident[IdentIndex].PassMethod = VARPASSING then begin
+
+        		 svar:=GetLocalName(IdentIndex);
+			 LoadBP2(IdentIndex, svar);
+
+			 if RecordSize(IdentIndex) <= 128 then begin
+
+			  asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex)-1, 2));
+			  asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
+
+			 end else
+			  asm65(#9'@move #' + Name + ' ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
+
+			end else
+
 			if (pos('adr.', Name) > 0) and (RecordSize(IdentIndex) <= 128) then begin
 
 			  if IndirectionLevel = ASPOINTERTOARRAYORIGIN2 then begin
@@ -11403,7 +11428,6 @@ case Tok[i].Kind of
 			  asm65(#9'@move #' + Name + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
 		  end;
-
 
 
      	       end else	   // ExpressionType <> RECORDTOK + OBJECTTOK
