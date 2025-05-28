@@ -251,10 +251,10 @@ var
       i := NumTok - 1;
 
 
-      while Tok[i].Kind <> TTokenKind.USESTOK do
+      while TokenAt(i).Kind <> TTokenKind.USESTOK do
       begin
 
-        if Tok[i].Kind = TTokenKind.STRINGLITERALTOK then
+        if TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK then
         begin
 
           CheckTok(i - 1, TTokenKind.INTOK);
@@ -262,8 +262,8 @@ var
 
           nam := '';
 
-          for k := 1 to Tok[i].StrLength do
-            nam := nam + chr(StaticStringData[Tok[i].StrAddress - CODEORIGIN + k]);
+          for k := 1 to TokenAt(i).StrLength do
+            nam := nam + chr(StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + k]);
 
           nam := FindFile(nam, 'unit');
 
@@ -275,12 +275,12 @@ var
 
           CheckTok(i, TTokenKind.IDENTTOK);
 
-          nam := FindFile(Tok[i].Name + '.pas', 'unit');
+          nam := FindFile(TokenAt(i).Name + '.pas', 'unit');
 
         end;
 
 
-        s := AnsiUpperCase(Tok[i].Name);
+        s := AnsiUpperCase(TokenAt(i).Name);
 
 
         // We clear earlier usages of the same unit.

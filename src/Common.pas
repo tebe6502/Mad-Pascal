@@ -123,7 +123,8 @@ var
 // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function Identifier(identifierIndex: TIdentifierIndex): TIdentifier;
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -142,7 +143,7 @@ procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
-procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
+procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 
 function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 
@@ -449,7 +450,7 @@ var
   found, expected: String;
 begin
 
-  Token := Tok[i];
+  Token := TokenAt(i);
   if Token.Kind <> ExpectedTokenCode then
   begin
 
@@ -537,7 +538,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
+procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 var
   i: Integer;
 begin
@@ -545,7 +546,8 @@ begin
   for i := 0 to High(linkObj) - 1 do
     if linkObj[i] = StrValue then
     begin
-      Tok[StrTokenIndex].Value := i;
+      // TODO
+      TokenAt(tokenIndex).Value := i;
       exit;
     end;
 
@@ -554,7 +556,7 @@ begin
 
   SetLength(linkObj, i + 2);
 
-  Tok[StrTokenIndex].Value := i;
+  Tok[tokenIndex].Value := i;
 
 end;
 
@@ -569,6 +571,7 @@ begin
 
   len := Length(StrValue);
 
+  // TODO: Error?
   if len > 255 then
     Data[0] := 255
   else
@@ -618,7 +621,7 @@ begin
   end;
 end;
 
-function Identifier(identifierIndex: TIdentifierIndex): TIdentifier;
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 begin
   if (identifierIndex < Low(Ident)) then
   begin
@@ -635,7 +638,7 @@ begin
   Result := Ident[identifierIndex];
 end;
 
-function Token(tokenIndex: TTokenIndex): TToken;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 begin
   if (tokenIndex < Low(Tok)) then
   begin

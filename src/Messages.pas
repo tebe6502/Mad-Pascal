@@ -369,7 +369,7 @@ begin
   toTokenIndex := tokenIndex;
   for i := fromTokenIndex to toTokenIndex do
   begin
-    token := Tok[i];
+    token := TokenAt(i);
     WriteLn(token.SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(token.SourceLocation.Line) +
       ', column ' + IntToStr(token.SourceLocation.Column) + '): kind=' + GetTokenKindName(token.Kind) +
       ' name=' + token.Name + '.');
