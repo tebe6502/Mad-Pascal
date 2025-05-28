@@ -192,6 +192,11 @@ uses
     end;
     Assert(filePath = '', 'Non-existing TestUnit found');
 
+
+    tokenList:=TTokenList.Create(Addr(Tok));
+    tokenList.AddToken(TTokenKind.IDENTTOK,TSourceFile.Create, 1,1, 1234);
+    TokenAt(1).Name := 'First';
+    AssertEquals(tokenAt(1).Name, 'First');
     EndTest('TestUnitCommon');
   end;
 
