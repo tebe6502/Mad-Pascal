@@ -40,7 +40,7 @@ uses
   begin
     if (actual = expected) then
     begin
-      Writeln('OK: ');
+      Writeln('OK: Got ''', actual, ''' = ''', expected, '''.');
     end
     else
     begin
@@ -82,17 +82,18 @@ uses
   end;
 
   procedure TestLoops;
+  const last = 10;
   var
     i, j: Integer;
   begin
     // StartTest('TestLoops');
     j := 1;
-    for i := 1 to 10 do
+    for i := 1 to last do
     begin
       AssertEquals(i, j);
       j := j + 1;
     end;
-    AssertEquals(i, 10);
+    AssertEquals(i, last+1);
     // EndTest('TestLoops');
   end;
 
