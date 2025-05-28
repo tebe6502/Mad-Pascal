@@ -19097,6 +19097,10 @@ begin
   NumStaticStrChars := NumStaticStrCharsTmp;
 
   ResetOpty;
+  optyFOR0 := '';
+  optyFOR1 := '';
+  optyFOR2 := '';
+  optyFOR3 := '';
 
   LIBRARY_USE := LIBRARYTOK_USE;
 

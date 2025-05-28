@@ -1,11 +1,12 @@
 // Mad-Pascal Test Program
-//
+
 // Ensure that the new Mad-Pascal Version compiles correctly to .a65
 
 program TestMP;
 
 uses
-  Crt, TestUnit;
+  Crt,
+  TestUnit;
 
 {$I TestInclude.inc}
 
@@ -33,6 +34,23 @@ uses
       Writeln('ERROR: Got ''', actual, ''' but expected ''', expected, '''.');
     end;
   end;
+
+
+  procedure AssertEquals(actual, expected: Integer); overload;
+  begin
+    if (actual = expected) then
+    begin
+      Writeln('OK: Got ''', actual, ''' = ''', expected, '''.');
+    end
+    else
+    begin
+
+      WriteLn('The actual value ''', actual, ''' is not equal to the expected value ''',
+        expected, '''.');
+    end;
+  end;
+
+
 
   procedure TestExpressions;
   var
@@ -63,6 +81,22 @@ uses
     AssertEquals(FloatToStr(SINGLE_CONST), SINGLE_CONST_STRING);
   end;
 
+  procedure TestLoops;
+  const last = 10;
+  var
+    i, j: Integer;
+  begin
+    // StartTest('TestLoops');
+    j := 1;
+    for i := 1 to last do
+    begin
+      AssertEquals(i, j);
+      j := j + 1;
+    end;
+    AssertEquals(i, last+1);
+    // EndTest('TestLoops');
+  end;
+
 var
   i: Integer;
 var
@@ -72,6 +106,7 @@ begin
   TestFloats;
   AssertEquals(TestUnit.TestUnitFunction, TestUnit.TestUnitString);
   AssertEquals(TestIncludeFunction, TestIncludeString);
+  TestLoops;
 
   Writeln('Test completed. Press any key');
   repeat

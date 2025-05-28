@@ -89,6 +89,12 @@ begin
 
   ResetOpty;
 
+  // Do NOT put this into ResetOpty!
+  optyFOR0 := '';
+  optyFOR1 := '';
+  optyFOR2 := '';
+  optyFOR3 := '';
+
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
 
 end;

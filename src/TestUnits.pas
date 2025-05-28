@@ -54,13 +54,27 @@ uses
     WriteLn('Unit Test ' + Name + ' ended.');
   end;
 
+  procedure TestLanguage();
+  var
+    i, j: Integer;
+  begin
+    StartTest('TestLanguage');
+    j := 1;
+    for i := 1 to 10 do
+    begin
+      AssertEquals(i, j);
+      j := j + 1;
+    end;
+    AssertEquals(i, 10);
+    EndTest('TestLanguage');
+  end;
 
-  procedure TestNative(filePath: TFilePath);
+  procedure TestNativeIO(filePath: TFilePath);
   var
     f: TextFile;
     s: String;
   begin
-    StartTest('TestFileNative');
+    StartTest('TestFileNativeIO');
 
     AssignFile(f, filePath);
 
@@ -72,7 +86,7 @@ uses
     finally
       CloseFile(f);
     end;
-    EndTest('TestFileNative');
+    EndTest('TestFileNativeIO');
   end;
 
   procedure TestFileIO(filePath: TFilePath);
@@ -112,7 +126,7 @@ uses
 
   begin
     StartTest('TestUnitFileIO');
-    TestNative(TEST_MP_FILE_PATH);
+    TestNativeIO(TEST_MP_FILE_PATH);
     TestFileIO(TEST_MP_FILE_PATH);
 
     pathList := TPathList.Create;
@@ -307,11 +321,12 @@ type
   // ----------------------------------------------------------------------------
   // Unit StringUtilities
   // ----------------------------------------------------------------------------
-  procedure TestStringUtilities;
+  procedure TestUnitStringUtilities;
   var
     s: String;
     i: Integer;
   begin
+    StartTest('TestUnitStringUtilities');
     s := '   12345 67890';
     i := 1;
     AssertEquals(StringUtilities.GetNumber(s, i), '12345');
@@ -319,16 +334,18 @@ type
     s := 'danaBank extmem ''dana_bank.obx''';
     i := 32;
     AssertEquals(StringUtilities.GetNumber(s, i), '');
+    EndTest('TestUnitStringUtilities');
   end;
 
 begin
   try
+    TestLanguage;
     TestUnitFileIO;
     TestUnitCommon;
     TestUnitDatatypes;
     TestUnitMathEvaluate;
     TestUnitMessages;
-    TestStringUtilities;
+    TestUnitStringUtilities;
   except
     on e: Exception do
     begin

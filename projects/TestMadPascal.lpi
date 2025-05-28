@@ -602,7 +602,8 @@
       </ConfigFile>
       <CustomOptions Value="-dDEBUG
 -dSIMULATED_COMMAND_LINE2
--dSIMULATED_FILE_IO2"/>
+-dSIMULATED_FILE_IO2
+-dUSEOPTFILE"/>
       <OtherDefines Count="1">
         <Define0 Value="DEBUG"/>
       </OtherDefines>

@@ -500,7 +500,9 @@ uses
 
  {$IFDEF USEOPTFILE}
 
-   OptFile.AssignFile(ChangeFileExt(programUnit.Name, '.opt') ); OptFile.Rewrite();
+   OptFile:=TFileSystem.CreateTextFile();
+   OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt') );
+   OptFile.Rewrite();
 
  {$ENDIF}
 
