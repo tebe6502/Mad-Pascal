@@ -164,8 +164,8 @@ Contributors:
 
 # podczas wartosciowania wyrazen typy sa roszerzane, w przypadku operacji '-' promowane do SIGNEDORDINALTYPES (BYTE -> TTokenKind.SMALLINTTOK ; WORD -> TTokenKind.INTEGERTOK)
 
-# (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 0) wersja z { }
-# (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 1) wersja bez { }
+# (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 0) wersja z { }
+# (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 1) wersja bez { }
 
 # --------------------------------------------------------------------------------------------------------------
 #                          |      DataType      |  AllocElementType  |  NumAllocElements  |  NumAllocElements_ |
@@ -546,10 +546,10 @@ uses
     TextColor(WHITE);
     seconds := (GetTickCount64 - StartTime + 500) / 1000;
 {$IFNDEF PAS2JS}
-    Writeln(Tok[NumTok].SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
+    Writeln(TokenAt(NumTok).SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
       NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
 {$ELSE}
-   Writeln(IntToStr(Tok[NumTok].SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
+   Writeln(IntToStr(TokenAt(NumTok).SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
  	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
 	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
 {$ENDIF}

@@ -1,6 +1,7 @@
 {$ASSERTIONS ON}
 
-// TODO: Should be ON but there some parts in the parser that stilly relay on array access with invalid indexes.
+// TODO: There are still cases where ranges need to be ignored, e.g. TFloat conversions
+//{$RANGECHECKS ON}
 {$RANGECHECKS OFF}
 
 //{$DEFINE WHILEDO}
@@ -9,7 +10,7 @@
 
 {$DEFINE OPTIMIZECODE}
 
-// The Delphi form is not accepted by PAS2JS
+// The Delphi form {$IOCHECKS ON} is not accepted by PAS2JS
 {$IFNDEF PAS2JS}
   {$I+}
 {$ELSE}
@@ -20,7 +21,7 @@
 {$IFDEF PAS2JS}
 {$DEFINE SIMULATED_FILE_IO}
 {$DEFINE SIMULATED_COMMAND_LINE}
-{$DEFINE SIMULATED_CONSOLE2}
+{$DEFINE SIMULATED_CONSOLE}
 {$ELSE}
 {$DEFINE UPCASE_STRING}
 {$ENDIF}

@@ -39,7 +39,6 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
-  Tok: TTokenList.TTokenArray;
 
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
@@ -61,7 +60,10 @@ var
 
   OldConstValType: TDataType;
 
-  i, NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
+  // TODO: Global "i" is dangerous.
+  i: Integer;
+
+  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
   NumStaticStrCharsTmp, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
@@ -120,6 +122,8 @@ var
 // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -138,7 +142,7 @@ procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
-procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
+procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 
 function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 
@@ -284,7 +288,7 @@ procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TD
   RightType: TDataType = TTokenKind.UNTYPETOK);
 begin
 
-  //writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
+  //writeln(TokenAt(ErrTokenIndex].Name,',', op,',',DataType);
 
   if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
   // Operators for RealTypes
@@ -445,7 +449,7 @@ var
   found, expected: String;
 begin
 
-  Token := Tok[i];
+  Token := TokenAt(i);
   if Token.Kind <> ExpectedTokenCode then
   begin
 
@@ -533,7 +537,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure DefineFilename(StrTokenIndex: TTokenIndex; StrValue: String);
+procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 var
   i: Integer;
 begin
@@ -541,7 +545,8 @@ begin
   for i := 0 to High(linkObj) - 1 do
     if linkObj[i] = StrValue then
     begin
-      Tok[StrTokenIndex].Value := i;
+      // TODO
+      TokenAt(tokenIndex).Value := i;
       exit;
     end;
 
@@ -550,7 +555,7 @@ begin
 
   SetLength(linkObj, i + 2);
 
-  Tok[StrTokenIndex].Value := i;
+  TokenAt(tokenIndex).Value := i;
 
 end;
 
@@ -565,6 +570,7 @@ begin
 
   len := Length(StrValue);
 
+  // TODO: Error?
   if len > 255 then
     Data[0] := 255
   else
@@ -582,14 +588,14 @@ begin
     if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then
     begin
 
-      Tok[StrTokenIndex].StrLength := len;
-      Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
+      TokenAt(StrTokenIndex).StrLength := len;
+      TokenAt(StrTokenIndex).StrAddress := CODEORIGIN + i;
 
       exit;
     end;
 
-  Tok[StrTokenIndex].StrLength := len;
-  Tok[StrTokenIndex].StrAddress := CODEORIGIN + NumStaticStrChars;
+  TokenAt(StrTokenIndex).StrLength := len;
+  TokenAt(StrTokenIndex).StrAddress := CODEORIGIN + NumStaticStrChars;
 
   StaticStringData[NumStaticStrChars] := Data[0]; //length(StrValue);
   Inc(NumStaticStrChars);
@@ -612,6 +618,29 @@ begin
   begin
     Result := tokenList.Size;
   end;
+end;
+
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+begin
+  if (identifierIndex < Low(Ident)) then
+  begin
+    Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(Ident));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  if (identifierIndex > High(Ident)) then
+  begin
+    Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(Ident));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  Result := Ident[identifierIndex];
+end;
+
+function TokenAt(tokenIndex: TTokenIndex): TToken;
+begin
+  Assert(TokenList<> nil, 'TokenList not yet created.');
+  Result := TokenList.GetTokenAtIndex(tokenIndex);
 end;
 
 end.

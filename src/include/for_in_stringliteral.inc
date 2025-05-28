@@ -4,7 +4,7 @@
 
   StartOptimization(j);
 
-  k := Tok[j].StrLength;
+  k := TokenAt(j).StrLength;
 
 
   if k <> 0 then
@@ -30,7 +30,7 @@
 
     asm65(#9'ldy #$00');
 
-    asm65(#9'lda $' + IntToHex(Tok[j].StrAddress - CODEORIGIN + CODEORIGIN_BASE + 1, 4) +
+    asm65(#9'lda $' + IntToHex(TokenAt(j).StrAddress - CODEORIGIN + CODEORIGIN_BASE + 1, 4) +
       '+' + IntToStr(k) + '-256,y');
     asm65(#9'sta ' + GetLocalName(IdentIndex));
 

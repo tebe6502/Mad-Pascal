@@ -19,6 +19,7 @@ var
   i, CharIndex, ChildIndex: Integer;
   DiagFile: ITextFile;
   token: TToken;
+  identifier: TIdentifier;
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
@@ -35,10 +36,10 @@ begin
 
   for i := 1 to NumTok do
   begin
-    token := Tok[i];
+    token := TokenAt(i);
     DiagFile.Write(i, 6).Write(token.GetSourceFileName, 30).Write(token.SourceLocation.Line,
       6).Write(token.GetSpelling, 30).WriteLn;
-    if Tok[i].Kind = TTokenKind.INTNUMBERTOK then
+    if token.Kind = TTokenKind.INTNUMBERTOK then
       DiagFile.WriteLn(' = ', IntToStr(token.Value))
     else if token.Kind = TTokenKind.FRACNUMBERTOK then
         //    DiagFile.WriteLn(' = ', token.FracValue: 8: 4)
@@ -67,19 +68,20 @@ begin
 
   for i := 1 to NumIdent do
   begin
-    DiagFile.Write(i, 6).Write(Ident[i].Block, 6).Write(Ident[i].Name, 30).Write(
-      GetTokenSpelling(Ident[i].Kind), 15);
-    if Ident[i].DataType <> TDataType.UNTYPETOK then
+    identifier:=IdentifierAt(i);
+    DiagFile.Write(i, 6).Write(identifier.Block, 6).Write(identifier.Name, 30).Write(
+      GetTokenSpelling(identifier.Kind), 15);
+    if identifier.DataType <> TDataType.UNTYPETOK then
     begin
-      DiagFile.Write(GetTokenSpelling(Ident[i].DataType), 15);
+      DiagFile.Write(GetTokenSpelling(identifier.DataType), 15);
     end
     else
     begin
       DiagFile.Write('N/A', 15);
     end;
-    DiagFile.Write(Ident[i].NumAllocElements, 15).Write(IntToHex(Ident[i].Value, 8), 15);
-    if (Ident[i].Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
-      TTokenKind.DESTRUCTORTOK]) and not Ident[i].IsNotDead then DiagFile.Write('Yes', 5)
+    DiagFile.Write(identifier.NumAllocElements, 15).Write(IntToHex(identifier.Value, 8), 15);
+    if (identifier.Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
+      TTokenKind.DESTRUCTORTOK]) and not identifier.IsNotDead then DiagFile.Write('Yes', 5)
     else
       DiagFile.Write('', 5);
   end;

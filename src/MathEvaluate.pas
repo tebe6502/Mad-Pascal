@@ -73,7 +73,7 @@ function SimpleExpression: TEvaluationResult; forward;
 
 procedure SkipBlanks;
 begin
-  while (s[cix] = ' ') do
+  while (cix <= Length(s)) and (s[cix] = ' ') do
     Inc(cix);
 end;
 
@@ -98,12 +98,12 @@ begin
   p := 0;
 
 
-  if s[cix] = '%' then // binary
+  if (cix <= Length(s)) and (s[cix] = '%') then // binary
   begin
 
     Inc(cix);
 
-    while (s[cix] in ['0', '1']) do
+    while (cix <= Length(s)) and (s[cix] in ['0', '1']) do
     begin
       n := n + s[cix];
 
@@ -131,41 +131,41 @@ begin
   else
 
 
-  if s[cix] = '$' then // hexadecimal
-  begin
-
-    n := '$';
-    Inc(cix);
-
-    while (UpCase(s[cix]) in ['0'..'9', 'A'..'F']) do
+    if (cix <= Length(s)) and (s[cix] = '$') then // hexadecimal
     begin
-      n := n + s[cix];
 
+      n := '$';
       Inc(cix);
+
+      while (cix <= Length(s)) and (UpCase(s[cix]) in ['0'..'9', 'A'..'F']) do
+      begin
+        n := n + s[cix];
+
+        Inc(cix);
+      end;
+
+      //  If the conversion isn't successful, then the parameter p (Code) contains
+      //  the index of the character in S which prevented the conversion
+      Val(n, v, p);
+
+      v1 := v;
+
+    end
+    else
+    begin              // decimal
+
+      while (cix <= Length(s)) and ((s[cix] in ['0'..'9']) or ((s[cix] = '.') and (not pflg))) do
+      begin
+        if (s[cix] = '.') then pflg := True;
+
+        n := n + s[cix];
+
+        Inc(cix);
+      end;
+
+      Val(n, v1, p);
+
     end;
-
-    //  If the conversion isn't successful, then the parameter p (Code) contains
-    //  the index of the character in S which prevented the conversion
-    Val(n, v, p);
-
-    v1 := v;
-
-  end
-  else
-  begin              // decimal
-
-    while (s[cix] in ['0'..'9']) or ((s[cix] = '.') and (not pflg)) do
-    begin
-      if (s[cix] = '.') then pflg := True;
-
-      n := n + s[cix];
-
-      Inc(cix);
-    end;
-
-    Val(n, v1, p);
-
-  end;
 
 
   if (p <> 0) then
@@ -286,41 +286,44 @@ begin
 
   end
   else
-  if (s[cix] = '(') then
-  begin
-    Inc(cix);
-
-    v1 := SimpleExpression;
-
-    SkipBlanks;
-
-    if (s[cix] <> ',') then
-
-      if (s[cix] = ')') then
-        Inc(cix)
-      else
-        RaiseError('Parenthesis Mismatch');
-  end
-  else
-  if (s[cix] = '-') or (s[cix] = '+') or (Copy(s, cix, 3) = 'NOT') then
-  begin
-    ch := s[cix];
-
-    if (ch = 'N') then
-      cix := cix + 3
-    else
+    if (cix <= Length(s)) and (s[cix] = '(') then
+    begin
       Inc(cix);
 
-    case ch of
-      '+': v1 := factor;
-      '-': v1 := -factor;
-      'N': v1 := xnot(factor);
+      v1 := SimpleExpression;
+
+      SkipBlanks;
+
+      if (cix > Length(s)) then RaiseError('Parenthesis Mismatch');
+      if (s[cix] <> ',') then
+      begin
+
+        if (s[cix] = ')') then
+          Inc(cix)
+        else
+          RaiseError('Parenthesis Mismatch');
+      end;
+    end
+    else
+      if (cix <= Length(s)) and ((s[cix] = '-') or (s[cix] = '+') or (Copy(s, cix, 3) = 'NOT')) then
+      begin
+        ch := s[cix];
+
+        if (ch = 'N') then
+          cix := cix + 3
+        else
+          Inc(cix);
+
+        case ch of
+          '+': v1 := factor;
+          '-': v1 := -factor;
+          'N': v1 := xnot(factor);
+          else
+            Assert(False, 'Invalid case');
+        end;
+      end
       else
-        Assert(False, 'Invalid case');
-    end;
-  end
-  else
-    v1 := constant;
+        v1 := constant;
 
   Result := v1;
 end;

@@ -98,7 +98,7 @@ begin
   par1 := -1;
   par2 := -1;
 
-  s := linkObj[Tok[i + 1].Value];
+  s := linkObj[TokenAt(i + 1).Value];
 
   if s <> '' then
   begin

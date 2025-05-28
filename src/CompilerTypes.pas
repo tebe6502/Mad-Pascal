@@ -4,7 +4,7 @@ unit CompilerTypes;
 
 interface
 
-uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens;
+uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -249,22 +249,21 @@ type
   // A token list owns token instances.
   TTokenList = class
   public
-  type TTokenArray = array of TToken;
-  type TTokenArrayPointer = ^TTokenArray;
-    constructor Create(const tokenArrayPointer: TTokenArrayPointer);
+
+    constructor Create;
     destructor Free;
 
     function Size: Integer;
     procedure Clear;
     function AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
     procedure RemoveToken;
-
+    function GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken;
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 
   private
-
+  type TTokenArray = array of TToken;
   var
-    tokenArrayPointer: TTokenArrayPointer;
+    tokenArray: TTokenArray;
 
   end;
 
@@ -485,9 +484,9 @@ end;
 // Class TTokenList
 // ----------------------------------------------------------------------------
 
-constructor TTokenList.Create(const tokenArrayPointer: TTokenArrayPointer);
+constructor TTokenList.Create;
 begin
-  self.tokenArrayPointer := tokenArrayPointer;
+  tokenArray := nil;
   Clear;
 end;
 
@@ -498,18 +497,21 @@ end;
 
 function TTokenList.Size: Integer;
 begin
-  Result := High(tokenArrayPointer^);
+  Result := High(tokenArray);
 end;
 
 procedure TTokenList.Clear;
 var
   i: Integer;
 begin
-  for i := Low(tokenArrayPointer^) to High(tokenArrayPointer^) do tokenArrayPointer^[i].Free;
+  if tokenArray <> nil then
+  begin
+    for i := Low(tokenArray) to High(tokenArray) do tokenArray[i].Free;
+  end;
 
   // Valid token indexes start at 1. The token at index 0 is kept as UNTYPED token.
-  SetLength(tokenArrayPointer^, 1);
-  tokenArrayPointer^[0] := TToken.Create;
+  SetLength(tokenArray, 1);
+  tokenArray[0] := TToken.Create;
 end;
 
 function TTokenList.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer;
@@ -537,21 +539,21 @@ begin
   else
   begin
 
-    if tokenArrayPointer^[i - 1].SourceLocation.Line <> Line then
+    if tokenArray[i - 1].SourceLocation.Line <> Line then
     //   Column := 1
     else
-      Column := Column + tokenArrayPointer^[i - 1].SourceLocation.Column;
+      Column := Column + tokenArray[i - 1].SourceLocation.Column;
 
   end;
 
-  // if Tok[i- 1].Line <> Line then writeln;
+  // if tokenArray[i- 1].Line <> Line then writeln;
 
   Result.SourceLocation.Line := Line;
   Result.SourceLocation.Column := Column;
 
 
-  SetLength(tokenArrayPointer^, i + 1);
-  tokenArrayPointer^[i] := Result;
+  SetLength(tokenArray, i + 1);
+  tokenArray[i] := Result;
 
   // WriteLn('Added token at index ' + IntToStr(i) + ': ' + GetTokenSpelling(kind));
 end;
@@ -561,12 +563,27 @@ var
   i: Integer;
 begin
   i := size;
-  tokenArrayPointer^[i].Free;
-  tokenArrayPointer^[i] := nil;
-  SetLength(tokenArrayPointer^, i);
+  tokenArray[i].Free;
+  tokenArray[i] := nil;
+  SetLength(tokenArray, i);
 
 end;
 
+function TTokenList.GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken;
+begin
+  if (tokenIndex < Low(tokenArray)) then
+  begin
+    Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(tokenArray));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  if (tokenIndex > High(tokenArray)) then
+  begin
+    Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(tokenArray));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+  Result := tokenArray[tokenIndex];
+end;
 
 function TTokenList.GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 var
@@ -576,7 +593,7 @@ begin
     Result := 'no token'
   else
   begin
-    kind := tokenArrayPointer^[tokenIndex].Kind;
+    kind := tokenArray[tokenIndex].Kind;
     GetHumanReadbleTokenSpelling(kind);
   end;
 end;

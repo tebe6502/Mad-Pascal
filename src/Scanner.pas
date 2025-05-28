@@ -251,10 +251,10 @@ var
       i := NumTok - 1;
 
 
-      while Tok[i].Kind <> TTokenKind.USESTOK do
+      while TokenAt(i).Kind <> TTokenKind.USESTOK do
       begin
 
-        if Tok[i].Kind = TTokenKind.STRINGLITERALTOK then
+        if TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK then
         begin
 
           CheckTok(i - 1, TTokenKind.INTOK);
@@ -262,8 +262,8 @@ var
 
           nam := '';
 
-          for k := 1 to Tok[i].StrLength do
-            nam := nam + chr(StaticStringData[Tok[i].StrAddress - CODEORIGIN + k]);
+          for k := 1 to TokenAt(i).StrLength do
+            nam := nam + chr(StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + k]);
 
           nam := FindFile(nam, 'unit');
 
@@ -275,12 +275,12 @@ var
 
           CheckTok(i, TTokenKind.IDENTTOK);
 
-          nam := FindFile(Tok[i].Name + '.pas', 'unit');
+          nam := FindFile(TokenAt(i).Name + '.pas', 'unit');
 
         end;
 
 
-        s := AnsiUpperCase(Tok[i].Name);
+        s := AnsiUpperCase(TokenAt(i).Name);
 
 
         // We clear earlier usages of the same unit.
@@ -312,7 +312,7 @@ var
         Line := _line;
         ActiveSourceFile := _uidx;
 
-        if Tok[i - 1].Kind = TTokenKind.COMMATOK then
+        if TokenAt(i - 1).Kind = TTokenKind.COMMATOK then
           Dec(i, 2)
         else
           Dec(i);
@@ -686,7 +686,7 @@ var
 
                               GetCommonConstType(NumTok, TTokenKind.WORDTOK, GetValueType(v));
 
-                              Tok[NumTok].Value := v;
+                              TokenAt(NumTok).Value := v;
 
                               AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
@@ -862,7 +862,7 @@ var
                                                   Inc(i);
                                                   skip_spaces;
 
-                                                  Tok[NumTok].SourceLocation.Line := line;
+                                                  TokenAt(NumTok).SourceLocation.Line := line;
 
                                                   if not (UpCase(d[i]) in AllowLabelFirstChars) then
                                                     Error(NumTok,
@@ -1255,14 +1255,14 @@ var
                 SafeReadChar(ch);
               end;
 
-              Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
+              TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
 
               if length(Num) > 17 then
-                Tok[NumTok].FracValue := 0
+                TokenAt(NumTok).FracValue := 0
               else
-                Tok[NumTok].FracValue := StrToFloat(Num + Frac);
+                TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
 
-              Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+              TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
               Spaces := 0;
             end;
           end;
@@ -1325,7 +1325,7 @@ var
               SetLength(StrParams, 1);
               StrParams[0] := '';
 
-              Tok[NumTok].SourceLocation.Line := Line;
+              TokenAt(NumTok).SourceLocation.Line := Line;
 
               if Num = '' then
               begin
@@ -1389,8 +1389,8 @@ var
             if CurToken = TTokenKind.ASMTOK then
             begin
 
-              Tok[NumTok].Kind := CurToken;
-              Tok[NumTok].Value := 0;
+              TokenAt(NumTok).Kind := CurToken;
+              TokenAt(NumTok).Value := 0;
 
               tmp := InFile.FilePos();
 
@@ -1407,7 +1407,7 @@ var
 
                 line := _line;        // zaczynamy od nowa czytać po 'ASM'
 
-                Tok[NumTok].Value := 1;
+                TokenAt(NumTok).Value := 1;
 
                 InFile.Seek2(tmp - 1);
 
@@ -1492,7 +1492,7 @@ var
 
                 if CurToken <> TTokenKind.UNTYPETOK then
                 begin    // Keyword found
-                  Tok[NumTok].Kind := CurToken;
+                  TokenAt(NumTok).Kind := CurToken;
 
                   if CurToken = TTokenKind.USESTOK then UsesFound := True;
 
@@ -1505,8 +1505,8 @@ var
                 end
                 else
                 begin        // Identifier found
-                  Tok[NumTok].Kind := TTokenKind.IDENTTOK;
-                  Tok[NumTok].Name := Text;
+                  TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
+                  TokenAt(NumTok).Name := Text;
                 end;
 
             end;
@@ -1737,9 +1737,9 @@ var
                 SafeReadChar(ch2);
               end;
 
-              Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
-              Tok[NumTok].FracValue := StrToFloat(Frac);
-              Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Frac) + Spaces;
+              TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
+              TokenAt(NumTok).FracValue := StrToFloat(Frac);
+              TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
               Spaces := 0;
 
               Frac := '';
@@ -1823,7 +1823,7 @@ var
 
       CheckTok(NumTok, TTokenKind.DOTTOK);
       CheckTok(NumTok - 1, TTokenKind.ENDTOK);
-      EndLine := Tok[NumTok - 1].SourceLocation.Line;
+      EndLine := TokenAt(NumTok - 1).SourceLocation.Line;
       tokenList.RemoveToken;
       tokenList.RemoveToken;
 
@@ -2057,9 +2057,9 @@ begin
             Inc(i);
           end;
 
-          Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
-          Tok[NumTok].FracValue := StrToFloat(Num + Frac);
-          Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+          TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
+          TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
+          TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
           Spaces := 0;
         end;
       end;
@@ -2133,13 +2133,13 @@ begin
           if CurToken <> TTokenKind.UNTYPETOK then
           begin    // Keyword found
 
-            Tok[NumTok].Kind := CurToken;
+            TokenAt(NumTok).Kind := CurToken;
 
           end
           else
           begin        // Identifier found
-            Tok[NumTok].Kind := TTokenKind.IDENTTOK;
-            Tok[NumTok].Name := Text;
+            TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
+            TokenAt(NumTok).Name := Text;
           end;
 
       end;
@@ -2374,9 +2374,9 @@ begin
             Inc(i);
           end;
 
-          Tok[NumTok].Kind := TTokenKind.FRACNUMBERTOK;
-          Tok[NumTok].FracValue := StrToFloat(Frac);
-          Tok[NumTok].SourceLocation.Column := Tok[NumTok - 1].SourceLocation.Column + length(Frac) + Spaces;
+          TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
+          TokenAt(NumTok).FracValue := StrToFloat(Frac);
+          TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
           Spaces := 0;
 
           Frac := '';

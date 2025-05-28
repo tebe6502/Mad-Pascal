@@ -1036,7 +1036,7 @@ var
     a := listing[j];
 
     if a <> '' then
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9]) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -1099,7 +1099,7 @@ var
 
       while a[i] in [' ', #9] do Inc(i);
 
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9]) do
       begin
         Result := Result + a[i];
         Inc(i);
