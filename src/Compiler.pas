@@ -3587,7 +3587,7 @@ begin
     begin
       asm65('; as Pointer to Pointer');
 
-      if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
+      if (IdentIndex>0) and (Identifier(IdentIndex).isAbsolute) and (Identifier(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
         (NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
       //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitArray[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
@@ -3655,7 +3655,7 @@ begin
 
       end;
 
-      if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
+      if (IdentIndex>0) and (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
         (NumAllocElements = 0) then asm65('-');  // -sta
 
       a65(TCode65.subBX);

@@ -120,6 +120,7 @@ var
 // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
+function Identifier(identifierIndex: TIdentifierIndex): TIdentifier;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -612,6 +613,23 @@ begin
   begin
     Result := tokenList.Size;
   end;
+end;
+
+function Identifier(identifierIndex: TIdentifierIndex): TIdentifier;
+begin
+  if (identifierIndex < Low(Ident)) then
+  begin
+    Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(Ident));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  if (identifierIndex > High(Ident)) then
+  begin
+    Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(Ident));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  Result := Ident[identifierIndex];
 end;
 
 end.

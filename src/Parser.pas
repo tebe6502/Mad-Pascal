@@ -986,8 +986,8 @@ begin
             VARIABLE: if Ident[IdentIndex].isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (Ident[IdentIndex].Value and $ff = 0) and (Byte(
-                  (Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) or
+                if (Ident[IdentIndex].Value and $ff = 0) and
+                  (Byte((Ident[IdentIndex].Value shr 24) and $7f) in [1..127]) or
                   ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <>
                   TDataType.UNTYPETOK) and (Ident[IdentIndex].NumAllocElements in [0..1])) then
                 begin
@@ -1534,7 +1534,8 @@ begin
   if (identIndex > 0) and (not (Ident[identIndex].Kind in [TTokenKind.PROCEDURETOK,
     TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
     (Ident[identIndex].Block = BlockStack[BlockStackTop]) and (Ident[identIndex].isOverload = False) and
-    (Ident[i].SourceFile = ActiveSourceFile) then
+    // TODO: The "i" in the next ling is the global "i"
+    (i>0) and (Ident[i].SourceFile = ActiveSourceFile) then
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier ' +
       Name + ' is already defined'))
   else
