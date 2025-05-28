@@ -39,7 +39,6 @@ var
   TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
-  Tok: TTokenList.TTokenArray;
 
   NumIdent: Integer;
   Ident: array [1..MAXIDENTS] of TIdentifier;
@@ -289,7 +288,7 @@ procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TD
   RightType: TDataType = TTokenKind.UNTYPETOK);
 begin
 
-  //writeln(tok[ErrTokenIndex].Name,',', op,',',DataType);
+  //writeln(TokenAt(ErrTokenIndex].Name,',', op,',',DataType);
 
   if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
   // Operators for RealTypes
@@ -556,7 +555,7 @@ begin
 
   SetLength(linkObj, i + 2);
 
-  Tok[tokenIndex].Value := i;
+  TokenAt(tokenIndex).Value := i;
 
 end;
 
@@ -589,14 +588,14 @@ begin
     if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then
     begin
 
-      Tok[StrTokenIndex].StrLength := len;
-      Tok[StrTokenIndex].StrAddress := CODEORIGIN + i;
+      TokenAt(StrTokenIndex).StrLength := len;
+      TokenAt(StrTokenIndex).StrAddress := CODEORIGIN + i;
 
       exit;
     end;
 
-  Tok[StrTokenIndex].StrLength := len;
-  Tok[StrTokenIndex].StrAddress := CODEORIGIN + NumStaticStrChars;
+  TokenAt(StrTokenIndex).StrLength := len;
+  TokenAt(StrTokenIndex).StrAddress := CODEORIGIN + NumStaticStrChars;
 
   StaticStringData[NumStaticStrChars] := Data[0]; //length(StrValue);
   Inc(NumStaticStrChars);
@@ -640,19 +639,8 @@ end;
 
 function TokenAt(tokenIndex: TTokenIndex): TToken;
 begin
-  if (tokenIndex < Low(Tok)) then
-  begin
-    Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(Tok));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
-  end;
-
-  if (tokenIndex > High(Tok)) then
-  begin
-    Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(Tok));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
-  end;
-
-  Result := Tok[tokenIndex];
+  Assert(TokenList<> nil, 'TokenList not yet created.');
+  Result := TokenList.GetTokenAtIndex(tokenIndex);
 end;
 
 end.

@@ -2,7 +2,7 @@
   // ===              PCHAR
   // -----------------------------------------------------------------------------
 
-  case Tok[i + 2].Kind of
+  case TokenAt(i + 2).Kind of
 
     // Character assignment to pointer  f:='a'
 
@@ -21,14 +21,14 @@
            asm65(#9'ldy #$00');
            asm65(#9'mva #$01 (:bp2),y');
            asm65(#9'iny');
-           asm65(#9'mva #$' + IntToHex(Tok[i + 2].Value , 2) + ' (:bp2),y');
+           asm65(#9'mva #$' + IntToHex(TokenAt(i + 2).Value , 2) + ' (:bp2),y');
          end;
 
          ASPOINTERTOARRAYORIGIN:
          begin
            asm65(#9'mwy ' + Ident[IdentIndex].Name+' :bp2');
            asm65(#9'ldy :STACKORIGIN,x');
-           asm65(#9'mva #$' + IntToHex(Tok[i + 2].Value , 2) + ' (:bp2),y');
+           asm65(#9'mva #$' + IntToHex(TokenAt(i + 2).Value , 2) + ' (:bp2),y');
 
            a65(__subBX);
          end;
@@ -38,7 +38,7 @@
 
           asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
           asm65(#9'ldy #$00');
-          asm65(#9'lda #$' + IntToHex(Tok[i + 2].Value, 2));
+          asm65(#9'lda #$' + IntToHex(TokenAt(i + 2).Value, 2));
           asm65(#9'sta (:bp2),y');
           asm65(#9'tya');
           asm65(#9'iny');
@@ -65,28 +65,28 @@
       svar := GetLocalName(IdentIndex);
 
       if Ident[IdentIndex].NumAllocElements in [0, 1] then
-        NumCharacters := Tok[i + 2].StrLength
+        NumCharacters := TokenAt(i + 2).StrLength
       else
-        NumCharacters := Min(Tok[i + 2].StrLength, Ident[IdentIndex].NumAllocElements - 1);
+        NumCharacters := Min(TokenAt(i + 2).StrLength, Ident[IdentIndex].NumAllocElements - 1);
 
       case IndirectionLevel of
 {
        ASPOINTERTOPOINTER:
 
-       if Tok[i + 2].StrLength = 0 then begin
+       if TokenAt(i + 2).StrLength = 0 then begin
          asm65(#9'mwy '+Ident[IdentIndex].Name+' :bp2');
          asm65(#9'ldy #$00');
          asm65(#9'mva #$00 (:bp2),y');
        end else
         if pos('.', Ident[IdentIndex].Name) > 0 then begin
 
-         asm65(#9'mwa #CODEORIGIN+$'+IntToHex(Tok[i + 2].StrAddress - CODEORIGIN, 4)+' @move.src');
+         asm65(#9'mwa #CODEORIGIN+$'+IntToHex(TokenAt(i + 2).StrAddress - CODEORIGIN, 4)+' @move.src');
          asm65(#9'adw '+copy(Ident[IdentIndex].Name,1, pos('.', Ident[IdentIndex].Name)-1) + ' #' +Ident[IdentIndex].Name +'-DATAORIGIN @move.dst');
          asm65(#9'mwa #'+IntToStr(Succ(NumCharacters))+' @move.cnt');
          asm65(#9'jsr @move');
 
         end else
-         asm65(#9'@move #CODEORIGIN+$'+IntToHex(Tok[i + 2].StrAddress - CODEORIGIN, 4)+' '+Ident[IdentIndex].Name+' #'+IntToStr(Succ(NumCharacters)));
+         asm65(#9'@move #CODEORIGIN+$'+IntToHex(TokenAt(i + 2).StrAddress - CODEORIGIN, 4)+' '+Ident[IdentIndex].Name+' #'+IntToStr(Succ(NumCharacters)));
 
        ASPOINTERTOARRAYORIGIN:
        GetCommonType(i + 1, CHARTOK, TTokenKind.POINTERTOK);
@@ -94,7 +94,7 @@
         ASPOINTER:
         begin
 
-          if Tok[i + 2].StrLength = 0 then
+          if TokenAt(i + 2).StrLength = 0 then
           begin
 
             asm65(#9'ldy ' + svar + '+1');
@@ -110,9 +110,9 @@
             asm65(#9'mwy ' + svar + ' :bp2');
 
             if Ident[IdentIndex].DataType = TTokenKind.POINTERTOK then
-              k := Tok[i + 2].StrAddress - CODEORIGIN + 1
+              k := TokenAt(i + 2).StrAddress - CODEORIGIN + 1
             else
-              k := Tok[i + 2].StrAddress - CODEORIGIN;
+              k := TokenAt(i + 2).StrAddress - CODEORIGIN;
 
             asm65(#9'lda <CODEORIGIN+$' + IntToHex(k, 4));
             asm65(#9'sta @move.src');
@@ -246,5 +246,5 @@
 
     end;
 
-  end; // case Tok[i + 2].Kind
+  end; // case TokenAt(i + 2).Kind
 

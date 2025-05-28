@@ -237,7 +237,7 @@ end;
 
 function GetUserDefinedText(const tokenIndex: TTokenIndex): String;
 begin
-  Result := 'User defined: ' + msgLists.msgUser[Tok[tokenIndex].Value];
+  Result := 'User defined: ' + msgLists.msgUser[TokenAt(tokenIndex).Value];
 end;
 
 function GetErrorMessage(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
@@ -258,7 +258,7 @@ begin
       if identIndex > 0 then
         Result := 'Identifier not found ''' + Ident[identIndex].Alias + ''''
       else
-        Result := 'Identifier not found ''' + Tok[tokenIndex].Name + '''';
+        Result := 'Identifier not found ''' + TokenAt(tokenIndex).Name + '''';
     end;
 
     TErrorCode.IncompatibleTypeOf:
@@ -402,7 +402,7 @@ begin
   if not isConst then
   begin
 
-    //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
+    //TokenAt(NumTok-1].Column := TokenAt(NumTok].Column + TokenAt(NumTok-1].Column;
 
     if tokenIndex <= NumTok then effectiveTokenIndex := tokenIndex
     else
@@ -415,10 +415,10 @@ begin
       WritePreviousTokens(effectiveTokenIndex);
       {$ENDIF}
 
-      token := Tok[effectiveTokenIndex];
+      token := TokenAt(effectiveTokenIndex);
       if (effectiveTokenIndex > 1) then
       begin
-        previousToken := Tok[effectiveTokenIndex - 1];
+        previousToken := TokenAt(effectiveTokenIndex - 1);
         WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
           ',' + IntToStr(Succ(previousToken.SourceLocation.Column)) + ')' + ' Error: ' + msg);
       end
@@ -640,11 +640,11 @@ begin
   if pass = TPass.CODE_GENERATION then
   begin
 
-    a := Tok[tokenIndex].SourceLocation.SourceFile.Path + ' (' + IntToStr(Tok[tokenIndex].SourceLocation.Line) +
+    a := TokenAt(tokenIndex).SourceLocation.SourceFile.Path + ' (' + IntToStr(TokenAt(tokenIndex).SourceLocation.Line) +
       ')' + ' Warning: ' + msg.GetText();
 
     // Add warning only once.
-    if msgLists.msgWarning.IndexOf(a) < 0 then  msgLists.msgWarning.Add(a);
+    if msgLists.msgWarning.IndexOf(a) < 0 then msgLists.msgWarning.Add(a);
 
   end;
 
@@ -716,7 +716,7 @@ begin
     if pos('.', Ident[identIndex].Name) = 0 then
     begin
 
-      a := Tok[tokenIndex].GetSourceFileLineString + ' Note: Local ';
+      a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: Local ';
 
       if Ident[identIndex].Kind <> UNITTYPE then
       begin
@@ -761,7 +761,7 @@ begin
   if Pass = TPass.CODE_GENERATION then
   begin
 
-    a := Tok[tokenIndex].GetSourceFileLineString + ' Note: ' + msg;
+    a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: ' + msg;
 
     msgLists.msgNote.Add(a);
 

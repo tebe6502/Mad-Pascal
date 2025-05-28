@@ -152,7 +152,6 @@ uses
     filePath: TFilePath;
     sourceFileList: TSourceFileList;
     sourceFile: TSourceFile;
-    tokenList: TTokenList;
     token: TToken;
   begin
 
@@ -170,7 +169,7 @@ uses
 
     sourceFileList := TSourceFileList.Create();
     SourceFile := sourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, 'TEST_PROGRAM', 'TestProgram.pas');
-    tokenList := TTokenList.Create(Addr(tok));
+    tokenList := TTokenList.Create;
     // Kind, SourceFile, Line, Column, Value
     token := tokenList.AddToken(TTokenKind.PROGRAMTOK, SourceFile, 1, 1, 0);
     tokenList.Free;
@@ -193,7 +192,7 @@ uses
     Assert(filePath = '', 'Non-existing TestUnit found');
 
 
-    tokenList:=TTokenList.Create(Addr(Tok));
+    tokenList:=TTokenList.Create;
     tokenList.AddToken(TTokenKind.IDENTTOK,TSourceFile.Create, 1,1, 1234);
     TokenAt(1).Name := 'First';
     AssertEquals(tokenAt(1).Name, 'First');

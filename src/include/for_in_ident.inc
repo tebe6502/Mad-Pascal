@@ -2,10 +2,10 @@
   // ===          FOR ch IN ident
   // -----------------------------------------------------------------------------
 
-  if Tok[j].Kind <> TTokenKind.IDENTTOK then
+  if TokenAt(j).Kind <> TTokenKind.IDENTTOK then
     Error(j, TErrorCode.IdentifierExpected);
 
-  IdentTemp := GetIdentIndex(Tok[j].Name);
+  IdentTemp := GetIdentIndex(TokenAt(j).Name);
 
   ActualParamType := Ident[IdentTemp].DataType;
   VarType := Ident[IdentTemp].AllocElementType;
