@@ -61,7 +61,10 @@ var
 
   OldConstValType: TDataType;
 
-  i, NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
+  // TODO: Global "i" is dangerous.
+  i: Integer;
+
+  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
   NumStaticStrCharsTmp, IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
@@ -630,6 +633,23 @@ begin
   end;
 
   Result := Ident[identifierIndex];
+end;
+
+function Token(tokenIndex: TTokenIndex): TToken;
+begin
+  if (tokenIndex < Low(Tok)) then
+  begin
+    Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(Tok));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  if (tokenIndex > High(Tok)) then
+  begin
+    Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(Tok));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  Result := Tok[tokenIndex];
 end;
 
 end.
