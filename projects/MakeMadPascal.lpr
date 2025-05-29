@@ -6,6 +6,7 @@ program MakeMadPascal;
 {$ScopedEnums ON}
 
 uses
+  Windows,
   Crt,
   Classes,
   Utilities,
@@ -15,7 +16,8 @@ uses
   LazFileUtils,
   Process,
   MTProcs,
-  SysUtils;
+  SysUtils,
+  CustApp;
 
 type
   TFileType = (UNKNOWN, TPROGRAM, TUNIT, TINCLUDE);
@@ -244,8 +246,8 @@ var
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
-        GetActionString(operation), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.',
+        [filePath, GetActionString(operation), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -338,6 +340,7 @@ type
 
   procedure Main;
   var
+    application: TCustomApplication;
     verbose: Boolean;
     maxFiles: Integer;
     i: Integer;
@@ -355,6 +358,10 @@ type
 
     diffFilesListFilePath: TFilePath;
   begin
+    //   application:=  TCustomApplication.Create;
+    //    Application.Initialize;
+    //   Application.Run;
+
     verbose := False;
 
     // TODO: Make these command line parameters.
@@ -395,6 +402,7 @@ type
         end;
       end;
       operation.threads := TThread.ProcessorCount - 1;
+      operation.threads := 1; // TODO
       Log(Format('Processing %d Pascal program with %d Threads.', [ProgramFiles.Count, operation.threads]));
       operation.action := TAction.COMPILE_REFERENCE;
       operation.verbose := verbose;
@@ -433,10 +441,18 @@ type
     finally
       ProgramFiles.Free;
       PascalFiles.Free;
+
     end;
   end;
 
 begin
+  {$IFDEF WINDOWS}
+   if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then
+   begin
+    System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
+   end;
+  {$ENDIF}
+
   InitCriticalSection(cs);
   startTickCount := GetTickCount64;
   try
@@ -450,7 +466,6 @@ begin
   endTickCount := GetTickCount64;
   seconds := trunc((endTickCount - startTickCount) / 1000);
   Log(Format('Main completed after %d seconds. Press any key.', [seconds]));
-  repeat
-  until keypressed;
+  // repeat  until keypressed;
   DoneCriticalSection(cs);
 end.
