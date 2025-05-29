@@ -269,7 +269,7 @@ type
 
   TIdentifierIndex = Integer;
 
-  TIdentifier = record
+  TIdentifier = class
     Name: TIdentifierName;
     Value: Int64;             // Value for a constant, address for a variable, procedure or function
     Block: Integer;           // Index of a block in which the identifier is defined
@@ -325,6 +325,24 @@ type
     AllocElementType: TDataType
   end;
 
+    // An identifier list owns identifier instances.
+    TIdentifierList = class
+    public
+
+      constructor Create;
+      destructor Free;
+
+      function Size: Integer;
+      procedure Clear;
+      function AddIdentifier: TIdentifier;
+      function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+
+    private
+    type TIdentifierArray = array of TIdentifier;
+    var
+      identifierArray: TIdentifierArray;
+
+    end;
 
   TCallGraphNode = record
     ChildBlock: array [1..MAXBLOCKS] of Integer;
@@ -596,6 +614,73 @@ begin
     kind := tokenArray[tokenIndex].Kind;
     GetHumanReadbleTokenSpelling(kind);
   end;
+end;
+
+// ----------------------------------------------------------------------------
+// Class TIdentifierList
+// ----------------------------------------------------------------------------
+
+constructor TIdentifierList.Create;
+begin
+  identifierArray := nil;
+  Clear;
+end;
+
+destructor TIdentifierList.Free;
+begin
+  Clear;
+end;
+
+function TIdentifierList.Size: Integer;
+begin
+  Result := High(identifierArray);
+end;
+
+procedure TIdentifierList.Clear;
+var
+  i: Integer;
+begin
+  if identifierArray <> nil then
+  begin
+    for i := Low(identifierArray) to High(identifierArray) do identifierArray[i].Free;
+  end;
+
+  // Valid identifier indexes start at 1. The identifier at index 0 is kept as UNTYPED identifier.
+  SetLength(identifierArray, 1);
+  identifierArray[0] := TIdentifier.Create;
+end;
+
+function TIdentifierList.AddIdentifier(): TIdentifier;
+var
+  i: Integer;
+begin
+   Result := TIdentifier.Create;
+
+  // if size >= MAXIDENTS then
+  //    Error(NumIdent, 'Out of resources, IDENT');
+  i := size + 1;
+
+  // Result.IdentifierIndex := i;
+
+  SetLength(identifierArray, i + 1);
+  identifierArray[i] := Result;
+end;
+
+
+function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+begin
+  if (identifierIndex < Low(identifierArray)) then
+  begin
+    Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(identifierArray));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+
+  if (identifierIndex > High(identifierArray)) then
+  begin
+    Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(identifierArray));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+  end;
+  Result := identifierArray[identifierIndex];
 end;
 
 // ----------------------------------------------------------------------------

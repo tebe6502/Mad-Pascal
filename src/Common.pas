@@ -40,8 +40,9 @@ var
 
   TokenList: TTokenList;
 
-  NumIdent: Integer;
-  Ident: array [1..MAXIDENTS] of TIdentifier;
+  // This is current index in the list, not the size of the list.
+  NumIdent_: Integer;
+  IdentifierList: TIdentifierList;
 
   SourceFileList: TSourceFileList;
 
@@ -122,8 +123,10 @@ var
 // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 function TokenAt(tokenIndex: TTokenIndex): TToken;
+
+function NumIdent: Integer;
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -241,7 +244,7 @@ end;
 
 function GetEnumName(IdentIndex: Integer): TString;
 var
-  IdentTtemp: Integer;
+  IdentTemp: Integer;
 
 
   function Search(Num: Cardinal): Integer;
@@ -254,8 +257,8 @@ var
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
       for IdentIndex := 1 to NumIdent do
-        if (Ident[IdentIndex].DataType = ENUMTYPE) and (Ident[IdentIndex].NumAllocElements = Num) and
-          (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
+        if (IdentifierAt(IdentIndex).DataType = ENUMTYPE) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
+          (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
           exit(IdentIndex);
   end;
 
@@ -263,20 +266,20 @@ begin
 
   Result := '';
 
-  if Ident[IdentIndex].NumAllocElements > 0 then
+  if IdentifierAt(IdentIndex).NumAllocElements > 0 then
   begin
-    IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
+    IdentTemp := Search(IdentifierAt(IdentIndex).NumAllocElements);
 
-    if IdentTtemp > 0 then
-      Result := Ident[IdentTtemp].Name;
+    if IdentTemp > 0 then
+      Result := IdentifierAt(IdentTemp).Name;
   end
   else
-    if Ident[IdentIndex].DataType = ENUMTYPE then
+    if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
     begin
-      IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
+      IdentTemp := Search(IdentifierAt(IdentIndex).NumAllocElements);
 
-      if IdentTtemp > 0 then
-        Result := Ident[IdentTtemp].Name;
+      if IdentTemp > 0 then
+        Result := IdentifierAt(IdentTemp).Name;
     end;
 
 end;  //GetEnumName
@@ -331,10 +334,11 @@ end;
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 begin
 
-  if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> TTokenKind.RECORDTOK) then
-    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
-      Ord(Ident[IdentIndex].DataType = TTokenKind.STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
+  if (IdentifierAt(IdentIndex).NumAllocElements > 0) and (IdentifierAt(IdentIndex).AllocElementType <>
+    TTokenKind.RECORDTOK) then
+    if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 +
+      Ord(IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK)) then
+      if IdentifierAt(IdentIndex).NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -347,10 +351,10 @@ procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: 
   ArrayIndexType: TDataType);
 begin
 
-  if Ident[IdentIndex].NumAllocElements_ > 0 then
-    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
-      Ord(Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements_ <> 1 then
+  if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
+    if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements_ - 1 +
+      Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
+      if IdentifierAt(IdentIndex).NumAllocElements_ <> 1 then
         WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
@@ -620,27 +624,21 @@ begin
   end;
 end;
 
-function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
-begin
-  if (identifierIndex < Low(Ident)) then
-  begin
-    Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(Ident));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
-  end;
-
-  if (identifierIndex > High(Ident)) then
-  begin
-    Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(Ident));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
-  end;
-
-  Result := Ident[identifierIndex];
-end;
-
 function TokenAt(tokenIndex: TTokenIndex): TToken;
 begin
-  Assert(TokenList<> nil, 'TokenList not yet created.');
+  Assert(TokenList <> nil, 'TokenList not yet created.');
   Result := TokenList.GetTokenAtIndex(tokenIndex);
+end;
+
+function NumIdent: Integer;
+begin
+  Result:=NumIdent_;
+end;
+
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+begin
+  Assert(IdentifierList <> nil, 'IdentifierList not yet created.');
+  Result := IdentifierList.GetIdentifierAtIndex(identifierIndex);
 end;
 
 end.

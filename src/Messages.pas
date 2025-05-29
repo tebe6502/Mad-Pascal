@@ -256,19 +256,19 @@ begin
     TErrorCode.UnknownIdentifier:
     begin
       if identIndex > 0 then
-        Result := 'Identifier not found ''' + Ident[identIndex].Alias + ''''
+        Result := 'Identifier not found ''' + IdentifierAt(identIndex).Alias + ''''
       else
         Result := 'Identifier not found ''' + TokenAt(tokenIndex).Name + '''';
     end;
 
     TErrorCode.IncompatibleTypeOf:
     begin
-      Result := 'Incompatible type of ' + Ident[identIndex].Name;
+      Result := 'Incompatible type of ' + IdentifierAt(IdentIndex).Name;
     end;
 
     TErrorCode.WrongNumberOfParameters:
     begin
-      Result := 'Wrong number of parameters specified for call to "' + Ident[identIndex].Name + '"';
+      Result := 'Wrong number of parameters specified for call to "' + IdentifierAt(IdentIndex).Name + '"';
     end;
 
     TErrorCode.CantAdrConstantExp:
@@ -311,7 +311,7 @@ begin
 
     TErrorCode.StringTruncated:
     begin
-      Result := 'String constant truncated to fit STRING[' + IntToStr(Ident[identIndex].NumAllocElements - 1) + ']';
+      Result := 'String constant truncated to fit STRING[' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1) + ']';
     end;
 
     TErrorCode.CantReadWrite:
@@ -333,12 +333,12 @@ begin
     end;
 
     TErrorCode.TooManyParameters: begin
-      Result := 'Too many formal parameters in ' + Ident[identIndex].Name;
+      Result := 'Too many formal parameters in ' + IdentifierAt(IdentIndex).Name;
     end;
 
     TErrorCode.CantDetermine:
     begin
-      Result := 'Can''t determine which overloaded function ''' + Ident[identIndex].Name + ''' to call';
+      Result := 'Can''t determine which overloaded function ''' + IdentifierAt(IdentIndex).Name + ''' to call';
     end;
 
     TErrorCode.UpperBoundOfRange:
@@ -517,38 +517,41 @@ end;
 procedure ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(const tokenIndex: TTokenIndex;
   errorCode: TErrorCode; identIndex: TIdentIndex; tokenKind: TTokenKind; arrayIdentIndex: TIdentIndex);
 var
+  identifier: TIdentifier;
+  arrayIdentifier: TIdentifier;
   msg: String;
 begin
 
   Assert((ErrorCode = TErrorCode.IllegalTypeConversion) or (ErrorCode = TErrorCode.IncompatibleTypesArray));
 
+  identifier:=IdentifierAt(IdentIndex);
   if errorCode = TErrorCode.IllegalTypeConversion then
     msg := 'Illegal type conversion: "Array[0..'
   else
   begin
     msg := 'Incompatible types: got ';
-    if Ident[identIndex].NumAllocElements > 0 then msg := msg + '"Array[0..';
+    if identifier.NumAllocElements > 0 then msg := msg + '"Array[0..';
   end;
 
 
-  if Ident[identIndex].NumAllocElements_ > 0 then
-    msg := msg + IntToStr(Ident[identIndex].NumAllocElements - 1) + '] Of Array[0..' +
-      IntToStr(Ident[identIndex].NumAllocElements_ - 1) + '] Of ' +
-      InfoAboutToken(Ident[identIndex].AllocElementType) + '" '
+  if identifier.NumAllocElements_ > 0 then
+    msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of Array[0..' +
+      IntToStr(identifier.NumAllocElements_ - 1) + '] Of ' +
+      InfoAboutToken(identifier.AllocElementType) + '" '
   else
-    if Ident[identIndex].NumAllocElements = 0 then
+    if identifier.NumAllocElements = 0 then
     begin
 
-      if Ident[identIndex].AllocElementType <> TTokenKind.UNTYPETOK then
-        msg := msg + '"^' + InfoAboutToken(Ident[identIndex].AllocElementType) + '" '
+      if identifier.AllocElementType <> TTokenKind.UNTYPETOK then
+        msg := msg + '"^' + InfoAboutToken(identifier.AllocElementType) + '" '
       else
         msg := msg + '"' + InfoAboutToken(TTokenKind.POINTERTOK) + '" ';
 
     end
     else
     begin
-      msg := msg + IntToStr(Ident[identIndex].NumAllocElements - 1) + '] Of ' +
-        InfoAboutToken(Ident[identIndex].AllocElementType) + '" ';
+      msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of ' +
+        InfoAboutToken(identifier.AllocElementType) + '" ';
     end;
 
   if errorCode = TErrorCode.IllegalTypeConversion then
@@ -556,24 +559,24 @@ begin
   else
     if arrayIdentIndex > 0 then
     begin
-
+      arrayIdentifier:=IdentifierAt(arrayIdentIndex);
       msg := msg + 'expected ';
 
-      if Ident[arrayIdentIndex].NumAllocElements_ > 0 then
-        msg := msg + '"Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements - 1) +
-          '] Of Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements_ - 1) + '] Of ' +
-          InfoAboutToken(Ident[identIndex].AllocElementType) + '"'
+      if IdentifierAt(arrayIdentIndex).NumAllocElements_ > 0 then
+        msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
+          '] Of Array[0..' + IntToStr(arrayIdentifier.NumAllocElements_ - 1) + '] Of ' +
+          InfoAboutToken(identifier.AllocElementType) + '"'
       else
-        if Ident[arrayIdentIndex].AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-          msg := msg + '"^' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
+        if arrayIdentifier.AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+          msg := msg + '"^' + TypeArray[arrayIdentifier.NumAllocElements].Field[0].Name + '"'
         else
         begin
 
-          if Ident[arrayIdentIndex].DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-            msg := msg + '"' + TypeArray[Ident[arrayIdentIndex].NumAllocElements].Field[0].Name + '"'
+          if arrayIdentifier.DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+            msg := msg + '"' + TypeArray[arrayIdentifier.NumAllocElements].Field[0].Name + '"'
           else
-            msg := msg + '"Array[0..' + IntToStr(Ident[arrayIdentIndex].NumAllocElements - 1) +
-              '] Of ' + InfoAboutToken(Ident[arrayIdentIndex].AllocElementType) + '"';
+            msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
+              '] Of ' + InfoAboutToken(arrayIdentifier.AllocElementType) + '"';
 
         end;
 
@@ -693,7 +696,7 @@ end;
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 begin
   Warning(tokenIndex, TMessage.Create(TErrorCode.VariableNotInit, 'Variable ''' +
-    Ident[identIndex].Name + ''' does not seem to be initialized'));
+    IdentifierAt(IdentIndex).Name + ''' does not seem to be initialized'));
 end;
 
 
@@ -713,20 +716,20 @@ var
 begin
 
   if Pass = TPass.CODE_GENERATION then
-    if pos('.', Ident[identIndex].Name) = 0 then
+    if pos('.', IdentifierAt(IdentIndex).Name) = 0 then
     begin
 
       a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: Local ';
 
-      if Ident[identIndex].Kind <> UNITTYPE then
+      if IdentifierAt(IdentIndex).Kind <> UNITTYPE then
       begin
 
-        case Ident[identIndex].Kind of
+        case IdentifierAt(IdentIndex).Kind of
           CONSTANT: a := a + 'const';
           USERTYPE: a := a + 'type';
           LABELTYPE: a := a + 'label';
 
-          VARIABLE: if Ident[identIndex].isAbsolute then
+          VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               a := a + 'absolutevar'
             else
               a := a + 'variable';
@@ -735,9 +738,9 @@ begin
           TTokenKind.FUNCTIONTOK: a := a + 'func';
         end;
 
-        a := a + ' ''' + Ident[identIndex].Name + '''' + ' not used';
+        a := a + ' ''' + IdentifierAt(IdentIndex).Name + '''' + ' not used';
 
-        if pos('@FN', Ident[identIndex].Name) = 1 then
+        if pos('@FN', IdentifierAt(IdentIndex).Name) = 1 then
 
         else
           msgLists.msgNote.Add(a);

@@ -48,12 +48,7 @@ var
   i: Integer;
 begin
 
-  NumIdent := 0;
-  for i := Low(Ident) to High(Ident) do
-  begin
-    Ident[i] := Default(TIdentifier);
-  end;
-
+  NumIdent_:=0;
   TokenList.Clear;
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
