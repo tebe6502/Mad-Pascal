@@ -310,7 +310,7 @@ type
     parallelData: ^TParalelData;
   begin
     parallelData := Data;
-    if not parallelData.errorOccurred then
+    // if not parallelData.errorOccurred then
     begin
       if not ProcessProgramAtIndex(parallelData^.ProgramFiles, Index, parallelData^.operation) then
       begin
