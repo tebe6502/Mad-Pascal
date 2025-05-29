@@ -22,7 +22,7 @@ set MP_EXE=%MP_SRC_FOLDER%\mp.exe
 set WUDSN_MP_EXE=%WUDSN_TOOLS_FOLDER%\PAS%\MP\bin\windows\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
-set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
+rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
 
 set MP_TESTS_FOLDER=%MP_SRC_FOLDER%\tests
 
@@ -41,6 +41,8 @@ if not "%MP_EXE%"=="" (
   if errorlevel 1 goto :eof
 
 rem Regression test with standard MP.
+goto :run_new_tests
+
   if "%TEST_MODE%"=="" (
     echo.
     echo INFO: Compiling with WUDSN version.
@@ -174,3 +176,8 @@ rem
   call :run_mp %1 %MP_FOLDER%\samples\a8\graph_crossplatform fern
   goto :eof
  
+
+rem New version of the comparison test
+:run_new_tests
+%MP_FOLDER%\projects\MakeMadPascal -allThreads -openResults
+goto :eof

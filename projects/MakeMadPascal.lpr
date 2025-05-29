@@ -34,7 +34,15 @@ type
   end;
 
 
+  TOptions = record
+    allFiles: Boolean;
+    allThreads: Boolean;
+    openResults: Boolean;
+    waitForKey: Boolean;
+  end;
+
 var
+  options: TOptions;
   cs: TRTLCriticalSection;
   startTickCount: QWord;
   endTickCount: QWord;
@@ -246,8 +254,8 @@ var
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, GetActionString(operation), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        GetActionString(operation), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -343,6 +351,7 @@ type
     application: TCustomApplication;
     verbose: Boolean;
     maxFiles: Integer;
+    p: String;
     i: Integer;
     PascalFiles: TStringList;
     samplesFolderPath: TFolderPath;
@@ -358,9 +367,20 @@ type
 
     diffFilesListFilePath: TFilePath;
   begin
-    //   application:=  TCustomApplication.Create;
-    //    Application.Initialize;
-    //   Application.Run;
+
+    options := Default(TOptions);
+    for i := 1 to ParamCount do
+    begin
+      p := ParamStr(i);
+      if p = '-allFiles' then options.allFiles := True;
+      if p = '-allThreads' then options.allThreads := True;
+      if p = '-openResults' then options.openResults := True;
+      if p = '-waitForKey' then options.waitForKey := True;
+
+      // application:=  TCustomApplication.Create;
+      // Application.Initialize;
+      // Application.Run;
+    end;
 
     verbose := False;
 
@@ -378,8 +398,10 @@ type
     PascalFiles := FindAllFiles(samplesFolderPath, '*.pas', True);
     ProgramFiles := TStringList.Create;
     try
-      maxFiles := High(Integer);
+
       maxFiles := 10;
+      if (options.allFiles) then maxFiles := High(Integer);
+
       if maxFiles > PascalFiles.Count then  maxFiles := PascalFiles.Count;
       Log(Format('Scanning %d of %d Pascal source files for programs.', [maxFiles, PascalFiles.Count]));
       for i := 1 to maxFiles do
@@ -401,8 +423,9 @@ type
           end;
         end;
       end;
-      operation.threads := TThread.ProcessorCount - 1;
-      operation.threads := 1; // TODO
+      operation.threads := 1;
+      if (options.AllTHreads) then operation.threads := TThread.ProcessorCount - 1;
+
       Log(Format('Processing %d Pascal program with %d Threads.', [ProgramFiles.Count, operation.threads]));
       operation.action := TAction.COMPILE_REFERENCE;
       operation.verbose := verbose;
@@ -433,8 +456,11 @@ type
         Log(Format('Found %d different files.', [operation.diffFilePaths.Count]));
         Log(Format('WinMerge file list is stored in %s.', [diffFilesListFilePath]));
         operation.diffFilePaths.SaveToFile(diffFilesListFilePath);
-        RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath]);
-        RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]]);
+        if (options.openResults) then
+        begin
+          RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath]);
+          RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]]);
+        end;
       end;
       operation.diffFilePaths.Free;
 
@@ -466,6 +492,10 @@ begin
   endTickCount := GetTickCount64;
   seconds := trunc((endTickCount - startTickCount) / 1000);
   Log(Format('Main completed after %d seconds. Press any key.', [seconds]));
-  // repeat  until keypressed;
+  if (options.waitForKey) then
+  begin
+    repeat
+    until keypressed;
+  end;
   DoneCriticalSection(cs);
 end.
