@@ -40,7 +40,8 @@ var
 
   TokenList: TTokenList;
 
-  NumIdent: Integer;
+  // This is current index in the list, not the size of the list.
+  NumIdent_: Integer;
   IdentifierList: TIdentifierList;
 
   SourceFileList: TSourceFileList;
@@ -122,8 +123,10 @@ var
 // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 function TokenAt(tokenIndex: TTokenIndex): TToken;
+
+function NumIdent: Integer;
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -627,6 +630,10 @@ begin
   Result := TokenList.GetTokenAtIndex(tokenIndex);
 end;
 
+function NumIdent: Integer;
+begin
+  Result:=NumIdent_;
+end;
 
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 begin

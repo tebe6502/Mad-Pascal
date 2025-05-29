@@ -1542,7 +1542,7 @@ begin
   else
   begin
 
-    Inc(NumIdent);
+    Inc(NumIdent_);
     identifier:=IdentifierList.GetIdentifierAtIndex(NumIdent);
 
     // For debugging

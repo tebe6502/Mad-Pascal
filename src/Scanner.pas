@@ -48,7 +48,7 @@ var
   i: Integer;
 begin
 
-  NumIdent:=0;
+  NumIdent_:=0;
   TokenList.Clear;
   ClearWordMemory(DataSegment);
   ClearWordMemory(StaticStringData);
