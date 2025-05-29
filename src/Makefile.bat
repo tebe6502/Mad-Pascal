@@ -180,5 +180,5 @@ rem
 rem New version of the comparison test
 :run_new_tests
 rem %MP_FOLDER%\projects\MakeMadPascal -allThreads -openResults
-%MP_FOLDER%\projects\MakeMadPascal -allThreads -allFiles -openResults
+%MP_FOLDER%\projects\MakeMadPascal -allThreads *allFiles -compileReference -compile -compare -openResults
 goto :eof

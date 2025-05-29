@@ -48,8 +48,15 @@ type
   TOptions = record
     allFiles: Boolean;
     allThreads: Boolean;
+
+    compileReference: Boolean;
+    compile: Boolean;
+    compare: Boolean;
+
     openResults: Boolean;
     waitForKey: Boolean;
+
+    verbose: Boolean;
   end;
 
 var
@@ -58,6 +65,7 @@ var
   startTickCount: QWord;
   endTickCount: QWord;
   seconds: QWord;
+  minutes: QWord;
 
   procedure Log(const message: String); overload;
   begin
@@ -159,6 +167,26 @@ var
     Result := RunExecutable(fileName, curDir, exename, commands, fileResult);
   end;
 
+  function LoadTextFile(const filePath: TfilePath; stringList: TStringList; var fileResult: TFileResult): Boolean;
+  begin
+    Result := False;
+    try
+      if FileExists(filePath) then
+      begin
+        stringList.LoadFromFile(filePath);
+        Result := True;
+      end
+      else
+      begin
+        Log(fileResult, Format('ERROR: File %s does not exist.', [filePath]));
+      end;
+    except
+      on E: EFOpenError do
+        Log(fileResult, Format('ERROR: File %s cannot be opened.', [filePath]));
+    end;
+
+  end;
+
   function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName: String;
     operation: TOperation; var fileResult: TFileResult): Boolean;
   const
@@ -181,8 +209,13 @@ var
         CreateAbsolutePath(a65FileName, curDir);
       a65ReferenceFilePath := CreateAbsolutePath(a65ReferenceFileName, curDir);
       diffFilePath := ChangeFileExt(a65FilePath, '.WinMerge');
-      Lines.LoadFromFile(a65FilePath);
-      ReferenceLines.LoadFromFile(a65ReferenceFilePath);
+
+      if LoadTextFile(a65FilePath, Lines, fileResult) and LoadTextFile(
+        a65ReferenceFilePath, ReferenceLines, fileResult) then
+      else
+      begin
+        exit(False);
+      end;
 
       if (Lines.Count < 3) then
       begin
@@ -226,7 +259,7 @@ var
           Log(fileResult, Format('%d: %-40s %-40s ', [i, LeftStr(line, 40), LeftStr(referenceLine, 40)]));
           Inc(diffs);
 
-          if (diffs > MAX_DIFFS) then exit;
+          if (diffs > MAX_DIFFS) then break;
         end;
         Inc(i);
         Inc(j);
@@ -372,7 +405,6 @@ type
   procedure Main;
   var
     application: TCustomApplication;
-    verbose: Boolean;
     maxFiles: Integer;
     p: String;
     i, j: Integer;
@@ -400,13 +432,16 @@ type
       if p = '-allThreads' then options.allThreads := True;
       if p = '-openResults' then options.openResults := True;
       if p = '-waitForKey' then options.waitForKey := True;
+      if p = '-compileReference' then options.compileReference := True;
+      if p = '-compile' then options.compile := True;
+      if p = '-compare' then options.compare := True;
+      if p = '-verbose' then options.verbose := True;
 
       // application:=  TCustomApplication.Create;
       // Application.Initialize;
       // Application.Run;
     end;
 
-    verbose := False;
 
     // TODO: Make these command line parameters.
     wudsnFolderPath := GetEnvironmentVariable('WUDSN_TOOLS_FOLDER');
@@ -423,12 +458,12 @@ type
     ProgramFiles := TStringList.Create;
     try
 
-      maxFiles := 10;
+      maxFiles := 50;
       if (options.allFiles) then maxFiles := High(Integer);
-
       if maxFiles > PascalFiles.Count then  maxFiles := PascalFiles.Count;
-      Log(Format('Scanning %d of %d Pascal source files for programs.', [maxFiles, PascalFiles.Count]));
-      for i := 1 to maxFiles do
+
+      Log(Format('Scanning %d Pascal source files for programs.', [PascalFiles.Count]));
+      for i := 1 to PascalFiles.Count do
       begin
         filePath := PascalFiles[i - 1];
         // Log(Format('Scanning file %s (%d of %d)', [filePath, i, maxFiles]));
@@ -437,86 +472,103 @@ type
           of
           TFileType.UNKNOWN:
           begin
-            if (verbose) then
+            if (options.verbose) then
             begin
               Log(Format('WARNING: Skipping file %s with unkown file type.', [filePath]));
             end;
           end;
           TFileType.TPROGRAM: begin
             ProgramFiles.Add(filePath);
+            if ProgramFiles.Count >= maxFiles then break;
           end;
         end;
       end;
+
+
+      operation := Default(TOperation);
       SetLength(operation.results, ProgramFiles.Count);
 
       operation.threads := 1;
       if (options.AllThreads) then operation.threads := TThread.ProcessorCount - 1;
 
       Log(Format('Processing %d Pascal program with %d Threads.', [ProgramFiles.Count, operation.threads]));
-      operation.action := TAction.COMPILE_REFERENCE;
-      operation.verbose := verbose;
-      operation.mpFolderPath := referenceMPFolderPath;
-      operation.mpExePath := referenceMPExePath;
-      ProcessPrograms(ProgramFiles, operation);
-
-      operation.action := TAction.COMPILE;
-      operation.verbose := verbose;
-      operation.mpFolderPath := mpFolderPath;
-      operation.mpExePath := mpExePath;
-      ProcessPrograms(ProgramFiles, operation);
-
-      operation.threads := 1;
-      operation.action := TAction.COMPARE;
-      operation.verbose := verbose;
-      operation.mpFolderPath := '';
-      operation.mpExePath := '';
-      operation.diffFilePaths := TStringList.Create;
-      ProcessPrograms(ProgramFiles, operation);
-      if (operation.diffFilePaths.Count = 0) then
+      if (options.compileReference) then
       begin
-        Log('All files are identical.');
-        DeleteFile(diffFilesListFilePath);
-      end
-      else
-      begin
-        Log(Format('Found %d different files.', [operation.diffFilePaths.Count]));
-        Log(Format('WinMerge file list is stored in %s.', [diffFilesListFilePath]));
-
-        try
-
-          operation.diffFilePaths.SaveToFile(diffFilesListFilePath);
-        except
-          on e: EFCreateError do
-          begin
-            Log(Format('ERROR: Cannot save %s.', [diffFilesListFilePath]));
-          end;
-
-        end;
-
-        for i := Low(operation.results) to High(operation.results) do
-        begin
-          if operation.results[i].log <> nil then
-          begin
-            Log(Format('Results for %s.', [operation.results[i].filePath]));
-            for j := 1 to operation.results[i].log.Count do
-            begin
-              Log(operation.results[i].log[j - 1]);
-            end;
-            operation.results[i].log.Free;
-            operation.results[i].log := nil;
-          end;
-
-        end;
-
-
-        if (options.openResults) then
-        begin
-          fileResult.filePath := 'All';
-          RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath], fileResult);
-          RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]], fileResult);
-        end;
+        operation.action := TAction.COMPILE_REFERENCE;
+        operation.verbose := options.verbose;
+        operation.mpFolderPath := referenceMPFolderPath;
+        operation.mpExePath := referenceMPExePath;
+        ProcessPrograms(ProgramFiles, operation);
       end;
-      operation.diffFilePaths.Free;
+
+      if (options.compile) then
+      begin
+        operation.action := TAction.COMPILE;
+        operation.verbose := options.verbose;
+        operation.mpFolderPath := mpFolderPath;
+        operation.mpExePath := mpExePath;
+        ProcessPrograms(ProgramFiles, operation);
+
+      end;
+
+
+      if (options.compare) then
+      begin
+        operation.threads := 1;
+        operation.action := TAction.COMPARE;
+        operation.verbose := options.verbose;
+        operation.mpFolderPath := '';
+        operation.mpExePath := '';
+        operation.diffFilePaths := TStringList.Create;
+
+        ProcessPrograms(ProgramFiles, operation);
+
+        if (operation.diffFilePaths.Count = 0) then
+        begin
+          Log('All files are identical.');
+          DeleteFile(diffFilesListFilePath);
+        end
+        else
+        begin
+          Log(Format('Found %d different files.', [operation.diffFilePaths.Count]));
+          Log(Format('WinMerge file list is stored in %s.', [diffFilesListFilePath]));
+
+          try
+
+            operation.diffFilePaths.SaveToFile(diffFilesListFilePath);
+          except
+            on e: EFCreateError do
+            begin
+              Log(Format('ERROR: Cannot save %s.', [diffFilesListFilePath]));
+            end;
+
+          end;
+
+          for i := Low(operation.results) to High(operation.results) do
+          begin
+            if operation.results[i].log <> nil then
+            begin
+              Log(Format('Results for %s.', [operation.results[i].filePath]));
+              for j := 1 to operation.results[i].log.Count do
+              begin
+                Log(operation.results[i].log[j - 1]);
+              end;
+              operation.results[i].log.Free;
+              operation.results[i].log := nil;
+            end;
+
+          end;
+
+
+          if (options.openResults) then
+          begin
+            fileResult.filePath := 'All';
+            RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath], fileResult);
+            RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]], fileResult);
+          end;
+        end;
+        operation.diffFilePaths.Free;
+      end;
 
     finally
       ProgramFiles.Free;
@@ -545,9 +597,12 @@ begin
   end;
   endTickCount := GetTickCount64;
   seconds := trunc((endTickCount - startTickCount) / 1000);
-  Log(Format('Main completed after %d seconds. Press any key.', [seconds]));
+  minutes := Trunc(seconds / 60);
+  seconds := seconds - minutes * 60;
+  Log(Format('Main completed after %d minutes, %d seconds.', [minutes, seconds]));
   if (options.waitForKey) then
   begin
+    Log('Press any key.');
     repeat
     until keypressed;
   end;
