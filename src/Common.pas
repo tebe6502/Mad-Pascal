@@ -256,7 +256,7 @@ var
 
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
-      for IdentIndex := 1 to IdentifierList.Size do
+      for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = ENUMTYPE) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
           (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
           exit(IdentIndex);
