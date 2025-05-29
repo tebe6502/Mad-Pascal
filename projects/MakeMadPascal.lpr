@@ -20,7 +20,7 @@ uses
 type
   TFileType = (UNKNOWN, TPROGRAM, TUNIT, TINCLUDE);
 
-  TAction = (CLEANUP, COMPILE, COMPILE_AND_COMPARE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE);
+  TAction = (CLEANUP, COMPILE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE);
 
   TOperation = record
     threads: Integer;
@@ -28,6 +28,7 @@ type
     verbose: Boolean;
     mpFolderPath: TFolderPath;
     mpExePath: TFilePath;
+    diffFilePaths: TStringList;
   end;
 
 
@@ -108,7 +109,7 @@ var
     end
     else
     begin
-      Log(Format('ERROR: Cannot compile "%s".', [title]));
+      Log(Format('ERROR: Cannot run "%s".', [title]));
       Log(Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
       Log(Format('%s', [outputString]));
       Log('');
@@ -127,13 +128,120 @@ var
     Result := RunExecutable(fileName, curDir, exename, commands);
   end;
 
-  function ProcessProgram(const FilePath: TFilePath; const operation: TOperation): Boolean;
+  function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName: String;
+    operation: TOperation): Boolean;
+  const
+    MAX_DIFFS = 5;
+  var
+    a65FilePath, a65ReferenceFilePath: TFilePath;
+    Lines, ReferenceLines: TStringList;
+    i, j, diffs: Integer;
+    line, referenceLine: String;
+    diffFileLines: TStringList;
+    diffFilePath: TFilePath;
+  begin
+    Result := True;
+    Lines := TStringList.Create;
+    ReferenceLines := TStringList.Create;
+
+    try
+
+      a65FilePath :=
+        CreateAbsolutePath(a65FileName, curDir);
+      a65ReferenceFilePath := CreateAbsolutePath(a65ReferenceFileName, curDir);
+      diffFilePath := ChangeFileExt(a65FilePath, '.WinMerge');
+      Lines.LoadFromFile(a65FilePath);
+      ReferenceLines.LoadFromFile(a65ReferenceFilePath);
+
+      if (Lines.Count < 3) then
+      begin
+        Log(Format('ERROR: %s', [a65FilePath]));
+        Log('ERROR: Not enough lines in output.');
+        EXIT(False);
+      end;
+
+      // Skip the first 2 lines with the compiler version output.
+      diffs := 0;
+      i := 3;
+      j := 3;
+      while (i <= Lines.Count) and (j <= ReferenceLines.Count) do
+      begin
+        // Find next non-empty line
+        line := Lines[i - 1];
+        // TODO: PMCNTL  = $D01D is temporary
+        while (i < Lines.Count) and ((line = '') or (line = 'PMCNTL'#9'= $D01D')) do
+        begin
+          Inc(i);
+          line := Lines[i - 1];
+        end;
+
+        // Find next non-empty line
+        referenceLine := ReferenceLines[j - 1];
+        while (j < ReferenceLines.Count) and (referenceLine = '') do
+        begin
+          Inc(j);
+          referenceLine := ReferenceLines[j - 1];
+        end;
+
+        if (line <> referenceLine) then
+        begin
+          if Result then
+          begin
+
+            Result := False;
+            Log(Format('ERROR: %s', [diffFilePath]));
+          end;
+
+          Log(Format('%d: %-40s %-40s ', [i, LeftStr(line, 40), LeftStr(referenceLine, 40)]));
+          Inc(diffs);
+
+          if (diffs > MAX_DIFFS) then exit;
+        end;
+        Inc(i);
+        Inc(j);
+      end;
+
+    finally
+      if Result then
+      begin
+        DeleteFile(diffFilePath);
+      end
+      else
+      begin
+        diffFileLines := TStringList.Create;
+
+        diffFileLines.add('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+        diffFileLines.add('<project>');
+        diffFileLines.add('   <paths>');
+        diffFileLines.add(Format('      <left>%s</left>', [a65FilePath]));
+        diffFileLines.add(Format('      <right>%s</right>', [a65ReferenceFilePath]));
+        diffFileLines.add('      <filter>*.*</filter>');
+        diffFileLines.add('      <subfolders>0</subfolders>');
+        diffFileLines.add('      <left-readonly>0</left-readonly>');
+        diffFileLines.add('      <right-readonly>0</right-readonly>');
+        diffFileLines.add('   </paths>');
+        diffFileLines.add('</project>');
+        diffFileLines.SaveToFile(diffFilePath);
+        diffFileLines.Free;
+        operation.diffFilePaths.Add(diffFilePath);
+
+      end;
+      ReferenceLines.Free;
+      Lines.Free;
+    end;
+
+  end;
+
+  function ProcessProgram(const FilePath: TFilePath; operation: TOperation): Boolean;
   var
     curDir: TFolderPath;
     fileName: String;
+    a65BaseFileName: String;
     a65FileName: String;
-
+    a65ReferenceFileName: String;
   begin
+    Result := False;
+
     if (operation.verbose) then
     begin
       Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
@@ -142,32 +250,31 @@ var
 
     curDir := ExtractFilePath(FilePath);
     fileName := ExtractFileName(FilePath);
-    a65FileName := ChangeFileExt(fileName, '');
+    a65BaseFileName := ChangeFileExt(fileName, '');
+    a65FileName := a65BaseFileName + '.a65';
+    a65ReferenceFileName := a65BaseFileName + '-Reference.a65';
+
     case operation.action
       of
       TAction.COMPILE:
-      begin
-      end;
 
-      TAction.COMPILE_AND_COMPARE:
       begin
+        Result := RunMadPascal(operation, curDir, fileName, a65FileName);
       end;
 
       TAction.COMPILE_REFERENCE:
       begin
-        a65FileName := a65FileName + '-Reference';
+        Result := RunMadPascal(operation, curDir, fileName, a65ReferenceFileName);
       end;
 
       TAction.COMPARE:
       begin
-        exit(false);
-        Assert(False, 'Unsupported action ' + GetActionString(operation));
+        Result := CompareA65File(curDir, a65FileName, a65ReferenceFileName, operation);
+
       end;
       else
         Assert(False, 'Unsupported action ' + GetActionString(operation));
     end;
-    a65FileName := a65FileName + '.a65';
-    result:=RunMadPascal(operation, curDir, fileName, a65FileName);
 
   end;
 
@@ -245,15 +352,21 @@ type
     referenceMPExePath: TFilePath;
     mpFolderPath: TFolderPath;
     mpExePath: TFilePath;
+
+    diffFilesListFilePath: TFilePath;
   begin
     verbose := False;
 
+    // TODO: Make these command line parameters.
     wudsnFolderPath := GetEnvironmentVariable('WUDSN_TOOLS_FOLDER');
     referenceMPFolderPath := CreateAbsolutePath('PAS\MP', wudsnFolderPath);
     referenceMPExePath := CreateAbsolutePath('bin\windows\mp.exe', referenceMPFolderPath);
+
     mpFolderPath := 'C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal';
     mpExePath := CreateAbsolutePath('src\mp.exe', mpFolderPath);
+
     samplesFolderPath := CreateAbsolutePath('samples', mpFolderPath);
+    diffFilesListFilePath := CreateAbsolutePath('WinMerge.txt', samplesFolderPath);
     Log(Format('Scanning folder %s for Pascal source files.', [samplesFolderPath]));
     PascalFiles := FindAllFiles(samplesFolderPath, '*.pas', True);
     ProgramFiles := TStringList.Create;
@@ -295,11 +408,27 @@ type
       operation.mpExePath := mpExePath;
       ProcessPrograms(ProgramFiles, operation);
 
+      operation.threads := 1;
       operation.action := TAction.COMPARE;
       operation.verbose := verbose;
       operation.mpFolderPath := '';
       operation.mpExePath := '';
+      operation.diffFilePaths := TStringList.Create;
       ProcessPrograms(ProgramFiles, operation);
+      if (operation.diffFilePaths.Count = 0) then
+      begin
+        Log('All files are identical.');
+        DeleteFile(diffFilesListFilePath);
+      end
+      else
+      begin
+        Log(Format('Found %d different files.', [operation.diffFilePaths.Count]));
+        Log(Format('WinMerge file list is stored in %s.', [diffFilesListFilePath]));
+        operation.diffFilePaths.SaveToFile(diffFilesListFilePath);
+        RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath]);
+        RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]]);
+      end;
+      operation.diffFilePaths.Free;
 
     finally
       ProgramFiles.Free;
