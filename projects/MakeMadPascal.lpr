@@ -19,10 +19,20 @@ uses
   SysUtils,
   CustApp;
 
+const
+  MAX_FILES = 1024;
+
 type
   TFileType = (UNKNOWN, TPROGRAM, TUNIT, TINCLUDE);
 
   TAction = (CLEANUP, COMPILE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE);
+
+  TFileResult = record
+    filePath: TFilePath;
+    log: TStringList;
+  end;
+
+  TFileResultArray = array of TFileResult;
 
   TOperation = record
     threads: Integer;
@@ -30,6 +40,7 @@ type
     verbose: Boolean;
     mpFolderPath: TFolderPath;
     mpExePath: TFilePath;
+    results: TFileResultArray;
     diffFilePaths: TStringList;
   end;
 
@@ -48,11 +59,21 @@ var
   endTickCount: QWord;
   seconds: QWord;
 
-  procedure Log(const message: String);
+  procedure Log(const message: String); overload;
   begin
     EnterCriticalSection(cs);
     WriteLn(message);
     LeaveCriticalSection(cs);
+  end;
+
+  procedure Log(var fileResult: TFileResult; const message: String); overload;
+  begin
+    if (fileResult.log = nil) then
+    begin
+      fileResult.log := TStringList.Create;
+
+    end;
+    fileResult.log.Add(message);
   end;
 
   function GetFileType(FilePath: TFilePath): TFileType;
@@ -109,7 +130,7 @@ var
 
 
   function RunExecutable(title: String; curDir: TFolderPath; exename: TProcessString;
-    commands: array of TProcessString): Boolean;
+    commands: array of TProcessString; var fileResult: TFileResult): Boolean;
   var
     outputString: TProcessString;
   begin
@@ -119,27 +140,27 @@ var
     end
     else
     begin
-      Log(Format('ERROR: Cannot run "%s".', [title]));
-      Log(Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
-      Log(Format('%s', [outputString]));
-      Log('');
+      Log(fileResult, format('ERROR: Cannot run "%s".', [title]));
+      Log(fileResult, Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
+      Log(fileResult, Format('%s', [outputString]));
+      Log(fileResult, '');
       Result := False;
     end;
   end;
 
   function RunMadPascal(const operation: TOperation; curDir: TFolderPath; fileName: String;
-    a65FileName: String): Boolean;
+    a65FileName: String; fileResult: TFileResult): Boolean;
   var
     exename: TProcessString;
     commands: array of TProcessString;
   begin
     exename := operation.mpExePath;
     commands := ['-ipath:' + CreateAbsolutePath('lib', operation.mpFolderPath), '-o:' + a65FileName, fileName];
-    Result := RunExecutable(fileName, curDir, exename, commands);
+    Result := RunExecutable(fileName, curDir, exename, commands, fileResult);
   end;
 
   function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName: String;
-    operation: TOperation): Boolean;
+    operation: TOperation; var fileResult: TFileResult): Boolean;
   const
     MAX_DIFFS = 5;
   var
@@ -165,8 +186,8 @@ var
 
       if (Lines.Count < 3) then
       begin
-        Log(Format('ERROR: %s', [a65FilePath]));
-        Log('ERROR: Not enough lines in output.');
+        Log(fileResult, Format('ERROR: %s', [a65FilePath]));
+        Log(fileResult, 'ERROR: Not enough lines in output.');
         EXIT(False);
       end;
 
@@ -199,10 +220,10 @@ var
           begin
 
             Result := False;
-            Log(Format('ERROR: %s', [diffFilePath]));
+            Log(fileResult, Format('ERROR: %s', [diffFilePath]));
           end;
 
-          Log(Format('%d: %-40s %-40s ', [i, LeftStr(line, 40), LeftStr(referenceLine, 40)]));
+          Log(fileResult, Format('%d: %-40s %-40s ', [i, LeftStr(line, 40), LeftStr(referenceLine, 40)]));
           Inc(diffs);
 
           if (diffs > MAX_DIFFS) then exit;
@@ -242,7 +263,7 @@ var
 
   end;
 
-  function ProcessProgram(const FilePath: TFilePath; operation: TOperation): Boolean;
+  function ProcessProgram(const FilePath: TFilePath; var operation: TOperation; var fileResult: TFileResult): Boolean;
   var
     curDir: TFolderPath;
     fileName: String;
@@ -250,12 +271,13 @@ var
     a65FileName: String;
     a65ReferenceFileName: String;
   begin
+    fileResult.filePath := filePath;
     Result := False;
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
-        GetActionString(operation), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.',
+        [filePath, GetActionString(operation), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -269,17 +291,17 @@ var
       TAction.COMPILE:
 
       begin
-        Result := RunMadPascal(operation, curDir, fileName, a65FileName);
+        Result := RunMadPascal(operation, curDir, fileName, a65FileName, fileResult);
       end;
 
       TAction.COMPILE_REFERENCE:
       begin
-        Result := RunMadPascal(operation, curDir, fileName, a65ReferenceFileName);
+        Result := RunMadPascal(operation, curDir, fileName, a65ReferenceFileName, fileResult);
       end;
 
       TAction.COMPARE:
       begin
-        Result := CompareA65File(curDir, a65FileName, a65ReferenceFileName, operation);
+        Result := CompareA65File(curDir, a65FileName, a65ReferenceFileName, operation, fileResult);
 
       end;
       else
@@ -290,18 +312,19 @@ var
 
 
   function ProcessProgramAtIndex(const ProgramFiles: TStringList; const index: Integer;
-  const operation: TOperation): Boolean;
+  var operation: TOperation): Boolean;
   begin
     Log(Format('Processing program %d of %d (%d%%) with action %s: %s',
       [index, ProgramFiles.Count, Trunc(index * 100 / ProgramFiles.Count), GetActionString(Operation),
       ExtractFileName(ProgramFiles[index - 1])]));
-    Result := ProcessProgram(ProgramFiles[index - 1], operation);
+    Result := ProcessProgram(ProgramFiles[index - 1], operation, operation.results[index - 1]);
   end;
 
 type
   TParalelData = record
     ProgramFiles: TStringList;
     operation: TOperation;
+    fileResults: TFileResultArray;
     errorOccurred: Boolean;
   end;
 
@@ -352,7 +375,7 @@ type
     verbose: Boolean;
     maxFiles: Integer;
     p: String;
-    i: Integer;
+    i, j: Integer;
     PascalFiles: TStringList;
     samplesFolderPath: TFolderPath;
     filePath: TFilePath;
@@ -366,6 +389,7 @@ type
     mpExePath: TFilePath;
 
     diffFilesListFilePath: TFilePath;
+    fileResult: TFileResult;
   begin
 
     options := Default(TOptions);
@@ -423,8 +447,10 @@ type
           end;
         end;
       end;
+      SetLength(operation.results, ProgramFiles.Count);
+
       operation.threads := 1;
-      if (options.AllTHreads) then operation.threads := TThread.ProcessorCount - 1;
+      if (options.AllThreads) then operation.threads := TThread.ProcessorCount - 1;
 
       Log(Format('Processing %d Pascal program with %d Threads.', [ProgramFiles.Count, operation.threads]));
       operation.action := TAction.COMPILE_REFERENCE;
@@ -455,11 +481,39 @@ type
       begin
         Log(Format('Found %d different files.', [operation.diffFilePaths.Count]));
         Log(Format('WinMerge file list is stored in %s.', [diffFilesListFilePath]));
-        operation.diffFilePaths.SaveToFile(diffFilesListFilePath);
+
+        try
+
+          operation.diffFilePaths.SaveToFile(diffFilesListFilePath);
+        except
+          on e: EFCreateError do
+          begin
+            Log(Format('ERROR: Cannot save %s.', [diffFilesListFilePath]));
+          end;
+
+        end;
+
+        for i := Low(operation.results) to High(operation.results) do
+        begin
+          if operation.results[i].log <> nil then
+          begin
+            Log(Format('Results for %s.', [operation.results[i].filePath]));
+            for j := 1 to operation.results[i].log.Count do
+            begin
+              Log(operation.results[i].log[j - 1]);
+            end;
+            operation.results[i].log.Free;
+            operation.results[i].log := nil;
+          end;
+
+        end;
+
+
         if (options.openResults) then
         begin
-          RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath]);
-          RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]]);
+          fileResult.filePath := 'All';
+          RunExecutable('File List', '', 'CMD.EXE', ['/C', diffFilesListFilePath], fileResult);
+          RunExecutable('WinMerge', '', 'CMD.EXE', ['/C', operation.diffFilePaths[0]], fileResult);
         end;
       end;
       operation.diffFilePaths.Free;
