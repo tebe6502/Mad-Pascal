@@ -41,7 +41,7 @@ var
   TokenList: TTokenList;
 
   NumIdent: Integer;
-  Ident: array [1..MAXIDENTS] of TIdentifier;
+  IdentifierList: TIdentifierList;
 
   SourceFileList: TSourceFileList;
 
@@ -253,7 +253,7 @@ var
 
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
-      for IdentIndex := 1 to NumIdent do
+      for IdentIndex := 1 to IdentifierList.Size do
         if (IdentifierAt(IdentIndex).DataType = ENUMTYPE) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
           (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
           exit(IdentIndex);
@@ -331,7 +331,8 @@ end;
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 begin
 
-  if (IdentifierAt(IdentIndex).NumAllocElements > 0) and (IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.RECORDTOK) then
+  if (IdentifierAt(IdentIndex).NumAllocElements > 0) and (IdentifierAt(IdentIndex).AllocElementType <>
+    TTokenKind.RECORDTOK) then
     if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 +
       Ord(IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK)) then
       if IdentifierAt(IdentIndex).NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
@@ -620,27 +621,17 @@ begin
   end;
 end;
 
-function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
-begin
-  if (identifierIndex < Low(Ident)) then
-  begin
-    Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(Ident));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
-  end;
-
-  if (identifierIndex > High(Ident)) then
-  begin
-    Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(Ident));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
-  end;
-
-  Result := Ident[identifierIndex];
-end;
-
 function TokenAt(tokenIndex: TTokenIndex): TToken;
 begin
-  Assert(TokenList<> nil, 'TokenList not yet created.');
+  Assert(TokenList <> nil, 'TokenList not yet created.');
   Result := TokenList.GetTokenAtIndex(tokenIndex);
+end;
+
+
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+begin
+  Assert(IdentifierList <> nil, 'IdentifierList not yet created.');
+  Result := IdentifierList.GetIdentifierAtIndex(identifierIndex);
 end;
 
 end.

@@ -19030,12 +19030,15 @@ end;
 procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 var
   scanner: IScanner;
+  i: Integer;
 begin
 
   Common.unitPathList := unitPathList;
   evaluationContext := TEvaluationContext.Create;
 
   TokenList := TTokenList.Create;
+  IdentifierList:=TIdentifierList.Create;
+  for i:=1 to MAXIDENTS do IdentifierList.AddIdentifier;
 
   SetLength(IFTmpPosStack, 1);
 

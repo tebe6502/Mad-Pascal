@@ -1526,6 +1526,7 @@ procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind
   IdType: TDataType = TDataType.IDENTTOK);
 var
   identIndex: Integer;
+  identifier: TIdentifier;
   NumAllocElements_: Cardinal;
 begin
 
@@ -1542,6 +1543,7 @@ begin
   begin
 
     Inc(NumIdent);
+    identifier:=IdentifierList.GetIdentifierAtIndex(NumIdent);
 
     // For debugging
     // Writeln('NumIdent='+IntToStr(NumIdent)+' ErrTokenIndex='+IntToStr(ErrTokenIndex)+' Name='+name+' Kind='+IntToStr( Kind)+' DataType='+IntToStr( DataType)+' NumAllocElements='+IntToStr( NumAllocElements)+' AllocElementType='+IntToStr( AllocElementType));
@@ -1551,37 +1553,37 @@ begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
     end;
 
-    IdentifierAt(NumIdent).Name := Name;
-    IdentifierAt(NumIdent).Kind := Kind;
-    IdentifierAt(NumIdent).DataType := DataType;
-    IdentifierAt(NumIdent).Block := BlockStack[BlockStackTop];
-    IdentifierAt(NumIdent).NumParams := 0;
-    IdentifierAt(NumIdent).isAbsolute := False;
-    IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VALPASSING;
-    IdentifierAt(NumIdent).IsUnresolvedForward := False;
+    identifier.Name := Name;
+    identifier.Kind := Kind;
+    identifier.DataType := DataType;
+    identifier.Block := BlockStack[BlockStackTop];
+    identifier.NumParams := 0;
+    identifier.isAbsolute := False;
+    identifier.PassMethod := TParameterPassingMethod.VALPASSING;
+    identifier.IsUnresolvedForward := False;
 
-    IdentifierAt(NumIdent).Section := PublicSection;
+    identifier.Section := PublicSection;
 
-    IdentifierAt(NumIdent).SourceFile := ActiveSourceFile;
+    identifier.SourceFile := ActiveSourceFile;
 
-    IdentifierAt(NumIdent).IdType := IdType;
+    identifier.IdType := IdType;
 
     if (Kind = VARIABLE) and (Data <> 0) then
     begin
-      IdentifierAt(NumIdent).isAbsolute := True;
-      IdentifierAt(NumIdent).isInit := True;
+      identifier.isAbsolute := True;
+      identifier.isInit := True;
     end;
 
     NumAllocElements_ := NumAllocElements shr 16;    // , yy]
     NumAllocElements := NumAllocElements and $FFFF;    // [xx,
 
 
-    //   if name = 'CH_EOL' then writeln( IdentifierAt(NumIdent).Block ,',', IdentifierAt(NumIdent).unitindex, ',',  IdentifierAt(NumIdent).Section,',', IdentifierAt(NumIdent).idType);
+    //   if name = 'CH_EOL' then writeln( identifier.Block ,',', identifier.unitindex, ',',  identifier.Section,',', identifier.idType);
 
     if Name <> 'RESULT' then
       if (NumIdent > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
-        if not ((IdentifierAt(NumIdent).Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
-          (IdentifierAt(NumIdent).IsNotDead)) then
+        if not ((identifier.Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
+          (identifier.IsNotDead)) then
           NoteForIdentifierNotUsed(tokenIndex, NumIdent);
 
     case Kind of
@@ -1589,25 +1591,25 @@ begin
       TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.UNITTOK, TTokenKind.CONSTRUCTORTOK,
       TTokenKind.DESTRUCTORTOK:
       begin
-        IdentifierAt(NumIdent).Value := CodeSize;      // Procedure entry point address
-        //      IdentifierAt(NumIdent).Section := true;
+        identifier.Value := CodeSize;      // Procedure entry point address
+        //      identifier.Section := true;
       end;
 
       VARIABLE:
       begin
 
-        if IdentifierAt(NumIdent).isAbsolute then
-          IdentifierAt(NumIdent).Value := Data - 1
+        if identifier.isAbsolute then
+          identifier.Value := Data - 1
         else
-          IdentifierAt(NumIdent).Value := DATAORIGIN + VarDataSize;  // Variable address
+          identifier.Value := DATAORIGIN + VarDataSize;  // Variable address
 
         if not OutputDisabled then
           VarDataSize := VarDataSize + GetDataSize(DataType);
 
-        IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;  // Number of array elements (0 for single variable)
-        IdentifierAt(NumIdent).NumAllocElements_ := NumAllocElements_;
+        identifier.NumAllocElements := NumAllocElements;  // Number of array elements (0 for single variable)
+        identifier.NumAllocElements_ := NumAllocElements_;
 
-        IdentifierAt(NumIdent).AllocElementType := AllocElementType;
+        identifier.AllocElementType := AllocElementType;
 
         if not OutputDisabled then
         begin
@@ -1628,7 +1630,7 @@ begin
                 else
                 begin
 
-                  if (IdentifierAt(NumIdent).idType = TDataType.ARRAYTOK) and (IdentifierAt(NumIdent).isAbsolute = False) and
+                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and
                     (Elements(NumIdent) = 1) then  // [0..0] ; [0..0, 0..0]
 
                   else
@@ -1645,30 +1647,30 @@ begin
 
       CONSTANT, ENUMTYPE:
       begin
-        IdentifierAt(NumIdent).Value := Data;        // Constant value
+        identifier.Value := Data;        // Constant value
 
         if DataType in Pointers + [TDataType.ENUMTOK] then
         begin
-          IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
-          IdentifierAt(NumIdent).NumAllocElements_ := NumAllocElements_;
+          identifier.NumAllocElements := NumAllocElements;
+          identifier.NumAllocElements_ := NumAllocElements_;
 
-          IdentifierAt(NumIdent).AllocElementType := AllocElementType;
+          identifier.AllocElementType := AllocElementType;
         end;
 
-        IdentifierAt(NumIdent).isInit := True;
+        identifier.isInit := True;
       end;
 
       USERTYPE:
       begin
-        IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
-        IdentifierAt(NumIdent).NumAllocElements_ := NumAllocElements_;
+        identifier.NumAllocElements := NumAllocElements;
+        identifier.NumAllocElements_ := NumAllocElements_;
 
-        IdentifierAt(NumIdent).AllocElementType := AllocElementType;
+        identifier.AllocElementType := AllocElementType;
       end;
 
       LABELTYPE:
       begin
-        IdentifierAt(NumIdent).isInit := False;
+        identifier.isInit := False;
       end;
 
     end;// case
