@@ -241,7 +241,7 @@ end;
 
 function GetEnumName(IdentIndex: Integer): TString;
 var
-  IdentTtemp: Integer;
+  IdentTemp: Integer;
 
 
   function Search(Num: Cardinal): Integer;
@@ -254,8 +254,8 @@ var
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
       for IdentIndex := 1 to NumIdent do
-        if (Ident[IdentIndex].DataType = ENUMTYPE) and (Ident[IdentIndex].NumAllocElements = Num) and
-          (BlockStack[BlockStackIndex] = Ident[IdentIndex].Block) then
+        if (IdentifierAt(IdentIndex).DataType = ENUMTYPE) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
+          (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
           exit(IdentIndex);
   end;
 
@@ -263,20 +263,20 @@ begin
 
   Result := '';
 
-  if Ident[IdentIndex].NumAllocElements > 0 then
+  if IdentifierAt(IdentIndex).NumAllocElements > 0 then
   begin
-    IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
+    IdentTemp := Search(IdentifierAt(IdentIndex).NumAllocElements);
 
-    if IdentTtemp > 0 then
-      Result := Ident[IdentTtemp].Name;
+    if IdentTemp > 0 then
+      Result := IdentifierAt(IdentTemp).Name;
   end
   else
-    if Ident[IdentIndex].DataType = ENUMTYPE then
+    if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
     begin
-      IdentTtemp := Search(Ident[IdentIndex].NumAllocElements);
+      IdentTemp := Search(IdentifierAt(IdentIndex).NumAllocElements);
 
-      if IdentTtemp > 0 then
-        Result := Ident[IdentTtemp].Name;
+      if IdentTemp > 0 then
+        Result := IdentifierAt(IdentTemp).Name;
     end;
 
 end;  //GetEnumName
@@ -331,10 +331,10 @@ end;
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 begin
 
-  if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> TTokenKind.RECORDTOK) then
-    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
-      Ord(Ident[IdentIndex].DataType = TTokenKind.STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
+  if (IdentifierAt(IdentIndex).NumAllocElements > 0) and (IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.RECORDTOK) then
+    if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 +
+      Ord(IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK)) then
+      if IdentifierAt(IdentIndex).NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -347,10 +347,10 @@ procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: 
   ArrayIndexType: TDataType);
 begin
 
-  if Ident[IdentIndex].NumAllocElements_ > 0 then
-    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
-      Ord(Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements_ <> 1 then
+  if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
+    if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements_ - 1 +
+      Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
+      if IdentifierAt(IdentIndex).NumAllocElements_ <> 1 then
         WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;

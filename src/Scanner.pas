@@ -51,7 +51,7 @@ begin
   NumIdent := 0;
   for i := Low(Ident) to High(Ident) do
   begin
-    Ident[i] := Default(TIdentifier);
+    ident[i] := TIdentifier.Create;
   end;
 
   TokenList.Clear;

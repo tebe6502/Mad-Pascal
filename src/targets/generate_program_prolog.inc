@@ -23,10 +23,10 @@ if Pass = TPass.CODE_GENERATION then begin
 
  asm65;
 
- asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdentIndex('TRUE')].Value));
- asm65('FALSE'#9#9'= '+IntToStr(Ident[GetIdentIndex('FALSE')].Value));
- asm65('EOL'#9#9'= $'+IntToHex(Ident[GetIdentIndex('EOL')].Value,2));
- asm65('__BUFFER'#9'= $'+IntToHex(Ident[GetIdentIndex('__BUFFER')].Value,4));
+ asm65('TRUE'#9#9'= '+IntToStr(IdentifierAt(GetIdentIndex('TRUE')).Value));
+ asm65('FALSE'#9#9'= '+IntToStr(IdentifierAt(GetIdentIndex('FALSE')).Value));
+ asm65('EOL'#9#9'= $'+IntToHex(IdentifierAt(GetIdentIndex('EOL')).Value,2));
+ asm65('__BUFFER'#9'= $'+IntToHex(IdentifierAt(GetIdentIndex('__BUFFER')).Value,4));
  asm65('@BUF'#9#9'= __BUFFER');
 
  asm65separator;

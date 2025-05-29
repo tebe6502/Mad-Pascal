@@ -7,24 +7,24 @@
 
   IdentTemp := GetIdentIndex(TokenAt(j).Name);
 
-  ActualParamType := Ident[IdentTemp].DataType;
-  VarType := Ident[IdentTemp].AllocElementType;
+  ActualParamType := IdentifierAt(IdentTemp).DataType;
+  VarType := IdentifierAt(IdentTemp).AllocElementType;
 
   k := Elements(IdentTemp);
 
   if k * GetDataSize(VarType) > 256 then
     Error(j, 'only arrays with a maximum of 256 bytes');
 
-  // writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
+  // writeln(ActualParamType,',', VarType,',',IdentifierAt(IdentTemp).NumAllocElements,',',IdentifierAt(IdentTemp).NumAllocElements_,' | ',IdentifierAt(IdentTemp).IdType);
 
-  if (ActualParamType <> TDataType.STRINGPOINTERTOK) and not (Ident[IdentTemp].IdType in
+  if (ActualParamType <> TDataType.STRINGPOINTERTOK) and not (IdentifierAt(IdentTemp).IdType in
     [TDataType.ARRAYTOK, TDataType.STRINGTOK, TDataType.STRINGLITERALTOK]) then
     Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
 
-  if (VarType in [TDataType.RECORDTOK]) and (Ident[IdentIndex].DataType = TDataType.POINTERTOK) then
+  if (VarType in [TDataType.RECORDTOK]) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) then
   // ok
   else
-    GetCommonType(i, Ident[IdentIndex].DataType, VarType);
+    GetCommonType(i, IdentifierAt(IdentIndex).DataType, VarType);
 
   StartOptimization(j);
 

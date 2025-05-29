@@ -269,7 +269,7 @@ type
 
   TIdentifierIndex = Integer;
 
-  TIdentifier = record
+  TIdentifier = class
     Name: TIdentifierName;
     Value: Int64;             // Value for a constant, address for a variable, procedure or function
     Block: Integer;           // Index of a block in which the identifier is defined

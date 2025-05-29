@@ -11,7 +11,6 @@ uses
   FileIO,
   MathEvaluate,
   Messages,
-  Scanner,
   Optimize,
   Tokens,
   Utilities,
