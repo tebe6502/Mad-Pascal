@@ -20,7 +20,7 @@ uses
 type
   TFileType = (UNKNOWN, TPROGRAM, TUNIT, TINCLUDE);
 
-  TAction = (CLEANUP, COMPILE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE);
+  TAction = (CLEANUP, COMPILE, COMPILE_AND_COMPARE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE);
 
   TOperation = record
     threads: Integer;
@@ -30,6 +30,19 @@ type
     mpExePath: TFilePath;
   end;
 
+
+var
+  cs: TRTLCriticalSection;
+  startTickCount: QWord;
+  endTickCount: QWord;
+  seconds: QWord;
+
+  procedure Log(const message: String);
+  begin
+    EnterCriticalSection(cs);
+    WriteLn(message);
+    LeaveCriticalSection(cs);
+  end;
 
   function GetFileType(FilePath: TFilePath): TFileType;
 
@@ -57,7 +70,7 @@ type
       begin
         fileType := TFileType.TINCLUDE;
       end;
-      //WriteLn(line);
+      //Log(line);
 
     end;
     CloseFile(pasFile);
@@ -82,52 +95,97 @@ type
     WriteStr(Result, operation.action);
   end;
 
-  procedure ProcessProgram(const FilePath: TFilePath; const operation: TOperation);
+
+
+  function RunExecutable(title: String; curDir: TFolderPath; exename: TProcessString;
+    commands: array of TProcessString): Boolean;
+  var
+    outputString: TProcessString;
+  begin
+    if RunCommandIndir(curDir, exename, commands, outputString) then
+    begin
+      Result := True;
+    end
+    else
+    begin
+      Log(Format('ERROR: Cannot compile "%s".', [title]));
+      Log(Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
+      Log(Format('%s', [outputString]));
+      Log('');
+      Result := False;
+    end;
+  end;
+
+  function RunMadPascal(const operation: TOperation; curDir: TFolderPath; fileName: String;
+    a65FileName: String): Boolean;
+  var
+    exename: TProcessString;
+    commands: array of TProcessString;
+  begin
+    exename := operation.mpExePath;
+    commands := ['-ipath:' + CreateAbsolutePath('lib', operation.mpFolderPath), '-o:' + a65FileName, fileName];
+    Result := RunExecutable(fileName, curDir, exename, commands);
+  end;
+
+  function ProcessProgram(const FilePath: TFilePath; const operation: TOperation): Boolean;
   var
     curDir: TFolderPath;
     fileName: String;
-    exename: TProcessString;
-    commands: array of TProcessString;
-    outputString: TProcessString;
+    a65FileName: String;
+
   begin
     if (operation.verbose) then
     begin
-      Writeln(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, GetActionString(operation), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        GetActionString(operation), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
     fileName := ExtractFileName(FilePath);
-    exename := operation.mpExePath;
-    commands := ['-ipath:' + CreateAbsolutePath('lib', operation.mpFolderPath), fileName];
-    if RunCommandIndir(curDir, exename, commands, outputString) then
-    begin
+    a65FileName := ChangeFileExt(fileName, '');
+    case operation.action
+      of
+      TAction.COMPILE:
+      begin
+      end;
 
-    end
-    else
-    begin
-      WriteLn(Format('ERROR: Cannot compile "%s".', [fileName]));
-      WriteLn(Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
-      WriteLn(Format('%s', [outputString]));
-      WriteLn;
+      TAction.COMPILE_AND_COMPARE:
+      begin
+      end;
+
+      TAction.COMPILE_REFERENCE:
+      begin
+        a65FileName := a65FileName + '-Reference';
+      end;
+
+      TAction.COMPARE:
+      begin
+        exit(false);
+        Assert(False, 'Unsupported action ' + GetActionString(operation));
+      end;
+      else
+        Assert(False, 'Unsupported action ' + GetActionString(operation));
     end;
+    a65FileName := a65FileName + '.a65';
+    result:=RunMadPascal(operation, curDir, fileName, a65FileName);
 
   end;
 
 
-  procedure ProcessProgramAtIndex(const ProgramFiles: TStringList; const index: Integer; const operation: TOperation);
+  function ProcessProgramAtIndex(const ProgramFiles: TStringList; const index: Integer;
+  const operation: TOperation): Boolean;
   begin
-    Writeln(Format('Processing program %d of %d (%d%%) with action %s.',
-      [index, ProgramFiles.Count, Trunc(index / ProgramFiles.Count), GetActionString(Operation)]));
-    Flush(Output);
-    ProcessProgram(ProgramFiles[index - 1], operation);
-    Flush(Output);
+    Log(Format('Processing program %d of %d (%d%%) with action %s: %s',
+      [index, ProgramFiles.Count, Trunc(index * 100 / ProgramFiles.Count), GetActionString(Operation),
+      ExtractFileName(ProgramFiles[index - 1])]));
+    Result := ProcessProgram(ProgramFiles[index - 1], operation);
   end;
 
 type
   TParalelData = record
     ProgramFiles: TStringList;
-    operation: TOperation
+    operation: TOperation;
+    errorOccurred: Boolean;
   end;
 
   procedure ProcessProgramParallel(Index: PtrInt; Data: Pointer; Item: TMultiThreadProcItem);
@@ -135,8 +193,13 @@ type
     parallelData: ^TParalelData;
   begin
     parallelData := Data;
-    ProcessProgramAtIndex(parallelData^.ProgramFiles, Index, parallelData^.operation);
-
+    if not parallelData.errorOccurred then
+    begin
+      if not ProcessProgramAtIndex(parallelData^.ProgramFiles, Index, parallelData^.operation) then
+      begin
+        parallelData.errorOccurred := True;
+      end;
+    end;
   end;
 
 
@@ -158,6 +221,7 @@ type
     begin
       parallelData.ProgramFiles := ProgramFiles;
       parallelData.operation := operation;
+      parallelData.errorOccurred := False;
       // address, startindex, endindex, optional data, numberOfThreads
       ProcThreadPool.DoParallel(@ProcessProgramParallel, 1, ProgramFiles.Count, Addr(parallelData), operation.threads);
 
@@ -190,18 +254,18 @@ type
     mpFolderPath := 'C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal';
     mpExePath := CreateAbsolutePath('src\mp.exe', mpFolderPath);
     samplesFolderPath := CreateAbsolutePath('samples', mpFolderPath);
-    WriteLn(Format('Scanning folder %s for Pascal source files.', [samplesFolderPath]));
+    Log(Format('Scanning folder %s for Pascal source files.', [samplesFolderPath]));
     PascalFiles := FindAllFiles(samplesFolderPath, '*.pas', True);
     ProgramFiles := TStringList.Create;
     try
       maxFiles := High(Integer);
-      maxFiles := 1;
+      maxFiles := 10;
       if maxFiles > PascalFiles.Count then  maxFiles := PascalFiles.Count;
-      WriteLn(Format('Scanning %d of %d Pascal source files for programs.', [maxFiles, PascalFiles.Count]));
+      Log(Format('Scanning %d of %d Pascal source files for programs.', [maxFiles, PascalFiles.Count]));
       for i := 1 to maxFiles do
       begin
         filePath := PascalFiles[i - 1];
-        // WriteLn(Format('Scanning file %s (%d of %d)', [filePath, i, maxFiles]));
+        // Log(Format('Scanning file %s (%d of %d)', [filePath, i, maxFiles]));
         fileType := GetFileType(filePath);
         case fileType
           of
@@ -209,7 +273,7 @@ type
           begin
             if (verbose) then
             begin
-              WriteLn(Format('WARNING: Skipping file %s with unkown file type.', [filePath]));
+              Log(Format('WARNING: Skipping file %s with unkown file type.', [filePath]));
             end;
           end;
           TFileType.TPROGRAM: begin
@@ -217,18 +281,26 @@ type
           end;
         end;
       end;
-      operation.threads := 2;
-      WriteLn(Format('Processing %d Pascal program with %d Threads.', [ProgramFiles.Count, operation.threads]));
+      operation.threads := TThread.ProcessorCount - 1;
+      Log(Format('Processing %d Pascal program with %d Threads.', [ProgramFiles.Count, operation.threads]));
       operation.action := TAction.COMPILE_REFERENCE;
       operation.verbose := verbose;
       operation.mpFolderPath := referenceMPFolderPath;
       operation.mpExePath := referenceMPExePath;
       ProcessPrograms(ProgramFiles, operation);
+
       operation.action := TAction.COMPILE;
       operation.verbose := verbose;
       operation.mpFolderPath := mpFolderPath;
       operation.mpExePath := mpExePath;
       ProcessPrograms(ProgramFiles, operation);
+
+      operation.action := TAction.COMPARE;
+      operation.verbose := verbose;
+      operation.mpFolderPath := '';
+      operation.mpExePath := '';
+      ProcessPrograms(ProgramFiles, operation);
+
     finally
       ProgramFiles.Free;
       PascalFiles.Free;
@@ -236,6 +308,8 @@ type
   end;
 
 begin
+  InitCriticalSection(cs);
+  startTickCount := GetTickCount64;
   try
     Main;
   except
@@ -244,7 +318,10 @@ begin
       ShowException(e, ExceptAddr);
     end;
   end;
-  Writeln('Main completed. Press any key.');
+  endTickCount := GetTickCount64;
+  seconds := trunc((endTickCount - startTickCount) / 1000);
+  Log(Format('Main completed after %d seconds. Press any key.', [seconds]));
   repeat
   until keypressed;
+  DoneCriticalSection(cs);
 end.
