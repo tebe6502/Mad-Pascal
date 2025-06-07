@@ -6373,7 +6373,10 @@ begin
 
 		    end;
 
-		    Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
+		    if Ident[IdentIndex].PassMethod = VARPASSING then
+		      Push(Ident[IdentIndex].Value, ASPOINTERTOPOINTER, DataSize[POINTERTOK], IdentIndex)
+		    else
+		      Push(Ident[IdentIndex].Value, ASPOINTER, DataSize[POINTERTOK], IdentIndex);
 
 		    inc(i);
 		  end;
@@ -10408,7 +10411,6 @@ begin
 	 iError(i + 2, VariableExpected)
 	else begin
 	 idx:=GetIdent(Tok[i + 2].Name^);
-
 
 	if (Ident[idx].Kind = CONSTTOK)	then begin
 
