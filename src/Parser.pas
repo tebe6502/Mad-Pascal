@@ -1663,6 +1663,8 @@ else
   Ident[NumIdent].PassMethod := VALPASSING;
   Ident[NumIdent].IsUnresolvedForward := false;
 
+  Ident[NumIdent].ObjectVariable := false;
+
   Ident[NumIdent].Section := PublicSection;
 
   Ident[NumIdent].UnitIndex := UnitNameIndex;
@@ -1778,8 +1780,9 @@ end;	//DefineIdent
 
 function DeclareFunction(i: integer; out ProcVarIndex: cardinal): integer;
 var  VarOfSameType: TVariableList;
+     ListPassMethod: TParameterPassingMethod;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType: Byte;
+     VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
      IsNestedFunction: Boolean;
 //     ConstVal: Int64;
@@ -1935,8 +1938,9 @@ end;	//DeclareFunction
 
 function DefineFunction(i, ForwardIdentIndex: integer; out isForward, isInt, isInl, isOvr: Boolean; var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: cardinal; out NestedFunctionAllocElementType: Byte): integer;
 var  VarOfSameType: TVariableList;
+     ListPassMethod: TParameterPassingMethod;
      NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
-     ListPassMethod, VarType, AllocElementType: Byte;
+     VarType, AllocElementType: Byte;
      NumAllocElements: cardinal;
 begin
 
@@ -2316,7 +2320,7 @@ var
    end else
     inc(Types[RecType].Size, DataSize[FieldType]);
 
-   Types[RecType].Field[x].Kind := 0;
+   Types[RecType].Field[x].ObjectVariable := false;
 
   end;
 
@@ -2657,7 +2661,8 @@ end else
 		     Types[NumAllocElements].Field[k].AllocElementType						//
 		     );												//
 
-	  Types[RecType].Field[ Types[RecType].NumFields ].Kind := OBJECTVARIABLE;
+          if DataType = OBJECTTOK then
+	  Types[RecType].Field[ Types[RecType].NumFields ].ObjectVariable := true;
 
 //	writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,',', Types[NumAllocElements].Field[k].NumAllocElements);
          end;

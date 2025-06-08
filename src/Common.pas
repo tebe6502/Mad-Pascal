@@ -227,15 +227,15 @@ const
 
   // Identifier kind codes
 
-  CONSTANT		= CONSTTOK;
-  USERTYPE		= TYPETOK;
-  VARIABLE		= VARTOK;
+  CONSTANT		= CONSTTOK;	// 1
+  USERTYPE		= TYPETOK;	// 2
+  VARIABLE		= VARTOK;	// 3
 //  PROC			= PROCEDURETOK;
 //  FUNC			= FUNCTIONTOK;
   LABELTYPE		= LABELTOK;
   UNITTYPE		= UNITTOK;
-
   ENUMTYPE		= ENUMTOK;
+
 
   // Compiler parameters
 
@@ -260,43 +260,11 @@ const
   CALLDETERMPASS	= 1;
   CODEGENERATIONPASS	= 2;
 
-  // Indirection levels
-
-  ASVALUE			= 0;
-  ASPOINTER			= 1;
-  ASPOINTERTOPOINTER		= 2;
-  ASPOINTERTOARRAYORIGIN	= 3;	// + GenerateIndexShift
-  ASPOINTERTOARRAYORIGIN2	= 4;	// - GenerateIndexShift
-  ASPOINTERTORECORD		= 5;
-  ASPOINTERTOARRAYRECORD	= 6;
-  ASSTRINGPOINTERTOARRAYORIGIN	= 7;
-  ASSTRINGPOINTER1TOARRAYORIGIN	= 8;
-  ASPOINTERTODEREFERENCE	= 9;
-  ASPOINTERTORECORDARRAYORIGIN	= 10;
-  ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN = 11;
-  ASPOINTERTOARRAYRECORDTOSTRING= 12;
-
-  ASCHAR		= 6;	// GenerateWriteString
-  ASBOOLEAN		= 7;
-  ASREAL		= 8;
-  ASSHORTREAL		= 9;
-  ASHALFSINGLE		= 10;
-  ASSINGLE		= 11;
-  ASPCHAR		= 12;
-
-  OBJECTVARIABLE	= 1;
-  RECORDVARIABLE	= 2;
 
   // Fixed-point 32-bit real number storage
 
   FRACBITS		= 8;	// Float Fixed Point
   TWOPOWERFRACBITS	= 256;
-
-  // Parameter passing
-
-  VALPASSING		= 1;
-  CONSTPASSING		= 2;
-  VARPASSING		= 3;
 
 
   // Data sizes
@@ -333,6 +301,45 @@ const
 
 
 type
+
+  // Indirection levels
+
+  TIndirectionLevel = (
+
+  ASVALUE				,	// Ord(Ident[IdentIndex].Kind = VARIABLE) -> 0 -> ASVALUE
+  ASPOINTER				,	// Ord(Ident[IdentIndex].Kind = VARIABLE) -> 1 -> ASPOINTER
+
+  ASPOINTERTOPOINTER			,
+  ASPOINTERTOARRAYORIGIN		,	// + GenerateIndexShift
+  ASPOINTERTOARRAYORIGIN2		,	// - GenerateIndexShift
+  ASPOINTERTORECORD			,
+  ASPOINTERTOARRAYRECORD		,
+  ASSTRINGPOINTERTOARRAYORIGIN		,
+  ASSTRINGPOINTER1TOARRAYORIGIN		,
+  ASPOINTERTODEREFERENCE		,
+  ASPOINTERTORECORDARRAYORIGIN		,
+  ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN ,
+  ASPOINTERTOARRAYRECORDTOSTRING	,
+
+  ASCHAR				,	// GenerateWriteString
+  ASBOOLEAN				,
+  ASREAL				,
+  ASSHORTREAL				,
+  ASHALFSINGLE				,
+  ASSINGLE				,
+  ASPCHAR
+  );
+
+  // Parameter passing
+
+  TParameterPassingMethod = (
+
+    UNDEFINED,
+    VALPASSING,   // By value, modifiable
+    CONSTPASSING, // By const, unmodifiable
+    VARPASSING    // By reference, modifiable
+    );
+
 
   ModifierCode = (mKeep = $100, mOverload= $80, mInterrupt = $40, mRegister = $20, mAssembler = $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
@@ -380,7 +387,7 @@ type
     DataType: Byte;
     NumAllocElements: Cardinal;
     AllocElementType: Byte;
-    PassMethod: Byte;
+    PassMethod: TParameterPassingMethod;
     i, i_: integer;
    end;
 
@@ -396,7 +403,7 @@ type
     DataType: Byte;
     NumAllocElements: Cardinal;
     AllocElementType: Byte;
-    Kind: Byte;
+    ObjectVariable: Boolean;
   end;
 
   TType = record
@@ -430,7 +437,7 @@ type
     Libraries : Integer;		// EXTERNAL alias 'libraries'
     DataType: Byte;
     IdType: Byte;
-    PassMethod: Byte;
+    PassMethod: TParameterPassingMethod;
     Pass: Byte;
 
     NestedNumAllocElements: cardinal;
@@ -473,7 +480,9 @@ type
 
       VARIABLE, USERTYPE:
 	(NumAllocElements, NumAllocElements_: Cardinal;
-	 AllocElementType: Byte);
+	 AllocElementType: Byte;
+	 ObjectVariable: Boolean;
+	);
     end;
 
 
