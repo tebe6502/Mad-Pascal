@@ -69,14 +69,14 @@
      Result := listing[i] = #9'sta :bp'
    end;
 
-   function INC_BP_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'inc :bp+1'
-   end;
-
    function STA_BP_1(i: integer): Boolean;
    begin
      Result := listing[i] = #9'sta :bp+1'
+   end;
+
+   function INC_BP_1(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'inc :bp+1'
    end;
 
    function STY_BP_1(i: integer): Boolean;
@@ -117,6 +117,11 @@
    function STA_BP2_1(i: integer): Boolean;
    begin
      Result := listing[i] = #9'sta :bp2+1'
+   end;
+
+   function STA_BP2_(i: integer): Boolean;
+   begin
+     Result := (listing[i] = #9'sta :bp2') or (listing[i] = #9'sta :bp2+1')
    end;
 
    function INC_BP2_1(i: integer): Boolean;

@@ -57,6 +57,7 @@
        if ora_stack(p) or
           (sty_stack(p) and lab_a(p-1) and lda(p+1) and and_stack(p+2)) or
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
+          (sty_stack(p) and lab_a(p-1) and ldy_1(p+1)) or
           (sty_stack(p) and lab_a(p-1) and (copy(listing[p], 6, 256) <> copy(listing[i+2], 6, 256))) or
           (tya(p) and (lab_a(p-1) = false) and (and_stack(p+1) = false)) then begin yes:=false; Break end;
 
