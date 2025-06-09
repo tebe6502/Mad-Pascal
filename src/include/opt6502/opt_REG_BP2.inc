@@ -81,9 +81,11 @@
 	 adc(i+10) and							// adc RSON+1				; 10
 	 sta_tmp_1(i+11) and						// sta :TMP+1				; 11
 	 ldy_im_0(i+12) and						// ldy #$00				; 12
-	 (listing[i+13] = #9'mva (:TMP),y :bp2') and			// mva (:TMP),y :bp2			; 13
-	 iny(i+14) and							// iny					; 14
-	 (listing[i+15] = #9'mva (:TMP),y :bp2+1') and			// mva (:TMP),y :bp2+1			; 15
+	 (listing[i+13] = #9'lda (:TMP),y') and				// lda (:TMP),y				; 13
+	 sta_bp2(i+14) and						// sta :bp2				; 14
+	 iny(i+15) and							// iny					; 15
+	 (listing[i+16] = #9'lda (:TMP),y') and				// lda (:TMP),y				; 16
+	 sta_bp2_1(i+17) and						// sta :bp2+1				; 17
          (copy(listing[i+10], 6, 256) = copy(listing[i+7], 6, 256) + '+1') and
          (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
 	 (copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) and
@@ -97,7 +99,7 @@
 	end else
 	if sta_tmp_1(i+11) and asl_stack(i+3) and rol_a(i+4) then begin
 	 arg0:='];'+GetString(i)+';'+GetString(i+2)+';'+GetString(i+7)+';'+GetString(i+10)+';';
-	 k:=16;
+	 k:=18;
 	end else
 	if asl_stack(i+3) and rol_a(i+4) then begin
 	 arg0:='&;'+GetString(i)+';'+GetString(i+2)+';'+GetString(i+6)+';'+GetString(i+9)+';';
@@ -158,6 +160,8 @@
 	  listing[i+13]:= '';
 	  listing[i+14]:= '';
 	  listing[i+15]:= '';
+	  listing[i+16]:= '';
+	  listing[i+17]:= '';
          end else
 	 if arg0[1] = '&' then begin
 	  listing[i]   := '';
