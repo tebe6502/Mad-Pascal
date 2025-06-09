@@ -1890,7 +1890,7 @@ end;
 {$i include/opt6502/opt_WHILE_AND.inc}
 {$i include/opt6502/opt_WHILE_OR.inc}
 {$i include/opt6502/opt_BOOLEAN_AND.inc}
-//{$i include/opt6502/opt_BOOLEAN_OR.inc}
+{$i include/opt6502/opt_BOOLEAN_OR.inc}
 
 // -----------------------------------------------------------------------------
 

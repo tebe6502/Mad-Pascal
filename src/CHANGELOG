@@ -1,3 +1,7 @@
+09.06.2025
+- dodana obsługa adresowania wskaźnika do tablicy w OBJECT
+- optymalizacja 'opt_BOOLEAN_OR.inc'
+
 16.05.2025
 - poprawki dla adresowanie rekordów VARPASSING
 
