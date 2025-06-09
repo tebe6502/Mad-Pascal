@@ -10843,10 +10843,6 @@ case Tok[i].Kind of
 
     	    VarType := Ident[IdentIndex].AllocElementType;
 
-//trs
-//	    writeln(Ident[IdentIndex].Name,',',vartype,' | ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,', : ',Ident[IdentIndex].ObjectVariable  ,' | ', Tok[i+2].Kind);
-
-
 
 	    if Tok[i + 2].Kind = DEREFERENCETOK then begin
 	     inc(i);
