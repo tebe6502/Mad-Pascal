@@ -6,11 +6,12 @@ program compress;
 uses buffer, huffenc;
 
 var
-   input   : reader;
+   rFile   : reader;
    infile  : string;
    outfile : string;
 
 begin
+{
    if (paramCount <> 2) then
    begin
       writeln(' usage: compress infile outfile ');
@@ -18,12 +19,28 @@ begin
    end;
    infile := paramstr(1);
    outfile := paramstr(2);
+ }
 
-   input.open(infile);
+{$ifdef atari}
+   infile:='D:KORONIS.MIC';
+   outfile:='D:KOR.HUF';   
+{$else}
+   infile:='KORONIS.MIC';
+   outfile:='KOR.HUF';   
+{$endif}   
+
+   rFile.open(infile);
+   rFile.fclose;
+
+
    openOutput(outfile);
-   while not(input.eof) do
-      writeChar(input.readChar);
-   input.fclose;
+
+   while not(rFile.end_of_file) do
+      writeChar(rFile.readChar);
+
    huffenc.closeOutput;
 
 end.
+ 
+ 
+ // 178 wycina stackorigin+9

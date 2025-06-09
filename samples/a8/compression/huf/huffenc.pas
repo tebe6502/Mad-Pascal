@@ -9,7 +9,7 @@ interface
 
 procedure openOutput(f : string);
 procedure writeChar(o  : char);
-procedure writeLine(o : string);
+//procedure writeLine(o : string);
 procedure closeOutput;
 
 implementation
@@ -21,7 +21,7 @@ const
 
 type
    treenode = record
-		 leftchild,rightchild : integer;
+		 leftchild,rightchild : smallint;
 		 character	      : word;
 		 {low byte indicates a character $FF00 indicates a node.}
 		 frequency            : word;
@@ -32,23 +32,24 @@ type
 	      end;
 
 var output   : writer;
+
    outbyte   : byte;
    bit	     : byte;
    input     : array[0 .. 8192] of char;
-   itail     : integer; {place where next character will be stored}
-   hufftree  : array[0 .. 512] of treenode;
-   hufftail  : integer; {index into tree array}
-   freqtable : array[0..255] of charfreq;
-   fttail    : integer; {place where the next entry in the frequency table will be stored}
+   itail     : smallint; {place where next character will be stored}
+   hufftree  : array[0 .. 512] of ^treenode;
+   hufftail  : smallint; {index into tree array}
+   freqtable : array[0..255] of ^charfreq;
+   fttail    : smallint; {place where the next entry in the frequency table will be stored}
 
 
 procedure addToTable(ch,fr : word);
-var i,c	  : integer;
+var i,c	  : smallint;
 begin
    i:=0;
    while i<fttail do
    begin
-      if (fr>freqTable[i].frequency) then
+      if (fr > freqTable[i].frequency) then
       begin
 	 {make room in the table}
 	 for c := fttail downto i+1 do
@@ -57,6 +58,9 @@ begin
 	 end;
 	 inc(fttail);
 	 {add it in the now empty slot}
+
+	 GetMem(freqtable[i], sizeof(charfreq));
+
 	 freqtable[i].character:=ch;
 	 freqtable[i].frequency:=fr;
 	 exit;
@@ -64,8 +68,12 @@ begin
       inc(i);
    end;
    {ok it's the worst one add it at the end}
+   
+   GetMem(freqtable[fttail], sizeof(charfreq));
+  
    freqtable[fttail].character:=ch;
    freqtable[fttail].frequency:=fr;
+
    inc(fttail);
 end;
 
@@ -79,59 +87,61 @@ end;
 procedure fillFreqTable;
 var
    frequency : array[0..255] of word;
-   i	     : integer;
+   i	     : smallint;
 begin
    fttail := 0;
+
    for i:=0 to 255 do
       frequency[i]:=0;
+
    for i:= 0 to itail-1 do
       inc(frequency[ord(input[i])]);
+
    for i:= 0 to 255 do
       if frequency[i]>0 then
 	 addToTable(i,frequency[i]);
 end;
 
-function huffNode(ch,fr	: word):integer;
+function huffNode(ch,fr	: word):smallint;
 var
-   i : integer;
+   i : smallint;
 begin
    if ((ch and $F000) = $F000) then
    begin {it's a node that's already created.}
+
       for i:= 0  to hufftail-1 do
-	 with hufftree[i] do
-	 begin
-	    if ((ch = character) and (fr = frequency)) then
-	    begin
+	    if ((ch = hufftree[i].character) and (fr = hufftree[i].frequency)) then
 	       {found it!}
-	       huffNode := i;
-	       exit;
-	    end;
-	 end;
+	       exit(i);
    end
    else
    begin
+      GetMem(hufftree[hufftail], sizeof(treenode));
+   
       {Create a node for this character}
       hufftree[hufftail].leftChild := -1;
       hufftree[hufftail].rightChild := -1;
       hufftree[hufftail].character := ch;
       hufftree[hufftail].frequency := fr;
-      huffNode := hufftail;
+
+      Result := hufftail;
+
       inc(hufftail);
    end;
 end;
 
-procedure writeNode(node : integer);
+procedure writeNode(node : smallint);
 begin
-   with hufftree[node] do
-   begin
-      output.writeChar(chr(hi(character)));
-      output.writeChar(chr(lo(character)));
-      if ((character and $F000) = $F000) then
+
+      output.writeChar(chr(hi(hufftree[node].character)));
+      output.writeChar(chr(lo(hufftree[node].character)));
+
+      if ((hufftree[node].character and $F000) = $F000) then
       begin
-	 writeNode(leftChild);
-	 writeNode(rightChild);
+	 writeNode(hufftree[node].leftChild);
+	 writeNode(hufftree[node].rightChild);
       end;
-   end;
+
 end;
 
 procedure writeBit(o : boolean);
@@ -155,6 +165,8 @@ var
    cn,c  : word;
    found : boolean;
 begin
+//   writeln(byte(i));
+
    cn := 0;
    node[0] := hufftail - 1; {root node};
    enc[0] := 0;
@@ -189,9 +201,13 @@ begin
 	 begin {didn't find it, move up the stack}
 	    dec(cn);
 	 end;
-	 if (cn>64) then halt(0);
+	 
+//	 write(cn,'-');
+	 if (cn>64) then BEGIN writeln('error'); halt(0); END;
       end;
    end;
+
+//   halt;
 
    {ok now we should have found the encoding! write it!}
    for c:= 0 to cn do
@@ -209,6 +225,9 @@ var
    pch,pfr     : word;
    i	       : word;
 begin
+ writeln('encode');
+
+
    {the first step in building a huffman tree is collecting frequency information}
    fillFreqTable;
 
@@ -232,6 +251,8 @@ begin
       pfr := fr1 + fr2;
       pch := $F000 or hufftail;
       addToTable(pch,pfr); {add to the freq table}
+      
+      GetMem(hufftree[hufftail], sizeof(treenode));
 
       {add to the huff coding tree}
       hufftree[hufftail].leftChild := hn1;
@@ -241,9 +262,9 @@ begin
       inc(hufftail);
    end;
 
-   {writeln('hufftail ',hufftail);
+   writeln('hufftail ',hufftail);
    writeln('fttail ',fttail);
-   writeln('itail ',itail);}
+   writeln('itail ',itail);
 
    {ok now after all that we can encode bytes, I know it took a while}
    { but first we need to encode the tree and save that to disk }
@@ -251,8 +272,8 @@ begin
    writeNode(hufftail-1); {the root node is the last one created}
 
    {write out the length (number of bytes) encoded in this block}
-   output.writeChar(chr(hi(itail)));
-   output.writeChar(chr(lo(itail)));
+//   output.writeChar(chr(hi(itail)));
+//   output.writeChar(chr(lo(itail)));
 
    outbyte := 0;
    bit := 0;
@@ -278,6 +299,7 @@ begin
    itail := 0;
 end;
 
+
 procedure writeChar(o  : char);
 begin
    input[itail] := o;
@@ -285,18 +307,23 @@ begin
    if (itail = 8192) then encodeBlock;
 end;
 
+{
 procedure writeLine(o : string);
 var
-   i :  integer;
+   i :  smallint;
 begin
    for i:=1 to length(o) do
       writeChar(o[i]);
+
    writeChar(chr(13));
    writeChar(chr(10));
 end;
+}
 
 procedure closeOutput;
 begin
+   writeln('> ',itail);
+
    if (itail>0) then encodeBlock;
    output.flush;
    output.fclose;
