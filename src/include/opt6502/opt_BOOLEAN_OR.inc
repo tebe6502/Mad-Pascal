@@ -15,14 +15,15 @@
        if and_stack(p) or
           (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
+          (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and (copy(listing[p], 6, 256) = copy(listing[p+2], 6, 256))) or
           (sty_stack(p) and lab_a(p-1) and (copy(listing[p], 6, 256) <> copy(listing[i+2], 6, 256))) or
           (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
 
       if yes then begin
 
 
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
+//      for p:=0 to l-1 do writeln(listing[p]);
+//      writeln('-------');
 
 
        for p:=i-1 downto 0 do begin
@@ -35,7 +36,7 @@
 	   (listing[p+1] = listing[i+2]) and					// ora :STACKORIGIN	; 1
 	   (listing[p+2] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; 2
 	 begin
-	   listing[p+1]   := #9'jeq l_' + IntToHex(CodeSize, 4) + 's';
+	   listing[p+1]   := #9'jne l1_' + IntToHex(CodeSize, 4) + 's';
 	   listing[p+2] := '';
 	 end;
 
@@ -51,7 +52,7 @@
 	   listing[p+3] := '';
 	  end else begin
 	   listing[p+1] := #9'lda ' + copy(listing[p+2], 6, 256);
-	   listing[p+2] := #9'jeq l_' + IntToHex(CodeSize, 4) + 's';
+	   listing[p+2] := #9'jne l_' + IntToHex(CodeSize, 4) + 's';
 	   listing[p+3] := '';
 	  end;
 
@@ -60,8 +61,9 @@
 	if dey(p) and								// dey
 	   lab_a(p+1) 								//@
 	then begin
-	  listing[p] := #9'jmp l_' + IntToHex(CodeSize, 4) + 's';
+	  listing[p] := #9'jmp *+6';
 
+	  listing[p+1] := '@\'#9'jmp l_' + IntToHex(CodeSize, 4) + 's';
 	end;
 
        end;
@@ -70,8 +72,8 @@
        listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$01';
 
 
-      for p:=0 to l-1 do writeln(listing[p]);
-      writeln('-------');
+//      for p:=0 to l-1 do writeln(listing[p]);
+//      writeln('-------');
 
 
        Result:=false; Break;
