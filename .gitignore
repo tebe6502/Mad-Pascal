@@ -16,3 +16,6 @@ src/test.bat
 *.opt
 samples/WinMerge.txt
 *.WinMerge
+.DS_Store
+projects/TestMadPascal
+projects/MakeMadPascal
