@@ -9,7 +9,7 @@ begin
 // ===				     FORTMP.
 // -----------------------------------------------------------------------------
 
-    if (pos('sta @FORTMP_', listing[i+1]) > 0) and			// change to MVA so that OPTYFOR optimization works
+    if (pos('sta @FORTMP_', listing[i+1]) > 0) and			// zamiana na MVA aby zadzialala optymalizacja OPTYFOR
        lda_im(i) then
     begin
      listing[i+1] := #9'mva ' + copy(listing[i], 6, 4) + ' ' +  copy(listing[i+1], 6, 256);
@@ -19,7 +19,7 @@ begin
     end;
 
 
-    if (pos('sta @FORTMP_', listing[i+1]) > 0) and			// change to MVA so that OPTYFOR optimization works
+    if (pos('sta @FORTMP_', listing[i+1]) > 0) and			// zamiana na MVA aby zadzialala optymalizacja OPTYFOR
        lda_adr(i) and (iy(i) = false) then
     begin
      listing[i+1] := #9'mva ' + copy(listing[i], 6, 256) + ' ' +  copy(listing[i+1], 6, 256);
