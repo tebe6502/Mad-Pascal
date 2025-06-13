@@ -29,18 +29,13 @@ begin
    outfile:='KOR.HUF';   
 {$endif}   
 
-   rFile.open(infile);
-   rFile.fclose;
-
-
+   rFile.fopen(infile);
    openOutput(outfile);
 
-   while not(rFile.end_of_file) do
+   while not(rFile.feof) do
       writeChar(rFile.readChar);
 
    huffenc.closeOutput;
+   rFile.fclose;
 
 end.
- 
- 
- // 178 wycina stackorigin+9

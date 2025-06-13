@@ -39,7 +39,7 @@ var output   : writer;
    itail     : smallint; {place where next character will be stored}
    hufftree  : array[0 .. 512] of ^treenode;
    hufftail  : smallint; {index into tree array}
-   freqtable : array[0..255] of ^charfreq;
+   [striped] freqtable : array[0..255] of ^charfreq;
    fttail    : smallint; {place where the next entry in the frequency table will be stored}
 
 
@@ -86,7 +86,7 @@ end;
 
 procedure fillFreqTable;
 var
-   frequency : array[0..255] of word;
+   [striped] frequency : array[0..255] of word;
    i	     : smallint;
 begin
    fttail := 0;
@@ -160,13 +160,11 @@ end;
 procedure encodeByte(i : char);
 var
    {a stack for the depth first search}
-   node  : array[0..64] of word;
+   [striped] node  : array[0..64] of word;
    enc   : array[0..64] of byte; { 0 unchecked 1 left 2 right 3 not found}
    cn,c  : word;
    found : boolean;
 begin
-//   writeln(byte(i));
-
    cn := 0;
    node[0] := hufftail - 1; {root node};
    enc[0] := 0;
@@ -202,12 +200,9 @@ begin
 	    dec(cn);
 	 end;
 	 
-//	 write(cn,'-');
 	 if (cn>64) then BEGIN writeln('error'); halt(0); END;
       end;
    end;
-
-//   halt;
 
    {ok now we should have found the encoding! write it!}
    for c:= 0 to cn do
@@ -225,9 +220,7 @@ var
    pch,pfr     : word;
    i	       : word;
 begin
- writeln('encode');
-
-
+ 
    {the first step in building a huffman tree is collecting frequency information}
    fillFreqTable;
 
@@ -290,7 +283,7 @@ end;
 
 procedure openOutput(f : string);
 begin
-   output.open(f);
+   output.fopen(f);
    {write the HUFF signature}
    output.writeChar('H');
    output.writeChar('U');
@@ -304,7 +297,7 @@ procedure writeChar(o  : char);
 begin
    input[itail] := o;
    inc(itail);
-   if (itail = 8192) then encodeBlock;
+   if (itail = high(input)) then encodeBlock;
 end;
 
 {
@@ -322,8 +315,6 @@ end;
 
 procedure closeOutput;
 begin
-   writeln('> ',itail);
-
    if (itail>0) then encodeBlock;
    output.flush;
    output.fclose;

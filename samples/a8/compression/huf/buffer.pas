@@ -16,10 +16,12 @@ type
       pos : word;
       input : file;
       
-      constructor open(infile:string);
+      _eof: Boolean;
+      
+      constructor fopen(infile:string);
       function readChar:char;
 //      function readLine:string;
-      function end_of_file:boolean;
+      function feof:boolean;
       procedure fillBuffer;
       destructor fclose;
    end;
@@ -28,7 +30,7 @@ type
       buff : PChar;
       pos : word;
       output : file;
-      constructor open(outfile:string);
+      constructor fopen(outfile:string);
       procedure writeChar(o : char);
 //      procedure writeLine(o : string);
       procedure flush;
@@ -37,11 +39,12 @@ type
    
 implementation
 
-constructor reader.open(infile:string);
+constructor reader.fopen(infile:string);
 begin
    //new(buff);
-   GetMem(buff, 8192); 
+   GetMem(buff, 4096); 
    
+   _eof:=false;
    pos := 0;
    filled:=0;
    assign(input,infile);  
@@ -53,11 +56,14 @@ end;
 procedure reader.fillBuffer;
 begin
    if (pos<filled) then exit; {we haven't read the buffer completely}
-   //if (eof(input)) then exit; {the last read reached the EOF!}
+   if _eof then exit; {the last read reached the EOF!}
    
-   blockRead(input,buff^,8192,filled);
+   blockRead(input,buff^,4096,filled);
+   
+   if filled < 4096 then _eof:=true;
+ 
    pos:=0;
-
+ 
 end;
 
 function reader.readChar:char;
@@ -69,7 +75,7 @@ begin
    end;
    Result := buff[pos];
    inc(pos);
-   //if (pos=filled) then reader.fillBuffer;
+   if (pos=filled) then reader.fillBuffer;
 end;
 
 {
@@ -91,10 +97,10 @@ begin
 end;
 }
 
-function reader.end_of_file:boolean;
+function reader.feof:boolean;
 begin
    Result := true;
-   if ((pos<filled) {or (not(eof(input)))} ) then Result := false;
+   if ((pos<filled) or (_eof = false)) then Result := false;
 end;
    
 destructor reader.fclose;
@@ -104,11 +110,11 @@ begin
 end;
 
 
-constructor writer.open(outfile:string);
+constructor writer.fopen(outfile:string);
 begin
    pos:=0;
    //new(buff);
-   GetMem(buff, 4098); 
+   GetMem(buff, 4096); 
 
    assign(output,outfile);
    rewrite(output,1);
@@ -119,7 +125,7 @@ begin
 
    buff[pos] := o;
    inc(pos);
-   if (pos=4097) then writer.flush;
+   if (pos=4096) then writer.flush;
 end;
 
 {
