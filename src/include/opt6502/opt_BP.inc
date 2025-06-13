@@ -2857,10 +2857,10 @@ begin
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH+9	; 4
        lda_a(i+5) and										// lda 					; 5
        add_stack(i+6) and									// add :STACKORIGIN+9			; 6
-       sta_a(i+7) and										// sta					; 7
+       sta_a(i+7) and (sta_bp2_(i+7) = false) and						// sta					; 7	~ sta :bp2
        lda_a(i+8) and										// lda 					; 8
        adc_stack(i+9) and									// adc :STACKORIGIN+STACKWIDTH+9	; 9
-       sta_a(i+10) then										// sta					; 10
+       sta_a(i+10) and (sta_bp2_(i+10) = false) then						// sta					; 10	~ sta :bp2
      if (copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) and
 	(copy(listing[i+4], 6, 256) = copy(listing[i+9], 6, 256)) then
 	begin
@@ -2886,10 +2886,10 @@ begin
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH+9	; 4
        lda_stack(i+5) and									// lda :STACKORIGIN+9			; 5
        add(i+6) and										// add					; 6
-       sta_a(i+7) and										// sta					; 7
+       sta_a(i+7) and (sta_bp2_(i+7) = false) and						// sta					; 7	~ sta :bp2
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH+9	; 8
        adc(i+9) and										// adc					; 9
-       sta_a(i+10) then										// sta					; 10
+       sta_a(i+10) and (sta_bp2_(i+10) = false) then						// sta					; 10	~ sta :bp2
      if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
 	(copy(listing[i+4], 6, 256) = copy(listing[i+8], 6, 256)) then
 	begin
@@ -3435,7 +3435,7 @@ begin
        (add_sub_val(i+8) or and_ora_eor_val(i+8)) and						// add|sub|and|ora|eor			; 8
        sta_a(i+9) then										// sta					; 9
      if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
-       begin   
+       begin
 	 p := GetWORD(i, i+3);
 
 	 listing[i+6] := #9'ldy ' + copy(listing[i+1], 6, 256);
