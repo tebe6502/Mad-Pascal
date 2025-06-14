@@ -2107,7 +2107,7 @@ begin
 
     TIOCode.FileMode:
 
-      asm65(#9'@openfile ' + IdentifierAt(IdentIndex).Name + ', C.SYSTEM.FileMode');
+      asm65(#9'@openfile ' + IdentifierAt(IdentIndex).Name + ', MAIN.SYSTEM.FileMode');
 
     TIOCode.Close:
 
