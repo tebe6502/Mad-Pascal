@@ -217,7 +217,7 @@ var
   end;
 
   function RunMadPascal(const operation: TOperation; curDir: TFolderPath; fileName: String;
-    a65FileName: String; fileResult: TFileResult): Boolean;
+    a65FileName: String; var fileResult: TFileResult): Boolean;
   var
     exename: TProcessString;
     commands: array of TProcessString;
@@ -465,18 +465,16 @@ type
     end;
 
     // Create / delete operation log file
-    operationLog := TStringList.Create;
     for i := Low(operation.results) to High(operation.results) do
     begin
       case operation.results[i].status of
         TStatus.ERROR:
         begin
           operation.logMessages.Add(Format('ERROR: Errors while processing %s', [operation.results[i].filePath]));
-          operationLog.AddStrings(operation.results[i].logMessages);
+           operation.logMessages.AddStrings(operation.results[i].logMessages);
         end;
       end;
     end;
-    operationLog.Free;
   end;
 
   procedure GetNextParam(var i: Integer; var Value: String);
