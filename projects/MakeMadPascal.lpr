@@ -571,8 +571,8 @@ type
     Log(Format('MP Exe Path             : %s', [mpExePath]));
 
 
-    Log(Format('Input Folder Path          : %s', [inputFolderPath]));
-    Log(Format('Input File Pattern         : %s', [inputFilePattern]));
+    Log(Format('Input Folder Path       : %s', [inputFolderPath]));
+    Log(Format('Input File Pattern      : %s', [inputFilePattern]));
 
     Log(Format('Scanning input folder %s for Pascal source files.', [inputFolderPath]));
     PascalFiles := FindAllFiles(inputFolderPath, '*.pas', True);
