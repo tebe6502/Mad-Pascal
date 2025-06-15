@@ -70,6 +70,7 @@ end;
 
 function ParseCPUParameter(const index: Longint; const parameterValue: String): TCPU;
 begin
+Result := TCPU.NONE;
 if parameterValue <> '' then
   if parameterValue = '6502' then Result:= TCPU.CPU_6502
   else
@@ -83,7 +84,7 @@ end;
 
 function ParseTargetParameter(const index: Longint; const parameterValue: String): TTargetID;
 begin
-
+Result := TTargetID.NONE;
 if parameterValue = 'A8' then Result := TTargetID.A8
 else if parameterValue = 'C64' then Result := TTargetID.C64
   else if parameterValue = 'C4P' then Result := TTargetID.C4P

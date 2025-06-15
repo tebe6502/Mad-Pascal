@@ -289,12 +289,7 @@ type
     NestedFunctionAllocElementType: TDataType;
     isNestedFunction: Boolean;
 
-    LoopVariable,
-    isAbsolute,
-    isInit,
-    isUntype,
-    isInitialized,
-    Section: Boolean;
+    LoopVariable, isAbsolute, isInit, isUntype, isInitialized, Section: Boolean;
 
     Kind: TTokenKind;
 
@@ -304,45 +299,33 @@ type
     ProcAsBlock: Integer;
     ObjectIndex: Integer;
 
-    IsUnresolvedForward,
-    updateResolvedForward,
-    isOverload,
-    isRegister,
-    isInterrupt,
-    isRecursion,
-    isStdCall,
-    isPascal,
-    isInline,
-    isAsm,
-    isExternal,
-    isKeep,
-    isVolatile,
-    isStriped,
-    IsNotDead: Boolean;
+    IsUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
+    isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile,
+    isStriped, IsNotDead: Boolean;
 
     //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;
     AllocElementType: TDataType
   end;
 
-    // An identifier list owns identifier instances.
-    TIdentifierList = class
-    public
+  // An identifier list owns identifier instances.
+  TIdentifierList = class
+  public
 
-      constructor Create;
-      destructor Free;
+    constructor Create;
+    destructor Free;
 
-      function Size: Integer;
-      procedure Clear;
-      function AddIdentifier: TIdentifier;
-      function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+    function Size: Integer;
+    procedure Clear;
+    function AddIdentifier: TIdentifier;
+    function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
 
-    private
-    type TIdentifierArray = array of TIdentifier;
-    var
-      identifierArray: TIdentifierArray;
+  private
+  type TIdentifierArray = array of TIdentifier;
+  var
+    identifierArray: TIdentifierArray;
 
-    end;
+  end;
 
   TCallGraphNode = record
     ChildBlock: array [1..MAXBLOCKS] of Integer;
@@ -607,6 +590,7 @@ function TTokenList.GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TStr
 var
   kind: TTokenKind;
 begin
+  Result := '';
   if tokenIndex > Size then
     Result := 'no token'
   else
@@ -654,7 +638,7 @@ function TIdentifierList.AddIdentifier(): TIdentifier;
 var
   i: Integer;
 begin
-   Result := TIdentifier.Create;
+  Result := TIdentifier.Create;
 
   // if size >= MAXIDENTS then
   //    Error(NumIdent, 'Out of resources, IDENT');
@@ -695,6 +679,7 @@ end;
 
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 begin
+  Result := $00;
   case ioCode of
     TIOCode.OpenRead: Result := $04;
     TIOCode.ReadRecord: Result := $05;
