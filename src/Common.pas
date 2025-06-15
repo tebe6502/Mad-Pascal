@@ -618,6 +618,7 @@ end;
 // The function is currently kept for compatibility, simulating the previous global variable.
 function NumTok: Integer;
 begin
+  Result := 0;
   if tokenList <> nil then
   begin
     Result := tokenList.Size;

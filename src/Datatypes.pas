@@ -71,6 +71,7 @@ begin
     end
     else
     begin
+      Result := 0;
       Assert(False);
     end;
 

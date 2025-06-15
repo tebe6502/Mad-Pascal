@@ -258,6 +258,7 @@ uses
       begin
         parameter := TEnvironment.GetParameterString(i);
         parameterUpperCase := AnsiUpperCase(parameter);
+        parameterValue := '';
         // Options start with a minus.
         if parameter[1] = '-' then
         begin
