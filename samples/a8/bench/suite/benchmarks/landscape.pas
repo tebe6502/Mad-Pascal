@@ -53,7 +53,7 @@ begin
 
           stop := colheight[c];
           if start > stop then begin
-            dec(p,(start - stop) * 40);
+            dec(p,byte(start - stop) * 40);
             stop := start;
             start := colheight[c];
           end;
