@@ -11,7 +11,8 @@ var i, p, k: integer;
     lab, tmp: string;
 begin
 
-   i:=100;
+   i := 100;
+   p := 0;
 
    if (pos(#9'jmp a_', TemporaryBuf[i]) > 0) then			// jmp a_xxxx
     begin

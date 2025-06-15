@@ -1,7 +1,8 @@
 
 function opt_SPL(i: integer): Boolean;
 var p: integer;
-var err: integer;
+var err: integer;  //  Note: Local variable "err" is assigned but never used
+
 begin
 
     Result := true;
@@ -18,6 +19,7 @@ begin
 //       spl(i+2) and										// spl					; 2
        dey(i+3) then										// dey					; 3
      begin
+
 	val(copy(listing[i+1], 7, 256), p, err);
 
 	listing[i+2] := '';
