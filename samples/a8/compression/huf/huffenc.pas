@@ -39,7 +39,7 @@ var output   : writer;
    itail     : smallint; {place where next character will be stored}
    hufftree  : array[0 .. 512] of ^treenode;
    hufftail  : smallint; {index into tree array}
-   [striped] freqtable : array[0..255] of ^charfreq;
+   freqtable : array[0..255] of ^charfreq;
    fttail    : smallint; {place where the next entry in the frequency table will be stored}
 
 
@@ -86,7 +86,7 @@ end;
 
 procedure fillFreqTable;
 var
-   [striped] frequency : array[0..255] of word;
+   frequency : array[0..255] of word;
    i	     : smallint;
 begin
    fttail := 0;
@@ -160,7 +160,7 @@ end;
 procedure encodeByte(i : char);
 var
    {a stack for the depth first search}
-   [striped] node  : array[0..64] of word;
+   node  : array[0..64] of word;
    enc   : array[0..64] of byte; { 0 unchecked 1 left 2 right 3 not found}
    cn,c  : word;
    found : boolean;

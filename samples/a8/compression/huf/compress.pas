@@ -11,7 +11,7 @@ var
    outfile : string;
 
 begin
-{
+
    if (paramCount <> 2) then
    begin
       writeln(' usage: compress infile outfile ');
@@ -19,8 +19,8 @@ begin
    end;
    infile := paramstr(1);
    outfile := paramstr(2);
- }
-
+ 
+(*
 {$ifdef atari}
    infile:='D:KORONIS.MIC';
    outfile:='D:KOR.HUF';   
@@ -28,6 +28,7 @@ begin
    infile:='KORONIS.MIC';
    outfile:='KOR.HUF';   
 {$endif}   
+*)
 
    rFile.fopen(infile);
    openOutput(outfile);
