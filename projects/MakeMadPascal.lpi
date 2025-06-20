@@ -23,6 +23,18 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
+      <Modes>
+        <Mode Name="default">
+          <local>
+            <CommandLineParams Value="-allThreads -allFiles -inputFilePattern compression -compileReference -compile -compare -openResults -waitForKey"/>
+          </local>
+        </Mode>
+        <Mode Name="cleanup">
+          <local>
+            <CommandLineParams Value="-allThreads -allFiles -cleanup -cleanupReference -waitForKey"/>
+          </local>
+        </Mode>
+      </Modes>
     </RunParams>
     <RequiredPackages>
       <Item>
