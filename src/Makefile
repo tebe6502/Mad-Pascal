@@ -1,3 +1,4 @@
+# See https://stackoverflow.com/questions/714100/os-detecting-makefile
 
 SRC = mp.pas \
   Common.pas \
@@ -17,14 +18,31 @@ SRC = mp.pas \
   include/opt65c02/*.inc \
   targets/*.inc
 
-BINDIR = ../bin
+BINBASEDIR = ../bin
 ifeq ($(OS),Windows_NT)
+  BINDIR = $(BINBASEDIR)/windows
   BIN = $(BINDIR)/mp.exe
 else
-  BIN = $(BINDIR)/mp
+    UNAME_S := $(shell uname -s)
+    UNAME_P := $(shell uname -p)
+    ifeq ($(UNAME_S),Linux)
+        # TODO
+		BIN = $(BINDIR)/mp
+    endif
+    ifeq ($(UNAME_S),Darwin)
+	  ifneq ($(filter arm%,$(UNAME_P)),)
+          BINDIR = $(BINBASEDIR)/macosx_aarch64
+      endif i
+       ifeq ($(UNAME_P),x86_64)
+          BINDIR = $(BINBASEDIR)/macosx_x86_64
+     endif
+       BIN = $(BINDIR)/mp
+    endif
 endif
 
 $(BIN): $(SRC)
+	echo "Compiling on $(OS)"
+	mkdir -p $(BINDIR)
 	fpc -Mdelphi -v -O3 $< -o$(BIN)
 
 clean:
