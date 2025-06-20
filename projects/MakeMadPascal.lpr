@@ -11,7 +11,7 @@ uses
      {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
      {$ENDIF} {$IFDEF DARWIN}
-  cthreads, cmem,
+  //cthreads, cmem,
      {$ENDIF}
   Crt,
   Classes,
@@ -111,6 +111,11 @@ var
     if path4 <> '' then  Result := CreateAbsolutePath(path4, Result);
     Result := SetDirSeparators(Result);
   end;
+
+procedure MakeAbsolutePath(var filePath:TFilePath);
+begin
+if filePath<>'' then filePath:=ExpandFileName(filePath)
+end;
 
   procedure Log(const message: String); overload;
   begin
@@ -309,8 +314,8 @@ var
 
     if not Result then
     begin
-      Log(fileResult, format('ERROR: Cannot run "%s".', [title]));
-      Log(fileResult, Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
+      Log(fileResult, format('ERROR: Cannot run executable "%s" for "%s" in folder "%s".', [exename, title,curDir]));
+      Log(fileResult, Format('ERROR: Command "%s %s" failed.', [exename, CommandsToString(commands)]));
       if errorString <> '' then  Log(fileResult, Format('%s', [errorString]));
       if outputString <> '' then Log(fileResult, Format('%s', [outputString]));
       Log(fileResult, '');
@@ -700,10 +705,16 @@ type
     if mpFolderPath = '' then mpFolderPath := ExtractFileDir(ExtractFileDir(ParamStr(0)));
     if mpExePath = '' then mpExePath := AppendPath(mpFolderPath, 'src', MP_EXE);
 
-    if referenceMPFolderPath = '' then  referenceMPFolderPath := mpFolderPath + '-origin';
+    if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath + '-origin';
     if referenceMPExePath = '' then referenceMPExePath :=
         AppendPath(referenceMPFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
     if inputFolderPath = '' then  inputFolderPath := AppendPath(mpFolderPath, 'samples');
+
+    MakeAbsolutePath(mpFolderPath);
+    MakeAbsolutePath(mpExePath);
+    MakeAbsolutePath(referenceMPFolderPath);
+    MakeAbsolutePath(referenceMPExePath);
+    MakeAbsolutePath(inputFolderPath);
 
     Log(Format('MP Folder Path          : %s', [mpFolderPath]));
     Log(Format('MP Exe Path             : %s', [mpExePath]));
