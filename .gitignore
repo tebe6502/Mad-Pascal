@@ -19,3 +19,5 @@ samples/WinMerge.txt
 .DS_Store
 projects/TestMadPascal
 projects/MakeMadPascal
+projects/*.res
+projects/ppas.sh
