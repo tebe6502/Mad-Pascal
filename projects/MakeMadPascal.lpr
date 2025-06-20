@@ -725,9 +725,12 @@ type
 
 
     // Use defaults, if not parameters were specified.
+    MakeAbsolutePath(mpFolderPath);
+
     if mpFolderPath = '' then mpFolderPath :=
         ExtractFileDir(ExtractFileDir(ParamStr(0)));
-    if mpExePath = '' then mpExePath := AppendPath(mpFolderPath, 'bin', MP_EXE);
+    if mpExePath = '' then mpExePath :=
+        AppendPath(mpFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
 
     if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath + '-origin';
     if referenceMPExePath = '' then referenceMPExePath :=

@@ -1,1 +1,1 @@
-./MakeMadPascal -allThreads -allFiles -mpFolderPath ./.. -inputFilePattern2 huf -compileReference -compile -compare
+./MakeMadPascal -allThreads -allFiles -mpFolderPath ./.. -inputFilePattern zilch -compileReference -compile -compare -openResults
