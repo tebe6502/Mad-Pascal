@@ -26,12 +26,17 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -inputFilePattern compression -compileReference -compile -compare -openResults -waitForKey"/>
+            <CommandLineParams Value="-allThreads -allFiles -inputFilePattern compression\pp -compileReference -compile -compare -openResults -waitForKey"/>
           </local>
         </Mode>
         <Mode Name="cleanup">
           <local>
             <CommandLineParams Value="-allThreads -allFiles -cleanup -cleanupReference -waitForKey"/>
+          </local>
+        </Mode>
+        <Mode Name="all">
+          <local>
+            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey"/>
           </local>
         </Mode>
       </Modes>
@@ -75,10 +80,6 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\Tokens.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="MakeMadPascal.sh"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
@@ -141,6 +142,9 @@
       </Item>
       <Item>
         <Name Value="EEValuationException"/>
+      </Item>
+      <Item>
+        <Name Value="EProcess"/>
       </Item>
     </Exceptions>
   </Debugging>
