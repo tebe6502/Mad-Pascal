@@ -6,7 +6,11 @@ program MakeMadPascal;
 {$ScopedEnums ON}
 
 uses
+ {$IFDEF WINDOWS}
   Windows,
+   {$ENDIF} {$IFDEF UNIX}
+  cthreads, cmem,
+   {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -23,9 +27,18 @@ const
   MAX_FILES = 10;
 
 type
-  TFileType = (UNKNOWN, TPROGRAM, TUNIT, TINCLUDE);
+  TFileType = (UNKNOWN, ERROR, TPROGRAM, TUNIT, TINCLUDE);
 
-  TAction = (CLEANUP, COMPILE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE);
+  TFileInfo = class
+    filePath: TFilePath;
+    fileType: TFileType;
+    requiredLibraryFolders: TStringList;
+
+    constructor Create(filePath: TfilePath);
+    destructor Free;
+  end;
+
+  TAction = (CLEANUP, COMPILE, CLEANUP_REFERENCE, COMPILE_REFERENCE, COMPARE, CLEANUP_RESULTS);
 
   TStatus = (OK, ERROR);
 
@@ -37,6 +50,8 @@ type
 
   TFileResultArray = array of TFileResult;
 
+
+
   TOperation = class
     threads: Integer;
     action: TAction;
@@ -46,11 +61,14 @@ type
     results: TFileResultArray;
     logMessages: TStringList;
     diffFilePaths: TStringList;
+    class function GetActionString(const action: TAction): String; overload;
+    class function GetLogFilePath(const folderPath: TFolderPath; const action: TAction): TFilePath; overload;
 
-    constructor Create(action: TAction);
+    constructor Create(const action: TAction);
     destructor Free;
-    function GetActionString(): String;
-    function WriteLog(folderPath: TFolderPath): TFilePath;
+    function GetActionString(): String; overload;
+    function GetLogFilePath(const folderPath: TFolderPath): TFilePath; overload;
+    function WriteLog(const filePath: TFilePath): Boolean;
   end;
 
 
@@ -58,11 +76,17 @@ type
     allFiles: Boolean;
     allThreads: Boolean;
 
-    compileReference: Boolean;
+    cleanup: Boolean;
     compile: Boolean;
+
+    cleanupReference: Boolean;
+    compileReference: Boolean;
+
     compare: Boolean;
 
     openResults: Boolean;
+    cleanupResults: Boolean;
+
     waitForKey: Boolean;
 
     verbose: Boolean;
@@ -104,7 +128,31 @@ var
     fileResult.logMessages.Add(message);
   end;
 
-  constructor TOperation.Create(action: TAction);
+
+  constructor TFileInfo.Create(filePath: TFilePath);
+  begin
+    self.filePath := filePath;
+    fileType := TFileType.Unknown;
+    requiredLibraryFolders := TStringList.Create;
+  end;
+
+  destructor TFileInfo.Free;
+  begin
+    requiredLibraryFolders.Free;
+    requiredLibraryFolders := nil;
+  end;
+
+  class function TOperation.GetActionString(const action: TAction): String; overload;
+  begin
+    WriteStr(Result, action);
+  end;
+
+  class  function TOperation.GetLogFilePath(const folderPath: TFolderPath; const action: TAction): TFilePath;
+  begin
+    Result := AppendPath(folderPath, 'MakeMadPascal-' + GetActionString(action) + '.log');
+  end;
+
+  constructor TOperation.Create(const action: TAction);
   begin
     self.action := action;
     logMessages := TStringList.Create;
@@ -118,20 +166,26 @@ var
   end;
 
 
-  function TOperation.GetActionString(): String;
+  function TOperation.GetActionString(): String; overload;
   begin
     WriteStr(Result, action);
   end;
 
-  function TOperation.WriteLog(folderPath: TFolderPath): TFilePath;
-  var
-    filePath: TFilePath;
+  function TOperation.GetLogFilePath(const folderPath: TFolderPath): TFilePath;
   begin
-    Result := '';
-    filePath := AppendPath(folderPath, 'MakeMadPascal-' + GetActionString + '.log');
+    Result := GetLogFilePath(folderPath, action);
+  end;
+
+  function TOperation.WriteLog(const filePath: TFilePath): Boolean;
+  begin
+    Result := False;
+
     if logMessages.Count = 0 then
     begin
-      DeleteFile(filePath);
+      if FileExists(filePath) then
+      begin
+        DeleteFile(filePath);
+      end;
     end
     else
     begin
@@ -139,7 +193,7 @@ var
       try
 
         logMessages.SaveToFile(filePath);
-        Result := filePath;
+        Result := True;
       except
         on e: EFCreateError do
         begin
@@ -151,39 +205,77 @@ var
 
   end;
 
-  function GetFileType(FilePath: TFilePath): TFileType;
+  // Parameter for line "line" must be uppercase.
+  // Parameter for line "lib" must be lowercase
+  procedure CheckForLibrary(const line: String; lib: String; var fileInfo: TFileInfo);
+  begin
+    // {$librarypath 'blibs'}
+    if pos('{$LIBRARYPATH ''' + UpperCase(lib) + '''', line) > 0 then
+    begin
+      fileInfo.requiredLibraryFolders.Add(lib);
+    end;
+  end;
+
+  function GetFileInfo(FilePath: TFilePath): TFileInfo;
 
   var
-    fileType: TFileType;
     pasFile: TextFile;
     Line: String;
   begin
-    AssignFile(pasFile, FilePath);
-    Reset(pasFile);
-    fileType := TFileType.UNKNOWN;
-    while (fileType = TFileType.UNKNOWN) and not EOF(pasFile) do
-    begin
-      ReadLn(pasFile, Line);
-      Line := UpperCase(line);
-      if (Pos('PROGRAM ', line) > 0) or (Pos('USES ', line) > 0) then
-      begin
-        fileType := TFileType.TPROGRAM;
-      end;
-      if (Pos('UNIT ', line) > 0) then
-      begin
-        fileType := TFileType.TUNIT;
-      end;
-      if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
-      begin
-        fileType := TFileType.TINCLUDE;
-      end;
-      //Log(line);
 
+    try
+      AssignFile(pasFile, FilePath);
+      Reset(pasFile);
+      Result := TFileInfo.Create(filePath);
+
+      while (Result.fileType = TFileType.UNKNOWN) and not EOF(pasFile) do
+      begin
+        ReadLn(pasFile, Line);
+        Line := UpperCase(line);
+        CheckForLibrary(line, 'blibs', Result);
+        CheckForLibrary(line, 'dlibs', Result);
+        if (Pos('PROGRAM ', line) > 0) or (Pos('USES ', line) > 0) then
+        begin
+          Result.fileType := TFileType.TPROGRAM;
+        end;
+        if (Pos('UNIT ', line) > 0) then
+        begin
+          Result.fileType := TFileType.TUNIT;
+        end;
+        if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
+        begin
+          Result.fileType := TFileType.TINCLUDE;
+        end;
+        //Log(line);
+
+      end;
+      CloseFile(pasFile);
+
+    except
+      on  EInOutError do
+        Result.fileType := TFileType.ERROR;
     end;
-    CloseFile(pasFile);
-    Result := FileType;
+
   end;
 
+
+  function Cleanup(curDir: TFolderPath; a65FileName: String; var fileResult: TFileResult): Boolean;
+  var
+    filePath: TFilePath;
+  begin
+
+    filePath := AppendPath(curDir, a65FileName);
+    if FileExists(filePath) then
+    begin
+      Result := DeleteFile(AppendPath(curDir, a65FileName));
+      if not Result then
+      begin
+        Log(fileResult, format('ERROR: Cannot delete "%s".', [filePath]));
+      end;
+    end
+    else
+      Result := True;
+  end;
 
   function CommandsToString(commands: array of TProcessString): String;
   var
@@ -201,16 +293,22 @@ var
     commands: array of TProcessString; var fileResult: TFileResult): Boolean;
   var
     outputString: TProcessString;
+    errorString: String;
   begin
-    if RunCommandIndir(curDir, exename, commands, outputString) then
-    begin
-      Result := True;
-    end
-    else
+    Result := False;
+    try
+      Result := RunCommandIndir(curDir, exename, commands, outputString);
+    except
+      on e: EProcess do
+        errorString := e.Message;
+    end;
+
+    if not Result then
     begin
       Log(fileResult, format('ERROR: Cannot run "%s".', [title]));
       Log(fileResult, Format('ERROR: Command "%s %s" failed.', [cmdLine, CommandsToString(commands)]));
-      Log(fileResult, Format('%s', [outputString]));
+      if errorString <> '' then  Log(fileResult, Format('%s', [errorString]));
+      if outputString <> '' then Log(fileResult, Format('%s', [outputString]));
       Log(fileResult, '');
       Result := False;
     end;
@@ -219,12 +317,33 @@ var
   function RunMadPascal(const operation: TOperation; curDir: TFolderPath; fileName: String;
     a65FileName: String; var fileResult: TFileResult): Boolean;
   var
+    fileInfo: TFileInfo;
     exename: TProcessString;
     commands: array of TProcessString;
+    index: Integer;
+    i: Integer;
   begin
-    exename := operation.mpExePath;
-    commands := ['-ipath:' + CreateAbsolutePath('lib', operation.mpFolderPath), '-o:' + a65FileName, fileName];
-    Result := RunExecutable(fileName, curDir, exename, commands, fileResult);
+
+    fileInfo := GetFileInfo(AppendPath(curDir, fileName));
+    if fileInfo.fileType = TFileType.TPROGRAM then
+    begin
+      exename := operation.mpExePath;
+      commands := nil;
+      SetLength(commands, 3 + fileInfo.requiredLibraryFolders.Count);
+      index := 0;
+      commands[index] := '-ipath:' + AppendPath(operation.mpFolderPath, 'lib');
+      Inc(index);
+      for i := 0 to fileInfo.requiredLibraryFolders.Count - 1 do
+      begin
+        commands[index] := '-ipath:' + AppendPath(operation.mpFolderPath, fileInfo.requiredLibraryFolders[i]);
+        Inc(index);
+      end;
+      commands[index] := '-o:' + a65FileName;
+      Inc(index);
+      commands[index] := fileName;
+      Result := RunExecutable(fileName, curDir, exename, commands, fileResult);
+    end;
+    fileInfo.Free;
   end;
 
   function LoadTextFile(const filePath: TfilePath; stringList: TStringList; var fileResult: TFileResult): Boolean;
@@ -247,7 +366,7 @@ var
 
   end;
 
-  function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName: String;
+  function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName, diffFileName: String;
     operation: TOperation; var fileResult: TFileResult): Boolean;
   const
     MAX_DIFFS = 5;
@@ -266,9 +385,9 @@ var
     try
 
       a65FilePath :=
-        CreateAbsolutePath(a65FileName, curDir);
-      a65ReferenceFilePath := CreateAbsolutePath(a65ReferenceFileName, curDir);
-      diffFilePath := ChangeFileExt(a65FilePath, '.WinMerge');
+        AppendPath(curDir, a65FileName);
+      a65ReferenceFilePath := AppendPath(curDir, a65ReferenceFileName);
+      diffFilePath := AppendPath(curDir, diffFileName);
 
       if LoadTextFile(a65FilePath, Lines, fileResult) and LoadTextFile(
         a65ReferenceFilePath, ReferenceLines, fileResult) then
@@ -363,6 +482,7 @@ var
     a65BaseFileName: String;
     a65FileName: String;
     a65ReferenceFileName: String;
+    diffFileName: String;
   begin
     fileResult.filePath := filePath;
     fileResult.status := TStatus.OK;
@@ -370,8 +490,8 @@ var
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -379,13 +499,24 @@ var
     a65BaseFileName := ChangeFileExt(fileName, '');
     a65FileName := a65BaseFileName + '.a65';
     a65ReferenceFileName := a65BaseFileName + '-Reference.a65';
+    diffFileName := a65BaseFileName + '.WinMerge';
 
     case operation.action
       of
-      TAction.COMPILE:
 
+      TAction.CLEANUP:
+      begin
+        Result := Cleanup(curDir, a65FileName, fileResult);
+      end;
+
+      TAction.COMPILE:
       begin
         Result := RunMadPascal(operation, curDir, fileName, a65FileName, fileResult);
+      end;
+
+      TAction.CLEANUP_REFERENCE:
+      begin
+        Result := Cleanup(curDir, a65ReferenceFileName, fileResult);
       end;
 
       TAction.COMPILE_REFERENCE:
@@ -393,9 +524,14 @@ var
         Result := RunMadPascal(operation, curDir, fileName, a65ReferenceFileName, fileResult);
       end;
 
+      TAction.CLEANUP_RESULTS:
+      begin
+        Result := Cleanup(curDir, diffFileName, fileResult);
+      end;
+
       TAction.COMPARE:
       begin
-        Result := CompareA65File(curDir, a65FileName, a65ReferenceFileName, operation, fileResult);
+        Result := CompareA65File(curDir, a65FileName, a65ReferenceFileName, diffFileName, operation, fileResult);
 
       end;
       else
@@ -443,7 +579,6 @@ type
   var
     i: Integer;
     parallelData: TParallelData;
-    operationLog: TStringList;
   begin
     SetLength(operation.results, ProgramFiles.Count);
 
@@ -471,7 +606,7 @@ type
         TStatus.ERROR:
         begin
           operation.logMessages.Add(Format('ERROR: Errors while processing %s', [operation.results[i].filePath]));
-           operation.logMessages.AddStrings(operation.results[i].logMessages);
+          operation.logMessages.AddStrings(operation.results[i].logMessages);
         end;
       end;
     end;
@@ -502,6 +637,7 @@ type
     i: Integer;
     operation: TOperation;
     operationResultFilePath: TFilePath;
+    operationResultFileExists: Boolean;
 
     referenceMPFolderPath: TFolderPath;
     referenceMPExePath: TFilePath;
@@ -514,7 +650,7 @@ type
     inputFolderPath: TFolderPath;
     inputFilePattern: String;
     filePath: TFilePath;
-    fileType: TFileType;
+    fileInfo: TFileInfo;
     ProgramFiles: TStringList;
     fileResult: TFileResult;
 
@@ -539,11 +675,14 @@ type
       if p = '-inputFilePattern' then GetNextParam(i, inputFilePattern);
       if p = '-allFiles' then options.allFiles := True;
       if p = '-allThreads' then options.allThreads := True;
-      if p = '-openResults' then options.openResults := True;
-      if p = '-waitForKey' then options.waitForKey := True;
-      if p = '-compileReference' then options.compileReference := True;
+      if p = '-cleanup' then options.cleanup := True;
       if p = '-compile' then options.compile := True;
+      if p = '-cleanupReference' then options.cleanupReference := True;
+      if p = '-compileReference' then options.compileReference := True;
       if p = '-compare' then options.compare := True;
+      if p = '-openResults' then options.openResults := True;
+      if p = '-cleanupResults' then options.cleanupResults := True;
+      if p = '-waitForKey' then options.waitForKey := True;
       if p = '-verbose' then options.verbose := True;
       Inc(i);
       // application:=  TCustomApplication.Create;
@@ -562,12 +701,11 @@ type
         AppendPath(referenceMPFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
     if inputFolderPath = '' then  inputFolderPath := AppendPath(mpFolderPath, 'samples');
 
-    Log(Format('Reference MP Folder Path: %s', [referenceMPFolderPath]));
-    Log(Format('Reference MP Exe Path   : %s', [referenceMPExePath]));
-
     Log(Format('MP Folder Path          : %s', [mpFolderPath]));
     Log(Format('MP Exe Path             : %s', [mpExePath]));
 
+    Log(Format('Reference MP Folder Path: %s', [referenceMPFolderPath]));
+    Log(Format('Reference MP Exe Path   : %s', [referenceMPExePath]));
 
     Log(Format('Input Folder Path       : %s', [inputFolderPath]));
     Log(Format('Input File Pattern      : %s', [inputFilePattern]));
@@ -591,8 +729,8 @@ type
           if x < 0 then Continue;
         end;
         // Log(Format('Scanning file %s (%d of %d)', [filePath, i, maxFiles]));
-        fileType := GetFileType(filePath);
-        case fileType
+        fileInfo := GetFileInfo(filePath);
+        case fileInfo.fileType
           of
           TFileType.UNKNOWN:
           begin
@@ -606,6 +744,7 @@ type
             if ProgramFiles.Count >= maxFiles then break;
           end;
         end;
+        fileInfo.Free;
       end;
 
 
@@ -620,13 +759,13 @@ type
       end;
 
       Log(Format('Processing %d Pascal programs with %d Threads.', [ProgramFiles.Count, threads]));
-      if (options.compileReference) then
+
+
+      if (options.cleanup) then
       begin
-        operation := TOperation.Create(TAction.COMPILE_REFERENCE);
+        operation := TOperation.Create(TAction.CLEANUP);
         operation.threads := threads;
         operation.verbose := options.verbose;
-        operation.mpFolderPath := referenceMPFolderPath;
-        operation.mpExePath := referenceMPExePath;
         ProcessPrograms(ProgramFiles, operation);
         operation.WriteLog(inputFolderPath);
         operation.Free;
@@ -645,6 +784,28 @@ type
 
       end;
 
+
+      if (options.cleanupReference) then
+      begin
+        operation := TOperation.Create(TAction.CLEANUP_REFERENCE);
+        operation.threads := threads;
+        operation.verbose := options.verbose;
+        ProcessPrograms(ProgramFiles, operation);
+        operation.WriteLog(inputFolderPath);
+        operation.Free;
+      end;
+
+      if (options.compileReference) then
+      begin
+        operation := TOperation.Create(TAction.COMPILE_REFERENCE);
+        operation.threads := threads;
+        operation.verbose := options.verbose;
+        operation.mpFolderPath := referenceMPFolderPath;
+        operation.mpExePath := referenceMPExePath;
+        ProcessPrograms(ProgramFiles, operation);
+        operation.WriteLog(inputFolderPath);
+        operation.Free;
+      end;
 
       if (options.compare) then
       begin
@@ -666,9 +827,10 @@ type
           operation.logMessages.AddStrings(operation.diffFilePaths);
         end;
 
-        operationResultFilePath := operation.WriteLog(inputFolderPath);
+        operationResultFilePath := operation.GetLogFilePath(inputFolderPath);
+        operationResultFileExists := operation.WriteLog(operationResultFilePath);
 
-        if (options.openResults and (operationResultFilePath <> '')) then
+        if (options.openResults and operationResultFileExists) then
         begin
           fileResult := Default(TFileResult);
           fileResult.filePath := 'All';
@@ -681,6 +843,13 @@ type
 
         operation.Free;
 
+      end;
+
+      if (options.cleanupResults) then
+      begin
+        DeleteFile(TOperation.GetLogFilePath(inputFolderPath, TAction.COMPILE));
+        DeleteFile(TOperation.GetLogFilePath(inputFolderPath, TAction.COMPILE_REFERENCE));
+        DeleteFile(TOperation.GetLogFilePath(inputFolderPath, TAction.COMPARE));
       end;
 
     finally
