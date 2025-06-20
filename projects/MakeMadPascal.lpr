@@ -8,9 +8,11 @@ program MakeMadPascal;
 uses
  {$IFDEF WINDOWS}
   Windows,
-   {$ENDIF} {$IFDEF UNIX}
+     {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-   {$ENDIF}
+     {$ENDIF} {$IFDEF DARWIN}
+  cthreads, cmem,
+     {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -68,7 +70,7 @@ type
     destructor Free;
     function GetActionString(): String; overload;
     function GetLogFilePath(const folderPath: TFolderPath): TFilePath; overload;
-    function WriteLog(const filePath: TFilePath): Boolean;
+    function WriteLog(const folderPath: TFolderPath): Boolean;
   end;
 
 
@@ -176,10 +178,12 @@ var
     Result := GetLogFilePath(folderPath, action);
   end;
 
-  function TOperation.WriteLog(const filePath: TFilePath): Boolean;
+  function TOperation.WriteLog(const folderPath: TFolderPath): Boolean;
+  var
+    filePath: TFilePath;
   begin
     Result := False;
-
+    filePath := GetLogFilePath(folderPath);
     if logMessages.Count = 0 then
     begin
       if FileExists(filePath) then
@@ -828,7 +832,7 @@ type
         end;
 
         operationResultFilePath := operation.GetLogFilePath(inputFolderPath);
-        operationResultFileExists := operation.WriteLog(operationResultFilePath);
+        operationResultFileExists := operation.WriteLog(inputFolderPath);
 
         if (options.openResults and operationResultFileExists) then
         begin
