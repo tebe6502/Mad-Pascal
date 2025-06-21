@@ -23,7 +23,7 @@ begin
 end;
 
 
-procedure dli:assembler;interrupt;
+procedure dli;assembler;interrupt;
 asm {
         pha
         txa
