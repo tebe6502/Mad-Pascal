@@ -42,6 +42,12 @@
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\compression\lzh"/>
           </local>
         </Mode>
+        <Mode Name="test">
+          <local>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib LZW2.PAS"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\compression\lzw\"/>
+          </local>
+        </Mode>
       </Modes>
     </RunParams>
     <Units>
@@ -560,6 +566,22 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\tests\TestInclude.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\samples\a8\demoeffects\bobs.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\samples\a8\demoeffects\bobs_f.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\samples\a8\demoeffects\space.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\samples\a8\games\3inaRow\game.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
