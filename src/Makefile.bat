@@ -17,9 +17,9 @@ call :normalize_path %~dp0..
 set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
 set MP_PAS=%MP_SRC_FOLDER%\mp.pas
-set MP_EXE=%MP_SRC_FOLDER%\mp.exe
+set MP_EXE=%MP_FOLDER%\bin\windows\mp.exe
 
-set WUDSN_MP_EXE=%WUDSN_TOOLS_FOLDER%\PAS%\MP\bin\windows\mp.exe
+set REFERENCE_MP_EXE=%MP_FOLDER%-origin\bin\windows\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -39,16 +39,17 @@ if not "%MP_EXE%"=="" (
   if exist "%MP_EXE%" del "%MP_EXE%"
   call fpc.bat %MP_PAS%
   if errorlevel 1 goto :eof
+  mv "mp.exe" "%MP_EXE%"
 
 rem Regression test with standard MP.
 goto :run_new_tests
 
   if "%TEST_MODE%"=="" (
     echo.
-    echo INFO: Compiling with WUDSN version.
+    echo INFO: Compiling with reference version.
     echo ===================================
     echo.
-    call :run_tests %WUDSN_MP_EXE%
+    call :run_tests %REFERENCE_MP_EXE%
   )
  
     
@@ -82,7 +83,7 @@ goto :eof
   set MP_OUTPUT_ASM_REF=%TEST_MP%-Reference.a65
   set MADS_OUTPUT_XEX_REF=%TEST_MP%-Reference.xex
 
-  if %MP%==%WUDSN_MP_EXE% (
+  if %MP%==%REFERENCE_MP_EXE% (
     set MP_OUTPUT_ASM=%MP_OUTPUT_ASM_REF%
     set MADS_OUTPUT_XEX=%MADS_OUTPUT_XEX_REF%
   ) else (
