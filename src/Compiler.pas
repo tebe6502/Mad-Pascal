@@ -1752,9 +1752,11 @@ begin
       end;
 
       asm65(#9'ldy #$00');
-      asm65(#9'mva (:TMP),y :bp2');
+      asm65(#9'lda (:TMP),y');
+      asm65(#9'sta :bp2');
       asm65(#9'iny');
-      asm65(#9'mva (:TMP),y :bp2+1');
+      asm65(#9'lda (:TMP),y');
+      asm65(#9'sta :bp2+1');
 
       if TestName(IdentIndex, svar) then
         asm65(#9'ldy #' + svar + '-DATAORIGIN')
@@ -18863,7 +18865,7 @@ end;
     if Pass = TPass.CODE_GENERATION then
     begin
 
-      // !!! musze zapisac wszystko, lacznie z 'zerami' !!! np. aby TextAtr dzialal
+      // !!! I have to save everything, including 'zeros' !!! For example, for TextAtr to work
 
       DataSegmentSize := VarDataSize;
 
