@@ -1,3 +1,4 @@
+program bobs;
 
 {
 Just a test of 3-frame snake-bob animation. By Bill Kendrick 12/29/94.
@@ -17,52 +18,63 @@ and no DIRECTION).
 -bill!  kendrick@vax.sonoma.edu
 }
 
-uses crt, graph, joystick;
+uses
+  crt,
+  graph,
+  joystick;
 
 var
-	ss: array [0..2, 0..1920-1] of byte;
+  ss: array [0..2, 0..1920 - 1] of Byte;
 
-	q: byte;
-	x, y, xm, ym: smallint;
+  q: Byte;
+  x, y, xm, ym: Smallint;
 
-	sc: pointer;
-	
+  sc: pointer;
+
 const
-	rad=4;
-	dia=rad*2;
+  rad = 4;
+  dia = rad * 2;
 
 begin
 
- InitGraph(6+16);
+  InitGraph(6 + 16);
 
- SetColor(1);
- 
- sc:=pointer(dpeek(88));
- 
- x:=dia;
- y:=dia;
- 
- xm:=3;
- ym:=3;
- 
+  SetColor(1);
+
+  sc := pointer(dpeek(88));
+
+  x := dia;
+  y := dia;
+
+  xm := 3;
+  ym := 3;
+
   repeat
-	pause;
+    pause;
 
-	inc(q);
-	if q > 2 then q:=0;
+    Inc(q);
+    if q > 2 then q := 0;
 
-	move(@ss[q,0], sc, 1920);
+    move(@ss[q, 0], sc, 1920);
 
-	inc(x, xm); 
-	inc(y, ym);
+    Inc(x, xm);
+    Inc(y, ym);
 
-	if (x<dia) or (x>ScreenWidth-dia) then begin xm:=-xm; inc(x, xm) end;
-	if (y<dia) or (y>ScreenHeight-dia) then begin ym:=-ym; inc(y, ym) end;
+    if (x < dia) or (x > ScreenWidth - dia) then
+    begin
+      xm := -xm;
+      Inc(x, xm);
+    end;
+    if (y < dia) or (y > ScreenHeight - dia) then
+    begin
+      ym := -ym;
+      Inc(y, ym);
+    end;
 
-	Circle(x, y, rad);
+    Circle(x, y, rad);
 
-	move(sc, @ss[q][0], 1920);
+    move(sc, @ss[q][0], 1920);
 
- until keypressed;
+  until keypressed;
 
 end.
