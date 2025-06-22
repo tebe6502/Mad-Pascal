@@ -8,11 +8,11 @@ program MakeMadPascal;
 uses
  {$IFDEF DARWIN}
   //cthreads, cmem,
-          {$ENDIF} {$IFDEF WINDOWS}
+             {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-          {$ENDIF} {$IFDEF UNIX}
+             {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-          {$ENDIF}
+             {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -234,7 +234,8 @@ var
   function GetFileInfo(FilePath: TFilePath): TFileInfo;
   var
     pasFile: TextFile;
-    Line: String;
+    done: Boolean;
+    line: String;
   begin
 
     try
@@ -242,13 +243,14 @@ var
       Reset(pasFile);
       Result := TFileInfo.Create(filePath);
 
-      while (Result.fileType = TFileType.UNKNOWN) and not EOF(pasFile) do
+      done := False;
+      while not done and not EOF(pasFile) do
       begin
-        ReadLn(pasFile, Line);
-        Line := UpperCase(line);
+        ReadLn(pasFile, line);
+        line := UpperCase(line);
         CheckForLibrary(line, 'blibs', Result);
         CheckForLibrary(line, 'dlibs', Result);
-        if (Pos('PROGRAM ', line) > 0) or (Pos('USES ', line) > 0) then
+        if (Pos('PROGRAM ', line) > 0) then
         begin
           Result.fileType := TFileType.TPROGRAM;
         end;
@@ -256,9 +258,23 @@ var
         begin
           Result.fileType := TFileType.TUNIT;
         end;
+        if (Pos('USES ', line) > 0) then
+        begin
+          if Result.fileType = TFileType.UNKNOWN then
+          begin
+            Result.fileType := TFileType.TPROGRAM;
+          end;
+          done:=true;
+        end;
         if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
         begin
           Result.fileType := TFileType.TINCLUDE;
+          done := True;
+        end;
+
+        if (Pos('BEGIN ', line) > 0) then
+        begin
+          done := True;
         end;
         //Log(line);
 
@@ -452,7 +468,7 @@ var
 
         // Normalize lines with absolute paths
         // Example: .link 'C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal-origin\lib\pp\unpp.obx'
-        if Pos('.link', line ) > 0 then
+        if Pos('.link', line) > 0 then
         begin
           line := StringReplace(line, mpFolderPath, mpReferenceFolderPath, [rfReplaceAll]);
         end;
@@ -529,8 +545,8 @@ var
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
