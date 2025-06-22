@@ -1,5 +1,6 @@
-procedure dliInGame;assembler; interrupt;
-asm {
+procedure dliInGame; assembler; interrupt;
+asm
+{
     phr
 
     mva >CHARSET_TXT_ADDRESS chbase
@@ -46,7 +47,7 @@ asm {
 };
 end;
 
-procedure vbli:interrupt;
+procedure vbli; interrupt;
 var dx,dy:shortInt;
 begin
     asm {
