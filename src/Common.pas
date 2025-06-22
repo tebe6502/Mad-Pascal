@@ -29,7 +29,7 @@ var
   AsmBlockIndex: Integer;
   AsmBlock: array [0..4095] of String;
 
-  Data, DataSegment, StaticStringData: TWordMemory;
+  DataSegment, StaticStringData: TWordMemory;
 
   AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
@@ -570,6 +570,7 @@ end;
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i, len: Integer;
+  Data: TWordMemory;
 begin
 
   len := Length(StrValue);
@@ -586,6 +587,8 @@ begin
     RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
+  // Writeln('DefineStaticString:  NumStaticStrChars=' + IntToStr(NumStaticStrChars) + ' Length=' +
+  //   IntToStr(len) + ' Value=' + StrValue);
   for i := 1 to len do Data[i] := Ord(StrValue[i]);
 
   for i := 0 to NumStaticStrChars - len - 1 do
@@ -633,7 +636,7 @@ end;
 
 function NumIdent: Integer;
 begin
-  Result:=NumIdent_;
+  Result := NumIdent_;
 end;
 
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
