@@ -8,11 +8,11 @@ program MakeMadPascal;
 uses
  {$IFDEF DARWIN}
   //cthreads, cmem,
-                {$ENDIF} {$IFDEF WINDOWS}
+                    {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-                {$ENDIF} {$IFDEF UNIX}
+                    {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-                {$ENDIF}
+                    {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -22,6 +22,7 @@ uses
   LazFileUtils,
   Process,
   MTProcs,
+  strutils,
   SysUtils,
   CustApp;
 
@@ -740,6 +741,7 @@ type
       begin
         inputFilePattern := '';
         GetNextParam(i, inputFilePattern);
+        SetDirSeparators(inputFilePattern);
         inputFilePatterns.Add(inputFilePattern);
       end;
       if p = '-allFiles' then options.allFiles := True;
@@ -776,7 +778,6 @@ type
 
     MakeAbsolutePath(mpFolderPath);
     MakeAbsolutePath(mpExePath);
-    MakeAbsolutePath(referenceMPFolderPath);
     MakeAbsolutePath(referenceMPExePath);
     MakeAbsolutePath(inputFolderPath);
 
@@ -810,7 +811,7 @@ type
           j := 1;
           while (j <= inputFilePatterns.Count) and not found do
           begin
-            found := (filePath.IndexOf(inputFilePatterns[j - 1]) >= 0);
+            found := ContainsText(filePath, inputFilePatterns[j - 1]);
             Inc(j);
           end;
           if not found then Continue;
@@ -870,6 +871,16 @@ type
         operation.verbose := options.verbose;
         operation.mpFolderPath := mpFolderPath;
         operation.mpExePath := mpExePath;
+        if not DirectoryExists(operation.mpFolderPath) then
+        begin
+          Log(Format('ERROR: MP folder %s does not exist.', [operation.mpFolderPath]));
+          exit;
+        end;
+        if not FileExists(operation.mpExePath) then
+        begin
+          Log(Format('ERROR: MP executable %s does not exist.', [operation.mpExePath]));
+          exit;
+        end;
         ProcessPrograms(ProgramFiles, operation);
         operation.WriteLog(inputFolderPath);
         operation.Free;
@@ -894,6 +905,17 @@ type
         operation.verbose := options.verbose;
         operation.referenceMPFolderPath := referenceMPFolderPath;
         operation.referenceMPExePath := referenceMPExePath;
+        if not DirectoryExists(operation.referenceMPFolderPath) then
+        begin
+          Log(Format('ERROR: Reference MP folder %s does not exist.', [operation.referenceMPFolderPath]));
+          exit;
+        end;
+        if not FileExists(operation.referenceMPExePath) then
+        begin
+          Log(Format('ERROR: Reference MP executable %s does not exist.', [operation.referenceMPExePath]));
+          exit;
+        end;
+
         ProcessPrograms(ProgramFiles, operation);
         operation.WriteLog(inputFolderPath);
         operation.Free;

@@ -17,7 +17,8 @@ call :normalize_path %~dp0..
 set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
 set MP_PAS=%MP_SRC_FOLDER%\mp.pas
-set MP_EXE=%MP_FOLDER%\bin\windows\mp.exe
+set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows
+set MP_EXE=%MP_BIN_FOLDER=%\mp.exe
 
 set REFERENCE_MP_EXE=%MP_FOLDER%-origin\bin\windows\mp.exe
 
@@ -39,7 +40,8 @@ if not "%MP_EXE%"=="" (
   if exist "%MP_EXE%" del "%MP_EXE%"
   call fpc.bat %MP_PAS%
   if errorlevel 1 goto :eof
-  mv "mp.exe" "%MP_EXE%"
+  if not exist %MP_BIN_FOLDER% mkdir "%MP_BIN_FOLDER%"
+  mv "mp.exe" %MP_BIN_FOLDER%"
 
 rem Regression test with standard MP.
 goto :run_new_tests

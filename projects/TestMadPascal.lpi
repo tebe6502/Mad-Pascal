@@ -44,8 +44,8 @@
         </Mode>
         <Mode Name="test">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib LZW2.PAS"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\compression\lzw\"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib tower_e80.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\con80\"/>
           </local>
         </Mode>
       </Modes>
@@ -569,20 +569,13 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\samples\a8\demoeffects\bobs.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\samples\a8\demoeffects\bobs_f.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\samples\a8\demoeffects\space.pas"/>
+        <Filename Value="..\samples\a8\con80\tower_e80.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\samples\a8\games\3inaRow\game.pas"/>
-        <IsPartOfProject Value="True"/>
+        <UnitName Value="towers"/>
       </Unit>
     </Units>
   </ProjectOptions>

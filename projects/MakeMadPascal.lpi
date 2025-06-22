@@ -26,7 +26,7 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -inputFilePattern compression\pp -compileReference -compile -compare -openResults -waitForKey"/>
+            <CommandLineParams Value="-allThreads -allFiles -inputFilePattern zx -compileReference -compile -compare -openResults -waitForKey"/>
           </local>
         </Mode>
         <Mode Name="cleanup">
