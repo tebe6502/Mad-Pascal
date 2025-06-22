@@ -129,7 +129,7 @@ asm
 	mva #scr40 559
 
 	mva #0 pmbase
-	mva #$03 pmcntl
+	mva #$03 gractl
 
 	lda #3
 	:4 sta sizep0+#

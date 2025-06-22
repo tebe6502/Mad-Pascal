@@ -53,7 +53,7 @@ main
 
 	ift USESPRITES
 	mva >pmg pmbase		;missiles and players data address
-	mva #$03 pmcntl		;enable players and missiles
+	mva #$03 gractl		;enable players and missiles
 	eif
 
 	lda:cmp:req $14		;wait 1 frame
@@ -1821,7 +1821,7 @@ raster_program_end
 	sta color2
 	sta color3
 	sta colbak
-	mva #$03 pmcntl
+	mva #$03 gractl
 	mva #$04 gtictl
 
 // -----------------------------------------------------------
