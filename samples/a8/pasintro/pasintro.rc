@@ -1,2 +1,2 @@
-rmt_player	DOSFILE	'msx\player.obx'
+rmt_player	DOSFILE	'msx\player.obj'
 rmt_modul	RMT	'msx\intro_strip.rmt'

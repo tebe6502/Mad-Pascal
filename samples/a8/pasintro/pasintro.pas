@@ -1,5 +1,6 @@
 // PasIntro v2.2 (Tebe / Madteam)
 // changes: 21-04-2018
+// https://github.com/tebe6502/PasIntro
 
 uses crt;
 
