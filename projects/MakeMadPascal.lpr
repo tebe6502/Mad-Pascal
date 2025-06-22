@@ -8,11 +8,11 @@ program MakeMadPascal;
 uses
  {$IFDEF DARWIN}
   //cthreads, cmem,
-             {$ENDIF} {$IFDEF WINDOWS}
+                {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-             {$ENDIF} {$IFDEF UNIX}
+                {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-             {$ENDIF}
+                {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -264,7 +264,7 @@ var
           begin
             Result.fileType := TFileType.TPROGRAM;
           end;
-          done:=true;
+          done := True;
         end;
         if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
         begin
@@ -545,8 +545,8 @@ var
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
-        operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.',
+        [filePath, operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -694,6 +694,10 @@ type
     maxFiles: Integer;
     p: String;
     i: Integer;
+
+    j: Integer;
+    found: Boolean;
+
     operation: TOperation;
     operationResultFilePath: TFilePath;
     operationResultFileExists: Boolean;
@@ -708,6 +712,7 @@ type
     PascalFiles: TStringList;
     inputFolderPath: TFolderPath;
     inputFilePattern: String;
+    inputFilePatterns: TStringList;
     filePath: TFilePath;
     fileInfo: TFileInfo;
     ProgramFiles: TStringList;
@@ -721,7 +726,7 @@ type
     mpFolderPath := '';
     mpExePath := '';
     inputFolderPath := '';
-    inputFilePattern := '';
+    inputFilePatterns := TStringList.Create;
     i := 1;
     while i <= ParamCount do
     begin
@@ -731,7 +736,12 @@ type
       if p = '-mpFolderPath' then GetNextParam(i, mpFolderPath);
       if p = '-mpExePath' then GetNextParam(i, mpExePath);
       if p = '-inputFolderPath' then GetNextParam(i, inputFolderPath);
-      if p = '-inputFilePattern' then GetNextParam(i, inputFilePattern);
+      if p = '-inputFilePattern' then
+      begin
+        inputFilePattern := '';
+        GetNextParam(i, inputFilePattern);
+        inputFilePatterns.Add(inputFilePattern);
+      end;
       if p = '-allFiles' then options.allFiles := True;
       if p = '-allThreads' then options.allThreads := True;
       if p = '-cleanup' then options.cleanup := True;
@@ -792,11 +802,20 @@ type
       for i := 1 to PascalFiles.Count do
       begin
         filePath := PascalFiles[i - 1];
-        if inputFilePattern <> '' then
+
+        // Maching any of the specified patterns?
+        if inputFilePatterns.Count > 0 then
         begin
-          x := filePath.IndexOf(inputFilePattern);
-          if x < 0 then Continue;
+          found := False;
+          j := 1;
+          while (j <= inputFilePatterns.Count) and not found do
+          begin
+            found := (filePath.IndexOf(inputFilePatterns[j - 1]) >= 0);
+            Inc(j);
+          end;
+          if not found then Continue;
         end;
+
         // Log(Format('Scanning file %s (%d of %d)', [filePath, i, maxFiles]));
         fileInfo := GetFileInfo(filePath);
         case fileInfo.fileType
@@ -940,7 +959,7 @@ type
     finally
       ProgramFiles.Free;
       PascalFiles.Free;
-
+      inputFilePatterns.Free;
     end;
   end;
 
