@@ -5,7 +5,7 @@ by Gawor (2020-01-18)
 
 program Stereogram;
 
-{$librarypath blibs}
+{$librarypath 'blibs'}
 
 uses B_Crt, SysUtils, Graph;
 
