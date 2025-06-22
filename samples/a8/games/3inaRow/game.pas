@@ -1,5 +1,6 @@
-program game3inarow;
-{$librarypath blibs'}
+program game;
+
+{$librarypath 'blibs'}
 uses atari, b_system, b_pmg, b_dl, b_crt, joystick, math, sysutils, rmt;
 
 {$I config.inc}
