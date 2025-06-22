@@ -12,7 +12,9 @@ begin  (* main program *)
    Initial := 'Q';
    Last_Name := 'Doe';
    Writeln(First_Name,Initial,Last_Name);
-   Full_Name := First_Name + ' ' + Initial + ' ' + Last_Name;
+   // The operator "+" is currently not supported in Mad-Pascal between "string" and "char".
+   // Full_Name := First_Name + ' ' + Initial + ' ' + Last_Name;
+   Full_Name := Concat(First_Name, Initial, Last_Name);
    Writeln(Full_Name);
 
    repeat until keypressed;
