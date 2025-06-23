@@ -1,148 +1,158 @@
+program test_ansi;
 
-uses vbxe, crt;
+uses
+  vbxe,
+  crt;
 
-var f: file;
+var
+  f: file;
 
-    num, i: word;
+  num, i: Word;
 
-    stop: Boolean;
+  stop: Boolean;
 
-    bf: array [0..255] of char;
+  bf: array [0..255] of Char;
 
-    row0: array [0..255] of byte absolute $0400;
+  row0: array [0..255] of Byte absolute $0400;
 
-    vram, src: TVBXEMemoryStream;
+  vram, src: TVBXEMemoryStream;
 
-    vadr, ansiend : cardinal;
-
-
-Procedure KeyScan;
-var a, onKey: byte;
+  vadr, ansiend: Cardinal;
 
 
-procedure get_key; assembler;
-asm
+  procedure KeyScan;
+  var
+    a, onKey: Byte;
+
+
+    procedure get_key; assembler;
+    asm
+
 key_delay = 1
 
-	lda $d20f
-	and #4
-	bne @exit
+  lda $d20f
+  and #4
+  bne @exit
 
-	lda $d209
+  lda $d209
 
-	cmp onKey_: #0
-	bne skp
+  cmp onKey_: #0
+  bne skp
 
-	ldy delay: #key_delay
-	dey
-	sty delay
-	bne @exit
+  ldy delay: #key_delay
+  dey
+  sty delay
+  bne @exit
 skp
-	sta onKey
-	sta onKey_
+  sta onKey
+  sta onKey_
 
-	mva #key_delay delay
-end;
+  mva #key_delay delay
 
+    end;
 
-BEGIN
-	get_key;
+  begin
+    get_key;
 
-	a:=0;
+    a := 0;
 
-	if onKey <> 0 then begin
+    if onKey <> 0 then
+    begin
 
-	 case onKey of
-	  28: stop:=true;
+      case onKey of
+        28: stop := True;
 
-	  46: a:=1;	// W
-	  62: a:=2;	// S
-	 end;
+        46: a := 1;  // W
+        62: a := 2;  // S
+      end;
 
-	end;
+    end;
 
-	onKey:=0;
+    onKey := 0;
 
-	case a of
-	  1: if vadr > VBXE_ANSIFRE then dec(vadr, 160);
-	  2: if vadr < ansiend then inc(vadr, 160);
-	end;
+    case a of
+      1: if vadr > VBXE_ANSIFRE then Dec(vadr, 160);
+      2: if vadr < ansiend then Inc(vadr, 160);
+    end;
 
-END;
+  end;
 
 
 
 begin
 
-EnableANSIMode;
+  EnableANSIMode;
 
-vram.create;
-vram.position:=VBXE_ANSIFRE;
+  vram.Create;
+  vram.position := VBXE_ANSIFRE;
 
-row_slide_status:=false;
-
-
-assign(f, 'D:CESPLAT.ANS'); reset(f, 1);
-
-repeat
-
- blockread(f, bf, 256, num);
-
- if num > 0 then
-  for i:=0 to num-1 do begin
-   AnsiChar(bf[i]);
+  row_slide_status := False;
 
 
-   if row_slide_status then begin
+  Assign(f, 'D:CESPLAT.ANS');
+  reset(f, 1);
 
-    vram.WriteBuffer(row0, 160);
+  repeat
 
-    row_slide_status:=false;
+    blockread(f, bf, 256, num);
 
-   end;
+    if num > 0 then
+      for i := 0 to num - 1 do
+      begin
+        Ansichar(bf[i]);
 
+
+        if row_slide_status then
+        begin
+
+          vram.WriteBuffer(row0, 160);
+
+          row_slide_status := False;
+
+        end;
+
+      end;
+
+  until num = 0;
+
+  Close(f);
+
+  NoSound;  // reset POKEY-s
+
+
+  src.Create;
+  src.position := VBXE_ANSIADR;
+
+
+  for i := 0 to 23 do
+  begin
+
+    src.ReadBuffer(bf, 160);
+
+    vram.WriteBuffer(bf, 160);
 
   end;
 
-until num = 0;
 
-close(f);
+  ansiend := vram.position - 24 * 160;
 
-NoSound;	// reset POKEY-s
+  vadr := ansiend;
 
+  stop := False;
 
-src.create;
-src.position:=VBXE_ANSIADR;
+  repeat
 
+    pause;
 
-for i:=0 to 23 do begin
+    KeyScan;
 
- src.ReadBuffer(bf, 160);
+    SetOverlayAddress(vadr);
 
- vram.WriteBuffer(bf, 160);
+    if stop then Break;
 
-end;
-
-
-ansiend := vram.position - 24*160;
-
-vadr:=ansiend;
-
-stop:=false;
-
-repeat
-
- pause;
-
- KeyScan;
-
- SetOverlayAddress(vadr);
-
- if stop then Break;
-
-until false;
+  until False;
 
 
-NormVideo;
+  NormVideo;
 
 end.

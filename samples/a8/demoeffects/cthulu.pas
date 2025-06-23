@@ -3,11 +3,7 @@ uses crt;
 
 begin
 
-
-
-
-
-end;
+end.
 
 
 {
