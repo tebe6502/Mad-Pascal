@@ -97,7 +97,7 @@ var
   optimize: record
     use: Boolean;
     SourceFile: TSourceFile;
-    line, old: Integer;
+    line, oldLine: Integer;
     end;
 
   codealign: record

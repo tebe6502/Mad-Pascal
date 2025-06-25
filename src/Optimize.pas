@@ -3774,14 +3774,14 @@ begin        // OptimizeASM
   if ((x = 0) and inxUse) then
   begin   // succesfull
 
-    if common.optimize.line <> common.optimize.old then
+    if common.optimize.line <> common.optimize.oldLine then
     begin
       WriteOut('');
       WriteOut('; optimize OK (' + common.optimize.SourceFile.Name + '), line = ' +
         IntToStr(common.optimize.line));
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.oldLine := common.optimize.line;
     end;
 
 
@@ -3898,7 +3898,7 @@ begin        // OptimizeASM
       end;
 
 
-    if common.optimize.line <> common.optimize.old then
+    if common.optimize.line <> common.optimize.oldLine then
     begin
       WriteOut('');
 
@@ -3911,7 +3911,7 @@ begin        // OptimizeASM
 
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.oldLine := common.optimize.line;
     end;
 
 
