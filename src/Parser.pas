@@ -34,7 +34,7 @@ function ObjectRecordSize(i: Cardinal): Integer;
 
 function RecordSize(IdentIndex: TIdentIndex; field: String = ''): Integer;
 
-procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
+procedure SaveToDataSegment(index: Integer; value: Int64; valueDataType: TDataType);
 
 // -----------------------------------------------------------------------------
 
@@ -299,61 +299,63 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
+procedure SaveToDataSegment(index: Integer; value: Int64; valueDataType: TDataType);
 begin
 
-  if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
+  if (index < 0) or (index > $FFFF) then
   begin
-    writeln('SaveToDataSegment: ', ConstDataSize);
+    writeln('SaveToDataSegment: Invalid segment index', index);
     RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
-  case ConstValType of
+  case valueDataType of
 
     TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
-      DataSegment[ConstDataSize] := Byte(ConstVal);
+    begin
+      DataSegment[index] := Byte(value);
+    end;
 
     TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
     TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
+      DataSegment[index] := Byte(value);
+      DataSegment[index + 1] := Byte(value shr 8);
     end;
 
     TDataType.DATAORIGINOFFSET:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal) or $8000;
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8) or $4000;
+      DataSegment[index] := Byte(value) or $8000;
+      DataSegment[index + 1] := Byte(value shr 8) or $4000;
     end;
 
     TDataType.CODEORIGINOFFSET:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal) or $2000;
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8) or $1000;
+      DataSegment[index] := Byte(value) or $2000;
+      DataSegment[index + 1] := Byte(value shr 8) or $1000;
     end;
 
     TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
-      DataSegment[ConstDataSize + 2] := Byte(ConstVal shr 16);
-      DataSegment[ConstDataSize + 3] := Byte(ConstVal shr 24);
+      DataSegment[index] := Byte(value);
+      DataSegment[index + 1] := Byte(value shr 8);
+      DataSegment[index + 2] := Byte(value shr 16);
+      DataSegment[index + 3] := Byte(value shr 24);
     end;
 
     TDataType.SINGLETOK: begin
-      ConstVal := CastToSingle(ConstVal);
+      value := CastToSingle(value);
 
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
-      DataSegment[ConstDataSize + 2] := Byte(ConstVal shr 16);
-      DataSegment[ConstDataSize + 3] := Byte(ConstVal shr 24);
+      DataSegment[index] := Byte(value);
+      DataSegment[index + 1] := Byte(value shr 8);
+      DataSegment[index + 2] := Byte(value shr 16);
+      DataSegment[index + 3] := Byte(value shr 24);
     end;
 
     TDataType.HALFSINGLETOK: begin
-      ConstVal := CastToHalfSingle(ConstVal);
+      value := CastToHalfSingle(value);
 
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
+      DataSegment[index] := Byte(value);
+      DataSegment[index + 1] := Byte(value shr 8);
     end;
 
   end;
