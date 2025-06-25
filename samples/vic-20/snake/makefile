@@ -7,7 +7,7 @@ all: clean build-vic20
 vic20: clean build-vic20 start-vic20
 
 build-vic20:
-	$(MP) src/vic20.pas -t raw -code A009 -o output/vic20.a65
+	$(MP) vic20.pas -t raw -code A009 -o output/vic20.a65
 	$(MADS) output/vic20.a65 -x -i:$(BASE) -o:output/vic20-core.bin
 	cat headers/vic20_cart.bin output/vic20-core.bin > bin/snake-vic20-pal-a000.crt
 

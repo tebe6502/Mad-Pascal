@@ -1,7 +1,10 @@
 .vscode
+# .a65 is considered tempoary, .asm is considered permanent
 *.a65
 *.lab
 *.lst
+#
+# .obx is considered tempoary, .obj is considered permanent
 *.obx
 *.xex
 *.o

@@ -1,5 +1,5 @@
 program fujitalk;
-{$librarypath '../blibs/'}
+{$librarypath 'blibs'}
 uses atari, http_client, crt, b_system, efast, fn_cookies, joystick;
 
 const 

@@ -137,7 +137,7 @@ begin
   RC := $d8; SETIRQSRC := 2; DETIRQSRC := 2;
   IRQVEC := word(@vbi);
 
-  FillSinHigh(sinusTable); InitDivision16; InitCharset;
+  FillSinHigh(@sinusTable); InitDivision16; InitCharset;
 
   asm { cli };
 

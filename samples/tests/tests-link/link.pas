@@ -22,7 +22,7 @@ begin
 end;
 
 
-{$link test.obx}
+{$link 'test.obj'}
 
 
 
