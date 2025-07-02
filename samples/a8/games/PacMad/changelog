@@ -1,0 +1,29 @@
+v 1.0
+
+changes:
+
+- 20 new levels !! (total 30)
+- game balance - now difficulty gradually increases.
+- bonus fruits - randomly appears in 3 variants
+- now each ghost can have different ai level
+- score presented on game ending and on hsc matrix
+- starting level selection on title screen
+- current level shown on gameover screen
+- new sound FX
+- cheat mode added
+- some speed optimizations
+- minor visual improvements
+
+zmiany:
+
+- 20 nowych poziomów, łącznie 30,
+- balans i zmiana kolejności poziomów, 
+- bonusy w postaci losowo pojawiających się owoców (w 3 wariantach)
+- każdy duszek ma teraz osobne AI,
+- wynik prezentowany na zakończenie gry i na matrycy HSC,
+- możliwość wyboru startowego poziomu klawiszem SELECT,
+- wyświetlanie bieżącego poziomu na ekranie końca gry
+- nowe efekty dzwiękowe,
+- ukryty 'cheat mode',
+- oprymalizacje szybkości,
+- drobne poprawki graficzne

@@ -1,0 +1,2 @@
+LEVELS_ADDRESS   rcasm   'assets/levels.asm'
+STRINGS_ADDRESS  rcasm   'assets/strings.asm'

@@ -1,0 +1,31 @@
+/* CSS Document */
+*{margin:0;padding:0;}
+body{font-family:Arial, sans-serif; background:#8ab}
+.tool{display:block;clear:both;width:80px;height:20px;margin:4px 0;line-height:12px;font-size:12px;}
+.tool_hr{margin:10px 0;clear:both}
+.itool{width:100px;margin:4px 0;}
+.tool_selected{font-weight:700;color:#f44;}
+.row{clear:both;}
+.tile{width:16px;height:16px;border-right:dotted 1px #888;border-bottom:dotted 1px #888;float:left;text-align:center;background-color:#222;line-height:15px;}
+.tile_dot,.tile_empty,.tile_pill,.tile_spawner,.tile_warp,.tile_exit,.tile_start{background-color:#ddd;}
+.tile_void{background-color:#444;}
+.tile_edge{background-color:#666;color:#aaa;font-size:10px;}
+.tile_warp{color:#fff;font-size:20px;line-height:16px;overflow:hidden;}
+.tile_dot:after{content:"•";}
+.tile_pill:after{content:"⦿";}
+.tile_spawner:after{content:"⨸";}
+.tile_warpL:before{content:"⩹ ";}
+.tile_warpR:before{content:"⩺ ";}
+.tile_start:after{content:"☺";}
+.tile_exit:after{content:"⇧";}
+.rectangle{background-color:#aaf;}
+#board{position:absolute;top:10px;left:10px;border:2px solid #000;margin-bottom:40px;}
+#logo{position:fixed;top:10px;left:382px;}
+#toolbox{position:fixed;top:60px;left:390px;}
+#filebox{position:fixed;top:60px;left:480px;}
+#output{position:absolute;top:10px;left:580px;}
+#outbox{width:400px;height:1726px;color:#aaa;background:#222}
+label{display:block;font-size:9px;margin:10px 0 2px 0;}
+.toolinput {width:80px;text-align:right;}
+.ai{width:16px}
+.colortool {float:left;width:25px;height:25px;margin:0 2px 10px 0;text-align:center;font-size:12px;}

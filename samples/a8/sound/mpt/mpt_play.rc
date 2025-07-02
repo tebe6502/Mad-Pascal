@@ -1,0 +1,5 @@
+; to jest player MPT
+mpt_player	MPTPLAY
+
+# to jest modul
+mpt_modul	MPT	'porazka.mpt'

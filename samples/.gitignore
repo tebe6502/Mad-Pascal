@@ -1,0 +1,8 @@
+*memory.dump
+*.a65
+*.lab
+*.lst
+*.obx
+*.xex
+*.exe
+*.log

@@ -1,0 +1,5 @@
+CHARSET_TILE_ADDRESS rcdata  '3row2.fnt'
+CHARSET_LEVELS_ADDRESS rcdata  '3row_lvl.fnt'
+CHARSET_TXT_ADDRESS rcdata '3rowtxt.fnt'
+LEVELS_ADDRESS rcasm 'levels.asm'
+

@@ -1,0 +1,1 @@
+ xxd -c 8 -g 1 -i $* | sed -e 's/0x/\$/g' | grep '\$'

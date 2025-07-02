@@ -1,0 +1,6 @@
+rmt_player_4    RMTPLAY  'delta.feat' 1
+rmt_module_4    RMT      'delta.rmt'
+rmt_player_8	RMTPLAY2 'smells.feat' 1
+rmt_module_8	RMT      'smells.rmt'
+charset         RCDATA   'atari.chr'
+

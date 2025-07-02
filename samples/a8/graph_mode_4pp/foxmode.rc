@@ -1,0 +1,2 @@
+CHARSET_RAM_ADDRESS	RCDATA	'fntdith.fnt'
+VIDEO_RAM_ADDRESS	RCDATA	'fntdith.scr'

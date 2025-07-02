@@ -1,0 +1,158 @@
+                                                   $3 * c001  20 48 C0    JSR $C048    ; init
+                                                      * c004  A9 18       LDA #$18     ; IRQ routine address
+                                                   $7 * c006  A0 C0       LDY #$C0     ; $C018
+                                                  $1d * c01b  20 21 C0    JSR $C021    ; driver   
+                                                  $25 * c023  CE 90 C0    DEC $C090
+                                                  $2a * c028  20 26 C2    JSR $C226
+                                                  $2d * c02b  20 25 C2    JSR $C225
+                                                  $30 * c02e  4C 25 C2    JMP $C225
+                                                  $38 * c036  8D 90 C0    STA $C090
+                                                  $3b * c039  20 40 C0    JSR $C040
+                                                  $3e * c03c  20 3F C0    JSR $C03F
+                                                  $42 * c040  DE 8A C0    DEC $C08A,X
+                                                  $47 * c045  4C 26 C2    JMP $C226
+                                                  $56 * c054  8D 62 C2    STA $C262
+                                                  $5b * c059  9D 81 C0    STA $C081,X    ; wstawia zera do 
+                                                  $63 * c061  BD B9 C4    LDA $C4B9,X    ; track	order lsb
+                                                  $68 * c066  BD BC C4    LDA $C4BC,X    ; track	order msb
+                                                  $71 * c06f  9D 8D C0    STA $C08D,X
+                                                  $77 * c075  9D E6 C0    STA $C0E6,X
+                                                  $7c * c07a  9D E9 C0    STA $C0E9,X
+                                                  $93 * c091  BC 8D C0    LDY $C08D,X
+                                                  $9a * c098  BD 84 C0    LDA $C084,X
+                                                  $9f * c09d  9D 84 C0    STA $C084,X
+                                             vary $a3 * c0a1  B9 47 C7    LDA $C747,Y    ; sequence array lsb
+                                             vary $a8 * c0a6  B9 39 C7    LDA $C739,Y    ; sequence array msb
+                                                  $ad * c0ab  BC 81 C0    LDY $C081,X
+                                                  $ba * c0b8  9D 8A C0    STA $C08A,X
+                                                  $bf * c0bd  9D 31 C0    STA $C031,X
+                                                  $c2 * c0c0  20 98 C0    JSR $C098
+                                                  $c5 * c0c3  4C 87 C1    JMP $C187
+                                                  $da * c0d8  9D 8A C0    STA $C08A,X
+                                                  $f1 * c0ef  9D D9 C3    STA $C3D9,X
+                                                  $fe * c0fc  BD E6 C0    LDA $C0E6,X
+                                                 $108 * c106  9D C9 C0    STA $C0C9,X
+                                                 $10e * c10c  B9 37 C4    LDA $C437,Y    ; sid freq. array lsb
+                                                 $111 * c10f  9D CC C0    STA $C0CC,X
+                                                 $114 * c112  9D E2 C3    STA $C3E2,X    ; sid freq. array msb
+                                                 $117 * c115  B9 C5 C1    LDA $C1C5,Y
+                                                 $11a * c118  9D CF C0    STA $C0CF,X
+                                                 $11d * c11b  9D B6 C2    STA $C2B6,X
+                                                 $124 * c122  9D 41 C1    STA $C141,X
+                                                 $129 * c127  9D 8A C0    STA $C08A,X
+                                                 $137 * c135  9D 47 C1    STA $C147,X
+                                                 $13d * c13b  9D 4A C1    STA $C14A,X
+                                                 $140 * c13e  4C 77 C1    JMP $C177
+                                                 $152 * c150  8E 62 C2    STX $C262
+                                                 $158 * c156  8D 66 C2    STA $C266
+                                                 $161 * c15f  8D A0 C2    STA $C2A0
+                                                 $170 * c16e  8D 6B C2    STA $C26B
+                                                 $173 * c171  BD B3 C2    LDA $C2B3,X
+                                                 $17b * c179  9D 31 C0    STA $C031,X
+                                                 $17e * c17c  9D B9 C2    STA $C2B9,X
+                                                 $183 * c181  9D DD C0    STA $C0DD,X
+                                                 $186 * c184  9D BD C2    STA $C2BD,X
+                                                 $190 * c18e  DE E9 C0    DEC $C0E9,X
+                                                 $195 * c193  BD B9 C4    LDA $C4B9,X    ; track	order lsb
+                                                 $19a * c198  BD BC C4    LDA $C4BC,X    ; track	order msb
+                                                 $19f * c19d  BC 87 C0    LDY $C087,X
+                                                 $1ad * c1ab  9D 87 C0    STA $C087,X
+                                                 $1b2 * c1b0  9D 8D C0    STA $C08D,X
+                                                 $1b8 * c1b6  9D E6 C0    STA $C0E6,X
+                                                 $1bd * c1bb  9D E9 C0    STA $C0E9,X
+                                                 $1c3 * c1c1  9D 81 C0    STA $C081,X
+                                                 $228 * c226  BC D9 C3    LDY $C3D9,X
+                                                 $22d * c22b  BD 41 C1    LDA $C141,X
+                                                 $234 * c232  9D 44 C1    STA $C144,X
+                                            vary $237 * c235  B9 55 C7    LDA $C755,Y    ; presets/instrumenty
+                                            vary $23c * c23a  B9 56 C7    LDA $C756,Y
+                                                 $23f * c23d  BC C6 C0    LDY $C0C6,X
+                                                 $24a * c248  BD 84 C0    LDA $C084,X
+                                            vary $254 * c252  B9 57 C7    LDA $C757,Y
+                                                 $257 * c255  9D 84 C0    STA $C084,X
+                                            vary $25a * c258  B9 58 C7    LDA $C758,Y
+                                                 $25d * c25b  9D DC C3    STA $C3DC,X
+                                                 $260 * c25e  9D DF C3    STA $C3DF,X
+                                                 $269 * c267  8D 9E C2    STA $C29E
+                                                 $26e * c26c  8D 96 C2    STA $C296
+                                                 $273 * c271  9D E0 C0    STA $C0E0,X
+                                                 $276 * c274  9D E3 C0    STA $C0E3,X
+                                            vary $279 * c277  B9 5A C7    LDA $C75A,Y
+                                                 $27f * c27d  9D 4D C1    STA $C14D,X
+                                                 $282 * c280  BD 41 C1    LDA $C141,X
+                                                 $287 * c285  9D 41 C1    STA $C141,X
+                                            vary $28a * c288  B9 5C C7    LDA $C75C,Y
+                                                 $28f * c28d  4C 85 C3    JMP $C385
+                                                 $292 * c290  EC 62 C2    CPX $C262
+                                                 $29b * c299  CE 96 C2    DEC $C296
+                                                 $2a3 * c2a1  8D 9E C2    STA $C29E
+                                                 $2af * c2ad  20 E5 C3    JSR $C3E5
+                                                 $2b2 * c2b0  4C 22 C3    JMP $C322
+                                                 $2c9 * c2c7  BD 41 C1    LDA $C141,X
+                                                 $2d6 * c2d4  DE 4D C1    DEC $C14D,X
+                                                 $2db * c2d9  FE 4D C1    INC $C14D,X
+                                                 $2de * c2dc  BD BD C2    LDA $C2BD,X
+                                                 $2e4 * c2e2  B9 C3 C2    LDA $C2C3,Y
+                                                 $2ec * c2ea  BD CC C0    LDA $C0CC,X
+                                            vary $2ef * c2ed  F9 5B C7    SBC $C75B,Y
+                                                 $2f2 * c2f0  9D CC C0    STA $C0CC,X
+                                                 $2f7 * c2f5  DE CF C0    DEC $C0CF,X
+                                                 $2ff * c2fd  BD CC C0    LDA $C0CC,X
+                                            vary $302 * c300  79 5B C7    ADC $C75B,Y
+                                                 $305 * c303  9D CC C0    STA $C0CC,X
+                                                 $30a * c308  FE CF C0    INC $C0CF,X
+                                                 $30f * c30d  FE DD C0    INC $C0DD,X
+                                            vary $312 * c310  B9 5A C7    LDA $C75A,Y
+                                                 $317 * c315  DD DD C0    CMP $C0DD,X
+                                                 $31e * c31c  9D DD C0    STA $C0DD,X
+                                                 $321 * c31f  FE BD C2    INC $C2BD,X
+                                            vary $326 * c324  B9 59 C7    LDA $C759,Y
+                                                 $334 * c332  7D DC C3    ADC $C3DC,X
+                                                 $337 * c335  9D DC C3    STA $C3DC,X
+                                                 $33c * c33a  7D DF C3    ADC $C3DF,X
+                                                 $33f * c33d  9D DF C3    STA $C3DF,X
+                                                 $342 * c340  4C 85 C3    JMP $C385
+                                                 $34b * c349  BD E3 C0    LDA $C0E3,X
+                                                 $351 * c34f  BD DC C3    LDA $C3DC,X
+                                                 $356 * c354  9D DC C3    STA $C3DC,X
+                                                 $35b * c359  FE DF C3    INC $C3DF,X
+                                                 $361 * c35f  BD DC C3    LDA $C3DC,X
+                                                 $366 * c364  9D DC C3    STA $C3DC,X
+                                                 $36b * c369  DE DF C3    DEC $C3DF,X
+                                                 $36e * c36c  FE E0 C0    INC $C0E0,X
+                                                 $375 * c373  DD E0 C0    CMP $C0E0,X
+                                                 $37c * c37a  9D E0 C0    STA $C0E0,X
+                                                 $37f * c37d  BD E3 C0    LDA $C0E3,X
+                                                 $384 * c382  9D E3 C0    STA $C0E3,X
+                                                 $387 * c385  BC C6 C0    LDY $C0C6,X
+                                                 $38a * c388  BD 84 C0    LDA $C084,X
+                                                 $390 * c38e  BD DF C3    LDA $C3DF,X
+                                                 $396 * c394  BD DC C3    LDA $C3DC,X
+                                                 $39c * c39a  BD 41 C1    LDA $C141,X
+                                                 $3a3 * c3a1  BD 47 C1    LDA $C147,X
+                                                 $3aa * c3a8  BD B9 C2    LDA $C2B9,X
+                                                 $3af * c3ad  9D B9 C2    STA $C2B9,X
+                                                 $3b5 * c3b3  BD E2 C3    LDA $C3E2,X
+                                                 $3b8 * c3b6  7D 47 C1    ADC $C147,X
+                                                 $3bb * c3b9  9D E2 C3    STA $C3E2,X
+                                                 $3c1 * c3bf  BD B6 C2    LDA $C2B6,X
+                                                 $3c4 * c3c2  7D 4A C1    ADC $C14A,X
+                                                 $3c7 * c3c5  9D B6 C2    STA $C2B6,X
+                                                 $3ce * c3cc  BD CC C0    LDA $C0CC,X
+                                                 $3d4 * c3d2  BD CF C0    LDA $C0CF,X
+                                                 $3e8 * c3e6  B9 98 C4    LDA $C498,Y    ; arpeggio array lsb
+                                                 $3ed * c3eb  B9 A8 C4    LDA $C4A8,Y    ; arpeggio array msb
+                                                 $3f2 * c3f0  BC 44 C1    LDY $C144,X
+                                                 $3f7 * c3f5  3D 31 C0    AND $C031,X
+                                                 $3fa * c3f8  9D 84 C0    STA $C084,X
+                                                 $403 * c401  7D C9 C0    ADC $C0C9,X
+                                                 $408 * c406  8D 29 C4    STA $C429
+                                                 $410 * c40e  8D 9E C2    STA $C29E
+                                                 $427 * c425  9D 44 C1    STA $C144,X
+                                                 $42c * c42a  B9 37 C4    LDA $C437,Y    ; sid freq.	array lsb
+                                                 $42f * c42d  9D CC C0    STA $C0CC,X
+                                                 $432 * c430  B9 C5 C1    LDA $C1C5,Y    ; sid freq.	array msb
+                                                 $435 * c433  9D CF C0    STA $C0CF,X
+                                                 $4a8 * c4a8  e0 c6 c6 c6  c6 c6 c6 c6  c6 c6 c6 c7  a4 c6 c7 c7
+                                                 $4bc * c4bc  c6 c6 c5
+                                                 $739 * c739  c5 c5 c5 c4  c4 c5 c4 c5  c5 c5 c5 c5  c5
