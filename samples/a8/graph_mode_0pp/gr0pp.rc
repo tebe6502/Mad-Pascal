@@ -1,2 +1,0 @@
-CHARSET_RAM_ADDRESS	RCDATA	'output.fnt'
-VIDEO_RAM_ADDRESS	RCDATA	'output.scr'

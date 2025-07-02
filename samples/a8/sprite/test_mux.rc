@@ -1,7 +1,0 @@
-chr0	rcdata 'assets\chr0.dat'
-chr1	rcdata 'assets\chr1.dat'
-scr0	rcdata 'assets\scr0.dat'
-scr1	rcdata 'assets\scr1.dat'
-lvl0	rcdata 'assets\level.bin'
-
-

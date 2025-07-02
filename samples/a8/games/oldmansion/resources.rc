@@ -1,4 +1,0 @@
-CHARSET_BASE rcdata 'starydom4.fnt'
-DISPLAY_LIST_BASE rcasm 'dlist.asm'
-RMT_PLAYER RMTPLAY 'rmtfeat.asm' 0
-RMT_MODULE RMT 'starydom.rmt'

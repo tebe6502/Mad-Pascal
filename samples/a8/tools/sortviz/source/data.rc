@@ -1,4 +1,0 @@
-CAPTIONS_ADDR rcasm 'data\captions.asm'
-IMAGE_1_ADDR rcdata 'data\faraon.gr15'
-FONT_ADDR rcdata 'data\font.fnt'
-SPLASH_ADDR rcdata 'data\splash.gr8'

@@ -1,4 +1,0 @@
-VOX REGIS
-wapniak 2017 game compo entry
-platform: Stock Atari XL/XE
-author: bocianu/AnticShop

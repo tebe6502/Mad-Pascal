@@ -1,3 +1,0 @@
-CHARSET_TILE_ADDRESS rcdata  'assets/zilch.fnt'
-RMT_PLAYER RMTPLAY 'rmt_feat.asm' 1
-RMT_MODULE RMT 'assets/zilch.rmt'

@@ -1,4 +1,0 @@
-mp -target:raw -cpu:65816 -code:0300 plasma_x65.pas
-mads -x -i:"$HOME/Tools/Mad-Pascal/base" plasma_x65.a65 -o:plasma_x65.bin
-./xexcreator.sh plasma_x65.bin plasma_x65.xex 0300
-x65 plasma_x65.xex

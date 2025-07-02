@@ -1,4 +1,0 @@
-logo	xbmp	'sv2.bmp'	0
-fonts	xbmp	'269_.bmp'	100
-modul	rmt	'sv2k16-02c_strip.rmt'
-player	rmtplay	'sv2k16-02c.feat' 1

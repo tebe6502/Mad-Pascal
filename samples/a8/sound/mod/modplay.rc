@@ -1,3 +1,0 @@
-effect	RCASM	'arrays.asm'
-volume	RCDATA	'volume.tab'
-vol6bit	RCDATA	'draco_6bit.dat'
