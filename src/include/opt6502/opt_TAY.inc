@@ -824,6 +824,63 @@ begin
      end;
 
 
+    if tay(i+16) and										// tay					; 16
+
+       lda_val(i) and (listing[i] = listing[i+13]) and						// lda A				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       asl_a(i+2) and										// asl @				; 2
+       asl_a(i+3) and										// asl @				; 3
+       tay(i+4) and										// tay					; 4
+       lda_a(i+5) and										// lda					; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN			; 6
+       lda_a(i+7) and										// lda					; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH		; 8
+       lda_a(i+9) and										// lda					; 9
+       sta_stack(i+10) and									// sta :STACKORIGIN+STACKWIDTH*2	; 10
+       lda_a(i+11) and										// lda					; 11
+       sta_stack(i+12) and									// sta :STACKORIGIN+STACKWIDTH*3	; 12
+//       lda_val(i+13) and									// lda A				; 13
+       asl_a(i+14) and										// asl @				; 14
+       asl_a(i+15) then										// asl @				; 15
+//       tay(i+16) then										// tay					; 16
+     begin
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+
+      	exit(false);
+     end;
+
+
+    if tay(i+14) and										// tay					; 14
+
+       lda_val(i) and (listing[i] = listing[i+11]) and						// lda A				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       asl_a(i+2) and										// asl @				; 2
+       asl_a(i+3) and										// asl @				; 3
+       tay(i+4) and										// tay					; 4
+       lda_a(i+5) and										// lda					; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN			; 6
+       lda_a(i+7) and										// lda					; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH		; 8
+       lda_a(i+9) and										// lda					; 9
+       sta_stack(i+10) and									// sta :STACKORIGIN+STACKWIDTH*2	; 10
+//       lda_val(i+11) and									// lda A				; 11
+       asl_a(i+12) and										// asl @				; 12
+       asl_a(i+13) then										// asl @				; 13
+//       tay(i+14) then										// tay					; 14
+     begin
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+
+      	exit(false);
+     end;
+
+
+
 // -----------------------------------------------------------------------------
 
 
