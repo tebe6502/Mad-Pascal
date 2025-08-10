@@ -142,36 +142,6 @@ begin
 // -----------------------------------------------------------------------------
 
     if (p > 1) and
-       lda_val(p-2) and (lda_im(p-2) = false) and					// lda					; p-2		+-CARDINAL
-       add_sub_val(p-1) and (add_sub_im(p-1) = false) and				// add|sub				; p-1
-											// sta :STACKORIGIN			; p
-       lda_a(p+1) and									// lda 					; p+1
-       adc_sbc(p+2) and									// adc|sbc				; p+2
-       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
-       rol_a(p+4) and									// rol @				; p+4
-       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
-       rol_a(p+6) and									// rol @				; p+6
-       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
-      begin
-	listing[i+1] := '';
-	listing[i+2] := #9'asl @';
-	listing[i+3] := #9'asl @';
-	listing[i+4] := #9'tay';
-	listing[i+5] := '';
-
-	listing[p+2] := '';
-	listing[p+3] := '';
-	listing[p+4] := '';
-	listing[p+5] := '';
-	listing[p+6] := '';
-	listing[p+7] := #9'sta #$00';
-
-	Result:=false; Break;
-      end;
-
-// -----------------------------------------------------------------------------
-
-    if (p > 1) and
        (lda_adr(i+6) or sta_adr(i+7)) and
        (iy(i+6) or iy(i+7)) and
 
@@ -266,6 +236,67 @@ begin
 	Result:=false; Break;
       end;
 
+// -----------------------------------------------------------------------------
+
+    if (p > 1) and
+       lda_val(p-2) and									// lda					; p-2		+-CARDINAL	[byte]
+       add_sub(p-1) and									// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       lda_val(p+1) and									// lda					; p+1
+       adc_sbc(p+2) and									// add|sbc				; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
+       rol_a(p+6) and									// rol @				; p+6
+       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+	listing[p+7] := '';
+
+	Result:=false; Break;
+      end;
+
+// -----------------------------------------------------------------------------
+{
+    if (p > 1) and
+       lda_val(p-2) and (lda_im(p-2) = false) and					// lda					; p-2		+-CARDINAL
+       add_sub_val(p-1) and (add_sub_im(p-1) = false) and				// add|sub				; p-1
+											// sta :STACKORIGIN			; p
+       lda_a(p+1) and									// lda 					; p+1
+       adc_sbc(p+2) and									// adc|sbc				; p+2
+       asl_stack(p+3) and								// asl :STACKORIGIN			; p+3
+       rol_a(p+4) and									// rol @				; p+4
+       asl_stack(p+5) and								// asl :STACKORIGIN			; p+5
+       rol_a(p+6) and									// rol @				; p+6
+       sta_stack(p+7) then								// sta :STACKORIGIN+STACKWIDTH		; p+7
+      begin
+	listing[i+1] := '';
+	listing[i+2] := #9'asl @';
+	listing[i+3] := #9'asl @';
+	listing[i+4] := #9'tay';
+	listing[i+5] := '';
+
+	listing[p+2] := '';
+	listing[p+3] := '';
+	listing[p+4] := '';
+	listing[p+5] := '';
+	listing[p+6] := '';
+	listing[p+7] := #9'sta #$00';
+
+	Result:=false; Break;
+      end;
+}
 // -----------------------------------------------------------------------------
 
        Break;
