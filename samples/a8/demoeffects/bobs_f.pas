@@ -29,42 +29,21 @@ const
 
   mode = 6 + 16;
 
-  b0 = $4000;
-  b1 = $4800;
-  b2 = $4000;
-  b3 = $4800;
-
 var
   buf1, buf2, buf3, buf4: TDisplayBuffer;
 
-  buf: array [0..3] of ^TDisplayBuffer;
-
   q, t: Byte;
-
-  dl: Word;
 
   x, y, xm, ym: Smallint;
 
-  sc: pointer;
-
-
 begin
 
-  InitGraph(mode);
-
-
-  NewDisplayBuffer(buf1, mode, $40);
-  NewDisplayBuffer(buf2, mode, $48);
-  NewDisplayBuffer(buf3, mode, $50);
-  NewDisplayBuffer(buf3, mode, $58);
-  buf[0]:=@buf1;
-  buf[1]:=@buf2;
-  buf[2]:=@buf3;
-  buf[3]:=@buf3;
+  NewDisplayBuffer(buf1, mode, $50);
+  NewDisplayBuffer(buf2, mode, $60);
+  NewDisplayBuffer(buf3, mode, $70);
+  NewDisplayBuffer(buf4, mode, $80);
 
   SetColor(1);
-
-  dl := dpeek($230);
 
   x := dia;
   y := dia;
@@ -76,13 +55,29 @@ begin
   t := 0;
 
   repeat
-    pause;
-    pause;
-    pause;
+    pause(2);
 
-    SetDisplayBuffer(buf[q]^);
+    case t of
+      0:
+        SetDisplayBuffer(buf1);
+      1:
+        SetDisplayBuffer(buf2);
+      2:
+        SetDisplayBuffer(buf3);
+      3:
+        SetDisplayBuffer(buf4);
+    end;
 
-    // dpoke(dl + 4, ss[t]);
+    case q of
+      0:
+        SetActiveBuffer(buf1);
+      1:
+        SetActiveBuffer(buf2);
+      2:
+        SetActiveBuffer(buf3);
+      3:
+        SetActiveBuffer(buf4);
+    end;
 
     Inc(x, xm);
     Inc(y, ym);
