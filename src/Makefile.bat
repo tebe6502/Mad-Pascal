@@ -18,9 +18,9 @@ set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
 set MP_PAS=%MP_SRC_FOLDER%\mp.pas
 set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows
-set MP_EXE=%MP_BIN_FOLDER=%\mp.exe
+set MP_EXE=%MP_BIN_FOLDER%\mp.exe
 
-set REFERENCE_MP_EXE=%MP_FOLDER%-origin\bin\windows\mp.exe
+set REFERENCE_MP_EXE=%MP_BIN_FOLDER%-origin\bin\windows\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -41,7 +41,10 @@ if not "%MP_EXE%"=="" (
   call fpc.bat %MP_PAS%
   if errorlevel 1 goto :eof
   if not exist %MP_BIN_FOLDER% mkdir "%MP_BIN_FOLDER%"
-  mv "mp.exe" %MP_BIN_FOLDER%"
+  copy "mp.exe" "%MP_EXE%"
+  if errorlevel 1 goto :eof
+  del "mp.exe"
+  if errorlevel 1 goto :eof
 
 rem Regression test with standard MP.
 goto :run_new_tests
