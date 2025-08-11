@@ -36,7 +36,7 @@
         </Mode>
         <Mode Name="all">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey"/>
+            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern const-var-scope"/>
           </local>
         </Mode>
       </Modes>
@@ -80,6 +80,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\Tokens.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="MakeMadPascal.bat"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

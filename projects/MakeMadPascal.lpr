@@ -9,11 +9,11 @@ program MakeMadPascal;
 uses
  {$IFDEF DARWIN}
 
-                                                    {$ENDIF} {$IFDEF WINDOWS}
+                                                         {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-                                                    {$ENDIF} {$IFDEF UNIX}
+                                                         {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-                                                    {$ENDIF}
+                                                         {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -374,8 +374,8 @@ var
     mpExePath: TFilePath;
     fileInfo: TFileInfo;
     exename: TProcessString;
-    commands: array of TProcessString;
-    index: Integer;
+    parameters: TStringList;
+    processParameters: array of TProcessString;
     i: Integer;
   begin
 
@@ -398,20 +398,33 @@ var
     if fileInfo.fileType = TFileType.TPROGRAM then
     begin
       exename := mpExePath;
-      commands := nil;
-      SetLength(commands, 3 + fileInfo.requiredLibraryFolders.Count);
-      index := 0;
-      commands[index] := '-ipath:' + AppendPath(mpFolderPath, 'lib');
-      Inc(index);
+      parameters := TStringList.Create;
+
+
+      parameters.add('-ipath:' + AppendPath(mpFolderPath, 'lib'));
       for i := 0 to fileInfo.requiredLibraryFolders.Count - 1 do
       begin
-        commands[index] := '-ipath:' + AppendPath(mpFolderPath, fileInfo.requiredLibraryFolders[i]);
-        Inc(index);
+        parameters.add('-ipath:' + AppendPath(mpFolderPath, fileInfo.requiredLibraryFolders[i]));
       end;
-      commands[index] := '-o:' + a65FileName;
-      Inc(index);
-      commands[index] := fileName;
-      Result := RunExecutable(fileName, curDir, exename, commands, fileResult);
+
+      // TODO: Pass platform from outside
+      if curDir.ToLower.Contains('c64') then
+      begin
+        parameters.add('-target:c64');
+      end;
+
+      parameters.add('-o:' + a65FileName);
+      parameters.add(fileName);
+
+      processParameters := nil;
+      SetLength(processParameters, parameters.Count);
+      for i := 0 to parameters.Count - 1 do
+      begin
+        processParameters[i] := parameters[i];
+      end;
+
+      Result := RunExecutable(fileName, curDir, exename, processParameters, fileResult);
+      parameters.Free;
     end;
     fileInfo.Free;
   end;
@@ -494,7 +507,7 @@ type
   const fileName: String; const a65FileName: String; var fileResult: TFileResult): Boolean;
   var
 
-    fileResultMessages: array[1..4] of TFileResultMessages;
+    fileResultMessages: array[1..6] of TFileResultMessages;
 
     i: Integer;
   begin
@@ -510,17 +523,26 @@ type
       fileResultMessages[2].AddMessage('Warning: User defined: Some warning');
       fileResultMessages[2].AddMessage('Error: User defined: Some error');
 
-      fileResultMessages[3] := TFileResultMessages.Create('samples\tests\tests-basic\negative-index-range.pas');
+
+      fileResultMessages[3] := TFileResultMessages.Create('samples\tests\tests-basic\const-var-scope.pas');
+      fileResultMessages[3].AddMessage('Identifier N is already defined');
+
+      fileResultMessages[4] := TFileResultMessages.Create('samples\tests\tests-basic\negative-index-range.pas');
       // TODO: Adapt when error IDs are available in origin
 
-      // fileResultMessages[3].AddMessage('Error: E81 - ArrayLowerBoundNotZero: Array lower bound is not zero');
-      fileResultMessages[3].AddMessage('ArrayLowerBoundNotZero: Array lower bound is not zero');
+      // fileResultMessages[4].AddMessage('Error: E81 - ArrayLowerBoundNotZero: Array lower bound is not zero');
+      fileResultMessages[4].AddMessage('ArrayLowerBoundNotZero: Array lower bound is not zero');
 
-      fileResultMessages[4] := TFileResultMessages.Create(
+      fileResultMessages[5] := TFileResultMessages.Create(
         'samples\tests\tests-medium\array-with-char-index.pas');
-      fileResultMessages[4].AddMessage(
-      //  'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
-       'ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+      fileResultMessages[5].AddMessage(
+        //  'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+        'ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+
+      fileResultMessages[6] := TFileResultMessages.Create('samples\common\DYNREC.PAS');
+      fileResultMessages[6].AddMessage(
+        'Error: Incompatible types: got "^PERSON" expected "PERSON"');
+
       for i := 1 to length(fileResultMessages) do
       begin
         CheckSampleFileWithMessages(curDir, fileName, a65FileName, fileResultMessages[i], fileResult, Result);
@@ -660,8 +682,8 @@ type
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
