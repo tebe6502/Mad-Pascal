@@ -1,4 +1,7 @@
-;; fujinet tiny web client by bocianu
+;  fujinet tiny web client by bocianu
+;
+;  This file must be assembled to "http_client.obj" and is used in "webclient.rc"
+
 CLIENT_ADDRESS = $5C00;
 
 _R = $40;  // Read - predefined values for data transfer direction (to be set in DSTATS)
