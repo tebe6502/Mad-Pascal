@@ -17,10 +17,10 @@ var
   i: word;
 
 begin
-  MemorySetup     := $14;
+  VMCSB            := $14;
 
-  BorderColor     := $00;
-  BackgroundColor := $00;
+  BorderColor      := $00;
+  BackgroundColor0 := $00;
 
   for i:= 0 to 999 do begin
     vram_Char[i] := Characters[i];
