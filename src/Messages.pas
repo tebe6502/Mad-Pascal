@@ -311,7 +311,8 @@ begin
 
     TErrorCode.StringTruncated:
     begin
-      Result := 'String constant truncated to fit STRING[' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1) + ']';
+      Result := 'String constant truncated to fit STRING[' +
+        IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1) + ']';
     end;
 
     TErrorCode.CantReadWrite:
@@ -524,7 +525,7 @@ begin
 
   Assert((ErrorCode = TErrorCode.IllegalTypeConversion) or (ErrorCode = TErrorCode.IncompatibleTypesArray));
 
-  identifier:=IdentifierAt(IdentIndex);
+  identifier := IdentifierAt(IdentIndex);
   if errorCode = TErrorCode.IllegalTypeConversion then
     msg := 'Illegal type conversion: "Array[0..'
   else
@@ -536,8 +537,7 @@ begin
 
   if identifier.NumAllocElements_ > 0 then
     msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of Array[0..' +
-      IntToStr(identifier.NumAllocElements_ - 1) + '] Of ' +
-      InfoAboutToken(identifier.AllocElementType) + '" '
+      IntToStr(identifier.NumAllocElements_ - 1) + '] Of ' + InfoAboutToken(identifier.AllocElementType) + '" '
   else
     if identifier.NumAllocElements = 0 then
     begin
@@ -559,7 +559,7 @@ begin
   else
     if arrayIdentIndex > 0 then
     begin
-      arrayIdentifier:=IdentifierAt(arrayIdentIndex);
+      arrayIdentifier := IdentifierAt(arrayIdentIndex);
       msg := msg + 'expected ';
 
       if IdentifierAt(arrayIdentIndex).NumAllocElements_ > 0 then
@@ -643,8 +643,8 @@ begin
   if pass = TPass.CODE_GENERATION then
   begin
 
-    a := TokenAt(tokenIndex).SourceLocation.SourceFile.Path + ' (' + IntToStr(TokenAt(tokenIndex).SourceLocation.Line) +
-      ')' + ' Warning: ' + msg.GetText();
+    a := TokenAt(tokenIndex).SourceLocation.SourceFile.Path + ' (' +
+      IntToStr(TokenAt(tokenIndex).SourceLocation.Line) + ')' + ' Warning: ' + msg.GetText();
 
     // Add warning only once.
     if msgLists.msgWarning.IndexOf(a) < 0 then msgLists.msgWarning.Add(a);
@@ -689,8 +689,8 @@ end;
 
 procedure WarningUserDefined(const tokenIndex: TTokenIndex);
 begin
-  Warning(tokenIndex, TMessage.Create(TErrorCode.UserDefined,
-    'Comparison might be always false due to range of constant and expression'));
+  Warning(tokenIndex, TMessage.Create(TErrorCode.UserDefined, 'User defined: ' +
+    msgLists.msgUser[TokenAt(tokenIndex).Value]));
 end;
 
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
