@@ -1,5 +1,4 @@
-
-program cube;
+program cube_clip;
 
 uses
   crt,
@@ -31,7 +30,6 @@ var
   tempX, tempY, tempZ, temp1, temp2: Real;
 
   angle1, angle2, angle3: Byte;
-  dl: Word;
 
   buf1, buf2: TDisplayBuffer;
 
