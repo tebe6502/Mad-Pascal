@@ -505,18 +505,22 @@ type
       fileResultMessages[1] := TFileResultMessages.Create('samples\common\math\ElfHash\elf_test.pas');
       fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
 
-      fileResultMessages[2] := TFileResultMessages.Create('samples\tests\tests-basic\directives.pas ');
+      fileResultMessages[2] := TFileResultMessages.Create('samples\tests\tests-basic\directives.pas');
+      fileResultMessages[2].AddMessage('User defined: Some info');
+      fileResultMessages[2].AddMessage('Warning: User defined: Some warning');
       fileResultMessages[2].AddMessage('Error: User defined: Some error');
-      fileResultMessages[2].AddMessage(
-        'Warning: Comparison might be always false due to range of constant and expression');
 
       fileResultMessages[3] := TFileResultMessages.Create('samples\tests\tests-basic\negative-index-range.pas');
-      fileResultMessages[3].AddMessage('Error: E81 - ArrayLowerBoundNotZero: Array lower bound is not zero');
+      // TODO: Adapt when error IDs are available in origin
+
+      // fileResultMessages[3].AddMessage('Error: E81 - ArrayLowerBoundNotZero: Array lower bound is not zero');
+      fileResultMessages[3].AddMessage('ArrayLowerBoundNotZero: Array lower bound is not zero');
 
       fileResultMessages[4] := TFileResultMessages.Create(
         'samples\tests\tests-medium\array-with-char-index.pas');
       fileResultMessages[4].AddMessage(
-        'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+      //  'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+       'ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
       for i := 1 to length(fileResultMessages) do
       begin
         CheckSampleFileWithMessages(curDir, fileName, a65FileName, fileResultMessages[i], fileResult, Result);

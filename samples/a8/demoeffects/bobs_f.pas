@@ -27,13 +27,17 @@ const
   rad = 4;
   dia = rad * 2;
 
+  mode = 6 + 16;
+
   b0 = $4000;
   b1 = $4800;
   b2 = $4000;
   b3 = $4800;
 
 var
-  ss: array [0..3] of Word = (b0, b1, b2, b3);
+  buf1, buf2, buf3, buf4: TDisplayBuffer;
+
+  buf: array [0..3] of ^TDisplayBuffer;
 
   q, t: Byte;
 
@@ -46,7 +50,17 @@ var
 
 begin
 
-  InitGraph(6 + 16);
+  InitGraph(mode);
+
+
+  NewDisplayBuffer(buf1, mode, $40);
+  NewDisplayBuffer(buf2, mode, $48);
+  NewDisplayBuffer(buf3, mode, $50);
+  NewDisplayBuffer(buf3, mode, $58);
+  buf[0]:=@buf1;
+  buf[1]:=@buf2;
+  buf[2]:=@buf3;
+  buf[3]:=@buf3;
 
   SetColor(1);
 
@@ -66,9 +80,9 @@ begin
     pause;
     pause;
 
-    FrameBuffer(ss[q]);
+    SetDisplayBuffer(buf[q]^);
 
-    dpoke(dl + 4, ss[t]);
+    // dpoke(dl + 4, ss[t]);
 
     Inc(x, xm);
     Inc(y, ym);
