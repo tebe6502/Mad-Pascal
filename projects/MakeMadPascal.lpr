@@ -2,17 +2,18 @@ program MakeMadPascal;
 
 // Idea: https://wiki.freepascal.org/Parallel_procedures
 
+
 {$I Defines.inc}
 {$ScopedEnums ON}
 
 uses
  {$IFDEF DARWIN}
-  //cthreads, cmem,
-                    {$ENDIF} {$IFDEF WINDOWS}
+
+                                                    {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-                    {$ENDIF} {$IFDEF UNIX}
+                                                    {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-                    {$ENDIF}
+                                                    {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -127,7 +128,7 @@ var
   procedure Log(const message: String); overload;
   begin
     EnterCriticalSection(cs);
-    WriteLn(message);
+    WriteLn(stdout, message);
     LeaveCriticalSection(cs);
   end;
 
@@ -217,6 +218,26 @@ var
         end;
       end;
 
+    end;
+
+  end;
+
+  function LoadTextFile(const filePath: TfilePath; stringList: TStringList; var fileResult: TFileResult): Boolean;
+  begin
+    Result := False;
+    try
+      if FileExists(filePath) then
+      begin
+        stringList.LoadFromFile(filePath);
+        Result := True;
+      end
+      else
+      begin
+        Log(fileResult, Format('ERROR: File %s does not exist.', [filePath]));
+      end;
+    except
+      on E: EFOpenError do
+        Log(fileResult, Format('ERROR: File %s cannot be opened.', [filePath]));
     end;
 
   end;
@@ -395,24 +416,113 @@ var
     fileInfo.Free;
   end;
 
-  function LoadTextFile(const filePath: TfilePath; stringList: TStringList; var fileResult: TFileResult): Boolean;
+  function IsSampleFile(const filePath: TFilePath; pathSuffix: TFilePath): Boolean;
   begin
-    Result := False;
-    try
-      if FileExists(filePath) then
-      begin
-        stringList.LoadFromFile(filePath);
-        Result := True;
-      end
-      else
-      begin
-        Log(fileResult, Format('ERROR: File %s does not exist.', [filePath]));
-      end;
-    except
-      on E: EFOpenError do
-        Log(fileResult, Format('ERROR: File %s cannot be opened.', [filePath]));
-    end;
+    SetDirSeparators(pathSuffix);
+    Result := filePath.EndsWith(pathSuffix);
+  end;
 
+
+type
+  TFileResultMessages = class
+    suffix: String;
+    Messages: TStringArray;
+
+    constructor Create(const suffix: String);
+    procedure AddMessage(const message: String);
+  end;
+
+
+  constructor TFileResultMessages.Create(const suffix: String);
+  begin
+    self.suffix := suffix;
+    Messages := nil;
+  end;
+
+  procedure TFileResultMessages.AddMessage(const message: String);
+  begin
+    SetLength(Messages, Length(Messages) + 1);
+    Messages[Length(Messages) - 1] := message;
+  end;
+
+  // Check if file result log contains all expected messages.
+  procedure CheckSampleFileWithMessages(const curDir: TFolderPath; const fileName: String;
+  const a65FileName: String; const fileResultMessages: TFileResultMessages; var fileResult: TFileResult;
+  var Result: Boolean);
+  var
+
+    message: String;
+    foundMessages: TStringList;
+    logMessage: String;
+    a65FilePath: TFilePath;
+
+  begin
+
+    if IsSampleFile(AppendPath(curDir, fileName), fileResultMessages.suffix) then
+    begin
+      foundMessages := TStringList.Create;
+      for message in fileResultMessages.Messages do
+      begin
+        for logMessage in fileResult.logMessages do
+        begin
+
+          if logMessage.Contains(message) then
+          begin
+            foundMessages.add('INFO: The log contains the expected message "' + message + '".');
+          end;
+
+        end;
+      end;
+
+      if Length(fileResultMessages.Messages) = foundMessages.Count then
+      begin
+        log(fileResult, 'INFO: The log contains all ' + IntToStr(Length(fileResultMessages.Messages)) +
+          ' expected messages.');
+
+        Result := True;
+        a65FilePath := AppendPath(curDir, a65FileName);
+        foundMessages.Insert(0, '');
+        foundMessages.Insert(0, 'Compiling "' + fileName + '" failed as expected."');
+        foundMessages.SaveToFile(a65FilePath);
+      end;
+      foundMessages.Free;
+    end;
+  end;
+
+  // Some source files can intionally not be compiled with MP and erros are expected.
+  function RunMadPascalFiltered(const operation: TOperation; const curDir: TFolderPath;
+  const fileName: String; const a65FileName: String; var fileResult: TFileResult): Boolean;
+  var
+
+    fileResultMessages: array[1..4] of TFileResultMessages;
+
+    i: Integer;
+  begin
+    Result := RunMadPascal(operation, curDir, fileName, a65FileName, fileResult);
+    if not Result then
+    begin
+
+      fileResultMessages[1] := TFileResultMessages.Create('samples\common\math\ElfHash\elf_test.pas');
+      fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+
+      fileResultMessages[2] := TFileResultMessages.Create('samples\tests\tests-basic\directives.pas ');
+      fileResultMessages[2].AddMessage('Error: User defined: Some error');
+      fileResultMessages[2].AddMessage(
+        'Warning: Comparison might be always false due to range of constant and expression');
+
+      fileResultMessages[3] := TFileResultMessages.Create('samples\tests\tests-basic\negative-index-range.pas');
+      fileResultMessages[3].AddMessage('Error: E81 - ArrayLowerBoundNotZero: Array lower bound is not zero');
+
+      fileResultMessages[4] := TFileResultMessages.Create(
+        'samples\tests\tests-medium\array-with-char-index.pas');
+      fileResultMessages[4].AddMessage(
+        'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+      for i := 1 to length(fileResultMessages) do
+      begin
+        CheckSampleFileWithMessages(curDir, fileName, a65FileName, fileResultMessages[i], fileResult, Result);
+        fileResultMessages[i].Free;
+      end;
+    end;
   end;
 
   function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName: String;
@@ -567,7 +677,7 @@ var
 
       TAction.COMPILE:
       begin
-        Result := RunMadPascal(operation, curDir, fileName, a65FileName, fileResult);
+        Result := RunMadPascalFiltered(operation, curDir, fileName, a65FileName, fileResult);
       end;
 
       TAction.CLEANUP_REFERENCE:
@@ -577,7 +687,7 @@ var
 
       TAction.COMPILE_REFERENCE:
       begin
-        Result := RunMadPascal(operation, curDir, fileName, a65ReferenceFileName, fileResult);
+        Result := RunMadPascalFiltered(operation, curDir, fileName, a65ReferenceFileName, fileResult);
       end;
 
       TAction.CLEANUP_RESULTS:
@@ -660,13 +770,11 @@ type
     // Create / delete operation log file
     for i := Low(operation.results) to High(operation.results) do
     begin
-      case operation.results[i].status of
-        TStatus.ERROR:
-        begin
-          operation.logMessages.Add(Format('ERROR: Errors while processing %s',
-            [operation.results[i].filePath]));
-          operation.logMessages.AddStrings(operation.results[i].logMessages);
-        end;
+      if operation.results[i].status = TStatus.ERROR then
+      begin
+        operation.logMessages.Add(Format('ERROR: Errors while processing %s',
+          [operation.results[i].filePath]));
+        operation.logMessages.AddStrings(operation.results[i].logMessages);
       end;
     end;
   end;
@@ -719,7 +827,6 @@ type
     ProgramFiles: TStringList;
     fileResult: TFileResult;
 
-    x: Integer;
   begin
 
     referenceMPFolderPath := '';
@@ -832,6 +939,7 @@ type
             ProgramFiles.Add(filePath);
             if ProgramFiles.Count >= maxFiles then break;
           end;
+          else
         end;
         fileInfo.Free;
       end;
