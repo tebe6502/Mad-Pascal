@@ -4,7 +4,7 @@ unit Parser;
 
 interface
 
-uses Common, CompilerTypes, Datatypes, Memory, Numbers, Tokens;
+uses Common, CompilerTypes, Datatypes, Numbers, Tokens;
 
 // -----------------------------------------------------------------------------
 
@@ -300,11 +300,10 @@ end;
 // ----------------------------------------------------------------------------
 
 procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
-var
-  memory: TWordMemory;
-
 begin
-  memory := _DataSegment;
+
+  // TODO
+  writeln('SaveToDataSegment: Segment index'+intToStr(index)+' value='+IntToStr(value));
 
   if (index < 0) or (index > $FFFF) then
   begin
@@ -312,59 +311,54 @@ begin
     RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
-  if index > 5800 then
-  begin
-    WriteLn('Yo');
-  end;
-
   case valueDataType of
 
     TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
     begin
-      memory[index] := Byte(Value);
+      _DataSegment[index] := Byte(Value);
     end;
 
     TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
     TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
-      memory[index] := Byte(Value);
-      memory[index + 1] := Byte(Value shr 8);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
     end;
 
     TDataType.DATAORIGINOFFSET:
     begin
-      memory[index] := Byte(Value) or $8000;
-      memory[index + 1] := Byte(Value shr 8) or $4000;
+      _DataSegment[index] := Byte(Value) or $8000;
+      _DataSegment[index + 1] := Byte(Value shr 8) or $4000;
     end;
 
     TDataType.CODEORIGINOFFSET:
     begin
-      memory[index] := Byte(Value) or $2000;
-      memory[index + 1] := Byte(Value shr 8) or $1000;
+      _DataSegment[index] := Byte(Value) or $2000;
+      _DataSegment[index + 1] := Byte(Value shr 8) or $1000;
     end;
 
     TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
     begin
-      memory[index] := Byte(Value);
-      memory[index + 1] := Byte(Value shr 8);
-      memory[index + 2] := Byte(Value shr 16);
-      memory[index + 3] := Byte(Value shr 24);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
+      _DataSegment[index + 2] := Byte(Value shr 16);
+      _DataSegment[index + 3] := Byte(Value shr 24);
     end;
 
     TDataType.SINGLETOK: begin
       Value := CastToSingle(Value);
 
-      memory[index] := Byte(Value);
-      memory[index + 1] := Byte(Value shr 8);
-      memory[index + 2] := Byte(Value shr 16);
-      memory[index + 3] := Byte(Value shr 24);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
+      _DataSegment[index + 2] := Byte(Value shr 16);
+      _DataSegment[index + 3] := Byte(Value shr 24);
     end;
 
     TDataType.HALFSINGLETOK: begin
       Value := CastToHalfSingle(Value);
 
-      memory[index] := Byte(Value);
-      memory[index + 1] := Byte(Value shr 8);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
     end;
 
   end;
@@ -1536,7 +1530,7 @@ end;  //CompileConstExpression
 
 
 procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
-  DataType: TDataType; NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64;
+  DataType: TDataType; NumAllocElements: TNumAllocElements; AllocElementType: TDataType; Data: Int64;
   IdType: TDataType = TDataType.IDENTTOK);
 var
   identIndex: Integer;
@@ -1567,13 +1561,6 @@ begin
     if NumIdent > MAXIDENTS then
     begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
-    end;
-
-    // Larger than the largest array?
-    if NumAllocElements > MAX_MEMORY_ADDRESS + 1 then
-    begin
-      Error(NumTok, TMessage.Create(TErrorCode.ArraySizeExceedsRAMSize,
-        'Cannot allocate array {0} with {1} elements.', Name, IntToStr(NumAllocElements)));
     end;
 
     identifier.Name := Name;
@@ -1668,8 +1655,7 @@ begin
                   begin
                     if Name = 'SS' then
                     begin
-                      Writeln('SS');
-                      ;
+                      Writeln('TODO: SS defined in ' + identifier.SourceFile.Path);
                     end;
                     elementCount := Integer(Elements(NumIdent));
                     elementSize := GetDataSize(AllocElementType);
