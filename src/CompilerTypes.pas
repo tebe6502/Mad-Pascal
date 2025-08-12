@@ -158,11 +158,14 @@ type
 
   TFieldKind = (UNTYPETOK, OBJECTVARIABLE, RECORDVARIABLE);
 
+  // Upper 16 bits encode the size of the 2nd array dimension.
+  TNumAllocElements = Cardinal;
+
   TField = record
     Name: TFieldName;
     Value: Int64;
     DataType: TDataType;
-    NumAllocElements: Cardinal;
+    NumAllocElements: TNumAllocElements;
     AllocElementType: TDataType;
     Kind: TFieldKind;
   end;

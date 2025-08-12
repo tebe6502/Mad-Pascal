@@ -1,11 +1,8 @@
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
 -inputFilePattern a8\compression\lzw\LZW2.pas ^
--inputFilePattern a8\con80\tower_e80.pas ^
--inputFilePattern a8\crt_console\tower.pas ^
 -inputFilePattern a8\demoeffects\bobs.pas  ^
 -inputFilePattern a8\demoeffects\chaos2.pas ^
 -inputFilePattern a8\demoeffects\chaos3.pas ^
--inputFilePattern a8\games\roto.pas ^
 -inputFilePattern a8\games\3inaRow\game.pas ^
 -inputFilePattern a8\games\PacMad\pacmad.pas ^
 -inputFilePattern a8\graph\RotatingSierpinskiCarpet.pas ^
@@ -15,11 +12,6 @@ MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -co
 -inputFilePattern a8\graph_vbxe\vbxeTextCustomPalette.pas ^
 -inputFilePattern a8\graph_vbxe\view.pas ^
 -inputFilePattern a8\string\stringUtilsDemo.pas ^
--inputFilePattern a8\tools\artur\artur.pas ^
--inputFilePattern a8\tools\sortviz\source\SortViz.pas ^
--inputFilePattern common\crt_console\tower.pas ^
--inputFilePattern common\math\quicksort.pas ^
--inputFilePattern neo6502\demoeffects\mortalcoil.pas ^
 -inputFilePattern tests\tests-basic\const-var-scope.pas ^
 -inputFilePattern tests\tests-record\array_record.pas
 

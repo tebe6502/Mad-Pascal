@@ -12133,8 +12133,8 @@ begin
                               (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                               Error(k, 'Incompatible types: got "' +
                                 GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                                '" expected "^' +
-                                GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                                '" expected "^' + GetTypeAtIndex(
+                                IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
                           ASPOINTERTOPOINTER:
                             if (IdentifierAt(IdentIndex).AllocElementType <>
@@ -12142,8 +12142,8 @@ begin
                               (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                               Error(k, 'Incompatible types: got "' +
                                 GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                                '" expected "^' +
-                                GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                                '" expected "^' + GetTypeAtIndex(
+                                IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
                           else
                             GetCommonType(i + 1, VarType, ExpressionType);
 
@@ -12163,8 +12163,8 @@ begin
                         else
                           if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                             Error(i, 'Incompatible types: got "' + InfoAboutToken(ExpressionType) +
-                              '" expected "' +
-                              GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
+                              '" expected "' + GetTypeAtIndex(
+                              IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
                           else
                             GetCommonType(i + 1, VarType, ExpressionType);
 
@@ -12293,7 +12293,8 @@ begin
                           not (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                           Error(k, 'Incompatible types: got "^' +
                             GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                            '" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                            '" expected "' + GetTypeAtIndex(
+                            IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
                       ASPOINTERTOPOINTER:
                         //         if {(TokenAt(i + 1).Kind <> TTokenKind.DEREFERENCETOK) and }(IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and not ( IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] ) then
@@ -12324,11 +12325,13 @@ begin
                         (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                         Error(i, 'Incompatible types: got "^' +
                           GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                          '" expected "^' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
+                          '" expected "^' + GetTypeAtIndex(
+                          IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
                       else
                         Error(i, 'Incompatible types: got "' +
                           GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                          '" expected "^' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                          '" expected "^' + GetTypeAtIndex(
+                          IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
                   end;
 
@@ -12394,7 +12397,8 @@ begin
                         else
                           Error(i, 'Incompatible types: got "' +
                             GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                            '" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                            '" expected "' + GetTypeAtIndex(
+                            IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
 
                     a65(TCode65.subBX);
@@ -16533,6 +16537,8 @@ begin
   end;
 
 
+  NumAllocElements := 0;
+
   if IdentifierAt(BlockIdentIndex).ObjectIndex > 0 then
   begin
 
@@ -16545,8 +16551,6 @@ begin
     IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
     IdentifierAt(NumIdent).AllocElementType := TTokenKind.WORDTOK;
     //  end;
-
-    NumAllocElements := 0;
 
     for ParamIndex := 1 to GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).NumFields do
       if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind = TFieldKind.UNTYPETOK then
@@ -16584,7 +16588,8 @@ begin
             NumAllocElements := GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
               ParamIndex].NumAllocElements and $ffff;
 
-            if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr 16 > 0 then
+            if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr
+              16 > 0 then
               NumAllocElements := (NumAllocElements *
                 (GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr 16));
 
@@ -16652,11 +16657,13 @@ begin
         for j := 1 to GetTypeAtIndex(Param[ParamIndex].NumAllocElements).NumFields do
         begin
 
-          DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,
+          DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(
+            Param[ParamIndex].NumAllocElements).Field[j].Name,
             VARIABLE,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,
-            GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].AllocElementType, 0, TTokenKind.DATAORIGINOFFSET);
+            GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].AllocElementType, 0,
+            TTokenKind.DATAORIGINOFFSET);
 
           IdentifierAt(NumIdent).Value := IdentifierAt(NumIdent).Value - tmpVarDataSize;
           IdentifierAt(NumIdent).PassMethod := Param[ParamIndex].PassMethod;
@@ -16712,11 +16719,13 @@ begin
         for j := 1 to GetTypeAtIndex(Param[ParamIndex].NumAllocElements).NumFields do
         begin
 
-          DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,
+          DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(
+            Param[ParamIndex].NumAllocElements).Field[j].Name,
             VARIABLE,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,
-            GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].AllocElementType, 0, TTokenKind.DATAORIGINOFFSET);
+            GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].AllocElementType, 0,
+            TTokenKind.DATAORIGINOFFSET);
 
           IdentifierAt(NumIdent).Value := IdentifierAt(NumIdent).Value - tmpVarDataSize;
           IdentifierAt(NumIdent).PassMethod := Param[ParamIndex].PassMethod;
@@ -16737,7 +16746,8 @@ begin
 
             // writeln(Param[ParamIndex].Name + '.' + GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,',',GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,',',GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,',',GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].AllocElementType);
 
-            DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,
+            DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(
+              Param[ParamIndex].NumAllocElements).Field[j].Name,
               VARIABLE,
               GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,
               GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,
@@ -16906,10 +16916,12 @@ begin
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].AllocElementType);
 }
 
-      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType = TDataType.OBJECTTOK then
+      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType =
+        TDataType.OBJECTTOK then
         Error(i, '-- under construction --');
 
-      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType = TDataType.RECORDTOK then
+      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType =
+        TDataType.RECORDTOK then
         ConstVal := 0;
 
       if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType in
@@ -16930,11 +16942,13 @@ begin
 
       SetVarDataSize(tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
-      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind = TFieldKind.OBJECTVARIABLE then
+      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind =
+        TFieldKind.OBJECTVARIABLE then
       begin
         IdentifierAt(NumIdent).Value := ConstVal + DATAORIGIN;
 
-        Inc(ConstVal, GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType));
+        Inc(ConstVal, GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
+          ParamIndex].DataType));
 
         SetVarDataSize(tmpVarDataSize);
       end;
@@ -17914,13 +17928,9 @@ begin
             end;
 
 
-
         if IdType = TDataType.IDENTTOK then IdType := IdentifierAt(GetIdentIndex(TokenAt(idx).Name)).IdType;
 
-
-
         tmpVarDataSize := GetVarDataSize;    // dla ABSOLUTE, RECORD
-
 
         for VarOfSameTypeIndex := 1 to NumVarOfSameType do
         begin
@@ -17940,7 +17950,6 @@ begin
             NumAllocElements := 1;
 
           end;
-
 
           if VarType = ENUMTYPE then
           begin
@@ -18680,7 +18689,7 @@ begin
         if Value and $3000 = $1000 then
           tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
         else
-          tmp := tmp + ' $' + IntToHex(Value);
+          tmp := tmp + ' $' + IntToHex(Byte(Value));
 end;
 
 // ----------------------------------------------------------------------------
@@ -18743,9 +18752,6 @@ var
   j: Integer;
   tmp: String;
 begin
-
-  DataSegmentSize := 0;
-
   asm65;
   asm65('DATAORIGIN');
 
@@ -18755,17 +18761,22 @@ begin
     if Pass = TPass.CODE_GENERATION then
     begin
 
-      // !!! I have to save everything, including 'zeros' !!! For example, for TextAtr to work
+      // !!! I have to save everything, including 'zeros' !!! For example, for TextAtr to wor
 
-      DataSegmentSize := GetVarDataSize;
-
-      if LIBRARYTOK_USE = False then
-        for j := DataSegmentSize - 1 downto 0 do
+      if LIBRARYTOK_USE then
+      begin
+        DataSegmentSize := GetVarDataSize;
+      end
+      else
+      begin
+        DataSegmentSize := 0;
+        for j := GetVarDataSize - 1 downto 0 do
           if _DataSegment[j] <> 0 then
           begin
             DataSegmentSize := j + 1;
             Break;
           end;
+      end;
 
       tmp := '';
 
@@ -18786,15 +18797,9 @@ begin
 
       if tmp <> '' then asm65(tmp);
 
-      // asm65;
-
-      //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
-
     end;
 
-  end;{ else
-asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
-}
+  end;
 
 
   if LIBRARYTOK_USE then
@@ -18841,7 +18846,6 @@ begin
 
   common.optimize.use := False;
 
-  ClearWordMemory(_DataSegment);
   SetVarDataSize(0);
 
 
@@ -19236,6 +19240,8 @@ begin
 
   // First pass: compile the program and build call graph
   NumPredefIdent := NumIdent;
+
+
   CompileProgram(TPass.CALL_DETERMINATION);
 
 
@@ -19245,7 +19251,7 @@ begin
 
   // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
   NumIdent_ := NumPredefIdent;
-
+  ClearWordMemory(_DataSegment);
 
   NumBlocks := 0;
   BlockStackTop := 0;

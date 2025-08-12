@@ -194,12 +194,6 @@ end;
 
 procedure SetVarDataSize(const size: Integer);
 begin
-
-  if (size > 5000) and (pass = TPass.CODE_GENERATION) then
-  begin
-    Writeln('Yo: ' + IntToStr(size));
-  end;
-
   _VarDataSize := size;
 end;
 
