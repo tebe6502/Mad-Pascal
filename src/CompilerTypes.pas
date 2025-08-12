@@ -172,7 +172,7 @@ type
     Block: Integer;
     NumFields: Integer;
     Size: Integer;
-    Field: array [0..MAXFIELDS] of TField;
+    Field: array [0..MAXTYPES] of TField;
   end;
 
   TSourceFileName = TName;
