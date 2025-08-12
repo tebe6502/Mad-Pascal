@@ -9,11 +9,11 @@ program MakeMadPascal;
 uses
  {$IFDEF DARWIN}
 
-                                                         {$ENDIF} {$IFDEF WINDOWS}
+                                                           {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-                                                         {$ENDIF} {$IFDEF UNIX}
+                                                           {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-                                                         {$ENDIF}
+                                                           {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -489,8 +489,10 @@ type
 
       if Length(fileResultMessages.Messages) = foundMessages.Count then
       begin
-        log(fileResult, 'INFO: The log contains all ' + IntToStr(Length(fileResultMessages.Messages)) +
-          ' expected messages.');
+        log(fileResult, 'INFO: The log for ' + fileName + ' contains all ' +
+          IntToStr(Length(fileResultMessages.Messages)) + ' expected messages.');
+        log(fileResult, '--------------------------------------------------------------');
+        log(fileResult, '');
 
         Result := True;
         a65FilePath := AppendPath(curDir, a65FileName);
@@ -821,7 +823,7 @@ type
     MP_EXE = 'mp';
   {$ENDIF}
   {$IFDEF WINDOWS}
-       const MP_BIN_FOLDER = 'windows';
+       const MP_BIN_FOLDER = 'windows_x86_64';
        const MP_EXE = 'mp.exe';
   {$ENDIF}
   var

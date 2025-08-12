@@ -17,7 +17,7 @@ call :normalize_path %~dp0..
 set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
 set MP_PAS=%MP_SRC_FOLDER%\mp.pas
-set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows
+set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64
 set MP_EXE=%MP_BIN_FOLDER%\mp.exe
 
 set REFERENCE_MP_EXE=%MP_BIN_FOLDER%-origin\bin\windows\mp.exe
@@ -28,6 +28,7 @@ rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
 set MP_TESTS_FOLDER=%MP_SRC_FOLDER%\tests
 
 cd /d %MP_SRC_FOLDER%
+
 
 if not "%TEST_EXE%"=="" (
   if exist "%TEST_EXE%" del "%TEST_EXE%"
@@ -43,8 +44,12 @@ if not "%MP_EXE%"=="" (
   if not exist %MP_BIN_FOLDER% mkdir "%MP_BIN_FOLDER%"
   copy "mp.exe" "%MP_EXE%"
   if errorlevel 1 goto :eof
+
+  rem DEL does not set the errorlevel!
   del "mp.exe"
-  if errorlevel 1 goto :eof
+  if exist "mp.exe" (
+    echo WARNING: Cannot delete %CD%\mp.exe
+  )
 
 rem Regression test with standard MP.
 goto :run_new_tests

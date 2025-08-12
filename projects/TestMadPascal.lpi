@@ -26,8 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:..\..\..\lib bobs.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\demoeffects\"/>
+            <CommandLineParams Value="-iPath:..\..\..\lib lines.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\graph"/>
           </local>
         </Mode>
         <Mode Name="PacMad">
