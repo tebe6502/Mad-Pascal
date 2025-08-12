@@ -16464,7 +16464,7 @@ begin
   VarOfSameType := Default(TVariableList);
 
   // TODO Fuji
-  WriteLn('Block=' + IntToStr(i) + '  BlockIdentIndex=' + IntToStr(BlockIdentIndex));
+  // WriteLn('Block=' + IntToStr(i) + '  BlockIdentIndex=' + IntToStr(BlockIdentIndex));
 
   j := 0;
   ConstVal := 0;
