@@ -997,8 +997,8 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (IdentifierAt(IdentIndex).Value and $ff = 0) and (Byte(
-                  (IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                if (IdentifierAt(IdentIndex).Value and $ff = 0) and
+                  (Byte((IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                   (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
@@ -1570,7 +1570,7 @@ begin
     end;
 
     // Larger than the largest array?
-    if NumAllocElements > MAX_MEMORY_ADDRESS then
+    if NumAllocElements > MAX_MEMORY_ADDRESS + 1 then
     begin
       Error(NumTok, TMessage.Create(TErrorCode.ArraySizeExceedsRAMSize,
         'Cannot allocate array {0} with {1} elements.', Name, IntToStr(NumAllocElements)));
