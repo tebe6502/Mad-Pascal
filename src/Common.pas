@@ -38,7 +38,7 @@ var
   Defines: array [1..MAXDEFINES] of TDefine;
 
   NumTypes: Integer;
-  TypeArray: array [1..MAXTYPES] of TType;
+  _TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
 
@@ -169,6 +169,8 @@ procedure IncVarDataSize(const size: Integer);
 function GetVarDataSize: Integer;
 procedure SetVarDataSize(const size: Integer);
 
+function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+
 // ----------------------------------------------------------------------------
 
 implementation
@@ -199,6 +201,12 @@ begin
   end;
 
   _VarDataSize := size;
+end;
+
+
+function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+begin
+  Result:=_TypeArray[typeIndex];
 end;
 
 function FindFile(Name: String; ftyp: TString): TFilePath; overload;

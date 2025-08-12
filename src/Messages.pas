@@ -568,12 +568,12 @@ begin
           InfoAboutToken(identifier.AllocElementType) + '"'
       else
         if arrayIdentifier.AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-          msg := msg + '"^' + TypeArray[arrayIdentifier.NumAllocElements].Field[0].Name + '"'
+          msg := msg + '"^' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
         else
         begin
 
           if arrayIdentifier.DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-            msg := msg + '"' + TypeArray[arrayIdentifier.NumAllocElements].Field[0].Name + '"'
+            msg := msg + '"' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
           else
             msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
               '] Of ' + InfoAboutToken(arrayIdentifier.AllocElementType) + '"';

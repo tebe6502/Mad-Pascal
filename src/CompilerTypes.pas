@@ -168,6 +168,8 @@ type
   end;
 
 
+  TTypeIndex = integer;
+
   TType = record
     Block: Integer;
     NumFields: Integer;
