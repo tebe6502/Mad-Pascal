@@ -12,6 +12,5 @@ MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -co
 -inputFilePattern a8\graph_vbxe\vbxeTextCustomPalette.pas ^
 -inputFilePattern a8\graph_vbxe\view.pas ^
 -inputFilePattern a8\string\stringUtilsDemo.pas ^
--inputFilePattern tests\tests-basic\const-var-scope.pas ^
 -inputFilePattern tests\tests-record\array_record.pas
 

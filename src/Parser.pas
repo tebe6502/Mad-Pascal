@@ -302,9 +302,6 @@ end;
 procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
 begin
 
-  // TODO
-  writeln('SaveToDataSegment: Segment index'+intToStr(index)+' value='+IntToStr(value));
-
   if (index < 0) or (index > $FFFF) then
   begin
     writeln('SaveToDataSegment: Invalid segment index', index);
