@@ -11946,9 +11946,10 @@ begin
                 (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) and
                 (IdentifierAt(IdentIndex).NumAllocElements > 0) and
                 ((IndirectionLevel in [ASPOINTER, ASPOINTERTOPOINTER]) or
-                ((IndirectionLevel = ASPOINTERTOARRAYORIGIN) and (IdentifierAt(IdentIndex).PassMethod =
-                TParameterPassingMethod.VARPASSING))) and (TokenAt(i + 2).Kind in
-                [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
+                ((IndirectionLevel = ASPOINTERTOARRAYORIGIN) and
+                (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING))) and
+                (TokenAt(i + 2).Kind in [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK,
+                TTokenKind.IDENTTOK]) then
               begin
 
 {$i include/compile_string.inc}
@@ -12588,11 +12589,10 @@ begin
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
-                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
+                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and (not
+                      (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK,
+                      TDataType.OBJECTTOK]) and not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in
+                      Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.IdentifierAt(IdentIndex).AllocElementType] *} IdentifierAt(IdentIndex).NumAllocElements > 1) and ({GetDataSize( TDataType.IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType] *} IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements > 1)) *) then
                     begin
 
@@ -16350,7 +16350,7 @@ begin
 
     //   writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
 
-    tmpVarDataSize_ := VarDataSize;
+    tmpVarDataSize_ := GetVarDataSize;
 
 
     if (NumAllocElements shr 16) > 0 then
@@ -16359,9 +16359,9 @@ begin
       IdentifierAt(NumIdent).NumAllocElements := NumAllocElements and $FFFF;
       IdentifierAt(NumIdent).NumAllocElements_ := NumAllocElements shr 16;
 
-      VarDataSize := tmpVarDataSize + (NumAllocElements shr 16) * GetDataSize(TDataType.POINTERTOK);
+      SetVarDataSize(tmpVarDataSize + (NumAllocElements shr 16) * GetDataSize(TDataType.POINTERTOK));
 
-      tmpVarDataSize := VarDataSize;
+      tmpVarDataSize := GetVarDataSize;
 
       NumAllocElements := NumAllocElements and $FFFF;
 
@@ -16395,7 +16395,7 @@ begin
 
       end;
 
-    VarDataSize := tmpVarDataSize;
+    SetVarDataSize(tmpVarDataSize);
 
   end
   else
@@ -16408,7 +16408,7 @@ begin
 
           //      writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + TypeArray[NumAllocElements].Field[ParamIndex].Name,',',TypeArray[NumAllocElements].Field[ParamIndex].DataType,',',TypeArray[NumAllocElements].Field[ParamIndex].AllocElementType,',',TypeArray[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',IdentifierAt(NumIdent).Value);
 
-          tmpVarDataSize_ := VarDataSize;
+          tmpVarDataSize_ := GetVarDataSize;
 
           DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' +
             TypeArray[NumAllocElements].Field[ParamIndex].Name,
@@ -16421,7 +16421,7 @@ begin
             if not (TypeArray[NumAllocElements].Field[ParamIndex].DataType in
               [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
               // fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
-              Inc(ConstVal, VarDataSize - tmpVarDataSize_);
+              Inc(ConstVal, GetVarDataSize - tmpVarDataSize_);
           //    GetDataSize( TDataType.TypeArray[NumAllocElements].Field[ParamIndex].DataType]);
 
         end;
@@ -16462,6 +16462,9 @@ begin
 
   //FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
   VarOfSameType := Default(TVariableList);
+
+  // TODO Fuji
+  WriteLn('Block=' + IntToStr(i) + '  BlockIdentIndex=' + IntToStr(BlockIdentIndex));
 
   j := 0;
   ConstVal := 0;
@@ -16622,7 +16625,7 @@ begin
 
       if isReg and (ParamIndex in [1..3]) then
       begin
-        tmpVarDataSize := VarDataSize;
+        tmpVarDataSize := GetVarDataSize;
 
         DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType,
           Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
@@ -16630,7 +16633,7 @@ begin
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).isAbsolute := True;
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).Value := (Byte(ParamIndex) shl 24) or $80000000;
 
-        VarDataSize := tmpVarDataSize;
+        SetVarDataSize(tmpVarDataSize);
 
       end
       else
@@ -16644,7 +16647,7 @@ begin
       if (Param[ParamIndex].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
       begin
 
-        tmpVarDataSize := VarDataSize;
+        tmpVarDataSize := GetVarDataSize;
 
         for j := 1 to TypeArray[Param[ParamIndex].NumAllocElements].NumFields do
         begin
@@ -16663,7 +16666,7 @@ begin
 
         end;
 
-        VarDataSize := tmpVarDataSize;
+        SetVarDataSize(tmpVarDataSize);
 
       end
       else
@@ -16683,7 +16686,7 @@ begin
     begin
       if isReg and (ParamIndex in [1..3]) then
       begin
-        tmpVarDataSize := VarDataSize;
+        tmpVarDataSize := GetVarDataSize;
 
         DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType,
           Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
@@ -16691,7 +16694,7 @@ begin
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).isAbsolute := True;
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).Value := (Byte(ParamIndex) shl 24) or $80000000;
 
-        VarDataSize := tmpVarDataSize;
+        SetVarDataSize(tmpVarDataSize);
 
       end
       else
@@ -16704,7 +16707,7 @@ begin
         (Param[ParamIndex].AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
       begin    // fix issue #94
 
-        tmpVarDataSize := VarDataSize;
+        tmpVarDataSize := GetVarDataSize;
 
         for j := 1 to TypeArray[Param[ParamIndex].NumAllocElements].NumFields do
         begin
@@ -16723,7 +16726,7 @@ begin
 
         end;
 
-        VarDataSize := tmpVarDataSize;
+        SetVarDataSize(tmpVarDataSize);
 
       end
       else
@@ -16753,7 +16756,7 @@ begin
   if IsFunction then
   begin  //DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType, 0, 0, 0);
 
-    tmpVarDataSize := VarDataSize;
+    tmpVarDataSize := GetVarDataSize;
 
     //  writeln(IdentifierAt(BlockIdentIndex).name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
 
@@ -16764,7 +16767,7 @@ begin
       IdentifierAt(NumIdent).isAbsolute := True;
       IdentifierAt(NumIdent).Value := $87000000;  // :STACKORIGIN-4 -> :TMP
 
-      VarDataSize := tmpVarDataSize;
+      SetVarDataSize(tmpVarDataSize);
     end;
 
     if FunctionResultType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
@@ -16894,7 +16897,7 @@ begin
     for ParamIndex := 1 to TypeArray[IdentifierAt(BlockIdentIndex).ObjectIndex].NumFields do
     begin
 
-      tmpVarDataSize := VarDataSize;
+      tmpVarDataSize := GetVarDataSize;
 
 {
   writeln(TypeArray[IdentifierAt(BlockIdentIndex).ObjectIndex].Field[ParamIndex].Name,',',
@@ -16925,7 +16928,7 @@ begin
 
       IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
 
-      VarDataSize := tmpVarDataSize + GetDataSize(TDataType.POINTERTOK);
+      SetVarDataSize(tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
       if TypeArray[IdentifierAt(BlockIdentIndex).ObjectIndex].Field[ParamIndex].Kind = TFieldKind.OBJECTVARIABLE then
       begin
@@ -16933,7 +16936,7 @@ begin
 
         Inc(ConstVal, GetDataSize(TypeArray[IdentifierAt(BlockIdentIndex).ObjectIndex].Field[ParamIndex].DataType));
 
-        VarDataSize := tmpVarDataSize;
+        SetVarDataSize(tmpVarDataSize);
       end;
 
     end;
@@ -17916,7 +17919,7 @@ begin
 
 
 
-        tmpVarDataSize := VarDataSize;    // dla ABSOLUTE, RECORD
+        tmpVarDataSize := GetVarDataSize;    // dla ABSOLUTE, RECORD
 
 
         for VarOfSameTypeIndex := 1 to NumVarOfSameType do
@@ -18003,10 +18006,10 @@ begin
 
                 for j := 0 to (NumAllocElements and $FFFF) * (NumAllocElements shr 16) - 1 do
                 begin
-                  SaveToDataSegment(idx, VarDataSize, TTokenKind.DATAORIGINOFFSET);
+                  SaveToDataSegment(idx, GetVarDataSize, TTokenKind.DATAORIGINOFFSET);
 
                   Inc(idx, 2);
-                  Inc(VarDataSize, NestedNumAllocElements);
+                  IncVarDataSize(NestedNumAllocElements);
                 end;
 
               end
@@ -18015,10 +18018,10 @@ begin
 
                 for j := 0 to NumAllocElements - 1 do
                 begin
-                  SaveToDataSegment(idx, VarDataSize, TTokenKind.DATAORIGINOFFSET);
+                  SaveToDataSegment(idx, GetVarDataSize, TTokenKind.DATAORIGINOFFSET);
 
                   Inc(idx, 2);
-                  Inc(VarDataSize, NestedNumAllocElements);
+                  IncVarDataSize(NestedNumAllocElements);
                 end;
 
               end;
@@ -18047,7 +18050,7 @@ begin
 
         if isAbsolute and (open_array = False) then
 
-          VarDataSize := tmpVarDataSize
+          SetVarDataSize(tmpVarDataSize)
 
         else
 
@@ -18219,7 +18222,7 @@ begin
                           IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
                         end;
 
-                        Inc(VarDataSize, NumAllocElements * GetDataSize(IdentifierAt(NumIdent).AllocElementType));
+                        IncVarDataSize(NumAllocElements * GetDataSize(IdentifierAt(NumIdent).AllocElementType));
 
                       end
                       else
@@ -18589,6 +18592,236 @@ end;
 
 end;  //CompileBlock
 
+// ----------------------------------------------------------------------------
+// Subroutines of CompileProgram
+// ----------------------------------------------------------------------------
+
+procedure CompileResources;
+var
+  i, j: Integer;
+  a: String;
+  res: TResource;
+begin
+
+  if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
+  begin
+
+    asm65;
+    asm65('.local'#9'RESOURCE');
+
+    asm65(#9'icl ''' + AnsiLowerCase(target.Name) + '\resource.asm''');
+
+    asm65;
+
+
+    for i := 0 to High(resArray) - 1 do
+      if resArray[i].resStream = False then
+      begin
+
+        j := NumIdent;
+
+        while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
+        begin
+          if IdentifierAt(j).Name = resArray[i].resName then
+          begin
+            resArray[i].resValue := IdentifierAt(j).Value;
+            Break;
+          end;
+          Dec(j);
+        end;
+
+      end;
+
+
+    for i := 0 to High(resArray) - 1 do
+      for j := 0 to High(resArray) - 1 do
+        if resArray[i].resValue < resArray[j].resValue then
+        begin
+          res := resArray[j];
+          resArray[j] := resArray[i];
+          resArray[i] := res;
+        end;
+
+
+    for i := 0 to High(resArray) - 1 do
+      if resArray[i].resStream = False then
+      begin
+
+        a := #9 + resArray[i].resType + ' ''' + resArray[i].resFile + '''' + ' ';
+
+        a := a + resArray[i].resFullName;
+
+        for j := 1 to MAXPARAMS do a := a + ' ' + resArray[i].resPar[j];
+
+        asm65(a);
+      end;
+
+    asm65('.endl');
+  end;
+end;
+
+// ----------------------------------------------------------------------------
+
+
+procedure CompileMemoryWord(const memory: TWordMemory; const index: Integer; var tmp: String);
+var
+  Value: Word;
+begin
+  Value := Memory[index];
+  if (Value and $c000) = $8000 then
+    tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(Value) or Byte(memory[index + 1]) shl 8, 4) + ']'
+  else
+    if Value and $c000 = $4000 then
+      tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
+    else
+      if Value and $3000 = $2000 then
+        tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(Value) or Byte(memory[index + 1]) shl 8, 4) + ']'
+      else
+        if Value and $3000 = $1000 then
+          tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
+        else
+          tmp := tmp + ' $' + IntToHex(Value);
+end;
+
+// ----------------------------------------------------------------------------
+
+procedure CompileStaticData;
+var
+  i: Integer;
+  tmp: String;
+begin
+  asm65;
+  asm65('.macro'#9'STATICDATA');
+
+  tmp := '';
+  for i := 0 to NumStaticStrChars - 1 do
+  begin
+
+    if (i mod 24 = 0) then
+    begin
+
+      if i > 0 then asm65(tmp);
+
+      tmp := '.by ';
+
+    end
+    else
+      if (i > 0) and (i mod 8 = 0) then tmp := tmp + ' ';
+
+    CompileMemoryWord(StaticStringData, i, tmp);
+  (*
+    if StaticStringData[i] and $c000 = $8000 then
+      tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
+        Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+    else
+      if StaticStringData[i] and $c000 = $4000 then
+        tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
+          Byte(StaticStringData[i]) shl 8, 4) + ']'
+      else
+        if StaticStringData[i] and $3000 = $2000 then
+          tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
+            Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+        else
+          if StaticStringData[i] and $3000 = $1000 then
+            tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
+              Byte(StaticStringData[i]) shl 8, 4) + ']'
+          else
+            tmp := tmp + ' $' + IntToHex(StaticStringData[i], 2);
+     *)
+  end;
+
+  if tmp <> '' then asm65(tmp);
+
+  asm65('.endm');
+end;
+
+// ----------------------------------------------------------------------------
+
+procedure CompileDataOrigin;
+var
+  DataSegmentSize: Integer;
+  j: Integer;
+  tmp: String;
+begin
+
+  DataSegmentSize := 0;
+
+  asm65;
+  asm65('DATAORIGIN');
+
+  // TODO: Issues with bobs.pas, too many bytes exported
+  if DataSegmentUse then
+  begin
+    if Pass = TPass.CODE_GENERATION then
+    begin
+
+      // !!! I have to save everything, including 'zeros' !!! For example, for TextAtr to work
+
+      DataSegmentSize := GetVarDataSize;
+
+      if LIBRARYTOK_USE = False then
+        for j := DataSegmentSize - 1 downto 0 do
+          if _DataSegment[j] <> 0 then
+          begin
+            DataSegmentSize := j + 1;
+            Break;
+          end;
+
+      tmp := '';
+
+      for j := 0 to DataSegmentSize - 1 do
+      begin
+
+        if (j mod 24 = 0) then
+        begin
+          if tmp <> '' then asm65(tmp);
+          tmp := '.by';
+        end;
+
+        if (j mod 8 = 0) then tmp := tmp + ' ';
+
+        CompileMemoryWord(_DataSegment, j, tmp);
+
+      end;
+
+      if tmp <> '' then asm65(tmp);
+
+      // asm65;
+
+      //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
+
+    end;
+
+  end;{ else
+asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
+}
+
+
+  if LIBRARYTOK_USE then
+  begin
+
+    asm65;
+    asm65('PROGRAMSTACK');
+
+  end
+  else
+  begin
+
+    asm65;
+    asm65('VARINITSIZE'#9'= *-DATAORIGIN');
+    asm65('VARDATASIZE'#9'= ' + IntToStr(GetVarDataSize));
+
+    asm65;
+    asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
+
+  end;
+
+  asm65;
+  asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
+
+  asm65;
+  asm65(#9'ert DATAORIGIN<@end,''DATA memory overlap''');
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -18596,10 +18829,9 @@ end;  //CompileBlock
 
 procedure CompileProgram(const pass: TPass);
 var
-  i, j, DataSegmentSize, IdentIndex: Integer;
-  tmp, a: String;
+  i, j, IdentIndex: Integer;
+  tmp: String;
   yes: Boolean;
-  res: TResource;
   SourceFile: TSourceFile;
 begin
 
@@ -18609,11 +18841,13 @@ begin
 
   common.optimize.use := False;
 
+  ClearWordMemory(_DataSegment);
+  SetVarDataSize(0);
+
+
   tmp := '';
 
   IOCheck := True;
-
-  DataSegmentSize := 0;
 
   AsmBlockIndex := 0;
 
@@ -18857,94 +19091,7 @@ end;
 
   end;
 
-  asm65;
-  asm65('DATAORIGIN');
-
-  if DataSegmentUse then
-  begin
-    if Pass = TPass.CODE_GENERATION then
-    begin
-
-      // !!! I have to save everything, including 'zeros' !!! For example, for TextAtr to work
-
-      DataSegmentSize := VarDataSize;
-
-      if LIBRARYTOK_USE = False then
-        for j := VarDataSize - 1 downto 0 do
-          if DataSegment[j] <> 0 then
-          begin
-            DataSegmentSize := j + 1;
-            Break;
-          end;
-
-      tmp := '';
-
-      for j := 0 to DataSegmentSize - 1 do
-      begin
-
-        if (j mod 24 = 0) then
-        begin
-          if tmp <> '' then asm65(tmp);
-          tmp := '.by';
-        end;
-
-        if (j mod 8 = 0) then tmp := tmp + ' ';
-
-        if DataSegment[j] and $c000 = $8000 then
-          tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(DataSegment[j]) or Byte(DataSegment[j + 1]) shl 8, 4) + ']'
-        else
-          if DataSegment[j] and $c000 = $4000 then
-            tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(DataSegment[j - 1]) or Byte(DataSegment[j]) shl 8, 4) + ']'
-          else
-            if DataSegment[j] and $3000 = $2000 then
-              tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(DataSegment[j]) or
-                Byte(DataSegment[j + 1]) shl 8, 4) + ']'
-            else
-              if DataSegment[j] and $3000 = $1000 then
-                tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(DataSegment[j - 1]) or
-                  Byte(DataSegment[j]) shl 8, 4) + ']'
-              else
-                tmp := tmp + ' $' + IntToHex(DataSegment[j], 2);
-
-      end;
-
-      if tmp <> '' then asm65(tmp);
-
-      // asm65;
-
-      //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
-
-    end;
-
-  end;{ else
- asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
-}
-
-
-  if LIBRARYTOK_USE then
-  begin
-
-    asm65;
-    asm65('PROGRAMSTACK');
-
-  end
-  else
-  begin
-
-    asm65;
-    asm65('VARINITSIZE'#9'= *-DATAORIGIN');
-    asm65('VARDATASIZE'#9'= ' + IntToStr(VarDataSize));
-
-    asm65;
-    asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
-
-  end;
-
-  asm65;
-  asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
-
-  asm65;
-  asm65(#9'ert DATAORIGIN<@end,''DATA memory overlap''');
+  CompileDataOrigin;
 
   if FastMul > 0 then
   begin
@@ -18979,105 +19126,9 @@ end;
 
   asm65separator;
 
-  asm65;
-  asm65('.macro'#9'STATICDATA');
+  CompileStaticData;
 
-  tmp := '';
-  for i := 0 to NumStaticStrChars - 1 do
-  begin
-
-    if (i mod 24 = 0) then
-    begin
-
-      if i > 0 then asm65(tmp);
-
-      tmp := '.by ';
-
-    end
-    else
-      if (i > 0) and (i mod 8 = 0) then tmp := tmp + ' ';
-
-    if StaticStringData[i] and $c000 = $8000 then
-      tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
-        Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
-    else
-      if StaticStringData[i] and $c000 = $4000 then
-        tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
-          Byte(StaticStringData[i]) shl 8, 4) + ']'
-      else
-        if StaticStringData[i] and $3000 = $2000 then
-          tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
-            Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
-        else
-          if StaticStringData[i] and $3000 = $1000 then
-            tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
-              Byte(StaticStringData[i]) shl 8, 4) + ']'
-          else
-            tmp := tmp + ' $' + IntToHex(StaticStringData[i], 2);
-
-  end;
-
-  if tmp <> '' then asm65(tmp);
-
-  asm65('.endm');
-
-
-  if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
-  begin
-
-    asm65;
-    asm65('.local'#9'RESOURCE');
-
-    asm65(#9'icl ''' + AnsiLowerCase(target.Name) + '\resource.asm''');
-
-    asm65;
-
-
-    for i := 0 to High(resArray) - 1 do
-      if resArray[i].resStream = False then
-      begin
-
-        j := NumIdent;
-
-        while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
-        begin
-          if IdentifierAt(j).Name = resArray[i].resName then
-          begin
-            resArray[i].resValue := IdentifierAt(j).Value;
-            Break;
-          end;
-          Dec(j);
-        end;
-
-      end;
-
-
-    for i := 0 to High(resArray) - 1 do
-      for j := 0 to High(resArray) - 1 do
-        if resArray[i].resValue < resArray[j].resValue then
-        begin
-          res := resArray[j];
-          resArray[j] := resArray[i];
-          resArray[i] := res;
-        end;
-
-
-    for i := 0 to High(resArray) - 1 do
-      if resArray[i].resStream = False then
-      begin
-
-        a := #9 + resArray[i].resType + ' ''' + resArray[i].resFile + '''' + ' ';
-
-        a := a + resArray[i].resFullName;
-
-        for j := 1 to MAXPARAMS do a := a + ' ' + resArray[i].resPar[j];
-
-        asm65(a);
-      end;
-
-    asm65('.endl');
-  end;
-
+  CompileResources;
 
   asm65;
   asm65(#9'end');
@@ -19195,13 +19246,11 @@ begin
   // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
   NumIdent_ := NumPredefIdent;
 
-  ClearWordMemory(DataSegment);
 
   NumBlocks := 0;
   BlockStackTop := 0;
   CodeSize := 0;
   CodePosStackTop := 0;
-  VarDataSize := 0;
   CaseCnt := 0;
   IfCnt := 0;
   ShrShlCnt := 0;

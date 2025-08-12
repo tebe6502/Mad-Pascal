@@ -29,7 +29,9 @@ var
   AsmBlockIndex: Integer;
   AsmBlock: array [0..4095] of String;
 
-  DataSegment, StaticStringData: TWordMemory;
+  _DataSegment: TWordMemory;
+  _VarDataSize: Integer;
+  StaticStringData: TWordMemory;
 
   AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
@@ -64,8 +66,8 @@ var
   // TODO: Global "i" is dangerous.
   i: Integer;
 
-  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
-  NumStaticStrCharsTmp, IfCnt, CaseCnt, IfdefLevel: Integer;
+  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, NumStaticStrCharsTmp,
+  IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
 
@@ -161,6 +163,12 @@ function GetVAL(a: String): Integer;
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
+
+procedure IncVarDataSize(const size: Integer);
+
+function GetVarDataSize: Integer;
+procedure SetVarDataSize(const size: Integer);
+
 // ----------------------------------------------------------------------------
 
 implementation
@@ -171,6 +179,27 @@ uses Messages, Utilities;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure IncVarDataSize(const size: Integer);
+begin
+  SetVarDataSize(_VarDataSize + size);
+end;
+
+function GetVarDataSize: Integer;
+begin
+  Result := _VarDataSize;
+end;
+
+
+procedure SetVarDataSize(const size: Integer);
+begin
+
+  if (size > 5000) and (pass = TPass.CODE_GENERATION) then
+  begin
+    Writeln('Yo: ' + IntToStr(size));
+  end;
+
+  _VarDataSize := size;
+end;
 
 function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 var

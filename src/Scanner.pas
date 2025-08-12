@@ -50,8 +50,7 @@ begin
 
   NumIdent_:=0;
   TokenList.Clear;
-  ClearWordMemory(DataSegment);
-  ClearWordMemory(StaticStringData);
+
 
   FastMul := -1;
   DataSegmentUse := False;
@@ -67,7 +66,6 @@ begin
   BlockStackTop := 0;
   CodeSize := 0;
   CodePosStackTop := 0;
-  VarDataSize := 0;
   CaseCnt := 0;
   IfCnt := 0;
   ShrShlCnt := 0;
@@ -75,6 +73,7 @@ begin
   run_func := 0;
   NumProc := 0;
 
+  ClearWordMemory(StaticStringData);
   NumStaticStrChars := 0;
 
   IfdefLevel := 0;

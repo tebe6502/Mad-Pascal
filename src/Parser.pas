@@ -4,7 +4,7 @@ unit Parser;
 
 interface
 
-uses Common, CompilerTypes, Datatypes, Numbers, Tokens;
+uses Common, CompilerTypes, Datatypes, Memory, Numbers, Tokens;
 
 // -----------------------------------------------------------------------------
 
@@ -299,9 +299,12 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
 procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
+var
+  memory: TWordMemory;
+
 begin
+  memory := _DataSegment;
 
   if (index < 0) or (index > $FFFF) then
   begin
@@ -309,54 +312,59 @@ begin
     RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
+  if index > 5800 then
+  begin
+    WriteLn('Yo');
+  end;
+
   case valueDataType of
 
     TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
     begin
-      DataSegment[index] := Byte(Value);
+      memory[index] := Byte(Value);
     end;
 
     TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
     TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
-      DataSegment[index] := Byte(Value);
-      DataSegment[index + 1] := Byte(Value shr 8);
+      memory[index] := Byte(Value);
+      memory[index + 1] := Byte(Value shr 8);
     end;
 
     TDataType.DATAORIGINOFFSET:
     begin
-      DataSegment[index] := Byte(Value) or $8000;
-      DataSegment[index + 1] := Byte(Value shr 8) or $4000;
+      memory[index] := Byte(Value) or $8000;
+      memory[index + 1] := Byte(Value shr 8) or $4000;
     end;
 
     TDataType.CODEORIGINOFFSET:
     begin
-      DataSegment[index] := Byte(Value) or $2000;
-      DataSegment[index + 1] := Byte(Value shr 8) or $1000;
+      memory[index] := Byte(Value) or $2000;
+      memory[index + 1] := Byte(Value shr 8) or $1000;
     end;
 
     TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
     begin
-      DataSegment[index] := Byte(Value);
-      DataSegment[index + 1] := Byte(Value shr 8);
-      DataSegment[index + 2] := Byte(Value shr 16);
-      DataSegment[index + 3] := Byte(Value shr 24);
+      memory[index] := Byte(Value);
+      memory[index + 1] := Byte(Value shr 8);
+      memory[index + 2] := Byte(Value shr 16);
+      memory[index + 3] := Byte(Value shr 24);
     end;
 
     TDataType.SINGLETOK: begin
       Value := CastToSingle(Value);
 
-      DataSegment[index] := Byte(Value);
-      DataSegment[index + 1] := Byte(Value shr 8);
-      DataSegment[index + 2] := Byte(Value shr 16);
-      DataSegment[index + 3] := Byte(Value shr 24);
+      memory[index] := Byte(Value);
+      memory[index + 1] := Byte(Value shr 8);
+      memory[index + 2] := Byte(Value shr 16);
+      memory[index + 3] := Byte(Value shr 24);
     end;
 
     TDataType.HALFSINGLETOK: begin
       Value := CastToHalfSingle(Value);
 
-      DataSegment[index] := Byte(Value);
-      DataSegment[index + 1] := Byte(Value shr 8);
+      memory[index] := Byte(Value);
+      memory[index + 1] := Byte(Value shr 8);
     end;
 
   end;
@@ -989,8 +997,8 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (IdentifierAt(IdentIndex).Value and $ff = 0) and
-                  (Byte((IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                if (IdentifierAt(IdentIndex).Value and $ff = 0) and (Byte(
+                  (IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                   (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
@@ -1534,6 +1542,7 @@ var
   identIndex: Integer;
   identifier: TIdentifier;
   NumAllocElements_: Cardinal;
+  elementCount, elementSize: Integer;
 begin
 
   identIndex := GetIdentIndex(Name);
@@ -1550,11 +1559,21 @@ begin
     identifier := IdentifierList.GetIdentifierAtIndex(NumIdent);
 
     // For debugging
-    // Writeln('NumIdent='+IntToStr(NumIdent)+' ErrTokenIndex='+IntToStr(ErrTokenIndex)+' Name='+name+' Kind='+IntToStr( Kind)+' DataType='+IntToStr( DataType)+' NumAllocElements='+IntToStr( NumAllocElements)+' AllocElementType='+IntToStr( AllocElementType));
+
+    Writeln('NumIdent=' + IntToStr(NumIdent) + ' tokenIndex=' + IntToStr(tokenIndex) + ' Name=' +
+      Name + ' Kind=' + GetTokenKindName(Kind) + ' DataType=' + IntToStr(Ord(DataType)) +
+      ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
 
     if NumIdent > MAXIDENTS then
     begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
+    end;
+
+    // Larger than the largest array?
+    if NumAllocElements > MAX_MEMORY_ADDRESS then
+    begin
+      Error(NumTok, TMessage.Create(TErrorCode.ArraySizeExceedsRAMSize,
+        'Cannot allocate array {0} with {1} elements.', Name, IntToStr(NumAllocElements)));
     end;
 
     identifier.Name := Name;
@@ -1603,12 +1622,18 @@ begin
       begin
 
         if identifier.isAbsolute then
-          identifier.Value := Data - 1
+        begin
+          identifier.Value := Data - 1;
+        end
         else
-          identifier.Value := DATAORIGIN + VarDataSize;  // Variable address
+        begin
+          identifier.Value := DATAORIGIN + _VarDataSize;  // Variable address
+        end;
 
         if not OutputDisabled then
-          VarDataSize := VarDataSize + GetDataSize(DataType);
+        begin
+          IncVarDataSize(GetDataSize(DataType));
+        end;
 
         identifier.NumAllocElements := NumAllocElements;  // Number of array elements (0 for single variable)
         identifier.NumAllocElements_ := NumAllocElements_;
@@ -1620,30 +1645,41 @@ begin
 
           if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
             (NumAllocElements_ = 0) then
-            Inc(VarDataSize, GetDataSize(TDataType.POINTERTOK))
+            IncVarDataSize(GetDataSize(TDataType.POINTERTOK))
           else
 
             if DataType in [ENUMTYPE] then
-              Inc(VarDataSize)
+              IncVarDataSize(1)
             else
               if (DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements > 0) then
-                VarDataSize := VarDataSize + 0
+                IncVarDataSize(0)
               else
                 if (DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) and (NumAllocElements > 0) then
-                  VarDataSize := VarDataSize + 12
+                  IncVarDataSize(12)
                 else
                 begin
 
                   if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and
-                    (Elements(NumIdent) = 1) then  // [0..0] ; [0..0, 0..0]
-
+                    (Elements(NumIdent) = 1) then
+                  begin
+                    // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
+                  end
                   else
-                    VarDataSize := VarDataSize + Integer(Elements(NumIdent) * GetDataSize(AllocElementType));
+                  begin
+                    if Name = 'SS' then
+                    begin
+                      Writeln('SS');
+                      ;
+                    end;
+                    elementCount := Integer(Elements(NumIdent));
+                    elementSize := GetDataSize(AllocElementType);
+                    IncVarDataSize(elementCount * elementSize);
+                  end;
 
                 end;
 
 
-          if NumAllocElements > 0 then Dec(VarDataSize, GetDataSize(DataType));
+          if NumAllocElements > 0 then IncVarDataSize(-GetDataSize(DataType));
 
         end;
 
