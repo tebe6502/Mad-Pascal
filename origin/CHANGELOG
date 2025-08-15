@@ -1,3 +1,6 @@
+16.08.2025
+- poprawione przekazywanie typu ENUM w procedurze/funkcji
+
 09.08.2025
 - optimizations opt_TAY, opt_EOR
 

@@ -7342,7 +7342,11 @@ begin
 
 if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
- for ParamIndex := 1 to NumActualParams do
+ for ParamIndex := 1 to NumActualParams do begin
+
+  ActualParamType := Ident[IdentIndex].Param[ParamIndex].DataType;
+  if ActualParamType = ENUMTOK then ActualParamType := Ident[IdentIndex].Param[ParamIndex].AllocElementType;
+
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
 
 					asm65(#9'lda :STACKORIGIN,x');
@@ -7352,7 +7356,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
 					a65(__subBX);
   end else
-  if (NumActualParams = 1) and (DataSize[Ident[IdentIndex].Param[ParamIndex].DataType] = 1) then begin			// only ONE parameter SIZE = 1
+  if (NumActualParams = 1) and (DataSize[ActualParamType] = 1) then begin			// only ONE parameter SIZE = 1
 
 			if Ident[IdentIndex].ObjectIndex > 0 then begin
 					asm65(#9'lda :STACKORIGIN,x');
@@ -7365,7 +7369,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 			end;
 
   end else
-  case Ident[IdentIndex].Param[ParamIndex].DataType of
+  case ActualParamType of
 
    BYTETOK, CHARTOK, BOOLEANTOK, SHORTINTTOK:
    				     begin
@@ -7400,8 +7404,10 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 				     end;
 
   else
-   Error(i, 'Unassigned: ' + IntToStr(Ident[IdentIndex].Param[ParamIndex].DataType) );
+   Error(i, 'Unassigned: ' + IntToStr(ActualParamType) );
   end;
+
+ end;
 
 
   old_func:=run_func;
@@ -7511,12 +7517,16 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 
  end;
 
+//writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].Kind,',',Ident[IdentIndex].isStdCall,',',Ident[IdentIndex].isRecursion);
 
 	if (Ident[IdentIndex].Kind = FUNCTIONTOK) and (Ident[IdentIndex].isStdCall = false) and (Ident[IdentIndex].isRecursion = false) then begin
 
 		  asm65(#9'inx');
 
-		  case DataSize[Ident[IdentIndex].DataType] of
+		  ActualParamType := Ident[IdentIndex].DataType;
+		  if ActualParamType = ENUMTOK then ActualParamType := Ident[IdentIndex].AllocElementType;
+
+		  case DataSize[ActualParamType] of
 
 		    1: begin
 			asm65(#9'mva ' + svar + '.RESULT :STACKORIGIN,x');
@@ -11779,7 +11789,7 @@ case Tok[i].Kind of
 		        asm65(#9'sta @move.dst');
                         asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
 		        asm65(#9'sta @move.dst+1');
-	
+
                         asm65(#9'lda :STACKORIGIN,x');
                         asm65(#9'add :STACKORIGIN-1,x');
                         asm65(#9'sta @move.src');
@@ -13608,6 +13618,10 @@ WHILETOK:
 
 	  IndirectionLevel := ASPOINTER;
 
+
+	  if Ident[IdentIndex].DataType = ENUMTOK then
+	   ExpressionType := Ident[IdentIndex].AllocElementType
+	  else
 	  if Ident[IdentIndex].DataType in Pointers then
 	   ExpressionType := WORDTOK
 	  else
@@ -14435,7 +14449,10 @@ begin
 		     if (Ident[IdentIndex].Name = 'RESULT') and (Ident[BlockIdentIndex].Kind = FUNCTIONTOK) then	// RESULT nie zliczaj
 
 		     else
-		      inc(size, DataSize[Ident[IdentIndex].DataType]);
+		      if Ident[IdentIndex].DataType = ENUMTOK then
+		        inc(size, DataSize[Ident[IdentIndex].AllocElementType])
+		      else
+		        inc(size, DataSize[Ident[IdentIndex].DataType]);
 
 		  end;
 
@@ -15565,7 +15582,13 @@ for ParamIndex := NumParams downto 1 do
 
 // Load ONE parameters from the stack
 if (Ident[BlockIdentIndex].ObjectIndex = 0) then
- if (yes = false) and (NumParams = 1) and (DataSize[Param[1].DataType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name);
+ if Param[1].DataType = ENUMTOK then begin
+
+  if (yes = false) and (NumParams = 1) and (DataSize[Param[1].AllocElementType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name)
+
+ end else
+
+  if (yes = false) and (NumParams = 1) and (DataSize[Param[1].DataType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name);
 
 
 // Load parameters from the stack
