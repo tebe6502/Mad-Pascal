@@ -4,7 +4,7 @@ unit aes;
 @author: Stijn Sanders, Tomasz 'Tebe' Biela
 @name: AES encryption unit
 
-@version: 1.0.2
+@version: 1.3
 
 @description:
 
@@ -81,6 +81,7 @@ type
   AESColumn=cardinal;
   FourBytes=array[0..3] of byte;
 
+
 function GMul4(a:AESColumn; b:byte): AESColumn;
 var
   c:AESColumn absolute Result;
@@ -102,7 +103,7 @@ begin
     if a and $80 <> 0 then d:=d or 1;
 
     a:=((a and $7F7F7F7F) shl 1) xor ($1b * d);
-   
+
     b:=b shr 1;
 
     if (b and 1) <> 0 then c:=c xor a;
@@ -123,15 +124,15 @@ begin
   //RoundKey:=Key;//see absolute
 
   //AddRoundKey
-  for i:=0 to 3 do
+  for i:=3 downto 0 do
     State[i]:=State[i] xor RoundKey[i];
 
   for r:=1 to 10 do
    begin
     //SubBytes+ShiftRows
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
      begin
-      FourBytes(MixBase[i])[0]:=sbox[FourBytes(State[ i and $ff        ])[0]];
+      FourBytes(MixBase[i])[0]:=sbox[FourBytes(State[ i and $ff ])[0]];
       FourBytes(MixBase[i])[1]:=sbox[FourBytes(State[(i+1) and 3])[1]];
       FourBytes(MixBase[i])[2]:=sbox[FourBytes(State[(i+2) and 3])[2]];
       FourBytes(MixBase[i])[3]:=sbox[FourBytes(State[(i+3) and 3])[3]];
@@ -141,7 +142,7 @@ begin
     if r=10 then
       State:=MixBase
     else
-      for i:=0 to 3 do begin
+      for i:=3 downto 0 do begin
 
         c:=(MixBase[i] shr 8) or (MixBase[i] shl 24);
 	d:=((MixBase[i] shr 16) or (MixBase[i] shl 16)) xor ((MixBase[i] shr 24) or (MixBase[i] shl 8));
@@ -160,7 +161,7 @@ begin
     RoundKey[3]:=RoundKey[3] xor RoundKey[2];
 
     //AddRoundKey
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
       State[i]:=State[i] xor RoundKey[i];
 
    end;
@@ -169,29 +170,20 @@ end;
 
 function AES128Decipher(InBlock:AESBlock;Key:AES128Key):AESBlock;
 var
-  r,i, rx:byte;
+  r,i:byte;
   c,d,e: cardinal;
   State:AESBlock absolute Result;
   RoundKey:AESBlock absolute Key;
-//  RoundKeys:array[1..10] of AESBlock;
-  RoundKeys:array[0..10*length(AESBlock)-1] of cardinal;
+  RoundKeys:array[0..10] of AESBlock;
   MixBase:AESBlock;
 begin
   State:=InBlock;
   //RoundKey:=Key;//see absolute
 
   //ExpandKey (up front, need them in reverse order)
-  rx:=0;
   for r:=1 to 10 do
    begin
-//    RoundKeys[r]:=RoundKey;
-
-    RoundKeys[rx] := RoundKey[0];
-    RoundKeys[rx+1] := RoundKey[1];
-    RoundKeys[rx+2] := RoundKey[2];
-    RoundKeys[rx+3] := RoundKey[3];
-
-    inc(rx, length(AESBlock));
+    RoundKeys[r]:=RoundKey;
 
     FourBytes(RoundKey[0])[0]:=FourBytes(RoundKey[0])[0] xor sbox[FourBytes(RoundKey[3])[1]] xor rcon[r];
     FourBytes(RoundKey[0])[1]:=FourBytes(RoundKey[0])[1] xor sbox[FourBytes(RoundKey[3])[2]];
@@ -204,14 +196,13 @@ begin
    end;
 
   //AddRoundKey
-  for i:=0 to 3 do
+  for i:=3 downto 0 do
     State[i]:=State[i] xor RoundKey[i];
 
-  rx:=9*4;
   for r:=10 downto 1 do
    begin
     //InvShiftRows+InvSubBytes
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
      begin
       FourBytes(MixBase[i])[0]:=ibox[FourBytes(State[ i         ])[0]];
       FourBytes(MixBase[i])[1]:=ibox[FourBytes(State[(i+3) and 3])[1]];
@@ -220,23 +211,16 @@ begin
      end;
 
     //AddRoundKey
-//    RoundKey:=RoundKeys[r];
+    RoundKey:=RoundKeys[r];
 
-    RoundKey[0]:=RoundKeys[rx];
-    RoundKey[1]:=RoundKeys[rx+1];
-    RoundKey[2]:=RoundKeys[rx+2];
-    RoundKey[3]:=RoundKeys[rx+3];
-
-    dec(rx, length(AESBlock));
-
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
       MixBase[i]:=MixBase[i] xor RoundKey[i];
 
     //InvMixColumns
     if r=1 then
       State:=MixBase
     else
-      for i:=0 to 3 do begin
+      for i:=3 downto 0 do begin
 
         c:=(MixBase[i] shr 8) or (MixBase[i] shl 24);
 	d:=(MixBase[i] shr 16) or (MixBase[i] shl 16);
@@ -260,7 +244,7 @@ begin
   //RoundKey:=Key;//see absolute
 
   //AddRoundKey
-  for i:=0 to 3 do
+  for i:=3 downto 0 do
     State[i]:=State[i] xor RoundKey[i];
 
   ri:=4;
@@ -269,7 +253,7 @@ begin
    begin
 
     //SubBytes+ShiftRows
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
      begin
       FourBytes(MixBase[i])[0]:=sbox[FourBytes(State[ i         ])[0]];
       FourBytes(MixBase[i])[1]:=sbox[FourBytes(State[(i+1) and 3])[1]];
@@ -281,7 +265,7 @@ begin
     if r=12 then
       State:=MixBase
     else
-      for i:=0 to 3 do begin
+      for i:=3 downto 0 do begin
 
 	c := (MixBase[i] shr 8) or (MixBase[i] shl 24);
 	d := ((MixBase[i] shr 16) or (MixBase[i] shl 16)) xor ((MixBase[i] shr 24) or (MixBase[i] shl 8));
@@ -304,6 +288,7 @@ begin
       else
         if not((r=1) and (ri>3)) then
           RoundKey[ri]:=RoundKey[ri] xor RoundKey[ri-1];
+
       State[i]:=State[i] xor RoundKey[ri];
       inc(ri);
      end;
@@ -312,42 +297,32 @@ end;
 
 function AES192Decipher(InBlock:AESBlock;Key:AES192Key):AESBlock;
 var
-  r,i,ri,rk, rx:byte;
+  r,i,ri,rk:byte;
   c,d,e: cardinal;
   State:AESBlock absolute Result;
   RoundKey:AES192Key absolute Key;
-//  RoundKeys:array[1..8] of AES192Key;
-  RoundKeys:array[0..8*length(AES192Key)-1] of cardinal;
+  RoundKeys:array[0..8] of AES192Key;
   MixBase:AESBlock;
 begin
   State:=InBlock;
   //RoundKey:=Key;//see absolute
 
   //ExpandKey (up front, need them in reverse order)
-  rx:=0;
   for rk:=1 to 8 do
    begin
-//    RoundKeys[rk]:=RoundKey;
-
-    RoundKeys[rx] := RoundKey[0];
-    RoundKeys[rx+1] := RoundKey[1];
-    RoundKeys[rx+2] := RoundKey[2];
-    RoundKeys[rx+3] := RoundKey[3];
-    RoundKeys[rx+4] := RoundKey[4];
-    RoundKeys[rx+5] := RoundKey[5];
-
-    inc(rx, length(AES192Key));
+    RoundKeys[rk]:=RoundKey;
 
     FourBytes(RoundKey[0])[0]:=FourBytes(RoundKey[0])[0] xor sbox[FourBytes(RoundKey[5])[1]] xor rcon[rk];
     FourBytes(RoundKey[0])[1]:=FourBytes(RoundKey[0])[1] xor sbox[FourBytes(RoundKey[5])[2]];
     FourBytes(RoundKey[0])[2]:=FourBytes(RoundKey[0])[2] xor sbox[FourBytes(RoundKey[5])[3]];
     FourBytes(RoundKey[0])[3]:=FourBytes(RoundKey[0])[3] xor sbox[FourBytes(RoundKey[5])[0]];
-    for ri:=1 to 5 do
-      RoundKey[ri]:=RoundKey[ri] xor RoundKey[ri-1];
+
+    for i:=1 to 5 do
+      RoundKey[i]:=RoundKey[i] xor RoundKey[i-1];
    end;
 
   //AddRoundKey
-  for i:=0 to 3 do
+  for i:=3 downto 0 do
     State[i]:=State[i] xor RoundKey[i];
 
   ri:=0;
@@ -356,7 +331,7 @@ begin
    begin
 
     //InvShiftRows+InvSubBytes
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
      begin
       FourBytes(MixBase[i])[0]:=ibox[FourBytes(State[ i         ])[0]];
       FourBytes(MixBase[i])[1]:=ibox[FourBytes(State[(i+3) and 3])[1]];
@@ -369,15 +344,7 @@ begin
      begin
       if ri=0 then
        begin
-        rx:=rk*6-6;
-//        RoundKey:=RoundKeys[rk];
-
-	RoundKey[0] := RoundKeys[rx];
-	RoundKey[1] := RoundKeys[rx+1];
-	RoundKey[2] := RoundKeys[rx+2];
-	RoundKey[3] := RoundKeys[rx+3];
-	RoundKey[4] := RoundKeys[rx+4];
-	RoundKey[5] := RoundKeys[rx+5];
+        RoundKey:=RoundKeys[rk];
 
 	dec(rk);
         ri:=5;
@@ -392,7 +359,7 @@ begin
     if r=1 then
       State:=MixBase
     else
-      for i:=0 to 3 do begin
+      for i:=3 downto 0 do begin
 
         c := (MixBase[i] shr 8) or (MixBase[i] shl 24);
 	d := (MixBase[i] shr 16) or (MixBase[i] shl 16);
@@ -416,14 +383,14 @@ begin
   //RoundKey:=Key;//see absolute
 
   //AddRoundKey
-  for i:=0 to 3 do
+  for i:=3 downto 0 do
     State[i]:=State[i] xor RoundKey[i];
 
   for r:=1 to 14 do
    begin
 
     //SubBytes+ShiftRows
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
      begin
       FourBytes(MixBase[i])[0]:=sbox[FourBytes(State[ i         ])[0]];
       FourBytes(MixBase[i])[1]:=sbox[FourBytes(State[(i+1) and 3])[1]];
@@ -435,7 +402,7 @@ begin
     if r=14 then
       State:=MixBase
     else
-      for i:=0 to 3 do begin
+      for i:=3 downto 0 do begin
 
 	c := (MixBase[i] shr 8) or (MixBase[i] shl 24);
 	d := ((MixBase[i] shr 16) or (MixBase[i] shl 16)) xor ((MixBase[i] shr 24) or (MixBase[i] shl 8));
@@ -453,51 +420,41 @@ begin
       RoundKey[1]:=RoundKey[1] xor RoundKey[0];
       RoundKey[2]:=RoundKey[2] xor RoundKey[1];
       RoundKey[3]:=RoundKey[3] xor RoundKey[2];
-      for i:=0 to 3 do
+
+      for i:=3 downto 0 do
         FourBytes(RoundKey[4])[i]:=FourBytes(RoundKey[4])[i] xor sbox[FourBytes(RoundKey[3])[i]];
+
       RoundKey[5]:=RoundKey[5] xor RoundKey[4];
       RoundKey[6]:=RoundKey[6] xor RoundKey[5];
       RoundKey[7]:=RoundKey[7] xor RoundKey[6];
       //AddRoundKey
-      for i:=0 to 3 do
+      for i:=3 downto 0 do
         State[i]:=State[i] xor RoundKey[i];
      end
     else
       //AddRoundKey
-      for i:=0 to 3 do
+      for i:=3 downto 0 do
         State[i]:=State[i] xor RoundKey[4+i];
    end;
 end;
 
+
 function AES256Decipher(InBlock:AESBlock;Key:AES256Key):AESBlock;
 var
-  r,i,ri,rk, rx:byte;
+  r,i,ri,rk:byte;
   c,d,e: cardinal;
   State:AESBlock absolute Result;
   RoundKey:AES256Key absolute Key;
-//  RoundKeys:array[1..7] of AES256Key;
-  RoundKeys: array [0..7*length(AES256Key)-1] of cardinal;
+  RoundKeys:array[0..7] of AES256Key;
   MixBase:AESBlock;
 begin
   State:=InBlock;
   //RoundKey:=Key;//see absolute
 
   //ExpandKey (up front, need them in reverse order)
-  rx:=0;
   for r:=1 to 7 do
    begin
-//    RoundKeys[r]:=RoundKey;
-
-    RoundKeys[rx] := RoundKey[0];
-    RoundKeys[rx+1] := RoundKey[1];
-    RoundKeys[rx+2] := RoundKey[2];
-    RoundKeys[rx+3] := RoundKey[3];
-    RoundKeys[rx+4] := RoundKey[4];
-    RoundKeys[rx+5] := RoundKey[5];
-    RoundKeys[rx+6] := RoundKey[6];
-    RoundKeys[rx+7] := RoundKey[7];
-
-    inc(rx, length(AES256Key));
+    RoundKeys[r]:=RoundKey;
 
     FourBytes(RoundKey[0])[0]:=FourBytes(RoundKey[0])[0] xor sbox[FourBytes(RoundKey[7])[1]] xor rcon[r];
     FourBytes(RoundKey[0])[1]:=FourBytes(RoundKey[0])[1] xor sbox[FourBytes(RoundKey[7])[2]];
@@ -508,7 +465,7 @@ begin
     RoundKey[2]:=RoundKey[2] xor RoundKey[1];
     RoundKey[3]:=RoundKey[3] xor RoundKey[2];
 
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
       FourBytes(RoundKey[4])[i]:=FourBytes(RoundKey[4])[i] xor sbox[FourBytes(RoundKey[3])[i]];
 
     RoundKey[5]:=RoundKey[5] xor RoundKey[4];
@@ -517,7 +474,7 @@ begin
    end;
 
   //AddRoundKey
-  for i:=0 to 3 do
+  for i:=3 downto 0 do
     State[i] := State[i] xor RoundKey[i];
 
   ri:=0;
@@ -526,7 +483,7 @@ begin
    begin
 
     //InvShiftRows+InvSubBytes
-    for i:=0 to 3 do
+    for i:=3 downto 0 do
      begin
       FourBytes(MixBase[i])[0]:=ibox[FourBytes(State[ i         ])[0]];
       FourBytes(MixBase[i])[1]:=ibox[FourBytes(State[(i+3) and 3])[1]];
@@ -539,17 +496,7 @@ begin
      begin
       if ri=0 then
        begin
-	rx:=rk*8-8;
-//        RoundKey:=RoundKeys[rk];
-
-	RoundKey[0] := RoundKeys[rx];
-	RoundKey[1] := RoundKeys[rx+1];
-	RoundKey[2] := RoundKeys[rx+2];
-	RoundKey[3] := RoundKeys[rx+3];
-	RoundKey[4] := RoundKeys[rx+4];
-	RoundKey[5] := RoundKeys[rx+5];
-	RoundKey[6] := RoundKeys[rx+6];
-	RoundKey[7] := RoundKeys[rx+7];
+        RoundKey:=RoundKeys[rk];
 
         dec(rk);
         ri:=7;
@@ -564,7 +511,7 @@ begin
     if r=1 then
       State:=MixBase
     else
-      for i:=0 to 3 do begin
+      for i:=3 downto 0 do begin
 
 	c := (MixBase[i] shr 8) or (MixBase[i] shl 24);
 	d := (MixBase[i] shr 16) or (MixBase[i] shl 16);

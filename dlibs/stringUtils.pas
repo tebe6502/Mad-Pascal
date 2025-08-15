@@ -3,7 +3,7 @@ unit stringUtils;
 * @type: unit
 * @author: dely <daniel.kozminski@gmail.com>
 * @name: String manipulation library.
-* @version: 0.4
+* @version: 0.5
 
 * @description:
 * String manipulation procedures and functions for use with MadPascal. 
@@ -98,6 +98,26 @@ procedure strAdd(var s1: string; s2: string); overload;
 *
 * @param: (string) s1 - The input string.
 * @param: (string) s2 - The string to add.
+*)
+
+function strPadLeft(str: string; len: byte; padChar: char): string;
+(*
+* @description:
+* Add character to the left of a string till a certain length is reached.
+*
+* @param: (string) str - String to pad..
+* @param: (string) len - Length of the resulting string.
+* @param: (string) padChar - The character that will be used to complete the string.
+*)
+
+function strPadRight(str: string; len: byte; padChar: char): string;
+(*
+* @description:
+* Add character to the right of a string till a certain length is reached.
+*
+* @param: (string) str - String to pad..
+* @param: (string) len - Length of the resulting string.
+* @param: (string) padChar - The character that will be used to complete the string.
 *)
 
 function strLeft(s: string; count: byte): string;
@@ -305,6 +325,51 @@ begin
     while l2>0 do begin
         s1[l1+l2] := s2[l2];
         dec(l2);
+    end;
+end;
+
+function strPadRight(str: string; len: integer; padChar: char): string;
+var
+    i: byte;
+begin
+    if Length(str) >= len then
+    begin
+        Result := str;
+        Exit;
+    end;
+
+    Result := str;
+    SetLength(Result, len);
+
+    for i := Length(str) + 1 to len do
+    begin
+        Result[i] := padChar;
+    end;
+end;
+
+function strPadLeft(str: string; len: byte; padChar: char): string;
+var
+    i: byte;
+    shift: byte;
+begin
+    if Length(str) >= len then
+    begin
+        Result := str;
+        Exit;
+    end;
+
+    Result := str;
+    shift := len - Length(str);
+
+    SetLength(Result, len);
+    for i := len downto shift + 1 do
+    begin
+        Result[i] := Result[i - shift];
+    end;
+
+    for i := 1 to shift do
+    begin
+        Result[i] := padChar;
     end;
 end;
 

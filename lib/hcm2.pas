@@ -3,8 +3,13 @@ unit hcm2;
 * @type: unit
 * @author: Sandor Teli, Tomasz Biela <tebe6502@gmail.com>
 * @name: Hard Color Map
+*
 * @version: 1.0
+*
 * @description:
+*
+* <https://bitbucket.org/sandor-hard/reharden/src/master/HCM.md>
+* <https://bitbucket.org/sandor-hard/hcm-converter/src/master/>
 *
 *)
 
