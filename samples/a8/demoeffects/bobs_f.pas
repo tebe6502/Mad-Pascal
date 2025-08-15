@@ -27,30 +27,23 @@ const
   rad = 4;
   dia = rad * 2;
 
-  b0 = $4000;
-  b1 = $4800;
-  b2 = $4000;
-  b3 = $4800;
+  mode = 6 + 16;
 
 var
-  ss: array [0..3] of Word = (b0, b1, b2, b3);
+  buf1, buf2, buf3, buf4: TDisplayBuffer;
 
   q, t: Byte;
 
-  dl: Word;
-
   x, y, xm, ym: Smallint;
-
-  sc: pointer;
-
 
 begin
 
-  InitGraph(6 + 16);
+  NewDisplayBuffer(buf1, mode, $50);
+  NewDisplayBuffer(buf2, mode, $60);
+  NewDisplayBuffer(buf3, mode, $70);
+  NewDisplayBuffer(buf4, mode, $80);
 
   SetColor(1);
-
-  dl := dpeek($230);
 
   x := dia;
   y := dia;
@@ -62,13 +55,29 @@ begin
   t := 0;
 
   repeat
-    pause;
-    pause;
-    pause;
+    pause(2);
 
-    FrameBuffer(ss[q]);
+    case t of
+      0:
+        SetDisplayBuffer(buf1);
+      1:
+        SetDisplayBuffer(buf2);
+      2:
+        SetDisplayBuffer(buf3);
+      3:
+        SetDisplayBuffer(buf4);
+    end;
 
-    dpoke(dl + 4, ss[t]);
+    case q of
+      0:
+        SetActiveBuffer(buf1);
+      1:
+        SetActiveBuffer(buf2);
+      2:
+        SetActiveBuffer(buf3);
+      3:
+        SetActiveBuffer(buf4);
+    end;
 
     Inc(x, xm);
     Inc(y, ym);

@@ -7,7 +7,7 @@ interface
 uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 const
-  title = '1.7.2';
+  title = '1.7.3-Test';
 
 
 var
@@ -29,14 +29,16 @@ var
   AsmBlockIndex: Integer;
   AsmBlock: array [0..4095] of String;
 
-  Data, DataSegment, StaticStringData: TWordMemory;
+  _DataSegment: TWordMemory;
+  _VarDataSize: Integer;
+  StaticStringData: TWordMemory;
 
   AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
   Defines: array [1..MAXDEFINES] of TDefine;
 
   NumTypes: Integer;
-  TypeArray: array [1..MAXTYPES] of TType;
+  _TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
 
@@ -64,8 +66,8 @@ var
   // TODO: Global "i" is dangerous.
   i: Integer;
 
-  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, VarDataSize,
-  NumStaticStrCharsTmp, IfCnt, CaseCnt, IfdefLevel: Integer;
+  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, NumStaticStrCharsTmp,
+  IfCnt, CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
 
@@ -97,7 +99,7 @@ var
   optimize: record
     use: Boolean;
     SourceFile: TSourceFile;
-    line, old: Integer;
+    line, oldLine: Integer;
     end;
 
   codealign: record
@@ -161,6 +163,14 @@ function GetVAL(a: String): Integer;
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
+
+procedure IncVarDataSize(const size: Integer);
+
+function GetVarDataSize: Integer;
+procedure SetVarDataSize(const size: Integer);
+
+function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+
 // ----------------------------------------------------------------------------
 
 implementation
@@ -171,6 +181,27 @@ uses Messages, Utilities;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure IncVarDataSize(const size: Integer);
+begin
+  SetVarDataSize(_VarDataSize + size);
+end;
+
+function GetVarDataSize: Integer;
+begin
+  Result := _VarDataSize;
+end;
+
+
+procedure SetVarDataSize(const size: Integer);
+begin
+  _VarDataSize := size;
+end;
+
+
+function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+begin
+  Result:=_TypeArray[typeIndex];
+end;
 
 function FindFile(Name: String; ftyp: TString): TFilePath; overload;
 var
@@ -570,6 +601,7 @@ end;
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i, len: Integer;
+  Data: TWordMemory;
 begin
 
   len := Length(StrValue);
@@ -586,6 +618,8 @@ begin
     RaiseHaltException(THaltException.COMPILING_ABORTED);
   end;
 
+  // Writeln('DefineStaticString:  NumStaticStrChars=' + IntToStr(NumStaticStrChars) + ' Length=' +
+  //   IntToStr(len) + ' Value=' + StrValue);
   for i := 1 to len do Data[i] := Ord(StrValue[i]);
 
   for i := 0 to NumStaticStrChars - len - 1 do
@@ -633,7 +667,7 @@ end;
 
 function NumIdent: Integer;
 begin
-  Result:=NumIdent_;
+  Result := NumIdent_;
 end;
 
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;

@@ -95,7 +95,7 @@ begin
 
     SkipWhitespaces(a, i);
 
-    if (i < Length(a)) then
+    if (i <= Length(a)) then
     begin
       if UpCase(a[i]) in AllowDigitFirstChars then
       begin
@@ -103,7 +103,7 @@ begin
         Result := UpCase(a[i]);
         Inc(i);
 
-        while UpCase(a[i]) in AllowDigitChars do
+        while (i <= Length(a)) and (UpCase(a[i]) in AllowDigitChars) do
         begin
           Result := Result + UpCase(a[i]);
           Inc(i);

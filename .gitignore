@@ -1,23 +1,28 @@
 .vscode
+# .a65 is considered tempoary, .asm is considered permanent
 *.a65
 *.lab
 *.lst
+#
+# .obx is considered tempoary, .obj is considered permanent
 *.obx
 *.xex
 *.o
 *.ppu
 *.pyc
-test/config.ini
+*.opt
+*.WinMerge
+.DS_Store
+bin/windows
 build.bat
 buildrun.bat
 build.sh
 __pycache__
-src/test.bat
-*.opt
-samples/WinMerge.txt
-*.WinMerge
-.DS_Store
 projects/TestMadPascal
 projects/MakeMadPascal
 projects/*.res
 projects/ppas.sh
+src/test.bat
+samples/WinMerge.txt
+test/config.ini
+

@@ -1,5 +1,5 @@
 program fujitalk;
-{$librarypath '../blibs/'}
+{$librarypath 'blibs'}
 uses atari, http_client, crt, b_system, efast, fn_cookies, joystick;
 
 const 
@@ -96,7 +96,7 @@ var
 
     refreshDelay: word;
 
-procedure StateCheck;forward;keep;
+procedure StateCheck;forward; keep;
 
 
 function Atascii2Antic(c: char): char; overload;
@@ -640,7 +640,7 @@ begin
    
 end;
 
-procedure StateCheck;
+procedure StateCheck; keep;
 var tab:byte;
     changed:boolean;
 begin

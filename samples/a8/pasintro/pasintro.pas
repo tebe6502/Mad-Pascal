@@ -1,5 +1,6 @@
 // PasIntro v2.2 (Tebe / Madteam)
 // changes: 21-04-2018
+// https://github.com/tebe6502/PasIntro
 
 uses crt;
 
@@ -128,7 +129,7 @@ asm
 	mva #scr40 559
 
 	mva #0 pmbase
-	mva #$03 pmcntl
+	mva #$03 gractl
 
 	lda #3
 	:4 sta sizep0+#

@@ -13,6 +13,9 @@
 {
   Unit implementing simple blowfish algorithm
 }
+
+(* This program is for FPC, not for MP.
+
 {$ifdef fpc}
 {$mode objfpc}
 {$h+}
@@ -20,7 +23,11 @@
 {$endif}
 unit BlowFish;
 
-interface
+interface;
+
+
+
+
 
 uses SysUtils,Classes;
 
@@ -83,7 +90,7 @@ Type
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
   end;
 
-Implementation
+implementation;
 
 ResourceString
   SNoSeekAllowed  = 'Seek not allowed on encryption streams';
@@ -731,5 +738,7 @@ begin
     FakeSeekForward(Offset,TSeekOrigin(Origin),FPos);
   Result:=FPos;
 end;
+*)
 
+begin
 end.

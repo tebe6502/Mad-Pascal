@@ -1,5 +1,5 @@
 program artur_atascii_art_editor;
-{$librarypath blibs'}
+{$librarypath 'blibs'}
 uses atari, crt, b_crt, b_system, b_pmg, sysutils, joystick; 
 
 const

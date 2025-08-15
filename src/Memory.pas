@@ -11,11 +11,11 @@ const
 type
   TWordMemory = array [MIN_MEMORY_ADDRESS..MAX_MEMORY_ADDRESS] of Word;
 
-procedure ClearWordMemory(anArray: TWordMemory);
+procedure ClearWordMemory(var anArray: TWordMemory);
 
 implementation
 
-procedure ClearWordMemory(anArray: TWordMemory);
+procedure ClearWordMemory(var anArray: TWordMemory);
 var i: Integer;
 begin
   for i := Low(anArray) to High(anArray) do

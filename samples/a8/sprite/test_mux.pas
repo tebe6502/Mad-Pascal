@@ -1,3 +1,5 @@
+program test_mux;
+
 uses crt, shanti;
 
 (*
@@ -38,8 +40,6 @@ var
 procedure vbl; interrupt; assembler;
 asm
 // own code
-
-
  plr
 end;
 
@@ -106,9 +106,9 @@ begin
 end;
 
 
-{$link assets\monster.obx}
-{$link assets\face.obx}
-{$link assets\thing.obx}
+{$link assets\monster.obj}
+{$link assets\face.obj}
+{$link assets\thing.obj}
 
 
 procedure addShapes;

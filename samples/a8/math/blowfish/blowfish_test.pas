@@ -1,23 +1,28 @@
-uses crt, blowfish;
+program blowfish_test;
+
+uses
+  crt,
+  blowfish;
 
 var
-	myencryptedstring, mydecryptedstring: string;
+  myencryptedstring, mydecryptedstring: String;
 
 
 begin
 
-blowfish.Create('your_secret_encryption_key');
+  blowfish.Create('your_secret_encryption_key');
 
-myencryptedstring := blowfish.EncryptString('ATARI Power With Price');
+  myencryptedstring := blowfish.EncryptString('ATARI Power With Price');
 
-writeln(myencryptedstring);
-
-
-mydecryptedstring := blowfish.DecryptString(myencryptedstring);
-
-writeln(mydecryptedstring);
+  WriteLn(myencryptedstring);
 
 
-repeat until keypressed;
+  mydecryptedstring := blowfish.DecryptString(myencryptedstring);
+
+  WriteLn(mydecryptedstring);
+
+
+  repeat
+  until keypressed;
 
 end.

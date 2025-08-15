@@ -2,17 +2,18 @@ program MakeMadPascal;
 
 // Idea: https://wiki.freepascal.org/Parallel_procedures
 
+
 {$I Defines.inc}
 {$ScopedEnums ON}
 
 uses
  {$IFDEF DARWIN}
-  //cthreads, cmem,
-          {$ENDIF} {$IFDEF WINDOWS}
+
+                                                           {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-          {$ENDIF} {$IFDEF UNIX}
+                                                           {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-          {$ENDIF}
+                                                           {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -22,6 +23,7 @@ uses
   LazFileUtils,
   Process,
   MTProcs,
+  strutils,
   SysUtils,
   CustApp;
 
@@ -126,7 +128,7 @@ var
   procedure Log(const message: String); overload;
   begin
     EnterCriticalSection(cs);
-    WriteLn(message);
+    WriteLn(stdout, message);
     LeaveCriticalSection(cs);
   end;
 
@@ -220,6 +222,26 @@ var
 
   end;
 
+  function LoadTextFile(const filePath: TfilePath; stringList: TStringList; var fileResult: TFileResult): Boolean;
+  begin
+    Result := False;
+    try
+      if FileExists(filePath) then
+      begin
+        stringList.LoadFromFile(filePath);
+        Result := True;
+      end
+      else
+      begin
+        Log(fileResult, Format('ERROR: File %s does not exist.', [filePath]));
+      end;
+    except
+      on E: EFOpenError do
+        Log(fileResult, Format('ERROR: File %s cannot be opened.', [filePath]));
+    end;
+
+  end;
+
   // Parameter for line "line" must be uppercase.
   // Parameter for line "lib" must be lowercase
   procedure CheckForLibrary(const line: String; lib: String; var fileInfo: TFileInfo);
@@ -234,7 +256,8 @@ var
   function GetFileInfo(FilePath: TFilePath): TFileInfo;
   var
     pasFile: TextFile;
-    Line: String;
+    done: Boolean;
+    line: String;
   begin
 
     try
@@ -242,13 +265,14 @@ var
       Reset(pasFile);
       Result := TFileInfo.Create(filePath);
 
-      while (Result.fileType = TFileType.UNKNOWN) and not EOF(pasFile) do
+      done := False;
+      while not done and not EOF(pasFile) do
       begin
-        ReadLn(pasFile, Line);
-        Line := UpperCase(line);
+        ReadLn(pasFile, line);
+        line := UpperCase(line);
         CheckForLibrary(line, 'blibs', Result);
         CheckForLibrary(line, 'dlibs', Result);
-        if (Pos('PROGRAM ', line) > 0) or (Pos('USES ', line) > 0) then
+        if (Pos('PROGRAM ', line) > 0) then
         begin
           Result.fileType := TFileType.TPROGRAM;
         end;
@@ -256,9 +280,23 @@ var
         begin
           Result.fileType := TFileType.TUNIT;
         end;
+        if (Pos('USES ', line) > 0) then
+        begin
+          if Result.fileType = TFileType.UNKNOWN then
+          begin
+            Result.fileType := TFileType.TPROGRAM;
+          end;
+          done := True;
+        end;
         if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
         begin
           Result.fileType := TFileType.TINCLUDE;
+          done := True;
+        end;
+
+        if (Pos('BEGIN ', line) > 0) then
+        begin
+          done := True;
         end;
         //Log(line);
 
@@ -336,8 +374,8 @@ var
     mpExePath: TFilePath;
     fileInfo: TFileInfo;
     exename: TProcessString;
-    commands: array of TProcessString;
-    index: Integer;
+    parameters: TStringList;
+    processParameters: array of TProcessString;
     i: Integer;
   begin
 
@@ -360,42 +398,159 @@ var
     if fileInfo.fileType = TFileType.TPROGRAM then
     begin
       exename := mpExePath;
-      commands := nil;
-      SetLength(commands, 3 + fileInfo.requiredLibraryFolders.Count);
-      index := 0;
-      commands[index] := '-ipath:' + AppendPath(mpFolderPath, 'lib');
-      Inc(index);
+      parameters := TStringList.Create;
+
+
+      parameters.add('-ipath:' + AppendPath(mpFolderPath, 'lib'));
       for i := 0 to fileInfo.requiredLibraryFolders.Count - 1 do
       begin
-        commands[index] := '-ipath:' + AppendPath(mpFolderPath, fileInfo.requiredLibraryFolders[i]);
-        Inc(index);
+        parameters.add('-ipath:' + AppendPath(mpFolderPath, fileInfo.requiredLibraryFolders[i]));
       end;
-      commands[index] := '-o:' + a65FileName;
-      Inc(index);
-      commands[index] := fileName;
-      Result := RunExecutable(fileName, curDir, exename, commands, fileResult);
+
+      // TODO: Pass platform from outside
+      if curDir.ToLower.Contains('c64') then
+      begin
+        parameters.add('-target:c64');
+      end;
+
+      parameters.add('-o:' + a65FileName);
+      parameters.add(fileName);
+
+      processParameters := nil;
+      SetLength(processParameters, parameters.Count);
+      for i := 0 to parameters.Count - 1 do
+      begin
+        processParameters[i] := parameters[i];
+      end;
+
+      Result := RunExecutable(fileName, curDir, exename, processParameters, fileResult);
+      parameters.Free;
     end;
     fileInfo.Free;
   end;
 
-  function LoadTextFile(const filePath: TfilePath; stringList: TStringList; var fileResult: TFileResult): Boolean;
+  function IsSampleFile(const filePath: TFilePath; pathSuffix: TFilePath): Boolean;
   begin
-    Result := False;
-    try
-      if FileExists(filePath) then
-      begin
-        stringList.LoadFromFile(filePath);
-        Result := True;
-      end
-      else
-      begin
-        Log(fileResult, Format('ERROR: File %s does not exist.', [filePath]));
-      end;
-    except
-      on E: EFOpenError do
-        Log(fileResult, Format('ERROR: File %s cannot be opened.', [filePath]));
-    end;
+    SetDirSeparators(pathSuffix);
+    Result := filePath.EndsWith(pathSuffix);
+  end;
 
+
+type
+  TFileResultMessages = class
+    suffix: String;
+    Messages: TStringArray;
+
+    constructor Create(const suffix: String);
+    procedure AddMessage(const message: String);
+  end;
+
+
+  constructor TFileResultMessages.Create(const suffix: String);
+  begin
+    self.suffix := suffix;
+    Messages := nil;
+  end;
+
+  procedure TFileResultMessages.AddMessage(const message: String);
+  begin
+    SetLength(Messages, Length(Messages) + 1);
+    Messages[Length(Messages) - 1] := message;
+  end;
+
+  // Check if file result log contains all expected messages.
+  procedure CheckSampleFileWithMessages(const curDir: TFolderPath; const fileName: String;
+  const a65FileName: String; const fileResultMessages: TFileResultMessages; var fileResult: TFileResult;
+  var Result: Boolean);
+  var
+
+    message: String;
+    foundMessages: TStringList;
+    logMessage: String;
+    a65FilePath: TFilePath;
+
+  begin
+
+    if IsSampleFile(AppendPath(curDir, fileName), fileResultMessages.suffix) then
+    begin
+      foundMessages := TStringList.Create;
+      for message in fileResultMessages.Messages do
+      begin
+        for logMessage in fileResult.logMessages do
+        begin
+
+          if logMessage.Contains(message) then
+          begin
+            foundMessages.add('INFO: The log contains the expected message "' + message + '".');
+          end;
+
+        end;
+      end;
+
+      if Length(fileResultMessages.Messages) = foundMessages.Count then
+      begin
+        log(fileResult, 'INFO: The log for ' + fileName + ' contains all ' +
+          IntToStr(Length(fileResultMessages.Messages)) + ' expected messages.');
+        log(fileResult, '--------------------------------------------------------------');
+        log(fileResult, '');
+
+        Result := True;
+        a65FilePath := AppendPath(curDir, a65FileName);
+        foundMessages.Insert(0, '');
+        foundMessages.Insert(0, 'Compiling "' + fileName + '" failed as expected."');
+        foundMessages.SaveToFile(a65FilePath);
+      end;
+      foundMessages.Free;
+    end;
+  end;
+
+  // Some source files can intionally not be compiled with MP and erros are expected.
+  function RunMadPascalFiltered(const operation: TOperation; const curDir: TFolderPath;
+  const fileName: String; const a65FileName: String; var fileResult: TFileResult): Boolean;
+  var
+
+    fileResultMessages: array[1..6] of TFileResultMessages;
+
+    i: Integer;
+  begin
+    Result := RunMadPascal(operation, curDir, fileName, a65FileName, fileResult);
+    if not Result then
+    begin
+
+      fileResultMessages[1] := TFileResultMessages.Create('samples\common\math\ElfHash\elf_test.pas');
+      fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+
+      fileResultMessages[2] := TFileResultMessages.Create('samples\tests\tests-basic\directives.pas');
+      fileResultMessages[2].AddMessage('User defined: Some info');
+      fileResultMessages[2].AddMessage('Warning: User defined: Some warning');
+      fileResultMessages[2].AddMessage('Error: User defined: Some error');
+
+
+      fileResultMessages[3] := TFileResultMessages.Create('samples\tests\tests-basic\const-var-scope.pas');
+      fileResultMessages[3].AddMessage('Identifier N is already defined');
+
+      fileResultMessages[4] := TFileResultMessages.Create('samples\tests\tests-basic\negative-index-range.pas');
+      // TODO: Adapt when error IDs are available in origin
+
+      // fileResultMessages[4].AddMessage('Error: E81 - ArrayLowerBoundNotZero: Array lower bound is not zero');
+      fileResultMessages[4].AddMessage('ArrayLowerBoundNotZero: Array lower bound is not zero');
+
+      fileResultMessages[5] := TFileResultMessages.Create(
+        'samples\tests\tests-medium\array-with-char-index.pas');
+      fileResultMessages[5].AddMessage(
+        //  'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+        'ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
+
+      fileResultMessages[6] := TFileResultMessages.Create('samples\common\DYNREC.PAS');
+      fileResultMessages[6].AddMessage(
+        'Error: Incompatible types: got "^PERSON" expected "PERSON"');
+
+      for i := 1 to length(fileResultMessages) do
+      begin
+        CheckSampleFileWithMessages(curDir, fileName, a65FileName, fileResultMessages[i], fileResult, Result);
+        fileResultMessages[i].Free;
+      end;
+    end;
   end;
 
   function CompareA65File(curDir: TFolderPath; a65FileName, a65ReferenceFileName: String;
@@ -452,7 +607,7 @@ var
 
         // Normalize lines with absolute paths
         // Example: .link 'C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal-origin\lib\pp\unpp.obx'
-        if Pos('.link', line ) > 0 then
+        if Pos('.link', line) > 0 then
         begin
           line := StringReplace(line, mpFolderPath, mpReferenceFolderPath, [rfReplaceAll]);
         end;
@@ -529,8 +684,8 @@ var
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -550,7 +705,7 @@ var
 
       TAction.COMPILE:
       begin
-        Result := RunMadPascal(operation, curDir, fileName, a65FileName, fileResult);
+        Result := RunMadPascalFiltered(operation, curDir, fileName, a65FileName, fileResult);
       end;
 
       TAction.CLEANUP_REFERENCE:
@@ -560,7 +715,7 @@ var
 
       TAction.COMPILE_REFERENCE:
       begin
-        Result := RunMadPascal(operation, curDir, fileName, a65ReferenceFileName, fileResult);
+        Result := RunMadPascalFiltered(operation, curDir, fileName, a65ReferenceFileName, fileResult);
       end;
 
       TAction.CLEANUP_RESULTS:
@@ -643,13 +798,11 @@ type
     // Create / delete operation log file
     for i := Low(operation.results) to High(operation.results) do
     begin
-      case operation.results[i].status of
-        TStatus.ERROR:
-        begin
-          operation.logMessages.Add(Format('ERROR: Errors while processing %s',
-            [operation.results[i].filePath]));
-          operation.logMessages.AddStrings(operation.results[i].logMessages);
-        end;
+      if operation.results[i].status = TStatus.ERROR then
+      begin
+        operation.logMessages.Add(Format('ERROR: Errors while processing %s',
+          [operation.results[i].filePath]));
+        operation.logMessages.AddStrings(operation.results[i].logMessages);
       end;
     end;
   end;
@@ -670,7 +823,7 @@ type
     MP_EXE = 'mp';
   {$ENDIF}
   {$IFDEF WINDOWS}
-       const MP_BIN_FOLDER = 'windows';
+       const MP_BIN_FOLDER = 'windows_x86_64';
        const MP_EXE = 'mp.exe';
   {$ENDIF}
   var
@@ -678,6 +831,10 @@ type
     maxFiles: Integer;
     p: String;
     i: Integer;
+
+    j: Integer;
+    found: Boolean;
+
     operation: TOperation;
     operationResultFilePath: TFilePath;
     operationResultFileExists: Boolean;
@@ -692,12 +849,12 @@ type
     PascalFiles: TStringList;
     inputFolderPath: TFolderPath;
     inputFilePattern: String;
+    inputFilePatterns: TStringList;
     filePath: TFilePath;
     fileInfo: TFileInfo;
     ProgramFiles: TStringList;
     fileResult: TFileResult;
 
-    x: Integer;
   begin
 
     referenceMPFolderPath := '';
@@ -705,7 +862,7 @@ type
     mpFolderPath := '';
     mpExePath := '';
     inputFolderPath := '';
-    inputFilePattern := '';
+    inputFilePatterns := TStringList.Create;
     i := 1;
     while i <= ParamCount do
     begin
@@ -715,7 +872,13 @@ type
       if p = '-mpFolderPath' then GetNextParam(i, mpFolderPath);
       if p = '-mpExePath' then GetNextParam(i, mpExePath);
       if p = '-inputFolderPath' then GetNextParam(i, inputFolderPath);
-      if p = '-inputFilePattern' then GetNextParam(i, inputFilePattern);
+      if p = '-inputFilePattern' then
+      begin
+        inputFilePattern := '';
+        GetNextParam(i, inputFilePattern);
+        SetDirSeparators(inputFilePattern);
+        inputFilePatterns.Add(inputFilePattern);
+      end;
       if p = '-allFiles' then options.allFiles := True;
       if p = '-allThreads' then options.allThreads := True;
       if p = '-cleanup' then options.cleanup := True;
@@ -750,7 +913,6 @@ type
 
     MakeAbsolutePath(mpFolderPath);
     MakeAbsolutePath(mpExePath);
-    MakeAbsolutePath(referenceMPFolderPath);
     MakeAbsolutePath(referenceMPExePath);
     MakeAbsolutePath(inputFolderPath);
 
@@ -776,11 +938,20 @@ type
       for i := 1 to PascalFiles.Count do
       begin
         filePath := PascalFiles[i - 1];
-        if inputFilePattern <> '' then
+
+        // Maching any of the specified patterns?
+        if inputFilePatterns.Count > 0 then
         begin
-          x := filePath.IndexOf(inputFilePattern);
-          if x < 0 then Continue;
+          found := False;
+          j := 1;
+          while (j <= inputFilePatterns.Count) and not found do
+          begin
+            found := ContainsText(filePath, inputFilePatterns[j - 1]);
+            Inc(j);
+          end;
+          if not found then Continue;
         end;
+
         // Log(Format('Scanning file %s (%d of %d)', [filePath, i, maxFiles]));
         fileInfo := GetFileInfo(filePath);
         case fileInfo.fileType
@@ -796,6 +967,7 @@ type
             ProgramFiles.Add(filePath);
             if ProgramFiles.Count >= maxFiles then break;
           end;
+          else
         end;
         fileInfo.Free;
       end;
@@ -835,6 +1007,16 @@ type
         operation.verbose := options.verbose;
         operation.mpFolderPath := mpFolderPath;
         operation.mpExePath := mpExePath;
+        if not DirectoryExists(operation.mpFolderPath) then
+        begin
+          Log(Format('ERROR: MP folder %s does not exist.', [operation.mpFolderPath]));
+          exit;
+        end;
+        if not FileExists(operation.mpExePath) then
+        begin
+          Log(Format('ERROR: MP executable %s does not exist.', [operation.mpExePath]));
+          exit;
+        end;
         ProcessPrograms(ProgramFiles, operation);
         operation.WriteLog(inputFolderPath);
         operation.Free;
@@ -859,6 +1041,17 @@ type
         operation.verbose := options.verbose;
         operation.referenceMPFolderPath := referenceMPFolderPath;
         operation.referenceMPExePath := referenceMPExePath;
+        if not DirectoryExists(operation.referenceMPFolderPath) then
+        begin
+          Log(Format('ERROR: Reference MP folder %s does not exist.', [operation.referenceMPFolderPath]));
+          exit;
+        end;
+        if not FileExists(operation.referenceMPExePath) then
+        begin
+          Log(Format('ERROR: Reference MP executable %s does not exist.', [operation.referenceMPExePath]));
+          exit;
+        end;
+
         ProcessPrograms(ProgramFiles, operation);
         operation.WriteLog(inputFolderPath);
         operation.Free;
@@ -924,7 +1117,7 @@ type
     finally
       ProgramFiles.Free;
       PascalFiles.Free;
-
+      inputFilePatterns.Free;
     end;
   end;
 

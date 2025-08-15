@@ -23,8 +23,8 @@ type
 
     procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
     // TODO: Remove, check why this is called with fixed UnitIndex=1
-    procedure AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger) ;
-    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger) ;
+    procedure AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
+    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
 
   private
     procedure TokenizeMacro(a: String; Line, Spaces: Integer);
@@ -48,10 +48,9 @@ var
   i: Integer;
 begin
 
-  NumIdent_:=0;
+  NumIdent_ := 0;
   TokenList.Clear;
-  ClearWordMemory(DataSegment);
-  ClearWordMemory(StaticStringData);
+
 
   FastMul := -1;
   DataSegmentUse := False;
@@ -67,7 +66,6 @@ begin
   BlockStackTop := 0;
   CodeSize := 0;
   CodePosStackTop := 0;
-  VarDataSize := 0;
   CaseCnt := 0;
   IfCnt := 0;
   ShrShlCnt := 0;
@@ -75,6 +73,7 @@ begin
   run_func := 0;
   NumProc := 0;
 
+  ClearWordMemory(StaticStringData);
   NumStaticStrChars := 0;
 
   IfdefLevel := 0;
@@ -126,6 +125,9 @@ begin
         res.resType := GetLabelUpperCase(s, i);
         res.resFile := GetFilePath(s, i);
 
+        // Debug
+        // WriteLn('DEBUG: ', res.resName, ',', res.resType, ',', res.resFile);
+
         if (res.resType = 'RCDATA') or (res.resType = 'RCASM') or (res.resType = 'DOSFILE') or
           (res.resType = 'RELOC') or (res.resType = 'RMT') or (res.resType = 'MPT') or
           (res.resType = 'CMC') or (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or
@@ -154,8 +156,6 @@ begin
 
           res.resPar[j] := tmp;
         end;
-
-        // WriteLn(res.resName,',',res.resType,',',res.resFile);
 
         for j := High(resArray) - 1 downto Low(resArray) do
           if resArray[j].resName = res.resName then
@@ -584,7 +584,8 @@ var
 
                               // TODO Error handling with exception
                               ActiveSourceFile :=
-                                SourceFileList.AddUnit(TSourceFileType.INCLUDE_FILE, ExtractFileName(filePath), filePath);
+                                SourceFileList.AddUnit(TSourceFileType.INCLUDE_FILE,
+                                ExtractFileName(filePath), filePath);
                               (* if IncludeIndex > High(SourceFileList.UnitArray) then
                                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
                                   'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
@@ -641,7 +642,8 @@ var
 
                             if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
                             else
-                              if s = 'NOLOOPUNROLL' then AddToken(TTokenKind.NOLOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
+                              if s = 'NOLOOPUNROLL' then
+                                AddToken(TTokenKind.NOLOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
                               else
                                 Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
                                   'Illegal optimization specified "' + s + '"'));
@@ -1257,7 +1259,8 @@ var
               else
                 TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
 
-              TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+              TokenAt(NumTok).SourceLocation.Column :=
+                TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
               Spaces := 0;
             end;
           end;
@@ -1734,7 +1737,8 @@ var
 
               TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
               TokenAt(NumTok).FracValue := StrToFloat(Frac);
-              TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
+              TokenAt(NumTok).SourceLocation.Column :=
+                TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
               Spaces := 0;
 
               Frac := '';
@@ -2054,7 +2058,8 @@ begin
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
           TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
-          TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+          TokenAt(NumTok).SourceLocation.Column :=
+            TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
           Spaces := 0;
         end;
       end;

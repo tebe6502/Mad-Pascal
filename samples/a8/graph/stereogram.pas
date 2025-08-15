@@ -5,7 +5,7 @@ by Gawor (2020-01-18)
 
 program Stereogram;
 
-{$librarypath blibs}
+{$librarypath 'blibs'}
 
 uses B_Crt, SysUtils, Graph;
 
@@ -100,7 +100,7 @@ var
   SubMode: TSubMode;
   PtX, PtY: Byte;
 
-// zmodyfikowana funkcja z pakietu blib
+// modified function from 'blibs' libary
 function CRT_ReadStringEx(Limit: Byte; Mode: TReadMode): String; overload;
 var
   C: Char;
@@ -261,7 +261,7 @@ begin
   CRT_GotoXY(0, 20);
   CRT_Write('Enter file name'~);
   CRT_GotoXY(0, 21);
-  Result := CRT_ReadStringEx(15, TReadMode(roUpper));
+  Result := CRT_ReadStringEx(15, TReadMode.roUpper);
 end;
 
 procedure ClearFileName;

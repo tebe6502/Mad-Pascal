@@ -1,5 +1,6 @@
 program XEM1_demo;
-{$librarypath '/home/willy/atari/mads/Mad-Pascal/blibs'}
+
+{$librarypath 'blibs'}
 
 uses atari, crt, pokey, b_pmg;
 

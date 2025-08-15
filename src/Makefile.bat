@@ -17,9 +17,10 @@ call :normalize_path %~dp0..
 set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
 set MP_PAS=%MP_SRC_FOLDER%\mp.pas
-set MP_EXE=%MP_SRC_FOLDER%\mp.exe
+set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64
+set MP_EXE=%MP_BIN_FOLDER%\mp.exe
 
-set WUDSN_MP_EXE=%WUDSN_TOOLS_FOLDER%\PAS%\MP\bin\windows\mp.exe
+set REFERENCE_MP_EXE=%MP_BIN_FOLDER%-origin\bin\windows\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -27,6 +28,7 @@ rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
 set MP_TESTS_FOLDER=%MP_SRC_FOLDER%\tests
 
 cd /d %MP_SRC_FOLDER%
+
 
 if not "%TEST_EXE%"=="" (
   if exist "%TEST_EXE%" del "%TEST_EXE%"
@@ -39,16 +41,25 @@ if not "%MP_EXE%"=="" (
   if exist "%MP_EXE%" del "%MP_EXE%"
   call fpc.bat %MP_PAS%
   if errorlevel 1 goto :eof
+  if not exist %MP_BIN_FOLDER% mkdir "%MP_BIN_FOLDER%"
+  copy "mp.exe" "%MP_EXE%"
+  if errorlevel 1 goto :eof
+
+  rem DEL does not set the errorlevel!
+  del "mp.exe"
+  if exist "mp.exe" (
+    echo WARNING: Cannot delete %CD%\mp.exe
+  )
 
 rem Regression test with standard MP.
 goto :run_new_tests
 
   if "%TEST_MODE%"=="" (
     echo.
-    echo INFO: Compiling with WUDSN version.
+    echo INFO: Compiling with reference version.
     echo ===================================
     echo.
-    call :run_tests %WUDSN_MP_EXE%
+    call :run_tests %REFERENCE_MP_EXE%
   )
  
     
@@ -82,7 +93,7 @@ goto :eof
   set MP_OUTPUT_ASM_REF=%TEST_MP%-Reference.a65
   set MADS_OUTPUT_XEX_REF=%TEST_MP%-Reference.xex
 
-  if %MP%==%WUDSN_MP_EXE% (
+  if %MP%==%REFERENCE_MP_EXE% (
     set MP_OUTPUT_ASM=%MP_OUTPUT_ASM_REF%
     set MADS_OUTPUT_XEX=%MADS_OUTPUT_XEX_REF%
   ) else (

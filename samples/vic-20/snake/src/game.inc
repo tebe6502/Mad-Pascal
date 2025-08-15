@@ -84,11 +84,11 @@ begin
 
   t1b := length(txt_info) shr 1; dec(t0b, t1b);
   set_xy(t0b, 2);
-  print(GAME_YELLOW, txt_info);
+  print(GAME_YELLOW, @txt_info);
 
   t1b := length(txt_turbo) shr 1; dec(t2b, t1b);
   set_xy(t2b, COL_SIZE shr 1 + 10);
-  print(GAME_YELLOW, txt_turbo);
+  print(GAME_YELLOW, @txt_turbo);
 
   repeat until (JOY and JOY_FIRE) <> 0;
 end;
@@ -122,7 +122,7 @@ end;
 procedure press_fire;
 begin
   set_xy(ROW_SIZE - length(txt_points) - 1, 0);
-  print(GAME_WHITE, txt_fire);
+  print(GAME_WHITE, @txt_fire);
 
   repeat until (JOY and JOY_FIRE) <> 0;
 end;
@@ -153,13 +153,13 @@ end;
 procedure draw_bottom_line;
 begin
   set_xy(0, COL_SIZE - 1);
-  print(GAME_WHITE, txt_level);
+  print(GAME_WHITE, @txt_level);
 
   set_xy(length(txt_level) + 1, COL_SIZE - 1);
-  print(GAME_WHITE, txt_time);
+  print(GAME_WHITE, @txt_time);
 
   set_xy(ROW_SIZE - length(txt_points), COL_SIZE - 1);
-  print(GAME_WHITE, txt_points);
+  print(GAME_WHITE, @txt_points);
 end;
 
 //:-------------------------------------------------------------:
@@ -167,7 +167,7 @@ end;
 procedure print_hi_score;
 begin
   set_xy(2, 0);
-  print(GAME_WHITE, txt_hscore);
+  print(GAME_WHITE, @txt_hscore);
   update_counter_4(0, @hi_score_bcd, @hi_scr_score);
 end;
 
