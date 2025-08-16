@@ -106,36 +106,29 @@ var
   yes: Boolean;
 
 
+{$i include\cmd_temporary.inc}
+
+
   function fail(i: Integer): Boolean;
   begin
 
-    if (pos('#asm:', TemporaryBuf[i]) = 1) or (pos('ldy ', TemporaryBuf[i]) > 0) or
-      (pos('mwy ', TemporaryBuf[i]) > 0) or (pos('mvy ', TemporaryBuf[i]) > 0) or
-      (pos('jsr ', TemporaryBuf[i]) > 0) or (pos(#9'.if', TemporaryBuf[i]) > 0) or
+    if (pos('#asm:', TemporaryBuf[i]) = 1) or ldy(i) or (pos('mwy ', TemporaryBuf[i]) > 0) or
+      (pos('mvy ', TemporaryBuf[i]) > 0) or jsr(i) or (pos(#9'.if', TemporaryBuf[i]) > 0) or
       (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or (pos(#9'@print', TemporaryBuf[i]) > 0) or
-      (TemporaryBuf[i] = #9'iny') or (TemporaryBuf[i] = #9'dey') or (TemporaryBuf[i] = #9'tya') or
-      (TemporaryBuf[i] = #9'tay') then Result := True
+      iny(i) or dey(i) or tya(i) or tay(i) then Result := True
     else
       Result := False;
 
   end;
 
 
-{$i include\cmd_temporary.inc}
-
-
   function SKIP(i: Integer): Boolean;
   begin
 
-    Result := (TemporaryBuf[i] = #9'seq') or (TemporaryBuf[i] = #9'sne') or (TemporaryBuf[i] = #9'spl') or
-      (TemporaryBuf[i] = #9'smi') or (TemporaryBuf[i] = #9'scc') or (TemporaryBuf[i] = #9'scs') or
-      (TemporaryBuf[i] = #9'svc') or (TemporaryBuf[i] = #9'svs') or (pos(#9'jne ', TemporaryBuf[i]) = 1) or
-      (pos(#9'jeq ', TemporaryBuf[i]) = 1) or (pos(#9'jcc ', TemporaryBuf[i]) = 1) or
-      (pos(#9'jcs ', TemporaryBuf[i]) = 1) or (pos(#9'jmi ', TemporaryBuf[i]) = 1) or
-      (pos(#9'jpl ', TemporaryBuf[i]) = 1) or (pos(#9'bne ', TemporaryBuf[i]) = 1) or
+    Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or svc(i) or
+      svs(i) or jne(i) or jeq(i) or jcc(i) or jcs(i) or jmi(i) or jpl(i) or (pos(#9'bne ', TemporaryBuf[i]) = 1) or
       (pos(#9'beq ', TemporaryBuf[i]) = 1) or (pos(#9'bcc ', TemporaryBuf[i]) = 1) or
-      (pos(#9'bcs ', TemporaryBuf[i]) = 1) or (pos(#9'bmi ', TemporaryBuf[i]) = 1) or
-      (pos(#9'bpl ', TemporaryBuf[i]) = 1);
+      (pos(#9'bcs ', TemporaryBuf[i]) = 1) or (pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
   end;
 
 
@@ -604,6 +597,12 @@ var
   end;
 
 
+  function argMatch(i, j: Integer): Boolean;
+  begin
+    Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
+  end;
+
+
   procedure WriteInstruction(i: Integer);
   begin
 
@@ -736,7 +735,7 @@ var
   function LDA_STA_BP(i: Integer): Boolean;
   begin
 
-    Result := (lda_bp_y(i) and sta(i + 1)) or (lda(i) and sta_bp_y(i + 1));
+    Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
 
   end;
 
@@ -857,8 +856,8 @@ var
 
           if lda_stack(k) and                 // sta :STACKORIGIN  ; k-1
             sta_stack(k - 1) and                // lda :STACKORIGIN  ; k
-            sta_a(i + 1) then                // sta      ; i+1
-            if copy(listing[k], 6, 256) = copy(listing[k - 1], 6, 256) then
+            (sta_a(i + 1) or add_sub(i + 1)) then            // sta|add|sub    ; i+1
+            if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -870,7 +869,7 @@ var
           if sta_stack(k) and                 // lda :STACKORIGIN  ; k-1
             lda_stack(k - 1) and                // sta :STACKORIGIN  ; k
             lda_a(i + 1) then                // lda      ; i+1
-            if copy(listing[k], 6, 256) = copy(listing[k - 1], 6, 256) then
+            if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -1559,7 +1558,7 @@ end;
       begin
 
 {
-if (pos('lda TE4+1', listing[i]) > 0) then begin
+if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1643,7 +1642,7 @@ end;
       begin
 
 {
-if (pos('lda #$04', listing[i]) > 0) then begin
+if (pos(#9'add #$00', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1740,9 +1739,9 @@ end;
 
 
         if (i = l - 4) and                    // "samotna" instrukcja na koncu bloku
-          lda_val(i + 1) and sta_a(i + 2) and sta_a(i + 3) and (lda_a(i) or and_ora_eor(i) or
-          lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or lsr_a(i) or asl_a(i) or
-          ror_a(i) or rol_a(i)) then
+          lda_val(i + 1) and sta_a(i + 2) and sta_a(i + 3) and (lda_a(i) or
+          and_ora_eor(i) or lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
+          lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i)) then
         begin
           listing[i] := '';
 
@@ -2027,7 +2026,7 @@ end;
 
       if lda(i) and                    // lda        ; 0
         ldy_1(i + 1) and                    // ldy #1      ; 1
-        (listing[i + 2] = #9'and #$00') and              // and #$00      ; 2
+        and_im_0(i + 2) and                  // and #$00      ; 2
         bne(i + 3) and                    // bne @+      ; 3
         lda(i + 4) then                    // lda        ; 4
       begin
@@ -2039,10 +2038,19 @@ end;
       end;
 
 
-      if (i > 0) and (listing[i] = #9'and #$00') then            // lda #$00      ; -1
+      if (i > 0) and and_im_0(i) then                // lda #$00      ; -1
         if lda_im_0(i - 1) then
         begin                // and #$00      ; 0
           listing[i] := '';
+          Result := False;
+          Break;
+        end;
+
+
+      if (i > 0) and ora(i) then                  // lda #$00      ; -1
+        if lda_im_0(i - 1) then
+        begin                // ora        ; 0
+          listing[i] := #9'lda ' + copy(listing[i], 6, 256);
           Result := False;
           Break;
         end;
@@ -2071,7 +2079,7 @@ end;
 
 
       if (lda_a(i) or adc_sbc(i)) and                // lda|adc|sbc      ; 0
-        ((listing[i + 1] = #9'eor #$00') or (listing[i + 1] = #9'ora #$00')) and      // eor|ora #$00      ; 1
+        (eor_im_0(i + 1) or ora_im_0(i + 1)) and              // eor|ora #$00      ; 1
         SKIP(i + 2) then                    // SKIP        ; 2
       begin
         listing[i + 1] := '';
@@ -2081,7 +2089,7 @@ end;
 
 
       if and_ora_eor(i) and                  // and|ora|eor      ; 0
-        ((listing[i + 1] = #9'eor #$00') or (listing[i + 1] = #9'ora #$00')) and      // eor|ora #$00      ; 1
+        (eor_im_0(i + 1) or ora_im_0(i + 1)) and              // eor|ora #$00      ; 1
         SKIP(i + 2) then                    // SKIP        ; 2
       begin
         listing[i + 1] := '';
@@ -2094,7 +2102,7 @@ end;
         iny(i + 1) and                    // iny        ; 1
         lda_stack(i + 2) and                  // lda :STACKORIGIN+9    ; 2
         cmp(i + 3) then                    // cmp        ; 3
-        if (copy(listing[i], 6, 256) = copy(listing[i + 2], 6, 256)) then
+        if argMatch(i, i + 2) then
         begin
           listing[i] := '';
 
@@ -2105,9 +2113,9 @@ end;
 
 
       if sta_stack(i) and                    // sta :STACKORIGIN+9    ; 0
-        lda(i + 1) and                    // lda        ; 1
+        lda(i + 1) and                    // lda        ; 1  ~lda adr.
         AND_ORA_EOR_STACK(i + 2) then                 // ora|and|eor :STACKORIGIN+9  ; 2
-        if (copy(listing[i], 6, 256) = copy(listing[i + 2], 6, 256)) then
+        if argMatch(i, i + 2) then
         begin
           listing[i] := '';
           listing[i + 1] := copy(listing[i + 2], 1, 5) + copy(listing[i + 1], 6, 256);
@@ -2121,8 +2129,7 @@ end;
         lda_stack(i + 1) and                  // lda :STACKORIGIN+9    ; 1
         AND_ORA_EOR_STACK(i + 2) and                // ora|and|eor :STACKORIGIN+10  ; 2
         sta_stack(i + 3) then                  // sta :STACKORIGIN+9    ; 3
-        if (copy(listing[i], 6, 256) = copy(listing[i + 2], 6, 256)) and
-          (copy(listing[i + 1], 6, 256) = copy(listing[i + 3], 6, 256)) then
+        if argMatch(i, i + 2) and argMatch(i + 1, i + 3) then
         begin
           listing[i] := #9'tya';
           listing[i + 1] := copy(listing[i + 2], 1, 5) + copy(listing[i + 1], 6, 256);
@@ -2133,10 +2140,10 @@ end;
 
 
       if sty_stack(i) and                    // sty :STACKORIGIN+10    ; 0
-        lda(i + 1) and                    // lda         ; 1
+        lda(i + 1) and                    // lda         ; 1  ~lda adr.
         add_stack(i + 2) and                  // add :STACKORIGIN+10    ; 2
         sta(i + 3) then                    // sta        ; 3
-        if (copy(listing[i], 6, 256) = copy(listing[i + 2], 6, 256)) then
+        if argMatch(i, i + 2) then
         begin
           listing[i] := #9'tya';
           listing[i + 1] := #9'add ' + copy(listing[i + 1], 6, 256);
@@ -2153,9 +2160,7 @@ end;
         lda_stack(i + 4) and                  // lda :STACKORIGIN+STACKWIDTH  ; 4
         bne(i + 5) and                    // bne @+      ; 5
         lda_stack(i + 6) then                  // lda :STACKORIGIN    ; 6
-        if (copy(listing[i], 6, 256) = copy(listing[i + 4], 6, 256)) and
-          (copy(listing[i + 1], 6, 256) = copy(listing[i + 3], 6, 256)) and
-          (copy(listing[i + 3], 6, 256) = copy(listing[i + 6], 6, 256)) then
+        if argMatch(i, i + 4) and argMatch(i + 1, i + 3) and argMatch(i + 3, i + 6) then
         begin
           listing[i] := listing[i + 5];
 
@@ -2170,13 +2175,12 @@ end;
         end;
 
 
-      if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = False) and
-        // and|ora|eor      ; 0
+      if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = False) and  // and|ora|eor      ; 0
         sta_stack(i + 1) and                  // sta :STACKORIGIN+N    ; 1
         ldy_1(i + 2) and                    // ldy #1      ; 2
         lda_stack(i + 3) and                   // lda :STACKORIGIN+N    ; 3
         (bne(i + 4) or beq(i + 4)) then                // bne|beq      ; 4
-        if copy(listing[i + 1], 6, 256) = copy(listing[i + 3], 6, 256) then
+        if argMatch(i + 1, i + 3) then
         begin
           listing[i + 1] := '';
           listing[i + 3] := listing[i];
@@ -2250,7 +2254,7 @@ end;
 {$i include/opt6502/opt_WHILE_AND.inc}
 {$i include/opt6502/opt_WHILE_OR.inc}
 {$i include/opt6502/opt_BOOLEAN_AND.inc}
-      //{$i include/opt6502/opt_BOOLEAN_OR.inc}
+{$i include/opt6502/opt_BOOLEAN_OR.inc}
 
       // -----------------------------------------------------------------------------
 
@@ -2856,9 +2860,8 @@ begin        // OptimizeASM
                                           end;
 
 
-                                          if lda_im(l) and (listing[l + 1] = #9'sta :ecx') and
-                                            lda_im(l + 2) and (listing[l + 3] = #9'sta :ecx+1') and
-                                            lda_im(l + 4) and sta_eax(l + 5) and lda_im(l + 6) and
+                                          if lda_im(l) and (listing[l + 1] = #9'sta :ecx') and lda_im(l + 2) and
+                                            (listing[l + 3] = #9'sta :ecx+1') and lda_im(l + 4) and sta_eax(l + 5) and lda_im(l + 6) and
                                             sta_eax_1(l + 7) then
                                           begin
 
@@ -2934,8 +2937,7 @@ begin        // OptimizeASM
                                           (listing[m + 1] = #9'sta :ecx') and             // sta :ecx        ; 1
                                             lda_im_0(m + 2) and                // lda #$00        ; 2
                                             (listing[m + 3] = #9'sta :ecx+1') and             // sta :ecx+1        ; 3
-                                            lda_a(m + 4) and {(lda_stack(m+4) = false) and}
-                                            // lda           ; 4
+                                            lda_a(m + 4) and {(lda_stack(m+4) = false) and}          // lda           ; 4
                                             sta_eax(m + 5) and                  // sta :eax        ; 5
                                             lda_im_0(m + 6) and                // lda #$00        ; 6
                                             sta_eax_1(m + 7) and                // sta :eax+1        ; 7
@@ -3149,8 +3151,7 @@ begin        // OptimizeASM
                                                               else
 
 
-                                                                if (pos('add', arg0) > 0) or
-                                                                  (pos('sub', arg0) > 0) then
+                                                                if (pos('add', arg0) > 0) or (pos('sub', arg0) > 0) then
                                                                 begin
 
                                                                   t := '';
@@ -3255,8 +3256,7 @@ begin        // OptimizeASM
                                                                   if elf = $0A86250C then
                                                                   begin    // addAL_CL
 
-                                                                    if (pos(',y', s[x - 1][0]) > 0) or
-                                                                      (pos(',y', s[x][0]) > 0) then
+                                                                    if (pos(',y', s[x - 1][0]) > 0) or (pos(',y', s[x][0]) > 0) then
                                                                     begin
                                                                       x := 30;
                                                                       Break;
@@ -3364,8 +3364,7 @@ begin        // OptimizeASM
                                                                   if elf = $004746C5 then    // @move    accepted
                                                                   else
 
-                                                                    if elf = $058D0867 then
-                                                                    // @cmpSTRING    accepted
+                                                                    if elf = $058D0867 then    // @cmpSTRING    accepted
                                                                     else
 
                                                                       if elf = $044A824C then    // @FCMPL    accepted
@@ -3374,221 +3373,90 @@ begin        // OptimizeASM
                                                                         if elf = $0044B931 then    // @FTOA    accepted
                                                                         else
 
-                                                                          if elf = $094C6F26 then
-                                                                          // @SHORTINT.DIV  accepted
+                                                                          if elf = $094C6F26 then    // @SHORTINT.DIV  accepted
                                                                           else
-                                                                            if elf = $09B849A6 then
-                                                                            // @SMALLINT.DIV  accepted
+                                                                            if elf = $09B849A6 then    // @SMALLINT.DIV  accepted
                                                                             else
-                                                                              if elf = $0FEB1076 then
-                                                                              // @INTEGER.DIV    accepted
+                                                                              if elf = $0FEB1076 then    // @INTEGER.DIV    accepted
                                                                               else
-                                                                                if elf = $094C77F4 then
-                                                                                // @SHORTINT.MOD  accepted
+                                                                                if elf = $094C77F4 then    // @SHORTINT.MOD  accepted
                                                                                 else
-                                                                                  if elf = $09B85174 then
-                                                                                  // @SMALLINT.MOD  accepted
+                                                                                  if elf = $09B85174 then    // @SMALLINT.MOD  accepted
                                                                                   else
-                                                                                    if elf = $0FEB2AA4 then
-                                                                                    // @INTEGER.MOD    accepted
+                                                                                    if elf = $0FEB2AA4 then    // @INTEGER.MOD    accepted
                                                                                     else
 
-                                                                                      if elf = $0E886C96 then
-                                                                                      // @BYTE.DIV    accepted
+                                                                                      if elf = $0E886C96 then    // @BYTE.DIV    accepted
                                                                                       else
-                                                                                        if elf = $04676D26 then
-                                                                                        // @WORD.DIV    accepted
+                                                                                        if elf = $04676D26 then    // @WORD.DIV    accepted
                                                                                         else
-                                                                                          if elf = $06294046 then
-                                                                                          // @CARDINAL.DIV  accepted
+                                                                                          if elf = $06294046 then    // @CARDINAL.DIV  accepted
                                                                                           else
-                                                                                            if elf = $0E887644 then
-                                                                                            // @BYTE.MOD    accepted
+                                                                                            if elf = $0E887644 then    // @BYTE.MOD    accepted
                                                                                             else
-                                                                                              if elf = $046775F4 then
-                                                                                              // @WORD.MOD    accepted
+                                                                                              if elf = $046775F4 then    // @WORD.MOD    accepted
                                                                                               else
-                                                                                                if elf = $06295A94 then
-                                                                                                // @CARDINAL.MOD  accepted
+                                                                                                if elf = $06295A94 then    // @CARDINAL.MOD  accepted
                                                                                                 else
 
-                                                                                                  if elf =
-                                                                                                    $0E965FAC then
-                                                                                                  // @SHORTREAL_MUL  accepted
+                                                                                                  if elf = $0E965FAC then    // @SHORTREAL_MUL  accepted
                                                                                                   else
-                                                                                                    if elf =
-                                                                                                      $096287FC then
-                                                                                                    // @REAL_MUL    accepted
+                                                                                                    if elf = $096287FC then    // @REAL_MUL    accepted
                                                                                                     else
-                                                                                                      if elf =
-                                                                                                        $0E9645D6 then
-                                                                                                      // @SHORTREAL_DIV  accepted
+                                                                                                      if elf = $0E9645D6 then    // @SHORTREAL_DIV  accepted
                                                                                                       else
-                                                                                                        if elf =
-                                                                                                          $09627D86 then
-                                                                                                        // @REAL_DIV    accepted
+                                                                                                        if elf = $09627D86 then    // @REAL_DIV    accepted
                                                                                                         else
 
-                                                                                                          if elf =
-                                                                                                            $02042144 then
-                                                                                                          // @REAL_ROUND    accepted
+                                                                                                          if elf = $02042144 then    // @REAL_ROUND    accepted
                                                                                                           else
-                                                                                                            if elf =
-                                                                                                              $063448B3 then
-                                                                                                            // @SHORTREAL_TRUNC  accepted
+                                                                                                            if elf = $063448B3 then    // @SHORTREAL_TRUNC  accepted
                                                                                                             else
-                                                                                                              if elf =
-                                                                                                                $020C1143
-                                                                                                              then
-                                                                                                              // @REAL_TRUNC    accepted
+                                                                                                              if elf = $020C1143 then    // @REAL_TRUNC    accepted
                                                                                                               else
-                                                                                                                if
-                                                                                                                elf =
-                                                                                                                  $0627E0C3
-                                                                                                                then
-
-                                                                                                                // @REAL_FRAC    accepted
+                                                                                                                if elf = $0627E0C3 then    // @REAL_FRAC    accepted
                                                                                                                 else
 
-                                                                                                                  if elf
-                                                                                                                    =
-                                                                                                                    $0044B29C
-                                                                                                                  then
-
-                                                                                                                  // @FMUL    accepted
+                                                                                                                  if elf = $0044B29C then    // @FMUL    accepted
                                                                                                                   else
-                                                                                                                    if elf
-                                                                                                                      =
-                                                                                                                      $0044A8E6
-                                                                                                                    then
-                                                                                                                    // @FDIV    accepted
+                                                                                                                    if elf = $0044A8E6 then    // @FDIV    accepted
                                                                                                                     else
-                                                                                                                      if
-                                                                                                                      elf
-                                                                                                                        =
-                                                                                                                        $0044A584
-                                                                                                                      then
-                                                                                                                      // @FADD    accepted
+                                                                                                                      if elf = $0044A584 then    // @FADD    accepted
                                                                                                                       else
-                                                                                                                        if
-                                                                                                                        elf
-                                                                                                                          =
-                                                                                                                          $0044B892
-                                                                                                                        then
-                                                                                                                        // @FSUB    accepted
+                                                                                                                        if elf = $0044B892 then    // @FSUB    accepted
                                                                                                                         else
-                                                                                                                          if
-                                                                                                                          elf
-                                                                                                                            =
-                                                                                                                            $00044C66
-                                                                                                                          then
-                                                                                                                          // @I2F      accepted
+                                                                                                                          if elf = $00044C66 then    // @I2F      accepted
                                                                                                                           else
-                                                                                                                            if
-                                                                                                                            elf
-                                                                                                                              =
-                                                                                                                              $00044969
-                                                                                                                            then
-                                                                                                                            // @F2I      accepted
+                                                                                                                            if elf = $00044969 then    // @F2I      accepted
                                                                                                                             else
-                                                                                                                              if
-                                                                                                                              elf
-                                                                                                                                =
-                                                                                                                                $044AB653
-                                                                                                                              then
-                                                                                                                              // @FFRAC    accepted
+                                                                                                                              if elf = $044AB653 then    // @FFRAC    accepted
                                                                                                                               else
-                                                                                                                                if
-                                                                                                                                elf
-                                                                                                                                  =
-                                                                                                                                  $04B74A64
-                                                                                                                                then
-                                                                                                                                // @FROUND    accepted
+                                                                                                                                if elf = $04B74A64 then    // @FROUND    accepted
                                                                                                                                 else
 
-                                                                                                                                  if
-                                                                                                                                  elf
-                                                                                                                                    =
-                                                                                                                                    $094C3D21
-                                                                                                                                  then
-                                                                                                                                  // @F16_F2A    accepted
+                                                                                                                                  if elf = $094C3D21 then    // @F16_F2A    accepted
                                                                                                                                   else
-                                                                                                                                    if
-                                                                                                                                    elf
-                                                                                                                                      =
-                                                                                                                                      $094C31C4
-                                                                                                                                    then
-                                                                                                                                    // @F16_ADD    accepted
+                                                                                                                                    if elf = $094C31C4 then    // @F16_ADD    accepted
                                                                                                                                     else
-                                                                                                                                      if
-                                                                                                                                      elf
-                                                                                                                                        =
-                                                                                                                                        $094C4CD2
-                                                                                                                                      then
-                                                                                                                                      // @F16_SUB    accepted
+                                                                                                                                      if elf = $094C4CD2 then     // @F16_SUB    accepted
                                                                                                                                       else
-                                                                                                                                        if
-                                                                                                                                        elf
-                                                                                                                                          =
-                                                                                                                                          $094C46DC
-                                                                                                                                        then
-                                                                                                                                        // @F16_MUL    accepted
+                                                                                                                                        if elf = $094C46DC then    // @F16_MUL    accepted
                                                                                                                                         else
-                                                                                                                                          if
-                                                                                                                                          elf
-                                                                                                                                            =
-                                                                                                                                            $094C3CA6
-                                                                                                                                          then
-                                                                                                                                          // @F16_DIV    accepted
+                                                                                                                                          if elf = $094C3CA6 then    // @F16_DIV    accepted
                                                                                                                                           else
-                                                                                                                                            if
-                                                                                                                                            elf
-                                                                                                                                              =
-                                                                                                                                              $094C3A74
-                                                                                                                                            then
-                                                                                                                                            // @F16_INT    accepted
+                                                                                                                                            if elf = $094C3A74 then    // @F16_INT    accepted
                                                                                                                                             else
-                                                                                                                                              if
-                                                                                                                                              elf
-                                                                                                                                                =
-                                                                                                                                                $0C430164
-                                                                                                                                              then
-                                                                                                                                              // @F16_ROUND    accepted
-                                                                                                                                              else
-                                                                                                                                                if
-                                                                                                                                                elf
-                                                                                                                                                  =
-                                                                                                                                                  $04C3F2C3
-                                                                                                                                                then
-                                                                                                                                                // @F16_FRAC    accepted
-                                                                                                                                                else
-                                                                                                                                                  if
-                                                                                                                                                  elf
-                                                                                                                                                    =
-                                                                                                                                                    $094C3826
-                                                                                                                                                  then
-                                                                                                                                                  // @F16_I2F    accepted
-                                                                                                                                                  else
-                                                                                                                                                    if
-                                                                                                                                                    elf
-                                                                                                                                                      =
-                                                                                                                                                      $0494C3E1
-                                                                                                                                                    then
-                                                                                                                                                    // @F16_EQ    accepted
-                                                                                                                                                    else
-                                                                                                                                                      if
-                                                                                                                                                      elf
-                                                                                                                                                        =
-                                                                                                                                                        $0494C384
-                                                                                                                                                      then
-                                                                                                                                                      // @F16_GT    accepted
-                                                                                                                                                      else
-                                                                                                                                                        if
-                                                                                                                                                        elf
-                                                                                                                                                          =
-                                                                                                                                                          $094C38C5
-                                                                                                                                                        then
-                                                                                                                                                        // @F16_GTE    accepted
+                                                                                                                                              if elf = $0C430164 then    // @F16_ROUND    accepted
+                                                                          else
+                                                                                                                                                if elf = $04C3F2C3 then    // @F16_FRAC    accepted
+                                                                            else
+                                                                                                                                                  if elf = $094C3826 then    // @F16_I2F    accepted
+                                                                              else
+                                                                                                                                                    if elf = $0494C3E1 then    // @F16_EQ    accepted
+                                                                                  else
+                                                                                                                                                      if elf = $0494C384 then    // @F16_GT    accepted
+                                                                                    else
+                                                                                                                                                        if elf = $094C38C5 then    // @F16_GTE    accepted
 
 
                                                                                                                                                         else
@@ -3600,8 +3468,7 @@ begin        // OptimizeASM
 
 {$ENDIF}
 
-                                                                                                                                                          x :=
-                                                                                                                                                            51;
+                                                                                                                                                          x := 51;
                                                                                                                                                           Break;
 
                                                                                                                                                         end;
@@ -3852,10 +3719,9 @@ begin        // OptimizeASM
 
     if optyA <> '' then
       for i := 0 to l - 1 do
-        if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or
-          //((optyY <> '') and (optyA = optyY)) or
-          lda(i) or lda_adr(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
-          (pos(#9'jmp ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then
+        if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) or
+          (pos(#9'.if', listing[i]) > 0) then
         begin
           optyA := '';
           Break;
