@@ -7,7 +7,7 @@
    for i := 0 to l - 1 do
     if mva_im(i) or
        (mva(i) and (pos(#9'mva adr.', listing[i]) = 0) and (pos(':STACK', listing[i]) = 0) and (iy(i) = false)) or
-       (lda_val(i) and (iy(i) = false) {and (SKIP(i+1) = false)}) then
+       (lda_val(i) and (iy(i) = false)) then
     begin
 
      arg0:=GetString(i);
@@ -49,7 +49,7 @@
      end else
      if tya(i) or and_ora_eor(i) or add_sub(i) or adc_sbc(i) or asl(i) or lsr(i) or rol(i) or ror(i) then begin
 
-       if (sta(i+1) or sta_adr(i+1)) and (iy(i+1) = false) then
+       if sta_a(i+1) and (iy(i+1) = false) then
         arg0 := GetString(i+1)
        else
         arg0 := '';
@@ -60,5 +60,5 @@
      if ((optyA <> '') and sty(i) and (listing[i] = #9'sty ' + optyA)) or
         lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
         lab_l(i) or lab_b(i) or lab_c(i) or //SKIP(i) or
+	(listing[i] = #9'#for') or
 	(pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyA := '' end;
-

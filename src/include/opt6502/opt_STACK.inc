@@ -116,7 +116,7 @@ begin
        lda_stack(i+1) and									// lda :STACKORIGIN			; 1
        sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
        dex(i+3) then										// dex					; 3
-     if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then
+     if (argMatch(i, i+1) = false) then
      begin
        listing[i] := '';
 
@@ -129,7 +129,7 @@ begin
        lda_stack(i+1) and									// lda :STACKORIGIN			; 1
        sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
        dex(i+3) then										// dex					; 3
-     if (copy(listing[i], 6, 256) <> copy(listing[i+1], 6, 256)) then
+     if (argMatch(i, i+1) = false) then
      begin
        listing[i] := '';
 
@@ -166,7 +166,7 @@ begin
     if (SKIP(i-1) = false) and
        lda_stack(i) and										// lda :STACKORIGIN+9			; 0
        sta_stack(i+1) then									// sta :STACKORIGIN+9			; 1
-     if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then begin
+     if argMatch(i, i+1) then begin
        listing[i]   := '';
        listing[i+1] := '';
        exit(false);
@@ -186,7 +186,7 @@ begin
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        sta_stack(i+3) then									// sta :STACKORIGIN			; 3
-     if copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256) then
+     if argMatch(i+1, i+3) then
      begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -200,7 +200,7 @@ begin
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        (listing[i+3] = listing[i]) and								// lda :STACKORIGIN			; 3
        sta_val(i+4) then									// sta					; 4
-     if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
+     if argMatch(i, i+2) then
      begin
        listing[i+2] := '';
        listing[i+3] := '';
@@ -211,7 +211,7 @@ begin
     if (lab_a(i) = false) and									//~@					; 0
        sty_stack(i+1) and 									// sty :STACKORIGIN			; 1
        lda_stack(i+2) then									// lda :STACKORIGIN			; 2
-     if copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256) then
+     if argMatch(i+1, i+2) then
      begin
        listing[i+1] := #9'tya';
        listing[i+2] := '';
@@ -245,7 +245,7 @@ begin
     if sta_stack(i) and										// sta :STACKORIGIN,x			; 0
        lda_stack(i+1) and									// lda :STACKORIGIN,x			; 1
        sta_val(i+2) then									// sta TILE				; 2
-     if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then
+     if argMatch(i, i+1) then
      begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -292,7 +292,7 @@ begin
     if lda_val(i) and (iy(i) = false) and							// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN,x			; 1
        ldy_stack(i+2) then									// ldy :STACKORIGIN,x			; 2
-     if copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256) then
+     if argMatch(i+1, i+2) then
      begin
 
        if iy(i) = false then begin
@@ -329,7 +329,7 @@ begin
     if sta_stack(i) and										// sta :STACKORIGIN,x			; 0
        ldy_stack(i+1) and									// ldy :STACKORIGIN-1,x			; 1
        lda_stack(i+2) then									// lda :STACKORIGIN,x			; 2
-     if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
+     if argMatch(i, i+2) then
      begin
        listing[i]   := '';
        listing[i+2] := '';
@@ -713,8 +713,8 @@ begin
        sta_val(i+9)  and									// sta ~:STACKORIGIN			; 9
        lda_stack(i+10) and									// lda :STACKORIGIN+STACKWIDTH,x	; 10
        sta_val(i+11) then									// sta ~:STACKORIGIN			; 11
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+8], 6, 256)) and
-        (copy(listing[i+3], 6, 256) = copy(listing[i+10], 6, 256)) then
+     if argMatch(i+1, i+8) and
+        argMatch(i+3, i+10) then
      begin
 	listing[i+8]  := #9'lda ' + copy(listing[i], 6, 256);
 
@@ -785,10 +785,10 @@ begin
           lda_a(i+17) and									// lda					; 17
           and_ora_eor_stack(i+18) and								// and|ora|eor :STACKORIGIN+STACKWIDTH*3; 18
           sta_a(i+19) then									// sta					; 19
-        if (copy(listing[i+1], 6, 256) = copy(listing[i+9], 6, 256)) and
-           (copy(listing[i+3], 6, 256) = copy(listing[i+12], 6, 256)) and
-           (copy(listing[i+5], 6, 256) = copy(listing[i+15], 6, 256)) and
-           (copy(listing[i+7], 6, 256) = copy(listing[i+18], 6, 256)) then
+        if argMatch(i+1, i+9) and
+           argMatch(i+3, i+12) and
+           argMatch(i+5, i+15) and
+           argMatch(i+7, i+18) then
          begin
 	   listing[i+9]  := copy(listing[i+9], 1, 5) + copy(listing[i], 6, 256);
 
@@ -1336,8 +1336,8 @@ begin
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH,x	; 8
        sta_val(i+9) then									// sta					; 9	~:STACKORIGIN
 //       dex(i+10) then										// dex					; 10
-    if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-       (copy(listing[i+5], 6, 256) = copy(listing[i+8], 6, 256)) then
+    if argMatch(i+2, i+6) and
+       argMatch(i+5, i+8) then
      begin
        listing[i+2] := listing[i+7];
 
@@ -1367,8 +1367,8 @@ begin
        lda_stack(i+10) and									// lda :STACKORIGIN+STACKWIDTH,x	; 10
        sta_val(i+11) then									// sta					; 11	~:STACKORIGIN
 //       dex(i+12) then										// dex					; 12
-    if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
-       (copy(listing[i+1], 6, 256) = copy(listing[i+10], 6, 256)) then
+    if argMatch(i+1, i+4) and
+       argMatch(i+1, i+10) then
      begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -1396,8 +1396,8 @@ begin
        lda_stack(i+9) and									// lda :STACKORIGIN+STACKORIGIN,x	; 9
        sta_val(i+10) then									// sta					; 10	~:STACKORIGIN
 //       dex(i+11) then										// dex					; 11
-    if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
-       (copy(listing[i+1], 6, 256) = copy(listing[i+9], 6, 256)) then
+    if argMatch(i+1, i+4) and
+       argMatch(i+1, i+9) then
      begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -2279,7 +2279,7 @@ begin
        lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 1
        and_ora_eor(i+2) and									// and|ora|eor				; 2
        sta_stack(i+3) then									// sta :STACKORIGIN+STACKWIDTH*3,x	; 3
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
+     if argMatch(i+1, i+3) and
 	(pos(copy(listing[i+1], 6, 256), listing[i]) > 0) then
       begin
 	listing[i]   := #9'lda ' + GetString(i);

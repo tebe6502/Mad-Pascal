@@ -9,7 +9,7 @@ begin
 // -----------------------------------------------------------------------------
 
     if (listing[i] = #9'jsr @mul40') and						// jsr @mul40		; 0
-       lda(i+1) and									// lda			; 1
+       lda(i+1) and									// lda			; 1	~lda adr.
        add_eax(i+2) then								// add :eax		; 2
       begin
         listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);

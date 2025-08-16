@@ -570,7 +570,7 @@ begin
        sta_ecx(i+1) and			 						// sta :ecx				; 1
        lda_im_0(i+2) and 								// lda #$00				; 2
        sta_ecx_1(i+3) and		 						// sta :ecx+1				; 3
-       lda(i+4) and {(lda_stack(i+4) = false) and}					// lda					; 4
+       lda(i+4) and {(lda_stack(i+4) = false) and}					// lda					; 4	~lda adr.
        sta_eax(i+5) and 								// sta :eax				; 5
        lda_im_0(i+6) and 								// lda #$00				; 6
        sta_eax_1(i+7) then 								// sta :eax+1				; 7
@@ -704,7 +704,7 @@ begin
 
 
   if ldy_im_0(i) and 									// ldy #$00				; 0
-     lda(i+1) and 									// lda 					; 1
+     lda(i+1) and 									// lda 					; 1	~lda adr.
      spl(i+2) and 									// spl					; 2
      dey(i+3) and 									// dey					; 3
      sta_eax(i+4) and		 							// sta :eax				; 4
@@ -721,7 +721,7 @@ begin
    begin
 
 
-    if lda(i+15) and 									// lda 					; 15
+    if lda(i+15) and 									// lda 					; 15	~lda adr.
        (add_eax(i+16) or sub_eax(i+16)) and						// add|sub :eax				; 16
        tay(i+17) then									// tay					; 17
      begin
@@ -1014,7 +1014,7 @@ begin
      end;
 
 
-    if lda_a(i) and									// lda 					; 0	* 256
+    if lda(i) and									// lda 					; 0	* 256	~lda adr.
        sta_eax(i+1) and									// sta :eax				; 1
        lda_a(i+2) and									// lda 					; 2
        sta_eax_1(i+3) and								// sta :eax+1				; 3

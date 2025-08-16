@@ -44,8 +44,8 @@
 	 adc_stack(i+8) and						// adc :STACKORIGIN+STACKWIDTH		; 8
 	 sta_bp2_1(i+9) and						// sta :bp2+1				; 9
          (copy(listing[i+7], 6, 256) = copy(listing[i+5], 6, 256) + '+1') and
-         (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+8], 6, 256)) )
+         argMatch(i+1, i+4) and
+	 argMatch(i+1, i+8) )
 
        or
 
@@ -62,9 +62,9 @@
 	 adc_stack(i+10) and						// adc :STACKORIGIN+STACKWIDTH		; 10
 	 sta_bp2_1(i+11) and						// sta :bp2+1				; 11
          (copy(listing[i+9], 6, 256) = copy(listing[i+6], 6, 256) + '+1') and
-         (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256)) and
-	 (copy(listing[i+5], 6, 256) = copy(listing[i+10], 6, 256)) )
+         argMatch(i+1, i+3) and
+	 argMatch(i+1, i+7) and
+	 argMatch(i+5, i+10) )
 
 	or
 
@@ -87,9 +87,9 @@
 	 (listing[i+16] = #9'lda (:TMP),y') and				// lda (:TMP),y				; 16
 	 sta_bp2_1(i+17) and						// sta :bp2+1				; 17
          (copy(listing[i+10], 6, 256) = copy(listing[i+7], 6, 256) + '+1') and
-         (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) and
-	 (copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) )
+         argMatch(i+1, i+3) and
+	 argMatch(i+1, i+6) and
+	 argMatch(i+5, i+9) )
 
         then begin
 

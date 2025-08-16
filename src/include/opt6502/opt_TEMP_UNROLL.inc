@@ -55,7 +55,7 @@ begin
 
      lda(0) and										// lda					; 0
      add_sub(1) and									// add|sub I				; 1
-     (TemporaryBuf[2] = #9'tay') and							// tay					; 2
+     tay(2) and										// tay					; 2
      lda(3) and										// lda					; 3
      sta_adr(4) then									// sta adr.TAB,y			; 4
    if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[7], 6, 256)) then
@@ -127,7 +127,7 @@ begin
        sty(2) and									// sty I				; 2
        lda(3) and									// lda					; 3
        add_sub(4) and									// add|sub I				; 4
-       (TemporaryBuf[5] = #9'tay') and							// tay					; 5
+       tay(5) and									// tay					; 5
        lda(6) and									// lda					; 6
        sta_adr(7) and									// sta adr.TAB,y			; 7
        (TemporaryBuf[8] = '===unroll===') then						//===unroll===				; 8

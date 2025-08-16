@@ -26,7 +26,7 @@ begin
 	     asl_a(p-2) and					// asl @			; p-2
 	     rol_stack(p-1) then				// rol :STACKORIGIN+STACKWIDTH	; p-1
 	     							// sta :STACKORIGIN		; p
-	   if (copy(listing[p-1], 6, 256) <> copy(listing[p], 6, 256)) then
+	   if (argMatch(p-1, p) = false) then
 	   begin
 	    listing[p-1] := '';
 
@@ -39,7 +39,7 @@ begin
 	     rol_stack(p-2) and					// rol :STACKORIGIN+STACKWIDTH	; p-2
 	     asl_a(p-1) then					// asl @			; p-1
 	     							// sta :STACKORIGIN		; p
-	   if (copy(listing[p-2], 6, 256) <> copy(listing[p], 6, 256)) then
+	   if (argMatch(p-2, p) = false) then
 	   begin
 	    listing[p-2] := '';
 
@@ -53,7 +53,7 @@ begin
 	     asl_a(p-2) and					// asl @			; p-2
 	     asl_a(p-1) then					// asl @			; p-1
 	     							// sta :STACKORIGIN		; p
-	   if (copy(listing[p-3], 6, 256) <> copy(listing[p], 6, 256)) then
+	   if (argMatch(p-3, p) = false) then
 	   begin
 	    listing[p-3] := '';
 
@@ -68,7 +68,7 @@ begin
 	     							// sta :STACKORIGIN		; p
 								//~lda				; p+1
              (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-2], 6, 256) <> copy(listing[p], 6, 256)) then
+	   if (argMatch(p-2, p) = false) then
 	   begin
 	    listing[p-2] := '';
 
@@ -84,8 +84,8 @@ begin
 	     							// sta :STACKORIGIN		; p
 								//~lda				; p+1
              (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-4], 6, 256) = copy(listing[p-2], 6, 256)) and
-	      (copy(listing[p-2], 6, 256) = copy(listing[p], 6, 256)) then
+	   if argMatch(p-4, p-2) and
+	      argMatch(p-2, p) then
 	   begin
 	    listing[p-3] := '';
 
@@ -105,9 +105,9 @@ begin
 	     							// sta :STACKORIGIN		; p
 								//~lda				; p+1
              (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-7], 6, 256) = copy(listing[p-3], 6, 256)) and
-	      (copy(listing[p-3], 6, 256) = copy(listing[p-2], 6, 256)) and
-	      (copy(listing[p-2], 6, 256) = copy(listing[p], 6, 256)) then
+	   if argMatch(p-7, p-3) and
+	      argMatch(p-3, p-2) and
+	      argMatch(p-2, p) then
 	   begin
 	    listing[p-7] := '';
 	    listing[p-6] := '';
@@ -129,7 +129,7 @@ begin
 	     							// sta :STACKORIGIN		; p
 								//~lda				; p+1
              (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-3], 6, 256) <> copy(listing[p], 6, 256)) then
+	   if (argMatch(p-3, p) = false) then
 	    begin
 	      listing[p-3] := '';
 
@@ -146,7 +146,7 @@ begin
 	     							// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-4], 6, 256) <> copy(listing[p], 6, 256)) then
+           if (argMatch(p-4, p) = false) then
  	    begin
 	      listing[p-4] := '';
 
@@ -164,8 +164,8 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-6], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if argMatch(p-6, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-5] := '';
 	      listing[p-4] := '';
@@ -186,8 +186,8 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-7], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if argMatch(p-7, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-6] := '';
 	      listing[p-5] := '';
@@ -209,10 +209,10 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-7], 6, 256) <> copy(listing[p], 6, 256)) and
-	      (copy(listing[p-6], 6, 256) = copy(listing[p-4], 6, 256)) and
-              (copy(listing[p-4], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if (argMatch(p-7, p) = false) and
+	      argMatch(p-6, p-4) and
+              argMatch(p-4, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-7] := '';
 
@@ -231,10 +231,10 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-6], 6, 256) <> copy(listing[p], 6, 256)) and
-	      (copy(listing[p-5], 6, 256) = copy(listing[p-4], 6, 256)) and
-              (copy(listing[p-4], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if (argMatch(p-6, p) = false) and
+	      argMatch(p-5, p-4) and
+              argMatch(p-4, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-6] := '';
 
@@ -250,7 +250,7 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-3], 6, 256) <> copy(listing[p-1], 6, 256)) then
+           if (argMatch(p-3, p-1) = false) then
  	    begin
 	      listing[p-3] := '';
 
@@ -267,7 +267,7 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-4], 6, 256) <> copy(listing[p-1], 6, 256)) then
+           if (argMatch(p-4, p-1) = false) then
  	    begin
 	      listing[p-4] := '';
 
@@ -285,7 +285,7 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-5], 6, 256) <> copy(listing[p-1], 6, 256)) then
+           if (argMatch(p-5, p-1) = false) then
  	    begin
 	      listing[p-5] := '';
 
@@ -305,10 +305,10 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-7], 6, 256) <> copy(listing[p], 6, 256)) and
-	      (copy(listing[p-5], 6, 256) = copy(listing[p-4], 6, 256)) and
-              (copy(listing[p-4], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if (argMatch(p-7, p) = false) and
+	      argMatch(p-5, p-4) and
+              argMatch(p-4, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-7] := '';
 
@@ -329,10 +329,10 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-8], 6, 256) <> copy(listing[p], 6, 256)) and
-	      (copy(listing[p-5], 6, 256) = copy(listing[p-4], 6, 256)) and
-              (copy(listing[p-4], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if (argMatch(p-8, p) = false) and
+	      argMatch(p-5, p-4) and
+              argMatch(p-4, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-8] := '';
 
@@ -353,10 +353,10 @@ begin
 								// sta :STACKORIGIN		; p
 								//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-           if (copy(listing[p-8], 6, 256) <> copy(listing[p], 6, 256)) and
-	      (copy(listing[p-6], 6, 256) = copy(listing[p-4], 6, 256)) and
-              (copy(listing[p-4], 6, 256) = copy(listing[p-1], 6, 256)) and
-              (copy(listing[p-1], 6, 256) = copy(listing[p], 6, 256)) then
+           if (argMatch(p-8, p) = false) and
+	      argMatch(p-6, p-4) and
+              argMatch(p-4, p-1) and
+              argMatch(p-1, p) then
  	    begin
 	      listing[p-8] := '';
 
@@ -392,8 +392,8 @@ begin
 	     							// sta :STACKORIGIN		; p
 	     							//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-5], 6, 256) = copy(listing[p-2], 6, 256)) and
-	      (copy(listing[p-2], 6, 256) = copy(listing[p], 6, 256)) then
+	   if argMatch(p-5, p-2) and
+	      argMatch(p-2, p) then
 	   begin
 	    listing[p-6] := #9'sta #$00';
 
@@ -413,8 +413,8 @@ begin
 	     							// sta :STACKORIGIN		; p
 	     							//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-3], 6, 256) = copy(listing[p], 6, 256)) and
-	      (copy(listing[p-4], 6, 256) <> copy(listing[p-3], 6, 256)) then
+	   if argMatch(p-3, p) and
+	      (argMatch(p-4, p-3) = false) then
 	   begin
 	    listing[p-4] := '';
 
@@ -448,8 +448,8 @@ begin
 	     							// sta :STACKORIGIN		; p
 	     							//~lda				; p+1
 	     (adc_sbc(p+2) = false) then			//~adc|sbc			; p+2
-	   if (copy(listing[p-3], 6, 256) = copy(listing[p], 6, 256)) and
-	      (copy(listing[p-5], 6, 256) <> copy(listing[p-3], 6, 256)) then
+	   if argMatch(p-3, p) and
+	      (argMatch(p-5, p-3) = false) then
 	   begin
 	    listing[p-5] := '';
 
@@ -479,7 +479,7 @@ begin
 	 end else
 	  if (pos(copy(listing[i], 6, 256), listing[p]) > 0) or
 	     lab_a(i) or (listing[i] = #9'eif') or
-	     ((pos(#9'jsr ', listing[i]) = 1) and (pos(#9'jsr @', listing[i]) = 0)) then Break;
+	     (jsr(i) and (pos(#9'jsr @', listing[i]) = 0)) then Break;
 
 	if Result = false then exit(false);
       end;

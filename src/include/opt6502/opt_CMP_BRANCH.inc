@@ -1035,7 +1035,7 @@ begin
        cmp(i+1) and (cmp_im(i+1) = false) and							// cmp TMP		; 1
        (jne(i+2) or bne(i+2)) and								// jne|bne		; 2
        (SKIP(i+3) = false) then
-     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+     if argMatch(i, i+1) then
       begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -1049,7 +1049,7 @@ begin
        cmp(i+1) and										// cmp TMP		; 1
        (jeq(i+2) or jcs(i+2)) and								// jeq|jcs		; 2
        (SKIP(i+3) = false) then
-     if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+     if argMatch(i, i+1) then
       begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -1063,7 +1063,7 @@ begin
        cmp(i+1) and										// cmp A		; 1
        jcc(i+2) and										// jcc			; 2
        jeq(i+3) then										// jeq			; 3
-    if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then
+    if argMatch(i, i+1) then
      begin
 
       listing[i]   := '';

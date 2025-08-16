@@ -269,8 +269,8 @@ begin
        lab_a(i+11) and										//@				; 11
        jcs(i+12) and										// jcs l_			; 12
        (SKIP(i+13) = false) then								//				; 13
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+9], 6, 256)) and
-        (copy(listing[i+5], 6, 256) = copy(listing[i+6], 6, 256)) then
+     if argMatch(i+2, i+9) and
+        argMatch(i+5, i+6) then
       begin
 	listing[i]  := '';
 	listing[i+1]:= '';
