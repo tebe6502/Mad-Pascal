@@ -1917,6 +1917,10 @@ begin
 	i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
 	Ident[NumIdent].DataType := VarType;					// Result
+
+        if VarType = ENUMTOK then
+	 Ident[NumIdent].AllocElementType := AllocElementType;
+
 	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;
 	Ident[NumIdent].NestedFunctionAllocElementType := AllocElementType;
 
@@ -1962,7 +1966,6 @@ begin
 	DefineIdent(i + 1, Tok[i + 1].Name^, FUNCTIONTOK, 0, 0, 0, 0);
 	IsNestedFunction := TRUE;
 	end;
-
 
       NumVarOfSameType := 0;
 
@@ -2081,6 +2084,10 @@ begin
 //	if Tok[i].Kind = PCHARTOK then NestedFunctionResultType := PCHARTOK;
 
 	Ident[NumIdent].DataType := NestedFunctionResultType;			// Result
+
+        if NestedFunctionResultType = ENUMTOK then
+	 Ident[NumIdent].AllocElementType := AllocElementType;
+
 
 	NestedFunctionNumAllocElements := NumAllocElements;
 	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;

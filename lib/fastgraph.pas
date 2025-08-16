@@ -4,6 +4,8 @@ unit fastgraph;
 @name: Unit to handle screen graphics, accelerated bitmap modes
 @author: Tomasz Biela (Tebe/Madteam)
 
+@version: 1.2
+
 @description:
 <http://www.freepascal.org/docs-html/rtl/graph/index-5.html>
 
@@ -18,6 +20,7 @@ fLine			fast Line
 fRectangle		fast Rectangle
 GetPixel
 HLine
+VLine
 InitGraph		mode: 3, 5, 7, 8, 9, 10, 11, 15
 Line
 LineTo
@@ -115,6 +118,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure SetActiveBuffer(var a: TDisplayBuffer); overload;
 	procedure fRectangle(x1, y1, x2, y2: smallint);
 	procedure Hline(x0,x1,y: smallint);
+	procedure Vline(x,y0,y1: smallint);
 	procedure LineTo(x, y: smallint);
 	procedure PutPixel(x,y: smallint); assembler; register;
 	function Scanline(y: smallint): PByte;
@@ -323,7 +327,7 @@ function GetPixel(x,y: smallint): byte; assembler;
 Return color of pixel
 *)
 asm
-{	txa:pha
+	txa:pha
 
 	lda y+1
 	bmi error
@@ -449,7 +453,6 @@ _1	lda (:bp2),y
 stop	sta Result
 
 	pla:tax
-};
 end;
 
 
@@ -700,8 +703,7 @@ stop	iny
 	lda (:bp2),y		; Byte with Right edge
 	and rmsk: #0
 	ora rcol: #0
-
-;	sta (:bp2),y
+	sta (:bp2),y
 
 	jmp exit
 
@@ -746,9 +748,144 @@ right	dta 0,0,0,0
 	dta %11111100
 	dta %11111111
 
+exit
+	ldx rX: #$00
+end;
 
-exit	sta (:bp2),y
+end;
 
+
+procedure Vline(x,y0,y1: smallint);
+(*
+@description:
+Draw horizintal line, fast as possible
+*)
+var mode: byte;
+    tmp: smallint;
+begin
+
+ if y0 > y1 then begin
+  tmp:=y1;
+  y1:=y0;
+  y0:=tmp;
+ end;
+
+ mode:=GraphMode and $0f;
+
+ if (mode<>5) and (mode<>7) and (mode<>15) then begin
+  Line(x,y0,x,y1);
+  exit;
+ end;
+
+asm
+	stx rX
+
+	jmp skp
+
+error	jmp exit
+
+skp
+	lda y1+1
+	bmi error
+	cmp MAIN.SYSTEM.ScreenHeight+1
+	bne sk0
+	lda y1
+	cmp MAIN.SYSTEM.ScreenHeight
+sk0
+	bcs error
+
+	lda y0+1
+	bmi error
+	cmp MAIN.SYSTEM.ScreenHeight+1
+	bne sk1
+	lda y0
+	cmp MAIN.SYSTEM.ScreenHeight
+sk1
+	bcc ok1
+
+	mwa MAIN.SYSTEM.ScreenHeight y0
+
+ok1	lda x+1
+	bmi error
+	cmp MAIN.SYSTEM.ScreenWidth+1
+	bne sk2
+	lda x
+	cmp MAIN.SYSTEM.ScreenWidth
+sk2
+	bcc ok2
+
+	mwa MAIN.SYSTEM.ScreenWidth x
+	clc
+ok2
+	ldy y0
+	lda adr.lineLo,y
+	adc lfb:#0
+	sta :bp2
+
+	lda adr.lineHi,y
+	adc hfb:#0
+	sta :bp2+1
+
+	lda adr.lineLo+1
+	sub adr.lineLo
+	sta width
+
+	lda GetColor
+	and #3
+	tay
+	
+	lda x
+	and #3
+	tax
+	lda andm,x
+	sta msk
+
+	lda tcolor,y
+	and mask,x
+	sta col
+
+	lda x
+	lsr @
+	lsr @
+	tay
+
+	lda y1
+	sub y0
+	tax
+	beq exit
+
+lp	lda (:bp2),y
+	and msk: #0
+	ora col: #0
+	sta (:bp2),y
+
+	lda :bp2
+	clc
+	adc width: #$00
+	sta :bp2
+	scc
+	inc :bp2+1
+
+	dex
+	
+	bne lp
+
+	jmp exit
+
+
+tcolor	dta $00,$55,$aa,$ff
+
+mask	dta %11000000
+	dta %00110000
+	dta %00001100
+	dta %00000011
+
+andm	dta %11000000^$ff
+	dta %00110000^$ff
+	dta %00001100^$ff
+	dta %00000011^$ff
+
+exit
 	ldx rX: #$00
 end;
 
@@ -1060,10 +1197,14 @@ Draws a rectangle with corners at (X1,Y1) and (X2,Y2), using the current color a
 *)
 begin
 
- fLine(x1,y1,x2,y1);
- fLine(x2,y1,x2,y2);
- fLine(x1,y2,x2,y2);
- fLine(x1,y1,x1,y2);
+ HLine(x1,x2, y1);
+ HLine(x1,x2, y2);
+ 
+ VLine(x2, y1, y2);
+ //fLine(x2,y1,x2,y2);
+ 
+ VLine(x1, y1, y2);
+ //fLine(x1,y1,x1,y2);
 
 end;
 
@@ -1093,6 +1234,11 @@ asm
 	.ifdef HLine
 	 sta HLine.lfb
 	 sty HLine.hfb
+	eif
+
+	.ifdef VLine
+	 sta VLine.lfb
+	 sty VLine.hfb
 	eif
 
 	.ifdef fLine
