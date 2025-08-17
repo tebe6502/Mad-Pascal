@@ -1,440 +1,390 @@
 unit MathEvaluate;
 
-(* Source: CLSN PASCAL                                              *)
-(* This program will evaluate numeric expressions like:             *)
-(* 5+6/7    sin(cos(pi))  sqrt(4*4)                                 *)
-(* Mutual recursion is necessary, hence the FORWARD clause is used. *)
+(* source: CLSN PASCAL              *)
+(*				    *)
+(* This program will evaluate       *)
+(* numeric expressions like:        *)
+
+(* 5+6/7    sin(cos(pi))  sqrt(4*4) *)
+
+(* Mutual recursion was necessary   *)
+(* so the FORWARD clause was used   *)
 
 interface
 
-{$I Defines.inc}
 
-uses SysUtils, CommonTypes, StringUtilities;
-
-type
-  TEvaluationResult = Single;
-
-type
-  EEValuationException = class(Exception)
-  private
-    _expression: String;
-    _index: Integer;
-  public
-    constructor Create(const msg: String);
-    property Expression: String read _expression;
-    property Index: Integer read _index;
-  end;
-
-type
-  IEvaluationContext = interface
-    function GetConstantName(const expression: String; var index: TStringIndex): String;
-    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
-  end;
-
-
-function Evaluate(const expression: String; const evaluationContext: IEvaluationContext): TEvaluationResult;
+	function evaluate(const a: string; i: integer): real;
 
 
 implementation
 
-uses Math;
+uses math, common, parser, scanner, messages;
 
 type
-  TOperator = String;
+  sop=string[10];
 
 var
-  evaluationContext: IEvaluationContext;
-  s: String;
-  cix: Integer;
+    s: string;
+  cix: integer;
 
-  // If the names of the functions are similar then their longer versions should be placed earlier.
-  // Example:_ arctan2 .. arctan
-  fop: array[0..14] of TOperator = (' ', 'PI', 'RND', 'SQRT', 'SQR', 'ARCTAN2', 'COS', 'SIN',
-    'TAN', 'EXP', 'LN', 'ABS', 'INT', 'POWER', 'ARCTAN');
-
-  top: array[0..7] of TOperator = (' ', '*', '/', 'DIV', 'MOD', 'AND', 'SHL', 'SHR');
-  seop: array[0..4] of TOperator = (' ', '+', '-', 'OR', 'XOR');
+  TokenIndex: integer;
 
 
+// if the names of the functions are similar then their longer versions should be placed earlier
+// arctan2 .. arctan
+  fop: array[0..14] of sop = (' ','PI','RND','SQRT','SQR','ARCTAN2','COS','SIN','TAN','EXP','LN','ABS','INT','POWER','ARCTAN');
 
-constructor EEValuationException.Create(const msg: String);
+  top: array[0..7] of sop=(' ','*','/','DIV','MOD','AND','SHL','SHR');
+  seop: array[0..4] of sop=(' ','+','-','OR','XOR');
+
+
+function simple_expression: real; forward;
+
+
+procedure skip_blanks;
 begin
-  inherited Create(msg);
-  _expression := MathEvaluate.s;
-  _index := MathEvaluate.cix;
+  while (s[cix]=' ') do
+    inc(cix);
 end;
 
-procedure RaiseError(const msg: String);
-begin
-  raise  EEValuationException.Create(msg);
-end;
 
-function SimpleExpression: TEvaluationResult; forward;
-
-procedure SkipBlanks;
-begin
-  while (cix <= Length(s)) and (s[cix] = ' ') do
-    Inc(cix);
-end;
-
-function Constant: TEvaluationResult;
+function constant: real;
 var
-  n: String;
-  i, v, k, ln: Integer;
-{$IFNDEF PAS2JS}
-  v1: TEvaluationResult;
-{$ELSE}
-  v1: ValReal; // For PAS2JS, should also work for FPC and be used a return value there,  see Test-70287.pas
-{$ENDIF}
-  p: Integer;
-  pflg: Boolean;
-  constantValue: TInteger;
+     n: string;
+    v1: real;
+     v, k, ln, i: integer;
+     p: word;
+  pflg: boolean;
+
+  IdentTemp: integer;
+
 begin
-  n := '';
-  pflg := False;
+  n:=''; pflg:=false;
 
-  SkipBlanks;
+  skip_blanks;
 
-  p := 0;
-
-
-  if (cix <= Length(s)) and (s[cix] = '%') then // binary
-  begin
-
-    Inc(cix);
-
-    while (cix <= Length(s)) and (s[cix] in ['0', '1']) do
-    begin
-      n := n + s[cix];
-
-      Inc(cix);
-    end;
-
-    if Length(n) = 0 then
-      RaiseError('Invalid constant %');
-
-    // Remove leading zeros
-    i := 1;
-    while n[i] = '0' do Inc(i);
-
-    ln := Length(n);
-    v := 0;
-
-    // Do the conversion
-    for k := ln downto i do
-      if n[k] = '1' then
-        v := v + (1 shl (ln - k));
-
-    v1 := v;
-
-  end
-  else
+  p:=0;
 
 
-    if (cix <= Length(s)) and (s[cix] = '$') then // hexadecimal
-    begin
+  if s[cix] = '%' then begin						// bin
 
-      n := '$';
-      Inc(cix);
+	  inc(cix);
 
-      while (cix <= Length(s)) and (UpCase(s[cix]) in ['0'..'9', 'A'..'F']) do
-      begin
-        n := n + s[cix];
+	  while (s[cix] in ['0', '1']) do
+	    begin
+	      n := n + s[cix];
 
-        Inc(cix);
-      end;
+	      inc(cix);
+	    end;
 
-      //  If the conversion isn't successful, then the parameter p (Code) contains
-      //  the index of the character in S which prevented the conversion
-      Val(n, v, p);
+       if length(n)=0 then
+	 Error(TokenIndex, 'Invalid constant %');
 
-      v1 := v;
+       //remove leading zeros
+       i:=1;
+       while n[i]='0' do inc(i);
 
-    end
+       ln:=length(n);
+       v:=0;
+
+       //do the conversion
+       for k:=ln downto i do
+	if n[k]='1' then
+	 v:=v+(1 shl (ln-k));
+
+       v1:=v;
+
+  end else
+
+
+  if s[cix] = '$' then begin						// hex
+
+	  n:='$';
+	  inc(cix);
+
+	  while (UpCase(s[cix]) in ['0'..'9', 'A'..'F']) do
+	    begin
+	      n := n + s[cix];
+
+	      inc(cix);
+	    end;
+
+	  val(n,v,p);
+
+	  v1:=v;
+
+  end else begin							// dec
+
+	  while (s[cix] in ['0'..'9']) or ((s[cix]='.') and (not pflg)) do
+	    begin
+	      if (s[cix]='.') then pflg:=true;
+
+	      n := n + s[cix];
+
+	      inc(cix);
+	    end;
+
+	  val(n,v1,p);
+
+  end;
+
+
+  if (p<>0) then begin
+
+    n:=get_constant(cix, s);
+
+    IdentTemp:=GetIdent(n);
+
+    if IdentTemp > 0 then
+     v1 := Ident[IdentTemp].Value
     else
-    begin              // decimal
+     Error(TokenIndex, 'Invalid constant "' + n + '"');
 
-      while (cix <= Length(s)) and ((s[cix] in ['0'..'9']) or ((s[cix] = '.') and (not pflg))) do
-      begin
-        if (s[cix] = '.') then pflg := True;
-
-        n := n + s[cix];
-
-        Inc(cix);
-      end;
-
-      Val(n, v1, p);
-
-    end;
-
-
-  if (p <> 0) then
-  begin
-
-    n := evaluationContext.GetConstantName(s, cix);
-    if n <> '' then
-    begin
-      constantValue := 0;
-      if evaluationContext.GetConstantValue(n, constantValue) then
-        v1 := constantValue
-      else
-        RaiseError('Invalid constant "' + n + '"');
-
-    end;
   end;
 
 
-  constant := v1;
+  constant:=v1;
 end;
 
 
-function XNot(v: TEvaluationResult): TEvaluationResult;
+function xnot(v: real): real;
 begin
-  if (v = 0) then
-    Result := 1
+  if (v=0) then
+    xnot:=1
   else
-    Result := 0;
+    xnot:=0;
 end;
 
 
-function Factor: TEvaluationResult;
+function factor: real;
 var
-  v1, v2: TEvaluationResult;
-  ch: Char;
-  op, i: Byte;
+       v1, v2: real;
+       ch: char;
+    op, i: byte;
 
 
-  procedure RaiseWrongNumberOfParametersError;
-  begin
+ procedure Wrong_number;
+ begin
 
-    RaiseError('Wrong number of parameters specified for call to "' + fop[op] + '"');
+   Error(TokenIndex, 'Wrong number of parameters specified for call to "' + fop[op] + '"');
 
-  end;
+ end;
+
 
 begin
-  SkipBlanks;
+  skip_blanks;
 
-  op := 0;
-  v1 := 0;
-  v2 := 0;
+  op:=0;
+  v1:=0;
+  v2:=0;
 
-  for i := 1 to High(fop) do
-    if (op = 0) then
-      if (Copy(s, cix, Length(fop[i])) = fop[i]) then
-        op := i;
+  for i:=1 to High(fop) do
+    if (op=0) then
+      if (copy(s,cix,length(fop[i])) = fop[i]) then
+        op:=i;
 
   if (op > 0) then
-  begin
-    cix := cix + Length(fop[op]);
-
-    SkipBlanks;
-
-    if (op in [1, 2]) and (s[cix] = '(') then
-      RaiseWrongNumberOfParametersError;
-
-
-    if (op > 2) then            // 0:' ', 1:'PI', 2:'RND'
     begin
-      if (s[cix] <> '(') then
-        RaiseWrongNumberOfParametersError;
+      cix:=cix + length(fop[op]);
 
-      v1 := factor;
+      skip_blanks;
 
-      if (op in [5, 13]) and (s[cix] <> ',') then    // 5:'ARCTAN2', 13:'POWER'
-        RaiseWrongNumberOfParametersError;
-
-      if s[cix] = ',' then
-      begin
-
-        if not (op in [5, 13]) then        // 5:'ARCTAN2', 13:'POWER'
-          RaiseWrongNumberOfParametersError;
-
-        Inc(cix);
-
-        SkipBlanks;
-
-        v2 := factor;
-
-        if s[cix] <> ')' then
-          RaiseWrongNumberOfParametersError;
-
-        Inc(cix);
-
-      end;
-
-    end;
+      if (op in [1,2]) and (s[cix] = '(') then
+        Wrong_number;
 
 
-    case op of
-      1: v1 := pi;
-      2: v1 := Random;
-      3: v1 := sqrt(v1);
-      4: v1 := sqr(v1);
-      5: v1 := arctan2(v1, v2);
-      6: v1 := cos(v1);
-      7: v1 := sin(v1);
-      8: v1 := sin(v1) / cos(v1);
-      9: v1 := exp(v1);
-      10: v1 := ln(v1);
-      11: v1 := abs(v1);
-      12: v1 := int(v1);
-      13: v1 := power(v1, v2);
-      14: v1 := arctan(v1);
-      else
-        Assert(False, 'Invalid operator code ' + IntToStr(op) + '.');
-    end;
+      if (op > 2) then						// 0:' ', 1:'PI', 2:'RND'
+        begin
+          if (s[cix] <> '(') then
+            Wrong_number;
 
-  end
-  else
-    if (cix <= Length(s)) and (s[cix] = '(') then
-    begin
-      Inc(cix);
+          v1:=factor;
 
-      v1 := SimpleExpression;
+	  if (op in [5,13]) and (s[cix] <> ',') then		// 5:'ARCTAN2', 13:'POWER'
+	    Wrong_number;
 
-      SkipBlanks;
+	  if s[cix] = ',' then begin
 
-      if (cix > Length(s)) then RaiseError('Parenthesis Mismatch');
-      if (s[cix] <> ',') then
-      begin
+	   if not (op in [5,13]) then				// 5:'ARCTAN2', 13:'POWER'
+	     Wrong_number;
 
-        if (s[cix] = ')') then
-          Inc(cix)
-        else
-          RaiseError('Parenthesis Mismatch');
-      end;
-    end
-    else
-      if (cix <= Length(s)) and ((s[cix] = '-') or (s[cix] = '+') or (Copy(s, cix, 3) = 'NOT')) then
-      begin
-        ch := s[cix];
+	   inc(cix);
 
-        if (ch = 'N') then
-          cix := cix + 3
-        else
-          Inc(cix);
+	   skip_blanks;
 
-        case ch of
-          '+': v1 := factor;
-          '-': v1 := -factor;
-          'N': v1 := xnot(factor);
-          else
-            Assert(False, 'Invalid case');
+	   v2:=factor;
+
+	   if s[cix] <> ')' then
+	     Wrong_number;
+
+	   inc(cix);
+
+	  end;
+
         end;
-      end
-      else
-        v1 := constant;
 
-  Result := v1;
-end;
-
-
-function Term: TEvaluationResult;
-var
-  op, i: Byte;
-  v1, v2: TEvaluationResult;
-
-begin
-  v1 := factor;
-
-  repeat
-    SkipBlanks;
-
-    op := 0;
-
-    for i := 1 to High(top) do
-      if (op = 0) then
-        if (Copy(s, cix, Length(top[i])) = top[i]) then
-          op := i;
-
-    if (op > 0) then
-    begin
-      cix := cix + Length(top[op]);
-
-      v2 := factor;
 
       case op of
-        1: v1 := v1 * v2;
-        2: v1 := v1 / v2;
-        3: v1 := round(v1) div round(v2);
-        4: v1 := round(v1) mod round(v2);
-        5: v1 := round(v1) and round(v2);
-        6: v1 := round(v1) shl round(v2);
-        7: v1 := round(v1) shr round(v2);
+        1: v1:=pi;
+	2: v1:=Random;
+        3: v1:=sqrt(v1);
+        4: v1:=sqr(v1);
+        5: v1:=arctan2(v1,v2);
+        6: v1:=cos(v1);
+        7: v1:=sin(v1);
+        8: v1:=sin(v1)/cos(v1);
+        9: v1:=exp(v1);
+       10: v1:=ln(v1);
+       11: v1:=abs(v1);
+       12: v1:=int(v1);
+       13: v1:=power(v1,v2);
+       14: v1:=arctan(v1);
       end;
-    end;
-
-  until (op = 0);
-
-  Result := v1;
-
-end;
 
 
-function SimpleExpression: TEvaluationResult;
-var
-  op, i: Byte;
-  v1, v2: TEvaluationResult;
-
-begin
-  SkipBlanks;
-
-  v1 := term;
-
-  repeat
-    SkipBlanks;
-
-    op := 0;
-
-    for i := 1 to High(seop) do
-      if (op = 0) then
-        if (Copy(s, cix, Length(seop[i])) = seop[i]) then
-          op := i;
-
-    if (op > 0) then
-    begin
-      cix := cix + Length(seop[op]);
-
-      v2 := term;
-
-      case op of
-        1: v1 := v1 + v2;
-        2: v1 := v1 - v2;
-        3: v1 := round(v1) or round(v2);
-        4: v1 := round(v1) xor round(v2);
-      end;
-    end;
-
-  until (op = 0);
-
-  Result := v1;
-end;
-
-
-function Evaluate(const expression: String; const evaluationContext: IEvaluationContext): TEvaluationResult;
-{$IFNDEF UPCASE_STRING}
-var
-  i: Integer;
-{$ENDIF}
-begin
-
-  if expression = '' then
-    Result := 0
+    end
   else
-  begin
+    if (s[cix]='(') then
+      begin
+        inc(cix);
 
-    // Set the global variables for the unit.
-    MathEvaluate.evaluationContext := evaluationContext;
-    {$IFDEF UPCASE_STRING}
-    MathEvaluate.s := UpCase(expression);
-    {$ELSE}
-    // Currently there is only UpCase(Char) in PAS2JS
-    MathEvaluate.s := expression;
-    for i := 1 to Length(MathEvaluate.s) do MathEvaluate.s[i] := UpCase(MathEvaluate.s[i]);
-    {$ENDIF}
-    MathEvaluate.cix := 1;
-    Result := SimpleExpression;
-  end;
+        v1:=simple_expression;
+
+        skip_blanks;
+
+	if (s[cix] <> ',') then
+
+        if (s[cix]=')') then
+          inc(cix)
+        else
+          Error(TokenIndex, 'Parenthesis Mismatch');
+      end
+    else
+      if (s[cix] = '-') or (s[cix] = '+') or (copy(s,cix,3)='NOT') then
+        begin
+          ch:=s[cix];
+
+          if (ch='N') then
+            cix:=cix+3
+          else
+            inc(cix);
+
+          case ch of
+            '+': v1:=factor;
+            '-': v1:=-factor;
+            'N': v1:=xnot(factor);
+          end;
+        end
+     else
+        v1:=constant;
+
+  factor:=v1;
 end;
+
+
+function term: real;
+var
+   op,i: byte;
+  v1,v2: real;
+
+begin
+  v1:=factor;
+
+  repeat
+    skip_blanks;
+
+    op:=0;
+
+    for i:=1 to High(top) do
+      if (op=0) then
+        if (copy(s,cix,length(top[i])) = top[i]) then
+          op:=i;
+
+    if (op>0) then
+      begin
+        cix:=cix+length(top[op]);
+
+        v2:=factor;
+
+        case op of
+          1: v1:=v1*v2;
+          2: v1:=v1/v2;
+          3: v1:=round(v1) div round(v2);
+          4: v1:=round(v1) mod round(v2);
+          5: v1:=round(v1) and round(v2);
+          6: v1:=round(v1) shl round(v2);
+          7: v1:=round(v1) shr round(v2);
+        end;
+      end;
+
+  until (op=0);
+
+  term:=v1;
+
+end;
+
+
+function simple_expression: real;
+var
+  op,i: byte;
+  v1,v2: real;
+
+begin
+  skip_blanks;
+
+  v1:=term;
+
+  repeat
+    skip_blanks;
+
+    op:=0;
+
+    for i:=1 to High(seop) do
+      if (op=0) then
+        if (copy(s,cix,length(seop[i])) = seop[i]) then
+          op:=i;
+
+    if (op>0) then
+      begin
+        cix:=cix+length(seop[op]);
+
+        v2:=term;
+
+        case op of
+          1: v1:=v1+v2;
+          2: v1:=v1-v2;
+          3: v1:=round(v1) or round(v2);
+          4: v1:=round(v1) xor round(v2);
+        end;
+      end;
+
+  until (op=0);
+
+  simple_expression:=v1;
+end;
+
+
+function evaluate(const a: string; i: integer): real;
+var k: word;
+begin
+
+  Result := 0;
+
+  TokenIndex := i;
+
+  if a <> '' then begin
+
+    cix:=1;
+
+    s := a;
+    for k:=1 to length(s) do
+     s[k]:=upcase(s[k]);
+
+    evaluate := simple_expression;
+
+  end;
+
+end;
+
 
 end.

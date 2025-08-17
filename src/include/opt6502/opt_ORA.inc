@@ -1,5 +1,6 @@
 
 function opt_ORA(i: integer): Boolean;
+var p :integer;
 begin
 
     Result := true;

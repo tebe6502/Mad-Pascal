@@ -1,3 +1,7 @@
+16.08.2025
+- poprawione przekazywanie typu ENUM w procedurze/funkcji
+- dodana obsługa instrukcji WITH
+
 09.08.2025
 - optimizations opt_TAY, opt_EOR
 
@@ -8,7 +12,7 @@
 - bugfixes and optimizations
 
 27.07.2025
-- opt_CMP_NE_EQ usunieta optymalizacja dla (WORD = WORD), koniecznie musi rozpatrzyc oba bajty, nie tylko najstarszy
+- opt_CMP_NE_EQ usunięta optymalizacja dla (WORD = WORD), koniecznie musi rozpatrzyć oba bajty, nie tylko najstarszy
 - nowy unit GIF, odczytuje obrazki max 336x240 GIF87, GIF89, wymaga VBXE
 
 26.07.2025
@@ -16,18 +20,18 @@
 - poprawione definiowane ObjectVariable
 
 24.07.2025
-- opt_IMUL_CL dodana optymalizacja dla mnozenia *6
+- opt_IMUL_CL dodana optymalizacja dla mnożenia *6
 - nowy unit SHA256
 
 14.07.2025
 - nowy unit AES
 - nowy unit BFONT (CHR Borland)
-- poprawiony blad uniemozliwiajacy dzialanie LENGHT dla USERTYPE
-- dodane rzutowanie tablicy tablica (AES)
-- poprawiony test limitu 256 bajtów na rekord, poprzednio zglaszal blad przy 255 bajtów
+- poprawiony błąd uniemożliwiający działanie LENGHT dla USERTYPE
+- dodane rzutowanie tablicy tablicą (AES)
+- poprawiony test limitu 256 bajtów na rekord, poprzednio zgłaszał błąd przy 255 bajtów
 
 09.06.2025
-- dodana obsluga adresowania wskaznika do tablicy w OBJECT
+- dodana obsługa adresowania wskaźnika do tablicy w OBJECT
 - optymalizacja 'opt_BOOLEAN_OR.inc'
 
 16.05.2025
@@ -38,16 +42,16 @@
 
 12.02.2025
 - nowy unit E80
-- poprawki dla GRAPH_ATARI.INC (LineTo), wartosc RMARGN zostaje zachowana
+- poprawki dla GRAPH_ATARI.INC (LineTo), wartość RMARGN zostaje zachowana
 
 06.02.2025
 - INC/DEC striped array, absolute array optimization
 
 28.01.2025
-- poprawione moduly RMT, SAPLZSS
+- poprawione moduły RMT, SAPLZSS
 - poprawiony plik base/atari/RESOURCE.ASM
-- dodany zasób RMTPLAY2, umozliwia ladowanie playera RMT pod ROM
-- dodany zasób RMTPLAYV, wersja VinsCool, umozliwia ladowanie playera RMT pod ROM, posiada path16, nie wymaga pliku .FEAT
+- dodany zasób RMTPLAY2, umożliwia ładowanie playera RMT pod ROM
+- dodany zasób RMTPLAYV, wersja VinsCool, umożliwia ładowanie playera RMT pod ROM, posiada path16, nie wymaga pliku .FEAT
 
 23.01.2025
 - optymalizacje, opt_TEMP_TAIL_IF, opt_TEMP_TAIL_CASE
@@ -72,7 +76,7 @@
 - optimizations
 
 04.01.2025
-- zasób XBMP wymaga teraz podania numeru palety (wczesniej domyslnie byla wybierana paleta #1)
+- zasób XBMP wymaga teraz podania numeru palety (wcześniej domyślnie była wybierana paleta #1)
 
 03.01.2025
 - poprawiony odczyt pliku HEA dla etykiet EXTERNAL
@@ -83,20 +87,20 @@
 - poprawiona alokocja pamieci dla tablic bez podanego rozmiaru (open array)
 
 28.12.2024
-- dla tablic [0..0] nie jest wymuszany wstepnie 'ABSOLUTE $0000', taka tablica nie jest alokowana w pamieci, zostaje zapisany tylko wskaznik do takiej tablicy
-- optymalizacja szybkosci dostepu do duzych tablic ABSOLUTE z liczba elementów przekraczajaca 255 elementow
+- dla tablic [0..0] nie jest wymuszany wstępnie 'ABSOLUTE $0000', taka tablica nie jest alokowana w pamięci, zostaje zapisany tylko wskaźnik do takiej tablicy
+- optymalizacja szybkości dostepu do duzych tablic ABSOLUTE z liczbą elementów przekraczajaca 255 elementow
 
 16.12.2024
 - C flag optimization
 
 11.12.2024
-- SYSTEM.PAS: SQRT(single), SQRT(float16) szybsza i wieksza precyzja obliczen
+- SYSTEM.PAS: SQRT(single), SQRT(float16) szybsza i większa precyzja obliczeń
 
 01.12.2024
 - opt_TEMP_BOOLEAN_OR.inc
 
 28.10.2024
-- unit: dodana mozliwosc uzycia bloku begin-end alternatywnie do initialization-end
+- unit: dodana możliwość użycia bloku begin-end alternatywnie do initialization-end
 
 03.10.2024
 - Optimize.pas (rebuild) bugfixes
@@ -133,11 +137,11 @@
 - opt_ADD.inc, dodatkowe optymalizacje 'add|sub # + add|sub #'
 
 30.06.2024
-- poprawione LENGTH dla tablic ze wskaznikiem do rekordu
-- poprawione CASE, mozliwe uzycie funkcji zwracajacej typ ENUM
+- poprawione LENGTH dla tablic ze wskaźnikiem do rekordu
+- poprawione CASE, możliwe użycie funkcji zwracajacej typ ENUM
 
 09.06.2024
-- dodana obsluga {$eval } dla inicjalizacji tablic o zadeklarowanym rozmiarze, np.:
+- dodana obsługa {$eval } dla inicjalizacji tablic o zadeklarowanym rozmiarze, np.:
 
  array [0..15] of byte = ( {$eval 16,":1"} );
 
@@ -148,21 +152,21 @@
 - SYSTEM, poprawione SQRT
 
 21.05.2024
-- bugifx CompileActualParameters, dodana zmienna old_i 'old_i:=i' zamiast 'j:=i', j bylo nadpisywane
-- Push ASPOINTERTOPOINTER, dopisany warunek 'and (Ident[IdentIndex].PassMethod <> VARPASSING)', rekordy w obiektach sa prawidlowo adresowane
+- bugifx CompileActualParameters, dodana zmienna old_i 'old_i:=i' zamiast 'j:=i', j było nadpisywane
+- Push ASPOINTERTOPOINTER, dopisany warunek 'and (Ident[IdentIndex].PassMethod <> VARPASSING)', rekordy w obiektach są prawidłowo adresowane
 
 19.05.2024
 - nowe przyklady kompresja/dekompresja LZW2, UNLZW, UPKR
 
 05.05.2024
-- dodana mozliwosc definiowania tablic 'open array' dla rekordów
-- dodana obsluga liczb HEX, BIN dla {$eval }
+- dodana możliwość definiowania tablic 'open array' dla rekordów
+- dodana obsługa liczb HEX, BIN dla {$eval }
 - poprawiony sposob przekazywania tablic/recordow do proc/func
 - szybsze 'mulINTEGER' dla NEO
 
 26.04.2024
 - poprawiony odczyt adresu dla 'array of type = [ ]'
-- inicjalizacja 'open array' przez string nie dubluje go w pamieci
+- inicjalizacja 'open array' przez string nie dubluje go w pamięci
 
 14.04.2024
 - array of byte = [], tworzy tablice array [0..0]
@@ -170,20 +174,20 @@
 - MATH: Power(real, real): real; Power(float16, float16): float16
 
 06.04.2024
-- przepisana obsluga typu SINGLE, bez udzialu stosu programowego
+- przepisana obsługa typu SINGLE, bez udziału stosu programowego
 
 04.04.2024
-- nowy modul PP (Power Packer decompressor)
-- nowy zasób PP (Power Packer file), modyfikuje plik *.PP aby dekompresor mógl zadzialac
+- nowy moduł PP (Power Packer decompressor)
+- nowy zasób PP (Power Packer file), modyfikuje plik *.PP aby dekompresor mógł zadziałać
 
 01.04.2024
-- nowy przelacznik -cpu [6502, 65c02, 65816]
+- nowy przełącznik -cpu [6502, 65c02, 65816]
 
 31.03.2024
 - poprawki PCHAR, PSTRING
 
 29.03.2024
-- umozliwione przekazywanie znaku (CHARLITERLATOK) jako STRING do procedur/funkcji
+- umożliwione przekazywanie znaku (CHARLITERLATOK) jako STRING do procedur/funkcji
 
 19.03.2024
 - {$f page} powoduje dodanie {$define fastmul}
@@ -192,25 +196,25 @@
 12.03.2024
 - poprawione LENGTH dla length(array_with_records[ ].string), length(char), length('literal')
 - unit FASTMATH: FASTDIV, FASTDIVS
-- rezerwacja pamieci dla IOCB@COPY tylko gdy etykieta @CmdLine jest zdefiniowana
+- rezerwacja pamięci dla IOCB@COPY tylko gdy etykieta @CmdLine jest zdefiniowana
 
 09.03.2024
 - [striped] dla tablic typu WORD, POINTER, CARDINAL, SMALLINT, INTEGER
 
 05.03.2024
 - poprawione @moveSTRING (base\strmove.asm)
-- poprawione GetIdent (Pasrser.pas), nie faworyzuje modulu SYSTEM
+- poprawione GetIdent (Pasrser.pas), nie faworyzuje modułu SYSTEM
 
 04.03.2024
 - naprawiona alokacja tablic z rekordami absolute
 - naprawione przekazywanie CHAR gdy parametrem jest STRING
 
 03.03.2024
-- mozliwosc uzywania procedur/funkcji overload z LIBRARY
+- możliwość używania procedur/funkcji overload z LIBRARY
 
 28.02.2024
 - Bugfixes
-- @buf dostepne z poziomu MP (__BUFFER)
+- @buf dostępne z poziomu MP (__BUFFER)
 
 24.02.2024
 - optymalizacje fastmul, base\common\byte.asm, base\common\word.asm
@@ -225,7 +229,7 @@
 - extractname
 
 16.02.2024
-- dodana mozliwosc ustawienia adresu kompilacji z poziomu programu, np.:
+- dodana możliwość ustawienia adresu kompilacji z poziomu programu, np.:
 
   program name : address;
   library name : address;
@@ -241,7 +245,7 @@
 - Bugfixes
 
 04.02.2024
-- bocianu dodal nowy target 'neo6502' (-t neo)
+- bocianu dodał nowy target 'neo6502' (-t neo)
 
 30.01.2024
 - issue #127 fixed (https://github.com/tebe6502/Mad-Pascal/issues/127)
@@ -261,7 +265,7 @@
 - issue #126 fixed (https://github.com/tebe6502/Mad-Pascal/issues/126)
 
 13.01.2024
-- unit Common, procedure DefineStaticString, usuniety ostatni nadmiarowy bajt ciagu znakowego
+- unit Common, procedure DefineStaticString, usunięty ostatni nadmiarowy bajt ciągu znakowego
 
 31.12.2023
 - Bugfixes
@@ -275,17 +279,17 @@
 
 12.12.2023
 - przepisany sposób alokacji bloków OVERLOAD
-- CRT_ATARI: TextBackground (wartosc <> 0 wlacza inwers znaku)
+- CRT_ATARI: TextBackground (wartosc <> 0 włącza inwers znaku)
 - poprawione PutChar
 - SYSTEM: GetMem(a: size): pointer;
 
 11.12.2023
 - Bugfixes
-- poprawiona obsluga przekazywania parametrów 'nieoznaczonych' (untyped)
+- poprawiona obsługa przekazywania parametrów 'nieoznaczonych' (untyped)
 
   procedure name (var par);
 
-- poprawione wykonywanie typu proceduralnego przekazywanego przez wskaznik
+- poprawione wykonywanie typu proceduralnego przekazywanego przez wskażnik
 
   procedure name(var proc);
   begin
@@ -296,8 +300,8 @@
 
 
 22.11.2023
-- umozliwienie alokacji tablic dla FASTMUL pod ROM gdy {$define ROMOFF}
-- optymalizacja szybkosci operacji DIV dla typu WORD, SMALLINT (zaleznie od aktywacji FASTMUL}
+- umożliwienie alokacji tablic dla FASTMUL pod ROM gdy {$define ROMOFF}
+- optymalizacja szybkośći operacji DIV dla typu WORD, SMALLINT (zależnie od aktywacji FASTMUL}
 - {$UNITPATH filename}
 - USES unit_name in 'filename'
 
@@ -321,11 +325,11 @@
 
 12.10.2023
 - Bugfixes and Optimizations
-- nowy modul BLOWFISH
-- nowy przyklad AES-Rijndeal
+- nowy moduł BLOWFISH
+- nowy przykład AES-Rijndeal
 
 03.10.2023
-- nowa dyrektywa kompilatora {$optimization loopunroll}, {$optimization noloopunroll}, dokonuje rozpetlenia petli FOR przy stalych parametrach
+- nowa dyrektywa kompilatora {$optimization loopunroll}, {$optimization noloopunroll}, dokonuje rozpętlenia pętli FOR przy stałych parametrach
 
 11.09.2023
 - Bugfixes and Optimizations
@@ -336,13 +340,13 @@
 var tab: array of char = 'D:PLIK.DAT'
 
 21.08.2023
-- nowa dyrektywa kompilatora {$bin2csv filename} pozwala inicjowac tablice np.:
+- nowa dyrektywa kompilatora {$bin2csv filename} pozwala inicjować tablice np.:
 
 var tb: array of byte = [ {$bin2csv filename} ];
 
 20.08.2023
-- poprawiona alokacja pamieci dla tablic [0..0], wymuszany jest wstepnie 'ABSOLUTE $0000', oszczedzamy 1 bajt pamieci
-- dodana mozliwosc deklaracji tablic bez podania ich rozmiaru, np.:
+- poprawiona alokacja pamięci dla tablic [0..0], wymuszany jest wstępnie 'ABSOLUTE $0000', oszczędzamy 1 bajt pamięci
+- dodana możliwość deklaracji tablic bez podania ich rozmiaru, np.:
 
 var tab: array of byte = [1,3,4,3,1];
 var tb: array of char = 'abcdefghij';
@@ -351,11 +355,11 @@ var tb: array of char = 'abcdefghij';
 - optymalizacja SIN/COS dla typów Real, ShortReal
 
 17.08.2023
-- unit Optimize, procedure WriteOut, dodany test (iOut >=0), ta zmienna ma na poczatku wartosc -1
+- unit Optimize, procedure WriteOut, dodany test (iOut >=0), ta zmienna ma na początku wartość -1
 
 16.08.2023
-- przepisany kod Mad Pascala na oddzielne moduly
-- przepisana obsluga tablic ze wskaznikami rekordów 'tab: array [0..x] of ^record'
+- przepisany kod Mad Pascala na oddzielne moduły
+- przepisana obsługa tablic ze wskażnikami rekordów 'tab: array [0..x] of ^record'
 
 18.04.2023
 - przepisana procedura SQRT (SYSTEM) dla REAL, SHORTREAL
@@ -371,28 +375,28 @@ var tb: array of char = 'abcdefghij';
 - przepisane operacje DIV, MOD dla BYTE, WORD, CARDINAL, SHORTINT, SMALLINT, INTEGER
 - rozpisane optymalizacje dla BYTE DIV 2..32
 - rozpisane optymalizacje dla BYTE MUL 0,1,2,3,4,5,7,8,10,16,32,40,64,96,128,255
-- dla wyrazen ze znakiem MINUS nastepuje promowanie do typu SIGNED
-- wyrazenia promowane sa do wiekszego typu jesli wystepuja w nich operacje PLUS, MINUS
+- dla wyrażeń ze znakiem MINUS następuje promowanie do typu SIGNED
+- wyrażenia promowane są do większego typu jeśli występują w nich operacje PLUS, MINUS
 - issue #114 fixed (https://github.com/tebe6502/Mad-Pascal/issues/114)
 - nowa dyrektywa {$DEFINE NOROMFONT} jako uzupelnienie dla {$DEFINE ROMOFF} wylaczajaca przepisywanie zestawu znakowego z ROM do RAM
-- dodano mozliwosc uzycia typu ENUM w petli FOR
-- dodane stale MAXINT, MAXSMALLINT
-- nowy sposób ustalenia adresu DATAORIGIN eliminujacy ryzyko wystapienia 'infinite loop' podczas assemblacji
-- poprawione adresowanie wskazników do rekordów, https://github.com/tebe6502/Mad-Pascal/blob/dev/samples/common/LINKLIST.PAS
+- dodano możliwość użycia typu ENUM w pętli FOR
+- dodane stałe MAXINT, MAXSMALLINT
+- nowy sposób ustalenia adresu DATAORIGIN eliminujący ryzyko wystąpienia 'infinite loop' podczas assemblacji
+- poprawione adresowanie wskażników do rekordów, https://github.com/tebe6502/Mad-Pascal/blob/dev/samples/common/LINKLIST.PAS
 
 16.12.2022
-- poprawiona optymalizacja rejestru Y w celu zapobiegania wystepowania bledów ochrony pamieci
-- dodatkowe optymalizacje szybkosci dla float16 (base\common\float16*.asm)
+- poprawiona optymalizacja rejestru Y w celu zapobiegania występowania błędów ochrony pamięci
+- dodatkowe optymalizacje szybkości dla float16 (base\common\float16*.asm)
 
 11.12.2022
-- 'base\atari\basicoff.asm' dodane wylaczenie klawisza BREAK (poke $10,$70)
+- 'base\atari\basicoff.asm' dodane wyłączenie klawisza BREAK (poke $10,$70)
 - unit xSFX
 
 08.12.2022
-- unit SYSTEM: dodana obsluga przerwania VBL natychmiastowego (IVBLI), https://mads.atari8.info/doc/pl/przerwania/
+- unit SYSTEM: dodana obsługa przerwania VBL natychmiastowego (IVBLI), https://mads.atari8.info/doc/pl/przerwania/
 
 03.12.2022
-- unit SAPLZSS, Decode jako funkcja zwraca TRUE kiedy zostaje osiagniety koniec strumienia danych
+- unit SAPLZSS, Decode jako funkcja zwraca TRUE kiedy zostaje osiągnięty koniec strumienia danych
 
 01.12.2022
 - unit CIO, poprawione parametry 'Device: PBYTE' na 'Device: PSTRING'
@@ -401,7 +405,7 @@ var tb: array of char = 'abcdefghij';
 - issue #110 fixed (LENGTH) (https://github.com/tebe6502/Mad-Pascal/issues/110)
 
 19.11.2022
-- poprawione INC, DEC dla tablic rozmiaru wiekszego niz 256 bajty, np.:
+- poprawione INC, DEC dla tablic rozmiaru większego niż 256 bajty, np.:
 
  inc(tb[i], 37);
 
@@ -412,21 +416,21 @@ var tb: array of char = 'abcdefghij';
 - SAPLZSS, poprawione restartowanie modulu (players/playlzs16_reloc.asm)
 
 01.11.2022
-- rezygnacja z VBXEANSI, zintegrowanie z VBXE, TEXTOUT zastapione przez WRITE/WRITELN
+- rezygnacja z VBXEANSI, zintegrowanie z VBXE, TEXTOUT zastąpione przez WRITE/WRITELN
 
 30.10.2022
-- poprawki dla 'GetIdentProc', wybiera sposród przeciazonych funkcji/procedur ta której parametry sa najmniejszego pasujacego typu (poprzednio decydowala kolejnosc deklaracji)
+- poprawki dla 'GetIdentProc', wybiera spośród przeciążonych funkcji/procedur tą której parametry są najmniejszego pasującego typu (poprzednio decydowała kolejność deklaracji)
 
 18.10.2022
 - unit VBXEANSI
 
 09.10.2022
-- naprawione przekazywanie wartosci funkcji przez tablice
+- naprawione przekazywanie wartości funkcji przez tablice
 - unit SHA1
 
 29.09.2022
 - SYSTEM: NtoBE, RorByte, RorByte, RorWord, RorWord, RorDWord, RorDWord, RolByte, RolByte, RolWord, RolWord, RolDWord, RolDWord, SarShortint, SarSmallint, SarLongint
-- mozliwosc zaincjowania tablicy typu CHAR przez STRING (jesli string jest krótszy zostana wstawione spacje), np.:
+- możliwość zaincjowania tablicy typu CHAR przez STRING (jeśli string jest krótszy zostaną wstawione spacje), np.:
 
     tab: array [0..15] of char = '0123456789ABCDEF';
 
@@ -443,7 +447,7 @@ var tb: array of char = 'abcdefghij';
 - unit JOYSTICK: PADDLE0, FIRE2
 
 07.09.2022
-- usuniecie komunikatu 'Note: Local variable 'RESULT' not used'
+- usunięcie komunikatu 'Note: Local variable 'RESULT' not used'
 
 29.08.2022
 - SizeOfResource(variable, name)
@@ -466,11 +470,11 @@ var tb: array of char = 'abcdefghij';
 
 26.06.2022
 - poprawione VOLATILE
-- poprawione tworzenie nazwy do tablicy znajdujacej sie w innym unicie, której rozmiar nie przekracza 256 bajtów
+- poprawione tworzenie nazwy do tablicy znajdującej się w innym unicie, której rozmiar nie przekracza 256 bajtów
 - issue #99 fixed (https://github.com/tebe6502/Mad-Pascal/issues/99)
 
 12.06.2022
-- poprawione przekazywania parametrów typu POINTER do procedur/funkcji (funkcja CompileAddress), rozrózniany jest parametr 'var buf' (formal type) a 'var buf:pointer', https://wiki.freepascal.org/Variable_parameter
+- poprawione przekazywania parametrów typu POINTER do procedur/funkcji (funkcja CompileAddress), rozróżniany jest parametr 'var buf' (formal type) a 'var buf:pointer', https://wiki.freepascal.org/Variable_parameter
 - poprawione przekazywanie parametrów do procedury BLOCKREAD
 
   blockread(f, ptr^, len);
@@ -479,7 +483,7 @@ var tb: array of char = 'abcdefghij';
 - rozbudowana funkcja RemoveUnusedSTACK
 
 15.05.2022
-- poprawiony plik 'targets\generate_program_prolog.inc', przywrócone dzialanie FASTMUL
+- poprawiony plik 'targets\generate_program_prolog.inc', przywrócone działanie FASTMUL
 
 04.05.2022
 - issue #98 fixed (https://github.com/tebe6502/Mad-Pascal/issues/98)
@@ -506,10 +510,10 @@ var tb: array of char = 'abcdefghij';
 - dodany modyfikator KEEP dla procedur/funkcji, oznaczona w ten sposób procedura/funkcja zostanie zawsze skompilowana
 
 10.04.2022
-- modyfikator REGISTER dla funkcji spowoduje alokacje wartosci funkcji na stronie zerowej (typy proste)
+- modyfikator REGISTER dla funkcji spowoduje alokację wartości funkcji na stronie zerowej (typy proste)
 
 09.04.2022
-- poprawiona funkcja 'CardToHalf' przeliczajaca stale na typ Float16 ('if frac(s) <> 0 then Result := f32Tof16(Src)')
+- poprawiona funkcja 'CardToHalf' przeliczająca stałe na typ Float16 ('if frac(s) <> 0 then Result := f32Tof16(Src)')
 
 08.03.2022
 - optymalizacja :EAX (tag: 2022-03-08)
@@ -522,10 +526,10 @@ var tb: array of char = 'abcdefghij';
 - nowy modyfikator EXTERNAL dla procedur/funkcji
 
 23.02.2022
-- poprawione dzialanie rekurencji dla funkcji (tests\tests-medium\function-with-one-argument, tests\tests-medium\function-with-two-arguments)
+- poprawione działanie rekurencji dla funkcji (tests\tests-medium\function-with-one-argument, tests\tests-medium\function-with-two-arguments)
 
 22.02.2022
-- ustalenie adresu wskaznika dla typu proceduralnego oznacza inny sposób wywolania procedury/funkcji, przez JMP (LABEL)
+- ustalenie adresu wskażnika dla typu proceduralnego oznacza inny sposób wywołania procedury/funkcji, przez JMP (LABEL)
 
 21.02.2022
 - issue #76 fixed (https://github.com/tebe6502/Mad-Pascal/issues/76)
@@ -541,11 +545,11 @@ var tb: array of char = 'abcdefghij';
 - poprawki dla @FORTMP_, wymagana nowa wersja Mad Assemblera
 
 23.01.2022
-- uproszczona inicjalizacja VBXE, poprawki dla modulów VBXE, GRAPH, CRT
+- uproszczona inicjalizacja VBXE, poprawki dla modułów VBXE, GRAPH, CRT
 
 17.01.2022
 - wydzielone oddzielne moduly GRAPH dla ATARI, C64, C4P, RAW
-- wstepna obsluga InitGraph dla C64, tryb bitmapy HiRes
+- wstępna obsługa InitGraph dla C64, tryb bitmapy HiRes
 
 12.01.2022
 - issue #78 fixed (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_val.pas)
@@ -554,23 +558,23 @@ var tb: array of char = 'abcdefghij';
 - issue #77 fixed (https://github.com/tebe6502/Mad-Pascal/tree/master/samples/tests/tests-record/record_dereference_as_var.pas)
 
 10.01.2022
-- dodana obsluga dyrektywy LINK {$L filename} https://www.freepascal.org/docs-html/prog/progsu43.html
+- dodana obsługa dyrektywy LINK {$L filename} https://www.freepascal.org/docs-html/prog/progsu43.html
 
 06.01.2022
 - issue #75 fixed (https://github.com/tebe6502/Mad-Pascal/blob/master/samples/tests/tests-pointer/arithmetic.pas)
 
 05.01.2022
 - zmiana sposobu przekazywania paramatrów do procedur/funkcji (od prawej do lewej strony), tak jak FPC, Delphi
-- dodana obsluga typu proceduralnego w tablicach
+- dodana obsługa typu proceduralnego w tablicach
 
 02.01.2022
-- dodana obsluga typu proceduralnego, bez tablic
+- dodana obsługa typu proceduralnego, bez tablic
 
 26.12.2021
 - optymalizacje dla @SMALLINT_MOD, @SMALLINT_DIV, @SHORTREAL_DIV
 
 16.12.2021
-- array [byte] of type, dla pozostalych typów innych niz BYTE wystapi blad 'Error in type definition'
+- array [byte] of type, dla pozostałych typów innych niż BYTE wystąpi błąd 'Error in type definition'
 
 14.12.2021
 - nowe testy dla SHR, tests\test-shr
@@ -579,27 +583,27 @@ var tb: array of char = 'abcdefghij';
 - dodana mozliwosc ustawienia adresu -CODE dla -TARGET RAW
 
 01.12.2021
-- poprawiony modul CRT pod systemy C64, C4P
+- poprawiony moduł CRT pod systemy C64, C4P
 
 30.11.2021
 - poprawiona precyzja konwersji Float32 to Float16 (Single -> Float16) 'CardToHalf'
 - nowa funkcja RandomF16
 
 23.11.2021
-- poprawiona, przepisana duza czesc optymalizacji dla stosu
+- poprawiona, przepisana duża część optymalizacji dla stosu
 
 21.11.2021
 - dodany nowy typ FLOAT16 (half-single)
 
 17.11.2021
-- wartosci funkcji zwracane sa przez zmienne zamiast stos programowy
+- wartości funkcji zwracane są przez zmienne zamiast stos programowy
 
 11.11.2021
 - kompilator nie zmienia rozszerzenia kompilowanego pliku na *.pas
 
 07.11.2021
 - fix issue #67, https://github.com/tebe6502/Mad-Pascal/issues/67
-- dodany przelacznik -O:FILENAME
+- dodany przełącznik -O:FILENAME
 
 05.11.2021
 - fix issue #66, https://github.com/tebe6502/Mad-Pascal/issues/66
@@ -609,7 +613,7 @@ var tb: array of char = 'abcdefghij';
 
 02.11.2021
 - naprawione parsowanie liczb hexadecymalnych w makrach
-- poprawiona kontrola nad parametrami przekazywanymi do makr, komunikaty bledów
+- poprawiona kontrola nad parametrami przekazywanymi do makr, komunikaty błędów
 
 31.10.2021
 - fix issue #63, https://github.com/tebe6502/Mad-Pascal/issues/63
@@ -618,9 +622,9 @@ var tb: array of char = 'abcdefghij';
 - fix issue #62, https://github.com/tebe6502/Mad-Pascal/issues/62
 
 25.10.2021
-- poprawiona optymalizacja petli FOR, https://github.com/tebe6502/Mad-Pascal/issues/61
-- alokacja pamieci na stronie zerowej dla dwóch wskazników FXPTR, PSPTR uzalezniona od wykorzystania VBXE (FXPTR), rekurencji (PSPTR), wymaga poprawionej wersji MadAssemblera
-- nowa procedura SplitString (nie wymaga modulu StrUtils)
+- poprawiona optymalizacja pętli FOR, https://github.com/tebe6502/Mad-Pascal/issues/61
+- alokacja pamięci na stronie zerowej dla dwóch wskaźników FXPTR, PSPTR uzależniona od wykorzystania VBXE (FXPTR), rekurencji (PSPTR), wymaga poprawionej wersji MadAssemblera
+- nowa procedura SplitString (nie wymaga modułu StrUtils)
 
 20.10.2021
 - optymalizaje dla 'WORD SHL ?', 'CARDINAL SHL ?', 'WORD SHR ?', 'CARDINAL SHR ?'
@@ -631,31 +635,31 @@ var tb: array of char = 'abcdefghij';
 - poprawiona procedura @hexStr (base\common\int2hex.asm), dodane inicjowanie zerami '0'
 
 06.10.2021
-- 'FOR element IN array' dla tablic nie przekraczajacych 256 bajtów
+- 'FOR element IN array' dla tablic nie przekraczających 256 bajtów
 
 25.09.2021
 - poprawione procedura GetIdentProc, oddzielny test dopasowania dla procedur/funkcji bez parametrów i z parametrami
 
 15.09.2021
-- dodana obsluga makr {$define label := ......}
+- dodana obsługa makr {$define label := ......}
 
 12.09.2021
-- dodana obsluga przerwan IRQ - TIMER1, TIMER2, TIMER4 (GetIntVec, SetIntVec)
+- dodana obsługa przerwań IRQ - TIMER1, TIMER2, TIMER4 (GetIntVec, SetIntVec)
 
 05.09.2021
-- dla OBJECT dodana obsluga metod CONSTRUCTOR, DESTRUCTOR
+- dla OBJECT dodana obsługa metod CONSTRUCTOR, DESTRUCTOR
 
 04.09.2021
 - optymalizacje dla 'WORD:=WORD SHR 15', 'WORD:=WORD SHL 15', 'CARDINAL:=CARDINAL SHR 31', 'CARDINAL:=CARDINAL SHL 31'
 
 25.08.2021
-- wydajniejsza petla optymalizujaca dla 'OptimizeRelation'
+- wydajniejsza pętla optymalizująca dla 'OptimizeRelation'
 
 25.07.2021
-- poprawione przekazywanie parametrów do obiektów (OBJECT) bez uzycia stosu programowego :STACKORIGIN (w wiekszosci przypadków)
+- poprawione przekazywanie parametrów do obiektów (OBJECT) bez użycia stosu programowego :STACKORIGIN (w większości przypadków)
 
 24.07.2021
-- wprowadzona mozliwosc wylaczenia optymalizacja dla odczytu zmiennej
+- wprowadzona możliwość wyłączenia optymalizacja dla odczytu zmiennej
   [volatile] vcount: byte absolute $d40b;
 
 19.07.2021
@@ -664,10 +668,10 @@ var tb: array of char = 'abcdefghij';
 - poprawiona optymalizacja word:=word*256
 
 11.07.2021
-- poprawki dla modulu MD5 (procedure MDHash)
-- dodany zapis wlasciwosci PassMethod dla 'ABSOLUTE var_label'
-- poprawiony modul GRAPHICS (TEXT zastapione przez TXT)
-- poprawiony modul VBXE (procedure VBXEMode)
+- poprawki dla modułu MD5 (procedure MDHash)
+- dodany zapis właściwości PassMethod dla 'ABSOLUTE var_label'
+- poprawiony moduł GRAPHICS (TEXT zastąpione przez TXT)
+- poprawiony moduł VBXE (procedure VBXEMode)
 
 07.07.2021
 - unit INIFILES
@@ -677,20 +681,20 @@ var tb: array of char = 'abcdefghij';
 - unit SYSTEM: CompareByte
 
 05.07.2021
-- dodana obsluga procedury Append(var Text)
+- dodana obsługa procedury Append(var Text)
 
 27.06.2021
-- dodana obsluga typu TEXTFILE (TEXT), slowo TEXT staje sie teraz slowem zarezerwowanym dla Pascala
+- dodana obsługa typu TEXTFILE (TEXT), słowo TEXT staje się teraz słowem zarezerwowanym dla Pascala
 - poprawiony unit VBXE (ReadBuffer, WriteBuffer)
-- dodana mozliwosc deklaracji zmiennej na stronie zerowej przez uzycie modyfikatora REGISTER
+- dodana możliwość deklaracji zmiennej na stronie zerowej przez użycie modyfikatora REGISTER
 
 25.06.2021
-- poprawa bledu optymalizacji rejestru A (opty REG A)
+- poprawa błędu optymalizacji rejestru A (opty REG A)
 - nowa biblioteka SMP (Sample player)
 - INLINE, nowy modyfikator dla procedur, funkcji który zamienia je w makra
 
 23.05.2021
-- poprawione dzialania EXIT w przypadku kiedy wystepuja zagniezdzone procedury/funkcje
+- poprawione działania EXIT w przypadku kiedy występują zagnieżdżone procedury/funkcje
 
 02.05.2021
 - dodane sortowanie zasobów $resource dla C64, C4Plus
@@ -699,19 +703,19 @@ var tb: array of char = 'abcdefghij';
 - poprawki optymalizacji generowanego kodu dla SHR, SHL
 
 31.03.2021
-- nowa dyrektywa $CODEALIGN, pozwalajaca wprowadzic wyrównanie kodu dla procedur, funkcji oraz petli
+- nowa dyrektywa $CODEALIGN, pozwalająca wprowadzić wyrównanie kodu dla procedur, funkcji oraz pętli
   $CODEALIGN PROC = value
   $CODEALIGN LOOP = value
 
 28.03.2021
-- obsluga standardowej skladni dla bloku ASM, nie sa wymagane klamry { }
+- obsługa standardowej składni dla bloku ASM, nie są wymagane klamry { }
 
 14.03.2021
-- dodana obsluga $resource dla C64, C4Plus (RCASM, RCDATA)
-- dla $resource RCDATA dodana mozliwosc podania przesuniecia od którego ma zostac odczytany plik
+- dodana obsługa $resource dla C64, C4Plus (RCASM, RCDATA)
+- dla $resource RCDATA dodana możliwość podania przesunięcia od którego ma zostać odczytany plik
 
 23.02.2021
-- dodana konwersja znaków PETSCII dla ciagów znaków zakonczonych ''~
+- dodana konwersja znaków PETSCII dla ciągów znaków zakończonych ''~
 
 18.02.2021
 - unit MISC DetectAntic
@@ -722,73 +726,73 @@ var tb: array of char = 'abcdefghij';
 - nowy unit: STRINGUTILS
 
 28.01.2021
-- parametry typu POINTER sa przekazywane do procedur/funkcji bez udzialu stosu programowego
+- parametry typu POINTER są przekazywane do procedur/funkcji bez udziału stosu programowego
 
 10.01.2021
-- unit SYSTEM uwzglednia rózne platformy ATARI, C64, C4Plus
+- unit SYSTEM uwzględnia różne platformy ATARI, C64, C4Plus
 - generowanie kodu dla Commodore C4 Plus (-c4p)
 
 03.01.2021
-- przekazywanie parametrów typu prostego do procedur/funkcji odbywa sie teraz bez udzialu stosu programowego
+- przekazywanie parametrów typu prostego do procedur/funkcji odbywa się teraz bez udziału stosu programowego
 
 01.01.2021
 - optymalizacja, zamiany shortint_0 > shortint_1 => shortint_1 < shortint_0
 - optymalizacja, zamiany smallint_0 > smallint_1 => smallint_1 < smallint_0
 
 26.12.2020
-- dodany test na obecnosc niedozwolonych instrukcji w bloku INTERRUPT (:BP, :STACKORIGIN)
+- dodany test na obecność niedozwolonych instrukcji w bloku INTERRUPT (:BP, :STACKORIGIN)
 
 21.12.2020
-- opt_ADR.inc zostal przepisany
+- opt_ADR.inc został przepisany
 
 06.12.2020
 - poprawki dla FOR gdy przerywany przez BREAK
 
 02.12.2020
-- poprawione generowanie kodu dla 'CASE expression OF', pozbycie sie stosu, optymalizacja kodu
-- poprawione dzialanie negacji dla 'type signed := - type unsigned'
+- poprawione generowanie kodu dla 'CASE expression OF', pozbycie się stosu, optymalizacja kodu
+- poprawione działanie negacji dla 'type signed := - type unsigned'
 
 01.12.2020
-- poprawki dla @MOVE nie przekraczajacych 256 bajtów, jesli obszary nie nachodza na siebie i adresy sa stalymi
+- poprawki dla @MOVE nie przekraczających 256 bajtów, jeśli obszary nie nachodzą na siebie i adresy są stałymi
 
 29.11.2020
-- przepisana od nowa optymalizacja dla tablic nie przekraczajacych rozmiaru 256 bajtów
-- poprawki dla CASE, brak mozliwosci uzycia bezposrednio elementu tablicy jako selektora
-- zmiany w RESOURCE, brak podania identyfikatora powoduje dolaczenia zasobu na koniec programu, adres mozna odczytac przez GetResourceHandle(pointer, name)
+- przepisana od nowa optymalizacja dla tablic nie przekraczających rozmiaru 256 bajtów
+- poprawki dla CASE, brak możliwości użycia bezpośrednio elementu tablicy jako selektora
+- zmiany w RESOURCE, brak podania identyfikatora powoduje dołączenia zasobu na koniec programu, adres można odczytać przez GetResourceHandle(pointer, name)
 
 5.11.2020
-- nowe optymalizacje dla tablic nie przekraczajacych rozmiaru 256 bajtów
-- optymalizacja petli FOR, jesli parametry sa znane mozliwe zmniejszenie rozmiaru typu licznika petli
+- nowe optymalizacje dla tablic nie przekraczających rozmiaru 256 bajtów
+- optymalizacja pętli FOR, jeśli parametry są znane możliwe zmniejszenie rozmiaru typu licznika pętli
 
 17.10.2020
-- dodany rozkaz 'ldy #$01' na zakonczenie programu (@halt)
-- mozliwosc dolaczenia bloku realizujacego wylaczenie BASIC-a {$define basicoff}
+- dodany rozkaz 'ldy #$01' na zakończenie programu (@halt)
+- możliwość dołączenia bloku realizującego wyłączenie BASIC-a {$define basicoff}
 
 12.10.2020
-- poprawione ReadDataArray, akceptuje pojedyncze znaki jako string dla tablic jedno i dwuwymiarowych
+- poprawione ReadDataArray, akceptuje pojedyńcze znaki jako string dla tablic jedno i dwuwymiarowych
 
 22.09.2020
-- krótsze nazwy przelacznikow -zpage (-z), -stack (-s), -data (-d), -code (-c), -define (-def), -ipath (-i), -diag
-- naprawione dzialanie tablic dwuwymiarowych typu const
+- krótsze nazwy przełacznikow -zpage (-z), -stack (-s), -data (-d), -code (-c), -define (-def), -ipath (-i), -diag
+- naprawione działanie tablic dwuwymiarowych typu const
 
 12.09.2020
-- dodany przelacznik -target (-t), mozliwosc wygenerowania kodu dla C64
+- dodany przełacznik -target (-t), mozliwość wygenerowania kodu dla C64
 
 09.09.2020
 - poprawiona optymalizacja dla IF () OR, IF () AND, WHILE () OR
 
 08.09.2020
 - optymalizacja dla FOR BYTE<128 DOWNTO
-- umozliwione adresowanie rekordu przez wskaznik (przyklad MD5)
+- umożliwione adresowanie rekordu przez wskaźnik (przykład MD5)
 
 02.08.2020
 - oddzielne pliki dla optymalizacji FOR, GT, LT, GTEQ, LTEQ, NE, EQ
-- poprawione testowanie peli FOR, WHILE dla WORD (BCC, BNE)
+- poprawione testowanie pęli FOR, WHILE dla WORD (BCC, BNE)
 
 19.07.2020
 - optymalizacja dla FOR BYTE DOWNTO
-- poprawione testowanie krancowych zakresów dla FOR BYTE/WORD
-- optymalizacja CASE, pozbycie sie nadmiarowego 'lda :STACKORIGIN+1,x'
+- poprawione testowanie krańcowych zakresów dla FOR BYTE/WORD
+- optymalizacja CASE, pozbycie się nadmiarowego 'lda :STACKORIGIN+1,x'
 
 27.06.2020
 - poprawione generowanie kodu dla INC/DEC
@@ -812,8 +816,8 @@ var tb: array of char = 'abcdefghij';
 - optymalizacje dla FOR TO DO, 0..High(Byte), High(Byte)..0, 0..High(Word), High(Word)..0, 0..High(Cardinal), High(Cardinal)..0
 
 02.06.2020
-- poprawki dla GetIdent, GetIdentProc, mozliwe wywolanie procedur/funkcji przez kwalifikator, np. CRT.GOTOXY(x,y)
-- zmienne, procedury, funkcje sa przeslaniane zaleznie od kolejnosci zdefiniowania
+- poprawki dla GetIdent, GetIdentProc, możliwe wywołanie procedur/funkcji przez kwalifikator, np. CRT.GOTOXY(x,y)
+- zmienne, procedury, funkcje są przesłaniane zależnie od kolejności zdefiniowania
 - poprawione generowanie warunków dla CASE, N..N, 0..N, N..255
 
 31.05.2020
@@ -825,16 +829,16 @@ var tb: array of char = 'abcdefghij';
 - GRAPH, FASTGRAPH: SetActiveBuffer, SetDisplayBuffer, NewDisplayBuffer, SwitchDisplayBuffer
 
 09.05.2020
-- przepisane adresowanie z uzyciem 'MWA LABEL :BP2' na 'MWY LABEL :BP2'
+- przepisane adresowanie z użyciem 'MWA LABEL :BP2' na 'MWY LABEL :BP2'
 
 05.05.2020
-- dodana moziwosc wylaczenia ROM-u, przez {$define ROMOFF}
+- dodana możiwość wyłaczenia ROM-u, przez {$define ROMOFF}
 
 26.04.2020
 - poprawione testowanie parametrow dla procedur/funkcji FORWARD
-- nowy modyfikator procedur/funkcji PASCAL umozliwia rekurencje tychze
-- komunikat bledu dla tablic STRING deklarowanych jako CONST z elementami CHAR, brak mozliwosc konwersji CHAR na STRING (tylko przez VAR jest to mozliwe)
-- poprawiony LENGTH, zwraca dlugosc elementu tablicy STRING
+- nowy modyfikator procedur/funkcji PASCAL umożliwia rekurencję tychże
+- komunikat błędu dla tablic STRING deklarowanych jako CONST z elementami CHAR, brak możliwość konwersji CHAR na STRING (tylko przez VAR jest to możliwe)
+- poprawiony LENGTH, zwraca długość elementu tablicy STRING
 
 21.04.2020
 - GRAPH.INC: procedure Ellipse(X, Y, StAngle, EndAngle, xRadius,yRadius: Word);
@@ -845,21 +849,21 @@ var tb: array of char = 'abcdefghij';
 - runtime library base\rtl6502.asm
 
 18.04.2020
-- optymalizacje kodu 6502 dla obliczania adresu tablic (przez wskaznik albo bezposrednio przez adr.label)
-- optymaliacja kodu 6502 dla obliczania dlugosci stringa (przez wskaznik albo bezposrednio przez adr.label)
+- optymalizacje kodu 6502 dla obliczania adresu tablic (przez wskaźnik albo bezpośrednio przez adr.label)
+- optymaliacja kodu 6502 dla obliczania długości stringa (przez wskaźnik albo bezpośrednio przez adr.label)
 
 17.04.2020
 - SYSTEM: GetMem, FreeMem
-- naprawione wywolanie Push w CompileSimpleExpression dla typu Single
+- naprawione wywołanie Push w CompileSimpleExpression dla typu Single
 
 16.04.2020
-- poprawiki SYSTEM (Concat), SYSUTILS (IntToStr, FloatToStr) w celu zmniejszenia uzycia pamieci na STRING-i
+- poprawiki SYSTEM (Concat), SYSUTILS (IntToStr, FloatToStr) w celu zmniejszenia użycia pamięci na STRING-i
 
 15.04.2020
-- nowe moduly CIO, S2 (VBXE)
+- nowe moduły CIO, S2 (VBXE)
 
 12.04.2020
-- optymalizacja dla wskazników na stronie zerowej, absolute (PByte Absolute ZPage)
+- optymalizacja dla wskaźników na stronie zerowej, absolute (PByte Absolute ZPage)
 
 07.04.2020
 - base\cpu6502.asm, nowe procedury dla typu SHORTREAL (Round, Trunc, Frac, Int)
@@ -875,14 +879,14 @@ var tb: array of char = 'abcdefghij';
 - dodatkowe optymalizacje dla (IF AND AND), (IF OR OR), (WHILE AND AND), (WHILE OR OR)
 
 22.03.2020
-- poprawione CheckArrayIndex, CheckArrayIndex_, nie zglasza ostrzezen dla PByte
+- poprawione CheckArrayIndex, CheckArrayIndex_, nie zgłasza ostrzeżen dla PByte
 
 12.03.2020
-- poprawka dla base\6502\cpu6502_cio.asm, w przypadku bledu IO przy otwieraniu kanalu ustawiany jest status OPEN zamiast EOF (@openfile)
+- poprawka dla base\6502\cpu6502_cio.asm, w przypadku błędu IO przy otwieraniu kanału ustawiany jest status OPEN zamiast EOF (@openfile)
 
 11.03.2020
 - optymalizacja WHILE (Sieve)
-- optymalizacja FOR, pozbycie sie @FORTMP_
+- optymalizacja FOR, pozbycie się @FORTMP_
 
 08.03.2020
 - optymalizacja warunków if () and () and ...
@@ -895,7 +899,7 @@ var tb: array of char = 'abcdefghij';
 - CompileSimpleExpression, dodane 'SafeCompileConstExpression' dla znaku MINUS
 
 18.02.2020
-- pointer jako licznik petli dla FOR
+- pointer jako licznik pętli dla FOR
 
 10.02.2020
 - @AllocMem ograniczony do 128 bajtowych bloków
@@ -923,40 +927,40 @@ var tb: array of char = 'abcdefghij';
 
 14.01.2020
 - SYSTEM: IntToStr(CARDINAL)
-- poprawki dla High(type), przedtem zwracalo blad 'type identifier not allowed here'
+- poprawki dla High(type), przedtem zwracało błąd 'type identifier not allowed here'
 
 09.01.2020
 - dodanie kodu resetujacego POKEY-a na poczatku uruchomienia programu
 
 02.01.2020
 - poprawiona optymalizacja 'opty REGY', zablokowana dla 'ldy :STACK'
-- przepisane rozwiniecie kodu dla notBOOLEAN
+- przepisane rozwinięcie kodu dla notBOOLEAN
 - optymalizacja dla WORD=0; WORD<>0; CARDINAL=0; CARDINAL<>0
 
 27.12.2019
 - poprawiona optymalizacja dla 'mwa label :bp2' / 'mwy label :bp2'
 
 16.12.2019
-- poprawiona procedura cmpStrig (cpu6502.asm) realizujaca porównanie dwóch ciagów STRING
+- poprawiona procedura cmpStrig (cpu6502.asm) realizująca porównanie dwóch ciągów STRING
 
 12.12.2019
-- zmiana organizacji pliku A65, cpu6502.asm jest teraz dolaczany na poczatku
+- zmiana organizacji pliku A65, cpu6502.asm jest teraz dołączany na początku
 
 12.08.2019
 - optymalizacja @fill, maksymalnie 16 stron (4KB) jest wypelnianych w petli Y co 128 bajtów
 
 03.12.2019
-- pozbycie sie pomocnicznej zmiennej IFTMP_xxxx, krótszy blok ELSE
-- wycofanie sie z kilku optymalizacji @move, kiedy adresy nie sa podane wprost (brak mozliwosci oceny czy kopiowanie ma isc w przód czy w tyl)
+- pozbycie się pomocnicznej zmiennej IFTMP_xxxx, krótszy blok ELSE
+- wycofanie się z kilku optymalizacji @move, kiedy adresy nie sa podane wprost (brak możliwości oceny czy kopiowanie ma iść w przód czy w tył)
 
 26.11.2019
-- optymalizacje dla @fill i @move, gdy len<=256 to zastepujemy petla z regY
-- poprawka dla ReadDataArray, mozliwe predefiniowanie tablicy stringów przez char 'array [0..xx] of string = ('a','b','c'...'
+- optymalizacje dla @fill i @move, gdy len<=256 to zastepujemy petlą z regY
+- poprawka dla ReadDataArray, możliwe predefiniowanie tablicy stringów przez char 'array [0..xx] of string = ('a','b','c'...'
 
 24.11.2019
-- dodana mozliwosc adresowania typów wskaznikowych (label:^byte; label:^word) jak tablic jednowymiarowych 'label[x]'
+- dodana możliwość adresowania typów wskaźnikowych (label:^byte; label:^word) jak tablic jednowymiarowych 'label[x]'
 - optymalizacje dla @printSTRING, @printCHAR
-- poprawione parsowanie stringów w TokenizeProgram, jeden ciagly ciag 'aaa'*'bbb'~, dwa oddzielne ciagi'aaa'*+'bbb'~
+- poprawione parsowanie stringów w TokenizeProgram, jeden ciągly ciąg 'aaa'*'bbb'~, dwa oddzielne ciągi'aaa'*+'bbb'~
 
 22.11.2019
 - poprawione adresowanie stringa w rekordzie 'if (ExpressionType in Pointers - [STRINGPOINTERTOK]) and'
@@ -974,19 +978,19 @@ var tb: array of char = 'abcdefghij';
 
 03.11.2019
 - optymalizacje dla FILLCHAR (@FILL)
-- optymalizacja dla RESOURCE (res6502.asm), detekcja pamieci dodatkowej oraz VBXE odbywa sie tylko na raz
+- optymalizacja dla RESOURCE (res6502.asm), detekcja pamięci dodatkowej oraz VBXE odbywa się tylko na raz
 - optymalizacja dla MULTOK (CompileTerm), nie rozszerza typu poza zadany typ
 - PeepholeOptimization_STACK, optymalizacje dla subAX_CX, addAX_CX
 
 02.11.2019
-- poprawka dla NumActualParameters, który nie uwzglednial procedur/funkcji overload o róznej liczbie parametrów, bral pod uwage ostatnia z nich
+- poprawka dla NumActualParameters, który nie uwzgledniał procedur/funkcji overload o różnej liczbie parametrów, brał pod uwagę ostatnią z nich
 
 31.10.2019
 - dodany typ PChar
 
 27.10.2019
 - optymalizacje dla Optymization_STACK
-- dodana mozliwosc zwracania wartosci funkcji przez typ wyliczeniowy
+- dodana możliwość zwracania wartości funkcji przez typ wyliczeniowy
 
 23.10.2019
 - zastapienie '.ifdef IFTMP_xxxx' przez IfTMPPosStack, krotsze bloki warunkowe
@@ -999,29 +1003,29 @@ var tb: array of char = 'abcdefghij';
 - PeepholeOptimization_STACK, optymalizacje dla subAL_CL, addAL_CL
 
 15.10.2019
-- krótszy blok inicjalizacji bloku danych DATAORIGIN jesli nie przekracza 256 bajtów, w innym przypadku wywolywana jest procedura @fill
+- krótszy blok inicjalizacji bloku danych DATAORIGIN jeśli nie przekracza 256 bajtów, w innym przypadku wywoływana jest procedura @fill
 
 14.10.2019
-- usuniety blad w definicji typu wlasnego, tablica dwuwymiarowa byla traktowana jako jednowymiarowa
-- usuniety blad który nie pozwalal adresowac tablicy dwuwymiarowej przez wskaznik do typu takiej tablicy
+- usunięty błąd w definicji typu własnego, tablica dwuwymiarowa była traktowana jako jednowymiarowa
+- usunięty błąd który nie pozwalał adresować tablicy dwuwymiarowej przez wskaźnik do typu takiej tablicy
 
 12.10.2019
-- nowe przelaczniki -define:symbol ; -ipath:filepath
+- nowe przełączniki -define:symbol ; -ipath:filepath
 
 30.09.2019
-- poprawiona procedura @StrToInt (base\cpu6502.asm), zabraklo INY na wyjsciu gdy zwraca blad IOResult = 106 (Invalid numeric format)
-- poprawiona procedura InitGraph w module FASTGRAPH, tryb 6 jest teraz inicjowany prawidlowo
+- poprawiona procedura @StrToInt (base\cpu6502.asm), zabrakło INY na wyjściu gdy zwraca błąd IOResult = 106 (Invalid numeric format)
+- poprawiona procedura InitGraph w module FASTGRAPH, tryb 6 jest teraz inicjowany prawidłowo
 
 24.09.2019
-- poprawiony modul PLAY w unit CMC, MPT, RMT, uzyty wczesniej rozkaz jmp(abs) jest zle wykonywany przez CPU6502, np. jmp ($91FF) skacze pod adres ($91FF, $9100)
+- poprawiony moduł PLAY w unit CMC, MPT, RMT, użyty wcześniej rozkaz jmp(abs) jest źle wykonywany przez CPU6502, np. jmp ($91FF) skacze pod adres ($91FF, $9100)
 
 22.09.2019
 - nowe wzory optymalizacji adresowania tablic ADR. dla PeepholeOptimization_STACK
 - nowe wzory optymalizacji movaBX_EAX dla PeepholeOptimization_STACK
-- dodane wspolne wyjscie dla generowanego listingu 'WriteOut' z dodatkowa optymalizacja kodu w TemporaryBuf
+- dodane wspolne wyjscie dla generowanego listingu 'WriteOut' z dodatkową optymalizacją kodu w TemporaryBuf
 
 17.09.2019
-- nowy unit EFAST dla przyspiesza wyswietlania na urzadzeniu E:
+- nowy unit EFAST dla przyspiesza wyświetlania na urządzeniu E:
 
 08.09.2019
 - poprawiony CompileAddress, dodany VarPass dla BlockRead
@@ -1029,15 +1033,15 @@ var tb: array of char = 'abcdefghij';
 
 01.09.2019
 - poprawiona procedura CompileAddress, dodane 'or ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType <> 0))'
-- poprawiona procedura TestIdentProc, procedury sa testowane dodatkowo na podstawie Ident[IdentIndex].UnitIndex, Ident[IdentIndex].Block
+- poprawiona procedura TestIdentProc, procedury są testowane dodatkowo na podstawie Ident[IdentIndex].UnitIndex, Ident[IdentIndex].Block
 - poprawione procedura DefineIdent , dodane 'and (not Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK])'
 
 25.08.2019
-- poprawiona i rozbudowana procedura TestIdentProc, trafniej wybiera procedury/funkcje o tych samych nazwach preferujac najpierw te znajdujace sie w aktualnych unicie lub zagniezdzone w procedurze/funkcji
+- poprawiona i rozbudowana procedura TestIdentProc, trafniej wybiera procedury/funkcje o tych samych nazwach preferując najpierw te znajdujące się w aktualnych unicie lub zagnieżdżone w procedurze/funkcji
 
 19.08.2019
 - unit GRAPH, FASTGRAPH, dodane parametry dla trybu 4 (80x96)
-- dla petli FOR wylaczona optymalizacja argumentu stalego gdy OPTIMIZECODE nie jest aktywne
+- dla pętli FOR wyłączona optymalizacja argumentu stałego gdy OPTIMIZECODE nie jest aktywne
 
 18.08.2019
 - optymalizacja dla IMULBYTE *$00,$01,$02,$04,$08,$10,$20,$40,$80,$100
@@ -1051,7 +1055,7 @@ var tb: array of char = 'abcdefghij';
 - blok Initialization dla CMC, MPT, RMT
 
 04.08.2019
-- predefiniowana tablica typu STRING musi zawierac ciagu co najmniej dwu znakowe, jedno znakowe sa traktowane jako CHAR których nie zaalokuje
+- predefiniowana tablica typu STRING musi zawierać ciągu co najmniej dwu znakowe, jedno znakowe są traktowane jako CHAR których nie zaalokuje
 - optymalizacja dla operacji dx:=dx*2 ; dx:=dx shl 1; dx:=dx+dx
 
 29.07.2019
@@ -1060,28 +1064,28 @@ var tb: array of char = 'abcdefghij';
 - test typu dla predefiniowanych danych tablic, przeliczenie IntegerTypes -> RealTypes
 
 14.07.2019
-- dodatkowe optymalizacje dla róznych wariantów "c:=a+b*2;" , "c:=b*2+a;" ,  "c:=a+2*b;" , "c:=2*b+a;" , *10 , ztmp8, ztmp9, ztmp10, ztmp11
+- dodatkowe optymalizacje dla różnych wariantów "c:=a+b*2;" , "c:=b*2+a;" ,  "c:=a+2*b;" , "c:=2*b+a;" , *10 , ztmp8, ztmp9, ztmp10, ztmp11
 
 06.07.2019
-- poprawione parsowanie dyrektyw warunkowych {$IFDEF} gdy wystepuje w takim bloku inny blok ASM {}
+- poprawione parsowanie dyrektyw warunkowych {$IFDEF} gdy występuję w takim bloku inny blok ASM {}
 
 11.05.2019
-- jednolita funkcja GetSizeof obliczajaca SIZEOF dla CompileConstFactor, CompileFactor
+- jednolita funkcja GetSizeof obliczająca SIZEOF dla CompileConstFactor, CompileFactor
 
 05.05.2019
 - rezygnacja z MAXTOKENS, tablica TOK jest dynamicznie alokowana przez SetLength
 
 28.04.2019
-- modul CMC poprawiony przez MadRafi-go, dodane procedury TCMC.Pause i TCMC.Cont
+- moduł CMC poprawiony przez MadRafi-go, dodane procedury TCMC.Pause i TCMC.Cont
 
 24.04.2019
-- poprawione dzialanie SIZEOF dla róznych sposobów adresowania rekordów
+- poprawione działanie SIZEOF dla różnych sposobów adresowania rekordów
 
 22.04.2019
-- dodana obsluga tablic z wskaznikami do rekordów, np.: array [0..11] of ^record
+- dodana obsługa tablic z wskaźnikami do rekordów, np.: array [0..11] of ^record
 
 17.04.2019
-- poprawione moduly CMC, MPT, RMT, procedura PLAY nie moze korzystac ze zmiennych strony zerowej (BP2) z których korzysta glówny program
+- poprawione moduły CMC, MPT, RMT, procedura PLAY nie może korzystać ze zmiennych strony zerowej (BP2) z których korzysta główny program
 
 09/10.04.2019
 - unit SYSTEM.PAS poszukiwany jest na podstawie aktualnych sciezek $LIBRARYPATH, poprzednio tylko w \LIB\ (procedura 'FindFile' oddzielona od 'TokenizeProgram')
@@ -1094,7 +1098,7 @@ var tb: array of char = 'abcdefghij';
 
 12/24.02.2019
 - poprawiony odczyt i testowanie wpisow w USES
-- zwiekszony rozmiar tablicy AsmBlock (4096)
+- zwiększony rozmiar tablicy AsmBlock (4096)
 
 31.01.2019
 - CompileStatement (FUNC, PROC) poprawione detekcja funkcji/procedury, bez 'yes := Ident[IdentIndex].Kind'
@@ -1108,11 +1112,11 @@ var tb: array of char = 'abcdefghij';
 - poprawka dla optymalizacji IMULBYTE (gdy *0, *1) -> :eax+1 = 0
 
 14.11.2018
-- dodana obsluga inicjalizacji tablic dwuwymiarowych dla stalych i zmiennych
-- poprawiona optymalizacja dla INW/IND, dla :STACK optymalizacja nie jest mozliwa
+- dodana obsluga inicjalizacji tablic dwuwymiarowych dla stałych i zmiennych
+- poprawiona optymalizacja dla INW/IND, dla :STACK optymalizacja nie jest możliwa
 
 10.11.2018
-- optymalizacja kodu dla operacji mnozenia *10
+- optymalizacja kodu dla operacji mnożenia *10
 - inne optymalizacje
 
 02.11.2018
@@ -1212,10 +1216,10 @@ var tb: array of char = 'abcdefghij';
 - dodany komunikat ostrzezenia 'UnreachableCode' gdy np.'if byte = -1' (powinno byc 'if byte = byte(-1)' )
 
 14.11.2017
-- dodana obsluga wskaznika do tablicy w rekordzie
+- dodana obsługa wskaznika do tablicy w rekordzie
 
 11.11.2017
-- petla FOR do prawidlowego dzialania wymaga zmiennej/stalej @FORTMP_
+- pętla FOR do prawidłowego działania wymaga zmiennej/stałej @FORTMP_
 
 02/03.11.2017
 - optymalizacja dla IMULBYTE (gdy *0, *1)
@@ -1231,13 +1235,13 @@ var tb: array of char = 'abcdefghij';
 
 21/23/24.09.2017
 - usuniety powazny blad dla FOR counter(integer), brakowalo 'CLV:SEC' -> cmpINT (base\cpu6502), oraz 'end else begin' w GenerateForToDoCondition
-- usuniety blad w CompileArrayIndex, index tablicy typu BYTE musi zostac rozszerzony do WORD jesli array [0..0]
+- usuniety blad w CompileArrayIndex, index tablicy typu BYTE musi zostać rozszerzony do WORD jesli array [0..0]
 - tablica CODE nie jest juz potrzebna
 - brakowalo reakcji na brak podania w linii komend nazwy pliku do kompilacji, teraz zostanie wywolane Syntax
 
 21.08.2017
 - poprawki dla GetIdent, dodany SearchCurrentUnit
-- label: nie wymaga dododatkowego konczacego srednika 'semicolontok'
+- label: nie wymaga dododatkowego konczącego srednika 'semicolontok'
 
 12.08.2017
 - poprawka dla GetIdentProc (+ [CHARTOK]) aby mozliwe bylo 'move(txt[2], pointer(dpeek(88)), 10)'
@@ -1280,9 +1284,9 @@ var tb: array of char = 'abcdefghij';
 - DefineFunction, dodany komunikat bledu 'Reserved word used as identifier'
 
 12/15/21.05.2017
-- optymalizacja imulBYTE, operacja *2;*4;*8;*16;*32 zastepowana jest odpowiednim przesunieciem bitów ASL
+- optymalizacja imulBYTE, operacja *2;*4;*8;*16;*32 zastępowana jest odpowiednim przesunieciem bitów ASL
 - wiecej optymalizacji dla OptimizeAssignment ('ldy #$07\ lda adr.tab,y' -> 'lda adr.tab+$07')
-- dodana zunifikowana funkcja CompileArrayIndex zwracajaca adres do tablicy jedno / dwu wymiarowej
+- dodana zunifikowana funkcja CompileArrayIndex zwracająca adres do tablicy jedno / dwu wymiarowej
 - usuniety blad dla optymalizacji CMPINTEGER, dodane CLV:SEC
 
 07.05.2017
@@ -1313,22 +1317,22 @@ var tb: array of char = 'abcdefghij';
 - dodana obsluga tablic dwuwymiarowych
 
 02.03.2017
-- dodana obsluga dyrektyw warunkowych $IFDEF, $IFNDEF, $ELSE, $ENDIF, $DEFINE, $UNDEF przez DMSC/Chile
+- dodana obsługa dyrektyw warunkowych $IFDEF, $IFNDEF, $ELSE, $ENDIF, $DEFINE, $UNDEF przez DMSC/Chile
 
 24.02.2017
-- poprawka dla UNIX/LINUX, reaguje na znak '/', '\' i zamienia na male literki
+- poprawka dla UNIX/LINUX, reaguje na znak '/', '\' i zamienia na małe literki
 - w linii komend opcja -o jest nadmiarowa, zawsze domyslnie wlaczona jest optymalizacja
 
 21.02.2017
-- poprawki dla $R (resource), mozna je umieszczac w dowolnym unicie (alokowane sa w glownym programie),
+- poprawki dla $R (resource), można je umieszczac w dowolnym unicie (alokowane sa w glownym programie),
   dodana informacje ResFullName, pelna nazwa adresu zasobu pobierana z unitu przez GetLocalName (isArray jest niepotrzebne)
 
 20.02.2017
-- klauzula USES dostepna w jest teraz w unitach, rozrozniany jest dostep do unitow z poziomu programu glownego i unitow
+- klauzula USES dostępna w jest teraz w unitach, rozrozniany jest dostep do unitow z poziomu programu glownego i unitow
 
 16.02.2017
 - dodana rejestracja nazwy unitu (UNITTYPE = UNITTOK) przez DefineIdent
-- dodana mozliwosc odwolania sie do publicznych zmiennych, procedur/funkcji unitu przez podanie 'unitname.label'
+- dodana możliwość odwołania sie do publicznych zmiennych, procedur/funkcji unitu przez podanie 'unitname.label'
 
 15.02.2017
 - 'adr.'+Ident[IdentIndex].Name zastapione przez GetLocalName(IdentIndex, 'adr.')
@@ -1363,11 +1367,11 @@ var tb: array of char = 'abcdefghij';
 - ResizeType, ExpandExpression przepisane na nowo
 
 01/07.08.2016
-- {$f} procedura szybkiego mnozenia FAST_MUL (16 x 16 -> 32 bit, 8 x 8 -> 16 bit), zajmuje 2Kb pamieci na tablice
+- {$f} procedura szybkiego mnozenia FAST_MUL (16 x 16 -> 32 bit, 8 x 8 -> 16 bit), zajmuje 2Kb pamięci na tablice
 - BASE6502.ASM -> poprawione mulSINGLE
 - SHORTINT, SMALLINT, INTEGER dla MUL nie wymagaja testu znaku, wystarczy ta sama procka mnozenia jak dla typow bez znaku
 - poprawiona optymalizacja zapisu rejestru akumulatora (optyA)
-- optymalizcja petli FOR (fixed repetition - only repeats a fixed number of times)
+- optymalizcja pętli FOR (fixed repetition - only repeats a fixed number of times)
 
   for index := StartingLow to EndingHigh do statement;
 
@@ -1384,7 +1388,7 @@ var tb: array of char = 'abcdefghij';
       resArray[i].isArray := false;
 
 17.07.2016
-- INTTOREAL zastapione przez typowanie do REAL
+- INTTOREAL zastąpione przez typowanie do REAL
 - usuniety blad 'GenerateProcFuncAsmLabels -> Value' ktory powodowal zwis gdy 'const f = -1.0;'
 
 09.07.2016
@@ -1394,7 +1398,7 @@ var tb: array of char = 'abcdefghij';
 
 05.07.2016
 - dla CASETOK, przed ELSE moze byc tez SEMICOLONTOK
-- dla array [0..0] nie bedzie ostrzezen 'Range check error while evaluating constants'
+- dla array [0..0] nie będzie ostrzezen 'Range check error while evaluating constants'
 
 03.07.2016
 - optymalizator ASM, array [0..255] of word|cardinal
@@ -1407,7 +1411,7 @@ var tb: array of char = 'abcdefghij';
 
 27.06.2016
 - poprawka dla optymalizatora ASM, resetowanie OPTYBP2 dla bloku ELSE (IFTOK)
-- resource {$R} sprawdza czy etykieta odnosi sie do wskaznika, przekazuje wtedy adres ADR.LABEL ( resArray[].isArray )
+- resource {$R} sprawdza czy etykieta odnosi się do wskaźnika, przekazuje wtedy adres ADR.LABEL ( resArray[].isArray )
 
 21.04.2016
 - dodane poprawki Greblus-a ($IFDEF UNIX} dla FindFile, Initialize
@@ -1426,15 +1430,15 @@ var tb: array of char = 'abcdefghij';
 - dodatkowa optymalizacja dla RECORD, nie powtarzamy inicjowania BP2 gdy 'mwa A bp2', 'mwy A bp2'
 
 12.05.2016
-- dodatkowy parametr dla zasobów {$R} aby mozna bylo bitmapy VBXE od zadanego koloru wczytac
+- dodatkowy parametr dla zasobów {$R} aby można było bitmapy VBXE od zadanego koloru wczytac
 
 14.05.2016
-- dodana do optymilizatora obsluga procedur xorAX_CX, xorEAX_ECX
-- kompilator potrafi wyliczyc wyrazenie z udzialem stalych (CONST)
-- optymalizacja dla INC/DEC(label, expression), expression jest wyliczane jako stala jesli to mozliwe
+- dodana do optymilizatora obsługa procedur xorAX_CX, xorEAX_ECX
+- kompilator potrafi wyliczyć wyrażenie z udziałem stałych (CONST)
+- optymalizacja dla INC/DEC(label, expression), expression jest wyliczane jako stała jeśli to możliwe
 
 21.05.2016
-- do osmiu parametrów dla makr realizujacych ladowanie zasobów (RESOURCE $R+}
+- do ośmiu parametrów dla makr realizujacych ładowanie zasobów (RESOURCE $R+}
 
 30.05.2016
 - pooprawki Greblusa dla $i+, $r+ (LowerCase)
@@ -1446,7 +1450,7 @@ var tb: array of char = 'abcdefghij';
 - optymalizacja asm dla @pull, @push
 
 12.06.2016
-- INTR zastapione przez GETINTVEC, SETINTVEC
+- INTR zastąpione przez GETINTVEC, SETINTVEC
 - RESULT dla funkcji moze byc teraz tablica
 - optymalizator ASM dla POKE, DPOKE, PEEK, DPEEK, FILLCHAR, MOVE, INTTOREAL
-- poprawione Tokenize, nie wymaga bialych znaków po 'END.'
+- poprawione Tokenize, nie wymaga białych znaków po 'END.'
