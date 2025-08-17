@@ -12,13 +12,13 @@ begin
       (TemporaryBuf[2] = #9'lda :eax+1') and						// lda :eax+1		; 2
       (TemporaryBuf[3] = #9'sub :ztmp8') and						// sub :ztmp8		; 3
       (TemporaryBuf[4] = #9'sta :eax+1') and						// sta :eax+1		; 4
-      (TemporaryBuf[5] = '@') and							//@			; 5
+      lab_a(5) and									//@			; 5
       (TemporaryBuf[6] = #9'lda :ztmp8') and						// lda :ztmp8		; 6
       (TemporaryBuf[7] = #9'bpl @+') and						// bpl @+		; 7
       (TemporaryBuf[8] = #9'lda :eax+1') and						// lda :eax+1		; 8
       (TemporaryBuf[9] = #9'sub :ztmp10') and						// sub :ztmp8		; 9
-      (TemporaryBuf[10] = #9'sta :eax+1') and						// sta :eax+1		; 10
-      (TemporaryBuf[11] = '@') then							//@			; 11
+      (TemporaryBuf[10]= #9'sta :eax+1') and						// sta :eax+1		; 10
+      lab_a(11) then									//@			; 11
     begin
 //     TemporaryBuf[0] := #9'lda :eax+1';
 

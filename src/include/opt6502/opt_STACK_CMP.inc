@@ -13,8 +13,8 @@ begin
        sty_stack(i+1) and									// sty :STACKORIGIN+2,x			; 1
        lda_stack(i+2) and									// lda :STACKORIGIN+1,x			; 2
        and_ora_eor_stack(i+3) then								// and|ora|eor :STACKORIGIN+2,x		; 3
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+3], 6, 256)) and
-        (copy(listing[i+1], 6, 256) <> copy(listing[i+2], 6, 256)) then
+     if argMatch(i+1, i+3) and
+        (argMatch(i+1, i+2) = false) then
      begin
        listing[i+1] := #9'tya';
        listing[i+2] := copy(listing[i+3], 1, 5) + copy(listing[i+2], 6, 256);
@@ -27,7 +27,7 @@ begin
     if lab_a(i) and										//@					; 0
        sty_stack(i+1) and									// sty :STACKORIGIN			; 1
        lda_stack(i+2) then									// lda :STACKORIGIN			; 2
-    if copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256) then
+    if argMatch(i+1, i+2) then
      begin
        listing[i+1] := #9'tya';
        listing[i+2] := '';

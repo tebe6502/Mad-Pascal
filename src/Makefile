@@ -20,7 +20,7 @@ SRC = mp.pas \
 
 BINBASEDIR = ../bin
 ifeq ($(OS),Windows_NT)
-  BINDIR = $(BINBASEDIR)/windows
+  BINDIR = $(BINBASEDIR)/windows_x86_64
   BIN = $(BINDIR)/mp.exe
 else
     UNAME_S := $(shell uname -s)

@@ -10,9 +10,9 @@ begin
 
     if //(TemporaryBuf[0] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 0
        inc_(1) and 									// inc W		; 1
-       (TemporaryBuf[2] = #9'sne') and							// sne			; 2
+       sne(2) and									// sne			; 2
        inc_(3) and									// inc W+1		; 3
-       (TemporaryBuf[4] = #9'seq') and							// seq			; 4
+       seq(4) and									// seq			; 4
        jmp(5) and									// jmp l_xxxx		; 5
        lab_l(6) then									//l_yyyy		; 6
      if (pos(TemporaryBuf[1], TemporaryBuf[3]) > 0) then
@@ -28,7 +28,7 @@ begin
        dec_(1) and 									// dec W		; 1
        lda(2) and 									// lda W		; 2
        (TemporaryBuf[3] = #9'cmp #$FF') and						// cmp #$FF		; 3
-       (TemporaryBuf[4] = #9'seq') and							// seq			; 4
+       seq(4) and									// seq			; 4
        jmp(5) and									// jmp l_xxxx		; 5
        lab_l(6) then									//l_yyyy		; 6
      if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
@@ -46,11 +46,11 @@ begin
        lda(1) and 									// lda W		; 1
        (TemporaryBuf[2] = #9'bne @+') and 						// bne @+		; 2
        dec_(3) and 									// dec W+1		; 3
-       (TemporaryBuf[4] = '@') and							//@			; 4
+       lab_a(4) and									//@			; 4
        dec_(5) and 									// dec W		; 5
        lda(6) and 									// lda W+1		; 6
        (TemporaryBuf[7] = #9'cmp #$FF') and						// cmp #$FF		; 7
-       (TemporaryBuf[8] = #9'seq') and							// seq			; 8
+       seq(8) and									// seq			; 8
        jmp(9) and									// jmp l_xxxx		; 9
        lab_l(10) then									//l_yyyy		; 10
      if (copy(TemporaryBuf[3], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then
@@ -79,7 +79,7 @@ begin
 											//			; 8
       (TemporaryBuf[9] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 9
       inc_(10) and									// inc C 		; 10
-      (TemporaryBuf[11] = #9'seq') and							// seq 			; 11
+      seq(11) and									// seq 			; 11
       (TemporaryBuf[12] = #9'jmp ' + TemporaryBuf[3]) and				// jmp l_2092		; 12
       lab_l(13) then									//l_			; 13
     if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[5], 6, 256)) and
@@ -121,12 +121,12 @@ begin
       lda(5) and									// lda Result		; 5
       add_sub(6) and									// add|sub		; 6
       sta(7) and									// sta Result		; 7
-      ((TemporaryBuf[8] = #9'scc') or (TemporaryBuf[8] = #9'scs')) and			// scc|scs		; 8
+      (scc(8) or scs(8)) and								// scc|scs		; 8
       (inc_(9) or dec_(9)) and								// inc|dec Result+1	; 9
 											//			; 10
       (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
       inc_(12) and									// inc C 		; 12
-      (TemporaryBuf[13] = #9'seq') and							// seq 			; 13
+      seq(13)and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
       lab_l(15) then									//l_			; 15
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) and
@@ -177,13 +177,13 @@ begin
       ldy(4) and									// ldy C		; 4
       lda(5) and									// lda			; 5
       add_sub(6) and									// add|sub		; 6
-      (TemporaryBuf[7] = #9'sta :bp+1') and						// sta :bp+1		; 7
+      sta_bp_1(7) and									// sta :bp+1		; 7
       lda(8) and									// lda			; 8
-      (TemporaryBuf[9] = #9'sta (:bp),y') and						// sta (:bp),y		; 9
+      sta_bp_y(9) and									// sta (:bp),y		; 9
 											//			; 10
       (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
       inc_(12) and									// inc C 		; 12
-      (TemporaryBuf[13] = #9'seq') and							// seq 			; 13
+      seq(13) and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
       lab_l(15) then									//l_			; 15
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) and
@@ -208,18 +208,18 @@ begin
    if (TemporaryBuf[0] = '') and							//			; 0
       lab_l(1) and									//l_2092		; 1
       (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 2
-      (TemporaryBuf[3] = #9'ldy #$00') and						// ldy #$00		; 3
+      ldy_im_0(3) and									// ldy #$00		; 3
       lda(4) and									// lda Result		; 4
       add_sub(5) and									// add|sub (P),y	; 5
       sta(6) and									// sta Result		; 6
-      ((TemporaryBuf[7] = #9'scc') or (TemporaryBuf[7] = #9'scs')) and			// scc|scs		; 7
+      (scc(7) or scs(7)) and								// scc|scs		; 7
       (inc_(8) or dec_(8)) and								// inc|dec Result+1	; 8
 											//			; 9
       (TemporaryBuf[10] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 10
       inc_(11) and									// inc P 		; 11
-      (TemporaryBuf[12] = #9'sne') and							// sne 			; 12
+      sne(12) and									// sne 			; 12
       inc_(13) and									// inc P+1 		; 13
-      (TemporaryBuf[14] = #9'seq') and							// seq 			; 14
+      seq(14) and									// seq 			; 14
       (TemporaryBuf[15] = #9'jmp ' + TemporaryBuf[1]) and				// jmp l_2092		; 15
       lab_l(16) then									//l_			; 16
     if (copy(TemporaryBuf[5], 6, 256) = '('+copy(TemporaryBuf[11], 6, 256)+'),y') then
@@ -276,7 +276,7 @@ begin
 											//			; 10
       (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
       inc_(12) and									// inc C 		; 12
-      (TemporaryBuf[13] = #9'seq') and							// seq 			; 13
+      seq(13) and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
       lab_l(15) then									//l_			; 15
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) and
@@ -417,7 +417,7 @@ begin
          if yes and
 	    (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			//; --- ForToDoEpilog
             (TemporaryBuf[p-2] = #9'inc ' + copy(TemporaryBuf[4], 6, 256)) and	// inc C
-            (TemporaryBuf[p-1] = #9'seq') and					// seq
+            seq(p-1) and							// seq
             (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_2092
             lab_l(p+1) then				//l_
 	  begin
@@ -522,7 +522,7 @@ begin
       cmp(7) and									// cmp			; 7
       (TemporaryBuf[8] = #9'bcc @+') and						// bcc @+		; 8
       jne_l(9) and									// jne l_		; 9
-      (TemporaryBuf[10] = '@') and							//@			; 10
+      lab_a(10) and							//@			; 10
       (TemporaryBuf[11] ='') and							//			; 11
       opti(12) and									//; optimize		; 12
       (TemporaryBuf[13] ='') and							//			; 13

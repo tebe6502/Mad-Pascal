@@ -35,10 +35,10 @@ begin
        lda_stack(i+21) and								// lda :STACKORIGIN+STACKWIDTH*3+10	; 21
 //       and_ora_eor(i+22) and								// and|ora|eor				; 22
        sta_a(i+23) then									// sta					; 23
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+12], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+15], 6, 256)) and
-	(copy(listing[i+8], 6, 256) = copy(listing[i+18], 6, 256)) and
-	(copy(listing[i+11], 6, 256) = copy(listing[i+21], 6, 256)) then
+     if argMatch(i+2, i+12) and
+	argMatch(i+5, i+15) and
+	argMatch(i+8, i+18) and
+	argMatch(i+11, i+21) then
        begin
 
 	listing_tmp[0] := listing[i];
@@ -102,10 +102,10 @@ begin
        lda_val(i+21) and								// lda						; 21	~:STACKORIGIN
 //       and_ora_eor_stack(i+22) and							// and|ora|eor :STACKORIGIN+STACKWIDTH*3	; 22
        sta_a(i+23) then									// sta						; 23
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+13], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+16], 6, 256)) and
-	(copy(listing[i+8], 6, 256) = copy(listing[i+19], 6, 256)) and
-	(copy(listing[i+11], 6, 256) = copy(listing[i+22], 6, 256)) then
+     if argMatch(i+2, i+13) and
+	argMatch(i+5, i+16) and
+	argMatch(i+8, i+19) and
+	argMatch(i+11, i+22) then
        begin
 
 	listing_tmp[0] := listing[i];
@@ -173,10 +173,10 @@ begin
        lda_a(i+25) and {(lda_stack(i+25) = false) and}					// lda 						; 25
 //       and_ora_eor_stack(i+26) and							// and|ora|eor :STACKORIGIN+STACKWIDTH*3+10	; 26
        sta_a(i+27) then									// sta						; 27
-     if (copy(listing[i+3], 6, 256) = copy(listing[i+17], 6, 256)) and
-	(copy(listing[i+7], 6, 256) = copy(listing[i+20], 6, 256)) and
-	(copy(listing[i+11], 6, 256) = copy(listing[i+23], 6, 256)) and
-	(copy(listing[i+15], 6, 256) = copy(listing[i+26], 6, 256)) then
+     if argMatch(i+3, i+17) and
+	argMatch(i+7, i+20) and
+	argMatch(i+11, i+23) and
+	argMatch(i+15, i+26) then
        begin
 
 	listing_tmp[0] := listing[i];
@@ -240,10 +240,10 @@ begin
        lda_a(i+17) and									// lda					; 17
 //       eor_stack(i+18) and								// eor :STACKORIGIN+STACKWIDTH*3+10	; 18
        sta_a(i+19) then									// sta					; 19
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+9], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+12], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+15], 6, 256)) and
-	(copy(listing[i+7], 6, 256) = copy(listing[i+18], 6, 256)) then
+     if argMatch(i+1, i+9) and
+	argMatch(i+3, i+12) and
+	argMatch(i+5, i+15) and
+	argMatch(i+7, i+18) then
        begin
 	listing[i+9]  := #9'eor ' + copy(listing[i], 6, 256);
 	listing[i+12] := #9'eor ' + copy(listing[i+2], 6, 256);
@@ -288,10 +288,10 @@ begin
        lda_a(i+20) and									// lda					; 20
 //       eor_stack(i+21) and								// eor :STACKORIGIN+STACKWIDTH*3+10	; 21
        sta_a(i+22) then									// sta					; 22
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+12], 6, 256)) and
-	(copy(listing[i+4], 6, 256) = copy(listing[i+15], 6, 256)) and
-	(copy(listing[i+7], 6, 256) = copy(listing[i+18], 6, 256)) and
-	(copy(listing[i+10], 6, 256) = copy(listing[i+21], 6, 256)) then
+     if argMatch(i+1, i+12) and
+	argMatch(i+4, i+15) and
+	argMatch(i+7, i+18) and
+	argMatch(i+10, i+21) then
        begin
 	listing[i]   := listing[i+11];
 	listing[i+1] := #9'eor (:bp2),y';
@@ -335,7 +335,7 @@ begin
        lda_stack(i+5) and								// lda :STACKORIGIN			; 5
 //       and_ora_eor(i+6) and								// and|ora|eor				; 6
        sta_val(i+7) then								// sta					; 7	~sta :STACKORIGN
-     if copy(listing[i+2], 6, 256) = copy(listing[i+5], 6, 256) then
+     if argMatch(i+2, i+5) then
        begin
 	listing[i+2] := listing[i+6];
 
@@ -354,7 +354,7 @@ begin
     if sta_stack(i) and 								// sta :STACKORIGIN+10			; 0
        lda_a(i+1) and 									// lda 					; 1
        eor_stack(i+2) then								// eor :STACKORIGIN+10			; 2
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+     if argMatch(i, i+2) then
        begin
 	listing[i] := '';
 	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);

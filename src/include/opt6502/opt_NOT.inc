@@ -15,7 +15,7 @@ begin
        lab_a(i+4) and									//@			; 4
        sty(i+5) and									// sty A		; 5
        (tya(i+6) = false) and (sty(i+6) = false) then					//~tya|sty		; 6
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) then
+     if argMatch(i+1, i+5) then
        begin
 	listing[i] := '';
 

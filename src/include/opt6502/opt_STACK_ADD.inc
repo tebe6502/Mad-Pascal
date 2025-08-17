@@ -19,8 +19,8 @@ begin
        sta_val(i+7) and										// sta ~:STACKORIGIN			; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH		; 8
        sta_val(i+9) then									// sta ~:STACKORIGIN			; 9
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-        (copy(listing[i+5], 6, 256) = copy(listing[i+8], 6, 256)) then
+     if argMatch(i+2, i+6) and
+        argMatch(i+5, i+8) then
      begin
        listing[i+2] := listing[i+7];
 
@@ -38,7 +38,7 @@ begin
        ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01')) and			// add|sub #$01				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        (inx(i+3) or dex(i+3)) then								// inx|dex				; 3
-    if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
+    if argMatch(i, i+2) then
      begin
 
        if listing[i+1] = #9'add #$01' then
@@ -281,7 +281,7 @@ begin
        sta_a(i+5) and										// sta :STACKORIGIN+STACKWIDTH,x	; 5
 //       ldy_stack(i+6) and									// ldy :STACKORIGIN,x			; 6
        (SKIP(i+7) = false) then									//~SKIP					; 7
-     if copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256) then
+     if argMatch(i+2, i+6) then
      begin
        listing[i+2] := #9'tay';
 

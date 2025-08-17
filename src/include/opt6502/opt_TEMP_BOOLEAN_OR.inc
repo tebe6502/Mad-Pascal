@@ -32,12 +32,12 @@ var i, p: integer;
 
 begin
 
- if (TemporaryBuf[0] = #9'ldy #1') and							// ldy #1		; 0
+ if ldy_1(0) and									// ldy #1		; 0
     lda(1) and										// lda			; 1
     cmp(2) and										// cmp			; 2
     branch(3) and									// beq|bne|bcc|bcs	; 3
-    (TemporaryBuf[4] = #9'dey') and							// dey			; 4
-    (TemporaryBuf[5] = '@') and								//@			; 5
+    dey(4) and										// dey			; 4
+    lab_a(5) and									//@			; 5
     sty_stack(6) then									// sty :STACKORIGIN	; 6
  begin
 
@@ -47,13 +47,13 @@ begin
   tmp := #9'ora ' + copy(TemporaryBuf[6], 6, 256);
 
   while (p < 512) and
-        (TemporaryBuf[p] = #9'ldy #1') and						// ldy #1
+        ldy_1(p) and									// ldy #1
         lda(p+1) and									// lda
         cmp(p+2) and									// cmp
         branch(p+3) and									// beq|bne|bcc|bcs
-        (TemporaryBuf[p+4] = #9'dey') and						// dey
-        (TemporaryBuf[p+5] = '@') and							//@
-        (TemporaryBuf[p+6] = #9'tya') and						// tya
+        dey(p+4) and									// dey
+        lab_a(p+5) and									//@
+        tya(p+6) and									// tya
 //        (pos('ora :STACK', TemporaryBuf[p+7]) > 0) and				// ora :STACKORIGIN
         (TemporaryBuf[p+7] = tmp) and
         sta(p+8) do									// sta

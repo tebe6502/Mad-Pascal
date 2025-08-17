@@ -75,9 +75,9 @@
            ((i > 2) and asl_a(i-1) and asl_a(i-2) and lda_val(i-3) and (iy(i-3) = false)) or
            ((i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_val(i-4) and (iy(i-4) = false)) or
 
-           ((i > 2) and add(i-1) and asl_a(i-2) and lda_val(i-3) and (copy(listing[i-1], 6, 256) = copy(listing[i-3], 6, 256)) and (iy(i-3) = false)) or
+           ((i > 2) and add(i-1) and asl_a(i-2) and lda_val(i-3) and argMatch(i-1, i-3) and (iy(i-3) = false)) or
 
-           ((i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_val(i-6) and (copy(listing[i-3], 6, 256) = copy(listing[i-6], 6, 256)) and (iy(i-6) = false)) )
+           ((i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_val(i-6) and argMatch(i-3, i-6) and (iy(i-6) = false)) )
 
       then begin
 
@@ -218,4 +218,5 @@
      if LabelIsUsed(i) or iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or jsr(i) or
         (pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) or ((optyA <> '') and (optyA = optyY)) or
         {(listing[i] = '@') or} lab_l(i) or lab_b(i) or lab_c(i) or
+	(listing[i] = #9'#for') or
 	(pos(#9'.if', listing[i]) > 0) then begin arg0 := ''; optyY := '' end;

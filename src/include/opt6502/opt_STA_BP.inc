@@ -20,8 +20,8 @@ begin
        ldy_stack(i+6) and								// ldy :STACKORIGIN+9			; 6
        lda_stack(i+7) then								// lda :STACKORIGIN+10			; 7
 //       sta_bp_y(i+8) then								// sta (:bp),y				; 8
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+7], 6, 256)) and
-	(copy(listing[i+2], 6, 256) <> copy(listing[i+6], 6, 256)) then
+     if argMatch(i+2, i+7) and
+	(argMatch(i+2, i+6) = false) then
        begin
 	listing[i+3] := '';
 	listing[i+4] := '';
@@ -44,8 +44,8 @@ begin
        ldy_stack(i+8) and								// ldy :STACKORIGIN+9			; 8
        lda_stack(i+9) then								// lda :STACKORIGIN+10			; 9
 //       sta_bp_y(i+10) then								// sta (:bp),y				; 10
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+9], 6, 256)) and
-	(copy(listing[i+2], 6, 256) <> copy(listing[i+8], 6, 256)) then
+     if argMatch(i+2, i+9) and
+	(argMatch(i+2, i+8) = false) then
        begin
 	listing[i+3] := '';
 	listing[i+4] := '';
@@ -71,9 +71,9 @@ begin
        lda(i+11) and									// lda					; 11
        (add_sub(i+12) or and_ora_eor(i+12)) then					// add|sub|and|ora|eor			; 12
 //       ldy_stack(i+13) then								// ldy :STACKORIGIN+9			; 13
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	(copy(listing[i+6], 6, 256) = copy(listing[i+8], 6, 256)) and
-	(copy(listing[i+8], 6, 256) = copy(listing[i+13], 6, 256)) then
+     if argMatch(i+2, i+6) and
+	argMatch(i+6, i+8) and
+	argMatch(i+8, i+13) then
        begin
 	listing[i+2] := #9'tay';
 
@@ -206,7 +206,7 @@ begin
        and_ora_eor(i+6) and								// and|ora|eor				; 6
        ldy_stack(i+7) then								// ldy :STACKORIGIN			; 7
 //       sta_bp_y(i+8) then 								// sta (:bp),y				; 8
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256)) then
+     if argMatch(i+1, i+7) then
       begin
         p:=GetBYTE(i+2);
 
@@ -232,7 +232,7 @@ begin
        lda_a(i+5) and									// lda					; 5
        ldy_stack(i+6) then								// ldy :STACKORIGIN			; 6
 //       sta_bp_y(i+7) then 								// sta (:bp),y				; 7
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+6], 6, 256)) then
+     if argMatch(i+1, i+6) then
       begin
         p:=GetBYTE(i+2);
 
@@ -256,7 +256,7 @@ begin
        sty_bp_1(i+3) and								// sty :bp+1				; 3
        ldy_stack(i+4) then								// ldy :STACKORIGIN			; 4
 //       lda_bp_y(i+5) then 								// lda (:bp),y				; 5
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+4], 6, 256)) then
+     if argMatch(i+1, i+4) then
       begin
         p:=GetBYTE(i+2);
 

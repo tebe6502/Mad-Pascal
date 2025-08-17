@@ -12593,10 +12593,11 @@ begin
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
 
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and (not
-                      (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK,
-                      TDataType.OBJECTTOK]) and not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in
-                      Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
+                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
+                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
+                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) (* and
        (({GetDataSize( TDataType.IdentifierAt(IdentIndex).AllocElementType] *} IdentifierAt(IdentIndex).NumAllocElements > 1) and ({GetDataSize( TDataType.IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType] *} IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements > 1)) *) then
                     begin
 
@@ -18689,7 +18690,7 @@ begin
         if Value and $3000 = $1000 then
           tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
         else
-          tmp := tmp + ' $' + IntToHex(Byte(Value));
+          tmp := tmp + ' $' + IntToHex(Byte(Value), 2);
 end;
 
 // ----------------------------------------------------------------------------

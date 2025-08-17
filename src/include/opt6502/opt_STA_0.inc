@@ -374,7 +374,7 @@ begin
     if sta_stack(i) and										// sta :STACKORIGIN		; 0
        asl_stack(i+1) and									// asl :STACKORIGIN		; 1
        sta_im_0(i+2) then									// sta #$00			; 2
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) then
+      if argMatch(i, i+1) then
        begin
 	listing[i+1] := listing[i];
 	listing[i]   := #9'asl @';
@@ -388,8 +388,8 @@ begin
 	asl_stack(i+1) and									// asl :STACKORIGIN		; 1
 	asl_stack(i+2) and									// asl :STACKORIGIN		; 2
         sta_im_0(i+3) then									// sta #$00			; 3
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
+      if argMatch(i, i+1) and
+	 argMatch(i+1, i+2) then
        begin
 	listing[i+2] := listing[i];
 	listing[i]   := #9'asl @';
@@ -403,7 +403,7 @@ begin
     if (SKIP(i-1) = false) and									//~SKIP
        lda_a(i) and										// lda :STACKORIGIN+9		; 0
        sta_a(i+1) then										// sta :STACKORIGIN+9		; 1
-     if copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256) then
+     if argMatch(i, i+1) then
      begin
        listing[i]  := '';
        listing[i+1]:= '';

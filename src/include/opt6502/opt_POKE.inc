@@ -47,7 +47,7 @@ begin
        sta_stack(i+7) and									// sta :STACKORIGIN		; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH	; 8
        sta_bp_1(i+9) then									// sta :bp+1			; 9
-    if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
+    if (argMatch(i+7, i+8) = false) then
        begin
         if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
@@ -70,7 +70,7 @@ begin
        tay(i+7) and										// tay				; 7
        lda(i+8) and										// lda 				; 8
        sta(i+9) then										// sta 				; 9
-    if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
+    if (argMatch(i+7, i+8) = false) then
        begin
         if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
@@ -95,7 +95,7 @@ begin
     if LDA_BP_Y(i+6) and									// lda (:bp),y			; 6
        ldy(i+7) and										// ldy				; 7
        sta(i+8) then										// sta 				; 8
-    if copy(listing[i+7], 6, 256) <> copy(listing[i+8], 6, 256) then
+    if (argMatch(i+7, i+8) = false) then
        begin
         if (pos(#9'lda <', listing[i]) > 0) {and (pos('lda >', listing[i+3]) > 0)} then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
@@ -267,7 +267,7 @@ begin
     if lda_bp_y(i+7) and									// lda (:bp),y			; 7
        ldy_stack(i+8) and									// ldy :STACKORIGIN		; 8
        sta(i+9) and (sta_stack(i+9) = false) then						// sta|sta (:bp),y		; 9
-    if (copy(listing[i+2], 6, 256) = copy(listing[i+8], 6, 256)) then
+    if argMatch(i+2, i+8) then
       begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
@@ -294,7 +294,7 @@ begin
        (and_ora_eor(i+8) or add_sub(i+8)) and							// and|ora|eor|add|sub		; 8
        ldy_stack(i+9) and									// ldy :STACKORIGIN		; 9
        sta(i+10) and (sta_stack(i+10) = false) then						// sta|sta (:bp),y		; 10
-    if (copy(listing[i+2], 6, 256) = copy(listing[i+9], 6, 256)) then
+    if argMatch(i+2, i+9) then
       begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'

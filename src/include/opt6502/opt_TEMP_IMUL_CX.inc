@@ -37,7 +37,7 @@ begin
 												// imulCX		; 11
 												// eif			; 12
 
-       (TemporaryBuf[0] = #9'lda #$00') and							// lda #$00		; 0
+       lda_im_0(0) and										// lda #$00		; 0
        sta(1) and										// sta X+1		; 1
        lda(2) and										// lda X		; 2
        (TemporaryBuf[3] = #9'sta :ecx') and							// sta :ecx		; 3

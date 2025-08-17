@@ -108,7 +108,7 @@ begin
 
 
    if sta_stack(0) and									// sta :STACKORIGIN	; 0
-      (TemporaryBuf[1] = #9'ldy #1') and						// ldy #1		; 1
+      ldy_1(1) and									// ldy #1		; 1
       lda_stack(2) and									// lda :STACKORIGIN	; 2
       (and_ora_eor(3) or cmp(3)) then							// and|ora|eor|cmp	; 3
     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
@@ -121,13 +121,13 @@ begin
     end;
 
 
-    if (TemporaryBuf[0] = #9'ldy #1') and 						// ldy #1		; 0	BOOL := BYTE > ?
+    if ldy_1(0) and 									// ldy #1		; 0	BOOL := BYTE > ?
        lda(1)and									// lda			; 1
        cmp(2) and									// cmp			; 2
        (TemporaryBuf[3] = #9'bcs @+') and						// bcs @+		; 3
-       (TemporaryBuf[4] = #9'dey') and							// dey			; 4
-       (TemporaryBuf[5] = '@') and							//@			; 5
-       (TemporaryBuf[6] = #9'tya') then							// tya			; 6
+       dey(4) and							// dey			; 4
+       lab_a(5) and							//@			; 5
+       tya(6) then							// tya			; 6
      begin
 	TemporaryBuf[0]   := '';
 

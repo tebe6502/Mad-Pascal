@@ -9,9 +9,9 @@ begin
 // -----------------------------------------------------------------------------
 
     if sta_stack(i) and									// sta :STACKORIGIN+9			; 0
-       lda_a(i+1) and		 							// lda					; 1
+       lda(i+1) and		 							// lda					; 1	~lda adr.
        add_stack(i+2) then								// add :STACKORIGIN+9			; 2
-     if copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256) then
+     if argMatch(i, i+2) then
      begin
 	listing[i]   := #9'add ' + copy(listing[i+1], 6, 256);
 	listing[i+1] := '';
@@ -33,14 +33,14 @@ begin
        lda(i+9) and									// lda DX+3				; 9
        adc(i+10) and									// adc DX+3				; 10
        sta(i+11) then									// sta DX+3				; 11
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) and
-	 (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) and
-	 (copy(listing[i+4], 6, 256) = copy(listing[i+5], 6, 256)) and
-	 (copy(listing[i+6], 6, 256) = copy(listing[i+7], 6, 256)) and
-	 (copy(listing[i+7], 6, 256) = copy(listing[i+8], 6, 256)) and
-	 (copy(listing[i+9], 6, 256) = copy(listing[i+10], 6, 256)) and
-	 (copy(listing[i+10], 6, 256) = copy(listing[i+11], 6, 256)) then
+      if argMatch(i, i+1) and
+	 argMatch(i+1, i+2) and
+	 argMatch(i+3, i+4) and
+	 argMatch(i+4, i+5) and
+	 argMatch(i+6, i+7) and
+	 argMatch(i+7, i+8) and
+	 argMatch(i+9, i+10) and
+	 argMatch(i+10, i+11) then
        begin
 	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
 	listing[i+1] := #9'rol ' + copy(listing[i+3], 6, 256);
@@ -68,10 +68,10 @@ begin
        sta(i+5) and									// sta DX+1				; 5
 											//					; 6
        (adc(i+7) = false) then								//~adc					; 7
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) and
-	 (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) and
-	 (copy(listing[i+4], 6, 256) = copy(listing[i+5], 6, 256)) then
+      if argMatch(i, i+1) and
+	 argMatch(i+1, i+2) and
+	 argMatch(i+3, i+4) and
+	 argMatch(i+4, i+5) then
        begin
 	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
 	listing[i+1] := #9'rol ' + copy(listing[i+3], 6, 256);
@@ -90,8 +90,8 @@ begin
        sta(i+2) and									// sta DX				; 2
 											//					; 3
        (adc(i+4) = false) then								//~adc					; 4
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) then
+      if argMatch(i, i+1) and
+	 argMatch(i+1, i+2) then
        begin
 	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
 
@@ -107,8 +107,8 @@ begin
        sta(i+2) and									// sta					; 2
 											//					; 3
        (adc(i+4) = false) then								//~adc					; 4
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) <> copy(listing[i+2], 6, 256)) then
+      if argMatch(i, i+1) and
+	 (argMatch(i+1, i+2) = false) then
        begin
 	listing[i+1] := #9'asl @';
 
@@ -123,10 +123,10 @@ begin
        sta(i+4) and									// sta DX				; 4
 											//					; 5
        (adc(i+6) = false) then								//~adc					; 6
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) and
-	 (copy(listing[i+2], 6, 256) = copy(listing[i+3], 6, 256)) and
-	 (copy(listing[i+3], 6, 256) = copy(listing[i+4], 6, 256)) then
+      if argMatch(i, i+1) and
+	 argMatch(i+1, i+2) and
+	 argMatch(i+2, i+3) and
+	 argMatch(i+3, i+4) then
        begin
 	listing[i]   := #9'asl ' + copy(listing[i], 6, 256);
 	listing[i+1] := listing[i];
@@ -145,10 +145,10 @@ begin
        sta(i+4) and									// sta					; 4
 											//					; 5
        (adc(i+6) = false) then								//~adc					; 6
-      if (copy(listing[i], 6, 256) = copy(listing[i+1], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+2], 6, 256)) and
-	 (copy(listing[i+2], 6, 256) = copy(listing[i+3], 6, 256)) and
-	 (copy(listing[i+3], 6, 256) <> copy(listing[i+4], 6, 256)) then
+      if argMatch(i, i+1) and
+	 argMatch(i+1, i+2) and
+	 argMatch(i+2, i+3) and
+	 (argMatch(i+3, i+4) = false) then
        begin
 	listing[i+1] := #9'asl @';
 	listing[i+2] := #9'asl @';
@@ -172,8 +172,8 @@ begin
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
        adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
        sta(i+11) then									// sta D+1				; 11
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
+     if argMatch(i+2, i+6) and
+	argMatch(i+5, i+9) then
        begin
 	listing[i+6] := listing[i+11];
 	listing[i+5] := listing[i+4];
@@ -205,8 +205,8 @@ begin
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
        adc_im_0(i+10) and								// adc #$00				; 10
        sta(i+11) then									// sta D+1				; 11
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
+     if argMatch(i+2, i+6) and
+	argMatch(i+5, i+9) then
        begin
 	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
 	listing[i+1] := listing[i+7];
@@ -224,54 +224,6 @@ begin
        end;
 
 
-{!#!#!#!#!#!#!#!#!#!#!#
-
-    if lda(i) and (lda_im_0(i) = false) and (iy(i) = false) and				// lda					; 0
-       add(i+1) and (add_im_0(i+1) = false) and (iy(i+1) = false) and			// add D				; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
-       lda_im_0(i+3) and								// lda #$00				; 3
-       adc(i+4) and (adc_im_0(i+4) = false) and						// adc D+1				; 4
-       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH		; 5
-       lda_stack(i+6) and								// lda :STACKORIGIN			; 6
-       add_sub(i+7) and									// add|sub				; 7
-       (sta_stack(i+8) = false) and sta(i+8) and (iy(i+8) = false) and			// sta D				; 8
-       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
-       adc_sbc(i+10) and								// adc|sbc				; 10
-       sta(i+11) and									// sta D+1				; 11
-											//					; 12
-       (adc_sbc(i+13) = false) then							//~adc|sbc				; 13
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
-       begin
-	listing[i+2] := listing[i+1];
-
-	listing[i+1] := #9'ldy ' + copy(listing[i+11], 6, 256);
-
-	listing[i+3] := #9'scc';
-	listing[i+4] := #9'iny';
-
-	listing[i+5] := '';
-	listing[i+6] := '';
-
-	listing[i+9] := #9'tya';
-
-	if adc_im_0(i+10) then begin
-	 listing[i+9]  := #9'scc';
-	 listing[i+10] := #9'iny';
-	 listing[i+11] := #9'sty ' + copy(listing[i+11], 6, 256);
-	end;
-
-	if sbc_im_0(i+10) then begin
-	 listing[i+9]  := #9'scs';
-	 listing[i+10] := #9'dey';
-	 listing[i+11] := #9'sty ' + copy(listing[i+11], 6, 256);
-	end;
-
-	exit(false);
-       end;
-}
-
-
     if lda(i) and (lda_im_0(i) = false) and (iy(i) = false) and				// lda					; 0
        add_sub(i+1) and (iy(i+1) = false) and
        (add_im_0(i+1) = false) and (sub_im_0(i+1) = false) and				// add|sub				; 1
@@ -287,8 +239,8 @@ begin
        sta(i+11) and									// sta T+1				; 11
 											//					; 12
        (adc_sbc(i+13) = false) then							//~adc|sbc				; 13
-     if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+9], 6, 256)) then
+     if argMatch(i+2, i+6) and
+	argMatch(i+5, i+9) then
        begin
 	listing[i+2] := listing[i+1];
 
@@ -335,8 +287,8 @@ begin
        sta_val(i+10) and (iy(i+10) = false) and						// sta					; 10
 											//					; 11
        (adc(i+12) = false) then								//~adc					; 12
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
-        (copy(listing[i+4], 6, 256) = copy(listing[i+8], 6, 256)) then
+     if argMatch(i+1, i+5) and
+        argMatch(i+4, i+8) then
        begin
 	listing[i+4] := listing[i+10];
 
@@ -381,8 +333,8 @@ begin
        sta_val(i+10) and (iy(i+10) = false) and						// sta					; 10
 											//					; 11
        (sbc(i+12) = false) then								//~sbc					; 12
-     if (copy(listing[i+1], 6, 256) = copy(listing[i+5], 6, 256)) and
-        (copy(listing[i+4], 6, 256) = copy(listing[i+8], 6, 256)) then
+     if argMatch(i+1, i+5) and
+        argMatch(i+4, i+8) then
        begin
 	listing[i+4] := listing[i+10];
 
@@ -427,8 +379,8 @@ begin
        sta(i+9) and									// sta					; 9
 											//					; 10
        (adc_sbc(i+11) = false) then							//~adc|sbc				; 11
-     if (copy(listing[i], 6, 256) = copy(listing[i+5], 6, 256)) and
-	(copy(listing[i+1], 6, 256) = copy(listing[i+8], 6, 256)) then
+     if argMatch(i, i+5) and
+	argMatch(i+1, i+8) then
        begin
 	listing[i+2] := '';
 	listing[i+3] := '';
@@ -448,7 +400,7 @@ begin
        sta(i+8) and									// sta					; 8
 											//					; 9
        (adc_sbc(i+10) = false) then							//~adc|sbc				; 10
-     if (copy(listing[i], 6, 256) = copy(listing[i+7], 6, 256)) then
+     if argMatch(i, i+7) then
        begin
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -465,8 +417,8 @@ begin
        sta_a(i+5) and									// sta					; 5
        lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH+9	; 6
        sta_a(i+7) then									// sta					; 7
-     if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) and
-        (copy(listing[i+3], 6, 256) = copy(listing[i+6], 6, 256)) then
+     if argMatch(i, i+4) and
+        argMatch(i+3, i+6) then
        begin
 	listing[i]   := listing[i+5];
 	listing[i+3] := listing[i+7];
@@ -491,9 +443,9 @@ begin
        sta(i+8) and									// sta				; 8
 											//				; 9
        (adc_sbc(i+10) = false) then							//~adc|sbc			; 10
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
-	(copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) then
+     if argMatch(i, i+2) and
+	argMatch(i+2, i+6) and
+	argMatch(i+3, i+5) then
        begin
 	listing[i+3] := '';
 	listing[i+4] := '';
@@ -524,11 +476,11 @@ begin
        sta(i+16) and									// sta ADDR+1				; 16
 											//					; 17
        (adc(i+18) = false) then								//~adc					; 18
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) and
-	(copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256)) and
-	(copy(listing[i+5], 6, 256) = copy(listing[i+15], 6, 256)) and
-	(copy(listing[i+6], 6, 256) = copy(listing[i+8], 6, 256)) and
-	(copy(listing[i+9], 6, 256) = copy(listing[i+11], 6, 256)) and
+     if argMatch(i, i+2) and
+	argMatch(i+3, i+5) and
+	argMatch(i+5, i+15) and
+	argMatch(i+6, i+8) and
+	argMatch(i+9, i+11) and
 	(listing[i] = listing[i+12]) then
        begin
         listing[i+2] := listing[i+13];
@@ -558,7 +510,7 @@ begin
        sta(i+4) and									// sta					; 4
 											//					; 5
        (adc_sbc(i+6) = false) then							//~adc|sbc				; 6
-      if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) then
+      if argMatch(i, i+3) then
        begin
 	listing[i+1] := '';
 
@@ -578,8 +530,8 @@ begin
        sta(i+9) and									// sta					; 9
 											//					; 10
        (adc_sbc(i+11) = false) then							//~adc|sbc				; 11
-      if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) and
-	 (copy(listing[i+6], 6, 256) = copy(listing[i+8], 6, 256)) then
+      if argMatch(i+2, i+6) and
+	 argMatch(i+6, i+8) then
        begin
 	listing[i+3] := '';
 	listing[i+4] := '';
@@ -601,8 +553,8 @@ begin
        sta(i+9) and									// sta					; 9
 											//					; 10
        (adc_sbc(i+11) = false) then							//~adc|sbc			 	; 11
-      if (copy(listing[i], 6, 256) = copy(listing[i+4], 6, 256)) and
-	 (copy(listing[i+1], 6, 256) = copy(listing[i+7], 6, 256)) then
+      if argMatch(i, i+4) and
+	 argMatch(i+1, i+7) then
        begin
 	listing[i+2] := '';
 	listing[i+3] := '';

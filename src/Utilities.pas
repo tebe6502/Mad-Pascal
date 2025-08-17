@@ -4,6 +4,8 @@ unit Utilities;
 
 interface
 
+uses SysUtils;
+
 type
   TExitCode = Longint;
 
@@ -15,7 +17,7 @@ type
   end;
 
 type
-  THaltException = class
+  THaltException = class(Exception)
 
   const
     // No errors occurred, the output files were created correctly
@@ -43,8 +45,6 @@ procedure RaiseHaltException(errnum: Longint);
 {$ENDIF}
 
 implementation
-
-uses SysUtils;
 
 class function TEnvironment.GetParameterCount(): Longint;
 begin

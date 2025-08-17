@@ -13,7 +13,7 @@
 *.opt
 *.WinMerge
 .DS_Store
-bin/windows
+bin/windows_x86_64
 build.bat
 buildrun.bat
 build.sh

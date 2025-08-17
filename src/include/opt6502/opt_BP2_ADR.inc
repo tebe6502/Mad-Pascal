@@ -19,6 +19,7 @@ begin
        ldy_im_0(i+6) then								// ldy #$00				; 6
     begin
 
+
      tmp:=#9'sta ' + copy(listing[i+1], 6, 256);
 
 

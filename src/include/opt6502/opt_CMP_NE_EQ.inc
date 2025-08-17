@@ -19,7 +19,7 @@ begin
        dey(i+5) and										// dey			; 5
        lab_a(i+6) and										//@			; 6
        (tya(i+7) or sty(i+7)) then								// tya|sty		; 7
-     if (copy(listing[i], 6, 256) = copy(listing[i+3], 6, 256)) then
+     if argMatch(i, i+3) then
       begin
        listing[i+2] := #9'cmp ' + copy(listing[i+2], 6, 256);
 
@@ -39,7 +39,7 @@ begin
        dey(i+5) and										// dey			; 5
        lab_a(i+6) and										//@			; 6
        (tya(i+7) or sty(i+7)) then								// tya|sty		; 7
-     if (copy(listing[i], 6, 256) = copy(listing[i+2], 6, 256)) then
+     if argMatch(i, i+2) then
       begin
        listing[i+2] := '';
 
@@ -125,6 +125,7 @@ begin
        exit(false);
       end;
 
+{ !!! nie moze decydowac na podstawie tylko starszego bajtu
 
     if (SKIP(i-1) = false) and
        lda(i) and										// lda W+1		; 0	WORD =
@@ -156,7 +157,7 @@ begin
 
        exit(false);
       end;
-
+}
 
     if ldy(i) and										// ldy 			; 0	opt_095	| WORD <> 0 ; WORD = 0
        lda_bp2_y(i+1) and									// lda (:bp2),y		; 1
@@ -167,7 +168,7 @@ begin
        lda_stack(i+6) and									// lda :STACKORIGIN	; 6
        lab_a(i+7) and										//@			; 7
        (jeq(i+8) or jne(i+8) {or beq(i+8) or bne(i+8)}) then					// jeq|jne|beq|bne	; 8
-    if (copy(listing[i+2], 6, 256) = copy(listing[i+6], 6, 256)) then
+    if argMatch(i+2, i+6) then
       begin
        listing[i+4] := #9'ora (:bp2),y';
 

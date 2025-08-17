@@ -505,7 +505,7 @@ begin
        lda_stack(i+10) and									// lda :STACKORIGIN+STACKWIDTH,x	; 10
        adc_im_0(i+11) and									// adc #$00				; 11
        sta_stack(i+12) then									// sta :STACKORIGIN+STACKWIDTH,x	; 12
-     if copy(listing[i+10], 6, 256) = copy(listing[i+12], 6, 256) then
+     if argMatch(i+10, i+12) then
      begin
        listing[i+9]  := #9'dex';
        listing[i+10] := listing[i];
@@ -535,7 +535,7 @@ begin
        lda_stack(i+3) and									// lda :STACKORIGIN+STACKWIDTH,x	; 3
        adc_im_0(i+4) and									// adc #$00				; 4
        sta_stack(i+5) then									// sta :STACKORIGIN+STACKWIDTH,x	; 5
-     if copy(listing[i+3], 6, 256) = copy(listing[i+5], 6, 256) then
+     if argMatch(i+3, i+5) then
      begin
        listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
        listing[i+1] := '';
