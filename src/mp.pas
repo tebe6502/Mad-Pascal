@@ -423,7 +423,7 @@ uses
 
           if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            ParameterError(i, 'Error: Can''t open file ''' + parameterValue + '''.');
+            ParameterError(i, 'Error: Can''t open file ''' + inputFilePath + '''.');
           end;
         end;
 
