@@ -7,7 +7,7 @@
 
   key          description
  --------------------------------
- w,a,s,d 	Move cursor around
+ w,a,s,d      Move cursor around
  SPACE        Open cell
  f            Flag/unflag cell
  r            Restart
@@ -55,7 +55,7 @@ type
 var
    MainField: Field;
    Cmd: Char;
-   Quit, yes: Boolean;
+   Quit: Boolean;
 
 
    function IsVictory(Field: Field): Boolean;
@@ -274,7 +274,7 @@ var
 
    procedure MoveDown(var Field: Field);
    begin
-      with Field do if CursorRow < Rows-1 then Inc(CursorRow);
+      with Field do if CursorRow < byte(Rows-1) then Inc(CursorRow);
    end;
 
    procedure MoveLeft(var Field: Field);
@@ -284,7 +284,7 @@ var
 
    procedure MoveRight(var Field: Field);
    begin
-      with Field do if CursorCol < Cols-1 then Inc(CursorCol);
+      with Field do if CursorCol < byte(Cols-1) then Inc(CursorCol);
    end;
 
 

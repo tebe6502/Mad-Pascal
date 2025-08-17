@@ -9246,11 +9246,12 @@ case Tok[i].Kind of
 	    end;
 
 
-	    if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
+	     if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
 
-	    Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
 
-	    CheckTok(i + 1, CBRACKETTOK);
+	     Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+	     CheckTok(i + 1, CBRACKETTOK);
 
 	    end;
 
@@ -10425,14 +10426,6 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
    if (RightValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) then
     if (Ident[GetIdent(Tok[i + 2].Name^)].AllocElementType = CHARTOK) and (Elements(GetIdent(Tok[i + 2].Name^)) in [1..255]) then sRight:=WordBool(1 or Elements(GetIdent(Tok[i + 2].Name^)) shl 8);
 
-{
-  if VarType = ENUMTYPE then begin
-
-   if (ValType = VarType) and (RightValType in IntegerTypes) then RightValType := VarType;
-   if (ValType in IntegerTypes) and (RightValType = VarType) then ValType := VarType;
-
-  end;
-}
 
 //  if (ValType in [SHORTREALTOK, REALTOK]) and (RightValType in [SHORTREALTOK, REALTOK]) then
 //    RightValType := ValType;
@@ -11079,16 +11072,16 @@ case Tok[i].Kind of
 	      if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
 	       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-	       par2 := copy(Ident[IdentIndex].Name, pos('.', Ident[IdentIndex].Name)+1, length(Ident[IdentIndex].Name));
+	       svar := copy(Ident[IdentIndex].Name, pos('.', Ident[IdentIndex].Name)+1, length(Ident[IdentIndex].Name));
 
 	       IdentIndex := IdentTemp;
 
-	       IdentTemp := RecordSize(IdentIndex, par2);
+	       IdentTemp := RecordSize(IdentIndex, svar);
 
 	       if IdentTemp < 0 then
-	        Error(i + 3, 'identifier idents no member ''' + par2 + '''');
+	        Error(i + 3, 'identifier idents no member ''' + svar + '''');
 
-	       par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+	        par2 := '$' + IntToHex(IdentTemp and $ffff, 2);			// offset to record field -> 'svar'
 
 	      end;
 
@@ -15662,7 +15655,7 @@ for ParamIndex := NumParams downto 1 do
 if (Ident[BlockIdentIndex].ObjectIndex = 0) then
  if Param[1].DataType = ENUMTYPE then begin
 
-  if (yes = false) and (NumParams = 1) and (DataSize[Param[1].AllocElementType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name)
+  if (yes = false) and (NumParams = 1) and (DataSize[Param[1].AllocElementType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name);
 
  end else
 
@@ -15677,8 +15670,14 @@ if yes then begin
 
 	if Param[ParamIndex].PassMethod = VARPASSING then
 	  GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
-	else
-	  GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	else begin
+
+	  if Param[ParamIndex].DataType = ENUMTOK then
+	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].AllocElementType], 0, Param[ParamIndex].Name)
+	  else
+	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+
+	end;
 
 
   	if (Param[ParamIndex].PassMethod <> VARPASSING) and
@@ -15728,8 +15727,14 @@ if yes then begin
   	if Assignment then
 	  if Param[ParamIndex].PassMethod = VARPASSING then
 	    GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
-	  else
-	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	  else begin
+
+	    if Param[ParamIndex].DataType = ENUMTYPE then
+	      GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].AllocElementType], 0, Param[ParamIndex].Name)
+	    else
+	      GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+
+	  end;
   end;
 
   if (Paramindex <> NumParams) then asm65(#9'jmi @main');

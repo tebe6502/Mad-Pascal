@@ -8,7 +8,7 @@ interface
 
 const
 
-  title = '1.7.4';
+  title = '1.7.5';
 
   TAB = ^I;		// Char for a TAB
   CR  = ^M;		// Char for a CR
