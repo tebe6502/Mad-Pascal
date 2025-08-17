@@ -18690,7 +18690,7 @@ begin
         if Value and $3000 = $1000 then
           tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
         else
-          tmp := tmp + ' $' + IntToHex(Byte(Value));
+          tmp := tmp + ' $' + IntToHex(Byte(Value), 2);
 end;
 
 // ----------------------------------------------------------------------------
