@@ -519,7 +519,7 @@ end;	//GetIdentProc
 
 procedure TestIdentProc(x: integer; S: TString);
 var IdentIndex, BlockStackIndex: Integer;
-    k, m: integer;
+    i, k, m: integer;
     ok: Boolean;
 
     ov: array of record
@@ -5757,7 +5757,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelation(rel: Byte; ValType: Byte);
+procedure GenerateRelation(relation: Byte; ValType: Byte);
 begin
 // asm65;
 // asm65('; relation');
@@ -5766,7 +5766,7 @@ begin
 
  if ValType = HALFSINGLETOK then begin
 
- case rel of
+ case relation of
   EQTOK:	// =
     begin
 	asm65(#9'lda :STACKORIGIN,x');
@@ -6008,7 +6008,7 @@ begin
 
  end;
 
- GenerateRelationOperation(rel, ValType);
+ GenerateRelationOperation(relation, ValType);
 
  Gen;
 
@@ -7043,6 +7043,18 @@ begin
 //	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',    Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
 
+	if (Tok[i].Kind = IDENTTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = ENUMTOK) then begin
+          IdentTemp := GetIdent(Tok[i].Name^);
+
+	  if Types[Ident[IdentTemp].NumAllocElements].Field[0].Name <> Types[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name then
+	    Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name + '"');
+
+          ActualParamType := Ident[IdentTemp].Kind;
+
+//	  writeln(Ident[IdentTemp].Kind,',', Ident[IdentTemp].NumAllocElements,'/', Ident[IdentIndex].Param[NumActualParams].NumAllocElements, ',',Types[Ident[IdentTemp].NumAllocElements].Field[0].name);
+	end;
+
+
 	if (Tok[i].Kind = IDENTTOK) and (ActualParamType in [RECORDTOK, OBJECTTOK]) and not (Ident[IdentIndex].Param[NumActualParams].DataType in Pointers) then
 	 if Ident[GetIdent(Tok[i].Name^)].isNestedFunction then begin
 
@@ -7143,6 +7155,7 @@ begin
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
               iError(i, IncompatibleTypes, 0, ActualParamType, -STRINGPOINTERTOK);
 
+
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then begin		// CHAR -> STRING
 
 	        if (ActualParamType = CHARTOK) and (Tok[i].Kind = CHARLITERALTOK) then begin
@@ -7204,7 +7217,7 @@ begin
 
 	      end;
 
-	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+	      //GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
 	  end;
 
@@ -7345,7 +7358,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
  for ParamIndex := 1 to NumActualParams do begin
 
   ActualParamType := Ident[IdentIndex].Param[ParamIndex].DataType;
-  if ActualParamType = ENUMTOK then ActualParamType := Ident[IdentIndex].Param[ParamIndex].AllocElementType;
+  if ActualParamType = ENUMTYPE then ActualParamType := Ident[IdentIndex].Param[ParamIndex].AllocElementType;
 
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
 
@@ -7524,7 +7537,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 		  asm65(#9'inx');
 
 		  ActualParamType := Ident[IdentIndex].DataType;
-		  if ActualParamType = ENUMTOK then ActualParamType := Ident[IdentIndex].AllocElementType;
+		  if ActualParamType = ENUMTYPE then ActualParamType := Ident[IdentIndex].NestedFunctionAllocElementType;
 
 		  case DataSize[ActualParamType] of
 
@@ -8469,7 +8482,7 @@ case Tok[i].Kind of
 
      CheckTok(i + 1, CPARTOK);
 
-     if ValType in [CHARTOK, BOOLEANTOK, ENUMTOK] then
+     if ValType in [CHARTOK, BOOLEANTOK, ENUMTYPE] then
        ValType := BYTETOK;
 
      Result:=i + 1;
@@ -8719,9 +8732,9 @@ case Tok[i].Kind of
 
 		 case Ident[IdentIndex].DataType of
 
-			ENUMTOK:
+			ENUMTYPE:
 		   	begin
-				ValType := ENUMTOK;
+				ValType := ENUMTYPE;
 			end;
 
 
@@ -9015,6 +9028,8 @@ case Tok[i].Kind of
 	CompileActualParameters(i, IdentIndex);
 
 	ValType := Ident[IdentIndex].DataType;
+
+	if ValType = ENUMTYPE then ValType := Ident[IdentIndex].NestedFunctionAllocElementType;
 
 	dec(run_func);
 
@@ -10368,7 +10383,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   begin
 
 
-  if ValType in RealTypes then VarType := ValType;
+  if ValType in RealTypes + [ENUMTYPE] then VarType := ValType;
 
 
   j := CompileSimpleExpression(i + 2, RightValType, VarType);
@@ -10410,6 +10425,14 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
    if (RightValType in Pointers) and (Tok[i + 2].Kind = IDENTTOK) then
     if (Ident[GetIdent(Tok[i + 2].Name^)].AllocElementType = CHARTOK) and (Elements(GetIdent(Tok[i + 2].Name^)) in [1..255]) then sRight:=WordBool(1 or Elements(GetIdent(Tok[i + 2].Name^)) shl 8);
 
+{
+  if VarType = ENUMTYPE then begin
+
+   if (ValType = VarType) and (RightValType in IntegerTypes) then RightValType := VarType;
+   if (ValType in IntegerTypes) and (RightValType = VarType) then ValType := VarType;
+
+  end;
+}
 
 //  if (ValType in [SHORTREALTOK, REALTOK]) and (RightValType in [SHORTREALTOK, REALTOK]) then
 //    RightValType := ValType;
@@ -12027,7 +12050,7 @@ case Tok[i].Kind of
     i := CompileExpression(i + 1, SelectorType);
 
 
-    if (SelectorType = ENUMTOK) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = FUNCTIONTOK) then begin
+    if (SelectorType = ENUMTYPE) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = FUNCTIONTOK) then begin
 
        IdentTemp:=GetIdent(Tok[j].Name^);
 
@@ -12036,9 +12059,22 @@ case Tok[i].Kind of
        EnumName := Types[Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].NumAllocElements].Field[0].Name;
 
     end else
+    if (SelectorType = ENUMTYPE) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = TYPETOK) then begin
 
-    if Tok[i].Kind = IDENTTOK then
-      EnumName := GetEnumName(GetIdent(Tok[i].Name^));
+       IdentTemp:=GetIdent(Tok[j].Name^);
+
+       EnumName := GetEnumName(IdentTemp);
+
+       SelectorType := Ident[IdentTemp].AllocElementType;
+
+    end else
+    if Tok[i].Kind = IDENTTOK then begin
+
+      IdentTemp:=GetIdent(Tok[i].Name^);
+
+      EnumName := GetEnumName(IdentTemp);
+
+    end;
 
 
     if SelectorType <> ENUMTYPE then
@@ -12076,6 +12112,7 @@ case Tok[i].Kind of
 	//warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
 	GetCommonType(i, ConstValType, SelectorType);
+
 
 	if (Tok[i].Kind = IDENTTOK)  then
 	 if ((EnumName = '') and (GetEnumName(GetIdent(Tok[i].Name^)) <> '')) or
@@ -12222,32 +12259,73 @@ case Tok[i].Kind of
 
     end;
 
+
+WITHTOK:
+    begin
+
+      inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
+
+      CheckTok(i + 1, IDENTTOK);
+
+      IdentIndex := GetIdent(Tok[i + 1].Name^);
+
+
+      if (Ident[IdentIndex].Kind = USERTYPE) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then
+
+      else
+      if (Ident[IdentIndex].Kind <> VARTOK) then
+       Error(i + 1, 'Expression type must be object or record type');
+
+
+      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = RECORDTOK) then
+
+      else
+      if not (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then
+       Error(i + 1, 'Expression type must be object or record type');
+
+      CheckTok(i + 2, DOTOK);
+
+      k:=High(WithName);
+      WithName[k] := Ident[IdentIndex].Name;
+      SetLength(WithName, k+2);
+
+      inc(i, 2);
+
+      j := CompileStatement(i + 1);
+
+      SetLength(WithName, k+1);
+
+      Result := j;
+
+    end;
+
+
 {$IFDEF WHILEDO}
 
 WHILETOK:
     begin
 //    writeln(codesize,',',CodePosStackTop);
 
-    inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
+      inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
 
-    asm65;
-    asm65('; --- WhileProlog');
+      asm65;
+      asm65('; --- WhileProlog');
 
-    ResetOpty;
+      ResetOpty;
 
-    GenerateRepeatUntilProlog;			// Save return address used by GenerateWhileDoEpilog
+      GenerateRepeatUntilProlog;		// Save return address used by GenerateWhileDoEpilog
 
-    SaveBreakAddress;
-
-
-    StartOptimization(i + 1);
-
-    j := CompileExpression(i + 1, ExpressionType);
+      SaveBreakAddress;
 
 
-    GetCommonType(j, BOOLEANTOK, ExpressionType);
+      StartOptimization(i + 1);
 
-    CheckTok(j + 1, DOTOK);
+      j := CompileExpression(i + 1, ExpressionType);
+
+
+      GetCommonType(j, BOOLEANTOK, ExpressionType);
+
+      CheckTok(j + 1, DOTOK);
 
       asm65;
       asm65('; --- WhileDoCondition');
@@ -13619,7 +13697,7 @@ WHILETOK:
 	  IndirectionLevel := ASPOINTER;
 
 
-	  if Ident[IdentIndex].DataType = ENUMTOK then
+	  if Ident[IdentIndex].DataType = ENUMTYPE then
 	   ExpressionType := Ident[IdentIndex].AllocElementType
 	  else
 	  if Ident[IdentIndex].DataType in Pointers then
@@ -14389,8 +14467,8 @@ begin
 
 		 if (Ident[IdentIndex].PassMethod <> VARPASSING) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
 
-		  asm65('adr.'+Ident[IdentIndex].Name + Value);
-		  asm65('.var '+Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		  asm65('adr.' + Ident[IdentIndex].Name + Value);
+		  asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
 		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
@@ -14449,7 +14527,7 @@ begin
 		     if (Ident[IdentIndex].Name = 'RESULT') and (Ident[BlockIdentIndex].Kind = FUNCTIONTOK) then	// RESULT nie zliczaj
 
 		     else
-		      if Ident[IdentIndex].DataType = ENUMTOK then
+		      if Ident[IdentIndex].DataType = ENUMTYPE then
 		        inc(size, DataSize[Ident[IdentIndex].AllocElementType])
 		      else
 		        inc(size, DataSize[Ident[IdentIndex].DataType]);
@@ -14458,8 +14536,8 @@ begin
 
       CONSTANT: if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
 
-		 asm65('adr.'+Ident[IdentIndex].Name + Value);
-		 asm65('.var '+Ident[IdentIndex].Name+#9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		 asm65('adr.' + Ident[IdentIndex].Name + Value);
+		 asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		end else
 		 if pos('@FORTMP_', Ident[IdentIndex].Name) = 0 then asm65(Ident[IdentIndex].Name + Value);
@@ -15190,7 +15268,7 @@ end;	//CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
+procedure CompileRecordDeclaration(i: integer; var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
 var tmpVarDataSize_, ParamIndex{, idx}: integer;
 begin
 
@@ -15582,7 +15660,7 @@ for ParamIndex := NumParams downto 1 do
 
 // Load ONE parameters from the stack
 if (Ident[BlockIdentIndex].ObjectIndex = 0) then
- if Param[1].DataType = ENUMTOK then begin
+ if Param[1].DataType = ENUMTYPE then begin
 
   if (yes = false) and (NumParams = 1) and (DataSize[Param[1].AllocElementType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name)
 
@@ -16185,7 +16263,7 @@ while Tok[i].Kind in
   	   if VarType in [RECORDTOK, OBJECTTOK] then
 	     Error(i, 'Only Array of ^'+InfoAboutToken(VarType)+' supported')
 	   else
-	   if VarType = ENUMTOK then
+	   if VarType = ENUMTYPE then
 	     Error(i, InfoAboutToken(VarType)+' arrays are not supported');
 
 	   if VarType = POINTERTOK then begin
@@ -16429,7 +16507,7 @@ while Tok[i].Kind in
     	if VarType in [RECORDTOK, OBJECTTOK] then
 	  Error(i, 'Only Array of ^'+InfoAboutToken(VarType)+' supported')
 	else
-	if VarType = ENUMTOK then
+	if VarType = ENUMTYPE then
 	  Error(i, InfoAboutToken(VarType)+' arrays are not supported');
 
 	if VarType = POINTERTOK then begin
@@ -16662,7 +16740,7 @@ while Tok[i].Kind in
 	end;
 
 
-	CompileRecordDeclaration(VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute);
+	CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute);
 
 
       end;
@@ -17915,6 +17993,8 @@ begin
 
  fillchar(DataSegment, sizeof(DataSegment), 0);
 
+ for CodeSize := 1 to High(UnitName) do UnitName[CodeSize].Units := 0;
+
  NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; VarDataSize := 0;
  CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
 
@@ -17934,9 +18014,7 @@ begin
  INTERFACETOK_USE := FALSE;
  PublicSection := TRUE;
 
- for i := 1 to High(UnitName) do UnitName[i].Units := 0;
-
- iOut:=0;
+ iOut:=-1;
  outTmp:='';
 
  SetLength(OptimizeBuf, 1);

@@ -151,6 +151,7 @@ const
   INTOK			= 114;
   VOLATILETOK		= 115;
   STRIPEDTOK		= 116;
+  WITHTOK		= 117;
 
 
   SETTOK		= 127;	// Size = 32 SET OF
@@ -173,7 +174,7 @@ const
   SINGLETOK		= 143;	// Size = 4 SINGLE / FLOAT		IEEE-754 32bit
   HALFSINGLETOK		= 144;	// Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16bit
   PCHARTOK		= 145;	// Size = 2 POINTER TO ARRAY OF CHAR
-  ENUMTOK		= 146;	// Size = 1 BYTE
+  ENUMTOK		= 146;	// Size = AllocElementType (4)
   PROCVARTOK		= 147;	// Size = 2
   TEXTFILETOK		= 148;	// Size = 2/12 TEXTFILE
   FORWARDTYPE		= 149;	// Size = 2
@@ -558,14 +559,12 @@ var
 
   OldConstValType: byte;
 
-  NumTok: integer = 0;
-
   AddDefines: integer = 1;
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
-  i, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, run_func, NumProc,
+  NumTok, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, NumProc,
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
-  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel: Integer;
+  NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
   iOut: integer = -1;
 
@@ -590,7 +589,7 @@ var
   MainPath, FilePath, optyA, optyY, optyBP2,
   optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
-  msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj: TArrayString;
+  msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj, WithName: TArrayString;
 
 
   optimize : record

@@ -21,13 +21,13 @@ begin
        (TemporaryBuf[6] = #9'sta :ecx+1') and							// sta :ecx+1		; 6
        (TemporaryBuf[7] = #9'sta :eax+1') then							// sta :eax+1		; 7
       begin
-	TemporaryBuf[i+5] := '~';
-	TemporaryBuf[i+6] := '~';
-	TemporaryBuf[i+7] := '~';
+	TemporaryBuf[5] := '~';
+	TemporaryBuf[6] := '~';
+	TemporaryBuf[7] := '~';
 
-	TemporaryBuf[i+9] := #9'fmulu_8';
+	TemporaryBuf[9] := #9'fmulu_8';
 
-	TemporaryBuf[i+11]:= #9'imulCL';
+	TemporaryBuf[11]:= #9'imulCL';
        end;
 
 
@@ -47,13 +47,13 @@ begin
        (TemporaryBuf[7] = #9'sta :eax+1') then							// sta :eax+1		; 7
      if copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[5], 6, 256) then
       begin
-	TemporaryBuf[i+5] := '~';
-	TemporaryBuf[i+6] := '~';
-	TemporaryBuf[i+7] := '~';
+	TemporaryBuf[5] := '~';
+	TemporaryBuf[6] := '~';
+	TemporaryBuf[7] := '~';
 
-	TemporaryBuf[i+9] := #9'fmulu_8';
+	TemporaryBuf[9] := #9'fmulu_8';
 
-	TemporaryBuf[i+11]:= #9'imulCL';
+	TemporaryBuf[11]:= #9'imulCL';
        end;
 
 end;	// procedure

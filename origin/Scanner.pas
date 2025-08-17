@@ -30,6 +30,7 @@ uses SysUtils, Common, Messages, SplitString;
 
 
 procedure TokenizeProgramInitialization;
+var i: integer;
 begin
 
  fillchar(Ident, sizeof(Ident), 0);
@@ -39,6 +40,7 @@ begin
  PublicSection := true;
  UnitNameIndex := 1;
 
+ SetLength(WithName, 1);
  SetLength(linkObj, 1);
  SetLength(resArray, 1);
  SetLength(msgUser, 1);
@@ -1826,6 +1828,7 @@ Spelling[SETTOK		] := 'SET';
 Spelling[PACKEDTOK	] := 'PACKED';
 Spelling[VOLATILETOK	] := 'VOLATILE';
 Spelling[STRIPEDTOK	] := 'STRIPED';
+Spelling[WITHTOK	] := 'WITH';
 Spelling[LABELTOK	] := 'LABEL';
 Spelling[GOTOTOK	] := 'GOTO';
 Spelling[INTOK		] := 'IN';
@@ -1958,7 +1961,7 @@ procedure TokenizeMacro(a: string; Line, Spaces: integer);
 var
   Text: string;
   Num, Frac: TString;
-  Err, Line2, TextPos, im: Integer;
+  i, Err, Line2, TextPos, im: Integer;
   yes: Boolean;
   ch, ch2: Char;
   CurToken: Byte;
