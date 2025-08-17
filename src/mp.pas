@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                 {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                {$ENDIF}
+                                 {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -479,13 +479,16 @@ uses
     MainPath := IncludeTrailingPathDelimiter(MainPath);
     unitPathList := TPathList.Create;
     unitPathList.AddFolder(MainPath + 'lib');
-
-    if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
-
     SourceFileList := TSourceFileList.Create();
 
     try
+
+      if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
+
       ParseParam();
+      // The main program is the first unit.
+
+      if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
     except
       on e: THaltException do
       begin
@@ -494,9 +497,6 @@ uses
       end;
     end;
 
-    // The main program is the first unit.
-
-    if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
     programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
  {$IFDEF USEOPTFILE}
