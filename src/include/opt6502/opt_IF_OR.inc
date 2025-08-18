@@ -67,7 +67,6 @@
      end;
 
 
-
     if lab_a(i) and										//@					; 0	ORA :STACK -> JEQ
        tya(i+1) and										// tya					; 1
        ora_stack(i+2) and									// ora :STACKORIGIN			; 2
