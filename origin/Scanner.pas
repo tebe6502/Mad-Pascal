@@ -279,11 +279,13 @@ begin
        (AnsiUpperCase(res.resType) = 'RELOC') or
        (AnsiUpperCase(res.resType) = 'RMT') or
        (AnsiUpperCase(res.resType) = 'MPT') or
+       (AnsiUpperCase(res.resType) = 'MD1') or
        (AnsiUpperCase(res.resType) = 'CMC') or
        (AnsiUpperCase(res.resType) = 'RMTPLAY') or
        (AnsiUpperCase(res.resType) = 'RMTPLAY2') or
        (AnsiUpperCase(res.resType) = 'RMTPLAYV') or
        (AnsiUpperCase(res.resType) = 'MPTPLAY') or
+       (AnsiUpperCase(res.resType) = 'MD1PLAY') or
        (AnsiUpperCase(res.resType) = 'CMCPLAY') or
        (AnsiUpperCase(res.resType) = 'EXTMEM') or
        (AnsiUpperCase(res.resType) = 'XBMP') or
