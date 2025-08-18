@@ -42,8 +42,13 @@ const
     DL_JVB = %01000001; // Jump to begining
 
 			// Antic Modes
-    DL_MODE_GR15 = $E;
-    DL_MODE_GR8 = $F;
+    DL_MODE_2 = $2;
+    DL_MODE_3 = $3;
+    DL_MODE_4 = $4;
+    DL_MODE_5 = $5;
+
+    DL_MODE_E = $E;
+    DL_MODE_F = $F;
 
 var
 	[volatile] irqens: byte absolute $10;		// rejestr cien IRQEN
