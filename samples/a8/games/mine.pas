@@ -18,12 +18,16 @@
 *)
 
 //
-//  FPC (MadPascal) version by Tomasz Biela ( 17.08.2025 )
+//  FPC (MadPascal) version by Tomasz Biela ( 18.08.2025 )
 //
 
 program mine;
 
-uses crt;
+uses crt
+{$IFDEF ATARI}
+,efast
+{$ENDIF}
+;
 
 //{$define DEBUG}
 
@@ -35,6 +39,8 @@ const
 type
    Cell = (Empty, Bomb);
    State = (Closed, Open, Flagged);
+
+   TMessage = string[31];
 
    Field = record
       Generated: Boolean;
@@ -58,7 +64,7 @@ var
    Quit: Boolean;
 
 
-   function IsVictory(Field: Field): Boolean;
+   function IsVictory(var Field: Field): Boolean;
    var
       Row, Col: byte;
    begin
@@ -81,19 +87,19 @@ var
          end
    end;
 
-   procedure RandomCell(Field: Field; var Row, Col: byte);
+   procedure RandomCell(var Field: Field; var Row, Col: byte);
    begin
       Row := Random(Field.Rows);
       Col := Random(Field.Cols);
    end;
 
-   function IsAroundCursor(Field: Field; Row, Col: byte): Boolean;
+   function IsAroundCursor(var Field: Field; Row, Col: byte): Boolean;
    var
       DRow, DCol: shortint;
    begin
       for DRow := -1 to 1 do
          for DCol := -1 to 1 do
-            if (Field.CursorRow + DRow = Row) and (Field.CursorCol + DCol = Col) then
+            if (byte(Field.CursorRow + DRow) = Row) and (byte(Field.CursorCol + DCol) = Col) then
                Exit(True);
       IsAroundCursor := False;
    end;
@@ -121,12 +127,12 @@ var
       end;
    end;
 
-   function FieldContains(Field: Field; Row, Col: byte): Boolean;
+   function FieldContains(var Field: Field; Row, Col: byte): Boolean;
    begin
       FieldContains := (0 <= Row) and (Row < Field.Rows) and (0 <= Col) and (Col < Field.Cols);
    end;
 
-   function CountNborBombs(Field: Field; Row, Col: byte): byte;
+   function CountNborBombs(var Field: Field; Row, Col: byte): byte;
    var
       DRow, DCol: shortint;
    begin
@@ -136,11 +142,11 @@ var
             for DCol := -1 to 1 do
                if (DRow <> 0) or (DCol <> 0) then
                   if FieldContains(Field, Row + DRow, Col + DCol) then
-                     if Cells[Row + DRow][Col + DCol] = ord(Bomb) then
+                     if Cells[byte(Row + DRow)][byte(Col + DCol)] = ord(Bomb) then
                         Inc(Result);
    end;
 
-   function CountNborFlags(Field: Field; Row, Col: byte): byte;
+   function CountNborFlags(var Field: Field; Row, Col: byte): byte;
    var
       DRow, DCol: shortint;
    begin
@@ -150,7 +156,7 @@ var
             for DCol := -1 to 1 do
                if (DRow <> 0) or (DCol <> 0) then
                   if FieldContains(Field, Row + DRow, Col + DCol) then
-                     if States[Row + DRow][Col + DCol] = ord(Flagged) then
+                     if States[byte(Row + DRow)][byte(Col + DCol)] = ord(Flagged) then
                         Inc(Result);
    end;
 
@@ -172,7 +178,7 @@ var
             for DRow := -1 to 1 do
                for DCol := -1 to 1 do
                   if FieldContains(Field, DRow + Row, DCol + Col) then
-                     if States[DRow + Row][DCol + Col] = ord(Closed) then
+                     if States[byte(DRow + Row)][byte(DCol + Col)] = ord(Closed) then
                         if OpenAt(Field, DRow + Row, DCol + Col) then
                            Exit(True);
 
@@ -224,12 +230,12 @@ var
       {$endif}
    end;
 
-   function IsAtCursor(Field: Field; Row, Col: byte): Boolean;
+   function IsAtCursor(var Field: Field; Row, Col: byte): Boolean;
    begin
       IsAtCursor := (Field.CursorRow = Row) and (Field.CursorCol = Col);
    end;
 
-   procedure FieldDisplay(Field: Field);
+   procedure FieldDisplay(var Field: Field);
    var
       Row, Col, Nbors: byte;
    begin
@@ -288,7 +294,7 @@ var
    end;
 
 
-   procedure FieldRedisplay(Field: Field);
+   procedure FieldRedisplay(var Field: Field);
    begin
       clrscr;
 
@@ -296,7 +302,7 @@ var
    end;
 
 
-   function YorN(Question: String; Kep: YornKeep): Boolean;
+   function YorN(Question: TMessage; Kep: YornKeep): Boolean;
    var
       Answer: Char;
    begin
@@ -304,7 +310,7 @@ var
       while True do
       begin
 
-         repeat until keypressed; 
+         repeat until keypressed;
          Answer:=readkey;
 
          case Answer of
@@ -319,7 +325,7 @@ var
                begin
                   if ((ord(Kep) shr 1) and 1) = 1
                   then WriteLn('n') else clrscr;
-		  
+
                   Exit(False);
                end;
          end;
@@ -327,12 +333,12 @@ var
    end;
 
 
-   function StateAtCursor(Field: Field): State;
+   function StateAtCursor(var Field: Field): State;
    begin
-      with Field do Result := State(States[CursorRow][CursorCol]);     
-   end;  
+      with Field do Result := State(States[CursorRow][CursorCol]);
+   end;
 
-   
+
 begin
    Randomize;
 
@@ -342,10 +348,10 @@ begin
    Quit := False;
    while not Quit do
    begin
-  
+
       repeat until keypressed;
       Cmd:=Readkey;
-      
+
       case Cmd of
          'w': begin
                  MoveUp(MainField);
@@ -360,7 +366,7 @@ begin
                  FieldRedisplay(MainField);
               end;
          'd': begin
-                 MoveRight(MainField);	 
+                 MoveRight(MainField);
                  FieldRedisplay(MainField);
               end;
 
@@ -384,20 +390,20 @@ begin
                   MainField.Peek := not MainField.Peek;
                   FieldRedisplay(MainField);
 
-		end; 
+		end;
          {$endif}
 
          ' ': begin
-	 
+
 		 if (StateAtCursor(MainField) = Flagged) then
 		  if YorN('Really open flagged cell?', KeepNone) then
-		  
+
 		  with MainField do States[CursorRow][CursorCol] := ord(Open)
-		   
+
 		  else
 		    FieldRedisplay(MainField);
-	 
-	 
+
+
                  if (StateAtCursor(MainField) <> Flagged) then
                     if OpenAtCursor(MainField) then
                     begin
@@ -427,7 +433,7 @@ begin
                        else FieldRedisplay(MainField);
                     end
               end;
-	      
+
       end;
    end;
 
