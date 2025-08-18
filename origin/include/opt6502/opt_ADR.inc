@@ -1946,4 +1946,42 @@ begin
        end;
 
 
+
+
+if //lda_stack(i) and
+   add_sub(i+1) and
+   sta_stack(i+2) and
+   lda_stack(i+3) and
+   adc_sbc(i+4) and
+   sta_stack(i+5) and
+
+   mwy(i+6) and
+   lda_stack(i+7) and
+   add_sub(i+8) and
+   sta_stack(i+9) and
+   lda_stack(i+10) and
+   adc_sbc(i+11) and
+   sta_stack(i+12) and
+   ldy_stack(i+13) then
+   
+ if argMatch(i+2, i+7) and
+    argMatch(i+7, i+9) and 
+    argMatch(i+5, i+10) and
+    argMatch(i+10, i+12) and
+    argMatch(i+9, i+13) then 
+   begin
+
+     listing[i+3] := '';
+     listing[i+4] := '';
+     listing[i+5] := '';
+
+     listing[i+10] := '';
+     listing[i+11] := '';
+     listing[i+12] := '';
+
+     exit(false);
+   end;
+
+
+
 end;		// function
