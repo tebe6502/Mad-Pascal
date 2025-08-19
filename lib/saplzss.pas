@@ -3,17 +3,20 @@ unit saplzss;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: SAP-R LZSS Player
- @version: 1.3
+ @version: 1.4
 
-   Version 1.1:
-	- function Decode: Boolean; (TRUE = end of song)
-
-   Version 1.2:
-	- TLZSSPlay.Init(a: byte), add clear buffers
+   Version 1.4:
+	- NTSC/PAL
 
    Version 1.3:
 	- TLZSSPlay.Init(a: byte), remove clear buffers
 	- TLZSSPlay.Clear
+
+   Version 1.2:
+	- TLZSSPlay.Init(a: byte), add clear buffers
+
+   Version 1.1:
+	- function Decode: Boolean; (TRUE = end of song)
 
  @description:
  <https://github.com/dmsc/lzss-sap>
@@ -36,7 +39,7 @@ type	TLZSSPlay = Object
 @description:
 object for controling SAP-R LZSS Player
 *)
-	jmp: byte;			// dta $4c
+	jmp: byte;			// dta $4c (JMP)
 
 	player: pointer;		// memory address of a player
 	modul: pointer;			// memory address of a module
@@ -53,6 +56,11 @@ object for controling SAP-R LZSS Player
 
 
 implementation
+
+uses misc;
+
+var	ntsc: byte;
+	player_enabled, play_frame: Boolean;
 
 
 procedure TLZSSPlay.Init(a: byte); assembler;
@@ -84,6 +92,9 @@ asm
 	ldy a		; POKEY: $00 | $10 | ...
 
 adr	jsr $ff06	; jsr player+6
+
+	lda #1
+	sta player_enabled
 
 	pla:tax
 end;
@@ -129,16 +140,30 @@ Decode stream music
 asm
 	txa:pha
 
-	mwa TLZSSPlay ptr
+	lda player_enabled
+	sta play_frame
+	beq quit
 
-	clc
+	asl ntsc		; =0 PAL, =4 NTSC
+	bcc skp
+
+	lda #%00000100
+	sta ntsc
+
+	lda #$00
+	sta play_frame
+	jmp quit
+skp
+	mwa TLZSSPlay ptr	; C = 0
+	sta play_frame
 
 	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
 ptr	equ *-2
 
 	lda #0
-	rol @
-	sta Result		; C = 1	-> 	if TRUE then 'end of song'
+	rol @			; C = 1	->		if TRUE then 'end of song'
+quit
+	sta Result
 
 	pla:tax
 end;
@@ -152,6 +177,9 @@ Play music
 asm
 	txa:pha
 
+	lda play_frame
+	beq quit
+
 	mwa TLZSSPlay ptr
 
 	sec
@@ -159,6 +187,7 @@ asm
 	jsr $ff00		; jmp (TLZSSPlay)	6502 buggy indirect jump
 ptr	equ *-2
 
+quit
 	pla:tax
 end;
 
@@ -172,6 +201,8 @@ asm
 	ldy a		; POKEY: $00 | $10 | ...
 
 	lda #0
+	sta player_enabled
+
 	sta $d208,y
 	lda #3
 	sta $d20f,y
@@ -190,5 +221,9 @@ end;
 
 initialization
 
+if DetectAntic then
+ ntsc:=0
+else
+ ntsc:=4;
 
 end.
