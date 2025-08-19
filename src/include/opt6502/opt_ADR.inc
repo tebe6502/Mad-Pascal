@@ -1946,4 +1946,38 @@ begin
        end;
 
 
+    if //lda_a(i) and									// lda					; 0
+      add_sub(i+1) and									// add|sub				; 1
+      sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+      lda_a(i+3) and									// lda					; 3
+      adc_sbc(i+4) and									// adc|sbc				; 4
+      sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH		; 5
+      mwy(i+6) and									// mwy					; 6
+      lda_stack(i+7) and								// lda :STACKORIGIN			; 7
+      add_sub(i+8) and									// add|sub				; 8
+      sta_stack(i+9) and								// sta :STACKORIGIN			; 9
+      lda_stack(i+10) and								// lda :STACKORIGIN+STACKWIDTH		; 10
+      adc_sbc(i+11) and									// adc|sbc				; 11
+      sta_stack(i+12) and								// sta :STACKORIGIN+STACKWIDTH		; 12
+      ldy_stack(i+13) then								// ldy :STACKORIGIN			; 13
+    if argMatch(i+2, i+7) and
+       argMatch(i+7, i+9) and
+       argMatch(i+5, i+10) and
+       argMatch(i+10, i+12) and
+       argMatch(i+9, i+13) then
+    begin
+
+     listing[i+3] := '';
+     listing[i+4] := '';
+     listing[i+5] := '';
+
+     listing[i+10] := '';
+     listing[i+11] := '';
+     listing[i+12] := '';
+
+     exit(false);
+    end;
+
+
+
 end;		// function
