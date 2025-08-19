@@ -3,7 +3,7 @@ unit rmt;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Raster Music Player library
- @version: 1.0
+ @version: 1.1
 
  @description:
  <http://atariki.krap.pl/index.php/Rmt>
@@ -41,6 +41,7 @@ implementation
 uses misc;
 
 var	ntsc: byte;
+	player_enabled: Boolean;
 
 
 procedure TRMT.Init(a: byte); assembler;
@@ -67,6 +68,8 @@ asm
 	iny
 	lda (:bp2),y
 	tay		; hi byte of RMT module to Y reg
+
+	sty player_enabled
 
 	lda a		; starting song line 0-255 to A reg
 adr	jsr $ff03	; jsr player+3
@@ -114,6 +117,9 @@ Play music, call this procedure every VBL frame
 asm
 	txa:pha
 
+	lda player_enabled
+	beq quit
+
 	asl ntsc		; =0 PAL, =4 NTSC
 	bcc skp
 
@@ -149,6 +155,9 @@ asm
 	sta adr+2
 
 adr	jsr $ff09	; jsr player+9
+
+	lda #$00
+	sta player_enabled
 
 	pla:tax
 end;
