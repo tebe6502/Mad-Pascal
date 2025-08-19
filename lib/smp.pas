@@ -3,9 +3,10 @@ unit smp;
  @type: unit
  @author: Chriss Hutt (Sheddy), Tomasz Biela (Tebe)
  @name: Sample player
- @version: 1.0
+ @version: 1.1 (2025-08-19)
 
  @description:
+ 
 *)
 
 {
@@ -39,12 +40,14 @@ procedure PlaySample; interrupt; assembler;
 @description:
 *)
 asm
-	pha				; save A
+	sta regA			; save A
+
 	lda #0
 value	equ *-1
 	sta AUDC4			; play sample ASAP to minimise DMA lag
-	tya
-	pha				; save Y
+
+	sty regY			; save Y
+
 	lda #0
 	sta IRQEN			; reset interrupt
 
@@ -67,9 +70,11 @@ nybble	equ *-1
 
 irq1	tya
 	and #$0f			; right nybble of sample
+
 	inc sample			; next lo byte of sample
 	bne irq2
 	inc sample+1			; next hi byte of sample
+
 	dec size			; check if at end of sample
 	bne irq2			; branch if not
 
@@ -93,9 +98,8 @@ size	equ *-1				; = 0
 irq2	ora #$f0			; no polycounters + volume only bit
 irq3	sta value			; save sample to play next irq
 
-	pla
-	tay
-	pla				; restore Y and A
+	lda regA: #$00			; restore Y and A
+	ldy regY: #$00
 end;
 
 
@@ -140,6 +144,7 @@ asm
 
 	lda #4
 	sta IRQEN			; enable timer 4
+	sta irqens			; !!! NTSC NEED
 
 	lda #$f8
 	sta PlaySample.value		; an initial sample value (with no polycounters + volume only bit)
