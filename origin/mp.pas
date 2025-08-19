@@ -5661,7 +5661,7 @@ end;	//GenerateBinaryOperation
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelationString(rel: Byte; LeftValType, RightValType: Byte; sLeft: WordBool = false; sRight: WordBool = false);
+procedure GenerateRelationString(relation: Byte; LeftValType, RightValType: Byte; sLeft: WordBool = false; sRight: WordBool = false);
 begin
  asm65;
  asm65('; relation STRING');
@@ -5672,32 +5672,34 @@ begin
 
  Gen;
 
+{
  if (LeftValType = POINTERTOK) and (RightValType = POINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'sta @cmpPCHAR.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.B+1');
+	asm65(#9'sta @cmpPCHAR.B+1');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'sta @cmpPCHAR.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.A+1');
+	asm65(#9'sta @cmpPCHAR.A+1');
 
 	asm65(#9'jsr @cmpPCHAR');
 
  end else
+ }
  if (LeftValType = POINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'sta @cmpPCHAR2STRING.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.B+1');
+	asm65(#9'sta @cmpPCHAR2STRING.B+1');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'sta @cmpPCHAR2STRING.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.A+1');
+	asm65(#9'sta @cmpPCHAR2STRING.A+1');
 
 	asm65(#9'jsr @cmpPCHAR2STRING');
 
@@ -5705,14 +5707,14 @@ begin
  if (LeftValType = STRINGPOINTERTOK) and (RightValType = POINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'sta @cmpSTRING2PCHAR.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.B+1');
+	asm65(#9'sta @cmpSTRING2PCHAR.B+1');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'sta @cmpSTRING2PCHAR.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.A+1');
+	asm65(#9'sta @cmpSTRING2PCHAR.A+1');
 
 	asm65(#9'jsr @cmpSTRING2PCHAR');
 
@@ -5739,7 +5741,7 @@ begin
  if RightValType = CHARTOK then
   a65(__cmpSTRING2CHAR);				// STRING ? CHAR
 
- GenerateRelationOperation(rel, BYTETOK);
+ GenerateRelationOperation(relation, BYTETOK);
 
  Gen;
 
@@ -10543,9 +10545,13 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   if sLeft or sRight then begin
 
-   if (ValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) and (RightValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) then
-    GenerateRelationString(Tok[i + 1].Kind, ValType, RightValType, sLeft, sRight)
-   else
+   if (ValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) and (RightValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) then begin
+
+    if (ValType = POINTERTOK) and (RightValType = POINTERTOK) then
+      Error(i, 'Can''t determine PCHAR length, consider using COMPAREMEM');
+
+    GenerateRelationString(Tok[i + 1].Kind, ValType, RightValType, sLeft, sRight);
+   end else
     GetCommonType(j, ValType, RightValType);
 
   end else
