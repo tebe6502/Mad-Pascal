@@ -4,7 +4,7 @@ unit gif;
 @author: Bjarke Viksoe, Tomasz 'Tebe' Biela
 @name: GIF
 
-@version: 1.2
+@version: 1.3
 
 @description:
 
@@ -48,6 +48,8 @@ Const
 	 geBitSizeOverflow = 9; { bit size went beyond 12 bits }
 
 IMPLEMENTATION
+
+uses sysutils;
 
 Const
 	BitShift: array [0..15] of word = (1,2,4,8,$10,$20,$40,$80,$100,$200,$400,$800,$1000,$2000,$4000,$8000);
@@ -553,6 +555,8 @@ end;
 
 function LoadGIF(filename : TString): byte;
 Begin
+	if not FileExists(filename) then exit(geNoFile);
+
 	Init(filename);
 
 	if Status <> geNoError then exit(Status);
