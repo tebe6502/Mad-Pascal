@@ -107,7 +107,7 @@ sprite_anim_speed 	:MAX_SPRITES brk	;szybkość animacji obiektu
 //		mva #scr40 dmactl
 		mva #$c0 nmien			;wlacz dli+vblk
 
-		mva #3 gractl			;włączamy duszki
+		mva #3 pmcntl			;włączamy duszki
 		mva #>sprites pmbase
 		mva #32+16+1 gtiactl		;kolorowe duszki, pociski w jednym kolorze
 

@@ -14,7 +14,7 @@ scr48	= @dmactl(wide|dma|players|missiles|oneline)		;screen 48b
 scr40	= @dmactl(normal|dma|players|missiles|oneline)		;screen 40b
 scr32	= @dmactl(narrow|dma|players|missiles|oneline)		;screen 32b
 
-.enum	@gractl
+.enum	@pmcntl
 	missiles= %1
 	players	= %10
 	trigs	= %100
@@ -237,7 +237,8 @@ gtictl	=	$D01B	; rejestr kontroli ukladu GTIA
 gtiactl	=	gtictl
 
 vdelay	=	$D01C	; licznik opoznienia pionowego P/MG
-gractl	=	$D01D	; rejestr kontroli graczy i pociskow
+pmcntl	=	$D01D	; rejestr kontroli graczy i pociskow
+gractl	=	PMCNTL
 hitclr	=	$D01E	; rejestr kasowania rejestrow kolizji
 consol	=	$D01F	; rejestr stanu klawiszy konsoli
 

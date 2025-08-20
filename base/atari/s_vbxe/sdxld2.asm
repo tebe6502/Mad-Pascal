@@ -654,12 +654,12 @@ E_84DC	jsr $0000
 E_84DF	jmp $0000
 
 ; http://tajemnice.atari8.info/8_91/8_91_dosy.html
-; Tablica sterownika (ang. handler) zawiera szereg wektorów o okreœlonym znaczeniu.
-; Ich kolejnoœæ jest nastêpuj¹ca:
+; Tablica sterownika (ang. handler) zawiera szereg wektorÃ³w o okreÅ›lonym znaczeniu.
+; Ich kolejnoÅ›Ä‡ jest nastÄ™pujÄ…ca:
 ;	OPEN (wektor otwarcia pliku)
-;	CLOSE (wektor zamkniêcia pliku)
-;	GET BYTE (wektor pobrania bajtu z urz¹dzenia Ÿród³owego)
-;	PUT BYTE (wektor wys³ania bajtu do peryferia)
+;	CLOSE (wektor zamkniÄ™cia pliku)
+;	GET BYTE (wektor pobrania bajtu z urzÄ…dzenia ÅºrÃ³dÅ‚owego)
+;	PUT BYTE (wektor wysÅ‚ania bajtu do peryferia)
 ;	GET STATUS (wektor pobrania statusu)
 ;	SPECIAL (wektor specjalny).
 
