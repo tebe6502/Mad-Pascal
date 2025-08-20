@@ -130,17 +130,17 @@ A	= :TMP		; ztmp8
 B	= :TMP+2	; ztmp10
 
 	ldy #0
-	
+
 	lda (ztmp10),y
 	sta count2
-	
+
 	lda (ztmp8),y
 	sta count1
 
 	cmp count2
 	scc
 	lda count2
-	sta count	
+	sta count
 
 	cmp #0
 	beq stop
@@ -175,61 +175,3 @@ fail	php
 	plp
 	rts
 .endp
-
-
-
-/*
-
-.proc	@cmpPCHAR
-
-A	= :TMP		; ztmp8
-B	= :TMP+2	; ztmp10
-
-	ldy #0
-loop
-	lda (ztmp8),y
-	ora (ztmp10),y
-	beq stop
-
-	lda (ztmp8),y
-	beq fail_
-	lda (ztmp10),y
-	beq fail_
-
-	lda (ztmp8),y
-	sub (ztmp10),y
-	bne  fail
-
-	iny
-	bne skp
-
-	inc ztmp8+1
-	inc ztmp10+1
-skp
-	jmp loop
-stop
-	ldy #1
-
-	lda #$28
-	sta 712
-
-
-	rts
-
-fail_	lda $d20a
-	sta $d01a
-	jmp fail_
-
-
-fail	brk
-
-
-	php
-
-	ldy #1
-
-	plp
-	rts
-.endp
-
-*/

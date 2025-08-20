@@ -5688,7 +5688,7 @@ begin
 	asm65(#9'jsr @cmpPCHAR');
 
  end else
- }
+
  if (LeftValType = POINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
@@ -5719,6 +5719,8 @@ begin
 	asm65(#9'jsr @cmpSTRING2PCHAR');
 
  end else
+ }
+
  if (LeftValType = STRINGPOINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 //  a65(__cmpSTRING)					// STRING ? STRING
 
@@ -10547,7 +10549,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
    if (ValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) and (RightValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) then begin
 
-    if (ValType = POINTERTOK) and (RightValType = POINTERTOK) then
+    if (ValType = POINTERTOK) or (RightValType = POINTERTOK) then
       Error(i, 'Can''t determine PCHAR length, consider using COMPAREMEM');
 
     GenerateRelationString(Tok[i + 1].Kind, ValType, RightValType, sLeft, sRight);
