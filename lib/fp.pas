@@ -42,7 +42,7 @@ type
 implementation
 
 
-{$link fp/fp.obx}
+{$link fp/fp.obj}
 
 
 end.

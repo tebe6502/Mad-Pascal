@@ -1,5 +1,3 @@
-program test_mux;
-
 uses crt, shanti;
 
 (*
@@ -35,11 +33,15 @@ var
 
 	spd_face, spd_thing: byte;
 
+	scr0: array [0..127] of byte absolute $0600;
+	scr1: array [0..127] of byte absolute $0680;
+
 
 
 procedure vbl; interrupt; assembler;
 asm
-// own code
+// user program code
+
  plr
 end;
 
@@ -54,10 +56,10 @@ begin
 
  fillchar(pointer(VIDEO_RAM_ADDRESS), $500, 0);
 
- GetResourceHandle(p, 'chr0');
+ GetResourceHandle(p, 'fnt0');
  move(p, pointer(CHARSET_RAM_ADDRESS), 1024);
 
- GetResourceHandle(p, 'chr1');
+ GetResourceHandle(p, 'fnt1');
  move(p, pointer(CHARSET_RAM_ADDRESS+1024), 1024);
 
  HPalette[pal_color0] := $e2;
@@ -83,15 +85,15 @@ begin
 
    a:=p[0];
 
-   if a<>$ff then begin
+   if a <> $ff then begin
 
-    a:=a shl 1;
+    a:=(a) shl 1;
 
-    v[0]:=a;
-    v[1]:=a+1;
+    v[0]:=scr0[a];
+    v[1]:=scr0[a+1];
 
-    v[32]:=a;
-    v[33]:=a+1;
+    v[32]:=scr1[a];
+    v[33]:=scr1[a+1];
 
    end;
 
@@ -106,9 +108,9 @@ begin
 end;
 
 
-{$link assets\monster.obj}
-{$link assets\face.obj}
-{$link assets\thing.obj}
+{$link assets\monster.obx}
+{$link assets\face.obx}
+{$link assets\thing.obx}
 
 
 procedure addShapes;

@@ -45,7 +45,7 @@ function fastdiv(divisor, divider: word): word;
 
 	{$codealign link = $100}
 
-	{$link fdiv\fdiv.obx}
+	{$link fdiv\fdiv.obj}
 
 	{$codealign link = 0}
 
