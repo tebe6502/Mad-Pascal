@@ -695,9 +695,8 @@ begin
        __shrAX_CL: asm65(#9'jsr @shrAX_CL');
       __shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
 
-	     __je: asm65(#9'beq *+5');					// =
-	    __jne: asm65(#9'bne *+5');					// <>
-
+//	     __je: asm65(#9'beq *+5');					// =
+//	    __jne: asm65(#9'bne *+5');					// <>
 //	     __jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;	// >
 //	    __jge: asm65(#9'bcs *+5');					// >=
 //	     __jl: asm65(#9'bcc *+5');					// <
@@ -3623,8 +3622,8 @@ Gen; Gen; Gen;								// mov :eax, [bx]
 a65(__subBX);
 
 asm65(#9'lda :STACKORIGIN+1,x');
+asm65(#9'bne *+5');
 
-a65(__jne);
 end;
 
 
@@ -3639,7 +3638,7 @@ begin
 
 Gen; Gen; Gen;								// mov :eax, [bx]
 
-a65(__je);
+asm65(#9'beq *+5')
 
 end;
 

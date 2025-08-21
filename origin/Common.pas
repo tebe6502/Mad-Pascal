@@ -352,18 +352,22 @@ type
   code65 =
   (
 
-  __je, __jne,
+//  __je, __jne,
 //  __jg, __jge, __jl, __jle,
+
   __putCHAR, __putEOL,
   __addBX, __subBX, __movaBX_Value,
+
   __imulECX,
+
 //  __notaBX, __negaBX, __notBOOLEAN,
+
   __addAL_CL, __addAX_CX, __addEAX_ECX,
   __shlAL_CL, __shlAX_CL, __shlEAX_CL,
   __subAL_CL, __subAX_CX, __subEAX_ECX,
-  __cmpSTRING, __cmpSTRING2CHAR, __cmpCHAR2STRING,
   __shrAL_CL, __shrAX_CL, __shrEAX_CL
 
+//  __cmpSTRING, __cmpSTRING2CHAR, __cmpCHAR2STRING,
 //  __cmpINT, __cmpEAX_ECX, __cmpAX_CX, __cmpSMALLINT, __cmpSHORTINT,
 //  __andEAX_ECX, __andAX_CX, __andAL_CL,
 //  __orEAX_ECX, __orAX_CX, __orAL_CL,
