@@ -2872,6 +2872,10 @@ begin				// OptimizeASM
 
       if elf = $058D0867 then		// @cmpSTRING		accepted
       else
+      if elf = $03CEEED7 then		// @cmpCHAR2STRING	accepted
+      else
+      if elf = $06FEACE2 then		// @cmpSTRING2CHAR	accepted
+      else
 
       if elf = $044A824C then		// @FCMPL		accepted
       else

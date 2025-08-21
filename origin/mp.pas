@@ -687,8 +687,8 @@ begin
 	 __putEOL: asm65(#9'@printEOL');
 	__putCHAR: asm65(#9'jsr @printCHAR');
 
-      __shlAL_CL: asm65(#9'jsr @shlEAX_CL.BYTE');
-      __shlAX_CL: asm65(#9'jsr @shlEAX_CL.WORD');
+       __shlAL_CL: asm65(#9'jsr @shlEAX_CL.BYTE');
+       __shlAX_CL: asm65(#9'jsr @shlEAX_CL.WORD');
       __shlEAX_CL: asm65(#9'jsr @shlEAX_CL.CARD');
 
        __shrAL_CL: asm65(#9'jsr @shrAL_CL');
@@ -717,9 +717,9 @@ begin
 	__imulECX: asm65(#9'jsr imulECX');
 
 //     __notBOOLEAN: asm65(#9'jsr notBOOLEAN');
-//	 __notaBX: asm65(#9'jsr notaBX');
+//	   __notaBX: asm65(#9'jsr notaBX');
 
-//	 __negaBX: asm65(#9'jsr negaBX');
+//	   __negaBX: asm65(#9'jsr negaBX');
 
 //     __xorEAX_ECX: asm65(#9'jsr xorEAX_ECX');
 //       __xorAX_CX: asm65(#9'jsr xorAX_CX');
@@ -730,8 +730,8 @@ begin
 //       __andAL_CL: asm65(#9'jsr andAL_CL');
 
 //      __orEAX_ECX: asm65(#9'jsr orEAX_ECX');
-//	__orAX_CX: asm65(#9'jsr orAX_CX');
-//	__orAL_CL: asm65(#9'jsr orAL_CL');
+//	  __orAX_CX: asm65(#9'jsr orAX_CX');
+//	  __orAL_CL: asm65(#9'jsr orAL_CL');
 
 //     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
 //       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
@@ -740,10 +740,9 @@ begin
 //	   __cmpINT: asm65(#9'jsr cmpINT');
 
 //      __cmpSTRING: asm65(#9'jsr cmpSTRING');
-
- __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
- __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
-
+// __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
+// __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
+ 
    __movaBX_Value: begin
 //		    asm65(#9'ldx sp', '; mov dword ptr [bx], Value');
 
@@ -5737,11 +5736,33 @@ begin
 	asm65(#9'jsr @cmpSTRING');
 
  end else
- if LeftValType = CHARTOK then
-  a65(__cmpCHAR2STRING)					// CHAR ? STRING
- else
- if RightValType = CHARTOK then
-  a65(__cmpSTRING2CHAR);				// STRING ? CHAR
+ if LeftValType = CHARTOK then begin
+//  a65(__cmpCHAR2STRING)				// CHAR ? STRING
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpCHAR2STRING.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpCHAR2STRING.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpCHAR2STRING.A');
+
+	asm65(#9'jsr @cmpCHAR2STRING');
+
+ end else
+ if RightValType = CHARTOK then begin
+//  a65(__cmpSTRING2CHAR);				// STRING ? CHAR
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpSTRING2CHAR.B');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpSTRING2CHAR.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING2CHAR.A+1');
+
+	asm65(#9'jsr @cmpSTRING2CHAR');
+ end;
 
  GenerateRelationOperation(relation, BYTETOK);
 

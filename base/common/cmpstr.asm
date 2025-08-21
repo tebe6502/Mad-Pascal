@@ -1,19 +1,14 @@
 
 /*
-	cmpSTRING2CHAR
-	cmpCHAR2STRING
+	@cmpSTRING2CHAR
+	@cmpCHAR2STRING
 	@cmpSTRING
 */
 
-.proc	cmpSTRING2CHAR
+.proc	@cmpSTRING2CHAR
 
-	lda :STACKORIGIN-1,x
-	sta ztmp8
-	lda :STACKORIGIN-1+STACKWIDTH,x
-	sta ztmp8+1
-
-	lda :STACKORIGIN,x
-	sta ztmp10
+A	= :TMP		; ztmp8
+B	= :TMP+2	; ztmp10
 
 	ldy #0
 
@@ -39,15 +34,10 @@ fail	lda #$ff
 .endp
 
 
-.proc	cmpCHAR2STRING
+.proc	@cmpCHAR2STRING
 
-	lda :STACKORIGIN-1,x
-	sta ztmp8
-
-	lda :STACKORIGIN,x
-	sta ztmp10
-	lda :STACKORIGIN+STACKWIDTH,x
-	sta ztmp10+1
+A	= :TMP		; ztmp8
+B	= :TMP+2	; ztmp10
 
 	ldy #0
 
