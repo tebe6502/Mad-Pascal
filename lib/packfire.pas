@@ -2,7 +2,7 @@ unit packfire;
 (*
 @type: unit
 @name: PackFire
-@author: Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
+@author: hitchhikr/Neural, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
 
 @description:
 
@@ -10,7 +10,7 @@ unit packfire;
 
 <https://www.cpcwiki.eu/forum/programming/dumb-question-15839-bitbuster-1-2/msg32069/#msg32069>
 
-https://github.com/tebe6502/Mad-Assembler/tree/master/examples/compression/packfire
+<https://github.com/tebe6502/Mad-Assembler/tree/master/examples/compression/packfire>
 
 !!! PackFire v1.2 !!!
 
