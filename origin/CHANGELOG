@@ -1,3 +1,6 @@
+24.08.2025
+- nowy unit SAM
+
 22.08.2025
 - poprawione parsowanie wartości rzeczywistych, akceptuje dodatkowe znaki 'E', '-', np. 6.1858296469E-02
 
