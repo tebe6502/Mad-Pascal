@@ -19,7 +19,14 @@ zeropage: $CB..$FF
 
 interface
 
+const
+	DEFAULT_SPEED_L1 = $41;
+	DEFAULT_PITCH_L1 = $40;
+	DEFAULT_SPEED_L0 = $46;
+	DEFAULT_PITCH_L0 = $40;
+
 	procedure say(s: string); overload;
+	procedure say(video: Boolean; speed, pitch: byte); overload; assembler;
 	procedure say; overload; assembler;
 
 
@@ -28,6 +35,30 @@ implementation
 {$link sam\sam_reloc.obj}
 	
 {$link sam\reciter_reloc.obj}
+
+
+procedure say(video: Boolean; speed, pitch: byte); overload; assembler;
+asm
+ ldy speed
+
+ lda video
+ sta LIGHTS
+
+ beq off
+
+ sty SPEED_L1
+ lda pitch
+ sta PITCH_L1
+ 
+ jmp @exit
+
+off
+
+ sty SPEED_L0
+ lda pitch
+ sta PITCH_L0
+
+end;
 
 
 procedure say(s: string); overload;

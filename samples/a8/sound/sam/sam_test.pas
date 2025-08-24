@@ -2,17 +2,14 @@ uses crt, sam;
 
 begin
 
- while true do begin
+ say('HELLO  ');
 
-   say('HELLO  ');
-
-   say; 
+ say; 
  
-   say('THIS IS MADPASCAL  UNIT   ');
+ say(true, DEFAULT_SPEED_L1, DEFAULT_PITCH_L1);
+ 
+ say('THIS IS MADPASCAL  UNIT   ');
 
-   repeat until keypressed;
-   readkey;
-   
- end;
+ repeat until keypressed;
 
 end.
