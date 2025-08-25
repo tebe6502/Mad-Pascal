@@ -741,7 +741,7 @@ begin
 //      __cmpSTRING: asm65(#9'jsr cmpSTRING');
 // __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
 // __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
- 
+
    __movaBX_Value: begin
 //		    asm65(#9'ldx sp', '; mov dword ptr [bx], Value');
 
@@ -11800,12 +11800,21 @@ case Tok[i].Kind of
 
 //writeln('1: ', Ident[IdentIndex].NumAllocElements_);
 
-                        asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
-                        asm65(#9'add :STACKORIGIN-1,x');
-                        asm65(#9'sta @move.dst');
-                        asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
-                        asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-                        asm65(#9'sta @move.dst+1');
+			if Tok[k + 1].Kind = OBRACKETTOK then begin			// = tab[x]
+                          asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'add :STACKORIGIN-2,x');
+                          asm65(#9'sta @move.dst');
+                          asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'adc :STACKORIGIN-2+STACKWIDTH,x');
+                          asm65(#9'sta @move.dst+1');
+			end else begin
+                          asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'add :STACKORIGIN-1,x');
+                          asm65(#9'sta @move.dst');
+                          asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+                          asm65(#9'sta @move.dst+1');
+			end;
 
                         asm65(#9'lda :STACKORIGIN,x');
 		        asm65(#9'sta @move.src');
