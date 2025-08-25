@@ -51,7 +51,7 @@ warmst	=	$08	; znacznik goracego startu
 boot?	=	$09	; znacznik odczytu wstepnego
 dosvec	=	$0A	; (2) wektor startowy programu dyskowego
 dosini	=	$0C	; (2) wektor inicjacji po odczycie z dyskietki
-
+pokmsk	=	$10	; IRQEN shadow register.
 brkkey	=	$11
 
 rtclok	=	$12	; (3) zegar czasu rzeczywistego
