@@ -138,15 +138,16 @@ type	TBCB = record
 		dst_adr: TUInt24;
 		dst_step_y: smallint;
 		dst_step_x: shortint;
-		blt_width: word;
-		blt_height: byte;
+		blt_width: word;		// 0..511
+		blt_height: byte;		// 0..255
 		blt_and_mask: byte;
 		blt_xor_mask: byte;
 		blt_collision_mask: byte;
-		blt_zoom: byte;
+		blt_zoom: byte;			// blt_zoomy bit 4..6 ; blt_zoomx bit 0..2
 		pattern_feature: byte;
-		blt_control: byte;
-	end;
+		blt_control: byte;		// %1000 = next blit
+	end;					// %0000 = copy all
+						// %0001 = copy if src <> 0
 
 
 {$i vbxe_memorystream_type.inc}

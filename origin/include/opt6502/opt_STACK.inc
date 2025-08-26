@@ -743,14 +743,18 @@ begin
       begin
 
 
-       if (listing[i+8] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 8
+       if lda_stack(i+8) and									// lda :STACKORIGIN,x			; 8
           sta_val(i+9) and									// sta ~:STACKORIGIN			; 9
-          (listing[i+10] = #9'lda :STACKORIGIN+STACKWIDTH,x') and				// lda :STACKORIGIN+STACKWIDTH,x	; 10
+          lda_stack(i+10) and									// lda :STACKORIGIN+STACKWIDTH,x	; 10
           sta_val(i+11) and									// sta ~:STACKORIGIN			; 11
-          (listing[i+12] = #9'lda :STACKORIGIN+STACKWIDTH*2,x') and				// lda :STACKORIGIN+STACKWIDTH*2,x	; 12
+          lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH*2,x	; 12
           sta_val(i+13) and									// sta ~:STACKORIGIN			; 13
-          (listing[i+14] = #9'lda :STACKORIGIN+STACKWIDTH*3,x') and				// lda :STACKORIGIN+STACKWIDTH*3,x	; 14
+          lda_stack(i+14) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 14
           sta_val(i+15) then									// sta ~:STACKORIGIN			; 15
+        if argMatch(i+1, i+8) and
+           argMatch(i+3, i+10) and
+           argMatch(i+5, i+12) and
+           argMatch(i+7, i+14) then
          begin
 	   listing[i+8]  := #9'lda ' + GetString(i);
 

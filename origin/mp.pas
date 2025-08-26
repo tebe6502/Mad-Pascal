@@ -6216,9 +6216,7 @@ begin
 	     if (Tok[i + 1].Kind = CBRACKETTOK) and (Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK]) then begin
 	      yes := FALSE;
 
-	      Push(NumAllocElements_ * Size, ASVALUE, DataSize[WORDTOK]);
-
-	     // if Ident[IdentIndex].isStriped = FALSE then GenerateIndexShift( Ident[IdentIndex].AllocElementType );
+	      Push(0, ASVALUE, DataSize[ArrayIndexType]);
 
 	      GenerateBinaryOperation(PLUSTOK, WORDTOK);
 
@@ -9968,6 +9966,7 @@ begin
     RightValType := Kind
    else
     RightValType := ValType;
+
   end;
 
 
@@ -10001,6 +10000,7 @@ begin
     ValType := Kind
    else
     ValType := RightValType;
+
   end;
 
 
@@ -11804,37 +11804,39 @@ case Tok[i].Kind of
 		         ((Ident[IdentIndex].NumAllocElements_ = Ident[IdentTemp].NumAllocElements) or
 		          (Ident[IdentIndex].NumAllocElements_ = Ident[IdentTemp].NumAllocElements_)) then begin
 
-//writeln('1: ', Ident[IdentIndex].NumAllocElements_);
+//writeln(tok[k].line,',', Ident[IdentTemp].NumAllocElements_);
 
-			if Tok[k + 1].Kind = OBRACKETTOK then begin			// = tab[x]
-	   	          a65(__subBX);
+			if Ident[IdentTemp].NumAllocElements_ = 0 then begin
 
-                          asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'lda ' + GetLocalName(IdentIndex));
                           asm65(#9'add :STACKORIGIN-1,x');
                           asm65(#9'sta @move.dst');
-                          asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
                           asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                           asm65(#9'sta @move.dst+1');
 
-                          asm65(#9'lda <' + GetLocalName(IdentTemp, 'adr.'));
-                          asm65(#9'add :STACKORIGIN,x');
+                          asm65(#9'lda ' + GetLocalName(IdentTemp));
 		          asm65(#9'sta @move.src');
-                          asm65(#9'lda >' + GetLocalName(IdentTemp, 'adr.'));
-                          asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+                          asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
 		          asm65(#9'sta @move.src+1');
 
 			end else begin
-                          asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+	   	          a65(__subBX);
+
+                          asm65(#9'lda ' + GetLocalName(IdentIndex));
                           asm65(#9'add :STACKORIGIN-1,x');
                           asm65(#9'sta @move.dst');
-                          asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                          asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
                           asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                           asm65(#9'sta @move.dst+1');
 
-                          asm65(#9'lda <' + GetLocalName(IdentTemp, 'adr.'));
+                          asm65(#9'lda ' + GetLocalName(IdentTemp));
+                          asm65(#9'add :STACKORIGIN,x');
 		          asm65(#9'sta @move.src');
-                          asm65(#9'lda >' + GetLocalName(IdentTemp, 'adr.'));
+                          asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
+                          asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
 		          asm65(#9'sta @move.src+1');
+
 			end;
 
 	   	        a65(__subBX);
@@ -11854,15 +11856,15 @@ case Tok[i].Kind of
 
 //writeln('2: ',Ident[IdentIndex].NumAllocElements);
 
-                        asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                        asm65(#9'lda ' + GetLocalName(IdentIndex));
 		        asm65(#9'sta @move.dst');
-                        asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                        asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
 		        asm65(#9'sta @move.dst+1');
 
-                        asm65(#9'lda <' + GetLocalName(IdentTemp, 'adr.'));
+                        asm65(#9'lda ' + GetLocalName(IdentTemp));
                         asm65(#9'add :STACKORIGIN-1,x');
                         asm65(#9'sta @move.src');
-                        asm65(#9'lda >' + GetLocalName(IdentTemp, 'adr.'));
+                        asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
                         asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                         asm65(#9'sta @move.src+1');
 
