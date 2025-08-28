@@ -136,7 +136,7 @@ begin
      end;
 
 
-    if (lda_a(i) or tya(i)) and									// lda|tya			; 0
+    if (lda_a(i) or tya(i) or sty(i)) and							// lda|tya|sty			; 0
        add_sub(i+1) and										// add				; 1
        sta_im_0(i+2) and									// sta #$00			; 2
        lda_a(i+3) and 										// lda				; 3
