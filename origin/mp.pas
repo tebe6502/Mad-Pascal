@@ -9339,6 +9339,8 @@ case Tok[i].Kind of
 //	  if ValType in IntegerTypes then
 //	    if DataSize[ValType] > DataSize[VarType] then ValType := VarType;     // skracaj typ danych    !!! niemozliwe skoro VarType = INTEGERTOK
 
+//writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].Kind,',',ValType,',',VarType);
+
 
 	  if (Ident[IdentIndex].Kind = CONSTANT) and (ValType in Pointers) then
 	   ConstVal := Ident[IdentIndex].Value - CODEORIGIN
