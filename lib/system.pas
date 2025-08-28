@@ -830,8 +830,6 @@ Fast inverse square root
 var sp: ^single;
     c: cardinal;
     f0, f1: single;
-const
-    threehalfs: single = 1.5;
 begin
 
 	sp:=@c;
@@ -894,9 +892,9 @@ Arctan returns the Arctangent of Value, which can be any Real type.
 
 The resulting angle is in radial units.
 
-@param: value - Real (Q24.8)
+@param: value - Single
 
-@returns: Real (Q24.8)
+@returns: Single
 *)
 var x, y: single;
     sign: Boolean;
