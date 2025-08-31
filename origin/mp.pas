@@ -7263,6 +7263,9 @@ begin
 
 	end;
 
+        if (Ident[IdentIndex].Param[NumActualParams].DataType in IntegerTypes) and (ActualParamType in RealTypes) then
+	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+         
 
 
 	if (Tok[i].Kind = IDENTTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = ENUMTOK) then begin

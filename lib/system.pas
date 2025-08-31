@@ -659,6 +659,7 @@ begin
 end;
 
 
+
 function Sqrt(x: Real): Real; overload;
 (*
 @description
@@ -668,6 +669,38 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: Real (Q24.8)
 *)
+
+var r, t, q, b: cardinal;
+begin
+
+    if (x <= 0) then exit(0.0);
+
+    r:=(PCardinal(@x)^) shr 8;
+
+    b := $40000000;
+    q := 0;
+
+    while( b > 0 ) do begin
+
+        t := q + b;
+        if( r >= t ) then begin
+
+            r := r - t;
+            q := t + b;
+        end;
+        r := r shl 1;
+        b := b shr 1;
+    end;
+
+    if( r > q ) then inc(q);
+
+    q:=q shr 8;
+
+    Result:=PReal(@q)^;
+end;
+
+
+{
 var sp: ^real;
     c: cardinal;
 
@@ -720,7 +753,7 @@ begin
 	end;
 
 end;
-
+}
 
 function Sqrt(x: Single): Single; overload;
 (*
@@ -781,7 +814,7 @@ begin
 	Result := sp^;
 
 	// Newton-Rapson iteration
-	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x / Result) * 0.5;
 end;
 
 
@@ -808,9 +841,9 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
-	Result:=(Result + x/Result) * 0.5;
+	Result:=(Result + x / Result) * 0.5;
+	Result:=(Result + x / Result) * 0.5;
+	Result:=(Result + x / Result) * 0.5;
 end;
 
 
