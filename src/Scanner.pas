@@ -133,7 +133,9 @@ begin
           (res.resType = 'CMC') or (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or
           (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
           (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
-          (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') then
+          (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') or
+          (res.resType = 'MD1PLAY') or (res.resType = 'MD1')
+        then        
 
         else
           Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType,
