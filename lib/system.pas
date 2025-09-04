@@ -215,8 +215,8 @@ const
 	function Abs(x: shortint): shortint; register; assembler; overload;
 	function Abs(x: smallint): smallint; register; assembler; overload;
 	function Abs(x: Integer): Integer; register; assembler; overload;
-	function ArcTan(value: real): real; overload;
-	function ArcTan(value: single): single; overload;
+	function ArcTan(a: real): real; overload;
+	function ArcTan(a: single): single; overload;
 	function ata2int(a: char): char; assembler;
 	function BinStr(Value: cardinal; Digits: byte): TString; assembler;
 	function CompareByte(P1,P2: PByte; Len: word): smallint; register; overload;
@@ -876,7 +876,7 @@ begin
 end;
 
 
-function ArcTan(value: real): real; overload;
+function ArcTan(a: real): real; overload;
 (*
 @description:
 Arctan returns the Arctangent of Value, which can be any Real type.
@@ -887,38 +887,44 @@ The resulting angle is in radial units.
 
 @returns: Real (Q24.8)
 *)
-var x, y: real;
-    sign: Boolean;
+const
+  c1 = 0.2447;
+  c2 = 0.0663;
+  pi_2 = 1.570796326;
+  pi_4 = 0.785398163;
+
+var
+  sign, yes: Boolean;
+  x: real;
+
 begin
-  sign:=false;
-  x:=value;
-  y:=0.0;
 
-  if (value=0.0) then begin
-    Result:=0.0;
-    exit;
-  end else
-   if (x < 0.0) then begin
-    sign:=true;
-    x:=-x;
-   end;
+  if a < 0 then begin
+    x := -a;
+    sign := true;
+  end else begin
+    x := a;
+    sign := false;
+  end;
 
-  x:=(x-1.0)/(x+1.0);
-  y:=x*x;
-  x := ((((((((.0028662257*y - .0161657367)*y + .0429096138)*y -
-             .0752896400)*y + .1065626393)*y - .1420889944)*y +
-             .1999355085)*y - .3333314528)*y + 1.0)*x;
-  x:= .785398163397 + x;
+  if x > 1.0 then begin
+   a := 1/x;
+   yes := true;
+  end else begin
+   a := x;
+   yes := false;
+  end;
 
-  if sign then
-   Result := -x
-  else
-   Result := x;
+  Result := pi_4*a - a*(a-1) *(c1+c2*a);
+
+  if yes then Result := pi_2 - Result;
+
+  if sign then Result := -Result;
 
 end;
 
 
-function ArcTan(value: single): single; overload;
+function ArcTan(a: single): single; overload;
 (*
 @description:
 Arctan returns the Arctangent of Value, which can be any Real type.
@@ -929,33 +935,39 @@ The resulting angle is in radial units.
 
 @returns: Single
 *)
-var x, y: single;
-    sign: Boolean;
+const
+  c1: single = 0.2447;
+  c2: single = 0.0663;
+  pi_2: single = 1.570796326;
+  pi_4: single = 0.785398163;
+
+var
+  sign, yes: Boolean;
+  x: single;
+
 begin
-  sign:=false;
-  x:=value;
-  y:=0;
 
-  if (integer(value) = 0) then begin
-    Result:=0;
-    exit;
-  end else
-   if (integer(x) < 0) then begin
-    sign:=true;
-    x:=-x;
-   end;
+  if a < 0 then begin
+    x := -a;
+    sign := true;
+  end else begin
+    x := a;
+    sign := false;
+  end;
 
-  x:=(x-1)/(x+1);
-  y:=x*x;
-  x := ((((((((.0028662257*y - .0161657367)*y + .0429096138)*y -
-             .0752896400)*y + .1065626393)*y - .1420889944)*y +
-             .1999355085)*y - .3333314528)*y + 1.0)*x;
-  x:= .785398163397 + x;
+  if x > 1.0 then begin
+   a := 1/x;
+   yes := true;
+  end else begin
+   a := x;
+   yes := false;
+  end;
 
-  if sign then
-   Result := -x
-  else
-   Result := x;
+  Result := pi_4*a - a*(a-1) *(c1+c2*a);
+
+  if yes then Result := pi_2 - Result;
+
+  if sign then Result := -Result;
 
 end;
 
