@@ -149,9 +149,19 @@
      Result := listing[i] = #9'add (:bp2),y'
    end;
 
+   function SUB_BP2_Y(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sub (:bp2),y'
+   end;
+
    function ADC_BP2_Y(i: integer): Boolean;
    begin
      Result := listing[i] = #9'adc (:bp2),y'
+   end;
+
+   function SBC_BP2_Y(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sbc (:bp2),y'
    end;
 
    function LDA_IM_0(i: integer): Boolean;

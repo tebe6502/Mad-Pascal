@@ -82,6 +82,27 @@ begin
        end;
 
 
+    if iny(i) and										// iny					; 0
+       lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
+       sta_a(i+2) and (iy(i+2) = false) and							// sta					; 2
+       (ldy(i+3) or mwy(i+3)) then								// ldy|mwy				; 3
+    begin
+     listing[i] := '';
+
+     exit(false);
+    end;
+
+
+    if iny(i) and										// iny					; 0
+       sta_a(i+1) and (iy(i+1) = false) and							// sta					; 1
+       (ldy(i+2) or mwy(i+2)) then								// ldy|mwy				; 2
+    begin
+     listing[i] := '';
+
+     exit(false);
+    end;
+
+
     if lda_val(i) and (lda_im(i) = false) and							// lda I				; 0	~:STACKORIGIN
        add_sub(i+1) and										// add|sub				; 1
        sta_val(i+2) and										// sta					; 2	~:STACKORIGN

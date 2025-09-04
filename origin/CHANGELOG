@@ -1,3 +1,6 @@
+04.09.2025
+- optimizations
+
 30.08.2025
 - dodana konwersja parametru procedury/funkcji INTEGER -> REAL
 - szybsza wersja 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
