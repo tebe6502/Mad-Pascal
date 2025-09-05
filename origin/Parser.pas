@@ -128,7 +128,17 @@ begin
 
   if S = '' then exit(-1);
 
+
+  if High(WithName) > 0 then
+   for TempIndex:=0 to High(WithName) do begin
+    Result := Search(WithName[TempIndex] + '.' + S, UnitNameIndex);
+
+    if Result > 0 then exit;
+   end;
+
+
   Result := Search(S, UnitNameIndex);
+
 
   if (Result = 0) and (pos('.', S) > 0) then begin   // potencjalnie odwolanie do unitu / obiektu
 
@@ -194,7 +204,7 @@ function RecordSize(IdentIndex: integer; field: string =''): integer;
 var i, j: integer;
     name, base: TName;
     FieldType, AllocElementType: Byte;
-    NumAllocElements: cardinal;
+    NumAllocElements, NumAllocElements_: cardinal;
     yes: Boolean;
 begin
 
@@ -214,20 +224,27 @@ begin
    for j := 1 to Types[i].NumFields do begin
 
     FieldType := Types[i].Field[j].DataType;
-    NumAllocElements := Types[i].Field[j].NumAllocElements;
+    NumAllocElements := Types[i].Field[j].NumAllocElements and $FFFF;
+    NumAllocElements_ := Types[i].Field[j].NumAllocElements shr 16;
     AllocElementType :=  Types[i].Field[j].AllocElementType;
 
     if AllocElementType in [FORWARDTYPE, PROCVARTOK] then begin
      AllocElementType := POINTERTOK;
      NumAllocElements := 0;
+     NumAllocElements_ := 0;
     end;
 
     if Types[i].Field[j].Name = field then begin yes:=true; Break end;
 
     if FieldType <> RECORDTOK then
-     if (FieldType in Pointers) and (NumAllocElements > 0) then
-      inc(Result, NumAllocElements * DataSize[AllocElementType])
-     else
+     if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+
+      if NumAllocElements_ > 0 then
+       inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])
+      else
+       inc(Result, NumAllocElements * DataSize[AllocElementType]);
+
+     end else
       inc(Result, DataSize[FieldType]);
 
    end;
@@ -245,15 +262,21 @@ begin
     if Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType <> RECORDTOK then begin
 
      FieldType := Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType;
-     NumAllocElements := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements;
+     NumAllocElements := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements and $FFFF;
+     NumAllocElements_ := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements shr 16;
      AllocElementType := Types[Ident[IdentIndex].NumAllocElements].Field[i].AllocElementType;
 
      if Types[Ident[IdentIndex].NumAllocElements].Field[i].Name = field then begin yes:=true; Break end;
 
      if FieldType <> RECORDTOK then
-      if (FieldType in Pointers) and (NumAllocElements > 0) then
-       inc(Result, NumAllocElements * DataSize[AllocElementType])
-      else
+      if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+
+       if NumAllocElements_ > 0 then
+        inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])
+       else
+        inc(Result, NumAllocElements * DataSize[AllocElementType]);
+
+      end else
        inc(Result, DataSize[FieldType]);
 
     end;
@@ -562,7 +585,7 @@ begin
  fl:=0;
  j:=0;
 
-// WRITELN(tok[i].line, ',', tok[i].kind);
+//WRITELN(tok[i].line, ',', tok[i].kind);
 
 case Tok[i].Kind of
 
@@ -970,13 +993,15 @@ case Tok[i].Kind of
 		  iError(i, TypeMismatch);
 
 
-		if (Ident[GetIdent(Tok[i].Name^)].DataType in RealTypes) and (ConstValType in RealTypes) then begin
+		if (Ident[IdentIndex].DataType in RealTypes) and (ConstValType in RealTypes) then begin
 		// ok
 		end else
-		if Ident[GetIdent(Tok[i].Name^)].DataType in Pointers then
+		if Ident[IdentIndex].DataType in Pointers then
 		  Error(j, 'Illegal type conversion: "'+InfoAboutToken(ConstValType)+'" to "'+Tok[i].Name^+'"');
 
-		ConstValType := Ident[GetIdent(Tok[i].Name^)].DataType;
+		ConstValType := Ident[IdentIndex].DataType;
+
+		if ConstValType = ENUMTYPE then ConstValType := Ident[IdentIndex].AllocElementType;
 
 		CheckTok(j + 1, CPARTOK);
 
@@ -1029,6 +1054,9 @@ case Tok[i].Kind of
 	 ConstVal := Ident[IdentIndex].Value - CODEORIGIN
 	else
 	 ConstVal := Ident[IdentIndex].Value;
+
+
+//writeln(ident[identindex].name,',',ConstValType,',',ident[identindex].kind);
 
 
 	if ConstValType = ENUMTYPE then begin
@@ -1918,9 +1946,6 @@ begin
 
 	Ident[NumIdent].DataType := VarType;					// Result
 
-        if VarType = ENUMTOK then
-	 Ident[NumIdent].AllocElementType := AllocElementType;
-
 	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;
 	Ident[NumIdent].NestedFunctionAllocElementType := AllocElementType;
 
@@ -2084,10 +2109,6 @@ begin
 //	if Tok[i].Kind = PCHARTOK then NestedFunctionResultType := PCHARTOK;
 
 	Ident[NumIdent].DataType := NestedFunctionResultType;			// Result
-
-        if NestedFunctionResultType = ENUMTOK then
-	 Ident[NumIdent].AllocElementType := AllocElementType;
-
 
 	NestedFunctionNumAllocElements := NumAllocElements;
 	Ident[NumIdent].NestedFunctionNumAllocElements := NumAllocElements;

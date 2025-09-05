@@ -8,18 +8,18 @@ var
  rcp: array [0..RANGE] of word;
 
  f:file;
- 
+
  i: integer;
- 
+
  v: byte;
 
 
 begin
 
 
- for i:=1 to RANGE do 
+ for i:=1 to RANGE do
   rcp[i] := trunc( (1/i) * 65536 + 0.99999);
- 
+
 
  assign(f, 'lrcp.bin'); rewrite(f, 1);
  for i:=0 to RANGE do begin

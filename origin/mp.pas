@@ -519,7 +519,7 @@ end;	//GetIdentProc
 
 procedure TestIdentProc(x: integer; S: TString);
 var IdentIndex, BlockStackIndex: Integer;
-    k, m: integer;
+    i, k, m: integer;
     ok: Boolean;
 
     ov: array of record
@@ -687,17 +687,16 @@ begin
 	 __putEOL: asm65(#9'@printEOL');
 	__putCHAR: asm65(#9'jsr @printCHAR');
 
-      __shlAL_CL: asm65(#9'jsr @shlEAX_CL.BYTE');
-      __shlAX_CL: asm65(#9'jsr @shlEAX_CL.WORD');
+       __shlAL_CL: asm65(#9'jsr @shlEAX_CL.BYTE');
+       __shlAX_CL: asm65(#9'jsr @shlEAX_CL.WORD');
       __shlEAX_CL: asm65(#9'jsr @shlEAX_CL.CARD');
 
        __shrAL_CL: asm65(#9'jsr @shrAL_CL');
        __shrAX_CL: asm65(#9'jsr @shrAX_CL');
       __shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
 
-	     __je: asm65(#9'beq *+5');					// =
-	    __jne: asm65(#9'bne *+5');					// <>
-
+//	     __je: asm65(#9'beq *+5');					// =
+//	    __jne: asm65(#9'bne *+5');					// <>
 //	     __jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;	// >
 //	    __jge: asm65(#9'bcs *+5');					// >=
 //	     __jl: asm65(#9'bcc *+5');					// <
@@ -717,9 +716,9 @@ begin
 	__imulECX: asm65(#9'jsr imulECX');
 
 //     __notBOOLEAN: asm65(#9'jsr notBOOLEAN');
-//	 __notaBX: asm65(#9'jsr notaBX');
+//	   __notaBX: asm65(#9'jsr notaBX');
 
-//	 __negaBX: asm65(#9'jsr negaBX');
+//	   __negaBX: asm65(#9'jsr negaBX');
 
 //     __xorEAX_ECX: asm65(#9'jsr xorEAX_ECX');
 //       __xorAX_CX: asm65(#9'jsr xorAX_CX');
@@ -730,8 +729,8 @@ begin
 //       __andAL_CL: asm65(#9'jsr andAL_CL');
 
 //      __orEAX_ECX: asm65(#9'jsr orEAX_ECX');
-//	__orAX_CX: asm65(#9'jsr orAX_CX');
-//	__orAL_CL: asm65(#9'jsr orAL_CL');
+//	  __orAX_CX: asm65(#9'jsr orAX_CX');
+//	  __orAL_CL: asm65(#9'jsr orAL_CL');
 
 //     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
 //       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
@@ -740,9 +739,8 @@ begin
 //	   __cmpINT: asm65(#9'jsr cmpINT');
 
 //      __cmpSTRING: asm65(#9'jsr cmpSTRING');
-
- __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
- __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
+// __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
+// __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
 
    __movaBX_Value: begin
 //		    asm65(#9'ldx sp', '; mov dword ptr [bx], Value');
@@ -3624,8 +3622,8 @@ Gen; Gen; Gen;								// mov :eax, [bx]
 a65(__subBX);
 
 asm65(#9'lda :STACKORIGIN+1,x');
+asm65(#9'bne *+5');
 
-a65(__jne);
 end;
 
 
@@ -3640,7 +3638,7 @@ begin
 
 Gen; Gen; Gen;								// mov :eax, [bx]
 
-a65(__je);
+asm65(#9'beq *+5')
 
 end;
 
@@ -5661,7 +5659,7 @@ end;	//GenerateBinaryOperation
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelationString(rel: Byte; LeftValType, RightValType: Byte; sLeft: WordBool = false; sRight: WordBool = false);
+procedure GenerateRelationString(relation: Byte; LeftValType, RightValType: Byte; sLeft: WordBool = false; sRight: WordBool = false);
 begin
  asm65;
  asm65('; relation STRING');
@@ -5672,32 +5670,34 @@ begin
 
  Gen;
 
+{
  if (LeftValType = POINTERTOK) and (RightValType = POINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'sta @cmpPCHAR.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.B+1');
+	asm65(#9'sta @cmpPCHAR.B+1');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'sta @cmpPCHAR.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.A+1');
+	asm65(#9'sta @cmpPCHAR.A+1');
 
 	asm65(#9'jsr @cmpPCHAR');
 
  end else
+
  if (LeftValType = POINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'sta @cmpPCHAR2STRING.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.B+1');
+	asm65(#9'sta @cmpPCHAR2STRING.B+1');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'sta @cmpPCHAR2STRING.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.A+1');
+	asm65(#9'sta @cmpPCHAR2STRING.A+1');
 
 	asm65(#9'jsr @cmpPCHAR2STRING');
 
@@ -5705,18 +5705,20 @@ begin
  if (LeftValType = STRINGPOINTERTOK) and (RightValType = POINTERTOK) then begin
 
  	asm65(#9'lda :STACKORIGIN,x');
-	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'sta @cmpSTRING2PCHAR.B');
 	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.B+1');
+	asm65(#9'sta @cmpSTRING2PCHAR.B+1');
 
 	asm65(#9'lda :STACKORIGIN-1,x');
-	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'sta @cmpSTRING2PCHAR.A');
 	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-	asm65(#9'sta @cmpSTRING.A+1');
+	asm65(#9'sta @cmpSTRING2PCHAR.A+1');
 
 	asm65(#9'jsr @cmpSTRING2PCHAR');
 
  end else
+ }
+
  if (LeftValType = STRINGPOINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 //  a65(__cmpSTRING)					// STRING ? STRING
 
@@ -5733,13 +5735,35 @@ begin
 	asm65(#9'jsr @cmpSTRING');
 
  end else
- if LeftValType = CHARTOK then
-  a65(__cmpCHAR2STRING)					// CHAR ? STRING
- else
- if RightValType = CHARTOK then
-  a65(__cmpSTRING2CHAR);				// STRING ? CHAR
+ if LeftValType = CHARTOK then begin
+//  a65(__cmpCHAR2STRING)				// CHAR ? STRING
 
- GenerateRelationOperation(rel, BYTETOK);
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpCHAR2STRING.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpCHAR2STRING.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpCHAR2STRING.A');
+
+	asm65(#9'jsr @cmpCHAR2STRING');
+
+ end else
+ if RightValType = CHARTOK then begin
+//  a65(__cmpSTRING2CHAR);				// STRING ? CHAR
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpSTRING2CHAR.B');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpSTRING2CHAR.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING2CHAR.A+1');
+
+	asm65(#9'jsr @cmpSTRING2CHAR');
+ end;
+
+ GenerateRelationOperation(relation, BYTETOK);
 
  Gen;
 
@@ -5757,7 +5781,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelation(rel: Byte; ValType: Byte);
+procedure GenerateRelation(relation: Byte; ValType: Byte);
 begin
 // asm65;
 // asm65('; relation');
@@ -5766,7 +5790,7 @@ begin
 
  if ValType = HALFSINGLETOK then begin
 
- case rel of
+ case relation of
   EQTOK:	// =
     begin
 	asm65(#9'lda :STACKORIGIN,x');
@@ -6008,7 +6032,7 @@ begin
 
  end;
 
- GenerateRelationOperation(rel, ValType);
+ GenerateRelationOperation(relation, ValType);
 
  Gen;
 
@@ -6191,6 +6215,10 @@ begin
 
 	     if (Tok[i + 1].Kind = CBRACKETTOK) and (Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK]) then begin
 	      yes := FALSE;
+
+	      Push(0, ASVALUE, DataSize[ArrayIndexType]);
+
+	      GenerateBinaryOperation(PLUSTOK, WORDTOK);
 
 	      VarType := ARRAYTOK;
 	     end else
@@ -6692,6 +6720,190 @@ end;	//NumActualParameters
 // ----------------------------------------------------------------------------
 
 
+procedure RealTypeConversion(var ValType, RightValType: Byte; Kind: Byte = 0);
+begin
+
+  If ((ValType = SINGLETOK) or (Kind = SINGLETOK)) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(INTEGERTOK, RightValType);
+
+//   asm65(#9'jsr @I2F');
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta :FPMAN0');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta :FPMAN1');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'sta :FPMAN2');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+			asm65(#9'sta :FPMAN3');
+
+			asm65(#9'jsr @I2F');
+
+			asm65(#9'lda :FPMAN0');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda :FPMAN1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'lda :FPMAN2');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'lda :FPMAN3');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+   if (ValType <> SINGLETOK) and (Kind = SINGLETOK) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+
+  end;
+
+
+  If (ValType in IntegerTypes) and ((RightValType = SINGLETOK) or (Kind = SINGLETOK)) then begin
+
+   ExpandParam_m1(INTEGERTOK, ValType);
+
+//   asm65(#9'jsr @I2F_M');
+
+			asm65(#9'lda :STACKORIGIN-1,x');
+			asm65(#9'sta :FPMAN0');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'sta :FPMAN1');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'sta :FPMAN2');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+			asm65(#9'sta :FPMAN3');
+
+			asm65(#9'jsr @I2F');
+
+			asm65(#9'lda :FPMAN0');
+			asm65(#9'sta :STACKORIGIN-1,x');
+			asm65(#9'lda :FPMAN1');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'lda :FPMAN2');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'lda :FPMAN3');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
+
+   if (RightValType <> SINGLETOK) and (Kind = SINGLETOK) then
+    ValType := Kind
+   else
+    ValType := RightValType;
+
+  end;
+
+
+  If ((ValType = HALFSINGLETOK) or (Kind = HALFSINGLETOK)) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(INTEGERTOK, RightValType);
+
+//   asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :eax');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda :eax+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+   if (ValType <> HALFSINGLETOK) and (Kind = HALFSINGLETOK) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+
+  end;
+
+
+  If (ValType in IntegerTypes) and ((RightValType = HALFSINGLETOK) or (Kind = HALFSINGLETOK)) then begin
+
+   ExpandParam_m1(INTEGERTOK, ValType);
+
+//   asm65(#9'jsr @F16_I2F');//_m');
+
+			asm65(#9'lda :STACKORIGIN-1,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :eax');
+			asm65(#9'sta :STACKORIGIN-1,x');
+			asm65(#9'lda :eax+1');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+
+   if (RightValType <> HALFSINGLETOK) and (Kind = HALFSINGLETOK) then
+    ValType := Kind
+   else
+    ValType := RightValType;
+  end;
+
+
+  If ((ValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(INTEGERTOK, RightValType);
+
+   asm65(#9'jsr @expandToREAL');
+{
+   asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+   asm65(#9'lda :STACKORIGIN,x');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+   asm65(#9'lda #$00');
+   asm65(#9'sta :STACKORIGIN,x');
+}
+   if not(ValType in [REALTOK, SHORTREALTOK]) and (Kind in [REALTOK, SHORTREALTOK]) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+
+  end;
+
+
+  If (ValType in IntegerTypes) and ((RightValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) then begin
+
+   ExpandParam_m1(INTEGERTOK, ValType);
+
+   asm65(#9'jsr @expandToREAL1');
+{
+   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
+   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
+   asm65(#9'lda :STACKORIGIN-1,x');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+   asm65(#9'lda #$00');
+   asm65(#9'sta :STACKORIGIN-1,x');
+}
+
+   if not(RightValType in [REALTOK, SHORTREALTOK]) and (Kind in [REALTOK, SHORTREALTOK]) then
+    ValType := Kind
+   else
+    ValType := RightValType;
+
+  end;
+
+end;	//RealTypeConversion
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure CompileActualParameters(var i: integer; IdentIndex: integer; ProcVarIndex: integer = 0);
 var NumActualParams, IdentTemp, ParamIndex, j, old_i, old_func: integer;
     ActualParamType, AllocElementType: byte;
@@ -7043,6 +7255,31 @@ begin
 //	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',    Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
 
+        if (ActualParamType in IntegerTypes) and (Ident[IdentIndex].Param[NumActualParams].DataType in RealTypes) then begin
+
+          AllocElementType := Ident[IdentIndex].Param[NumActualParams].DataType;
+
+	  RealTypeConversion(AllocElementType, ActualParamType);
+
+	end;
+
+        if (Ident[IdentIndex].Param[NumActualParams].DataType in IntegerTypes) and (ActualParamType in RealTypes) then
+	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+         
+
+
+	if (Tok[i].Kind = IDENTTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = ENUMTOK) then begin
+          IdentTemp := GetIdent(Tok[i].Name^);
+
+	  if Types[Ident[IdentTemp].NumAllocElements].Field[0].Name <> Types[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name then
+	    Error(i, 'Incompatible types: got "' + Types[Ident[IdentTemp].NumAllocElements].Field[0].Name +'" expected "' + Types[Ident[IdentIndex].Param[NumActualParams].NumAllocElements].Field[0].Name + '"');
+
+          ActualParamType := Ident[IdentTemp].Kind;
+
+//	  writeln(Ident[IdentTemp].Kind,',', Ident[IdentTemp].NumAllocElements,'/', Ident[IdentIndex].Param[NumActualParams].NumAllocElements, ',',Types[Ident[IdentTemp].NumAllocElements].Field[0].name);
+	end;
+
+
 	if (Tok[i].Kind = IDENTTOK) and (ActualParamType in [RECORDTOK, OBJECTTOK]) and not (Ident[IdentIndex].Param[NumActualParams].DataType in Pointers) then
 	 if Ident[GetIdent(Tok[i].Name^)].isNestedFunction then begin
 
@@ -7143,6 +7380,7 @@ begin
             if (ActualParamType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then
               iError(i, IncompatibleTypes, 0, ActualParamType, -STRINGPOINTERTOK);
 
+
 	      if (Ident[IdentIndex].Param[NumActualParams].DataType = STRINGPOINTERTOK) then begin		// CHAR -> STRING
 
 	        if (ActualParamType = CHARTOK) and (Tok[i].Kind = CHARLITERALTOK) then begin
@@ -7204,7 +7442,7 @@ begin
 
 	      end;
 
-	      GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
+	      //GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
 	  end;
 
@@ -7345,7 +7583,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
  for ParamIndex := 1 to NumActualParams do begin
 
   ActualParamType := Ident[IdentIndex].Param[ParamIndex].DataType;
-  if ActualParamType = ENUMTOK then ActualParamType := Ident[IdentIndex].Param[ParamIndex].AllocElementType;
+  if ActualParamType = ENUMTYPE then ActualParamType := Ident[IdentIndex].Param[ParamIndex].AllocElementType;
 
   if Ident[IdentIndex].Param[ParamIndex].PassMethod = VARPASSING then begin
 
@@ -7524,7 +7762,7 @@ if (yes = FALSE) and (Ident[IdentIndex].NumParams > 0) then begin
 		  asm65(#9'inx');
 
 		  ActualParamType := Ident[IdentIndex].DataType;
-		  if ActualParamType = ENUMTOK then ActualParamType := Ident[IdentIndex].AllocElementType;
+		  if ActualParamType = ENUMTYPE then ActualParamType := Ident[IdentIndex].NestedFunctionAllocElementType;
 
 		  case DataSize[ActualParamType] of
 
@@ -8469,7 +8707,7 @@ case Tok[i].Kind of
 
      CheckTok(i + 1, CPARTOK);
 
-     if ValType in [CHARTOK, BOOLEANTOK, ENUMTOK] then
+     if ValType in [CHARTOK, BOOLEANTOK, ENUMTYPE] then
        ValType := BYTETOK;
 
      Result:=i + 1;
@@ -8719,9 +8957,9 @@ case Tok[i].Kind of
 
 		 case Ident[IdentIndex].DataType of
 
-			ENUMTOK:
+			ENUMTYPE:
 		   	begin
-				ValType := ENUMTOK;
+				ValType := ENUMTYPE;
 			end;
 
 
@@ -9016,6 +9254,8 @@ case Tok[i].Kind of
 
 	ValType := Ident[IdentIndex].DataType;
 
+	if ValType = ENUMTYPE then ValType := Ident[IdentIndex].NestedFunctionAllocElementType;
+
 	dec(run_func);
 
 	Result := i;
@@ -9231,11 +9471,12 @@ case Tok[i].Kind of
 	    end;
 
 
-	    if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
+	     if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
 
-	    Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
 
-	    CheckTok(i + 1, CBRACKETTOK);
+	     Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
+
+	     CheckTok(i + 1, CBRACKETTOK);
 
 	    end;
 
@@ -9296,7 +9537,11 @@ case Tok[i].Kind of
 //	    if DataSize[ValType] > DataSize[VarType] then ValType := VarType;     // skracaj typ danych    !!! niemozliwe skoro VarType = INTEGERTOK
 
 
-	  if (Ident[IdentIndex].Kind = CONSTANT) and (ValType in Pointers) then
+
+	  if (Ident[IdentIndex].Kind = CONSTANT) then begin
+
+
+	  if {(Ident[IdentIndex].Kind = CONSTANT) and} (ValType in Pointers) then
 	   ConstVal := Ident[IdentIndex].Value - CODEORIGIN
 	  else
 	   ConstVal := Ident[IdentIndex].Value;
@@ -9317,6 +9562,9 @@ case Tok[i].Kind of
 	    end;
 
 
+          end;
+
+
 
 	  if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentIndex].NumAllocElements > 0) and
 	     (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET) then
@@ -9330,6 +9578,7 @@ case Tok[i].Kind of
 	   Push(ConstVal, ASVALUE, DataSize[ValType], IdentIndex)
 	  else}
 	   Push(ConstVal, TIndirectionLevel(Ord(Ident[IdentIndex].Kind = VARIABLE)), DataSize[ValType], IdentIndex);
+
 
 
 	  if (BLOCKSTACKTOP = 1) then
@@ -9889,188 +10138,6 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure RealTypeConversion(var ValType, RightValType: Byte; Kind: Byte = 0);
-begin
-
-  If ((ValType = SINGLETOK) or (Kind = SINGLETOK)) and (RightValType in IntegerTypes) then begin
-
-   ExpandParam(INTEGERTOK, RightValType);
-
-//   asm65(#9'jsr @I2F');
-
-			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta :FPMAN0');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta :FPMAN1');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'sta :FPMAN2');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-			asm65(#9'sta :FPMAN3');
-
-			asm65(#9'jsr @I2F');
-
-			asm65(#9'lda :FPMAN0');
-			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda :FPMAN1');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'lda :FPMAN2');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'lda :FPMAN3');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-
-   if (ValType <> SINGLETOK) and (Kind = SINGLETOK) then
-    RightValType := Kind
-   else
-    RightValType := ValType;
-  end;
-
-
-  If (ValType in IntegerTypes) and ((RightValType = SINGLETOK) or (Kind = SINGLETOK)) then begin
-
-   ExpandParam_m1(INTEGERTOK, ValType);
-
-//   asm65(#9'jsr @I2F_M');
-
-			asm65(#9'lda :STACKORIGIN-1,x');
-			asm65(#9'sta :FPMAN0');
-			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-			asm65(#9'sta :FPMAN1');
-			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-			asm65(#9'sta :FPMAN2');
-			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-			asm65(#9'sta :FPMAN3');
-
-			asm65(#9'jsr @I2F');
-
-			asm65(#9'lda :FPMAN0');
-			asm65(#9'sta :STACKORIGIN-1,x');
-			asm65(#9'lda :FPMAN1');
-			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-			asm65(#9'lda :FPMAN2');
-			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-			asm65(#9'lda :FPMAN3');
-			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
-
-   if (RightValType <> SINGLETOK) and (Kind = SINGLETOK) then
-    ValType := Kind
-   else
-    ValType := RightValType;
-  end;
-
-
-  If ((ValType = HALFSINGLETOK) or (Kind = HALFSINGLETOK)) and (RightValType in IntegerTypes) then begin
-
-   ExpandParam(INTEGERTOK, RightValType);
-
-//   asm65(#9'jsr @F16_I2F');
-
-			asm65(#9'lda :STACKORIGIN,x');
-			asm65(#9'sta @F16_I2F.SV');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-			asm65(#9'sta @F16_I2F.SV+1');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-			asm65(#9'sta @F16_I2F.SV+2');
-			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-			asm65(#9'sta @F16_I2F.SV+3');
-
-			asm65(#9'jsr @F16_I2F');
-
-			asm65(#9'lda :eax');
-			asm65(#9'sta :STACKORIGIN,x');
-			asm65(#9'lda :eax+1');
-			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-   if (ValType <> HALFSINGLETOK) and (Kind = HALFSINGLETOK) then
-    RightValType := Kind
-   else
-    RightValType := ValType;
-
-  end;
-
-
-  If (ValType in IntegerTypes) and ((RightValType = HALFSINGLETOK) or (Kind = HALFSINGLETOK)) then begin
-
-   ExpandParam_m1(INTEGERTOK, ValType);
-
-//   asm65(#9'jsr @F16_I2F');//_m');
-
-			asm65(#9'lda :STACKORIGIN-1,x');
-			asm65(#9'sta @F16_I2F.SV');
-			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-			asm65(#9'sta @F16_I2F.SV+1');
-			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-			asm65(#9'sta @F16_I2F.SV+2');
-			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-			asm65(#9'sta @F16_I2F.SV+3');
-
-			asm65(#9'jsr @F16_I2F');
-
-			asm65(#9'lda :eax');
-			asm65(#9'sta :STACKORIGIN-1,x');
-			asm65(#9'lda :eax+1');
-			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-
-
-   if (RightValType <> HALFSINGLETOK) and (Kind = HALFSINGLETOK) then
-    ValType := Kind
-   else
-    ValType := RightValType;
-  end;
-
-
-  If ((ValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) and (RightValType in IntegerTypes) then begin
-
-   ExpandParam(INTEGERTOK, RightValType);
-
-   asm65(#9'jsr @expandToREAL');
-{
-   asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-   asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-   asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-   asm65(#9'lda :STACKORIGIN,x');
-   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-   asm65(#9'lda #$00');
-   asm65(#9'sta :STACKORIGIN,x');
-}
-   if not(ValType in [REALTOK, SHORTREALTOK]) and (Kind in [REALTOK, SHORTREALTOK]) then
-    RightValType := Kind
-   else
-    RightValType := ValType;
-
-  end;
-
-
-  If (ValType in IntegerTypes) and ((RightValType in [REALTOK, SHORTREALTOK]) or (Kind in [REALTOK, SHORTREALTOK])) then begin
-
-   ExpandParam_m1(INTEGERTOK, ValType);
-
-   asm65(#9'jsr @expandToREAL1');
-{
-   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
-   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-   asm65(#9'lda :STACKORIGIN-1,x');
-   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-   asm65(#9'lda #$00');
-   asm65(#9'sta :STACKORIGIN-1,x');
-}
-
-   if not(RightValType in [REALTOK, SHORTREALTOK]) and (Kind in [REALTOK, SHORTREALTOK]) then
-    ValType := Kind
-   else
-    ValType := RightValType;
-
-  end;
-
-end;	//RealTypeConversion
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
 function CompileTerm(i: Integer; out ValType: Byte; VarType: Byte = INTEGERTOK): Integer;
 var
   j, k, oldCodeSize: Integer;
@@ -10368,7 +10435,7 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
   begin
 
 
-  if ValType in RealTypes then VarType := ValType;
+  if ValType in RealTypes + [ENUMTYPE] then VarType := ValType;
 
 
   j := CompileSimpleExpression(i + 2, RightValType, VarType);
@@ -10527,9 +10594,13 @@ if Tok[i + 1].Kind in [EQTOK, NETOK, LTTOK, LETOK, GTTOK, GETOK] then
 
   if sLeft or sRight then begin
 
-   if (ValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) and (RightValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) then
-    GenerateRelationString(Tok[i + 1].Kind, ValType, RightValType, sLeft, sRight)
-   else
+   if (ValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) and (RightValType in [CHARTOK, STRINGPOINTERTOK, POINTERTOK]) then begin
+
+    if (ValType = POINTERTOK) or (RightValType = POINTERTOK) then
+      Error(i, 'Can''t determine PCHAR length, consider using COMPAREMEM');
+
+    GenerateRelationString(Tok[i + 1].Kind, ValType, RightValType, sLeft, sRight);
+   end else
     GetCommonType(j, ValType, RightValType);
 
   end else
@@ -11056,16 +11127,16 @@ case Tok[i].Kind of
 	      if (Ident[IdentTemp].DataType = POINTERTOK) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
 	       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-	       par2 := copy(Ident[IdentIndex].Name, pos('.', Ident[IdentIndex].Name)+1, length(Ident[IdentIndex].Name));
+	       svar := copy(Ident[IdentIndex].Name, pos('.', Ident[IdentIndex].Name)+1, length(Ident[IdentIndex].Name));
 
 	       IdentIndex := IdentTemp;
 
-	       IdentTemp := RecordSize(IdentIndex, par2);
+	       IdentTemp := RecordSize(IdentIndex, svar);
 
 	       if IdentTemp < 0 then
-	        Error(i + 3, 'identifier idents no member ''' + par2 + '''');
+	        Error(i + 3, 'identifier idents no member ''' + svar + '''');
 
-	       par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+	        par2 := '$' + IntToHex(IdentTemp and $ffff, 2);			// offset to record field -> 'svar'
 
 	      end;
 
@@ -11754,19 +11825,40 @@ case Tok[i].Kind of
 		         ((Ident[IdentIndex].NumAllocElements_ = Ident[IdentTemp].NumAllocElements) or
 		          (Ident[IdentIndex].NumAllocElements_ = Ident[IdentTemp].NumAllocElements_)) then begin
 
-//writeln('1: ', Ident[IdentIndex].NumAllocElements_);
+//writeln(tok[k].line,',', Ident[IdentTemp].NumAllocElements_);
 
-                        asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
-                        asm65(#9'add :STACKORIGIN-1,x');
-                        asm65(#9'sta @move.dst');
-                        asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
-                        asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-                        asm65(#9'sta @move.dst+1');
+			if Ident[IdentTemp].NumAllocElements_ = 0 then begin
 
-                        asm65(#9'lda :STACKORIGIN,x');
-		        asm65(#9'sta @move.src');
-                        asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-		        asm65(#9'sta @move.src+1');
+                          asm65(#9'lda ' + GetLocalName(IdentIndex));
+                          asm65(#9'add :STACKORIGIN-1,x');
+                          asm65(#9'sta @move.dst');
+                          asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
+                          asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+                          asm65(#9'sta @move.dst+1');
+
+                          asm65(#9'lda ' + GetLocalName(IdentTemp));
+		          asm65(#9'sta @move.src');
+                          asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
+		          asm65(#9'sta @move.src+1');
+
+			end else begin
+	   	          a65(__subBX);
+
+                          asm65(#9'lda ' + GetLocalName(IdentIndex));
+                          asm65(#9'add :STACKORIGIN-1,x');
+                          asm65(#9'sta @move.dst');
+                          asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
+                          asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+                          asm65(#9'sta @move.dst+1');
+
+                          asm65(#9'lda ' + GetLocalName(IdentTemp));
+                          asm65(#9'add :STACKORIGIN,x');
+		          asm65(#9'sta @move.src');
+                          asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
+                          asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+		          asm65(#9'sta @move.src+1');
+
+			end;
 
 	   	        a65(__subBX);
 	   	        a65(__subBX);
@@ -11785,15 +11877,15 @@ case Tok[i].Kind of
 
 //writeln('2: ',Ident[IdentIndex].NumAllocElements);
 
-                        asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                        asm65(#9'lda ' + GetLocalName(IdentIndex));
 		        asm65(#9'sta @move.dst');
-                        asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                        asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
 		        asm65(#9'sta @move.dst+1');
 
-                        asm65(#9'lda :STACKORIGIN,x');
+                        asm65(#9'lda ' + GetLocalName(IdentTemp));
                         asm65(#9'add :STACKORIGIN-1,x');
                         asm65(#9'sta @move.src');
-                        asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+                        asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
                         asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                         asm65(#9'sta @move.src+1');
 
@@ -12027,7 +12119,7 @@ case Tok[i].Kind of
     i := CompileExpression(i + 1, SelectorType);
 
 
-    if (SelectorType = ENUMTOK) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = FUNCTIONTOK) then begin
+    if (SelectorType = ENUMTYPE) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = FUNCTIONTOK) then begin
 
        IdentTemp:=GetIdent(Tok[j].Name^);
 
@@ -12036,9 +12128,22 @@ case Tok[i].Kind of
        EnumName := Types[Ident[GetIdentResult(Ident[IdentTemp].ProcAsBlock)].NumAllocElements].Field[0].Name;
 
     end else
+    if (SelectorType = ENUMTYPE) and (Tok[j].Kind = IDENTTOK) and (Ident[GetIdent(Tok[j].Name^)].Kind = TYPETOK) then begin
 
-    if Tok[i].Kind = IDENTTOK then
-      EnumName := GetEnumName(GetIdent(Tok[i].Name^));
+       IdentTemp:=GetIdent(Tok[j].Name^);
+
+       EnumName := GetEnumName(IdentTemp);
+
+       SelectorType := Ident[IdentTemp].AllocElementType;
+
+    end else
+    if Tok[i].Kind = IDENTTOK then begin
+
+      IdentTemp:=GetIdent(Tok[i].Name^);
+
+      EnumName := GetEnumName(IdentTemp);
+
+    end;
 
 
     if SelectorType <> ENUMTYPE then
@@ -12076,6 +12181,7 @@ case Tok[i].Kind of
 	//warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
 	GetCommonType(i, ConstValType, SelectorType);
+
 
 	if (Tok[i].Kind = IDENTTOK)  then
 	 if ((EnumName = '') and (GetEnumName(GetIdent(Tok[i].Name^)) <> '')) or
@@ -12222,32 +12328,73 @@ case Tok[i].Kind of
 
     end;
 
+
+WITHTOK:
+    begin
+
+      inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
+
+      CheckTok(i + 1, IDENTTOK);
+
+      IdentIndex := GetIdent(Tok[i + 1].Name^);
+
+
+      if (Ident[IdentIndex].Kind = USERTYPE) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then
+
+      else
+      if (Ident[IdentIndex].Kind <> VARTOK) then
+       Error(i + 1, 'Expression type must be object or record type');
+
+
+      if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = RECORDTOK) then
+
+      else
+      if not (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK]) then
+       Error(i + 1, 'Expression type must be object or record type');
+
+      CheckTok(i + 2, DOTOK);
+
+      k:=High(WithName);
+      WithName[k] := Ident[IdentIndex].Name;
+      SetLength(WithName, k+2);
+
+      inc(i, 2);
+
+      j := CompileStatement(i + 1);
+
+      SetLength(WithName, k+1);
+
+      Result := j;
+
+    end;
+
+
 {$IFDEF WHILEDO}
 
 WHILETOK:
     begin
 //    writeln(codesize,',',CodePosStackTop);
 
-    inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
+      inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
 
-    asm65;
-    asm65('; --- WhileProlog');
+      asm65;
+      asm65('; --- WhileProlog');
 
-    ResetOpty;
+      ResetOpty;
 
-    GenerateRepeatUntilProlog;			// Save return address used by GenerateWhileDoEpilog
+      GenerateRepeatUntilProlog;		// Save return address used by GenerateWhileDoEpilog
 
-    SaveBreakAddress;
-
-
-    StartOptimization(i + 1);
-
-    j := CompileExpression(i + 1, ExpressionType);
+      SaveBreakAddress;
 
 
-    GetCommonType(j, BOOLEANTOK, ExpressionType);
+      StartOptimization(i + 1);
 
-    CheckTok(j + 1, DOTOK);
+      j := CompileExpression(i + 1, ExpressionType);
+
+
+      GetCommonType(j, BOOLEANTOK, ExpressionType);
+
+      CheckTok(j + 1, DOTOK);
 
       asm65;
       asm65('; --- WhileDoCondition');
@@ -13619,7 +13766,7 @@ WHILETOK:
 	  IndirectionLevel := ASPOINTER;
 
 
-	  if Ident[IdentIndex].DataType = ENUMTOK then
+	  if Ident[IdentIndex].DataType = ENUMTYPE then
 	   ExpressionType := Ident[IdentIndex].AllocElementType
 	  else
 	  if Ident[IdentIndex].DataType in Pointers then
@@ -14389,8 +14536,8 @@ begin
 
 		 if (Ident[IdentIndex].PassMethod <> VARPASSING) and (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
 
-		  asm65('adr.'+Ident[IdentIndex].Name + Value);
-		  asm65('.var '+Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		  asm65('adr.' + Ident[IdentIndex].Name + Value);
+		  asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
 		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
@@ -14449,7 +14596,7 @@ begin
 		     if (Ident[IdentIndex].Name = 'RESULT') and (Ident[BlockIdentIndex].Kind = FUNCTIONTOK) then	// RESULT nie zliczaj
 
 		     else
-		      if Ident[IdentIndex].DataType = ENUMTOK then
+		      if Ident[IdentIndex].DataType = ENUMTYPE then
 		        inc(size, DataSize[Ident[IdentIndex].AllocElementType])
 		      else
 		        inc(size, DataSize[Ident[IdentIndex].DataType]);
@@ -14458,8 +14605,8 @@ begin
 
       CONSTANT: if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements > 0) then begin
 
-		 asm65('adr.'+Ident[IdentIndex].Name + Value);
-		 asm65('.var '+Ident[IdentIndex].Name+#9'= adr.' + Ident[IdentIndex].Name + ' .word');
+		 asm65('adr.' + Ident[IdentIndex].Name + Value);
+		 asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		end else
 		 if pos('@FORTMP_', Ident[IdentIndex].Name) = 0 then asm65(Ident[IdentIndex].Name + Value);
@@ -15190,7 +15337,7 @@ end;	//CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
+procedure CompileRecordDeclaration(i: integer; var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
 var tmpVarDataSize_, ParamIndex{, idx}: integer;
 begin
 
@@ -15582,9 +15729,9 @@ for ParamIndex := NumParams downto 1 do
 
 // Load ONE parameters from the stack
 if (Ident[BlockIdentIndex].ObjectIndex = 0) then
- if Param[1].DataType = ENUMTOK then begin
+ if Param[1].DataType = ENUMTYPE then begin
 
-  if (yes = false) and (NumParams = 1) and (DataSize[Param[1].AllocElementType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name)
+  if (yes = false) and (NumParams = 1) and (DataSize[Param[1].AllocElementType] = 1) and (Param[1].PassMethod <> VARPASSING) then asm65(#9'sta ' + Param[1].Name);
 
  end else
 
@@ -15599,8 +15746,14 @@ if yes then begin
 
 	if Param[ParamIndex].PassMethod = VARPASSING then
 	  GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
-	else
-	  GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	else begin
+
+	  if Param[ParamIndex].DataType = ENUMTOK then
+	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].AllocElementType], 0, Param[ParamIndex].Name)
+	  else
+	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+
+	end;
 
 
   	if (Param[ParamIndex].PassMethod <> VARPASSING) and
@@ -15650,8 +15803,14 @@ if yes then begin
   	if Assignment then
 	  if Param[ParamIndex].PassMethod = VARPASSING then
 	    GenerateAssignment(ASPOINTER, DataSize[POINTERTOK], 0, Param[ParamIndex].Name)
-	  else
-	    GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+	  else begin
+
+	    if Param[ParamIndex].DataType = ENUMTYPE then
+	      GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].AllocElementType], 0, Param[ParamIndex].Name)
+	    else
+	      GenerateAssignment(ASPOINTER, DataSize[Param[ParamIndex].DataType], 0, Param[ParamIndex].Name);
+
+	  end;
   end;
 
   if (Paramindex <> NumParams) then asm65(#9'jmi @main');
@@ -16185,7 +16344,7 @@ while Tok[i].Kind in
   	   if VarType in [RECORDTOK, OBJECTTOK] then
 	     Error(i, 'Only Array of ^'+InfoAboutToken(VarType)+' supported')
 	   else
-	   if VarType = ENUMTOK then
+	   if VarType = ENUMTYPE then
 	     Error(i, InfoAboutToken(VarType)+' arrays are not supported');
 
 	   if VarType = POINTERTOK then begin
@@ -16429,7 +16588,7 @@ while Tok[i].Kind in
     	if VarType in [RECORDTOK, OBJECTTOK] then
 	  Error(i, 'Only Array of ^'+InfoAboutToken(VarType)+' supported')
 	else
-	if VarType = ENUMTOK then
+	if VarType = ENUMTYPE then
 	  Error(i, InfoAboutToken(VarType)+' arrays are not supported');
 
 	if VarType = POINTERTOK then begin
@@ -16662,7 +16821,7 @@ while Tok[i].Kind in
 	end;
 
 
-	CompileRecordDeclaration(VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute);
+	CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute);
 
 
       end;
@@ -17915,6 +18074,8 @@ begin
 
  fillchar(DataSegment, sizeof(DataSegment), 0);
 
+ for CodeSize := 1 to High(UnitName) do UnitName[CodeSize].Units := 0;
+
  NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; VarDataSize := 0;
  CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
 
@@ -17934,9 +18095,7 @@ begin
  INTERFACETOK_USE := FALSE;
  PublicSection := TRUE;
 
- for i := 1 to High(UnitName) do UnitName[i].Units := 0;
-
- iOut:=0;
+ iOut:=-1;
  outTmp:='';
 
  SetLength(OptimizeBuf, 1);

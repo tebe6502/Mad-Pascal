@@ -1,5 +1,30 @@
+04.09.2025
+- optimizations
+
+30.08.2025
+- dodana konwersja parametru procedury/funkcji INTEGER -> REAL
+- szybsza wersja 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
+
+27.08.2025
+- bugfixes and optimizations
+
+24.08.2025
+- nowy unit SAM
+- nowy unit PACKFIRE
+
+22.08.2025
+- poprawione parsowanie wartości rzeczywistych, akceptuje dodatkowe znaki 'E', '-', np. 6.1858296469E-02
+
+21.08.2025
+- optymalizacje @cmpCHAR2STRING, @cmpSTRING2CHAR
+
+18.08.2025
+- dodane zasoby MD1, MD1PLAY
+- nowy unit MD1
+
 16.08.2025
 - poprawione przekazywanie typu ENUM w procedurze/funkcji
+- dodana obsługa instrukcji WITH
 
 09.08.2025
 - optimizations opt_TAY, opt_EOR

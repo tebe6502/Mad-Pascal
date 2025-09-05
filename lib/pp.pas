@@ -31,6 +31,6 @@ procedure unPP(src, dst: pointer); external 'pp\unpp';
 
 implementation
 
-	{$link pp\unpp.obx}
+	{$link pp\unpp.obj}
 
 end.

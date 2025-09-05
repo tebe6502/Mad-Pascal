@@ -52,7 +52,7 @@ function constant: real;
 var
      n: string;
     v1: real;
-     v, k, ln: integer;
+     v, k, ln, i: integer;
      p: word;
   pflg: boolean;
 

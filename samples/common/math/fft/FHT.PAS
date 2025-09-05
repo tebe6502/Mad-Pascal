@@ -41,6 +41,8 @@ begin
 (* Reorder the data *)
     tt:=1/len;
     arg := sqrt(tt);
+    
+//    writeln(arg:8:8); while true do;
 
     jj := 0;  ii := 0;  kk := 0;
     while ii < len do begin

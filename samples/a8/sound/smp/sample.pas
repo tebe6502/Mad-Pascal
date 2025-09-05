@@ -1,5 +1,7 @@
 uses crt, smp, joystick;
 
+// unit SMP disable ROM
+
 {$r sample.rc}
 
 
@@ -10,6 +12,7 @@ var
 	sampl: TSMP;
 
 begin
+
  writeln('IRQ Sample (press FIRE)');
 
  sampl.adr:=pointer(gun);

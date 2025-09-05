@@ -1,0 +1,7 @@
+fnt0	rcdata 'assets\hans_kloss_fnt_0.bin'
+fnt1	rcdata 'assets\hans_kloss_fnt_1.bin'
+scr0	rcdata 'assets\hans_kloss_scr_0.bin'
+scr1	rcdata 'assets\hans_kloss_scr_1.bin'
+lvl0	rcdata 'assets\hans_kloss.bin'
+
+

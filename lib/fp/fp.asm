@@ -150,7 +150,7 @@ _itofp.flptr = flptr
 _itofp	.proc	(.dword fr0 .word flptr) .var
 
 	txa:pha
-	
+
 	lda fr0+3
 	and #$80
 	pha

@@ -67,7 +67,6 @@
      end;
 
 
-
     if lab_a(i) and										//@					; 0	ORA :STACK -> JEQ
        tya(i+1) and										// tya					; 1
        ora_stack(i+2) and									// ora :STACKORIGIN			; 2
@@ -136,7 +135,7 @@
 //       listing[i+3] := '';
 
        for p:=i downto 0 do
-        if pos(tmp, listing[p]) > 0 then begin
+        if (pos(tmp, listing[p]) > 0) and (add_sub(p-1) = false) and (adc_sbc(p-1) = false) then begin
 	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jne ' + copy(listing[i+3], 6, 256) + 'x';
 	 Break;
 	end;

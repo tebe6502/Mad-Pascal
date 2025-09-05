@@ -39,8 +39,10 @@ The available features are:
 * Recursion
 
 ## Compile
+    origin\
+	src\
 
-    fpc -MDelphi -vh -O3 mp.pas
+	fpc -MDelphi -vh -O3 mp.pas
 
 ## Usage
 [WUDSN and Mad-Pascal](https://forums.atariage.com/topic/348660-wudsn-mad-pascal-quick-hack-increasing-usability/)

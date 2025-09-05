@@ -3,7 +3,7 @@ unit mpt;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Music Pro Tracker library
- @version: 1.1 (2022-09-20)
+ @version: 1.2 (2022-09-20; 2025-08-18)
 
  @description:
  <http://atariki.krap.pl/index.php/Music_Protracker>
@@ -41,6 +41,7 @@ implementation
 uses misc;
 
 var	ntsc: byte;
+	player_enabled: Boolean;
 
 
 procedure TMPT.Init; assembler;
@@ -76,6 +77,9 @@ asm
 	jsr $ffff
 adr	equ *-2
 
+	lda #1
+	sta player_enabled
+
 	pla:tax
 end;
 
@@ -88,6 +92,9 @@ Play music, call this procedure every VBL frame
 asm
 	txa:pha
 
+	lda player_enabled
+	beq quit
+
 	asl ntsc		; =0 PAL, =4 NTSC
 	bcc skp
 
@@ -96,7 +103,7 @@ asm
 
 	bne quit
 skp
-	mwa TMPT ptr
+	mwa TMPT ptr		; C = 0
 
 	jsr $ff00		; jmp (TMPT)	6502 buggy indirect jump
 ptr	equ *-2
@@ -112,6 +119,7 @@ Halt MPT player
 *)
 asm
 	lda #0
+	sta player_enabled
 	sta $d208
 	sta $d218
 	ldy #3

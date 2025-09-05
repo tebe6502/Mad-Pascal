@@ -81,27 +81,28 @@ procedure TVBXEMemoryStream.ReadBuffer(var Buffer; Count: word);
 
 *)
 var bnk: byte;
-    adr, i: word;
-    dst: ^byte;
+    i: word;
+    src: PByte register;
+    dst: PByte register;
 begin
 	bnk:=Position shr 12 or $80;
-	adr:=Position and $0fff or VBXE_WINDOW;
+	src:=pointer(Position and $0fff or VBXE_WINDOW);
 
 	VBXEMemoryBank(bnk);
 
 	dst:=@Buffer;
 
-	for i:=0 to Count-1 do begin
+	for i:=Count-1 downto 0 do begin
 
-	 dst^:=peek(adr);
+	 dst[0]:=src[0];
 
-	 inc(adr);
+	 inc(src);
 	 inc(dst);
 
-	 if adr>=VBXE_WINDOW+$1000 then begin
+	 if word(src)>=VBXE_WINDOW+$1000 then begin
 	  inc(bnk);
 	  VBXEMemoryBank(bnk);
-	  adr:=VBXE_WINDOW;
+	  src:=pointer(VBXE_WINDOW);
 	 end;
 
 	end;
@@ -118,27 +119,28 @@ procedure TVBXEMemoryStream.WriteBuffer(var Buffer; Count: word);
 
 *)
 var bnk: byte;
-    adr, i: word;
-    src: ^byte;
+    i: word;
+    dst: PByte register;
+    src: PByte register;
 begin
 	bnk:=Position shr 12 or $80;
-	adr:=Position and $0fff or VBXE_WINDOW;
+	dst:=pointer(Position and $0fff or VBXE_WINDOW);
 
 	VBXEMemoryBank(bnk);
 
 	src:=@Buffer;
 
-	for i:=0 to Count-1 do begin
+	for i:=Count-1 downto 0 do begin
 
-	 poke(adr, src^);
+	 dst[0]:=src[0];
 
-	 inc(adr);
+	 inc(dst);
 	 inc(src);
 
-	 if adr >= VBXE_WINDOW+$1000 then begin
+	 if word(dst) >= VBXE_WINDOW+$1000 then begin
 	  inc(bnk);
 	  VBXEMemoryBank(bnk);
-	  adr:=VBXE_WINDOW;
+	  dst:=pointer(VBXE_WINDOW);
 	 end;
 
 	end;

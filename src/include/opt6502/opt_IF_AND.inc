@@ -111,7 +111,7 @@
 //       listing[i+3] := '';
 
        for p:=i downto 0 do
-        if pos(tmp, listing[p]) > 0 then begin
+        if (pos(tmp, listing[p]) > 0) and (add_sub(p-1) = false) and (adc_sbc(p-1) = false) then begin
 	 if (listing[p] = #9'sta ' + tmp) then listing[p] := listing[i+3];
 	 Break;
 	end;

@@ -1,4 +1,4 @@
-
+// 0..65535 / 0..511
 
 .extrn	eax, ecx	.byte
 
@@ -27,14 +27,14 @@ hrcp	ins 'hrcp.bin'
 	bcs skp
 
 	mwa eax eax+2
-	
+
 	rts
 skp
 	lda lrcp,y
 	sta ecx
 	lda hrcp,y
 	sta ecx+1
-	
+
 	jmp fmulu_16
 
 _hi
@@ -42,7 +42,7 @@ _hi
 	sta ecx
 	lda hrcp+$100,y
 	sta ecx+1
-	
+
 	jmp fmulu_16
 .endp
 
@@ -55,7 +55,7 @@ _hi
 
 	lda eax+1				; dividend sign
 	bpl @+
-	
+
 	lda #$00
 	sub eax
 	sta eax

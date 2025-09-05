@@ -8,7 +8,9 @@
 	EXTMEM
 	LIBRARY		PORTB -> RAM
 	MPT		RAM / ROM
+	MD1		RAM / ROM
 	MPTPLAY		RAM / ROM
+	MD1PLAY		RAM / ROM
 	PP		RAM / ROM
 	RCASM		RAM / ROM
 	RCDATA		RAM / ROM
@@ -349,7 +351,43 @@ data
 
 	m@romfont main.%%lab, main.%%lab+len-1
 
-	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+len-1	
+	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+len-1,', $FC..$FF'
+.endm
+
+
+
+/* ----------------------------------------------------------------------- */
+/* MD1PLAY
+/* ----------------------------------------------------------------------- */
+
+.macro	MD1PLAY (nam, lab)
+
+	org RESORIGIN
+
+len = .sizeof(_%%2)
+
+mcpy	ift (main.%%lab < $bc20)&&(main.%%lab+len >= $bc20)
+	mva #0 sdmctl
+	sta dmactl
+	eif
+
+	jsr sys.off
+
+	memcpy #data #main.%%lab #len
+
+	jmp sys.on
+data
+
+.local	_%%2, main.%%lab
+
+	.link 'atari\players\md1_player_reloc.obx'
+
+.endl
+	ini mcpy
+
+	m@romfont main.%%lab, main.%%lab+len-1
+
+	.print '$R MD1PLAY ',main.%%lab,'..',main.%%lab+len-1,', $EC..$FF'
 .endm
 
 
@@ -384,7 +422,7 @@ data
 
 	m@romfont main.%%lab, main.%%lab+len-1
 
-	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+len-1
+	.print '$R MPTPLAY ',main.%%lab,'..',main.%%lab+len-1,', $F0..$FB'
 .endm
 
 
@@ -970,6 +1008,38 @@ data	mpt_relocator %%1,main.%%lab
 	mpt_relocator %%1,main.%%lab	
  eif
 	.print '$R MPT     ',main.%%lab,'..',main.%%lab+len-6," %%1"
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+/* MD1
+/* ----------------------------------------------------------------------- */
+
+.macro	MD1 (nam, lab)
+
+len = .filesize(%%1)
+
+	ert main.%%lab+len-6>$FFFF,'Memory overrun ',main.%%lab+len-6
+
+ ift main.%%lab+len-6 >= $c000
+	org RESORIGIN
+
+mcpy	jsr sys.off
+
+	memcpy #data #main.%%lab #len-6
+
+	jmp sys.on
+
+data	mpt_relocator %%1,main.%%lab
+
+	m@romfont main.%%lab, main.%%lab+len-6
+
+	ini mcpy
+ els
+	org main.%%lab
+	mpt_relocator %%1,main.%%lab	
+ eif
+	.print '$R MD1     ',main.%%lab,'..',main.%%lab+len-6," %%1"
 .endm
 
 

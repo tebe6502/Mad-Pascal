@@ -1,0 +1,6 @@
+; to jest player MD1
+md1_player	MD1PLAY
+
+# to jest modul
+md1_modul	MD1	'nutamb.md1'
+md1_sample	RCDATA	'nutamb.d8'

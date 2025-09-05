@@ -30,6 +30,7 @@ uses SysUtils, Common, Messages, SplitString;
 
 
 procedure TokenizeProgramInitialization;
+var i: integer;
 begin
 
  fillchar(Ident, sizeof(Ident), 0);
@@ -39,6 +40,7 @@ begin
  PublicSection := true;
  UnitNameIndex := 1;
 
+ SetLength(WithName, 1);
  SetLength(linkObj, 1);
  SetLength(resArray, 1);
  SetLength(msgUser, 1);
@@ -277,11 +279,13 @@ begin
        (AnsiUpperCase(res.resType) = 'RELOC') or
        (AnsiUpperCase(res.resType) = 'RMT') or
        (AnsiUpperCase(res.resType) = 'MPT') or
+       (AnsiUpperCase(res.resType) = 'MD1') or
        (AnsiUpperCase(res.resType) = 'CMC') or
        (AnsiUpperCase(res.resType) = 'RMTPLAY') or
        (AnsiUpperCase(res.resType) = 'RMTPLAY2') or
        (AnsiUpperCase(res.resType) = 'RMTPLAYV') or
        (AnsiUpperCase(res.resType) = 'MPTPLAY') or
+       (AnsiUpperCase(res.resType) = 'MD1PLAY') or
        (AnsiUpperCase(res.resType) = 'CMCPLAY') or
        (AnsiUpperCase(res.resType) = 'EXTMEM') or
        (AnsiUpperCase(res.resType) = 'XBMP') or
@@ -1270,7 +1274,7 @@ var
 	    begin				// Fractional part found
 	    Frac := '.';
 
-	    while ch in ['0'..'9'] do
+	    while UpCase(ch) in ['0'..'9', '-','E'] do
 	      begin
 	      Frac := Frac + ch;
 	      SafeReadChar(ch);
@@ -1695,7 +1699,7 @@ var
 
 	   Frac := '0.';		  // Fractional part found
 
-	   while ch2 in ['0'..'9'] do begin
+	   while UpCase(ch2) in ['0'..'9', '-','E'] do begin
 	    Frac := Frac + ch2;
 	    SafeReadChar(ch2);
 	   end;
@@ -1826,6 +1830,7 @@ Spelling[SETTOK		] := 'SET';
 Spelling[PACKEDTOK	] := 'PACKED';
 Spelling[VOLATILETOK	] := 'VOLATILE';
 Spelling[STRIPEDTOK	] := 'STRIPED';
+Spelling[WITHTOK	] := 'WITH';
 Spelling[LABELTOK	] := 'LABEL';
 Spelling[GOTOTOK	] := 'GOTO';
 Spelling[INTOK		] := 'IN';
@@ -1958,7 +1963,7 @@ procedure TokenizeMacro(a: string; Line, Spaces: integer);
 var
   Text: string;
   Num, Frac: TString;
-  Err, Line2, TextPos, im: Integer;
+  i, Err, Line2, TextPos, im: Integer;
   yes: Boolean;
   ch, ch2: Char;
   CurToken: Byte;
@@ -2120,7 +2125,7 @@ begin
 	    begin				// Fractional part found
 	    Frac := '.';
 
-	    while ch in ['0'..'9'] do
+	    while UpCase(ch) in ['0'..'9', '-','E'] do
 	      begin
 	      Frac := Frac + ch;
 
@@ -2377,7 +2382,7 @@ begin
 
 	   Frac := '0.';		  // Fractional part found
 
-	   while ch2 in ['0'..'9'] do begin
+	   while UpCase(ch2) in ['0'..'9', '-','E'] do begin
 	    Frac := Frac + ch2;
 
 	    ch2:=a[i]; inc(i);
