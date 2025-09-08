@@ -121,6 +121,8 @@ begin
 // 				     WORD
 // -----------------------------------------------------------------------------
 
+{ !!! nie usuwaj 'CMP #$00' !!!
+
     if ldy_1(i) and										// ldy #1		; 0	BOOL := WORD >
        lda_val(i+1) and										// lda W+1		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
@@ -142,7 +144,7 @@ begin
 
        exit(false);
       end;
-
+}
 
     if (SKIP(i-1) = false) and
        lda_bp2_y(i) and										// lda (:bp2),y		; 0	:BP2 > 0

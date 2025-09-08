@@ -3,7 +3,7 @@ unit f16;
  @type: unit
  @author: Tomasz Biela (Tebe), Artyom Beilis, Marek Mauder
  @name: Half Float IEEE Library
- @version: 1.0
+ @version: 1.1
 
  @description:
 
@@ -15,7 +15,6 @@ unit f16;
 
  <http://weitz.de/ieee/>
 *)
-
 
 {
 
@@ -45,7 +44,7 @@ interface
 	function f16_mul(a, b: word): word;
 	function f16_div(a,b: word): word;
 
-	function f16_from_int(sv: integer): float16;
+	function f16_from_int(sv: integer): word;
 	function f16_int(a: word): integer;
 
 	function f32Tof16(f: single): word;
@@ -57,15 +56,11 @@ interface
 	function f16_lt(a, b: word): Boolean;
 	function f16_neq(a, b: word): Boolean;
 
-
 	function FloatToHalf(f: Single): word;
-	function HalfToFloat(Half: float16): Single;
+	function HalfToFloat(Half: word): Single;
 
 
 implementation
-
-type
-	PFloat16 = ^float16;
 
 
 function f16_sub(a, b: word): word;
@@ -614,7 +609,7 @@ begin
 end;
 
 
-function f16_from_int(sv: integer): float16;
+function f16_from_int(sv: integer): word;
 (*
 @description:
 *)
@@ -648,16 +643,12 @@ begin
 // #define SIGNED_INF_VALUE(x)  ((x & SIGN_MASK) | 0x7C00)
 
  if e >= 31 then begin
-  sig := (sig and $8000) or $7C00;
-
-  Result:=PFloat16(@sig)^;
+  Result := (sig and $8000) or $7C00;
 
   exit;
  end;
 
- sig := sig or (e shl 10) or (v and 1023);
-
- Result:=PFloat16(@sig)^;
+ Result := sig or (e shl 10) or (v and 1023);
 
 end;
 
@@ -697,8 +688,8 @@ end;
 function f32Tof16(f: single): word;
 (*
 @description:
- https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
 *)
+//https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
 var
 	fltInt32: ^cardinal;
 	fltInt16, tmp: word;
@@ -831,7 +822,7 @@ begin
 end;
 
 
-function HalfToFloat(Half: float16): Single;
+function HalfToFloat(Half: word): Single;
 (*
 @description:
 *)
@@ -840,9 +831,9 @@ var
   Exp: byte;
 begin
   // Extract sign, exponent, and mantissa from half number
-  Sign := (word(Half) and $8000) shl 16;
-  Exp := (word(Half) and $7C00) shr 10;
-  Mantissa := word(Half) and 1023;
+  Sign := (Half and $8000) shl 16;
+  Exp := (Half and $7C00) shr 10;
+  Mantissa := Half and 1023;
 
   if (Exp > 0) and (Exp < 31) then
   begin
