@@ -1837,7 +1837,7 @@ begin
        lda_stack(i+13) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 13
        and_ora_eor_bp2_y(i+14) and								// and|ora|eor (:bp2),y			; 14
        sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 15
-       lda_im_0(i+16) and									// lda #$00				; 16
+       lda_a(i+16) and										// lda OFFSET+1				; 16
        sta_stack(i+17) and									// sta :STACKORIGIN+STACKWIDTH+10	; 17
        lda_a(i+18) and										// lda OFFSET				; 18
        asl_a(i+19) and										// asl @				; 19
@@ -1950,7 +1950,7 @@ begin
        iny(i+9) and										// iny					; 9
        LDA_BP2_Y(i+10) and									// lda (:bp2),y				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 11
-       lda_im_0(i+12) and									// lda #$00				; 12
+       lda_a(i+12) and										// lda OFFSET+1				; 12
        sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+10	; 13
        lda_a(i+14) and										// lda OFFSET				; 14
        asl_a(i+15) and										// asl @				; 15
