@@ -796,6 +796,16 @@
      Result := (listing[i] = #9'and (:bp2),y') or (listing[i] = #9'ora (:bp2),y') or (listing[i] = #9'eor (:bp2),y');
    end;
 
+   function ADD_SUB_BP2_Y(i: integer): Boolean;
+   begin
+     Result := (listing[i] = #9'add (:bp2),y') or (listing[i] = #9'sub (:bp2),y');
+   end;
+
+   function ADC_SBC_BP2_Y(i: integer): Boolean;
+   begin
+     Result := (listing[i] = #9'adc (:bp2),y') or (listing[i] = #9'sbc (:bp2),y');
+   end;
+
    function MWY_BP2(i: integer): Boolean;
    begin
      Result := (pos(#9'mwy ', listing[i]) = 1) and (pos(' :bp2', listing[i]) > 0);
