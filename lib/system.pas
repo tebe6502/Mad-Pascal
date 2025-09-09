@@ -776,7 +776,22 @@ begin
 	Result := PSingle(@c)^;
 
 	// Newton-Rapson iteration
-	Result := 0.5 * (Result + x / Result);
+	Result := (Result + x / Result);
+
+	//Result := 0.5 * (Result + x / Result);
+
+	c:=cardinal(Result);
+
+        if (c and $7F800000) <> 0 then			// * 0.5
+        begin
+        // normalna liczba -> zmniejszamy cechę o 1
+          c := c - $00800000;
+
+          Result := PSingle(@c)^;
+        end else
+        // denormalne lub zero -> lepiej podzielić "klasycznie"
+          Result := Result * 0.5;
+
 //	Result := 0.5 * (Result + x / Result);	// x < 1 -> higher precision
 end;
 
@@ -816,17 +831,8 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: integer
 *)
-var c: cardinal;
 begin
-	if x <= 0 then exit(single(0.0));
-
-	// Solved equation for square roots
-	c := (cardinal(x) shr 1) + $1fc00000;
-
-	Result := PSingle(@c)^;
-
-	// Newton-Rapson iteration
-	Result := 0.5 * (Result + x / Result);
+	Result := Sqrt( Single(X) )
 end;
 
 
