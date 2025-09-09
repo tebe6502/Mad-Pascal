@@ -969,29 +969,49 @@ begin
 	argMatch(i+8, i+19) and
 	argMatch(i+11, i+22) then
        begin
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-	listing[i+6] := '';
-	listing[i+7] := '';
-	listing[i+8] := '';
-	listing[i+9] := '';
-	listing[i+10] := '';
-	listing[i+11] := '';
 
 	if add(i+13) then begin
-	 listing[i+13] := #9'add (:bp2),y+';
-	 listing[i+16] := #9'adc (:bp2),y+';
-	 listing[i+19] := #9'adc (:bp2),y+';
-	 listing[i+22] := #9'adc (:bp2),y';
+	 listing[i+1] := listing[i+12];
+	 listing[i+2] := #9'add (:bp2),y';
+	 listing[i+3] := listing[i+14];
+	 listing[i+4] := #9'iny';
+	 listing[i+5] := listing[i+15];
+	 listing[i+6] := #9'adc (:bp2),y';
+	 listing[i+7] := listing[i+17];
+	 listing[i+8] := #9'iny';
+	 listing[i+9] := listing[i+18];
+	 listing[i+10]:= #9'adc (:bp2),y';
+	 listing[i+11]:= listing[i+20];
+	 listing[i+12]:= #9'iny';
+	 listing[i+13]:= listing[i+21];
+	 listing[i+14]:= #9'adc (:bp2),y';
+	 listing[i+15]:= listing[i+23];
 	end else begin
-	 listing[i+13] := #9'sub (:bp2),y+';
-	 listing[i+16] := #9'sbc (:bp2),y+';
-	 listing[i+19] := #9'sbc (:bp2),y+';
-	 listing[i+22] := #9'sbc (:bp2),y';
+	 listing[i+1] := listing[i+12];
+	 listing[i+2] := #9'sub (:bp2),y';
+	 listing[i+3] := listing[i+14];
+	 listing[i+4] := #9'iny';
+	 listing[i+5] := listing[i+15];
+	 listing[i+6] := #9'sbc (:bp2),y';
+	 listing[i+7] := listing[i+17];
+	 listing[i+8] := #9'iny';
+	 listing[i+9] := listing[i+18];
+	 listing[i+10]:= #9'sbc (:bp2),y';
+	 listing[i+11]:= listing[i+20];
+	 listing[i+12]:= #9'iny';
+	 listing[i+13]:= listing[i+21];
+	 listing[i+14]:= #9'sbc (:bp2),y';
+	 listing[i+15]:= listing[i+23];
 	end;
+
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+	listing[i+19] := '';
+	listing[i+20] := '';
+	listing[i+21] := '';
+	listing[i+22] := '';
+	listing[i+23] := '';
 
 	exit(false);
        end;
