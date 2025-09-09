@@ -635,7 +635,7 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result + x/Result);// * 0.5;
+	Result := (Result + x / Result);// * 0.5;
 
 	asm
 	 lsr Result+1
@@ -657,7 +657,6 @@ begin
 	end;
 
 end;
-
 
 
 function Sqrt(x: Real): Real; overload;
@@ -755,6 +754,7 @@ begin
 end;
 }
 
+
 function Sqrt(x: Single): Single; overload;
 (*
 @description
@@ -766,25 +766,20 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: Single
 *)
-var sp: ^single;
-    c: cardinal;
+var c: cardinal;
 begin
 	if integer(x) <= 0 then exit(single(0.0));
 
-	sp:=@c;
-
-	//c:=cardinal(x) shr 1;
-
 	// Solved equation for square roots
-	//c := (c + $3f800000) shr 1;
 	c := (cardinal(x) shr 1) + $1fc00000;
 
-	Result := sp^;
+	Result := PSingle(@c)^;
 
 	// Newton-Rapson iteration
-	Result:=(Result + x/Result) * 0.5;
-//	Result:=(Result + x/Result) * 0.5;	// x < 1 -> higher precision
+	Result := 0.5 * (Result + x / Result);
+//	Result := 0.5 * (Result + x / Result);	// x < 1 -> higher precision
 end;
+
 
 
 function Sqrt(x: float16): float16; overload;
@@ -798,23 +793,17 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: float16
 *)
-var sp: ^float16;
-    c: word;
+var c: word;
 begin
 	if smallint(x) <= 0 then exit(float16(0.0));
 
-	sp:=@c;
-
-	//c:=word(x) shr 1;
-
 	// Solved equation for square roots
-	//c := (c + $3c00) shr 1;
 	c := (word(x) shr 1) + $1e00;
 
-	Result := sp^;
+	Result := PFloat16(@c)^;
 
 	// Newton-Rapson iteration
-	Result:=(Result + x / Result) * 0.5;
+	Result := 0.5 * (Result + x / Result);
 end;
 
 
@@ -827,23 +816,17 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: integer
 *)
-var sp: ^single;
-    c: cardinal;
+var c: cardinal;
 begin
-
 	if x <= 0 then exit(single(0.0));
 
-	sp:=@c;
+	// Solved equation for square roots
+	c := (cardinal(x) shr 1) + $1fc00000;
 
-	c:=cardinal(single(x));
+	Result := PSingle(@c)^;
 
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
-
-	Result := sp^;
-
-	Result:=(Result + x / Result) * 0.5;
-	Result:=(Result + x / Result) * 0.5;
-	Result:=(Result + x / Result) * 0.5;
+	// Newton-Rapson iteration
+	Result := 0.5 * (Result + x / Result);
 end;
 
 
@@ -864,7 +847,6 @@ var sp: ^single;
     c: cardinal;
     f0, f1: single;
 begin
-
 	sp:=@c;
 
 	f0 := number * 0.5;
@@ -872,7 +854,6 @@ begin
 	c  := $5f3759df - (c shr 1);	// what the fuck?
         f1 := f0 * sp^ * sp^;
 	Result := sp^ * ( 1.5 - f1 );	// 1st iteration
-
 end;
 
 
@@ -2297,7 +2278,7 @@ begin
     s2len := Length(s2);
 
     result := 0;
-    
+
     if s1len > s2len then exit;
 
     for i := 1 to s2len - s1len + 1 do
