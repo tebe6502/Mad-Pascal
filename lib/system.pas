@@ -790,7 +790,7 @@ begin
           Result := PSingle(@c)^;
         end else
         // denormalne lub zero -> lepiej podzielić "klasycznie"
-          Result := Result * 0.5;
+          Result := 0.5 * Result;
 
 //	Result := 0.5 * (Result + x / Result);	// x < 1 -> higher precision
 end;
@@ -849,17 +849,30 @@ Fast inverse square root
 
 @returns: Single
 *)
-var sp: ^single;
-    c: cardinal;
+var c: cardinal;
     f0, f1: single;
 begin
-	sp:=@c;
+	//f0 := number * 0.5;
 
-	f0 := number * 0.5;
+	c := cardinal(number);
+
+        if (c and $7F800000) <> 0 then		// * 0.5
+        begin
+        // normalna liczba -> zmniejszamy cechę o 1
+          c := c - $00800000;
+
+          f0 := PSingle(@c)^;
+        end else
+        // denormalne lub zero -> lepiej podzielić "klasycznie"
+          f0 := 0.5 * number;
+
 	c  := cardinal(number);		// evil floating point bit level hacking
 	c  := $5f3759df - (c shr 1);	// what the fuck?
-        f1 := f0 * sp^ * sp^;
-	Result := sp^ * ( 1.5 - f1 );	// 1st iteration
+
+	f1 := PSingle(@c)^;
+
+        Result := f0 * f1 * f1;
+	Result := f1 * ( 1.5 - Result );	// 1st iteration
 end;
 
 
