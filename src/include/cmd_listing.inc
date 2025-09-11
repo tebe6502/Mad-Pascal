@@ -264,6 +264,16 @@
      Result := listing[i] = #9'lda :eax+1'
    end;
 
+   function LDA_EAX_2(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'lda :eax+2'
+   end;
+
+   function LDA_EAX_3(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'lda :eax+3'
+   end;
+
    function STA_EAX(i: integer): Boolean;
    begin
      Result := listing[i] = #9'sta :eax'
