@@ -333,9 +333,9 @@ begin
        add_sub_AX_CX(i+2) and									// jsr addAX_CX|subAX_CX		; 2
        dex(i+3) and										// dex					; 3
        (listing[i+4] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 4
-       sta(i+5) and										// sta					; 5
+       sta_a(i+5) and										// sta					; 5
        (listing[i+6] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 6
-       sta(i+7) then										// sta					; 7
+       sta_a(i+7) then										// sta					; 7
      if (pos(':STACKORIGIN,x', listing[i]) > 0) and
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) then
      begin
@@ -372,9 +372,9 @@ begin
        add_sub_AX_CX(i+3) and									// jsr addAX_CX|subAX_CX		; 3
        dex(i+4) and										// dex					; 4
        (listing[i+5] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 5
-       sta(i+6) and										// sta					; 6
+       sta_a(i+6) and										// sta					; 6
        (listing[i+7] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 7
-       sta(i+8) then										// sta					; 8
+       sta_a(i+8) then										// sta					; 8
      begin
 
        if listing[i+3] = #9'jsr addAX_CX' then begin
@@ -408,9 +408,9 @@ begin
        add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
        dex(i+6) and										// dex					; 6
        (listing[i+7] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 7
-       sta(i+8) and										// sta					; 8
+       sta_a(i+8) and										// sta					; 8
        (listing[i+9] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 9
-       sta(i+10) then										// sta					; 10
+       sta_a(i+10) then										// sta					; 10
      if (pos(':STACKORIGIN,x', listing[i+2]) > 0) then
      begin
 
@@ -451,9 +451,9 @@ begin
        ADD_SUB_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
        dex(i+7) and										// dex					; 7
        (listing[i+8] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 8
-       sta(i+9) and										// sta A				; 9
+       sta_a(i+9) and										// sta A				; 9
        (listing[i+10] = #9'lda :STACKORIGIN+STACKWIDTH,x') and					// lda :STACKORIGIN+STACKWIDTH,x	; 10
-       sta(i+11) then										// sta A+1				; 11
+       sta_a(i+11) then										// sta A+1				; 11
      if (pos(':STACKORIGIN,x', listing[i+2]) > 0) and
 	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+3]) > 0) and
 	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+4]) > 0) and
