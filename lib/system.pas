@@ -208,6 +208,8 @@ const
 
 {$i '../src/targets/systemh.inc'}
 
+var
+	mem: array [0..0] of byte absolute $0000;
 
 	function Abs(x: Real): Real; register; assembler; overload;
 	function Abs(x: Single): Single; register; assembler; overload;
@@ -325,8 +327,6 @@ const
 implementation
 
 var
-	mem: array [0..0] of byte absolute $0000;
-
 	RndSeed: smallint;
 
 procedure RunError(a: byte);
