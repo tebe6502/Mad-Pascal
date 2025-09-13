@@ -1143,9 +1143,11 @@ begin
       WORDTOK: Result := Low(Word);
   CARDINALTOK: Result := Low(Cardinal);
     STRINGTOK: Result := 1;
+   POINTERTOK: Result := 0;
 
  else
   iError(i, TypeMismatch);
+
  end;// case
 
 end;
@@ -1172,9 +1174,11 @@ begin
       WORDTOK: Result := High(Word);
   CARDINALTOK: Result := High(Cardinal);
     STRINGTOK: Result := 255;
+   POINTERTOK: Result := High(Word);
 
  else
   iError(i, TypeMismatch);
+
  end;// case
 
 end;

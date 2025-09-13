@@ -2133,22 +2133,22 @@ begin
 
  svara := svar;
  if pos('.', svar) > 0 then
-  svara:=GetLocalName(IdentIndex, 'adr.')
+  svara := GetLocalName(IdentIndex, 'adr.')
  else
-  svara:='adr.'+svar;
+  svara := 'adr.' + svar;
 
 
  if Down then begin
-  asm65;
-  asm65('; Dec(var X [ ; N: int ] ) -> '+InfoAboutToken(ExpressionType));
+  //asm65;
+  //asm65('; Dec(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
 
 //  a:='sbb';
   b:='sub';
   c:='sbc';
 
  end else begin
-  asm65;
-  asm65('; Inc(var X [ ; N: int ] ) -> '+InfoAboutToken(ExpressionType));
+  //asm65;
+  //asm65('; Inc(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
 
 //  a:='adb';
   b:='add';
@@ -2293,7 +2293,6 @@ begin
 
 		    end;
 
-
 		  end else begin
 
 		   if Ident[IdentIndex].PassMethod = VARPASSING then begin
@@ -2312,11 +2311,11 @@ begin
 		    asm65(#9 + b + ' :STACKORIGIN,x');
 		    asm65(#9'sta '+svara+',y');
 }
-		    asm65(#9'lda <'+svara);
+		    asm65(#9'lda <' + svara);
 		    asm65(#9'add :STACKORIGIN-1,x');
 		    asm65(#9'tay');
 
-		    asm65(#9'lda >'+svara);
+		    asm65(#9'lda >' + svara);
 		    asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
 		    asm65(#9'sta :bp+1');
 
@@ -4747,8 +4746,8 @@ end;
 procedure GenerateBinaryOperation(op: Byte; ResultType: Byte);
 begin
 
-asm65;
-asm65('; Generate Binary Operation for '+InfoAboutToken(ResultType));
+//asm65;
+//asm65('; Generate Binary Operation for ' + InfoAboutToken(ResultType));
 
 Gen; Gen; Gen;							// mov :ecx, [bx]      :STACKORIGIN,x
 
@@ -5677,8 +5676,9 @@ end;	//GenerateBinaryOperation
 
 procedure GenerateRelationString(relation: Byte; LeftValType, RightValType: Byte; sLeft: WordBool = false; sRight: WordBool = false);
 begin
- asm65;
- asm65('; relation STRING');
+ 
+// asm65;
+// asm65('; relation STRING');
 
  Gen;
 
@@ -8251,8 +8251,8 @@ case Tok[i].Kind of
 
      CheckTok(i + 1, CPARTOK);
 
-     asm65;
-     asm65('; Lo(X)');
+     //asm65;
+     //asm65('; Lo(X)');
 
      case ActualParamType of
       SHORTINTTOK, BYTETOK:
@@ -8284,8 +8284,8 @@ case Tok[i].Kind of
 
      CheckTok(i + 1, CPARTOK);
 
-     asm65;
-     asm65('; Hi(X)');
+     //asm65;
+     //asm65('; Hi(X)');
 
      case ActualParamType of
 	 SHORTINTTOK, BYTETOK: asm65(#9'jsr @hiBYTE');
@@ -13363,6 +13363,7 @@ WHILETOK:
 	  iError(i + 2, UnknownIdentifier);
 	end;
 
+
   WRITETOK, WRITELNTOK:
     begin
 
@@ -13547,7 +13548,7 @@ WHILETOK:
 	STRINGLITERALTOK:			      // 'text'
 	       repeat
 		 GenerateWriteString(Tok[i + 1].StrAddress, ASPOINTER);
-		 inc(i, 2);
+		 inc(i, 2); 
 	       until Tok[i + 1].Kind <> STRINGLITERALTOK;
 
 	else
@@ -13848,7 +13849,7 @@ WHILETOK:
 	   j := i + 2;
 	   yes:=false;
 
-	   if SafeCompileConstExpression(j, ConstVal, ActualParamType, Ident[IdentIndex].DataType, true) then
+	   if SafeCompileConstExpression(j, ConstVal, ActualParamType, {Ident[IdentIndex].DataType} ExpressionType, true) then
 	    yes:=true
 	   else
 	     j := CompileExpression(j, ActualParamType);
@@ -13933,6 +13934,7 @@ WHILETOK:
 
 	 if (NumActualParams = 0) then begin
 
+{
 	  asm65;
 
 	  if Down then
@@ -13941,6 +13943,7 @@ WHILETOK:
 	   asm65('; Inc(var X) -> ' + InfoAboutToken(ExpressionType));
 
 	  asm65;
+}
 
 	  GenerateForToDoEpilog(ExpressionType, Down, IdentIndex, false, 0);		// +1, -1
 	 end else

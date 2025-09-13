@@ -3378,6 +3378,35 @@ begin
       end;
 
 
+    if lda_bp_y(i+6) and									// lda (:bp),y				; 6
+
+       lda_im(i) and										// lda #				; 0
+       add_im(i+1) and	 									// add #				; 1
+       tay(i+2) and										// tay					; 2
+       lda_im(i+3) and										// lda #				; 3
+       adc_im(i+4) and										// adc #				; 4
+       sta_bp_1(i+5) and									// sta :bp+1				; 5
+//       lda_bp_y(i+6) and									// lda (:bp),y				; 6
+       (add_sub(i+7) or and_ora_eor(i+7)) and							// add|sub|and|ora|eor			; 7
+       sta_bp_y(i+8) then		 							// sta (:bp),y				; 8
+      begin
+        p := GetWORD(i, i+3) + GetWORD(i+1, i+4);
+
+	listing[i+6] := #9'lda $' + IntToHex(p, 4);
+
+	listing[i+8] := #9'sta $' + IntToHex(p, 4);
+
+	listing[i]  := '';
+	listing[i+1]:= '';
+	listing[i+2]:= '';
+	listing[i+3]:= '';
+	listing[i+4]:= '';
+	listing[i+5]:= '';
+
+	exit(false);
+      end;
+
+
     if sta_bp_1(i+5) and									// sta :bp+1				; 5
 
        lda_im(i) and										// lda #				; 0
@@ -3417,6 +3446,28 @@ begin
 
 	if lda_bp_y(i+3) then listing[i+3] := #9'lda $' + IntToHex(p, 4);
 	if sta_bp_y(i+4) then listing[i+4] := #9'sta $' + IntToHex(p, 4);
+
+	listing[i]  := '';
+	listing[i+1]:= '';
+	listing[i+2]:= '';
+
+	exit(false);
+       end;
+
+
+    if lda_bp_y(i+3) and									// lda (:bp),y				; 3
+
+       ldy_im(i) and										// ldy #				; 0
+       lda_im(i+1) and										// lda #				; 1
+       sta_bp_1(i+2) and									// sta :bp+1				; 2
+//       lda_bp_y(i+3) and									// lda (:bp),y				; 3
+       (add_sub(i+4) or and_ora_eor(i+4)) and							// add|sub|and|ora|eor			; 4
+       sta_bp_y(i+5) then		 							// sta (:bp),y				; 5
+      begin
+        p := GetWORD(i, i+1);
+
+	listing[i+3] := #9'lda $' + IntToHex(p, 4);
+	listing[i+5] := #9'sta $' + IntToHex(p, 4);
 
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -4295,6 +4346,89 @@ begin
 	listing[i+7] := '';
 
 	listing[i+9] := #9'sta $' + IntToHex(p+1, 4);
+
+	exit(false);
+       end;
+
+
+    if LDA_BP2_Y(i+9) and									// lda (:bp2),y				; 9
+
+       lda_im(i) and										// lda #				; 0
+       sta_bp2(i+1) and										// sta :bp2				; 1
+       lda_im(i+2) and										// lda #				; 2
+       sta_bp2_1(i+3) and									// sta :bp2+1				; 3
+       ldy_im_0(i+4) and									// ldy #$00				; 4
+       LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
+       (add_sub(i+6) or and_ora_eor(i+6)) and							// add|sub|and|ora|eor			; 6
+       sta_bp2_y(i+7) and									// sta (:bp2),y				; 7
+       iny(i+8) and 										// iny					; 8
+//       LDA_BP2_Y(i+9) and									// lda (:bp2),y				; 9
+       (adc_sbc(i+10) or and_ora_eor(i+10)) and							// adc|sbc|and|ora|eor			; 10
+       sta_bp2_y(i+11) and									// sta (:bp2),y				; 11
+       (iny(i+12) = false) then									//~iny					; 12
+       begin
+	p:=GetWORD(i, i+2);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+	listing[i+5] := #9'lda $' + IntToHex(p, 4);
+
+	listing[i+7] := #9'sta $' + IntToHex(p, 4);
+	listing[i+8] := '';
+	listing[i+9] := #9'lda $' + IntToHex(p+1, 4);
+
+	listing[i+11] := #9'sta $' + IntToHex(p+1, 4);
+
+	exit(false);
+       end;
+
+
+    if STA_BP2_Y(i+11) and									// sta (:bp2),y				; 11
+
+       lda_im(i) and										// lda #				; 0
+       sta_bp2(i+1) and										// sta :bp2				; 1
+       lda_im(i+2) and										// lda #				; 2
+       sta_bp2_1(i+3) and									// sta :bp2+1				; 3
+       ldy_im_0(i+4) and									// ldy #$00				; 4
+       lda_bp2_y(i+5) and									// lda (:bp2),y				; 5
+       (add_sub(i+6) or and_ora_eor(i+6)) and							// add|sub|and|ora|eor			; 6
+       STA_BP2_Y(i+7) and									// sta (:bp2),y				; 7
+       iny(i+8) and 										// iny					; 8
+       lda_bp2_y(i+9) and									// lda (:bp2),y				; 9
+       (adc_sbc(i+10) or and_ora_eor(i+10)) and							// add|sub|and|ora|eor			; 10
+//       STA_BP2_Y(i+11) and									// sta (:bp2),y				; 11
+       iny(i+12) and 										// iny					; 12
+       lda_bp2_y(i+13) and									// lda (:bp2),y				; 13
+       (adc_sbc(i+14) or and_ora_eor(i+14)) and							// add|sub|and|ora|eor			; 14
+       STA_BP2_Y(i+15) and									// sta (:bp2),y				; 15
+       iny(i+16) and 										// iny					; 16
+       lda_bp2_y(i+17) and									// lda (:bp2),y				; 17
+       (adc_sbc(i+18) or and_ora_eor(i+18)) and							// add|sub|and|ora|eor			; 18
+       STA_BP2_Y(i+19) then									// sta (:bp2),y				; 19
+       begin
+	p:=GetWORD(i, i+2);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+
+	listing[i+5] := #9'lda $' + IntToHex(p, 4);
+	listing[i+7] := #9'sta $' + IntToHex(p, 4);
+	listing[i+8] := '';
+	listing[i+9] := #9'lda $' + IntToHex(p+1, 4);
+	listing[i+11]:= #9'sta $' + IntToHex(p+1, 4);
+	listing[i+12] := '';
+	listing[i+13]:= #9'lda $' + IntToHex(p+2, 4);
+	listing[i+15]:= #9'sta $' + IntToHex(p+2, 4);
+	listing[i+16] := '';
+	listing[i+17]:= #9'lda $' + IntToHex(p+3, 4);
+	listing[i+19]:= #9'sta $' + IntToHex(p+3, 4);
 
 	exit(false);
        end;
