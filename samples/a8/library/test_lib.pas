@@ -1,3 +1,7 @@
+
+// file .a65 assemble with switch -hm (Mads Assembler)
+// the -hm switch will generate a .HEA file
+
 library subs : $6000;
 
 uses crt ;
