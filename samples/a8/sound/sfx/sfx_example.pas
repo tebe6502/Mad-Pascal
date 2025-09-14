@@ -255,11 +255,25 @@ const
 var
 
 	sfx: TSFX;
+	
+	ch: char;
 
 begin
 	sfx.clear;
-	sfx.add(@sfx6);
 
+	sfx.add(@sfx1);
+	sfx.add(@sfx2);
+	sfx.add(@sfx3);
+	sfx.add(@sfx4);
+	sfx.add(@sfx5);
+	sfx.add(@sfx6);
+	sfx.add(@sfx7);
+	sfx.add(@sfx8);
+	sfx.add(@sfx9);		// the maximum possible number of sound-effects is 32
+
+	writeln('xSFX Engine demonstration');
+	writeln;
+	writeln('Press 1-9 key');
 
 	while true do begin
 
@@ -268,10 +282,20 @@ begin
 
 	 if keypressed then begin
 
-	  readkey;
-
-    	  sfx.init(1);
-
+	  ch:=readkey;
+	  
+	  case ch of
+	   '1': sfx.init(1);
+	   '2': sfx.init(2);
+	   '3': sfx.init(3);
+	   '4': sfx.init(4);
+	   '5': sfx.init(5);
+	   '6': sfx.init(6);
+	   '7': sfx.init(7);
+	   '8': sfx.init(8);
+	   '9': sfx.init(9);
+	  end;
+	  
 	 end;
 
 	end;
