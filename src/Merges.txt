@@ -202,6 +202,10 @@ Original: https://github.com/peterdell/Mad-Pascal/commit/8232f025169e0d70c6a1343
 Merge: n/a
 Description: Only lib / samples/ origin/include/opt6502/
 
+Original: https://github.com/tebe6502/Mad-Pascal/commit/a26b646d270537d15c5346f9d19146f256bbacfd
+Merge: TODO
+Description: Merge origin to sec - a26b646d270537d15c5346f9d19146f256bbacfd - RecordSize fix
+
 
 
 
