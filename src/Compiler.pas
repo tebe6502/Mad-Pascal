@@ -2328,19 +2328,35 @@ begin
 
           if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
           begin
+               if (IdentIndex > 0) and (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).idType = ARRAYTOK) and (IdentifierAt(IdentIndex).Value >= 0) then begin
 
-            asm65(#9'lda ' + svar);
-            asm65(#9'add :STACKORIGIN-1,x');
-            asm65(#9'tay');
+	 	  asm65(#9'lda #$' + IntToHex(byte(IdentifierAt(IdentIndex).Value), 2));
+	          asm65(#9'add :STACKORIGIN-1,x');
+	          asm65(#9'tay');
+	          asm65(#9'lda #$' + IntToHex(byte(IdentifierAt(IdentIndex).Value shr 8), 2));
+	          asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+	          asm65(#9'sta :bp+1');
 
-            asm65(#9'lda ' + svar + '+1');
-            asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-            asm65(#9'sta :bp+1');
+		  asm65(#9'lda (:bp),y');
+		  asm65(#9 + b + ' :STACKORIGIN,x');
+		  asm65(#9'sta (:bp),y');
 
-            asm65;
-            asm65(#9'lda (:bp),y');
-            asm65(#9 + b + ' :STACKORIGIN,x');
-            asm65(#9'sta (:bp),y');
+	        end else begin
+
+                  asm65(#9'lda ' + svar);
+                  asm65(#9'add :STACKORIGIN-1,x');
+                  asm65(#9'tay');
+
+                  asm65(#9'lda ' + svar + '+1');
+                  asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+                  asm65(#9'sta :bp+1');
+
+                  asm65;
+                  asm65(#9'lda (:bp),y');
+                  asm65(#9 + b + ' :STACKORIGIN,x');
+                  asm65(#9'sta (:bp),y');
+
+                end;
 
           end
           else
@@ -7716,7 +7732,7 @@ begin
 
 	  end;
 
-          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealType) and (ActualParamType in RealTypes)
+          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes)
           then GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = ENUMTOK) then begin
