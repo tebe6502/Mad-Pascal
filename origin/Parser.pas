@@ -211,7 +211,7 @@ begin
 // if Ident[IdentIndex].NumAllocElements_ > 0 then
 //  i := Ident[IdentIndex].NumAllocElements_
 // else
-  i := Ident[IdentIndex].NumAllocElements;
+  i := Ident[IdentIndex].NumAllocElements and $FFFF;
 
  Result := 0;
 
@@ -238,6 +238,12 @@ begin
 
     if FieldType <> RECORDTOK then
      if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+     
+     if AllocElementType = RECORDTOK then begin
+       AllocElementType := POINTERTOK;
+       NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
+       NumAllocElements_ := 0;
+     end;
 
       if NumAllocElements_ > 0 then
        inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])
