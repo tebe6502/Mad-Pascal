@@ -1091,6 +1091,17 @@ var
     end;
 
 
+    function ReadFractionalPart(ch: char): String;  overload;
+    begin
+    Result:='.';
+
+    while UpCase(ch) in ['0'..'9', '-','E'] do
+    begin
+      Result := Result + ch;
+      SafeReadChar(ch);
+    end;
+    end;
+
     procedure TextInvers(p: Integer);
     var
       i: Integer;
@@ -1247,13 +1258,7 @@ var
               InFile.Seek2(InFile.FilePos() - 1)  // Range ('..') token
             else
             begin        // Fractional part found
-              Frac := '.';
-
-              while UpCase(ch) in ['0'..'9', '-','E'] do
-              begin
-                Frac := Frac + ch;
-                SafeReadChar(ch);
-              end;
+              Frac := ReadFractionalPart(ch);
 
               TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
 
@@ -1726,17 +1731,11 @@ var
           end
           else
             if (ch = '.') and (ch2 in ['0'..'9']) then
-            begin
+            begin  // Fractional part found
 
               AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 0, 0);
 
-              Frac := '0.';      // Fractional part found
-
-              while UpCase(ch2) in ['0'..'9', '-','E'] do
-              begin
-                Frac := Frac + ch2;
-                SafeReadChar(ch2);
-              end;
+              Frac := ReadFractionalPart(ch2);
 
               TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
               TokenAt(NumTok).FracValue := StrToFloat(Frac);
@@ -1857,6 +1856,17 @@ end;  // TokenizeProgram
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+function ReadFractionalPart(const a: String; var i: Integer; ch: char): String;  overload;
+begin
+Result:='0.';
+while UpCase(ch) in ['0'..'9', '-','E'] do
+begin
+  Result := Result + ch;
+
+  ch := a[i];
+  Inc(i);
+end;
+end;
 
 procedure TScanner.TokenizeMacro(a: String; Line, Spaces: Integer);
 var
@@ -2048,16 +2058,8 @@ begin
         if ch = '.' then
           Dec(i)        // Range ('..') token
         else
-        begin        // Fractional part found
-          Frac := '.';
-
-          while UpCase(ch) in ['0'..'9', '-','E'] do
-          begin
-            Frac := Frac + ch;
-
-            ch := a[i];
-            Inc(i);
-          end;
+        begin
+          Frac:=ReadFractionalPart(a,i,ch);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
           TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
@@ -2366,16 +2368,7 @@ begin
         begin
 
           AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
-
-          Frac := '0.';      // Fractional part found
-
-          while UpCase(ch2) in ['0'..'9', '-','E'] do
-          begin
-            Frac := Frac + ch2;
-
-            ch2 := a[i];
-            Inc(i);
-          end;
+          Frac:=ReadFractionalPart(a,i,ch2);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
           TokenAt(NumTok).FracValue := StrToFloat(Frac);
