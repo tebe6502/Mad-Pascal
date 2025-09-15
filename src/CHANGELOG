@@ -1,3 +1,7 @@
+18.08.2025
+- added MD1, MD1PLAY resources
+- new unit MD1
+
 16.08.2025
 - improved ENUM type passing in procedure/function
 - added support for WITH statement
