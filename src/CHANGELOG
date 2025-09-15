@@ -1,3 +1,6 @@
+21.08.2025
+- optimizations for @cmpCHAR2STRING, @cmpSTRING2CHAR
+
 18.08.2025
 - added MD1, MD1PLAY resources
 - new unit MD1

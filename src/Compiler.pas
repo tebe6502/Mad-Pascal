@@ -646,13 +646,13 @@ begin
     TCode65.shrAX_CL: asm65(#9'jsr @shrAX_CL');
     TCode65.shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
 
-    TCode65.je: asm65(#9'beq *+5');          // =
-    TCode65.jne: asm65(#9'bne *+5');          // <>
+    // TCode65.je: asm65(#9'beq *+5');          // =
+    // TCode65.jne: asm65(#9'bne *+5');          // <>
 
-    //       TCode65.jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;  // >
-    //      TCode65.jge: asm65(#9'bcs *+5');          // >=
-    //       TCode65.jl: asm65(#9'bcc *+5');          // <
-    //      TCode65.jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;  // <=
+    // TCode65.jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;  // >
+    // TCode65.jge: asm65(#9'bcs *+5');          // >=
+    // TCode65.jl: asm65(#9'bcc *+5');          // <
+    // TCode65.jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;  // <=
 
     TCode65.addBX: asm65(#9'inx');
     TCode65.subBX: asm65(#9'dex');
@@ -667,36 +667,36 @@ begin
 
     TCode65.imulECX: asm65(#9'jsr imulECX');
 
-    //     TCode65.notBOOLEAN: asm65(#9'jsr notBOOLEAN');
-    //   TCode65.notaBX: asm65(#9'jsr notaBX');
+    // TCode65.notBOOLEAN: asm65(#9'jsr notBOOLEAN');
+    // TCode65.notaBX: asm65(#9'jsr notaBX');
 
-    //   TCode65.negaBX: asm65(#9'jsr negaBX');
+    // TCode65.negaBX: asm65(#9'jsr negaBX');
 
-    //     TCode65.xorEAX_ECX: asm65(#9'jsr xorEAX_ECX');
-    //       TCode65.xorAX_CX: asm65(#9'jsr xorAX_CX');
-    //       TCode65.xorAL_CL: asm65(#9'jsr xorAL_CL');
+    // TCode65.xorEAX_ECX: asm65(#9'jsr xorEAX_ECX');
+    // TCode65.xorAX_CX: asm65(#9'jsr xorAX_CX');
+    // TCode65.xorAL_CL: asm65(#9'jsr xorAL_CL');
 
-    //     TCode65.andEAX_ECX: asm65(#9'jsr andEAX_ECX');
-    //       TCode65.andAX_CX: asm65(#9'jsr andAX_CX');
-    //       TCode65.andAL_CL: asm65(#9'jsr andAL_CL');
+    // TCode65.andEAX_ECX: asm65(#9'jsr andEAX_ECX');
+    // TCode65.andAX_CX: asm65(#9'jsr andAX_CX');
+    // TCode65.andAL_CL: asm65(#9'jsr andAL_CL');
 
-    //      TCode65.orEAX_ECX: asm65(#9'jsr orEAX_ECX');
-    //  TCode65.orAX_CX: asm65(#9'jsr orAX_CX');
-    //  TCode65.orAL_CL: asm65(#9'jsr orAL_CL');
+    // TCode65.orEAX_ECX: asm65(#9'jsr orEAX_ECX');
+    // TCode65.orAX_CX: asm65(#9'jsr orAX_CX');
+    // TCode65.orAL_CL: asm65(#9'jsr orAL_CL');
 
-    //     TCode65.cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
-    //       TCode65.cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
-    //    TCode65.cmpSHORTINT: asm65(#9'jsr cmpSHORTINT');
-    //    TCode65.cmpSMALLINT: asm65(#9'jsr cmpSMALLINT');
-    //     TCode65.cmpINT: asm65(#9'jsr cmpINT');
+    // TCode65.cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
+    // TCode65.cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
+    // TCode65.cmpSHORTINT: asm65(#9'jsr cmpSHORTINT');
+    // TCode65.cmpSMALLINT: asm65(#9'jsr cmpSMALLINT');
+    // TCode65.cmpINT: asm65(#9'jsr cmpINT');
 
-    //      TCode65.cmpSTRING: asm65(#9'jsr cmpSTRING');
+    // TCode65.cmpSTRING: asm65(#9'jsr cmpSTRING');
 
-    TCode65.cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
-    TCode65.cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
+    // TCode65.cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
+    // TCode65.cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
 
     TCode65.movaBX_Value: begin
-      //        asm65(#9'ldx sp', '; mov dword ptr [bx], Value');
+      //       asm65(#9'ldx sp', '; mov dword ptr [bx], Value');
 
       if Kind = VARIABLE then
       begin          // @label
@@ -3780,7 +3780,7 @@ begin
 
   asm65(#9'lda :STACKORIGIN+1,x');
 
-  a65(TCode65.jne);
+  asm65(#9'bne *+5');
 end;
 
 
@@ -3797,7 +3797,7 @@ begin
   Gen;
   Gen;                // mov :eax, [bx]
 
-  a65(TCode65.je);
+  asm65(#9'beq *+5');
 
 end;
 
@@ -5957,51 +5957,121 @@ end;  //GenerateBinaryOperation
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelationString(rel: TTokenKind; LeftValType, RightValType: TDataType);
+procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType: TDataType);
 begin
-  asm65;
-  asm65('; relation STRING');
 
-  Gen;
+// asm65;
+// asm65('; relation STRING');
 
-  asm65(#9'ldy #1');
+ Gen;
 
-  Gen;
+ asm65(#9'ldy #1');
 
-  if (LeftValType = TDataType.STRINGPOINTERTOK) and (RightValType = TDataType.STRINGPOINTERTOK) then
-  begin
-    //  a65(TCode65.cmpSTRING)          // STRING ? STRING
+ Gen;
 
-    asm65(#9'lda :STACKORIGIN,x');
-    asm65(#9'sta @cmpSTRING.B');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-    asm65(#9'sta @cmpSTRING.B+1');
+{
+ if (LeftValType = POINTERTOK) and (RightValType = POINTERTOK) then begin
 
-    asm65(#9'lda :STACKORIGIN-1,x');
-    asm65(#9'sta @cmpSTRING.A');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-    asm65(#9'sta @cmpSTRING.A+1');
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpPCHAR.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpPCHAR.B+1');
 
-    asm65(#9'jsr @cmpSTRING');
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpPCHAR.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpPCHAR.A+1');
 
-  end
-  else
-    if LeftValType = TDataType.CHARTOK then
-      a65(TCode65.cmpCHAR2STRING)          // CHAR ? STRING
-    else
-      if RightValType = TDataType.CHARTOK then
-        a65(TCode65.cmpSTRING2CHAR);        // STRING ? CHAR
+	asm65(#9'jsr @cmpPCHAR');
 
-  GenerateRelationOperation(rel, TTokenKind.BYTETOK);
+ end else
 
-  Gen;
+ if (LeftValType = POINTERTOK) and (RightValType = STRINGPOINTERTOK) then begin
 
-  asm65(#9'dey');
-  asm65('@');
-  // asm65(#9'tya');      !!! ~
-  asm65(#9'sty :STACKORIGIN-1,x');
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpPCHAR2STRING.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpPCHAR2STRING.B+1');
 
-  a65(TCode65.subBX);
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpPCHAR2STRING.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpPCHAR2STRING.A+1');
+
+	asm65(#9'jsr @cmpPCHAR2STRING');
+
+ end else
+ if (LeftValType = STRINGPOINTERTOK) and (RightValType = POINTERTOK) then begin
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpSTRING2PCHAR.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING2PCHAR.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpSTRING2PCHAR.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING2PCHAR.A+1');
+
+	asm65(#9'jsr @cmpSTRING2PCHAR');
+
+ end else
+ }
+
+ if (LeftValType = TDatatype.STRINGPOINTERTOK) and (RightValType = TDatatype.STRINGPOINTERTOK) then begin
+//  a65(__cmpSTRING)					// STRING ? STRING
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpSTRING.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpSTRING.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING.A+1');
+
+	asm65(#9'jsr @cmpSTRING');
+
+ end else
+ if LeftValType = TDatatype.CHARTOK then begin
+//  a65(__cmpCHAR2STRING)				// CHAR ? STRING
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpCHAR2STRING.B');
+	asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	asm65(#9'sta @cmpCHAR2STRING.B+1');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpCHAR2STRING.A');
+
+	asm65(#9'jsr @cmpCHAR2STRING');
+
+ end else
+ if RightValType = TDatatype.CHARTOK then begin
+//  a65(__cmpSTRING2CHAR);				// STRING ? CHAR
+
+ 	asm65(#9'lda :STACKORIGIN,x');
+	asm65(#9'sta @cmpSTRING2CHAR.B');
+
+	asm65(#9'lda :STACKORIGIN-1,x');
+	asm65(#9'sta @cmpSTRING2CHAR.A');
+	asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+	asm65(#9'sta @cmpSTRING2CHAR.A+1');
+
+	asm65(#9'jsr @cmpSTRING2CHAR');
+ end;
+
+ GenerateRelationOperation(relation, TDatatype.BYTETOK);
+
+ Gen;
+
+ asm65(#9'dey');
+ asm65('@');
+// asm65(#9'tya');			!!! ~
+ asm65(#9'sty :STACKORIGIN-1,x');
+
+ a65(TCode65.subBX);
 
 end;
 
