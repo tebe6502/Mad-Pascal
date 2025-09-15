@@ -264,6 +264,16 @@
      Result := listing[i] = #9'lda :eax+1'
    end;
 
+   function LDA_EAX_2(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'lda :eax+2'
+   end;
+
+   function LDA_EAX_3(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'lda :eax+3'
+   end;
+
    function STA_EAX(i: integer): Boolean;
    begin
      Result := listing[i] = #9'sta :eax'
@@ -794,6 +804,16 @@
    function AND_ORA_EOR_BP2_Y(i: integer): Boolean;
    begin
      Result := (listing[i] = #9'and (:bp2),y') or (listing[i] = #9'ora (:bp2),y') or (listing[i] = #9'eor (:bp2),y');
+   end;
+
+   function ADD_SUB_BP2_Y(i: integer): Boolean;
+   begin
+     Result := (listing[i] = #9'add (:bp2),y') or (listing[i] = #9'sub (:bp2),y');
+   end;
+
+   function ADC_SBC_BP2_Y(i: integer): Boolean;
+   begin
+     Result := (listing[i] = #9'adc (:bp2),y') or (listing[i] = #9'sbc (:bp2),y');
    end;
 
    function MWY_BP2(i: integer): Boolean;

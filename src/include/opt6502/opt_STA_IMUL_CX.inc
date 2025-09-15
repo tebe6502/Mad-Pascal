@@ -878,9 +878,36 @@ begin
 
 
       if lda_eax(i+13) and								// lda :eax		; 13
-         sta(i+14) and									// sta			; 14
+         sta_a(i+14) and								// sta			; 14
          lda_eax_1(i+15) and								// lda :eax+1		; 15
-         sta(i+16) and									// sta			; 16
+         sta_a(i+16) and								// sta			; 16
+         lda_eax_2(i+17) and								// lda :eax+2		; 17
+         sta_a(i+18) and								// sta			; 18
+         lda_eax_3(i+19) and								// lda :eax+3		; 19
+         sta_a(i+20) then								// sta			; 20
+       begin
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	listing[i+8] := listing[i+6];
+	listing[i+9] := #9'sta :eax+2';
+	listing[i+10]:= #9'lda #$00';
+	listing[i+11]:= #9'sta :eax+3';
+	listing[i+12] := '';
+
+	listing[i+6] := listing[i+4];
+	listing[i+4] := #9'lda #$00';
+
+	exit(false);
+       end;
+
+
+      if lda_eax(i+13) and								// lda :eax		; 13
+         sta_a(i+14) and								// sta			; 14
+         lda_eax_1(i+15) and								// lda :eax+1		; 15
+         sta_a(i+16) and								// sta			; 16
          (lda_eax_x(i+17) = false) then							//~lda :eax+2		; 17
        begin
 	listing[i]   := '';
@@ -902,9 +929,9 @@ begin
 
 
       if lda_eax_1(i+13) and								// lda :eax+1		; 13
-         sta(i+14) and									// sta			; 14
+         sta_a(i+14) and								// sta			; 14
          lda_eax(i+15) and								// lda :eax		; 15
-         sta(i+16) and									// sta			; 16
+         sta_a(i+16) and								// sta			; 16
          (lda_eax_x(i+17) = false) then							//~lda :eax+2		; 17
        begin
 	listing[i]   := '';
@@ -927,10 +954,10 @@ begin
 
       if lda_eax(i+13) and								// lda :eax		; 13
 	 add_sub(i+14) and								// add|sub		; 14
-         sta(i+15) and									// sta			; 15
+         sta_a(i+15) and								// sta			; 15
          lda_eax_1(i+16) and								// lda :eax+1		; 16
 	 adc_sbc(i+17) and								// adc|sbc		; 17
-         sta(i+18) and									// sta			; 18
+         sta_a(i+18) and								// sta			; 18
          (lda_eax_x(i+19) = false) then							//~lda :eax+2		; 19
        begin
 	listing[i]   := '';

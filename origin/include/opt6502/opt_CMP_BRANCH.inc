@@ -1150,8 +1150,8 @@ begin
       end;
 
 
-    if bcc(i) and										// bcc @+			; 0
-       beq(i+1) and										// beq @+			; 1
+    if bcc_a(i) and										// bcc @+			; 0
+       beq_a(i+1) and										// beq @+			; 1
        (listing[i+2] = #9'jmp *+6') and								// jmp *+6			; 2
        (pos('@'#9'jmp l_', listing[i+3]) > 0) and						//@ jmp l_			; 3
        (jmp(i+4) = false) then									//~jmp l_			; 4
@@ -1167,7 +1167,7 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       (beq(i) or bne(i)) and									// beq|bne @+			; 0
+       (beq_a(i) or bne_a(i)) and								// beq|bne @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (jmp(i+3) = false) then									//~jmp l_			; 3
@@ -1203,7 +1203,7 @@ begin
 
 
     if (SKIP(i-1) = false) and
-       (bpl_a(i) or bmi(i)) and									// bpl|bmi @+			; 0
+       (bpl_a(i) or bmi_a(i)) and								// bpl|bmi @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
        (jmp(i+3) = false) then									//~jmp l_			; 3

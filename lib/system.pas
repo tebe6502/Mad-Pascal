@@ -208,6 +208,8 @@ const
 
 {$i '../src/targets/systemh.inc'}
 
+var
+	mem: array [0..0] of byte absolute $0000;
 
 	function Abs(x: Real): Real; register; assembler; overload;
 	function Abs(x: Single): Single; register; assembler; overload;
@@ -325,8 +327,6 @@ const
 implementation
 
 var
-	mem: array [0..0] of byte absolute $0000;
-
 	RndSeed: smallint;
 
 procedure RunError(a: byte);
@@ -635,7 +635,7 @@ begin
 
 	Result := sp^;
 
-	Result:=(Result + x/Result);// * 0.5;
+	Result := (Result + x / Result);// * 0.5;
 
 	asm
 	 lsr Result+1
@@ -657,7 +657,6 @@ begin
 	end;
 
 end;
-
 
 
 function Sqrt(x: Real): Real; overload;
@@ -755,6 +754,7 @@ begin
 end;
 }
 
+
 function Sqrt(x: Single): Single; overload;
 (*
 @description
@@ -766,25 +766,35 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: Single
 *)
-var sp: ^single;
-    c: cardinal;
+var c: cardinal;
 begin
 	if integer(x) <= 0 then exit(single(0.0));
 
-	sp:=@c;
-
-	//c:=cardinal(x) shr 1;
-
 	// Solved equation for square roots
-	//c := (c + $3f800000) shr 1;
 	c := (cardinal(x) shr 1) + $1fc00000;
 
-	Result := sp^;
+	Result := PSingle(@c)^;
 
 	// Newton-Rapson iteration
-	Result:=(Result + x/Result) * 0.5;
-//	Result:=(Result + x/Result) * 0.5;	// x < 1 -> higher precision
+	Result := (Result + x / Result);
+
+	//Result := 0.5 * (Result + x / Result);
+
+	c:=cardinal(Result);
+
+        if (c and $7F800000) <> 0 then			// * 0.5
+        begin
+        // normalna liczba -> zmniejszamy cechę o 1
+          c := c - $00800000;
+
+          Result := PSingle(@c)^;
+        end else
+        // denormalne lub zero -> lepiej podzielić "klasycznie"
+          Result := 0.5 * Result;
+
+//	Result := 0.5 * (Result + x / Result);	// x < 1 -> higher precision
 end;
+
 
 
 function Sqrt(x: float16): float16; overload;
@@ -798,23 +808,17 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: float16
 *)
-var sp: ^float16;
-    c: word;
+var c: word;
 begin
 	if smallint(x) <= 0 then exit(float16(0.0));
 
-	sp:=@c;
-
-	//c:=word(x) shr 1;
-
 	// Solved equation for square roots
-	//c := (c + $3c00) shr 1;
 	c := (word(x) shr 1) + $1e00;
 
-	Result := sp^;
+	Result := PFloat16(@c)^;
 
 	// Newton-Rapson iteration
-	Result:=(Result + x / Result) * 0.5;
+	Result := 0.5 * (Result + x / Result);
 end;
 
 
@@ -827,23 +831,8 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: integer
 *)
-var sp: ^single;
-    c: cardinal;
 begin
-
-	if x <= 0 then exit(single(0.0));
-
-	sp:=@c;
-
-	c:=cardinal(single(x));
-
-	if c > $3f800000 then c := (c - $3f800000) shr 1 + $3f800000;
-
-	Result := sp^;
-
-	Result:=(Result + x / Result) * 0.5;
-	Result:=(Result + x / Result) * 0.5;
-	Result:=(Result + x / Result) * 0.5;
+	Result := Sqrt( Single(X) )
 end;
 
 
@@ -860,19 +849,30 @@ Fast inverse square root
 
 @returns: Single
 *)
-var sp: ^single;
-    c: cardinal;
+var c: cardinal;
     f0, f1: single;
 begin
+	//f0 := number * 0.5;
 
-	sp:=@c;
+	c := cardinal(number);
 
-	f0 := number * 0.5;
+        if (c and $7F800000) <> 0 then		// * 0.5
+        begin
+        // normalna liczba -> zmniejszamy cechę o 1
+          c := c - $00800000;
+
+          f0 := PSingle(@c)^;
+        end else
+        // denormalne lub zero -> lepiej podzielić "klasycznie"
+          f0 := 0.5 * number;
+
 	c  := cardinal(number);		// evil floating point bit level hacking
 	c  := $5f3759df - (c shr 1);	// what the fuck?
-        f1 := f0 * sp^ * sp^;
-	Result := sp^ * ( 1.5 - f1 );	// 1st iteration
 
+	f1 := PSingle(@c)^;
+
+        Result := f0 * f1 * f1;
+	Result := f1 * ( 1.5 - Result );	// 1st iteration
 end;
 
 
@@ -2297,7 +2297,7 @@ begin
     s2len := Length(s2);
 
     result := 0;
-    
+
     if s1len > s2len then exit;
 
     for i := 1 to s2len - s1len + 1 do

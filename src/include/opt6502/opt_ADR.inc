@@ -882,6 +882,44 @@ begin
       end;
 
 
+    if (p > 2) and
+       (lda_adr(i+6) or sta_adr(i+7)) and
+       (iy(i+6) or iy(i+7)) and
+
+       rol_stack(p-3) and								// rol :STACKORIGIN+STACKWIDTH		; p-3		+-BYTE
+       add_sub_val(p-2) and (add_sub_im(p-2) = false) and 				// add|sub				; p-2
+       add_sub_im(p-1) and 								// add|sub #				; p-1
+											// sta :STACKORIGIN			; p
+       lda_a(p+1) and									// lda					; p+1
+       adc_sbc(p+2) and									// adc|sbc				; p+2
+       sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											// 					; p+4
+       (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
+     if argMatch(p-3, p+3) then
+      begin
+        q:=GetBYTE(p-1);
+
+	if add_im(p-1) then
+		LDA_STA_ADR(i,q,'+')
+	else
+		LDA_STA_ADR(i,q,'-');
+
+	listing[p-3] := '';
+
+	listing[p-1] := '';
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (p > 4) and
        rol_a(p-5) and									// rol @				; p-5		+-BYTE
        sta_stack(p-4) and								// sta :STACKORIGIN+STACKWIDTH		; p-4

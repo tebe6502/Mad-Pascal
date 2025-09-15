@@ -40,7 +40,7 @@ begin
 
 
     if (iny(i) or dey(i)) and									// iny|dey				; 0
-       (ldy(i+1) or mvy(i+1)) then								// ldy|mvy				; 1
+       (ldy(i+1) or mwy(i+1) or mvy(i+1)) then							// ldy|mwy|mvy				; 1
        begin
 	listing[i] := '';
 
@@ -85,7 +85,7 @@ begin
     if iny(i) and										// iny					; 0
        lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
        sta_a(i+2) and (iy(i+2) = false) and							// sta					; 2
-       (ldy(i+3) or mwy(i+3)) then								// ldy|mwy				; 3
+       (ldy(i+3) or mwy(i+3) or mvy(i+3)) then							// ldy|mwy|mvy				; 3
     begin
      listing[i] := '';
 
@@ -95,7 +95,7 @@ begin
 
     if iny(i) and										// iny					; 0
        sta_a(i+1) and (iy(i+1) = false) and							// sta					; 1
-       (ldy(i+2) or mwy(i+2)) then								// ldy|mwy				; 2
+       (ldy(i+2) or mwy(i+2) or mvy(i+2)) then							// ldy|mwy|mvy				; 2
     begin
      listing[i] := '';
 
