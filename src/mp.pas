@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                              {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                {$ENDIF}
+                                              {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -220,11 +220,10 @@ uses
   function Main: TExitCode;
 
   var
-    MainPath: String;
-
     // Command line parameters
     inputFilePath: TFilePath;
     unitPathList: TPathList;
+    libFolderPath: TFolderPath;
     targetID: TTargetID;
     cpu: TCPU;
 
@@ -423,7 +422,7 @@ uses
 
           if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            ParameterError(i, 'Error: Can''t open file ''' + inputFilePath + '''.');
+            ParameterError(i, 'Error: Cannot open input file ''' + ExpandFileName(inputFilePath) + ''' for reading.');
           end;
         end;
 
@@ -475,17 +474,28 @@ uses
     WriteLn(Compiler.CompilerTitle);
 
 
-    MainPath := ExtractFilePath(ParamStr(0));
-    MainPath := IncludeTrailingPathDelimiter(MainPath);
-    unitPathList := TPathList.Create;
-    unitPathList.AddFolder(MainPath + 'lib');
+    // By default the executable is in 'bin/<os>'.
+    libFolderPath := ExtractFileDir(ParamStr(0));
+    libFolderPath := ExtractFileDir(libFolderPath);
+    libFolderPath := ExtractFileDir(libFolderPath);
+    libFolderPath := IncludeTrailingPathDelimiter(libFolderPath) + 'lib';
 
-    if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
+    unitPathList := TPathList.Create;
+    if TFileSystem.FolderExists(libFolderPath) then
+    begin
+      unitPathList.AddFolder(libFolderPath);
+    end;
 
     SourceFileList := TSourceFileList.Create();
 
     try
+
+      if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
+
       ParseParam();
+      // The main program is the first unit.
+
+      if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
     except
       on e: THaltException do
       begin
@@ -494,27 +504,53 @@ uses
       end;
     end;
 
-    // The main program is the first unit.
-
-    if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
     programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
- {$IFDEF USEOPTFILE}
+    {$IFDEF USEOPTFILE} // TODO Make command line option
 
-   OptFile:=TFileSystem.CreateTextFile();
-   OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt') );
-   OptFile.Rewrite();
+    OptFile := TFileSystem.CreateTextFile();
+    OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt'));
+    try
+      OptFile.Rewrite();
 
- {$ENDIF}
+    except
+      on e: EInOutError do
+      begin
+      Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
+
+
+    {$ENDIF}
 
     OutFile := TFileSystem.CreateTextFile;
+
     if ExtractFileName(outputFilePath) <> '' then
-      OutFile.Assign(outputFilePath)
+    begin
+      OutFile.Assign(outputFilePath);
+    end
     else
+    begin
       OutFile.Assign(ChangeFileExt(programUnit.Name, '.a65'));
+    end;
+    try
+      OutFile.Rewrite;
 
-    OutFile.Rewrite;
-
+    except
+      on e: EInOutError do
+      begin
+        Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open output file "%s" for writing. %s.',
+          [OutFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
 
     StartTime := GetTickCount64;
 

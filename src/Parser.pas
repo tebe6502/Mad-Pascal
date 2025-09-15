@@ -141,6 +141,14 @@ begin
 
   if S = '' then exit(-1);
 
+  // Check if it can be found in the current WITH context
+  if High(WithName) > 0 then
+  for TempIndex:=0 to High(WithName) do begin
+    Result := Search(WithName[TempIndex] + '.' + S, ActiveSourceFile);
+
+    if Result > 0 then exit;
+  end;
+
   Result := Search(S, ActiveSourceFile);
 
   if (Result = 0) and (pos('.', S) > 0) then
@@ -207,14 +215,14 @@ var
   i, j: Integer;
   Name, base: TName;
   FieldType, AllocElementType: TDataType;
-  NumAllocElements: Cardinal;
+  NumAllocElements, NumAllocElements_: Cardinal;
   yes: Boolean;
 begin
 
   // if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
   //  i := IdentifierAt(IdentIndex).NumAllocElements_
   // else
-  i := IdentifierAt(IdentIndex).NumAllocElements;
+  i := IdentifierAt(IdentIndex).NumAllocElements and $FFFF;
 
   Result := 0;
 
@@ -229,13 +237,15 @@ begin
     begin
 
       FieldType :=GetTypeAtIndex(i).Field[j].DataType;
-      NumAllocElements :=GetTypeAtIndex(i).Field[j].NumAllocElements;
+      NumAllocElements :=GetTypeAtIndex(i).Field[j].NumAllocElements and $FFFF;
+      NumAllocElements_ :=GetTypeAtIndex(i).Field[j].NumAllocElements shr 16;
       AllocElementType :=GetTypeAtIndex(i).Field[j].AllocElementType;
 
       if AllocElementType in [TDataType.FORWARDTYPE, TDataType.PROCVARTOK] then
       begin
         AllocElementType := TDataType.POINTERTOK;
         NumAllocElements := 0;
+        NumAllocElements_ := 0;
       end;
 
       if GetTypeAtIndex(i).Field[j].Name = field then
@@ -245,8 +255,17 @@ begin
       end;
 
       if FieldType <> TDataType.RECORDTOK then
-        if (FieldType in Pointers) and (NumAllocElements > 0) then
-          Inc(Result, NumAllocElements * GetDataSize(AllocElementType))
+        if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+           if AllocElementType = RECORDTOK then begin
+             AllocElementType := POINTERTOK;
+             NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
+             NumAllocElements_ := 0;
+           end;
+           if NumAllocElements_ > 0 then
+             Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
+           else
+             Inc(Result, NumAllocElements * GetDataSize(AllocElementType))
+        end
         else
           Inc(Result, GetDataSize(FieldType));
 
@@ -268,7 +287,8 @@ begin
         begin
 
           FieldType :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].DataType;
-          NumAllocElements :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements;
+          NumAllocElements :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements and $ffff;
+          NumAllocElements_ :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
           AllocElementType :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].AllocElementType;
 
           if GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].Name = field then
@@ -278,9 +298,12 @@ begin
           end;
 
           if FieldType <> TDataType.RECORDTOK then
-            if (FieldType in Pointers) and (NumAllocElements > 0) then
-              Inc(Result, NumAllocElements * GetDataSize(AllocElementType))
-            else
+            if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+              if NumAllocElements_ > 0 then
+                 Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
+              else
+                 Inc(Result, NumAllocElements * GetDataSize(AllocElementType))
+            end else
               Inc(Result, GetDataSize(FieldType));
 
         end;
@@ -867,18 +890,19 @@ begin
             Error(i, TErrorCode.TypeMismatch);
 
 
-          if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType in RealTypes) and (ConstValType in RealTypes) then
+          if (IdentifierAt(IdentIndex).DataType in RealTypes) and (ConstValType in RealTypes) then
           begin
             // ok
           end
           else
-            if IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType in Pointers then
+            if IdentifierAt(IdentIndex).DataType in Pointers then
             begin
               Error(j, TMessage.Create(TErrorCode.IllegalTypeConversion, 'Illegal type conversion: "' +
                 InfoAboutToken(ConstValType) + '" to "' + TokenAt(i).Name + '"'));
             end;
 
           ConstValType := IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType;
+          if ConstValType = ENUMTYPE then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
 
           CheckTok(j + 1, TDataType.CPARTOK);
 
@@ -944,6 +968,7 @@ begin
               else
                 ConstVal := IdentifierAt(IdentIndex).Value;
 
+             // Writeln(IdentifierAt(identindex).name,',',ConstValType,',',IdentifierAt(identindex).kind)
 
               if ConstValType = ENUMTYPE then
               begin
@@ -1854,6 +1879,7 @@ begin
     i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
     IdentifierAt(NumIdent).DataType := VarType;          // Result
+
     IdentifierAt(NumIdent).NestedFunctionNumAllocElements := NumAllocElements;
     IdentifierAt(NumIdent).NestedFunctionAllocElementType := AllocElementType;
 
@@ -2852,7 +2878,7 @@ begin
                   NumAllocElements := RecType;      // index to the Types array
                   AllocElementType := TDataType.UNTYPETOK;
 
-                  if GetTypeAtIndex(RecType).Size >= 256 then
+                  if GetTypeAtIndex(RecType).Size > 256 then
                     Error(i, TMessage.Create(TErrorCode.RecordSizeExceedsLimit,
                       'Record size {0} exceeds the 256 bytes limit.', IntToStr(GetTypeAtIndex(RecType).Size)));
 

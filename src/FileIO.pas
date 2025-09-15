@@ -33,12 +33,14 @@ type
 // https://www.freepascal.org/docs-html/rtl/system/filepos.html
 type
   IFile = interface
+    function GetFilePath: TFilePath;
+    function GetAbsoluteFilePath: TFilePath;
     procedure Assign(filePath: TFilePath);
     procedure Close;
     procedure Erase();
     function EOF(): Boolean;
-    procedure Reset(); // Open for reading
-    procedure Rewrite(); // Open for writing
+    procedure Reset(); // Open for reading, raises EInOutError
+    procedure Rewrite(); // Open for writing, raises EInOutError
   end;
 
 type
@@ -106,6 +108,7 @@ type
     class function CreateBinaryFile: IBinaryFile; static;
     class function CreateTextFile: ITextFile; static;
     class function FileExists_(filePath: TFilePath): Boolean;
+    class function FolderExists(folderPath: TFolderPath): Boolean;
     class function NormalizePath(filePath: TFilePath): String;
 
   {$IFDEF SIMULATED_FILE_IO}
@@ -128,6 +131,8 @@ type
   public
   type TFileMode = (Read, Write);
     constructor Create;
+    function GetFilePath(): String;
+    function GetAbsoluteFilePath(): String;
     procedure Assign(filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
@@ -286,6 +291,15 @@ begin
   filePath := '';
 end;
 
+function TFile.GetFilePath(): String;
+begin
+  Result := filePath;
+end;
+
+function TFile.GetAbsoluteFilePath(): String;
+begin
+  Result := ExpandFileName(filePath);
+end;
 
 // ----------------------------------------------------------------------------
 // TTextFile
@@ -672,6 +686,15 @@ class function TFileSystem.FileExists_(filePath: TFilePath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
+  {$ELSE}
+  Result := fileMap.GetEntry(filePath) <> nil;
+  {$ENDIF}
+end;
+
+class function TFileSystem.FolderExists(folderPath: TFolderPath): Boolean;
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
+  Result := DirectoryExists(folderPath);
   {$ELSE}
   Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}

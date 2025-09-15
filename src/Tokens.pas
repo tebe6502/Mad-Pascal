@@ -135,8 +135,8 @@ type
     INTOK,
     VOLATILETOK,
     STRIPEDTOK,
+    WITHTOK,
 
-    RESERVED_117,
     RESERVED_118,
     RESERVED_119,
     RESERVED_120,
@@ -167,7 +167,7 @@ type
     SINGLETOK,         // Size = 4 SINGLE / FLOAT    IEEE-754 32-bit
     HALFSINGLETOK,     // Size = 2 HALFSINGLE / FLOAT16  IEEE-754 16-bit
     PCHARTOK,          // Size = 2 POINTER TO ARRAY OF CHAR
-    ENUMTOK,           // Size = 1 BYTE
+    ENUMTOK,           // Size = AllocElementType (4)
     PROCVARTOK,        // Size = 2
     TEXTFILETOK,       // Size = 2/12 TEXTFILE
     FORWARDTYPE,       // Size = 2
@@ -300,6 +300,7 @@ begin
   AddTokenSpelling(TTokenKind.PACKEDTOK, 'PACKED');
   AddTokenSpelling(TTokenKind.VOLATILETOK, 'VOLATILE');
   AddTokenSpelling(TTokenKind.STRIPEDTOK, 'STRIPED');
+  AddTokenSpelling(TTokenKind.WITHTOK, 'WITH');
   AddTokenSpelling(TTokenKind.LABELTOK, 'LABEL');
   AddTokenSpelling(TTokenKind.GOTOTOK, 'GOTO');
   AddTokenSpelling(TTokenKind.INTOK, 'IN');

@@ -58,6 +58,7 @@ begin
   PublicSection := True;
   ActiveSourceFile := ProgramUnit;
 
+  SetLength(WithName, 1);
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
   Messages.Initialize;
@@ -134,8 +135,7 @@ begin
           (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
           (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
           (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') or
-          (res.resType = 'MD1PLAY') or (res.resType = 'MD1')
-        then        
+          (res.resType = 'MD1PLAY') or (res.resType = 'MD1') then
 
         else
           Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType,
@@ -1090,6 +1090,37 @@ var
     end;
 
 
+    function ReadFractionalPart(var ch: Char): String; overload;
+    begin
+      Result := '.';
+      while UpCase(ch) in ['0'..'9'] do
+      begin
+        Result := Result + ch;
+        SafeReadChar(ch);
+      end;
+
+      // Scientific exponent syntax?
+      if UpCase(ch) in ['E'] then
+      begin
+        Result := Result + ch;
+        SafeReadChar(ch);
+
+        // Negative exponent or digit
+        if UpCase(ch) in ['0'..'9', '-'] then
+        begin
+          Result := Result + ch;
+          SafeReadChar(ch);
+        end;
+
+        // More digits
+        while UpCase(ch) in ['0'..'9'] do
+        begin
+          Result := Result + ch;
+          SafeReadChar(ch);
+        end;
+      end;
+    end;
+
     procedure TextInvers(p: Integer);
     var
       i: Integer;
@@ -1197,7 +1228,7 @@ var
         end
         else
 
-          while ch in ['0'..'9'] do    // Number suspected
+          while ch in ['0'..'9'] do    // Number expected
           begin
             Num := Num + ch;
             SafeReadChar(ch);
@@ -1239,20 +1270,14 @@ var
           AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, length(Num) + Spaces, StrToInt(Num));
           Spaces := 0;
 
-          if ch = '.' then      // Fractional part suspected
+          if ch = '.' then      // Fractional part expected
           begin
             SafeReadChar(ch);
             if ch = '.' then
               InFile.Seek2(InFile.FilePos() - 1)  // Range ('..') token
             else
             begin        // Fractional part found
-              Frac := '.';
-
-              while ch in ['0'..'9'] do
-              begin
-                Frac := Frac + ch;
-                SafeReadChar(ch);
-              end;
+              Frac := ReadFractionalPart(ch);
 
               TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
 
@@ -1272,7 +1297,7 @@ var
         end;
 
 
-        if ch in ['A'..'Z', '_'] then    // Keyword or identifier suspected
+        if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
         begin
           Text := '';
 
@@ -1709,7 +1734,7 @@ var
         //  AddToken(UNKNOWNIDENTTOK, ActiveSourceFile, Line, 1, ord(ch));
 
 
-        if ch in [':', '>', '<', '.'] then          // Double-character token suspected
+        if ch in [':', '>', '<', '.'] then          // Double-character token expected
         begin
           ch_ := ch;
 
@@ -1725,20 +1750,14 @@ var
           end
           else
             if (ch = '.') and (ch2 in ['0'..'9']) then
-            begin
+            begin  // Fractional part found
 
               AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 0, 0);
 
-              Frac := '0.';      // Fractional part found
-
-              while ch2 in ['0'..'9'] do
-              begin
-                Frac := Frac + ch2;
-                SafeReadChar(ch2);
-              end;
+              Frac := ReadFractionalPart(ch2);
 
               TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-              TokenAt(NumTok).FracValue := StrToFloat(Frac);
+              TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
               TokenAt(NumTok).SourceLocation.Column :=
                 TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
               Spaces := 0;
@@ -1856,6 +1875,44 @@ end;  // TokenizeProgram
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+function ReadFractionalPart(const a: String; var i: Integer; ch: Char): String; overload;
+begin
+  Result := '.';
+
+  begin
+    Result := '.';
+    while UpCase(ch) in ['0'..'9'] do
+    begin
+      Result := Result + ch;
+      ch := a[i];
+      Inc(i);
+    end;
+
+    // Scientific exponent syntax?
+    if UpCase(ch) in ['E'] then
+    begin
+      Result := Result + ch;
+      ch := a[i];
+      Inc(i);
+
+      // Negative exponent or digit
+      if UpCase(ch) in ['0'..'9', '-'] then
+      begin
+        Result := Result + ch;
+        ch := a[i];
+        Inc(i);
+      end;
+
+      // More digits
+      while UpCase(ch) in ['0'..'9'] do
+      begin
+        Result := Result + ch;
+        ch := a[i];
+        Inc(i);
+      end;
+    end;
+  end;
+end;
 
 procedure TScanner.TokenizeMacro(a: String; Line, Spaces: Integer);
 var
@@ -1995,7 +2052,7 @@ var
       end
       else
 
-        while ch in ['0'..'9'] do    // Number suspected
+        while ch in ['0'..'9'] do    // Number expected
         begin
           Num := Num + ch;
           ch := a[i];
@@ -2038,7 +2095,7 @@ begin
       AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
       Spaces := 0;
 
-      if ch = '.' then      // Fractional part suspected
+      if ch = '.' then      // Fractional part expected
       begin
 
         ch := a[i];
@@ -2047,16 +2104,8 @@ begin
         if ch = '.' then
           Dec(i)        // Range ('..') token
         else
-        begin        // Fractional part found
-          Frac := '.';
-
-          while ch in ['0'..'9'] do
-          begin
-            Frac := Frac + ch;
-
-            ch := a[i];
-            Inc(i);
-          end;
+        begin
+          Frac := ReadFractionalPart(a, i, ch);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
           TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
@@ -2071,7 +2120,7 @@ begin
     end;
 
 
-    if ch in ['A'..'Z', '_'] then    // Keyword or identifier suspected
+    if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
     begin
 
       Text := '';
@@ -2347,7 +2396,7 @@ begin
     end;
 
 
-    if ch in [':', '>', '<', '.'] then          // Double-character token suspected
+    if ch in [':', '>', '<', '.'] then          // Double-character token expected
     begin
 
       Line2 := Line;
@@ -2365,19 +2414,10 @@ begin
         begin
 
           AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
-
-          Frac := '0.';      // Fractional part found
-
-          while ch2 in ['0'..'9'] do
-          begin
-            Frac := Frac + ch2;
-
-            ch2 := a[i];
-            Inc(i);
-          end;
+          Frac := ReadFractionalPart(a, i, ch2);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-          TokenAt(NumTok).FracValue := StrToFloat(Frac);
+          TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
           TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
           Spaces := 0;
 
