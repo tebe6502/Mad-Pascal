@@ -1179,7 +1179,7 @@ begin
   begin
     Kind := IdentifierAt(IdentIndex).Kind;
 
-    if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+    if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
     begin
       Size := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
       NumAllocElements := 0;
@@ -2176,7 +2176,7 @@ begin
   if IdentIndex > 0 then
   begin
 
-    if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+    if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
     begin
       NumAllocElements := 0;
     end
@@ -2657,7 +2657,7 @@ begin
   if IdentIndex > 0 then
   begin
 
-    if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+    if IdentifierAt(IdentIndex).DataType = TDatatype.ENUMTOK then
     begin
       Size := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
       NumAllocElements := 0;
@@ -3834,10 +3834,10 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelationOperation(rel: TTokenKind; ValType: TDataType);
+procedure GenerateRelationOperation(relation: TTokenKind; ValType: TDataType);
 begin
 
-  case rel of
+  case relation of
     TTokenKind.EQTOK:
     begin
       Gen;
@@ -4141,7 +4141,7 @@ begin
   Gen;
   Gen;              // cmp :ecx, Value1
 
-  if (SelectorType in [TDataType.BYTETOK, TDataType.CHARTOK, ENUMTYPE]) and (Value1 >= 0) and (Value2 >= 0) then
+  if (SelectorType in [TDataType.BYTETOK, TDataType.CHARTOK, TDataType.ENUMTOK]) and (Value1 >= 0) and (Value2 >= 0) then
   begin
 
     if (Value1 = 0) and (Value2 = 255) then
@@ -6010,7 +6010,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateRelation(rel: TTokenKind; ValType: TDataType);
+procedure GenerateRelation(relation: TTokenKind; ValType: TDataType);
 begin
   // asm65;
   // asm65('; relation');
@@ -6020,7 +6020,7 @@ begin
   if ValType = TDataType.HALFSINGLETOK then
   begin
 
-    case rel of
+    case relation of
       TTokenKind.EQTOK:  // =
       begin
         asm65(#9'lda :STACKORIGIN,x');
@@ -6265,7 +6265,7 @@ begin
 
     end;
 
-    GenerateRelationOperation(rel, ValType);
+    GenerateRelationOperation(relation, ValType);
 
     Gen;
 
@@ -6666,7 +6666,7 @@ begin
               i := CompileArrayIndex(i, IdentIndex);
 
 
-              if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+              if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
               begin
                 //   Size := GetDataSize( TDataType.IdentifierAt(IdentIndex).AllocElementType];
                 NumAllocElements := 0;
@@ -7459,7 +7459,7 @@ begin
               end;
 
 
-          //  writeln('x ',IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType,' | ',ActualParamType,',',AllocElementType,',',IdentTemp);
+          //  Writeln('x ',IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType,' | ',ActualParamType,',',AllocElementType,',',IdentTemp);
 
 
           if IdentTemp = 0 then
@@ -7479,8 +7479,18 @@ begin
           i := CompileExpression(i + 2, ActualParamType, IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
           // Evaluate actual parameters and push them onto the stack
 
-          //  writeln(IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).kind,',',    IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+          //  Writeln(IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).kind,',',    IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
+          if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = ENUMTOK) then begin
+             IdentTemp := GetIdentIndex(TokenAt(i).Name);
+
+	    if _TypeArray[IdentifierAt(IdentTemp).NumAllocElements].Field[0].Name <> _TypeArray[IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements].Field[0].Name then
+	      Error(i, 'Incompatible types: got "' + _TypeArray[IdentifierAt(IdentTemp).NumAllocElements].Field[0].Name +'" expected "' + _TypeArray[IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements].Field[0].Name + '"');
+
+            ActualParamType := IdentifierAt(IdentTemp).Kind;
+
+//	    Writeln(IdentifierAt(IdentTemp).Kind,',', IdentifierAt(IdentTemp).NumAllocElements,'/', Ident[IdentIndex].Param[NumActualParams].NumAllocElements, ',',_TypeArray[IdentifierAt(IdentTemp).NumAllocElements].Field[0].name);
+	  end;
 
           if (TokenAt(i).Kind = TTokenKind.IDENTTOK) and (ActualParamType in
             [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK]) and not
@@ -7682,7 +7692,7 @@ begin
 
                 end;
 
-                GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+                // GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
               end;
 
@@ -7850,8 +7860,7 @@ begin
     begin
 
       ActualParamType := IdentifierAt(IdentIndex).Param[ParamIndex].DataType;
-      if ActualParamType = ENUMTOK then
-        ActualParamType := IdentifierAt(IdentIndex).Param[ParamIndex].AllocElementType;
+      if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).Param[ParamIndex].AllocElementType;
 
       if IdentifierAt(IdentIndex).Param[ParamIndex].PassMethod = TParameterPassingMethod.VARPASSING then
       begin
@@ -8055,8 +8064,7 @@ begin
     asm65(#9'inx');
 
     ActualParamType := IdentifierAt(IdentIndex).DataType;
-    if ActualParamType = ENUMTOK then
-      ActualParamType := IdentifierAt(IdentIndex).AllocElementType;
+    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).AllocElementType;
 
     case GetDataSize(ActualParamType) of
 
@@ -8151,7 +8159,7 @@ begin
 
       end;
 {
-      if ValType = TDataType.ENUMTYPE then begin
+      if ValType = TDataType.ENUMTOK then begin
 
        if TokenAt(j].Kind = TTokenKind.IDENTTOK then
   IdentIndex := GetIdentIndex(TokenAt(j].Name)
@@ -8224,7 +8232,7 @@ begin
       CodeSize := oldCodeSize;
 
 {
-      if ValType = ENUMTYPE then begin
+      if ValType = TDataType.ENUMTOK then begin
 
        if TokenAt(j].Kind = TTokenKind.IDENTTOK then
   IdentIndex := GetIdentIndex(TokenAt(j].Name)
@@ -8237,7 +8245,7 @@ begin
 
        if IdentifierAt(IdentTemp).NumAllocElements = 0 then Error(i, TypeMismatch);
 
-       ValType := ENUMTYPE;
+       ValType := TDataType.ENUMTOK;
        Push(IdentifierAt(IdentTemp).Value, ASPOINTER, GetDataSize(TDataType.POINTERTOK), IdentTemp);
 
        GenerateWriteString(IdentifierAt(IdentTemp).Value, ASPOINTERTOPOINTER, IdentifierAt(IdentTemp).DataType, IdentTemp)
@@ -9057,7 +9065,7 @@ begin
 
       i := CompileExpression(i + 2, ValType, TDataType.BYTETOK);
 
-      if not (ValType in OrdinalTypes + [ENUMTYPE]) then
+      if not (ValType in OrdinalTypes + [TDataType.ENUMTOK]) then
         Error(i, TErrorCode.OrdinalExpExpected);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
@@ -9582,6 +9590,7 @@ begin
                 CompileActualParameters(i, IdentIndex);
 
                 ValType := IdentifierAt(IdentIndex).DataType;
+                if ValType = TDataType.ENUMTOK then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
                 Dec(run_func);
 
@@ -9912,7 +9921,7 @@ begin
                       //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).idType,'/',IdentifierAt(IdentIndex).Kind,' = ',IdentifierAt(IdentIndex).PassMethod ,' | ',ValType,',',TokenAt(j].kind,',',TokenAt(j+1].kind);
 
 
-                      if (ValType = ENUMTYPE) and (IdentifierAt(IdentIndex).DataType = ENUMTYPE) then
+                      if (ValType = TDataType.ENUMTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) then
                         ValType := IdentifierAt(IdentIndex).AllocElementType;
 
 
@@ -11097,7 +11106,7 @@ begin
     TTokenKind.GTTOK, TTokenKind.GETOK] then
   begin
 
-    if ValType in RealTypes then VarType := ValType;
+    if ValType in RealTypes + [TDataType.ENUMTOK] then VarType := ValType;
 
 
     j := CompileSimpleExpression(i + 2, RightValType, VarType);
@@ -11145,7 +11154,14 @@ begin
         if (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).AllocElementType = TDataType.CHARTOK) and
           (Elements(GetIdentIndex(TokenAt(i + 2).Name)) > 0) then sRight := True;
 
+    {
+      if VarType = TDataType.ENUMTOK then begin
 
+       if (ValType = VarType) and (RightValType in IntegerTypes) then RightValType := VarType;
+       if (ValType in IntegerTypes) and (RightValType = VarType) then ValType := VarType;
+
+      end;
+    }
     //  if (ValType in [SHORTREALTOK, TTokenKind.REALTOK]) and (RightValType in [SHORTREALTOK, TTokenKind.REALTOK]) then
     //    RightValType := ValType;
 
@@ -12184,7 +12200,7 @@ begin
 
                   end
                   else
-                    if (VarType = ENUMTYPE) {and (TokenAt(k).Kind = TTokenKind.IDENTTOK)} then
+                    if (VarType = TDataType.ENUMTOK) {and (TokenAt(k).Kind = TTokenKind.IDENTTOK)} then
                     begin
 
                       if (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
@@ -12196,7 +12212,7 @@ begin
                         IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock);
 
                       if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = USERTYPE) and
-                        (IdentifierAt(IdentTemp).DataType = ENUMTYPE) then
+                        (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
                       begin
 
                         if IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements then
@@ -12204,7 +12220,7 @@ begin
 
                       end
                       else
-                        if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = ENUMTYPE) then
+                        if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TDataType.ENUMTOK) then
                         begin
 
                           if IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(IdentIndex).NumAllocElements then
@@ -12212,7 +12228,7 @@ begin
 
                         end
                         else
-                          if (IdentTemp > 0) and (IdentifierAt(IdentTemp).DataType = ENUMTYPE) then
+                          if (IdentTemp > 0) and (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
                           begin
 
                             if IdentifierAt(IdentTemp).NumAllocElements <>
@@ -12232,8 +12248,8 @@ begin
                       else
                         IdentTemp := 0;
 
-                      if (IdentTemp > 0) and ((IdentifierAt(IdentTemp).Kind = ENUMTYPE) or
-                        (IdentifierAt(IdentTemp).DataType = ENUMTYPE)) then
+                      if (IdentTemp > 0) and ((IdentifierAt(IdentTemp).Kind = TDataType.ENUMTOK) or
+                        (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK)) then
                         ErrorIncompatibleEnumIdentifierType(i, IdentTemp, ExpressionType)
                       else
                         GetCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
@@ -12868,7 +12884,7 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (SelectorType = TTokenKind.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
+      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
         (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
       begin
 
@@ -12881,15 +12897,30 @@ begin
       end
       else
 
-        if TokenAt(i).Kind = TTokenKind.IDENTTOK then
-          EnumName := GetEnumName(GetIdentIndex(TokenAt(i).Name));
+//        if TokenAt(i).Kind = TTokenKind.IDENTTOK then
+//          EnumName := GetEnumName(GetIdentIndex(TokenAt(i).Name));
+
+      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TYPETOK) then begin
+
+         IdentTemp:=GetIdentIndex(TokenAt(j).Name);
+         EnumName := GetEnumName(IdentTemp);
+
+         SelectorType := IdentifierAt(IdentTemp).AllocElementType;
+
+      end else
+      if TokenAt(i).Kind = IDENTTOK then begin
+
+        IdentTemp:=GetIdentIndex(TokenAt(i).Name);
+        EnumName := GetEnumName(IdentTemp);
+
+      end;
 
 
-      if SelectorType <> ENUMTYPE then
+      if SelectorType <> TDataType.ENUMTOK then
         if GetDataSize(SelectorType) <> 1 then
           Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
 
-      if not (SelectorType in OrdinalTypes + [ENUMTYPE]) then
+      if not (SelectorType in OrdinalTypes + [TDataType.ENUMTOK]) then
         Error(i, 'Ordinal variable expected as ''CASE'' selector');
 
       CheckTok(i + 1, TTokenKind.OFTOK);
@@ -13067,6 +13098,45 @@ begin
       end
       else
         RemoveFromSystemStack;      // Remove conditional expression
+
+    end;
+
+    WITHTOK:
+    begin
+
+      inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
+
+      CheckTok(i + 1, IDENTTOK);
+
+      IdentIndex := GetIdentIndex(TokenAt(i + 1).Name);
+
+
+      if (IdentifierAt(IdentIndex).Kind = USERTYPE) and (IdentifierAt(IdentIndex).DataType in [RECORDTOK, OBJECTTOK]) then
+
+      else
+      if (IdentifierAt(IdentIndex).Kind <> VARTOK) then
+       Error(i + 1, 'Expression type must be object or record type');
+
+
+      if (IdentifierAt(IdentIndex).DataType = POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = RECORDTOK) then
+
+      else
+      if not (IdentifierAt(IdentIndex).DataType in [RECORDTOK, OBJECTTOK]) then
+       Error(i + 1, 'Expression type must be object or record type');
+
+      CheckTok(i + 2, DOTOK);
+
+      k:=High(WithName);
+      WithName[k] := IdentifierAt(IdentIndex).Name;
+      SetLength(WithName, k+2);
+
+      inc(i, 2);
+
+      j := CompileStatement(i + 1);
+
+      SetLength(WithName, k+1);
+
+      Result := j;
 
     end;
 
@@ -14348,7 +14418,7 @@ WHILETOK:
 
                 end;
 
-                //    if ExpressionType = ENUMTYPE then
+                //    if ExpressionType = TDataType.ENUMTOK then
                 //      GenerateWriteString(TokenAt(i).Value, ASVALUE, TTokenKind.INTEGERTOK)    // Enumeration argument
                 //    else
 
@@ -16356,9 +16426,9 @@ end;  //CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(var VarOfSameType: TVariableList; var tmpVarDataSize: Integer;
+procedure CompileRecordDeclaration(i: Integer; var VarOfSameType: TVariableList; var tmpVarDataSize: Integer;
   var ConstVal: Int64; VarOfSameTypeIndex: Integer; VarType, AllocElementType: TDataType;
-  NumAllocElements: Cardinal; isAbsolute: Boolean);
+  NumAllocElements: Cardinal; isAbsolute: Boolean); // TODO: Actually not used
 var
   tmpVarDataSize_, ParamIndex{, idx}: Integer;
 begin
@@ -17979,13 +18049,13 @@ begin
 
           end;
 
-          if VarType = ENUMTYPE then
+          if VarType = TDataType.ENUMTOK then
           begin
 
             DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, VARIABLE, AllocElementType, 0,
               TDataType.UNTYPETOK, 0, IdType);
 
-            IdentifierAt(NumIdent).DataType := ENUMTYPE;
+            IdentifierAt(NumIdent).DataType := TDataType.ENUMTOK;
             IdentifierAt(NumIdent).AllocElementType := AllocElementType;
             IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
 
@@ -18068,7 +18138,7 @@ begin
           end;
 
 
-          CompileRecordDeclaration(VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType,
+          CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType,
             AllocElementType, NumAllocElements, isAbsolute);
 
         end;
@@ -19281,6 +19351,8 @@ begin
   NumIdent_ := NumPredefIdent;
   ClearWordMemory(_DataSegment);
 
+  SourceFileList.ClearAllowedUnitNames;
+
   NumBlocks := 0;
   BlockStackTop := 0;
   CodeSize := 0;
@@ -19307,10 +19379,7 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  // TODO Why here?
-  SourceFileList.ClearAllowedUnitNames;
-
-  iOut := 0;
+  iOut := -1;
   outTmp := '';
 
   SetLength(OptimizeBuf, 1);

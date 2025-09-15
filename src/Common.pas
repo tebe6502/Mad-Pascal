@@ -91,6 +91,8 @@ var
   LinkObj: TStringArray;
   unitPathList: TPathList;
 
+  WithName: TStringArray;
+
   // Optimizer Settings
   iOut: Integer;
   outTmp: TString;
