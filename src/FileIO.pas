@@ -106,6 +106,7 @@ type
     class function CreateBinaryFile: IBinaryFile; static;
     class function CreateTextFile: ITextFile; static;
     class function FileExists_(filePath: TFilePath): Boolean;
+    class function FolderExists(folderPath: TFolderPath): Boolean;
     class function NormalizePath(filePath: TFilePath): String;
 
   {$IFDEF SIMULATED_FILE_IO}
@@ -672,6 +673,15 @@ class function TFileSystem.FileExists_(filePath: TFilePath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
+  {$ELSE}
+  Result := fileMap.GetEntry(filePath) <> nil;
+  {$ENDIF}
+end;
+
+class function TFileSystem.FolderExists(folderPath: TFolderPath): Boolean;
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
+  Result := DirectoryExists(folderPath);
   {$ELSE}
   Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}
