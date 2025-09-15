@@ -7,8 +7,6 @@ MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -co
 -inputFilePattern samples\a8\graph_vbxe\gif\gifview.pas  ^
 -inputFilePattern samples\a8\math\aes\aes_test.pas  ^
 -inputFilePattern samples\a8\math\sha256\sha256_test.pas  ^
--inputFilePattern samples\a8\sprite\hans_kloss.pas  ^
--inputFilePattern samples\a8\sprite\test_mux.pas  ^
 -inputFilePattern samples\a8\tools\sortviz\source\SortViz.pas  ^
 -inputFilePattern samples\common\dynrec.pas  ^
 -inputFilePattern samples\common\realmath.pas  ^
