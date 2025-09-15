@@ -1,10 +1,10 @@
 .vscode
-# .a65 is considered tempoary, .asm is considered permanent
+# .a65 is considered temporary, .asm is considered permanent
 *.a65
 *.lab
 *.lst
 #
-# .obx is considered tempoary, .obj is considered permanent
+# .obx is considered temporary, .obj is considered permanent
 *.obx
 *.xex
 *.o
@@ -26,3 +26,4 @@ src/test.bat
 samples/WinMerge.txt
 test/config.ini
 
+origin/mp.exe
