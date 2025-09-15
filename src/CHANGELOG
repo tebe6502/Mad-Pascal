@@ -1,5 +1,6 @@
 24.08.2025
 - new unit SAM
+- new unit PACKFIRE
 
 22.08.2025
 - improved parsing of real values, accepts additional characters 'E', '-', e.g. 6.1858296469E-02
