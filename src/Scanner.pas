@@ -1198,7 +1198,7 @@ var
         end
         else
 
-          while ch in ['0'..'9'] do    // Number suspected
+          while ch in ['0'..'9'] do    // Number expected
           begin
             Num := Num + ch;
             SafeReadChar(ch);
@@ -1240,7 +1240,7 @@ var
           AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, length(Num) + Spaces, StrToInt(Num));
           Spaces := 0;
 
-          if ch = '.' then      // Fractional part suspected
+          if ch = '.' then      // Fractional part expected
           begin
             SafeReadChar(ch);
             if ch = '.' then
@@ -1273,7 +1273,7 @@ var
         end;
 
 
-        if ch in ['A'..'Z', '_'] then    // Keyword or identifier suspected
+        if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
         begin
           Text := '';
 
@@ -1710,7 +1710,7 @@ var
         //  AddToken(UNKNOWNIDENTTOK, ActiveSourceFile, Line, 1, ord(ch));
 
 
-        if ch in [':', '>', '<', '.'] then          // Double-character token suspected
+        if ch in [':', '>', '<', '.'] then          // Double-character token expected
         begin
           ch_ := ch;
 
@@ -1996,7 +1996,7 @@ var
       end
       else
 
-        while ch in ['0'..'9'] do    // Number suspected
+        while ch in ['0'..'9'] do    // Number expected
         begin
           Num := Num + ch;
           ch := a[i];
@@ -2039,7 +2039,7 @@ begin
       AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
       Spaces := 0;
 
-      if ch = '.' then      // Fractional part suspected
+      if ch = '.' then      // Fractional part expected
       begin
 
         ch := a[i];
@@ -2072,7 +2072,7 @@ begin
     end;
 
 
-    if ch in ['A'..'Z', '_'] then    // Keyword or identifier suspected
+    if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
     begin
 
       Text := '';
@@ -2348,7 +2348,7 @@ begin
     end;
 
 
-    if ch in [':', '>', '<', '.'] then          // Double-character token suspected
+    if ch in [':', '>', '<', '.'] then          // Double-character token expected
     begin
 
       Line2 := Line;
