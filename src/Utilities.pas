@@ -17,7 +17,7 @@ type
   end;
 
 type
-  THaltException = class(Exception)
+  THaltException = class(Exception)   // TODO: EHaltException
 
   const
     // No errors occurred, the output files were created correctly

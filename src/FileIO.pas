@@ -33,12 +33,13 @@ type
 // https://www.freepascal.org/docs-html/rtl/system/filepos.html
 type
   IFile = interface
+    function GetFilePath: TFilePath;
     procedure Assign(filePath: TFilePath);
     procedure Close;
     procedure Erase();
     function EOF(): Boolean;
-    procedure Reset(); // Open for reading
-    procedure Rewrite(); // Open for writing
+    procedure Reset(); // Open for reading, raises EInOutError
+    procedure Rewrite(); // Open for writing, raises EInOutError
   end;
 
 type
@@ -129,6 +130,7 @@ type
   public
   type TFileMode = (Read, Write);
     constructor Create;
+    function GetFilePath(): String;
     procedure Assign(filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
@@ -287,6 +289,10 @@ begin
   filePath := '';
 end;
 
+function TFile.GetFilePath(): String;
+begin
+  Result := filePath;
+end;
 
 // ----------------------------------------------------------------------------
 // TTextFile
