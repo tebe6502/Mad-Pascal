@@ -7716,7 +7716,7 @@ begin
 
 	  end;
 
-          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes) and (ActualParamType in RealTypes)
+          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealType) and (ActualParamType in RealTypes)
           then GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = ENUMTOK) then begin

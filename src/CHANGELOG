@@ -1,3 +1,9 @@
+13.09.2025
+- bugfixes and optimizations
+
+04.09.2025
+- optimizations
+
 30.08.2025
 - added INTEGER -> REAL procedure/function parameter conversion
 - faster version of 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
