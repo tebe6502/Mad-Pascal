@@ -83,6 +83,7 @@
       <Unit>
         <Filename Value="..\src\mp.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MADPASCAL"/>
       </Unit>
       <Unit>
         <Filename Value="..\src\Numbers.pas"/>
@@ -566,6 +567,14 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\tests\TestInclude.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Merges.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\CHANGELOG"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

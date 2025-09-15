@@ -49,7 +49,7 @@ const
     4,  // Size = 4 SINGLE / FLOAT
     2,  // Size = 2 HALFSINGLE / FLOAT16
     2,  // Size = 2 PCHAR
-    1,  // Size = 1 BYTE
+    4,  // Size = 4 ENUM
     2,  // Size = 2 PROCVAR
     2,  // Size = 2 TEXTFILE
     2  // Size = 2 FORWARD

@@ -1854,6 +1854,7 @@ begin
     i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
     IdentifierAt(NumIdent).DataType := VarType;          // Result
+    if VarType = ENUMTOK then IdentifierAt(NumIdent).AllocElementType := AllocElementType;
     IdentifierAt(NumIdent).NestedFunctionNumAllocElements := NumAllocElements;
     IdentifierAt(NumIdent).NestedFunctionAllocElementType := AllocElementType;
 
@@ -2029,6 +2030,8 @@ begin
       //  if TokenAt(i).Kind = PCHARTOK then NestedFunctionResultType := PCHARTOK;
 
       IdentifierAt(NumIdent).DataType := NestedFunctionResultType;      // Result
+
+      if NestedFunctionResultType = ENUMTOK then IdentifierAt(NumIdent).AllocElementType := AllocElementType;
 
       NestedFunctionNumAllocElements := NumAllocElements;
       IdentifierAt(NumIdent).NestedFunctionNumAllocElements := NumAllocElements;

@@ -7847,6 +7847,12 @@ begin
   begin
 
     for ParamIndex := 1 to NumActualParams do
+    begin
+
+      ActualParamType := IdentifierAt(IdentIndex).Param[ParamIndex].DataType;
+      if ActualParamType = ENUMTOK then
+        ActualParamType := IdentifierAt(IdentIndex).Param[ParamIndex].AllocElementType;
+
       if IdentifierAt(IdentIndex).Param[ParamIndex].PassMethod = TParameterPassingMethod.VARPASSING then
       begin
 
@@ -7858,7 +7864,7 @@ begin
         a65(TCode65.subBX);
       end
       else
-        if (NumActualParams = 1) and (GetDataSize(IdentifierAt(IdentIndex).Param[ParamIndex].DataType) = 1) then
+        if (NumActualParams = 1) and (GetDataSize(ActualParamType) = 1) then
         begin      // only ONE parameter SIZE = 1
 
           if IdentifierAt(IdentIndex).ObjectIndex > 0 then
@@ -7876,7 +7882,7 @@ begin
 
         end
         else
-          case IdentifierAt(IdentIndex).Param[ParamIndex].DataType of
+          case ActualParamType of
 
             TTokenKind.BYTETOK, TTokenKind.CHARTOK, TTokenKind.BOOLEANTOK, TTokenKind.SHORTINTTOK:
             begin
@@ -7913,8 +7919,9 @@ begin
 
             else
               Error(i, TMessage.Create(TErrorCode.Unassigned, 'Unassigned: {0}',
-                GetTokenKindName(IdentifierAt(IdentIndex).Param[ParamIndex].DataType)));
+                GetTokenKindName(ActualParamType)));
           end;
+    end;
 
 
     old_func := run_func;
@@ -8039,6 +8046,7 @@ begin
 
   end;
 
+  //writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).Kind,',',IdentifierAt(IdentIndex).isStdCall,',',IdentifierAt(IdentIndex).isRecursion);
 
   if (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) and (IdentifierAt(IdentIndex).isStdCall = False) and
     (IdentifierAt(IdentIndex).isRecursion = False) then
@@ -8046,7 +8054,11 @@ begin
 
     asm65(#9'inx');
 
-    case GetDataSize(IdentifierAt(IdentIndex).DataType) of
+    ActualParamType := IdentifierAt(IdentIndex).DataType;
+    if ActualParamType = ENUMTOK then
+      ActualParamType := IdentifierAt(IdentIndex).AllocElementType;
+
+    case GetDataSize(ActualParamType) of
 
       1: begin
         asm65(#9'mva ' + svar + '.RESULT :STACKORIGIN,x');
@@ -14575,10 +14587,13 @@ WHILETOK:
 
       IndirectionLevel := ASPOINTER;
 
-      if IdentifierAt(IdentIndex).DataType in Pointers then
-        ExpressionType := TTokenKind.WORDTOK
-      else
-        ExpressionType := IdentifierAt(IdentIndex).DataType;
+      if IdentifierAt(IdentIndex).DataType = ENUMTOK then
+	   ExpressionType := IdentifierAt(IdentIndex).AllocElementType
+	  else
+        if IdentifierAt(IdentIndex).DataType in Pointers then
+          ExpressionType := TTokenKind.WORDTOK
+        else
+          ExpressionType := IdentifierAt(IdentIndex).DataType;
 
 
       if IdentifierAt(IdentIndex).AllocElementType = TDataType.REALTOK then
@@ -16816,8 +16831,20 @@ begin
 
   // Load ONE parameters from the stack
   if (IdentifierAt(BlockIdentIndex).ObjectIndex = 0) then
-    if (yes = False) and (NumParams = 1) and (GetDataSize(Param[1].DataType) = 1) and
-      (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then asm65(#9'sta ' + Param[1].Name);
+
+    // TODO: This can be written shorter
+    if Param[1].DataType = ENUMTOK then
+    begin
+      if (yes = False) and (NumParams = 1) and (GetDataSize(Param[1].AllocElementType) = 1) and
+        (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then
+        asm65(#9'sta ' + Param[1].Name);
+    end
+    else
+      if (yes = False) and (NumParams = 1) and (GetDataSize(Param[1].DataType) = 1) and
+        (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then
+        asm65(#9'sta ' + Param[1].Name);
+
+
 
 
   // Load parameters from the stack
