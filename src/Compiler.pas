@@ -7097,6 +7097,188 @@ end;  //NumActualParameters
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure RealTypeConversion(var ValType, RightValType: TDataType; Kind: TTokenKind = TTokenKind.UNTYPETOK);
+begin
+
+  If ((ValType = TDataType.SINGLETOK) or (Kind = TTokenKind.SINGLETOK)) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(TDataType.INTEGERTOK, RightValType);
+
+//   asm65(#9'jsr @I2F');
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta :FPMAN0');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta :FPMAN1');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'sta :FPMAN2');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+			asm65(#9'sta :FPMAN3');
+
+			asm65(#9'jsr @I2F');
+
+			asm65(#9'lda :FPMAN0');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda :FPMAN1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'lda :FPMAN2');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'lda :FPMAN3');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+
+   if (ValType <> TDataType.SINGLETOK) and (Kind = TTokenKind.SINGLETOK) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+
+  end;
+
+
+  If (ValType in IntegerTypes) and ((RightValType = TDataType.SINGLETOK) or (Kind = TTokenKind.SINGLETOK)) then begin
+
+   ExpandParam_m1(TDataType.INTEGERTOK, ValType);
+
+//   asm65(#9'jsr @I2F_M');
+
+			asm65(#9'lda :STACKORIGIN-1,x');
+			asm65(#9'sta :FPMAN0');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'sta :FPMAN1');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'sta :FPMAN2');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+			asm65(#9'sta :FPMAN3');
+
+			asm65(#9'jsr @I2F');
+
+			asm65(#9'lda :FPMAN0');
+			asm65(#9'sta :STACKORIGIN-1,x');
+			asm65(#9'lda :FPMAN1');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'lda :FPMAN2');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'lda :FPMAN3');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
+
+   if (RightValType <> TDataType.SINGLETOK) and (Kind = TTokenKind.SINGLETOK) then
+    ValType := Kind
+   else
+    ValType := RightValType;
+
+  end;
+
+
+  If ((ValType = TDataType.HALFSINGLETOK) or (Kind = TTokenKind.HALFSINGLETOK)) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(TDataType.INTEGERTOK, RightValType);
+
+//   asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :STACKORIGIN,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :eax');
+			asm65(#9'sta :STACKORIGIN,x');
+			asm65(#9'lda :eax+1');
+			asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+   if (ValType <> HALFSINGLETOK) and (Kind = TTokenKind.HALFSINGLETOK) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+
+  end;
+
+
+  If (ValType in IntegerTypes) and ((RightValType = TTokenKind.HALFSINGLETOK) or (Kind = TTokenKind.HALFSINGLETOK)) then begin
+
+   ExpandParam_m1(TDataType.INTEGERTOK, ValType);
+
+//   asm65(#9'jsr @F16_I2F');//_m');
+
+			asm65(#9'lda :STACKORIGIN-1,x');
+			asm65(#9'sta @F16_I2F.SV');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+			asm65(#9'sta @F16_I2F.SV+1');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+			asm65(#9'sta @F16_I2F.SV+2');
+			asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
+			asm65(#9'sta @F16_I2F.SV+3');
+
+			asm65(#9'jsr @F16_I2F');
+
+			asm65(#9'lda :eax');
+			asm65(#9'sta :STACKORIGIN-1,x');
+			asm65(#9'lda :eax+1');
+			asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+
+   if (RightValType <> TDataType.HALFSINGLETOK) and (Kind = TTokenKind.HALFSINGLETOK) then
+    ValType := Kind
+   else
+    ValType := RightValType;
+  end;
+
+
+  If ((ValType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) or (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK])) and (RightValType in IntegerTypes) then begin
+
+   ExpandParam(TDataType.INTEGERTOK, RightValType);
+
+   asm65(#9'jsr @expandToREAL');
+{
+   asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+   asm65(#9'lda :STACKORIGIN,x');
+   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+   asm65(#9'lda #$00');
+   asm65(#9'sta :STACKORIGIN,x');
+}
+   if not(ValType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) and (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK]) then
+    RightValType := Kind
+   else
+    RightValType := ValType;
+
+  end;
+
+
+  If (ValType in IntegerTypes) and ((RightValType in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK]) or (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK])) then begin
+
+   ExpandParam_m1(TDataType.INTEGERTOK, ValType);
+
+   asm65(#9'jsr @expandToREAL1');
+{
+   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
+   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
+   asm65(#9'lda :STACKORIGIN-1,x');
+   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+   asm65(#9'lda #$00');
+   asm65(#9'sta :STACKORIGIN-1,x');
+}
+
+   if not(RightValType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) and (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK]) then
+    ValType := Kind
+   else
+    ValType := RightValType;
+
+  end;
+
+end;	//RealTypeConversion
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 
 procedure CompileActualParameters(var i: Integer; IdentIndex: Integer; ProcVarIndex: Integer = 0);
 var
@@ -7525,6 +7707,17 @@ begin
           // Evaluate actual parameters and push them onto the stack
 
           //  Writeln(IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).kind,',',    IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+
+          if (ActualParamType in IntegerTypes) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in RealTypes) then begin
+
+            AllocElementType := IdentifierAt(IdentIndex).Param[NumActualParams].DataType;
+
+	    RealTypeConversion(AllocElementType, ActualParamType);
+
+	  end;
+
+          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes) and (ActualParamType in RealTypes)
+          then GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = ENUMTOK) then begin
              IdentTemp := GetIdentIndex(TokenAt(i).Name);
@@ -9972,10 +10165,11 @@ begin
                       //      if GetDataSize(ValType) > GetDataSize( TDataType.VarType] then ValType := VarType;     // skracaj typ danych    !!! niemozliwe skoro VarType = TDataType.INTEGERTOK
 
 
-                      if (IdentifierAt(IdentIndex).Kind = CONSTANT) and (ValType in Pointers) then
-                        ConstVal := IdentifierAt(IdentIndex).Value - CODEORIGIN
-                      else
-                        ConstVal := IdentifierAt(IdentIndex).Value;
+                      if (IdentifierAt(IdentIndex).Kind = CONSTANT) then begin
+                        if {(Ident[IdentIndex].Kind = CONSTANT) and} (ValType in Pointers) then
+                           ConstVal := IdentifierAt(IdentIndex).Value - CODEORIGIN
+                        else
+                           ConstVal := IdentifierAt(IdentIndex).Value;
 
 
                       if (ValType in IntegerTypes) and (VarType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) then
@@ -9991,6 +10185,8 @@ begin
                       begin
                         ConstVal := CastToSingle(ConstVal);
                         //ValType := TTokenKind.SINGLETOK;
+                      end;
+
                       end;
 
 
@@ -10603,7 +10799,6 @@ begin
 
 end;  //CompileFactor
 
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -10618,198 +10813,6 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure RealTypeConversion(var ValType, RightValType: TDataType; Kind: TTokenKind = TTokenKind.UNTYPETOK);
-begin
-
-  if ((ValType = TDataType.SINGLETOK) or (Kind = TTokenKind.SINGLETOK)) and (RightValType in IntegerTypes) then
-  begin
-
-    ExpandParam(TDataType.INTEGERTOK, RightValType);
-
-    //   asm65(#9'jsr @I2F');
-
-    asm65(#9'lda :STACKORIGIN,x');
-    asm65(#9'sta :FPMAN0');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-    asm65(#9'sta :FPMAN1');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-    asm65(#9'sta :FPMAN2');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-    asm65(#9'sta :FPMAN3');
-
-    asm65(#9'jsr @I2F');
-
-    asm65(#9'lda :FPMAN0');
-    asm65(#9'sta :STACKORIGIN,x');
-    asm65(#9'lda :FPMAN1');
-    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-    asm65(#9'lda :FPMAN2');
-    asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-    asm65(#9'lda :FPMAN3');
-    asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-
-    if (ValType <> TTokenKind.SINGLETOK) and (Kind = TTokenKind.SINGLETOK) then
-      RightValType := Kind
-    else
-      RightValType := ValType;
-  end;
-
-
-  if (ValType in IntegerTypes) and ((RightValType = TDataType.SINGLETOK) or (Kind = TTokenKind.SINGLETOK)) then
-  begin
-
-    ExpandParam_m1(TDataType.INTEGERTOK, ValType);
-
-    //   asm65(#9'jsr @I2F_M');
-
-    asm65(#9'lda :STACKORIGIN-1,x');
-    asm65(#9'sta :FPMAN0');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-    asm65(#9'sta :FPMAN1');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-    asm65(#9'sta :FPMAN2');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-    asm65(#9'sta :FPMAN3');
-
-    asm65(#9'jsr @I2F');
-
-    asm65(#9'lda :FPMAN0');
-    asm65(#9'sta :STACKORIGIN-1,x');
-    asm65(#9'lda :FPMAN1');
-    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-    asm65(#9'lda :FPMAN2');
-    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-    asm65(#9'lda :FPMAN3');
-    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
-
-    if (RightValType <> TTokenKind.SINGLETOK) and (Kind = TTokenKind.SINGLETOK) then
-      ValType := Kind
-    else
-      ValType := RightValType;
-  end;
-
-
-  if ((ValType = TDataType.HALFSINGLETOK) or (Kind = TDataType.HALFSINGLETOK)) and
-    (RightValType in IntegerTypes) then
-  begin
-
-    ExpandParam(TDataType.INTEGERTOK, RightValType);
-
-    //   asm65(#9'jsr @F16_I2F');
-
-    asm65(#9'lda :STACKORIGIN,x');
-    asm65(#9'sta @F16_I2F.SV');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-    asm65(#9'sta @F16_I2F.SV+1');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-    asm65(#9'sta @F16_I2F.SV+2');
-    asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-    asm65(#9'sta @F16_I2F.SV+3');
-
-    asm65(#9'jsr @F16_I2F');
-
-    asm65(#9'lda :eax');
-    asm65(#9'sta :STACKORIGIN,x');
-    asm65(#9'lda :eax+1');
-    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-
-    if (ValType <> TDataType.HALFSINGLETOK) and (Kind = TDataType.HALFSINGLETOK) then
-      RightValType := Kind
-    else
-      RightValType := ValType;
-
-  end;
-
-
-  if (ValType in IntegerTypes) and ((RightValType = TDataType.HALFSINGLETOK) or
-    (Kind = TDataType.HALFSINGLETOK)) then
-  begin
-
-    ExpandParam_m1(TDataType.INTEGERTOK, ValType);
-
-    //   asm65(#9'jsr @F16_I2F');//_m');
-
-    asm65(#9'lda :STACKORIGIN-1,x');
-    asm65(#9'sta @F16_I2F.SV');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-    asm65(#9'sta @F16_I2F.SV+1');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-    asm65(#9'sta @F16_I2F.SV+2');
-    asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
-    asm65(#9'sta @F16_I2F.SV+3');
-
-    asm65(#9'jsr @F16_I2F');
-
-    asm65(#9'lda :eax');
-    asm65(#9'sta :STACKORIGIN-1,x');
-    asm65(#9'lda :eax+1');
-    asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-
-
-    if (RightValType <> TDataType.HALFSINGLETOK) and (Kind = TDataType.HALFSINGLETOK) then
-      ValType := Kind
-    else
-      ValType := RightValType;
-  end;
-
-
-  if ((ValType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) or
-    (Kind in [TDataType.REALTOK, TDataType.SHORTREALTOK])) and (RightValType in IntegerTypes) then
-  begin
-
-    ExpandParam(TDataType.INTEGERTOK, RightValType);
-
-    asm65(#9'jsr @expandToREAL');
-{
-   asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-   asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
-   asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-   asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
-   asm65(#9'lda :STACKORIGIN,x');
-   asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
-   asm65(#9'lda #$00');
-   asm65(#9'sta :STACKORIGIN,x');
-}
-    if not (ValType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) and
-      (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK]) then
-      RightValType := Kind
-    else
-      RightValType := ValType;
-
-  end;
-
-
-  if (ValType in IntegerTypes) and ((RightValType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) or
-    (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK])) then
-  begin
-
-    ExpandParam_m1(TDataType.INTEGERTOK, ValType);
-
-    asm65(#9'jsr @expandToREAL1');
-{
-   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*2,x');
-   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
-   asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
-   asm65(#9'lda :STACKORIGIN-1,x');
-   asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-   asm65(#9'lda #$00');
-   asm65(#9'sta :STACKORIGIN-1,x');
-}
-
-    if not (RightValType in [TDataType.REALTOK, TTokenKind.SHORTREALTOK]) and
-      (Kind in [TTokenKind.REALTOK, TTokenKind.SHORTREALTOK]) then
-      ValType := Kind
-    else
-      ValType := RightValType;
-
-  end;
-
-end;  //RealTypeConversion
 
 
 // ----------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+30.08.2025
+- added INTEGER -> REAL procedure/function parameter conversion
+- faster version of 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
+
 24.08.2025
 - new unit SAM
 - new unit PACKFIRE
