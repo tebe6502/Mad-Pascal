@@ -816,6 +816,8 @@ type
   end;
 
   procedure Main;
+  const MP_ORIGIN_FOLDER = 'origin';
+
   {$IFDEF DARWIN}
   const
     MP_BIN_FOLDER = 'macosx_aarch64';
@@ -906,9 +908,9 @@ type
     if mpExePath = '' then mpExePath :=
         AppendPath(mpFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
 
-    if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath + '-origin';
+    if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath;
     if referenceMPExePath = '' then referenceMPExePath :=
-        AppendPath(referenceMPFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
+        AppendPath(referenceMPFolderPath, MP_ORIGIN_FOLDER, MP_EXE);
     if inputFolderPath = '' then  inputFolderPath := AppendPath(mpFolderPath, 'samples');
 
     MakeAbsolutePath(mpFolderPath);
