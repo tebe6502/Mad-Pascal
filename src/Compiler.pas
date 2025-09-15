@@ -2201,8 +2201,8 @@ begin
 
   if Down then
   begin
-    asm65;
-    asm65('; Dec(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
+    // asm65;
+    // asm65('; Dec(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
 
     //  a:='sbb';
     b := 'sub';
@@ -2211,8 +2211,8 @@ begin
   end
   else
   begin
-    asm65;
-    asm65('; Inc(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
+    // asm65;
+    // asm65('; Inc(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
 
     //  a:='adb';
     b := 'add';
@@ -4988,8 +4988,8 @@ end;
 procedure GenerateBinaryOperation(op: TTokenKind; ResultType: TDataType);
 begin
 
-  asm65;
-  asm65('; Generate Binary Operation for ' + InfoAboutToken(ResultType));
+  // asm65;
+  // asm65('; Generate Binary Operation for ' + InfoAboutToken(ResultType));
 
   Gen;
   Gen;
@@ -8847,8 +8847,8 @@ begin
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
-      asm65;
-      asm65('; Lo(X)');
+      // asm65;
+      // asm65('; Lo(X)');
 
       case ActualParamType of
         TTokenKind.SHORTINTTOK, TTokenKind.BYTETOK:
@@ -8880,8 +8880,8 @@ begin
 
       CheckTok(i + 1, TDataType.CPARTOK);
 
-      asm65;
-      asm65('; Hi(X)');
+      // asm65;
+      // asm65('; Hi(X)');
 
       case ActualParamType of
         TTokenKind.SHORTINTTOK, TTokenKind.BYTETOK: asm65(#9'jsr @hiBYTE');
@@ -14880,7 +14880,7 @@ WHILETOK:
         j := i + 2;
         yes := False;
 
-        if SafeCompileConstExpression(j, ConstVal, ActualParamType, IdentifierAt(IdentIndex).DataType, True) then
+        if SafeCompileConstExpression(j, ConstVal, ActualParamType, { IdentifierAt(IdentIndex).DataType } ExpressionType, True) then
           yes := True
         else
           j := CompileExpression(j, ActualParamType);
@@ -14987,7 +14987,7 @@ WHILETOK:
 
       if (NumActualParams = 0) then
       begin
-
+{
         asm65;
 
         if Down then
@@ -14996,7 +14996,7 @@ WHILETOK:
           asm65('; Inc(var X) -> ' + InfoAboutToken(ExpressionType));
 
         asm65;
-
+}
         GenerateForToDoEpilog(ExpressionType, Down, IdentIndex, False, 0);    // +1, -1
       end
       else

@@ -415,6 +415,7 @@ begin
     TDataType.WORDTOK: Result := Low(Word);
     TDataType.CARDINALTOK: Result := Low(Cardinal);
     TDataType.STRINGTOK: Result := 1;
+    TDataType.POINTERTOK: Result := 0;
 
     else
       Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch'));
@@ -445,6 +446,7 @@ begin
     TDataType.WORDTOK: Result := High(Word);
     TDataType.CARDINALTOK: Result := High(Cardinal);
     TDataType.STRINGTOK: Result := 255;
+    TDataType.POINTERTOK: Result := High(Word);
 
     else
       Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch'));
