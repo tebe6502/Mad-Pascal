@@ -2873,7 +2873,7 @@ begin
                   NumAllocElements := RecType;      // index to the Types array
                   AllocElementType := TDataType.UNTYPETOK;
 
-                  if GetTypeAtIndex(RecType).Size >= 256 then
+                  if GetTypeAtIndex(RecType).Size > 256 then
                     Error(i, TMessage.Create(TErrorCode.RecordSizeExceedsLimit,
                       'Record size {0} exceeds the 256 bytes limit.', IntToStr(GetTypeAtIndex(RecType).Size)));
 
