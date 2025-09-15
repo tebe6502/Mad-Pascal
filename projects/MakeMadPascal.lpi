@@ -36,7 +36,7 @@
         </Mode>
         <Mode Name="all">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFil2ePattern graph"/>
+            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern GIfview.pas"/>
           </local>
         </Mode>
       </Modes>
