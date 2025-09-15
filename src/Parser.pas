@@ -222,7 +222,7 @@ begin
   // if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
   //  i := IdentifierAt(IdentIndex).NumAllocElements_
   // else
-  i := IdentifierAt(IdentIndex).NumAllocElements;
+  i := IdentifierAt(IdentIndex).NumAllocElements and $FFFF;
 
   Result := 0;
 
@@ -256,10 +256,15 @@ begin
 
       if FieldType <> TDataType.RECORDTOK then
         if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+           if AllocElementType = RECORDTOK then begin
+             AllocElementType := POINTERTOK;
+             NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
+             NumAllocElements_ := 0;
+           end;
            if NumAllocElements_ > 0 then
-            Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
+             Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
            else
-            Inc(Result, NumAllocElements * GetDataSize(AllocElementType))
+             Inc(Result, NumAllocElements * GetDataSize(AllocElementType))
         end
         else
           Inc(Result, GetDataSize(FieldType));
