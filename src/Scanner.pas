@@ -1757,7 +1757,7 @@ var
               Frac := ReadFractionalPart(ch2);
 
               TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-              TokenAt(NumTok).FracValue := StrToFloat(Frac);
+              TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
               TokenAt(NumTok).SourceLocation.Column :=
                 TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
               Spaces := 0;
@@ -1877,7 +1877,7 @@ end;  // TokenizeProgram
 
 function ReadFractionalPart(const a: String; var i: Integer; ch: Char): String; overload;
 begin
-  Result := '0.';
+  Result := '.';
 
   begin
     Result := '.';
@@ -2417,7 +2417,7 @@ begin
           Frac := ReadFractionalPart(a, i, ch2);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-          TokenAt(NumTok).FracValue := StrToFloat(Frac);
+          TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
           TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
           Spaces := 0;
 
