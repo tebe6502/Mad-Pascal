@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                 {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                     {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                 {$ENDIF}
+                                     {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -220,11 +220,10 @@ uses
   function Main: TExitCode;
 
   var
-    MainPath: String;
-
     // Command line parameters
     inputFilePath: TFilePath;
     unitPathList: TPathList;
+    libFolderPath: TFolderPath;
     targetID: TTargetID;
     cpu: TCPU;
 
@@ -475,10 +474,18 @@ uses
     WriteLn(Compiler.CompilerTitle);
 
 
-    MainPath := ExtractFilePath(ParamStr(0));
-    MainPath := IncludeTrailingPathDelimiter(MainPath);
+    // By default the executable is in 'bin/<os>'.
+    libFolderPath := ExtractFileDir(ParamStr(0));
+    libFolderPath := ExtractFileDir(libFolderPath);
+    libFolderPath := ExtractFileDir(libFolderPath);
+    libFolderPath := IncludeTrailingPathDelimiter(libFolderPath) + 'lib';
+
     unitPathList := TPathList.Create;
-    unitPathList.AddFolder(MainPath + 'lib');
+    if TFileSystem.FolderExists(libFolderPath) then
+    begin
+      unitPathList.AddFolder(libFolderPath);
+    end;
+
     SourceFileList := TSourceFileList.Create();
 
     try
