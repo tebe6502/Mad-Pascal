@@ -102,8 +102,8 @@ type
   TCode65 =
     (
 
-    je, jne,
-    //  jg, jge, jl, jle,
+    // je, jne,
+    // jg, jge, jl, jle,
     putCHAR, putEOL,
     addBX, subBX, movaBX_Value,
     imulECX,
@@ -111,13 +111,13 @@ type
     addAL_CL, addAX_CX, addEAX_ECX,
     shlAL_CL, shlAX_CL, shlEAX_CL,
     subAL_CL, subAX_CX, subEAX_ECX,
-    cmpSTRING, cmpSTRING2CHAR, cmpCHAR2STRING,
+    // cmpSTRING, cmpSTRING2CHAR, cmpCHAR2STRING,
     shrAL_CL, shrAX_CL, shrEAX_CL
 
-    //  cmpINT, cmpEAX_ECX, cmpAX_CX, cmpSMALLINT, cmpSHORTINT,
-    //  andEAX_ECX, andAX_CX, andAL_CL,
-    //  orEAX_ECX, orAX_CX, orAL_CL,
-    //  xorEAX_ECX, xorAX_CX xorAL_CL
+    // cmpINT, cmpEAX_ECX, cmpAX_CX, cmpSMALLINT, cmpSHORTINT,
+    // andEAX_ECX, andAX_CX, andAL_CL,
+    // orEAX_ECX, orAX_CX, orAL_CL,
+    // xorEAX_ECX, xorAX_CX xorAL_CL
 
     );
 

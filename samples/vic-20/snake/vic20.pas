@@ -1,4 +1,4 @@
-{$r res/gfx.rc}
+{$r 'res/gfx.rc'}
 
 {$librarypath 'src/systems'}
 

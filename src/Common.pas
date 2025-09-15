@@ -7,7 +7,7 @@ interface
 uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 const
-  title = '1.7.3-Test';
+  title = '1.7.5-Test';
 
 
 var
@@ -90,6 +90,8 @@ var
 
   LinkObj: TStringArray;
   unitPathList: TPathList;
+
+  WithName: TStringArray;
 
   // Optimizer Settings
   iOut: Integer;
@@ -413,6 +415,7 @@ begin
     TDataType.WORDTOK: Result := Low(Word);
     TDataType.CARDINALTOK: Result := Low(Cardinal);
     TDataType.STRINGTOK: Result := 1;
+    TDataType.POINTERTOK: Result := 0;
 
     else
       Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch'));
@@ -443,6 +446,7 @@ begin
     TDataType.WORDTOK: Result := High(Word);
     TDataType.CARDINALTOK: Result := High(Cardinal);
     TDataType.STRINGTOK: Result := 255;
+    TDataType.POINTERTOK: Result := High(Word);
 
     else
       Error(i, TMessage.Create(TErrorCode.TypeMismatch, 'Type mismatch'));

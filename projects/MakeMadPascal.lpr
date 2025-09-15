@@ -412,6 +412,10 @@ var
       begin
         parameters.add('-target:c64');
       end;
+      if curDir.ToLower.Contains('vic-20') then
+      begin
+        // TODO parameters.add('-target:raw');
+      end;
 
       parameters.add('-o:' + a65FileName);
       parameters.add(fileName);
@@ -541,9 +545,9 @@ type
         //  'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
         'ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
 
-      fileResultMessages[6] := TFileResultMessages.Create('samples\common\DYNREC.PAS');
+      fileResultMessages[6] := TFileResultMessages.Create('samples\common\dynrec.pas');
       fileResultMessages[6].AddMessage(
-        'Error: Incompatible types: got "^PERSON" expected "PERSON"');
+        'Incompatible types: got "^PERSON" expected "PERSON"');
 
       for i := 1 to length(fileResultMessages) do
       begin
@@ -815,7 +819,21 @@ type
       Value := '';
   end;
 
+  function GetCountText(count: Cardinal; singular:String; plural:String):String;
+  begin
+    if count =1 then
+    begin
+      Result:=Format('%d %s', [count, singular]);
+    end
+    else
+    begin
+      Result :=Format('%d %s', [count, plural]);
+    end;
+  end;
+
   procedure Main;
+  const MP_ORIGIN_FOLDER = 'origin';
+
   {$IFDEF DARWIN}
   const
     MP_BIN_FOLDER = 'macosx_aarch64';
@@ -906,9 +924,9 @@ type
     if mpExePath = '' then mpExePath :=
         AppendPath(mpFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
 
-    if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath + '-origin';
+    if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath;
     if referenceMPExePath = '' then referenceMPExePath :=
-        AppendPath(referenceMPFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
+        AppendPath(referenceMPFolderPath, MP_ORIGIN_FOLDER, MP_EXE);
     if inputFolderPath = '' then  inputFolderPath := AppendPath(mpFolderPath, 'samples');
 
     MakeAbsolutePath(mpFolderPath);
@@ -987,7 +1005,7 @@ type
         threads := 1;
       end;
 
-      Log(Format('Processing %d Pascal programs with %d Threads.', [ProgramFiles.Count, threads]));
+      Log(Format('Processing %s with %s.', [GetCountText(ProgramFiles.Count,'Pascal program','Pascal programs'), GetCountText(threads, 'thread', 'threads')]));
 
 
       if (options.cleanup) then
@@ -1077,7 +1095,7 @@ type
         end
         else
         begin
-          operation.logMessages.Add(Format('Found %d different files.', [operation.diffFilePaths.Count]));
+          operation.logMessages.Add(Format('Found %s.', [GetCountText(operation.diffFilePaths.Count, 'different file', 'different files')]));
           operation.logMessages.AddStrings(operation.diffFilePaths);
         end;
 

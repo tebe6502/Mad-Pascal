@@ -108,9 +108,9 @@ begin
 end;
 
 
-{$link assets\monster.obx}
-{$link assets\face.obx}
-{$link assets\thing.obx}
+{$link 'assets/monster.obj' }
+{$link 'assets/face.obj' }
+{$link 'assets/thing.obj' }
 
 
 procedure addShapes;

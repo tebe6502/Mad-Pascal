@@ -26,8 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:..\..\..\lib lines.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\graph"/>
+            <CommandLineParams Value="-iPath:..\..\..\..\lib gifview.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\graph_vbxe\gif"/>
           </local>
         </Mode>
         <Mode Name="PacMad">
@@ -83,6 +83,7 @@
       <Unit>
         <Filename Value="..\src\mp.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MADPASCAL"/>
       </Unit>
       <Unit>
         <Filename Value="..\src\Numbers.pas"/>
@@ -566,6 +567,14 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\tests\TestInclude.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Merges.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\CHANGELOG"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

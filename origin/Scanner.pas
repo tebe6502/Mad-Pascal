@@ -1115,6 +1115,36 @@ var
     end;
   end;
 
+  function ReadFractionalPart(var ch: Char): String; overload;
+  begin
+    Result := '.';
+    while UpCase(ch) in ['0'..'9'] do
+    begin
+      Result := Result + ch;
+      SafeReadChar(ch);
+    end;
+
+    // Scientific exponent syntax?
+    if UpCase(ch) in ['E'] then
+    begin
+      Result := Result + ch;
+      SafeReadChar(ch);
+
+      // Negative exponent or digit
+      if UpCase(ch) in ['0'..'9', '-'] then
+      begin
+        Result := Result + ch;
+        SafeReadChar(ch);
+      end;
+
+      // More digits
+      while UpCase(ch) in ['0'..'9'] do
+      begin
+        Result := Result + ch;
+        SafeReadChar(ch);
+      end;
+    end;
+  end;
 
   procedure SkipWhiteSpace;				// 'string' + #xx + 'string'
   begin
@@ -1272,13 +1302,7 @@ var
 	    Seek(InFile, FilePos(InFile) - 1)	// Range ('..') token
 	  else
 	    begin				// Fractional part found
-	    Frac := '.';
-
-	    while UpCase(ch) in ['0'..'9', '-','E'] do
-	      begin
-	      Frac := Frac + ch;
-	      SafeReadChar(ch);
-	      end;
+	    Frac := ReadFractionalPart(ch);
 
 	    Tok[NumTok].Kind := FRACNUMBERTOK;
 
@@ -1697,15 +1721,10 @@ var
 
 	   AddToken(INTNUMBERTOK, UnitIndex, Line, 0, 0);
 
-	   Frac := '0.';		  // Fractional part found
-
-	   while UpCase(ch2) in ['0'..'9', '-','E'] do begin
-	    Frac := Frac + ch2;
-	    SafeReadChar(ch2);
-	   end;
+	   Frac := ReadFractionalPart(ch2);  // Fractional part found
 
 	   Tok[NumTok].Kind := FRACNUMBERTOK;
-	   Tok[NumTok].FracValue := StrToFloat(Frac);
+	   Tok[NumTok].FracValue := StrToFloat('0'+Frac);
 	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
 
 	   Frac := '';
@@ -1954,6 +1973,47 @@ Spelling[TEXTTOK	] := 'TEXT';
 
 end;	//TokenizeProgram
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+function ReadFractionalPart(const a: String; var i: Integer; ch: Char): String; overload;
+begin
+  Result := '.';
+
+  begin
+    Result := '.';
+    while UpCase(ch) in ['0'..'9'] do
+    begin
+      Result := Result + ch;
+      ch := a[i];
+      Inc(i);
+    end;
+
+    // Scientific exponent syntax?
+    if UpCase(ch) in ['E'] then
+    begin
+      Result := Result + ch;
+      ch := a[i];
+      Inc(i);
+
+      // Negative exponent or digit
+      if UpCase(ch) in ['0'..'9', '-'] then
+      begin
+        Result := Result + ch;
+        ch := a[i];
+        Inc(i);
+      end;
+
+      // More digits
+      while UpCase(ch) in ['0'..'9'] do
+      begin
+        Result := Result + ch;
+        ch := a[i];
+        Inc(i);
+      end;
+    end;
+  end;
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -2123,14 +2183,7 @@ begin
 	    dec(i)				// Range ('..') token
 	  else
 	    begin				// Fractional part found
-	    Frac := '.';
-
-	    while UpCase(ch) in ['0'..'9', '-','E'] do
-	      begin
-	      Frac := Frac + ch;
-
-	      ch:=a[i]; inc(i);
-	      end;
+	    Frac := ReadFractionalPart(a,i,ch);
 
 	    Tok[NumTok].Kind := FRACNUMBERTOK;
 	    Tok[NumTok].FracValue := StrToFloat(Num + Frac);
@@ -2380,16 +2433,10 @@ begin
 
 	   AddToken(INTNUMBERTOK, 1, Line, 0, 0);
 
-	   Frac := '0.';		  // Fractional part found
-
-	   while UpCase(ch2) in ['0'..'9', '-','E'] do begin
-	    Frac := Frac + ch2;
-
-	    ch2:=a[i]; inc(i);
-	   end;
+	   Frac := ReadFractionalPart(a,i,ch2);  // Fractional part found
 
 	   Tok[NumTok].Kind := FRACNUMBERTOK;
-	   Tok[NumTok].FracValue := StrToFloat(Frac);
+	   Tok[NumTok].FracValue := StrToFloat('0'+Frac);
 	   Tok[NumTok].Column := Tok[NumTok-1].Column + length(Frac) + Spaces; Spaces:=0;
 
 	   Frac := '';

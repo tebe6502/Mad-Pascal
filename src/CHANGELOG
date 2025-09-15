@@ -1,3 +1,34 @@
+15.09.2025
+- bugfixes  (Parser.pas -> RecordSize)
+
+13.09.2025
+- bugfixes and optimizations
+
+04.09.2025
+- optimizations
+
+30.08.2025
+- added INTEGER -> REAL procedure/function parameter conversion
+- faster version of 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
+
+24.08.2025
+- new unit SAM
+- new unit PACKFIRE
+
+22.08.2025
+- improved parsing of real values, accepts additional characters 'E', '-', e.g. 6.1858296469E-02
+
+21.08.2025
+- optimizations for @cmpCHAR2STRING, @cmpSTRING2CHAR
+
+18.08.2025
+- added MD1, MD1PLAY resources
+- new unit MD1
+
+16.08.2025
+- improved ENUM type passing in procedure/function
+- added support for WITH statement
+
 09.08.2025
 - optimizations opt_TAY, opt_EOR
 
