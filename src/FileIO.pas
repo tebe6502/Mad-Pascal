@@ -34,6 +34,7 @@ type
 type
   IFile = interface
     function GetFilePath: TFilePath;
+    function GetAbsoluteFilePath: TFilePath;
     procedure Assign(filePath: TFilePath);
     procedure Close;
     procedure Erase();
@@ -131,6 +132,7 @@ type
   type TFileMode = (Read, Write);
     constructor Create;
     function GetFilePath(): String;
+    function GetAbsoluteFilePath(): String;
     procedure Assign(filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
@@ -292,6 +294,11 @@ end;
 function TFile.GetFilePath(): String;
 begin
   Result := filePath;
+end;
+
+function TFile.GetAbsoluteFilePath(): String;
+begin
+  Result := ExpandFileName(filePath);
 end;
 
 // ----------------------------------------------------------------------------
