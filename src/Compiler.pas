@@ -11154,14 +11154,6 @@ begin
         if (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).AllocElementType = TDataType.CHARTOK) and
           (Elements(GetIdentIndex(TokenAt(i + 2).Name)) > 0) then sRight := True;
 
-    {
-      if VarType = TDataType.ENUMTOK then begin
-
-       if (ValType = VarType) and (RightValType in IntegerTypes) then RightValType := VarType;
-       if (ValType in IntegerTypes) and (RightValType = VarType) then ValType := VarType;
-
-      end;
-    }
     //  if (ValType in [SHORTREALTOK, TTokenKind.REALTOK]) and (RightValType in [SHORTREALTOK, TTokenKind.REALTOK]) then
     //    RightValType := ValType;
 
@@ -11835,17 +11827,17 @@ begin
                     begin
                       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-                      par2 := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) +
+                      svar := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) +
                         1, length(IdentifierAt(IdentIndex).Name));
 
                       IdentIndex := IdentTemp;
 
-                      IdentTemp := RecordSize(IdentIndex, par2);
+                      IdentTemp := RecordSize(IdentIndex, svar);
 
                       if IdentTemp < 0 then
-                        Error(i + 3, 'identifier idents no member ''' + par2 + '''');
+                        Error(i + 3, 'identifier idents no member ''' + svar + '''');
 
-                      par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
+                      par2 := '$' + IntToHex(IdentTemp and $ffff, 2);  // offset to record field -> 'svar'
 
                     end;
 
@@ -16928,9 +16920,12 @@ begin
 
         if Param[ParamIndex].PassMethod = TParameterPassingMethod.VARPASSING then
           GenerateAssignment(ASPOINTER, GetDataSize(TDataType.POINTERTOK), 0, Param[ParamIndex].Name)
-        else
-          GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
-
+        else  begin
+           if Param[ParamIndex].DataType = TDatatype.ENUMTOK then
+	    GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
+	  else
+            GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
+        end;
 
         if (Param[ParamIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
           (Param[ParamIndex].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
@@ -16988,8 +16983,12 @@ begin
         if Assignment then
           if Param[ParamIndex].PassMethod = TParameterPassingMethod.VARPASSING then
             GenerateAssignment(ASPOINTER, GetDataSize(TDataType.POINTERTOK), 0, Param[ParamIndex].Name)
-          else
-            GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
+          else begin
+            if Param[ParamIndex].DataType = ENUMTYPE then
+	      GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
+            else
+              GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
+          end;
       end;
 
       if (Paramindex <> NumParams) then asm65(#9'jmi @main');
