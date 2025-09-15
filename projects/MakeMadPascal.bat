@@ -8,7 +8,6 @@ MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -co
 -inputFilePattern samples\a8\math\sha256\sha256_test.pas  ^
 -inputFilePattern samples\a8\tools\sortviz\source\SortViz.pas  ^
 -inputFilePattern samples\common\dynrec.pas  ^
--inputFilePattern samples\common\realmath.pas  ^
 -inputFilePattern samples\common\math\fft\fourier.pas  ^
 -inputFilePattern samples\common\object\hello.pas  ^
 -inputFilePattern samples\tests\tests-basic\negative-index-range.pas  ^
