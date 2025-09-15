@@ -1249,7 +1249,7 @@ var
             begin        // Fractional part found
               Frac := '.';
 
-              while ch in ['0'..'9'] do
+              while UpCase(ch) in ['0'..'9', '-','E'] do
               begin
                 Frac := Frac + ch;
                 SafeReadChar(ch);
@@ -1732,7 +1732,7 @@ var
 
               Frac := '0.';      // Fractional part found
 
-              while ch2 in ['0'..'9'] do
+              while UpCase(ch2) in ['0'..'9', '-','E'] do
               begin
                 Frac := Frac + ch2;
                 SafeReadChar(ch2);
@@ -2051,7 +2051,7 @@ begin
         begin        // Fractional part found
           Frac := '.';
 
-          while ch in ['0'..'9'] do
+          while UpCase(ch) in ['0'..'9', '-','E'] do
           begin
             Frac := Frac + ch;
 
@@ -2369,7 +2369,7 @@ begin
 
           Frac := '0.';      // Fractional part found
 
-          while ch2 in ['0'..'9'] do
+          while UpCase(ch2) in ['0'..'9', '-','E'] do
           begin
             Frac := Frac + ch2;
 

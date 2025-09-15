@@ -1,3 +1,6 @@
+22.08.2025
+- improved parsing of real values, accepts additional characters 'E', '-', e.g. 6.1858296469E-02
+
 21.08.2025
 - optimizations for @cmpCHAR2STRING, @cmpSTRING2CHAR
 
