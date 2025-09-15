@@ -412,6 +412,10 @@ var
       begin
         parameters.add('-target:c64');
       end;
+      if curDir.ToLower.Contains('vic-20') then
+      begin
+        // TODO parameters.add('-target:raw');
+      end;
 
       parameters.add('-o:' + a65FileName);
       parameters.add(fileName);
@@ -541,9 +545,9 @@ type
         //  'Error: E80 - ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
         'ArrayLowerBoundNotInteger: Array lower bound must be an integer value');
 
-      fileResultMessages[6] := TFileResultMessages.Create('samples\common\DYNREC.PAS');
+      fileResultMessages[6] := TFileResultMessages.Create('samples\common\dynrec.pas');
       fileResultMessages[6].AddMessage(
-        'Error: Incompatible types: got "^PERSON" expected "PERSON"');
+        'Incompatible types: got "^PERSON" expected "PERSON"');
 
       for i := 1 to length(fileResultMessages) do
       begin
