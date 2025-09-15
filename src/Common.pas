@@ -7,7 +7,7 @@ interface
 uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
 
 const
-  title = '1.7.3-Test';
+  title = '1.7.4-Test';
 
 
 var
