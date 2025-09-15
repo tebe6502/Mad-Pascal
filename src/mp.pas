@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                            {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                              {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                            {$ENDIF}
+                                              {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -514,9 +514,11 @@ uses
       OptFile.Rewrite();
 
     except
-      on EInOutError do
+      on e: EInOutError do
       begin
-        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing.', [OptFile.GetAbsoluteFilePath()]));
+      Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
         Result := THaltException.COMPILING_NOT_STARTED;
         Exit();
       end;
@@ -524,11 +526,9 @@ uses
 
 
     {$ENDIF}
-    Writeln({$INCLUDE %FILE%} + ':' + {$INCLUDE %LINE%});   // JAC!
+
     OutFile := TFileSystem.CreateTextFile;
 
-
-    // TODO: Absolute paths and error handling
     if ExtractFileName(outputFilePath) <> '' then
     begin
       OutFile.Assign(outputFilePath);
@@ -541,9 +541,12 @@ uses
       OutFile.Rewrite;
 
     except
-      on EInOutError do
+      on e: EInOutError do
       begin
-        WriteLn(Format('ERROR: Cannot open output file "%s" for writing.', [OutFile.GetAbsoluteFilePath()]));
+        Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open output file "%s" for writing. %s.',
+          [OutFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
         Result := THaltException.COMPILING_NOT_STARTED;
         Exit();
       end;
