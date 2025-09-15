@@ -815,6 +815,18 @@ type
       Value := '';
   end;
 
+  function GetCountText(count: Cardinal; singular:String; plural:String):String;
+  begin
+    if count =1 then
+    begin
+      Result:=Format('%d %s', [count, singular]);
+    end
+    else
+    begin
+      Result :=Format('%d %s', [count, plural]);
+    end;
+  end;
+
   procedure Main;
   const MP_ORIGIN_FOLDER = 'origin';
 
@@ -989,7 +1001,7 @@ type
         threads := 1;
       end;
 
-      Log(Format('Processing %d Pascal programs with %d Threads.', [ProgramFiles.Count, threads]));
+      Log(Format('Processing %s with %s.', [GetCountText(ProgramFiles.Count,'Pascal program','Pascal programs'), GetCountText(threads, 'thread', 'threads')]));
 
 
       if (options.cleanup) then
@@ -1079,7 +1091,7 @@ type
         end
         else
         begin
-          operation.logMessages.Add(Format('Found %d different files.', [operation.diffFilePaths.Count]));
+          operation.logMessages.Add(Format('Found %s.', [GetCountText(operation.diffFilePaths.Count, 'different file', 'different files')]));
           operation.logMessages.AddStrings(operation.diffFilePaths);
         end;
 
