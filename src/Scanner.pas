@@ -135,8 +135,7 @@ begin
           (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
           (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
           (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') or
-          (res.resType = 'MD1PLAY') or (res.resType = 'MD1')
-        then        
+          (res.resType = 'MD1PLAY') or (res.resType = 'MD1') then
 
         else
           Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType,
@@ -1091,15 +1090,35 @@ var
     end;
 
 
-    function ReadFractionalPart(ch: char): String;  overload;
+    function ReadFractionalPart(var ch: Char): String; overload;
     begin
-    Result:='.';
+      Result := '.';
+      while UpCase(ch) in ['0'..'9'] do
+      begin
+        Result := Result + ch;
+        SafeReadChar(ch);
+      end;
 
-    while UpCase(ch) in ['0'..'9', '-','E'] do
-    begin
-      Result := Result + ch;
-      SafeReadChar(ch);
-    end;
+      // Scientific exponent syntax?
+      if UpCase(ch) in ['E'] then
+      begin
+        Result := Result + ch;
+        SafeReadChar(ch);
+
+        // Negative exponent or digit
+        if UpCase(ch) in ['0'..'9', '-'] then
+        begin
+          Result := Result + ch;
+          SafeReadChar(ch);
+        end;
+
+        // More digits
+        while UpCase(ch) in ['0'..'9'] do
+        begin
+          Result := Result + ch;
+          SafeReadChar(ch);
+        end;
+      end;
     end;
 
     procedure TextInvers(p: Integer);
@@ -1856,16 +1875,43 @@ end;  // TokenizeProgram
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-function ReadFractionalPart(const a: String; var i: Integer; ch: char): String;  overload;
+function ReadFractionalPart(const a: String; var i: Integer; ch: Char): String; overload;
 begin
-Result:='0.';
-while UpCase(ch) in ['0'..'9', '-','E'] do
-begin
-  Result := Result + ch;
+  Result := '0.';
 
-  ch := a[i];
-  Inc(i);
-end;
+  begin
+    Result := '.';
+    while UpCase(ch) in ['0'..'9'] do
+    begin
+      Result := Result + ch;
+      ch := a[i];
+      Inc(i);
+    end;
+
+    // Scientific exponent syntax?
+    if UpCase(ch) in ['E'] then
+    begin
+      Result := Result + ch;
+      ch := a[i];
+      Inc(i);
+
+      // Negative exponent or digit
+      if UpCase(ch) in ['0'..'9', '-'] then
+      begin
+        Result := Result + ch;
+        ch := a[i];
+        Inc(i);
+      end;
+
+      // More digits
+      while UpCase(ch) in ['0'..'9'] do
+      begin
+        Result := Result + ch;
+        ch := a[i];
+        Inc(i);
+      end;
+    end;
+  end;
 end;
 
 procedure TScanner.TokenizeMacro(a: String; Line, Spaces: Integer);
@@ -2059,7 +2105,7 @@ begin
           Dec(i)        // Range ('..') token
         else
         begin
-          Frac:=ReadFractionalPart(a,i,ch);
+          Frac := ReadFractionalPart(a, i, ch);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
           TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
@@ -2368,7 +2414,7 @@ begin
         begin
 
           AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
-          Frac:=ReadFractionalPart(a,i,ch2);
+          Frac := ReadFractionalPart(a, i, ch2);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
           TokenAt(NumTok).FracValue := StrToFloat(Frac);
