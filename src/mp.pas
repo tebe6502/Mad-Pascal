@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                     {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                            {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                     {$ENDIF}
+                                            {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -422,7 +422,7 @@ uses
 
           if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            ParameterError(i, 'Error: Can''t open file ''' + inputFilePath + '''.');
+            ParameterError(i, 'Error: Cannot open input file ''' + ExpandFileName(inputFilePath) + ''' for reading.');
           end;
         end;
 
@@ -506,22 +506,48 @@ uses
 
     programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
- {$IFDEF USEOPTFILE}
+    {$IFDEF USEOPTFILE} // TODO Make command line option
 
-   OptFile:=TFileSystem.CreateTextFile();
-   OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt') );
-   OptFile.Rewrite();
+    OptFile := TFileSystem.CreateTextFile();
+    OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt'));
+    try
+      OptFile.Rewrite();
 
- {$ENDIF}
+    except
+      on EInOutError do
+      begin
+        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing.', [OptFile.GetAbsoluteFilePath()]));
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
 
+
+    {$ENDIF}
+    Writeln({$INCLUDE %FILE%} + ':' + {$INCLUDE %LINE%});   // JAC!
     OutFile := TFileSystem.CreateTextFile;
+
+
+    // TODO: Absolute paths and error handling
     if ExtractFileName(outputFilePath) <> '' then
-      OutFile.Assign(outputFilePath)
+    begin
+      OutFile.Assign(outputFilePath);
+    end
     else
+    begin
       OutFile.Assign(ChangeFileExt(programUnit.Name, '.a65'));
+    end;
+    try
+      OutFile.Rewrite;
 
-    OutFile.Rewrite;
-
+    except
+      on EInOutError do
+      begin
+        WriteLn(Format('ERROR: Cannot open output file "%s" for writing.', [OutFile.GetAbsoluteFilePath()]));
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
 
     StartTime := GetTickCount64;
 
