@@ -248,6 +248,8 @@ begin
         NumAllocElements_ := 0;
       end;
 
+      if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
+
       if GetTypeAtIndex(i).Field[j].Name = field then
       begin
         yes := True;
@@ -290,6 +292,8 @@ begin
           NumAllocElements :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements and $ffff;
           NumAllocElements_ :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
           AllocElementType :=GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].AllocElementType;
+	  
+	  if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
           if GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].Name = field then
           begin
@@ -299,6 +303,11 @@ begin
 
           if FieldType <> TDataType.RECORDTOK then
             if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+               if AllocElementType = RECORDTOK then begin
+                 AllocElementType := POINTERTOK;
+                 NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
+                 NumAllocElements_ := 0;
+               end;
               if NumAllocElements_ > 0 then
                  Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
               else
