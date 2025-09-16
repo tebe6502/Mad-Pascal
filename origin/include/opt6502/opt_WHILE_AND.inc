@@ -12,7 +12,7 @@
       yes := true;
 
       for p:=i-1 downto 0 do
-       if ora_stack(p) or
+       if ora_stack(p) or local(p) or
           (sty_stack(p) and lab_a(p-1) and lda(p+1) and and_stack(p+2)) or
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
 	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
@@ -67,8 +67,8 @@
        listing[i+2] := copy(listing[i+3], 6, 256) + 'w';
 //       listing[i+3] := '';
 
-       for p:=i downto 0 do
-        if pos(tmp, listing[p]) > 0 then begin
+       for p:=i downto 1 do
+        if (pos(tmp, listing[p]) > 0) and (add_sub(p-1) = false) and (adc_sbc(p-1) = false) and (lda_a(p-1) = false) then begin
 	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jeq ' + copy(listing[i+3], 6, 256) + 'w';
 	 Break;
 	end;
