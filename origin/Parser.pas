@@ -234,16 +234,18 @@ begin
      NumAllocElements_ := 0;
     end;
 
+    if FieldType = ENUMTOK then FieldType := AllocElementType;
+
     if Types[i].Field[j].Name = field then begin yes:=true; Break end;
 
     if FieldType <> RECORDTOK then
      if (FieldType in Pointers) and (NumAllocElements > 0) then begin
-     
-     if AllocElementType = RECORDTOK then begin
-       AllocElementType := POINTERTOK;
-       NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
-       NumAllocElements_ := 0;
-     end;
+
+      if AllocElementType = RECORDTOK then begin
+        AllocElementType := POINTERTOK;
+        NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
+        NumAllocElements_ := 0;
+      end;
 
       if NumAllocElements_ > 0 then
        inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])
@@ -272,10 +274,18 @@ begin
      NumAllocElements_ := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements shr 16;
      AllocElementType := Types[Ident[IdentIndex].NumAllocElements].Field[i].AllocElementType;
 
+     if FieldType = ENUMTOK then FieldType := AllocElementType;
+
      if Types[Ident[IdentIndex].NumAllocElements].Field[i].Name = field then begin yes:=true; Break end;
 
      if FieldType <> RECORDTOK then
       if (FieldType in Pointers) and (NumAllocElements > 0) then begin
+
+       if AllocElementType = RECORDTOK then begin
+         AllocElementType := POINTERTOK;
+         NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
+         NumAllocElements_ := 0;
+       end;
 
        if NumAllocElements_ > 0 then
         inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])

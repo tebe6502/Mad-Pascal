@@ -1,5 +1,6 @@
 16.09.2025
 - bugfixes and optimizations (opt_ADR.pas) -> array 2D
+- RecordSize (ENUM size)
 
 15.09.2025
 - bugfixes  (Parser.pas -> RecordSize)
