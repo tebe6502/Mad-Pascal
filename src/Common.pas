@@ -151,7 +151,7 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 
-function FindFile(Name: String; ftyp: TString): TFilePath; overload;
+function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
 
 function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
 
@@ -202,28 +202,36 @@ end;
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 begin
-  Result:=_TypeArray[typeIndex];
+  Result := _TypeArray[typeIndex];
 end;
 
-function FindFile(Name: String; ftyp: TString): TFilePath; overload;
+function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
 var
+  unitPathText: String;
   msg: IMessage;
 begin
-  Result := unitPathList.FindFile(Name);
+  Result := unitPathList.FindFile(FileName);
   if Result = '' then
   begin
+    if unitPathList.GetSize() = 0 then
+    begin
+      unitPathText :=
+        'an empty unit path. Specify the folders for the unit path via the ''-ipath:<folder>'' command line parameter';
+    end
+    else
+    begin
+      unitPathText := 'unit path '''+unitPathList.ToString+'''';
+    end;
     if ftyp = 'unit' then
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound,
-        'Can''t find unit ''{0}'' used by program ''{1}'' in unit path ''{2}''.',
-        ChangeFileExt(Name, ''), PROGRAM_NAME, unitPathList.ToString);
+      msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+        ftyp, ChangeFileExt(FileName, ''), PROGRAM_NAME, unitPathText);
 
     end
     else
     begin
       msg := TMessage.Create(TErrorCode.FileNotFound,
-        'Can''t find {0} ''{1}'' used by program ''{2}'' in unit path ''{3}''.', ftyp,
-        Name, PROGRAM_NAME, unitPathList.ToString);
+        'Cannnot find {0} ''{1}'' used by program ''{2}'' in {3}.', ftyp, FileName, PROGRAM_NAME, unitPathText);
     end;
     Error(NumTok, msg);
   end;

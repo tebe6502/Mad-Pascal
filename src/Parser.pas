@@ -3012,18 +3012,18 @@ begin
                             i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
                             if not (ExpressionType in IntegerTypes) then
                               Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,
-                                'Array lower bound must be an integer value'));
+                                'Array lower bound must be an integer value.'));
 
                             if LowerBound <> 0 then
                               Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                'Array lower bound is not zero'));
+                                'Array lower bound is not zero.'));
 
                             CheckTok(i + 1, TTokenKind.RANGETOK);
 
                             i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
                             if not (ExpressionType in IntegerTypes) then
                               Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger,
-                                'Array upper bound must be integer'));
+                                'Array upper bound must be integer value.'));
 
                             if UpperBound < 0 then
                               Error(i, TErrorCode.UpperBoundOfRange);
@@ -3039,18 +3039,18 @@ begin
                               i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
                               if not (ExpressionType in IntegerTypes) then
                                 Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,
-                                  'Array lower bound must be integer'));
+                                  'Array lower bound must be an integer value.'));
 
                               if LowerBound <> 0 then
                                 Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                  'Array lower bound is not zero'));
+                                  'Array lower bound is not zero.'));
 
                               CheckTok(i + 1, TTokenKind.RANGETOK);
 
                               i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
                               if not (ExpressionType in IntegerTypes) then
                                 Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger,
-                                  'Array upper bound must be integer'));
+                                  'Array upper bound must be an integer value.'));
 
                               if UpperBound < 0 then
                                 Error(i, TErrorCode.UpperBoundOfRange);
