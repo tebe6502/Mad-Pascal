@@ -3056,7 +3056,7 @@ if Tok[i].Kind in AllTypes then
    if NestedDataType in [RECORDTOK, OBJECTTOK, ENUMTOK] then begin			// !!! dla RECORD, OBJECT tablice nie zadzialaja !!!
 
     if (NumAllocElements shr 16 > 0) then
-      Error(i, 'Multidimensional ' + InfoAboutToken(NestedDataType) + ' arrays are not supported');
+      Error(i, 'Multidimensional ^' + InfoAboutToken(NestedDataType) + ' arrays are not supported');
 
 //    if NestedDataType = RECORDTOK then
 //    else
