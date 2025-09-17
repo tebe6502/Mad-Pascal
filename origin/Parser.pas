@@ -234,6 +234,8 @@ begin
      NumAllocElements_ := 0;
     end;
 
+//    writeln(Types[i].Field[j].Name ,',',FieldType,',',AllocElementType);
+
     if FieldType = ENUMTOK then FieldType := AllocElementType;
 
     if Types[i].Field[j].Name = field then begin yes:=true; Break end;
@@ -2346,9 +2348,17 @@ var
 //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
 
 
+   if FieldType = ENUMTOK then FieldType := AllocElementType;
+
+
    if not (FieldType in [RECORDTOK, OBJECTTOK]) then begin
 
     if FieldType in Pointers then begin
+
+      if AllocElementType = RECORDTOK then begin
+        AllocElementType := POINTERTOK;
+        NumAllocElements := NumAllocElements shr 16;
+      end;
 
      if (FieldType = POINTERTOK) and (AllocElementType = FORWARDTYPE) then
       inc(Types[RecType].Size, DataSize[POINTERTOK])
@@ -2364,11 +2374,11 @@ var
    end else
     inc(Types[RecType].Size, DataSize[FieldType]);
 
+
    if pos('.', Types[RecType].Field[x].Name) > 0 then
     Types[RecType].Field[x].ObjectVariable := Types[RecType].Field[0].ObjectVariable
    else
     Types[RecType].Field[x].ObjectVariable := FALSE;
-
 
   end;
 

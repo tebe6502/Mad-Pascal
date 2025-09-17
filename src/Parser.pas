@@ -2309,12 +2309,19 @@ var
 
     //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
 
+    if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
+
 
     if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
     begin
 
       if FieldType in Pointers then
       begin
+      
+        if AllocElementType = TDataType.RECORDTOK then begin
+          AllocElementType := POINTERTOK;
+          NumAllocElements := NumAllocElements shr 16;
+	end;
 
         if (FieldType = TDataType.POINTERTOK) and (AllocElementType = TDataType.FORWARDTYPE) then
           Inc(_TypeArray[RecType].Size, GetDataSize(TDataType.POINTERTOK))
