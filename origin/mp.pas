@@ -5676,7 +5676,7 @@ end;	//GenerateBinaryOperation
 
 procedure GenerateRelationString(relation: Byte; LeftValType, RightValType: Byte; sLeft: WordBool = false; sRight: WordBool = false);
 begin
- 
+
 // asm65;
 // asm65('; relation STRING');
 
@@ -13548,7 +13548,7 @@ WHILETOK:
 	STRINGLITERALTOK:			      // 'text'
 	       repeat
 		 GenerateWriteString(Tok[i + 1].StrAddress, ASPOINTER);
-		 inc(i, 2); 
+		 inc(i, 2);
 	       until Tok[i + 1].Kind <> STRINGLITERALTOK;
 
 	else

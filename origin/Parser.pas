@@ -1074,7 +1074,7 @@ case Tok[i].Kind of
 	 ConstVal := Ident[IdentIndex].Value;
 
 
-//writeln(ident[identindex].name,',',ConstValType,',',ident[identindex].kind);
+//writeln(ident[identindex].name,',',ConstValType,',',ident[identindex].NumAllocElements,',',ident[identindex].NumAllocElements_,',',ident[identindex].AllocElementType);
 
 
 	if ConstValType = ENUMTYPE then begin
@@ -3055,7 +3055,7 @@ if Tok[i].Kind in AllTypes then
 //    Error(i, 'Multidimensional arrays are not supported');
    if NestedDataType in [RECORDTOK, OBJECTTOK, ENUMTOK] then begin			// !!! dla RECORD, OBJECT tablice nie zadzialaja !!!
 
-    if NumAllocElements shr 16 > 0 then
+    if (NumAllocElements shr 16 > 0) then
       Error(i, 'Multidimensional ' + InfoAboutToken(NestedDataType) + ' arrays are not supported');
 
 //    if NestedDataType = RECORDTOK then
@@ -3075,8 +3075,8 @@ if Tok[i].Kind in AllTypes then
    end else
    if not (NestedDataType in [STRINGPOINTERTOK, RECORDTOK, OBJECTTOK{, PCHARTOK}]) and (Tok[i].Kind <> PCHARTOK) then begin
 
-     if (NestedAllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
-       Error(i, 'Multidimensional arrays type ' +  InfoAboutToken(NestedAllocElementType) + ' are not supported');
+     if ((NestedAllocElementType in [RECORDTOK, OBJECTTOK, PROCVARTOK]) and (NumAllocElements shr 16 > 0)) or (NestedDataType = DEREFERENCEARRAYTOK) then
+       Error(i, 'Multidimensional ^' +  InfoAboutToken(NestedAllocElementType) + ' arrays are not supported');
 
      NestedDataType := NestedAllocElementType;
 
