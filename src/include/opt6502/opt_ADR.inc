@@ -1112,6 +1112,19 @@ begin
       end;
 
 
+    if sta_stack(p) and									// sta :STACKORIGIN			; p		BYTE
+       iny(p+1)and									// iny					; p+1	
+       lda_a(p+2) and									// add|sub				; p+2
+       sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
+     if argMatch(p+3, i+3) then
+      begin
+	listing[p+2] := '';
+	listing[p+3] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (p > 1) and
        lda_val(p-2) and									// lda					; p-2		+-BYTE
        add_sub_val(p-1) and								// add|sub				; p-1

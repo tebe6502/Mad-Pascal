@@ -1506,11 +1506,21 @@ begin
      begin
       p := GetWORD(i+1, i+4) - GetWORD(i+7, i+10);
 
-      listing[i+1] := #9'add #$' + IntToHex(p and $ff, 2);
-      listing[i+4] := #9'adc #$' + IntToHex(byte(p shr 8), 2);
+      if p < 0 then begin
+        p:=abs(p);
 
-      listing[i+2] := listing[i+8];
-      listing[i+5] := listing[i+11];
+        listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
+        listing[i+4] := #9'sbc #$' + IntToHex(byte(p shr 8), 2);
+
+        listing[i+2] := listing[i+8];
+        listing[i+5] := listing[i+11];
+      end else begin
+        listing[i+1] := #9'add #$' + IntToHex(p and $ff, 2);
+        listing[i+4] := #9'adc #$' + IntToHex(byte(p shr 8), 2);
+
+        listing[i+2] := listing[i+8];
+        listing[i+5] := listing[i+11];
+      end;
 
       listing[i+6] := '';
       listing[i+7] := '';
@@ -1809,11 +1819,21 @@ begin
      begin
       p := GetWORD(i+1, i+5) - GetWORD(i+8, i+11);
 
-      listing[i+1] := #9'add #$' + IntToHex(p and $ff, 2);
-      listing[i+2] := listing[i+9];
+      if p < 0 then begin
+       p := abs(p);
 
-      listing[i+5] := #9'adc #$' + IntToHex(byte(p shr 8), 2);
-      listing[i+6] := listing[i+12];
+       listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
+       listing[i+2] := listing[i+9];
+
+       listing[i+5] := #9'sbc #$' + IntToHex(byte(p shr 8), 2);
+       listing[i+6] := listing[i+12];
+      end else begin
+       listing[i+1] := #9'add #$' + IntToHex(p and $ff, 2);
+       listing[i+2] := listing[i+9];
+
+       listing[i+5] := #9'adc #$' + IntToHex(byte(p shr 8), 2);
+       listing[i+6] := listing[i+12];
+      end;
 
       listing[i+7] := '';
       listing[i+8] := '';
