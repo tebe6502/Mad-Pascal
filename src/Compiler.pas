@@ -18718,8 +18718,11 @@ begin
 
             i := j + 1;
 
-            GenerateReturn(IsNestedFunction, isInt, IdentifierAt(ForwardIdentIndex).isInline,
-              IdentifierAt(ForwardIdentIndex).isOverload);
+            GenerateReturn(IsNestedFunction,
+	                   IdentifierAt(ForwardIdentIndex).isInterrupt,
+			   IdentifierAt(ForwardIdentIndex).isInline,
+                           IdentifierAt(ForwardIdentIndex).isOverload
+			   );
 
             if OutputDisabled then OutputDisabled := False;
 

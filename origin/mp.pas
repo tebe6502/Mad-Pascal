@@ -17214,7 +17214,7 @@ while Tok[i].Kind in
 
 	i := j + 1;
 
-	GenerateReturn(IsNestedFunction, isInt, Ident[ForwardIdentIndex].isInline, Ident[ForwardIdentIndex].isOverload);
+	GenerateReturn(IsNestedFunction, Ident[ForwardIdentIndex].isInterrupt, Ident[ForwardIdentIndex].isInline, Ident[ForwardIdentIndex].isOverload);
 
 	if OutputDisabled then OutputDisabled := FALSE;
 
