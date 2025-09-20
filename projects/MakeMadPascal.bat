@@ -1,6 +1,9 @@
 rem Replace .pas  ^ .pas  ^ ^
 rem Replace -inputFilePattern IdentifierAt(IdentIndex)   -inputFilePattern
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
+-inputFilePattern samples\tests\tests-enum\enum_proc_arg.pas  
+exit
+rem
 -inputFilePattern samples\a8\games\mine.pas  ^
 -inputFilePattern samples\a8\games\hitbox\hitbox2.pas  ^
 -inputFilePattern samples\a8\graph\stereogram.pas  ^

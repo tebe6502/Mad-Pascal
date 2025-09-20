@@ -26,14 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:..\..\..\..\lib gifview.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\graph_vbxe\gif"/>
-          </local>
-        </Mode>
-        <Mode Name="PacMad">
-          <local>
-            <CommandLineParams Value="-iPath:..\..\..\..\lib pacmad.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\games\PacMad"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib enum_proc_arg_test.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-enum\"/>
           </local>
         </Mode>
         <Mode Name="samples">
@@ -625,9 +619,6 @@
 -dSIMULATED_COMMAND_LINE2
 -dSIMULATED_FILE_IO2
 -dUSEOPTFILE"/>
-      <OtherDefines Count="1">
-        <Define0 Value="DEBUG"/>
-      </OtherDefines>
     </Other>
   </CompilerOptions>
   <Debugging>

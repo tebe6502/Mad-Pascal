@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="\"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="TestMadPascalOrigin"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes>
+      <Item Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes>
+        <Mode Name="default">
+          <local>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib enum_proc_arg_test.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-enum\"/>
+          </local>
+        </Mode>
+        <Mode Name="samples">
+          <local>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib lzhuf.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\compression\lzh"/>
+          </local>
+        </Mode>
+        <Mode Name="test">
+          <local>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib const-var-scope.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-basic\"/>
+          </local>
+        </Mode>
+      </Modes>
+    </RunParams>
+    <Units>
+      <Unit>
+        <Filename Value="TestMadPascalOrigin.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MADPASCAL"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Parser.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Scanner.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Common.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Diagnostic.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\MathEvaluate.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Messages.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\mp.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MADPASCAL"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Optimize.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\define.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\cmd_listing.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\cmd_temporary.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\compile_pchar.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\compile_string.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\doevaluate.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\for_in_ident.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\for_in_stringliteral.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\include\syntax.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="TestMadPascalOrigin"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="..\origin;$(ProjOutDir)"/>
+      <OtherUnitFiles Value="..\origin"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="Delphi"/>
+        <IncludeAssertionCode Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Checks>
+        <IOChecks Value="True"/>
+        <OverflowChecks Value="True"/>
+        <StackChecks Value="True"/>
+      </Checks>
+      <VerifyObjMethodCallValidity Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <DebugInfoType Value="dsDwarf2Set"/>
+      </Debugging>
+    </Linking>
+    <Other>
+      <Verbosity>
+        <ShoLineNum Value="True"/>
+        <ShowHintsForUnusedUnitsInMainSrc Value="True"/>
+      </Verbosity>
+      <ConfigFile>
+        <StopAfterErrCount Value="100"/>
+      </ConfigFile>
+      <CustomOptions Value="-dDEBUG
+-dSIMULATED_COMMAND_LINE2
+-dSIMULATED_FILE_IO2
+-dUSEOPTFILE"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions>
+      <Item>
+        <Name Value="EAbort"/>
+        <Enabled Value="False"/>
+      </Item>
+      <Item>
+        <Name Value="ECodetoolError"/>
+        <Enabled Value="False"/>
+      </Item>
+      <Item>
+        <Name Value="EFOpenError"/>
+      </Item>
+      <Item>
+        <Name Value="THaltException"/>
+      </Item>
+      <Item>
+        <Name Value="ERangeError"/>
+        <Enabled Value="False"/>
+      </Item>
+      <Item>
+        <Name Value="RunError(201)"/>
+      </Item>
+      <Item>
+        <Name Value="EEValuationException"/>
+      </Item>
+      <Item>
+        <Name Value="RunError(100)"/>
+      </Item>
+      <Item>
+        <Name Value="EInOutError"/>
+      </Item>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
