@@ -173,6 +173,7 @@ procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
 var TraceFile: TextFile;
+procedure LogTrace(message: String);
 
 // ----------------------------------------------------------------------------
 

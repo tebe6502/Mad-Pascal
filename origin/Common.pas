@@ -682,6 +682,7 @@ var
         procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
         var TraceFile: TextFile;
+        procedure LogTrace(message: String);
 
 // ----------------------------------------------------------------------------
 
@@ -711,8 +712,12 @@ begin
   _VarDataSize := size;
   token:= Tok[tokenIndex];
 
-    GetSourceFileLocationString := UnitName[ token.UnitIndex].Path + ' ( line ' + IntToStr(token.Line) +
-      ', column ' + IntToStr(token.Column) + ')';
+    GetSourceFileLocationString := UnitName[ token.UnitIndex].Path;
+
+    if (token.line>0) then
+    begin
+     GetSourceFileLocationString:=GetSourceFileLocationString+ ' ( line ' + IntToStr(token.Line) + ', column ' + IntToStr(token.Column) + ')';
+    end;
 
 
   LogTrace(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, GetSourceFileLocationString,'TODO',   _VarDataSize]));

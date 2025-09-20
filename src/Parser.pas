@@ -341,6 +341,8 @@ end;
 
 procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
 begin
+  // JAC!
+  LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [index, value, valueDataType]));
 
   if (index < 0) or (index > $FFFF) then
   begin
@@ -2317,19 +2319,12 @@ var
 
     //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
 
-    if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
-
 
     if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
     begin
 
       if FieldType in Pointers then
       begin
-      
-        if AllocElementType = TDataType.RECORDTOK then begin
-          AllocElementType := POINTERTOK;
-          NumAllocElements := NumAllocElements shr 16;
-	end;
 
         if (FieldType = TDataType.POINTERTOK) and (AllocElementType = TDataType.FORWARDTYPE) then
           Inc(_TypeArray[RecType].Size, GetDataSize(TDataType.POINTERTOK))
