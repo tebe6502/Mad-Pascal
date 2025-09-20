@@ -171,7 +171,7 @@ type
   end;
 
 
-  TTypeIndex = integer;
+  TTypeIndex = Integer;
 
   TType = record
     Block: Integer;
@@ -476,8 +476,11 @@ end;
 
 function TToken.GetSourceFileLocationString: String;
 begin
-  Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) +
-    ', column ' + IntToStr(SourceLocation.Column) + ')';
+  if SourceLocation.SourceFile <> nil then
+  begin
+    Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) +
+      ', column ' + IntToStr(SourceLocation.Column) + ')';
+  end;
 end;
 
 function TToken.GetSpelling: TString;
