@@ -567,7 +567,7 @@ var
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
   NumTok, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
+  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
   iOut: integer = -1;
@@ -675,11 +675,40 @@ var
 
 	function StrToInt(const a: string): Int64;
 
+        type TTokenIndex = Integer;
+        procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+
+        function GetVarDataSize: Integer;
+        procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+
 // ----------------------------------------------------------------------------
 
 implementation
 
 uses SysUtils, Messages;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+function GetVarDataSize: Integer;
+begin
+  Result := _VarDataSize;
+end;
+
+
+procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+var token: TToken;
+begin
+  _VarDataSize := size;
+  token:= Tok[tokenIndex];
+  // WriteLn(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, token.GetSourceFileLocationString, token.GetSpelling,   _VarDataSize]));
+end;
+
+
+procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+begin
+  SetVarDataSize(tokenIndex, _VarDataSize + size);
+end;
 
 // ----------------------------------------------------------------------------
 
