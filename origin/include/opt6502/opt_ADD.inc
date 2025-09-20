@@ -40,6 +40,29 @@ begin
      end;
 
 
+    if lda_a(i)	and									// lda					; 0
+       add_sub(i+1) and									// add|sub				; 1
+       add_sub(i+2) and									// add|sub				; 2
+       add_im_0(i+3) and								// add #$00				; 3
+       (sta_a(i+4) or tay(i+4)) then							// sta|tay				; 4
+     begin
+	listing[i+3] := '';
+
+	exit(false);
+     end;
+
+
+    if lda_a(i)	and									// lda					; 0
+       add_sub(i+1) and									// add|sub				; 1
+       add_im_0(i+2) and								// add #$00				; 2
+       (sta_a(i+3) or tay(i+3)) then							// sta|tay				; 3
+     begin
+	listing[i+2] := '';
+
+	exit(false);
+     end;
+
+
     if (pos(#9'lda <adr.', listing[i]) > 0) and						// lda <adr.				; 0
        add_stack(i+1) and								// add :STACKORIGIN			; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
@@ -1175,7 +1198,9 @@ begin
     if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
        sub_im(i+1) and 									// sub #				; 1
        add_im(i+2) and 									// add #				; 2
-       sta_a(i+3) then									// sta 					; 3
+       (sta_a(i+3) or tay(i+3)) and							// sta|tay				; 3
+											//					; 4
+       (adc_sbc(i+5) = false) then							//~adc|sbc				; 5
      begin
       p := -GetBYTE(i+1) + GetBYTE(i+2);
 
@@ -1189,7 +1214,9 @@ begin
     if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
        add_im(i+1) and									// add #				; 1
        sub_im(i+2) and									// sub #				; 2
-       sta_a(i+3) then									// sta 					; 3
+       (sta_a(i+3) or tay(i+3)) and							// sta|tay				; 3
+											//					; 4
+       (adc_sbc(i+5) = false) then							//~adc|sbc				; 5
      begin
       p := GetBYTE(i+1) - GetBYTE(i+2);
 
@@ -1203,7 +1230,9 @@ begin
     if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
        add_im(i+1) and 									// add #				; 1
        add_im(i+2) and									// add #				; 2
-       sta_a(i+3) then									// sta 					; 3
+       (sta_a(i+3) or tay(i+3)) and							// sta|tay				; 3
+											//					; 4
+       (adc(i+5) = false) then								//~adc					; 5
      begin
       p := GetBYTE(i+1) + GetBYTE(i+2);
 
@@ -1217,7 +1246,9 @@ begin
     if //lda_a(i) and (lda_im(i) = false) and						// lda					; 0
        sub_im(i+1) and									// sub #				; 1
        sub_im(i+2) and 									// sub #				; 2
-       sta_a(i+3) then									// sta 					; 3
+       (sta_a(i+3) or tay(i+3)) and							// sta|tay				; 3
+											//					; 4
+       (sbc(i+5) = false) then								//~sbc					; 5
      begin
       p := GetBYTE(i+1) + GetBYTE(i+2);
 
