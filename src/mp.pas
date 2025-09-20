@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                              {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                                {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                              {$ENDIF}
+                                                {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -529,14 +529,12 @@ uses
 
     OutFile := TFileSystem.CreateTextFile;
 
-    if ExtractFileName(outputFilePath) <> '' then
+    if ExtractFileName(outputFilePath) = '' then
     begin
-      OutFile.Assign(outputFilePath);
-    end
-    else
-    begin
-      OutFile.Assign(ChangeFileExt(programUnit.Name, '.a65'));
+      outputFilePath := ChangeFileExt(programUnit.Name, '.a65');
     end;
+
+    OutFile.Assign(outputFilePath);
     try
       OutFile.Rewrite;
 
@@ -551,6 +549,9 @@ uses
         Exit();
       end;
     end;
+
+    Assign(traceFile, outputFilePath + '.log');
+    rewrite(traceFile);
 
     StartTime := GetTickCount64;
 
@@ -567,6 +568,7 @@ uses
       end;
     end;
 
+    Close(traceFile);
 {$IFDEF USEOPTFILE}
 
  OptFile.Close;

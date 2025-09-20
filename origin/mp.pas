@@ -18023,10 +18023,12 @@ begin
  {$ENDIF}
 
 
- if ExtractFileName(outputFile) <> '' then
-  AssignFile(OutFile, outputFile)
- else
-  AssignFile(OutFile, ChangeFileExt(UnitName[1].Name, '.a65') );
+ if ExtractFileName(outputFile) = '' then
+ begin
+      outputFile :=ChangeFileExt(UnitName[1].Name, '.a65');
+ end;
+
+ AssignFile(OutFile, outputFile);
 
  FileMode:=1;
  rewrite(OutFile);
@@ -18037,6 +18039,9 @@ begin
 
  start_time:=GetTickCount64;
 
+
+ Assign(traceFile, outputFile + '.log');
+ Rewrite(traceFile);
 
 // ----------------------------------------------------------------------------
 // Set defines for first pass;
@@ -18131,6 +18136,7 @@ begin
 
 {$ENDIF}
 
+CloseFile(TraceFile);
 
 // Diagnostics
  if DiagMode then Diagnostics;
@@ -18151,5 +18157,9 @@ begin
  if High(msgNote) > 0 then Writeln(High(msgNote), ' note(s) issued');
 
  NormVideo;
+
+ // JAC!
+ repeat
+  until KeyPressed;
 
 end.

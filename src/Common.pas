@@ -172,12 +172,18 @@ procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
+var TraceFile: TextFile;
+
 // ----------------------------------------------------------------------------
 
 implementation
 
 uses Messages, Utilities;
 
+procedure LogTrace(message: String);
+begin
+     Writeln(traceFile, message);
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -193,7 +199,7 @@ var token: TToken;
 begin
   _VarDataSize := size;
   token:= TokenAt(tokenIndex);
-  WriteLn(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, token.GetSourceFileLocationString, token.GetSpelling,   _VarDataSize]));
+  LogTrace(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*},   _VarDataSize]));
 end;
 
 

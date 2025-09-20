@@ -681,11 +681,18 @@ var
         function GetVarDataSize: Integer;
         procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
+        var TraceFile: TextFile;
+
 // ----------------------------------------------------------------------------
 
 implementation
 
 uses SysUtils, Messages;
+
+procedure LogTrace(message: String);
+begin
+     Writeln(traceFile, message);
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -698,10 +705,17 @@ end;
 
 procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 var token: TToken;
+  var  GetSourceFileLocationString: String;
+
 begin
   _VarDataSize := size;
   token:= Tok[tokenIndex];
-  // WriteLn(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, token.GetSourceFileLocationString, token.GetSpelling,   _VarDataSize]));
+
+    GetSourceFileLocationString := UnitName[ token.UnitIndex].Path + ' ( line ' + IntToStr(token.Line) +
+      ', column ' + IntToStr(token.Column) + ')';
+
+
+  LogTrace(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, GetSourceFileLocationString,'TODO',   _VarDataSize]));
 end;
 
 
