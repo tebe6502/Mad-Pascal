@@ -166,10 +166,9 @@ function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
 
-procedure IncVarDataSize(const size: Integer);
-
 function GetVarDataSize: Integer;
-procedure SetVarDataSize(const size: Integer);
+procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
@@ -183,20 +182,24 @@ uses Messages, Utilities;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure IncVarDataSize(const size: Integer);
-begin
-  SetVarDataSize(_VarDataSize + size);
-end;
-
 function GetVarDataSize: Integer;
 begin
   Result := _VarDataSize;
 end;
 
 
-procedure SetVarDataSize(const size: Integer);
+procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+var token: TToken;
 begin
   _VarDataSize := size;
+  token:= TokenAt(tokenIndex);
+  WriteLn(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, token.GetSourceFileLocationString, token.GetSpelling,   _VarDataSize]));
+end;
+
+
+procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+begin
+  SetVarDataSize(tokenIndex, _VarDataSize + size);
 end;
 
 
@@ -220,7 +223,7 @@ begin
     end
     else
     begin
-      unitPathText := 'unit path '''+unitPathList.ToString+'''';
+      unitPathText := 'unit path ''' + unitPathList.ToString + '''';
     end;
     if ftyp = 'unit' then
     begin

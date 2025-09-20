@@ -11408,7 +11408,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function CompileBlockRead(var i: Integer; IdentIndex: TIdentIndex; IdentBlock: Integer): Integer;
+function CompileBlockRead(var i: TTokenIndex; IdentIndex: TIdentIndex; IdentBlock: Integer): Integer;
 var
   NumActualParams, idx: Integer;
   ActualParamType, AllocElementType: TDataType;
@@ -16592,7 +16592,7 @@ begin
       IdentifierAt(NumIdent).NumAllocElements := NumAllocElements and $FFFF;
       IdentifierAt(NumIdent).NumAllocElements_ := NumAllocElements shr 16;
 
-      SetVarDataSize(tmpVarDataSize + (NumAllocElements shr 16) * GetDataSize(TDataType.POINTERTOK));
+      SetVarDataSize(i, tmpVarDataSize + (NumAllocElements shr 16) * GetDataSize(TDataType.POINTERTOK));
 
       tmpVarDataSize := GetVarDataSize;
 
@@ -16628,7 +16628,7 @@ begin
 
       end;
 
-    SetVarDataSize(tmpVarDataSize);
+    SetVarDataSize(i, tmpVarDataSize);
 
   end
   else
@@ -16666,7 +16666,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function CompileBlock(i: Integer; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean;
+function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integer; IsFunction: Boolean;
   FunctionResultType: TDataType; FunctionNumAllocElements: Cardinal = 0;
   FunctionAllocElementType: TDataType = TDataType.UNTYPETOK): Integer;
 var
@@ -16867,7 +16867,7 @@ begin
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).isAbsolute := True;
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).Value := (Byte(ParamIndex) shl 24) or $80000000;
 
-        SetVarDataSize(tmpVarDataSize);
+        SetVarDataSize(i, tmpVarDataSize);
 
       end
       else
@@ -16902,7 +16902,7 @@ begin
 
         end;
 
-        SetVarDataSize(tmpVarDataSize);
+        SetVarDataSize(i, tmpVarDataSize);
 
       end
       else
@@ -16930,7 +16930,7 @@ begin
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).isAbsolute := True;
         IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).Value := (Byte(ParamIndex) shl 24) or $80000000;
 
-        SetVarDataSize(tmpVarDataSize);
+        SetVarDataSize(i, tmpVarDataSize);
 
       end
       else
@@ -16964,7 +16964,7 @@ begin
 
         end;
 
-        SetVarDataSize(tmpVarDataSize);
+        SetVarDataSize(i, tmpVarDataSize);
 
       end
       else
@@ -17006,7 +17006,7 @@ begin
       IdentifierAt(NumIdent).isAbsolute := True;
       IdentifierAt(NumIdent).Value := $87000000;  // :STACKORIGIN-4 -> :TMP
 
-      SetVarDataSize(tmpVarDataSize);
+      SetVarDataSize(i, tmpVarDataSize);
     end;
 
     if FunctionResultType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
@@ -17188,7 +17188,7 @@ begin
 
       IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
 
-      SetVarDataSize(tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
+      SetVarDataSize(i, tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
       if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind =
         TFieldKind.OBJECTVARIABLE then
@@ -17198,7 +17198,7 @@ begin
         Inc(ConstVal, GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
           ParamIndex].DataType));
 
-        SetVarDataSize(tmpVarDataSize);
+        SetVarDataSize(i, tmpVarDataSize);
       end;
 
     end;
@@ -18266,7 +18266,7 @@ begin
                   SaveToDataSegment(idx, GetVarDataSize, TTokenKind.DATAORIGINOFFSET);
 
                   Inc(idx, 2);
-                  IncVarDataSize(NestedNumAllocElements);
+                  IncVarDataSize(i, NestedNumAllocElements);
                 end;
 
               end
@@ -18278,7 +18278,7 @@ begin
                   SaveToDataSegment(idx, GetVarDataSize, TTokenKind.DATAORIGINOFFSET);
 
                   Inc(idx, 2);
-                  IncVarDataSize(NestedNumAllocElements);
+                  IncVarDataSize(i, NestedNumAllocElements);
                 end;
 
               end;
@@ -18307,7 +18307,7 @@ begin
 
         if isAbsolute and (open_array = False) then
 
-          SetVarDataSize(tmpVarDataSize)
+          SetVarDataSize(i, tmpVarDataSize)
 
         else
 
@@ -18479,7 +18479,7 @@ begin
                           IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
                         end;
 
-                        IncVarDataSize(NumAllocElements * GetDataSize(IdentifierAt(NumIdent).AllocElementType));
+                        IncVarDataSize(i, NumAllocElements * GetDataSize(IdentifierAt(NumIdent).AllocElementType));
 
                       end
                       else
@@ -19097,7 +19097,7 @@ begin
 
   common.optimize.use := False;
 
-  SetVarDataSize(0);
+  SetVarDataSize(0, 0);
 
 
   tmp := '';
