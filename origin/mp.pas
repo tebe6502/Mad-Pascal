@@ -14476,13 +14476,6 @@ var IdentIndex, size: integer;
 
 // ----------------------------------------------------------------------------
 
-  procedure IncSize(bytes: Integer);
-  begin
-    // LogTrace(Format('IncSize %d by %d', [size, bytes]));
-    Inc(size, bytes);
-  end;
-
-// ----------------------------------------------------------------------------
 begin
 
  if Pass = CODEGENERATIONPASS then begin
@@ -14566,7 +14559,7 @@ begin
 		  asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
-		  IncSize( Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
+		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
 
 		 end else
 		  if Ident[IdentIndex].DataType = FILETOK then
@@ -14607,7 +14600,7 @@ begin
 		  end;
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
-		  IncSize( Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
+		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
 
 		 end else
 		  if (Ident[IdentIndex].DataType = FILETOK) {and (Ident[IdentIndex].Block = 1)} then
@@ -14623,9 +14616,9 @@ begin
 
 		     else
 		      if Ident[IdentIndex].DataType = ENUMTYPE then
-		        IncSize( DataSize[Ident[IdentIndex].AllocElementType])
+		        inc(size, DataSize[Ident[IdentIndex].AllocElementType])
 		      else
-		        IncSize( DataSize[Ident[IdentIndex].DataType]);
+		        inc(size, DataSize[Ident[IdentIndex].DataType]);
 
 		  end;
 
@@ -15373,7 +15366,7 @@ begin
 
 //	 writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
 
-	 tmpVarDataSize_ := GetVarDataSize;
+	 tmpVarDataSize_ := VarDataSize;
 
 
 	 if (NumAllocElements shr 16) > 0 then begin											// array [0..x] of record
@@ -15381,9 +15374,9 @@ begin
 	   Ident[NumIdent].NumAllocElements  := NumAllocElements and $FFFF;
 	   Ident[NumIdent].NumAllocElements_ := NumAllocElements shr 16;
 
-	   SetVarDataSize(i, tmpVarDataSize + (NumAllocElements shr 16) * DataSize[POINTERTOK]);
+	   VarDataSize := tmpVarDataSize + (NumAllocElements shr 16) * DataSize[POINTERTOK];
 
-	   tmpVarDataSize := GetVarDataSize;
+	   tmpVarDataSize := VarDataSize;
 
 	   NumAllocElements := NumAllocElements and $FFFF;
 
@@ -15412,7 +15405,7 @@ begin
 
 	  end;
 
-	  SetVarDataSize(i, tmpVarDataSize);
+	  VarDataSize := tmpVarDataSize;
 
    end else
 
@@ -15422,7 +15415,7 @@ begin
 
 //	    writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
 
- 	    tmpVarDataSize_ := GetVarDataSize;
+ 	    tmpVarDataSize_ := VarDataSize;
 
 	    DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
 	    VARIABLE,
@@ -15432,7 +15425,7 @@ begin
 
 	    if isAbsolute then
 	      if not (Types[NumAllocElements].Field[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then				// fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
-		inc(ConstVal, GetVarDataSize - tmpVarDataSize_);//    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
+		inc(ConstVal, VarDataSize - tmpVarDataSize_);//    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
 
 	  end;
 
@@ -15603,14 +15596,14 @@ for ParamIndex := 1 to NumParams do
     if Param[ParamIndex].PassMethod = VARPASSING then begin
 
      if isReg and (ParamIndex in [1..3]) then begin
-      tmpVarDataSize := GetVarDataSize;
+      tmpVarDataSize := VarDataSize;
 
       DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
 
       Ident[GetIdent(Param[ParamIndex].Name)].isAbsolute := true;
       Ident[GetIdent(Param[ParamIndex].Name)].Value := (byte(ParamIndex) shl 24) or $80000000;
 
-      SetVarDataSize( i, tmpVarDataSize);
+      VarDataSize := tmpVarDataSize;
 
      end else
       if Param[ParamIndex].DataType in Pointers then
@@ -15621,7 +15614,7 @@ for ParamIndex := 1 to NumParams do
 
      if (Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK]) then begin
 
-      tmpVarDataSize := GetVarDataSize;
+      tmpVarDataSize := VarDataSize;
 
       for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin
 
@@ -15638,7 +15631,7 @@ for ParamIndex := 1 to NumParams do
 
       end;
 
-      SetVarDataSize(i, tmpVarDataSize);
+      VarDataSize := tmpVarDataSize;
 
      end else
 
@@ -15652,14 +15645,14 @@ for ParamIndex := 1 to NumParams do
 
     end else begin
      if isReg and (ParamIndex in [1..3]) then begin
-      tmpVarDataSize := GetVarDataSize;
+      tmpVarDataSize := VarDataSize;
 
       DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
 
       Ident[GetIdent(Param[ParamIndex].Name)].isAbsolute := true;
       Ident[GetIdent(Param[ParamIndex].Name)].Value := (byte(ParamIndex) shl 24) or $80000000;
 
-      SetVarDataSize (i,tmpVarDataSize);
+      VarDataSize := tmpVarDataSize;
 
      end else
       DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
@@ -15668,7 +15661,7 @@ for ParamIndex := 1 to NumParams do
 
      if (Param[ParamIndex].DataType = POINTERTOK) and (Param[ParamIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin		// fix issue #94
 																	//
-      tmpVarDataSize := GetVarDataSize;													//
+      tmpVarDataSize := VarDataSize;													//
 																	//
       for j := 1 to Types[Param[ParamIndex].NumAllocElements].NumFields do begin							//
 																	//
@@ -15685,7 +15678,7 @@ for ParamIndex := 1 to NumParams do
 																	//
       end;																//
 																	//
-      SetVarDataSize (i, tmpVarDataSize);													//
+      VarDataSize := tmpVarDataSize;													//
 																	//
      end else
 
@@ -15712,7 +15705,7 @@ for ParamIndex := 1 to NumParams do
 // Allocate Result variable if the current block is a function
 if IsFunction then begin	//DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType, 0, 0, 0);
 
-    tmpVarDataSize := GetVarDataSize;
+    tmpVarDataSize := VarDataSize;
 
 //	writeln(Ident[BlockIdentIndex].name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
 
@@ -15722,7 +15715,7 @@ if IsFunction then begin	//DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType
       Ident[NumIdent].isAbsolute := true;
       Ident[NumIdent].Value := $87000000;	// :STACKORIGIN-4 -> :TMP
 
-      SetVarDataSize(i, tmpVarDataSize);
+      VarDataSize := tmpVarDataSize;
     end;
 
     if FunctionResultType in [RECORDTOK, OBJECTTOK] then
@@ -15851,7 +15844,7 @@ end;
 if Ident[BlockIdentIndex].ObjectIndex > 0 then
  for ParamIndex := 1 to Types[Ident[BlockIdentIndex].ObjectIndex].NumFields do begin
 
-  tmpVarDataSize := GetVarDataSize;
+  tmpVarDataSize := VarDataSize;
 
 {
   writeln(Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].Name,',',
@@ -15881,14 +15874,14 @@ if Ident[BlockIdentIndex].ObjectIndex > 0 then
   Ident[NumIdent].ObjectVariable := TRUE;
 
 
-  SetVarDataSize(i, tmpVarDataSize + DataSize[POINTERTOK]);
+  VarDataSize := tmpVarDataSize + DataSize[POINTERTOK];
 
   if Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].ObjectVariable then begin
    Ident[NumIdent].Value := ConstVal + DATAORIGIN;
 
    inc(ConstVal, DataSize[Types[Ident[BlockIdentIndex].ObjectIndex].Field[ParamIndex].DataType]);
 
-   SetVarDataSize (i, tmpVarDataSize);
+   VarDataSize := tmpVarDataSize;
   end;
 
  end;
@@ -16749,7 +16742,7 @@ while Tok[i].Kind in
 
 
 
-      tmpVarDataSize := GetVarDataSize;		// dla ABSOLUTE, RECORD
+      tmpVarDataSize := VarDataSize;		// dla ABSOLUTE, RECORD
 
 
       for VarOfSameTypeIndex := 1 to NumVarOfSameType do begin
@@ -16824,19 +16817,19 @@ while Tok[i].Kind in
 	   if NumAllocElements shr 16 > 0 then begin
 
 		for j:=0 to (NumAllocElements and $FFFF) * (NumAllocElements shr 16) - 1 do begin
-      		  SaveToDataSegment(idx, GetVarDataSize, DATAORIGINOFFSET);
+      		  SaveToDataSegment(idx, VarDataSize, DATAORIGINOFFSET);
 
 		  inc(idx, 2);
- 		  incVarDataSize(i, NestedNumAllocElements);
+ 		  inc(VarDataSize, NestedNumAllocElements);
 		end;
 
 	   end else begin
 
 		for j:=0 to NumAllocElements - 1 do begin
-      		  SaveToDataSegment(idx, GetVarDataSize, DATAORIGINOFFSET);
+      		  SaveToDataSegment(idx, VarDataSize, DATAORIGINOFFSET);
 
 		  inc(idx, 2);
- 		  incVarDataSize(i, NestedNumAllocElements);
+ 		  inc(VarDataSize, NestedNumAllocElements);
 		end;
 
 	   end;
@@ -16865,7 +16858,7 @@ while Tok[i].Kind in
 
        if isAbsolute and (open_array = false) then
 
-	SetVarDataSize( i, tmpVarDataSize   )
+	VarDataSize := tmpVarDataSize
 
        else
 
@@ -17015,7 +17008,7 @@ while Tok[i].Kind in
 	       Ident[NumIdent].NumAllocElements := NumAllocElements;
 	     end;
 
-	     incVarDataSize(i, NumAllocElements * DataSize[Ident[NumIdent].AllocElementType]);
+	     inc(VarDataSize, NumAllocElements * DataSize[Ident[NumIdent].AllocElementType]);
 
 	    end else begin										// array [] of type = ( )
 
@@ -17583,12 +17576,12 @@ asm65('DATAORIGIN');
 if DataSegmentUse then begin
  if Pass = CODEGENERATIONPASS then begin
 
-// !!! I need to save everything, including the 'zeros'!!! For example, for TextAtr to work
+// !!! musze zapisac wszystko, lacznie z 'zerami' !!! np. aby TextAtr dzialal
 
-  DataSegmentSize := GetVarDataSize;
+  DataSegmentSize := VarDataSize;
 
   if LIBRARYTOK_USE = FALSE then
-   for j := GetVarDataSize - 1 downto 0 do
+   for j := VarDataSize - 1 downto 0 do
     if DataSegment[j] <> 0 then begin DataSegmentSize := j+1; Break end;
 
   tmp:='';
@@ -17640,7 +17633,7 @@ end else begin
 
   asm65;
   asm65('VARINITSIZE'#9'= *-DATAORIGIN');
-  asm65('VARDATASIZE'#9'= '+IntToStr(GetVarDataSize));
+  asm65('VARDATASIZE'#9'= '+IntToStr(VarDataSize));
 
   asm65;
   asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
@@ -18021,20 +18014,22 @@ begin
   FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
 
  DefaultFormatSettings.DecimalSeparator := '.';
+
+
  {$IFDEF USEOPTFILE}
+
  AssignFile(OptFile, ChangeFileExt(UnitName[1].Name, '.opt') ); FileMode:=1; rewrite(OptFile);
+
  {$ENDIF}
 
 
- if ExtractFileName(outputFile) = '' then
- begin
-      outputFile :=ChangeFileExt(UnitName[1].Name, '.a65');
- end;
-
- AssignFile(OutFile, outputFile);
+ if ExtractFileName(outputFile) <> '' then
+  AssignFile(OutFile, outputFile)
+ else
+  AssignFile(OutFile, ChangeFileExt(UnitName[1].Name, '.a65') );
 
  FileMode:=1;
- Rewrite(OutFile);
+ rewrite(OutFile);
 
  TextColor(WHITE);
 
@@ -18042,11 +18037,6 @@ begin
 
  start_time:=GetTickCount64;
 
- {$IFDEF USETRACEFILE}
- Assign(traceFile, ChangeFileExt( outputFile, '.log'));
- FileMode:=1;
- Rewrite(traceFile);
- {$ENDIF}
 
 // ----------------------------------------------------------------------------
 // Set defines for first pass;
@@ -18105,7 +18095,7 @@ begin
 
  for CodeSize := 1 to High(UnitName) do UnitName[CodeSize].Units := 0;
 
- NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; SetVarDataSize(0, 0);
+ NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; VarDataSize := 0;
  CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
 
  NumStaticStrChars := NumStaticStrCharsTmp;
@@ -18136,12 +18126,11 @@ begin
  CloseFile(OutFile);
 
 {$IFDEF USEOPTFILE}
+
  CloseFile(OptFile);
+
 {$ENDIF}
 
-{$IFDEF USETRACEFILE}
-CloseFile(TraceFile);
-{$ENDIF}
 
 // Diagnostics
  if DiagMode then Diagnostics;
@@ -18162,9 +18151,5 @@ CloseFile(TraceFile);
  if High(msgNote) > 0 then Writeln(High(msgNote), ' note(s) issued');
 
  NormVideo;
-
- // JAC!
- repeat
-  until KeyPressed;
 
 end.

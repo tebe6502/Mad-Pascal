@@ -67,9 +67,9 @@ begin
        end;
 
 
-    if ldy_im(i) and 										// ldy #				; 0
+    if ldy_im(i) and (DATA(i) = false) and							// ldy #				; 0
        iny(i+1) then										// iny					; 1
-       begin
+      begin
 	p := GetBYTE(i) + 1;
 
 	if p < 256 then begin
@@ -79,7 +79,17 @@ begin
 	 exit(false);
 	end;
 
-       end;
+      end;
+
+
+    if ldy_im(i) and DATA(i) and								// ldy #CONTEXT.STATE-DATAORIGIN	; 0
+       iny(i+1) then										// iny					; 1
+    begin
+     listing[i] := listing[i] + '+1';
+     listing[i+1] := '';
+
+     exit(false);
+    end;
 
 
     if iny(i) and										// iny					; 0
@@ -341,10 +351,10 @@ begin
       end;
 
 
-    if ldy_im(i+5) and										// ldy #				; 5
+    if ldy_im(i+5) and (DATA(i+5) = false) and							// ldy #				; 5
 
        lda_bp2(i) and										// lda :bp2				; 0
-       add_im(i+1) and (pos('-DATAORIGIN', listing[i+1]) > 0) and				// add #CONTEXT.STATE-DATAORIGIN	; 1
+       add_im(i+1) and DATA(i+1) and								// add #CONTEXT.STATE-DATAORIGIN	; 1
        sta_bp2(i+2) and										// sta :bp2				; 2
        scc(i+3) and										// scc					; 3
        inc_bp2_1(i+4) then									// inc :bp2+1				; 4
@@ -369,7 +379,7 @@ begin
     if ldy_im(i+12) and										// ldy #				; 12
 
        lda_bp2(i) and										// lda :bp2				; 0
-       add_im(i+1) and (pos('-DATAORIGIN', listing[i+1]) > 0) and				// add #CONTEXT.STATE-DATAORIGIN	; 1
+       add_im(i+1) and DATA(i+1) and								// add #CONTEXT.STATE-DATAORIGIN	; 1
        sta_bp2(i+2) and										// sta :bp2				; 2
        lda_bp2_1(i+3) and									// lda :bp2+1				; 3
        adc_im_0(i+4) and									// adc #$00				; 4

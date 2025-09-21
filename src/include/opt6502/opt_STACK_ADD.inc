@@ -228,7 +228,7 @@ begin
 
        mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
        lda_bp2(i+1) and										// lda :bp2				; 1
-       add_im(i+2) and (pos('-DATAORIGIN', listing[i+2]) > 0) and				// add #CONTEXT.STATE-DATAORIGIN	; 2
+       add_im(i+2) and DATA(i+2) and								// add #CONTEXT.STATE-DATAORIGIN	; 2
        sta_bp2(i+3) and										// sta :bp2				; 3
        lda_bp2_1(i+4) and									// lda :bp2+1				; 4
        adc_im_0(i+5) and									// adc #$00				; 5

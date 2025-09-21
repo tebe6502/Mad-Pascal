@@ -1,4 +1,10 @@
 
+   function DATA(i: integer): Boolean;
+   begin
+     Result := (pos('-DATAORIGIN', listing[i]) > 0);
+   end;
+
+
    function TAY(i: integer): Boolean;
    begin
      Result := listing[i] = #9'tay'
