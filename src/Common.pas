@@ -172,7 +172,9 @@ procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
-var TraceFile: TextFile;
+var
+  TraceFile: ITextFile;
+
 procedure LogTrace(message: String);
 
 // ----------------------------------------------------------------------------
@@ -183,7 +185,9 @@ uses Messages, Utilities;
 
 procedure LogTrace(message: String);
 begin
-     Writeln(traceFile, message);
+  {$IFDEF USETRACEFILE}
+       traceFile.Writeln(message);
+  {$ENDIF}
 end;
 
 // ----------------------------------------------------------------------------
@@ -196,11 +200,13 @@ end;
 
 
 procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
-var token: TToken;
+//var
+//  token: TToken;
 begin
   _VarDataSize := size;
-  token:= TokenAt(tokenIndex);
-  LogTrace(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*},   _VarDataSize]));
+  // token := TokenAt(tokenIndex);
+  // LogTrace(Format('SetVarDataSize: TokenIndex=%d: %s %s VarDataSize=%d',
+  //  [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*}, _VarDataSize]));
 end;
 
 

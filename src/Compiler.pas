@@ -15521,9 +15521,6 @@ var
   fnam, txt, svar: String;
   varbegin: TString;
   HeaFile: ITextFile;
-  // Debugging
-  traceSize: Boolean;
-  varDataSizeString: String;
 
   // ----------------------------------------------------------------------------
 
@@ -15675,8 +15672,8 @@ var
   begin
     dataSize := GetDataSize(identifier.AllocElementType);
     Result := identifier.NumAllocElements * dataSize;
-    if (traceSize) then Writeln('Identifier ', GetIdentifierFullName(identifier), ' has ',
-        identifier.NumAllocElements, ' elements of size ', dataSize, ' = ', Result, ' bytes.');
+    // LogTrace(Format('Identifier %s has %d element of size %d = %d',
+    //  [GetIdentifierFullName(identifier), identifier.NumAllocElements, dataSize, Result]));
   end;
 
 
@@ -15684,7 +15681,7 @@ var
 
   procedure IncSize(bytes: Integer);
   begin
-    LogTrace(Format('IncSize %d by %d', [size, bytes]));
+    // LogTrace(Format('IncSize %d by %d', [size, bytes]));
     Inc(size, bytes);
   end;
 
@@ -15700,15 +15697,6 @@ begin
     emptyLine := True;
     size := 0;
     varbegin := '';
-    traceSize := False;
-
-    // For debugging
-  (*
-      if IdentifierAt(BlockIdentIndex).Name = 'DRAWSPLINE' then
-      begin
-        traceSize := True;
-        Writeln('Tracing ', GetIdentifierFullName(IdentifierAt(BlockIdentIndex)), '.');
-      end; *)
 
     for IdentIndex := 1 to NumIdent do
       if (IdentifierAt(IdentIndex).Block = IdentifierAt(BlockIdentIndex).ProcAsBlock) and
@@ -15920,15 +15908,7 @@ begin
       if VarSize and (size > 0) then
       begin
         asm65('@VarData'#9'= ' + varbegin);
-        varDataSizeString := IntToStr(size);
-        if traceSize then
-        begin
-          Writeln(GetIdentifierFullName(IdentifierAt(BlockIdentIndex)), ' has VarDataSize=',
-            varDataSizeString, ' bytes.');
-          // TODO
-        end;
-
-        asm65('@VarDataSize'#9'= ' + varDataSizeString);
+        asm65('@VarDataSize'#9'= ' + IntToStr(size));
         asm65;
       end;
 

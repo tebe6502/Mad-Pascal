@@ -341,8 +341,7 @@ end;
 
 procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
 begin
-  // JAC!
-  LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [index, value, valueDataType]));
+  // LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [index, value, valueDataType]));
 
   if (index < 0) or (index > $FFFF) then
   begin
