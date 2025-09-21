@@ -455,8 +455,7 @@ procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValTyp
 var ftmp: TFloat;
 begin
 
-  // JAC!
-  LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [ConstDataSize, ConstVal, ConstValType]));
+// LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [ConstDataSize, ConstVal, ConstValType]));
 
 
 	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then begin writeln('SaveToDataSegment: ', ConstDataSize); halt end;

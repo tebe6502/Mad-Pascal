@@ -692,7 +692,9 @@ uses SysUtils, Messages;
 
 procedure LogTrace(message: String);
 begin
+{$IFDEF USETRACEFILE}
      Writeln(traceFile, message);
+{$ENDIF}
 end;
 
 // ----------------------------------------------------------------------------
@@ -706,21 +708,23 @@ end;
 
 procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 var token: TToken;
-  var  GetSourceFileLocationString: String;
+// var  GetSourceFileLocationString: String;
 
 begin
   _VarDataSize := size;
   token:= Tok[tokenIndex];
 
-    GetSourceFileLocationString := UnitName[ token.UnitIndex].Path;
+  (*
+  GetSourceFileLocationString := UnitName[ token.UnitIndex].Path;
 
-    if (token.line>0) then
-    begin
-     GetSourceFileLocationString:=GetSourceFileLocationString+ ' ( line ' + IntToStr(token.Line) + ', column ' + IntToStr(token.Column) + ')';
-    end;
+  if (token.line>0) then
+  begin
+   GetSourceFileLocationString:=GetSourceFileLocationString+ ' ( line ' + IntToStr(token.Line) + ', column ' + IntToStr(token.Column) + ')';
+  end;
 
 
-  LogTrace(Format('TODO: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, GetSourceFileLocationString,'TODO',   _VarDataSize]));
+  // LogTrace(Format('SetVarDataSize: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, GetSourceFileLocationString,'TODO',   _VarDataSize]));
+  *)
 end;
 
 

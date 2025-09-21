@@ -14476,11 +14476,11 @@ var IdentIndex, size: integer;
 
 // ----------------------------------------------------------------------------
 
-procedure IncSize(bytes: Integer);
-begin
-LogTrace(Format('IncSize %d by %d', [size, bytes]));
-Inc(size, bytes);
-end;
+  procedure IncSize(bytes: Integer);
+  begin
+    // LogTrace(Format('IncSize %d by %d', [size, bytes]));
+    Inc(size, bytes);
+  end;
 
 // ----------------------------------------------------------------------------
 begin
@@ -18024,9 +18024,7 @@ begin
 
 
  {$IFDEF USEOPTFILE}
-
  AssignFile(OptFile, ChangeFileExt(UnitName[1].Name, '.opt') ); FileMode:=1; rewrite(OptFile);
-
  {$ENDIF}
 
 
@@ -18038,7 +18036,7 @@ begin
  AssignFile(OutFile, outputFile);
 
  FileMode:=1;
- rewrite(OutFile);
+ Rewrite(OutFile);
 
  TextColor(WHITE);
 
@@ -18046,9 +18044,11 @@ begin
 
  start_time:=GetTickCount64;
 
-
+ {$IFDEF USETRACEFILE}
  Assign(traceFile, outputFile + '.log');
+ FileMode:=1;
  Rewrite(traceFile);
+ {$ENDIF}
 
 // ----------------------------------------------------------------------------
 // Set defines for first pass;
@@ -18138,12 +18138,12 @@ begin
  CloseFile(OutFile);
 
 {$IFDEF USEOPTFILE}
-
  CloseFile(OptFile);
-
 {$ENDIF}
 
+{$IFDEF USETRACEFILE}
 CloseFile(TraceFile);
+{$ENDIF}
 
 // Diagnostics
  if DiagMode then Diagnostics;
