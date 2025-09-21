@@ -30,7 +30,7 @@ else
 		# BINDIR = $(BINBASEDIR)/linux_$(UNAME_P)
 		BIN = $(BINDIR)/mp
 		endif
-		ifeq ($(UNAME_S),Darwin)A
+		ifeq ($(UNAME_S),Darwin)
 		ifneq ($(filter arm%,$(UNAME_P)),)
 					BINDIR = $(BINBASEDIR)/macosx_aarch64
 			endif
