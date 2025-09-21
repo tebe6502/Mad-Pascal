@@ -27,12 +27,13 @@ else
     UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_S),Linux)
         # TODO
+		# BINDIR = $(BINBASEDIR)/linux_$(UNAME_P)
 		BIN = $(BINDIR)/mp
     endif
     ifeq ($(UNAME_S),Darwin)
 	  ifneq ($(filter arm%,$(UNAME_P)),)
           BINDIR = $(BINBASEDIR)/macosx_aarch64
-      endif i
+      endif
        ifeq ($(UNAME_P),x86_64)
           BINDIR = $(BINBASEDIR)/macosx_x86_64
      endif
