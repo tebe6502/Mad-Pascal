@@ -18021,8 +18021,6 @@ begin
   FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
 
  DefaultFormatSettings.DecimalSeparator := '.';
-
-
  {$IFDEF USEOPTFILE}
  AssignFile(OptFile, ChangeFileExt(UnitName[1].Name, '.opt') ); FileMode:=1; rewrite(OptFile);
  {$ENDIF}
@@ -18045,7 +18043,7 @@ begin
  start_time:=GetTickCount64;
 
  {$IFDEF USETRACEFILE}
- Assign(traceFile, outputFile + '.log');
+ Assign(traceFile, ChangeFileExt( outputFile, '.log'));
  FileMode:=1;
  Rewrite(traceFile);
  {$ENDIF}

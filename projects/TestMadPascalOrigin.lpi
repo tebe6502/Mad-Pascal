@@ -26,7 +26,7 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib enum_proc_arg_test.pas -o:enum_proc_arg_test-Reference.a65"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib enum_proc_arg.pas -o:enum_proc_arg-Reference.a65"/>
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-enum\"/>
           </local>
         </Mode>
@@ -165,7 +165,8 @@
       <CustomOptions Value="-dDEBUG
 -dSIMULATED_COMMAND_LINE2
 -dSIMULATED_FILE_IO2
--dUSEOPTFILE"/>
+-dUSEOPTFILE
+-dUSETRACEFILE"/>
     </Other>
   </CompilerOptions>
   <Debugging>
