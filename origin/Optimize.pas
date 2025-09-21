@@ -1431,13 +1431,14 @@ end;
 
 
 {
-if (pos(#9'add #$00', listing[i]) > 0) then begin
+if (pos(#9'sub #$', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
     if opt_FORTMP(i) = false then begin Result := false; Break end;
 
