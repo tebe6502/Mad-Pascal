@@ -26,8 +26,7 @@ else
 		UNAME_S := $(shell uname -s)
 		UNAME_P := $(shell uname -p)
 		ifeq ($(UNAME_S),Linux)
-				# TODO
-		# BINDIR = $(BINBASEDIR)/linux_$(UNAME_P)
+		BINDIR = $(BINBASEDIR)/linux_$(UNAME_P)
 		BIN = $(BINDIR)/mp
 		endif
 		ifeq ($(UNAME_S),Darwin)
