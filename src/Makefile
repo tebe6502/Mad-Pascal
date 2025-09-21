@@ -27,7 +27,7 @@ else
     UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_S),Linux)
         # TODO
-		BIN = $(BINDIR)/mp
+		BIN = $(BINBASEDIR)/mp
     endif
     ifeq ($(UNAME_S),Darwin)
 	  ifneq ($(filter arm%,$(UNAME_P)),)
@@ -36,7 +36,7 @@ else
        ifeq ($(UNAME_P),x86_64)
           BINDIR = $(BINBASEDIR)/macosx_x86_64
      endif
-       BIN = $(BINDIR)/mp
+       BIN = $(BINBASEDIR)/mp
     endif
 endif
 
