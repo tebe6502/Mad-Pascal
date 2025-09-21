@@ -14476,6 +14476,13 @@ var IdentIndex, size: integer;
 
 // ----------------------------------------------------------------------------
 
+procedure IncSize(bytes: Integer);
+begin
+LogTrace(Format('IncSize %d by %d', [size, bytes]));
+Inc(size, bytes);
+end;
+
+// ----------------------------------------------------------------------------
 begin
 
  if Pass = CODEGENERATIONPASS then begin
@@ -14559,7 +14566,7 @@ begin
 		  asm65('.var ' + Ident[IdentIndex].Name + #9'= adr.' + Ident[IdentIndex].Name + ' .word');
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
-		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
+		  IncSize( Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
 
 		 end else
 		  if Ident[IdentIndex].DataType = FILETOK then
@@ -14600,7 +14607,7 @@ begin
 		  end;
 
 		  if size = 0 then varbegin := Ident[IdentIndex].Name;
-		  inc(size, Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
+		  IncSize( Ident[IdentIndex].NumAllocElements * DataSize[Ident[IdentIndex].AllocElementType] );
 
 		 end else
 		  if (Ident[IdentIndex].DataType = FILETOK) {and (Ident[IdentIndex].Block = 1)} then
@@ -14616,9 +14623,9 @@ begin
 
 		     else
 		      if Ident[IdentIndex].DataType = ENUMTYPE then
-		        inc(size, DataSize[Ident[IdentIndex].AllocElementType])
+		        IncSize( DataSize[Ident[IdentIndex].AllocElementType])
 		      else
-		        inc(size, DataSize[Ident[IdentIndex].DataType]);
+		        IncSize( DataSize[Ident[IdentIndex].DataType]);
 
 		  end;
 
@@ -17576,7 +17583,7 @@ asm65('DATAORIGIN');
 if DataSegmentUse then begin
  if Pass = CODEGENERATIONPASS then begin
 
-// !!! musze zapisac wszystko, lacznie z 'zerami' !!! np. aby TextAtr dzialal
+// !!! I need to save everything, including the 'zeros'!!! For example, for TextAtr to work
 
   DataSegmentSize := GetVarDataSize;
 
