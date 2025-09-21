@@ -188,9 +188,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                              {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+                                                    {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                              {$ENDIF}
+                                                    {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -529,14 +529,12 @@ uses
 
     OutFile := TFileSystem.CreateTextFile;
 
-    if ExtractFileName(outputFilePath) <> '' then
+    if ExtractFileName(outputFilePath) = '' then
     begin
-      OutFile.Assign(outputFilePath);
-    end
-    else
-    begin
-      OutFile.Assign(ChangeFileExt(programUnit.Name, '.a65'));
+      outputFilePath := ChangeFileExt(programUnit.Name, '.a65');
     end;
+
+    OutFile.Assign(outputFilePath);
     try
       OutFile.Rewrite;
 
@@ -551,6 +549,24 @@ uses
         Exit();
       end;
     end;
+
+    {$IFDEF USETRACEFILE}
+    traceFile := TFileSystem.CreateTextFile;
+    traceFile.Assign(ChangeFileExt(outputFilePath, '.log'));
+    try
+      traceFile.Rewrite();
+    except
+      on e: EInOutError do
+      begin
+        Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open trace file file "%s" for writing. %s.',
+          [traceFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
+    {$ENDIF}
 
     StartTime := GetTickCount64;
 
@@ -567,11 +583,13 @@ uses
       end;
     end;
 
-{$IFDEF USEOPTFILE}
+    {$IFDEF USETRACEFILE}
+    TraceFile.Close;
+    {$ENDIF}
 
- OptFile.Close;
-
-{$ENDIF}
+    {$IFDEF USEOPTFILE}
+    OptFile.Close;
+    {$ENDIF}
 
 
     // Diagnostics

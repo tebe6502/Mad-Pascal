@@ -47,7 +47,7 @@ begin
  SetLength(msgWarning, 1);
  SetLength(msgNote, 1);
 
- NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; VarDataSize := 0;
+ NumBlocks := 0; BlockStackTop := 0; CodeSize := 0; CodePosStackTop := 0; SetVarDataSize(0,0);
  CaseCnt := 0; IfCnt := 0; ShrShlCnt := 0; NumTypes := 0; run_func := 0; NumProc := 0;
  NumTok := 0; NumIdent := 0;
 
