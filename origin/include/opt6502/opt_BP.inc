@@ -1760,7 +1760,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-  if ldy(i) and											// ldy					; 0	cardinal
+  if ldy_im_0(i) and										// ldy #$00				; 0	cardinal
      LDA_BP2_Y(i+1) and										// lda (:bp2),y				; 1
      sta_stack(i+2) and										// sta :STACKORIGIN			; 2
      iny(i+3) and										// iny					; 3
@@ -1965,15 +1965,18 @@ begin
 	end;
 
 
-    if (listing[i] = listing[i+18]) and								// ldy XXX				; 0
+    if ldy_im_0(i+18) and									// ldy #$00				; 18
+
+       sta_bp2_1(i+17) and									// sta :bp2+1				; 17
 
        lda_a(i+12) and										// lda OFFSET				; 12
        add_sub(i+13) and									// add|sub				; 13
        sta_bp2(i+14) and									// sta :bp2				; 14
        lda_a(i+15) and										// lda OFFSET+1				; 15
        adc_sbc(i+16) and									// adc|sbc				; 16
-       sta_bp2_1(i+17) and									// sta :bp2+1				; 17
-//       ldy(i+18) and										// ldy XXX				; 18
+//       sta_bp2_1(i+17) and									// sta :bp2+1				; 17
+
+//       ldy_im_0(i+18) and									// ldy #$00				; 18
        lda(i+19) and										// lda :STACKORIGIN+10			; 19
        STA_BP2_Y(i+20) and									// sta (:bp2),y				; 20
        iny(i+21) and										// iny					; 21
@@ -2030,11 +2033,9 @@ begin
        end;
 
 
-    if (listing[i] = listing[i+24]) and								// ldy XXX				; 0
+    if ldy_im_0(i+24) and									// ldy #$00				; 24
 
        sta_bp2_1(i+23) and									// sta :bp2+1				; 23
-
-       (and_ora_eor_bp2_y(i+38) or adc_sbc_bp2_y(i+38)) and					// and|ora|eor|adc|sbc (:bp2),y		; 38
 
        lda_a(i+12) and										// lda OFFSET+1				; 12
        sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+10	; 13
@@ -2050,7 +2051,7 @@ begin
        adc_sbc_stack(i+22) and									// adc|sbc :STACKORIGIN+STACKWIDTH+10	; 22
 //       sta_bp2_1(i+23) and									// sta :bp2+1				; 23
 
-//       ldy(i+24) and										// ldy XXX				; 24
+//       ldy_im_0(i+24) and									// ldy #$00				; 24
        lda_stack(i+25) and									// lda :STACKORIGIN+9			; 25
        (and_ora_eor_bp2_y(i+26) or add_sub_bp2_y(i+26)) and					// and|ora|eor|add|sub (:bp2),y		; 26
        sta_a(i+27) and										// sta					; 27
@@ -2064,7 +2065,7 @@ begin
        sta_a(i+35) and										// sta					; 35
        iny(i+36) and										// iny					; 36
        lda_stack(i+37) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 37
-//       (and_ora_eor_bp2_y(i+38) or adc_sbc_bp2_y(i+38)) and					// and|ora|eor|adc|sbc (:bp2),y		; 38
+       (and_ora_eor_bp2_y(i+38) or adc_sbc_bp2_y(i+38)) and					// and|ora|eor|adc|sbc (:bp2),y		; 38
        sta_a(i+39) then										// sta					; 39
      if argMatch(i+2, i+25) and
 	argMatch(i+5, i+29) and
@@ -2104,11 +2105,9 @@ begin
        end;
 
 
-    if (listing[i] = listing[i+23]) and								// ldy XXX				; 0
+    if ldy_im_0(i+23) and									// ldy #$00				; 23
 
        sta_bp2_1(i+22) and									// sta :bp2+1				; 22
-
-       (and_ora_eor_bp2_y(i+37) or adc_sbc_bp2_y(i+37)) and					// and|ora|eor|adc|sbc (:bp2),y		; 37
 
        lda_a(i+12) and										// lda OFFSET+1				; 12
        sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+10	; 13
@@ -2123,7 +2122,7 @@ begin
        add_sub_stack(i+21) and									// add|sub :STACKORIGIN+STACKWIDTH+10	; 21
 //       sta_bp2_1(i+22) and									// sta :bp2+1				; 22
 
-//       ldy(i+23) and										// ldy XXX				; 23
+//       ldy_im_0(i+23) and									// ldy #$00				; 23
        lda_stack(i+24) and									// lda :STACKORIGIN+9			; 24
        (and_ora_eor_bp2_y(i+25) or add_sub_bp2_y(i+25)) and					// and|ora|eor|add|sub (:bp2),y		; 25
        sta_a(i+26) and										// sta					; 26
@@ -2137,7 +2136,7 @@ begin
        sta_a(i+34) and										// sta					; 34
        iny(i+35) and										// iny					; 35
        lda_stack(i+36) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 36
-//       (and_ora_eor_bp2_y(i+37) or adc_sbc_bp2_y(i+37)) and					// and|ora|eor|adc|sbc (:bp2),y		; 37
+       (and_ora_eor_bp2_y(i+37) or adc_sbc_bp2_y(i+37)) and					// and|ora|eor|adc|sbc (:bp2),y		; 37
        sta_a(i+38) then										// sta					; 38
      if argMatch(i+2, i+24) and
 	argMatch(i+5, i+28) and
@@ -2177,9 +2176,9 @@ begin
        end;
 
 
+    if ldy_im_0(i+29) and									// ldy #$00				; 29
 
-
-    if (listing[i] = listing[i+30]) and								// ldy XXX				; 0
+       sta_bp2_1(i+28) and									// sta :bp2+1				; 28
 
        lda_a(i+12) and										// lda					; 12
        and_ora_eor(i+13) and									// and|ora|eor				; 13
@@ -2188,57 +2187,56 @@ begin
        and_ora_eor(i+16) and									// and|ora|eor				; 16
        sta_stack(i+17) and									// sta :STACKORIGIN+STACKWIDTH+10	; 17
 
-       lda_stack(i+18) and									// lda :STACKORIGIN+STACKWIDTH+10	; 18
-       asl_stack(i+19) and									// asl :STACKORIGIN+10			; 19
-       rol_a(i+20) and										// rol @				; 20
-       asl_stack(i+21) and									// asl :STACKORIGIN+10			; 21
-       rol_a(i+22) and										// rol @				; 22
-       sta_stack(i+23) and									// sta :STACKORIGIN+STACKWIDTH+10	; 23
+       asl_stack(i+18) and									// asl :STACKORIGIN+10			; 18
+       rol_a(i+19) and										// rol @				; 19
+       asl_stack(i+20) and									// asl :STACKORIGIN+10			; 20
+       rol_a(i+21) and										// rol @				; 21
+       sta_stack(i+22) and									// sta :STACKORIGIN+STACKWIDTH+10	; 22
 
-       lda_a(i+24) and										// lda OFFSET				; 24
-       add_sub_stack(i+25) and									// add|sub :STACKORIGIN+10		; 25
-       sta_bp2(i+26) and									// sta :bp2				; 26
-       lda_a(i+27) and										// lda OFFSET+1				; 27
-       adc_sbc_stack(i+28) and									// adc|sbc :STACKORIGIN+STACKWIDTH+10	; 28
-       sta_bp2_1(i+29) and									// sta :bp2+1				; 29
+       lda_a(i+23) and										// lda OFFSET				; 23
+       add_sub_stack(i+24) and									// add|sub :STACKORIGIN+10		; 24
+       sta_bp2(i+25) and									// sta :bp2				; 25
+       lda_a(i+26) and										// lda OFFSET+1				; 26
+       adc_sbc_stack(i+27) and									// adc|sbc :STACKORIGIN+STACKWIDTH+10	; 27
+//       sta_bp2_1(i+28) and									// sta :bp2+1				; 28
 
-//       ldy(i+30) and										// ldy XXX				; 30
-       lda_stack(i+31) and									// lda :STACKORIGIN+9			; 31
-       (and_ora_eor_bp2_y(i+32) or add_sub_bp2_y(i+32)) and					// and|ora|eor|add|sub (:bp2),y		; 32
-       sta_a(i+33) and										// sta					; 33
-       iny(i+34) and										// iny					; 34
-       lda_stack(i+35) and									// lda :STACKORIGIN+STACKWIDTH+9	; 35
-       (and_ora_eor_bp2_y(i+36) or adc_sbc_bp2_y(i+36)) and					// and|ora|eor|adc|sbc (:bp2),y		; 36
-       sta_a(i+37) and										// sta					; 37
-       iny(i+38) and										// iny					; 38
-       lda_stack(i+39) and									// lda :STACKORIGIN+STACKWIDTH*2+9	; 39
-       (and_ora_eor_bp2_y(i+40) or adc_sbc_bp2_y(i+40)) and					// and|ora|eor|adc|sbc (:bp2),y		; 40
-       sta_a(i+41) and										// sta					; 41
-       iny(i+42) and										// iny					; 42
-       lda_stack(i+43) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 43
-       (and_ora_eor_bp2_y(i+44) or adc_sbc_bp2_y(i+44)) and					// and|ora|eor|adc|sbc (:bp2),y		; 44
-       sta_a(i+45) then										// sta					; 45
-     if argMatch(i+2, i+31) and
-	argMatch(i+5, i+35) and
-	argMatch(i+8, i+39) and
-	argMatch(i+11, i+43) then
+//       ldy_im_0(i+29) and									// ldy #$00				; 29
+       lda_stack(i+30) and									// lda :STACKORIGIN+9			; 30
+       (and_ora_eor_bp2_y(i+31) or add_sub_bp2_y(i+31)) and					// and|ora|eor|add|sub (:bp2),y		; 31
+       sta_a(i+32) and										// sta					; 32
+       iny(i+33) and										// iny					; 33
+       lda_stack(i+34) and									// lda :STACKORIGIN+STACKWIDTH+9	; 34
+       (and_ora_eor_bp2_y(i+35) or adc_sbc_bp2_y(i+35)) and					// and|ora|eor|adc|sbc (:bp2),y		; 35
+       sta_a(i+36) and										// sta					; 36
+       iny(i+37) and										// iny					; 37
+       lda_stack(i+38) and									// lda :STACKORIGIN+STACKWIDTH*2+9	; 38
+       (and_ora_eor_bp2_y(i+39) or adc_sbc_bp2_y(i+39)) and					// and|ora|eor|adc|sbc (:bp2),y		; 39
+       sta_a(i+40) and										// sta					; 40
+       iny(i+41) and										// iny					; 41
+       lda_stack(i+42) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 42
+       (and_ora_eor_bp2_y(i+43) or adc_sbc_bp2_y(i+43)) and					// and|ora|eor|adc|sbc (:bp2),y		; 43
+       sta_a(i+44) then										// sta					; 44
+     if argMatch(i+2, i+30) and
+	argMatch(i+5, i+34) and
+	argMatch(i+8, i+38) and
+	argMatch(i+11, i+42) then
        begin
 
-	listing[i+26] := #9'sta :TMP';
+	listing[i+25] := #9'sta :TMP';
 
-	listing[i+29] := #9'sta :TMP+1';
+	listing[i+28] := #9'sta :TMP+1';
 
-	listing[i+31] := #9'lda (:bp2),y';
-	listing[i+32] := copy(listing[i+32], 1, 5) + '(:TMP),y';
+	listing[i+30] := #9'lda (:bp2),y';
+	listing[i+31] := copy(listing[i+31], 1, 5) + '(:TMP),y';
 
-	listing[i+35] := #9'lda (:bp2),y';
-	listing[i+36] := copy(listing[i+36], 1, 5) + '(:TMP),y';
+	listing[i+34] := #9'lda (:bp2),y';
+	listing[i+35] := copy(listing[i+35], 1, 5) + '(:TMP),y';
 
-	listing[i+39] := #9'lda (:bp2),y';
-	listing[i+40] := copy(listing[i+40], 1, 5) + '(:TMP),y';
+	listing[i+38] := #9'lda (:bp2),y';
+	listing[i+39] := copy(listing[i+39], 1, 5) + '(:TMP),y';
 
-	listing[i+43] := #9'lda (:bp2),y';
-	listing[i+44] := copy(listing[i+44], 1, 5) + '(:TMP),y';
+	listing[i+42] := #9'lda (:bp2),y';
+	listing[i+43] := copy(listing[i+43], 1, 5) + '(:TMP),y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2256,76 +2254,83 @@ begin
 	exit(false);
        end;
 
-{
-	ldy #$00
-	lda (:bp2),y
-	sta :STACKORIGIN+9
-	iny
-	lda (:bp2),y
-	sta :STACKORIGIN+STACKWIDTH+9
-	iny
-	lda (:bp2),y
-	sta :STACKORIGIN+STACKWIDTH*2+9
-	iny
-	lda (:bp2),y
-	sta :STACKORIGIN+STACKWIDTH*3+9
 
-	lda Y
-	and #$FF
-	sta :STACKORIGIN+10
-	lda Y+1
-	and #$03
-	sta :STACKORIGIN+STACKWIDTH+10
+    if ldy_im_0(i+28) and									// ldy #$00				; 28
 
-	lda :STACKORIGIN+STACKWIDTH+10
-	asl :STACKORIGIN+10
-	rol @
-	asl :STACKORIGIN+10
-	rol @
-	sta :STACKORIGIN+STACKWIDTH+10
+       sta_bp2_1(i+27) and									// sta :bp2+1				; 27
 
-	lda TAB
-	add :STACKORIGIN+10
-	sta :bp2
-	lda TAB+1
-	adc :STACKORIGIN+STACKWIDTH+10
-	sta :bp2+1
+       lda_a(i+12) and										// lda					; 12
+       sta_stack(i+13) and									// sta :STACKORIGIN+10			; 13
+       lda_a(i+14) and										// lda					; 14
+       and_ora_eor(i+15) and									// and|ora|eor				; 15
+       sta_stack(i+16) and									// sta :STACKORIGIN+STACKWIDTH+10	; 16
 
-	ldy #$00
-	lda (:bp2),y
-	sta :STACKORIGIN+10
-	iny
-	lda (:bp2),y
-	sta :STACKORIGIN+STACKWIDTH+10
-	iny
-	lda (:bp2),y
-	sta :STACKORIGIN+STACKWIDTH*2+10
-	iny
-	lda (:bp2),y
-	sta :STACKORIGIN+STACKWIDTH*3+10
+       asl_stack(i+17) and									// asl :STACKORIGIN+10			; 17
+       rol_a(i+18) and										// rol @				; 18
+       asl_stack(i+19) and									// asl :STACKORIGIN+10			; 19
+       rol_a(i+20) and										// rol @				; 20
+       sta_stack(i+21) and									// sta :STACKORIGIN+STACKWIDTH+10	; 21
 
-	lda :STACKORIGIN+9
-	add :STACKORIGIN+10
-	sta :STACKORIGIN+9
-	lda :STACKORIGIN+STACKWIDTH+9
-	adc :STACKORIGIN+STACKWIDTH+10
-	sta :STACKORIGIN+STACKWIDTH+9
-	lda :STACKORIGIN+STACKWIDTH*2+9
-	adc :STACKORIGIN+STACKWIDTH*2+10
-	sta :STACKORIGIN+STACKWIDTH*2+9
-	lda :STACKORIGIN+STACKWIDTH*3+9
-	adc :STACKORIGIN+STACKWIDTH*3+10
-	sta :STACKORIGIN+STACKWIDTH*3+9
-	lda :STACKORIGIN+9
-	sta I
-	lda :STACKORIGIN+STACKWIDTH+9
-	sta I+1
-	lda :STACKORIGIN+STACKWIDTH*2+9
-	sta I+2
-	lda :STACKORIGIN+STACKWIDTH*3+9
-	sta I+3
+       lda_a(i+22) and										// lda OFFSET				; 22
+       add_sub_stack(i+23) and									// add|sub :STACKORIGIN+10		; 23
+       sta_bp2(i+24) and									// sta :bp2				; 24
+       lda_a(i+25) and										// lda OFFSET+1				; 25
+       adc_sbc_stack(i+26) and									// adc|sbc :STACKORIGIN+STACKWIDTH+10	; 26
+//       sta_bp2_1(i+27) and									// sta :bp2+1				; 27
 
-}
+//       ldy_im_0(i+28) and									// ldy #$00				; 28
+       lda_stack(i+29) and									// lda :STACKORIGIN+9			; 29
+       (and_ora_eor_bp2_y(i+30) or add_sub_bp2_y(i+30)) and					// and|ora|eor|add|sub (:bp2),y		; 30
+       sta_a(i+31) and										// sta					; 31
+       iny(i+32) and										// iny					; 32
+       lda_stack(i+33) and									// lda :STACKORIGIN+STACKWIDTH+9	; 33
+       (and_ora_eor_bp2_y(i+34) or adc_sbc_bp2_y(i+34)) and					// and|ora|eor|adc|sbc (:bp2),y		; 34
+       sta_a(i+35) and										// sta					; 35
+       iny(i+36) and										// iny					; 36
+       lda_stack(i+37) and									// lda :STACKORIGIN+STACKWIDTH*2+9	; 37
+       (and_ora_eor_bp2_y(i+38) or adc_sbc_bp2_y(i+38)) and					// and|ora|eor|adc|sbc (:bp2),y		; 38
+       sta_a(i+39) and										// sta					; 39
+       iny(i+40) and										// iny					; 40
+       lda_stack(i+41) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 41
+       (and_ora_eor_bp2_y(i+42) or adc_sbc_bp2_y(i+42)) and					// and|ora|eor|adc|sbc (:bp2),y		; 42
+       sta_a(i+43) then										// sta					; 43
+     if argMatch(i+2, i+29) and
+	argMatch(i+5, i+33) and
+	argMatch(i+8, i+37) and
+	argMatch(i+11, i+41) then
+       begin
+
+	listing[i+24] := #9'sta :TMP';
+
+	listing[i+27] := #9'sta :TMP+1';
+
+	listing[i+29] := #9'lda (:bp2),y';
+	listing[i+30] := copy(listing[i+30], 1, 5) + '(:TMP),y';
+
+	listing[i+33] := #9'lda (:bp2),y';
+	listing[i+34] := copy(listing[i+34], 1, 5) + '(:TMP),y';
+
+	listing[i+37] := #9'lda (:bp2),y';
+	listing[i+38] := copy(listing[i+38], 1, 5) + '(:TMP),y';
+
+	listing[i+41] := #9'lda (:bp2),y';
+	listing[i+42] := copy(listing[i+42], 1, 5) + '(:TMP),y';
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10]:= '';
+	listing[i+11]:= '';
+
+	exit(false);
+       end;
 
 
     end;
@@ -4119,6 +4124,7 @@ begin
        lda_a(i+9) and										// lda YR+3				; 9
        adc_sbc(i+10) and									// adc|sbc				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3+10	; 11
+
        lda_a(i+12) and										// lda FLOODFILLSTACK			; 12
        add_sub(i+13) and									// add|sub				; 13
        sta_bp2(i+14) and									// sta :bp2				; 14

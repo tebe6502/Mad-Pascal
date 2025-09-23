@@ -872,16 +872,16 @@ begin
     if lda_stack(i+18) and									// lda :STACKORIGIN+STACKWIDTH*3	; 18
 
        lda_a(i) and										// lda					; 0
-       and_ora_eor(i+1) and									// and|ora|eor				; 1
+       (add_sub(i+1) or and_ora_eor(i+1)) and							// add|sub|and|ora|eor			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_a(i+3) and										// lda 					; 3
-       and_ora_eor(i+4) and									// and|ora|eor				; 4
+       (adc_sbc(i+4) or and_ora_eor(i+4)) and							// adc|sbc|and|ora|eor			; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_a(i+6) and										// lda 					; 6
-       and_ora_eor(i+7) and									// and|ora|eor				; 7
+       (adc_sbc(i+7) or and_ora_eor(i+7)) and							// adc|sbc|and|ora|eor			; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*2	; 8
        lda_a(i+9) and										// lda 					; 9
-       and_ora_eor(i+10) and									// and|ora|eor				; 10
+       (adc_sbc(i+10) or and_ora_eor(i+10)) and							// adc|sbc|and|ora|eor			; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3	; 11
        lda_stack(i+12) and									// lda :STACKORIGIN			; 12
        sta_a(i+13) and										// sta 					; 13
@@ -920,24 +920,28 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
+  if sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
 
-       lda_a(i) and										// lda					; 0
-       sta_a(i+1) and										// sta A				; 1
-       lda_a(i+2) and										// lda 					; 2
-       sta_a(i+3) and										// sta A+1				; 3
-       lda_a(i+4) and										// lda 					; 4
-       sta_a(i+5) and										// sta A+2				; 5
-       lda_a(i+6) and										// lda 					; 6
-       sta_a(i+7) and										// sta A+3				; 7
-       lda_a(i+8) and										// lda A				; 8
-       sta_stack(i+9) and									// sta :STACKORIGIN			; 9
-       lda_a(i+10) and										// lda A+1				; 10
-       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH		; 11
-       lda_a(i+12) and										// lda A+2				; 12
-       sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH*2	; 13
-       lda_a(i+14) then										// lda A+3				; 14
-//       sta_stack(i+15) then									// sta :STACKORIGIN+STACKWIDTH*3	; 15
+     lda_a(i) and										// lda					; 0
+     sta_a(i+1) and										// sta A				; 1
+     lda_a(i+2) and										// lda 					; 2
+     sta_a(i+3) and										// sta A+1				; 3
+     lda_a(i+4) and										// lda 					; 4
+     sta_a(i+5) and										// sta A+2				; 5
+     lda_a(i+6) and										// lda 					; 6
+     sta_a(i+7) and										// sta A+3				; 7
+
+     lda_a(i+8) and										// lda A				; 8
+     sta_stack(i+9) and										// sta :STACKORIGIN			; 9
+     lda_a(i+10) and										// lda A+1				; 10
+     sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH		; 11
+     lda_a(i+12) and										// lda A+2				; 12
+     sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH*2	; 13
+     lda_a(i+14) then										// lda A+3				; 14
+//     sta_stack(i+15) then									// sta :STACKORIGIN+STACKWIDTH*3	; 15
+    begin
+
+
      if argMatch(i+1, i+8) and
 	argMatch(i+3, i+10) and
 	argMatch(i+5, i+12) and
@@ -964,24 +968,6 @@ begin
      end;
 
 
-    if sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
-
-       lda_a(i) and										// lda					; 0
-       sta_a(i+1) and										// sta A				; 1
-       lda_a(i+2) and										// lda 					; 2
-       sta_a(i+3) and										// sta A+1				; 3
-       lda_a(i+4) and										// lda 					; 4
-       sta_a(i+5) and										// sta A+2				; 5
-       lda_a(i+6) and										// lda 					; 6
-       sta_a(i+7) and										// sta A+3				; 7
-       lda_a(i+8) and										// lda A				; 8
-       sta_stack(i+9) and									// sta :STACKORIGIN			; 9
-       lda_a(i+10) and										// lda A+1				; 10
-       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH		; 11
-       lda_a(i+12) and										// lda ...				; 12
-       sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH*2	; 13
-       lda_a(i+14) then										// lda ...				; 14
-//       sta_stack(i+15) then									// sta :STACKORIGIN+STACKWIDTH*3	; 15
      if argMatch(i+1, i+8) and
 	argMatch(i+3, i+10) and
 	(argMatch(i+5, i+12) = false) and
@@ -998,6 +984,12 @@ begin
 
       	exit(false);
      end;
+
+
+    end;
+
+
+// -----------------------------------------------------------------------------
 
 
     if sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH*2	; 4
