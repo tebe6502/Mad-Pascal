@@ -8919,7 +8919,9 @@ case Tok[i].Kind of
     		 asm65(#9'sta :bp2+1');
 		 asm65(#9'ldy #$00');
 // perl
-//		 writeln( DataSize[Ident[IdentIndex].AllocElementType],',', Ident[IdentIndex].AllocElementType );
+//		 writeln(Ident[IdentIndex].name,',', DataSize[Ident[IdentIndex].AllocElementType],',', Ident[IdentIndex].AllocElementType ,',',ValType,',',VarType);
+
+	         ValType := Ident[IdentIndex].AllocElementType;
 
 	 	 case DataSize[Ident[IdentIndex].AllocElementType] of
 		  1: begin
@@ -9488,6 +9490,10 @@ case Tok[i].Kind of
 
 
 	     if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
+
+
+	     if VarType <> UNTYPETOK then
+              if DataSize[ValType] > DataSize[VarType] then ValType := VarType;
 
 
 	     Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);

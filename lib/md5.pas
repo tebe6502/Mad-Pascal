@@ -4,7 +4,8 @@ unit md5;
  @author: Free Pascal development team, Tomasz Biela (Tebe)
  @name: MD5
 
- @version: 1.1 (2022-09-28)
+ @version: 1.2 (2025-09-24) MD5Print
+           1.1 (2022-09-28)
 
  @description:
  Implements a MD5 digest algorithm (RFC 1321)
@@ -41,6 +42,8 @@ documentation and/or software.
 interface
 
 type
+
+ FourBytes = array[0..3] of byte;
 
  TMD5 = record
     Align,
@@ -328,28 +331,41 @@ end;
 
 
 function MD5Print(var MD5: TMD5): TString;
+const
+    thex: array [0..15] of char = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
 
- procedure MoveBuf; assembler;
- asm
- 	ldy #31
- mv:	lda @buf+1,y
-	sta @buf+9,y
-	dey
-	bpl mv
+var i, a: byte;
+    c: cardinal;
+
+
+ procedure AddByte;
+ var j: byte;
+ begin
+ 
+   for j:=3 downto 0 do begin
+
+    a := FourBytes( c )[j];
+  
+    Result[i]:=thex[a shr 4];
+    Result[i+1]:=thex[a and $0f];
+    
+    inc(i, 2);
+   end; 
+  
  end;
+
 
 begin
 
- hexStr(md5.State[3],8); MoveBuf;
- hexStr(md5.State[2],8); MoveBuf;
- hexStr(md5.State[1],8); MoveBuf;
- hexStr(md5.State[0],8);
+ Result[0]:=#32;
+ i:=1;
 
- asm
- 	mva #32 @buf
-	mwa #@buf Result
- end;
+ c := md5.State[0]; AddByte;
+ c := md5.State[1]; AddByte;
+ c := md5.State[2]; AddByte;
+ c := md5.State[3]; AddByte;
 
 end;
+
 
 end.
