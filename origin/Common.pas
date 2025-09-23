@@ -567,7 +567,7 @@ var
   NumDefines: integer = 1;	// NumDefines = AddDefines
 
   NumTok, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, VarDataSize, Pass, ShrShlCnt,
+  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
   iOut: integer = -1;
@@ -675,11 +675,64 @@ var
 
 	function StrToInt(const a: string): Int64;
 
+        type TTokenIndex = Integer;
+        procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+
+        function GetVarDataSize: Integer;
+        procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+
+        var TraceFile: TextFile;
+        procedure LogTrace(message: String);
+
 // ----------------------------------------------------------------------------
 
 implementation
 
 uses SysUtils, Messages;
+
+// ----------------------------------------------------------------------------
+
+procedure LogTrace(message: String);
+begin
+{$IFDEF USETRACEFILE}
+     Writeln(traceFile, message);
+{$ENDIF}
+end;
+
+// ----------------------------------------------------------------------------
+
+function GetVarDataSize: Integer;
+begin
+  Result := _VarDataSize;
+end;
+
+
+procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+var token: TToken;
+// var  GetSourceFileLocationString: String;
+
+begin
+  _VarDataSize := size;
+  token:= Tok[tokenIndex];
+
+  (*
+  GetSourceFileLocationString := UnitName[ token.UnitIndex].Path;
+
+  if (token.line>0) then
+  begin
+   GetSourceFileLocationString:=GetSourceFileLocationString+ ' ( line ' + IntToStr(token.Line) + ', column ' + IntToStr(token.Column) + ')';
+  end;
+
+
+  // LogTrace(Format('SetVarDataSize: TokenIndex=%d: %s %s VarDataSize=%d', [tokenIndex, GetSourceFileLocationString,'TODO',   _VarDataSize]));
+  *)
+end;
+
+
+procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+begin
+  SetVarDataSize(tokenIndex, _VarDataSize + size);
+end;
 
 // ----------------------------------------------------------------------------
 

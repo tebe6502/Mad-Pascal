@@ -455,6 +455,9 @@ procedure SaveToDataSegment(ConstDataSize: integer; ConstVal: Int64; ConstValTyp
 var ftmp: TFloat;
 begin
 
+// LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [ConstDataSize, ConstVal, ConstValType]));
+
+
 	if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then begin writeln('SaveToDataSegment: ', ConstDataSize); halt end;
 
 	 ftmp:=Default(TFloat);
@@ -1747,10 +1750,10 @@ else
       if Ident[NumIdent].isAbsolute then
        Ident[NumIdent].Value := Data - 1
       else
-       Ident[NumIdent].Value := DATAORIGIN + VarDataSize;	// Variable address
+       Ident[NumIdent].Value := DATAORIGIN + GetVarDataSize;	// Variable address
 
       if not OutputDisabled then
-	VarDataSize := VarDataSize + DataSize[DataType];
+	IncVarDataSize( ErrTokenIndex,DataSize[DataType]);
 
       Ident[NumIdent].NumAllocElements := NumAllocElements;	// Number of array elements (0 for single variable)
       Ident[NumIdent].NumAllocElements_ := NumAllocElements_;
@@ -1760,28 +1763,28 @@ else
       if not OutputDisabled then begin
 
        if (DataType = POINTERTOK) and (AllocElementType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements_ = 0) then
-        inc(VarDataSize, DataSize[POINTERTOK])
+         IncVarDataSize( ErrTokenIndex, DataSize[POINTERTOK])
        else
 
        if DataType in [ENUMTYPE] then
-        inc(VarDataSize)
+        IncVarDataSize( ErrTokenIndex,1)
        else
        if (DataType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements > 0) then
-	VarDataSize := VarDataSize + 0
+	IncVarDataSize( ErrTokenIndex, 0)
        else
        if (DataType in [FILETOK, TEXTFILETOK]) and (NumAllocElements > 0) then
-	VarDataSize := VarDataSize + 12
+	IncVarDataSize( ErrTokenIndex, 12)
        else begin
 
         if (Ident[NumIdent].idType = ARRAYTOK) and (Ident[NumIdent].isAbsolute = false) and (Elements(NumIdent) = 1) then	// [0..0] ; [0..0, 0..0]
 
 	else
- 	  VarDataSize := VarDataSize + integer(Elements(NumIdent) * DataSize[AllocElementType]);
+ 	  IncVarDataSize( ErrTokenIndex,  integer(Elements(NumIdent) * DataSize[AllocElementType]));
 
        end;
 
 
-       if NumAllocElements > 0 then dec(VarDataSize, DataSize[DataType]);
+       if NumAllocElements > 0 then IncVarDataSize( ErrTokenIndex,-DataSize[DataType]);
 
       end;
 
