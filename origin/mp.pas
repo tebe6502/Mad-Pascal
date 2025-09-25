@@ -7126,9 +7126,6 @@ begin
 
 	i := CompileAddress(i + 1, ActualParamType, AllocElementType, true);
 
-	if AllocElementType = ARRAYTOK then begin
-         AllocElementType := POINTERTOK;
-	end;
 
 //	writeln(Ident[IdentIndex].Param[NumActualParams].Name,',',Ident[IdentIndex].Param[NumActualParams].DataType  ,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements and $FFFF,'/',Ident[IdentIndex].Param[NumActualParams].NumAllocElements shr 16,' | ',ActualParamType,',', AllocElementType);
 
@@ -7147,6 +7144,10 @@ begin
 	  asm65(#9'lda (:bp2),y');
  	  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
+	end;
+
+	if AllocElementType = ARRAYTOK then begin
+         AllocElementType := POINTERTOK;
 	end;
 
 
@@ -7268,9 +7269,15 @@ begin
 
        end else begin
 
-	i := CompileExpression(i + 2, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);	// Evaluate actual parameters and push them onto the stack
 
-//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',    Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+        if (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].NumAllocElements > 0) then
+  	  i := CompileAddress(i + 1, ActualParamType, AllocElementType)
+	else
+	  i := CompileExpression(i + 2, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);	// Evaluate actual parameters and push them onto the stack
+
+
+
+//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
 
         if (ActualParamType in IntegerTypes) and (Ident[IdentIndex].Param[NumActualParams].DataType in RealTypes) then begin
@@ -7284,9 +7291,9 @@ begin
         if (Ident[IdentIndex].Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes) then
 	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
-	
+
 	if (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) then
-	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType); 
+	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
 
 	if (Tok[i].Kind = IDENTTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = ENUMTOK) then begin
@@ -9369,15 +9376,16 @@ case Tok[i].Kind of
 	  else
 	    begin
 
-//writeln('> ',Ident[IdentIndex].Name,',',ValType,',',Ident[GetIdent(Tok[i].Name^)].name);
+//writeln('> ',Ident[IdentIndex].Name,',',ValType,',',Ident[GetIdent(Tok[i].Name^)].name,',',VarType);
 // perl
   	    i := CompileArrayIndex(i, IdentIndex, ValType);							// array[ ].field
+
 
  	    if ValType = ARRAYTOK then begin
 
 	        ValType := POINTERTOK ;
 
-		Push(0, ASPOINTER, DataSize[ValType], IdentIndex, 0);
+	        Push(0, ASPOINTER, DataSize[ValType], IdentIndex, 0);
 
 	    end else
 
