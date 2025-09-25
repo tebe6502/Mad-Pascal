@@ -6146,7 +6146,6 @@ begin
 
 	      VarType := Ident[IdentIndex].AllocElementType;
 
-
 	      if ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].IdType = DEREFERENCEARRAYTOK)) then begin
 	        NumAllocElements := Ident[IdentIndex].NestedNumAllocElements and $FFFF;
 	        NumAllocElements_ := Ident[IdentIndex].NestedNumAllocElements shr 16;
@@ -6229,7 +6228,7 @@ begin
 
 	    if NumAllocElements_ > 0 then begin
 
-	     if (Tok[i + 1].Kind = CBRACKETTOK) and (Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK]) then begin
+	     if (Tok[i + 1].Kind = CBRACKETTOK) and (Tok[i + 2].Kind <> OBRACKETTOK) {(Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK])} then begin
 	      yes := FALSE;
 
 	      Push(0, ASVALUE, DataSize[ArrayIndexType]);
@@ -7127,6 +7126,9 @@ begin
 
 	i := CompileAddress(i + 1, ActualParamType, AllocElementType, true);
 
+	if AllocElementType = ARRAYTOK then begin
+         AllocElementType := POINTERTOK;
+	end;
 
 //	writeln(Ident[IdentIndex].Param[NumActualParams].Name,',',Ident[IdentIndex].Param[NumActualParams].DataType  ,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements and $FFFF,'/',Ident[IdentIndex].Param[NumActualParams].NumAllocElements shr 16,' | ',ActualParamType,',', AllocElementType);
 
@@ -7282,6 +7284,9 @@ begin
         if (Ident[IdentIndex].Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes) then
 	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
+	
+	if (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) then
+	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType); 
 
 
 	if (Tok[i].Kind = IDENTTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = ENUMTOK) then begin
@@ -8896,6 +8901,8 @@ case Tok[i].Kind of
 //		CheckTok(i + 1, OPARTOK);
 
 		if (Ident[IdentIndex].DataType = POINTERTOK) and (Elements(IdentIndex) > 0) then begin
+
+ //writeln(Ident[IdentIndex].name, ',', Ident[IdentIndex].PassMethod);
 
 		 i := CompileAddress(i+1, VarType, ValType);
 
