@@ -101,17 +101,16 @@ var p, k , q: integer;
         if (pos('#asm:', TemporaryBuf[i]) = 1) or
 
 	   ldy(i) or
-           (pos('mwy ', TemporaryBuf[i]) > 0) or
-           (pos('mvy ', TemporaryBuf[i]) > 0) or
            jsr(i) or
-           (pos(#9'.if', TemporaryBuf[i]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
-           (pos(#9'@print', TemporaryBuf[i]) > 0) or
            iny(i) or
            dey(i) or
+           tay(i) or
            tya(i) or
-           tay(i) then Result:=true else Result:=false;
-
+           mwy(i) or
+	   mwy(i) or
+           (pos(#9'.if', TemporaryBuf[i]) > 0) or
+           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
+           (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
   end;
 
 
@@ -225,9 +224,9 @@ begin
 
 
 {
-if (pos('jmp a_0004', TemporaryBuf[3]) > 0) then begin
+if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
 
-      for p:=0 to 11 do writeln(TemporaryBuf[p]);
+      for p:=0 to 30 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
@@ -1270,6 +1269,7 @@ end;
      if opt_BRANCH(i) = false then begin Result := false; Break end;
 
      if opt_STACK(i) = false then begin Result := false; Break end;
+
      if opt_STACK_INX(i) = false then begin Result := false; Break end;
      if opt_STACK_ADD(i) = false then begin Result := false; Break end;
      if opt_STACK_CMP(i) = false then begin Result := false; Break end;
@@ -1431,7 +1431,7 @@ end;
 
 
 {
-if (pos(#9'sub #$', listing[i]) > 0) then begin
+if (pos(#9'and #$', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
