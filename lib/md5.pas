@@ -334,17 +334,17 @@ function MD5Print(var MD5: TMD5): TString;
 const
     thex: array [0..15] of char = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
 
-var i, a: byte;
-    c: cardinal;
+var i,j,k, a: byte;
 
+begin
 
- procedure AddByte;
- var j: byte;
- begin
- 
+ Result[0]:=#32;
+ i:=1;
+
+ for k:=0 to 3 do
    for j:=3 downto 0 do begin
 
-    a := FourBytes( c )[j];
+    a := FourBytes( md5.State[k] )[j];
   
     Result[i]:=thex[a shr 4];
     Result[i+1]:=thex[a and $0f];
@@ -352,18 +352,6 @@ var i, a: byte;
     inc(i, 2);
    end; 
   
- end;
-
-
-begin
-
- Result[0]:=#32;
- i:=1;
-
- c := md5.State[0]; AddByte;
- c := md5.State[1]; AddByte;
- c := md5.State[2]; AddByte;
- c := md5.State[3]; AddByte;
 
 end;
 
