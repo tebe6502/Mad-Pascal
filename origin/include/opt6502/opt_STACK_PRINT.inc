@@ -2,6 +2,18 @@
 function opt_STACK_PRINT(i: integer): Boolean;
 var p: integer;
     tmp: string;
+
+
+ function fail(i: integer): Boolean;
+ begin
+
+  Result := jsr(i) or
+            dex(i) or
+            (pos(#9'@print', listing[i]) > 0);
+
+ end;
+
+
 begin
 
     Result := true;
@@ -101,7 +113,7 @@ begin
 
 	if dex(i+7) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+7] := ''; listing[p] := ''; Break end;
 
   	exit(false);
@@ -123,7 +135,7 @@ begin
 
 	if dex(i+5) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+5] := ''; listing[p] := ''; Break end;
 
   	exit(false);
@@ -155,7 +167,7 @@ begin
 
 	if dex(i+2) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
 	exit(false);
@@ -201,13 +213,12 @@ begin
        sta_stack(i) then									// sta :STACKORIGIN,x			; 0
 //       (listing[i+1] = #9'jsr @printBYTE') then						// jsr @printBYTE			; 1
       begin
-
         listing[i]   := '';
 	listing[i+1] := #9'jsr @printBYTE._a';
 
 	if dex(i+2) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
 	exit(false);
@@ -220,13 +231,12 @@ begin
 //       (listing[i+1] = #9'jsr @printBYTE') then						// jsr @printBYTE			; 1
      if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
       begin
-
         listing[i]   := #9'lda ' + GetString(i);
 	listing[i+1] := #9'jsr @printBYTE._a';
 
 	if dex(i+2) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+2] := ''; listing[p] := ''; Break end;
 
 	exit(false);
@@ -248,7 +258,7 @@ begin
 
 	if dex(i+3) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+3] := ''; listing[p] := ''; Break end;
 
 	exit(false);
@@ -276,7 +286,7 @@ begin
 
 	if dex(i+5) then
 	 for p:=i-1 downto 0 do
-	  if jsr(p) then Break else
+	  if fail(p) then Break else
 	   if inx(p) then begin listing[i+5] := ''; listing[p] := ''; Break end;
 
 	exit(false);

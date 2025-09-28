@@ -1,4 +1,14 @@
 
+  function MWY(i: integer): Boolean;
+  begin
+    Result := pos(#9'mwy ', TemporaryBuf[i]) = 1
+  end;
+
+  function MVY(i: integer): Boolean;
+  begin
+    Result := pos(#9'mvy ', TemporaryBuf[i]) = 1
+  end;
+
   function MVA(i: integer): Boolean;
   begin
     Result := pos(#9'mva ', TemporaryBuf[i]) = 1

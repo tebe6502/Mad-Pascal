@@ -70,7 +70,7 @@ begin
        adc_stack(i+4) and								// adc :STACKORIGIN+STACKWIDTH		; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_stack(i+6) and								// lda :STACKORIGIN			; 6
-       add_im(i+7) and									// add #				; 7
+       add_im(i+7) and (data(i+7) = false) and						// add #				; 7
        sta_stack(i+8) and								// sta :STACKORIGIN			; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
        adc_im(i+10) and									// adc #				; 10
@@ -107,7 +107,7 @@ begin
        adc(i+3) and									// adc					; 3
        sta_stack(i+4) and								// sta :STACKORIGIN+STACKWIDTH		; 4
        lda_stack(i+5) and								// lda :STACKORIGIN			; 5
-       add_im(i+6) and									// add #				; 6
+       add_im(i+6) and (data(i+6) = false) and						// add #				; 6
        sta_stack(i+7) and								// sta :STACKORIGIN			; 7
        lda_stack(i+8) and								// lda :STACKORIGIN+STACKWIDTH		; 8
        adc_im(i+9) and									// adc #				; 9
@@ -1161,7 +1161,7 @@ begin
     if adc_im(i+4) and									// adc #				; 4
 
        lda_im(i) and 									// lda #				; 0
-       add_im(i+1) and									// add #				; 1
+       add_im(i+1) and (data(i+1) = false) and						// add #				; 1
        sta_a(i+2) and									// sta					; 2
        lda_im(i+3) and									// lda #				; 3
 //       adc_im(i+4) and								// adc #				; 4
@@ -1455,7 +1455,7 @@ begin
        adc(i+4) and									// adc					; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+9	; 5
        lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
-       add_im(i+7) and									// add #				; 7
+       add_im(i+7) and (data(i+7) = false) and						// add #				; 7
        sta_a(i+8) and									// sta P				; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH+9	; 9
 //       adc_im(i+10) and								// adc #$00				; 10
@@ -1759,14 +1759,14 @@ begin
    if adc_im(i+11) and									// adc #				; 11
 
       lda_a(i) and									// lda W				; 0
-      add_im(i+1) and									// add #				; 1
+      add_im(i+1) and (data(i+1) = false) and						// add #				; 1
       sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
       iny(i+3) and									// iny					; 3
       lda_a(i+4) and									// lda W+1				; 4
       adc_im(i+5) and									// adc #				; 5
       sta_stack(i+6) and								// sta :STACKORIGIN+STACKWIDTH+9	; 6
       lda_stack(i+7) and								// lda :STACKORIGIN+9			; 7
-      add_im(i+8) and									// add #				; 8
+      add_im(i+8) and (data(i+8) = false) and						// add #				; 8
       sta_a(i+9) and									// sta W				; 9
       lda_stack(i+10) and								// lda :STACKORIGIN+STACKWIDTH+9	; 10
 //      adc_im(i+11) and								// adc #				; 11
@@ -1803,7 +1803,7 @@ begin
       adc(i+5) and									// adc					; 5
       sta_stack(i+6) and								// sta :STACKORIGIN+STACKWIDTH+9	; 6
       lda_stack(i+7) and								// lda :STACKORIGIN+9			; 7
-      add_im(i+8) and									// add #				; 8
+      add_im(i+8) and (data(i+8) = false) and						// add #				; 8
       sta_a(i+9) and									// sta W				; 9
       lda_stack(i+10) and								// lda :STACKORIGIN+STACKWIDTH+9	; 10
 //      adc_im(i+11) and								// adc #				; 11
@@ -1917,13 +1917,13 @@ begin
    if adc_im(i+10) and									// adc #				; 10
 
       lda_a(i) and									// lda W				; 0
-      add_im(i+1) and									// add #				; 1
+      add_im(i+1) and (data(i+1) = false) and						// add #				; 1
       sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
       lda_a(i+3) and									// lda W+1				; 3
       adc_im(i+4) and									// adc #				; 4
       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+9	; 5
       lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
-      add_im(i+7) and									// add #				; 7
+      add_im(i+7) and (data(i+7) = false) and						// add #				; 7
       sta_a(i+8) and									// sta W				; 8
       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH+9	; 9
 //      adc_im(i+10) and								// adc #				; 10
