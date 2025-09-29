@@ -9558,6 +9558,67 @@ begin
 
           //    CheckTok(i + 1, TTokenKind.OPARTOK);
 
+          if (IdentifierAt(IdentIndex).DataType = TDatatype.POINTERTOK) and (Elements(IdentIndex) > 0) then
+          begin
+
+            i := CompileAddress(i + 1, VarType, ValType);
+
+            CheckTok(i + 1, CPARTOK);
+            CheckTok(i + 2, OBRACKETTOK);
+
+            i := CompileArrayIndex(i + 1, IdentIndex, AllocElementType);
+
+            asm65(#9'lda :STACKORIGIN-1,x');
+            asm65(#9'add :STACKORIGIN,x');
+            asm65(#9'sta :STACKORIGIN-1,x');
+            asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+            asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+            asm65(#9'dex');
+
+            asm65(#9'lda :STACKORIGIN,x');
+            asm65(#9'sta :bp2');
+            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'sta :bp2+1');
+            asm65(#9'ldy #$00');
+            // perl
+            //     writeln(Ident[IdentIndex].name,',', DataSize[Ident[IdentIndex].AllocElementType],',', Ident[IdentIndex].AllocElementType ,',',ValType,',',VarType);
+
+            ValType := IdentifierAt(IdentIndex).AllocElementType;
+
+            case GetDataSize(ValType) of
+              1: begin
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN,x');
+              end;
+
+              2: begin
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'iny');
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+              end;
+
+              4: begin
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'iny');
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'iny');
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+                asm65(#9'iny');
+                asm65(#9'lda (:bp2),y');
+                asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+              end;
+
+            end;
+
+            exit(i + 1);
+          end;
 
           j := CompileExpression(i + 2, ValType);
 
