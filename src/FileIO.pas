@@ -711,8 +711,6 @@ begin
    begin
     Result := StringReplace(filePath, '\', '/', [rfReplaceAll]);
    end;
-
-  Result := LowerCase(Result);
   {$ENDIF}
 
   {$IFDEF SIMULATED_FILE_IO}

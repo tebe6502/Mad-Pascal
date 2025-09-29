@@ -266,7 +266,7 @@ var
           for k := 1 to TokenAt(i).StrLength do
             nam := nam + chr(StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + k]);
 
-          nam := FindFile(nam, 'unit');
+          nam := FindFile(LowerCase(nam), 'unit');
 
           Dec(i, 2);
 
@@ -276,7 +276,7 @@ var
 
           CheckTok(i, TTokenKind.IDENTTOK);
 
-          nam := FindFile(TokenAt(i).Name + '.pas', 'unit');
+          nam := FindFile(LowerCase(TokenAt(i).Name) + '.pas', 'unit');
 
         end;
 
