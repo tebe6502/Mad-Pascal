@@ -1,20 +1,22 @@
+program array_bracket;
+
 // Verification test for https://forums.atariage.com/topic/240919-mad-pascal/page/41/#findComment-5721582
 // array_bracket.pas (14,38) Error: Syntax error, '[' expected but ')' found
-TYPE
- TCHRIMAG = ARRAY[ 0..7] OF 0..255;
 
-VAR
- CHARSET  : ARRAY[ 0..63] OF TCHRIMAG;
+type
+  TCHRIMAG = array[0..7] of 0..255;
 
-PROCEDURE PRGRCHR( VAR A1: TCHRIMAG); EXTERNAL;
+var
+  CHARSET: array[0..63] of TCHRIMAG;
 
-PROCEDURE PRINTCHR( ACHAR: CHAR);
+  procedure PRGRCHR(var A1: TCHRIMAG); external;
 
- BEGIN
-  PRGRCHR( CHARSET[ ORD( ACHAR) - 32])
- END;
+  procedure PRINTCHR(ACHAR: Char);
 
-BEGIN
- PRINTCHR('A');
-END.
+  begin
+    PRGRCHR(CHARSET[Ord(ACHAR) - 32]);
+  end;
 
+begin
+  PRINTCHR('A');
+end.
