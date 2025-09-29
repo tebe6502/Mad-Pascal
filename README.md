@@ -186,6 +186,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [PokeyMAX](https://github.com/MADRAFi/PokeyMAX)
 * [PokeyMAX update tool](https://github.com/MADRAFi/PMAX_Update)
 * [rogul](https://gitlab.com/bocianu/rogul)
+* [kara-t-rex](https://gitlab.com/bocianu/kara-t-rex)
 
 ## Benchmarks
 
