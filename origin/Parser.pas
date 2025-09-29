@@ -285,7 +285,7 @@ begin
 
        if AllocElementType = RECORDTOK then begin
          AllocElementType := POINTERTOK;
-         NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
+         NumAllocElements := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements shr 16;
          NumAllocElements_ := 0;
        end;
 

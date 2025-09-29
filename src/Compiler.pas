@@ -137,7 +137,10 @@ var
   lab: String;
 begin
 
-  if (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
+  lab := IdentifierAt(IdentIndex).Name;
+
+  //if (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
+  if (lab <> a) and
     (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
 
@@ -16733,9 +16736,9 @@ end;  //CheckForwardResolutions
 
 procedure CompileRecordDeclaration(i: Integer; var VarOfSameType: TVariableList;
   var tmpVarDataSize: Integer; var ConstVal: Int64; VarOfSameTypeIndex: Integer;
-  VarType, AllocElementType: TDataType; NumAllocElements: Cardinal; isAbsolute: Boolean); // TODO: Actually not used
+  VarType, AllocElementType: TDataType; NumAllocElements: Cardinal; isAbsolute: Boolean; var idx: integer); // TODO: Actually not used
 var
-  tmpVarDataSize_, ParamIndex{, idx}: Integer;
+  tmpVarDataSize_, ParamIndex: Integer;
 begin
 
   //  writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',GetTypeAtIndex(NumAllocElements).Block,' | ', AllocElementType);
@@ -16766,7 +16769,7 @@ begin
     // wskaznik dla ^record
 
 
-    //idx := IdentifierAt(NumIdent).Value - DATAORIGIN;
+    idx := IdentifierAt(NumIdent).Value - DATAORIGIN;
 
     //writeln(NumAllocElements);
     //!@!@
@@ -18453,7 +18456,7 @@ begin
 
 
           CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType,
-            AllocElementType, NumAllocElements, isAbsolute);
+            AllocElementType, NumAllocElements, isAbsolute, idx);
 
         end;
 

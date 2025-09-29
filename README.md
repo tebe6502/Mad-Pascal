@@ -177,14 +177,17 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
 * [run-fox-run](https://gitlab.com/bocianu/run-fox-run)
 * [Robots Rumble](https://github.com/tebe6502/robotsrumble)
+* [neo-pas-template](https://gitlab.com/bocianu/neo-pas-template)
 * [neo-sandbox](https://gitlab.com/bocianu/neo-sandbox)
 * [neo-swimo](https://gitlab.com/bocianu/neo-swimo)
 * [neo-solsuite](https://gitlab.com/bocianu/neo-solsuite)
+* [neo-bohomaze](https://gitlab.com/bocianu/neo-bohomaze)
 * [neo-mplib](https://gitlab.com/bocianu/neo-mplibs)
 * [Mafia](https://github.com/drunkeneye/MAFIA.A8)
 * [PokeyMAX](https://github.com/MADRAFi/PokeyMAX)
 * [PokeyMAX update tool](https://github.com/MADRAFi/PMAX_Update)
 * [rogul](https://gitlab.com/bocianu/rogul)
+* [kara-t-rex](https://gitlab.com/bocianu/kara-t-rex)
 
 ## Benchmarks
 

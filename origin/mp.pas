@@ -254,9 +254,10 @@ function ExtractName(IdentIndex: integer; const a: string): string;
 var lab: string;
 begin
 
- if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then begin
+ lab := Ident[IdentIndex].Name;
 
-   lab := Ident[IdentIndex].Name;
+ if (lab <> a) and (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then begin
+
    if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
    if (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.adr.', a) = 1) then
@@ -715,37 +716,9 @@ begin
 
 	__imulECX: asm65(#9'jsr imulECX');
 
-//     __notBOOLEAN: asm65(#9'jsr notBOOLEAN');
-//	   __notaBX: asm65(#9'jsr notaBX');
-
-//	   __negaBX: asm65(#9'jsr negaBX');
-
-//     __xorEAX_ECX: asm65(#9'jsr xorEAX_ECX');
-//       __xorAX_CX: asm65(#9'jsr xorAX_CX');
-//       __xorAL_CL: asm65(#9'jsr xorAL_CL');
-
-//     __andEAX_ECX: asm65(#9'jsr andEAX_ECX');
-//       __andAX_CX: asm65(#9'jsr andAX_CX');
-//       __andAL_CL: asm65(#9'jsr andAL_CL');
-
-//      __orEAX_ECX: asm65(#9'jsr orEAX_ECX');
-//	  __orAX_CX: asm65(#9'jsr orAX_CX');
-//	  __orAL_CL: asm65(#9'jsr orAL_CL');
-
-//     __cmpEAX_ECX: asm65(#9'jsr cmpEAX_ECX');
-//       __cmpAX_CX: asm65(#9'jsr cmpEAX_ECX.AX_CX');
-//    __cmpSHORTINT: asm65(#9'jsr cmpSHORTINT');
-//    __cmpSMALLINT: asm65(#9'jsr cmpSMALLINT');
-//	   __cmpINT: asm65(#9'jsr cmpINT');
-
-//      __cmpSTRING: asm65(#9'jsr cmpSTRING');
-// __cmpCHAR2STRING: asm65(#9'jsr cmpCHAR2STRING');
-// __cmpSTRING2CHAR: asm65(#9'jsr cmpSTRING2CHAR');
-
    __movaBX_Value: begin
-//		    asm65(#9'ldx sp', '; mov dword ptr [bx], Value');
 
-		    if Kind=VARIABLE then begin		      // @label
+		    if Kind = VARIABLE then begin		      // @label
 
 		     svar := GetLocalName(IdentIndex);
 
@@ -2050,15 +2023,15 @@ begin
    ioOpenRead,
    ioOpenWrite:
 
-	asm65(#9'@openfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
+	asm65(#9'@openfile ' + Ident[IdentIndex].Name + ', #'+IntToStr(ord(Code)));
 
    ioFileMode:
 
-	asm65(#9'@openfile '+Ident[IdentIndex].Name+', MAIN.SYSTEM.FileMode');
+	asm65(#9'@openfile ' + Ident[IdentIndex].Name + ', MAIN.SYSTEM.FileMode');
 
    ioClose:
 
-   	asm65(#9'@closefile '+Ident[IdentIndex].Name);
+   	asm65(#9'@closefile ' + Ident[IdentIndex].Name);
 
  end;
 
@@ -2093,9 +2066,9 @@ begin
    ioWriteRecord:
 
 	if NumParams = 3 then
-	  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code) or $80))
+	  asm65(#9'@readfile ' + Ident[IdentIndex].Name + ', #'+IntToStr(ord(Code) or $80))
 	else
-	  asm65(#9'@readfile '+Ident[IdentIndex].Name+', #'+IntToStr(ord(Code)));
+	  asm65(#9'@readfile ' + Ident[IdentIndex].Name + ', #'+IntToStr(ord(Code)));
 
  end;
 
@@ -6146,7 +6119,6 @@ begin
 
 	      VarType := Ident[IdentIndex].AllocElementType;
 
-
 	      if ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].IdType = DEREFERENCEARRAYTOK)) then begin
 	        NumAllocElements := Ident[IdentIndex].NestedNumAllocElements and $FFFF;
 	        NumAllocElements_ := Ident[IdentIndex].NestedNumAllocElements shr 16;
@@ -6229,7 +6201,7 @@ begin
 
 	    if NumAllocElements_ > 0 then begin
 
-	     if (Tok[i + 1].Kind = CBRACKETTOK) and (Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK]) then begin
+	     if (Tok[i + 1].Kind = CBRACKETTOK) and (Tok[i + 2].Kind <> OBRACKETTOK) {(Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK])} then begin
 	      yes := FALSE;
 
 	      Push(0, ASVALUE, DataSize[ArrayIndexType]);
@@ -6412,16 +6384,15 @@ begin
 	      i := CompileArrayIndex(i, IdentIndex, AllocElementType);
 
 
-	if Ident[IdentIndex].DataType = ENUMTYPE then begin
-//   Size := DataSize[Ident[IdentIndex].AllocElementType];
-	 NumAllocElements := 0;
-	end else
-	 NumAllocElements := Elements(IdentIndex); //Ident[IdentIndex].NumAllocElements;
+	if Ident[IdentIndex].DataType = ENUMTYPE then
+	  NumAllocElements := 0
+	else
+	  NumAllocElements := Elements(IdentIndex);
 
 	svar := GetLocalName(IdentIndex);
 
   	if (pos('.', svar) > 0) then begin
-//	 lab:=copy(svar,1,pos('.', svar)-1);
+//	 lab:=copy(svar, 1, svar.IndexOf('.'));
 	 lab := ExtractName(IdentIndex, svar);
 
 	 rec := (Ident[GetIdent(lab)].AllocElementType = RECORDTOK);
@@ -6429,7 +6400,7 @@ begin
 
 	//AllocElementType := Ident[IdentIndex].AllocElementType;
 
-//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',VarPass );
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',VarPass ,',',rec,',',Ident[IdentIndex].idType);
 
 	if rec then begin							// record.array[]
 
@@ -7147,6 +7118,10 @@ begin
 
 	end;
 
+	if AllocElementType = ARRAYTOK then begin
+         AllocElementType := POINTERTOK;
+	end;
+
 
 	if Tok[i].Kind = IDENTTOK then
 	 IdentTemp := GetIdent(Tok[i].Name^)
@@ -7266,9 +7241,14 @@ begin
 
        end else begin
 
-	i := CompileExpression(i + 2, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);	// Evaluate actual parameters and push them onto the stack
+        if (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) and (Ident[IdentIndex].Param[NumActualParams].NumAllocElements > 0) and not (Ident[IdentIndex].Param[NumActualParams].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+  	  i := CompileAddress(i + 1, ActualParamType, AllocElementType)
+	else
+	  i := CompileExpression(i + 2, ActualParamType, Ident[IdentIndex].Param[NumActualParams].DataType);	// Evaluate actual parameters and push them onto the stack
 
-//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',    Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+
+
+//	writeln(Ident[IdentIndex].name,',', Ident[IdentIndex].kind,',',Ident[IdentIndex].Param[NumActualParams].DataType,',',Ident[IdentIndex].Param[NumActualParams].NumAllocElements,',',Ident[IdentIndex].Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
 
         if (ActualParamType in IntegerTypes) and (Ident[IdentIndex].Param[NumActualParams].DataType in RealTypes) then begin
@@ -7282,6 +7262,9 @@ begin
         if (Ident[IdentIndex].Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes) then
 	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
+
+	if (Ident[IdentIndex].Param[NumActualParams].DataType = POINTERTOK) then
+	  GetCommonType(i, Ident[IdentIndex].Param[NumActualParams].DataType, ActualParamType);
 
 
 	if (Tok[i].Kind = IDENTTOK) and (Ident[IdentIndex].Param[NumActualParams].DataType = ENUMTOK) then begin
@@ -8899,6 +8882,10 @@ case Tok[i].Kind of
 
 		 i := CompileAddress(i+1, VarType, ValType);
 
+
+//writeln(Ident[IdentIndex].name, ',', Ident[IdentIndex].PassMethod,',',VarType,',',ValType);
+
+
 		 CheckTok(i + 1, CPARTOK);
 		 CheckTok(i + 2, OBRACKETTOK);
 
@@ -8919,7 +8906,9 @@ case Tok[i].Kind of
     		 asm65(#9'sta :bp2+1');
 		 asm65(#9'ldy #$00');
 // perl
-//		 writeln( DataSize[Ident[IdentIndex].AllocElementType],',', Ident[IdentIndex].AllocElementType );
+//		 writeln(Ident[IdentIndex].name,',', DataSize[Ident[IdentIndex].AllocElementType],',', Ident[IdentIndex].AllocElementType ,',',ValType,',',VarType);
+
+	         ValType := Ident[IdentIndex].AllocElementType;
 
 	 	 case DataSize[Ident[IdentIndex].AllocElementType] of
 		  1: begin
@@ -9360,15 +9349,16 @@ case Tok[i].Kind of
 	  else
 	    begin
 
-//writeln('> ',Ident[IdentIndex].Name,',',ValType,',',Ident[GetIdent(Tok[i].Name^)].name);
+//	writeln('> ',Ident[IdentIndex].Name,',',ValType,',',Ident[GetIdent(Tok[i].Name^)].name,',',VarType);
 // perl
   	    i := CompileArrayIndex(i, IdentIndex, ValType);							// array[ ].field
+
 
  	    if ValType = ARRAYTOK then begin
 
 	        ValType := POINTERTOK ;
 
-		Push(0, ASPOINTER, DataSize[ValType], IdentIndex, 0);
+	        Push(0, ASPOINTER, DataSize[ValType], IdentIndex, 0);
 
 	    end else
 
@@ -9488,6 +9478,10 @@ case Tok[i].Kind of
 
 
 	     if ValType in [RECORDTOK, OBJECTTOK] then ValType := POINTERTOK;
+
+
+	     if VarType <> UNTYPETOK then
+              if DataSize[ValType] > DataSize[VarType] then ValType := VarType;
 
 
 	     Push(Ident[IdentIndex].Value, IndirectionLevel, DataSize[ValType], IdentIndex, IdentTemp and $ffff);
@@ -14827,8 +14821,6 @@ end;
 
 begin
 
-// yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
-
 {
   if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
@@ -15017,7 +15009,6 @@ end;
 
 begin
 
-// yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 {
   if (Tok[i].Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin		// init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
@@ -15363,8 +15354,8 @@ end;	//CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(i: integer; var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean);
-var tmpVarDataSize_, ParamIndex{, idx}: integer;
+procedure CompileRecordDeclaration(i: integer; var VarOfSameType: TVariableList; var tmpVarDataSize: integer; var ConstVal: Int64; VarOfSameTypeIndex: integer; VarType, AllocElementType: Byte; NumAllocElements: cardinal; isAbsolute: Boolean; var idx: integer);
+var tmpVarDataSize_, ParamIndex: integer;
 begin
 
 //	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
@@ -15391,7 +15382,7 @@ begin
 	   if Ident[NumIdent].isAbsolute = false then inc(tmpVarDataSize, DataSize[POINTERTOK]);		// wskaznik dla ^record
 
 
-	 //idx := Ident[NumIdent].Value - DATAORIGIN;
+	 idx := Ident[NumIdent].Value - DATAORIGIN;
 
 //writeln(NumAllocElements);
 //!@!@
@@ -15436,7 +15427,7 @@ begin
 
 	  end;
 
-end;
+end;	//CompileRecordDeclaration
 
 
 // ----------------------------------------------------------------------------
@@ -16847,7 +16838,7 @@ while Tok[i].Kind in
 	end;
 
 
-	CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute);
+	CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType, AllocElementType, NumAllocElements, isAbsolute, idx);	// !!! idx !!!
 
 
       end;
@@ -16865,7 +16856,7 @@ while Tok[i].Kind in
 
        if isAbsolute and (open_array = false) then
 
-	SetVarDataSize( i, tmpVarDataSize   )
+	SetVarDataSize( i, tmpVarDataSize )
 
        else
 
