@@ -6563,7 +6563,8 @@ begin
   if NumAllocElements_ > 0 then
   begin
 
-    if (TokenAt(i + 1).Kind = CBRACKETTOK) and (TokenAt(i + 2).Kind in [ASSIGNTOK, SEMICOLONTOK]) then
+    if (TokenAt(i + 1).Kind = CBRACKETTOK) and (TokenAt(i + 2).Kind <> OBRACKETTOK)
+    {(Tok[i + 2].Kind in [ASSIGNTOK, SEMICOLONTOK])} then
     begin
       yes := False;
 
@@ -7592,6 +7593,10 @@ begin
 
           i := CompileAddress(i + 1, ActualParamType, AllocElementType, True);
 
+          if AllocElementType = ARRAYTOK then
+          begin
+            AllocElementType := POINTERTOK;
+          end;
 
           //  writeln(IdentifierAt(IdentIndex).Param[NumActualParams].Name,',',IdentifierAt(IdentIndex).Param[NumActualParams].DataType  ,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType,',',IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements and $FFFF,'/',IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements shr 16,' | ',ActualParamType,',', AllocElementType);
 
@@ -7790,6 +7795,9 @@ begin
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealTypes) and
             (ActualParamType in RealTypes) then
+            GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+
+          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDatatype.POINTERTOK) then
             GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = ENUMTOK) then
