@@ -617,6 +617,15 @@ var
 {$ENDIF}
 
 // ----------------------------------------------------------------------------
+type
+  TTokenIndex = Integer;
+
+type
+  TIdentifierIndex = Integer;
+
+function TokenAt(tokenIndex: TTokenIndex): TToken;
+
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 
 procedure AddDefine(X: String);
 
@@ -667,9 +676,6 @@ function Min(a, b: Integer): Integer;
 function SearchDefine(X: String): Integer;
 
 function StrToInt(const a: String): Int64;
-
-type
-  TTokenIndex = Integer;
 
 procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
@@ -1047,8 +1053,8 @@ begin
   //writeln(tok[ErrTokenIndex].Name^,',', op,',',DataType);
 
   if {(not (DataType in (OrdinalTypes + [REALTOK, POINTERTOK]))) or}
-  ((DataType in RealTypes) and not (op in [MULTOK, DIVTOK, PLUSTOK, MINUSTOK, GTTOK,
-    GETOK, EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in IntegerTypes) and not
+  ((DataType in RealTypes) and not (op in [MULTOK, DIVTOK, PLUSTOK, MINUSTOK, GTTOK, GETOK,
+    EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in IntegerTypes) and not
     (op in [MULTOK, IDIVTOK, MODTOK, SHLTOK, SHRTOK, ANDTOK, PLUSTOK, MINUSTOK, ORTOK, XORTOK,
     NOTTOK, GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or ((DataType = CHARTOK) and
     not (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, INTOK])) or
@@ -1056,8 +1062,8 @@ begin
     EQTOK, NETOK, LETOK, LTTOK])) or ((DataType in Pointers) and not
     (op in [GTTOK, GETOK, EQTOK, NETOK, LETOK, LTTOK, PLUSTOK, MINUSTOK])) then
     if DataType = RightType then
-      Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) + '" ' +
-        InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
+      Error(ErrTokenIndex, 'Operator is not overloaded: ' + '"' + InfoAboutToken(DataType) +
+        '" ' + InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"')
     else
       Error(ErrTokenIndex, 'Operation "' + InfoAboutToken(op) + '" not supported for types "' +
         InfoAboutToken(DataType) + '" and "' + InfoAboutToken(RightType) + '"');
@@ -1075,7 +1081,8 @@ begin
   if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> RECORDTOK) then
     if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
       Ord(Ident[IdentIndex].DataType = STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements <> 1 then warning(i, RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
+      if Ident[IdentIndex].NumAllocElements <> 1 then
+        warning(i, RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
 
 end;
 
@@ -1347,11 +1354,10 @@ begin
     ((DstType <> REALTOK) and (SrcType = REALTOK)) or ((DstType = SINGLETOK) and (SrcType <> SINGLETOK)) or
     ((DstType <> SINGLETOK) and (SrcType = SINGLETOK)) or ((DstType = HALFSINGLETOK) and
     (SrcType <> HALFSINGLETOK)) or ((DstType <> HALFSINGLETOK) and (SrcType = HALFSINGLETOK)) or
-    ((DstType = SHORTREALTOK) and (SrcType <> SHORTREALTOK)) or
-    ((DstType <> SHORTREALTOK) and (SrcType = SHORTREALTOK)) or
-    ((DstType in IntegerTypes) and (SrcType in [CHARTOK, BOOLEANTOK, POINTERTOK, DATAORIGINOFFSET,
-    CODEORIGINOFFSET, STRINGPOINTERTOK])) or ((SrcType in IntegerTypes) and
-    (DstType in [CHARTOK, BOOLEANTOK])) then
+    ((DstType = SHORTREALTOK) and (SrcType <> SHORTREALTOK)) or ((DstType <> SHORTREALTOK) and
+    (SrcType = SHORTREALTOK)) or ((DstType in IntegerTypes) and
+    (SrcType in [CHARTOK, BOOLEANTOK, POINTERTOK, DATAORIGINOFFSET, CODEORIGINOFFSET, STRINGPOINTERTOK])) or
+    ((SrcType in IntegerTypes) and (DstType in [CHARTOK, BOOLEANTOK])) then
 
     if err then
       iError(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
@@ -1468,6 +1474,17 @@ end;  //DefineStaticString
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+
+function TokenAt(tokenIndex: TTokenIndex): TToken;
+begin
+  Result := Tok[tokenIndex];
+end;
+
+
+function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+begin
+  Result := Ident[identifierIndex];
+end;
 
 
 end.
