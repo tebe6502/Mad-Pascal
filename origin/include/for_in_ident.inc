@@ -4,7 +4,7 @@
 // -----------------------------------------------------------------------------
 
   	    if Tok[j].Kind <> IDENTTOK then
-	      iError(j, IdentifierExpected);
+	      Error(j, IdentifierExpected);
 
 	    IdentTemp := GetIdent(Tok[j].Name^);
 

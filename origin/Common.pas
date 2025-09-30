@@ -1211,7 +1211,7 @@ begin
 
   case DataType of
 
-    UNTYPETOK: iError(i, CantReadWrite);
+    UNTYPETOK: Error(i, CantReadWrite);
     INTEGERTOK: Result := Low(Integer);
     SMALLINTTOK: Result := Low(Smallint);
     SHORTINTTOK: Result := Low(Shortint);
@@ -1224,7 +1224,7 @@ begin
     POINTERTOK: Result := 0;
 
     else
-      iError(i, TypeMismatch);
+      Error(i, TypeMismatch);
 
   end;// case
 
@@ -1242,7 +1242,7 @@ begin
 
   case DataType of
 
-    UNTYPETOK: iError(i, CantReadWrite);
+    UNTYPETOK: Error(i, CantReadWrite);
     INTEGERTOK: Result := High(Integer);
     SMALLINTTOK: Result := High(Smallint);
     SHORTINTTOK: Result := High(Shortint);
@@ -1255,7 +1255,7 @@ begin
     POINTERTOK: Result := High(Word);
 
     else
-      iError(i, TypeMismatch);
+      Error(i, TypeMismatch);
 
   end;// case
 
@@ -1360,7 +1360,7 @@ begin
     ((SrcType in IntegerTypes) and (DstType in [CHARTOK, BOOLEANTOK])) then
 
     if err then
-      iError(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
+      Error(ErrTokenIndex, IncompatibleTypes, 0, SrcType, DstType)
     else
       Result := True;
 
@@ -1390,7 +1390,7 @@ begin
   if LeftType = UNTYPETOK then Result := RightType;
 
   if Result = 0 then
-    iError(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
+    Error(ErrTokenIndex, IncompatibleTypes, 0, RightType, LeftType);
 
 end;  //GetCommonType
 

@@ -1,8 +1,7 @@
 unit Scanner;
 
-interface
-
 {$i define.inc}
+interface
 
 // ----------------------------------------------------------------------------
 
@@ -28,6 +27,10 @@ uses SysUtils, Common, Messages, SplitString;
 
 // ----------------------------------------------------------------------------
 
+procedure ErrorOrdinalExpExpected(i: TTokenIndex);
+begin
+  Error(i, TErrorCode.OrdinalExpExpected);
+end;
 
 procedure TokenizeProgramInitialization;
 var
@@ -873,7 +876,7 @@ var
                               val(s, v, Err);
 
                               if Err > 0 then
-                                iError(NumTok, OrdinalExpExpected);
+                                ErrorOrdinalExpExpected(NumTok);
 
                               GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
 
@@ -951,7 +954,7 @@ var
   val(s,CPUMode, Err);
 
   if Err > 0 then
-   iError(NumTok, OrdinalExpExpected);
+   Error(NumTok, OrdinalExpExpected);
 
   GetCommonConstType(NumTok, CARDINALTOK, GetValueType(CPUMode));
 
@@ -984,7 +987,7 @@ var
                                         val(s, FastMul, Err);
 
                                         if Err <> 0 then
-                                          iError(NumTok, OrdinalExpExpected);
+                                          ErrorOrdinalExpExpected(NumTok);
 
                                         AddDefine('FASTMUL');
                                         AddDefines := NumDefines;
@@ -1378,7 +1381,7 @@ var
         end;
 
         if length(Num) = 0 then
-          iError(NumTok, OrdinalExpExpected);
+          ErrorOrdinalExpExpected(NumTok);
 
         Num := '%' + Num;
 
@@ -1397,7 +1400,7 @@ var
           end;
 
           if length(Num) = 0 then
-            iError(NumTok, OrdinalExpExpected);
+            ErrorOrdinalExpExpected(NumTok);
 
           Num := '$' + Num;
 
@@ -2340,7 +2343,7 @@ var
       end;
 
       if length(Num) = 0 then
-        iError(NumTok, OrdinalExpExpected);
+        ErrorOrdinalExpExpected(NumTok);
 
       Num := '%' + Num;
 
@@ -2361,7 +2364,7 @@ var
         end;
 
         if length(Num) = 0 then
-          iError(NumTok, OrdinalExpExpected);
+          ErrorOrdinalExpExpected(NumTok);
 
         Num := '$' + Num;
 
