@@ -6,15 +6,11 @@ interface
 
 // ----------------------------------------------------------------------------
 
-var
-  TemporaryBuf: array [0..511] of String;
-
+procedure ResetOpty;
 
 procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
-procedure OptimizeProgram(MainIndex: Integer);
-
-procedure ResetOpty;
+procedure OptimizeProgram(MainProcedureIndex: Integer);
 
 procedure WriteOut(a: String);            // OptimizeTemporaryBuf
 
@@ -25,6 +21,9 @@ procedure FlushTempBuf;
 implementation
 
 uses Crt, SysUtils, Common;
+var
+  TemporaryBuf: array [0..511] of String;
+
 
 // ----------------------------------------------------------------------------
 
@@ -43,12 +42,12 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure OptimizeProgram(MainIndex: Integer);
+procedure OptimizeProgram(MainProcedureIndex: Integer);
 type
-  TBoolean = array [1..MAXBLOCKS] of Boolean;
+  TBooleanArray = array [1..MAXBLOCKS] of Boolean;
 
 var
-  ProcAsBlock: TBoolean;          // issue #125 fixed
+  ProcAsBlock: TBooleanArray;          // issue #125 fixed
 
   procedure MarkNotDead(IdentIndex: Integer);
   var
@@ -57,7 +56,7 @@ var
 
     Ident[IdentIndex].IsNotDead := True;
 
-    ProcAsBlockIndex := Ident[IdentIndex].ProcAsBlock;
+    ProcAsBlockIndex := IdentifierAt(IdentIndex).ProcAsBlock;
 
     if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) and
       (CallGraph[ProcAsBlockIndex].NumChildren > 0) then
@@ -67,7 +66,7 @@ var
 
       for ChildIndex := 1 to CallGraph[ProcAsBlockIndex].NumChildren do
         for ChildIdentIndex := 1 to NumIdent do
-          if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock =
+          if (IdentifierAt(ChildIdentIndex).ProcAsBlock > 0) and (IdentifierAt(ChildIdentIndex).ProcAsBlock =
             CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
             MarkNotDead(ChildIdentIndex);
 
@@ -77,11 +76,10 @@ var
 
 begin
 
-  //fillbyte(ProcAsBlock, sizeof(ProcAsBlock), 0);
-  ProcAsBlock := Default(TBoolean);
+  ProcAsBlock := Default(TBooleanArray);
 
   // Perform dead code elimination
-  MarkNotDead(MainIndex);
+  MarkNotDead(MainProcedureIndex);
 
 end;
 
@@ -539,6 +537,7 @@ procedure OptimizeASM;
 type
   TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;
+  TString0_3_Array = array [0..3] of String;
 
 var
   inxUse, found: Boolean;
@@ -551,7 +550,7 @@ var
 
   a, t, arg0: String;
 
-  s: array [0..15, 0..3] of String;
+  s: array [0..15] of TString0_3_Array;
 
   // -----------------------------------------------------------------------------
 
@@ -607,12 +606,7 @@ var
 
       NormVideo;
 
-      //       FreeTokens;
-
-      //       CloseFile(OutFile);
-      //       Erase(OutFile);
-
-      //       Halt(2);
+    // RaiseHaltException(THaltException.COMPILING_ABORTED);
     end;
 
     WriteOut(listing[i]);
@@ -1030,7 +1024,7 @@ var
     a := listing[j];
 
     if a <> '' then
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9]) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -1093,7 +1087,7 @@ var
 
       while a[i] in [' ', #9] do Inc(i);
 
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9])  do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -1107,16 +1101,25 @@ var
 
 
   function RemoveUnusedSTACK: Boolean;
+  const
+    last_i = 7;
+  const
+    last_i_plus_one = last_i + 1;
+  const
+    min_j = 0;
+  const
+    last_j = 3;
+  type
+    TArray0_3Boolean = array[min_j..last_j] of Boolean;
   var
-    j: Byte;
-    i: Integer;
-    cnt_l,          // licznik odczytow stosu
-    cnt_s: array [0..7 + 1, 0..3] of Boolean;  // licznik zapisow stosu
+    i, j: Integer;
+    cnt_l,          // load stack pointer
+    cnt_s: array [0..last_i_plus_one] of TArray0_3Boolean;  // store stack pointer
 
 
     procedure Clear;
     var
-      i: Byte;
+      i, j: Byte;
     begin
 
       for i := 0 to 15 do
@@ -1127,8 +1130,14 @@ var
         s[i][3] := '';
       end;
 
-      fillchar(cnt_l, sizeof(cnt_l), False);
-      fillchar(cnt_s, sizeof(cnt_s), False);
+      for i := Low(cnt_l) to High(cnt_l) do
+      begin
+        for j := min_j to last_j do
+        begin
+          cnt_l[i][j] := False;
+          cnt_s[i][j] := False;
+        end;
+      end;
 
     end;
 
@@ -1311,7 +1320,7 @@ var
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i, p: Integer;
+    i: Integer;
     tmp: String;
   begin
 
@@ -1528,7 +1537,7 @@ end;
 
     function PeepholeOptimization_STA: Boolean;
     var
-      i, p: Integer;
+      i: Integer;
     begin
 
       Result := True;
@@ -1612,7 +1621,7 @@ end;
 
     function PeepholeOptimization: Boolean;
     var
-      p, i: Integer;
+      i: Integer;
     begin
 
       Result := True;
@@ -3684,7 +3693,7 @@ begin        // OptimizeASM
 
     if l > High(listing) then
     begin
-      writeln('Out of resources, LISTING');
+      WriteLn('Out of resources, LISTING');
       halt;
     end;
 
@@ -3813,7 +3822,7 @@ var
 begin
 
 {$IFDEF OPTIMIZECODE}
- optimize_code := true;
+ optimize_code := True;
 {$ELSE}
   optimize_code := False;
 {$ENDIF}
