@@ -9,11 +9,11 @@ program MakeMadPascal;
 uses
  {$IFDEF DARWIN}
 
-                                                           {$ENDIF} {$IFDEF WINDOWS}
+                                                             {$ENDIF} {$IFDEF WINDOWS}
   Windows,
-                                                           {$ENDIF} {$IFDEF UNIX}
+                                                             {$ENDIF} {$IFDEF UNIX}
   cthreads, cmem,
-                                                           {$ENDIF}
+                                                             {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -272,26 +272,30 @@ var
         line := UpperCase(line);
         CheckForLibrary(line, 'blibs', Result);
         CheckForLibrary(line, 'dlibs', Result);
-        if (Pos('PROGRAM ', line) > 0) then
+        if (Result.fileType = TFileType.UNKNOWN) and (Pos('PROGRAM ', line) > 0) then
         begin
           Result.fileType := TFileType.TPROGRAM;
         end;
-        if (Pos('UNIT ', line) > 0) then
+        if (Result.fileType = TFileType.UNKNOWN) and (Pos('UNIT ', line) > 0) then
         begin
           Result.fileType := TFileType.TUNIT;
         end;
-        if (Pos('USES ', line) > 0) then
+
+        if Result.fileType = TFileType.UNKNOWN then
         begin
-          if Result.fileType = TFileType.UNKNOWN then
+          if (Pos('USES ', line) > 0) then
           begin
-            Result.fileType := TFileType.TPROGRAM;
+
+            begin
+              Result.fileType := TFileType.TPROGRAM;
+            end;
+            done := True;
           end;
-          done := True;
-        end;
-        if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
-        begin
-          Result.fileType := TFileType.TINCLUDE;
-          done := True;
+          if (Pos('PROCEDURE ', line) > 0) or (Pos('FUNCTION ', line) > 0) then
+          begin
+            Result.fileType := TFileType.TINCLUDE;
+            done := True;
+          end;
         end;
 
         if (Pos('BEGIN ', line) > 0) then
@@ -819,20 +823,21 @@ type
       Value := '';
   end;
 
-  function GetCountText(count: Cardinal; singular:String; plural:String):String;
+  function GetCountText(Count: Cardinal; singular: String; plural: String): String;
   begin
-    if count =1 then
+    if Count = 1 then
     begin
-      Result:=Format('%d %s', [count, singular]);
+      Result := Format('%d %s', [Count, singular]);
     end
     else
     begin
-      Result :=Format('%d %s', [count, plural]);
+      Result := Format('%d %s', [Count, plural]);
     end;
   end;
 
   procedure Main;
-  const MP_ORIGIN_FOLDER = 'origin';
+  const
+    MP_ORIGIN_FOLDER = 'origin';
 
   {$IFDEF DARWIN}
   const
@@ -1005,7 +1010,8 @@ type
         threads := 1;
       end;
 
-      Log(Format('Processing %s with %s.', [GetCountText(ProgramFiles.Count,'Pascal program','Pascal programs'), GetCountText(threads, 'thread', 'threads')]));
+      Log(Format('Processing %s with %s.', [GetCountText(ProgramFiles.Count, 'Pascal program', 'Pascal programs'),
+        GetCountText(threads, 'thread', 'threads')]));
 
 
       if (options.cleanup) then
@@ -1095,7 +1101,8 @@ type
         end
         else
         begin
-          operation.logMessages.Add(Format('Found %s.', [GetCountText(operation.diffFilePaths.Count, 'different file', 'different files')]));
+          operation.logMessages.Add(Format('Found %s.',
+            [GetCountText(operation.diffFilePaths.Count, 'different file', 'different files')]));
           operation.logMessages.AddStrings(operation.diffFilePaths);
         end;
 

@@ -36,7 +36,7 @@
         </Mode>
         <Mode Name="all">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePa2ttern dynrec.pas"/>
+            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern bracket"/>
           </local>
         </Mode>
       </Modes>

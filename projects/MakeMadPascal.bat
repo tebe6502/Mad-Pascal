@@ -1,10 +1,11 @@
+@echo off
+cd %~dp0
 rem Replace .pas ^ .pas ^
 rem Replace -inputFilePattern IdentifierAt(IdentIndex)   -inputFilePattern
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
 -inputFilePattern samples\a8\graph\stereogram.pas ^
 -inputFilePattern samples\common\math\fft\fourier.pas ^
--inputFilePattern samples\tests\tests-medium\array-with-char-index.pas ^
--inputFilePattern samples\a8\crt_console\life.pas ^
+-inputFilePattern samples\a8\crt_console\life2.pas ^
 -inputFilePattern samples\a8\demoeffects\bobs.pas ^
 -inputFilePattern samples\a8\demoeffects\bobs_f.pas ^
 -inputFilePattern samples\a8\games\jump.pas ^
@@ -20,6 +21,7 @@ MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -co
 -inputFilePattern samples\common\crt_console\life.pas ^
 -inputFilePattern samples\common\graphics\mandel.pas ^
 -inputFilePattern samples\common\object\hello.pas ^
+-inputFilePattern samples\tests\tests-array\array_bracket.pas ^
 -inputFilePattern samples\tests\tests-basic\negative-index-range.pas ^
 -inputFilePattern samples\tests\tests-medium\array-with-char-index.pas ^
 -inputFilePattern samples\vic-20\snake\vic20.pas ^
