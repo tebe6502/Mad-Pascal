@@ -3637,23 +3637,6 @@ begin
       else
         asm65(#9'mwy ' + svar + ' :bp2');
 
-{
-        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then begin
-
-
-  writeln(IdentifierAt(Identindex).name,',',IdentifierAt(Identindex).AllocElementType,',',IdentifierAt(Identindex).NumAllocElements,',',IdentifierAt(Identindex).kind);
-
-
-     asm65(#9'ldy #$00') ;
-     asm65(#9'lda (:bp2),y') ;
-     asm65(#9'pha') ;
-     asm65(#9'iny') ;
-     asm65(#9'lda (:bp2),y') ;
-     asm65(#9'sta :bp2+1') ;
-     asm65(#9'pla') ;
-     asm65(#9'sta :bp2') ;
-  end;
-}
 
       LoadRegisterY;
 
@@ -3801,7 +3784,6 @@ begin
   a65(TCode65.subBX);
 
   asm65(#9'lda :STACKORIGIN+1,x');
-
   asm65(#9'bne *+5');
 end;
 
@@ -8124,14 +8106,14 @@ begin
         Dec(NumActualParams);
       end;
 
-    //until TokenAt(i + 1].Kind <> TTokenKind.COMMATOK;
+    //until TokenAt(i + 1).Kind <> TTokenKind.COMMATOK;
 
     i := Param[1].i_;
 
     CheckTok(i + 1, TTokenKind.CPARTOK);
 
     Inc(i);
-  end;// if TokenAt(i + 1].Kind = OPARTOR
+  end;// if TokenAt(i + 1).Kind = OPARTOR
 
 
   NumActualParams := ParamIndex;
@@ -10353,7 +10335,7 @@ begin
                         {or (ValType = TDataType. TTokenKind.HALFSINGLETOK)} then
                         begin
                           ConstVal := CastToHalfSingle(ConstVal);
-                          //ValType := TTokenKind. TTokenKind.HALFSINGLETOK;
+                          //ValType := TTokenKind.HALFSINGLETOK;
                         end;
 
                         if (VarType = TDataType.SINGLETOK) then
