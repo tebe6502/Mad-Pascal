@@ -36,6 +36,8 @@ if not "%TEST_EXE%"=="" (
   if errorlevel 1 goto :eof
 )
 
+
+
 if not "%MP_EXE%"=="" (
   echo INFO: Compiling %MP_PAS% to %MP_EXE%.
   if exist "%MP_EXE%" del "%MP_EXE%"
@@ -50,6 +52,7 @@ if not "%MP_EXE%"=="" (
   if exist "mp.exe" (
     echo WARNING: Cannot delete %CD%\mp.exe
   )
+)
 
 rem Regression test with standard MP.
 call %MP_FOLDER%\projects\MakeMadPascal.bat
