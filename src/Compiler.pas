@@ -10146,8 +10146,9 @@ begin
 
                               Inc(i);
 
-                              ValType := IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                                '.' + TokenAt(i).Name)).AllocElementType;
+                              ValType :=
+                                IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' +
+                                TokenAt(i).Name)).AllocElementType;
 
                               IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
@@ -10236,8 +10237,9 @@ begin
                                   [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                                 begin
 
-                                  svar := copy(IdentifierAt(IdentIndex).Name,
-                                    pos('.', IdentifierAt(IdentIndex).Name) + 1, length(IdentifierAt(IdentIndex).Name));
+                                  svar :=
+                                    copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) +
+                                    1, length(IdentifierAt(IdentIndex).Name));
 
                                   IdentIndex := IdentTemp;
 
@@ -10257,7 +10259,14 @@ begin
 
 
                               if ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                              begin
                                 ValType := TDataType.POINTERTOK;
+                              end;
+
+                              if VarType <> TDataType.UNTYPETOK then
+                              begin
+                                if GetDataSize(ValType) > GetDataSize(VarType) then ValType := VarType;
+                              end;
 
                               Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType),
                                 IdentIndex, IdentTemp and $ffff);
