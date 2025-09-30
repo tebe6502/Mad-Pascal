@@ -23,7 +23,7 @@ procedure omin_spacje(var i: Integer; var a: String);
 
 implementation
 
-uses SysUtils, Common, Messages, SplitString;
+uses SysUtils, Common, Messages, Optimize, SplitString;
 
 // ----------------------------------------------------------------------------
 
@@ -37,9 +37,10 @@ var
   i: Integer;
 begin
 
+  NumTok := 0;
+  NumIdent := 0;
   fillchar(Ident, sizeof(Ident), 0);
   fillchar(DataSegment, sizeof(DataSegment), 0);
-  fillchar(StaticStringData, sizeof(StaticStringData), 0);
 
   PublicSection := True;
   UnitNameIndex := 1;
@@ -47,6 +48,7 @@ begin
   SetLength(WithName, 1);
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
+  
   SetLength(msgUser, 1);
   SetLength(msgWarning, 1);
   SetLength(msgNote, 1);
@@ -54,16 +56,15 @@ begin
   NumBlocks := 0;
   BlockStackTop := 0;
   CodeSize := 0;
-  CodePosStackTop := 0; // SetVarDataSize(0,0);
+  CodePosStackTop := 0;
   CaseCnt := 0;
   IfCnt := 0;
   ShrShlCnt := 0;
   NumTypes := 0;
   run_func := 0;
   NumProc := 0;
-  NumTok := 0;
-  NumIdent := 0;
 
+  fillchar(StaticStringData, sizeof(StaticStringData), 0);
   NumStaticStrChars := 0;
 
   IfdefLevel := 0;
@@ -71,10 +72,9 @@ begin
 
   NumDefines := AddDefines;
 
-  optyA := '';
-  optyY := '';
-  optyBP2 := '';
+  ResetOpty;
 
+  // Do NOT put this into ResetOpty!
   optyFOR0 := '';
   optyFOR1 := '';
   optyFOR2 := '';
