@@ -24,7 +24,8 @@ type
 // ----------------------------------------------------------------------------
 
 procedure Error(tokenIndex: TTokenIndex; const msg: String); overload;
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; IdentIndex: Integer = 0;
+  SrcType: Int64 = 0; DstType: Int64 = 0); overload;
 
 function ErrorMessage(ErrTokenIndex: Integer; err: ErrorCode; IdentIndex: Integer = 0;
   SrcType: Int64 = 0; DstType: Int64 = 0): String;
@@ -316,9 +317,10 @@ begin
 
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;IdentIndex: Integer = 0;
+  SrcType: Int64 = 0; DstType: Int64 = 0); overload;
 begin
-  iError(tokenIndex, errorCode);
+  iError(tokenIndex, errorCode, IdentIndex, SrcType, DstType);
 end;
 
 // ----------------------------------------------------------------------------
