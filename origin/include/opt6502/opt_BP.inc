@@ -753,6 +753,43 @@ begin
        end;
 
 
+    if STA_BP2_Y(i+12) and									// sta (:bp2),y				; 12
+
+       ldy_im_0(i) and (listing[i] = listing[i+7]) and						// ldy #$00				; 0
+
+       lda_bp2_y(i+1) and									// lda (:bp2),y				; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
+       iny(i+3) and										// iny					; 3
+       lda_bp2_y(i+4) and									// lda (:bp2),y				; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
+       mwy_bp2(i+6) and										// mwy X :bp2				; 6
+//       ldy_im_0(i+7) and 									// ldy #$00				; 7
+       lda_stack(i+8) and									// lda :STACKORIGIN			; 8
+       STA_BP2_Y(i+9) and									// sta (:bp2),y				; 9
+       iny(i+10) and										// iny					; 10
+       lda_stack(i+11) then 									// lda :STACKORIGIN+STACKWIDTH		; 11
+//       STA_BP2_Y(i+12) then									// sta (:bp2),y				; 12
+     if argMatch(i+2, i+8) and
+	argMatch(i+5, i+11) then
+       begin
+	listing[i]   := #9'mwy ' + GetString(i+6) + ' :TMP';
+	listing[i+1] := #9'ldy #$00';
+	listing[i+2] := #9'lda (:bp2),y';
+	listing[i+3] := #9'sta (:TMP),y';
+	listing[i+4] := #9'iny';
+	listing[i+5] := #9'lda (:bp2),y';
+	listing[i+6] := #9'sta (:TMP),y';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10]:= '';
+	listing[i+11]:= '';
+	listing[i+12]:= '';
+
+	exit(false);
+       end;
+
+
     if STA_BP2_Y(i+7) and									// sta (:bp2),y				; 7
 
        lda_a(i) and (iy(i) = false) and								// lda					; 0
