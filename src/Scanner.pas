@@ -244,7 +244,8 @@ var
       i, j, k: Integer;
       _line: Integer;
       _uidx: TSourceFile;
-      s, nam: String;
+      unitName: String;
+      filePath: TFilePath;
     begin
 
       UsesFound := False;
@@ -261,12 +262,12 @@ var
           CheckTok(i - 1, TTokenKind.INTOK);
           CheckTok(i - 2, TTokenKind.IDENTTOK);
 
-          nam := '';
+          filePath := '';
 
           for k := 1 to TokenAt(i).StrLength do
-            nam := nam + chr(StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + k]);
+            filePath := filePath + chr(StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + k]);
 
-          nam := FindFile(nam, 'unit');
+          filePath := FindFile(filePath, 'unit');
 
           Dec(i, 2);
 
@@ -276,19 +277,19 @@ var
 
           CheckTok(i, TTokenKind.IDENTTOK);
 
-          nam := FindFile(TokenAt(i).Name + '.pas', 'unit');
+          filePath := FindFile(TokenAt(i).Name + '.pas', 'unit');
 
         end;
 
 
-        s := AnsiUpperCase(TokenAt(i).Name);
+        unitName := AnsiUpperCase(TokenAt(i).Name);
 
 
         // We clear earlier usages of the same unit.
         // This means this entry in the unit list will not be tokenized.
         for j := 2 to SourceFileList.Size do
         begin
-          if SourceFileList.GetSourceFile(j).Name = s then SourceFileList.GetSourceFile(j).Name := '';
+          if SourceFileList.GetSourceFile(j).Name = unitName then SourceFileList.GetSourceFile(j).Name := '';
         end;
 
         _line := Line;
@@ -305,7 +306,7 @@ var
             IntToStr(ActiveSourceFile)));
         end; *)
 
-        ActiveSourceFile := SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, s, nam);
+        ActiveSourceFile := SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, unitName, filePath);
         Line := 1;
 
         TokenizeUnit(ActiveSourceFile, True);
