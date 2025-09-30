@@ -18,9 +18,13 @@ type
     UnreachableCode, IllegalQualifier, LoHi, StripedAllowed
     );
 
+type
+  TErrorCode = ErrorCode;
+
 // ----------------------------------------------------------------------------
 
-procedure Error(ErrTokenIndex: Integer; Msg: String);
+procedure Error(tokenIndex: TTokenIndex; const msg: String); overload;
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
 
 function ErrorMessage(ErrTokenIndex: Integer; err: ErrorCode; IdentIndex: Integer = 0;
   SrcType: Int64 = 0; DstType: Int64 = 0): String;
@@ -280,7 +284,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Error(ErrTokenIndex: Integer; Msg: String);
+procedure Error(tokenIndex: TTokenIndex; const msg: String);
 begin
 
   if not isConst then
@@ -290,12 +294,12 @@ begin
 
     WritelnMsg;
 
-    if ErrTokenIndex > NumTok then ErrTokenIndex := NumTok;
+    if tokenIndex > NumTok then tokenIndex := NumTok;
 
     TextColor(LIGHTRED);
 
-    WriteLn(UnitName[Tok[ErrTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[ErrTokenIndex].Line) +
-      ',' + IntToStr(Succ(Tok[ErrTokenIndex - 1].Column)) + ')' + ' Error: ' + Msg);
+    WriteLn(UnitName[Tok[tokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
+      ',' + IntToStr(Succ(Tok[tokenIndex - 1].Column)) + ')' + ' Error: ' + Msg);
 
     NormVideo;
 
@@ -312,6 +316,10 @@ begin
 
 end;
 
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
+begin
+  iError(tokenIndex, errorCode);
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
