@@ -388,9 +388,9 @@ type
 
   TParam = record
     Name: TString;
-    DataType: Byte;
+    DataType: TDataType;
     NumAllocElements: Cardinal;
-    AllocElementType: Byte;
+    AllocElementType: TDataType;
     PassMethod: TParameterPassingMethod;
     i, i_: Integer;
   end;
@@ -420,7 +420,7 @@ type
   TToken = record
     UnitIndex, Column: Smallint;
     Line: Integer;
-    case Kind: Byte of
+    case Kind: TTokenKind of
       IDENTTOK: (Name: ^TString);
       INTNUMBERTOK: (Value: Int64);
       FRACNUMBERTOK: (FracValue: Single);
@@ -436,7 +436,7 @@ type
     Alias: TString;      // EXTERNAL alias 'libraries'
     Libraries: Integer;    // EXTERNAL alias 'libraries'
     DataType: TDataType;
-    IdType: Byte;
+    IdType: TDataType;
     PassMethod: TParameterPassingMethod;
     Pass: Byte;
 
@@ -445,7 +445,7 @@ type
     NestedDataType: Byte;
 
     NestedFunctionNumAllocElements: Cardinal;
-    NestedFunctionAllocElementType: Byte;
+    NestedFunctionAllocElementType: TDataType;
     isNestedFunction: Boolean;
 
     LoopVariable,
@@ -539,7 +539,6 @@ var
   Types: array [1..MAXTYPES] of TType;
   Tok: array of TToken;
   Ident: array [1..MAXIDENTS] of TIdentifier;
-  Spelling: array [1..MAXTOKENNAMES] of TString;
   UnitName: array [1..MAXUNITS + MAXUNITS] of TUnit;  // {$include ...} -> UnitName[MAXUNITS..]
   Defines: array [1..MAXDEFINES] of TDefines;
   IFTmpPosStack: array of Integer;
@@ -548,7 +547,7 @@ var
   BlockStack: array [0..MAXBLOCKS - 1] of Integer;
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
 
-  OldConstValType: Byte;
+  OldConstValType: TDataType;
 
   AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
@@ -624,13 +623,13 @@ procedure AddDefine(X: String);
 
 procedure AddPath(s: String);
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 
 procedure CheckOperator(ErrTokenIndex: Integer; op: TTokenKind; DataType: TDataType; RightType: TDataType = TDataType.UNTYPETOK);
 
-procedure CheckTok(i: Integer; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 
 procedure DefineStaticString(StrTokenIndex: Integer; StrValue: String);
 
@@ -649,8 +648,6 @@ function GetCommonConstType(ErrTokenIndex: Integer; DstType, SrcType: TDataType;
 function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: TDataType): TDataType;
 
 function GetEnumName(IdentIndex: Integer): TString;
-
-function GetSpelling(i: Integer): TString;
 
 function GetVAL(a: String): Integer;
 
@@ -989,39 +986,13 @@ var
 begin
 
   for i := 1 to NumTok do
-    if (Tok[i].Kind = IDENTTOK) and (Tok[i].Name <> nil) then Dispose(Tok[i].Name);
+    if (Tok[i].Kind = TTokenKind.IDENTTOK) and (Tok[i].Name <> nil) then Dispose(Tok[i].Name);
 
   SetLength(Tok, 0);
   SetLength(IFTmpPosStack, 0);
   SetLength(UnitPath, 0);
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetSpelling(i: Integer): TString;
-begin
-
-  if i > NumTok then
-    Result := 'no token'
-  else if (Tok[i].Kind > 0) and (Tok[i].Kind < IDENTTOK) then
-      Result := Spelling[Tok[i].Kind]
-    else if Tok[i].Kind = IDENTTOK then
-        Result := 'identifier'
-      else if (Tok[i].Kind = INTNUMBERTOK) or (Tok[i].Kind = FRACNUMBERTOK) then
-          Result := 'number'
-        else if (Tok[i].Kind = CHARLITERALTOK) or (Tok[i].Kind = STRINGLITERALTOK) then
-            Result := 'literal'
-          else if (Tok[i].Kind = UNITENDTOK) then
-              Result := 'END'
-            else if (Tok[i].Kind = EOFTOK) then
-                Result := 'end of file'
-              else
-                Result := 'unknown token';
-
-end;
 
 
 // ----------------------------------------------------------------------------
@@ -1031,7 +1002,8 @@ end;
 function ErrTokenFound(ErrTokenIndex: Integer): String;
 begin
 
-  Result := ' expected but ''' + GetSpelling(ErrTokenIndex) + ''' found';
+  // JAC! TODO
+  Result := ' expected but '''; // + GetSpelling(ErrTokenIndex) + ''' found';
 
 end;
 
@@ -1068,32 +1040,35 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArrayIndex; ArrayIndexType: TDataType);
 begin
 
-  if (Ident[IdentIndex].NumAllocElements > 0) and (Ident[IdentIndex].AllocElementType <> TDataType.RECORDTOK) then
-    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements - 1 +
-      Ord(Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements <> 1 then
-        warning(i, TErrorCode.RangeCheckError, IdentIndex, ArrayIndex, ArrayIndexType);
+  if (IdentifierAt(IdentIndex).NumAllocElements > 0) and (IdentifierAt(IdentIndex).AllocElementType <>
+    TTokenKind.RECORDTOK) then
+    if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 +
+      Ord(IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK)) then
+      if IdentifierAt(IdentIndex).NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
+
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure CheckArrayIndex_(i: Integer; IdentIndex: Integer; ArrayIndex: Int64; ArrayIndexType: Byte);
+procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TArrayIndex;
+  ArrayIndexType: TDataType);
 begin
 
-  if Ident[IdentIndex].NumAllocElements_ > 0 then
-    if (ArrayIndex < 0) or (ArrayIndex > Ident[IdentIndex].NumAllocElements_ - 1 +
-      Ord(Ident[IdentIndex].DataType = TDataType.STRINGPOINTERTOK)) then
-      if Ident[IdentIndex].NumAllocElements_ <> 1 then
-        warning(i, TErrorCode.RangeCheckError_, IdentIndex, ArrayIndex, ArrayIndexType);
+  if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
+    if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements_ - 1 +
+      Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
+      if IdentifierAt(IdentIndex).NumAllocElements_ <> 1 then
+        WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;
+
 
 
 // ----------------------------------------------------------------------------
@@ -1310,28 +1285,28 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: Integer; ExpectedTok: Byte);
+procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 var
-  s: String;
+  Token: TToken;
+  found, expected: String;
 begin
 
-  if ExpectedTok < IDENTTOK then
-    s := Spelling[ExpectedTok]
-  else if ExpectedTok = IDENTTOK then
-      s := 'identifier'
-    else if (ExpectedTok = INTNUMBERTOK) then
-        s := 'number'
-      else if (ExpectedTok = CHARLITERALTOK) then
-          s := 'literal'
-        else if (ExpectedTok = STRINGLITERALTOK) then
-            s := 'string'
-          else
-            s := 'unknown token';
+  Token := TokenAt(i);
+  if Token.Kind <> ExpectedTokenCode then
+  begin
 
-  if Tok[i].Kind <> ExpectedTok then
-    Error(i, 'Syntax error, ' + '''' + s + '''' + ' expected but ''' + GetSpelling(i) + ''' found');
+    found := GetTokenSpelling(Token.Kind);
+    expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
-end;  //CheckTok
+    // JAC! TODO
+    (*
+    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected +
+      '''' + ' expected but ''' + found + ''' found.'));
+    *)
+
+  end;
+
+end;
 
 
 // ----------------------------------------------------------------------------

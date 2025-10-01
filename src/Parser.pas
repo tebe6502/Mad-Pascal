@@ -1752,8 +1752,8 @@ end;  //DefineIdent
 function DeclareFunction(i: Integer; out ProcVarIndex: Cardinal): Integer;
 var
   VarOfSameType: TVariableList;
-  NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
   ListPassMethod: TParameterPassingMethod;
+  NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
   VarType, AllocElementType: TDataType;
   NumAllocElements: Cardinal;
   IsNestedFunction: Boolean;

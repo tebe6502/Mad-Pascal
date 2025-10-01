@@ -24,7 +24,7 @@ procedure omin_spacje(var i: Integer; var a: String);
 
 implementation
 
-uses SysUtils, Common, Datatypes, Messages, Optimize, SplitString;
+uses SysUtils, Common, Datatypes, Messages, Optimize, SplitString, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -262,32 +262,6 @@ begin
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetStandardToken(S: TString): Integer;
-var
-  i: Integer;
-begin
-  Result := 0;
-
-  if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL'
-  else
-    if (S = 'UINT16') then S := 'WORD'
-    else
-      if (S = 'LONGINT') then S := 'INTEGER';
-
-  for i := 1 to MAXTOKENNAMES do
-    if S = Spelling[i] then
-    begin
-      Result := i;
-      Break;
-    end;
-end;
-
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -375,7 +349,7 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 
 
-procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
+procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: Int64);
 begin
 
   Inc(NumTok);
@@ -436,7 +410,7 @@ var
   Tmp: Int64;
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2, ch_: Char;
-  CurToken: Byte;
+  CurToken: TTokenKind;
   StrParams: TArrayString;
 
 
@@ -683,7 +657,7 @@ var
       end;
 
 
-      procedure newMsgUser(Kind: Byte);
+      procedure newMsgUser(Kind: TTokenKind);
       var
         k: Integer;
       begin
@@ -1580,7 +1554,7 @@ var
 
               if CurToken = EXTERNALTOK then ExternalFound := True;
 
-              AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0);
+              AddToken(TTokenKind.UNTYPETOK, UnitIndex, Line, length(Text) + Spaces, 0);
               Spaces := 0;
 
             end;
@@ -1688,9 +1662,9 @@ var
             else
             begin
 
-              if CurToken <> MACRORELEASE then
+              if CurToken <> TTokenKind.MACRORELEASE then
 
-                if CurToken <> 0 then
+                if CurToken <> TTokenKind.UNTYPETOK then
                 begin    // Keyword found
                   Tok[NumTok].Kind := CurToken;
 
@@ -1699,12 +1673,12 @@ var
                   if CurToken = UNITTOK then UnitFound := True;
 
                   if testUnit and (UnitFound = False) then
-                    Error(NumTok, 'Syntax error, "UNIT" expected but "' + Spelling[CurToken] + '" found');
+                    Error(NumTok, 'Syntax error, "UNIT" expected but "' + GetTokenSpelling(CurToken) + '" found');
 
                 end
                 else
                 begin        // Identifier found
-                  Tok[NumTok].Kind := IDENTTOK;
+                  Tok[NumTok].Kind := TTokenKind.IDENTTOK;
                   New(Tok[NumTok].Name);
                   Tok[NumTok].Name^ := Text;
                 end;
@@ -2020,159 +1994,6 @@ var
   end;
 
 begin
-  // Token spelling definition
-
-  Spelling[CONSTTOK] := 'CONST';
-  Spelling[TYPETOK] := 'TYPE';
-  Spelling[VARTOK] := 'VAR';
-  Spelling[PROCEDURETOK] := 'PROCEDURE';
-  Spelling[FUNCTIONTOK] := 'FUNCTION';
-  Spelling[OBJECTTOK] := 'OBJECT';
-  Spelling[PROGRAMTOK] := 'PROGRAM';
-  Spelling[LIBRARYTOK] := 'LIBRARY';
-  Spelling[EXPORTSTOK] := 'EXPORTS';
-  Spelling[EXTERNALTOK] := 'EXTERNAL';
-  Spelling[UNITTOK] := 'UNIT';
-  Spelling[INTERFACETOK] := 'INTERFACE';
-  Spelling[IMPLEMENTATIONTOK] := 'IMPLEMENTATION';
-  Spelling[INITIALIZATIONTOK] := 'INITIALIZATION';
-  Spelling[CONSTRUCTORTOK] := 'CONSTRUCTOR';
-  Spelling[DESTRUCTORTOK] := 'DESTRUCTOR';
-  Spelling[OVERLOADTOK] := 'OVERLOAD';
-  Spelling[ASSEMBLERTOK] := 'ASSEMBLER';
-  Spelling[FORWARDTOK] := 'FORWARD';
-  Spelling[REGISTERTOK] := 'REGISTER';
-  Spelling[INTERRUPTTOK] := 'INTERRUPT';
-  Spelling[PASCALTOK] := 'PASCAL';
-  Spelling[STDCALLTOK] := 'STDCALL';
-  Spelling[INLINETOK] := 'INLINE';
-  Spelling[KEEPTOK] := 'KEEP';
-
-  Spelling[ASSIGNFILETOK] := 'ASSIGN';
-  Spelling[RESETTOK] := 'RESET';
-  Spelling[REWRITETOK] := 'REWRITE';
-  Spelling[APPENDTOK] := 'APPEND';
-  Spelling[BLOCKREADTOK] := 'BLOCKREAD';
-  Spelling[BLOCKWRITETOK] := 'BLOCKWRITE';
-  Spelling[CLOSEFILETOK] := 'CLOSE';
-
-  Spelling[GETRESOURCEHANDLETOK] := 'GETRESOURCEHANDLE';
-  Spelling[SIZEOFRESOURCETOK] := 'SIZEOFRESOURCE';
-
-
-  Spelling[FILETOK] := 'FILE';
-  Spelling[TEXTFILETOK] := 'TEXTFILE';
-  Spelling[SETTOK] := 'SET';
-  Spelling[PACKEDTOK] := 'PACKED';
-  Spelling[VOLATILETOK] := 'VOLATILE';
-  Spelling[STRIPEDTOK] := 'STRIPED';
-  Spelling[WITHTOK] := 'WITH';
-  Spelling[LABELTOK] := 'LABEL';
-  Spelling[GOTOTOK] := 'GOTO';
-  Spelling[INTOK] := 'IN';
-  Spelling[RECORDTOK] := 'RECORD';
-  Spelling[CASETOK] := 'CASE';
-  Spelling[BEGINTOK] := 'BEGIN';
-  Spelling[ENDTOK] := 'END';
-  Spelling[IFTOK] := 'IF';
-  Spelling[THENTOK] := 'THEN';
-  Spelling[ELSETOK] := 'ELSE';
-  Spelling[WHILETOK] := 'WHILE';
-  Spelling[DOTOK] := 'DO';
-  Spelling[REPEATTOK] := 'REPEAT';
-  Spelling[UNTILTOK] := 'UNTIL';
-  Spelling[FORTOK] := 'FOR';
-  Spelling[TOTOK] := 'TO';
-  Spelling[DOWNTOTOK] := 'DOWNTO';
-  Spelling[ASSIGNTOK] := ':=';
-  Spelling[WRITETOK] := 'WRITE';
-  Spelling[WRITELNTOK] := 'WRITELN';
-  Spelling[SIZEOFTOK] := 'SIZEOF';
-  Spelling[LENGTHTOK] := 'LENGTH';
-  Spelling[HIGHTOK] := 'HIGH';
-  Spelling[LOWTOK] := 'LOW';
-  Spelling[INTTOK] := 'INT';
-  Spelling[FRACTOK] := 'FRAC';
-  Spelling[TRUNCTOK] := 'TRUNC';
-  Spelling[ROUNDTOK] := 'ROUND';
-  Spelling[ODDTOK] := 'ODD';
-
-  Spelling[READLNTOK] := 'READLN';
-  Spelling[HALTTOK] := 'HALT';
-  Spelling[BREAKTOK] := 'BREAK';
-  Spelling[CONTINUETOK] := 'CONTINUE';
-  Spelling[EXITTOK] := 'EXIT';
-
-  Spelling[SUCCTOK] := 'SUCC';
-  Spelling[PREDTOK] := 'PRED';
-
-  Spelling[INCTOK] := 'INC';
-  Spelling[DECTOK] := 'DEC';
-  Spelling[ORDTOK] := 'ORD';
-  Spelling[CHRTOK] := 'CHR';
-  Spelling[ASMTOK] := 'ASM';
-  Spelling[ABSOLUTETOK] := 'ABSOLUTE';
-  Spelling[USESTOK] := 'USES';
-  Spelling[LOTOK] := 'LO';
-  Spelling[HITOK] := 'HI';
-  Spelling[GETINTVECTOK] := 'GETINTVEC';
-  Spelling[SETINTVECTOK] := 'SETINTVEC';
-  Spelling[ARRAYTOK] := 'ARRAY';
-  Spelling[OFTOK] := 'OF';
-  Spelling[STRINGTOK] := 'STRING';
-
-  Spelling[RANGETOK] := '..';
-
-  Spelling[EQTOK] := '=';
-  Spelling[NETOK] := '<>';
-  Spelling[LTTOK] := '<';
-  Spelling[LETOK] := '<=';
-  Spelling[GTTOK] := '>';
-  Spelling[GETOK] := '>=';
-
-  Spelling[DOTTOK] := '.';
-  Spelling[COMMATOK] := ',';
-  Spelling[SEMICOLONTOK] := ';';
-  Spelling[OPARTOK] := '(';
-  Spelling[CPARTOK] := ')';
-  Spelling[DEREFERENCETOK] := '^';
-  Spelling[ADDRESSTOK] := '@';
-  Spelling[OBRACKETTOK] := '[';
-  Spelling[CBRACKETTOK] := ']';
-  Spelling[COLONTOK] := ':';
-
-  Spelling[PLUSTOK] := '+';
-  Spelling[MINUSTOK] := '-';
-  Spelling[MULTOK] := '*';
-  Spelling[DIVTOK] := '/';
-  Spelling[IDIVTOK] := 'DIV';
-  Spelling[MODTOK] := 'MOD';
-  Spelling[SHLTOK] := 'SHL';
-  Spelling[SHRTOK] := 'SHR';
-  Spelling[ORTOK] := 'OR';
-  Spelling[XORTOK] := 'XOR';
-  Spelling[ANDTOK] := 'AND';
-  Spelling[NOTTOK] := 'NOT';
-
-  Spelling[INTEGERTOK] := 'INTEGER';
-  Spelling[CARDINALTOK] := 'CARDINAL';
-  Spelling[SMALLINTTOK] := 'SMALLINT';
-  Spelling[SHORTINTTOK] := 'SHORTINT';
-  Spelling[WORDTOK] := 'WORD';
-  Spelling[BYTETOK] := 'BYTE';
-  Spelling[CHARTOK] := 'CHAR';
-  Spelling[BOOLEANTOK] := 'BOOLEAN';
-  Spelling[POINTERTOK] := 'POINTER';
-  Spelling[SHORTREALTOK] := 'SHORTREAL';
-  Spelling[REALTOK] := 'REAL';
-  Spelling[SINGLETOK] := 'SINGLE';
-  Spelling[HALFSINGLETOK] := 'FLOAT16';
-  Spelling[PCHARTOK] := 'PCHAR';
-
-  Spelling[SHORTSTRINGTOK] := 'SHORTSTRING';
-  Spelling[FLOATTOK] := 'FLOAT';
-  Spelling[TEXTTOK] := 'TEXT';
-
   AsmFound := False;
   UsesFound := False;
   UnitFound := False;
@@ -2243,7 +2064,7 @@ var
   i, Err, Line2, TextPos, im: Integer;
   yes: Boolean;
   ch, ch2: Char;
-  CurToken: Byte;
+  CurToken: TTokenKind;
 
 
   procedure SkipWhiteSpace;        // 'string' + #xx + 'string'
@@ -2492,14 +2313,14 @@ begin
           if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
           if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
-          AddToken(0, 1, Line, length(Text) + Spaces, 0);
+          AddToken(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0);
           Spaces := 0;
 
         end;
 
-        if CurToken <> MACRORELEASE then
+        if CurToken <> TTokenKind.MACRORELEASE then
 
-          if CurToken <> 0 then
+        if CurToken <> TTokenKind.UNTYPETOK then
           begin    // Keyword found
 
             Tok[NumTok].Kind := CurToken;
@@ -2507,7 +2328,7 @@ begin
           end
           else
           begin        // Identifier found
-            Tok[NumTok].Kind := IDENTTOK;
+            Tok[NumTok].Kind := TTokenKind.IDENTTOK;
             New(Tok[NumTok].Name);
             Tok[NumTok].Name^ := Text;
           end;

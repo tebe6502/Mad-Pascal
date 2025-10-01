@@ -4,7 +4,7 @@ unit Messages;
 
 interface
 
-uses Common, Datatypes, Tokens;
+uses Common, CommonTypes, CompilerTypes, Datatypes, Tokens;
 
 {$SCOPEDENUMS ON}
 
@@ -35,6 +35,9 @@ procedure iError(ErrTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 
 
 procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
   const dstType: TDataType; const dstPointer: Boolean = False);
+procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
+  const tokenKind: TTokenKind);
+procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
 procedure newMsg(var msg: TArrayString; var a: String);
 
@@ -44,6 +47,8 @@ procedure Note(NoteTokenIndex: Integer; Msg: String); overload;
 
 procedure Warning(WarnTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0;
   SrcType: Int64 = 0; DstType: Int64 = 0);
+
+procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
 
 procedure WritelnMsg;
@@ -358,6 +363,17 @@ begin
   // Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
 end;
 
+procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
+  const tokenKind: TTokenKind);
+begin
+  // TODO
+end;
+
+procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
+begin
+
+end;
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -391,7 +407,10 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
+begin
 
+end;
 
 procedure newMsg(var msg: TArrayString; var a: String);
 var
