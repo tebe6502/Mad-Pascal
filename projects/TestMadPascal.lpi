@@ -54,6 +54,12 @@
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\common\object\"/>
           </local>
         </Mode>
+        <Mode Name="array_bracket">
+          <local>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib array_bracket.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-array"/>
+          </local>
+        </Mode>
       </Modes>
     </RunParams>
     <Units>

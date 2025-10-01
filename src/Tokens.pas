@@ -3,9 +3,9 @@ unit Tokens;
 
 interface
 
-// The RESERVED_... values are placeholder for compatibility with previous versions.
+// The RESERVED_... values are placeholders for compatibility with previous versions.
 // This ensures the existing values are stable when new constants are defined for the existing logical blocks.
-// This is important to have 100% the same output in the A65 files.
+// It is important to have 100% the same output in the A65 files.
 type
   TTokenKind = (
     UNTYPETOK,

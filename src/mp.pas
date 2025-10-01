@@ -16,12 +16,18 @@ Mad-Pascal cross-compiler for MOS 6502 CPU (Atari 8-bit, C64, ... ) by Tomasz Bi
 
 Contributors:
 
++ Andrew Danson:
+  - unit BFONT (Borland CHR)
+
 + Artyom Beilis, Marek Mauder (https://github.com/artyom-beilis/float16) :
   - Float16 (half-single)
 
 + Bartosz Zbytniewski :
   - Bug Hunter
   - Commodore C4+/C64 minimal unit SYSTEM setup
+
++ Bjarke Viksoe :
+  - unit GIF
 
 + Bostjan Gorisek :
   - unit PMG, ZXLIB
@@ -59,6 +65,9 @@ Contributors:
 + Joseph Zatarski (https://forums.atariage.com/topic/225063-full-color-ansi-vbxe-terminal-in-the-works/) :
   - base\atari\vbxeansi.asm
 
++ John Brandwood :
+  - unit APLIB
+
 + Konrad Kokoszkiewicz :
   - base\atari\cmdline.asm
   - base\atari\vbxedetect.asm
@@ -68,7 +77,6 @@ Contributors:
 + Krzysztof Dudek (http://xxl.atari.pl/) :
   - unit XBIOS: BLIBS library
   - unit LZ4: unLZ4
-  - unit aPLib: unAPL
 
 + Krzysztof Swiecicki :
   - unit PP
@@ -104,6 +112,9 @@ Contributors:
 + Steven Don (https://www.shdon.com/) :
   - unit IMAGE, VIMAGE: BMP, GIF, PCX
 
++ Stijn Sanders (https://github.com/stijnsanders) :
+  - unit AES
+
 + Ullrich von Bassewitz, Christian Krueger (https://github.com/cc65/cc65/libsrc/common/) :
   - base\common\memmove.asm
   - base\common\memset.asm
@@ -125,8 +136,6 @@ Contributors:
 
 + Zlatko Bleha (https://atariwiki.org/wiki/Wiki.jsp?page=Super%20fast%20circle%20routine) :
   - GRAPH.INC Circle
-
-
 
 
 # rejestr X (=$FF) uzywany jest do przekazywania parametrow przez programowy stos :STACKORIGIN
@@ -161,6 +170,7 @@ Contributors:
 # indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * GetDataSize(AllocElementType)) + b * GetDataSize(AllocElementType)
 
 # dla typu OBJECT przekazywany jest poczatkowy adres alokacji danych pamieci (HI = regY, LO = regA), potem sa obliczane kolejne adresy w naglowku procedury/funkcji
+# zaleca sie uzywania typow prostych, wskazniki do tablic w OBJECT marnuja duzo zasobow CPU
 
 # podczas wartosciowania wyrazen typy sa roszerzane, w przypadku operacji '-' promowane do SIGNEDORDINALTYPES (BYTE -> TTokenKind.SMALLINTTOK ; WORD -> TTokenKind.INTEGERTOK)
 

@@ -16,7 +16,6 @@ procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
 procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
 
-
 procedure WriteOut(a: String);            // OptimizeTemporaryBuf
 
 procedure FlushTempBuf;
@@ -112,13 +111,12 @@ var
   function fail(i: Integer): Boolean;
   begin
 
-    if (pos('#asm:', TemporaryBuf[i]) = 1) or ldy(i) or (pos('mwy ', TemporaryBuf[i]) > 0) or
-      (pos('mvy ', TemporaryBuf[i]) > 0) or jsr(i) or (pos(#9'.if', TemporaryBuf[i]) > 0) or
-      (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or (pos(#9'@print', TemporaryBuf[i]) > 0) or
-      iny(i) or dey(i) or tya(i) or tay(i) then Result := True
+    if (pos('#asm:', TemporaryBuf[i]) = 1) or ldy(i) or jsr(i) or
+      iny(i) or dey(i) or tay(i) or tya(i) or mwy(i) or
+      mwy(i) or (pos(#9'.if', TemporaryBuf[i]) > 0) or (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
+      (pos(#9'@print', TemporaryBuf[i]) > 0) then Result := True
     else
       Result := False;
-
   end;
 
 
@@ -222,9 +220,9 @@ var
 begin
 
 {
-if (pos('jmp a_0004', TemporaryBuf[3]) > 0) then begin
+if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
 
-      for p:=0 to 11 do writeln(TemporaryBuf[p]);
+      for p:=0 to 30 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
@@ -245,6 +243,7 @@ end;
   opt_TEMP_JMP;
   opt_TEMP_ZTMP;
   opt_TEMP_UNROLL;
+
 
   // -----------------------------------------------------------------------------
 
@@ -1406,6 +1405,7 @@ end;
         Result := False;
         Break;
       end;
+
       if opt_STACK_INX(i) = False then
       begin
         Result := False;
@@ -1642,7 +1642,7 @@ end;
       begin
 
 {
-if (pos(#9'sub #$00', listing[i]) > 0) then begin
+if (pos(#9'and #$', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
