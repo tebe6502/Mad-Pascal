@@ -24,7 +24,7 @@ procedure omin_spacje(var i: Integer; var a: String);
 
 implementation
 
-uses SysUtils, Common, Messages, Optimize, SplitString;
+uses SysUtils, Common, Datatypes, Messages, Optimize, SplitString;
 
 // ----------------------------------------------------------------------------
 
@@ -879,7 +879,7 @@ var
                               if Err > 0 then
                                 ErrorOrdinalExpExpected(NumTok);
 
-                              GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
+                              GetCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
 
                               Tok[NumTok].Value := v;
 
@@ -993,7 +993,7 @@ var
                                         AddDefine('FASTMUL');
                                         AddDefines := NumDefines;
 
-                                        GetCommonConstType(NumTok, BYTETOK, GetValueType(FastMul));
+                                        GetCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
 
                                         Dec(NumTok);
                                       end

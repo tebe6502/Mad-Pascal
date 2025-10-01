@@ -1,10 +1,10 @@
 unit Parser;
 
+{$i Defines.inc}
+
 interface
 
-uses Common;
-
-{$i Defines.inc}
+uses Common, CompilerTypes, Datatypes;
 
 // -----------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ function Elements(IdentIndex: Integer): Cardinal;
 
 function GetIdent(S: TString): Integer;
 
-function GetSizeof(i: Integer; ValType: Byte): Int64;
+function GetSizeof(i: Integer; ValType: TDataType): Int64;
 
 procedure Int2Float(var ConstVal: Int64);
 
@@ -37,7 +37,7 @@ function ObjectRecordSize(i: Cardinal): Integer;
 
 function RecordSize(IdentIndex: Integer; field: String = ''): Integer;
 
-procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: Byte);
+procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
 
 // -----------------------------------------------------------------------------
 
@@ -55,10 +55,10 @@ begin
     Result := 0
   else
 
-    if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then
+    if Ident[IdentIndex].AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
       Result := Ident[IdentIndex].NumAllocElements_
     else
-      if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType in [PROCVARTOK]) then
+      if (Ident[IdentIndex].NumAllocElements_ = 0) or (Ident[IdentIndex].AllocElementType in [TDataType.PROCVARTOK]) then
         Result := Ident[IdentIndex].NumAllocElements
       else
         Result := Ident[IdentIndex].NumAllocElements * Ident[IdentIndex].NumAllocElements_;
@@ -166,7 +166,7 @@ begin
       if (Ident[TempIndex].Kind = UNITTYPE) or (Ident[TempIndex].DataType = ENUMTYPE) then
         Result := SearchCurrentUnit(copy(S, pos('.', S) + 1, length(S)), Ident[TempIndex].UnitIndex)
       else
-        if Ident[TempIndex].DataType = OBJECTTOK then
+        if Ident[TempIndex].DataType = TDataType.OBJECTTOK then
           Result := SearchCurrentUnit(Types[Ident[TempIndex].NumAllocElements].Field[0].Name +
             copy(S, pos('.', S), length(S)), Ident[TempIndex].UnitIndex);
       {else
@@ -187,14 +187,14 @@ end;  //GetIdent
 function ObjectRecordSize(i: Cardinal): Integer;
 var
   j: Integer;
-  FieldType: Byte;
+  FieldType: TDataType;
   //    AllocElementType: Byte;
   //    NumAllocElements: cardinal;
 begin
 
   Result := 0;
 
-  FieldType := 0;
+  FieldType := TDataType.UNTYPETOK;
 
   if i > 0 then
   begin
@@ -206,8 +206,8 @@ begin
       //NumAllocElements := Types[i].Field[j].NumAllocElements;
       //AllocElementType := Types[i].Field[j].AllocElementType;
 
-      if FieldType <> RECORDTOK then
-        Inc(Result, DataSize[FieldType]);
+      if FieldType <> TDataType.RECORDTOK then
+        Inc(Result, GetDataSize(FieldType));
 
     end;
 
@@ -224,7 +224,7 @@ function RecordSize(IdentIndex: Integer; field: String = ''): Integer;
 var
   i, j: Integer;
   Name, base: TName;
-  FieldType, AllocElementType: Byte;
+  FieldType, AllocElementType: TDataType;
   NumAllocElements, NumAllocElements_: Cardinal;
   yes: Boolean;
 begin
@@ -236,7 +236,7 @@ begin
 
   Result := 0;
 
-  FieldType := 0;
+  FieldType := TDataType.UNTYPETOK;
 
   yes := False;
 
@@ -251,16 +251,16 @@ begin
       NumAllocElements_ := Types[i].Field[j].NumAllocElements shr 16;
       AllocElementType := Types[i].Field[j].AllocElementType;
 
-      if AllocElementType in [FORWARDTYPE, PROCVARTOK] then
+      if AllocElementType in [TDataType.FORWARDTYPE, TDataType.PROCVARTOK] then
       begin
-        AllocElementType := POINTERTOK;
+        AllocElementType := TDataType.POINTERTOK;
         NumAllocElements := 0;
         NumAllocElements_ := 0;
       end;
 
       //    writeln(Types[i].Field[j].Name ,',',FieldType,',',AllocElementType);
 
-      if FieldType = ENUMTOK then FieldType := AllocElementType;
+      if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
       if Types[i].Field[j].Name = field then
       begin
@@ -268,25 +268,25 @@ begin
         Break;
       end;
 
-      if FieldType <> RECORDTOK then
+      if FieldType <> TDataType.RECORDTOK then
         if (FieldType in Pointers) and (NumAllocElements > 0) then
         begin
 
-          if AllocElementType = RECORDTOK then
+          if AllocElementType = TDataType.RECORDTOK then
           begin
-            AllocElementType := POINTERTOK;
+            AllocElementType := TDataType.POINTERTOK;
             NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
             NumAllocElements_ := 0;
           end;
 
           if NumAllocElements_ > 0 then
-            Inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])
+            Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
           else
-            Inc(Result, NumAllocElements * DataSize[AllocElementType]);
+            Inc(Result, NumAllocElements * GetDataSize(AllocElementType));
 
         end
         else
-          Inc(Result, DataSize[FieldType]);
+          Inc(Result, GetDataSize(FieldType));
 
     end;
 
@@ -302,7 +302,7 @@ begin
 
     for i := 1 to Types[Ident[IdentIndex].NumAllocElements].NumFields do
       if pos(Name, base + '.' + Types[Ident[IdentIndex].NumAllocElements].Field[i].Name) > 0 then
-        if Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType <> RECORDTOK then
+        if Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType <> TDataType.RECORDTOK then
         begin
 
           FieldType := Types[Ident[IdentIndex].NumAllocElements].Field[i].DataType;
@@ -310,7 +310,7 @@ begin
           NumAllocElements_ := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements shr 16;
           AllocElementType := Types[Ident[IdentIndex].NumAllocElements].Field[i].AllocElementType;
 
-          if FieldType = ENUMTOK then FieldType := AllocElementType;
+          if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
           if Types[Ident[IdentIndex].NumAllocElements].Field[i].Name = field then
           begin
@@ -318,25 +318,25 @@ begin
             Break;
           end;
 
-          if FieldType <> RECORDTOK then
+          if FieldType <> TDataType.RECORDTOK then
             if (FieldType in Pointers) and (NumAllocElements > 0) then
             begin
 
-              if AllocElementType = RECORDTOK then
+              if AllocElementType = TDataType.RECORDTOK then
               begin
-                AllocElementType := POINTERTOK;
+                AllocElementType := TDataType.POINTERTOK;
                 NumAllocElements := Types[Ident[IdentIndex].NumAllocElements].Field[i].NumAllocElements shr 16;
                 NumAllocElements_ := 0;
               end;
 
               if NumAllocElements_ > 0 then
-                Inc(Result, NumAllocElements * NumAllocElements_ * DataSize[AllocElementType])
+                Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
               else
-                Inc(Result, NumAllocElements * DataSize[AllocElementType]);
+                Inc(Result, NumAllocElements * GetDataSize(AllocElementType));
 
             end
             else
-              Inc(Result, DataSize[FieldType]);
+              Inc(Result, GetDataSize(FieldType));
 
         end;
 
@@ -347,7 +347,7 @@ begin
     if not yes then
       Result := -1
     else
-      Result := Result + FieldType shl 16;    // type | offset
+      Result := Result + Ord(FieldType) shl 16;    // type | offset
 
 end;
 
@@ -493,7 +493,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: Byte);
+procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
 var
   ftmp: TFloat;
 begin
@@ -511,28 +511,28 @@ begin
 
   case ConstValType of
 
-    SHORTINTTOK, BYTETOK, CHARTOK, BOOLEANTOK:
+    TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
       DataSegment[ConstDataSize] := Byte(ConstVal);
 
-    SMALLINTTOK, WORDTOK, SHORTREALTOK, POINTERTOK, STRINGPOINTERTOK, PCHARTOK:
+    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
       DataSegment[ConstDataSize] := Byte(ConstVal);
       DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
     end;
 
-    DATAORIGINOFFSET:
+    TDataType.DATAORIGINOFFSET:
     begin
       DataSegment[ConstDataSize] := Byte(ConstVal) or $8000;
       DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8) or $4000;
     end;
 
-    CODEORIGINOFFSET:
+    TDataType.CODEORIGINOFFSET:
     begin
       DataSegment[ConstDataSize] := Byte(ConstVal) or $2000;
       DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8) or $1000;
     end;
 
-    INTEGERTOK, CARDINALTOK, REALTOK:
+    TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
     begin
       DataSegment[ConstDataSize] := Byte(ConstVal);
       DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
@@ -540,7 +540,7 @@ begin
       DataSegment[ConstDataSize + 3] := Byte(ConstVal shr 24);
     end;
 
-    SINGLETOK: begin
+    TDataType.SINGLETOK: begin
       move(ConstVal, ftmp, sizeof(ftmp));
 
       ConstVal := ftmp[1];
@@ -551,7 +551,7 @@ begin
       DataSegment[ConstDataSize + 3] := Byte(ConstVal shr 24);
     end;
 
-    HALFSINGLETOK: begin
+    TDataType.HALFSINGLETOK: begin
       move(ConstVal, ftmp, sizeof(ftmp));
       ConstVal := CardToHalf(ftmp[1]);
 
@@ -570,7 +570,7 @@ end;  //SaveToDataSegment
 // ----------------------------------------------------------------------------
 
 
-function GetSizeof(i: Integer; ValType: Byte): Int64;
+function GetSizeof(i: Integer; ValType: TDataType): Int64;
 var
   IdentIndex: Integer;
 begin
@@ -579,7 +579,7 @@ begin
 
   case ValType of
 
-    ENUMTYPE: Result := DataSize[Ident[IdentIndex].AllocElementType];
+    ENUMTYPE: Result := GetDataSize(Ident[IdentIndex].AllocElementType);
 
     RECORDTOK: if (Ident[IdentIndex].DataType = POINTERTOK) and (Tok[i + 3].Kind = CPARTOK) then
         Result := DataSize[POINTERTOK]
@@ -602,7 +602,7 @@ begin
 
         end
         else
-          if Ident[IdentIndex].PassMethod = VARPASSING then
+          if Ident[IdentIndex].PassMethod = TParameterPassingMethod.VARPASSING then
             Result := RecordSize(IdentIndex)
           else
             Result := DataSize[POINTERTOK];
