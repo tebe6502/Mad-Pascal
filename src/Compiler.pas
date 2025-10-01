@@ -1426,6 +1426,29 @@ begin
               asm65(#9'lda #$' + IntToHex(Byte(IdentifierAt(IdentIndex).Value shr 8), 2));
               asm65(#9'adc' + GetStackVariable(1));
               asm65(#9'sta :bp+1');
+                asm65(#9'lda (:bp),y');
+                asm65(#9'sta' + GetStackVariable(0));
+
+              end
+              else
+              begin
+
+                if IdentifierAt(IdentIndex).ObjectVariable and (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
+                begin
+
+                  asm65(#9'mwy ' + svar + ' :TMP');
+
+                  asm65(#9'ldy #$00');
+                  asm65(#9'lda (:TMP),y');
+                  asm65(#9'add' + GetStackVariable(0));
+                  asm65(#9'sta :bp2');
+                  asm65(#9'iny');
+                  asm65(#9'lda (:TMP),y');
+                  asm65(#9'adc' + GetStackVariable(1));
+                  asm65(#9'sta :bp2+1');
+                  asm65(#9'ldy #$00');
+                  asm65(#9'lda (:bp2),y');
+                  asm65(#9'sta' + GetStackVariable(0));
 
             end
             else
@@ -1437,11 +1460,12 @@ begin
               asm65(#9'lda ' + svar + '+1');
               asm65(#9'adc' + GetStackVariable(1));
               asm65(#9'sta :bp+1');
+                  asm65(#9'lda (:bp),y');
+                  asm65(#9'sta' + GetStackVariable(0));
 
             end;
 
-            asm65(#9'lda (:bp),y');
-            asm65(#9'sta' + GetStackVariable(0));
+              end;
 
             if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
               TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
@@ -2352,12 +2376,10 @@ begin
               asm65(#9'lda ' + svar);
               asm65(#9'add :STACKORIGIN-1,x');
               asm65(#9'tay');
-
               asm65(#9'lda ' + svar + '+1');
               asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
               asm65(#9'sta :bp+1');
 
-              asm65;
               asm65(#9'lda (:bp),y');
               asm65(#9 + b + ' :STACKORIGIN,x');
               asm65(#9'sta (:bp),y');
@@ -2493,6 +2515,21 @@ begin
             else
             begin
 
+                if IdentifierAt(IdentIndex).isStriped then
+                begin
+
+                  asm65(#9'ldy :STACKORIGIN-1,x');
+                  asm65(#9'lda ' + svara + ',y');
+                  asm65(#9 + b + ' :STACKORIGIN,x');
+                  asm65(#9'sta ' + svara + ',y');
+                  asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+                  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+                  asm65(#9'sta ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
+
+                end
+                else
+                begin
+
               asm65(#9'ldy :STACKORIGIN-1,x');
               asm65(#9'lda ' + svara + ',y');
               asm65(#9 + b + ' :STACKORIGIN,x');
@@ -2505,6 +2542,7 @@ begin
 
           end;
 
+  		  end;
         4: if IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING then
           begin
 
@@ -2615,6 +2653,27 @@ begin
             else
             begin
 
+                if IdentifierAt(IdentIndex).isStriped then
+                begin
+
+                  asm65(#9'ldy :STACKORIGIN-1,x');
+                  asm65(#9'lda ' + svara + ',y');
+                  asm65(#9 + b + ' :STACKORIGIN,x');
+                  asm65(#9'sta ' + svara + ',y');
+                  asm65(#9'lda ' + svara + '+' + IntToStr(Integer(NumAllocElements)) + ',y');
+                  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+                  asm65(#9'sta ' + svara + '+' + IntToStr(Integer(NumAllocElements)) + ',y');
+                  asm65(#9'lda ' + svara + '+' + IntToStr(Integer(NumAllocElements * 2)) + ',y');
+                  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*2,x');
+                  asm65(#9'sta ' + svara + '+' + IntToStr(Integer(NumAllocElements * 2)) + ',y');
+                  asm65(#9'lda ' + svara + '+' + IntToStr(Integer(NumAllocElements * 3)) + ',y');
+                  asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
+                  asm65(#9'sta ' + svara + '+' + IntToStr(Integer(NumAllocElements * 3)) + ',y');
+
+                end
+                else
+                begin
+
               asm65(#9'ldy :STACKORIGIN-1,x');
               asm65(#9'lda ' + svara + ',y');
               asm65(#9 + b + ' :STACKORIGIN,x');
@@ -2635,6 +2694,7 @@ begin
 
       end;
 
+      end;
       a65(TCode65.subBX);
 
     end;
@@ -2753,10 +2813,12 @@ begin
             asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
             asm65(#9'sta :TMP+1');
 
-            asm65(#9'ldy #$00');
-            asm65(#9'mva (:TMP),y :bp2');
+              asm65(#9'ldy #$00');
+              asm65(#9'lda (:TMP),y');
+              asm65(#9'sta :bp2');
             asm65(#9'iny');
-            asm65(#9'mva (:TMP),y :bp2+1');
+              asm65(#9'lda (:TMP),y');
+              asm65(#9'sta :bp2+1');
 
           end;
 
@@ -2771,17 +2833,14 @@ begin
           asm65(#9'sta :TMP+1');
 
           asm65(#9'ldy #$00');
-          asm65(#9'mva (:TMP),y :bp2');
+            asm65(#9'lda (:TMP),y');
+            asm65(#9'sta :bp2');
           asm65(#9'iny');
-          asm65(#9'mva (:TMP),y :bp2+1');
+            asm65(#9'lda (:TMP),y');
+            asm65(#9'sta :bp2+1');
 
         end;
-{
-    asm65(#9'ldy #$00');
-    asm65(#9'mva (:TMP),y :bp2');
-    asm65(#9'iny');
-    asm65(#9'mva (:TMP),y :bp2+1');
-}
+
       end
       else
       begin
@@ -2905,6 +2964,29 @@ begin
               asm65(#9'lda #$' + IntToHex(Byte(IdentifierAt(IdentIndex).Value shr 8), 2));
               asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
               asm65(#9'sta :bp+1');
+                asm65(#9'lda :STACKORIGIN,x');
+                asm65(#9'sta (:bp),y');
+
+              end
+              else
+              begin
+
+                if IdentifierAt(IdentIndex).ObjectVariable and (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
+                begin
+
+                  asm65(#9'mwy ' + svar + ' :TMP');
+
+                  asm65(#9'ldy #$00');
+                  asm65(#9'lda (:TMP),y');
+                  asm65(#9'add :STACKORIGIN-1,x');
+                  asm65(#9'sta :bp2');
+                  asm65(#9'iny');
+                  asm65(#9'lda (:TMP),y');
+                  asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+                  asm65(#9'sta :bp2+1');
+                  asm65(#9'ldy #$00');
+                  asm65(#9'lda :STACKORIGIN,x');
+                  asm65(#9'sta (:bp2),y');
 
             end
             else
@@ -2916,11 +2998,12 @@ begin
               asm65(#9'lda ' + svar + '+1');
               asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
               asm65(#9'sta :bp+1');
+                  asm65(#9'lda :STACKORIGIN,x');
+                  asm65(#9'sta (:bp),y');
 
             end;
 
-            asm65(#9'lda :STACKORIGIN,x');
-            asm65(#9'sta (:bp),y');
+              end;
 
             if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
               TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('-');  // -sta
@@ -3785,6 +3868,7 @@ begin
 
   asm65(#9'lda :STACKORIGIN+1,x');
   asm65(#9'bne *+5');
+
 end;
 
 

@@ -61,6 +61,7 @@ begin
   SetLength(WithName, 1);
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
+  
   Messages.Initialize;
 
   NumBlocks := 0;

@@ -310,7 +310,8 @@ type
 
     //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;
-    AllocElementType: TDataType
+    AllocElementType: TDataType;
+    ObjectVariable: Boolean;   // TODO Not yet filled
   end;
 
   // An identifier list owns identifier instances.
