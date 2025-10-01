@@ -189,7 +189,7 @@ Contributors:
 
 program MADPASCAL;
 
-{$i define.inc}
+{$i Defines.inc}
 
 uses
   Crt,

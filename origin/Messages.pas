@@ -2,7 +2,7 @@ unit Messages;
 
 interface
 
-{$i define.inc}
+{$i Defines.inc}
 
 uses Common;
 

@@ -2,7 +2,7 @@ unit Diagnostic;
 
 interface
 
-{$i define.inc}
+{$i Defines.inc}
 
 // ----------------------------------------------------------------------------
 

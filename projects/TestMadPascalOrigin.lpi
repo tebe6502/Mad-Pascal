@@ -90,10 +90,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\origin\define.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\origin\include\cmd_listing.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -123,6 +119,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\origin\include\syntax.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Defines.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
