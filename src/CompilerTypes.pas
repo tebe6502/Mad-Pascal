@@ -170,6 +170,7 @@ type
     NumAllocElements: TNumAllocElements;
     AllocElementType: TDataType;
     Kind: TFieldKind;
+    ObjectVariable: Boolean;
   end;
 
 

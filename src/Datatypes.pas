@@ -52,7 +52,7 @@ const
     4,  // Size = 4 ENUM
     2,  // Size = 2 PROCVAR
     2,  // Size = 2 TEXTFILE
-    2  // Size = 2 FORWARD
+    2   // Size = 2 FORWARD
     );
 
 
