@@ -1,49 +1,46 @@
 unit Parser;
 
-{$i Defines.inc}
+{$I Defines.inc}
 
 interface
 
-uses Common, CompilerTypes, Datatypes, Tokens;
+uses Common, CompilerTypes, Datatypes, Numbers, Tokens;
 
 // -----------------------------------------------------------------------------
 
-function CardToHalf(Src: Uint32): Word;
+function CompileType(i: TTokenIndex; out DataType: TDataType; out NumAllocElements: Cardinal;
+  out AllocElementType: TDataType): TTokenIndex;
 
-function CompileType(i: Integer; out DataType: TDataType; out NumAllocElements: Cardinal;
-  out AllocElementType: TDataType): Integer;
+function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType;
+  const VarType: TDataType = TDataType.INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): TTokenIndex;
 
-function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: TDataType;
-  VarType: TDataType = TDataType.INTEGERTOK; Err: Boolean = False; War: Boolean = True): Integer;
+function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 
-function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: TDataType): Integer;
+procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
+  DataType: TDataType; NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64;
+  IdType: TDataType = TDataType.IDENTTOK);
 
-procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: TTokenKind; DataType: TDataType;
-  NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64; IdType: TDataType = TDataType.IDENTTOK);
+function DefineFunction(i: TTokenIndex; ForwardIdentIndex: TIdentIndex; out isForward, isInt, isInl, isOvr: Boolean;
+  var IsNestedFunction: Boolean; out NestedFunctionResultType: TDataType;
+  out NestedFunctionNumAllocElements: Cardinal; out NestedFunctionAllocElementType: TDataType): Integer;
 
-function DefineFunction(i, ForwardIdentIndex: Integer; out isForward, isInt, isInl, isOvr: Boolean;
-  var IsNestedFunction: Boolean; out NestedFunctionResultType: TDataType; out NestedFunctionNumAllocElements: Cardinal;
-  out NestedFunctionAllocElementType: TDataType): Integer;
+function Elements(IdentIndex: TIdentIndex): Cardinal;
 
-function Elements(IdentIndex: Integer): Cardinal;
+function GetIdentIndex(S: TIdentifierName): TIdentIndex;
 
-function GetIdent(S: TString): Integer;
-
-function GetSizeof(i: Integer; ValType: TDataType): Int64;
-
-procedure Int2Float(var ConstVal: Int64);
+function GetSizeOf(i: TTokenIndex; ValType: TDataType): Int64;
 
 function ObjectRecordSize(i: Cardinal): Integer;
 
-function RecordSize(IdentIndex: Integer; field: String = ''): Integer;
+function RecordSize(IdentIndex: TIdentIndex; field: String = ''): Integer;
 
-procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
+procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
 
 // -----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Messages;
+uses SysUtils, Messages, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -51,7 +48,7 @@ uses SysUtils, Messages;
 function Elements(IdentIndex: Integer): Cardinal;
 begin
 
-  if (IdentifierAt(IdentIndex).DataType = ENUMTYPE) then
+  if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) then
     Result := 0
   else
 
@@ -342,156 +339,21 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
-function CardToHalf(Src: Uint32): Word;
-var
-  Sign, Exp, Mantissa: Longint;
-  s: Single;
-
-
-  function f32Tof16(fltInt32: Uint32): Word;
-    //https://stackoverflow.com/questions/3026441/float32-to-float16/3026505
-  var
-    //  fltInt32: uint32;
-    fltInt16, tmp: Uint16;
-
-  begin
-    //  fltInt32 := PLongWord(@Float)^;
-    fltInt16 := (fltInt32 shr 31) shl 5;
-    tmp := (fltInt32 shr 23) and $ff;
-    tmp := (tmp - $70) and (Longword(SarLongint(($70 - tmp), 4)) shr 27);
-    fltInt16 := (fltInt16 or tmp) shl 10;
-    Result := fltInt16 or ((fltInt32 shr 13) and $3ff) + 1;
-  end;
-
+procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
 begin
+  // LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [index, value, valueDataType]));
 
-  s := PSingle(@Src)^;
-
-  if (frac(s) <> 0) and (abs(s) >= 0.000060975552) then
-
-    Result := f32Tof16(Src)
-
-  else
-  begin
-
-    // Extract sign, exponent, and mantissa from Single number
-    Sign := Src shr 31;
-    Exp := Longint((Src and $7F800000) shr 23) - 127 + 15;
-    Mantissa := Src and $007FFFFF;
-
-    if (Exp > 0) and (Exp < 30) then
-    begin
-      // Simple case - round the significand and combine it with the sign and exponent
-      Result := (Sign shl 15) or (Exp shl 10) or ((Mantissa + $00001000) shr 13);
-    end
-    else if Src = 0 then
-      begin
-        // Input float is zero - return zero
-        Result := 0;
-      end
-      else
-      begin
-        // Difficult case - lengthy conversion
-        if Exp <= 0 then
-        begin
-          if Exp < -10 then
-          begin
-            // Input float's value is less than HalfMin, return zero
-            Result := 0;
-          end
-          else
-          begin
-            // Float is a normalized Single whose magnitude is less than HalfNormMin.
-            // We convert it to denormalized half.
-            Mantissa := (Mantissa or $00800000) shr (1 - Exp);
-            // Round to nearest
-            if (Mantissa and $00001000) > 0 then
-              Mantissa := Mantissa + $00002000;
-            // Assemble Sign and Mantissa (Exp is zero to get denormalized number)
-            Result := (Sign shl 15) or (Mantissa shr 13);
-          end;
-        end
-        else if Exp = 255 - 127 + 15 then
-          begin
-            if Mantissa = 0 then
-            begin
-              // Input float is infinity, create infinity half with original sign
-              Result := (Sign shl 15) or $7C00;
-            end
-            else
-            begin
-              // Input float is NaN, create half NaN with original sign and mantissa
-              Result := (Sign shl 15) or $7C00 or (Mantissa shr 13);
-            end;
-          end
-          else
-          begin
-            // Exp is > 0 so input float is normalized Single
-
-            // Round to nearest
-            if (Mantissa and $00001000) > 0 then
-            begin
-              Mantissa := Mantissa + $00002000;
-              if (Mantissa and $00800000) > 0 then
-              begin
-                Mantissa := 0;
-                Exp := Exp + 1;
-              end;
-            end;
-
-            if Exp > 30 then
-            begin
-              // Exponent overflow - return infinity half
-              Result := (Sign shl 15) or $7C00;
-            end
-            else
-              // Assemble normalized half
-              Result := (Sign shl 15) or (Exp shl 10) or (Mantissa shr 13);
-          end;
-      end;
-
-  end;
-
-end;  //CardToHalf
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure Int2Float(var ConstVal: Int64);
-var
-  ftmp: TFloat;
-  fl: Single;
+  if (index < 0) or (index > $FFFF) then
 begin
-
-  fl := Integer(ConstVal);
-
-  ftmp[0] := round(fl * TWOPOWERFRACBITS);
-  ftmp[1] := Integer(fl);
-
-  move(ftmp, ConstVal, sizeof(ftmp));
-
+    writeln('SaveToDataSegment: Invalid segment index', index);
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
 end;
 
+  case valueDataType of
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure SaveToDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
-var
-  ftmp: TFloat;
-begin
-
-  // LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [ConstDataSize, ConstVal, ConstValType]));
-
-
-  if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
+    TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
   begin
-    writeln('SaveToDataSegment: ', ConstDataSize);
-    halt;
+      _DataSegment[index] := Byte(Value);
   end;
 
   ftmp := Default(TFloat);
@@ -557,18 +419,20 @@ end;  //SaveToDataSegment
 // ----------------------------------------------------------------------------
 
 
-function GetSizeof(i: Integer; ValType: TDataType): Int64;
+function GetSizeOf(i: TTokenIndex; ValType: TDataType): Int64;
 var
   IdentIndex: Integer;
 begin
 
-  IdentIndex := GetIdent(Tok[i + 2].Name^);
+  IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
 
   case ValType of
 
-    ENUMTYPE: Result := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
+    ENUMTYPE:
+      Result := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
 
-    TDataType.RECORDTOK: if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (Tok[i + 3].Kind = TTokenKind.CPARTOK) then
+    TDataType.RECORDTOK:
+      if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (TokenAt(i + 3).Kind = TDataType.CPARTOK) then
         Result := GetDataSize(TDataType.POINTERTOK)
       else
         Result := RecordSize(IdentIndex);
@@ -582,7 +446,7 @@ begin
         if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
         begin
 
-          if Tok[i + 3].Kind = TTokenKind.OBRACKETTOK then
+          if TokenAt(i + 3).Kind = TDataType.OBRACKETTOK then
             Result := GetDataSize(TDataType.POINTERTOK)
           else
             Result := IdentifierAt(IdentIndex).NumAllocElements_ * 2;
@@ -605,7 +469,7 @@ begin
 
     else
 
-      if ValType = UNTYPETOK then
+      if ValType = TDataType.UNTYPETOK then
         Result := 0
       else
         Result := GetDataSize(ValType)
@@ -619,7 +483,7 @@ end;  //GetSizeof
 // ----------------------------------------------------------------------------
 
 
-function CompileConstFactor(i: Integer; out ConstVal: Int64; out ConstValType: TDataType): Integer;
+function CompileConstFactor(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 var
   IdentIndex, j: Integer;
   Kind: TTokenKind;
@@ -648,15 +512,15 @@ begin
   fl := 0;
   j := 0;
 
-  //WRITELN(tok[i].line, ',', tok[i].kind);
+  // WRITELN(TokenAt(i).line, ',', TokenAt(i).kind);
 
-  case Tok[i].Kind of
+  case TokenAt(i).Kind of
 
-    LOWTOK:
+    TTokenKind.LOWTOK:
     begin
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      if Tok[i + 2].Kind in AllTypes {+ [STRINGTOK]} then
+      if TokenAt(i + 2).Kind in AllTypes {+ [TTokenKind.STRINGTOK]} then
       begin
 
         ConstValType := TokenAt(i + 2).Kind;
@@ -681,20 +545,20 @@ begin
 
       ConstValType := GetValueType(ConstVal);
 
-      CheckTok(i + 1, CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       Result := i + 1;
     end;
 
 
-    HIGHTOK:
+    TTokenKind.HIGHTOK:
     begin
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      if Tok[i + 2].Kind in AllTypes {+ [STRINGTOK]} then
+      if TokenAt(i + 2).Kind in AllTypes {+ [STRINGTOK]} then
       begin
 
-        ConstValType := Tok[i + 2].Kind;
+        ConstValType := TokenAt(i + 2).Kind;
 
         Inc(i, 2);
 
@@ -710,9 +574,9 @@ begin
 
       if ConstValType in Pointers then
       begin
-        IdentIndex := GetIdent(Tok[i].Name^);
+        IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
-        if IdentifierAt(IdentIndex).AllocElementType in [RECORDTOK, OBJECTTOK] then
+        if IdentifierAt(IdentIndex).AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
           ConstVal := IdentifierAt(IdentIndex).NumAllocElements_ - 1
         else
           if IdentifierAt(IdentIndex).NumAllocElements > 0 then
@@ -726,22 +590,22 @@ begin
 
       ConstValType := GetValueType(ConstVal);
 
-      CheckTok(i + 1, CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       Result := i + 1;
     end;
 
 
-    LENGTHTOK:
+    TTokenKind.LENGTHTOK:
     begin
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       ConstVal := 0;
 
-      if Tok[i + 2].Kind = IDENTTOK then
+      if TokenAt(i + 2).Kind = TTokenKind.IDENTTOK then
       begin
 
-        IdentIndex := GetIdent(Tok[i + 2].Name^);
+        IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
 
         if IdentIndex = 0 then
           Error(i + 2, TErrorCode.UnknownIdentifier);
@@ -749,8 +613,8 @@ begin
         if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT, USERTYPE] then
         begin
 
-          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
-            (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) 
+          or ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
           begin
 
             if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
@@ -787,20 +651,20 @@ begin
       else
         Error(i + 2, TErrorCode.IdentifierExpected);
 
-      CheckTok(i + 1, CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       Result := i + 1;
     end;
 
 
-    SIZEOFTOK:
+    TTokenKind.SIZEOFTOK:
     begin
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      if Tok[i + 2].Kind in OrdinalTypes + RealTypes + [TDataType.POINTERTOK] then
+      if TokenAt(i + 2).Kind in OrdinalTypes + RealTypes + [TTokenKind.POINTERTOK] then
       begin
 
-        ConstVal := GetDataSize(Tok[i + 2].Kind);
+        ConstVal := GetDataSize(TokenAt(i + 2).Kind);
         ConstValType := TDataType.BYTETOK;
 
         j := i + 2;
@@ -809,7 +673,7 @@ begin
       else
       begin
 
-        if Tok[i + 2].Kind <> IDENTTOK then
+        if TokenAt(i + 2).Kind <> TTokenKind.IDENTTOK then
           Error(i + 2, TErrorCode.IdentifierExpected);
 
         j := CompileConstExpression(i + 2, ConstVal, ConstValType);
@@ -822,16 +686,16 @@ begin
 
       end;
 
-      CheckTok(j + 1, CPARTOK);
+      CheckTok(j + 1, TTokenKind.CPARTOK);
 
       Result := j + 1;
     end;
 
 
-    LOTOK:
+    TTokenKind.LOTOK:
     begin
 
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       OldConstValType := TDataType.UNTYPETOK;
 
@@ -839,11 +703,13 @@ begin
 
       if isError then Exit;
 
-      if OldConstValType in [TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
+      // TODO: But here OldConstValType=TDataType.UNTYPETOK always?
+      if OldConstValType in [TTokenKind.DATAORIGINOFFSET, TTokenKind.CODEORIGINOFFSET] then
+        Error(i, TMessage.Create(TErrorCode.InvalidVariableAddress, 'Can''t take the address of variable'));
 
       GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
-      CheckTok(i + 1, CPARTOK);
+      CheckTok(i + 1, TDataType.CPARTOK);
 
       case ConstValType of
         TDataType.INTEGERTOK, TDataType.CARDINALTOK: ConstVal := ConstVal and $0000FFFF;
@@ -857,10 +723,10 @@ begin
     end;
 
 
-    HITOK:
+    TDataType.HITOK:
     begin
 
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TDataType.OPARTOK);
 
       OldConstValType := TDataType.UNTYPETOK;
 
@@ -868,16 +734,17 @@ begin
 
       if isError then Exit;
 
-      if OldConstValType in [DATAORIGINOFFSET, CODEORIGINOFFSET] then Error(i, 'Can''t take the address of variable');
+      if OldConstValType in [TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET] then
+        Error(i, TMessage.Create(TErrorCode.InvalidVariableAddress, 'Can''t take the address of variable'));
 
-      GetCommonConstType(i, INTEGERTOK, ConstValType);
+      GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
-      CheckTok(i + 1, CPARTOK);
+      CheckTok(i + 1, TDataType.CPARTOK);
 
       case ConstValType of
-        INTEGERTOK, CARDINALTOK: ConstVal := ConstVal shr 16;
-        SMALLINTTOK, WORDTOK: ConstVal := ConstVal shr 8;
-        SHORTINTTOK, BYTETOK: ConstVal := ConstVal shr 4;
+        TDataType.INTEGERTOK, TDataType.CARDINALTOK: ConstVal := ConstVal shr 16;
+        TDataType.SMALLINTTOK, TDataType.WORDTOK: ConstVal := ConstVal shr 8;
+        TDataType.SHORTINTTOK, TDataType.BYTETOK: ConstVal := ConstVal shr 4;
       end;
 
       ConstValType := GetValueType(ConstVal);
@@ -885,12 +752,12 @@ begin
     end;
 
 
-    INTTOK, FRACTOK:
+    TDataType.INTTOK, TDataType.FRACTOK:
     begin
 
-      Kind := Tok[i].Kind;
+      Kind := TokenAt(i).Kind;
 
-      CheckTok(i + 1, OPARTOK);
+      CheckTok(i + 1, TDataType.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
