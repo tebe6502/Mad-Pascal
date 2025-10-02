@@ -19613,6 +19613,26 @@ end;
 
   end;  //CompileProgram
 
+// ----------------------------------------------------------------------------
+//                                 Compiler Main
+// ----------------------------------------------------------------------------
+procedure InitializeIdentifiers;
+
+{$IFNDEF PAS2JS}
+const
+  PI_VALUE: TNumber = $40490FDB00000324; // does not fit into 53 bits Javascript double  mantissa
+const
+  NAN_VALUE: TNumber = $FFC00000FFC00000;
+const
+  INFINITY_VALUE: TNumber = $7F8000007F800000;
+const
+  NEGINFINITY_VALUE: TNumber = $FF800000FF800000;
+{$ELSE}
+  const PI_VALUE: Int64 = 3; // does not fit into 53 bits Javascript double  mantissa
+  const NAN_VALUE: Int64 = $11111111;
+  const INFINITY_VALUE: Int64 = $22222222;
+  const NEGINFINITY_VALUE: Int64 = $33333333;
+{$ENDIF}
 
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
@@ -19874,8 +19894,11 @@ begin
   //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
 
   WriteLn(CompilerTitle);
+  
+  TokenList := TTokenList.Create;
+  IdentifierList := TIdentifierList.Create;
+  for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
 
-  SetLength(Tok, 1);
   SetLength(IFTmpPosStack, 1);
 
   Tok[NumTok].Line := 0;
@@ -19935,67 +19958,44 @@ begin
 
   // ----------------------------------------------------------------------------
   // Set defines for first pass;
-  TokenizeProgram;
+  scanner := TScanner.Create;
+
+  scanner.TokenizeProgram(programUnit, True);
 
   if NumTok = 0 then Error(1, '');
 
-  Inc(NumUnits);
-  UnitName[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
-  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
+  // Add default unit 'system.pas'
+  SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
-
-  TokenizeProgram(False);
+  scanner.TokenizeProgram(programUnit, False);
 
   // ----------------------------------------------------------------------------
 
   NumStaticStrCharsTmp := NumStaticStrChars;
 
-  // Initilize identifiers for predefined constants
-  DefineIdent(1, 'BLOCKREAD', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
-  DefineIdent(1, 'BLOCKWRITE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
-
-  DefineIdent(1, 'GETRESOURCEHANDLE', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
-
-  DefineIdent(1, 'NIL', CONSTANT, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
-
-  DefineIdent(1, 'EOL', CONSTANT, TDataType.CHARTOK, 0, TDataType.UNTYPETOK, target.eol);
-
-  DefineIdent(1, '__BUFFER', CONSTANT, TDataType.WORDTOK, 0, TDataType.UNTYPETOK, target.buf);
-
-  DefineIdent(1, 'TRUE', CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000001);
-  DefineIdent(1, 'FALSE', CONSTANT, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000000);
-
-  DefineIdent(1, 'MAXINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXINT);
-  DefineIdent(1, 'MAXSMALLINT', CONSTANT, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXSMALLINT);
-
-  DefineIdent(1, 'PI', CONSTANT, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
-  DefineIdent(1, 'NAN', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
-  DefineIdent(1, 'INFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
-  DefineIdent(1, 'NEGINFINITY', CONSTANT, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
+  InitializeIdentifiers;
 
   // First pass: compile the program and build call graph
   NumPredefIdent := NumIdent;
-  Pass := TPass.CALL_DETERMINATION;
-  CompileProgram;
+
+
+  CompileProgram(TPass.CALL_DETERMINATION);
 
 
   // Visit call graph nodes and mark all procedures that are called as not dead
-  OptimizeProgram(GetIdent('MAIN'));
+  OptimizeProgram(GetIdentIndex('MAIN'));
 
 
   // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
-  NumIdent := NumPredefIdent;
+  NumIdent_ := NumPredefIdent;
+  ClearWordMemory(_DataSegment);
 
-  fillchar(DataSegment, sizeof(DataSegment), 0);
-
-  for CodeSize := 1 to High(UnitName) do UnitName[CodeSize].Units := 0;
+  SourceFileList.ClearAllowedUnitNames;
 
   NumBlocks := 0;
   BlockStackTop := 0;
   CodeSize := 0;
   CodePosStackTop := 0;
-  SetVarDataSize(0, 0);
   CaseCnt := 0;
   IfCnt := 0;
   ShrShlCnt := 0;
@@ -20004,7 +20004,6 @@ begin
   NumProc := 0;
 
   NumStaticStrChars := NumStaticStrCharsTmp;
-
 
   ResetOpty;
   optyFOR0 := '';
@@ -20024,38 +20023,23 @@ begin
 
   SetLength(OptimizeBuf, 1);
 
-  Pass := TPass.CODE_GENERATION;
-  CompileProgram;
+  CompileProgram(TPass.CODE_GENERATION);
 
-  Flush(OutFile);
-  CloseFile(OutFile);
+end;
 
-{$IFDEF USEOPTFILE}
- CloseFile(OptFile);
-{$ENDIF}
+procedure Free;
+begin
 
-{$IFDEF USETRACEFILE}
-CloseFile(TraceFile);
-{$ENDIF}
+  TokenList.Free;
+  TokenList := nil;
 
-  // Diagnostics
-  if DiagMode then Diagnostics;
+  IdentifierList.Free;
+  IdentifierList := nil;
 
-
-  WritelnMsg;
-
-  TextColor(WHITE);
-
-  Writeln(TokenAt(NumTok).Line, ' lines compiled, ', ((GetTickCount64 - start_time + 500) / 1000): 2: 2, ' sec, ',
-    NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
-
-  FreeTokens;
-
-  TextColor(LIGHTGRAY);
-
-  if High(msgWarning) > 0 then Writeln(High(msgWarning), ' warning(s) issued');
-  if High(msgNote) > 0 then Writeln(High(msgNote), ' note(s) issued');
-
-  NormVideo;
+  SetLength(IFTmpPosStack, 0);
+  evaluationContext := nil;
+  unitPathList.Free;
+  unitPathList := nil;
+end;
 
 end.
