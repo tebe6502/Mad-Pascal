@@ -207,6 +207,7 @@ uses
   Scanner,
   Parser,
   Optimize,
+  Targets,
   Tokens,
   Diagnostic,
   MathEvaluate;

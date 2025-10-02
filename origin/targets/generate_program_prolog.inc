@@ -18,15 +18,15 @@ if Pass = TPass.CODE_GENERATION then begin
 
  asm65('STACKWIDTH'#9'= 16');
 
- if target.id = ___a8 then
+ if target.id = TTargetID.A8 then
   asm65('CODEORIGIN'#9'= $'+IntToHex(CODEORIGIN_BASE, 4));
 
  asm65;
 
- asm65('TRUE'#9#9'= '+IntToStr(Ident[GetIdent('TRUE')].Value));
- asm65('FALSE'#9#9'= '+IntToStr(Ident[GetIdent('FALSE')].Value));
- asm65('EOL'#9#9'= $'+IntToHex(Ident[GetIdent('EOL')].Value,2));
- asm65('__BUFFER'#9'= $'+IntToHex(Ident[GetIdent('__BUFFER')].Value,4));
+ asm65('TRUE'#9#9'= '+IntToStr(IdentifierAt(GetIdentIndex('TRUE')).Value));
+ asm65('FALSE'#9#9'= '+IntToStr(IdentifierAt(GetIdentIndex('FALSE')).Value));
+ asm65('EOL'#9#9'= $'+IntToHex(IdentifierAt(GetIdentIndex('EOL')).Value,2));
+ asm65('__BUFFER'#9'= $'+IntToHex(IdentifierAt(GetIdentIndex('__BUFFER')).Value,4));
  asm65('@BUF'#9#9'= __BUFFER');
 
  asm65separator;
@@ -38,7 +38,7 @@ if Pass = TPass.CODE_GENERATION then begin
  asm65('zpage');
  asm65;
 
- if target.id = ___a8 then begin
+ if target.id = TTargetID.A8 then begin
 
   asm65('.if .def(@vbxe_detect)');
   asm65('fxptr'#9'.ds 2','; VBXE pointer');
@@ -97,7 +97,7 @@ if Pass = TPass.CODE_GENERATION then begin
  asm65('dl'#9'= edx');
  asm65('dh'#9'= edx+1');
 
-if (target.id = ___neo) then begin
+if (target.id = TTargetID.NEO) then begin
  asm65;
  asm65('FP1MAN0 = VAR1_B0');
  asm65('FP1MAN1 = VAR1_B1');
@@ -156,7 +156,7 @@ end;
  asm65('FPEXP'#9'.ds 1');
 
 
- if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
+ if (target.id = TTargetID.A8) and (LIBRARY_USE = FALSE) then begin
 
   if RCLIBRARY then begin
     asm65;
@@ -181,11 +181,11 @@ end;
  end;
 
 
-// if (High(resArray) > 0) and (target.id = ___a8) and LIBRARY_USE then
+// if (High(resArray) > 0) and (target.id = TComputer.A8) and LIBRARY_USE then
 // asm65(#9'ert ''Resources in LIBRARY not allowed''');
 
 
- if (High(resArray) > 0) and (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
+ if (High(resArray) > 0) and (target.id = TTargetID.A8) and (LIBRARY_USE = FALSE) then begin
 
   asm65;
   asm65(#9'org CODEORIGIN');
@@ -220,7 +220,7 @@ end;
  asm65separator;
 
 
- if target.id = ___a8 then begin
+ if target.id = TTargetID.A8 then begin
 
   asm65;
   asm65(#9'org CODEORIGIN');
@@ -231,7 +231,7 @@ end;
    if (header = 'END') then break else
     if header <> '' then asm65(#9'' + header) else asm65;
 
-  if (target.id = ___raw) then begin
+  if (target.id = TTargetID.RAW) then begin
 
    asm65;
    asm65(#9'opt h-f+');
@@ -242,7 +242,7 @@ end;
 
    CODEORIGIN_BASE := target.codeorigin + 3;
 
-  end else if (target.id = ___neo) then begin
+  end else if (target.id = TTargetID.NEO) then begin
 
    asm65;
    asm65(#9'opt h-f+c+');
@@ -276,7 +276,7 @@ end;
  asm65('RTLIB');
 
 
- if target.id = ___a8 then
+ if target.id = TTargetID.A8 then
   asm65(#9'icl ''rtl6502_a8.asm''')
  else
   asm65(#9'icl ''rtl6502_' + AnsiLowerCase(target.name) + '.asm''');
@@ -304,7 +304,7 @@ end;
  asm65;
 
 
- if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
+ if (target.id = TTargetID.A8) and (LIBRARY_USE = FALSE) then begin
 
   asm65(#9'.ifdef MAIN.@DEFINES.ROMOFF');
   asm65(#9'icl ''atari\romoff.asm''');
@@ -323,7 +323,7 @@ end;
   asm65('VADR'#9'= DATAORIGIN+VARINITSIZE');
   asm65;
 
-  if (target.id = ___a8) then begin
+  if (target.id = TTargetID.A8) then begin
    asm65(#9'ift (VADR > $BFFF) && .not(.def MAIN.@DEFINES.ROMOFF)');
    asm65(#9'ert ''Invalid memory address range '',VADR');
    asm65(#9'eif');
@@ -348,7 +348,7 @@ end;
  asm65;
 
 
- if (target.id in [___c64, ___c4p]) then begin
+ if (target.id in [TTargetID.C64, TTargetID.C4P]) then begin
 
   asm65(#9'lda #$0e');
   asm65(#9'jsr $ffd2','; shifted charset');
@@ -357,7 +357,7 @@ end;
  end;
 
 
- if (target.id = ___neo) then begin
+ if (target.id = TTargetID.NEO) then begin
 
    asm65(#9'stz $FF04','; set radians as default');
    asm65(#9'mva #35 $FF01');
@@ -366,7 +366,7 @@ end;
  end;
 
 
- if (target.id = ___a8) and (LIBRARY_USE = FALSE) then begin
+ if (target.id = TTargetID.A8) and (LIBRARY_USE = FALSE) then begin
 
   asm65(#9'ldx #$00','; X = 0');
   asm65(#9'stx bp','; BP = 0');
@@ -392,7 +392,7 @@ end;
  end;
 
 
- if target.cpu <> CPU_6502 then asm65(#9'opt c+');
+ if target.cpu <> TCPU.CPU_6502 then asm65(#9'opt c+');
 
 
  asm65(#9'UNITINITIALIZATION');
