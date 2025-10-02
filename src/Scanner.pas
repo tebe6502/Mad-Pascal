@@ -233,7 +233,7 @@ var
   procedure TokenizeUnit(a: TSourceFile; tesTSourceFile: Boolean = False); forward;
 
 
-  procedure Tokenize(filePath: TFilePath; tesTSourceFile: Boolean = False);
+  procedure Tokenize(filePath: TFilePath; testSourceFile: Boolean = False);
   var
     InFile: IBinaryFile;
     _line: Integer;
@@ -2110,7 +2110,7 @@ begin
         if ch = '.' then
           Dec(i)        // Range ('..') token
         else
-        begin
+        begin        // Fractional part found
           Frac := ReadFractionalPart(a, i, ch);
 
           TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;

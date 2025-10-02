@@ -45,6 +45,7 @@ begin
   optyA := '';
   optyY := '';
   optyBP2 := '';
+
 end;
 
 

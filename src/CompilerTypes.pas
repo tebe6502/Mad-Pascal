@@ -62,7 +62,7 @@ const
 
 
   // Indirection levels
-type TIndirectionLevel = TInteger;
+type TIndirectionLevel = Byte;
 
 const
   ASVALUE = 0;

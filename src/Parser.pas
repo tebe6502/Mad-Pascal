@@ -260,9 +260,9 @@ begin
       if FieldType <> TDataType.RECORDTOK then
         if (FieldType in Pointers) and (NumAllocElements > 0) then
         begin
-          if AllocElementType = RECORDTOK then
+          if AllocElementType = TDataType.RECORDTOK then
           begin
-            AllocElementType := POINTERTOK;
+            AllocElementType := TDataType.POINTERTOK;
             NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
             NumAllocElements_ := 0;
           end;
@@ -309,9 +309,9 @@ begin
           if FieldType <> TDataType.RECORDTOK then
             if (FieldType in Pointers) and (NumAllocElements > 0) then
             begin
-              if AllocElementType = RECORDTOK then
+              if AllocElementType = TDataType.RECORDTOK then
               begin
-                AllocElementType := POINTERTOK;
+                AllocElementType := TDataType.POINTERTOK;
                 NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
                 NumAllocElements_ := 0;
               end;
@@ -595,15 +595,14 @@ begin
         if IdentIndex = 0 then
           Error(i + 2, TErrorCode.UnknownIdentifier);
 
-        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT] then
+        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT,USERTYPE] then
         begin
 
-          if (IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK) or
-            ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)
+          or ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
           begin
 
-            if (IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK) or
-              (IdentifierAt(IdentIndex).AllocElementType = TTokenKind.CHARTOK) then
+            if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
             begin
 
               isError := True;
@@ -615,9 +614,9 @@ begin
 
               //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).AllocElementType );
 
-              if (IdentifierAt(IdentIndex).DataType = TTokenKind.POINTERTOK) and
-                (IdentifierAt(IdentIndex).AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK]) then
-                ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
+              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in
+               [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+				ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
               else
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements;
 
@@ -651,7 +650,7 @@ begin
       begin
 
         ConstVal := GetDataSize(TokenAt(i + 2).Kind);
-        ConstValType := TTokenKind.BYTETOK;
+        ConstValType := TDataType.BYTETOK;
 
         j := i + 2;
 
@@ -967,8 +966,7 @@ begin
                 case GetDataSize(ConstValType) of
                   1: ConstVal := GetStaticValue(0 + Ord(IdentifierAt(IdentIndex).idType = TDataType.PCHARTOK));
                   2: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8;
-                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl
-                      16 + GetStaticValue(3) shl 24;
+                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl 16 + GetStaticValue(3) shl 24;
                 end;
 
                 if ConstValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then ConstVal := ConstVal shl 32;
@@ -1031,8 +1029,7 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (IdentifierAt(IdentIndex).Value and $ff = 0) and (Byte(
-                  (IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                   (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
@@ -1206,7 +1203,7 @@ begin
 
       if isError then Exit;
 
-      if ConstValType = TTokenKind.BOOLEANTOK then
+      if ConstValType = TDataType.BOOLEANTOK then
         ConstVal := Ord(not (ConstVal <> 0))
 
       else
@@ -1265,10 +1262,10 @@ begin
 
         if (IdentifierAt(IdentIndex).DataType in Pointers) and
           ((IdentifierAt(IdentIndex).NumAllocElements > 0) and
-          (IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.RECORDTOK)) then
-          if ((IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.UNTYPETOK) and
+          (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)) then
+          if ((IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
             (IdentifierAt(IdentIndex).NumAllocElements in [0, 1])) or
-            (IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK) then
+            (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) then
           begin
 
           end
