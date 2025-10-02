@@ -58,7 +58,8 @@ begin
     if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
       Result := IdentifierAt(IdentIndex).NumAllocElements_
     else
-      if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or (IdentifierAt(IdentIndex).AllocElementType in [TDataType.PROCVARTOK]) then
+      if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or (IdentifierAt(IdentIndex).AllocElementType in
+        [TDataType.PROCVARTOK]) then
         Result := IdentifierAt(IdentIndex).NumAllocElements
       else
         Result := IdentifierAt(IdentIndex).NumAllocElements * IdentifierAt(IdentIndex).NumAllocElements_;
@@ -70,11 +71,11 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetIdent(S: TString): Integer;
+function GetIdentIndex(S: TString): TIdentIndex;
 var
-  TempIndex: Integer;
+  TempIndex: TIdentIndex;
 
-  function UnitAllowedAccess(IdentIndex, Index: Integer): Boolean;
+  function UnitAllowedAccess(IdentIndex: TIdentIndex; SourceFile: TSourceFile): Boolean;
   var
     i: Integer;
   begin
@@ -83,12 +84,12 @@ var
 
     if IdentifierAt(IdentIndex).Section then
       for i := MAXALLOWEDUNITS downto 1 do
-        if UnitName[Index].Allow[i] = UnitName[IdentifierAt(IdentIndex).UnitIndex].Name then exit(True);
+        if SourceFile.AllowedUnitNames[i] = IdentifierAt(IdentIndex).SourceFile.Name then exit(True);
 
   end;
 
 
-  function Search(X: TString; UnitIndex: Integer): Integer;
+  function Search(X: TString; SourceFile: TSourceFile): Integer;
   var
     IdentIndex, BlockStackIndex: Integer;
   begin
@@ -99,23 +100,24 @@ var
       // search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
         if (X = IdentifierAt(IdentIndex).Name) and (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
-          if (IdentifierAt(IdentIndex).UnitIndex = UnitIndex) {or IdentifierAt(IdentIndex).Section} or
-            (IdentifierAt(IdentIndex).UnitIndex = 1) or (UnitName[IdentifierAt(IdentIndex).UnitIndex].Name = 'SYSTEM') or
-            UnitAllowedAccess(IdentIndex, UnitIndex) then
+          if (IdentifierAt(IdentIndex).SourceFile = SourceFile) {or IdentifierAt(IdentIndex).Section} or
+            (IdentifierAt(IdentIndex).SourceFile.UnitIndex = 1) or
+            (IdentifierAt(IdentIndex).SourceFile.Name = 'SYSTEM') or UnitAllowedAccess(IdentIndex, SourceFile) then
           begin
             Result := IdentIndex;
-            Ident[IdentIndex].Pass := Pass;
+            IdentifierAt(IdentIndex).Pass := Pass;
 
-            if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X) - 1));
+            if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
-            if (IdentifierAt(IdentIndex).UnitIndex = UnitIndex) or (IdentifierAt(IdentIndex).UnitIndex = 1)
-            { or (UnitName[IdentifierAt(IdentIndex).UnitIndex].Name = 'SYSTEM')} then exit;
+            if (IdentifierAt(IdentIndex).SourceFile = SourceFile) or
+              (IdentifierAt(IdentIndex).SourceFile.UnitIndex = 1)
+            { or (IdentifierAt(IdentIndex).SourceFile.NAME) = 'SYSTEM')} then exit;
           end;
 
   end;
 
 
-  function SearchCurrentUnit(X: TString; UnitIndex: Integer): Integer;
+  function SearchCurrenTSourceFile(X: TString; SourceFile: TSourceFile): Integer;
   var
     IdentIndex, BlockStackIndex: Integer;
   begin
@@ -126,14 +128,14 @@ var
       // search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
         if (X = IdentifierAt(IdentIndex).Name) and (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
-          if (IdentifierAt(IdentIndex).UnitIndex = UnitIndex) or UnitAllowedAccess(IdentIndex, UnitIndex) then
+          if (IdentifierAt(IdentIndex).SourceFile = SourceFile) or UnitAllowedAccess(IdentIndex, SourceFile) then
           begin
             Result := IdentIndex;
-            Ident[IdentIndex].Pass := Pass;
+            IdentifierAt(IdentIndex).Pass := Pass;
 
-            if pos('.', X) > 0 then GetIdent(copy(X, 1, pos('.', X) - 1));
+            if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
-            if (IdentifierAt(IdentIndex).UnitIndex = UnitIndex) then exit;
+            if (IdentifierAt(IdentIndex).SourceFile = SourceFile) then exit;
           end;
 
   end;
@@ -142,38 +144,36 @@ begin
 
   if S = '' then exit(-1);
 
-
+  // Check if it can be found in the current WITH context
   if High(WithName) > 0 then
     for TempIndex := 0 to High(WithName) do
     begin
-      Result := Search(WithName[TempIndex] + '.' + S, UnitNameIndex);
+      Result := Search(WithName[TempIndex] + '.' + S, ActiveSourceFile);
 
       if Result > 0 then exit;
     end;
 
-
-  Result := Search(S, UnitNameIndex);
-
+  Result := Search(S, ActiveSourceFile);
 
   if (Result = 0) and (pos('.', S) > 0) then
   begin   // potencjalnie odwolanie do unitu / obiektu
 
-    TempIndex := Search(copy(S, 1, pos('.', S) - 1), UnitNameIndex);
+    TempIndex := Search(copy(S, 1, pos('.', S) - 1), ActiveSourceFile);
 
-    //    writeln(S,',',Ident[TempIndex].Kind,' - ', Ident[TempIndex].DataType, ' / ',Ident[TempIndex].AllocElementType);
+    //    writeln(S,',',IdentifierAt(TempIndex).Kind,' - ', IdentifierAt(TempIndex).DataType, ' / ',IdentifierAt(TempIndex).AllocElementType);
 
     if TempIndex > 0 then
-      if (Ident[TempIndex].Kind = UNITTYPE) or (Ident[TempIndex].DataType = ENUMTYPE) then
-        Result := SearchCurrentUnit(copy(S, pos('.', S) + 1, length(S)), Ident[TempIndex].UnitIndex)
+      if (IdentifierAt(TempIndex).Kind = UNITTYPE) or (IdentifierAt(TempIndex).DataType = ENUMTYPE) then
+        Result := SearchCurrenTSourceFile(copy(S, pos('.', S) + 1, length(S)), IdentifierAt(TempIndex).SourceFile)
       else
-        if Ident[TempIndex].DataType = TDataType.OBJECTTOK then
-          Result := SearchCurrentUnit(Types[Ident[TempIndex].NumAllocElements].Field[0].Name +
-            copy(S, pos('.', S), length(S)), Ident[TempIndex].UnitIndex);
+        if IdentifierAt(TempIndex).DataType = TDataType.OBJECTTOK then
+          Result := SearchCurrenTSourceFile(GetTypeAtIndex(IdentifierAt(TempIndex).NumAllocElements).Field[0].Name +
+            copy(S, pos('.', S), length(S)), IdentifierAt(TempIndex).SourceFile);
       {else
-       if ( (Ident[TempIndex].DataType in Pointers) and (Ident[TempIndex].AllocElementType = RECORDTOK) ) then
+       if ( (IdentifierAt(TempIndex).DataType in Pointers) and (IdentifierAt(TempIndex).AllocElementType = RECORDTOK) ) then
   Result := TempIndex;}
 
-    //    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIndex,'/',Result,' | ',Ident[TempIndex].Kind,',',UnitName[Ident[TempIndex].UnitIndex].Name);
+    //    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIndex,'/',Result,' | ',IdentifierAt(TempIndex).Kind,',',IdentifierAt(TempIndex).SourceFile.Name);
 
   end;
 
@@ -188,23 +188,17 @@ function ObjectRecordSize(i: Cardinal): Integer;
 var
   j: Integer;
   FieldType: TDataType;
-  //    AllocElementType: Byte;
-  //    NumAllocElements: cardinal;
 begin
 
   Result := 0;
 
-  FieldType := TDataType.UNTYPETOK;
-
   if i > 0 then
   begin
 
-    for j := 1 to Types[i].NumFields do
+    for j := 1 to GetTypeAtIndex(i).NumFields do
     begin
 
-      FieldType := Types[i].Field[j].DataType;
-      //NumAllocElements := Types[i].Field[j].NumAllocElements;
-      //AllocElementType := Types[i].Field[j].AllocElementType;
+      FieldType := GetTypeAtIndex(i).Field[j].DataType;
 
       if FieldType <> TDataType.RECORDTOK then
         Inc(Result, GetDataSize(FieldType));
@@ -243,13 +237,13 @@ begin
   if i > 0 then
   begin
 
-    for j := 1 to Types[i].NumFields do
+    for j := 1 to GetTypeAtIndex(i).NumFields do
     begin
 
-      FieldType := Types[i].Field[j].DataType;
-      NumAllocElements := Types[i].Field[j].NumAllocElements and $FFFF;
-      NumAllocElements_ := Types[i].Field[j].NumAllocElements shr 16;
-      AllocElementType := Types[i].Field[j].AllocElementType;
+      FieldType := GetTypeAtIndex(i).Field[j].DataType;
+      NumAllocElements := GetTypeAtIndex(i).Field[j].NumAllocElements and $FFFF;
+      NumAllocElements_ := GetTypeAtIndex(i).Field[j].NumAllocElements shr 16;
+      AllocElementType := GetTypeAtIndex(i).Field[j].AllocElementType;
 
       if AllocElementType in [TDataType.FORWARDTYPE, TDataType.PROCVARTOK] then
       begin
@@ -258,11 +252,9 @@ begin
         NumAllocElements_ := 0;
       end;
 
-      //    writeln(Types[i].Field[j].Name ,',',FieldType,',',AllocElementType);
-
       if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
-      if Types[i].Field[j].Name = field then
+      if GetTypeAtIndex(i).Field[j].Name = field then
       begin
         yes := True;
         Break;
@@ -271,19 +263,16 @@ begin
       if FieldType <> TDataType.RECORDTOK then
         if (FieldType in Pointers) and (NumAllocElements > 0) then
         begin
-
           if AllocElementType = TDataType.RECORDTOK then
           begin
             AllocElementType := TDataType.POINTERTOK;
-            NumAllocElements := Types[i].Field[j].NumAllocElements shr 16;
+            NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
             NumAllocElements_ := 0;
           end;
-
           if NumAllocElements_ > 0 then
             Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
           else
             Inc(Result, NumAllocElements * GetDataSize(AllocElementType));
-
         end
         else
           Inc(Result, GetDataSize(FieldType));
@@ -298,21 +287,23 @@ begin
 
     base := copy(Name, 1, pos('.', Name) - 1);
 
-    IdentIndex := GetIdent(base);
+    IdentIndex := GetIdentIndex(base);
 
-    for i := 1 to Types[IdentifierAt(IdentIndex).NumAllocElements].NumFields do
-      if pos(Name, base + '.' + Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].Name) > 0 then
-        if Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].DataType <> TDataType.RECORDTOK then
+    for i := 1 to GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).NumFields do
+      if pos(Name, base + '.' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].Name) > 0 then
+        if GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].DataType <> TDataType.RECORDTOK then
         begin
 
-          FieldType := Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].DataType;
-          NumAllocElements := Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].NumAllocElements and $FFFF;
-          NumAllocElements_ := Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].NumAllocElements shr 16;
-          AllocElementType := Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].AllocElementType;
+          FieldType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].DataType;
+          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
+            and $ffff;
+          NumAllocElements_ := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
+            shr 16;
+          AllocElementType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].AllocElementType;
 
           if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
-          if Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].Name = field then
+          if GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].Name = field then
           begin
             yes := True;
             Break;
@@ -321,19 +312,16 @@ begin
           if FieldType <> TDataType.RECORDTOK then
             if (FieldType in Pointers) and (NumAllocElements > 0) then
             begin
-
               if AllocElementType = TDataType.RECORDTOK then
               begin
                 AllocElementType := TDataType.POINTERTOK;
-                NumAllocElements := Types[IdentifierAt(IdentIndex).NumAllocElements].Field[i].NumAllocElements shr 16;
+                NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
                 NumAllocElements_ := 0;
               end;
-
               if NumAllocElements_ > 0 then
                 Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
               else
                 Inc(Result, NumAllocElements * GetDataSize(AllocElementType));
-
             end
             else
               Inc(Result, GetDataSize(FieldType));
@@ -350,7 +338,6 @@ begin
       Result := Result + Ord(FieldType) shl 16;    // type | offset
 
 end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
