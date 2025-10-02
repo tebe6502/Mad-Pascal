@@ -9218,11 +9218,11 @@ begin
         if ActualParamType in RealTypes then
         begin
 
-          ValType := TTokenKind.INTEGERTOK;
+          ValType := TDataType.INTEGERTOK;
 
           case ActualParamType of
 
-            TTokenKind.SHORTREALTOK:
+            TDataType.SHORTREALTOK:
             begin
               //asm65(#9'jsr @SHORTREAL_TRUNC');
 
@@ -9236,10 +9236,10 @@ begin
               asm65(#9'lda :eax');
               asm65(#9'sta :STACKORIGIN,x');
 
-              ValType := TTokenKind.SHORTINTTOK;
+              ValType := TDataType.SHORTINTTOK;
             end;
 
-            TTokenKind.REALTOK:
+            TDataType.REALTOK:
             begin
               // asm65(#9'jsr @REAL_TRUNC');
 
@@ -9285,7 +9285,7 @@ begin
               asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
             end;
 
-            TTokenKind.SINGLETOK:
+            TDataType.SINGLETOK:
             begin
               // asm65(#9'jsr @F2I');
 
@@ -9314,7 +9314,7 @@ begin
 
         end
         else
-          GetCommonConstType(i, TTokenKind.REALTOK, ActualParamType);
+          GetCommonConstType(i, TDataType.REALTOK, ActualParamType);
 
       Result := i + 1;
     end;
@@ -9373,7 +9373,7 @@ begin
 
             end;
 
-            TTokenKind.HALFSINGLETOK:
+            TDataType.HALFSINGLETOK:
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -9394,7 +9394,7 @@ begin
 
             end;
 
-            TTokenKind.SINGLETOK:
+            TDataType.SINGLETOK:
             begin
               //asm65(#9'jsr @FROUND');
 
@@ -9424,7 +9424,7 @@ begin
 
         end
         else
-          GetCommonConstType(i, TTokenKind.REALTOK, ActualParamType);
+          GetCommonConstType(i, TDataType.REALTOK, ActualParamType);
 
       Result := i + 1;
     end;
@@ -9436,7 +9436,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonConstType(i, TTokenKind.CARDINALTOK, ActualParamType);
+      GetCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -9444,7 +9444,7 @@ begin
       asm65(#9'and #$01');
       asm65(#9'sta :STACKORIGIN,x');
 
-      ValType := TTokenKind.BOOLEANTOK;
+      ValType := TDataType.BOOLEANTOK;
       Result := i + 1;
     end;
 

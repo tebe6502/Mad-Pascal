@@ -62,7 +62,9 @@ const
 
 
   // Indirection levels
+type TIndirectionLevel = TInteger;
 
+const
   ASVALUE = 0;
   ASPOINTER = 1;
   ASPOINTERTOPOINTER = 2;

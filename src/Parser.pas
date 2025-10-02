@@ -2796,7 +2796,7 @@ begin
                 _TypeArray[RecType].Block := BlockStack[BlockStackTop];
 
                 DataType := TDataType.OBJECTTOK;
-                NumAllocElements := RecType;      // ndex to the Types array
+                NumAllocElements := RecType;      // Index to the Types array
                 AllocElementType := TDataType.UNTYPETOK;
 
                 Result := i;
